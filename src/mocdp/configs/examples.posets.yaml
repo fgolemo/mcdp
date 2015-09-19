@@ -1,0 +1,13 @@
+- id: interval
+  desc: Test interval
+  code:
+  - mocdp.Interval
+  - L: 0
+    U: 1
+
+
+- id: Rcomp
+  desc: "[0, ...] U [infinity]"
+  code:
+  - mocdp.Rcomp
+  - {}

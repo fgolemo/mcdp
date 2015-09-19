@@ -1,0 +1,12 @@
+*.egg-info
+out-*
+src/procgraph_optimize/examples/coastguard09.avi*
+out
+*.avi*
+.compmake.rc
+*.pgc
+.compmake.rc
+*.mp4
+*.timestamps
+*.metadata.yaml
+*.pyc
