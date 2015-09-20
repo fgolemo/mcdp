@@ -81,7 +81,7 @@ class Interval(Poset):
 
     def check_leq(self, a, b):
         if not(a <= b):
-            raise NotLeq('%s ≰ %s')
+            raise NotLeq('%s ≰ %s' % (a, b))
 
     def belongs(self, x):
         check_isinstance(x, float)
@@ -200,7 +200,6 @@ class UpperSets(Poset):
         f = lambda x: UpperSet(set([x]), self.P)
         return map(f, chain)
 
-
     def belongs(self, x):
         check_isinstance(x, UpperSet)
         if not isinstance(x, UpperSet):
@@ -227,21 +226,30 @@ class UpperSets(Poset):
             raise NotLeq('a = my ⊤')
 
         self.my_leq_(a, b)
-        self.my_leq_(b, a)
+        # XXX: not sure I should add this, with inverted
+#         self.my_leq_(b, a, inverted)
 
     def my_leq_(self, A, B):
         # there exists an a in A that a <= b
         def dominated(b):
+            problems = []
             for a in A.minimals:
-                if self.P.leq(a, b):
-                    return True
-            return False
+                try:
+                    # if inverted: self.P.check_leq(b, a)
+                    self.P.check_leq(a, b)
+                    return True, None
+                except NotLeq as e:
+                    problems.append(e)
+            return False, problems
 
 
         # for all elements in B
         for b in B.minimals:
-            if not dominated(b):
-                raise NotLeq("b = %s not dominated by any a in %s" % (b, A.minimals))
+            is_dominated, whynot = dominated(b)
+            if not is_dominated:
+                msg = "b = %s not dominated by any a in %s" % (b, A.minimals)
+                msg += '\n' + '\n- '.join(map(str, whynot))
+                raise NotLeq(msg)
 
 
     def __repr__(self):
