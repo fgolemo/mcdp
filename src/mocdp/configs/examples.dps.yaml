@@ -1,7 +1,7 @@
 - id: simple_battery
   desc: Simple battery
   code:
-  - mocdp.bat.BatteryDP
-  - {}
+  - mocdp.BatteryDP
+  - energy_density: 3.0
 
-  
+

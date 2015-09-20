@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from contracts import contract
 from abc import ABCMeta, abstractmethod
 from contracts.utils import check_isinstance
@@ -22,6 +24,11 @@ class Space():
     def belongs(self, x):
         pass
     
+class NotLeq(Exception):
+    pass
+class NotBelongs(Exception):
+    pass
+
 class Poset(Space):
 
     @abstractmethod
@@ -31,12 +38,26 @@ class Poset(Space):
     def get_top(self):
         pass
 
-    def get_bot(self): return self.get_bottom()
+    def get_bot(self):
+        return self.get_bottom()
+
+    def get_test_chain(self, n):
+        """
+            Returns a test chain of length n
+        """
+        return [self.get_bottom(), self.get_top()]
+
+    def leq(self, a, b):
+        try:
+            self.check_leq(a, b)
+            return True
+        except NotLeq:
+            return False
 
     @abstractmethod
-    def leq(self, a, b):
+    def check_leq(self, a, b):
+        # raise NotLeq if not a <= b
         pass
-
 
 class Interval(Poset):
     def __init__(self, L, U):
@@ -47,27 +68,34 @@ class Interval(Poset):
         self.belongs(self.U)
         assert self.leq(self.L, self.U)
 
+    def get_test_chain(self, n):
+        import numpy as np
+        res = np.linspace(self.L, self.U, n)
+        return list(res)
+
     def get_bottom(self):
         return self.L
 
     def get_top(self):
         return self.U
 
-    def leq(self, a, b):
-        return a <= b
+    def check_leq(self, a, b):
+        if not(a <= b):
+            raise NotLeq('%s ≰ %s')
 
     def belongs(self, x):
         check_isinstance(x, float)
-#         if not isinstance(x, float):
-#             raise ValueError('Not float: %s' % x)
         if not self.L <= x <= self.U:
-            msg = 'Not valid %s <= %s <= %s' % (self.L, x, self.U)
-            raise ValueError(msg)
+            msg = '!(%s ≤ %s ≤ %s)' % (self.L, x, self.U)
+            raise NotBelongs(msg)
         return True
+
+    def __repr__(self):
+        return "[%s,%s]" % (self.L, self.U)
 
 class RcompTop():
     def __repr__(self):
-        return "T"
+        return "⊤"
     def __eq__(self, x):
         return isinstance(x, RcompTop)
     def __hash__(self):
@@ -90,17 +118,25 @@ class Rcomp(Poset):
 
         check_isinstance(x, float)
         if not 0 <= x:
-            msg = 'Not valid %s <= %s' % (0, x)
+            msg = '%s ≰ %s' % (0, x)
             raise ValueError(msg)
         return True
+    
+    def __repr__(self):
+        return "ℜ⋃{⊤}"
         
-    def leq(self, a, b):
-        if a == b: return True
+    def _leq(self, a, b):
+        if a == b:
+            return True
         if a == self.top:
             return False
         if b == self.top:
             return True
         return a <= b
+
+    def check_leq(self, a, b):
+        if not self._leq(a, b):
+            raise NotLeq()
 
 class ProductSpace(Poset):
 
@@ -117,20 +153,27 @@ class UpperSet():
         for m in minimals:
             self.P.belongs(m)
 
-    def __repr__(self):
-        return "|".join(">= %s" % m for m in self.minimals)
+        from mocdp.poset_utils import check_minimal
+        check_minimal(minimals, P)
+
+
+    def __repr__(self):  # ≤  ≥
+        return "∪".join("{x∣ x ≥ %s}" % m for m in self.minimals)
+
 
 class EmptySet():
     def __init__(self, P):
         self.P = P
 
     def __repr__(self):
-        return "{}"
+        return "∅"
     
     def __eq__(self, other):
         return isinstance(other, EmptySet) and other.P == self.P
 
+
 class UpperSets(Poset):
+
     @contract(P='$Poset|str')
     def __init__(self, P):
         from mocdp.configuration import get_conftools_posets
@@ -152,17 +195,23 @@ class UpperSets(Poset):
         x = self.P.get_top()
         return UpperSet(set([x]), self.P)
 
+    def get_test_chain(self, n):
+        chain = self.P.get_test_chain(n)
+        f = lambda x: UpperSet(set([x]), self.P)
+        return map(f, chain)
+
+
     def belongs(self, x):
         check_isinstance(x, UpperSet)
         if not isinstance(x, UpperSet):
             msg = 'Not an upperset: %s' % x
-            raise ValueError(msg)
+            raise NotBelongs(msg)
         if not x.P == self.P:
-            msg = 'Not same poset: %s != %s' % (self.P, x.P)
-            raise ValueError(msg)
+            msg = 'Different poset: %s ≠ %s' % (self.P, x.P)
+            raise NotBelongs(msg)
         return True 
         
-    def leq(self, a, b):
+    def check_leq(self, a, b):
         self.belongs(a)
         self.belongs(b)
         if a == b:
@@ -172,13 +221,15 @@ class UpperSets(Poset):
         if b == self.top:
             return True
         if b == self.bot:
-            return False
+            raise NotLeq('b = my ⊥')
+
         if a == self.top:
-            return False
+            raise NotLeq('a = my ⊤')
 
-        return self.leq_(a, b) and self.leq_(b, a)
+        self.my_leq_(a, b)
+        self.my_leq_(b, a)
 
-    def leq_(self, A, B):
+    def my_leq_(self, A, B):
         # there exists an a in A that a <= b
         def dominated(b):
             for a in A.minimals:
@@ -186,12 +237,15 @@ class UpperSets(Poset):
                     return True
             return False
 
+
         # for all elements in B
         for b in B.minimals:
             if not dominated(b):
-                return False
+                raise NotLeq("b = %s not dominated by any a in %s" % (b, A.minimals))
 
-        return True
+
+    def __repr__(self):
+        return "UpperSets(%r)" % self.P
 
 class PrimitiveDP():
     __metaclass__ = ABCMeta

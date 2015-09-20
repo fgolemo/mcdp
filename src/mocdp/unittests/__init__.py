@@ -1,14 +1,7 @@
-from mocdp.bat import BatteryDP
 
 from .posets_basic import *
 from .dps_basic import *
 
-def test_1():
-    
-    battery = BatteryDP()
-    
-    res = battery.solve(0.0)
-    res = battery.solve(1.0)
     
 #
 #

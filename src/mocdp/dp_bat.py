@@ -1,8 +1,16 @@
-from mocdp.defs import Interval, UpperSet, PrimitiveDP, Rcomp
+from mocdp.defs import UpperSet, PrimitiveDP, Rcomp
+from contracts import contract
 
 
 class BatteryDP(PrimitiveDP):
     
+    @contract(energy_density='float, >0')
+    def __init__(self, energy_density):
+        '''
+        :param energy_density: Joule/gram
+        '''
+        self.energy_density = energy_density
+
     def get_fun_space(self):
         # return Interval(L=0.0, U=1.0)
         return Rcomp()
@@ -21,6 +29,6 @@ class BatteryDP(PrimitiveDP):
             return ressp.get_top()
         
         joules = min_func
-        weight = joules * 3
+        weight = joules / self.energy_density
         us = UpperSet(set([weight]), ressp)
         return us
