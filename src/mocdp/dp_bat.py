@@ -65,6 +65,31 @@ class Weight2totalpayload(PrimitiveDP):
         return ressp.U(payload)
 
 
+class Payload2energy(PrimitiveDP):
+
+    def __init__(self, T, alpha):
+        self.T = T
+        self.alpha = alpha
+
+    def get_fun_space(self):
+        return Rcomp()
+
+    def get_res_space(self):
+        return Rcomp()
+
+    def solve(self, min_func):
+        funsp = self.get_fun_space()
+        ressp = self.get_res_space()
+        funsp.belongs(min_func)
+
+        if min_func == funsp.get_top():
+            return ressp.U(ressp.get_top())
+
+        payload = min_func
+        energy = payload * self.alpha * self.T
+        return ressp.U(energy)
+
+
 """
 dp BatteryDP:
     energy_density = 12 

@@ -4,6 +4,7 @@ from .defs import *
 from .dp_series import *
 
 from .dp_bat import *
+from .dp_loop import *
 
 def jobs_comptests(context):
     # configuration

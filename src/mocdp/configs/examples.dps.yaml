@@ -11,6 +11,12 @@
   - mocdp.Weight2totalpayload
   - baseline: 100
 
+- id: Payload2energy
+  desc: Payload2energy
+  code:
+  - mocdp.Payload2energy
+  - alpha: 0.1
+    T: 10
 
 - id: series1
   desc: Simple series
@@ -18,3 +24,17 @@
   - mocdp.Series
   - dp1: simple_battery
     dp2: Weight2totalpayload
+
+- id: series2
+  desc: Simple series
+  code:
+  - mocdp.Series
+  - dp1: series1
+    dp2: Payload2energy
+
+- id: loop1
+  desc: Simple loop
+  code:
+  - mocdp.SimpleLoop
+  - dp1: series2
+

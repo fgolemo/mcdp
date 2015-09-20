@@ -28,6 +28,8 @@ class NotLeq(Exception):
     pass
 class NotBelongs(Exception):
     pass
+class NotJoinable(Exception):
+    pass
 
 class Poset(Space):
 
@@ -54,16 +56,29 @@ class Poset(Space):
         except NotLeq:
             return False
 
+    def join(self, a, b): # "max" ∨
+        self.belongs(a)
+        self.belongs(b)
+        msg = 'The join %s ∨ %s does not exist in %s.' % (a, b, self)
+        raise NotJoinable(msg)
+
+    def meet(self, a, b):  # "min" ∧
+        msg = 'The meet %s ∧ %s does not exist in %s.' % (a, b, self)
+        raise NotJoinable(msg)
+
     @abstractmethod
     def check_leq(self, a, b):
         # raise NotLeq if not a <= b
         pass
-    
-    
+
     def U(self, a):
         """ Returns the principal upper set corresponding to the given a. """
         self.belongs(a)
         return UpperSet(set([a]), self)
+
+    def Us(self, elements):
+        return UpperSet(set(elements), self)
+
 
 class Interval(Poset):
     def __init__(self, L, U):
@@ -75,7 +90,6 @@ class Interval(Poset):
         assert self.leq(self.L, self.U)
 
     def get_test_chain(self, n):
-        import numpy as np
         res = np.linspace(self.L, self.U, n)
         return list(res)
 
@@ -127,19 +141,31 @@ class Rcomp(Poset):
             raise ValueError(msg)
         return True
     
+    def join(self, a, b):
+        if self.leq(a, b):
+            return b
+        if self.leq(b, a):
+            return b
+        assert False
 
+    def meet(self, a, b):
+        if self.leq(a, b):
+            return a
+        if self.leq(b, a):
+            return b
+        assert False
+    
     def get_test_chain(self, n):
         s = [self.get_bottom()]
         s.extend(sorted(np.random.rand(n - 2) * 10))
         s.append(self.get_top())
         return s
 
-
     def __eq__(self, other):
         return isinstance(other, Rcomp)
 
     def __repr__(self):
-        return "ℜ⋃{⊤}"
+        return "ℜ ⋃ {⊤}"
         
     def _leq(self, a, b):
         if a == b:
@@ -174,6 +200,7 @@ class UpperSet():
 
         from mocdp.poset_utils import check_minimal
         check_minimal(minimals, P)
+
 
 
     def __repr__(self):  # ≤  ≥
@@ -270,9 +297,25 @@ class UpperSets(Poset):
                 msg += '\n' + '\n- '.join(map(str, whynot))
                 raise NotLeq(msg)
 
+#     def join(self, a, b):  # "max" ∨
+#         self.belongs(a)
+#         self.belongs(b)
+#
+#         elements = set()
+#         elements.update(a.minimals)
+#         elements.update(b.minimals)
+#
+#         elements0 = self.
+#
+#         r = UpperSet(elements0, self.P)
+#
+#         self.check_leq(a, r)
+#         self.check_leq(b, r)
+#
+#         return r
 
     def __repr__(self):
-        return "UpperSets(%r)" % self.P
+        return "Upsets(%r)" % self.P
 
 class PrimitiveDP():
     __metaclass__ = ABCMeta
@@ -299,3 +342,21 @@ class PrimitiveDP():
             Returns an UpperSet 
         '''
         pass
+    
+    @contract(ufunc=UpperSet)
+    def solveU(self, ufunc):
+        UF = UpperSets(self.get_fun_space())
+        UF.belongs(ufunc)
+        from mocdp.poset_utils import poset_minima
+
+        res = set([])
+        for m in ufunc.minimals:
+            u = self.solve(m)
+            res.update(u.minimals)
+        ressp = self.get_res_space()
+        minima = poset_minima(res, ressp.leq)
+        return ressp.Us(minima)
+
+
+
+
