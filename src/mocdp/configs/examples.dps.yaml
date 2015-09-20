@@ -5,3 +5,16 @@
   - energy_density: 3.0
 
 
+- id: Weight2totalpayload
+  desc: Weight2totalpayload
+  code:
+  - mocdp.Weight2totalpayload
+  - baseline: 100
+
+
+- id: series1
+  desc: Simple series
+  code:
+  - mocdp.Series
+  - dp1: simple_battery
+    dp2: Weight2totalpayload

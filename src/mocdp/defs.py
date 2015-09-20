@@ -3,7 +3,7 @@
 from contracts import contract
 from abc import ABCMeta, abstractmethod
 from contracts.utils import check_isinstance
-
+import numpy as np
 
 class Space():
     __metaclass__ = ABCMeta
@@ -58,6 +58,12 @@ class Poset(Space):
     def check_leq(self, a, b):
         # raise NotLeq if not a <= b
         pass
+    
+    
+    def U(self, a):
+        """ Returns the principal upper set corresponding to the given a. """
+        self.belongs(a)
+        return UpperSet(set([a]), self)
 
 class Interval(Poset):
     def __init__(self, L, U):
@@ -105,7 +111,6 @@ class Rcomp(Poset):
     def __init__(self):
         self.top = RcompTop()
 
-
     def get_bottom(self):
         return 0.0
 
@@ -122,6 +127,17 @@ class Rcomp(Poset):
             raise ValueError(msg)
         return True
     
+
+    def get_test_chain(self, n):
+        s = [self.get_bottom()]
+        s.extend(sorted(np.random.rand(n - 2) * 10))
+        s.append(self.get_top())
+        return s
+
+
+    def __eq__(self, other):
+        return isinstance(other, Rcomp)
+
     def __repr__(self):
         return "ℜ⋃{⊤}"
         
@@ -135,8 +151,11 @@ class Rcomp(Poset):
         return a <= b
 
     def check_leq(self, a, b):
+        self.belongs(a)
+        self.belongs(b)
         if not self._leq(a, b):
-            raise NotLeq()
+            msg = '%s ≰ %s' % (a, b)
+            raise NotLeq(msg)
 
 class ProductSpace(Poset):
 

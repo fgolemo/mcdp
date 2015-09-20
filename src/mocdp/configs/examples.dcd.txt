@@ -1,0 +1,65 @@
+
+dp chassis = primitive:
+    
+
+dp battery = primitive:
+    f voltage (intervals of V) "Supplied voltage"
+    f amps    (A)              "Supplied amps"
+
+    r weight  (g)              "Battery weight"
+    r cost    ($)
+    
+    solve with [python comp.pokde.pok]
+
+
+dp chassis_plus_motor = compose:
+    dp motor = ...
+    dp chassis = ...
+
+    f extra_payload
+    f velocity = chassis.velocity
+
+    r voltage = motor.voltage
+    r current = motor.current
+
+    # constraints
+    extra_payload + motor.weight <= chassis.payload
+    chassis.req_speed <= motor.speed
+    chassis.req_torque <= motor.torque
+
+dp MCB_plus_PSU = compose:
+    dp MCB = MCB
+    dp PSU = battery
+    
+    f mission_duration (s) "Mission duration"
+    f req_voltage = MCB.voltage
+    f req_amps    = MCB.amps 
+    
+    r weight = MCB.weight + PSU.weight
+    r cost   = MCB.cost   + PSU.cost
+
+    power = MCB.req_V + MCB.req_A
+    PSU.capacity >= power * mission_duration
+
+dp mobility_plus_power = compose:
+    dp 0 = MCB_plus_PSU
+    dp 1 = chassis_plus_motor
+
+    F velocity = velocity─┤1
+    F extra_payload (g)   "Extra payload"
+    F extra_power   (P)   "Extra power"
+    F mission_time = mission_time─┤0
+    
+# ≤  ≥  ├─ ─┤
+    R control_strategy = 0├─control_strategy
+    R weight 
+        = 0├─ weight + 1├─weight
+    R cost = 0├─cost + 1├─cost
+    
+    extra_payload + 1├─ weight ≤ payload ─┤0
+    0 ├─ voltage ≤ voltage ─┤ 1
+    0 ├──── amps ≤ amps ────┤ 1
+    # ├────┤
+    #chassis_plus_motor.req_amps  ≤ MCB_plus_PSU.provided_amps
+
+

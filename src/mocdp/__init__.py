@@ -15,7 +15,6 @@ def jobs_comptests(context):
 
     # instantiation
     from comptests import jobs_registrar
-    from mocdp.configuration import get_conftools_mocdp_config
     jobs_registrar(context, get_conftools_mocdp_config())
 
 # # have fun: ≤  ≥  ├─ ─┤ ≠ ⊂ ⊃ ° × ∩ ∪ ∨ ∧ ∞ ∉ ∈ ∃ ∀ → ± ·
