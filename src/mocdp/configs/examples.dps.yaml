@@ -1,0 +1,7 @@
+- id: simple_battery
+  desc: Simple battery
+  code:
+  - mocdp.bat.BatteryDP
+  - {}
+
+  

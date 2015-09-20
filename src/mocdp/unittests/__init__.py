@@ -1,6 +1,7 @@
 from mocdp.bat import BatteryDP
 
 from .posets_basic import *
+from .dps_basic import *
 
 def test_1():
     

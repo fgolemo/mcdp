@@ -1,9 +1,9 @@
-- id: interval
+- id: interval01
   desc: Test interval
   code:
   - mocdp.Interval
-  - L: 0
-    U: 1
+  - L: 0.0
+    U: 1.0
 
 
 - id: Rcomp
@@ -11,3 +11,15 @@
   code:
   - mocdp.Rcomp
   - {}
+
+- id: U_Rcomp
+  desc: upper sets of Rcomp
+  code:
+  - mocdp.UpperSets
+  - P: 'Rcomp'
+
+- id: U_interval01
+  desc: upper sets of interval
+  code:
+  - mocdp.UpperSets
+  - P: 'interval01'
