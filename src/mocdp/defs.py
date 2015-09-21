@@ -4,6 +4,7 @@ from contracts import contract
 from abc import ABCMeta, abstractmethod
 from contracts.utils import check_isinstance
 import numpy as np
+from contracts.interface import describe_value
 
 class Space():
     __metaclass__ = ABCMeta
@@ -31,17 +32,26 @@ class NotBelongs(Exception):
 class NotJoinable(Exception):
     pass
 
+class NotBounded(Exception):
+    pass
+
 class Poset(Space):
 
     @abstractmethod
-    def get_bottom(self):
+    def check_leq(self, a, b):
+        # Return none if a<=b; otherwise raise NotLeq with a description
         pass
 
-    def get_top(self):
-        pass
+    def get_bottom(self):
+        msg = 'Bottom not available for %s.' % describe_value(self)
+        raise NotBounded(msg)
 
     def get_bot(self):
         return self.get_bottom()
+
+    def get_top(self):
+        msg = 'Top not available for %s.' % describe_value(self)
+        raise NotBounded(msg)
 
     def get_test_chain(self, n):
         """
@@ -65,11 +75,6 @@ class Poset(Space):
     def meet(self, a, b):  # "min" ∧
         msg = 'The meet %s ∧ %s does not exist in %s.' % (a, b, self)
         raise NotJoinable(msg)
-
-    @abstractmethod
-    def check_leq(self, a, b):
-        # raise NotLeq if not a <= b
-        pass
 
     def U(self, a):
         """ Returns the principal upper set corresponding to the given a. """
@@ -183,11 +188,57 @@ class Rcomp(Poset):
             msg = '%s ≰ %s' % (a, b)
             raise NotLeq(msg)
 
-class ProductSpace(Poset):
-
-    @contract(subs='dict(str:$Poset)')
+class PosetProduct(Poset):
+    """ A product of Posets with the product order. """
+    @contract(subs='seq(str|$Poset)')
     def __init__(self, subs):
-        self.subs = subs
+        from mocdp.configuration import get_conftools_posets
+        library = get_conftools_posets()
+        self.subs = tuple([library.instance_smarter(s)[1] for s in subs])
+        print self.subs
+        
+    def get_top(self):
+        return tuple([s.get_top() for s in self.subs])
+    
+    def get_bottom(self):
+        return tuple([s.get_bottom() for s in self.subs])
+    
+    def check_leq(self, a, b):
+        problems = []
+        for i, (sub, x, y) in enumerate(zip(self.subs, a, b)):
+            try:
+                sub.check_leq(x, y)
+            except NotLeq as e:
+                msg = '#%d (%s): %s !<= %s: %s' % (i, sub, x, y, e)
+                problems.append(msg)
+        if problems:
+            msg = "\n".join(problems)
+            raise NotLeq(msg)
+
+    def belongs(self, x):
+        problems = []
+        for i, (sub, e) in enumerate(zip(self.subs, x)):
+            try:
+                sub.belongs(x)
+            except NotBelongs as e:
+                msg = '#%d (%s): %s does not belong: %s' % (i, sub, x, e)
+                problems.append(msg)
+
+        if problems:
+            msg = "\n".join(problems)
+            raise NotBelongs(msg)
+
+
+    def get_test_chain(self, n):
+        """
+            Returns a test chain of length n
+        """
+        chains = [s.get_test_chain(n) for s in self.subs]
+        res = zip(*tuple(chains))
+        return res
+
+    def __repr__(self):
+        return "×".join([str(s) for s in self.subs])
 
 
 class UpperSet():

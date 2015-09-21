@@ -14,7 +14,7 @@ class SimpleLoop(PrimitiveDP):
         ressp = self.get_res_space()
 
         if not funsp == ressp:
-            raise_desc(ValueError, "Need same space", funsp=funsp, ressp=ressp)
+            raise_desc(ValueError, "Need exactly same space", funsp=funsp, ressp=ressp)
 
     def get_fun_space(self):
         return self.dp1.get_fun_space()
@@ -29,7 +29,7 @@ class SimpleLoop(PrimitiveDP):
         f = [funsp.U(func)]
         r = [self.dp1.solveU(f[0])]
 
-        for i in range(10):
+        for i in range(10):  # XXX
 #             fi = fU.join(f[0], r[-1])
             fi = r[-1]
             ri = self.dp1.solveU(fi)

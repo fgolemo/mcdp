@@ -23,3 +23,14 @@
   code:
   - mocdp.UpperSets
   - P: 'interval01'
+
+- id: square
+  desc: "[0,1]x[0,1]"
+  code:
+  - mocdp.PosetProduct
+  - subs: 
+    - interval01
+    - interval01
+
+
+
