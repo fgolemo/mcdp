@@ -13,6 +13,8 @@ def jobs_comptests(context):
     # tests
     from . import unittests
 
+    from .posets.tests import *
+    from .dp.tests import *
     from .example_battery.tests import *
 
     # instantiation

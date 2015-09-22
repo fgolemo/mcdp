@@ -9,6 +9,7 @@ def plot_upset_minima(pylab, us):
     for p in points:
         pylab.plot(p[0], p[1], 'k.')
 
+
 @contract(us=UpperSet)
 def plot_upset_R2(pylab, us, axis, color_shadow, color_lines='none'):
     points = us.minimals
@@ -19,6 +20,7 @@ def plot_upset_R2(pylab, us, axis, color_shadow, color_lines='none'):
     # cuteness
     for p in points:
         pylab.plot(p[0], p[1], 'k.')
+
 
 def plot_cone(pylab, p, axis, color_shadow, color_lines):
     from matplotlib import patches

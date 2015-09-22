@@ -8,10 +8,6 @@ def check_dp1(_id_dp, dp):
     f_top = funsp.get_top()
     f_bot = funsp.get_bottom()
 
-#     ressp = dp.get_res_space()
-#     r_top = ressp.get_top()
-#     r_bot = ressp.get_bot()
-
     u0 = dp.solve(f_bot)
     u1 = dp.solve(f_top)
 
