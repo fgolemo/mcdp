@@ -66,8 +66,9 @@ class Poset(Space):
         from .uppersets import UpperSet
         return UpperSet(set([a]), self)
 
-    @contract(elements='seq')
+    @contract(elements='seq|set')
     def Us(self, elements):
+        elements = list(elements)
         for e in elements:
             self.belongs(e)
         # XXX n^2

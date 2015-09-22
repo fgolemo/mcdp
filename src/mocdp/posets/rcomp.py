@@ -5,6 +5,7 @@ import numpy as np
 
 __all__ = [
    'Rcomp',
+   'RcompUnits',
 ]
 
 class RcompTop():
@@ -83,3 +84,33 @@ class Rcomp(Poset):
         if not self._leq(a, b):
             msg = '%s ≰ %s' % (a, b)
             raise NotLeq(msg)
+
+    def multiply(self, a, b):
+        """ times, extended for top """
+        if a == self.top or b == self.top:
+            return self.top
+        return a * b
+
+class RcompUnits(Rcomp):
+    def __init__(self, units):
+        Rcomp.__init__(self)
+        self.units = units
+
+    def __eq__(self, other):
+        if not isinstance(other, Rcomp):
+            return False
+
+        if isinstance(other, RcompUnits):
+            return other.units == self.units
+
+        return True
+
+
+
+
+
+
+
+
+
+

@@ -11,6 +11,18 @@
   - mocdp.posets.Rcomp
   - {}
 
+- id: Rcomp_g
+  desc: grams
+  code:
+  - mocdp.posets.RcompUnits
+  - units: g
+
+- id: Rcomp_J
+  desc: Joules
+  code:
+  - mocdp.posets.RcompUnits
+  - units: J
+
 - id: U_Rcomp
   desc: upper sets of Rcomp
   code:

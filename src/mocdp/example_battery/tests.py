@@ -10,7 +10,6 @@ def check_ex16(_id_dp, dp):
     res = dp.solve(bot)
     print('res', res)
 
-
 @for_some_dps_dyn('ex16_loop')
 def check_ex16b(context, _id_dp, dp):
     r = context.comp(check_ex16b_r, dp)

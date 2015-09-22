@@ -1,5 +1,30 @@
+- id: test_identity
+  desc: Identity
+  code:
+  - mocdp.dp.Identity
+  - F: ['mocdp.posets.Rcomp', {}]
+
+- id: test_linear
+  desc: Testing parallel construction
+  code:
+  - mocdp.dp.Linear
+  - a: 10.0
+
+- id: test_par
+  desc: Testing parallel construction
+  code:
+  - mocdp.dp.Parallel
+  - dp1: ['mocdp.dp.Linear', {a: 3.0}]
+    dp2: ['mocdp.dp.Linear', {a: 2.0}]
 
 
+- id: test_linear_J_to_g
+  desc: Testing convertions
+  code:
+  - mocdp.dp.Linear
+  - F: Rcomp_J
+    R: Rcomp_g
+    a: 4.0
 
 
 
