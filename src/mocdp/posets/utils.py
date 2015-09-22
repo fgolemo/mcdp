@@ -1,8 +1,13 @@
 # -*- coding: utf-8 -*-
 
-from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
-from mocdp.defs import NotLeq
+from .poset import NotLeq
+from contracts import raise_wrapped
+
+__all__ = [
+    'check_minimal',
+    'poset_minima',
+    'poset_check_chain',
+]
 
 def check_minimal(elements, poset):
     m2 = poset_minima(elements, poset.leq)

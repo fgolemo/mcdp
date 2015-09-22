@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-
-from mocdp.defs import UpperSet, PrimitiveDP, Rcomp
+import numpy as np
+from mocdp.posets import Rcomp, PosetProduct
+from mocdp.dp import PrimitiveDP
 from contracts import contract
 
 
@@ -90,6 +91,88 @@ class Payload2energy(PrimitiveDP):
         return ressp.U(energy)
 
 
+def T(Ps):
+    return 10.0 + 1 / np.sqrt(Ps)
+
+def Pa_from_weight(W):
+    return 1.0 + W
+
+class Payload2ET(PrimitiveDP):
+    """ Example 16 in RAFC """
+    def __init__(self):
+        pass
+
+    def get_fun_space(self):
+        "F = carry payload P"
+        return Rcomp()
+
+    def get_res_space(self):
+        "R = energy E, time T"
+        return PosetProduct((Rcomp(), Rcomp()))
+
+    def solve(self, min_func):
+        funsp = self.get_fun_space()
+        ressp = self.get_res_space()
+        funsp.belongs(min_func)
+
+        if min_func == funsp.get_top():
+            return ressp.U(ressp.get_top())
+
+        W = min_func
+
+#         PS = np.logspace(1e-5, 1e5, 20)
+        # paper PS = np.linspace(0.01, 5.0, 500)
+        PS = np.linspace(0.01, 5.0, 10)
+
+        P2E = lambda Ps: T(Ps) * (Pa_from_weight(W) + Ps)
+
+        choices = [ (P2E(Ps), T(Ps)) for Ps in PS ]
+
+        for c in choices:
+            ressp.belongs(c)
+
+        from mocdp.posets.utils import poset_minima
+        min_choices = poset_minima(choices, ressp.leq)
+
+        # print('Choices: %d down to %d' % (len(choices), len(min_choices)))
+        return ressp.Us(min_choices)
+    def __repr__(self):
+        return 'Payload2ET()'
+
+class ET2Payload(PrimitiveDP):
+    """ Example 16 in RAFC """
+    def __init__(self, Tmax, W0, rho):
+        self.Tmax = Tmax
+        self.W0 = W0
+        self.rho = rho
+
+    def __repr__(self):
+        return 'ET2Payload(Tmax=%.2f;W0=%.2f;rho=%.2f)' % (self.Tmax, self.W0, self.rho)
+
+    def get_res_space(self):
+        "R = carry payload P"
+        return Rcomp()
+
+    def get_fun_space(self):
+        "F = energy E, time T"
+        return PosetProduct((Rcomp(), Rcomp()))
+
+    def solve(self, min_func):
+        funsp = self.get_fun_space()
+        ressp = self.get_res_space()
+        funsp.belongs(min_func)
+
+        if min_func == funsp.get_top():
+            return ressp.U(ressp.get_top())
+
+        (E, T) = min_func
+        
+        if T > self.Tmax:
+            return ressp.U(ressp.get_top())
+
+        W = self.W0 + (1.0 / self.rho) * E
+
+        return ressp.U(W)
 """
 dp BatteryDP:
     energy_density = 12 
@@ -111,20 +194,20 @@ dp:
         $ P ≥ X * x $
     
     C:
-        baseline (g) = 100  "Baseline payload" 
+        baseline (g) = 100.0  "Baseline payload" 
         
     F:
-        battery_weight (g) 
+        battery_weight (g)   "Weight of battery to carry"
           
     R:
-        total_payload  (g)  "Payload" / $P$ 
+        total_payload  (g)  "Payload"  $P$ 
     
     total_payload ≥ battery_weight + baseline
     
 dp payload2energy:
     
-    F payload (g) "Carry this payload." tex P
-    R energy  (J) "Required stored energy." tex E
+    F payload (g) "Carry the payload @." tex P
+    R energy  (J) "Required stored energy @." tex E
 
 dp rafc_example:
 

@@ -63,3 +63,35 @@ dp mobility_plus_power = compose:
     #chassis_plus_motor.req_amps  ≤ MCB_plus_PSU.provided_amps
 
 
+ue
+
+dp MCB_plus_PSU:
+    dp MCB = MCB
+    dp PSU = battery
+    
+    f mission_duration (s) "Mission duration"
+    f req_voltage = MCB.voltage
+    f req_amps    = MCB.amps 
+    
+    r weight = MCB.weight + PSU.weight
+    r cost   = MCB.cost   + PSU.cost
+
+    power = MCB.req_V + MCB.req_A
+    PSU.capacity >= power * mission_duration
+    
+    
+    I:
+    	Ps (W)  "Sensing power"
+    	
+    	exec 1/T(s)
+    	eval 1/T(s)
+    
+    req_amps = 
+    
+    
+    
+    
+    
+    
+    
+    

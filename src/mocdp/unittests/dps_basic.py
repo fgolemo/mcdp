@@ -1,5 +1,5 @@
-from mocdp.unittests.generation import for_all_dps
-from mocdp.poset_utils import poset_check_chain
+from .generation import for_all_dps
+
 
 @for_all_dps
 def check_dp1(_id_dp, dp):
@@ -25,6 +25,8 @@ def check_dp1(_id_dp, dp):
 
 @for_all_dps
 def check_dp2(_id_dp, dp):
+    from mocdp.posets.utils import poset_check_chain
+
     funsp = dp.get_fun_space()
 
     chain = funsp.get_test_chain(n=5)
@@ -36,4 +38,6 @@ def check_dp2(_id_dp, dp):
     poset_check_chain(trsp, trchain)
 
     print trchain
+
+
 

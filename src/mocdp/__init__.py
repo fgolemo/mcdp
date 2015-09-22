@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 from .configuration import *
-from .defs import *
-from .dp_series import *
+from . import posets
+from . import dp
 
-from .dp_bat import *
-from .dp_loop import *
+
 
 def jobs_comptests(context):
     # configuration
     from conf_tools import GlobalConfig
-    GlobalConfig.global_load_dir("mocdp.configs")
+    GlobalConfig.global_load_dir("mocdp")
 
     # tests
     from . import unittests
+
+    from .example_battery.tests import *
 
     # instantiation
     from comptests import jobs_registrar

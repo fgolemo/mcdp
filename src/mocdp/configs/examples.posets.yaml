@@ -1,33 +1,32 @@
 - id: interval01
   desc: Test interval
   code:
-  - mocdp.Interval
+  - mocdp.posets.Interval
   - L: 0.0
     U: 1.0
-
 
 - id: Rcomp
   desc: "[0, ...] U [infinity]"
   code:
-  - mocdp.Rcomp
+  - mocdp.posets.Rcomp
   - {}
 
 - id: U_Rcomp
   desc: upper sets of Rcomp
   code:
-  - mocdp.UpperSets
+  - mocdp.posets.UpperSets
   - P: 'Rcomp'
 
 - id: U_interval01
   desc: upper sets of interval
   code:
-  - mocdp.UpperSets
+  - mocdp.posets.UpperSets
   - P: 'interval01'
 
 - id: square
   desc: "[0,1]x[0,1]"
   code:
-  - mocdp.PosetProduct
+  - mocdp.posets.PosetProduct
   - subs: 
     - interval01
     - interval01
