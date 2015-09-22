@@ -1,0 +1,6 @@
+python-cjson
+-e git+https://github.com/AndreaCensi/contracts.git@env_fault#egg=PyContracts
+-e git+https://github.com/AndreaCensi/compmake.git@env_fault#egg=compmake
+-e git+https://github.com/AndreaCensi/comptests.git@env_fault#egg=comptests
+-e git+https://github.com/AndreaCensi/conf_tools.git@env_fault#egg=ConfTools
+-e git+https://github.com/AndreaCensi/geometry.git@env_fault#egg=pygeometry

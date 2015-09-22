@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-from .poset import Poset
+from .poset import NotLeq, Poset
 from .space import NotBelongs
-from contracts.utils import check_isinstance
+from contracts import check_isinstance
 import numpy as np
-from mocdp.posets.poset import NotLeq
 
 __all__ = [
    'Interval',
@@ -36,7 +35,8 @@ class Interval(Poset):
     def belongs(self, x):
         check_isinstance(x, float)
         if not self.L <= x <= self.U:
-            msg = '!(%s ≤ %s ≤ %s)' % (self.L, x, self.U)
+            msg = '%s ∉ [%s, %s]' % (x, self.format(self.L),
+                                     self.format(self.U))
             raise NotBelongs(msg)
         return True
 

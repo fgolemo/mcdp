@@ -3,7 +3,9 @@ from .poset import NotLeq, Poset
 from .space import NotBelongs
 from contracts import contract
 
-__all__ = ['PosetProduct']
+__all__ = [
+    'PosetProduct',
+]
 
 
 class PosetProduct(Poset):
@@ -26,7 +28,7 @@ class PosetProduct(Poset):
             try:
                 sub.check_leq(x, y)
             except NotLeq as e:
-                msg = '#%d (%s): %s !<= %s: %s' % (i, sub, x, y, e)
+                msg = '#%d (%s): %s ≰ %s: %s' % (i, sub, x, y, e)
                 problems.append(msg)
         if problems:
             msg = "\n".join(problems)
@@ -47,7 +49,7 @@ class PosetProduct(Poset):
 
     def format(self, x):
         ss = []
-        for i, (sub, xe) in enumerate(zip(self.subs, x)):
+        for _, (sub, xe) in enumerate(zip(self.subs, x)):
             ss.append(sub.format(xe))
 
         return '(' + ', '.join(ss) + ')'
