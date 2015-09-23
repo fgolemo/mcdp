@@ -3,3 +3,9 @@
   code:
   - mocdp.example_battery.TimeEnergyTradeoff
   - {}
+
+- id: battery_complete
+  desc: battery_complete
+  code:
+  - mocdp.example_battery.battery_complete
+  - {}

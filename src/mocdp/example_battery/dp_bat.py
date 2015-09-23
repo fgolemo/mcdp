@@ -4,6 +4,7 @@ from mocdp.posets import Rcomp, PosetProduct
 from mocdp.dp import PrimitiveDP
 from contracts import contract
 
+from . import R_Energy, R_Time, R_Power, R_Weight
 
 class BatteryDP(PrimitiveDP):
     """ 
@@ -20,12 +21,10 @@ class BatteryDP(PrimitiveDP):
         self.energy_density = energy_density
 
     def get_fun_space(self):
-        # return Interval(L=0.0, U=1.0)
-        return Rcomp()
+        return R_Energy
     
     def get_res_space(self):
-        # return Interval(L=0.0, U=3.0)
-        return Rcomp()
+        return R_Weight
     
     def solve(self, min_func):
         funsp = self.get_fun_space()

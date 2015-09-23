@@ -5,6 +5,9 @@ from mocdp.unittests.generation import for_all_dps
 def check_dp1(id_dp, dp):
     print('Testing %s: %s' % (id_dp, dp))
     funsp = dp.get_fun_space()
+    ressp = dp.get_res_space()
+    print('F: %s' % funsp)
+    print('R: %s' % ressp)
 
     f_top = funsp.get_top()
     f_bot = funsp.get_bottom()

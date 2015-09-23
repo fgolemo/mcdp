@@ -2,6 +2,7 @@
 from .poset import NotLeq, Poset
 from .space import NotBelongs
 from contracts import contract
+from contracts.utils import check_isinstance
 
 __all__ = [
     'PosetProduct',
@@ -15,6 +16,11 @@ class PosetProduct(Poset):
         from mocdp.configuration import get_conftools_posets
         library = get_conftools_posets()
         self.subs = tuple([library.instance_smarter(s)[1] for s in subs])
+
+
+    def __getitem__(self, index):
+        check_isinstance(index, int)
+        return self.subs[index]
 
     def get_top(self):
         return tuple([s.get_top() for s in self.subs])

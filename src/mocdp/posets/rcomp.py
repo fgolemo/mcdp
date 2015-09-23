@@ -62,7 +62,8 @@ class Rcomp(Poset):
 
     def __repr__(self):
 #         return "ℜ ⋃ {⊤}"
-        return "ℜ"
+#         return "ℜ"
+        return "R"
 
     def format(self, x):
         if x == self.top:
