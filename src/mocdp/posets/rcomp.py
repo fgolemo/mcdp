@@ -61,7 +61,8 @@ class Rcomp(Poset):
         return isinstance(other, Rcomp)
 
     def __repr__(self):
-        return "ℜ ⋃ {⊤}"
+#         return "ℜ ⋃ {⊤}"
+        return "ℜ"
 
     def format(self, x):
         if x == self.top:
@@ -101,6 +102,10 @@ class RcompUnits(Rcomp):
     def __init__(self, units):
         Rcomp.__init__(self)
         self.units = units
+
+    def __repr__(self):
+        s = Rcomp.__repr__(self)
+        return s + "[%s]" % self.units
 
     def __eq__(self, other):
         if not isinstance(other, Rcomp):

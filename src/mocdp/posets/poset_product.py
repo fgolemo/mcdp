@@ -63,7 +63,13 @@ class PosetProduct(Poset):
         return res
 
     def __repr__(self):
-        return "×".join([str(s) for s in self.subs])
+        def f(x):
+            if isinstance(x, PosetProduct):
+                return "(%r)" % x
+            else:
+                return x.__repr__()
+
+        return "×".join(map(f, self.subs))
 
     def __eq__(self, other):
         return isinstance(other, PosetProduct) and other.subs == self.subs

@@ -3,37 +3,22 @@ from .primitive import PrimitiveDP
 from mocdp import get_conftools_posets
 from mocdp.posets import PosetProduct
 from contracts.utils import check_isinstance
+from contracts import contract
 
 
 __all__ = [
     'Flatten',
 ]
 
-class Flatten(PrimitiveDP):
-    """ Takes a F which is a product space
-    
-    """
-    def __init__(self, F):
-        library = get_conftools_posets()
-        _, F0 = library.instance_smarter(F)
+
+class Mux(PrimitiveDP):
+
+    @contract(coords='seq(int|tuple(int,int))')
+    def __init__(self, F, R, coords):
+        self.F = F
+        self.R = R
+        self.coords = coords
         
-        self.F = F0
-        check_isinstance(F0, PosetProduct)
-
-        coords = []
-        rs = []
-        for i, f in enumerate(F0.subs):
-            if isinstance(f, PosetProduct):
-                for j, x in enumerate(f.subs):
-                    rs.append(x)
-                    coords.append((i, j))
-            else:
-                rs.append(f)
-                coords.append(i)
-
-        self.R = PosetProduct(tuple(rs))
-        self.coords = tuple(coords)
-
     def get_fun_space(self):
         return self.F
 
@@ -53,6 +38,32 @@ class Flatten(PrimitiveDP):
         return self.R.U(r)
 
     def __repr__(self):
+        return 'Mux(%r -> %r, %s)' % (self.F, self.R, self.coords)
+
+
+def get_flatten_muxmap(F0):
+    check_isinstance(F0, PosetProduct)
+    coords = []
+    rs = []
+    for i, f in enumerate(F0.subs):
+        if isinstance(f, PosetProduct):
+            for j, x in enumerate(f.subs):
+                rs.append(x)
+                coords.append((i, j))
+        else:
+            rs.append(f)
+            coords.append(i)
+
+    R = PosetProduct(tuple(rs))
+    coords = tuple(coords)
+    return R, coords
+
+class Flatten(Mux):
+    def __init__(self, F):
+        library = get_conftools_posets()
+        _, F0 = library.instance_smarter(F)
+        R, coords = get_flatten_muxmap(F0)
+        Mux.__init__(self, F0, R, coords)
+
+    def __repr__(self):
         return 'Flatten(%r -> %r, %s)' % (self.F, self.R, self.coords)
-
-
