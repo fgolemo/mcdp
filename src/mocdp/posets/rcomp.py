@@ -86,10 +86,16 @@ class Rcomp(Poset):
             raise NotLeq(msg)
 
     def multiply(self, a, b):
-        """ times, extended for top """
+        """ Multiplication, extended for top """
         if a == self.top or b == self.top:
             return self.top
         return a * b
+
+    def add(self, a, b):
+        """ Addition, extended for top """
+        if a == self.top or b == self.top:
+            return self.top
+        return a + b
 
 class RcompUnits(Rcomp):
     def __init__(self, units):

@@ -1,8 +1,33 @@
+- id: test_flatten
+  desc: Flatten
+  code:
+  - mocdp.dp.Flatten
+  - F: 
+    - mocdp.posets.PosetProduct
+    - subs:
+      - - mocdp.posets.PosetProduct
+        - subs: [Rcomp_J, Rcomp_g]
+      - Rcomp
+
+
 - id: test_identity
   desc: Identity
   code:
   - mocdp.dp.Identity
   - F: ['mocdp.posets.Rcomp', {}]
+
+- id: test_sum
+  desc: Sum
+  code:
+  - mocdp.dp.Sum
+  - F: ['mocdp.posets.Rcomp', {}]
+
+- id: test_split
+  desc: Split
+  code:
+  - mocdp.dp.Split
+  - F: ['mocdp.posets.Rcomp', {}]
+
 
 - id: test_linear
   desc: Testing parallel construction

@@ -10,3 +10,6 @@ out
 *.timestamps
 *.metadata.yaml
 *.pyc
+.coverage
+.noseids
+coverage_information

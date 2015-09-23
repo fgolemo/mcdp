@@ -10,7 +10,7 @@ __all__ = [
 
 class PosetProduct(Poset):
     """ A product of Posets with the product order. """
-    @contract(subs='seq(str|$Poset)')
+    @contract(subs='seq(str|$Poset|code_spec)')
     def __init__(self, subs):
         from mocdp.configuration import get_conftools_posets
         library = get_conftools_posets()

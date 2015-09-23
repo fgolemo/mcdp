@@ -1,3 +1,10 @@
+
+- id: single
+  desc: Single element
+  code:
+  - mocdp.posets.Single
+  - element: "*"
+
 - id: interval01
   desc: Test interval
   code:

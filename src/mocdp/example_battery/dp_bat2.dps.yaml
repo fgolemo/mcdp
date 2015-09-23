@@ -1,0 +1,5 @@
+- id: TimeEnergyTradeoff
+  desc: TimeEnergyTradeoff
+  code:
+  - mocdp.example_battery.TimeEnergyTradeoff
+  - {}

@@ -1,3 +1,7 @@
+package=mocdp
+
+include pypackage.mk
+
 out=out/comptests
 
 comptests:

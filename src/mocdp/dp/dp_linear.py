@@ -37,6 +37,6 @@ class Linear(PrimitiveDP):
         return self.R.U(r)
 
     def __repr__(self):
-        return 'Linear(%r)' % self.a
+        return 'Linear(%r)' % self.F.format(self.a)
 
 
