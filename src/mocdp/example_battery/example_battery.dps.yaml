@@ -32,11 +32,11 @@
   - dp1: series1
     dp2: Payload2energy
 
-- id: loop1
-  desc: Simple loop
-  code:
-  - mocdp.dp.SimpleLoop
-  - dp1: series2
+# - id: loop1
+#   desc: Simple loop
+#   code:
+#   - mocdp.dp.SimpleLoop
+#   - dp1: series2
 
 
 
@@ -61,11 +61,11 @@
   - dp1: ex16_Payload2ET
     dp2: ex16_ET2Payload
 
-- id: ex16_loop
-  desc: ex16
-  code:
-  - mocdp.dp.SimpleLoop
-  - dp1: ex16_series
+# - id: ex16_loop
+#   desc: ex16
+#   code:
+#   - mocdp.dp.SimpleLoop
+#   - dp1: ex16_series
 
 
 

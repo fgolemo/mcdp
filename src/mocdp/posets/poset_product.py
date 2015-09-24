@@ -2,7 +2,7 @@
 from .poset import NotLeq, Poset
 from .space import NotBelongs
 from contracts import contract
-from contracts.utils import check_isinstance
+from contracts.utils import check_isinstance, indent, raise_desc
 
 __all__ = [
     'PosetProduct',
@@ -34,11 +34,13 @@ class PosetProduct(Poset):
             try:
                 sub.check_leq(x, y)
             except NotLeq as e:
-                msg = '#%d (%s): %s ≰ %s: %s' % (i, sub, x, y, e)
+                msg = '#%d (%s): %s ≰ %s.' % (i, sub, x, y)
+                msg += '\n' + indent(str(e).strip(), '| ')
                 problems.append(msg)
         if problems:
+            msg = 'Leq does not hold.\n'
             msg = "\n".join(problems)
-            raise NotLeq(msg)
+            raise_desc(NotLeq, msg, args_first=False, self=self, a=a, b=b)
 
     def belongs(self, x):
         problems = []
@@ -46,12 +48,14 @@ class PosetProduct(Poset):
             try:
                 sub.belongs(xe)
             except NotBelongs as e:
-                msg = '#%d (%s): %s does not belong: %s' % (i, sub, xe, e)
+                msg = '#%s: Component %s does not belong to factor %s' % (i, xe, sub)
+                msg += '\n' + indent(str(e).strip(), '| ')
                 problems.append(msg)
 
         if problems:
-            msg = "\n".join(problems)
-            raise NotBelongs(msg)
+            msg = 'The point does not belong to this product space.\n'
+            msg += "\n".join(problems)
+            raise_desc(NotBelongs, msg, args_first=False, self=self, x=x)
 
     def format(self, x):
         ss = []

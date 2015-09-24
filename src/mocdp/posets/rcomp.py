@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from .poset import NotLeq, Poset
-from contracts.utils import check_isinstance
+from contracts.utils import raise_desc
+from mocdp.posets.space import NotBelongs
 import numpy as np
 
 __all__ = [
@@ -30,10 +31,14 @@ class Rcomp(Poset):
         if x == self.top:
             return True
 
-        check_isinstance(x, float)
+        if not isinstance(x, float):
+#             raise NotBelongs('Not a float')
+            raise_desc(NotBelongs, 'Not a float.', x=x)
+
         if not 0 <= x:
             msg = '%s ≰ %s' % (0, x)
-            raise ValueError(msg)
+#             raise NotBelongs(msg)
+            raise_desc(NotBelongs, msg, x=x)
 
         return True
 
@@ -66,6 +71,7 @@ class Rcomp(Poset):
         return "R"
 
     def format(self, x):
+        self.belongs(x)
         if x == self.top:
             return self.top.__repr__()
         else:
@@ -107,7 +113,9 @@ class RcompUnits(Rcomp):
     def __repr__(self):
         s = Rcomp.__repr__(self)
         return s + "[%s]" % self.units
-
+#
+#     def belongs(self, x):
+#         return Rcomp.belongs(self, x)
     def __eq__(self, other):
         if not isinstance(other, Rcomp):
             return False

@@ -1,16 +1,17 @@
 from mocdp.unittests.generation import for_some_dps, for_some_dps_dyn
 from reprep import Report
 from mocdp.drawing import plot_upset_minima, plot_upset_R2
+import warnings
 
 
-@for_some_dps('ex16_loop')
+# @for_some_dps('ex16_loop')
 def check_ex16(_id_dp, dp):
     funsp = dp.get_fun_space()
     bot = funsp.get_bottom()
     res = dp.solve(bot)
     print('res', res)
 
-@for_some_dps_dyn('ex16_loop')
+# @for_some_dps_dyn('ex16_loop')
 def check_ex16b(context, _id_dp, dp):
     r = context.comp(check_ex16b_r, dp)
     context.add_report(r, 'ex16')
@@ -24,8 +25,8 @@ def check_ex16b_r(dp):
 
     return r
 
-
-@for_some_dps_dyn('ex16_loop')
+warnings.warn('readd')
+# @for_some_dps_dyn('ex16_loop')
 def check_ex16c(context, _id_dp, dp):
     r = context.comp(check_ex16c_r, dp)
     context.add_report(r, 'ex16c')
