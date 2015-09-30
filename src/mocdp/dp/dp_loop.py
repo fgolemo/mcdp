@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
-from contracts.utils import raise_desc, check_isinstance
-from mocdp.posets.poset_product import PosetProduct
-from mocdp.posets.space import Map
-from mocdp.posets.uppersets import UpperSet, UpperSets
-import warnings
+from contracts.utils import check_isinstance, raise_desc
+from mocdp.posets import Map, PosetProduct, UpperSet, UpperSets
 from mocdp.posets.utils import poset_minima
+import warnings
 
 
 __all__ = ['DPLoop']
@@ -104,7 +102,6 @@ class DPLoop(PrimitiveDP):
     def get_normal_form(self):
         S0, alpha0, beta0 = self.dp1.get_normal_form()
 
-        dp1 = self.dp1
         UpsetR2 = UpperSets(self.R2)
         S = PosetProduct((S0, UpsetR2))
         F1S = PosetProduct((self.F1, S))
@@ -165,7 +162,6 @@ class DPLoop(PrimitiveDP):
             def __call__(self, x):
                 (f1, (s, r2s)) = x
                 UpsetR2.belongs(r2s)
-
 
                 am = set()
                 bm = set()
