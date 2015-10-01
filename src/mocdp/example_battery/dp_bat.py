@@ -33,7 +33,7 @@ class BatteryDP(PrimitiveDP):
         weight = joules / self.energy_density
         return ressp.U(weight)
 
-    def __repr__(self): return 'battery'
+#     def __repr__(self): return 'battery'
 
 class Weight2totalpayload(PrimitiveDP):
 
@@ -116,8 +116,8 @@ class Payload2ET(PrimitiveDP):
 
         # print('Choices: %d down to %d' % (len(choices), len(min_choices)))
         return ressp.Us(min_choices)
-    def __repr__(self):
-        return 'Payload2ET()'
+#     def __repr__(self):
+#         return 'Payload2ET(%s,%s)' % (self.F, self.R)
 
 class ET2Payload(PrimitiveDP):
     """ Example 16 in RAFC """
@@ -129,9 +129,9 @@ class ET2Payload(PrimitiveDP):
         F = PosetProduct((R_Energy, R_Time))
         R = R_Weight
         PrimitiveDP.__init__(self, F=F, R=R)
-
-    def __repr__(self):
-        return 'ET2Payload(Tmax=%.2f;W0=%.2f;rho=%.2f)' % (self.Tmax, self.W0, self.rho)
+#
+#     def __repr__(self):
+#         return 'ET2Payload(Tmax=%.2f;W0=%.2f;rho=%.2f)' % (self.Tmax, self.W0, self.rho)
 
 
     def solve(self, min_func):

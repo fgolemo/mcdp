@@ -30,7 +30,7 @@ if False:
             return self.dp1.get_res_space()
 
         def solve(self, func):
-            from mocdp.posets import NotLeq, UpperSets
+            from mocdp.posets import NotLeq
 
             funsp = self.dp1.get_fun_space()
             fU = UpperSets(funsp)

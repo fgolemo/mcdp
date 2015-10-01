@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 from abc import ABCMeta, abstractmethod
-from contracts import contract
-from decent_logs.withinternallog import WithInternalLog
-from mocdp.posets import Poset, Space, UpperSet, UpperSets
-from mocdp.posets.poset_product import PosetProduct
-from mocdp.posets.space import Map, NotBelongs
-from mocdp.posets.single import Single
-from contracts.utils import raise_wrapped
 from collections import namedtuple
+from contracts import contract
+from contracts.utils import raise_wrapped
+from decent_logs.withinternallog import WithInternalLog
+from mocdp.posets import (Map, NotBelongs, Poset, PosetProduct, Single, Space,
+    UpperSet, UpperSets)
 
 __all__ = [
     'PrimitiveDP',
@@ -29,8 +27,8 @@ class PrimitiveMeta(ABCMeta):
                 try:
                     F.belongs(f)
                 except NotBelongs as e:
-                    raise_wrapped(NotBelongs, e,
-                                  "Function passed to solve() is not in function space.",
+                    msg = "Function passed to solve() is not in function space."
+                    raise_wrapped(NotBelongs, e, msg,
                                   F=F, f=f, self=self)
 
                 try:
@@ -107,10 +105,15 @@ class PrimitiveDP(WithInternalLog):
         beta = DefaultBeta(self)
         return NormalForm(S=get_S_null(), alpha=alpha, beta=beta)
 
+    def __repr__(self):
+        return '%s(%s->%s)' % (type(self).__name__, self.F, self.R)
+
+
 NormalForm = namedtuple('NormalForm', ['S', 'alpha', 'beta'])
 
 def get_S_null_element():
     return '@'
+
 def get_S_null():
     Void = Single(get_S_null_element())
     return Void

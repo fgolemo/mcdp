@@ -20,7 +20,7 @@ class TimeEnergyTradeoff(PrimitiveDP):
 
     def __init__(self):
         F = Single("navigate")
-        R = PosetProduct((R_Time, R_Energy))
+        R = PosetProduct((R_Power, R_Time))
 
         PrimitiveDP.__init__(self, F=F, R=R)
 
@@ -40,8 +40,8 @@ class TimeEnergyTradeoff(PrimitiveDP):
 
         return ressp.Us(min_choices)
 
-    def __repr__(self):
-        return 'TimeEnergyTradeoff()'
+#     def __repr__(self):
+#         return 'TimeEnergyTradeoff()'
 
 
 def Pa_from_weight(W):
@@ -63,8 +63,8 @@ class Mobility(PrimitiveDP):
 
         return self.R.U(r)
 
-    def __repr__(self):
-        return 'Mobility(%s->%s)' % (self.F, self.R)
+#     def __repr__(self):
+#         return 'Mobility(%s->%s)' % (self.F, self.R)
 
 def series(l):
     if len(l) == 1:
@@ -84,20 +84,37 @@ def battery_complete():
     F = PosetProduct((PosetProduct((R_Weight, N)), R_Weight))
 
     dpB = Mux(F, [[(0, 0), 1], (0, 1)])
+
+    assert dpB.get_fun_space() == F
+
     dpA = Parallel(Sum(R_Weight), Identity(N))
+
+    series([dpB, dpA])
 
     dp1 = Parallel(Mobility(), TimeEnergyTradeoff())
 
+    series([dpA, dp1])
+
     dp2 = Mux(F=dp1.get_res_space(), coords=[[0, (1, 0)], (1, 1)])
 
-    dp4 = Parallel(Sum(Rcomp()), Identity(R_Time))
-    dp4b = Mux(dp4.get_res_space(), [1, [0, 1]])
+    series([dp1, dp2])
+
+    dp4 = Parallel(Sum(R_Power), Identity(R_Time))
+
+    series([dp2, dp4])
+
+    dp4b = Mux(dp4.get_res_space(), [1, [1, 0]])
+
+    series([dp4, dp4b])
+
     e_from_tp = Product(R_Time, R_Power, R_Energy)
 
     from .dp_bat import BatteryDP
     battery = BatteryDP(energy_density=100.0)
 
     dp7 = Parallel(Identity(R_Time), Series(e_from_tp, battery))
+
+    series([dp4b, dp7])
 
     dps = series([dpB, dpA, dp1, dp2, dp4, dp4b, dp7])
     dp = DPLoop(dps)

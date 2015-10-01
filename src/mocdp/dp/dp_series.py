@@ -1,5 +1,10 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
+from mocdp.posets.uppersets import UpperSets
+from mocdp.posets.poset_product import PosetProduct
+from mocdp.posets.space import Map
+from mocdp.dp.primitive import NormalForm
+from contracts.utils import raise_desc
 
 __all__ = [
     'Series',
@@ -13,13 +18,22 @@ class Series(PrimitiveDP):
         _, self.dp1 = library.instance_smarter(dp1)
         _, self.dp2 = library.instance_smarter(dp2)
 
-        F = self.dp1.get_fun_space()
-        R = self.dp2.get_res_space()
 
-        PrimitiveDP.__init__(self, F=F, R=R)
+        R1 = self.dp1.get_res_space()
+        F2 = self.dp2.get_fun_space()
+
+        if not R1 == F2:
+            msg = 'Cannot connect different spaces.'
+            raise_desc(ValueError, msg, dp1=dp1, dp2=dp2, R1=R1, F2=F2)
+
+
+        F1 = self.dp1.get_fun_space()
+        R2 = self.dp2.get_res_space()
+
+        PrimitiveDP.__init__(self, F=F1, R=R2)
         
     def solve(self, func):
-        from mocdp.posets import UpperSets, UpperSet, poset_minima
+        from mocdp.posets import UpperSet, poset_minima
 
         self.info('func: %s' % self.F.format(func))
 
@@ -51,4 +65,63 @@ class Series(PrimitiveDP):
     def __repr__(self):
         return 'Series(%r, %r)' % (self.dp1, self.dp2)
 
+    def get_normal_form(self):
+        """
+            
+            alpha1: U(F1) x S1 -> U(R1)
+            beta1:  U(F1) x S1 -> S1
+            
+            alpha2: U(R1) x S2 -> U(R2)
+            beta2:  U(R1) x S2 -> S2
+             
+        """
+
+        S1, alpha1, beta1 = self.dp1.get_normal_form()
+        S2, alpha2, beta2 = self.dp2.get_normal_form()
+
+        F1 = self.dp1.get_fun_space()
+        R1 = self.dp1.get_res_space()
+        R2 = self.dp2.get_res_space()
+
+        UR2 = UpperSets(R2)
+
+        UF1 = UpperSets(F1)
+        """
+        S = S1 x S2 is a Poset
+        alpha: UF1 x S -> UR1
+        beta: UF1 x S -> S
+"""     
+        S = PosetProduct((S1, S2))
+        D = PosetProduct((UF1, S))
+                         
+        class SeriesAlpha(Map):
+            def __init__(self, dp):
+                self.dp = dp
+                dom = D
+                cod = UR2
+                Map.__init__(self, dom, cod)
+
+            def _call(self, x):
+                (F, (s1, s2)) = x
+                a = alpha1((F, s1))
+                return alpha2((a, s2))
+
+        class SeriesBeta(Map):
+            def __init__(self, dp):
+                self.dp = dp
+                dom = D
+                cod = S
+                Map.__init__(self, dom, cod)
+
+            def _call(self, x):
+
+                (F, (s1, s2)) = x
+
+                r_1 = beta1((F, s1))
+                a = alpha1((F, s1))
+                r_2 = beta2((a, s2))
+                
+                return r_1, r_2
+
+        return NormalForm(S, SeriesAlpha(self), SeriesBeta(self))
 
