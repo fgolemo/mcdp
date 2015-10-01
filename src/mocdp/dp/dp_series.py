@@ -13,15 +13,11 @@ class Series(PrimitiveDP):
         _, self.dp1 = library.instance_smarter(dp1)
         _, self.dp2 = library.instance_smarter(dp2)
 
-        self.F = self.dp1.get_fun_space()
-        self.R = self.dp2.get_res_space()
+        F = self.dp1.get_fun_space()
+        R = self.dp2.get_res_space()
+
+        PrimitiveDP.__init__(self, F=F, R=R)
         
-    def get_fun_space(self):
-        return self.F
-
-    def get_res_space(self):
-        return self.R
-
     def solve(self, func):
         from mocdp.posets import UpperSets, UpperSet, poset_minima
 

@@ -31,7 +31,7 @@ class SpaceMeta(ABCMeta):
         else:
             warnings.warn("Not decorating %s :%s " % (name, cls))
 
-class Space():
+class Space(object):
     __metaclass__ = SpaceMeta
 
     def format(self, x):

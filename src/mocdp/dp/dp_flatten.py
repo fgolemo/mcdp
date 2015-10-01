@@ -19,15 +19,10 @@ class Mux(PrimitiveDP):
         _, F = library.instance_smarter(F)
         R = get_R_from_F_coords(F, coords)
 
-        self.F = F
-        self.R = R
         self.coords = coords
         
-    def get_fun_space(self):
-        return self.F
 
-    def get_res_space(self):
-        return self.R
+        PrimitiveDP.__init__(self, F=F, R=R)
 
     def solve(self, func):
         self.F.belongs(func)

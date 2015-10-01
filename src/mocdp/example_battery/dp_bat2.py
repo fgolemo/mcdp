@@ -19,19 +19,14 @@ def T_from_Ps(Ps):
 class TimeEnergyTradeoff(PrimitiveDP):
 
     def __init__(self):
-        self.F = Single("navigate")
-        self.R = PosetProduct((R_Time, R_Energy))
+        F = Single("navigate")
+        R = PosetProduct((R_Time, R_Energy))
 
-    def get_fun_space(self):
-        return self.F
-
-    def get_res_space(self):
-        return self.R
+        PrimitiveDP.__init__(self, F=F, R=R)
 
     def solve(self, min_func):
-        funsp = self.get_fun_space()
+        assert min_func == 'navigate'
         ressp = self.get_res_space()
-        funsp.belongs(min_func)
 
         PS = np.linspace(0.01, 5.0, 10)
 
@@ -55,18 +50,12 @@ def Pa_from_weight(W):
 class Mobility(PrimitiveDP):
 
     def __init__(self):
-        self.F = RcompUnits('g')
-        self.R = RcompUnits('W')
+        F = RcompUnits('g')
+        R = RcompUnits('W')
 
-    def get_fun_space(self):
-        return self.F
-
-    def get_res_space(self):
-        return self.R
+        PrimitiveDP.__init__(self, F=F, R=R)
 
     def solve(self, func):
-        self.F.belongs(func)
-
         if func == self.F.get_top():
             r = self.R.get_top()
         else:

@@ -18,6 +18,9 @@ class PosetProduct(Poset):
         self.subs = tuple([library.instance_smarter(s)[1] for s in subs])
 
 
+    def __len__(self):
+        return len(self.subs)
+
     def __getitem__(self, index):
         check_isinstance(index, int)
         return self.subs[index]

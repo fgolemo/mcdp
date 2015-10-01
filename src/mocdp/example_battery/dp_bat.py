@@ -20,18 +20,12 @@ class BatteryDP(PrimitiveDP):
         '''
         self.energy_density = energy_density
 
-    def get_fun_space(self):
-        return R_Energy
-    
-    def get_res_space(self):
-        return R_Weight
+        PrimitiveDP.__init__(self, F=R_Energy, R=R_Weight)
     
     def solve(self, min_func):
         funsp = self.get_fun_space()
         ressp = self.get_res_space()
 
-        funsp.belongs(min_func)
-        
         if min_func == funsp.get_top():
             return ressp.U(ressp.get_top())
         
@@ -39,18 +33,15 @@ class BatteryDP(PrimitiveDP):
         weight = joules / self.energy_density
         return ressp.U(weight)
 
+    def __repr__(self): return 'battery'
 
 class Weight2totalpayload(PrimitiveDP):
 
     def __init__(self, baseline=100):
         self.baseline = baseline
 
-    def get_fun_space(self):
-        return Rcomp()
+        PrimitiveDP.__init__(self, F=Rcomp(), R=Rcomp())
 
-    def get_res_space(self):
-        return Rcomp()
-    
     def solve(self, min_func):
         funsp = self.get_fun_space()
         ressp = self.get_res_space()
@@ -71,11 +62,8 @@ class Payload2energy(PrimitiveDP):
         self.T = T
         self.alpha = alpha
 
-    def get_fun_space(self):
-        return Rcomp()
 
-    def get_res_space(self):
-        return Rcomp()
+        PrimitiveDP.__init__(self, F=Rcomp(), R=Rcomp())
 
     def solve(self, min_func):
         funsp = self.get_fun_space()
@@ -99,20 +87,13 @@ def Pa_from_weight(W):
 class Payload2ET(PrimitiveDP):
     """ Example 16 in RAFC """
     def __init__(self):
-        pass
-
-    def get_fun_space(self):
-        "F = carry payload P"
-        return Rcomp()
-
-    def get_res_space(self):
-        "R = energy E, time T"
-        return PosetProduct((Rcomp(), Rcomp()))
+        F = Rcomp()
+        R = PosetProduct((Rcomp(), Rcomp()))
+        PrimitiveDP.__init__(self, F=F, R=R)
 
     def solve(self, min_func):
         funsp = self.get_fun_space()
         ressp = self.get_res_space()
-        funsp.belongs(min_func)
 
         if min_func == funsp.get_top():
             return ressp.U(ressp.get_top())
@@ -145,16 +126,13 @@ class ET2Payload(PrimitiveDP):
         self.W0 = W0
         self.rho = rho
 
+        F = PosetProduct((R_Energy, R_Time))
+        R = R_Weight
+        PrimitiveDP.__init__(self, F=F, R=R)
+
     def __repr__(self):
         return 'ET2Payload(Tmax=%.2f;W0=%.2f;rho=%.2f)' % (self.Tmax, self.W0, self.rho)
 
-    def get_res_space(self):
-        "R = carry payload P"
-        return Rcomp()
-
-    def get_fun_space(self):
-        "F = energy E, time T"
-        return PosetProduct((Rcomp(), Rcomp()))
 
     def solve(self, min_func):
         funsp = self.get_fun_space()

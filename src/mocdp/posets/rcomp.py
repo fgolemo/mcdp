@@ -32,12 +32,10 @@ class Rcomp(Poset):
             return True
 
         if not isinstance(x, float):
-#             raise NotBelongs('Not a float')
             raise_desc(NotBelongs, 'Not a float.', x=x)
 
         if not 0 <= x:
             msg = '%s ≰ %s' % (0, x)
-#             raise NotBelongs(msg)
             raise_desc(NotBelongs, msg, x=x)
 
         return True

@@ -15,15 +15,11 @@ class Sum(PrimitiveDP):
         library = get_conftools_posets()
         _, F0 = library.instance_smarter(F)
 
-        self.F = PosetProduct((F0, F0))
-        self.R = F0
+        F = PosetProduct((F0, F0))
+        R = F0
         self.F0 = F0
 
-    def get_fun_space(self):
-        return self.F
-
-    def get_res_space(self):
-        return self.R
+        PrimitiveDP.__init__(self, F=F, R=R)
 
     def solve(self, func):
         self.F.belongs(func)
@@ -45,19 +41,12 @@ class Product(PrimitiveDP):
         library = get_conftools_posets()
         _, self.F1 = library.instance_smarter(F1)
         _, self.F2 = library.instance_smarter(F2)
-        _, self.R = library.instance_smarter(R)
+        _, R = library.instance_smarter(R)
 
-        self.F = PosetProduct((F1, F2))
-
-    def get_fun_space(self):
-        return self.F
-
-    def get_res_space(self):
-        return self.R
+        F = PosetProduct((F1, F2))
+        PrimitiveDP.__init__(self, F=F, R=R)
 
     def solve(self, func):
-        self.F.belongs(func)
-
         f1, f2 = func
 
         r = self.F1.multiply(f1, f2)

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts.utils import check_isinstance, raise_desc
-from mocdp.posets import Map, PosetProduct, UpperSet, UpperSets
-from mocdp.posets.utils import poset_minima
+from mocdp.posets import Map, PosetProduct, UpperSet, UpperSets, poset_minima
 import warnings
 
 
@@ -82,22 +81,19 @@ class DPLoop(PrimitiveDP):
         funsp = self.dp1.get_fun_space()
         ressp = self.dp1.get_res_space()
 
+        check_isinstance(funsp, PosetProduct)
+        check_isinstance(ressp, PosetProduct)
+
         self.F1 = funsp[0]
         self.R1 = ressp[0]
         self.R2 = funsp[1]
 
-        check_isinstance(funsp, PosetProduct)
-        check_isinstance(ressp, PosetProduct)
-
         if not funsp[1] == ressp[1]:
-
             raise_desc(ValueError, "Spaces incompatible for loop", funsp=funsp, ressp=ressp)
 
-    def get_fun_space(self):
-        return self.F1
-
-    def get_res_space(self):
-        return self.R1
+        F = self.F1
+        R = self.R1
+        PrimitiveDP.__init__(self, F=F, R=R)
 
     def get_normal_form(self):
         S0, alpha0, beta0 = self.dp1.get_normal_form()

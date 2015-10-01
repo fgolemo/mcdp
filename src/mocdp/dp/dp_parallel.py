@@ -15,16 +15,15 @@ class Parallel(PrimitiveDP):
         _, self.dp1 = library.instance_smarter(dp1)
         _, self.dp2 = library.instance_smarter(dp2)
 
-    def get_fun_space(self):
         F1 = self.dp1.get_fun_space()
         F2 = self.dp2.get_fun_space()
-        return PosetProduct((F1, F2))
-
-    def get_res_space(self):
+        F = PosetProduct((F1, F2))
         R1 = self.dp1.get_res_space()
         R2 = self.dp2.get_res_space()
-        return PosetProduct((R1, R2))
+        R = PosetProduct((R1, R2))
 
+        PrimitiveDP.__init__(self, F=F, R=R)
+        
     def solve(self, f):
         F = self.get_fun_space()
         F.belongs(f)
