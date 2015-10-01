@@ -17,7 +17,6 @@ class PosetProduct(Poset):
         library = get_conftools_posets()
         self.subs = tuple([library.instance_smarter(s)[1] for s in subs])
 
-
     def __len__(self):
         return len(self.subs)
 
@@ -46,6 +45,9 @@ class PosetProduct(Poset):
             raise_desc(NotLeq, msg, args_first=False, self=self, a=a, b=b)
 
     def belongs(self, x):
+        if not isinstance(x, tuple):
+            raise_desc(NotBelongs, 'Not a tuple', x=x, self=self)
+
         problems = []
         for i, (sub, xe) in enumerate(zip(self.subs, x)):
             try:

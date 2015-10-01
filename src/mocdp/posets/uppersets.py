@@ -9,8 +9,9 @@ __all__ = [
 ]
 
 class UpperSet():
+    @contract(minimals='set|list', P=Poset)
     def __init__(self, minimals, P):
-        self.minimals = minimals
+        self.minimals = frozenset(minimals)
         self.P = P
 
         problems = []

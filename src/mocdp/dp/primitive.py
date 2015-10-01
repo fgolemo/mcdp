@@ -96,54 +96,59 @@ class PrimitiveDP(WithInternalLog):
         minima = poset_minima(res, ressp.leq)
         return ressp.Us(minima)
 
-    def get_normal_form(self):
-        alpha = DefaultAlphaMap(self)
-        beta = DefaultBeta(self)
-        return (get_S_null(), alpha, beta)
 
-#     @abstractmethod
-    def get_normal_form2(self):
+    def get_normal_form(self):
         """
             S is a Poset
             alpha: U(F) x S -> U(R)
             beta:  U(F) x S -> S 
         """
-        pass
+        alpha = DefaultAlphaMap(self)
+        beta = DefaultBeta(self)
+        return NormalForm(S=get_S_null(), alpha=alpha, beta=beta)
 
 NormalForm = namedtuple('NormalForm', ['S', 'alpha', 'beta'])
 
-
-
+def get_S_null_element():
+    return '@'
 def get_S_null():
-    Void = Single('*')
-    UpperVoid = UpperSets(Void)
-    return UpperVoid
+    Void = Single(get_S_null_element())
+    return Void
+#     UpperVoid = UpperSets(Void)
+#     return UpperVoid
 
 class DefaultAlphaMap(Map):
     def __init__(self, dp):
         self.dp = dp
         F = self.dp.get_fun_space()
+        R = self.dp.get_res_space()
+        self.UF = UpperSets(F)
+        self.UR = UpperSets(R)
         self.S = get_S_null()
-        self.D = PosetProduct((F, self.S))
+        self.D = PosetProduct((self.UF, self.S))
 
     def get_domain(self):
         return self.D
 
     def get_codomain(self):
-        return self.dp.get_tradeoff_space()
+        return self.UR
 
-    def __call__(self, x):
-        f, s = x
-        assert s.minimals == set(["*"]), s
-        return self.dp.solve(f)
+    def _call(self, x):
+        F, _s = x
+        Res = self.dp.solveU(F)
+        return Res
 
 
 class DefaultBeta(Map):
     def __init__(self, dp):
         self.dp = dp
         F = self.dp.get_fun_space()
+        R = self.dp.get_res_space()
+        self.UF = UpperSets(F)
+        self.UR = UpperSets(R)
+
         self.S = get_S_null()
-        self.D = PosetProduct((F, self.S))
+        self.D = PosetProduct((self.UF, self.S))
         self.C = self.S
 
     def get_domain(self):
@@ -152,8 +157,6 @@ class DefaultBeta(Map):
     def get_codomain(self):
         return self.S
 
-    def __call__(self, x):
-        self.D.belongs(x)
-        _f, s = x
-        assert s.minimals == set(["*"]), s
+    def _call(self, x):
+        _F, s = x
         return s

@@ -23,7 +23,6 @@ class Series(PrimitiveDP):
 
         self.info('func: %s' % self.F.format(func))
 
-
         u1 = self.dp1.solve(func)
         ressp1 = self.dp1.get_res_space()
         tr1 = UpperSets(ressp1)

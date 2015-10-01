@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from mocdp.unittests.generation import for_all_dps
+from mocdp.posets.uppersets import UpperSets
 
 @for_all_dps
 def check_normalform(id_dp, dp):
@@ -10,7 +11,11 @@ def check_normalform(id_dp, dp):
     print('β: %s' % beta)
 
     F = dp.get_fun_space()
-    f_bot = F.get_bottom()
+    R = dp.get_res_space()
+    UF = UpperSets(F)
+    UR = UpperSets(R)
+
+    f_bot = UF.get_bottom()
     S_bot = S.get_bottom()
 
     x = (f_bot, S_bot)
