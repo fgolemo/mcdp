@@ -47,15 +47,17 @@ class Map():
 
     __metaclass__ = ABCMeta
 
-    @abstractmethod
+    def __init__(self, dom, cod):
+        self.dom = dom
+        self.cod = cod
+
     @contract(returns=Space)
     def get_domain(self):
-        pass
+        return self.dom
 
-    @abstractmethod
     @contract(returns=Space)
     def get_codomain(self):
-        pass
+        return self.cod
 
     def __call__(self, x):
         D = self.get_domain()

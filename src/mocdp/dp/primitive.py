@@ -114,24 +114,18 @@ def get_S_null_element():
 def get_S_null():
     Void = Single(get_S_null_element())
     return Void
-#     UpperVoid = UpperSets(Void)
-#     return UpperVoid
 
 class DefaultAlphaMap(Map):
     def __init__(self, dp):
         self.dp = dp
-        F = self.dp.get_fun_space()
-        R = self.dp.get_res_space()
-        self.UF = UpperSets(F)
-        self.UR = UpperSets(R)
-        self.S = get_S_null()
-        self.D = PosetProduct((self.UF, self.S))
+        F = dp.get_fun_space()
+        R = dp.get_res_space()
+        UF = UpperSets(F)
+        S = get_S_null()
+        dom = PosetProduct((UF, S))
 
-    def get_domain(self):
-        return self.D
-
-    def get_codomain(self):
-        return self.UR
+        cod = UpperSets(R)
+        Map.__init__(self, dom, cod)
 
     def _call(self, x):
         F, _s = x
@@ -142,20 +136,13 @@ class DefaultAlphaMap(Map):
 class DefaultBeta(Map):
     def __init__(self, dp):
         self.dp = dp
-        F = self.dp.get_fun_space()
-        R = self.dp.get_res_space()
-        self.UF = UpperSets(F)
-        self.UR = UpperSets(R)
+        F = dp.get_fun_space()
+        UF = UpperSets(F)
 
-        self.S = get_S_null()
-        self.D = PosetProduct((self.UF, self.S))
-        self.C = self.S
-
-    def get_domain(self):
-        return self.D
-
-    def get_codomain(self):
-        return self.S
+        S = get_S_null()
+        dom = PosetProduct((UF, S))
+        cod = S
+        Map.__init__(self, dom, cod)
 
     def _call(self, x):
         _F, s = x

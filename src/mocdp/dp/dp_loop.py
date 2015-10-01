@@ -126,11 +126,9 @@ class DPLoop(PrimitiveDP):
             def __init__(self, dp):
                 self.dp = dp
 
-            def get_domain(self):
-                return PosetProduct( (UF1, S) ) 
-
-            def get_codomain(self):
-                return UR1
+                dom = PosetProduct((UF1, S))
+                cod = UR1
+                Map.__init__(self, dom, cod)
 
             def _call(self, x):
                 (fs, (s0, rs)) = x
@@ -166,11 +164,9 @@ class DPLoop(PrimitiveDP):
             def __init__(self, dp):
                 self.dp = dp
 
-            def get_domain(self):
-                return PosetProduct((UF1, S))
-
-            def get_codomain(self):
-                return S
+                dom = PosetProduct((UF1, S))
+                cod = S
+                Map.__init__(self, dom, cod)
 
             def _call(self, x):
                 # beta0:  U(F0) x S0 -> S0
@@ -204,6 +200,8 @@ class DPLoop(PrimitiveDP):
                 m1 = UpperSet(u, R2)
                 
                 return s0p, m1
+
+
 #                 am = set()
 #                 bm = set()
 #                 for r2 in r2s.minimals:
