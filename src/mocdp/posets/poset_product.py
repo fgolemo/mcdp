@@ -13,6 +13,8 @@ class PosetProduct(Poset):
     """ A product of Posets with the product order. """
     @contract(subs='seq(str|$Poset|code_spec)')
     def __init__(self, subs):
+#         if not subs:
+#             raise ValueError('subs cannot be empty')
         from mocdp.configuration import get_conftools_posets
         library = get_conftools_posets()
         self.subs = tuple([library.instance_smarter(s)[1] for s in subs])
@@ -83,6 +85,9 @@ class PosetProduct(Poset):
                 return "(%r)" % x
             else:
                 return x.__repr__()
+
+        if len(self.subs) == 0:
+            return "1"
 
         return "×".join(map(f, self.subs))
 

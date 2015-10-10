@@ -13,11 +13,11 @@ def jobs_comptests(context):
     # tests
     from . import unittests
 
-
     from .posets import tests
     from .dp import tests  # @Reimport
     from .dp_report import tests  # @Reimport
     from .example_battery import tests  # @Reimport
+    from .comp import tests  # @Reimport
 
     # instantiation
     from comptests import jobs_registrar

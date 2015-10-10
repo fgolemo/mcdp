@@ -2,19 +2,30 @@
 dp chassis = primitive:
     
 
-dp battery = primitive:
-    f voltage (intervals of V) "Supplied voltage"
-    f amps    (A)              "Supplied amps"
+dp battery:
+ 
+    provides voltage (intervals of V) "Supplied voltage"
+    provides amps    (A)              "Supplied amps"
 
-    r weight  (g)              "Battery weight"
-    r cost    ($)
-    
-    solve with [python comp.pokde.pok]
+    requires weight  (g)              "Battery weight"
+    requires cost    ($)			  "cost"
+        
+    implemented by [python comp.pokde.pok]
 
+	x = required voltage of motor
+	y = provided voltage of chassis
 
-dp chassis_plus_motor = compose:
+	(required voltage of motor) >= (provided voltage of chassis)
+
+	x >= y
+	
+
+dp chassis_plus_motor:
     dp motor = ...
     dp chassis = ...
+
+	cost = (cost of motor) + (cost of chassis) 
+
 
     f extra_payload
     f velocity = chassis.velocity

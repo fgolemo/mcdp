@@ -3,7 +3,7 @@ from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 from contracts import contract
 from contracts.utils import raise_wrapped
-from decent_logs.withinternallog import WithInternalLog
+from decent_logs import WithInternalLog
 from mocdp.posets import (Map, NotBelongs, Poset, PosetProduct, Single, Space,
     UpperSet, UpperSets)
 
@@ -93,7 +93,6 @@ class PrimitiveDP(WithInternalLog):
         ressp = self.get_res_space()
         minima = poset_minima(res, ressp.leq)
         return ressp.Us(minima)
-
 
     def get_normal_form(self):
         """

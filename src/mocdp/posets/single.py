@@ -34,7 +34,7 @@ class Single(Poset):
         assert a == b == self.element
         return self.element
 
-    def get_test_chain(self, n):
+    def get_test_chain(self, n):  # @UnusedVariable
         return [self.element, self.element]
 
     def __eq__(self, other):

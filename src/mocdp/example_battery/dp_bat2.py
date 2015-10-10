@@ -1,6 +1,6 @@
 from mocdp.posets.single import Single
 from mocdp.posets.poset_product import PosetProduct
-from mocdp.posets.rcomp import RcompUnits, Rcomp
+from mocdp.posets.rcomp import RcompUnits
 import numpy as np
 from mocdp.dp.primitive import PrimitiveDP
 from mocdp.dp.dp_parallel import Parallel
@@ -63,8 +63,6 @@ class Mobility(PrimitiveDP):
 
         return self.R.U(r)
 
-#     def __repr__(self):
-#         return 'Mobility(%s->%s)' % (self.F, self.R)
 
 def series(l):
     if len(l) == 1:
