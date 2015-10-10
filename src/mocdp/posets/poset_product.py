@@ -89,6 +89,9 @@ class PosetProduct(Poset):
         if len(self.subs) == 0:
             return "1"
 
+        if len(self.subs) == 1:
+            return '(%s×)' % list(self.subs)[0]
+
         return "×".join(map(f, self.subs))
 
     def __eq__(self, other):

@@ -79,11 +79,10 @@ def get_it(seq, coords, reduce_list):
         [0, (1, 1)] => ['a', 'c']
     
     """
-
-
-
+#     print('get_it(%s, %s)' % (seq, coords))
     if coords == ():
         return seq
+
     if isinstance(coords, list):
         subs = [get_it(seq, c, reduce_list=reduce_list) for c in coords]
         R = reduce_list(subs)
@@ -95,7 +94,7 @@ def get_it(seq, coords, reduce_list):
     assert isinstance(coords, tuple) and len(coords) >= 1, coords
     a = coords[0]
     r = coords[1:]
-    assert isinstance(a, int)
+    assert isinstance(a, int), a
     if r:
         s = seq[a]
         assert isinstance(r, tuple)

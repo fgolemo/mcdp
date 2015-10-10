@@ -85,12 +85,20 @@ class DPLoop(PrimitiveDP):
         check_isinstance(funsp, PosetProduct)
         check_isinstance(ressp, PosetProduct)
 
+        if len(funsp) != 2:
+            raise ValueError('funsp needs to be length 2: %s' % funsp)
+
+        if len(ressp) != 2:
+            raise ValueError('ressp needs to be length 2: %s' % ressp)
+
         self.F1 = funsp[0]
         self.R1 = ressp[0]
         self.R2 = funsp[1]
 
-        if not funsp[1] == ressp[1]:
-            raise_desc(ValueError, "Spaces incompatible for loop", funsp=funsp, ressp=ressp)
+        if not (funsp[1]) == (ressp[1]):
+            raise_desc(ValueError, "Spaces incompatible for loop",
+                       funsp=funsp, ressp=ressp,
+                       ressp1=ressp[1], funsp1=funsp[1])
 
         F = self.F1
         R = self.R1

@@ -11,6 +11,8 @@ from mocdp.dp.dp_flatten import Mux
 from contracts.utils import raise_wrapped
 from mocdp.dp.dp_series import Series
 from mocdp.comp.wrap import SimpleWrap, dpwrap
+from mocdp.posets.poset_product import PosetProduct
+from mocdp.dp.dp_loop import DPLoop
 
 Connection = namedtuple('Connection', 'dp1 s1 dp2 s2')
 
@@ -34,9 +36,15 @@ def parse_connection(s):
 
     raise ValueError(s)
 
+class TheresALoop(Exception):
+    pass
+
 @contract(name2dp='dict(str:$NamedDP)', connections='set(str|$Connection)|list(str|$Connection)',
           returns=NamedDP)
 def dpconnect(name2dp, connections):
+    """
+        Raises TheresALoop
+    """
     if len(name2dp) < 2:
         raise ValueError()
     connections = set(map(parse_connection, connections))
@@ -67,7 +75,7 @@ def dpconnect(name2dp, connections):
     try:
         order = order_dps(set(name2dp), connections)
     except NetworkXUnfeasible:
-        raise NotImplementedError()
+        raise TheresALoop()
 
     # Now let's pick the first two
     first = order[0]
@@ -114,8 +122,9 @@ def dpconnect(name2dp, connections):
 
 @contract(ndp1=NamedDP, ndp2=NamedDP, returns=NamedDP, connections='set($Connection)')
 def connect2(ndp1, ndp2, connections, split):
+
     #
-    #     |   |          |-B1--------->
+    #     |   |          |-B1(split)----->
     # f1->|   |--B1----->|         ___
     #     | 1 |          |----B2->|   |
     #     |___| -C1--C2---------->| 2 |->r2
@@ -129,7 +138,7 @@ def connect2(ndp1, ndp2, connections, split):
 
     f1 = ndp1.get_fnames()
     f2 = ndp2.get_fnames()
-    r1 = ndp1.get_rnames()
+
     r2 = ndp2.get_rnames()
     # split = B1 is given
     # find B2 from B1
@@ -147,7 +156,7 @@ def connect2(ndp1, ndp2, connections, split):
     all_s2 = set([c.s2 for c in connections])
     C2 = [x for x in all_s2 if not x in B2]
     # Find C1
-    C1 = map(s1_from_s2, C2)
+#     C1 = map(s1_from_s2, C2)
     # Find D
     D = [x for x in f2 if (x not in B2) and (x not in C2)]
 
@@ -167,8 +176,12 @@ def connect2(ndp1, ndp2, connections, split):
     # ---------D----------------->|___|
     
     if D:
-        D_types = ndp2.get_ftypes(D)
-        Id_D = Identity(D_types)
+        if len(D) == 1:
+            D_type = ndp2.get_ftype(D[0])
+            Id_D = Identity(D_type)
+        else:
+            D_types = ndp2.get_ftypes(D)
+            Id_D = Identity(D_types)
         X = Parallel(ndp1.get_dp(), Id_D)
     else:
         X = ndp1.get_dp()
@@ -181,10 +194,6 @@ def connect2(ndp1, ndp2, connections, split):
         Z = ndp2.get_dp()
 
 
-#     B2_types = ndp2.get_ftypes(B2)
-
-
-
     #      ___
     #     |   |  .            *-B1-------.----->
     # f1->|   |  . |--B1----->*          .   ___
@@ -192,10 +201,6 @@ def connect2(ndp1, ndp2, connections, split):
     #     |___|  . |-C1------------C2->|-.->| 2 |->r2
     # ---------D-.-------------------->| .  |___|
 
-#     print('Xr', X.get_res_space())
-#     print('Zf', Z.get_fun_space())
-#     print 'X', X
-#     print 'Z', Z
 
     # I need to write the muxer
     # look at the end
@@ -204,15 +209,28 @@ def connect2(ndp1, ndp2, connections, split):
     if D:
         for x in ndp2.get_fnames():
             if x in B2:
-                i = (0, ndp1.rindex(s1_from_s2(x)))
+                i = (0,)
+                a = ndp1.rindex(s1_from_s2(x))
+                if a != ():
+                    i = i + (a,)
                 mux_B2_C2_D.append(i)
+#                 print('B2[%s] got %s' % (x, i))
                 assert x not in C2 and x not in D
             if x in C2:
-                i = (0, ndp1.rindex(s1_from_s2(x)))
+                a = ndp1.rindex(s1_from_s2(x))
+                i = (0,)
+                if a != ():
+                    i = i + (a,)
+#                 print('C2[%s] got %s' % (x, i))
                 mux_B2_C2_D.append(i)
                 assert x not in D
             if x in D:
-                i = (1, D.index(x))
+                if len(D) == 1:
+                    i = (1,)
+                else:
+                    i = (1, D.index(x))
+
+#                 print('D[%s] giv %s ' % (x, i))
                 mux_B2_C2_D.append(i)
     else:
         for x in ndp2.get_fnames():
@@ -223,8 +241,6 @@ def connect2(ndp1, ndp2, connections, split):
                 i = ndp1.rindex(s1_from_s2(x))
                 mux_B2_C2_D.append(i)
 
-
-
     if B1:
         mux_B1 = [(0, ndp1.rindex(s)) for s in B1]
         coords = [mux_B1, mux_B2_C2_D]
@@ -232,10 +248,11 @@ def connect2(ndp1, ndp2, connections, split):
         coords = mux_B2_C2_D
 
     F = X.get_res_space()
+#     print('Creating Mux from F = %r, coords= %r ' % (F, coords))
+    if len(coords) == 1:
+        coords = coords[0]
     Y = Mux(coords=coords, F=F)
-#
-#     print('fun m', Y.get_fun_space())
-#     print('res m', Y.get_res_space())
+
 
     A = Series(X, Y)
     Series(Y, Z)
@@ -243,10 +260,14 @@ def connect2(ndp1, ndp2, connections, split):
 
     fnames = f1 + D
     rnames = B1 + r2
+#     print('ndp1:%s' % ndp1.desc())
+#     print('res_dp', res_dp.get_fun_space())
+    if len(fnames) == 1:
+        fnames = fnames[0]
+    if len(rnames) == 1:
+        rnames = rnames[0]
     res = dpwrap(res_dp, fnames, rnames)
 
-    print('Connect fun = %s' % res_dp.get_fun_space())
-    print('        res = %s' % res_dp.get_res_space())
     return res
 
 
@@ -271,8 +292,68 @@ def order_dps(names, connections):
         G.add_edge(dp1, dp2)
         
     l = topological_sort(G)
-    print l
     
     assert set(l) == names 
     return l
+
+@contract(ndp=NamedDP, lf='str', lr='str', returns=NamedDP)
+def dploop(ndp, lr, lf):
+    print(ndp.desc())
+    print('lr', lr)
+    print('lf', lf)
+    #  A----> |     |--B----->
+    #         | ndp |
+    #  lf---->|_____|-----lr
+    #  `--------(>=)------/
+    #
+
+    # of --> |dp| --> or
+    # lf              lr
+    #
+    ndp.rindex(lr)
+    ndp.findex(lf)
+
+    F0 = ndp.get_fnames()
+    A = list(set(F0) - set([lf]))
+    R0 = ndp.get_rnames()
+    B = list(set(R0) - set([lr]))
+
+
+    # loop(series(X, dp, Y))
+    # X is now the product space
+    F = PosetProduct((ndp.get_ftypes(A), ndp.get_ftype(lf)))
+    coords = []
+    for x in F0:
+        if x == lf:
+            coords.append(1)
+        else:
+            coords.append((0, A.index(x)))
+    X = Mux(F, coords)
+
+#     if B:
+#     R = PosetProduct((ndp.get_rtypes(B), ndp.get_rtype(lr)))
+    R = ndp.get_dp().get_res_space()
+    coords_B = [ ndp.rindex(x) for x in B]
+    coords = [coords_B, ndp.rindex(lr)]
+    Y = Mux(R, coords)
+
+    print('TRyingt to interconnect %s' % ndp.get_dp())
+    Series(ndp.get_dp(), Y)
+#     else:
+# #         R = PosetProduct((ndp.get_rtypes(B), ndp.get_rtype(lr)))
+# #         Y = Mux(R, ndp.rindex(lr))
+#         Y = None
+
+    a = Series(X, ndp.get_dp())
+
+    if Y is not None:
+        dp = Series(a, Y)
+    else:
+        dp = a
+    res_dp = DPLoop(dp)
+
+    res = dpwrap(res_dp, fnames=A, rnames=B)
+
+
+    return res
 
