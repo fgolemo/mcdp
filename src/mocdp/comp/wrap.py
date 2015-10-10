@@ -2,18 +2,25 @@ from contracts import contract, raise_wrapped
 from mocdp.comp.interfaces import NamedDP
 from mocdp.dp.primitive import PrimitiveDP
 from mocdp.posets.poset_product import PosetProduct
-from mocdp.posets.uppersets import UpperSet
 from mocdp.dp.dp_flatten import get_it
+from mocdp.configuration import get_conftools_dps
+
+__all__ = [
+    'SimpleWrap',
+    'dpwrap',
+]
+
 
 class SimpleWrap(NamedDP):
     def __init__(self, dp, fnames, rnames):
-        self.dp = dp
+        
+        _ , self.dp = get_conftools_dps().instance_smarter(dp)
 
         try:
             # assume that dp has product spaces of given length
 
-            F = dp.get_fun_space()
-            R = dp.get_res_space()
+            F = self.dp.get_fun_space()
+            R = self.dp.get_res_space()
 
             if isinstance(F, PosetProduct):
                 if not isinstance(fnames, list) or not len(F) == len(fnames):
@@ -39,7 +46,7 @@ class SimpleWrap(NamedDP):
 
         except Exception as e:
             msg = 'Cannot wrap primitive DP.'
-            raise_wrapped(ValueError, e, msg, dp=dp, fnames=fnames, rnames=rnames)
+            raise_wrapped(ValueError, e, msg, dp=self.dp, fnames=fnames, rnames=rnames)
 
     def get_dp(self):
         return self.dp

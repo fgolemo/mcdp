@@ -1,11 +1,11 @@
 from comptests.registrar import comptest
+from contracts.utils import raise_desc
 from mocdp.comp.connection import TheresALoop, dpconnect, dploop
 from mocdp.comp.wrap import dpwrap
 from mocdp.dp.dp_sum import Product
 from mocdp.example_battery import R_Energy, R_Power, R_Time, R_Weight
 from mocdp.example_battery.dp_bat import BatteryDP
 from mocdp.example_battery.dp_bat2 import Mobility
-from contracts.utils import raise_desc
 
 
 @comptest
@@ -39,9 +39,7 @@ def check_compose():
 
     y = dpconnect(dict(battery=battery, x=x),
                ["battery.capacity >= x.energy"])
-#
-#     z = dploop(y, 'weight', 'weight')
-    
+
 
 
 def check_rtype(ndp, r, expected):
@@ -106,8 +104,6 @@ def check_compose2_fail():
         pass
 
 
-
-
 @comptest
 def check_compose2_loop():
     actuation = dpwrap(Mobility(),
@@ -130,6 +126,7 @@ def check_compose2_loop():
     check_ftype(x, 'weight', R_Weight)
 
     assert y.get_rnames() == []
+
 
 
 

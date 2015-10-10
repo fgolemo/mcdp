@@ -119,3 +119,6 @@ def battery_complete():
 
     return dp
 
+def energy_product():
+    return Product(R_Time, R_Power, R_Energy)
+

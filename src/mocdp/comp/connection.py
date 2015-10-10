@@ -10,9 +10,10 @@ from mocdp.dp.dp_parallel import Parallel
 from mocdp.dp.dp_flatten import Mux
 from contracts.utils import raise_wrapped
 from mocdp.dp.dp_series import Series
-from mocdp.comp.wrap import SimpleWrap, dpwrap
+from mocdp.comp.wrap import  dpwrap
 from mocdp.posets.poset_product import PosetProduct
 from mocdp.dp.dp_loop import DPLoop
+from mocdp.configuration import get_conftools_nameddps
 
 Connection = namedtuple('Connection', 'dp1 s1 dp2 s2')
 
@@ -39,7 +40,9 @@ def parse_connection(s):
 class TheresALoop(Exception):
     pass
 
-@contract(name2dp='dict(str:$NamedDP)', connections='set(str|$Connection)|list(str|$Connection)',
+
+@contract(name2dp='dict(str:($NamedDP|str|code_spec))',
+          connections='set(str|$Connection)|list(str|$Connection)',
           returns=NamedDP)
 def dpconnect(name2dp, connections):
     """
@@ -47,6 +50,11 @@ def dpconnect(name2dp, connections):
     """
     if len(name2dp) < 2:
         raise ValueError()
+
+    for k, v in name2dp.items():
+        _, name2dp[k] = get_conftools_nameddps().instance_smarter(v)
+
+
     connections = set(map(parse_connection, connections))
     for c in connections:
         if not c.dp1 in name2dp:

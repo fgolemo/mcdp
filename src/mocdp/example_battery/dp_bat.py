@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-import numpy as np
-from mocdp.posets import Rcomp, PosetProduct
-from mocdp.dp import PrimitiveDP
+from . import R_Energy, R_Time, R_Weight
 from contracts import contract
+from mocdp.dp import PrimitiveDP
+from mocdp.posets import PosetProduct, Rcomp
+import numpy as np
 
-from . import R_Energy, R_Time, R_Power, R_Weight
 
 class BatteryDP(PrimitiveDP):
     """ 
@@ -13,12 +13,12 @@ class BatteryDP(PrimitiveDP):
         R: need battery of weight W
         
     """
-    @contract(energy_density='float, >0')
+    @contract(energy_density='(int|float), >0')
     def __init__(self, energy_density):
         '''
         :param energy_density: Joule/gram
         '''
-        self.energy_density = energy_density
+        self.energy_density = float(energy_density)
 
         PrimitiveDP.__init__(self, F=R_Energy, R=R_Weight)
     
