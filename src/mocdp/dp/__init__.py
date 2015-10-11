@@ -10,3 +10,4 @@ from .dp_split import *
 
 from .dp_flatten import *
 
+from .dp_max import *

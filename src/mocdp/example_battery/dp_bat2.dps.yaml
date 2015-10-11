@@ -21,3 +21,9 @@
   code:
   - mocdp.example_battery.BatteryDP
   - energy_density: 100
+
+- id: SimpleNonlinearity1
+  desc: "h(x) = 1+log(x+1)"
+  code:
+  - mocdp.example_battery.SimpleNonlinearity1
+  - {}

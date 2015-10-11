@@ -15,6 +15,7 @@ from mocdp.posets.poset_product import PosetProduct
 from mocdp.dp.dp_loop import DPLoop, DPLoop0
 from mocdp.configuration import get_conftools_nameddps
 from networkx.algorithms.cycles import cycle_basis, simple_cycles
+from networkx.algorithms.components.connected import is_connected
 
 Connection = namedtuple('Connection', 'dp1 s1 dp2 s2')
 
@@ -292,8 +293,11 @@ def make_name(already):
 
 
 @contract(connections='set($Connection)')
-def get_connection_graph(connections):
+def get_connection_graph(names, connections):
     G = networkx.DiGraph()
+    # add names to check if it is connected
+    for n in names:
+        G.add_node(n)
     for c in connections:
         dp1 = c.dp1
         dp2 = c.dp2
@@ -303,9 +307,18 @@ def get_connection_graph(connections):
 @contract(names='set(str)', connections='set($Connection)')
 def order_dps(names, connections):
     """ Returns a total order consistent with the partial order """
-    G = get_connection_graph(connections)
+    G = get_connection_graph(names, connections)
+    Gu = G.to_undirected()
+    if not is_connected(Gu):
+        msg = 'The graph is not weakly connected. (missing constraints?)'
+        msg += '\nNames: %s' % names
+        msg += '\nconnections: %s' % connections
+        raise Exception(msg)
     l = topological_sort(G)
-    assert set(l) == names 
+    if not (set(l) == names):
+        msg = 'names = %s\n returned = %s\n connections: %s' % (names, l, connections)
+        msg += '\n graph: %s %s' % (list(Gu.nodes()), list(Gu.edges()))
+        raise Exception(msg)
     return l
 
 #

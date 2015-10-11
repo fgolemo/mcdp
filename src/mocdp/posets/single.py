@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .poset import Poset
-from mocdp.posets.space import NotBelongs
+from .space import NotBelongs
 
 __all__ = [
    'Single',
@@ -51,7 +51,7 @@ class Single(Poset):
         self.belongs(b)
         return True
 
-    def check_equal(self, a, b):
+    def check_equal(self, a, b):  # @UnusedVariable
         return True
 
 

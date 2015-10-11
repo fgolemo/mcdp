@@ -1,6 +1,7 @@
 from abc import ABCMeta
-from contracts.utils import raise_wrapped
-import warnings
+from contracts import raise_wrapped
+
+__all__ = ['SpaceMeta', 'decorate_methods']
 
 class SpaceMeta(ABCMeta):
     # we use __init__ rather than __new__ here because we want
@@ -22,7 +23,8 @@ def decorate_belongs(f):
         return f
     return bel
 
-def decorate_methods(cls, name, bases, dct, method2dec):
+def decorate_methods(cls, name, bases, dct, method2dec):  # @UnusedVariable
+    # import warnings
     for method_name, decorator in method2dec.items():
         if method_name in cls.__dict__:
             orig = cls.__dict__[method_name]

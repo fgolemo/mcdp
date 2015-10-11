@@ -80,7 +80,7 @@ class Series(PrimitiveDP):
         S2, alpha2, beta2 = self.dp2.get_normal_form()
 
         F1 = self.dp1.get_fun_space()
-        R1 = self.dp1.get_res_space()
+        # R1 = self.dp1.get_res_space()
         R2 = self.dp2.get_res_space()
 
         UR2 = UpperSets(R2)

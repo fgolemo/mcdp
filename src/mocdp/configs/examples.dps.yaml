@@ -51,8 +51,17 @@
     R: Rcomp_g
     a: 4.0
 
+- id: test_max
+  desc: max
+  code:
+  - mocdp.dp.Max
+  - F: Rcomp_J
 
-
+- id: test_min
+  desc: min
+  code:
+  - mocdp.dp.Min
+  - F: Rcomp_J
 
 
 

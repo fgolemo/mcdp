@@ -30,7 +30,7 @@ class UpperSet():
         check_minimal(minimals, P)
 
     def __repr__(self):  # ≤  ≥
-        return "∪".join("{x∣ x ≥ %s}" % self.P.format(m)for m in self.minimals)
+        return "∪".join("{x∣ x ≥ %s}" % self.P.format(m) for m in self.minimals)
 
 
 class UpperSets(Poset):

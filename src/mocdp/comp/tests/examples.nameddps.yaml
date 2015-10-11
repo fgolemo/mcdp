@@ -56,12 +56,7 @@
   - mocdp.comp.dpgraph
   - name2dp: 
       max: max_f_r
-      h: hlin
-      actuation:
-      - mocdp.comp.SimpleWrap
-      - fnames: weight
-        rnames: actuation_power
-        dp: ['mocdp.example_battery.Mobility', {}]
+      h: hnlin
     connections:
     - 'h.x >= max.z'
     - 'max.r >= h.r'
@@ -72,7 +67,9 @@
   - mocdp.comp.SimpleWrap
   - fnames: ['f', 'r']
     rnames: 'z'
-    dp: max
+    dp: 
+    - mocdp.dp.Max
+    - F: Rcomp_J
 
 - id: hnlin
   desc: ""
@@ -80,4 +77,4 @@
   - mocdp.comp.SimpleWrap
   - fnames: 'x'
     rnames: 'r'
-    dp: max
+    dp: SimpleNonlinearity1

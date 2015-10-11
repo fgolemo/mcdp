@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts.utils import check_isinstance, raise_desc, raise_wrapped
-from mocdp.posets import Map, PosetProduct, UpperSet, UpperSets, poset_minima
-import warnings
+from mocdp.posets import (Map, NotLeq, PosetProduct, UpperSet, UpperSets,
+    poset_minima)
 import itertools
-from mocdp.posets.poset import NotLeq
+
 
 
 __all__ = ['DPLoop']
@@ -31,7 +31,6 @@ if False:
             return self.dp1.get_res_space()
 
         def solve(self, func):
-            from mocdp.posets import NotLeq
 
             funsp = self.dp1.get_fun_space()
             fU = UpperSets(funsp)
@@ -42,7 +41,7 @@ if False:
     #         print('f', f)
     #         print('r', r)
 
-            for i in range(10):  # XXX
+            for _ in range(10):  # XXX
     #             fi = fU.join(f[0], r[-1])
                 fi = r[-1]
     #             print('fi', fi)

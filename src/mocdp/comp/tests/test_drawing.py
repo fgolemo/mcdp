@@ -20,7 +20,7 @@ def nameddp1_solve(context, _, ndp):
     if not is_scalar(funsp) or not is_scalar(ressp):
         return
 
-    solutions = context.comp(solve_ndp, ndp)
+    solutions = context.comp(solve_ndp, ndp, n=30)
     r = context.comp(report_solutions, ndp, solutions)
     context.add_report(r, 'report_solutions')
 
@@ -68,7 +68,7 @@ def report_solutions(ndp, solutions):
 
     return r
 
-def solve_ndp(ndp, n=10):
+def solve_ndp(ndp, n=20):
     dp = ndp.get_dp()
     funsp = dp.get_fun_space()
     chain = funsp.get_test_chain(n=n)

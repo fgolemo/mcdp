@@ -1,6 +1,6 @@
 from mocdp.posets.single import Single
 from mocdp.posets.poset_product import PosetProduct
-from mocdp.posets.rcomp import RcompUnits
+from mocdp.posets.rcomp import RcompUnits, Rcomp
 import numpy as np
 from mocdp.dp.primitive import PrimitiveDP
 from mocdp.dp.dp_parallel import Parallel
@@ -11,6 +11,26 @@ from mocdp.dp.dp_identity import Identity
 
 from . import R_Energy, R_Time, R_Power, R_Weight
 from mocdp.dp.dp_loop import DPLoop
+
+
+class SimpleNonlinearity1(PrimitiveDP):
+    # h(x) = 1+log(x+1) 
+    # h(0) = 1
+    # h(x) = x => x = 2.14
+
+    def __init__(self):
+        F = Rcomp()
+        R = Rcomp()
+        PrimitiveDP.__init__(self, F=F, R=R)
+
+    def solve(self, f):
+        F = self.get_fun_space()
+        R = self.get_res_space()
+        if f == F.get_top():
+            top = R.get_top()
+            return R.U(top)
+        y = 1.0 + np.log(1.0 + f)
+        return R.U(y)
 
 
 def T_from_Ps(Ps):
