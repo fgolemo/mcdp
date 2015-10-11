@@ -420,11 +420,10 @@ class DPLoop0(PrimitiveDP):
             UR.belongs(res)
             return res
             
-        for _ in range(10):  # XXX
+        for _ in range(100):  # XXX
             # now take the product of f1
             si = S[-1]
             sip = iterate(si)
-
 
             try:
                 UR.check_leq(si, sip)

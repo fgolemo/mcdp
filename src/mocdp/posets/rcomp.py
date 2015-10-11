@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from .poset import NotLeq, Poset
 from contracts.utils import raise_desc
-from mocdp.posets.space import NotBelongs
+from mocdp.posets.space import NotBelongs, NotEqual
 import numpy as np
 
 __all__ = [
@@ -44,7 +44,7 @@ class Rcomp(Poset):
         if self.leq(a, b):
             return b
         if self.leq(b, a):
-            return b
+            return a
         assert False
 
     def meet(self, a, b):
@@ -102,6 +102,11 @@ class Rcomp(Poset):
         if a == self.top or b == self.top:
             return self.top
         return a + b
+
+    def check_equal(self, x, y):
+        if not x == y:
+            raise NotEqual('%s != %s' % (x, y))
+
 
 class RcompUnits(Rcomp):
     def __init__(self, units):

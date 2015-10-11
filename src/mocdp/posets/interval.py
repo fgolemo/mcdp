@@ -3,6 +3,7 @@ from .poset import NotLeq, Poset
 from .space import NotBelongs
 from contracts import check_isinstance
 import numpy as np
+from mocdp.posets.space import NotEqual
 
 __all__ = [
    'Interval',
@@ -27,6 +28,10 @@ class Interval(Poset):
 
     def get_top(self):
         return self.U
+
+    def check_equal(self, a, b):
+        if not (a == b):
+            raise NotEqual('%s != %s' % (a, b))
 
     def check_leq(self, a, b):
         if not(a <= b):

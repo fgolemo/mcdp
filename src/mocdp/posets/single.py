@@ -51,5 +51,7 @@ class Single(Poset):
         self.belongs(b)
         return True
 
+    def check_equal(self, a, b):
+        return True
 
 

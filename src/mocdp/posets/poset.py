@@ -16,6 +16,9 @@ class NotLeq(Exception):
 class NotJoinable(Exception):
     pass
 
+class NotMeetable(Exception):
+    pass
+
 class NotBounded(Exception):
     pass
 
@@ -51,12 +54,20 @@ class Poset(Space):
             return False
 
     def join(self, a, b):  # "max" ∨
-        self.belongs(a)
-        self.belongs(b)
+        if self.leq(a, b):
+            return b
+        if self.leq(b, a):
+            return a
+
         msg = 'The join %s ∨ %s does not exist in %s.' % (a, b, self)
         raise NotJoinable(msg)
 
     def meet(self, a, b):  # "min" ∧
+        if self.leq(a, b):
+            return a
+        if self.leq(b, a):
+            return b
+
         msg = 'The meet %s ∧ %s does not exist in %s.' % (a, b, self)
         raise NotJoinable(msg)
 

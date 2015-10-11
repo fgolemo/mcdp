@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from .poset import NotLeq, Poset
 from .space import NotBelongs
+from .utils import poset_minima
 from contracts import check_isinstance, contract
+from mocdp.posets.space import NotEqual
 
 __all__ = [
     'UpperSet',
@@ -69,6 +71,12 @@ class UpperSets(Poset):
             raise NotBelongs(msg)
         return True
 
+    def check_equal(self, a, b):
+        m1 = a.minimals
+        m2 = b.minimals
+        if not (m1 == m2):
+            raise NotEqual('%s != %s' % (m1, m2))
+
     def check_leq(self, a, b):
         self.belongs(a)
         self.belongs(b)
@@ -110,22 +118,18 @@ class UpperSets(Poset):
                 msg += '\n' + '\n- '.join(map(str, whynot))
                 raise NotLeq(msg)
 
-#     def join(self, a, b):  # "max" ∨
-#         self.belongs(a)
-#         self.belongs(b)
-#
-#         elements = set()
-#         elements.update(a.minimals)
-#         elements.update(b.minimals)
-#
-#         elements0 = self.
-#
-#         r = UpperSet(elements0, self.P)
-#
-#         self.check_leq(a, r)
-#         self.check_leq(b, r)
-#
-#         return r
+    def meet(self, a, b):  # "min" ∨
+        # To compute the meet (min) of two upper sets
+        # just take the union of the minimal elements
+        # (without redundant elements)
+        elements = set()
+        elements.update(a.minimals)
+        elements.update(b.minimals)
+        elements0 = poset_minima(elements, self.P.leq)
+        r = UpperSet(elements0, self.P)
+        self.check_leq(r, a)
+        self.check_leq(r, b)
+        return r
 
     def format(self, x):
         return "∪".join("{x∣ x ≥ %s}" % self.P.format(m) for m in x.minimals)

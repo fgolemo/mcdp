@@ -48,3 +48,36 @@
     rnames: 'battery_weight'
     dp: BatteryDP
 
+
+
+- id: maxh
+  desc: ""
+  code:
+  - mocdp.comp.dpgraph
+  - name2dp: 
+      max: max_f_r
+      h: hlin
+      actuation:
+      - mocdp.comp.SimpleWrap
+      - fnames: weight
+        rnames: actuation_power
+        dp: ['mocdp.example_battery.Mobility', {}]
+    connections:
+    - 'h.x >= max.z'
+    - 'max.r >= h.r'
+
+- id: max_f_r
+  desc: ""
+  code:
+  - mocdp.comp.SimpleWrap
+  - fnames: ['f', 'r']
+    rnames: 'z'
+    dp: max
+
+- id: hnlin
+  desc: ""
+  code:
+  - mocdp.comp.SimpleWrap
+  - fnames: 'x'
+    rnames: 'r'
+    dp: max

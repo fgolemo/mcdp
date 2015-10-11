@@ -2,6 +2,7 @@ from mocdp.unittests.generation import for_all_dps
 from mocdp.dp.dp_loop import DPLoop
 
 
+
 @for_all_dps
 def check_dp1(id_dp, dp):
     print('Testing %s: %s' % (id_dp, dp))
