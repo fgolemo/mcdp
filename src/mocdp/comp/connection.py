@@ -12,8 +12,9 @@ from contracts.utils import raise_wrapped
 from mocdp.dp.dp_series import Series
 from mocdp.comp.wrap import  dpwrap
 from mocdp.posets.poset_product import PosetProduct
-from mocdp.dp.dp_loop import DPLoop
+from mocdp.dp.dp_loop import DPLoop, DPLoop0
 from mocdp.configuration import get_conftools_nameddps
+from networkx.algorithms.cycles import cycle_basis, simple_cycles
 
 Connection = namedtuple('Connection', 'dp1 s1 dp2 s2')
 
@@ -41,21 +42,7 @@ class TheresALoop(Exception):
     pass
 
 
-@contract(name2dp='dict(str:($NamedDP|str|code_spec))',
-          connections='set(str|$Connection)|list(str|$Connection)',
-          returns=NamedDP)
-def dpconnect(name2dp, connections):
-    """
-        Raises TheresALoop
-    """
-    if len(name2dp) < 2:
-        raise ValueError()
-
-    for k, v in name2dp.items():
-        _, name2dp[k] = get_conftools_nameddps().instance_smarter(v)
-
-
-    connections = set(map(parse_connection, connections))
+def check_connections(name2dp, connections):
     for c in connections:
         if not c.dp1 in name2dp:
             msg = 'Refers to unknown dp %r (known %r).' % (c.dp1, set(name2dp))
@@ -73,6 +60,22 @@ def dpconnect(name2dp, connections):
             ndp2.findex(c.s2)
         except ValueError as e:
             raise_wrapped(ValueError, e, 'Unknown signal.', s2=c.s2, c=c, ndp2=ndp2)
+ 
+@contract(name2dp='dict(str:($NamedDP|str|code_spec))',
+          connections='set(str|$Connection)|list(str|$Connection)',
+          returns=NamedDP)
+def dpconnect(name2dp, connections):
+    """
+        Raises TheresALoop
+    """
+    if len(name2dp) < 2:
+        raise ValueError()
+
+    for k, v in name2dp.items():
+        _, name2dp[k] = get_conftools_nameddps().instance_smarter(v)
+
+    connections = set(map(parse_connection, connections))
+    check_connections(name2dp, connections)
 
     # A, B, C
 
@@ -288,80 +291,262 @@ def make_name(already):
     assert False
 
 
-
-@contract(names='set(str)', connections='set($Connection)')
-def order_dps(names, connections):
-    """ Returns a total order consistent with the partial order """ 
-
+@contract(connections='set($Connection)')
+def get_connection_graph(connections):
     G = networkx.DiGraph()
     for c in connections:
         dp1 = c.dp1
         dp2 = c.dp2
         G.add_edge(dp1, dp2)
-        
+    return G
+
+@contract(names='set(str)', connections='set($Connection)')
+def order_dps(names, connections):
+    """ Returns a total order consistent with the partial order """
+    G = get_connection_graph(connections)
     l = topological_sort(G)
-    
     assert set(l) == names 
     return l
 
-@contract(ndp=NamedDP, lf='str', lr='str', returns=NamedDP)
-def dploop(ndp, lr, lf):
-    print(ndp.desc())
-    print('lr', lr)
-    print('lf', lf)
-    #  A----> |     |--B----->
-    #         | ndp |
-    #  lf---->|_____|-----lr
-    #  `--------(>=)------/
-    #
+#
+# @contract(ndp=NamedDP, lf='str', lr='str', returns=NamedDP)
+# def dploop(ndp, lr, lf):
+#     #  A----> |     |--B----->
+#     #         | ndp |
+#     #  lf---->|_____|-----lr
+#     #  `--------(>=)------/
+#     #
+#
+#     ndp.rindex(lr)
+#     ndp.findex(lf)
+#
+#     F0 = ndp.get_fnames()
+#     A = list(set(F0) - set([lf]))
+#     assert not lf in A
+#     R0 = ndp.get_rnames()
+#     B = list(set(R0) - set([lr]))
+#     # X is now the product space
+#     F = PosetProduct((ndp.get_ftypes(A), ndp.get_ftype(lf)))
+#     coords = []
+#     for x in F0:
+#         if x == lf:
+#             coords.append(1)
+#         else:
+#             coords.append((0, A.index(x)))
+#     X = Mux(F, coords)
+#
+#     R = ndp.get_dp().get_res_space()
+#     coords_B = [ ndp.rindex(x) for x in B]
+#     coords = [coords_B, ndp.rindex(lr)]
+#     Y = Mux(R, coords)
+#
+#     print('Y res: %s' % Y.get_res_space())
+# #     print('TRyingt to interconnect %s' % ndp.get_dp())
+#     Series(ndp.get_dp(), Y)
+#
+#     a = Series(X, ndp.get_dp())
+#
+#     if Y is not None:
+#         dp = Series(a, Y)
+#     else:
+#         dp = a
+#
+#     res_dp = DPLoop(dp)
+#
+#     print('fnames: %s ' % A)
+#     print('rnames: %s ' % B)
+#     if len(A) == 1:
+#         A = A[0]
+#     if len(B) == 1:
+#         B = B[0]
+#     res = dpwrap(res_dp, fnames=A, rnames=B)
+#
+#     return res
 
-    # of --> |dp| --> or
-    # lf              lr
-    #
+
+if False:
+    @contract(ndp=NamedDP, lf='str', lr='str', returns=NamedDP)
+    def dploop2(ndp, lr, lf):
+        #  A----> |     |--B----->
+        #         | ndp |  *---lr->
+        #  lf---->|_____|--*--lr
+        #  `--------(>=)------/
+        #
+
+        ndp.rindex(lr)
+        ndp.findex(lf)
+
+        F0 = ndp.get_fnames()
+        A = list(set(F0) - set([lf]))
+        R0 = ndp.get_rnames()
+        B = list(set(R0) - set([lr]))
+        # X is now the product space
+        F = PosetProduct((ndp.get_ftypes(A), ndp.get_ftype(lf)))
+        coords = []
+        for x in F0:
+            if x == lf:
+                coords.append(1)
+            else:
+                coords.append((0, A.index(x)))
+        X = Mux(F, coords)
+
+        R = ndp.get_dp().get_res_space()
+        coords_Blr = [ ndp.rindex(x) for x in B]
+        coords_Blr.append(ndp.rindex(lr))
+        coords = [coords_Blr, ndp.rindex(lr)]
+        Y = Mux(R, coords)
+
+        Series(ndp.get_dp(), Y)
+
+        a = Series(X, ndp.get_dp())
+
+        if Y is not None:
+            dp = Series(a, Y)
+        else:
+            dp = a
+        res_dp = DPLoop(dp)
+
+        fnames = A
+        rnames = R0
+        if len(fnames) == 1:
+            funsp = res_dp.get_fun_space()
+            res_dp = Series(Mux(funsp[0], [()]), res_dp)
+            fnames = fnames[0]
+        if len(rnames) == 1:
+            ressp = res_dp.get_res_space()
+            res_dp = Series(res_dp, Mux(ressp, 0))
+            rnames = rnames[0]
+        res = dpwrap(res_dp, fnames, rnames)
+
+        return res
+
+
+@contract(ndp=NamedDP, lf='str', lr='str', returns=NamedDP)
+def dploop0(ndp, lr, lf):
     ndp.rindex(lr)
     ndp.findex(lf)
 
-    F0 = ndp.get_fnames()
-    A = list(set(F0) - set([lf]))
-    R0 = ndp.get_rnames()
-    B = list(set(R0) - set([lr]))
-
-
-    # loop(series(X, dp, Y))
-    # X is now the product space
-    F = PosetProduct((ndp.get_ftypes(A), ndp.get_ftype(lf)))
-    coords = []
-    for x in F0:
-        if x == lf:
-            coords.append(1)
-        else:
-            coords.append((0, A.index(x)))
-    X = Mux(F, coords)
-
-#     if B:
-#     R = PosetProduct((ndp.get_rtypes(B), ndp.get_rtype(lr)))
+    #
+    # This is the version in the papers
+    #           ______
+    #    f1 -> |  dp  |--->r
+    #    f2 -> |______|R|
+    #       `-----------/
+    #            _____
+    #  A------->|     |--B--|
+    #     |-o   | ndp |     |--->
+    #  -R-|-lf->|_____|--lr-| |
+    #  `--------(>=)----------/
+    #
+    # write as dploop0(series(X, dp))
+    #
+    # where X is a mux with function space A * R
+    # and coords
     R = ndp.get_dp().get_res_space()
-    coords_B = [ ndp.rindex(x) for x in B]
-    coords = [coords_B, ndp.rindex(lr)]
-    Y = Mux(R, coords)
+    F = ndp.get_dp().get_fun_space()
+    print('F: %s' % F)
+    print('R: %s' % R)
 
-    print('TRyingt to interconnect %s' % ndp.get_dp())
-    Series(ndp.get_dp(), Y)
-#     else:
-# #         R = PosetProduct((ndp.get_rtypes(B), ndp.get_rtype(lr)))
-# #         Y = Mux(R, ndp.rindex(lr))
-#         Y = None
+    F0 = ndp.get_fnames()
+    A = list(F0)  # preserve order
+    A.remove(lf)
+    print('F0: %s' % F0)
+    print('A: %s' % A)
 
-    a = Series(X, ndp.get_dp())
+    def coord_concat(a, b):
+        if b == (): return a
+        return a + (b,)
 
-    if Y is not None:
-        dp = Series(a, Y)
-    else:
-        dp = a
-    res_dp = DPLoop(dp)
+    F = PosetProduct((ndp.get_ftypes(A), R))
+    coords = []
+    for x in ndp.get_fnames():
+        if x in A:
+            i = A.index(x)
+            coords.append(coord_concat((0,), i))
+        if x == lf:
+            coords.append(coord_concat((1,), ndp.rindex(lr)))
 
-    res = dpwrap(res_dp, fnames=A, rnames=B)
+#     print('F: %s' % F)
+#     print('coords: %s' % coords)
+    X = Mux(F, coords)
+    
+    res_dp = DPLoop0(Series(X, ndp.get_dp()))
+    print('res_dp F: %s' % res_dp.get_fun_space())
+    rnames = ndp.get_rnames()
+    fnames = A
 
+    print('Rnames before: %s' % rnames)
 
+    if len(fnames) == 1:
+        funsp = res_dp.get_fun_space()
+        res_dp = Series(Mux(funsp[0], [()]), res_dp)
+        fnames = fnames[0]
+
+    ressp = res_dp.get_res_space()
+    print('res_dp R: %s' % ressp)
+    if len(rnames) == 1:
+        if isinstance(ressp, PosetProduct):
+            res_dp = Series(res_dp, Mux(ressp, 0))
+            rnames = rnames[0]
+            print('now rnames= %r' % rnames)
+        else:
+            rnames = rnames[0]  # XXX
+
+    print('rnames: %r fnames: %s' % (rnames, fnames))
+    res = dpwrap(res_dp, fnames, rnames)
     return res
+
+
+
+
+@contract(name2dp='dict(str:($NamedDP|str|code_spec))',
+          connections='set(str|$Connection)|list(str|$Connection)',
+          returns=NamedDP)
+def dpgraph(name2dp, connections):
+    if len(name2dp) < 2:
+        raise ValueError()
+
+    for k, v in name2dp.items():
+        _, name2dp[k] = get_conftools_nameddps().instance_smarter(v)
+
+    connections = set(map(parse_connection, connections))
+    check_connections(name2dp, connections)
+
+    G = get_connection_multigraph(connections)
+    cycles = list(simple_cycles(G))
+    if not cycles:
+        return dpconnect(name2dp, connections)
+
+    # choose one constraint
+    cycle0 = cycles[0]
+    # get one connection that breaks the cycle
+    first = cycle0[0]
+    second = cycle0[1]
+    def find_one(a, b):
+        for c in connections:
+            if c.dp1 == a and c.dp2 == b:
+                return c
+        assert False
+    c = find_one(first, second)
+    
+    other_connections = set()
+    other_connections.update(connections)
+    other_connections.remove(c)
+    
+    ndp = dpgraph(name2dp, other_connections)
+#     print('Ignoring %s, obtain %s' % (c, ndp.desc()))
+    return dploop0(ndp, c.s1, c.s2)
+
+
+@contract(connections='set($Connection)')
+def get_connection_multigraph(connections):
+    G = networkx.MultiDiGraph()
+    for c in connections:
+        dp1 = c.dp1
+        dp2 = c.dp2
+        G.add_edge(dp1, dp2, s1=c.s1)
+    return G
+
+    
+
 

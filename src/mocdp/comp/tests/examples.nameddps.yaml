@@ -1,0 +1,50 @@
+- id: battery_open
+  desc: ""
+  code:
+  - mocdp.comp.dpconnect
+  - name2dp: 
+      times: energy_times
+      battery: battery
+      actuation:
+      - mocdp.comp.SimpleWrap
+      - fnames: weight
+        rnames: actuation_power
+        dp: ['mocdp.example_battery.Mobility', {}]
+    connections:
+    - 'times.power >= actuation.actuation_power'
+    - 'battery.capacity >= times.energy'
+
+
+- id: battery_complete
+  desc: ""
+  code:
+  - mocdp.comp.dpgraph
+  - name2dp: 
+      times: energy_times
+      battery: battery
+      actuation:
+      - mocdp.comp.SimpleWrap
+      - fnames: weight
+        rnames: actuation_power
+        dp: ['mocdp.example_battery.Mobility', {}]
+    connections:
+    - 'times.power >= actuation.actuation_power'
+    - 'battery.capacity >= times.energy'
+    - 'actuation.weight >= battery.battery_weight'
+
+- id: energy_times
+  desc: ""
+  code:
+  - mocdp.comp.SimpleWrap
+  - fnames: ['mission_time', 'power']
+    rnames: 'energy'
+    dp: energy_product
+
+- id: battery
+  desc: ""
+  code:
+  - mocdp.comp.SimpleWrap
+  - fnames: 'capacity'
+    rnames: 'battery_weight'
+    dp: BatteryDP
+

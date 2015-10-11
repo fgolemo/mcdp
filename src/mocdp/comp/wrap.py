@@ -16,11 +16,11 @@ class SimpleWrap(NamedDP):
         
         _ , self.dp = get_conftools_dps().instance_smarter(dp)
 
+        F = self.dp.get_fun_space()
+        R = self.dp.get_res_space()
+
         try:
             # assume that dp has product spaces of given length
-
-            F = self.dp.get_fun_space()
-            R = self.dp.get_res_space()
 
             if isinstance(F, PosetProduct):
                 if not isinstance(fnames, list) or not len(F) == len(fnames):
@@ -40,13 +40,13 @@ class SimpleWrap(NamedDP):
                 self.Rnames = rnames
             else:
                 if not isinstance(rnames, str):
-                    raise ValueError("R and fnames incompatible")
+                    raise ValueError("R and rnames incompatible: want one string")
                 self.R_single = True
                 self.Rname = rnames
 
         except Exception as e:
             msg = 'Cannot wrap primitive DP.'
-            raise_wrapped(ValueError, e, msg, dp=self.dp, fnames=fnames, rnames=rnames)
+            raise_wrapped(ValueError, e, msg, dp=self.dp, F=F, R=R, fnames=fnames, rnames=rnames)
 
     def get_dp(self):
         return self.dp
@@ -72,6 +72,7 @@ class SimpleWrap(NamedDP):
                 raise ValueError('I only know %r; asked %r.' % (self.Rname, r))
 
             return ()
+
         rnames = self.get_rnames()
         try:
             return rnames.index(r)

@@ -14,6 +14,7 @@ for_all_posets = comptests_for_all(library_posets)
 for_some_posets = comptests_for_some(library_posets)
 for_all_dps = comptests_for_all(library_dps)
 for_all_dps_dyn = comptests_for_all_dynamic(library_dps)
+for_all_nameddps_dyn = comptests_for_all_dynamic(library_nameddps)
 for_some_dps = comptests_for_some(library_dps)
 for_some_dps_dyn = comptests_for_some_dynamic(library_dps)
 

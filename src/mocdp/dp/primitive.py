@@ -105,7 +105,7 @@ class PrimitiveDP(WithInternalLog):
         return NormalForm(S=get_S_null(), alpha=alpha, beta=beta)
 
     def __repr__(self):
-        return '%s(%s->%s)' % (type(self).__name__, self.F, self.R)
+        return '%s(%s→%s)' % (type(self).__name__, self.F, self.R)
 
 
 NormalForm = namedtuple('NormalForm', ['S', 'alpha', 'beta'])

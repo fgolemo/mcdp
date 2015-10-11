@@ -54,6 +54,6 @@ class Product(PrimitiveDP):
         return self.R.U(r)
 
     def __repr__(self):
-        return 'Multiply(%rx%r->%r)' % (self.F1, self.F2, self.R)
+        return 'Multiply(%r×%r→%r)' % (self.F1, self.F2, self.R)
 
 

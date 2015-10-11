@@ -83,4 +83,4 @@ class Map():
         pass
 
     def __repr__(self):
-        return "%s->%s" % (self.get_domain(), self.get_codomain())
+        return "%s→%s" % (self.get_domain(), self.get_codomain())

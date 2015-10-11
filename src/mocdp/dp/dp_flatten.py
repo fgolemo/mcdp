@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
+from contracts import contract
+from contracts.utils import check_isinstance
 from mocdp import get_conftools_posets
 from mocdp.posets import PosetProduct
-from contracts.utils import check_isinstance
-from contracts import contract
+from multi_index import get_it
 
 
 __all__ = [
@@ -13,7 +14,7 @@ __all__ = [
 
 class Mux(PrimitiveDP):
 
-    @contract(coords='seq(int|tuple|list)')
+    @contract(coords='seq(int|tuple|list)|int')
     def __init__(self, F, coords):
         library = get_conftools_posets()
         _, F = library.instance_smarter(F)
@@ -32,7 +33,7 @@ class Mux(PrimitiveDP):
         return self.R.U(r)
 
     def __repr__(self):
-        return 'Mux(%r -> %r, %s)' % (self.F, self.R, self.coords)
+        return 'Mux(%r → %r, %s)' % (self.F, self.R, self.coords)
 
 def get_R_from_F_coords(F, coords):
     return get_it(F, coords, reduce_list=PosetProduct)
@@ -40,71 +41,13 @@ def get_R_from_F_coords(F, coords):
 def get_flatten_muxmap(F0):
     check_isinstance(F0, PosetProduct)
     coords = []
-#     rs = []
     for i, f in enumerate(F0.subs):
         if isinstance(f, PosetProduct):
             for j, x in enumerate(f.subs):
-#                 rs.append(x)
                 coords.append((i, j))
         else:
-#             rs.append(f)
             coords.append(i)
-
-#     R_ = PosetProduct(tuple(rs))
-    
-
-#     assert (R == R_), (R, R_)
-    
-#     return R, coords
     return coords
-
-
-def show(f):
-
-    def ff(seq, coords, reduce_list):
-#         print('get_it(%s, %s)' % (seq, coords))
-        r = f(seq, coords, reduce_list)
-#         print(' =>  %s' % r.__repr__())
-        return r
-    return ff
-
-@show
-@contract(coords='tuple|int|list')
-def get_it(seq, coords, reduce_list):
-    """
-        ['a', ['b', 'c']]
-        
-        () => ['a', ['b', 'c']]
-        [(), ()] => reduce([['a', ['b', 'c']], ['a', ['b', 'c']]])
-        [0, (1, 1)] => ['a', 'c']
-    
-    """
-#     print('get_it(%s, %s)' % (seq, coords))
-    if coords == ():
-        return seq
-
-    if isinstance(coords, list):
-        subs = [get_it(seq, c, reduce_list=reduce_list) for c in coords]
-        R = reduce_list(subs)
-        return R
-
-    if isinstance(coords, int):
-        return seq[coords]
-
-    assert isinstance(coords, tuple) and len(coords) >= 1, coords
-    a = coords[0]
-    r = coords[1:]
-    assert isinstance(a, int), a
-    if r:
-        s = seq[a]
-        assert isinstance(r, tuple)
-        return get_it(s, r, reduce_list=reduce_list)
-    else:
-        assert isinstance(a, int)
-        return seq[a]
-    
-
-
 
 class Flatten(Mux):
     def __init__(self, F):
@@ -114,4 +57,4 @@ class Flatten(Mux):
         Mux.__init__(self, F0, coords)
 
     def __repr__(self):
-        return 'Flatten(%r -> %r, %s)' % (self.F, self.R, self.coords)
+        return 'Flatten(%r→%r, %s)' % (self.F, self.R, self.coords)
