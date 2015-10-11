@@ -2,7 +2,7 @@ from reprep import Report
 from mocdp.dp.dp_series import Series
 from mocdp.dp.dp_parallel import Parallel
 from mocdp.dp.dp_loop import DPLoop
-from procgraph_optimize.gg_utils import gg_figure
+from .gg_utils import gg_figure
 from mocdp.posets import PosetProduct
 
 
