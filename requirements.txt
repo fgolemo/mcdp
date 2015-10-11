@@ -1,4 +1,5 @@
 python-cjson
+networkx
 -e git+https://github.com/AndreaCensi/contracts.git@env_fault#egg=PyContracts
 -e git+https://github.com/AndreaCensi/compmake.git@env_fault#egg=compmake
 -e git+https://github.com/AndreaCensi/quickapp.git@env_fault#egg=quickapp
