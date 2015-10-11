@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
-from contracts.utils import check_isinstance, raise_desc
+from contracts.utils import check_isinstance, raise_desc, raise_wrapped
 from mocdp.posets import Map, PosetProduct, UpperSet, UpperSets, poset_minima
 import warnings
 import itertools
+from mocdp.posets.poset import NotLeq
 
 
 __all__ = ['DPLoop']
@@ -388,7 +389,52 @@ class DPLoop0(PrimitiveDP):
 #         return S, DPAlpha(self), DPBeta(self)
 
     def __repr__(self):
-        return 'DPloop(%s)' % self.dp1
+        return 'DPLoop0(%s)' % self.dp1
 
-    def solve(self, func):
-        raise NotImplementedError()
+    def solve(self, f1):
+        F = self.dp1.get_fun_space()
+        F1 = F[0]
+        F1.belongs(f1)
+        R = self.dp1.get_res_space()
+
+        UR = UpperSets(R)
+        UF = UpperSets(F)
+
+        # we consider a set of iterates
+        # we start from the bottom
+        s0 = UR.get_bottom()
+
+        S = [s0]
+        
+        def iterate(si):
+            """ Returns the next iteration """
+            # compute the product
+            UR.belongs(si)
+            upset = set()
+            for r in si.minimals:
+                upset.add((f1, r))
+            upset = UpperSet(upset, F)
+            UF.belongs(upset)
+            # solve the 
+            res = self.dp1.solveU(upset)
+            UR.belongs(res)
+            return res
+            
+        for _ in range(10):  # XXX
+            # now take the product of f1
+            si = S[-1]
+            sip = iterate(si)
+
+
+            try:
+                UR.check_leq(si, sip)
+            except NotLeq as e:
+                msg = 'Loop iteration invariant not satisfied.'
+                raise_wrapped(Exception, e, msg, si=si, sip=sip, dp=self.dp1)
+
+            S.append(sip)
+
+            if UR.leq(sip, si):
+                print('breaking because converged')
+                break 
+        return S[-1]

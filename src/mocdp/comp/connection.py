@@ -443,15 +443,10 @@ def dploop0(ndp, lr, lf):
     # where X is a mux with function space A * R
     # and coords
     R = ndp.get_dp().get_res_space()
-    F = ndp.get_dp().get_fun_space()
-    print('F: %s' % F)
-    print('R: %s' % R)
 
     F0 = ndp.get_fnames()
     A = list(F0)  # preserve order
     A.remove(lf)
-    print('F0: %s' % F0)
-    print('A: %s' % A)
 
     def coord_concat(a, b):
         if b == (): return a
@@ -466,16 +461,11 @@ def dploop0(ndp, lr, lf):
         if x == lf:
             coords.append(coord_concat((1,), ndp.rindex(lr)))
 
-#     print('F: %s' % F)
-#     print('coords: %s' % coords)
     X = Mux(F, coords)
     
     res_dp = DPLoop0(Series(X, ndp.get_dp()))
-    print('res_dp F: %s' % res_dp.get_fun_space())
     rnames = ndp.get_rnames()
     fnames = A
-
-    print('Rnames before: %s' % rnames)
 
     if len(fnames) == 1:
         funsp = res_dp.get_fun_space()
@@ -483,20 +473,15 @@ def dploop0(ndp, lr, lf):
         fnames = fnames[0]
 
     ressp = res_dp.get_res_space()
-    print('res_dp R: %s' % ressp)
     if len(rnames) == 1:
         if isinstance(ressp, PosetProduct):
             res_dp = Series(res_dp, Mux(ressp, 0))
             rnames = rnames[0]
-            print('now rnames= %r' % rnames)
         else:
             rnames = rnames[0]  # XXX
 
-    print('rnames: %r fnames: %s' % (rnames, fnames))
     res = dpwrap(res_dp, fnames, rnames)
     return res
-
-
 
 
 @contract(name2dp='dict(str:($NamedDP|str|code_spec))',
