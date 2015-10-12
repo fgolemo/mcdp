@@ -6,7 +6,7 @@ from mocdp.comp.interfaces import NamedDP
 from pyparsing import (Combine, Forward, LineEnd, LineStart, Literal,
     ParseException, ParseFatalException, ParserElement, SkipTo, Suppress, Word,
     ZeroOrMore, alphanums, alphas, oneOf, opAssoc, operatorPrecedence,
-    OneOrMore, Group)
+    OneOrMore, Group, Optional)
 from mocdp.lang.parts import SetName
 from mocdp.lang.utils import parse_action
 from collections import namedtuple
@@ -35,7 +35,7 @@ line = SkipTo(LineEnd(), failOn=LineStart() + LineEnd())
 
 
 # identifier
-idn = Combine(oneOf(list(alphas)) + Word('_' + alphanums))
+idn = Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))
 
 # load battery
 load_expr = S(L('load')) + C(idn, 'load_arg')
@@ -85,8 +85,8 @@ dp_model = S(L('cdp')) + S(L('{')) + OneOrMore(dp_statement) + S(L('}'))
 # f name (unit)
 # wraps name
 
-FunStatement = namedtuple('FunStatement', 'fname')
-ResStatement = namedtuple('ResStatement', 'rname')
+FunStatement = namedtuple('FunStatement', 'fname unit')
+ResStatement = namedtuple('ResStatement', 'rname unit')
 # ImplStatement = namedtuple('ImplStatement', 'name')
 LoadDP = namedtuple('LoadDP', 'name')
 DPWrap = namedtuple('DPWrap', 'fun res impl')
@@ -95,11 +95,13 @@ funcname = Combine(idn + ZeroOrMore(L('.') + idn))
 code_spec = S(L('code')) + C(funcname, 'function')
 spa(code_spec, lambda t: PDPCodeSpec(function=t['function'], arguments={}))
 
-fun_statement = S(L('f')) ^ S(L('provides')) + C(idn, 'fname')
-spa(fun_statement, lambda t: FunStatement(t['fname']))
+unitst = S(L('(')) + C(idn, 'unit') + S(L(')'))
 
-res_statement = S(L('r')) ^ S(L('requires')) + C(idn, 'rname')
-spa(res_statement, lambda t: ResStatement(t['rname']))
+fun_statement = S(L('f')) ^ S(L('provides')) + C(idn, 'fname') + unitst
+spa(fun_statement, lambda t: FunStatement(t['fname'], t['unit']))
+
+res_statement = S(L('r')) ^ S(L('requires')) + C(idn, 'rname') + unitst
+spa(res_statement, lambda t: ResStatement(t['rname'], t['unit']))
 
 load_pdp = S(L('load')) + C(idn, 'name')
 spa(load_pdp, lambda t: LoadDP(t['name']))

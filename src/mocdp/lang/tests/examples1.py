@@ -65,9 +65,9 @@ def check_lang4_composition():
 
     s = """
 dp {
-    provides current
-    provides capacity
-    requires weight
+    provides current (A)
+    provides capacity (J)
+    requires weight (g)
     
     implemented-by load times
 }
@@ -86,15 +86,15 @@ def check_lang5_composition():
     s = """
     cdp {
         battery = dp {
-            provides capacity
-            requires battery_weight
+            provides capacity (J)
+            requires battery_weight (g)
             
             implemented-by load BatteryDP
         }
         
         actuation = dp {
-            provides weight
-            requires actuation_power
+            provides weight (g)
+            requires actuation_power (W)
             
             implemented-by code mocdp.example_battery.Mobility
         }
@@ -113,22 +113,25 @@ def check_lang6_composition():
     parse_wrap(funcname, 'mocdp.example_battery.Mobility')
     parse_wrap(code_spec, 'code mocdp.example_battery.Mobility')
 
+        # requires mission_time (s)
+        # provides energy (T)
     s = """
     cdp {
+        
         battery = dp {
-            provides capacity
-            requires battery_weight
+            provides capacity (J)
+            requires battery_weight (g)
             
             implemented-by load BatteryDP
         }
         
         actuation = dp {
-            provides payload
-            requires actuation_power
+            provides payload (g)
+            requires actuation_power (W)
             
             implemented-by code mocdp.example_battery.Mobility
         }
-        
+                
         capacity provided by battery >= mission_time * (actuation_power required by actuation)    
         payload provided by actuation >= battery_weight required by battery
     }
