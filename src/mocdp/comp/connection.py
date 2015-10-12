@@ -107,9 +107,9 @@ def dpconnect(name2dp, connections):
 
     # these are other names that need to be preserved for the first 1
 
-    split = set([c.s1
-                 for c in connections
-                 if c.dp1 == first and c.dp2 != second])
+    split = [c.s1
+             for c in connections
+             if c.dp1 == first and c.dp2 != second]
 
     dp = connect2(name2dp[first], name2dp[second], set(first_connections), split=split)
 
@@ -142,29 +142,51 @@ def dpconnect(name2dp, connections):
 
     return dpconnect(name2dp, set(other_connections))
 
-@contract(ndp1=NamedDP, ndp2=NamedDP, returns=NamedDP, connections='set($Connection)')
+def list_diff(l, toremove):
+    """ Returns a copy of the list without the elements in toremove """
+    return [x for x in l if not x in toremove]
+
+def its_dp_as_product(ndp):
+    """ If fnames == 1 """
+    dp = ndp.get_dp()
+    if len(ndp.get_fnames()) == 1:
+        F0 = dp.get_fun_space()
+        F = PosetProduct((F0,))
+        down = Mux(F, 0)
+        dp = Series(down, dp)
+
+    if len(ndp.get_rnames()) == 1:
+        R0 = dp.get_res_space()
+#         R = PosetProduct((R0,))
+        lift = Mux(R0, [()])
+        dp = Series(dp, lift)
+
+    return dp
+
+@contract(ndp1=NamedDP, ndp2=NamedDP,
+          connections='set($Connection)',
+          split='list(str)',
+          returns=NamedDP)
 def connect2(ndp1, ndp2, connections, split):
+    """ Note the argument split must be strings so that orders are preserved
+        and deterministic. """
     try:
         if not connections:
             raise ValueError('Empty connections')
 
-        #
+        #     |   |------------------------->A
         #     |   |          |-B1(split)----->
         # f1->|   |--B1----->|         ___
-        #     | 1 |          |----B2->|   |
+        #     | 1 |          |----B2->|   |   all_s2 = B2 + C2  all_s1 = B1 + C1
         #     |___| -C1--C2---------->| 2 |->r2
         # ---------D----------------->|___|
         #
-        # f = f1 + D
-        # r = r2 + A
+        # ftot = f1 + D
+        # rtot = A + b1 + r2
         # A + B + C = r1
         # B + C + D = f2
         # split = A + B
 
-        f1 = ndp1.get_fnames()
-        f2 = ndp2.get_fnames()
-
-        r2 = ndp2.get_rnames()
         # split = B1 is given
         # find B2 from B1
         def s2_from_s1(s1):
@@ -175,129 +197,221 @@ def connect2(ndp1, ndp2, connections, split):
             for c in connections:
                 if c.s2 == s2: return c.s1
             assert False, 'Cannot find connection with s2 = %s' % s2
+
+        f1 = ndp1.get_fnames()
+        r1 = ndp1.get_rnames()
+        f2 = ndp2.get_fnames()
+        r2 = ndp2.get_rnames()
+
+        all_s2 = set([c.s2 for c in connections])
+        all_s1 = set([c.s1 for c in connections])
+
+        # assert that all split are in s1
+        for x in split: assert x in all_s1
+
         B1 = list(split)
         B2 = map(s2_from_s1, B1)
-        # Find C2
-        all_s2 = set([c.s2 for c in connections])
-        C2 = [x for x in all_s2 if not x in B2]
-        # Find C1
-    #     C1 = map(s1_from_s2, C2)
-        # Find D
-        D = [x for x in f2 if (x not in B2) and (x not in C2)]
+        C2 = list_diff(all_s2, B2)
+        C1 = map(s1_from_s2, C2)
+        A = list_diff(r1, B1 + C1)
+        D = list_diff(f2, B2 + C2)
 
-    #     f0 = f1 + D
-    #     r0 = B1 + r2
+        print('B1: %s' % B1)
+        print('B2: %s' % B2)
+        print('C2: %s' % C1)
+        print('C1: %s' % C1)
+        print(' A: %s' % A)
+        print(' D: %s' % D)
+        fntot = f1 + D
+        rntot = A + B1 + r2
+
+        # now I can create Ftot and Rtot
+        Ftot = PosetProduct(tuple(list(ndp1.get_ftypes(f1)) + list(ndp2.get_ftypes(D))))
+        Rtot = PosetProduct(tuple(list(ndp1.get_rtypes(A)) +
+                                  list(ndp1.get_rtypes(B1)) +
+                                  list(ndp2.get_rtypes(r2))))
+
+        print('Ftot: %s' % str(Ftot))
+        print('      %s' % str(fntot))
+        print('Rtot: %s' % str(Rtot))
+        print('      %s' % str(rntot))
+        assert len(fntot) == len(Ftot)
+        assert len(rntot) == len(Rtot)
+
+
+        # I can create the first muxer m1
+        # from ftot to Product(f1, D)
+
+        m1_for_f1 = [fntot.index(s) for s in f1]
+        m1_for_D = [fntot.index(s) for s in D]
+
+        m1coords = [m1_for_f1, m1_for_D]
+        m1 = Mux(Ftot, m1coords)
+
+        print('m1: %s' % m1)
+        print('m1.R: %s' % m1.get_res_space())
+
+        # Get Identity on D
+        D_types = ndp2.get_ftypes(D)
+        Id_D = Identity(D_types)
+
+        ndp1_p = its_dp_as_product(ndp1)
+        X = Parallel(ndp1_p, Id_D)
+
+        # make sure we can connect
+        m1_X = Series(m1, X)
+        print('m1_X = %s' % m1_X)
+        print('m1_X.R = %s' % m1_X.get_res_space()  )      
+        
+        
+        def coords_cat(c1, m):
+            if m != ():
+                return c1 + (m,)
+            else:
+                return c1
+        
+        A_B1_types = PosetProduct(tuple(ndp1.get_rtypes(A)) + tuple(ndp1.get_rtypes(B1)))
+        Id_A_B1 = Identity(A_B1_types)
+        ndp2_p = its_dp_as_product(ndp2)
+        Z = Parallel(Id_A_B1, ndp2_p)
+        print('Z.R = %s' % Z.get_res_space())
+        print('B1: %s' % B1)
+        print('R2: %s' % r2)
+        m2coords_A = [(0, (A + B1).index(x)) for x in A]
+        m2coords_B1 = [(0, (A + B1).index(x)) for x in B1]
+        m2coords_r2 = [(1, r2.index(x)) for x in r2]
+        m2coords = m2coords_A + m2coords_B1 + m2coords_r2
+        print('m2coords_A: %r' % m2coords_A)
+        print('m2coords_B1: %r' % m2coords_B1)
+        print('m2coords_r2: %r' % m2coords_r2)
+        print('m2coords: %r' % m2coords)
+
+        print('Z.R: %s' % Z.get_res_space())
+        m2 = Mux(Z.get_res_space(), m2coords)
+        
+        assert len(m2.get_res_space()) == len(rntot), ((m2.get_res_space(), rntot))
+        # make sure we can connect
+        Z_m2 = Series(Z, m2)
 
         #
-        #  f0 -> | X | -> |Y |-> |Z| -> r0
+        #  f0 -> |m1| -> | X | -> |Y |-> |Z| -> |m2| -> r0
         #
-        # X = [parallel 1, Id_D]
+        # X = dp1 | Id_D
+        # Z = Id_B1 | dp2
 
         #      ___
-        #     |   |          |-B1--------->
+        #     |   |------------------------->A
+        #     |   |          |-B1----------->
         # f1->|   |--B1----->|         ___
         #     | 1 |          |----B2->|   |
         #     |___| -C1-----------C2->| 2 |->r2
         # ---------D----------------->|___|
 
-        if D:
-            if len(D) == 1:
-                D_type = ndp2.get_ftype(D[0])
-                Id_D = Identity(D_type)
-            else:
-                D_types = ndp2.get_ftypes(D)
-                Id_D = Identity(D_types)
-            X = Parallel(ndp1.get_dp(), Id_D)
-        else:
-            X = ndp1.get_dp()
-
-        if B1:
-            B1_types = ndp1.get_rtypes(B1)
-            Id_B1 = Identity(B1_types)
-            Z = Parallel(Id_B1, ndp2.get_dp())
-        else:
-            Z = ndp2.get_dp()
-
-
         #      ___
+        #     |   |-------------------------------->A
         #     |   |  .            *-B1-------.----->
         # f1->|   |  . |--B1----->*          .   ___
         #     | 1 |--.-|          *----B2->| .  |   |
         #     |___|  . |-C1------------C2->|-.->| 2 |->r2
         # ---------D-.-------------------->| .  |___|
-
+        # m1  | X | Y                        |  Z    | m2
 
         # I need to write the muxer
         # look at the end
         # iterate 2's functions
-        mux_B2_C2_D = []
-        if D:
-            for x in ndp2.get_fnames():
-                if x in B2:
-                    i = (0,)
-                    a = ndp1.rindex(s1_from_s2(x))
-                    if a != ():
-                        i = i + (a,)
-                    mux_B2_C2_D.append(i)
-    #                 print('B2[%s] got %s' % (x, i))
-                    assert x not in C2 and x not in D
-                if x in C2:
-                    a = ndp1.rindex(s1_from_s2(x))
-                    i = (0,)
-                    if a != ():
-                        i = i + (a,)
-    #                 print('C2[%s] got %s' % (x, i))
-                    mux_B2_C2_D.append(i)
-                    assert x not in D
-                if x in D:
-                    if len(D) == 1:
-                        i = (1,)
-                    else:
-                        i = (1, D.index(x))
 
-    #                 print('D[%s] giv %s ' % (x, i))
-                    mux_B2_C2_D.append(i)
-        else:
-            for x in ndp2.get_fnames():
-                if x in B2:
-                    i = ndp1.rindex(s1_from_s2(x))
-                    mux_B2_C2_D.append(i)
-                if x in C2:
-                    i = ndp1.rindex(s1_from_s2(x))
-                    mux_B2_C2_D.append(i)
-    
-        if B1:
-            mux_B1 = [(0, ndp1.rindex(s)) for s in B1]
-            coords = [mux_B1, mux_B2_C2_D]
-        else:
-            coords = mux_B2_C2_D
+        Y_coords_A_B1 = []
+        for x in A:
+            Y_coords_A_B1.append((0, r1.index(x)))
+        for x in B1:
+            Y_coords_A_B1.append((0, r1.index(x)))
+        
+        Y_coords_B2_C2_D = []
+        for x in f2:
+            if (x in B2) or (x in C2):
+                Y_coords_B2_C2_D.append((0, r1.index(s1_from_s2(x))))
+                assert x not in D
+            elif x in D:
+                Y_coords_B2_C2_D.append((1, D.index(x)))
+            else:
+                assert False
 
-        F = X.get_res_space()
-    #     print('Creating Mux from F = %r, coords= %r ' % (F, coords))
-        if len(coords) == 1:
-            coords = coords[0]
-        Y = Mux(coords=coords, F=F)
+        print ('Y_coords_A_B1: %s' % Y_coords_A_B1)
+        print ('Y_coords_B2_C2_D: %s' % Y_coords_B2_C2_D)
+        Y_coords = [Y_coords_A_B1, Y_coords_B2_C2_D]
+        Y = Mux(m1_X.get_res_space(), Y_coords)
 
-        A = Series(X, Y)
-        Series(Y, Z)
-        res_dp = Series(A, Z)
+        m1_X_Y = Series(m1_X, Y)
+        _Y_Z_m2 = Series(Y, Z_m2)
+        res_dp = Series(m1_X_Y, Z_m2)
 
-        fnames = f1 + D
-        rnames = B1 + r2
-    #     print('ndp1:%s' % ndp1.desc())
-    #     print('res_dp', res_dp.get_fun_space())
+        fnames = fntot
+        rnames = rntot
+
         if len(fnames) == 1:
             fnames = fnames[0]
             funsp = res_dp.get_fun_space()
             res_dp = Series(Mux(funsp[0], [()]), res_dp)
+
         if len(rnames) == 1:
             rnames = rnames[0]
             ressp = res_dp.get_res_space()
             res_dp = Series(res_dp, Mux(ressp, 0))
 
+        print('res_dp: %s' % res_dp)
         res = dpwrap(res_dp, fnames, rnames)
 
         return res
+
+#         mux_B2_C2_D = []
+#         if D:
+#             for x in ndp2.get_fnames():
+#                 if x in B2:
+#                     i = (0,)
+#                     a = ndp1.rindex(s1_from_s2(x))
+#                     if a != ():
+#                         i = i + (a,)
+#                     mux_B2_C2_D.append(i)
+#     #                 print('B2[%s] got %s' % (x, i))
+#                     assert x not in C2 and x not in D
+#                 if x in C2:
+#                     a = ndp1.rindex(s1_from_s2(x))
+#                     i = (0,)
+#                     if a != ():
+#                         i = i + (a,)
+#     #                 print('C2[%s] got %s' % (x, i))
+#                     mux_B2_C2_D.append(i)
+#                     assert x not in D
+#                 if x in D:
+#                     if len(D) == 1:
+#                         i = (1,)
+#                     else:
+#                         i = (1, D.index(x))
+#
+#     #                 print('D[%s] giv %s ' % (x, i))
+#                     mux_B2_C2_D.append(i)
+#         else:
+#             for x in ndp2.get_fnames():
+#                 if x in B2:
+#                     i = ndp1.rindex(s1_from_s2(x))
+#                     mux_B2_C2_D.append(i)
+#                 if x in C2:
+#                     i = ndp1.rindex(s1_from_s2(x))
+#                     mux_B2_C2_D.append(i)
+#
+#         if B1:
+#             mux_B1 = [(0, ndp1.rindex(s)) for s in B1]
+#             coords = [mux_B1, mux_B2_C2_D]
+#         else:
+#             coords = mux_B2_C2_D
+#
+#         F = X.get_res_space()
+#     #     print('Creating Mux from F = %r, coords= %r ' % (F, coords))
+#         if len(coords) == 1:
+#             coords = coords[0]
+#         Y = Mux(coords=coords, F=F)
+
+
 
     except Exception as e:
         msg = 'connect2() failed'

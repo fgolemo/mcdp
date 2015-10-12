@@ -42,7 +42,7 @@ def get_it(seq, coords, reduce_list):
         else:
             assert isinstance(a, int)
             return seq[a]
-    except InvalidCoords as e:
+    except (InvalidCoords, IndexError) as e:
         msg = 'Error while calling %s { %s }' % (seq, coords)
         raise_wrapped(ValueError, e, msg, compact=True,
                       seq=seq, coords=coords, reduce_list=reduce_list)
