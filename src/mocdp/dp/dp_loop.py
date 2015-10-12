@@ -399,11 +399,6 @@ class DPLoop0(PrimitiveDP):
         UR = UpperSets(R)
         UF = UpperSets(F)
 
-        # we consider a set of iterates
-        # we start from the bottom
-        s0 = UR.get_bottom()
-
-        S = [s0]
         
         def iterate(si):
             """ Returns the next iteration """
@@ -418,6 +413,12 @@ class DPLoop0(PrimitiveDP):
             res = self.dp1.solveU(upset)
             UR.belongs(res)
             return res
+
+        # we consider a set of iterates
+        # we start from the bottom
+        s0 = UR.get_bottom()
+
+        S = [s0]
             
         for i in range(100):  # XXX
             # now take the product of f1

@@ -1,6 +1,6 @@
 from comptests.registrar import comptest
-from mocdp.lang.blocks import parse_model, parse_wrap, ow
-from mocdp.lang.lines import load_expr, idn, rvalue
+from mocdp.lang.syntax import (idn, load_expr, ow, parse_model, parse_wrap,
+    rvalue)
 from pyparsing import Literal
 
 @comptest
@@ -8,10 +8,10 @@ def check_lang():
     parse_wrap(idn, 'battery')
     parse_wrap(idn + ow, 'battery ')
     parse_wrap(idn + ow + Literal('='), 'battery=')
-    parse_wrap(load_expr, 'battery = load battery')
+    parse_wrap(load_expr, 'load battery')
 
     data = """
-dp:
+dp {
     battery = load battery
     times = load energy_times
     actuation = load mobility
@@ -19,7 +19,7 @@ dp:
     times.power >= actuation.actuation_power
     battery.capacity >= times.energy
     actuation.weight >= battery.battery_weight
-    
+}
     """
     return parse_model(data)
 
@@ -27,7 +27,7 @@ dp:
 @comptest
 def check_lang2():
     data = """
-dp:
+dp {
     battery = load battery
     times = load energy_times
     actuation = load mobility
@@ -38,6 +38,7 @@ dp:
 # comment
     actuation.weight >= battery.battery_weight
     # comment
+}
     """
     parse_model(data)
 
@@ -46,20 +47,37 @@ def check_lang3_times():
     parse_wrap(rvalue, 'mission_time')
 
     data = """
-dp:
+dp {
     battery = load battery
     actuation = load mobility
      
     battery.capacity >= actuation.actuation_power * mission_time    
     actuation.weight >= battery.battery_weight
-    
+    }
+    """
+    parse_model(data)
+
+
+
+# @comptest
+def check_lang4_composition():
+    parse_wrap(rvalue, 'mission_time')
+
+    data = """
+dp {
+    battery = load battery
+    actuation = load mobility
+     
+    battery.capacity >= actuation.actuation_power * mission_time    
+    actuation.weight >= battery.battery_weight
+    }
     """
     parse_model(data)
 
 
 examples1 = [
     """
-dp electric-battery:
+dp electric-battery {
     provides voltage (intervals of V)
     provides current (A)
     provides capacity (J)
