@@ -1,7 +1,10 @@
 from abc import ABCMeta
 from contracts import raise_wrapped
 
-__all__ = ['SpaceMeta', 'decorate_methods']
+__all__ = [
+    'SpaceMeta',
+    'decorate_methods',
+]
 
 class SpaceMeta(ABCMeta):
     # we use __init__ rather than __new__ here because we want
@@ -9,7 +12,9 @@ class SpaceMeta(ABCMeta):
     # created
     def __init__(cls, name, bases, dct):  # @NoSelf
         ABCMeta.__init__(cls, name, bases, dct)
-        method2dec = {'belongs': decorate_belongs}
+        method2dec = {
+            'belongs': decorate_belongs,
+        }
         decorate_methods(cls, name, bases, dct, method2dec)
 
 def decorate_belongs(f):

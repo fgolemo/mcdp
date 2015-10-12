@@ -51,7 +51,9 @@ def report_solutions(ndp, solutions):
             return isinstance(r, float)
 
         def get_finite_part(a, b):
-            return unzip([(f, r) for (f, r) in zip(a, b) if is_finite(r)])
+            return unzip([(f, r) for (f, r) in zip(a, b)
+                          if is_finite(r)
+                          and is_finite(f)])
 
         def get_unfeasible_f(a, b):
             return [f for (f, r) in zip(a, b) if not is_finite(r) and
@@ -59,6 +61,7 @@ def report_solutions(ndp, solutions):
                     ]
 
         f0, y0 = get_finite_part(f, y)
+        print f0, y0
         fu = get_unfeasible_f(f, y)
 
         pylab.plot(f0, y0, 'k.')

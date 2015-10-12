@@ -18,6 +18,7 @@ def jobs_comptests(context):
     from .dp_report import tests  # @Reimport
     from .example_battery import tests  # @Reimport
     from .comp import tests  # @Reimport
+    from .lang import tests  # @Reimport
 
     # instantiation
     from comptests import jobs_registrar

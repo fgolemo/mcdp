@@ -1,4 +1,6 @@
-from mocdp.posets.space_meta import decorate_methods, SpaceMeta
+from .space_meta import decorate_methods, SpaceMeta
+
+__all__ = ['PosetMeta']
 
 class PosetMeta(SpaceMeta):
     # we use __init__ rather than __new__ here because we want

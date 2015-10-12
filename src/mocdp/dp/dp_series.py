@@ -35,14 +35,14 @@ class Series(PrimitiveDP):
     def solve(self, func):
         from mocdp.posets import UpperSet, poset_minima
 
-        self.info('func: %s' % self.F.format(func))
+#         self.info('func: %s' % self.F.format(func))
 
         u1 = self.dp1.solve(func)
         ressp1 = self.dp1.get_res_space()
         tr1 = UpperSets(ressp1)
         tr1.belongs(u1)
 
-        self.info('u1: %s' % tr1.format(u1))
+#         self.info('u1: %s' % tr1.format(u1))
 
         mins = set([])
         for u in u1.minimals:
@@ -58,7 +58,7 @@ class Series(PrimitiveDP):
         us = UpperSet(minimals, ressp)
         tres.belongs(us)
 
-        self.info('us: %s' % tres.format(us))
+#         self.info('us: %s' % tres.format(us))
 
         return us
 

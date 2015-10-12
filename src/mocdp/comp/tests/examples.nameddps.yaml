@@ -48,8 +48,6 @@
     rnames: 'battery_weight'
     dp: BatteryDP
 
-
-
 - id: maxh
   desc: ""
   code:
@@ -78,3 +76,32 @@
   - fnames: 'x'
     rnames: 'r'
     dp: SimpleNonlinearity1
+
+- id: minh
+  desc: ""
+  code:
+  - mocdp.comp.dpgraph
+  - name2dp: 
+      min: min_f_r
+      h: hnlin
+    connections:
+    - 'h.x >= min.z'
+    - 'min.r >= h.r'
+
+- id: min_f_r
+  desc: ""
+  code:
+  - mocdp.comp.SimpleWrap
+  - fnames: ['f', 'r']
+    rnames: 'z'
+    dp: 
+    - mocdp.dp.Min
+    - F: Rcomp_J
+
+- id: mobility
+  desc: ""
+  code:
+  - mocdp.comp.SimpleWrap
+  - fnames: weight
+    rnames: actuation_power
+    dp: ['mocdp.example_battery.Mobility', {}]

@@ -25,13 +25,6 @@ class NamedDP():
     
 
 
-#
-# def parallel(dp1, dp2):
-#     pass
-#
-#
-# def interconnect(name2dp, connections):
-#     pass
 
 #
 # class DPBuilder():
