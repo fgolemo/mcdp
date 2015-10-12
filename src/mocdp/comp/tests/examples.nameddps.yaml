@@ -120,3 +120,42 @@
           battery.capacity >= times.energy
           actuation.weight >= battery.battery_weight
       }
+
+
+- id: testmax
+  desc: "Test with max"
+  code: 
+  - mocdp.lang.parse
+  - string: |
+      cdp {
+          provides f (R)
+          
+          hnlin = dp {
+              provides x (R)
+              requires r (R)
+              
+              implemented-by load SimpleNonlinearity1
+          }
+          
+          hnlin.x >= max(f, hnlin.r)        
+      }
+
+- id: testmin
+  desc: "Test with min"
+  code: 
+  - mocdp.lang.parse
+  - string: |
+      cdp {
+          provides f (R)
+          
+          hnlin = dp {
+              provides x (R)
+              requires r (R)
+              
+              implemented-by load SimpleNonlinearity1
+          }
+          
+          hnlin.x >= min(f, hnlin.r)        
+      }
+
+

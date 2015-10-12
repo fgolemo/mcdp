@@ -3,14 +3,14 @@ from .parts import (Constraint, FunStatement, LoadCommand, Mult, NewFunction,
 from contracts import contract
 from contracts.interface import ContractSyntaxError, Where
 from mocdp.comp.interfaces import NamedDP
-from mocdp.lang.parts import DPWrap, LoadDP, PDPCodeSpec, Plus, OpMax
+from mocdp.lang.parts import DPWrap, LoadDP, PDPCodeSpec, Plus, OpMax, OpMin
 from mocdp.lang.utils import parse_action
 from mocdp.posets.rcomp import (R_Current, R_Energy, R_Power, R_Time, R_Voltage,
     R_Weight, Rcomp)
 from pyparsing import (Combine, Forward, Group, LineEnd, LineStart, Literal,
     OneOrMore, Optional, ParseException, ParseFatalException, ParserElement,
     SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas, oneOf, opAssoc,
-    operatorPrecedence)
+    operatorPrecedence, Or)
 
 ParserElement.enablePackrat()
 
@@ -85,10 +85,18 @@ spa(rvalue_resource, lambda t: Resource(t['dp'], t['s']))
 rvalue_new_function = C(idn, 'new_function')
 spa(rvalue_new_function, lambda t: NewFunction(t['new_function']))
 
-max_expr = (C(L('max'), 'op') + S(L('(')) +
+binary = {
+    'max': OpMax,
+    'min': OpMin,
+}
+
+opname = Or([L(x) for x in binary])
+max_expr = (C(opname, 'opname') + S(L('(')) +
                 C(rvalue, 'op1') + S(L(','))
                 + C(rvalue, 'op2')) + S(L(')'))
-spa(max_expr, lambda t: OpMax(t['op1'], t['op2']))
+
+
+spa(max_expr, lambda t: binary[t['opname']](t['op1'], t['op2']))
 
 operand = rvalue_new_function ^ rvalue_resource ^ max_expr
 
