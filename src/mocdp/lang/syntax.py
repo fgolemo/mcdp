@@ -1,14 +1,15 @@
 
 from .parts import Constraint, LoadCommand, Mult, NewFunction, Resource
 from contracts import contract
-from contracts.interface import ContractSyntaxError, Where
+from contracts.interface import ContractSyntaxError, Where, describe_value
 from mocdp.comp.interfaces import NamedDP
 from pyparsing import (Combine, Forward, LineEnd, LineStart, Literal,
     ParseException, ParseFatalException, ParserElement, SkipTo, Suppress, Word,
     ZeroOrMore, alphanums, alphas, oneOf, opAssoc, operatorPrecedence,
-    OneOrMore)
+    OneOrMore, Group)
 from mocdp.lang.parts import SetName
 from mocdp.lang.utils import parse_action
+from collections import namedtuple
 
 
 
@@ -23,9 +24,6 @@ C = lambda x, b: x.setResultsName(b)
 def spa(x, b):
     @parse_action
     def p(tokens):
-#         print('s: %r' % _s)
-#         print('loc: %s' % _loc)
-#         print('tokens: %r' % tokens)
         return b(tokens)
     x.setParseAction(p)
 
@@ -49,7 +47,9 @@ setname_expr = C(idn, 'dpname') + S(L('=')) + C(dp_rvalue, 'rvalue')
 spa(setname_expr, lambda t: SetName(t['dpname'], t['rvalue']))
 
 rvalue = Forward()
-rvalue_resource = C(idn, 'dp') + S(L('.')) + C(idn, 's')
+rvalue_resource_simple = C(idn, 'dp') + S(L('.')) + C(idn, 's')
+rvalue_resource_fancy =C(idn, 's') + S(L('required')) + S(L('by')) + C(idn, 'dp') 
+rvalue_resource = rvalue_resource_simple | rvalue_resource_fancy
 spa(rvalue_resource, lambda t: Resource(t['dp'], t['s']))
 
 rvalue_new_function = C(idn, 'new_function')
@@ -61,18 +61,61 @@ operand = rvalue_new_function ^ rvalue_resource
 comment_line = ow + Literal('#') + line + S(EOL)
 
 
-constraint_expr = (C(idn, 'dp2') + S(L('.')) + C(idn, 's2') +
-                   S(L('>=')) + C(rvalue, 'rvalue'))
+simple = (C(idn, 'dp2') + S(L('.')) + C(idn, 's2'))
+fancy = (C(idn, 's2') + S(L('provided')) + S(L('by')) + C(idn, 'dp2'))
+signal_rvalue = simple | fancy | (S(L('(')) + (simple | fancy) + S(L(')')))
+
+constraint_expr = (
+                signal_rvalue
+                   +                 
+                   S(L('>=')) + C(rvalue, 'rvalue')
+                )   
 
 line_expr = load_expr ^ constraint_expr ^ setname_expr
 
 
 dp_statement = S(comment_line) ^ line_expr
 
-dp_model = S(L('dp')) + S(L('{')) + OneOrMore(dp_statement) + S(L('}'))
+dp_model = S(L('cdp')) + S(L('{')) + OneOrMore(dp_statement) + S(L('}'))
 
 
-dp_rvalue << load_expr ^ dp_model
+# Simple DPs being wrapped
+#
+# f name (unit)
+# f name (unit)
+# wraps name
+
+FunStatement = namedtuple('FunStatement', 'fname')
+ResStatement = namedtuple('ResStatement', 'rname')
+# ImplStatement = namedtuple('ImplStatement', 'name')
+LoadDP = namedtuple('LoadDP', 'name')
+DPWrap = namedtuple('DPWrap', 'fun res impl')
+PDPCodeSpec = namedtuple('PDPCodeSpec', 'function arguments')
+funcname = Combine(idn + ZeroOrMore(L('.') + idn))
+code_spec = S(L('code')) + C(funcname, 'function')
+spa(code_spec, lambda t: PDPCodeSpec(function=t['function'], arguments={}))
+
+fun_statement = S(L('f')) ^ S(L('provides')) + C(idn, 'fname')
+spa(fun_statement, lambda t: FunStatement(t['fname']))
+
+res_statement = S(L('r')) ^ S(L('requires')) + C(idn, 'rname')
+spa(res_statement, lambda t: ResStatement(t['rname']))
+
+load_pdp = S(L('load')) + C(idn, 'name')
+spa(load_pdp, lambda t: LoadDP(t['name']))
+
+pdp_rvalue = load_pdp ^ code_spec
+
+
+simple_dp_model = (S(L('dp')) + S(L('{')) +
+                   C(Group(OneOrMore(fun_statement)), 'fun') +
+                   C(Group(OneOrMore(res_statement)), 'res') +
+                   S(L('implemented-by')) + C(pdp_rvalue, 'pdp_rvalue') +
+                   S(L('}')))
+spa(simple_dp_model, lambda t: DPWrap(list(t[0]), list(t[1]), t[2]))
+
+
+dp_rvalue << (load_expr | simple_dp_model) ^ dp_model
 
 
 @parse_action
@@ -116,14 +159,6 @@ def parse_line(line):
 
 @parse_action
 def dp_model_parse_action(tokens):
-
-#     lines = filter(None, [t.strip() for t in tokens])
-#
-#     # remove comment line
-#     is_comment = lambda x: x[0] == '#'
-#     lines = [l for l in lines if not is_comment(l)]
-#     res = map(parse_line, lines)
-
     res = list(tokens)
     from mocdp.lang.blocks import interpret_commands
     return interpret_commands(res)

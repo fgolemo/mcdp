@@ -111,7 +111,7 @@
   code: 
   - mocdp.lang.parse
   - string: |
-      dp {
+      cdp {
           battery = load battery
           times = load energy_times
           actuation = load mobility

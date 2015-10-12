@@ -1,6 +1,6 @@
 from comptests.registrar import comptest
 from mocdp.lang.syntax import (idn, load_expr, ow, parse_model, parse_wrap,
-    rvalue)
+    rvalue, simple_dp_model, funcname, code_spec)
 from pyparsing import Literal
 
 @comptest
@@ -11,7 +11,7 @@ def check_lang():
     parse_wrap(load_expr, 'load battery')
 
     data = """
-dp {
+cdp {
     battery = load battery
     times = load energy_times
     actuation = load mobility
@@ -27,7 +27,7 @@ dp {
 @comptest
 def check_lang2():
     data = """
-dp {
+cdp {
     battery = load battery
     times = load energy_times
     actuation = load mobility
@@ -47,7 +47,7 @@ def check_lang3_times():
     parse_wrap(rvalue, 'mission_time')
 
     data = """
-dp {
+cdp {
     battery = load battery
     actuation = load mobility
      
@@ -59,21 +59,81 @@ dp {
 
 
 
-# @comptest
+@comptest
 def check_lang4_composition():
     parse_wrap(rvalue, 'mission_time')
 
-    data = """
+    s = """
 dp {
-    battery = load battery
-    actuation = load mobility
-     
-    battery.capacity >= actuation.actuation_power * mission_time    
-    actuation.weight >= battery.battery_weight
+    provides current
+    provides capacity
+    requires weight
+    
+    implemented-by load times
+}
+    """
+    res = parse_wrap(simple_dp_model, s)[0]
+
+
+
+@comptest
+def check_lang5_composition():
+    parse_wrap(rvalue, 'mission_time')
+
+    parse_wrap(funcname, 'mocdp.example_battery.Mobility')
+    parse_wrap(code_spec, 'code mocdp.example_battery.Mobility')
+
+    s = """
+    cdp {
+        battery = dp {
+            provides capacity
+            requires battery_weight
+            
+            implemented-by load BatteryDP
+        }
+        
+        actuation = dp {
+            provides weight
+            requires actuation_power
+            
+            implemented-by code mocdp.example_battery.Mobility
+        }
+        
+        battery.capacity >= actuation.actuation_power * mission_time    
+        actuation.weight >= battery.battery_weight
     }
     """
-    parse_model(data)
+    res = parse_model(s)
 
+
+@comptest
+def check_lang6_composition():
+    parse_wrap(rvalue, 'mission_time')
+
+    parse_wrap(funcname, 'mocdp.example_battery.Mobility')
+    parse_wrap(code_spec, 'code mocdp.example_battery.Mobility')
+
+    s = """
+    cdp {
+        battery = dp {
+            provides capacity
+            requires battery_weight
+            
+            implemented-by load BatteryDP
+        }
+        
+        actuation = dp {
+            provides payload
+            requires actuation_power
+            
+            implemented-by code mocdp.example_battery.Mobility
+        }
+        
+        capacity provided by battery >= mission_time * (actuation_power required by actuation)    
+        payload provided by actuation >= battery_weight required by battery
+    }
+    """
+    res = parse_model(s)
 
 examples1 = [
     """
