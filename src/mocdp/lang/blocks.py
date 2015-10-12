@@ -94,6 +94,9 @@ def interpret_commands(res):
 @contract(returns=NamedDP)
 def eval_dp_rvalue(r, context):  # @UnusedVariable
     library = get_conftools_nameddps()
+    if isinstance(r, NamedDP):
+        return r
+
     if isinstance(r, LoadCommand):
         load_arg = r.load_arg
         _, ndp = library.instance_smarter(load_arg)
@@ -111,6 +114,7 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
         if len(fnames) == 1: fnames = fnames[0]
         if len(rnames) == 1: rnames = rnames[0]
         return SimpleWrap(dp=dp, fnames=fnames, rnames=rnames)
+
 
     raise ValueError('Invalid dprvalue: %s' % str(r))
 

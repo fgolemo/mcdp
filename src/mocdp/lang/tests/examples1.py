@@ -209,8 +209,6 @@ def check_lang9_max():
     parse_wrap(rvalue, 'max(f, g)')
     parse_wrap(constraint_expr, 'hnlin.x >= max(f, g)')
 
-
-
     parse_model("""
     cdp {
         provides f (R)
@@ -226,6 +224,24 @@ def check_lang9_max():
     }
     """)
 
+
+
+@comptest
+def check_lang10_comments():
+    parse_model("""
+    cdp {
+        provides f (R)
+        
+        hnlin = dp {
+            provides x (R)
+            requires r (R)
+            
+            implemented-by load SimpleNonlinearity1
+        }
+        
+        hnlin.x >= max(f, hnlin.r)        
+    }
+    """)
 
 
 examples1 = [

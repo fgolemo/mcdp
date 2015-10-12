@@ -140,7 +140,8 @@ simple_dp_model = (S(L('dp')) + S(L('{')) +
 spa(simple_dp_model, lambda t: DPWrap(list(t[0]), list(t[1]), t[2]))
 
 
-dp_rvalue << (load_expr | simple_dp_model) ^ dp_model
+# dp_rvalue << (load_expr | simple_dp_model) ^ dp_model
+dp_rvalue << (load_expr | simple_dp_model | dp_model)
 
 
 @parse_action
