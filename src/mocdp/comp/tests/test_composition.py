@@ -204,7 +204,6 @@ def check_compose2_generic():
     assert y.get_rnames() == ['battery_weight'], y.get_rnames()
 
     check_ftype(y, 'mission_time', R_Time)
-#     check_ftype(x, 'weight', R_Weight)
     check_rtype(y, 'battery_weight', R_Weight)
 
     dp = y.get_dp()

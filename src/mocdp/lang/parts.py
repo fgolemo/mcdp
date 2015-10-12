@@ -13,6 +13,8 @@ def namedtuplewhere(a, b):
 
 Mult = namedtuplewhere('Mult', 'a b')
 Plus = namedtuplewhere('Plus', 'a b')
+OpMax = namedtuplewhere('Max', 'a b')
+OpMin = namedtuplewhere('Min', 'a b')
 Resource = namedtuplewhere('Resource', 'dp s')
 NewFunction = namedtuplewhere('NewFunction', 'name')
 Constraint = namedtuplewhere('Constraint', 'dp2 s2 rvalue')

@@ -3,10 +3,10 @@ from .parts import (Constraint, FunStatement, LoadCommand, Mult, NewFunction,
 from contracts import contract
 from contracts.interface import ContractSyntaxError, Where
 from mocdp.comp.interfaces import NamedDP
-from mocdp.lang.parts import DPWrap, LoadDP, PDPCodeSpec, Plus
+from mocdp.lang.parts import DPWrap, LoadDP, PDPCodeSpec, Plus, OpMax
 from mocdp.lang.utils import parse_action
 from mocdp.posets.rcomp import (R_Current, R_Energy, R_Power, R_Time, R_Voltage,
-    R_Weight)
+    R_Weight, Rcomp)
 from pyparsing import (Combine, Forward, Group, LineEnd, LineStart, Literal,
     OneOrMore, Optional, ParseException, ParseFatalException, ParserElement,
     SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas, oneOf, opAssoc,
@@ -51,6 +51,7 @@ units = {
     'V': R_Voltage,
     'g': R_Weight,
     'W': R_Power,
+    'R': Rcomp(),
 }
 unit_expr = oneOf(list(units))
 spa(unit_expr, lambda t: units[t[0]])
@@ -75,14 +76,21 @@ spa(setname_expr, lambda t: SetName(t['dpname'], t['rvalue']))
 
 rvalue = Forward()
 rvalue_resource_simple = C(idn, 'dp') + S(L('.')) + C(idn, 's')
-rvalue_resource_fancy =C(idn, 's') + S(L('required')) + S(L('by')) + C(idn, 'dp') 
+
+prep = (S(L('required')) + S(L('by'))) | S(L('of'))
+rvalue_resource_fancy = C(idn, 's') + prep + C(idn, 'dp')
 rvalue_resource = rvalue_resource_simple | rvalue_resource_fancy
 spa(rvalue_resource, lambda t: Resource(t['dp'], t['s']))
 
 rvalue_new_function = C(idn, 'new_function')
 spa(rvalue_new_function, lambda t: NewFunction(t['new_function']))
 
-operand = rvalue_new_function ^ rvalue_resource
+max_expr = (C(L('max'), 'op') + S(L('(')) +
+                C(rvalue, 'op1') + S(L(','))
+                + C(rvalue, 'op2')) + S(L(')'))
+spa(max_expr, lambda t: OpMax(t['op1'], t['op2']))
+
+operand = rvalue_new_function ^ rvalue_resource ^ max_expr
 
 # comment_line = S(LineStart()) + ow + L('#') + line + S(EOL)
 comment_line = ow + Literal('#') + line + S(EOL)

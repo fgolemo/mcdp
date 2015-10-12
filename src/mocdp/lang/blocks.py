@@ -12,7 +12,8 @@ from mocdp.dp.primitive import PrimitiveDP
 from mocdp.lang.syntax import (DPSyntaxError, DPWrap, FunStatement, LoadDP,
     PDPCodeSpec, ResStatement)
 from mocdp.posets.rcomp import mult_table
-from mocdp.lang.parts import Plus
+from mocdp.lang.parts import Plus, OpMax, OpMin
+from mocdp.dp.dp_max import Max, Min
 
 class Context():
     def __init__(self):
@@ -138,39 +139,69 @@ def eval_rvalue(rvalue, context):
             raise DPSyntaxError(msg, where=rvalue.where)
         return rvalue
 
-    if isinstance(rvalue, Mult):
+    def eval_ops(rvalue):
+        """ Returns a, F1, b, F2 """
         a = eval_rvalue(rvalue.a, context)
         b = eval_rvalue(rvalue.b, context)
         F1 = context.names[a.dp].get_rtype(a.s)
         F2 = context.names[b.dp].get_rtype(b.s)
-        R = mult_table(F1, F2)
-        ndp = dpwrap(Product(F1, F2, R), ['a', 'b'], 'res')
-        name = context.new_name('mult')
-        c1 = Connection(dp1=a.dp, s1=a.s, dp2=name, s2='a')
-        c2 = Connection(dp1=b.dp, s1=b.s, dp2=name, s2='b')
+        return a, F1, b, F2
+
+    def add_binary(dp, nprefix, na, nb, nres):
+        ndp = dpwrap(dp, [na, nb], nres)
+        name = context.new_name(nprefix)
+        c1 = Connection(dp1=a.dp, s1=a.s, dp2=name, s2=na)
+        c2 = Connection(dp1=b.dp, s1=b.s, dp2=name, s2=nb)
         context.add_ndp(name, ndp)
         context.add_connection(c1)
         context.add_connection(c2)
-        return Resource(name, 'res')
+        return Resource(name, nres)
+
+    if isinstance(rvalue, Mult):
+        a, F1, b, F2 = eval_ops(rvalue)
+
+        R = mult_table(F1, F2)
+        dp = Product(F1, F2, R)
+        nprefix, na, nb, nres = 'times', 'p0', 'p1', 'product'
+
+        return add_binary(dp, nprefix, na, nb, nres)
+
 
     if isinstance(rvalue, Plus):
-        a = eval_rvalue(rvalue.a, context)
-        b = eval_rvalue(rvalue.b, context)
-        F1 = context.names[a.dp].get_rtype(a.s)
-        F2 = context.names[b.dp].get_rtype(b.s)
+        a, F1, b, F2 = eval_ops(rvalue)
         if not F1 == F2:
             msg = 'Incompatible units: %s and %s' % (F1, F2)
             raise DPSyntaxError(msg, where=rvalue.where)
-        # todo: create new signal names
-        ndp = dpwrap(Sum(F1), ['p0', 'p1'], 'sum')
 
-        name = context.new_name('sum')
-        c1 = Connection(dp1=a.dp, s1=a.s, dp2=name, s2='p0')
-        c2 = Connection(dp1=b.dp, s1=b.s, dp2=name, s2='p1')
-        context.add_ndp(name, ndp)
-        context.add_connection(c1)
-        context.add_connection(c2)
-        return Resource(name, 'sum')
+        dp = Sum(F1)
+        nprefix, na, nb, nres = 'add', 's0', 's1', 'sum'
+
+        # TODO: this will raise an exception
+        # nprefix, na, nb, nres = 'add', 'p0', 'p1', 'sum'
+
+        return add_binary(dp, nprefix, na, nb, nres)
+
+    if isinstance(rvalue, OpMax):
+        a, F1, b, F2 = eval_ops(rvalue)
+        if not F1 == F2:
+            msg = 'Incompatible units: %s and %s' % (F1, F2)
+            raise DPSyntaxError(msg, where=rvalue.where)
+
+        dp = Max(F1)
+        nprefix, na, nb, nres = 'opmax', 'm0', 'm1', 'max'
+
+        return add_binary(dp, nprefix, na, nb, nres)
+
+    if isinstance(rvalue, OpMin):
+        a, F1, b, F2 = eval_ops(rvalue)
+        if not F1 == F2:
+            msg = 'Incompatible units: %s and %s' % (F1, F2)
+            raise DPSyntaxError(msg, where=rvalue.where)
+
+        dp = Min(F1)
+        nprefix, na, nb, nres = 'opmin', 'm0', 'm1', 'min'
+
+        return add_binary(dp, nprefix, na, nb, nres)
 
     if isinstance(rvalue, NewFunction):
         if not rvalue.name in context.names:

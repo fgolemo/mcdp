@@ -1,6 +1,6 @@
 from comptests.registrar import comptest
 from mocdp.lang.syntax import (idn, load_expr, ow, parse_model, parse_wrap,
-    rvalue, simple_dp_model, funcname, code_spec)
+    rvalue, simple_dp_model, funcname, code_spec, max_expr, constraint_expr)
 from pyparsing import Literal
 
 @comptest
@@ -168,7 +168,64 @@ def check_lang7_addition():
         payload provided by actuation >= (battery_weight required by battery) + extra_payload
     }
     """
-    res = parse_model(s)
+    parse_model(s)
+
+
+@comptest
+def check_lang8_addition():
+    # x of b  == x required by b
+    s = """
+    cdp {
+        provides mission_time  (s)
+        provides extra_payload (g)
+        
+        battery = dp {
+            provides capacity (J)
+            requires weight   (g)
+            
+            implemented-by load BatteryDP
+        }
+        
+        actuation = dp {
+            provides payload (g)
+            requires power   (W)
+            
+            implemented-by code mocdp.example_battery.Mobility
+        }
+                
+        capacity provided by battery >= mission_time * (power required by actuation)    
+        payload provided by actuation >= (weight of battery) + extra_payload
+    }
+    """
+    parse_model(s)
+
+
+
+@comptest
+def check_lang9_max():
+
+
+    parse_wrap(max_expr, 'max(f, g)')
+    parse_wrap(rvalue, 'max(f, g)')
+    parse_wrap(constraint_expr, 'hnlin.x >= max(f, g)')
+
+
+
+    parse_model("""
+    cdp {
+        provides f (R)
+        
+        hnlin = dp {
+            provides x (R)
+            requires r (R)
+            
+            implemented-by load SimpleNonlinearity1
+        }
+        
+        hnlin.x >= max(f, hnlin.r)        
+    }
+    """)
+
 
 
 examples1 = [
