@@ -7,11 +7,12 @@ from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import SimpleWrap, dpwrap
 from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
 from mocdp.dp.dp_identity import Identity
-from mocdp.dp.dp_sum import Product
+from mocdp.dp.dp_sum import Product, Sum
 from mocdp.dp.primitive import PrimitiveDP
 from mocdp.lang.syntax import (DPSyntaxError, DPWrap, FunStatement, LoadDP,
     PDPCodeSpec, ResStatement)
 from mocdp.posets.rcomp import mult_table
+from mocdp.lang.parts import Plus
 
 class Context():
     def __init__(self):
@@ -21,7 +22,7 @@ class Context():
         self.newresources = {}
 
     def info(self, s):
-        # print(s)
+        print(s)
         pass
 
     def add_ndp(self, name, ndp):
@@ -31,6 +32,7 @@ class Context():
         self.names[name] = ndp
 
     def add_connection(self, c):
+        self.info('Adding connection %r' % str(c))
         if not c.dp1 in self.names:
             raise_desc(ValueError, 'Invalid connection: %r not found.' % c.dp1,
                        names=self.names, c=c)
@@ -126,8 +128,6 @@ def eval_pdp(r, context):
             
     raise ValueError('Invalid pdp rvalue: %s' % str(r))
 
-
-
 # @contract(returns=Resource)
 def eval_rvalue(rvalue, context):
     from .parts import Resource, Mult, NewFunction
@@ -152,6 +152,25 @@ def eval_rvalue(rvalue, context):
         context.add_connection(c1)
         context.add_connection(c2)
         return Resource(name, 'res')
+
+    if isinstance(rvalue, Plus):
+        a = eval_rvalue(rvalue.a, context)
+        b = eval_rvalue(rvalue.b, context)
+        F1 = context.names[a.dp].get_rtype(a.s)
+        F2 = context.names[b.dp].get_rtype(b.s)
+        if not F1 == F2:
+            msg = 'Incompatible units: %s and %s' % (F1, F2)
+            raise DPSyntaxError(msg, where=rvalue.where)
+        # todo: create new signal names
+        ndp = dpwrap(Sum(F1), ['p0', 'p1'], 'sum')
+
+        name = context.new_name('sum')
+        c1 = Connection(dp1=a.dp, s1=a.s, dp2=name, s2='p0')
+        c2 = Connection(dp1=b.dp, s1=b.s, dp2=name, s2='p1')
+        context.add_ndp(name, ndp)
+        context.add_connection(c1)
+        context.add_connection(c2)
+        return Resource(name, 'sum')
 
     if isinstance(rvalue, NewFunction):
         if not rvalue.name in context.names:

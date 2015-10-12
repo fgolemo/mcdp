@@ -1,11 +1,9 @@
-
-
 from .parts import (Constraint, FunStatement, LoadCommand, Mult, NewFunction,
     ResStatement, Resource, SetName)
-from collections import namedtuple
 from contracts import contract
 from contracts.interface import ContractSyntaxError, Where
 from mocdp.comp.interfaces import NamedDP
+from mocdp.lang.parts import DPWrap, LoadDP, PDPCodeSpec, Plus
 from mocdp.lang.utils import parse_action
 from mocdp.posets.rcomp import (R_Current, R_Energy, R_Power, R_Time, R_Voltage,
     R_Weight)
@@ -13,7 +11,6 @@ from pyparsing import (Combine, Forward, Group, LineEnd, LineStart, Literal,
     OneOrMore, Optional, ParseException, ParseFatalException, ParserElement,
     SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas, oneOf, opAssoc,
     operatorPrecedence)
-from mocdp.lang.parts import PDPCodeSpec, LoadDP, DPWrap
 
 ParserElement.enablePackrat()
 
@@ -131,14 +128,16 @@ dp_rvalue << (load_expr | simple_dp_model) ^ dp_model
 
 
 @parse_action
-def mult_parse_action(tokens):  # @UnusedVariable
+def mult_parse_action(tokens):
     t = tokens[0]
     assert t[1] == '*'
     return Mult(t[0], t[2])
 
 @parse_action
-def plus_parse_action(tokens):  # @UnusedVariable
-    assert False
+def plus_parse_action(tokens):
+    t = tokens[0]
+    assert t[1] == '+'
+    return Plus(t[0], t[2])
 
 rvalue << operatorPrecedence(operand, [
 #     ('-', 1, opAssoc.RIGHT, Unary.parse_action),

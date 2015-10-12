@@ -17,16 +17,26 @@ class SimpleWrap(NamedDP):
         _ , self.dp = get_conftools_dps().instance_smarter(dp)
 
         F = self.dp.get_fun_space()
+
         R = self.dp.get_res_space()
 
         try:
             # assume that dp has product spaces of given length
+
+            if isinstance(rnames, list):
+                if not len(set(rnames)) == len(rnames):
+                    raise ValueError('Repeated rnames.')
+            if isinstance(fnames, list):
+                if not len(set(fnames)) == len(fnames):
+                    raise ValueError('Repeated fnames.')
+
 
             if isinstance(F, PosetProduct):
                 if not isinstance(fnames, list) or not len(F) == len(fnames):
                     raise ValueError("F incompatible")
                 self.F_single = False
                 self.Fnames = fnames
+
             else:
                 if not isinstance(fnames, str):
                     raise ValueError("F and fnames incompatible: not a string")
@@ -38,6 +48,7 @@ class SimpleWrap(NamedDP):
                     raise ValueError("R incompatible")
                 self.R_single = False
                 self.Rnames = rnames
+
             else:
                 if not isinstance(rnames, str):
                     raise ValueError("R and rnames incompatible: want one string")
@@ -46,7 +57,8 @@ class SimpleWrap(NamedDP):
 
         except Exception as e:
             msg = 'Cannot wrap primitive DP.'
-            raise_wrapped(ValueError, e, msg, dp=self.dp, F=F, R=R, fnames=fnames, rnames=rnames)
+            raise_wrapped(ValueError, e, msg, dp=self.dp, F=F, R=R,
+                          fnames=fnames, rnames=rnames)
 
     def get_dp(self):
         return self.dp
@@ -126,52 +138,6 @@ class SimpleWrap(NamedDP):
         for r in self.get_rnames():
             s += '\n (%10s) %15s ' % (self.get_rtype(r), r)
         return s
-#
-#
-#
-# class LiftRToProduct(PrimitiveDP):
-#     """ Returns a new DP with ProductPoset of length 1 """
-#
-#     def __init__(self, dp):
-#         self.dp = dp
-#
-#         F0 = dp.get_fun_space()
-#         R0 = dp.get_res_space()
-#
-#         if isinstance(R0, PosetProduct):
-#             raise ValueError('R already product')
-#
-#         F = F0
-#         R = PosetProduct((R0,))
-#         PrimitiveDP.__init__(self, F=F, R=R)
-# #
-#
-# class LiftToProduct(PrimitiveDP):
-#     """ Returns a new DP with ProductPoset of length 1 """
-#
-#     def __init__(self, dp):
-#         self.dp = dp
-#
-#         F0 = dp.get_fun_space()
-#         R0 = dp.get_res_space()
-#
-#         if isinstance(F0, PosetProduct):
-#             raise ValueError('F already product')
-#         if isinstance(R0, PosetProduct):
-#             raise ValueError('R already product')
-#
-#         F = PosetProduct((F0,))
-#         R = PosetProduct((R0,))
-#         PrimitiveDP.__init__(self, F=F, R=R)
-#
-#
-#     @contract(returns=UpperSet)
-#     def solve(self, func):
-#         '''
-#             Given one func point,
-#             Returns an UpperSet
-#         '''
-#         raise NotImplementedError()
 
 
 @contract(dp=PrimitiveDP, returns=NamedDP, fnames='str|seq(str)', rnames='str|seq(str)')
