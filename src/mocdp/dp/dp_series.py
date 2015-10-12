@@ -7,23 +7,24 @@ from mocdp.dp.primitive import NormalForm
 from contracts.utils import raise_desc
 
 __all__ = [
-    'Series',
     'make_series',
+    'Series',
 ]
+
 
 def make_series(dp1, dp2):
     """ Creates a Series if needed.
-        Simplifies the identity """
+        Simplifies the identity and muxes """
     # first, check that the series would be created correctly
     from mocdp.dp.dp_identity import Identity
-    a = Series(dp1, dp2)
+    a = Series0(dp1, dp2)
     if isinstance(dp1, Identity):
         return dp2
     if isinstance(dp2, Identity):
         return dp1
     return a
 
-class Series(PrimitiveDP):
+class Series0(PrimitiveDP):
 
     def __init__(self, dp1, dp2):
         from mocdp import get_conftools_dps
@@ -137,4 +138,7 @@ class Series(PrimitiveDP):
                 return r_1, r_2
 
         return NormalForm(S, SeriesAlpha(self), SeriesBeta(self))
+
+
+Series = Series0
 

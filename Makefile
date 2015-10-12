@@ -12,5 +12,6 @@ comptests-run:
 	mkdir -p $(out)
 	comptests -o $(out) --contracts --nonose mocdp 
 
+
 clean:
 	rm -rf $(out)

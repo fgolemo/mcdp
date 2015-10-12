@@ -1,5 +1,5 @@
 from reprep import Report
-from mocdp.dp.dp_series import Series
+from mocdp.dp.dp_series import Series0
 from mocdp.dp.dp_parallel import Parallel
 from mocdp.dp.dp_loop import DPLoop, DPLoop0
 from .gg_utils import gg_figure
@@ -18,7 +18,7 @@ def report_dp1(dp):
 def gvgen_from_dp(dp0):
 
     def go(dp):
-        if isinstance(dp, Series):
+        if isinstance(dp, Series0):
             r = go_series(dp)
         elif isinstance(dp, Parallel):
             r = go_parallel(dp)

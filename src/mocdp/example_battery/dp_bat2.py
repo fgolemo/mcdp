@@ -2,7 +2,7 @@ from mocdp.dp.dp_flatten import Mux
 from mocdp.dp.dp_identity import Identity
 from mocdp.dp.dp_loop import DPLoop
 from mocdp.dp.dp_parallel import Parallel
-from mocdp.dp.dp_series import Series
+from mocdp.dp.dp_series import make_series
 from mocdp.dp.dp_sum import Product, Sum
 from mocdp.dp.primitive import PrimitiveDP
 from mocdp.posets.poset_product import PosetProduct
@@ -88,7 +88,7 @@ def series(l):
     if len(l) == 1:
         return l[0]
     else:
-        return Series(l[0], series(l[1:]))
+        return make_series(l[0], series(l[1:]))
 
 def battery_complete():
 
@@ -130,7 +130,7 @@ def battery_complete():
     from .dp_bat import BatteryDP
     battery = BatteryDP(energy_density=100.0)
 
-    dp7 = Parallel(Identity(R_Time), Series(e_from_tp, battery))
+    dp7 = Parallel(Identity(R_Time), make_series(e_from_tp, battery))
 
     series([dp4b, dp7])
 

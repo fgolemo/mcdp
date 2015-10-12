@@ -8,7 +8,7 @@ from mocdp.dp.dp_flatten import Mux
 from mocdp.dp.dp_identity import Identity
 from mocdp.dp.dp_loop import DPLoop, DPLoop0
 from mocdp.dp.dp_parallel import Parallel
-from mocdp.dp.dp_series import Series
+from mocdp.dp.dp_series import make_series
 from mocdp.posets.poset_product import PosetProduct
 from networkx.algorithms.components.connected import is_connected
 from networkx.algorithms.cycles import simple_cycles
@@ -153,13 +153,13 @@ def its_dp_as_product(ndp):
         F0 = dp.get_fun_space()
         F = PosetProduct((F0,))
         down = Mux(F, 0)
-        dp = Series(down, dp)
+        dp = make_series(down, dp)
 
     if len(ndp.get_rnames()) == 1:
         R0 = dp.get_res_space()
 #         R = PosetProduct((R0,))
         lift = Mux(R0, [()])
-        dp = Series(dp, lift)
+        dp = make_series(dp, lift)
 
     return dp
 
@@ -259,7 +259,7 @@ def connect2(ndp1, ndp2, connections, split):
         X = Parallel(ndp1_p, Id_D)
 
         # make sure we can connect
-        m1_X = Series(m1, X)
+        m1_X = make_series(m1, X)
         # print('m1_X = %s' % m1_X)
         # print('m1_X.R = %s' % m1_X.get_res_space()  )
         
@@ -291,7 +291,7 @@ def connect2(ndp1, ndp2, connections, split):
         
         assert len(m2.get_res_space()) == len(rntot), ((m2.get_res_space(), rntot))
         # make sure we can connect
-        Z_m2 = Series(Z, m2)
+        Z_m2 = make_series(Z, m2)
 
         #
         #  f0 -> |m1| -> | X | -> |Y |-> |Z| -> |m2| -> r0
@@ -341,9 +341,9 @@ def connect2(ndp1, ndp2, connections, split):
         Y_coords = [Y_coords_A_B1, Y_coords_B2_C2_D]
         Y = Mux(m1_X.get_res_space(), Y_coords)
 
-        m1_X_Y = Series(m1_X, Y)
-        _Y_Z_m2 = Series(Y, Z_m2)
-        res_dp = Series(m1_X_Y, Z_m2)
+        m1_X_Y = make_series(m1_X, Y)
+        _Y_Z_m2 = make_series(Y, Z_m2)
+        res_dp = make_series(m1_X_Y, Z_m2)
 
         fnames = fntot
         rnames = rntot
@@ -351,12 +351,12 @@ def connect2(ndp1, ndp2, connections, split):
         if len(fnames) == 1:
             fnames = fnames[0]
             funsp = res_dp.get_fun_space()
-            res_dp = Series(Mux(funsp[0], [()]), res_dp)
+            res_dp = make_series(Mux(funsp[0], [()]), res_dp)
 
         if len(rnames) == 1:
             rnames = rnames[0]
             ressp = res_dp.get_res_space()
-            res_dp = Series(res_dp, Mux(ressp, 0))
+            res_dp = make_series(res_dp, Mux(ressp, 0))
 
         # print('res_dp: %s' % res_dp)
         res = dpwrap(res_dp, fnames, rnames)
@@ -543,12 +543,12 @@ if False:
         coords = [coords_Blr, ndp.rindex(lr)]
         Y = Mux(R, coords)
 
-        Series(ndp.get_dp(), Y)
+        make_series(ndp.get_dp(), Y)
 
-        a = Series(X, ndp.get_dp())
+        a = make_series(X, ndp.get_dp())
 
         if Y is not None:
-            dp = Series(a, Y)
+            dp = make_series(a, Y)
         else:
             dp = a
         res_dp = DPLoop(dp)
@@ -557,11 +557,11 @@ if False:
         rnames = R0
         if len(fnames) == 1:
             funsp = res_dp.get_fun_space()
-            res_dp = Series(Mux(funsp[0], [()]), res_dp)
+            res_dp = make_series(Mux(funsp[0], [()]), res_dp)
             fnames = fnames[0]
         if len(rnames) == 1:
             ressp = res_dp.get_res_space()
-            res_dp = Series(res_dp, Mux(ressp, 0))
+            res_dp = make_series(res_dp, Mux(ressp, 0))
             rnames = rnames[0]
         res = dpwrap(res_dp, fnames, rnames)
 
@@ -610,19 +610,19 @@ def dploop0(ndp, lr, lf):
 
     X = Mux(F, coords)
     
-    res_dp = DPLoop0(Series(X, ndp.get_dp()))
+    res_dp = DPLoop0(make_series(X, ndp.get_dp()))
     rnames = ndp.get_rnames()
     fnames = A
 
     if len(fnames) == 1:
         funsp = res_dp.get_fun_space()
-        res_dp = Series(Mux(funsp[0], [()]), res_dp)
+        res_dp = make_series(Mux(funsp[0], [()]), res_dp)
         fnames = fnames[0]
 
     ressp = res_dp.get_res_space()
     if len(rnames) == 1:
         if isinstance(ressp, PosetProduct):
-            res_dp = Series(res_dp, Mux(ressp, 0))
+            res_dp = make_series(res_dp, Mux(ressp, 0))
             rnames = rnames[0]
         else:
             rnames = rnames[0]  # XXX
