@@ -288,8 +288,13 @@ def connect2(ndp1, ndp2, connections, split):
     #     print('res_dp', res_dp.get_fun_space())
         if len(fnames) == 1:
             fnames = fnames[0]
+            funsp = res_dp.get_fun_space()
+            res_dp = Series(Mux(funsp[0], [()]), res_dp)
         if len(rnames) == 1:
             rnames = rnames[0]
+            ressp = res_dp.get_res_space()
+            res_dp = Series(res_dp, Mux(ressp, 0))
+
         res = dpwrap(res_dp, fnames, rnames)
 
         return res
