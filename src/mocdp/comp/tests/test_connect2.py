@@ -95,3 +95,6 @@ def check_connect2_d():
     connections = set([Connection('-', 'r2', '-', 'F0')])
 
     res = connect2(ndp1, ndp2, connections, split=[])
+
+    assert_equal(res.get_fnames() , ['f0', 'f1', 'f2', 'F1'])
+    assert_equal(res.get_rnames() , ['r0', 'r1', 'R0', 'R1'])
