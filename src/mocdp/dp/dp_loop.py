@@ -419,7 +419,7 @@ class DPLoop0(PrimitiveDP):
             UR.belongs(res)
             return res
             
-        for _ in range(100):  # XXX
+        for i in range(100):  # XXX
             # now take the product of f1
             si = S[-1]
             sip = iterate(si)
@@ -433,6 +433,6 @@ class DPLoop0(PrimitiveDP):
             S.append(sip)
 
             if UR.leq(sip, si):
-                print('breaking because converged')
+                print('Breaking because converged (iteration %s)' % i)
                 break 
         return S[-1]

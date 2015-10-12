@@ -39,7 +39,7 @@ def check_compose():
     print('x fun: %s' % x.get_dp().get_fun_space())
     print('x res: %s' % x.get_dp().get_res_space())
 
-    y = dpconnect(dict(battery=battery, x=x),
+    _y = dpconnect(dict(battery=battery, x=x),
                ["battery.capacity >= x.energy"])
 
 

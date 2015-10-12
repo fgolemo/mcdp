@@ -40,7 +40,7 @@ class Poset(Space):
         msg = 'Top not available for %s.' % describe_value(self)
         raise NotBounded(msg)
 
-    def get_test_chain(self, n):
+    def get_test_chain(self, n):  # @UnusedVariable
         """
             Returns a test chain of length n
         """

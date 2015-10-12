@@ -8,6 +8,8 @@ from mocdp.comp.wrap import dpwrap
 from mocdp.posets.rcomp import Rcomp
 from mocdp.dp.dp_identity import Identity
 from contracts.utils import raise_desc, raise_wrapped
+from mocdp.comp.interfaces import NamedDP
+from contracts import contract
 
 
 ParserElement.enablePackrat()
@@ -30,7 +32,7 @@ dp_model = ZeroOrMore(ow + EOL) + DPStart + EOL + \
                    S(comment_line))
 
 
-def dp_model_parse_action(s, loc, tokens):
+def dp_model_parse_action(_s, _loc, tokens):
 
     lines = filter(None, [t.strip() for t in tokens])
 
@@ -107,6 +109,7 @@ def interpret_commands(res):
 def eval_rvalue(rvalue, context):
     from mocdp.lang.lines import Resource
     from mocdp.lang.lines import Mult
+    from mocdp.lang.lines import NewFunction
 
     if isinstance(rvalue, Resource):
         return rvalue
@@ -125,8 +128,6 @@ def eval_rvalue(rvalue, context):
         context.add_connection(c1)
         context.add_connection(c2)
         return Resource(name, 'res')
-
-    from mocdp.lang.lines import NewFunction
 
     if isinstance(rvalue, NewFunction):
         F = Rcomp()
@@ -149,6 +150,7 @@ def parse_wrap(expr, string):
         where = Where(string, line=e.lineno, column=e.col)
         raise DPSyntaxError(str(e), where=where)
 
+@contract(returns=NamedDP)
 def parse_model(string):
     res = parse_wrap(dp_model, string)[0]
-
+    return res

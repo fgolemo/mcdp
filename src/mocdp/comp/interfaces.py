@@ -1,9 +1,9 @@
 from contracts import contract
-from mocdp.dp.primitive import PrimitiveDP
-from contracts.utils import raise_wrapped
-from mocdp.posets.poset_product import PosetProduct
 from abc import ABCMeta, abstractmethod
 
+__all__ = [
+    'NamedDP',
+]
 
 class NamedDP():
     """ A DP with names """

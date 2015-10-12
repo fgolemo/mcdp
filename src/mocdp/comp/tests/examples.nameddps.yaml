@@ -105,3 +105,18 @@
   - fnames: weight
     rnames: actuation_power
     dp: ['mocdp.example_battery.Mobility', {}]
+
+- id: battery_complete_parsed
+  desc: ""
+  code: 
+  - mocdp.lang.parse
+  - string: |
+      dp:
+          battery = load battery
+          times = load energy_times
+          actuation = load mobility
+          #     
+          times.power >= actuation.actuation_power
+          battery.capacity >= times.energy
+          actuation.weight >= battery.battery_weight
+

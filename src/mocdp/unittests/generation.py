@@ -1,6 +1,5 @@
 from comptests import (comptests_for_all, comptests_for_all_dynamic,
-    comptests_for_all_pairs, comptests_for_all_pairs_dynamic, comptests_for_some,
-    comptests_for_some_pairs)
+    comptests_for_some)
 from comptests.registrar import comptests_for_some_dynamic
 from mocdp.configuration import (get_conftools_dps, get_conftools_nameddps,
     get_conftools_posets)
