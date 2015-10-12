@@ -64,4 +64,14 @@
   - F: Rcomp_J
 
 
+- id: "dp_${ndp}"
+  desc: "DP from namedDP"
+  code: 
+  - mocdp.comp.dp_from_ndp
+  - ndp: "${ndp}"
+
+
+- id: dp_testminsq
+
+- id: dp_testmax
 

@@ -1,8 +1,10 @@
 from contracts import contract
 from abc import ABCMeta, abstractmethod
+from mocdp.configuration import get_conftools_nameddps
 
 __all__ = [
     'NamedDP',
+    'dp_from_ndp',
 ]
 
 class NamedDP():
@@ -25,7 +27,11 @@ class NamedDP():
     
 
 
-
+def dp_from_ndp(ndp):
+    """ Unwrap """
+    _, ndp = get_conftools_nameddps().instance_smarter(ndp)
+    # unwrap
+    return ndp.get_dp()
 #
 # class DPBuilder():
 #     def get_required_params(self):

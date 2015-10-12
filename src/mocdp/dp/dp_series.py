@@ -8,7 +8,20 @@ from contracts.utils import raise_desc
 
 __all__ = [
     'Series',
+    'make_series',
 ]
+
+def make_series(dp1, dp2):
+    """ Creates a Series if needed.
+        Simplifies the identity """
+    # first, check that the series would be created correctly
+    from mocdp.dp.dp_identity import Identity
+    a = Series(dp1, dp2)
+    if isinstance(dp1, Identity):
+        return dp2
+    if isinstance(dp2, Identity):
+        return dp1
+    return a
 
 class Series(PrimitiveDP):
 

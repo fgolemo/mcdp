@@ -1,7 +1,7 @@
 from reprep import Report
 from mocdp.dp.dp_series import Series
 from mocdp.dp.dp_parallel import Parallel
-from mocdp.dp.dp_loop import DPLoop
+from mocdp.dp.dp_loop import DPLoop, DPLoop0
 from .gg_utils import gg_figure
 from mocdp.posets import PosetProduct
 
@@ -24,6 +24,8 @@ def gvgen_from_dp(dp0):
             r = go_parallel(dp)
         elif isinstance(dp, DPLoop):
             r = go_loop(dp)
+        elif isinstance(dp, DPLoop0):
+            r = go_loop0(dp)
         else:
             r = go_simple(dp)
 
@@ -100,6 +102,15 @@ def gvgen_from_dp(dp0):
 
         return (i, n1o)
         
+    def go_loop0(dp):
+        (n1i, n1o) = go(dp.dp1)
+
+        i = gg.newItem('|')
+        gg.newLink(i, n1i)
+        gg.newLink(n1o, i)
+
+        return (i, n1o)
+
 
     import gvgen  # @UnresolvedImport
     gg = gvgen.GvGen(options="rankdir=LR")

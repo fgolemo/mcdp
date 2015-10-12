@@ -216,12 +216,12 @@ def connect2(ndp1, ndp2, connections, split):
         A = list_diff(r1, B1 + C1)
         D = list_diff(f2, B2 + C2)
 
-        print('B1: %s' % B1)
-        print('B2: %s' % B2)
-        print('C2: %s' % C1)
-        print('C1: %s' % C1)
-        print(' A: %s' % A)
-        print(' D: %s' % D)
+        # print('B1: %s' % B1)
+        # print('B2: %s' % B2)
+        # print('C2: %s' % C1)
+        # print('C1: %s' % C1)
+        # print(' A: %s' % A)
+        # print(' D: %s' % D)
         fntot = f1 + D
         rntot = A + B1 + r2
 
@@ -231,10 +231,10 @@ def connect2(ndp1, ndp2, connections, split):
                                   list(ndp1.get_rtypes(B1)) +
                                   list(ndp2.get_rtypes(r2))))
 
-        print('Ftot: %s' % str(Ftot))
-        print('      %s' % str(fntot))
-        print('Rtot: %s' % str(Rtot))
-        print('      %s' % str(rntot))
+        # print('Ftot: %s' % str(Ftot))
+        # print('      %s' % str(fntot))
+        # print('Rtot: %s' % str(Rtot))
+        # print('      %s' % str(rntot))
         assert len(fntot) == len(Ftot)
         assert len(rntot) == len(Rtot)
 
@@ -248,8 +248,8 @@ def connect2(ndp1, ndp2, connections, split):
         m1coords = [m1_for_f1, m1_for_D]
         m1 = Mux(Ftot, m1coords)
 
-        print('m1: %s' % m1)
-        print('m1.R: %s' % m1.get_res_space())
+        # print('m1: %s' % m1)
+        # print('m1.R: %s' % m1.get_res_space())
 
         # Get Identity on D
         D_types = ndp2.get_ftypes(D)
@@ -260,8 +260,8 @@ def connect2(ndp1, ndp2, connections, split):
 
         # make sure we can connect
         m1_X = Series(m1, X)
-        print('m1_X = %s' % m1_X)
-        print('m1_X.R = %s' % m1_X.get_res_space()  )      
+        # print('m1_X = %s' % m1_X)
+        # print('m1_X.R = %s' % m1_X.get_res_space()  )
         
         
         def coords_cat(c1, m):
@@ -274,19 +274,19 @@ def connect2(ndp1, ndp2, connections, split):
         Id_A_B1 = Identity(A_B1_types)
         ndp2_p = its_dp_as_product(ndp2)
         Z = Parallel(Id_A_B1, ndp2_p)
-        print('Z.R = %s' % Z.get_res_space())
-        print('B1: %s' % B1)
-        print('R2: %s' % r2)
+        # print('Z.R = %s' % Z.get_res_space())
+        # print('B1: %s' % B1)
+        # print('R2: %s' % r2)
         m2coords_A = [(0, (A + B1).index(x)) for x in A]
         m2coords_B1 = [(0, (A + B1).index(x)) for x in B1]
         m2coords_r2 = [(1, r2.index(x)) for x in r2]
         m2coords = m2coords_A + m2coords_B1 + m2coords_r2
-        print('m2coords_A: %r' % m2coords_A)
-        print('m2coords_B1: %r' % m2coords_B1)
-        print('m2coords_r2: %r' % m2coords_r2)
-        print('m2coords: %r' % m2coords)
+        # print('m2coords_A: %r' % m2coords_A)
+        # print('m2coords_B1: %r' % m2coords_B1)
+        # print('m2coords_r2: %r' % m2coords_r2)
+        # print('m2coords: %r' % m2coords)
 
-        print('Z.R: %s' % Z.get_res_space())
+        # print('Z.R: %s' % Z.get_res_space())
         m2 = Mux(Z.get_res_space(), m2coords)
         
         assert len(m2.get_res_space()) == len(rntot), ((m2.get_res_space(), rntot))
@@ -336,8 +336,8 @@ def connect2(ndp1, ndp2, connections, split):
             else:
                 assert False
 
-        print ('Y_coords_A_B1: %s' % Y_coords_A_B1)
-        print ('Y_coords_B2_C2_D: %s' % Y_coords_B2_C2_D)
+        # print ('Y_coords_A_B1: %s' % Y_coords_A_B1)
+        # print ('Y_coords_B2_C2_D: %s' % Y_coords_B2_C2_D)
         Y_coords = [Y_coords_A_B1, Y_coords_B2_C2_D]
         Y = Mux(m1_X.get_res_space(), Y_coords)
 
@@ -358,7 +358,7 @@ def connect2(ndp1, ndp2, connections, split):
             ressp = res_dp.get_res_space()
             res_dp = Series(res_dp, Mux(ressp, 0))
 
-        print('res_dp: %s' % res_dp)
+        # print('res_dp: %s' % res_dp)
         res = dpwrap(res_dp, fnames, rnames)
 
         return res
