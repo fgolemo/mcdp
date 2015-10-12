@@ -1,17 +1,19 @@
 
-from .parts import Constraint, LoadCommand, Mult, NewFunction, Resource
-from contracts import contract
-from contracts.interface import ContractSyntaxError, Where, describe_value
-from mocdp.comp.interfaces import NamedDP
-from pyparsing import (Combine, Forward, LineEnd, LineStart, Literal,
-    ParseException, ParseFatalException, ParserElement, SkipTo, Suppress, Word,
-    ZeroOrMore, alphanums, alphas, oneOf, opAssoc, operatorPrecedence,
-    OneOrMore, Group, Optional)
-from mocdp.lang.parts import SetName
-from mocdp.lang.utils import parse_action
+
+from .parts import (Constraint, FunStatement, LoadCommand, Mult, NewFunction,
+    ResStatement, Resource, SetName)
 from collections import namedtuple
-
-
+from contracts import contract
+from contracts.interface import ContractSyntaxError, Where
+from mocdp.comp.interfaces import NamedDP
+from mocdp.lang.utils import parse_action
+from mocdp.posets.rcomp import (R_Current, R_Energy, R_Power, R_Time, R_Voltage,
+    R_Weight)
+from pyparsing import (Combine, Forward, Group, LineEnd, LineStart, Literal,
+    OneOrMore, Optional, ParseException, ParseFatalException, ParserElement,
+    SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas, oneOf, opAssoc,
+    operatorPrecedence)
+from mocdp.lang.parts import PDPCodeSpec, LoadDP, DPWrap
 
 ParserElement.enablePackrat()
 
@@ -23,10 +25,11 @@ L = Literal
 C = lambda x, b: x.setResultsName(b)
 def spa(x, b):
     @parse_action
-    def p(tokens):
-        return b(tokens)
+    def p(tokens, loc, s):
+        res = b(tokens)
+        res.where = Where(s, loc)
+        return res
     x.setParseAction(p)
-
 
 
 ow = S(ZeroOrMore(L(' ')))
@@ -36,6 +39,33 @@ line = SkipTo(LineEnd(), failOn=LineStart() + LineEnd())
 
 # identifier
 idn = Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))
+
+
+# Simple DPs being wrapped
+#
+# f name (unit)
+# f name (unit)
+# wraps name
+
+units = {
+    'J': R_Energy,
+    's': R_Time,
+    'A': R_Current,
+    'V': R_Voltage,
+    'g': R_Weight,
+    'W': R_Power,
+}
+unit_expr = oneOf(list(units))
+spa(unit_expr, lambda t: units[t[0]])
+
+unitst = S(L('(')) + C(unit_expr, 'unit') + S(L(')'))
+fun_statement = S(L('f')) ^ S(L('provides')) + C(idn, 'fname') + unitst
+spa(fun_statement, lambda t: FunStatement(t['fname'], t['unit']))
+
+res_statement = S(L('r')) ^ S(L('requires')) + C(idn, 'rname') + unitst
+spa(res_statement, lambda t: ResStatement(t['rname'], t['unit']))
+
+
 
 # load battery
 load_expr = S(L('load')) + C(idn, 'load_arg')
@@ -71,37 +101,17 @@ constraint_expr = (
                    S(L('>=')) + C(rvalue, 'rvalue')
                 )   
 
-line_expr = load_expr ^ constraint_expr ^ setname_expr
-
-
+line_expr = load_expr ^ constraint_expr ^ setname_expr ^ fun_statement ^ res_statement
 dp_statement = S(comment_line) ^ line_expr
 
 dp_model = S(L('cdp')) + S(L('{')) + OneOrMore(dp_statement) + S(L('}'))
 
 
-# Simple DPs being wrapped
-#
-# f name (unit)
-# f name (unit)
-# wraps name
-
-FunStatement = namedtuple('FunStatement', 'fname unit')
-ResStatement = namedtuple('ResStatement', 'rname unit')
-# ImplStatement = namedtuple('ImplStatement', 'name')
-LoadDP = namedtuple('LoadDP', 'name')
-DPWrap = namedtuple('DPWrap', 'fun res impl')
-PDPCodeSpec = namedtuple('PDPCodeSpec', 'function arguments')
 funcname = Combine(idn + ZeroOrMore(L('.') + idn))
 code_spec = S(L('code')) + C(funcname, 'function')
 spa(code_spec, lambda t: PDPCodeSpec(function=t['function'], arguments={}))
 
-unitst = S(L('(')) + C(idn, 'unit') + S(L(')'))
 
-fun_statement = S(L('f')) ^ S(L('provides')) + C(idn, 'fname') + unitst
-spa(fun_statement, lambda t: FunStatement(t['fname'], t['unit']))
-
-res_statement = S(L('r')) ^ S(L('requires')) + C(idn, 'rname') + unitst
-spa(res_statement, lambda t: ResStatement(t['rname'], t['unit']))
 
 load_pdp = S(L('load')) + C(idn, 'name')
 spa(load_pdp, lambda t: LoadDP(t['name']))

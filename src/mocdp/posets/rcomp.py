@@ -128,8 +128,38 @@ class RcompUnits(Rcomp):
 
         return True
 
+R_Time = RcompUnits('s')
+R_Power = RcompUnits('W')
+R_Energy = RcompUnits('J')
+R_Weight = RcompUnits('g')
+R_Current = RcompUnits('A')
+R_Voltage = RcompUnits('V')
+
+def mult_table(a, b):
+
+    options = {
+        (R_Time, R_Power): R_Energy,
 
 
+    }
+
+    def search_by_equality(x):
+        for k, v in options.items():
+            if k == x:
+                return v
+        return None
+
+
+    o1 = search_by_equality((a, b))
+    if o1 is not None:
+        return o1
+    o2 = search_by_equality((b, a))
+    if o2 is not None:
+        return o2
+
+
+    msg = 'Cannot find the product of %r with %r.' % (a, b)
+    raise ValueError(msg)
 
 
 

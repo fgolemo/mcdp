@@ -48,15 +48,16 @@ def check_lang3_times():
 
     data = """
 cdp {
+    provides mission_time (s)
+
     battery = load battery
     actuation = load mobility
      
     battery.capacity >= actuation.actuation_power * mission_time    
     actuation.weight >= battery.battery_weight
-    }
+}
     """
     parse_model(data)
-
 
 
 @comptest
@@ -85,6 +86,8 @@ def check_lang5_composition():
 
     s = """
     cdp {
+        provides mission_time (s)
+    
         battery = dp {
             provides capacity (J)
             requires battery_weight (g)
@@ -113,10 +116,11 @@ def check_lang6_composition():
     parse_wrap(funcname, 'mocdp.example_battery.Mobility')
     parse_wrap(code_spec, 'code mocdp.example_battery.Mobility')
 
-        # requires mission_time (s)
+
         # provides energy (T)
     s = """
     cdp {
+        provides mission_time (s)
         
         battery = dp {
             provides capacity (J)
@@ -203,10 +207,6 @@ my-robot
 
 
 ]
-
-
-def f():
-    pass
 
 
 

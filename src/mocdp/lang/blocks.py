@@ -1,23 +1,31 @@
 from .parts import Constraint, LoadCommand, SetName
-from contracts import describe_value, contract
+from conf_tools.code_specs import instantiate_spec
+from contracts import contract, describe_value
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.comp.connection import Connection
-from mocdp.comp.wrap import dpwrap, SimpleWrap
-from mocdp.configuration import get_conftools_nameddps, get_conftools_dps
+from mocdp.comp.interfaces import NamedDP
+from mocdp.comp.wrap import SimpleWrap, dpwrap
+from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
 from mocdp.dp.dp_identity import Identity
 from mocdp.dp.dp_sum import Product
-from mocdp.posets.rcomp import Rcomp
-from mocdp.lang.syntax import DPWrap, LoadDP, PDPCodeSpec
-from mocdp.comp.interfaces import NamedDP
 from mocdp.dp.primitive import PrimitiveDP
-from conf_tools.code_specs import instantiate_spec
+from mocdp.lang.syntax import (DPSyntaxError, DPWrap, FunStatement, LoadDP,
+    PDPCodeSpec, ResStatement)
+from mocdp.posets.rcomp import mult_table
 
 class Context():
     def __init__(self):
         self.names = {}
         self.connections = []
+        self.newfunctions = {}
+        self.newresources = {}
+
+    def info(self, s):
+        # print(s)
+        pass
 
     def add_ndp(self, name, ndp):
+        self.info('Adding name %r = %r' % (name, ndp))
         if name in self.names:
             raise ValueError('Already know %r' % name)
         self.names[name] = ndp
@@ -61,6 +69,15 @@ def interpret_commands(res):
             ndp = eval_dp_rvalue(r.dp_rvalue, context)
             context.add_ndp(name, ndp)
 
+        elif isinstance(r, ResStatement):
+            print('ignoring %r' % str(r))
+            pass
+
+        elif isinstance(r, FunStatement):
+            F = r.unit
+            ndp = dpwrap(Identity(F), r.fname, 'a')
+            context.add_ndp(r.fname, ndp)
+
         else:
             raise ValueError('Cannot interpret %s' % describe_value(r))
 
@@ -102,12 +119,13 @@ def eval_pdp(r, context):
         return dp
 
     if isinstance(r, PDPCodeSpec):
-        function  = r.function
-        arguments  = r.arguments
+        function = r.function
+        arguments = r.arguments
         res = instantiate_spec([function, arguments])
         return res
             
     raise ValueError('Invalid pdp rvalue: %s' % str(r))
+
 
 
 # @contract(returns=Resource)
@@ -115,14 +133,17 @@ def eval_rvalue(rvalue, context):
     from .parts import Resource, Mult, NewFunction
 
     if isinstance(rvalue, Resource):
+        if not rvalue.dp in context.names:
+            msg = 'Unknown dp (%r.%r)' % (rvalue.dp, rvalue.s)
+            raise DPSyntaxError(msg, where=rvalue.where)
         return rvalue
 
     if isinstance(rvalue, Mult):
         a = eval_rvalue(rvalue.a, context)
         b = eval_rvalue(rvalue.b, context)
-        F1 = Rcomp()
-        F2 = Rcomp()
-        R = Rcomp()
+        F1 = context.names[a.dp].get_rtype(a.s)
+        F2 = context.names[b.dp].get_rtype(b.s)
+        R = mult_table(F1, F2)
         ndp = dpwrap(Product(F1, F2, R), ['a', 'b'], 'res')
         name = context.new_name('mult')
         c1 = Connection(dp1=a.dp, s1=a.s, dp2=name, s2='a')
@@ -133,11 +154,11 @@ def eval_rvalue(rvalue, context):
         return Resource(name, 'res')
 
     if isinstance(rvalue, NewFunction):
-        F = Rcomp()
-        ndp = dpwrap(Identity(F), rvalue.name, 'a')
-        name = context.new_name('id')
-        context.add_ndp(name, ndp)
-        return Resource(name, 'a')
+        if not rvalue.name in context.names:
+            msg = 'New function name %r not declared.' % rvalue.name
+            msg += '\n known names: %s' % list(context.names)
+            raise DPSyntaxError(msg, where=rvalue.where)
+        return Resource(rvalue.name, 'a')
 
     raise ValueError(rvalue)
 

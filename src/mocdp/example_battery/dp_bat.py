@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from . import R_Energy, R_Time, R_Weight
 from contracts import contract
 from mocdp.dp import PrimitiveDP
 from mocdp.posets import PosetProduct, Rcomp
 import numpy as np
+from mocdp.posets.rcomp import R_Energy, R_Weight, R_Time
 
 
 class BatteryDP(PrimitiveDP):
