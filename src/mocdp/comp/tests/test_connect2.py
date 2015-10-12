@@ -88,7 +88,6 @@ def check_connect2_d():
     #  f2 -> |  | -r2:F0-> | c2 | -> R0
     #  F1----------------> |    | -> R1
     
-    
     ndp1 = get_dummy(['f0', 'f1', 'f2'], ['r0', 'r1', 'r2'])
     ndp2 = get_dummy(['F0', 'F1'], ['R0', 'R1'])
     
