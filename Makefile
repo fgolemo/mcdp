@@ -6,7 +6,7 @@ out=out/comptests
 
 comptests:
 	mkdir -p $(out)
-	comptests -o $(out) --contracts --console mocdp
+	comptests -o $(out) --contracts --nonose --console mocdp
 
 comptests-run:
 	mkdir -p $(out)

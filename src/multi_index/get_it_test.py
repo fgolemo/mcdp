@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 from contracts.utils import raise_desc, raise_wrapped
 from multi_index import get_it
 
@@ -35,17 +37,24 @@ cases = [
   (A, [0, (1, 1)], ['a', 'c']),
 ]
 
-def compose_indices(A, i1, i2):
+def compose_indices(A, i1, i2, reducel):
+    print('A: %s ' % str(A))
+    print('i1: %s ' % str(i1))
+    print('i2: %s ' % str(i2))
+
     i0 = get_id_indices(A)
-    i0i1 = get_it(i0, i1, list)
-    i0i1i2 = get_it(i0i1, i2, list)
+    print('i0: %s' % str(i0))
+    i0i1 = get_it(i0, i1, reducel)
+    print('i0i1: %s' % str(i0i1))
+    i0i1i2 = get_it(i0i1, i2, reducel)
+    print('i0i1i2: %s' % str(i0i1i2))
     return i0i1i2
 
-def check_associativity(A, i1, i2):
-    G = lambda x, i: get_it(x, i, list)
+def check_associativity(A, i1, i2, reducel):
+    G = lambda x, i: get_it(x, i, reducel)
     Ai1 = G(A, i1)
     r1 = G(Ai1, i2)
-    i1i2 = compose_indices(A, i1, i2)
+    i1i2 = compose_indices(A, i1, i2, reducel)
     r2 = G(A, i1i2)
 
     if r1 != r2:
@@ -60,7 +69,7 @@ def test_compositions():
     ]
 
     for X, i1, i2 in ccases:
-        yield check_associativity, X, i1, i2
+        yield check_associativity, X, i1, i2, list
 
 def get_id_indices(x, prefix=None):
     if prefix is None:
@@ -130,8 +139,11 @@ def check_get_id_indices(a, res):
 
 
     
-    
-    
-    
+#  Mux(R → (R×), [()])
+#  Mux((R×) → R, 0)
+
+# i0 = ()
+# i0i1 = [()]
+# i0i1i2 = ()
 
 

@@ -4,7 +4,7 @@ from mocdp.posets.uppersets import UpperSets
 from mocdp.posets.poset_product import PosetProduct
 from mocdp.posets.space import Map
 from mocdp.dp.primitive import NormalForm
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, raise_wrapped
 
 __all__ = [
     'make_series',
@@ -22,7 +22,38 @@ def make_series(dp1, dp2):
         return dp2
     if isinstance(dp2, Identity):
         return dp1
+
+    from mocdp.dp.dp_flatten import Mux
+    if isinstance(dp1, Mux) and isinstance(dp2, Mux):
+        return mux_composition(dp1, dp2)
     return a
+
+def mux_composition(dp1, dp2):
+    try:
+        dp0 = Series(dp1, dp2)
+        from mocdp.dp.dp_flatten import Mux
+        assert isinstance(dp1, Mux)
+        assert isinstance(dp2, Mux)
+        F = dp1.get_fun_space()
+    #     assert isinstance(F, PosetProduct),
+
+        c1 = dp1.coords
+        c2 = dp2.coords
+        from multi_index.get_it_test import compose_indices
+        coords = compose_indices(F, c1, c2, list)
+        res = Mux(F, coords)
+
+        print('res: %s' % str(res))
+
+        assert res.get_res_space() == dp0.get_res_space()
+
+        return res
+    except Exception as e:
+        msg = 'Cannot create shortcut.'
+        raise_wrapped(Exception , e , msg, dp1=dp1, dp2=dp2,)
+
+
+
 
 class Series0(PrimitiveDP):
 

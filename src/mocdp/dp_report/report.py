@@ -4,6 +4,7 @@ from mocdp.dp.dp_parallel import Parallel
 from mocdp.dp.dp_loop import DPLoop, DPLoop0
 from .gg_utils import gg_figure
 from mocdp.posets import PosetProduct
+from mocdp.dp.dp_flatten import Mux
 
 
 def report_dp1(dp):
@@ -44,6 +45,8 @@ def gvgen_from_dp(dp0):
             
     def go_simple(dp):
         label = type(dp).__name__
+        if isinstance(dp, Mux):
+            label = 'Mux\n%s' % dp.coords
         n = gg.newItem(label)
 #
 #         {'color': 'blue', 'shape': 'box', 'style': 'rounded',
