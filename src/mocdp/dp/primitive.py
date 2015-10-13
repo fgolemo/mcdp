@@ -107,6 +107,8 @@ class PrimitiveDP(WithInternalLog):
     def __repr__(self):
         return '%s(%s→%s)' % (type(self).__name__, self.F, self.R)
 
+    def repr_long(self):
+        return self.__repr__()
 
 NormalForm = namedtuple('NormalForm', ['S', 'alpha', 'beta'])
 

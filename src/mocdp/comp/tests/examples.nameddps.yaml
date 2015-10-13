@@ -180,3 +180,48 @@
         DP.f >= max(f0, DP.r)
       }
 
+- id: testminsq_2
+  desc: "Equivalent, just switching the order of arguments to max"
+  code: 
+  - mocdp.lang.parse
+  - string: |
+      cdp {
+        provides f0 [R]
+        DP = cdp {
+            provides f [R]
+            
+            hnlin = dp {
+                provides x [R]
+                requires r [R]
+                
+                implemented-by load SimpleNonlinearity1
+            }
+            
+            hnlin.x >= min(f, hnlin.r)        
+        }
+        DP.f >= max(DP.r, f0)
+      }
+
+
+- id: testminsq_3
+  desc: "Equivalent, just switching the order of arguments to max"
+  code: 
+  - mocdp.lang.parse
+  - string: |
+      cdp {
+        provides f0 [R]
+        DP = cdp {
+            provides f [R]
+            
+            hnlin = dp {
+                provides x [R]
+                requires r [R]
+                
+                implemented-by load SimpleNonlinearity1
+            }
+            
+            hnlin.x >= min(hnlin.r, f)        
+        }
+        DP.f >= max(DP.r, f0)
+      }
+

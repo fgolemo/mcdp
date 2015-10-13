@@ -4,8 +4,9 @@ from mocdp.posets.uppersets import UpperSets
 from mocdp.posets.poset_product import PosetProduct
 from mocdp.posets.space import Map
 from mocdp.dp.primitive import NormalForm
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, indent
 from multi_index.imp import simplify_indices
+
 
 
 
@@ -15,8 +16,8 @@ __all__ = [
 ]
 
 def equiv_to_identity(dp):
-    from blocks.library.simple.identity import Identity
     from mocdp.dp.dp_flatten import Mux
+    from mocdp.dp.dp_identity import Identity
     if isinstance(dp, Identity):
         return True
     if isinstance(dp, Mux):
@@ -32,16 +33,14 @@ def make_series(dp1, dp2):
     from mocdp.dp.dp_flatten import Mux
     # first, check that the series would be created correctly
     from mocdp.dp.dp_identity import Identity
-    a = Series0(dp1, dp2)
-    if isinstance(dp1, Identity):
-        return dp2
-
 
     if equiv_to_identity(dp1):
         return dp2
 
     if equiv_to_identity(dp2):
         return dp1
+
+    a = Series0(dp1, dp2)
 
     if isinstance(dp1, Mux) and isinstance(dp2, Mux):
         return mux_composition(dp1, dp2)
@@ -148,6 +147,8 @@ class Series0(PrimitiveDP):
         _, self.dp1 = library.instance_smarter(dp1)
         _, self.dp2 = library.instance_smarter(dp2)
 
+        if equiv_to_identity(self.dp1) or equiv_to_identity(self.dp2):
+            raise ValueError('should not happen series\n- %s\n -%s' % (self.dp1, self.dp2))
 
         R1 = self.dp1.get_res_space()
         F2 = self.dp2.get_fun_space()
@@ -155,7 +156,6 @@ class Series0(PrimitiveDP):
         if not R1 == F2:
             msg = 'Cannot connect different spaces.'
             raise_desc(ValueError, msg, dp1=dp1, dp2=dp2, R1=R1, F2=F2)
-
 
         F1 = self.dp1.get_fun_space()
         R2 = self.dp2.get_res_space()
@@ -194,6 +194,13 @@ class Series0(PrimitiveDP):
 
     def __repr__(self):
         return 'Series(%r, %r)' % (self.dp1, self.dp2)
+    def repr_long(self):
+        r1 = self.dp1.repr_long()
+        r2 = self.dp2.repr_long()
+        s = 'Series:'
+        s += '\n' + indent(r1, 'S1 ')
+        s += '\n' + indent(r2, 'S2 ')
+        return s
 
     def get_normal_form(self):
         """

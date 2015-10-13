@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
-from contracts.utils import check_isinstance, raise_desc, raise_wrapped
+from contracts.utils import check_isinstance, raise_desc, raise_wrapped, indent
 from mocdp.posets import (Map, NotLeq, PosetProduct, UpperSet, UpperSets,
     poset_minima)
 import itertools
@@ -393,7 +393,9 @@ class DPLoop0(PrimitiveDP):
 
     def __repr__(self):
         return 'DPLoop0(%s)' % self.dp1
-
+    def repr_long(self):
+        s = 'DPLoop0:\n'
+        return s + indent(self.dp1.repr_long(), 'L ')
     def solve(self, f1):
         F = self.dp1.get_fun_space()
         F1 = F[0]

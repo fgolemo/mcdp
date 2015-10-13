@@ -2,6 +2,7 @@
 from .primitive import PrimitiveDP
 from mocdp.posets import PosetProduct
 import itertools
+from contracts.utils import indent
 
 __all__ = [
     'Parallel',
@@ -78,4 +79,10 @@ class Parallel(PrimitiveDP):
     def __repr__(self):
         return 'Parallel(%r, %r)' % (self.dp1, self.dp2)
 
-
+    def repr_long(self):
+        r1 = self.dp1.repr_long()
+        r2 = self.dp2.repr_long()
+        s = 'Parallel:'
+        s += '\n' + indent(r1, 'P1 ')
+        s += '\n' + indent(r2, 'P2 ')
+        return s

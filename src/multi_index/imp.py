@@ -54,8 +54,9 @@ def simplify_indices(x):
         return ()
     if x == [0, 1]:
         return ()
-#     if x == [0, (1,)]:
-#         return ()
+    # TODO: do it general
+    if x == [0, (1,)]:
+        return ()
     if x == [0, 1, 2]:
         return ()
     return x

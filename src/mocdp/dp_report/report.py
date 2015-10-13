@@ -13,6 +13,7 @@ def report_dp1(dp):
     gg = gvgen_from_dp(dp)    
     gg_figure(r, 'graph', gg)
 
+    r.text('long', dp.repr_long())
     return r
 
 
