@@ -12,7 +12,7 @@ from mocdp.dp.primitive import PrimitiveDP
 from mocdp.lang.syntax import (DPSyntaxError, DPWrap, FunStatement, LoadDP,
     PDPCodeSpec, ResStatement)
 from mocdp.posets.rcomp import mult_table
-from mocdp.lang.parts import Plus, OpMax, OpMin
+from mocdp.lang.parts import Plus, OpMax, OpMin, Function, NewResource
 from mocdp.dp.dp_max import Max, Min
 
 class Context():
@@ -64,7 +64,8 @@ def interpret_commands(res):
 
         elif isinstance(r, Constraint):
             resource = eval_rvalue(r.rvalue, context)
-            c = Connection(dp1=resource.dp, s1=resource.s, dp2=r.dp2, s2=r.s2)
+            function = eval_lfunction(r.function, context)
+            c = Connection(dp1=resource.dp, s1=resource.s, dp2=function.dp, s2=function.s)
             context.add_connection(c)
             
         elif isinstance(r, SetName):
@@ -73,8 +74,9 @@ def interpret_commands(res):
             context.add_ndp(name, ndp)
 
         elif isinstance(r, ResStatement):
-            print('ignoring %r' % str(r))
-            pass
+            F = r.unit
+            ndp = dpwrap(Identity(F), 'a', r.rname)
+            context.add_ndp(r.rname, ndp)
 
         elif isinstance(r, FunStatement):
             F = r.unit
@@ -133,6 +135,23 @@ def eval_pdp(r, context):
             
     raise ValueError('Invalid pdp rvalue: %s' % str(r))
 
+@contract(returns=Function)
+def eval_lfunction(lf, context):
+    if isinstance(lf, Function):
+        if not lf.dp in context.names:
+            msg = 'Unknown dp (%r.%r)' % (lf.dp, lf.s)
+            raise DPSyntaxError(msg, where=lf.where)
+        return lf
+    if isinstance(lf, NewResource):
+        if not lf.name in context.names:
+            msg = 'New resource name %r not declared.' % lf.name
+            msg += '\n known names: %s' % list(context.names)
+            raise DPSyntaxError(msg, where=lf.where)
+
+        return Function(lf.name, context.names[lf.name].get_fnames()[0])
+
+    raise ValueError(lf)
+
 # @contract(returns=Resource)
 def eval_rvalue(rvalue, context):
     from .parts import Resource, Mult, NewFunction
@@ -187,7 +206,7 @@ def eval_rvalue(rvalue, context):
 
     if isinstance(rvalue, OpMax):
         a, F1, b, F2 = eval_ops(rvalue)
-        if not F1 == F2:
+        if not (F1 == F2):
             msg = 'Incompatible units: %s and %s' % (F1, F2)
             raise DPSyntaxError(msg, where=rvalue.where)
 
@@ -198,7 +217,7 @@ def eval_rvalue(rvalue, context):
 
     if isinstance(rvalue, OpMin):
         a, F1, b, F2 = eval_ops(rvalue)
-        if not F1 == F2:
+        if not (F1 == F2):
             msg = 'Incompatible units: %s and %s' % (F1, F2)
             raise DPSyntaxError(msg, where=rvalue.where)
 
@@ -208,11 +227,13 @@ def eval_rvalue(rvalue, context):
         return add_binary(dp, nprefix, na, nb, nres)
 
     if isinstance(rvalue, NewFunction):
-        if not rvalue.name in context.names:
-            msg = 'New function name %r not declared.' % rvalue.name
+        n = rvalue.name
+        if not n in context.names:
+            msg = 'New function name %r not declared.' % n
             msg += '\n known names: %s' % list(context.names)
             raise DPSyntaxError(msg, where=rvalue.where)
-        return Resource(rvalue.name, 'a')
+        s = context.names[n].get_rnames()[0]
+        return Resource(n, s)
 
     raise ValueError(rvalue)
 

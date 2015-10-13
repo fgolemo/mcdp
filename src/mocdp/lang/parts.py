@@ -16,8 +16,11 @@ Plus = namedtuplewhere('Plus', 'a b')
 OpMax = namedtuplewhere('Max', 'a b')
 OpMin = namedtuplewhere('Min', 'a b')
 Resource = namedtuplewhere('Resource', 'dp s')
+Function = namedtuplewhere('Function', 'dp s')
+
 NewFunction = namedtuplewhere('NewFunction', 'name')
-Constraint = namedtuplewhere('Constraint', 'dp2 s2 rvalue')
+NewResource = namedtuplewhere('NewResource', 'name')
+Constraint = namedtuplewhere('Constraint', 'function rvalue')
 
 LoadCommand = namedtuplewhere('LoadCommand', 'load_arg')
 SetName = namedtuplewhere('SetName', 'name dp_rvalue')

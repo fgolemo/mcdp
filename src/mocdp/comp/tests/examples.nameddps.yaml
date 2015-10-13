@@ -128,11 +128,11 @@
   - mocdp.lang.parse
   - string: |
       cdp {
-          provides f (R)
+          provides f [R]
           
           hnlin = dp {
-              provides x (R)
-              requires r (R)
+              provides x [R]
+              requires r [R]
               
               implemented-by load SimpleNonlinearity1
           }
@@ -146,11 +146,11 @@
   - mocdp.lang.parse
   - string: |
       cdp {
-          provides f (R)
+          provides f [R]
           
           hnlin = dp {
-              provides x (R)
-              requires r (R)
+              provides x [R]
+              requires r [R]
               
               implemented-by load SimpleNonlinearity1
           }
@@ -164,13 +164,13 @@
   - mocdp.lang.parse
   - string: |
       cdp {
-        provides f0 (R)
+        provides f0 [R]
         DP = cdp {
-            provides f (R)
+            provides f [R]
             
             hnlin = dp {
-                provides x (R)
-                requires r (R)
+                provides x [R]
+                requires r [R]
                 
                 implemented-by load SimpleNonlinearity1
             }

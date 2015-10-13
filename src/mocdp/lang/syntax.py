@@ -3,7 +3,8 @@ from .parts import (Constraint, FunStatement, LoadCommand, Mult, NewFunction,
 from contracts import contract
 from contracts.interface import ContractSyntaxError, Where
 from mocdp.comp.interfaces import NamedDP
-from mocdp.lang.parts import DPWrap, LoadDP, PDPCodeSpec, Plus, OpMax, OpMin
+from mocdp.lang.parts import DPWrap, LoadDP, PDPCodeSpec, Plus, OpMax, OpMin, \
+    Function, NewResource
 from mocdp.lang.utils import parse_action
 from mocdp.posets.rcomp import (R_Current, R_Energy, R_Power, R_Time, R_Voltage,
     R_Weight, Rcomp)
@@ -56,7 +57,7 @@ units = {
 unit_expr = oneOf(list(units))
 spa(unit_expr, lambda t: units[t[0]])
 
-unitst = S(L('(')) + C(unit_expr, 'unit') + S(L(')'))
+unitst = S(L('[')) + C(unit_expr, 'unit') + S(L(']'))
 fun_statement = S(L('f')) ^ S(L('provides')) + C(idn, 'fname') + unitst
 spa(fun_statement, lambda t: FunStatement(t['fname'], t['unit']))
 
@@ -85,6 +86,10 @@ spa(rvalue_resource, lambda t: Resource(t['dp'], t['s']))
 rvalue_new_function = C(idn, 'new_function')
 spa(rvalue_new_function, lambda t: NewFunction(t['new_function']))
 
+lf_new_resource = C(idn, 'new_resource')
+spa(lf_new_resource, lambda t: NewResource(t['new_resource']))
+
+
 binary = {
     'max': OpMax,
     'min': OpMin,
@@ -106,15 +111,22 @@ comment_line = ow + Literal('#') + line + S(EOL)
 
 simple = (C(idn, 'dp2') + S(L('.')) + C(idn, 's2'))
 fancy = (C(idn, 's2') + S(L('provided')) + S(L('by')) + C(idn, 'dp2'))
-signal_rvalue = simple | fancy | (S(L('(')) + (simple | fancy) + S(L(')')))
 
-constraint_expr = (
-                signal_rvalue
-                   +                 
-                   S(L('>=')) + C(rvalue, 'rvalue')
-                )   
+spa(simple, lambda t: Function(t['dp2'], t['s2']))
+spa(fancy, lambda t: Function(t['dp2'], t['s2']))
 
-line_expr = load_expr ^ constraint_expr ^ setname_expr ^ fun_statement ^ res_statement
+signal_rvalue = simple | fancy | lf_new_resource | (S(L('(')) + (simple | fancy | lf_new_resource) + S(L(')')))
+
+GEQ = S(L('>=')) 
+LEQ = S(L('<='))
+
+constraint_expr = C(signal_rvalue, 'lf') + GEQ + C(rvalue, 'rvalue')
+spa(constraint_expr, lambda t: Constraint(t['lf'], t['rvalue']))
+
+constraint_expr2 = C(rvalue, 'rvalue') + LEQ + C(signal_rvalue, 'lf')
+spa(constraint_expr2, lambda t: Constraint(t['lf'], t['rvalue']))
+
+line_expr = load_expr ^ constraint_expr ^ constraint_expr2 ^ setname_expr ^ fun_statement ^ res_statement
 dp_statement = S(comment_line) ^ line_expr
 
 dp_model = S(L('cdp')) + S(L('{')) + OneOrMore(dp_statement) + S(L('}'))
@@ -164,7 +176,7 @@ rvalue << operatorPrecedence(operand, [
 ])
 
 
-spa(constraint_expr, lambda t: Constraint(t['dp2'], t['s2'], t['rvalue']))
+
 
 
 class DPSyntaxError(ContractSyntaxError):

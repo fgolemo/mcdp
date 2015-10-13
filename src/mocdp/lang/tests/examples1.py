@@ -48,7 +48,7 @@ def check_lang3_times():
 
     data = """
 cdp {
-    provides mission_time (s)
+    provides mission_time [s]
 
     battery = load battery
     actuation = load mobility
@@ -66,9 +66,9 @@ def check_lang4_composition():
 
     s = """
 dp {
-    provides current (A)
-    provides capacity (J)
-    requires weight (g)
+    provides current [A]
+    provides capacity [J]
+    requires weight [g]
     
     implemented-by load times
 }
@@ -86,18 +86,18 @@ def check_lang5_composition():
 
     s = """
     cdp {
-        provides mission_time (s)
+        provides mission_time [s]
     
         battery = dp {
-            provides capacity (J)
-            requires battery_weight (g)
+            provides capacity [J]
+            requires battery_weight [g]
             
             implemented-by load BatteryDP
         }
         
         actuation = dp {
-            provides weight (g)
-            requires actuation_power (W)
+            provides weight [g]
+            requires actuation_power [W]
             
             implemented-by code mocdp.example_battery.Mobility
         }
@@ -120,18 +120,18 @@ def check_lang6_composition():
         # provides energy (T)
     s = """
     cdp {
-        provides mission_time (s)
+        provides mission_time [s]
         
         battery = dp {
-            provides capacity (J)
-            requires battery_weight (g)
+            provides capacity [J]
+            requires battery_weight [g]
             
             implemented-by load BatteryDP
         }
         
         actuation = dp {
-            provides payload (g)
-            requires actuation_power (W)
+            provides payload [g]
+            requires actuation_power [W]
             
             implemented-by code mocdp.example_battery.Mobility
         }
@@ -147,19 +147,19 @@ def check_lang6_composition():
 def check_lang7_addition():
     s = """
     cdp {
-        provides mission_time (s)
-        provides extra_payload (g)
+        provides mission_time [s]
+        provides extra_payload [g]
         
         battery = dp {
-            provides capacity (J)
-            requires battery_weight (g)
+            provides capacity [J]
+            requires battery_weight [g]
             
             implemented-by load BatteryDP
         }
         
         actuation = dp {
-            provides payload (g)
-            requires actuation_power (W)
+            provides payload [g]
+            requires actuation_power [W]
             
             implemented-by code mocdp.example_battery.Mobility
         }
@@ -176,19 +176,19 @@ def check_lang8_addition():
     # x of b  == x required by b
     s = """
     cdp {
-        provides mission_time  (s)
-        provides extra_payload (g)
+        provides mission_time  [s]
+        provides extra_payload [g]
         
         battery = dp {
-            provides capacity (J)
-            requires weight   (g)
+            provides capacity [J]
+            requires weight   [g]
             
             implemented-by load BatteryDP
         }
         
         actuation = dp {
-            provides payload (g)
-            requires power   (W)
+            provides payload [g]
+            requires power   [W]
             
             implemented-by code mocdp.example_battery.Mobility
         }
@@ -211,11 +211,11 @@ def check_lang9_max():
 
     parse_model("""
     cdp {
-        provides f (R)
+        provides f [R]
         
         hnlin = dp {
-            provides x (R)
-            requires r (R)
+            provides x [R]
+            requires r [R]
             
             implemented-by load SimpleNonlinearity1
         }
@@ -230,11 +230,11 @@ def check_lang9_max():
 def check_lang10_comments():
     parse_model("""
     cdp {
-        provides f (R)
+        provides f [R]
         
         hnlin = dp {
-            provides x (R)
-            requires r (R)
+            provides x [R]
+            requires r [R]
             
             implemented-by load SimpleNonlinearity1
         }
@@ -244,14 +244,55 @@ def check_lang10_comments():
     """)
 
 
+
+@comptest
+def check_lang11_resources():
+    parse_model("""
+    cdp {
+        provides f [R]
+        requires z [R]
+        
+        hnlin = dp {
+            provides x [R]
+            requires r [R]
+            
+            implemented-by load SimpleNonlinearity1
+        }
+        
+        hnlin.x >= max(f, hnlin.r)
+        z >= hnlin.r        
+    }
+    """)
+
+
+
+
+@comptest
+def check_lang11_leq():
+    parse_model("""
+    cdp {
+        provides f [R]
+        
+        hnlin = dp {
+            provides x [R]
+            requires r [R]
+            
+            implemented-by load SimpleNonlinearity1
+        }
+        
+        max(f, hnlin.r) <= hnlin.x        
+    }
+    """)
+
+
 examples1 = [
     """
 dp electric-battery {
     provides voltage (intervals of V)
-    provides current (A)
-    provides capacity (J)
+    provides current [A]
+    provides capacity [J]
     
-    requires carry-weight (g)
+    requires carry-weight [g]
     requires volume (L)
     requires shape (Shape-type)
     
