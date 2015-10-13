@@ -14,6 +14,17 @@ __all__ = [
     'Series',
 ]
 
+def equiv_to_identity(dp):
+    from blocks.library.simple.identity import Identity
+    from mocdp.dp.dp_flatten import Mux
+    if isinstance(dp, Identity):
+        return True
+    if isinstance(dp, Mux):
+        s = simplify_indices(dp.coords)
+        if s == ():
+            return True
+    return False
+
 
 def make_series(dp1, dp2):
     """ Creates a Series if needed.
@@ -25,19 +36,11 @@ def make_series(dp1, dp2):
     if isinstance(dp1, Identity):
         return dp2
 
-    def is_identity(dp):
-        if isinstance(dp, Identity):
-            return True
-        if isinstance(dp, Mux):
-            s = simplify_indices(dp.coords)
-            if s == ():
-                return True
-        return False
 
-    if is_identity(dp1):
+    if equiv_to_identity(dp1):
         return dp2
 
-    if is_identity(dp2):
+    if equiv_to_identity(dp2):
         return dp1
 
     if isinstance(dp1, Mux) and isinstance(dp2, Mux):

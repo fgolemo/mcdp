@@ -15,22 +15,20 @@ def make_parallel(dp1, dp2):
     # if none is a mux, we cannot do anything
     if not isinstance(dp1, Mux) and not isinstance(dp2, Mux):
         return Parallel(dp1, dp2)
-
-    def identity_as_mux(x):
-        if isinstance(x, Identity):
-            F = x.get_fun_space()
-            return Mux(F, ())
-        return x
-    
-    dp1 = identity_as_mux(dp1)
-    dp2 = identity_as_mux(dp2)
+#
+#     def identity_as_mux(x):
+#         if isinstance(x, Identity):
+#             F = x.get_fun_space()
+#             return Mux(F, ())
+#         return x
+#
+#     dp1 = identity_as_mux(dp1)
+#     dp2 = identity_as_mux(dp2)
 
     a = Parallel(dp1, dp2)
 
-    if isinstance(dp1, Mux) and isinstance(dp2, Mux):
-
-
-        if dp1.coords == () and dp2.coords == ():
+    from mocdp.dp.dp_series import equiv_to_identity
+    if equiv_to_identity(dp1) and equiv_to_identity(dp2):
             return Identity(a.get_fun_space())
 
     # change identity to Mux
