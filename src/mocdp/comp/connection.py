@@ -7,7 +7,7 @@ from mocdp.configuration import get_conftools_nameddps
 from mocdp.dp.dp_flatten import Mux
 from mocdp.dp.dp_identity import Identity
 from mocdp.dp.dp_loop import DPLoop, DPLoop0
-from mocdp.dp.dp_parallel import Parallel
+from mocdp.dp.dp_parallel import make_parallel
 from mocdp.dp.dp_series import make_series
 from mocdp.posets.poset_product import PosetProduct
 from networkx.algorithms.components.connected import is_connected
@@ -256,7 +256,7 @@ def connect2(ndp1, ndp2, connections, split):
         Id_D = Identity(D_types)
 
         ndp1_p = its_dp_as_product(ndp1)
-        X = Parallel(ndp1_p, Id_D)
+        X = make_parallel(ndp1_p, Id_D)
 
         # make sure we can connect
         m1_X = make_series(m1, X)
@@ -273,7 +273,7 @@ def connect2(ndp1, ndp2, connections, split):
         A_B1_types = PosetProduct(tuple(ndp1.get_rtypes(A)) + tuple(ndp1.get_rtypes(B1)))
         Id_A_B1 = Identity(A_B1_types)
         ndp2_p = its_dp_as_product(ndp2)
-        Z = Parallel(Id_A_B1, ndp2_p)
+        Z = make_parallel(Id_A_B1, ndp2_p)
         # print('Z.R = %s' % Z.get_res_space())
         # print('B1: %s' % B1)
         # print('R2: %s' % r2)

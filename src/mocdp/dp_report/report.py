@@ -26,7 +26,7 @@ def gvgen_from_dp(dp0):
         elif isinstance(dp, DPLoop):
             r = go_loop(dp)
         elif isinstance(dp, DPLoop0):
-            r = go_loop0(dp)
+            r = go_loop(dp)
         else:
             r = go_simple(dp)
 
@@ -46,7 +46,7 @@ def gvgen_from_dp(dp0):
     def go_simple(dp):
         label = type(dp).__name__
         if isinstance(dp, Mux):
-            label = 'Mux\n%s' % dp.coords
+            label = 'Mux\n%s' % str(dp.coords)
         n = gg.newItem(label)
 #
 #         {'color': 'blue', 'shape': 'box', 'style': 'rounded',
@@ -99,20 +99,12 @@ def gvgen_from_dp(dp0):
         (n1i, n1o) = go(dp.dp1)
 
         i = gg.newItem('|')
+        o = gg.newItem('*')
         gg.newLink(i, n1i)
-        gg.newLink(n1o, i)
-#         gg.newLink(i, n2i)
+        gg.newLink(n1o, o)
+        gg.newLink(o, i)
 
-        return (i, n1o)
-        
-    def go_loop0(dp):
-        (n1i, n1o) = go(dp.dp1)
-
-        i = gg.newItem('|')
-        gg.newLink(i, n1i)
-        gg.newLink(n1o, i)
-
-        return (i, n1o)
+        return (i, o)
 
 
     import gvgen  # @UnresolvedImport

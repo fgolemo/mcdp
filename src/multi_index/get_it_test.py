@@ -38,16 +38,16 @@ cases = [
 ]
 
 def compose_indices(A, i1, i2, reducel):
-    print('A: %s ' % str(A))
-    print('i1: %s ' % str(i1))
-    print('i2: %s ' % str(i2))
+#     print('A: %s ' % str(A))
+#     print('i1: %s ' % str(i1))
+#     print('i2: %s ' % str(i2))
 
     i0 = get_id_indices(A)
-    print('i0: %s' % str(i0))
+#     print('i0: %s' % str(i0))
     i0i1 = get_it(i0, i1, reducel)
-    print('i0i1: %s' % str(i0i1))
+#     print('i0i1: %s' % str(i0i1))
     i0i1i2 = get_it(i0i1, i2, reducel)
-    print('i0i1i2: %s' % str(i0i1i2))
+#     print('i0i1i2: %s' % str(i0i1i2))
     return i0i1i2
 
 def check_associativity(A, i1, i2, reducel):

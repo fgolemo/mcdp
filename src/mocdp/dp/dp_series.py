@@ -5,6 +5,9 @@ from mocdp.posets.poset_product import PosetProduct
 from mocdp.posets.space import Map
 from mocdp.dp.primitive import NormalForm
 from contracts.utils import raise_desc, raise_wrapped
+from multi_index.imp import simplify_indices
+
+
 
 __all__ = [
     'make_series',
@@ -15,18 +18,97 @@ __all__ = [
 def make_series(dp1, dp2):
     """ Creates a Series if needed.
         Simplifies the identity and muxes """
+    from mocdp.dp.dp_flatten import Mux
     # first, check that the series would be created correctly
     from mocdp.dp.dp_identity import Identity
     a = Series0(dp1, dp2)
     if isinstance(dp1, Identity):
         return dp2
-    if isinstance(dp2, Identity):
+
+    def is_identity(dp):
+        if isinstance(dp, Identity):
+            return True
+        if isinstance(dp, Mux) and dp.coords == ():
+            return True
+        return False
+
+    if is_identity(dp1):
+        return dp2
+
+    if is_identity(dp2):
         return dp1
 
-    from mocdp.dp.dp_flatten import Mux
     if isinstance(dp1, Mux) and isinstance(dp2, Mux):
         return mux_composition(dp1, dp2)
+
+    if isinstance(dp1, Mux):
+        if isinstance(dp2, Series0):
+            dps = unwrap_series(dp2)
+            if isinstance(dps[0], Mux):
+                first = mux_composition(dp1, dps[0])
+                rest = reduce(Series0, dps[1:])
+                return make_series(first, rest)
+
+        from mocdp.dp.dp_parallel import Parallel
+        def has_null_fun(dp):
+            F = dp.get_fun_space()
+            return isinstance(F, PosetProduct) and len(F) == 0
+
+        if isinstance(dp2, Parallel):
+            if isinstance(dp2.dp1, Identity) and has_null_fun(dp2.dp1):
+                assert len(dp1.coords) == 2  # because it is followed by parallel
+                assert dp1.coords[0] == []  # because it's null
+                x = dp1.coords[1]
+                A = Mux(dp1.get_fun_space(), x)
+                B = dp2.dp2
+                C = Mux(B.get_res_space(), [[], ()])
+                return make_series(make_series(A, B), C)
+
+            if isinstance(dp2.dp2, Identity) and has_null_fun(dp2.dp2):
+                assert len(dp1.coords) == 2  # because it is followed by parallel
+                assert dp1.coords[1] == []  # because it's null
+                x = dp1.coords[0]
+                A = Mux(dp1.get_fun_space(), x)
+                B = dp2.dp1
+                C = Mux(B.get_res_space(), [(), []])
+                return make_series(make_series(A, B), C)
+
+        if isinstance(dp2, Series0):
+            dps = unwrap_series(dp2)
+
+            def has_null_identity(dp):
+                assert isinstance(dp, Parallel)
+                if isinstance(dp.dp1, Identity) and has_null_fun(dp.dp1):
+                    return True
+                if isinstance(dp.dp2, Identity) and has_null_fun(dp.dp2):
+                    return True
+                return False
+
+            if isinstance(dps[0], Parallel) and has_null_identity(dps[0]):
+                first = make_series(dp1, dps[0])
+                rest = reduce(Series0, dps[1:])
+                return make_series(first, rest)
+
+
+    if isinstance(dp2, Mux):
+        if isinstance(dp1, Series):
+            dps = unwrap_series(dp1)
+            if isinstance(dps[-1], Mux):
+                last = mux_composition(dps[-1], dp2)
+                rest = reduce(Series0, dps[:-1])
+                return make_series(rest, last)
+
+#     print('Cannot simplify:')
+#     print(' dp1: %s' % dp1)
+#     print(' dp2: %s' % dp2)
+#     print('\n- '.join([str(x) for x in unwrap_series(a)]))
     return a
+
+def unwrap_series(dp):
+    if not isinstance(dp, Series):
+        return [dp]
+    else:
+        return unwrap_series(dp.dp1) + unwrap_series(dp.dp2)
 
 def mux_composition(dp1, dp2):
     try:
@@ -35,15 +117,13 @@ def mux_composition(dp1, dp2):
         assert isinstance(dp1, Mux)
         assert isinstance(dp2, Mux)
         F = dp1.get_fun_space()
-    #     assert isinstance(F, PosetProduct),
-
         c1 = dp1.coords
         c2 = dp2.coords
         from multi_index.get_it_test import compose_indices
         coords = compose_indices(F, c1, c2, list)
-        res = Mux(F, coords)
 
-        print('res: %s' % str(res))
+        coords = simplify_indices(coords)
+        res = Mux(F, coords)
 
         assert res.get_res_space() == dp0.get_res_space()
 
