@@ -28,8 +28,10 @@ def make_series(dp1, dp2):
     def is_identity(dp):
         if isinstance(dp, Identity):
             return True
-        if isinstance(dp, Mux) and dp.coords == ():
-            return True
+        if isinstance(dp, Mux):
+            s = simplify_indices(dp.coords)
+            if s == ():
+                return True
         return False
 
     if is_identity(dp1):

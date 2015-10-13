@@ -8,7 +8,7 @@ from mocdp.dp.dp_flatten import Mux
 from mocdp.dp.dp_identity import Identity
 from mocdp.dp.dp_loop import DPLoop, DPLoop0
 from mocdp.dp.dp_parallel import make_parallel
-from mocdp.dp.dp_series import make_series
+from mocdp.dp.dp_series import make_series, Series0
 from mocdp.posets.poset_product import PosetProduct
 from networkx.algorithms.components.connected import is_connected
 from networkx.algorithms.cycles import simple_cycles
@@ -517,62 +517,62 @@ def order_dps(names, connections):
 #
 #     return res
 
-
-if False:
-    @contract(ndp=NamedDP, lf='str', lr='str', returns=NamedDP)
-    def dploop2(ndp, lr, lf):
-        #  A----> |     |--B----->
-        #         | ndp |  *---lr->
-        #  lf---->|_____|--*--lr
-        #  `--------(>=)------/
-        #
-
-        ndp.rindex(lr)
-        ndp.findex(lf)
-
-        F0 = ndp.get_fnames()
-        A = list(set(F0) - set([lf]))
-        R0 = ndp.get_rnames()
-        B = list(set(R0) - set([lr]))
-        # X is now the product space
-        F = PosetProduct((ndp.get_ftypes(A), ndp.get_ftype(lf)))
-        coords = []
-        for x in F0:
-            if x == lf:
-                coords.append(1)
-            else:
-                coords.append((0, A.index(x)))
-        X = Mux(F, coords)
-
-        R = ndp.get_dp().get_res_space()
-        coords_Blr = [ ndp.rindex(x) for x in B]
-        coords_Blr.append(ndp.rindex(lr))
-        coords = [coords_Blr, ndp.rindex(lr)]
-        Y = Mux(R, coords)
-
-        make_series(ndp.get_dp(), Y)
-
-        a = make_series(X, ndp.get_dp())
-
-        if Y is not None:
-            dp = make_series(a, Y)
-        else:
-            dp = a
-        res_dp = DPLoop(dp)
-
-        fnames = A
-        rnames = R0
-        if len(fnames) == 1:
-            funsp = res_dp.get_fun_space()
-            res_dp = make_series(Mux(funsp[0], [()]), res_dp)
-            fnames = fnames[0]
-        if len(rnames) == 1:
-            ressp = res_dp.get_res_space()
-            res_dp = make_series(res_dp, Mux(ressp, 0))
-            rnames = rnames[0]
-        res = dpwrap(res_dp, fnames, rnames)
-
-        return res
+#
+# if False:
+#     @contract(ndp=NamedDP, lf='str', lr='str', returns=NamedDP)
+#     def dploop2(ndp, lr, lf):
+#         #  A----> |     |--B----->
+#         #         | ndp |  *---lr->
+#         #  lf---->|_____|--*--lr
+#         #  `--------(>=)------/
+#         #
+#
+#         ndp.rindex(lr)
+#         ndp.findex(lf)
+#
+#         F0 = ndp.get_fnames()
+#         A = list(set(F0) - set([lf]))
+#         R0 = ndp.get_rnames()
+#         B = list(set(R0) - set([lr]))
+#         # X is now the product space
+#         F = PosetProduct((ndp.get_ftypes(A), ndp.get_ftype(lf)))
+#         coords = []
+#         for x in F0:
+#             if x == lf:
+#                 coords.append(1)
+#             else:
+#                 coords.append((0, A.index(x)))
+#         X = Mux(F, coords)
+#
+#         R = ndp.get_dp().get_res_space()
+#         coords_Blr = [ ndp.rindex(x) for x in B]
+#         coords_Blr.append(ndp.rindex(lr))
+#         coords = [coords_Blr, ndp.rindex(lr)]
+#         Y = Mux(R, coords)
+#
+#         make_series(ndp.get_dp(), Y)
+#
+#         a = make_series(X, ndp.get_dp())
+#
+#         if Y is not None:
+#             dp = make_series(a, Y)
+#         else:
+#             dp = a
+#         res_dp = DPLoop(dp)
+#
+#         fnames = A
+#         rnames = R0
+#         if len(fnames) == 1:
+#             funsp = res_dp.get_fun_space()
+#             res_dp = make_series(Mux(funsp[0], [()]), res_dp)
+#             fnames = fnames[0]
+#         if len(rnames) == 1:
+#             ressp = res_dp.get_res_space()
+#             res_dp = make_series(res_dp, Mux(ressp, 0))
+#             rnames = rnames[0]
+#         res = dpwrap(res_dp, fnames, rnames)
+#
+#         return res
 
 
 @contract(ndp=NamedDP, lf='str', lr='str', returns=NamedDP)
@@ -606,12 +606,18 @@ def dploop0(ndp, lr, lf):
         if b == (): return a
         return a + (b,)
 
-    F = PosetProduct((ndp.get_ftypes(A), R))
+    if len(A) == 1:
+        F = PosetProduct((ndp.get_ftype(A[0]), R))
+    else:
+        F = PosetProduct((ndp.get_ftypes(A), R))
     coords = []
     for x in ndp.get_fnames():
         if x in A:
             i = A.index(x)
-            coords.append(coord_concat((0,), i))
+            if len(A) != 1:
+                coords.append(coord_concat((0,), i))
+            else:
+                coords.append(0)  # just get the one A
         if x == lf:
             coords.append(coord_concat((1,), ndp.rindex(lr)))
 
@@ -622,8 +628,9 @@ def dploop0(ndp, lr, lf):
     fnames = A
 
     if len(fnames) == 1:
-        funsp = res_dp.get_fun_space()
-        res_dp = make_series(Mux(funsp[0], [()]), res_dp)
+#         print('At this point, res_dp')
+#         funsp = res_dp.get_fun_space()
+#         res_dp = make_series(Mux(funsp[0], [()]), res_dp)
         fnames = fnames[0]
 
     ressp = res_dp.get_res_space()

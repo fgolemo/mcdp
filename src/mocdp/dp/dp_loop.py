@@ -4,6 +4,7 @@ from contracts.utils import check_isinstance, raise_desc, raise_wrapped
 from mocdp.posets import (Map, NotLeq, PosetProduct, UpperSet, UpperSets,
     poset_minima)
 import itertools
+from mocdp.posets.rcomp import Rcomp
 
 
 
@@ -265,15 +266,18 @@ class DPLoop0(PrimitiveDP):
         funsp = self.dp1.get_fun_space()
         ressp = self.dp1.get_res_space()
 
-        check_isinstance(funsp, PosetProduct)
+        if not isinstance(funsp, PosetProduct):
+            raise ValueError('Funsp is not a product: %r' % funsp)
 
         if len(funsp) != 2:
             raise ValueError('funsp needs to be length 2: %s' % funsp)
 
-        if funsp[1] != ressp:
+        funsp1 = funsp[1]
+
+        if not(funsp1 == ressp):
             raise_desc(ValueError, "Spaces incompatible for loop",
                        funsp=funsp, ressp=ressp,
-                       ressp1=ressp[1], funsp1=funsp[1])
+                        funsp1=funsp1)
 
         F1 = funsp[0]
         F = F1

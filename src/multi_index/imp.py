@@ -49,8 +49,14 @@ def get_it(seq, coords, reduce_list):
 
 
 def simplify_indices(x):
-    """ simplifies an index expression """
+    """ simplifies an index expression. () is the identity """
     if x == [0]:
+        return ()
+    if x == [0, 1]:
+        return ()
+#     if x == [0, (1,)]:
+#         return ()
+    if x == [0, 1, 2]:
         return ()
     return x
 

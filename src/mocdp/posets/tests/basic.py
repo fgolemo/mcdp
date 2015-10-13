@@ -1,4 +1,5 @@
 from mocdp.unittests.generation import for_all_posets, for_some_posets
+from comptests.registrar import comptest
 
 
 @for_all_posets
@@ -27,3 +28,8 @@ def check_square(_id_poset, poset):
     assert not P.leq((0.0, 0.1), (0.0, 0.0))
 
 
+@comptest
+def check_equality():
+    from mocdp.posets.rcomp import Rcomp
+    assert Rcomp() == Rcomp()
+    assert not (Rcomp() != Rcomp())
