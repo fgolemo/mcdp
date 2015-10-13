@@ -291,7 +291,7 @@ def connect2(ndp1, ndp2, connections, split):
         
         assert len(m2.get_res_space()) == len(rntot), ((m2.get_res_space(), rntot))
         # make sure we can connect
-        Z_m2 = make_series(Z, m2)
+        make_series(Z, m2)
 
         #
         #  f0 -> |m1| -> | X | -> |Y |-> |Z| -> |m2| -> r0
@@ -341,9 +341,16 @@ def connect2(ndp1, ndp2, connections, split):
         Y_coords = [Y_coords_A_B1, Y_coords_B2_C2_D]
         Y = Mux(m1_X.get_res_space(), Y_coords)
 
-        m1_X_Y = make_series(m1_X, Y)
-        _Y_Z_m2 = make_series(Y, Z_m2)
-        res_dp = make_series(m1_X_Y, Z_m2)
+        # m1* Xp Y* Zp m2*
+        # Let's make series
+        # m1_X is simplifed
+        Y_Z = make_series(Y, Z)
+        Y_Z_m2 = make_series(Y_Z, m2)
+
+#         m1_X_Y = make_series(m1_X, Y)
+#         Z_m2 = make_series(Z, m2)
+#         _Y_Z_m2 = make_series(Y, Z_m2)
+        res_dp = make_series(m1_X, Y_Z_m2)
 
         fnames = fntot
         rnames = rntot

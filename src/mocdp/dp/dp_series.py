@@ -46,7 +46,7 @@ def make_series(dp1, dp2):
             dps = unwrap_series(dp2)
             if isinstance(dps[0], Mux):
                 first = mux_composition(dp1, dps[0])
-                rest = reduce(Series0, dps[1:])
+                rest = reduce(make_series, dps[1:])
                 return make_series(first, rest)
 
         from mocdp.dp.dp_parallel import Parallel
@@ -86,7 +86,7 @@ def make_series(dp1, dp2):
 
             if isinstance(dps[0], Parallel) and has_null_identity(dps[0]):
                 first = make_series(dp1, dps[0])
-                rest = reduce(Series0, dps[1:])
+                rest = reduce(make_series, dps[1:])
                 return make_series(first, rest)
 
 
@@ -95,7 +95,7 @@ def make_series(dp1, dp2):
             dps = unwrap_series(dp1)
             if isinstance(dps[-1], Mux):
                 last = mux_composition(dps[-1], dp2)
-                rest = reduce(Series0, dps[:-1])
+                rest = reduce(make_series, dps[:-1])
                 return make_series(rest, last)
 
 #     print('Cannot simplify:')
