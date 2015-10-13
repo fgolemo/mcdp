@@ -63,6 +63,11 @@ class Rcomp(Poset):
     def __eq__(self, other):
         return isinstance(other, Rcomp)
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
+
+
     def __repr__(self):
 #         return "ℜ ⋃ {⊤}"
 #         return "ℜ"
