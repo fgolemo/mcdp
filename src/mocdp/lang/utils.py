@@ -29,7 +29,7 @@ def parse_action(f):
         action.exc_info = None
         try:
             return f(*args[:-(num_args + 1):-1])
-        except TypeError as e:
+        except TypeError as e:  # @UnusedVariable
             action.exc_info = sys.exc_info()
             raise
 

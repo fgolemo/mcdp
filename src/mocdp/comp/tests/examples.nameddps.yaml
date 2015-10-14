@@ -31,6 +31,7 @@
     - 'times.power >= actuation.actuation_power'
     - 'battery.capacity >= times.energy'
     - 'actuation.weight >= battery.battery_weight'
+    split: []
 
 - id: energy_times
   desc: ""
@@ -58,6 +59,7 @@
     connections:
     - 'h.x >= max.z'
     - 'max.r >= h.r'
+    split: []
 
 - id: max_f_r
   desc: ""
@@ -87,6 +89,7 @@
     connections:
     - 'h.x >= min.z'
     - 'min.r >= h.r'
+    split: []
 
 - id: min_f_r
   desc: ""
@@ -112,9 +115,14 @@
   - mocdp.lang.parse
   - string: |
       cdp {
+          #
+          provides x [s]                                                                      
+          #
           battery = load battery
           times = load energy_times
           actuation = load mobility
+          #
+          times.mission_time >= x
           #     
           times.power >= actuation.actuation_power
           battery.capacity >= times.energy
@@ -167,17 +175,19 @@
         provides f0 [R]
         DP = cdp {
             provides f [R]
+            requires r2 [R]
             
             hnlin = dp {
                 provides x [R]
                 requires r [R]
-                
+               
                 implemented-by load SimpleNonlinearity1
             }
             
             hnlin.x >= min(f, hnlin.r)        
+            r2 >= hnlin.r
         }
-        DP.f >= max(f0, DP.r)
+        DP.f >= max(f0, DP.r2)
       }
 
 - id: testminsq_2
@@ -189,6 +199,7 @@
         provides f0 [R]
         DP = cdp {
             provides f [R]
+            requires r2 [R]
             
             hnlin = dp {
                 provides x [R]
@@ -197,9 +208,10 @@
                 implemented-by load SimpleNonlinearity1
             }
             
-            hnlin.x >= min(f, hnlin.r)        
+            hnlin.x >= min(f, hnlin.r)  
+            r2 >= hnlin.r      
         }
-        DP.f >= max(DP.r, f0)
+        DP.f >= max(DP.r2, f0)
       }
 
 
@@ -212,6 +224,7 @@
         provides f0 [R]
         DP = cdp {
             provides f [R]
+            requires r2 [R]
             
             hnlin = dp {
                 provides x [R]
@@ -221,7 +234,8 @@
             }
             
             hnlin.x >= min(hnlin.r, f)        
+            r2 >= hnlin.r
         }
-        DP.f >= max(DP.r, f0)
+        DP.f >= max(DP.r2, f0)
       }
 

@@ -1,7 +1,12 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mocdp.lang.syntax import (idn, load_expr, ow, parse_model, parse_wrap,
     rvalue, simple_dp_model, funcname, code_spec, max_expr, constraint_expr)
 from pyparsing import Literal
+from nose.tools import assert_equal
+from mocdp.dp.dp_max import Max
+from mocdp.lang.blocks import DPSemanticError
+from contracts.utils import raise_wrapped
 
 @comptest
 def check_lang():
@@ -12,9 +17,13 @@ def check_lang():
 
     data = """
 cdp {
+    provides mission_time [s] 
+    
     battery = load battery
     times = load energy_times
     actuation = load mobility
+    
+    times.mission_time >= mission_time
     
     times.power >= actuation.actuation_power
     battery.capacity >= times.energy
@@ -28,6 +37,8 @@ cdp {
 def check_lang2():
     data = """
 cdp {
+    provides mission_time [s] 
+    
     battery = load battery
     times = load energy_times
     actuation = load mobility
@@ -35,6 +46,8 @@ cdp {
     times.power >= actuation.actuation_power
     # comment
     battery.capacity >= times.energy
+    times.mission_time >= mission_time
+
 # comment
     actuation.weight >= battery.battery_weight
     # comment
@@ -58,6 +71,66 @@ cdp {
 }
     """
     parse_model(data)
+
+def assert_semantic_error(s):
+    try:
+        res = parse_model(s)
+    except DPSemanticError:
+        pass
+    except BaseException as e:
+        msg = "Expected semantic error, got %s." % type(e)
+        raise_wrapped(Exception, e, msg, s=s)
+    else:
+        msg = "Expected an exception, instead succesfull instantiation."
+        raise_wrapped(Exception, e, msg, s=s, res=res.desc_long())
+    
+    
+@comptest
+def check_lang10_asllspecified():
+
+    s = """
+cdp {
+    battery = load battery
+}
+    """
+    assert_semantic_error(s)  # unconnected
+
+    s = """
+cdp {
+    provides capacity [J]
+
+    battery = load battery
+    battery.capacity >= capacity
+}
+    """
+    assert_semantic_error(s)  # unconnected
+
+    ndp = parse_model("""
+cdp {
+    provides c [J]
+    requires w [g]
+    
+    battery = load battery
+    battery.capacity >= c
+    
+    w >= battery.battery_weight
+}
+    """)
+
+    # reused same function
+    ndp = parse_model("""
+cdp {
+    provides c [J]
+    requires w1 [g]
+    requires w2 [g]
+    
+    battery = load battery
+    battery.capacity >= c
+    
+    w1 >= battery.battery_weight
+    w2 >= battery.battery_weight
+}
+    """)
 
 
 @comptest
@@ -174,10 +247,11 @@ def check_lang7_addition():
 @comptest
 def check_lang8_addition():
     # x of b  == x required by b
-    s = """
+    p = parse_model("""
     cdp {
         provides mission_time  [s]
         provides extra_payload [g]
+        requires total_weight [g]
         
         battery = dp {
             provides capacity [J]
@@ -195,21 +269,24 @@ def check_lang8_addition():
                 
         capacity provided by battery >= mission_time * (power required by actuation)    
         payload provided by actuation >= (weight of battery) + extra_payload
+        
+        total_weight >= weight of battery
     }
-    """
-    parse_model(s)
+    """)
+    assert_equal(p.get_rnames(), ['total_weight'])
+    assert_equal(p.get_fnames(), ['mission_time', 'extra_payload'])
+
 
 
 
 @comptest
 def check_lang9_max():
 
-
     parse_wrap(max_expr, 'max(f, g)')
     parse_wrap(rvalue, 'max(f, g)')
     parse_wrap(constraint_expr, 'hnlin.x >= max(f, g)')
 
-    parse_model("""
+    p = parse_model("""
     cdp {
         provides f [R]
         
@@ -224,11 +301,13 @@ def check_lang9_max():
     }
     """)
 
+    assert_equal(p.get_rnames(), [])
+    assert_equal(p.get_fnames(), ['f'])
 
 
 @comptest
 def check_lang10_comments():
-    parse_model("""
+    p = parse_model("""
     cdp {
         provides f [R]
         
@@ -242,12 +321,15 @@ def check_lang10_comments():
         hnlin.x >= max(f, hnlin.r)        
     }
     """)
+    assert_equal(p.get_rnames(), [])
+    assert_equal(p.get_fnames(), ['f'])
+
 
 
 
 @comptest
 def check_lang11_resources():
-    parse_model("""
+    p = parse_model("""
     cdp {
         provides f [R]
         requires z [R]
@@ -263,6 +345,9 @@ def check_lang11_resources():
         z >= hnlin.r        
     }
     """)
+
+    assert_equal(p.get_rnames(), ['z'])
+    assert_equal(p.get_fnames(), ['f'])
 
 
 
@@ -284,6 +369,60 @@ def check_lang11_leq():
     }
     """)
 
+@comptest
+def check_simplification():
+    """
+        Simplification for commutative stuff
+        
+        SimpleWrap
+         provides          y (R[s]) 
+         provides          x (R[s]) 
+         requires          z (R[s]) 
+        | Series:   R[s]×R[s] -> R[s]
+        | S1 Mux(R[s]×R[s] → R[s]×R[s], [1, 0])
+        | S2 Max(R[s])
+    
+    """
+    m1 = parse_model("""
+    cdp {
+        provides x  [s]
+        provides y  [s]
+        requires z  [s]
+                
+        z >= max(x, y)
+    }
+""")
+    dp1 = m1.get_dp()
+
+    m2 = parse_model("""
+    cdp {
+        provides x  [s]
+        provides y  [s]
+        requires z  [s]
+                
+        z >= max(x, y)
+    }
+""")
+    dp2 = m2.get_dp()
+    assert isinstance(dp1, Max)
+    assert isinstance(dp2, Max)
+
+
+
+@comptest
+def check_lang12_addition_as_resources():
+    # x of b  == x required by b
+#     p = parse_model("""
+#     cdp {
+#         provides a [R]
+#         provides b [R]
+#         requires c [R]
+#         requires d [R]
+#         
+#         c + d >= a + b
+#         }
+#     """)
+    pass
 
 examples1 = [
     """

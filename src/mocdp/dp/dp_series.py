@@ -25,7 +25,22 @@ def equiv_to_identity(dp):
         if s == ():
             return True
     return False
-
+#
+# def is_permutation(dp):
+#     from mocdp.dp.dp_flatten import Mux
+#     if not isinstance(dp, Mux):
+#         return False
+#
+#     if dp.coords == [1, 0]:
+#         return True
+#     # TODO: more options
+#     return False
+# def is_permutation_invariant(dp):
+#     from mocdp.dp import Product, Sum, Min, Max
+#     if isinstance(dp, (Max, Min, Sum, Product)):
+#         return True
+#     # TODO: more options
+#     return False
 
 def make_series(dp1, dp2):
     """ Creates a Series if needed.
@@ -39,6 +54,12 @@ def make_series(dp1, dp2):
 
     if equiv_to_identity(dp2):
         return dp1
+#
+#     if is_permutation(dp1) and is_permutation_invariant(dp2):
+#         # wrong, because the types might not match
+#         # need to permute the types of dp2
+#         return dp2
+
 
     a = Series0(dp1, dp2)
 
@@ -197,7 +218,7 @@ class Series0(PrimitiveDP):
     def repr_long(self):
         r1 = self.dp1.repr_long()
         r2 = self.dp2.repr_long()
-        s = 'Series:'
+        s = 'Series:   %s -> %s' % (self.get_fun_space(), self.get_res_space())
         s += '\n' + indent(r1, 'S1 ')
         s += '\n' + indent(r2, 'S2 ')
         return s

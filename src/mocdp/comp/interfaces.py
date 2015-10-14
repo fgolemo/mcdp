@@ -25,6 +25,10 @@ class NamedDP():
     def get_rnames(self):
         pass
     
+class ComposedNamedDP():
+    
+    def __init__(self, name2dp, connections):
+        pass
 
 
 def dp_from_ndp(ndp):

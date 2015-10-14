@@ -1,17 +1,21 @@
+# -*- coding: utf-8 -*-
 from .parts import (Constraint, FunStatement, LoadCommand, Mult, NewFunction,
     ResStatement, Resource, SetName)
 from contracts import contract
-from contracts.interface import ContractSyntaxError, Where
+from contracts.interface import  Where
+from contracts.utils import indent, raise_wrapped
+from mocdp.comp.exceptions import DPInternalError, DPUserError, DPSyntaxError, \
+    DPSemanticError
 from mocdp.comp.interfaces import NamedDP
-from mocdp.lang.parts import DPWrap, LoadDP, PDPCodeSpec, Plus, OpMax, OpMin, \
-    Function, NewResource
+from mocdp.lang.parts import (
+    DPWrap, Function, LoadDP, NewResource, OpMax, OpMin, PDPCodeSpec, Plus)
 from mocdp.lang.utils import parse_action
 from mocdp.posets.rcomp import (R_Current, R_Energy, R_Power, R_Time, R_Voltage,
     R_Weight, Rcomp)
 from pyparsing import (Combine, Forward, Group, LineEnd, LineStart, Literal,
-    OneOrMore, Optional, ParseException, ParseFatalException, ParserElement,
+    OneOrMore, Optional, Or, ParseException, ParseFatalException, ParserElement,
     SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas, oneOf, opAssoc,
-    operatorPrecedence, Or)
+    operatorPrecedence)
 
 ParserElement.enablePackrat()
 
@@ -24,8 +28,13 @@ C = lambda x, b: x.setResultsName(b)
 def spa(x, b):
     @parse_action
     def p(tokens, loc, s):
-        res = b(tokens)
-        res.where = Where(s, loc)
+        where = Where(s, loc)
+        try:
+            res = b(tokens)
+        except BaseException as e:
+            raise_wrapped(Exception, e, "Error while parsing.", where=where.__str__(),
+                          tokens=tokens)
+        res.where = where
         return res
     x.setParseAction(p)
 
@@ -178,16 +187,21 @@ rvalue << operatorPrecedence(operand, [
 
 
 
-
-class DPSyntaxError(ContractSyntaxError):
-    pass
-
 def parse_wrap(expr, string):
     try:
         return expr.parseString(string, parseAll=True)
     except (ParseException, ParseFatalException) as e:
         where = Where(string, line=e.lineno, column=e.col)
         raise DPSyntaxError(str(e), where=where)
+    except DPSemanticError as e:
+        msg = "User error while interpreting the model:"
+        msg += "\n" + indent(string, '  | ')
+        raise_wrapped(DPSemanticError, e, msg, compact=True)
+    except DPInternalError as e:
+        msg = "Internal error while evaluating the spec:"
+        msg += "\n" + indent(string, '  | ')
+        raise_wrapped(DPInternalError, e, msg, compact=False)
+    
 
 @contract(returns=NamedDP)
 def parse_model(string):

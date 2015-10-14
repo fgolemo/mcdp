@@ -196,21 +196,21 @@ def check_compose2_generic():
     y = dpgraph(dict(actuation=actuation, times=times, battery=battery),
               ['times.power >= actuation.actuation_power',
                'battery.capacity >= times.energy',
-               'actuation.weight >= battery.battery_weight'])
+               'actuation.weight >= battery.battery_weight'], split=[])
 
     print y.desc()
 
     assert y.get_fnames() == ['mission_time'], y.get_fnames()
-    assert y.get_rnames() == ['battery_weight'], y.get_rnames()
+    assert y.get_rnames() == [], y.get_rnames()
 
     check_ftype(y, 'mission_time', R_Time)
-    check_rtype(y, 'battery_weight', R_Weight)
+#     check_rtype(y, 'battery_weight', R_Weight)
 
     dp = y.get_dp()
     funsp = dp.get_fun_space()
     ressp = dp.get_res_space()
     assert funsp == R_Time, funsp
-    assert ressp == R_Weight, ressp
+    assert ressp == PosetProduct(()), ressp
 
 
 

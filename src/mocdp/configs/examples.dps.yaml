@@ -63,6 +63,12 @@
   - mocdp.dp.Min
   - F: Rcomp_J
 
+- id: test_term
+  desc: Terminator
+  code:
+  - mocdp.dp.Terminator
+  - F: Rcomp_J
+
 
 - id: "dp_${ndp}"
   desc: "DP from namedDP"
