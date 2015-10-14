@@ -47,19 +47,19 @@ def get_it(seq, coords, reduce_list):
         raise_wrapped(ValueError, e, msg, compact=True,
                       seq=seq, coords=coords, reduce_list=reduce_list)
 
-
-def simplify_indices(x):
-    """ simplifies an index expression. () is the identity """
-    if x == [0]:
-        return ()
-    if x == [0, 1]:
-        return ()
-    # TODO: do it general
-    if x == [0, (1,)]:
-        return ()
-    if x == [0, 1, 2]:
-        return ()
-    return x
-
+# Wrong - example: F = ('a', 'b') and x = [0]
+# def simplify_indices(x):
+#     """ simplifies an index expression. () is the identity """
+# #     if x == [0]:
+# #         return ()
+# #     if x == [0, 1]:
+# #         return ()
+# #     # TODO: do it general
+# #     if x == [0, (1,)]:
+# #         return ()
+# #     if x == [0, 1, 2]:
+# #         return ()
+#     return x
+#
 
 

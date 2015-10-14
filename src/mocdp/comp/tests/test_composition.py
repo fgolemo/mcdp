@@ -3,11 +3,15 @@ from comptests.registrar import comptest
 from contracts.utils import raise_desc
 from mocdp.comp.connection import TheresALoop, dpconnect, dpgraph, dploop0
 from mocdp.comp.wrap import dpwrap
-from mocdp.dp.dp_sum import Product
+from mocdp.dp.dp_sum import Product, Sum
 from mocdp.example_battery import R_Energy, R_Power, R_Time, R_Weight
 from mocdp.example_battery.dp_bat import BatteryDP
 from mocdp.example_battery.dp_bat2 import Mobility
 from mocdp.posets.poset_product import PosetProduct
+from mocdp.posets.rcomp import Rcomp
+from mocdp.dp.dp_terminator import Terminator
+from mocdp.dp.dp_series import Series, make_series
+from numpy.testing.utils import assert_equal
 
 
 @comptest
@@ -211,6 +215,40 @@ def check_compose2_generic():
     ressp = dp.get_res_space()
     assert funsp == R_Time, funsp
     assert ressp == PosetProduct(()), ressp
+
+
+def check_same_spaces(dp1, dp2):
+    print('dp1: %s' % dp1)
+    print('dp2: %s' % dp2)
+    assert_equal(dp1.get_fun_space(), dp2.get_fun_space())
+    assert_equal(dp1.get_res_space(), dp2.get_res_space())
+
+@comptest
+def rule_terminator_series():
+    # Series(X(F,R), Terminator(R)) => Terminator(F)
+    F0 = Rcomp()
+    from mocdp.dp.dp_flatten import Mux
+    dp1 = Mux(F0, ())
+    dp2 = Terminator(F0)
+    # make sure we can obtain it
+    s0 = Series(dp1, dp2)
+    s1 = make_series(dp1, dp2)
+    check_same_spaces(s0, s1)
+    assert isinstance(s1, Terminator), s1
+
+@comptest
+def rule_terminator_parallel():
+    pass
+#     # Parallel(X(F,R), Terminator(R)) => Terminator(F)
+#     F0 = Rcomp()
+#     F = PosetProduct((F0, F0))
+#     dp1 = Sum()
+
+
+
+
+
+
 
 
 

@@ -120,7 +120,7 @@ def dpconnect(name2dp, connections, split=[]):
         if c.s1 in split:
             split1.append(c.s1)
 
-    print('splitting %s' % split)
+#     print('splitting %s' % split)
     dp = connect2(name2dp[first], name2dp[second], set(first_connections), split=split1)
 
     others = list(order)
@@ -719,12 +719,12 @@ def dpgraph(name2dp, connections, split):
             split1 = []
 
         split1.extend(split)
-        print('we are calling dpgraph on:\n' + format_dict_long(name2dp, True))
-        print('with connections:\n' + format_list_long(other_connections, True))
+#         print('we are calling dpgraph on:\n' + format_dict_long(name2dp, True))
+#         print('with connections:\n' + format_list_long(other_connections, True))
         ndp = dpgraph(name2dp, other_connections, split=split1)
     #     print('Ignoring %s, obtain %s' % (c, ndp.desc()))
 
-        print('closing the loop with %s and %s' % (c.s1, c.s2))
+#         print('closing the loop with %s and %s' % (c.s1, c.s2))
 
         # now we make sure that the signals we have are preserved
         ndp.rindex(c.s1)
@@ -736,7 +736,7 @@ def dpgraph(name2dp, connections, split):
     
         res = connect2(l, term, set([Connection("-", c.s1, "-", c.s1)]), split=[])
     
-        print('looped:\n%s' % l.repr_long())
+#         print('looped:\n%s' % l.repr_long())
         return res
     except BaseException as e:
         compact = isinstance(e, DPInternalError)

@@ -5,7 +5,7 @@ from mocdp.posets.poset_product import PosetProduct
 from mocdp.posets.space import Map
 from mocdp.dp.primitive import NormalForm
 from contracts.utils import raise_desc, raise_wrapped, indent
-from multi_index.imp import simplify_indices
+
 
 
 
@@ -21,7 +21,7 @@ def equiv_to_identity(dp):
     if isinstance(dp, Identity):
         return True
     if isinstance(dp, Mux):
-        s = simplify_indices(dp.coords)
+        s = simplify_indices_F(dp.get_fun_space(), dp.coords)
         if s == ():
             return True
     return False
@@ -42,12 +42,35 @@ def equiv_to_identity(dp):
 #     # TODO: more options
 #     return False
 
+def is_equiv_to_terminator(dp):
+    from mocdp.dp.dp_terminator import Terminator
+    if isinstance(dp, Terminator):
+        return True
+#     from mocdp.dp.dp_flatten import Mux
+#     if isinstance(dp, Mux) and dp.coords == []:
+#         return True
+    return False
+
 def make_series(dp1, dp2):
     """ Creates a Series if needed.
         Simplifies the identity and muxes """
     from mocdp.dp.dp_flatten import Mux
     # first, check that the series would be created correctly
     from mocdp.dp.dp_identity import Identity
+
+    # Series(X(F,R), Terminator(R)) => Terminator(F)
+    # but X not loop
+#     from mocdp.dp.dp_loop import DPLoop0
+    if is_equiv_to_terminator(dp2) and isinstance(dp1, Mux):
+
+        from mocdp.dp.dp_terminator import Terminator
+        res = Terminator(dp1.get_fun_space())
+        print('Terminator')
+        print('-dp1: %s' % dp1.repr_long())
+        print('-dp2: %s' % dp2.repr_long())
+        print('-res: %s' % res.repr_long())
+        assert res.get_fun_space() == dp1.get_fun_space()
+        return res
 
     if equiv_to_identity(dp1):
         return dp2
@@ -61,7 +84,7 @@ def make_series(dp1, dp2):
 #         return dp2
 
 
-    a = Series0(dp1, dp2)
+#     a = Series0(dp1, dp2)
 
     if isinstance(dp1, Mux) and isinstance(dp2, Mux):
         return mux_composition(dp1, dp2)
@@ -127,13 +150,24 @@ def make_series(dp1, dp2):
 #     print(' dp1: %s' % dp1)
 #     print(' dp2: %s' % dp2)
 #     print('\n- '.join([str(x) for x in unwrap_series(a)]))
-    return a
+    return Series0(dp1, dp2)
 
 def unwrap_series(dp):
     if not isinstance(dp, Series):
         return [dp]
     else:
         return unwrap_series(dp.dp1) + unwrap_series(dp.dp2)
+
+def simplify_indices_F(F, coords):
+    if coords == [0] and len(F) == 1:
+        return ()
+    if coords == [0, 1] and len(F) == 2:
+        return ()
+    if coords == [0, (1,)] and len(F) == 2:
+        return ()
+    if coords == [0, 1, 2] and len(F) == 3:
+        return ()
+    return coords
 
 def mux_composition(dp1, dp2):
     try:
@@ -146,10 +180,26 @@ def mux_composition(dp1, dp2):
         c2 = dp2.coords
         from multi_index.get_it_test import compose_indices
         coords = compose_indices(F, c1, c2, list)
+        print('coords: %s' % str(coords))
+        coords = simplify_indices_F(F, coords)
 
-        coords = simplify_indices(coords)
+        #     if x == [0]:
+#         return ()
+#     if x == [0, 1]:
+#         return ()
+#     # TODO: do it general
+#     if x == [0, (1,)]:
+#         return ()
+#     if x == [0, 1, 2]:
+#         return ()
+
+
+        print('simpli: %s' % str(coords))
         res = Mux(F, coords)
 
+        print('dp1: %s' % dp1)
+        print('dp2: %s' % dp2)
+        print('res: %s' % res)
         assert res.get_res_space() == dp0.get_res_space()
 
         return res
@@ -168,8 +218,8 @@ class Series0(PrimitiveDP):
         _, self.dp1 = library.instance_smarter(dp1)
         _, self.dp2 = library.instance_smarter(dp2)
 
-        if equiv_to_identity(self.dp1) or equiv_to_identity(self.dp2):
-            raise ValueError('should not happen series\n- %s\n -%s' % (self.dp1, self.dp2))
+        # if equiv_to_identity(self.dp1) or equiv_to_identity(self.dp2):
+        #    raise ValueError('should not happen series\n- %s\n -%s' % (self.dp1, self.dp2))
 
         R1 = self.dp1.get_res_space()
         F2 = self.dp2.get_fun_space()

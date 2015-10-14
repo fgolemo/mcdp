@@ -12,10 +12,12 @@ __all__ = [
 def make_parallel(dp1, dp2):
     from mocdp.dp.dp_flatten import Mux
     from mocdp.dp.dp_identity import Identity
+    from mocdp.dp.dp_series import make_series
+    from mocdp.dp.dp_series import is_equiv_to_terminator
 
-    # if none is a mux, we cannot do anything
-    if not isinstance(dp1, Mux) and not isinstance(dp2, Mux):
-        return Parallel(dp1, dp2)
+#     # if none is a mux, we cannot do anything
+#     if not isinstance(dp1, Mux) and not isinstance(dp2, Mux):
+#         return Parallel(dp1, dp2)
 #
 #     def identity_as_mux(x):
 #         if isinstance(x, Identity):
@@ -26,13 +28,33 @@ def make_parallel(dp1, dp2):
 #     dp1 = identity_as_mux(dp1)
 #     dp2 = identity_as_mux(dp2)
 
-    a = Parallel(dp1, dp2)
 
     from mocdp.dp.dp_series import equiv_to_identity
-    if equiv_to_identity(dp1) and equiv_to_identity(dp2):
-            return Identity(a.get_fun_space())
-
     # change identity to Mux
+    a = Parallel(dp1, dp2)
+    if equiv_to_identity(dp1) and equiv_to_identity(dp2):
+        F = PosetProduct((dp1.get_fun_space(), dp2.get_fun_space()))
+        assert F == a.get_fun_space()
+        return Identity(F)
+
+    # Parallel(X, Terminator) => Series(Mux([0]), X, Mux([0, ()]))
+    if is_equiv_to_terminator(dp2):
+        F = a.get_fun_space()  # PosetProduct((dp1.get_fun_space(),))
+        m1 = Mux(F, coords=0)
+        m2 = dp1
+        m3 = Mux(m2.get_res_space(), [(), []])
+        res = make_series(make_series(m1, m2), m3)
+
+        assert res.get_res_space() == a.get_res_space()
+        assert res.get_fun_space() == a.get_fun_space()
+        return res
+
+    if is_equiv_to_terminator(dp1):
+        F = a.get_fun_space()  # PosetProduct((dp1.get_fun_space(),))
+        m1 = Mux(F, coords=1)
+        m2 = dp2
+        m3 = Mux(m2.get_res_space(), [[], ()])
+        return make_series(make_series(m1, m2), m3)
 
 
     return a
