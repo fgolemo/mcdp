@@ -77,6 +77,15 @@ def make_series(dp1, dp2):
 
 #     a = Series0(dp1, dp2)
 
+    from mocdp.dp.dp_parallel import Parallel
+    from mocdp.dp.dp_parallel_simplification import make_parallel
+
+    if isinstance(dp1, Parallel) and isinstance(dp2, Parallel):
+        a = make_series(dp1.dp1, dp2.dp1)
+        b = make_series(dp1.dp2, dp2.dp2)
+        return make_parallel(a, b)
+
+
     if isinstance(dp1, Mux) and isinstance(dp2, Mux):
         return mux_composition(dp1, dp2)
 
