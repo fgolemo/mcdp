@@ -11,7 +11,7 @@ from mocdp.lang.parts import (
     DPWrap, Function, LoadDP, NewResource, OpMax, OpMin, PDPCodeSpec, Plus)
 from mocdp.lang.utils import parse_action
 from mocdp.posets.rcomp import (R_Current, R_Energy, R_Power, R_Time, R_Voltage,
-    R_Weight, Rcomp)
+    R_Weight, Rcomp, R_Cost)
 from pyparsing import (Combine, Forward, Group, LineEnd, LineStart, Literal,
     OneOrMore, Optional, Or, ParseException, ParseFatalException, ParserElement,
     SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas, oneOf, opAssoc,
@@ -61,6 +61,7 @@ units = {
     'V': R_Voltage,
     'g': R_Weight,
     'W': R_Power,
+    '$': R_Cost,
     'R': Rcomp(),
 }
 unit_expr = oneOf(list(units))
@@ -154,8 +155,8 @@ pdp_rvalue = load_pdp ^ code_spec
 
 
 simple_dp_model = (S(L('dp')) + S(L('{')) +
-                   C(Group(OneOrMore(fun_statement)), 'fun') +
-                   C(Group(OneOrMore(res_statement)), 'res') +
+                   C(Group(ZeroOrMore(fun_statement)), 'fun') +
+                   C(Group(ZeroOrMore(res_statement)), 'res') +
                    S(L('implemented-by')) + C(pdp_rvalue, 'pdp_rvalue') +
                    S(L('}')))
 spa(simple_dp_model, lambda t: DPWrap(list(t[0]), list(t[1]), t[2]))
@@ -188,6 +189,7 @@ rvalue << operatorPrecedence(operand, [
 
 
 def parse_wrap(expr, string):
+    string = string.strip()
     try:
         return expr.parseString(string, parseAll=True)
     except (ParseException, ParseFatalException) as e:
@@ -195,16 +197,25 @@ def parse_wrap(expr, string):
         raise DPSyntaxError(str(e), where=where)
     except DPSemanticError as e:
         msg = "User error while interpreting the model:"
-        msg += "\n" + indent(string, '  | ')
+        msg += "\n\n" + indent(string, '  > ') + '\n'
         raise_wrapped(DPSemanticError, e, msg, compact=True)
     except DPInternalError as e:
         msg = "Internal error while evaluating the spec:"
-        msg += "\n" + indent(string, '  | ')
+        msg += "\n\n" + indent(string, '  > ') + '\n'
         raise_wrapped(DPInternalError, e, msg, compact=False)
     
+def remove_comments(s):
+    lines = s.split("\n")
+    def remove_comment(line):
+        if '#' in line:
+            return line[:line.index('#')]
+        else:
+            return line
+    return "\n".join(map(remove_comment, lines))
 
 @contract(returns=NamedDP)
 def parse_model(string):
+    string = remove_comments(string)
     res = parse_wrap(dp_model, string)[0]
     return res
 

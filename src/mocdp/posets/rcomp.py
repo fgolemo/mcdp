@@ -135,6 +135,7 @@ class RcompUnits(Rcomp):
 
 R_Time = RcompUnits('s')
 R_Power = RcompUnits('W')
+R_Cost = RcompUnits('$')
 R_Energy = RcompUnits('J')
 R_Weight = RcompUnits('g')
 R_Current = RcompUnits('A')

@@ -65,10 +65,10 @@ def make_series(dp1, dp2):
 
         from mocdp.dp.dp_terminator import Terminator
         res = Terminator(dp1.get_fun_space())
-        print('Terminator')
-        print('-dp1: %s' % dp1.repr_long())
-        print('-dp2: %s' % dp2.repr_long())
-        print('-res: %s' % res.repr_long())
+#         print('Terminator')
+#         print('-dp1: %s' % dp1.repr_long())
+#         print('-dp2: %s' % dp2.repr_long())
+#         print('-res: %s' % res.repr_long())
         assert res.get_fun_space() == dp1.get_fun_space()
         return res
 
@@ -180,7 +180,7 @@ def mux_composition(dp1, dp2):
         c2 = dp2.coords
         from multi_index.get_it_test import compose_indices
         coords = compose_indices(F, c1, c2, list)
-        print('coords: %s' % str(coords))
+#         print('coords: %s' % str(coords))
         coords = simplify_indices_F(F, coords)
 
         #     if x == [0]:
@@ -194,12 +194,12 @@ def mux_composition(dp1, dp2):
 #         return ()
 
 
-        print('simpli: %s' % str(coords))
+#         print('simpli: %s' % str(coords))
         res = Mux(F, coords)
 
-        print('dp1: %s' % dp1)
-        print('dp2: %s' % dp2)
-        print('res: %s' % res)
+#         print('dp1: %s' % dp1)
+#         print('dp2: %s' % dp2)
+#         print('res: %s' % res)
         assert res.get_res_space() == dp0.get_res_space()
 
         return res

@@ -1,6 +1,7 @@
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import raise_wrapped, format_dict_long, format_list_long
+from contracts.utils import raise_wrapped, format_dict_long, format_list_long, \
+    raise_desc
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import dpwrap
 from mocdp.configuration import get_conftools_nameddps
@@ -18,6 +19,7 @@ import networkx
 import re
 from mocdp.dp.dp_terminator import Terminator
 from mocdp.comp import DPInternalError
+from mocdp.comp.exceptions import DPSemanticError
 
 Connection0 = namedtuple('Connection', 'dp1 s1 dp2 s2')
 class Connection(Connection0):
@@ -110,8 +112,10 @@ def dpconnect(name2dp, connections, split=[]):
     not_belongs_first = lambda c: not belongs_first(c)
     first_connections = filter(belongs_first, connections)
 
-    # these are other names that need to be preserved for the first 1
+    # these are the signals that are going to be connected and hence closed
+    to_be_connected = [c.s1 for c in first_connections]
 
+    # these are other names that need to be preserved for the first 1
     split1 = [c.s1
              for c in connections
              if c.dp1 == first and c.dp2 != second]
@@ -120,7 +124,17 @@ def dpconnect(name2dp, connections, split=[]):
         if c.s1 in split:
             split1.append(c.s1)
 
-#     print('splitting %s' % split)
+    # now we remove from split1 the ones that are not connected
+    split1 = [s for s in split1 if s in to_be_connected]
+
+    # check that all the splitting is in connection
+    for s in split1:
+        for c in first_connections:
+            if c.s1 == s:
+                break
+        else:
+            msg = 'Cannot find split signal in first_connections.'
+            raise_desc(Exception, msg, s=s, first_connections=first_connections, connections=connections, split1=split)
     dp = connect2(name2dp[first], name2dp[second], set(first_connections), split=split1)
 
     others = list(order)
@@ -385,59 +399,9 @@ def connect2(ndp1, ndp2, connections, split):
 
         return res
 
-#         mux_B2_C2_D = []
-#         if D:
-#             for x in ndp2.get_fnames():
-#                 if x in B2:
-#                     i = (0,)
-#                     a = ndp1.rindex(s1_from_s2(x))
-#                     if a != ():
-#                         i = i + (a,)
-#                     mux_B2_C2_D.append(i)
-#     #                 print('B2[%s] got %s' % (x, i))
-#                     assert x not in C2 and x not in D
-#                 if x in C2:
-#                     a = ndp1.rindex(s1_from_s2(x))
-#                     i = (0,)
-#                     if a != ():
-#                         i = i + (a,)
-#     #                 print('C2[%s] got %s' % (x, i))
-#                     mux_B2_C2_D.append(i)
-#                     assert x not in D
-#                 if x in D:
-#                     if len(D) == 1:
-#                         i = (1,)
-#                     else:
-#                         i = (1, D.index(x))
-#
-#     #                 print('D[%s] giv %s ' % (x, i))
-#                     mux_B2_C2_D.append(i)
-#         else:
-#             for x in ndp2.get_fnames():
-#                 if x in B2:
-#                     i = ndp1.rindex(s1_from_s2(x))
-#                     mux_B2_C2_D.append(i)
-#                 if x in C2:
-#                     i = ndp1.rindex(s1_from_s2(x))
-#                     mux_B2_C2_D.append(i)
-#
-#         if B1:
-#             mux_B1 = [(0, ndp1.rindex(s)) for s in B1]
-#             coords = [mux_B1, mux_B2_C2_D]
-#         else:
-#             coords = mux_B2_C2_D
-#
-#         F = X.get_res_space()
-#     #     print('Creating Mux from F = %r, coords= %r ' % (F, coords))
-#         if len(coords) == 1:
-#             coords = coords[0]
-#         Y = Mux(coords=coords, F=F)
-
-
-
     except Exception as e:
         msg = 'connect2() failed'
-        raise_wrapped(Exception, e, msg, ndp1=ndp1, ndp2=ndp2, connections=connections, split=split)
+        raise_wrapped(DPInternalError, e, msg, ndp1=ndp1, ndp2=ndp2, connections=connections, split=split)
 
 
 def make_name(already):
@@ -469,12 +433,12 @@ def order_dps(names, connections):
         msg = 'The graph is not weakly connected. (missing constraints?)'
         msg += '\nNames: %s' % names
         msg += '\nconnections: %s' % connections
-        raise Exception(msg)
+        raise DPSemanticError(msg)
     l = topological_sort(G)
     if not (set(l) == names):
         msg = 'names = %s\n returned = %s\n connections: %s' % (names, l, connections)
         msg += '\n graph: %s %s' % (list(Gu.nodes()), list(Gu.edges()))
-        raise Exception(msg)
+        raise DPInternalError(msg)
     return l
 
 #
@@ -719,12 +683,7 @@ def dpgraph(name2dp, connections, split):
             split1 = []
 
         split1.extend(split)
-#         print('we are calling dpgraph on:\n' + format_dict_long(name2dp, True))
-#         print('with connections:\n' + format_list_long(other_connections, True))
         ndp = dpgraph(name2dp, other_connections, split=split1)
-    #     print('Ignoring %s, obtain %s' % (c, ndp.desc()))
-
-#         print('closing the loop with %s and %s' % (c.s1, c.s2))
 
         # now we make sure that the signals we have are preserved
         ndp.rindex(c.s1)
@@ -736,8 +695,12 @@ def dpgraph(name2dp, connections, split):
     
         res = connect2(l, term, set([Connection("-", c.s1, "-", c.s1)]), split=[])
     
-#         print('looped:\n%s' % l.repr_long())
         return res
+    except DPSemanticError as e:
+        compact = isinstance(e, DPSemanticError)
+        raise_wrapped(DPSemanticError, e, 'Error while calling dpgraph()',compact=compact,
+                      names=format_dict_long(name2dp, informal=True),
+                      connection=format_list_long(connections, informal=True))
     except BaseException as e:
         compact = isinstance(e, DPInternalError)
         raise_wrapped(DPInternalError, e, 'Error while calling dpgraph()',

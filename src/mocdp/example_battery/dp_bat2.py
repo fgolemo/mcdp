@@ -60,9 +60,30 @@ class TimeEnergyTradeoff(PrimitiveDP):
 
         return ressp.Us(min_choices)
 
-#     def __repr__(self):
-#         return 'TimeEnergyTradeoff()'
 
+class PowerTimeTradeoff(PrimitiveDP):
+
+    def __init__(self):
+        F = PosetProduct(())
+        R = PosetProduct((R_Power, R_Time))
+
+        PrimitiveDP.__init__(self, F=F, R=R)
+
+    def solve(self, min_func):
+        assert min_func == ()
+        ressp = self.get_res_space()
+
+        PS = np.linspace(0.01, 5.0, 10)
+
+        choices = [ (Ps, T_from_Ps(Ps)) for Ps in PS ]
+
+        for c in choices:
+            ressp.belongs(c)
+
+        from mocdp.posets.utils import poset_minima
+        min_choices = poset_minima(choices, ressp.leq)
+
+        return ressp.Us(min_choices)
 
 def Pa_from_weight(W):
     return 1.0 + W
