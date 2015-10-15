@@ -364,13 +364,13 @@ def make_series(dp1, dp2):
         check_same_spaces(Series(dp1, dp2), res)
         return res
 
-    if isinstance(dp2, Mux):
-        if isinstance(dp1, Series):
-            dps = unwrap_series(dp1)
-            if isinstance(dps[-1], Mux):
-                last = mux_composition(dps[-1], dp2)
-                rest = reduce(make_series, dps[:-1])
-                return make_series(rest, last)
+#     if isinstance(dp2, Mux):
+#         if isinstance(dp1, Series):
+#             dps = unwrap_series(dp1)
+#             if isinstance(dps[-1], Mux):
+#                 last = mux_composition(dps[-1], dp2)
+#                 rest = reduce(make_series, dps[:-1])
+#                 return make_series(rest, last)
 
 #     print('Cannot simplify:')
 #     print(' dp1: %s' % dp1)
