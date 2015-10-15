@@ -5,15 +5,181 @@ from mocdp.posets.poset_product import PosetProduct
 from multi_index.get_it_test import compose_indices, get_id_indices
 import warnings
 from mocdp.dp.dp_series import Series
+from abc import abstractmethod, ABCMeta
+from mocdp.exceptions import DPInternalError
+from mocdp.dp.dp_parallel import Parallel
+from mocdp.dp.dp_parallel_simplification import make_parallel
 
 __all__ = [
     'make_series',
 ]
 
+
+class SeriesSimplificationRule():
+    __metaclass__ = ABCMeta
+
+    @abstractmethod
+    def applies(self, dp1, dp2):
+        """ Returns true if it applies. """
+
+    def execute(self, dp1, dp2):
+        """ Returns the simplified version. """
+        # check that everything is correct
+        dp0 = Series(dp1, dp2)
+        try:
+            res = self._execute(dp1, dp2)
+        except BaseException as e:
+            msg = 'Error while executing Series simplification rule.'
+            raise_wrapped(DPInternalError, e, msg, dp1=dp1.repr_long(),
+                          dp2=dp2.repr_long(), rule=self)
+        from mocdp.comp.tests.test_composition import check_same_spaces
+        try:
+            check_same_spaces(dp0, res)
+        except AssertionError as e:
+            msg = 'Invalid Series simplification rule.'
+            raise_wrapped(DPInternalError, e, msg, dp1=dp1.repr_long(),
+                          dp2=dp2.repr_long(), rule=self, res=res.repr_long())
+        return res
+
+    @abstractmethod
+    def _execute(self, dp1, dp2):
+        pass
+
+
+
+class RuleSimplifyLift(SeriesSimplificationRule):
+    """ 
+                        |- A
+        Mux([x, [y]]) --|
+                        |- B
+                        
+                        |-- A
+        Mux([x, y]) ----|
+                        |-- Mux([()]) - B
+    
+    """
+    def applies(self, dp1, dp2):
+        if not isinstance(dp2, Parallel):
+            return False
+
+        if not isinstance(dp1, Mux):
+            return False
+
+        coords = dp1.coords
+        assert isinstance(coords, list) and len(coords) == 2
+        if isinstance(coords[1], list) and len(coords[1]) == 1:
+            return True
+
+    def _execute(self, dp1, dp2):
+        assert isinstance(dp1, Mux)
+        assert isinstance(dp2, Parallel)
+        assert isinstance(dp1.coords, list) and len(dp1.coords) == 2
+        assert isinstance(dp1.coords[1], list) and len(dp1.coords[1]) == 1
+        x = dp1.coords[0]
+        y = dp1.coords[1][0]
+
+        m1 = Mux(dp1.get_fun_space(), [x, y])
+
+        F2 = m1.get_res_space()[1]
+        m2 = Mux(F2, [()])
+
+        P = make_parallel(dp2.dp1, make_series(m2, dp2.dp2))
+
+        res = make_series(m1, P)
+        return res
+
+
+class RuleSimplifyLiftB(SeriesSimplificationRule):
+    """ 
+                        |- A
+        Mux([[x], y]) --|
+                        |- B
+                        
+                        |-- Mux([()]) - A
+        Mux([x, y]) ----|
+                        |-- B
+    
+    """
+    def applies(self, dp1, dp2):
+        if not isinstance(dp2, Parallel):
+            return False
+
+        if not isinstance(dp1, Mux):
+            return False
+
+        coords = dp1.coords
+        assert isinstance(coords, list) and len(coords) == 2
+        if isinstance(coords[0], list) and len(coords[0]) == 1:
+            return True
+
+    def _execute(self, dp1, dp2):
+        assert isinstance(dp1, Mux)
+        assert isinstance(dp2, Parallel)
+        assert isinstance(dp1.coords, list) and len(dp1.coords) == 2
+        assert isinstance(dp1.coords[0], list) and len(dp1.coords[0]) == 1
+        x = dp1.coords[0][0]
+        y = dp1.coords[1]
+
+        m1 = Mux(dp1.get_fun_space(), [x, y])
+
+        F1 = m1.get_res_space()[0]
+        m2 = Mux(F1, [()])
+
+        P = make_parallel(make_series(m2, dp2.dp1), dp2.dp2)
+
+        res = make_series(m1, P)
+        return res
+
+
+def is_two_permutation(F, coords):
+    if not isinstance(F, PosetProduct) or not len(F) == 2:
+        return False
+    if coords == [1, 0]:
+        return True
+    if coords == [(1,), 0]:
+        return True
+    return False
+    
+class RuleSimplifyPermPar(SeriesSimplificationRule):
+    """ 
+                      |- A - |
+        Mux([1, 0]) --|      | --- 
+                      |- B - |
+                        
+                      |- B - |
+        --------------|      | --- Mux([1, 0]) 
+                      |- A - |
+                        
+    
+    """
+    def applies(self, dp1, dp2):
+        if not isinstance(dp2, Parallel):
+            return False
+
+        if not isinstance(dp1, Mux) or not is_two_permutation(dp1.get_fun_space(), dp1.coords):
+            return False
+
+        return True
+
+    def _execute(self, dp1, dp2):
+        assert isinstance(dp1, Mux)
+        F = dp1.get_fun_space()
+        assert is_two_permutation(F, dp1.coords)
+
+        # invert
+        P = make_parallel(dp2.dp2, dp2.dp1)
+
+        m2 = Mux(P.get_res_space(), [1, 0])
+        res = make_series(P, m2)
+        return res
+
+
 def equiv_to_identity(dp):
     if isinstance(dp, Identity):
         return True
     if isinstance(dp, Mux):
+        if dp.coords == ():
+            return True
         s = simplify_indices_F(dp.get_fun_space(), dp.coords)
         if s == ():
             return True
@@ -44,6 +210,12 @@ def is_equiv_to_terminator(dp):
 #         return True
     return False
 
+rules = [
+    RuleSimplifyLift(),
+    RuleSimplifyLiftB(),
+    RuleSimplifyPermPar(),
+]
+
 def make_series(dp1, dp2):
     """ Creates a Series if needed.
         Simplifies the identity and muxes """
@@ -56,10 +228,6 @@ def make_series(dp1, dp2):
 
         from mocdp.dp.dp_terminator import Terminator
         res = Terminator(dp1.get_fun_space())
-#         print('Terminator')
-#         print('-dp1: %s' % dp1.repr_long())
-#         print('-dp2: %s' % dp2.repr_long())
-#         print('-res: %s' % res.repr_long())
         assert res.get_fun_space() == dp1.get_fun_space()
         return res
 
@@ -75,10 +243,6 @@ def make_series(dp1, dp2):
 #         return dp2
 
 
-#     a = Series0(dp1, dp2)
-
-    from mocdp.dp.dp_parallel import Parallel
-    from mocdp.dp.dp_parallel_simplification import make_parallel
 
     if isinstance(dp1, Parallel) and isinstance(dp2, Parallel):
         a = make_series(dp1.dp1, dp2.dp1)
@@ -97,7 +261,6 @@ def make_series(dp1, dp2):
                 rest = reduce(make_series, dps[1:])
                 return make_series(first, rest)
 
-        from mocdp.dp.dp_parallel import Parallel
         def has_null_fun(dp):
             F = dp.get_fun_space()
             return isinstance(F, PosetProduct) and len(F) == 0
@@ -138,7 +301,6 @@ def make_series(dp1, dp2):
                 return make_series(first, rest)
 
 
-    from mocdp.dp.dp_parallel_simplification import make_parallel
     from mocdp.comp.tests.test_composition import check_same_spaces
 
     # bring the mux outside the parallel
@@ -190,40 +352,6 @@ def make_series(dp1, dp2):
         check_same_spaces(Series(dp1, dp2), res)
         return res
 
-#     # from the right
-#     # bring the mux outside the parallel
-#     #  - p1 - Mux(a) --> |
-#     #                    | -
-#     #  ----------------> |
-#     #  - p1 - |-Mux(a)-|
-#     #         |        | -
-#     #  -------|--------|
-
-#     #  - p1 - |
-#     #         | ---> Mux( [0 * (a)], 1 )
-#     #  -------|
-#     if isinstance(dp2, Mux) and isinstance(dp1, Parallel) \
-#         and isinstance(unwrap_series(dp1.dp1)[-1], Mux):
-#
-#         unwrapped = unwrap_series(dp1.dp1)
-#         last_mux = unwrapped[-1]
-#         assert isinstance(last_mux, Mux)
-#
-#         coords = dp2.coords
-#         assert isinstance(coords, list) and len(coords) == 2, coords
-#
-#         F = dp1.get_fun_space()
-#         coords2 = [compose_indices(F, coords[0], first_mux.coords, list), coords[1]]
-#         m2 = Mux(F, coords2)
-#
-#         rest = wrap_series(first_mux.get_res_space(), unwrapped[1:])
-#
-#         res = make_series(m2, make_parallel(rest, dp2.dp2))
-#
-#         check_same_spaces(Series0(dp1, dp2), res)
-#         return res
-
-
     if isinstance(dp2, Mux):
         if isinstance(dp1, Series):
             dps = unwrap_series(dp1)
@@ -236,6 +364,19 @@ def make_series(dp1, dp2):
 #     print(' dp1: %s' % dp1)
 #     print(' dp2: %s' % dp2)
 #     print('\n- '.join([str(x) for x in unwrap_series(a)]))
+
+
+    for rule in rules:
+        if rule.applies(dp1, dp2):
+            return rule.execute(dp1, dp2)
+
+        # Make sure this is robust
+        dps = unwrap_series(dp1)
+        if rule.applies(dp1, dps[0]):
+            r = rule.execute(dp1, dps[0])
+            rest = wrap_series(dps[0].get_fun_space(), dps[1:])
+            return make_series(r, rest)
+
     return Series(dp1, dp2)
 
 def unwrap_series(dp):
@@ -250,16 +391,16 @@ def unwrap_as_series_start_last(dp):
     dpu_start = wrap_series(dp.get_fun_space(), dpu[:-1])
     return dpu_start, dpu_last
 
-
 def wrap_series(F0, dps):
     if len(dps) == 0:
         return Identity(F0)
     else:
         return make_series(dps[0], wrap_series(dps[0].get_res_space(), dps[1:]))
 
+from mocdp.dp.dp_flatten import get_R_from_F_coords
+
 def simplify_indices_F(F, coords):
     # Safety check: Clearly if it's not the identity it cannot be equal to ()
-    from mocdp.dp.dp_flatten import get_R_from_F_coords
     R = get_R_from_F_coords(F, coords)
     if not (R == F):
         return coords

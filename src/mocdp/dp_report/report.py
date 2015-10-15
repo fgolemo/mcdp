@@ -1,10 +1,10 @@
 from reprep import Report
 from mocdp.dp.dp_series import Series0
-from mocdp.dp.dp_parallel import Parallel
-from mocdp.dp.dp_loop import DPLoop, DPLoop0
+from mocdp.dp import Parallel
+from mocdp.dp import DPLoop, DPLoop0
 from .gg_utils import gg_figure
 from mocdp.posets import PosetProduct
-from mocdp.dp.dp_flatten import Mux
+from mocdp.dp import Mux
 
 
 def report_dp1(dp):
@@ -99,11 +99,12 @@ def gvgen_from_dp(dp0):
     def go_loop(dp):
         (n1i, n1o) = go(dp.dp1)
 
-        i = gg.newItem('|')
-        o = gg.newItem('*')
-        gg.newLink(i, n1i)
-        gg.newLink(n1o, o)
-        gg.newLink(o, i)
+        i = gg.newItem('L')
+        o = gg.newItem('L')
+        gg.newLink(i, n1i, label=str(dp.dp1.get_fun_space()))
+
+        gg.newLink(n1o, o, label=str(dp.dp1.get_res_space()))
+        gg.newLink(o, i, label=str(dp.dp1.get_res_space()))
 
         return (i, o)
 
@@ -118,11 +119,11 @@ def gvgen_from_dp(dp0):
     gg.styleAppend("simple", "style", "rounded")
 #     gg.styleAppend("simple", "color", "blue")
 
-    f0 = gg.newItem("function")
+    f0 = gg.newItem("")
     (f, r) = go(dp0)
-    r0 = gg.newItem("resources")
-    gg.newLink(f0, f)
-    gg.newLink(r, r0)
+    r0 = gg.newItem("")
+    gg.newLink(f0, f, label=str(dp0.get_fun_space()))
+    gg.newLink(r, r0, label=str(dp0.get_res_space()))
 
     gg.styleApply("prim", f0)
     gg.styleApply("prim", r0)

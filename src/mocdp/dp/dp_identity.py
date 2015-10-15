@@ -8,6 +8,11 @@ __all__ = [
     'Identity',
 ]
 
+
+# def Identity(F):
+#     from mocdp.dp.dp_flatten import Mux
+#     return Mux(F, ())
+
 class Identity(PrimitiveDP):
 
     @contract(F='$Poset|str|code_spec')

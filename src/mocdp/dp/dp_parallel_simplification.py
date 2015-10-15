@@ -11,7 +11,7 @@ __all__ = [
     'make_parallel',
 ]
 
-class ParallelSimplificationRule():
+class ParSimplificationRule():
     __metaclass__ = ABCMeta
 
     @abstractmethod
@@ -42,7 +42,7 @@ class ParallelSimplificationRule():
         pass
 
 
-class RuleMuxOutside(ParallelSimplificationRule):
+class RuleMuxOutside(ParSimplificationRule):
 #     #  - p1 - Mux(a) --> |
 #     #                    | -
 #     #  ----------------> |
@@ -74,7 +74,7 @@ class RuleMuxOutside(ParallelSimplificationRule):
         return make_series(x, m)
 
 
-class RuleMuxOutsideB(ParallelSimplificationRule):
+class RuleMuxOutsideB(ParSimplificationRule):
 #     #  - -- ----------> |
 #     #                    | -
 #     #  --p2---Mux(a)---> |
