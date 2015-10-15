@@ -5,6 +5,8 @@ from mocdp.posets.poset_product import PosetProduct
 from mocdp.posets.space import Map
 from mocdp.dp.primitive import NormalForm
 from contracts.utils import raise_desc, raise_wrapped, indent
+from multi_index.get_it_test import compose_indices
+from mocdp.dp.dp_identity import Identity
 
 
 
@@ -138,6 +140,38 @@ def make_series(dp1, dp2):
                 return make_series(first, rest)
 
 
+    # bring the mux outside the parallel
+    #                   | - Mux(c) - p1
+    #  Mux([a,b]) ----> |
+    #                   | -
+    #                     | - p1
+    #  Mux([a*c,b]) ----> |
+    #                     |
+    from mocdp.dp.dp_parallel import make_parallel
+    from mocdp.comp.tests.test_composition import check_same_spaces
+
+    if isinstance(dp1, Mux) and isinstance(dp2, Parallel) \
+        and isinstance(unwrap_series(dp2.dp1)[0], Mux):
+
+        unwrapped = unwrap_series(dp2.dp1)
+        first_mux = unwrapped[0]
+        assert isinstance(first_mux, Mux)
+
+        coords = dp1.coords
+        assert isinstance(coords, list) and len(coords) == 2, coords
+
+        F = dp1.get_fun_space()
+        coords2 = [compose_indices(F, coords[0], first_mux.coords, list), coords[1]]
+        m2 = Mux(F, coords2)
+        
+        rest = wrap_series(first_mux.get_res_space(), unwrapped[1:])
+
+        res = make_series(m2, make_parallel(rest, dp2.dp2))
+
+        check_same_spaces(Series0(dp1, dp2), res)
+        return res
+        
+
     if isinstance(dp2, Mux):
         if isinstance(dp1, Series):
             dps = unwrap_series(dp1)
@@ -158,6 +192,13 @@ def unwrap_series(dp):
     else:
         return unwrap_series(dp.dp1) + unwrap_series(dp.dp2)
 
+def wrap_series(F0, dps):
+    if len(dps) == 0:
+        return Identity(F0)
+    else:
+
+        return make_series(dps[0], wrap_series(dps[0].get_res_space(), dps[1:]))
+    
 def simplify_indices_F(F, coords):
     if coords == [0] and len(F) == 1:
         return ()
