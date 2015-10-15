@@ -377,38 +377,16 @@ def make_series(dp1, dp2):
 #     print(' dp2: %s' % dp2)
 #     print('\n- '.join([str(x) for x in unwrap_series(a)]))
 
+    dp1s = unwrap_series(dp1)
+    dp2s = unwrap_series(dp2)
 
     for rule in rules:
-        if rule.applies(dp1, dp2):
-            return rule.execute(dp1, dp2)
-
-        # Make sure this is robust
-        # dp1 --- [ dp2s[0], dps[1: ] ]
-        dp2s = unwrap_series(dp2)
-        if rule.applies(dp1, dp2s[0]):
-            r = rule.execute(dp1, dp2s[0])
-            rest = wrap_series(dp2s[0].get_fun_space(), dp2s[1:])
-            return make_series(r, rest)
-
-        # Opposite
-        # [dp1s[:-1] dp1s[-1]] --- dp2
-        dp1s = unwrap_series(dp1)
-        if rule.applies(dp1s[-1], dp2):
-            r = rule.execute(dp1s[-1], dp2)
-            first = wrap_series(dp1.get_fun_space(), dp1s[:-1])
-            return make_series(first, r)
-
-        # together...
         # [dp1s[:-1] dp1s[-1]] --- [dp2s[0] dp2s[1:]]
         if rule.applies(dp1s[-1], dp2s[0]):
             r = rule.execute(dp1s[-1], dp2s[0])
             first = wrap_series(dp1.get_fun_space(), dp1s[:-1])
             rest = wrap_series(dp2s[0].get_fun_space(), dp2s[1:])
             return make_series(first, make_series(r, rest))
-
-
-
-
 
     return Series(dp1, dp2)
 
