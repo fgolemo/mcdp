@@ -1,4 +1,3 @@
-from mocdp.unittests.generation import for_some_dps, for_some_dps_dyn
 from reprep import Report
 from mocdp.drawing import plot_upset_minima, plot_upset_R2
 import warnings

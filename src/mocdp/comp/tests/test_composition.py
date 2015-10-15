@@ -3,14 +3,12 @@ from comptests.registrar import comptest
 from contracts.utils import raise_desc
 from mocdp.comp.connection import TheresALoop, dpconnect, dpgraph, dploop0
 from mocdp.comp.wrap import dpwrap
-from mocdp.dp.dp_sum import Product, Sum
+from mocdp.dp import Product, Series, Terminator, make_series
 from mocdp.example_battery import R_Energy, R_Power, R_Time, R_Weight
 from mocdp.example_battery.dp_bat import BatteryDP
 from mocdp.example_battery.dp_bat2 import Mobility
 from mocdp.posets.poset_product import PosetProduct
 from mocdp.posets.rcomp import Rcomp
-from mocdp.dp.dp_terminator import Terminator
-from mocdp.dp.dp_series import Series, make_series
 from numpy.testing.utils import assert_equal
 
 
@@ -218,8 +216,8 @@ def check_compose2_generic():
 
 
 def check_same_spaces(dp1, dp2):
-    print('dp1: %s' % dp1)
-    print('dp2: %s' % dp2)
+#     print('dp1: %s' % dp1)
+#     print('dp2: %s' % dp2)
     assert_equal(dp1.get_fun_space(), dp2.get_fun_space())
     assert_equal(dp1.get_res_space(), dp2.get_res_space())
 

@@ -1,11 +1,11 @@
 from contracts import contract, raise_wrapped
-from mocdp.comp.interfaces import NamedDP
-from mocdp.dp.primitive import PrimitiveDP
+from .interfaces import NamedDP
+from mocdp.dp import PrimitiveDP
 from mocdp.posets.poset_product import PosetProduct
 from mocdp.dp.dp_flatten import get_it
 from mocdp.configuration import get_conftools_dps
 from contracts.utils import indent, raise_desc
-from mocdp.comp.exceptions import DPInternalError
+from mocdp.exceptions import DPInternalError
 
 __all__ = [
     'SimpleWrap',

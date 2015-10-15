@@ -12,3 +12,7 @@ from .dp_flatten import *
 
 from .dp_max import *
 from .dp_terminator import *
+
+
+from .dp_parallel_simplification import *
+from .dp_series_simplification import *

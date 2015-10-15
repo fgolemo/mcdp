@@ -12,6 +12,10 @@ comptests-run:
 	mkdir -p $(out)
 	comptests -o $(out) --contracts --nonose mocdp 
 
+comptests-run-parallel:
+	mkdir -p $(out)
+	comptests -o $(out) --contracts --nonose -c "rparmake" mocdp  
+
 
 clean:
 	rm -rf $(out)

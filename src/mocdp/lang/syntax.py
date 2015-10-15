@@ -2,16 +2,15 @@
 from .parts import (Constraint, FunStatement, LoadCommand, Mult, NewFunction,
     ResStatement, Resource, SetName)
 from contracts import contract
-from contracts.interface import  Where
+from contracts.interface import Where
 from contracts.utils import indent, raise_wrapped
-from mocdp.comp.exceptions import DPInternalError, DPUserError, DPSyntaxError, \
-    DPSemanticError
 from mocdp.comp.interfaces import NamedDP
+from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError)
 from mocdp.lang.parts import (
     DPWrap, Function, LoadDP, NewResource, OpMax, OpMin, PDPCodeSpec, Plus)
 from mocdp.lang.utils import parse_action
-from mocdp.posets.rcomp import (R_Current, R_Energy, R_Power, R_Time, R_Voltage,
-    R_Weight, Rcomp, R_Cost)
+from mocdp.posets.rcomp import (R_Cost, R_Current, R_Energy, R_Power, R_Time,
+    R_Voltage, R_Weight, Rcomp)
 from pyparsing import (Combine, Forward, Group, LineEnd, LineStart, Literal,
     OneOrMore, Optional, Or, ParseException, ParseFatalException, ParserElement,
     SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas, oneOf, opAssoc,

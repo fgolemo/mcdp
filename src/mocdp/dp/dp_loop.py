@@ -7,7 +7,7 @@ import itertools
 
 
 
-__all__ = ['DPLoop']
+__all__ = ['DPLoop', 'DPLoop0']
 #
 # if False:
 #     class SimpleLoop(PrimitiveDP):

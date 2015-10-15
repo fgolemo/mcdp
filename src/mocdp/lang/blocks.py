@@ -15,7 +15,7 @@ from mocdp.lang.parts import Function, NewResource, OpMax, OpMin, Plus, Resource
 from mocdp.lang.syntax import (DPSyntaxError, DPWrap, FunStatement, LoadDP,
     PDPCodeSpec, ResStatement)
 from mocdp.posets.rcomp import mult_table
-from mocdp.comp.exceptions import DPSemanticError
+from mocdp.exceptions import DPSemanticError
 
 class Context():
     def __init__(self):

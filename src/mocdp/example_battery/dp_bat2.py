@@ -1,8 +1,8 @@
+from mocdp.dp import make_series
 from mocdp.dp.dp_flatten import Mux
 from mocdp.dp.dp_identity import Identity
 from mocdp.dp.dp_loop import DPLoop
 from mocdp.dp.dp_parallel import Parallel
-from mocdp.dp.dp_series import make_series
 from mocdp.dp.dp_sum import Product, Sum
 from mocdp.dp.primitive import PrimitiveDP
 from mocdp.posets.poset_product import PosetProduct

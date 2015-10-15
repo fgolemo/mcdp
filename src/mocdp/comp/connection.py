@@ -1,25 +1,21 @@
+from .interfaces import NamedDP
+from .wrap import dpwrap
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import raise_wrapped, format_dict_long, format_list_long, \
-    raise_desc
-from mocdp.comp.interfaces import NamedDP
-from mocdp.comp.wrap import dpwrap
+from contracts.utils import (format_dict_long, format_list_long, raise_desc,
+    raise_wrapped)
+from mocdp.comp import DPInternalError
 from mocdp.configuration import get_conftools_nameddps
-from mocdp.dp.dp_flatten import Mux
-from mocdp.dp.dp_identity import Identity
-from mocdp.dp.dp_loop import DPLoop0
-from mocdp.dp.dp_parallel import make_parallel
-from mocdp.dp.dp_series import make_series
-from mocdp.posets.poset_product import PosetProduct
+from mocdp.dp import (DPLoop0, Identity, Mux, Terminator, make_parallel,
+    make_series)
+from mocdp.exceptions import DPSemanticError
+from mocdp.posets import PosetProduct
 from networkx.algorithms.components.connected import is_connected
 from networkx.algorithms.cycles import simple_cycles
 from networkx.algorithms.dag import topological_sort
 from networkx.exception import NetworkXUnfeasible
 import networkx
 import re
-from mocdp.dp.dp_terminator import Terminator
-from mocdp.comp import DPInternalError
-from mocdp.comp.exceptions import DPSemanticError
 
 Connection0 = namedtuple('Connection', 'dp1 s1 dp2 s2')
 class Connection(Connection0):
