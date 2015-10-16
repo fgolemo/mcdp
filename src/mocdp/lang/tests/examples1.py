@@ -522,6 +522,18 @@ cdp {
 }
     """)
 
+@comptest
+def check_lang19():
+    warnings.warn('fix this bug')
+    p = parse_model("""
+cdp {
+    requires g [R]
+    provides f [R]
+    
+    g >= f * f * f + f * f * f + f
+}
+    """)
+
 
 examples1 = [
     """

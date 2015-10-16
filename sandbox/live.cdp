@@ -2,5 +2,12 @@ cdp {
 	requires g [R]
 	provides f [R]
 	
-	g >= f * f * f * f
+	g >= f * f * f + f  + f
+
+	
+
+
+
+
 }
+

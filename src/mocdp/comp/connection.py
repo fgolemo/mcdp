@@ -6,7 +6,7 @@ from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
 from mocdp.comp import DPInternalError
 from mocdp.configuration import get_conftools_nameddps
-from mocdp.dp import (DPLoop0, Identity, Mux, Terminator, make_parallel,
+from mocdp.dp import (DPLoop0, Mux, Terminator, make_parallel,
     make_series)
 from mocdp.exceptions import DPSemanticError
 from mocdp.posets import PosetProduct
@@ -16,6 +16,7 @@ from networkx.algorithms.dag import topological_sort
 from networkx.exception import NetworkXUnfeasible
 import networkx
 import re
+from mocdp.dp.dp_identity import Identity
 
 Connection0 = namedtuple('Connection', 'dp1 s1 dp2 s2')
 class Connection(Connection0):
@@ -293,6 +294,7 @@ def connect2(ndp1, ndp2, connections, split):
 
         # Get Identity on D
         D_types = ndp2.get_ftypes(D)
+        # Id_D = Mux(D_types, ())  # or identity
         Id_D = Identity(D_types)
 
         ndp1_p = its_dp_as_product(ndp1)
@@ -311,6 +313,7 @@ def connect2(ndp1, ndp2, connections, split):
                 return c1
         
         A_B1_types = PosetProduct(tuple(ndp1.get_rtypes(A)) + tuple(ndp1.get_rtypes(B1)))
+        # Id_A_B1 = Mux(A_B1_types, ())  # or identity
         Id_A_B1 = Identity(A_B1_types)
         ndp2_p = its_dp_as_product(ndp2)
         Z = make_parallel(Id_A_B1, ndp2_p)
