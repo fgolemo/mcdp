@@ -1,19 +1,22 @@
 
 
-cdp {
+cdp  {
 
-	times = cdp {
-		provides a [R]
-		provides b [R]
-		requires c [R]
- 
-    	c >= a * b + b
-	}
+#	times = cdp {
+#		provides a [R]
+#		provides b [R]
+#		requires c [R]
+# 
+#    	c >= a * b + b 
+#	}
 
-	times.a >= times.c
-	times.b >= times.c 
+	#times.a >= times.c
+	#times.b >= times.c 
 
-	
+	provides a [R]
+	requires b []	
+
+	b >= a
 	
 }
 

@@ -567,7 +567,25 @@ def check_lang21():
         times.b >= times.c 
     }
 """)
+    
 
+@comptest
+def check_lang22():    
+    # Need connections
+    assert_semantic_error("""    
+    cdp  {
+        provides a [R]
+    }
+    """)
+
+@comptest
+def check_lang23():
+    # Need connections
+    assert_semantic_error("""    
+    cdp  {
+        requires a [R]
+    }
+    """)
 
 examples1 = [
     """

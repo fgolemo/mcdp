@@ -15,7 +15,7 @@ from pyparsing import (Combine, Forward, Group, LineEnd, LineStart, Literal,
     Optional, Or, ParseException, ParseFatalException, ParserElement, SkipTo,
     Suppress, Word, ZeroOrMore, alphanums, alphas, oneOf, opAssoc,
     operatorPrecedence)
-import string
+
 
 ParserElement.enablePackrat()
 
@@ -68,30 +68,30 @@ units = {
 unit_expr = oneOf(list(units))
 spa(unit_expr, lambda t: units[t[0]])
 
-unitst = S(L('[')) + C(unit_expr, 'unit') + S(L(']'))
-fun_statement = S(L('F')) ^ S(L('provides')) + C(idn, 'fname') + unitst
+unitst = S(L('[')) - C(unit_expr, 'unit') - S(L(']'))
+fun_statement = S(L('F')) ^ S(L('provides')) - C(idn, 'fname') - unitst
 spa(fun_statement, lambda t: FunStatement(t['fname'], t['unit']))
 
-res_statement = S(L('R')) ^ S(L('requires')) + C(idn, 'rname') + unitst
+res_statement = S(L('R')) ^ S(L('requires')) - C(idn, 'rname') - unitst
 spa(res_statement, lambda t: ResStatement(t['rname'], t['unit']))
 
 
 
 # load battery
-load_expr = S(L('load')) + C(idn, 'load_arg')
+load_expr = S(L('load')) - C(idn, 'load_arg')
 spa(load_expr, lambda t: LoadCommand(t['load_arg']))
 
 dp_rvalue = Forward()
 # <dpname> = ...
-setname_expr = C(idn, 'dpname') + S(L('=')) + C(dp_rvalue, 'rvalue')
+setname_expr = (C(idn, 'dpname') + S(L('='))) - C(dp_rvalue, 'rvalue')
 spa(setname_expr, lambda t: SetName(t['dpname'], t['rvalue']))
 
 rvalue = Forward()
-rvalue_resource_simple = C(idn, 'dp') + S(L('.')) + C(idn, 's')
+rvalue_resource_simple = C(idn, 'dp') + S(L('.')) - C(idn, 's')
 
-prep = (S(L('required')) + S(L('by'))) | S(L('of'))
-rvalue_resource_fancy = C(idn, 's') + prep + C(idn, 'dp')
-rvalue_resource = rvalue_resource_simple | rvalue_resource_fancy
+prep = (S(L('required')) - S(L('by'))) | S(L('of'))
+rvalue_resource_fancy = C(idn, 's') + prep - C(idn, 'dp')
+rvalue_resource = rvalue_resource_simple ^ rvalue_resource_fancy
 spa(rvalue_resource, lambda t: Resource(t['dp'], t['s']))
 
 rvalue_new_function = C(idn, 'new_function')
@@ -107,9 +107,9 @@ binary = {
 }
 
 opname = Or([L(x) for x in binary])
-max_expr = (C(opname, 'opname') + S(L('(')) +
-                C(rvalue, 'op1') + S(L(','))
-                + C(rvalue, 'op2')) + S(L(')'))
+max_expr = (C(opname, 'opname') - S(L('(')) +
+                C(rvalue, 'op1') - S(L(','))
+                + C(rvalue, 'op2')) - S(L(')'))
 
 
 spa(max_expr, lambda t: binary[t['opname']](t['op1'], t['op2']))
@@ -120,31 +120,31 @@ operand = rvalue_new_function ^ rvalue_resource ^ max_expr
 # comment_line = ow + Literal('#') + line + S(EOL)
 
 
-simple = (C(idn, 'dp2') + S(L('.')) + C(idn, 's2'))
-fancy = (C(idn, 's2') + S(L('provided')) + S(L('by')) + C(idn, 'dp2'))
+simple = (C(idn, 'dp2') + S(L('.')) - C(idn, 's2'))
+fancy = (C(idn, 's2') + S(L('provided')) - S(L('by')) - C(idn, 'dp2'))
 
 spa(simple, lambda t: Function(t['dp2'], t['s2']))
 spa(fancy, lambda t: Function(t['dp2'], t['s2']))
 
-signal_rvalue = simple | fancy | lf_new_resource | (S(L('(')) + (simple | fancy | lf_new_resource) + S(L(')')))
+signal_rvalue = simple ^ fancy ^ lf_new_resource ^ (S(L('(')) - (simple ^ fancy ^ lf_new_resource) - S(L(')')))
 
 GEQ = S(L('>=')) 
 LEQ = S(L('<='))
 
-constraint_expr = C(signal_rvalue, 'lf') + GEQ + C(rvalue, 'rvalue')
+constraint_expr = C(signal_rvalue, 'lf') + GEQ - C(rvalue, 'rvalue')
 spa(constraint_expr, lambda t: Constraint(t['lf'], t['rvalue']))
 
-constraint_expr2 = C(rvalue, 'rvalue') + LEQ + C(signal_rvalue, 'lf')
+constraint_expr2 = C(rvalue, 'rvalue') + LEQ - C(signal_rvalue, 'lf')
 spa(constraint_expr2, lambda t: Constraint(t['lf'], t['rvalue']))
 
 line_expr = load_expr ^ constraint_expr ^ constraint_expr2 ^ setname_expr ^ fun_statement ^ res_statement
 # dp_statement = S(comment_line) ^ line_expr
 
-dp_model = S(L('cdp')) + S(L('{')) + ZeroOrMore(S(ow) + line_expr) + S(L('}'))
+dp_model = S(L('cdp')) - S(L('{')) - ZeroOrMore(S(ow) + line_expr) - S(L('}'))
 
 
-funcname = Combine(idn + ZeroOrMore(L('.') + idn))
-code_spec = S(L('code')) + C(funcname, 'function')
+funcname = Combine(idn + ZeroOrMore(L('.') - idn))
+code_spec = S(L('code')) - C(funcname, 'function')
 spa(code_spec, lambda t: PDPCodeSpec(function=t['function'], arguments={}))
 
 
@@ -155,10 +155,10 @@ spa(load_pdp, lambda t: LoadDP(t['name']))
 pdp_rvalue = load_pdp ^ code_spec
 
 
-simple_dp_model = (S(L('dp')) + S(L('{')) +
-                   C(Group(ZeroOrMore(fun_statement)), 'fun') +
-                   C(Group(ZeroOrMore(res_statement)), 'res') +
-                   S(L('implemented-by')) + C(pdp_rvalue, 'pdp_rvalue') +
+simple_dp_model = (S(L('dp')) - S(L('{')) -
+                   C(Group(ZeroOrMore(fun_statement)), 'fun') -
+                   C(Group(ZeroOrMore(res_statement)), 'res') -
+                   S(L('implemented-by')) - C(pdp_rvalue, 'pdp_rvalue') -
                    S(L('}')))
 spa(simple_dp_model, lambda t: DPWrap(list(t[0]), list(t[1]), t[2]))
 
