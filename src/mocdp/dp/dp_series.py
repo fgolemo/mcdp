@@ -12,8 +12,6 @@ __all__ = [
 
 
 
-
-
 class Series0(PrimitiveDP):
 
     def __init__(self, dp1, dp2):

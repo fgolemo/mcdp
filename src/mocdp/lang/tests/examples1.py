@@ -524,8 +524,7 @@ cdp {
 
 @comptest
 def check_lang19():
-    warnings.warn('fix this bug')
-    p = parse_model("""
+    parse_model("""
 cdp {
     requires g [R]
     provides f [R]
@@ -533,6 +532,24 @@ cdp {
     g >= f * f * f + f * f * f + f
 }
     """)
+
+@comptest
+def check_lang20():
+    """ One loop """
+    parse_model("""
+cdp {
+    times = dp {
+        provides a [R]
+        provides b [R]
+        requires c [R]
+ 
+        implemented-by load times_R
+    }
+
+    times.a >= times.c
+    times.b >= times.c 
+}
+""")
 
 
 examples1 = [

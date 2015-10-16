@@ -17,6 +17,7 @@ from mocdp.lang.syntax import (DPSyntaxError, DPWrap, FunStatement, LoadDP,
 from mocdp.posets.rcomp import mult_table
 from mocdp.exceptions import DPSemanticError, DPInternalError
 from contracts.syntax import e
+from conf_tools.exceptions import SemanticMistakeKeyNotFound
 
 class Context():
     def __init__(self):
@@ -78,6 +79,30 @@ class Context():
             if not cand in self.names:
                 return cand
         assert False
+
+    def _fun_name_exists(self, fname):
+        for ndp in self.names.values():
+            if fname in ndp.get_fnames():
+                return True
+        return False
+
+    def _res_name_exists(self, rname):
+        for ndp in self.names.values():
+            if rname in ndp.get_rnames():
+                return True
+        return False
+
+    def new_fun_name(self, prefix):
+        for i in range(1, 10):
+            cand = prefix + '%d' % i
+            if not self._fun_name_exists(cand):
+                return cand
+
+    def new_res_name(self, prefix):
+        for i in range(1, 10):
+            cand = prefix + '%d' % i
+            if not self._res_name_exists(cand):
+                return cand
 
     @contract(a=Resource)
     def get_rtype(self, a):
@@ -183,7 +208,7 @@ def check_missing_connections(context):
             s += '\n' + indent(msg, 'help: ')
 
     if unconnected_res:
-        s += "There are some unconnected resources:"
+        s += "\nThere are some unconnected resources:"
         for n, rn in unconnected_res:
             s += '\n- resource %s of dp %r' % (rn, n)
             msg = 'One way to fix this is to add an explicit resource:\n'
@@ -218,7 +243,12 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
         rnames = [r.rname for r in res]
         if len(fnames) == 1: fnames = fnames[0]
         if len(rnames) == 1: rnames = rnames[0]
-        return SimpleWrap(dp=dp, fnames=fnames, rnames=rnames)
+        try:
+            w = SimpleWrap(dp=dp, fnames=fnames, rnames=rnames)
+        except ValueError as e:
+            raise DPSemanticError(str(e), r.where)
+
+        return w
 
 
     raise ValueError('Invalid dprvalue: %s' % str(r))
@@ -227,7 +257,11 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
 def eval_pdp(r, context):  # @UnusedVariable
     if isinstance(r, LoadDP):
         name = r.name
-        _, dp = get_conftools_dps().instance_smarter(name)
+        try:
+            _, dp = get_conftools_dps().instance_smarter(name)
+        except SemanticMistakeKeyNotFound as e:
+            raise DPSemanticError(str(e), r.where)
+
         return dp
 
     if isinstance(r, PDPCodeSpec):
@@ -270,7 +304,6 @@ def eval_rvalue(rvalue, context):
                 msg = 'Unknown dp (%r.%r)' % (rvalue.dp, rvalue.s)
                 raise DPSemanticError(msg, where=rvalue.where)
 
-
             ndp = context.names[rvalue.dp]
             if not rvalue.s in ndp.get_rnames():
                 msg = 'Unknown resource %r.' % (rvalue.s)
@@ -289,6 +322,10 @@ def eval_rvalue(rvalue, context):
             return a, F1, b, F2
 
         def add_binary(dp, nprefix, na, nb, nres):
+            nres = context.new_res_name(nres)
+            na = context.new_fun_name(na)
+            nb = context.new_fun_name(nb)
+
             ndp = dpwrap(dp, [na, nb], nres)
             name = context.new_name(nprefix)
             c1 = Connection(dp1=a.dp, s1=a.s, dp2=name, s2=na)

@@ -8,6 +8,7 @@ import logging
 import os
 import sys
 import time
+from conf_tools.global_config import GlobalConfig
 logger = logging.getLogger(__name__)
 
 
@@ -18,6 +19,7 @@ def safe_makedirs(dirname):
         os.makedirs(dirname)
 
 def watch_main():
+    GlobalConfig.global_load_dir("mocdp")
     filename = sys.argv[1]
     if not '.cdp' in filename:
         raise ValueError(filename)

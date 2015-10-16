@@ -305,7 +305,6 @@ def connect2(ndp1, ndp2, connections, split):
         # print('m1_X = %s' % m1_X)
         # print('m1_X.R = %s' % m1_X.get_res_space()  )
         
-        
         def coords_cat(c1, m):
             if m != ():
                 return c1 + (m,)

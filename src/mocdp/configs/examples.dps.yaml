@@ -69,6 +69,13 @@
   - mocdp.dp.Terminator
   - F: Rcomp_J
 
+- id: times_R
+  desc: Times multiplying
+  code:
+  - mocdp.dp.Product
+  - F1: R_dimensionless
+    F2: R_dimensionless
+    R: R_dimensionless
 
 - id: "dp_${ndp}"
   desc: "DP from namedDP"
@@ -76,8 +83,9 @@
   - mocdp.comp.dp_from_ndp
   - ndp: "${ndp}"
 
-
 - id: dp_testminsq
 
 - id: dp_testmax
+
+
 
