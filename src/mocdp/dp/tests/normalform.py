@@ -15,10 +15,10 @@ def check_normalform(id_dp, dp):
     UF = UpperSets(F)
     UR = UpperSets(R)
 
-    f_bot = UF.get_bottom()
+    uf_bot = UF.get_bottom()
     S_bot = S.get_bottom()
 
-    x = (f_bot, S_bot)
+    x = (uf_bot, S_bot)
     alpha.get_domain().belongs(x)
 
     y = alpha(x)
@@ -29,3 +29,28 @@ def check_normalform(id_dp, dp):
     print('codomain: %s' % beta.get_codomain())
     print('z = %s' % str(z))
     beta.get_codomain().belongs(z)
+
+    f_fix = uf_bot
+    print('f_fix: %s' % UF.format(f_fix))
+    Ss = [S_bot]
+    for i in range(10):
+        Si = beta((f_fix, Ss[-1]))
+        print('i = %s  %s' % (i, Si))
+        S.belongs(Si)
+        Ss.append(Si)
+        # check increasing sequence
+        S.check_leq(Ss[-2], Ss[-1])
+        if S.leq(Ss[-1], Ss[-2]):  # => equality
+            print('Converged exactly')
+            break
+    Sinf = Ss[-1]
+    print('S converged to %s' % S.format(Sinf))
+    ur = alpha((f_fix, Sinf))
+    print('Results:')
+    print(' uf: %s' % UF.format(f_fix))
+    print(' ur: %s' % UR.format(ur))
+    print(' Sinf: %s' % S.format(Sinf))
+
+
+
+

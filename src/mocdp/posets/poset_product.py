@@ -80,6 +80,9 @@ class PosetProduct(Poset):
             raise_desc(NotBelongs, msg, args_first=False, self=self, x=x)
 
     def format(self, x):
+        if not isinstance(x, tuple):
+            raise_desc(NotBelongs, 'Not a tuple', x=x, self=self)
+
         ss = []
         for _, (sub, xe) in enumerate(zip(self.subs, x)):
             ss.append(sub.format(xe))
