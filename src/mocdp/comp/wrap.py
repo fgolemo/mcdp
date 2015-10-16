@@ -6,6 +6,7 @@ from mocdp.dp.dp_flatten import get_it
 from mocdp.configuration import get_conftools_dps
 from contracts.utils import indent, raise_desc
 from mocdp.exceptions import DPInternalError
+import warnings
 
 __all__ = [
     'SimpleWrap',
@@ -28,6 +29,7 @@ class SimpleWrap(NamedDP):
             if isinstance(rnames, list):
                 if not len(set(rnames)) == len(rnames):
                     raise ValueError('Repeated rnames.')
+
             if isinstance(fnames, list):
                 if not len(set(fnames)) == len(fnames):
                     raise ValueError('Repeated fnames.')
@@ -44,17 +46,27 @@ class SimpleWrap(NamedDP):
                 self.F_single = True
                 self.Fname = fnames
 
-            if isinstance(R, PosetProduct):
-                if not isinstance(rnames, list) or not len(R) == len(rnames):
+            if isinstance(rnames, list):
+                if not isinstance(R, PosetProduct):
                     raise ValueError("R incompatible")
-                self.R_single = False
                 self.Rnames = rnames
-
+                self.R_single = False
             else:
-                if not isinstance(rnames, str):
-                    raise ValueError("R and rnames incompatible: want one string")
                 self.R_single = True
                 self.Rname = rnames
+
+            warnings.warn('very late night')
+#             if isinstance(R, PosetProduct):
+#                 if not isinstance(rnames, list) or not len(R) == len(rnames):
+#                     raise ValueError("R incompatible")
+#                 self.R_single = False
+#                 self.Rnames = rnames
+#
+#             else:
+#                 if not isinstance(rnames, str):
+#                     raise ValueError("R and rnames incompatible: want one string")
+#                 self.R_single = True
+#                 self.Rname = rnames
 
         except Exception as e:
             msg = 'Cannot wrap primitive DP.'
@@ -91,6 +103,7 @@ class SimpleWrap(NamedDP):
             return ()
 
         rnames = self.get_rnames()
+
         try:
             return rnames.index(r)
         except ValueError:

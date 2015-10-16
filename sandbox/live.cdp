@@ -2,12 +2,12 @@
 
 cdp {
 
-	times = dp {
+	times = cdp {
 		provides a [R]
 		provides b [R]
 		requires c [R]
  
-    	implemented-by load times_R
+    	c >= a * b
 	}
 
 	times.a >= times.c

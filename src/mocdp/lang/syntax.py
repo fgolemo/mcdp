@@ -10,11 +10,12 @@ from mocdp.lang.parts import (
     DPWrap, Function, LoadDP, NewResource, OpMax, OpMin, PDPCodeSpec, Plus)
 from mocdp.lang.utils import parse_action
 from mocdp.posets.rcomp import (R_Cost, R_Current, R_Energy, R_Power, R_Time,
-    R_Voltage, R_Weight, Rcomp, R_dimensionless)
+    R_Voltage, R_Weight, R_dimensionless)
 from pyparsing import (Combine, Forward, Group, LineEnd, LineStart, Literal,
-    Optional, Or, ParseException, ParseFatalException, ParserElement,
-    SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas, oneOf, opAssoc,
+    Optional, Or, ParseException, ParseFatalException, ParserElement, SkipTo,
+    Suppress, Word, ZeroOrMore, alphanums, alphas, oneOf, opAssoc,
     operatorPrecedence)
+import string
 
 ParserElement.enablePackrat()
 
@@ -222,10 +223,25 @@ rvalue << operatorPrecedence(operand, [
 ])
 
 
-
+#
+# def boxit(s):
+#     lines = s.split('\n')
+#     W = max(map(len, lines))
+# #     c = ['┌', '┐', '└', '┘']
+#     s = '┌' + '┄' * (W + 2) + '┐'
+#     s += '\n' + '┆ ' + ' ' * (W) + ' ┆'
+#
+#     for l in lines:
+#         s += '\n┆ ' + l.ljust(W, '-') + ' ┆'
+#     s += '\n' + '┆ ' + ' ' * (W) + ' ┆'
+#     s += '\n' + '└' + '┄' * (W + 2) + '┘'
+#
+#     return s
 
 def parse_wrap(expr, string):
     string = string.strip()
+    # m = boxit
+    m = lambda x: x
     try:
         return expr.parseString(string, parseAll=True)
     except (ParseException, ParseFatalException) as e:
@@ -233,11 +249,11 @@ def parse_wrap(expr, string):
         raise DPSyntaxError(str(e), where=where)
     except DPSemanticError as e:
         msg = "User error while interpreting the model:"
-        msg += "\n\n" + indent(string, '  > ') + '\n'
+        msg += "\n\n" + indent(m(string), '  ') + '\n'
         raise_wrapped(DPSemanticError, e, msg, compact=True)
     except DPInternalError as e:
         msg = "Internal error while evaluating the spec:"
-        msg += "\n\n" + indent(string, '  > ') + '\n'
+        msg += "\n\n" + indent(m(string), '  ') + '\n'
         raise_wrapped(DPInternalError, e, msg, compact=False)
     
 def remove_comments(s):

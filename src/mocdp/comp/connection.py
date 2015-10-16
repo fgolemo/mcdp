@@ -17,6 +17,7 @@ from networkx.exception import NetworkXUnfeasible
 import networkx
 import re
 from mocdp.dp.dp_identity import Identity
+import warnings
 
 Connection0 = namedtuple('Connection', 'dp1 s1 dp2 s2')
 class Connection(Connection0):
@@ -73,9 +74,17 @@ def dpconnect(name2dp, connections, split=[]):
     """
         Raises TheresALoop
     """
-    if len(name2dp) < 2:
-        msg = 'Less than two DPs: %s' % name2dp
-        raise DPInternalError(msg)
+    if len(name2dp) == 1:
+        if connections:
+            raise NotImplementedError
+        return list(name2dp.values())[0]
+
+#     if len(name2dp) < 2:
+#
+#         msg = 'Less than two DPs: %s' % name2dp
+#         raise_desc(DPInternalError, msg, name2dp=format_dict_long(name2dp),
+#                    connections=format_list_long(connections),
+#                    split=split)
 
     for k, v in name2dp.items():
         _, name2dp[k] = get_conftools_nameddps().instance_smarter(v)
@@ -194,7 +203,6 @@ def its_dp_as_product(ndp):
 
     if len(ndp.get_rnames()) == 1:
         R0 = dp.get_res_space()
-#         R = PosetProduct((R0,))
         lift = Mux(R0, [()])
         dp = make_series(dp, lift)
 
@@ -207,6 +215,9 @@ def its_dp_as_product(ndp):
 def connect2(ndp1, ndp2, connections, split):
     """ Note the argument split must be strings so that orders are preserved
         and deterministic. """
+
+    if ndp1 is ndp2:
+        raise ValueError('Equal')
 
     if len(set(split)) != len(split):
         msg = 'Repeated signals in split: %s' % str(split)
@@ -604,6 +615,10 @@ def dploop0(ndp, lr, lf):
             F = PosetProduct((ndp.get_ftype(A[0]), R))
         else:
             F = PosetProduct((ndp.get_ftypes(A), R))
+
+        print('A: %s' % A)
+        print('F: %s' % F)
+
         coords = []
         for x in ndp.get_fnames():
             if x in A:
@@ -613,11 +628,23 @@ def dploop0(ndp, lr, lf):
                 else:
                     coords.append(0)  # just get the one A
             if x == lf:
-                coords.append(coord_concat((1,), ndp.rindex(lr)))
+                print('x = lf = %s' % x)
+                xc = coord_concat((1,), ndp.rindex(lr))
+                coords.append(xc)
+
+
+        warnings.warn('This is a trick')
+        if len(coords) == 1:
+            coords = coords[0]
     
         X = Mux(F, coords)
+        print('X = %s' % X.repr_long())
+        dp = ndp.get_dp()
+        print('dp = %s' % dp.repr_long())
+        S = make_series(X, dp)
+        print('S = %s' % S)
         
-        res_dp = DPLoop0(make_series(X, ndp.get_dp()))
+        res_dp = DPLoop0(S)
         rnames = ndp.get_rnames()
         fnames = A
     
@@ -637,11 +664,9 @@ def dploop0(ndp, lr, lf):
     
         res = dpwrap(res_dp, fnames, rnames)
         return res
-    except BaseException as e:
+    except DPInternalError as e:
         msg = 'Error while calling dploop0( lr = %s -> lf = %s) ' % (lr, lf)
-        compact = isinstance(e, DPInternalError)
-        raise_wrapped(DPInternalError, e, msg, compact=compact,
-                      ndp=ndp.repr_long())
+        raise_wrapped(DPInternalError, e, msg, ndp=ndp.repr_long())
 
 
 
@@ -651,10 +676,28 @@ def dploop0(ndp, lr, lf):
 def dpgraph(name2dp, connections, split):
     if not len(set(split)) == len(split):
         raise ValueError('dpgraph: Repeated signals in split: %s' % str(split))
+
+    if not(name2dp):
+        msg = 'I only have %d names: %s' % (len(name2dp), list(name2dp))
+        raise DPInternalError(msg)
+
+    res = dpgraph_(name2dp, connections, split)
+
     try:
-        if len(name2dp) < 1:
-            msg = 'I only have %d names: %s' % (len(name2dp), list(name2dp))
-            raise DPInternalError(msg)
+        for x in split:
+            res.rindex(x)
+    except DPInternalError as e:
+        msg = 'Invalid result from dpgraph_().'
+        raise_wrapped(DPInternalError, e, msg, res=res, name2dp=name2dp, connections=connections,
+                   split=split)
+    return res
+
+@contract(name2dp='dict(str:($NamedDP|str|code_spec))',
+          connections='set(str|$Connection)|list(str|$Connection)',
+          returns=NamedDP)
+def dpgraph_(name2dp, connections, split):
+
+    try:
 
         for k, v in name2dp.items():
             _, name2dp[k] = get_conftools_nameddps().instance_smarter(v)
@@ -671,7 +714,12 @@ def dpgraph(name2dp, connections, split):
         cycle0 = cycles[0]
         # get one connection that breaks the cycle
         first = cycle0[0]
-        second = cycle0[1]
+        if len(cycle0) == 1:
+#             raise NotImplementedError
+            second = first
+        else:
+            second = cycle0[1]
+
         def find_one(a, b):
             for c in connections:
                 if c.dp1 == a and c.dp2 == b:
@@ -698,29 +746,46 @@ def dpgraph(name2dp, connections, split):
             split1 = []
 
         split1.extend(split)
+
+
+        print('asking to %s %s %s' % (name2dp, other_connections, split1))
         ndp = dpgraph(name2dp, other_connections, split=split1)
+        print('the result was: %s' % ndp.repr_long())
 
         # now we make sure that the signals we have are preserved
         ndp.rindex(c.s1)
         ndp.findex(c.s2)
         l = dploop0(ndp, c.s1, c.s2)
+        print('The result of loop was %s' % l.repr_long())
 
-        F = ndp.get_rtype(c.s1)
-        term = dpwrap(Terminator(F), c.s1, [])
-    
-        res = connect2(l, term, set([Connection("-", c.s1, "-", c.s1)]), split=[])
-    
-        return res
+        l.rindex(c.s1)
+
+        if c.s1 in split:
+            return l
+#             F = ndp.get_rtype(c.s1)
+#             R0 = l.get_rtype(c.s1)
+#             print('R0 type: %s' % type(R0))
+#
+#             lift = dpwrap(Mux(R0, [()]), c.s1, [c.s1])
+#             res = connect2(l, lift,
+#                            set([Connection("-", c.s1, "-", c.s1)]), split=[])
+#             return res
+
+        else:
+            F = ndp.get_rtype(c.s1)
+            term = dpwrap(Terminator(F), c.s1, [])
+
+            res = connect2(l, term,
+                           set([Connection("-", c.s1, "-", c.s1)]), split=[])
+
+            return res
     except DPSemanticError as e:
-        compact = isinstance(e, DPSemanticError)
         raise_wrapped(DPSemanticError, e, 'Error while calling dpgraph().',
-                      compact=compact,
+                      compact=True,
                       names=format_dict_long(name2dp, informal=True),
                       connection=format_list_long(connections, informal=True))
-    except BaseException as e:
-        compact = isinstance(e, DPInternalError)
+    except DPInternalError as e:
         raise_wrapped(DPInternalError, e, 'Error while calling dpgraph().',
-                      compact=compact,
                       names=format_dict_long(name2dp, informal=True),
                       connection=format_list_long(connections, informal=True))
 
