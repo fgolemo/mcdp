@@ -11,9 +11,9 @@ cdp {
 	}
 
 	times.a >= times.c
-	# times.b >= times.c 
+	times.b >= times.c 
 
-	provides b_ [R]
-	times.b >= b_
+	
+	
 }
 
