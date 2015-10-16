@@ -4,7 +4,7 @@ from collections import namedtuple
 from contracts import contract
 from contracts.utils import raise_wrapped
 from decent_logs import WithInternalLog
-from mocdp.posets import (Map, NotBelongs, Poset, PosetProduct, Single, Space,
+from mocdp.posets import (Map, NotBelongs, Poset, PosetProduct, Space,
     UpperSet, UpperSets)
 
 __all__ = [
@@ -102,7 +102,8 @@ class PrimitiveDP(WithInternalLog):
         """
         alpha = DefaultAlphaMap(self)
         beta = DefaultBeta(self)
-        return NormalForm(S=get_S_null(), alpha=alpha, beta=beta)
+        S = PosetProduct(())
+        return NormalForm(S=S, alpha=alpha, beta=beta)
 
     def __repr__(self):
         return '%s(%s→%s)' % (type(self).__name__, self.F, self.R)
@@ -111,13 +112,13 @@ class PrimitiveDP(WithInternalLog):
         return self.__repr__()
 
 NormalForm = namedtuple('NormalForm', ['S', 'alpha', 'beta'])
-
-def get_S_null_element():
-    return '@'
-
-def get_S_null():
-    Void = Single(get_S_null_element())
-    return Void
+#
+# def get_S_null_element():
+#     return '@'
+#
+# def get_S_null():
+#     Void = Single(get_S_null_element())
+#     return Void
 
 class DefaultAlphaMap(Map):
     def __init__(self, dp):
@@ -125,7 +126,7 @@ class DefaultAlphaMap(Map):
         F = dp.get_fun_space()
         R = dp.get_res_space()
         UF = UpperSets(F)
-        S = get_S_null()
+        S = PosetProduct(())
         dom = PosetProduct((UF, S))
 
         cod = UpperSets(R)
@@ -143,7 +144,7 @@ class DefaultBeta(Map):
         F = dp.get_fun_space()
         UF = UpperSets(F)
 
-        S = get_S_null()
+        S = PosetProduct(())
         dom = PosetProduct((UF, S))
         cod = S
         Map.__init__(self, dom, cod)

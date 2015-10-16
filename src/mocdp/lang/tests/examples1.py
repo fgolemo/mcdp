@@ -118,7 +118,7 @@ cdp {
     """)
 
     # reused same function
-    ndp = parse_model("""
+    parse_model("""
 cdp {
     provides c [J]
     requires w1 [g]
@@ -549,6 +549,23 @@ cdp {
     times.a >= times.c
     times.b >= times.c 
 }
+""")
+
+@comptest
+def check_lang21():    
+    parse_model("""
+    cdp {
+        times = cdp {
+            provides a [R]
+            provides b [R]
+            requires c [R]
+     
+            c >= a * b
+        }
+    
+        times.a >= times.c
+        times.b >= times.c 
+    }
 """)
 
 

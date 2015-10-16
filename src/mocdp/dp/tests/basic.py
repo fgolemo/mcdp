@@ -1,5 +1,4 @@
 from mocdp.unittests.generation import for_all_dps
-from mocdp.dp.dp_loop import DPLoop
 
 
 
@@ -15,8 +14,8 @@ def check_dp1(id_dp, dp):
     f_top = funsp.get_top()
     f_bot = funsp.get_bottom()
 
-    if isinstance(dp, DPLoop):
-        return
+#     if isinstance(dp, DPLoop0):
+#         return
 
     u0 = dp.solve(f_bot)
     u1 = dp.solve(f_top)
@@ -38,8 +37,8 @@ def check_dp2(_id_dp, dp):
     chain = funsp.get_test_chain(n=5)
     poset_check_chain(funsp, chain)
 
-    if isinstance(dp, DPLoop):
-        return
+#     if isinstance(dp, DPLoop):
+#         return
 
     trchain = map(dp.solve, chain)
 

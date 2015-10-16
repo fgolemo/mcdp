@@ -1,9 +1,9 @@
+# -*- coding: utf-8 -*-
 from reprep import Report
 from mocdp.dp.dp_series import Series0
 from mocdp.dp import Parallel
-from mocdp.dp import DPLoop, DPLoop0
+from mocdp.dp import DPLoop0
 from .gg_utils import gg_figure
-from mocdp.posets import PosetProduct
 from mocdp.dp import Mux
 
 
@@ -14,6 +14,16 @@ def report_dp1(dp):
     gg_figure(r, 'graph', gg)
 
     r.text('long', dp.repr_long())
+
+
+    S, alpha, beta = dp.get_normal_form()
+
+    s = ""
+    s += 'S: %s' % S
+    s += '\nα: %s' % alpha
+    s += '\nβ: %s' % beta
+    r.text('normalform', s)
+
     return r
 
 
@@ -24,8 +34,8 @@ def gvgen_from_dp(dp0):
             r = go_series(dp)
         elif isinstance(dp, Parallel):
             r = go_parallel(dp)
-        elif isinstance(dp, DPLoop):
-            r = go_loop(dp)
+#         elif isinstance(dp, DPLoop):
+#             r = go_loop(dp)
         elif isinstance(dp, DPLoop0):
             r = go_loop(dp)
         else:
@@ -54,11 +64,11 @@ def gvgen_from_dp(dp0):
 #                         'fontname': 'Palatino italic', 'fontsize': 10},
 
         gg.styleApply("simple", n)
-        F = dp.get_fun_space()
-        R = dp.get_res_space()
+        # F = dp.get_fun_space()
+        # R = dp.get_res_space()
 
-        nin = 1 if not isinstance(F, PosetProduct) else len(F)
-        nout = 1 if not isinstance(R, PosetProduct) else len(R)
+        # nin = 1 if not isinstance(F, PosetProduct) else len(F)
+        # nout = 1 if not isinstance(R, PosetProduct) else len(R)
 
         return (n, n)
 #         return (tuple([n for _ in range(nin)]),

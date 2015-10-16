@@ -1,7 +1,6 @@
 from mocdp.dp import make_series
 from mocdp.dp.dp_flatten import Mux
 from mocdp.dp.dp_identity import Identity
-from mocdp.dp.dp_loop import DPLoop
 from mocdp.dp.dp_parallel import Parallel
 from mocdp.dp.dp_sum import Product, Sum
 from mocdp.dp.primitive import PrimitiveDP
@@ -156,9 +155,9 @@ def battery_complete():
     series([dp4b, dp7])
 
     dps = series([dpB, dpA, dp1, dp2, dp4, dp4b, dp7])
-    dp = DPLoop(dps)
+#     dp = DPLoop(dps)
 
-    return dp
+    return dps
 
 def energy_product():
     return Product(R_Time, R_Power, R_Energy)

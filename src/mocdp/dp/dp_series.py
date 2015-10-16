@@ -38,14 +38,10 @@ class Series0(PrimitiveDP):
     def solve(self, func):
         from mocdp.posets import UpperSet, poset_minima
 
-#         self.info('func: %s' % self.F.format(func))
-
         u1 = self.dp1.solve(func)
         ressp1 = self.dp1.get_res_space()
         tr1 = UpperSets(ressp1)
         tr1.belongs(u1)
-
-#         self.info('u1: %s' % tr1.format(u1))
 
         mins = set([])
         for u in u1.minimals:
@@ -61,12 +57,11 @@ class Series0(PrimitiveDP):
         us = UpperSet(minimals, ressp)
         tres.belongs(us)
 
-#         self.info('us: %s' % tres.format(us))
-
         return us
 
     def __repr__(self):
         return 'Series(%r, %r)' % (self.dp1, self.dp2)
+
     def repr_long(self):
         r1 = self.dp1.repr_long()
         r2 = self.dp2.repr_long()
@@ -101,7 +96,9 @@ class Series0(PrimitiveDP):
         alpha: UF1 x S -> UR1
         beta: UF1 x S -> S
 """     
-        S = PosetProduct((S1, S2))
+        S = prod_make(S1, S2)
+
+
         D = PosetProduct((UF1, S))
                          
         class SeriesAlpha(Map):
@@ -112,7 +109,8 @@ class Series0(PrimitiveDP):
                 Map.__init__(self, dom, cod)
 
             def _call(self, x):
-                (F, (s1, s2)) = x
+                (F, s) = x
+                (s1, s2) = prod_get_state(S1, S2, s)
                 a = alpha1((F, s1))
                 return alpha2((a, s2))
 
@@ -125,17 +123,61 @@ class Series0(PrimitiveDP):
 
             def _call(self, x):
 
-                (F, (s1, s2)) = x
-
+                (F, s) = x
+                (s1, s2) = prod_get_state(S1, S2, s)
                 r_1 = beta1((F, s1))
                 a = alpha1((F, s1))
                 r_2 = beta2((a, s2))
                 
-                return r_1, r_2
+                return prod_make_state(S1, S2, r_1, r_2)
 
         return NormalForm(S, SeriesAlpha(self), SeriesBeta(self))
 
 
 Series = Series0
+
+if False:
+    # Huge product spaces
+    def prod_make(S1, S2):
+        S = PosetProduct((S1, S2))
+        return S
+
+    def prod_get_state(S1, S2, s):  # @UnusedVariable
+        (s1, s2) = s
+        return (s1, s2)
+else:
+
+    def prod_make(S1, S2):
+        assert isinstance(S1, PosetProduct), S1
+        if isinstance(S2, PosetProduct):
+            S = PosetProduct(S1.subs + S2.subs)
+        else:
+            S = PosetProduct(S1.subs + (S2,))
+
+        return S
+
+    def prod_make_state(S1, S2, s1, s2):
+        assert isinstance(S1, PosetProduct), S1
+        assert isinstance(s1, tuple)
+        if isinstance(S2, PosetProduct):
+            assert isinstance(s2, tuple)
+            return s1 + s2
+        else:
+            return s1 + (s2,)
+
+    def prod_get_state(S1, S2, s):
+        assert isinstance(S1, PosetProduct)
+        assert isinstance(s, tuple)
+        n1 = len(S1)
+
+        s1 = s[:n1]
+        s2 = s[n1:]
+        if isinstance(S2, PosetProduct):
+            pass
+        else:
+            assert len(s2) == 1
+            s2 = s2[0]
+
+        return (s1, s2)
 
 

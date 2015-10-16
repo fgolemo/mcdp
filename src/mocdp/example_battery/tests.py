@@ -31,7 +31,7 @@ def check_ex16c(context, _id_dp, dp):
     context.add_report(r, 'ex16c')
 
 def check_ex16c_r(dp):
-    from mocdp.dp.dp_loop import SimpleLoop
+#     from mocdp.dp.dp_loop import SimpleLoop
     funsp = dp.get_fun_space()
 
     assert isinstance(dp, SimpleLoop)
@@ -45,7 +45,6 @@ def check_ex16c_r(dp):
 
     res1 = dp1.solve(payload1)
     res2 = dp1.solve(payload2)
-
 
     r = Report()
     caption = 'Two curves for each payload'

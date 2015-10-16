@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
-from contracts.utils import check_isinstance, raise_desc, raise_wrapped, indent
-from mocdp.posets import (Map, NotLeq, PosetProduct, UpperSet, UpperSets,
-    poset_minima)
+from contracts.utils import indent, raise_desc, raise_wrapped
+from mocdp.posets import Map, NotLeq, PosetProduct, UpperSet, UpperSets
 import itertools
 
 
-
-__all__ = ['DPLoop', 'DPLoop0']
+__all__ = [
+    'DPLoop0',
+]
 #
 # if False:
 #     class SimpleLoop(PrimitiveDP):
@@ -68,221 +68,42 @@ __all__ = ['DPLoop', 'DPLoop0']
 #
 #             return r[-1]
 
-
-
-class DPLoop(PrimitiveDP):
-
-    def __init__(self, dp1):
-
-        from mocdp import get_conftools_dps
-
-        library = get_conftools_dps()
-        _, self.dp1 = library.instance_smarter(dp1)
-
-        funsp = self.dp1.get_fun_space()
-        ressp = self.dp1.get_res_space()
-
-        check_isinstance(funsp, PosetProduct)
-        check_isinstance(ressp, PosetProduct)
-
-        if len(funsp) != 2:
-            raise ValueError('funsp needs to be length 2: %s' % funsp)
-
-        if len(ressp) != 2:
-            raise ValueError('ressp needs to be length 2: %s' % ressp)
-
-        self.F1 = funsp[0]
-        self.R1 = ressp[0]
-        self.R2 = funsp[1]
-
-        if not (funsp[1]) == (ressp[1]):
-            raise_desc(ValueError, "Spaces incompatible for loop",
-                       funsp=funsp, ressp=ressp,
-                       ressp1=ressp[1], funsp1=funsp[1])
-
-        F = self.F1
-        R = self.R1
-        PrimitiveDP.__init__(self, F=F, R=R)
-
-    def get_normal_form(self):
-        """
-            S0 is a Poset
-            alpha0: U(F0) x S0 -> U(R0)
-            beta0:  U(F0) x S0 -> S0 
-        """
-
-        S0, alpha0, beta0 = self.dp1.get_normal_form()
-
-        R1 = self.R1
-        R2 = self.R2
-        F1 = self.F1
-        UR2 = UpperSets(self.R2)
-
-        S = PosetProduct((S0, UR2))
-        UF1 = UpperSets(self.F1)
-        UR1 = UpperSets(self.R1)
-        F1R2 = PosetProduct((F1, R2))
-        UF1R2 = UpperSets(F1R2)
-        UR1R2 = UpperSets(PosetProduct((self.R1, R2)))
-        
-        """
-        S = S0 x UR2 is a Poset
-        alpha: UF1 x S -> UR1
-        beta: UF1 x S -> S
-"""
-        class DPAlpha(Map):
-            def __init__(self, dp):
-                self.dp = dp
-
-                dom = PosetProduct((UF1, S))
-                cod = UR1
-                Map.__init__(self, dom, cod)
-
-            def _call(self, x):
-                (fs, (s0, rs)) = x
-                # fs is an upper set of F1
-                UF1.belongs(fs)
-                # rs is an upper set of R2
-                UR2.belongs(rs)
-                
-                # alpha0: U(F0) x S0 -> U(R0)
-                # alpha0: U(F1xR2) x S0 -> U(R1xR2)
-                print('rs: %s' % rs)
-                print('fs: %s' % fs)
-                # make the dot product
-                print set(itertools.product(fs.minimals, rs.minimals))
-                x = UpperSet(set(itertools.product(fs.minimals, rs.minimals)), F1R2)
-                # this is an elment of U(F1xR2)
-                UF1R2.belongs(x)
-                
-                # get what alpha0 says
-                y0 = alpha0((x, s0))
-                # this is in UR1R2
-                UR1R2.belongs(y0)
-                
-                # now drop to UR1
-                u = set([m[0] for m in y0.minimals])
-                u = poset_minima(u, R1.leq)
-                a1 = UpperSet(u, R1)
-
-                return a1
-
-
-        class DPBeta(Map):
-            def __init__(self, dp):
-                self.dp = dp
-
-                dom = PosetProduct((UF1, S))
-                cod = S
-                Map.__init__(self, dom, cod)
-
-            def _call(self, x):
-                # beta0:  U(F0) x S0 -> S0
-                # beta0: U(F1xR1) x S0 -> S0 
-
-                # beta: UF1 x S -> S
-                # beta: UF1 x (S0 x UR2) -> (S0 x UR2)
-                fs, (s0, rs) = x
-
-                # fs is an upper set of F1
-                UF1.belongs(fs)
-                # rs is an upper set of R2
-                UR2.belongs(rs)
-                
-                # make the dot product
-                x = UpperSet(set(itertools.product(fs.minimals, rs.minimals)), F1R2)
-                # this is an elment of U(F1xR2)
-                UF1R2.belongs(x)
-                
-                # get what beta0 says
-                s0p = beta0((x, s0))
-                
-                # get what alpha0 says
-                y0 = alpha0((x, s0))
-                # this is in UR1R2
-                UR1R2.belongs(y0)
-
-                # now drop to UR2
-                u = [m[1] for m in y0.minimals]
-                u = poset_minima(u, R2.leq)
-                m1 = UpperSet(u, R2)
-                
-                return s0p, m1
-
-        return S, DPAlpha(self), DPBeta(self)
-
-    def __repr__(self):
-        return 'DPloop(%s)' % self.dp1
-
-    def solve(self, func):
-        raise NotImplementedError()
-#         from mocdp.posets import NotLeq, UpperSets
+#
+#
+# class DPLoop(PrimitiveDP):
+#
+#     def __init__(self, dp1):
+#
+#         from mocdp import get_conftools_dps
+#
+#         library = get_conftools_dps()
+#         _, self.dp1 = library.instance_smarter(dp1)
 #
 #         funsp = self.dp1.get_fun_space()
-#         ressp = self.dp1.get_res_spe
-#         fU = UpperSets(ressp)
+#         ressp = self.dp1.get_res_space()
 #
-#         f = [funsp.U(func)]
-#         q = [self.R2.get_bottom()]
+#         check_isinstance(funsp, PosetProduct)
+#         check_isinstance(ressp, PosetProduct)
 #
-# #
-# #         print('f', f)
-# #         print('r', r)
+#         if len(funsp) != 2:
+#             raise ValueError('funsp needs to be length 2: %s' % funsp)
 #
-#         for i in range(10):  # XXX
-# #             fi = fU.join(f[0], r[-1])
-#             fi = r[-1]
-# #             print('fi', fi)
-#             ri = self.dp1.solveU(fi)
-# #             print('ri', ri)
-#             f.append(fi)
-#             r.append(ri)
+#         if len(ressp) != 2:
+#             raise ValueError('ressp needs to be length 2: %s' % ressp)
 #
-#             if f[-1] == f[-2]:
-#                 print('breaking because of f converged: %s' % f[-1])
-#                 break
-# #
-# #         print f
-# #         print r
+#         self.F1 = funsp[0]
+#         self.R1 = ressp[0]
+#         self.R2 = funsp[1]
 #
-#         return r[-1]
-
-
-class DPLoop0(PrimitiveDP):
-    """
-        This is the version in the papers
-                  ______
-           f1 -> |  dp  |--->r
-           f2 -> |______| |
-              `-----------/
-    """
-    def __init__(self, dp1):
-        from mocdp import get_conftools_dps
-
-        library = get_conftools_dps()
-        _, self.dp1 = library.instance_smarter(dp1)
-
-        funsp = self.dp1.get_fun_space()
-        ressp = self.dp1.get_res_space()
-
-        if not isinstance(funsp, PosetProduct):
-            raise ValueError('Funsp is not a product: %r' % funsp)
-
-        if len(funsp) != 2:
-            raise ValueError('funsp needs to be length 2: %s' % funsp)
-
-        funsp1 = funsp[1]
-
-        if not(funsp1 == ressp):
-            raise_desc(ValueError, "Spaces incompatible for loop",
-                       funsp=funsp, ressp=ressp,
-                        funsp1=funsp1)
-
-        F1 = funsp[0]
-        F = F1
-        R = ressp
-        PrimitiveDP.__init__(self, F=F, R=R)
-
+#         if not (funsp[1]) == (ressp[1]):
+#             raise_desc(ValueError, "Spaces incompatible for loop",
+#                        funsp=funsp, ressp=ressp,
+#                        ressp1=ressp[1], funsp1=funsp[1])
+#
+#         F = self.F1
+#         R = self.R1
+#         PrimitiveDP.__init__(self, F=F, R=R)
+#
 #     def get_normal_form(self):
 #         """
 #             S0 is a Poset
@@ -389,6 +210,197 @@ class DPLoop0(PrimitiveDP):
 #                 return s0p, m1
 #
 #         return S, DPAlpha(self), DPBeta(self)
+#
+#     def __repr__(self):
+#         return 'DPloop(%s)' % self.dp1
+#
+#     def solve(self, func):
+#         raise NotImplementedError()
+#         from mocdp.posets import NotLeq, UpperSets
+#
+#         funsp = self.dp1.get_fun_space()
+#         ressp = self.dp1.get_res_spe
+#         fU = UpperSets(ressp)
+#
+#         f = [funsp.U(func)]
+#         q = [self.R2.get_bottom()]
+#
+# #
+# #         print('f', f)
+# #         print('r', r)
+#
+#         for i in range(10):  # XXX
+# #             fi = fU.join(f[0], r[-1])
+#             fi = r[-1]
+# #             print('fi', fi)
+#             ri = self.dp1.solveU(fi)
+# #             print('ri', ri)
+#             f.append(fi)
+#             r.append(ri)
+#
+#             if f[-1] == f[-2]:
+#                 print('breaking because of f converged: %s' % f[-1])
+#                 break
+# #
+# #         print f
+# #         print r
+#
+#         return r[-1]
+
+
+class DPLoop0(PrimitiveDP):
+    """
+        This is the version in the papers
+                  ______
+           f1 -> |  dp  |--->r
+           f2 -> |______| |
+              `-----------/
+    """
+    def __init__(self, dp1):
+        from mocdp import get_conftools_dps
+
+        library = get_conftools_dps()
+        _, self.dp1 = library.instance_smarter(dp1)
+
+        funsp = self.dp1.get_fun_space()
+        ressp = self.dp1.get_res_space()
+
+        if not isinstance(funsp, PosetProduct):
+            raise ValueError('Funsp is not a product: %r' % funsp)
+
+        if len(funsp) != 2:
+            raise ValueError('funsp needs to be length 2: %s' % funsp)
+
+        funsp1 = funsp[1]
+
+        if not(funsp1 == ressp):
+            raise_desc(ValueError, "Spaces incompatible for loop",
+                       funsp=funsp, ressp=ressp,
+                        funsp1=funsp1)
+
+        F1 = funsp[0]
+        F = F1
+        R = ressp
+        PrimitiveDP.__init__(self, F=F, R=R)
+
+    def get_normal_form(self):
+        """
+            S0 is a Poset
+            alpha0: U(F0) x S0 -> UR
+            beta0:  U(F0) x S0 -> S0
+        """
+
+        S0, alpha0, beta0 = self.dp1.get_normal_form()
+
+        F = self.dp1.get_fun_space()
+        R = self.dp1.get_res_space()
+        F1 = F[0]
+        UR = UpperSets(R)
+
+#         S = PosetProduct((S0, UR))
+
+        from mocdp.dp.dp_series import prod_make
+        S = prod_make(S0, UR)
+
+
+        UF1 = UpperSets(F1)
+#         UR1 = UpperSets(self.R1)
+        F1R = PosetProduct((F1, R))
+        UF1R = UpperSets(F1R)
+
+#         UR1R2 = UpperSets(PosetProduct((self.R1, R2)))
+        from mocdp.dp.dp_series import prod_get_state
+
+        """
+        S = S0 x UR is a Poset
+        alpha: UF1 x S -> UR
+        beta: UF1 x S -> S
+"""
+        class DPAlpha(Map):
+            def __init__(self, dp):
+                self.dp = dp
+
+                dom = PosetProduct((UF1, S))
+                cod = UR
+                Map.__init__(self, dom, cod)
+
+            def _call(self, x):
+                (fs, s) = x
+                (s0, rs) = prod_get_state(S0, UR, s)
+
+                # fs is an upper set of F1
+                UF1.belongs(fs)
+                # rs is an upper set of R2
+                UR.belongs(rs)
+
+                # alpha0: U(F0) x S0 -> U(R0)
+                # alpha0: U(F1xR2) x S0 -> U(R1xR2)
+                print('rs: %s' % rs)
+                print('fs: %s' % fs)
+                # make the dot product
+                print set(itertools.product(fs.minimals, rs.minimals))
+                x = UpperSet(set(itertools.product(fs.minimals, rs.minimals)), F1R)
+                # this is an elment of U(F1xR)
+                UF1R.belongs(x)
+
+                # get what alpha0 says
+                y0 = alpha0((x, s0))
+                # this is in UR
+                UR.belongs(y0)
+
+#                 # now drop to UR1
+#                 u = set([m[0] for m in y0.minimals])
+#                 u = poset_minima(u, R1.leq)
+#                 a1 = UpperSet(u, R1)
+
+                return y0
+
+
+        class DPBeta(Map):
+            def __init__(self, dp):
+                self.dp = dp
+
+                dom = PosetProduct((UF1, S))
+                cod = S
+                Map.__init__(self, dom, cod)
+
+            def _call(self, x):
+                # beta0: U(F0) x S0 -> S0
+                # beta0: U(F1xR1) x S0 -> S0
+
+                # beta: UF1 x S -> S
+                # beta: UF1 x (S0 x UR) -> (S0 x UR)
+                fs, s = x
+                (s0, rs) = prod_get_state(S0, UR, s)
+
+                # fs is an upper set of F1
+                UF1.belongs(fs)
+                # rs is an upper set of R2
+                UR.belongs(rs)
+
+                # make the dot product
+                x = UpperSet(set(itertools.product(fs.minimals, rs.minimals)), F1R)
+                # this is an elment of U(F1xR2)
+                UF1R.belongs(x)
+
+                # get what beta0 says
+                s0p = beta0((x, s0))
+
+                # get what alpha0 says
+                y0 = alpha0((x, s0))
+                # this is in UR1R2
+                UR.belongs(y0)
+
+                # now drop to UR2
+#                 u = [m[1] for m in y0.minimals]
+#                 u = poset_minima(u, R.leq)
+#                 m1 = UpperSet(u, R)
+
+                from mocdp.dp.dp_series import prod_make_state
+                res = prod_make_state(S0, UR, s0p, y0)
+                return res
+
+        return S, DPAlpha(self), DPBeta(self)
 
     def __repr__(self):
         return 'DPLoop0(%s)' % self.dp1

@@ -59,7 +59,7 @@ def nx_generic_graphviz_plot(G, output, prog='dot'):
 def gg_figure(r, name, ggraph):
     """ Adds a figure to the Report r that displays this graph
         and also its source. """
-    f = r.figure(name)
+    f = r.figure(name, cols=1)
 
     # save file in dot file
     with tmpfile(".dot") as filename_dot:

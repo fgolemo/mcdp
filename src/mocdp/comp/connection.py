@@ -616,8 +616,8 @@ def dploop0(ndp, lr, lf):
         else:
             F = PosetProduct((ndp.get_ftypes(A), R))
 
-        print('A: %s' % A)
-        print('F: %s' % F)
+        # print('A: %s' % A)
+        # print('F: %s' % F)
 
         coords = []
         for x in ndp.get_fnames():
@@ -628,7 +628,7 @@ def dploop0(ndp, lr, lf):
                 else:
                     coords.append(0)  # just get the one A
             if x == lf:
-                print('x = lf = %s' % x)
+                # print('x = lf = %s' % x)
                 xc = coord_concat((1,), ndp.rindex(lr))
                 coords.append(xc)
 
@@ -638,11 +638,11 @@ def dploop0(ndp, lr, lf):
             coords = coords[0]
     
         X = Mux(F, coords)
-        print('X = %s' % X.repr_long())
+        # print('X = %s' % X.repr_long())
         dp = ndp.get_dp()
-        print('dp = %s' % dp.repr_long())
+        # print('dp = %s' % dp.repr_long())
         S = make_series(X, dp)
-        print('S = %s' % S)
+        # print('S = %s' % S)
         
         res_dp = DPLoop0(S)
         rnames = ndp.get_rnames()
@@ -748,15 +748,15 @@ def dpgraph_(name2dp, connections, split):
         split1.extend(split)
 
 
-        print('asking to %s %s %s' % (name2dp, other_connections, split1))
+        # print('asking to %s %s %s' % (name2dp, other_connections, split1))
         ndp = dpgraph(name2dp, other_connections, split=split1)
-        print('the result was: %s' % ndp.repr_long())
+        # print('the result was: %s' % ndp.repr_long())
 
         # now we make sure that the signals we have are preserved
         ndp.rindex(c.s1)
         ndp.findex(c.s2)
         l = dploop0(ndp, c.s1, c.s2)
-        print('The result of loop was %s' % l.repr_long())
+        # print('The result of loop was %s' % l.repr_long())
 
         l.rindex(c.s1)
 

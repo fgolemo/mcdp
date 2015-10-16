@@ -7,11 +7,13 @@ cdp {
 		provides b [R]
 		requires c [R]
  
-    	c >= a * b
+    	c >= a * b + b
 	}
 
 	times.a >= times.c
-	times.b >= times.c 
+	# times.b >= times.c 
 
+	provides b_ [R]
+	times.b >= b_
 }
 
