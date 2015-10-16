@@ -3,6 +3,8 @@ from .poset import NotLeq, Poset
 from contracts.utils import raise_desc
 from mocdp.posets.space import NotBelongs, NotEqual
 import numpy as np
+from comptests.registrar import comptest_fails
+
 
 __all__ = [
    'Rcomp',
@@ -120,6 +122,8 @@ class RcompUnits(Rcomp):
 
     def __repr__(self):
         s = Rcomp.__repr__(self)
+        if self.units == '*':
+            return s
         return s + "[%s]" % self.units
 #
 #     def belongs(self, x):
@@ -133,6 +137,7 @@ class RcompUnits(Rcomp):
 
         return True
 
+R_dimensionless = RcompUnits('*')
 R_Time = RcompUnits('s')
 R_Power = RcompUnits('W')
 R_Cost = RcompUnits('$')
@@ -141,20 +146,22 @@ R_Weight = RcompUnits('g')
 R_Current = RcompUnits('A')
 R_Voltage = RcompUnits('V')
 
+
+
+
 def mult_table(a, b):
 
     options = {
         (R_Time, R_Power): R_Energy,
-
+        (R_dimensionless, R_dimensionless): R_dimensionless,
 
     }
 
     def search_by_equality(x):
         for k, v in options.items():
-            if k == x:
+            if k == x and (k[0].units == x[0].units) and (k[1].units == x[1].units):
                 return v
         return None
-
 
     o1 = search_by_equality((a, b))
     if o1 is not None:
@@ -163,13 +170,18 @@ def mult_table(a, b):
     if o2 is not None:
         return o2
 
-
     msg = 'Cannot find the product of %r with %r.' % (a, b)
+    
+    msg += '\nKnown multiplication table:\n'
+    for (m1, m2), res in options.items():
+        msg += '   %10s x %10s = %10s' % (m1, m2, res)
+    
     raise ValueError(msg)
 
 
-
-
+@comptest_fails
+def mult_table_check():
+    mult_table(R_Time, R_Time)
 
 
 

@@ -1,0 +1,6 @@
+cdp {
+	requires g [R]
+	provides f [R]
+	
+	g >= f * f * f * f
+}

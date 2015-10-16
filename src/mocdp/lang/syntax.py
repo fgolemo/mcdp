@@ -5,14 +5,14 @@ from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_wrapped
 from mocdp.comp.interfaces import NamedDP
-from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError)
+from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mocdp.lang.parts import (
     DPWrap, Function, LoadDP, NewResource, OpMax, OpMin, PDPCodeSpec, Plus)
 from mocdp.lang.utils import parse_action
 from mocdp.posets.rcomp import (R_Cost, R_Current, R_Energy, R_Power, R_Time,
-    R_Voltage, R_Weight, Rcomp)
+    R_Voltage, R_Weight, Rcomp, R_dimensionless)
 from pyparsing import (Combine, Forward, Group, LineEnd, LineStart, Literal,
-    OneOrMore, Optional, Or, ParseException, ParseFatalException, ParserElement,
+    Optional, Or, ParseException, ParseFatalException, ParserElement,
     SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas, oneOf, opAssoc,
     operatorPrecedence)
 
@@ -31,7 +31,8 @@ def spa(x, b):
         try:
             res = b(tokens)
         except BaseException as e:
-            raise_wrapped(Exception, e, "Error while parsing.", where=where.__str__(),
+            print e
+            raise_wrapped(DPInternalError, e, "Error while parsing.", where=where.__str__(),
                           tokens=tokens)
         res.where = where
         return res
@@ -61,16 +62,16 @@ units = {
     'g': R_Weight,
     'W': R_Power,
     '$': R_Cost,
-    'R': Rcomp(),
+    'R': R_dimensionless,
 }
 unit_expr = oneOf(list(units))
 spa(unit_expr, lambda t: units[t[0]])
 
 unitst = S(L('[')) + C(unit_expr, 'unit') + S(L(']'))
-fun_statement = S(L('f')) ^ S(L('provides')) + C(idn, 'fname') + unitst
+fun_statement = S(L('F')) ^ S(L('provides')) + C(idn, 'fname') + unitst
 spa(fun_statement, lambda t: FunStatement(t['fname'], t['unit']))
 
-res_statement = S(L('r')) ^ S(L('requires')) + C(idn, 'rname') + unitst
+res_statement = S(L('R')) ^ S(L('requires')) + C(idn, 'rname') + unitst
 spa(res_statement, lambda t: ResStatement(t['rname'], t['unit']))
 
 
@@ -115,7 +116,7 @@ spa(max_expr, lambda t: binary[t['opname']](t['op1'], t['op2']))
 operand = rvalue_new_function ^ rvalue_resource ^ max_expr
 
 # comment_line = S(LineStart()) + ow + L('#') + line + S(EOL)
-comment_line = ow + Literal('#') + line + S(EOL)
+# comment_line = ow + Literal('#') + line + S(EOL)
 
 
 simple = (C(idn, 'dp2') + S(L('.')) + C(idn, 's2'))
@@ -136,9 +137,9 @@ constraint_expr2 = C(rvalue, 'rvalue') + LEQ + C(signal_rvalue, 'lf')
 spa(constraint_expr2, lambda t: Constraint(t['lf'], t['rvalue']))
 
 line_expr = load_expr ^ constraint_expr ^ constraint_expr2 ^ setname_expr ^ fun_statement ^ res_statement
-dp_statement = S(comment_line) ^ line_expr
+# dp_statement = S(comment_line) ^ line_expr
 
-dp_model = S(L('cdp')) + S(L('{')) + OneOrMore(dp_statement) + S(L('}'))
+dp_model = S(L('cdp')) + S(L('{')) + ZeroOrMore(S(ow) + line_expr) + S(L('}'))
 
 
 funcname = Combine(idn + ZeroOrMore(L('.') + idn))
@@ -167,15 +168,51 @@ dp_rvalue << (load_expr | simple_dp_model | dp_model)
 
 @parse_action
 def mult_parse_action(tokens):
-    t = tokens[0]
-    assert t[1] == '*'
-    return Mult(t[0], t[2])
+    tokens = list(tokens[0])
+
+    bop = Mult
+    @contract(tokens='list')
+    def parse_op(tokens):
+        n = len(tokens)
+        if not (n >= 3 and 1 == n % 2):
+            msg = 'Expected odd number tokens than %s: %s' % (n, tokens)
+            raise DPInternalError(msg)
+
+        if len(tokens) == 3:
+            assert tokens[1] == '*'
+            return bop(tokens[0], tokens[2])
+        else:
+            op1 = tokens[0]
+            assert tokens[1] == '*'
+            op2 = parse_op(tokens[2:])
+            return bop(op1, op2)
+
+    res = parse_op(tokens)
+    return res
 
 @parse_action
 def plus_parse_action(tokens):
-    t = tokens[0]
-    assert t[1] == '+'
-    return Plus(t[0], t[2])
+    tokens = list(tokens[0])
+
+    @contract(tokens='list')
+    def parse_op(tokens):
+        n = len(tokens)
+        if not (n >= 3 and 1 == n % 2):
+            msg = 'Expected odd number tokens than %s: %s' % (n, tokens)
+            raise DPInternalError(msg)
+
+        if len(tokens) == 3:
+            assert tokens[1] == '+'
+            return Plus(tokens[0], tokens[2])
+        else:
+            op1 = tokens[0]
+            assert tokens[1] == '+'
+            op2 = parse_op(tokens[2:])
+            return Plus(op1, op2)
+
+    res = parse_op(tokens)
+    return res
+
 
 rvalue << operatorPrecedence(operand, [
 #     ('-', 1, opAssoc.RIGHT, Unary.parse_action),
@@ -224,6 +261,8 @@ def parse_line(line):
 @parse_action
 def dp_model_parse_action(tokens):
     res = list(tokens)
+    if not res:
+        raise DPSemanticError('Empty model')
     from mocdp.lang.blocks import interpret_commands
     return interpret_commands(res)
 

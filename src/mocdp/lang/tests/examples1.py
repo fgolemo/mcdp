@@ -72,7 +72,7 @@ cdp {
     """
     parse_model(data)
 
-def assert_semantic_error(s):
+def assert_semantic_error(s , desc=None):
     try:
         res = parse_model(s)
     except DPSemanticError:
@@ -408,6 +408,7 @@ def check_simplification():
     # assert isinstance(dp1, Max)
 #     assert isinstance(dp2, Max)
 
+
 @comptest
 def check_lang13_diagram():
     m1 = parse_model("""
@@ -463,6 +464,64 @@ def check_lang12_addition_as_resources():
 #         }
 #     """)
     pass
+
+@comptest
+def check_lang14():
+    p = parse_model("""
+    cdp {
+        provides g [s]
+        requires f2 [s]
+
+        f2 >= g + g
+    }
+    """)
+
+@comptest
+def check_lang15():
+    assert_semantic_error("""
+cdp {
+    provides g [s]
+    provides f [s]
+
+    f >= g
+}""", "the name 'f' can't be used as a function")
+
+@comptest
+def check_lang16():
+    warnings.warn('fix this bug')
+    p = parse_model("""
+cdp {
+    requires g [s]
+    provides f [s]
+    
+    g >= f + f + f
+
+}""")
+
+@comptest
+def check_lang17():
+    warnings.warn('fix this bug')
+    p = parse_model("""
+cdp {
+    requires g [R]
+    provides f [R]
+    
+    g >= f * f * f 
+}
+    """)
+
+@comptest
+def check_lang18():
+    warnings.warn('fix this bug')
+    p = parse_model("""
+cdp {
+    requires g [R]
+    provides f [R]
+    
+    g >= f * f * f * f
+}
+    """)
+
 
 examples1 = [
     """

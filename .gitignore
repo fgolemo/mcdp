@@ -13,3 +13,4 @@ out
 .coverage
 .noseids
 coverage_information
+sandbox/live

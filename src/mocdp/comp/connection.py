@@ -73,7 +73,8 @@ def dpconnect(name2dp, connections, split=[]):
         Raises TheresALoop
     """
     if len(name2dp) < 2:
-        raise ValueError()
+        msg = 'Less than two DPs: %s' % name2dp
+        raise DPInternalError(msg)
 
     for k, v in name2dp.items():
         _, name2dp[k] = get_conftools_nameddps().instance_smarter(v)
@@ -123,6 +124,14 @@ def dpconnect(name2dp, connections, split=[]):
     # now we remove from split1 the ones that are not connected
     split1 = [s for s in split1 if s in to_be_connected]
 
+    # note that this might produce repeated names in split1
+    if len(split1) != len(set(split1)):
+        split1_unique = []
+        for x in split1:
+            if not x in split1_unique:
+                split1_unique.append(x)
+        split1 = split1_unique
+
     # check that all the splitting is in connection
     for s in split1:
         for c in first_connections:
@@ -131,6 +140,8 @@ def dpconnect(name2dp, connections, split=[]):
         else:
             msg = 'Cannot find split signal in first_connections.'
             raise_desc(Exception, msg, s=s, first_connections=first_connections, connections=connections, split1=split)
+
+
     dp = connect2(name2dp[first], name2dp[second], set(first_connections), split=split1)
 
     others = list(order)
@@ -195,6 +206,10 @@ def its_dp_as_product(ndp):
 def connect2(ndp1, ndp2, connections, split):
     """ Note the argument split must be strings so that orders are preserved
         and deterministic. """
+
+    if len(set(split)) != len(split):
+        msg = 'Repeated signals in split: %s' % str(split)
+        raise ValueError(msg)
     try:
         if not connections:
             raise ValueError('Empty connections')
@@ -632,10 +647,12 @@ def dploop0(ndp, lr, lf):
           connections='set(str|$Connection)|list(str|$Connection)',
           returns=NamedDP)
 def dpgraph(name2dp, connections, split):
+    if not len(set(split)) == len(split):
+        raise ValueError('dpgraph: Repeated signals in split: %s' % str(split))
     try:
-        if len(name2dp) < 2:
+        if len(name2dp) < 1:
             msg = 'I only have %d names: %s' % (len(name2dp), list(name2dp))
-            raise ValueError(msg)
+            raise DPInternalError(msg)
 
         for k, v in name2dp.items():
             _, name2dp[k] = get_conftools_nameddps().instance_smarter(v)
@@ -694,12 +711,13 @@ def dpgraph(name2dp, connections, split):
         return res
     except DPSemanticError as e:
         compact = isinstance(e, DPSemanticError)
-        raise_wrapped(DPSemanticError, e, 'Error while calling dpgraph()',compact=compact,
+        raise_wrapped(DPSemanticError, e, 'Error while calling dpgraph().',
+                      compact=compact,
                       names=format_dict_long(name2dp, informal=True),
                       connection=format_list_long(connections, informal=True))
     except BaseException as e:
         compact = isinstance(e, DPInternalError)
-        raise_wrapped(DPInternalError, e, 'Error while calling dpgraph()',
+        raise_wrapped(DPInternalError, e, 'Error while calling dpgraph().',
                       compact=compact,
                       names=format_dict_long(name2dp, informal=True),
                       connection=format_list_long(connections, informal=True))

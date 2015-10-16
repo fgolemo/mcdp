@@ -2,7 +2,7 @@
 from .parts import Constraint, LoadCommand, SetName
 from conf_tools.code_specs import instantiate_spec
 from contracts import contract, describe_value
-from contracts.utils import raise_desc, indent
+from contracts.utils import raise_desc, indent, raise_wrapped
 from mocdp.comp.connection import Connection
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import SimpleWrap, dpwrap
@@ -15,7 +15,8 @@ from mocdp.lang.parts import Function, NewResource, OpMax, OpMin, Plus, Resource
 from mocdp.lang.syntax import (DPSyntaxError, DPWrap, FunStatement, LoadDP,
     PDPCodeSpec, ResStatement)
 from mocdp.posets.rcomp import mult_table
-from mocdp.exceptions import DPSemanticError
+from mocdp.exceptions import DPSemanticError, DPInternalError
+from contracts.syntax import e
 
 class Context():
     def __init__(self):
@@ -27,7 +28,7 @@ class Context():
         self.connections = []
 
     def info(self, s):
-        print(s)
+#         print(s)
         pass
 
     def add_ndp(self, name, ndp):
@@ -38,10 +39,12 @@ class Context():
         self.names[name] = ndp
 
     def add_ndp_fun(self, name, ndp):
+        self.info('Adding new function %r' % str(name))
         self.add_ndp(name, ndp)
         self.newfunctions[name] = ndp
 
     def add_ndp_res(self, name, ndp):
+        self.info('Adding new resource %r' % str(name))
         self.add_ndp(name, ndp)
         self.newresources[name] = ndp
 
@@ -50,6 +53,14 @@ class Context():
         if not c.dp1 in self.names:
             raise_desc(DPSemanticError, 'Invalid connection: %r not found.' % c.dp1,
                        names=self.names, c=c)
+
+        if c.dp2 in self.newfunctions:
+            raise_desc(DPSemanticError, "Cannot add connection to external interface %r." % c.dp1,
+                       newfunctions=self.newfunctions, c=c)
+
+        if c.dp1 in self.newresources:
+            raise_desc(DPSemanticError, "Cannot add connection to external interface %r." % c.dp2,
+                       newresources=self.newresources, c=c)
 
         self.names[c.dp1].rindex(c.s1)
 
@@ -85,35 +96,44 @@ def interpret_commands(res):
     context = Context()
     
     for r in res:
-        if isinstance(r, Connection):
-            context.add_connection(r)
+        try:
+            if isinstance(r, Connection):
+                context.add_connection(r)
 
-        elif isinstance(r, Constraint):
-            resource = eval_rvalue(r.rvalue, context)
-            function = eval_lfunction(r.function, context)
-            c = Connection(dp1=resource.dp, s1=resource.s,
-                           dp2=function.dp, s2=function.s)
-            context.add_connection(c)
+
+            elif isinstance(r, Constraint):
+                resource = eval_rvalue(r.rvalue, context)
+                function = eval_lfunction(r.function, context)
+                c = Connection(dp1=resource.dp, s1=resource.s,
+                               dp2=function.dp, s2=function.s)
+                context.add_connection(c)
+
+            elif isinstance(r, SetName):
+                name = r.name
+                ndp = eval_dp_rvalue(r.dp_rvalue, context)
+                context.add_ndp(name, ndp)
+
+            elif isinstance(r, ResStatement):
+                F = r.unit
+                ndp = dpwrap(Identity(F), r.rname, r.rname)
+                context.add_ndp_res(r.rname, ndp)
+
+            elif isinstance(r, FunStatement):
+                F = r.unit
+                ndp = dpwrap(Identity(F), r.fname, r.fname)
+                context.add_ndp_fun(r.fname, ndp)
+
+            else:
+                raise DPInternalError('Cannot interpret %s' % describe_value(r))
+        except DPSemanticError as e:
+            if e.where is None:
+                raise DPSemanticError(str(e), where=r.where)
+            raise
             
-        elif isinstance(r, SetName):
-            name = r.name
-            ndp = eval_dp_rvalue(r.dp_rvalue, context)
-            context.add_ndp(name, ndp)
-
-        elif isinstance(r, ResStatement):
-            F = r.unit
-            ndp = dpwrap(Identity(F), 'a', r.rname)
-            context.add_ndp_res(r.rname, ndp)
-
-        elif isinstance(r, FunStatement):
-            F = r.unit
-            ndp = dpwrap(Identity(F), r.fname, 'a')
-            context.add_ndp_fun(r.fname, ndp)
-
-        else:
-            raise ValueError('Cannot interpret %s' % describe_value(r))
-
     check_missing_connections(context)
+
+    if not context.names:
+        raise DPSemanticError('Empty model')
 
     from mocdp.comp.connection import dpgraph
     return dpgraph(context.names, context.connections, split=[])
@@ -224,6 +244,11 @@ def eval_lfunction(lf, context):
         if not lf.dp in context.names:
             msg = 'Unknown dp (%r.%r)' % (lf.dp, lf.s)
             raise DPSyntaxError(msg, where=lf.where)
+
+        if lf.dp in context.newresources:
+            msg = 'Cannot use the name of an external interface function.'
+            raise DPSemanticError(msg, where=lf.where)
+
         return lf
 
     if isinstance(lf, NewResource):
@@ -244,6 +269,7 @@ def eval_rvalue(rvalue, context):
             if not rvalue.dp in context.names:
                 msg = 'Unknown dp (%r.%r)' % (rvalue.dp, rvalue.s)
                 raise DPSemanticError(msg, where=rvalue.where)
+
 
             ndp = context.names[rvalue.dp]
             if not rvalue.s in ndp.get_rnames():
@@ -275,7 +301,12 @@ def eval_rvalue(rvalue, context):
         if isinstance(rvalue, Mult):
             a, F1, b, F2 = eval_ops(rvalue)
 
-            R = mult_table(F1, F2)
+            try:
+                R = mult_table(F1, F2)
+            except ValueError as e:
+                msg = 'CDP is very strongly typed...'
+                raise_wrapped(DPInternalError, e, msg)
+
             dp = Product(F1, F2, R)
             nprefix, na, nb, nres = 'times', 'p0', 'p1', 'product'
 
@@ -286,7 +317,7 @@ def eval_rvalue(rvalue, context):
             a, F1, b, F2 = eval_ops(rvalue)
             if not F1 == F2:
                 msg = 'Incompatible units: %s and %s' % (F1, F2)
-                raise DPSyntaxError(msg, where=rvalue.where)
+                raise_desc(DPSemanticError, msg, rvalue=rvalue)
 
             dp = Sum(F1)
             nprefix, na, nb, nres = 'add', 's0', 's1', 'sum'

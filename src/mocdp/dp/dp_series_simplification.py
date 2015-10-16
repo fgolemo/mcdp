@@ -9,6 +9,7 @@ from abc import abstractmethod, ABCMeta
 from mocdp.exceptions import DPInternalError
 from mocdp.dp.dp_parallel import Parallel
 from mocdp.dp.dp_parallel_simplification import make_parallel
+from contracts import contract
 
 __all__ = [
     'make_series',
@@ -248,30 +249,23 @@ def make_series(dp1, dp2):
 
     if equiv_to_identity(dp2):
         return dp1
-#
-#     if is_permutation(dp1) and is_permutation_invariant(dp2):
-#         # wrong, because the types might not match
-#         # need to permute the types of dp2
-#         return dp2
-
-
 
     if isinstance(dp1, Parallel) and isinstance(dp2, Parallel):
         a = make_series(dp1.dp1, dp2.dp1)
         b = make_series(dp1.dp2, dp2.dp2)
         return make_parallel(a, b)
 
-
+    # TODO: comment this, you get an error
     if isinstance(dp1, Mux) and isinstance(dp2, Mux):
         return mux_composition(dp1, dp2)
 
     if isinstance(dp1, Mux):
-        if isinstance(dp2, Series):
-            dps = unwrap_series(dp2)
-            if isinstance(dps[0], Mux):
-                first = mux_composition(dp1, dps[0])
-                rest = reduce(make_series, dps[1:])
-                return make_series(first, rest)
+#         if isinstance(dp2, Series):
+#             dps = unwrap_series(dp2)
+#             if isinstance(dps[0], Mux):
+#                 first = mux_composition(dp1, dps[0])
+#                 rest = reduce(make_series, dps[1:])
+#                 return make_series(first, rest)
 
         def has_null_fun(dp):
             F = dp.get_fun_space()
@@ -364,13 +358,6 @@ def make_series(dp1, dp2):
         check_same_spaces(Series(dp1, dp2), res)
         return res
 
-#     if isinstance(dp2, Mux):
-#         if isinstance(dp1, Series):
-#             dps = unwrap_series(dp1)
-#             if isinstance(dps[-1], Mux):
-#                 last = mux_composition(dps[-1], dp2)
-#                 rest = reduce(make_series, dps[:-1])
-#                 return make_series(rest, last)
 
 #     print('Cannot simplify:')
 #     print(' dp1: %s' % dp1)
@@ -442,39 +429,24 @@ def simplify_indices_F(F, coords):
     # [[(0, 1)], [(1, 0), (0, 0)]]
     return coords
 
+
+@contract(dp1=Mux, dp2=Mux)
 def mux_composition(dp1, dp2):
     try:
         dp0 = Series(dp1, dp2)
-        assert isinstance(dp1, Mux)
-        assert isinstance(dp2, Mux)
+
         F = dp1.get_fun_space()
         c1 = dp1.coords
         c2 = dp2.coords
         coords = compose_indices(F, c1, c2, list)
-#         print('coords: %s' % str(coords))
         coords = simplify_indices_F(F, coords)
 
-        #     if x == [0]:
-#         return ()
-#     if x == [0, 1]:
-#         return ()
-#     # TODO: do it general
-#     if x == [0, (1,)]:
-#         return ()
-#     if x == [0, 1, 2]:
-#         return ()
-
-
-#         print('simpli: %s' % str(coords))
         res = Mux(F, coords)
-
-#         print('dp1: %s' % dp1)
-#         print('dp2: %s' % dp2)
-#         print('res: %s' % res)
         assert res.get_res_space() == dp0.get_res_space()
 
         return res
-    except Exception as e:
+    except DPInternalError as e:
         msg = 'Cannot create shortcut.'
-        raise_wrapped(Exception , e , msg, dp1=dp1, dp2=dp2,)
+        raise_wrapped(DPInternalError, e, msg,
+                      dp1=dp1.repr_long(), dp2=dp2.repr_long())
 
