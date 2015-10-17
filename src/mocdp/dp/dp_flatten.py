@@ -3,9 +3,9 @@ from .primitive import PrimitiveDP
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
 from mocdp import get_conftools_posets
+from mocdp.exceptions import DPInternalError
 from mocdp.posets import PosetProduct
 from multi_index import get_it
-from mocdp.exceptions import DPInternalError
 
 
 __all__ = [

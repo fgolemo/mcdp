@@ -166,17 +166,13 @@ def interpret_commands(res):
 
     return CompositeNamedDP(context=context)
 
-
-def check_missing_connections(context):
-    """ Checks that all resources and functions are connected. """
-
-    # now look for unconnected functions and resources
+def get_missing_connections(context):
     connected_fun = set()  # contains (name, f)
     connected_res = set()  # contains (name, f)
     for c in context.connections:
         connected_fun.add((c.dp2, c.s2))
         connected_res.add((c.dp1, c.s1))
-        
+
     available_fun = set()
     available_res = set()
     # look for the open connections
@@ -190,18 +186,34 @@ def check_missing_connections(context):
             for rn in ndp.get_rnames():
                 available_res.add((n, rn))
 
-    print('context.connections: %s' % context.connections)
-    print('context.newfunctions: %s' % context.newfunctions)
-    print('context.newresources: %s' % context.newresources)
-    print ('available_fun: %s' % available_fun)
-    print ('available_res: %s' % available_res)
-    print ('connected_fun: %s' % connected_fun)
-    print ('connected_res: %s' % connected_res)
+#     print('context.connections: %s' % context.connections)
+#     print('context.newfunctions: %s' % context.newfunctions)
+#     print('context.newresources: %s' % context.newresources)
+#     print ('available_fun: %s' % available_fun)
+#     print ('available_res: %s' % available_res)
+#     print ('connected_fun: %s' % connected_fun)
+#     print ('connected_res: %s' % connected_res)
 
     unconnected_fun = available_fun - connected_fun
     unconnected_res = available_res - connected_res
-    print ('unconnected_res: %s' % unconnected_res)
-    print ('unconnected_fun: %s' % unconnected_fun)
+
+#     print('context.connections: %s' % context.connections)
+#     print('context.newfunctions: %s' % context.newfunctions)
+#     print('context.newresources: %s' % context.newresources)
+#     print ('available_fun: %s' % available_fun)
+#     print ('available_res: %s' % available_res)
+#     print ('connected_fun: %s' % connected_fun)
+#     print ('connected_res: %s' % connected_res)
+#     print ('unconnected_res: %s' % unconnected_res)
+#     print ('unconnected_fun: %s' % unconnected_fun)
+
+    return unconnected_fun, unconnected_res
+
+def check_missing_connections(context):
+    """ Checks that all resources and functions are connected. """
+
+
+    unconnected_fun, unconnected_res = get_missing_connections(context)
 
     s = ""
     if unconnected_fun:

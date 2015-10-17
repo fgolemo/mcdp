@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
-from reprep import Report
-from mocdp.dp.dp_series import Series0
-from mocdp.dp import Parallel
-from mocdp.dp import DPLoop0
 from .gg_utils import gg_figure
-from mocdp.dp import Mux
 from contracts import contract
-from mocdp.comp.interfaces import CompositeNamedDP
+from mocdp.comp.interfaces import CompositeNamedDP, NamedDP
+from mocdp.dp import DPLoop0, Mux, Parallel, Series0
+from mocdp.dp_report.gg_ndp import gvgen_from_ndp
+from reprep import Report
 
-@contract(ndp=CompositeNamedDP)
+@contract(ndp=NamedDP)
 def report_ndp1(ndp):
     r = Report()
 
@@ -16,6 +14,7 @@ def report_ndp1(ndp):
     gg_figure(r, 'graph', gg)
 
     return r
+
 
 
 def report_dp1(dp):
@@ -44,24 +43,10 @@ def gvgen_from_dp(dp0):
             r = go_series(dp)
         elif isinstance(dp, Parallel):
             r = go_parallel(dp)
-#         elif isinstance(dp, DPLoop):
-#             r = go_loop(dp)
         elif isinstance(dp, DPLoop0):
             r = go_loop(dp)
         else:
             r = go_simple(dp)
-
-#         rin, rout = r
-#         F = dp.get_fun_space()
-#         R = dp.get_res_space()
-#         error = 0
-#         if isinstance(F, PosetProduct):
-#             if not (len(F) == len(rin)): error = 'lenF'
-#         if isinstance(R, PosetProduct):
-#             if not (len(R) == len(rout)): error = 'lenR'
-#
-#         if error:
-#             raise_desc(ValueError, error, dp=dp, F=F, R=R, rin=rin, rout=rout)
         return r
             
     def go_simple(dp):

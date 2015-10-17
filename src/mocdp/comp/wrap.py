@@ -15,7 +15,8 @@ __all__ = [
 
 
 class SimpleWrap(NamedDP):
-    def __init__(self, dp, fnames, rnames):
+    
+    def __init__(self, dp, fnames, rnames, icon=None):
         
         _ , self.dp = get_conftools_dps().instance_smarter(dp)
 
@@ -67,11 +68,17 @@ class SimpleWrap(NamedDP):
 #                     raise ValueError("R and rnames incompatible: want one string")
 #                 self.R_single = True
 #                 self.Rname = rnames
-
+            self.icon = icon
         except Exception as e:
             msg = 'Cannot wrap primitive DP.'
             raise_wrapped(ValueError, e, msg, dp=self.dp, F=F, R=R,
                           fnames=fnames, rnames=rnames)
+
+    def get_icon(self):
+        if self.icon is None:
+            return type(self.dp).__name__
+        else:
+            return self.icon
 
     def check_fully_connected(self):
         pass  # it is

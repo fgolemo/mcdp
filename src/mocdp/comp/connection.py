@@ -22,7 +22,7 @@ import warnings
 Connection0 = namedtuple('Connection', 'dp1 s1 dp2 s2')
 class Connection(Connection0):
     def __repr__(self):
-        return "Connection(%s.%s >= %s.%s)" % (self.dp2, self.s2, self.dp1, self.s1)
+        return "Connection(2 %s.%s >= %s.%s 1)" % (self.dp2, self.s2, self.dp1, self.s1)
 
 def _parse(cstring):
     """ power.a >= battery.b """

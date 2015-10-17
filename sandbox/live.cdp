@@ -1,5 +1,8 @@
-cdp  {
-    provides f [g]
-    
-    f <= 10.0 [g]
+cdp {
+  motor = abstract cdp {
+    provides torque [R]
+    requires weight [R]
+  }
+
+
 }

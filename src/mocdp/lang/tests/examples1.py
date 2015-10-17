@@ -617,7 +617,38 @@ cdp {
 }
     """)
 
-
+@comptest
+def check_lang28():
+    assert_parsable_to_unconnected_ndp("""
+cdp {
+  
+  child1 = cdp {
+      provides a [R]
+      provides b [R]
+      requires c [R]
+      c >= a + b
+  }
+  
+  child1.F1 >= 0.0 [R]
+}
+""")
+    
+@comptest
+def check_lang29():
+    """ Fails because of double constraint on DP.a """
+    assert_semantic_error("""
+     cdp {
+      
+        DP = cdp {
+            provides a [R]
+            provides b [R]
+            requires c [R]
+            c >= a * b
+        }
+       
+       DP.a >= DP.c
+       DP.a >= DP.c
+  }""")
 
 examples1 = [
     """

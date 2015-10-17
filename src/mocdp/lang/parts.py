@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # operators
 from collections import namedtuple
 

@@ -1,4 +1,4 @@
-from mocdp.dp_report.report import report_dp1
+from mocdp.dp_report.report import report_dp1, report_ndp1
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mocdp.lang.syntax import parse_ndp
 from reprep import Report
@@ -9,6 +9,7 @@ import os
 import sys
 import time
 from conf_tools.global_config import GlobalConfig
+from mocdp.comp.interfaces import NotConnected
 logger = logging.getLogger(__name__)
 
 
@@ -30,27 +31,43 @@ def watch_main():
     safe_makedirs(out)
     def go():
         s = open(filename).read()
+        out_r = os.path.join(out, 'report_dp1.html')
+        out_r1 = os.path.join(out, 'report_ndp1.html')
+
         try: 
             ndp = parse_ndp(s)
         except (DPSyntaxError, DPSemanticError) as e:
             r = Report()
             r.text('error', str(e))
-
             logger.error("Error while reading %r." % filename)
             logger.error(str(e))
+            r.to_html(out_r)
+            r.to_html(out_r1)
+            return
         except DPInternalError as e:
             r = Report()
             r.text('developer_error', str(e))
-
             logger.error("Developer error while reading %r." % filename)
             logger.error(str(e))
             logger.error("Please file a bug report and attach %r." % filename)
+            r.to_html(out_r)
+            r.to_html(out_r1)
+            return
+
+        r1 = report_ndp1(ndp)
+        r1.to_html(out_r1)
+
+        try:
+            ndp.check_fully_connected()
+        except NotConnected as e:
+            print('Not connected')
+            r = Report()
+            r.text('not_connected', str(e))
         else:
-            logger.info("OK %r" % filename)
             dp = ndp.get_dp()
             r = report_dp1(dp)
-
-        r.to_html(os.path.join(out, 'report_dp1.html'))
+        r.to_html(out_r)
+        print('Succesful.')
 
     go()
     watch(path, go)

@@ -9,6 +9,7 @@ from mocdp.posets.space_product import SpaceProduct
 
 __all__ = [
     'Series',
+    'Series0',
 ]
 
 

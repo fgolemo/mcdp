@@ -1,10 +1,10 @@
-from contracts import contract
 from abc import ABCMeta, abstractmethod
+from contracts import contract
+from contracts.utils import format_dict_long, format_list_long, raise_wrapped
 from mocdp.configuration import get_conftools_nameddps
-
-from contracts.utils import raise_wrapped, format_list_long, format_dict_long
 from mocdp.exceptions import DPSemanticError
 from mocdp.posets.poset_product import PosetProduct
+
 
 __all__ = [
     'NamedDP',

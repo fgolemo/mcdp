@@ -3,14 +3,12 @@ from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     assert_syntax_error)
 from comptests.registrar import comptest
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
-from mocdp.lang.blocks import DPSemanticError
+from contracts.utils import raise_wrapped
 from mocdp.lang.parts import ValueWithUnits
-from mocdp.lang.syntax import (code_spec, constraint_expr, empty_unit,
-    floatnumber, funcname, idn, integer, integer_or_float, load_expr, max_expr,
-    number, number_with_unit, ow, parse_wrap, rvalue, simple_dp_model)
-from mocdp.posets.rcomp import R_Weight, R_dimensionless
-from nose.tools import assert_equal, assert_equal
+from mocdp.lang.syntax import (floatnumber, integer, integer_or_float,
+    number_with_unit, parse_wrap)
+from mocdp.posets.rcomp import R_Weight
+from nose.tools import assert_equal
 
 
 @contract(string=str)

@@ -7,6 +7,7 @@ from reprep.constants import MIME_PNG, MIME_PDF
 from copy import deepcopy
 import traceback
 from contextlib import contextmanager
+from system_cmd.structures import CmdException
 
 
 def graphviz_run(filename_dot, output, prog='dot'):
@@ -15,10 +16,21 @@ def graphviz_run(filename_dot, output, prog='dot'):
         raise ValueError((output, suff))
 
     cmd = [prog, '-T%s' % suff, '-o', output, filename_dot]
-    system_cmd_result(cwd='.', cmd=cmd,
+    try:
+        # print('running graphviz')
+        system_cmd_result(cwd='.', cmd=cmd,
                  display_stdout=False,
                  display_stderr=False,
                  raise_on_error=True)
+        # print('done')
+    except CmdException:
+        emergency = 'emergency.dot'
+        print('saving to %r' % emergency)
+        with open(filename_dot) as f1:
+            with open(emergency, 'w') as f:
+                f.write(f1.read())
+        raise
+
 
 def gg_deepcopy(ggraph):
     try:
@@ -55,6 +67,15 @@ def nx_generic_graphviz_plot(G, output, prog='dot'):
         nx.write_dot(G, filename_dot)
         graphviz_run(filename_dot, output, prog=prog)
 
+def get_dot_string(gg):
+    with tmpfile(".dot") as filename_dot:
+        with open(filename_dot, 'w') as fo:
+            gg.dot(fo)
+        contents = open(filename_dot).read()
+
+        contents = contents.replace('"<TABLE', '<<TABLE')
+        contents = contents.replace('</TABLE>"', '</TABLE>>')
+        return contents
 
 def gg_figure(r, name, ggraph):
     """ Adds a figure to the Report r that displays this graph
@@ -64,7 +85,7 @@ def gg_figure(r, name, ggraph):
     # save file in dot file
     with tmpfile(".dot") as filename_dot:
         with open(filename_dot, 'w') as fo:
-            ggraph.dot(fo)
+            fo.write(get_dot_string(ggraph))
 
         prog = 'dot'
         with f.data_file('graph', MIME_PNG) as filename:
