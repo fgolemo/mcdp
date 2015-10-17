@@ -5,6 +5,17 @@ from mocdp.dp import Parallel
 from mocdp.dp import DPLoop0
 from .gg_utils import gg_figure
 from mocdp.dp import Mux
+from contracts import contract
+from mocdp.comp.interfaces import CompositeNamedDP
+
+@contract(ndp=CompositeNamedDP)
+def report_ndp1(ndp):
+    r = Report()
+
+    gg = gvgen_from_ndp(ndp)
+    gg_figure(r, 'graph', gg)
+
+    return r
 
 
 def report_dp1(dp):
@@ -14,7 +25,6 @@ def report_dp1(dp):
     gg_figure(r, 'graph', gg)
 
     r.text('long', dp.repr_long())
-
 
     S, alpha, beta = dp.get_normal_form()
 

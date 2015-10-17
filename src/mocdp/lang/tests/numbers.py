@@ -1,18 +1,16 @@
-
 # -*- coding: utf-8 -*-
+from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
+    assert_syntax_error)
 from comptests.registrar import comptest
+from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.lang.blocks import DPSemanticError
-from mocdp.lang.syntax import (
-    code_spec, constraint_expr, floatnumber, funcname, idn, load_expr, max_expr,
-    ow, parse_model, parse_wrap, rvalue, simple_dp_model, integer, number,
-    integer_or_float, number_with_unit, empty_unit)
-from mocdp.lang.tests.examples1 import assert_syntax_error, \
-    assert_semantic_error
-from nose.tools import assert_equal, assert_equal
-from contracts import contract
-from mocdp.posets.rcomp import R_dimensionless, R_Weight
 from mocdp.lang.parts import ValueWithUnits
+from mocdp.lang.syntax import (code_spec, constraint_expr, empty_unit,
+    floatnumber, funcname, idn, integer, integer_or_float, load_expr, max_expr,
+    number, number_with_unit, ow, parse_wrap, rvalue, simple_dp_model)
+from mocdp.posets.rcomp import R_Weight, R_dimensionless
+from nose.tools import assert_equal, assert_equal
 
 
 @contract(string=str)
@@ -40,7 +38,8 @@ def check_numbers2():
 @comptest
 def check_numbers3():
     # Need connections: don't know the value of a
-    parse_model("""    
+
+    assert_parsable_to_connected_ndp("""    
     cdp  {
         requires a [g]
         

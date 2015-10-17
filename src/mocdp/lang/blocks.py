@@ -4,7 +4,7 @@ from conf_tools import SemanticMistakeKeyNotFound, instantiate_spec
 from contracts import contract, describe_value
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.comp.connection import Connection
-from mocdp.comp.interfaces import NamedDP
+from mocdp.comp.interfaces import NamedDP, CompositeNamedDP
 from mocdp.comp.wrap import SimpleWrap, dpwrap
 from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
 from mocdp.dp import Identity, Max, Min, PrimitiveDP, Product, Sum
@@ -115,7 +115,7 @@ class Context():
     def get_rtype(self, a):
         """ Gets the type of a resource, raises DPSemanticError if not present. """
         if not a.dp in self.names:
-            msg = "Cannot find dp %r." % a
+            msg = "Cannot find resource %r." % a
             raise DPSemanticError(msg)
         dp = self.names[a.dp]
         if not a.s in dp.get_rnames():
@@ -161,13 +161,10 @@ def interpret_commands(res):
                 raise DPSemanticError(str(e), where=r.where)
             raise
             
-    check_missing_connections(context)
-
     if not context.names:
         raise DPSemanticError('Empty model')
 
-    from mocdp.comp.connection import dpgraph
-    return dpgraph(context.names, context.connections, split=[])
+    return CompositeNamedDP(context=context)
 
 
 def check_missing_connections(context):
@@ -239,7 +236,8 @@ def check_missing_connections(context):
             s += '\n' + indent(msg, 'help: ')
 
     if s:
-        raise DPSemanticError(s)
+        from mocdp.comp.interfaces import NotConnected
+        raise NotConnected(s)
 
 @contract(returns=NamedDP)
 def eval_dp_rvalue(r, context):  # @UnusedVariable

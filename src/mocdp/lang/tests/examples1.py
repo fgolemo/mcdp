@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
+from .utils import assert_parsable_to_unconnected_ndp
 from comptests.registrar import comptest
-from mocdp.lang.syntax import (idn, load_expr, ow, parse_model, parse_wrap,
-    rvalue, simple_dp_model, funcname, code_spec, max_expr, constraint_expr)
-from pyparsing import Literal
+from mocdp.lang.syntax import (code_spec, constraint_expr, funcname, idn,
+    load_expr, max_expr, ow, parse_wrap, rvalue, simple_dp_model)
+from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp,
+    assert_semantic_error)
 from nose.tools import assert_equal
-from mocdp.lang.blocks import DPSemanticError
-from contracts.utils import raise_wrapped, raise_desc
+from pyparsing import Literal
 import warnings
-from mocdp.exceptions import DPSyntaxError
 
 @comptest
 def check_lang():
@@ -16,7 +16,7 @@ def check_lang():
     parse_wrap(idn + ow + Literal('='), 'battery=')
     parse_wrap(load_expr, 'load battery')
 
-    data = """
+    assert_parsable_to_connected_ndp("""
 cdp {
     provides mission_time [s] 
     
@@ -30,8 +30,7 @@ cdp {
     battery.capacity >= times.energy
     actuation.weight >= battery.battery_weight
 }
-    """
-    return parse_model(data)
+    """)
 
 
 @comptest
@@ -54,7 +53,7 @@ cdp {
     # comment
 }
     """
-    parse_model(data)
+    assert_parsable_to_connected_ndp(data)
 
 @comptest
 def check_lang3_times():
@@ -71,37 +70,8 @@ cdp {
     actuation.weight >= battery.battery_weight
 }
     """
-    parse_model(data)
+    assert_parsable_to_connected_ndp(data)
 
-def assert_syntax_error(s, expr, desc=None):
-    try:
-        res = parse_wrap(expr, s)
-    except DPSyntaxError:
-        pass
-    except BaseException as e:
-        msg = "Expected syntax error, got %s." % type(e)
-        raise_wrapped(Exception, e, msg, s=s)
-    else:
-        msg = "Expected an exception, instead succesfull instantiation."
-        if desc:
-            msg += '\n' + desc
-        raise_desc(Exception, msg, s=s, res=res.repr_long())
-
-
-def assert_semantic_error(s , desc=None):
-    try:
-        res = parse_model(s)
-    except DPSemanticError:
-        pass
-    except BaseException as e:
-        msg = "Expected semantic error, got %s." % type(e)
-        raise_wrapped(Exception, e, msg, s=s)
-    else:
-        msg = "Expected an exception, instead succesfull instantiation."
-        if desc:
-            msg += '\n' + desc
-        raise_desc(Exception, msg, s=s, res=res.repr_long())
-    
     
 @comptest
 def check_lang10_asllspecified():
@@ -123,7 +93,7 @@ cdp {
     """
     assert_semantic_error(s)  # unconnected
 
-    ndp = parse_model("""
+    ndp = assert_parsable_to_connected_ndp("""
 cdp {
     provides c [J]
     requires w [g]
@@ -136,7 +106,7 @@ cdp {
     """)
 
     # reused same function
-    parse_model("""
+    assert_parsable_to_connected_ndp("""
 cdp {
     provides c [J]
     requires w1 [g]
@@ -175,7 +145,7 @@ def check_lang5_composition():
     parse_wrap(funcname, 'mocdp.example_battery.Mobility')
     parse_wrap(code_spec, 'code mocdp.example_battery.Mobility')
 
-    s = """
+    assert_parsable_to_connected_ndp("""
     cdp {
         provides mission_time [s]
     
@@ -196,8 +166,7 @@ def check_lang5_composition():
         battery.capacity >= actuation.actuation_power * mission_time    
         actuation.weight >= battery.battery_weight
     }
-    """
-    res = parse_model(s)
+    """)
 
 
 @comptest
@@ -231,7 +200,7 @@ def check_lang6_composition():
         payload provided by actuation >= battery_weight required by battery
     }
     """
-    res = parse_model(s)
+    assert_parsable_to_connected_ndp(s)
 
 
 @comptest
@@ -259,13 +228,13 @@ def check_lang7_addition():
         payload provided by actuation >= (battery_weight required by battery) + extra_payload
     }
     """
-    parse_model(s)
+    assert_parsable_to_connected_ndp(s)
 
 
 @comptest
 def check_lang8_addition():
     # x of b  == x required by b
-    p = parse_model("""
+    p = assert_parsable_to_connected_ndp("""
     cdp {
         provides mission_time  [s]
         provides extra_payload [g]
@@ -304,7 +273,7 @@ def check_lang9_max():
     parse_wrap(rvalue, 'max(f, g)')
     parse_wrap(constraint_expr, 'hnlin.x >= max(f, g)')
 
-    p = parse_model("""
+    p = assert_parsable_to_connected_ndp("""
     cdp {
         provides f [R]
         
@@ -325,7 +294,7 @@ def check_lang9_max():
 
 @comptest
 def check_lang10_comments():
-    p = parse_model("""
+    p = assert_parsable_to_connected_ndp("""
     cdp {
         provides f [R]
         
@@ -347,7 +316,7 @@ def check_lang10_comments():
 
 @comptest
 def check_lang11_resources():
-    p = parse_model("""
+    p = assert_parsable_to_connected_ndp("""
     cdp {
         provides f [R]
         requires z [R]
@@ -372,7 +341,7 @@ def check_lang11_resources():
 
 @comptest
 def check_lang11_leq():
-    parse_model("""
+    assert_parsable_to_connected_ndp("""
     cdp {
         provides f [R]
         
@@ -401,7 +370,7 @@ def check_simplification():
         | S2 Max(R[s])
     
     """
-    m1 = parse_model("""
+    m1 = assert_parsable_to_connected_ndp("""
     cdp {
         provides x  [s]
         provides y  [s]
@@ -412,7 +381,7 @@ def check_simplification():
 """)
     dp1 = m1.get_dp()
 
-    m2 = parse_model("""
+    m2 = assert_parsable_to_connected_ndp("""
     cdp {
         provides x  [s]
         provides y  [s]
@@ -429,7 +398,7 @@ def check_simplification():
 
 @comptest
 def check_lang13_diagram():
-    m1 = parse_model("""
+    assert_parsable_to_connected_ndp("""
     cdp {
         provides cargo [g]
         requires total_weight [g]
@@ -471,7 +440,7 @@ def check_lang13_diagram():
 @comptest
 def check_lang12_addition_as_resources():
     # x of b  == x required by b
-#     p = parse_model("""
+#     p = assert_parsable_to_connected_ndp("""
 #     cdp {
 #         provides a [R]
 #         provides b [R]
@@ -485,7 +454,7 @@ def check_lang12_addition_as_resources():
 
 @comptest
 def check_lang14():
-    p = parse_model("""
+    assert_parsable_to_connected_ndp("""
     cdp {
         provides g [s]
         requires f2 [s]
@@ -507,7 +476,7 @@ cdp {
 @comptest
 def check_lang16():
     warnings.warn('fix this bug')
-    p = parse_model("""
+    assert_parsable_to_connected_ndp("""
 cdp {
     requires g [s]
     provides f [s]
@@ -519,7 +488,7 @@ cdp {
 @comptest
 def check_lang17():
     warnings.warn('fix this bug')
-    p = parse_model("""
+    assert_parsable_to_connected_ndp("""
 cdp {
     requires g [R]
     provides f [R]
@@ -531,7 +500,7 @@ cdp {
 @comptest
 def check_lang18():
     warnings.warn('fix this bug')
-    p = parse_model("""
+    assert_parsable_to_connected_ndp("""
 cdp {
     requires g [R]
     provides f [R]
@@ -542,7 +511,7 @@ cdp {
 
 @comptest
 def check_lang19():
-    parse_model("""
+    assert_parsable_to_connected_ndp("""
 cdp {
     requires g [R]
     provides f [R]
@@ -554,7 +523,7 @@ cdp {
 @comptest
 def check_lang20():
     """ One loop """
-    parse_model("""
+    assert_parsable_to_connected_ndp("""
 cdp {
     times = dp {
         provides a [R]
@@ -571,7 +540,7 @@ cdp {
 
 @comptest
 def check_lang21():    
-    parse_model("""
+    assert_parsable_to_connected_ndp("""
     cdp {
         times = cdp {
             provides a [R]
@@ -608,7 +577,7 @@ def check_lang23():
 @comptest
 def check_lang24():
     # This is fine: it's just a sink
-    parse_model("""    
+    assert_parsable_to_connected_ndp("""    
     cdp  {
         provides a [R]
         a <= 5.0 [R]
@@ -637,6 +606,17 @@ def check_lang26():
         a <= 5.0 [g] # invalid unit
     }
     """)
+
+
+@comptest
+def check_lang27():
+    assert_parsable_to_unconnected_ndp("""
+cdp {
+    requires g [R]
+    provides f [R] 
+}
+    """)
+
 
 
 examples1 = [

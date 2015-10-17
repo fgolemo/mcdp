@@ -73,6 +73,9 @@ class SimpleWrap(NamedDP):
             raise_wrapped(ValueError, e, msg, dp=self.dp, F=F, R=R,
                           fnames=fnames, rnames=rnames)
 
+    def check_fully_connected(self):
+        pass  # it is
+
     def get_dp(self):
         return self.dp
 
@@ -88,12 +91,7 @@ class SimpleWrap(NamedDP):
         else:
             return self.Rnames
 
-    def __repr__(self):
-        return 'Wrap(%s|%s|%s)' % (self.get_fnames(), self.dp, self.get_rnames())
     
-    def repr_long(self):
-        return self.desc()
-
     def rindex(self, r):
         if self.R_single:
             if not r == self.Rname:
@@ -128,35 +126,29 @@ class SimpleWrap(NamedDP):
     def get_ftype(self, fname):
         F = self.get_dp().get_fun_space()
         i = self.findex(fname)
-#         print('Asking type of %r in F = %r with index = %r' % (fname, F, i))
         return get_it(F, i, reduce_list=None)
-
-    def get_ftypes(self, signals):
-        # Returns the product space
-        types = [self.get_ftype(s) for s in signals]
-        return PosetProduct(tuple(types))
 
     @contract(rname=str)
     def get_rtype(self, rname):
         R = self.get_dp().get_res_space()
         i = self.rindex(rname)
-#         print('Asking type of %r in R = %r with index = %r' % (rname, R, i))
         return get_it(R, i, reduce_list=None)
-
-    def get_rtypes(self, signals):
-#         if not signals: raise ValueError('empty')
-        # Returns the product space
-        types = [self.get_rtype(s) for s in signals]
-        return PosetProduct(tuple(types))
 
     def desc(self):
         s = 'SimpleWrap'
         for f in self.get_fnames():
-            s += '\n provides %10s (%s) ' % (f, self.get_ftype(f))
+            s += '\n  provides %10s (%s) ' % (f, self.get_ftype(f))
         for r in self.get_rnames():
-            s += '\n requires %10s (%s) ' % (r, self.get_rtype(r))
-        s += '\n' + indent(self.get_dp().repr_long(), '| ')
+            s += '\n  requires %10s (%s) ' % (r, self.get_rtype(r))
+        s += '\n' + indent(self.get_dp().repr_long(), '  | ')
         return s
+
+    def __repr__(self):
+        return self.desc()
+#         return 'Wrap(%s|%s|%s)' % (self.get_fnames(), self.dp, self.get_rnames())
+
+    def repr_long(self):
+        return self.desc()
 
 
 @contract(dp=PrimitiveDP, returns=NamedDP, fnames='str|seq(str)', rnames='str|seq(str)')

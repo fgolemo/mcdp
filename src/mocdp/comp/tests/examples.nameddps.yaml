@@ -112,7 +112,7 @@
 - id: battery_complete_parsed
   desc: ""
   code: 
-  - mocdp.lang.parse
+  - mocdp.lang.parse_ndp
   - string: |
       cdp {
           #
@@ -133,7 +133,7 @@
 - id: testmax
   desc: "Test with max"
   code: 
-  - mocdp.lang.parse
+  - mocdp.lang.parse_ndp
   - string: |
       cdp {
           provides f [R]
@@ -151,7 +151,7 @@
 - id: testmin
   desc: "Test with min"
   code: 
-  - mocdp.lang.parse
+  - mocdp.lang.parse_ndp
   - string: |
       cdp {
           provides f [R]
@@ -169,7 +169,7 @@
 - id: testminsq
   desc: "Test with min"
   code: 
-  - mocdp.lang.parse
+  - mocdp.lang.parse_ndp
   - string: |
       cdp {
         provides f0 [R]
@@ -193,7 +193,7 @@
 - id: testminsq_2
   desc: "Equivalent, just switching the order of arguments to max"
   code: 
-  - mocdp.lang.parse
+  - mocdp.lang.parse_ndp
   - string: |
       cdp {
         provides f0 [R]
@@ -218,7 +218,7 @@
 - id: testminsq_3
   desc: "Equivalent, just switching the order of arguments to max"
   code: 
-  - mocdp.lang.parse
+  - mocdp.lang.parse_ndp
   - string: |
       cdp {
         provides f0 [R]
@@ -242,7 +242,7 @@
 - id: testlang13_diagram
   desc: "Diagram in the presentation"
   code: 
-  - mocdp.lang.parse
+  - mocdp.lang.parse_ndp
   - string: |
       cdp {
           provides cargo [g]

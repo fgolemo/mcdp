@@ -6,17 +6,16 @@ from contracts.interface import Where, describe_value
 from contracts.utils import indent, raise_wrapped
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
-from mocdp.lang.parts import (
-    DPWrap, Function, LoadDP, NewResource, OpMax, OpMin, PDPCodeSpec, Plus,
-    ValueWithUnits, NewLimit)
+from mocdp.lang.parts import (DPWrap, Function, LoadDP, NewLimit, NewResource,
+    OpMax, OpMin, PDPCodeSpec, Plus, ValueWithUnits)
 from mocdp.lang.utils import parse_action
 from mocdp.posets.rcomp import (R_Cost, R_Current, R_Energy, R_Power, R_Time,
     R_Voltage, R_Weight, R_dimensionless)
-from pyparsing import (Combine, Forward, Group, LineEnd, LineStart, Literal,
-    Optional, Or, ParseException, ParseFatalException, ParserElement, SkipTo,
-    Suppress, Word, ZeroOrMore, alphanums, alphas, oneOf, opAssoc,
-    operatorPrecedence, nums, CaselessLiteral)
 from mocdp.posets.space import NotBelongs
+from pyparsing import (CaselessLiteral, Combine, Forward, Group, LineEnd,
+    LineStart, Literal, Optional, Or, ParseException, ParseFatalException,
+    ParserElement, SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas, nums,
+    oneOf, opAssoc, operatorPrecedence)
 
 
 ParserElement.enablePackrat()
@@ -309,8 +308,9 @@ def remove_comments(s):
     return "\n".join(map(remove_comment, lines))
 
 @contract(returns=NamedDP)
-def parse_model(string):
+def parse_ndp(string):
     res = parse_wrap(dp_model, string)[0]
+    assert isinstance(res, NamedDP)
     return res
 
 def parse_line(line):

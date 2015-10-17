@@ -34,7 +34,7 @@ def check_ex16c_r(dp):
 #     from mocdp.dp.dp_loop import SimpleLoop
     funsp = dp.get_fun_space()
 
-    assert isinstance(dp, SimpleLoop)
+#     assert isinstance(dp, SimpleLoop)
 
     # Payload2ET
     dp1 = dp.dp1.dp1

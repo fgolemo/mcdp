@@ -1,6 +1,6 @@
 from mocdp.dp_report.report import report_dp1
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
-from mocdp.lang.syntax import parse_model
+from mocdp.lang.syntax import parse_ndp
 from reprep import Report
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
@@ -31,7 +31,7 @@ def watch_main():
     def go():
         s = open(filename).read()
         try: 
-            ndp = parse_model(s)
+            ndp = parse_ndp(s)
         except (DPSyntaxError, DPSemanticError) as e:
             r = Report()
             r.text('error', str(e))

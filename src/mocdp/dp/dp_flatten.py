@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts import contract
-from contracts.utils import check_isinstance
+from contracts.utils import check_isinstance, raise_wrapped
 from mocdp import get_conftools_posets
 from mocdp.posets import PosetProduct
 from multi_index import get_it
+from mocdp.exceptions import DPInternalError
 
 
 __all__ = [
@@ -18,7 +19,11 @@ class Mux(PrimitiveDP):
     def __init__(self, F, coords):
         library = get_conftools_posets()
         _, F = library.instance_smarter(F)
-        R = get_R_from_F_coords(F, coords)
+        try:
+            R = get_R_from_F_coords(F, coords)
+        except ValueError as e:
+            msg = 'Cannot create Mux'
+            raise_wrapped(DPInternalError, e, msg, F=F, coords=coords)
 
         self.coords = coords
         

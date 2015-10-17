@@ -278,7 +278,15 @@ def connect2(ndp1, ndp2, connections, split):
         rntot = A + B1 + r2
 
         # now I can create Ftot and Rtot
-        Ftot = PosetProduct(tuple(list(ndp1.get_ftypes(f1)) + list(ndp2.get_ftypes(D))))
+        f1_types = ndp1.get_ftypes(f1)
+
+        D_types = ndp2.get_ftypes(D)
+#         print('f1: %s' % f1)
+#         print('f1 types: %s' % f1_types)
+#         print('D: %s' % D)
+#         print('D types: %s' % D_types)
+
+        Ftot = PosetProduct(tuple(list(f1_types) + list(D_types)))
         Rtot = PosetProduct(tuple(list(ndp1.get_rtypes(A)) +
                                   list(ndp1.get_rtypes(B1)) +
                                   list(ndp2.get_rtypes(r2))))
@@ -287,8 +295,8 @@ def connect2(ndp1, ndp2, connections, split):
         # print('      %s' % str(fntot))
         # print('Rtot: %s' % str(Rtot))
         # print('      %s' % str(rntot))
-        assert len(fntot) == len(Ftot)
-        assert len(rntot) == len(Rtot)
+        assert len(fntot) == len(Ftot), (fntot, Ftot)
+        assert len(rntot) == len(Rtot), (rntot, Rtot)
 
 
         # I can create the first muxer m1
