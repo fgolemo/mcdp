@@ -9,6 +9,7 @@ from mocdp.posets.rcomp import (R_Energy, R_Power, R_Time, R_Weight, Rcomp,
     RcompUnits)
 from mocdp.posets.single import Single
 import numpy as np
+from mocdp.posets.space_product import SpaceProduct
 
 
 
@@ -20,7 +21,8 @@ class SimpleNonlinearity1(PrimitiveDP):
     def __init__(self):
         F = Rcomp()
         R = Rcomp()
-        PrimitiveDP.__init__(self, F=F, R=R)
+        M = SpaceProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, f):
         F = self.get_fun_space()
@@ -41,7 +43,8 @@ class TimeEnergyTradeoff(PrimitiveDP):
         F = Single("navigate")
         R = PosetProduct((R_Power, R_Time))
 
-        PrimitiveDP.__init__(self, F=F, R=R)
+        M = SpaceProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, min_func):
         assert min_func == 'navigate'
@@ -66,7 +69,8 @@ class PowerTimeTradeoff(PrimitiveDP):
         F = PosetProduct(())
         R = PosetProduct((R_Power, R_Time))
 
-        PrimitiveDP.__init__(self, F=F, R=R)
+        M = SpaceProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, min_func):
         assert min_func == ()
@@ -93,7 +97,8 @@ class Mobility(PrimitiveDP):
         F = RcompUnits('g')
         R = RcompUnits('W')
 
-        PrimitiveDP.__init__(self, F=F, R=R)
+        M = SpaceProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, func):
         if func == self.F.get_top():

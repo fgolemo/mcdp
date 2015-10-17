@@ -10,6 +10,8 @@ def namedtuplewhere(a, b):
     F.__name__ = a
     return F
 
+NewLimit = namedtuplewhere('NewLimit', 'value_with_unit')
+ValueWithUnits = namedtuplewhere('ValueWithUnits', 'value unit')
 
 Mult = namedtuplewhere('Mult', 'a b')
 Plus = namedtuplewhere('Plus', 'a b')

@@ -3,6 +3,7 @@ from .primitive import PrimitiveDP
 from mocdp import get_conftools_posets
 from mocdp.posets import PosetProduct
 from mocdp.posets.uppersets import UpperSet
+from mocdp.posets.space_product import SpaceProduct
 
 
 __all__ = [
@@ -17,8 +18,8 @@ class Terminator(PrimitiveDP):
         _, F = library.instance_smarter(F)
 
         R = PosetProduct(())
-
-        PrimitiveDP.__init__(self, F=F, R=R)
+        M = SpaceProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, func):  # @UnusedVariable
         return UpperSet([()], self.R)

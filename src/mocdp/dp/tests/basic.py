@@ -11,6 +11,11 @@ def check_dp1(id_dp, dp):
     print('F: %s' % funsp)
     print('R: %s' % ressp)
 
+    I = dp.get_imp_space()
+    M = dp.get_imp_space_mod_res()
+    print('I: %s' % I)
+    print('M: %s' % M)
+
     f_top = funsp.get_top()
     f_bot = funsp.get_bottom()
 
@@ -19,8 +24,6 @@ def check_dp1(id_dp, dp):
 
     u0 = dp.solve(f_bot)
     u1 = dp.solve(f_top)
-
-    
 
     print('u0', u0)
     print('u1', u1)

@@ -16,3 +16,5 @@ from .dp_terminator import *
 
 from .dp_parallel_simplification import *
 from .dp_series_simplification import *
+from .dp_constant import *
+from .dp_limit import *

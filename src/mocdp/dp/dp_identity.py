@@ -2,6 +2,7 @@
 from .primitive import PrimitiveDP
 from contracts import contract
 from mocdp.posets import Poset  # @UnusedImport
+from mocdp.posets.poset_product import PosetProduct
 
 
 __all__ = [
@@ -20,7 +21,8 @@ class Identity(PrimitiveDP):
         from mocdp import get_conftools_posets
         _, F = get_conftools_posets().instance_smarter(F)
         R = F
-        PrimitiveDP.__init__(self, F=F, R=R)
+        M = PosetProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
 
     def solve(self, f):

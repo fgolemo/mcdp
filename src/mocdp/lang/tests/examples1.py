@@ -5,8 +5,9 @@ from mocdp.lang.syntax import (idn, load_expr, ow, parse_model, parse_wrap,
 from pyparsing import Literal
 from nose.tools import assert_equal
 from mocdp.lang.blocks import DPSemanticError
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, raise_desc
 import warnings
+from mocdp.exceptions import DPSyntaxError
 
 @comptest
 def check_lang():
@@ -72,6 +73,21 @@ cdp {
     """
     parse_model(data)
 
+def assert_syntax_error(s, expr, desc=None):
+    try:
+        res = parse_wrap(expr, s)
+    except DPSyntaxError:
+        pass
+    except BaseException as e:
+        msg = "Expected syntax error, got %s." % type(e)
+        raise_wrapped(Exception, e, msg, s=s)
+    else:
+        msg = "Expected an exception, instead succesfull instantiation."
+        if desc:
+            msg += '\n' + desc
+        raise_desc(Exception, msg, s=s, res=res.repr_long())
+
+
 def assert_semantic_error(s , desc=None):
     try:
         res = parse_model(s)
@@ -82,7 +98,9 @@ def assert_semantic_error(s , desc=None):
         raise_wrapped(Exception, e, msg, s=s)
     else:
         msg = "Expected an exception, instead succesfull instantiation."
-        raise_wrapped(Exception, e, msg, s=s, res=res.desc_long())
+        if desc:
+            msg += '\n' + desc
+        raise_desc(Exception, msg, s=s, res=res.repr_long())
     
     
 @comptest
@@ -571,7 +589,16 @@ def check_lang21():
 
 @comptest
 def check_lang22():    
-    # Need connections
+    # Need connections: don't know the value of a
+    assert_semantic_error("""    
+    cdp  {
+        requires a [R]
+    }
+    """)
+
+@comptest
+def check_lang23():
+    # This is not fine
     assert_semantic_error("""    
     cdp  {
         provides a [R]
@@ -579,13 +606,38 @@ def check_lang22():
     """)
 
 @comptest
-def check_lang23():
-    # Need connections
-    assert_semantic_error("""    
+def check_lang24():
+    # This is fine: it's just a sink
+    parse_model("""    
     cdp  {
-        requires a [R]
+        provides a [R]
+        a <= 5.0 [R]
     }
     """)
+
+
+@comptest
+def check_lang25():
+    # This should fail because -2 is not in Rcomp
+    assert_semantic_error("""    
+    cdp  {
+        provides f [g]
+        requires r [g]
+        
+        r >= f * -2 [R]
+    }
+    """)
+
+@comptest
+def check_lang26():
+
+    assert_semantic_error("""    
+    cdp  {
+        provides a [R]
+        a <= 5.0 [g] # invalid unit
+    }
+    """)
+
 
 examples1 = [
     """

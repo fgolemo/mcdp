@@ -2,6 +2,8 @@
 from .primitive import PrimitiveDP
 from mocdp import get_conftools_posets
 from mocdp.posets import PosetProduct
+from mocdp.posets.space_product import SpaceProduct
+import warnings
 
 
 __all__ = [
@@ -11,13 +13,15 @@ __all__ = [
 class Split(PrimitiveDP):
 
     def __init__(self, F):
+        warnings.warn('Replace by Mux')
         library = get_conftools_posets()
         _, F0 = library.instance_smarter(F)
 
         R = PosetProduct((F0, F0))
         F = F0
 
-        PrimitiveDP.__init__(self, F=F, R=R)
+        M = SpaceProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, func):
         r = (func, func)

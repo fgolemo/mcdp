@@ -8,6 +8,7 @@ from mocdp.posets.space import Map
 from mocdp.dp.dp_series import prod_get_state, prod_make_state
 from mocdp.dp.primitive import NormalForm
 from mocdp.posets.utils import poset_minima
+from mocdp.posets.space_product import SpaceProduct
 
 __all__ = [
     'Parallel',
@@ -27,9 +28,14 @@ class Parallel(PrimitiveDP):
         F = PosetProduct((F1, F2))
         R1 = self.dp1.get_res_space()
         R2 = self.dp2.get_res_space()
+
         R = PosetProduct((R1, R2))
 
-        PrimitiveDP.__init__(self, F=F, R=R)
+        M1 = self.dp1.get_imp_space_mod_res()
+        M2 = self.dp2.get_imp_space_mod_res()
+        M = SpaceProduct((M1, M2))
+
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
         
     def solve(self, f):
         F = self.get_fun_space()

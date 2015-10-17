@@ -1,23 +1,22 @@
 # -*- coding: utf-8 -*-
 from .parts import Constraint, LoadCommand, SetName
-from conf_tools.code_specs import instantiate_spec
+from conf_tools import SemanticMistakeKeyNotFound, instantiate_spec
 from contracts import contract, describe_value
-from contracts.utils import raise_desc, indent, raise_wrapped
+from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.comp.connection import Connection
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import SimpleWrap, dpwrap
 from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
-from mocdp.dp.dp_identity import Identity
-from mocdp.dp.dp_max import Max, Min
-from mocdp.dp.dp_sum import Product, Sum
-from mocdp.dp.primitive import PrimitiveDP
-from mocdp.lang.parts import Function, NewResource, OpMax, OpMin, Plus, Resource
+from mocdp.dp import Identity, Max, Min, PrimitiveDP, Product, Sum
+from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.lang.parts import Function, NewResource, OpMax, OpMin, Plus, Resource, \
+    ValueWithUnits, NewLimit
 from mocdp.lang.syntax import (DPSyntaxError, DPWrap, FunStatement, LoadDP,
     PDPCodeSpec, ResStatement)
-from mocdp.posets.rcomp import mult_table
-from mocdp.exceptions import DPSemanticError, DPInternalError
-from contracts.syntax import e
-from conf_tools.exceptions import SemanticMistakeKeyNotFound
+from mocdp.posets.rcomp import mult_table, Rcomp
+from mocdp.dp.dp_constant import Constant
+from mocdp.posets.space import NotBelongs
+from mocdp.dp.dp_limit import Limit
 
 class Context():
     def __init__(self):
@@ -70,6 +69,14 @@ class Context():
                        names=self.names, c=c)
 
         self.names[c.dp2].findex(c.s2)
+
+        ndp1 = self.names[c.dp1]
+        ndp2 = self.names[c.dp2]
+        R1 = ndp1.get_rtype(c.s1)
+        F2 = ndp2.get_ftype(c.s2)
+        if not (R1 == F2):
+            msg = 'Connection between different spaces'
+            raise_desc(DPSemanticError, msg, F2=F2, R1=R1)
 
         self.connections.append(c)
 
@@ -125,7 +132,6 @@ def interpret_commands(res):
             if isinstance(r, Connection):
                 context.add_connection(r)
 
-
             elif isinstance(r, Constraint):
                 resource = eval_rvalue(r.rvalue, context)
                 function = eval_lfunction(r.function, context)
@@ -178,22 +184,27 @@ def check_missing_connections(context):
     available_res = set()
     # look for the open connections
     for n, ndp in context.names.items():
-        if n in context.newfunctions or n in context.newresources:
-            continue
-        for fn in ndp.get_fnames():
-            available_fun.add((n, fn))
-        for rn in ndp.get_rnames():
-            available_res.add((n, rn))
 
-#     print ('available_fun: %s' % available_fun)
-#     print ('available_res: %s' % available_res)
-#     print ('connected_fun: %s' % connected_fun)
-#     print ('connected_res: %s' % connected_res)
+        if not n in context.newfunctions:
+            for fn in ndp.get_fnames():
+                available_fun.add((n, fn))
+
+        if not n in context.newresources:
+            for rn in ndp.get_rnames():
+                available_res.add((n, rn))
+
+    print('context.connections: %s' % context.connections)
+    print('context.newfunctions: %s' % context.newfunctions)
+    print('context.newresources: %s' % context.newresources)
+    print ('available_fun: %s' % available_fun)
+    print ('available_res: %s' % available_res)
+    print ('connected_fun: %s' % connected_fun)
+    print ('connected_res: %s' % connected_res)
 
     unconnected_fun = available_fun - connected_fun
     unconnected_res = available_res - connected_res
-#     print ('unconnected_res: %s' % unconnected_res)
-#     print ('unconnected_fun: %s' % unconnected_fun)
+    print ('unconnected_res: %s' % unconnected_res)
+    print ('unconnected_fun: %s' % unconnected_fun)
 
     s = ""
     if unconnected_fun:
@@ -201,9 +212,13 @@ def check_missing_connections(context):
         for n, fn in unconnected_fun:
             s += '\n- function %r of dp %r' % (fn, n)
             msg = 'One way to fix this is to add an explicit function:\n'
-            fn2 = fn + '_'
+            fn2 = 'f'
             fix = "provides %s [unit]" % fn2
-            fix += '\n' + "%s.%s >= %s" % (fn, n, fn2)
+            if n in context.newresources:
+                ref = n
+            else:
+                ref = '%s.%s' % (n, fn)
+            fix += '\n' + "%s >= %s" % (ref, fn2)
             msg += indent(fix, '    ')
             s += '\n' + indent(msg, 'help: ')
 
@@ -212,9 +227,14 @@ def check_missing_connections(context):
         for n, rn in unconnected_res:
             s += '\n- resource %s of dp %r' % (rn, n)
             msg = 'One way to fix this is to add an explicit resource:\n'
-            rn2 = rn + '_'
+            rn2 = 'r'
             fix = "requires %s [unit]" % rn2
-            fix += '\n' + "%s >= %s.%s" % (rn2, n, rn)
+            if n in context.newfunctions:
+                ref = n
+            else:
+                ref = '%s.%s' % (n, rn)
+            # todo: omit '.' if n is
+            fix += '\n' + "%s >= %s" % (rn2, ref)
             msg += indent(fix, '    ')
             s += '\n' + indent(msg, 'help: ')
 
@@ -292,6 +312,25 @@ def eval_lfunction(lf, context):
             raise DPSyntaxError(msg, where=lf.where)
         return Function(lf.name, context.names[lf.name].get_fnames()[0])
 
+    if isinstance(lf, NewLimit):
+        vu = lf.value_with_unit
+        value = vu.value
+        F = vu.unit
+        # TODO: special conversion int -> float
+        try:
+            F.belongs(value)
+        except NotBelongs as e:
+            msg = 'Invalid value provided.'
+            raise_wrapped(DPSemanticError, e, msg)
+
+        dp = Limit(F, value)
+        n = context.new_name('lim')
+        sn = context.new_fun_name('l')
+        ndp = dpwrap(dp, sn, [])
+        context.add_ndp(n, ndp)
+
+        return Function(n, sn)
+        
     raise ValueError(lf)
 
 # @contract(returns=Resource)
@@ -359,9 +398,6 @@ def eval_rvalue(rvalue, context):
             dp = Sum(F1)
             nprefix, na, nb, nres = 'add', 's0', 's1', 'sum'
 
-            # TODO: this will raise an exception
-            # nprefix, na, nb, nres = 'add', 'p0', 'p1', 'sum'
-
             return add_binary(dp, nprefix, na, nb, nres)
 
         if isinstance(rvalue, OpMax):
@@ -385,6 +421,24 @@ def eval_rvalue(rvalue, context):
             nprefix, na, nb, nres = 'opmin', 'm0', 'm1', 'min'
 
             return add_binary(dp, nprefix, na, nb, nres)
+
+        if isinstance(rvalue, ValueWithUnits):
+            # implicit conversion from int to float
+            unit = rvalue.unit
+            value = rvalue.value
+            if isinstance(unit, Rcomp):
+                if isinstance(value, int):
+                    value = float(value)
+            try:
+                unit.belongs(value)
+            except NotBelongs as e:
+                raise_wrapped(DPSemanticError, e, "Value is not in the give space.")
+
+            dp = Constant(unit, value)
+            nres = context.new_res_name('c')
+            ndp = dpwrap(dp, [], nres)
+            context.add_ndp(nres, ndp)
+            return Resource(nres, nres)
 
         if isinstance(rvalue, NewFunction):
             n = rvalue.name

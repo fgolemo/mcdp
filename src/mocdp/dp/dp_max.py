@@ -2,6 +2,7 @@
 from .primitive import PrimitiveDP
 from mocdp import get_conftools_posets
 from mocdp.posets import PosetProduct
+from mocdp.posets.space_product import SpaceProduct
 
 
 __all__ = [
@@ -20,7 +21,8 @@ class Max(PrimitiveDP):
         R = F0
         self.F0 = F0
 
-        PrimitiveDP.__init__(self, F=F, R=R)
+        M = SpaceProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, func):
         f1, f2 = func
@@ -44,7 +46,8 @@ class Min(PrimitiveDP):
         R = F0
         self.F0 = F0
 
-        PrimitiveDP.__init__(self, F=F, R=R)
+        M = SpaceProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, func):
         f1, f2 = func

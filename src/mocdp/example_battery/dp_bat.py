@@ -4,6 +4,7 @@ from mocdp.dp import PrimitiveDP
 from mocdp.posets import PosetProduct, Rcomp
 import numpy as np
 from mocdp.posets.rcomp import R_Energy, R_Weight, R_Time
+from mocdp.posets.space_product import SpaceProduct
 
 
 class BatteryDP(PrimitiveDP):
@@ -20,7 +21,8 @@ class BatteryDP(PrimitiveDP):
         '''
         self.energy_density = float(energy_density)
 
-        PrimitiveDP.__init__(self, F=R_Energy, R=R_Weight)
+        M = SpaceProduct(())
+        PrimitiveDP.__init__(self, F=R_Energy, R=R_Weight, M=M)
     
     def solve(self, min_func):
         funsp = self.get_fun_space()
@@ -40,7 +42,10 @@ class Weight2totalpayload(PrimitiveDP):
     def __init__(self, baseline=100):
         self.baseline = baseline
 
-        PrimitiveDP.__init__(self, F=Rcomp(), R=Rcomp())
+        M = SpaceProduct(())
+        R = Rcomp()
+        F = Rcomp()
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, min_func):
         funsp = self.get_fun_space()
@@ -62,8 +67,8 @@ class Payload2energy(PrimitiveDP):
         self.T = T
         self.alpha = alpha
 
-
-        PrimitiveDP.__init__(self, F=Rcomp(), R=Rcomp())
+        M = SpaceProduct(())
+        PrimitiveDP.__init__(self, F=Rcomp(), R=Rcomp(), M=M)
 
     def solve(self, min_func):
         funsp = self.get_fun_space()
@@ -88,8 +93,9 @@ class Payload2ET(PrimitiveDP):
     """ Example 16 in RAFC """
     def __init__(self):
         F = Rcomp()
+        M = SpaceProduct(())  # XXX
         R = PosetProduct((Rcomp(), Rcomp()))
-        PrimitiveDP.__init__(self, F=F, R=R)
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, min_func):
         funsp = self.get_fun_space()
@@ -128,7 +134,8 @@ class ET2Payload(PrimitiveDP):
 
         F = PosetProduct((R_Energy, R_Time))
         R = R_Weight
-        PrimitiveDP.__init__(self, F=F, R=R)
+        M = SpaceProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 #
 #     def __repr__(self):
 #         return 'ET2Payload(Tmax=%.2f;W0=%.2f;rho=%.2f)' % (self.Tmax, self.W0, self.rho)

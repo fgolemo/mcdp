@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from abc import abstractmethod, ABCMeta
 from contracts.utils import raise_wrapped
 from mocdp.exceptions import DPInternalError

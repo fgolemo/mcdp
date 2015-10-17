@@ -6,6 +6,7 @@ from mocdp.comp.wrap import SimpleWrap
 from mocdp.dp.primitive import PrimitiveDP
 from mocdp.posets import PosetProduct, Rcomp
 from nose.tools import assert_equal
+from mocdp.posets.space_product import SpaceProduct
 
 
 def get_dummy(fnames, rnames):
@@ -20,7 +21,8 @@ def get_dummy(fnames, rnames):
 
     class Dummy(PrimitiveDP):
         def __init__(self):
-            PrimitiveDP.__init__(self, F=F, R=R)
+            M = SpaceProduct(())
+            PrimitiveDP.__init__(self, F=F, R=R, M=M)
         def solve(self, _func):
             return self.R.bottom()
 

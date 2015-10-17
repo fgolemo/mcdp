@@ -22,8 +22,8 @@ class Mux(PrimitiveDP):
 
         self.coords = coords
         
-
-        PrimitiveDP.__init__(self, F=F, R=R)
+        M = PosetProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, func):
         self.F.belongs(func)

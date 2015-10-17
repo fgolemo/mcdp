@@ -6,6 +6,7 @@ from contracts.utils import raise_wrapped
 from decent_logs import WithInternalLog
 from mocdp.posets import (Map, NotBelongs, Poset, PosetProduct, Space,
     UpperSet, UpperSets)
+from mocdp.posets.space_product import SpaceProduct
 
 __all__ = [
     'PrimitiveDP',
@@ -46,13 +47,21 @@ class PrimitiveMeta(ABCMeta):
 
 
 class PrimitiveDP(WithInternalLog):
+    """ 
+                        I = Res * M
+               F      Res    M=I/Res
+        Sum   RxR     R       []
+    
+    """
     __metaclass__ = PrimitiveMeta
 
-    @contract(F=Space, R=Space)
-    def __init__(self, F, R):
+    @contract(F=Space, R=Poset, M=Space)
+    def __init__(self, F, R, M):
         self._inited = True
         self.F = F
         self.R = R
+        self.M = M
+        self.I = SpaceProduct((R, M))
 
     def _assert_inited(self):
         if not '_inited' in self.__dict__:
@@ -66,6 +75,14 @@ class PrimitiveDP(WithInternalLog):
     @contract(returns=Poset)
     def get_res_space(self):
         return self.R
+
+    @contract(returns=Space)
+    def get_imp_space(self):
+        return self.I
+
+    @contract(returns=Space)
+    def get_imp_space_mod_res(self):
+        return self.M
 
     @contract(returns=Poset)
     def get_tradeoff_space(self):
@@ -112,13 +129,7 @@ class PrimitiveDP(WithInternalLog):
         return self.__repr__()
 
 NormalForm = namedtuple('NormalForm', ['S', 'alpha', 'beta'])
-#
-# def get_S_null_element():
-#     return '@'
-#
-# def get_S_null():
-#     Void = Single(get_S_null_element())
-#     return Void
+
 
 class DefaultAlphaMap(Map):
     def __init__(self, dp):

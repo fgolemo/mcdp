@@ -4,6 +4,7 @@ from contracts.utils import indent, raise_desc
 from mocdp.dp.primitive import NormalForm
 from mocdp.posets import Map, PosetProduct, UpperSets
 from mocdp.exceptions import DPInternalError
+from mocdp.posets.space_product import SpaceProduct
 
 
 __all__ = [
@@ -33,7 +34,11 @@ class Series0(PrimitiveDP):
         F1 = self.dp1.get_fun_space()
         R2 = self.dp2.get_res_space()
 
-        PrimitiveDP.__init__(self, F=F1, R=R2)
+        M1 = self.dp1.get_imp_space_mod_res()
+        M2 = self.dp2.get_imp_space_mod_res()
+        M = SpaceProduct((M1, M2))
+
+        PrimitiveDP.__init__(self, F=F1, R=R2, M=M)
         
     def solve(self, func):
         from mocdp.posets import UpperSet, poset_minima

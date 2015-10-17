@@ -2,6 +2,7 @@
 from .primitive import PrimitiveDP
 from mocdp import get_conftools_posets
 from mocdp.posets import PosetProduct
+from mocdp.posets.space_product import SpaceProduct
 
 
 __all__ = [
@@ -19,7 +20,8 @@ class Sum(PrimitiveDP):
         R = F0
         self.F0 = F0
 
-        PrimitiveDP.__init__(self, F=F, R=R)
+        M = SpaceProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, func):
         self.F.belongs(func)
@@ -44,7 +46,9 @@ class Product(PrimitiveDP):
         _, R = library.instance_smarter(R)
 
         F = PosetProduct((F1, F2))
-        PrimitiveDP.__init__(self, F=F, R=R)
+
+        M = SpaceProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, func):
         f1, f2 = func

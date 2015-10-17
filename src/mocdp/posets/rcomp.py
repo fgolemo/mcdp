@@ -20,6 +20,9 @@ class RcompTop():
         return 42  # "RCompTop"
 
 class Rcomp(Poset):
+    """
+        [0, inf) U {T}
+    """
     def __init__(self):
         self.top = RcompTop()
 
@@ -150,6 +153,10 @@ R_Voltage = RcompUnits('V')
 
 
 def mult_table(a, b):
+    if a == R_dimensionless:
+        return b
+    if b == R_dimensionless:
+        return a
 
     options = {
         (R_Time, R_Power): R_Energy,
@@ -174,7 +181,7 @@ def mult_table(a, b):
     
     msg += '\nKnown multiplication table:\n'
     for (m1, m2), res in options.items():
-        msg += '   %10s x %10s = %10s' % (m1, m2, res)
+        msg += '\n   %10s x %10s = %10s' % (m1, m2, res)
     
     raise ValueError(msg)
 

@@ -262,26 +262,27 @@ class DPLoop0(PrimitiveDP):
         library = get_conftools_dps()
         _, self.dp1 = library.instance_smarter(dp1)
 
-        funsp = self.dp1.get_fun_space()
-        ressp = self.dp1.get_res_space()
+        F0 = self.dp1.get_fun_space()
+        R0 = self.dp1.get_res_space()
+        M0 = self.dp1.get_imp_space_mod_res()
 
-        if not isinstance(funsp, PosetProduct):
-            raise ValueError('Funsp is not a product: %r' % funsp)
+        if not isinstance(F0, PosetProduct):
+            raise ValueError('Funsp is not a product: %r' % F0)
 
-        if len(funsp) != 2:
-            raise ValueError('funsp needs to be length 2: %s' % funsp)
+        if len(F0) != 2:
+            raise ValueError('funsp needs to be length 2: %s' % F0)
 
-        funsp1 = funsp[1]
+        F1 = F0[0]
+        F2 = F0[1]
 
-        if not(funsp1 == ressp):
+        if not(F2 == R0):
             raise_desc(ValueError, "Spaces incompatible for loop",
-                       funsp=funsp, ressp=ressp,
-                        funsp1=funsp1)
+                       funsp=F0, ressp=R0)
 
-        F1 = funsp[0]
         F = F1
-        R = ressp
-        PrimitiveDP.__init__(self, F=F, R=R)
+        R = R0
+        M = M0
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def get_normal_form(self):
         """
@@ -335,10 +336,10 @@ class DPLoop0(PrimitiveDP):
 
                 # alpha0: U(F0) x S0 -> U(R0)
                 # alpha0: U(F1xR2) x S0 -> U(R1xR2)
-                print('rs: %s' % rs)
-                print('fs: %s' % fs)
+                #print('rs: %s' % rs)
+                #print('fs: %s' % fs)
                 # make the dot product
-                print set(itertools.product(fs.minimals, rs.minimals))
+                #print set(itertools.product(fs.minimals, rs.minimals))
                 x = UpperSet(set(itertools.product(fs.minimals, rs.minimals)), F1R)
                 # this is an elment of U(F1xR)
                 UF1R.belongs(x)

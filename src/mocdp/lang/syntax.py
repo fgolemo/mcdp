@@ -2,19 +2,21 @@
 from .parts import (Constraint, FunStatement, LoadCommand, Mult, NewFunction,
     ResStatement, Resource, SetName)
 from contracts import contract
-from contracts.interface import Where
+from contracts.interface import Where, describe_value
 from contracts.utils import indent, raise_wrapped
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mocdp.lang.parts import (
-    DPWrap, Function, LoadDP, NewResource, OpMax, OpMin, PDPCodeSpec, Plus)
+    DPWrap, Function, LoadDP, NewResource, OpMax, OpMin, PDPCodeSpec, Plus,
+    ValueWithUnits, NewLimit)
 from mocdp.lang.utils import parse_action
 from mocdp.posets.rcomp import (R_Cost, R_Current, R_Energy, R_Power, R_Time,
     R_Voltage, R_Weight, R_dimensionless)
 from pyparsing import (Combine, Forward, Group, LineEnd, LineStart, Literal,
     Optional, Or, ParseException, ParseFatalException, ParserElement, SkipTo,
     Suppress, Word, ZeroOrMore, alphanums, alphas, oneOf, opAssoc,
-    operatorPrecedence)
+    operatorPrecedence, nums, CaselessLiteral)
+from mocdp.posets.space import NotBelongs
 
 
 ParserElement.enablePackrat()
@@ -24,7 +26,10 @@ ParserElement.enablePackrat()
 # shortcuts
 S = Suppress
 L = Literal
+O = Optional
+# "call"
 C = lambda x, b: x.setResultsName(b)
+
 def spa(x, b):
     @parse_action
     def p(tokens, loc, s):
@@ -35,14 +40,16 @@ def spa(x, b):
             print e
             raise_wrapped(DPInternalError, e, "Error while parsing.", where=where.__str__(),
                           tokens=tokens)
-        res.where = where
+
+        if hasattr(res, 'where'):
+            res.where = where
         return res
     x.setParseAction(p)
 
-
+# optional whitespace
 ow = S(ZeroOrMore(L(' ')))
-EOL = S(LineEnd())
-line = SkipTo(LineEnd(), failOn=LineStart() + LineEnd())
+# EOL = S(LineEnd())
+# line = SkipTo(LineEnd(), failOn=LineStart() + LineEnd())
 
 
 # identifier
@@ -68,6 +75,25 @@ units = {
 unit_expr = oneOf(list(units))
 spa(unit_expr, lambda t: units[t[0]])
 
+# numbers
+number = Word(nums)
+point = Literal('.')
+e = CaselessLiteral('E')
+plusorminus = Literal('+') | Literal('-')
+integer = Combine(O(plusorminus) + number)
+# Note that '42' is not a valid float...
+floatnumber = (Combine(integer + point + O(number) + O(e + integer)) |
+                Combine(integer + e + integer))
+
+def convert_int(tokens):
+    assert(len(tokens) == 1)
+    return int(tokens[0])
+
+integer.setParseAction(convert_int)
+floatnumber.setParseAction(lambda tokens: float(tokens[0]))
+
+integer_or_float = integer ^ floatnumber
+
 unitst = S(L('[')) - C(unit_expr, 'unit') - S(L(']'))
 fun_statement = S(L('F')) ^ S(L('provides')) - C(idn, 'fname') - unitst
 spa(fun_statement, lambda t: FunStatement(t['fname'], t['unit']))
@@ -75,7 +101,17 @@ spa(fun_statement, lambda t: FunStatement(t['fname'], t['unit']))
 res_statement = S(L('R')) ^ S(L('requires')) - C(idn, 'rname') - unitst
 spa(res_statement, lambda t: ResStatement(t['rname'], t['unit']))
 
+empty_unit = S(L('[')) + S(L(']'))
+spa(empty_unit, lambda _: dict(unit=R_dimensionless))
+number_with_unit = C(integer_or_float, 'value') + unitst ^ empty_unit  # C(empty_unit, 'unit')
 
+def number_with_unit_parse(t):
+    value = t[0]
+    units = t[1]
+    res = ValueWithUnits(value, units)
+    return res
+
+spa(number_with_unit, number_with_unit_parse)
 
 # load battery
 load_expr = S(L('load')) - C(idn, 'load_arg')
@@ -100,6 +136,9 @@ spa(rvalue_new_function, lambda t: NewFunction(t['new_function']))
 lf_new_resource = C(idn, 'new_resource')
 spa(lf_new_resource, lambda t: NewResource(t['new_resource']))
 
+lf_new_limit = C(Group(number_with_unit), 'limit')
+spa(lf_new_limit, lambda t: NewLimit(t['limit'][0]))
+
 
 binary = {
     'max': OpMax,
@@ -114,7 +153,7 @@ max_expr = (C(opname, 'opname') - S(L('(')) +
 
 spa(max_expr, lambda t: binary[t['opname']](t['op1'], t['op2']))
 
-operand = rvalue_new_function ^ rvalue_resource ^ max_expr
+operand = rvalue_new_function ^ rvalue_resource ^ max_expr ^ number_with_unit
 
 # comment_line = S(LineStart()) + ow + L('#') + line + S(EOL)
 # comment_line = ow + Literal('#') + line + S(EOL)
@@ -126,7 +165,7 @@ fancy = (C(idn, 's2') + S(L('provided')) - S(L('by')) - C(idn, 'dp2'))
 spa(simple, lambda t: Function(t['dp2'], t['s2']))
 spa(fancy, lambda t: Function(t['dp2'], t['s2']))
 
-signal_rvalue = simple ^ fancy ^ lf_new_resource ^ (S(L('(')) - (simple ^ fancy ^ lf_new_resource) - S(L(')')))
+signal_rvalue = lf_new_limit ^ simple ^ fancy ^ lf_new_resource ^ (S(L('(')) - (lf_new_limit ^ simple ^ fancy ^ lf_new_resource) - S(L(')')))
 
 GEQ = S(L('>=')) 
 LEQ = S(L('<='))
@@ -149,7 +188,7 @@ spa(code_spec, lambda t: PDPCodeSpec(function=t['function'], arguments={}))
 
 
 
-load_pdp = S(L('load')) + C(idn, 'name')
+load_pdp = S(L('load')) - C(idn, 'name')
 spa(load_pdp, lambda t: LoadDP(t['name']))
 
 pdp_rvalue = load_pdp ^ code_spec
@@ -239,12 +278,16 @@ rvalue << operatorPrecedence(operand, [
 #     return s
 
 def parse_wrap(expr, string):
-    string = string.strip()
+    string0 = remove_comments(string)
+
+    # Nice trick: the removE_comments doesn't change the number of lines
+    # it only truncates them...
     # m = boxit
     m = lambda x: x
     try:
-        return expr.parseString(string, parseAll=True)
+        return expr.parseString(string0, parseAll=True)
     except (ParseException, ParseFatalException) as e:
+        # ... so we can use "string" here.
         where = Where(string, line=e.lineno, column=e.col)
         raise DPSyntaxError(str(e), where=where)
     except DPSemanticError as e:
@@ -267,7 +310,6 @@ def remove_comments(s):
 
 @contract(returns=NamedDP)
 def parse_model(string):
-    string = remove_comments(string)
     res = parse_wrap(dp_model, string)[0]
     return res
 
