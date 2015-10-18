@@ -32,7 +32,7 @@ def check_ex16c(context, _id_dp, dp):
 
 def check_ex16c_r(dp):
 #     from mocdp.dp.dp_loop import SimpleLoop
-    funsp = dp.get_fun_space()
+#     funsp = dp.get_fun_space()
 
 #     assert isinstance(dp, SimpleLoop)
 

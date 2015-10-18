@@ -93,7 +93,7 @@ cdp {
     """
     assert_semantic_error(s)  # unconnected
 
-    ndp = assert_parsable_to_connected_ndp("""
+    assert_parsable_to_connected_ndp("""
 cdp {
     provides c [J]
     requires w [g]
@@ -134,7 +134,7 @@ dp {
     implemented-by load times
 }
     """
-    res = parse_wrap(simple_dp_model, s)[0]
+    parse_wrap(simple_dp_model, s)[0]
 
 
 
@@ -771,6 +771,21 @@ def check_lang36():
 #   }
 # }
 # """)
+
+
+@comptest
+def check_lang37():
+    assert_parsable_to_connected_ndp("""
+      template cdp {
+            provides voltage [V]
+            provides current [A]
+            #    
+            requires cost [$]
+            requires weight [g]
+            requires voltage [V] # repeated, but should be ok!
+            requires current [A]
+          }
+    """)
 
 examples1 = [
     """

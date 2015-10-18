@@ -113,7 +113,7 @@ def test_get_id_indices():
     for a, res in icases:
         yield check_get_id_indices, a, res
     
-import numpy as np
+
 
 def check_get_id_indices(a, res):
     got = get_id_indices(a)
@@ -131,7 +131,6 @@ def check_get_id_indices(a, res):
         a2 = get_it(a, got, reducel)
     except Exception as e:
         raise_wrapped(ValueError, e, "invalid index produced", a=a, res=res, got=got)
-
 
     if str(a2) != str(a):
         msg = 'Not invertible'

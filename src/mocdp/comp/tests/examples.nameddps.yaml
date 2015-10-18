@@ -1,37 +1,37 @@
-- id: battery_open
-  desc: ""
-  code:
-  - mocdp.comp.dpconnect
-  - name2dp: 
-      times: energy_times
-      battery: battery
-      actuation:
-      - mocdp.comp.SimpleWrap
-      - fnames: weight
-        rnames: actuation_power
-        dp: ['mocdp.example_battery.Mobility', {}]
-    connections:
-    - 'times.power >= actuation.actuation_power'
-    - 'battery.capacity >= times.energy'
+# - id: battery_open
+#   desc: ""
+#   code:
+#   - mocdp.comp.dpconnect
+#   - name2dp: 
+#       times: energy_times
+#       battery: battery
+#       actuation:
+#       - mocdp.comp.SimpleWrap
+#       - fnames: weight
+#         rnames: actuation_power
+#         dp: ['mocdp.example_battery.Mobility', {}]
+#     connections:
+#     - 'times.power >= actuation.actuation_power'
+#     - 'battery.capacity >= times.energy'
 
 
-- id: battery_complete
-  desc: ""
-  code:
-  - mocdp.comp.dpgraph
-  - name2dp: 
-      times: energy_times
-      battery: battery
-      actuation:
-      - mocdp.comp.SimpleWrap
-      - fnames: weight
-        rnames: actuation_power
-        dp: ['mocdp.example_battery.Mobility', {}]
-    connections:
-    - 'times.power >= actuation.actuation_power'
-    - 'battery.capacity >= times.energy'
-    - 'actuation.weight >= battery.battery_weight'
-    split: []
+# - id: battery_complete
+#   desc: ""
+#   code:
+#   - mocdp.comp.dpgraph
+#   - name2dp: 
+#       times: energy_times
+#       battery: battery
+#       actuation:
+#       - mocdp.comp.SimpleWrap
+#       - fnames: weight
+#         rnames: actuation_power
+#         dp: ['mocdp.example_battery.Mobility', {}]
+#     connections:
+#     - 'times.power >= actuation.actuation_power'
+#     - 'battery.capacity >= times.energy'
+#     - 'actuation.weight >= battery.battery_weight'
+#     split: []
 
 - id: energy_times
   desc: ""
@@ -49,17 +49,17 @@
     rnames: 'battery_weight'
     dp: BatteryDP
 
-- id: maxh
-  desc: ""
-  code:
-  - mocdp.comp.dpgraph
-  - name2dp: 
-      max: max_f_r
-      h: hnlin
-    connections:
-    - 'h.x >= max.z'
-    - 'max.r >= h.r'
-    split: []
+# - id: maxh
+#   desc: ""
+#   code:
+#   - mocdp.comp.dpgraph
+#   - name2dp: 
+#       max: max_f_r
+#       h: hnlin
+#     connections:
+#     - 'h.x >= max.z'
+#     - 'max.r >= h.r'
+#     split: []
 
 - id: max_f_r
   desc: ""
@@ -79,17 +79,17 @@
     rnames: 'r'
     dp: SimpleNonlinearity1
 
-- id: minh
-  desc: ""
-  code:
-  - mocdp.comp.dpgraph
-  - name2dp: 
-      min: min_f_r
-      h: hnlin
-    connections:
-    - 'h.x >= min.z'
-    - 'min.r >= h.r'
-    split: []
+# - id: minh
+#   desc: ""
+#   code:
+#   - mocdp.comp.dpgraph
+#   - name2dp: 
+#       min: min_f_r
+#       h: hnlin
+#     connections:
+#     - 'h.x >= min.z'
+#     - 'min.r >= h.r'
+#     split: []
 
 - id: min_f_r
   desc: ""

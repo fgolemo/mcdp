@@ -19,6 +19,7 @@ AbstractAway = namedtuplewhere('AbstractAway', 'dp_rvalue')
 
 Mult = namedtuplewhere('Mult', 'a b')
 Plus = namedtuplewhere('Plus', 'a b')
+PlusN = namedtuplewhere('PlusN', 'ops')
 OpMax = namedtuplewhere('Max', 'a b')
 OpMin = namedtuplewhere('Min', 'a b')
 Resource = namedtuplewhere('Resource', 'dp s')

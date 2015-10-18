@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts.utils import indent
-from mocdp.posets import PosetProduct
-import itertools
-from mocdp.posets.uppersets import UpperSets, UpperSet
-from mocdp.posets.space import Map
 from mocdp.dp.dp_series import prod_get_state, prod_make_state
 from mocdp.dp.primitive import NormalForm
-from mocdp.posets.utils import poset_minima
-from mocdp.posets.space_product import SpaceProduct
+from mocdp.posets import (Map, PosetProduct, SpaceProduct, UpperSet, UpperSets,
+    poset_minima)
+import itertools
 
 __all__ = [
     'Parallel',
@@ -89,9 +86,9 @@ class Parallel(PrimitiveDP):
         F = self.get_fun_space()
         R = self.get_res_space()
         F1 = F[0]
-        R1 = R[0]
+        # R1 = R[0]
         F2 = F[1]
-        R2 = R[1]
+        # R2 = R[1]
         UF = UpperSets(F)
         UR = UpperSets(R)
 

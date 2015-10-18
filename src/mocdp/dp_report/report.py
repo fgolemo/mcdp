@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
+from .gg_ndp import gvgen_from_ndp
 from .gg_utils import gg_figure
 from contracts import contract
-from mocdp.comp.interfaces import CompositeNamedDP, NamedDP
+from mocdp.comp.interfaces import NamedDP
 from mocdp.dp import DPLoop0, Mux, Parallel, Series0
-from mocdp.dp_report.gg_ndp import gvgen_from_ndp
 from reprep import Report
 
 @contract(ndp=NamedDP)

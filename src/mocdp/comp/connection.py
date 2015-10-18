@@ -6,7 +6,7 @@ from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
 from mocdp.comp import DPInternalError
 from mocdp.configuration import get_conftools_nameddps
-from mocdp.dp import (DPLoop0, Mux, Terminator, make_parallel,
+from mocdp.dp import (DPLoop0, Identity, Mux, Terminator, make_parallel,
     make_series)
 from mocdp.exceptions import DPSemanticError
 from mocdp.posets import PosetProduct
@@ -16,7 +16,6 @@ from networkx.algorithms.dag import topological_sort
 from networkx.exception import NetworkXUnfeasible
 import networkx
 import re
-from mocdp.dp.dp_identity import Identity
 import warnings
 
 Connection0 = namedtuple('Connection', 'dp1 s1 dp2 s2')
@@ -218,6 +217,13 @@ def connect2(ndp1, ndp2, connections, split):
 
     if ndp1 is ndp2:
         raise ValueError('Equal')
+    
+    def common(x, y):
+        return len(set(x + y)) != len(set(x)) + len(set(y))
+
+    if (common(ndp1.get_fnames(), ndp2.get_fnames()) or \
+        common(ndp1.get_rnames(), ndp2.get_rnames())):
+        raise_desc(DPInternalError, 'repeated names', ndp1=ndp1, ndp2=ndp2)
 
     if len(set(split)) != len(split):
         msg = 'Repeated signals in split: %s' % str(split)
@@ -276,6 +282,9 @@ def connect2(ndp1, ndp2, connections, split):
         # print(' D: %s' % D)
         fntot = f1 + D
         rntot = A + B1 + r2
+
+        if there_are_repetitions(fntot) or there_are_repetitions(rntot):
+            raise_desc(NotImplementedError, 'Repeated names', fnames=fntot, rnames=fntot)
 
         # now I can create Ftot and Rtot
         f1_types = ndp1.get_ftypes(f1)
@@ -416,8 +425,6 @@ def connect2(ndp1, ndp2, connections, split):
         fnames = fntot
         rnames = rntot
 
-        if there_are_repetitions(fnames) or there_are_repetitions(rnames):
-            raise_desc(NotImplementedError, 'Repeated names', fnames=fnames, rnames=rnames)
 
         if len(fnames) == 1:
             fnames = fnames[0]
@@ -689,12 +696,27 @@ def dploop0(ndp, lr, lf):
           connections='set(str|$Connection)|list(str|$Connection)',
           returns=NamedDP)
 def dpgraph(name2dp, connections, split):
+    """ This assumes that the graph is weakly connected
+        and that there are no repetitions of names of resources
+        or functions"""
     if not len(set(split)) == len(split):
         raise ValueError('dpgraph: Repeated signals in split: %s' % str(split))
 
     if not(name2dp):
         msg = 'I only have %d names: %s' % (len(name2dp), list(name2dp))
         raise DPInternalError(msg)
+
+    # check that there are no repetitions
+    all_functions = []
+    all_resources = []
+    for _, ndp in name2dp.items():
+        assert isinstance(ndp, NamedDP), ndp
+        all_functions.extend(ndp.get_fnames())
+        all_resources.extend(ndp.get_rnames())
+
+    if there_are_repetitions(all_functions) or there_are_repetitions(all_resources):
+        raise_desc(NotImplementedError, 'Repetitions',
+                   all_functions=all_functions, all_resources=all_resources)
 
     res = dpgraph_(name2dp, connections, split)
 
@@ -703,7 +725,8 @@ def dpgraph(name2dp, connections, split):
             res.rindex(x)
     except DPInternalError as e:
         msg = 'Invalid result from dpgraph_().'
-        raise_wrapped(DPInternalError, e, msg, res=res, name2dp=name2dp, connections=connections,
+        raise_wrapped(DPInternalError, e, msg, res=res,
+                      name2dp=name2dp, connections=connections,
                    split=split)
     return res
 
@@ -728,9 +751,9 @@ def dpgraph_(name2dp, connections, split):
         # choose one constraint
         cycle0 = cycles[0]
         # get one connection that breaks the cycle
+        # TODO: get the one with the smallest cardinality
         first = cycle0[0]
         if len(cycle0) == 1:
-#             raise NotImplementedError
             second = first
         else:
             second = cycle0[1]

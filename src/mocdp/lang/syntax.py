@@ -1,22 +1,20 @@
 # -*- coding: utf-8 -*-
-from .parts import (Constraint, FunStatement, LoadCommand, Mult, NewFunction,
-    ResStatement, Resource, SetName)
+from .parts import (AbstractAway, Constraint, DPWrap, FunStatement, Function,
+    LoadCommand, LoadDP, MakeTemplate, Mult, NewFunction, NewLimit, NewResource,
+    OpMax, OpMin, PDPCodeSpec, Plus, ResStatement, Resource, SetName,
+    ValueWithUnits)
+from .utils import parse_action
 from contracts import contract
-from contracts.interface import Where, describe_value
+from contracts.interface import Where
 from contracts.utils import indent, raise_wrapped
-from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
-from mocdp.lang.parts import (DPWrap, Function, LoadDP, NewLimit, NewResource,
-    OpMax, OpMin, PDPCodeSpec, Plus, ValueWithUnits, AbstractAway, MakeTemplate)
-from mocdp.lang.utils import parse_action
 from mocdp.posets.rcomp import (R_Cost, R_Current, R_Energy, R_Power, R_Time,
     R_Voltage, R_Weight, R_dimensionless)
-from mocdp.posets.space import NotBelongs
-from pyparsing import (CaselessLiteral, Combine, Forward, Group, LineEnd,
-    LineStart, Literal, Optional, Or, ParseException, ParseFatalException,
-    ParserElement, SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas, nums,
-    oneOf, opAssoc, operatorPrecedence)
-from mocdp.lang.blocks import Context, eval_dp_rvalue
+from pyparsing import (CaselessLiteral, Combine, Forward, Group, Literal,
+    Optional, Or, ParseException, ParseFatalException, ParserElement, Suppress,
+    Word, ZeroOrMore, alphanums, alphas, nums, oneOf, opAssoc,
+    operatorPrecedence)
+from mocdp.lang.parts import PlusN
 
 
 ParserElement.enablePackrat()
@@ -240,24 +238,33 @@ def mult_parse_action(tokens):
 def plus_parse_action(tokens):
     tokens = list(tokens[0])
 
-    @contract(tokens='list')
-    def parse_op(tokens):
-        n = len(tokens)
-        if not (n >= 3 and 1 == n % 2):
-            msg = 'Expected odd number tokens than %s: %s' % (n, tokens)
-            raise DPInternalError(msg)
+#     @contract(tokens='list')
+#     def parse_op(tokens):
+#         n = len(tokens)
+#         if not (n >= 3 and 1 == n % 2):
+#             msg = 'Expected odd number tokens than %s: %s' % (n, tokens)
+#             raise DPInternalError(msg)
+#
+#         if len(tokens) == 3:
+#             assert tokens[1] == '+'
+#             return Plus(tokens[0], tokens[2])
+#         else:
+#             op1 = tokens[0]
+#             assert tokens[1] == '+'
+#             op2 = parse_op(tokens[2:])
+#             return Plus(op1, op2)
+#
+#     res = parse_op(tokens)
+#
 
-        if len(tokens) == 3:
-            assert tokens[1] == '+'
-            return Plus(tokens[0], tokens[2])
+    ops = []
+    for i, t in enumerate(tokens):
+        if i % 2 == 0:
+            ops.append(t)
         else:
-            op1 = tokens[0]
-            assert tokens[1] == '+'
-            op2 = parse_op(tokens[2:])
-            return Plus(op1, op2)
+            assert t == '+'
 
-    res = parse_op(tokens)
-    return res
+    return PlusN(ops)
 
 
 rvalue << operatorPrecedence(operand, [
@@ -284,10 +291,10 @@ rvalue << operatorPrecedence(operand, [
 #     return s
 
 def parse_wrap(expr, string):
-    string0 = remove_comments(string)
-
     # Nice trick: the removE_comments doesn't change the number of lines
     # it only truncates them...
+    string0 = remove_comments(string)
+
     # m = boxit
     m = lambda x: x
     try:
@@ -314,16 +321,16 @@ def remove_comments(s):
             return line
     return "\n".join(map(remove_comment, lines))
 
-@contract(returns=NamedDP)
+# @contract(returns=NamedDP)
 def parse_ndp(string):
     v = parse_wrap(dp_rvalue, string)[0]
+    from mocdp.lang.blocks import Context, eval_dp_rvalue
     context = Context()
     res = eval_dp_rvalue(v, context)
     # I'm not sure what happens to the context
     # if context.names # error ??
 
-    # old version
-    # res = parse_wrap(dp_model, string)[0]
+    from mocdp.comp.interfaces import NamedDP
     assert isinstance(res, NamedDP), res
     return res
 

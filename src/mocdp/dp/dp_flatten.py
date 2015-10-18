@@ -52,7 +52,7 @@ def get_flatten_muxmap(F0):
     coords = []
     for i, f in enumerate(F0.subs):
         if isinstance(f, PosetProduct):
-            for j, x in enumerate(f.subs):
+            for j, _ in enumerate(f.subs):
                 coords.append((i, j))
         else:
             coords.append(i)

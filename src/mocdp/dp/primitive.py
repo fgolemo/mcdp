@@ -5,8 +5,7 @@ from contracts import contract
 from contracts.utils import raise_wrapped
 from decent_logs import WithInternalLog
 from mocdp.posets import (Map, NotBelongs, Poset, PosetProduct, Space,
-    UpperSet, UpperSets)
-from mocdp.posets.space_product import SpaceProduct
+    SpaceProduct, UpperSet, UpperSets)
 
 __all__ = [
     'PrimitiveDP',
@@ -139,7 +138,6 @@ class DefaultAlphaMap(Map):
         UF = UpperSets(F)
         S = PosetProduct(())
         dom = PosetProduct((UF, S))
-
         cod = UpperSets(R)
         Map.__init__(self, dom, cod)
 

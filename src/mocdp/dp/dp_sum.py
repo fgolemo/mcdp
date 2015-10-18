@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from mocdp import get_conftools_posets
-from mocdp.posets import PosetProduct
-from mocdp.posets.space_product import SpaceProduct
+from mocdp.posets import PosetProduct, SpaceProduct
+from contracts import contract
+import functools
 
 
 __all__ = [
-    'Sum',
+    'Sum', 'SumN',
     'Product',
 ]
 
@@ -35,6 +36,33 @@ class Sum(PrimitiveDP):
     def __repr__(self):
         return 'Sum(%r)' % self.F0
 
+
+class SumN(PrimitiveDP):
+
+    @contract(n='int,>=1')
+    def __init__(self, F, n):
+
+        library = get_conftools_posets()
+        _, F0 = library.instance_smarter(F)
+
+        self.F0 = F0
+        self.n = n
+
+        F = PosetProduct((F0,) * n)
+        R = F0
+
+        M = SpaceProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+
+    def solve(self, func):
+        self.F.belongs(func)
+
+        r = functools.reduce(self.F0.add, func)
+
+        return self.R.U(r)
+
+    def __repr__(self):
+        return 'Sum(%s, %r)' % (self.n, self.F0)
 
 
 class Product(PrimitiveDP):

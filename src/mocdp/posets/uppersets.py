@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from .poset import NotLeq, Poset
-from .space import NotBelongs
+from .space import NotBelongs, NotEqual
 from .utils import poset_minima
 from contracts import check_isinstance, contract
-from mocdp.posets.space import NotEqual
 
 __all__ = [
     'UpperSet',
@@ -23,14 +22,16 @@ class UpperSet():
             except NotBelongs as e:
                 problems.append(e)
         if problems:
-            msg = "Cannot create upper set:\n" + "\n".join(str(p) for p in problems)
+            msg = "Cannot create upper set:\n"
+            msg += "\n".join(str(p) for p in problems)
             raise NotBelongs(msg)
 
         from .utils import check_minimal
         check_minimal(minimals, P)
 
     def __repr__(self):  # ≤  ≥
-        return "∪".join("{x∣ x ≥ %s}" % self.P.format(m) for m in self.minimals)
+        return "∪".join("{x∣ x ≥ %s}" % self.P.format(m)
+                        for m in self.minimals)
 
 
 class UpperSets(Poset):
@@ -75,7 +76,7 @@ class UpperSets(Poset):
         m1 = a.minimals
         m2 = b.minimals
         if not (m1 == m2):
-            raise NotEqual('%s != %s' % (m1, m2))
+            raise NotEqual('%s ≠ %s' % (m1, m2))
 
     def check_leq(self, a, b):
         self.belongs(a)

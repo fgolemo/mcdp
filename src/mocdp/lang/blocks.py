@@ -16,8 +16,9 @@ from mocdp.lang.syntax import (DPSyntaxError, DPWrap, FunStatement, LoadDP,
     PDPCodeSpec, ResStatement)
 from mocdp.posets import NotBelongs
 from mocdp.posets.rcomp import Rcomp, mult_table
-from mocdp.lang.parts import MakeTemplate
+from mocdp.lang.parts import MakeTemplate, PlusN
 from mocdp.posets.poset_product import PosetProduct
+from mocdp.dp.dp_sum import SumN
 
 class Context():
     def __init__(self):
@@ -90,11 +91,11 @@ class Context():
         self.connections.append(c)
 
     def new_name(self, prefix):
-        for i in range(1, 10):
+        for i in range(1, 1000):
             cand = prefix + '%d' % i
             if not cand in self.names:
                 return cand
-        assert False
+        assert False, 'cannot find name? %r' % cand
 
     def _fun_name_exists(self, fname):
         for ndp in self.names.values():
@@ -109,16 +110,18 @@ class Context():
         return False
 
     def new_fun_name(self, prefix):
-        for i in range(1, 10):
+        for i in range(1, 1000):
             cand = prefix + '%d' % i
             if not self._fun_name_exists(cand):
                 return cand
+        assert False, 'cannot find name? %r' % cand
 
     def new_res_name(self, prefix):
-        for i in range(1, 10):
+        for i in range(1, 10000):
             cand = prefix + '%d' % i
             if not self._res_name_exists(cand):
                 return cand
+        assert False, 'cannot find name? %r' % cand
 
     @contract(a=Resource)
     def get_rtype(self, a):
@@ -466,6 +469,39 @@ def eval_rvalue(rvalue, context):
             nprefix, na, nb, nres = 'add', 's0', 's1', 'sum'
 
             return add_binary(dp, nprefix, na, nb, nres)
+
+        if isinstance(rvalue, PlusN):
+            ops = rvalue.ops
+            assert len(ops) > 1
+            R = None
+            op_rs = []
+            for op in ops:
+                op_r = eval_rvalue(op, context)
+                op_rs.append(op_r)
+                op_R = context.get_rtype(op_r)
+                if R is not None:
+                    if not (R == op_R):
+                        msg = 'Incompatible units: %s and %s' % (R, op_R)
+                        raise_desc(DPSemanticError, msg, rvalue=rvalue)
+                R = op_R
+
+            dp = SumN(R, len(ops))
+
+            nres = context.new_res_name('sum')
+            fnames = []
+            for i, op in enumerate(ops):
+                ni = context.new_fun_name('s%s' % i)
+                fnames.append(ni)
+
+            ndp = dpwrap(dp, fnames, nres)
+            name = context.new_name('sum')
+            context.add_ndp(name, ndp)
+
+            for i, op in enumerate(ops):
+                c = Connection(dp1=op_rs[i].dp, s1=op_rs[i].s, dp2=name, s2=fnames[i])
+                context.add_connection(c)
+            
+            return Resource(name, nres)
 
         if isinstance(rvalue, OpMax):
             a, F1, b, F2 = eval_ops(rvalue)

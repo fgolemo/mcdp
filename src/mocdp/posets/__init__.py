@@ -6,3 +6,4 @@ from .poset_product import *
 from .uppersets import *
 from .single import *
 from .utils import *
+from .space_product import *

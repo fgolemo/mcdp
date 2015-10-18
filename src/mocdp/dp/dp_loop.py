@@ -419,7 +419,6 @@ class DPLoop0(PrimitiveDP):
         UR = UpperSets(R)
         UF = UpperSets(F)
 
-        
         def iterate(si):
             """ Returns the next iteration """
             # compute the product

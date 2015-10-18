@@ -1,12 +1,10 @@
-from comptests.registrar import comptest
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.comp.interfaces import NamedDP
+from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPSyntaxError
 from mocdp.lang.blocks import DPSemanticError
-from mocdp.lang.syntax import (code_spec, constraint_expr, funcname, idn,
-    load_expr, max_expr, ow, parse_ndp, parse_wrap, rvalue, simple_dp_model)
-from mocdp.comp.wrap import SimpleWrap
+from mocdp.lang.syntax import parse_ndp, parse_wrap
 
 
 def assert_syntax_error(s, expr, desc=None):
@@ -42,12 +40,14 @@ def assert_semantic_error(s , desc=None):
 
 @contract(returns=NamedDP)
 def assert_parsable_to_unconnected_ndp(s, desc=None):
+    print(desc)
     res = parse_ndp(s)
     return res
 
 @contract(returns=NamedDP)
 def assert_parsable_to_connected_ndp(s , desc=None):
     """ This asserts that s can be compiled to a *connected* ndp. """
+    print(desc)
     res = parse_ndp(s)
     if isinstance(res, SimpleWrap):
         return res

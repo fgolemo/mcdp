@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
-from mocdp.comp.wrap import SimpleWrap
-from mocdp.comp.interfaces import CompositeNamedDP
 from collections import defaultdict
-from mocdp.dp.dp_identity import Identity
-from mocdp.dp.dp_sum import Product, Sum
-from mocdp.dp.dp_constant import Constant
-from mocdp.posets.rcomp import RcompUnits, Rcomp, R_dimensionless
-import os
+from mocdp.comp.interfaces import CompositeNamedDP
+from mocdp.comp.wrap import SimpleWrap
+from mocdp.dp import Constant, Identity, Limit, Max, Min, Product, Sum
 from mocdp.lang.blocks import get_missing_connections
-from mocdp.dp.dp_max import Max, Min
-from mocdp.dp.dp_limit import Limit
-from system_cmd.meat import system_cmd_result
-from system_cmd.structures import CmdException
+from mocdp.posets.rcomp import R_dimensionless, Rcomp, RcompUnits
+from system_cmd import CmdException, system_cmd_result
+import os
+from mocdp.dp.dp_sum import SumN
 
 
 def gvgen_from_ndp(ndp):
@@ -122,7 +118,7 @@ def choose_best_icon(iconoptions, imagepath='icons'):
             return resize_icon(imagename, imagepath, 100)
     return None
 
-def create_simplewrap(gg, parent, ndp, yourname=None):
+def create_simplewrap(gg, parent, ndp, yourname=None):  # @UnusedVariable
     assert isinstance(ndp, SimpleWrap)
     label = str(ndp)
 
@@ -130,6 +126,7 @@ def create_simplewrap(gg, parent, ndp, yourname=None):
 
     special = [
         (Sum, ''),
+        (SumN, ''),
         (Product, ''),
     ]
     classname = type(ndp.dp).__name__
@@ -187,7 +184,7 @@ def create_simplewrap(gg, parent, ndp, yourname=None):
 
     node = gg.newItem(label)
 
-    if isinstance(ndp.dp, Sum):
+    if isinstance(ndp.dp, (Sum, SumN)):
         gg.styleApply("sum", node)
 
     if sname:
@@ -214,7 +211,7 @@ def format_unit(R):
     else:
         return '[%s]' % str(R)
             
-def create_composite(gg, parent, ndp, yourname=None):
+def create_composite(gg, parent, ndp, yourname=None):  # @UnusedVariable
     assert isinstance(ndp, CompositeNamedDP)
 #     cluster = gg.newItem("", parent=parent)
     cluster = None
