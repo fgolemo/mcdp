@@ -1,56 +1,55 @@
- cdp {  
-
-  motor = template cdp {
-    provides speed [R]
-    provides torque [R]
-
-    requires cost [$]
-    requires motor_weight [g]
-    requires voltage [V]
-    requires current [A]
-  }
-
-  chassis = template cdp {
-    provides payload [g]
-    provides velocity [R]
-
-    requires cost [$]
-    requires total_weight [g]
-    requires motor_speed [R]
-    requires motor_torque [R]
-  }
-
-  battery = template cdp {
-    provides capacity [J]
-    requires cost [$]
-    requires battery_weight [g] 
-  }
-
-  shipping = template cdp {
-    provides ships [g]
-    requires postage [$]
-  }
-
-  requires cost [$]
-  provides velocity [R]
-  provides endurance [s]
- 
-  torque provided by motor >= chassis.motor_torque
-  speed provided by motor >= chassis.motor_speed
-  #power >= motor.current * motor.voltage
-
-  chassis.payload >= motor.motor_weight + battery.battery_weight
-  
-  chassis.velocity >= velocity
-
-  battery.capacity >= endurance * (motor.current * motor.voltage)
-
-  shipping.ships >= chassis.total_weight
-  
-  cost >= motor.cost + chassis.cost + battery.cost + shipping.postage
-
-  # also minimize the weight
-  requires w [g]
-  w >= battery.battery_weight
-
-}
+cdp {  
+          motor = template cdp {
+            provides speed [R]
+            provides torque [R]
+            #    
+            requires cost [$]
+            requires motor_weight [g]
+            requires voltage [V]
+            requires current [A]
+          }
+          #
+          chassis = template cdp {
+            provides payload [g]
+            provides velocity [R]
+            #
+            requires cost [$]
+            requires total_weight [g]
+            requires motor_speed [R]
+            requires motor_torque [R]
+          }
+          #
+          battery = template cdp {
+            provides capacity [J]
+            requires cost [$]
+            requires battery_weight [g] 
+          }
+          #
+          shipping = template cdp {
+            provides ships [g]
+            requires postage [$]
+          }
+          #
+          requires cost [$]
+          provides velocity [R]
+          provides endurance [s]
+          #
+          torque provided by motor >= chassis.motor_torque
+          speed provided by motor >= chassis.motor_speed
+          #power >= motor.current * motor.voltage
+          #
+          chassis.payload >= motor.motor_weight + battery.battery_weight
+          #
+          chassis.velocity >= velocity
+          #
+          battery.capacity >= endurance * (motor.current * motor.voltage)
+          #
+          shipping.ships >= chassis.total_weight
+          #
+          cost >= motor.cost + chassis.cost + battery.cost + shipping.postage
+          #
+          # also minimize the weight
+          requires w [g]
+          w >= battery.battery_weight
+          #
+        }

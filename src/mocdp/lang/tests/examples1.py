@@ -744,27 +744,7 @@ def check_lang34():
 }
 """)
 
-@comptest
-def check_lang35():
-    # This should work
-    assert_parsable_to_connected_ndp("""
-cdp {
-    requires power [W]
-    requires weight [g]
-    requires cost [W]
-  
-  
-    motor = load motor
-    chassis = load chassis
-  
-    torque provided by motor >= chassis.motor_torque
-    speed provided by motor >= chassis.motor_speed
-    power >= motor.current * motor.voltage
-  
-    weight >= motor.weight + chassis.weight
-    cost >= motor.cost + chassis.cost
-  }
-""")
+
 
 @comptest
 def check_lang36():

@@ -416,6 +416,9 @@ def connect2(ndp1, ndp2, connections, split):
         fnames = fntot
         rnames = rntot
 
+        if there_are_repetitions(fnames) or there_are_repetitions(rnames):
+            raise_desc(NotImplementedError, 'Repeated names', fnames=fnames, rnames=rnames)
+
         if len(fnames) == 1:
             fnames = fnames[0]
             funsp = res_dp.get_fun_space()
@@ -427,6 +430,8 @@ def connect2(ndp1, ndp2, connections, split):
             res_dp = make_series(res_dp, Mux(ressp, 0))
 
         # print('res_dp: %s' % res_dp)
+
+
         res = dpwrap(res_dp, fnames, rnames)
 
         return res
@@ -435,6 +440,8 @@ def connect2(ndp1, ndp2, connections, split):
         msg = 'connect2() failed'
         raise_wrapped(DPInternalError, e, msg, ndp1=ndp1, ndp2=ndp2, connections=connections, split=split)
 
+def there_are_repetitions(x):
+    return len(x) != len(set(x))
 
 def make_name(already):
     for i in range(1, 10):

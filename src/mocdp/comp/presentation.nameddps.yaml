@@ -3,7 +3,7 @@
   code: 
   - mocdp.lang.parse_ndp
   - string: |
-        template cdp {  
+        cdp {  
           motor = template cdp {
             provides speed [R]
             provides torque [R]
