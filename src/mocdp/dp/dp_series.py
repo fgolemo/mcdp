@@ -5,6 +5,9 @@ from mocdp.dp.primitive import NormalForm
 from mocdp.posets import Map, PosetProduct, UpperSets
 from mocdp.exceptions import DPInternalError
 from mocdp.posets.space_product import SpaceProduct
+from mocdp.posets.poset import Poset
+from contracts import contract
+from mocdp.posets.space import Space  # @UnusedImport
 
 
 __all__ = [
@@ -37,7 +40,10 @@ class Series0(PrimitiveDP):
 
         M1 = self.dp1.get_imp_space_mod_res()
         M2 = self.dp2.get_imp_space_mod_res()
-        M = SpaceProduct((M1, M2))
+
+        # M = prod_make(M1, M2)
+        M, _pack, _unpack = get_product_compact(M1, M2)
+        # M = SpaceProduct((M1, M2))
 
         PrimitiveDP.__init__(self, F=F1, R=R2, M=M)
         
@@ -104,7 +110,7 @@ class Series0(PrimitiveDP):
         alpha: UF1 x S -> UR1
         beta: UF1 x S -> S
 """     
-        S = prod_make(S1, S2)
+        S, pack, unpack = get_product_compact(S1, S2)
 
 
         D = PosetProduct((UF1, S))
@@ -118,7 +124,7 @@ class Series0(PrimitiveDP):
 
             def _call(self, x):
                 (F, s) = x
-                (s1, s2) = prod_get_state(S1, S2, s)
+                (s1, s2) = unpack(s)
                 a = alpha1((F, s1))
                 return alpha2((a, s2))
 
@@ -132,12 +138,12 @@ class Series0(PrimitiveDP):
             def _call(self, x):
 
                 (F, s) = x
-                (s1, s2) = prod_get_state(S1, S2, s)
+                (s1, s2) = unpack(s)
                 r_1 = beta1((F, s1))
                 a = alpha1((F, s1))
                 r_2 = beta2((a, s2))
                 
-                return prod_make_state(S1, S2, r_1, r_2)
+                return pack(r_1, r_2)
 
         return NormalForm(S, SeriesAlpha(self), SeriesBeta(self))
 
@@ -154,33 +160,48 @@ if False:
         (s1, s2) = s
         return (s1, s2)
 else:
+    @contract(returns='tuple($Space, *, *)')
+    def get_product_compact(S1, S2):
+        """
+            S, pack, unpack = get_product_compact(S1, S2)
+        """
 
-    def prod_make(S1, S2):
-        assert isinstance(S1, PosetProduct), S1
-        if isinstance(S2, PosetProduct):
-            S = PosetProduct(S1.subs + S2.subs)
+        S = _prod_make(S1, S2)
+        pack = lambda s1, s2: _prod_make_state(S1, S2, s1, s2)
+        unpack = lambda s: _prod_get_state(S1, S2, s)
+        return S, pack, unpack
+
+    def _prod_make(S1, S2):
+        assert isinstance(S1, SpaceProduct), S1
+        if isinstance(S2, SpaceProduct):
+            subs = (S1.subs + S2.subs)
         else:
-            S = PosetProduct(S1.subs + (S2,))
+            subs = (S1.subs + (S2,))
+
+        if all(isinstance(x, Poset) for x in subs):
+            S = PosetProduct(subs)
+        else:
+            S = SpaceProduct(subs)
 
         return S
 
-    def prod_make_state(S1, S2, s1, s2):
-        assert isinstance(S1, PosetProduct), S1
+    def _prod_make_state(S1, S2, s1, s2):
+        assert isinstance(S1, SpaceProduct), S1
         assert isinstance(s1, tuple)
-        if isinstance(S2, PosetProduct):
+        if isinstance(S2, SpaceProduct):
             assert isinstance(s2, tuple)
             return s1 + s2
         else:
             return s1 + (s2,)
 
-    def prod_get_state(S1, S2, s):
-        assert isinstance(S1, PosetProduct)
+    def _prod_get_state(S1, S2, s):
+        assert isinstance(S1, SpaceProduct)
         assert isinstance(s, tuple)
         n1 = len(S1)
 
         s1 = s[:n1]
         s2 = s[n1:]
-        if isinstance(S2, PosetProduct):
+        if isinstance(S2, SpaceProduct):
             pass
         else:
             assert len(s2) == 1
@@ -188,7 +209,7 @@ else:
 
         return (s1, s2)
 
-def fit_into(s1, s2, cols):
-    n = cols - len(s1) - len(s2)
-    return s1 + ' ' * n + s2
+# def fit_into(s1, s2, cols):
+#     n = cols - len(s1) - len(s2)
+#     return s1 + ' ' * n + s2
 

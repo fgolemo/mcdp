@@ -281,7 +281,10 @@ class DPLoop0(PrimitiveDP):
 
         F = F1
         R = R0
-        M = M0
+        # M = M0
+        # from mocdp.dp.dp_series import prod_make
+        from mocdp.dp.dp_series import get_product_compact
+        M, _pack, _unpack = get_product_compact(M0, F2)
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def get_normal_form(self):
@@ -300,9 +303,10 @@ class DPLoop0(PrimitiveDP):
 
 #         S = PosetProduct((S0, UR))
 
-        from mocdp.dp.dp_series import prod_make
-        S = prod_make(S0, UR)
-
+        # from mocdp.dp.dp_series import prod_make
+        # S = prod_make(S0, UR)
+        from mocdp.dp.dp_series import get_product_compact
+        S, pack, unpack = get_product_compact(S0, UR)
 
         UF1 = UpperSets(F1)
 #         UR1 = UpperSets(self.R1)
@@ -310,7 +314,7 @@ class DPLoop0(PrimitiveDP):
         UF1R = UpperSets(F1R)
 
 #         UR1R2 = UpperSets(PosetProduct((self.R1, R2)))
-        from mocdp.dp.dp_series import prod_get_state
+#         from mocdp.dp.dp_series import prod_get_state
 
         """
         S = S0 x UR is a Poset
@@ -327,7 +331,7 @@ class DPLoop0(PrimitiveDP):
 
             def _call(self, x):
                 (fs, s) = x
-                (s0, rs) = prod_get_state(S0, UR, s)
+                (s0, rs) = unpack(s)
 
                 # fs is an upper set of F1
                 UF1.belongs(fs)
@@ -372,7 +376,8 @@ class DPLoop0(PrimitiveDP):
                 # beta: UF1 x S -> S
                 # beta: UF1 x (S0 x UR) -> (S0 x UR)
                 fs, s = x
-                (s0, rs) = prod_get_state(S0, UR, s)
+                # (s0, rs) = prod_get_state(S0, UR, s)
+                (s0, rs) = unpack(s)
 
                 # fs is an upper set of F1
                 UF1.belongs(fs)
@@ -397,8 +402,9 @@ class DPLoop0(PrimitiveDP):
 #                 u = poset_minima(u, R.leq)
 #                 m1 = UpperSet(u, R)
 
-                from mocdp.dp.dp_series import prod_make_state
-                res = prod_make_state(S0, UR, s0p, y0)
+                # from mocdp.dp.dp_series import prod_make_state
+                # res = prod_make_state(S0, UR, s0p, y0)
+                res = pack(s0p, y0)
                 return res
 
         return S, DPAlpha(self), DPBeta(self)

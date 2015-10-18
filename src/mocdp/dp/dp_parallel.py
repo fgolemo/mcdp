@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts.utils import indent
-from mocdp.dp.dp_series import prod_get_state, prod_make_state
+
 from mocdp.dp.primitive import NormalForm
-from mocdp.posets import (Map, PosetProduct, SpaceProduct, UpperSet, UpperSets,
+from mocdp.posets import (Map, PosetProduct, UpperSet, UpperSets,
     poset_minima)
 import itertools
 
@@ -30,7 +30,9 @@ class Parallel(PrimitiveDP):
 
         M1 = self.dp1.get_imp_space_mod_res()
         M2 = self.dp2.get_imp_space_mod_res()
-        M = SpaceProduct((M1, M2))
+        # M = SpaceProduct((M1, M2))
+        from mocdp.dp.dp_series import get_product_compact
+        M, _, _ = get_product_compact(M1, M2)
 
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
         
@@ -80,8 +82,9 @@ class Parallel(PrimitiveDP):
         S1, alpha1, beta1 = self.dp1.get_normal_form()
         S2, alpha2, beta2 = self.dp2.get_normal_form()
 
-        from mocdp.dp.dp_series import prod_make
-        S = prod_make(S1, S2)
+        # S = prod_make(S1, S2)
+        from mocdp.dp.dp_series import get_product_compact
+        S, pack, unpack = get_product_compact(S1, S2)
 
         F = self.get_fun_space()
         R = self.get_res_space()
@@ -106,7 +109,7 @@ class Parallel(PrimitiveDP):
 
             def _call(self, x):
                 (uf, s) = x
-                (s1, s2) = prod_get_state(S1, S2, s)
+                (s1, s2) = unpack(s)
 
                 res = set()
                 for f1, f2 in uf.minimals:
@@ -138,14 +141,14 @@ class Parallel(PrimitiveDP):
 
             def _call(self, x):
                 (uf, s) = x
-                (s1, s2) = prod_get_state(S1, S2, s)
+                (s1, s2) = unpack(s)
 
                 # now need to project down
                 uf1, uf2 = upperset_project_two(F, uf)
 
                 s1p = beta1((uf1, s1))
                 s2p = beta2((uf2, s2))
-                return prod_make_state(S1, S2, s1p, s2p)
+                return pack(s1p, s2p)
 
         return NormalForm(S, SeriesAlpha(self), SeriesBeta(self))
 
