@@ -2,7 +2,7 @@
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, raise_desc
 from decent_logs import WithInternalLog
 from mocdp.posets import (Map, NotBelongs, Poset, PosetProduct, Space,
     SpaceProduct, UpperSet, UpperSets)
@@ -43,12 +43,14 @@ class PrimitiveMeta(ABCMeta):
 
             setattr(cls, 'solve', solve2)
 
+class NotFeasible(Exception):
+    pass
 
 
 class PrimitiveDP(WithInternalLog):
     """ 
-                        I = Res * M
-               F      Res    M=I/Res
+                        I = F * M
+               F      Res    M=I/F
         Sum   RxR     R       []
     
     """
@@ -86,6 +88,49 @@ class PrimitiveDP(WithInternalLog):
     @contract(returns=Poset)
     def get_tradeoff_space(self):
         return UpperSets(self.R)
+
+    def is_feasible(self, func, m, r):
+        try:
+            self.check_feasible(func, m, r)
+        except NotFeasible as e:
+            # print('Not feasible: %s' % e)
+            return False
+        else:
+            return True
+
+    def check_feasible(self, func, m, r):
+        self.F.belongs(func)
+        self.M.belongs(m)
+        self.R.belongs(r)
+        used = self.evaluate_f_m(func, m)
+        if not self.R.leq(used, r):
+            msg = 'No %s <= %s' % (self.R.format(used), self.R.format(r))
+            raise_desc(NotFeasible, msg, func=func, m=m, r=r, used=used)
+
+    def evaluate_f_m(self, func, m):
+        """ Returns the minimal resources needed
+            by the particular implementation m 
+        
+            raises NotFeasible
+        """
+        self.F.belongs(func)
+        # by default
+        M = self.get_imp_space_mod_res()
+        M.belongs(m)
+        if isinstance(M, SpaceProduct) and m == ():
+            rs = self.solve(func)
+            minimals = list(rs.minimals)
+            if len(minimals) == 1:
+                return minimals[0]
+            else:
+                msg = 'Cannot use default evaluate_f_m() because multiple miminals.'
+                raise_desc(NotImplementedError, msg,
+                           classname=type(self),
+                           func=func, M=M, m=m, minimals=rs.minimals)
+        else:
+            msg = 'Cannot use default evaluate_f_m()'
+            raise_desc(NotImplementedError, msg,
+                       classname=type(self), func=func, M=M, m=m,)
 
     @abstractmethod
     @contract(returns=UpperSet)

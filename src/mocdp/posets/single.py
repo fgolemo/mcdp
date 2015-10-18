@@ -34,6 +34,9 @@ class Single(Poset):
         assert a == b == self.element
         return self.element
 
+    def witness(self):
+        return self.element
+
     def get_test_chain(self, n):  # @UnusedVariable
         return [self.element, self.element]
 

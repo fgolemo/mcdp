@@ -10,7 +10,8 @@ class Dummy(PrimitiveDP):
         M = SpaceProduct(())
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
     def solve(self, _func):
-        return UpperSet(self.R.get_bottom(), self.R)
+        minimals = [self.R.get_bottom()]
+        return UpperSet(set(minimals), self.R)
 
 def template(functions, resources):
     

@@ -5,6 +5,8 @@ from contracts import contract
 from mocdp.comp.interfaces import NamedDP
 from mocdp.dp import DPLoop0, Mux, Parallel, Series0
 from reprep import Report
+from mocdp.posets.poset_product import PosetProduct
+from mocdp.posets.rcomp import R_dimensionless
 
 @contract(ndp=NamedDP)
 def report_ndp1(ndp):
@@ -35,6 +37,25 @@ def report_dp1(dp):
 
     M = dp.get_imp_space_mod_res()
     r.text('ImodR', str(M))
+
+    R = dp.get_res_space()
+    F = dp.get_fun_space()
+    Rinf = R.get_top()
+    Fbot = F.get_bottom()
+    
+    if M == PosetProduct((R_dimensionless,)):
+        print('M scalar')
+        s = ""
+        ms = [0.0, 0.25, 0.5, 0.75, 1.0]
+        for m in ms:
+            feasible = dp.is_feasible(Fbot, (m,), Rinf)
+            s += '\n m = %s  = %s' % (m, feasible)
+        r.text('scalarres', s)
+    else:
+        m = M.witness()
+        feasible = dp.is_feasible(Fbot, m, Rinf)
+        r.text('some', 'bot feasible( %s, %s,%s): %s' % (Fbot, m, Rinf, feasible))
+
     return r
 
 
@@ -56,27 +77,8 @@ def gvgen_from_dp(dp0):
         if isinstance(dp, Mux):
             label = 'Mux\n%s' % str(dp.coords)
         n = gg.newItem(label)
-#
-#         {'color': 'blue', 'shape': 'box', 'style': 'rounded',
-#                         'fontname': 'Palatino italic', 'fontsize': 10},
-
         gg.styleApply("simple", n)
-        # F = dp.get_fun_space()
-        # R = dp.get_res_space()
-
-        # nin = 1 if not isinstance(F, PosetProduct) else len(F)
-        # nout = 1 if not isinstance(R, PosetProduct) else len(R)
-
         return (n, n)
-#         return (tuple([n for _ in range(nin)]),
-#                 tuple([n for _ in range(nout)]))
-#         if is_cgraph_io_node(cnode):
-#             gg.styleApply(STYLE_CGRAPH_NODE_IO, n)
-#         else:
-#             gg.styleApply(STYLE_CGRAPH_NODE, n)
-
-#         cc[cnode] = n
-        
             
     def go_series(dp):
         (n1i, n1o) = go(dp.dp1)
@@ -111,7 +113,12 @@ def gvgen_from_dp(dp0):
         gg.newLink(i, n1i, label=str(dp.dp1.get_fun_space()))
 
         gg.newLink(n1o, o, label=str(dp.dp1.get_res_space()))
-        gg.newLink(o, i, label=str(dp.dp1.get_res_space()))
+        loop_label = str(dp.dp1.get_res_space())
+        M = dp.get_imp_space_mod_res()
+        M0 = dp.dp1.get_imp_space_mod_res()
+        loop_label += ' M0: %s' % M0
+        loop_label += ' M: %s' % M
+        gg.newLink(o, i, label=loop_label)
 
         return (i, o)
 

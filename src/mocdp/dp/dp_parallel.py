@@ -6,6 +6,7 @@ from mocdp.dp.primitive import NormalForm
 from mocdp.posets import (Map, PosetProduct, UpperSet, UpperSets,
     poset_minima)
 import itertools
+from mocdp.dp.dp_series import get_product_compact
 
 __all__ = [
     'Parallel',
@@ -31,11 +32,22 @@ class Parallel(PrimitiveDP):
         M1 = self.dp1.get_imp_space_mod_res()
         M2 = self.dp2.get_imp_space_mod_res()
         # M = SpaceProduct((M1, M2))
-        from mocdp.dp.dp_series import get_product_compact
         M, _, _ = get_product_compact(M1, M2)
+        self.M1 = M1
+        self.M2 = M2
 
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
         
+    def evaluate_f_m(self, f, m):
+        """ Returns the resources needed
+            by the particular implementation m """
+        _, _, unpack = get_product_compact(self.M1, self.M2)
+        f1, f2 = f
+        m1, m2 = unpack(m)
+        r1 = self.dp1.evaluate_f_m(f1, m1)
+        r2 = self.dp2.evaluate_f_m(f2, m2)
+        return (r1, r2)
+
     def solve(self, f):
         F = self.get_fun_space()
         F.belongs(f)

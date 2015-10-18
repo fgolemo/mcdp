@@ -3,6 +3,7 @@ from .primitive import PrimitiveDP
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.posets import Map, NotLeq, PosetProduct, UpperSet, UpperSets
 import itertools
+from mocdp.dp.primitive import NotFeasible
 
 
 __all__ = [
@@ -284,8 +285,48 @@ class DPLoop0(PrimitiveDP):
         # M = M0
         # from mocdp.dp.dp_series import prod_make
         from mocdp.dp.dp_series import get_product_compact
-        M, _pack, _unpack = get_product_compact(M0, F2)
+        M, _, _ = get_product_compact(M0, F2)
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        self.M0 = M0
+        self.F2 = F2
+
+    def evaluate_f_m(self, f1, m):
+        """ Returns the resources needed
+            by the particular implementation.
+            raises NotFeasible 
+        """
+        from mocdp.dp.dp_series import get_product_compact
+        _, _, unpack = get_product_compact(self.M0, self.F2)
+        m0, f2 = unpack(m)
+        f = (f1, f2)
+        r = self.dp1.evaluate_f_m(f, m0)
+        F2 = self.F2
+        try:
+            F2.check_leq(r, f2)
+        except NotLeq as e:
+            msg = 'Loop constraint %s <= %s not satisfied.' % (F2.format(r), F2.format(f2))
+            raise_wrapped(NotFeasible, e, msg, compact=True)
+        return r
+
+    def is_feasible(self, f1, m, r):
+        from mocdp.dp.dp_series import get_product_compact
+        _, _, unpack = get_product_compact(self.M0, self.F2)
+        m0, f2 = unpack(m)
+        f = (f1, f2)
+        print('checking feasilbility for loop')
+        print('f = %s' % str(f))
+        print('m0 = %s, f2 = %s' % (m0, f2))
+
+        if not self.dp1.is_feasible(f, m0, r):
+            print('The internal one is not feasibile with (%s, %s, %s)' % (f, m0, r))
+            return False
+        used = self.evaluate_f_m(f, m0)
+        print('used = %s' % str(used))
+        ok1 = self.R.leq(used, r)
+        ok2 = self.R.leq(r, f2)
+        print('ok1 = %s' % ok1)
+        print('ok2 = %s' % ok2)
+        return ok1 and ok2
 
     def get_normal_form(self):
         """

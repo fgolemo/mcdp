@@ -9,6 +9,10 @@ class NotBelongs(Exception):
 class NotEqual(Exception):
     pass
 
+class Uninhabited(Exception):
+    ''' There is no element in this space. Raised by witness().'''
+    pass
+
 class Space(object):
     __metaclass__ = SpaceMeta
 
@@ -31,6 +35,11 @@ class Space(object):
             return True
         except NotEqual:
             return False
+        
+    def witness(self):
+        """ Returns an element of the space, or raise Uninhabited
+            if the space is empty. """
+        raise NotImplementedError(type(self))
 
 class Map():
 

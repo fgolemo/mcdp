@@ -39,6 +39,8 @@ class SpaceProduct(Space):
     def belongs(self, x):
         if not isinstance(x, tuple):
             raise_desc(NotBelongs, 'Not a tuple', x=x, self=self)
+        if not len(x) == len(self.subs):
+            raise_desc(NotBelongs, 'Length does not match', x=x, self=self)
 
         problems = []
         for i, (sub, xe) in enumerate(zip(self.subs, x)):
@@ -63,6 +65,9 @@ class SpaceProduct(Space):
             ss.append(sub.format(xe))
 
         return '(' + ', '.join(ss) + ')'
+
+    def witness(self):
+        return tuple(x.witness() for x in self.subs)
 
     def __repr__(self):
         def f(x):

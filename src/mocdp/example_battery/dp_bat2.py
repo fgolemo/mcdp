@@ -10,6 +10,7 @@ from mocdp.posets.rcomp import (R_Energy, R_Power, R_Time, R_Weight, Rcomp,
 from mocdp.posets.single import Single
 import numpy as np
 from mocdp.posets.space_product import SpaceProduct
+from contracts import contract
 
 
 
@@ -33,9 +34,9 @@ class SimpleNonlinearity1(PrimitiveDP):
         y = 1.0 + np.log(1.0 + f)
         return R.U(y)
 
-
+@contract(Ps='float')
 def T_from_Ps(Ps):
-    return 10.0 + 1 / np.sqrt(Ps)
+    return float(10.0 + 1 / np.sqrt(Ps))
 
 class TimeEnergyTradeoff(PrimitiveDP):
 
@@ -43,8 +44,13 @@ class TimeEnergyTradeoff(PrimitiveDP):
         F = Single("navigate")
         R = PosetProduct((R_Power, R_Time))
 
-        M = SpaceProduct(())
+        M = R_Power
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
+
+    def evaluate_f_m(self, func, m):
+        assert func == 'navigate'
+        Ps = m
+        return (Ps, T_from_Ps(Ps))
 
     def solve(self, min_func):
         assert min_func == 'navigate'
@@ -69,8 +75,15 @@ class PowerTimeTradeoff(PrimitiveDP):
         F = PosetProduct(())
         R = PosetProduct((R_Power, R_Time))
 
-        M = SpaceProduct(())
+        M = R_Power
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
+
+    def evaluate_f_m(self, func, m):
+        assert func == ()
+        Ps = m
+        print('M = %s m= %s' % (self.M, m))
+        self.M.belongs(m)
+        return (Ps, T_from_Ps(Ps))
 
     def solve(self, min_func):
         assert min_func == ()

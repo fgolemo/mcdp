@@ -3,7 +3,7 @@ from contracts import contract
 from mocdp.dp import PrimitiveDP
 from mocdp.posets import PosetProduct, Rcomp
 import numpy as np
-from mocdp.posets.rcomp import R_Energy, R_Weight, R_Time
+from mocdp.posets.rcomp import R_Energy, R_Weight, R_Time, R_Power
 from mocdp.posets.space_product import SpaceProduct
 
 
@@ -93,9 +93,20 @@ class Payload2ET(PrimitiveDP):
     """ Example 16 in RAFC """
     def __init__(self):
         F = Rcomp()
-        M = SpaceProduct(())  # XXX
+        M = R_Power
         R = PosetProduct((Rcomp(), Rcomp()))
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
+
+    def evaluate_f_m(self, func, m):
+        self.F.belongs(func)
+        self.M.belongs(m)
+        W = func
+        Ps = m
+        return self._r_from_W_Ps(W, Ps)
+
+    def _r_from_W_Ps(self, W, Ps):
+        P2E = lambda Ps: T(Ps) * (Pa_from_weight(W) + Ps)
+        return (P2E(Ps), T(Ps))
 
     def solve(self, min_func):
         funsp = self.get_fun_space()
@@ -110,9 +121,7 @@ class Payload2ET(PrimitiveDP):
         # paper PS = np.linspace(0.01, 5.0, 500)
         PS = np.linspace(0.01, 5.0, 10)
 
-        P2E = lambda Ps: T(Ps) * (Pa_from_weight(W) + Ps)
-
-        choices = [ (P2E(Ps), T(Ps)) for Ps in PS ]
+        choices = [ self._r_from_W_Ps(W, Ps) for Ps in PS ]
 
         for c in choices:
             ressp.belongs(c)

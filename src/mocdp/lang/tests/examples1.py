@@ -787,6 +787,23 @@ def check_lang37():
           }
     """)
 
+
+@comptest
+def check_lang38():
+    assert_parsable_to_connected_ndp("""
+    cdp {  
+    f =  cdp {
+        provides a [R]
+            
+        requires c [R]
+            
+        c >= a
+    }
+
+    f.a >= f.c
+  
+  }
+""")
 examples1 = [
     """
 dp electric-battery {
