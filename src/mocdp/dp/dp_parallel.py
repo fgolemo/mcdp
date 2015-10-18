@@ -64,12 +64,10 @@ class Parallel(PrimitiveDP):
     def repr_long(self):
         r1 = self.dp1.repr_long()
         r2 = self.dp2.repr_long()
-        s = 'Parallel:   %s -> %s' % (self.get_fun_space(), self.get_res_space())
-        s += '\n' + indent(r1, 'P1 ')
-        s += '\n' + indent(r2, 'P2 ')
+        s = 'Parallel  %% %s -> %s' % (self.get_fun_space(), self.get_res_space())
+        s += '\n' + indent(r1, '. ', first='\ ')
+        s += '\n' + indent(r2, '. ', first='\ ')
         return s
-
-
 
     def get_normal_form(self):
         """

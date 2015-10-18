@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
-from .parts import Constraint, LoadCommand, SetName
+from .parts import (AbstractAway, Constraint, Function, LoadCommand, NewLimit,
+    NewResource, OpMax, OpMin, Plus, Resource, SetName, ValueWithUnits)
 from conf_tools import SemanticMistakeKeyNotFound, instantiate_spec
+from conf_tools.exceptions import ConfToolsException
 from contracts import contract, describe_value
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.comp.connection import Connection
-from mocdp.comp.interfaces import NamedDP, CompositeNamedDP
+from mocdp.comp.interfaces import CompositeNamedDP, NamedDP, NotConnected
 from mocdp.comp.wrap import SimpleWrap, dpwrap
 from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
-from mocdp.dp import Identity, Max, Min, PrimitiveDP, Product, Sum
+from mocdp.dp import (Constant, Identity, Limit, Max, Min, PrimitiveDP, Product,
+    Sum)
 from mocdp.exceptions import DPInternalError, DPSemanticError
-from mocdp.lang.parts import Function, NewResource, OpMax, OpMin, Plus, Resource, \
-    ValueWithUnits, NewLimit
 from mocdp.lang.syntax import (DPSyntaxError, DPWrap, FunStatement, LoadDP,
     PDPCodeSpec, ResStatement)
-from mocdp.posets.rcomp import mult_table, Rcomp
-from mocdp.dp.dp_constant import Constant
-from mocdp.posets.space import NotBelongs
-from mocdp.dp.dp_limit import Limit
+from mocdp.posets import NotBelongs
+from mocdp.posets.rcomp import Rcomp, mult_table
+from mocdp.lang.parts import MakeTemplate
+from mocdp.posets.poset_product import PosetProduct
 
 class Context():
     def __init__(self):
@@ -54,6 +55,10 @@ class Context():
             raise_desc(DPSemanticError, 'Invalid connection: %r not found.' % c.dp1,
                        names=self.names, c=c)
 
+        if not c.dp2 in self.names:
+            raise_desc(DPSemanticError, 'Invalid connection: %r not found.' % c.dp2,
+                       names=self.names, c=c)
+
         if c.dp2 in self.newfunctions:
             raise_desc(DPSemanticError, "Cannot add connection to external interface %r." % c.dp1,
                        newfunctions=self.newfunctions, c=c)
@@ -62,16 +67,20 @@ class Context():
             raise_desc(DPSemanticError, "Cannot add connection to external interface %r." % c.dp2,
                        newresources=self.newresources, c=c)
 
-        self.names[c.dp1].rindex(c.s1)
-
-        if not c.dp2 in self.names:
-            raise_desc(DPSemanticError, 'Invalid connection: %r not found.' % c.dp2,
-                       names=self.names, c=c)
-
-        self.names[c.dp2].findex(c.s2)
-
         ndp1 = self.names[c.dp1]
         ndp2 = self.names[c.dp2]
+
+        rnames = ndp1.get_rnames()
+        if not c.s1 in rnames:
+            msg = "Resource %r does not exist (known: %s)" % (c.s1, ", ".join(rnames))
+            raise_desc(DPSemanticError, msg, known=rnames)
+
+        fnames = ndp2.get_fnames()
+        if not c.s2 in fnames:
+            msg = "Function %r does not exist (known: %s)" % (c.s2, ", ".join(fnames))
+            raise_desc(DPSemanticError, msg, known=rnames)
+
+
         R1 = ndp1.get_rtype(c.s1)
         F2 = ndp2.get_ftype(c.s2)
         if not (R1 == F2):
@@ -248,38 +257,86 @@ def check_missing_connections(context):
             s += '\n' + indent(msg, 'help: ')
 
     if s:
-        from mocdp.comp.interfaces import NotConnected
         raise NotConnected(s)
 
 @contract(returns=NamedDP)
 def eval_dp_rvalue(r, context):  # @UnusedVariable
-    library = get_conftools_nameddps()
-    if isinstance(r, NamedDP):
-        return r
+    try:
+        library = get_conftools_nameddps()
+        if isinstance(r, NamedDP):
+            return r
 
-    if isinstance(r, LoadCommand):
-        load_arg = r.load_arg
-        _, ndp = library.instance_smarter(load_arg)
-        return ndp
+        if isinstance(r, LoadCommand):
+            load_arg = r.load_arg
+            try:
+                _, ndp = library.instance_smarter(load_arg)
+            except ConfToolsException as e:
+                msg = 'Cannot load predefined DP %s.' % load_arg.__repr__()
+                raise_wrapped(DPSemanticError, e, msg)
 
-    if isinstance(r, DPWrap):
-        fun = r.fun
-        res = r.res
-        impl = r.impl
+            return ndp
 
-        dp = eval_pdp(impl, context)
+        if isinstance(r, DPWrap):
+            fun = r.fun
+            res = r.res
+            impl = r.impl
 
-        fnames = [f.fname for f in fun]
-        rnames = [r.rname for r in res]
-        if len(fnames) == 1: fnames = fnames[0]
-        if len(rnames) == 1: rnames = rnames[0]
-        try:
-            w = SimpleWrap(dp=dp, fnames=fnames, rnames=rnames)
-        except ValueError as e:
-            raise DPSemanticError(str(e), r.where)
+            dp = eval_pdp(impl, context)
 
-        return w
+            fnames = [f.fname for f in fun]
+            rnames = [r.rname for r in res]
+            if len(fnames) == 1: fnames = fnames[0]
+            if len(rnames) == 1: rnames = rnames[0]
+            try:
+                w = SimpleWrap(dp=dp, fnames=fnames, rnames=rnames)
+            except ValueError as e:
+                raise DPSemanticError(str(e), r.where)
 
+            return w
+
+        if isinstance(r, AbstractAway):
+            ndp = eval_dp_rvalue(r.dp_rvalue, context)
+            if isinstance(ndp, SimpleWrap):
+                return ndp
+            try:
+                ndp.check_fully_connected()
+            except NotConnected as e:
+                msg = 'Cannot abstract away the design problem because it is not connected.'
+                raise_wrapped(DPSemanticError, e, msg)
+
+            ndpa = ndp.abstract()
+            return ndpa
+
+        if isinstance(r, MakeTemplate):
+            ndp = eval_dp_rvalue(r.dp_rvalue, context)
+
+            fnames = ndp.get_fnames()
+            ftypes = ndp.get_ftypes(fnames)
+            rnames = ndp.get_rnames()
+            rtypes = ndp.get_rtypes(rnames)
+
+            if len(fnames) == 1:
+                fnames = fnames[0]
+                F = ftypes[0]
+            else:
+                F = PosetProduct(tuple(ftypes))
+
+            if len(rnames) == 1:
+                rnames = rnames[0]
+                R = rtypes[0]
+            else:
+                R = PosetProduct(tuple(rtypes))
+
+            from mocdp.comp.template_imp import Dummy
+
+            dp = Dummy(F, R)
+            res = SimpleWrap(dp, fnames, rnames)
+            return res
+
+    except DPSemanticError as e:
+        if e.where is None:
+            e.where = r.where
+        raise e
 
     raise ValueError('Invalid dprvalue: %s' % str(r))
 

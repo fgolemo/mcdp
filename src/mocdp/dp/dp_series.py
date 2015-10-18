@@ -71,9 +71,11 @@ class Series0(PrimitiveDP):
     def repr_long(self):
         r1 = self.dp1.repr_long()
         r2 = self.dp2.repr_long()
-        s = 'Series:   %s -> %s' % (self.get_fun_space(), self.get_res_space())
-        s += '\n' + indent(r1, 'S1 ')
-        s += '\n' + indent(r2, 'S2 ')
+        s1 = 'Series:'
+        s2 = ' %s -> %s' % (self.get_fun_space(), self.get_res_space())
+        s = s1 + ' % ' + s2
+        s += '\n' + indent(r1, '. ', first='\ ')
+        s += '\n' + indent(r2, '. ', first='\ ')
         return s
 
     def get_normal_form(self):
@@ -186,4 +188,7 @@ else:
 
         return (s1, s2)
 
+def fit_into(s1, s2, cols):
+    n = cols - len(s1) - len(s2)
+    return s1 + ' ' * n + s2
 

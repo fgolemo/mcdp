@@ -14,6 +14,9 @@ def namedtuplewhere(a, b):
 NewLimit = namedtuplewhere('NewLimit', 'value_with_unit')
 ValueWithUnits = namedtuplewhere('ValueWithUnits', 'value unit')
 
+MakeTemplate = namedtuplewhere('MakeTemplate', 'dp_rvalue')
+AbstractAway = namedtuplewhere('AbstractAway', 'dp_rvalue')
+
 Mult = namedtuplewhere('Mult', 'a b')
 Plus = namedtuplewhere('Plus', 'a b')
 OpMax = namedtuplewhere('Max', 'a b')

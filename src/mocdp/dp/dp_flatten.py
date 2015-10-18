@@ -40,6 +40,10 @@ class Mux(PrimitiveDP):
     def __repr__(self):
         return 'Mux(%r → %r, %s)' % (self.F, self.R, self.coords)
 
+    def repr_long(self):
+        s = 'Mux(%s)' % self.coords
+        return s
+
 def get_R_from_F_coords(F, coords):
     return get_it(F, coords, reduce_list=PosetProduct)
 

@@ -160,6 +160,7 @@ def mult_table(a, b):
 
     options = {
         (R_Time, R_Power): R_Energy,
+        (R_Current, R_Voltage): R_Power,
         (R_dimensionless, R_dimensionless): R_dimensionless,
 
     }

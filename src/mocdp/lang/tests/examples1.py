@@ -619,7 +619,7 @@ cdp {
 
 @comptest
 def check_lang28():
-    assert_parsable_to_unconnected_ndp("""
+    assert_semantic_error("""
 cdp {
   
   child1 = cdp {
@@ -629,7 +629,7 @@ cdp {
       c >= a + b
   }
   
-  child1.F1 >= 0.0 [R]
+  child1.F1 >= 0.0 [R] # no F1
 }
 """)
     
@@ -649,6 +649,148 @@ def check_lang29():
        DP.a >= DP.c
        DP.a >= DP.c
   }""")
+
+@comptest
+def check_lang30():
+    assert_parsable_to_unconnected_ndp("""
+cdp {
+  motor = abstract dp {
+    provides torque [R]
+    requires weight [R]
+
+    implemented-by load BatteryDP
+  }
+}
+""")
+
+@comptest
+def check_lang31():
+    # Should be joule
+    assert_semantic_error("""
+cdp {
+  motor = abstract dp {
+    provides torque [R]
+    requires weight [R]
+
+    implemented-by load BatteryDP
+  }
+}
+""")
+
+@comptest
+def check_lang32():
+    # wrong name: torque, should raise semantic error
+    assert_semantic_error("""
+cdp {
+  motor = abstract cdp {
+    provides capacity [J]
+    requires weight [R]
+
+  battery = dp {
+    provides capacity [J]
+    requires weight [R]
+
+    implemented-by load BatteryDP
+  }
+    capacity <= battery.torque 
+    battery.weight <= weight
+}}""")
+
+@comptest
+def check_lang33():
+    # This should work
+    assert_parsable_to_unconnected_ndp("""
+cdp {
+  motor = abstract cdp {
+    provides capacity [J]
+    requires weight [g]
+
+  battery = dp {
+    provides capacity [J]
+    requires weight [g]
+
+    implemented-by load BatteryDP
+  }
+    capacity + 1.0 [J] <= battery.capacity 
+    battery.weight <= weight
+}}""")
+
+
+@comptest
+def check_lang34():
+    # This should work
+    assert_parsable_to_connected_ndp("""    
+    abstract cdp {
+  provides capacity [J]
+  requires weight [g]
+
+  motor = abstract cdp {
+    provides capacity [J]
+    requires weight [g]
+
+  battery = dp {
+    provides capacity [J]
+    requires weight [g]
+
+    implemented-by load BatteryDP
+  }
+    capacity + 1.0 [J] <= battery.capacity 
+    battery.weight <= weight
+  }
+
+  motor.capacity >= capacity
+  weight >= motor.weight
+
+}
+""")
+
+@comptest
+def check_lang35():
+    # This should work
+    assert_parsable_to_connected_ndp("""
+cdp {
+    requires power [W]
+    requires weight [g]
+    requires cost [W]
+  
+  
+    motor = load motor
+    chassis = load chassis
+  
+    torque provided by motor >= chassis.motor_torque
+    speed provided by motor >= chassis.motor_speed
+    power >= motor.current * motor.voltage
+  
+    weight >= motor.weight + chassis.weight
+    cost >= motor.cost + chassis.cost
+  }
+""")
+
+@comptest
+def check_lang36():
+    assert_parsable_to_unconnected_ndp("""
+ cdp {  
+
+ motor = template cdp {
+  requires cost [$]
+  provides velocity [R]
+  provides endurance [s]
+}
+
+}""")
+
+# TODO:
+#     assert_parsable_to_unconnected_ndp("""
+# cdp {
+#   motor = abstract cdp {
+#     provides torque [R]
+#     requires weight [R]
+#
+#     weight >= 1.0 [R]
+#     torque <= 1.0 [R]
+#   }
+# }
+# """)
 
 examples1 = [
     """

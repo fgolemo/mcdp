@@ -7,7 +7,7 @@ from contracts.utils import indent, raise_wrapped
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mocdp.lang.parts import (DPWrap, Function, LoadDP, NewLimit, NewResource,
-    OpMax, OpMin, PDPCodeSpec, Plus, ValueWithUnits)
+    OpMax, OpMin, PDPCodeSpec, Plus, ValueWithUnits, AbstractAway, MakeTemplate)
 from mocdp.lang.utils import parse_action
 from mocdp.posets.rcomp import (R_Cost, R_Current, R_Energy, R_Power, R_Time,
     R_Voltage, R_Weight, R_dimensionless)
@@ -16,6 +16,7 @@ from pyparsing import (CaselessLiteral, Combine, Forward, Group, LineEnd,
     LineStart, Literal, Optional, Or, ParseException, ParseFatalException,
     ParserElement, SkipTo, Suppress, Word, ZeroOrMore, alphanums, alphas, nums,
     oneOf, opAssoc, operatorPrecedence)
+from mocdp.lang.blocks import Context, eval_dp_rvalue
 
 
 ParserElement.enablePackrat()
@@ -201,8 +202,14 @@ simple_dp_model = (S(L('dp')) - S(L('{')) -
 spa(simple_dp_model, lambda t: DPWrap(list(t[0]), list(t[1]), t[2]))
 
 
+abstract_expr = S(L('abstract')) - C(dp_rvalue, 'dp_rvalue')
+spa(abstract_expr, lambda t: AbstractAway(t['dp_rvalue']))
+
+template_expr = S(L('template')) - C(dp_rvalue, 'dp_rvalue')
+spa(template_expr, lambda t: MakeTemplate(t['dp_rvalue']))
+
 # dp_rvalue << (load_expr | simple_dp_model) ^ dp_model
-dp_rvalue << (load_expr | simple_dp_model | dp_model)
+dp_rvalue << (load_expr | simple_dp_model | dp_model | abstract_expr | template_expr)
 
 
 @parse_action
@@ -309,8 +316,15 @@ def remove_comments(s):
 
 @contract(returns=NamedDP)
 def parse_ndp(string):
-    res = parse_wrap(dp_model, string)[0]
-    assert isinstance(res, NamedDP)
+    v = parse_wrap(dp_rvalue, string)[0]
+    context = Context()
+    res = eval_dp_rvalue(v, context)
+    # I'm not sure what happens to the context
+    # if context.names # error ??
+
+    # old version
+    # res = parse_wrap(dp_model, string)[0]
+    assert isinstance(res, NamedDP), res
     return res
 
 def parse_line(line):

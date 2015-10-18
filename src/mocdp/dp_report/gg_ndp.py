@@ -9,13 +9,17 @@ from mocdp.posets.rcomp import RcompUnits, Rcomp, R_dimensionless
 import os
 from mocdp.lang.blocks import get_missing_connections
 from mocdp.dp.dp_max import Max, Min
+from mocdp.dp.dp_limit import Limit
+from system_cmd.meat import system_cmd_result
+from system_cmd.structures import CmdException
 
 
 def gvgen_from_ndp(ndp):
     import gvgen  # @UnresolvedImport
     gg = gvgen.GvGen(options="rankdir=LR")
+    cluster_functions = gg.newItem("")
 
-    gg.styleAppend("external", "shape", "plaintext")
+    gg.styleAppend("external", "shape", "none")
 
     gg.styleAppend("connector", "shape", "plaintext")
     gg.styleAppend("simple", "shape", "box")
@@ -46,37 +50,79 @@ def gvgen_from_ndp(ndp):
     gg.styleAppend('splitter', 'color', 'black')
     gg.styleAppend('splitter', 'fillcolor', 'black')
     gg.styleAppend('splitter_link', 'dir', 'none')
-#     gg.styleAppend("leq", "shape", "plaintext")
-#     gg.styleAppend("leq", "margin", "0.0,0.0")
-#     gg.styleAppend("leq", "fontsize", "14")
 
     functions, resources = create(gg, None, ndp)
+
 
     for fname, n in functions.items():
         F = ndp.get_ftype(fname)
         label = fname + ' ' + format_unit(F)
-        x = gg.newItem(label)
+        x = gg.newItem(label, parent=cluster_functions)
         gg.styleApply("external", x)
-        # gg.newLink(gg.newItem(""), n, label=fname)
-        gg.newLink(x, n)
+
+        l = gg.newLink(x, n)
+        gg.propertyAppend(l, "headport", "w")
+        gg.propertyAppend(l, "tailport", "e")
+
+    cluster_resources = gg.newItem("")
     for rname, n in resources.items():
         R = ndp.get_rtype(rname)
         label = rname + ' ' + format_unit(R)
-        x = gg.newItem(label)
+        x = gg.newItem(label, parent=cluster_resources)
         gg.styleApply("external", x)
-        # gg.newLink(gg.newItem(""), n, label=fname)
-        gg.newLink(n, x)
+
+        l = gg.newLink(n, x)
+        gg.propertyAppend(l, "headport", "w")
+        gg.propertyAppend(l, "tailport", "e")
+
+    gg.styleApply("external", cluster_functions)
+    gg.styleApply("external", cluster_resources)
+
+    # XXX: for some reason cannot turn off the border, using "white"
+    gg.propertyAppend(cluster_functions, "shape", "plain")
+    gg.propertyAppend(cluster_functions, "color", "white")
+    gg.propertyAppend(cluster_resources, "shape", "plain")
+    gg.propertyAppend(cluster_resources, "color", "white")
+
 
     return gg
 
-def create(gg, parent, ndp):
+def create(gg, parent, ndp, yourname=None):
     if isinstance(ndp, SimpleWrap):
-        return create_simplewrap(gg, parent, ndp)
+        return create_simplewrap(gg, parent, ndp, yourname=yourname)
 
     if isinstance(ndp, CompositeNamedDP):
-        return create_composite(gg, parent, ndp)
+        return create_composite(gg, parent, ndp, yourname=yourname)
 
-def create_simplewrap(gg, parent, ndp):
+
+def resize_icon(filename, imagepath, size):
+    
+    from cdpview.go import safe_makedirs
+    res = os.path.join(imagepath, 'resized', str(size))
+    safe_makedirs(res)
+    resized = os.path.join(res, os.path.basename(filename))
+    if not os.path.exists(resized):
+        cmd = ['convert', filename, '-resize', '%s' % size, resized]
+        try:
+            # print('running graphviz')
+            system_cmd_result(cwd='.', cmd=cmd,
+                     display_stdout=False,
+                     display_stderr=False,
+                     raise_on_error=True)
+            # print('done')
+        except CmdException:
+            raise
+    return resized
+
+def choose_best_icon(iconoptions, imagepath='icons'):
+    for option in iconoptions:
+        if option is None: continue
+        imagename = os.path.join(imagepath, option) + '.png'
+        if os.path.exists(imagename):
+            return resize_icon(imagename, imagepath, 100)
+    return None
+
+def create_simplewrap(gg, parent, ndp, yourname=None):
     assert isinstance(ndp, SimpleWrap)
     label = str(ndp)
 
@@ -87,12 +133,11 @@ def create_simplewrap(gg, parent, ndp):
         (Product, ''),
     ]
     classname = type(ndp.dp).__name__
-    imagepath = 'icons'  # TODO:
+
     icon = ndp.get_icon()
-    imagename = os.path.join(imagepath, icon) + '.png'
-    default = os.path.join(imagepath, 'default') + '.png'
-    if not os.path.exists(imagename):
-        imagename = default
+
+    iconoptions = [yourname, icon, classname, 'default']
+    best_icon = choose_best_icon(iconoptions)
 
     simple = [Min, Max, Identity]
     only_string = isinstance(ndp.dp, tuple(simple))
@@ -102,57 +147,60 @@ def create_simplewrap(gg, parent, ndp):
         for t, _ in special:
             if isinstance(ndp.dp, t):
                 sname = t
-                gg.styleAppend(sname, 'image', imagename)
+                gg.styleAppend(sname, 'image', best_icon)
                 gg.styleAppend(sname, 'imagescale', 'true')
                 gg.styleAppend(sname, 'fixedsize', 'true')
                 gg.styleAppend(sname, 'height', '1.0')
                 gg.styleAppend(sname, "shape", "none")
-    #             gg.styleAppend(sname, "style", "none")
-                # gg.styleAppend(sname, "margin", "0.5,0.5")
                 label = ''
                 break
         else:
-            if os.path.exists(imagename):
+            if best_icon is not None:
+                if yourname is not None:
+                    shortlabel = yourname
+                else:
+                    shortlabel = classname
                 sname = classname
-                # gg.styleAppend(sname, 'image', imagename)
                 gg.styleAppend(sname, 'imagescale', 'true')
-    #             gg.styleAppend(sname, 'fixedsize', 'true')
                 gg.styleAppend(sname, 'height', '1.0')
                 gg.styleAppend(sname, "shape", "box")
                 gg.styleAppend(sname, "style", "rounded")
-    #             gg.styleAppend(sname, "margin", "0.5,0.5")
-                label = "<TABLE CELLBORDER='0' BORDER='0'><TR><TD>%s</TD></TR><TR><TD><IMG SRC='%s' SCALE='TRUE'/></TD></TR></TABLE>"
-                label = label % (classname, imagename)
-
-        #         label = look_for
-
-        #         label = ""
+                label = ("<TABLE CELLBORDER='0' BORDER='0'><TR><TD>%s</TD></TR>"
+                "<TR><TD><IMG SRC='%s' SCALE='TRUE'/></TD></TR></TABLE>")
+                label = label % (shortlabel, best_icon)
             else:
-                print('Image %r not found' % imagename)
+                # print('Image %r not found' % imagename)
                 sname = None
 
     if isinstance(ndp.dp, Constant):
         R = ndp.dp.get_res_space()
         c = ndp.dp.c
         label = R.format(c) + ' ' + format_unit(R)
+        sname = 'constant'
 
-    cluster = gg.newItem(label)
+    if isinstance(ndp.dp, Limit):
+        F = ndp.dp.get_fun_space()
+        c = ndp.dp.limit
+        label = F.format(c) + ' ' + format_unit(F)
+        sname = 'limit'
+
+
+    node = gg.newItem(label)
+
+    if isinstance(ndp.dp, Sum):
+        gg.styleApply("sum", node)
+
+    if sname:
+        gg.styleApply(sname, node)
+
 #     gg.styleApply("simple", cluster)
     functions = {}
     resources = {}
     for rname in ndp.get_rnames():
-        resources[rname] = cluster  # gg.newItem(rname, cluster)
+        resources[rname] = node  # gg.newItem(rname, cluster)
     for fname in ndp.get_fnames():
-        functions[fname] = cluster  # gg.newItem(fname, cluster)
+        functions[fname] = node  # gg.newItem(fname, cluster)
 
-    if isinstance(ndp.dp, Constant):
-        gg.styleApply("constant", cluster)
-
-    if isinstance(ndp.dp, Sum):
-        gg.styleApply("sum", cluster)
-
-    if sname:
-        gg.styleApply(sname, cluster)
 
     return functions, resources
 
@@ -166,7 +214,7 @@ def format_unit(R):
     else:
         return '[%s]' % str(R)
             
-def create_composite(gg, parent, ndp):
+def create_composite(gg, parent, ndp, yourname=None):
     assert isinstance(ndp, CompositeNamedDP)
 #     cluster = gg.newItem("", parent=parent)
     cluster = None
@@ -222,7 +270,7 @@ def create_composite(gg, parent, ndp):
             # print('Skipping extra node for r %r' % name)
             continue
 
-        f, r = create(gg, cluster, value)
+        f, r = create(gg, cluster, value, yourname=name)
         # print('name %s -> functions %s , resources = %s' % (name, list(f), list(r)))
         names2resources[name] = r
         names2functions[name] = f

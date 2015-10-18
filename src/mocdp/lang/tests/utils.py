@@ -6,6 +6,7 @@ from mocdp.exceptions import DPSyntaxError
 from mocdp.lang.blocks import DPSemanticError
 from mocdp.lang.syntax import (code_spec, constraint_expr, funcname, idn,
     load_expr, max_expr, ow, parse_ndp, parse_wrap, rvalue, simple_dp_model)
+from mocdp.comp.wrap import SimpleWrap
 
 
 def assert_syntax_error(s, expr, desc=None):
@@ -48,6 +49,8 @@ def assert_parsable_to_unconnected_ndp(s, desc=None):
 def assert_parsable_to_connected_ndp(s , desc=None):
     """ This asserts that s can be compiled to a *connected* ndp. """
     res = parse_ndp(s)
+    if isinstance(res, SimpleWrap):
+        return res
     ndp = res.abstract()
     return ndp
 #         try:
