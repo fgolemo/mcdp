@@ -11,6 +11,8 @@ def namedtuplewhere(a, b):
     F.__name__ = a
     return F
 
+GenericNonlinearity = namedtuplewhere('GenericNonlinearity', 'function op1')
+
 NewLimit = namedtuplewhere('NewLimit', 'value_with_unit')
 ValueWithUnits = namedtuplewhere('ValueWithUnits', 'value unit')
 

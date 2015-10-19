@@ -8,6 +8,7 @@ from mocdp.posets.rcomp import R_dimensionless, Rcomp, RcompUnits
 from system_cmd import CmdException, system_cmd_result
 import os
 from mocdp.dp.dp_sum import SumN
+from mocdp.dp.dp_generic_unary import GenericUnary
 
 
 def gvgen_from_ndp(ndp):
@@ -136,10 +137,13 @@ def create_simplewrap(gg, parent, ndp, yourname=None):  # @UnusedVariable
     iconoptions = [yourname, icon, classname, 'default']
     best_icon = choose_best_icon(iconoptions)
 
-    simple = [Min, Max, Identity]
+    simple = [Min, Max, Identity, GenericUnary]
     only_string = isinstance(ndp.dp, tuple(simple))
     if only_string:
+
         label = type(ndp.dp).__name__
+        if isinstance(simple, GenericUnary):
+            label = simple.function.__name__
     else:
         for t, _ in special:
             if isinstance(ndp.dp, t):

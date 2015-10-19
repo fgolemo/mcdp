@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts.utils import indent, raise_desc, raise_wrapped
-from mocdp.dp.primitive import NormalForm, NotFeasible
+from mocdp.dp.primitive import NormalForm, NotFeasible, Feasible
 from mocdp.posets import Map, PosetProduct, UpperSets
 from mocdp.exceptions import DPInternalError
 from mocdp.posets.space_product import SpaceProduct
 from mocdp.posets.poset import Poset
 from contracts import contract
 from mocdp.posets.space import Space  # @UnusedImport
+from mocdp.dp.dp_identity import Identity
+from mocdp.dp.dp_flatten import Mux
 
 
 __all__ = [
@@ -41,52 +43,132 @@ class Series0(PrimitiveDP):
         self.M1 = self.dp1.get_imp_space_mod_res()
         self.M2 = self.dp2.get_imp_space_mod_res()
 
-        M, _, _ = get_product_compact(self.M1, R1, self.M2)
+
+        if isinstance(self.dp1, (Mux, Identity)):
+            self.extraM = SpaceProduct(())
+        elif self._is_equiv_to_terminator(self.dp2):
+            self.extraM = SpaceProduct(())
+        else:
+            self.extraM = R1
+        M, _, _ = get_product_compact(self.M1, self.extraM, self.M2)
+
+
         PrimitiveDP.__init__(self, F=F1, R=R2, M=M)
         
     def evaluate_f_m(self, f1, m):
         """ Returns the resources needed
             by the particular implementation m """
-        F1 = self.dp1.get_fun_space()
-        R1 = self.dp1.get_res_space()
+        F1 = self.dp1.get_fun_space() 
         F1.belongs(f1)
-        M, _, unpack = get_product_compact(self.M1, R1, self.M2)
+        M, _, unpack = get_product_compact(self.M1, self.extraM, self.M2)
         M.belongs(m)
-        m1, f2, m2 = unpack(m)
-        r1 = self.dp1.evaluate_f_m(f1, m1)
-#         f2 = r1  # could be another element of M
+        m1, m_extra, m2 = unpack(m)
+        
+        if isinstance(self.dp1, (Mux, Identity)):
+            f2 = self.dp1.evaluate_f_m(f1, m1)
+        elif self._is_equiv_to_terminator(self.dp2):
+            F2 = self.dp2.get_fun_space()
+            f2 = F2.get_top()
+        else:
+            f2 = m_extra
+                
+#         r1 = self.dp1.evaluate_f_m(f1, m1)
+#         f2 = r1
         r2 = self.dp2.evaluate_f_m(f2, m2)
         return r2
 
+    def _is_equiv_to_terminator(self, dp):
+        from mocdp.dp.dp_terminator import Terminator
+        if isinstance(dp, Terminator):
+            return True
+        from mocdp.dp.dp_flatten import Mux
+        if isinstance(dp, Mux) and dp.coords == []:
+            return True
+        return False
 
     def check_feasible(self, f1, m, r):
-        # print('Feasible for %s' % type(self))
-        R1 = self.dp1.get_res_space()
-        M, _, unpack = get_product_compact(self.M1, R1, self.M2)
+        # print('series:check_feasible(%s,%s,%s)' % (f1, m, r))
+        M, _, unpack = get_product_compact(self.M1, self.extraM, self.M2)
         M.belongs(m)
-        m1, f2, m2 = unpack(m)
+        m1, m_extra, m2 = unpack(m)
+
+        # r1 = self.dp1.evaluate_f_m(f1, m1)
+        comments = ''
+        try:
+            if isinstance(self.dp1, (Mux, Identity)):
+                f2 = self.dp1.evaluate_f_m(f1, m1)
+            elif self._is_equiv_to_terminator(self.dp2):
+                comments += 'dp2 is terminator'
+                # f2 = self.dp1.evaluate_f_m(f1, m1)
+                F2 = self.dp2.get_fun_space()
+                f2 = F2.get_top()
+            else:
+                comments += 'Using extra.'
+                f2 = m_extra
+        except NotFeasible as e:
+            msg = 'series: Asking for feasible(f1=%s, m=%s, r=%s)' % (f1, m, r)
+            msg += 'First evaluation not feasible.'
+            raise_wrapped(NotFeasible, e, msg, comments=comments,
+                          dp1=self.dp1.repr_long(), dp2=self.dp2.repr_long())
+            
         try:
             self.dp1.check_feasible(f1, m1, f2)
         except NotFeasible as e:
-            msg = 'First one not feasible'
-            raise_wrapped(NotFeasible, e, msg, compact=True)
+            msg = 'series: Asking for feasible(f1=%s, m=%s, r=%s)' % (f1, m, r)
+            msg += '\nFirst one not feasible:'
+            msg += '\n  f1 = %s -> [dp1(%s)] <~= f2 = %s ' % (f1, m1, f2)
+            raise_wrapped(NotFeasible, e, msg, compact=True, comments=comments,
+                          dp1=self.dp1.repr_long(), dp2=self.dp2.repr_long())
+ 
+        if not self._is_equiv_to_terminator(self.dp2):
+            try:
+                self.dp2.check_feasible(f2, m2, r)
+            except NotFeasible as e:
+                msg = 'series: Asking for feasible(f1=%s, m=%s, r=%s)' % (f1, m, r)
+                msg += '\nFirst one is feasible:'
+                msg += '\n  f1 = %s -> [dp1(%s)] <= f2 = %s ' % (f1, m1, f2)
+                msg += '\nbut dp2 is *not* feasible:'
+                msg += '\n  f2 = %s -> [dp2(%s)] <~= r = %s ' % (f2, m2, r)
+                raise_wrapped(NotFeasible, e, msg, compact=True, dp2=self.dp2.repr_long(),
+                              dp1=self.dp1.repr_long(), comments=comments)
+        # r2 = self.dp2.evaluate_f_m(f2, m2)
+        # print('ok: %s [%s] %s <= %s [%s] %s <= %s' % (f1, m1, r1, f2, m2, r2, r))
 
-        # R1 = self.dp1.get_res_space()
-        # print('r1 = %s' % R1.format(r1))
-#         f2 = r1  # could be another element of M
+    def check_unfeasible(self, f1, m, r):
+        M, _, unpack = get_product_compact(self.M1, self.extraM, self.M2)
+        M.belongs(m)
+        m1, m_extra, m2 = unpack(m)
         try:
-            self.dp2.check_feasible(f2, m2, r)
-#             r2 = self.dp2.evaluate_f_m(f2, m2)
-        except NotFeasible as e:
-            msg = 'Second one not feasible'
-            raise_wrapped(NotFeasible, e, msg, compact=True)
+            if isinstance(self.dp1, (Mux, Identity)):
+                r1 = self.dp1.evaluate_f_m(f1, m1)
+            elif self._is_equiv_to_terminator(self.dp2):
+                F2 = self.dp2.get_fun_space()
+                r1 = F2.get_top()
+            else:
+                r1 = m_extra
+        except NotFeasible:
+            return  # ok
 
-#
-#         R2 = self.R
-#         # print('evaluated to r2 = %s' % R2.format(r2))
-#         ok2 = R2.leq(r2, r)
-#         print('%s <= %s is %s' % (R2.format(r2), R2.format(r), ok2))
-#         return ok2
+        try:
+            self.dp1.check_unfeasible(f1, m1, r1)
+        except Feasible as e1:
+#             f2 = self.dp1.evaluate_f_m(f1, m1)
+            try:
+                f2 = r1
+                self.dp2.check_unfeasible(f2, m2, r)
+            except Feasible as e2:
+                msg = 'series: Asking to show unfeasible(f1=%s, m=%s, r=%s)' % (f1, m, r)
+
+                msg += '\nBut! one is feasible:'
+                msg += '\n  f1 = %s -> [ m1 = %s ] <= r1 = %s ' % (f1, m1, r1)
+                msg += '\n' + indent(self.dp1.repr_long(), '  dp1: ')
+                msg += '\n' + indent(str(e1).strip(), ' 1| ')
+#                 msg += '\n Then f2 evaluated to f2 = %s. ' % str(f2)
+                msg += '\nand two is feasible:'
+                msg += '\n  f2 = %s -> [ m2 = %s ] <= r = %s ' % (f2, m2, r)
+                msg += '\n' + indent(self.dp2.repr_long(), '  dp2: ')
+                msg += '\n' + indent(str(e2).strip(), ' 2| ')
+                raise_desc(Feasible, msg)
 
 
     def solve(self, func):

@@ -18,3 +18,4 @@ from .dp_parallel_simplification import *
 from .dp_series_simplification import *
 from .dp_constant import *
 from .dp_limit import *
+from .dp_generic_unary import *

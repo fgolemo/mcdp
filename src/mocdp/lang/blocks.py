@@ -16,9 +16,10 @@ from mocdp.lang.syntax import (DPSyntaxError, DPWrap, FunStatement, LoadDP,
     PDPCodeSpec, ResStatement)
 from mocdp.posets import NotBelongs
 from mocdp.posets.rcomp import Rcomp, mult_table
-from mocdp.lang.parts import MakeTemplate, PlusN
+from mocdp.lang.parts import MakeTemplate, PlusN, GenericNonlinearity
 from mocdp.posets.poset_product import PosetProduct
 from mocdp.dp.dp_sum import SumN
+from mocdp.dp.dp_generic_unary import GenericUnary
 
 class Context():
     def __init__(self):
@@ -551,6 +552,30 @@ def eval_rvalue(rvalue, context):
                 raise DPSyntaxError(msg, where=rvalue.where)
             s = context.names[n].get_rnames()[0]
             return Resource(n, s)
+
+        if isinstance(rvalue, GenericNonlinearity):
+            op_r = eval_rvalue(rvalue.op1, context)
+            function = rvalue.function
+            F = context.get_rtype(op_r)
+            R = F
+
+            dp = GenericUnary(F=F, R=R, function=function)
+
+            fnames = context.new_fun_name('s')
+            name = context.new_name(function.__name__)
+            rname = context.new_res_name('res')
+
+            ndp = dpwrap(dp, fnames, rname)
+            context.add_ndp(name, ndp)
+
+            c = Connection(dp1=op_r.dp, s1=op_r.s, dp2=name, s2=fnames)
+
+            context.add_connection(c)
+
+            return Resource(name, rname)
+
+
+
 
         raise ValueError(rvalue)
     except DPSemanticError as e:

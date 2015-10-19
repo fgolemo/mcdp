@@ -14,7 +14,8 @@ from pyparsing import (CaselessLiteral, Combine, Forward, Group, Literal,
     Optional, Or, ParseException, ParseFatalException, ParserElement, Suppress,
     Word, ZeroOrMore, alphanums, alphas, nums, oneOf, opAssoc,
     operatorPrecedence)
-from mocdp.lang.parts import PlusN
+from mocdp.lang.parts import PlusN, GenericNonlinearity
+import math
 
 
 ParserElement.enablePackrat()
@@ -137,6 +138,19 @@ spa(lf_new_resource, lambda t: NewResource(t['new_resource']))
 lf_new_limit = C(Group(number_with_unit), 'limit')
 spa(lf_new_limit, lambda t: NewLimit(t['limit'][0]))
 
+def square(x):
+    return x * x
+
+unary = {
+    'sqrt': lambda op1: GenericNonlinearity(math.sqrt, op1),
+    'square': lambda op1: GenericNonlinearity(square, op1),
+}
+unary_op = Or([L(x) for x in unary])
+unary_expr = (C(unary_op, 'opname') - S(L('('))
+                + C(rvalue, 'op1')) - S(L(')'))
+
+spa(unary_expr, lambda t: unary[t['opname']](t['op1']))
+
 
 binary = {
     'max': OpMax,
@@ -144,14 +158,14 @@ binary = {
 }
 
 opname = Or([L(x) for x in binary])
-max_expr = (C(opname, 'opname') - S(L('(')) +
+binary_expr = (C(opname, 'opname') - S(L('(')) +
                 C(rvalue, 'op1') - S(L(','))
                 + C(rvalue, 'op2')) - S(L(')'))
 
 
-spa(max_expr, lambda t: binary[t['opname']](t['op1'], t['op2']))
+spa(binary_expr, lambda t: binary[t['opname']](t['op1'], t['op2']))
 
-operand = rvalue_new_function ^ rvalue_resource ^ max_expr ^ number_with_unit
+operand = rvalue_new_function ^ rvalue_resource ^ binary_expr ^ unary_expr ^ number_with_unit
 
 # comment_line = S(LineStart()) + ow + L('#') + line + S(EOL)
 # comment_line = ow + Literal('#') + line + S(EOL)

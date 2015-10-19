@@ -4,9 +4,9 @@ from nose.tools import assert_equal
 from mocdp.posets.rcomp import R_dimensionless, R_Time, R_Weight, R_Energy
 from mocdp.posets.space_product import SpaceProduct
 from mocdp.lang.syntax import parse_ndp
-import itertools
 from mocdp.dp.dp_series import get_product_compact
 from mocdp.posets.poset_product import PosetProduct
+from mocdp.dp.primitive import NotFeasible, Feasible
 
 
 
@@ -19,8 +19,12 @@ def check_evaluate_f_m1(id_dp, dp):
     
     f0 = F.get_bottom()
     m0 = M.witness()
-    r = dp.evaluate_f_m(f0, m0)
-    R.belongs(r)
+    try:
+        r = dp.evaluate_f_m(f0, m0)
+        R.belongs(r)
+    except NotFeasible:
+        pass
+
 
 @comptest
 def check_products():
@@ -69,17 +73,16 @@ def check_products():
 def check_evaluation():
     ndp = parse_ndp("""
     cdp {  
-          f =  cdp {
-            provides a [R]
-            provides b [R]
-            #    
-            requires c [R]
-            # c >= 0.3 [R] * (a * b)  
-            c >= (a * b) + 0.42 [R]
-          }
+    f =  cdp {
+        provides a [R]
+            
+        requires c [R]
+            
+        c >= square(a)
+    }
 
-      f.a >= f.c
-      f.b >= f.c
+    f.a >= square(f.c)
+  
   }
     """)
     dp = ndp.get_dp()
@@ -90,12 +93,55 @@ def check_evaluation():
     assert_equal(dp.get_res_space(), SpaceProduct(()))
     assert_equal(dp.get_fun_space(), SpaceProduct(()))
 
-    bf = dp.is_feasible((), (0.0, 0.0), ())
-    print('bf: %s ' % bf)
+#     # this is wrong
+#     dp.check_feasible((), (0.9, 0.0), ())
+
+    def assert_check_feasible_raises(*args):
+        try:
+            dp.check_feasible(*args)
+        except NotFeasible:
+            pass
+        else:
+            msg = 'Expected check_feasible() to raise NotFeasible.'
+            msg += 'args = %s' % str(args)
+            raise Exception(msg)
+
+    def assert_check_unfeasible_raises(*args):
+        try:
+            dp.check_unfeasible(*args)
+        except Feasible:
+            pass
+        else:
+            msg = 'Expected check_unfeasible() to raise Feasible.'
+            msg += 'args = %s' % str(args)
+            raise Exception(msg)
+
+#     dp.check_unfeasible((), (0.0, 0.0), ())
+
+    def assert_feasible(*args):
+        dp.check_feasible(*args)
+        assert_check_unfeasible_raises(*args)
+    def assert_unfeasible(*args):
+        dp.check_unfeasible(*args)
+        assert_check_feasible_raises(*args)
+
+
+    assert_feasible((), (0.0, 0.0), ())
+    assert_feasible((), (1.0, 1.0), ())
+    assert_unfeasible((), (0.0, 1.0), ())
+    assert_unfeasible((), (0.0, 0.9), ())
+    assert_feasible((), (0.5, 0.5), ())
+
+
+    assert_unfeasible((), (1.0, 0.0), ())
+    assert_unfeasible((), (1.1, 1.1), ())
+
+    assert_unfeasible((), (0.9, 0.0), ())
+
 
     import numpy as np
-    xs = np.linspace(0, 1, 50)
-    ys = np.linspace(0, 1, 50)
+    xs = np.linspace(0, 1.5, 30)
+    ys = np.linspace(0, 1.5, 30)
     
     for y in reversed(ys):
 
@@ -104,9 +150,25 @@ def check_evaluation():
             f = ()
             r = ()
             m = (x, y)
-            feasible = dp.is_feasible(f, m, r)
-            res.append(str(int(feasible)))
+            try:
+                dp.check_feasible(f, m, r)
+            except NotFeasible:
+                feasible = False
+            else:
+                feasible = True
 
-        line = 'y = %.3s  ' % y + "".join(res)
+            try:
+                dp.check_unfeasible(f, m, r)
+            except Feasible:
+                unfeasible = False
+            else:
+                unfeasible = True
+            if feasible and unfeasible or (not feasible and not unfeasible):
+                raise Exception('Point is both feasible and unfeasible: %s %s %s' % (f, m, r))
+            res.append(feasible)
+            # res.append(unfeasible)
+
+        res = "".join(str(int(w))   for w in res)
+        line = 'y = %10.5s  ' % y + "".join(res)
         print(line)
 

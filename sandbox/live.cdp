@@ -4,9 +4,9 @@ cdp {
             
         requires c [R]
             
-        c >= a * a + 0.1 [R]
+        c >= square(a)
     }
 
-    f.a >= f.c
+    f.a >= square(f.c)
   
   }

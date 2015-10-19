@@ -2,7 +2,7 @@
 from .utils import assert_parsable_to_unconnected_ndp
 from comptests.registrar import comptest
 from mocdp.lang.syntax import (code_spec, constraint_expr, funcname, idn,
-    load_expr, max_expr, ow, parse_wrap, rvalue, simple_dp_model)
+    load_expr, ow, parse_wrap, rvalue, simple_dp_model, binary_expr)
 from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp,
     assert_semantic_error)
 from nose.tools import assert_equal
@@ -269,7 +269,7 @@ def check_lang8_addition():
 @comptest
 def check_lang9_max():
 
-    parse_wrap(max_expr, 'max(f, g)')
+    parse_wrap(binary_expr, 'max(f, g)')
     parse_wrap(rvalue, 'max(f, g)')
     parse_wrap(constraint_expr, 'hnlin.x >= max(f, g)')
 

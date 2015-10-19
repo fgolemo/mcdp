@@ -45,7 +45,8 @@ class PrimitiveMeta(ABCMeta):
 
 class NotFeasible(Exception):
     pass
-
+class Feasible(Exception):
+    pass
 
 class PrimitiveDP(WithInternalLog):
     """ 
@@ -98,14 +99,27 @@ class PrimitiveDP(WithInternalLog):
         else:
             return True
 
-    def check_feasible(self, func, m, r):
-        self.F.belongs(func)
+    def check_unfeasible(self, f, m, r):
+        try:
+            used = self.evaluate_f_m(f, m)
+        except NotFeasible:
+            return
+        if self.R.leq(used, r):
+            msg = 'Generic implementation of check_feasible(), says:\n'
+            msg += ('f = %s -> [ m = %s ] -> used = %s <= r = %s' %
+                (f, m, self.R.format(used), self.R.format(r)))
+            raise_desc(Feasible, msg)
+
+    def check_feasible(self, f, m, r):
+        self.F.belongs(f)
         self.M.belongs(m)
         self.R.belongs(r)
-        used = self.evaluate_f_m(func, m)
+        used = self.evaluate_f_m(f, m)
         if not self.R.leq(used, r):
-            msg = 'No %s <= %s' % (self.R.format(used), self.R.format(r))
-            raise_desc(NotFeasible, msg, func=func, m=m, r=r, used=used)
+            msg = 'Generic implementation of check_feasible(), says:\n'
+            msg += 'f = %s -> [self(%s)] -> %s <~= %s' % (
+                        self.F.format(f), self.M.format(m), self.R.format(used), self.R.format(r))
+            raise_desc(NotFeasible, msg)  # f=f, m=m, r=r, used=used)
 
     def evaluate_f_m(self, func, m):
         """ Returns the minimal resources needed
