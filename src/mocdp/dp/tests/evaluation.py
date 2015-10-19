@@ -162,17 +162,9 @@ def check_evaluation2():
     assert_feasible(dp, (), (0.0, 0.0), ())
     assert_feasible(dp, (), (1.0, 1.0), ())
     assert_feasible(dp, (), (1.1, 1.1), ())
-#     assert_unfeasible(dp, (), (0.0, 1.0), ())
-#     assert_unfeasible(dp, (), (0.0, 0.9), ())
     assert_unfeasible(dp, (), (0.5, 0.5), ())
     assert_unfeasible(dp, (), (2.0, 1.0), ())
     assert_unfeasible(dp, (), (1.0, 2.0), ())
-#
-#     assert_unfeasible(dp, (), (1.0, 0.0), ())
-#     assert_unfeasible(dp, (), (1.1, 1.1), ())
-#
-#     assert_unfeasible(dp, (), (0.9, 0.0), ())
-
 
     import numpy as np
     xs = np.linspace(0, 3.5, 30)

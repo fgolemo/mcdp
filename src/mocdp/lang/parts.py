@@ -11,7 +11,7 @@ def namedtuplewhere(a, b):
     F.__name__ = a
     return F
 
-GenericNonlinearity = namedtuplewhere('GenericNonlinearity', 'function op1')
+GenericNonlinearity = namedtuplewhere('GenericNonlinearity', 'function op1 R_from_F')
 
 NewLimit = namedtuplewhere('NewLimit', 'value_with_unit')
 ValueWithUnits = namedtuplewhere('ValueWithUnits', 'value unit')
@@ -22,6 +22,7 @@ AbstractAway = namedtuplewhere('AbstractAway', 'dp_rvalue')
 Mult = namedtuplewhere('Mult', 'a b')
 Plus = namedtuplewhere('Plus', 'a b')
 PlusN = namedtuplewhere('PlusN', 'ops')
+MultN = namedtuplewhere('MultN', 'ops')
 OpMax = namedtuplewhere('Max', 'a b')
 OpMin = namedtuplewhere('Min', 'a b')
 Resource = namedtuplewhere('Resource', 'dp s')

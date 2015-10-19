@@ -81,7 +81,6 @@ class Series0(PrimitiveDP):
         from mocdp.dp.dp_terminator import Terminator
         if isinstance(dp, Terminator):
             return True
-        from mocdp.dp.dp_flatten import Mux
         if isinstance(dp, Mux) and dp.coords == []:
             return True
         return False

@@ -4,6 +4,7 @@ from contracts.utils import raise_desc
 from mocdp.posets.space import NotBelongs, NotEqual
 import numpy as np
 from comptests.registrar import comptest_fails
+import functools
 
 
 __all__ = [
@@ -153,7 +154,8 @@ R_Current = RcompUnits('A')
 R_Voltage = RcompUnits('V')
 
 
-
+def mult_table_seq(seq):
+    return functools.reduce(mult_table, seq)
 
 def mult_table(a, b):
     if a == R_dimensionless:

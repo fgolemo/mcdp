@@ -7,7 +7,7 @@ from mocdp.lang.blocks import get_missing_connections
 from mocdp.posets.rcomp import R_dimensionless, Rcomp, RcompUnits
 from system_cmd import CmdException, system_cmd_result
 import os
-from mocdp.dp.dp_sum import SumN
+from mocdp.dp.dp_sum import SumN, ProductN
 from mocdp.dp.dp_generic_unary import GenericUnary
 
 
@@ -23,7 +23,6 @@ def gvgen_from_ndp(ndp):
     gg.styleAppend("simple", "style", "rounded")
 
     gg.styleAppend("constant", "shape", "plaintext")
-#     gg.styleAppend("leq", "shape", "circle")
 
     gg.styleAppend("unconnected_node", "shape", "plaintext")
     gg.styleAppend("unconnected_node", "fontcolor", "red")
@@ -129,6 +128,7 @@ def create_simplewrap(gg, parent, ndp, yourname=None):  # @UnusedVariable
         (Sum, ''),
         (SumN, ''),
         (Product, ''),
+        (ProductN, ''),
     ]
     classname = type(ndp.dp).__name__
 
@@ -137,13 +137,15 @@ def create_simplewrap(gg, parent, ndp, yourname=None):  # @UnusedVariable
     iconoptions = [yourname, icon, classname, 'default']
     best_icon = choose_best_icon(iconoptions)
 
-    simple = [Min, Max, Identity, GenericUnary]
-    only_string = isinstance(ndp.dp, tuple(simple))
+    simple = (Min, Max, Identity, GenericUnary)
+    only_string = isinstance(ndp.dp, simple)
     if only_string:
 
         label = type(ndp.dp).__name__
-        if isinstance(simple, GenericUnary):
-            label = simple.function.__name__
+        if isinstance(ndp.dp, GenericUnary):
+            label = ndp.dp.__repr__()
+
+        sname = 'simple'
     else:
         for t, _ in special:
             if isinstance(ndp.dp, t):
@@ -194,20 +196,19 @@ def create_simplewrap(gg, parent, ndp, yourname=None):  # @UnusedVariable
     if sname:
         gg.styleApply(sname, node)
 
-#     gg.styleApply("simple", cluster)
     functions = {}
     resources = {}
     for rname in ndp.get_rnames():
-        resources[rname] = node  # gg.newItem(rname, cluster)
+        resources[rname] = node
     for fname in ndp.get_fnames():
-        functions[fname] = node  # gg.newItem(fname, cluster)
-
+        functions[fname] = node
 
     return functions, resources
 
 def format_unit(R):
     if R == R_dimensionless:
-        return '[R]'
+        # return '[R]'
+        return ''
     elif isinstance(R, RcompUnits):
         return '[%s]' % R.units
     elif isinstance(R, Rcomp):

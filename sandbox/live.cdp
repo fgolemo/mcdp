@@ -1,12 +1,8 @@
 cdp {  
-    f =  cdp {
-        provides a [R]
-            
-        requires c [R]
-            
-        c >= square(a)
+    f =  template cdp {
+        provides x [R]
+        requires y [R]
     }
 
-    f.a >= square(f.c)
-  
+    f.x  >= f.y
   }

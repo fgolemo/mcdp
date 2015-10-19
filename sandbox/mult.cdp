@@ -1,0 +1,13 @@
+cdp {  
+    f =  cdp {
+        provides a [R]
+        provides b [R]
+        requires c [R]
+            
+        c >= a * b + 1.0 [R]
+    }
+
+    f.a >= f.c
+    f.b >= f.c
+  
+  }

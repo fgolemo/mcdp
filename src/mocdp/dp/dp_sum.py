@@ -86,6 +86,23 @@ class Product(PrimitiveDP):
         return self.R.U(r)
 
     def __repr__(self):
-        return 'Multiply(%r×%r→%r)' % (self.F1, self.F2, self.R)
+        return 'Product(%r×%r→%r)' % (self.F1, self.F2, self.R)
+
+class ProductN(PrimitiveDP):
+
+    @contract(Fs='tuple')
+    def __init__(self, Fs, R):
+        F = PosetProduct(Fs)
+        M = SpaceProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+
+    def solve(self, f):
+        self.F.belongs(f)
+        mult = lambda x, y: x * y
+        r = functools.reduce(mult, f)
+        return self.R.U(r)
+
+    def __repr__(self):
+        return 'ProductN(%s -> %s)' % (self.F, self.R)
 
 

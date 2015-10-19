@@ -1,21 +1,23 @@
 # -*- coding: utf-8 -*-
 from .parts import (AbstractAway, Constraint, DPWrap, FunStatement, Function,
     LoadCommand, LoadDP, MakeTemplate, Mult, NewFunction, NewLimit, NewResource,
-    OpMax, OpMin, PDPCodeSpec, Plus, ResStatement, Resource, SetName,
+    OpMax, OpMin, PDPCodeSpec, ResStatement, Resource, SetName,
     ValueWithUnits)
 from .utils import parse_action
 from contracts import contract
 from contracts.interface import Where
-from contracts.utils import indent, raise_wrapped
+from contracts.utils import indent, raise_wrapped, raise_desc
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
+from mocdp.lang.parts import GenericNonlinearity, PlusN, MultN
 from mocdp.posets.rcomp import (R_Cost, R_Current, R_Energy, R_Power, R_Time,
-    R_Voltage, R_Weight, R_dimensionless)
+    R_Voltage, R_Weight, R_dimensionless, mult_table)
 from pyparsing import (CaselessLiteral, Combine, Forward, Group, Literal,
     Optional, Or, ParseException, ParseFatalException, ParserElement, Suppress,
     Word, ZeroOrMore, alphanums, alphas, nums, oneOf, opAssoc,
     operatorPrecedence)
-from mocdp.lang.parts import PlusN, GenericNonlinearity
 import math
+import functools
+from mocdp.posets.space import Space
 
 
 ParserElement.enablePackrat()
@@ -37,8 +39,8 @@ def spa(x, b):
             res = b(tokens)
         except BaseException as e:
             print e
-            raise_wrapped(DPInternalError, e, "Error while parsing.", where=where.__str__(),
-                          tokens=tokens)
+            raise_wrapped(DPInternalError, e, "Error while parsing.",
+                          where=where.__str__(), tokens=tokens)
 
         if hasattr(res, 'where'):
             res.where = where
@@ -142,8 +144,8 @@ def square(x):
     return x * x
 
 unary = {
-    'sqrt': lambda op1: GenericNonlinearity(math.sqrt, op1),
-    'square': lambda op1: GenericNonlinearity(square, op1),
+    'sqrt': lambda op1: GenericNonlinearity(math.sqrt, op1, lambda F: F),
+    'square': lambda op1: GenericNonlinearity(square, op1, lambda F: F),
 }
 unary_op = Or([L(x) for x in unary])
 unary_expr = (C(unary_op, 'opname') - S(L('('))
@@ -189,7 +191,7 @@ constraint_expr2 = C(rvalue, 'rvalue') + LEQ - C(signal_rvalue, 'lf')
 spa(constraint_expr2, lambda t: Constraint(t['lf'], t['rvalue']))
 
 line_expr = load_expr ^ constraint_expr ^ constraint_expr2 ^ setname_expr ^ fun_statement ^ res_statement
-# dp_statement = S(comment_line) ^ line_expr
+
 
 dp_model = S(L('cdp')) - S(L('{')) - ZeroOrMore(S(ow) + line_expr) - S(L('}'))
 
@@ -228,48 +230,59 @@ dp_rvalue << (load_expr | simple_dp_model | dp_model | abstract_expr | template_
 def mult_parse_action(tokens):
     tokens = list(tokens[0])
 
-    bop = Mult
-    @contract(tokens='list')
-    def parse_op(tokens):
-        n = len(tokens)
-        if not (n >= 3 and 1 == n % 2):
-            msg = 'Expected odd number tokens than %s: %s' % (n, tokens)
-            raise DPInternalError(msg)
-
-        if len(tokens) == 3:
-            assert tokens[1] == '*'
-            return bop(tokens[0], tokens[2])
+    ops = []
+    for i, t in enumerate(tokens):
+        if i % 2 == 0:
+            ops.append(t)
         else:
-            op1 = tokens[0]
-            assert tokens[1] == '*'
-            op2 = parse_op(tokens[2:])
-            return bop(op1, op2)
+            assert t == '*'
 
-    res = parse_op(tokens)
-    return res
+    assert len(ops) > 1
+
+    constants = [op for op in ops if isinstance(op, ValueWithUnits)]
+    nonconstants = [op for op in ops if not isinstance(op, ValueWithUnits)]
+
+    if constants:
+        # compile time optimization
+        def mult(a, b):
+            R = mult_table(a.unit, b.unit)
+            value = a.value * b.value
+            return ValueWithUnits(value=value, unit=R)
+        res = functools.reduce(mult, constants)
+
+        if len(nonconstants) == 0:
+            return res
+
+        if len(nonconstants) == 1:
+            op1 = nonconstants[0]
+        else:
+            assert len(nonconstants) > 1
+            op1 = MultN(nonconstants)
+        function = MultValue(res.value)
+
+        from mocdp.dp_report.gg_ndp import format_unit
+        setattr(function, '__name__', '× %s %s' % (res.unit.format(res.value),
+                                                   format_unit(res.unit)))
+        R_from_F = MultType(res.unit)
+        return GenericNonlinearity(function=function, op1=op1, R_from_F=R_from_F)
+
+    return MultN(ops)
+
+class MultType():
+    def __init__(self, factor):
+        self.factor = factor
+    def __call__(self, F):
+        return mult_table(F, self.factor)
+
+class MultValue():
+    def __init__(self, res):
+        self.res = res
+    def __call__(self, x):
+        return x * self.res
 
 @parse_action
 def plus_parse_action(tokens):
     tokens = list(tokens[0])
-
-#     @contract(tokens='list')
-#     def parse_op(tokens):
-#         n = len(tokens)
-#         if not (n >= 3 and 1 == n % 2):
-#             msg = 'Expected odd number tokens than %s: %s' % (n, tokens)
-#             raise DPInternalError(msg)
-#
-#         if len(tokens) == 3:
-#             assert tokens[1] == '+'
-#             return Plus(tokens[0], tokens[2])
-#         else:
-#             op1 = tokens[0]
-#             assert tokens[1] == '+'
-#             op2 = parse_op(tokens[2:])
-#             return Plus(op1, op2)
-#
-#     res = parse_op(tokens)
-#
 
     ops = []
     for i, t in enumerate(tokens):
@@ -277,9 +290,66 @@ def plus_parse_action(tokens):
             ops.append(t)
         else:
             assert t == '+'
+            
+    def simplify(op):
+        if isinstance(op, GenericNonlinearity) and isinstance(op.function, PlusValue):
+            value = op.function.value
+            unit = op.factor
+            vu = ValueWithUnits(value=value, unit=unit)
+            return [op.op1, vu]
+        else:
+            return [op]
+    newops = []
+    for op in ops:
+        newops.extend(simplify(op))
+
+    ops = newops
+
+    constants = [op for op in ops if isinstance(op, ValueWithUnits)]
+    nonconstants = [op for op in ops if not isinstance(op, ValueWithUnits)]
+
+    if constants:
+        # compile time optimization
+        def add(a, b):
+            R = add_table(a.unit, b.unit)
+            value = a.value + b.value
+            return ValueWithUnits(value=value, unit=R)
+        res = functools.reduce(add, constants)
+        if len(nonconstants) == 0:
+            return res
+
+        if len(nonconstants) == 1:
+            op1 = nonconstants[0]
+        else:
+            assert len(nonconstants) > 1
+            op1 = PlusN(nonconstants)
+        function = PlusValue(res.value)
+        from mocdp.dp_report.gg_ndp import format_unit
+        setattr(function, '__name__', '+ %s %s' % (res.unit.format(res.value),
+                                                   format_unit(res.unit)))
+        R_from_F = PlusType(res.unit)
+        return GenericNonlinearity(function=function, op1=op1, R_from_F=R_from_F)
 
     return PlusN(ops)
 
+def add_table(F1, F2):
+    if not F1 == F2:
+        msg = 'Incompatible units for addition.'
+        raise_desc(DPSemanticError, msg, F1=F1, F2=F2)
+    return F1
+
+class PlusType():
+    @contract(factor=Space)
+    def __init__(self, factor):
+        self.factor = factor
+    def __call__(self, F):
+        return add_table(F, self.factor)
+
+class PlusValue():
+    def __init__(self, value):
+        self.value = value
+    def __call__(self, x):
+        return x + self.value
 
 rvalue << operatorPrecedence(operand, [
 #     ('-', 1, opAssoc.RIGHT, Unary.parse_action),

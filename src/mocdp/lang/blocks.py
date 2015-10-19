@@ -15,10 +15,10 @@ from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.syntax import (DPSyntaxError, DPWrap, FunStatement, LoadDP,
     PDPCodeSpec, ResStatement)
 from mocdp.posets import NotBelongs
-from mocdp.posets.rcomp import Rcomp, mult_table
-from mocdp.lang.parts import MakeTemplate, PlusN, GenericNonlinearity
+from mocdp.posets.rcomp import Rcomp, mult_table, mult_table_seq
+from mocdp.lang.parts import MakeTemplate, PlusN, GenericNonlinearity, MultN
 from mocdp.posets.poset_product import PosetProduct
-from mocdp.dp.dp_sum import SumN
+from mocdp.dp.dp_sum import SumN, ProductN
 from mocdp.dp.dp_generic_unary import GenericUnary
 
 class Context():
@@ -504,6 +504,38 @@ def eval_rvalue(rvalue, context):
             
             return Resource(name, nres)
 
+        if isinstance(rvalue, MultN):
+            ops = rvalue.ops
+            assert len(ops) > 1
+            R = None
+            op_rs = []
+            op_Fs = []
+            for op in ops:
+                op_r = eval_rvalue(op, context)
+                op_rs.append(op_r)
+                op_R = context.get_rtype(op_r)
+                op_Fs.append(op_R)
+
+            R = mult_table_seq(op_Fs)
+            dp = ProductN(tuple(op_Fs), R)
+
+            nres = context.new_res_name('prod')
+            fnames = []
+            for i, op in enumerate(ops):
+                ni = context.new_fun_name('s%s' % i)
+                fnames.append(ni)
+
+            ndp = dpwrap(dp, fnames, nres)
+            name = context.new_name('prod')
+            context.add_ndp(name, ndp)
+
+            for i, op in enumerate(ops):
+                c = Connection(dp1=op_rs[i].dp, s1=op_rs[i].s, dp2=name, s2=fnames[i])
+                context.add_connection(c)
+
+            return Resource(name, nres)
+
+
         if isinstance(rvalue, OpMax):
             a, F1, b, F2 = eval_ops(rvalue)
             if not (F1 == F2):
@@ -556,8 +588,9 @@ def eval_rvalue(rvalue, context):
         if isinstance(rvalue, GenericNonlinearity):
             op_r = eval_rvalue(rvalue.op1, context)
             function = rvalue.function
+            R_from_F = rvalue.R_from_F
             F = context.get_rtype(op_r)
-            R = F
+            R = R_from_F(F)
 
             dp = GenericUnary(F=F, R=R, function=function)
 

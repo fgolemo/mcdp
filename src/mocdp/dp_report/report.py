@@ -7,6 +7,7 @@ from mocdp.dp import DPLoop0, Mux, Parallel, Series0
 from reprep import Report
 from mocdp.posets.poset_product import PosetProduct
 from mocdp.posets.rcomp import R_dimensionless
+from mocdp.dp.dp_generic_unary import GenericUnary
 
 @contract(ndp=NamedDP)
 def report_ndp1(ndp):
@@ -44,7 +45,6 @@ def report_dp1(dp):
     Fbot = F.get_bottom()
     
     if M == PosetProduct((R_dimensionless,)):
-        print('M scalar')
         s = ""
         ms = [0.0, 0.25, 0.5, 0.75, 1.0]
         for m in ms:
@@ -76,6 +76,8 @@ def gvgen_from_dp(dp0):
         label = type(dp).__name__
         if isinstance(dp, Mux):
             label = 'Mux\n%s' % str(dp.coords)
+        if isinstance(dp, GenericUnary):
+            label = dp.__repr__()
         n = gg.newItem(label)
         gg.styleApply("simple", n)
         return (n, n)
