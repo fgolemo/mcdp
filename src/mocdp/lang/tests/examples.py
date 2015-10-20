@@ -30,48 +30,64 @@ def get_marked_tests(filename):
         msg += '"semantic_error", "syntax_error" at the beginning of the file.'
         raise_desc(Exception, msg, line1=line1, filename=filename)
     return tests
-#
-# def test_one(filename):
-#     with open(filename) as f:
-#         contents = f.read()
-#
-#     line1 = contents.split('\n')[0]
-#     if not 'test' in line1:
-#         msg = 'Please add a "test" comment at the beginning of the file.'
-#         raise_desc(Exception, msg, line1=line1, filename=filename)
-#
-#
-#     if 'unconnected' in line1:
-#         assert_parsable_to_unconnected_ndp(contents)
-#     elif 'connected' in line1:
-#         assert_parsable_to_connected_ndp(contents)
-#     elif 'semantic_error' in line1:
-#         assert_semantic_error(contents)
-#     elif 'syntax_error' in line1:
-#         assert_syntax_error(contents)
-#     else:
-#         msg = 'Please add one of "connected", "unconnected", '
-#         msg += '"semantic_error", "syntax_error" at the beginning of the file.'
-#         raise_desc(Exception, msg, line1=line1, filename=filename)
         
 def test_one(test, filename):
     with open(filename) as f:
         contents = f.read()
     test(contents)
 
-def define_test_for(filename, basename):
+def test_report_dp1(filename, outdir, basename):
+    from mocdp.lang.syntax import parse_ndp
+    with open(filename) as f:
+        contents = f.read()
+    ndp = parse_ndp(contents)
+    dp = ndp.get_dp()
+    from mocdp.dp_report.report import report_dp1
+    r = report_dp1(dp)
+    f = os.path.join(outdir, '%s_dp1.html' % basename)
+    r.to_html(f)
+    return r
+
+def test_report_ndp1(filename, outdir, basename):
+    from mocdp.lang.syntax import parse_ndp
+    with open(filename) as f:
+        contents = f.read()
+    ndp = parse_ndp(contents)
+    from mocdp.dp_report.report import report_ndp1
+    r = report_ndp1(ndp)
+    f = os.path.join(outdir, '%s_ndp1.html' % basename)
+    r.to_html(f)
+    return r
+
+def define_test_for(context, filename, basename):
+    outdir = os.path.dirname(filename)
+    outdir = os.path.join(outdir, 'out')
 
     tests = get_marked_tests(filename)
     for test in tests:
-        job_id = 'file-%s-%s' % (basename, test.__name__)
-        register_indep(test_one, dynamic=False, args=(test, filename,),
-                    kwargs=dict(job_id=job_id))
+        n = test.__name__.replace('assert_', '').replace('_ndp', '')
+        p_job_id = 'fileparse-%s-%s' % (basename, n)
+        p_job = context.comp_config(test_one, test, filename,
+                                    job_id=p_job_id)
+        
+    if assert_parsable_to_unconnected_ndp in tests:
+        job_id = 'filedraw-%s-%s' % (basename, 'report_ndp1')
+        r = context.comp_config(test_report_ndp1, filename, outdir, basename,
+                                job_id=job_id, extra_dep=[p_job])
+        context.add_report(r, 'examples_report_ndp1', file=basename)
+        
+    if assert_parsable_to_connected_ndp in tests or assert_parsable_to_connected_ndp in tests:
+        job_id = 'filedraw-%s-%s' % (basename, 'report_dp1')
+        r = context.comp_config(test_report_dp1, filename, outdir, basename,
+                                 job_id=job_id, extra_dep=[p_job])
+        context.add_report(r, 'examples_report_dp1', file=basename)
+        
     
-def define_tests():
+def define_tests(context):
     folder = dir_from_package_name('mocdp.lang.tests.ok')
 
     filenames = locate_files(folder, '*.cdp')
 
     for f in filenames:
         basename = os.path.splitext(os.path.basename(f))[0]
-        define_test_for(f, basename)
+        define_test_for(context, f, basename)

@@ -17,9 +17,6 @@ def template(functions, resources):
     
     fnames = list(functions)
     rnames = list(resources)
-    
-    print fnames
-    print rnames
 
     get_space = lambda x: parse_wrap(unit_expr, x)[0]
 
