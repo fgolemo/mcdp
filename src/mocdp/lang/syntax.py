@@ -1,23 +1,22 @@
 # -*- coding: utf-8 -*-
 from .parts import (AbstractAway, Constraint, DPWrap, FunStatement, Function,
-    LoadCommand, LoadDP, MakeTemplate, Mult, NewFunction, NewLimit, NewResource,
-    OpMax, OpMin, PDPCodeSpec, ResStatement, Resource, SetName,
-    ValueWithUnits)
+    LoadCommand, LoadDP, MakeTemplate, NewFunction, NewLimit, NewResource, OpMax,
+    OpMin, PDPCodeSpec, ResStatement, Resource, SetName, ValueWithUnits)
 from .utils import parse_action
 from contracts import contract
 from contracts.interface import Where
-from contracts.utils import indent, raise_wrapped, raise_desc
+from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
-from mocdp.lang.parts import GenericNonlinearity, PlusN, MultN
+from mocdp.lang.parts import GenericNonlinearity, MultN, PlusN
 from mocdp.posets.rcomp import (R_Cost, R_Current, R_Energy, R_Power, R_Time,
     R_Voltage, R_Weight, R_dimensionless, mult_table)
+from mocdp.posets.space import Space, NotBelongs
 from pyparsing import (CaselessLiteral, Combine, Forward, Group, Literal,
     Optional, Or, ParseException, ParseFatalException, ParserElement, Suppress,
     Word, ZeroOrMore, alphanums, alphas, nums, oneOf, opAssoc,
     operatorPrecedence)
-import math
 import functools
-from mocdp.posets.space import Space
+import math
 
 
 ParserElement.enablePackrat()
@@ -37,8 +36,11 @@ def spa(x, b):
         where = Where(s, loc)
         try:
             res = b(tokens)
+        except DPSemanticError as e:
+            if e.where is None:
+                e.where = where
+            raise DPSemanticError(str(e), where=where)
         except BaseException as e:
-            print e
             raise_wrapped(DPInternalError, e, "Error while parsing.",
                           where=where.__str__(), tokens=tokens)
 
@@ -109,6 +111,14 @@ number_with_unit = C(integer_or_float, 'value') + unitst ^ empty_unit  # C(empty
 def number_with_unit_parse(t):
     value = t[0]
     units = t[1]
+    from mocdp.posets.rcomp import Rcomp
+    if isinstance(value, int) and isinstance(units, Rcomp):
+        value = float(value)
+    try:
+        units.belongs(value)
+    except NotBelongs as e:
+        msg = 'Value %r does not belong to %s.' % (value, units)
+        raise_desc(DPSemanticError, msg)
     res = ValueWithUnits(value, units)
     return res
 
@@ -424,8 +434,8 @@ def parse_line(line):
 @parse_action
 def dp_model_parse_action(tokens):
     res = list(tokens)
-    if not res:
-        raise DPSemanticError('Empty model')
+    # if not res:
+    #    raise DPSemanticError('Empty model')
     from mocdp.lang.blocks import interpret_commands
     return interpret_commands(res)
 

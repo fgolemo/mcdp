@@ -6,8 +6,6 @@ from mocdp.exceptions import DPSemanticError
 from mocdp.posets.poset_product import PosetProduct
 
 
-
-
 __all__ = [
     'NamedDP',
     'dp_from_ndp',
@@ -25,6 +23,14 @@ class NamedDP():
     def check_fully_connected(self):
         # Raise notConnected
         pass
+
+    def is_fully_connected(self):
+        try:
+            self.check_fully_connected()
+        except NotConnected:
+            return False
+        else:
+            return True
 
     @abstractmethod
     @contract(returns='list(str)')
@@ -86,8 +92,8 @@ class CompositeNamedDP(NamedDP):
             try:
                 ndp.check_fully_connected()
             except NotConnected as e:
-                msg = 'Block %r is not connected.' % name
-                raise_wrapped(NotConnected, e, msg)
+                msg = 'Sub-design problem %r is not connected.' % name
+                raise_wrapped(NotConnected, e, msg, compact=True)
         from mocdp.lang.blocks import check_missing_connections
         check_missing_connections(self.context)
     
@@ -121,7 +127,7 @@ class CompositeNamedDP(NamedDP):
             self.check_fully_connected()
         except NotConnected as e:
             msg = 'Cannot abstract because not all subproblems are connected.'
-            raise_wrapped(DPSemanticError, e, msg)
+            raise_wrapped(DPSemanticError, e, msg, compact=True)
         
         context = self.context
         res = dpgraph_making_sure_no_reps(context.names,

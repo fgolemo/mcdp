@@ -20,6 +20,9 @@ def jobs_comptests(context):
     from .comp import tests  # @Reimport
     from .lang import tests  # @Reimport
 
+    from mocdp.lang.tests.examples import define_tests
+    define_tests()
+
     # instantiation
     from comptests import jobs_registrar
     jobs_registrar(context, get_conftools_mocdp_config())

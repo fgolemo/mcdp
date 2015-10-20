@@ -3,13 +3,46 @@ from collections import defaultdict
 from mocdp.comp.interfaces import CompositeNamedDP
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.dp import Constant, Identity, Limit, Max, Min, Product, Sum
+from mocdp.dp.dp_generic_unary import GenericUnary
+from mocdp.dp.dp_sum import ProductN, SumN
 from mocdp.lang.blocks import get_missing_connections
 from mocdp.posets.rcomp import R_dimensionless, Rcomp, RcompUnits
 from system_cmd import CmdException, system_cmd_result
 import os
-from mocdp.dp.dp_sum import SumN, ProductN
-from mocdp.dp.dp_generic_unary import GenericUnary
 
+
+class GraphDrawingContext():
+    def __init__(self, gg, parent, yourname, level=0):
+        self.gg = gg
+        self.parent = parent
+        self.yourname = yourname
+        self.level = level
+        
+    def newItem(self, label):
+        return self.gg.newItem(label, parent=self.parent)
+        
+    def child_context(self, parent, yourname):
+        c = GraphDrawingContext(gg=self.gg, parent=parent, yourname=yourname,
+                                level=self.level + 1)
+        return c
+
+    def styleApply(self, sname, n):
+        self.gg.styleApply(sname, n)
+
+    def newLink(self, a, b, label=None):
+        return self.gg.newLink(a, b, label)
+
+    def styleAppend(self, a, b, c):
+        self.gg.styleAppend(a, b, c)
+
+    def should_I_enclose(self, ndp):
+        if self.level == 0:
+            return False
+        return True
+        if ndp.is_fully_connected():
+            return False
+        else:
+            return self.yourname is not None
 
 def gvgen_from_ndp(ndp):
     import gvgen  # @UnresolvedImport
@@ -29,6 +62,9 @@ def gvgen_from_ndp(ndp):
     gg.styleAppend("unconnected_link", "color", "red")
     gg.styleAppend("unconnected_link", "fontcolor", "red")
 
+    gg.styleAppend("container", "shape", "box")
+    gg.styleAppend("container", "style", "rounded")
+
     gg.styleAppend("sum", "shape", "box")
     gg.styleAppend("sum", "style", "rounded")
     gg.styleAppend('sum', 'image', 'icons/sum.png')
@@ -40,6 +76,11 @@ def gvgen_from_ndp(ndp):
     gg.styleAppend('leq', 'imagescale', 'true')
     gg.styleAppend('leq', 'fixedsize', 'true')
 
+    # a red dot for unconnected
+    gg.styleAppend('unconnected', 'shape', 'point')
+    gg.styleAppend('unconnected', 'width', '0.1')
+    gg.styleAppend('unconnected', 'color', 'red')
+
     gg.styleAppend('splitter', 'style', 'filled')
     gg.styleAppend('splitter', 'shape', 'point')
     gg.styleAppend('splitter', 'width', '0.1')
@@ -47,8 +88,10 @@ def gvgen_from_ndp(ndp):
     gg.styleAppend('splitter', 'fillcolor', 'black')
     gg.styleAppend('splitter_link', 'dir', 'none')
 
-    functions, resources = create(gg, None, ndp)
+    gg.styleAppend('limit', 'color', 'black')
 
+    gdc = GraphDrawingContext(gg=gg, parent=None, yourname=None)
+    functions, resources = create(gdc, ndp)
 
     for fname, n in functions.items():
         F = ndp.get_ftype(fname)
@@ -83,13 +126,21 @@ def gvgen_from_ndp(ndp):
 
     return gg
 
-def create(gg, parent, ndp, yourname=None):
+def create(gdc, ndp):
     if isinstance(ndp, SimpleWrap):
-        return create_simplewrap(gg, parent, ndp, yourname=yourname)
+        res = create_simplewrap(gdc, ndp)
 
     if isinstance(ndp, CompositeNamedDP):
-        return create_composite(gg, parent, ndp, yourname=yourname)
+        res = create_composite(gdc, ndp)
 
+    functions, resources = res
+
+    for fn in ndp.get_fnames():
+        assert fn in functions
+    for rn in ndp.get_rnames():
+        assert rn in resources
+
+    return res
 
 def resize_icon(filename, imagepath, size):
     
@@ -118,7 +169,7 @@ def choose_best_icon(iconoptions, imagepath='icons'):
             return resize_icon(imagename, imagepath, 100)
     return None
 
-def create_simplewrap(gg, parent, ndp, yourname=None):  # @UnusedVariable
+def create_simplewrap(gdc, ndp):
     assert isinstance(ndp, SimpleWrap)
     label = str(ndp)
 
@@ -134,7 +185,7 @@ def create_simplewrap(gg, parent, ndp, yourname=None):  # @UnusedVariable
 
     icon = ndp.get_icon()
 
-    iconoptions = [yourname, icon, classname, 'default']
+    iconoptions = [gdc.yourname, icon, classname, 'default']
     best_icon = choose_best_icon(iconoptions)
 
     simple = (Min, Max, Identity, GenericUnary)
@@ -150,24 +201,24 @@ def create_simplewrap(gg, parent, ndp, yourname=None):  # @UnusedVariable
         for t, _ in special:
             if isinstance(ndp.dp, t):
                 sname = t
-                gg.styleAppend(sname, 'image', best_icon)
-                gg.styleAppend(sname, 'imagescale', 'true')
-                gg.styleAppend(sname, 'fixedsize', 'true')
-                gg.styleAppend(sname, 'height', '1.0')
-                gg.styleAppend(sname, "shape", "none")
+                gdc.styleAppend(sname, 'image', best_icon)
+                gdc.styleAppend(sname, 'imagescale', 'true')
+                gdc.styleAppend(sname, 'fixedsize', 'true')
+                gdc.styleAppend(sname, 'height', '1.0')
+                gdc.styleAppend(sname, "shape", "none")
                 label = ''
                 break
         else:
             if best_icon is not None:
-                if yourname is not None:
-                    shortlabel = yourname
+                if gdc.yourname is not None:
+                    shortlabel = gdc.yourname
                 else:
                     shortlabel = classname
                 sname = classname
-                gg.styleAppend(sname, 'imagescale', 'true')
-                gg.styleAppend(sname, 'height', '1.0')
-                gg.styleAppend(sname, "shape", "box")
-                gg.styleAppend(sname, "style", "rounded")
+                gdc.styleAppend(sname, 'imagescale', 'true')
+                gdc.styleAppend(sname, 'height', '1.0')
+                gdc.styleAppend(sname, "shape", "box")
+                gdc.styleAppend(sname, "style", "rounded")
                 label = ("<TABLE CELLBORDER='0' BORDER='0'><TR><TD>%s</TD></TR>"
                 "<TR><TD><IMG SRC='%s' SCALE='TRUE'/></TD></TR></TABLE>")
                 label = label % (shortlabel, best_icon)
@@ -188,13 +239,13 @@ def create_simplewrap(gg, parent, ndp, yourname=None):  # @UnusedVariable
         sname = 'limit'
 
 
-    node = gg.newItem(label)
+    node = gdc.newItem(label)
 
     if isinstance(ndp.dp, (Sum, SumN)):
-        gg.styleApply("sum", node)
+        gdc.styleApply("sum", node)
 
     if sname:
-        gg.styleApply(sname, node)
+        gdc.styleApply(sname, node)
 
     functions = {}
     resources = {}
@@ -216,10 +267,14 @@ def format_unit(R):
     else:
         return '[%s]' % str(R)
             
-def create_composite(gg, parent, ndp, yourname=None):  # @UnusedVariable
+def create_composite(gdc, ndp):  # @UnusedVariable
     assert isinstance(ndp, CompositeNamedDP)
-#     cluster = gg.newItem("", parent=parent)
-    cluster = None
+
+    if gdc.should_I_enclose(ndp):
+        c = gdc.newItem(gdc.yourname)
+        gdc.styleApply('container', c)
+        gdc = gdc.child_context(parent=c, yourname=gdc.yourname)
+
 
     names2resources = defaultdict(lambda: {})
     names2functions = defaultdict(lambda: {})
@@ -242,11 +297,19 @@ def create_composite(gg, parent, ndp, yourname=None):  # @UnusedVariable
         # print('Connection to %r: %r' % (name, res))
         return res
 
-    def is_solitary_function(name):
-        return len(get_connections_to_function(name)) == 1
+    # it is connected to only one
+    def is_function_with_one_connection(name):
+        return  name in ndp.context.newfunctions  and len(get_connections_to_function(name)) == 1
 
-    def is_solitary_resource(name):
-        return len(get_connections_to_resource(name)) == 1
+    # it is connected to only one
+    def is_resource_with_one_connection(name):
+        return name in ndp.context.newresources  and len(get_connections_to_resource(name)) == 1
+
+    def is_function_with_no_connections(name):
+        return  name in ndp.context.newfunctions  and len(get_connections_to_function(name)) == 0
+
+    def is_resource_with_no_connections(name):
+        return name in ndp.context.newresources  and len(get_connections_to_resource(name)) == 0
 
     def get_connections_to_dp_resource(name, rn):
         assert name in ndp.context.names
@@ -264,15 +327,36 @@ def create_composite(gg, parent, ndp, yourname=None):  # @UnusedVariable
         
     for name, value in ndp.context.names.items():
         # do not create these edges
-        if name in ndp.context.newfunctions and is_solitary_function(name):
+        if is_function_with_one_connection(name):
             # print('Skipping extra node for f %r' % name)
             continue
 
-        if name in ndp.context.newresources and is_solitary_resource(name):
+        if is_function_with_no_connections(name):
+            # only draw the balloon
+            item = gdc.newItem("%s" % name)
+            gdc.styleApply('unconnected', item)
+            for fn in value.get_fnames():
+                names2functions[name][fn] = item
+            for rn in value.get_rnames():
+                names2resources[name][rn] = item
+            continue
+
+        if is_resource_with_no_connections(name):
+            # only draw the balloon instead of "Identity" node
+            item = gdc.newItem("%s" % name)
+            gdc.styleApply('unconnected', item)
+            for fn in value.get_fnames():
+                names2functions[name][fn] = item
+            for rn in value.get_rnames():
+                names2resources[name][rn] = item
+            continue
+
+        if is_resource_with_one_connection(name):
             # print('Skipping extra node for r %r' % name)
             continue
 
-        f, r = create(gg, cluster, value, yourname=name)
+        child = gdc.child_context(yourname=name, parent=gdc.parent)
+        f, r = create(child, value)
         # print('name %s -> functions %s , resources = %s' % (name, list(f), list(r)))
         names2resources[name] = r
         names2functions[name] = f
@@ -281,15 +365,15 @@ def create_composite(gg, parent, ndp, yourname=None):  # @UnusedVariable
             if resource_has_more_than_one_connected(name, rn):
                 # create new splitter
                 orig = names2resources[name][rn]
-                split = gg.newItem('')
-                gg.styleApply('splitter', split)
-                l = gg.newLink(orig, split)
-                gg.styleApply('splitter_link', l)
+                split = gdc.newItem('')
+                gdc.styleApply('splitter', split)
+                l = gdc.newLink(orig, split)
+                gdc.styleApply('splitter_link', l)
                 names2resources[name][rn] = split
         
     ignore_connections = set()
     for name, value in ndp.context.names.items():
-        if name in ndp.context.newfunctions and is_solitary_function(name):
+        if  is_function_with_one_connection(name):
             only_one = get_connections_to_function(name)[0]
             ignore_connections.add(only_one)
             node = names2functions[only_one.dp2][only_one.s2]
@@ -298,7 +382,7 @@ def create_composite(gg, parent, ndp, yourname=None):  # @UnusedVariable
             names2resources[name][only_one.s1] = node
 
     for name, value in ndp.context.names.items():
-        if name in ndp.context.newresources and is_solitary_resource(name):
+        if is_resource_with_one_connection(name):
             only_one = get_connections_to_resource(name)[0]
             ignore_connections.add(only_one)
             node = names2resources[only_one.dp1][only_one.s1]
@@ -321,43 +405,53 @@ def create_composite(gg, parent, ndp, yourname=None):  # @UnusedVariable
 #             print('skipping')
 #             continue
 
-        box = gg.newItem('')  # '≼')
-        gg.styleApply("leq", box)
+        box = gdc.newItem('')  # '≼')
+        gdc.styleApply("leq", box)
 
         ua = ndp.context.names[c.dp2].get_ftype(c.s2)
         ub = ndp.context.names[c.dp1].get_rtype(c.s1)
-        gg.newLink(box, n_a , label=get_signal_label(c.s2, ua))
-        gg.newLink(n_b, box, label=get_signal_label(c.s1, ub))
+        gdc.newLink(box, n_a , label=get_signal_label(c.s2, ua))
+        gdc.newLink(n_b, box, label=get_signal_label(c.s1, ub))
 
     unconnected_fun, unconnected_res = get_missing_connections(ndp.context)
     for (dp, fn) in unconnected_fun:
-        x = gg.newItem('')
-        gg.styleApply("unconnected_node", x)
+        x = gdc.newItem('')
+        gdc.styleApply("unconnected_node", x)
 
         n = names2functions[dp][fn]
         F = ndp.context.names[dp].get_ftype(fn)
-        l = gg.newLink(x, n, label=get_signal_label(fn, F))
-        gg.styleApply('unconnected_link', l)
+        l = gdc.newLink(x, n, label=get_signal_label(fn, F))
+        gdc.styleApply('unconnected_link', l)
 
     for (dp, rn) in unconnected_res:
-        x = gg.newItem('')
-        gg.styleApply("unconnected_node", x)
+        x = gdc.newItem('')
+        gdc.styleApply("unconnected_node", x)
 
         n = names2resources[dp][rn]
         R = ndp.context.names[dp].get_rtype(rn)
-        l = gg.newLink(n, x, label=get_signal_label(rn, R))
-        gg.styleApply('unconnected_link', l)
-
+        l = gdc.newLink(n, x, label=get_signal_label(rn, R))
+        gdc.styleApply('unconnected_link', l)
 
 
     functions = {}
     resources = {}
 
+
     for rname in ndp.get_rnames():
-        resources[rname] = list(names2resources[rname].values())[0]
+
+#         if  is_resource_with_one_connection(name) and cluster is not None:
+#             resources[rname] = cluster
+#         else:
+#             # XXX: this part didn't work well
+            resources[rname] = list(names2resources[rname].values())[0]
 
     for fname in ndp.get_fnames():
-        functions[fname] = list(names2functions[fname].values())[0]
+#         if is_function_with_no_connections(name) and cluster is not None:
+#
+#             functions[fname] = cluster
+#         else:
+#             # XXX: this part didn't work well
+            functions[fname] = list(names2functions[fname].values())[0]
  
     return functions, resources
 

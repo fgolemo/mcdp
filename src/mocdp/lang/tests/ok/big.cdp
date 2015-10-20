@@ -1,0 +1,30 @@
+# test connected
+cdp {  
+  requires cost [$]
+  provides velocity [R]
+  provides endurance [s]
+
+  motor = load motor
+  chassis = load chassis
+  battery = load battery2
+
+  torque provided by motor >= chassis.motor_torque
+  speed provided by motor >= chassis.motor_speed
+  #power >= motor.current * motor.voltage
+
+  chassis.payload >= motor.motor_weight + battery.battery_weight
+  
+  chassis.velocity >= velocity
+
+  battery.capacity >= endurance * (motor.current * motor.voltage)
+
+  shipping = load shipping
+  shipping.ships >= chassis.total_weight
+  
+  cost >= motor.motor_cost + chassis.chassis_cost + battery.battery_cost + shipping.postage
+
+  # also minimize the weight
+  requires w [g]
+  w >= battery.battery_weight
+
+}

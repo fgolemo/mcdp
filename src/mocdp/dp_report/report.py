@@ -4,10 +4,10 @@ from .gg_utils import gg_figure
 from contracts import contract
 from mocdp.comp.interfaces import NamedDP
 from mocdp.dp import DPLoop0, Mux, Parallel, Series0
-from reprep import Report
+from mocdp.dp.dp_generic_unary import GenericUnary
 from mocdp.posets.poset_product import PosetProduct
 from mocdp.posets.rcomp import R_dimensionless
-from mocdp.dp.dp_generic_unary import GenericUnary
+from reprep import Report
 
 @contract(ndp=NamedDP)
 def report_ndp1(ndp):

@@ -1,12 +1,12 @@
-from mocdp.unittests.generation import for_all_dps
 from comptests.registrar import comptest
-from nose.tools import assert_equal
-from mocdp.posets.rcomp import R_dimensionless, R_Time, R_Weight, R_Energy
-from mocdp.posets.space_product import SpaceProduct
-from mocdp.lang.syntax import parse_ndp
 from mocdp.dp.dp_series import get_product_compact
+from mocdp.dp.primitive import Feasible, NotFeasible
+from mocdp.lang.syntax import parse_ndp
 from mocdp.posets.poset_product import PosetProduct
-from mocdp.dp.primitive import NotFeasible, Feasible
+from mocdp.posets.rcomp import R_Energy, R_Time, R_Weight, R_dimensionless
+from mocdp.posets.space_product import SpaceProduct
+from mocdp.unittests.generation import for_all_dps
+from nose.tools import assert_equal
 
 
 

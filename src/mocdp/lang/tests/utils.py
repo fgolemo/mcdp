@@ -42,6 +42,9 @@ def assert_semantic_error(s , desc=None):
 def assert_parsable_to_unconnected_ndp(s, desc=None):
     print(desc)
     res = parse_ndp(s)
+    if res.is_fully_connected():
+        msg = 'The graph appears connected but it should be disconnected.'
+        raise Exception(msg)
     return res
 
 @contract(returns=NamedDP)

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from .parts import (AbstractAway, Constraint, Function, LoadCommand, NewLimit,
     NewResource, OpMax, OpMin, Plus, Resource, SetName, ValueWithUnits)
-from conf_tools import SemanticMistakeKeyNotFound, instantiate_spec
-from conf_tools.exceptions import ConfToolsException
+from conf_tools import (ConfToolsException, SemanticMistakeKeyNotFound,
+    instantiate_spec)
 from contracts import contract, describe_value
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.comp.connection import Connection
@@ -11,15 +11,15 @@ from mocdp.comp.wrap import SimpleWrap, dpwrap
 from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
 from mocdp.dp import (Constant, Identity, Limit, Max, Min, PrimitiveDP, Product,
     Sum)
+from mocdp.dp.dp_generic_unary import GenericUnary
+from mocdp.dp.dp_sum import ProductN, SumN
 from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.lang.parts import GenericNonlinearity, MakeTemplate, MultN, PlusN
 from mocdp.lang.syntax import (DPSyntaxError, DPWrap, FunStatement, LoadDP,
     PDPCodeSpec, ResStatement)
 from mocdp.posets import NotBelongs
-from mocdp.posets.rcomp import Rcomp, mult_table, mult_table_seq
-from mocdp.lang.parts import MakeTemplate, PlusN, GenericNonlinearity, MultN
 from mocdp.posets.poset_product import PosetProduct
-from mocdp.dp.dp_sum import SumN, ProductN
-from mocdp.dp.dp_generic_unary import GenericUnary
+from mocdp.posets.rcomp import Rcomp, mult_table, mult_table_seq
 
 class Context():
     def __init__(self):
@@ -173,9 +173,9 @@ def interpret_commands(res):
             if e.where is None:
                 raise DPSemanticError(str(e), where=r.where)
             raise
-            
-    if not context.names:
-        raise DPSemanticError('Empty model')
+
+    # if not context.names:
+    #    raise DPSemanticError('Empty model')
 
     return CompositeNamedDP(context=context)
 

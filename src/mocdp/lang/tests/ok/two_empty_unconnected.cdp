@@ -1,0 +1,7 @@
+# test unconnected
+cdp {
+    a = cdp  { 
+    }
+    b = cdp {
+    }
+}

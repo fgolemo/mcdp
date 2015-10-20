@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from .utils import assert_parsable_to_unconnected_ndp
 from comptests.registrar import comptest
-from mocdp.lang.syntax import (code_spec, constraint_expr, funcname, idn,
-    load_expr, ow, parse_wrap, rvalue, simple_dp_model, binary_expr)
+from mocdp.lang.syntax import (
+    binary_expr, code_spec, constraint_expr, funcname, idn, load_expr, ow,
+    parse_wrap, rvalue, simple_dp_model)
 from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp,
     assert_semantic_error)
 from nose.tools import assert_equal
@@ -804,6 +805,166 @@ def check_lang38():
   
   }
 """)
+
+
+@comptest
+def check_lang39():
+    assert_parsable_to_connected_ndp("""
+    cdp {  
+    f =  cdp {
+        provides x [R]
+        requires y [R]
+        y >= x
+    }
+
+    f.x  >= f.y
+  }""")
+
+
+@comptest
+def check_lang40():
+    assert_parsable_to_connected_ndp("""
+cdp {  
+    f =  template cdp {
+        provides x [R]
+        requires y [R]
+
+    }
+    g = template cdp {
+        provides a [R]
+        requires x [R]
+    }
+    # conversion from int
+    f.x  >= f.y + g.x + 4 [R]
+    g.a >= f.y 
+  }
+""")
+
+@comptest
+def check_lang41():
+    """ Allow empty models. """
+    assert_parsable_to_unconnected_ndp(
+"""
+    cdp {
+  
+    DP1 = template cdp {
+  
+  
+  
+    }
+  
+  }""")
+
+@comptest
+def check_lang42():
+    assert_parsable_to_unconnected_ndp(
+"""    
+abstract cdp {
+          motor = template cdp {
+            provides speed [R]
+            provides torque [R]
+            #    
+            requires cost [$]
+            requires weight [g]
+            requires voltage [V]
+            requires current [A]
+          }
+           #
+          chassis = template cdp {
+            provides payload [g]
+            provides velocity [R]
+            #
+            requires cost [$]
+            requires total_weight [g]
+            requires motor_speed [R]
+            requires motor_torque [R]
+
+            requires controller [R]
+          }
+
+          provides torque [R]
+          provides speed [R]
+
+          motor.speed >= speed
+          motor.torque >= torque
+
+          requires cost [$]
+          requires total_weight [g]
+          
+          requires voltage [V]
+          requires current [A]
+
+          total_weight >= chassis.total_weight 
+          
+          provides payload [g]
+          chassis.payload >= payload + motor.weight
+          
+          cost >= chassis.cost + motor.cost
+
+          torque provided by motor >= chassis.motor_torque
+          speed provided by motor >= chassis.motor_speed
+
+          provides velocity [R]
+          chassis.velocity >= velocity
+ 
+          voltage >= motor.voltage
+          current >= motor.current
+
+          requires controller [R]
+          controller >= chassis.controller
+      }
+""")
+
+@comptest
+def check_lang43():
+    """ Shortcuts """
+    assert_parsable_to_unconnected_ndp(
+"""    
+abstract cdp {
+          motor = template cdp {
+            provides speed [R]
+            provides torque [R]
+            #    
+            requires cost [$]
+            requires weight [g]
+            requires voltage [V]
+            requires current [A]
+          }
+           #
+          chassis = template cdp {
+            provides payload [g]
+            provides velocity [R]
+            #
+            requires cost [$]
+            requires total_weight [g]
+            requires motor_speed [R]
+            requires motor_torque [R]
+
+            requires controller [R]
+          }
+
+          provides torque by motor
+          provides speed  by motor
+
+          requires total_weight for chassis
+          
+          requires voltage for motor
+          requires current for motor
+          
+          provides payload [g]
+          chassis.payload >= payload + motor.weight
+          
+          requires cost [$]
+          cost >= chassis.cost + motor.cost
+
+          torque provided by motor >= chassis.motor_torque
+          speed provided by motor >= chassis.motor_speed
+
+          provides velocity by chassis
+          requires controller for chassis
+      }
+""")
+
 examples1 = [
     """
 dp electric-battery {

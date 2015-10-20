@@ -72,8 +72,6 @@ class Series0(PrimitiveDP):
         else:
             f2 = m_extra
                 
-#         r1 = self.dp1.evaluate_f_m(f1, m1)
-#         f2 = r1
         r2 = self.dp2.evaluate_f_m(f2, m2)
         return r2
 
@@ -91,7 +89,6 @@ class Series0(PrimitiveDP):
         M.belongs(m)
         m1, m_extra, m2 = unpack(m)
 
-        # r1 = self.dp1.evaluate_f_m(f1, m1)
         comments = ''
         try:
             if isinstance(self.dp1, (Mux, Identity)):
@@ -130,8 +127,6 @@ class Series0(PrimitiveDP):
                 msg += '\n  f2 = %s -> [dp2(%s)] <~= r = %s ' % (f2, m2, r)
                 raise_wrapped(NotFeasible, e, msg, compact=True, dp2=self.dp2.repr_long(),
                               dp1=self.dp1.repr_long(), comments=comments)
-        # r2 = self.dp2.evaluate_f_m(f2, m2)
-        # print('ok: %s [%s] %s <= %s [%s] %s <= %s' % (f1, m1, r1, f2, m2, r2, r))
 
     def check_unfeasible(self, f1, m, r):
         M, _, unpack = get_product_compact(self.M1, self.extraM, self.M2)
@@ -151,7 +146,6 @@ class Series0(PrimitiveDP):
         try:
             self.dp1.check_unfeasible(f1, m1, r1)
         except Feasible as e1:
-#             f2 = self.dp1.evaluate_f_m(f1, m1)
             try:
                 f2 = r1
                 self.dp2.check_unfeasible(f2, m2, r)

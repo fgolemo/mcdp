@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
+from contracts import contract
 from mocdp import get_conftools_posets
 from mocdp.posets import PosetProduct, SpaceProduct
-from contracts import contract
 import functools
 
 

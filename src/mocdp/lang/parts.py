@@ -14,7 +14,12 @@ def namedtuplewhere(a, b):
 GenericNonlinearity = namedtuplewhere('GenericNonlinearity', 'function op1 R_from_F')
 
 NewLimit = namedtuplewhere('NewLimit', 'value_with_unit')
-ValueWithUnits = namedtuplewhere('ValueWithUnits', 'value unit')
+
+ValueWithUnits0 = namedtuplewhere('ValueWithUnits0', 'value unit')
+class ValueWithUnits(ValueWithUnits0):
+    def __init__(self, value, unit):
+        unit.belongs(value)
+        ValueWithUnits0.__init__(self, value=value, unit=unit)
 
 MakeTemplate = namedtuplewhere('MakeTemplate', 'dp_rvalue')
 AbstractAway = namedtuplewhere('AbstractAway', 'dp_rvalue')

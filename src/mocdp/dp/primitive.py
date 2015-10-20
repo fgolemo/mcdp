@@ -2,7 +2,7 @@
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import raise_wrapped, raise_desc
+from contracts.utils import raise_desc, raise_wrapped
 from decent_logs import WithInternalLog
 from mocdp.posets import (Map, NotBelongs, Poset, PosetProduct, Space,
     SpaceProduct, UpperSet, UpperSets)
