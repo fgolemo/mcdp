@@ -1,14 +1,12 @@
-# test unconnected
 cdp {
-    a = template cdp  { 
-      provides weight [g]
+    motor = template cdp {
+        provides speed [R]
+        provides torque [R]
+        requires cost [$]
+    }
+            
+    #provides speed, torque using motor
+    provides torque using motor
+    requires cost for motor
 
-      requires ciao [R]
-    }
-    b = template cdp {
-      requires x [g]
-      provides y [R]
-    }
-    a.weight >= b.x
-    a.ciao <= b.y
 }

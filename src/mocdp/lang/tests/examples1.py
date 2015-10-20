@@ -943,8 +943,8 @@ abstract cdp {
             requires controller [R]
           }
 
-          provides torque by motor
-          provides speed  by motor
+          provides torque using motor
+          provides speed  using motor
 
           requires total_weight for chassis
           
@@ -960,10 +960,69 @@ abstract cdp {
           torque provided by motor >= chassis.motor_torque
           speed provided by motor >= chassis.motor_speed
 
-          provides velocity by chassis
+          provides velocity using chassis
           requires controller for chassis
       }
 """)
+
+
+@comptest
+def check_lang44():
+    """ Shortcuts "using" """
+    assert_parsable_to_connected_ndp(
+"""    
+cdp {
+    motor = template cdp {
+        provides speed [R]
+    }
+            
+    provides speed using motor
+}
+""")
+
+@comptest
+def check_lang45():
+    """ Shortcuts "using" """
+    assert_parsable_to_connected_ndp(
+"""    
+cdp {
+    motor = template cdp {
+        provides speed [R]
+    }
+            
+    provides speed <= motor.speed
+}
+""")
+
+
+@comptest
+def check_lang46():
+    """ Shortcuts "for" """
+    assert_parsable_to_connected_ndp(
+"""    
+cdp {
+    motor = template cdp {
+        requires cost [$]
+    }
+            
+    requires cost for motor
+}
+""")
+
+@comptest
+def check_lang47():
+    """ Shortcuts "for" """
+    assert_parsable_to_connected_ndp(
+"""    
+cdp {
+    motor = template cdp {
+        requires cost [$]
+    }
+            
+    requires cost >= motor.cost
+}
+""")
+
 
 examples1 = [
     """

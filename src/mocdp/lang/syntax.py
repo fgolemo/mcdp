@@ -7,10 +7,11 @@ from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
-from mocdp.lang.parts import GenericNonlinearity, MultN, PlusN
+from mocdp.lang.parts import GenericNonlinearity, MultN, PlusN, FunShortcut1, \
+    ResShortcut1, FunShortcut2, ResShortcut2
 from mocdp.posets.rcomp import (R_Cost, R_Current, R_Energy, R_Power, R_Time,
     R_Voltage, R_Weight, R_dimensionless, mult_table)
-from mocdp.posets.space import Space, NotBelongs
+from mocdp.posets.space import NotBelongs, Space
 from pyparsing import (CaselessLiteral, Combine, Forward, Group, Literal,
     Optional, Or, ParseException, ParseFatalException, ParserElement, Suppress,
     Word, ZeroOrMore, alphanums, alphas, nums, oneOf, opAssoc,
@@ -98,10 +99,16 @@ floatnumber.setParseAction(lambda tokens: float(tokens[0]))
 integer_or_float = integer ^ floatnumber
 
 unitst = S(L('[')) - C(unit_expr, 'unit') - S(L(']'))
-fun_statement = S(L('F')) ^ S(L('provides')) - C(idn, 'fname') - unitst
+
+PROVIDES = S(L('provides'))
+REQUIRES = S(L('requires'))
+USING = S(L('using'))
+FOR = S(L('for'))
+
+fun_statement = PROVIDES - C(idn, 'fname') + unitst
 spa(fun_statement, lambda t: FunStatement(t['fname'], t['unit']))
 
-res_statement = S(L('R')) ^ S(L('requires')) - C(idn, 'rname') - unitst
+res_statement = REQUIRES - C(idn, 'rname') + unitst
 spa(res_statement, lambda t: ResStatement(t['rname'], t['unit']))
 
 empty_unit = S(L('[')) + S(L(']'))
@@ -200,7 +207,26 @@ spa(constraint_expr, lambda t: Constraint(t['lf'], t['rvalue']))
 constraint_expr2 = C(rvalue, 'rvalue') + LEQ - C(signal_rvalue, 'lf')
 spa(constraint_expr2, lambda t: Constraint(t['lf'], t['rvalue']))
 
-line_expr = load_expr ^ constraint_expr ^ constraint_expr2 ^ setname_expr ^ fun_statement ^ res_statement
+
+
+fun_shortcut1 = PROVIDES - C(idn, 'fname') + USING + C(idn, 'name')
+res_shortcut1 = REQUIRES - C(idn, 'rname') + FOR + C(idn, 'name')
+
+fun_shortcut2 = PROVIDES - C(idn, 'fname') + LEQ - C(signal_rvalue, 'lf')
+res_shortcut2 = REQUIRES - C(idn, 'rname') + GEQ - C(rvalue, 'rvalue')
+
+
+
+spa(fun_shortcut1, lambda t: FunShortcut1(t['fname'], t['name']))
+spa(res_shortcut1, lambda t: ResShortcut1(t['rname'], t['name']))
+
+spa(fun_shortcut2, lambda t: FunShortcut2(t['fname'], t['lf']))
+spa(res_shortcut2, lambda t: ResShortcut2(t['rname'], t['rvalue']))
+
+
+line_expr = (load_expr ^ constraint_expr ^ constraint_expr2 ^ setname_expr
+             ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
+             ^ res_shortcut1 ^ res_shortcut2)
 
 
 dp_model = S(L('cdp')) - S(L('{')) - ZeroOrMore(S(ow) + line_expr) - S(L('}'))

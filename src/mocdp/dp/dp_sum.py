@@ -98,6 +98,16 @@ class ProductN(PrimitiveDP):
 
     def solve(self, f):
         self.F.belongs(f)
+        # print self.F, f
+
+        # first, find out if there are any tops
+        def is_there_a_top():
+            for Fi, fi in zip(self.F, f):
+                if Fi.leq(Fi.get_top(), fi):
+                    return True
+            return False
+        if is_there_a_top():
+            return self.R.U(self.R.get_top())
         mult = lambda x, y: x * y
         r = functools.reduce(mult, f)
         return self.R.U(r)

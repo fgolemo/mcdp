@@ -14,7 +14,8 @@ from mocdp.dp import (Constant, Identity, Limit, Max, Min, PrimitiveDP, Product,
 from mocdp.dp.dp_generic_unary import GenericUnary
 from mocdp.dp.dp_sum import ProductN, SumN
 from mocdp.exceptions import DPInternalError, DPSemanticError
-from mocdp.lang.parts import GenericNonlinearity, MakeTemplate, MultN, PlusN
+from mocdp.lang.parts import GenericNonlinearity, MakeTemplate, MultN, PlusN, \
+    FunShortcut1, ResShortcut1, FunShortcut2, ResShortcut2, NewFunction
 from mocdp.lang.syntax import (DPWrap, FunStatement, LoadDP, PDPCodeSpec,
     ResStatement)
 from mocdp.posets import NotBelongs, PosetProduct
@@ -173,54 +174,103 @@ class Context():
     def get_rtype(self, a):
         """ Gets the type of a resource, raises DPSemanticError if not present. """
         if not a.dp in self.names:
-            msg = "Cannot find resource %r." % a
-            raise DPSemanticError(msg)
+            msg = "Cannot find design problem %r." % str(a)
+            raise DPSemanticError(msg, where=a.where)
         dp = self.names[a.dp]
         if not a.s in dp.get_rnames():
             msg = "Design problem %r does not have resource %r." % (a.dp, a.s)
-            raise DPSemanticError(msg)
+            raise DPSemanticError(msg, where=a.where)
         return dp.get_rtype(a.s)
 
+    @contract(a=Function)
+    def get_ftype(self, a):
+        """ Gets the type of a function, raises DPSemanticError if not present. """
+        if not a.dp in self.names:
+            msg = "Cannot find design problem %r." % str(a)
+            raise DPSemanticError(msg, where=a.where)
+        dp = self.names[a.dp]
+        if not a.s in dp.get_fnames():
+            msg = "Design problem %r does not have function %r." % (a.dp, a.s)
+            raise DPSemanticError(msg, where=a.where)
+        return dp.get_ftype(a.s)
 
+def eval_statement(r, context):
+    if isinstance(r, Connection):
+        context.add_connection(r)
+    
+    elif isinstance(r, Constraint):
+        resource = eval_rvalue(r.rvalue, context)
+        function = eval_lfunction(r.function, context)
+        c = Connection(dp1=resource.dp, s1=resource.s,
+                       dp2=function.dp, s2=function.s)
+        context.add_connection(c)
+    
+    elif isinstance(r, SetName):
+        name = r.name
+        ndp = eval_dp_rvalue(r.dp_rvalue, context)
+        context.add_ndp(name, ndp)
+    
+    elif isinstance(r, ResStatement):
+        # requires r.rname [r.unit]
+        F = r.unit
+        ndp = dpwrap(Identity(F), r.rname, r.rname)
+        context.add_ndp_res(r.rname, ndp)
+#         return NewResource(r.rname)
+        return Function(context.get_name_for_res_node(r.rname), r.rname)
+    
+    elif isinstance(r, FunStatement):
+        F = r.unit
+        ndp = dpwrap(Identity(F), r.fname, r.fname)
+        context.add_ndp_fun(r.fname, ndp)
+        return Resource(context.get_name_for_fun_node(r.fname), r.fname)
+    
+    elif isinstance(r, FunShortcut1):  # provides fname using name
+        B = Function(r.name, r.fname)
+        F = context.get_ftype(B)
+        A = eval_statement(FunStatement(r.fname, F), context)
+        eval_statement(Constraint(function=B, rvalue=A), context)
+
+    elif isinstance(r, ResShortcut1):  # requires rname for name
+        # resource rname [r0]
+        # rname >= name.rname
+        A = Resource(r.name, r.rname)
+        R = context.get_rtype(A)
+        B = eval_statement(ResStatement(r.rname, R), context)
+        # B >= A
+        eval_statement(Constraint(function=B, rvalue=A), context)
+        # eval_rvalue wants Resource or NewFunction
+        # eval_lfunction wants Function or NewResource
+
+    elif isinstance(r, FunShortcut2):  # provides rname <= (lf)
+        B = eval_lfunction(r.lf, context)
+        assert isinstance(B, Function)
+        F = context.get_ftype(B)
+        A = eval_statement(FunStatement(r.fname, F), context)
+        eval_statement(Constraint(function=B, rvalue=A), context)
+
+    elif isinstance(r, ResShortcut2):  # requires rname >= (rvalue)
+        A = eval_rvalue(r.rvalue, context)
+        assert isinstance(A, Resource)
+        R = context.get_rtype(A)
+        B = eval_statement(ResStatement(r.rname, R), context)
+        # B >= A
+        eval_statement(Constraint(function=B, rvalue=A), context)
+
+        # ndp = eval_dp_rvalue(r.rvalue, context)
+    
+    else:
+        raise DPInternalError('Cannot interpret %s' % describe_value(r))
+    
 def interpret_commands(res):
     context = Context()
     
     for r in res:
         try:
-            if isinstance(r, Connection):
-                context.add_connection(r)
-
-            elif isinstance(r, Constraint):
-                resource = eval_rvalue(r.rvalue, context)
-                function = eval_lfunction(r.function, context)
-                c = Connection(dp1=resource.dp, s1=resource.s,
-                               dp2=function.dp, s2=function.s)
-                context.add_connection(c)
-
-            elif isinstance(r, SetName):
-                name = r.name
-                ndp = eval_dp_rvalue(r.dp_rvalue, context)
-                context.add_ndp(name, ndp)
-
-            elif isinstance(r, ResStatement):
-                F = r.unit
-                ndp = dpwrap(Identity(F), r.rname, r.rname)
-                context.add_ndp_res(r.rname, ndp)
-
-            elif isinstance(r, FunStatement):
-                F = r.unit
-                ndp = dpwrap(Identity(F), r.fname, r.fname)
-                context.add_ndp_fun(r.fname, ndp)
-
-            else:
-                raise DPInternalError('Cannot interpret %s' % describe_value(r))
+            eval_statement(r, context)
         except DPSemanticError as e:
             if e.where is None:
                 raise DPSemanticError(str(e), where=r.where)
             raise
-
-    # if not context.names:
-    #    raise DPSemanticError('Empty model')
 
     return CompositeNamedDP(context=context)
 
@@ -428,9 +478,10 @@ def eval_lfunction(lf, context):
             msg = 'Unknown dp (%r.%r)' % (lf.dp, lf.s)
             raise DPSemanticError(msg, where=lf.where)
 
-        if context.is_new_resource(lf.dp):
-            msg = 'Cannot use the name of an external interface function.'
-            raise DPSemanticError(msg, where=lf.where)
+#         warnings.warn('Not sure if this was necessary')
+#         if context.is_new_resource(lf.dp):
+#             msg = 'Cannot use the name %s of an external interface function.' % lf.__repr__()
+#             raise DPSemanticError(msg, where=lf.where)
 
         return lf
 
@@ -464,13 +515,15 @@ def eval_lfunction(lf, context):
         context.add_ndp(n, ndp)
 
         return Function(n, sn)
-        
-    raise ValueError(lf)
+
+    msg = 'Cannot eval_lfunction(%s)' % lf.__repr__()
+    raise ValueError(msg)
 
 # @contract(returns=Resource)
 def eval_rvalue(rvalue, context):
+    # wants Resource or NewFunction
     try:
-        from .parts import Mult, NewFunction
+        from .parts import Mult
 
         if isinstance(rvalue, Resource):
             if not rvalue.dp in context.names:
@@ -674,10 +727,8 @@ def eval_rvalue(rvalue, context):
 
             return Resource(name, rname)
 
-
-
-
-        raise ValueError(rvalue)
+        msg = 'Cannot evaluate %s as rvalue.' % rvalue.__repr__()
+        raise ValueError(msg)
     except DPSemanticError as e:
         if e.where is None:
             raise DPSemanticError(str(e), where=rvalue.where)

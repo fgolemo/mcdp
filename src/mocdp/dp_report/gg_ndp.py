@@ -9,6 +9,7 @@ from mocdp.lang.blocks import get_missing_connections
 from mocdp.posets.rcomp import R_dimensionless, Rcomp, RcompUnits
 from system_cmd import CmdException, system_cmd_result
 import os
+import warnings
 
 
 class GraphDrawingContext():
@@ -36,6 +37,7 @@ class GraphDrawingContext():
         self.gg.styleAppend(a, b, c)
 
     def should_I_enclose(self, ndp):
+        warnings.warn('Add option here')
         if self.level == 0:
             return False
         return True
@@ -43,6 +45,7 @@ class GraphDrawingContext():
             return False
         else:
             return self.yourname is not None
+
 
 def gvgen_from_ndp(ndp):
     import gvgen  # @UnresolvedImport
@@ -122,7 +125,6 @@ def gvgen_from_ndp(ndp):
     gg.propertyAppend(cluster_functions, "color", "white")
     gg.propertyAppend(cluster_resources, "shape", "plain")
     gg.propertyAppend(cluster_resources, "color", "white")
-
 
     return gg
 
@@ -214,6 +216,7 @@ def create_simplewrap(gdc, ndp):
                     shortlabel = gdc.yourname
                 else:
                     shortlabel = classname
+                # shortlabel = '<I><B>%sa</B></I>' % shortlabel
                 sname = classname
                 gdc.styleAppend(sname, 'imagescale', 'true')
                 gdc.styleAppend(sname, 'height', '1.0')
@@ -225,6 +228,7 @@ def create_simplewrap(gdc, ndp):
             else:
                 # print('Image %r not found' % imagename)
                 sname = None
+
 
     if isinstance(ndp.dp, Constant):
         R = ndp.dp.get_res_space()
@@ -238,6 +242,9 @@ def create_simplewrap(gdc, ndp):
         label = F.format(c) + ' ' + format_unit(F)
         sname = 'limit'
 
+#     if label[:2] != '<T':
+#         # Only available in svg or cairo renderer
+#         label = '<I>%s</I>' % label
 
     node = gdc.newItem(label)
 
@@ -438,22 +445,12 @@ def create_composite(gdc, ndp):  # @UnusedVariable
 
 
     for rname in ndp.get_rnames():
-
-#         if  is_resource_with_one_connection(name) and cluster is not None:
-#             resources[rname] = cluster
-#         else:
-#             # XXX: this part didn't work well
         name = ndp.context.get_name_for_res_node(rname)
         resources[rname] = list(names2resources[name].values())[0]
 
     for fname in ndp.get_fnames():
-#         if is_function_with_no_connections(name) and cluster is not None:
-#
-#             functions[fname] = cluster
-#         else:
-#             # XXX: this part didn't work well
-            name = ndp.context.get_name_for_fun_node(fname)
-            functions[fname] = list(names2functions[name].values())[0]
+        name = ndp.context.get_name_for_fun_node(fname)
+        functions[fname] = list(names2functions[name].values())[0]
  
     return functions, resources
 

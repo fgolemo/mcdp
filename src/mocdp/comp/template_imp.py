@@ -1,17 +1,20 @@
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.dp.primitive import PrimitiveDP
 from mocdp.lang.syntax import parse_wrap, unit_expr
-from mocdp.posets import UpperSet
-from mocdp.posets.poset_product import PosetProduct
-from mocdp.posets.space_product import SpaceProduct
+from mocdp.posets import PosetProduct, SpaceProduct, UpperSet
 
-class Dummy(PrimitiveDP):
+__all__ = [
+    'template',
+]
+
+class Template(PrimitiveDP):
     def __init__(self, F, R):
         M = SpaceProduct(())
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
     def solve(self, _func):
         minimals = [self.R.get_bottom()]
         return UpperSet(set(minimals), self.R)
+Dummy = Template
 
 def template(functions, resources):
     
@@ -33,4 +36,4 @@ def template(functions, resources):
         R = R[0]
         rnames = rnames[0]
 
-    return SimpleWrap(Dummy(F, R), fnames, rnames)
+    return SimpleWrap(Template(F, R), fnames, rnames)
