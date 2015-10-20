@@ -280,7 +280,7 @@ def create_composite(gdc, ndp):  # @UnusedVariable
     names2functions = defaultdict(lambda: {})
 
     def get_connections_to_function(name):
-        assert name in ndp.context.newfunctions
+        assert ndp.context.is_new_function(name)
         res = []
         for c in ndp.context.connections:
             if c.dp1 == name:
@@ -289,7 +289,7 @@ def create_composite(gdc, ndp):  # @UnusedVariable
         return res
 
     def get_connections_to_resource(name):
-        assert name in ndp.context.newresources
+        assert ndp.context.is_new_resource(name)
         res = []
         for c in ndp.context.connections:
             if c.dp2 == name:
@@ -299,17 +299,17 @@ def create_composite(gdc, ndp):  # @UnusedVariable
 
     # it is connected to only one
     def is_function_with_one_connection(name):
-        return  name in ndp.context.newfunctions  and len(get_connections_to_function(name)) == 1
+        return ndp.context.is_new_function(name) and len(get_connections_to_function(name)) == 1
 
     # it is connected to only one
     def is_resource_with_one_connection(name):
-        return name in ndp.context.newresources  and len(get_connections_to_resource(name)) == 1
+        return ndp.context.is_new_resource(name) and len(get_connections_to_resource(name)) == 1
 
     def is_function_with_no_connections(name):
-        return  name in ndp.context.newfunctions  and len(get_connections_to_function(name)) == 0
+        return ndp.context.is_new_function(name)  and len(get_connections_to_function(name)) == 0
 
     def is_resource_with_no_connections(name):
-        return name in ndp.context.newresources  and len(get_connections_to_resource(name)) == 0
+        return ndp.context.is_new_resource(name)   and len(get_connections_to_resource(name)) == 0
 
     def get_connections_to_dp_resource(name, rn):
         assert name in ndp.context.names
@@ -443,7 +443,8 @@ def create_composite(gdc, ndp):  # @UnusedVariable
 #             resources[rname] = cluster
 #         else:
 #             # XXX: this part didn't work well
-            resources[rname] = list(names2resources[rname].values())[0]
+        name = ndp.context.get_name_for_res_node(rname)
+        resources[rname] = list(names2resources[name].values())[0]
 
     for fname in ndp.get_fnames():
 #         if is_function_with_no_connections(name) and cluster is not None:
@@ -451,7 +452,8 @@ def create_composite(gdc, ndp):  # @UnusedVariable
 #             functions[fname] = cluster
 #         else:
 #             # XXX: this part didn't work well
-            functions[fname] = list(names2functions[fname].values())[0]
+            name = ndp.context.get_name_for_fun_node(fname)
+            functions[fname] = list(names2functions[name].values())[0]
  
     return functions, resources
 

@@ -1,6 +1,14 @@
+# test unconnected
 cdp {
     a = template cdp  { 
+      provides weight [g]
+
+      requires ciao [R]
     }
     b = template cdp {
+      requires x [g]
+      provides y [R]
     }
+    a.weight >= b.x
+    a.ciao <= b.y
 }

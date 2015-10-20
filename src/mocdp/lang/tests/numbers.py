@@ -31,7 +31,8 @@ def check_numbers1():
 def check_numbers2():
     parse_wrap_check('1.0 [g]', number_with_unit, ValueWithUnits(1.0, R_Weight))
     assert_syntax_error('1', number_with_unit)
-    parse_wrap_check('1 [g]', number_with_unit, ValueWithUnits(1, R_Weight))
+    # automatic conversion to float
+    parse_wrap_check('1 [g]', number_with_unit, ValueWithUnits(1.0, R_Weight))
 
 @comptest
 def check_numbers3():

@@ -211,7 +211,7 @@ def its_dp_as_product(ndp):
           connections='set($Connection)',
           split='list(str)',
           returns=NamedDP)
-def connect2(ndp1, ndp2, connections, split):
+def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
     """ Note the argument split must be strings so that orders are preserved
         and deterministic. """
 
@@ -221,9 +221,10 @@ def connect2(ndp1, ndp2, connections, split):
     def common(x, y):
         return len(set(x + y)) != len(set(x)) + len(set(y))
 
-    if (common(ndp1.get_fnames(), ndp2.get_fnames()) or \
-        common(ndp1.get_rnames(), ndp2.get_rnames())):
-        raise_desc(DPInternalError, 'repeated names', ndp1=ndp1, ndp2=ndp2)
+    if not repeated_ok:
+        if (common(ndp1.get_fnames(), ndp2.get_fnames()) or \
+            common(ndp1.get_rnames(), ndp2.get_rnames())):
+            raise_desc(DPInternalError, 'repeated names', ndp1=ndp1, ndp2=ndp2)
 
     if len(set(split)) != len(split):
         msg = 'Repeated signals in split: %s' % str(split)
@@ -487,117 +488,6 @@ def order_dps(names, connections):
         raise DPInternalError(msg)
     return l
 
-#
-# @contract(ndp=NamedDP, lf='str', lr='str', returns=NamedDP)
-# def dploop(ndp, lr, lf):
-#     #  A----> |     |--B----->
-#     #         | ndp |
-#     #  lf---->|_____|-----lr
-#     #  `--------(>=)------/
-#     #
-#
-#     ndp.rindex(lr)
-#     ndp.findex(lf)
-#
-#     F0 = ndp.get_fnames()
-#     A = list(set(F0) - set([lf]))
-#     assert not lf in A
-#     R0 = ndp.get_rnames()
-#     B = list(set(R0) - set([lr]))
-#     # X is now the product space
-#     F = PosetProduct((ndp.get_ftypes(A), ndp.get_ftype(lf)))
-#     coords = []
-#     for x in F0:
-#         if x == lf:
-#             coords.append(1)
-#         else:
-#             coords.append((0, A.index(x)))
-#     X = Mux(F, coords)
-#
-#     R = ndp.get_dp().get_res_space()
-#     coords_B = [ ndp.rindex(x) for x in B]
-#     coords = [coords_B, ndp.rindex(lr)]
-#     Y = Mux(R, coords)
-#
-#     print('Y res: %s' % Y.get_res_space())
-# #     print('TRyingt to interconnect %s' % ndp.get_dp())
-#     Series(ndp.get_dp(), Y)
-#
-#     a = Series(X, ndp.get_dp())
-#
-#     if Y is not None:
-#         dp = Series(a, Y)
-#     else:
-#         dp = a
-#
-#     res_dp = DPLoop(dp)
-#
-#     print('fnames: %s ' % A)
-#     print('rnames: %s ' % B)
-#     if len(A) == 1:
-#         A = A[0]
-#     if len(B) == 1:
-#         B = B[0]
-#     res = dpwrap(res_dp, fnames=A, rnames=B)
-#
-#     return res
-
-#
-# if False:
-#     @contract(ndp=NamedDP, lf='str', lr='str', returns=NamedDP)
-#     def dploop2(ndp, lr, lf):
-#         #  A----> |     |--B----->
-#         #         | ndp |  *---lr->
-#         #  lf---->|_____|--*--lr
-#         #  `--------(>=)------/
-#         #
-#
-#         ndp.rindex(lr)
-#         ndp.findex(lf)
-#
-#         F0 = ndp.get_fnames()
-#         A = list(set(F0) - set([lf]))
-#         R0 = ndp.get_rnames()
-#         B = list(set(R0) - set([lr]))
-#         # X is now the product space
-#         F = PosetProduct((ndp.get_ftypes(A), ndp.get_ftype(lf)))
-#         coords = []
-#         for x in F0:
-#             if x == lf:
-#                 coords.append(1)
-#             else:
-#                 coords.append((0, A.index(x)))
-#         X = Mux(F, coords)
-#
-#         R = ndp.get_dp().get_res_space()
-#         coords_Blr = [ ndp.rindex(x) for x in B]
-#         coords_Blr.append(ndp.rindex(lr))
-#         coords = [coords_Blr, ndp.rindex(lr)]
-#         Y = Mux(R, coords)
-#
-#         make_series(ndp.get_dp(), Y)
-#
-#         a = make_series(X, ndp.get_dp())
-#
-#         if Y is not None:
-#             dp = make_series(a, Y)
-#         else:
-#             dp = a
-#         res_dp = DPLoop(dp)
-#
-#         fnames = A
-#         rnames = R0
-#         if len(fnames) == 1:
-#             funsp = res_dp.get_fun_space()
-#             res_dp = make_series(Mux(funsp[0], [()]), res_dp)
-#             fnames = fnames[0]
-#         if len(rnames) == 1:
-#             ressp = res_dp.get_res_space()
-#             res_dp = make_series(res_dp, Mux(ressp, 0))
-#             rnames = rnames[0]
-#         res = dpwrap(res_dp, fnames, rnames)
-#
-#         return res
 
 
 @contract(ndp=NamedDP, lf='str', lr='str', returns=NamedDP)
@@ -698,7 +588,7 @@ def dploop0(ndp, lr, lf):
 def dpgraph(name2dp, connections, split):
     """ This assumes that the graph is weakly connected
         and that there are no repetitions of names of resources
-        or functions"""
+        or functions."""
     if not len(set(split)) == len(split):
         raise ValueError('dpgraph: Repeated signals in split: %s' % str(split))
 
@@ -804,14 +694,6 @@ def dpgraph_(name2dp, connections, split):
 
         if c.s1 in split:
             return l
-#             F = ndp.get_rtype(c.s1)
-#             R0 = l.get_rtype(c.s1)
-#             print('R0 type: %s' % type(R0))
-#
-#             lift = dpwrap(Mux(R0, [()]), c.s1, [c.s1])
-#             res = connect2(l, lift,
-#                            set([Connection("-", c.s1, "-", c.s1)]), split=[])
-#             return res
 
         else:
             F = ndp.get_rtype(c.s1)

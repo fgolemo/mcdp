@@ -15,23 +15,22 @@ from mocdp.dp.dp_generic_unary import GenericUnary
 from mocdp.dp.dp_sum import ProductN, SumN
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.parts import GenericNonlinearity, MakeTemplate, MultN, PlusN
-from mocdp.lang.syntax import (DPSyntaxError, DPWrap, FunStatement, LoadDP,
-    PDPCodeSpec, ResStatement)
-from mocdp.posets import NotBelongs
-from mocdp.posets.poset_product import PosetProduct
+from mocdp.lang.syntax import (DPWrap, FunStatement, LoadDP, PDPCodeSpec,
+    ResStatement)
+from mocdp.posets import NotBelongs, PosetProduct
 from mocdp.posets.rcomp import Rcomp, mult_table, mult_table_seq
+import warnings
 
 class Context():
     def __init__(self):
         self.names = {}  # name -> ndp
-        # for a new function or new resource, the ndp shows up twice
-        # both in "names" as well as newfunctions, newresources
-        self.newfunctions = {}  # name -> ndp
-        self.newresources = {}  # name -> ndp
         self.connections = []
 
+        self.fnames = []
+        self.rnames = []
+
     def info(self, s):
-#         print(s)
+        # print(s)
         pass
 
     def add_ndp(self, name, ndp):
@@ -41,15 +40,59 @@ class Context():
             raise DPSemanticError('Repeated identifier %r.' % name)
         self.names[name] = ndp
 
-    def add_ndp_fun(self, name, ndp):
-        self.info('Adding new function %r' % str(name))
-        self.add_ndp(name, ndp)
-        self.newfunctions[name] = ndp
+    def get_name_for_fun_node(self, name):
+        return '_fun_%s' % name
 
-    def add_ndp_res(self, name, ndp):
-        self.info('Adding new resource %r' % str(name))
+    def add_ndp_fun(self, fname, ndp):
+        name = self.get_name_for_fun_node(fname)
+        self.info('Adding new function %r as %r.' % (str(name), fname))
         self.add_ndp(name, ndp)
-        self.newresources[name] = ndp
+        self.fnames.append(fname)
+
+    def is_new_function(self, name):
+        assert name in self.names
+        return '_fun_' in name
+
+    def is_new_resource(self, name):
+        assert name in self.names
+        return '_res_' in name
+
+    def get_name_for_res_node(self, name):
+        return '_res_%s' % name
+
+    def add_ndp_res(self, rname, ndp):
+        name = self.get_name_for_res_node(rname)
+        self.info('Adding new resource %r as %r ' % (str(name), rname))
+        self.add_ndp(name, ndp)
+        self.rnames.append(rname)
+
+        # self.newresources[rname] = ndp
+
+    def iterate_new_functions(self):
+        for fname in self.fnames:
+            name = self.get_name_for_fun_node(fname)
+            ndp = self.names[name]
+            yield fname, name, ndp
+
+    def iterate_new_resources(self):
+        for rname in self.rnames:
+            name = self.get_name_for_res_node(rname)
+            ndp = self.names[name]
+            yield rname, name, ndp
+    # for fname, name, ndp in context.iterate_new_functions():
+
+
+    def get_ndp_res(self, rname):
+        name = self.get_name_for_res_node(rname)
+        if not name in self.names:
+            raise ValueError('Resource name %r (%r) not found in %s.' % (rname, name, list(self.names)))
+        return self.names[name]
+
+    def get_ndp_fun(self, fname):
+        name = self.get_name_for_fun_node(fname)
+        if not name in self.names:
+            raise ValueError('Function name %r (%r) not found in %s.' % (fname, name, list(self.names)))
+        return self.names[name]
 
     def add_connection(self, c):
         self.info('Adding connection %r' % str(c))
@@ -61,13 +104,15 @@ class Context():
             raise_desc(DPSemanticError, 'Invalid connection: %r not found.' % c.dp2,
                        names=self.names, c=c)
 
-        if c.dp2 in self.newfunctions:
-            raise_desc(DPSemanticError, "Cannot add connection to external interface %r." % c.dp1,
-                       newfunctions=self.newfunctions, c=c)
+        warnings.warn('redo this check')
 
-        if c.dp1 in self.newresources:
+        if self.is_new_function(c.dp2):
+            raise_desc(DPSemanticError, "Cannot add connection to external interface %r." % c.dp1,
+                        c=c)
+
+        if self.is_new_resource(c.dp1):
             raise_desc(DPSemanticError, "Cannot add connection to external interface %r." % c.dp2,
-                       newresources=self.newresources, c=c)
+                        c=c)
 
         ndp1 = self.names[c.dp1]
         ndp2 = self.names[c.dp2]
@@ -191,11 +236,11 @@ def get_missing_connections(context):
     # look for the open connections
     for n, ndp in context.names.items():
 
-        if not n in context.newfunctions:
+        if not context.is_new_function(n):
             for fn in ndp.get_fnames():
                 available_fun.add((n, fn))
 
-        if not n in context.newresources:
+        if not context.is_new_resource(n):
             for rn in ndp.get_rnames():
                 available_res.add((n, rn))
 
@@ -225,7 +270,6 @@ def get_missing_connections(context):
 def check_missing_connections(context):
     """ Checks that all resources and functions are connected. """
 
-
     unconnected_fun, unconnected_res = get_missing_connections(context)
 
     s = ""
@@ -236,7 +280,7 @@ def check_missing_connections(context):
             msg = 'One way to fix this is to add an explicit function:\n'
             fn2 = 'f'
             fix = "provides %s [unit]" % fn2
-            if n in context.newresources:
+            if context.is_new_resource(n):
                 ref = n
             else:
                 ref = '%s.%s' % (n, fn)
@@ -251,7 +295,7 @@ def check_missing_connections(context):
             msg = 'One way to fix this is to add an explicit resource:\n'
             rn2 = 'r'
             fix = "requires %s [unit]" % rn2
-            if n in context.newfunctions:
+            if context.is_new_function(n):
                 ref = n
             else:
                 ref = '%s.%s' % (n, rn)
@@ -260,8 +304,22 @@ def check_missing_connections(context):
             msg += indent(fix, '    ')
             s += '\n' + indent(msg, 'help: ')
 
+
+    # This should count as unconnected:
+# cdp {
+#     a = template cdp {}
+#     b = template cdp {}
+# }
+    for name, ndp in context.names.items():
+        # anything that has both zero functions and zero resources is unconnected
+        rnames = ndp.get_rnames()
+        fnames = ndp.get_fnames()
+        if not rnames and not fnames:
+            s += "\nBlock %r has no functions or resources." % name
+
     if s:
         raise NotConnected(s)
+    
 
 @contract(returns=NamedDP)
 def eval_dp_rvalue(r, context):  # @UnusedVariable
@@ -306,7 +364,7 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
                 ndp.check_fully_connected()
             except NotConnected as e:
                 msg = 'Cannot abstract away the design problem because it is not connected.'
-                raise_wrapped(DPSemanticError, e, msg)
+                raise_wrapped(DPSemanticError, e, msg, compact=True)
 
             ndpa = ndp.abstract()
             return ndpa
@@ -368,20 +426,25 @@ def eval_lfunction(lf, context):
     if isinstance(lf, Function):
         if not lf.dp in context.names:
             msg = 'Unknown dp (%r.%r)' % (lf.dp, lf.s)
-            raise DPSyntaxError(msg, where=lf.where)
+            raise DPSemanticError(msg, where=lf.where)
 
-        if lf.dp in context.newresources:
+        if context.is_new_resource(lf.dp):
             msg = 'Cannot use the name of an external interface function.'
             raise DPSemanticError(msg, where=lf.where)
 
         return lf
 
     if isinstance(lf, NewResource):
-        if not lf.name in context.names:
-            msg = 'New resource name %r not declared.' % lf.name
-            msg += '\n known names: %s' % list(context.names)
-            raise DPSyntaxError(msg, where=lf.where)
-        return Function(lf.name, context.names[lf.name].get_fnames()[0])
+        rname = lf.name
+        try:
+            dummy_ndp = context.get_ndp_res(rname)
+        except ValueError as e:
+            msg = 'New resource name %r not declared.' % rname
+            msg += '\n%s' % str(e)
+            raise DPSemanticError(msg, where=lf.where)
+
+        return Function(context.get_name_for_res_node(rname),
+                        dummy_ndp.get_fnames()[0])
 
     if isinstance(lf, NewLimit):
         vu = lf.value_with_unit
@@ -540,7 +603,7 @@ def eval_rvalue(rvalue, context):
             a, F1, b, F2 = eval_ops(rvalue)
             if not (F1 == F2):
                 msg = 'Incompatible units: %s and %s' % (F1, F2)
-                raise DPSyntaxError(msg, where=rvalue.where)
+                raise DPSemanticError(msg, where=rvalue.where)
 
             dp = Max(F1)
             nprefix, na, nb, nres = 'opmax', 'm0', 'm1', 'max'
@@ -551,7 +614,7 @@ def eval_rvalue(rvalue, context):
             a, F1, b, F2 = eval_ops(rvalue)
             if not (F1 == F2):
                 msg = 'Incompatible units: %s and %s' % (F1, F2)
-                raise DPSyntaxError(msg, where=rvalue.where)
+                raise DPSemanticError(msg, where=rvalue.where)
 
             dp = Min(F1)
             nprefix, na, nb, nres = 'opmin', 'm0', 'm1', 'min'
@@ -577,13 +640,17 @@ def eval_rvalue(rvalue, context):
             return Resource(nres, nres)
 
         if isinstance(rvalue, NewFunction):
-            n = rvalue.name
-            if not n in context.names:
-                msg = 'New function name %r not declared.' % n
-                msg += '\n known names: %s' % list(context.names)
-                raise DPSyntaxError(msg, where=rvalue.where)
-            s = context.names[n].get_rnames()[0]
-            return Resource(n, s)
+            fname = rvalue.name
+
+            try:
+                dummy_ndp = context.get_ndp_fun(fname)
+            except ValueError as e:
+                msg = 'New function name %r not declared.' % fname
+                msg += '\n%s' % str(e)
+                raise DPSemanticError(msg, where=rvalue.where)
+
+            s = dummy_ndp.get_rnames()[0]
+            return Resource(context.get_name_for_fun_node(fname), s)
 
         if isinstance(rvalue, GenericNonlinearity):
             op_r = eval_rvalue(rvalue.op1, context)
