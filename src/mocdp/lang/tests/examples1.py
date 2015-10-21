@@ -857,9 +857,9 @@ def check_lang41():
 
 @comptest
 def check_lang42():
-    assert_parsable_to_unconnected_ndp(
+    assert_parsable_to_connected_ndp(
 """    
-abstract cdp {
+ cdp {
           motor = template cdp {
             provides speed [R]
             provides torque [R]
@@ -881,12 +881,7 @@ abstract cdp {
 
             requires controller [R]
           }
-
-          provides torque [R]
-          provides speed [R]
-
-          motor.speed >= speed
-          motor.torque >= torque
+ 
 
           requires cost [$]
           requires total_weight [g]
@@ -918,9 +913,9 @@ abstract cdp {
 @comptest
 def check_lang43():
     """ Shortcuts """
-    assert_parsable_to_unconnected_ndp(
+    assert_parsable_to_connected_ndp(
 """    
-abstract cdp {
+ cdp {
           motor = template cdp {
             provides speed [R]
             provides torque [R]
@@ -942,9 +937,6 @@ abstract cdp {
 
             requires controller [R]
           }
-
-          provides torque using motor
-          provides speed  using motor
 
           requires total_weight for chassis
           
@@ -1022,6 +1014,54 @@ cdp {
     requires cost >= motor.cost
 }
 """)
+
+
+@comptest
+def check_lang48():
+    """ Shortcuts "for" """
+    assert_parsable_to_connected_ndp(
+"""    
+cdp {
+    provides endurance [s]
+    provides power [W]
+    
+    energy = endurance * power
+    
+    requires e2 >= energy + 2.0 [J]
+}
+""")
+
+@comptest
+def check_lang49():
+    """ Shortcuts "for" """
+    assert_parsable_to_connected_ndp(
+"""    
+cdp {
+    motor = template cdp {
+        requires cost [$]
+        requires weight [g]
+    }
+            
+    requires cost, weight for motor
+}
+""")
+
+@comptest
+def check_lang50():
+    """ Shortcuts "using" """
+    assert_parsable_to_connected_ndp(
+"""    
+cdp {
+    motor = template cdp {
+        provides speed [R]
+        provides torque [R]
+        provides x [R]
+    }
+            
+    provides speed, torque, x using motor
+}
+""")
+
 
 
 examples1 = [

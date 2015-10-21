@@ -1,0 +1,10 @@
+# test semantic_error
+cdp {  
+      motor = template cdp {
+        provides speed [R]
+      }
+
+      provides speed1 <= motor.speed
+      # illegal second connection
+      provides speed2 <= motor.speed      
+}

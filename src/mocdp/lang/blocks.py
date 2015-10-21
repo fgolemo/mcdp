@@ -15,7 +15,8 @@ from mocdp.dp.dp_generic_unary import GenericUnary
 from mocdp.dp.dp_sum import ProductN, SumN
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.parts import GenericNonlinearity, MakeTemplate, MultN, PlusN, \
-    FunShortcut1, ResShortcut1, FunShortcut2, ResShortcut2, NewFunction
+    FunShortcut1, ResShortcut1, FunShortcut2, ResShortcut2, NewFunction,\
+    SetNameResource
 from mocdp.lang.syntax import (DPWrap, FunStatement, LoadDP, PDPCodeSpec,
     ResStatement)
 from mocdp.posets import NotBelongs, PosetProduct
@@ -29,6 +30,9 @@ class Context():
 
         self.fnames = []
         self.rnames = []
+
+        # energy = endurance * power
+        self.var2resource = {}  # str -> Resource
 
     def info(self, s):
         # print(s)
@@ -209,13 +213,17 @@ def eval_statement(r, context):
         name = r.name
         ndp = eval_dp_rvalue(r.dp_rvalue, context)
         context.add_ndp(name, ndp)
-    
+        
+    elif isinstance(r, SetNameResource):
+        name = r.name
+        rvalue = eval_rvalue(r.rvalue, context)
+        context.var2resource[name] = rvalue
+
     elif isinstance(r, ResStatement):
         # requires r.rname [r.unit]
         F = r.unit
         ndp = dpwrap(Identity(F), r.rname, r.rname)
         context.add_ndp_res(r.rname, ndp)
-#         return NewResource(r.rname)
         return Function(context.get_name_for_res_node(r.rname), r.rname)
     
     elif isinstance(r, FunStatement):
@@ -694,6 +702,9 @@ def eval_rvalue(rvalue, context):
 
         if isinstance(rvalue, NewFunction):
             fname = rvalue.name
+
+            if fname in context.var2resource:
+                return context.var2resource[fname]
 
             try:
                 dummy_ndp = context.get_ndp_fun(fname)

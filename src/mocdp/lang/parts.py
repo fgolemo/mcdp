@@ -39,6 +39,7 @@ Constraint = namedtuplewhere('Constraint', 'function rvalue')
 
 LoadCommand = namedtuplewhere('LoadCommand', 'load_arg')
 SetName = namedtuplewhere('SetName', 'name dp_rvalue')
+SetNameResource = namedtuplewhere('SetNameResource', 'name rvalue')
 
 FunStatement = namedtuplewhere('FunStatement', 'fname unit')
 ResStatement = namedtuplewhere('ResStatement', 'rname unit')

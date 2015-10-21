@@ -22,12 +22,6 @@ abstract cdp {
             requires controller [R]
           }
 
-          provides torque [R]
-          provides speed [R]
-
-          motor.speed >= speed
-          motor.torque >= torque
-
           requires cost [$]
           requires total_weight [g]
           

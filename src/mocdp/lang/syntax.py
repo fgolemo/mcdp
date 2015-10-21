@@ -8,7 +8,7 @@ from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mocdp.lang.parts import GenericNonlinearity, MultN, PlusN, FunShortcut1, \
-    ResShortcut1, FunShortcut2, ResShortcut2
+    ResShortcut1, FunShortcut2, ResShortcut2, SetNameResource
 from mocdp.posets.rcomp import (R_Cost, R_Current, R_Energy, R_Power, R_Time,
     R_Voltage, R_Weight, R_dimensionless, mult_table)
 from mocdp.posets.space import NotBelongs, Space
@@ -137,10 +137,16 @@ spa(load_expr, lambda t: LoadCommand(t['load_arg']))
 
 dp_rvalue = Forward()
 # <dpname> = ...
-setname_expr = (C(idn, 'dpname') + S(L('='))) - C(dp_rvalue, 'rvalue')
-spa(setname_expr, lambda t: SetName(t['dpname'], t['rvalue']))
+setname_expr = (C(idn, 'dpname') + S(L('='))) + C(dp_rvalue, 'dp_rvalue')
+spa(setname_expr, lambda t: SetName(t['dpname'], t['dp_rvalue']))
+
 
 rvalue = Forward()
+
+setname_resource = (C(idn, 'name') + S(L('='))) + C(rvalue, 'rvalue')
+spa(setname_resource, lambda t: SetNameResource(t['name'], t['rvalue']))
+
+
 rvalue_resource_simple = C(idn, 'dp') + S(L('.')) - C(idn, 's')
 
 prep = (S(L('required')) - S(L('by'))) | S(L('of'))
@@ -224,7 +230,7 @@ spa(fun_shortcut2, lambda t: FunShortcut2(t['fname'], t['lf']))
 spa(res_shortcut2, lambda t: ResShortcut2(t['rname'], t['rvalue']))
 
 
-line_expr = (load_expr ^ constraint_expr ^ constraint_expr2 ^ setname_expr
+line_expr = (load_expr ^ constraint_expr ^ constraint_expr2 ^ setname_expr ^ setname_resource
              ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
              ^ res_shortcut1 ^ res_shortcut2)
 
