@@ -8,7 +8,7 @@ from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mocdp.lang.parts import GenericNonlinearity, MultN, PlusN, FunShortcut1, \
-    ResShortcut1, FunShortcut2, ResShortcut2, SetNameResource
+    ResShortcut1, FunShortcut2, ResShortcut2, SetNameResource, InvMult
 from mocdp.posets.rcomp import (R_Cost, R_Current, R_Energy, R_Power, R_Time,
     R_Voltage, R_Weight, R_dimensionless, mult_table)
 from mocdp.posets.space import NotBelongs, Space
@@ -142,6 +142,7 @@ spa(setname_expr, lambda t: SetName(t['dpname'], t['dp_rvalue']))
 
 
 rvalue = Forward()
+fvalue = Forward()
 
 setname_resource = (C(idn, 'name') + S(L('='))) + C(rvalue, 'rvalue')
 spa(setname_resource, lambda t: SetNameResource(t['name'], t['rvalue']))
@@ -202,15 +203,16 @@ fancy = (C(idn, 's2') + S(L('provided')) - S(L('by')) - C(idn, 'dp2'))
 spa(simple, lambda t: Function(t['dp2'], t['s2']))
 spa(fancy, lambda t: Function(t['dp2'], t['s2']))
 
-signal_rvalue = lf_new_limit ^ simple ^ fancy ^ lf_new_resource ^ (S(L('(')) - (lf_new_limit ^ simple ^ fancy ^ lf_new_resource) - S(L(')')))
+
+fvalue_operand = lf_new_limit ^ simple ^ fancy ^ lf_new_resource ^ (S(L('(')) - (lf_new_limit ^ simple ^ fancy ^ lf_new_resource) - S(L(')')))
 
 GEQ = S(L('>=')) 
 LEQ = S(L('<='))
 
-constraint_expr = C(signal_rvalue, 'lf') + GEQ - C(rvalue, 'rvalue')
+constraint_expr = C(fvalue, 'lf') + GEQ - C(rvalue, 'rvalue')
 spa(constraint_expr, lambda t: Constraint(t['lf'], t['rvalue']))
 
-constraint_expr2 = C(rvalue, 'rvalue') + LEQ - C(signal_rvalue, 'lf')
+constraint_expr2 = C(rvalue, 'rvalue') + LEQ - C(fvalue, 'lf')
 spa(constraint_expr2, lambda t: Constraint(t['lf'], t['rvalue']))
 
 
@@ -218,7 +220,7 @@ spa(constraint_expr2, lambda t: Constraint(t['lf'], t['rvalue']))
 fun_shortcut1 = PROVIDES - C(idn, 'fname') + USING + C(idn, 'name')
 res_shortcut1 = REQUIRES - C(idn, 'rname') + FOR + C(idn, 'name')
 
-fun_shortcut2 = PROVIDES - C(idn, 'fname') + LEQ - C(signal_rvalue, 'lf')
+fun_shortcut2 = PROVIDES - C(idn, 'fname') + LEQ - C(fvalue, 'lf')
 res_shortcut2 = REQUIRES - C(idn, 'rname') + GEQ - C(rvalue, 'rvalue')
 
 
@@ -398,6 +400,29 @@ rvalue << operatorPrecedence(operand, [
     ('*', 2, opAssoc.LEFT, mult_parse_action),
 #     ('-', 2, opAssoc.LEFT, Binary.parse_action),
     ('+', 2, opAssoc.LEFT, plus_parse_action),
+])
+
+@parse_action
+def mult_inv_parse_action(tokens):
+    tokens = list(tokens[0])
+
+    ops = []
+    for i, t in enumerate(tokens):
+        if i % 2 == 0:
+            ops.append(t)
+        else:
+            assert t == '*'
+
+    assert len(ops) > 1
+    assert len(ops) == 2
+    return InvMult(ops)
+
+
+fvalue << operatorPrecedence(fvalue_operand, [
+#     ('-', 1, opAssoc.RIGHT, Unary.parse_action),
+    ('*', 2, opAssoc.LEFT, mult_inv_parse_action),
+#     ('-', 2, opAssoc.LEFT, Binary.parse_action),
+#     ('+', 2, opAssoc.LEFT, plus_parse_action),
 ])
 
 

@@ -19,3 +19,5 @@ from .dp_series_simplification import *
 from .dp_constant import *
 from .dp_limit import *
 from .dp_generic_unary import *
+
+from .dp_mult_inv import *

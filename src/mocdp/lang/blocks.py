@@ -16,12 +16,13 @@ from mocdp.dp.dp_sum import ProductN, SumN
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.parts import GenericNonlinearity, MakeTemplate, MultN, PlusN, \
     FunShortcut1, ResShortcut1, FunShortcut2, ResShortcut2, NewFunction,\
-    SetNameResource
+    SetNameResource, InvMult
 from mocdp.lang.syntax import (DPWrap, FunStatement, LoadDP, PDPCodeSpec,
     ResStatement)
 from mocdp.posets import NotBelongs, PosetProduct
 from mocdp.posets.rcomp import Rcomp, mult_table, mult_table_seq
 import warnings
+from mocdp.dp.dp_mult_inv import InvMult2
 
 class Context():
     def __init__(self):
@@ -492,6 +493,43 @@ def eval_lfunction(lf, context):
 #             raise DPSemanticError(msg, where=lf.where)
 
         return lf
+
+    if isinstance(lf, InvMult):
+        ops = lf.ops
+        if len(ops) != 2:
+            raise DPInternalError('Only 2 expected')
+
+        fs = []
+
+        for op_i in ops:
+            fi = eval_lfunction(op_i, context)
+            fs.append(fi)
+
+        assert len(fs) == 2
+
+
+
+        Fs = map(context.get_ftype, fs)
+        R = mult_table(Fs[0], Fs[1])
+
+
+        dp = InvMult2(R, tuple(Fs))
+        ndp = dpwrap(dp, '_input', ['_f0', '_f1'])
+
+
+
+        name = context.new_name('_invmult')
+        context.add_ndp(name, ndp)
+
+        c1 = Connection(dp2=fs[0].dp, s2=fs[0].s, dp1=name, s1='_f0')
+        c2 = Connection(dp2=fs[1].dp, s2=fs[1].s, dp1=name, s1='_f1')
+        context.add_connection(c1)
+        context.add_connection(c2)
+
+        res = Function(name, '_input')
+        return res
+
+
 
     if isinstance(lf, NewResource):
         rname = lf.name

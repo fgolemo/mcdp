@@ -1,40 +1,10 @@
-abstract cdp {
-          motor = template cdp {
-            provides speed [R]
-            provides torque [R]
-            #    
-            requires cost [$]
-            requires weight [g]
-            requires voltage [V]
-            requires current [A]
-          }
-           #
-          chassis = template cdp {
-            provides payload [g]
-            provides velocity [R]
-            #
-            requires cost [$]
-            requires total_weight [g]
-            requires motor_speed [R]
-            requires motor_torque [R]
+cdp {
 
-            requires controller [R]
-          }
+  requires a [R]
+  requires b [R]
+  
+  provides c [R]
+  
+  c <= a * b
 
-          requires total_weight for chassis
-          
-          requires voltage for motor
-          requires current for motor
-          
-          provides payload [g]
-          chassis.payload >= payload + motor.weight
-          
-          requires cost [$]
-          cost >= chassis.cost + motor.cost
-
-          torque provided by motor >= chassis.motor_torque
-          speed provided by motor >= chassis.motor_speed
-
-          provides velocity using chassis
-          requires controller for chassis
-      }
+}

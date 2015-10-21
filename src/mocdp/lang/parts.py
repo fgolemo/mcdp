@@ -48,7 +48,7 @@ LoadDP = namedtuplewhere('LoadDP', 'name')
 DPWrap = namedtuplewhere('DPWrap', 'fun res impl')
 PDPCodeSpec = namedtuplewhere('PDPCodeSpec', 'function arguments')
 
-
+InvMult = namedtuplewhere('InvMult', 'ops')
 FunShortcut1 = namedtuplewhere('FunShortcut1', 'fname name')
 ResShortcut1 = namedtuplewhere('ResShortcut1', 'rname name')
 FunShortcut2 = namedtuplewhere('FunShortcut2', 'fname lf')
