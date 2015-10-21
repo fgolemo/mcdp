@@ -1,4 +1,9 @@
 from mocdp.unittests.generation import for_all_dps
+from mocdp.posets.poset_product import PosetProduct
+from mocdp.posets.rcomp import Rcomp, R_Weight
+from comptests.registrar import comptest
+from mocdp.dp.dp_series import get_product_compact
+from nose.tools import assert_equal
 
 
 
@@ -50,5 +55,36 @@ def check_dp2(_id_dp, dp):
 
     print trchain
 
+@comptest
+def check_products1():
+    def check_product(S1, S2, expected):
+        S, pack, unpack = get_product_compact(S1, S2)
+        print('product(%s, %s) = %s  expected %s' % (S1, S2, S, expected))
+        assert_equal(S, expected)
+
+        a = S1.witness()
+        b = S2.witness()
+        S1.belongs(a)
+        S2.belongs(b)
+        c = pack(a, b)
+        a2, b2 = unpack(c)
+        S1.check_equal(a, a2)
+        S2.check_equal(b, b2)
+
+        print('a = %s  b = %s' % (a, b))
+        print('c = %s ' % S.format(c))
+        print('a2 = %s  b2 = %s' % (a2, b2))
+
+
+    R = Rcomp()
+    E = R_Weight
+    check_product(PosetProduct((R, E)), R, PosetProduct((R, E, R)))
+    check_product(PosetProduct((R, R)), E, PosetProduct((R, R, E)))
+    check_product(PosetProduct((R, E)), PosetProduct((R, E)), PosetProduct((R, E, R, E)))
+
+    check_product(PosetProduct(()), R, R)
+    check_product(PosetProduct(()), PosetProduct((R,)), R)
+    check_product(R, PosetProduct(()), R)
+    check_product(PosetProduct((R,)), PosetProduct(()), R)
 
 

@@ -637,13 +637,20 @@ def dpgraph_(name2dp, connections, split):
         connections = set(map(parse_connection, connections))
         check_connections(name2dp, connections)
 
+
+        get_connection_multigraph_weighted(name2dp, connections)
+
         G = get_connection_multigraph(connections)
         cycles = list(simple_cycles(G))
         if not cycles:
             return dpconnect(name2dp, connections, split=split)
 
+        print('Cycles: %s ' % str(cycles))
         # choose one constraint
         cycle0 = cycles[0]
+
+        print('Choosing %s ' % str(cycle0))
+
         # get one connection that breaks the cycle
         # TODO: get the one with the smallest cardinality
         first = cycle0[0]
@@ -723,6 +730,32 @@ def get_connection_multigraph(connections):
         G.add_edge(dp1, dp2, s1=c.s1)
     return G
 
+
+@contract(connections='set($Connection)')
+def get_connection_multigraph_weighted(name2dp, connections):
+    G = networkx.MultiDiGraph()
+    for c in connections:
+        dp1 = c.dp1
+        dp2 = c.dp2
+        if not G.has_edge(dp1, dp2):
+            already = []
+            G.add_edge(dp1, dp2)
+        else:
+            already = G.edge[dp1][dp2]['spaces']
+        R = name2dp[c.dp1].get_rtype(c.s1)
+        already.append(R)
+        G.edge[dp1][dp2]['spaces'] = already
+
+    cycles = list(simple_cycles(G))
+    for cycle in cycles:
+        cycle = list(cycle)
+        cycle = cycle + [cycle[0]]
+        
+        for i in range(len(cycle) - 1):
+            val = G.edge[cycle[i]][cycle[i + 1]]['spaces']
+            print('%s -> %s -> %s' % (cycle[i], val, cycle[i + 1]))
+
+    return G
     
 
 

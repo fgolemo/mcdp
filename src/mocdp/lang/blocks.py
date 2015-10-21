@@ -12,17 +12,17 @@ from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
 from mocdp.dp import (Constant, Identity, Limit, Max, Min, PrimitiveDP, Product,
     Sum)
 from mocdp.dp.dp_generic_unary import GenericUnary
+from mocdp.dp.dp_mult_inv import InvMult2
 from mocdp.dp.dp_sum import ProductN, SumN
 from mocdp.exceptions import DPInternalError, DPSemanticError
-from mocdp.lang.parts import GenericNonlinearity, MakeTemplate, MultN, PlusN, \
-    FunShortcut1, ResShortcut1, FunShortcut2, ResShortcut2, NewFunction,\
-    SetNameResource, InvMult
+from mocdp.lang.parts import (FunShortcut1, FunShortcut2, GenericNonlinearity,
+    InvMult, MakeTemplate, MultN, NewFunction, PlusN, ResShortcut1, ResShortcut2,
+    SetNameResource)
 from mocdp.lang.syntax import (DPWrap, FunStatement, LoadDP, PDPCodeSpec,
     ResStatement)
 from mocdp.posets import NotBelongs, PosetProduct
 from mocdp.posets.rcomp import Rcomp, mult_table, mult_table_seq
 import warnings
-from mocdp.dp.dp_mult_inv import InvMult2
 
 class Context():
     def __init__(self):
@@ -81,23 +81,25 @@ class Context():
             yield fname, name, ndp
 
     def iterate_new_resources(self):
+    # for fname, name, ndp in context.iterate_new_functions():
+
         for rname in self.rnames:
             name = self.get_name_for_res_node(rname)
             ndp = self.names[name]
             yield rname, name, ndp
-    # for fname, name, ndp in context.iterate_new_functions():
-
 
     def get_ndp_res(self, rname):
         name = self.get_name_for_res_node(rname)
         if not name in self.names:
-            raise ValueError('Resource name %r (%r) not found in %s.' % (rname, name, list(self.names)))
+            raise ValueError('Resource name %r (%r) not found in %s.' %
+                             (rname, name, list(self.names)))
         return self.names[name]
 
     def get_ndp_fun(self, fname):
         name = self.get_name_for_fun_node(fname)
         if not name in self.names:
-            raise ValueError('Function name %r (%r) not found in %s.' % (fname, name, list(self.names)))
+            raise ValueError('Function name %r (%r) not found in %s.' %
+                             (fname, name, list(self.names)))
         return self.names[name]
 
     def add_connection(self, c):
@@ -113,12 +115,18 @@ class Context():
         warnings.warn('redo this check')
 
         if self.is_new_function(c.dp2):
-            raise_desc(DPSemanticError, "Cannot add connection to external interface %r." % c.dp1,
-                        c=c)
+            msg = "Cannot add connection to external interface %r." % c.dp1
+            raise_desc(DPSemanticError, msg, c=c)
 
         if self.is_new_resource(c.dp1):
-            raise_desc(DPSemanticError, "Cannot add connection to external interface %r." % c.dp2,
-                        c=c)
+            msg = "Cannot add connection to external interface %r." % c.dp2
+            raise_desc(DPSemanticError, msg, c=c)
+
+        # Find if there is already a connection to c.dp2,c.s2
+        for c0 in self.connections:
+            if c0.dp2 == c.dp2 and c0.s2 == c0.s2:
+                msg = 'There is already a connection to function %r of %r.' % (c.s2, c.dp2)
+                raise_desc(DPSemanticError, msg)
 
         ndp1 = self.names[c.dp1]
         ndp2 = self.names[c.dp2]

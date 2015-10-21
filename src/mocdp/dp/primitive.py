@@ -2,7 +2,7 @@
 from abc import ABCMeta, abstractmethod
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, indent
 from decent_logs import WithInternalLog
 from mocdp.posets import (Map, NotBelongs, Poset, PosetProduct, Space,
     SpaceProduct, UpperSet, UpperSets)
@@ -185,6 +185,47 @@ class PrimitiveDP(WithInternalLog):
 
     def repr_long(self):
         return self.__repr__()
+
+    def _children(self):
+        l = []
+        if hasattr(self, 'dp1'):
+            l.append(self.dp1)
+        if hasattr(self, 'dp2'):
+            l.append(self.dp2)
+        return tuple(l)
+
+    def tree_long(self, n=None):
+        if n is None: n = 120
+        s = type(self).__name__
+        S, _, _ = self.get_normal_form()
+        u = lambda x: x.decode('utf-8')
+        ulen = lambda x: len(u(x))
+
+        def clip(x, n):
+
+            s = str(x)
+            unicode_string = s.decode("utf-8")
+            l = len(unicode_string)
+            s = s + ' ' * (n - l)
+            if len(u(s)) > n:
+                x = u(s)
+                x = x[:n - 3] + '...'
+                s = x.encode('utf-8')
+            return s
+
+        s2 = '   [F = %s  R = %s  M = %s  S = %s]' % (clip(self.F, 13),
+                       clip(self.R, 10), clip(self.M, 15),
+                           clip(S, 28))
+
+        head = s + ' ' * (n - ulen(s) - ulen(s2)) + s2
+
+        for x in self._children():
+            head += '\n' + indent(x.tree_long(n - 2), '  ')
+
+        return head
+
+
+
 
 NormalForm = namedtuple('NormalForm', ['S', 'alpha', 'beta'])
 

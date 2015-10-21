@@ -41,7 +41,7 @@ class Mux(PrimitiveDP):
         return 'Mux(%r → %r, %s)' % (self.F, self.R, self.coords)
 
     def repr_long(self):
-        s = 'Mux(%s)' % self.coords
+        s = 'Mux(%s)' % self.coords.__repr__()
         return s
 
 def get_R_from_F_coords(F, coords):

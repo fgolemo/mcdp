@@ -288,20 +288,22 @@ else:
             return _prod_make_state(elements, spaces)
         def unpack(s):
             return _prod_get_state(s, spaces)
-#         pack = lambda s1, s2: _prod_make_state(s1, s2, spaces=spaces)
-#         unpack = lambda s: _prod_get_state(s, spaces=spaces)
         return S, pack, unpack
 
+    def get_subs(x):
+        if isinstance(x, SpaceProduct):
+            return x.subs
+        else:
+            return (x,)
+
     def _prod_make(spaces):
-        def get_subs(x):
-            if isinstance(x, SpaceProduct):
-                return x.subs
-            else:
-                return (x,)
 
         subs = ()
         for space in spaces:
             subs = subs + get_subs(space)
+
+        if len(subs) == 1:
+            return subs[0]
 
         if all(isinstance(x, Poset) for x in subs):
             S = PosetProduct(subs)
@@ -321,13 +323,28 @@ else:
         s = ()
         for space, e in zip(spaces, elements):
             s = s + get_state(space, e)
+
+        if len(s) == 1:
+            return s[0]
+
         return s
 
     def _prod_get_state(s, spaces):
+        subs = ()
+        for space in spaces:
+            subs = subs + get_subs(space)
+
+        is_empty = len(subs) == 1
+        if is_empty:
+            s = (s,)
+        
         assert isinstance(s, tuple)
-        S = _prod_make(spaces)
+        
+        
+ #       S = _prod_make(spaces)
         # print('S = %s %s s =%s' % (S, type(S), s))
-        S.belongs(s)
+#        S.belongs(s)
+
         res = []
         for Si in spaces:
             if isinstance(Si, SpaceProduct):

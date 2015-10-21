@@ -36,6 +36,8 @@ def report_dp1(dp):
     s += '\nβ: %s' % beta
     r.text('normalform', s)
 
+    r.text('tree_long', dp.tree_long())
+
     M = dp.get_imp_space_mod_res()
     r.text('ImodR', str(M))
 
