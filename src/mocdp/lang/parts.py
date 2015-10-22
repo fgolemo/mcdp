@@ -53,3 +53,5 @@ FunShortcut1 = namedtuplewhere('FunShortcut1', 'fname name')
 ResShortcut1 = namedtuplewhere('ResShortcut1', 'rname name')
 FunShortcut2 = namedtuplewhere('FunShortcut2', 'fname lf')
 ResShortcut2 = namedtuplewhere('ResShortcut2', 'rname rvalue')
+MultipleStatements = namedtuplewhere('namedtuplewhere', 'statements')
+

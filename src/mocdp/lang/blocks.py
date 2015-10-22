@@ -17,7 +17,7 @@ from mocdp.dp.dp_sum import ProductN, SumN
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.parts import (FunShortcut1, FunShortcut2, GenericNonlinearity,
     InvMult, MakeTemplate, MultN, NewFunction, PlusN, ResShortcut1, ResShortcut2,
-    SetNameResource, ValueWithUnits0)
+    SetNameResource, ValueWithUnits0, MultipleStatements)
 from mocdp.lang.syntax import (DPWrap, FunStatement, LoadDP, PDPCodeSpec,
     ResStatement)
 from mocdp.posets import NotBelongs, PosetProduct
@@ -209,6 +209,7 @@ class Context():
         return dp.get_ftype(a.s)
 
 def eval_statement(r, context):
+
     if isinstance(r, Connection):
         context.add_connection(r)
     
@@ -275,7 +276,9 @@ def eval_statement(r, context):
         eval_statement(Constraint(function=B, rvalue=A), context)
 
         # ndp = eval_dp_rvalue(r.rvalue, context)
-    
+    elif isinstance(r, MultipleStatements):
+        for s in r.statements:
+            eval_statement(s, context)
     else:
         raise DPInternalError('Cannot interpret %s' % describe_value(r))
     

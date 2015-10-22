@@ -3,7 +3,7 @@ from .utils import assert_parsable_to_unconnected_ndp
 from comptests.registrar import comptest
 from mocdp.lang.syntax import (
     binary_expr, code_spec, constraint_expr, funcname, idn, load_expr, ow,
-    parse_wrap, rvalue, simple_dp_model)
+    parse_wrap, rvalue, simple_dp_model, res_shortcut3)
 from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp,
     assert_semantic_error)
 from nose.tools import assert_equal
@@ -1034,6 +1034,7 @@ cdp {
 @comptest
 def check_lang49():
     """ Shortcuts "for" """
+    parse_wrap(res_shortcut3, "requires cost, weight for motor")
     assert_parsable_to_connected_ndp(
 """    
 cdp {

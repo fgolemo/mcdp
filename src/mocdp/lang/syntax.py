@@ -8,14 +8,15 @@ from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mocdp.lang.parts import GenericNonlinearity, MultN, PlusN, FunShortcut1, \
-    ResShortcut1, FunShortcut2, ResShortcut2, SetNameResource, InvMult
+    ResShortcut1, FunShortcut2, ResShortcut2, SetNameResource, InvMult, \
+    MultipleStatements
 from mocdp.posets.rcomp import (R_Cost, R_Current, R_Energy, R_Power, R_Time,
     R_Voltage, R_Weight, R_dimensionless, mult_table)
 from mocdp.posets.space import NotBelongs, Space
 from pyparsing import (CaselessLiteral, Combine, Forward, Group, Literal,
     Optional, Or, ParseException, ParseFatalException, ParserElement, Suppress,
     Word, ZeroOrMore, alphanums, alphas, nums, oneOf, opAssoc,
-    operatorPrecedence)
+    operatorPrecedence, OneOrMore)
 import functools
 import math
 
@@ -105,10 +106,10 @@ REQUIRES = S(L('requires'))
 USING = S(L('using'))
 FOR = S(L('for'))
 
-fun_statement = PROVIDES - C(idn, 'fname') + unitst
+fun_statement = PROVIDES + C(idn, 'fname') + unitst
 spa(fun_statement, lambda t: FunStatement(t['fname'], t['unit']))
 
-res_statement = REQUIRES - C(idn, 'rname') + unitst
+res_statement = REQUIRES + C(idn, 'rname') + unitst
 spa(res_statement, lambda t: ResStatement(t['rname'], t['unit']))
 
 empty_unit = S(L('[')) + S(L(']'))
@@ -217,11 +218,14 @@ spa(constraint_expr2, lambda t: Constraint(t['lf'], t['rvalue']))
 
 
 
-fun_shortcut1 = PROVIDES - C(idn, 'fname') + USING + C(idn, 'name')
-res_shortcut1 = REQUIRES - C(idn, 'rname') + FOR + C(idn, 'name')
+fun_shortcut1 = PROVIDES + C(idn, 'fname') + USING + C(idn, 'name')
+res_shortcut1 = REQUIRES + C(idn, 'rname') + FOR + C(idn, 'name')
 
-fun_shortcut2 = PROVIDES - C(idn, 'fname') + LEQ - C(fvalue, 'lf')
-res_shortcut2 = REQUIRES - C(idn, 'rname') + GEQ - C(rvalue, 'rvalue')
+fun_shortcut2 = PROVIDES + C(idn, 'fname') + LEQ - C(fvalue, 'lf')
+res_shortcut2 = REQUIRES + C(idn, 'rname') + GEQ - C(rvalue, 'rvalue')
+
+fun_shortcut3 = PROVIDES + C(Group(idn + OneOrMore(S(L(',')) + idn)), 'fnames') + USING + C(idn, 'name')
+res_shortcut3 = REQUIRES + C(Group(idn + OneOrMore(S(L(',')) + idn)), 'rnames') + FOR + C(idn, 'name')
 
 
 
@@ -231,10 +235,29 @@ spa(res_shortcut1, lambda t: ResShortcut1(t['rname'], t['name']))
 spa(fun_shortcut2, lambda t: FunShortcut2(t['fname'], t['lf']))
 spa(res_shortcut2, lambda t: ResShortcut2(t['rname'], t['rvalue']))
 
+def res_shortcut3_parse(tokens):
+    name = tokens['name']
+    res = []
+    for rname in tokens['rnames']:
+        res.append(ResShortcut1(rname, name))
+    return MultipleStatements(res)
+
+def fun_shortcut3_parse(tokens):
+    name = tokens['name']
+    res = []
+    for fname in tokens['fnames']:
+        res.append(FunShortcut1(fname, name))
+    return MultipleStatements(res)
+
+
+
+spa(fun_shortcut3, fun_shortcut3_parse)
+
+spa(res_shortcut3, res_shortcut3_parse)
 
 line_expr = (load_expr ^ constraint_expr ^ constraint_expr2 ^ setname_expr ^ setname_resource
              ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
-             ^ res_shortcut1 ^ res_shortcut2)
+             ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3)
 
 
 dp_model = S(L('cdp')) - S(L('{')) - ZeroOrMore(S(ow) + line_expr) - S(L('}'))
