@@ -1,0 +1,17 @@
+# test connected
+cdp {
+
+  multinv = abstract cdp {
+  	requires x [R]
+  	requires y [R]
+  
+  	provides c [R]
+  
+    c <= x * y
+  }
+
+  multinv.c >= max( square(multinv.x), 1.0 [R])
+
+  requires y for multinv
+
+}

@@ -16,9 +16,18 @@ __all__ = [
     'Series',
     'Series0',
 ]
-
-
-
+#
+# def only_one_r_from_f():
+#     """ This is the test that makes sure we
+#  if isinstance(self.dp1, (Mux, Identity)):
+#
+# def do_not_create_intermediate_M(dp1):
+#     from mocdp.lang.parts import GenericNonlinearity
+#     if isinstance(dp1, (Mux, Identity, GenericNonlinearity)):
+#         return True
+#     if isinstance(dp1, Parallel0):
+#         return do
+#
 class Series0(PrimitiveDP):
 
     def __init__(self, dp1, dp2):
@@ -63,7 +72,7 @@ class Series0(PrimitiveDP):
         M, _, unpack = get_product_compact(self.M1, self.extraM, self.M2)
         M.belongs(m)
         m1, m_extra, m2 = unpack(m)
-        
+
         if isinstance(self.dp1, (Mux, Identity)):
             f2 = self.dp1.evaluate_f_m(f1, m1)
         elif self._is_equiv_to_terminator(self.dp2):

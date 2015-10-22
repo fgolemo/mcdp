@@ -20,6 +20,8 @@ class PosetProduct(SpaceProduct, Poset):
         SpaceProduct.__init__(self, subs)
 
     def check_leq(self, a, b):
+        self.belongs(a)
+        self.belongs(b)
         problems = []
         for i, (sub, x, y) in enumerate(zip(self.subs, a, b)):
             try:

@@ -6,8 +6,7 @@ from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
 from mocdp.comp import DPInternalError
 from mocdp.configuration import get_conftools_nameddps
-from mocdp.dp import (DPLoop0, Identity, Mux, Terminator, make_parallel,
-    make_series)
+from mocdp.dp import Identity, Mux, Terminator, make_parallel, make_series
 from mocdp.exceptions import DPSemanticError
 from mocdp.posets import PosetProduct
 from networkx.algorithms.components.connected import is_connected
@@ -17,6 +16,7 @@ from networkx.exception import NetworkXUnfeasible
 import networkx
 import re
 import warnings
+from mocdp.dp.dp_loop import make_loop
 
 Connection0 = namedtuple('Connection', 'dp1 s1 dp2 s2')
 class Connection(Connection0):
@@ -556,7 +556,7 @@ def dploop0(ndp, lr, lf):
         S = make_series(X, dp)
         # print('S = %s' % S)
         
-        res_dp = DPLoop0(S)
+        res_dp = make_loop(S)
         rnames = ndp.get_rnames()
         fnames = A
     

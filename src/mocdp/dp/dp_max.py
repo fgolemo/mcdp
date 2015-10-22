@@ -34,6 +34,20 @@ class Max(PrimitiveDP):
     def __repr__(self):
         return 'Max(%r)' % self.F0
 
+class Max1(PrimitiveDP):
+
+    def __init__(self, F, value):
+        R = F
+        M = SpaceProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        self.value = value
+
+    def solve(self, f):
+        r = self.F.join(f, self.value)
+        return self.R.U(r)
+
+    def __repr__(self):
+        return 'Max1(%r, %s)' % (self.F, self.value)
 
 class Min(PrimitiveDP):
     """ Meet on a poset """

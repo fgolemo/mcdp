@@ -103,8 +103,9 @@ def gvgen_from_ndp(ndp):
         gg.styleApply("external", x)
 
         l = gg.newLink(x, n)
-        gg.propertyAppend(l, "headport", "w")
-        gg.propertyAppend(l, "tailport", "e")
+        if False:
+            gg.propertyAppend(l, "headport", "w")
+            gg.propertyAppend(l, "tailport", "e")
 
     cluster_resources = gg.newItem("")
     for rname, n in resources.items():
@@ -114,8 +115,9 @@ def gvgen_from_ndp(ndp):
         gg.styleApply("external", x)
 
         l = gg.newLink(n, x)
-        gg.propertyAppend(l, "headport", "w")
-        gg.propertyAppend(l, "tailport", "e")
+        if False:
+            gg.propertyAppend(l, "headport", "w")
+            gg.propertyAppend(l, "tailport", "e")
 
     gg.styleApply("external", cluster_functions)
     gg.styleApply("external", cluster_resources)
@@ -417,8 +419,13 @@ def create_composite(gdc, ndp):  # @UnusedVariable
 
         ua = ndp.context.names[c.dp2].get_ftype(c.s2)
         ub = ndp.context.names[c.dp1].get_rtype(c.s1)
-        gdc.newLink(box, n_a , label=get_signal_label(c.s2, ua))
-        gdc.newLink(n_b, box, label=get_signal_label(c.s1, ub))
+        l1 = gdc.newLink(box, n_a , label=get_signal_label(c.s2, ua))
+        if False:
+            gdc.gg.propertyAppend(l1, "headport", "w")
+
+        l2 = gdc.newLink(n_b, box, label=get_signal_label(c.s1, ub))
+        if False:
+            gdc.gg.propertyAppend(l2, "tailport", "e")
 
     unconnected_fun, unconnected_res = get_missing_connections(ndp.context)
     for (dp, fn) in unconnected_fun:

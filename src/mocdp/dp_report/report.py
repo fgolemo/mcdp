@@ -55,6 +55,7 @@ def report_dp1(dp):
         r.text('scalarres', s)
     else:
         m = M.witness()
+        print(Fbot, m, Rinf)
         feasible = dp.is_feasible(Fbot, m, Rinf)
         r.text('some', 'bot feasible( %s, %s,%s): %s' % (Fbot, m, Rinf, feasible))
 

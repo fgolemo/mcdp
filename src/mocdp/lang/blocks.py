@@ -17,12 +17,13 @@ from mocdp.dp.dp_sum import ProductN, SumN
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.parts import (FunShortcut1, FunShortcut2, GenericNonlinearity,
     InvMult, MakeTemplate, MultN, NewFunction, PlusN, ResShortcut1, ResShortcut2,
-    SetNameResource)
+    SetNameResource, ValueWithUnits0)
 from mocdp.lang.syntax import (DPWrap, FunStatement, LoadDP, PDPCodeSpec,
     ResStatement)
 from mocdp.posets import NotBelongs, PosetProduct
 from mocdp.posets.rcomp import Rcomp, mult_table, mult_table_seq
 import warnings
+from mocdp.dp.dp_max import Max1
 
 class Context():
     def __init__(self):
@@ -124,7 +125,7 @@ class Context():
 
         # Find if there is already a connection to c.dp2,c.s2
         for c0 in self.connections:
-            if c0.dp2 == c.dp2 and c0.s2 == c0.s2:
+            if c0.dp2 == c.dp2 and c0.s2 == c.s2:
                 msg = 'There is already a connection to function %r of %r.' % (c.s2, c.dp2)
                 raise_desc(DPSemanticError, msg)
 
@@ -707,7 +708,39 @@ def eval_rvalue(rvalue, context):
 
 
         if isinstance(rvalue, OpMax):
-            a, F1, b, F2 = eval_ops(rvalue)
+
+            print('Opmax', rvalue)
+
+            if isinstance(rvalue.a, ValueWithUnits0):
+                b = eval_rvalue(rvalue.b, context)
+                print('a is constant')
+                name = context.new_name('max1')
+                ndp = dpwrap(Max1(rvalue.a.unit, rvalue.a.value), '_in', '_out')
+                context.add_ndp(name, ndp)
+                c = Connection(dp1=b.dp, s1=b.s, dp2=name, s2='_in')
+                context.add_connection(c)
+                return Resource(name, '_out')
+
+            a = eval_rvalue(rvalue.a, context)
+
+            if isinstance(rvalue.b, ValueWithUnits0):
+
+                print('using straight')
+                name = context.new_name('max1')
+                ndp = dpwrap(Max1(rvalue.b.unit, rvalue.b.value), '_in', '_out')
+                context.add_ndp(name, ndp)
+                c = Connection(dp1=a.dp, s1=a.s, dp2=name, s2='_in')
+                context.add_connection(c)
+                return Resource(name, '_out')
+
+            b = eval_rvalue(rvalue.b, context)
+
+            F1 = context.get_rtype(a)
+            F2 = context.get_rtype(b)
+
+
+#             a, F1, b, F2 = eval_ops(rvalue)
+
             if not (F1 == F2):
                 msg = 'Incompatible units: %s and %s' % (F1, F2)
                 raise DPSemanticError(msg, where=rvalue.where)

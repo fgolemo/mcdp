@@ -1,9 +1,9 @@
 from contracts import contract
 from mocdp.dp import PrimitiveDP
 from mocdp.posets import Poset  # @UnusedImport
-from mocdp.posets import PosetProduct, SpaceProduct
+from mocdp.posets import PosetProduct
 from mocdp.posets.utils import poset_minima
-
+import numpy as np
 
 __all__ = [
     'InvMult2',
@@ -15,21 +15,32 @@ class InvMult2(PrimitiveDP):
     @contract(Rs='tuple[2],seq[2]($Poset)')
     def __init__(self, F, Rs):
         R = PosetProduct(Rs)
-        M = SpaceProduct(())
+        # M = SpaceProduct((R[0],))
+        M = R[0]
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, f):
         if self.F.equal(f, self.F.get_bottom()):
             return self.R.U(self.R.get_bottom())
 
+        n = 20
+        options = np.exp(np.linspace(-2, 2, n))
+        s = set()
+        for o in options:
+            s.add((o, f / o))
+
+        return self.R.Us(s)
+
+    def evaluate_f_m(self, f, m):
+        if m == 0.0:
+            return (0.0, 0.0)
+        return (m, f / m)
+
         # print self.F, f
-        raise NotImplementedError()
+#         raise NotImplementedError()
     
     def solve_approx(self, f, n):
-        
         m = n / 2
-
-        import numpy as np
         r0 = set()
         r1 = set()
         v = np.sqrt(f)

@@ -4,6 +4,7 @@ from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.posets import Map, NotLeq, PosetProduct, UpperSet, UpperSets
 import itertools
 from mocdp.dp.primitive import NotFeasible, Feasible
+from mocdp.posets.utils import poset_minima
 
 
 __all__ = [
@@ -248,6 +249,32 @@ __all__ = [
 #
 #         return r[-1]
 
+def make_loop(dp):
+    from mocdp.dp.dp_series_simplification import unwrap_series
+    from mocdp.dp.dp_series_simplification import wrap_series
+    from mocdp.dp.dp_flatten import Mux
+    from mocdp.dp.dp_series_simplification import make_series
+    from mocdp.dp.dp_identity import Identity
+    from mocdp.dp.dp_parallel_simplification import make_parallel
+
+    # Loop( Series(S, mux) ) = Series(Loop( Series(Parallel(Id, mux), S) ), mux)
+
+
+    dps = unwrap_series(dp)
+
+    if len(dps) > 1 and isinstance(dps[-1], Mux):
+        F = dp.get_fun_space()
+        F1 = F[0]
+#         F2 = F[1]
+        first = make_parallel(Identity(F1), dps[-1])
+#         mux2 = Mux(dp.get_fun_space(), [0, coords])
+        x = wrap_series(first.get_fun_space(), [first] + dps[:-1])
+        return make_series(make_loop(x), dps[-1])
+    
+    
+    return DPLoop0(dp)
+
+
 
 class DPLoop0(PrimitiveDP):
     """
@@ -310,6 +337,8 @@ class DPLoop0(PrimitiveDP):
             msg += "\n f1 = %10s -->| ->[ %s ] --> %s " % (F1.format(f1), self.dp1, F2.format(r))
             msg += "\n f2 = %10s -->|" % F2.format(f2)
             raise_wrapped(NotFeasible, e, msg, compact=True)
+
+        self.R.belongs(r)
         return r
 
     def check_unfeasible(self, f1, m, r):
@@ -329,7 +358,7 @@ class DPLoop0(PrimitiveDP):
             if F2.leq(used, f2):
                 msg = 'loop: asking to show it is unfeasible (%s, %s, %s)' % (f1, m, r)
                 msg += '\nBut inner is feasible and loop constraint *is* satisfied.'
-                msg += "\n f1 = %10s -->| ->[ m0= %s ] --> %s <= %s" % (F1.format(f1), M.format(m0),
+                msg += "\n f1 = %10s -->| ->[ m0= %s ] --> %s <= %s" % (F1.format(f1), self.M0.format(m0),
                                                                     F2.format(used), F2.format(r))
                 msg += "\n f2 = %10s -->|" % F2.format(f2)
                 raise_wrapped(Feasible, e, msg, compact=True, dp1=self.dp1.repr_long())
@@ -440,21 +469,36 @@ class DPLoop0(PrimitiveDP):
                 #print('fs: %s' % fs)
                 # make the dot product
                 #print set(itertools.product(fs.minimals, rs.minimals))
-                x = UpperSet(set(itertools.product(fs.minimals, rs.minimals)), F1R)
-                # this is an elment of U(F1xR)
-                UF1R.belongs(x)
 
-                # get what alpha0 says
-                y0 = alpha0((x, s0))
-                # this is in UR
-                UR.belongs(y0)
+                solutions = set()
+                # for each r
+                for f2 in rs.minimals:
+                    # take the product
 
+                    x = UpperSet(set((_, f2) for _ in fs.minimals), F1R)
+                    # this is an elment of U(F1xR)
+                    UF1R.belongs(x)
+
+                    # set(itertools.product(fs.minimals, rs.minimals)), F1R)
+                    # get what alpha0 says
+                    y0 = alpha0((x, s0))
+                    # this is in UR
+                    UR.belongs(y0)
+                    
+                    # now check which ones are ok
+                    for r in y0.minimals:
+                        if R.leq(r, f2):
+                            solutions.add(r)
+                 
+                u = poset_minima(solutions, R.leq)
+                a1 = UpperSet(u, R)
+                return a1
+                
 #                 # now drop to UR1
 #                 u = set([m[0] for m in y0.minimals])
 #                 u = poset_minima(u, R1.leq)
 #                 a1 = UpperSet(u, R1)
 
-                return y0
 
 
         class DPBeta(Map):
@@ -525,15 +569,33 @@ class DPLoop0(PrimitiveDP):
             """ Returns the next iteration """
             # compute the product
             UR.belongs(si)
-            upset = set()
-            for r in si.minimals:
-                upset.add((f1, r))
-            upset = UpperSet(upset, F)
-            UF.belongs(upset)
-            # solve the 
-            res = self.dp1.solveU(upset)
-            UR.belongs(res)
+            
+            solutions = set()
+            # for each f2 in si
+            for f2 in si.minimals:
+                
+                # what are the results of solve(f1, f2)?
+                f = (f1, f2)
+                res = self.dp1.solve(f)
+                for r in res.minimals:
+#                     if R.leq(r, f2):
+                        solutions.add(r)
+
+            if not solutions:
+                print('No viable solutions asking f1 = %s and si = %s' % (f1, si))
+            u = poset_minima(solutions, R.leq)
+
+            res = R.Us(u)
+            print('solutions of iterations: %s' % res)
             return res
+
+#             upset.add((f1, r))
+#             upset = UpperSet(upset, F)
+#             UF.belongs(upset)
+#             # solve the
+#             res = self.dp1.solveU(upset)
+#             UR.belongs(res)
+#             return res
 
         # we consider a set of iterates
         # we start from the bottom
@@ -555,6 +617,8 @@ class DPLoop0(PrimitiveDP):
             S.append(sip)
 
             if UR.leq(sip, si):
-                print('Breaking because converged (iteration %s)' % i)
+                print('Breaking because converged (iteration %s) ' % i)
+                print(' solution is %s %s' % (UR.format(sip), type(sip)))
                 break 
+
         return S[-1]

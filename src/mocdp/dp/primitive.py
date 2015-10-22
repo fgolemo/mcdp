@@ -115,6 +115,7 @@ class PrimitiveDP(WithInternalLog):
         self.M.belongs(m)
         self.R.belongs(r)
         used = self.evaluate_f_m(f, m)
+        self.R.belongs(used)
         if not self.R.leq(used, r):
             msg = 'Generic implementation of check_feasible(), says:\n'
             msg += 'f = %s -> [self(%s)] -> %s <~= %s' % (
@@ -260,4 +261,6 @@ class DefaultBeta(Map):
 
     def _call(self, x):
         _F, s = x
+        print('Beta() for %s' % (self.dp))
+        print(' f = %s s = %s -> unchanged ' % (_F, s))
         return s
