@@ -9,7 +9,7 @@ from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mocdp.lang.parts import GenericNonlinearity, MultN, PlusN, FunShortcut1, \
     ResShortcut1, FunShortcut2, ResShortcut2, SetNameResource, InvMult, \
-    MultipleStatements
+    MultipleStatements, Compact
 from mocdp.posets.rcomp import (R_Cost, R_Current, R_Energy, R_Power, R_Time,
     R_Voltage, R_Weight, R_dimensionless, mult_table)
 from mocdp.posets.space import NotBelongs, Space
@@ -286,11 +286,15 @@ spa(simple_dp_model, lambda t: DPWrap(list(t[0]), list(t[1]), t[2]))
 abstract_expr = S(L('abstract')) - C(dp_rvalue, 'dp_rvalue')
 spa(abstract_expr, lambda t: AbstractAway(t['dp_rvalue']))
 
+compact_expr = S(L('compact')) - C(dp_rvalue, 'dp_rvalue')
+spa(compact_expr, lambda t: Compact(t['dp_rvalue']))
+
 template_expr = S(L('template')) - C(dp_rvalue, 'dp_rvalue')
 spa(template_expr, lambda t: MakeTemplate(t['dp_rvalue']))
 
 # dp_rvalue << (load_expr | simple_dp_model) ^ dp_model
-dp_rvalue << (load_expr | simple_dp_model | dp_model | abstract_expr | template_expr)
+dp_rvalue << (load_expr | simple_dp_model | dp_model | abstract_expr |
+              template_expr | compact_expr)
 
 
 @parse_action

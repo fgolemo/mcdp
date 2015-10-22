@@ -1,4 +1,3 @@
-from comptests.registrar import register_indep
 from conf_tools.utils.locate_files_imp import locate_files
 from conf_tools.utils.resources import dir_from_package_name
 from contracts.utils import raise_desc
@@ -74,13 +73,13 @@ def define_test_for(context, filename, basename):
         p_job = context.comp_config(test_one, test, filename,
                                     job_id=p_job_id)
         
-    if assert_parsable_to_unconnected_ndp in tests:
+    if assert_parsable_to_connected_ndp in tests or assert_parsable_to_unconnected_ndp in tests:
         job_id = '%s-%s' % (basename, 'report_ndp1')
         r = context.comp_config(test_report_ndp1, filename, outdir, basename,
                                 job_id=job_id, extra_dep=[p_job])
         context.add_report(r, 'examples_report_ndp1', file=basename)
         
-    if assert_parsable_to_connected_ndp in tests or assert_parsable_to_connected_ndp in tests:
+    if assert_parsable_to_connected_ndp in tests:
         job_id = '%s-%s' % (basename, 'report_dp1')
         r = context.comp_config(test_report_dp1, filename, outdir, basename,
                                  job_id=job_id, extra_dep=[p_job])

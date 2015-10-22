@@ -349,11 +349,6 @@ else:
         
         assert isinstance(s, tuple)
         
-        
- #       S = _prod_make(spaces)
-        # print('S = %s %s s =%s' % (S, type(S), s))
-#        S.belongs(s)
-
         res = []
         for Si in spaces:
             if isinstance(Si, SpaceProduct):
@@ -366,8 +361,3 @@ else:
             res.append(si)
 
         return tuple(res)
-
-# def fit_into(s1, s2, cols):
-#     n = cols - len(s1) - len(s2)
-#     return s1 + ' ' * n + s2
-

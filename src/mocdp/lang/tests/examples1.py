@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from .utils import assert_parsable_to_unconnected_ndp
 from comptests.registrar import comptest
+from mocdp.dp.dp_max import Max
 from mocdp.lang.syntax import (
     binary_expr, code_spec, constraint_expr, funcname, idn, load_expr, ow,
-    parse_wrap, rvalue, simple_dp_model, res_shortcut3)
+    parse_wrap, res_shortcut3, rvalue, simple_dp_model)
 from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp,
     assert_semantic_error)
 from nose.tools import assert_equal
@@ -393,8 +394,8 @@ def check_simplification():
 """)
     dp2 = m2.get_dp()
     warnings.warn('readd')
-    # assert isinstance(dp1, Max)
-#     assert isinstance(dp2, Max)
+    assert isinstance(dp1, Max)
+    assert isinstance(dp2, Max)
 
 
 @comptest

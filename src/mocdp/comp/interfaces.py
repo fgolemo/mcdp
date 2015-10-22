@@ -149,6 +149,9 @@ class CompositeNamedDP(NamedDP):
         s += '\n connections: \n' + format_list_long(self.context.connections, informal=True)
         s += '\n names: \n' + format_dict_long(self.context.names, informal=True)
         return s
+    
+    def compact(self):
+        raise NotImplementedError()
 
 def dpgraph_making_sure_no_reps(context):
     from mocdp.comp.connection import dpgraph
@@ -245,7 +248,6 @@ def dpgraph_translate_rn(context,
     return dpgraph_making_sure_no_reps(c2)
 
 def wrap_change_name_resource(ndp, rn, rn2):
-    from mocdp.dp.dp_identity import Identity
     from mocdp.comp.wrap import dpwrap
     from mocdp.comp.connection import Connection
 
@@ -276,7 +278,6 @@ def dpgraph_translate_fn(context, name, fn, fn2):
 
 
 def wrap_change_name_function(ndp, fn, fn2):
-    from mocdp.dp.dp_identity import Identity
     from mocdp.comp.wrap import dpwrap
     from mocdp.comp.connection import Connection
 

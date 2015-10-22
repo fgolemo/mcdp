@@ -17,7 +17,7 @@ from mocdp.dp.dp_sum import ProductN, SumN
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.parts import (FunShortcut1, FunShortcut2, GenericNonlinearity,
     InvMult, MakeTemplate, MultN, NewFunction, PlusN, ResShortcut1, ResShortcut2,
-    SetNameResource, ValueWithUnits0, MultipleStatements)
+    SetNameResource, ValueWithUnits0, MultipleStatements, Compact)
 from mocdp.lang.syntax import (DPWrap, FunStatement, LoadDP, PDPCodeSpec,
     ResStatement)
 from mocdp.posets import NotBelongs, PosetProduct
@@ -395,11 +395,12 @@ def check_missing_connections(context):
 @contract(returns=NamedDP)
 def eval_dp_rvalue(r, context):  # @UnusedVariable
     try:
-        library = get_conftools_nameddps()
+
         if isinstance(r, NamedDP):
             return r
 
         if isinstance(r, LoadCommand):
+            library = get_conftools_nameddps()
             load_arg = r.load_arg
             try:
                 _, ndp = library.instance_smarter(load_arg)
@@ -465,13 +466,21 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             dp = Dummy(F, R)
             res = SimpleWrap(dp, fnames, rnames)
             return res
+        
+        if isinstance(r, Compact):
+            ndp = eval_dp_rvalue(r.dp_rvalue, context)
+            if isinstance(ndp, CompositeNamedDP):
+                return ndp.compact()
+            else:
+                msg = 'Cannot compact primitive NDP.'
+                raise_desc(DPSemanticError, msg, ndp=ndp.repr_long())
 
     except DPSemanticError as e:
         if e.where is None:
             e.where = r.where
         raise e
 
-    raise ValueError('Invalid dprvalue: %s' % str(r))
+    raise DPInternalError('Invalid dprvalue: %s' % str(r))
 
 @contract(returns=PrimitiveDP)
 def eval_pdp(r, context):  # @UnusedVariable
@@ -490,7 +499,7 @@ def eval_pdp(r, context):  # @UnusedVariable
         res = instantiate_spec([function, arguments])
         return res
             
-    raise ValueError('Invalid pdp rvalue: %s' % str(r))
+    raise DPInternalError('Invalid pdp rvalue: %s' % str(r))
 
 @contract(returns=Function)
 def eval_lfunction(lf, context):
@@ -575,7 +584,7 @@ def eval_lfunction(lf, context):
         return Function(n, sn)
 
     msg = 'Cannot eval_lfunction(%s)' % lf.__repr__()
-    raise ValueError(msg)
+    raise DPInternalError(msg)
 
 # @contract(returns=Resource)
 def eval_rvalue(rvalue, context):

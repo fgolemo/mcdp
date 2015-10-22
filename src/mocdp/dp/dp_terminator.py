@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from mocdp import get_conftools_posets
-from mocdp.posets import PosetProduct
-from mocdp.posets.uppersets import UpperSet
-from mocdp.posets.space_product import SpaceProduct
+from mocdp.posets import PosetProduct, SpaceProduct, UpperSet
 
 
 __all__ = [
@@ -11,7 +9,7 @@ __all__ = [
 ]
 
 class Terminator(PrimitiveDP):
-    """ Terminates a signal line """
+    """ Terminates a line """
 
     def __init__(self, F):
         library = get_conftools_posets()

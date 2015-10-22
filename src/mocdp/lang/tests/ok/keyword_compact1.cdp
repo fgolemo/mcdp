@@ -8,10 +8,9 @@ compact cdp {
       B = template cdp {
         provides speed [R]
         provides torque [R]
-      
       }
       
-      A.speed<=B.speed
-      A.torque<=B.torque
+      A.speed <= B.speed
+      A.torque <= B.torque
           
 }

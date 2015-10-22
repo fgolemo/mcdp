@@ -23,6 +23,7 @@ class ValueWithUnits(ValueWithUnits0):
 
 MakeTemplate = namedtuplewhere('MakeTemplate', 'dp_rvalue')
 AbstractAway = namedtuplewhere('AbstractAway', 'dp_rvalue')
+Compact = namedtuplewhere('Compact', 'dp_rvalue')
 
 Mult = namedtuplewhere('Mult', 'a b')
 Plus = namedtuplewhere('Plus', 'a b')

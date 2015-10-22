@@ -1,7 +1,3 @@
-from contracts import contract
-from abc import ABCMeta, abstractmethod
-from mocdp.posets.space import Space, Map
-from mocdp.posets.poset_product import PosetProduct
 
 # 
 # class GenericProduct():

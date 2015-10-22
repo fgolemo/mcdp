@@ -1,5 +1,5 @@
 from comptests.registrar import comptest_dynamic
-from mocdp.drawing import plot_upset_R2, plot_upset_minima
+from mocdp.drawing import plot_upset_R2
 from mocdp.lang.syntax import parse_ndp
 from mocdp.posets.uppersets import UpperSets
 from reprep import Report
@@ -48,8 +48,6 @@ def check_invmult_report(dp):
         mx = max(x for (x, _) in R1.minimals)
         my = max(y for (_, y) in R1.minimals)
         axis = (0, mx * 1.1, 0, my * 1.1)
-
-        import numpy as np
 
         plot_upset_R2(pylab, R0, axis, color_shadow=[1.0, 0.8, 0.8])
         plot_upset_R2(pylab, R1, axis, color_shadow=[0.8, 1.0, 0.8])
@@ -118,15 +116,15 @@ cdp {
         print('Computing step')
         s_next = beta((f, s_last))
 
-        rn = alpha((f, s_next))
-        print('%d: rn  = %s' % (i, UR.format(rn)))
-
-        ss.append(s_next)
-        sr.append(rn)
-
-        if S.equal(ss[-2], ss[-1]):
+        if S.equal(ss[-1], s_next):
             print('%d: breaking because converged' % i)
             break
+
+        rn = alpha((f, s_next))
+        print('%d: rn  = %s' % (i, UR.format(rn)))
+        
+        ss.append(s_next)
+        sr.append(rn)
 
 
     print('plotting')
@@ -212,15 +210,16 @@ cdp {
         print('Computing step')
         s_next = beta((f, s_last))
 
+        if S.equal(ss[-1], s_next):
+            print('%d: breaking because converged' % i)
+            break
+
         rn = alpha((f, s_next))
         print('%d: rn  = %s' % (i, UR.format(rn)))
 
         ss.append(s_next)
         sr.append(rn)
 
-        if S.equal(ss[-2], ss[-1]):
-            print('%d: breaking because converged' % i)
-            break
 
     print('plotting')
     mx = 3.0
@@ -231,6 +230,7 @@ cdp {
     caption = 'Solution using solve()'
     with fig0.plot('S%d' % i, caption=caption) as pylab:
         plot_upset_R2(pylab, rmin, axis, color_shadow=[1.0, 0.8, 0.9])
+        pylab.axis(axis)
 
 
     fig = r.figure(cols=2)
@@ -248,6 +248,7 @@ cdp {
             pylab.plot(xs, ys, 'k-')
 
             pylab.axis(axis)
+
         with fig.plot('R%d' % i, caption=UR.format(sr[i])) as pylab:
             Rmin = sr[i]
             plot_upset_R2(pylab, Rmin, axis, color_shadow=[0.8, 1.0, 0.8])

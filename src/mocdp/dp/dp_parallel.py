@@ -94,8 +94,6 @@ class Parallel(PrimitiveDP):
         S1, alpha1, beta1 = self.dp1.get_normal_form()
         S2, alpha2, beta2 = self.dp2.get_normal_form()
 
-        # S = prod_make(S1, S2)
-        from mocdp.dp.dp_series import get_product_compact
         S, pack, unpack = get_product_compact(S1, S2)
 
         F = self.get_fun_space()

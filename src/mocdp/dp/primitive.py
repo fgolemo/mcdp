@@ -93,8 +93,7 @@ class PrimitiveDP(WithInternalLog):
     def is_feasible(self, func, m, r):
         try:
             self.check_feasible(func, m, r)
-        except NotFeasible as e:
-            # print('Not feasible: %s' % e)
+        except NotFeasible:
             return False
         else:
             return True

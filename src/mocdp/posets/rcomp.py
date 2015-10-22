@@ -87,7 +87,8 @@ class Rcomp(Poset):
         if x == self.top:
             return self.top.__repr__()
         else:
-            return '%.3f' % x
+            # return '%.3f' % x
+            return '%.7f' % x
 
     def _leq(self, a, b):
         if a == b:

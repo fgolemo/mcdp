@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts.utils import indent, raise_desc, raise_wrapped
+from mocdp.dp.primitive import Feasible, NotFeasible
 from mocdp.posets import Map, NotLeq, PosetProduct, UpperSet, UpperSets
-import itertools
-from mocdp.dp.primitive import NotFeasible, Feasible
 from mocdp.posets.utils import poset_minima
+import itertools
 
 
 __all__ = [
@@ -257,23 +257,16 @@ def make_loop(dp):
     from mocdp.dp.dp_identity import Identity
     from mocdp.dp.dp_parallel_simplification import make_parallel
 
-    # Loop( Series(S, mux) ) = Series(Loop( Series(Parallel(Id, mux), S) ), mux)
-
-
     dps = unwrap_series(dp)
 
     if len(dps) > 1 and isinstance(dps[-1], Mux):
-        F = dp.get_fun_space()
-        F1 = F[0]
-#         F2 = F[1]
+        # Loop( Series(S, mux) ) = Series(Loop( Series(Parallel(Id, mux), S) ), mux)
+        F1 = dp.get_fun_space()[0]
         first = make_parallel(Identity(F1), dps[-1])
-#         mux2 = Mux(dp.get_fun_space(), [0, coords])
         x = wrap_series(first.get_fun_space(), [first] + dps[:-1])
         return make_series(make_loop(x), dps[-1])
     
-    
     return DPLoop0(dp)
-
 
 
 class DPLoop0(PrimitiveDP):
@@ -493,12 +486,6 @@ class DPLoop0(PrimitiveDP):
                 u = poset_minima(solutions, R.leq)
                 a1 = UpperSet(u, R)
                 return a1
-                
-#                 # now drop to UR1
-#                 u = set([m[0] for m in y0.minimals])
-#                 u = poset_minima(u, R1.leq)
-#                 a1 = UpperSet(u, R1)
-
 
 
         class DPBeta(Map):
@@ -537,13 +524,6 @@ class DPLoop0(PrimitiveDP):
                 # this is in UR1R2
                 UR.belongs(y0)
 
-                # now drop to UR2
-#                 u = [m[1] for m in y0.minimals]
-#                 u = poset_minima(u, R.leq)
-#                 m1 = UpperSet(u, R)
-
-                # from mocdp.dp.dp_series import prod_make_state
-                # res = prod_make_state(S0, UR, s0p, y0)
                 res = pack(s0p, y0)
                 return res
 
@@ -563,9 +543,8 @@ class DPLoop0(PrimitiveDP):
         R = self.dp1.get_res_space()
 
         UR = UpperSets(R)
-        UF = UpperSets(F)
 
-        def iterate(si):
+        def iterate(si, enforce_constraint):
             """ Returns the next iteration """
             # compute the product
             UR.belongs(si)
@@ -578,7 +557,7 @@ class DPLoop0(PrimitiveDP):
                 f = (f1, f2)
                 res = self.dp1.solve(f)
                 for r in res.minimals:
-#                     if R.leq(r, f2):
+                    if not enforce_constraint or  R.leq(r, f2):
                         solutions.add(r)
 
             if not solutions:
@@ -588,14 +567,7 @@ class DPLoop0(PrimitiveDP):
             res = R.Us(u)
             print('solutions of iterations: %s' % res)
             return res
-
-#             upset.add((f1, r))
-#             upset = UpperSet(upset, F)
-#             UF.belongs(upset)
-#             # solve the
-#             res = self.dp1.solveU(upset)
-#             UR.belongs(res)
-#             return res
+ 
 
         # we consider a set of iterates
         # we start from the bottom
@@ -606,7 +578,7 @@ class DPLoop0(PrimitiveDP):
         for i in range(100):  # XXX
             # now take the product of f1
             si = S[-1]
-            sip = iterate(si)
+            sip = iterate(si, enforce_constraint=False)
 
             try:
                 UR.check_leq(si, sip)
@@ -621,4 +593,10 @@ class DPLoop0(PrimitiveDP):
                 print(' solution is %s %s' % (UR.format(sip), type(sip)))
                 break 
 
-        return S[-1]
+        last =  S[-1]
+        
+        res = iterate(last, enforce_constraint=True)
+        return res
+                        
+                        
+                        
