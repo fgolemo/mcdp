@@ -7,8 +7,10 @@ import functools
 
 
 __all__ = [
-    'Sum', 'SumN',
+    'Sum',
+    'SumN',
     'Product',
+    'ProductN',
 ]
 
 class Sum(PrimitiveDP):

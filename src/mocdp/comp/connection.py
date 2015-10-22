@@ -1,6 +1,5 @@
 from .interfaces import NamedDP
 from .wrap import dpwrap
-from collections import namedtuple
 from contracts import contract
 from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
@@ -17,11 +16,7 @@ import networkx
 import re
 import warnings
 from mocdp.dp.dp_loop import make_loop
-
-Connection0 = namedtuple('Connection', 'dp1 s1 dp2 s2')
-class Connection(Connection0):
-    def __repr__(self):
-        return "Connection(2 %s.%s >= %s.%s 1)" % (self.dp2, self.s2, self.dp1, self.s1)
+from .context import Connection
 
 def _parse(cstring):
     """ power.a >= battery.b """

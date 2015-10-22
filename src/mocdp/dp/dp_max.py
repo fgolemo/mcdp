@@ -7,6 +7,7 @@ from mocdp.posets.space_product import SpaceProduct
 
 __all__ = [
     'Max',
+    'Max1',
     'Min',
 ]
 

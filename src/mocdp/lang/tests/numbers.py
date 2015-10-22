@@ -4,12 +4,13 @@ from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
 from comptests.registrar import comptest
 from contracts import contract
 from contracts.utils import raise_wrapped
-from mocdp.lang.parts import ValueWithUnits
+from mocdp.lang.parts import CDPLanguage
 from mocdp.lang.syntax import (floatnumber, integer, integer_or_float,
     number_with_unit, parse_wrap)
 from mocdp.posets.rcomp import R_Weight
 from nose.tools import assert_equal
 
+CDP = CDPLanguage
 
 @contract(string=str)
 def parse_wrap_check(string, expr, result):
@@ -29,10 +30,10 @@ def check_numbers1():
 
 @comptest
 def check_numbers2():
-    parse_wrap_check('1.0 [g]', number_with_unit, ValueWithUnits(1.0, R_Weight))
+    parse_wrap_check('1.0 [g]', number_with_unit, CDP.ValueWithUnits(1.0, R_Weight))
     assert_syntax_error('1', number_with_unit)
     # automatic conversion to float
-    parse_wrap_check('1 [g]', number_with_unit, ValueWithUnits(1.0, R_Weight))
+    parse_wrap_check('1 [g]', number_with_unit, CDP.ValueWithUnits(1.0, R_Weight))
 
 @comptest
 def check_numbers3():

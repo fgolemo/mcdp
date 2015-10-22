@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
-from mocdp.comp.interfaces import CompositeNamedDP
-from mocdp.comp.wrap import SimpleWrap
-from mocdp.dp import Constant, Identity, Limit, Max, Min, Product, Sum
-from mocdp.dp.dp_generic_unary import GenericUnary
-from mocdp.dp.dp_sum import ProductN, SumN
+from mocdp.comp import CompositeNamedDP, SimpleWrap
+from mocdp.dp import (
+    Constant, GenericUnary, Identity, Limit, Max, Min, Product, ProductN, Sum,
+    SumN)
 from mocdp.lang.blocks import get_missing_connections
 from mocdp.posets.rcomp import R_dimensionless, Rcomp, RcompUnits
 from system_cmd import CmdException, system_cmd_result
