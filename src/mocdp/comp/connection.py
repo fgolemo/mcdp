@@ -619,6 +619,62 @@ def dpgraph(name2dp, connections, split):
                    split=split)
     return res
 
+def simple_cycles_as_edges(G):
+    cycles = list(simple_cycles(G))
+    def c2e(c):
+        for i in range(len(c)):
+            n1 = c[i]
+            n2 = c[(i + 1) % len(c)]
+            yield n1, n2
+
+    return [list(c2e(c)) for c in cycles]
+
+def choose_connection_to_cut1(connections):
+    G = get_connection_multigraph(connections)
+    cycles = list(simple_cycles(G))
+
+    from collections import defaultdict
+    counts = defaultdict(lambda: 0)
+
+    c_as_e = simple_cycles_as_edges(G)
+    
+    for cycle in c_as_e:
+        for edge in cycle:
+            counts[edge] += 1
+
+    ncycles = len(c_as_e)
+    best_edge, ncycles_broken = max(list(counts.items()), key=lambda x: x[1])
+
+    def find_one(a, b):
+        for c in connections:
+            if c.dp1 == a and c.dp2 == b:
+                return c
+        assert False
+
+    its_connection = find_one(best_edge[0], best_edge[1])
+    print('best edge: %s breaks %d of %d cycles' % (str(best_edge), ncycles_broken, ncycles))
+    print('its connection is %s' % str(its_connection))
+    return its_connection
+
+#     print(c_as_e)
+#     print('Cycles: %s ' % str(cycles))
+#     # choose one constraint
+#     cycle0 = cycles[0]
+#
+#     print('Choosing %s ' % str(cycle0))
+#
+#     # get one connection that breaks the cycle
+#     # TODO: get the one with the smallest cardinality
+#     first = cycle0[0]
+#     if len(cycle0) == 1:
+#         second = first
+#     else:
+#         second = cycle0[1]
+#
+#
+#     c = find_one(first, second)
+#     return c
+
 @contract(name2dp='dict(str:($NamedDP|str|code_spec))',
           connections='set(str|$Connection)|list(str|$Connection)',
           returns=NamedDP)
@@ -632,34 +688,15 @@ def dpgraph_(name2dp, connections, split):
         connections = set(map(parse_connection, connections))
         check_connections(name2dp, connections)
 
-
-        get_connection_multigraph_weighted(name2dp, connections)
-
         G = get_connection_multigraph(connections)
         cycles = list(simple_cycles(G))
         if not cycles:
             return dpconnect(name2dp, connections, split=split)
 
-        print('Cycles: %s ' % str(cycles))
-        # choose one constraint
-        cycle0 = cycles[0]
 
-        print('Choosing %s ' % str(cycle0))
+#         get_connection_multigraph_weighted(name2dp, connections)
 
-        # get one connection that breaks the cycle
-        # TODO: get the one with the smallest cardinality
-        first = cycle0[0]
-        if len(cycle0) == 1:
-            second = first
-        else:
-            second = cycle0[1]
-
-        def find_one(a, b):
-            for c in connections:
-                if c.dp1 == a and c.dp2 == b:
-                    return c
-            assert False
-        c = find_one(first, second)
+        c = choose_connection_to_cut1(connections)
 
         other_connections = set()
         other_connections.update(connections)

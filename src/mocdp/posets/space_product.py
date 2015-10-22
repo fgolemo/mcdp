@@ -71,16 +71,17 @@ class SpaceProduct(Space):
 
     def __repr__(self):
         def f(x):
-            if isinstance(x, SpaceProduct):
-                return "(%r)" % x
+            r = x.__repr__()
+            if  r[-1] != ')' and (isinstance(x, SpaceProduct) or ("×" in r)):
+                return "(%s)" % r
             else:
-                return x.__repr__()
+                return r
 
         if len(self.subs) == 0:
             return "1"
 
         if len(self.subs) == 1:
-            return '(%s×)' % list(self.subs)[0]
+            return '(%s×)' % f(list(self.subs)[0])
 
         return "×".join(map(f, self.subs))
 

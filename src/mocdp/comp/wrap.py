@@ -35,17 +35,21 @@ class SimpleWrap(NamedDP):
                 if not len(set(fnames)) == len(fnames):
                     raise ValueError('Repeated fnames.')
 
-            if isinstance(F, PosetProduct):
-                if not isinstance(fnames, list) or not len(F) == len(fnames):
-                    raise ValueError("F incompatible")
-                self.F_single = False
-                self.Fnames = fnames
-
-            else:
-                if not isinstance(fnames, str):
-                    raise ValueError("F and fnames incompatible: not a string: %s %s" % (F, fnames))
+            if isinstance(fnames, str):
                 self.F_single = True
                 self.Fname = fnames
+            else:
+                if isinstance(F, PosetProduct):
+                    if not isinstance(fnames, list) or not len(F) == len(fnames):
+                        raise ValueError("F incompatible")
+                    self.F_single = False
+                    self.Fnames = fnames
+
+                else:
+                    if not isinstance(fnames, str):
+                        raise ValueError("F and fnames incompatible: not a string: %s %s" % (F, fnames))
+                    self.F_single = True
+                    self.Fname = fnames
 
             if isinstance(rnames, list):
                 if not isinstance(R, PosetProduct):

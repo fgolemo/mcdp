@@ -7,3 +7,4 @@ from .uppersets import *
 from .single import *
 from .utils import *
 from .space_product import *
+from .category_product import *

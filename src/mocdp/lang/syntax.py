@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from .parts import CDPLanguage
 from .utils import parse_action
 from contracts import contract
 from contracts.interface import Where
@@ -8,12 +9,11 @@ from mocdp.posets.rcomp import (R_Cost, R_Current, R_Energy, R_Power, R_Time,
     R_Voltage, R_Weight, R_dimensionless, mult_table)
 from mocdp.posets.space import NotBelongs, Space
 from pyparsing import (CaselessLiteral, Combine, Forward, Group, Literal,
-    Optional, Or, ParseException, ParseFatalException, ParserElement, Suppress,
-    Word, ZeroOrMore, alphanums, alphas, nums, oneOf, opAssoc,
-    operatorPrecedence, OneOrMore)
+    OneOrMore, Optional, Or, ParseException, ParseFatalException, ParserElement,
+    Suppress, Word, ZeroOrMore, alphanums, alphas, nums, oneOf, opAssoc,
+    operatorPrecedence)
 import functools
 import math
-from .parts import CDPLanguage
 
 CDP = CDPLanguage
 

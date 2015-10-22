@@ -1,3 +1,88 @@
+from .poset import Poset
+from .poset_product import PosetProduct
+from .space_product import SpaceProduct
+from contracts import contract
+from mocdp.posets.space import Space  # @UnusedImport
+
+__all__ = [
+    'get_product_compact',
+]
+
+@contract(returns='tuple($Space, *, *)')
+def get_product_compact(*spaces):
+    """
+        S, pack, unpack = get_product_compact(S1, S2)
+    """
+
+    S = _prod_make(spaces)
+    def pack(*elements):
+        return _prod_make_state(elements, spaces)
+    def unpack(s):
+        return _prod_get_state(s, spaces)
+    return S, pack, unpack
+
+def get_subs(x):
+    if isinstance(x, SpaceProduct):
+        return x.subs
+    else:
+        return (x,)
+
+def _prod_make(spaces):
+
+    subs = ()
+    for space in spaces:
+        subs = subs + get_subs(space)
+
+    if len(subs) == 1:
+        return subs[0]
+
+    if all(isinstance(x, Poset) for x in subs):
+        S = PosetProduct(subs)
+    else:
+        S = SpaceProduct(subs)
+
+    return S
+
+def _prod_make_state(elements, spaces):
+
+    def get_state(X, x):
+        if isinstance(X, SpaceProduct):
+            return x
+        else:
+            return (x,)
+
+    s = ()
+    for space, e in zip(spaces, elements):
+        s = s + get_state(space, e)
+
+    if len(s) == 1:
+        return s[0]
+
+    return s
+
+def _prod_get_state(s, spaces):
+    subs = ()
+    for space in spaces:
+        subs = subs + get_subs(space)
+
+    is_empty = len(subs) == 1
+    if is_empty:
+        s = (s,)
+
+    assert isinstance(s, tuple)
+
+    res = []
+    for Si in spaces:
+        if isinstance(Si, SpaceProduct):
+            n = len(Si)
+            si = s[:n]
+            s = s[n:]
+        else:
+            si = s[0]
+            s = s[1:]
+        res.append(si)
+
+    return tuple(res)
 
 # 
 # class GenericProduct():
