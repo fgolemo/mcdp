@@ -4,6 +4,7 @@ from contracts import contract
 from mocdp import get_conftools_posets
 from mocdp.posets import PosetProduct, SpaceProduct
 import functools
+from mocdp.posets.rcomp_units import RcompUnits
 
 
 __all__ = [
@@ -41,30 +42,58 @@ class Sum(PrimitiveDP):
 
 class SumN(PrimitiveDP):
 
-    @contract(n='int,>=1')
-    def __init__(self, F, n):
+    @contract(Fs='tuple, seq[>=2]($RcompUnits)', R=RcompUnits)
+    def __init__(self, Fs, R):
 
-        library = get_conftools_posets()
-        _, F0 = library.instance_smarter(F)
+        self.Fs = Fs
 
-        self.F0 = F0
-        self.n = n
-
-        F = PosetProduct((F0,) * n)
-        R = F0
+        # todo: check dimensionality
+        F = PosetProduct(self.Fs)
+        R = R
 
         M = SpaceProduct(())
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, func):
         self.F.belongs(func)
+        
+        res = 0.0
+        for Fi, x in zip(self.Fs, func):
+            # reasonably sure this is correct...
+            factor = 1.0 / float(self.R.units / Fi.units)
+            res += factor * x
 
-        r = functools.reduce(self.F0.add, func)
-
-        return self.R.U(r)
+        return self.R.U(res)
 
     def __repr__(self):
-        return 'Sum(%s, %r)' % (self.n, self.F0)
+        return 'SumN(%s -> %s)' % (self.F, self.R)
+
+class SumUnitsNotCompatible(Exception):
+    pass
+
+@contract(Fs='tuple, seq[>=2]($RcompUnits)')
+def check_sum_units_compatible(Fs):
+    """
+    
+        raises SumUnitsNotCompatible
+    """
+    F0 = Fs[0]
+    errors = []
+    for i, F in enumerate(Fs):
+        
+        try: 
+            F.units + F0.units
+        except ValueError as e:
+            errors.append(e)
+        except BaseException as e:
+            print(e)
+            
+    if errors:
+        msg = "Units not compatible: "
+        msg += '\n' + "\n".join(str(e) for e in errors)
+        raise SumUnitsNotCompatible(msg)
+
+
 
 
 class Product(PrimitiveDP):

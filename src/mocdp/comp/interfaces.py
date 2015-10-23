@@ -58,11 +58,13 @@ class NamedDP():
     def repr_long(self):
         return self.__repr__()
 
+    @contract(signals='list|tuple')
     def get_ftypes(self, signals):
         # Returns the product space
         types = [self.get_ftype(s) for s in signals]
         return PosetProduct(tuple(types))
 
+    @contract(signals='list|tuple')
     def get_rtypes(self, signals):
         # Returns the product space
         types = [self.get_rtype(s) for s in signals]

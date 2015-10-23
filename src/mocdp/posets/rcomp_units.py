@@ -4,6 +4,7 @@ from pint import UnitRegistry
 import functools
 from contracts.utils import check_isinstance, raise_wrapped
 from mocdp.exceptions import DPSyntaxError
+from pint.unit import UndefinedUnitError
 
 # __all__ = [
 #    'RcompUnits',
@@ -38,11 +39,9 @@ class RcompUnits(Rcomp):
         # need to call it to make sure dollars i defined
         ureg = get_ureg()  # @UnusedVariable
 
-
-        s = Rcomp.__repr__(self)
-        if self == R_dimensionless:
-            return s
-        return s + "[%s]" % format_pint_unit_short(self.units)
+        if self.units == R_dimensionless.units:
+            return 'R[]'
+        return "R[%s]" % format_pint_unit_short(self.units)
 
     def __getstate__(self):
         u = self.units
@@ -56,28 +55,23 @@ class RcompUnits(Rcomp):
         self.units = ureg.Quantity(units_ex[0], units_ex[1])
 
     def __eq__(self, other):
-        if not isinstance(other, Rcomp):
-            return False
-
-        # need to call it to make sure dollars i defined
-        ureg = get_ureg()  # @UnusedVariable
-
         if isinstance(other, RcompUnits):
-#             print('comparing %s and %s' % (str((self.units).__repr__()),
-#                                            str(other.units.__repr__())))
-            return other.units.dimensionality == self.units.dimensionality
+            eq = (other.units == self.units)
+            return eq
+        return False
 
-        return True
-
-def parse_pint(s):
+def parse_pint(s0):
     """ thin wrapper taking care of dollars not recognized """
-    s = s.replace('$', ' dollars ')
+    s = s0.replace('$', ' dollars ')
     ureg = get_ureg()
     try:
         return ureg.parse_expression(s)
+    except UndefinedUnitError as e:
+        msg = 'Cannot parse units %r.' % s0
+        raise_wrapped(DPSyntaxError, e, msg, compact=True)
     except Exception as e:
-        msg = 'Cannot parse units.'
-        raise_wrapped(DPSyntaxError, e, msg, s=s)
+        msg = 'Cannot parse units %r.' % s0
+        raise_wrapped(DPSyntaxError, e, msg)
 
 def make_rcompunit(units):
     s = units.strip()

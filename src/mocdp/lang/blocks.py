@@ -9,10 +9,12 @@ from mocdp.comp import (CompositeNamedDP, Connection, Context, NamedDP,
 from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
 from mocdp.dp import (Constant, GenericUnary, Identity, InvMult2, Limit, Max,
     Max1, Min, PrimitiveDP, Product, ProductN, Sum, SumN)
+from mocdp.dp.dp_sum import SumUnitsNotCompatible, check_sum_units_compatible
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.parts import CDPLanguage
-from mocdp.posets import (NotBelongs, PosetProduct, Rcomp, mult_table,
-    mult_table_seq)
+from mocdp.posets import (NotBelongs, NotLeq, PosetProduct, Rcomp,
+    get_types_universe, mult_table, mult_table_seq)
+from mocdp.posets.space import NotEqual
 
 
 CDP = CDPLanguage
@@ -26,6 +28,36 @@ def eval_statement(r, context):
     elif isinstance(r, CDP.Constraint):
         resource = eval_rvalue(r.rvalue, context)
         function = eval_lfunction(r.function, context)
+
+        R1 = context.get_rtype(resource)
+        F2 = context.get_ftype(function)
+        
+        tu = get_types_universe()
+
+        if not tu.equal(R1, F2):
+            try:
+                tu.check_leq(R1, F2)
+            except NotLeq as e:
+                msg = 'Constraint between incompatible spaces.'
+                raise_wrapped(DPSemanticError, e, msg)
+
+            map1, _map2 = tu.get_embedding(R1, F2)
+
+            conversion = GenericUnary(R1, F2, map1)
+            conversion_ndp = dpwrap(conversion, '_in', '_out')
+
+            name = context.new_name('_conversion')
+            context.add_ndp(name, conversion_ndp)
+
+            c1 = Connection(dp1=resource.dp, s1=resource.s,
+                       dp2=name, s2='_in')
+            context.add_connection(c1)
+            resource = CDP.Resource(name, '_out')
+
+        else:
+            # print('Spaces are equal: %s and %s' % (R1, F2))
+            pass
+
         c = Connection(dp1=resource.dp, s1=resource.s,
                        dp2=function.dp, s2=function.s)
         context.add_connection(c)
@@ -235,12 +267,37 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
 
             fnames = [f.fname for f in fun]
             rnames = [r.rname for r in res]
-            if len(fnames) == 1: fnames = fnames[0]
-            if len(rnames) == 1: rnames = rnames[0]
+
+            if len(fnames) == 1:
+                use_fnames = fnames[0]
+            else:
+                use_fnames = fnames
+            if len(rnames) == 1:
+                use_rnames = rnames[0]
+            else:
+                use_rnames = rnames
+
             try:
-                w = SimpleWrap(dp=dp, fnames=fnames, rnames=rnames)
+                w = SimpleWrap(dp=dp, fnames=use_fnames, rnames=use_rnames)
             except ValueError as e:
                 raise DPSemanticError(str(e), r.where)
+
+            ftypes = w.get_ftypes(fnames)
+            rtypes = w.get_rtypes(rnames)
+            ftypes_expected = PosetProduct(tuple([f.unit for f in fun]))
+            rtypes_expected = PosetProduct(tuple([r.unit for r in res]))
+
+            try:
+                tu = get_types_universe()
+                tu.check_equal(ftypes, ftypes_expected)
+                tu.check_equal(rtypes, rtypes_expected)
+            except NotEqual as e:
+                msg = 'The types in the description do not match.'
+                raise_wrapped(DPSemanticError, e, msg,
+                           ftypes=ftypes,
+                           ftypes_expected=ftypes_expected,
+                           rtypes=rtypes,
+                           rtypes_expected=rtypes_expected, compact=True)
 
             return w
 
@@ -473,19 +530,24 @@ def eval_rvalue(rvalue, context):
         if isinstance(rvalue, CDP.PlusN):
             ops = rvalue.ops
             assert len(ops) > 1
-            R = None
             op_rs = []
+            op_Rs = []
             for op in ops:
                 op_r = eval_rvalue(op, context)
                 op_rs.append(op_r)
                 op_R = context.get_rtype(op_r)
-                if R is not None:
-                    if not (R == op_R):
-                        msg = 'Incompatible units: %s and %s' % (R, op_R)
-                        raise_desc(DPSemanticError, msg, rvalue=rvalue)
-                R = op_R
+                op_Rs.append(op_R)
 
-            dp = SumN(R, len(ops))
+            try:
+                check_sum_units_compatible(tuple(op_Rs))
+            except SumUnitsNotCompatible as e:
+                msg = 'Incompatible units found: %s' % str(e)
+                raise DPSemanticError(msg, where=rvalue.where)
+                # raise_wrapped(DPSemanticError, e, msg, rvalue=rvalue)
+            except BaseException as e:
+                raise_wrapped(DPInternalError, e, '', op_Rs=op_Rs)
+
+            dp = SumN(tuple(op_Rs), op_Rs[0])
 
             nres = context.new_res_name('sum')
             fnames = []
@@ -539,7 +601,7 @@ def eval_rvalue(rvalue, context):
 
             if isinstance(rvalue.a, CDP.ValueWithUnits0):
                 b = eval_rvalue(rvalue.b, context)
-                print('a is constant')
+                # print('a is constant')
                 name = context.new_name('max1')
                 ndp = dpwrap(Max1(rvalue.a.unit, rvalue.a.value), '_in', '_out')
                 context.add_ndp(name, ndp)
@@ -550,8 +612,7 @@ def eval_rvalue(rvalue, context):
             a = eval_rvalue(rvalue.a, context)
 
             if isinstance(rvalue.b, CDP.ValueWithUnits0):
-
-                print('using straight')
+                # print('using straight')
                 name = context.new_name('max1')
                 ndp = dpwrap(Max1(rvalue.b.unit, rvalue.b.value), '_in', '_out')
                 context.add_ndp(name, ndp)
@@ -564,11 +625,11 @@ def eval_rvalue(rvalue, context):
             F1 = context.get_rtype(a)
             F2 = context.get_rtype(b)
 
-
-#             a, F1, b, F2 = eval_ops(rvalue)
-
+            print context.names[a.dp].repr_long()
+            print context.names[b.dp].repr_long()
             if not (F1 == F2):
-                msg = 'Incompatible units: %s and %s' % (F1, F2)
+                msg = 'Incompatible units for Max(): %s and %s' % (F1, F2)
+                msg += '%s and %s' % (type(F1), type(F2))
                 raise DPSemanticError(msg, where=rvalue.where)
 
             dp = Max(F1)

@@ -143,6 +143,7 @@ class Context():
 
         R1 = ndp1.get_rtype(c.s1)
         F2 = ndp2.get_ftype(c.s2)
+        # print('connecting R1 %s to R2 %s' % (R1, F2))
         if not (R1 == F2):
             msg = 'Connection between different spaces'
             raise_desc(DPSemanticError, msg, F2=F2, R1=R1)

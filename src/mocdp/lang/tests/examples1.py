@@ -658,8 +658,8 @@ def check_lang30():
     assert_parsable_to_unconnected_ndp("""
 cdp {
   motor = abstract dp {
-    provides torque [R]
-    requires weight [R]
+    provides energy [J]
+    requires mass [g]
 
     implemented-by load BatteryDP
   }
@@ -672,8 +672,8 @@ def check_lang31():
     assert_semantic_error("""
 cdp {
   motor = abstract dp {
-    provides torque [R]
-    requires weight [R]
+    provides energy [W]
+    requires mass [g]
 
     implemented-by load BatteryDP
   }
@@ -682,21 +682,20 @@ cdp {
 
 @comptest
 def check_lang32():
-    # wrong name: torque, should raise semantic error
     assert_semantic_error("""
 cdp {
   motor = abstract cdp {
-    provides capacity [J]
-    requires weight [R]
+    provides capacity [W]
+    requires mass [g]
 
   battery = dp {
     provides capacity [J]
-    requires weight [R]
+    requires mass [g]
 
     implemented-by load BatteryDP
   }
     capacity <= battery.torque 
-    battery.weight <= weight
+    battery.mass <= mass
 }}""")
 
 @comptest

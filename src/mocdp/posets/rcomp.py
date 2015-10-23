@@ -71,12 +71,10 @@ class Rcomp(Poset):
     def __ne__(self, other):
         return not self.__eq__(other)
 
-
-
     def __repr__(self):
 #         return "ℜ ⋃ {⊤}"
 #         return "ℜ"
-        return "R"
+        return "Rcomp()"
 
     def format(self, x):
         self.belongs(x)

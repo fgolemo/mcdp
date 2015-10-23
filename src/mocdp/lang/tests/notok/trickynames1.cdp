@@ -1,0 +1,11 @@
+# test unconnected
+cdp {  
+      
+        requires x [g] 
+        provides x [g]
+
+        requires y [g]
+        provides y [g]
+
+        x >= y
+}

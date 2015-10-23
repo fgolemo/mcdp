@@ -42,7 +42,8 @@ class Series0(PrimitiveDP):
 
         if not R1 == F2:
             msg = 'Cannot connect different spaces.'
-            raise_desc(DPInternalError, msg, dp1=dp1.repr_long(), dp2=dp2.repr_long(), R1=R1, F2=F2)
+            raise_desc(DPInternalError, msg, dp1=self.dp1.repr_long(),
+                       dp2=self.dp2.repr_long(), R1=R1, F2=F2)
 
         F1 = self.dp1.get_fun_space()
         R2 = self.dp2.get_res_space()

@@ -1,0 +1,13 @@
+# test connected
+cdp {  
+      
+        requires a [g] 
+        provides b [g]
+
+        requires c [g]
+        provides d [g]
+
+        a >= b + 1 g
+        c >= d + 2 g 
+ 
+}

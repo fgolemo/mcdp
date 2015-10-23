@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from mocdp.dp import PrimitiveDP
-from mocdp.posets import PosetProduct, Rcomp
+from mocdp.posets import (PosetProduct, R_Energy, R_Power, R_Time, R_Weight,
+    SpaceProduct)
 import numpy as np
-from mocdp.posets import R_Energy, R_Weight, R_Time, R_Power
-from mocdp.posets.space_product import SpaceProduct
 
 
 class BatteryDP(PrimitiveDP):
@@ -43,8 +42,8 @@ class Weight2totalpayload(PrimitiveDP):
         self.baseline = baseline
 
         M = SpaceProduct(())
-        R = Rcomp()
-        F = Rcomp()
+        R = R_Weight
+        F = R_Weight
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, min_func):
@@ -68,7 +67,9 @@ class Payload2energy(PrimitiveDP):
         self.alpha = alpha
 
         M = SpaceProduct(())
-        PrimitiveDP.__init__(self, F=Rcomp(), R=Rcomp(), M=M)
+        F = R_Weight
+        R = R_Energy
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, min_func):
         funsp = self.get_fun_space()
@@ -95,9 +96,9 @@ def Pa_from_weight(W):
 class Payload2ET(PrimitiveDP):
     """ Example 16 in RAFC """
     def __init__(self):
-        F = Rcomp()
+        F = R_Weight
         M = R_Power
-        R = PosetProduct((Rcomp(), Rcomp()))
+        R = PosetProduct((R_Energy, R_Time))
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def evaluate_f_m(self, func, m):

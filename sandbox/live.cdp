@@ -1,26 +1,10 @@
-# test connected
 cdp {  
-      motor_chassis =  cdp {
-          motor =  cdp {
-           
-          }
-           #
-          chassis = template cdp {
-            provides payload [g]
-            provides velocity [m/s]
-            #
-            requires cost [$]
-            requires total_weight [g]
-            requires motor_speed [rad/s]
-            requires motor_torque [N m]
+    provides a [m/s] 
+    provides b [mph]
 
-            requires controller [R]
-          }
- 
-          
-       
+    requires c [m/s]
+    requires d [mph]
 
-      }
-          
-               
+    c >= a + b
+    d >= a + b
 }

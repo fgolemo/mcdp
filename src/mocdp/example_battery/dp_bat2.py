@@ -1,16 +1,13 @@
+from contracts import contract
 from mocdp.dp import make_series
 from mocdp.dp.dp_flatten import Mux
 from mocdp.dp.dp_identity import Identity
 from mocdp.dp.dp_parallel import Parallel
 from mocdp.dp.dp_sum import Product, Sum
 from mocdp.dp.primitive import PrimitiveDP
-from mocdp.posets.poset_product import PosetProduct
-from mocdp.posets import (R_Energy, R_Power, R_Time, R_Weight, Rcomp,
-    RcompUnits)
-from mocdp.posets.single import Single
+from mocdp.posets import (PosetProduct, R_Energy, R_Power, R_Time, R_Weight,
+    R_dimensionless, Single, SpaceProduct)
 import numpy as np
-from mocdp.posets.space_product import SpaceProduct
-from contracts import contract
 
 
 
@@ -20,8 +17,8 @@ class SimpleNonlinearity1(PrimitiveDP):
     # h(x) = x => x = 2.14
 
     def __init__(self):
-        F = Rcomp()
-        R = Rcomp()
+        F = R_dimensionless
+        R = R_dimensionless
         M = SpaceProduct(())
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 

@@ -32,9 +32,10 @@ class Space(object):
     def equal(self, a, b):
         try:
             self.check_equal(a, b)
-            return True
         except NotEqual:
             return False
+        else:
+            return True
         
     def witness(self):
         """ Returns an element of the space, or raise Uninhabited

@@ -35,6 +35,9 @@ def spa(x, b):
         where = Where(s, loc)
         try:
             res = b(tokens)
+        except DPSyntaxError as e:
+            e.where = where
+            raise DPSyntaxError(str(e), where=where)
         except DPSemanticError as e:
             if e.where is None:
                 e.where = where

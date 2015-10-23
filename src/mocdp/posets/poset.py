@@ -22,12 +22,25 @@ class NotMeetable(Exception):
 class NotBounded(Exception):
     pass
 
-class Poset(Space):
-
+class Preorder(Space):
+    """
+        A space with a transitive and reflexive relation.
+        
+        Not necessarily antisymmetric. So if a <= b and b <= a,
+        not necessarily a == b.
+    """
     @abstractmethod
     def check_leq(self, a, b):
-        # Return none if a<=b; otherwise raise NotLeq with a description
-        pass
+        """ Return None if a<=b; otherwise raise NotLeq with a description """
+
+    def leq(self, a, b):
+        try:
+            self.check_leq(a, b)
+            return True
+        except NotLeq:
+            return False
+        
+class Poset(Preorder):
 
     def get_bottom(self):
         msg = 'Bottom not available for %s.' % describe_value(self)
@@ -46,12 +59,6 @@ class Poset(Space):
         """
         return [self.get_bottom(), self.get_top()]
 
-    def leq(self, a, b):
-        try:
-            self.check_leq(a, b)
-            return True
-        except NotLeq:
-            return False
 
     def join(self, a, b):  # "max" ∨
         if self.leq(a, b):
