@@ -33,6 +33,6 @@ addons:
     - python-matplotlib
     - python-numpy
     - python-yaml
-    - python-cjson
-    - python-pil
+    # - python-cjson disallowed by Travis!
+    # - python-pil not found on Travis
     - graphviz # TODO: add check for existence
