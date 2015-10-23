@@ -21,13 +21,13 @@
 - id: Rcomp_g
   desc: grams
   code:
-  - mocdp.posets.RcompUnits
+  - mocdp.posets.make_rcompunit
   - units: g
 
 - id: Rcomp_J
   desc: Joules
   code:
-  - mocdp.posets.RcompUnits
+  - mocdp.posets.make_rcompunit
   - units: J
 
 - id: U_Rcomp
@@ -54,6 +54,6 @@
 - id: R_dimensionless
   desc: dimensionless
   code:
-  - mocdp.posets.RcompUnits
-  - units: '*'
+  - mocdp.posets.make_rcompunit
+  - units: 'm/m'
 

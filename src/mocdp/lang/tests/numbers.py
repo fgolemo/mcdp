@@ -7,7 +7,7 @@ from contracts.utils import raise_wrapped
 from mocdp.lang.parts import CDPLanguage
 from mocdp.lang.syntax import (floatnumber, integer, integer_or_float,
     number_with_unit, parse_wrap)
-from mocdp.posets.rcomp import R_Weight
+from mocdp.posets import R_Weight
 from nose.tools import assert_equal
 
 CDP = CDPLanguage

@@ -1,15 +1,45 @@
 # test connected
-compact cdp {  
+cdp {  
+      motor_chassis =  cdp {
           motor = template cdp {
-            provides speed [R]
-            provides torque [R]
+            provides speed [rad/s]
+            provides torque [N m]
             #    
             requires cost [$]
             requires weight [g]
             requires voltage [V]
             requires current [A]
           }
-           MCB = template cdp {
+           #
+          chassis = template cdp {
+            provides payload [g]
+            provides velocity [m/s]
+            #
+            requires cost [$]
+            requires total_weight [g]
+            requires motor_speed [rad/s]
+            requires motor_torque [N m]
+
+            requires controller [R]
+          }
+ 
+          
+          requires voltage, current for motor
+        requires total_weight for chassis
+          requires cost >= chassis.cost + motor.cost
+          provides velocity using chassis
+          requires controller for chassis
+
+          torque provided by motor >= motor_torque required by chassis
+          speed provided by motor >= motor_speed required by chassis
+          
+          provides payload [g]
+          chassis.payload >= payload + motor.weight
+                   
+
+      }
+          
+          MCB = template cdp {
             provides voltage [V]
             provides current [A]
             #    
@@ -18,21 +48,10 @@ compact cdp {
             requires input_voltage [V]
             requires input_current [A]
           }
-          motor.voltage <= MCB.voltage
-          motor.current <= MCB.current
+          motor_chassis.voltage <= MCB.voltage
+          motor_chassis.current <= MCB.current
 
-          #
-          chassis = template cdp {
-            provides payload [g]
-            provides velocity [R]
-            #
-            requires cost [$]
-            requires total_weight [g]
-            requires motor_speed [R]
-            requires motor_torque [R]
-
-            requires controller [R]
-          }
+         
           #
           battery = template cdp {
             provides capacity [J]
@@ -45,23 +64,19 @@ compact cdp {
             requires postage [$]
           }
 
-          requires cost [$]
-          provides velocity [R]
-          provides endurance [s]
-
-          torque provided by motor >= chassis.motor_torque
-          speed provided by motor >= chassis.motor_speed
           
-          chassis.velocity >= velocity
+          provides velocity using motor_chassis
+          
+          provides endurance [s]
           
           #
-          shipping.ships >= chassis.total_weight
+          shipping.ships >= motor_chassis.total_weight
           #
           #
           # also minimize the weight
           requires w [g]
           w >= battery.weight
-          #
+         
 
 
           autonomy = template cdp {
@@ -70,6 +85,7 @@ compact cdp {
             requires cost [$]
             requires weight [g]
           }
+          autonomy.controller >= motor_chassis.controller
 
           computation = template cdp {
             provides computation_graph [R]
@@ -79,12 +95,12 @@ compact cdp {
             requires weight [g]
           }
           autonomy.computation_graph <= computation.computation_graph
-          chassis.controller <= autonomy.controller
+          # motor_chassis.controller <= autonomy.controller
 
+      requires cost [$]
+          cost >= motor_chassis.cost + battery.cost + MCB.cost  + autonomy.cost + shipping.postage + computation.cost
 
-          cost >= motor.cost + chassis.cost + battery.cost + MCB.cost  + autonomy.cost + shipping.postage + computation.cost
-
-          chassis.payload >= motor.weight + battery.weight + MCB.weight + autonomy.weight +computation.weight
+          motor_chassis.payload >=  battery.weight + MCB.weight + autonomy.weight +computation.weight
 
           battery.capacity >= endurance * ( (MCB.input_current +  computation.current) * (MCB.input_voltage + computation.voltage))
           

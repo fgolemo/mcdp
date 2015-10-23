@@ -5,10 +5,11 @@ from mocdp.dp import (
     Constant, GenericUnary, Identity, Limit, Max, Min, Product, ProductN, Sum,
     SumN)
 from mocdp.lang.blocks import get_missing_connections
-from mocdp.posets.rcomp import R_dimensionless, Rcomp, RcompUnits
+from mocdp.posets import R_dimensionless, Rcomp, RcompUnits
 from system_cmd import CmdException, system_cmd_result
 import os
 import warnings
+from mocdp.posets.rcomp_units import format_pint_unit_short
 
 
 class GraphDrawingContext():
@@ -269,7 +270,7 @@ def format_unit(R):
         # return '[R]'
         return ''
     elif isinstance(R, RcompUnits):
-        return '[%s]' % R.units
+        return '[%s]' % format_pint_unit_short(R.units)
     elif isinstance(R, Rcomp):
         return '[R]'
     else:

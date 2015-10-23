@@ -5,8 +5,8 @@ from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
-from mocdp.posets.rcomp import (R_Cost, R_Current, R_Energy, R_Power, R_Time,
-    R_Voltage, R_Weight, R_dimensionless, mult_table)
+from mocdp.posets.rcomp_units import (mult_table, make_rcompunit,
+    R_dimensionless)
 from mocdp.posets.space import NotBelongs, Space
 from pyparsing import (CaselessLiteral, Combine, Forward, Group, Literal,
     OneOrMore, Optional, Or, ParseException, ParseFatalException, ParserElement,
@@ -53,29 +53,17 @@ ow = S(ZeroOrMore(L(' ')))
 # EOL = S(LineEnd())
 # line = SkipTo(LineEnd(), failOn=LineStart() + LineEnd())
 
-
 # identifier
 idn = Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))
 
+unit_expr = Combine(OneOrMore(Word(alphanums + '/' + ' ' + '^' + '$')))
 
-# Simple DPs being wrapped
-#
-# f name (unit)
-# f name (unit)
-# wraps name
+def parse_unit_expr(tokens):
+    # print('tokens: %s' % str(tokens))
+    x = tokens[0]
+    return make_rcompunit(x)
 
-units = {
-    'J': R_Energy,
-    's': R_Time,
-    'A': R_Current,
-    'V': R_Voltage,
-    'g': R_Weight,
-    'W': R_Power,
-    '$': R_Cost,
-    'R': R_dimensionless,
-}
-unit_expr = oneOf(list(units))
-spa(unit_expr, lambda t: units[t[0]])
+spa(unit_expr, parse_unit_expr)
 
 # numbers
 number = Word(nums)

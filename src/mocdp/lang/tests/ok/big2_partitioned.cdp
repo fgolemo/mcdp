@@ -2,8 +2,8 @@
 cdp {  
       motor_chassis = abstract cdp {
           motor = template cdp {
-            provides speed [R]
-            provides torque [R]
+            provides speed [rad/s]
+            provides torque [N m]
             #    
             requires cost [$]
             requires weight [g]
@@ -13,40 +13,30 @@ cdp {
            #
           chassis = template cdp {
             provides payload [g]
-            provides velocity [R]
+            provides velocity [m/s]
             #
             requires cost [$]
             requires total_weight [g]
-            requires motor_speed [R]
-            requires motor_torque [R]
+            requires motor_speed [rad/s]
+            requires motor_torque [N m]
 
             requires controller [R]
           }
-
-          requires cost [$]
-          requires total_weight [g]
+ 
           
-          requires voltage [V]
-          requires current [A]
+          requires voltage, current for motor
+   		  requires total_weight for chassis
+          requires cost >= chassis.cost + motor.cost
+          provides velocity using chassis
+          requires controller for chassis
 
-          total_weight >= chassis.total_weight 
+          torque provided by motor >= motor_torque required by chassis
+          speed provided by motor >= motor_speed required by chassis
           
           provides payload [g]
           chassis.payload >= payload + motor.weight
-          
-          cost >= chassis.cost + motor.cost
+                   
 
-          torque provided by motor >= chassis.motor_torque
-          speed provided by motor >= chassis.motor_speed
-
-          provides velocity [R]
-          chassis.velocity >= velocity
- 
-          voltage >= motor.voltage
-          current >= motor.current
-
-          requires controller [R]
-          controller >= chassis.controller
       }
           
           MCB = template cdp {
@@ -74,12 +64,10 @@ cdp {
             requires postage [$]
           }
 
-          requires cost [$]
-          provides velocity [R]
-          provides endurance [s]
-
           
-          motor_chassis.velocity >= velocity
+          provides velocity using motor_chassis
+          
+       	  provides endurance [s]
           
           #
           shipping.ships >= motor_chassis.total_weight
@@ -88,7 +76,7 @@ cdp {
           # also minimize the weight
           requires w [g]
           w >= battery.weight
-          #
+         
 
 
           autonomy = template cdp {
@@ -109,7 +97,7 @@ cdp {
           autonomy.computation_graph <= computation.computation_graph
           # motor_chassis.controller <= autonomy.controller
 
-
+		  requires cost [$]
           cost >= motor_chassis.cost + battery.cost + MCB.cost  + autonomy.cost + shipping.postage + computation.cost
 
           motor_chassis.payload >=  battery.weight + MCB.weight + autonomy.weight +computation.weight

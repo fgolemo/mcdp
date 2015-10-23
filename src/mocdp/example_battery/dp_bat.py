@@ -3,7 +3,7 @@ from contracts import contract
 from mocdp.dp import PrimitiveDP
 from mocdp.posets import PosetProduct, Rcomp
 import numpy as np
-from mocdp.posets.rcomp import R_Energy, R_Weight, R_Time, R_Power
+from mocdp.posets import R_Energy, R_Weight, R_Time, R_Power
 from mocdp.posets.space_product import SpaceProduct
 
 
@@ -84,7 +84,10 @@ class Payload2energy(PrimitiveDP):
 
 
 def T(Ps):
-    return 10.0 + 1 / np.sqrt(Ps)
+    if Ps == 0:
+        return R_Time.get_top()
+        # raise ValueError(Ps)
+    return 10.0 + 1.0 / np.sqrt(Ps)
 
 def Pa_from_weight(W):
     return 1.0 + W
@@ -105,6 +108,8 @@ class Payload2ET(PrimitiveDP):
         return self._r_from_W_Ps(W, Ps)
 
     def _r_from_W_Ps(self, W, Ps):
+        if Ps == 0:
+            return (0.0, R_Time.get_top())
         P2E = lambda Ps: T(Ps) * (Pa_from_weight(W) + Ps)
         return (P2E(Ps), T(Ps))
 

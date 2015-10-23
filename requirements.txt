@@ -1,5 +1,6 @@
 python-cjson
 networkx
+pint
 #numpy
 #matplotlib
 -e git+https://github.com/AndreaCensi/reprep.git@env_fault#egg=RepRep

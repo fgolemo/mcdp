@@ -4,11 +4,11 @@ from comptests.registrar import comptest
 from mocdp.dp.dp_max import Max
 from mocdp.lang.syntax import (
     binary_expr, code_spec, constraint_expr, funcname, idn, load_expr, ow,
-    parse_wrap, res_shortcut3, rvalue, simple_dp_model)
+    parse_wrap, res_shortcut3, rvalue, simple_dp_model, unit_expr)
 from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp,
     assert_semantic_error)
 from nose.tools import assert_equal
-from pyparsing import Literal
+from pyparsing import Literal, alphanums
 import warnings
 
 @comptest
@@ -1065,6 +1065,15 @@ cdp {
 """)
 
 
+@comptest
+def check_lang51():
+    """ Shortcuts "using" """
+    print unit_expr
+    print alphanums
+    parse_wrap(unit_expr, "N")
+    parse_wrap(unit_expr, "m")
+    parse_wrap(unit_expr, "N m")
+    
 
 examples1 = [
     """

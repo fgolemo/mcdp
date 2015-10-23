@@ -1,4 +1,4 @@
-from mocdp.posets.rcomp import RcompUnits
+from mocdp.posets import RcompUnits
 
 
 from .dp_bat import *

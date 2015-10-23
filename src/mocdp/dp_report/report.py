@@ -6,7 +6,7 @@ from mocdp.comp.interfaces import NamedDP
 from mocdp.dp import DPLoop0, Mux, Parallel, Series0
 from mocdp.dp.dp_generic_unary import GenericUnary
 from mocdp.posets.poset_product import PosetProduct
-from mocdp.posets.rcomp import R_dimensionless
+from mocdp.posets import R_dimensionless
 from reprep import Report
 
 @contract(ndp=NamedDP)

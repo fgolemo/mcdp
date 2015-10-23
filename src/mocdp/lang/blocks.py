@@ -10,10 +10,10 @@ from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
 from mocdp.dp import (Constant, GenericUnary, Identity, InvMult2, Limit, Max,
     Max1, Min, PrimitiveDP, Product, ProductN, Sum, SumN)
 from mocdp.exceptions import DPInternalError, DPSemanticError
-
-from mocdp.posets import NotBelongs, PosetProduct
-from mocdp.posets.rcomp import Rcomp, mult_table, mult_table_seq
 from mocdp.lang.parts import CDPLanguage
+from mocdp.posets import (NotBelongs, PosetProduct, Rcomp, mult_table,
+    mult_table_seq)
+
 
 CDP = CDPLanguage
 
