@@ -15,7 +15,11 @@ install:
 - "pip install -r requirements.txt"
 - python setup.py develop
 # command to run tests
-script: make comptests-run-parallel
+script: 
+- make comptests-run-parallel
+after_failure:
+- comptests out/comptests -c "ls failed"
+- comptests out/comptests -c "why failed"
 addons:
   apt:
     # sources:
