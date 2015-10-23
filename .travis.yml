@@ -8,6 +8,15 @@ python:
   # - "3.5"
   # - "3.5-dev" # 3.5 development branch
 # command to install dependencies
-install: "pip install -r requirements.txt"
+install: 
+- "pip install -r requirements.txt"
+- python setup.py develop
 # command to run tests
 script: make comptests-run-parallel
+addons:
+  apt:
+    # sources:
+    # - ubuntu-toolchain-r-test
+    packages:
+    - python-matplotlib
+    - python-numpy
