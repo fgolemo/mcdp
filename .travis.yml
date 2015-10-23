@@ -21,3 +21,4 @@ addons:
     packages:
     - python-matplotlib
     - python-numpy
+    - python-pil
