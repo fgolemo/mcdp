@@ -64,8 +64,20 @@ def watch_main():
             r = Report()
             r.text('not_connected', str(e))
         else:
-            dp = ndp.get_dp()
-            r = report_dp1(dp)
+            try:
+                dp = ndp.get_dp()
+            except (DPInternalError, DPSemanticError) as e:
+                r = Report()
+                r.text('developer_error', str(e))
+                logger.error("Developer error while reading %r." % filename)
+                logger.error(str(e))
+                logger.error("Please file a bug report and attach %r." % filename)
+                r.to_html(out_r)
+                return
+            else:
+                r = report_dp1(dp)
+
+
         r.to_html(out_r)
         print('Succesful.')
 

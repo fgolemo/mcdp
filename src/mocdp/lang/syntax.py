@@ -11,7 +11,7 @@ from mocdp.posets.space import NotBelongs, Space
 from pyparsing import (CaselessLiteral, Combine, Forward, Group, Literal,
     OneOrMore, Optional, Or, ParseException, ParseFatalException, ParserElement,
     Suppress, Word, ZeroOrMore, alphanums, alphas, nums, oneOf, opAssoc,
-    operatorPrecedence)
+    operatorPrecedence, NotAny)
 import functools
 import math
 
@@ -56,7 +56,10 @@ ow = S(ZeroOrMore(L(' ')))
 # identifier
 idn = Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))
 
-unit_expr = Combine(OneOrMore(Word(alphanums + '/' + ' ' + '^' + '$')))
+unit1 = Word(alphas + '$' + ' ')
+unit2 = L('/')
+unit3 = L('^') + L('2')
+unit_expr = Combine(OneOrMore(unit1 ^ unit2 ^ unit3))
 
 def parse_unit_expr(tokens):
     # print('tokens: %s' % str(tokens))
@@ -84,7 +87,7 @@ floatnumber.setParseAction(lambda tokens: float(tokens[0]))
 
 integer_or_float = integer ^ floatnumber
 
-unitst = S(L('[')) - C(unit_expr, 'unit') - S(L(']'))
+unitst = S(L('[')) + C(unit_expr, 'unit') + S(L(']'))
 
 PROVIDES = S(L('provides'))
 REQUIRES = S(L('requires'))
@@ -100,9 +103,13 @@ spa(res_statement, lambda t: CDP.ResStatement(t['rname'], t['unit']))
 
 empty_unit = S(L('[')) + S(L(']'))
 spa(empty_unit, lambda _: dict(unit=R_dimensionless))
-number_with_unit = C(integer_or_float, 'value') + unitst ^ empty_unit  # C(empty_unit, 'unit')
+number_with_unit = C(integer_or_float, 'value') + C(unit_expr, 'unit') ^ unitst ^ empty_unit
+number_with_unit = ((C(integer_or_float, 'value') + unitst) ^
+                    (C(integer_or_float, 'value') + C(unit_expr, 'unit'))
+                    )
 
 def number_with_unit_parse(t):
+    print('parsing tokens %s' % str(t))
     value = t[0]
     units = t[1]
     from mocdp.posets.rcomp import Rcomp
@@ -133,6 +140,16 @@ fvalue = Forward()
 
 setname_resource = (C(idn, 'name') + S(L('='))) + C(rvalue, 'rvalue')
 spa(setname_resource, lambda t: CDP.SetNameResource(t['name'], t['rvalue']))
+
+reserved = oneOf(['load', 'compact', 'required', 'provides', 'abstract', 'dp', 'cdp',
+                  'template'])
+variable_ref = NotAny(reserved) + C(idn, 'variable_ref_name')
+spa(variable_ref, lambda t: CDP.VariableRef(t['variable_ref_name']))
+
+constant_value = number_with_unit ^ variable_ref
+
+setname_value = (C(idn, 'setname_value') + S(L('='))) + C(constant_value, 'constant_value')
+spa(setname_value, lambda t: CDP.SetNameConstant(t['setname_value'], t['constant_value']))
 
 
 rvalue_resource_simple = C(idn, 'dp') + S(L('.')) - C(idn, 's')
@@ -178,7 +195,7 @@ binary_expr = (C(opname, 'opname') - S(L('(')) +
 
 spa(binary_expr, lambda t: binary[t['opname']](t['op1'], t['op2']))
 
-operand = rvalue_new_function ^ rvalue_resource ^ binary_expr ^ unary_expr ^ number_with_unit
+operand = rvalue_new_function ^ rvalue_resource ^ binary_expr ^ unary_expr ^ constant_value
 
 # comment_line = S(LineStart()) + ow + L('#') + line + S(EOL)
 # comment_line = ow + Literal('#') + line + S(EOL)
@@ -241,7 +258,8 @@ spa(fun_shortcut3, fun_shortcut3_parse)
 
 spa(res_shortcut3, res_shortcut3_parse)
 
-line_expr = (load_expr ^ constraint_expr ^ constraint_expr2 ^ setname_expr ^ setname_resource
+line_expr = (load_expr ^ constraint_expr ^ constraint_expr2 ^
+             (setname_value ^ setname_expr ^ setname_resource)
              ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
              ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3)
 
@@ -462,7 +480,7 @@ def parse_wrap(expr, string):
     # m = boxit
     m = lambda x: x
     try:
-        return expr.parseString(string0, parseAll=True)
+        return expr.parseString(string0, parseAll=True)  # [0]
     except (ParseException, ParseFatalException) as e:
         # ... so we can use "string" here.
         where = Where(string, line=e.lineno, column=e.col)

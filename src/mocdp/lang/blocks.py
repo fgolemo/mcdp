@@ -40,6 +40,12 @@ def eval_statement(r, context):
         rvalue = eval_rvalue(r.rvalue, context)
         context.var2resource[name] = rvalue
 
+    elif isinstance(r, CDP.SetNameConstant):
+        if r.name in context.constants:
+            msg = 'Constant %r already set.' % r.name
+            raise DPSemanticError(msg, where=r.where)
+        context.constants[r.name] = r.constant_value
+
     elif isinstance(r, CDP.ResStatement):
         # requires r.rname [r.unit]
         F = r.unit
@@ -376,6 +382,7 @@ def eval_lfunction(lf, context):
 
     if isinstance(lf, CDP.NewLimit):
         vu = lf.value_with_unit
+
         value = vu.value
         F = vu.unit
         # TODO: special conversion int -> float
@@ -530,8 +537,6 @@ def eval_rvalue(rvalue, context):
 
         if isinstance(rvalue, CDP.OpMax):
 
-            print('Opmax', rvalue)
-
             if isinstance(rvalue.a, CDP.ValueWithUnits0):
                 b = eval_rvalue(rvalue.b, context)
                 print('a is constant')
@@ -600,8 +605,18 @@ def eval_rvalue(rvalue, context):
             context.add_ndp(nres, ndp)
             return CDP.Resource(nres, nres)
 
+        if isinstance(rvalue, CDP.VariableRef):
+            if rvalue.name in context.constants:
+                return eval_rvalue(context.constants[rvalue.name], context)
+            else:
+                msg = 'Variable %r not found' % rvalue.name
+                raise DPSemanticError(msg, where=rvalue.where)
+
         if isinstance(rvalue, CDP.NewFunction):
             fname = rvalue.name
+
+            if rvalue.name in context.constants:
+                return eval_rvalue(context.constants[rvalue.name], context)
 
             if fname in context.var2resource:
                 return context.var2resource[fname]

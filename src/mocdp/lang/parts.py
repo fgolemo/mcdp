@@ -38,13 +38,18 @@ class CDPLanguage():
     Resource = namedtuplewhere('Resource', 'dp s')
     Function = namedtuplewhere('Function', 'dp s')
 
+    VariableRef = namedtuplewhere('VariableRef', 'name')
+
+    # also plays like VariableRef
     NewFunction = namedtuplewhere('NewFunction', 'name')
+
     NewResource = namedtuplewhere('NewResource', 'name')
     Constraint = namedtuplewhere('Constraint', 'function rvalue')
 
     LoadCommand = namedtuplewhere('LoadCommand', 'load_arg')
     SetName = namedtuplewhere('SetName', 'name dp_rvalue')
     SetNameResource = namedtuplewhere('SetNameResource', 'name rvalue')
+    SetNameConstant = namedtuplewhere('SetNameConstant', 'name constant_value')
 
     FunStatement = namedtuplewhere('FunStatement', 'fname unit')
     ResStatement = namedtuplewhere('ResStatement', 'rname unit')

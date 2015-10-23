@@ -4,7 +4,8 @@ from comptests.registrar import comptest
 from mocdp.dp.dp_max import Max
 from mocdp.lang.syntax import (
     binary_expr, code_spec, constraint_expr, funcname, idn, load_expr, ow,
-    parse_wrap, res_shortcut3, rvalue, simple_dp_model, unit_expr)
+    parse_wrap, res_shortcut3, rvalue, simple_dp_model, unit_expr,
+    number_with_unit, unitst)
 from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp,
     assert_semantic_error)
 from nose.tools import assert_equal
@@ -1064,16 +1065,41 @@ cdp {
 }
 """)
 
+@comptest
+def check_lang52():
+    assert_parsable_to_connected_ndp(
+"""    
+# test connected
+cdp {
+
+
+    requires weight >= 1.0 g
+    provides capacity <= 2.0 J
+
+}
+""")
 
 @comptest
 def check_lang51():
     """ Shortcuts "using" """
     print unit_expr
     print alphanums
+    print parse_wrap(unit_expr, 'R')
+    print parse_wrap(unitst, '[R]')
+
+    parse_wrap(number_with_unit, '4.0 [R]')
+
     parse_wrap(unit_expr, "N")
     parse_wrap(unit_expr, "m")
     parse_wrap(unit_expr, "N m")
+    parse_wrap(unit_expr, "m / s^2")
+    parse_wrap(unit_expr, "m/s^2")
     
+    parse_wrap(number_with_unit, '1 m')
+    parse_wrap(number_with_unit, '1 m/s')
+    parse_wrap(number_with_unit, '1 m/s^2')
+
+
 
 examples1 = [
     """

@@ -1,14 +1,8 @@
 # test connected
 cdp {  
       motor_chassis =  cdp {
-          motor = template cdp {
-            provides speed [rad/s]
-            provides torque [N m]
-            #    
-            requires cost [$]
-            requires weight [g]
-            requires voltage [V]
-            requires current [A]
+          motor =  cdp {
+           
           }
            #
           chassis = template cdp {
@@ -24,85 +18,9 @@ cdp {
           }
  
           
-          requires voltage, current for motor
-        requires total_weight for chassis
-          requires cost >= chassis.cost + motor.cost
-          provides velocity using chassis
-          requires controller for chassis
-
-          torque provided by motor >= motor_torque required by chassis
-          speed provided by motor >= motor_speed required by chassis
-          
-          provides payload [g]
-          chassis.payload >= payload + motor.weight
-                   
+       
 
       }
           
-          MCB = template cdp {
-            provides voltage [V]
-            provides current [A]
-            #    
-            requires cost [$]
-            requires weight [g]
-            requires input_voltage [V]
-            requires input_current [A]
-          }
-          motor_chassis.voltage <= MCB.voltage
-          motor_chassis.current <= MCB.current
-
-         
-          #
-          battery = template cdp {
-            provides capacity [J]
-            requires cost [$]
-            requires weight [g] 
-          }
-          #
-          shipping = template cdp {
-            provides ships [g]
-            requires postage [$]
-          }
-
-          
-          provides velocity using motor_chassis
-          
-          provides endurance [s]
-          
-          #
-          shipping.ships >= motor_chassis.total_weight
-          #
-          #
-          # also minimize the weight
-          requires w [g]
-          w >= battery.weight
-         
-
-
-          autonomy = template cdp {
-            provides controller [R]
-            requires computation_graph [R]
-            requires cost [$]
-            requires weight [g]
-          }
-          autonomy.controller >= motor_chassis.controller
-
-          computation = template cdp {
-            provides computation_graph [R]
-            requires voltage [V]
-            requires current [A]
-            requires cost [$]
-            requires weight [g]
-          }
-          autonomy.computation_graph <= computation.computation_graph
-          # motor_chassis.controller <= autonomy.controller
-
-      requires cost [$]
-          cost >= motor_chassis.cost + battery.cost + MCB.cost  + autonomy.cost + shipping.postage + computation.cost
-
-          motor_chassis.payload >=  battery.weight + MCB.weight + autonomy.weight +computation.weight
-
-          battery.capacity >= endurance * ( (MCB.input_current +  computation.current) * (MCB.input_voltage + computation.voltage))
-          
-          
-        }
+               
+}

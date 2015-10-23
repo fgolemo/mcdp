@@ -1,8 +1,8 @@
+# -*- coding: utf-8 -*-
 from .rcomp import Rcomp
 from pint import UnitRegistry
 import functools
 from contracts.utils import check_isinstance, raise_wrapped
-from pint.unit import DefinitionSyntaxError
 from mocdp.exceptions import DPSyntaxError
 
 # __all__ = [
@@ -22,13 +22,6 @@ _ureg = MyUnitRegistry()
 
 def get_ureg():
     ureg = _ureg
-#     try:
-#         ureg.parse_expression('dollars')
-#     except DefinitionSyntaxError:
-#         raise
-#     except ValueError:
-#         ureg.define(' dollars = [cost] ')
-#     ureg.parse_expression('dollars')
     return ureg
 
 class RcompUnits(Rcomp):
@@ -94,17 +87,27 @@ def make_rcompunit(units):
     return RcompUnits(unit, extra=None)
 
 def format_pint_unit_short(units):
+    # some preferred ways
+    if units == R_Power.units:  # units = A*V*s
+        return 'W'
+    if units == R_Energy.units:
+        return 'J'
+    if units == R_Force.units:
+        return 'N'
+
     x = '{:~}'.format(units)
     x = x.replace('1.0', '')
     x = x.replace('1', '')
     x = x.replace('dollars', '$')
     x = x.replace(' ', '')
     x = x.replace('**', '^')
+    x = x.replace('^2', '²')
     return str(x)
 
 R_dimensionless = make_rcompunit('m/m')
 R_Time = make_rcompunit('s')
 R_Power = make_rcompunit('W')
+R_Force = make_rcompunit('N')
 R_Cost = make_rcompunit('$')
 R_Energy = make_rcompunit('J')
 R_Weight = make_rcompunit('g')

@@ -31,6 +31,8 @@ class Context():
         # energy = endurance * power
         self.var2resource = {}  # str -> Resource
 
+        self.constants = {}  # str -> ValueWithUnits
+
     def info(self, s):
         # print(s)
         pass
