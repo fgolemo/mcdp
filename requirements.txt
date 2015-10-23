@@ -3,9 +3,8 @@ networkx
 pint
 #numpy
 #matplotlib
-# dkeopk-e git+https://github.com/AndreaCensi/reprep.git@env_fault#egg=RepRep
-reprep
 -e git+https://github.com/AndreaCensi/contracts.git@env_fault#egg=PyContracts
+reprep
 -e git+https://github.com/AndreaCensi/compmake.git@env_fault#egg=compmake
 -e git+https://github.com/AndreaCensi/quickapp.git@env_fault#egg=quickapp
 -e git+https://github.com/AndreaCensi/conf_tools.git@env_fault#egg=ConfTools
