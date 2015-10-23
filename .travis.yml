@@ -10,6 +10,9 @@ python:
   # - "3.5-dev" # 3.5 development branch
   - "pypy"
 # command to install dependencies
+cache:
+  directories:
+    - $HOME/.cache/pip
 install: 
 - "echo '\nconfig interactive 0' >> .compmake.rc "
 - "pip install -r requirements.txt"
