@@ -17,6 +17,7 @@ install:
 - "echo '\nconfig interactive 0' >> .compmake.rc "
 - "pip install -r requirements.txt"
 - dot -V
+- python -c "import matplotlib"
 - python setup.py develop
 # command to run tests
 script: 
