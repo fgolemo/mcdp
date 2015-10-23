@@ -8,6 +8,7 @@ python:
   # - "3.4"
   # - "3.5"
   # - "3.5-dev" # 3.5 development branch
+  - "pypy"
 # command to install dependencies
 install: 
 - "echo '\nconfig interactive 0' >> .compmake.rc "
@@ -22,4 +23,7 @@ addons:
     packages:
     - python-matplotlib
     - python-numpy
+    - python-yaml
+    - python-cjson
     - python-pil
+    - graphviz # TODO: add check for existence
