@@ -24,8 +24,8 @@ install:
 script: 
 - make comptests-run-parallel
 after_failure:
-- comptests out/comptests -c "ls failed"
-- comptests out/comptests -c "why failed"
+- compmake out/comptests -c "ls failed"
+- compmake out/comptests -c "why failed"
 addons:
   apt:
     # sources:
