@@ -8,4 +8,4 @@ networkx
 -e git+https://github.com/AndreaCensi/quickapp.git@env_fault#egg=quickapp
 -e git+https://github.com/AndreaCensi/conf_tools.git@env_fault#egg=ConfTools
 -e git+https://github.com/AndreaCensi/comptests.git@env_fault#egg=comptests
--e git+https://github.com/AndreaCensi/gvgen.git@env_fault#egg=gvgen
+-e git+https://github.com/AndreaCensi/gvgen.git@master#egg=gvgen
