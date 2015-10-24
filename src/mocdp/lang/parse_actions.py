@@ -9,6 +9,7 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mocdp.posets import NotBelongs, Space, mult_table
 from pyparsing import ParseException, ParseFatalException
 import functools
+from mocdp.lang.namedtuple_tricks import get_copy_with_where
 
 
 CDP = CDPLanguage
@@ -32,7 +33,7 @@ def spa(x, b):
                           where=where.__str__(), tokens=tokens)
 
         if isnamedtupleinstance(res):
-            from mocdp.lang.parts import get_copy_with_where
+
             res = get_copy_with_where(res, where=where)
         return res
     x.setParseAction(p)

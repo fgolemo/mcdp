@@ -7,7 +7,8 @@ from mocdp.lang.blocks import DPSemanticError
 from mocdp.lang.syntax import parse_ndp, parse_wrap
 from nose.tools import assert_equal
 from comptests.registrar import register_indep
-from mocdp.lang.parts import remove_where_info
+from mocdp.lang.namedtuple_tricks import remove_where_info
+
 
 
 def assert_syntax_error(s, expr, desc=None):

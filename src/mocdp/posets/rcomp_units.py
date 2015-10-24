@@ -29,7 +29,7 @@ def get_ureg():
 class RcompUnits(Rcomp):
 
 #     @contract(pint_unit=ureg.Quantity)
-    def __init__(self, pint_unit, extra):
+    def __init__(self, pint_unit):
         ureg = get_ureg()
         check_isinstance(pint_unit, ureg.Quantity)
             
@@ -84,7 +84,7 @@ def make_rcompunit(units):
     if s == 'R':
         s = 'm/m'
     unit = parse_pint(s)
-    return RcompUnits(unit, extra=None)
+    return RcompUnits(unit)
 
 def format_pint_unit_short(units):
     # some preferred ways
@@ -120,7 +120,7 @@ def mult_table_seq(seq):
 
 def mult_table(a, b):
     unit2 = a.units * b.units
-    return RcompUnits(unit2, extra=None)
+    return RcompUnits(unit2)
 #
 #     if a == R_dimensionless:
 #         return b
