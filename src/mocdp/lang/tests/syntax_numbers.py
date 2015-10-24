@@ -160,6 +160,6 @@ def check_type_universe1():
 
     tu.check_equal(R1, R2)
     tu.check_leq(R1, R2)
-    embed1, embed2 = tu.get_embedding(R1, R2)
+    _embed1, _embed2 = tu.get_embedding(R1, R2)
 
 

@@ -45,7 +45,7 @@ def assert_semantic_error(s , desc=None):
         raise_desc(Exception, msg, s=s, res=res.repr_long())
 
 @contract(returns=NamedDP)
-def assert_parsable_to_unconnected_ndp(s, desc=None):
+def assert_parsable_to_unconnected_ndp(s, desc=None):  # @UnusedVariable
     res = parse_ndp(s)
     if res.is_fully_connected():
         msg = 'The graph appears connected but it should be disconnected.'
@@ -53,7 +53,7 @@ def assert_parsable_to_unconnected_ndp(s, desc=None):
     return res
 
 @contract(returns=NamedDP)
-def assert_parsable_to_connected_ndp(s , desc=None):
+def assert_parsable_to_connected_ndp(s , desc=None):  # @UnusedVariable
     """ This asserts that s can be compiled to a *connected* ndp. """
     res = parse_ndp(s)
     if isinstance(res, SimpleWrap):
@@ -113,7 +113,7 @@ def ok(expr, string, result):
 #     job_id = 'parse-%s' % str(string)
 #     job_id = None
     expr = find_parsing_element(expr)
-    job_id = 'parse-%s-ok' % expr.name
+#     job_id = 'parse-%s-ok' % expr.name
     register_indep(parse_wrap_check, dynamic=False,
                    args=(string, expr, result), kwargs=dict())
 

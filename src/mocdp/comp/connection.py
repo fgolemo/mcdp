@@ -1,3 +1,4 @@
+from .context import Connection
 from .interfaces import NamedDP
 from .wrap import dpwrap
 from contracts import contract
@@ -6,6 +7,7 @@ from contracts.utils import (format_dict_long, format_list_long, raise_desc,
 from mocdp.comp import DPInternalError
 from mocdp.configuration import get_conftools_nameddps
 from mocdp.dp import Identity, Mux, Terminator, make_parallel, make_series
+from mocdp.dp.dp_loop import make_loop
 from mocdp.exceptions import DPSemanticError
 from mocdp.posets import PosetProduct
 from networkx.algorithms.components.connected import is_connected
@@ -15,8 +17,6 @@ from networkx.exception import NetworkXUnfeasible
 import networkx
 import re
 import warnings
-from mocdp.dp.dp_loop import make_loop
-from .context import Connection
 
 def _parse(cstring):
     """ power.a >= battery.b """
@@ -629,9 +629,8 @@ def simple_cycles_as_edges(G):
 
     return [list(c2e(c)) for c in cycles]
 
-def choose_connection_to_cut1(connections):
+def choose_connection_to_cut1(connections, name2dp):
     G = get_connection_multigraph(connections)
-    cycles = list(simple_cycles(G))
 
     from collections import defaultdict
     counts = defaultdict(lambda: 0)
@@ -654,26 +653,9 @@ def choose_connection_to_cut1(connections):
     its_connection = find_one(best_edge[0], best_edge[1])
     print('best edge: %s breaks %d of %d cycles' % (str(best_edge), ncycles_broken, ncycles))
     print('its connection is %s' % str(its_connection))
+    print('querying F = %s ' % name2dp[its_connection.dp1].get_rtype(its_connection.s1))
     return its_connection
 
-#     print(c_as_e)
-#     print('Cycles: %s ' % str(cycles))
-#     # choose one constraint
-#     cycle0 = cycles[0]
-#
-#     print('Choosing %s ' % str(cycle0))
-#
-#     # get one connection that breaks the cycle
-#     # TODO: get the one with the smallest cardinality
-#     first = cycle0[0]
-#     if len(cycle0) == 1:
-#         second = first
-#     else:
-#         second = cycle0[1]
-#
-#
-#     c = find_one(first, second)
-#     return c
 
 @contract(name2dp='dict(str:($NamedDP|str|code_spec))',
           connections='set(str|$Connection)|list(str|$Connection)',
@@ -693,15 +675,11 @@ def dpgraph_(name2dp, connections, split):
         if not cycles:
             return dpconnect(name2dp, connections, split=split)
 
-
-#         get_connection_multigraph_weighted(name2dp, connections)
-
-        c = choose_connection_to_cut1(connections)
+        c = choose_connection_to_cut1(connections, name2dp)
 
         other_connections = set()
         other_connections.update(connections)
         other_connections.remove(c)
-
 
         def connections_include_resource(conns, s):
             for c in conns:
