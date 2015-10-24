@@ -1,13 +1,12 @@
 """ Utils for graphgen """
 
-import os
-from system_cmd.meat import system_cmd_result
-import networkx as nx  # @UnresolvedImport
-from reprep.constants import MIME_PNG, MIME_PDF
-from copy import deepcopy
-import traceback
 from contextlib import contextmanager
-from system_cmd.structures import CmdException
+from copy import deepcopy
+from reprep.constants import MIME_PDF, MIME_PNG
+from system_cmd import CmdException, system_cmd_result
+import networkx as nx  # @UnresolvedImport
+import os
+import traceback
 
 
 def graphviz_run(filename_dot, output, prog='dot'):

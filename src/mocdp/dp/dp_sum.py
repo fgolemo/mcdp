@@ -2,8 +2,7 @@
 from .primitive import PrimitiveDP
 from contracts import contract
 from mocdp import get_conftools_posets
-from mocdp.posets import PosetProduct, SpaceProduct
-from mocdp.posets.rcomp_units import RcompUnits
+from mocdp.posets import PosetProduct, RcompUnits, SpaceProduct
 import functools
 
 
@@ -81,14 +80,14 @@ def check_sum_units_compatible(Fs):
     """
     F0 = Fs[0]
     errors = []
-    for i, F in enumerate(Fs):
+    for F in Fs:
         
         try: 
             F.units + F0.units
         except ValueError as e:
             errors.append(e)
         except BaseException as e:
-            print(e)
+            raise
             
     if errors:
         msg = "Units not compatible: "

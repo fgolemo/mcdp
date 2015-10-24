@@ -7,7 +7,6 @@ from mocdp.exceptions import DPSemanticError
 import warnings
 
 
-
 __all__ = [
     'Connection',
     'Context',

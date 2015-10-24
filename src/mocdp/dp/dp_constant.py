@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts import contract
-from mocdp.posets import PosetProduct, Poset  # @UnusedImport
+from mocdp.posets import Poset  # @UnusedImport
+from mocdp.posets import PosetProduct
 
 
 __all__ = [

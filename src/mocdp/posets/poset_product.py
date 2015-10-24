@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-from .poset import Poset
-from contracts import contract
+from .poset import NotLeq, Poset
 from .space_product import SpaceProduct
+from contracts import contract
 from contracts.utils import indent, raise_desc
-from mocdp.posets.poset import NotLeq
 
 __all__ = [
     'PosetProduct',

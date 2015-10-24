@@ -1,11 +1,11 @@
-from contracts import contract, raise_wrapped
 from .interfaces import NamedDP
-from mocdp.dp import PrimitiveDP
-from mocdp.posets.poset_product import PosetProduct
-from mocdp.dp.dp_flatten import get_it
-from mocdp.configuration import get_conftools_dps
+from contracts import contract, raise_wrapped
 from contracts.utils import indent, raise_desc
+from mocdp.configuration import get_conftools_dps
+from mocdp.dp import PrimitiveDP
+from mocdp.dp.dp_flatten import get_it
 from mocdp.exceptions import DPInternalError
+from mocdp.posets import PosetProduct
 import warnings
 
 __all__ = [
@@ -156,7 +156,6 @@ class SimpleWrap(NamedDP):
 
     def __repr__(self):
         return self.desc()
-#         return 'Wrap(%s|%s|%s)' % (self.get_fnames(), self.dp, self.get_rnames())
 
     def repr_long(self):
         return self.desc()

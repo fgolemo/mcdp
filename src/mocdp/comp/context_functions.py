@@ -1,6 +1,6 @@
-from mocdp.dp.dp_identity import Identity
-from mocdp.comp.context import Connection, Context
 from contracts import contract
+from mocdp.comp.context import Connection, Context
+from mocdp.dp.dp_identity import Identity
 
 
 @contract(returns='list(tuple(str, str, set($Connection)))')
@@ -17,8 +17,6 @@ def find_nodes_with_multiple_connections(context):
             if len(connections) > 1:
                 seq.append((name1, name2, connections))
     return seq
-
-
 
 
 def dpgraph_making_sure_no_reps(context):

@@ -1,50 +1,21 @@
 # -*- coding: utf-8 -*-
-from abc import ABCMeta, abstractmethod
+from .primitive_meta import PrimitiveMeta
+from abc import abstractmethod
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped, indent
+from contracts.utils import indent, raise_desc
 from decent_logs import WithInternalLog
-from mocdp.posets import (Map, NotBelongs, Poset, PosetProduct, Space,
-    SpaceProduct, UpperSet, UpperSets)
+from mocdp.posets import (
+    Map, Poset, PosetProduct, Space, SpaceProduct, UpperSet, UpperSets)
 
 __all__ = [
     'PrimitiveDP',
 ]
 
 
-class PrimitiveMeta(ABCMeta):
-    # we use __init__ rather than __new__ here because we want
-    # to modify attributes of the class *after* they have been
-    # created
-    def __init__(cls, name, bases, dct):  # @NoSelf
-        ABCMeta.__init__(cls, name, bases, dct)
-
-        if 'solve' in cls.__dict__:
-            solve = cls.__dict__['solve']
-
-            def solve2(self, f):
-                F = self.get_fun_space()
-                try:
-                    F.belongs(f)
-                except NotBelongs as e:
-                    msg = "Function passed to solve() is not in function space."
-                    raise_wrapped(NotBelongs, e, msg,
-                                  F=F, f=f, self=self)
-
-                try:
-                    return solve(self, f)
-                except NotBelongs as e:
-                    raise_wrapped(NotBelongs, e,
-                        'Solve failed.', self=self, f=f)
-                except NotImplementedError as e:
-                    raise_wrapped(NotImplementedError, e,
-                        'Solve not implemented for class %s.' % name)
-                return f
-
-            setattr(cls, 'solve', solve2)
-
 class NotFeasible(Exception):
     pass
+
 class Feasible(Exception):
     pass
 

@@ -1,8 +1,7 @@
 from contracts import contract
 from mocdp.dp import PrimitiveDP
 from mocdp.posets import Poset  # @UnusedImport
-from mocdp.posets import PosetProduct
-from mocdp.posets.utils import poset_minima
+from mocdp.posets import PosetProduct, poset_minima
 import numpy as np
 
 __all__ = [
@@ -15,7 +14,6 @@ class InvMult2(PrimitiveDP):
     @contract(Rs='tuple[2],seq[2]($Poset)')
     def __init__(self, F, Rs):
         R = PosetProduct(Rs)
-        # M = SpaceProduct((R[0],))
         M = R[0]
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 

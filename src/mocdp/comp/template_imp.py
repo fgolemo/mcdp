@@ -1,6 +1,6 @@
-from mocdp.comp.wrap import SimpleWrap
-from mocdp.dp.primitive import PrimitiveDP
-from mocdp.lang.syntax import parse_wrap, Syntax
+from .wrap import SimpleWrap
+from mocdp.dp import PrimitiveDP
+from mocdp.lang.syntax import Syntax, parse_wrap
 from mocdp.posets import PosetProduct, SpaceProduct, UpperSet
 
 __all__ = [
@@ -14,6 +14,7 @@ class Template(PrimitiveDP):
     def solve(self, _func):
         minimals = [self.R.get_bottom()]
         return UpperSet(set(minimals), self.R)
+
 Dummy = Template
 
 def template(functions, resources):

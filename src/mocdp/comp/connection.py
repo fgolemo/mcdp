@@ -4,20 +4,18 @@ from .wrap import dpwrap
 from contracts import contract
 from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
-from mocdp.comp import DPInternalError
 from mocdp.configuration import get_conftools_nameddps
 from mocdp.dp import Identity, Mux, Terminator, make_parallel, make_series
 from mocdp.dp.dp_loop import make_loop
-from mocdp.exceptions import DPSemanticError
+from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.posets import PosetProduct
-from networkx.algorithms.components.connected import is_connected
-from networkx.algorithms.cycles import simple_cycles
-from networkx.algorithms.dag import topological_sort
-from networkx.exception import NetworkXUnfeasible
-import networkx
+from networkx import NetworkXUnfeasible, DiGraph, MultiDiGraph
+from networkx.algorithms import is_connected, simple_cycles, topological_sort
+
 import re
 import warnings
 
+# TODO: can remove
 def _parse(cstring):
     """ power.a >= battery.b """
     c = re.compile(r'\s*(\w+)\s*\.(\w+)\s*>=\s*(\w+)\s*\.(\w+)\s*')
@@ -456,7 +454,7 @@ def make_name(already):
 
 @contract(connections='set($Connection)')
 def get_connection_graph(names, connections):
-    G = networkx.DiGraph()
+    G = DiGraph()
     # add names to check if it is connected
     for n in names:
         G.add_node(n)
@@ -696,16 +694,12 @@ def dpgraph_(name2dp, connections, split):
 
         split1.extend(split)
 
-
-        # print('asking to %s %s %s' % (name2dp, other_connections, split1))
         ndp = dpgraph(name2dp, other_connections, split=split1)
-        # print('the result was: %s' % ndp.repr_long())
 
         # now we make sure that the signals we have are preserved
         ndp.rindex(c.s1)
         ndp.findex(c.s2)
         l = dploop0(ndp, c.s1, c.s2)
-        # print('The result of loop was %s' % l.repr_long())
 
         l.rindex(c.s1)
 
@@ -733,7 +727,7 @@ def dpgraph_(name2dp, connections, split):
 
 @contract(connections='set($Connection)')
 def get_connection_multigraph(connections):
-    G = networkx.MultiDiGraph()
+    G = MultiDiGraph()
     for c in connections:
         dp1 = c.dp1
         dp2 = c.dp2
@@ -743,7 +737,7 @@ def get_connection_multigraph(connections):
 
 @contract(connections='set($Connection)')
 def get_connection_multigraph_weighted(name2dp, connections):
-    G = networkx.MultiDiGraph()
+    G = MultiDiGraph()
     for c in connections:
         dp1 = c.dp1
         dp2 = c.dp2

@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
+from .any import Any, BottomCompletion, TopCompletion
 from .rcomp import Rcomp
-from pint import UnitRegistry
-import functools
 from contracts.utils import check_isinstance, raise_wrapped
 from mocdp.exceptions import DPSyntaxError
+from pint import UnitRegistry
 from pint.unit import UndefinedUnitError
-from mocdp.posets.any import Any, BottomCompletion, TopCompletion
+import functools
 
 # __all__ = [
 #    'RcompUnits',

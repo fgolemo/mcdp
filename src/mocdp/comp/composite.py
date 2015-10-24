@@ -1,7 +1,6 @@
-from .interfaces import NamedDP
+from .context import Connection
+from .interfaces import NamedDP, NotConnected
 from contracts.utils import format_dict_long, format_list_long, raise_wrapped
-from mocdp.comp.context import Connection
-from mocdp.comp.interfaces import NotConnected
 from mocdp.exceptions import DPSemanticError
 
 

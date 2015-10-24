@@ -1,8 +1,12 @@
+from .poset import NotLeq, Poset
+from .space import NotEqual
 from contracts.utils import raise_wrapped
-from mocdp.posets.poset import NotLeq, Poset
-from mocdp.posets.space import NotEqual
 
-__all__ = ['Any', 'TopCompletion', 'BottomCompletion']
+__all__ = [
+    'Any',
+    'TopCompletion',
+    'BottomCompletion',
+]
 
 class Any(Poset):
     """ 

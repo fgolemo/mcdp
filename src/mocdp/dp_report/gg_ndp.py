@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
-from contracts.library.dummy import Any
 from mocdp.comp import CompositeNamedDP, SimpleWrap
 from mocdp.dp import (
     Constant, GenericUnary, Identity, Limit, Max, Min, Product, ProductN, Sum,
     SumN)
 from mocdp.lang.blocks import get_missing_connections
-from mocdp.posets import (BottomCompletion, R_dimensionless, Rcomp, RcompUnits,
-    TopCompletion)
-from mocdp.posets.rcomp_units import format_pint_unit_short
+from mocdp.posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
+    RcompUnits, TopCompletion, format_pint_unit_short)
 from system_cmd import CmdException, system_cmd_result
 import os
 import warnings

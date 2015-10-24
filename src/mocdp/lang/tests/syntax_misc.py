@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from .utils import assert_parsable_to_unconnected_ndp
 from comptests.registrar import comptest, comptest_fails
-from mocdp.dp.dp_max import Max
+from mocdp.dp import Max
 from mocdp.lang.syntax import Syntax, parse_wrap
 from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp,
     assert_semantic_error)
