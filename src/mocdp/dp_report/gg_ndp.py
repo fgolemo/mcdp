@@ -10,6 +10,8 @@ from system_cmd import CmdException, system_cmd_result
 import os
 import warnings
 from mocdp.posets.rcomp_units import format_pint_unit_short
+from contracts.library.dummy import Any
+from mocdp.posets.any import BottomCompletion, TopCompletion
 
 
 class GraphDrawingContext():
@@ -40,6 +42,8 @@ class GraphDrawingContext():
         warnings.warn('Add option here')
         if self.level == 0:
             return False
+
+        return False
         return True
         if ndp.is_fully_connected():
             return False
@@ -53,6 +57,8 @@ def gvgen_from_ndp(ndp):
     cluster_functions = gg.newItem("")
 
     gg.styleAppend("external", "shape", "none")
+    gg.styleAppend("external_cluster", "shape", "box")
+    gg.styleAppend("external_cluster", "color", "red")
 
     gg.styleAppend("connector", "shape", "plaintext")
     gg.styleAppend("simple", "shape", "box")
@@ -115,18 +121,19 @@ def gvgen_from_ndp(ndp):
         gg.styleApply("external", x)
 
         l = gg.newLink(n, x)
+
         if False:
             gg.propertyAppend(l, "headport", "w")
             gg.propertyAppend(l, "tailport", "e")
 
-    gg.styleApply("external", cluster_functions)
-    gg.styleApply("external", cluster_resources)
+    gg.styleApply("external_cluster", cluster_functions)
+    gg.styleApply("external_cluster", cluster_resources)
 
     # XXX: for some reason cannot turn off the border, using "white"
-    gg.propertyAppend(cluster_functions, "shape", "plain")
-    gg.propertyAppend(cluster_functions, "color", "white")
-    gg.propertyAppend(cluster_resources, "shape", "plain")
-    gg.propertyAppend(cluster_resources, "color", "white")
+#     gg.propertyAppend(cluster_functions, "shape", "plain")
+#     gg.propertyAppend(cluster_functions, "color", "white")
+#     gg.propertyAppend(cluster_resources, "shape", "box")
+#     gg.propertyAppend(cluster_resources, "color", "red")
 
     return gg
 
@@ -172,6 +179,11 @@ def choose_best_icon(iconoptions, imagepath='icons'):
         if os.path.exists(imagename):
             return resize_icon(imagename, imagepath, 100)
     return None
+
+def is_simple(ndp):
+    return isinstance(ndp, SimpleWrap) and isinstance(ndp.dp,
+     (Min, Max, Identity, GenericUnary, Sum, SumN, Product, ProductN))
+
 
 def create_simplewrap(gdc, ndp):
     assert isinstance(ndp, SimpleWrap)
@@ -266,9 +278,14 @@ def create_simplewrap(gdc, ndp):
     return functions, resources
 
 def format_unit(R):
+    if R == BottomCompletion(TopCompletion(Any())):
+        return '[*]'
+    warnings.warn('fix bug')
+    if isinstance(R, BottomCompletion):
+        return '[*]'
     if R == R_dimensionless:
-        # return '[R]'
-        return ''
+#         return '[R]'
+        return '[]'
     elif isinstance(R, RcompUnits):
         return '[%s]' % format_pint_unit_short(R.units)
     elif isinstance(R, Rcomp):
@@ -377,6 +394,9 @@ def create_composite(gdc, ndp):  # @UnusedVariable
                 split = gdc.newItem('')
                 gdc.styleApply('splitter', split)
                 l = gdc.newLink(orig, split)
+                gdc.gg.propertyAppend(l, "constraint", "false")
+                gdc.gg.propertyAppend(l, "weight", "0")
+
                 gdc.styleApply('splitter_link', l)
                 names2resources[name][rn] = split
         
@@ -426,6 +446,35 @@ def create_composite(gdc, ndp):  # @UnusedVariable
         l2 = gdc.newLink(n_b, box, label=get_signal_label(c.s1, ub))
         if False:
             gdc.gg.propertyAppend(l2, "tailport", "e")
+
+        # XXX
+#         if is_simple(ndp.context.names[c.dp1]) and
+        
+        ok2 = False
+        both_simple = is_simple(ndp.context.names[c.dp1]) and is_simple(ndp.context.names[c.dp2])
+        ok1 = False
+#         import numpy as np
+#         ok2 = np.random.rand() < 0.8
+#         ok2 = True
+#         print ok2
+        if ok1:
+            gdc.gg.propertyAppend(l1, 'constraint', 'false')
+        if ok2:
+            gdc.gg.propertyAppend(l2, 'constraint', 'false')
+
+        any_simple = is_simple(ndp.context.names[c.dp1]) or is_simple(ndp.context.names[c.dp2])
+
+        if both_simple:
+            weight = 0
+        elif any_simple:
+            weight = 0.5
+        else:
+            weight = 1
+        if any_simple:
+            gdc.gg.propertyAppend(l2, 'weight', '%s' % weight)
+            gdc.gg.propertyAppend(l1, 'weight', '%s' % weight)
+            
+
 
     unconnected_fun, unconnected_res = get_missing_connections(ndp.context)
     for (dp, fn) in unconnected_fun:

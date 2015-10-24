@@ -6,6 +6,7 @@ from .space_meta import SpaceMeta
 
 class NotBelongs(Exception):
     pass
+
 class NotEqual(Exception):
     pass
 

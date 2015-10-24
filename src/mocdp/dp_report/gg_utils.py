@@ -87,10 +87,10 @@ def gg_figure(r, name, ggraph):
         with open(filename_dot, 'w') as fo:
             s = get_dot_string(ggraph)
             fo.write(s)
-#         ff = '%s.dot' % id(r)
-#         print('writing to %r' % ff)
-#         with open(ff, 'w') as f2:
-#             f2.write(s)
+        ff = '%s.dot' % id(r)
+        print('writing to %r' % ff)
+        with open(ff, 'w') as f2:
+            f2.write(s)
 
         prog = 'dot'
         with f.data_file('graph', MIME_PNG) as filename:

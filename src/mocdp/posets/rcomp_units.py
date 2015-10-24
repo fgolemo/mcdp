@@ -5,6 +5,7 @@ import functools
 from contracts.utils import check_isinstance, raise_wrapped
 from mocdp.exceptions import DPSyntaxError
 from pint.unit import UndefinedUnitError
+from mocdp.posets.any import Any, BottomCompletion, TopCompletion
 
 # __all__ = [
 #    'RcompUnits',
@@ -66,7 +67,8 @@ def parse_pint(s0):
     ureg = get_ureg()
     try:
         return ureg.parse_expression(s)
-    except UndefinedUnitError as e:
+
+    except (UndefinedUnitError, SyntaxError) as e:
         msg = 'Cannot parse units %r.' % s0
         raise_wrapped(DPSyntaxError, e, msg, compact=True)
     except Exception as e:
@@ -75,6 +77,10 @@ def parse_pint(s0):
 
 def make_rcompunit(units):
     s = units.strip()
+
+    if s == '*':
+        return BottomCompletion(TopCompletion(Any()))
+
     if s == 'R':
         s = 'm/m'
     unit = parse_pint(s)

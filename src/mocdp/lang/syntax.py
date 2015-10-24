@@ -20,6 +20,10 @@ CDP = CDPLanguage
 
 ParserElement.enablePackrat()
 
+reserved = oneOf(['load', 'compact', 'required', 'provides', 'abstract', 'dp', 'cdp', 'mcdp',
+                  'template', 'sub'])
+
+
 # ParserElement.setDefaultWhitespaceChars('')
 
 # shortcuts
@@ -62,7 +66,8 @@ idn = Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))
 unit1 = Word(alphas + '$' + ' ')
 unit2 = L('/')
 unit3 = L('^') + L('2')
-unit_expr = Combine(OneOrMore(unit1 ^ unit2 ^ unit3))
+unit4 = L('*')  # any
+unit_expr = Combine(OneOrMore(unit1 ^ unit2 ^ unit3 ^ unit4))
 
 def parse_unit_expr(tokens):
     # print('tokens: %s' % str(tokens))
@@ -112,7 +117,6 @@ number_with_unit = ((C(integer_or_float, 'value') + unitst) ^
                     )
 
 def number_with_unit_parse(t):
-    print('parsing tokens %s' % str(t))
     value = t[0]
     units = t[1]
     from mocdp.posets.rcomp import Rcomp
@@ -134,7 +138,7 @@ spa(load_expr, lambda t: CDP.LoadCommand(t['load_arg']))
 
 dp_rvalue = Forward()
 # <dpname> = ...
-setname_expr = (C(idn, 'dpname') + S(L('='))) + C(dp_rvalue, 'dp_rvalue')
+setname_expr = (S(O('sub')) - C(idn, 'dpname') + S(L('='))) + C(dp_rvalue, 'dp_rvalue')
 spa(setname_expr, lambda t: CDP.SetName(t['dpname'], t['dp_rvalue']))
 
 
@@ -144,8 +148,6 @@ fvalue = Forward()
 setname_resource = (C(idn, 'name') + S(L('='))) + C(rvalue, 'rvalue')
 spa(setname_resource, lambda t: CDP.SetNameResource(t['name'], t['rvalue']))
 
-reserved = oneOf(['load', 'compact', 'required', 'provides', 'abstract', 'dp', 'cdp',
-                  'template'])
 variable_ref = NotAny(reserved) + C(idn, 'variable_ref_name')
 spa(variable_ref, lambda t: CDP.VariableRef(t['variable_ref_name']))
 
@@ -267,7 +269,8 @@ line_expr = (load_expr ^ constraint_expr ^ constraint_expr2 ^
              ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3)
 
 
-dp_model = S(L('cdp')) - S(L('{')) - ZeroOrMore(S(ow) + line_expr) - S(L('}'))
+CDPTOKEN = S(L('cdp')) | S(L('mcdp'))
+dp_model = CDPTOKEN - S(L('{')) - ZeroOrMore(S(ow) + line_expr) - S(L('}'))
 
 
 funcname = Combine(idn + ZeroOrMore(L('.') - idn))

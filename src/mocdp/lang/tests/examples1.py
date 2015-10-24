@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .utils import assert_parsable_to_unconnected_ndp
-from comptests.registrar import comptest
+from comptests.registrar import comptest, comptest_fails
 from mocdp.dp.dp_max import Max
 from mocdp.lang.syntax import (
     binary_expr, code_spec, constraint_expr, funcname, idn, load_expr, ow,
@@ -1064,7 +1064,7 @@ cdp {
 }
 """)
 
-@comptest
+@comptest_fails
 def check_lang52():
     assert_parsable_to_connected_ndp(
 """    
