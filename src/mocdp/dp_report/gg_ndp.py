@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
+from contracts.library.dummy import Any
 from mocdp.comp import CompositeNamedDP, SimpleWrap
 from mocdp.dp import (
     Constant, GenericUnary, Identity, Limit, Max, Min, Product, ProductN, Sum,
     SumN)
 from mocdp.lang.blocks import get_missing_connections
-from mocdp.posets import R_dimensionless, Rcomp, RcompUnits
+from mocdp.posets import (BottomCompletion, R_dimensionless, Rcomp, RcompUnits,
+    TopCompletion)
+from mocdp.posets.rcomp_units import format_pint_unit_short
 from system_cmd import CmdException, system_cmd_result
 import os
 import warnings
-from mocdp.posets.rcomp_units import format_pint_unit_short
-from contracts.library.dummy import Any
-from mocdp.posets.any import BottomCompletion, TopCompletion
 
 
 class GraphDrawingContext():
@@ -423,57 +423,51 @@ def create_composite(gdc, ndp):  # @UnusedVariable
     for c in ndp.context.connections:
         if c in ignore_connections:
             continue
-        # print('the function is %s . %s' % (c.dp2, c.s2))
-        # print('the resource is %s . %s' % (c.dp1, c.s1))
         dpa = names2functions[c.dp2]
         n_a = dpa[c.s2]
         dpb = names2resources[c.dp1]
         n_b = dpb[c.s1]
 
-#         if n_a == n_b:
-#             print('skipping')
-#             continue
+        second_simple = is_simple(ndp.context.names[c.dp2])
+        first_simple = is_simple(ndp.context.names[c.dp1])
+        any_simple = second_simple or first_simple
+        both_simple = second_simple and first_simple
 
-        box = gdc.newItem('')  # '≼')
-        gdc.styleApply("leq", box)
+        # TODO: make parameter
+        skip = second_simple
 
         ua = ndp.context.names[c.dp2].get_ftype(c.s2)
         ub = ndp.context.names[c.dp1].get_rtype(c.s1)
-        l1 = gdc.newLink(box, n_a , label=get_signal_label(c.s2, ua))
-        if False:
-            gdc.gg.propertyAppend(l1, "headport", "w")
 
-        l2 = gdc.newLink(n_b, box, label=get_signal_label(c.s1, ub))
-        if False:
-            gdc.gg.propertyAppend(l2, "tailport", "e")
+        if skip:
+            l1 = gdc.newLink(n_b, n_a , label=get_signal_label(c.s1, ub))
 
-        # XXX
-#         if is_simple(ndp.context.names[c.dp1]) and
-        
-        ok2 = False
-        both_simple = is_simple(ndp.context.names[c.dp1]) and is_simple(ndp.context.names[c.dp2])
-        ok1 = False
-#         import numpy as np
-#         ok2 = np.random.rand() < 0.8
-#         ok2 = True
-#         print ok2
-        if ok1:
-            gdc.gg.propertyAppend(l1, 'constraint', 'false')
-        if ok2:
-            gdc.gg.propertyAppend(l2, 'constraint', 'false')
-
-        any_simple = is_simple(ndp.context.names[c.dp1]) or is_simple(ndp.context.names[c.dp2])
-
-        if both_simple:
-            weight = 0
-        elif any_simple:
-            weight = 0.5
         else:
-            weight = 1
-        if any_simple:
-            gdc.gg.propertyAppend(l2, 'weight', '%s' % weight)
-            gdc.gg.propertyAppend(l1, 'weight', '%s' % weight)
+            box = gdc.newItem('')  # '≼')
+            gdc.styleApply("leq", box)
+    
+            l1 = gdc.newLink(box, n_a , label=get_signal_label(c.s2, ua))
+            if False:
+                gdc.gg.propertyAppend(l1, "headport", "w")
+    
+            l2 = gdc.newLink(n_b, box, label=get_signal_label(c.s1, ub))
+            if False:
+                gdc.gg.propertyAppend(l2, "tailport", "e")
             
+            if False:
+                gdc.gg.propertyAppend(l1, 'constraint', 'false')
+                gdc.gg.propertyAppend(l2, 'constraint', 'false')
+    
+            if both_simple:
+                weight = 0
+            elif any_simple:
+                weight = 0.5
+            else:
+                weight = 1
+            if any_simple:
+                gdc.gg.propertyAppend(l2, 'weight', '%s' % weight)
+                gdc.gg.propertyAppend(l1, 'weight', '%s' % weight)
+                
 
 
     unconnected_fun, unconnected_res = get_missing_connections(ndp.context)

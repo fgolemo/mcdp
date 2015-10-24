@@ -2,41 +2,29 @@
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     assert_syntax_error)
 from comptests.registrar import comptest
-from contracts import contract
-from contracts.utils import raise_wrapped
 from mocdp.lang.parts import CDPLanguage
-from mocdp.lang.syntax import (floatnumber, integer, integer_or_float,
-    number_with_unit, parse_wrap, parse_ndp)
+from mocdp.lang.syntax import Syntax, parse_ndp
+from mocdp.lang.tests.utils import parse_wrap_check
 from mocdp.posets import R_Weight
-from nose.tools import assert_equal
-from numpy.testing.utils import assert_allclose
-from mocdp.posets.types_universe import get_types_universe
 from mocdp.posets.rcomp_units import make_rcompunit
+from mocdp.posets.types_universe import get_types_universe
+from numpy.testing.utils import assert_allclose
 
 CDP = CDPLanguage
 
-@contract(string=str)
-def parse_wrap_check(string, expr, result):
-    try:
-        res = parse_wrap(expr, string)[0]  # note the 0, first element
-        assert_equal(result, res)
-    except BaseException as e:
-        msg = 'Cannot parse %r' % string
-        raise_wrapped(Exception, e, msg, expr=expr, string=string, expected=result)
-
 @comptest
 def check_numbers1():
-    parse_wrap_check('1.0', floatnumber, 1.0)
-    assert_syntax_error('1', floatnumber)
-    parse_wrap_check('1', integer, 1)
-    parse_wrap_check('1', integer_or_float, 1)
+    parse_wrap_check('1.0', Syntax.floatnumber, 1.0)
+    assert_syntax_error('1', Syntax.floatnumber)
+    parse_wrap_check('1', Syntax.integer, 1)
+    parse_wrap_check('1', Syntax.integer_or_float, 1)
 
 @comptest
 def check_numbers2():
-    parse_wrap_check('1.0 [g]', number_with_unit, CDP.ValueWithUnits(1.0, R_Weight))
-    assert_syntax_error('1', number_with_unit)
+    parse_wrap_check('1.0 [g]', Syntax.number_with_unit, CDP.ValueWithUnits(1.0, R_Weight))
+    assert_syntax_error('1', Syntax.number_with_unit)
     # automatic conversion to float
-    parse_wrap_check('1 [g]', number_with_unit, CDP.ValueWithUnits(1.0, R_Weight))
+    parse_wrap_check('1 [g]', Syntax.number_with_unit, CDP.ValueWithUnits(1.0, R_Weight))
 
 @comptest
 def check_numbers3():

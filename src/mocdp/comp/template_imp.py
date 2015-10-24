@@ -1,6 +1,6 @@
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.dp.primitive import PrimitiveDP
-from mocdp.lang.syntax import parse_wrap, unit_expr
+from mocdp.lang.syntax import parse_wrap, Syntax
 from mocdp.posets import PosetProduct, SpaceProduct, UpperSet
 
 __all__ = [
@@ -21,7 +21,7 @@ def template(functions, resources):
     fnames = list(functions)
     rnames = list(resources)
 
-    get_space = lambda x: parse_wrap(unit_expr, x)[0]
+    get_space = lambda x: parse_wrap(Syntax.unit_expr, x)[0]
 
     Fs = tuple(get_space(functions[x]) for x in fnames)
     Rs = tuple(get_space(resources[x]) for x in rnames)

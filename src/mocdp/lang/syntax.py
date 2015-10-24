@@ -1,538 +1,274 @@
 # -*- coding: utf-8 -*-
-from .parts import CDPLanguage
-from .utils import parse_action
-from contracts import contract
-from contracts.interface import Where
-from contracts.utils import indent, raise_desc, raise_wrapped
-from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
-from mocdp.posets.rcomp_units import (mult_table, make_rcompunit,
-    R_dimensionless)
-from mocdp.posets.space import NotBelongs, Space
-from pyparsing import (CaselessLiteral, Combine, Forward, Group, Literal,
-    OneOrMore, Optional, Or, ParseException, ParseFatalException, ParserElement,
-    Suppress, Word, ZeroOrMore, alphanums, alphas, nums, oneOf, opAssoc,
-    operatorPrecedence, NotAny)
-import functools
+from .parse_actions import *  # @UnusedWildImport
+from mocdp.lang.helpers import square
+from mocdp.posets import R_dimensionless, make_rcompunit
+from pyparsing import (
+    CaselessLiteral, Combine, Forward, Group, Literal, NotAny, OneOrMore,
+    Optional, Or, ParserElement, Suppress, Word, ZeroOrMore, alphanums, alphas,
+    nums, oneOf, opAssoc, operatorPrecedence)
 import math
 
-CDP = CDPLanguage
 
 
 ParserElement.enablePackrat()
 
-reserved = oneOf(['load', 'compact', 'required', 'provides', 'abstract', 'dp', 'cdp', 'mcdp',
-                  'template', 'sub'])
-
-
-# ParserElement.setDefaultWhitespaceChars('')
-
-# shortcuts
-S = Suppress
-L = Literal
-O = Optional
-# "call"
-C = lambda x, b: x.setResultsName(b)
-
-def spa(x, b):
-    @parse_action
-    def p(tokens, loc, s):
-        where = Where(s, loc)
-        try:
-            res = b(tokens)
-        except DPSyntaxError as e:
-            e.where = where
-            raise DPSyntaxError(str(e), where=where)
-        except DPSemanticError as e:
-            if e.where is None:
-                e.where = where
-            raise DPSemanticError(str(e), where=where)
-        except BaseException as e:
-            raise_wrapped(DPInternalError, e, "Error while parsing.",
-                          where=where.__str__(), tokens=tokens)
-
-        if hasattr(res, 'where'):
-            res.where = where
-        return res
-    x.setParseAction(p)
-
-# optional whitespace
-ow = S(ZeroOrMore(L(' ')))
-# EOL = S(LineEnd())
-# line = SkipTo(LineEnd(), failOn=LineStart() + LineEnd())
-
-# identifier
-idn = Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))
-
-unit1 = Word(alphas + '$' + ' ')
-unit2 = L('/')
-unit3 = L('^') + L('2')
-unit4 = L('*')  # any
-unit_expr = Combine(OneOrMore(unit1 ^ unit2 ^ unit3 ^ unit4))
-
-def parse_unit_expr(tokens):
-    # print('tokens: %s' % str(tokens))
-    x = tokens[0]
-    return make_rcompunit(x)
-
-spa(unit_expr, parse_unit_expr)
-
-# numbers
-number = Word(nums)
-point = Literal('.')
-e = CaselessLiteral('E')
-plusorminus = Literal('+') | Literal('-')
-integer = Combine(O(plusorminus) + number)
-# Note that '42' is not a valid float...
-floatnumber = (Combine(integer + point + O(number) + O(e + integer)) |
-                Combine(integer + e + integer))
-
-def convert_int(tokens):
-    assert(len(tokens) == 1)
-    return int(tokens[0])
-
-integer.setParseAction(convert_int)
-floatnumber.setParseAction(lambda tokens: float(tokens[0]))
-
-integer_or_float = integer ^ floatnumber
-
-unitst = S(L('[')) + C(unit_expr, 'unit') + S(L(']'))
-
-PROVIDES = S(L('provides'))
-REQUIRES = S(L('requires'))
-USING = S(L('using'))
-FOR = S(L('for'))
-
 
-fun_statement = PROVIDES + C(idn, 'fname') + unitst
-spa(fun_statement, lambda t: CDP.FunStatement(t['fname'], t['unit']))
+class Syntax():
+    keywords = ['load', 'compact', 'required', 'provides', 'abstract',
+                      'dp', 'cdp', 'mcdp', 'template', 'sub']
+    reserved = oneOf(keywords)
 
-res_statement = REQUIRES + C(idn, 'rname') + unitst
-spa(res_statement, lambda t: CDP.ResStatement(t['rname'], t['unit']))
+    # ParserElement.setDefaultWhitespaceChars('')
 
-empty_unit = S(L('[')) + S(L(']'))
-spa(empty_unit, lambda _: dict(unit=R_dimensionless))
-number_with_unit = C(integer_or_float, 'value') + C(unit_expr, 'unit') ^ unitst ^ empty_unit
-number_with_unit = ((C(integer_or_float, 'value') + unitst) ^
-                    (C(integer_or_float, 'value') + C(unit_expr, 'unit'))
-                    )
+    # shortcuts
+    S = Suppress
+    L = Literal
+    O = Optional
+    # "call"
+    C = lambda x, b: x.setResultsName(b)
 
-def number_with_unit_parse(t):
-    value = t[0]
-    units = t[1]
-    from mocdp.posets.rcomp import Rcomp
-    if isinstance(value, int) and isinstance(units, Rcomp):
-        value = float(value)
-    try:
-        units.belongs(value)
-    except NotBelongs as e:
-        msg = 'Value %r does not belong to %s.' % (value, units)
-        raise_desc(DPSemanticError, msg)
-    res = CDP.ValueWithUnits(value, units)
-    return res
+    # optional whitespace
+    ow = S(ZeroOrMore(L(' ')))
+    # EOL = S(LineEnd())
+    # line = SkipTo(LineEnd(), failOn=LineStart() + LineEnd())
 
-spa(number_with_unit, number_with_unit_parse)
+    # identifier
+    idn = Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))
 
-# load battery
-load_expr = S(L('load')) - C(idn, 'load_arg')
-spa(load_expr, lambda t: CDP.LoadCommand(t['load_arg']))
+    unit1 = Word(alphas + '$' + ' ')
+    unit2 = L('/')
+    unit3 = L('^') + L('2')
+    unit4 = L('*')  # any
+    unit_expr = Combine(OneOrMore(unit1 ^ unit2 ^ unit3 ^ unit4))
 
-dp_rvalue = Forward()
-# <dpname> = ...
-setname_expr = (S(O('sub')) - C(idn, 'dpname') + S(L('='))) + C(dp_rvalue, 'dp_rvalue')
-spa(setname_expr, lambda t: CDP.SetName(t['dpname'], t['dp_rvalue']))
 
+    spa(unit_expr, lambda t:  make_rcompunit(t[0]))
 
-rvalue = Forward()
-fvalue = Forward()
+    # numbers
+    number = Word(nums)
+    point = Literal('.')
+    e = CaselessLiteral('E')
+    plusorminus = Literal('+') | Literal('-')
+    integer = Combine(O(plusorminus) + number)
+    # Note that '42' is not a valid float...
+    floatnumber = (Combine(integer + point + O(number) + O(e + integer)) |
+                    Combine(integer + e + integer))
 
-setname_resource = (C(idn, 'name') + S(L('='))) + C(rvalue, 'rvalue')
-spa(setname_resource, lambda t: CDP.SetNameResource(t['name'], t['rvalue']))
+    spa(integer, lambda t: int(t[0]))
+    spa(floatnumber, lambda t: float(t[0]))
 
-variable_ref = NotAny(reserved) + C(idn, 'variable_ref_name')
-spa(variable_ref, lambda t: CDP.VariableRef(t['variable_ref_name']))
+    integer_or_float = integer ^ floatnumber
 
-constant_value = number_with_unit ^ variable_ref
+    unitst = S(L('[')) + C(unit_expr, 'unit') + S(L(']'))
 
-setname_value = (C(idn, 'setname_value') + S(L('='))) + C(constant_value, 'constant_value')
-spa(setname_value, lambda t: CDP.SetNameConstant(t['setname_value'], t['constant_value']))
+    PROVIDES = S(L('provides'))
+    REQUIRES = S(L('requires'))
+    USING = S(L('using'))
+    FOR = S(L('for'))
 
 
-rvalue_resource_simple = C(idn, 'dp') + S(L('.')) - C(idn, 's')
+    fun_statement = PROVIDES + C(idn, 'fname') + unitst
+    spa(fun_statement, lambda t: CDP.FunStatement(t['fname'], t['unit']))
 
-prep = (S(L('required')) - S(L('by'))) | S(L('of'))
-rvalue_resource_fancy = C(idn, 's') + prep - C(idn, 'dp')
-rvalue_resource = rvalue_resource_simple ^ rvalue_resource_fancy
-spa(rvalue_resource, lambda t: CDP.Resource(t['dp'], t['s']))
+    res_statement = REQUIRES + C(idn, 'rname') + unitst
+    spa(res_statement, lambda t: CDP.ResStatement(t['rname'], t['unit']))
 
-rvalue_new_function = C(idn, 'new_function')
-spa(rvalue_new_function, lambda t: CDP.NewFunction(t['new_function']))
+    empty_unit = S(L('[')) + S(L(']'))
+    spa(empty_unit, lambda _: dict(unit=R_dimensionless))
+    number_with_unit = C(integer_or_float, 'value') + C(unit_expr, 'unit') ^ unitst ^ empty_unit
+    number_with_unit = ((C(integer_or_float, 'value') + unitst) ^
+                        (C(integer_or_float, 'value') + C(unit_expr, 'unit'))
+                        )
 
-lf_new_resource = C(idn, 'new_resource')
-spa(lf_new_resource, lambda t: CDP.NewResource(t['new_resource']))
 
-lf_new_limit = C(Group(number_with_unit), 'limit')
-spa(lf_new_limit, lambda t: CDP.NewLimit(t['limit'][0]))
 
-def square(x):
-    return x * x
+    spa(number_with_unit, number_with_unit_parse)
 
-unary = {
-    'sqrt': lambda op1: CDP.GenericNonlinearity(math.sqrt, op1, lambda F: F),
-    'square': lambda op1: CDP.GenericNonlinearity(square, op1, lambda F: F),
-}
-unary_op = Or([L(x) for x in unary])
-unary_expr = (C(unary_op, 'opname') - S(L('('))
-                + C(rvalue, 'op1')) - S(L(')'))
+    # load battery
+    load_expr = S(L('load')) - C(idn, 'load_arg')
+    spa(load_expr, lambda t: CDP.LoadCommand(t['load_arg']))
 
-spa(unary_expr, lambda t: unary[t['opname']](t['op1']))
+    dp_rvalue = Forward()
+    # <dpname> = ...
+    setname_expr = (S(O('sub')) - C(idn, 'dpname') + S(L('='))) + C(dp_rvalue, 'dp_rvalue')
+    spa(setname_expr, lambda t: CDP.SetName(t['dpname'], t['dp_rvalue']))
 
 
-binary = {
-    'max': CDP.OpMax,
-    'min': CDP.OpMin,
-}
+    rvalue = Forward()
+    fvalue = Forward()
 
-opname = Or([L(x) for x in binary])
-binary_expr = (C(opname, 'opname') - S(L('(')) +
-                C(rvalue, 'op1') - S(L(','))
-                + C(rvalue, 'op2')) - S(L(')'))
+    setname_resource = (C(idn, 'name') + S(L('='))) + C(rvalue, 'rvalue')
+    spa(setname_resource, lambda t: CDP.SetNameResource(t['name'], t['rvalue']))
 
+    variable_ref = NotAny(reserved) + C(idn, 'variable_ref_name')
+    spa(variable_ref, lambda t: CDP.VariableRef(t['variable_ref_name']))
 
-spa(binary_expr, lambda t: binary[t['opname']](t['op1'], t['op2']))
+    constant_value = number_with_unit ^ variable_ref
 
-operand = rvalue_new_function ^ rvalue_resource ^ binary_expr ^ unary_expr ^ constant_value
+    setname_value = (C(idn, 'setname_value') + S(L('='))) + C(constant_value, 'constant_value')
+    spa(setname_value, lambda t: CDP.SetNameConstant(t['setname_value'], t['constant_value']))
 
-# comment_line = S(LineStart()) + ow + L('#') + line + S(EOL)
-# comment_line = ow + Literal('#') + line + S(EOL)
 
+    rvalue_resource_simple = C(idn, 'dp') + S(L('.')) - C(idn, 's')
 
-simple = (C(idn, 'dp2') + S(L('.')) - C(idn, 's2'))
-fancy = (C(idn, 's2') + S(L('provided')) - S(L('by')) - C(idn, 'dp2'))
+    prep = (S(L('required')) - S(L('by'))) | S(L('of'))
+    rvalue_resource_fancy = C(idn, 's') + prep - C(idn, 'dp')
+    rvalue_resource = rvalue_resource_simple ^ rvalue_resource_fancy
+    spa(rvalue_resource, lambda t: CDP.Resource(t['dp'], t['s']))
 
-spa(simple, lambda t: CDP.Function(t['dp2'], t['s2']))
-spa(fancy, lambda t: CDP.Function(t['dp2'], t['s2']))
+    rvalue_new_function = C(idn, 'new_function')
+    spa(rvalue_new_function, lambda t: CDP.NewFunction(t['new_function']))
 
+    lf_new_resource = C(idn, 'new_resource')
+    spa(lf_new_resource, lambda t: CDP.NewResource(t['new_resource']))
 
-fvalue_operand = lf_new_limit ^ simple ^ fancy ^ lf_new_resource ^ (S(L('(')) - (lf_new_limit ^ simple ^ fancy ^ lf_new_resource) - S(L(')')))
+    lf_new_limit = C(Group(number_with_unit), 'limit')
+    spa(lf_new_limit, lambda t: CDP.NewLimit(t['limit'][0]))
 
-GEQ = S(L('>=')) 
-LEQ = S(L('<='))
+    unary = {
+        'sqrt': lambda op1: CDP.GenericNonlinearity(math.sqrt, op1, lambda F: F),
+        'square': lambda op1: CDP.GenericNonlinearity(square, op1, lambda F: F),
+    }
+    unary_op = Or([L(x) for x in unary])
+    unary_expr = (C(unary_op, 'opname') - S(L('('))
+                    + C(rvalue, 'op1')) - S(L(')'))
 
-constraint_expr = C(fvalue, 'lf') + GEQ - C(rvalue, 'rvalue')
-spa(constraint_expr, lambda t: CDP.Constraint(t['lf'], t['rvalue']))
+    spa(unary_expr, lambda t: Syntax.unary[t['opname']](t['op1']))
 
-constraint_expr2 = C(rvalue, 'rvalue') + LEQ - C(fvalue, 'lf')
-spa(constraint_expr2, lambda t: CDP.Constraint(t['lf'], t['rvalue']))
 
+    binary = {
+        'max': CDP.OpMax,
+        'min': CDP.OpMin,
+    }
 
+    opname = Or([L(x) for x in binary])
+    binary_expr = (C(opname, 'opname') - S(L('(')) +
+                    C(rvalue, 'op1') - S(L(','))
+                    + C(rvalue, 'op2')) - S(L(')'))
 
-fun_shortcut1 = PROVIDES + C(idn, 'fname') + USING + C(idn, 'name')
-res_shortcut1 = REQUIRES + C(idn, 'rname') + FOR + C(idn, 'name')
 
-fun_shortcut2 = PROVIDES + C(idn, 'fname') + LEQ - C(fvalue, 'lf')
-res_shortcut2 = REQUIRES + C(idn, 'rname') + GEQ - C(rvalue, 'rvalue')
+    spa(binary_expr, lambda t: Syntax.binary[t['opname']](t['op1'], t['op2']))
 
-fun_shortcut3 = PROVIDES + C(Group(idn + OneOrMore(S(L(',')) + idn)), 'fnames') + USING + C(idn, 'name')
-res_shortcut3 = REQUIRES + C(Group(idn + OneOrMore(S(L(',')) + idn)), 'rnames') + FOR + C(idn, 'name')
+    operand = rvalue_new_function ^ rvalue_resource ^ binary_expr ^ unary_expr ^ constant_value
 
+    # comment_line = S(LineStart()) + ow + L('#') + line + S(EOL)
+    # comment_line = ow + Literal('#') + line + S(EOL)
 
 
-spa(fun_shortcut1, lambda t: CDP.FunShortcut1(t['fname'], t['name']))
-spa(res_shortcut1, lambda t: CDP.ResShortcut1(t['rname'], t['name']))
+    simple = (C(idn, 'dp2') + S(L('.')) - C(idn, 's2'))
+    fancy = (C(idn, 's2') + S(L('provided')) - S(L('by')) - C(idn, 'dp2'))
 
-spa(fun_shortcut2, lambda t: CDP.FunShortcut2(t['fname'], t['lf']))
-spa(res_shortcut2, lambda t: CDP.ResShortcut2(t['rname'], t['rvalue']))
+    spa(simple, lambda t: CDP.Function(t['dp2'], t['s2']))
+    spa(fancy, lambda t: CDP.Function(t['dp2'], t['s2']))
 
-def res_shortcut3_parse(tokens):
-    name = tokens['name']
-    res = []
-    for rname in tokens['rnames']:
-        res.append(CDP.ResShortcut1(rname, name))
-    return CDP.MultipleStatements(res)
 
-def fun_shortcut3_parse(tokens):
-    name = tokens['name']
-    res = []
-    for fname in tokens['fnames']:
-        res.append(CDP.FunShortcut1(fname, name))
-    return CDP.MultipleStatements(res)
+    fvalue_operand = lf_new_limit ^ simple ^ fancy ^ lf_new_resource ^ (S(L('(')) - (lf_new_limit ^ simple ^ fancy ^ lf_new_resource) - S(L(')')))
 
+    # Fractions
 
+    integer_fraction = C(integer, 'num') + S(L('/')) + C(integer, 'den')
+    spa(integer_fraction, lambda t: CDP.IntegerFraction(t['num'], t['den']))
 
-spa(fun_shortcut3, fun_shortcut3_parse)
 
-spa(res_shortcut3, res_shortcut3_parse)
+    power_expr = (S(L('pow')) - S(L('(')) +
+                    C(rvalue, 'op1') - S(L(','))
+                    + C(integer_fraction, 'exponent')) - S(L(')'))
 
-line_expr = (load_expr ^ constraint_expr ^ constraint_expr2 ^
-             (setname_value ^ setname_expr ^ setname_resource)
-             ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
-             ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3)
-
-
-CDPTOKEN = S(L('cdp')) | S(L('mcdp'))
-dp_model = CDPTOKEN - S(L('{')) - ZeroOrMore(S(ow) + line_expr) - S(L('}'))
-
-
-funcname = Combine(idn + ZeroOrMore(L('.') - idn))
-code_spec = S(L('code')) - C(funcname, 'function')
-spa(code_spec, lambda t: CDP.PDPCodeSpec(function=t['function'], arguments={}))
-
-
-
-load_pdp = S(L('load')) - C(idn, 'name')
-spa(load_pdp, lambda t: CDP.LoadDP(t['name']))
-
-pdp_rvalue = load_pdp ^ code_spec
-
-
-simple_dp_model = (S(L('dp')) - S(L('{')) -
-                   C(Group(ZeroOrMore(fun_statement)), 'fun') -
-                   C(Group(ZeroOrMore(res_statement)), 'res') -
-                   S(L('implemented-by')) - C(pdp_rvalue, 'pdp_rvalue') -
-                   S(L('}')))
-spa(simple_dp_model, lambda t: CDP.DPWrap(list(t[0]), list(t[1]), t[2]))
-
-
-abstract_expr = S(L('abstract')) - C(dp_rvalue, 'dp_rvalue')
-spa(abstract_expr, lambda t: CDP.AbstractAway(t['dp_rvalue']))
-
-compact_expr = S(L('compact')) - C(dp_rvalue, 'dp_rvalue')
-spa(compact_expr, lambda t: CDP.Compact(t['dp_rvalue']))
-
-template_expr = S(L('template')) - C(dp_rvalue, 'dp_rvalue')
-spa(template_expr, lambda t: CDP.MakeTemplate(t['dp_rvalue']))
-
-# dp_rvalue << (load_expr | simple_dp_model) ^ dp_model
-dp_rvalue << (load_expr | simple_dp_model | dp_model | abstract_expr |
-              template_expr | compact_expr)
-
-
-@parse_action
-def mult_parse_action(tokens):
-    tokens = list(tokens[0])
-
-    ops = []
-    for i, t in enumerate(tokens):
-        if i % 2 == 0:
-            ops.append(t)
-        else:
-            assert t == '*'
-
-    assert len(ops) > 1
-
-    constants = [op for op in ops if isinstance(op, CDP.ValueWithUnits)]
-    nonconstants = [op for op in ops if not isinstance(op, CDP.ValueWithUnits)]
-
-    if constants:
-        # compile time optimization
-        def mult(a, b):
-            R = mult_table(a.unit, b.unit)
-            value = a.value * b.value
-            return CDP.ValueWithUnits(value=value, unit=R)
-        res = functools.reduce(mult, constants)
-
-        if len(nonconstants) == 0:
-            return res
-
-        if len(nonconstants) == 1:
-            op1 = nonconstants[0]
-        else:
-            assert len(nonconstants) > 1
-            op1 = CDP.MultN(nonconstants)
-        function = MultValue(res.value)
-
-        from mocdp.dp_report.gg_ndp import format_unit
-        setattr(function, '__name__', '× %s %s' % (res.unit.format(res.value),
-                                                   format_unit(res.unit)))
-        R_from_F = MultType(res.unit)
-        return CDP.GenericNonlinearity(function=function, op1=op1, R_from_F=R_from_F)
-
-    return CDP.MultN(ops)
-
-class MultType():
-    def __init__(self, factor):
-        self.factor = factor
-    def __call__(self, F):
-        return mult_table(F, self.factor)
-
-class MultValue():
-    def __init__(self, res):
-        self.res = res
-    def __call__(self, x):
-        return x * self.res
-
-@parse_action
-def plus_parse_action(tokens):
-    tokens = list(tokens[0])
-
-    ops = []
-    for i, t in enumerate(tokens):
-        if i % 2 == 0:
-            ops.append(t)
-        else:
-            assert t == '+'
-            
-    def simplify(op):
-        if isinstance(op, CDP.GenericNonlinearity) and isinstance(op.function, PlusValue):
-            value = op.function.value
-            unit = op.factor
-            vu = CDP.ValueWithUnits(value=value, unit=unit)
-            return [op.op1, vu]
-        else:
-            return [op]
-    newops = []
-    for op in ops:
-        newops.extend(simplify(op))
-
-    ops = newops
-
-    constants = [op for op in ops if isinstance(op, CDP.ValueWithUnits)]
-    nonconstants = [op for op in ops if not isinstance(op, CDP.ValueWithUnits)]
-
-    if constants:
-        # compile time optimization
-        def add(a, b):
-            R = add_table(a.unit, b.unit)
-            value = a.value + b.value
-            return CDP.ValueWithUnits(value=value, unit=R)
-        res = functools.reduce(add, constants)
-        if len(nonconstants) == 0:
-            return res
-
-        if len(nonconstants) == 1:
-            op1 = nonconstants[0]
-        else:
-            assert len(nonconstants) > 1
-            op1 = CDP.PlusN(nonconstants)
-        function = PlusValue(res.value)
-        from mocdp.dp_report.gg_ndp import format_unit
-        setattr(function, '__name__', '+ %s %s' % (res.unit.format(res.value),
-                                                   format_unit(res.unit)))
-        R_from_F = PlusType(res.unit)
-        return CDP.GenericNonlinearity(function=function, op1=op1, R_from_F=R_from_F)
-
-    return CDP.PlusN(ops)
-
-def add_table(F1, F2):
-    if not F1 == F2:
-        msg = 'Incompatible units for addition.'
-        raise_desc(DPSemanticError, msg, F1=F1, F2=F2)
-    return F1
-
-class PlusType():
-    @contract(factor=Space)
-    def __init__(self, factor):
-        self.factor = factor
-    def __call__(self, F):
-        return add_table(F, self.factor)
-
-class PlusValue():
-    def __init__(self, value):
-        self.value = value
-    def __call__(self, x):
-        return x + self.value
-
-rvalue << operatorPrecedence(operand, [
-#     ('-', 1, opAssoc.RIGHT, Unary.parse_action),
-    ('*', 2, opAssoc.LEFT, mult_parse_action),
-#     ('-', 2, opAssoc.LEFT, Binary.parse_action),
-    ('+', 2, opAssoc.LEFT, plus_parse_action),
-])
-
-@parse_action
-def mult_inv_parse_action(tokens):
-    tokens = list(tokens[0])
-
-    ops = []
-    for i, t in enumerate(tokens):
-        if i % 2 == 0:
-            ops.append(t)
-        else:
-            assert t == '*'
-
-    assert len(ops) > 1
-    assert len(ops) == 2
-    return CDP.InvMult(ops)
-
-
-fvalue << operatorPrecedence(fvalue_operand, [
-#     ('-', 1, opAssoc.RIGHT, Unary.parse_action),
-    ('*', 2, opAssoc.LEFT, mult_inv_parse_action),
-#     ('-', 2, opAssoc.LEFT, Binary.parse_action),
-#     ('+', 2, opAssoc.LEFT, plus_parse_action),
-])
-
-
-#
-# def boxit(s):
-#     lines = s.split('\n')
-#     W = max(map(len, lines))
-# #     c = ['┌', '┐', '└', '┘']
-#     s = '┌' + '┄' * (W + 2) + '┐'
-#     s += '\n' + '┆ ' + ' ' * (W) + ' ┆'
-#
-#     for l in lines:
-#         s += '\n┆ ' + l.ljust(W, '-') + ' ┆'
-#     s += '\n' + '┆ ' + ' ' * (W) + ' ┆'
-#     s += '\n' + '└' + '┄' * (W + 2) + '┘'
-#
-#     return s
-
-def parse_wrap(expr, string):
-    # Nice trick: the removE_comments doesn't change the number of lines
-    # it only truncates them...
-    string0 = remove_comments(string)
-
-    # m = boxit
-    m = lambda x: x
-    try:
-        return expr.parseString(string0, parseAll=True)  # [0]
-    except (ParseException, ParseFatalException) as e:
-        # ... so we can use "string" here.
-        where = Where(string, line=e.lineno, column=e.col)
-        raise DPSyntaxError(str(e), where=where)
-    except DPSemanticError as e:
-        msg = "User error while interpreting the model:"
-        msg += "\n\n" + indent(m(string), '  ') + '\n'
-        raise_wrapped(DPSemanticError, e, msg, compact=True)
-    except DPInternalError as e:
-        msg = "Internal error while evaluating the spec:"
-        msg += "\n\n" + indent(m(string), '  ') + '\n'
-        raise_wrapped(DPInternalError, e, msg, compact=False)
     
-def remove_comments(s):
-    lines = s.split("\n")
-    def remove_comment(line):
-        if '#' in line:
-            return line[:line.index('#')]
-        else:
-            return line
-    return "\n".join(map(remove_comment, lines))
+    spa(power_expr, power_expr_parse)
+#     spa(power_expr, lambda t: CDP.Power(op1=t['op1'], exponent=t['exponent']))
 
-# @contract(returns=NamedDP)
-def parse_ndp(string):
-    v = parse_wrap(dp_rvalue, string)[0]
-    from mocdp.lang.blocks import Context, eval_dp_rvalue
-    context = Context()
-    res = eval_dp_rvalue(v, context)
-    # I'm not sure what happens to the context
-    # if context.names # error ??
 
-    from mocdp.comp.interfaces import NamedDP
-    assert isinstance(res, NamedDP), res
-    return res
 
-def parse_line(line):
-    return parse_wrap(line_expr, line)[0]
+    GEQ = S(L('>='))
+    LEQ = S(L('<='))
 
-@parse_action
-def dp_model_parse_action(tokens):
-    res = list(tokens)
-    # if not res:
-    #    raise DPSemanticError('Empty model')
-    from mocdp.lang.blocks import interpret_commands
-    return interpret_commands(res)
+    constraint_expr = C(fvalue, 'lf') + GEQ - C(rvalue, 'rvalue')
+    spa(constraint_expr, lambda t: CDP.Constraint(t['lf'], t['rvalue']))
 
-dp_model.setParseAction(dp_model_parse_action)
+    constraint_expr2 = C(rvalue, 'rvalue') + LEQ - C(fvalue, 'lf')
+    spa(constraint_expr2, lambda t: CDP.Constraint(t['lf'], t['rvalue']))
+
+
+
+    fun_shortcut1 = PROVIDES + C(idn, 'fname') + USING + C(idn, 'name')
+    res_shortcut1 = REQUIRES + C(idn, 'rname') + FOR + C(idn, 'name')
+
+    fun_shortcut2 = PROVIDES + C(idn, 'fname') + LEQ - C(fvalue, 'lf')
+    res_shortcut2 = REQUIRES + C(idn, 'rname') + GEQ - C(rvalue, 'rvalue')
+
+    fun_shortcut3 = PROVIDES + C(Group(idn + OneOrMore(S(L(',')) + idn)), 'fnames') + USING + C(idn, 'name')
+    res_shortcut3 = REQUIRES + C(Group(idn + OneOrMore(S(L(',')) + idn)), 'rnames') + FOR + C(idn, 'name')
+
+
+
+    spa(fun_shortcut1, lambda t: CDP.FunShortcut1(t['fname'], t['name']))
+    spa(res_shortcut1, lambda t: CDP.ResShortcut1(t['rname'], t['name']))
+
+    spa(fun_shortcut2, lambda t: CDP.FunShortcut2(t['fname'], t['lf']))
+    spa(res_shortcut2, lambda t: CDP.ResShortcut2(t['rname'], t['rvalue']))
+
+
+    spa(fun_shortcut3, fun_shortcut3_parse)
+
+    spa(res_shortcut3, res_shortcut3_parse)
+
+    line_expr = (load_expr ^ constraint_expr ^ constraint_expr2 ^
+                 (setname_value ^ setname_expr ^ setname_resource)
+                 ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
+                 ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3)
+
+
+    CDPTOKEN = S(L('cdp')) | S(L('mcdp'))
+    dp_model = CDPTOKEN - S(L('{')) - ZeroOrMore(S(ow) + line_expr) - S(L('}'))
+    spa(dp_model, dp_model_parse_action)
+
+    funcname = Combine(idn + ZeroOrMore(L('.') - idn))
+    code_spec = S(L('code')) - C(funcname, 'function')
+    spa(code_spec, lambda t: CDP.PDPCodeSpec(function=t['function'], arguments={}))
+
+
+
+    load_pdp = S(L('load')) - C(idn, 'name')
+    spa(load_pdp, lambda t: CDP.LoadDP(t['name']))
+
+    pdp_rvalue = load_pdp ^ code_spec
+
+
+    simple_dp_model = (S(L('dp')) - S(L('{')) -
+                       C(Group(ZeroOrMore(fun_statement)), 'fun') -
+                       C(Group(ZeroOrMore(res_statement)), 'res') -
+                       S(L('implemented-by')) - C(pdp_rvalue, 'pdp_rvalue') -
+                       S(L('}')))
+    spa(simple_dp_model, lambda t: CDP.DPWrap(list(t[0]), list(t[1]), t[2]))
+
+
+    abstract_expr = S(L('abstract')) - C(dp_rvalue, 'dp_rvalue')
+    spa(abstract_expr, lambda t: CDP.AbstractAway(t['dp_rvalue']))
+
+    compact_expr = S(L('compact')) - C(dp_rvalue, 'dp_rvalue')
+    spa(compact_expr, lambda t: CDP.Compact(t['dp_rvalue']))
+
+    template_expr = S(L('template')) - C(dp_rvalue, 'dp_rvalue')
+    spa(template_expr, lambda t: CDP.MakeTemplate(t['dp_rvalue']))
+
+    # dp_rvalue << (load_expr | simple_dp_model) ^ dp_model
+    dp_rvalue << (load_expr | simple_dp_model | dp_model | abstract_expr |
+                  template_expr | compact_expr)
+
+    rvalue << operatorPrecedence(operand, [
+    #     ('-', 1, opAssoc.RIGHT, Unary.parse_action),
+        ('*', 2, opAssoc.LEFT, mult_parse_action),
+    #     ('-', 2, opAssoc.LEFT, Binary.parse_action),
+        ('+', 2, opAssoc.LEFT, plus_parse_action),
+    ])
+
+
+    fvalue << operatorPrecedence(fvalue_operand, [
+    #     ('-', 1, opAssoc.RIGHT, Unary.parse_action),
+        ('*', 2, opAssoc.LEFT, mult_inv_parse_action),
+    #     ('-', 2, opAssoc.LEFT, Binary.parse_action),
+    #     ('+', 2, opAssoc.LEFT, plus_parse_action),
+    ])
 
 

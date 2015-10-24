@@ -16,6 +16,10 @@ comptests-run-parallel:
 	mkdir -p $(out)
 	comptests -o $(out) --contracts --nonose -c "rparmake" mocdp  
 
+comptests-run-parallel-nocontracts:
+	mkdir -p $(out)
+	DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "rparmake" mocdp  
+
 
 clean:
 	rm -rf $(out)

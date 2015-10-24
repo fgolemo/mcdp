@@ -5,9 +5,14 @@ from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPSyntaxError
 from mocdp.lang.blocks import DPSemanticError
 from mocdp.lang.syntax import parse_ndp, parse_wrap
+from nose.tools import assert_equal
+from comptests.registrar import register_indep
+from mocdp.lang.parts import remove_where_info
 
 
 def assert_syntax_error(s, expr, desc=None):
+    if isinstance(expr, ParsingElement):
+        expr = expr.get()
     try:
         res = parse_wrap(expr, s)
     except DPSyntaxError:
@@ -40,7 +45,6 @@ def assert_semantic_error(s , desc=None):
 
 @contract(returns=NamedDP)
 def assert_parsable_to_unconnected_ndp(s, desc=None):
-    print(desc)
     res = parse_ndp(s)
     if res.is_fully_connected():
         msg = 'The graph appears connected but it should be disconnected.'
@@ -50,12 +54,100 @@ def assert_parsable_to_unconnected_ndp(s, desc=None):
 @contract(returns=NamedDP)
 def assert_parsable_to_connected_ndp(s , desc=None):
     """ This asserts that s can be compiled to a *connected* ndp. """
-    print(desc)
     res = parse_ndp(s)
     if isinstance(res, SimpleWrap):
         return res
     ndp = res.abstract()
     return ndp
+
+
+@contract(string=str)
+def parse_wrap_check(string, expr, result):
+    if isinstance(expr, ParsingElement):
+        expr = expr.get()
+
+    try:
+        res = parse_wrap(expr, string)[0]  # note the 0, first element
+        res0 = remove_where_info(res)
+        assert_equal(result, res0)
+    except BaseException as e:
+        msg = 'Cannot parse %r' % string
+        raise_wrapped(Exception, e, msg,
+                      expr=find_parsing_element(expr),
+                      string=string, expected=result)
+
+
+@contract(string=str)
+def parse_wrap_semantic_error(string, expr):
+    """ Assert semantic error """
+    if isinstance(expr, ParsingElement):
+        expr = expr.get()
+
+    try:
+        _res = parse_wrap(expr, string)[0]  # note the 0, first element
+    except DPSemanticError:
+        pass
+    except BaseException as e:
+        msg = 'Expected DPSemanticError.'
+        raise_wrapped(Exception, e, msg,
+                      expr=find_parsing_element(expr), string=string)
+
+
+@contract(string=str)
+def parse_wrap_syntax_error(string, expr):
+    """ Assert semantic error """
+    if isinstance(expr, ParsingElement):
+        expr = expr.get()
+
+    try:
+        _res = parse_wrap(expr, string)[0]  # note the 0, first element
+    except DPSyntaxError:
+        pass
+    except BaseException as e:
+        msg = 'Expected DPSyntaxError.'
+        raise_wrapped(Exception, e, msg, expr=find_parsing_element(expr), string=string)
+
+
+def ok(expr, string, result):
+#     job_id = 'parse-%s' % str(string)
+#     job_id = None
+    expr = find_parsing_element(expr)
+    job_id = 'parse-%s-ok' % expr.name
+    register_indep(parse_wrap_check, dynamic=False,
+                   args=(string, expr, result), kwargs=dict())
+
+def sem(expr, string):
+#     job_id = 'parse-%s' % str(string)
+#     job_id
+#     job_id = None
+    expr = find_parsing_element(expr)
+    register_indep(parse_wrap_semantic_error, dynamic=False,
+                   args=(string, expr), kwargs=dict())
+
+def syn(expr, string):
+#     job_id = 'parse-%s' % str(string)
+#     job_id = None
+    expr = find_parsing_element(expr)
+    register_indep(parse_wrap_syntax_error, dynamic=False,
+                   args=(string, expr), kwargs=dict())
+
+
+class ParsingElement():
+    def __init__(self, name):
+        self.name = name
+    def get(self):
+        from mocdp.lang.syntax import Syntax
+        return getattr(Syntax, self.name)
+
+@contract(returns=ParsingElement)
+def find_parsing_element(x):
+    from mocdp.lang.syntax import Syntax
+    for name, value in Syntax.__dict__.items():  # @UndefinedVariable
+        if value is x:
+            return ParsingElement(name)
+    raise ValueError('Cannot find element for %s.' % str(x))
+
+
 #         try:
 #
 #     except DPSemanticError:

@@ -16,3 +16,5 @@ coverage_information
 sandbox/live
 resized
 .ipynb_checkpoints
+4*.dot
+rafc-notebooks

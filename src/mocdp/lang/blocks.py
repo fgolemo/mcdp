@@ -8,13 +8,12 @@ from mocdp.comp import (CompositeNamedDP, Connection, Context, NamedDP,
     NotConnected, SimpleWrap, dpwrap)
 from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
 from mocdp.dp import (Constant, GenericUnary, Identity, InvMult2, Limit, Max,
-    Max1, Min, PrimitiveDP, Product, ProductN, Sum, SumN)
-from mocdp.dp.dp_sum import SumUnitsNotCompatible, check_sum_units_compatible
+    Max1, Min, PrimitiveDP, Product, ProductN, Sum, SumN, SumUnitsNotCompatible,
+    check_sum_units_compatible)
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.parts import CDPLanguage
-from mocdp.posets import (NotBelongs, NotLeq, PosetProduct, Rcomp,
+from mocdp.posets import (NotBelongs, NotEqual, NotLeq, PosetProduct, Rcomp,
     get_types_universe, mult_table, mult_table_seq)
-from mocdp.posets.space import NotEqual
 
 
 CDP = CDPLanguage

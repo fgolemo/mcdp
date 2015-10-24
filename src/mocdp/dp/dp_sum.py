@@ -3,8 +3,8 @@ from .primitive import PrimitiveDP
 from contracts import contract
 from mocdp import get_conftools_posets
 from mocdp.posets import PosetProduct, SpaceProduct
-import functools
 from mocdp.posets.rcomp_units import RcompUnits
+import functools
 
 
 __all__ = [
@@ -12,6 +12,8 @@ __all__ = [
     'SumN',
     'Product',
     'ProductN',
+    'SumUnitsNotCompatible',
+    'check_sum_units_compatible',
 ]
 
 class Sum(PrimitiveDP):

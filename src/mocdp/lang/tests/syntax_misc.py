@@ -2,22 +2,19 @@
 from .utils import assert_parsable_to_unconnected_ndp
 from comptests.registrar import comptest, comptest_fails
 from mocdp.dp.dp_max import Max
-from mocdp.lang.syntax import (
-    binary_expr, code_spec, constraint_expr, funcname, idn, load_expr, ow,
-    parse_wrap, res_shortcut3, rvalue, simple_dp_model, unit_expr,
-    number_with_unit, unitst)
+from mocdp.lang.syntax import Syntax, parse_wrap
 from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp,
     assert_semantic_error)
 from nose.tools import assert_equal
-from pyparsing import Literal, alphanums
+from pyparsing import Literal
 import warnings
 
 @comptest
 def check_lang():
-    parse_wrap(idn, 'battery')
-    parse_wrap(idn + ow, 'battery ')
-    parse_wrap(idn + ow + Literal('='), 'battery=')
-    parse_wrap(load_expr, 'load battery')
+    parse_wrap(Syntax.idn, 'battery')
+    parse_wrap(Syntax.idn + Syntax.ow, 'battery ')
+    parse_wrap(Syntax.idn + Syntax.ow + Literal('='), 'battery=')
+    parse_wrap(Syntax.load_expr, 'load battery')
 
     assert_parsable_to_connected_ndp("""
 cdp {
@@ -60,7 +57,7 @@ cdp {
 
 @comptest
 def check_lang3_times():
-    parse_wrap(rvalue, 'mission_time')
+    parse_wrap(Syntax.rvalue, 'mission_time')
 
     data = """
 cdp {
@@ -126,7 +123,7 @@ cdp {
 
 @comptest
 def check_lang4_composition():
-    parse_wrap(rvalue, 'mission_time')
+    parse_wrap(Syntax.rvalue, 'mission_time')
 
     s = """
 dp {
@@ -137,16 +134,16 @@ dp {
     implemented-by load times
 }
     """
-    parse_wrap(simple_dp_model, s)[0]
+    parse_wrap(Syntax.simple_dp_model, s)[0]
 
 
 
 @comptest
 def check_lang5_composition():
-    parse_wrap(rvalue, 'mission_time')
+    parse_wrap(Syntax.rvalue, 'mission_time')
 
-    parse_wrap(funcname, 'mocdp.example_battery.Mobility')
-    parse_wrap(code_spec, 'code mocdp.example_battery.Mobility')
+    parse_wrap(Syntax.funcname, 'mocdp.example_battery.Mobility')
+    parse_wrap(Syntax.code_spec, 'code mocdp.example_battery.Mobility')
 
     assert_parsable_to_connected_ndp("""
     cdp {
@@ -174,10 +171,10 @@ def check_lang5_composition():
 
 @comptest
 def check_lang6_composition():
-    parse_wrap(rvalue, 'mission_time')
+    parse_wrap(Syntax.rvalue, 'mission_time')
 
-    parse_wrap(funcname, 'mocdp.example_battery.Mobility')
-    parse_wrap(code_spec, 'code mocdp.example_battery.Mobility')
+    parse_wrap(Syntax.funcname, 'mocdp.example_battery.Mobility')
+    parse_wrap(Syntax.code_spec, 'code mocdp.example_battery.Mobility')
 
 
         # provides energy (T)
@@ -272,9 +269,9 @@ def check_lang8_addition():
 @comptest
 def check_lang9_max():
 
-    parse_wrap(binary_expr, 'max(f, g)')
-    parse_wrap(rvalue, 'max(f, g)')
-    parse_wrap(constraint_expr, 'hnlin.x >= max(f, g)')
+    parse_wrap(Syntax.binary_expr, 'max(f, g)')
+    parse_wrap(Syntax.rvalue, 'max(f, g)')
+    parse_wrap(Syntax.constraint_expr, 'hnlin.x >= max(f, g)')
 
     p = assert_parsable_to_connected_ndp("""
     cdp {
@@ -1035,7 +1032,7 @@ cdp {
 @comptest
 def check_lang49():
     """ Shortcuts "for" """
-    parse_wrap(res_shortcut3, "requires cost, weight for motor")
+    parse_wrap(Syntax.res_shortcut3, "requires cost, weight for motor")
     assert_parsable_to_connected_ndp(
 """    
 cdp {
@@ -1081,22 +1078,20 @@ cdp {
 @comptest
 def check_lang51():
     """ Shortcuts "using" """
-    print unit_expr
-    print alphanums
-    print parse_wrap(unit_expr, 'R')
-    print parse_wrap(unitst, '[R]')
+    print parse_wrap(Syntax.unit_expr, 'R')
+    print parse_wrap(Syntax.unitst, '[R]')
 
-    parse_wrap(number_with_unit, '4.0 [R]')
+    parse_wrap(Syntax.number_with_unit, '4.0 [R]')
 
-    parse_wrap(unit_expr, "N")
-    parse_wrap(unit_expr, "m")
-    parse_wrap(unit_expr, "N m")
-    parse_wrap(unit_expr, "m / s^2")
-    parse_wrap(unit_expr, "m/s^2")
+    parse_wrap(Syntax.unit_expr, "N")
+    parse_wrap(Syntax.unit_expr, "m")
+    parse_wrap(Syntax.unit_expr, "N m")
+    parse_wrap(Syntax.unit_expr, "m / s^2")
+    parse_wrap(Syntax.unit_expr, "m/s^2")
     
-    parse_wrap(number_with_unit, '1 m')
-    parse_wrap(number_with_unit, '1 m/s')
-    parse_wrap(number_with_unit, '1 m/s^2')
+    parse_wrap(Syntax.number_with_unit, '1 m')
+    parse_wrap(Syntax.number_with_unit, '1 m/s')
+    parse_wrap(Syntax.number_with_unit, '1 m/s^2')
 
 
 
