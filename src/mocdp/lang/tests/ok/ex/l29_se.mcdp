@@ -1,0 +1,14 @@
+# test semantic_error
+# Fails because of double constraint on DP.a 
+ cdp {
+  
+    DP = cdp {
+        provides a [R]
+        provides b [R]
+        requires c [R]
+        c >= a * b
+    }
+   
+   DP.a >= DP.c
+   DP.a >= DP.c
+  }

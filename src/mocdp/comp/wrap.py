@@ -47,7 +47,8 @@ class SimpleWrap(NamedDP):
 
                 else:
                     if not isinstance(fnames, str):
-                        raise ValueError("F and fnames incompatible: not a string: %s %s" % (F, fnames))
+                        msg = "F and fnames incompatible: not a string: %s %s" % (F, fnames)
+                        raise ValueError(msg)
                     self.F_single = True
                     self.Fname = fnames
 
@@ -117,14 +118,16 @@ class SimpleWrap(NamedDP):
             return rnames.index(r)
         except ValueError:
             msg = 'Cannot find resource %r.' % r
-            raise_desc(DPInternalError, msg, r=r, rnames=rnames, self=self.repr_long())
+            raise_desc(DPInternalError, msg,
+                       r=r, rnames=rnames, self=self.repr_long())
 
 
     def findex(self, f):
         if self.F_single:
             if not f == self.Fname:
                 msg = 'Cannot find function %r.' % f
-                raise_desc(DPInternalError, msg, fnames=[self.Fname], self=self.repr_long())
+                raise_desc(DPInternalError, msg,
+                           fnames=[self.Fname], self=self.repr_long())
             return ()
         fnames = self.get_fnames()
         try:

@@ -1,0 +1,13 @@
+# test connected
+cdp {
+    provides f [R]
+    
+    hnlin = dp {
+        provides x [R]
+        requires r [R]
+        
+        implemented-by load SimpleNonlinearity1
+    }
+    
+    max(f, hnlin.r) <= hnlin.x        
+}

@@ -1,0 +1,7 @@
+# test unconnected
+# allow empty models
+    cdp {
+  
+    DP1 = template cdp { }
+  
+  }

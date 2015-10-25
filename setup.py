@@ -4,10 +4,10 @@ from setuptools import setup, find_packages
 version = "1.0"
 
 setup(name='mocdp',
-      url='',
-      description='',
+      url='http://github.com/AndreaCensi/mcdp',
+      description='Monotone Co-Design Problems',
       long_description='',
-      package_data={'':['*.*']},
+      package_data={'':['*.*', '*.mcdp', '*.cdp', '*.png']},
       keywords="",
       license="",
 
@@ -18,7 +18,7 @@ setup(name='mocdp',
       version=version,
 
       download_url=
-        'http://github.com/AndreaCensi/mocdp/tarball/%s' % version,
+        'http://github.com/AndreaCensi/mcdp/tarball/%s' % version,
 
       package_dir={'':'src'},
       packages=find_packages('src'),
@@ -26,8 +26,17 @@ setup(name='mocdp',
         'ConfTools>=1.0,<2',
         'PyContracts>=1.2,<2',
         'quickapp', 
+        'reprep',
+        'gvgen',
+        'pint',
+        'watchdog',
+        'networkx',
       ],
-      tests_require=['nose>=1.1.2,<2'],
+      tests_require=[
+        'nose>=1.1.2,<2',
+        'comptests',
+        'compmake',
+      ],
       entry_points={
 
          'console_scripts': [

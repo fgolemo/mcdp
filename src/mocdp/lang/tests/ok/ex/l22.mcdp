@@ -1,0 +1,5 @@
+# test semantic_error
+# Need connections: don't know the value of a
+mcdp {
+	requires a [R]
+}

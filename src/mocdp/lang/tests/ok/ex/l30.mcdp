@@ -1,0 +1,9 @@
+# test unconnected
+cdp {
+  motor = abstract dp {
+    provides energy [J]
+    requires mass [g]
+
+    implemented-by load BatteryDP
+  }
+}

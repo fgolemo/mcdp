@@ -1,0 +1,9 @@
+# test connected
+cdp {
+    motor = template cdp {
+        requires cost [$]
+        requires weight [g]
+    }
+            
+    requires cost, weight for motor
+}

@@ -1,0 +1,7 @@
+# test unconnected
+cdp {
+    provides capacity [J]
+
+    battery = load battery
+    battery.capacity >= capacity
+}

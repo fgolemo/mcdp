@@ -1,0 +1,23 @@
+# test connected
+ abstract cdp {
+  provides capacity [J]
+  requires weight [g]
+
+  motor = abstract cdp {
+    provides capacity [J]
+    requires weight [g]
+
+  battery = dp {
+    provides capacity [J]
+    requires weight [g]
+
+    implemented-by load BatteryDP
+  }
+    capacity + 1.0 [J] <= battery.capacity 
+    battery.weight <= weight
+  }
+
+  motor.capacity >= capacity
+  weight >= motor.weight
+
+}

@@ -1,0 +1,15 @@
+# test semantic_error
+cdp {
+  motor = abstract cdp {
+    provides capacity [W]
+    requires mass [g]
+
+  battery = dp {
+    provides capacity [J]
+    requires mass [g]
+
+    implemented-by load BatteryDP
+  }
+    capacity <= battery.torque 
+    battery.mass <= mass
+}}

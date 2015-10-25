@@ -1,0 +1,8 @@
+# test connected
+cdp {
+    motor = template cdp {
+        requires cost [$]
+    }
+            
+    requires cost >= motor.cost
+}

@@ -1,0 +1,17 @@
+# test connected
+mcdp {
+    provides mission_time [s] 
+    
+    battery = load battery
+    times = load energy_times
+    actuation = load mobility
+# comment
+    times.power >= actuation.actuation_power
+    # comment
+    battery.capacity >= times.energy
+    times.mission_time >= mission_time
+
+# comment
+    actuation.weight >= battery.battery_weight
+    # comment
+}

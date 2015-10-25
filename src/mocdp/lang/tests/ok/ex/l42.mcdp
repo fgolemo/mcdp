@@ -1,0 +1,50 @@
+# test connected 
+ cdp {
+          motor = template cdp {
+            provides speed [R]
+            provides torque [R]
+            #    
+            requires cost [$]
+            requires weight [g]
+            requires voltage [V]
+            requires current [A]
+          }
+           #
+          chassis = template cdp {
+            provides payload [g]
+            provides velocity [R]
+            #
+            requires cost [$]
+            requires total_weight [g]
+            requires motor_speed [R]
+            requires motor_torque [R]
+
+            requires controller [R]
+          }
+ 
+
+          requires cost [$]
+          requires total_weight [g]
+          
+          requires voltage [V]
+          requires current [A]
+
+          total_weight >= chassis.total_weight 
+          
+          provides payload [g]
+          chassis.payload >= payload + motor.weight
+          
+          cost >= chassis.cost + motor.cost
+
+          torque provided by motor >= chassis.motor_torque
+          speed provided by motor >= chassis.motor_speed
+
+          provides velocity [R]
+          chassis.velocity >= velocity
+ 
+          voltage >= motor.voltage
+          current >= motor.current
+
+          requires controller [R]
+          controller >= chassis.controller
+      }

@@ -1,0 +1,10 @@
+# test semantic_error
+# Should be joule
+cdp {
+  motor = abstract dp {
+    provides energy [W]
+    requires mass [g]
+
+    implemented-by load BatteryDP
+  }
+}

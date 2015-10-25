@@ -1,10 +1,10 @@
-from conf_tools.utils.locate_files_imp import locate_files
-from conf_tools.utils.resources import dir_from_package_name
+from conf_tools.utils import dir_from_package_name, locate_files
 from contracts.utils import raise_desc
 from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp,
     assert_parsable_to_unconnected_ndp, assert_semantic_error,
     assert_syntax_error)
 import os
+
 
 def get_marked_tests(filename):
     with open(filename) as f:
@@ -60,7 +60,17 @@ def test_report_ndp1(filename, outdir, basename):
     print('Written to %r.' % f)
     return r
 
-def define_test_for(context, filename, basename):
+def known_fail(f, *args):
+    try:
+        f(*args)
+    except:
+        pass
+    else:
+        msg = 'Should be a known failure.'
+        raise Exception(msg)
+
+
+def define_test_for(context, filename, basename, known_failure=False):
     outdir = os.path.dirname(filename)
     outdir = os.path.join(outdir, 'out')
 
@@ -70,28 +80,48 @@ def define_test_for(context, filename, basename):
     for test in tests:
         n = test.__name__.replace('assert_', '').replace('_ndp', '')
         p_job_id = '%s-%s' % (basename, n)
-        p_job = context.comp_config(test_one, test, filename,
-                                    job_id=p_job_id)
         
-    if assert_parsable_to_connected_ndp in tests or assert_parsable_to_unconnected_ndp in tests:
-        job_id = '%s-%s' % (basename, 'report_ndp1')
-        r = context.comp_config(test_report_ndp1, filename, outdir, basename,
-                                job_id=job_id, extra_dep=[p_job])
-        context.add_report(r, 'examples_report_ndp1', file=basename)
-        
-    if assert_parsable_to_connected_ndp in tests:
-        job_id = '%s-%s' % (basename, 'report_dp1')
-        r = context.comp_config(test_report_dp1, filename, outdir, basename,
-                                 job_id=job_id, extra_dep=[p_job])
-        context.add_report(r, 'examples_report_dp1', file=basename)
+        if not known_failure:
+            p_job = context.comp_config(test_one, test, filename,
+                                        job_id=p_job_id)
+        else:
+            context.comp_config(known_fail, test_one, test, filename, job_id=p_job_id)
+
+    if not known_failure:
+        if (assert_parsable_to_connected_ndp in tests
+            or assert_parsable_to_unconnected_ndp in tests):
+            job_id = '%s-%s' % (basename, 'report_ndp1')
+            r = context.comp_config(test_report_ndp1, filename, outdir, basename,
+                                    job_id=job_id, extra_dep=[p_job])
+            context.add_report(r, 'examples_report_ndp1', file=basename)
+
+        if assert_parsable_to_connected_ndp in tests:
+            job_id = '%s-%s' % (basename, 'report_dp1')
+            r = context.comp_config(test_report_dp1, filename, outdir, basename,
+                                     job_id=job_id, extra_dep=[p_job])
+            context.add_report(r, 'examples_report_dp1', file=basename)
         
     
 def define_tests(context):
     folder = dir_from_package_name('mocdp.lang.tests.ok')
 
-    filenames = locate_files(folder, '*.cdp')
+    filenames = []
+    filenames.extend(locate_files(folder, '*.cdp'))
+    filenames.extend(locate_files(folder, '*.mcdp'))
 
     context = context.child('examples')
     for f in filenames:
         basename = os.path.splitext(os.path.basename(f))[0]
         define_test_for(context, f, basename)
+
+    folder_notok = 'mocdp.lang.tests.ok'
+    filenames = []
+    filenames.extend(locate_files(folder_notok, '*.cdp'))
+    filenames.extend(locate_files(folder_notok, '*.mcdp'))
+
+    context = context.child('notok')
+    for f in filenames:
+        basename = os.path.splitext(os.path.basename(f))[0]
+        define_test_for(context, f, basename, known_failure=True)
+
+

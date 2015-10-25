@@ -1,0 +1,12 @@
+# test semantic_error
+cdp {
+  
+  child1 = cdp {
+      provides a [R]
+      provides b [R]
+      requires c [R]
+      c >= a + b
+  }
+  
+  child1.F1 >= 0.0 [R] # no F1
+}

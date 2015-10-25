@@ -37,7 +37,7 @@ class GraphDrawingContext():
         self.gg.styleAppend(a, b, c)
 
     def should_I_enclose(self, ndp):
-        warnings.warn('Add option here')
+        warnings.warn('Add options here')
         if self.level == 0:
             return False
 
@@ -282,7 +282,7 @@ def format_unit(R):
     if isinstance(R, BottomCompletion):
         return '[*]'
     if R == R_dimensionless:
-#         return '[R]'
+        # return '[R]'
         return '[]'
     elif isinstance(R, RcompUnits):
         return '[%s]' % format_pint_unit_short(R.units)
@@ -298,7 +298,6 @@ def create_composite(gdc, ndp):  # @UnusedVariable
         c = gdc.newItem(gdc.yourname)
         gdc.styleApply('container', c)
         gdc = gdc.child_context(parent=c, yourname=gdc.yourname)
-
 
     names2resources = defaultdict(lambda: {})
     names2functions = defaultdict(lambda: {})
@@ -323,17 +322,21 @@ def create_composite(gdc, ndp):  # @UnusedVariable
 
     # it is connected to only one
     def is_function_with_one_connection(name):
-        return ndp.context.is_new_function(name) and len(get_connections_to_function(name)) == 1
+        return (ndp.context.is_new_function(name)
+                and len(get_connections_to_function(name)) == 1)
 
     # it is connected to only one
     def is_resource_with_one_connection(name):
-        return ndp.context.is_new_resource(name) and len(get_connections_to_resource(name)) == 1
+        return (ndp.context.is_new_resource(name)
+                and len(get_connections_to_resource(name)) == 1)
 
     def is_function_with_no_connections(name):
-        return ndp.context.is_new_function(name)  and len(get_connections_to_function(name)) == 0
+        return (ndp.context.is_new_function(name)
+                and len(get_connections_to_function(name)) == 0)
 
     def is_resource_with_no_connections(name):
-        return ndp.context.is_new_resource(name)   and len(get_connections_to_resource(name)) == 0
+        return (ndp.context.is_new_resource(name)
+                and len(get_connections_to_resource(name)) == 0)
 
     def get_connections_to_dp_resource(name, rn):
         assert name in ndp.context.names
@@ -400,7 +403,7 @@ def create_composite(gdc, ndp):  # @UnusedVariable
         
     ignore_connections = set()
     for name, value in ndp.context.names.items():
-        if  is_function_with_one_connection(name):
+        if is_function_with_one_connection(name):
             only_one = get_connections_to_function(name)[0]
             ignore_connections.add(only_one)
             node = names2functions[only_one.dp2][only_one.s2]
@@ -466,8 +469,6 @@ def create_composite(gdc, ndp):  # @UnusedVariable
                 gdc.gg.propertyAppend(l2, 'weight', '%s' % weight)
                 gdc.gg.propertyAppend(l1, 'weight', '%s' % weight)
                 
-
-
     unconnected_fun, unconnected_res = get_missing_connections(ndp.context)
     for (dp, fn) in unconnected_fun:
         x = gdc.newItem('')
@@ -487,10 +488,8 @@ def create_composite(gdc, ndp):  # @UnusedVariable
         l = gdc.newLink(n, x, label=get_signal_label(rn, R))
         gdc.styleApply('unconnected_link', l)
 
-
     functions = {}
     resources = {}
-
 
     for rname in ndp.get_rnames():
         name = ndp.context.get_name_for_res_node(rname)

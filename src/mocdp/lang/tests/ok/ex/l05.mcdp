@@ -1,0 +1,21 @@
+# test connected
+cdp {
+    provides mission_time [s]
+
+    battery = dp {
+        provides capacity [J]
+        requires battery_weight [g]
+        
+        implemented-by load BatteryDP
+    }
+    
+    actuation = dp {
+        provides weight [g]
+        requires actuation_power [W]
+        
+        implemented-by code mocdp.example_battery.Mobility
+    }
+    
+    battery.capacity >= actuation.actuation_power * mission_time    
+    actuation.weight >= battery.battery_weight
+}

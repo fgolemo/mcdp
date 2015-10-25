@@ -1,0 +1,15 @@
+# test connected
+cdp {  
+    f =  template cdp {
+        provides x [R]
+        requires y [R]
+
+    }
+    g = template cdp {
+        provides a [R]
+        requires x [R]
+    }
+    # conversion from int
+    f.x  >= f.y + g.x + 4 [R]
+    g.a >= f.y 
+  }

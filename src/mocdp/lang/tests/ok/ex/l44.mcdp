@@ -1,0 +1,8 @@
+# test connected
+cdp {
+    motor = template cdp {
+        provides speed [R]
+    }
+            
+    provides speed using motor
+}

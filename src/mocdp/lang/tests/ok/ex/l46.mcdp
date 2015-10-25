@@ -1,0 +1,9 @@
+# test connected
+# shortcut for
+cdp {
+    motor = template cdp {
+        requires cost [$]
+    }
+            
+    requires cost for motor
+}

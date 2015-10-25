@@ -1,0 +1,13 @@
+# test connected
+    cdp {  
+    f =  cdp {
+        provides a [R]
+            
+        requires c [R]
+            
+        c >= a
+    }
+
+    f.a >= f.c
+  
+  }
