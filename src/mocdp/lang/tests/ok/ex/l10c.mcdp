@@ -4,7 +4,7 @@ cdp {
     requires w1 [g]
     requires w2 [g]
     
-    battery = load battery
+    sub battery = load battery
     battery.capacity >= c
     
     w1 >= battery.battery_weight

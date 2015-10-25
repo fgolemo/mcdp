@@ -1,7 +1,7 @@
 # test connected
 # shortcut for
 cdp {
-    motor = template cdp {
+    sub motor = template cdp {
         requires cost [$]
     }
             

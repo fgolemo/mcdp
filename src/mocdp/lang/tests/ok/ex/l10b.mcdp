@@ -3,7 +3,7 @@ mcdp {
     provides c [J]
     requires w [g]
     
-    battery = load battery
+    sub battery = load battery
     battery.capacity >= c
     
     w >= battery.battery_weight

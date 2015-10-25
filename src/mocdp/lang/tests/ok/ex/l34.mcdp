@@ -1,13 +1,13 @@
 # test connected
- abstract cdp {
+abstract cdp {
   provides capacity [J]
   requires weight [g]
 
-  motor = abstract cdp {
+  sub motor = abstract cdp {
     provides capacity [J]
     requires weight [g]
 
-  battery = dp {
+  sub battery = dp {
     provides capacity [J]
     requires weight [g]
 

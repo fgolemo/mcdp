@@ -1,11 +1,11 @@
 # test connected
 cdp {  
-    f =  template cdp {
+    sub f =  template cdp {
         provides x [R]
         requires y [R]
 
     }
-    g = template cdp {
+    sub g = template cdp {
         provides a [R]
         requires x [R]
     }

@@ -1,6 +1,6 @@
 # test unconnected
 cdp {
-  motor = abstract dp {
+  sub motor = abstract dp {
     provides energy [J]
     requires mass [g]
 

@@ -2,7 +2,7 @@
 cdp {
     provides f [R]
     
-    hnlin = dp {
+    sub hnlin = dp {
         provides x [R]
         requires r [R]
         

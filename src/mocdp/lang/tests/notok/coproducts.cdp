@@ -1,0 +1,39 @@
+# test connected
+# co-products
+cdp {
+	
+	# note: no "sub"
+	battery1 = cdp {
+		provides capacity [J]
+		requires cost [$]
+		requires weight [g]
+
+		cost >= 1 $
+		weight >= 1 kg
+		capacity <= 1 J
+	}
+
+	nuclear_battery = cdp {
+		provides capacity [J]
+		requires cost [$]
+		requires weight [g]
+		requires plutonium [g]
+
+		cost >= 1.5 $
+		weight >= 1 kg
+
+		specific_energy = 12 J / g
+		
+		# we are available only in big sizes
+		effective_capacity = max(capacity, 30 J)
+		weight >= specific_energy * effective_capacity
+	}
+
+	# co-product = alternatives
+	sub battery = battery1 ^ nuclear_battery
+
+	provides capacity using battery
+	requires cost, weight, plutonium for battery
+
+
+}

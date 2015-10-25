@@ -1,9 +1,9 @@
 # test connected
-cdp {
+mcdp {
     provides mission_time [s]
 
-    battery = load battery
-    actuation = load mobility
+    sub battery = load battery
+    sub actuation = load mobility
      
     battery.capacity >= actuation.actuation_power * mission_time    
     actuation.weight >= battery.battery_weight

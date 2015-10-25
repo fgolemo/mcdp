@@ -46,18 +46,19 @@ def report_dp1(dp):
     Rinf = R.get_top()
     Fbot = F.get_bottom()
     
-    if M == PosetProduct((R_dimensionless,)):
-        s = ""
-        ms = [0.0, 0.25, 0.5, 0.75, 1.0]
-        for m in ms:
-            feasible = dp.is_feasible(Fbot, (m,), Rinf)
-            s += '\n m = %s  = %s' % (m, feasible)
-        r.text('scalarres', s)
-    else:
-        m = M.witness()
-        print(Fbot, m, Rinf)
-        feasible = dp.is_feasible(Fbot, m, Rinf)
-        r.text('some', 'bot feasible( %s, %s,%s): %s' % (Fbot, m, Rinf, feasible))
+    if False:
+        if M == PosetProduct((R_dimensionless,)):
+            s = ""
+            ms = [0.0, 0.25, 0.5, 0.75, 1.0]
+            for m in ms:
+                feasible = dp.is_feasible(Fbot, (m,), Rinf)
+                s += '\n m = %s  = %s' % (m, feasible)
+            r.text('scalarres', s)
+        else:
+            m = M.witness()
+            print(Fbot, m, Rinf)
+            feasible = dp.is_feasible(Fbot, m, Rinf)
+            r.text('some', 'bot feasible( %s, %s,%s): %s' % (Fbot, m, Rinf, feasible))
 
     return r
 

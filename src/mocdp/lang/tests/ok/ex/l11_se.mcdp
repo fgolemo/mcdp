@@ -2,6 +2,6 @@
 cdp {
     provides capacity [J]
 
-    battery = load battery
+    sub battery = load battery
     battery.capacity >= capacity
 }

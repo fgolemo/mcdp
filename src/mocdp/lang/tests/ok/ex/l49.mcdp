@@ -1,6 +1,6 @@
 # test connected
 cdp {
-    motor = template cdp {
+    sub motor = template cdp {
         requires cost [$]
         requires weight [g]
     }
