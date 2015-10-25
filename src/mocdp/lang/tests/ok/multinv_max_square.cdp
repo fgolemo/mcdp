@@ -1,7 +1,7 @@
 # test connected
 cdp {
 
-  multinv = abstract cdp {
+  sub multinv = abstract cdp {
   	requires x [R]
   	requires y [R]
   

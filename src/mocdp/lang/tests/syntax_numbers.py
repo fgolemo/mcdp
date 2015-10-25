@@ -61,7 +61,7 @@ cdp {
         provides b [m/s]
 
 
-        motor = cdp { 
+        sub motor = cdp { 
           provides vel [mph]
           requires vel2 [mph]
 

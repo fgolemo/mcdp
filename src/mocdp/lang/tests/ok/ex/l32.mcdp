@@ -1,10 +1,10 @@
 # test semantic_error
 cdp {
-  motor = abstract cdp {
+  sub motor = abstract cdp {
     provides capacity [W]
     requires mass [g]
 
-  battery = dp {
+  sub battery = dp {
     provides capacity [J]
     requires mass [g]
 

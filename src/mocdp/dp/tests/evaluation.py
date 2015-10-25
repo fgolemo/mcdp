@@ -71,7 +71,7 @@ def check_products():
 def check_evaluation():
     ndp = parse_ndp("""
     cdp {  
-    f =  cdp {
+    sub f =  cdp {
         provides a [R]
             
         requires c [R]
@@ -137,7 +137,7 @@ def check_evaluation():
 def check_evaluation2():
     ndp = parse_ndp("""
     cdp {  
-    f =  cdp {
+    sub f =  cdp {
         provides a [R]
             
         requires c [R]

@@ -1,10 +1,9 @@
 from comptests.registrar import comptest_dynamic
 from mocdp.drawing import plot_upset_R2
 from mocdp.lang.syntax import parse_ndp
-from mocdp.posets.uppersets import UpperSets
+from mocdp.posets import UpperSets
 from reprep import Report
 import numpy as np
-
 
 
 
@@ -75,7 +74,7 @@ def check_invmult2_report():
     ndp = parse_ndp("""
 cdp {
 
-    multinv = abstract cdp {
+    sub multinv = abstract cdp {
   requires x [R]
   requires y [R]
 
@@ -134,6 +133,7 @@ cdp {
 
     fig = r.figure(cols=2)
     for i, s in enumerate(ss):
+
         with fig.plot('S%d' % i) as pylab:
             plot_upset_R2(pylab, s, axis, color_shadow=[1.0, 0.8, 0.8])
 
@@ -146,15 +146,15 @@ cdp {
             pylab.plot(xs, ys, 'k-')
 
             pylab.axis(axis)
+
         with fig.plot('R%d' % i) as pylab:
             Rmin = sr[i]
             y = np.array(list(Rmin.minimals))
             x = y * 0
             pylab.plot(x, y, 'k.')
             pylab.axis((-mx / 10, mx / 10, 0, my))
+
     return r
-
-
 
 
 @comptest_dynamic
@@ -167,7 +167,7 @@ def check_invmult3_report():
     ndp = parse_ndp("""
 cdp {
 
-    multinv = abstract cdp {
+    sub multinv = abstract cdp {
   requires x [R]
   requires y [R]
 

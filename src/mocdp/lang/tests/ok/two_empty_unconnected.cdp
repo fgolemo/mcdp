@@ -1,7 +1,5 @@
 # test unconnected
 cdp {
-    a = cdp  { 
-    }
-    b = cdp {
-    }
+	sub a = cdp { }
+	sub b = cdp { }
 }

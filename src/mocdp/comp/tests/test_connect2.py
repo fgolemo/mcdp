@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from comptests.registrar import comptest
 from mocdp.comp.connection import Connection, connect2
 from mocdp.comp.wrap import SimpleWrap

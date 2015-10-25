@@ -118,9 +118,9 @@
           #
           provides x [s]                                                                      
           #
-          battery = load battery
-          times = load energy_times
-          actuation = load mobility
+          sub battery = load battery
+          sub times = load energy_times
+          sub actuation = load mobility
           #
           times.mission_time >= x
           #     
@@ -138,7 +138,7 @@
       cdp {
           provides f [R]
           
-          hnlin = dp {
+          sub hnlin = dp {
               provides x [R]
               requires r [R]
               
@@ -156,7 +156,7 @@
       cdp {
           provides f [R]
           
-          hnlin = dp {
+          sub hnlin = dp {
               provides x [R]
               requires r [R]
               
@@ -173,11 +173,11 @@
   - string: |
       cdp {
         provides f0 [R]
-        DP = cdp {
+        sub DP = cdp {
             provides f [R]
             requires r2 [R]
             
-            hnlin = dp {
+            sub hnlin = dp {
                 provides x [R]
                 requires r [R]
                
@@ -197,11 +197,11 @@
   - string: |
       cdp {
         provides f0 [R]
-        DP = cdp {
+        sub DP = cdp {
             provides f [R]
             requires r2 [R]
             
-            hnlin = dp {
+            sub hnlin = dp {
                 provides x [R]
                 requires r [R]
                 
@@ -222,11 +222,11 @@
   - string: |
       cdp {
         provides f0 [R]
-        DP = cdp {
+        sub DP = cdp {
             provides f [R]
             requires r2 [R]
             
-            hnlin = dp {
+            sub hnlin = dp {
                 provides x [R]
                 requires r [R]
                 
@@ -248,21 +248,21 @@
           provides cargo [g]
           requires total_weight [g]
           #
-          battery = dp {
+          sub battery = dp {
               provides capacity [J]
               requires battery_weight [g]
               
               implemented-by load BatteryDP
           }
           #
-          actuation = dp {
+          sub actuation = dp {
               provides weight [g]
               requires actuation_power [W]
               
               implemented-by code mocdp.example_battery.Mobility
           }
           #
-          sensing = dp {
+          sub sensing = dp {
           #
               requires sensing_power [W]
               requires mission_time [s]

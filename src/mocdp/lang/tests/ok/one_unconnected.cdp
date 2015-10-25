@@ -1,5 +1,5 @@
 # test unconnected
 cdp {
-    a = template cdp  { 
+    sub a = template cdp  { 
     }
 }

@@ -4,7 +4,7 @@
   - mocdp.lang.parse_ndp
   - string: |
         cdp {  
-          motor = template cdp {
+          sub motor = template cdp {
             provides speed [R]
             provides torque [R]
             #    
@@ -14,7 +14,7 @@
             requires current [A]
           }
           #
-          chassis = template cdp {
+          sub chassis = template cdp {
             provides payload [g]
             provides velocity [R]
             #
@@ -24,13 +24,13 @@
             requires motor_torque [R]
           }
           #
-          battery = template cdp {
+          sub battery = template cdp {
             provides capacity [J]
             requires cost [$]
             requires battery_weight [g] 
           }
           #
-          shipping = template cdp {
+          sub shipping = template cdp {
             provides ships [g]
             requires postage [$]
           }

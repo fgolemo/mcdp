@@ -8,8 +8,6 @@ from pyparsing import (
     nums, oneOf, opAssoc, operatorPrecedence)
 import math
 
-
-
 ParserElement.enablePackrat()
 
 
@@ -66,7 +64,6 @@ class Syntax():
     USING = S(L('using'))
     FOR = S(L('for'))
 
-
     fun_statement = PROVIDES + C(idn, 'fname') + unitst
     spa(fun_statement, lambda t: CDP.FunStatement(t['fname'], t['unit']))
 
@@ -77,10 +74,7 @@ class Syntax():
     spa(empty_unit, lambda _: dict(unit=R_dimensionless))
     number_with_unit = C(integer_or_float, 'value') + C(unit_expr, 'unit') ^ unitst ^ empty_unit
     number_with_unit = ((C(integer_or_float, 'value') + unitst) ^
-                        (C(integer_or_float, 'value') + C(unit_expr, 'unit'))
-                        )
-
-
+                        (C(integer_or_float, 'value') + C(unit_expr, 'unit')))
 
     spa(number_with_unit, number_with_unit_parse)
 
@@ -90,7 +84,7 @@ class Syntax():
 
     dp_rvalue = Forward()
     # <dpname> = ...
-    setname_expr = (S(O('sub')) - C(idn, 'dpname') + S(L('='))) + C(dp_rvalue, 'dp_rvalue')
+    setname_expr = S(L('sub')) - C(idn, 'dpname') - S(L('=')) - C(dp_rvalue, 'dp_rvalue')
     spa(setname_expr, lambda t: CDP.SetName(t['dpname'], t['dp_rvalue']))
 
 

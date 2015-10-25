@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from .utils import assert_parsable_to_unconnected_ndp
 from comptests.registrar import comptest, comptest_fails
 from mocdp.dp import Max
 from mocdp.lang.syntax import Syntax, parse_wrap
@@ -7,7 +6,6 @@ from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp,
     assert_semantic_error)
 from nose.tools import assert_equal
 from pyparsing import Literal
-import warnings
 
 @comptest
 def check_lang():
@@ -15,7 +13,6 @@ def check_lang():
     parse_wrap(Syntax.idn + Syntax.ow, 'battery ')
     parse_wrap(Syntax.idn + Syntax.ow + Literal('='), 'battery=')
     parse_wrap(Syntax.load_expr, 'load battery')
-
 
 
 @comptest
@@ -66,14 +63,14 @@ def check_lang8_addition():
         provides extra_payload [g]
         requires total_weight [g]
         
-        battery = dp {
+        sub battery = dp {
             provides capacity [J]
             requires weight   [g]
             
             implemented-by load BatteryDP
         }
         
-        actuation = dp {
+        sub actuation = dp {
             provides payload [g]
             requires power   [W]
             
@@ -103,7 +100,7 @@ def check_lang9_max():
     cdp {
         provides f [R]
         
-        hnlin = dp {
+        sub hnlin = dp {
             provides x [R]
             requires r [R]
             
@@ -124,7 +121,7 @@ def check_lang10_comments():
     cdp {
         provides f [R]
         
-        hnlin = dp {
+        sub hnlin = dp {
             provides x [R]
             requires r [R]
             
@@ -147,7 +144,7 @@ def check_lang11_resources():
         provides f [R]
         requires z [R]
         
-        hnlin = dp {
+       sub  hnlin = dp {
             provides x [R]
             requires r [R]
             
