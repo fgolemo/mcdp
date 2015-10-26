@@ -186,6 +186,31 @@ class RuleSimplifyPermPar(SeriesSimplificationRule):
         return res
 
 
+
+class RuleJoinPar(SeriesSimplificationRule):
+    """ 
+            
+                        
+                      |- A - |     | - C 
+        --------------|      | --- |  
+                      |- B - |     | - D
+                      
+                      
+                         |- A C
+                     ----|
+                         | - B D
+    
+    """
+    def applies(self, dp1, dp2):
+        return isinstance(dp1, Parallel) and isinstance(dp2, Parallel)
+
+    def _execute(self, dp1, dp2):
+        A = dp1.dp1
+        B = dp1.dp2
+        C = dp2.dp1
+        D = dp2.dp2
+        return make_parallel(make_series(A, C), make_series(B, D))
+
 def equiv_to_identity(dp):
     if isinstance(dp, Identity):
         return True
@@ -227,6 +252,7 @@ rules = [
     RuleSimplifyLiftB(),
     RuleSimplifyPermPar(),
     RuleMuxComposition(),
+    RuleJoinPar(),
 ]
 
 def make_series(dp1, dp2):
