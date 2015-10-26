@@ -38,7 +38,9 @@ class Rcomp(Poset):
 
         if not isinstance(x, float):
             raise_desc(NotBelongs, 'Not a float.', x=x)
-
+        if not np.isfinite(x):
+            msg = 'Not finite and not equal to top (%s).' % self.top
+            raise_desc(NotBelongs, msg, x=x)
         if not 0 <= x:
             msg = '%s ≰ %s' % (0, x)
             raise_desc(NotBelongs, msg, x=x)
@@ -81,8 +83,8 @@ class Rcomp(Poset):
         if x == self.top:
             return self.top.__repr__()
         else:
-            # return '%.3f' % x
-            return '%.7f' % x
+            # TODO: add parameter
+            return '%.3f' % x
 
     def _leq(self, a, b):
         if a == b:

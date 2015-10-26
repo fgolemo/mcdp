@@ -231,6 +231,6 @@ class DefaultBeta(Map):
 
     def _call(self, x):
         _F, s = x
-        print('Beta() for %s' % (self.dp))
-        print(' f = %s s = %s -> unchanged ' % (_F, s))
+        # print('Beta() for %s' % (self.dp))
+        # print(' f = %s s = %s -> unchanged ' % (_F, s))
         return s

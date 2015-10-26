@@ -25,12 +25,14 @@ class Limit(PrimitiveDP):
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, f):
-        if self.R.leq(f, self.limit):
+        if self.F.leq(f, self.limit):
             res = UpperSet(set([()]), self.R)
+            # print('returning res %s' % res)
             return res
         else:
             warnings.warn('Alternative is to use Top; think about it')
             empty = UpperSet(set(), self.R)
+            # print('returning empty %s' % empty)
             return empty
 
     def __repr__(self):

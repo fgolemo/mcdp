@@ -33,6 +33,8 @@ class SimpleNonlinearity1(PrimitiveDP):
 
 @contract(Ps='float')
 def T_from_Ps(Ps):
+    if Ps == 0:
+        return R_Time.get_top()
     return float(10.0 + 1 / np.sqrt(Ps))
 
 class TimeEnergyTradeoff(PrimitiveDP):

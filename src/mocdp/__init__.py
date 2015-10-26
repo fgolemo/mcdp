@@ -3,7 +3,8 @@ from .configuration import *
 from . import posets
 from . import dp
 
-
+import numpy
+numpy.seterr('raise')
 
 def jobs_comptests(context):
     # configuration

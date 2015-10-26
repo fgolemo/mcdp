@@ -98,6 +98,7 @@ def mult_parse_action(tokens):
         else:
             assert len(nonconstants) > 1
             op1 = CDP.MultN(nonconstants)
+
         function = MultValue(res.value)
 
         from mocdp.dp_report.gg_ndp import format_unit
@@ -115,8 +116,10 @@ class MultType():
         return mult_table(F, self.factor)
 
 class MultValue():
+
     def __init__(self, res):
         self.res = res
+
     def __call__(self, x):
         return x * self.res
 

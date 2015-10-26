@@ -60,6 +60,9 @@ class SumN(PrimitiveDP):
         
         res = 0.0
         for Fi, x in zip(self.Fs, func):
+            if Fi.equal(x, Fi.get_top()):
+                res = self.R.get_top()
+                break
             # reasonably sure this is correct...
             factor = 1.0 / float(self.R.units / Fi.units)
             res += factor * x

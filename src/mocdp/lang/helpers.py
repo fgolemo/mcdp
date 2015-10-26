@@ -1,3 +1,5 @@
 
+
 def square(x):
-    return x * x
+    res = x * x
+    return res

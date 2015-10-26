@@ -1,6 +1,7 @@
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.posets.poset import NotLeq, Preorder
-from mocdp.posets.space import NotEqual, Map
+from mocdp.posets.space import Map, NotEqual
+import numpy as np
 
 __all__ = ['get_types_universe']
 
@@ -70,9 +71,11 @@ class LinearMapComp(Map):
     
     def _call(self, x):
         if self.A.equal(x, self.A.get_top()):
-            return self.B.get_Top()
-        return x * self.factor
-
+            return self.B.get_top()
+        res = x * self.factor
+        if np.isinf(res):
+            return self.B.get_top()
+        return res
 
 tu = TypesUniverse()
 

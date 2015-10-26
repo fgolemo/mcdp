@@ -3,6 +3,7 @@ from .poset import NotLeq, Poset
 from .space import NotBelongs, NotEqual
 from .utils import poset_minima
 from contracts import check_isinstance, contract
+from contracts.utils import raise_desc
 
 __all__ = [
     'UpperSet',
@@ -14,6 +15,11 @@ class UpperSet():
     def __init__(self, minimals, P):
         self.minimals = frozenset(minimals)
         self.P = P
+
+#         if len(self.minimals) == 0:
+#             msg = 'Cannot create upper set from empty set.'
+#             raise_desc(ValueError, msg, P=self.P)
+
 
         problems = []
         for m in minimals:
@@ -67,9 +73,9 @@ class UpperSets(Poset):
         return map(f, chain)
 
     def belongs(self, x):
-        check_isinstance(x, UpperSet)
+#         check_isinstance(x, UpperSet)
         if not isinstance(x, UpperSet):
-            msg = 'Not an upperset: %s' % x
+            msg = 'Not an upperset: %s' % x.__repr__()
             raise NotBelongs(msg)
         if not x.P == self.P:
             msg = 'Different poset: %s ≠ %s' % (self.P, x.P)

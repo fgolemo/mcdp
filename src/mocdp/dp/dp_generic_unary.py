@@ -2,6 +2,8 @@
 from .primitive import PrimitiveDP
 from mocdp.posets import PosetProduct
 
+import numpy as np
+import warnings
 
 __all__ = [
     'GenericUnary',
@@ -15,8 +17,15 @@ class GenericUnary(PrimitiveDP):
         self.function = function
 
     def solve(self, func):
-        r = self.function(func)
+        if self.F.equal(func, self.F.get_top()):
+            r = self.R.get_top()
+        else:
+            r = self.function(func)
 
+            warnings.warn('give much more thoguth')
+            if isinstance(r, float) and np.isinf(r):
+                r = self.R.get_top()
+            
         return self.R.U(r)
 
     def __repr__(self):

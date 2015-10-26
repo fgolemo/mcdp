@@ -8,6 +8,9 @@ from mocdp.dp.dp_generic_unary import GenericUnary
 from mocdp.posets.poset_product import PosetProduct
 from mocdp.posets import R_dimensionless
 from reprep import Report
+import warnings
+from mocdp.dp.dp_constant import Constant
+from mocdp.dp.dp_limit import Limit
 
 @contract(ndp=NamedDP)
 def report_ndp1(ndp):
@@ -80,6 +83,12 @@ def gvgen_from_dp(dp0):
         label = type(dp).__name__
         if isinstance(dp, Mux):
             label = 'Mux\n%s' % str(dp.coords)
+        if isinstance(dp, Constant):
+            x = '%s %s' % (dp.R.format(dp.c), dp.R)
+            label = 'Constant\n%s' % x
+        if isinstance(dp, Limit):
+            x = '<= %s [%s]' % (dp.F.format(dp.limit), dp.F)
+            label = 'Limit\n%s' % x
         if isinstance(dp, GenericUnary):
             label = dp.__repr__()
         n = gg.newItem(label)
@@ -114,17 +123,27 @@ def gvgen_from_dp(dp0):
     def go_loop(dp):
         (n1i, n1o) = go(dp.dp1)
 
-        i = gg.newItem('L')
-        o = gg.newItem('L')
+        i = gg.newItem('|')
+        gg.propertyAppend(i, "shape", "plaintext")
+        o = gg.newItem('')
+        gg.propertyAppend(o, "shape", "point")
+
         gg.newLink(i, n1i, label=str(dp.dp1.get_fun_space()))
 
         gg.newLink(n1o, o, label=str(dp.dp1.get_res_space()))
         loop_label = str(dp.dp1.get_res_space())
-        M = dp.get_imp_space_mod_res()
-        M0 = dp.dp1.get_imp_space_mod_res()
-        loop_label += ' M0: %s' % M0
-        loop_label += ' M: %s' % M
-        gg.newLink(o, i, label=loop_label)
+
+        warnings.warn('add option')
+        if False:
+            M = dp.get_imp_space_mod_res()
+            M0 = dp.dp1.get_imp_space_mod_res()
+            loop_label += ' M0: %s' % M0
+            loop_label += ' M: %s' % M
+        l = gg.newLink(o, i, label=loop_label)
+        gg.propertyAppend(l, "color", "red")
+        gg.propertyAppend(l, "headport", "sw")
+        gg.propertyAppend(l, "tailport", "s")
+
 
         return (i, o)
 

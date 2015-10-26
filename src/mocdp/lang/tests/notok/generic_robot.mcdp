@@ -1,0 +1,43 @@
+energetics := interface {
+	provides capacity [J] 
+	requires mass    [kg]
+}
+
+actuation := interface {
+	""" A generic interface for actuation """
+	provides lift  [N]
+	requires power [W] 
+}
+
+simple_battery := map {
+	param specific_energy [J/g] = 1.0 
+
+	implementation-of energetics {
+		mass >= capacity / specific_energy
+	}
+}
+
+robot = map {
+
+	param energetics [refinement-of energetics] 
+	param act [refinement-of actuation]
+	
+	mcdp {
+		
+		sub battery := $energetics
+		sub sensing := $sensing
+
+	
+		battery.capacity >= sensing.power  
+	}
+}
+
+
+se_lithium := 1.0 J / g
+lithium_battery := simple_battery(specific_energy=se_lithium)
+
+battery := lithium_battery ^ other_battery ^ another ^ solar_panel
+ 
+my_robot := robot(energetics=battery, sensor=cavallo)
+
+

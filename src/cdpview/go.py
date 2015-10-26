@@ -10,6 +10,8 @@ import sys
 import time
 from conf_tools.global_config import GlobalConfig
 from mocdp.comp.interfaces import NotConnected
+from mocdp.dp.solver import generic_solve
+from mocdp.posets.uppersets import UpperSets
 logger = logging.getLogger(__name__)
 
 
@@ -29,7 +31,8 @@ def watch_main():
     if not path: path = '.'
     out = os.path.splitext(filename)[0]
     safe_makedirs(out)
-    def go():
+
+    def go(do_reportdp, do_reportndp):
         s = open(filename).read()
         out_r = os.path.join(out, 'report_dp1.html')
         out_r1 = os.path.join(out, 'report_ndp1.html')
@@ -54,8 +57,9 @@ def watch_main():
             r.to_html(out_r1)
             return
 
-        r1 = report_ndp1(ndp)
-        r1.to_html(out_r1)
+        if do_reportdp:
+            r1 = report_ndp1(ndp)
+            r1.to_html(out_r1)
 
         try:
             ndp.check_fully_connected()
@@ -73,16 +77,51 @@ def watch_main():
                 logger.error(str(e))
                 logger.error("Please file a bug report and attach %r." % filename)
                 r.to_html(out_r)
-                return
+                dp = None
             else:
-                r = report_dp1(dp)
+                if do_reportndp:
+                    r = report_dp1(dp)
+                else:
+                    r = None
 
+        if r is not None:
+            r.to_html(out_r)
 
-        r.to_html(out_r)
-        print('Succesful.')
+        print('Successful.')
+                
+        if dp is None:
+            return
 
-    go()
-    watch(path, go)
+        F = dp.get_fun_space()
+        f = F.get_bottom()
+        print('Querying with %s %s' % (F, F.format(f)))
+        try: 
+            trace = generic_solve(dp, f=f, max_steps=None)
+            print('result: %s' % trace.result)
+            ss = trace.get_s_sequence()
+            S = trace.S
+            print('S = %s' % str(S))
+            print('s converged to %s' % S.format(ss[-1]))
+            R = trace.dp.get_res_space()
+            UR = UpperSets(R)
+            sr = trace.get_r_sequence()
+            print('UR = %s' % UR)
+            print('R converged to %s' % UR.format(sr[-1]))
+
+        except:
+            raise
+            pass
+
+    do_reportdp = True
+    do_reportndp = True
+#     do_reportdp = False
+#     do_reportndp = False
+
+    def go0():
+        go(do_reportdp=do_reportdp, do_reportndp=do_reportndp)
+
+    go0()
+    watch(path, go0)
     
     
 def watch(path, handler):

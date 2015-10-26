@@ -54,14 +54,14 @@ class GraphDrawingContext():
 
     def should_I_skip_leq(self, context, c):
         second_simple = is_simple(context.names[c.dp2])
-        first_simple = is_simple(context.names[c.dp1])
+        # first_simple = is_simple(context.names[c.dp1])
         # any_simple = second_simple or first_simple
         # both_simple = second_simple and first_simple
 
         warnings.warn('Add options here')
         skip = second_simple
 
-        skip = False
+#         skip = False
         return skip
 
 
