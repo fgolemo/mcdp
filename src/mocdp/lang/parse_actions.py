@@ -5,11 +5,12 @@ from compmake.jobs.dependencies import isnamedtupleinstance
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
+from mocdp.dp.dp_sum import sum_units
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
+from mocdp.lang.namedtuple_tricks import get_copy_with_where
 from mocdp.posets import NotBelongs, Space, mult_table
 from pyparsing import ParseException, ParseFatalException
 import functools
-from mocdp.lang.namedtuple_tricks import get_copy_with_where
 
 
 CDP = CDPLanguage
@@ -79,34 +80,6 @@ def mult_parse_action(tokens):
 
     assert len(ops) > 1
 
-    constants = [op for op in ops if isinstance(op, CDP.ValueWithUnits)]
-    nonconstants = [op for op in ops if not isinstance(op, CDP.ValueWithUnits)]
-
-    if constants:
-        # compile time optimization
-        def mult(a, b):
-            R = mult_table(a.unit, b.unit)
-            value = a.value * b.value
-            return CDP.ValueWithUnits(value=value, unit=R)
-        res = functools.reduce(mult, constants)
-
-        if len(nonconstants) == 0:
-            return res
-
-        if len(nonconstants) == 1:
-            op1 = nonconstants[0]
-        else:
-            assert len(nonconstants) > 1
-            op1 = CDP.MultN(nonconstants)
-
-        function = MultValue(res.value)
-
-        from mocdp.dp_report.gg_ndp import format_unit
-        setattr(function, '__name__', '× %s %s' % (res.unit.format(res.value),
-                                                   format_unit(res.unit)))
-        R_from_F = MultType(res.unit)
-        return CDP.GenericNonlinearity(function=function, op1=op1, R_from_F=R_from_F)
-
     return CDP.MultN(ops)
 
 class MultType():
@@ -123,6 +96,32 @@ class MultValue():
     def __call__(self, x):
         return x * self.res
 
+def mult_constants2(a, b):
+    R = mult_table(a.unit, b.unit)
+    value = a.value * b.value
+    return CDP.ValueWithUnits(value=value, unit=R)
+
+def mult_constantsN(seq):
+    return functools.reduce(mult_constants2, seq)
+
+
+def add_table(F1, F2):
+    if not F1 == F2:
+        msg = 'Incompatible units for addition.'
+        raise_desc(DPSemanticError, msg, F1=F1, F2=F2)
+    return F1
+
+def plus_constants2(a, b):
+    R = a.unit 
+    Fs = [a.unit, b.unit]
+    values = [a.value, b.value]
+    res = sum_units(Fs, values, R)
+    return CDP.ValueWithUnits(value=res, unit=R)
+
+def plus_constantsN(constants):
+    return functools.reduce(plus_constants2, constants)
+
+
 @parse_action
 def plus_parse_action(tokens):
     tokens = list(tokens[0])
@@ -133,53 +132,8 @@ def plus_parse_action(tokens):
             ops.append(t)
         else:
             assert t == '+'
-
-    def simplify(op):
-        if isinstance(op, CDP.GenericNonlinearity) and isinstance(op.function, PlusValue):
-            value = op.function.value
-            unit = op.factor
-            vu = CDP.ValueWithUnits(value=value, unit=unit)
-            return [op.op1, vu]
-        else:
-            return [op]
-    newops = []
-    for op in ops:
-        newops.extend(simplify(op))
-
-    ops = newops
-
-    constants = [op for op in ops if isinstance(op, CDP.ValueWithUnits)]
-    nonconstants = [op for op in ops if not isinstance(op, CDP.ValueWithUnits)]
-
-    if constants:
-        # compile time optimization
-        def add(a, b):
-            R = add_table(a.unit, b.unit)
-            value = a.value + b.value
-            return CDP.ValueWithUnits(value=value, unit=R)
-        res = functools.reduce(add, constants)
-        if len(nonconstants) == 0:
-            return res
-
-        if len(nonconstants) == 1:
-            op1 = nonconstants[0]
-        else:
-            assert len(nonconstants) > 1
-            op1 = CDP.PlusN(nonconstants)
-        function = PlusValue(res.value)
-        from mocdp.dp_report.gg_ndp import format_unit
-        setattr(function, '__name__', '+ %s %s' % (res.unit.format(res.value),
-                                                   format_unit(res.unit)))
-        R_from_F = PlusType(res.unit)
-        return CDP.GenericNonlinearity(function=function, op1=op1, R_from_F=R_from_F)
-
     return CDP.PlusN(ops)
 
-def add_table(F1, F2):
-    if not F1 == F2:
-        msg = 'Incompatible units for addition.'
-        raise_desc(DPSemanticError, msg, F1=F1, F2=F2)
-    return F1
 
 class PlusType():
     @contract(factor=Space)
@@ -205,7 +159,6 @@ def mult_inv_parse_action(tokens):
         else:
             assert t == '*'
 
-    assert len(ops) > 1
     assert len(ops) == 2
     return CDP.InvMult(ops)
 

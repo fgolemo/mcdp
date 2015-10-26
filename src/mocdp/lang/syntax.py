@@ -84,23 +84,29 @@ class Syntax():
 
     dp_rvalue = Forward()
     # <dpname> = ...
-    setname_expr = S(L('sub')) - C(idn, 'dpname') - S(L('=')) - C(dp_rvalue, 'dp_rvalue')
-    spa(setname_expr, lambda t: CDP.SetName(t['dpname'], t['dp_rvalue']))
+    setsub_expr = S(L('sub')) - C(idn, 'dpname') - S(L('=')) - C(dp_rvalue, 'dp_rvalue')
+    spa(setsub_expr, lambda t: CDP.SetName(t['dpname'], t['dp_rvalue']))
 
 
     rvalue = Forward()
     fvalue = Forward()
 
-    setname_resource = (C(idn, 'name') + S(L('='))) + C(rvalue, 'rvalue')
-    spa(setname_resource, lambda t: CDP.SetNameResource(t['name'], t['rvalue']))
+    setname_rightside = rvalue
+    setname_generic = (C(idn, 'name') + S(L('='))) + C(setname_rightside, 'right_side')
+    spa(setname_generic, lambda t: CDP.SetNameGeneric(t['name'], t['right_side']))
+
+#     setname_resource = (C(idn, 'name') + S(L('='))) + C(rvalue, 'rvalue')
+#     spa(setname_resource, lambda t: CDP.SetNameResource(t['name'], t['rvalue']))
+# 
+#     setname_value = (C(idn, 'setname_value') + S(L('='))) + C(constant_value, 'constant_value')
+#     spa(setname_value, lambda t: CDP.SetNameConstant(t['setname_value'], t['constant_value']))
+
 
     variable_ref = NotAny(reserved) + C(idn, 'variable_ref_name')
     spa(variable_ref, lambda t: CDP.VariableRef(t['variable_ref_name']))
 
     constant_value = number_with_unit ^ variable_ref
 
-    setname_value = (C(idn, 'setname_value') + S(L('='))) + C(constant_value, 'constant_value')
-    spa(setname_value, lambda t: CDP.SetNameConstant(t['setname_value'], t['constant_value']))
 
 
     rvalue_resource_simple = C(idn, 'dp') + S(L('.')) - C(idn, 's')
@@ -111,7 +117,7 @@ class Syntax():
     spa(rvalue_resource, lambda t: CDP.Resource(t['dp'], t['s']))
 
     rvalue_new_function = C(idn, 'new_function')
-    spa(rvalue_new_function, lambda t: CDP.NewFunction(t['new_function']))
+    spa(rvalue_new_function, lambda t: CDP.VariableRef(t['new_function']))
 
     lf_new_resource = C(idn, 'new_resource')
     spa(lf_new_resource, lambda t: CDP.NewResource(t['new_resource']))
@@ -208,7 +214,7 @@ class Syntax():
     spa(res_shortcut3, res_shortcut3_parse)
 
     line_expr = (load_expr ^ constraint_expr ^ constraint_expr2 ^
-                 (setname_value ^ setname_expr ^ setname_resource)
+                 (setname_generic ^ setsub_expr)
                  ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
                  ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3)
 

@@ -1,3 +1,4 @@
+# test connected
 cdp {  
     provides x [s] 
     requires y [s]

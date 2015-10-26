@@ -1,15 +1,15 @@
+from abc import ABCMeta, abstractmethod
+from contracts import contract
 from contracts.utils import raise_wrapped
+from mocdp.dp.dp_flatten import Mux, get_R_from_F_coords
 from mocdp.dp.dp_identity import Identity
-from mocdp.dp.dp_flatten import Mux
+from mocdp.dp.dp_parallel import Parallel
+from mocdp.dp.dp_parallel_simplification import make_parallel
+from mocdp.dp.dp_series import Series
+from mocdp.exceptions import DPInternalError
 from mocdp.posets.poset_product import PosetProduct
 from multi_index.get_it_test import compose_indices, get_id_indices
 import warnings
-from mocdp.dp.dp_series import Series
-from abc import abstractmethod, ABCMeta
-from mocdp.exceptions import DPInternalError
-from mocdp.dp.dp_parallel import Parallel
-from mocdp.dp.dp_parallel_simplification import make_parallel
-from contracts import contract
 
 __all__ = [
     'make_series',
@@ -421,7 +421,6 @@ def wrap_series(F0, dps):
     else:
         return make_series(dps[0], wrap_series(dps[0].get_res_space(), dps[1:]))
 
-from mocdp.dp.dp_flatten import get_R_from_F_coords
 
 def simplify_indices_F(F, coords):
     # Safety check: Clearly if it's not the identity it cannot be equal to ()

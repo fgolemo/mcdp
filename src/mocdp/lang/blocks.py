@@ -8,9 +8,10 @@ from mocdp.comp import (CompositeNamedDP, Connection, Context, NamedDP,
     NotConnected, SimpleWrap, dpwrap)
 from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
 from mocdp.dp import (Constant, GenericUnary, Identity, InvMult2, Limit, Max,
-    Max1, Min, PrimitiveDP, Product, ProductN, Sum, SumN, SumUnitsNotCompatible,
-    check_sum_units_compatible)
+    Max1, Min, PrimitiveDP, ProductN)
+from mocdp.dp.dp_sum import SumN
 from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.lang.parse_actions import plus_constantsN
 from mocdp.lang.parts import CDPLanguage
 from mocdp.posets import (NotBelongs, NotEqual, NotLeq, PosetProduct, Rcomp,
     get_types_universe, mult_table, mult_table_seq)
@@ -66,16 +67,27 @@ def eval_statement(r, context):
         ndp = eval_dp_rvalue(r.dp_rvalue, context)
         context.add_ndp(name, ndp)
         
-    elif isinstance(r, CDP.SetNameResource):
+    elif isinstance(r, CDP.SetNameGeneric):
         name = r.name
-        rvalue = eval_rvalue(r.rvalue, context)
-        context.var2resource[name] = rvalue
+        right_side = r.right_side
 
-    elif isinstance(r, CDP.SetNameConstant):
         if r.name in context.constants:
             msg = 'Constant %r already set.' % r.name
             raise DPSemanticError(msg, where=r.where)
-        context.constants[r.name] = r.constant_value
+
+        if r.name in context.var2resource:
+            msg = 'Resource %r already set.' % r.name
+            raise DPSemanticError(msg, where=r.where)
+
+        try:
+            res = eval_constant(right_side, context)
+            context.constants[r.name] = res
+
+        except NotConstant as e:
+#             print('Cannot evaluate %r as constant: %s ' % (right_side, e))
+            rvalue = eval_rvalue(right_side, context)
+            # print('adding as resource')
+            context.var2resource[name] = rvalue
 
     elif isinstance(r, CDP.ResStatement):
         # requires r.rname [r.unit]
@@ -459,12 +471,12 @@ def eval_lfunction(lf, context):
     msg = 'Cannot eval_lfunction(%s)' % lf.__repr__()
     raise DPInternalError(msg)
 
-# @contract(returns=Resource)
+@contract(returns=CDP.Resource)
 def eval_rvalue(rvalue, context):
     # wants Resource or NewFunction
     try:
-        
         if isinstance(rvalue, CDP.Resource):
+        
             if not rvalue.dp in context.names:
                 msg = 'Unknown dp (%r.%r)' % (rvalue.dp, rvalue.s)
                 raise DPSemanticError(msg, where=rvalue.where)
@@ -500,100 +512,11 @@ def eval_rvalue(rvalue, context):
             context.add_connection(c2)
             return CDP.Resource(name, nres)
 
-        if isinstance(rvalue, CDP.Mult):
-            a, F1, b, F2 = eval_ops(rvalue)
-
-            try:
-                R = mult_table(F1, F2)
-            except ValueError as e:
-                msg = 'CDP is very strongly typed...'
-                raise_wrapped(DPInternalError, e, msg)
-
-            dp = Product(F1, F2, R)
-            nprefix, na, nb, nres = 'times', 'p0', 'p1', 'product'
-
-            return add_binary(dp, nprefix, na, nb, nres)
-
-
-        if isinstance(rvalue, CDP.Plus):
-            a, F1, b, F2 = eval_ops(rvalue)
-            if not F1 == F2:
-                msg = 'Incompatible units: %s and %s' % (F1, F2)
-                raise_desc(DPSemanticError, msg, rvalue=rvalue)
-
-            dp = Sum(F1)
-            nprefix, na, nb, nres = 'add', 's0', 's1', 'sum'
-
-            return add_binary(dp, nprefix, na, nb, nres)
+        if isinstance(rvalue, CDP.MultN):
+            return eval_MultN_as_rvalue(rvalue, context)
 
         if isinstance(rvalue, CDP.PlusN):
-            ops = rvalue.ops
-            assert len(ops) > 1
-            op_rs = []
-            op_Rs = []
-            for op in ops:
-                op_r = eval_rvalue(op, context)
-                op_rs.append(op_r)
-                op_R = context.get_rtype(op_r)
-                op_Rs.append(op_R)
-
-            try:
-                check_sum_units_compatible(tuple(op_Rs))
-            except SumUnitsNotCompatible as e:
-                msg = 'Incompatible units found: %s' % str(e)
-                raise DPSemanticError(msg, where=rvalue.where)
-                # raise_wrapped(DPSemanticError, e, msg, rvalue=rvalue)
-            except BaseException as e:
-                raise_wrapped(DPInternalError, e, '', op_Rs=op_Rs)
-
-            dp = SumN(tuple(op_Rs), op_Rs[0])
-
-            nres = context.new_res_name('sum')
-            fnames = []
-            for i, op in enumerate(ops):
-                ni = context.new_fun_name('s%s' % i)
-                fnames.append(ni)
-
-            ndp = dpwrap(dp, fnames, nres)
-            name = context.new_name('sum')
-            context.add_ndp(name, ndp)
-
-            for i, op in enumerate(ops):
-                c = Connection(dp1=op_rs[i].dp, s1=op_rs[i].s, dp2=name, s2=fnames[i])
-                context.add_connection(c)
-            
-            return CDP.Resource(name, nres)
-
-        if isinstance(rvalue, CDP.MultN):
-            ops = rvalue.ops
-            assert len(ops) > 1
-            R = None
-            op_rs = []
-            op_Fs = []
-            for op in ops:
-                op_r = eval_rvalue(op, context)
-                op_rs.append(op_r)
-                op_R = context.get_rtype(op_r)
-                op_Fs.append(op_R)
-
-            R = mult_table_seq(op_Fs)
-            dp = ProductN(tuple(op_Fs), R)
-
-            nres = context.new_res_name('prod')
-            fnames = []
-            for i, op in enumerate(ops):
-                ni = context.new_fun_name('s%s' % i)
-                fnames.append(ni)
-
-            ndp = dpwrap(dp, fnames, nres)
-            name = context.new_name('prod')
-            context.add_ndp(name, ndp)
-
-            for i, op in enumerate(ops):
-                c = Connection(dp1=op_rs[i].dp, s1=op_rs[i].s, dp2=name, s2=fnames[i])
-                context.add_connection(c)
-
-            return CDP.Resource(name, nres)
+            return eval_PlusN_as_rvalue(rvalue, context)
 
 
         if isinstance(rvalue, CDP.OpMax):
@@ -624,8 +547,8 @@ def eval_rvalue(rvalue, context):
             F1 = context.get_rtype(a)
             F2 = context.get_rtype(b)
 
-            print context.names[a.dp].repr_long()
-            print context.names[b.dp].repr_long()
+#             print context.names[a.dp].repr_long()
+#             print context.names[b.dp].repr_long()
             if not (F1 == F2):
                 msg = 'Incompatible units for Max(): %s and %s' % (F1, F2)
                 msg += '%s and %s' % (type(F1), type(F2))
@@ -651,6 +574,7 @@ def eval_rvalue(rvalue, context):
             # implicit conversion from int to float
             unit = rvalue.unit
             value = rvalue.value
+            # XXX: stuff here
             if isinstance(unit, Rcomp):
                 if isinstance(value, int):
                     value = float(value)
@@ -658,38 +582,25 @@ def eval_rvalue(rvalue, context):
                 unit.belongs(value)
             except NotBelongs as e:
                 raise_wrapped(DPSemanticError, e, "Value is not in the give space.")
-
-            dp = Constant(unit, value)
-            nres = context.new_res_name('c')
-            ndp = dpwrap(dp, [], nres)
-            context.add_ndp(nres, ndp)
-            return CDP.Resource(nres, nres)
-
+                
+            return get_valuewithunits_as_resource(rvalue, context)
+        
         if isinstance(rvalue, CDP.VariableRef):
             if rvalue.name in context.constants:
                 return eval_rvalue(context.constants[rvalue.name], context)
-            else:
-                msg = 'Variable %r not found' % rvalue.name
-                raise DPSemanticError(msg, where=rvalue.where)
 
-        if isinstance(rvalue, CDP.NewFunction):
-            fname = rvalue.name
-
-            if rvalue.name in context.constants:
-                return eval_rvalue(context.constants[rvalue.name], context)
-
-            if fname in context.var2resource:
-                return context.var2resource[fname]
+            elif rvalue.name in context.var2resource:
+                return context.var2resource[rvalue.name]
 
             try:
-                dummy_ndp = context.get_ndp_fun(fname)
+                dummy_ndp = context.get_ndp_fun(rvalue.name)
             except ValueError as e:
-                msg = 'New function name %r not declared.' % fname
+                msg = 'New function name %r not declared.' % rvalue.name
                 msg += '\n%s' % str(e)
                 raise DPSemanticError(msg, where=rvalue.where)
 
             s = dummy_ndp.get_rnames()[0]
-            return CDP.Resource(context.get_name_for_fun_node(fname), s)
+            return CDP.Resource(context.get_name_for_fun_node(rvalue.name), s)
 
         if isinstance(rvalue, CDP.GenericNonlinearity):
             op_r = eval_rvalue(rvalue.op1, context)
@@ -719,4 +630,268 @@ def eval_rvalue(rvalue, context):
         if e.where is None:
             raise DPSemanticError(str(e), where=rvalue.where)
         raise e
+
+class NotConstant(Exception):
+    pass
+
+@contract(returns=CDP.ValueWithUnits)
+def eval_constant(op, context):
+    """ 
+        Raises NotConstant if not constant. 
+        Returns ValueWithUnits
+    """
+    
+    if isinstance(op, (CDP.Resource)):
+        raise NotConstant(str(op))
+
+    if isinstance(op, (CDP.OpMax, CDP.OpMin, CDP.Power)):
+        # TODO: can implement optimization
+        raise NotConstant(str(op))
+
+    if isinstance(op, CDP.ValueWithUnits):
+        return op
+
+    if isinstance(op, CDP.VariableRef):
+        if op.name in context.constants:
+            return context.constants[op.name]
+
+        if op.name in context.var2resource:
+            res = context.var2resource[op.name]
+            msg = 'This is a resource.'
+            raise_desc(NotConstant, msg, res=res)
+            
+        try:
+            x = context.get_ndp_fun(op.name)
+        except ValueError:
+            pass
+        else:
+            raise_desc(NotConstant, 'Corresponds to new function.', x=x)
+
+        msg = 'Variable ref %r unknown.' % op.name
+        raise DPSemanticError(msg, where=op.where)
+
+    if isinstance(op, CDP.GenericNonlinearity):
+        raise NotConstant(op)
+    
+    if isinstance(op, CDP.PlusN):
+        return eval_PlusN_as_constant(op, context)
+
+    if isinstance(op, CDP.MultN):
+        return eval_MultN_as_constant(op, context)
+
+    msg = 'Cannot evaluate %s as constant.' % op.__repr__()
+    raise ValueError(msg)
+
+def eval_PlusN_as_constant(x, context):
+    return eval_PlusN(x, context, wants_constant=True)
+
+def eval_MultN_as_constant(x, context):
+    return eval_MultN(x, context, wants_constant=True)
+
+def eval_MultN_as_rvalue(x, context):
+    res = eval_MultN(x, context, wants_constant=False)
+    if isinstance(res, CDP.ValueWithUnits):
+        return get_valuewithunits_as_resource(res, context)
+    else:
+        return res
+
+def eval_PlusN_as_rvalue(x, context):
+    res = eval_PlusN(x, context, wants_constant=False)
+    if isinstance(res, CDP.ValueWithUnits):
+        return get_valuewithunits_as_resource(res, context)
+    else:
+        return res
+
+
+def flatten_multN(ops):
+    res = []
+    for op in ops:
+        if isinstance(op, CDP.MultN):
+            res.extend(flatten_multN(op.ops))
+        else:
+            res.append(op)
+    return res
+
+
+def eval_MultN(x, context, wants_constant):
+    """ Raises NotConstant if wants_constant is True. """
+    from mocdp.lang.parse_actions import mult_constantsN 
+
+    assert isinstance(x, CDP.MultN)
+
+    ops = flatten_multN(x.ops)
+    assert len(ops) > 1
+
+    constants = []
+    resources = []
+
+    for op in ops:
+
+        try:
+            x = eval_constant(op, context)
+            assert isinstance(x, CDP.ValueWithUnits)
+            constants.append(x)
+        except NotConstant as e:
+            if wants_constant:
+                msg = 'Product not constant because one op is not constant.'
+                raise_wrapped(NotConstant, e, msg, op=op)
+            x = eval_rvalue(op, context)
+            assert isinstance(x, CDP.Resource)
+            resources.append(x)
+
+    # it's a constant value
+    if len(resources) == 0:
+        return mult_constantsN(constants)
+    if len(resources) == 1:
+        c = mult_constantsN(constants)
+        return get_mult_op(context, r=resources[0], c=c)
+    else:
+        # there are some resources
+        resources_types = [context.get_rtype(_) for _ in resources]
+
+        # create multiplication for the resources
+        R = mult_table_seq(resources_types)
+
+        dp = ProductN(tuple(resources_types), R)
+
+        r = create_operation(context, dp, resources,
+                             name_prefix='_prod', op_prefix='_factor',
+                             res_prefix='_result')
+
+        if not constants:
+            return r
+        else:
+            c = mult_constantsN(constants)
+            return get_mult_op(context, r, c)
+
+@contract(r=CDP.Resource, c=CDP.ValueWithUnits)
+def get_mult_op(context, r, c):
+    from mocdp.lang.parse_actions import MultValue
+    from mocdp.dp_report.gg_ndp import format_unit
+    function = MultValue(c.value)
+    rtype = context.get_rtype(r)
+    setattr(function, '__name__', '× %s %s' % (c.unit.format(c.value),
+                                               format_unit(c.unit)))
+
+    F = rtype
+    R = mult_table(rtype, c.unit)
+    dp = GenericUnary(F, R, function)
+
+    r2 = create_operation(context, dp, resources=[r],
+                          name_prefix='_mult', op_prefix='_x',
+                          res_prefix='_y')
+    return r2
+
+
+def flatten_plusN(ops):
+    res = []
+    for op in ops:
+        if isinstance(op, CDP.PlusN):
+            res.extend(flatten_plusN(op.ops))
+        else:
+            res.append(op)
+    return res
+
+def eval_PlusN(x, context, wants_constant):
+    """ Raises NotConstant if wants_constant is True. """
+    assert isinstance(x, CDP.PlusN)
+    assert len(x.ops) > 1
+
+    ops = flatten_plusN(x.ops)
+
+    constants = []
+    resources = []
+
+    for op in ops:
+        try:
+            x = eval_constant(op, context)
+            assert isinstance(x, CDP.ValueWithUnits)
+            constants.append(x)
+        except NotConstant as e:
+            if wants_constant:
+                msg = 'Product not constant because one op is not constant.'
+                raise_wrapped(NotConstant, e, msg, op=op)
+            x = eval_rvalue(op, context)
+            assert isinstance(x, CDP.Resource)
+            resources.append(x)
+
+    # it's a constant value
+    if len(resources) == 0:
+        return plus_constantsN(constants)
+    elif len(resources) == 1:
+        c = plus_constantsN(constants)
+        return get_plus_op(context, r=resources[0], c=c)
+    else:
+        # there are some resources
+        resources_types = [context.get_rtype(_) for _ in resources]
+
+        # create multiplication for the resources
+        R = resources_types[0]
+
+        dp = SumN(tuple(resources_types), R)
+
+        r = create_operation(context, dp, resources,
+                             name_prefix='_sum', op_prefix='_term',
+                             res_prefix='_result')
+
+        if not constants:
+            return r
+        else:
+            c = plus_constantsN(constants)
+            return get_plus_op(context, r=r, c=c)
+
+
+def get_plus_op(context, r, c):
+    from mocdp.lang.parse_actions import PlusValue
+    from mocdp.dp_report.gg_ndp import format_unit
+
+    function = PlusValue(c.value)
+    setattr(function, '__name__', '+ %s %s' % (c.unit.format(c.value),
+                                               format_unit(c.unit)))
+    rtype = context.get_rtype(r)
+
+    F = rtype
+    R = rtype
+    dp = GenericUnary(F, R, function)  # XXX
+
+    r2 = create_operation(context, dp, resources=[r],
+                          name_prefix='_plus', op_prefix='_x',
+                          res_prefix='_y')
+
+    return r2
+    
+    
+@contract(resources='seq')
+def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix):
+    name = context.new_name(name_prefix)
+    name_result = context.new_res_name(res_prefix)
+
+    connections = []
+    fnames = []
+    for i, r in enumerate(resources):
+        ni = context.new_fun_name('%s%s' % (op_prefix, i))
+        c = Connection(dp1=r.dp, s1=r.s, dp2=name, s2=ni)
+        fnames.append(ni)
+        connections.append(c)
+
+    if len(fnames) == 1:
+        fnames = fnames[0]
+
+    ndp = dpwrap(dp, fnames, name_result)
+    context.add_ndp(name, ndp)
+
+    for c in connections:
+        context.add_connection(c)
+
+    res = CDP.Resource(name, name_result)
+    return res
+
+
+@contract(v=CDP.ValueWithUnits)
+def get_valuewithunits_as_resource(v, context):
+    dp = Constant(R=v.unit, value=v.value)
+    nres = context.new_res_name('c')
+    ndp = dpwrap(dp, [], nres)
+    context.add_ndp(nres, ndp)
+    return CDP.Resource(nres, nres)
 

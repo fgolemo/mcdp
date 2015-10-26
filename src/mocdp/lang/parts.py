@@ -21,27 +21,23 @@ class CDPLanguage():
     AbstractAway = namedtuplewhere('AbstractAway', 'dp_rvalue')
     Compact = namedtuplewhere('Compact', 'dp_rvalue')
 
-    Mult = namedtuplewhere('Mult', 'a b')
-    Plus = namedtuplewhere('Plus', 'a b')
     PlusN = namedtuplewhere('PlusN', 'ops')
     MultN = namedtuplewhere('MultN', 'ops')
     OpMax = namedtuplewhere('Max', 'a b')
     OpMin = namedtuplewhere('Min', 'a b')
+
     Resource = namedtuplewhere('Resource', 'dp s')
     Function = namedtuplewhere('Function', 'dp s')
 
     VariableRef = namedtuplewhere('VariableRef', 'name')
-
-    # also plays like VariableRef
-    NewFunction = namedtuplewhere('NewFunction', 'name')
 
     NewResource = namedtuplewhere('NewResource', 'name')
     Constraint = namedtuplewhere('Constraint', 'function rvalue')
 
     LoadCommand = namedtuplewhere('LoadCommand', 'load_arg')
     SetName = namedtuplewhere('SetName', 'name dp_rvalue')
-    SetNameResource = namedtuplewhere('SetNameResource', 'name rvalue')
-    SetNameConstant = namedtuplewhere('SetNameConstant', 'name constant_value')
+
+    SetNameGeneric = namedtuplewhere('SetNameGeneric', 'name right_side')
 
     FunStatement = namedtuplewhere('FunStatement', 'fname unit')
     ResStatement = namedtuplewhere('ResStatement', 'rname unit')

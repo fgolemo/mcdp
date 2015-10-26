@@ -58,19 +58,24 @@ class SumN(PrimitiveDP):
     def solve(self, func):
         self.F.belongs(func)
         
-        res = 0.0
-        for Fi, x in zip(self.Fs, func):
-            if Fi.equal(x, Fi.get_top()):
-                res = self.R.get_top()
-                break
-            # reasonably sure this is correct...
-            factor = 1.0 / float(self.R.units / Fi.units)
-            res += factor * x
+        res = sum_units(self.Fs, func, self.R)
 
         return self.R.U(res)
 
     def __repr__(self):
         return 'SumN(%s -> %s)' % (self.F, self.R)
+
+# Fs: sequence of Rcompunits
+def sum_units(Fs, values, R):
+    res = 0.0
+    for Fi, x in zip(Fs, values):
+        if Fi.equal(x, Fi.get_top()):
+            res = R.get_top()
+            break
+        # reasonably sure this is correct...
+        factor = 1.0 / float(R.units / Fi.units)
+        res += factor * x
+    return res
 
 class SumUnitsNotCompatible(Exception):
     pass
@@ -125,7 +130,7 @@ class Product(PrimitiveDP):
 
 class ProductN(PrimitiveDP):
 
-    @contract(Fs='tuple')
+    @contract(Fs='tuple[>=2]')
     def __init__(self, Fs, R):
         F = PosetProduct(Fs)
         M = SpaceProduct(())
