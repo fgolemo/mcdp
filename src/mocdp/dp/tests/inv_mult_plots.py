@@ -11,7 +11,7 @@ from mocdp.posets.types_universe import get_types_universe
 from mocdp.posets.poset_product import PosetProduct
 from mocdp.posets.rcomp import Rcomp
 from mocdp.posets.poset import NotLeq
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, raise_desc
 
 
 @comptest_dynamic
@@ -38,7 +38,7 @@ def check_invmult_report(dp):
 #     assert isinstance(dp, SimpleLoop)
 
     f = 1.0
-    R0, R1 = dp.solve_approx(f=f, n=15)
+    R0, R1 = dp.solve_approx(f=f, nl=15, nu=15)
     UR = UpperSets(dp.get_res_space())
 
     UR.belongs(R0)
@@ -197,59 +197,102 @@ cdp {
     r = Report()
 
     F = dp.get_fun_space()
-    UR = UpperSets(dp.get_res_space())
+    R = dp.get_res_space()
+    UR = UpperSets(R)
     f = ()  # F.U(())
 
     r.text('dp', dp.tree_long())
     print('solving straight:')
-    rmin = dp.solve(())
-    print('Rmin: %s' % UR.format(rmin))
+#     rmin = dp.solve(())
+#     print('Rmin: %s' % UR.format(rmin))
 
-    trace = generic_solve(dp, f=f, max_steps=None)
+    trace = generic_solve(dp, f=f, max_steps=1)
 
 
     print('plotting')
     mx = 3.0
     my = 3.0
     axis = (0, mx * 1.1, 0, my * 1.1)
+#
+#     fig0 = r.figure(cols=2)
+#     caption = 'Solution using solve()'
+#     with fig0.plot('S0', caption=caption) as pylab:
+#         plot_upset_R2(pylab, rmin, axis, color_shadow=[1.0, 0.8, 0.9])
+#         pylab.axis(axis)
 
-    fig0 = r.figure(cols=2)
-    caption = 'Solution using solve()'
-    with fig0.plot('S0', caption=caption) as pylab:
-        plot_upset_R2(pylab, rmin, axis, color_shadow=[1.0, 0.8, 0.9])
-        pylab.axis(axis)
+    plotters = { 'UR2': PlotterUR2() }
 
-    P2D = Plotter2D()
-    P2D.check_plot_space(trace.S)
+    def annotation(pylab, axis):
+        xs = np.linspace(0.001, 1, 100)
+        ys = 1 / xs
+        pylab.plot(xs, ys, 'k-')
 
-    fig = r.figure(cols=2)
-    S_sequence = trace.get_s_sequence()
-    S_axis = P2D.axis_for_sequence(S_sequence)
+        xs = np.linspace(1, mx, 100)
+        ys = xs
+        pylab.plot(xs, ys, 'k-')
 
-    R_sequence = trace.get_r_sequence()
-    R_axis = P2D.axis_for_sequence(R_sequence)
+    # make sure it includes (0,0) and (2, 0)
+    axis0 = (0, 2, 0, 0)
 
-    for i, s in enumerate(S_sequence):
-        ri = R_sequence[i]
+    with r.subsection('S', caption='S') as rr:
+        space = trace.S
+        sequence = trace.get_s_sequence()
+        generic_try_plotters(rr, plotters, space, sequence, axis0=axis0, annotation=annotation)
 
-        with fig.plot('S%d' % i, caption=trace.S.format(s)) as pylab:
-            plot_upset_R2(pylab, s, axis, color_shadow=[1.0, 0.8, 0.8])
-
-            xs = np.linspace(0.001, 1, 100)
-            ys = 1 / xs
-            pylab.plot(xs, ys, 'k-')
-
-            xs = np.linspace(1, mx, 100)
-            ys = xs
-            pylab.plot(xs, ys, 'k-')
-
-            pylab.axis(axis)
-
-        with fig.plot('R%d' % i, caption=UR.format(ri)) as pylab:
-            plot_upset_R2(pylab, ri, axis, color_shadow=[0.8, 1.0, 0.8])
-            pylab.axis(axis)
+    with r.subsection('R', caption='R') as rr:
+        space = UR
+        sequence = trace.get_r_sequence()
+        generic_try_plotters(rr, plotters, space, sequence, axis0=axis0, annotation=annotation)
 
     return r
+
+def generic_try_plotters(r, plotters, space, sequence, axis0=None, annotation=None):
+    nplots = 0
+    for name, plotter in plotters.items():
+        try:
+            plotter.check_plot_space(space)
+        except NotPlottable as e:
+            print('Plotter %r cannot plot %r:\n%s' % (name, space, e))
+            continue
+        nplots += 1
+        
+        f = r.figure(name)
+        generic_plot_sequence(f, plotter, space, sequence, axis0=axis0, annotation=annotation)
+
+    if not nplots:
+        r.text('error', 'No plotters for %s' % space)
+        
+
+def join_axes(a, b):
+    return (min(a[0], b[0]),
+            max(a[1], b[1]),
+            min(a[2], b[2]),
+            max(a[3], b[3]))
+
+def generic_plot_sequence(r, plotter, space, sequence, axis0=None, annotation=None):
+
+    axis = plotter.axis_for_sequence(space, sequence)
+    if axis0 is not None:
+        axis = join_axes(axis, axis0)
+
+
+    for i, x in enumerate(sequence):
+        caption = space.format(x)
+        with r.plot('S%d' % i, caption=caption) as pylab:
+            plotter.plot(pylab, axis, space, x)
+            if annotation is not None:
+                annotation(pylab, axis)
+#             plot_upset_R2(pylab, s, axis, color_shadow=[1.0, 0.8, 0.8])
+#
+#             xs = np.linspace(0.001, 1, 100)
+#             ys = 1 / xs
+#             pylab.plot(xs, ys, 'k-')
+#
+#             xs = np.linspace(1, mx, 100)
+#             ys = xs
+#             pylab.plot(xs, ys, 'k-')
+
+            pylab.axis(axis)
 
 class NotPlottable(Exception):
     pass
@@ -263,21 +306,21 @@ class Plotter():
     
     @abstractmethod
     @contract(returns='seq[4]')
-    def axis_for_sequence(self, seq):
+    def axis_for_sequence(self, space, seq):
         pass
 
     @abstractmethod
-    def plot(self, pylab, x):
+    def plot(self, pylab, axis, space, value):
         pass
 
-class Plotter2D():
+class PlotterUR2():
     __metaclass__ = ABCMeta
     
-    @abstractmethod
     def check_plot_space(self, space):
         tu = get_types_universe()
         if not isinstance(space, UpperSets):
-            return False
+            msg = 'I can only plot upper sets.'
+            raise_desc(NotPlottable, msg, space=space)
         
         R2 = PosetProduct((Rcomp(), Rcomp()))
         P = space.P 
@@ -287,15 +330,26 @@ class Plotter2D():
             msg = ('cannot convert to R^2 from %s' % space)
             raise_wrapped(NotPlottable, e, msg)
         
-        f1, f2 = tu.get_embedding(P, R2)
+        _f1, _f2 = tu.get_embedding(P, R2)
     
     @contract(returns='seq[4]')
     def axis_for_sequence(self, space, seq):
+        self.check_plot_space(space)
+
+
         R2 = PosetProduct((Rcomp(), Rcomp()))
         tu = get_types_universe()
-        f1, f2 = tu.get_embedding(space.P, R2)
+        P_TO_R2, _ = tu.get_embedding(space.P, R2)
+        
+        for s in seq:
+            points = map(P_TO_R2, s.minimals)
+        xs = [p[0] for p in points]
+        ys = [p[1] for p in points]
+        return (min(xs), max(xs), min(ys), max(ys))
 
     def plot(self, pylab, axis, space, value):
+        self.check_plot_space(space)
+
         v = value
         plot_upset_R2(pylab, v, axis, color_shadow=[1.0, 0.8, 0.8])
 

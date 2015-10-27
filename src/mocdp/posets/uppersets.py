@@ -35,6 +35,10 @@ class UpperSet():
         from .utils import check_minimal
         check_minimal(minimals, P)
 
+    @contract(returns=Poset)
+    def get_poset(self):
+        return self.P
+
     def __repr__(self):  # ≤  ≥
         contents = " v ".join("x ≥ %s" % self.P.format(m)
                         for m in self.minimals)

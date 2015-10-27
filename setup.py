@@ -40,7 +40,7 @@ setup(name='mocdp',
       entry_points={
 
          'console_scripts': [
-            # 'popt_plot_cgraph = procgraph_optimize.programs:plot_cgraph',
+            'mcdp_plot = cdpview:mcdp_plot_main',
             
         ]
       }

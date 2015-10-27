@@ -37,7 +37,7 @@ class InvMult2(PrimitiveDP):
         # print self.F, f
 #         raise NotImplementedError()
     
-    def solve_approx(self, f, n):
+    def solve_approx(self, f, n, nu):
         m = n / 2
         r0 = set()
         r1 = set()

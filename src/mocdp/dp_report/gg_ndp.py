@@ -20,6 +20,8 @@ class GraphDrawingContext():
         self.yourname = yourname
         self.level = level
         
+        self.set_style('default')
+        
     def newItem(self, label):
         return self.gg.newItem(label, parent=self.parent)
         
@@ -37,35 +39,49 @@ class GraphDrawingContext():
     def styleAppend(self, a, b, c):
         self.gg.styleAppend(a, b, c)
 
+    def set_style(self, style):
+        if style == 'default':
+            self.policy_enclose = 'always_except_first'
+            self.policy_skip = 'never'
+        elif style == 'clean':
+            self.policy_enclose = 'only_if_unconnected'
+            self.policy_skip = 'if_second_simple'
+            
+        else: 
+            raise ValueError(style)
+        
     def should_I_enclose(self, ndp):
-
-        warnings.warn('Add options here')
         if self.level == 0:
             return False
 
-        return True
-
-        return True
-        if ndp.is_fully_connected():
-            return False
+        if self.policy_enclose == 'always_except_first':
+            return True
+        elif self.policy_enclose == 'only_if_unconnected':
+            unconnected = not ndp.is_fully_connected() 
+            if unconnected:
+                return True
+            else:
+                return self.yourname is not None
         else:
-            return self.yourname is not None
-
+            raise ValueError(self.policy_enclose)
 
     def should_I_skip_leq(self, context, c):
-        second_simple = is_simple(context.names[c.dp2])
-        # first_simple = is_simple(context.names[c.dp1])
-        # any_simple = second_simple or first_simple
-        # both_simple = second_simple and first_simple
+        if self.policy_skip == 'never':
+            return False
+        elif self.policy_skip == 'if_second_simple':
+            second_simple = is_simple(context.names[c.dp2])
+            # first_simple = is_simple(context.names[c.dp1])
+            # any_simple = second_simple or first_simple
+            # both_simple = second_simple and first_simple
 
-        warnings.warn('Add options here')
-        skip = second_simple
+            warnings.warn('Add options here')
+            skip = second_simple
+            return skip
+        else:
+            assert False, self.policy_skip
 
-#         skip = False
-        return skip
 
-
-def gvgen_from_ndp(ndp):
+def gvgen_from_ndp(ndp, style='default'):
     import gvgen  # @UnresolvedImport
     gg = gvgen.GvGen(options="rankdir=LR")
     if len(ndp.get_fnames()) > 0:
@@ -115,6 +131,7 @@ def gvgen_from_ndp(ndp):
     gg.styleAppend('limit', 'color', 'black')
 
     gdc = GraphDrawingContext(gg=gg, parent=None, yourname=None)
+    gdc.set_style(style)
     functions, resources = create(gdc, ndp)
 
     if functions:

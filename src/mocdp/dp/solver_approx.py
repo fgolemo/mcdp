@@ -1,15 +1,9 @@
 from mocdp.posets.uppersets import UpperSets
 from contracts import contract
+from mocdp.dp.solver import MaxStepsReached
 
-MaxStepsReached = 'MaxStepsReached'
-ConvergedToFinite = 'ConvergedToFinite'
-ConvergedToInfinite = 'ConvergedToInfinite'
-ConvergedToEmpty = 'ConvergedToEmpty'
+class SolverApproxTrace():
 
-Allowed = [MaxStepsReached, ConvergedToFinite, ConvergedToInfinite, ConvergedToEmpty]
-
-class SolverTrace():
-    
     def __init__(self, dp, f, strace, rtrace, result):
         assert result in Allowed
         R = dp.get_res_space()
@@ -31,24 +25,28 @@ class SolverTrace():
 
     def get_s_sequence(self):
         return list(self.strace)
-    
+
     def get_r_sequence(self):
-        # sequence in UR
         return list(self.rtrace)
 
-@contract(returns=SolverTrace)
-def generic_solve(dp, f, max_steps=None):
+@contract(returns=SolverApproxTrace)
+def generic_solve_approx(dp, f, max_steps=None):
     F = dp.get_fun_space()
     F.belongs(f)
     uf = F.U(f)
     UR = UpperSets(dp.get_res_space())
 
-    S, alpha, beta = dp.get_normal_form()
+    S, gamma, delta = dp.get_normal_form()
 
     s0 = S.get_bottom()
 
-    ss = [s0]
-    sr = [alpha((uf, s0))]
+    ss_l = [s0]
+    ss_u = [s0]
+    nl = 0
+    nu = 0
+    x, y = gamma((uf, s0, nl, nu))
+    sr_l = [x]
+    sr_u = [y]
 
     result = None
 
@@ -57,10 +55,10 @@ def generic_solve(dp, f, max_steps=None):
             if i >= max_steps:
                 result = MaxStepsReached
                 break
-                 
-        s_last = ss[-1]
+
+        s_l_last = ss[-1]
         print('Computing step')
-        s_next = beta((uf, s_last))
+        s_l_next, s_u_next = beta((uf, s_last))
 
         print('%d: si  = %s' % (i, S.format(s_next)))
 
@@ -71,7 +69,7 @@ def generic_solve(dp, f, max_steps=None):
 
         rn = alpha((uf, s_next))
         print('%d: rn  = %s' % (i, UR.format(rn)))
-        
+
         ss.append(s_next)
         sr.append(rn)
 

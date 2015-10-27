@@ -7,6 +7,7 @@ from contracts.utils import indent, raise_desc
 from decent_logs import WithInternalLog
 from mocdp.posets import (
     Map, Poset, PosetProduct, Space, SpaceProduct, UpperSet, UpperSets)
+from mocdp.posets.ncomp import Ncomp
 
 __all__ = [
     'PrimitiveDP',
@@ -126,6 +127,29 @@ class PrimitiveDP(WithInternalLog):
         '''
         pass
 
+    @contract(returns='tuple($UpperSet, $UpperSet)')
+    def solve_approx(self, f, nl, nu):  # @UnusedVariable
+        x = self.solve(f)
+        return x, x
+
+    @contract(ufunc=UpperSet)
+    def solveU_approx(self, ufunc, nl, nu):
+        UF = UpperSets(self.get_fun_space())
+        UF.belongs(ufunc)
+        from mocdp.posets import poset_minima
+        R = self.get_res_space()
+
+        res_l = set([])
+        res_u = set([])
+        for m in ufunc.minimals:
+            l, u = self.solve_approx(m, nl, nu)
+            res_u.update(u.minimals)
+            res_l.update(l.minimals)
+
+        l = R.Us(poset_minima(res_l, R.leq))
+        u = R.Us(poset_minima(res_u, R.leq))
+        return l, u
+
     @contract(ufunc=UpperSet)
     def solveU(self, ufunc):
         UF = UpperSets(self.get_fun_space())
@@ -150,6 +174,13 @@ class PrimitiveDP(WithInternalLog):
         beta = DefaultBeta(self)
         S = PosetProduct(())
         return NormalForm(S=S, alpha=alpha, beta=beta)
+
+    def get_normal_form_approx(self):
+        gamma = DefaultGamma(self)
+        delta = DefaultDelta(self)
+        S = PosetProduct(())
+        return NormalFormApprox(S=S, gamma=gamma, delta=delta)
+
 
     def __repr__(self):
         return '%s(%s→%s)' % (type(self).__name__, self.F, self.R)
@@ -200,6 +231,8 @@ class PrimitiveDP(WithInternalLog):
 
 NormalForm = namedtuple('NormalForm', ['S', 'alpha', 'beta'])
 
+NormalFormApprox = namedtuple('NormalFormApprox', ['S', 'gamma', 'delta'])
+
 
 class DefaultAlphaMap(Map):
     def __init__(self, dp):
@@ -234,3 +267,45 @@ class DefaultBeta(Map):
         # print('Beta() for %s' % (self.dp))
         # print(' f = %s s = %s -> unchanged ' % (_F, s))
         return s
+
+
+class DefaultGamma(Map):
+    """
+    
+        F x S, Nl, Nu
+    """
+    def __init__(self, dp):
+        self.dp = dp
+        F = dp.get_fun_space()
+        R = dp.get_res_space()
+        UF = UpperSets(F)
+        UR = UpperSets(R)
+        S = PosetProduct(())
+        N = Ncomp()
+        dom = PosetProduct((UF, S, N, N))
+        cod = PosetProduct((UR, UR))
+        Map.__init__(self, dom, cod)
+
+    def _call(self, x):
+        F, _s, nl, nu = x
+        Res = self.dp.solveU_approx(F, nl, nu)
+        return Res
+
+
+class DefaultDelta(Map):
+    def __init__(self, dp):
+        self.dp = dp
+        F = dp.get_fun_space()
+        UF = UpperSets(F)
+
+        S = PosetProduct(())
+        N = Ncomp()
+        dom = PosetProduct((UF, S, N, N))
+        cod = PosetProduct((S, S))
+        Map.__init__(self, dom, cod)
+
+    def _call(self, x):
+        _F, s, _nl, _nu = x
+        # print('Beta() for %s' % (self.dp))
+        # print(' f = %s s = %s -> unchanged ' % (_F, s))
+        return s, s
