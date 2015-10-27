@@ -1,20 +1,32 @@
 import os
 from setuptools import setup, find_packages
 
-version = "1.0"
+def get_version(filename):
+    import ast
+    version = None
+    with file(filename) as f:
+        for line in f:
+            if line.startswith('__version__'):
+                version = ast.parse(line).body[0].value.s
+                break
+        else:
+            raise ValueError('No version found in %r.' % filename)
+    if version is None:
+        raise ValueError(filename)
+    return version
 
-setup(name='mocdp',
+version = get_version(filename='src/mocdp/__init__.py')
+
+setup(name='PyMCDP',
       url='http://github.com/AndreaCensi/mcdp',
-      description='Monotone Co-Design Problems',
+      description='Interpreter and solver for Monotone Co-Design Problems',
       long_description='',
       package_data={'':['*.*', '*.mcdp', '*.cdp', '*.png']},
-      keywords="",
-      license="",
-
+      keywords="Optimization",
+      license="MIT",
       classifiers=[
         'Development Status :: 4 - Beta',
       ],
-
       version=version,
 
       download_url=
@@ -32,16 +44,16 @@ setup(name='mocdp',
         'watchdog',
         'networkx',
       ],
+
       tests_require=[
         'nose>=1.1.2,<2',
         'comptests',
         'compmake',
       ],
-      entry_points={
 
+      entry_points={
          'console_scripts': [
             'mcdp_plot = cdpview:mcdp_plot_main',
-            
         ]
       }
 )
