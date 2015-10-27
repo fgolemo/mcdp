@@ -24,10 +24,10 @@ def graphviz_run(filename_dot, output, prog='dot'):
         # print('done')
     except CmdException:
         emergency = 'emergency.dot'
-        print('saving to %r' % emergency)
-        with open(filename_dot) as f1:
-            with open(emergency, 'w') as f:
-                f.write(f1.read())
+        print('saving to %r' % emergency)  # XXX
+        contents = open(filename_dot).read()
+        with open(emergency, 'w') as f:
+            f.write(contents)
         raise
 
 

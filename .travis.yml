@@ -26,6 +26,7 @@ script:
 after_failure:
 - compmake out/comptests -c "ls failed"
 - compmake out/comptests -c "why failed"
+- cat emergency.dot
 addons:
   apt:
     # sources:
