@@ -65,7 +65,8 @@ def ast_to_html(s, complete_document):
 #
 #             print('orig %d: %s' % (i, s_lines[i]))
 #             print('trans %d: %s' % (i, lines[i]))
-        raise ValueError('Error in syntax: %s, %s' % (len(lines), len(s_comments)))
+        e = ValueError('Error in syntax: %s, %s' % (len(lines), len(s_comments)))
+        print(e)
     
     out = ""
     for i, (a, comment) in enumerate(zip(lines, s_comments)):
@@ -207,6 +208,16 @@ def make_tree_list(xs, character_end):
 
 
 def iterate_sub(x):
+    def loc(a):
+        a = a[1]
+        if isnamedtuplewhere(a):
+            return a.where.character
+        return 0
+
+    o = list(iterate_notwhere(x))
+    return sorted(o, key=loc)
+
+def iterate_notwhere(x):
     d = x._asdict()
     for k, v in d.items():
         if k == 'where':

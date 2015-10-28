@@ -5,6 +5,7 @@ from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.exceptions import DPSemanticError
 import warnings
+from appinst.linux2 import indent
 
 
 __all__ = [
@@ -18,6 +19,17 @@ class Connection(Connection0):
         return ("Connection(2 %s.%s >= %s.%s 1)" %
                 (self.dp2, self.s2, self.dp1, self.s1))
 
+class CFunction():
+    @contract(dp=str, s=str)
+    def __init__(self, dp, s):
+        self.dp = dp
+        self.s = s
+
+class CResource():
+    @contract(dp=str, s=str)
+    def __init__(self, dp, s):
+        self.dp = dp
+        self.s = s
 
 class Context():
     def __init__(self):
@@ -31,6 +43,28 @@ class Context():
         self.var2resource = {}  # str -> Resource
 
         self.constants = {}  # str -> ValueWithUnits
+
+
+    @contract(s='str', dp='str', returns=CFunction)
+    def make_function(self, dp, s):
+        return CFunction(dp, s)
+
+    @contract(s='str', dp='str', returns=CResource)
+    def make_resource(self, dp, s):
+        
+        if not dp in self.names:
+            msg = 'Unknown dp (%r.%r)' % (dp, s)
+            raise DPSemanticError(msg)
+
+        ndp = self.names[dp]
+
+        if not s in ndp.get_rnames():
+            msg = 'Unknown resource %r.' % (s)
+            msg += '\nThe design problem %r evaluates to:' % dp
+            msg += '\n' + indent(ndp.repr_long(), '  ')
+            raise DPSemanticError(msg)
+
+        return CResource(dp, s)
 
     def _check_good_name(self, name):
         forbidden = ['(', ']', ')', ' ']
@@ -205,28 +239,28 @@ class Context():
                 return cand
         assert False, 'cannot find name? %r' % cand
 
-    # @contract(a=Resource)
+    @contract(a=CResource)
     def get_rtype(self, a):
         """ Gets the type of a resource, raises DPSemanticError if not present. """
         if not a.dp in self.names:
             msg = "Cannot find design problem %r." % str(a)
-            raise DPSemanticError(msg, where=a.where)
+            raise DPSemanticError(msg)
         dp = self.names[a.dp]
         if not a.s in dp.get_rnames():
             msg = "Design problem %r does not have resource %r." % (a.dp, a.s)
-            raise DPSemanticError(msg, where=a.where)
+            raise DPSemanticError(msg)
         return dp.get_rtype(a.s)
 
-    # @contract(a=Function)
+    @contract(a=CFunction)
     def get_ftype(self, a):
         """ Gets the type of a function, raises DPSemanticError if not present. """
         if not a.dp in self.names:
             msg = "Cannot find design problem %r." % str(a)
-            raise DPSemanticError(msg, where=a.where)
+            raise DPSemanticError(msg)
         dp = self.names[a.dp]
         if not a.s in dp.get_fnames():
             msg = "Design problem %r does not have function %r." % (a.dp, a.s)
-            raise DPSemanticError(msg, where=a.where)
+            raise DPSemanticError(msg)
         return dp.get_ftype(a.s)
 
     def get_connections_for(self, name1, name2):

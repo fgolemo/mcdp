@@ -3,7 +3,7 @@
 from conf_tools import (ConfToolsException, SemanticMistakeKeyNotFound,
     instantiate_spec)
 from contracts import contract, describe_value
-from contracts.utils import indent, raise_desc, raise_wrapped
+from contracts.utils import indent, raise_desc, raise_wrapped, check_isinstance
 from mocdp.comp import (CompositeNamedDP, Connection, Context, NamedDP,
     NotConnected, SimpleWrap, dpwrap)
 from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
@@ -15,11 +15,46 @@ from mocdp.lang.parse_actions import plus_constantsN
 from mocdp.lang.parts import CDPLanguage, unwrap_list
 from mocdp.posets import (NotBelongs, NotEqual, NotLeq, PosetProduct, Rcomp,
     get_types_universe, mult_table, mult_table_seq)
+from mocdp.comp.context import CFunction, CResource
 
 
 CDP = CDPLanguage
+#
 
+def add_constraint(context, resource, function):
+    R1 = context.get_rtype(resource)
+    F2 = context.get_ftype(function)
+    
+    tu = get_types_universe()
 
+    if not tu.equal(R1, F2):
+        try:
+            tu.check_leq(R1, F2)
+        except NotLeq as e:
+            msg = 'Constraint between incompatible spaces.'
+            raise_wrapped(DPSemanticError, e, msg)
+
+        map1, _map2 = tu.get_embedding(R1, F2)
+
+        conversion = GenericUnary(R1, F2, map1)
+        conversion_ndp = dpwrap(conversion, '_in', '_out')
+
+        name = context.new_name('_conversion')
+        context.add_ndp(name, conversion_ndp)
+
+        c1 = Connection(dp1=resource.dp, s1=resource.s,
+                   dp2=name, s2='_in')
+        context.add_connection(c1)
+        resource = context.make_resource(name, '_out')
+
+    else:
+        # print('Spaces are equal: %s and %s' % (R1, F2))
+        pass
+
+    c = Connection(dp1=resource.dp, s1=resource.s,
+                   dp2=function.dp, s2=function.s)
+    context.add_connection(c)
+    
 def eval_statement(r, context):
 
     if isinstance(r, Connection):
@@ -28,39 +63,7 @@ def eval_statement(r, context):
     elif isinstance(r, CDP.Constraint):
         resource = eval_rvalue(r.rvalue, context)
         function = eval_lfunction(r.function, context)
-
-        R1 = context.get_rtype(resource)
-        F2 = context.get_ftype(function)
-        
-        tu = get_types_universe()
-
-        if not tu.equal(R1, F2):
-            try:
-                tu.check_leq(R1, F2)
-            except NotLeq as e:
-                msg = 'Constraint between incompatible spaces.'
-                raise_wrapped(DPSemanticError, e, msg)
-
-            map1, _map2 = tu.get_embedding(R1, F2)
-
-            conversion = GenericUnary(R1, F2, map1)
-            conversion_ndp = dpwrap(conversion, '_in', '_out')
-
-            name = context.new_name('_conversion')
-            context.add_ndp(name, conversion_ndp)
-
-            c1 = Connection(dp1=resource.dp, s1=resource.s,
-                       dp2=name, s2='_in')
-            context.add_connection(c1)
-            resource = CDP.Resource(name, '_out')
-
-        else:
-            # print('Spaces are equal: %s and %s' % (R1, F2))
-            pass
-
-        c = Connection(dp1=resource.dp, s1=resource.s,
-                       dp2=function.dp, s2=function.s)
-        context.add_connection(c)
+        add_constraint(context, resource, function)
     
     elif isinstance(r, CDP.SetName):
         name = r.name
@@ -82,9 +85,8 @@ def eval_statement(r, context):
         try:
             res = eval_constant(right_side, context)
             context.set_constant(name, res)
-
-        except NotConstant as e:
-#             print('Cannot evaluate %r as constant: %s ' % (right_side, e))
+        except NotConstant:
+            # print('Cannot evaluate %r as constant: %s ' % (right_side, e))
             rvalue = eval_rvalue(right_side, context)
             # print('adding as resource')
             context.set_var2resource(name, rvalue)
@@ -95,51 +97,69 @@ def eval_statement(r, context):
         rname = r.rname.value
         ndp = dpwrap(Identity(F), rname, rname)
         context.add_ndp_res(rname, ndp)
-        return CDP.Function(context.get_name_for_res_node(rname), rname)
+        return context.make_function(context.get_name_for_res_node(rname), rname)
     
     elif isinstance(r, CDP.FunStatement):
         F = r.unit.value
         fname = r.fname.value
         ndp = dpwrap(Identity(F), fname, fname)
         context.add_ndp_fun(fname, ndp)
-        return CDP.Resource(context.get_name_for_fun_node(fname), fname)
+        return context.make_resource(context.get_name_for_fun_node(fname), fname)
     
     elif isinstance(r, CDP.FunShortcut1):  # provides fname using name
-        B = CDP.Function(r.name, r.fname)
+        fname = r.fname.value
+        B = context.make_function(r.name, fname)
         F = context.get_ftype(B)
-        A = eval_statement(CDP.FunStatement('-', CDP.FName(r.fname), CDP.Unit(F)), context)
-        eval_statement(CDP.Constraint(function=B, rvalue=A), context)
+        A = eval_statement(CDP.FunStatement('-', r.fname, CDP.Unit(F)), context)
+        add_constraint(context, resource=A, function=B)
 
     elif isinstance(r, CDP.ResShortcut1):  # requires rname for name
         # resource rname [r0]
         # rname >= name.rname
-        A = CDP.Resource(r.name, r.rname)
+        rname = r.rname.value
+        A = context.make_resource(r.name, rname)
         R = context.get_rtype(A)
-        B = eval_statement(CDP.ResStatement('-', CDP.RName(r.rname), CDP.Unit(R)), context)
+        B = eval_statement(CDP.ResStatement('-', r.rname, CDP.Unit(R)), context)
         # B >= A
-        eval_statement(CDP.Constraint(function=B, rvalue=A), context)
-        # eval_rvalue wants Resource or NewFunction
-        # eval_lfunction wants Function or NewResource
+        add_constraint(context, resource=A, function=B)
+
+    elif isinstance(r, CDP.ResShortcut1m):  # requires rname for name
+
+        for rname in unwrap_list(r.rnames):
+            A = context.make_resource(r.name, rname.value)
+            R = context.get_rtype(A)
+            B = eval_statement(CDP.ResStatement('-', rname, CDP.Unit(R)), context)
+            add_constraint(context, resource=A, function=B)
+
+    elif isinstance(r, CDP.FunShortcut1m):  # requires rname for name
+
+        for fname in unwrap_list(r.fnames):
+            B = context.make_function(r.name, fname.value)
+            F = context.get_ftype(B)
+            A = eval_statement(CDP.FunStatement('-', fname, CDP.Unit(F)), context)
+            add_constraint(context, resource=A, function=B)
 
     elif isinstance(r, CDP.FunShortcut2):  # provides rname <= (lf)
         B = eval_lfunction(r.lf, context)
-        assert isinstance(B, CDP.Function)
+        assert isinstance(B, CFunction)
         F = context.get_ftype(B)
-        A = eval_statement(CDP.FunStatement('-', CDP.FName(r.fname), CDP.Unit(F)), context)
-        eval_statement(CDP.Constraint(function=B, rvalue=A), context)
+        A = eval_statement(CDP.FunStatement('-', r.fname, CDP.Unit(F)), context)
+        add_constraint(context, resource=A, function=B)
+#         eval_statement(CDP.Constraint(function=B, rvalue=A, prep=None), context)
 
     elif isinstance(r, CDP.ResShortcut2):  # requires rname >= (rvalue)
         A = eval_rvalue(r.rvalue, context)
-        assert isinstance(A, CDP.Resource)
+        assert isinstance(A, CResource)
         R = context.get_rtype(A)
-        B = eval_statement(CDP.ResStatement('-', CDP.RName(r.rname), CDP.Unit(R)), context)
+        B = eval_statement(CDP.ResStatement('-', r.rname, CDP.Unit(R)), context)
         # B >= A
-        eval_statement(CDP.Constraint(function=B, rvalue=A), context)
+        add_constraint(context, resource=A, function=B)
+#         eval_statement(CDP.Constraint(function=B, rvalue=A, prep=None), context)
 
         # ndp = eval_dp_rvalue(r.rvalue, context)
-    elif isinstance(r, CDP.MultipleStatements):
-        for s in r.statements:
-            eval_statement(s, context)
+#     elif isinstance(r, CDP.MultipleStatements):
+#         for s in r.statements:
+#             eval_statement(s, context)
     else:
         raise DPInternalError('Cannot interpret %s' % describe_value(r))
     
@@ -282,8 +302,8 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
 
             dp = eval_pdp(impl, context)
 
-            fnames = [f.fname for f in fun]
-            rnames = [r.rname for r in res]
+            fnames = [f.fname.value for f in fun]
+            rnames = [r.rname.value for r in res]
 
             if len(fnames) == 1:
                 use_fnames = fnames[0]
@@ -301,8 +321,8 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
 
             ftypes = w.get_ftypes(fnames)
             rtypes = w.get_rtypes(rnames)
-            ftypes_expected = PosetProduct(tuple([f.unit for f in fun]))
-            rtypes_expected = PosetProduct(tuple([r.unit for r in res]))
+            ftypes_expected = PosetProduct(tuple([f.unit.value for f in fun]))
+            rtypes_expected = PosetProduct(tuple([r.unit.value for r in res]))
 
             try:
                 tu = get_types_universe()
@@ -386,12 +406,15 @@ def eval_pdp(r, context):  # @UnusedVariable
     if isinstance(r, CDP.PDPCodeSpec):
         function = r.function
         arguments = r.arguments
+#         print('function: %s' % function)
+#         print('arguments: %s' % arguments)
+        check_isinstance(function, str)
         res = instantiate_spec([function, arguments])
         return res
             
     raise DPInternalError('Invalid pdp rvalue: %s' % str(r))
 
-@contract(returns=CDP.Function)
+@contract(returns=CFunction)
 def eval_lfunction(lf, context):
     if isinstance(lf, CDP.Function):
         if not lf.dp in context.names:
@@ -403,7 +426,7 @@ def eval_lfunction(lf, context):
 #             msg = 'Cannot use the name %s of an external interface function.' % lf.__repr__()
 #             raise DPSemanticError(msg, where=lf.where)
 
-        return lf
+        return context.make_function(dp=lf.dp, s=lf.s)
 
     if isinstance(lf, CDP.InvMult):
         ops = lf.ops
@@ -437,7 +460,7 @@ def eval_lfunction(lf, context):
         context.add_connection(c1)
         context.add_connection(c2)
 
-        res = CDP.Function(name, '_input')
+        res = context.make_function(name, '_input')
         return res
 
 
@@ -451,7 +474,7 @@ def eval_lfunction(lf, context):
             msg += '\n%s' % str(e)
             raise DPSemanticError(msg, where=lf.where)
 
-        return CDP.Function(context.get_name_for_res_node(rname),
+        return context.make_function(context.get_name_for_res_node(rname),
                         dummy_ndp.get_fnames()[0])
 
     if isinstance(lf, CDP.NewLimit):
@@ -472,30 +495,18 @@ def eval_lfunction(lf, context):
         ndp = dpwrap(dp, sn, [])
         context.add_ndp(n, ndp)
 
-        return CDP.Function(n, sn)
+        return context.make_function(n, sn)
 
     msg = 'Cannot eval_lfunction(%s)' % lf.__repr__()
     raise DPInternalError(msg)
 
-@contract(returns=CDP.Resource)
+@contract(returns=CResource)
 def eval_rvalue(rvalue, context):
     # wants Resource or NewFunction
     try:
         if isinstance(rvalue, CDP.Resource):
+            return context.make_resource(dp=rvalue.dp, s=rvalue.s)
         
-            if not rvalue.dp in context.names:
-                msg = 'Unknown dp (%r.%r)' % (rvalue.dp, rvalue.s)
-                raise DPSemanticError(msg, where=rvalue.where)
-
-            ndp = context.names[rvalue.dp]
-            if not rvalue.s in ndp.get_rnames():
-                msg = 'Unknown resource %r.' % (rvalue.s)
-                msg += '\nThe design problem %r evaluates to:' % rvalue.dp
-                msg += '\n' + indent(ndp.repr_long(), '  ')
-                raise DPSemanticError(msg, where=rvalue.where)
-
-            return rvalue
-
         def eval_ops(rvalue):
             """ Returns a, F1, b, F2 """
             a = eval_rvalue(rvalue.a, context)
@@ -516,7 +527,7 @@ def eval_rvalue(rvalue, context):
             context.add_ndp(name, ndp)
             context.add_connection(c1)
             context.add_connection(c2)
-            return CDP.Resource(name, nres)
+            return context.make_resource(name, nres)
 
         if isinstance(rvalue, CDP.MultN):
             return eval_MultN_as_rvalue(rvalue, context)
@@ -534,7 +545,7 @@ def eval_rvalue(rvalue, context):
                 context.add_ndp(name, ndp)
                 c = Connection(dp1=b.dp, s1=b.s, dp2=name, s2='_in')
                 context.add_connection(c)
-                return CDP.Resource(name, '_out')
+                return context.make_resource(name, '_out')
 
             a = eval_rvalue(rvalue.a, context)
 
@@ -545,7 +556,7 @@ def eval_rvalue(rvalue, context):
                 context.add_ndp(name, ndp)
                 c = Connection(dp1=a.dp, s1=a.s, dp2=name, s2='_in')
                 context.add_connection(c)
-                return CDP.Resource(name, '_out')
+                return context.make_resource(name, '_out')
 
             b = eval_rvalue(rvalue.b, context)
 
@@ -605,7 +616,7 @@ def eval_rvalue(rvalue, context):
                 raise DPSemanticError(msg, where=rvalue.where)
 
             s = dummy_ndp.get_rnames()[0]
-            return CDP.Resource(context.get_name_for_fun_node(rvalue.name), s)
+            return context.make_resource(context.get_name_for_fun_node(rvalue.name), s)
 
         if isinstance(rvalue, CDP.GenericNonlinearity):
             op_r = eval_rvalue(rvalue.op1, context)
@@ -627,7 +638,7 @@ def eval_rvalue(rvalue, context):
 
             context.add_connection(c)
 
-            return CDP.Resource(name, rname)
+            return context.make_resource(name, rname)
 
         msg = 'Cannot evaluate %s as rvalue.' % rvalue.__repr__()
         raise ValueError(msg)
@@ -741,7 +752,7 @@ def eval_MultN(x, context, wants_constant):
                 msg = 'Product not constant because one op is not constant.'
                 raise_wrapped(NotConstant, e, msg, op=op)
             x = eval_rvalue(op, context)
-            assert isinstance(x, CDP.Resource)
+            assert isinstance(x, CResource)
             resources.append(x)
 
     # it's a constant value
@@ -817,7 +828,7 @@ def eval_PlusN(x, context, wants_constant):
                 msg = 'Product not constant because one op is not constant.'
                 raise_wrapped(NotConstant, e, msg, op=op)
             x = eval_rvalue(op, context)
-            assert isinstance(x, CDP.Resource)
+            assert isinstance(x, CResource)
             resources.append(x)
 
     # it's a constant value
@@ -888,7 +899,7 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
     for c in connections:
         context.add_connection(c)
 
-    res = CDP.Resource(name, name_result)
+    res = context.make_resource(name, name_result)
     return res
 
 
@@ -898,5 +909,5 @@ def get_valuewithunits_as_resource(v, context):
     nres = context.new_res_name('c')
     ndp = dpwrap(dp, [], nres)
     context.add_ndp(nres, ndp)
-    return CDP.Resource(nres, nres)
+    return context.make_resource(nres, nres)
 

@@ -17,26 +17,27 @@ class CDPLanguage():
             unit.belongs(value)
             CDPLanguage.ValueWithUnits0.__init__(self, value=value, unit=unit, where=where)
 
-    MakeTemplate = namedtuplewhere('MakeTemplate', 'dp_rvalue')
-    AbstractAway = namedtuplewhere('AbstractAway', 'dp_rvalue')
-    Compact = namedtuplewhere('Compact', 'dp_rvalue')
+    MakeTemplate = namedtuplewhere('MakeTemplate', 'keyword dp_rvalue')
+    AbstractAway = namedtuplewhere('AbstractAway', 'keyword dp_rvalue')
+    Compact = namedtuplewhere('Compact', 'keyword dp_rvalue')
 
     PlusN = namedtuplewhere('PlusN', 'ops')
     MultN = namedtuplewhere('MultN', 'ops')
-    OpMax = namedtuplewhere('Max', 'a b')
-    OpMin = namedtuplewhere('Min', 'a b')
+    OpMax = namedtuplewhere('Max', 'keyword a b')
+    OpMin = namedtuplewhere('Min', 'keyword a b')
 
+    DPName = namedtuplewhere('DPName', 'value')
 
-    Resource = namedtuplewhere('Resource', 'dp s')
-    Function = namedtuplewhere('Function', 'dp s')
+    Resource = namedtuplewhere('Resource', 'dp s keyword')
+    Function = namedtuplewhere('Function', 'dp s keyword')
 
     VariableRef = namedtuplewhere('VariableRef', 'name')
 
     NewResource = namedtuplewhere('NewResource', 'name')
-    Constraint = namedtuplewhere('Constraint', 'function rvalue')
+    Constraint = namedtuplewhere('Constraint', 'function rvalue prep')
 
     LoadCommand = namedtuplewhere('LoadCommand', 'load_arg')
-    SetName = namedtuplewhere('SetName', 'name dp_rvalue')
+    SetName = namedtuplewhere('SetName', 'keyword name dp_rvalue')
 
     SetNameGenericVar = namedtuplewhere('SetNameGenericVar', 'value')
     SetNameGeneric = namedtuplewhere('SetNameGeneric', 'name right_side')
@@ -45,6 +46,19 @@ class CDPLanguage():
     ProvideKeyword = namedtuplewhere('ProvideKeyword', 'keyword')
     RequireKeyword = namedtuplewhere('RequireKeyword', 'keyword')
     MCDPKeyword = namedtuplewhere('MCDPKeyword', 'keyword')
+    SubKeyword = namedtuplewhere('SubKeyword', 'keyword')
+    CompactKeyword = namedtuplewhere('CompactKeyword', 'keyword')
+    AbstractKeyword = namedtuplewhere('AbstractKeyword', 'keyword')
+    TemplateKeyword = namedtuplewhere('TemplateKeyword', 'keyword')
+    ForKeyword = namedtuplewhere('ForKeyword', 'keyword')
+    UsingKeyword = namedtuplewhere('UsingKeyword', 'keyword')
+    RequiredByKeyword = namedtuplewhere('RequiredByKeyword', 'keyword')
+    ProvidedByKeyword = namedtuplewhere('ProvidedByKeyword', 'keyword')
+    OpKeyword = namedtuplewhere('OpKeyword', 'keyword')  # Max
+    # just prepositions
+    leq = namedtuplewhere('leq', 'glyph')
+    geq = namedtuplewhere('geq', 'glyph')
+    DotPrep = namedtuplewhere('DotPrep', 'glyph')
 
     FName = namedtuplewhere('FName', 'value')
     RName = namedtuplewhere('RName', 'value')
@@ -58,10 +72,19 @@ class CDPLanguage():
     PDPCodeSpec = namedtuplewhere('PDPCodeSpec', 'function arguments')
 
     InvMult = namedtuplewhere('InvMult', 'ops')
-    FunShortcut1 = namedtuplewhere('FunShortcut1', 'fname name')
-    ResShortcut1 = namedtuplewhere('ResShortcut1', 'rname name')
-    FunShortcut2 = namedtuplewhere('FunShortcut2', 'fname lf')
-    ResShortcut2 = namedtuplewhere('ResShortcut2', 'rname rvalue')
+    FunShortcut1 = namedtuplewhere('FunShortcut1', 'provides fname prep_using name')
+    ResShortcut1_ = namedtuplewhere('ResShortcut1', 'requires rname prep_for name')
+
+    class ResShortcut1(ResShortcut1_):
+        def __init__(self, requires, rname, prep_for, name):
+            if not isinstance(rname, CDPLanguage.RName):
+                raise ValueError(rname)
+            CDPLanguage.ResShortcut1_.__init__(self, requires, rname, prep_for, name)
+
+    FunShortcut1m = namedtuplewhere('FunShortcut1m', 'provides fnames prep_using name')
+    ResShortcut1m = namedtuplewhere('ResShortcut1m', 'requires rnames prep_for name')
+    FunShortcut2 = namedtuplewhere('FunShortcut2', 'keyword fname leq lf')
+    ResShortcut2 = namedtuplewhere('ResShortcut2', 'keyword rname geq rvalue')
 #     MultipleStatements = namedtuplewhere('MultipleStatements', 'statements')
     
     IntegerFraction = namedtuplewhere('IntegerFraction', 'num den')
@@ -72,23 +95,28 @@ class CDPLanguage():
 list_types = {
 }
 
-for i in range(1, 30):
+for i in range(1, 100):
     args = ['e%d' % _ for _ in range(i)]
     ltype = namedtuplewhere('List%d' % i, " ".join(args))
     list_types[i] = ltype
 
+list_types[0] = namedtuplewhere('List0', 'dummy')
+
 def make_list(x, where=None):
+    if not len(x):
+        return list_types[0](dummy='dummy', where=where)
+
     ltype = list_types[len(x)]
     res = ltype(*tuple(x), where=where)
-#     print('res: %s' % str(res))
     return res
 
 def unwrap_list(res):
+    if isinstance(res, list_types[0]):
+        return []
     normal = []
     for k, v in res._asdict().items():
         if k == 'where': continue
         normal.append(v)
-#     print('unwrapped to %r' % normal)
     return normal
 
 

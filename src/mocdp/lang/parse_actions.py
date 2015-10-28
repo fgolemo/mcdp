@@ -86,19 +86,6 @@ def number_with_unit_parse(t):
     res = CDP.ValueWithUnits(value, units)
     return res
 
-def res_shortcut3_parse(tokens):
-    name = tokens['name']
-    res = []
-    for rname in tokens['rnames']:
-        res.append(CDP.ResShortcut1(rname, name))
-    return CDP.MultipleStatements(res)
-
-def fun_shortcut3_parse(tokens):
-    name = tokens['name']
-    res = []
-    for fname in tokens['fnames']:
-        res.append(CDP.FunShortcut1(fname, name))
-    return CDP.MultipleStatements(res)
 
 @parse_action
 @wheredecorator
@@ -247,19 +234,7 @@ def parse_ndp(string):
 def parse_line(line):
     from mocdp.lang.syntax import Syntax
     return parse_wrap(Syntax.line_expr, line)[0]
-#
-# @parse_action
-# def dp_model_parse_action(tokens):
-#     keyword = tokens[0]
-#
-#     statements = CDP.MultipleStatements(list(tokens[1:]))
-#     print 'statmeents', statements
-#     # if not res:
-#     #    raise DPSemanticError('Empty model')
-# #     from mocdp.lang.blocks import interpret_commands
-# #     return interpret_commands(statements)
-#
-#     return CDP.BuildProblem(keyword=keyword, statements=statements)
+
 
 def power_expr_parse(t):
     op1 = t[0]

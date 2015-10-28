@@ -10,6 +10,9 @@ import math
 
 ParserElement.enablePackrat()
 
+def sp(a, b):
+    spa(a, b)
+    return a
 
 class Syntax():
     keywords = ['load', 'compact', 'required', 'provides', 'abstract',
@@ -32,7 +35,7 @@ class Syntax():
     # line = SkipTo(LineEnd(), failOn=LineStart() + LineEnd())
 
     # identifier
-    idn = Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))
+    idn = (Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))).setResultsName('idn')
 
     unit1 = Word(alphas + '$' + ' ')
     unit2 = L('/')
@@ -60,26 +63,20 @@ class Syntax():
 
     unitst = S(L('[')) + C(unit_expr, 'unit') + S(L(']'))
 
-    PROVIDES = L('provides')
-    spa(PROVIDES, lambda t: CDP.ProvideKeyword(t[0]))
-
-    REQUIRES = L('requires')
-    spa(REQUIRES, lambda t: CDP.RequireKeyword(t[0]))
+    PROVIDES = sp(L('provides'), lambda t: CDP.ProvideKeyword(t[0]))
+    REQUIRES = sp(L('requires'), lambda t: CDP.RequireKeyword(t[0]))
     
-    USING = S(L('using'))
-    FOR = S(L('for'))
+    USING = sp(L('using'), lambda t: CDP.UsingKeyword(t[0]))
+    FOR = sp(L('for'), lambda t: CDP.ForKeyword(t[0]))
 
-    fname = idn.copy()
-    spa(fname, lambda t: CDP.FName(t[0]))
-    rname = idn.copy()
-    spa(rname, lambda t: CDP.RName(t[0]))
+    fname = sp(idn.copy(), lambda t: CDP.FName(t[0]))
+    rname = sp(idn.copy(), lambda t: CDP.RName(t[0]))
 
-    fun_statement = PROVIDES + C(fname, 'fname') + unitst
-#     spa(fun_statement, fun_statement_parse)
-    spa(fun_statement, lambda t: CDP.FunStatement(t[0], t[1], t[2]))
+    fun_statement = sp(PROVIDES + C(fname, 'fname') + unitst,
+                       lambda t: CDP.FunStatement(t[0], t[1], t[2]))
 
-    res_statement = REQUIRES + C(rname, 'rname') + unitst
-    spa(res_statement, lambda t: CDP.ResStatement(t[0], t[1], t[2]))
+    res_statement = sp(REQUIRES + C(rname, 'rname') + unitst,
+                       lambda t: CDP.ResStatement(t[0], t[1], t[2]))
 
     empty_unit = S(L('[')) + S(L(']'))
     spa(empty_unit, lambda _: dict(unit=R_dimensionless))
@@ -90,13 +87,16 @@ class Syntax():
     spa(number_with_unit, number_with_unit_parse)
 
     # load battery
-    load_expr = S(L('load')) - C(idn, 'load_arg')
+    load_expr = S(L('load')) - C(idn.copy(), 'load_arg')
     spa(load_expr, lambda t: CDP.LoadCommand(t['load_arg']))
 
     dp_rvalue = Forward()
     # <dpname> = ...
-    setsub_expr = S(L('sub')) - C(idn, 'dpname') - S(L('=')) - C(dp_rvalue, 'dp_rvalue')
-    spa(setsub_expr, lambda t: CDP.SetName(t['dpname'], t['dp_rvalue']))
+
+    SUB = sp(L('sub'), lambda t: CDP.SubKeyword(t[0]))
+
+    setsub_expr = sp(SUB - C(idn.copy(), 'dpname') - S(L('=')) - C(dp_rvalue, 'dp_rvalue'),
+                     lambda t: CDP.SetName(t[0], t[1], t[2]))
 
 
     rvalue = Forward()
@@ -110,24 +110,31 @@ class Syntax():
     spa(setname_generic, lambda t: CDP.SetNameGeneric(t[0], t[1]))
 
 
-    variable_ref = NotAny(reserved) + C(idn, 'variable_ref_name')
+    variable_ref = NotAny(reserved) + C(idn.copy(), 'variable_ref_name')
     spa(variable_ref, lambda t: CDP.VariableRef(t['variable_ref_name']))
 
     constant_value = number_with_unit ^ variable_ref
 
 
+    rvalue_resource_simple = sp(C(idn.copy(), 'dp') + L('.') - C(idn.copy(), 's'),
+                                lambda t: CDP.Resource(s=t[2], keyword=t[1], dp=t[0]))
 
-    rvalue_resource_simple = C(idn, 'dp') + S(L('.')) - C(idn, 's')
+    REQUIRED_BY = sp(L('required') - L('by'),
+                    lambda _: CDP.RequiredByKeyword('required by'))
 
-    prep = (S(L('required')) - S(L('by'))) | S(L('of'))
-    rvalue_resource_fancy = C(idn, 's') + prep - C(idn, 'dp')
+    PROVIDED_BY = sp(L('provided') - L('by'),
+                    lambda _: CDP.ProvidedByKeyword('provided by'))
+
+                     
+    rvalue_resource_fancy = sp(C(idn.copy(), 's') + REQUIRED_BY - C(idn.copy(), 'dp'),
+                               lambda t: CDP.Resource(s=t[0], keyword=t[1], dp=t[2]))
+
     rvalue_resource = rvalue_resource_simple ^ rvalue_resource_fancy
-    spa(rvalue_resource, lambda t: CDP.Resource(t['dp'], t['s']))
 
-    rvalue_new_function = C(idn, 'new_function')
+    rvalue_new_function = C(idn.copy(), 'new_function')
     spa(rvalue_new_function, lambda t: CDP.VariableRef(t['new_function']))
 
-    lf_new_resource = C(idn, 'new_resource')
+    lf_new_resource = C(idn.copy(), 'new_resource')
     spa(lf_new_resource, lambda t: CDP.NewResource(t['new_resource']))
 
     lf_new_limit = C(Group(number_with_unit), 'limit')
@@ -149,13 +156,14 @@ class Syntax():
         'min': CDP.OpMin,
     }
 
-    opname = Or([L(x) for x in binary])
-    binary_expr = (C(opname, 'opname') - S(L('(')) +
+    opname = sp(Or([L(x) for x in binary]), lambda t: CDP.OpKeyword(t[0]))
+
+    binary_expr = (opname - S(L('(')) +
                     C(rvalue, 'op1') - S(L(','))
                     + C(rvalue, 'op2')) - S(L(')'))
 
 
-    spa(binary_expr, lambda t: Syntax.binary[t['opname']](t['op1'], t['op2']))
+    spa(binary_expr, lambda t: Syntax.binary[t[0].keyword](a=t['op1'], b=t['op2'], keyword=t[0]))
 
     operand = rvalue_new_function ^ rvalue_resource ^ binary_expr ^ unary_expr ^ constant_value
 
@@ -163,12 +171,12 @@ class Syntax():
     # comment_line = ow + Literal('#') + line + S(EOL)
 
 
-    simple = (C(idn, 'dp2') + S(L('.')) - C(idn, 's2'))
-    fancy = (C(idn, 's2') + S(L('provided')) - S(L('by')) - C(idn, 'dp2'))
-
-    spa(simple, lambda t: CDP.Function(t['dp2'], t['s2']))
-    spa(fancy, lambda t: CDP.Function(t['dp2'], t['s2']))
-
+    DOT = sp(L('.'), lambda t: CDP.DotPrep(t[0]))
+    
+    simple = sp(C(idn.copy(), 'dp2') + DOT - C(idn.copy(), 's2'),
+               lambda t: CDP.Function(dp=t['dp2'], s=t['s2'], keyword=t[1])  )
+    fancy = sp(C(idn.copy(), 's2') + PROVIDED_BY - C(idn.copy(), 'dp2'),
+                lambda t: CDP.Function(dp=t['dp2'], s=t['s2'], keyword=t[1]))
 
     fvalue_operand = lf_new_limit ^ simple ^ fancy ^ lf_new_resource ^ (S(L('(')) - (lf_new_limit ^ simple ^ fancy ^ lf_new_resource) - S(L(')')))
 
@@ -188,38 +196,48 @@ class Syntax():
 
 
 
-    GEQ = S(L('>='))
-    LEQ = S(L('<='))
+    GEQ = sp(L('>='), lambda t: CDP.geq(t[0]))
+    LEQ = sp(L('<='), lambda t: CDP.leq(t[0]))
 
     constraint_expr = C(fvalue, 'lf') + GEQ - C(rvalue, 'rvalue')
-    spa(constraint_expr, lambda t: CDP.Constraint(t['lf'], t['rvalue']))
+    spa(constraint_expr, lambda t: CDP.Constraint(function=t['lf'],
+                                                  rvalue=t['rvalue'], prep=t[1]))
 
     constraint_expr2 = C(rvalue, 'rvalue') + LEQ - C(fvalue, 'lf')
-    spa(constraint_expr2, lambda t: CDP.Constraint(t['lf'], t['rvalue']))
+    spa(constraint_expr2, lambda t: CDP.Constraint(function=t['lf'],
+                                                   rvalue=t['rvalue'], prep=t[1]))
 
 
 
-    fun_shortcut1 = PROVIDES + C(idn, 'fname') + USING + C(idn, 'name')
-    res_shortcut1 = REQUIRES + C(idn, 'rname') + FOR + C(idn, 'name')
+    fun_shortcut1 = sp(PROVIDES + fname + USING + idn.copy(),
+                       lambda t: CDP.FunShortcut1(provides=t[0],
+                                                  fname=t[1],
+                                                  prep_using=t[2],
+                                                  name=t[3]))
 
-    fun_shortcut2 = PROVIDES + C(idn, 'fname') + LEQ - C(fvalue, 'lf')
-    res_shortcut2 = REQUIRES + C(idn, 'rname') + GEQ - C(rvalue, 'rvalue')
+    res_shortcut1 = sp(REQUIRES + rname + FOR + idn,
+                       lambda t: CDP.ResShortcut1(t[0], t[1], t[2], t[3]))
 
-    fun_shortcut3 = PROVIDES + C(Group(idn + OneOrMore(S(L(',')) + idn)), 'fnames') + USING + C(idn, 'name')
-    res_shortcut3 = REQUIRES + C(Group(idn + OneOrMore(S(L(',')) + idn)), 'rnames') + FOR + C(idn, 'name')
+    fun_shortcut2 = sp(PROVIDES + fname + LEQ - fvalue,
+                       lambda t: CDP.FunShortcut2(t[0], t[1], t[2], t[3]))
 
+    res_shortcut2 = sp(REQUIRES + rname + GEQ - rvalue,
+                       lambda t: CDP.ResShortcut2(t[0], t[1], t[2], t[3]))
 
+    fun_shortcut3 = sp(PROVIDES + C(Group(fname + OneOrMore(S(L(',')) + fname)), 'fnames')
+                       + USING + C(idn.copy(), 'name'),
+                       lambda t: CDP.FunShortcut1m(provides=t[0],
+                             fnames=make_list(list(t['fnames'])),
+                             prep_using=t[2],
+                             name=t['name']))
 
-    spa(fun_shortcut1, lambda t: CDP.FunShortcut1(t['fname'], t['name']))
-    spa(res_shortcut1, lambda t: CDP.ResShortcut1(t['rname'], t['name']))
+    res_shortcut3 = sp(REQUIRES + C(Group(rname + OneOrMore(S(L(',')) + rname)), 'rnames')
+                       + FOR + C(idn.copy(), 'name'),
+                       lambda t: CDP.ResShortcut1m(requires=t[0],
+                             rnames=make_list(list(t['rnames'])),
+                             prep_for=t[2],
+                             name=t['name']))
 
-    spa(fun_shortcut2, lambda t: CDP.FunShortcut2(t['fname'], t['lf']))
-    spa(res_shortcut2, lambda t: CDP.ResShortcut2(t['rname'], t['rvalue']))
-
-
-    spa(fun_shortcut3, fun_shortcut3_parse)
-
-    spa(res_shortcut3, res_shortcut3_parse)
 
     line_expr = (load_expr ^ constraint_expr ^ constraint_expr2 ^
                  (setname_generic ^ setsub_expr)
@@ -237,11 +255,11 @@ class Syntax():
     spa(dp_model, lambda t: CDP.BuildProblem(keyword=t[0], statements=t[1]))
 
     funcname = Combine(idn + ZeroOrMore(L('.') - idn))
-    code_spec = S(L('code')) - C(funcname, 'function')
-    spa(code_spec, lambda t: CDP.PDPCodeSpec(function=t['function'], arguments={}))
+    code_spec = sp(S(L('code')) - C(funcname, 'function'),
+                   lambda t: CDP.PDPCodeSpec(function=t['function'][0], arguments={}))
 
 
-    load_pdp = S(L('load')) - C(idn, 'name')
+    load_pdp = S(L('load')) - C(idn.copy(), 'name')
     spa(load_pdp, lambda t: CDP.LoadDP(t['name']))
 
     pdp_rvalue = load_pdp ^ code_spec
@@ -255,14 +273,19 @@ class Syntax():
     spa(simple_dp_model, lambda t: CDP.DPWrap(list(t[0]), list(t[1]), t[2]))
 
 
-    abstract_expr = S(L('abstract')) - C(dp_rvalue, 'dp_rvalue')
-    spa(abstract_expr, lambda t: CDP.AbstractAway(t['dp_rvalue']))
+    COMPACT = sp(L('compact'), lambda t: CDP.CompactKeyword(t[0]))
+    TEMPLATE = sp(L('template'), lambda t: CDP.TemplateKeyword(t[0]))
+    ABSTRACT = sp(L('abstract'), lambda t: CDP.AbstractKeyword(t[0]))
 
-    compact_expr = S(L('compact')) - C(dp_rvalue, 'dp_rvalue')
-    spa(compact_expr, lambda t: CDP.Compact(t['dp_rvalue']))
+    abstract_expr = sp(ABSTRACT - dp_rvalue, 
+                       lambda t: CDP.AbstractAway(t[0], t[1]))
 
-    template_expr = S(L('template')) - C(dp_rvalue, 'dp_rvalue')
-    spa(template_expr, lambda t: CDP.MakeTemplate(t['dp_rvalue']))
+    
+    compact_expr = sp(COMPACT - dp_rvalue,
+                       lambda t: CDP.Compact(t[0], t[1]))
+
+    template_expr = sp(TEMPLATE - dp_rvalue,
+                       lambda t: CDP.MakeTemplate(t[0], t[1]))
 
     # dp_rvalue << (load_expr | simple_dp_model) ^ dp_model
     dp_rvalue << (load_expr | simple_dp_model | dp_model | abstract_expr |
