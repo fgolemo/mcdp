@@ -21,6 +21,7 @@ from mocdp.comp.context import CFunction, CResource
 CDP = CDPLanguage
 #
 
+@contract(resource=CResource, function=CFunction)
 def add_constraint(context, resource, function):
     R1 = context.get_rtype(resource)
     F2 = context.get_ftype(function)
@@ -417,16 +418,16 @@ def eval_pdp(r, context):  # @UnusedVariable
 @contract(returns=CFunction)
 def eval_lfunction(lf, context):
     if isinstance(lf, CDP.Function):
-        if not lf.dp in context.names:
-            msg = 'Unknown dp (%r.%r)' % (lf.dp, lf.s)
-            raise DPSemanticError(msg, where=lf.where)
+#         if not lf.dp in context.names:
+#             msg = 'Unknown dp (%r.%r)' % (lf.dp, lf.s)
+#             raise DPSemanticError(msg, where=lf.where)
 
 #         warnings.warn('Not sure if this was necessary')
 #         if context.is_new_resource(lf.dp):
 #             msg = 'Cannot use the name %s of an external interface function.' % lf.__repr__()
 #             raise DPSemanticError(msg, where=lf.where)
 
-        return context.make_function(dp=lf.dp, s=lf.s)
+        return context.make_function(dp=lf.dp.value, s=lf.s.value)
 
     if isinstance(lf, CDP.InvMult):
         ops = lf.ops
@@ -505,7 +506,7 @@ def eval_rvalue(rvalue, context):
     # wants Resource or NewFunction
     try:
         if isinstance(rvalue, CDP.Resource):
-            return context.make_resource(dp=rvalue.dp, s=rvalue.s)
+            return context.make_resource(dp=rvalue.dp.value, s=rvalue.s.value)
         
         def eval_ops(rvalue):
             """ Returns a, F1, b, F2 """

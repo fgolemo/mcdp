@@ -115,8 +115,10 @@ class Syntax():
 
     constant_value = number_with_unit ^ variable_ref
 
+    dpname = sp(idn.copy(), lambda t: CDP.DPName(t[0]))
+    DOT = sp(L('.'), lambda t: CDP.DotPrep(t[0]))
 
-    rvalue_resource_simple = sp(C(idn.copy(), 'dp') + L('.') - C(idn.copy(), 's'),
+    rvalue_resource_simple = sp(dpname + DOT - rname,
                                 lambda t: CDP.Resource(s=t[2], keyword=t[1], dp=t[0]))
 
     REQUIRED_BY = sp(L('required') - L('by'),
@@ -126,7 +128,7 @@ class Syntax():
                     lambda _: CDP.ProvidedByKeyword('provided by'))
 
                      
-    rvalue_resource_fancy = sp(C(idn.copy(), 's') + REQUIRED_BY - C(idn.copy(), 'dp'),
+    rvalue_resource_fancy = sp(rname + REQUIRED_BY - dpname,
                                lambda t: CDP.Resource(s=t[0], keyword=t[1], dp=t[2]))
 
     rvalue_resource = rvalue_resource_simple ^ rvalue_resource_fancy
@@ -171,12 +173,14 @@ class Syntax():
     # comment_line = ow + Literal('#') + line + S(EOL)
 
 
-    DOT = sp(L('.'), lambda t: CDP.DotPrep(t[0]))
     
-    simple = sp(C(idn.copy(), 'dp2') + DOT - C(idn.copy(), 's2'),
-               lambda t: CDP.Function(dp=t['dp2'], s=t['s2'], keyword=t[1])  )
-    fancy = sp(C(idn.copy(), 's2') + PROVIDED_BY - C(idn.copy(), 'dp2'),
-                lambda t: CDP.Function(dp=t['dp2'], s=t['s2'], keyword=t[1]))
+
+
+    simple = sp(dpname + DOT - fname,
+               lambda t: CDP.Function(dp=t[0], s=t[2], keyword=t[1]))
+
+    fancy = sp(fname + PROVIDED_BY - dpname,
+                lambda t: CDP.Function(dp=t[2], s=t[0], keyword=t[1]))
 
     fvalue_operand = lf_new_limit ^ simple ^ fancy ^ lf_new_resource ^ (S(L('(')) - (lf_new_limit ^ simple ^ fancy ^ lf_new_resource) - S(L(')')))
 

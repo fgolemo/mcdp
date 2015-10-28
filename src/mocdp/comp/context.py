@@ -47,11 +47,15 @@ class Context():
 
     @contract(s='str', dp='str', returns=CFunction)
     def make_function(self, dp, s):
+        assert isinstance(dp, str)
+        if not dp in self.names:
+            msg = 'Unknown dp (%r.%r)' % (dp, s)
+            raise DPSemanticError(msg)
         return CFunction(dp, s)
 
     @contract(s='str', dp='str', returns=CResource)
     def make_resource(self, dp, s):
-        
+        assert isinstance(dp, str)
         if not dp in self.names:
             msg = 'Unknown dp (%r.%r)' % (dp, s)
             raise DPSemanticError(msg)
