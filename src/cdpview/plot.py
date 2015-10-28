@@ -5,6 +5,8 @@ from mocdp.lang.parse_actions import parse_ndp
 from quickapp import QuickAppBase
 from reprep import Report
 import os
+from reprep.constants import MIME_PNG
+from contracts import contract
 
 
 def get_ndp(data):
@@ -27,11 +29,30 @@ def png_from_gg(gg):
 def ndp_visualization(data, style):
     ndp = get_ndp(data) 
     gg = gvgen_from_ndp(ndp, style)
-    return png_from_gg(gg)
+    res1 = ('png', style, png_from_gg(gg))
+    return [res1]
+
+@contract(data=dict)
+def syntax_frag(data):
+    from mocdp.dp_report.html import ast_to_html
+    s = data['s']
+    res = ast_to_html(s, complete_document=False)
+    res1 = ('html', 'syntax_frag', res)
+    return [res1]
+
+@contract(data=dict)
+def syntax_doc(data):
+    from mocdp.dp_report.html import ast_to_html
+    s = data['s']
+    res = ast_to_html(s, complete_document=True)
+    res1 = ('html', 'syntax_doc', res)
+    return [res1]
 
 allplots  = {
     'ndp_default': lambda data: ndp_visualization(data, 'default'),
     'ndp_clean': lambda data: ndp_visualization(data, 'clean'),
+    'syntax_doc': syntax_doc,
+    'syntax_frag': syntax_frag,
 }
 
 def do_plots(filename, plots, outdir):
@@ -39,15 +60,27 @@ def do_plots(filename, plots, outdir):
     data = {}
     data['s'] = s
     
+    results = []
     for p in plots:    
-        png = allplots[p](data)
-        
-        base = os.path.splitext(os.path.basename(filename))[0]
-        base += '-plot-%s.png' % p
-        out = os.path.join(outdir, base)
-        print('Writing to %s' % out)
-        with open(out, 'w') as f:
-            f.write(png)
+        print('plotting %r ' % p)
+        res = allplots[p](data)
+        assert isinstance(res, list)
+        for r in res:
+            assert isinstance(r, tuple), r
+            mime, name, x = r
+            ext = mime
+
+            base = os.path.splitext(os.path.basename(filename))[0]
+            base += '-%s.%s' % (name, ext)
+
+            out = os.path.join(outdir, base)
+            print('Writing to %s' % out)
+            with open(out, 'w') as f:
+                f.write(x)
+
+            results.append(r)
+
+    return results
 
 
 

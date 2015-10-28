@@ -12,7 +12,7 @@ from mocdp.dp import (Constant, GenericUnary, Identity, InvMult2, Limit, Max,
 from mocdp.dp.dp_sum import SumN
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.parse_actions import plus_constantsN
-from mocdp.lang.parts import CDPLanguage
+from mocdp.lang.parts import CDPLanguage, unwrap_list
 from mocdp.posets import (NotBelongs, NotEqual, NotLeq, PosetProduct, Rcomp,
     get_types_universe, mult_table, mult_table_seq)
 
@@ -68,44 +68,46 @@ def eval_statement(r, context):
         context.add_ndp(name, ndp)
         
     elif isinstance(r, CDP.SetNameGeneric):
-        name = r.name
+        name = r.name.value
         right_side = r.right_side
 
-        if r.name in context.constants:
-            msg = 'Constant %r already set.' % r.name
+        if name in context.constants:
+            msg = 'Constant %r already set.' % name
             raise DPSemanticError(msg, where=r.where)
 
-        if r.name in context.var2resource:
-            msg = 'Resource %r already set.' % r.name
+        if name in context.var2resource:
+            msg = 'Resource %r already set.' % name
             raise DPSemanticError(msg, where=r.where)
 
         try:
             res = eval_constant(right_side, context)
-            context.constants[r.name] = res
+            context.set_constant(name, res)
 
         except NotConstant as e:
 #             print('Cannot evaluate %r as constant: %s ' % (right_side, e))
             rvalue = eval_rvalue(right_side, context)
             # print('adding as resource')
-            context.var2resource[name] = rvalue
+            context.set_var2resource(name, rvalue)
 
     elif isinstance(r, CDP.ResStatement):
         # requires r.rname [r.unit]
-        F = r.unit
-        ndp = dpwrap(Identity(F), r.rname, r.rname)
-        context.add_ndp_res(r.rname, ndp)
-        return CDP.Function(context.get_name_for_res_node(r.rname), r.rname)
+        F = r.unit.value
+        rname = r.rname.value
+        ndp = dpwrap(Identity(F), rname, rname)
+        context.add_ndp_res(rname, ndp)
+        return CDP.Function(context.get_name_for_res_node(rname), rname)
     
     elif isinstance(r, CDP.FunStatement):
-        F = r.unit
-        ndp = dpwrap(Identity(F), r.fname, r.fname)
-        context.add_ndp_fun(r.fname, ndp)
-        return CDP.Resource(context.get_name_for_fun_node(r.fname), r.fname)
+        F = r.unit.value
+        fname = r.fname.value
+        ndp = dpwrap(Identity(F), fname, fname)
+        context.add_ndp_fun(fname, ndp)
+        return CDP.Resource(context.get_name_for_fun_node(fname), fname)
     
     elif isinstance(r, CDP.FunShortcut1):  # provides fname using name
         B = CDP.Function(r.name, r.fname)
         F = context.get_ftype(B)
-        A = eval_statement(CDP.FunStatement(r.fname, F), context)
+        A = eval_statement(CDP.FunStatement('-', CDP.FName(r.fname), CDP.Unit(F)), context)
         eval_statement(CDP.Constraint(function=B, rvalue=A), context)
 
     elif isinstance(r, CDP.ResShortcut1):  # requires rname for name
@@ -113,7 +115,7 @@ def eval_statement(r, context):
         # rname >= name.rname
         A = CDP.Resource(r.name, r.rname)
         R = context.get_rtype(A)
-        B = eval_statement(CDP.ResStatement(r.rname, R), context)
+        B = eval_statement(CDP.ResStatement('-', CDP.RName(r.rname), CDP.Unit(R)), context)
         # B >= A
         eval_statement(CDP.Constraint(function=B, rvalue=A), context)
         # eval_rvalue wants Resource or NewFunction
@@ -123,14 +125,14 @@ def eval_statement(r, context):
         B = eval_lfunction(r.lf, context)
         assert isinstance(B, CDP.Function)
         F = context.get_ftype(B)
-        A = eval_statement(CDP.FunStatement(r.fname, F), context)
+        A = eval_statement(CDP.FunStatement('-', CDP.FName(r.fname), CDP.Unit(F)), context)
         eval_statement(CDP.Constraint(function=B, rvalue=A), context)
 
     elif isinstance(r, CDP.ResShortcut2):  # requires rname >= (rvalue)
         A = eval_rvalue(r.rvalue, context)
         assert isinstance(A, CDP.Resource)
         R = context.get_rtype(A)
-        B = eval_statement(CDP.ResStatement(r.rname, R), context)
+        B = eval_statement(CDP.ResStatement('-', CDP.RName(r.rname), CDP.Unit(R)), context)
         # B >= A
         eval_statement(CDP.Constraint(function=B, rvalue=A), context)
 
@@ -254,6 +256,10 @@ def check_missing_connections(context):
 @contract(returns=NamedDP)
 def eval_dp_rvalue(r, context):  # @UnusedVariable
     try:
+        if isinstance(r, CDP.BuildProblem):
+            special_list = r.statements
+            statements = unwrap_list(special_list)
+            return interpret_commands(statements)
 
         if isinstance(r, NamedDP):
             return r
@@ -518,7 +524,6 @@ def eval_rvalue(rvalue, context):
         if isinstance(rvalue, CDP.PlusN):
             return eval_PlusN_as_rvalue(rvalue, context)
 
-
         if isinstance(rvalue, CDP.OpMax):
 
             if isinstance(rvalue.a, CDP.ValueWithUnits0):
@@ -707,7 +712,7 @@ def flatten_multN(ops):
     res = []
     for op in ops:
         if isinstance(op, CDP.MultN):
-            res.extend(flatten_multN(op.ops))
+            res.extend(flatten_multN(unwrap_list(op.ops)))
         else:
             res.append(op)
     return res
@@ -719,7 +724,7 @@ def eval_MultN(x, context, wants_constant):
 
     assert isinstance(x, CDP.MultN)
 
-    ops = flatten_multN(x.ops)
+    ops = flatten_multN(unwrap_list(x.ops))
     assert len(ops) > 1
 
     constants = []
@@ -787,7 +792,7 @@ def flatten_plusN(ops):
     res = []
     for op in ops:
         if isinstance(op, CDP.PlusN):
-            res.extend(flatten_plusN(op.ops))
+            res.extend(flatten_plusN(unwrap_list(op.ops)))
         else:
             res.append(op)
     return res
@@ -797,7 +802,7 @@ def eval_PlusN(x, context, wants_constant):
     assert isinstance(x, CDP.PlusN)
     assert len(x.ops) > 1
 
-    ops = flatten_plusN(x.ops)
+    ops = flatten_plusN(unwrap_list(x.ops))
 
     constants = []
     resources = []

@@ -206,13 +206,9 @@ cdp {
 #     rmin = dp.solve(())
 #     print('Rmin: %s' % UR.format(rmin))
 
-    trace = generic_solve(dp, f=f, max_steps=1)
+    trace = generic_solve(dp, f=f, max_steps=None)
 
 
-    print('plotting')
-    mx = 3.0
-    my = 3.0
-    axis = (0, mx * 1.1, 0, my * 1.1)
 #
 #     fig0 = r.figure(cols=2)
 #     caption = 'Solution using solve()'
@@ -223,13 +219,15 @@ cdp {
     plotters = { 'UR2': PlotterUR2() }
 
     def annotation(pylab, axis):
-        xs = np.linspace(0.001, 1, 100)
+        minx, maxx, miny, maxy = axis
+        xs = np.linspace(minx, 1, 100)
+        xs = np.array([x for x in xs if  x != 0])
         ys = 1 / xs
         pylab.plot(xs, ys, 'k-')
 
-        xs = np.linspace(1, mx, 100)
+        xs = np.linspace(1, maxx, 100)
         ys = xs
-        pylab.plot(xs, ys, 'k-')
+        pylab.plot(xs, ys, 'k--')
 
     # make sure it includes (0,0) and (2, 0)
     axis0 = (0, 2, 0, 0)

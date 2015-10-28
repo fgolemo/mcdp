@@ -11,10 +11,12 @@ from system_cmd import CmdException, system_cmd_result
 import os
 import warnings
 from contracts.utils import raise_wrapped
+from conf_tools.utils.resources import dir_from_package_name
+from tempfile import mkdtemp
 
 
 class GraphDrawingContext():
-    def __init__(self, gg, parent, yourname, level=0):
+    def __init__(self, gg, parent, yourname, level=0, tmppath=None):
         self.gg = gg
         self.parent = parent
         self.yourname = yourname
@@ -22,12 +24,17 @@ class GraphDrawingContext():
         
         self.set_style('default')
         
+        if tmppath is None:
+            tmppath = mkdtemp(suffix="dp-icons")
+            print('created tmp directory %r' % tmppath)
+        self.tmppath = tmppath
+
     def newItem(self, label):
         return self.gg.newItem(label, parent=self.parent)
         
     def child_context(self, parent, yourname):
         c = GraphDrawingContext(gg=self.gg, parent=parent, yourname=yourname,
-                                level=self.level + 1)
+                                level=self.level + 1, tmppath=self.tmppath)
         return c
 
     def styleApply(self, sname, n):
@@ -80,12 +87,34 @@ class GraphDrawingContext():
         else:
             assert False, self.policy_skip
 
+    def get_temp_path(self):
+        return self.tmppath
+
+    def get_imagepath(self):
+        base = dir_from_package_name('mocdp.dp_report')
+        imagepath = os.path.join(base, 'icons')
+        if not os.path.exists(imagepath):
+            raise ValueError('Icons path does not exist: %r' % imagepath)
+        return imagepath
+
+    def get_icon(self, options):
+        tmppath = self.get_temp_path()
+        imagepath = self.get_imagepath()
+        best = choose_best_icon(options, imagepath, tmppath)
+        return best
 
 def gvgen_from_ndp(ndp, style='default'):
     import gvgen  # @UnresolvedImport
     gg = gvgen.GvGen(options="rankdir=LR")
     if len(ndp.get_fnames()) > 0:
         cluster_functions = gg.newItem("")
+
+    gdc = GraphDrawingContext(gg=gg, parent=None, yourname=None)
+    gdc.set_style(style)
+
+
+
+
 
     gg.styleAppend("external", "shape", "none")
     gg.styleAppend("external_cluster", "shape", "box")
@@ -107,12 +136,12 @@ def gvgen_from_ndp(ndp, style='default'):
 
     gg.styleAppend("sum", "shape", "box")
     gg.styleAppend("sum", "style", "rounded")
-    gg.styleAppend('sum', 'image', 'icons/sum.png')
+    gg.styleAppend('sum', 'image', gdc.get_icon(['sum']))
     gg.styleAppend('sum', 'imagescale', 'true')
     gg.styleAppend('sum', 'fixedsize', 'true')
 
     gg.styleAppend("leq", "shape", "plaintext")
-    gg.styleAppend('leq', 'image', 'icons/leq.png')
+    gg.styleAppend('leq', 'image', gdc.get_icon(['leq']))
     gg.styleAppend('leq', 'imagescale', 'true')
     gg.styleAppend('leq', 'fixedsize', 'true')
 
@@ -130,8 +159,6 @@ def gvgen_from_ndp(ndp, style='default'):
 
     gg.styleAppend('limit', 'color', 'black')
 
-    gdc = GraphDrawingContext(gg=gg, parent=None, yourname=None)
-    gdc.set_style(style)
     functions, resources = create(gdc, ndp)
 
     if functions:
@@ -187,10 +214,10 @@ def create(gdc, ndp):
 
     return res
 
-def resize_icon(filename, imagepath, size):
+def resize_icon(filename, tmppath, size):
     
     from cdpview.go import safe_makedirs
-    res = os.path.join(imagepath, 'resized', str(size))
+    res = os.path.join(tmppath, 'resized', str(size))
     safe_makedirs(res)
     resized = os.path.join(res, os.path.basename(filename))
     if not os.path.exists(resized):
@@ -206,12 +233,12 @@ def resize_icon(filename, imagepath, size):
             raise
     return resized
 
-def choose_best_icon(iconoptions, imagepath='icons'):
+def choose_best_icon(iconoptions, imagepath, tmppath):
     for option in iconoptions:
         if option is None: continue
         imagename = os.path.join(imagepath, option) + '.png'
         if os.path.exists(imagename):
-            return resize_icon(imagename, imagepath, 100)
+            return resize_icon(imagename, tmppath, 100)
     return None
 
 def is_simple(ndp):
@@ -236,7 +263,8 @@ def create_simplewrap(gdc, ndp):
     icon = ndp.get_icon()
 
     iconoptions = [gdc.yourname, icon, classname, 'default']
-    best_icon = choose_best_icon(iconoptions)
+
+    best_icon = gdc.get_icon(iconoptions)
 
     simple = (Min, Max, Identity, GenericUnary)
     only_string = isinstance(ndp.dp, simple)

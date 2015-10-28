@@ -1,5 +1,12 @@
 from collections import namedtuple
 
+def isnamedtuplewhere(x):
+    from compmake.jobs.dependencies import isnamedtupleinstance
+    if not isnamedtupleinstance(x):
+        return False
+    d = x._asdict()
+    return 'where' in d
+
 def namedtuplewhere(a, b):
     fields = b.split(" ")
     assert not 'where' in fields

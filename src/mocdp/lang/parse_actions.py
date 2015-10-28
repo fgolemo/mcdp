@@ -11,14 +11,13 @@ from mocdp.lang.namedtuple_tricks import get_copy_with_where
 from mocdp.posets import NotBelongs, Space, mult_table
 from pyparsing import ParseException, ParseFatalException
 import functools
+from mocdp.lang.parts import make_list, unwrap_list
 
 
 CDP = CDPLanguage
 
-
-def spa(x, b):
-    @parse_action
-    def p(tokens, loc, s):
+def wheredecorator(b):
+    def bb(tokens, loc, s):
         where = Where(s, loc)
         try:
             res = b(tokens)
@@ -33,15 +32,49 @@ def spa(x, b):
             raise_wrapped(DPInternalError, e, "Error while parsing.",
                           where=where.__str__(), tokens=tokens)
 
-        if isnamedtupleinstance(res):
+        if isinstance(res, CDP.PlusN):
+            res = CDP.PlusN(ops=make_list(unwrap_list(res.ops), where))
 
+        if isinstance(res, CDP.MultN):
+            res = CDP.MultN(ops=make_list(unwrap_list(res.ops), where))
+
+        if isnamedtupleinstance(res) or isinstance(res, CDP.ValueWithUnits):
             res = get_copy_with_where(res, where=where)
+
+#         else:
+#             print('Not adding where to %s' % type(res))
+        return res
+    return bb
+
+def spa(x, b):
+    @parse_action
+    def p(tokens, loc, s):
+        bb = wheredecorator(b)
+        res = bb(tokens, loc, s)
+        # if we are here, then it means the parse was succesful
+        # we try again
+
+        # not this, it would be recursive
+        # x.parseString(s[loc:])
+
+        x2 = x.copy()
+        x2.setParseAction()
+        # a = x2.parseString(s[loc:])
+        loc_end, tokens = x2._parse(s[loc:], 0)
+        character_end = loc + loc_end
+
+        if isnamedtupleinstance(res) or isinstance(res, CDP.ValueWithUnits):
+            w = res.where
+            w2 = Where(w.string, character_end=character_end, character=w.character)
+            res = get_copy_with_where(res, where=w2)
+
         return res
     x.setParseAction(p)
 
 def number_with_unit_parse(t):
     value = t[0]
-    units = t[1]
+    _units = t[1]
+    units = _units.value
     from mocdp.posets.rcomp import Rcomp
     if isinstance(value, int) and isinstance(units, Rcomp):
         value = float(value)
@@ -68,6 +101,7 @@ def fun_shortcut3_parse(tokens):
     return CDP.MultipleStatements(res)
 
 @parse_action
+@wheredecorator
 def mult_parse_action(tokens):
     tokens = list(tokens[0])
 
@@ -80,7 +114,8 @@ def mult_parse_action(tokens):
 
     assert len(ops) > 1
 
-    return CDP.MultN(ops)
+    res = CDP.MultN(make_list(ops))
+    return res
 
 class MultType():
     def __init__(self, factor):
@@ -123,6 +158,7 @@ def plus_constantsN(constants):
 
 
 @parse_action
+@wheredecorator
 def plus_parse_action(tokens):
     tokens = list(tokens[0])
 
@@ -132,7 +168,8 @@ def plus_parse_action(tokens):
             ops.append(t)
         else:
             assert t == '+'
-    return CDP.PlusN(ops)
+    res = CDP.PlusN(make_list(ops))
+    return res
 
 
 class PlusType():
@@ -161,8 +198,6 @@ def mult_inv_parse_action(tokens):
 
     assert len(ops) == 2
     return CDP.InvMult(ops)
-
-
 
 def parse_wrap(expr, string):
     # Nice trick: the removE_comments doesn't change the number of lines
@@ -212,14 +247,19 @@ def parse_ndp(string):
 def parse_line(line):
     from mocdp.lang.syntax import Syntax
     return parse_wrap(Syntax.line_expr, line)[0]
-
-@parse_action
-def dp_model_parse_action(tokens):
-    res = list(tokens)
-    # if not res:
-    #    raise DPSemanticError('Empty model')
-    from mocdp.lang.blocks import interpret_commands
-    return interpret_commands(res)
+#
+# @parse_action
+# def dp_model_parse_action(tokens):
+#     keyword = tokens[0]
+#
+#     statements = CDP.MultipleStatements(list(tokens[1:]))
+#     print 'statmeents', statements
+#     # if not res:
+#     #    raise DPSemanticError('Empty model')
+# #     from mocdp.lang.blocks import interpret_commands
+# #     return interpret_commands(statements)
+#
+#     return CDP.BuildProblem(keyword=keyword, statements=statements)
 
 def power_expr_parse(t):
     op1 = t[0]

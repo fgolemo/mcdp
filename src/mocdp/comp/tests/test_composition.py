@@ -218,8 +218,16 @@ def check_compose2_generic():
 def check_same_spaces(dp1, dp2):
 #     print('dp1: %s' % dp1)
 #     print('dp2: %s' % dp2)
-    assert_equal(dp1.get_fun_space(), dp2.get_fun_space())
-    assert_equal(dp1.get_res_space(), dp2.get_res_space())
+    F1 = dp1.get_fun_space()
+    R1 = dp1.get_res_space()
+    F2 = dp2.get_fun_space()
+    R2 = dp2.get_res_space()
+    if not (R1 == R2):
+        msg = 'R not preserved'
+        raise_desc(AssertionError, msg, R1=R1, R2=R2)
+    if not (F1 == F2):
+        msg = 'F not preserved'
+        raise_desc(AssertionError, msg, F1=F1, F2=F2)
 
 @comptest
 def rule_terminator_series():

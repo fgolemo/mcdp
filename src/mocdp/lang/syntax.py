@@ -13,7 +13,8 @@ ParserElement.enablePackrat()
 
 class Syntax():
     keywords = ['load', 'compact', 'required', 'provides', 'abstract',
-                      'dp', 'cdp', 'mcdp', 'template', 'sub']
+                      'dp', 'cdp', 'mcdp', 'template', 'sub', 'for',
+                      'provided', 'requires', 'implemented-by', 'using', 'by']
     reserved = oneOf(keywords)
 
     # ParserElement.setDefaultWhitespaceChars('')
@@ -40,7 +41,7 @@ class Syntax():
     unit_expr = Combine(OneOrMore(unit1 ^ unit2 ^ unit3 ^ unit4))
 
 
-    spa(unit_expr, lambda t:  make_rcompunit(t[0]))
+    spa(unit_expr, lambda t: CDP.Unit(make_rcompunit(t[0])))
 
     # numbers
     number = Word(nums)
@@ -59,16 +60,26 @@ class Syntax():
 
     unitst = S(L('[')) + C(unit_expr, 'unit') + S(L(']'))
 
-    PROVIDES = S(L('provides'))
-    REQUIRES = S(L('requires'))
+    PROVIDES = L('provides')
+    spa(PROVIDES, lambda t: CDP.ProvideKeyword(t[0]))
+
+    REQUIRES = L('requires')
+    spa(REQUIRES, lambda t: CDP.RequireKeyword(t[0]))
+    
     USING = S(L('using'))
     FOR = S(L('for'))
 
-    fun_statement = PROVIDES + C(idn, 'fname') + unitst
-    spa(fun_statement, lambda t: CDP.FunStatement(t['fname'], t['unit']))
+    fname = idn.copy()
+    spa(fname, lambda t: CDP.FName(t[0]))
+    rname = idn.copy()
+    spa(rname, lambda t: CDP.RName(t[0]))
 
-    res_statement = REQUIRES + C(idn, 'rname') + unitst
-    spa(res_statement, lambda t: CDP.ResStatement(t['rname'], t['unit']))
+    fun_statement = PROVIDES + C(fname, 'fname') + unitst
+#     spa(fun_statement, fun_statement_parse)
+    spa(fun_statement, lambda t: CDP.FunStatement(t[0], t[1], t[2]))
+
+    res_statement = REQUIRES + C(rname, 'rname') + unitst
+    spa(res_statement, lambda t: CDP.ResStatement(t[0], t[1], t[2]))
 
     empty_unit = S(L('[')) + S(L(']'))
     spa(empty_unit, lambda _: dict(unit=R_dimensionless))
@@ -92,14 +103,11 @@ class Syntax():
     fvalue = Forward()
 
     setname_rightside = rvalue
-    setname_generic = (C(idn, 'name') + S(L('='))) + C(setname_rightside, 'right_side')
-    spa(setname_generic, lambda t: CDP.SetNameGeneric(t['name'], t['right_side']))
 
-#     setname_resource = (C(idn, 'name') + S(L('='))) + C(rvalue, 'rvalue')
-#     spa(setname_resource, lambda t: CDP.SetNameResource(t['name'], t['rvalue']))
-# 
-#     setname_value = (C(idn, 'setname_value') + S(L('='))) + C(constant_value, 'constant_value')
-#     spa(setname_value, lambda t: CDP.SetNameConstant(t['setname_value'], t['constant_value']))
+    setname_generic_var = idn.copy()
+    spa(setname_generic_var, lambda t: CDP.SetNameGenericVar(t[0]))
+    setname_generic = (C(setname_generic_var, 'name') + S(L('='))) + C(setname_rightside, 'right_side')
+    spa(setname_generic, lambda t: CDP.SetNameGeneric(t[0], t[1]))
 
 
     variable_ref = NotAny(reserved) + C(idn, 'variable_ref_name')
@@ -219,14 +227,18 @@ class Syntax():
                  ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3)
 
 
-    CDPTOKEN = S(L('cdp')) | S(L('mcdp'))
-    dp_model = CDPTOKEN - S(L('{')) - ZeroOrMore(S(ow) + line_expr) - S(L('}'))
-    spa(dp_model, dp_model_parse_action)
+    CDPTOKEN = L('cdp') | L('mcdp')
+    spa(CDPTOKEN, lambda t: CDP.MCDPKeyword(t[0]))
+
+    dp_model_statements = ZeroOrMore(S(ow) + line_expr)
+    spa(dp_model_statements, lambda t: make_list(t))
+
+    dp_model = CDPTOKEN - S(L('{')) - dp_model_statements - S(L('}'))
+    spa(dp_model, lambda t: CDP.BuildProblem(keyword=t[0], statements=t[1]))
 
     funcname = Combine(idn + ZeroOrMore(L('.') - idn))
     code_spec = S(L('code')) - C(funcname, 'function')
     spa(code_spec, lambda t: CDP.PDPCodeSpec(function=t['function'], arguments={}))
-
 
 
     load_pdp = S(L('load')) - C(idn, 'name')

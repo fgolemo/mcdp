@@ -32,6 +32,28 @@ class Context():
 
         self.constants = {}  # str -> ValueWithUnits
 
+    def _check_good_name(self, name):
+        forbidden = ['(', ']', ')', ' ']
+        for f in forbidden:
+            if f in name:
+                raise ValueError(name)
+
+    @contract(name=str)
+    def set_var2resource(self, name, value):
+        self._check_good_name(name)
+        if name in self.var2resource:
+            raise ValueError(name)
+
+        self.var2resource[name] = value
+
+    @contract(name=str)
+    def set_constant(self, name, value):
+        self._check_good_name(name)
+        if name in self.var2resource:
+            raise ValueError(name)
+
+        self.constants[name] = value
+
     def info(self, s):
         # print(s)
         pass

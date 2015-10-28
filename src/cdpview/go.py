@@ -2,8 +2,6 @@ from mocdp.dp_report.report import report_dp1, report_ndp1
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mocdp.lang.syntax import parse_ndp
 from reprep import Report
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
 import logging
 import os
 import sys
@@ -125,7 +123,9 @@ def watch_main():
     
     
 def watch(path, handler):
-    
+    from watchdog.events import FileSystemEventHandler
+    from watchdog.observers import Observer
+
     class MyWatcher(FileSystemEventHandler):
         def on_modified(self, event):  # @UnusedVariable
             src_path = event.src_path
