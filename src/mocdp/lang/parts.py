@@ -2,8 +2,8 @@
 
 from .namedtuple_tricks import namedtuplewhere
 from contracts.interface import Where
-from mocdp.exceptions import DPSemanticError, DPInternalError
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped
+from mocdp.exceptions import DPInternalError
 
 __all__ = ['CDPLanguage']
 
@@ -37,7 +37,7 @@ class CDPLanguage():
     NewResource = namedtuplewhere('NewResource', 'name')
     Constraint = namedtuplewhere('Constraint', 'function rvalue prep')
 
-    LoadCommand = namedtuplewhere('LoadCommand', 'load_arg')
+    LoadCommand = namedtuplewhere('LoadCommand', 'keyword load_arg')
     SetName = namedtuplewhere('SetName', 'keyword name dp_rvalue')
 
     SetNameGenericVar = namedtuplewhere('SetNameGenericVar', 'value')
@@ -55,7 +55,12 @@ class CDPLanguage():
     UsingKeyword = namedtuplewhere('UsingKeyword', 'keyword')
     RequiredByKeyword = namedtuplewhere('RequiredByKeyword', 'keyword')
     ProvidedByKeyword = namedtuplewhere('ProvidedByKeyword', 'keyword')
+    ImplementedbyKeyword = namedtuplewhere('ImplementedbyKeyword', 'keyword')
+    LoadKeyword = namedtuplewhere('LoadKeyword', 'keyword')
+    CodeKeyword = namedtuplewhere('CodeKeyword', 'keyword')
     OpKeyword = namedtuplewhere('OpKeyword', 'keyword')  # Max
+    DPWrapToken = namedtuplewhere('DPWrapToken', 'keyword')
+    FuncName = namedtuplewhere('FuncName', 'value')  # python function name
     # just prepositions
     leq = namedtuplewhere('leq', 'glyph')
     geq = namedtuplewhere('geq', 'glyph')
@@ -71,30 +76,24 @@ class CDPLanguage():
     FunStatement = namedtuplewhere('FunStatement', 'keyword fname unit')
     ResStatement = namedtuplewhere('ResStatement', 'keyword rname unit')
 
-    LoadDP = namedtuplewhere('LoadDP', 'name')
-    DPWrap = namedtuplewhere('DPWrap', 'fun res impl')
-    PDPCodeSpec = namedtuplewhere('PDPCodeSpec', 'function arguments')
+    LoadDP = namedtuplewhere('LoadDP', 'keyword name')
+    DPWrap = namedtuplewhere('DPWrap', 'token statements prep impl')
+    PDPCodeSpec = namedtuplewhere('PDPCodeSpec', 'keyword function arguments')
 
     InvMult = namedtuplewhere('InvMult', 'ops')
     FunShortcut1 = namedtuplewhere('FunShortcut1', 'provides fname prep_using name')
-    ResShortcut1_ = namedtuplewhere('ResShortcut1', 'requires rname prep_for name')
-
-    class ResShortcut1(ResShortcut1_):
-        def __init__(self, requires, rname, prep_for, name):
-            if not isinstance(rname, CDPLanguage.RName):
-                raise ValueError(rname)
-            CDPLanguage.ResShortcut1_.__init__(self, requires, rname, prep_for, name)
+    ResShortcut1 = namedtuplewhere('ResShortcut1', 'requires rname prep_for name')
 
     FunShortcut1m = namedtuplewhere('FunShortcut1m', 'provides fnames prep_using name')
     ResShortcut1m = namedtuplewhere('ResShortcut1m', 'requires rnames prep_for name')
     FunShortcut2 = namedtuplewhere('FunShortcut2', 'keyword fname leq lf')
     ResShortcut2 = namedtuplewhere('ResShortcut2', 'keyword rname geq rvalue')
-#     MultipleStatements = namedtuplewhere('MultipleStatements', 'statements')
     
     IntegerFraction = namedtuplewhere('IntegerFraction', 'num den')
 
     Power = namedtuplewhere('Power', 'op1 exponent')
     BuildProblem = namedtuplewhere('BuildProblem', 'keyword statements')
+
 
 list_types = {
 }
@@ -113,13 +112,18 @@ def is_a_special_list(x):
 def make_list(x, where=None):
     try:
         if not len(x):
-            if not where:
-                raise ValueError(x)
+#             if not where:
+#                 raise ValueError(x)
             return list_types[0](dummy='dummy', where=where)
     
         ltype = list_types[len(x)]
         w1 = x[0].where
         w2 = x[-1].where
+        if w1 is None or w2 is None:
+            for y in x:
+                if y.where is None:
+                    print y
+            raise_desc(ValueError, 'Cannot create list', x=x)
         w3 = Where(string=w1.string,
                       character=w1.character,
                       character_end=w2.character_end)
@@ -138,5 +142,6 @@ def unwrap_list(res):
         if k == 'where': continue
         normal.append(v)
     return normal
+
 
 

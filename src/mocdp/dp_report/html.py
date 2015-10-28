@@ -1,12 +1,12 @@
+from collections import namedtuple
 from contracts import contract
 from contracts.interface import Where
-from contracts.utils import indent, raise_wrapped, raise_desc
+from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.comp.tests.test_drawing import unzip
-from mocdp.lang.namedtuple_tricks import get_copy_with_where, isnamedtuplewhere
+from mocdp.lang.namedtuple_tricks import isnamedtuplewhere
 from mocdp.lang.parse_actions import parse_wrap
-from mocdp.lang.syntax import Syntax
 from mocdp.lang.parts import is_a_special_list
-from collections import namedtuple
+from mocdp.lang.syntax import Syntax
 
 
 def isolate_comments(s):
@@ -35,12 +35,9 @@ def ast_to_html(s, complete_document):
             empty_lines.append(line)
         else:
             break
+
     full_lines = s_lines[len(empty_lines):]
     for_pyparsing = "\n".join(full_lines)
-#     print('Stripped s: %r' % s[:100])
-#     print('First s_lines:', s_lines[:5])
-#     print('First chars in s_only: %r' % s_only[:100])
-
     block = parse_wrap(Syntax.dp_rvalue, for_pyparsing)[0]
 
     if not isnamedtuplewhere(block):
@@ -55,7 +52,18 @@ def ast_to_html(s, complete_document):
     snippets = list(print_html_inner(block2))
     assert len(snippets) == 1
     snippet = snippets[0]
-    transformed_p = snippet.transformed
+
+#     def sanitize(x):
+#         x = x.replace('>=', '&gt;=')
+#         x = x.replace('<=', '&lt;=')
+#         return x
+    def sanitize_comment(x):
+        x = x.replace('>', '&gt;')
+        x = x.replace('<', '&lt;')
+        return x
+
+#     transformed_p = sanitize(snippet.transformed)
+    transformed_p = (snippet.transformed)
 
     # add back the white space
     if empty_lines:
@@ -76,54 +84,46 @@ def ast_to_html(s, complete_document):
     for i, (a, comment) in enumerate(zip(lines, s_comments)):
         out += a
         if comment:
-            out += '<span class="comment">%s</span>' % comment
+            out += '<span class="comment">%s</span>' % sanitize_comment(comment)
 
         if i != len(lines) - 1:
             out += '\n'
+
+    frag = ""
+
+    frag += '\n<pre><code>'
+    frag += out
+    frag += '\n</code></pre>'
+
+    frag += '\n\n<style type="text/css">\n' + css + '\n</style>\n\n'
 
     if complete_document:
         s = """<html><head>
         <link rel="stylesheet" type="text/css" href="syntax.css"> 
         </head><body>"""
-        s += '\n<pre><code>'
-        s += out
-        s += '\n<pre><code>'
-    #     s += """
-    #     <style type="text/css">
-    #     span.element { margin: 2px; padding: 1px; border: solid 1px black;}
-    #     span.unit { color: #f80; }
-    #     span.Unit { color: red; }
-    #     span.ProvideKeyword, span.RequireKeyword,span.MCDP  { font-weight: bold; color: #00a;}
-    #     </style>
-    #     """
+        s += frag
         s += '\n</body></html>'
         return s
     else:
-        return out
+        return frag
 
 Snippet = namedtuple('Snippet', 'op orig a b transformed')
 
+def iterate2(x):
+    for  _, op in iterate_notwhere(x):
+        if isnamedtuplewhere(op):
+            for m in print_html_inner(op):
+                yield m
+
+def order_contributions(it):
+    @contract(x=Snippet)
+    def loc(x):
+        return x.a
+    o = list(it)
+    return sorted(o, key=loc)
+
 def print_html_inner(x):
     assert isnamedtuplewhere(x), x
-        
-    def iterate():
-        for  _, op in iterate_notwhere(x):
-            if isnamedtuplewhere(op):
-                for m in print_html_inner(op):
-                    yield m
-                    
-    def order_contributions(it):
-        @contract(x=Snippet)
-        def loc(x):
-            return x.a
-#             print x
-#             a = x[1]
-#             if isnamedtuplewhere(a):
-#                 return a.where.character
-#             return 0
-
-        o = list(it)
-        return sorted(o, key=loc)
 
     def iterate_check_order(it):
         last = 0
@@ -138,7 +138,7 @@ def print_html_inner(x):
             last = b
             yield i
 
-    subs = list(iterate_check_order(order_contributions(iterate())))
+    subs = list(iterate_check_order(order_contributions(iterate2(x))))
 
     if is_a_special_list(x):
         for _ in subs:
@@ -149,12 +149,12 @@ def print_html_inner(x):
     out = ""
     for _, _, a, b, transformed in subs:
         if a > cur:
-            out += x.where.string[cur:a]
+            out += sanitize(x.where.string[cur:a])
         out += transformed
         cur = b
 
     if cur != x.where.character_end:
-        out += x.where.string[cur:x.where.character_end]
+        out += sanitize(x.where.string[cur:x.where.character_end])
 
     orig0 = x.where.string[x.where.character:x.where.character_end]
 
@@ -162,6 +162,14 @@ def print_html_inner(x):
     transformed0 = "<span class='%s'>%s</span>" % (klass, out)
     yield Snippet(op=x, orig=orig0, a=x.where.character, b=x.where.character_end,
                   transformed=transformed0)
+
+def sanitize(x):
+    if 'span' in x:
+        raise ValueError('getting confused %s' % x)
+
+    x = x.replace('>=', '&gt;=')
+    x = x.replace('<=', '&lt;=')
+    return x
 
 def print_ast(x):
     try:
@@ -191,6 +199,7 @@ def make_tree(x, character_end):
 
     fields = {}
     last = None
+
     for k, v in reversed(list(iterate_sub(x))):
         if last is None:
             v_character_end = character_end
@@ -207,12 +216,14 @@ def make_tree(x, character_end):
     w = x.where
 
     if w.character_end is None:
+        if character_end < w.character:
+            print('**** warning: need to fix this')
+            character_end = w.character + 1
         w = Where(string=w.string, character=w.character,
                   character_end=character_end)
 
     fields['where'] = w
     return type(x)(**fields)
-
 
 
 def iterate_sub(x):
@@ -225,9 +236,59 @@ def iterate_sub(x):
     o = list(iterate_notwhere(x))
     return sorted(o, key=loc)
 
+
 def iterate_notwhere(x):
     d = x._asdict()
     for k, v in d.items():
         if k == 'where':
             continue
         yield k, v
+
+
+css = """
+     /*span.element { margin: 2px; padding: 1px; border: solid 1px black;}*/
+     /*span.unit { color: #f80; } */
+     span.Unit { color: purple; }
+     span.ProvideKeyword, span.FName { color: darkgreen;}
+     span.RequireKeyword, span.RName  { color: darkred;}
+     span.NewResource { color: darkred;}
+     span.ValueExpr { color: orange;}
+     /*span.Function  { color: darkgreen;}*/
+span.ProvideKeyword,
+span.RequireKeyword,     
+       span.MCDPKeyword,
+       span.SubKeyword,
+    span.CompactKeyword,
+    span.AbstractKeyword,
+    span.TemplateKeyword,
+    span.ForKeyword,
+    span.UsingKeyword,
+    span.RequiredByKeyword,
+    span.ProvidedByKeyword,
+    span.LoadKeyword,
+    span.CodeKeyword,
+    span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
+    span.ImplementedbyKeyword 
+       { font-weight: bold; }
+       
+    span.FuncName { color: blue; }
+
+       span.MCDPKeyword,
+       span.SubKeyword,
+    span.CompactKeyword,
+    span.AbstractKeyword,
+    span.TemplateKeyword,
+    span.ForKeyword,
+    span.UsingKeyword,
+    span.RequiredByKeyword,
+    span.ProvidedByKeyword,
+    span.LoadKeyword, span.CodeKeyword,
+    span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
+    span.ImplementedbyKeyword 
+    {
+       color: #00a;}
+     span.FName, span.RName { } /*font-style: italic;}*/
+     span.DPName { font-style: italic; }
+     span.comment { color: grey;}
+
+"""

@@ -16,6 +16,7 @@ from mocdp.lang.parts import CDPLanguage, unwrap_list
 from mocdp.posets import (NotBelongs, NotEqual, NotLeq, PosetProduct, Rcomp,
     get_types_universe, mult_table, mult_table_seq)
 from mocdp.comp.context import CFunction, CResource, ValueWithUnits
+from mocdp.posets.space import Space
 
 
 CDP = CDPLanguage
@@ -67,7 +68,7 @@ def eval_statement(r, context):
         add_constraint(context, resource, function)
     
     elif isinstance(r, CDP.SetName):
-        name = r.name
+        name = r.name.value
         ndp = eval_dp_rvalue(r.dp_rvalue, context)
         context.add_ndp(name, ndp)
         
@@ -109,7 +110,7 @@ def eval_statement(r, context):
     
     elif isinstance(r, CDP.FunShortcut1):  # provides fname using name
         fname = r.fname.value
-        B = context.make_function(r.name, fname)
+        B = context.make_function(r.name.value, fname)
         F = context.get_ftype(B)
         A = eval_statement(CDP.FunStatement('-', r.fname, CDP.Unit(F)), context)
         add_constraint(context, resource=A, function=B)
@@ -117,25 +118,21 @@ def eval_statement(r, context):
     elif isinstance(r, CDP.ResShortcut1):  # requires rname for name
         # resource rname [r0]
         # rname >= name.rname
-        rname = r.rname.value
-        A = context.make_resource(r.name, rname)
+        A = context.make_resource(r.name.value, r.rname.value)
         R = context.get_rtype(A)
         B = eval_statement(CDP.ResStatement('-', r.rname, CDP.Unit(R)), context)
-        # B >= A
-        add_constraint(context, resource=A, function=B)
+        add_constraint(context, resource=A, function=B)  # B >= A
 
-    elif isinstance(r, CDP.ResShortcut1m):  # requires rname for name
-
+    elif isinstance(r, CDP.ResShortcut1m):  # requires rname1, rname2, ... for name
         for rname in unwrap_list(r.rnames):
-            A = context.make_resource(r.name, rname.value)
+            A = context.make_resource(r.name.value, rname.value)
             R = context.get_rtype(A)
             B = eval_statement(CDP.ResStatement('-', rname, CDP.Unit(R)), context)
             add_constraint(context, resource=A, function=B)
 
-    elif isinstance(r, CDP.FunShortcut1m):  # requires rname for name
-
+    elif isinstance(r, CDP.FunShortcut1m):  # provides fname1,fname2,... using name
         for fname in unwrap_list(r.fnames):
-            B = context.make_function(r.name, fname.value)
+            B = context.make_function(r.name.value, fname.value)
             F = context.get_ftype(B)
             A = eval_statement(CDP.FunStatement('-', fname, CDP.Unit(F)), context)
             add_constraint(context, resource=A, function=B)
@@ -287,7 +284,7 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
 
         if isinstance(r, CDP.LoadCommand):
             library = get_conftools_nameddps()
-            load_arg = r.load_arg
+            load_arg = r.load_arg.value
             try:
                 _, ndp = library.instance_smarter(load_arg)
             except ConfToolsException as e:
@@ -297,8 +294,11 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             return ndp
 
         if isinstance(r, CDP.DPWrap):
-            fun = r.fun
-            res = r.res
+            statements = unwrap_list(r.statements)
+            fun = [x for x in statements if isinstance(x, CDP.FunStatement)]
+            res = [x for x in statements if isinstance(x, CDP.ResStatement)]
+
+            assert len(fun) + len(res) == len(statements), statements
             impl = r.impl
 
             dp = eval_pdp(impl, context)
@@ -396,7 +396,7 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
 @contract(returns=PrimitiveDP)
 def eval_pdp(r, context):  # @UnusedVariable
     if isinstance(r, CDP.LoadDP):
-        name = r.name
+        name = r.name.value
         try:
             _, dp = get_conftools_dps().instance_smarter(name)
         except SemanticMistakeKeyNotFound as e:
@@ -405,7 +405,7 @@ def eval_pdp(r, context):  # @UnusedVariable
         return dp
 
     if isinstance(r, CDP.PDPCodeSpec):
-        function = r.function
+        function = r.function.value
         arguments = r.arguments
 #         print('function: %s' % function)
 #         print('arguments: %s' % arguments)
@@ -479,18 +479,20 @@ def eval_lfunction(lf, context):
                         dummy_ndp.get_fnames()[0])
 
     if isinstance(lf, CDP.NewLimit):
-        vu = lf.value_with_unit
+        A = eval_constant(lf.value_with_unit, context)
+#         vu = lf.value_with_unit
+#
+#         value = vu.value.value
+#         F = vu.unit.value
+#         # TODO: special conversion int -> float
+#
+#         try:
+#             F.belongs(value)
+#         except NotBelongs as e:
+#             msg = 'Invalid value provided.'
+#             raise_wrapped(DPSemanticError, e, msg)
 
-        value = vu.value
-        F = vu.unit
-        # TODO: special conversion int -> float
-        try:
-            F.belongs(value)
-        except NotBelongs as e:
-            msg = 'Invalid value provided.'
-            raise_wrapped(DPSemanticError, e, msg)
-
-        dp = Limit(F, value)
+        dp = Limit(A.unit, A.value)
         n = context.new_name('lim')
         sn = context.new_fun_name('l')
         ndp = dpwrap(dp, sn, [])
@@ -553,7 +555,7 @@ def eval_rvalue(rvalue, context):
             if isinstance(rvalue.b, CDP.SimpleValue):
                 # print('using straight')
                 name = context.new_name('max1')
-                ndp = dpwrap(Max1(rvalue.b.unit, rvalue.b.value), '_in', '_out')
+                ndp = dpwrap(Max1(rvalue.b.unit.value, rvalue.b.value.value), '_in', '_out')
                 context.add_ndp(name, ndp)
                 c = Connection(dp1=a.dp, s1=a.s, dp2=name, s2='_in')
                 context.add_connection(c)
@@ -589,8 +591,8 @@ def eval_rvalue(rvalue, context):
 
         if isinstance(rvalue, CDP.SimpleValue):
             # implicit conversion from int to float
-            unit = rvalue.unit
-            value = rvalue.value
+            unit = rvalue.unit.value
+            value = rvalue.value.value
             # XXX: stuff here
             if isinstance(unit, Rcomp):
                 if isinstance(value, int):
@@ -600,7 +602,8 @@ def eval_rvalue(rvalue, context):
             except NotBelongs as e:
                 raise_wrapped(DPSemanticError, e, "Value is not in the give space.")
                 
-            return get_valuewithunits_as_resource(rvalue, context)
+            c = ValueWithUnits(value, unit)
+            return get_valuewithunits_as_resource(c, context)
         
         if isinstance(rvalue, CDP.VariableRef):
             if rvalue.name in context.constants:
@@ -666,7 +669,18 @@ def eval_constant(op, context):
         raise NotConstant(str(op))
 
     if isinstance(op, CDP.SimpleValue):
-        return ValueWithUnits(op.value, op.unit)
+        F = op.unit.value
+        assert isinstance(F, Space), op
+        v = op.value.value
+        if isinstance(v, int) and isinstance(F, Rcomp):
+            v = float(v)
+
+        try:
+            F.belongs(v)
+        except NotBelongs as e:
+            msg = 'Not in space'
+            raise_wrapped(DPSemanticError, e, msg, F=F, v=v)
+        return ValueWithUnits(unit=F, value=v)
 
     if isinstance(op, CDP.VariableRef):
         if op.name in context.constants:
@@ -781,7 +795,7 @@ def eval_MultN(x, context, wants_constant):
             c = mult_constantsN(constants)
             return get_mult_op(context, r, c)
 
-@contract(r=CDP.Resource, c=ValueWithUnits)
+@contract(r=CResource, c=ValueWithUnits)
 def get_mult_op(context, r, c):
     from mocdp.lang.parse_actions import MultValue
     from mocdp.dp_report.gg_ndp import format_unit
@@ -857,7 +871,7 @@ def eval_PlusN(x, context, wants_constant):
             c = plus_constantsN(constants)
             return get_plus_op(context, r=r, c=c)
 
-
+@contract(r=CResource, c=ValueWithUnits)
 def get_plus_op(context, r, c):
     from mocdp.lang.parse_actions import PlusValue
     from mocdp.dp_report.gg_ndp import format_unit

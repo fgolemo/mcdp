@@ -2,10 +2,11 @@
 
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import raise_desc
-from mocdp.exceptions import DPSemanticError
+from contracts.utils import raise_desc, indent
+from mocdp.exceptions import DPSemanticError, DPInternalError
 import warnings
-from appinst.linux2 import indent
+
+from mocdp.posets.space import Space
 
 
 __all__ = [
@@ -33,6 +34,8 @@ class CResource():
 
 
 class ValueWithUnits():
+
+    @contract(unit=Space)
     def __init__(self, value, unit):
         unit.belongs(value)
         self.value = value
@@ -64,7 +67,8 @@ class Context():
 
     @contract(s='str', dp='str', returns=CResource)
     def make_resource(self, dp, s):
-        assert isinstance(dp, str)
+        if not isinstance(dp, str):
+            raise DPInternalError((dp, s))
         if not dp in self.names:
             msg = 'Unknown dp (%r.%r)' % (dp, s)
             raise DPSemanticError(msg)
@@ -261,7 +265,7 @@ class Context():
         dp = self.names[a.dp]
         if not a.s in dp.get_rnames():
             msg = "Design problem %r does not have resource %r." % (a.dp, a.s)
-            raise DPSemanticError(msg)
+            raise_desc(DPSemanticError, msg, ndp=dp.repr_long())
         return dp.get_rtype(a.s)
 
     @contract(a=CFunction)
@@ -273,7 +277,7 @@ class Context():
         dp = self.names[a.dp]
         if not a.s in dp.get_fnames():
             msg = "Design problem %r does not have function %r." % (a.dp, a.s)
-            raise DPSemanticError(msg)
+            raise_desc(DPSemanticError, msg, ndp=dp.repr_long())
         return dp.get_ftype(a.s)
 
     def get_connections_for(self, name1, name2):

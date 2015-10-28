@@ -17,7 +17,7 @@ span.RequireKeyword,
     span.UsingKeyword,
     span.RequiredByKeyword,
     span.ProvidedByKeyword,
-    span.leq, span.geq, span.OpKeyword, span.eq, span.plus
+    span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times
        { font-weight: bold; }
 
        span.MCDPKeyword,
@@ -29,7 +29,7 @@ span.RequireKeyword,
     span.UsingKeyword,
     span.RequiredByKeyword,
     span.ProvidedByKeyword,
-    span.leq, span.geq, span.OpKeyword, span.eq, span.plus
+    span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times
     {
        color: #00a;}
      span.FName, span.RName { } /*font-style: italic;}*/

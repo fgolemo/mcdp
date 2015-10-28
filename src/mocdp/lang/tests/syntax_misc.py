@@ -78,9 +78,9 @@ def check_lang8_addition():
         }
                 
         capacity provided by battery >= mission_time * (power required by actuation)    
-        payload provided by actuation >= (weight of battery) + extra_payload
+        payload provided by actuation >= (weight required by battery) + extra_payload
         
-        total_weight >= weight of battery
+        total_weight >= weight required by battery
     }
     """)
     assert_equal(p.get_rnames(), ['total_weight'])

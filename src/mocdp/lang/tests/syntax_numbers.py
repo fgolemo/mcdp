@@ -17,14 +17,17 @@ def check_numbers1():
     parse_wrap_check('1.0', Syntax.floatnumber, 1.0)
     assert_syntax_error('1', Syntax.floatnumber)
     parse_wrap_check('1', Syntax.integer, 1)
-    parse_wrap_check('1', Syntax.integer_or_float, 1)
+    parse_wrap_check('1', Syntax.integer_or_float, CDP.ValueExpr(1))
+    parse_wrap_check('1.0', Syntax.integer_or_float, CDP.ValueExpr(1.0))
 
 @comptest
 def check_numbers2():
-    parse_wrap_check('1.0 [g]', Syntax.number_with_unit, CDP.ValueWithUnits(1.0, R_Weight))
+    parse_wrap_check('1.0 [g]', Syntax.number_with_unit, CDP.SimpleValue(CDP.ValueExpr(1.0),
+                                                                         CDP.UnitExpr(R_Weight)))
     assert_syntax_error('1', Syntax.number_with_unit)
     # automatic conversion to float
-    parse_wrap_check('1 [g]', Syntax.number_with_unit, CDP.ValueWithUnits(1.0, R_Weight))
+    parse_wrap_check('1 [g]', Syntax.number_with_unit, CDP.SimpleValue(CDP.ValueExpr(1.0),
+                                                                        CDP.UnitExpr(R_Weight)))
 
 @comptest
 def check_numbers3():

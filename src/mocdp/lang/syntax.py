@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from .parse_actions import *  # @UnusedWildImport
 from mocdp.lang.helpers import square
-from mocdp.posets import R_dimensionless, make_rcompunit
+from mocdp.posets import make_rcompunit
 from pyparsing import (
     CaselessLiteral, Combine, Forward, Group, Literal, NotAny, OneOrMore,
     Optional, Or, ParserElement, Suppress, Word, ZeroOrMore, alphanums, alphas,
@@ -88,15 +88,21 @@ class Syntax():
     number_with_unit = number_with_unit1 ^ number_with_unit2 ^ number_with_unit3
 
     # load battery
-    load_expr = S(L('load')) - C(idn.copy(), 'load_arg')
-    spa(load_expr, lambda t: CDP.LoadCommand(t['load_arg']))
+    LOAD = sp(L('load'), lambda t: CDP.LoadKeyword(t[0]))
+
+    # TODO: change
+    ndpname = sp(idn.copy(), lambda t: CDP.FuncName(t[0]))  # XXX
+
+    load_expr = sp(LOAD - ndpname, lambda t: CDP.LoadCommand(t[0], t[1]))
 
     dp_rvalue = Forward()
     # <dpname> = ...
 
     SUB = sp(L('sub'), lambda t: CDP.SubKeyword(t[0]))
 
-    setsub_expr = sp(SUB - C(idn.copy(), 'dpname') - S(L('=')) - C(dp_rvalue, 'dp_rvalue'),
+    dpname = sp(idn.copy(), lambda t: CDP.DPName(t[0]))
+
+    setsub_expr = sp(SUB - dpname - S(L('=')) - C(dp_rvalue, 'dp_rvalue'),
                      lambda t: CDP.SetName(t[0], t[1], t[2]))
 
 
@@ -122,7 +128,7 @@ class Syntax():
 
     constant_value = number_with_unit ^ variable_ref
 
-    dpname = sp(idn.copy(), lambda t: CDP.DPName(t[0]))
+
 
     rvalue_resource_simple = sp(dpname + DOT - rname,
                                 lambda t: CDP.Resource(s=t[2], keyword=t[1], dp=t[0]))
@@ -175,12 +181,6 @@ class Syntax():
 
     operand = rvalue_new_function ^ rvalue_resource ^ binary_expr ^ unary_expr ^ constant_value
 
-    # comment_line = S(LineStart()) + ow + L('#') + line + S(EOL)
-    # comment_line = ow + Literal('#') + line + S(EOL)
-
-
-    
-
 
     simple = sp(dpname + DOT - fname,
                lambda t: CDP.Function(dp=t[0], s=t[2], keyword=t[1]))
@@ -192,40 +192,36 @@ class Syntax():
 
     # Fractions
 
-    integer_fraction = C(integer, 'num') + S(L('/')) + C(integer, 'den')
-    spa(integer_fraction, lambda t: CDP.IntegerFraction(t['num'], t['den']))
+    integer_fraction = sp(C(integer, 'num') + S(L('/')) + C(integer, 'den'),
+                          lambda t: CDP.IntegerFraction(t['num'], t['den']))
 
 
-    power_expr = (S(L('pow')) - S(L('(')) +
+    power_expr = sp((S(L('pow')) - S(L('(')) +
                     C(rvalue, 'op1') - S(L(','))
-                    + C(integer_fraction, 'exponent')) - S(L(')'))
-
-    
-    spa(power_expr, power_expr_parse)
-#     spa(power_expr, lambda t: CDP.Power(op1=t['op1'], exponent=t['exponent']))
-
+                    + C(integer_fraction, 'exponent')) - S(L(')')),
+                    power_expr_parse)
 
 
     GEQ = sp(L('>='), lambda t: CDP.geq(t[0]))
     LEQ = sp(L('<='), lambda t: CDP.leq(t[0]))
 
-    constraint_expr = C(fvalue, 'lf') + GEQ - C(rvalue, 'rvalue')
-    spa(constraint_expr, lambda t: CDP.Constraint(function=t['lf'],
+    constraint_expr = sp(C(fvalue, 'lf') + GEQ - C(rvalue, 'rvalue'),
+                         lambda t: CDP.Constraint(function=t['lf'],
                                                   rvalue=t['rvalue'], prep=t[1]))
 
-    constraint_expr2 = C(rvalue, 'rvalue') + LEQ - C(fvalue, 'lf')
-    spa(constraint_expr2, lambda t: CDP.Constraint(function=t['lf'],
+    constraint_expr2 = sp(C(rvalue, 'rvalue') + LEQ - C(fvalue, 'lf'),
+                          lambda t: CDP.Constraint(function=t['lf'],
                                                    rvalue=t['rvalue'], prep=t[1]))
 
 
 
-    fun_shortcut1 = sp(PROVIDES + fname + USING + idn.copy(),
+    fun_shortcut1 = sp(PROVIDES + fname + USING + dpname,
                        lambda t: CDP.FunShortcut1(provides=t[0],
                                                   fname=t[1],
                                                   prep_using=t[2],
                                                   name=t[3]))
 
-    res_shortcut1 = sp(REQUIRES + rname + FOR + idn,
+    res_shortcut1 = sp(REQUIRES + rname + FOR + dpname,
                        lambda t: CDP.ResShortcut1(t[0], t[1], t[2], t[3]))
 
     fun_shortcut2 = sp(PROVIDES + fname + LEQ - fvalue,
@@ -235,18 +231,18 @@ class Syntax():
                        lambda t: CDP.ResShortcut2(t[0], t[1], t[2], t[3]))
 
     fun_shortcut3 = sp(PROVIDES + C(Group(fname + OneOrMore(S(L(',')) + fname)), 'fnames')
-                       + USING + C(idn.copy(), 'name'),
-                       lambda t: CDP.FunShortcut1m(provides=t[0],
+                       + USING + dpname,
+                       lambda t: funshortcut1m(provides=t[0],
                              fnames=make_list(list(t['fnames'])),
                              prep_using=t[2],
-                             name=t['name']))
+                             name=t[3]))
 
     res_shortcut3 = sp(REQUIRES + C(Group(rname + OneOrMore(S(L(',')) + rname)), 'rnames')
-                       + FOR + C(idn.copy(), 'name'),
-                       lambda t: CDP.ResShortcut1m(requires=t[0],
+                       + FOR + dpname,
+                       lambda t: resshortcut1m(requires=t[0],
                              rnames=make_list(list(t['rnames'])),
                              prep_for=t[2],
-                             name=t['name']))
+                             name=t[3]))
 
 
     line_expr = (load_expr ^ constraint_expr ^ constraint_expr2 ^
@@ -255,32 +251,38 @@ class Syntax():
                  ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3)
 
 
-    CDPTOKEN = L('cdp') | L('mcdp')
-    spa(CDPTOKEN, lambda t: CDP.MCDPKeyword(t[0]))
+    CDPTOKEN = sp(L('cdp') | L('mcdp'), lambda t: CDP.MCDPKeyword(t[0]))
 
-    dp_model_statements = ZeroOrMore(S(ow) + line_expr)
-    spa(dp_model_statements, lambda t: make_list(t))
+    dp_model_statements = sp(ZeroOrMore(S(ow) + line_expr),
+                             lambda t: make_list(list(t)))
 
-    dp_model = CDPTOKEN - S(L('{')) - dp_model_statements - S(L('}'))
-    spa(dp_model, lambda t: CDP.BuildProblem(keyword=t[0], statements=t[1]))
+    dp_model = sp(CDPTOKEN - S(L('{')) - dp_model_statements - S(L('}')),
+                  lambda t: CDP.BuildProblem(keyword=t[0], statements=t[1]))
 
-    funcname = Combine(idn + ZeroOrMore(L('.') - idn))
-    code_spec = sp(S(L('code')) - C(funcname, 'function'),
-                   lambda t: CDP.PDPCodeSpec(function=t['function'][0], arguments={}))
+    funcname = sp(Combine(idn + ZeroOrMore(L('.') - idn)), lambda t: CDP.FuncName(t[0]))
+    CODE = sp(L('code'), lambda t: CDP.CodeKeyword(t[0]))
 
+    code_spec = sp(CODE - funcname,
+                   lambda t: CDP.PDPCodeSpec(keyword=t[0], function=t[1], arguments={}))
 
-    load_pdp = S(L('load')) - C(idn.copy(), 'name')
-    spa(load_pdp, lambda t: CDP.LoadDP(t['name']))
+    pdpname = sp(idn.copy(), lambda t: CDP.FuncName(t[0]))
+    load_pdp = sp(LOAD - pdpname,
+                  lambda t: CDP.LoadDP(t[0], t[1]))
 
     pdp_rvalue = load_pdp ^ code_spec
 
+    DPTOKEN = sp(L('dp'), lambda t: CDP.DPWrapToken(t[0]))
 
-    simple_dp_model = (S(L('dp')) - S(L('{')) -
-                       C(Group(ZeroOrMore(fun_statement)), 'fun') -
-                       C(Group(ZeroOrMore(res_statement)), 'res') -
-                       S(L('implemented-by')) - C(pdp_rvalue, 'pdp_rvalue') -
-                       S(L('}')))
-    spa(simple_dp_model, lambda t: CDP.DPWrap(list(t[0]), list(t[1]), t[2]))
+    simple_dp_model_stats = sp(ZeroOrMore(S(ow) + fun_statement ^ res_statement),
+                               lambda t: make_list(list(t)))
+
+    IMPLEMENTEDBY = sp(L('implemented-by'), lambda t: CDP.ImplementedbyKeyword(t[0]))
+
+    simple_dp_model = sp(DPTOKEN - S(L('{')) -
+                       simple_dp_model_stats -
+                       IMPLEMENTEDBY - pdp_rvalue -
+                       S(L('}')),
+                         lambda t: CDP.DPWrap(token=t[0], statements=t[1], prep=t[2], impl=t[3]))
 
 
     COMPACT = sp(L('compact'), lambda t: CDP.CompactKeyword(t[0]))

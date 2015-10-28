@@ -70,26 +70,15 @@ def spa(x, b):
             w = res.where
             w2 = Where(w.string, character_end=character_end, character=w.character)
             res = get_copy_with_where(res, where=w2)
+#         else:
+#             print('cannot fix %s because namedtuple instance' % str(res))
 
+        if not isinstance(res, (float, int, str)):
+            if res.where is None:
+                msg = 'Found element with no where'
+                raise_desc(ValueError, msg, res=res)
         return res
     x.setParseAction(p)
-#
-# def number_with_unit_parse(t):
-#     value = t[0]
-#     _units = t[1]
-#     units = _units.value
-#     from mocdp.posets.rcomp import Rcomp
-#     if isinstance(value, int) and isinstance(units, Rcomp):
-#         value = float(value)
-#     try:
-#         units.belongs(value)
-#     except NotBelongs:
-#         msg = 'Value %r does not belong to %s.' % (value, units)
-#         raise_desc(DPSemanticError, msg)
-#
-#     return CDP.SimpleValue(value, units)
-
-
 
 @parse_action
 @wheredecorator
@@ -252,3 +241,12 @@ def power_expr_parse(t):
     assert isinstance(exp, CDPLanguage.IntegerFraction)
     return CDP.Power(op1=op1, exponent=exp)
 
+@contract(name= CDP.DPName)
+def funshortcut1m(provides, fnames, prep_using, name):
+    return CDP.FunShortcut1m(provides=provides,
+                             fnames=fnames,
+                             prep_using=prep_using,
+                             name=name)
+@contract(name=CDP.DPName)
+def resshortcut1m(requires, rnames, prep_for, name):
+    return CDP.ResShortcut1m(requires=requires, rnames=rnames, prep_for=prep_for, name=name)
