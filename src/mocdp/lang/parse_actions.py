@@ -12,6 +12,7 @@ from mocdp.posets import NotBelongs, Space, mult_table
 from pyparsing import ParseException, ParseFatalException
 import functools
 from mocdp.lang.parts import make_list, unwrap_list
+from mocdp.comp.context import ValueWithUnits
 
 
 CDP = CDPLanguage
@@ -31,14 +32,16 @@ def wheredecorator(b):
         except BaseException as e:
             raise_wrapped(DPInternalError, e, "Error while parsing.",
                           where=where.__str__(), tokens=tokens)
+#
+#         if isinstance(res, CDP.PlusN):
+#             res = CDP.PlusN(ops=make_list(unwrap_list(res.ops), where),
+#                             glyphs=make_list(unwrap_list(res.glyphs), where))
+#
+#         if isinstance(res, CDP.MultN):
+#             res = CDP.MultN(ops=make_list(unwrap_list(res.ops), where),
+#                             glyphs=make_list(unwrap_list(res.glyphs), where))
 
-        if isinstance(res, CDP.PlusN):
-            res = CDP.PlusN(ops=make_list(unwrap_list(res.ops), where))
-
-        if isinstance(res, CDP.MultN):
-            res = CDP.MultN(ops=make_list(unwrap_list(res.ops), where))
-
-        if isnamedtupleinstance(res) or isinstance(res, CDP.ValueWithUnits):
+        if isnamedtupleinstance(res):  # or isinstance(res, ValueWithUnits):
             res = get_copy_with_where(res, where=where)
 
 #         else:
@@ -63,28 +66,29 @@ def spa(x, b):
         loc_end, tokens = x2._parse(s[loc:], 0)
         character_end = loc + loc_end
 
-        if isnamedtupleinstance(res) or isinstance(res, CDP.ValueWithUnits):
+        if isnamedtupleinstance(res):  # or isinstance(res, ):
             w = res.where
             w2 = Where(w.string, character_end=character_end, character=w.character)
             res = get_copy_with_where(res, where=w2)
 
         return res
     x.setParseAction(p)
+#
+# def number_with_unit_parse(t):
+#     value = t[0]
+#     _units = t[1]
+#     units = _units.value
+#     from mocdp.posets.rcomp import Rcomp
+#     if isinstance(value, int) and isinstance(units, Rcomp):
+#         value = float(value)
+#     try:
+#         units.belongs(value)
+#     except NotBelongs:
+#         msg = 'Value %r does not belong to %s.' % (value, units)
+#         raise_desc(DPSemanticError, msg)
+#
+#     return CDP.SimpleValue(value, units)
 
-def number_with_unit_parse(t):
-    value = t[0]
-    _units = t[1]
-    units = _units.value
-    from mocdp.posets.rcomp import Rcomp
-    if isinstance(value, int) and isinstance(units, Rcomp):
-        value = float(value)
-    try:
-        units.belongs(value)
-    except NotBelongs:
-        msg = 'Value %r does not belong to %s.' % (value, units)
-        raise_desc(DPSemanticError, msg)
-    res = CDP.ValueWithUnits(value, units)
-    return res
 
 
 @parse_action
@@ -93,15 +97,17 @@ def mult_parse_action(tokens):
     tokens = list(tokens[0])
 
     ops = []
+    glyphs = []
     for i, t in enumerate(tokens):
         if i % 2 == 0:
             ops.append(t)
         else:
-            assert t == '*'
+            assert isinstance(t, CDP.times)
+            glyphs.append(t)
 
     assert len(ops) > 1
 
-    res = CDP.MultN(make_list(ops))
+    res = CDP.MultN(make_list(ops), make_list(glyphs))
     return res
 
 class MultType():
@@ -121,7 +127,7 @@ class MultValue():
 def mult_constants2(a, b):
     R = mult_table(a.unit, b.unit)
     value = a.value * b.value
-    return CDP.ValueWithUnits(value=value, unit=R)
+    return ValueWithUnits(value=value, unit=R)
 
 def mult_constantsN(seq):
     return functools.reduce(mult_constants2, seq)
@@ -138,7 +144,7 @@ def plus_constants2(a, b):
     Fs = [a.unit, b.unit]
     values = [a.value, b.value]
     res = sum_units(Fs, values, R)
-    return CDP.ValueWithUnits(value=res, unit=R)
+    return ValueWithUnits(value=res, unit=R)
 
 def plus_constantsN(constants):
     return functools.reduce(plus_constants2, constants)
@@ -150,12 +156,16 @@ def plus_parse_action(tokens):
     tokens = list(tokens[0])
 
     ops = []
+    glyphs = []
     for i, t in enumerate(tokens):
         if i % 2 == 0:
             ops.append(t)
         else:
-            assert t == '+'
-    res = CDP.PlusN(make_list(ops))
+#             assert t == '+'
+            assert isinstance(t, CDP.plus)
+            glyphs.append(t)
+
+    res = CDP.PlusN(make_list(ops), make_list(glyphs))
     return res
 
 

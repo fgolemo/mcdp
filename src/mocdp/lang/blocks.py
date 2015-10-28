@@ -15,7 +15,7 @@ from mocdp.lang.parse_actions import plus_constantsN
 from mocdp.lang.parts import CDPLanguage, unwrap_list
 from mocdp.posets import (NotBelongs, NotEqual, NotLeq, PosetProduct, Rcomp,
     get_types_universe, mult_table, mult_table_seq)
-from mocdp.comp.context import CFunction, CResource
+from mocdp.comp.context import CFunction, CResource, ValueWithUnits
 
 
 CDP = CDPLanguage
@@ -538,7 +538,7 @@ def eval_rvalue(rvalue, context):
 
         if isinstance(rvalue, CDP.OpMax):
 
-            if isinstance(rvalue.a, CDP.ValueWithUnits0):
+            if isinstance(rvalue.a, CDP.SimpleValue):
                 b = eval_rvalue(rvalue.b, context)
                 # print('a is constant')
                 name = context.new_name('max1')
@@ -550,7 +550,7 @@ def eval_rvalue(rvalue, context):
 
             a = eval_rvalue(rvalue.a, context)
 
-            if isinstance(rvalue.b, CDP.ValueWithUnits0):
+            if isinstance(rvalue.b, CDP.SimpleValue):
                 # print('using straight')
                 name = context.new_name('max1')
                 ndp = dpwrap(Max1(rvalue.b.unit, rvalue.b.value), '_in', '_out')
@@ -587,7 +587,7 @@ def eval_rvalue(rvalue, context):
 
             return add_binary(dp, nprefix, na, nb, nres)
 
-        if isinstance(rvalue, CDP.ValueWithUnits):
+        if isinstance(rvalue, CDP.SimpleValue):
             # implicit conversion from int to float
             unit = rvalue.unit
             value = rvalue.value
@@ -651,7 +651,7 @@ def eval_rvalue(rvalue, context):
 class NotConstant(Exception):
     pass
 
-@contract(returns=CDP.ValueWithUnits)
+@contract(returns=ValueWithUnits)
 def eval_constant(op, context):
     """ 
         Raises NotConstant if not constant. 
@@ -665,8 +665,8 @@ def eval_constant(op, context):
         # TODO: can implement optimization
         raise NotConstant(str(op))
 
-    if isinstance(op, CDP.ValueWithUnits):
-        return op
+    if isinstance(op, CDP.SimpleValue):
+        return ValueWithUnits(op.value, op.unit)
 
     if isinstance(op, CDP.VariableRef):
         if op.name in context.constants:
@@ -707,14 +707,14 @@ def eval_MultN_as_constant(x, context):
 
 def eval_MultN_as_rvalue(x, context):
     res = eval_MultN(x, context, wants_constant=False)
-    if isinstance(res, CDP.ValueWithUnits):
+    if isinstance(res, ValueWithUnits):
         return get_valuewithunits_as_resource(res, context)
     else:
         return res
 
 def eval_PlusN_as_rvalue(x, context):
     res = eval_PlusN(x, context, wants_constant=False)
-    if isinstance(res, CDP.ValueWithUnits):
+    if isinstance(res, ValueWithUnits):
         return get_valuewithunits_as_resource(res, context)
     else:
         return res
@@ -746,7 +746,7 @@ def eval_MultN(x, context, wants_constant):
 
         try:
             x = eval_constant(op, context)
-            assert isinstance(x, CDP.ValueWithUnits)
+            assert isinstance(x, ValueWithUnits)
             constants.append(x)
         except NotConstant as e:
             if wants_constant:
@@ -781,7 +781,7 @@ def eval_MultN(x, context, wants_constant):
             c = mult_constantsN(constants)
             return get_mult_op(context, r, c)
 
-@contract(r=CDP.Resource, c=CDP.ValueWithUnits)
+@contract(r=CDP.Resource, c=ValueWithUnits)
 def get_mult_op(context, r, c):
     from mocdp.lang.parse_actions import MultValue
     from mocdp.dp_report.gg_ndp import format_unit
@@ -822,7 +822,7 @@ def eval_PlusN(x, context, wants_constant):
     for op in ops:
         try:
             x = eval_constant(op, context)
-            assert isinstance(x, CDP.ValueWithUnits)
+            assert isinstance(x, ValueWithUnits)
             constants.append(x)
         except NotConstant as e:
             if wants_constant:
@@ -904,7 +904,7 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
     return res
 
 
-@contract(v=CDP.ValueWithUnits)
+@contract(v=ValueWithUnits)
 def get_valuewithunits_as_resource(v, context):
     dp = Constant(R=v.unit, value=v.value)
     nres = context.new_res_name('c')

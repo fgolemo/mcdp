@@ -31,6 +31,15 @@ class CResource():
         self.dp = dp
         self.s = s
 
+
+class ValueWithUnits():
+    def __init__(self, value, unit):
+        unit.belongs(value)
+        self.value = value
+        self.unit = unit
+
+
+
 class Context():
     def __init__(self):
         self.names = {}  # name -> ndp

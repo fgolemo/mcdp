@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from .namedtuple_tricks import namedtuplewhere
+from contracts.interface import Where
+from mocdp.exceptions import DPSemanticError, DPInternalError
+from contracts.utils import raise_wrapped
 
 __all__ = ['CDPLanguage']
 
@@ -11,18 +14,16 @@ class CDPLanguage():
 
     NewLimit = namedtuplewhere('NewLimit', 'value_with_unit')
 
-    ValueWithUnits0 = namedtuplewhere('ValueWithUnits0', 'value unit')
-    class ValueWithUnits(ValueWithUnits0):
-        def __init__(self, value, unit, where=None):
-            unit.belongs(value)
-            CDPLanguage.ValueWithUnits0.__init__(self, value=value, unit=unit, where=where)
+    ValueExpr = namedtuplewhere('ValueExpr', 'value')
+    UnitExpr = namedtuplewhere('UnitExpr', 'value')
+    SimpleValue = namedtuplewhere('SimpleValue', 'value unit')
 
     MakeTemplate = namedtuplewhere('MakeTemplate', 'keyword dp_rvalue')
     AbstractAway = namedtuplewhere('AbstractAway', 'keyword dp_rvalue')
     Compact = namedtuplewhere('Compact', 'keyword dp_rvalue')
 
-    PlusN = namedtuplewhere('PlusN', 'ops')
-    MultN = namedtuplewhere('MultN', 'ops')
+    PlusN = namedtuplewhere('PlusN', 'ops glyphs')
+    MultN = namedtuplewhere('MultN', 'ops glyphs')
     OpMax = namedtuplewhere('Max', 'keyword a b')
     OpMin = namedtuplewhere('Min', 'keyword a b')
 
@@ -40,7 +41,7 @@ class CDPLanguage():
     SetName = namedtuplewhere('SetName', 'keyword name dp_rvalue')
 
     SetNameGenericVar = namedtuplewhere('SetNameGenericVar', 'value')
-    SetNameGeneric = namedtuplewhere('SetNameGeneric', 'name right_side')
+    SetNameGeneric = namedtuplewhere('SetNameGeneric', 'name eq right_side')
 
     # Just Keywords
     ProvideKeyword = namedtuplewhere('ProvideKeyword', 'keyword')
@@ -58,6 +59,9 @@ class CDPLanguage():
     # just prepositions
     leq = namedtuplewhere('leq', 'glyph')
     geq = namedtuplewhere('geq', 'glyph')
+    eq = namedtuplewhere('eq', 'glyph')
+    plus = namedtuplewhere('plus', 'glyph')
+    times = namedtuplewhere('times', 'glyph')
     DotPrep = namedtuplewhere('DotPrep', 'glyph')
 
     FName = namedtuplewhere('FName', 'value')
@@ -102,13 +106,29 @@ for i in range(1, 100):
 
 list_types[0] = namedtuplewhere('List0', 'dummy')
 
-def make_list(x, where=None):
-    if not len(x):
-        return list_types[0](dummy='dummy', where=where)
 
-    ltype = list_types[len(x)]
-    res = ltype(*tuple(x), where=where)
-    return res
+def is_a_special_list(x):
+    return 'List' in type(x).__name__
+
+def make_list(x, where=None):
+    try:
+        if not len(x):
+            if not where:
+                raise ValueError(x)
+            return list_types[0](dummy='dummy', where=where)
+    
+        ltype = list_types[len(x)]
+        w1 = x[0].where
+        w2 = x[-1].where
+        w3 = Where(string=w1.string,
+                      character=w1.character,
+                      character_end=w2.character_end)
+
+        res = ltype(*tuple(x), where=w3)
+        return res
+    except BaseException as e:
+        msg = 'Cannot create list'
+        raise_wrapped(DPInternalError, e, msg, x=x, where=where)
 
 def unwrap_list(res):
     if isinstance(res, list_types[0]):

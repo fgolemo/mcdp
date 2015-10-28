@@ -59,7 +59,8 @@ class Syntax():
     spa(integer, lambda t: int(t[0]))
     spa(floatnumber, lambda t: float(t[0]))
 
-    integer_or_float = integer ^ floatnumber
+    integer_or_float = sp(integer ^ floatnumber,
+                          lambda t: CDP.ValueExpr(t[0]))
 
     unitst = S(L('[')) + C(unit_expr, 'unit') + S(L(']'))
 
@@ -78,13 +79,13 @@ class Syntax():
     res_statement = sp(REQUIRES + C(rname, 'rname') + unitst,
                        lambda t: CDP.ResStatement(t[0], t[1], t[2]))
 
-    empty_unit = S(L('[')) + S(L(']'))
-    spa(empty_unit, lambda _: dict(unit=R_dimensionless))
-    number_with_unit = C(integer_or_float, 'value') + C(unit_expr, 'unit') ^ unitst ^ empty_unit
-    number_with_unit = ((C(integer_or_float, 'value') + unitst) ^
-                        (C(integer_or_float, 'value') + C(unit_expr, 'unit')))
-
-    spa(number_with_unit, number_with_unit_parse)
+    number_with_unit1 = sp(integer_or_float + unitst,
+                           lambda t: CDP.SimpleValue(t[0], t[1]))
+    number_with_unit2 = sp(integer_or_float + S(L('[')) + S(L(']')),
+                           lambda t: CDP.SimpleValue(t[0], CDP.UnitExpr('R')))
+    number_with_unit3 = sp(integer_or_float + unit_expr,
+                           lambda t: CDP.SimpleValue(t[0], t[1]))
+    number_with_unit = number_with_unit1 ^ number_with_unit2 ^ number_with_unit3
 
     # load battery
     load_expr = S(L('load')) - C(idn.copy(), 'load_arg')
@@ -104,10 +105,16 @@ class Syntax():
 
     setname_rightside = rvalue
 
-    setname_generic_var = idn.copy()
-    spa(setname_generic_var, lambda t: CDP.SetNameGenericVar(t[0]))
-    setname_generic = (C(setname_generic_var, 'name') + S(L('='))) + C(setname_rightside, 'right_side')
-    spa(setname_generic, lambda t: CDP.SetNameGeneric(t[0], t[1]))
+    EQ = sp(L('='), lambda t: CDP.eq(t[0]))
+    DOT = sp(L('.'), lambda t: CDP.DotPrep(t[0]))
+    PLUS = sp(L('+'), lambda t: CDP.plus(t[0]))
+    TIMES = sp(L('*'), lambda t: CDP.times(t[0]))
+ 
+    setname_generic_var = sp(idn.copy(),
+                              lambda t: CDP.SetNameGenericVar(t[0]))
+
+    setname_generic = sp(setname_generic_var + EQ + setname_rightside,
+                         lambda t: CDP.SetNameGeneric(t[0], t[1], t[2]))
 
 
     variable_ref = NotAny(reserved) + C(idn.copy(), 'variable_ref_name')
@@ -116,7 +123,6 @@ class Syntax():
     constant_value = number_with_unit ^ variable_ref
 
     dpname = sp(idn.copy(), lambda t: CDP.DPName(t[0]))
-    DOT = sp(L('.'), lambda t: CDP.DotPrep(t[0]))
 
     rvalue_resource_simple = sp(dpname + DOT - rname,
                                 lambda t: CDP.Resource(s=t[2], keyword=t[1], dp=t[0]))
@@ -297,9 +303,9 @@ class Syntax():
 
     rvalue << operatorPrecedence(operand, [
     #     ('-', 1, opAssoc.RIGHT, Unary.parse_action),
-        ('*', 2, opAssoc.LEFT, mult_parse_action),
+        (TIMES, 2, opAssoc.LEFT, mult_parse_action),
     #     ('-', 2, opAssoc.LEFT, Binary.parse_action),
-        ('+', 2, opAssoc.LEFT, plus_parse_action),
+        (PLUS, 2, opAssoc.LEFT, plus_parse_action),
     ])
 
 

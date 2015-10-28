@@ -1,10 +1,12 @@
-from mocdp.lang.namedtuple_tricks import isnamedtuplewhere, get_copy_with_where
 from contracts import contract
-from mocdp.lang.syntax import Syntax
-from mocdp.lang.parse_actions import parse_wrap
 from contracts.interface import Where
-from contracts.utils import indent, raise_wrapped
+from contracts.utils import indent, raise_wrapped, raise_desc
 from mocdp.comp.tests.test_drawing import unzip
+from mocdp.lang.namedtuple_tricks import get_copy_with_where, isnamedtuplewhere
+from mocdp.lang.parse_actions import parse_wrap
+from mocdp.lang.syntax import Syntax
+from mocdp.lang.parts import is_a_special_list
+from collections import namedtuple
 
 
 def isolate_comments(s):
@@ -22,10 +24,9 @@ def isolate_comments(s):
 
 @contract(s=str)
 def ast_to_html(s, complete_document):
-#     s = s.lstrip()
+
     s_lines, s_comments = isolate_comments(s)
     assert len(s_lines) == len(s_comments) 
-#     s_only = "\n".join(s_lines)
     # Problem: initial comment, '# test connected\nmcdp'
 
     empty_lines = []
@@ -45,13 +46,16 @@ def ast_to_html(s, complete_document):
     if not isnamedtuplewhere(block):
         raise ValueError(block)
 
-#     print print_ast(block)
+    print print_ast(block)
 
     block2 = make_tree(block, character_end=len(s))
-#     print print_ast(block2)
+    print print_ast(block2)
 
 
-    _, _, _, transformed_p = print_html_inner(block2)
+    snippets = list(print_html_inner(block2))
+    assert len(snippets) == 1
+    snippet = snippets[0]
+    transformed_p = snippet.transformed
 
     # add back the white space
     if empty_lines:
@@ -97,16 +101,53 @@ def ast_to_html(s, complete_document):
     else:
         return out
 
+Snippet = namedtuple('Snippet', 'op orig a b transformed')
+
 def print_html_inner(x):
     assert isnamedtuplewhere(x), x
+        
     def iterate():
-        for  _, op in iterate_sub(x):
+        for  _, op in iterate_notwhere(x):
             if isnamedtuplewhere(op):
-                yield print_html_inner(op)
+                for m in print_html_inner(op):
+                    yield m
+                    
+    def order_contributions(it):
+        @contract(x=Snippet)
+        def loc(x):
+            return x.a
+#             print x
+#             a = x[1]
+#             if isnamedtuplewhere(a):
+#                 return a.where.character
+#             return 0
+
+        o = list(it)
+        return sorted(o, key=loc)
+
+    def iterate_check_order(it):
+        last = 0
+        cur = []
+        for i in it:
+            op, o, a, b, _ = i
+            cur.append('from %d -> %d: %s -> %r' % (a, b, type(op).__name__, o))
+            if not a >= last:
+                raise_desc(ValueError, 'bad order', cur="\n".join(cur))
+            if not b >= a:
+                raise_desc(ValueError, 'bad ordering', cur="\n".join(cur))
+            last = b
+            yield i
+
+    subs = list(iterate_check_order(order_contributions(iterate())))
+
+    if is_a_special_list(x):
+        for _ in subs:
+            yield _
+        return
 
     cur = x.where.character
     out = ""
-    for _, a, b, transformed in iterate():
+    for _, _, a, b, transformed in subs:
         if a > cur:
             out += x.where.string[cur:a]
         out += transformed
@@ -119,21 +160,11 @@ def print_html_inner(x):
 
     klass = type(x).__name__
     transformed0 = "<span class='%s'>%s</span>" % (klass, out)
-    return orig0, x.where.character, x.where.character_end, transformed0
-
-
-
+    yield Snippet(op=x, orig=orig0, a=x.where.character, b=x.where.character_end,
+                  transformed=transformed0)
 
 def print_ast(x):
     try:
-#         if isinstance(x, list):
-#             s = ''
-#             for i, xi in enumerate(x):
-#                 first = '- '
-#                 if i > 0:
-#                     s += '\n'
-#                 s += indent(print_ast(xi), ' ' * len(first), first=first)
-#             return s
         if isnamedtuplewhere(x):
             s = '%s' % type(x).__name__
             s += '  %r' % x.where
@@ -169,10 +200,7 @@ def make_tree(x, character_end):
             else:
                 v_character_end = character_end
 
-        if isinstance(v, list):
-            v2 = make_tree_list(v, character_end=v_character_end)
-        else:
-            v2 = make_tree(v, character_end=v_character_end)
+        v2 = make_tree(v, character_end=v_character_end)
         fields[k] = v2
         last = v2
 
@@ -185,26 +213,6 @@ def make_tree(x, character_end):
     fields['where'] = w
     return type(x)(**fields)
 
-@contract(character_end='int')
-def make_tree_list(xs, character_end):
-    res = []
-    for i, x in enumerate(xs):
-        if i < len(xs)- 1:
-            next_starts_at = xs[i + 1].where.character
-        else:
-            next_starts_at = character_end
-
-        x2 = make_tree(x, next_starts_at)
-        w = x2.where
-        if w.character_end is None:
-            where2 = Where(string=w.string, character=w.character,
-                       character_end=next_starts_at)
-        else:
-            where2 = w
-        x3 = get_copy_with_where(x2, where=where2)
-        res.append(x3)
-
-    return res
 
 
 def iterate_sub(x):
