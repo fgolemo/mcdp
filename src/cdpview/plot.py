@@ -7,6 +7,8 @@ from reprep import Report
 import os
 from reprep.constants import MIME_PNG
 from contracts import contract
+from tempfile import mkdtemp
+from system_cmd.meat import system_cmd_result
 
 
 def get_ndp(data):
@@ -20,17 +22,54 @@ def get_dp(data):
         data['dp'] = ndp.get_dp()
     return data['dp']
 
-def png_from_gg(gg):
+def png_pdf_from_gg(gg):
     r = Report()
     gg_figure(r, 'graph', gg)
-    node = r.resolve_url('graph/graph')
-    return node.raw_data
+    png_node = r.resolve_url('graph/graph')
+    pdf_node = r.resolve_url('graph_pdf')
+    return png_node.get_raw_data(), pdf_node.get_raw_data()
+
 
 def ndp_visualization(data, style):
     ndp = get_ndp(data) 
     gg = gvgen_from_ndp(ndp, style)
-    res1 = ('png', style, png_from_gg(gg))
-    return [res1]
+    png, pdf = png_pdf_from_gg(gg)
+    res1 = ('png', style, png)
+    res2 = ('pdf', style, pdf)
+    return [res1, res2]
+
+def syntax_pdf(data):
+    from mocdp.dp_report.html import ast_to_html
+    s = data['s']
+    s = s.replace('\t', '    ')
+    html = ast_to_html(s, complete_document=True)
+
+    d = mkdtemp()
+    
+    f_html = os.path.join(d, 'file.html')
+    with open(f_html, 'w') as f:
+        f.write(html)
+        
+    f_pdf = os.path.join(d, 'file.pdf')
+    cmd= ['wkhtmltopdf','-s','A1',f_html,f_pdf]
+    system_cmd_result(
+            d, cmd, 
+            display_stdout=False,
+            display_stderr=False,
+            raise_on_error=True)
+      
+    f_pdf_crop = os.path.join(d, 'file_crop.pdf')
+    cmd = ['pdfcrop', '--margins', '4', f_pdf, f_pdf_crop]
+    system_cmd_result(
+            d, cmd, 
+            display_stdout=False,
+            display_stderr=False,
+            raise_on_error=True)
+
+    with open(f_pdf_crop) as f:
+        data = f.read()
+
+    return [('pdf', 'syntax_pdf', data)]
 
 @contract(data=dict)
 def syntax_frag(data):
@@ -53,6 +92,7 @@ allplots  = {
     'ndp_clean': lambda data: ndp_visualization(data, 'clean'),
     'syntax_doc': syntax_doc,
     'syntax_frag': syntax_frag,
+    'syntax_pdf': syntax_pdf,
 }
 
 def do_plots(filename, plots, outdir):
@@ -68,6 +108,7 @@ def do_plots(filename, plots, outdir):
         for r in res:
             assert isinstance(r, tuple), r
             mime, name, x = r
+            assert isinstance(x, str), x
             ext = mime
 
             base = os.path.splitext(os.path.basename(filename))[0]
@@ -88,6 +129,7 @@ class PlotDP(QuickAppBase):
     """ Plot a design program """
     def define_program_options(self, params):
         params.add_string('filename')
+        params.add_flag('watch')
         params.add_string('out', help='Output dir', default=None)
         params.add_string_list('plots', default='*')
 
@@ -102,6 +144,13 @@ class PlotDP(QuickAppBase):
             out = options.out
         plots = expand_string(options.plots, list(allplots))
         do_plots(filename, plots, out)
+
+        if options.watch:
+            def handler():
+                do_plots(filename, plots, out)
+
+            from cdpview.go import watch
+            watch(path=os.path.dirname(options.filename), handler=handler)
 
 
 mcdp_plot_main = PlotDP.get_sys_main()

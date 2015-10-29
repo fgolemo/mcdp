@@ -1,11 +1,11 @@
-# test connected
-cdp {
-
-	requires a [R]
-	requires b [R]
+mcdp {
 	
-	provides c [R]
-	
-	c <= a * b
+  sub f = template mcdp  {
 
+  	provides x [R]
+  	requires y [R]
+
+  }
+
+  f.x >= f.y
 }

@@ -250,14 +250,13 @@ def iterate_notwhere(x):
         yield k, v
 
 
-css = """
-     /*span.element { margin: 2px; padding: 1px; border: solid 1px black;}*/
-     /*span.unit { color: #f80; } */
+css = """ 
      span.Unit { color: purple; }
      span.ProvideKeyword, span.FName { color: darkgreen;}
      span.RequireKeyword, span.RName  { color: darkred;}
+     
      span.NewResource { color: darkred;}
-     span.ValueExpr { color: orange;}
+     span.ValueExpr { color: #CC6600 ;}
      /*span.Function  { color: darkgreen;}*/
 span.ProvideKeyword,
 span.RequireKeyword,     
@@ -276,7 +275,7 @@ span.RequireKeyword,
     span.ImplementedbyKeyword 
        { font-weight: bold; }
        
-    span.FuncName { color: blue; }
+    span.FuncName { color: #CC6600 ; }
 
        span.MCDPKeyword,
        span.SubKeyword,

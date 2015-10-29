@@ -129,7 +129,7 @@ def watch(path, handler):
     class MyWatcher(FileSystemEventHandler):
         def on_modified(self, event):  # @UnusedVariable
             src_path = event.src_path
-            if '.cdp' in src_path:
+            if '.cdp' in src_path or '.mcdp' in src_path:
                 handler.__call__()
 
     logging.basicConfig(level=logging.INFO,
