@@ -114,11 +114,16 @@ def gvgen_from_ndp(ndp, style='default'):
 
 
 
-
-
     gg.styleAppend("external", "shape", "none")
-    gg.styleAppend("external_cluster", "shape", "box")
-    gg.styleAppend("external_cluster", "color", "red")
+    gg.styleAppend("external_cluster_functions", "shape", "plaintext")
+    gg.styleAppend("external_cluster_functions", "bgcolor", "#d0FFd0")
+    gg.styleAppend("external_cluster_functions", "color", "white")
+#     gg.styleAppend("external_cluster_functions", "color", "#008000")
+    gg.styleAppend("external_cluster_resources", "shape", "plaintext")
+    gg.styleAppend("external_cluster_resources", "bgcolor", "#FFd0d0")
+    gg.styleAppend("external_cluster_resources", "color", "white")
+#     gg.styleAppend("external_cluster_functions", "color", "#008000")
+
 
     gg.styleAppend("connector", "shape", "plaintext")
     gg.styleAppend("simple", "shape", "box")
@@ -173,7 +178,7 @@ def gvgen_from_ndp(ndp, style='default'):
                 gg.propertyAppend(l, "headport", "w")
                 gg.propertyAppend(l, "tailport", "e")
 
-            gg.styleApply("external_cluster", cluster_functions)
+            gg.styleApply("external_cluster_functions", cluster_functions)
 
     if resources:
         cluster_resources = gg.newItem("")
@@ -188,7 +193,7 @@ def gvgen_from_ndp(ndp, style='default'):
             if False:
                 gg.propertyAppend(l, "headport", "w")
                 gg.propertyAppend(l, "tailport", "e")
-        gg.styleApply("external_cluster", cluster_resources)
+        gg.styleApply("external_cluster_resources", cluster_resources)
 
     # XXX: for some reason cannot turn off the border, using "white"
 #     gg.propertyAppend(cluster_functions, "shape", "plain")
@@ -347,7 +352,9 @@ def format_unit(R):
         return '[*]'
     if R == R_dimensionless:
         # return '[R]'
-        return '[]'
+#         return '[]'
+        # TODO: make option
+        return ''
     elif isinstance(R, RcompUnits):
         return '[%s]' % format_pint_unit_short(R.units)
     elif isinstance(R, Rcomp):

@@ -1,0 +1,8 @@
+# test semantic_error
+mcdp {
+   requires a [R]
+
+	# cannot assign the name a
+	a = 2 J
+
+}
