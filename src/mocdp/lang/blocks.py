@@ -407,8 +407,6 @@ def eval_pdp(r, context):  # @UnusedVariable
     if isinstance(r, CDP.PDPCodeSpec):
         function = r.function.value
         arguments = r.arguments
-#         print('function: %s' % function)
-#         print('arguments: %s' % arguments)
         check_isinstance(function, str)
         res = instantiate_spec([function, arguments])
         return res
@@ -418,15 +416,6 @@ def eval_pdp(r, context):  # @UnusedVariable
 @contract(returns=CFunction)
 def eval_lfunction(lf, context):
     if isinstance(lf, CDP.Function):
-#         if not lf.dp in context.names:
-#             msg = 'Unknown dp (%r.%r)' % (lf.dp, lf.s)
-#             raise DPSemanticError(msg, where=lf.where)
-
-#         warnings.warn('Not sure if this was necessary')
-#         if context.is_new_resource(lf.dp):
-#             msg = 'Cannot use the name %s of an external interface function.' % lf.__repr__()
-#             raise DPSemanticError(msg, where=lf.where)
-
         return context.make_function(dp=lf.dp.value, s=lf.s.value)
 
     if isinstance(lf, CDP.InvMult):
@@ -442,16 +431,12 @@ def eval_lfunction(lf, context):
 
         assert len(fs) == 2
 
-
-
         Fs = map(context.get_ftype, fs)
         R = mult_table(Fs[0], Fs[1])
 
 
         dp = InvMult2(R, tuple(Fs))
         ndp = dpwrap(dp, '_input', ['_f0', '_f1'])
-
-
 
         name = context.new_name('_invmult')
         context.add_ndp(name, ndp)
@@ -463,8 +448,6 @@ def eval_lfunction(lf, context):
 
         res = context.make_function(name, '_input')
         return res
-
-
 
     if isinstance(lf, CDP.NewResource):
         rname = lf.name
@@ -480,18 +463,6 @@ def eval_lfunction(lf, context):
 
     if isinstance(lf, CDP.NewLimit):
         A = eval_constant(lf.value_with_unit, context)
-#         vu = lf.value_with_unit
-#
-#         value = vu.value.value
-#         F = vu.unit.value
-#         # TODO: special conversion int -> float
-#
-#         try:
-#             F.belongs(value)
-#         except NotBelongs as e:
-#             msg = 'Invalid value provided.'
-#             raise_wrapped(DPSemanticError, e, msg)
-
         dp = Limit(A.unit, A.value)
         n = context.new_name('lim')
         sn = context.new_fun_name('l')
@@ -566,8 +537,6 @@ def eval_rvalue(rvalue, context):
             F1 = context.get_rtype(a)
             F2 = context.get_rtype(b)
 
-#             print context.names[a.dp].repr_long()
-#             print context.names[b.dp].repr_long()
             if not (F1 == F2):
                 msg = 'Incompatible units for Max(): %s and %s' % (F1, F2)
                 msg += '%s and %s' % (type(F1), type(F2))
