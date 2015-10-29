@@ -22,8 +22,8 @@ class CDPLanguage():
     AbstractAway = namedtuplewhere('AbstractAway', 'keyword dp_rvalue')
     Compact = namedtuplewhere('Compact', 'keyword dp_rvalue')
 
-    PlusN = namedtuplewhere('PlusN', 'ops glyphs')
-    MultN = namedtuplewhere('MultN', 'ops glyphs')
+    PlusN = namedtuplewhere('PlusN', 'ops')
+    MultN = namedtuplewhere('MultN', 'ops')
     OpMax = namedtuplewhere('Max', 'keyword a b')
     OpMin = namedtuplewhere('Min', 'keyword a b')
 
@@ -119,11 +119,11 @@ def make_list(x, where=None):
         ltype = list_types[len(x)]
         w1 = x[0].where
         w2 = x[-1].where
+
         if w1 is None or w2 is None:
-            for y in x:
-                if y.where is None:
-                    print y
             raise_desc(ValueError, 'Cannot create list', x=x)
+
+        assert w2.character_end is not None
         w3 = Where(string=w1.string,
                       character=w1.character,
                       character_end=w2.character_end)
@@ -132,7 +132,7 @@ def make_list(x, where=None):
         return res
     except BaseException as e:
         msg = 'Cannot create list'
-        raise_wrapped(DPInternalError, e, msg, x=x, where=where)
+        raise_wrapped(DPInternalError, e, msg, x=x, where=where, x_last=x[-1])
 
 def unwrap_list(res):
     if isinstance(res, list_types[0]):

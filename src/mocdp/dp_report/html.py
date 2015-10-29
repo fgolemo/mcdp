@@ -53,16 +53,11 @@ def ast_to_html(s, complete_document):
     assert len(snippets) == 1
     snippet = snippets[0]
 
-#     def sanitize(x):
-#         x = x.replace('>=', '&gt;=')
-#         x = x.replace('<=', '&lt;=')
-#         return x
     def sanitize_comment(x):
         x = x.replace('>', '&gt;')
         x = x.replace('<', '&lt;')
         return x
 
-#     transformed_p = sanitize(snippet.transformed)
     transformed_p = (snippet.transformed)
 
     # add back the white space
@@ -130,7 +125,9 @@ def print_html_inner(x):
         cur = []
         for i in it:
             op, o, a, b, _ = i
-            cur.append('from %d -> %d: %s -> %r' % (a, b, type(op).__name__, o))
+            cur.append('%s from %d -> %d: %s -> %r' % (type(x).__name__,
+                                                       a, b, type(op).__name__, o))
+
             if not a >= last:
                 raise_desc(ValueError, 'bad order', cur="\n".join(cur))
             if not b >= a:
@@ -147,13 +144,18 @@ def print_html_inner(x):
 
     cur = x.where.character
     out = ""
-    for _, _, a, b, transformed in subs:
+    for op, orig, a, b, transformed in subs:
         if a > cur:
+#             print ('%s: raw %r' % (type(x).__name__, x.where.string[cur:a]))
             out += sanitize(x.where.string[cur:a])
+#         print ('%s: chi %s %r' % (type(x).__name__, type(op).__name__, orig))
+#         print ('%s      %s %s' % (type(x).__name__, type(op).__name__, transformed))
         out += transformed
         cur = b
 
     if cur != x.where.character_end:
+#         why = 'ended at cur = %d, character_end = %s' % (cur, x.where.character_end)
+#         print('%s: %s rest %r' % (type(x).__name__, why, x.where.string[cur:x.where.character_end]))
         out += sanitize(x.where.string[cur:x.where.character_end])
 
     orig0 = x.where.string[x.where.character:x.where.character_end]
@@ -227,9 +229,12 @@ def make_tree(x, character_end):
 
 
 def iterate_sub(x):
-    def loc(a):
-        a = a[1]
+    def loc(m):
+        a = m[1]
         if isnamedtuplewhere(a):
+            if a.where is None:
+                print('warning: no where found for %s' % str(a))
+                return 0
             return a.where.character
         return 0
 

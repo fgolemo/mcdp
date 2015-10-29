@@ -4,6 +4,7 @@ from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp,
     assert_parsable_to_unconnected_ndp, assert_semantic_error,
     assert_syntax_error)
 import os
+from StringIO import StringIO
 
 
 def get_marked_tests(filename):
@@ -18,8 +19,10 @@ def get_marked_tests(filename):
     tests = []
     if 'unconnected' in line1:
         tests.append(assert_parsable_to_unconnected_ndp)
+        tests.append(syntax_test)
     elif 'connected' in line1:
         tests.append(assert_parsable_to_connected_ndp)
+        tests.append(syntax_test)
     elif 'semantic_error' in line1:
         tests.append(assert_semantic_error)
     elif 'syntax_error' in line1:
@@ -30,6 +33,18 @@ def get_marked_tests(filename):
         raise_desc(Exception, msg, line1=line1, filename=filename)
     return tests
         
+def syntax_test(contents):
+    from mocdp.dp_report.html import ast_to_html
+    html = ast_to_html(contents, complete_document=False)
+
+    import xml.etree.ElementTree as ETree
+    try:
+        s = StringIO(html)
+        _doc = ETree.parse(s)
+    except ETree.ParseError :
+        print("ERROR in {0} : {1}".format(ETree.ParseError.filename, ETree.ParseError.msg))
+
+
 def test_one(test, filename):
     with open(filename) as f:
         contents = f.read()

@@ -430,7 +430,7 @@ def eval_lfunction(lf, context):
         return context.make_function(dp=lf.dp.value, s=lf.s.value)
 
     if isinstance(lf, CDP.InvMult):
-        ops = lf.ops
+        ops = get_odd_ops(unwrap_list(lf.ops))
         if len(ops) != 2:
             raise DPInternalError('Only 2 expected')
 
@@ -738,7 +738,7 @@ def flatten_multN(ops):
     res = []
     for op in ops:
         if isinstance(op, CDP.MultN):
-            res.extend(flatten_multN(unwrap_list(op.ops)))
+            res.extend(flatten_multN(get_odd_ops(unwrap_list(op.ops))))
         else:
             res.append(op)
     return res
@@ -750,7 +750,7 @@ def eval_MultN(x, context, wants_constant):
 
     assert isinstance(x, CDP.MultN)
 
-    ops = flatten_multN(unwrap_list(x.ops))
+    ops = flatten_multN(get_odd_ops(unwrap_list(x.ops)))
     assert len(ops) > 1
 
     constants = []
@@ -818,9 +818,17 @@ def flatten_plusN(ops):
     res = []
     for op in ops:
         if isinstance(op, CDP.PlusN):
-            res.extend(flatten_plusN(unwrap_list(op.ops)))
+            res.extend(flatten_plusN(get_odd_ops(unwrap_list(op.ops))))
         else:
             res.append(op)
+    return res
+
+def get_odd_ops(l):
+    """ Returns odd elements from l. """
+    res = []
+    for i, x in enumerate(l):
+        if i % 2 == 0:
+            res.append(x)
     return res
 
 def eval_PlusN(x, context, wants_constant):
@@ -828,8 +836,7 @@ def eval_PlusN(x, context, wants_constant):
     assert isinstance(x, CDP.PlusN)
     assert len(x.ops) > 1
 
-    ops = flatten_plusN(unwrap_list(x.ops))
-
+    ops = flatten_plusN(get_odd_ops(unwrap_list(x.ops)))
     constants = []
     resources = []
 

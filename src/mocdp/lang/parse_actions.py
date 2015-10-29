@@ -8,10 +8,10 @@ from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.dp.dp_sum import sum_units
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mocdp.lang.namedtuple_tricks import get_copy_with_where
-from mocdp.posets import NotBelongs, Space, mult_table
+from mocdp.posets import  Space, mult_table
 from pyparsing import ParseException, ParseFatalException
 import functools
-from mocdp.lang.parts import make_list, unwrap_list
+from mocdp.lang.parts import make_list
 from mocdp.comp.context import ValueWithUnits
 
 
@@ -32,20 +32,9 @@ def wheredecorator(b):
         except BaseException as e:
             raise_wrapped(DPInternalError, e, "Error while parsing.",
                           where=where.__str__(), tokens=tokens)
-#
-#         if isinstance(res, CDP.PlusN):
-#             res = CDP.PlusN(ops=make_list(unwrap_list(res.ops), where),
-#                             glyphs=make_list(unwrap_list(res.glyphs), where))
-#
-#         if isinstance(res, CDP.MultN):
-#             res = CDP.MultN(ops=make_list(unwrap_list(res.ops), where),
-#                             glyphs=make_list(unwrap_list(res.glyphs), where))
-
-        if isnamedtupleinstance(res):  # or isinstance(res, ValueWithUnits):
+        if isnamedtupleinstance(res) and res.where is None:  # or isinstance(res, ValueWithUnits):
             res = get_copy_with_where(res, where=where)
 
-#         else:
-#             print('Not adding where to %s' % type(res))
         return res
     return bb
 
@@ -66,17 +55,18 @@ def spa(x, b):
         loc_end, tokens = x2._parse(s[loc:], 0)
         character_end = loc + loc_end
 
-        if isnamedtupleinstance(res):  # or isinstance(res, ):
-            w = res.where
-            w2 = Where(w.string, character_end=character_end, character=w.character)
+        if isnamedtupleinstance(res) and (res.where is None or res.where.character_end is None):
+            w2 = Where(s, character_end=character_end, character=loc)
             res = get_copy_with_where(res, where=w2)
-#         else:
-#             print('cannot fix %s because namedtuple instance' % str(res))
 
         if not isinstance(res, (float, int, str)):
             if res.where is None:
                 msg = 'Found element with no where'
                 raise_desc(ValueError, msg, res=res)
+
+        if hasattr(res, 'where'):
+            assert res.where.character_end is not None, (res, isnamedtupleinstance(res))
+
         return res
     x.setParseAction(p)
 
@@ -84,19 +74,21 @@ def spa(x, b):
 @wheredecorator
 def mult_parse_action(tokens):
     tokens = list(tokens[0])
+#
+#     ops = []
+#     glyphs = []
+#     for i, t in enumerate(tokens):
+#         if i % 2 == 0:
+#             ops.append(t)
+#         else:
+#             assert isinstance(t, CDP.times)
+#             glyphs.append(t)
+#
+#     assert len(ops) > 1
 
-    ops = []
-    glyphs = []
-    for i, t in enumerate(tokens):
-        if i % 2 == 0:
-            ops.append(t)
-        else:
-            assert isinstance(t, CDP.times)
-            glyphs.append(t)
-
-    assert len(ops) > 1
-
-    res = CDP.MultN(make_list(ops), make_list(glyphs))
+    l = make_list(tokens)
+    assert l.where.character_end is not None
+    res = CDP.MultN(l, where=l.where)
     return res
 
 class MultType():
@@ -143,18 +135,21 @@ def plus_constantsN(constants):
 @wheredecorator
 def plus_parse_action(tokens):
     tokens = list(tokens[0])
+#
+#     ops = []
+#     glyphs = []
+#     for i, t in enumerate(tokens):
+#         if i % 2 == 0:
+#             ops.append(t)
+#         else:
+# #             assert t == '+'
+#             assert isinstance(t, CDP.plus)
+#             glyphs.append(t)
 
-    ops = []
-    glyphs = []
-    for i, t in enumerate(tokens):
-        if i % 2 == 0:
-            ops.append(t)
-        else:
-#             assert t == '+'
-            assert isinstance(t, CDP.plus)
-            glyphs.append(t)
 
-    res = CDP.PlusN(make_list(ops), make_list(glyphs))
+    l = make_list(tokens)
+    assert l.where.character_end is not None
+    res = CDP.PlusN(l, where=l.where)
     return res
 
 
@@ -174,16 +169,17 @@ class PlusValue():
 @parse_action
 def mult_inv_parse_action(tokens):
     tokens = list(tokens[0])
-
-    ops = []
-    for i, t in enumerate(tokens):
-        if i % 2 == 0:
-            ops.append(t)
-        else:
-            assert t == '*'
-
-    assert len(ops) == 2
-    return CDP.InvMult(ops)
+#
+#     ops = []
+#     for i, t in enumerate(tokens):
+#         if i % 2 == 0:
+#             ops.append(t)
+#         else:
+#             assert t == '*'
+#
+#     assert len(ops) == 2
+    ops = make_list(tokens)
+    return CDP.InvMult(ops, where=ops.where)
 
 def parse_wrap(expr, string):
     # Nice trick: the removE_comments doesn't change the number of lines
