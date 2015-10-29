@@ -476,16 +476,14 @@ def create_composite(gdc0, ndp):
             else:
                 return False
 
-        print('drawing stuff')
         for name, value in ndp.context.names.items():
-            print('drawing %s' % name)
             # do not create these edges
             if is_function_with_one_connection_that_is_not_a_res_one(name):
-                print('Skipping extra node for is_function_with_one_connection %r' % name)
+                # print('Skipping extra node for is_function_with_one_connection %r' % name)
                 continue
 
             if is_resource_with_one_connection_that_is_not_a_fun_one(name):
-                print('skipping extra node for %r' % name)
+                # print('skipping extra node for %r' % name)
                 continue
 
             if is_function_with_no_connections(name):

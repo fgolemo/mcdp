@@ -8,6 +8,7 @@ from mocdp.dp.primitive import PrimitiveDP
 from mocdp.posets import (PosetProduct, R_Energy, R_Power, R_Time, R_Weight,
     R_dimensionless, Single, SpaceProduct)
 import numpy as np
+from mocdp.posets.rcomp_units import R_Weight_g
 
 
 
@@ -106,7 +107,7 @@ def Pa_from_weight(W):
 class Mobility(PrimitiveDP):
 
     def __init__(self):
-        F = R_Weight
+        F = R_Weight_g
         R = R_Power
 
         M = SpaceProduct(())

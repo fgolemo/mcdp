@@ -250,7 +250,7 @@
           #
           sub battery = dp {
               provides capacity [J]
-              requires battery_weight [g]
+              requires battery_weight [kg]
               
               implemented-by load BatteryDP
           }

@@ -3,7 +3,7 @@
 cdp {
   sub motor = abstract dp {
     provides energy [W]
-    requires mass [g]
+    requires mass [kg]
 
     implemented-by load BatteryDP
   }

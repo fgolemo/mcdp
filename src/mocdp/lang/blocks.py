@@ -315,6 +315,15 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             else:
                 use_rnames = rnames
 
+#
+#             try:
+#                 tu.check_leq(R1, F2)
+#             except NotLeq as e:
+#                 msg = 'Constraint between incompatible spaces.'
+#                 raise_wrapped(DPSemanticError, e, msg)
+#
+#             map1, _map2 = tu.get_embedding(R1, F2)
+
             try:
                 w = SimpleWrap(dp=dp, fnames=use_fnames, rnames=use_rnames)
             except ValueError as e:
@@ -332,6 +341,7 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             except NotEqual as e:
                 msg = 'The types in the description do not match.'
                 raise_wrapped(DPSemanticError, e, msg,
+                              dp=dp,
                            ftypes=ftypes,
                            ftypes_expected=ftypes_expected,
                            rtypes=rtypes,

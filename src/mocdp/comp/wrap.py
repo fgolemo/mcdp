@@ -6,7 +6,6 @@ from mocdp.dp import PrimitiveDP
 from mocdp.dp.dp_flatten import get_it
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 from mocdp.posets import PosetProduct
-import warnings
 
 __all__ = [
     'SimpleWrap',
@@ -21,7 +20,6 @@ class SimpleWrap(NamedDP):
         _ , self.dp = get_conftools_dps().instance_smarter(dp)
 
         F = self.dp.get_fun_space()
-
         R = self.dp.get_res_space()
 
         try:
@@ -39,12 +37,12 @@ class SimpleWrap(NamedDP):
                 self.F_single = True
                 self.Fname = fnames
             else:
+
                 if isinstance(F, PosetProduct):
                     if not isinstance(fnames, list) or not len(F) == len(fnames):
                         raise ValueError("F incompatible")
                     self.F_single = False
                     self.Fnames = fnames
-
                 else:
                     if not isinstance(fnames, str):
                         msg = "F and fnames incompatible: not a string: %s %s" % (F, fnames)

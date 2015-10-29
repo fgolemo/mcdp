@@ -120,6 +120,7 @@ R_Force = make_rcompunit('N')
 R_Cost = make_rcompunit('$')
 R_Energy = make_rcompunit('J')
 R_Weight = make_rcompunit('kg')
+R_Weight_g = make_rcompunit('g')
 
 R_Current = make_rcompunit('A')
 R_Voltage = make_rcompunit('V')

@@ -6,7 +6,7 @@ from mocdp.lang.parts import CDPLanguage
 from mocdp.lang.syntax import Syntax, parse_ndp
 from mocdp.lang.tests.utils import parse_wrap_check
 from mocdp.posets import R_Weight
-from mocdp.posets.rcomp_units import make_rcompunit
+from mocdp.posets.rcomp_units import make_rcompunit, R_Weight_g
 from mocdp.posets.types_universe import get_types_universe
 from numpy.testing.utils import assert_allclose
 
@@ -23,11 +23,11 @@ def check_numbers1():
 @comptest
 def check_numbers2():
     parse_wrap_check('1.0 [g]', Syntax.number_with_unit, CDP.SimpleValue(CDP.ValueExpr(1.0),
-                                                                         CDP.UnitExpr(R_Weight)))
+                                                                         CDP.UnitExpr(R_Weight_g)))
     assert_syntax_error('1', Syntax.number_with_unit)
     # automatic conversion to float
     parse_wrap_check('1 [g]', Syntax.number_with_unit, CDP.SimpleValue(CDP.ValueExpr(1.0),
-                                                                        CDP.UnitExpr(R_Weight)))
+                                                                        CDP.UnitExpr(R_Weight_g)))
 
 @comptest
 def check_numbers3():

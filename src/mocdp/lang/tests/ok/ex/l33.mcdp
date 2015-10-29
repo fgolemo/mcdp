@@ -6,7 +6,7 @@ cdp {
 
   sub battery = dp {
     provides capacity [J]
-    requires weight [g]
+    requires weight [kg]
 
     implemented-by load BatteryDP
   }

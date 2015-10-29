@@ -65,7 +65,7 @@ def check_lang8_addition():
         
         sub battery = dp {
             provides capacity [J]
-            requires weight   [g]
+            requires weight   [kg]
             
             implemented-by load BatteryDP
         }
