@@ -1,6 +1,7 @@
 from contracts import contract
 from mocdp.posets.uppersets import UpperSet
 import warnings
+from mocdp.exceptions import mcdp_dev_warning
 
 
 def plot_upset_minima(pylab, us):
@@ -18,7 +19,7 @@ def plot_upset_R2(pylab, us, axis, color_shadow, color_lines='none'):
     xmin, xmax, ymin, ymax = axis
     for p in points:
         if xmin <= p[0] <= xmax and (ymin <= p[1] <= ymax):
-            warnings.warn('This should be smarter')
+            mcdp_dev_warning('This should be smarter')
             plot_cone(pylab, p, axis, color_shadow=color_shadow,
                       color_lines=color_lines)
     # cuteness

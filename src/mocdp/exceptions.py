@@ -12,3 +12,9 @@ class DPSyntaxError(ContractSyntaxError, DPUserError):
 
 class DPSemanticError(ContractSyntaxError, DPUserError):
     pass
+
+
+
+def mcdp_dev_warning(s):
+    # warnings.warn(s)
+    pass

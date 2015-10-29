@@ -4,7 +4,7 @@ from contracts.utils import indent, raise_desc
 from mocdp.configuration import get_conftools_dps
 from mocdp.dp import PrimitiveDP
 from mocdp.dp.dp_flatten import get_it
-from mocdp.exceptions import DPInternalError
+from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 from mocdp.posets import PosetProduct
 import warnings
 
@@ -61,7 +61,7 @@ class SimpleWrap(NamedDP):
                 self.R_single = True
                 self.Rname = rnames
 
-            warnings.warn('very late night')
+            mcdp_dev_warning('very late night')
 #             if isinstance(R, PosetProduct):
 #                 if not isinstance(rnames, list) or not len(R) == len(rnames):
 #                     raise ValueError("R incompatible")

@@ -6,6 +6,7 @@ from mocdp.posets.rcomp import Rcomp
 from mocdp.posets.space_product import SpaceProduct
 from contracts import contract
 import warnings
+from mocdp.exceptions import mcdp_dev_warning
 
 __all__ = [
     'get_types_universe',
@@ -102,7 +103,7 @@ class ProductMap(Map):
     def __init__(self, fs):
         fs = tuple(fs)
         self.fs = fs
-        warnings.warn('add promotion to SpaceProduct')
+        mcdp_dev_warning('add promotion to SpaceProduct')
         dom = SpaceProduct(tuple(fi.get_domain() for fi in fs))
         cod = SpaceProduct(tuple(fi.get_codomain() for fi in fs))
         Map.__init__(self, dom=dom, cod=cod)

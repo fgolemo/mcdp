@@ -4,6 +4,7 @@ from contracts import contract
 from mocdp import get_conftools_posets
 from mocdp.posets import PosetProduct, RcompUnits, SpaceProduct
 import functools
+import numpy as np
 
 
 __all__ = [
@@ -57,9 +58,7 @@ class SumN(PrimitiveDP):
 
     def solve(self, func):
         self.F.belongs(func)
-        
         res = sum_units(self.Fs, func, self.R)
-
         return self.R.U(res)
 
     def __repr__(self):
@@ -70,11 +69,13 @@ def sum_units(Fs, values, R):
     res = 0.0
     for Fi, x in zip(Fs, values):
         if Fi.equal(x, Fi.get_top()):
-            res = R.get_top()
-            break
+            return  R.get_top()
+
         # reasonably sure this is correct...
         factor = 1.0 / float(R.units / Fi.units)
         res += factor * x
+    if np.isinf(res):
+        return R.get_top()
     return res
 
 class SumUnitsNotCompatible(Exception):
@@ -150,6 +151,8 @@ class ProductN(PrimitiveDP):
             return self.R.U(self.R.get_top())
         mult = lambda x, y: x * y
         r = functools.reduce(mult, f)
+        if np.isinf(r):
+            r = self.R.get_top()
         return self.R.U(r)
 
     def __repr__(self):

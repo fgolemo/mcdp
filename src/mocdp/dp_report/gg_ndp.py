@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
+from conf_tools.utils.resources import dir_from_package_name
+from contracts.utils import raise_wrapped
 from mocdp.comp import CompositeNamedDP, SimpleWrap
 from mocdp.dp import (
     Constant, GenericUnary, Identity, Limit, Max, Min, Product, ProductN, Sum,
     SumN)
+from mocdp.exceptions import mcdp_dev_warning
 from mocdp.lang.blocks import get_missing_connections
 from mocdp.posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
 from system_cmd import CmdException, system_cmd_result
-import os
-import warnings
-from contracts.utils import raise_wrapped
-from conf_tools.utils.resources import dir_from_package_name
 from tempfile import mkdtemp
+import os
 
 
 class GraphDrawingContext():
@@ -26,11 +26,19 @@ class GraphDrawingContext():
         
         if tmppath is None:
             tmppath = mkdtemp(suffix="dp-icons")
-            print('created tmp directory %r' % tmppath)
+            mcdp_dev_warning('need to share icons')
+            # print('created tmp directory %r' % tmppath)
         self.tmppath = tmppath
 
+        self.all_nodes = []
+
+    def get_all_nodes(self):
+        return self.all_nodes
+
     def newItem(self, label):
-        return self.gg.newItem(label, parent=self.parent)
+        n = self.gg.newItem(label, parent=self.parent)
+        self.all_nodes.append(n)
+        return n
         
     def child_context(self, parent, yourname):
         c = GraphDrawingContext(gg=self.gg, parent=parent, yourname=yourname,
@@ -81,7 +89,7 @@ class GraphDrawingContext():
             # any_simple = second_simple or first_simple
             # both_simple = second_simple and first_simple
 
-            warnings.warn('Add options here')
+            mcdp_dev_warning('Add options here')
             skip = second_simple
             return skip
         else:
@@ -167,10 +175,12 @@ def gvgen_from_ndp(ndp, style='default'):
     functions, resources = create(gdc, ndp)
 
     if functions:
+        nodes_functions = []
         for fname, n in functions.items():
             F = ndp.get_ftype(fname)
             label = fname + ' ' + format_unit(F)
             x = gg.newItem(label, parent=cluster_functions)
+            nodes_functions.append(x)
             gg.styleApply("external", x)
 
             l = gg.newLink(x, n)
@@ -182,10 +192,12 @@ def gvgen_from_ndp(ndp, style='default'):
 
     if resources:
         cluster_resources = gg.newItem("")
+        nodes_resources = []
         for rname, n in resources.items():
             R = ndp.get_rtype(rname)
             label = rname + ' ' + format_unit(R)
             x = gg.newItem(label, parent=cluster_resources)
+            nodes_resources.append(x)
             gg.styleApply("external", x)
 
             l = gg.newLink(n, x)
@@ -194,6 +206,23 @@ def gvgen_from_ndp(ndp, style='default'):
                 gg.propertyAppend(l, "headport", "w")
                 gg.propertyAppend(l, "tailport", "e")
         gg.styleApply("external_cluster_resources", cluster_resources)
+
+
+    if True:
+        all_nodes = gdc.get_all_nodes()
+
+        for i, n in enumerate(all_nodes):
+            if i % 5 != 0:
+                continue
+
+            if functions:
+                l = gdc.newLink(nodes_functions[0], n)
+                gg.propertyAppend(l, "style", "invis")
+
+            if True:
+                if resources:
+                    l = gdc.newLink(n, nodes_resources[0])
+                    gg.propertyAppend(l, "style", "invis")
 
     # XXX: for some reason cannot turn off the border, using "white"
 #     gg.propertyAppend(cluster_functions, "shape", "plain")
@@ -314,13 +343,13 @@ def create_simplewrap(gdc, ndp):
     if isinstance(ndp.dp, Constant):
         R = ndp.dp.get_res_space()
         c = ndp.dp.c
-        label = R.format(c) + ' ' + format_unit(R)
+        label = R.format(c)  # + ' ' + format_unit(R)
         sname = 'constant'
 
     if isinstance(ndp.dp, Limit):
         F = ndp.dp.get_fun_space()
         c = ndp.dp.limit
-        label = F.format(c) + ' ' + format_unit(F)
+        label = F.format(c)  # + ' ' + format_unit(F)
         sname = 'limit'
 
 #     if label[:2] != '<T':
@@ -347,7 +376,7 @@ def create_simplewrap(gdc, ndp):
 def format_unit(R):
     if R == BottomCompletion(TopCompletion(Any())):
         return '[*]'
-    warnings.warn('fix bug')
+    mcdp_dev_warning('fix bug')
     if isinstance(R, BottomCompletion):
         return '[*]'
     if R == R_dimensionless:
@@ -362,18 +391,20 @@ def format_unit(R):
     else:
         return '[%s]' % str(R)
             
-def create_composite(gdc, ndp):
+def create_composite(gdc0, ndp):
     try:
         assert isinstance(ndp, CompositeNamedDP)
 
         names2resources = defaultdict(lambda: {})
         names2functions = defaultdict(lambda: {})
 
-        if gdc.should_I_enclose(ndp):
-            c = gdc.newItem(gdc.yourname)
-            gdc.styleApply('container', c)
-            gdc = gdc.child_context(parent=c, yourname=gdc.yourname)
 
+        if gdc0.should_I_enclose(ndp):
+            c = gdc0.newItem(gdc0.yourname)
+            gdc0.styleApply('container', c)
+            gdc = gdc0.child_context(parent=c, yourname=gdc0.yourname)
+        else:
+            gdc = gdc0
 
         def get_connections_to_function(name):
             assert ndp.context.is_new_function(name)
@@ -479,6 +510,7 @@ def create_composite(gdc, ndp):
 
             child = gdc.child_context(yourname=name, parent=gdc.parent)
             f, r = create(child, value)
+            gdc.all_nodes.extend(child.all_nodes)
             # print('name %s -> functions %s , resources = %s' % (name, list(f), list(r)))
             names2resources[name] = r
             names2functions[name] = f
@@ -606,6 +638,9 @@ def create_composite(gdc, ndp):
         for fname in ndp.get_fnames():
             name = ndp.context.get_name_for_fun_node(fname)
             functions[fname] = list(names2functions[name].values())[0]
+
+        if not (gdc is gdc0):
+            gdc0.all_nodes.extend(gdc.all_nodes)
 
         return functions, resources
     except BaseException as e:

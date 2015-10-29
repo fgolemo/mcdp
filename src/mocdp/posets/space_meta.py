@@ -36,5 +36,5 @@ def decorate_methods(cls, name, bases, dct, method2dec):  # @UnusedVariable
             decorated = decorator(orig)
             setattr(cls, method_name, decorated)
     else:
-        # warnings.warn("Not decorating %s :%s " % (name, cls))
+        # mcdp_dev_warning("Not decorating %s :%s " % (name, cls))
         pass

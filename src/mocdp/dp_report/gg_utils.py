@@ -7,6 +7,7 @@ from system_cmd import CmdException, system_cmd_result
 import networkx as nx  # @UnresolvedImport
 import os
 import traceback
+from mocdp.exceptions import mcdp_dev_warning
 
 
 def graphviz_run(filename_dot, output, prog='dot'):
@@ -37,7 +38,7 @@ def gg_deepcopy(ggraph):
     except Exception as e:
         print traceback.format_exc(e)
         import warnings
-        warnings.warn('Deep copy of gvgen graph failed: happens when in IPython.')
+        mcdp_dev_warning('Deep copy of gvgen graph failed: happens when in IPython.')
         return ggraph
 
 

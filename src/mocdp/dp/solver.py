@@ -3,7 +3,7 @@ from contracts import contract
 
 MaxStepsReached = 'MaxStepsReached'
 ConvergedToFinite = 'ConvergedToFinite'
-ConvergedToInfinite = 'ConvergedToInfinite'
+ConvergedToInfinite = 'ConvergedToTop'
 ConvergedToEmpty = 'ConvergedToEmpty'
 
 Allowed = [MaxStepsReached, ConvergedToFinite, ConvergedToInfinite, ConvergedToEmpty]
@@ -52,6 +52,7 @@ def generic_solve(dp, f, max_steps=None):
 
     result = None
 
+    print('Iterating in the space %s' % S)
     for i in range(100000):
         if max_steps:
             if i >= max_steps:
@@ -59,7 +60,6 @@ def generic_solve(dp, f, max_steps=None):
                 break
                  
         s_last = ss[-1]
-        print('Computing step')
         s_next = beta((uf, s_last))
 
         print('%d: si  = %s' % (i, S.format(s_next)))
@@ -70,7 +70,7 @@ def generic_solve(dp, f, max_steps=None):
             break
 
         rn = alpha((uf, s_next))
-        print('%d: rn  = %s' % (i, UR.format(rn)))
+        # print('%d: rn  = %s' % (i, UR.format(rn)))
         
         ss.append(s_next)
         sr.append(rn)

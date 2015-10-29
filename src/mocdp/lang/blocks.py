@@ -767,11 +767,11 @@ def eval_MultN(x, context, wants_constant):
 @contract(r=CResource, c=ValueWithUnits)
 def get_mult_op(context, r, c):
     from mocdp.lang.parse_actions import MultValue
-    from mocdp.dp_report.gg_ndp import format_unit
     function = MultValue(c.value)
     rtype = context.get_rtype(r)
-    setattr(function, '__name__', '× %s %s' % (c.unit.format(c.value),
-                                               format_unit(c.unit)))
+#     setattr(function, '__name__', '× %s %s' % (c.unit.format(c.value),
+#                                                format_unit(c.unit)))
+    setattr(function, '__name__', '× %s' % (c.unit.format(c.value)))
 
     F = rtype
     R = mult_table(rtype, c.unit)

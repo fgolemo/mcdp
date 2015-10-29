@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
+from mocdp.exceptions import mcdp_dev_warning
 from mocdp.posets import PosetProduct
-
 import numpy as np
-import warnings
+
 
 __all__ = [
     'GenericUnary',
@@ -22,7 +22,7 @@ class GenericUnary(PrimitiveDP):
         else:
             r = self.function(func)
 
-            warnings.warn('give much more thoguth')
+            mcdp_dev_warning('give much more thoguth')
             if isinstance(r, float) and np.isinf(r):
                 r = self.R.get_top()
             

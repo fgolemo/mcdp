@@ -34,6 +34,9 @@ class BatteryDP(PrimitiveDP):
         weight = joules / self.energy_density
         return ressp.U(weight)
 
+
+
+
 #     def __repr__(self): return 'battery'
 
 class Weight2totalpayload(PrimitiveDP):

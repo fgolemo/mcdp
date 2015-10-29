@@ -4,6 +4,7 @@ from contracts import contract
 from mocdp.posets import Poset  # @UnusedImport
 from mocdp.posets import PosetProduct, UpperSet
 import warnings
+from mocdp.exceptions import mcdp_dev_warning
 
 
 __all__ = [
@@ -30,7 +31,7 @@ class Limit(PrimitiveDP):
             # print('returning res %s' % res)
             return res
         else:
-            warnings.warn('Alternative is to use Top; think about it')
+            mcdp_dev_warning('Alternative is to use Top; think about it')
             empty = UpperSet(set(), self.R)
             # print('returning empty %s' % empty)
             return empty

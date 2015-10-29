@@ -61,6 +61,15 @@ class RcompUnits(Rcomp):
             return eq
         return False
 
+    def format(self, x):
+        if x == self.top:
+            return self.top.__repr__()
+        else:
+            s = Rcomp.format(self, x)
+#             s = '%.5f' % x
+            return '%s %s' % (s, format_pint_unit_short(self.units))
+
+
 def parse_pint(s0):
     """ thin wrapper taking care of dollars not recognized """
     s = s0.replace('$', ' dollars ')
@@ -110,7 +119,8 @@ R_Power = make_rcompunit('W')
 R_Force = make_rcompunit('N')
 R_Cost = make_rcompunit('$')
 R_Energy = make_rcompunit('J')
-R_Weight = make_rcompunit('g')
+R_Weight = make_rcompunit('kg')
+
 R_Current = make_rcompunit('A')
 R_Voltage = make_rcompunit('V')
 

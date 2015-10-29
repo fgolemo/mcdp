@@ -4,6 +4,7 @@ from mocdp import get_conftools_posets
 from mocdp.posets import PosetProduct
 from mocdp.posets.space_product import SpaceProduct
 import warnings
+from mocdp.exceptions import mcdp_dev_warning
 
 
 __all__ = [
@@ -13,7 +14,7 @@ __all__ = [
 class Split(PrimitiveDP):
 
     def __init__(self, F):
-        warnings.warn('Replace by Mux')
+        mcdp_dev_warning('Replace by Mux')
         library = get_conftools_posets()
         _, F0 = library.instance_smarter(F)
 

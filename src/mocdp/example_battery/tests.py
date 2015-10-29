@@ -1,6 +1,6 @@
 from reprep import Report
 from mocdp.drawing import plot_upset_minima, plot_upset_R2
-import warnings
+from mocdp.exceptions import mcdp_dev_warning
 
 
 # @for_some_dps('ex16_loop')
@@ -24,7 +24,7 @@ def check_ex16b_r(dp):
 
     return r
 
-warnings.warn('readd')
+mcdp_dev_warning('readd')
 # @for_some_dps_dyn('ex16_loop')
 def check_ex16c(context, _id_dp, dp):
     r = context.comp(check_ex16c_r, dp)

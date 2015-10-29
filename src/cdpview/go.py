@@ -22,7 +22,7 @@ def safe_makedirs(dirname):
 def watch_main():
     GlobalConfig.global_load_dir("mocdp")
     filename = sys.argv[1]
-    if not '.cdp' in filename:
+    if not '.cdp' in filename and not '.mcdp' in filename:
         raise ValueError(filename)
 
     path = os.path.dirname(filename)

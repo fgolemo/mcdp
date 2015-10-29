@@ -54,6 +54,7 @@ setup(name='PyMCDP',
       entry_points={
          'console_scripts': [
             'mcdp_plot = cdpview:mcdp_plot_main',
+            'mcdp_solve = cdpview:mcdp_solve_main',
         ]
       }
 )

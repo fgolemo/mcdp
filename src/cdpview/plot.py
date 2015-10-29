@@ -5,10 +5,10 @@ from mocdp.lang.parse_actions import parse_ndp
 from quickapp import QuickAppBase
 from reprep import Report
 import os
-from reprep.constants import MIME_PNG
 from contracts import contract
 from tempfile import mkdtemp
-from system_cmd.meat import system_cmd_result
+from system_cmd import system_cmd_result
+from conf_tools.global_config import GlobalConfig
 
 
 def get_ndp(data):
@@ -134,6 +134,8 @@ class PlotDP(QuickAppBase):
         params.add_string_list('plots', default='*')
 
     def go(self):
+        GlobalConfig.global_load_dir("mocdp")
+
         options = self.get_options()
         filename = options.filename
         if options.out is None:

@@ -3,7 +3,7 @@
 from collections import namedtuple
 from contracts import contract
 from contracts.utils import raise_desc, indent
-from mocdp.exceptions import DPSemanticError, DPInternalError
+from mocdp.exceptions import DPSemanticError, DPInternalError, mcdp_dev_warning
 import warnings
 
 from mocdp.posets.space import Space
@@ -17,8 +17,8 @@ __all__ = [
 Connection0 = namedtuple('Connection', 'dp1 s1 dp2 s2')
 class Connection(Connection0):
     def __repr__(self):
-        return ("Connection(2 %s.%s >= %s.%s 1)" %
-                (self.dp2, self.s2, self.dp1, self.s1))
+        return ("Constraint(%s.%s <= %s.%s)" %
+                (self.dp1, self.s1, self.dp2, self.s2))
 
 class CFunction():
     @contract(dp=str, s=str)
@@ -183,7 +183,7 @@ class Context():
             raise_desc(DPSemanticError, 'Invalid connection: %r not found.' % c.dp2,
                        names=self.names, c=c)
 
-        warnings.warn('redo this check')
+        mcdp_dev_warning('redo this check')
 
         if self.is_new_function(c.dp2):
             msg = "Cannot add connection to external interface %r." % c.dp1

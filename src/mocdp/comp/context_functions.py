@@ -40,8 +40,8 @@ def dpgraph_making_sure_no_reps(context):
         for fn in ndp.get_fnames():
 
             if len(functions[fn]) != 0:
-                print('need to translate F (%s, %s) because already in %s' %
-                      (name, fn, functions[fn]))
+#                 print('need to translate F (%s, %s) because already in %s' %
+#                       (name, fn, functions[fn]))
 
                 fn2 = '_%s_%s' % (name, fn)
 
@@ -55,8 +55,8 @@ def dpgraph_making_sure_no_reps(context):
         for rn in ndp.get_rnames():
 
             if len(resources[rn]) != 0:
-                print('need to translate R (%s, %s) because already in %s' %
-                       (name, rn, resources[rn]))
+#                 print('need to translate R (%s, %s) because already in %s' %
+#                        (name, rn, resources[rn]))
 
                 rn2 = '_%s_%s' % (name, rn)
 

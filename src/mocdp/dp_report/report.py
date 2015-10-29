@@ -11,6 +11,7 @@ from reprep import Report
 import warnings
 from mocdp.dp.dp_constant import Constant
 from mocdp.dp.dp_limit import Limit
+from mocdp.exceptions import mcdp_dev_warning
 
 @contract(ndp=NamedDP)
 def report_ndp1(ndp):
@@ -133,7 +134,7 @@ def gvgen_from_dp(dp0):
         gg.newLink(n1o, o, label=str(dp.dp1.get_res_space()))
         loop_label = str(dp.dp1.get_res_space())
 
-        warnings.warn('add option')
+        mcdp_dev_warning('add option')
         if False:
             M = dp.get_imp_space_mod_res()
             M0 = dp.dp1.get_imp_space_mod_res()

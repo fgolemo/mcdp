@@ -7,7 +7,7 @@ from contracts.utils import (format_dict_long, format_list_long, raise_desc,
 from mocdp.configuration import get_conftools_nameddps
 from mocdp.dp import Identity, Mux, Terminator, make_parallel, make_series
 from mocdp.dp.dp_loop import make_loop
-from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.posets import PosetProduct
 from networkx import NetworkXUnfeasible, DiGraph, MultiDiGraph
 from networkx.algorithms import is_connected, simple_cycles, topological_sort
@@ -538,7 +538,7 @@ def dploop0(ndp, lr, lf):
                 coords.append(xc)
 
 
-        warnings.warn('This is a trick')
+        mcdp_dev_warning('This is a trick')
         if len(coords) == 1:
             coords = coords[0]
     
@@ -649,9 +649,11 @@ def choose_connection_to_cut1(connections, name2dp):
         assert False
 
     its_connection = find_one(best_edge[0], best_edge[1])
-    print('best edge: %s breaks %d of %d cycles' % (str(best_edge), ncycles_broken, ncycles))
-    print('its connection is %s' % str(its_connection))
-    print('querying F = %s ' % name2dp[its_connection.dp1].get_rtype(its_connection.s1))
+    F = name2dp[its_connection.dp1].get_rtype(its_connection.s1)
+    print('Min cut: breaking %d of %d cycles by removing %s, space = %s.' %
+        (ncycles_broken, ncycles, str(its_connection), F))
+    # print('its connection is %s' % str(its_connection))
+    # print('querying F = %s ' % name2dp[its_connection.dp1].get_rtype(its_connection.s1))
     return its_connection
 
 
