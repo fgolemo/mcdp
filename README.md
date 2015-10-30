@@ -10,7 +10,7 @@ along with the MCDPL snippet that describes it (right)*
 
 <img src="http://mcdp.mit.edu/mcdp_intro/1510_mcdp_examples01_battery_actuation.png"/>
 
-### Installation
+## Installation
 
 If you install from source, first install the dependencies:
 
@@ -26,17 +26,17 @@ If you install from repos
 
     pip install -U PyMCDP 
 
-### Getting started
+## Getting started
 
 There are a few ``*.mcdp`` files scattered around the repository.
 
-### Drawing diagrams 
+#### Drawing diagrams 
 
 The programs ``mcdp-plot`` will parse and plot the MCDP in a variety of representations.
 
     $ mcdp-plot <filename>.mcdp
 
-### Solving diagrams
+#### Solving diagrams
     
 The program ``mcdp-solve`` is a solver.
 
