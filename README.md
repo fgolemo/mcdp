@@ -14,29 +14,29 @@ along with the MCDPL snippet that describes it (right)*
 
 If you install from source, first install the dependencies:
 
-    pip install -r requirements.txt
+    $ pip install -r requirements.txt
 
 The dependencies are: ...
 
 Then install the main module:
     
-    python setup.py develop
+    $ python setup.py develop
 
 If you install from repos
 
-    pip install -U PyMCDP 
+    $ pip install -U PyMCDP 
 
 ## Getting started
 
 There are a few ``*.mcdp`` files scattered around the repository.
 
-#### Drawing diagrams 
+#### Drawing Co-Design Problems diagrams
 
 The programs ``mcdp-plot`` will parse and plot the MCDP in a variety of representations.
 
     $ mcdp-plot <filename>.mcdp
 
-#### Solving diagrams
+#### Solving Co-Design Problems
     
 The program ``mcdp-solve`` is a solver.
 
