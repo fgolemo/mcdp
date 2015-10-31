@@ -199,9 +199,8 @@ def check_simplification():
     assert isinstance(dp2, Max)
 
 
-@comptest_fails
+@comptest
 def check_lang12_addition_as_resources():
-    # x of b  == x required by b
     assert_parsable_to_connected_ndp("""
     cdp {
         provides a [R]

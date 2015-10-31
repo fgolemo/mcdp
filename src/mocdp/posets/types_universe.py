@@ -5,7 +5,6 @@ import numpy as np
 from mocdp.posets.rcomp import Rcomp
 from mocdp.posets.space_product import SpaceProduct
 from contracts import contract
-import warnings
 from mocdp.exceptions import mcdp_dev_warning
 
 __all__ = [

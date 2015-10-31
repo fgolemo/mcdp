@@ -86,13 +86,17 @@ def eval_statement(r, context):
             raise DPSemanticError(msg, where=r.where)
 
         try:
-            res = eval_constant(right_side, context)
-            context.set_constant(name, res)
+            x = eval_constant(right_side, context)
+            context.set_constant(name, x)
         except NotConstant:
             # print('Cannot evaluate %r as constant: %s ' % (right_side, e))
-            rvalue = eval_rvalue(right_side, context)
-            # print('adding as resource')
-            context.set_var2resource(name, rvalue)
+            try:
+                x = eval_rvalue(right_side, context)
+                # print('adding as resource')
+                context.set_var2resource(name, x)
+            except:
+                x = eval_dp_rvalue(right_side, context)
+                context.set_var2model(name, x)
 
     elif isinstance(r, CDP.ResStatement):
         # requires r.rname [r.unit]
@@ -341,6 +345,16 @@ def eval_dp_rvalue_dpwrap(r, context):
 
     return w
 
+def eval_dp_rvalue_coproduct(r, context):
+    assert isinstance(r, CDP.Coproduct)
+    ops = get_odd_ops(unwrap_list(r.ops))
+    ndps = []
+    for i, op in enumerate(ops):
+        ndp = eval_dp_rvalue(op, context)
+        ndps.append(ndp)
+    from mocdp.comp.interfaces import NamedDPCoproduct
+    return NamedDPCoproduct(tuple(ndps))
+
 @contract(returns=NamedDP)
 def eval_dp_rvalue(r, context):  # @UnusedVariable
     try:
@@ -348,6 +362,13 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             special_list = r.statements
             statements = unwrap_list(special_list)
             return interpret_commands(statements)
+
+        if isinstance(r, CDP.VariableRef):
+            return context.get_var2model(r.name)
+
+
+        if isinstance(r, CDP.Coproduct):
+            return eval_dp_rvalue_coproduct(r, context)
 
         if isinstance(r, NamedDP):
             return r
@@ -549,8 +570,14 @@ def eval_lfunction(lf, context):
     msg = 'Cannot eval_lfunction(%s)' % lf.__repr__()
     raise DPInternalError(msg)
 
+class DoesNotEvalToResource(Exception):
+    """ also called rvalue """
+
 @contract(returns=CResource)
 def eval_rvalue(rvalue, context):
+    """
+        raises DoesNotEvalToResource
+    """
     # wants Resource or NewFunction
     try:
         if isinstance(rvalue, CDP.Resource):
@@ -687,8 +714,8 @@ def eval_rvalue(rvalue, context):
 
             return context.make_resource(name, rname)
 
-        msg = 'Cannot evaluate %s as rvalue.' % rvalue.__repr__()
-        raise ValueError(msg)
+        msg = 'Cannot evaluate as resource.'
+        raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
     except DPSemanticError as e:
         if e.where is None:
             raise DPSemanticError(str(e), where=rvalue.where)
@@ -766,8 +793,8 @@ def eval_constant(op, context):
     if isinstance(op, CDP.MultN):
         return eval_MultN_as_constant(op, context)
 
-    msg = 'Cannot evaluate %s as constant.' % op.__repr__()
-    raise ValueError(msg)
+    msg = 'Cannot evaluate %s as constant.' % type(op).__name__
+    raise_desc(NotConstant, msg, op=op)
 
 def eval_PlusN_as_constant(x, context):
     return eval_PlusN(x, context, wants_constant=True)
@@ -937,16 +964,15 @@ def eval_PlusN(x, context, wants_constant):
 @contract(r=CResource, c=ValueWithUnits)
 def get_plus_op(context, r, c):
     from mocdp.lang.parse_actions import PlusValue
-    from mocdp.dp_report.gg_ndp import format_unit
 
-    function = PlusValue(c.value)
-    setattr(function, '__name__', '+ %s %s' % (c.unit.format(c.value),
-                                               format_unit(c.unit)))
     rtype = context.get_rtype(r)
 
     F = rtype
     R = rtype
+    function = PlusValue(F=F, R=R, c=c)
+    setattr(function, '__name__', '+ %s' % (c.unit.format(c.value)))
     dp = GenericUnary(F, R, function)  # XXX
+    # TODO: dp = WrapAMap(map)
 
     r2 = create_operation(context, dp, resources=[r],
                           name_prefix='_plus', op_prefix='_x',

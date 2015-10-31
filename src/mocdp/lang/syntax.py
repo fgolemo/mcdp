@@ -114,7 +114,7 @@ class Syntax():
     rvalue = Forward()
     fvalue = Forward()
 
-    setname_rightside = rvalue
+    setname_rightside = rvalue ^ dp_rvalue
 
     EQ = sp(L('='), lambda t: CDP.eq(t[0]))
     DOT = sp(L('.'), lambda t: CDP.DotPrep(t[0]))
@@ -128,8 +128,8 @@ class Syntax():
                          lambda t: CDP.SetNameGeneric(t[0], t[1], t[2]))
 
 
-    variable_ref = NotAny(reserved) + C(idn.copy(), 'variable_ref_name')
-    spa(variable_ref, lambda t: CDP.VariableRef(t['variable_ref_name']))
+    variable_ref = sp(NotAny(reserved) + C(idn.copy(), 'variable_ref_name'),
+                      lambda t: CDP.VariableRef(t['variable_ref_name']))
 
     constant_value = number_with_unit ^ variable_ref
 
@@ -291,6 +291,7 @@ class Syntax():
     COMPACT = sp(L('compact'), lambda t: CDP.CompactKeyword(t[0]))
     TEMPLATE = sp(L('template'), lambda t: CDP.TemplateKeyword(t[0]))
     ABSTRACT = sp(L('abstract'), lambda t: CDP.AbstractKeyword(t[0]))
+    COPROD = sp(L('^'), lambda t: CDP.coprod(t[0]))
 
     abstract_expr = sp(ABSTRACT - dp_rvalue, 
                        lambda t: CDP.AbstractAway(t[0], t[1]))
@@ -302,9 +303,14 @@ class Syntax():
     template_expr = sp(TEMPLATE - dp_rvalue,
                        lambda t: CDP.MakeTemplate(t[0], t[1]))
 
-    # dp_rvalue << (load_expr | simple_dp_model) ^ dp_model
-    dp_rvalue << (load_expr | simple_dp_model | dp_model | abstract_expr |
-                  template_expr | compact_expr)
+    dp_operand = (load_expr | simple_dp_model | dp_model | abstract_expr |
+                  template_expr | compact_expr | variable_ref)
+
+    dp_rvalue << operatorPrecedence(dp_operand, [
+    #     ('-', 1, opAssoc.RIGHT, Unary.parse_action),
+        (COPROD, 2, opAssoc.LEFT, coprod_parse_action),
+    ])
+
 
     rvalue << operatorPrecedence(operand, [
     #     ('-', 1, opAssoc.RIGHT, Unary.parse_action),

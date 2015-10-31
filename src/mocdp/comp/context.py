@@ -49,7 +49,7 @@ class Context():
 
         # energy = endurance * power
         self.var2resource = {}  # str -> Resource
-
+        self.var2model = {}  # str -> NamedDP
         self.constants = {}  # str -> ValueWithUnits
 
 
@@ -92,6 +92,18 @@ class Context():
             raise ValueError(name)
 
         self.var2resource[name] = value
+
+    @contract(name=str)
+    def set_var2model(self, name, value):
+        from mocdp.comp.interfaces import NamedDP
+        assert isinstance(value, NamedDP)
+        self._check_good_name(name)
+        if name in self.var2model:
+            raise ValueError(name)
+        self.var2model[name] = value
+
+    def get_var2model(self, name):
+        return self.var2model[name]
 
     @contract(name=str)
     def set_constant(self, name, value):

@@ -1,16 +1,17 @@
-from quickapp.quick_app_base import QuickAppBase
-import os
-from mocdp.lang.parse_actions import parse_wrap, parse_ndp
-from mocdp.lang.syntax import Syntax
+from conf_tools import GlobalConfig
+from mocdp.comp.context import Context
 from mocdp.dp.solver import generic_solve
-from mocdp.posets.uppersets import UpperSets
+from mocdp.dp.tests.inv_mult_plots import generic_report
+from mocdp.lang.blocks import eval_constant
+from mocdp.lang.parse_actions import parse_ndp, parse_wrap
+from mocdp.lang.syntax import Syntax
 from mocdp.posets.poset_product import PosetProduct
 from mocdp.posets.types_universe import get_types_universe
-from mocdp.comp.context import Context
-from mocdp.lang.blocks import eval_constant
-from conf_tools.global_config import GlobalConfig
+from mocdp.posets.uppersets import UpperSets
+from quickapp import QuickAppBase
 from reprep import Report
-from mocdp.dp.tests.inv_mult_plots import generic_report
+import os
+from contracts.utils import raise_desc
 
 
 class SolveDP(QuickAppBase):
@@ -60,11 +61,16 @@ class SolveDP(QuickAppBase):
         dp = ndp.get_dp()
 
         fnames = ndp.get_fnames()
+        if len(fnames) != len(fd):
+            raise_desc(ValueError, 'Length does not match.', fnames=fnames,
+                       params=params)
 
         if len(fnames) == 1:
             Fd = Fd[0]
+            fd = fd[0]
         else:
             Fd = Fd
+            fd = fd
 
 
         F = dp.get_fun_space()

@@ -7,3 +7,4 @@ from .examples import *
 
 
 
+from .syntax_coproduct import *

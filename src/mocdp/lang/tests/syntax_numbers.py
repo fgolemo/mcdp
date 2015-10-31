@@ -4,11 +4,11 @@ from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
 from comptests.registrar import comptest
 from mocdp.lang.parts import CDPLanguage
 from mocdp.lang.syntax import Syntax, parse_ndp
-from mocdp.lang.tests.utils import parse_wrap_check, parse_wrap_syntax_error,\
-    TestFailed
-from mocdp.posets import R_Weight
-from mocdp.posets.rcomp_units import make_rcompunit, R_Weight_g
+from mocdp.lang.tests.utils import (TestFailed, parse_wrap_check,
+    parse_wrap_syntax_error)
+from mocdp.posets.rcomp_units import R_Weight_g, make_rcompunit
 from mocdp.posets.types_universe import get_types_universe
+from nose.tools import assert_equal
 from numpy.testing.utils import assert_allclose
 
 CDP = CDPLanguage
@@ -23,14 +23,12 @@ def check_numbers1():
 
 @comptest
 def check_numbers2():
-    parse_wrap_check('1.0 [g]', Syntax.number_with_unit, CDP.SimpleValue(CDP.ValueExpr(1.0),
-                                                                         CDP.Unit(R_Weight_g)))
+    parse_wrap_check('1.0 [g]', Syntax.number_with_unit,
+                     CDP.SimpleValue(CDP.ValueExpr(1.0), CDP.Unit(R_Weight_g)))
     assert_syntax_error('1', Syntax.number_with_unit)
     # automatic conversion to float
-    parse_wrap_check('1 [g]', Syntax.number_with_unit, CDP.SimpleValue(CDP.ValueExpr(1.0),
-                                                                        CDP.Unit(R_Weight_g)))
-
-
+    parse_wrap_check('1 [g]', Syntax.number_with_unit,
+                      CDP.SimpleValue(CDP.ValueExpr(1.0), CDP.Unit(R_Weight_g)))
 
 @comptest
 def check_unit1():
@@ -200,5 +198,84 @@ def check_type_universe1():
     tu.check_equal(R1, R2)
     tu.check_leq(R1, R2)
     _embed1, _embed2 = tu.get_embedding(R1, R2)
+
+@comptest
+def check_conversion1():
+    ndp = parse_ndp("""
+    mcdp {
+           provides capacity [J]
+           requires mass [kg] # note kg, below is g
+    
+           a = 1 kg / J
+           m0 = 5 g
+           mass >= a * capacity + m0
+    }""")
+
+    dp = ndp.get_dp()
+    print(dp.repr_long())
+    print(dp)
+    r = dp.solve(0.0)
+    print(r)
+    assert_equal(r.minimals, set([0.005]))
+
+
+
+@comptest
+def check_conversion2():
+    ndp = parse_ndp("""
+    mcdp {
+           provides capacity [J]
+           requires mass [g] # note grams, above is kg
+    
+           a = 1 kg / J
+           m0 = 5 g
+           mass >= a * capacity + m0
+    }""")
+
+    dp = ndp.get_dp()
+    print(dp.repr_long())
+    r = dp.solve(0.0)
+    print(r)
+    assert_equal(r.minimals, set([5.0]))
+
+
+
+@comptest
+def check_conversion3():
+    ndp = parse_ndp("""
+    mcdp {
+           provides capacity [J]
+           requires mass [kg] # note kg, below is g
+    
+           a = 1 kg / J
+           m0 = 0.005 kg
+           mass >= a * capacity + m0
+    }""")
+
+    dp = ndp.get_dp()
+    print(dp.repr_long())
+    r = dp.solve(0.0)
+    print(r)
+    assert_equal(r.minimals, set([0.005]))
+
+
+@comptest
+def check_conversion4():
+    ndp = parse_ndp("""
+    mcdp {
+           provides capacity [J]
+           requires mass [g] # note grams, above is kg
+    
+           a = 1 kg / J
+           m0 = 0.005 kg # note now in kg
+           mass >= a * capacity + m0
+    }""")
+
+    dp = ndp.get_dp()
+    print(dp.repr_long())
+    r = dp.solve(0.0)
+    print(r)
+    assert_equal(r.minimals, set([5.0]))
+
 
 

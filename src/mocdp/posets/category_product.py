@@ -13,7 +13,6 @@ def get_product_compact(*spaces):
     """
         S, pack, unpack = get_product_compact(S1, S2)
     """
-
     S = _prod_make(spaces)
     def pack(*elements):
         return _prod_make_state(elements, spaces)

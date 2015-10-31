@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
 from conf_tools.utils.resources import dir_from_package_name
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, raise_desc
 from mocdp.comp import CompositeNamedDP, SimpleWrap
 from mocdp.dp import (
     Constant, GenericUnary, Identity, Limit, Max, Min, Product, ProductN, Sum,
@@ -14,6 +14,8 @@ from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
 from mocdp.dp.dp_mult_inv import InvMult2, InvPlus2
+from mocdp.comp.interfaces import NamedDPCoproduct
+from contextlib import contextmanager
 
 
 class GraphDrawingContext():
@@ -45,6 +47,14 @@ class GraphDrawingContext():
         c = GraphDrawingContext(gg=self.gg, parent=parent, yourname=yourname,
                                 level=self.level + 1, tmppath=self.tmppath)
         return c
+
+    @contextmanager
+    def child_context_yield(self, parent, yourname):
+        c = GraphDrawingContext(gg=self.gg, parent=parent, yourname=yourname,
+                                level=self.level + 1, tmppath=self.tmppath)
+        yield c
+        self.all_nodes.extend(c.all_nodes)
+
 
     def styleApply(self, sname, n):
         self.gg.styleApply(sname, n)
@@ -173,6 +183,11 @@ def gvgen_from_ndp(ndp, style='default'):
 
     gg.styleAppend('limit', 'color', 'black')
 
+    gg.styleAppend("coproduct_resource", "shape", "point")
+    gg.styleAppend("coproduct_function", "shape", "point")
+    gg.styleAppend("coproduct_link", "style", "dashed")
+
+
     functions, resources = create(gdc, ndp)
 
     if functions:
@@ -236,9 +251,12 @@ def gvgen_from_ndp(ndp, style='default'):
 def create(gdc, ndp):
     if isinstance(ndp, SimpleWrap):
         res = create_simplewrap(gdc, ndp)
-
-    if isinstance(ndp, CompositeNamedDP):
+    elif isinstance(ndp, CompositeNamedDP):
         res = create_composite(gdc, ndp)
+    elif isinstance(ndp, NamedDPCoproduct):
+        res = create_coproduct(gdc, ndp)
+    else:
+        raise_desc(NotImplementedError, '', ndp=ndp)
 
     functions, resources = res
 
@@ -394,6 +412,39 @@ def format_unit(R):
     else:
         return '[%s]' % str(R)
             
+def create_coproduct(gdc0, ndp):
+    
+#     cluster = gdc0.newItem('mycluster-%s' % gdc0.yourname)
+#     gdc0 = gdc0.child_context(parent=cluster, yourname=None)
+
+    functions = {}
+    resources = {}
+
+    for rname in ndp.get_rnames():
+        c = gdc0.newItem(rname)
+        resources[rname] = c
+        gdc0.styleApply('coproduct_resource', c)
+
+    for fname in ndp.get_fnames():
+        c = gdc0.newItem(fname)
+        functions[fname] = c
+        gdc0.styleApply('coproduct_function', c)
+
+    for i, ndpi in enumerate(ndp.ndps):
+        with gdc0.child_context_yield(parent=gdc0.parent, yourname='%s' % i) as gdci:
+            funi, resi = create(gdci, ndpi)
+
+            for fn, fni in zip(ndp.get_fnames(), ndpi.get_fnames()):
+                l = gdc0.newLink(functions[fn], funi[fni])
+                gdci.styleApply('coproduct_link', l)
+
+            for rn, rni in zip(ndp.get_rnames(), ndpi.get_rnames()):
+                l = gdc0.newLink(resi[rni], resources[rn])
+                gdci.styleApply('coproduct_link', l)
+
+
+    return functions, resources
+
 def create_composite(gdc0, ndp):
     try:
         assert isinstance(ndp, CompositeNamedDP)
@@ -509,9 +560,8 @@ def create_composite(gdc0, ndp):
                     names2resources[name][rn] = item
                 continue
 
-            child = gdc.child_context(yourname=name, parent=gdc.parent)
-            f, r = create(child, value)
-            gdc.all_nodes.extend(child.all_nodes)
+            with gdc.child_context_yield(yourname=name, parent=gdc.parent) as child:
+                f, r = create(child, value)
             # print('name %s -> functions %s , resources = %s' % (name, list(f), list(r)))
             names2resources[name] = r
             names2functions[name] = f

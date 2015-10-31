@@ -16,7 +16,6 @@ class CDPLanguage():
 
     ValueExpr = namedtuplewhere('ValueExpr', 'value')
     Unit = namedtuplewhere('Unit', 'value')
-#     UnitExpr = namedtuplewhere('UnitExpr', 'value')
     SimpleValue = namedtuplewhere('SimpleValue', 'value unit')
 
     MakeTemplate = namedtuplewhere('MakeTemplate', 'keyword dp_rvalue')
@@ -25,6 +24,7 @@ class CDPLanguage():
 
     PlusN = namedtuplewhere('PlusN', 'ops')
     MultN = namedtuplewhere('MultN', 'ops')
+    Coproduct = namedtuplewhere('Coproduct', 'ops')
     OpMax = namedtuplewhere('Max', 'keyword a b')
     OpMin = namedtuplewhere('Min', 'keyword a b')
 
@@ -68,6 +68,7 @@ class CDPLanguage():
     eq = namedtuplewhere('eq', 'glyph')
     plus = namedtuplewhere('plus', 'glyph')
     times = namedtuplewhere('times', 'glyph')
+    coprod = namedtuplewhere('coprod', 'glyph')
     DotPrep = namedtuplewhere('DotPrep', 'glyph')
 
     FName = namedtuplewhere('FName', 'value')

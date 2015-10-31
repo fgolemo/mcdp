@@ -1,18 +1,16 @@
+from conf_tools.global_config import GlobalConfig
+from mocdp.comp.interfaces import NotConnected
+from mocdp.dp.solver import generic_solve
 from mocdp.dp_report.report import report_dp1, report_ndp1
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mocdp.lang.syntax import parse_ndp
+from mocdp.posets.uppersets import UpperSets
 from reprep import Report
 import logging
 import os
 import sys
 import time
-from conf_tools.global_config import GlobalConfig
-from mocdp.comp.interfaces import NotConnected
-from mocdp.dp.solver import generic_solve
-from mocdp.posets.uppersets import UpperSets
 logger = logging.getLogger(__name__)
-
-
 
 
 def safe_makedirs(dirname):

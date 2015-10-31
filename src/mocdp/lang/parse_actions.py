@@ -74,22 +74,20 @@ def spa(x, b):
 @wheredecorator
 def mult_parse_action(tokens):
     tokens = list(tokens[0])
-#
-#     ops = []
-#     glyphs = []
-#     for i, t in enumerate(tokens):
-#         if i % 2 == 0:
-#             ops.append(t)
-#         else:
-#             assert isinstance(t, CDP.times)
-#             glyphs.append(t)
-#
-#     assert len(ops) > 1
-
     l = make_list(tokens)
     assert l.where.character_end is not None
     res = CDP.MultN(l, where=l.where)
     return res
+
+@parse_action
+@wheredecorator
+def coprod_parse_action(tokens):
+    tokens = list(tokens[0])
+    l = make_list(tokens)
+    assert l.where.character_end is not None
+    res = CDP.Coproduct(l, where=l.where)
+    return res
+
 
 class MultType():
     def __init__(self, factor):
@@ -161,10 +159,18 @@ class PlusType():
         return add_table(F, self.factor)
 
 class PlusValue():
-    def __init__(self, value):
-        self.value = value
+
+    def __init__(self, F, R, c):
+        self.F = F
+        self.c = c
+        c.unit
+        c.value
+        self.R = R
     def __call__(self, x):
-        return x + self.value
+        values = [self.c.value, x]
+        Fs = [self.c.unit, self.F]
+        return sum_units(Fs, values, self.R)
+
 
 @parse_action
 def mult_inv_parse_action(tokens):

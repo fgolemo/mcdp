@@ -1,14 +1,26 @@
 mcdp {
 	
-  	provides x [R]
-  	requires y [R]
+	battery1 = mcdp {
+		provides capacity [J]
+  		requires mass [kg]
 
-  sub f = template mcdp  {
+		a = 1 kg / J
+		m0 = 5 g
+		mass >= a * capacity + m0
+	}
+  	
+  	battery2 = mcdp {
+		provides capacity [J]
+  		requires mass [kg]
 
-  	provides x [R]
-  	requires y [R]
+		a = 0.6 kg / J
+		m0 = 10 g
+		mass >= a * capacity + m0
+	}
+  	
+  	sub battery = battery1 ^ battery2
 
-  }
-
-  f.x >= f.y
+  	requires mass for battery
+  	provides capacity using battery
+  	
 }
