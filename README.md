@@ -71,7 +71,13 @@ For example, the command
 will produce these graphs:
 
 <table>
-<tr><td>Syntax highlighting</td><td><a href="example-battery/battery-syntax_pdf.png"><img src="example-battery/battery-syntax_pdf.png"  height="200px/></a></td></tr>
+<tr>
+    <td>Syntax highlighting</td>
+    <td><a href="example-battery/battery-syntax_pdf.png">
+        <img src="example-battery/battery-syntax_pdf.png" height="300px"/>
+        </a>
+    </td>
+</tr>
 <tr><td>Verbose graph</td><td><a href="example-battery/battery-clean.png"><img src="example-battery/battery-clean.png"/></a></td></tr>
 <tr><td>Cleaned-up graph</td><td ><a href="example-battery/battery-default.png">
 <img src="example-battery/battery-default.png" height="300px"/></a></td></tr>
