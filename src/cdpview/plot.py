@@ -11,7 +11,6 @@ from system_cmd import system_cmd_result
 from conf_tools.global_config import GlobalConfig
 from mocdp.dp_report.report import gvgen_from_dp
 
-
 def get_ndp(data):
     if not 'ndp' in data:
         data['ndp'] = parse_ndp(data['s'])
@@ -87,7 +86,6 @@ def syntax_pdf(data):
             display_stderr=False,
             raise_on_error=True)
 
-
     with open(f_png) as f:
         pngdata = f.read()
 
@@ -151,8 +149,9 @@ def do_plots(filename, plots, outdir):
 class PlotDP(QuickAppBase):
     """ Plot a design program """
     def define_program_options(self, params):
-        params.add_string('filename')
         params.add_flag('watch')
+        params.accept_extra()
+
         params.add_string('out', help='Output dir', default=None)
         params.add_string_list('plots', default='*')
 
@@ -160,7 +159,12 @@ class PlotDP(QuickAppBase):
         GlobalConfig.global_load_dir("mocdp")
 
         options = self.get_options()
-        filename = options.filename
+        filenames = options.get_extra()
+
+        if len(filenames) > 1:
+            raise NotImplementedError('Only one filename')
+
+        filename = filenames[0]
         if options.out is None:
             out = os.path.dirname(filename)
             if not out:
