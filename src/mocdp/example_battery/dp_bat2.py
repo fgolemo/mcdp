@@ -5,10 +5,9 @@ from mocdp.dp.dp_identity import Identity
 from mocdp.dp.dp_parallel import Parallel
 from mocdp.dp.dp_sum import Product, Sum
 from mocdp.dp.primitive import PrimitiveDP
-from mocdp.posets import (PosetProduct, R_Energy, R_Power, R_Time, R_Weight,
+from mocdp.posets import (PosetProduct, R_Energy, R_Power, R_Time, R_Weight_g,
     R_dimensionless, Single, SpaceProduct)
 import numpy as np
-from mocdp.posets.rcomp_units import R_Weight_g
 
 
 
@@ -137,13 +136,13 @@ def battery_complete():
 
     N = Single('navigate')
     
-    F = PosetProduct((PosetProduct((R_Weight, N)), R_Weight))
+    F = PosetProduct((PosetProduct((R_Weight_g, N)), R_Weight_g))
 
     dpB = Mux(F, [[(0, 0), 1], (0, 1)])
 
     assert dpB.get_fun_space() == F
 
-    dpA = Parallel(Sum(R_Weight), Identity(N))
+    dpA = Parallel(Sum(R_Weight_g), Identity(N))
 
     series([dpB, dpA])
 

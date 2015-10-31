@@ -215,9 +215,10 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
         return len(set(x + y)) != len(set(x)) + len(set(y))
 
     if not repeated_ok:
-        if (common(ndp1.get_fnames(), ndp2.get_fnames()) or \
+        if (common(ndp1.get_fnames(), ndp2.get_fnames()) or
             common(ndp1.get_rnames(), ndp2.get_rnames())):
-            raise_desc(DPInternalError, 'repeated names', ndp1=ndp1, ndp2=ndp2)
+            raise_desc(DPInternalError, 'repeated names', ndp1=ndp1, ndp2=ndp2,
+                       connections=connections, split=split)
 
     if len(set(split)) != len(split):
         msg = 'Repeated signals in split: %s' % str(split)

@@ -60,12 +60,10 @@ class SolveDP(QuickAppBase):
         dp = ndp.get_dp()
 
         fnames = ndp.get_fnames()
-        f = fd
+
         if len(fnames) == 1:
-            f = fd[0]
             Fd = Fd[0]
         else:
-            f = fd
             Fd = Fd
 
 

@@ -4,27 +4,24 @@ from contracts.utils import raise_desc
 from mocdp.comp.connection import TheresALoop, dpconnect, dpgraph, dploop0
 from mocdp.comp.wrap import dpwrap
 from mocdp.dp import Product, Series, Terminator, make_series
-from mocdp.example_battery import R_Energy, R_Power, R_Time, R_Weight
 from mocdp.example_battery.dp_bat import BatteryDP
 from mocdp.example_battery.dp_bat2 import Mobility
-from mocdp.posets.poset_product import PosetProduct
-from mocdp.posets.rcomp import Rcomp
-from numpy.testing.utils import assert_equal
-
+from mocdp.posets import (PosetProduct, R_Energy, R_Power, R_Time, R_Weight_g,
+    Rcomp)
 
 @comptest
 def check_compose():
 
     actuation = dpwrap(Mobility(), 'weight', 'actuation_power')
 
-    check_ftype(actuation, 'weight', R_Weight)
+    check_ftype(actuation, 'weight', R_Weight_g)
     check_rtype(actuation, 'actuation_power', R_Power)
     
     battery = dpwrap(BatteryDP(energy_density=100.0),
                      'capacity', 'weight')
 
     check_ftype(battery, 'capacity', R_Energy)
-    check_rtype(battery, 'weight', R_Weight)
+    check_rtype(battery, 'weight', R_Weight_g)
 
     times = dpwrap(Product(R_Time, R_Power, R_Energy),
                    ['mission_time', 'power'], 'energy')
@@ -66,7 +63,7 @@ def check_compose2():
     battery = dpwrap((BatteryDP(energy_density=100.0)),
                      'capacity', 'weight')
 
-    check_rtype(battery, 'weight', R_Weight)
+    check_rtype(battery, 'weight', R_Weight_g)
     check_ftype(battery, 'capacity', R_Energy)
 
     times = dpwrap((Product(R_Time, R_Power, R_Energy)),
@@ -82,15 +79,15 @@ def check_compose2():
 
     print res.desc()
 
-    check_rtype(res, 'weight', R_Weight)
+    check_rtype(res, 'weight', R_Weight_g)
     check_ftype(res, 'mission_time', R_Time)
-    check_ftype(res, 'weight', R_Weight)
+    check_ftype(res, 'weight', R_Weight_g)
 
     dp = res.get_dp()
     funsp = dp.get_fun_space()
     ressp = dp.get_res_space()
-    assert funsp == PosetProduct((R_Weight, R_Time)), funsp
-    assert ressp == R_Weight, ressp
+    assert funsp == PosetProduct((R_Weight_g, R_Time)), funsp
+    assert ressp == R_Weight_g, ressp
 
 
 @comptest
@@ -170,7 +167,7 @@ def check_compose2_loop2():
 
     check_ftype(x, 'mission_time', R_Time)
 #     check_ftype(x, 'weight', R_Weight)
-    check_rtype(x, 'battery_weight', R_Weight)
+    check_rtype(x, 'battery_weight', R_Weight_g)
 
 
     dp = y.get_dp()
@@ -180,7 +177,7 @@ def check_compose2_loop2():
     print('funsp: %s' % funsp)
     print('ressp: %s' % ressp)
     assert funsp == R_Time, funsp
-    assert ressp == R_Weight, ressp
+    assert ressp == R_Weight_g, ressp
 
 
 

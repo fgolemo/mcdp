@@ -66,7 +66,6 @@ class RcompUnits(Rcomp):
             return self.top.__repr__()
         else:
             s = Rcomp.format(self, x)
-#             s = '%.5f' % x
             return '%s %s' % (s, format_pint_unit_short(self.units))
 
 

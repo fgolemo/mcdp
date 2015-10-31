@@ -120,9 +120,10 @@ def wrap_change_name_resource(ndp, rn, rn2):
     from mocdp.comp.wrap import dpwrap
 
     R = ndp.get_rtype(rn)
-    second = dpwrap(Identity(R), rn, rn2)
+    tmpname = '__tmp_%s' % rn
+    second = dpwrap(Identity(R), tmpname, rn2)
     from mocdp.comp.connection import connect2
-    connections = set([Connection('-', rn, '-', rn)])
+    connections = set([Connection('-', rn, '-', tmpname)])
     return connect2(ndp, second, connections, split=[])
 
 def dpgraph_translate_fn(context, name, fn, fn2):
@@ -131,11 +132,11 @@ def dpgraph_translate_fn(context, name, fn, fn2):
         if c.dp2 == name and c.s2 == fn:
             c = Connection(c.dp1, c.s1, name, fn2)
         return c
+
     connections2 = map(translate_connections, context.connections)
     names2 = context.names.copy()
 
     names2[name] = wrap_change_name_function(context.names[name], fn, fn2)
-
 
     c2 = Context()
     c2.rnames = context.rnames
@@ -148,10 +149,10 @@ def dpgraph_translate_fn(context, name, fn, fn2):
 def wrap_change_name_function(ndp, fn, fn2):
     from mocdp.comp.wrap import dpwrap
 
-
     F = ndp.get_ftype(fn)
-    first = dpwrap(Identity(F), fn2, fn)
+    tmpname = '__tmp_%s' % fn
+    first = dpwrap(Identity(F), fn2, tmpname)
     from mocdp.comp.connection import connect2
-    connections = set([Connection('-', fn, '-', fn)])
+    connections = set([Connection('-', tmpname, '-', fn)])
     return connect2(first, ndp, connections, split=[])
 

@@ -1,23 +1,23 @@
 # -*- coding: utf-8 -*-
 
+from .parse_actions import plus_constantsN
+from .parts import CDPLanguage, unwrap_list
 from conf_tools import (ConfToolsException, SemanticMistakeKeyNotFound,
     instantiate_spec)
 from contracts import contract, describe_value
-from contracts.utils import indent, raise_desc, raise_wrapped, check_isinstance
+from contracts.utils import check_isinstance, indent, raise_desc, raise_wrapped
 from mocdp.comp import (CompositeNamedDP, Connection, Context, NamedDP,
     NotConnected, SimpleWrap, dpwrap)
-from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
-from mocdp.dp import (Constant, GenericUnary, Identity, InvMult2, Limit, Max,
-    Max1, Min, PrimitiveDP, ProductN)
-from mocdp.dp.dp_sum import SumN
-from mocdp.exceptions import DPInternalError, DPSemanticError
-from mocdp.lang.parse_actions import plus_constantsN
-from mocdp.lang.parts import CDPLanguage, unwrap_list
-from mocdp.posets import (NotBelongs, NotEqual, NotLeq, PosetProduct, Rcomp,
-    get_types_universe, mult_table, mult_table_seq)
 from mocdp.comp.context import CFunction, CResource, ValueWithUnits
-from mocdp.posets.space import Space
-from mocdp.dp.dp_mult_inv import InvPlus2
+from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
+from mocdp.dp import (
+    Constant, GenericUnary, Identity, InvMult2, InvPlus2, Limit, Max, Max1, Min,
+    PrimitiveDP, ProductN, SumN)
+from mocdp.dp.dp_generic_unary import WrapAMap
+from mocdp.dp.dp_series_simplification import make_series
+from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.posets import (NotBelongs, NotEqual, NotLeq, PosetProduct, Rcomp,
+    Space, get_types_universe, mult_table, mult_table_seq)
 
 
 CDP = CDPLanguage
@@ -144,7 +144,6 @@ def eval_statement(r, context):
         F = context.get_ftype(B)
         A = eval_statement(CDP.FunStatement('-', r.fname, CDP.Unit(F)), context)
         add_constraint(context, resource=A, function=B)
-#         eval_statement(CDP.Constraint(function=B, rvalue=A, prep=None), context)
 
     elif isinstance(r, CDP.ResShortcut2):  # requires rname >= (rvalue)
         A = eval_rvalue(r.rvalue, context)
@@ -153,12 +152,7 @@ def eval_statement(r, context):
         B = eval_statement(CDP.ResStatement('-', r.rname, CDP.Unit(R)), context)
         # B >= A
         add_constraint(context, resource=A, function=B)
-#         eval_statement(CDP.Constraint(function=B, rvalue=A, prep=None), context)
 
-        # ndp = eval_dp_rvalue(r.rvalue, context)
-#     elif isinstance(r, CDP.MultipleStatements):
-#         for s in r.statements:
-#             eval_statement(s, context)
     else:
         raise DPInternalError('Cannot interpret %s' % describe_value(r))
     
@@ -272,6 +266,81 @@ def check_missing_connections(context):
         raise NotConnected(s)
     
 
+@contract(r=CDP.DPWrap)
+def eval_dp_rvalue_dpwrap(r, context):
+    tu = get_types_universe()
+
+    statements = unwrap_list(r.statements)
+    fun = [x for x in statements if isinstance(x, CDP.FunStatement)]
+    res = [x for x in statements if isinstance(x, CDP.ResStatement)]
+
+    assert len(fun) + len(res) == len(statements), statements
+    impl = r.impl
+
+    dp = eval_pdp(impl, context)
+
+    fnames = [f.fname.value for f in fun]
+    rnames = [r.rname.value for r in res]
+
+    if len(fnames) == 1:
+        use_fnames = fnames[0]
+    else:
+        use_fnames = fnames
+    if len(rnames) == 1:
+        use_rnames = rnames[0]
+    else:
+        use_rnames = rnames
+
+    dp_F = dp.get_fun_space()
+    dp_R = dp.get_res_space()
+
+    # Check that the functions are the same
+    want_Fs = tuple([f.unit.value for f in fun])
+    if len(want_Fs) == 1:
+        want_F = want_Fs[0]
+    else:
+        want_F = PosetProduct(want_Fs)
+
+    want_Rs = tuple([r.unit.value for r in res])
+    if len(want_Rs) == 1:
+        want_R = want_Rs[0]
+    else:
+        want_R = PosetProduct(want_Rs)
+
+    dp_prefix = get_conversion(want_F, dp_F)
+    dp_postfix = get_conversion(dp_R, want_R)
+
+    if dp_prefix is not None:
+        dp = make_series(dp_prefix, dp)
+
+    if dp_postfix is not None:
+        dp = make_series(dp, dp_postfix)
+
+    try:
+        w = SimpleWrap(dp=dp, fnames=use_fnames, rnames=use_rnames)
+    except ValueError as e:
+        raise DPSemanticError(str(e), r.where)
+
+    ftypes = w.get_ftypes(fnames)
+    rtypes = w.get_rtypes(rnames)
+    ftypes_expected = PosetProduct(tuple([f.unit.value for f in fun]))
+    rtypes_expected = PosetProduct(tuple([r.unit.value for r in res]))
+
+    try:
+
+        tu.check_equal(ftypes, ftypes_expected)
+        tu.check_equal(rtypes, rtypes_expected)
+    except NotEqual as e:
+        msg = 'The types in the description do not match.'
+        raise_wrapped(DPSemanticError, e, msg,
+                      dp=dp,
+                   ftypes=ftypes,
+                   ftypes_expected=ftypes_expected,
+                   rtypes=rtypes,
+                   rtypes_expected=rtypes_expected, compact=True)
+
+    return w
+
 @contract(returns=NamedDP)
 def eval_dp_rvalue(r, context):  # @UnusedVariable
     try:
@@ -295,60 +364,7 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             return ndp
 
         if isinstance(r, CDP.DPWrap):
-            statements = unwrap_list(r.statements)
-            fun = [x for x in statements if isinstance(x, CDP.FunStatement)]
-            res = [x for x in statements if isinstance(x, CDP.ResStatement)]
-
-            assert len(fun) + len(res) == len(statements), statements
-            impl = r.impl
-
-            dp = eval_pdp(impl, context)
-
-            fnames = [f.fname.value for f in fun]
-            rnames = [r.rname.value for r in res]
-
-            if len(fnames) == 1:
-                use_fnames = fnames[0]
-            else:
-                use_fnames = fnames
-            if len(rnames) == 1:
-                use_rnames = rnames[0]
-            else:
-                use_rnames = rnames
-
-#
-#             try:
-#                 tu.check_leq(R1, F2)
-#             except NotLeq as e:
-#                 msg = 'Constraint between incompatible spaces.'
-#                 raise_wrapped(DPSemanticError, e, msg)
-#
-#             map1, _map2 = tu.get_embedding(R1, F2)
-
-            try:
-                w = SimpleWrap(dp=dp, fnames=use_fnames, rnames=use_rnames)
-            except ValueError as e:
-                raise DPSemanticError(str(e), r.where)
-
-            ftypes = w.get_ftypes(fnames)
-            rtypes = w.get_rtypes(rnames)
-            ftypes_expected = PosetProduct(tuple([f.unit.value for f in fun]))
-            rtypes_expected = PosetProduct(tuple([r.unit.value for r in res]))
-
-            try:
-                tu = get_types_universe()
-                tu.check_equal(ftypes, ftypes_expected)
-                tu.check_equal(rtypes, rtypes_expected)
-            except NotEqual as e:
-                msg = 'The types in the description do not match.'
-                raise_wrapped(DPSemanticError, e, msg,
-                              dp=dp,
-                           ftypes=ftypes,
-                           ftypes_expected=ftypes_expected,
-                           rtypes=rtypes,
-                           rtypes_expected=rtypes_expected, compact=True)
-
-            return w
+            return eval_dp_rvalue_dpwrap(r, context)
 
         if isinstance(r, CDP.AbstractAway):
             ndp = eval_dp_rvalue(r.dp_rvalue, context)
@@ -403,6 +419,23 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
         raise e
 
     raise DPInternalError('Invalid dprvalue: %s' % str(r))
+
+def get_conversion(A, B):
+    """ Returns None if there is no need. """
+    tu = get_types_universe()
+    try:
+        tu.check_leq(A, B)
+    except NotLeq as e:
+        msg = 'Wrapping with incompatible units.'
+        raise_wrapped(DPSemanticError, e, msg, A=A, B=B)
+
+    if tu.equal(A, B):
+        conversion = None
+    else:
+        A_to_B, _ = tu.get_embedding(A, B)
+        conversion = WrapAMap(A_to_B)
+
+    return conversion
 
 @contract(returns=PrimitiveDP)
 def eval_pdp(r, context):  # @UnusedVariable
@@ -566,7 +599,6 @@ def eval_rvalue(rvalue, context):
             a = eval_rvalue(rvalue.a, context)
 
             if isinstance(rvalue.b, CDP.SimpleValue):
-                # print('using straight')
                 name = context.new_name('max1')
                 ndp = dpwrap(Max1(rvalue.b.unit.value, rvalue.b.value.value), '_in', '_out')
                 context.add_ndp(name, ndp)
@@ -666,7 +698,7 @@ class NotConstant(Exception):
     pass
 
 @contract(returns=Space)
-def eval_unit(x, context):
+def eval_unit(x, context):  # @UnusedVariable
 
     if isinstance(x, CDP.Unit):
         S = x.value

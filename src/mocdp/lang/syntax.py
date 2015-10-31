@@ -2,12 +2,12 @@
 from .parse_actions import *  # @UnusedWildImport
 from mocdp.lang.helpers import square
 from mocdp.posets import make_rcompunit
+from mocdp.posets.rcomp_units import R_dimensionless
 from pyparsing import (
     CaselessLiteral, Combine, Forward, Group, Literal, NotAny, OneOrMore,
     Optional, Or, ParserElement, Suppress, Word, ZeroOrMore, alphanums, alphas,
     nums, oneOf, opAssoc, operatorPrecedence)
 import math
-from mocdp.posets.rcomp_units import R_dimensionless
 
 ParserElement.enablePackrat()
 
