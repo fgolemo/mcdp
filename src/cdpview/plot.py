@@ -77,7 +77,21 @@ def syntax_pdf(data):
     with open(f_pdf_crop) as f:
         data = f.read()
 
-    return [('pdf', 'syntax_pdf', data)]
+    f_png = os.path.join(d, 'file.png')
+    cmd = ['convert', '-density', '300', f_pdf_crop,
+            '-background', 'white', '-alpha', 'remove',
+            '-resize', '50%', f_png]
+    system_cmd_result(
+            d, cmd,
+            display_stdout=False,
+            display_stderr=False,
+            raise_on_error=True)
+
+
+    with open(f_png) as f:
+        pngdata = f.read()
+
+    return [('pdf', 'syntax_pdf', data), ('png', 'syntax_pdf', pngdata)]
 
 @contract(data=dict)
 def syntax_frag(data):

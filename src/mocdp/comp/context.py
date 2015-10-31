@@ -1,13 +1,9 @@
 # -*- coding: utf-8 -*-
-
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import raise_desc, indent
-from mocdp.exceptions import DPSemanticError, DPInternalError, mcdp_dev_warning
-import warnings
-
-from mocdp.posets.space import Space
-
+from contracts.utils import indent, raise_desc
+from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+from mocdp.posets import Space
 
 __all__ = [
     'Connection',
