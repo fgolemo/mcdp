@@ -71,19 +71,12 @@ For example, the command
 will produce these graphs:
 
 <table>
-<tr><td>Verbose graph</td><td>Cleaned-up graph</td></tr>
-<tr>
-<td><a href="example-battery/battery-clean.png"><img src="example-battery/battery-clean.png"/></a></td>
-<td><a href="example-battery/battery-default.png"><img src="example-battery/battery-default.png"/></a></td>
-</tr>
-<tr>
-<td><img src="example-battery/battery-dp_tree.png"/></td>
-<td><img src="example-battery/battery-syntax_pdf.png"/></td>
+<tr><td>Syntax highlighting</td><td><img src="example-battery/battery-syntax_pdf.png"/></td></tr>
+<tr><td>Verbose graph</td><td><a href="example-battery/battery-clean.png"><img src="example-battery/battery-clean.png"/></a></td></tr>
+<tr><td>Cleaned-up graph</td><td><a href="example-battery/battery-default.png"><img src="example-battery/battery-default.png"/></a></td></tr>
+<tr><td>Tree representation</td><td><img src="example-battery/battery-dp_tree.png"/></td></tr>
 </tr></table>
-
-Plus syntax highlighting:
-
-<img src="example-battery/battery-syntax_pdf.png" style="height: 10em/>
+ 
 
 
 
