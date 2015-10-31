@@ -30,11 +30,6 @@ If you install from repos
 
 There are a few ``*.mcdp`` files scattered around the repository.
 
-#### Drawing Co-Design Problems diagrams
-
-The programs ``mcdp-plot`` will parse and plot the MCDP in a variety of representations.
-
-    $ mcdp-plot <filename>.mcdp
 
 #### Solving Co-Design Problems
     
@@ -42,9 +37,46 @@ The program ``mcdp-solve`` is a solver.
 
     $ mcdp-solve <filename>.mcdp <f1> <f2> ...
     
-For example,
+For example, to solve one of the examples specified in ``example-battery/battery.mcdp'', use:
 
-    $ mcdp-solve example-battery/battery.mcdp "1 hour" "1 kg" "1 W"
+    $ mcdp-solve example-battery/battery.mcdp "1 hour" "0.1 kg" "1 W"
+
+The expected output is:
+
+    ...
+    Iteration result: ConvergedToFinite
+    Fixed-point iteration converged to: {x ∣ x ≥ (0.03941 kg, 0.13941 kg) }
+    Minimal resources needed: mass = {x ∣ x ≥ 0.03941 kg }
+
+This is the case of unreasonable demands (1 kg of extra payload):
+
+    $ mcdp-solve example-battery/battery.mcdp "1 hour" "1.0 kg" "1 W"
+
+This is the expected output:
+
+    Iteration result: ConvergedToTop
+    Fixed-point iteration converged to: {x ∣ x ≥ (⊤, ⊤) }
+    Minimal resources needed: mass = {x ∣ x ≥ ⊤ }
+
+#### Drawing Co-Design Problems diagrams
+
+The programs ``mcdp-plot`` will parse and plot the MCDP in a variety of representations.
+
+    $ mcdp-plot <filename>.mcdp
+
+For example, the command
+
+    $ mcdp-plot example-battery/battery.mcdp 
+    
+will produce:
+
+
+<img src="example-battery/battery-clean.png"/>
+<img src="example-battery/battery-default.png"/>
+<img src="example-battery/battery-dp_tree.png"/>
+<img src="example-battery/battery-syntax_pdf.png"/>
+
+
 
 
 
