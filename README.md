@@ -35,7 +35,7 @@ Then install the main module:
 
 ## Getting started
 
-<!-- There are a few ``*.mcdp`` files scattered around the repository. -->
+<!-- 	 -->
 
 
 #### Solving Co-Design Problems
@@ -85,9 +85,9 @@ will produce these graphs:
         </a>
     </td>
 </tr>
-<tr><td>Verbose graph</td><td><a href="example-battery/battery-clean.png"><img src="example-battery/battery-clean.png"/></a></td></tr>
-<tr><td>Cleaned-up graph</td><td ><a href="example-battery/battery-default.png">
-<img src="example-battery/battery-default.png" height="300px"/></a></td></tr>
+<tr><td>Verbose graph</td><td><a href="example-battery/battery-default.png"><img src="example-battery/battery-default.png"/></a></td></tr>
+<tr><td>Cleaned-up graph</td><td ><a href="example-battery/battery-clean.png">
+<img src="example-battery/battery-clean.png" height="300px"/></a></td></tr>
 <tr><td>Tree representation</td><td><img src="example-battery/battery-dp_tree.png"/></td></tr>
 </tr></table>
  
