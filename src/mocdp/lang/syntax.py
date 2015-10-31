@@ -7,12 +7,14 @@ from pyparsing import (
     Optional, Or, ParserElement, Suppress, Word, ZeroOrMore, alphanums, alphas,
     nums, oneOf, opAssoc, operatorPrecedence)
 import math
+from mocdp.posets.rcomp_units import R_dimensionless
 
 ParserElement.enablePackrat()
 
 def sp(a, b):
     spa(a, b)
     return a
+
 
 class Syntax():
     keywords = ['load', 'compact', 'required', 'provides', 'abstract',
@@ -37,11 +39,12 @@ class Syntax():
     # identifier
     idn = (Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))).setResultsName('idn')
 
-    unit1 = Word(alphas + '$' + ' ')
-    unit2 = L('/')
-    unit3 = L('^') + L('2')
-    unit4 = L('*')  # any
-    unit_expr = Combine(OneOrMore(unit1 ^ unit2 ^ unit3 ^ unit4))
+    unit_base = Word(alphas + '$' + ' ')
+    unit_power = L('^') + O(L(' ')) + Word(nums)
+    unit_simple = unit_base + O(unit_power)
+    unit_connector = L('/') | L('*')
+
+    unit_expr = Combine(unit_simple + ZeroOrMore(unit_connector + unit_simple))
 
 
     spa(unit_expr, lambda t: CDP.Unit(make_rcompunit(t[0])))
@@ -81,8 +84,10 @@ class Syntax():
 
     number_with_unit1 = sp(integer_or_float + unitst,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
-    number_with_unit2 = sp(integer_or_float + S(L('[')) + S(L(']')),
-                           lambda t: CDP.SimpleValue(t[0], CDP.UnitExpr('R')))
+
+    dimensionless = sp(L('[') + L(']'), lambda _: CDP.Unit(R_dimensionless))
+    number_with_unit2 = sp(integer_or_float + dimensionless,
+                           lambda t: CDP.SimpleValue(t[0], t[1]))
     number_with_unit3 = sp(integer_or_float + unit_expr,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
     number_with_unit = number_with_unit1 ^ number_with_unit2 ^ number_with_unit3
@@ -213,8 +218,6 @@ class Syntax():
                           lambda t: CDP.Constraint(function=t['lf'],
                                                    rvalue=t['rvalue'], prep=t[1]))
 
-
-
     fun_shortcut1 = sp(PROVIDES + fname + USING + dpname,
                        lambda t: CDP.FunShortcut1(provides=t[0],
                                                   fname=t[1],
@@ -314,6 +317,7 @@ class Syntax():
     fvalue << operatorPrecedence(fvalue_operand, [
     #     ('-', 1, opAssoc.RIGHT, Unary.parse_action),
         ('*', 2, opAssoc.LEFT, mult_inv_parse_action),
+        ('+', 2, opAssoc.LEFT, plus_inv_parse_action),
     #     ('-', 2, opAssoc.LEFT, Binary.parse_action),
     #     ('+', 2, opAssoc.LEFT, plus_parse_action),
     ])

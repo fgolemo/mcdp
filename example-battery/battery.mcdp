@@ -8,7 +8,7 @@ mcdp {
     provides extra_power [W]
 
     # Sub-design problem: choose the battery
-    sub battery =  mcdp {
+    sub battery = mcdp {
         # A battery provides capacity
         provides capacity [J]        
         # and requires some mass to be transported
@@ -17,8 +17,8 @@ mcdp {
         # requires volume [liters]
 
         # alpha = specific energy
-        one_over_alpha = 1.0 kg/J
-
+        # Lithium-Ion: 500 Wh / kg = 1800000 J / kg 
+        one_over_alpha = 0.0000005556 kg/J
         mass >= capacity * one_over_alpha
     }
 
@@ -29,7 +29,7 @@ mcdp {
         # and will require power
         requires power [W]
         # simple model: quadratic
-        c = 0.002 W/N^2
+        c = 10.0 W/N^2
         power >= lift * lift * c
     }
     # Co-design constraint: battery must be large enough

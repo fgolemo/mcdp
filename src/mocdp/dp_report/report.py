@@ -8,7 +8,6 @@ from mocdp.dp.dp_generic_unary import GenericUnary
 from mocdp.posets.poset_product import PosetProduct
 from mocdp.posets import R_dimensionless
 from reprep import Report
-import warnings
 from mocdp.dp.dp_constant import Constant
 from mocdp.dp.dp_limit import Limit
 from mocdp.exceptions import mcdp_dev_warning
@@ -26,7 +25,6 @@ def report_ndp1(ndp):
 
 def report_dp1(dp):
     r = Report()
-
     gg = gvgen_from_dp(dp)    
     gg_figure(r, 'graph', gg)
 

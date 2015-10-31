@@ -17,6 +17,7 @@ from mocdp.posets import (NotBelongs, NotEqual, NotLeq, PosetProduct, Rcomp,
     get_types_universe, mult_table, mult_table_seq)
 from mocdp.comp.context import CFunction, CResource, ValueWithUnits
 from mocdp.posets.space import Space
+from mocdp.dp.dp_mult_inv import InvPlus2
 
 
 CDP = CDPLanguage
@@ -459,6 +460,37 @@ def eval_lfunction(lf, context):
         res = context.make_function(name, '_input')
         return res
 
+    if isinstance(lf, CDP.InvPlus):
+        ops = get_odd_ops(unwrap_list(lf.ops))
+        if len(ops) != 2:
+            raise DPInternalError('Only 2 expected')
+
+        fs = []
+
+        for op_i in ops:
+            fi = eval_lfunction(op_i, context)
+            fs.append(fi)
+
+        assert len(fs) == 2
+
+        Fs = map(context.get_ftype, fs)
+        # R = plus_table(Fs[0], Fs[1])
+        R = Fs[0]
+
+        dp = InvPlus2(R, tuple(Fs))
+        ndp = dpwrap(dp, '_input', ['_f0', '_f1'])
+
+        name = context.new_name('_invplus')
+        context.add_ndp(name, ndp)
+
+        c1 = Connection(dp2=fs[0].dp, s2=fs[0].s, dp1=name, s1='_f0')
+        c2 = Connection(dp2=fs[1].dp, s2=fs[1].s, dp1=name, s1='_f1')
+        context.add_connection(c1)
+        context.add_connection(c2)
+
+        res = context.make_function(name, '_input')
+        return res
+
     if isinstance(lf, CDP.NewResource):
         rname = lf.name
         try:
@@ -633,6 +665,17 @@ def eval_rvalue(rvalue, context):
 class NotConstant(Exception):
     pass
 
+@contract(returns=Space)
+def eval_unit(x, context):
+
+    if isinstance(x, CDP.Unit):
+        S = x.value
+        assert isinstance(S, Space), S
+        return S
+    
+    msg = 'Cannot evaluate %s as unit.' % x.__repr__()
+    raise ValueError(msg)
+    
 @contract(returns=ValueWithUnits)
 def eval_constant(op, context):
     """ 
@@ -648,7 +691,9 @@ def eval_constant(op, context):
         raise NotConstant(str(op))
 
     if isinstance(op, CDP.SimpleValue):
-        F = op.unit.value
+        assert isinstance(op.unit, CDP.Unit), op
+
+        F = eval_unit(op.unit, context)
         assert isinstance(F, Space), op
         v = op.value.value
         if isinstance(v, int) and isinstance(F, Rcomp):

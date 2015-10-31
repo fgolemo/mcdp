@@ -274,6 +274,7 @@ class DPLoop0(PrimitiveDP):
                 # rs is an upper set of R2
                 UR.belongs(rs)
 
+                # print('loop-beta: product of %s and %s' % (fs, rs))
                 # make the dot product
                 x = UpperSet(set(itertools.product(fs.minimals, rs.minimals)), F1R)
                 # this is an elment of U(F1xR2)

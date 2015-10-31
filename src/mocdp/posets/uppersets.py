@@ -41,7 +41,7 @@ class UpperSet():
 
     def __repr__(self):  # ≤  ≥
         contents = " v ".join("x ≥ %s" % self.P.format(m)
-                        for m in self.minimals)
+                        for m in sorted(self.minimals))
 
         return "{x ∣ %s }" % contents
 #         return "∪".join("{x∣ x ≥ %s}" % self.P.format(m)
@@ -148,7 +148,7 @@ class UpperSets(Poset):
 
     def format(self, x):
         contents = " v ".join("x ≥ %s" % self.P.format(m)
-                        for m in x.minimals)
+                        for m in sorted(x.minimals))
 
         return "{x ∣ %s }" % contents
 

@@ -13,6 +13,7 @@ from mocdp.posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
+from mocdp.dp.dp_mult_inv import InvMult2, InvPlus2
 
 
 class GraphDrawingContext():
@@ -277,7 +278,7 @@ def choose_best_icon(iconoptions, imagepath, tmppath):
 
 def is_simple(ndp):
     return isinstance(ndp, SimpleWrap) and isinstance(ndp.dp,
-     (Min, Max, Identity, GenericUnary, Sum, SumN, Product, ProductN))
+     (Min, Max, Identity, GenericUnary, Sum, SumN, Product, ProductN, InvPlus2, InvMult2))
 
 
 def create_simplewrap(gdc, ndp):
@@ -291,6 +292,8 @@ def create_simplewrap(gdc, ndp):
         (SumN, ''),
         (Product, ''),
         (ProductN, ''),
+        (InvPlus2, ''),
+        (InvMult2, ''),
     ]
     classname = type(ndp.dp).__name__
 
@@ -651,6 +654,9 @@ def get_signal_label(name, unit):
     for i in range(9):
         if str(i) in name:
             name = ""
+
+    if '_' in name:
+        name = ''
     s2 = format_unit(unit)
     if name:
         return name + ' ' + s2

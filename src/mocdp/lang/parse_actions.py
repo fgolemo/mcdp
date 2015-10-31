@@ -169,17 +169,14 @@ class PlusValue():
 @parse_action
 def mult_inv_parse_action(tokens):
     tokens = list(tokens[0])
-#
-#     ops = []
-#     for i, t in enumerate(tokens):
-#         if i % 2 == 0:
-#             ops.append(t)
-#         else:
-#             assert t == '*'
-#
-#     assert len(ops) == 2
     ops = make_list(tokens)
     return CDP.InvMult(ops, where=ops.where)
+
+@parse_action
+def plus_inv_parse_action(tokens):
+    tokens = list(tokens[0])
+    ops = make_list(tokens)
+    return CDP.InvPlus(ops, where=ops.where)
 
 def parse_wrap(expr, string):
     # Nice trick: the removE_comments doesn't change the number of lines

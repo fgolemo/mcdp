@@ -9,22 +9,22 @@ from mocdp.posets.types_universe import get_types_universe
 from mocdp.comp.context import Context
 from mocdp.lang.blocks import eval_constant
 from conf_tools.global_config import GlobalConfig
+from reprep import Report
+from mocdp.dp.tests.inv_mult_plots import generic_report
 
 
 class SolveDP(QuickAppBase):
     """ Plot a design program """
     def define_program_options(self, params):
-#         params.add_string('filename')
-#         params.add_flag('watch')
         params.add_string('out', help='Output dir', default=None)
-#         params.add_string_list('plots', default='*')
+        params.add_int('max_steps', help='Maximum number of steps', default=None)
         params.accept_extra()
+        params.add_flag('plot')
 
     def go(self):
         GlobalConfig.global_load_dir("mocdp")
 
         options = self.get_options()
-#         filename = options.filename
         params = options.get_extra()
 
         if len(params) < 1:
@@ -59,6 +59,16 @@ class SolveDP(QuickAppBase):
         ndp = parse_ndp(s)
         dp = ndp.get_dp()
 
+        fnames = ndp.get_fnames()
+        f = fd
+        if len(fnames) == 1:
+            f = fd[0]
+            Fd = Fd[0]
+        else:
+            f = fd
+            Fd = Fd
+
+
         F = dp.get_fun_space()
 
         # TODO: check units compatible
@@ -67,9 +77,14 @@ class SolveDP(QuickAppBase):
 
         tu.check_leq(Fd, F)
 
-        f = fd
+        A_to_B, _ = tu.get_embedding(Fd, F)
+        fg = A_to_B(fd)
+
+        print('query: %s' % ", ".join(params))
+        print('converted: %s' % F.format(fg))
+        max_steps = options.max_steps
         try: 
-            trace = generic_solve(dp, f=f, max_steps=None)
+            trace = generic_solve(dp, f=fg, max_steps=max_steps)
             print('Iteration result: %s' % trace.result)
             ss = trace.get_s_sequence()
             S = trace.S
@@ -84,6 +99,13 @@ class SolveDP(QuickAppBase):
         except:
             raise
             pass
+
+        if options.plot:
+            r = Report()
+            generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0))
+            out_html = os.path.splitext(filename)[0] + '-solve.html'
+            print('writing to %r' % out_html)
+            r.to_html(out_html)
 #
 #         plots = expand_string(options.plots, list(allplots))
 #         do_plots(filename, plots, out)

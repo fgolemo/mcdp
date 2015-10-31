@@ -4,7 +4,8 @@ from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
 from comptests.registrar import comptest
 from mocdp.lang.parts import CDPLanguage
 from mocdp.lang.syntax import Syntax, parse_ndp
-from mocdp.lang.tests.utils import parse_wrap_check
+from mocdp.lang.tests.utils import parse_wrap_check, parse_wrap_syntax_error,\
+    TestFailed
 from mocdp.posets import R_Weight
 from mocdp.posets.rcomp_units import make_rcompunit, R_Weight_g
 from mocdp.posets.types_universe import get_types_universe
@@ -23,11 +24,46 @@ def check_numbers1():
 @comptest
 def check_numbers2():
     parse_wrap_check('1.0 [g]', Syntax.number_with_unit, CDP.SimpleValue(CDP.ValueExpr(1.0),
-                                                                         CDP.UnitExpr(R_Weight_g)))
+                                                                         CDP.Unit(R_Weight_g)))
     assert_syntax_error('1', Syntax.number_with_unit)
     # automatic conversion to float
     parse_wrap_check('1 [g]', Syntax.number_with_unit, CDP.SimpleValue(CDP.ValueExpr(1.0),
-                                                                        CDP.UnitExpr(R_Weight_g)))
+                                                                        CDP.Unit(R_Weight_g)))
+
+
+
+@comptest
+def check_unit1():
+
+    parse_wrap_syntax_error('*', Syntax.unit_expr)
+    parse_wrap_syntax_error('/', Syntax.unit_expr)
+    parse_wrap_syntax_error('^2', Syntax.unit_expr)
+    good = ['g', 'g^2', 'g^ 2', 'g ^ 2', 'm/g ^2',
+            'm^2/g^2', 'N m', '$', 'V', 'A', 'm/s',
+            'any',
+            ]
+    results = []
+    for g in good:
+        try:
+            r = parse_wrap_check(g, Syntax.unit_expr)
+        except TestFailed as e:
+            results.append((g, False, e, None))
+        else:
+            results.append((g, True, None, r))
+    
+    exceptions = []
+    for g, ok, e, r in results:
+        if ok:
+            print('%20s: OK   %s' % (g, r))
+        if not ok:
+            print('%20s: FAIL ' % g)
+            exceptions.append(e)
+
+    if exceptions:
+        msg = "\n".join(str(e) for e in exceptions)
+        raise TestFailed(msg)
+
+
 
 @comptest
 def check_numbers3():

@@ -15,7 +15,8 @@ class CDPLanguage():
     NewLimit = namedtuplewhere('NewLimit', 'value_with_unit')
 
     ValueExpr = namedtuplewhere('ValueExpr', 'value')
-    UnitExpr = namedtuplewhere('UnitExpr', 'value')
+    Unit = namedtuplewhere('Unit', 'value')
+#     UnitExpr = namedtuplewhere('UnitExpr', 'value')
     SimpleValue = namedtuplewhere('SimpleValue', 'value unit')
 
     MakeTemplate = namedtuplewhere('MakeTemplate', 'keyword dp_rvalue')
@@ -71,7 +72,7 @@ class CDPLanguage():
 
     FName = namedtuplewhere('FName', 'value')
     RName = namedtuplewhere('RName', 'value')
-    Unit = namedtuplewhere('Unit', 'value')
+
 
     FunStatement = namedtuplewhere('FunStatement', 'keyword fname unit')
     ResStatement = namedtuplewhere('ResStatement', 'keyword rname unit')
@@ -81,6 +82,7 @@ class CDPLanguage():
     PDPCodeSpec = namedtuplewhere('PDPCodeSpec', 'keyword function arguments')
 
     InvMult = namedtuplewhere('InvMult', 'ops')
+    InvPlus = namedtuplewhere('InvPlus', 'ops')
     FunShortcut1 = namedtuplewhere('FunShortcut1', 'provides fname prep_using name')
     ResShortcut1 = namedtuplewhere('ResShortcut1', 'requires rname prep_for name')
 

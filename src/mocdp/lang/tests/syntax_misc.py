@@ -280,6 +280,21 @@ def check_lang51():
 
 
 
+@comptest
+def check_lang_invplus():
+    assert_parsable_to_connected_ndp("""
+cdp {
+    provides a [s]
+    
+    requires x [s]
+    requires y [s]
+    
+    x + y >= a
+}""")
+
+
+
+
 examples1 = [
     """
 dp electric-battery {

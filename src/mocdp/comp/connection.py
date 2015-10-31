@@ -9,11 +9,11 @@ from mocdp.dp import Identity, Mux, Terminator, make_parallel, make_series
 from mocdp.dp.dp_loop import make_loop
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.posets import PosetProduct
-from networkx import NetworkXUnfeasible, DiGraph, MultiDiGraph
+from networkx import DiGraph, MultiDiGraph, NetworkXUnfeasible
 from networkx.algorithms import is_connected, simple_cycles, topological_sort
-
 import re
-import warnings
+
+
 
 # TODO: can remove
 def _parse(cstring):

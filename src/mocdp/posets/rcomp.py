@@ -98,6 +98,8 @@ class Rcomp(Poset):
             return True
         return a <= b
 
+    def leq(self, a, b):
+        return self._leq(a, b)
     def check_leq(self, a, b):
         self.belongs(a)
         self.belongs(b)

@@ -46,9 +46,11 @@ def generic_solve(dp, f, max_steps=None):
     S, alpha, beta = dp.get_normal_form()
 
     s0 = S.get_bottom()
-
+    print('s0: %s' % str(s0))
     ss = [s0]
     sr = [alpha((uf, s0))]
+
+    print('sr0: %s' % str(sr[0]))
 
     result = None
 
@@ -85,9 +87,10 @@ def generic_solve(dp, f, max_steps=None):
                 result = ConvergedToInfinite
                 break
 
-    if sr:
-        if not sr[-1].minimals:
-            result = ConvergedToEmpty
+    if result != MaxStepsReached:
+        if sr:
+            if not sr[-1].minimals:
+                result = ConvergedToEmpty
 
 
     return SolverTrace(dp=dp, f=f, strace=ss, rtrace=sr, result=result)

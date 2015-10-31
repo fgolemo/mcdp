@@ -60,18 +60,23 @@ def assert_parsable_to_connected_ndp(s , desc=None):  # @UnusedVariable
     return ndp
 
 
+class TestFailed(Exception):
+    pass
+
 @contract(string=str)
-def parse_wrap_check(string, expr, result):
+def parse_wrap_check(string, expr, result=None):
     if isinstance(expr, ParsingElement):
         expr = expr.get()
 
     try:
         res = parse_wrap(expr, string)[0]  # note the 0, first element
         res0 = remove_where_info(res)
-        assert_equal(result, res0)
+        if result is not None:
+            assert_equal(result, res0)
+        return res
     except BaseException as e:
         msg = 'Cannot parse %r' % string
-        raise_wrapped(Exception, e, msg,
+        raise_wrapped(TestFailed, e, msg,
                       expr=find_parsing_element(expr),
                       string=string, expected=result)
 
@@ -88,7 +93,7 @@ def parse_wrap_semantic_error(string, expr):
         pass
     except BaseException as e:
         msg = 'Expected DPSemanticError.'
-        raise_wrapped(Exception, e, msg,
+        raise_wrapped(TestFailed, e, msg,
                       expr=find_parsing_element(expr), string=string)
 
 
@@ -104,7 +109,7 @@ def parse_wrap_syntax_error(string, expr):
         pass
     except BaseException as e:
         msg = 'Expected DPSyntaxError.'
-        raise_wrapped(Exception, e, msg,
+        raise_wrapped(TestFailed, e, msg,
                       expr=find_parsing_element(expr), string=string)
 
 def ok(expr, string, result):

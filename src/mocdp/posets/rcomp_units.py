@@ -87,7 +87,7 @@ def parse_pint(s0):
 def make_rcompunit(units):
     s = units.strip()
 
-    if s == '*':
+    if s == 'any':
         return BottomCompletion(TopCompletion(Any()))
 
     if s == 'R':

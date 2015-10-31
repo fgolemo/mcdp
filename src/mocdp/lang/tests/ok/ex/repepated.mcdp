@@ -1,0 +1,17 @@
+# test connected
+# This fails with repeated names (x)
+cdp {
+	sub f = mcdp  {
+	    provides a [s]
+	    
+	    requires x [s]
+	    requires y [s]
+	    
+	    x + y >= a
+	}
+
+	provides x [s]
+	f.a >= f.x + x
+
+	requires x, y for f
+}

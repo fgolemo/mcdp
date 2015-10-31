@@ -32,7 +32,7 @@ mcdp {  # mcdp = Monotone Co-Design Problem
       requires motor_torque [N m]
 	  # It also requires a controller
 	  # The unit "*" is a place-holder for this template
-      requires control_function [*]
+      requires control_function [any]
     }
 
  	# the entire CDP provides the function "velocity"
@@ -78,8 +78,8 @@ mcdp {  # mcdp = Monotone Co-Design Problem
     # See paper "Resource-Aware Robotics-Application"
     # for a discussion of how to define a partial order
     # on the set of controller and computation graphs
-    provides control_function [*]
-    requires computation_graph [*]
+    provides control_function [any]
+    requires computation_graph [any]
     requires cost [$]
     requires weight [g]
   }
@@ -88,7 +88,7 @@ mcdp {  # mcdp = Monotone Co-Design Problem
   sub computer = template mcdp {
     # a computer is something that runs a program
     # defined by a computation graph
-    provides computation_graph [*]
+    provides computation_graph [any]
     # and needs cost+SWAPto do so
     requires voltage [V]
     requires current [A]

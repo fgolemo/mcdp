@@ -20,7 +20,7 @@ mcdp {
       requires motor_speed [rad/s]
       requires motor_torque [N m]
 
-      requires control_function [*]
+      requires control_function [any]
     }
 
       
@@ -68,15 +68,15 @@ mcdp {
   # "Autonomy" is a placeholder. It provides
   # a control function and requires SWAP resources.
   sub autonomy = template mcdp {
-    provides control_function [*]
-    requires computation_graph [*]
+    provides control_function [any]
+    requires computation_graph [any]
     requires cost [$]
     requires weight [g]
   }
   autonomy.control_function >= motor_chassis.control_function
 
   sub computation = template mcdp {
-    provides computation_graph [*]
+    provides computation_graph [any]
     requires voltage [V]
     requires current [A]
     requires cost [$]

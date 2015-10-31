@@ -18,6 +18,12 @@ class PosetProduct(SpaceProduct, Poset):
         subs = tuple([library.instance_smarter(s)[1] for s in subs])
         SpaceProduct.__init__(self, subs)
 
+    def leq(self, a, b):
+        for sub, x, y in zip(self.subs, a, b):
+            if not sub.leq(x, y):
+                return False
+        return True
+
     def check_leq(self, a, b):
         self.belongs(a)
         self.belongs(b)

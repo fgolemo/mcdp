@@ -9,6 +9,7 @@ from contracts import contract
 from tempfile import mkdtemp
 from system_cmd import system_cmd_result
 from conf_tools.global_config import GlobalConfig
+from mocdp.dp_report.report import gvgen_from_dp
 
 
 def get_ndp(data):
@@ -29,6 +30,13 @@ def png_pdf_from_gg(gg):
     pdf_node = r.resolve_url('graph_pdf')
     return png_node.get_raw_data(), pdf_node.get_raw_data()
 
+def dp_visualization(data):
+    dp = get_dp(data)
+    gg = gvgen_from_dp(dp)
+    png, pdf = png_pdf_from_gg(gg)
+    res1 = ('png', 'dp_tree', png)
+    res2 = ('pdf', 'dp_tree', pdf)
+    return [res1, res2]
 
 def ndp_visualization(data, style):
     ndp = get_ndp(data) 
@@ -93,6 +101,7 @@ allplots  = {
     'syntax_doc': syntax_doc,
     'syntax_frag': syntax_frag,
     'syntax_pdf': syntax_pdf,
+    'dp_tree': dp_visualization,
 }
 
 def do_plots(filename, plots, outdir):
