@@ -68,15 +68,22 @@ For example, the command
 
     $ mcdp-plot example-battery/battery.mcdp 
     
-will produce:
+will produce these graphs:
 
-<table><tr>
-<td><img src="example-battery/battery-clean.png"/></td>
-<td><img src="example-battery/battery-default.png"/></td>
+<table>
+<tr><td>Verbose graph</td><td>Cleaned-up graph</td></tr>
+<tr>
+<td><a href="example-battery/battery-clean.png"><img src="example-battery/battery-clean.png"/></a></td>
+<td><a href="example-battery/battery-default.png"><img src="example-battery/battery-default.png"/></a></td>
+</tr>
+<tr>
 <td><img src="example-battery/battery-dp_tree.png"/></td>
 <td><img src="example-battery/battery-syntax_pdf.png"/></td>
 </tr></table>
 
+Plus syntax highlighting:
+
+<img src="example-battery/battery-syntax_pdf.png" style="height: 10em/>
 
 
 
