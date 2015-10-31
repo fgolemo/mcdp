@@ -70,11 +70,12 @@ For example, the command
     
 will produce:
 
-
-<img src="example-battery/battery-clean.png"/>
-<img src="example-battery/battery-default.png"/>
-<img src="example-battery/battery-dp_tree.png"/>
-<img src="example-battery/battery-syntax_pdf.png"/>
+<table><tr>
+<td><img src="example-battery/battery-clean.png"/></td>
+<td><img src="example-battery/battery-default.png"/></td>
+<td><img src="example-battery/battery-dp_tree.png"/></td>
+<td><img src="example-battery/battery-syntax_pdf.png"/></td>
+</tr></table>
 
 
 
