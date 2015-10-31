@@ -10,25 +10,32 @@ along with the MCDPL snippet that describes it (right)*
 
 <img src="http://mcdp.mit.edu/mcdp_intro/1510_mcdp_examples01_battery_actuation.png"/>
 
-## Installation
+## Installation with pip
 
-If you install from source, first install the dependencies:
+Run this:
+
+	$ pip install -U PyMCDP 
+
+
+## Installation from source
+
+Clone the repo:
+
+	$ git clone git@github.com:AndreaCensi/mcdp.git
+	$ cd mcdp
+
+Install the dependencies:
 
     $ pip install -r requirements.txt
 
-The dependencies are: ...
-
 Then install the main module:
     
-    $ python setup.py develop
+    $ python setup.py develop 
 
-If you install from repos
-
-    $ pip install -U PyMCDP 
 
 ## Getting started
 
-There are a few ``*.mcdp`` files scattered around the repository.
+<!-- There are a few ``*.mcdp`` files scattered around the repository. -->
 
 
 #### Solving Co-Design Problems
