@@ -6,7 +6,7 @@ from mocdp.posets.rcomp_units import R_dimensionless
 from pyparsing import (
     CaselessLiteral, Combine, Forward, Group, Literal, NotAny, OneOrMore,
     Optional, Or, ParserElement, Suppress, Word, ZeroOrMore, alphanums, alphas,
-    nums, oneOf, opAssoc, operatorPrecedence)
+    nums, oneOf, opAssoc, operatorPrecedence, nestedExpr)
 import math
 
 ParserElement.enablePackrat()
@@ -120,6 +120,7 @@ class Syntax():
     DOT = sp(L('.'), lambda t: CDP.DotPrep(t[0]))
     PLUS = sp(L('+'), lambda t: CDP.plus(t[0]))
     TIMES = sp(L('*'), lambda t: CDP.times(t[0]))
+    BAR = sp(L('/'), lambda t: CDP.bar(t[0]))
  
     setname_generic_var = sp(idn.copy(),
                               lambda t: CDP.SetNameGenericVar(t[0]))
@@ -131,7 +132,16 @@ class Syntax():
     variable_ref = sp(NotAny(reserved) + C(idn.copy(), 'variable_ref_name'),
                       lambda t: CDP.VariableRef(t['variable_ref_name']))
 
-    constant_value = number_with_unit ^ variable_ref
+    constant_value = Forward()
+    
+
+#     par = nestedExpr(opener='(', closer=')', content=constant_value)
+
+#     par = S(L("(")) + number_with_unit + S(L(")"))
+    constant_value << number_with_unit ^ variable_ref
+
+    # ^ divide_constants)
+
 
 
 
@@ -311,10 +321,10 @@ class Syntax():
         (COPROD, 2, opAssoc.LEFT, coprod_parse_action),
     ])
 
-
     rvalue << operatorPrecedence(operand, [
     #     ('-', 1, opAssoc.RIGHT, Unary.parse_action),
         (TIMES, 2, opAssoc.LEFT, mult_parse_action),
+        (BAR, 2, opAssoc.LEFT, divide_parse_action),
     #     ('-', 2, opAssoc.LEFT, Binary.parse_action),
         (PLUS, 2, opAssoc.LEFT, plus_parse_action),
     ])
@@ -328,4 +338,7 @@ class Syntax():
     #     ('+', 2, opAssoc.LEFT, plus_parse_action),
     ])
 
+
+#     divide_constants = sp(constant_value + BAR + constant_value,
+#                               lambda t: CDP.Divide(make_list([t[0], t[1], t[2]])))
 

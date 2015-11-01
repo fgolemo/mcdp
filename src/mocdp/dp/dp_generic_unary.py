@@ -19,6 +19,9 @@ class GenericUnary(PrimitiveDP):
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
         self.function = function
 
+    def get_implementations_f_r(self, f, r):  # @UnusedVariable
+        return set([()])
+
     def solve(self, func):
         if self.F.equal(func, self.F.get_top()):
             r = self.R.get_top()

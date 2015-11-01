@@ -2,6 +2,7 @@
 from .space import Space
 from abc import abstractmethod
 from contracts import contract, describe_value
+from mocdp.exceptions import do_extra_checks
 
 __all__ = [
     'Poset',
@@ -80,17 +81,19 @@ class Poset(Preorder):
 
     def U(self, a):
         """ Returns the principal upper set corresponding to the given a. """
-        self.belongs(a)
+        if do_extra_checks():
+            self.belongs(a)
         from .uppersets import UpperSet
         return UpperSet(set([a]), self)
 
     @contract(elements='seq|set')
     def Us(self, elements):
         elements = list(elements)
-        for e in elements:
-            self.belongs(e)
-        # XXX n^2
-        from .utils import check_minimal
-        check_minimal(elements, poset=self)
+        if do_extra_checks():
+            for e in elements:
+                self.belongs(e)
+                # XXX n^2
+            from .utils import check_minimal
+            check_minimal(elements, poset=self)
         from .uppersets import UpperSet
         return UpperSet(set(elements), self)

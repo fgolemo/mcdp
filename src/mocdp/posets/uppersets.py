@@ -4,6 +4,7 @@ from .space import NotBelongs, NotEqual
 from .utils import poset_minima
 from contracts import check_isinstance, contract
 from contracts.utils import raise_desc
+from mocdp.exceptions import do_extra_checks
 
 __all__ = [
     'UpperSet',
@@ -20,20 +21,21 @@ class UpperSet():
 #             msg = 'Cannot create upper set from empty set.'
 #             raise_desc(ValueError, msg, P=self.P)
 
+        if do_extra_checks():
+            # XXX
+            problems = []
+            for m in minimals:
+                try:
+                    self.P.belongs(m)
+                except NotBelongs as e:
+                    problems.append(e)
+            if problems:
+                msg = "Cannot create upper set:\n"
+                msg += "\n".join(str(p) for p in problems)
+                raise NotBelongs(msg)
 
-        problems = []
-        for m in minimals:
-            try:
-                self.P.belongs(m)
-            except NotBelongs as e:
-                problems.append(e)
-        if problems:
-            msg = "Cannot create upper set:\n"
-            msg += "\n".join(str(p) for p in problems)
-            raise NotBelongs(msg)
-
-        from .utils import check_minimal
-        check_minimal(minimals, P)
+            from .utils import check_minimal
+            check_minimal(minimals, P)
 
     @contract(returns=Poset)
     def get_poset(self):
@@ -58,10 +60,11 @@ class UpperSets(Poset):
         self.top = self.get_top()
         self.bot = self.get_bottom()
 
-        self.belongs(self.top)
-        self.belongs(self.bot)
-        assert self.leq(self.bot, self.top)
-        assert not self.leq(self.top, self.bot)  # unless empty
+        if do_extra_checks:
+            self.belongs(self.top)
+            self.belongs(self.bot)
+            assert self.leq(self.bot, self.top)
+            assert not self.leq(self.top, self.bot)  # unless empty
 
     def get_bottom(self):
         x = self.P.get_bottom()

@@ -1,8 +1,7 @@
 mcdp {  
     # We need to fly for this duration
     provides endurance [s] 
-    # While carrying this payload
-    # (in addition to battery)
+    # While carrying this extra payload
     provides extra_payload [kg]
     # And providing this extra power
     provides extra_power [W]
@@ -14,12 +13,10 @@ mcdp {
         # and requires some mass to be transported
         requires mass [kg] 
         # requires cost [$]
-        # requires volume [liters]
 
-        # alpha = specific energy
-        # Lithium-Ion: 500 Wh / kg = 1800000 J / kg 
-        one_over_alpha = 0.0000005556 kg/J
-        mass >= capacity * one_over_alpha
+        specific_energy_Li_Ion = 500 Wh / kg 
+
+        mass >= capacity / specific_energy_Li_Ion
     }
 
     # Sub-design problem: actuation

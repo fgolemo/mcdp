@@ -74,6 +74,7 @@ def sum_units(Fs, values, R):
         # reasonably sure this is correct...
         factor = 1.0 / float(R.units / Fi.units)
         res += factor * x
+
     if np.isinf(res):
         return R.get_top()
     return res

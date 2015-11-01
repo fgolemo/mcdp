@@ -37,6 +37,8 @@ class ValueWithUnits():
         self.value = value
         self.unit = unit
 
+    def __repr__(self):
+        return 'ValueWithUnits(%r, %r)' % (self.value, self.unit)
 
 
 class Context():

@@ -3,6 +3,7 @@ from abc import ABCMeta, abstractmethod
 from contracts import contract
 from contracts import raise_wrapped
 from .space_meta import SpaceMeta
+from mocdp.exceptions import do_extra_checks
 
 class NotBelongs(Exception):
     pass
@@ -61,20 +62,23 @@ class Map():
 
     def __call__(self, x):
         D = self.get_domain()
-        try:
-            D.belongs(x)
-        except NotBelongs as e:
-            msg = 'Point does not belong to domain.'
-            raise_wrapped(NotBelongs, e, msg, map=self, x=x, domain=D)
+        if do_extra_checks():
+            try:
+                D.belongs(x)
+            except NotBelongs as e:
+                msg = 'Point does not belong to domain.'
+                raise_wrapped(NotBelongs, e, msg, map=self, x=x, domain=D)
 
         y = self._call(x)
 
-        C = self.get_codomain()
-        try:
-            C.belongs(y)
-        except NotBelongs as e:
-            msg = 'Point does not belong to codomain.'
-            raise_wrapped(NotBelongs, e, msg, map=self, y=y, codomain=C)
+        if do_extra_checks():
+
+            C = self.get_codomain()
+            try:
+                C.belongs(y)
+            except NotBelongs as e:
+                msg = 'Point does not belong to codomain.'
+                raise_wrapped(NotBelongs, e, msg, map=self, y=y, codomain=C)
 
         return y
 

@@ -91,5 +91,7 @@ class Coproduct1(Space):
         i, active = x
         return i, active[i]
 
-
+    def format(self, x):
+        i, e = self.unpack(x)
+        return '%s:(%s)' % (i, self.spaces[i].format(e))
 

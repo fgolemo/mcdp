@@ -327,7 +327,7 @@ def create_simplewrap(gdc, ndp):
 
         label = type(ndp.dp).__name__
         if isinstance(ndp.dp, GenericUnary):
-            label = ndp.dp.__repr__()
+            label = ndp.dp.function.__name__
 
         sname = 'simple'
     else:

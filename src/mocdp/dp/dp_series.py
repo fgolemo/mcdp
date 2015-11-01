@@ -4,9 +4,9 @@ from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.dp.primitive import NormalForm, NotFeasible, Feasible
 from mocdp.posets import Map, PosetProduct, UpperSets
 from mocdp.exceptions import DPInternalError
-from mocdp.posets.space_product import SpaceProduct
-from mocdp.dp.dp_identity import Identity
-from mocdp.dp.dp_flatten import Mux
+from mocdp.posets import SpaceProduct
+from .dp_identity import Identity
+from .dp_flatten import Mux
 from mocdp.posets import get_product_compact
 
 
@@ -66,10 +66,10 @@ class Series0(PrimitiveDP):
     def evaluate_f_m(self, f1, m):
         """ Returns the resources needed
             by the particular implementation m """
-        F1 = self.dp1.get_fun_space() 
-        F1.belongs(f1)
-        M, _, unpack = get_product_compact(self.M1, self.extraM, self.M2)
-        M.belongs(m)
+        # F1 = self.dp1.get_fun_space()
+        # F1.belongs(f1)
+        _M, _, unpack = get_product_compact(self.M1, self.extraM, self.M2)
+        # M.belongs(m)
         m1, m_extra, m2 = unpack(m)
 
         if isinstance(self.dp1, (Mux, Identity)):
@@ -82,6 +82,43 @@ class Series0(PrimitiveDP):
                 
         r2 = self.dp2.evaluate_f_m(f2, m2)
         return r2
+
+    def get_implementations_f_r(self, f, r):
+        f1 = f
+        _M, pack, _unpack = get_product_compact(self.M1, self.extraM, self.M2)
+        R2 = self.dp2.get_res_space()
+        res = set()
+        # First let's solve again for r1
+        r1s = self.dp1.solve(f)
+        for r1 in r1s.minimals:
+            m1s = self.dp1.get_implementations_f_r(f1, r1)
+            assert m1s, (self.dp1, f1, r1)
+            
+            f2 = r1
+            r2s = self.dp2.solve(f2)
+            
+            if isinstance(self.dp1, (Mux, Identity)):
+                m_extra = f2  # XXX
+            elif self._is_equiv_to_terminator(self.dp2):
+                m_extra = f2  # XXX
+            else:
+                m_extra = f2
+
+            for r2 in r2s.minimals:
+                if not R2.leq(r2, r):
+                    continue
+                m2s = self.dp2.get_implementations_f_r(f2, r2)
+                print('Found f1=%s r1=%s r2=%s' % (f1, r1, r2))
+                for m1 in m1s:
+                    for m2 in m2s:
+                        m = pack(m1, m_extra, m2)
+                        res.add(m)
+        if not res:
+            msg = 'The (f,r) pair was not feasible.'
+            raise_desc(NotFeasible, msg, f=f, r=r, self=self)
+        assert res
+        return res
+
 
     def _is_equiv_to_terminator(self, dp):
         from mocdp.dp.dp_terminator import Terminator

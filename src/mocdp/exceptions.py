@@ -13,7 +13,8 @@ class DPSyntaxError(ContractSyntaxError, DPUserError):
 class DPSemanticError(ContractSyntaxError, DPUserError):
     pass
 
-
+def do_extra_checks():
+    return False
 
 def mcdp_dev_warning(s):
     # warnings.warn(s)

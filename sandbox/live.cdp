@@ -1,26 +1,31 @@
 mcdp {
-	
-	battery1 = mcdp {
-		provides capacity [J]
-  		requires mass [kg]
+    # two linear response
+    # 0J => 0, 0
+    # two slutions for 12.5 g
+    # 100J =>
+    battery1 = mcdp {
+        provides capacity [J]
+        requires mass [kg]
 
-		a = 1 kg / J
-		m0 = 5 g
-		mass >= a * capacity + m0
-	}
-  	
-  	battery2 = mcdp {
-		provides capacity [J]
-  		requires mass [kg]
+        m0 = 5 g
+        specific_energy = 1 J / kg 
 
-		a = 0.6 kg / J
-		m0 = 10 g
-		mass >= a * capacity + m0
-	}
-  	
-  	sub battery = battery1 ^ battery2
+        mass >=  capacity / specific_energy + m0
+    }
+    
+    battery2 = mcdp {
+        provides capacity [J]
+        requires mass [kg]
 
-  	requires mass for battery
-  	provides capacity using battery
-  	
+        m0 = 10 g 
+        specific_energy = 0.6 J / kg
+
+        mass >= capacity / specific_energy + m0
+    }
+    
+    sub battery = battery1 ^ battery2
+
+    requires mass for battery
+    provides capacity using battery
+    
 }

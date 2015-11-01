@@ -5,9 +5,12 @@ from collections import namedtuple
 from contracts import contract
 from contracts.utils import indent, raise_desc
 from decent_logs import WithInternalLog
+from mocdp.exceptions import do_extra_checks
 from mocdp.posets import (
-    Map, Poset, PosetProduct, Space, SpaceProduct, UpperSet, UpperSets)
+    Map, Poset, PosetProduct, Space, SpaceProduct, UpperSet, UpperSets,
+    poset_minima)
 from mocdp.posets.ncomp import Ncomp
+
 
 __all__ = [
     'PrimitiveDP',
@@ -82,16 +85,23 @@ class PrimitiveDP(WithInternalLog):
             raise_desc(Feasible, msg)
 
     def check_feasible(self, f, m, r):
-        self.F.belongs(f)
-        self.M.belongs(m)
-        self.R.belongs(r)
+        if do_extra_checks():
+            self.F.belongs(f)
+            self.M.belongs(m)
+            self.R.belongs(r)
         used = self.evaluate_f_m(f, m)
-        self.R.belongs(used)
+        if do_extra_checks():
+            self.R.belongs(used)
         if not self.R.leq(used, r):
             msg = 'Generic implementation of check_feasible(), says:\n'
             msg += 'f = %s -> [self(%s)] -> %s <~= %s' % (
                         self.F.format(f), self.M.format(m), self.R.format(used), self.R.format(r))
             raise_desc(NotFeasible, msg)  # f=f, m=m, r=r, used=used)
+
+    def get_implementations_f_r(self, f, r):
+        """ Returns the set of implementations that realize the pair (f, r).
+            Returns a non-empty set or raises NotFeasible. """
+        raise NotImplementedError(type(self).__name__)
 
     def evaluate_f_m(self, func, m):
         """ Returns the minimal resources needed
@@ -99,10 +109,10 @@ class PrimitiveDP(WithInternalLog):
         
             raises NotFeasible
         """
-        self.F.belongs(func)
-        # by default
         M = self.get_imp_space_mod_res()
-        M.belongs(m)
+        if do_extra_checks():
+            self.F.belongs(func)
+            M.belongs(m)
         if isinstance(M, SpaceProduct) and m == ():
             rs = self.solve(func)
             minimals = list(rs.minimals)
@@ -152,9 +162,9 @@ class PrimitiveDP(WithInternalLog):
 
     @contract(ufunc=UpperSet)
     def solveU(self, ufunc):
-        UF = UpperSets(self.get_fun_space())
-        UF.belongs(ufunc)
-        from mocdp.posets import poset_minima
+        if do_extra_checks():
+            UF = UpperSets(self.get_fun_space())
+            UF.belongs(ufunc)
         
         res = set([])
         for m in ufunc.minimals:

@@ -7,6 +7,7 @@ from contracts import contract
 from mocdp.posets.types_universe import get_types_universe
 from mocdp.posets.space import NotEqual
 from mocdp.posets.category_coproduct import Coproduct1
+from mocdp.dp.primitive import NotFeasible
 
 
 __all__ = [
@@ -52,6 +53,27 @@ class CoProductDP(PrimitiveDP):
 
         i, xi = self.M.unpack(m)
         return self.dps[i].evaluate_f_m(f, xi)
+
+    def get_implementations_f_r(self, f, r):
+        """ Returns a nonempty set of thinks in self.M.
+            Might raise NotFeasible() """
+        res = set()
+        es = []
+        for j, dp in enumerate(self.dps):
+            try:
+                ms = dp.get_implementations_f_r(f, r)
+                print('%s: dp.get_implementations_f_r(f, r) = %s ' % (j, ms))
+                assert len(ms) > 0, dp
+                for m in ms:
+                    res.add(self.M.pack(j, m))
+            except NotFeasible as e:
+                es.append(e)
+        if not ms:
+            # no one was feasible
+            msg = 'None was feasible'
+            msg += '\n\n' + '\n\n'.join(str(e) for e in es)
+            raise_desc(NotFeasible, msg, f=f, r=r, self=self)
+        return res
 
     def solve(self, f):
         R = self.get_res_space()

@@ -24,6 +24,7 @@ class CDPLanguage():
 
     PlusN = namedtuplewhere('PlusN', 'ops')
     MultN = namedtuplewhere('MultN', 'ops')
+    Divide = namedtuplewhere('Divide', 'ops')
     Coproduct = namedtuplewhere('Coproduct', 'ops')
     OpMax = namedtuplewhere('Max', 'keyword a b')
     OpMin = namedtuplewhere('Min', 'keyword a b')
@@ -68,6 +69,7 @@ class CDPLanguage():
     eq = namedtuplewhere('eq', 'glyph')
     plus = namedtuplewhere('plus', 'glyph')
     times = namedtuplewhere('times', 'glyph')
+    bar = namedtuplewhere('bar', 'glyph')
     coprod = namedtuplewhere('coprod', 'glyph')
     DotPrep = namedtuplewhere('DotPrep', 'glyph')
 

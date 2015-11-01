@@ -18,6 +18,7 @@ from mocdp.dp.dp_series_simplification import make_series
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.posets import (NotBelongs, NotEqual, NotLeq, PosetProduct, Rcomp,
     Space, get_types_universe, mult_table, mult_table_seq)
+from mocdp.lang.parse_actions import inv_constant
 
 
 CDP = CDPLanguage
@@ -580,6 +581,9 @@ def eval_rvalue(rvalue, context):
     """
     # wants Resource or NewFunction
     try:
+        if isinstance(rvalue, CDP.Divide):
+            return eval_divide_as_rvalue(rvalue, context)
+
         if isinstance(rvalue, CDP.Resource):
             return context.make_resource(dp=rvalue.dp.value, s=rvalue.s.value)
         
@@ -735,12 +739,25 @@ def eval_unit(x, context):  # @UnusedVariable
     msg = 'Cannot evaluate %s as unit.' % x.__repr__()
     raise ValueError(msg)
     
+def eval_constant_divide(op, context):
+    ops = get_odd_ops(unwrap_list(op.ops))
+    if len(ops) != 2:
+        raise DPSemanticError('divide by more than two')
+
+    constants = [eval_constant(_, context) for _ in ops]
+    invs = [inv_constant(_) for _ in constants]
+    from mocdp.lang.parse_actions import mult_constantsN
+    return mult_constantsN(invs)
+
+       
 @contract(returns=ValueWithUnits)
 def eval_constant(op, context):
     """ 
         Raises NotConstant if not constant. 
         Returns ValueWithUnits
     """
+    if isinstance(op, CDP.Divide):
+        return eval_constant_divide(op, context)
     
     if isinstance(op, (CDP.Resource)):
         raise NotConstant(str(op))
@@ -809,6 +826,32 @@ def eval_MultN_as_rvalue(x, context):
     else:
         return res
 
+def eval_divide_as_rvalue(op, context):
+    ops = get_odd_ops(unwrap_list(op.ops))
+    
+    try:
+        c2 = eval_constant(ops[1], context)
+    except NotConstant as e:
+        msg = 'Cannot divide by a non-constant.'
+        raise_wrapped(DPSemanticError, e, msg, ops[0])
+    
+    try:
+        c1 = eval_constant(ops[0], context)
+        # also the first one is a constant
+        from mocdp.lang.parse_actions import mult_constantsN
+        return mult_constantsN([inv_constant(c1), inv_constant(c2)])
+
+    except NotConstant:
+        pass
+    
+    # then eval as resource
+    r = eval_rvalue(ops[0], context)
+    c2_inv = inv_constant(c2)
+    res = get_mult_op(context, r=r, c=c2_inv)
+    return res
+    
+    
+     
 def eval_PlusN_as_rvalue(x, context):
     res = eval_PlusN(x, context, wants_constant=False)
     if isinstance(res, ValueWithUnits):

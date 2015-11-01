@@ -10,6 +10,7 @@ from mocdp.posets.rcomp_units import R_Weight_g, make_rcompunit
 from mocdp.posets.types_universe import get_types_universe
 from nose.tools import assert_equal
 from numpy.testing.utils import assert_allclose
+from mocdp.lang.blocks import eval_constant
 
 CDP = CDPLanguage
 
@@ -29,6 +30,18 @@ def check_numbers2():
     # automatic conversion to float
     parse_wrap_check('1 [g]', Syntax.number_with_unit,
                       CDP.SimpleValue(CDP.ValueExpr(1.0), CDP.Unit(R_Weight_g)))
+
+@comptest
+def check_division():
+    print parse_wrap_check('(5 g)', Syntax.rvalue)
+    c = parse_wrap_check('1.0 [g] / 5 [l]', Syntax.rvalue)
+    print parse_wrap_check('(5 g) / 5 l', Syntax.rvalue)
+
+    from mocdp.comp.context import Context
+    context = Context()
+    r = eval_constant(c, context)
+    print r
+
 
 @comptest
 def check_unit1():

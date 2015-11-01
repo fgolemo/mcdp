@@ -3,6 +3,7 @@ from .poset import NotLeq, Poset
 from .space import NotBelongs, NotEqual
 from contracts.utils import raise_desc
 import numpy as np
+from mocdp.exceptions import do_extra_checks
 
 __all__ = [
    'Rcomp',
@@ -100,9 +101,11 @@ class Rcomp(Poset):
 
     def leq(self, a, b):
         return self._leq(a, b)
+
     def check_leq(self, a, b):
-        self.belongs(a)
-        self.belongs(b)
+        if do_extra_checks():
+            self.belongs(a)
+            self.belongs(b)
         if not self._leq(a, b):
             msg = '%s ≰ %s' % (a, b)
             raise NotLeq(msg)

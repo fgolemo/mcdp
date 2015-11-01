@@ -10,10 +10,6 @@ __all__ = [
 ]
 
 
-# def Identity(F):
-#     from mocdp.dp.dp_flatten import Mux
-#     return Mux(F, ())
-
 class Identity(PrimitiveDP):
 
     @contract(F='$Poset|str|code_spec')
@@ -24,9 +20,7 @@ class Identity(PrimitiveDP):
         M = PosetProduct(())
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
-
     def solve(self, f):
-        self.F.belongs(f)
         return self.R.U(f)
 
     def __repr__(self):

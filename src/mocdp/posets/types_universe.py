@@ -1,6 +1,6 @@
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.posets.poset import NotLeq, Preorder
-from mocdp.posets.space import Map, NotEqual, Space
+from mocdp.posets.space import Map, NotEqual, Space, NotBelongs
 import numpy as np
 from mocdp.posets.rcomp import Rcomp
 from mocdp.posets.space_product import SpaceProduct
@@ -22,6 +22,13 @@ class TypesUniverse(Preorder):
         For example,  int <= float, and embedding = (float(), int())
     
     """
+
+    def belongs(self, x):
+        from mocdp.posets.rcomp_units import RcompUnits
+        known = (RcompUnits, Rcomp)
+        if not isinstance(x, known):
+            raise_desc(NotBelongs, x=x, known=known)
+
 
     def check_equal(self, A, B):
         if not(A == B):

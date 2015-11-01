@@ -1,4 +1,5 @@
 from .space_meta import decorate_methods, SpaceMeta
+from contracts.enabling import all_disabled
 
 __all__ = ['PosetMeta']
 
@@ -12,7 +13,11 @@ class PosetMeta(SpaceMeta):
         methods2dec = {
             'join': join_decorator,
         }
-        decorate_methods(cls, name, bases, dct, methods2dec)
+        if all_disabled():
+            # print('Removing extra checks on Posets')
+            pass
+        else:
+            decorate_methods(cls, name, bases, dct, methods2dec)
 
 
 def join_decorator(f):

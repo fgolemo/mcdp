@@ -1,17 +1,15 @@
 from conf_tools import GlobalConfig
+from contracts.utils import raise_desc
 from mocdp.comp.context import Context
 from mocdp.dp.solver import generic_solve
 from mocdp.dp.tests.inv_mult_plots import generic_report
 from mocdp.lang.blocks import eval_constant
 from mocdp.lang.parse_actions import parse_ndp, parse_wrap
 from mocdp.lang.syntax import Syntax
-from mocdp.posets.poset_product import PosetProduct
-from mocdp.posets.types_universe import get_types_universe
-from mocdp.posets.uppersets import UpperSets
+from mocdp.posets import PosetProduct, UpperSets, get_types_universe
 from quickapp import QuickAppBase
 from reprep import Report
 import os
-from contracts.utils import raise_desc
 
 
 class SolveDP(QuickAppBase):
@@ -20,7 +18,8 @@ class SolveDP(QuickAppBase):
         params.add_string('out', help='Output dir', default=None)
         params.add_int('max_steps', help='Maximum number of steps', default=None)
         params.accept_extra()
-        params.add_flag('plot')
+        params.add_flag('plot', help='Show iterations graphically')
+        params.add_flag('imp', help='Show implementations')
 
     def go(self):
         GlobalConfig.global_load_dir("mocdp")
@@ -42,8 +41,6 @@ class SolveDP(QuickAppBase):
 
 
         params = params[1:]
-
-
 
         fd = []
         Fd = []
@@ -100,9 +97,19 @@ class SolveDP(QuickAppBase):
             x = ", ".join(rnames)
             print('Minimal resources needed: %s = %s' % (x, UR.format(sr[-1])))
 
+
+
         except:
             raise
-            pass
+
+        if options.imp:
+            M = dp.get_imp_space_mod_res()
+            for r in sr[-1].minimals:
+                ms = dp.get_implementations_f_r(f=fg, r=r)
+                s = 'r = %s ' % R.format(r)
+                for m in ms:
+                    s += "m = %s " % M.format(m)
+                print(s)
 
         if options.plot:
             r = Report()

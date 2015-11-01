@@ -13,6 +13,7 @@ from pyparsing import ParseException, ParseFatalException
 import functools
 from mocdp.lang.parts import make_list
 from mocdp.comp.context import ValueWithUnits
+from mocdp.posets.rcomp_units import RcompUnits
 
 
 CDP = CDPLanguage
@@ -79,6 +80,17 @@ def mult_parse_action(tokens):
     res = CDP.MultN(l, where=l.where)
     return res
 
+
+@parse_action
+@wheredecorator
+def divide_parse_action(tokens):
+    tokens = list(tokens[0])
+    l = make_list(tokens)
+    assert l.where.character_end is not None
+    res = CDP.Divide(l, where=l.where)
+    return res
+
+
 @parse_action
 @wheredecorator
 def coprod_parse_action(tokens):
@@ -102,6 +114,20 @@ class MultValue():
 
     def __call__(self, x):
         return x * self.res
+
+@contract(S=RcompUnits)
+def inv_unit(S):
+    # S.units is a pint quantity
+    return RcompUnits(1 / S.units)
+
+def inv_constant(a):
+    unit = inv_unit(a.unit)
+    if a.value == 0:
+        raise DPSemanticError('Division by zero')
+    # TODO: what about integers?
+    value = 1.0 / a.value
+    return ValueWithUnits(value=value, unit=unit)
+
 
 def mult_constants2(a, b):
     R = mult_table(a.unit, b.unit)

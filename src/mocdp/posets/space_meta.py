@@ -1,5 +1,6 @@
 from abc import ABCMeta
 from contracts import raise_wrapped
+from contracts.enabling import all_disabled
 
 __all__ = [
     'SpaceMeta',
@@ -15,7 +16,11 @@ class SpaceMeta(ABCMeta):
         method2dec = {
             'belongs': decorate_belongs,
         }
-        decorate_methods(cls, name, bases, dct, method2dec)
+        if all_disabled():
+            # print('Removing extra checks on Spaces')
+            pass
+        else:
+            decorate_methods(cls, name, bases, dct, method2dec)
 
 def decorate_belongs(f):
     def bel(self, x):
