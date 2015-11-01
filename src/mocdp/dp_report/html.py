@@ -43,10 +43,10 @@ def ast_to_html(s, complete_document):
     if not isnamedtuplewhere(block):
         raise ValueError(block)
 
-    print print_ast(block)
-
+    # print print_ast(block)
+    # XXX: this should not be necessary anymore
     block2 = make_tree(block, character_end=len(s))
-    print print_ast(block2)
+    # print print_ast(block2)
 
 
     snippets = list(print_html_inner(block2))
