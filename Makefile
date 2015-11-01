@@ -29,3 +29,11 @@ comptests-run-parallel-nocontracts-prof:
 
 clean:
 	rm -rf $(out)
+
+
+stats-locs:
+	wc -l `find . -type f -name '*.py' | grep -v test`
+
+stats-locs-tests:
+	wc -l `find . -type f -name '*.py' | grep test`
+

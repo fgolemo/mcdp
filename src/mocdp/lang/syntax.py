@@ -6,7 +6,7 @@ from mocdp.posets.rcomp_units import R_dimensionless
 from pyparsing import (
     CaselessLiteral, Combine, Forward, Group, Literal, NotAny, OneOrMore,
     Optional, Or, ParserElement, Suppress, Word, ZeroOrMore, alphanums, alphas,
-    nums, oneOf, opAssoc, operatorPrecedence, nestedExpr)
+    nums, oneOf, opAssoc, operatorPrecedence)
 import math
 
 ParserElement.enablePackrat()
@@ -16,10 +16,18 @@ def sp(a, b):
     return a
 
 
+def VariableRef_make(t):
+    name = t[0]
+    if not isinstance(name, str):
+        raise ValueError(t)
+    res = CDP.VariableRef(name)
+    return res
+
 class Syntax():
     keywords = ['load', 'compact', 'required', 'provides', 'abstract',
                       'dp', 'cdp', 'mcdp', 'template', 'sub', 'for',
-                      'provided', 'requires', 'implemented-by', 'using', 'by']
+                      'provided', 'requires', 'implemented-by', 'using', 'by',
+                      'catalogue', 'set-of']
     reserved = oneOf(keywords)
 
     # ParserElement.setDefaultWhitespaceChars('')
@@ -37,17 +45,16 @@ class Syntax():
     # line = SkipTo(LineEnd(), failOn=LineStart() + LineEnd())
 
     # identifier
-    idn = (Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))).setResultsName('idn')
+    idn = (NotAny(reserved) + Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))).setResultsName('idn')
 
-    unit_base = Word(alphas + '$' + ' ')
+#     idn =  idn0
+    unit_base = NotAny(reserved) + Word(alphas + '$' + ' ')
     unit_power = L('^') + O(L(' ')) + Word(nums)
     unit_simple = unit_base + O(unit_power)
     unit_connector = L('/') | L('*')
 
-    unit_expr = Combine(unit_simple + ZeroOrMore(unit_connector + unit_simple))
-
-
-    spa(unit_expr, lambda t: CDP.Unit(make_rcompunit(t[0])))
+    unit_expr = sp(Combine(unit_simple + ZeroOrMore(unit_connector + unit_simple)),
+                   lambda t: CDP.Unit(make_rcompunit(t[0])))
 
     # numbers
     number = Word(nums)
@@ -64,6 +71,9 @@ class Syntax():
 
     integer_or_float = sp(integer ^ floatnumber,
                           lambda t: CDP.ValueExpr(t[0]))
+
+    COMMA = sp(L(','), lambda t: CDP.comma(t[0]))
+
 
     unitst = S(L('[')) + C(unit_expr, 'unit') + S(L(']'))
 
@@ -129,16 +139,23 @@ class Syntax():
                          lambda t: CDP.SetNameGeneric(t[0], t[1], t[2]))
 
 
-    variable_ref = sp(NotAny(reserved) + C(idn.copy(), 'variable_ref_name'),
-                      lambda t: CDP.VariableRef(t['variable_ref_name']))
+
+
+    variable_ref = sp(idn.copy(), VariableRef_make)
+    # variable_ref = sp(idn, lambda t: CDP.VariableRef(t[0]))
+#     variable_ref = sp(NotAny(reserved) + C(idn.copy(), 'variable_ref_name'),
+#                       lambda t: CDP.VariableRef(t['variable_ref_name']))
 
     constant_value = Forward()
     
+    collection_of_constants = sp(S(L('{')) + constant_value +
+                                ZeroOrMore(COMMA + constant_value) + S(L('}')),
+                                lambda t: CDP.Collection(make_list(list(t))))
 
 #     par = nestedExpr(opener='(', closer=')', content=constant_value)
 
 #     par = S(L("(")) + number_with_unit + S(L(")"))
-    constant_value << number_with_unit ^ variable_ref
+    constant_value << (number_with_unit ^ variable_ref ^ collection_of_constants)
 
     # ^ divide_constants)
 
@@ -160,24 +177,22 @@ class Syntax():
 
     rvalue_resource = rvalue_resource_simple ^ rvalue_resource_fancy
 
-    rvalue_new_function = C(idn.copy(), 'new_function')
-    spa(rvalue_new_function, lambda t: CDP.VariableRef(t['new_function']))
+    rvalue_new_function = sp(idn.copy(), VariableRef_make)
 
-    lf_new_resource = C(idn.copy(), 'new_resource')
-    spa(lf_new_resource, lambda t: CDP.NewResource(t['new_resource']))
+    lf_new_resource = sp(idn.copy(),
+                         lambda t: CDP.NewResource(t[0]))
 
-    lf_new_limit = C(Group(number_with_unit), 'limit')
-    spa(lf_new_limit, lambda t: CDP.NewLimit(t['limit'][0]))
+    lf_new_limit = sp(C(Group(number_with_unit), 'limit'),
+                      lambda t: CDP.NewLimit(t['limit'][0]))
 
     unary = {
         'sqrt': lambda op1: CDP.GenericNonlinearity(math.sqrt, op1, lambda F: F),
         'square': lambda op1: CDP.GenericNonlinearity(square, op1, lambda F: F),
     }
     unary_op = Or([L(x) for x in unary])
-    unary_expr = (C(unary_op, 'opname') - S(L('('))
-                    + C(rvalue, 'op1')) - S(L(')'))
-
-    spa(unary_expr, lambda t: Syntax.unary[t['opname']](t['op1']))
+    unary_expr = sp((C(unary_op, 'opname') - S(L('('))
+                    + C(rvalue, 'op1')) - S(L(')')),
+                    lambda t: Syntax.unary[t['opname']](t['op1']))
 
 
     binary = {
@@ -187,12 +202,10 @@ class Syntax():
 
     opname = sp(Or([L(x) for x in binary]), lambda t: CDP.OpKeyword(t[0]))
 
-    binary_expr = (opname - S(L('(')) +
+    binary_expr = sp((opname - S(L('(')) +
                     C(rvalue, 'op1') - S(L(','))
-                    + C(rvalue, 'op2')) - S(L(')'))
-
-
-    spa(binary_expr, lambda t: Syntax.binary[t[0].keyword](a=t['op1'], b=t['op2'], keyword=t[0]))
+                    + C(rvalue, 'op2')) - S(L(')')) ,
+                   lambda t: Syntax.binary[t[0].keyword](a=t['op1'], b=t['op2'], keyword=t[0]))
 
     operand = rvalue_new_function ^ rvalue_resource ^ binary_expr ^ unary_expr ^ constant_value
 
@@ -269,8 +282,10 @@ class Syntax():
     dp_model_statements = sp(ZeroOrMore(S(ow) + line_expr),
                              lambda t: make_list(list(t)))
 
+
     dp_model = sp(CDPTOKEN - S(L('{')) - dp_model_statements - S(L('}')),
                   lambda t: CDP.BuildProblem(keyword=t[0], statements=t[1]))
+
 
     funcname = sp(Combine(idn + ZeroOrMore(L('.') - idn)), lambda t: CDP.FuncName(t[0]))
     CODE = sp(L('code'), lambda t: CDP.CodeKeyword(t[0]))
@@ -298,6 +313,23 @@ class Syntax():
                          lambda t: CDP.DPWrap(token=t[0], statements=t[1], prep=t[2], impl=t[3]))
 
 
+    FROMCATALOGUE = sp(L('catalogue'), lambda t:CDP.FromCatalogueKeyword(t[0]))
+
+    entry = rvalue
+    imp_name = sp(idn.copy(), lambda t: CDP.ImpName(t[0]))
+    catalogue_row = sp(imp_name +  # S(L('[')) + entry +
+                       ZeroOrMore(S('|') + entry),  # + S(L(']')),
+                       lambda t: make_list(list(t)))
+    catalogue_table = sp(OneOrMore(catalogue_row),
+                         lambda t: CDP.CatalogueTable(make_list(list(t))))
+
+    catalogue_dp = sp(FROMCATALOGUE - S(L('{')) -
+                   simple_dp_model_stats -
+                   catalogue_table -
+                   S(L('}')),
+                   lambda t: CDP.FromCatalogue(t[0], t[1], t[2]))
+
+
     COMPACT = sp(L('compact'), lambda t: CDP.CompactKeyword(t[0]))
     TEMPLATE = sp(L('template'), lambda t: CDP.TemplateKeyword(t[0]))
     ABSTRACT = sp(L('abstract'), lambda t: CDP.AbstractKeyword(t[0]))
@@ -314,7 +346,7 @@ class Syntax():
                        lambda t: CDP.MakeTemplate(t[0], t[1]))
 
     dp_operand = (load_expr | simple_dp_model | dp_model | abstract_expr |
-                  template_expr | compact_expr | variable_ref)
+                  template_expr | compact_expr | variable_ref | catalogue_dp)
 
     dp_rvalue << operatorPrecedence(dp_operand, [
     #     ('-', 1, opAssoc.RIGHT, Unary.parse_action),

@@ -17,10 +17,6 @@ class UpperSet():
         self.minimals = frozenset(minimals)
         self.P = P
 
-#         if len(self.minimals) == 0:
-#             msg = 'Cannot create upper set from empty set.'
-#             raise_desc(ValueError, msg, P=self.P)
-
         if do_extra_checks():
             # XXX
             problems = []

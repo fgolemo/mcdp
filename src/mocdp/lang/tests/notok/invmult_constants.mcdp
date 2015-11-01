@@ -1,0 +1,9 @@
+# test connected
+mcdp {
+	provides capacity [J]
+	requires mass [kg]
+
+	se = 2 J / kg
+	mass * se >= capacity 
+}
+  	

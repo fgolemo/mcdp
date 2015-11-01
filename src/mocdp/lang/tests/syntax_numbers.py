@@ -290,5 +290,47 @@ def check_conversion4():
     print(r)
     assert_equal(r.minimals, set([5.0]))
 
+@comptest
+def check_tables():
 
+    parse_wrap_check("duracella | 1.5 V | 5 $ | 0.20 g ",
+                     Syntax.catalogue_row)
+    parse_wrap_check("duracella | 1.5 V | 5 $ | 0.20 g | 1.5 [mA] * 10 [V]",
+                     Syntax.catalogue_row)
+
+@comptest
+def alternatives():
+    npd = parse_ndp("""
+mcdp {
+    # two linear response
+    # 0J => 0, 0
+    # two slutions for 12.5 g
+    # 100J =>
+    battery1 = mcdp {
+        provides capacity [J]
+        requires mass [kg]
+
+        m0 = 5 g
+        specific_energy = 1 J / kg 
+
+        mass >=  capacity / specific_energy + m0
+    }
+    
+    battery2 = mcdp {
+        provides capacity [J]
+        requires mass [kg]
+
+        m0 = 10 g 
+        specific_energy = 0.6 J / kg
+
+        mass >= capacity / specific_energy + m0
+    }
+    
+    sub battery = battery1 ^ battery2
+
+    requires mass for battery
+    provides capacity using battery
+    
+}
+""")
 

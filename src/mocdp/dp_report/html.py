@@ -272,9 +272,10 @@ span.RequireKeyword,
     span.LoadKeyword,
     span.CodeKeyword,
     span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
-    span.ImplementedbyKeyword 
+    span.ImplementedbyKeyword , span.FromCatalogueKeyword
        { font-weight: bold; }
        
+    span.ImpName { color: #CC6600; }
     span.FuncName { color: #CC6600 ; }
 
        span.MCDPKeyword,
@@ -288,7 +289,7 @@ span.RequireKeyword,
     span.ProvidedByKeyword,
     span.LoadKeyword, span.CodeKeyword,
     span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
-    span.ImplementedbyKeyword 
+    span.ImplementedbyKeyword,  span.FromCatalogueKeyword 
     {
        color: #00a;}
      span.FName, span.RName { } /*font-style: italic;}*/

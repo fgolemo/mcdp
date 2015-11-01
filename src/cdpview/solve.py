@@ -97,8 +97,6 @@ class SolveDP(QuickAppBase):
             x = ", ".join(rnames)
             print('Minimal resources needed: %s = %s' % (x, UR.format(sr[-1])))
 
-
-
         except:
             raise
 

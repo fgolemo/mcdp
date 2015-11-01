@@ -63,6 +63,14 @@ class CDPLanguage():
     OpKeyword = namedtuplewhere('OpKeyword', 'keyword')  # Max
     DPWrapToken = namedtuplewhere('DPWrapToken', 'keyword')
     FuncName = namedtuplewhere('FuncName', 'value')  # python function name
+
+    # catalogue =
+    FromCatalogueKeyword = namedtuplewhere('FromCatalogueKeyword', 'keyword')  # python function name
+
+    ImpName = namedtuplewhere('ImpName', 'value')
+    CatalogueRow = namedtuplewhere('CatalogeRow', 'cells')
+    CatalogueTable = namedtuplewhere('CatalogueTable', 'rows')
+    FromCatalogue = namedtuplewhere('FromCatalogue', 'keyword funres table')
     # just prepositions
     leq = namedtuplewhere('leq', 'glyph')
     geq = namedtuplewhere('geq', 'glyph')
@@ -72,10 +80,11 @@ class CDPLanguage():
     bar = namedtuplewhere('bar', 'glyph')
     coprod = namedtuplewhere('coprod', 'glyph')
     DotPrep = namedtuplewhere('DotPrep', 'glyph')
+    comma = namedtuplewhere('comma', 'glyph')
 
     FName = namedtuplewhere('FName', 'value')
     RName = namedtuplewhere('RName', 'value')
-
+    Collection = namedtuplewhere('Collection', 'elements')
 
     FunStatement = namedtuplewhere('FunStatement', 'keyword fname unit')
     ResStatement = namedtuplewhere('ResStatement', 'keyword rname unit')

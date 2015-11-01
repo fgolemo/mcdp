@@ -22,6 +22,22 @@ mcdp {
 
         mass >= capacity / specific_energy + m0
     }
+
+    x = (1.5 mA) * 10 V
+    battery3 = catalogue {
+
+        provides voltage [V]
+        provides capacity [J]
+
+        requires mass [kg]
+        requires cost [$]
+
+        duracella | 1.5 V | 5 $ | 0.20 g 
+        duracella | 1.5 V | 5 $ | 0.20 g + e | (1.5 mA*h) * 10 V 
+
+        #duracella | 1.5 V | 5 $ | 0.20 g | (1.5 V) * 15000 (mA*h)
+        #duracellb | 5.0 V | 5 $ | 0.20 g | (5.0 V) * 15000 (mA*h)
+    }
     
     sub battery = battery1 ^ battery2
 

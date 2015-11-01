@@ -1,0 +1,37 @@
+mcdp {
+	
+	simple_cell = catalogue {
+
+        provides voltage [V]
+        provides capacity [J]
+
+        requires mass [kg]
+        requires cost [$]
+
+        model1 | 1.5 V | 5 $ | 0.20 kg 
+        model2 | 1.5 V | 5 $ | 0.20 kg 
+        model3 | 5   V | 5 $ | 0.30 kg
+
+    }
+
+    cell_plus_converter = mcdp {
+    	sub converter = catalogue {
+    		provides voltage_out [V]
+    		requires voltage_in  [V]
+    		requires cost [$]
+    		requires weight [g]
+	
+	        step_up1 |  5 V | 1.5 V | 5 $  | 20 g  
+	        step_up2 | 12 V | 1.5 V | 10 $ | 20 g  
+    	}
+
+    	sub cell = simple_cell
+    	provides voltage <= converter.voltage_in
+    	converter.voltage_out >= cell.voltage
+    	requires mass for cell
+    	requires cost >= cell.cost + converter.cost
+    }
+
+    sub battery = simple_cell ^ cell_plus_converter
+
+}

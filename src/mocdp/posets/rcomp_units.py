@@ -6,6 +6,7 @@ from mocdp.exceptions import DPSyntaxError
 from pint import UnitRegistry
 from pint.unit import UndefinedUnitError
 import functools
+from mocdp.posets.finite_set import FiniteCollectionsInclusion
 
 # __all__ = [
 #    'RcompUnits',
@@ -84,14 +85,23 @@ def parse_pint(s0):
         raise_wrapped(DPSyntaxError, e, msg)
 
 def make_rcompunit(units):
-    s = units.strip()
+    try:
+        s = units.strip()
+    
+        if s.startswith('set of'):
+            t = s.split('set of')
+            u = make_rcompunit(t[1])
+            return FiniteCollectionsInclusion(u)
 
-    if s == 'any':
-        return BottomCompletion(TopCompletion(Any()))
-
-    if s == 'R':
-        s = 'm/m'
-    unit = parse_pint(s)
+        if s == 'any':
+            return BottomCompletion(TopCompletion(Any()))
+    
+        if s == 'R':
+            s = 'm/m'
+        unit = parse_pint(s)
+    except DPSyntaxError as e:
+        msg = 'Cannot parse %r.' % units
+        raise_wrapped(DPSyntaxError, e, msg)
     return RcompUnits(unit)
 
 def format_pint_unit_short(units):

@@ -108,12 +108,12 @@ def syntax_doc(data):
     return [res1]
 
 allplots  = {
-    'ndp_default': lambda data: ndp_visualization(data, 'default'),
-    'ndp_clean': lambda data: ndp_visualization(data, 'clean'),
-    'syntax_doc': syntax_doc,
-    'syntax_frag': syntax_frag,
-    'syntax_pdf': syntax_pdf,
-    'dp_tree': dp_visualization,
+    ('syntax_doc', syntax_doc),
+    ('syntax_frag', syntax_frag),
+    ('syntax_pdf', syntax_pdf),
+    ('ndp_default', lambda data: ndp_visualization(data, 'default')),
+    ('ndp_clean', lambda data: ndp_visualization(data, 'clean')),
+    ('dp_tree', dp_visualization),
 }
 
 def do_plots(filename, plots, outdir):
@@ -121,10 +121,11 @@ def do_plots(filename, plots, outdir):
     data = {}
     data['s'] = s
     
+    d = dict(allplots)
     results = []
     for p in plots:    
         print('plotting %r ' % p)
-        res = allplots[p](data)
+        res = d[p](data)
         assert isinstance(res, list)
         for r in res:
             assert isinstance(r, tuple), r
@@ -171,7 +172,8 @@ class PlotDP(QuickAppBase):
                 out = '.'
         else:
             out = options.out
-        plots = expand_string(options.plots, list(allplots))
+        possible = [p for p, _ in allplots]
+        plots = expand_string(options.plots, list(possible))
         do_plots(filename, plots, out)
 
         if options.watch:
