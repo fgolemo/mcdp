@@ -6,7 +6,7 @@ python:
   # - "3.2"
   # - "3.3"
   # - "3.4"
-  - "3.5"
+  # - "3.5"
   # - "3.5-dev" # 3.5 development branch
   - "pypy"
 # command to install dependencies
@@ -25,10 +25,10 @@ install:
 - python setup.py develop
 # command to run tests
 script: 
-- make -C example-catalogue
-- make -C example-battery
 # run first without contracts
 - make comptests-run-parallel-nocontracts
+- make -C example-catalogue
+- make -C example-battery
 - make clean comptests-run-parallel
 after_failure:
 - compmake out/comptests -c "ls failed"
@@ -42,6 +42,7 @@ addons:
     - python-matplotlib
     - python-numpy
     - python-yaml
+    - wkhtmltopdf
     - pypy-dev
     - python-cffi  # for pypy/numpy
     # - python-cjson disallowed by Travis!
