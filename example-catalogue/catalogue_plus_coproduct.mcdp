@@ -8,9 +8,13 @@
         requires cost [$]
         requires mass [kg]
 
-        model1 | {1.5 V} | 1 J |  5 $ | 0.20 kg 
-        model2 | {1.5 V} | 1 J | 15 $ | 0.10 kg 
-        model3 | {5.0 V} | 1 J |  5 $ | 0.30 kg
+        # These two have some functions, but
+        # non-dominating resources
+        model1 | {1.5 V} | 1 MJ |  5 $ | 0.20 kg 
+        model2 | {1.5 V} | 1 MJ | 15 $ | 0.10 kg 
+        # This one gives 5V; it's cheap but will
+        # need an adapter
+        model3 | {5.0 V} | 1 MJ |  5 $ | 0.30 kg
 
     }
 

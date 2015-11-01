@@ -10,12 +10,14 @@ from mocdp.posets import PosetProduct, UpperSets, get_types_universe
 from quickapp import QuickAppBase
 from reprep import Report
 import os
+import logging
 
 class ExpectationsNotMet(Exception):
     pass
 
 class SolveDP(QuickAppBase):
-    """ Plot a design program """
+    """ Solves an MCDP. """
+
     def define_program_options(self, params):
         params.add_string('out', help='Output dir', default=None)
         params.add_int('max_steps', help='Maximum number of steps', default=None)
@@ -28,7 +30,10 @@ class SolveDP(QuickAppBase):
         params.add_flag('plot', help='Show iterations graphically')
         params.add_flag('imp', help='Show implementations')
 
+
     def go(self):
+        from conf_tools import logger
+        logger.setLevel(logging.CRITICAL)
         GlobalConfig.global_load_dir("mocdp")
 
         options = self.get_options()
