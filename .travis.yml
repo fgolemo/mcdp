@@ -19,6 +19,7 @@ install:
 - dot -V
 - "if [[ $TRAVIS_PYTHON_VERSION != 'pypy' ]]; then pip install matplotlib ; fi"
 - "if [[ $TRAVIS_PYTHON_VERSION != 'pypy' ]]; then python -c 'import matplotlib' ; fi"
+- "if [[ $TRAVIS_PYTHON_VERSION == 'pypy' ]]; then pypy --version; fi"
 - "if [[ $TRAVIS_PYTHON_VERSION == 'pypy' ]]; then pip install git+https://bitbucket.org/pypy/numpy.git; fi"
 - python setup.py develop
 # command to run tests

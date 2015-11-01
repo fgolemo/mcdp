@@ -1,21 +1,20 @@
 # -*- coding: utf-8 -*-
+from abc import ABCMeta, abstractmethod
 from comptests.registrar import comptest_dynamic
+from contracts import contract
+from contracts.utils import raise_desc, raise_wrapped
+from mocdp.dp.solver import generic_solve
 from mocdp.drawing import plot_upset_R2
 from mocdp.lang.syntax import parse_ndp
 from mocdp.posets import UpperSets
-from reprep import Report
-import numpy as np
-from mocdp.dp.solver import generic_solve
-from abc import ABCMeta, abstractmethod
-from contracts import contract
-from mocdp.posets.types_universe import get_types_universe
+from mocdp.posets.poset import NotLeq
 from mocdp.posets.poset_product import PosetProduct
 from mocdp.posets.rcomp import Rcomp
-from mocdp.posets.poset import NotLeq
-from contracts.utils import raise_wrapped, raise_desc
-import itertools
-import functools
+from mocdp.posets.types_universe import get_types_universe
 from mocdp.posets.uppersets import UpperSet
+from reprep import Report
+import functools
+import numpy as np
 
 
 @comptest_dynamic
