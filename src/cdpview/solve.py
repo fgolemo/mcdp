@@ -11,12 +11,19 @@ from quickapp import QuickAppBase
 from reprep import Report
 import os
 
+class ExpectationsNotMet(Exception):
+    pass
 
 class SolveDP(QuickAppBase):
     """ Plot a design program """
     def define_program_options(self, params):
         params.add_string('out', help='Output dir', default=None)
         params.add_int('max_steps', help='Maximum number of steps', default=None)
+
+        params.add_int('expect_nimp', help='Expected number of implementations.',
+                        default=None)
+        params.add_int('expect_nres', help='Expected number of resources.',
+                        default=None)
         params.accept_extra()
         params.add_flag('plot', help='Show iterations graphically')
         params.add_flag('imp', help='Show implementations')
@@ -100,17 +107,31 @@ class SolveDP(QuickAppBase):
         except:
             raise
 
+        nres = len(sr[-1].minimals)
+        if options.expect_nres is not None:
+            if nres != options.expect_nres:
+                msg = 'Found wrong number of resources'
+                raise_desc(ExpectationsNotMet, msg,
+                           expect_nres=options.expect_nres, nres=nres)
+
         if options.imp:
             M = dp.get_imp_space_mod_res()
             # print('M = %s' % M)
 
+            nimplementations = 0
             for r in sr[-1].minimals:
                 ms = dp.get_implementations_f_r(f=fg, r=r)
+                nimplementations += len(ms)
                 s = 'r = %s ' % R.format(r)
                 for j, m in enumerate(ms):
                     # print('m = %s' % str(m))
                     s += "\n  implementation %d: m = %s " % (j + 1, M.format(m))
                 print(s)
+            if options.expect_nimp is not None:
+                if options.expect_nimp != nimplementations:
+                    msg = 'Found wrong number of implementations'
+                    raise_desc(ExpectationsNotMet, msg, expect_nimp=options.expect_nimp,
+                               nimplementations=nimplementations)
 
         if options.plot:
             r = Report()

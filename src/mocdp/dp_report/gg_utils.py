@@ -2,12 +2,12 @@
 
 from contextlib import contextmanager
 from copy import deepcopy
+from mocdp.exceptions import mcdp_dev_warning
 from reprep.constants import MIME_PDF, MIME_PNG
 from system_cmd import CmdException, system_cmd_result
 import networkx as nx  # @UnresolvedImport
 import os
 import traceback
-from mocdp.exceptions import mcdp_dev_warning
 
 
 def graphviz_run(filename_dot, output, prog='dot'):
