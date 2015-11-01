@@ -287,9 +287,10 @@ def join_axes(a, b):
 def generic_plot_sequence(r, plotter, space, sequence, axis0=None, annotation=None):
 
     axis = plotter.axis_for_sequence(space, sequence)
+
+    axis = enlarge(axis, 0.15)
     if axis0 is not None:
         axis = join_axes(axis, axis0)
-
 
     for i, x in enumerate(sequence):
         caption = space.format(x)
@@ -298,15 +299,12 @@ def generic_plot_sequence(r, plotter, space, sequence, axis0=None, annotation=No
             plotter.plot(pylab, axis, space, x)
             if annotation is not None:
                 annotation(pylab, axis)
-#             plot_upset_R2(pylab, s, axis, color_shadow=[1.0, 0.8, 0.8])
-#
-#             xs = np.linspace(0.001, 1, 100)
-#             ys = 1 / xs
-#             pylab.plot(xs, ys, 'k-')
-#
-#             xs = np.linspace(1, mx, 100)
-#             ys = xs
-#             pylab.plot(xs, ys, 'k-')
+
+            xlabel, ylabel = plotter.get_xylabels(space)
+            if xlabel:
+                pylab.xlabel(xlabel)
+            if ylabel:
+                pylab.ylabel(ylabel)
 
             pylab.axis(axis)
 
@@ -329,6 +327,9 @@ class Plotter():
     def plot(self, pylab, axis, space, value):
         pass
 
+    def get_xylabels(self, space):
+        return None, None
+
 class PlotterUR2(Plotter):
 
     def check_plot_space(self, space):
@@ -347,6 +348,10 @@ class PlotterUR2(Plotter):
 
         _f1, _f2 = tu.get_embedding(P, R2)
     
+    def get_xylabels(self, space):
+        P = space.P
+        return '%s' % P[0], '%s' % P[1]
+
     @contract(returns='seq[4]')
     def axis_for_sequence(self, space, seq):
         self.check_plot_space(space)

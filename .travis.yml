@@ -23,6 +23,8 @@ install:
 - python setup.py develop
 # command to run tests
 script: 
+- make -C example-catalogue
+- make -C example-battery
 - make comptests-run-parallel
 after_failure:
 - compmake out/comptests -c "ls failed"

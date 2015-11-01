@@ -9,8 +9,8 @@ from mocdp.lang.syntax import Syntax
 from mocdp.posets import PosetProduct, UpperSets, get_types_universe
 from quickapp import QuickAppBase
 from reprep import Report
-import os
 import logging
+import os
 
 class ExpectationsNotMet(Exception):
     pass
@@ -28,8 +28,7 @@ class SolveDP(QuickAppBase):
                         default=None)
         params.accept_extra()
         params.add_flag('plot', help='Show iterations graphically')
-        params.add_flag('imp', help='Show implementations')
-
+        params.add_flag('imp', help='Compute and show implementations.')
 
     def go(self):
         from conf_tools import logger
@@ -37,6 +36,8 @@ class SolveDP(QuickAppBase):
         GlobalConfig.global_load_dir("mocdp")
 
         options = self.get_options()
+        if options.expect_nimp is not None:
+            options.imp = True
         params = options.get_extra()
 
         if len(params) < 1:
@@ -141,7 +142,10 @@ class SolveDP(QuickAppBase):
         if options.plot:
             r = Report()
             generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0))
-            out_html = os.path.splitext(filename)[0] + '-solve.html'
+
+            params = '-'.join(params).replace(' ', '').replace('{', '').replace('}', '')
+            out_html = os.path.splitext(os.path.basename(filename))[0] + '-%s.html' % params
+            out_html = os.path.join(out, out_html)
             print('writing to %r' % out_html)
             r.to_html(out_html)
 #
