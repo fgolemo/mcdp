@@ -44,9 +44,9 @@ The program ``mcdp-solve`` is a solver.
 
     $ mcdp-solve <filename>.mcdp <f1> <f2> ...
     
-For example, to solve one of the examples specified in ``examples/example-battery/out/out/battery.mcdp'', use:
+For example, to solve one of the examples specified in ``examples/example-battery/out/battery.mcdp'', use:
 
-    $ mcdp-solve examples/example-battery/out/out/battery.mcdp "1 hour" "0.1 kg" "1 W"
+    $ mcdp-solve examples/example-battery/battery.mcdp "1 hour" "0.1 kg" "1 W"
 
 The expected output is:
 
@@ -57,7 +57,7 @@ The expected output is:
 
 This is the case of unreasonable demands (1 kg of extra payload):
 
-    $ mcdp-solve examples/example-battery/out/out/battery.mcdp "1 hour" "1.0 kg" "1 W"
+    $ mcdp-solve examples/example-battery/battery.mcdp "1 hour" "1.0 kg" "1 W"
 
 This is the expected output:
 
@@ -73,22 +73,22 @@ The programs ``mcdp-plot`` will parse and plot the MCDP in a variety of represen
 
 For example, the command
 
-    $ mcdp-plot examples/example-battery/out/out/battery.mcdp 
+    $ mcdp-plot examples/example-battery/battery.mcdp 
     
 will produce these graphs:
 
 <table>
 <tr>
     <td>Syntax highlighting</td>
-    <td><a href="examples/example-battery/out/out/battery-syntax_pdf.png">
-        <img src="examples/example-battery/out/out/battery-syntax_pdf.png" height="500px"/>
+    <td><a href="examples/example-battery/out/battery-syntax_pdf.png">
+        <img src="examples/example-battery/out/battery-syntax_pdf.png" height="500px"/>
         </a>
     </td>
 </tr>
-<tr><td>Verbose graph</td><td><a href="examples/example-battery/out/out/battery-default.png"><img src="examples/example-battery/out/out/battery-default.png"/></a></td></tr>
-<tr><td>Cleaned-up graph</td><td ><a href="examples/example-battery/out/out/battery-clean.png">
-<img src="examples/example-battery/out/out/battery-clean.png" height="300px"/></a></td></tr>
-<tr><td>Tree representation</td><td><img src="examples/example-battery/out/out/battery-dp_tree.png"/></td></tr>
+<tr><td>Verbose graph</td><td><a href="examples/example-battery/out/battery-default.png"><img src="examples/example-battery/out/battery-default.png"/></a></td></tr>
+<tr><td>Cleaned-up graph</td><td ><a href="examples/example-battery/out/battery-clean.png">
+<img src="examples/example-battery/out/battery-clean.png" height="300px"/></a></td></tr>
+<tr><td>Tree representation</td><td><img src="examples/example-battery/out/battery-dp_tree.png"/></td></tr>
 </tr></table>
  
 
