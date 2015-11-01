@@ -10,6 +10,7 @@ from tempfile import mkdtemp
 from system_cmd import system_cmd_result
 from conf_tools.global_config import GlobalConfig
 from mocdp.dp_report.report import gvgen_from_dp
+from cdpview.utils_mkdir import mkdirs_thread_safe
 
 def get_ndp(data):
     if not 'ndp' in data:
@@ -172,6 +173,7 @@ class PlotDP(QuickAppBase):
                 out = '.'
         else:
             out = options.out
+        mkdirs_thread_safe(out)
         possible = [p for p, _ in allplots]
         plots = expand_string(options.plots, list(possible))
         do_plots(filename, plots, out)

@@ -615,7 +615,7 @@ def create_composite(gdc0, ndp):
 
         for c in ndp.context.connections:
             if c in ignore_connections:
-                print('ignoring connection %s' % str(c))
+                # print('ignoring connection %s' % str(c))
                 continue
 
             dpa = names2functions[c.dp2]

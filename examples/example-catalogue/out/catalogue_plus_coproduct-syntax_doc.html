@@ -1,0 +1,107 @@
+<html><head>
+        <link rel="stylesheet" type="text/css" href="syntax.css"> 
+        </head><body>
+<pre><code><span class='BuildProblem'><span class='MCDPKeyword'>mcdp</span> {
+    
+    <span class='SetNameGeneric'><span class='SetNameGenericVar'>simple_cell</span> <span class='eq'>=</span> <span class='FromCatalogue'><span class='FromCatalogueKeyword'>catalogue</span> {
+
+        <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> voltage</span> [<span class='Unit'>set of V</span>]</span>
+        <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> capacity</span> [<span class='Unit'>J</span>]</span>
+
+        <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> cost</span> [<span class='Unit'>$</span>]</span>
+        <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> mass</span> [<span class='Unit'>kg</span>]</span><span class='CatalogueTable'><span class='ImpName'>
+
+        <span class="comment"># These two have some functions, but</span>
+        <span class="comment"># non-dominating resources</span>
+        model1</span> | <span class='Collection'>{<span class='SimpleValue'><span class='ValueExpr'>1.5</span> <span class='Unit'>V</span></span>}</span> | <span class='SimpleValue'><span class='ValueExpr'>1</span> <span class='Unit'>MJ </span></span>|  <span class='SimpleValue'><span class='ValueExpr'>5</span> <span class='Unit'>$ </span></span>| <span class='SimpleValue'><span class='ValueExpr'>0.20</span> <span class='Unit'>kg </span></span><span class='ImpName'>
+        model2</span> | <span class='Collection'>{<span class='SimpleValue'><span class='ValueExpr'>1.5</span> <span class='Unit'>V</span></span>}</span> | <span class='SimpleValue'><span class='ValueExpr'>1</span> <span class='Unit'>MJ </span></span>| <span class='SimpleValue'><span class='ValueExpr'>15</span> <span class='Unit'>$ </span></span>| <span class='SimpleValue'><span class='ValueExpr'>0.10</span> <span class='Unit'>kg </span></span><span class='ImpName'>
+        <span class="comment"># This one gives 5V; it's cheap but will</span>
+        <span class="comment"># need an adapter</span>
+        model3</span> | <span class='Collection'>{<span class='SimpleValue'><span class='ValueExpr'>5.0</span> <span class='Unit'>V</span></span>}</span> | <span class='SimpleValue'><span class='ValueExpr'>1</span> <span class='Unit'>MJ </span></span>|  <span class='SimpleValue'><span class='ValueExpr'>5</span> <span class='Unit'>$ </span></span>| <span class='SimpleValue'><span class='ValueExpr'>0.30</span> <span class='Unit'>kg</span></span></span>
+
+    }</span></span>
+
+    <span class='SetNameGeneric'><span class='SetNameGenericVar'>cell_plus_converter</span> <span class='eq'>=</span> <span class='BuildProblem'><span class='MCDPKeyword'>mcdp</span> {
+        <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> voltage</span> [<span class='Unit'>set of V</span>]</span>
+        <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> capacity</span> [<span class='Unit'>J</span>]</span>
+        <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> cost</span> [<span class='Unit'>$</span>]</span>
+        <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> mass</span> [<span class='Unit'>kg</span>]</span>
+
+        <span class='SetName'><span class='SubKeyword'>sub</span><span class='DPName'> converter</span> = <span class='FromCatalogue'><span class='FromCatalogueKeyword'>catalogue</span> {
+            <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> voltage_out</span> [<span class='Unit'>set of V</span>]</span>
+            <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> voltage_in</span>  [<span class='Unit'>set of V</span>]</span>
+            <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> cost</span> [<span class='Unit'>$</span>]</span>
+            <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> mass</span> [<span class='Unit'>g</span>]</span><span class='CatalogueTable'><span class='ImpName'>
+    
+            step_up1</span> |<span class='Collection'>{<span class='SimpleValue'><span class='ValueExpr'>5</span>  <span class='Unit'>V</span></span>}</span>      | <span class='Collection'>{<span class='SimpleValue'><span class='ValueExpr'>1.5</span> <span class='Unit'>V</span></span>}</span> | <span class='SimpleValue'><span class='ValueExpr'>5</span> <span class='Unit'>$  </span></span>| <span class='SimpleValue'><span class='ValueExpr'>20</span> <span class='Unit'>g  </span></span><span class='ImpName'>
+            step_up2</span> |<span class='Collection'>{<span class='SimpleValue'><span class='ValueExpr'>12</span> <span class='Unit'>V</span></span>}</span>      | <span class='Collection'>{<span class='SimpleValue'><span class='ValueExpr'>1.5</span> <span class='Unit'>V</span></span>}</span> | <span class='SimpleValue'><span class='ValueExpr'>10</span> <span class='Unit'>$ </span></span>| <span class='SimpleValue'><span class='ValueExpr'>20</span> <span class='Unit'>g  </span></span><span class='ImpName'>
+            step_up2</span> |<span class='Collection'>{<span class='SimpleValue'><span class='ValueExpr'>12</span> <span class='Unit'>V</span></span><span class='comma'>,</span> <span class='SimpleValue'><span class='ValueExpr'>5</span> <span class='Unit'>V</span></span>}</span> | <span class='Collection'>{<span class='SimpleValue'><span class='ValueExpr'>1.5</span> <span class='Unit'>V</span></span>}</span> | <span class='SimpleValue'><span class='ValueExpr'>10</span> <span class='Unit'>$ </span></span>| <span class='SimpleValue'><span class='ValueExpr'>20</span> <span class='Unit'>g  </span></span></span>
+        }</span></span>
+
+        <span class='SetName'><span class='SubKeyword'>sub</span><span class='DPName'> cell</span> = <span class='VariableRef'>simple_cell</span></span>
+
+        <span class='Constraint'><span class='VariableRef'>voltage</span> <span class='leq'>&lt;=</span> <span class='Function'><span class='DPName'>converter</span><span class='DotPrep'>.</span><span class='FName'>voltage_out</span></span></span>
+        <span class='Constraint'><span class='Resource'><span class='DPName'>converter</span><span class='DotPrep'>.</span><span class='RName'>voltage_in</span></span> <span class='leq'>&lt;=</span> <span class='Function'><span class='DPName'>cell</span><span class='DotPrep'>.</span><span class='FName'>voltage</span></span></span>
+        <span class='Constraint'><span class='NewResource'>mass</span> <span class='geq'>&gt;=</span> <span class='PlusN'><span class='Resource'><span class='DPName'>cell</span><span class='DotPrep'>.</span><span class='RName'>mass</span></span> <span class='plus'>+</span> <span class='Resource'><span class='DPName'>converter</span><span class='DotPrep'>.</span><span class='RName'>mass</span></span></span></span>
+        <span class='Constraint'><span class='NewResource'>cost</span> <span class='geq'>&gt;=</span> <span class='PlusN'><span class='Resource'><span class='DPName'>cell</span><span class='DotPrep'>.</span><span class='RName'>cost</span></span> <span class='plus'>+</span> <span class='Resource'><span class='DPName'>converter</span><span class='DotPrep'>.</span><span class='RName'>cost</span></span></span></span>
+        <span class='Constraint'><span class='VariableRef'>capacity</span> <span class='leq'>&lt;=</span> <span class='Function'><span class='DPName'>cell</span><span class='DotPrep'>.</span><span class='FName'>capacity</span></span></span>
+    }</span></span>
+
+    <span class='SetName'><span class='SubKeyword'>sub</span><span class='DPName'> battery</span> = <span class='Coproduct'><span class='VariableRef'>simple_cell</span> <span class='coprod'>^</span><span class='VariableRef'> cell_plus_converter</span></span></span>
+    <span class='ResShortcut1m'><span class='RequireKeyword'>requires</span><span class='RName'> cost</span>,<span class='RName'> mass</span> <span class='ForKeyword'>for</span><span class='DPName'> battery</span></span>
+    <span class='FunShortcut1m'><span class='ProvideKeyword'>provides</span><span class='FName'> voltage</span>,<span class='FName'> capacity</span> <span class='UsingKeyword'>using</span><span class='DPName'> battery</span></span>
+}</span>
+</code></pre>
+
+<style type="text/css">
+ 
+     span.Unit { color: purple; }
+     span.ProvideKeyword, span.FName { color: darkgreen;}
+     span.RequireKeyword, span.RName  { color: darkred;}
+     
+     span.NewResource { color: darkred;}
+     span.ValueExpr { color: #CC6600 ;}
+     /*span.Function  { color: darkgreen;}*/
+span.ProvideKeyword,
+span.RequireKeyword,     
+       span.MCDPKeyword,
+       span.SubKeyword,
+    span.CompactKeyword,
+    span.AbstractKeyword,
+    span.TemplateKeyword,
+    span.ForKeyword,
+    span.UsingKeyword,
+    span.RequiredByKeyword,
+    span.ProvidedByKeyword,
+    span.LoadKeyword,
+    span.CodeKeyword,
+    span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
+    span.ImplementedbyKeyword , span.FromCatalogueKeyword
+       { font-weight: bold; }
+       
+    span.ImpName { color: #CC6600; }
+    span.FuncName { color: #CC6600 ; }
+
+       span.MCDPKeyword,
+       span.SubKeyword,
+    span.CompactKeyword,
+    span.AbstractKeyword,
+    span.TemplateKeyword,
+    span.ForKeyword,
+    span.UsingKeyword,
+    span.RequiredByKeyword,
+    span.ProvidedByKeyword,
+    span.LoadKeyword, span.CodeKeyword,
+    span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
+    span.ImplementedbyKeyword,  span.FromCatalogueKeyword 
+    {
+       color: #00a;}
+     span.FName, span.RName { } /*font-style: italic;}*/
+     span.DPName { font-style: italic; }
+     span.comment { color: grey;}
+
+
+</style>
+
+
+</body></html>

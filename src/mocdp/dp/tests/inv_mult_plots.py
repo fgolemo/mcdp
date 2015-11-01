@@ -305,7 +305,8 @@ def generic_plot_sequence(r, plotter, space, sequence, axis0=None, annotation=No
             if ylabel:
                 pylab.ylabel(ylabel)
 
-            pylab.axis(axis)
+            if (axis[0] != axis[1]) or (axis[2] != axis[3]):
+                pylab.axis(axis)
 
 class NotPlottable(Exception):
     pass
