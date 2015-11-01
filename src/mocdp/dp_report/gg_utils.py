@@ -29,6 +29,7 @@ def graphviz_run(filename_dot, output, prog='dot'):
         contents = open(filename_dot).read()
         with open(emergency, 'w') as f:
             f.write(contents)
+        print(contents)
         raise
 
 

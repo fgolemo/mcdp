@@ -10,15 +10,15 @@ python:
   # - "3.5-dev" # 3.5 development branch
   - "pypy"
 # command to install dependencies
-cache:
-  directories:
-    - $HOME/.cache/pip
+# cache:
+#   directories:
+#     - $HOME/.cache/pip
 install: 
 - "echo '\nconfig interactive 0' >> .compmake.rc "
 - "pip install -r requirements.txt"
 - dot -V
-- pip install matplotlib
-- python -c "import matplotlib"
+- "if [[ $TRAVIS_PYTHON_VERSION != 'pypy' ]]; then pip install matplotlib ; fi"
+- "if [[ $TRAVIS_PYTHON_VERSION != 'pypy' ]]; then python -c 'import matplotlib' ; fi"
 - python setup.py develop
 # command to run tests
 script: 
