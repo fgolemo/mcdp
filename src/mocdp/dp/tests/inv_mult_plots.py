@@ -17,7 +17,7 @@ import functools
 import numpy as np
 
 
-@comptest_dynamic
+# @comptest_dynamic
 def check_invmult(context):
     ndp = parse_ndp("""
     cdp {

@@ -26,7 +26,9 @@ install:
 script: 
 - make -C example-catalogue
 - make -C example-battery
-- make comptests-run-parallel
+# run first without contracts
+- make comptests-run-parallel-nocontracts
+- make clean comptests-run-parallel
 after_failure:
 - compmake out/comptests -c "ls failed"
 - compmake out/comptests -c "why failed"
