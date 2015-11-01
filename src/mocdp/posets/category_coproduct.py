@@ -43,7 +43,8 @@ class Coproduct1(Space):
                         self.spaces[j].belongs(sj)
                     except NotBelongs as e:
                         msg = 'Element %d' % j
-                        raise_wrapped(NotBelongs, e, msg, j=j, sj=sj)
+                        raise_wrapped(NotBelongs, e, msg, j=j, sj=sj,
+                                      spacej=self.spaces[j])
                 else:
                     if not sj == Coproduct1.fill:
                         msg = 'sj is not fill'
@@ -93,5 +94,5 @@ class Coproduct1(Space):
 
     def format(self, x):
         i, e = self.unpack(x)
-        return '%s:(%s)' % (i, self.spaces[i].format(e))
+        return 'alt%s:(%s)' % ((i + 1), self.spaces[i].format(e))
 

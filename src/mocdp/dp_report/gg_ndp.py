@@ -431,7 +431,11 @@ def create_coproduct(gdc0, ndp):
         gdc0.styleApply('coproduct_function', c)
 
     for i, ndpi in enumerate(ndp.ndps):
-        with gdc0.child_context_yield(parent=gdc0.parent, yourname='%s' % i) as gdci:
+        if gdc0.yourname is not None:
+            header = '%s - alternative %s' % (gdc0.yourname, i + 1)
+        else:
+            header = 'alternative %s' % (i + 1)
+        with gdc0.child_context_yield(parent=gdc0.parent, yourname=header) as gdci:
             funi, resi = create(gdci, ndpi)
 
             for fn, fni in zip(ndp.get_fnames(), ndpi.get_fnames()):

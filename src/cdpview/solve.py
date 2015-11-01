@@ -46,7 +46,7 @@ class SolveDP(QuickAppBase):
         Fd = []
         context = Context()
         for p in params:
-            res = parse_wrap(Syntax.number_with_unit, p)[0]
+            res = parse_wrap(Syntax.constant_value, p)[0]
             vu = eval_constant(res, context)
             fd.append(vu.value)
             Fd.append(vu.unit)
@@ -102,11 +102,14 @@ class SolveDP(QuickAppBase):
 
         if options.imp:
             M = dp.get_imp_space_mod_res()
+            # print('M = %s' % M)
+
             for r in sr[-1].minimals:
                 ms = dp.get_implementations_f_r(f=fg, r=r)
                 s = 'r = %s ' % R.format(r)
-                for m in ms:
-                    s += "m = %s " % M.format(m)
+                for j, m in enumerate(ms):
+                    # print('m = %s' % str(m))
+                    s += "\n  implementation %d: m = %s " % (j + 1, M.format(m))
                 print(s)
 
         if options.plot:

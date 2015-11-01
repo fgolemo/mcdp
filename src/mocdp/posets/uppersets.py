@@ -5,6 +5,7 @@ from .utils import poset_minima
 from contracts import check_isinstance, contract
 from contracts.utils import raise_desc
 from mocdp.exceptions import do_extra_checks
+from mocdp.posets.poset import NotBounded
 
 __all__ = [
     'UpperSet',
@@ -53,14 +54,16 @@ class UpperSets(Poset):
         from mocdp.configuration import get_conftools_posets
         _, self.P = get_conftools_posets().instance_smarter(P)
 
-        self.top = self.get_top()
-        self.bot = self.get_bottom()
-
         if do_extra_checks:
-            self.belongs(self.top)
-            self.belongs(self.bot)
-            assert self.leq(self.bot, self.top)
-            assert not self.leq(self.top, self.bot)  # unless empty
+            try:
+                self.top = self.get_top()
+                self.belongs(self.top)
+                self.bot = self.get_bottom()
+                self.belongs(self.bot)
+                assert self.leq(self.bot, self.top)
+                assert not self.leq(self.top, self.bot)  # unless empty
+            except NotBounded:
+                pass
 
     def get_bottom(self):
         x = self.P.get_bottom()

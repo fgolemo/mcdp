@@ -3,7 +3,7 @@ from .primitive import PrimitiveDP
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.dp.primitive import NormalForm, NotFeasible, Feasible
 from mocdp.posets import Map, PosetProduct, UpperSets
-from mocdp.exceptions import DPInternalError
+from mocdp.exceptions import DPInternalError, do_extra_checks
 from mocdp.posets import SpaceProduct
 from .dp_identity import Identity
 from .dp_flatten import Mux
@@ -98,9 +98,11 @@ class Series0(PrimitiveDP):
             r2s = self.dp2.solve(f2)
             
             if isinstance(self.dp1, (Mux, Identity)):
-                m_extra = f2  # XXX
+                # print('equivalent to identity')
+                m_extra = ()  # XXX
             elif self._is_equiv_to_terminator(self.dp2):
-                m_extra = f2  # XXX
+                # print('equivalent to _is_equiv_to_terminator')
+                m_extra = ()  # XXX
             else:
                 m_extra = f2
 
@@ -108,7 +110,7 @@ class Series0(PrimitiveDP):
                 if not R2.leq(r2, r):
                     continue
                 m2s = self.dp2.get_implementations_f_r(f2, r2)
-                print('Found f1=%s r1=%s r2=%s' % (f1, r1, r2))
+                # print('Found f1=%s r1=%s r2=%s' % (f1, r1, r2))
                 for m1 in m1s:
                     for m2 in m2s:
                         m = pack(m1, m_extra, m2)
@@ -116,6 +118,12 @@ class Series0(PrimitiveDP):
         if not res:
             msg = 'The (f,r) pair was not feasible.'
             raise_desc(NotFeasible, msg, f=f, r=r, self=self)
+
+
+        if do_extra_checks():
+            M = self.get_imp_space_mod_res()
+            for _ in res:
+                M.belongs(_)
         assert res
         return res
 

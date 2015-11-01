@@ -25,10 +25,10 @@ class FiniteCollection():
                 raise NotBelongs(msg)
 
     def __repr__(self):  # ≤  ≥
-        contents = ", ".join(self.P.format(m)
-                        for m in sorted(self.minimals))
+        contents = ", ".join(self.S.format(m)
+                        for m in sorted(self.elements))
 
-        return "{ %s }" % contents
+        return "{%s}" % contents
 
 
 class FiniteCollectionsInclusion(Poset):
@@ -44,6 +44,9 @@ class FiniteCollectionsInclusion(Poset):
 
     def get_bottom(self):
         return FiniteCollection(set([]), self.S)
+
+    def __eq__(self, other):
+        return isinstance(other, FiniteCollectionsInclusion) and self.S == other.S
 #
 #     def get_top(self):
 #         x = self.P.get_top()
@@ -88,7 +91,7 @@ class FiniteCollectionsInclusion(Poset):
         contents = ", ".join(self.S.format(m)
                         for m in sorted(x.elements))
 
-        return "{ %s }" % contents
+        return "{%s}" % contents
 
     def __repr__(self):
-        return "set-of %r" % self.S
+        return "set-of(%r)" % self.S

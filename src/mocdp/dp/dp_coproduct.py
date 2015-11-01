@@ -5,9 +5,10 @@ from mocdp.posets import poset_minima
 
 from contracts import contract
 from mocdp.posets.types_universe import get_types_universe
-from mocdp.posets.space import NotEqual
+from mocdp.posets.space import NotEqual, NotBelongs
 from mocdp.posets.category_coproduct import Coproduct1
 from mocdp.dp.primitive import NotFeasible
+from mocdp.exceptions import do_extra_checks
 
 
 __all__ = [
@@ -62,9 +63,13 @@ class CoProductDP(PrimitiveDP):
         for j, dp in enumerate(self.dps):
             try:
                 ms = dp.get_implementations_f_r(f, r)
-                print('%s: dp.get_implementations_f_r(f, r) = %s ' % (j, ms))
-                assert len(ms) > 0, dp
+                # print('%s: dp.get_implementations_f_r(f, r) = %s ' % (j, ms))
                 for m in ms:
+                    Mj = dp.get_imp_space_mod_res()
+                    try:
+                        Mj.belongs(m)
+                    except NotBelongs:
+                        raise ValueError(dp)
                     res.add(self.M.pack(j, m))
             except NotFeasible as e:
                 es.append(e)
@@ -73,6 +78,11 @@ class CoProductDP(PrimitiveDP):
             msg = 'None was feasible'
             msg += '\n\n' + '\n\n'.join(str(e) for e in es)
             raise_desc(NotFeasible, msg, f=f, r=r, self=self)
+
+        if do_extra_checks():
+            for _ in res:
+                self.M.belongs(_)
+
         return res
 
     def solve(self, f):

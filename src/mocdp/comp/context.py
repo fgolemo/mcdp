@@ -55,6 +55,15 @@ class Context():
         self.constants = {}  # str -> ValueWithUnits
 
 
+    def child(self):
+        """ A child context preserves the value of the constants
+            and the model types. """
+        c = Context()
+        c.var2model.update(self.var2model)
+        c.constants.update(self.constants)
+        return c
+
+
     @contract(s='str', dp='str', returns=CFunction)
     def make_function(self, dp, s):
         assert isinstance(dp, str)

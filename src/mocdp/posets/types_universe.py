@@ -5,7 +5,7 @@ import numpy as np
 from mocdp.posets.rcomp import Rcomp
 from mocdp.posets.space_product import SpaceProduct
 from contracts import contract
-from mocdp.exceptions import mcdp_dev_warning
+from mocdp.exceptions import mcdp_dev_warning, DPInternalError
 
 __all__ = [
     'get_types_universe',
@@ -36,6 +36,12 @@ class TypesUniverse(Preorder):
             raise_desc(NotEqual, msg, A=A, B=B)
 
     def check_leq(self, A, B):
+        
+        from mocdp.posets.finite_set import FiniteCollectionsInclusion
+        if isinstance(A, FiniteCollectionsInclusion) and isinstance(B, FiniteCollectionsInclusion):
+            self.check_leq(A.S, B.S)
+            return
+        
         from mocdp.posets.rcomp_units import RcompUnits
         if isinstance(A, RcompUnits) and isinstance(B, RcompUnits):
             if A.units.dimensionality == B.units.dimensionality:
@@ -61,7 +67,7 @@ class TypesUniverse(Preorder):
             self.check_leq(A, B)
         except NotLeq as e:
             msg = 'Cannot get embedding if not preorder holds.'
-            raise_wrapped(ValueError, e, msg)
+            raise_wrapped(DPInternalError, e, msg)
 
         from mocdp.posets.rcomp_units import RcompUnits
         from mocdp.posets.rcomp_units import format_pint_unit_short
@@ -91,8 +97,32 @@ class TypesUniverse(Preorder):
             return get_product_embedding(self, A, B)
 
 
+        from mocdp.posets.finite_set import FiniteCollectionsInclusion
+        if isinstance(A, FiniteCollectionsInclusion) and isinstance(B, FiniteCollectionsInclusion):
+            a_to_b, b_to_a = self.get_embedding(A.S, B.S)
+            m1 = LiftToFiniteCollections(a_to_b)
+            m2 = LiftToFiniteCollections(b_to_a)
+            setattr(m1, '__name__', 'L%s' % a_to_b.__name__)
+            setattr(m1, '__name__', 'L%s' % b_to_a.__name__)
+            return m1, m2
+
         msg = 'Did not code embedding.'
         raise_desc(AssertionError, msg, A=A, B=B)
+
+class LiftToFiniteCollections(Map):
+    @contract(f=Map)
+    def __init__(self, f):
+        from mocdp.posets.finite_set import FiniteCollectionsInclusion
+        dom = FiniteCollectionsInclusion(f.get_domain())
+        cod = FiniteCollectionsInclusion(f.get_codomain())
+        self.f = f
+        Map.__init__(self, dom=dom, cod=cod)
+    def _call(self, x):
+        elements = x.elements
+        elements2 = set(self.f(_) for _ in elements)
+        S2 = self.f.get_codomain()
+        from mocdp.posets.finite_set import FiniteCollection
+        return FiniteCollection(elements2, S2)
 
 class Identity(Map):
 

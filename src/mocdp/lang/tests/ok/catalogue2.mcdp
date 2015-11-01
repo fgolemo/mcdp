@@ -1,28 +1,5 @@
-from comptests.registrar import comptest
-from mocdp.lang.tests.utils import parse_wrap_check
-from mocdp.lang.syntax import Syntax
-from mocdp.lang.parse_actions import parse_ndp
-
-@comptest
-def check_sets1():
-    r = parse_wrap_check("{ 1.5 V, 5 V }",
-                     Syntax.collection_of_constants)
-    print r
-
-    r = parse_wrap_check("{ 1.5 V, 5 V }",
-                     Syntax.constant_value)
-    print r
-
-@comptest
-def check_sets2():
-    r = parse_wrap_check("[set of V]",
-                     Syntax.unitst)
-    print r
-
-@comptest
-def check_sets3():
-    ndp = parse_ndp("""
-    mcdp {
+# test connected
+mcdp {
     
     simple_cell = catalogue {
 
@@ -32,9 +9,9 @@ def check_sets3():
         requires cost [$]
         requires mass [kg]
 
-        model1 | {1.5 V} | 1 J | 5 $ | 0.20 kg 
-        model2 | {1.5 V} | 1 J | 5 $ | 0.20 kg 
-        model3 | {5.0 V} | 1 J | 5 $ | 0.30 kg
+        model1 | {1.5 V} | 1 J |  5 $ | 0.20 kg 
+        model2 | {1.5 V} | 1 J | 15 $ | 0.10 kg 
+        model3 | {5.0 V} | 1 J |  5 $ | 0.30 kg
 
     }
 
@@ -65,11 +42,6 @@ def check_sets3():
     }
 
     sub battery = simple_cell ^ cell_plus_converter
-
+    requires cost, mass for battery
+    provides voltage, capacity using battery
 }
-    """)
-    pass
-
-@comptest
-def check_sets4():
-    pass

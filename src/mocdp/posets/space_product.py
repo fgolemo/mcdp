@@ -40,7 +40,9 @@ class SpaceProduct(Space):
         if not isinstance(x, tuple):
             raise_desc(NotBelongs, 'Not a tuple', x=x, self=self)
         if not len(x) == len(self.subs):
-            raise_desc(NotBelongs, 'Length does not match', x=x, self=self)
+            raise_desc(NotBelongs, 'Length does not match: len(x) = %s != %s'
+                       % (len(x), len(self.subs)),
+                        x=x, self=self)
 
         problems = []
         for i, (sub, xe) in enumerate(zip(self.subs, x)):

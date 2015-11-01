@@ -5,6 +5,7 @@ from mocdp.dp.dp_series import get_product_compact
 from mocdp.dp.primitive import NormalForm
 from mocdp.posets import Map, PosetProduct, UpperSet, UpperSets, poset_minima
 import itertools
+from mocdp.exceptions import do_extra_checks
 
 
 __all__ = [
@@ -36,6 +37,25 @@ class Parallel(PrimitiveDP):
         self.M2 = M2
 
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        
+    def get_implementations_f_r(self, f, r):
+        f1, f2 = f
+        r1, r2 = r
+        _, pack, _ = get_product_compact(self.M1, self.M2)
+
+        m1s = self.dp1.get_implementations_f_r(f1, r1)
+        m2s = self.dp2.get_implementations_f_r(f2, r2)
+        options = set()
+        for m1 in m1s:
+            for m2 in m2s:
+                m = pack(m1, m2)
+                options.add(m)
+
+        if do_extra_checks():
+            for _ in options:
+                self.M.belongs(_)
+
+        return options
         
     def evaluate_f_m(self, f, m):
         """ Returns the resources needed

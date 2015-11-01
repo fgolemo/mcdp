@@ -16,9 +16,12 @@ from mocdp.dp import (
 from mocdp.dp.dp_generic_unary import WrapAMap
 from mocdp.dp.dp_series_simplification import make_series
 from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.lang.parse_actions import inv_constant
 from mocdp.posets import (NotBelongs, NotEqual, NotLeq, PosetProduct, Rcomp,
     Space, get_types_universe, mult_table, mult_table_seq)
-from mocdp.lang.parse_actions import inv_constant
+from mocdp.posets.finite_set import FiniteCollection, FiniteCollectionsInclusion
+from mocdp.dp.dp_catalogue import CatalogueDP
+from mocdp.posets.any import Any
 
 
 CDP = CDPLanguage
@@ -161,8 +164,8 @@ def eval_statement(r, context):
     else:
         raise DPInternalError('Cannot interpret %s' % describe_value(r))
     
-def interpret_commands(res):
-    context = Context()
+def interpret_commands(res, context):
+    context = context.child()
     
     for r in res:
         try:
@@ -350,11 +353,90 @@ def eval_dp_rvalue_coproduct(r, context):
     assert isinstance(r, CDP.Coproduct)
     ops = get_odd_ops(unwrap_list(r.ops))
     ndps = []
-    for i, op in enumerate(ops):
+    for _, op in enumerate(ops):
         ndp = eval_dp_rvalue(op, context)
         ndps.append(ndp)
     from mocdp.comp.interfaces import NamedDPCoproduct
     return NamedDPCoproduct(tuple(ndps))
+
+def eval_dp_rvalue_catalogue(r, context):
+    assert isinstance(r, CDP.FromCatalogue)
+    # FIXME:need to check for re-ordering
+    statements = unwrap_list(r.funres)
+    fun = [x for x in statements if isinstance(x, CDP.FunStatement)]
+    res = [x for x in statements if isinstance(x, CDP.ResStatement)]
+    Fs = [_.unit.value for _ in fun]
+    Rs = [_.unit.value for _ in res]
+
+    assert len(fun) + len(res) == len(statements), statements
+    tu = get_types_universe()
+    table = r.table
+    rows = unwrap_list(table.rows)
+    entries = []
+    for row in rows:
+        items = unwrap_list(row)
+        name = items[0].value
+        expected = 1 + len(fun) + len(res)
+        if len(items) != expected:
+            msg = 'Row does not match number of elements (%s fun, %s res)' % (len(fun), len(res))
+            raise DPSemanticError(msg, where=items[-1].where)
+        fvalues0 = items[1:1+len(fun)]
+        rvalues0 = items[1 + len(fun):1 + len(fun) + len(res)]
+
+        fvalues = [eval_constant(_, context) for _ in fvalues0]
+        rvalues = [eval_constant(_, context) for _ in rvalues0]
+
+        for cell, Fhave, F in zip(fvalues0, fvalues, Fs):
+            try:
+                tu.check_leq(Fhave.unit, F)
+            except NotLeq as e:
+                msg = 'Dimensionality problem: cannot convert %s to %s.' % (Fhave.unit, F)
+                ex = lambda msg: DPSemanticError(msg, where=cell.where)
+                raise_wrapped(ex, e, msg, compact=True)
+            
+        for cell, Rhave, R in zip(rvalues0, rvalues, Rs):
+            try:
+                tu.check_leq(Rhave.unit, R)
+            except NotLeq as e:
+                msg = 'Dimensionality problem: cannot convert %s to %s.' % (Rhave.unit, R)
+                ex = lambda msg: DPSemanticError(msg, where=cell.where)
+                raise_wrapped(ex, e, msg, compact=True)
+
+        fvalues_ = [convert_vu(_.value, _.unit, F, context) for (_, F) in zip(fvalues, Fs)]
+        rvalues_ = [convert_vu(_.value, _.unit, R, context) for (_, R) in zip(rvalues, Rs)]
+
+        assert len(fvalues_) == len(fun)
+        assert len(rvalues_) == len(res)
+
+        entries.append((name, tuple(fvalues_), tuple(rvalues_)))
+
+    M = Any()
+    # use integers
+#     entries = [(float(i), b, c) for i, (_, b, c) in enumerate(entries)]
+
+    fnames = [_.fname.value for  _ in fun]
+    rnames = [_.rname.value for  _ in res]
+
+    if len(Fs) > 1:
+        F = PosetProduct(tuple(Fs))
+    else:
+        F = Fs[0]
+        fnames = fnames[0]
+        entries = [(a, b[0], c) for (a, b, c) in entries]
+
+    if len(Rs) > 1:
+        R = PosetProduct(tuple(Rs))
+    else:
+        R = Rs[0]
+        rnames = rnames[0]
+        entries = [(a, b, c[0]) for (a, b, c) in entries]
+
+    dp = CatalogueDP(F=F, R=R, M=M, entries=tuple(entries))
+
+
+
+    ndp = dpwrap(dp, fnames=fnames, rnames=rnames)
+    return ndp
 
 @contract(returns=NamedDP)
 def eval_dp_rvalue(r, context):  # @UnusedVariable
@@ -362,11 +444,13 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
         if isinstance(r, CDP.BuildProblem):
             special_list = r.statements
             statements = unwrap_list(special_list)
-            return interpret_commands(statements)
+            return interpret_commands(statements, context)
 
         if isinstance(r, CDP.VariableRef):
             return context.get_var2model(r.name)
 
+        if isinstance(r, CDP.FromCatalogue):
+            return eval_dp_rvalue_catalogue(r, context)
 
         if isinstance(r, CDP.Coproduct):
             return eval_dp_rvalue_coproduct(r, context)
@@ -749,7 +833,30 @@ def eval_constant_divide(op, context):
     from mocdp.lang.parse_actions import mult_constantsN
     return mult_constantsN(invs)
 
-       
+@contract(unit1=Space, unit2=Space)
+def convert_vu(value, unit1, unit2, context):  # @UnusedVariable
+    tu = get_types_universe()
+    A_to_B, _ = tu.get_embedding(unit1, unit2)
+    return A_to_B(value)
+
+    
+def eval_constant_collection(op, context):
+    ops = get_odd_ops(unwrap_list(op.elements))
+    if len(ops) == 0:
+        raise DPSemanticError('empty list')
+    elements = [eval_constant(_, context) for _ in ops]
+
+    e0 = elements[0]
+
+    u0 = e0.unit
+    elements = [convert_vu(_.value, _.unit, u0, context) for _ in elements]
+
+    value = FiniteCollection(set(elements), u0)
+    unit = FiniteCollectionsInclusion(u0)
+    vu = ValueWithUnits(value, unit)
+
+    return vu
+
 @contract(returns=ValueWithUnits)
 def eval_constant(op, context):
     """ 
@@ -759,6 +866,9 @@ def eval_constant(op, context):
     if isinstance(op, CDP.Divide):
         return eval_constant_divide(op, context)
     
+    if isinstance(op, CDP.Collection):
+        return eval_constant_collection(op, context)
+
     if isinstance(op, (CDP.Resource)):
         raise NotConstant(str(op))
 

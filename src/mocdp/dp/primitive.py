@@ -101,6 +101,13 @@ class PrimitiveDP(WithInternalLog):
     def get_implementations_f_r(self, f, r):
         """ Returns the set of implementations that realize the pair (f, r).
             Returns a non-empty set or raises NotFeasible. """
+        M = self.get_imp_space_mod_res()
+
+        if isinstance(M, SpaceProduct) and len(M) == 0:
+            m = ()
+            self.check_feasible(f, m , r)
+            return set([m])
+
         raise NotImplementedError(type(self).__name__)
 
     def evaluate_f_m(self, func, m):
