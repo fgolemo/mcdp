@@ -78,7 +78,7 @@ def syntax_pdf(data):
         data = f.read()
 
     f_png = os.path.join(d, 'file.png')
-    cmd = ['convert', '-density', '300', f_pdf_crop,
+    cmd = ['convert', '-density', '600', f_pdf_crop,
             '-background', 'white', '-alpha', 'remove',
             '-resize', '50%', f_png]
     system_cmd_result(

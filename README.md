@@ -65,7 +65,7 @@ This is the expected output:
     Fixed-point iteration converged to: {x ∣ x ≥ (⊤, ⊤) }
     Minimal resources needed: mass = {x ∣ x ≥ ⊤ }
 
-#### Drawing Co-Design Problems diagrams
+#### Visualization of Co-Design Problems
 
 The programs ``mcdp-plot`` will parse and plot the MCDP in a variety of representations.
 

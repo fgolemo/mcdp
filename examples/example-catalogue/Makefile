@@ -8,6 +8,7 @@ clean:
 	rm -rf out/
 	
 plots:
+	mcdp-plot $(outp) choose.mcdp
 	mcdp-plot $(outp) $(dp1)
 	mcdp-plot $(outp) $(dp2)
 

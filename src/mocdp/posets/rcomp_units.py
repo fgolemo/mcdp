@@ -110,6 +110,10 @@ def format_pint_unit_short(units):
         return 'W'
     if units == R_Energy.units:
         return 'J'
+    if units == R_Weight.units:
+        return 'kg'
+    if units == R_Weight_g.units:
+        return 'g'
     if units == R_Force.units:
         return 'N'
 
