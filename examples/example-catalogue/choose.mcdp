@@ -14,7 +14,7 @@ mcdp {
         requires mass [kg]
 
         m0 = 100 g 
-        specific_energy = 1 MJ / kg
+        specific_energy = 1.0 MJ / kg
 
         mass >= capacity / specific_energy + m0
     }
