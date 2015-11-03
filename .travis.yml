@@ -29,6 +29,7 @@ script:
 - make comptests-run-parallel-nocontracts
 - make -C examples/example-catalogue
 - make -C examples/example-battery
+# the run with contracts
 - make clean comptests-run-parallel
 after_failure:
 - compmake out/comptests -c "ls failed"
