@@ -20,7 +20,7 @@ version = get_version(filename='src/mocdp/__init__.py')
 setup(name='PyMCDP',
       url='http://github.com/AndreaCensi/mcdp',
       maintainer="Andrea Censi",
-      description='Interpreter and solver for Monotone Co-Design Problems',
+      description='PyMCDP is an nterpreter and solver for Monotone Co-Design Problems',
       long_description='',
       package_data={'':['*.*', '*.mcdp', '*.cdp', '*.png']},
       keywords="Optimization",
