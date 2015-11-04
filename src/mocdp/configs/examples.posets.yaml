@@ -57,3 +57,10 @@
   - mocdp.posets.make_rcompunit
   - units: 'm/m'
 
+
+- id: Nat
+  desc: Natural numbers
+  code:
+  - mocdp.posets.Nat
+  - {}
+

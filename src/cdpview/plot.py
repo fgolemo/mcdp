@@ -11,6 +11,7 @@ from system_cmd import system_cmd_result
 from conf_tools.global_config import GlobalConfig
 from mocdp.dp_report.report import gvgen_from_dp
 from cdpview.utils_mkdir import mkdirs_thread_safe
+from system_cmd.structures import CmdException
 
 def get_ndp(data):
     if not 'ndp' in data:
@@ -58,40 +59,43 @@ def syntax_pdf(data):
     with open(f_html, 'w') as f:
         f.write(html)
         
-    f_pdf = os.path.join(d, 'file.pdf')
-    cmd= ['wkhtmltopdf','-s','A1',f_html,f_pdf]
-    system_cmd_result(
-            d, cmd, 
-            display_stdout=False,
-            display_stderr=False,
-            raise_on_error=True)
-      
-    f_pdf_crop = os.path.join(d, 'file_crop.pdf')
-    cmd = ['pdfcrop', '--margins', '4', f_pdf, f_pdf_crop]
-    system_cmd_result(
-            d, cmd, 
-            display_stdout=False,
-            display_stderr=False,
-            raise_on_error=True)
-
-    with open(f_pdf_crop) as f:
-        data = f.read()
-
-    f_png = os.path.join(d, 'file.png')
-    cmd = ['convert', '-density', '600', f_pdf_crop,
-            '-background', 'white', '-alpha', 'remove',
-            '-resize', '50%', f_png]
-    system_cmd_result(
-            d, cmd,
-            display_stdout=False,
-            display_stderr=False,
-            raise_on_error=True)
-
-    with open(f_png) as f:
-        pngdata = f.read()
-
-    return [('pdf', 'syntax_pdf', data), ('png', 'syntax_pdf', pngdata)]
-
+    try:
+        f_pdf = os.path.join(d, 'file.pdf')
+        cmd= ['wkhtmltopdf','-s','A1',f_html,f_pdf]
+        system_cmd_result(
+                d, cmd, 
+                display_stdout=False,
+                display_stderr=False,
+                raise_on_error=True)
+          
+        f_pdf_crop = os.path.join(d, 'file_crop.pdf')
+        cmd = ['pdfcrop', '--margins', '4', f_pdf, f_pdf_crop]
+        system_cmd_result(
+                d, cmd, 
+                display_stdout=False,
+                display_stderr=False,
+                raise_on_error=True)
+    
+        with open(f_pdf_crop) as f:
+            data = f.read()
+    
+        f_png = os.path.join(d, 'file.png')
+        cmd = ['convert', '-density', '600', f_pdf_crop,
+                '-background', 'white', '-alpha', 'remove',
+                '-resize', '50%', f_png]
+        system_cmd_result(
+                d, cmd,
+                display_stdout=False,
+                display_stderr=False,
+                raise_on_error=True)
+    
+        with open(f_png) as f:
+            pngdata = f.read()
+    
+        return [('pdf', 'syntax_pdf', data), ('png', 'syntax_pdf', pngdata)]
+    except CmdException as e:
+        raise e
+        
 @contract(data=dict)
 def syntax_frag(data):
     from mocdp.dp_report.html import ast_to_html
@@ -125,8 +129,12 @@ def do_plots(filename, plots, outdir):
     d = dict(allplots)
     results = []
     for p in plots:    
-        print('plotting %r ' % p)
-        res = d[p](data)
+        # print('plotting %r ' % p)
+        try:
+            res = d[p](data)
+        except CmdException as e:
+            print(e)
+            pass
         assert isinstance(res, list)
         for r in res:
             assert isinstance(r, tuple), r
