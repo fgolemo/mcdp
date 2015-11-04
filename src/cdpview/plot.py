@@ -1,17 +1,17 @@
+from .utils_mkdir import mkdirs_thread_safe
+from conf_tools import GlobalConfig
 from conf_tools.utils import expand_string
+from contracts import contract
 from mocdp.dp_report.gg_ndp import gvgen_from_ndp
 from mocdp.dp_report.gg_utils import gg_figure
+from mocdp.dp_report.report import gvgen_from_dp
+from mocdp.exceptions import mcdp_dev_warning
 from mocdp.lang.parse_actions import parse_ndp
 from quickapp import QuickAppBase
 from reprep import Report
-import os
-from contracts import contract
+from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
-from system_cmd import system_cmd_result
-from conf_tools.global_config import GlobalConfig
-from mocdp.dp_report.report import gvgen_from_dp
-from cdpview.utils_mkdir import mkdirs_thread_safe
-from system_cmd.structures import CmdException
+import os
 
 def get_ndp(data):
     if not 'ndp' in data:
@@ -133,6 +133,7 @@ def do_plots(filename, plots, outdir):
         try:
             res = d[p](data)
         except CmdException as e:
+            mcdp_dev_warning('Add better checks of error.')
             print(e)
             pass
         assert isinstance(res, list)
