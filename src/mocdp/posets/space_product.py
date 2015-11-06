@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .space import Space, NotEqual, NotBelongs
+from .space import NotBelongs, NotEqual, Space
 from contracts import contract
 from contracts.utils import check_isinstance, indent, raise_desc
 

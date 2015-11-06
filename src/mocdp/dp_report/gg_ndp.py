@@ -123,7 +123,7 @@ class GraphDrawingContext():
         return best
 
 def gvgen_from_ndp(ndp, style='default'):
-    import gvgen  # @UnresolvedImport
+    import my_gvgen as gvgen
     gg = gvgen.GvGen(options="rankdir=LR")
     if len(ndp.get_fnames()) > 0:
         cluster_functions = gg.newItem("")

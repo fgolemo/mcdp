@@ -48,7 +48,7 @@ setup(name='PyMCDP',
         'ConfTools>=1.7',
         'QuickApp>=1.2',
         'RepRep>=2.8',
-        'gvgen==0.9.1',
+        # 'gvgen==0.9.1',
       ],
       dependency_links  = [
           'https://github.com/AndreaCensi/contracts/archive/env_fault.zip#egg=PyContracts',
@@ -56,7 +56,7 @@ setup(name='PyMCDP',
           #'https://github.com/AndreaCensi/quickapp/archive/env_fault.zip#egg=QuickApp',
           'git+https://github.com/AndreaCensi/quickapp.git@env_fault#egg=QuickApp',
           'https://github.com/AndreaCensi/reprep/archive/env_fault.zip#egg=RepRep',
-          'https://github.com/AndreaCensi/gvgen/archive/master.zip#egg=gvgen-0.9.1',
+          # 'https://github.com/AndreaCensi/gvgen/archive/master.zip#egg=gvgen-0.9.1',
       ],
 
       tests_require=[

@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from abc import ABCMeta, abstractmethod
-from contracts import contract
-from contracts import raise_wrapped
 from .space_meta import SpaceMeta
+from abc import ABCMeta, abstractmethod
+from contracts import contract, raise_wrapped
 from mocdp.exceptions import do_extra_checks
 
 class NotBelongs(Exception):

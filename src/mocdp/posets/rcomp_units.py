@@ -3,10 +3,10 @@ from .any import Any, BottomCompletion, TopCompletion
 from .rcomp import Rcomp
 from contracts.utils import check_isinstance, raise_wrapped
 from mocdp.exceptions import DPSyntaxError
+from mocdp.posets import FiniteCollectionsInclusion
 from pint import UnitRegistry
 from pint.unit import UndefinedUnitError
 import functools
-from mocdp.posets.finite_set import FiniteCollectionsInclusion
 
 # __all__ = [
 #    'RcompUnits',
@@ -29,7 +29,6 @@ def get_ureg():
 
 class RcompUnits(Rcomp):
 
-#     @contract(pint_unit=ureg.Quantity)
     def __init__(self, pint_unit):
         ureg = get_ureg()
         check_isinstance(pint_unit, ureg.Quantity)

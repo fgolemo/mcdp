@@ -147,7 +147,7 @@ def gvgen_from_dp(dp0):
         return (i, o)
 
 
-    import gvgen  # @UnresolvedImport
+    import my_gvgen as gvgen
     gg = gvgen.GvGen(options="rankdir=LR")
 
 

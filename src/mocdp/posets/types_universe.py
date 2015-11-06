@@ -1,11 +1,11 @@
-from contracts.utils import raise_desc, raise_wrapped
-from mocdp.posets.poset import NotLeq, Preorder
-from mocdp.posets.space import Map, NotEqual, Space, NotBelongs
-import numpy as np
-from mocdp.posets.rcomp import Rcomp
-from mocdp.posets.space_product import SpaceProduct
 from contracts import contract
-from mocdp.exceptions import mcdp_dev_warning, DPInternalError
+from contracts.utils import raise_desc, raise_wrapped
+from mocdp.exceptions import DPInternalError, mcdp_dev_warning
+from mocdp.posets.poset import NotLeq, Preorder
+from mocdp.posets.rcomp import Rcomp
+from mocdp.posets.space import Map, NotBelongs, NotEqual, Space
+from mocdp.posets.space_product import SpaceProduct
+import numpy as np
 
 __all__ = [
     'get_types_universe',
