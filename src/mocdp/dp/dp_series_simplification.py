@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from contracts import contract
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, raise_desc
 from mocdp.dp.dp_flatten import Mux, get_R_from_F_coords
 from mocdp.dp.dp_identity import Identity
 from mocdp.dp.dp_parallel import Parallel
@@ -9,7 +9,6 @@ from mocdp.dp.dp_series import Series
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 from mocdp.posets.poset_product import PosetProduct
 from multi_index.get_it_test import compose_indices, get_id_indices
-import warnings
 
 __all__ = [
     'make_series',
@@ -33,7 +32,7 @@ class SeriesSimplificationRule():
             msg = 'Error while executing Series simplification rule.'
             raise_wrapped(DPInternalError, e, msg, dp1=dp1.repr_long(),
                           dp2=dp2.repr_long(), rule=self)
-        from mocdp.comp.tests.test_composition import check_same_spaces
+
         try:
             check_same_spaces(dp0, res)
         except AssertionError as e:
@@ -332,9 +331,6 @@ def make_series(dp1, dp2):
                 rest = reduce(make_series, dps[1:])
                 return make_series(first, rest)
 
-
-    from mocdp.comp.tests.test_composition import check_same_spaces
-
     # bring the mux outside the parallel
     #                   | - Mux(c) - p1
     #  Mux([a,b]) ----> |
@@ -402,6 +398,22 @@ def make_series(dp1, dp2):
             return make_series(first, make_series(r, rest))
 
     return Series(dp1, dp2)
+
+
+def check_same_spaces(dp1, dp2):
+#     print('dp1: %s' % dp1)
+#     print('dp2: %s' % dp2)
+    F1 = dp1.get_fun_space()
+    R1 = dp1.get_res_space()
+    F2 = dp2.get_fun_space()
+    R2 = dp2.get_res_space()
+    if not (R1 == R2):
+        msg = 'R not preserved'
+        raise_desc(AssertionError, msg, R1=R1, R2=R2)
+    if not (F1 == F2):
+        msg = 'F not preserved'
+        raise_desc(AssertionError, msg, F1=F1, F2=F2)
+
 
 def unwrap_series(dp):
     if not isinstance(dp, Series):

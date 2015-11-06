@@ -2,7 +2,7 @@ from collections import namedtuple
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
-from mocdp.comp.tests.test_drawing import unzip
+
 from mocdp.lang.namedtuple_tricks import isnamedtuplewhere
 from mocdp.lang.parse_actions import parse_wrap
 from mocdp.lang.parts import is_a_special_list
@@ -21,6 +21,9 @@ def isolate_comments(s):
             return line, None
 
     return unzip(map(isolate_comment, lines))
+
+def unzip(iterable):
+    return zip(*iterable)
 
 @contract(s=str)
 def ast_to_html(s, complete_document):

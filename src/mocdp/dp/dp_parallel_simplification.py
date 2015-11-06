@@ -29,8 +29,9 @@ class ParSimplificationRule():
             msg = 'Error while executing Parallel simplification rule.'
             raise_wrapped(DPInternalError, e, msg, dp1=dp1.repr_long(),
                           dp2=dp2.repr_long(), rule=self)
-        from mocdp.comp.tests.test_composition import check_same_spaces
+
         try:
+            from mocdp.dp.dp_series_simplification import check_same_spaces
             check_same_spaces(dp0, res)
         except AssertionError as e:
             msg = 'Invalid Parallel simplification for rule.'
