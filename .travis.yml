@@ -25,6 +25,7 @@ install:
 - python setup.py develop
 - "python -c 'import contracts; print contracts.__version__'"
 - "python -c 'import quickapp;  print  quickapp.__version__'"
+- "python -c 'import compmake;  print  compmake.__version__'"
 - "python -c 'import reprep;    print    reprep.__version__'"
 # command to run tests
 script: 
