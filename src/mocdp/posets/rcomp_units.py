@@ -3,7 +3,6 @@ from .any import Any, BottomCompletion, TopCompletion
 from .rcomp import Rcomp
 from contracts.utils import check_isinstance, raise_wrapped
 from mocdp.exceptions import DPSyntaxError
-from mocdp.posets import FiniteCollectionsInclusion
 from pint import UnitRegistry
 from pint.unit import UndefinedUnitError
 import functools
@@ -90,6 +89,7 @@ def make_rcompunit(units):
         if s.startswith('set of'):
             t = s.split('set of')
             u = make_rcompunit(t[1])
+            from .finite_set import FiniteCollectionsInclusion
             return FiniteCollectionsInclusion(u)
 
         if s == 'any':
