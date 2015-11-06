@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 from conf_tools import GlobalConfig
 from contracts.utils import raise_desc
 from mocdp.comp.context import Context
 from mocdp.dp.solver import generic_solve
-from mocdp.dp.tests.inv_mult_plots import generic_report
+from mocdp.dp_report.generic_report_utils import generic_report
 from mocdp.lang.blocks import eval_constant
 from mocdp.lang.parse_actions import parse_ndp, parse_wrap
 from mocdp.lang.syntax import Syntax
@@ -11,6 +12,7 @@ from quickapp import QuickAppBase
 from reprep import Report
 import logging
 import os
+# from mocdp.dp.tests.inv_mult_plots import generic_report
 
 class ExpectationsNotMet(Exception):
     pass
