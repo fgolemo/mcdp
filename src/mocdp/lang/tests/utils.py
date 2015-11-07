@@ -99,18 +99,23 @@ def parse_wrap_semantic_error(string, expr):
 
 @contract(string=str)
 def parse_wrap_syntax_error(string, expr):
-    """ Assert semantic error """
+    """ Assert syntax error """
     if isinstance(expr, ParsingElement):
         expr = expr.get()
 
     try:
-        _res = parse_wrap(expr, string)[0]  # note the 0, first element
-    except DPSyntaxError:
-        pass
+        res = parse_wrap(expr, string)
+        _res = res[0]  # note the 0, first element
+        msg = 'Expected DPSyntaxError.'
+        raise_desc(TestFailed, msg, res=res.__repr__())
+    except DPSyntaxError as e:
+        return e
     except BaseException as e:
         msg = 'Expected DPSyntaxError.'
         raise_wrapped(TestFailed, e, msg,
                       expr=find_parsing_element(expr), string=string)
+
+
 
 def ok(expr, string, result):
     expr = find_parsing_element(expr)

@@ -1,5 +1,5 @@
 # test unconnected
-cdp {
+mcdp {
     requires g [R]
     provides f [R] 
 }

@@ -1,6 +1,6 @@
 # test semantic_error
 # Fails because of double constraint on DP.a 
- cdp {
+mcdp {
   
     sub DP = cdp {
         provides a [R]

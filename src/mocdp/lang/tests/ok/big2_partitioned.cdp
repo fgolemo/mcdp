@@ -3,7 +3,7 @@ mcdp {
   sub motor_chassis =  mcdp {
     sub motor = template mcdp {
       provides speed [rad/s]
-      provides torque [N m]
+      provides torque [N*m]
       #    
       requires cost [$]
       requires weight [g]
@@ -18,7 +18,7 @@ mcdp {
       requires cost [$]
       requires total_weight [g]
       requires motor_speed [rad/s]
-      requires motor_torque [N m]
+      requires motor_torque [N*m]
 
       requires control_function [any]
     }

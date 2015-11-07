@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from .parse_actions import *  # @UnusedWildImport
 from mocdp.lang.helpers import square
-from mocdp.posets import make_rcompunit
-from mocdp.posets.rcomp_units import R_dimensionless
+from mocdp.posets import R_dimensionless, make_rcompunit
 from pyparsing import (
     CaselessLiteral, Combine, Forward, Group, Literal, NotAny, OneOrMore,
     Optional, Or, ParserElement, Suppress, Word, ZeroOrMore, alphanums, alphas,
-    nums, oneOf, opAssoc, operatorPrecedence)
+    nums, oneOf, opAssoc, operatorPrecedence, FollowedBy)
 import math
+from mocdp.lang.parse_actions import parse_pint_unit
 
 ParserElement.enablePackrat()
 
@@ -27,8 +27,7 @@ class Syntax():
     keywords = ['load', 'compact', 'required', 'provides', 'abstract',
                       'dp', 'cdp', 'mcdp', 'template', 'sub', 'for',
                       'provided', 'requires', 'implemented-by', 'using', 'by',
-                      'catalogue', 'set-of']
-    reserved = oneOf(keywords)
+                      'catalogue', 'set-of', 'mcdp-type', 'dptype', 'instance']
 
     # ParserElement.setDefaultWhitespaceChars('')
 
@@ -45,16 +44,56 @@ class Syntax():
     # line = SkipTo(LineEnd(), failOn=LineStart() + LineEnd())
 
     # identifier
-    idn = (NotAny(reserved) + Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))).setResultsName('idn')
+    idn = (NotAny(oneOf(keywords)) + Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))).setResultsName('idn')
 
-#     idn =  idn0
-    unit_base = NotAny(reserved) + Word(alphas + '$' + ' ')
-    unit_power = L('^') + O(L(' ')) + Word(nums)
+#     # Special case: allow an expression like AxBxC
+#     alphabet = ('A B C D E F G H I J K L M N O P Q R S T U W V X Y Z '
+#                  'a b c d e f g h i j k l m n o p q r s t u w v x y z '
+#                  '$')
+#     nofollow = 'a b c d e f g h i j k l m n o p q r s t u w v   y z '
+#     # also do not commit if part of word (SEn, a_2)
+#     nofollow += ' A B C D E F G H I J K L M N O P Q R S T U W V X Y Z '
+#     nofollow += ' 0 1 2 3 4 5 6 7 8 9 _'
+#     # but recall 'axis_angle'
+#     v = (oneOf(alphabet.split()) + FollowedBy(NotAny(oneOf(nofollow.split()))))
+
+    disallowed = oneOf(keywords + ['x'])
+    unit_base = NotAny(oneOf(keywords + ['x'])) + Word(alphas + '$')
+
+    unit_power = L('^') + Word(nums)
     unit_simple = unit_base + O(unit_power)
     unit_connector = L('/') | L('*')
 
-    unit_expr = sp(Combine(unit_simple + ZeroOrMore(unit_connector + unit_simple)),
-                   lambda t: CDP.Unit(make_rcompunit(t[0])))
+#     pint_unit = sp(Combine(unit_simple + ZeroOrMore(unit_connector + unit_simple)),
+#                    parse_pint_unit)
+    pint_unit = sp((unit_simple + ZeroOrMore(unit_connector + unit_simple)),
+                   parse_pint_unit)
+
+
+    space_expr = Forward()
+
+# misc_variables = (oneOf(alphabetl.split())
+#                   + FollowedBy(NotAny(oneOf(nofollow.split() + ['x']))))
+
+
+
+    power_set_expr = sp((L('℘') | L('set-of')) - L('(') + space_expr + L(')'),
+                        lambda t: CDP.PowerSet(t[0], t[1],
+                                               t[2], t[3]))
+#
+#     power_set_expr2 = sp((Combine(L('set') + L('of'))) + space_expr ,
+#                         lambda t: CDP.PowerSet(t[0], t[1],
+#                                                t[2], t[3]))
+
+    space_operand = (pint_unit ^ power_set_expr)
+
+
+    PRODUCT = sp(L('x') | L('×'), lambda t: CDP.product(t[0]))
+
+    space_expr << operatorPrecedence(space_operand, [
+                (PRODUCT, 2, opAssoc.LEFT, space_product_parse_action),
+    ])
+
 
     # numbers
     number = Word(nums)
@@ -75,7 +114,7 @@ class Syntax():
     COMMA = sp(L(','), lambda t: CDP.comma(t[0]))
 
 
-    unitst = S(L('[')) + C(unit_expr, 'unit') + S(L(']'))
+    unitst = S(L('[')) + C(space_expr, 'unit') + S(L(']'))
 
     PROVIDES = sp(L('provides'), lambda t: CDP.ProvideKeyword(t[0]))
     REQUIRES = sp(L('requires'), lambda t: CDP.RequireKeyword(t[0]))
@@ -89,8 +128,10 @@ class Syntax():
     fun_statement = sp(PROVIDES + C(fname, 'fname') + unitst,
                        lambda t: CDP.FunStatement(t[0], t[1], t[2]))
 
+
     res_statement = sp(REQUIRES + C(rname, 'rname') + unitst,
                        lambda t: CDP.ResStatement(t[0], t[1], t[2]))
+
 
     number_with_unit1 = sp(integer_or_float + unitst,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
@@ -98,7 +139,7 @@ class Syntax():
     dimensionless = sp(L('[') + L(']'), lambda _: CDP.Unit(R_dimensionless))
     number_with_unit2 = sp(integer_or_float + dimensionless,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
-    number_with_unit3 = sp(integer_or_float + unit_expr,
+    number_with_unit3 = sp(integer_or_float + space_expr,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
     number_with_unit = number_with_unit1 ^ number_with_unit2 ^ number_with_unit3
 
@@ -114,12 +155,22 @@ class Syntax():
     # <dpname> = ...
 
     SUB = sp(L('sub'), lambda t: CDP.SubKeyword(t[0]))
+    MCDPTYPE = sp(L('mcdp-type') | L('dptype'), lambda t: CDP.MCDPTypeKeyword(t[0]))
 
     dpname = sp(idn.copy(), lambda t: CDP.DPName(t[0]))
+    dptypename = sp(idn.copy(), lambda t: CDP.DPTypeName(t[0]))
 
-    setsub_expr = sp(SUB - dpname - S(L('=')) - C(dp_rvalue, 'dp_rvalue'),
+    INSTANCE = sp(L('instance') + O(L('of')), lambda t: CDP.InstanceKeyword(t[0]))
+    dpinstance_from_type = sp((INSTANCE + dp_rvalue) ^ (INSTANCE + L('(') + dp_rvalue + L(")")),
+                              lambda t: CDP.DPInstance(t[0], t[1]))
+
+    dpinstance_expr = (dpinstance_from_type ^ dp_rvalue)
+
+    setsub_expr = sp(SUB - dpname - S(L('=')) - dp_rvalue,  # dpinstance_expr,
                      lambda t: CDP.SetName(t[0], t[1], t[2]))
 
+    setmcdptype_expr = sp(MCDPTYPE - dptypename - L('=') - dp_rvalue,
+                     lambda t: CDP.SetMCDPType(t[0], t[1], t[2], t[3]))
 
     rvalue = Forward()
     fvalue = Forward()
@@ -139,28 +190,16 @@ class Syntax():
                          lambda t: CDP.SetNameGeneric(t[0], t[1], t[2]))
 
 
-
-
     variable_ref = sp(idn.copy(), VariableRef_make)
-    # variable_ref = sp(idn, lambda t: CDP.VariableRef(t[0]))
-#     variable_ref = sp(NotAny(reserved) + C(idn.copy(), 'variable_ref_name'),
-#                       lambda t: CDP.VariableRef(t['variable_ref_name']))
-
+    dp_variable_ref = sp(idn.copy(), lambda t: CDP.DPVariableRef(t[0]))
+    
     constant_value = Forward()
     
     collection_of_constants = sp(S(L('{')) + constant_value +
                                 ZeroOrMore(COMMA + constant_value) + S(L('}')),
                                 lambda t: CDP.Collection(make_list(list(t))))
 
-#     par = nestedExpr(opener='(', closer=')', content=constant_value)
-
-#     par = S(L("(")) + number_with_unit + S(L(")"))
     constant_value << (number_with_unit ^ variable_ref ^ collection_of_constants)
-
-    # ^ divide_constants)
-
-
-
 
     rvalue_resource_simple = sp(dpname + DOT - rname,
                                 lambda t: CDP.Resource(s=t[2], keyword=t[1], dp=t[0]))
@@ -229,9 +268,9 @@ class Syntax():
                     + C(integer_fraction, 'exponent')) - S(L(')')),
                     power_expr_parse)
 
-
-    GEQ = sp(L('>='), lambda t: CDP.geq(t[0]))
-    LEQ = sp(L('<='), lambda t: CDP.leq(t[0]))
+# ℘ = 'power-set'
+    GEQ = sp(L('>=') | L('≥') | L('⊇') | L('≽') | L('⊒'), lambda t: CDP.geq(t[0]))
+    LEQ = sp(L('<=') | L('≤') | L('⊆') | L('≼') | L('⊑'), lambda t: CDP.leq(t[0]))
 
     constraint_expr = sp(C(fvalue, 'lf') + GEQ - C(rvalue, 'rvalue'),
                          lambda t: CDP.Constraint(function=t['lf'],
@@ -272,7 +311,7 @@ class Syntax():
 
 
     line_expr = (load_expr ^ constraint_expr ^ constraint_expr2 ^
-                 (setname_generic ^ setsub_expr)
+                 (setname_generic ^ setsub_expr ^ setmcdptype_expr)
                  ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
                  ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3)
 
@@ -346,7 +385,7 @@ class Syntax():
                        lambda t: CDP.MakeTemplate(t[0], t[1]))
 
     dp_operand = (load_expr | simple_dp_model | dp_model | abstract_expr |
-                  template_expr | compact_expr | variable_ref | catalogue_dp)
+                  template_expr | compact_expr | dp_variable_ref | catalogue_dp)
 
     dp_rvalue << operatorPrecedence(dp_operand, [
     #     ('-', 1, opAssoc.RIGHT, Unary.parse_action),

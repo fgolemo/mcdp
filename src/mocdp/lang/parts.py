@@ -22,6 +22,7 @@ class CDPLanguage():
     AbstractAway = namedtuplewhere('AbstractAway', 'keyword dp_rvalue')
     Compact = namedtuplewhere('Compact', 'keyword dp_rvalue')
 
+    DPInstance = namedtuplewhere('DPInstance', 'keyword dp_rvalue')
     PlusN = namedtuplewhere('PlusN', 'ops')
     MultN = namedtuplewhere('MultN', 'ops')
     Divide = namedtuplewhere('Divide', 'ops')
@@ -30,26 +31,31 @@ class CDPLanguage():
     OpMin = namedtuplewhere('Min', 'keyword a b')
 
     DPName = namedtuplewhere('DPName', 'value')
+    DPTypeName = namedtuplewhere('DPTypeName', 'value')
 
     Resource = namedtuplewhere('Resource', 'dp s keyword')
     Function = namedtuplewhere('Function', 'dp s keyword')
 
     VariableRef = namedtuplewhere('VariableRef', 'name')
+    DPVariableRef = namedtuplewhere('DPVariableRef', 'name')
 
     NewResource = namedtuplewhere('NewResource', 'name')
     Constraint = namedtuplewhere('Constraint', 'function rvalue prep')
 
     LoadCommand = namedtuplewhere('LoadCommand', 'keyword load_arg')
     SetName = namedtuplewhere('SetName', 'keyword name dp_rvalue')
+    SetMCDPType = namedtuplewhere('SetMCDPType', 'keyword name eq right_side')
 
     SetNameGenericVar = namedtuplewhere('SetNameGenericVar', 'value')
     SetNameGeneric = namedtuplewhere('SetNameGeneric', 'name eq right_side')
 
+    PowerSet = namedtuplewhere('PowerSet', 'symbol p1 space p2')
     # Just Keywords
     ProvideKeyword = namedtuplewhere('ProvideKeyword', 'keyword')
     RequireKeyword = namedtuplewhere('RequireKeyword', 'keyword')
     MCDPKeyword = namedtuplewhere('MCDPKeyword', 'keyword')
     SubKeyword = namedtuplewhere('SubKeyword', 'keyword')
+    MCDPTypeKeyword = namedtuplewhere('MCDPTypeKeyword', 'keyword')
     CompactKeyword = namedtuplewhere('CompactKeyword', 'keyword')
     AbstractKeyword = namedtuplewhere('AbstractKeyword', 'keyword')
     TemplateKeyword = namedtuplewhere('TemplateKeyword', 'keyword')
@@ -60,6 +66,7 @@ class CDPLanguage():
     ImplementedbyKeyword = namedtuplewhere('ImplementedbyKeyword', 'keyword')
     LoadKeyword = namedtuplewhere('LoadKeyword', 'keyword')
     CodeKeyword = namedtuplewhere('CodeKeyword', 'keyword')
+    InstanceKeyword = namedtuplewhere('InstanceKeyword', 'keyword')
     OpKeyword = namedtuplewhere('OpKeyword', 'keyword')  # Max
     DPWrapToken = namedtuplewhere('DPWrapToken', 'keyword')
     FuncName = namedtuplewhere('FuncName', 'value')  # python function name
@@ -73,6 +80,7 @@ class CDPLanguage():
     FromCatalogue = namedtuplewhere('FromCatalogue', 'keyword funres table')
     # just prepositions
     leq = namedtuplewhere('leq', 'glyph')
+    product = namedtuplewhere('product', 'glyph')
     geq = namedtuplewhere('geq', 'glyph')
     eq = namedtuplewhere('eq', 'glyph')
     plus = namedtuplewhere('plus', 'glyph')
@@ -93,6 +101,7 @@ class CDPLanguage():
     DPWrap = namedtuplewhere('DPWrap', 'token statements prep impl')
     PDPCodeSpec = namedtuplewhere('PDPCodeSpec', 'keyword function arguments')
 
+    SpaceProduct = namedtuplewhere('SpaceProduct', 'ops')
     InvMult = namedtuplewhere('InvMult', 'ops')
     InvPlus = namedtuplewhere('InvPlus', 'ops')
     FunShortcut1 = namedtuplewhere('FunShortcut1', 'provides fname prep_using name')

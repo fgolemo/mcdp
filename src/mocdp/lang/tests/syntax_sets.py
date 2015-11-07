@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mocdp.lang.tests.utils import parse_wrap_check
 from mocdp.lang.syntax import Syntax
@@ -15,9 +16,11 @@ def check_sets1():
 
 @comptest
 def check_sets2():
-    r = parse_wrap_check("[set of V]",
+    r = parse_wrap_check("[set-of(V)]",
                      Syntax.unitst)
     print r
+    r = parse_wrap_check("[℘(V)]",
+                     Syntax.unitst)
 
 @comptest
 def check_sets3():
@@ -26,7 +29,7 @@ def check_sets3():
     
     simple_cell = catalogue {
 
-        provides voltage [set of V]
+        provides voltage [set-of(V)]
         provides capacity [J]
 
         requires cost [$]
@@ -39,14 +42,14 @@ def check_sets3():
     }
 
     cell_plus_converter = mcdp {
-        provides voltage [set of V]
+        provides voltage [set-of(V)]
         provides capacity [J]
         requires cost [$]
         requires mass [kg]
 
         sub converter = catalogue {
-            provides voltage_out [set of V]
-            requires voltage_in  [set of V]
+            provides voltage_out [set-of(V)]
+            requires voltage_in  [set-of(V)]
             requires cost [$]
             requires mass [g]
     

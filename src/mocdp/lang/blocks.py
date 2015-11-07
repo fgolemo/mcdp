@@ -6,22 +6,22 @@ from conf_tools import (ConfToolsException, SemanticMistakeKeyNotFound,
     instantiate_spec)
 from contracts import contract, describe_value
 from contracts.utils import check_isinstance, indent, raise_desc, raise_wrapped
-from mocdp.comp import (CompositeNamedDP, Connection, Context, NamedDP,
-    NotConnected, SimpleWrap, dpwrap)
+from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
+    SimpleWrap, dpwrap)
 from mocdp.comp.context import CFunction, CResource, ValueWithUnits
 from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
 from mocdp.dp import (
     Constant, GenericUnary, Identity, InvMult2, InvPlus2, Limit, Max, Max1, Min,
     PrimitiveDP, ProductN, SumN)
+from mocdp.dp.dp_catalogue import CatalogueDP
 from mocdp.dp.dp_generic_unary import WrapAMap
 from mocdp.dp.dp_series_simplification import make_series
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.parse_actions import inv_constant
 from mocdp.posets import (NotBelongs, NotEqual, NotLeq, PosetProduct, Rcomp,
     Space, get_types_universe, mult_table, mult_table_seq)
-from mocdp.posets.finite_set import FiniteCollection, FiniteCollectionsInclusion
-from mocdp.dp.dp_catalogue import CatalogueDP
 from mocdp.posets.any import Any
+from mocdp.posets.finite_set import FiniteCollection, FiniteCollectionsInclusion
 
 
 CDP = CDPLanguage
@@ -76,7 +76,13 @@ def eval_statement(r, context):
         name = r.name.value
         ndp = eval_dp_rvalue(r.dp_rvalue, context)
         context.add_ndp(name, ndp)
-        
+       
+    elif isinstance(r, CDP.SetMCDPType):
+        name = r.name.value
+        right_side = r.right_side
+        x = eval_dp_rvalue(right_side, context)
+        context.set_var2model(name, x)
+
     elif isinstance(r, CDP.SetNameGeneric):
         name = r.name.value
         right_side = r.right_side
@@ -104,14 +110,14 @@ def eval_statement(r, context):
 
     elif isinstance(r, CDP.ResStatement):
         # requires r.rname [r.unit]
-        F = r.unit.value
+        F = eval_space(r.unit, context)
         rname = r.rname.value
         ndp = dpwrap(Identity(F), rname, rname)
         context.add_ndp_res(rname, ndp)
         return context.make_function(context.get_name_for_res_node(rname), rname)
     
     elif isinstance(r, CDP.FunStatement):
-        F = r.unit.value
+        F = eval_space(r.unit, context)
         fname = r.fname.value
         ndp = dpwrap(Identity(F), fname, fname)
         context.add_ndp_fun(fname, ndp)
@@ -303,13 +309,13 @@ def eval_dp_rvalue_dpwrap(r, context):
     dp_R = dp.get_res_space()
 
     # Check that the functions are the same
-    want_Fs = tuple([f.unit.value for f in fun])
+    want_Fs = tuple([eval_space(f.unit, context) for f in fun])
     if len(want_Fs) == 1:
         want_F = want_Fs[0]
     else:
         want_F = PosetProduct(want_Fs)
 
-    want_Rs = tuple([r.unit.value for r in res])
+    want_Rs = tuple([eval_space(r.unit, context) for r in res])
     if len(want_Rs) == 1:
         want_R = want_Rs[0]
     else:
@@ -331,8 +337,8 @@ def eval_dp_rvalue_dpwrap(r, context):
 
     ftypes = w.get_ftypes(fnames)
     rtypes = w.get_rtypes(rnames)
-    ftypes_expected = PosetProduct(tuple([f.unit.value for f in fun]))
-    rtypes_expected = PosetProduct(tuple([r.unit.value for r in res]))
+    ftypes_expected = PosetProduct(tuple([eval_space(f.unit, context) for f in fun]))
+    rtypes_expected = PosetProduct(tuple([eval_space(r.unit, context) for r in res]))
 
     try:
 
@@ -365,8 +371,8 @@ def eval_dp_rvalue_catalogue(r, context):
     statements = unwrap_list(r.funres)
     fun = [x for x in statements if isinstance(x, CDP.FunStatement)]
     res = [x for x in statements if isinstance(x, CDP.ResStatement)]
-    Fs = [_.unit.value for _ in fun]
-    Rs = [_.unit.value for _ in res]
+    Fs = [eval_space(_.unit, context) for _ in fun]
+    Rs = [eval_space(_.unit, context) for _ in res]
 
     assert len(fun) + len(res) == len(statements), statements
     tu = get_types_universe()
@@ -438,6 +444,20 @@ def eval_dp_rvalue_catalogue(r, context):
     ndp = dpwrap(dp, fnames=fnames, rnames=rnames)
     return ndp
 
+@contract(returns=Space)
+def eval_space(r, context):
+    if isinstance(r, CDP.PowerSet):
+        P = eval_space(r.space, context)
+        return FiniteCollectionsInclusion(P)
+    if isinstance(r, CDP.SpaceProduct):
+        ops = get_odd_ops(unwrap_list(r.ops))
+        Ss = [eval_space(_, context) for _ in ops]
+        return PosetProduct(tuple(Ss))
+    if isinstance(r, CDP.Unit):
+        return r.value
+    raise DPInternalError('Invalid value to eval_space: %s' % str(r))
+
+
 @contract(returns=NamedDP)
 def eval_dp_rvalue(r, context):  # @UnusedVariable
     try:
@@ -446,7 +466,11 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             statements = unwrap_list(special_list)
             return interpret_commands(statements, context)
 
+        # TODO: remove
         if isinstance(r, CDP.VariableRef):
+            return context.get_var2model(r.name)
+
+        if isinstance(r, CDP.DPVariableRef):
             return context.get_var2model(r.name)
 
         if isinstance(r, CDP.FromCatalogue):
@@ -454,6 +478,9 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
 
         if isinstance(r, CDP.Coproduct):
             return eval_dp_rvalue_coproduct(r, context)
+
+        if isinstance(r, CDP.DPInstance):
+            return eval_dp_rvalue(r.dp_rvalue, context)
 
         if isinstance(r, NamedDP):
             return r

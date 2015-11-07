@@ -1,0 +1,64 @@
+mcdp simple_cell = catalogue {
+    provides voltage  [℘(V)]
+    provides capacity [J]
+
+    requires cost [$]
+    requires mass [kg]
+
+    # These two have some functions, but
+    # non-dominating resources
+    model1 | {1.5 V} | 1 MJ |  5 $ | 0.20 kg 
+    model2 | {1.5 V} | 1 MJ | 15 $ | 0.10 kg 
+    # This model gives 5V and needs an adapter
+    model3 | {5.0 V} | 1 MJ |  5 $ | 0.30 kg
+}
+
+mcdp converters = catalogue {
+    provides voltage    [℘(V)]
+    requires v_in       [℘(V)]
+    requires cost       [$]
+    requires mass       [g]
+    
+    step_up1 | {5 V}        | {1.5 V} |  5 $ | 20 g 
+    step_up2 |       {12 V} | {1.5 V} | 10 $ | 20 g  
+    step_up2 | {5 V,  12 V} | {1.5 V} | 10 $ | 20 g  
+}
+
+mcdp cell_plus_converter = mcdp { 
+
+    sub converter = instance of converters
+    sub cell      = instance of simple_cell
+
+    provides voltage  using converter
+    provides capacity using cell
+
+    (v_in required by converter) ⊆ (voltage provided by cell)
+
+    requires cost ≥ cost required by cell + cost required by converter
+    requires mass ≥ mass required by cell + mass required by converter
+}
+
+mcdp cell_interconnection = map {
+    param cell [mcdp]
+
+    mcdp {
+        mcdp None = mcdp {
+            provides capacity <= 0 A
+            provides voltage  <= {0 V}
+            requires mass >= 0 g
+        }
+
+        provides voltage  [V]
+        provides capacity  [J]
+
+        slot1 = instance (None ^ $cell)
+        slot2 = instance (None ^ $cell) 
+
+        voltage <= slot1.voltage (+) slot2.voltage
+        capacity <= slot1.capacity + slot2.capacity
+        ampacity <= slot1.ampacity + slot2.ampacity
+    }
+}
+simple_cell ^ cell_plus_converter
+# dptype battery = simple_cell ^ cell_plus_converter
+

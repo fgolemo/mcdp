@@ -3,7 +3,7 @@ from comptests.registrar import comptest, comptest_fails
 from mocdp.dp import Max
 from mocdp.lang.syntax import Syntax, parse_wrap
 from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp,
-    assert_semantic_error)
+    assert_semantic_error, parse_wrap_check)
 from nose.tools import assert_equal
 from pyparsing import Literal
 
@@ -91,7 +91,22 @@ def check_lang8_addition():
 
 @comptest
 def check_lang9_max():
-
+    parse_wrap_check("""provides x [R]""",
+                     Syntax.fun_statement)
+    parse_wrap_check("""
+            provides x [R]
+            requires r [R]
+        """,
+    Syntax.simple_dp_model_stats)
+   
+    parse_wrap_check("""dp {
+            provides x [R]
+            requires r [R]
+            
+            implemented-by load SimpleNonlinearity1
+        }""",
+        Syntax.simple_dp_model)
+    
     parse_wrap(Syntax.binary_expr, 'max(f, g)')
     parse_wrap(Syntax.rvalue, 'max(f, g)')
     parse_wrap(Syntax.constraint_expr, 'hnlin.x >= max(f, g)')
@@ -262,16 +277,18 @@ def check_lang49():
 @comptest
 def check_lang51():
     """ Shortcuts "using" """
-    print parse_wrap(Syntax.unit_expr, 'R')
+    print parse_wrap(Syntax.pint_unit, 'R')
     print parse_wrap(Syntax.unitst, '[R]')
+
+
 
     parse_wrap(Syntax.number_with_unit, '4.0 [R]')
 
-    parse_wrap(Syntax.unit_expr, "N")
-    parse_wrap(Syntax.unit_expr, "m")
-    parse_wrap(Syntax.unit_expr, "N m")
-    parse_wrap(Syntax.unit_expr, "m / s^2")
-    parse_wrap(Syntax.unit_expr, "m/s^2")
+    parse_wrap(Syntax.pint_unit, "N")
+    parse_wrap(Syntax.pint_unit, "m")
+    parse_wrap(Syntax.pint_unit, "N*m")
+    parse_wrap(Syntax.pint_unit, "m / s^2")
+    parse_wrap(Syntax.pint_unit, "m/s^2")
     
     parse_wrap(Syntax.number_with_unit, '1 m')
     parse_wrap(Syntax.number_with_unit, '1 m/s')

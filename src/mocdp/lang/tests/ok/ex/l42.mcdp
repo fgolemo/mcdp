@@ -1,6 +1,6 @@
 # test connected 
- cdp {
-          sub motor = template cdp {
+mcdp {
+          sub motor = template mcdp {
             provides speed [R]
             provides torque [R]
             #    
@@ -10,7 +10,7 @@
             requires current [A]
           }
            #
-          sub chassis = template cdp {
+          sub chassis = template mcdp {
             provides payload [g]
             provides velocity [R]
             #

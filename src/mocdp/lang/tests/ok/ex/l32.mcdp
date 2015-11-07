@@ -1,5 +1,5 @@
 # test semantic_error
-cdp {
+mcdp {
   sub motor = abstract cdp {
     provides capacity [W]
     requires mass [g]

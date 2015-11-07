@@ -2,7 +2,6 @@ from collections import namedtuple
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
-
 from mocdp.lang.namedtuple_tricks import isnamedtuplewhere
 from mocdp.lang.parse_actions import parse_wrap
 from mocdp.lang.parts import is_a_special_list
@@ -97,7 +96,7 @@ def ast_to_html(s, complete_document):
 
     if complete_document:
         s = """<html><head>
-        <link rel="stylesheet" type="text/css" href="syntax.css"> 
+        <meta charset="utf-8" />
         </head><body>"""
         s += frag
         s += '\n</body></html>'
@@ -275,8 +274,12 @@ span.RequireKeyword,
     span.LoadKeyword,
     span.CodeKeyword,
     span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
-    span.ImplementedbyKeyword , span.FromCatalogueKeyword
+    span.ImplementedbyKeyword , span.FromCatalogueKeyword, span.MCDPTypeKeywor,
+    span.InstanceKeyword,
+    span.MCDPTypeKeyword
        { font-weight: bold; }
+       
+    
        
     span.ImpName { color: #CC6600; }
     span.FuncName { color: #CC6600 ; }
@@ -292,11 +295,19 @@ span.RequireKeyword,
     span.ProvidedByKeyword,
     span.LoadKeyword, span.CodeKeyword,
     span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
-    span.ImplementedbyKeyword,  span.FromCatalogueKeyword 
+    span.ImplementedbyKeyword,  
+    span.FromCatalogueKeyword, 
+    span.MCDPTypeKeyword,
+    span.InstanceKeyword
     {
-       color: #00a;}
-     span.FName, span.RName { } /*font-style: italic;}*/
-     span.DPName { font-style: italic; }
-     span.comment { color: grey;}
+       color: #00a;
+    }
+    
+    span.FName, span.RName { } 
+    span.DPName { font-style: italic; }
+     
+    span.DPVariableRef { font-weight: bold; }
+    span.DPTypeName { color: black; font-weight: bold; }
+    span.comment { color: grey;}
 
 """

@@ -1,9 +1,9 @@
 # test connected
-abstract cdp {
+abstract mcdp {
   provides capacity [J]
   requires weight [g]
 
-  sub motor = abstract cdp {
+  sub motor = abstract mcdp {
     provides capacity [J]
     requires weight [g]
 

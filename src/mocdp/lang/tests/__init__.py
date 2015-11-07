@@ -4,3 +4,4 @@ from .syntax_power import *
 from .examples import *
 from .syntax_coproduct import *
 from .syntax_sets import *
+from .syntax_spaces import *
