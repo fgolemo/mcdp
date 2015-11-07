@@ -4,7 +4,7 @@ catalogue {
     requires v_in       [set-of(V)]
     requires cost       [$]
     requires mass       [g]
-    requires shape      [m × m × m]
+    requires shape      [m x m x m]
     
     step_up1 | {5 V}        | {1.5 V} |  5 $ | 20 g | ⟨5mm, 5mm, 5mm⟩
     step_up2 |       {12 V} | {1.5 V} | 10 $ | 20 g | ⟨5mm, 5mm, 5mm⟩

@@ -946,6 +946,17 @@ def eval_constant(op, context):
 
     if isinstance(op, CDP.MultN):
         return eval_MultN_as_constant(op, context)
+    
+    if isinstance(op, CDP.MakeTupleConstants):
+        ops = get_odd_ops(unwrap_list(op.ops))
+        constants = [eval_constant(_, context) for _ in ops]
+        # TODO: generic product
+        Fs = [_.unit for _ in constants]
+        vs = [_.value for _ in constants]
+        F = PosetProduct(tuple(Fs))
+        v = tuple(vs)
+        F.belongs(v)
+        return ValueWithUnits(v, F)
 
     msg = 'Cannot evaluate %s as constant.' % type(op).__name__
     raise_desc(NotConstant, msg, op=op)

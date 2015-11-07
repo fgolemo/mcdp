@@ -17,6 +17,7 @@ class CDPLanguage():
     ValueExpr = namedtuplewhere('ValueExpr', 'value')
     Unit = namedtuplewhere('Unit', 'value')
     SimpleValue = namedtuplewhere('SimpleValue', 'value unit')
+    MakeTupleConstants = namedtuplewhere('MakeTupleConstants', 'open ops close')
 
     MakeTemplate = namedtuplewhere('MakeTemplate', 'keyword dp_rvalue')
     AbstractAway = namedtuplewhere('AbstractAway', 'keyword dp_rvalue')
@@ -67,6 +68,8 @@ class CDPLanguage():
     LoadKeyword = namedtuplewhere('LoadKeyword', 'keyword')
     CodeKeyword = namedtuplewhere('CodeKeyword', 'keyword')
     InstanceKeyword = namedtuplewhere('InstanceKeyword', 'keyword')
+    OpenBraceKeyword = namedtuplewhere('OpenBraceKeyword', 'keyword')
+    CloseBraceKeyword = namedtuplewhere('CloseBraceKeyword', 'keyword')
     OpKeyword = namedtuplewhere('OpKeyword', 'keyword')  # Max
     DPWrapToken = namedtuplewhere('DPWrapToken', 'keyword')
     FuncName = namedtuplewhere('FuncName', 'value')  # python function name
@@ -89,6 +92,8 @@ class CDPLanguage():
     coprod = namedtuplewhere('coprod', 'glyph')
     DotPrep = namedtuplewhere('DotPrep', 'glyph')
     comma = namedtuplewhere('comma', 'glyph')
+    open_brace = namedtuplewhere('open_brace', 'glyph')
+    close_brace = namedtuplewhere('close_brace', 'glyph')
 
     FName = namedtuplewhere('FName', 'value')
     RName = namedtuplewhere('RName', 'value')

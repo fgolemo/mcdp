@@ -39,43 +39,22 @@ class Syntax():
     C = lambda x, b: x.setResultsName(b)
 
     # optional whitespace
-    ow = S(ZeroOrMore(L(' ')))
-    # EOL = S(LineEnd())
-    # line = SkipTo(LineEnd(), failOn=LineStart() + LineEnd())
-
+    ow = S(ZeroOrMore(L(' '))) 
     # identifier
     idn = (NotAny(oneOf(keywords)) + Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))).setResultsName('idn')
-
-#     # Special case: allow an expression like AxBxC
-#     alphabet = ('A B C D E F G H I J K L M N O P Q R S T U W V X Y Z '
-#                  'a b c d e f g h i j k l m n o p q r s t u w v x y z '
-#                  '$')
-#     nofollow = 'a b c d e f g h i j k l m n o p q r s t u w v   y z '
-#     # also do not commit if part of word (SEn, a_2)
-#     nofollow += ' A B C D E F G H I J K L M N O P Q R S T U W V X Y Z '
-#     nofollow += ' 0 1 2 3 4 5 6 7 8 9 _'
-#     # but recall 'axis_angle'
-#     v = (oneOf(alphabet.split()) + FollowedBy(NotAny(oneOf(nofollow.split()))))
-
+ 
     disallowed = oneOf(keywords + ['x'])
     unit_base = NotAny(oneOf(keywords + ['x'])) + Word(alphas + '$')
 
     unit_power = L('^') + Word(nums)
     unit_simple = unit_base + O(unit_power)
     unit_connector = L('/') | L('*')
-
-#     pint_unit = sp(Combine(unit_simple + ZeroOrMore(unit_connector + unit_simple)),
-#                    parse_pint_unit)
+ 
     pint_unit = sp((unit_simple + ZeroOrMore(unit_connector + unit_simple)),
                    parse_pint_unit)
 
 
-    space_expr = Forward()
-
-# misc_variables = (oneOf(alphabetl.split())
-#                   + FollowedBy(NotAny(oneOf(nofollow.split() + ['x']))))
-
-
+    space_expr = Forward() 
 
     power_set_expr = sp((L('℘') | L('set-of')) - L('(') + space_expr + L(')'),
                         lambda t: CDP.PowerSet(t[0], t[1],
@@ -155,7 +134,7 @@ class Syntax():
     # <dpname> = ...
 
     SUB = sp(L('sub'), lambda t: CDP.SubKeyword(t[0]))
-    MCDPTYPE = sp(L('mcdp-type') | L('dptype'), lambda t: CDP.MCDPTypeKeyword(t[0]))
+    MCDPTYPE = sp(L('mcdp-type') ^ L('mcdp') ^ L('dptype'), lambda t: CDP.MCDPTypeKeyword(t[0]))
 
     dpname = sp(idn.copy(), lambda t: CDP.DPName(t[0]))
     dptypename = sp(idn.copy(), lambda t: CDP.DPTypeName(t[0]))
@@ -194,12 +173,19 @@ class Syntax():
     dp_variable_ref = sp(idn.copy(), lambda t: CDP.DPVariableRef(t[0]))
     
     constant_value = Forward()
+    # 'MATHEMATICAL LEFT ANGLE BRACKET' (U+27E8) ⟨
+    # 'MATHEMATICAL RIGHT ANGLE BRACKET'   ⟩
+
+    OPEN_BRACE = sp(L('<') ^ L('⟨'), lambda t: CDP.OpenBraceKeyword(t[0]))
+    CLOSE_BRACE = sp(L('>') ^ L('⟩'), lambda t: CDP.CloseBraceKeyword(t[0]))
+    tuple_of_constants = sp(OPEN_BRACE + constant_value + ZeroOrMore(COMMA + constant_value) + CLOSE_BRACE,
+                            lambda t: CDP.MakeTupleConstants(t[0], make_list(list(t)[1:-1]), t[-1]))
     
     collection_of_constants = sp(S(L('{')) + constant_value +
                                 ZeroOrMore(COMMA + constant_value) + S(L('}')),
                                 lambda t: CDP.Collection(make_list(list(t))))
 
-    constant_value << (number_with_unit ^ variable_ref ^ collection_of_constants)
+    constant_value << (number_with_unit ^ variable_ref ^ collection_of_constants ^ tuple_of_constants)
 
     rvalue_resource_simple = sp(dpname + DOT - rname,
                                 lambda t: CDP.Resource(s=t[2], keyword=t[1], dp=t[0]))
