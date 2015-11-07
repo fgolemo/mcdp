@@ -25,7 +25,7 @@ def VariableRef_make(t):
 
 class Syntax():
     keywords = ['load', 'compact', 'required', 'provides', 'abstract',
-                      'dp', 'cdp', 'mcdp', 'template', 'sub', 'for',
+                      'dp', 'cdp', 'mcdp', 'template', 'sub', 'for', 'instance',
                       'provided', 'requires', 'implemented-by', 'using', 'by',
                       'catalogue', 'set-of', 'mcdp-type', 'dptype', 'instance']
 
@@ -160,13 +160,13 @@ class Syntax():
     dpname = sp(idn.copy(), lambda t: CDP.DPName(t[0]))
     dptypename = sp(idn.copy(), lambda t: CDP.DPTypeName(t[0]))
 
-    INSTANCE = sp(L('instance') + O(L('of')), lambda t: CDP.InstanceKeyword(t[0]))
+    INSTANCE = sp(Combine(L('instance') + O(L('of'))), lambda t: CDP.InstanceKeyword(t[0]))
     dpinstance_from_type = sp((INSTANCE + dp_rvalue) ^ (INSTANCE + L('(') + dp_rvalue + L(")")),
                               lambda t: CDP.DPInstance(t[0], t[1]))
 
     dpinstance_expr = (dpinstance_from_type ^ dp_rvalue)
 
-    setsub_expr = sp(SUB - dpname - S(L('=')) - dp_rvalue,  # dpinstance_expr,
+    setsub_expr = sp(SUB - dpname - S(L('=')) - dpinstance_expr,
                      lambda t: CDP.SetName(t[0], t[1], t[2]))
 
     setmcdptype_expr = sp(MCDPTYPE - dptypename - L('=') - dp_rvalue,
@@ -309,8 +309,8 @@ class Syntax():
                              prep_for=t[2],
                              name=t[3]))
 
-
-    line_expr = (load_expr ^ constraint_expr ^ constraint_expr2 ^
+# load_expr ^
+    line_expr = (constraint_expr ^ constraint_expr2 ^
                  (setname_generic ^ setsub_expr ^ setmcdptype_expr)
                  ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
                  ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3)
@@ -376,7 +376,6 @@ class Syntax():
 
     abstract_expr = sp(ABSTRACT - dp_rvalue, 
                        lambda t: CDP.AbstractAway(t[0], t[1]))
-
     
     compact_expr = sp(COMPACT - dp_rvalue,
                        lambda t: CDP.Compact(t[0], t[1]))
