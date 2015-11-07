@@ -1,12 +1,15 @@
 # test connected
 catalogue {
-    provides voltage    [℘(V)]
-    requires v_in       [set-of(V)]
-    requires cost       [$]
-    requires mass       [g]
-    requires shape      [m × m × m]
+    provides voltage [set-of(V)]
     
-    step_up1 | {5 V}        | {1.5 V} |  5 $ | 20 g | ⟨5mm, 5mm, 5mm⟩
-    step_up2 |       {12 V} | {1.5 V} | 10 $ | 20 g | ⟨5mm, 5mm, 5mm⟩
-    step_up2 | {5 V,  12 V} | {1.5 V} | 10 $ | 20 g | <5mm, 5mm, 5mm>
+    requires v_in    [set-of(V)]
+    requires cost    [$]
+    requires mass    [g]
+    requires shape   [mm × mm × mm]
+    
+    # model name | voltage provided |   v_in  | cost | weight |     shape
+    # -----------┼------------------┼---------┼------┼--------┼----------------
+      converter1 |   {5 V}          | {1.5 V} |  5 $ |  20 g  | ⟨5mm, 5mm, 5mm⟩
+      converter2 |         {12 V}   | {1.5 V} | 15 $ |  15 g  | ⟨5mm, 5mm, 5mm⟩
+      converter3 |   {5 V,  12 V}   | {1.5 V} | 10 $ |  20 g  | ⟨5mm, 5mm, 5mm⟩
 }

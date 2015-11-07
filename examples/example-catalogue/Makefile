@@ -3,12 +3,13 @@ all: plots solve
 dp1=catalogue1.mcdp
 dp2=catalogue_plus_coproduct.mcdp
 dp3=catalogue_plus_coproduct-compact.mcdp
+dp4=sizes.mcdp
 outp=--out out/
 
 clean:
 	rm -rf out/
 	
-plots: plot1 plot2 plot3
+plots: plot1 plot2 plot3 plot4
 
 plot1:
 	mcdp-plot $(outp) choose.mcdp
@@ -19,6 +20,9 @@ plot2:
 
 plot3:
 	mcdp-plot $(outp) $(dp3)
+
+plot4:
+	mcdp-plot $(outp) $(dp4)
 
 solve:
 	mcdp-solve --plot $(outp) --expect_nres 2 --expect_nimp 2 $(dp2) "{1.5V}" "1 MJ"
