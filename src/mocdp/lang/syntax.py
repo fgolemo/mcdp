@@ -246,20 +246,20 @@ class Syntax():
 
     # Fractions
 
-    integer_fraction = sp(C(integer, 'num') + S(L('/')) + C(integer, 'den'),
-                          lambda t: CDP.IntegerFraction(t['num'], t['den']))
+    integer_fraction = sp(integer + S(L('/')) + integer,
+                          lambda t: CDP.IntegerFraction(num=t[0], den=t[1]))
 
     power_expr = sp((S(L('pow')) - S(L('(')) + C(rvalue, 'op1') - S(L(','))
                     + C(integer_fraction, 'exponent')) - S(L(')')),
                     power_expr_parse)
 
-    constraint_expr = sp(C(fvalue, 'lf') + GEQ - C(rvalue, 'rvalue'),
-                         lambda t: CDP.Constraint(function=t['lf'],
-                                                  rvalue=t['rvalue'], prep=t[1]))
+    constraint_expr = sp(fvalue + GEQ - rvalue,
+                         lambda t: CDP.Constraint(function=t[0],
+                                                  rvalue=t[2], prep=t[1]))
 
-    constraint_expr2 = sp(C(rvalue, 'rvalue') + LEQ - C(fvalue, 'lf'),
-                          lambda t: CDP.Constraint(function=t['lf'],
-                                                   rvalue=t['rvalue'], prep=t[1]))
+    constraint_expr2 = sp(rvalue + LEQ - fvalue,
+                          lambda t: CDP.Constraint(function=t[2],
+                                                   rvalue=t[0], prep=t[1]))
 
     fun_shortcut1 = sp(PROVIDES + fname + USING + dpname,
                        lambda t: CDP.FunShortcut1(provides=t[0],
