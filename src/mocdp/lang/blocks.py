@@ -384,7 +384,8 @@ def eval_dp_rvalue_catalogue(r, context):
         name = items[0].value
         expected = 1 + len(fun) + len(res)
         if len(items) != expected:
-            msg = 'Row does not match number of elements (%s fun, %s res)' % (len(fun), len(res))
+            msg = 'Row with %d elements does not match expected of elements (%s fun, %s res)' % (len(items), len(fun), len(res))
+            # msg += ' items: %s' % str(items)
             raise DPSemanticError(msg, where=items[-1].where)
         fvalues0 = items[1:1+len(fun)]
         rvalues0 = items[1 + len(fun):1 + len(fun) + len(res)]
