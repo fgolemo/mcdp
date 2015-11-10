@@ -1,5 +1,5 @@
 # test connected
-template cdp {
+template mcdp {
 	provides voltage [V]
 	provides current [A]
 	#    

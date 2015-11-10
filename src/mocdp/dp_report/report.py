@@ -43,12 +43,12 @@ def report_dp1(dp):
     M = dp.get_imp_space_mod_res()
     r.text('ImodR', str(M))
 
-    R = dp.get_res_space()
-    F = dp.get_fun_space()
-    Rinf = R.get_top()
-    Fbot = F.get_bottom()
-    
+
     if False:
+        R = dp.get_res_space()
+        F = dp.get_fun_space()
+        Rinf = R.get_top()
+        Fbot = F.get_bottom()
         if M == PosetProduct((R_dimensionless,)):
             s = ""
             ms = [0.0, 0.25, 0.5, 0.75, 1.0]

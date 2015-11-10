@@ -1,6 +1,6 @@
 catalogue {
 
-    provides voltage [set of V]
+    provides voltage [set-of(V)]
     provides capacity [J]
 
     requires cost [$]

@@ -1,5 +1,5 @@
 # test connected
-cdp {
+mcdp {
     provides f [R]
     
     sub hnlin = dp {

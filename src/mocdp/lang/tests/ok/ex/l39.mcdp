@@ -1,6 +1,6 @@
 # test connected
- cdp {  
-    sub f =  cdp {
+mcdp {  
+    sub f =  mcdp {
         provides x [R]
         requires y [R]
         y >= x

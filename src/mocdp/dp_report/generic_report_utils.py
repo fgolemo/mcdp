@@ -13,12 +13,12 @@ import functools
 import numpy as np
 
 def generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0)):
-    plotters = { 'UR2': PlotterUR2(),
-                    'URRpR_12': PlotterURRpR_12(),
-                    'URRpR_13': PlotterURRpR_13(),
-                    'URRpR_23': PlotterURRpR_23(),
-                    }
-    # F = dp.get_fun_space()
+    plotters = {
+        'UR2': PlotterUR2(),
+        'URRpR_12': PlotterURRpR_12(),
+        'URRpR_13': PlotterURRpR_13(),
+        'URRpR_23': PlotterURRpR_23(),
+    }
     R = dp.get_res_space()
     UR = UpperSets(R)
 

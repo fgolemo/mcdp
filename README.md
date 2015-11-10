@@ -47,7 +47,7 @@ The program ``mcdp-solve`` is a solver.
     
 For example, to solve one of the examples specified in ``examples/example-battery/out/battery.mcdp'', use:
 
-    $ mcdp-solve examples/example-battery/battery.mcdp "1 hour" "0.1 kg" "1 W"
+    $ mcdp-solve examples/example-battery/battery.mcdp "<1 hour, 0.1 kg, 1 W>"
 
 The expected output is:
 
@@ -58,7 +58,7 @@ The expected output is:
 
 This is the case of unreasonable demands (1 kg of extra payload):
 
-    $ mcdp-solve examples/example-battery/battery.mcdp "1 hour" "1.0 kg" "1 W"
+    $ mcdp-solve examples/example-battery/battery.mcdp "<1 hour, 1.0 kg, 1 W>"
 
 This is the expected output:
 

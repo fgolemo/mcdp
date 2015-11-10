@@ -2,7 +2,6 @@ from collections import namedtuple
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
-
 from mocdp.lang.namedtuple_tricks import isnamedtuplewhere
 from mocdp.lang.parse_actions import parse_wrap
 from mocdp.lang.parts import is_a_special_list
@@ -26,7 +25,7 @@ def unzip(iterable):
     return zip(*iterable)
 
 @contract(s=str)
-def ast_to_html(s, complete_document):
+def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda lineno: False):
 
     s_lines, s_comments = isolate_comments(s)
     assert len(s_lines) == len(s_comments) 
@@ -80,12 +79,19 @@ def ast_to_html(s, complete_document):
     
     out = ""
     for i, (a, comment) in enumerate(zip(lines, s_comments)):
-        out += a
+        line = a
         if comment:
-            out += '<span class="comment">%s</span>' % sanitize_comment(comment)
-
-        if i != len(lines) - 1:
-            out += '\n'
+            line += '<span class="comment">%s</span>' % sanitize_comment(comment)
+        lineno = i + 1
+        if ignore_line(lineno):
+            pass
+        else:
+            out += "<span id='line%d'>" % lineno
+            out += "<span class='line-gutter'>%2d</span>" % lineno
+            out += "<span class='line-content'>" + line + "</span>"
+            out += "</span>"
+            if i != len(lines) - 1:
+                out += '\n'
 
     frag = ""
 
@@ -93,11 +99,11 @@ def ast_to_html(s, complete_document):
     frag += out
     frag += '\n</code></pre>'
 
-    frag += '\n\n<style type="text/css">\n' + css + '\n</style>\n\n'
+    frag += '\n\n<style type="text/css">\n' + css + '\n' + extra_css + '\n</style>\n\n'
 
     if complete_document:
         s = """<html><head>
-        <link rel="stylesheet" type="text/css" href="syntax.css"> 
+        <meta charset="utf-8" />
         </head><body>"""
         s += frag
         s += '\n</body></html>'
@@ -147,18 +153,13 @@ def print_html_inner(x):
 
     cur = x.where.character
     out = ""
-    for op, orig, a, b, transformed in subs:
+    for _op, _orig, a, b, transformed in subs:
         if a > cur:
-#             print ('%s: raw %r' % (type(x).__name__, x.where.string[cur:a]))
             out += sanitize(x.where.string[cur:a])
-#         print ('%s: chi %s %r' % (type(x).__name__, type(op).__name__, orig))
-#         print ('%s      %s %s' % (type(x).__name__, type(op).__name__, transformed))
         out += transformed
         cur = b
 
     if cur != x.where.character_end:
-#         why = 'ended at cur = %d, character_end = %s' % (cur, x.where.character_end)
-#         print('%s: %s rest %r' % (type(x).__name__, why, x.where.string[cur:x.where.character_end]))
         out += sanitize(x.where.string[cur:x.where.character_end])
 
     orig0 = x.where.string[x.where.character:x.where.character_end]
@@ -275,8 +276,12 @@ span.RequireKeyword,
     span.LoadKeyword,
     span.CodeKeyword,
     span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
-    span.ImplementedbyKeyword , span.FromCatalogueKeyword
+    span.ImplementedbyKeyword , span.FromCatalogueKeyword, span.MCDPTypeKeywor,
+    span.InstanceKeyword,
+    span.MCDPTypeKeyword
        { font-weight: bold; }
+       
+    
        
     span.ImpName { color: #CC6600; }
     span.FuncName { color: #CC6600 ; }
@@ -292,11 +297,20 @@ span.RequireKeyword,
     span.ProvidedByKeyword,
     span.LoadKeyword, span.CodeKeyword,
     span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
-    span.ImplementedbyKeyword,  span.FromCatalogueKeyword 
+    span.ImplementedbyKeyword,  
+    span.FromCatalogueKeyword, 
+    span.MCDPTypeKeyword,
+    span.InstanceKeyword
     {
-       color: #00a;}
-     span.FName, span.RName { } /*font-style: italic;}*/
-     span.DPName { font-style: italic; }
-     span.comment { color: grey;}
+       color: #00a;
+    }
+    
+    span.FName, span.RName { } 
+    span.DPName { font-style: italic; }
+     
+    span.DPVariableRef { font-weight: bold; }
+    span.DPTypeName { color: black; font-weight: bold; }
+    span.comment { color: grey;}
 
+    span.line-gutter {    margin-right: 1em; color: grey; }
 """

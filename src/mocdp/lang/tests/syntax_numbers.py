@@ -46,33 +46,62 @@ def check_division():
 @comptest
 def check_unit1():
 
-    parse_wrap_syntax_error('*', Syntax.unit_expr)
-    parse_wrap_syntax_error('/', Syntax.unit_expr)
-    parse_wrap_syntax_error('^2', Syntax.unit_expr)
-    good = ['g', 'g^2', 'g^ 2', 'g ^ 2', 'm/g ^2',
-            'm^2/g^2', 'N m', '$', 'V', 'A', 'm/s',
-            'any',
-            ]
-    results = []
-    for g in good:
-        try:
-            r = parse_wrap_check(g, Syntax.unit_expr)
-        except TestFailed as e:
-            results.append((g, False, e, None))
-        else:
-            results.append((g, True, None, r))
-    
-    exceptions = []
-    for g, ok, e, r in results:
-        if ok:
-            print('%20s: OK   %s' % (g, r))
-        if not ok:
-            print('%20s: FAIL ' % g)
-            exceptions.append(e)
+    print('parsing as unit_simple:')
+    print parse_wrap_syntax_error('N*m', Syntax.unit_simple)
+    print('parsing as pint_unit:')
+    print parse_wrap_check('N*m', Syntax.pint_unit)
+    parse_wrap_check('y', Syntax.unit_simple)
+    parse_wrap_syntax_error('x', Syntax.unit_simple)
+    parse_wrap_check('x', Syntax.disallowed)
+    print('unit_base:')
+    parse_wrap_syntax_error('V x m', Syntax.unit_base)
 
-    if exceptions:
-        msg = "\n".join(str(e) for e in exceptions)
-        raise TestFailed(msg)
+    nu = Syntax.number_with_unit3
+#     Syntax.space_expr.setWhiteSpaceChars(' \t')
+    print('skip: %r white: %r copydef: %r' % (nu.skipWhitespace, nu.whiteChars,
+            nu.copyDefaultWhiteChars))
+    parse_wrap_check('12 W', nu)
+    parse_wrap_check('12 Wh', nu)
+    parse_wrap_syntax_error('12 W\n h', nu)
+
+
+
+
+    
+    if True:
+        print('unit_simple:')
+        parse_wrap_syntax_error('V x m', Syntax.unit_simple)
+
+        print('pint_unit:')
+        parse_wrap_syntax_error('V x m', Syntax.pint_unit)
+
+        parse_wrap_syntax_error('*', Syntax.pint_unit)
+        parse_wrap_syntax_error('/', Syntax.pint_unit)
+        parse_wrap_syntax_error('^2', Syntax.pint_unit)
+        good = ['g', 'g^2', 'g^ 2', 'g ^ 2', 'm/g ^2',
+                'm^2/g^2', 'N*m', '$', 'V', 'A', 'm/s',
+                'any',
+                ]
+        results = []
+        for g in good:
+            try:
+                r = parse_wrap_check(g, Syntax.pint_unit)
+            except TestFailed as e:
+                results.append((g, False, e, None))
+            else:
+                results.append((g, True, None, r))
+
+        exceptions = []
+        for g, ok, e, r in results:
+            if ok:
+                print('%20s: OK   %s' % (g, r))
+            if not ok:
+                print('%20s: FAIL ' % g)
+                exceptions.append(e)
+
+        if exceptions:
+            msg = "\n".join(str(e) for e in exceptions)
+            raise TestFailed(msg)
 
 
 

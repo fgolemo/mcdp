@@ -1,5 +1,5 @@
 # test unconnected
-cdp {
+mcdp {
     provides capacity [J]
 
     sub battery = load battery

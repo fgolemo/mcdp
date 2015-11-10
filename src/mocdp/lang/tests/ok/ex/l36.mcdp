@@ -1,6 +1,6 @@
 # test unconnected
 mcdp {  
-	sub motor = template cdp {
+	sub motor = template mcdp {
   		requires cost [$]
   		provides velocity [R]
   		provides endurance [s]

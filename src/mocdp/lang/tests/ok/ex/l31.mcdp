@@ -1,6 +1,6 @@
 # test semantic_error
 # Should be joule
-cdp {
+mcdp {
   sub motor = abstract dp {
     provides energy [W]
     requires mass [kg]

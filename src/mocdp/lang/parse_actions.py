@@ -199,6 +199,12 @@ class PlusValue():
 
 
 @parse_action
+def space_product_parse_action(tokens):
+    tokens = list(tokens[0])
+    ops = make_list(tokens)
+    return CDP.SpaceProduct(ops, where=ops.where)
+
+@parse_action
 def mult_inv_parse_action(tokens):
     tokens = list(tokens[0])
     ops = make_list(tokens)
@@ -245,7 +251,8 @@ def remove_comments(s):
 def parse_ndp(string):
     from mocdp.lang.syntax import Syntax
     v = parse_wrap(Syntax.dp_rvalue, string)[0]
-    from mocdp.lang.blocks import Context, eval_dp_rvalue
+    from mocdp.lang.blocks import  eval_dp_rvalue
+    from mocdp.comp.context import Context
     context = Context()
     res = eval_dp_rvalue(v, context)
     # I'm not sure what happens to the context
@@ -275,3 +282,11 @@ def funshortcut1m(provides, fnames, prep_using, name):
 @contract(name=CDP.DPName)
 def resshortcut1m(requires, rnames, prep_for, name):
     return CDP.ResShortcut1m(requires=requires, rnames=rnames, prep_for=prep_for, name=name)
+
+def parse_pint_unit(tokens):
+    tokens = list(tokens)
+    pint_string = " ".join(tokens)
+    # print 'parse_pint_unit, tokens = %s, pint_string = %s' % (tokens, pint_string)
+
+    from mocdp.posets.rcomp_units import make_rcompunit
+    return CDP.Unit(make_rcompunit(pint_string))

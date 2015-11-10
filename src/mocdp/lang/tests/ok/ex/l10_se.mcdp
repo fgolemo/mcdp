@@ -1,4 +1,4 @@
 # test unconnected
-cdp {
+mcdp {
     sub battery = load battery
 }

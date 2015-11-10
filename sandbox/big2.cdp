@@ -7,7 +7,7 @@ mcdp {  # mcdp = Monotone Co-Design Problem
     sub motor = template mcdp {
       # a motor provides a certain torque at a certain speed
       provides speed [rad/s]
-      provides torque [N m]
+      provides torque [N*m]
       # and requires $ to buy it, g to carry it, 
       # and voltage, current to power it
       requires cost [$]
@@ -29,7 +29,7 @@ mcdp {  # mcdp = Monotone Co-Design Problem
       requires total_weight [g]
       # It requires a motor with the given specs
       requires motor_speed [rad/s]
-      requires motor_torque [N m]
+      requires motor_torque [N*m]
 	  # It also requires a controller
 	  # The unit "*" is a place-holder for this template
       requires control_function [any]

@@ -1,5 +1,5 @@
 # test connected
-cdp {
+mcdp {
     provides mission_time [s]
 
     sub battery = dp {
