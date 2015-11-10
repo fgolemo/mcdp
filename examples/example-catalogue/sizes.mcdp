@@ -1,6 +1,6 @@
 # test connected
 catalogue {
-    provides voltage [set-of(V)]
+    provides voltage [set-of(V)] 
     
     requires v_in    [set-of(V)]
     requires cost    [$]

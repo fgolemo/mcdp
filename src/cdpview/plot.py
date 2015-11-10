@@ -47,11 +47,35 @@ def ndp_visualization(data, style):
     res2 = ('pdf', style, pdf)
     return [res1, res2]
 
+def create_extra_css(params):
+#     hide = params.get('hide', '')
+#     lines = hide.split(':')
+    out = ''
+#     if not lines:
+#         pass
+#     else:
+#         for l in lines:
+#             out += 'span#line%s, ' % l
+#         out += ' { display: none; }'
+    return out
+
+def get_lines_to_hide(params):
+    hide = params.get('hide', '')
+    if not hide:
+        return []
+    lines = hide.split(':')
+    return [int(_) for _ in lines]
+
 def syntax_pdf(data):
     from mocdp.dp_report.html import ast_to_html
     s = data['s']
     s = s.replace('\t', '    ')
-    html = ast_to_html(s, complete_document=True)
+    extra_css = create_extra_css(data['params'])
+    lines_to_hide = get_lines_to_hide(data['params'])
+    def ignore_line(lineno):
+        return lineno  in lines_to_hide
+    html = ast_to_html(s, complete_document=True, extra_css=extra_css,
+                       ignore_line=ignore_line)
 
     d = mkdtemp()
     
@@ -100,7 +124,8 @@ def syntax_pdf(data):
 def syntax_frag(data):
     from mocdp.dp_report.html import ast_to_html
     s = data['s']
-    res = ast_to_html(s, complete_document=False)
+    extra_css = create_extra_css(data['params'])
+    res = ast_to_html(s, complete_document=False, extra_css=extra_css)
     res1 = ('html', 'syntax_frag', res)
     return [res1]
 
@@ -108,8 +133,26 @@ def syntax_frag(data):
 def syntax_doc(data):
     from mocdp.dp_report.html import ast_to_html
     s = data['s']
-    res = ast_to_html(s, complete_document=True)
+    extra_css = create_extra_css(data['params'])
+    lines_to_hide = get_lines_to_hide(data['params'])
+    def ignore_line(lineno):
+        return lineno  in lines_to_hide
+
+    res = ast_to_html(s, complete_document=True, extra_css=extra_css,
+                      ignore_line=ignore_line)
     res1 = ('html', 'syntax_doc', res)
+    return [res1]
+
+def tex_form(data):
+    filename = data['filename']
+    d = os.path.dirname(filename)
+    b = os.path.basename(filename)
+    graphics = os.path.join(d, 'out', os.path.splitext(b)[0]) + '-syntax_pdf.pdf'
+    graphics = os.path.realpath(graphics)
+    res = """
+    \\includegraphics{%s}
+    """ % graphics
+    res1 = ('tex', 'tex_form', res)
     return [res1]
 
 allplots  = {
@@ -119,13 +162,28 @@ allplots  = {
     ('ndp_default', lambda data: ndp_visualization(data, 'default')),
     ('ndp_clean', lambda data: ndp_visualization(data, 'clean')),
     ('dp_tree', dp_visualization),
+    ('tex_form', tex_form),
 }
 
-def do_plots(filename, plots, outdir):
+@contract(returns='tuple(str,*)')
+def parse_kv(x):
+    return tuple(x.split('='))
+
+def parse_params(p):
+    p = p.strip()
+    if not p:
+        return {}
+    seq = p.split(',')
+
+    return dict(parse_kv(_) for _ in seq)
+
+def do_plots(filename, plots, outdir, extra_params):
     s = open(filename).read()
     data = {}
+    data['filename'] = filename
     data['s'] = s
-    
+    data['params'] = parse_params(extra_params)
+
     d = dict(allplots)
     results = []
     for p in plots:    
@@ -163,8 +221,13 @@ class PlotDP(QuickAppBase):
         params.add_flag('watch')
         params.accept_extra()
 
+        possible = [p for p, _ in allplots]
+
+
         params.add_string('out', help='Output dir', default=None)
-        params.add_string_list('plots', default='*')
+        params.add_string('extra_params', help='Add extra params', default="")
+
+        params.add_string('plots', default='*', help='One of: %s' % possible)
 
     def go(self):
         GlobalConfig.global_load_dir("mocdp")
@@ -185,7 +248,7 @@ class PlotDP(QuickAppBase):
         mkdirs_thread_safe(out)
         possible = [p for p, _ in allplots]
         plots = expand_string(options.plots, list(possible))
-        do_plots(filename, plots, out)
+        do_plots(filename, plots, out, options.extra_params)
 
         if options.watch:
             def handler():

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from conf_tools import GlobalConfig
+from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.comp.context import Context
 from mocdp.dp.solver import generic_solve
@@ -7,12 +8,11 @@ from mocdp.dp_report.generic_report_utils import generic_report
 from mocdp.lang.blocks import eval_constant
 from mocdp.lang.parse_actions import parse_ndp, parse_wrap
 from mocdp.lang.syntax import Syntax
-from mocdp.posets import PosetProduct, UpperSets, get_types_universe
+from mocdp.posets import UpperSets, get_types_universe
 from quickapp import QuickAppBase
 from reprep import Report
 import logging
 import os
-# from mocdp.dp.tests.inv_mult_plots import generic_report
 
 class ExpectationsNotMet(Exception):
     pass
@@ -57,46 +57,22 @@ class SolveDP(QuickAppBase):
 
         params = params[1:]
 
-        fd = []
-        Fd = []
-        context = Context()
-        for p in params:
-            res = parse_wrap(Syntax.constant_value, p)[0]
-            vu = eval_constant(res, context)
-            fd.append(vu.value)
-            Fd.append(vu.unit)
-        Fd = PosetProduct(Fd)
-        fd = tuple(fd)
+
 
         s = open(filename).read()
         ndp = parse_ndp(s)
         dp = ndp.get_dp()
-
         fnames = ndp.get_fnames()
-        if len(fnames) != len(fd):
-            raise_desc(ValueError, 'Length does not match.', fnames=fnames,
-                       params=params)
-
-        if len(fnames) == 1:
-            Fd = Fd[0]
-            fd = fd[0]
-        else:
-            Fd = Fd
-            fd = fd
-
 
         F = dp.get_fun_space()
 
-        # TODO: check units compatible
+#         fg = interpret_params(params, fnames, F)
+        if len(params) != 1:
+            raise ValueError(params)
+        p = params[0]
+        fg = interpret_params_1string(p, F)
 
-        tu = get_types_universe()
-
-        tu.check_leq(Fd, F)
-
-        A_to_B, _ = tu.get_embedding(Fd, F)
-        fg = A_to_B(fd)
-
-        print('query: %s' % ", ".join(params))
+        print('query: %s' % p)
         print('converted: %s' % F.format(fg))
         max_steps = options.max_steps
         try: 
@@ -150,16 +126,59 @@ class SolveDP(QuickAppBase):
             out_html = os.path.join(out, out_html)
             print('writing to %r' % out_html)
             r.to_html(out_html)
-#
-#         plots = expand_string(options.plots, list(allplots))
-#         do_plots(filename, plots, out)
-#
-#         if options.watch:
-#             def handler():
-#                 do_plots(filename, plots, out)
-#
-#             from cdpview.go import watch
-#             watch(path=os.path.dirname(options.filename), handler=handler)
 
+#
+# @contract(params="seq(str)")
+# def interpret_params(params, fnames, F):
+#     fds = []
+#     Fds = []
+#     context = Context()
+#     for p in params:
+#         res = parse_wrap(Syntax.constant_value, p)[0]
+#         vu = eval_constant(res, context)
+#         fds.append(vu.value)
+#         Fds.append(vu.unit)
+#     Fd = PosetProduct(tuple(Fds))
+#     fd = tuple(fds)
+#
+#     if len(fnames) != len(fd):
+#         raise_desc(ValueError, 'Length does not match.', fnames=fnames,
+#                    params=params)
+#
+#     if len(fnames) == 1:
+#         Fd = Fd[0]
+#         fd = fd[0]
+#     else:
+#         Fd = Fd
+#         fd = fd
+#
+#
+#     # TODO: check units compatible
+#
+#     tu = get_types_universe()
+#
+#     tu.check_leq(Fd, F)
+#     A_to_B, _ = tu.get_embedding(Fd, F)
+#     fg = A_to_B(fd)
+#     return fg
+
+@contract(p="str")
+def interpret_params_1string(p, F):
+    context = Context()
+
+    res = parse_wrap(Syntax.constant_value, p)[0]
+    vu = eval_constant(res, context)
+
+    Fd = vu.unit
+    fd = vu.value
+
+    # TODO: check units compatible
+
+    tu = get_types_universe()
+
+    tu.check_leq(Fd, F)
+    A_to_B, _ = tu.get_embedding(Fd, F)
+    fg = A_to_B(fd)
+    return fg
 
 mcdp_solve_main = SolveDP.get_sys_main()

@@ -3,7 +3,7 @@ from .primitive import PrimitiveDP
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
 from mocdp import get_conftools_posets
-from mocdp.exceptions import DPInternalError
+from mocdp.exceptions import DPInternalError, do_extra_checks
 from mocdp.posets import PosetProduct
 from multi_index import get_it
 
@@ -31,7 +31,8 @@ class Mux(PrimitiveDP):
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, func):
-        self.F.belongs(func)
+        if do_extra_checks():
+            self.F.belongs(func)
 
         r = get_it(func, self.coords, reduce_list=tuple)
 
