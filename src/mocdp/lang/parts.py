@@ -122,7 +122,9 @@ class CDPLanguage():
     Power = namedtuplewhere('Power', 'op1 exponent')
     BuildProblem = namedtuplewhere('BuildProblem', 'keyword statements')
 
-
+# Create a type for each length of lists
+# with elements e1, e2, e3, etc.
+# The list with length 0 has a dummy element "dummy".
 list_types = {
 }
 
@@ -133,15 +135,12 @@ for i in range(1, 100):
 
 list_types[0] = namedtuplewhere('List0', 'dummy')
 
-
 def is_a_special_list(x):
     return 'List' in type(x).__name__
 
 def make_list(x, where=None):
     try:
         if not len(x):
-#             if not where:
-#                 raise ValueError(x)
             return list_types[0](dummy='dummy', where=where)
     
         ltype = list_types[len(x)]

@@ -1,33 +1,42 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
-from mocdp.lang.tests.utils import parse_wrap_check
 from mocdp.lang.syntax import Syntax
 from mocdp.lang.parse_actions import parse_ndp
 
-@comptest
-def check_sets1():
-    r = parse_wrap_check("{ 1.5 V, 5 V }",
-                     Syntax.collection_of_constants)
-    print r
+from .utils import ok, sem, syn
 
-    r = parse_wrap_check("{ 1.5 V, 5 V }",
-                     Syntax.constant_value)
-    print r
+ok(Syntax.collection_of_constants, "{ 1.5 V, 5 V }")
+ok(Syntax.constant_value, "{ 1.5 V, 5 V }")
 
-@comptest
-def check_sets2():
-    r = parse_wrap_check("[set-of(V)]",
-                     Syntax.unitst)
-    print r
-    r = parse_wrap_check("[℘(V)]",
-                     Syntax.unitst)
+# @comptest
+# def check_sets1():
+#     r = parse_wrap_check("{ 1.5 V, 5 V }",
+#                      Syntax.collection_of_constants)
+#     print r
+#
+#     r = parse_wrap_check("{ 1.5 V, 5 V }",
+#                      Syntax.constant_value)
+#     print r
+
+
+ok(Syntax.unitst, "[set-of(V)]")
+
+ok(Syntax.unitst, "[℘(V)]")
+
+# @comptest
+# def check_sets2():
+#     r = parse_wrap_check("[set-of(V)]",
+#                      Syntax.unitst)
+#     print r
+#     r = parse_wrap_check("[℘(V)]",
+#                      Syntax.unitst)
 
 @comptest
 def check_sets3():
-    ndp = parse_ndp("""
+    parse_ndp("""
     mcdp {
     
-    simple_cell = catalogue {
+    sub simple_cell = instance catalogue {
 
         provides voltage [set-of(V)]
         provides capacity [J]
@@ -41,13 +50,13 @@ def check_sets3():
 
     }
 
-    cell_plus_converter = mcdp {
+    sub cell_plus_converter = instance mcdp {
         provides voltage [set-of(V)]
         provides capacity [J]
         requires cost [$]
         requires mass [kg]
 
-        sub converter = catalogue {
+        sub converter = instance catalogue {
             provides voltage_out [set-of(V)]
             requires voltage_in  [set-of(V)]
             requires cost [$]
@@ -67,7 +76,7 @@ def check_sets3():
         capacity <= cell.capacity
     }
 
-    sub battery = simple_cell ^ cell_plus_converter
+    sub battery = instance simple_cell ^ cell_plus_converter
 
 }
     """)

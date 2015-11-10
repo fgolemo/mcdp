@@ -40,7 +40,7 @@ def generic_try_plotters(r, plotters, space, sequence, axis0=None, annotation=No
     for name, plotter in plotters.items():
         try:
             plotter.check_plot_space(space)
-        except NotPlottable as e:
+        except NotPlottable:
             # print('Plotter %r cannot plot %r:\n%s' % (name, space, e))
             continue
         nplots += 1
@@ -102,7 +102,7 @@ class Plotter():
     def plot(self, pylab, axis, space, value):
         pass
 
-    def get_xylabels(self, space):
+    def get_xylabels(self, _space):
         return None, None
 
 class PlotterUR2(Plotter):

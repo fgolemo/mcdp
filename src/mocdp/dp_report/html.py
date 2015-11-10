@@ -25,7 +25,7 @@ def unzip(iterable):
     return zip(*iterable)
 
 @contract(s=str)
-def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda lineno: False):
+def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: False):
 
     s_lines, s_comments = isolate_comments(s)
     assert len(s_lines) == len(s_comments) 

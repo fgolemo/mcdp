@@ -1,4 +1,4 @@
-from contracts.interface import ContractSyntaxError
+from contracts import ContractSyntaxError, all_disabled
 
 class DPInternalError(Exception):
     """ Internal consistency errors (not user) """
@@ -15,8 +15,6 @@ class DPSemanticError(ContractSyntaxError, DPUserError):
 
 class _storage:
     first = True
-
-from contracts.enabling import all_disabled
 
 def do_extra_checks():
 

@@ -117,7 +117,7 @@ def parse_wrap_syntax_error(string, expr):
 
 
 
-def ok(expr, string, result):
+def ok(expr, string, result=None):
     expr = find_parsing_element(expr)
     register_indep(parse_wrap_check, dynamic=False,
                    args=(string, expr, result), kwargs=dict())

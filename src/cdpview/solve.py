@@ -13,6 +13,7 @@ from quickapp import QuickAppBase
 from reprep import Report
 import logging
 import os
+from mocdp.posets.poset_product import PosetProduct
 
 class ExpectationsNotMet(Exception):
     pass
@@ -66,14 +67,13 @@ class SolveDP(QuickAppBase):
 
         F = dp.get_fun_space()
 
-#         fg = interpret_params(params, fnames, F)
-        if len(params) != 1:
-            raise ValueError(params)
-        p = params[0]
-        fg = interpret_params_1string(p, F)
+        if len(params) > 1:
+            fg = interpret_params(params, fnames, F)
+        else:
+            p = params[0]
+            fg = interpret_params_1string(p, F)
 
-        print('query: %s' % p)
-        print('converted: %s' % F.format(fg))
+        print('query: %s' % F.format(fg))
         max_steps = options.max_steps
         try: 
             trace = generic_solve(dp, f=fg, max_steps=max_steps)
@@ -127,40 +127,39 @@ class SolveDP(QuickAppBase):
             print('writing to %r' % out_html)
             r.to_html(out_html)
 
-#
-# @contract(params="seq(str)")
-# def interpret_params(params, fnames, F):
-#     fds = []
-#     Fds = []
-#     context = Context()
-#     for p in params:
-#         res = parse_wrap(Syntax.constant_value, p)[0]
-#         vu = eval_constant(res, context)
-#         fds.append(vu.value)
-#         Fds.append(vu.unit)
-#     Fd = PosetProduct(tuple(Fds))
-#     fd = tuple(fds)
-#
-#     if len(fnames) != len(fd):
-#         raise_desc(ValueError, 'Length does not match.', fnames=fnames,
-#                    params=params)
-#
-#     if len(fnames) == 1:
-#         Fd = Fd[0]
-#         fd = fd[0]
-#     else:
-#         Fd = Fd
-#         fd = fd
-#
-#
-#     # TODO: check units compatible
-#
-#     tu = get_types_universe()
-#
-#     tu.check_leq(Fd, F)
-#     A_to_B, _ = tu.get_embedding(Fd, F)
-#     fg = A_to_B(fd)
-#     return fg
+
+@contract(params="seq(str)")
+def interpret_params(params, fnames, F):
+    fds = []
+    Fds = []
+    context = Context()
+    for p in params:
+        res = parse_wrap(Syntax.constant_value, p)[0]
+        vu = eval_constant(res, context)
+        fds.append(vu.value)
+        Fds.append(vu.unit)
+    Fd = PosetProduct(tuple(Fds))
+    fd = tuple(fds)
+
+    if len(fnames) != len(fd):
+        raise_desc(ValueError, 'Length does not match.', fnames=fnames,
+                   params=params)
+
+    if len(fnames) == 1:
+        Fd = Fd[0]
+        fd = fd[0]
+    else:
+        Fd = Fd
+        fd = fd
+
+    # TODO: check units compatible
+
+    tu = get_types_universe()
+
+    tu.check_leq(Fd, F)
+    A_to_B, _ = tu.get_embedding(Fd, F)
+    fg = A_to_B(fd)
+    return fg
 
 @contract(p="str")
 def interpret_params_1string(p, F):
