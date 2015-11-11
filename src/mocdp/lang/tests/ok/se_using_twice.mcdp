@@ -1,6 +1,6 @@
 # test semantic_error
-cdp {  
-  sub motor = template cdp {
+mcdp {  
+  sub motor = template mcdp {
     provides speed [R]
   }
 

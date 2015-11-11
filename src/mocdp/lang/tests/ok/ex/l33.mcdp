@@ -1,10 +1,10 @@
 # test unconnected
 mcdp {
-  sub motor = abstract cdp {
+  sub motor = instance abstract mcdp {
     provides capacity [J]
     requires weight [g]
 
-  sub battery = dp {
+  sub battery = instance dp {
     provides capacity [J]
     requires weight [kg]
 

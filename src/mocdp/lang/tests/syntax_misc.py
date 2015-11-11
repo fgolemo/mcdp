@@ -58,19 +58,19 @@ def check_lang6_composition():
 def check_lang8_addition():
     # x of b  == x required by b
     p = assert_parsable_to_connected_ndp("""
-    cdp {
+    mcdp {
         provides mission_time  [s]
         provides extra_payload [g]
         requires total_weight [g]
         
-        sub battery = dp {
+        sub battery = instance dp {
             provides capacity [J]
             requires weight   [kg]
             
             implemented-by load BatteryDP
         }
         
-        sub actuation = dp {
+        sub actuation = instance dp {
             provides payload [g]
             requires power   [W]
             
@@ -112,10 +112,10 @@ def check_lang9_max():
     parse_wrap(Syntax.constraint_expr, 'hnlin.x >= max(f, g)')
 
     p = assert_parsable_to_connected_ndp("""
-    cdp {
+    mcdp {
         provides f [R]
         
-        sub hnlin = dp {
+        sub hnlin = instance dp {
             provides x [R]
             requires r [R]
             
@@ -133,10 +133,10 @@ def check_lang9_max():
 @comptest
 def check_lang10_comments():
     p = assert_parsable_to_connected_ndp("""
-    cdp {
+    mcdp {
         provides f [R]
         
-        sub hnlin = dp {
+        sub hnlin = instance dp {
             provides x [R]
             requires r [R]
             
@@ -155,11 +155,11 @@ def check_lang10_comments():
 @comptest
 def check_lang11_resources():
     p = assert_parsable_to_connected_ndp("""
-    cdp {
+    mcdp {
         provides f [R]
         requires z [R]
         
-       sub  hnlin = dp {
+       sub hnlin = instance dp {
             provides x [R]
             requires r [R]
             
@@ -190,7 +190,7 @@ def check_simplification():
     
     """
     m1 = assert_parsable_to_connected_ndp("""
-    cdp {
+    mcdp {
         provides x  [s]
         provides y  [s]
         requires z  [s]
@@ -201,7 +201,7 @@ def check_simplification():
     dp1 = m1.get_dp()
 
     m2 = assert_parsable_to_connected_ndp("""
-    cdp {
+    mcdp {
         provides x  [s]
         provides y  [s]
         requires z  [s]
@@ -217,7 +217,7 @@ def check_simplification():
 @comptest
 def check_lang12_addition_as_resources():
     assert_parsable_to_connected_ndp("""
-    cdp {
+    mcdp {
         provides a [R]
         provides b [R]
         requires c [R]
@@ -231,7 +231,7 @@ def check_lang12_addition_as_resources():
 @comptest
 def check_lang15():
     assert_semantic_error("""
-cdp {
+mcdp {
     provides g [s]
     provides f [s]
 
@@ -299,7 +299,7 @@ def check_lang51():
 @comptest
 def check_lang_invplus():
     assert_parsable_to_connected_ndp("""
-cdp {
+mcdp {
     provides a [s]
     
     requires x [s]

@@ -1,5 +1,5 @@
 # test connected
-cdp {
+mcdp {
     provides a [R]
     provides b [R]
     requires c [R]

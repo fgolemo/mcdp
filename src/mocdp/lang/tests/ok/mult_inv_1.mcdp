@@ -1,5 +1,5 @@
 # test connected
-cdp {
+mcdp {
 
 	requires a [R]
 	requires b [R]

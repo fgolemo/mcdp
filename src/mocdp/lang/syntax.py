@@ -25,7 +25,7 @@ def VariableRef_make(t):
 class Syntax():
     keywords = [
         'load', 'compact', 'required', 'provides', 'abstract',
-        'dp', 'cdp', 'mcdp', 'template', 'sub', 'for', 'instance',
+        'dp', 'mcdp', 'template', 'sub', 'for', 'instance',
         'provided', 'requires', 'implemented-by', 'using', 'by',
         'catalogue', 'set-of', 'mcdp-type', 'dptype', 'instance',
     ]
@@ -68,7 +68,7 @@ class Syntax():
     BAR = sp(L('/'), lambda t: CDP.bar(t[0]))
     DPTOKEN = sp(L('dp'), lambda t: CDP.DPWrapToken(t[0]))
     IMPLEMENTEDBY = sp(L('implemented-by'), lambda t: CDP.ImplementedbyKeyword(t[0]))
-    CDPTOKEN = sp(L('cdp') | L('mcdp'), lambda t: CDP.MCDPKeyword(t[0]))
+    CDPTOKEN = sp(L('mcdp'), lambda t: CDP.MCDPKeyword(t[0]))
 
     FROMCATALOGUE = sp(L('catalogue'), lambda t:CDP.FromCatalogueKeyword(t[0]))
     COMPACT = sp(L('compact'), lambda t: CDP.CompactKeyword(t[0]))

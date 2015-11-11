@@ -1,5 +1,5 @@
 # test unconnected
-cdp {
-    sub a = template cdp  { 
+mcdp {
+    sub a = template mcdp  { 
     }
 }

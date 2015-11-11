@@ -1,6 +1,6 @@
 # test connected
-cdp {  
-    sub f =  cdp {
+mcdp {  
+    sub f =  mcdp {
         provides a [R]
         provides b [R]
         requires c [R]

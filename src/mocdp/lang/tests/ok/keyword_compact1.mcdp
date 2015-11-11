@@ -1,11 +1,11 @@
 # test connected
-compact cdp {  
-      sub A = template cdp {
+compact mcdp {  
+      sub A = template mcdp {
         requires speed [R]
         requires torque [R]
       }
       
-      sub B = template cdp {
+      sub B = template mcdp {
         provides speed [R]
         provides torque [R]
       }

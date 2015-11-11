@@ -1,5 +1,5 @@
 # test connected
-cdp {  
+mcdp {  
     provides x [s] 
     requires y [s]
 

@@ -1,6 +1,6 @@
 # test connected
 mcdp {  
-  sub motor_chassis =  mcdp {
+  sub motor_chassis = instance mcdp {
     sub motor = template mcdp {
       provides speed [rad/s]
       provides torque [N*m]
@@ -11,7 +11,7 @@ mcdp {
       requires current [A]
     }
      #
-    sub chassis = template mcdp {
+    sub chassis = instance template mcdp {
       provides payload [g]
       provides velocity [m/s]
       #
@@ -37,7 +37,7 @@ mcdp {
     chassis.payload >= payload + motor.weight
   }
       
-  sub MCB = template mcdp {
+  sub MCB = instance template mcdp {
     provides voltage [V]
     provides current [A]
     #    
@@ -51,7 +51,7 @@ mcdp {
 
 
   #
-  sub battery = template mcdp {
+  sub battery = instance template mcdp {
     provides capacity [J]
     provides voltage [V]
     provides current [A]
@@ -67,7 +67,7 @@ mcdp {
 
   # "Autonomy" is a placeholder. It provides
   # a control function and requires SWAP resources.
-  sub autonomy = template mcdp {
+  sub autonomy = instance template mcdp {
     provides control_function [any]
     requires computation_graph [any]
     requires cost [$]
@@ -75,7 +75,7 @@ mcdp {
   }
   autonomy.control_function >= motor_chassis.control_function
 
-  sub computation = template mcdp {
+  sub computation = instance template mcdp {
     provides computation_graph [any]
     requires voltage [V]
     requires current [A]
@@ -100,7 +100,7 @@ mcdp {
   battery.voltage >= voltage
 
   # Shipping is $0.5/lbs
-  sub shipping = abstract mcdp {
+  sub shipping = instance abstract mcdp {
     provides ships [g]
     requires postage [$]
 

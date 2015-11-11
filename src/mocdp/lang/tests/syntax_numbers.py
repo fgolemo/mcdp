@@ -110,7 +110,7 @@ def check_numbers3():
     # Need connections: don't know the value of a
 
     assert_parsable_to_connected_ndp("""    
-    cdp  {
+    mcdp  {
         requires a [g]
         
         a >= 2 [g]
@@ -120,7 +120,7 @@ def check_numbers3():
 @comptest
 def check_numbers3_neg():
     assert_semantic_error("""    
-    cdp  {
+    mcdp  {
         provides f [g]
         requires r [g]
         
@@ -134,13 +134,13 @@ ONE_MPH_IN_M_S = 0.44704
 def check_unit_conversions():
     ndp = parse_ndp("""
     # test connected
-cdp {  
+mcdp {  
       
         requires a [m/s] 
         provides b [m/s]
 
 
-        sub motor = cdp { 
+        sub motor = instance mcdp { 
           provides vel [mph]
           requires vel2 [mph]
 
@@ -195,7 +195,7 @@ def check_unit_conversions2():
 
 
     ndp = parse_ndp("""
-cdp {  
+mcdp {  
     provides a [m/s] 
     provides b [mph]
 
@@ -329,7 +329,7 @@ def check_tables():
 
 @comptest
 def alternatives():
-    npd = parse_ndp("""
+    parse_ndp("""
 mcdp {
     # two linear response
     # 0J => 0, 0

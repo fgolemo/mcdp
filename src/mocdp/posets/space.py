@@ -60,8 +60,8 @@ class Map():
         return self.cod
 
     def __call__(self, x):
-        D = self.get_domain()
         if do_extra_checks():
+            D = self.get_domain()
             try:
                 D.belongs(x)
             except NotBelongs as e:

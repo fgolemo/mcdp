@@ -1,10 +1,10 @@
 # test connected
-cdp {  
+mcdp {  
     provides T [s] 
     provides W0 [kg]
     provides P0 [W]
 
-    sub battery = abstract cdp {
+    sub battery = abstract mcdp {
     	provides capacity [J] 
         provides one_over_alpha [kg/J]
     	requires mass     [kg] 
@@ -14,7 +14,7 @@ cdp {
 
     provides one_over_alpha using battery
 
-    sub actuation = abstract cdp {
+    sub actuation = abstract mcdp {
     	provides lift  	[N]
     	requires power [W]
         gamma =  10 W/N

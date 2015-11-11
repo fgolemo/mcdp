@@ -1,5 +1,5 @@
 # test connected  
-cdp {
+mcdp {
     provides endurance [s]
     provides power [W]
     

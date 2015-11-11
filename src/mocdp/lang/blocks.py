@@ -8,7 +8,8 @@ from contracts import contract, describe_value
 from contracts.utils import check_isinstance, indent, raise_desc, raise_wrapped
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
-from mocdp.comp.context import CFunction, CResource, ValueWithUnits
+from mocdp.comp.context import CFunction, CResource, ValueWithUnits, \
+    NoSuchMCDPType
 from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
 from mocdp.dp import (
     Constant, GenericUnary, Identity, InvMult2, InvPlus2, Limit, Max, Max1, Min,
@@ -469,10 +470,18 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
 
         # TODO: remove
         if isinstance(r, CDP.VariableRef):
-            return context.get_var2model(r.name)
+            try:
+                return context.get_var2model(r.name)
+            except NoSuchMCDPType as e:
+                msg = 'Cannot find name.'
+                raise_wrapped(DPSemanticError, e, msg, compact=True)
 
         if isinstance(r, CDP.DPVariableRef):
-            return context.get_var2model(r.name)
+            try:
+                return context.get_var2model(r.name)
+            except NoSuchMCDPType as e:
+                msg = 'Cannot find name.'
+                raise_wrapped(DPSemanticError, e, msg, compact=True)
 
         if isinstance(r, CDP.FromCatalogue):
             return eval_dp_rvalue_catalogue(r, context)
@@ -549,7 +558,8 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
 
     except DPSemanticError as e:
         if e.where is None:
-            e.where = r.where
+            e = DPSemanticError(str(e), r.where)
+#             e.where = r.where
         raise e
 
     raise DPInternalError('Invalid dprvalue: %s' % str(r))

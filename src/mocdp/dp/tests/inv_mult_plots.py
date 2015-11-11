@@ -1,27 +1,19 @@
 # -*- coding: utf-8 -*-
-from abc import ABCMeta, abstractmethod
 from comptests.registrar import comptest_dynamic
-from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
 from mocdp.dp.solver import generic_solve
 from mocdp.dp_report.generic_report_utils import generic_report
 from mocdp.drawing import plot_upset_R2
 from mocdp.lang.syntax import parse_ndp
 from mocdp.posets import UpperSets
-from mocdp.posets.poset import NotLeq
-from mocdp.posets.poset_product import PosetProduct
-from mocdp.posets.rcomp import Rcomp
-from mocdp.posets.types_universe import get_types_universe
-from mocdp.posets.uppersets import UpperSet
 from reprep import Report
-import functools
+
 import numpy as np
 
 
 # @comptest_dynamic
 def check_invmult(context):
     ndp = parse_ndp("""
-    cdp {
+    mcdp {
       requires a [R]
       requires b [R]
       
@@ -83,9 +75,9 @@ def check_invmult2(context):
 def check_invmult2_report():
 
     ndp = parse_ndp("""
-    cdp {
+    mcdp {
     
-        sub multinv = abstract cdp {
+        sub multinv = abstract mcdp {
             requires x [R]
             requires y [R]
             
@@ -176,9 +168,9 @@ def check_invmult3(context):
 def check_invmult3_report():
 
     ndp = parse_ndp("""
-cdp {
+mcdp {
 
-    sub multinv = abstract cdp {
+    sub multinv = abstract mcdp {
   requires x [R]
   requires y [R]
 
@@ -200,9 +192,9 @@ cdp {
 
     r = Report()
 
-    F = dp.get_fun_space()
-    R = dp.get_res_space()
-    UR = UpperSets(R)
+#     F = dp.get_fun_space()
+#     R = dp.get_res_space()
+#     UR = UpperSets(R)
     f = ()  # F.U(())
 
     r.text('dp', dp.tree_long())
@@ -221,7 +213,7 @@ cdp {
 #         pylab.axis(axis)
 
     def annotation(pylab, axis):
-        minx, maxx, miny, maxy = axis
+        minx, maxx, _, _ = axis
         xs = np.linspace(minx, 1, 100)
         xs = np.array([x for x in xs if  x != 0])
         ys = 1 / xs

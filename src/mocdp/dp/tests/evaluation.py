@@ -70,8 +70,8 @@ def check_products():
 @comptest
 def check_evaluation():
     ndp = parse_ndp("""
-    cdp {  
-    sub f =  cdp {
+    mcdp {  
+    sub f = instance mcdp {
         provides a [R]
             
         requires c [R]
@@ -136,8 +136,8 @@ def check_evaluation():
 @comptest
 def check_evaluation2():
     ndp = parse_ndp("""
-    cdp {  
-    sub f =  cdp {
+    mcdp {  
+    sub f = instance mcdp {
         provides a [R]
             
         requires c [R]

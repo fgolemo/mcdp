@@ -1,6 +1,6 @@
 # test connected
-cdp {
-    sub motor = template cdp {
+mcdp {
+    sub motor = template mcdp {
         requires cost [$]
     }
             

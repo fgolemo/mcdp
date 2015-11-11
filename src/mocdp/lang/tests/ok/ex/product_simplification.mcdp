@@ -1,6 +1,6 @@
 # test connected
 # todo: verify 1 block
-cdp {  
+mcdp {  
     provides x [s] 
     requires y [m/s]
 

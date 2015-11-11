@@ -53,7 +53,7 @@ def check_spaces3():  # changename
 def check_spaces4():
     print parse_wrap_check('<5mm, 5mm, 5mm>', Syntax.tuple_of_constants)
     print parse_wrap_check('step_up1 | {5 V}        | {1.5 V} |  5 $ | 20 g | <5mm, 5mm, 5mm>', Syntax.catalogue_row)
-    ndp = parse_ndp("""
+    parse_ndp("""
 catalogue {
     provides voltage    [℘(V)]
     requires v_in       [℘(V)]

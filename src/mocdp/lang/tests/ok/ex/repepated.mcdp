@@ -1,6 +1,6 @@
 # test connected
 # This fails with repeated names (x)
-cdp {
+mcdp {
 	sub f = mcdp  {
 	    provides a [s]
 	    

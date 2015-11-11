@@ -2,7 +2,7 @@
 # Fails because of double constraint on DP.a 
 mcdp {
   
-    sub DP = cdp {
+    sub DP = mcdp {
         provides a [R]
         provides b [R]
         requires c [R]

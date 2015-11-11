@@ -3,8 +3,8 @@
   code: 
   - mocdp.lang.parse_ndp
   - string: |
-        cdp {  
-          sub motor = template cdp {
+        mcdp {  
+          sub motor = instance template mcdp {
             provides speed [R]
             provides torque [R]
             #    
@@ -14,7 +14,7 @@
             requires current [A]
           }
           #
-          sub chassis = template cdp {
+          sub chassis = instance template mcdp {
             provides payload [g]
             provides velocity [R]
             #
@@ -24,13 +24,13 @@
             requires motor_torque [R]
           }
           #
-          sub battery = template cdp {
+          sub battery =instance template mcdp {
             provides capacity [J]
             requires cost [$]
             requires battery_weight [g] 
           }
           #
-          sub shipping = template cdp {
+          sub shipping =instance template mcdp {
             provides ships [g]
             requires postage [$]
           }

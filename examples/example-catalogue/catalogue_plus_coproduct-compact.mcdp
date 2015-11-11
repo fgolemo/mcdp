@@ -1,6 +1,6 @@
  mcdp {
     
-    mcdp-type simple_cell = catalogue {
+    mcdp simple_cell = catalogue {
         provides voltage  [℘(V)]
         provides capacity [J]
 
@@ -15,7 +15,7 @@
         model3 | {5.0 V} | 1 MJ |  5 $ | 0.30 kg
     }
 
-    mcdp-type cell_plus_converter = mcdp { 
+    mcdp cell_plus_converter = mcdp { 
 
         sub converter = instance catalogue {
             provides voltage    [set-of(V)]

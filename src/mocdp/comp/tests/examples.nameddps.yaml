@@ -114,13 +114,13 @@
   code: 
   - mocdp.lang.parse_ndp
   - string: |
-      cdp {
+      mcdp {
           #
           provides x [s]                                                                      
           #
-          sub battery = load battery
-          sub times = load energy_times
-          sub actuation = load mobility
+          sub battery = instance load battery
+          sub times = instance load energy_times
+          sub actuation = instance load mobility
           #
           times.mission_time >= x
           #     
@@ -135,10 +135,10 @@
   code: 
   - mocdp.lang.parse_ndp
   - string: |
-      cdp {
+      mcdp {
           provides f [R]
           
-          sub hnlin = dp {
+          sub hnlin = instance dp {
               provides x [R]
               requires r [R]
               
@@ -153,10 +153,10 @@
   code: 
   - mocdp.lang.parse_ndp
   - string: |
-      cdp {
+      mcdp {
           provides f [R]
           
-          sub hnlin = dp {
+          sub hnlin = instance dp {
               provides x [R]
               requires r [R]
               
@@ -171,13 +171,13 @@
   code: 
   - mocdp.lang.parse_ndp
   - string: |
-      cdp {
+      mcdp {
         provides f0 [R]
-        sub DP = cdp {
+        sub DP = instance mcdp {
             provides f [R]
             requires r2 [R]
             
-            sub hnlin = dp {
+            sub hnlin = instance dp {
                 provides x [R]
                 requires r [R]
                
@@ -195,9 +195,9 @@
   code: 
   - mocdp.lang.parse_ndp
   - string: |
-      cdp {
+      mcdp {
         provides f0 [R]
-        sub DP = cdp {
+        sub DP = mcdp {
             provides f [R]
             requires r2 [R]
             
@@ -220,13 +220,13 @@
   code: 
   - mocdp.lang.parse_ndp
   - string: |
-      cdp {
+      mcdp {
         provides f0 [R]
-        sub DP = cdp {
+        sub DP = mcdp {
             provides f [R]
             requires r2 [R]
             
-            sub hnlin = dp {
+            sub hnlin = instance dp {
                 provides x [R]
                 requires r [R]
                 
@@ -244,25 +244,25 @@
   code: 
   - mocdp.lang.parse_ndp
   - string: |
-      cdp {
+      mcdp {
           provides cargo [g]
           requires total_weight [g]
           #
-          sub battery = dp {
+          sub battery = instance dp {
               provides capacity [J]
               requires battery_weight [kg]
               
               implemented-by load BatteryDP
           }
           #
-          sub actuation = dp {
+          sub actuation = instance dp {
               provides weight [g]
               requires actuation_power [W]
               
               implemented-by code mocdp.example_battery.Mobility
           }
           #
-          sub sensing = dp {
+          sub sensing = instance dp {
           #
               requires sensing_power [W]
               requires mission_time [s]

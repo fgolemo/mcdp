@@ -3,7 +3,7 @@ from comptests.registrar import comptest
 from mocdp.lang.syntax import Syntax
 from mocdp.lang.parse_actions import parse_ndp
 
-from .utils import ok, sem, syn
+from .utils import ok
 
 ok(Syntax.collection_of_constants, "{ 1.5 V, 5 V }")
 ok(Syntax.constant_value, "{ 1.5 V, 5 V }")
@@ -36,7 +36,7 @@ def check_sets3():
     parse_ndp("""
     mcdp {
     
-    sub simple_cell = instance catalogue {
+    mcdp simple_cell = catalogue {
 
         provides voltage [set-of(V)]
         provides capacity [J]
@@ -50,7 +50,7 @@ def check_sets3():
 
     }
 
-    sub cell_plus_converter = instance mcdp {
+    mcdp cell_plus_converter =  mcdp {
         provides voltage [set-of(V)]
         provides capacity [J]
         requires cost [$]
@@ -67,7 +67,7 @@ def check_sets3():
             step_up2 |{12 V, 5 V} | {1.5 V} | 10 $ | 20 g  
         }
 
-        sub cell = simple_cell
+        sub cell = instance simple_cell
 
         voltage <= converter.voltage_out
         converter.voltage_in <= cell.voltage
@@ -76,7 +76,7 @@ def check_sets3():
         capacity <= cell.capacity
     }
 
-    sub battery = instance simple_cell ^ cell_plus_converter
+    sub battery = instance (simple_cell ^ cell_plus_converter)
 
 }
     """)

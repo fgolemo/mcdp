@@ -58,8 +58,6 @@ class SolveDP(QuickAppBase):
 
         params = params[1:]
 
-
-
         s = open(filename).read()
         ndp = parse_ndp(s)
         dp = ndp.get_dp()
@@ -142,8 +140,8 @@ def interpret_params(params, fnames, F):
     fd = tuple(fds)
 
     if len(fnames) != len(fd):
-        raise_desc(ValueError, 'Length does not match.', fnames=fnames,
-                   params=params)
+        msg = 'Length does not match.'
+        raise_desc(ValueError, msg, fnames=fnames, params=params)
 
     if len(fnames) == 1:
         Fd = Fd[0]
@@ -170,8 +168,6 @@ def interpret_params_1string(p, F):
 
     Fd = vu.unit
     fd = vu.value
-
-    # TODO: check units compatible
 
     tu = get_types_universe()
 

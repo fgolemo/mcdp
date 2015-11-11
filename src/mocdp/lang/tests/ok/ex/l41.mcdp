@@ -1,7 +1,7 @@
 # test unconnected
 # allow empty models
-    cdp {
+   mcdp {
   
-    sub DP1 = template cdp { }
+    sub DP1 = template mcdp { }
   
   }

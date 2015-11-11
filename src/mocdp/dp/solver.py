@@ -1,5 +1,6 @@
 from mocdp.posets.uppersets import UpperSets
 from contracts import contract
+from mocdp.exceptions import do_extra_checks
 
 MaxStepsReached = 'MaxStepsReached'
 ConvergedToFinite = 'ConvergedToFinite'
@@ -39,9 +40,10 @@ class SolverTrace():
 @contract(returns=SolverTrace)
 def generic_solve(dp, f, max_steps=None):
     F = dp.get_fun_space()
-    F.belongs(f)
+    if do_extra_checks():
+        F.belongs(f)
     uf = F.U(f)
-    UR = UpperSets(dp.get_res_space())
+    # UR = UpperSets(dp.get_res_space())
 
     S, alpha, beta = dp.get_normal_form()
 
@@ -94,9 +96,5 @@ def generic_solve(dp, f, max_steps=None):
 
 
     return SolverTrace(dp=dp, f=f, strace=ss, rtrace=sr, result=result)
-
-
-
-
 
 

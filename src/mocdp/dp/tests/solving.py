@@ -6,12 +6,12 @@ from numpy.ma.testutils import assert_equal
 
 def get_problem(gamma, add_mass_limit=None):
     prob = """
-    cdp {  
+    mcdp {  
     provides T [s] 
     provides W0 [kg]
     provides P0 [W]
 
-    sub battery = abstract cdp {
+    sub battery = instance abstract mcdp {
         provides capacity [J] 
         provides one_over_alpha [kg/J]
         requires mass     [kg] 
@@ -21,7 +21,7 @@ def get_problem(gamma, add_mass_limit=None):
 
     provides one_over_alpha using battery
 
-    sub actuation = abstract cdp {
+    sub actuation = instance abstract mcdp {
         provides lift      [N]
         requires power [W]
         gamma = GAMMA

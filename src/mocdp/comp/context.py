@@ -4,6 +4,7 @@ from contracts import contract
 from contracts.utils import indent, raise_desc
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.posets import Space
+from conf_tools.utils.not_found import check_is_in
 
 __all__ = [
     'Connection',
@@ -40,6 +41,8 @@ class ValueWithUnits():
     def __repr__(self):
         return 'ValueWithUnits(%r, %r)' % (self.value, self.unit)
 
+class NoSuchMCDPType(Exception):
+    pass
 
 class Context():
     def __init__(self):
@@ -114,6 +117,12 @@ class Context():
         self.var2model[name] = value
 
     def get_var2model(self, name):
+        if not name in self.var2model:
+            msg = 'I cannot find the MCDP type %r.' % name
+            msg += '\n Known types: %s' % list(self.var2model)
+            msg += '\n Known constants: %s' % list(self.constants)
+            msg += '\n Known resources: %s' % list(self.var2resource)
+            raise NoSuchMCDPType(msg)
         return self.var2model[name]
 
     @contract(name=str)
