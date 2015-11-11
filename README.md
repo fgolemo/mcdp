@@ -45,7 +45,7 @@ The program ``mcdp-solve`` is a solver.
 
     $ mcdp-solve <filename>.mcdp <f1> <f2> ...
     
-For example, to solve one of the examples specified in ``examples/example-battery/out/battery.mcdp'', use:
+For example, to solve one the example specified in ``examples/example-battery/battery.mcdp'', use:
 
     $ mcdp-solve examples/example-battery/battery.mcdp "<1 hour, 0.1 kg, 1 W>"
 
@@ -81,15 +81,15 @@ will produce these graphs:
 <table>
 <tr>
     <td>Syntax highlighting</td>
-    <td><a href="examples/example-battery/out/battery-syntax_pdf.png">
-        <img src="examples/example-battery/out/battery-syntax_pdf.png" height="500px"/>
+    <td><a href="examples/example-battery/out_expected/battery-syntax_pdf.png">
+        <img src="examples/example-battery/out_expected/battery-syntax_pdf.png" height="500px"/>
         </a>
     </td>
 </tr>
-<tr><td>Verbose graph</td><td><a href="examples/example-battery/out/battery-default.png"><img src="examples/example-battery/out/battery-default.png"/></a></td></tr>
-<tr><td>Cleaned-up graph</td><td ><a href="examples/example-battery/out/battery-clean.png">
-<img src="examples/example-battery/out/battery-clean.png" height="300px"/></a></td></tr>
-<tr><td>Tree representation</td><td><img src="examples/example-battery/out/battery-dp_tree.png"/></td></tr>
+<tr><td>Verbose graph</td><td><a href="examples/example-battery/out_expected/battery-default.png"><img src="examples/example-battery/out_expected/battery-default.png"/></a></td></tr>
+<tr><td>Cleaned-up graph</td><td ><a href="examples/example-battery/out_expected/battery-clean.png">
+<img src="examples/example-battery/out_expected/battery-clean.png" height="300px"/></a></td></tr>
+<tr><td>Tree representation</td><td><img src="examples/example-battery/out_expected/battery-dp_tree.png"/></td></tr>
 </tr></table>
  
 
