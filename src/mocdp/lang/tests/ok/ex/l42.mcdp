@@ -1,6 +1,6 @@
 # test connected 
 mcdp {
-          sub motor = template mcdp {
+          sub motor = instance template mcdp {
             provides speed [R]
             provides torque [R]
             #    
@@ -10,7 +10,7 @@ mcdp {
             requires current [A]
           }
            #
-          sub chassis = template mcdp {
+          sub chassis = instance template mcdp {
             provides payload [g]
             provides velocity [R]
             #

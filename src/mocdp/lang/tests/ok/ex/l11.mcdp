@@ -2,7 +2,7 @@
 mcdp {
     provides f [R]
     
-    sub hnlin = dp {
+    sub hnlin = instance dp {
         provides x [R]
         requires r [R]
         

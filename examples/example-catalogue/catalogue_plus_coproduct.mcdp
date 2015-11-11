@@ -24,7 +24,7 @@
         requires cost [$]
         requires mass [kg]
 
-        sub converter = catalogue {
+        sub converter = instance catalogue {
             provides voltage_out [set-of(V)]
             requires voltage_in  [set-of(V)]
             requires cost [$]
@@ -35,7 +35,7 @@
             step_up2 |{12 V, 5 V} | {1.5 V} | 10 $ | 20 g  
         }
 
-        sub cell = simple_cell
+        sub cell = instance simple_cell
 
         voltage <= converter.voltage_out
         converter.voltage_in <= cell.voltage

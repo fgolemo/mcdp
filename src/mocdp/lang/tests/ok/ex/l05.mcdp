@@ -2,14 +2,14 @@
 mcdp {
     provides mission_time [s]
 
-    sub battery = dp {
+    sub battery = instance dp {
         provides capacity [J]
         requires battery_weight [kg]
         
         implemented-by load BatteryDP
     }
     
-    sub actuation = dp {
+    sub actuation = instance dp {
         provides weight [g]
         requires actuation_power [W]
         

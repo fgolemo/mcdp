@@ -1,5 +1,5 @@
 # test unconnected
 mcdp {
-    sub a = template mcdp  { 
+    sub a = instance template mcdp  { 
     }
 }

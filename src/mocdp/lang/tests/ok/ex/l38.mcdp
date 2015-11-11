@@ -1,6 +1,6 @@
 # test connected
 mcdp {  
-    sub f = mcdp {
+    sub f = instance mcdp {
         provides a [R]
         requires c [R]
             

@@ -1,5 +1,5 @@
 # test unconnected
 mcdp {
-	sub a = mcdp { }
-	sub b = mcdp { }
+	sub a = instance mcdp { }
+	sub b = instance mcdp { }
 }

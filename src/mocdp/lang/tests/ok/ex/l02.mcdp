@@ -2,9 +2,9 @@
 mcdp {
     provides mission_time [s] 
     
-    sub battery = load battery
-    sub times = load energy_times
-    sub actuation = load mobility
+    sub battery = instance load battery
+    sub times = instance load energy_times
+    sub actuation = instance load mobility
 # comment
     times.power >= actuation.actuation_power
     # comment

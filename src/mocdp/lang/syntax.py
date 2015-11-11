@@ -162,7 +162,8 @@ class Syntax():
     dpinstance_from_type = sp((INSTANCE + dp_rvalue) ^ (INSTANCE + L('(') + dp_rvalue + L(")")),
                               lambda t: CDP.DPInstance(t[0], t[1]))
 
-    dpinstance_expr = (dpinstance_from_type ^ dp_rvalue)
+    # dpinstance_expr = (dpinstance_from_type ^ dp_rvalue)
+    dpinstance_expr = dpinstance_from_type
 
     setsub_expr = sp(SUB - dpname - S(L('=')) - dpinstance_expr,
                      lambda t: CDP.SetName(t[0], t[1], t[2]))

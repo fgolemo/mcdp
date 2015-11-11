@@ -1,11 +1,11 @@
 # test connected
 compact mcdp {  
-      sub A = template mcdp {
+      sub A = instance template mcdp {
         requires speed [R]
         requires torque [R]
       }
       
-      sub B = template mcdp {
+      sub B = instance template mcdp {
         provides speed [R]
         provides torque [R]
       }

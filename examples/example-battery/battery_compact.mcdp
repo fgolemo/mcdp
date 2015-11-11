@@ -8,7 +8,7 @@ mcdp {
     provides extra_power [W]
 
     # Sub-design problem: choose the battery
-    sub battery = dp {
+    sub battery = instance dp {
 
         provides capacity [J]
         requires mass [kg]
@@ -16,7 +16,7 @@ mcdp {
     implemented-by load BatteryDP
     }
     # Sub-design problem: actuation
-    sub actuation = abstract mcdp {
+    sub actuation = instance abstract mcdp {
         # actuators need to provide this lift
         provides lift [N]
         # and will require power

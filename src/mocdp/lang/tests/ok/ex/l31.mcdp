@@ -1,7 +1,7 @@
 # test semantic_error
 # Should be joule
 mcdp {
-  sub motor = abstract dp {
+  sub motor = instance abstract dp {
     provides energy [W]
     requires mass [kg]
 

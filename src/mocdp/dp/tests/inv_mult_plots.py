@@ -77,7 +77,7 @@ def check_invmult2_report():
     ndp = parse_ndp("""
     mcdp {
     
-        sub multinv = abstract mcdp {
+        sub multinv = instance abstract mcdp {
             requires x [R]
             requires y [R]
             
@@ -170,7 +170,7 @@ def check_invmult3_report():
     ndp = parse_ndp("""
 mcdp {
 
-    sub multinv = abstract mcdp {
+    sub multinv = instance abstract mcdp {
   requires x [R]
   requires y [R]
 

@@ -2,7 +2,7 @@
 # Fails because of double constraint on DP.a 
 mcdp {
   
-    sub DP = mcdp {
+    sub DP = instance mcdp {
         provides a [R]
         provides b [R]
         requires c [R]

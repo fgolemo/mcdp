@@ -1,6 +1,6 @@
 # test unconnected
 mcdp {
-  sub motor = abstract dp {
+  sub motor = instance abstract dp {
     provides energy [J]
     requires mass [kg]
 

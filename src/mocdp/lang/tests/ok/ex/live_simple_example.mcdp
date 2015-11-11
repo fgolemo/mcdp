@@ -4,7 +4,7 @@ mcdp {
     provides W0 [kg]
     provides P0 [W]
 
-    sub battery = abstract mcdp {
+    sub battery = instance abstract mcdp {
     	provides capacity [J] 
         provides one_over_alpha [kg/J]
     	requires mass     [kg] 
@@ -14,7 +14,7 @@ mcdp {
 
     provides one_over_alpha using battery
 
-    sub actuation = abstract mcdp {
+    sub actuation = instance abstract mcdp {
     	provides lift  	[N]
     	requires power [W]
         gamma =  10 W/N

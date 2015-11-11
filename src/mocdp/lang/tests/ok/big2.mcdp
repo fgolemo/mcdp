@@ -4,7 +4,7 @@ mcdp {  # mcdp = Monotone Co-Design Problem
 	# a MCDP is defined recursively as a composition
 	# of MCDPs. In this example, a "template" is a leaf
 	# and indicate the interface without the implementation
-    sub motor = template mcdp {
+    sub motor = instance template mcdp {
       # a motor provides a certain torque at a certain speed
       provides speed [rad/s]
       provides torque [N*m]
@@ -18,7 +18,7 @@ mcdp {  # mcdp = Monotone Co-Design Problem
     
     # A "chassis" is the platform without the motors
     # and energetics
-    sub chassis = template mcdp {
+    sub chassis = instance template mcdp {
       # It provides a certain payload
       provides payload [g]
       # and moves it at a given linear velocity
@@ -44,7 +44,7 @@ mcdp {  # mcdp = Monotone Co-Design Problem
     speed provided by motor >= motor_speed required by chassis
     
     # Motor control board in between battery and motor
-  	sub MCB = template mcdp {
+  	sub MCB = instance template mcdp {
     	provides voltage [V]
     	provides current [A]
      	# SWAP
@@ -60,7 +60,7 @@ mcdp {  # mcdp = Monotone Co-Design Problem
   	motor.current <= MCB.current
 
   	# We need a battery
-	sub battery = template mcdp {
+	sub battery = instance template mcdp {
 		# with the given capacity
     	provides capacity [J]
     	# supplying a certain voltage/max current
@@ -74,7 +74,7 @@ mcdp {  # mcdp = Monotone Co-Design Problem
 
   # "Autonomy" is a placeholder. It provides
   # a control function and requires SWAP resources.
-  sub autonomy = template mcdp {
+  sub autonomy = instance template mcdp {
     # See paper "Resource-Aware Robotics-Application"
     # for a discussion of how to define a partial order
     # on the set of controller and computation graphs
@@ -85,7 +85,7 @@ mcdp {  # mcdp = Monotone Co-Design Problem
   }
   autonomy.control_function >= chassis.control_function
 
-  sub computer = template mcdp {
+  sub computer = instance template mcdp {
     # a computer is something that runs a program
     # defined by a computation graph
     provides computation_graph [any]
@@ -121,7 +121,7 @@ mcdp {  # mcdp = Monotone Co-Design Problem
   battery.voltage >= voltage
 
   # We can take into account the shipping cost
-  sub shipping = abstract mcdp {
+  sub shipping = instance abstract mcdp {
     provides ships [g]
     requires postage [$]
 

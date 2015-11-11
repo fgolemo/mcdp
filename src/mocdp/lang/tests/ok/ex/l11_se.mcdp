@@ -2,6 +2,6 @@
 mcdp {
     provides capacity [J]
 
-    sub battery = load battery
+    sub battery = instance load battery
     battery.capacity >= capacity
 }

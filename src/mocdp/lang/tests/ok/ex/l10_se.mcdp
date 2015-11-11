@@ -1,4 +1,4 @@
 # test unconnected
 mcdp {
-    sub battery = load battery
+    sub battery = instance load battery
 }

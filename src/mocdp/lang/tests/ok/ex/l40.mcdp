@@ -1,11 +1,11 @@
 # test connected
 mcdp {  
-    sub f =  template mcdp {
+    sub f =  instance template mcdp {
         provides x [R]
         requires y [R]
 
     }
-    sub g = template mcdp {
+    sub g = instance template mcdp {
         provides a [R]
         requires x [R]
     }

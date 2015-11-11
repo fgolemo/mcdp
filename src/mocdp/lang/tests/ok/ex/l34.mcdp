@@ -3,11 +3,11 @@ abstract mcdp {
   provides capacity [J]
   requires weight [g]
 
-  sub motor = abstract mcdp {
+  sub motor = instance abstract mcdp {
     provides capacity [J]
     requires weight [g]
 
-  sub battery = dp {
+  sub battery = instance dp {
     provides capacity [J]
     requires weight [kg]
 

@@ -1,6 +1,6 @@
 # test connected
 mcdp {
-    sub times = mcdp {
+    sub times = instance mcdp {
         provides a [R]
         provides b [R]
         requires c [R]

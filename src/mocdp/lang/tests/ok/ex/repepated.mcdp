@@ -1,7 +1,7 @@
 # test connected
 # This fails with repeated names (x)
 mcdp {
-	sub f = mcdp  {
+	sub f = instance mcdp  {
 	    provides a [s]
 	    
 	    requires x [s]

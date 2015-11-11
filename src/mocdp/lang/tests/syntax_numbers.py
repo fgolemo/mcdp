@@ -335,7 +335,7 @@ mcdp {
     # 0J => 0, 0
     # two slutions for 12.5 g
     # 100J =>
-    battery1 = mcdp {
+    mcdp battery1 = mcdp {
         provides capacity [J]
         requires mass [kg]
 
@@ -345,7 +345,7 @@ mcdp {
         mass >=  capacity / specific_energy + m0
     }
     
-    battery2 = mcdp {
+    mcdp battery2 = mcdp {
         provides capacity [J]
         requires mass [kg]
 
@@ -355,7 +355,7 @@ mcdp {
         mass >= capacity / specific_energy + m0
     }
     
-    sub battery = battery1 ^ battery2
+    sub battery = instance (battery1 ^ battery2)
 
     requires mass for battery
     provides capacity using battery

@@ -1,7 +1,7 @@
 # test connected
 mcdp {  
   sub motor_chassis = instance mcdp {
-    sub motor = template mcdp {
+    sub motor = instance template mcdp {
       provides speed [rad/s]
       provides torque [N*m]
       #    

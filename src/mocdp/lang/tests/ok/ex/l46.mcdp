@@ -1,7 +1,7 @@
 # test connected
 # shortcut for
 mcdp {
-    sub motor = template mcdp {
+    sub motor = instance template mcdp {
         requires cost [$]
     }
             

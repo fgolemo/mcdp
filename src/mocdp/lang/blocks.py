@@ -559,7 +559,6 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
     except DPSemanticError as e:
         if e.where is None:
             e = DPSemanticError(str(e), r.where)
-#             e.where = r.where
         raise e
 
     raise DPInternalError('Invalid dprvalue: %s' % str(r))

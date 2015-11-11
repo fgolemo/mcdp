@@ -2,6 +2,6 @@
 # allow empty models
    mcdp {
   
-    sub DP1 = template mcdp { }
+    sub DP1 = instance template mcdp { }
   
   }

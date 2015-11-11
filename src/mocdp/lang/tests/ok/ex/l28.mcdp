@@ -1,7 +1,7 @@
 # test semantic_error
 mcdp {
   
-  sub child1 = mcdp {
+  sub child1 =instance mcdp {
       provides a [R]
       provides b [R]
       requires c [R]

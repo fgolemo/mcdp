@@ -1,10 +1,10 @@
 # test semantic_error
 mcdp {
-  sub motor = abstract mcdp {
+  sub motor = instance abstract mcdp {
     provides capacity [W]
     requires mass [g]
 
-  sub battery = dp {
+  sub battery = instance dp {
     provides capacity [J]
     requires mass [kg]
 

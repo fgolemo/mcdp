@@ -3,21 +3,21 @@ mcdp {
     provides cargo [g]
     requires total_weight [g]
     
-    sub battery = dp {
+    sub battery = instance dp {
         provides capacity [J]
         requires battery_weight [kg]
         
         implemented-by load BatteryDP
     }
     
-    sub actuation = dp {
+    sub actuation = instance dp {
         provides weight [g]
         requires actuation_power [W]
         
         implemented-by code mocdp.example_battery.Mobility
     }
 
-    sub sensing = dp {
+    sub sensing = instance dp {
 
         requires sensing_power [W]
         requires mission_time [s]

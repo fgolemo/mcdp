@@ -1,8 +1,7 @@
 # test connected
 mcdp {
+    provides g [s]
+    requires f2 [s]
 
-        provides g [s]
-        requires f2 [s]
-
-        f2 >= g + g
- }
+    f2 >= g + g
+}

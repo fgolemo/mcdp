@@ -1,7 +1,7 @@
 # test connected
 mcdp {
 
-  sub multinv = abstract mcdp {
+  sub multinv = instance abstract mcdp {
   	requires x [R]
   	requires y [R]
   

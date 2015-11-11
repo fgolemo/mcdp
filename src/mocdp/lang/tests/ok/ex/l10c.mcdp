@@ -4,7 +4,7 @@ mcdp {
     requires w1 [g]
     requires w2 [g]
     
-    sub battery = load battery
+    sub battery = instance load battery
     battery.capacity >= c
     
     w1 >= battery.battery_weight

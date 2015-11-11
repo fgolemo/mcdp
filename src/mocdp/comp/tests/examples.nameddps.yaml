@@ -197,11 +197,11 @@
   - string: |
       mcdp {
         provides f0 [R]
-        sub DP = mcdp {
+        sub DP = instance mcdp {
             provides f [R]
             requires r2 [R]
             
-            sub hnlin = dp {
+            sub hnlin = instance dp {
                 provides x [R]
                 requires r [R]
                 
@@ -222,7 +222,7 @@
   - string: |
       mcdp {
         provides f0 [R]
-        sub DP = mcdp {
+        sub DP =instance  mcdp {
             provides f [R]
             requires r2 [R]
             
