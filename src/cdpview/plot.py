@@ -193,7 +193,7 @@ def do_plots(filename, plots, outdir, extra_params):
         except CmdException as e:
             mcdp_dev_warning('Add better checks of error.')
             print(e)
-            pass
+            continue
         assert isinstance(res, list)
         for r in res:
             assert isinstance(r, tuple), r
