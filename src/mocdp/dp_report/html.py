@@ -21,8 +21,10 @@ def isolate_comments(s):
 
     return unzip(map(isolate_comment, lines))
 
+
 def unzip(iterable):
     return zip(*iterable)
+
 
 @contract(s=str)
 def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: False):
@@ -255,17 +257,20 @@ def iterate_notwhere(x):
 
 
 css = """ 
-     span.Unit { color: purple; }
      span.ProvideKeyword, span.FName { color: darkgreen;}
      span.RequireKeyword, span.RName  { color: darkred;}
      
      span.NewResource { color: darkred;}
-     span.ValueExpr { color: #CC6600 ;}
+     span.NewFunction { color: darkgreen; }
+     
+    span.Unit  {  color: #aC5600 ;}
+    span.ValueExpr { color: #CC6600 ;}
+     
      /*span.Function  { color: darkgreen;}*/
-span.ProvideKeyword,
-span.RequireKeyword,     
-       span.MCDPKeyword,
-       span.SubKeyword,
+    span.ProvideKeyword,
+    span.RequireKeyword,     
+    span.MCDPKeyword,
+    span.SubKeyword,
     span.CompactKeyword,
     span.AbstractKeyword,
     span.TemplateKeyword,
@@ -278,16 +283,15 @@ span.RequireKeyword,
     span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
     span.ImplementedbyKeyword , span.FromCatalogueKeyword, span.MCDPTypeKeywor,
     span.InstanceKeyword,
-    span.MCDPTypeKeyword
-       { font-weight: bold; }
-       
-    
+    span.MCDPTypeKeyword { 
+        font-weight: bold; 
+    }
        
     span.ImpName { color: #CC6600; }
     span.FuncName { color: #CC6600 ; }
 
-       span.MCDPKeyword,
-       span.SubKeyword,
+    span.MCDPKeyword,
+    span.SubKeyword,
     span.CompactKeyword,
     span.AbstractKeyword,
     span.TemplateKeyword,
@@ -306,11 +310,21 @@ span.RequireKeyword,
     }
     
     span.FName, span.RName { } 
-    span.DPName { font-style: italic; }
-     
-    span.DPVariableRef { font-weight: bold; }
-    span.DPTypeName { color: black; font-weight: bold; }
-    span.comment { color: grey;}
+    span.DPName {  
+        color: #a0a;
+    }
+    
+    span.DPTypeName, span.DPVariableRef { 
+        color:  #00F; 
+        font-weight: bold; 
+    }
+      
+    span.comment { 
+        color: grey;
+    }
 
-    span.line-gutter {    margin-right: 1em; color: grey; }
+    span.line-gutter {    
+        margin-right: 1em; 
+        color: grey; 
+    }
 """

@@ -41,6 +41,7 @@ class CDPLanguage():
     DPVariableRef = namedtuplewhere('DPVariableRef', 'name')
 
     NewResource = namedtuplewhere('NewResource', 'name')
+    NewFunction = namedtuplewhere('NewFunction', 'name')
     Constraint = namedtuplewhere('Constraint', 'function rvalue prep')
 
     LoadCommand = namedtuplewhere('LoadCommand', 'keyword load_arg')

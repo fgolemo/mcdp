@@ -167,14 +167,17 @@ class Syntax():
 
     setsub_expr = sp(SUB - dpname - S(L('=')) - dpinstance_expr,
                      lambda t: CDP.SetName(t[0], t[1], t[2]))
+    setsub_expr_implicit = sp(dpname - S(L('=')) - dpinstance_expr,
+                     lambda t: CDP.SetName(None, t[0], t[1]))
 
     setmcdptype_expr = sp(MCDPTYPE - dptypename - L('=') - dp_rvalue,
                      lambda t: CDP.SetMCDPType(t[0], t[1], t[2], t[3]))
-
+    setmcdptype_expr_implicit = sp(dptypename - L('=') - dp_rvalue,
+                     lambda t: CDP.SetMCDPType(None, t[0], t[1], t[2]))
     rvalue = Forward()
     fvalue = Forward()
 
-    setname_rightside = rvalue ^ dp_rvalue
+    setname_rightside = rvalue  # ^ dp_rvalue
  
     setname_generic_var = sp(idn.copy(),
                               lambda t: CDP.SetNameGenericVar(t[0]))
@@ -205,9 +208,14 @@ class Syntax():
     rvalue_resource = rvalue_resource_simple ^ rvalue_resource_fancy
 
     rvalue_new_function = sp(idn.copy(), VariableRef_make)
-
+    rvalue_new_function2 = sp(DOT + idn.copy(),
+                              lambda t: CDP.NewFunction(t[1]))
+    
     lf_new_resource = sp(idn.copy(),
                          lambda t: CDP.NewResource(t[0]))
+
+    lf_new_resource2 = sp(DOT + idn.copy(), lambda t: CDP.NewResource(t[1]))
+
 
     lf_new_limit = sp(C(Group(number_with_unit), 'limit'),
                       lambda t: CDP.NewLimit(t['limit'][0]))
@@ -234,7 +242,7 @@ class Syntax():
                     + C(rvalue, 'op2')) - S(L(')')) ,
                    lambda t: Syntax.binary[t[0].keyword](a=t['op1'], b=t['op2'], keyword=t[0]))
 
-    operand = rvalue_new_function ^ rvalue_resource ^ binary_expr ^ unary_expr ^ constant_value
+    operand = rvalue_new_function ^ rvalue_new_function2 ^ rvalue_resource ^ binary_expr ^ unary_expr ^ constant_value
 
 
     simple = sp(dpname + DOT - fname,
@@ -243,7 +251,7 @@ class Syntax():
     fancy = sp(fname + PROVIDED_BY - dpname,
                 lambda t: CDP.Function(dp=t[2], s=t[0], keyword=t[1]))
 
-    fvalue_operand = lf_new_limit ^ simple ^ fancy ^ lf_new_resource ^ (S(L('(')) - (lf_new_limit ^ simple ^ fancy ^ lf_new_resource) - S(L(')')))
+    fvalue_operand = lf_new_limit ^ simple ^ fancy ^ lf_new_resource ^ lf_new_resource2 ^ (S(L('(')) - (lf_new_limit ^ simple ^ fancy ^ lf_new_resource) - S(L(')')))
 
     # Fractions
 
@@ -292,7 +300,7 @@ class Syntax():
                              name=t[3]))
 
     line_expr = (constraint_expr ^ constraint_expr2 ^
-                 (setname_generic ^ setsub_expr ^ setmcdptype_expr)
+                 (setname_generic ^ setsub_expr ^ setsub_expr_implicit ^ setmcdptype_expr ^ setmcdptype_expr_implicit)
                  ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
                  ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3)
 

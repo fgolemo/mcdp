@@ -1,6 +1,6 @@
  mcdp {
     
-    mcdp simple_cell = catalogue {
+    simple_cell = catalogue {
         provides voltage  [℘(V)]
         provides capacity [J]
 
@@ -15,9 +15,9 @@
         model3 | {5.0 V} | 1 MJ |  5 $ | 0.30 kg
     }
 
-    mcdp cell_plus_converter = mcdp { 
+    cell_plus_converter = mcdp { 
 
-        sub converter = instance catalogue {
+        converter = instance catalogue {
             provides voltage    [set-of(V)]
             requires v_in       [set-of(V)]
             requires cost       [$]
@@ -28,7 +28,7 @@
             step_up2 | {5 V,  12 V} | {1.5 V} | 10 $ | 20 g  
         }
 
-        sub cell = instance simple_cell
+        cell = instance simple_cell
 
         provides voltage  using converter
         provides capacity using cell
@@ -38,7 +38,7 @@
         requires cost ≥ cost required by cell + cost required by converter
         requires mass ≥ mass required by cell + mass required by converter
     }
-    sub battery = instance simple_cell ^ cell_plus_converter
+    battery = instance simple_cell ^ cell_plus_converter
     requires cost, mass for battery
     provides voltage, capacity using battery
 }

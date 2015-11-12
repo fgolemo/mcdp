@@ -708,6 +708,18 @@ def eval_rvalue(rvalue, context):
         if isinstance(rvalue, CDP.Resource):
             return context.make_resource(dp=rvalue.dp.value, s=rvalue.s.value)
         
+        if isinstance(rvalue, CDP.NewFunction):
+            fname = rvalue.name
+            try:
+                dummy_ndp = context.get_ndp_fun(fname)
+            except ValueError as e:
+                msg = 'New resource name %r not declared.' % fname
+                msg += '\n%s' % str(e)
+                raise DPSemanticError(msg, where=rvalue.where)
+
+            return context.make_resource(context.get_name_for_fun_node(fname),
+                            dummy_ndp.get_rnames()[0])
+
         def eval_ops(rvalue):
             """ Returns a, F1, b, F2 """
             a = eval_rvalue(rvalue.a, context)
