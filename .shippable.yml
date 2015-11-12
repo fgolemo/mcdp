@@ -15,7 +15,7 @@ install:
 - sudo apt-get install python-yaml
 - sudo apt-get install wkhtmltopdf
 - pip install -r requirements.txt
-# - pip install numpy
+- pip install numpy
 # - pip install scipy 
 
 - "python -c 'import contracts; print contracts.__version__'"
