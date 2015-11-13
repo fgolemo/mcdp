@@ -13,9 +13,10 @@ from mocdp.posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
-from mocdp.dp.dp_mult_inv import InvMult2, InvPlus2
+from mocdp.dp.dp_mult_inv import InvMult2, InvPlus2, InvPlus2Nat
 from mocdp.comp.interfaces import NamedDPCoproduct
 from contextlib import contextmanager
+from mocdp.dp.dp_sum import SumNNat
 
 
 class GraphDrawingContext():
@@ -308,11 +309,14 @@ def create_simplewrap(gdc, ndp):
     special = [
         (Sum, ''),
         (SumN, ''),
+        (SumNNat, ''),
         (Product, ''),
         (ProductN, ''),
         (InvPlus2, ''),
         (InvMult2, ''),
+        (InvPlus2Nat, ''),
     ]
+
     classname = type(ndp.dp).__name__
 
     icon = ndp.get_icon()

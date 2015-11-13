@@ -28,7 +28,7 @@ class Syntax():
         'dp', 'mcdp', 'template', 'sub', 'for', 'instance',
         'provided', 'requires', 'implemented-by', 'using', 'by',
         'catalogue', 'set-of', 'mcdp-type', 'dptype', 'instance',
-        'Nat'
+        'Nat', 'Int',
     ]
 
     # shortcuts
@@ -107,8 +107,9 @@ class Syntax():
 #                                                t[2], t[3]))
 
     nat_expr = sp(L('Nat'), lambda t: CDP.Nat(t[0]))
+    int_expr = sp(L('Int'), lambda t: CDP.Int(t[0]))
 
-    space_operand = (pint_unit ^ power_set_expr ^ nat_expr)
+    space_operand = (pint_unit ^ power_set_expr ^ nat_expr ^ int_expr)
 
     space_expr << operatorPrecedence(space_operand, [
                 (PRODUCT, 2, opAssoc.LEFT, space_product_parse_action),
@@ -118,14 +119,16 @@ class Syntax():
     number = Word(nums)
     point = Literal('.')
     e = CaselessLiteral('E')
-    plusorminus = Literal('+') | Literal('-')
-    integer = Combine(O(plusorminus) + number)
+    plus = Literal('+')
+    plusorminus = plus | Literal('-')
+    nonneg_integer = sp(Combine(O(plus) + number),
+                        lambda t: int(t[0]))
+    integer = sp(Combine(O(plusorminus) + number),
+                    lambda t: int(t[0]))
     # Note that '42' is not a valid float...
-    floatnumber = (Combine(integer + point + O(number) + O(e + integer)) |
-                    Combine(integer + e + integer))
-
-    spa(integer, lambda t: int(t[0]))
-    spa(floatnumber, lambda t: float(t[0]))
+    floatnumber = sp((Combine(integer + point + O(number) + O(e + integer)) |
+                      Combine(integer + e + integer)),
+                     lambda t: float(t[0]))
 
     integer_or_float = sp(integer ^ floatnumber,
                           lambda t: CDP.ValueExpr(t[0]))
@@ -133,7 +136,8 @@ class Syntax():
     unitst = S(L('[')) + C(space_expr, 'unit') + S(L(']'))
 
 
-    nat_constant = sp(L('int') + L(':') + integer, lambda t: CDP.NatConstant(t[0], t[1], t[2]))
+    nat_constant = sp(L('nat') + L(':') + nonneg_integer, lambda t: CDP.NatConstant(t[0], t[1], t[2]))
+    int_constant = sp(L('int') + L(':') + integer, lambda t: CDP.IntConstant(t[0], t[1], t[2]))
 
 
 
@@ -205,7 +209,7 @@ class Syntax():
                                  ZeroOrMore(COMMA + constant_value) + S(L('}')),
                                  lambda t: CDP.Collection(make_list(list(t))))
 
-    constant_value << (number_with_unit ^ variable_ref ^ collection_of_constants ^ tuple_of_constants ^ nat_constant)
+    constant_value << (number_with_unit ^ variable_ref ^ collection_of_constants ^ tuple_of_constants ^ nat_constant ^ int_constant)
 
     rvalue_resource_simple = sp(dpname + DOT - rname,
                                 lambda t: CDP.Resource(s=t[2], keyword=t[1], dp=t[0]))

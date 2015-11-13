@@ -1,23 +1,17 @@
 # -*- coding: utf-8 -*-
 from .parts import CDPLanguage
 from contracts import contract
-from mocdp.comp import (Connection, dpwrap)
-from mocdp.comp.context import (CFunction)
-from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
-from mocdp.dp import (
-    Constant, GenericUnary, Identity, InvMult2, InvPlus2, Limit, Max, Max1, Min,
-    PrimitiveDP, ProductN, SumN)
-from mocdp.dp.dp_catalogue import CatalogueDP
-from mocdp.dp.dp_generic_unary import WrapAMap
-from mocdp.dp.dp_series_simplification import make_series
+from mocdp.comp import Connection, dpwrap
+from mocdp.comp.context import CFunction
+from mocdp.dp import InvMult2, InvPlus2, Limit
 from mocdp.exceptions import DPInternalError, DPSemanticError
-from mocdp.lang.parse_actions import inv_constant
 from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
-from mocdp.posets import (NotBelongs, NotEqual, NotLeq, PosetProduct, Rcomp,
-    Space, get_types_universe, mult_table, mult_table_seq)
-from mocdp.posets.any import Any
-from mocdp.posets.finite_set import FiniteCollection, FiniteCollectionsInclusion
+from mocdp.posets import mult_table
+from mocdp.posets.rcomp_units import RcompUnits
+from contracts.utils import raise_desc
 from mocdp.posets.nat import Nat
+from mocdp.dp.dp_mult_inv import InvPlus2Nat
+
 CDP = CDPLanguage
 
 __all__ = ['eval_lfunction']
@@ -59,35 +53,7 @@ def eval_lfunction(lf, context):
         return res
 
     if isinstance(lf, CDP.InvPlus):
-        ops = get_odd_ops(unwrap_list(lf.ops))
-        if len(ops) != 2:
-            raise DPInternalError('Only 2 expected')
-
-        fs = []
-
-        for op_i in ops:
-            fi = eval_lfunction(op_i, context)
-            fs.append(fi)
-
-        assert len(fs) == 2
-
-        Fs = map(context.get_ftype, fs)
-        # R = plus_table(Fs[0], Fs[1])
-        R = Fs[0]
-
-        dp = InvPlus2(R, tuple(Fs))
-        ndp = dpwrap(dp, '_input', ['_f0', '_f1'])
-
-        name = context.new_name('_invplus')
-        context.add_ndp(name, ndp)
-
-        c1 = Connection(dp2=fs[0].dp, s2=fs[0].s, dp1=name, s1='_f0')
-        c2 = Connection(dp2=fs[1].dp, s2=fs[1].s, dp1=name, s1='_f1')
-        context.add_connection(c1)
-        context.add_connection(c2)
-
-        res = context.make_function(name, '_input')
-        return res
+        return eval_lfunction_invplus(lf, context)
 
     if isinstance(lf, CDP.NewResource):
         rname = lf.name
@@ -115,3 +81,41 @@ def eval_lfunction(lf, context):
     msg = 'Cannot eval_lfunction(%s)' % lf.__repr__()
     raise DPInternalError(msg)
 
+
+def eval_lfunction_invplus(lf, context):
+    ops = get_odd_ops(unwrap_list(lf.ops))
+    if len(ops) != 2:
+        raise DPInternalError('Only 2 expected')
+
+    fs = []
+
+    for op_i in ops:
+        fi = eval_lfunction(op_i, context)
+        fs.append(fi)
+
+    assert len(fs) == 2
+
+    Fs = map(context.get_ftype, fs)
+    R = Fs[0]
+
+    if all(isinstance(_, RcompUnits) for _ in Fs):
+        dp = InvPlus2(R, tuple(Fs))
+    elif all(isinstance(_, Nat) for _ in Fs):
+        dp = InvPlus2Nat(R, tuple(Fs))
+    else:
+        msg = 'Cannot find operator for mixed values'
+        raise_desc(DPInternalError, msg, Fs=Fs)
+    
+
+    ndp = dpwrap(dp, '_input', ['_f0', '_f1'])
+
+    name = context.new_name('_invplus')
+    context.add_ndp(name, ndp)
+
+    c1 = Connection(dp2=fs[0].dp, s2=fs[0].s, dp1=name, s1='_f0')
+    c2 = Connection(dp2=fs[1].dp, s2=fs[1].s, dp1=name, s1='_f1')
+    context.add_connection(c1)
+    context.add_connection(c2)
+
+    res = context.make_function(name, '_input')
+    return res

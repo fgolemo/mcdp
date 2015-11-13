@@ -1,0 +1,6 @@
+include *.rst
+include *.md
+include *.txt
+include *.cfg
+include *.mk
+recursive-include src/mocdp/dp_report/icons *

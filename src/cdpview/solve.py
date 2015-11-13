@@ -3,18 +3,18 @@ from conf_tools import GlobalConfig
 from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.comp.context import Context
-from mocdp.dp.solver import generic_solve, generic_solve_by_loop
+from mocdp.dp.solver import generic_solve
 from mocdp.dp_report.generic_report_utils import generic_report
-
+from mocdp.lang.eval_constant_imp import eval_constant
 from mocdp.lang.parse_actions import parse_ndp, parse_wrap
 from mocdp.lang.syntax import Syntax
 from mocdp.posets import UpperSets, get_types_universe
+from mocdp.posets.poset_product import PosetProduct
 from quickapp import QuickAppBase
 from reprep import Report
 import logging
 import os
-from mocdp.posets.poset_product import PosetProduct
-from mocdp.lang.eval_constant_imp import eval_constant
+
 
 class ExpectationsNotMet(Exception):
     pass
@@ -109,8 +109,6 @@ class SolveDP(QuickAppBase):
 
         if options.imp:
             M = dp.get_imp_space_mod_res()
-            # print('M = %s' % M)
-
             nimplementations = 0
             for r in sr[-1].minimals:
                 ms = dp.get_implementations_f_r(f=fg, r=r)
@@ -130,7 +128,7 @@ class SolveDP(QuickAppBase):
             r = Report()
             generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0))
 
-            params = '-'.join(params).replace(' ', '').replace('{', '').replace('}', '')
+            params = '-'.join(params).replace(' ', '').replace('{', '').replace('}', '').replace(':', '')
             out_html = os.path.splitext(os.path.basename(filename))[0] + '-%s.html' % params
             out_html = os.path.join(out, out_html)
             print('writing to %r' % out_html)

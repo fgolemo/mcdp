@@ -5,11 +5,17 @@ from mocdp import get_conftools_posets
 from mocdp.posets import PosetProduct, RcompUnits, SpaceProduct
 import functools
 import numpy as np
+from contracts.utils import check_isinstance
+from mocdp.posets.nat import Nat, Int
+from mocdp.posets.space import Map
+from mocdp.posets.poset import Poset
+from mocdp.posets.types_universe import get_types_universe
 
 
 __all__ = [
     'Sum',
     'SumN',
+    'SumNNat',
     'Product',
     'ProductN',
     'SumUnitsNotCompatible',
@@ -42,11 +48,12 @@ class Sum(PrimitiveDP):
         return 'Sum(%r)' % self.F0
 
 
-class SumN(PrimitiveDP):
-
-    @contract(Fs='tuple, seq[>=2]($RcompUnits)', R=RcompUnits)
+class SumNNat(PrimitiveDP):
+    @contract(Fs='tuple, seq[>=2]($Nat)', R=Nat)
     def __init__(self, Fs, R):
-
+        for _ in Fs:
+            check_isinstance(_, Nat)
+        check_isinstance(R, Nat)
         self.Fs = Fs
 
         # todo: check dimensionality
@@ -57,7 +64,58 @@ class SumN(PrimitiveDP):
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, func):
-        self.F.belongs(func)
+        res = sum_nats(self.Fs, func, self.R)
+        return self.R.U(res)
+
+    def __repr__(self):
+        return 'SumNNat(%s -> %s)' % (self.F, self.R)
+
+class SumNInt(Map):
+    """ Sum of many spaces that can be cast to Int, and  """
+    @contract(Fs='tuple, seq[>=2]($Space)', R=Poset)
+    def __init__(self, Fs, R):
+        dom = PosetProduct(Fs)
+        cod = R
+        Map.__init__(self, dom=dom, cod=cod)
+        
+        tu = get_types_universe()
+        self.subs = []
+        target = Int()
+        for F in Fs:
+            # need F to be cast to Int
+            F_to_Int, _ = tu.get_embedding(F, target)
+            self.subs.append(F_to_Int)
+
+        self.to_R, _ = tu.get_embedding(target, R)
+        
+    def _call(self, x):
+        res = 0
+        target = Int()
+        for xe, s in zip(x, self.subs):
+            xe_int = s(xe)
+            res = target.add(res, xe_int)
+        r = self.to_R(res)
+        return r
+    
+
+class SumN(PrimitiveDP):
+    """ Sum of real values with units. """
+    @contract(Fs='tuple, seq[>=2]($RcompUnits)', R=RcompUnits)
+    def __init__(self, Fs, R):
+        for _ in Fs:
+            check_isinstance(_, RcompUnits)
+        check_isinstance(R, RcompUnits)
+        self.Fs = Fs
+
+        # todo: check dimensionality
+        F = PosetProduct(self.Fs)
+        R = R
+
+        M = SpaceProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+
+    def solve(self, func):
+        # self.F.belongs(func)
         res = sum_units(self.Fs, func, self.R)
         return self.R.U(res)
 
@@ -78,6 +136,28 @@ def sum_units(Fs, values, R):
     if np.isinf(res):
         return R.get_top()
     return res
+
+
+# Fs: sequence of Rcompunits
+def sum_nats(Fs, values, R):
+    for _ in Fs:
+        assert isinstance(_, Nat)
+    assert isinstance(R, Nat)
+    res = 0
+    for Fi, x in zip(Fs, values):
+        if Fi.equal(x, Fi.get_top()):
+            return R.get_top()
+        assert isinstance(x, int), x
+    
+        # reasonably sure this is correct...
+        # factor = 1.0 / float(R.units / Fi.units)
+        factor = 1
+        res += factor * x
+
+    if np.isinf(res):
+        return R.get_top()
+    return res
+
 
 class SumUnitsNotCompatible(Exception):
     pass
@@ -134,6 +214,9 @@ class ProductN(PrimitiveDP):
 
     @contract(Fs='tuple[>=2]')
     def __init__(self, Fs, R):
+        for _ in Fs:
+            check_isinstance(_, RcompUnits)
+        check_isinstance(R, RcompUnits)
         F = PosetProduct(Fs)
         M = SpaceProduct(())
         PrimitiveDP.__init__(self, F=F, R=R, M=M)

@@ -3,6 +3,9 @@ from mocdp.dp import PrimitiveDP
 from mocdp.posets import Poset  # @UnusedImport
 from mocdp.posets import PosetProduct, poset_minima
 import numpy as np
+from contracts.utils import check_isinstance
+from mocdp.posets.rcomp_units import RcompUnits
+from mocdp.posets.nat import Nat
 
 __all__ = [
     'InvMult2',
@@ -88,8 +91,11 @@ class InvMult2(PrimitiveDP):
 
 class InvPlus2(PrimitiveDP):
 
-    @contract(Rs='tuple[2],seq[2]($Poset)')
+    @contract(Rs='tuple[2],seq[2]($RcompUnits)', F=RcompUnits)
     def __init__(self, F, Rs):
+        for _ in Rs:
+            check_isinstance(_, RcompUnits)
+        check_isinstance(F, RcompUnits)
         R = PosetProduct(Rs)
         M = R[0]
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
@@ -97,6 +103,7 @@ class InvPlus2(PrimitiveDP):
     def solve(self, f):
         n = 20
         options = np.linspace(0, f, n)
+        # FIXME: bug - are we taking into account the units?
         s = set()
         for o in options:
             s.add((o, f - o))
@@ -105,6 +112,38 @@ class InvPlus2(PrimitiveDP):
 
     def evaluate_f_m(self, f, m):
         return (m, f - m)
+
+    def __repr__(self):
+        return 'InvPlus2(%s -> %s)' % (self.F, self.R)
+
+
+class InvPlus2Nat(PrimitiveDP):
+
+    @contract(Rs='tuple[2],seq[2]($Nat)', F=Nat)
+    def __init__(self, F, Rs):
+        for _ in Rs:
+            check_isinstance(_, Nat)
+        check_isinstance(F, Nat)
+        R = PosetProduct(Rs)
+        M = R[0]
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+
+    def solve(self, f):
+        # FIXME: what about the top?
+        assert isinstance(f, int)
+
+        s = set()
+        for o in range(f + 1):
+            s.add((o, f - o))
+
+        return self.R.Us(s)
+
+    def evaluate_f_m(self, f, m):
+        return (m, f - m)
+
+    def __repr__(self):
+        return 'InvPlus2Nat(%s -> %s)' % (self.F, self.R)
+
 
 #     def solve_approx(self, f, n, nu):
 #         m = n / 2
@@ -148,7 +187,4 @@ class InvPlus2(PrimitiveDP):
 #         mult = lambda x, y: x * y
 #         r = functools.reduce(mult, f)
 #         return self.R.U(r)
-
-    def __repr__(self):
-        return 'InvPlus2(%s -> %s)' % (self.F, self.R)
 

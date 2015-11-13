@@ -7,7 +7,7 @@ from mocdp.exceptions import DPSemanticError
 from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
 from mocdp.posets import NotBelongs, PosetProduct, Rcomp, Space
 from mocdp.posets.finite_set import FiniteCollection, FiniteCollectionsInclusion
-from mocdp.posets.nat import Nat
+from mocdp.posets.nat import Nat, Int
 CDP = CDPLanguage
 
 class NotConstant(Exception):
@@ -28,6 +28,9 @@ def eval_constant(op, context):
 
     if isinstance(op, CDP.NatConstant):
         return ValueWithUnits(unit=Nat(), value=op.value)
+
+    if isinstance(op, CDP.IntConstant):
+        return ValueWithUnits(unit=Int(), value=op.value)
 
     if isinstance(op, CDP.Collection):
         return eval_constant_collection(op, context)
@@ -97,6 +100,7 @@ def eval_constant(op, context):
 
     msg = 'Cannot evaluate %s as constant.' % type(op).__name__
     raise_desc(NotConstant, msg, op=op)
+
 
 
 

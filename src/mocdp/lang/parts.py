@@ -41,7 +41,8 @@ class CDPLanguage():
     NewFunction = namedtuplewhere('NewFunction', 'name')
     Constraint = namedtuplewhere('Constraint', 'function rvalue prep')
 
-    NatConstant = namedtuplewhere('NatConstant', 's1 s2 value')
+    NatConstant = namedtuplewhere('NatConstant', 's1 s2 value')  # value = int, >=0
+    IntConstant = namedtuplewhere('IntConstant', 's1 s2 value')  # value = int
 
     LoadCommand = namedtuplewhere('LoadCommand', 'keyword load_arg')
     SetName = namedtuplewhere('SetName', 'keyword name dp_rvalue')
@@ -53,6 +54,7 @@ class CDPLanguage():
     PowerSet = namedtuplewhere('PowerSet', 'symbol p1 space p2')
     # natural numbers
     Nat = namedtuplewhere('Nat', 'symbol')
+    Int = namedtuplewhere('Int', 'symbol')
     # Just Keywords
     ProvideKeyword = namedtuplewhere('ProvideKeyword', 'keyword')
     RequireKeyword = namedtuplewhere('RequireKeyword', 'keyword')

@@ -1,4 +1,4 @@
-from mocdp.posets.uppersets import UpperSets
+from mocdp.posets.uppersets import UpperSets, UpperSet
 from contracts import contract
 from mocdp.exceptions import do_extra_checks
 from mocdp.dp.dp_loop import DPLoop0
@@ -141,21 +141,21 @@ def generic_solve(dp, f, max_steps=None):
         ss.append(s_next)
         sr.append(rn)
 
-        if not s_next.minimals:
-            result = ConvergedToEmpty
-            break
-
-        if len(s_next.minimals) == 1:
-            m1 = list(s_next.minimals)[0]
-            if S.P.equal(S.P.get_top(), m1):
-                result = ConvergedToInfinite
+        if isinstance(s_next, UpperSet):
+            if not s_next.minimals:
+                result = ConvergedToEmpty
                 break
+
+            if len(s_next.minimals) == 1:
+                m1 = list(s_next.minimals)[0]
+                if S.P.equal(S.P.get_top(), m1):
+                    result = ConvergedToInfinite
+                    break
 
     if result != MaxStepsReached:
         if sr:
             if not sr[-1].minimals:
                 result = ConvergedToEmpty
-
 
     return SolverTrace(dp=dp, f=f, strace=ss, rtrace=sr, result=result)
 

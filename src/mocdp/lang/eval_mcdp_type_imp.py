@@ -14,6 +14,7 @@ from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
 from mocdp.posets import NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.posets.any import Any
+from mocdp.dp.dp_generic_unary import WrapAMap
 
 CDP = CDPLanguage
 
@@ -304,9 +305,10 @@ def add_constraint(context, resource, function):
             msg = 'Constraint between incompatible spaces.'
             raise_wrapped(DPSemanticError, e, msg)
 
-        map1, _map2 = tu.get_embedding(R1, F2)
+        map1, _ = tu.get_embedding(R1, F2)
 
-        conversion = GenericUnary(R1, F2, map1)
+        # conversion = GenericUnary(R1, F2, map1)
+        conversion = WrapAMap(map1)
         conversion_ndp = dpwrap(conversion, '_in', '_out')
 
         name = context.new_name('_conversion')

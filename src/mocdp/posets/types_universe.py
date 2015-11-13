@@ -6,6 +6,7 @@ from mocdp.posets.rcomp import Rcomp
 from mocdp.posets.space import Map, NotBelongs, NotEqual, Space
 from mocdp.posets.space_product import SpaceProduct
 import numpy as np
+from mocdp.posets.nat import Nat, Int
 
 __all__ = [
     'get_types_universe',
@@ -37,15 +38,30 @@ class TypesUniverse(Preorder):
 
     def check_leq(self, A, B):
         from mocdp.posets.nat import Nat
+        from mocdp.posets.finite_set import FiniteCollectionsInclusion
+        from mocdp.posets.rcomp_units import RcompUnits
+        from mocdp.posets.nat import Int
+
         if isinstance(A, Nat) and isinstance(B, Nat):
             return
+
+        if isinstance(A, Nat) and isinstance(B, Int):
+            return
+
+        if isinstance(A, Int) and isinstance(B, Int):
+            return
         
-        from mocdp.posets.finite_set import FiniteCollectionsInclusion
+        # Natural numbers can be embdedded into reals
+        # (well, not all natural numbers, not biglongs, but close enough)
+        if isinstance(A, Nat) and isinstance(B, RcompUnits):
+            return
+        if isinstance(A, Nat) and isinstance(B, Rcomp):
+            return
+
         if isinstance(A, FiniteCollectionsInclusion) and isinstance(B, FiniteCollectionsInclusion):
             self.check_leq(A.S, B.S)
             return
         
-        from mocdp.posets.rcomp_units import RcompUnits
         if isinstance(A, RcompUnits) and isinstance(B, RcompUnits):
             if A.units.dimensionality == B.units.dimensionality:
                 return
@@ -75,6 +91,15 @@ class TypesUniverse(Preorder):
         from mocdp.posets.rcomp_units import RcompUnits
         from mocdp.posets.rcomp_units import format_pint_unit_short
 
+        if isinstance(A, Nat) and isinstance(B, RcompUnits):
+            return Identity(A, B), CoerceToInt(B, A)
+
+        if isinstance(A, Nat) and isinstance(B, Rcomp):
+            return Identity(A, B), CoerceToInt(B, A)
+
+        if isinstance(A, Nat) and isinstance(B, Int):
+            return Identity(A, B), Identity(B, A)
+            
         if isinstance(A, RcompUnits) and isinstance(B, RcompUnits):
             assert A.units.dimensionality == B.units.dimensionality
 
@@ -84,8 +109,6 @@ class TypesUniverse(Preorder):
 
             a = format_pint_unit_short(A.units)
             b = format_pint_unit_short(B.units)
-#             setattr(B_to_A, '__name__', '%s-to-%s-f%.3f' % (b, a, B_to_A.factor))
-#             setattr(A_to_B, '__name__', '%s-to-%s-f%.3f' % (a, b, A_to_B.factor))
             setattr(B_to_A, '__name__', '%s-to-%s' % (b, a))
             setattr(A_to_B, '__name__', '%s-to-%s' % (a, b))
             return A_to_B, B_to_A
@@ -139,6 +162,14 @@ class Identity(Map):
     def _call(self, x):
         return x
 
+class CoerceToInt(Map):
+
+    @contract(cod=Space, dom=Space)
+    def __init__(self, cod, dom):
+        Map.__init__(self, cod, dom)
+
+    def _call(self, x):
+        return int(x)
 
 class ProductMap(Map):
     @contract(fs='seq[>=1]($Map)')

@@ -37,10 +37,12 @@ def generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0)):
 
 def generic_try_plotters(r, plotters, space, sequence, axis0=None, annotation=None):
     nplots = 0
+    es = []
     for name, plotter in plotters.items():
         try:
             plotter.check_plot_space(space)
-        except NotPlottable:
+        except NotPlottable as e:
+            es.append(e)
             # print('Plotter %r cannot plot %r:\n%s' % (name, space, e))
             continue
         nplots += 1
@@ -49,7 +51,7 @@ def generic_try_plotters(r, plotters, space, sequence, axis0=None, annotation=No
         generic_plot_sequence(f, plotter, space, sequence, axis0=axis0, annotation=annotation)
 
     if not nplots:
-        r.text('error', 'No plotters for %s' % space)
+        r.text('error', 'No plotters for %s' % space + '\n\n' + "\n".join(str(e) for e in es))
 
 
 def join_axes(a, b):
@@ -75,11 +77,15 @@ def generic_plot_sequence(r, plotter, space, sequence, axis0=None, annotation=No
                 annotation(pylab, axis)
 
             xlabel, ylabel = plotter.get_xylabels(space)
-            if xlabel:
-                pylab.xlabel(xlabel)
-            if ylabel:
-                pylab.ylabel(ylabel)
+            try:
+                if xlabel:
+                    pylab.xlabel(xlabel)
+                if ylabel:
+                    pylab.ylabel(ylabel)
+            except UnicodeDecodeError as e:
 
+                print xlabel, xlabel.__repr__(), ylabel, ylabel.__repr__(), e
+            
             if (axis[0] != axis[1]) or (axis[2] != axis[3]):
                 pylab.axis(axis)
 
@@ -141,14 +147,6 @@ class PlotterUR2(Plotter):
         return enlarge(functools.reduce(reduce_bounds, axes), 0.1)
 
 #
-#
-#         for s in seq:
-#             points = map(P_TO_R2, s.minimals)
-#         if len(points) == 0:
-#             return (0, 1, 0, 1)
-#         xs = [p[0] for p in points]
-#         ys = [p[1] for p in points]
-#         return (min(xs), max(xs), min(ys), max(ys))
 
     def plot(self, pylab, axis, space, value):
         self.check_plot_space(space)

@@ -2,13 +2,17 @@
 from .parse_actions import plus_constantsN
 from .parts import CDPLanguage
 from contracts import contract
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, raise_desc
 from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.dp import GenericUnary, ProductN, SumN
-from mocdp.exceptions import DPSemanticError
+from mocdp.exceptions import DPSemanticError, DPInternalError
 from mocdp.lang.parse_actions import inv_constant
 from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
 from mocdp.posets import Space, get_types_universe, mult_table, mult_table_seq
+from mocdp.posets.rcomp_units import RcompUnits
+from mocdp.posets.nat import Nat, Int
+from mocdp.dp.dp_sum import SumNNat, SumNInt
+from mocdp.dp.dp_generic_unary import WrapAMap
 CDP = CDPLanguage
 
 def eval_constant_divide(op, context):
@@ -24,7 +28,6 @@ def eval_constant_divide(op, context):
     return mult_constantsN(invs)
 
 
-
 @contract(unit1=Space, unit2=Space)
 def convert_vu(value, unit1, unit2, context):  # @UnusedVariable
     tu = get_types_universe()
@@ -35,8 +38,10 @@ def convert_vu(value, unit1, unit2, context):  # @UnusedVariable
 def eval_PlusN_as_constant(x, context):
     return eval_PlusN(x, context, wants_constant=True)
 
+
 def eval_MultN_as_constant(x, context):
     return eval_MultN(x, context, wants_constant=True)
+
 
 def eval_MultN_as_rvalue(x, context):
     res = eval_MultN(x, context, wants_constant=False)
@@ -45,6 +50,7 @@ def eval_MultN_as_rvalue(x, context):
         return get_valuewithunits_as_resource(res, context)
     else:
         return res
+
 
 def eval_divide_as_rvalue(op, context):
     from mocdp.lang.eval_resources_imp import eval_rvalue
@@ -180,9 +186,8 @@ def flatten_plusN(ops):
 
 def eval_PlusN(x, context, wants_constant):
     """ Raises NotConstant if wants_constant is True. """
-    from mocdp.lang.eval_constant_imp import NotConstant
-    from mocdp.lang.eval_constant_imp import eval_constant
-    from mocdp.lang.eval_resources_imp import eval_rvalue
+    from .eval_constant_imp import NotConstant, eval_constant
+    from .eval_resources_imp import eval_rvalue
 
     assert isinstance(x, CDP.PlusN)
     assert len(x.ops) > 1
@@ -214,10 +219,25 @@ def eval_PlusN(x, context, wants_constant):
         # there are some resources
         resources_types = [context.get_rtype(_) for _ in resources]
 
-        # create multiplication for the resources
-        R = resources_types[0]
+        target_int = Int()
+        tu = get_types_universe()
+        def castable_to_int(_):
+            return tu.leq(_, target_int)
 
-        dp = SumN(tuple(resources_types), R)
+        if all(isinstance(_, RcompUnits) for _ in resources_types):
+            # addition between floats
+            R = resources_types[0]
+            dp = SumN(tuple(resources_types), R)
+        elif all(isinstance(_, Nat) for _ in resources_types):
+            # natural number
+            R = Nat()
+            dp = SumNNat(tuple(resources_types), R)
+        elif all(castable_to_int(_) for _ in resources_types):
+            R = Int()
+            dp = WrapAMap(SumNInt(tuple(resources_types), R))
+        else:
+            msg = 'Cannot find sum operator for mixed types.'
+            raise_desc(DPInternalError, msg, resources_types=resources_types)
 
         from mocdp.lang.helpers import create_operation
         r = create_operation(context, dp, resources,
