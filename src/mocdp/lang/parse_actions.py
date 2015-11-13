@@ -11,9 +11,10 @@ from mocdp.lang.namedtuple_tricks import get_copy_with_where
 from mocdp.posets import  Space, mult_table
 from pyparsing import ParseException, ParseFatalException
 import functools
-from mocdp.lang.parts import make_list
+
 from mocdp.comp.context import ValueWithUnits
 from mocdp.posets.rcomp_units import RcompUnits
+from mocdp.lang.utils_lists import make_list
 
 
 CDP = CDPLanguage
@@ -251,9 +252,10 @@ def remove_comments(s):
 def parse_ndp(string):
     from mocdp.lang.syntax import Syntax
     v = parse_wrap(Syntax.dp_rvalue, string)[0]
-    from mocdp.lang.blocks import  eval_dp_rvalue
+
     from mocdp.comp.context import Context
     context = Context()
+    from mocdp.lang.eval_mcdp_type_imp import eval_dp_rvalue
     res = eval_dp_rvalue(v, context)
     # I'm not sure what happens to the context
     # if context.names # error ??

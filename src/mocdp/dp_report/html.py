@@ -4,8 +4,9 @@ from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.lang.namedtuple_tricks import isnamedtuplewhere
 from mocdp.lang.parse_actions import parse_wrap
-from mocdp.lang.parts import is_a_special_list
+
 from mocdp.lang.syntax import Syntax
+from mocdp.lang.utils_lists import is_a_special_list
 
 
 def isolate_comments(s):

@@ -21,7 +21,14 @@ def poset_minima(elements, leq):
     res = []
     for e in elements:
         # nobody is less than it
-        should_add = all([not leq(r, e) for r in res])
+        # should_add = all([not leq(r, e) for r in res])
+        for r in res:
+            if leq(r, e):
+                should_add = False
+                break
+        else:
+            should_add = True
+        
         if should_add:
             # remove the ones that are less than this
             res = [r for r in res if not leq(e, r)] + [e]

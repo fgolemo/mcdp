@@ -3,8 +3,7 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.exceptions import DPSyntaxError
-from mocdp.lang.blocks import DPSemanticError
+from mocdp.exceptions import DPSyntaxError, DPSemanticError
 from mocdp.lang.namedtuple_tricks import remove_where_info
 from mocdp.lang.syntax import parse_ndp, parse_wrap
 from nose.tools import assert_equal

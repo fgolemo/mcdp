@@ -36,6 +36,9 @@ class TypesUniverse(Preorder):
             raise_desc(NotEqual, msg, A=A, B=B)
 
     def check_leq(self, A, B):
+        from mocdp.posets.nat import Nat
+        if isinstance(A, Nat) and isinstance(B, Nat):
+            return
         
         from mocdp.posets.finite_set import FiniteCollectionsInclusion
         if isinstance(A, FiniteCollectionsInclusion) and isinstance(B, FiniteCollectionsInclusion):
@@ -87,6 +90,9 @@ class TypesUniverse(Preorder):
             setattr(A_to_B, '__name__', '%s-to-%s' % (a, b))
             return A_to_B, B_to_A
 
+
+        if self.equal(A, B):
+            return Identity(A, B), Identity(B, A)
 
         if isinstance(A, Rcomp) and isinstance(B, RcompUnits):
             return Identity(A, B), Identity(B, A)

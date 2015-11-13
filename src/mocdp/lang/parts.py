@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from .namedtuple_tricks import namedtuplewhere
-from contracts.interface import Where
-from contracts.utils import raise_desc, raise_wrapped
-from mocdp.exceptions import DPInternalError
 
 __all__ = ['CDPLanguage']
 
@@ -44,6 +41,8 @@ class CDPLanguage():
     NewFunction = namedtuplewhere('NewFunction', 'name')
     Constraint = namedtuplewhere('Constraint', 'function rvalue prep')
 
+    NatConstant = namedtuplewhere('NatConstant', 's1 s2 value')
+
     LoadCommand = namedtuplewhere('LoadCommand', 'keyword load_arg')
     SetName = namedtuplewhere('SetName', 'keyword name dp_rvalue')
     SetMCDPType = namedtuplewhere('SetMCDPType', 'keyword name eq right_side')
@@ -52,6 +51,8 @@ class CDPLanguage():
     SetNameGeneric = namedtuplewhere('SetNameGeneric', 'name eq right_side')
 
     PowerSet = namedtuplewhere('PowerSet', 'symbol p1 space p2')
+    # natural numbers
+    Nat = namedtuplewhere('Nat', 'symbol')
     # Just Keywords
     ProvideKeyword = namedtuplewhere('ProvideKeyword', 'keyword')
     RequireKeyword = namedtuplewhere('RequireKeyword', 'keyword')
@@ -123,53 +124,6 @@ class CDPLanguage():
     Power = namedtuplewhere('Power', 'op1 exponent')
     BuildProblem = namedtuplewhere('BuildProblem', 'keyword statements')
 
-# Create a type for each length of lists
-# with elements e1, e2, e3, etc.
-# The list with length 0 has a dummy element "dummy".
-list_types = {
-}
-
-for i in range(1, 100):
-    args = ['e%d' % _ for _ in range(i)]
-    ltype = namedtuplewhere('List%d' % i, " ".join(args))
-    list_types[i] = ltype
-
-list_types[0] = namedtuplewhere('List0', 'dummy')
-
-def is_a_special_list(x):
-    return 'List' in type(x).__name__
-
-def make_list(x, where=None):
-    try:
-        if not len(x):
-            return list_types[0](dummy='dummy', where=where)
-    
-        ltype = list_types[len(x)]
-        w1 = x[0].where
-        w2 = x[-1].where
-
-        if w1 is None or w2 is None:
-            raise_desc(ValueError, 'Cannot create list', x=x)
-
-        assert w2.character_end is not None
-        w3 = Where(string=w1.string,
-                      character=w1.character,
-                      character_end=w2.character_end)
-
-        res = ltype(*tuple(x), where=w3)
-        return res
-    except BaseException as e:
-        msg = 'Cannot create list'
-        raise_wrapped(DPInternalError, e, msg, x=x, where=where, x_last=x[-1])
-
-def unwrap_list(res):
-    if isinstance(res, list_types[0]):
-        return []
-    normal = []
-    for k, v in res._asdict().items():
-        if k == 'where': continue
-        normal.append(v)
-    return normal
 
 
 

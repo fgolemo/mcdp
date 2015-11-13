@@ -10,7 +10,7 @@ from mocdp.posets.rcomp_units import R_Weight_g, make_rcompunit
 from mocdp.posets.types_universe import get_types_universe
 from nose.tools import assert_equal
 from numpy.testing.utils import assert_allclose
-from mocdp.lang.blocks import eval_constant
+from mocdp.lang.eval_constant_imp import eval_constant
 
 CDP = CDPLanguage
 
@@ -47,14 +47,14 @@ def check_division():
 def check_unit1():
 
     print('parsing as unit_simple:')
-    print parse_wrap_syntax_error('N*m', Syntax.unit_simple)
+    print parse_wrap_syntax_error('N*m', Syntax.pint_unit_simple)
     print('parsing as pint_unit:')
     print parse_wrap_check('N*m', Syntax.pint_unit)
-    parse_wrap_check('y', Syntax.unit_simple)
-    parse_wrap_syntax_error('x', Syntax.unit_simple)
+    parse_wrap_check('y', Syntax.pint_unit_simple)
+    parse_wrap_syntax_error('x', Syntax.pint_unit_simple)
     parse_wrap_check('x', Syntax.disallowed)
     print('unit_base:')
-    parse_wrap_syntax_error('V x m', Syntax.unit_base)
+    parse_wrap_syntax_error('V x m', Syntax.pint_unit_simple)
 
     nu = Syntax.number_with_unit3
 #     Syntax.space_expr.setWhiteSpaceChars(' \t')
@@ -70,7 +70,7 @@ def check_unit1():
     
     if True:
         print('unit_simple:')
-        parse_wrap_syntax_error('V x m', Syntax.unit_simple)
+        parse_wrap_syntax_error('V x m', Syntax.pint_unit_simple)
 
         print('pint_unit:')
         parse_wrap_syntax_error('V x m', Syntax.pint_unit)

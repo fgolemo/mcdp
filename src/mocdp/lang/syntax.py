@@ -28,6 +28,7 @@ class Syntax():
         'dp', 'mcdp', 'template', 'sub', 'for', 'instance',
         'provided', 'requires', 'implemented-by', 'using', 'by',
         'catalogue', 'set-of', 'mcdp-type', 'dptype', 'instance',
+        'Nat'
     ]
 
     # shortcuts
@@ -86,13 +87,13 @@ class Syntax():
     idn = (NotAny(oneOf(keywords)) + Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))).setResultsName('idn')
  
     disallowed = oneOf(keywords + ['x'])
-    unit_base = NotAny(oneOf(keywords + ['x'])) + Word(alphas + '$')
+    pint_unit_base = NotAny(oneOf(keywords + ['x'])) + Word(alphas + '$')
 
-    unit_power = L('^') + Word(nums)
-    unit_simple = unit_base + O(unit_power)
-    unit_connector = L('/') | L('*')
+    pint_unit_power = L('^') + Word(nums)
+    pint_unit_simple = pint_unit_base + O(pint_unit_power)
+    pint_unit_connector = L('/') | L('*')
  
-    pint_unit = sp((unit_simple + ZeroOrMore(unit_connector + unit_simple)),
+    pint_unit = sp((pint_unit_simple + ZeroOrMore(pint_unit_connector + pint_unit_simple)),
                    parse_pint_unit)
 
     space_expr = Forward() 
@@ -105,7 +106,9 @@ class Syntax():
 #                         lambda t: CDP.PowerSet(t[0], t[1],
 #                                                t[2], t[3]))
 
-    space_operand = (pint_unit ^ power_set_expr)
+    nat_expr = sp(L('Nat'), lambda t: CDP.Nat(t[0]))
+
+    space_operand = (pint_unit ^ power_set_expr ^ nat_expr)
 
     space_expr << operatorPrecedence(space_operand, [
                 (PRODUCT, 2, opAssoc.LEFT, space_product_parse_action),
@@ -128,6 +131,11 @@ class Syntax():
                           lambda t: CDP.ValueExpr(t[0]))
 
     unitst = S(L('[')) + C(space_expr, 'unit') + S(L(']'))
+
+
+    nat_constant = sp(L('int') + L(':') + integer, lambda t: CDP.NatConstant(t[0], t[1], t[2]))
+
+
 
     fname = sp(idn.copy(), lambda t: CDP.FName(t[0]))
     rname = sp(idn.copy(), lambda t: CDP.RName(t[0]))
@@ -197,7 +205,7 @@ class Syntax():
                                  ZeroOrMore(COMMA + constant_value) + S(L('}')),
                                  lambda t: CDP.Collection(make_list(list(t))))
 
-    constant_value << (number_with_unit ^ variable_ref ^ collection_of_constants ^ tuple_of_constants)
+    constant_value << (number_with_unit ^ variable_ref ^ collection_of_constants ^ tuple_of_constants ^ nat_constant)
 
     rvalue_resource_simple = sp(dpname + DOT - rname,
                                 lambda t: CDP.Resource(s=t[2], keyword=t[1], dp=t[0]))

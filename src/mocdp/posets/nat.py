@@ -3,7 +3,6 @@ from .poset import NotLeq, Poset
 from .space import NotBelongs, NotEqual
 from contracts.utils import raise_desc
 from mocdp.exceptions import do_extra_checks
-import numpy as np
 import random
 
 __all__ = [
