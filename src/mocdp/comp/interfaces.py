@@ -92,7 +92,7 @@ class NamedDPCoproduct(NamedDP):
         ftypes = first.get_ftypes(first.get_fnames())
         rtypes = first.get_rtypes(first.get_rnames())
 
-        for i, ndp in enumerate(ndps):
+        for _, ndp in enumerate(ndps):
             ftypes_i = ndp.get_ftypes(ndp.get_fnames())
             rtypes_i = ndp.get_rtypes(ndp.get_rnames())
 

@@ -64,6 +64,10 @@ def generic_plot_sequence(r, plotter, space, sequence, axis0=None, annotation=No
 
     axis = plotter.axis_for_sequence(space, sequence)
 
+    if axis[0] == axis[1]:
+        dx = 1
+#         dy = 1
+        axis = (axis[0] - dx, axis[1] + dx, axis[2], axis[3])
     axis = enlarge(axis, 0.15)
     if axis0 is not None:
         axis = join_axes(axis, axis0)
@@ -82,8 +86,8 @@ def generic_plot_sequence(r, plotter, space, sequence, axis0=None, annotation=No
                     pylab.xlabel(xlabel)
                 if ylabel:
                     pylab.ylabel(ylabel)
-            except UnicodeDecodeError as e:
 
+            except UnicodeDecodeError as e:
                 print xlabel, xlabel.__repr__(), ylabel, ylabel.__repr__(), e
             
             if (axis[0] != axis[1]) or (axis[2] != axis[3]):
@@ -146,12 +150,11 @@ class PlotterUR2(Plotter):
         axes = [get_bounds(_) for _ in points2d]
         return enlarge(functools.reduce(reduce_bounds, axes), 0.1)
 
-#
-
     def plot(self, pylab, axis, space, value):
         self.check_plot_space(space)
 
         v = value
+        print axis
         plot_upset_R2(pylab, v, axis, color_shadow=[1.0, 0.8, 0.8])
 
 

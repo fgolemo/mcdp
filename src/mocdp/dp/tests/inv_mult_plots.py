@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest_dynamic
+from comptests.registrar import comptest_dynamic, comptest
 from mocdp.dp.solver import generic_solve
 from mocdp.dp_report.generic_report_utils import generic_report
 from mocdp.drawing import plot_upset_R2
@@ -229,3 +229,29 @@ mcdp {
     generic_report(r, dp, trace, annotation=annotation, axis0=axis0)
 
     return r
+
+
+
+@comptest
+def check_loop_result1():
+    pass
+
+@comptest
+def check_loop_result2():
+    pass
+
+@comptest
+def check_loop_result3():
+    pass
+
+@comptest
+def check_loop_result4():
+    pass
+
+@comptest
+def check_loop_result5():
+    pass
+
+
+
+

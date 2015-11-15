@@ -221,9 +221,9 @@ class Series0(PrimitiveDP):
         from mocdp.posets import UpperSet, poset_minima
 
         u1 = self.dp1.solve(func)
-        ressp1 = self.dp1.get_res_space()
-        tr1 = UpperSets(ressp1)
-        tr1.belongs(u1)
+        # ressp1 = self.dp1.get_res_space()
+        # tr1 = UpperSets(ressp1)
+        # tr1.belongs(u1)
 
         mins = set([])
         for u in u1.minimals:
@@ -234,11 +234,12 @@ class Series0(PrimitiveDP):
         ressp = self.get_res_space()
         minimals = poset_minima(mins, ressp.leq)
         # now mins is a set of UpperSets
-        tres = self.get_tradeoff_space()
+        # tres = self.get_tradeoff_space()
 
         us = UpperSet(minimals, ressp)
-        tres.belongs(us)
+        # tres.belongs(us)
 
+        # print('solving for %s' % str(func))
         return us
 
     def __repr__(self):

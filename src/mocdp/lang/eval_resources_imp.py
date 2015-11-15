@@ -7,8 +7,8 @@ from contracts import contract, describe_value
 from contracts.utils import check_isinstance, indent, raise_desc, raise_wrapped
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
-from mocdp.comp.context import CFunction, CResource, ValueWithUnits, \
-    NoSuchMCDPType
+from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
+    ValueWithUnits)
 from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
 from mocdp.dp import (
     Constant, GenericUnary, Identity, InvMult2, InvPlus2, Limit, Max, Max1, Min,
@@ -23,6 +23,9 @@ from mocdp.posets import (NotBelongs, NotEqual, NotLeq, PosetProduct, Rcomp,
 from mocdp.posets.any import Any
 from mocdp.posets.finite_set import FiniteCollection, FiniteCollectionsInclusion
 from mocdp.posets.nat import Nat
+from mocdp.posets.rcomp_units import RcompUnits
+import numpy as np
+from mocdp.posets.space import Map
 CDP = CDPLanguage
 class DoesNotEvalToResource(Exception):
     """ also called rvalue """
@@ -167,12 +170,22 @@ def eval_rvalue(rvalue, context):
 
         if isinstance(rvalue, CDP.GenericNonlinearity):
             op_r = eval_rvalue(rvalue.op1, context)
+            # this is supposed to be a numpy function that takes a scalar float
             function = rvalue.function
             R_from_F = rvalue.R_from_F
             F = context.get_rtype(op_r)
-            R = R_from_F(F)
-
-            dp = GenericUnary(F=F, R=R, function=function)
+            
+            tu = get_types_universe()
+            if isinstance(F, Rcomp) or isinstance(F, RcompUnits):
+                R = F
+                dp = GenericUnary(F=F, R=R, function=function)
+            elif isinstance(F, Nat):
+                m = RoundAfter(function, dom=Nat(), cod=Nat())
+                dp = WrapAMap(m)
+            else:
+                msg = 'Cannot create unary operator'
+                raise_desc(DPInternalError, msg, function=function, F=F)
+                
 
             fnames = context.new_fun_name('s')
             name = context.new_name(function.__name__)
@@ -193,3 +206,25 @@ def eval_rvalue(rvalue, context):
         if e.where is None:
             raise DPSemanticError(str(e), where=rvalue.where)
         raise e
+
+class RoundAfter(Map):
+    """ Applies a function and rounds it to int. """
+
+    def __init__(self, f, dom, cod):
+        self.f = f
+        Map.__init__(self, dom, cod)
+
+    def _call(self, x):
+        if np.isinf(x):
+            return self.cod.get_top()
+        
+        y = self.f(x)
+        if np.isinf(y):
+            return self.cod.get_top()
+        
+        y = int(np.round(y))
+        return y
+
+
+
+

@@ -321,7 +321,11 @@ class DPLoop0(PrimitiveDP):
                 f = (f1, f2)
                 res = self.dp1.solve(f)
                 for r in res.minimals:
-                    if not enforce_constraint or  R.leq(r, f2):
+                    if (not enforce_constraint) or R.leq(r, f2):
+                        # f1  ->|    | r
+                        #       | dp1|----->
+                        # f2 |->|____|   |
+                        #     `----(>=)--/
                         solutions.add(r)
 
             if not solutions:
@@ -329,7 +333,7 @@ class DPLoop0(PrimitiveDP):
             u = poset_minima(solutions, R.leq)
 
             res = R.Us(u)
-            print('solutions of iterations: %s' % res)
+            print('fixed point of iterations: %s' % UR.format(res))
             return res
  
 
@@ -340,7 +344,6 @@ class DPLoop0(PrimitiveDP):
         S = [s0]
             
         for i in range(100):  # XXX
-            # now take the product of f1
             si = S[-1]
             sip = iterate(si, enforce_constraint=False)
 
@@ -361,6 +364,16 @@ class DPLoop0(PrimitiveDP):
         
         res = iterate(last, enforce_constraint=True)
         return res
+        print('XXX' * 10)
+        print('Just trying things out...')
+        print
+        print('f1 = %s' % str(f1))
+        print('last = %s' % str(last))
+        # print('res = %s' % res)
+        return last
+        # return res
+
+
                         
                         
                         

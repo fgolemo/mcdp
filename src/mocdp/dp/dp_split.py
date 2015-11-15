@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from mocdp import get_conftools_posets
+from mocdp.exceptions import mcdp_dev_warning
 from mocdp.posets import PosetProduct
 from mocdp.posets.space_product import SpaceProduct
-import warnings
-from mocdp.exceptions import mcdp_dev_warning
 
 
 __all__ = [

@@ -151,9 +151,10 @@ class PrimitiveDP(WithInternalLog):
 
     @contract(ufunc=UpperSet)
     def solveU_approx(self, ufunc, nl, nu):
-        UF = UpperSets(self.get_fun_space())
-        UF.belongs(ufunc)
-        from mocdp.posets import poset_minima
+        if do_extra_checks():
+            UF = UpperSets(self.get_fun_space())
+            UF.belongs(ufunc)
+
         R = self.get_res_space()
 
         res_l = set([])
@@ -221,7 +222,6 @@ class PrimitiveDP(WithInternalLog):
         ulen = lambda x: len(u(x))
 
         def clip(x, n):
-
             s = str(x)
             unicode_string = s.decode("utf-8")
             l = len(unicode_string)

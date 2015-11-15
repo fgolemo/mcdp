@@ -4,7 +4,6 @@ from contracts import contract
 from contracts.utils import indent, raise_desc
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.posets import Space
-from conf_tools.utils.not_found import check_is_in
 
 __all__ = [
     'Connection',

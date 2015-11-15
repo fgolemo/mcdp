@@ -80,7 +80,8 @@ class SolveDP(QuickAppBase):
         if options.direct:
             print dp
             dp0 = dp.dp1
-            dp.solve(fg)
+            res = dp.solve(fg)
+            print('results: %s' % str(res))
             # trace = generic_solve_by_loop(dp0, f=fg, max_steps=max_steps)
 
         else:

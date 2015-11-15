@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts import contract
+from contracts.utils import check_isinstance
 from mocdp import get_conftools_posets
-from mocdp.posets import PosetProduct, RcompUnits, SpaceProduct
+from mocdp.posets import PosetProduct, RcompUnits, Space  # @UnusedImport
+from mocdp.posets import SpaceProduct
+from mocdp.posets.nat import Int, Nat
+from mocdp.posets.poset import Poset
+from mocdp.posets.space import Map
+from mocdp.posets.types_universe import get_types_universe
 import functools
 import numpy as np
-from contracts.utils import check_isinstance
-from mocdp.posets.nat import Nat, Int
-from mocdp.posets.space import Map
-from mocdp.posets.poset import Poset
-from mocdp.posets.types_universe import get_types_universe
+
 
 
 __all__ = [

@@ -171,6 +171,9 @@ class CoerceToInt(Map):
     def _call(self, x):
         return int(x)
 
+
+
+
 class ProductMap(Map):
     @contract(fs='seq[>=1]($Map)')
     def __init__(self, fs):

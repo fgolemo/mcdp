@@ -307,7 +307,6 @@ def add_constraint(context, resource, function):
 
         map1, _ = tu.get_embedding(R1, F2)
 
-        # conversion = GenericUnary(R1, F2, map1)
         conversion = WrapAMap(map1)
         conversion_ndp = dpwrap(conversion, '_in', '_out')
 

@@ -2,8 +2,6 @@
 from .primitive import PrimitiveDP
 from contracts import contract
 from mocdp.posets import Poset  # @UnusedImport
-from mocdp.posets.poset_product import PosetProduct
-from mocdp.posets.rcomp import Rcomp
 
 
 __all__ = [
@@ -26,7 +24,7 @@ class CatalogueDP(PrimitiveDP):
         R = self.R
         F = self.F
         options_r = []
-        for name, f_max, r_min in self.entries:
+        for _name, f_max, r_min in self.entries:
             if F.leq(f, f_max):
                 options_r.append(r_min)
 
