@@ -12,6 +12,7 @@ from mocdp.lang.parse_actions import inv_constant
 from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
 from mocdp.posets import (Int, Nat, RcompUnits, Space, get_types_universe,
     mult_table, mult_table_seq)
+from mocdp.posets.space import Map
 CDP = CDPLanguage
 
 def eval_constant_divide(op, context):
@@ -161,17 +162,37 @@ def get_mult_op(context, r, c):
     from mocdp.lang.helpers import create_operation
     rtype = context.get_rtype(r)
 
-    F = rtype
-    R = mult_table(rtype, c.unit)
-    function = MultValue(c.value)
-    setattr(function, '__name__', '× %s' % (c.unit.format(c.value)))
-    dp = GenericUnary(F, R, function)
-
+    # Case 1: rcompunits, rcompunits
+    if isinstance(rtype, RcompUnits) and  isinstance(c.unit, RcompUnits):
+        F = rtype
+        R = mult_table(rtype, c.unit)
+        function = MultValue(c.value)
+        setattr(function, '__name__', '× %s' % (c.unit.format(c.value)))
+        dp = GenericUnary(F, R, function)
+    if isinstance(rtype, Nat) and isinstance(c.unit, Nat):
+        amap = MultNat(c.value)
+        dp = WrapAMap(amap)
+    else:
+        msg = 'Cannot create multiplication operation.'
+        raise_desc(DPInternalError, msg, rtype=rtype, c=c)
     r2 = create_operation(context, dp, resources=[r],
                           name_prefix='_mult', op_prefix='_x',
                           res_prefix='_y')
     return r2
 
+class MultNat(Map):
+    @contract(value=int)
+    def __init__(self, value):
+        self.value = value
+        self.N = Nat()
+        Map.__init__(self, dom=self.N, cod=self.N)
+    def _call(self, x):
+        if self.N.equal(self.N.get_top(), x):
+            return x
+        # TODO: check
+        res = x * self.value
+        assert isinstance(res, int), res
+        return res
 
 def flatten_plusN(ops):
     res = []

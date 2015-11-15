@@ -278,8 +278,8 @@ mcdp {
          x + y >= c
     }
     
-  requires x for s
-  provides c using s
+    requires x for s
+    provides c using s
     
     requires y2 >= s.y * nat:2
     
@@ -290,7 +290,7 @@ mcdp {
 
     f = 2
     res = dp.solve(f)
-    expected = set([(0, 2), (1, 1), (2, 0)])
+    expected = set([(0, 4), (1, 2), (2, 0)])
     assert_equal(expected, res.minimals)
 
 
@@ -421,39 +421,39 @@ mcdp {
     }
     
     t1 = mcdp {
-        provides c [Nat]
+        # solution of this = (0,6)
         requires money [Nat]
         requires time  [Nat]
         w = instance adp1
-        c <= w.c
+        w.c >= w.x
         money >= nat:0 * w.x
-        time  >= nat:1 * w.x 
+        time  >= nat:2 * w.x 
     }
 
     t2 = mcdp {
-        provides c [Nat]
+        # solution of this = (2,0)
         requires money [Nat]
         requires time  [Nat]
-        w = instance adp1
-        c <= w.c
+        w = instance adp2
+        w.c >= w.x
         money >= nat:1 * w.x
         time  >= nat:0 * w.x 
     }
 
     s = instance t1 ^ t2
     
-    s.c >= s.x
-   
-    requires x for s
+    requires money, time for s
 }"""
     )
-    N = Nat()
-    UNat = UpperSets(N)
     dp = ndp.get_dp()
     print dp
     res = dp.solve(())
     print res
-    UNat.check_equal(res, N.U(2))
+
+    R = dp.get_res_space()
+    UR = UpperSets(R)
+    UR.check_equal(res, R.Us([(2, 0), (0, 6)]))
+#     UNat.check_equal(res, N.U(2))
 
 
 @comptest
