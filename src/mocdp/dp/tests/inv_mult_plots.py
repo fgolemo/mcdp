@@ -8,6 +8,12 @@ from mocdp.posets import UpperSets
 from reprep import Report
 
 import numpy as np
+from nose.tools import assert_equal
+from mocdp.posets.space import Map
+from mocdp.posets.nat import Nat
+from mocdp.lang.tests.utils import assert_semantic_error
+from mocdp.dp.dp_generic_unary import WrapAMap
+from mocdp.posets.poset_product import PosetProduct
 
 
 # @comptest_dynamic
@@ -234,19 +240,221 @@ mcdp {
 
 @comptest
 def check_loop_result1():
-    pass
+
+    ndp = parse_ndp("""
+mcdp {
+    s = instance mcdp {
+      requires x [Nat]
+      requires y [Nat]
+      provides c [Nat]
+
+         x + y >= c
+    }
+    
+  requires x, y for s
+  provides c using s
+
+}"""
+    )
+
+    dp = ndp.get_dp()
+
+    f = 2
+    res = dp.solve(f)
+    expected = set([(0, 2), (1, 1), (2, 0)])
+    assert_equal(expected, res.minimals)
+
 
 @comptest
 def check_loop_result2():
-    pass
+
+    ndp = parse_ndp("""
+mcdp {
+    s = instance mcdp {
+      requires x [Nat]
+      requires y [Nat]
+      provides c [Nat]
+
+         x + y >= c
+    }
+    
+  requires x for s
+  provides c using s
+    
+    requires y2 >= s.y * nat:2
+    
+}"""
+    )
+
+    dp = ndp.get_dp()
+
+    f = 2
+    res = dp.solve(f)
+    expected = set([(0, 2), (1, 1), (2, 0)])
+    assert_equal(expected, res.minimals)
+
+
+class CounterMap(Map):
+    """ This is:
+    
+        f(x) = {  x + 1  for x <= n-1
+                  n      for x >= n
+    """
+    def __init__(self, n):
+        self.n = n
+        Map.__init__(self, Nat(), Nat())
+    def _call(self, x):
+        if self.dom.leq(x, self.n - 1):
+            return x + 1
+        return self.n
+    def __repr__(self):
+        return 'CounterMap(%r)' % self.n
+
+class CounterDP(WrapAMap):
+    def __init__(self, n):
+        WrapAMap.__init__(self, CounterMap(n))
 
 @comptest
 def check_loop_result3():
-    pass
+    assert_semantic_error("""
+mcdp {
+    s = instance dp {
+        requires x [Nat]
+        provides c [Nat]
+
+        # semantic error: does not exist
+        implemented-by code mocdp.dp.tests.inv_mult_plots.CounterMap___(n=3)
+    }
+   
+}"""
+    )
+
+    assert_semantic_error("""
+mcdp {
+    s = instance dp {
+        requires x [Nat]
+        provides c [Nat]
+
+        # semantic error: not a DP
+        implemented-by code mocdp.dp.tests.inv_mult_plots.CounterMap(n=3)
+    }
+   
+}"""
+    )
+    
+    ndp = parse_ndp("""
+mcdp {
+    adp1 = dp {
+        requires x [Nat]
+        provides c [Nat]
+
+        implemented-by code mocdp.dp.tests.inv_mult_plots.CounterDP(n=3)
+    }
+
+    s = instance adp1 
+    
+    s.c >= s.x
+   
+}"""
+    )
+    
+#     UNat = UpperSets(Nat())
+
+    dp = ndp.get_dp()
+    print dp
+    res = dp.solve(())
+    print res.__repr__()
+    One = PosetProduct(())
+    U1 = UpperSets(One)
+    U1.check_equal(res, One.U(()))
+
+    ndp = parse_ndp("""
+mcdp {
+    adp1 = dp {
+        requires x [Nat]
+        provides c [Nat]
+
+        implemented-by code mocdp.dp.tests.inv_mult_plots.CounterDP(n=3)
+    }
+    
+    adp2 = dp {
+        requires x [Nat]
+        provides c [Nat]
+
+        implemented-by code mocdp.dp.tests.inv_mult_plots.CounterDP(n=2)
+    }
+
+    s = instance adp1 ^ adp2
+    
+    s.c >= s.x
+   
+    requires x for s
+}"""
+    )
+    N = Nat()
+    UNat = UpperSets(N)
+    dp = ndp.get_dp()
+    print dp
+    res = dp.solve(())
+    print res
+    UNat.check_equal(res, N.U(2))
 
 @comptest
 def check_loop_result4():
-    pass
+    # Exploration of 2 technologies,
+    # with two resources: money and time
+
+    ndp = parse_ndp("""
+mcdp {
+    adp1 = dp {
+        requires x [Nat]
+        provides c [Nat]
+
+        implemented-by code mocdp.dp.tests.inv_mult_plots.CounterDP(n=3)
+    }
+    
+    adp2 = dp {
+        requires x [Nat]
+        provides c [Nat]
+
+        implemented-by code mocdp.dp.tests.inv_mult_plots.CounterDP(n=2)
+    }
+    
+    t1 = mcdp {
+        provides c [Nat]
+        requires money [Nat]
+        requires time  [Nat]
+        w = instance adp1
+        c <= w.c
+        money >= nat:0 * w.x
+        time  >= nat:1 * w.x 
+    }
+
+    t2 = mcdp {
+        provides c [Nat]
+        requires money [Nat]
+        requires time  [Nat]
+        w = instance adp1
+        c <= w.c
+        money >= nat:1 * w.x
+        time  >= nat:0 * w.x 
+    }
+
+    s = instance t1 ^ t2
+    
+    s.c >= s.x
+   
+    requires x for s
+}"""
+    )
+    N = Nat()
+    UNat = UpperSets(N)
+    dp = ndp.get_dp()
+    print dp
+    res = dp.solve(())
+    print res
+    UNat.check_equal(res, N.U(2))
+
 
 @comptest
 def check_loop_result5():

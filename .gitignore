@@ -21,3 +21,4 @@ rafc-notebooks
 emergency.dot
 dist/PyMCDP-*.tar.gz
 sandbox
+*.prof

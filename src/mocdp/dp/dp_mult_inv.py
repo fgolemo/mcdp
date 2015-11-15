@@ -1,11 +1,9 @@
 from contracts import contract
-from mocdp.dp import PrimitiveDP
-from mocdp.posets import Poset  # @UnusedImport
-from mocdp.posets import PosetProduct, poset_minima
-import numpy as np
 from contracts.utils import check_isinstance
-from mocdp.posets.rcomp_units import RcompUnits
-from mocdp.posets.nat import Nat
+from mocdp.dp import PrimitiveDP
+from mocdp.posets import Nat, Poset  # @UnusedImport
+from mocdp.posets import PosetProduct, RcompUnits, poset_minima
+import numpy as np
 
 __all__ = [
     'InvMult2',

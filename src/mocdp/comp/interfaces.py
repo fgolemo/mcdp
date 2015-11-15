@@ -46,6 +46,18 @@ class NamedDP():
     def get_rnames(self):
         pass
 
+    def rindex(self, rn):
+        rnames = self.get_rnames()
+        if len(rnames) == 1:
+            return ()
+        return rnames.index(rn)
+
+    def findex(self, fn):
+        fnames = self.get_fnames()
+        if len(fnames) == 1:
+            return ()
+        return fnames.index(fn)
+
     @abstractmethod
     @contract(rname=str)
     def get_rtype(self, rname):

@@ -2,17 +2,16 @@
 from .parse_actions import plus_constantsN
 from .parts import CDPLanguage
 from contracts import contract
-from contracts.utils import raise_wrapped, raise_desc
+from contracts.utils import raise_desc, raise_wrapped
 from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.dp import GenericUnary, ProductN, SumN
-from mocdp.exceptions import DPSemanticError, DPInternalError
+from mocdp.dp import WrapAMap
+from mocdp.dp import SumNInt, SumNNat
+from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.parse_actions import inv_constant
 from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
-from mocdp.posets import Space, get_types_universe, mult_table, mult_table_seq
-from mocdp.posets.rcomp_units import RcompUnits
-from mocdp.posets.nat import Nat, Int
-from mocdp.dp.dp_sum import SumNNat, SumNInt
-from mocdp.dp.dp_generic_unary import WrapAMap
+from mocdp.posets import (Int, Nat, RcompUnits, Space, get_types_universe,
+    mult_table, mult_table_seq)
 CDP = CDPLanguage
 
 def eval_constant_divide(op, context):
@@ -143,7 +142,6 @@ def eval_MultN(x, context, wants_constant):
 
         # create multiplication for the resources
         R = mult_table_seq(resources_types)
-
         dp = ProductN(tuple(resources_types), R)
 
         from mocdp.lang.helpers import create_operation
@@ -160,15 +158,15 @@ def eval_MultN(x, context, wants_constant):
 @contract(r=CResource, c=ValueWithUnits)
 def get_mult_op(context, r, c):
     from mocdp.lang.parse_actions import MultValue
-    function = MultValue(c.value)
+    from mocdp.lang.helpers import create_operation
     rtype = context.get_rtype(r)
-    setattr(function, '__name__', '× %s' % (c.unit.format(c.value)))
 
     F = rtype
     R = mult_table(rtype, c.unit)
+    function = MultValue(c.value)
+    setattr(function, '__name__', '× %s' % (c.unit.format(c.value)))
     dp = GenericUnary(F, R, function)
 
-    from mocdp.lang.helpers import create_operation
     r2 = create_operation(context, dp, resources=[r],
                           name_prefix='_mult', op_prefix='_x',
                           res_prefix='_y')

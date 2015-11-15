@@ -5,17 +5,14 @@ from compmake.jobs.dependencies import isnamedtupleinstance
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
+from mocdp.comp.context import ValueWithUnits
 from mocdp.dp.dp_sum import sum_units
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mocdp.lang.namedtuple_tricks import get_copy_with_where
-from mocdp.posets import  Space, mult_table
+from mocdp.lang.utils_lists import make_list
+from mocdp.posets import RcompUnits, Space, mult_table
 from pyparsing import ParseException, ParseFatalException
 import functools
-
-from mocdp.comp.context import ValueWithUnits
-from mocdp.posets.rcomp_units import RcompUnits
-from mocdp.lang.utils_lists import make_list
-
 
 CDP = CDPLanguage
 

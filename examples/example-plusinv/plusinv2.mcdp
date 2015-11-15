@@ -1,0 +1,9 @@
+mcdp {
+    provides a [s]
+    
+    requires x [s]
+    requires y [s]
+    requires z [s]
+    
+    x + y * z >= a
+}

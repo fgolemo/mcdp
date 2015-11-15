@@ -1,0 +1,18 @@
+mcdp {
+	f = instance mcdp  {
+	    provides a [s]
+	    
+	    requires x [s]
+	    requires y [s]
+	    
+	    x + y >= a
+	}
+
+	provides z [s]
+
+	# x+y >=sqrt(x) + 0.5 * y + 10
+	f.a >= sqrt(f.x) + f.y * 0.5 [] + z 
+
+	requires x, y for f
+}
+ 
