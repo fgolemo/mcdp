@@ -31,13 +31,17 @@ class PrimitiveMeta(ABCMeta):
                                       F=F, f=f, self=self)
 
                     try:
-                        return solve(self, f)
+                        res = solve(self, f)
+                        return res
                     except NotBelongs as e:
                         raise_wrapped(NotBelongs, e,
                             'Solve failed.', self=self, f=f)
                     except NotImplementedError as e:
                         raise_wrapped(NotImplementedError, e,
                             'Solve not implemented for class %s.' % name)
-                    return f
+                    except Exception as e:
+                        raise_wrapped(Exception, e,
+                            'Solve failed', f=f, self=self)
+
 
                 setattr(cls, 'solve', solve2)

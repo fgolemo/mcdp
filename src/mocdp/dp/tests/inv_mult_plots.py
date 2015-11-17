@@ -584,6 +584,8 @@ mcdp {
 }"""
     )
     dp = ndp.get_dp()
+    R = dp.get_res_space()
+    UR = UpperSets(R)
     print dp
     print dp.repr_long()
     f0 = ()
@@ -595,9 +597,12 @@ mcdp {
     res2 = trace.get_r_sequence()[-1]
     print('res2: %s' % res2)
 
-@comptest
-def check_loop_result5():
+    solution = R.Us([(0, 7), (3, 6), (4, 4), (6, 3), (7, 0)])
+    UR.check_equal(res1, solution)
+    UR.check_equal(res2, solution)
 
+
+def get_simple_equiv():
     class RoundSqrt(Map):
         def __init__(self):
             Map.__init__(self, Nat(), Nat())
@@ -616,8 +621,13 @@ def check_loop_result5():
     print s1
     dp0 = wrap_series(s1.get_fun_space(), [s0, s1, s2, s3, s4])
     dp = make_loop(dp0)
-    print dp.repr_long()
+    return dp0, dp
 
+@comptest
+def check_loop_result5c():
+
+    dp0, dp = get_simple_equiv()
+    print dp.repr_long()
 
     res = dp.solve(())
     print res
@@ -674,7 +684,7 @@ def check_loop_result5():
     check_feasible((1, 7))
     check_feasible((10, 10))
 
-    result = dp.solve2(())
+    result = dp.solve_trace(())
     for i, r in enumerate(result):
         print('%d: %s' % (i, UR.format(r.s)))
         print('converged: %s' % str(r.converged))
@@ -699,8 +709,25 @@ def check_loop_result5():
         except NotEqual as e:
             print e
 
+@comptest
+def check_loop_result5():
+    dp0, dp = get_simple_equiv()
+    print dp.repr_long()
 
+    dp0, dp = get_simple_equiv()
 
-    # UR.check_equal(result, R.Us(solutions))
+    R = dp0.get_res_space()
 
+    S, alpha, beta = dp.get_normal_form()
+    One = PosetProduct(())
+    uf = One.U(())
+    s0 = S.get_bottom()
+    ss = [s0]
+    for i in range(4):
+        snext = beta((uf, ss[-1]))
+        ss.append(snext)
+        print('S[%d]: %s' % (i + 1, S.format(snext)))
+    print('S: %s' % S)
+    print('α: %s' % alpha)
+    print('β: %s' % beta)
 

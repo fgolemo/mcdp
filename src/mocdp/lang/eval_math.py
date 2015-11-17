@@ -4,9 +4,7 @@ from .parts import CDPLanguage
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.comp.context import CResource, ValueWithUnits
-from mocdp.dp import GenericUnary, ProductN, SumN
-from mocdp.dp import WrapAMap
-from mocdp.dp import SumNInt, SumNNat
+from mocdp.dp import GenericUnary, ProductN, SumN, SumNInt, SumNNat, WrapAMap
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.parse_actions import inv_constant
 from mocdp.lang.utils_lists import get_odd_ops, unwrap_list

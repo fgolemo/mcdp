@@ -1,31 +1,20 @@
 # -*- coding: utf-8 -*-
+from .dp_flatten import Mux
+from .dp_identity import Identity
 from .primitive import PrimitiveDP
 from contracts.utils import indent, raise_desc, raise_wrapped
-from mocdp.dp.primitive import NormalForm, NotFeasible, Feasible
-from mocdp.posets import Map, PosetProduct, UpperSets
+from mocdp.dp.primitive import Feasible, NormalForm, NotFeasible
 from mocdp.exceptions import DPInternalError, do_extra_checks
-from mocdp.posets import SpaceProduct
-from .dp_identity import Identity
-from .dp_flatten import Mux
-from mocdp.posets import get_product_compact
+from mocdp.posets import (Map, PosetProduct, SpaceProduct, UpperSets,
+    get_product_compact)
 
 
 __all__ = [
     'Series',
     'Series0',
 ]
-#
-# def only_one_r_from_f():
-#     """ This is the test that makes sure we
-#  if isinstance(self.dp1, (Mux, Identity)):
-#
-# def do_not_create_intermediate_M(dp1):
-#     from mocdp.lang.parts import GenericNonlinearity
-#     if isinstance(dp1, (Mux, Identity, GenericNonlinearity)):
-#         return True
-#     if isinstance(dp1, Parallel0):
-#         return do
-#
+
+
 class Series0(PrimitiveDP):
 
     def __init__(self, dp1, dp2):
@@ -229,7 +218,6 @@ class Series0(PrimitiveDP):
         for u in u1.minimals:
             v = self.dp2.solve(u)
             mins.update(v.minimals)
-            
 
         ressp = self.get_res_space()
         minimals = poset_minima(mins, ressp.leq)

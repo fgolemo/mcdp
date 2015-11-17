@@ -14,6 +14,7 @@ from quickapp import QuickAppBase
 from reprep import Report
 import logging
 import os
+from decent_params.utils.script_utils import UserError
 
 
 class ExpectationsNotMet(Exception):
@@ -34,7 +35,7 @@ class SolveDP(QuickAppBase):
         params.add_flag('plot', help='Show iterations graphically')
         params.add_flag('imp', help='Compute and show implementations.')
 
-        params.add_flag('direct', help='Solve by direct iteration')
+        params.add_flag('advanced', help='Solve by advanced solver (in development)')
 
     def go(self):
         from conf_tools import logger
@@ -58,7 +59,6 @@ class SolveDP(QuickAppBase):
         else:
             out = options.out
 
-
         params = params[1:]
 
         s = open(filename).read()
@@ -67,21 +67,29 @@ class SolveDP(QuickAppBase):
         fnames = ndp.get_fnames()
 
         F = dp.get_fun_space()
+        R = dp.get_res_space()
+        UR = UpperSets(R)
 
         if len(params) > 1:
             fg = interpret_params(params, fnames, F)
-        else:
+        elif len(params) == 1:
             p = params[0]
             fg = interpret_params_1string(p, F)
+        else:
+            tu = get_types_universe()
+            if tu.equal(F, PosetProduct(())):
+                fg = ()
+            else:
+                msg = 'Please specify query parameter.'
+                raise_desc(UserError, msg, F=F)
 
         print('query: %s' % F.format(fg))
         max_steps = options.max_steps
 
-        if options.direct:
-            print dp
-            dp0 = dp.dp1
+        if not options.advanced:
+
             res = dp.solve(fg)
-            print('results: %s' % str(res))
+            print('results: %s' % UR.format(res))
             # trace = generic_solve_by_loop(dp0, f=fg, max_steps=max_steps)
 
         else:
@@ -101,7 +109,8 @@ class SolveDP(QuickAppBase):
             except:
                 raise
 
-        nres = len(sr[-1].minimals)
+        UR.belongs(res)
+        nres = len(res.minimals)
         if options.expect_nres is not None:
             if nres != options.expect_nres:
                 msg = 'Found wrong number of resources'
@@ -111,7 +120,7 @@ class SolveDP(QuickAppBase):
         if options.imp:
             M = dp.get_imp_space_mod_res()
             nimplementations = 0
-            for r in sr[-1].minimals:
+            for r in res.minimals:
                 ms = dp.get_implementations_f_r(f=fg, r=r)
                 nimplementations += len(ms)
                 s = 'r = %s ' % R.format(r)
@@ -126,6 +135,9 @@ class SolveDP(QuickAppBase):
                                nimplementations=nimplementations)
 
         if options.plot:
+            if not options.advanced:
+                msg = 'Need advanced solver to use plot feature.'
+                raise UserError(msg)
             r = Report()
             generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0))
 

@@ -90,7 +90,7 @@ def define_test_for(context, filename, basename, known_failure=False):
     outdir = os.path.join(outdir, 'out')
 
     tests = get_marked_tests(filename)
-    print('tests for %s: %s' % (filename , tests))
+    # print('tests for %s: %s' % (filename , tests))
     
     for test in tests:
         n = test.__name__.replace('assert_', '').replace('_ndp', '')

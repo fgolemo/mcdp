@@ -166,12 +166,11 @@ def eval_rvalue(rvalue, context):
                 R = F
                 dp = GenericUnary(F=F, R=R, function=function)
             elif isinstance(F, Nat):
-                m = RoundAfter(function, dom=Nat(), cod=Nat())
+                m = CeilAfter(function, dom=Nat(), cod=Nat())
                 dp = WrapAMap(m)
             else:
                 msg = 'Cannot create unary operator'
                 raise_desc(DPInternalError, msg, function=function, F=F)
-                
 
             fnames = context.new_fun_name('s')
             name = context.new_name(function.__name__)
@@ -193,7 +192,7 @@ def eval_rvalue(rvalue, context):
             raise DPSemanticError(str(e), where=rvalue.where)
         raise e
 
-class RoundAfter(Map):
+class CeilAfter(Map):
     """ Applies a function and rounds it to int. """
 
     def __init__(self, f, dom, cod):
@@ -204,11 +203,11 @@ class RoundAfter(Map):
         if np.isinf(x):
             return self.cod.get_top()
         
-        y = self.f(x)
+        y = self.f(x * 1.0)
         if np.isinf(y):
             return self.cod.get_top()
         
-        y = int(np.round(y))
+        y = int(np.ceil(y))
         return y
 
 
