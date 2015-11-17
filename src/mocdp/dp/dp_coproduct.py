@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
-from contracts.utils import indent, raise_desc
-from mocdp.posets import poset_minima
-
 from contracts import contract
-from mocdp.posets.types_universe import get_types_universe
-from mocdp.posets.space import NotEqual, NotBelongs
-from mocdp.posets.category_coproduct import Coproduct1
-from mocdp.dp.primitive import NotFeasible
+from contracts.utils import indent, raise_desc
+from mocdp.dp.primitive import NotFeasible, NormalForm
 from mocdp.exceptions import do_extra_checks
+from mocdp.posets import poset_minima
+from mocdp.posets.category_coproduct import Coproduct1
+from mocdp.posets import NotBelongs, NotEqual
+from mocdp.posets.types_universe import get_types_universe
+from mocdp.posets.poset_product import PosetProduct
+from mocdp.posets.uppersets import UpperSets, UpperSet
+from mocdp.posets.space import Map
+from mocdp.posets.poset_coproduct import PosetCoproduct
+
 
 
 __all__ = [
@@ -109,84 +113,80 @@ class CoProductDP(PrimitiveDP):
             s += '\n' + indent(r1, '. ', first='^ ')
         return s
 #
-#     def get_normal_form(self):
-#         """
-#
-#             alpha1: U(F1) x S1 -> U(R1)
-#             beta1:  U(F1) x S1 -> S1
-#
-#             alpha2: U(F2) x S2 -> U(R2)
-#             beta2:  U(R2) x S2 -> S2
-#
-#         """
-#
-#         S1, alpha1, beta1 = self.dp1.get_normal_form()
-#         S2, alpha2, beta2 = self.dp2.get_normal_form()
-#
-#         S, pack, unpack = get_product_compact(S1, S2)
-#
-#         F = self.get_fun_space()
-#         R = self.get_res_space()
-#         F1 = F[0]
-#         # R1 = R[0]
-#         F2 = F[1]
-#         # R2 = R[1]
-#         UF = UpperSets(F)
-#         UR = UpperSets(R)
-#
-#         D = PosetProduct((UF, S))
-#         """
-#             alpha: U(F1xF2) x (S1xS2) -> U(R1xR2)
-#             beta : U(F1xF2) x (S1xS2) -> (S1xS2)
-#         """
-#         class SeriesAlpha(Map):
-#             def __init__(self, dp):
-#                 self.dp = dp
-#                 dom = D
-#                 cod = UR
-#                 Map.__init__(self, dom, cod)
-#
-#             def _call(self, x):
-#                 (uf, s) = x
-#                 (s1, s2) = unpack(s)
-#
-#                 res = set()
-#                 for f1, f2 in uf.minimals:
-#
-#                     uf1 = UpperSet(set([f1]), F1)
-#                     ur1 = alpha1((uf1, s1))
-#
-#                     uf2 = UpperSet(set([f2]), F2)
-#                     ur2 = alpha2((uf2, s2))
-#
-#                     # now I need to take all combinations
-#                     for a, b in itertools.product(ur1.minimals, ur2.minimals):
-#                         res.add((a, b))
-#                 # now take the minimal
-#                 resm = poset_minima(res, R.leq)
-#                 r = UpperSet(resm, R)
-#                 return r
-#
-#         """
-#             alpha: U(F1xF2) x (S1xS2) -> U(R1xR2)
-#             beta : U(F1xF2) x (S1xS2) -> (S1xS2)
-#         """
-#         class SeriesBeta(Map):
-#             def __init__(self, dp):
-#                 self.dp = dp
-#                 dom = D
-#                 cod = S
-#                 Map.__init__(self, dom, cod)
-#
-#             def _call(self, x):
-#                 (uf, s) = x
-#                 (s1, s2) = unpack(s)
-#
-#                 # now need to project down
-#                 uf1, uf2 = upperset_project_two(F, uf)
-#
-#                 s1p = beta1((uf1, s1))
-#                 s2p = beta2((uf2, s2))
-#                 return pack(s1p, s2p)
-#
-#         return NormalForm(S, SeriesAlpha(self), SeriesBeta(self))
+    def get_normal_form(self):
+        """
+
+            alpha1: U(F) x S1 -> U(R)
+            beta1:  U(F) x S1 -> S1
+
+            ...
+            
+            alphaN: U(F) x SN -> U(R)
+            betaN:  U(R) x SN -> SN
+            
+            S = S1 ^ S2 ^ ... ^ SN
+            
+            alpha: U(F) x (S) -> U(R)
+            beta : U(F) x (S) -> (S)
+
+        """
+        
+        nf = [dp.get_normal_form() for dp in self.dps]
+        
+        Ss = [_.S for _ in nf]
+        S = PosetProduct(tuple(Ss))
+        print('S: %s' % S)
+
+        F = self.get_fun_space()
+        R = self.get_res_space()
+
+        UF = UpperSets(F)
+        UR = UpperSets(R)
+
+        D = PosetProduct((UF, S))
+        """
+            D = U(F) x S
+            alpha: U(F) x S -> U(R)
+            beta : U(F) x S -> (S)
+        """
+        class CPAlpha(Map):
+            def __init__(self, dp):
+                self.dp = dp
+                dom = D
+                cod = UR
+                Map.__init__(self, dom, cod)
+
+            def _call(self, x):
+                (uf, s) = x
+                
+                uris = []
+                for i, si in enumerate(s):
+                    uri = nf[i].alpha((uf, si))
+                    uris.append(uri)
+
+                res = set()
+                for _ in uris:
+                    res.update(_.minimals)
+                resm = poset_minima(res, R.leq)
+                r = UpperSet(resm, R)
+                return r
+
+        class CPBeta(Map):
+            def __init__(self, dp):
+                self.dp = dp
+                dom = D
+                cod = S
+                Map.__init__(self, dom, cod)
+
+            def _call(self, x):
+                (uf, s) = x
+
+                res = []
+                for i, si in enumerate(s):
+
+                    sn = nf[i].beta((uf, si))
+                    res.append(sn)
+
+                return tuple(res)
+
+        return NormalForm(S, CPAlpha(self), CPBeta(self))

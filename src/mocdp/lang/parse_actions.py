@@ -4,7 +4,7 @@ from .utils import parse_action
 from compmake.jobs.dependencies import isnamedtupleinstance
 from contracts import contract
 from contracts.interface import Where
-from contracts.utils import indent, raise_desc, raise_wrapped
+from contracts.utils import indent, raise_desc, raise_wrapped, check_isinstance
 from mocdp.comp.context import ValueWithUnits
 from mocdp.dp.dp_sum import sum_units
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
@@ -185,6 +185,8 @@ class PlusType():
 class PlusValue():
 
     def __init__(self, F, R, c):
+        check_isinstance(F, RcompUnits)
+        check_isinstance(c.unit, RcompUnits)
         self.F = F
         self.c = c
         c.unit

@@ -129,6 +129,8 @@ class SumN(PrimitiveDP):
 
 # Fs: sequence of Rcompunits
 def sum_units(Fs, values, R):
+    for Fi in Fs:
+        check_isinstance(Fi, RcompUnits)
     res = 0.0
     for Fi, x in zip(Fs, values):
         if Fi.equal(x, Fi.get_top()):
@@ -188,8 +190,6 @@ def check_sum_units_compatible(Fs):
         msg = "Units not compatible: "
         msg += '\n' + "\n".join(str(e) for e in errors)
         raise SumUnitsNotCompatible(msg)
-
-
 
 
 class Product(PrimitiveDP):

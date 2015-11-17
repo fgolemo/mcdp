@@ -5,6 +5,7 @@ from mocdp.dp.primitive import Feasible, NotFeasible
 from mocdp.posets import Map, NotLeq, PosetProduct, UpperSet, UpperSets
 from mocdp.posets.utils import poset_minima
 import itertools
+from collections import namedtuple
 
 
 __all__ = [
@@ -333,7 +334,7 @@ class DPLoop0(PrimitiveDP):
             u = poset_minima(solutions, R.leq)
 
             res = R.Us(u)
-            print('fixed point of iterations: %s' % UR.format(res))
+            # print('iterations: %s' % UR.format(res))
             return res
  
 
@@ -341,12 +342,13 @@ class DPLoop0(PrimitiveDP):
         # we start from the bottom
         s0 = UR.get_bottom()
 
+        print('Iterating in UR = %s' % UR)
+        print('Starting from %s' % UR.format(s0))
         S = [s0]
-            
         for i in range(100):  # XXX
             si = S[-1]
             sip = iterate(si, enforce_constraint=False)
-
+            print('iteration %d: %s' % (i, sip))
             try:
                 UR.check_leq(si, sip)
             except NotLeq as e:
@@ -374,6 +376,77 @@ class DPLoop0(PrimitiveDP):
         # return res
 
 
+    def solve2(self, f1):
+        F = self.dp1.get_fun_space()
+        F1 = F[0]
+        F1.belongs(f1)
+        R = self.dp1.get_res_space()
+
+        UR = UpperSets(R)
+
+        def iterate(si):
+            """ Returns the next iteration """
+            # compute the product
+            UR.belongs(si)
+
+            def solve1(f2):
+                result = set()
+                res = self.dp1.solve((f1, f2))
+                for r in res.minimals:
+                    if R.leq(f2, r):
+                        # f1  ->|    | r
+                        #       | dp1|----->
+                        # f2 |->|____|   |
+                        #     `----(>=)--/
+                        result.add(r)
+                return R.Us(result)
+
+            solutions = set()
+            converged = set()  # subset of solutions for which they converged
+            # for each f2 in si
+            for f2 in si.minimals:
+                # what are the results of solve(f1, f2)?
+                result = solve1(f2)
+                # print('f2 = %s -> %s' % (f2, UR.format(result)))
+                solutions.update(result.minimals)
+                if f2 in result.minimals:
+                    converged.add(f2)
+
+            if not solutions:
+                print('No viable solutions asking f1 = %s and si = %s' % (f1, si))
+            u = poset_minima(solutions, R.leq)
+
+            res = R.Us(u)
+            # print('iterations: %s' % UR.format(res))
+            return res, converged
+
+
+        # we consider a set of iterates
+        # we start from the bottom
+        s0 = UR.get_bottom()
+
+        print('Iterating in UR = %s' % UR)
+        print('Starting from %s' % UR.format(s0))
+
+        S = [Iteration(s=s0, converged=set())]
+        for i in range(100):  # XXX
+            si = S[-1].s
+            sip, converged = iterate(si)
+            print('it %d: %s' % (i, sip))
+            try:
+                UR.check_leq(si, sip)
+            except NotLeq as e:
+                msg = 'Loop iteration invariant not satisfied.'
+                raise_wrapped(Exception, e, msg, si=si, sip=sip, dp=self.dp1)
+
+            S.append(Iteration(s=sip, converged=converged))
+
+            if UR.leq(sip, si):
+                print('Breaking because converged (iteration %s) ' % i)
+                print(' solution is %s %s' % (UR.format(sip), type(sip)))
+                break
+
+        return S
                         
-                        
+Iteration = namedtuple('Iteration', 's converged')
                         

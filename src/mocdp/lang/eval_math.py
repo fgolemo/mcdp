@@ -169,7 +169,7 @@ def get_mult_op(context, r, c):
         function = MultValue(c.value)
         setattr(function, '__name__', '× %s' % (c.unit.format(c.value)))
         dp = GenericUnary(F, R, function)
-    if isinstance(rtype, Nat) and isinstance(c.unit, Nat):
+    elif isinstance(rtype, Nat) and isinstance(c.unit, Nat):
         amap = MultNat(c.value)
         dp = WrapAMap(amap)
     else:
@@ -193,6 +193,21 @@ class MultNat(Map):
         res = x * self.value
         assert isinstance(res, int), res
         return res
+
+class PlusNat(Map):
+    @contract(value=int)
+    def __init__(self, value):
+        self.value = value
+        self.N = Nat()
+        Map.__init__(self, dom=self.N, cod=self.N)
+    def _call(self, x):
+        if self.N.equal(self.N.get_top(), x):
+            return x
+        # TODO: check overflow
+        res = x + self.value
+        assert isinstance(res, int), res
+        return res
+
 
 def flatten_plusN(ops):
     res = []
@@ -275,11 +290,20 @@ def get_plus_op(context, r, c):
 
     rtype = context.get_rtype(r)
 
-    F = rtype
-    R = rtype
-    function = PlusValue(F=F, R=R, c=c)
-    setattr(function, '__name__', '+ %s' % (c.unit.format(c.value)))
-    dp = GenericUnary(F, R, function)  # XXX
+    if isinstance(rtype, RcompUnits) and  isinstance(c.unit, RcompUnits):
+        F = rtype
+        R = rtype
+        function = PlusValue(F=F, R=R, c=c)
+        setattr(function, '__name__', '+ %s' % (c.unit.format(c.value)))
+        dp = GenericUnary(F, R, function)  # XXX
+    elif isinstance(rtype, Nat) and isinstance(c.unit, Nat):
+        amap = PlusNat(c.value)
+        dp = WrapAMap(amap)
+    else:
+        msg = 'Cannot create addition operation.'
+        raise_desc(DPInternalError, msg, rtype=rtype, c=c)
+
+
     # TODO: dp = WrapAMap(map)
 
     from mocdp.lang.helpers import create_operation

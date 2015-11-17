@@ -66,7 +66,8 @@ class RuleSimplifyLift(SeriesSimplificationRule):
             return False
 
         coords = dp1.coords
-        assert isinstance(coords, list) and len(coords) == 2
+        if not (isinstance(coords, list) and len(coords) == 2):
+            return False
         if isinstance(coords[1], list) and len(coords[1]) == 1:
             return True
 
@@ -108,7 +109,8 @@ class RuleSimplifyLiftB(SeriesSimplificationRule):
             return False
 
         coords = dp1.coords
-        assert isinstance(coords, list) and len(coords) == 2
+        if not(isinstance(coords, list) and len(coords) == 2):
+            return False
         if isinstance(coords[0], list) and len(coords[0]) == 1:
             return True
 

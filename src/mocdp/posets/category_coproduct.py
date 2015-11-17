@@ -5,7 +5,7 @@ from contracts.utils import raise_wrapped, raise_desc
 
 class Coproduct1(Space):
     """
-        The coproduct of two spaces A, B
+        The coproduct of spaces A, B
         
         is represented as tuples of the kind
         

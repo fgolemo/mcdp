@@ -7,14 +7,14 @@ from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
 from mocdp.comp.context import CFunction, CResource, NoSuchMCDPType
 from mocdp.configuration import get_conftools_nameddps
-from mocdp.dp import GenericUnary, Identity
+from mocdp.dp import Identity
 from mocdp.dp.dp_catalogue import CatalogueDP
+from mocdp.dp.dp_generic_unary import WrapAMap
 from mocdp.dp.dp_series_simplification import make_series
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
 from mocdp.posets import NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.posets.any import Any
-from mocdp.dp.dp_generic_unary import WrapAMap
 
 CDP = CDPLanguage
 

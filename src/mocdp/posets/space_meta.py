@@ -29,7 +29,7 @@ def decorate_belongs(f):
             f(self, x)
         except NotBelongs as e:
             msg = 'Point does not belong to space.'
-            raise_wrapped(NotBelongs, e, msg, space=self, x=x)
+            raise_wrapped(NotBelongs, e, msg, space=self, x=x, compact=True)
         return f
     return bel
 

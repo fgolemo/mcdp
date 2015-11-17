@@ -188,9 +188,46 @@ class PrimitiveDP(WithInternalLog):
             alpha: U(F) x S -> U(R)
             beta:  U(F) x S -> S 
         """
+        One = PosetProduct(())
+#         UOne = UpperSets(One)
+#         S = UOne
+        S = One
+
+        class DefaultAlphaMap(Map):
+            def __init__(self, dp):
+                self.dp = dp
+                F = dp.get_fun_space()
+                R = dp.get_res_space()
+                UF = UpperSets(F)
+                dom = PosetProduct((UF, S))
+                cod = UpperSets(R)
+                Map.__init__(self, dom, cod)
+
+            def _call(self, x):
+                F, _s = x
+                Res = self.dp.solveU(F)
+                return Res
+
+
+        class DefaultBeta(Map):
+            def __init__(self, dp):
+                self.dp = dp
+                F = dp.get_fun_space()
+                UF = UpperSets(F)
+                dom = PosetProduct((UF, S))
+                cod = S
+                Map.__init__(self, dom, cod)
+
+            def _call(self, x):
+                _F, s = x
+
+                # print('Beta() for %s' % (self.dp))
+                # print(' f = %s s = %s -> unchanged ' % (_F, s))
+                return s
+
         alpha = DefaultAlphaMap(self)
         beta = DefaultBeta(self)
-        S = PosetProduct(())
+
         return NormalForm(S=S, alpha=alpha, beta=beta)
 
     def get_normal_form_approx(self):
@@ -251,39 +288,6 @@ NormalForm = namedtuple('NormalForm', ['S', 'alpha', 'beta'])
 NormalFormApprox = namedtuple('NormalFormApprox', ['S', 'gamma', 'delta'])
 
 
-class DefaultAlphaMap(Map):
-    def __init__(self, dp):
-        self.dp = dp
-        F = dp.get_fun_space()
-        R = dp.get_res_space()
-        UF = UpperSets(F)
-        S = PosetProduct(())
-        dom = PosetProduct((UF, S))
-        cod = UpperSets(R)
-        Map.__init__(self, dom, cod)
-
-    def _call(self, x):
-        F, _s = x
-        Res = self.dp.solveU(F)
-        return Res
-
-
-class DefaultBeta(Map):
-    def __init__(self, dp):
-        self.dp = dp
-        F = dp.get_fun_space()
-        UF = UpperSets(F)
-
-        S = PosetProduct(())
-        dom = PosetProduct((UF, S))
-        cod = S
-        Map.__init__(self, dom, cod)
-
-    def _call(self, x):
-        _F, s = x
-        # print('Beta() for %s' % (self.dp))
-        # print(' f = %s s = %s -> unchanged ' % (_F, s))
-        return s
 
 
 class DefaultGamma(Map):
