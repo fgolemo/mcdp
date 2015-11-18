@@ -38,19 +38,17 @@ class UpperSet():
     def get_poset(self):
         return self.P
 
-    def __repr__old(self):  # ≤  ≥
-        contents = " v ".join("x ≥ %s" % self.P.format(m)
-                        for m in sorted(self.minimals))
-
-        return "{x ∣ %s }" % contents
-#         return "∪".join("{x∣ x ≥ %s}" % self.P.format(m)
-#                         for m in self.minimals)
+#     def __repr__old(self):  # ≤  ≥
+#         contents = " v ".join("x ≥ %s" % self.P.format(m)
+#                         for m in sorted(self.minimals))
+#
+#         return "{x ∣ %s }" % contents
 
     def __repr__(self):
         contents = ", ".join(self.P.format(m)
                         for m in sorted(self.minimals))
 
-        return "↑{%s})" % contents
+        return "↑{%s}" % contents
 
 
 class UpperSets(Poset):
@@ -85,7 +83,6 @@ class UpperSets(Poset):
         return map(f, chain)
 
     def belongs(self, x):
-#         check_isinstance(x, UpperSet)
         if not isinstance(x, UpperSet):
             msg = 'Not an upperset: %s' % x.__repr__()
             raise NotBelongs(msg)
