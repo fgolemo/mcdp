@@ -2,17 +2,15 @@
 from .parse_actions import plus_constantsN
 from .parts import CDPLanguage
 from contracts import contract
-from contracts.utils import raise_wrapped, raise_desc
+from contracts.utils import raise_desc, raise_wrapped
 from mocdp.comp.context import CResource, ValueWithUnits
-from mocdp.dp import GenericUnary, ProductN, SumN
-from mocdp.exceptions import DPSemanticError, DPInternalError
+from mocdp.dp import GenericUnary, ProductN, SumN, SumNInt, SumNNat, WrapAMap
+from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.parse_actions import inv_constant
 from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
-from mocdp.posets import Space, get_types_universe, mult_table, mult_table_seq
-from mocdp.posets.rcomp_units import RcompUnits
-from mocdp.posets.nat import Nat, Int
-from mocdp.dp.dp_sum import SumNNat, SumNInt
-from mocdp.dp.dp_generic_unary import WrapAMap
+from mocdp.posets import (Int, Nat, RcompUnits, Space, get_types_universe,
+    mult_table, mult_table_seq)
+from mocdp.posets.space import Map
 CDP = CDPLanguage
 
 def eval_constant_divide(op, context):
@@ -143,7 +141,6 @@ def eval_MultN(x, context, wants_constant):
 
         # create multiplication for the resources
         R = mult_table_seq(resources_types)
-
         dp = ProductN(tuple(resources_types), R)
 
         from mocdp.lang.helpers import create_operation
@@ -160,19 +157,54 @@ def eval_MultN(x, context, wants_constant):
 @contract(r=CResource, c=ValueWithUnits)
 def get_mult_op(context, r, c):
     from mocdp.lang.parse_actions import MultValue
-    function = MultValue(c.value)
-    rtype = context.get_rtype(r)
-    setattr(function, '__name__', '× %s' % (c.unit.format(c.value)))
-
-    F = rtype
-    R = mult_table(rtype, c.unit)
-    dp = GenericUnary(F, R, function)
-
     from mocdp.lang.helpers import create_operation
+    rtype = context.get_rtype(r)
+
+    # Case 1: rcompunits, rcompunits
+    if isinstance(rtype, RcompUnits) and  isinstance(c.unit, RcompUnits):
+        F = rtype
+        R = mult_table(rtype, c.unit)
+        function = MultValue(c.value)
+        setattr(function, '__name__', '× %s' % (c.unit.format(c.value)))
+        dp = GenericUnary(F, R, function)
+    elif isinstance(rtype, Nat) and isinstance(c.unit, Nat):
+        amap = MultNat(c.value)
+        dp = WrapAMap(amap)
+    else:
+        msg = 'Cannot create multiplication operation.'
+        raise_desc(DPInternalError, msg, rtype=rtype, c=c)
     r2 = create_operation(context, dp, resources=[r],
                           name_prefix='_mult', op_prefix='_x',
                           res_prefix='_y')
     return r2
+
+class MultNat(Map):
+    @contract(value=int)
+    def __init__(self, value):
+        self.value = value
+        self.N = Nat()
+        Map.__init__(self, dom=self.N, cod=self.N)
+    def _call(self, x):
+        if self.N.equal(self.N.get_top(), x):
+            return x
+        # TODO: check
+        res = x * self.value
+        assert isinstance(res, int), res
+        return res
+
+class PlusNat(Map):
+    @contract(value=int)
+    def __init__(self, value):
+        self.value = value
+        self.N = Nat()
+        Map.__init__(self, dom=self.N, cod=self.N)
+    def _call(self, x):
+        if self.N.equal(self.N.get_top(), x):
+            return x
+        # TODO: check overflow
+        res = x + self.value
+        assert isinstance(res, int), res
+        return res
 
 
 def flatten_plusN(ops):
@@ -256,11 +288,20 @@ def get_plus_op(context, r, c):
 
     rtype = context.get_rtype(r)
 
-    F = rtype
-    R = rtype
-    function = PlusValue(F=F, R=R, c=c)
-    setattr(function, '__name__', '+ %s' % (c.unit.format(c.value)))
-    dp = GenericUnary(F, R, function)  # XXX
+    if isinstance(rtype, RcompUnits) and  isinstance(c.unit, RcompUnits):
+        F = rtype
+        R = rtype
+        function = PlusValue(F=F, R=R, c=c)
+        setattr(function, '__name__', '+ %s' % (c.unit.format(c.value)))
+        dp = GenericUnary(F, R, function)  # XXX
+    elif isinstance(rtype, Nat) and isinstance(c.unit, Nat):
+        amap = PlusNat(c.value)
+        dp = WrapAMap(amap)
+    else:
+        msg = 'Cannot create addition operation.'
+        raise_desc(DPInternalError, msg, rtype=rtype, c=c)
+
+
     # TODO: dp = WrapAMap(map)
 
     from mocdp.lang.helpers import create_operation

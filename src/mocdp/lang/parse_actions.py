@@ -4,18 +4,16 @@ from .utils import parse_action
 from compmake.jobs.dependencies import isnamedtupleinstance
 from contracts import contract
 from contracts.interface import Where
-from contracts.utils import indent, raise_desc, raise_wrapped
+from contracts.utils import indent, raise_desc, raise_wrapped, check_isinstance
+from mocdp.comp.context import ValueWithUnits
 from mocdp.dp.dp_sum import sum_units
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mocdp.lang.namedtuple_tricks import get_copy_with_where
-from mocdp.posets import  Space, mult_table
+from mocdp.lang.utils_lists import make_list
+from mocdp.posets import RcompUnits, Space, mult_table
 from pyparsing import ParseException, ParseFatalException
 import functools
-
-from mocdp.comp.context import ValueWithUnits
-from mocdp.posets.rcomp_units import RcompUnits
-from mocdp.lang.utils_lists import make_list
-
+import os
 
 CDP = CDPLanguage
 
@@ -188,6 +186,8 @@ class PlusType():
 class PlusValue():
 
     def __init__(self, F, R, c):
+        check_isinstance(F, RcompUnits)
+        check_isinstance(c.unit, RcompUnits)
         self.F = F
         self.c = c
         c.unit
@@ -216,6 +216,14 @@ def plus_inv_parse_action(tokens):
     tokens = list(tokens[0])
     ops = make_list(tokens)
     return CDP.InvPlus(ops, where=ops.where)
+
+def parse_wrap_filename(expr, filename):
+    with open(filename) as f:
+        contents = f.read()
+    try:
+        return parse_wrap(expr, contents)
+    except (DPSyntaxError, DPSemanticError) as e:
+        raise e.with_filename(filename)
 
 def parse_wrap(expr, string):
     # Nice trick: the removE_comments doesn't change the number of lines
@@ -248,8 +256,20 @@ def remove_comments(s):
             return line
     return "\n".join(map(remove_comment, lines))
 
+def parse_ndp_filename(filename):
+    """ Reads the file and returns as NamedDP.
+        The exception are annotated with filename. """
+    with open(filename) as f:
+        contents = f.read()
+    try:
+        return parse_ndp(contents)
+    except (DPSyntaxError, DPSemanticError) as e:
+        raise e.with_filename(filename)
+
 # @contract(returns=NamedDP)
 def parse_ndp(string):
+    if os.path.exists(string):
+        raise ValueError('expected string, not filename :%s' % string)
     from mocdp.lang.syntax import Syntax
     v = parse_wrap(Syntax.dp_rvalue, string)[0]
 

@@ -6,14 +6,8 @@ from mocdp.exceptions import DPSyntaxError
 from pint import UnitRegistry
 from pint.unit import UndefinedUnitError
 import functools
+from contracts import contract
 
-# __all__ = [
-#    'RcompUnits',
-#    'ureg',
-#    'make_rcompunit',
-#     'mult_table',
-#     'mult_table_seq',
-# ]
 
 class MyUnitRegistry(UnitRegistry):
     def __init__(self, *args, **kwargs):
@@ -141,47 +135,10 @@ R_Voltage = make_rcompunit('V')
 def mult_table_seq(seq):
     return functools.reduce(mult_table, seq)
 
+@contract(a=RcompUnits, b=RcompUnits)
 def mult_table(a, b):
     unit2 = a.units * b.units
     return RcompUnits(unit2)
-#
-#     if a == R_dimensionless:
-#         return b
-#     if b == R_dimensionless:
-#         return a
-#
-#     options = {
-#         (R_Time, R_Power): R_Energy,
-#         (R_Current, R_Voltage): R_Power,
-#         (R_dimensionless, R_dimensionless): R_dimensionless,
-#
-#     }
-#
-#     def search_by_equality(x):
-#         for k, v in options.items():
-#             if k == x and (k[0].units == x[0].units) and (k[1].units == x[1].units):
-#                 return v
-#         return None
-#
-#     o1 = search_by_equality((a, b))
-#     if o1 is not None:
-#         return o1
-#     o2 = search_by_equality((b, a))
-#     if o2 is not None:
-#         return o2
-#
-#     msg = 'Cannot find the product of %r with %r.' % (a, b)
-#
-#     msg += '\nKnown multiplication table:\n'
-#     for (m1, m2), res in options.items():
-#         msg += '\n   %10s x %10s = %10s' % (m1, m2, res)
-#
-#     raise ValueError(msg)
-
-
-# @comptest_fails
-# def mult_table_check():
-#     mult_table(R_Time, R_Time)
 
 
 

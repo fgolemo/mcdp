@@ -25,10 +25,10 @@ plot4:
 	mcdp-plot $(outp) $(dp4)
 
 solve:
-	mcdp-solve --plot $(outp) --expect_nres 2 --expect_nimp 2 $(dp2) "<{1.5V}, 1 MJ>"
-	mcdp-solve --plot $(outp) --expect_nres 3 --expect_nimp 3 $(dp2) "<{5V}, 1 MJ>"
+	mcdp-solve  $(outp) --expect_nres 2 --expect_nimp 2 $(dp2) "<{1.5V}, 1 MJ>"
+	mcdp-solve  $(outp) --expect_nres 3 --expect_nimp 3 $(dp2) "<{5V}, 1 MJ>"
 
 
 solve3:
-	mcdp-solve --plot $(outp) --expect_nres 2 --expect_nimp 2 $(dp3) "<{1.5V}, 1 MJ>"
-	mcdp-solve --plot $(outp) --expect_nres 3 --expect_nimp 3 $(dp3) "<  {5V}, 1 MJ>"
+	mcdp-solve   $(outp) --expect_nres 2 --expect_nimp 2 $(dp3) "<{1.5V}, 1 MJ>"
+	mcdp-solve   $(outp) --expect_nres 3 --expect_nimp 3 $(dp3) "<  {5V}, 1 MJ>"

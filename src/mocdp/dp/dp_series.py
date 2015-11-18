@@ -1,31 +1,21 @@
 # -*- coding: utf-8 -*-
+from .dp_flatten import Mux
+from .dp_identity import Identity
 from .primitive import PrimitiveDP
 from contracts.utils import indent, raise_desc, raise_wrapped
-from mocdp.dp.primitive import NormalForm, NotFeasible, Feasible
-from mocdp.posets import Map, PosetProduct, UpperSets
+from mocdp.dp.primitive import Feasible, NormalForm, NotFeasible
 from mocdp.exceptions import DPInternalError, do_extra_checks
-from mocdp.posets import SpaceProduct
-from .dp_identity import Identity
-from .dp_flatten import Mux
-from mocdp.posets import get_product_compact
+from mocdp.posets import (Map, PosetProduct, SpaceProduct, UpperSets,
+    get_product_compact)
+from mocdp.dp.tracer import Tracer
 
 
 __all__ = [
     'Series',
     'Series0',
 ]
-#
-# def only_one_r_from_f():
-#     """ This is the test that makes sure we
-#  if isinstance(self.dp1, (Mux, Identity)):
-#
-# def do_not_create_intermediate_M(dp1):
-#     from mocdp.lang.parts import GenericNonlinearity
-#     if isinstance(dp1, (Mux, Identity, GenericNonlinearity)):
-#         return True
-#     if isinstance(dp1, Parallel0):
-#         return do
-#
+
+
 class Series0(PrimitiveDP):
 
     def __init__(self, dp1, dp2):
@@ -61,6 +51,7 @@ class Series0(PrimitiveDP):
         M, _, _ = get_product_compact(self.M1, self.extraM, self.M2)
 
 
+        self._solve_cache = {}
         PrimitiveDP.__init__(self, F=F1, R=R2, M=M)
         
     def evaluate_f_m(self, f1, m):
@@ -216,30 +207,41 @@ class Series0(PrimitiveDP):
                 msg += '\n' + indent(str(e2).strip(), ' 2| ')
                 raise_desc(Feasible, msg)
 
-
     def solve(self, func):
+        trace = Tracer()
+        return self.solve_trace(func, trace)
+
+    def solve_trace(self, func, trace):
+        if func in self._solve_cache:
+            # trace.log('using cache for %s' % str(func))
+            return trace.result(self._solve_cache[func])
+        trace.values(type='series')
         from mocdp.posets import UpperSet, poset_minima
 
-        u1 = self.dp1.solve(func)
-        ressp1 = self.dp1.get_res_space()
-        tr1 = UpperSets(ressp1)
-        tr1.belongs(u1)
+        with trace.child('dp1') as t:
+            u1 = self.dp1.solve_trace(func, t)
+        # ressp1 = self.dp1.get_res_space()
+        # tr1 = UpperSets(ressp1)
+        # tr1.belongs(u1)
 
         mins = set([])
         for u in u1.minimals:
-            v = self.dp2.solve(u)
+            with trace.child('dp2') as t:
+                v = self.dp2.solve_trace(u, t)
             mins.update(v.minimals)
-            
 
         ressp = self.get_res_space()
         minimals = poset_minima(mins, ressp.leq)
         # now mins is a set of UpperSets
-        tres = self.get_tradeoff_space()
+        # tres = self.get_tradeoff_space()
 
         us = UpperSet(minimals, ressp)
-        tres.belongs(us)
+        # tres.belongs(us)
 
-        return us
+        # print('solving for %s' % str(func))
+        # return us
+        self._solve_cache[func] = us
+        return trace.result(us)
 
     def __repr__(self):
         return 'Series(%r, %r)' % (self.dp1, self.dp2)

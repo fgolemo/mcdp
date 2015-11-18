@@ -4,7 +4,8 @@ from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.comp.context import Context
 from mocdp.dp.solver import generic_solve
-from mocdp.dp_report.generic_report_utils import generic_report
+from mocdp.dp_report.generic_report_utils import generic_report, generic_plot, \
+    generic_report_trace
 from mocdp.lang.eval_constant_imp import eval_constant
 from mocdp.lang.parse_actions import parse_ndp, parse_wrap
 from mocdp.lang.syntax import Syntax
@@ -14,6 +15,8 @@ from quickapp import QuickAppBase
 from reprep import Report
 import logging
 import os
+from decent_params.utils.script_utils import UserError
+from mocdp.dp.tracer import Tracer
 
 
 class ExpectationsNotMet(Exception):
@@ -34,7 +37,7 @@ class SolveDP(QuickAppBase):
         params.add_flag('plot', help='Show iterations graphically')
         params.add_flag('imp', help='Compute and show implementations.')
 
-        params.add_flag('direct', help='Solve by direct iteration')
+        params.add_flag('advanced', help='Solve by advanced solver (in development)')
 
     def go(self):
         from conf_tools import logger
@@ -58,7 +61,6 @@ class SolveDP(QuickAppBase):
         else:
             out = options.out
 
-
         params = params[1:]
 
         s = open(filename).read()
@@ -67,20 +69,29 @@ class SolveDP(QuickAppBase):
         fnames = ndp.get_fnames()
 
         F = dp.get_fun_space()
+        R = dp.get_res_space()
+        UR = UpperSets(R)
 
         if len(params) > 1:
             fg = interpret_params(params, fnames, F)
-        else:
+        elif len(params) == 1:
             p = params[0]
             fg = interpret_params_1string(p, F)
+        else:
+            tu = get_types_universe()
+            if tu.equal(F, PosetProduct(())):
+                fg = ()
+            else:
+                msg = 'Please specify query parameter.'
+                raise_desc(UserError, msg, F=F)
 
         print('query: %s' % F.format(fg))
         max_steps = options.max_steps
 
-        if options.direct:
-            print dp
-            dp0 = dp.dp1
-            dp.solve(fg)
+        if not options.advanced:
+            trace = Tracer()
+            res = dp.solve_trace(fg, trace)
+            print('results: %s' % UR.format(res))
             # trace = generic_solve_by_loop(dp0, f=fg, max_steps=max_steps)
 
         else:
@@ -100,7 +111,8 @@ class SolveDP(QuickAppBase):
             except:
                 raise
 
-        nres = len(sr[-1].minimals)
+        UR.belongs(res)
+        nres = len(res.minimals)
         if options.expect_nres is not None:
             if nres != options.expect_nres:
                 msg = 'Found wrong number of resources'
@@ -110,7 +122,7 @@ class SolveDP(QuickAppBase):
         if options.imp:
             M = dp.get_imp_space_mod_res()
             nimplementations = 0
-            for r in sr[-1].minimals:
+            for r in res.minimals:
                 ms = dp.get_implementations_f_r(f=fg, r=r)
                 nimplementations += len(ms)
                 s = 'r = %s ' % R.format(r)
@@ -126,7 +138,12 @@ class SolveDP(QuickAppBase):
 
         if options.plot:
             r = Report()
-            generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0))
+            if options.advanced:
+                generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0))
+            else:
+                f = r.figure()
+                generic_plot(f, space=UR, value=res)
+                generic_report_trace(r, ndp, dp, trace)
 
             params = '-'.join(params).replace(' ', '').replace('{', '').replace('}', '').replace(':', '')
             out_html = os.path.splitext(os.path.basename(filename))[0] + '-%s.html' % params

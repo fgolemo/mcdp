@@ -1,23 +1,28 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts import contract
+from contracts.utils import check_isinstance
 from mocdp import get_conftools_posets
-from mocdp.posets import PosetProduct, RcompUnits, SpaceProduct
+from mocdp.posets import PosetProduct, RcompUnits, Space  # @UnusedImport
+from mocdp.posets import SpaceProduct
+from mocdp.posets.nat import Int, Nat
+from mocdp.posets.poset import Poset
+from mocdp.posets.space import Map
+from mocdp.posets.types_universe import get_types_universe
 import functools
 import numpy as np
-from contracts.utils import check_isinstance
-from mocdp.posets.nat import Nat, Int
-from mocdp.posets.space import Map
-from mocdp.posets.poset import Poset
-from mocdp.posets.types_universe import get_types_universe
+from mocdp.posets.rcomp import Rcomp
+
 
 
 __all__ = [
     'Sum',
     'SumN',
     'SumNNat',
+    'SumNInt',
     'Product',
     'ProductN',
+#     'ProductNNat',
     'SumUnitsNotCompatible',
     'check_sum_units_compatible',
 ]
@@ -124,6 +129,8 @@ class SumN(PrimitiveDP):
 
 # Fs: sequence of Rcompunits
 def sum_units(Fs, values, R):
+    for Fi in Fs:
+        check_isinstance(Fi, RcompUnits)
     res = 0.0
     for Fi, x in zip(Fs, values):
         if Fi.equal(x, Fi.get_top()):
@@ -185,8 +192,6 @@ def check_sum_units_compatible(Fs):
         raise SumUnitsNotCompatible(msg)
 
 
-
-
 class Product(PrimitiveDP):
 
     def __init__(self, F1, F2, R):
@@ -222,9 +227,6 @@ class ProductN(PrimitiveDP):
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, f):
-        self.F.belongs(f)
-        # print self.F, f
-
         # first, find out if there are any tops
         def is_there_a_top():
             for Fi, fi in zip(self.F, f):
@@ -241,5 +243,39 @@ class ProductN(PrimitiveDP):
 
     def __repr__(self):
         return 'ProductN(%s -> %s)' % (self.F, self.R)
+
+
+class ProductMap(Map):
+    
+    def __init__(self, Fs, R):
+        for _ in Fs:
+            check_isinstance(_, (Nat, Rcomp))
+        check_isinstance(R, (Nat, Rcomp))
+        self.Fs = Fs
+        self.R = R
+
+    def _call(self, x):
+        def is_there_a_top():
+            for Fi, fi in zip(self.Fs, x):
+                if Fi.equal(Fi.get_top(), fi):
+                    return True
+            return False
+        if is_there_a_top():
+            return self.R.U(self.R.get_top())
+        # float
+        res = 1.0
+        for fi in x:  # Fi, fi in zip(self.Fs, x):
+            res = res * fi
+        finite = bool(np.isfinite(res))
+        if isinstance(self.R, Nat):
+            if finite:
+                return int(np.ceil(res))
+            else:
+                return self.R.top()
+        if isinstance(self.R, Rcomp):
+            if finite:
+                return res
+            else:
+                return self.R.top()
 
 

@@ -1,28 +1,17 @@
 # -*- coding: utf-8 -*-
-from .parse_actions import plus_constantsN
 from .parts import CDPLanguage
-from conf_tools import (ConfToolsException, SemanticMistakeKeyNotFound,
-    instantiate_spec)
-from contracts import contract, describe_value
-from contracts.utils import check_isinstance, indent, raise_desc, raise_wrapped
-from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
-    SimpleWrap, dpwrap)
-from mocdp.comp.context import CFunction, CResource, ValueWithUnits, \
-    NoSuchMCDPType
-from mocdp.configuration import get_conftools_dps, get_conftools_nameddps
-from mocdp.dp import (
-    Constant, GenericUnary, Identity, InvMult2, InvPlus2, Limit, Max, Max1, Min,
-    PrimitiveDP, ProductN, SumN)
-from mocdp.dp.dp_catalogue import CatalogueDP
-from mocdp.dp.dp_generic_unary import WrapAMap
-from mocdp.dp.dp_series_simplification import make_series
+from contracts import contract, raise_wrapped
+from contracts.utils import raise_desc
+from mocdp.comp import Connection, dpwrap
+from mocdp.comp.context import CResource, ValueWithUnits
+from mocdp.dp import GenericUnary, Max, Max1, Min, WrapAMap
 from mocdp.exceptions import DPInternalError, DPSemanticError
-from mocdp.lang.parse_actions import inv_constant
-from mocdp.posets import (NotBelongs, NotEqual, NotLeq, PosetProduct, Rcomp,
-    Space, get_types_universe, mult_table, mult_table_seq)
-from mocdp.posets.any import Any
-from mocdp.posets.finite_set import FiniteCollection, FiniteCollectionsInclusion
-from mocdp.posets.nat import Nat
+from mocdp.posets import Map, Nat, NotBelongs, Rcomp, RcompUnits
+import numpy as np
+
+
+
+
 CDP = CDPLanguage
 class DoesNotEvalToResource(Exception):
     """ also called rvalue """
@@ -167,12 +156,21 @@ def eval_rvalue(rvalue, context):
 
         if isinstance(rvalue, CDP.GenericNonlinearity):
             op_r = eval_rvalue(rvalue.op1, context)
+            # this is supposed to be a numpy function that takes a scalar float
             function = rvalue.function
-            R_from_F = rvalue.R_from_F
+            # R_from_F = rvalue.R_from_F TODO: remove
             F = context.get_rtype(op_r)
-            R = R_from_F(F)
-
-            dp = GenericUnary(F=F, R=R, function=function)
+            
+            # tu = get_types_universe()
+            if isinstance(F, Rcomp) or isinstance(F, RcompUnits):
+                R = F
+                dp = GenericUnary(F=F, R=R, function=function)
+            elif isinstance(F, Nat):
+                m = CeilAfter(function, dom=Nat(), cod=Nat())
+                dp = WrapAMap(m)
+            else:
+                msg = 'Cannot create unary operator'
+                raise_desc(DPInternalError, msg, function=function, F=F)
 
             fnames = context.new_fun_name('s')
             name = context.new_name(function.__name__)
@@ -193,3 +191,25 @@ def eval_rvalue(rvalue, context):
         if e.where is None:
             raise DPSemanticError(str(e), where=rvalue.where)
         raise e
+
+class CeilAfter(Map):
+    """ Applies a function and rounds it to int. """
+
+    def __init__(self, f, dom, cod):
+        self.f = f
+        Map.__init__(self, dom, cod)
+
+    def _call(self, x):
+        if np.isinf(x):
+            return self.cod.get_top()
+        
+        y = self.f(x * 1.0)
+        if np.isinf(y):
+            return self.cod.get_top()
+        
+        y = int(np.ceil(y))
+        return y
+
+
+
+

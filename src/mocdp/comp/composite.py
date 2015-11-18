@@ -44,16 +44,16 @@ class CompositeNamedDP(NamedDP):
 
     def get_rnames(self):
         return list(self._rnames)
-
-    def rindex(self, rn):
-        if len(self._rnames) == 1:
-            return ()
-        return self._rnames.index(rn)
-
-    def findex(self, fn):
-        if len(self._fnames) == 1:
-            return ()
-        return self._fnames.index(fn)
+#
+#     def rindex(self, rn):
+#         if len(self._rnames) == 1:
+#             return ()
+#         return self._rnames.index(rn)
+#
+#     def findex(self, fn):
+#         if len(self._fnames) == 1:
+#             return ()
+#         return self._fnames.index(fn)
 
     def get_rtype(self, rn):
         ndp = self.context.get_ndp_res(rn)

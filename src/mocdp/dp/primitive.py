@@ -105,7 +105,7 @@ class PrimitiveDP(WithInternalLog):
 
         if isinstance(M, SpaceProduct) and len(M) == 0:
             m = ()
-            self.check_feasible(f, m , r)
+            # self.check_feasible(f, m , r)
             return set([m])
 
         raise NotImplementedError(type(self).__name__)
@@ -144,6 +144,10 @@ class PrimitiveDP(WithInternalLog):
         '''
         pass
 
+    @contract(returns=UpperSet)
+    def solve_trace(self, func, tracer):  # @UnusedVariable
+        return self.solve(func)
+
     @contract(returns='tuple($UpperSet, $UpperSet)')
     def solve_approx(self, f, nl, nu):  # @UnusedVariable
         x = self.solve(f)
@@ -151,9 +155,10 @@ class PrimitiveDP(WithInternalLog):
 
     @contract(ufunc=UpperSet)
     def solveU_approx(self, ufunc, nl, nu):
-        UF = UpperSets(self.get_fun_space())
-        UF.belongs(ufunc)
-        from mocdp.posets import poset_minima
+        if do_extra_checks():
+            UF = UpperSets(self.get_fun_space())
+            UF.belongs(ufunc)
+
         R = self.get_res_space()
 
         res_l = set([])
@@ -187,9 +192,46 @@ class PrimitiveDP(WithInternalLog):
             alpha: U(F) x S -> U(R)
             beta:  U(F) x S -> S 
         """
+        One = PosetProduct(())
+#         UOne = UpperSets(One)
+#         S = UOne
+        S = One
+
+        class DefaultAlphaMap(Map):
+            def __init__(self, dp):
+                self.dp = dp
+                F = dp.get_fun_space()
+                R = dp.get_res_space()
+                UF = UpperSets(F)
+                dom = PosetProduct((UF, S))
+                cod = UpperSets(R)
+                Map.__init__(self, dom, cod)
+
+            def _call(self, x):
+                F, _s = x
+                Res = self.dp.solveU(F)
+                return Res
+
+
+        class DefaultBeta(Map):
+            def __init__(self, dp):
+                self.dp = dp
+                F = dp.get_fun_space()
+                UF = UpperSets(F)
+                dom = PosetProduct((UF, S))
+                cod = S
+                Map.__init__(self, dom, cod)
+
+            def _call(self, x):
+                _F, s = x
+
+                # print('Beta() for %s' % (self.dp))
+                # print(' f = %s s = %s -> unchanged ' % (_F, s))
+                return s
+
         alpha = DefaultAlphaMap(self)
         beta = DefaultBeta(self)
-        S = PosetProduct(())
+
         return NormalForm(S=S, alpha=alpha, beta=beta)
 
     def get_normal_form_approx(self):
@@ -221,7 +263,6 @@ class PrimitiveDP(WithInternalLog):
         ulen = lambda x: len(u(x))
 
         def clip(x, n):
-
             s = str(x)
             unicode_string = s.decode("utf-8")
             l = len(unicode_string)
@@ -251,39 +292,6 @@ NormalForm = namedtuple('NormalForm', ['S', 'alpha', 'beta'])
 NormalFormApprox = namedtuple('NormalFormApprox', ['S', 'gamma', 'delta'])
 
 
-class DefaultAlphaMap(Map):
-    def __init__(self, dp):
-        self.dp = dp
-        F = dp.get_fun_space()
-        R = dp.get_res_space()
-        UF = UpperSets(F)
-        S = PosetProduct(())
-        dom = PosetProduct((UF, S))
-        cod = UpperSets(R)
-        Map.__init__(self, dom, cod)
-
-    def _call(self, x):
-        F, _s = x
-        Res = self.dp.solveU(F)
-        return Res
-
-
-class DefaultBeta(Map):
-    def __init__(self, dp):
-        self.dp = dp
-        F = dp.get_fun_space()
-        UF = UpperSets(F)
-
-        S = PosetProduct(())
-        dom = PosetProduct((UF, S))
-        cod = S
-        Map.__init__(self, dom, cod)
-
-    def _call(self, x):
-        _F, s = x
-        # print('Beta() for %s' % (self.dp))
-        # print(' f = %s s = %s -> unchanged ' % (_F, s))
-        return s
 
 
 class DefaultGamma(Map):

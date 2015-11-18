@@ -2,10 +2,10 @@
 from .poset import NotLeq, Poset
 from .space import NotBelongs, NotEqual
 from .utils import poset_minima
-from contracts import check_isinstance, contract
-from contracts.utils import raise_desc
+from contracts import contract
 from mocdp.exceptions import do_extra_checks
 from mocdp.posets.poset import NotBounded
+
 
 __all__ = [
     'UpperSet',
@@ -38,13 +38,19 @@ class UpperSet():
     def get_poset(self):
         return self.P
 
-    def __repr__(self):  # ≤  ≥
+    def __repr__old(self):  # ≤  ≥
         contents = " v ".join("x ≥ %s" % self.P.format(m)
                         for m in sorted(self.minimals))
 
         return "{x ∣ %s }" % contents
 #         return "∪".join("{x∣ x ≥ %s}" % self.P.format(m)
 #                         for m in self.minimals)
+
+    def __repr__(self):
+        contents = ", ".join(self.P.format(m)
+                        for m in sorted(self.minimals))
+
+        return "↑{%s})" % contents
 
 
 class UpperSets(Poset):
@@ -92,7 +98,8 @@ class UpperSets(Poset):
         m1 = a.minimals
         m2 = b.minimals
         if not (m1 == m2):
-            raise NotEqual('%s ≠ %s' % (m1, m2))
+            msg = 'The two sets are not equal\n   %s\n!= %s' % (self.format(a), self.format(b))
+            raise NotEqual(msg)
 
     def check_leq(self, a, b):
         self.belongs(a)
@@ -148,12 +155,17 @@ class UpperSets(Poset):
         self.check_leq(r, b)
         return r
 
-    def format(self, x):
+    def format0(self, x):
         contents = " v ".join("x ≥ %s" % self.P.format(m)
                         for m in sorted(x.minimals))
 
         return "{x ∣ %s }" % contents
 
+    def format(self, x):
+        contents = ", ".join(self.P.format(m)
+                        for m in sorted(x.minimals))
+
+        return "↑{%s})" % contents
 
     def __repr__(self):
-        return "Upsets(%r)" % self.P
+        return "U(%r)" % self.P

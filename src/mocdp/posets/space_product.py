@@ -66,7 +66,10 @@ class SpaceProduct(Space):
         for _, (sub, xe) in enumerate(zip(self.subs, x)):
             ss.append(sub.format(xe))
 
-        return '(' + ', '.join(ss) + ')'
+    # 'MATHEMATICAL LEFT ANGLE BRACKET' (U+27E8) ⟨
+    # 'MATHEMATICAL RIGHT ANGLE BRACKET'   ⟩
+
+        return '⟨' + ', '.join(ss) + '⟩'
 
     def witness(self):
         return tuple(x.witness() for x in self.subs)

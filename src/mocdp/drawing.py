@@ -1,6 +1,5 @@
 from contracts import contract
 from mocdp.posets.uppersets import UpperSet
-import warnings
 from mocdp.exceptions import mcdp_dev_warning
 
 
@@ -13,7 +12,7 @@ def plot_upset_minima(pylab, us):
 
 
 @contract(us=UpperSet)
-def plot_upset_R2(pylab, us, axis, color_shadow, color_lines='none'):
+def plot_upset_R2(pylab, us, axis, color_shadow, color_lines='none', markers='r.'):
     points = us.minimals
 
     xmin, xmax, ymin, ymax = axis
@@ -23,8 +22,9 @@ def plot_upset_R2(pylab, us, axis, color_shadow, color_lines='none'):
             plot_cone(pylab, p, axis, color_shadow=color_shadow,
                       color_lines=color_lines)
     # cuteness
-    for p in points:
-        pylab.plot(p[0], p[1], 'k.')
+    if markers is not None:
+        for p in points:
+            pylab.plot(p[0], p[1], markers)
 
 
 def plot_cone(pylab, p, axis, color_shadow, color_lines):

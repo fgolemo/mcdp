@@ -12,7 +12,7 @@ def check_normalform_approx(id_dp, dp):
 
     F = dp.get_fun_space()
     UF = UpperSets(F)
-    R = dp.get_res_space()
+    _R = dp.get_res_space()
 
     uf_bot = UF.get_bottom()
     S_bot = S.get_bottom()
@@ -32,7 +32,7 @@ def check_normalform_approx(id_dp, dp):
 
     # Start with bottom
 
-    x1 = (uf_bot, S_bot, 0, 0)
+#     x1 = (uf_bot, S_bot, 0, 0)
 
 
 

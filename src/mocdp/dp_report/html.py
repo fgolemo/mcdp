@@ -77,8 +77,10 @@ def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: 
 #
 #             print('orig %d: %s' % (i, s_lines[i]))
 #             print('trans %d: %s' % (i, lines[i]))
-        e = ValueError('Error in syntax: %s, %s' % (len(lines), len(s_comments)))
-        print(e)
+        msg = 'Lost some lines while pretty printing: %s, %s' % (len(lines), len(s_comments))
+
+        print(msg)
+        print('original string[:10] = %r' % s[:10])
     
     out = ""
     for i, (a, comment) in enumerate(zip(lines, s_comments)):
@@ -264,7 +266,7 @@ css = """
      span.NewResource { color: darkred;}
      span.NewFunction { color: darkgreen; }
      
-    span.Unit  {  color: #aC5600 ;}
+    span.Unit, span.Nat, span.Int  {  color: #aC5600 ;}
     span.ValueExpr { color: #CC6600 ;}
      
      /*span.Function  { color: darkgreen;}*/

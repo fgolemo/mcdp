@@ -38,6 +38,10 @@ class SolverTrace():
         # sequence in UR
         return list(self.rtrace)
 
+    @contract(returns=str)
+    def get_result(self):
+        return self.result
+
 @contract(returns=SolverTrace)
 def generic_solve_by_loop(dp, f, max_steps=None):
     assert isinstance(dp, DPLoop0)

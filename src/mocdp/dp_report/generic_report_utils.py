@@ -12,13 +12,46 @@ from mocdp.posets.uppersets import UpperSet, UpperSets
 import functools
 import numpy as np
 
+def generic_report_trace(r, ndp, dp, trace, annotation=None, axis0=(0, 0, 0, 0)):
+    r.text('dp', dp.repr_long())
+    # r.text('trace', trace.format())
+    
+    for l, trace_loop in enumerate(trace.find_loops()):
+        with r.subsection('loop%d' % l) as r2:
+            _report_loop(r2, trace_loop)
+        
+        
+def _report_loop(r, trace_loop):
+    sips = list(trace_loop.get_iteration_values('sip'))
+    converged = list(trace_loop.get_iteration_values('converged'))
+#     r.text('sip', str(sips))
+#     r.text('converged', str(converged))
+    
+    UR = trace_loop.get_value1('UR')
+    R = trace_loop.get_value1('R')
+
+    with r.subsection('sip') as r2:
+        for name, plotter in get_plotters(plotters, UR):
+            f = r2.figure(name, cols=5)
+
+            axis = plotter.axis_for_sequence(UR, sips)
+
+            for i, sip in enumerate(sips):
+                with f.plot('step%d' % i) as pylab:
+                    c_orange = '#FFA500'
+                    c_red = [1, 0.5, 0.5]
+                    plotter.plot(pylab, axis, UR, R.U(R.get_bottom()), params=dict(color_shadow=c_red, markers=None))
+                    plotter.plot(pylab, axis, UR, sip, params=dict(color_shadow=c_orange))
+                    conv = converged[i]
+                    c_blue = [0.6, 0.6, 1.0]
+                    plotter.plot(pylab, axis, UR, R.Us(converged[i]), params=dict(color_shadow=c_blue))
+                    for c in conv:
+                        p = plotter.toR2(c)
+                        pylab.plot(p[0], p[1], 'go', markersize=10, markeredgecolor='g')
+                    pylab.axis(axis)
+
 def generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0)):
-    plotters = {
-        'UR2': PlotterUR2(),
-        'URRpR_12': PlotterURRpR_12(),
-        'URRpR_13': PlotterURRpR_13(),
-        'URRpR_23': PlotterURRpR_23(),
-    }
+   
     R = dp.get_res_space()
     UR = UpperSets(R)
 
@@ -33,6 +66,14 @@ def generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0)):
         sequence = trace.get_r_sequence()
         generic_try_plotters(rr, plotters, space, sequence, axis0=axis0,
                              annotation=annotation)
+
+def get_plotters(plotters, space):
+    for name, plotter in plotters.items():
+        try:
+            plotter.check_plot_space(space)
+            yield name, plotter
+        except NotPlottable as e:
+            pass
 
 
 def generic_try_plotters(r, plotters, space, sequence, axis0=None, annotation=None):
@@ -60,10 +101,31 @@ def join_axes(a, b):
             min(a[2], b[2]),
             max(a[3], b[3]))
 
+
+def generic_plot(f, space, value):
+    es = []
+    for name, plotter in plotters.items():
+        try:
+            plotter.check_plot_space(space)
+        except NotPlottable as e:
+            es.append(e)
+            # print('Plotter %r cannot plot %r:\n%s' % (name, space, e))
+            continue
+
+        axis = plotter.axis_for_sequence(space, [value])
+        # axis = enlarge(axis, 0.15)
+        with f.plot(name) as pylab:
+            plotter.plot(pylab, axis, space, value)
+            pylab.axis(axis)
+
 def generic_plot_sequence(r, plotter, space, sequence, axis0=None, annotation=None):
 
     axis = plotter.axis_for_sequence(space, sequence)
 
+    if axis[0] == axis[1]:
+        dx = 1
+#         dy = 1
+        axis = (axis[0] - dx, axis[1] + dx, axis[2], axis[3])
     axis = enlarge(axis, 0.15)
     if axis0 is not None:
         axis = join_axes(axis, axis0)
@@ -82,8 +144,8 @@ def generic_plot_sequence(r, plotter, space, sequence, axis0=None, annotation=No
                     pylab.xlabel(xlabel)
                 if ylabel:
                     pylab.ylabel(ylabel)
-            except UnicodeDecodeError as e:
 
+            except UnicodeDecodeError as e:
                 print xlabel, xlabel.__repr__(), ylabel, ylabel.__repr__(), e
             
             if (axis[0] != axis[1]) or (axis[2] != axis[3]):
@@ -146,12 +208,11 @@ class PlotterUR2(Plotter):
         axes = [get_bounds(_) for _ in points2d]
         return enlarge(functools.reduce(reduce_bounds, axes), 0.1)
 
-#
-
     def plot(self, pylab, axis, space, value):
         self.check_plot_space(space)
 
         v = value
+
         plot_upset_R2(pylab, v, axis, color_shadow=[1.0, 0.8, 0.8])
 
 
@@ -192,16 +253,24 @@ class PlotterURRpR(Plotter):
         return enlarge(functools.reduce(reduce_bounds, axes), 0.1)
 
 
-    def plot(self, pylab, axis, space, value):
+    def plot(self, pylab, axis, space, value, params=None):
+        params0 = dict(color_shadow=[1.0, 0.8, 0.8], markers='k.',
+                       markers_params={})
+        if params is None:
+            params = {}
+        params0.update(params)
+        color_shadow = params0['color_shadow']
+        markers = params0['markers']
+        markers_params = params0['markers_params']
         self.check_plot_space(space)
         tu = get_types_universe()
         P_TO_S, _ = tu.get_embedding(space.P, self.S)
 
 #         y =-x+sqrt(x)+10,
         # y>=-2x+ 2sqrt(x)+20.
-        xs = np.linspace(0, 20, 100)
-        ys = -2 * (xs - np.sqrt(xs) - 10)
-        pylab.plot(xs, ys, '--')
+#         xs = np.linspace(0, 20, 100)
+#         ys = -2 * (xs - np.sqrt(xs) - 10)
+#         pylab.plot(xs, ys, '--')
 
         points2d = [self.toR2(P_TO_S(_)) for _ in value.minimals]
 
@@ -216,9 +285,9 @@ class PlotterURRpR(Plotter):
 
 
         v = MyUpperSet(points2d, P=R2)
-        plot_upset_R2(pylab, v, axis, color_shadow=[1.0, 0.8, 0.8])
-        for p in points2d:
-            pylab.plot(p[0], p[1], 'rx')
+        plot_upset_R2(pylab, v, axis, color_shadow=color_shadow, markers=markers)
+        # for p in points2d:
+        #    pylab.plot(p[0], p[1], 'rx')
 
 class PlotterURRpR_12(PlotterURRpR):
 
@@ -261,5 +330,9 @@ def get_bounds(points):
     return (min(xs), max(xs), min(ys), max(ys))
 
 
-
-
+plotters = {
+       'UR2': PlotterUR2(),
+       'URRpR_12': PlotterURRpR_12(),
+       'URRpR_13': PlotterURRpR_13(),
+       'URRpR_23': PlotterURRpR_23(),
+}
