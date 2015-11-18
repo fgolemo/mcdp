@@ -54,7 +54,7 @@ class Syntax():
 
     OPEN_BRACE = sp(L('<') ^ L('⟨'), lambda t: CDP.OpenBraceKeyword(t[0]))
     CLOSE_BRACE = sp(L('>') ^ L('⟩'), lambda t: CDP.CloseBraceKeyword(t[0]))
-    REQUIRED_BY = sp(L('required') - L('by'),
+    REQUIRED_BY = sp((L('required') | L('req.')) - L('by'),
                     lambda _: CDP.RequiredByKeyword('required by'))
 
     PROVIDED_BY = sp(L('provided') - L('by'),

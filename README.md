@@ -9,7 +9,14 @@ Please see <http://mcdp.mit.edu> for an introduction (or some [examples][example
 *Below, an example of a graphical representation of an MCDP (left)
 along with the MCDPL snippet that describes it (right)*
 
-<img src="http://mcdp.mit.edu/mcdp_intro/1510_mcdp_examples01_battery_actuation.png"/>
+<table>
+ <tr>
+ <td><img src="examples/example-battery/out_expected/battery_minimal-clean.png" height="500px"/></td>
+ <td><img src="examples/example-battery/out_expected/battery_minimal-syntax_pdf.png" height="500px"/>
+ </td>
+ </tr>
+</table>
+
 
 ## Installation with pip
 
