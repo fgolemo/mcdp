@@ -35,7 +35,7 @@ script:
 - make -C examples/example-catalogue
 - make -C examples/example-battery
 # the run with contracts
-- make clean comptests-run-parallel
+- make clean comptests-run
 after_failure:
 - compmake out/comptests -c "ls failed"
 - compmake out/comptests -c "why failed"

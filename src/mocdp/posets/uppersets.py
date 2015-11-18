@@ -165,7 +165,7 @@ class UpperSets(Poset):
         contents = ", ".join(self.P.format(m)
                         for m in sorted(x.minimals))
 
-        return "↑{%s})" % contents
+        return "↑{%s}" % contents
 
     def __repr__(self):
         return "U(%r)" % self.P
