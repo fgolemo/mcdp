@@ -4,7 +4,8 @@ from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.comp.context import Context
 from mocdp.dp.solver import generic_solve
-from mocdp.dp_report.generic_report_utils import generic_report
+from mocdp.dp_report.generic_report_utils import generic_report, generic_plot, \
+    generic_report_trace
 from mocdp.lang.eval_constant_imp import eval_constant
 from mocdp.lang.parse_actions import parse_ndp, parse_wrap
 from mocdp.lang.syntax import Syntax
@@ -15,6 +16,7 @@ from reprep import Report
 import logging
 import os
 from decent_params.utils.script_utils import UserError
+from mocdp.dp.tracer import Tracer
 
 
 class ExpectationsNotMet(Exception):
@@ -87,8 +89,8 @@ class SolveDP(QuickAppBase):
         max_steps = options.max_steps
 
         if not options.advanced:
-
-            res = dp.solve(fg)
+            trace = Tracer()
+            res = dp.solve_trace(fg, trace)
             print('results: %s' % UR.format(res))
             # trace = generic_solve_by_loop(dp0, f=fg, max_steps=max_steps)
 
@@ -135,11 +137,13 @@ class SolveDP(QuickAppBase):
                                nimplementations=nimplementations)
 
         if options.plot:
-            if not options.advanced:
-                msg = 'Need advanced solver to use plot feature.'
-                raise UserError(msg)
             r = Report()
-            generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0))
+            if options.advanced:
+                generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0))
+            else:
+                f = r.figure()
+                generic_plot(f, space=UR, value=res)
+                generic_report_trace(r, ndp, dp, trace)
 
             params = '-'.join(params).replace(' ', '').replace('{', '').replace('}', '').replace(':', '')
             out_html = os.path.splitext(os.path.basename(filename))[0] + '-%s.html' % params

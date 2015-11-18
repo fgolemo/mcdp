@@ -106,8 +106,8 @@ class Syntax():
 #                         lambda t: CDP.PowerSet(t[0], t[1],
 #                                                t[2], t[3]))
 
-    nat_expr = sp(L('Nat'), lambda t: CDP.Nat(t[0]))
-    int_expr = sp(L('Int'), lambda t: CDP.Int(t[0]))
+    nat_expr = sp(L('Nat') | L('ℕ'), lambda t: CDP.Nat(t[0]))
+    int_expr = sp(L('Int') | L('ℤ'), lambda t: CDP.Int(t[0]))
 
     space_operand = (pint_unit ^ power_set_expr ^ nat_expr ^ int_expr)
 

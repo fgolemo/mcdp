@@ -108,6 +108,10 @@ class InvPlus2(PrimitiveDP):
 
         return self.R.Us(s)
 
+    def get_implementations_f_r(self, f, r):  # @UnusedVariable
+        r1, r2 = r  # @UnusedVariable
+        return set([r1])
+
     def evaluate_f_m(self, f, m):
         return (m, f - m)
 
@@ -135,6 +139,10 @@ class InvPlus2Nat(PrimitiveDP):
             s.add((o, f - o))
 
         return self.R.Us(s)
+
+    def get_implementations_f_r(self, f, r):  # @UnusedVariable
+        r1, r2 = r  # @UnusedVariable
+        return set([r1])
 
     def evaluate_f_m(self, f, m):
         return (m, f - m)

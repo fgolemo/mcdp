@@ -22,6 +22,7 @@ from mocdp.dp.dp_sum import SumNNat
 from mocdp.dp.dp_series_simplification import wrap_series
 from mocdp.dp.dp_loop import make_loop
 from mocdp.dp.dp_flatten import Mux
+from mocdp.dp.tracer import Tracer
 
 
 # @comptest_dynamic
@@ -684,10 +685,15 @@ def check_loop_result5c():
     check_feasible((1, 7))
     check_feasible((10, 10))
 
-    result = dp.solve_trace(())
-    for i, r in enumerate(result):
-        print('%d: %s' % (i, UR.format(r.s)))
-        print('converged: %s' % str(r.converged))
+    trace = Tracer()
+    res = dp.solve_trace((), trace)
+    print trace.format()
+    converged = list(trace.get_iteration_values('converged'))
+
+    print converged
+#     for i, r in enumerate(result):
+#         print('%d: %s' % (i, UR.format(r.s)))
+#         print('converged: %s' % str(r.converged))
 
     expected = [
         [(0, 0)],
@@ -698,8 +704,8 @@ def check_loop_result5c():
         [(0, 7), (3, 6), (4, 4), (6, 3), (7, 0)],
         [(0, 7), (3, 6), (4, 4), (6, 3), (7, 0)],
     ]
-    for i, r in enumerate(result):
-        found = r.s
+    sip = list(trace.get_iteration_values('sip'))
+    for i, found in enumerate(sip):
         want = R.Us(expected[i])
         print('step: %d' % i)
         print('want:  %s' % UR.format(want))

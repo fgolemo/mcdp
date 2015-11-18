@@ -105,7 +105,7 @@ class PrimitiveDP(WithInternalLog):
 
         if isinstance(M, SpaceProduct) and len(M) == 0:
             m = ()
-            self.check_feasible(f, m , r)
+            # self.check_feasible(f, m , r)
             return set([m])
 
         raise NotImplementedError(type(self).__name__)
@@ -143,6 +143,10 @@ class PrimitiveDP(WithInternalLog):
             Returns an UpperSet 
         '''
         pass
+
+    @contract(returns=UpperSet)
+    def solve_trace(self, func, tracer):  # @UnusedVariable
+        return self.solve(func)
 
     @contract(returns='tuple($UpperSet, $UpperSet)')
     def solve_approx(self, f, nl, nu):  # @UnusedVariable

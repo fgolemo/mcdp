@@ -7,6 +7,7 @@ from mocdp.exceptions import DPSyntaxError, DPSemanticError
 from mocdp.lang.namedtuple_tricks import remove_where_info
 from mocdp.lang.syntax import parse_ndp, parse_wrap
 from nose.tools import assert_equal
+from mocdp.lang.parse_actions import parse_ndp_filename, parse_wrap_filename
 
 def assert_syntax_error(s, expr, desc=None):
     if isinstance(expr, ParsingElement):
@@ -24,7 +25,38 @@ def assert_syntax_error(s, expr, desc=None):
             msg += '\n' + desc
         raise_desc(Exception, msg, s=s, res=res.repr_long())
 
+def assert_syntax_error_fn(filename, expr, desc=None):
+    if isinstance(expr, ParsingElement):
+        expr = expr.get()
+    try:
+        res = parse_wrap_filename(expr, filename)
+    except DPSyntaxError:
+        pass
+    except BaseException as e:
+        msg = "Expected syntax error, got %s." % type(e)
+        raise_wrapped(Exception, e, msg, filename=filename)
+    else:
+        msg = "Expected an exception, instead succesfull instantiation."
+        if desc:
+            msg += '\n' + desc
+        raise_desc(Exception, msg, filename=filename, res=res.repr_long())
 
+
+def assert_semantic_error_fn(filename, desc=None):
+    try:
+        res = parse_ndp_filename(filename)
+        res.abstract()
+    except DPSemanticError:
+        pass
+    except BaseException as e:
+        msg = "Expected semantic error, got %s." % type(e)
+        raise_wrapped(Exception, e, msg)
+    else:
+        msg = "Expected an exception, instead succesfull instantiation."
+        if desc:
+            msg += '\n' + desc
+        raise_desc(Exception, msg, filename=filename, res=res.repr_long())
+        
 def assert_semantic_error(s , desc=None):
     """ This asserts that s can be parsed, but cannot  be compiled to a *connected* ndp. """
     try:
@@ -48,6 +80,23 @@ def assert_parsable_to_unconnected_ndp(s, desc=None):  # @UnusedVariable
         msg = 'The graph appears connected but it should be disconnected.'
         raise Exception(msg)
     return res
+
+@contract(returns=NamedDP)
+def assert_parsable_to_unconnected_ndp_fn(filename):
+    res = parse_ndp_filename(filename)
+    if res.is_fully_connected():
+        msg = 'The graph appears connected but it should be disconnected.'
+        raise Exception(msg)
+    return res
+
+
+@contract(returns=NamedDP)
+def assert_parsable_to_connected_ndp_fn(filename):
+    res = parse_ndp_filename(filename)
+    if isinstance(res, SimpleWrap):
+        return res
+    ndp = res.abstract()
+    return ndp
 
 @contract(returns=NamedDP)
 def assert_parsable_to_connected_ndp(s , desc=None):  # @UnusedVariable

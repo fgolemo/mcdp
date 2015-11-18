@@ -6,12 +6,16 @@ class DPInternalError(Exception):
 class DPUserError(Exception):
     pass
 
-
 class DPSyntaxError(ContractSyntaxError, DPUserError):
-    pass
+
+    def with_filename(self, filename):
+        where = self.where.with_filename(filename)
+        return type(self)(self.error, where=where)
 
 class DPSemanticError(ContractSyntaxError, DPUserError):
-    pass
+    def with_filename(self, filename):
+        where = self.where.with_filename(filename)
+        return type(self)(self.error, where=where)
 
 class _storage:
     first = True

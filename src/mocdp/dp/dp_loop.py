@@ -6,6 +6,8 @@ from mocdp.posets import Map, NotLeq, PosetProduct, UpperSet, UpperSets
 from mocdp.posets.utils import poset_minima
 import itertools
 from collections import namedtuple
+from mocdp.dp.tracer import Tracer
+from mocdp.exceptions import do_extra_checks
 
 
 __all__ = [
@@ -70,9 +72,31 @@ class DPLoop0(PrimitiveDP):
         # from mocdp.dp.dp_series import prod_make
         from mocdp.dp.dp_series import get_product_compact
         M, _, _ = get_product_compact(M0, F2)
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
         self.M0 = M0
         self.F2 = F2
+
+        self._solve_cache = {}
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+
+    def get_implementations_f_r(self, f1, r):
+        f2 = r
+        f = (f1, f2)
+        m0s = self.dp1.get_implementations_f_r(f, r)
+        options = set()
+        from mocdp.dp.dp_series import get_product_compact
+
+        M, M_pack, _ = get_product_compact(self.M0, self.F2)
+
+        
+        for m0 in m0s:
+            m = M_pack(m0, r)
+            options.add(m)
+
+        if do_extra_checks():
+            for _ in options:
+                M.belongs(_)
+
+        return options
 
     def evaluate_f_m(self, f1, m):
         """ Returns the resources needed
@@ -315,10 +339,15 @@ class DPLoop0(PrimitiveDP):
 
 
     def solve(self, f1):
-        trace = self.solve_trace(f1)
-        return trace[-1].s
+        t = Tracer()
+        res = self.solve_trace(f1, t)
+        return res
 
-    def solve_trace(self, f1):
+    def solve_trace(self, f1, trace):
+        if f1 in self._solve_cache:
+            # trace.log('using cache for %s' % str(func))
+            return trace.result(self._solve_cache[f1])
+
         F = self.dp1.get_fun_space()
         F1 = F[0]
         F1.belongs(f1)
@@ -326,34 +355,40 @@ class DPLoop0(PrimitiveDP):
 
         UR = UpperSets(R)
 
+        trace.values(type='loop', UR=UR, R=R, dp=self)
+
         # we consider a set of iterates
         # we start from the bottom
         s0 = UR.get_bottom()
 
-        print('Iterating in UR = %s' % UR)
-        print('Starting from %s' % UR.format(s0))
+        trace.log('Iterating in UR = %s' % UR)
+        trace.log('Starting from %s' % UR.format(s0))
 
         S = [Iteration(s=s0, converged=set())]
         for i in range(100):  # XXX
-            si = S[-1].s
-            sip, converged = iterate(self.dp1, f1, R, si)
-            print('it %d: %s' % (i, UR.format(sip)))
-            try:
-                UR.check_leq(si, sip)
-            except NotLeq as e:
-                msg = 'Loop iteration invariant not satisfied.'
-                raise_wrapped(Exception, e, msg, si=si, sip=sip, dp=self.dp1)
+            with trace.iteration(i) as t:
+                si = S[-1].s
+                sip, converged = iterate(self.dp1, f1, R, si, t)
+                t.values(sip=sip, converged=converged)
+                t.log('it %d: %s' % (i, UR.format(sip)))
+                try:
+                    UR.check_leq(si, sip)
+                except NotLeq as e:
+                    msg = 'Loop iteration invariant not satisfied.'
+                    raise_wrapped(Exception, e, msg, si=si, sip=sip, dp=self.dp1)
 
-            S.append(Iteration(s=sip, converged=converged))
+                S.append(Iteration(s=sip, converged=converged))
 
-            if UR.leq(sip, si):
-                print('Breaking because converged (iteration %s) ' % i)
-                print(' solution is %s' % (UR.format(sip)))
-                break
+                if UR.leq(sip, si):
+                    t.log('Breaking because converged (iteration %s) ' % i)
+                    t.log(' solution is %s' % (UR.format(sip)))
+                    break
 
-        return S
+        res = S[-1].s
+        self._solve_cache[f1] = res
+        return trace.result(res)
 
-def iterate(dp0, f1, R, si):
+def iterate(dp0, f1, R, si, trace):
     """ Returns the next iteration  si \in UR 
     
         ?: F1 x UR -> UR
@@ -367,7 +402,7 @@ def iterate(dp0, f1, R, si):
     # for each f2 in si
     for f2 in si.minimals:
         # what are the results of solve(f1, f2)?
-        result = _solve1(R, f1, f2, dp0=dp0)
+        result = _solve1(R, f1, f2, dp0, trace)
         # print('f2 = %s -> %s' % (f2, UR.format(result)))
         solutions.update(result.minimals)
         if f2 in result.minimals:
@@ -382,9 +417,9 @@ def iterate(dp0, f1, R, si):
     return res, converged
 
 
-def _solve1(R, f1, f2, dp0):
+def _solve1(R, f1, f2, dp0, trace):
     result = set()
-    res = dp0.solve((f1, f2))
+    res = dp0.solve_trace((f1, f2), trace)
     for r in res.minimals:
         if R.leq(f2, r):
             # f1  ->|    | r

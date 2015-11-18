@@ -1,4 +1,4 @@
-all: plots solve solve_old_syntax
+all: plots solve 
 
 outp=--out out/
 dp1=plusinv1.mcdp
@@ -13,13 +13,13 @@ clean:
 	rm -rf out/
 
 solve:
-	mcdp-solve  $(outp) $(dp1)  "10 s"
-	mcdp-solve  $(outp) $(dp2)  "10 s"
-	mcdp-solve  $(outp) $(dp3) 	"10 s"
-	mcdp-solve  $(outp) $(dp4)  "10 s"
-	mcdp-solve  $(outp) $(dp5)  "nat:5"
-	mcdp-solve  $(outp) $(dp6)  "nat:4"
-	mcdp-solve  $(outp) $(dp7)  "nat:4"
+	mcdp-solve  --plot $(outp) $(dp1)  "10 s"
+	mcdp-solve  --plot $(outp) $(dp2)  "10 s"
+	mcdp-solve  --plot $(outp) $(dp3) 	"10 s"
+	mcdp-solve  --plot $(outp) $(dp4)  "10 s"
+	mcdp-solve  --plot $(outp) $(dp5)  "nat:5"
+	mcdp-solve  --plot $(outp) $(dp6)  "nat:4"
+	mcdp-solve  --plot $(outp) $(dp7)  "nat:4"
 	
 
 plots:

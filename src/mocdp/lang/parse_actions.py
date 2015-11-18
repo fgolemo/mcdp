@@ -13,6 +13,7 @@ from mocdp.lang.utils_lists import make_list
 from mocdp.posets import RcompUnits, Space, mult_table
 from pyparsing import ParseException, ParseFatalException
 import functools
+import os
 
 CDP = CDPLanguage
 
@@ -216,6 +217,14 @@ def plus_inv_parse_action(tokens):
     ops = make_list(tokens)
     return CDP.InvPlus(ops, where=ops.where)
 
+def parse_wrap_filename(expr, filename):
+    with open(filename) as f:
+        contents = f.read()
+    try:
+        return parse_wrap(expr, contents)
+    except (DPSyntaxError, DPSemanticError) as e:
+        raise e.with_filename(filename)
+
 def parse_wrap(expr, string):
     # Nice trick: the removE_comments doesn't change the number of lines
     # it only truncates them...
@@ -247,8 +256,20 @@ def remove_comments(s):
             return line
     return "\n".join(map(remove_comment, lines))
 
+def parse_ndp_filename(filename):
+    """ Reads the file and returns as NamedDP.
+        The exception are annotated with filename. """
+    with open(filename) as f:
+        contents = f.read()
+    try:
+        return parse_ndp(contents)
+    except (DPSyntaxError, DPSemanticError) as e:
+        raise e.with_filename(filename)
+
 # @contract(returns=NamedDP)
 def parse_ndp(string):
+    if os.path.exists(string):
+        raise ValueError('expected string, not filename :%s' % string)
     from mocdp.lang.syntax import Syntax
     v = parse_wrap(Syntax.dp_rvalue, string)[0]
 

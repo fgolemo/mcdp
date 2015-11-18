@@ -1,10 +1,10 @@
+from StringIO import StringIO
 from conf_tools.utils import dir_from_package_name, locate_files
 from contracts.utils import raise_desc
-from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp,
-    assert_parsable_to_unconnected_ndp, assert_semantic_error,
-    assert_syntax_error)
+from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp_fn,
+    assert_parsable_to_unconnected_ndp_fn, assert_semantic_error,
+    assert_semantic_error_fn, assert_syntax_error, assert_syntax_error_fn)
 import os
-from StringIO import StringIO
 
 
 def get_marked_tests(filename):
@@ -18,21 +18,26 @@ def get_marked_tests(filename):
 
     tests = []
     if 'unconnected' in line1:
-        tests.append(assert_parsable_to_unconnected_ndp)
-        tests.append(syntax_test)
+        tests.append(assert_parsable_to_unconnected_ndp_fn)
+        tests.append(syntax_test_fn)
     elif 'connected' in line1:
-        tests.append(assert_parsable_to_connected_ndp)
-        tests.append(syntax_test)
+        tests.append(assert_parsable_to_connected_ndp_fn)
+        tests.append(syntax_test_fn)
     elif 'semantic_error' in line1:
-        tests.append(assert_semantic_error)
+        tests.append(assert_semantic_error_fn)
     elif 'syntax_error' in line1:
-        tests.append(assert_syntax_error)
+        tests.append(assert_syntax_error_fn)
     else:
         msg = 'Please add one of "connected", "unconnected", '
         msg += '"semantic_error", "syntax_error" at the beginning of the file.'
         raise_desc(Exception, msg, line1=line1, filename=filename)
     return tests
-        
+
+def syntax_test_fn(filename):
+    with open(filename) as f:
+        contents = f.read()
+    return syntax_test(contents)
+
 def syntax_test(contents):
     from mocdp.dp_report.html import ast_to_html
     html = ast_to_html(contents, complete_document=False)
@@ -46,15 +51,13 @@ def syntax_test(contents):
 
 
 def test_one(test, filename):
-    with open(filename) as f:
-        contents = f.read()
-    test(contents)
+#     with open(filename) as f:
+#         contents = f.read()
+    test(filename)
 
 def test_report_dp1(filename, outdir, basename):
-    from mocdp.lang.syntax import parse_ndp
-    with open(filename) as f:
-        contents = f.read()
-    ndp = parse_ndp(contents)
+    from mocdp.lang.syntax import parse_ndp_filename
+    ndp = parse_ndp_filename(filename)
     dp = ndp.get_dp()
     from mocdp.dp_report.report import report_dp1
     r = report_dp1(dp)
@@ -64,10 +67,8 @@ def test_report_dp1(filename, outdir, basename):
     return r
 
 def test_report_ndp1(filename, outdir, basename):
-    from mocdp.lang.syntax import parse_ndp
-    with open(filename) as f:
-        contents = f.read()
-    ndp = parse_ndp(contents)
+    from mocdp.lang.syntax import parse_ndp_filename
+    ndp = parse_ndp_filename(filename)
     from mocdp.dp_report.report import report_ndp1
     r = report_ndp1(ndp)
     f = os.path.join(outdir, '%s_ndp1.html' % basename)
@@ -85,12 +86,10 @@ def known_fail(f, *args):
         raise Exception(msg)
 
 
-def define_test_for(context, filename, basename, known_failure=False):
+def define_test_for(context, filename, basename, tests, known_failure=False):
     outdir = os.path.dirname(filename)
     outdir = os.path.join(outdir, 'out')
 
-    tests = get_marked_tests(filename)
-    # print('tests for %s: %s' % (filename , tests))
     
     for test in tests:
         n = test.__name__.replace('assert_', '').replace('_ndp', '')
@@ -100,17 +99,18 @@ def define_test_for(context, filename, basename, known_failure=False):
             p_job = context.comp_config(test_one, test, filename,
                                         job_id=p_job_id)
         else:
-            context.comp_config(known_fail, test_one, test, filename, job_id=p_job_id)
+            context.comp_config(known_fail, test_one, test, filename,
+                                job_id=p_job_id)
 
     if not known_failure:
-        if (assert_parsable_to_connected_ndp in tests
-            or assert_parsable_to_unconnected_ndp in tests):
+        if (assert_parsable_to_connected_ndp_fn in tests
+            or assert_parsable_to_unconnected_ndp_fn in tests):
             job_id = '%s-%s' % (basename, 'report_ndp1')
             r = context.comp_config(test_report_ndp1, filename, outdir, basename,
                                     job_id=job_id, extra_dep=[p_job])
             context.add_report(r, 'examples_report_ndp1', file=basename)
 
-        if assert_parsable_to_connected_ndp in tests:
+        if assert_parsable_to_connected_ndp_fn in tests:
             job_id = '%s-%s' % (basename, 'report_dp1')
             r = context.comp_config(test_report_dp1, filename, outdir, basename,
                                      job_id=job_id, extra_dep=[p_job])
@@ -118,16 +118,39 @@ def define_test_for(context, filename, basename, known_failure=False):
         
     
 def define_tests(context):
-    folder = dir_from_package_name('mocdp.lang.tests.ok')
-
     filenames = []
+    folder = dir_from_package_name('mocdp.lang.tests.ok')
     filenames.extend(locate_files(folder, '*.cdp'))
     filenames.extend(locate_files(folder, '*.mcdp'))
 
     context = context.child('examples')
+    found = set()
+    def get_unique_basename(f):
+        orig = os.path.splitext(os.path.basename(f))[0]
+        if orig in found:
+            for i in range(10):
+                bn = '%s_%d' % (orig, i + 1)
+                if not bn in found:
+                    return bn
+            assert False, (orig, found)
+        else:
+            found.add(orig)
+            return orig
+
+    folder = os.path.join(dir_from_package_name('mocdp'), '../../examples')
+    examples2 = list(locate_files(folder, '*.mcdp'))
+    filenames.extend(examples2)
+
     for f in filenames:
-        basename = os.path.splitext(os.path.basename(f))[0]
-        define_test_for(context, f, basename)
+
+        basename = get_unique_basename(f)
+        print('defining %s' % basename)
+        if f in examples2:
+            tests = [assert_parsable_to_connected_ndp_fn]
+        else:
+            tests = get_marked_tests(f)
+        define_test_for(context, f, basename, tests)
+
 
     folder_notok = 'mocdp.lang.tests.ok'
     filenames = []
@@ -137,6 +160,7 @@ def define_tests(context):
     context = context.child('notok')
     for f in filenames:
         basename = os.path.splitext(os.path.basename(f))[0]
-        define_test_for(context, f, basename, known_failure=True)
+        tests = get_marked_tests(f)
+        define_test_for(context, f, basename, tests, known_failure=True)
 
 

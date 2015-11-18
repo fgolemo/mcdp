@@ -53,8 +53,8 @@ class TypesUniverse(Preorder):
         
         # Natural numbers can be embdedded into reals
         # (well, not all natural numbers, not biglongs, but close enough)
-        if isinstance(A, Nat) and isinstance(B, RcompUnits):
-            return
+#         if isinstance(A, Nat) and isinstance(B, RcompUnits):
+#             return
         if isinstance(A, Nat) and isinstance(B, Rcomp):
             return
 
@@ -91,11 +91,11 @@ class TypesUniverse(Preorder):
         from mocdp.posets.rcomp_units import RcompUnits
         from mocdp.posets.rcomp_units import format_pint_unit_short
 
-        if isinstance(A, Nat) and isinstance(B, RcompUnits):
-            return Identity(A, B), CoerceToInt(B, A)
+#         if isinstance(A, Nat) and isinstance(B, RcompUnits):
+#             return Identity(A, B), CoerceToInt(B, A)
 
         if isinstance(A, Nat) and isinstance(B, Rcomp):
-            return Identity(A, B), CoerceToInt(B, A)
+            return PromoteToFloat(A, B), CoerceToInt(B, A)
 
         if isinstance(A, Nat) and isinstance(B, Int):
             return Identity(A, B), Identity(B, A)
@@ -171,6 +171,15 @@ class CoerceToInt(Map):
     def _call(self, x):
         return int(x)
 
+
+class PromoteToFloat(Map):
+
+    @contract(cod=Space, dom=Space)
+    def __init__(self, cod, dom):
+        Map.__init__(self, cod, dom)
+
+    def _call(self, x):
+        return float(x)
 
 
 

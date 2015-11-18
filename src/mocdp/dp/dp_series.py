@@ -7,6 +7,7 @@ from mocdp.dp.primitive import Feasible, NormalForm, NotFeasible
 from mocdp.exceptions import DPInternalError, do_extra_checks
 from mocdp.posets import (Map, PosetProduct, SpaceProduct, UpperSets,
     get_product_compact)
+from mocdp.dp.tracer import Tracer
 
 
 __all__ = [
@@ -50,6 +51,7 @@ class Series0(PrimitiveDP):
         M, _, _ = get_product_compact(self.M1, self.extraM, self.M2)
 
 
+        self._solve_cache = {}
         PrimitiveDP.__init__(self, F=F1, R=R2, M=M)
         
     def evaluate_f_m(self, f1, m):
@@ -205,18 +207,27 @@ class Series0(PrimitiveDP):
                 msg += '\n' + indent(str(e2).strip(), ' 2| ')
                 raise_desc(Feasible, msg)
 
-
     def solve(self, func):
+        trace = Tracer()
+        return self.solve_trace(func, trace)
+
+    def solve_trace(self, func, trace):
+        if func in self._solve_cache:
+            # trace.log('using cache for %s' % str(func))
+            return trace.result(self._solve_cache[func])
+        trace.values(type='series')
         from mocdp.posets import UpperSet, poset_minima
 
-        u1 = self.dp1.solve(func)
+        with trace.child('dp1') as t:
+            u1 = self.dp1.solve_trace(func, t)
         # ressp1 = self.dp1.get_res_space()
         # tr1 = UpperSets(ressp1)
         # tr1.belongs(u1)
 
         mins = set([])
         for u in u1.minimals:
-            v = self.dp2.solve(u)
+            with trace.child('dp2') as t:
+                v = self.dp2.solve_trace(u, t)
             mins.update(v.minimals)
 
         ressp = self.get_res_space()
@@ -228,7 +239,9 @@ class Series0(PrimitiveDP):
         # tres.belongs(us)
 
         # print('solving for %s' % str(func))
-        return us
+        # return us
+        self._solve_cache[func] = us
+        return trace.result(us)
 
     def __repr__(self):
         return 'Series(%r, %r)' % (self.dp1, self.dp2)

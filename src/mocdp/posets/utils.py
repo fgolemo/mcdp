@@ -2,6 +2,7 @@
 
 from .poset import NotLeq
 from contracts import raise_wrapped
+import time
 
 __all__ = [
     'check_minimal',
@@ -15,9 +16,35 @@ def check_minimal(elements, poset):
         msg = 'Set of elements is not minimal: %s' % elements
         raise ValueError(msg)
 
+def time_poset_minima_func(f):
+    def ff(elements, leq):
+        class Storage:
+            nleq = 0
+        def leq2(a, b):
+            Storage.nleq += 1
+            return leq(a, b)
+        t0 = time.clock()
+        res = f(elements, leq2)
+        delta = time.clock() - t0
+        n1 = len(elements)
+        n2 = len(res)
+        if n1 == n2:
+
+            if n1 > 10:
+                print('unnecessary leq!')
+                print('poset_minima %d -> %d t = %f s nleq = %d leq = %s' %
+                      (n1, n2, delta, Storage.nleq, leq))
+        return res
+    return ff
+
+@time_poset_minima_func
 def poset_minima(elements, leq):
     """ Find the minima of a poset according to given comparison 
         function. For small sets only - O(n^2). """
+    n = len(elements)
+    if n == 1:
+        return elements
+
     res = []
     for e in elements:
         # nobody is less than it
