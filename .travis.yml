@@ -30,7 +30,8 @@ install:
 # command to run tests
 script: 
 # run first without contracts
-- make comptests-run-parallel-nocontracts
+#- make comptests-run-parallel-nocontracts
+- make comptests-run-nocontracts
 - make -C examples/example-catalogue
 - make -C examples/example-battery
 # the run with contracts

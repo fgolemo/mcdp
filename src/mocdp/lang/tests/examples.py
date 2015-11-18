@@ -2,8 +2,8 @@ from StringIO import StringIO
 from conf_tools.utils import dir_from_package_name, locate_files
 from contracts.utils import raise_desc
 from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp_fn,
-    assert_parsable_to_unconnected_ndp_fn, assert_semantic_error,
-    assert_semantic_error_fn, assert_syntax_error, assert_syntax_error_fn)
+    assert_parsable_to_unconnected_ndp_fn,
+    assert_semantic_error_fn, assert_syntax_error_fn)
 import os
 
 

@@ -10,7 +10,6 @@ from mocdp.posets.rcomp import Rcomp
 from mocdp.posets.types_universe import get_types_universe
 from mocdp.posets.uppersets import UpperSet, UpperSets
 import functools
-import numpy as np
 
 def generic_report_trace(r, ndp, dp, trace, annotation=None, axis0=(0, 0, 0, 0)):
     r.text('dp', dp.repr_long())
