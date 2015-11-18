@@ -11,8 +11,8 @@ along with the MCDPL snippet that describes it (right)*
 
 <table>
  <tr>
- <td><img src="examples/example-battery/out_expected/battery_minimal-clean.png" width="500px"/></td>
- <td><img src="examples/example-battery/out_expected/battery_minimal-syntax_pdf.png" width="200px"/>
+ <td><img src="examples/example-battery/out_expected/battery_minimal-clean.png" width="400px"/></td>
+ <td><img src="examples/example-battery/out_expected/battery_minimal-syntax_pdf.png" width="300px"/>
  </td>
  </tr>
 </table>
