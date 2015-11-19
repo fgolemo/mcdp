@@ -58,6 +58,9 @@ Then install the main module:
  <td><img src="examples/example-plusinv/animations/plusinvnat2-nat4.gif" width="300px"/></td>
  <td><img src="examples/example-plusinv/animations/plusinvnat2-nat10.gif" width="300px"/></td>
  </tr>
+ <tr>
+ <td><img src="examples/example-plusinv/animations/legend.png" width="500px"/></td>
+ </tr>
 </table>
 
 The program ``mcdp-solve`` is a solver.
