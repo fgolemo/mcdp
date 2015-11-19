@@ -54,13 +54,18 @@ Then install the main module:
  <td><img src="examples/example-plusinv/animations/plusinvnat2-nat10.gif" width="300px"/>
  </td>
  </tr>
-</table>
+<tr>
+ <td><img src="examples/example-plusinv/animations/plusinvnat2-nat4-problem.png" width="300px"/></td>
+ <td><img src="examples/example-plusinv/animations/plusinvnat2-nat10-problem.png" width="300px"/>
+ </td>
+ </tr>
+<</table>
 
 The program ``mcdp-solve`` is a solver.
 
     $ mcdp-solve <filename>.mcdp <f1> <f2> ...
     
-For example, to solve one the example specified in ``examples/example-battery/battery.mcdp'', use:
+For example, to solve the problem specified in ``examples/example-battery/battery.mcdp``, use:
 
     $ mcdp-solve examples/example-battery/battery.mcdp "<1 hour, 0.1 kg, 1 W>"
 
