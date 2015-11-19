@@ -46,7 +46,16 @@ Then install the main module:
 <!-- 	 -->
 
 
-#### Solving Co-Design Problems
+#### Solving Monotone Co-Design Problems
+
+To solve an MCDP, one constructs a chain of antichains in the product poset of resources. 
+
+The animations below show the sequence of antichains being
+constructed to solve two variations of the same problem.
+
+(Whether the problem statement describes an MCDP is 
+absolutely not obvious using the formula representation;  it becomes obvious when writing the problem as a graph
+of monotone problems.)
 
 <table>
 <tr>
