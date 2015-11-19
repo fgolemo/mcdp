@@ -365,7 +365,7 @@ class DPLoop0(PrimitiveDP):
         trace.log('Starting from %s' % UR.format(s0))
 
         S = [Iteration(s=s0, converged=set())]
-        for i in range(100):  # XXX
+        for i in range(1000):  # XXX
             with trace.iteration(i) as t:
                 si = S[-1].s
                 sip, converged = iterate(self.dp1, f1, R, si, t)

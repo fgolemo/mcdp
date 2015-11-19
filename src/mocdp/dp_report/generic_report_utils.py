@@ -2,7 +2,7 @@
 
 from abc import ABCMeta, abstractmethod
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, indent
 from mocdp.drawing import plot_upset_R2
 from mocdp.posets.poset import NotLeq
 from mocdp.posets.poset_product import PosetProduct
@@ -10,17 +10,25 @@ from mocdp.posets.rcomp import Rcomp
 from mocdp.posets.types_universe import get_types_universe
 from mocdp.posets.uppersets import UpperSet, UpperSets
 import functools
+from cdpview.go import safe_makedirs
+import os
+from system_cmd.interface import system_cmd_show
+from system_cmd.structures import CmdException
+from reprep.config import RepRepDefaults
 
-def generic_report_trace(r, ndp, dp, trace, annotation=None, axis0=(0, 0, 0, 0)):
+extra_space_finite = 0.025
+extra_space_top = 0.05
+
+def generic_report_trace(r, ndp, dp, trace, out, annotation=None, axis0=(0, 0, 0, 0)):
     r.text('dp', dp.repr_long())
     # r.text('trace', trace.format())
     
     for l, trace_loop in enumerate(trace.find_loops()):
         with r.subsection('loop%d' % l) as r2:
-            _report_loop(r2, trace_loop)
+            _report_loop(r2, trace_loop, out)
         
         
-def _report_loop(r, trace_loop):
+def _report_loop(r, trace_loop, out):
     sips = list(trace_loop.get_iteration_values('sip'))
     converged = list(trace_loop.get_iteration_values('converged'))
 #     r.text('sip', str(sips))
@@ -35,19 +43,73 @@ def _report_loop(r, trace_loop):
 
             axis = plotter.axis_for_sequence(UR, sips)
 
+            axis = list(axis)
+            axis[0] = 0.0
+            axis[2] = 0.0
+            axis[1] = min(axis[1], 1000.0)
+            axis[3] = min(axis[3], 1000.0)
+            axis = tuple(axis)
+            RepRepDefaults.savefig_params['transparent'] = False
+
+            outdir = os.path.join(out, 'video-%s' % name)
+
+            visualized_axis = enlarge(axis, extra_space_top * 2)
+            print('Decided on axis %s' % str(axis))
             for i, sip in enumerate(sips):
                 with f.plot('step%d' % i) as pylab:
+
                     c_orange = '#FFA500'
                     c_red = [1, 0.5, 0.5]
+                    print('bottom')
                     plotter.plot(pylab, axis, UR, R.U(R.get_bottom()), params=dict(color_shadow=c_red, markers=None))
+                    print('sip')
                     plotter.plot(pylab, axis, UR, sip, params=dict(color_shadow=c_orange))
                     conv = converged[i]
                     c_blue = [0.6, 0.6, 1.0]
+                    print('converged')
                     plotter.plot(pylab, axis, UR, R.Us(converged[i]), params=dict(color_shadow=c_blue))
+                    print('minimal')
                     for c in conv:
                         p = plotter.toR2(c)
                         pylab.plot(p[0], p[1], 'go', markersize=10, markeredgecolor='g')
-                    pylab.axis(axis)
+                    # pylab.axis(enlarge_topright(axis, extra_space_top * 2))
+                    pylab.axis(visualized_axis)
+#
+#                     pylab.gcf().patch.set_facecolor('blue')
+#                     pylab.gcf().patch.set_alpha(0.7)
+
+                node = f.resolve_url('step%d/png' % i)
+
+                safe_makedirs(outdir)
+                fn = os.path.join(outdir, '%05d.png' % i)
+                with open(fn, 'w') as fi:
+                    fi.write(node.raw_data)
+
+            outmp4 = os.path.join(out, 'video-%s.mp4' % name)
+
+            try:
+                from procgraph_mplayer.scripts.join_video import join_video_29
+            except ImportError as e:
+                print(e)
+            else:
+                join_video_29(output=outmp4, dirname=outdir, pattern='.*.png', fps=1.0)
+#
+#             cmd2 = ['pg-video-join',
+#                 '-d', outdir,
+#                 '-p', '.*.png',
+#                 '--fps', '1',
+#                 '-o', outmp4]
+#
+#             try:
+#                 system_cmd_show('.', cmd2)
+#                 metadata = outmp4 + '.metadata.yaml'
+#                 if os.path.exists(metadata):
+#                     os.unlink(metadata)
+#             except CmdException as e:
+#                 if 'No such file or directory' in str(e):
+#                     print('Could not create video - ignoring')
+#                     print(indent(str(e), '> '))
+
 
 def generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0)):
    
@@ -114,7 +176,7 @@ def generic_plot(f, space, value):
         axis = plotter.axis_for_sequence(space, [value])
         # axis = enlarge(axis, 0.15)
         with f.plot(name) as pylab:
-            plotter.plot(pylab, axis, space, value)
+            plotter.plot(pylab, axis, space, value, params={})
             pylab.axis(axis)
 
 def generic_plot_sequence(r, plotter, space, sequence, axis0=None, annotation=None):
@@ -166,7 +228,7 @@ class Plotter():
         pass
 
     @abstractmethod
-    def plot(self, pylab, axis, space, value):
+    def plot(self, pylab, axis, space, value, params):
         pass
 
     def get_xylabels(self, _space):
@@ -198,21 +260,65 @@ class PlotterUR2(Plotter):
     def axis_for_sequence(self, space, seq):
         self.check_plot_space(space)
 
-
         R2 = PosetProduct((Rcomp(), Rcomp()))
         tu = get_types_universe()
         P_TO_S, _ = tu.get_embedding(space.P, R2)
 
-        points2d = [[(P_TO_S(_)) for _ in s.minimals] for s in seq]
+        maxx, maxy = 1000.0, 1000.0
+        def limit(p):
+            x, y = p
+            x = min(x, maxx)
+            y = min(y, maxy)
+            return x, y
+
+        points2d = [[(limit(P_TO_S(_))) for _ in s.minimals] for s in seq]
+
         axes = [get_bounds(_) for _ in points2d]
         return enlarge(functools.reduce(reduce_bounds, axes), 0.1)
 
-    def plot(self, pylab, axis, space, value):
+    def toR2(self, p):
+        return self._get_screen_coords(p, self.axis)
+
+    def _get_screen_coords(self, p, axis=None):
+        x, y = p
+
+        if axis is not None:
+            dy = (axis[3] - axis[2]) * extra_space_top
+            dx = (axis[1] - axis[0]) * extra_space_top
+            top_x = axis[1] + dx
+            top_y = axis[3] + dy
+
+        if isinstance(x, (float, int)):
+            x = min(axis[1], x)
+        else:  # top
+            x = top_x
+        if isinstance(y, (float, int)):
+            y = min(axis[3], y)
+        else:  # top
+            y = top_y
+
+        p2 = x, y
+
+#         print('p: %s -> %s' % (p, p2))
+        return p2
+
+    def plot(self, pylab, axis, space, value, params):
+        params0 = dict(color_shadow=[1.0, 0.8, 0.8], markers='k.',
+                       markers_params={})
+        params0.update(params)
+        color_shadow = params0['color_shadow']
+        markers = params0['markers']
+
+        self.axis = axis
         self.check_plot_space(space)
 
-        v = value
+        minimals = [self._get_screen_coords(_, axis) for _ in value.minimals]
 
-        plot_upset_R2(pylab, v, axis, color_shadow=[1.0, 0.8, 0.8])
+        # R2 = PosetProduct((Rcomp(), Rcomp()))
+        v = space.P.Us(minimals)
+#         print('drawing v= %s' % str(v))
+        plot_upset_R2(pylab, v, axis, extra_space_shadow=extra_space_finite,
+                      color_shadow=color_shadow)
 
 
 # Upsets((R[s]×R[s])×R[s])
@@ -252,11 +358,9 @@ class PlotterURRpR(Plotter):
         return enlarge(functools.reduce(reduce_bounds, axes), 0.1)
 
 
-    def plot(self, pylab, axis, space, value, params=None):
+    def plot(self, pylab, axis, space, value, params={}):
         params0 = dict(color_shadow=[1.0, 0.8, 0.8], markers='k.',
                        markers_params={})
-        if params is None:
-            params = {}
         params0.update(params)
         color_shadow = params0['color_shadow']
         markers = params0['markers']
@@ -307,13 +411,35 @@ class PlotterURRpR_23(PlotterURRpR):
         return (b, c)
 
 
+def enlarge_x(b, f):
+    w = b[1] - b[0]
+    h = b[3] - b[2]
+    dw = f * w
+    dh = 0
+    return (b[0] - dw, b[1] + dw, b[2] - dh, b[3] + dh)
 
+def enlarge_y(b, f):
+    w = b[1] - b[0]
+    h = b[3] - b[2]
+    dw = 0
+    dh = h * f
+    return (b[0] - dw, b[1] + dw, b[2] - dh, b[3] + dh)
+
+
+@contract(b='seq[4](float)', f='float,>=0')
 def enlarge(b, f):
     w = b[1] - b[0]
     h = b[3] - b[2]
     dw = f * w
     dh = h * f
     return (b[0] - dw, b[1] + dw, b[2] - dh, b[3] + dh)
+
+def enlarge_topright(b, f):
+    w = b[1] - b[0]
+    h = b[3] - b[2]
+    dw = f * w
+    dh = h * f
+    return (b[0], b[1] + dw, b[2], b[3] + dh)
 
 def reduce_bounds(b1, b2):
     return (min(b1[0], b2[0]),
@@ -326,8 +452,25 @@ def get_bounds(points):
         return (0, 0, 0, 0)
     xs = [p[0] for p in points]
     ys = [p[1] for p in points]
-    return (min(xs), max(xs), min(ys), max(ys))
+    return (min_comp(xs, 0.0),
+            max_comp(xs, 0.0),
+            min_comp(ys, 0.0),
+            max_comp(ys, 0.0))
 
+def _get_finite(xs):
+    return  [_ for _ in xs if isinstance(_, (int, float))]
+
+def max_comp(xs, d):
+    xs = _get_finite(xs)
+    if not xs:
+        return d
+    return max(xs)
+
+def min_comp(xs, d):
+    xs = _get_finite(xs)
+    if not xs:
+        return d
+    return min(xs)
 
 plotters = {
        'UR2': PlotterUR2(),

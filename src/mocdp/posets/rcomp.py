@@ -11,7 +11,8 @@ __all__ = [
 
 class RcompTop():
     def __repr__(self):
-        return "⊤"
+        # return "⊤"
+        return "∞"
     def __eq__(self, x):
         return isinstance(x, RcompTop)
     def __hash__(self):

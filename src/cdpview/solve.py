@@ -136,6 +136,10 @@ class SolveDP(QuickAppBase):
                     raise_desc(ExpectationsNotMet, msg, expect_nimp=options.expect_nimp,
                                nimplementations=nimplementations)
 
+        params = '-'.join(params).replace(' ', '').replace('{', '').replace('}', '').replace(':', '')
+            
+        out = os.path.splitext(os.path.basename(filename))[0] + '-'  + params
+
         if options.plot:
             r = Report()
             if options.advanced:
@@ -143,11 +147,9 @@ class SolveDP(QuickAppBase):
             else:
                 f = r.figure()
                 generic_plot(f, space=UR, value=res)
-                generic_report_trace(r, ndp, dp, trace)
+                generic_report_trace(r, ndp, dp, trace, out)
 
-            params = '-'.join(params).replace(' ', '').replace('{', '').replace('}', '').replace(':', '')
-            out_html = os.path.splitext(os.path.basename(filename))[0] + '-%s.html' % params
-            out_html = os.path.join(out, out_html)
+            out_html = os.path.join(out, 'report.html')
             print('writing to %r' % out_html)
             r.to_html(out_html)
 
