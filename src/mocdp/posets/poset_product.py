@@ -3,6 +3,7 @@ from .poset import NotLeq, Poset
 from .space_product import SpaceProduct
 from contracts import contract
 from contracts.utils import indent, raise_desc
+from mocdp.exceptions import do_extra_checks
 
 __all__ = [
     'PosetProduct',
@@ -25,8 +26,9 @@ class PosetProduct(SpaceProduct, Poset):
         return True
 
     def check_leq(self, a, b):
-        self.belongs(a)
-        self.belongs(b)
+        if do_extra_checks():
+            self.belongs(a)
+            self.belongs(b)
         problems = []
         for i, (sub, x, y) in enumerate(zip(self.subs, a, b)):
             try:

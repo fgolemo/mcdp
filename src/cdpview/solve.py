@@ -2,10 +2,12 @@
 from conf_tools import GlobalConfig
 from contracts import contract
 from contracts.utils import raise_desc
+from decent_params import UserError
 from mocdp.comp.context import Context
 from mocdp.dp.solver import generic_solve
-from mocdp.dp_report.generic_report_utils import generic_report, generic_plot, \
-    generic_report_trace
+from mocdp.dp.tracer import Tracer
+from mocdp.dp_report.generic_report_utils import (generic_plot, generic_report,
+    generic_report_trace)
 from mocdp.lang.eval_constant_imp import eval_constant
 from mocdp.lang.parse_actions import parse_ndp, parse_wrap
 from mocdp.lang.syntax import Syntax
@@ -15,8 +17,6 @@ from quickapp import QuickAppBase
 from reprep import Report
 import logging
 import os
-from decent_params.utils.script_utils import UserError
-from mocdp.dp.tracer import Tracer
 
 
 class ExpectationsNotMet(Exception):
@@ -26,18 +26,23 @@ class SolveDP(QuickAppBase):
     """ Solves an MCDP. """
 
     def define_program_options(self, params):
-        params.add_string('out', help='Output dir', default=None)
-        params.add_int('max_steps', help='Maximum number of steps', default=None)
+        params.add_string('out',
+                          help='Output dir', default=None)
+        params.add_int('max_steps',
+                       help='Maximum number of steps', default=None)
 
-        params.add_int('expect_nimp', help='Expected number of implementations.',
+        params.add_int('expect_nimp',
+                       help='Expected number of implementations.',
                         default=None)
-        params.add_int('expect_nres', help='Expected number of resources.',
+        params.add_int('expect_nres',
+                       help='Expected number of resources.',
                         default=None)
         params.accept_extra()
         params.add_flag('plot', help='Show iterations graphically')
         params.add_flag('imp', help='Compute and show implementations.')
 
-        params.add_flag('advanced', help='Solve by advanced solver (in development)')
+        params.add_flag('advanced',
+                        help='Solve by advanced solver (in development)')
 
     def go(self):
         from conf_tools import logger
@@ -91,8 +96,10 @@ class SolveDP(QuickAppBase):
         if not options.advanced:
             trace = Tracer()
             res = dp.solve_trace(fg, trace)
-            print('results: %s' % UR.format(res))
-            # trace = generic_solve_by_loop(dp0, f=fg, max_steps=max_steps)
+            rnames = ndp.get_rnames()
+            x = ", ".join(rnames)
+            print('Minimal resources needed: %s = %s'
+                  % (x, UR.format(res)))
 
         else:
             try:
@@ -100,13 +107,15 @@ class SolveDP(QuickAppBase):
                 print('Iteration result: %s' % trace.result)
                 ss = trace.get_s_sequence()
                 S = trace.S
-                print('Fixed-point iteration converged to: %s' % S.format(ss[-1]))
+                print('Fixed-point iteration converged to: %s'
+                      % S.format(ss[-1]))
                 R = trace.dp.get_res_space()
                 UR = UpperSets(R)
                 sr = trace.get_r_sequence()
                 rnames = ndp.get_rnames()
                 x = ", ".join(rnames)
-                print('Minimal resources needed: %s = %s' % (x, UR.format(sr[-1])))
+                print('Minimal resources needed: %s = %s'
+                      % (x, UR.format(sr[-1])))
 
             except:
                 raise
@@ -133,17 +142,21 @@ class SolveDP(QuickAppBase):
             if options.expect_nimp is not None:
                 if options.expect_nimp != nimplementations:
                     msg = 'Found wrong number of implementations'
-                    raise_desc(ExpectationsNotMet, msg, expect_nimp=options.expect_nimp,
+                    raise_desc(ExpectationsNotMet, msg,
+                               expect_nimp=options.expect_nimp,
                                nimplementations=nimplementations)
 
-        params = '-'.join(params).replace(' ', '').replace('{', '').replace('}', '').replace(':', '')
-            
-        out = os.path.splitext(os.path.basename(filename))[0] + '-'  + params
+        pp = '-'.join(params)
+        for forbidden in ['-',' ','{','}',':']:
+            pp = pp.replace(forbidden, '')
+
+        out = os.path.splitext(os.path.basename(filename))[0] + '-' + pp
 
         if options.plot:
             r = Report()
             if options.advanced:
-                generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0))
+                generic_report(r, dp, trace,
+                               annotation=None, axis0=(0, 0, 0, 0))
             else:
                 f = r.figure()
                 generic_plot(f, space=UR, value=res)

@@ -1,9 +1,8 @@
 from abc import ABCMeta, abstractmethod
 from contracts import contract
+from contracts.utils import raise_desc, raise_wrapped
 from mocdp.configuration import get_conftools_nameddps
-from mocdp.posets import PosetProduct
-from mocdp.posets.space import NotEqual
-from contracts.utils import raise_wrapped, raise_desc
+from mocdp.posets import NotEqual, PosetProduct
 
 
 __all__ = [
@@ -112,13 +111,15 @@ class NamedDPCoproduct(NamedDP):
                 tu.check_equal(ftypes, ftypes_i)
             except NotEqual as e:
                 msg = 'Cannot create co-product: ftypes do not match.'
-                raise_wrapped(ValueError, e, msg, ftypes=ftypes, ftypes_i=ftypes_i)
+                raise_wrapped(ValueError, e, msg,
+                              ftypes=ftypes, ftypes_i=ftypes_i)
 
             try:
                 tu.check_equal(rtypes, rtypes_i)
             except NotEqual as e:
                 msg = 'Cannot create co-product: rtypes do not match.'
-                raise_wrapped(ValueError, e, msg, rtypes=rtypes, rtypes_i=rtypes_i)
+                raise_wrapped(ValueError, e, msg,
+                              rtypes=rtypes, rtypes_i=rtypes_i)
 
         self.ndps = ndps
 

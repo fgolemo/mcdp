@@ -12,7 +12,8 @@ def plot_upset_minima(pylab, us):
 
 
 @contract(us=UpperSet)
-def plot_upset_R2(pylab, us, axis, color_shadow, extra_space_shadow=0.05, color_lines='none', markers='r.'):
+def plot_upset_R2(pylab, us, axis, color_shadow,
+                  extra_space_shadow=0.05, color_lines='none', markers='r.'):
     from mocdp.dp_report.generic_report_utils import enlarge_x
     from mocdp.dp_report.generic_report_utils import enlarge_y
 

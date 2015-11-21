@@ -1,25 +1,23 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABCMeta, abstractmethod
+from cdpview.go import safe_makedirs
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped, indent
+from contracts.utils import raise_desc, raise_wrapped
 from mocdp.drawing import plot_upset_R2
 from mocdp.posets.poset import NotLeq
 from mocdp.posets.poset_product import PosetProduct
 from mocdp.posets.rcomp import Rcomp
 from mocdp.posets.types_universe import get_types_universe
 from mocdp.posets.uppersets import UpperSet, UpperSets
-import functools
-from cdpview.go import safe_makedirs
-import os
-from system_cmd.interface import system_cmd_show
-from system_cmd.structures import CmdException
 from reprep.config import RepRepDefaults
+import functools
+import os
 
 extra_space_finite = 0.025
 extra_space_top = 0.05
 
-def generic_report_trace(r, ndp, dp, trace, out, annotation=None, axis0=(0, 0, 0, 0)):
+def generic_report_trace(r, ndp, dp, trace, out):
     r.text('dp', dp.repr_long())
     # r.text('trace', trace.format())
     
@@ -31,8 +29,6 @@ def generic_report_trace(r, ndp, dp, trace, out, annotation=None, axis0=(0, 0, 0
 def _report_loop(r, trace_loop, out):
     sips = list(trace_loop.get_iteration_values('sip'))
     converged = list(trace_loop.get_iteration_values('converged'))
-#     r.text('sip', str(sips))
-#     r.text('converged', str(converged))
     
     UR = trace_loop.get_value1('UR')
     R = trace_loop.get_value1('R')
@@ -61,17 +57,21 @@ def _report_loop(r, trace_loop, out):
                     c_orange = '#FFA500'
                     c_red = [1, 0.5, 0.5]
                     print('bottom')
-                    plotter.plot(pylab, axis, UR, R.U(R.get_bottom()), params=dict(color_shadow=c_red, markers=None))
+                    plotter.plot(pylab, axis, UR, R.U(R.get_bottom()),
+                                 params=dict(color_shadow=c_red, markers=None))
                     print('sip')
-                    plotter.plot(pylab, axis, UR, sip, params=dict(color_shadow=c_orange))
+                    plotter.plot(pylab, axis, UR, sip,
+                                 params=dict(color_shadow=c_orange))
                     conv = converged[i]
                     c_blue = [0.6, 0.6, 1.0]
                     print('converged')
-                    plotter.plot(pylab, axis, UR, R.Us(converged[i]), params=dict(color_shadow=c_blue))
+                    plotter.plot(pylab, axis, UR, R.Us(converged[i]),
+                                 params=dict(color_shadow=c_blue))
                     print('minimal')
                     for c in conv:
                         p = plotter.toR2(c)
-                        pylab.plot(p[0], p[1], 'go', markersize=10, markeredgecolor='g')
+                        pylab.plot(p[0], p[1], 'go',
+                                   markersize=10, markeredgecolor='g')
                     # pylab.axis(enlarge_topright(axis, extra_space_top * 2))
                     pylab.axis(visualized_axis)
 #
@@ -92,7 +92,8 @@ def _report_loop(r, trace_loop, out):
             except ImportError as e:
                 print(e)
             else:
-                join_video_29(output=outmp4, dirname=outdir, pattern='.*.png', fps=1.0)
+                join_video_29(output=outmp4, dirname=outdir,
+                              pattern='.*.png', fps=1.0)
 #
 #             cmd2 = ['pg-video-join',
 #                 '-d', outdir,
@@ -137,7 +138,8 @@ def get_plotters(plotters, space):
             pass
 
 
-def generic_try_plotters(r, plotters, space, sequence, axis0=None, annotation=None):
+def generic_try_plotters(r, plotters, space, sequence,
+                         axis0=None, annotation=None):
     nplots = 0
     es = []
     for name, plotter in plotters.items():
@@ -150,10 +152,12 @@ def generic_try_plotters(r, plotters, space, sequence, axis0=None, annotation=No
         nplots += 1
 
         f = r.figure(name, cols=5)
-        generic_plot_sequence(f, plotter, space, sequence, axis0=axis0, annotation=annotation)
+        generic_plot_sequence(f, plotter, space, sequence, axis0=axis0,
+                              annotation=annotation)
 
     if not nplots:
-        r.text('error', 'No plotters for %s' % space + '\n\n' + "\n".join(str(e) for e in es))
+        r.text('error', 'No plotters for %s' % space +
+               '\n\n' + "\n".join(str(e) for e in es))
 
 
 def join_axes(a, b):
@@ -179,7 +183,8 @@ def generic_plot(f, space, value):
             plotter.plot(pylab, axis, space, value, params={})
             pylab.axis(axis)
 
-def generic_plot_sequence(r, plotter, space, sequence, axis0=None, annotation=None):
+def generic_plot_sequence(r, plotter, space, sequence,
+                          axis0=None, annotation=None):
 
     axis = plotter.axis_for_sequence(space, sequence)
 
@@ -388,7 +393,8 @@ class PlotterURRpR(Plotter):
 
 
         v = MyUpperSet(points2d, P=R2)
-        plot_upset_R2(pylab, v, axis, color_shadow=color_shadow, markers=markers)
+        plot_upset_R2(pylab, v, axis,
+                      color_shadow=color_shadow, markers=markers)
         # for p in points2d:
         #    pylab.plot(p[0], p[1], 'rx')
 
