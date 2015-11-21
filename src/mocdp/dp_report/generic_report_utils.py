@@ -233,7 +233,7 @@ class Plotter():
         pass
 
     @abstractmethod
-    def plot(self, pylab, axis, space, value, params):
+    def plot(self, pylab, axis, space, value, params={}):
         pass
 
     def get_xylabels(self, _space):
@@ -307,7 +307,7 @@ class PlotterUR2(Plotter):
 #         print('p: %s -> %s' % (p, p2))
         return p2
 
-    def plot(self, pylab, axis, space, value, params):
+    def plot(self, pylab, axis, space, value, params={}):
         params0 = dict(color_shadow=[1.0, 0.8, 0.8], markers='k.',
                        markers_params={})
         params0.update(params)

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest_dynamic, comptest
+from comptests.registrar import comptest_dynamic, comptest, comptest_fails
 from mocdp.dp.solver import generic_solve
 from mocdp.dp_report.generic_report_utils import generic_report
 from mocdp.drawing import plot_upset_R2
@@ -539,7 +539,7 @@ mcdp {
     print res2
     UR.check_equal(res2, expected)
 
-@comptest
+@comptest_fails
 def check_loop_result5a():
 
     mx = 10
