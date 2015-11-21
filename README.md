@@ -95,21 +95,22 @@ For example, the command
 will produce these graphs:
 
 <table>
-<tr>
-    <td>Syntax highlighting</td>
-    <td><a href="examples/example-battery/out_expected/battery-syntax_pdf.png">
-        <img src="examples/example-battery/out_expected/battery-syntax_pdf.png" height="500px"/>
-        </a>
-    </td>
-</tr>
-<tr><td>Verbose graph</td><td><a href="examples/example-battery/out_expected/battery-default.png"><img src="examples/example-battery/out_expected/battery-default.png"/></a></td></tr>
-<tr><td>Cleaned-up graph</td><td ><a href="examples/example-battery/out_expected/battery-clean.png">
-<img src="examples/example-battery/out_expected/battery-clean.png" height="300px"/></a></td></tr>
-<tr><td>Tree representation</td><td><img src="examples/example-battery/out_expected/battery-dp_tree.png"/></td></tr>
-</tr></table>
+    <tr>
+        <td>Syntax highlighting</td>
+        <td><a href="examples/example-battery/out_expected/battery-syntax_pdf.png">
+            <img src="examples/example-battery/out_expected/battery-syntax_pdf.png" height="500px"/>
+            </a>
+        </td>
+    </tr>
+    <tr><td>Verbose graph</td><td><a href="examples/example-battery/out_expected/battery-default.png"><img src="examples/example-battery/out_expected/battery-default.png"/></a></td></tr>
+    <tr><td>Cleaned-up graph</td><td ><a href="examples/example-battery/out_expected/battery-clean.png">
+    <img src="examples/example-battery/out_expected/battery-clean.png" height="300px"/></a></td></tr>
+    <tr><td>Tree representation</td><td><img src="examples/example-battery/out_expected/battery-dp_tree.png"/></td></tr>
+    </tr>
+</table>
 
 
-## Visualization of the solution
+<h2>Visualization of the solution</h2>
 
 To solve an MCDP, one constructs a chain of antichains in the product poset of resources. 
 
