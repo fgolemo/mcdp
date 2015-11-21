@@ -98,7 +98,7 @@ class PrimitiveDP(WithInternalLog):
                         self.F.format(f), self.M.format(m), self.R.format(used), self.R.format(r))
             raise_desc(NotFeasible, msg)  # f=f, m=m, r=r, used=used)
 
-    def get_implementations_f_r(self, f, r):
+    def get_implementations_f_r(self, f, r):  # @UnusedVariable
         """ Returns the set of implementations that realize the pair (f, r).
             Returns a non-empty set or raises NotFeasible. """
         M = self.get_imp_space_mod_res()

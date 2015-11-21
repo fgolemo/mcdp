@@ -35,9 +35,6 @@ class InvMult2(PrimitiveDP):
         if m == 0.0:
             return (0.0, 0.0)
         return (m, f / m)
-
-        # print self.F, f
-#         raise NotImplementedError()
     
     def solve_approx(self, f, n, nu):
         m = n / 2
