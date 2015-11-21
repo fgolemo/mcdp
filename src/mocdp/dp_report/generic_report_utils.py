@@ -432,7 +432,7 @@ def enlarge_y(b, f):
     return (b[0] - dw, b[1] + dw, b[2] - dh, b[3] + dh)
 
 
-@contract(b='seq[4](float)', f='float,>=0')
+@contract(b='seq[4](float|int)', f='float,>=0')
 def enlarge(b, f):
     w = b[1] - b[0]
     h = b[3] - b[2]

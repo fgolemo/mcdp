@@ -1,0 +1,19 @@
+mcdp {  
+ provides endurance [s] 
+ provides payload   [kg]
+ battery = instance template 
+  mcdp {
+    provides capacity [J]
+    requires mass     [kg]
+  }
+ actuation = instance template 
+  mcdp {
+    provides lift  [N]
+    requires power [W]
+  }
+ capacity provided by battery >= 
+    endurance * (power required by actuation)
+ g = 9.81 m/s^2
+ lift provided by actuation >=
+    (mass required by battery + payload) * g
+}
