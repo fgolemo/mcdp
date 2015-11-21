@@ -10,9 +10,9 @@ python:
   # - "3.5-dev" # 3.5 development branch
   # - "pypy"
 # command to install dependencies
-# cache:
-#   directories:
-#     - $HOME/.cache/pip
+cache:
+  directories:
+    - $HOME/.cache/pip
 install: 
 - "echo '\nconfig interactive 0\nconfig echo_stdout 0\nconfig echo_stderr 0\nconfig echo False\nconfig status_line_enabled False\nconfig console_status False' >> .compmake.rc "
 - "cat .compmake.rc"
