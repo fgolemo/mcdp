@@ -14,7 +14,7 @@ python:
 #   directories:
 #     - $HOME/.cache/pip
 install: 
-- "echo '\nconfig interactive 0\nconfig echo_stdout 0\nconfig echo_stderr 0\nconfig echo 0\n config status_line_enabled 0' >> .compmake.rc "
+- "echo '\nconfig interactive 0\nconfig echo_stdout 0\nconfig echo_stderr 0\nconfig echo False\n config status_line_enabled False' >> .compmake.rc "
 - "cat .compmake.rc"
 - "pip install -r requirements.txt"
 - dot -V
