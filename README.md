@@ -17,15 +17,24 @@ along with the MCDPL snippet that describes it (right)*
  </tr>
 </table>
 
+## Installation
 
-## Installation with pip
+### Prerequisites
+
+On Ubuntu:
+
+    sudo apt-get install python-numpy python-matplotlib python-yaml
+    sudo apt-get install graphviz
+    sudo apt-get install wkhtmltopdf
+
+### Installation with pip
 
 Run this:
 
 	$ pip install -U PyMCDP 
 
 
-## Installation from source
+### Installation from source
 
 Clone the repo:
 
@@ -47,30 +56,6 @@ Then install the main module:
 
 
 #### Solving Monotone Co-Design Problems
-
-To solve an MCDP, one constructs a chain of antichains in the product poset of resources. 
-
-The animations below show the sequence of antichains being
-constructed to solve two variations of the same problem.
-
-(Whether the problem statement describes an MCDP is 
-absolutely not obvious using the formula representation;  it becomes obvious when writing the problem as a graph
-of monotone problems.)
-
-<table>
-<tr>
- <td><img src="examples/example-plusinv/animations/plusinvnat2-nat4-problem.png" width="300px"/></td>
- <td><img src="examples/example-plusinv/animations/plusinvnat2-nat10-problem.png" width="300px"/>
- </td>
- </tr>
- <tr>
- <td><img src="examples/example-plusinv/animations/plusinvnat2-nat4.gif" width="300px"/></td>
- <td><img src="examples/example-plusinv/animations/plusinvnat2-nat10.gif" width="300px"/></td>
- </tr>
- <tr>
- <td colspan="2"><img src="examples/example-plusinv/animations/legend.png" width="500px"/></td>
- </tr>
-</table>
 
 The program ``mcdp-solve`` is a solver.
 
@@ -124,6 +109,31 @@ will produce these graphs:
 </tr></table>
  
 
+### Visualization of the solution
+
+To solve an MCDP, one constructs a chain of antichains in the product poset of resources. 
+
+The animations below show the sequence of antichains being
+constructed to solve two variations of the same problem.
+
+(Whether the problem statement describes an MCDP is 
+absolutely not obvious using the formula representation;  it becomes obvious when writing the problem as a graph
+of monotone problems.)
+
+<table>
+<tr>
+ <td><img src="examples/example-plusinv/animations/plusinvnat2-nat4-problem.png" width="300px"/></td>
+ <td><img src="examples/example-plusinv/animations/plusinvnat2-nat10-problem.png" width="300px"/>
+ </td>
+ </tr>
+ <tr>
+ <td><img src="examples/example-plusinv/animations/plusinvnat2-nat4.gif" width="300px"/></td>
+ <td><img src="examples/example-plusinv/animations/plusinvnat2-nat10.gif" width="300px"/></td>
+ </tr>
+ <tr>
+ <td colspan="2"><img src="examples/example-plusinv/animations/legend.png" width="500px"/></td>
+ </tr>
+</table>
 
 
 

@@ -9,8 +9,7 @@ python:
   # - pypy
   
 install:
-- sudo apt-get install cmake
-- sudo apt-get install python-numpy python-scipy libblas-dev liblapack-dev gfortran
+- sudo apt-get install python-numpy
 - sudo apt-get install python-matplotlib
 - sudo apt-get install python-yaml
 - sudo apt-get install wkhtmltopdf
