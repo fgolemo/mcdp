@@ -107,9 +107,9 @@ will produce these graphs:
 <img src="examples/example-battery/out_expected/battery-clean.png" height="300px"/></a></td></tr>
 <tr><td>Tree representation</td><td><img src="examples/example-battery/out_expected/battery-dp_tree.png"/></td></tr>
 </tr></table>
- 
 
-### Visualization of the solution
+
+## Visualization of the solution
 
 To solve an MCDP, one constructs a chain of antichains in the product poset of resources. 
 
