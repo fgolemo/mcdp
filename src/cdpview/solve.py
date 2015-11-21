@@ -6,8 +6,7 @@ from decent_params import UserError
 from mocdp.comp.context import Context
 from mocdp.dp.solver import generic_solve
 from mocdp.dp.tracer import Tracer
-from mocdp.dp_report.generic_report_utils import (generic_plot, generic_report,
-    generic_report_trace)
+
 from mocdp.lang.eval_constant_imp import eval_constant
 from mocdp.lang.parse_actions import parse_ndp, parse_wrap
 from mocdp.lang.syntax import Syntax
@@ -155,11 +154,14 @@ class SolveDP(QuickAppBase):
         if options.plot:
             r = Report()
             if options.advanced:
+                from mocdp.dp_report.generic_report_utils import generic_report
                 generic_report(r, dp, trace,
                                annotation=None, axis0=(0, 0, 0, 0))
             else:
                 f = r.figure()
+                from mocdp.dp_report.generic_report_utils import generic_plot
                 generic_plot(f, space=UR, value=res)
+                from mocdp.dp_report.generic_report_utils import generic_report_trace
                 generic_report_trace(r, ndp, dp, trace, out)
 
             out_html = os.path.join(out, 'report.html')
