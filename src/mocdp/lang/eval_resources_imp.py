@@ -7,6 +7,7 @@ from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.dp import GenericUnary, Max, Max1, Min, WrapAMap
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.posets import Map, Nat, NotBelongs, Rcomp, RcompUnits
+from mocdp.posets.rcomp_units import RCompUnitsPower
 import numpy as np
 
 
@@ -199,6 +200,12 @@ def eval_rvalue(rvalue, context):
                 assert False
 
             print('base: %s expo %d %d' % (base, num, den))
+            print('base: %s' % context.get_rtype(base))
+            
+            F = context.get_rtype(base)
+            m = RCompUnitsPower(F, num=num, den=den)
+            print('m: %s' % m)
+
             raise NotImplementedError()
 
         msg = 'Cannot evaluate as resource.'

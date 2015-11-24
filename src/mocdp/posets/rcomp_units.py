@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 from .any import Any, BottomCompletion, TopCompletion
 from .rcomp import Rcomp
-from contracts.utils import check_isinstance, raise_wrapped
+from contracts.utils import check_isinstance, raise_wrapped, raise_desc
 from mocdp.exceptions import DPSyntaxError
 from pint import UnitRegistry
 from pint.unit import UndefinedUnitError
 import functools
 from contracts import contract
+from mocdp.posets.space import Map
+import math
 
 
 class MyUnitRegistry(UnitRegistry):
@@ -33,7 +35,8 @@ class RcompUnits(Rcomp):
         # need to call it to make sure dollars i defined
         ureg = get_ureg()  # @UnusedVariable
 
-        c = "ℝ̅"
+        # c = "ℝ̅"
+        c = "ℝᶜ"
 
         if self.units == R_dimensionless.units:
             return '%s[]' % c
@@ -143,5 +146,31 @@ def mult_table(a, b):
     unit2 = a.units * b.units
     return RcompUnits(unit2)
 
+@contract(a=RcompUnits, num='int', den='int')
+def rcompunits_pow(a, num, den):
+    """
+        Gets the unit for a ^ (num/den)
+    """
+    if den != 1:
+        raise_desc(NotImplementedError, a=a, num=num, den=den)
 
+    res = a
+    for _ in range(num - 1):
+        res = mult_table(res, a)
 
+    return res
+
+class RCompUnitsPower(Map):
+    def __init__(self, F, num, den):
+        R = rcompunits_pow(F, num, den)
+        Map.__init__(self, dom=F, cod=R)
+        self.num = num
+        self.den = den
+    def _call(self, x):
+        e = 1.0 * self.num / self.den
+        r = math.pow(x, e)
+        return r
+    def __str__(self):
+        return '^ %s/%s' % (self.num, self.den)
+
+        
