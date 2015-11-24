@@ -158,7 +158,6 @@ def define_tests(context):
 
     folder_notok = 'mocdp.lang.tests.ok'
     filenames = []
-    filenames.extend(locate_files(folder_notok, '*.cdp'))
     filenames.extend(locate_files(folder_notok, '*.mcdp'))
 
     context = context.child('notok')
