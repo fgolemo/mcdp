@@ -204,9 +204,12 @@ def eval_rvalue(rvalue, context):
             
             F = context.get_rtype(base)
             m = RCompUnitsPower(F, num=num, den=den)
-            print('m: %s' % m)
+            dp = WrapAMap(m)
+            from mocdp.lang.helpers import create_operation
+            return create_operation(context, dp=dp, resources=[base],
+                             name_prefix='_prod', op_prefix='_factor',
+                             res_prefix='_result')
 
-            raise NotImplementedError()
 
         msg = 'Cannot evaluate as resource.'
         raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)

@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 from .parts import CDPLanguage
 from contracts import contract
+from contracts.utils import raise_desc
 from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import CFunction
 from mocdp.dp import InvMult2, InvPlus2, Limit
+from mocdp.dp.dp_mult_inv import InvPlus2Nat
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
 from mocdp.posets import mult_table
-from mocdp.posets.rcomp_units import RcompUnits
-from contracts.utils import raise_desc
 from mocdp.posets.nat import Nat
-from mocdp.dp.dp_mult_inv import InvPlus2Nat
+from mocdp.posets.rcomp_units import RcompUnits
 
 CDP = CDPLanguage
 

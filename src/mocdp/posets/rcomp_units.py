@@ -35,6 +35,7 @@ class RcompUnits(Rcomp):
         # need to call it to make sure dollars i defined
         ureg = get_ureg()  # @UnusedVariable
 
+        # graphviz does not support three-byte unicode
         # c = "ℝ̅"
         c = "ℝᶜ"
 
@@ -151,14 +152,18 @@ def rcompunits_pow(a, num, den):
     """
         Gets the unit for a ^ (num/den)
     """
-    if den != 1:
-        raise_desc(NotImplementedError, a=a, num=num, den=den)
 
-    res = a
-    for _ in range(num - 1):
-        res = mult_table(res, a)
-
-    return res
+    x = 1.0 * num / den
+    u = a.units ** x
+    return RcompUnits(u)
+#     if den != 1:
+#         raise_desc(NotImplementedError, a=a, num=num, den=den)
+#
+#     res = a
+#     for _ in range(num - 1):
+#         res = mult_table(res, a)
+#
+#     return res
 
 class RCompUnitsPower(Map):
     def __init__(self, F, num, den):
