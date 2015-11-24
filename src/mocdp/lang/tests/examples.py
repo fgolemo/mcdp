@@ -146,7 +146,11 @@ def define_tests(context):
         basename = get_unique_basename(f)
         print('defining %s' % basename)
         if f in examples2:
-            tests = [assert_parsable_to_connected_ndp_fn]
+            contents = open(f).read()
+            if '...' in contents:
+                tests = [assert_semantic_error_fn]
+            else:
+                tests = [assert_parsable_to_connected_ndp_fn]
         else:
             tests = get_marked_tests(f)
         define_test_for(context, f, basename, tests)
