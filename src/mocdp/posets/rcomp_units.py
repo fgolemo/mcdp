@@ -33,9 +33,12 @@ class RcompUnits(Rcomp):
         # need to call it to make sure dollars i defined
         ureg = get_ureg()  # @UnusedVariable
 
+        c = "ℝ̅"
+
         if self.units == R_dimensionless.units:
-            return 'R[]'
-        return "R[%s]" % format_pint_unit_short(self.units)
+            return '%s[]' % c
+
+        return "%s[%s]" % (c, format_pint_unit_short(self.units))
 
     def __getstate__(self):
         u = self.units

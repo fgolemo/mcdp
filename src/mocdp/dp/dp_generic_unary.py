@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
+from contracts import contract
 from mocdp.exceptions import mcdp_dev_warning
 from mocdp.posets import PosetProduct
-import numpy as np
 from mocdp.posets.space import Map
-from contracts import contract
+import numpy as np
 
 
 __all__ = [
@@ -35,8 +35,7 @@ class GenericUnary(PrimitiveDP):
         return self.R.U(r)
 
     def __repr__(self):
-        return "GenericUnary(%s) %% %s -> %s" % (self.function.__name__, self.F, self.R)
-
+        return "GenericUnary(%s)" % self.function.__name__
 
 
 class WrapAMap(PrimitiveDP):

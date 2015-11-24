@@ -77,10 +77,25 @@ def report_solutions(ndp, solutions):
 
         pylab.plot(f0, y0, 'k.')
         pylab.plot(fu, 0 * np.array(fu), 'rs')
-        pylab.xlabel(xl)
-        pylab.ylabel(yl)
+        pylab_xlabel_unicode(pylab, xl)
+        pylab_ylabel_unicode(pylab, yl)
 
     return r
+
+
+def pylab_xlabel_unicode(pylab, xl):
+    try:
+        pylab.xlabel(xl)
+    except UnicodeDecodeError as e:
+        print('Cannot set label %s %r: %s' % (xl, xl, e))
+
+
+def pylab_ylabel_unicode(pylab, yl):
+    try:
+        pylab.ylabel(yl)
+    except UnicodeDecodeError as e:
+        print('Cannot set label %s %r: %s' % (yl, yl, e))
+
 
 def solve_ndp(ndp, n=20):
     dp = ndp.get_dp()

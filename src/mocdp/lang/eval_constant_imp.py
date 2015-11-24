@@ -14,7 +14,6 @@ class NotConstant(Exception):
     pass
 
 
-
 @contract(returns=ValueWithUnits)
 def eval_constant(op, context):
     """ 

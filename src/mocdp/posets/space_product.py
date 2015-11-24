@@ -83,7 +83,8 @@ class SpaceProduct(Space):
                 return r
 
         if len(self.subs) == 0:
-            return "1"
+            return "𝟙"
+            # return "1"
 
         if len(self.subs) == 1:
             return '(%s×)' % f(list(self.subs)[0])

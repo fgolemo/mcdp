@@ -48,6 +48,9 @@ class CDPLanguage():
     SetName = namedtuplewhere('SetName', 'keyword name dp_rvalue')
     SetMCDPType = namedtuplewhere('SetMCDPType', 'keyword name eq right_side')
 
+    # an incomplete model
+    Ellipsis = namedtuplewhere('Ellipsis', 'token')
+
     SetNameGenericVar = namedtuplewhere('SetNameGenericVar', 'value')
     SetNameGeneric = namedtuplewhere('SetNameGeneric', 'name eq right_side')
 

@@ -7,7 +7,7 @@ mcdp {
         specific_energy = 500 Wh / kg
         mass >= capacity / specific_energy
     }
-    sub actuation = instance mcdp {
+    actuation = instance mcdp {
         provides lift [N]
         requires power [W]
         power >= lift * lift * 10.0 W/N^2

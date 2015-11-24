@@ -56,7 +56,7 @@ def check_sets3():
         requires cost [$]
         requires mass [kg]
 
-        sub converter = instance catalogue {
+        converter = instance catalogue {
             provides voltage_out [set-of(V)]
             requires voltage_in  [set-of(V)]
             requires cost [$]
@@ -67,7 +67,7 @@ def check_sets3():
             step_up2 |{12 V, 5 V} | {1.5 V} | 10 $ | 20 g  
         }
 
-        sub cell = instance simple_cell
+        cell = instance simple_cell
 
         voltage <= converter.voltage_out
         converter.voltage_in <= cell.voltage
@@ -76,7 +76,7 @@ def check_sets3():
         capacity <= cell.capacity
     }
 
-    sub battery = instance (simple_cell ^ cell_plus_converter)
+    battery = instance (simple_cell ^ cell_plus_converter)
 
 }
     """)

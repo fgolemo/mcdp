@@ -292,7 +292,7 @@ def parse_line(line):
 def power_expr_parse(t):
     op1 = t[0]
     exp = t[1]
-    assert isinstance(exp, CDPLanguage.IntegerFraction)
+    assert isinstance(exp, (CDPLanguage.IntegerFraction, int))
     return CDP.Power(op1=op1, exponent=exp)
 
 @contract(name= CDP.DPName)

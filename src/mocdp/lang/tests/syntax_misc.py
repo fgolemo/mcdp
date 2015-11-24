@@ -109,7 +109,7 @@ def check_lang9_max():
     
     parse_wrap(Syntax.binary_expr, 'max(f, g)')
     parse_wrap(Syntax.rvalue, 'max(f, g)')
-    parse_wrap(Syntax.constraint_expr, 'hnlin.x >= max(f, g)')
+    parse_wrap(Syntax.constraint_expr_geq, 'hnlin.x >= max(f, g)')
 
     p = assert_parsable_to_connected_ndp("""
     mcdp {

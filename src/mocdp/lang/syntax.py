@@ -5,7 +5,7 @@ from mocdp.posets import R_dimensionless
 from pyparsing import (
     CaselessLiteral, Combine, Forward, Group, Literal, NotAny, OneOrMore,
     Optional, Or, ParserElement, Suppress, Word, ZeroOrMore, alphanums, alphas,
-    nums, oneOf, opAssoc, operatorPrecedence)
+    nums, oneOf, opAssoc, operatorPrecedence, Keyword, MatchFirst)
 import math
 
 ParserElement.enablePackrat()
@@ -28,7 +28,7 @@ class Syntax():
         'dp', 'mcdp', 'template', 'sub', 'for', 'instance',
         'provided', 'requires', 'implemented-by', 'using', 'by',
         'catalogue', 'set-of', 'mcdp-type', 'dptype', 'instance',
-        'Nat', 'Int',
+        'Nat', 'Int', 'pow',
     ]
 
     # shortcuts
@@ -83,8 +83,11 @@ class Syntax():
 
     # optional whitespace
     ow = S(ZeroOrMore(L(' '))) 
+
     # identifier
-    idn = (NotAny(oneOf(keywords)) + Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))).setResultsName('idn')
+    idn = (NotAny(MatchFirst([Keyword(_) for _ in keywords])) +
+            Combine(oneOf(list(alphas)) +
+                    Optional(Word('_' + alphanums)))).setResultsName('idn')
  
     disallowed = oneOf(keywords + ['x'])
     pint_unit_base = NotAny(oneOf(keywords + ['x'])) + Word(alphas + '$')
@@ -136,8 +139,11 @@ class Syntax():
     unitst = S(L('[')) + C(space_expr, 'unit') + S(L(']'))
 
 
-    nat_constant = sp(L('nat') + L(':') + nonneg_integer, lambda t: CDP.NatConstant(t[0], t[1], t[2]))
-    int_constant = sp(L('int') + L(':') + integer, lambda t: CDP.IntConstant(t[0], t[1], t[2]))
+    nat_constant = sp(L('nat') + L(':') + nonneg_integer,
+                      lambda t: CDP.NatConstant(t[0], t[1], t[2]))
+
+    int_constant = sp(L('int') + L(':') + integer,
+                      lambda t: CDP.IntConstant(t[0], t[1], t[2]))
 
 
 
@@ -165,9 +171,11 @@ class Syntax():
 
     load_expr = sp(LOAD - ndpname, lambda t: CDP.LoadCommand(t[0], t[1]))
 
+    # An expression that evaluates to a NamedDP
     dp_rvalue = Forward()
-    # <dpname> = ...
 
+
+    # <dpname> = ...
     dpname = sp(idn.copy(), lambda t: CDP.DPName(t[0]))
     dptypename = sp(idn.copy(), lambda t: CDP.DPTypeName(t[0]))
 
@@ -186,10 +194,15 @@ class Syntax():
                      lambda t: CDP.SetMCDPType(t[0], t[1], t[2], t[3]))
     setmcdptype_expr_implicit = sp(dptypename - L('=') - dp_rvalue,
                      lambda t: CDP.SetMCDPType(None, t[0], t[1], t[2]))
+
+    # An expression that evaluates to a resource
     rvalue = Forward()
+    # An expression that evaluates to a function
     fvalue = Forward()
 
-    setname_rightside = rvalue  # ^ dp_rvalue
+    # For pretty printing
+    ELLIPSIS = sp(L('...'), lambda t: CDP.Ellipsis(t[0]))
+    setname_rightside = ELLIPSIS | rvalue  # ^ dp_rvalue
  
     setname_generic_var = sp(idn.copy(),
                               lambda t: CDP.SetNameGenericVar(t[0]))
@@ -254,7 +267,7 @@ class Syntax():
                     + C(rvalue, 'op2')) - S(L(')')) ,
                    lambda t: Syntax.binary[t[0].keyword](a=t['op1'], b=t['op2'], keyword=t[0]))
 
-    operand = rvalue_new_function ^ rvalue_new_function2 ^ rvalue_resource ^ binary_expr ^ unary_expr ^ constant_value
+
 
 
     simple = sp(dpname + DOT - fname,
@@ -270,15 +283,18 @@ class Syntax():
     integer_fraction = sp(integer + S(L('/')) + integer,
                           lambda t: CDP.IntegerFraction(num=t[0], den=t[1]))
 
-    power_expr = sp((S(L('pow')) - S(L('(')) + C(rvalue, 'op1') - S(L(','))
-                    + C(integer_fraction, 'exponent')) - S(L(')')),
+    rat_power_exponent = integer_fraction | integer
+
+    power_expr_1 = sp((S(L('pow')) - S(L('(')) - C(rvalue, 'op1') - S(L(','))
+                    + C(rat_power_exponent, 'exponent')) - S(L(')')),
                     power_expr_parse)
 
-    constraint_expr = sp(fvalue + GEQ - rvalue,
+
+    constraint_expr_geq = sp(fvalue + GEQ - rvalue,
                          lambda t: CDP.Constraint(function=t[0],
                                                   rvalue=t[2], prep=t[1]))
 
-    constraint_expr2 = sp(rvalue + LEQ - fvalue,
+    constraint_expr_leq = sp(rvalue + LEQ - fvalue,
                           lambda t: CDP.Constraint(function=t[2],
                                                    rvalue=t[0], prep=t[1]))
 
@@ -311,7 +327,7 @@ class Syntax():
                              prep_for=t[2],
                              name=t[3]))
 
-    line_expr = (constraint_expr ^ constraint_expr2 ^
+    line_expr = (constraint_expr_geq ^ constraint_expr_leq ^
                  (setname_generic ^ setsub_expr ^ setsub_expr_implicit ^ setmcdptype_expr ^ setmcdptype_expr_implicit)
                  ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
                  ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3)
@@ -388,7 +404,23 @@ class Syntax():
         (COPROD, 2, opAssoc.LEFT, coprod_parse_action),
     ])
 
-    rvalue << operatorPrecedence(operand, [
+    # I could put "rvalue" here, but then I get a recursive
+    power_expr_2 = sp((rvalue_resource ^ rvalue_new_function)
+                      + S(L('^')) - rat_power_exponent,
+                      lambda t: CDP.Power(op1=t[0], exponent=t[1]))
+
+    power_expr = power_expr_1 ^ power_expr_2
+
+    rvalue_operand = (rvalue_new_function ^
+                       rvalue_new_function2 ^
+                       rvalue_resource ^
+                       binary_expr ^
+                       unary_expr ^
+                       constant_value ^
+                       power_expr_1 ^
+                       power_expr_2)
+
+    rvalue << operatorPrecedence(rvalue_operand, [
         (TIMES, 2, opAssoc.LEFT, mult_parse_action),
         (BAR, 2, opAssoc.LEFT, divide_parse_action),
         (PLUS, 2, opAssoc.LEFT, plus_parse_action),

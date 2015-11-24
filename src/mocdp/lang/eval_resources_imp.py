@@ -14,7 +14,7 @@ import numpy as np
 
 CDP = CDPLanguage
 class DoesNotEvalToResource(Exception):
-    """ also called rvalue """
+    """ also called "rvalue" """
 
 @contract(returns=CResource)
 def eval_rvalue(rvalue, context):
@@ -184,6 +184,22 @@ def eval_rvalue(rvalue, context):
             context.add_connection(c)
 
             return context.make_resource(name, rname)
+
+        if isinstance(rvalue, CDP.Power):
+            base = eval_rvalue(rvalue.op1, context)
+            exponent = rvalue.exponent
+
+            if isinstance(exponent, CDP.IntegerFraction):
+                num = exponent.num
+                den = exponent.den
+            elif isinstance(exponent, int):
+                num = exponent
+                den = 1
+            else:
+                assert False
+
+            print('base: %s expo %d %d' % (base, num, den))
+            raise NotImplementedError()
 
         msg = 'Cannot evaluate as resource.'
         raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
