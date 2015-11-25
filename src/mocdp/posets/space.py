@@ -7,6 +7,11 @@ from mocdp.exceptions import do_extra_checks
 class NotBelongs(Exception):
     pass
 
+class Belongs(Exception):
+    """ The point actually belongs to the set
+        raised by check_not_belongs """
+    pass
+
 class NotEqual(Exception):
     pass
 
@@ -23,7 +28,18 @@ class Space(object):
 
     @abstractmethod
     def belongs(self, x):
-        pass
+        """ Raise NotBelongs """
+    
+    def check_belongs(self, x):
+        return self.belongs(x)
+    
+    def check_not_belongs(self, x):
+        try:
+            self.check_belongs(x)
+        except NotBelongs:
+            return
+        else:
+            raise Belongs()
 
     @abstractmethod
     def check_equal(self, x, y):

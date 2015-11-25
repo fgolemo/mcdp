@@ -16,6 +16,7 @@ from quickapp import QuickAppBase
 from reprep import Report
 import logging
 import os
+from mocdp.dp.dp_transformations import get_dp_bounds
 
 
 class ExpectationsNotMet(Exception):
@@ -38,10 +39,15 @@ class SolveDP(QuickAppBase):
                         default=None)
         params.accept_extra()
         params.add_flag('plot', help='Show iterations graphically')
+        params.add_flag('movie', help='Create animation.')
         params.add_flag('imp', help='Compute and show implementations.')
 
         params.add_flag('advanced',
                         help='Solve by advanced solver (in development)')
+        params.add_int('lower', default=None,
+                       help='Use lower bound approx')
+        params.add_int('upper', default=None,
+                       help='Use upper bound approx')
 
     def go(self):
         from conf_tools import logger
@@ -57,6 +63,7 @@ class SolveDP(QuickAppBase):
             raise ValueError('Please specify filename.')
 
         filename = params[0]
+        basename = os.path.splitext(os.path.basename(filename))[0]
 
         if options.out is None:
             out = os.path.dirname(filename)
@@ -70,6 +77,16 @@ class SolveDP(QuickAppBase):
         s = open(filename).read()
         ndp = parse_ndp(s)
         dp = ndp.get_dp()
+        
+        if options.upper is not None:
+            _, dp = get_dp_bounds(dp, 1, options.upper)
+            basename += '-u-%03d' % options.upper
+            assert options.lower is None
+        if options.lower is not None:
+            dp, _ = get_dp_bounds(dp, options.lower, 1)
+            basename += '-l-%03d' % options.lower
+            assert options.upper is None
+            
         fnames = ndp.get_fnames()
 
         F = dp.get_fun_space()
@@ -149,7 +166,8 @@ class SolveDP(QuickAppBase):
         for forbidden in ['-',' ','{','}',':']:
             pp = pp.replace(forbidden, '')
 
-        out = os.path.splitext(os.path.basename(filename))[0] + '-' + pp
+        d = basename + '-' + pp
+        outd = os.path.join(out, d)
 
         if options.plot:
             r = Report()
@@ -162,9 +180,9 @@ class SolveDP(QuickAppBase):
                 from mocdp.dp_report.generic_report_utils import generic_plot
                 generic_plot(f, space=UR, value=res)
                 from mocdp.dp_report.generic_report_utils import generic_report_trace
-                generic_report_trace(r, ndp, dp, trace, out)
+                generic_report_trace(r, ndp, dp, trace, outd, do_movie=options.movie)
 
-            out_html = os.path.join(out, 'report.html')
+            out_html = os.path.join(outd, 'report.html')
             print('writing to %r' % out_html)
             r.to_html(out_html)
 

@@ -247,6 +247,7 @@ class Syntax():
 
     unary = {
         'sqrt': lambda op1: CDP.GenericNonlinearity(math.sqrt, op1, lambda F: F),
+        'ceil': lambda op1: CDP.GenericNonlinearity(math.ceil, op1, lambda F: F),
         'square': lambda op1: CDP.GenericNonlinearity(square, op1, lambda F: F),
     }
 

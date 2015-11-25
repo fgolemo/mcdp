@@ -5,6 +5,8 @@ from .utils import poset_minima
 from contracts import contract
 from mocdp.exceptions import do_extra_checks
 from mocdp.posets.poset import NotBounded
+from mocdp.posets.space import Space
+from contracts.utils import raise_desc
 
 
 __all__ = [
@@ -12,7 +14,8 @@ __all__ = [
     'UpperSets',
 ]
 
-class UpperSet():
+class UpperSet(Space):
+    
     @contract(minimals='set|list', P=Poset)
     def __init__(self, minimals, P):
         self.minimals = frozenset(minimals)
@@ -37,6 +40,17 @@ class UpperSet():
     @contract(returns=Poset)
     def get_poset(self):
         return self.P
+    
+    def check_equal(self, x, y):
+        self.P.check_equal(x, y)
+
+    def belongs(self, x):
+        self.P.belongs(x)
+        for p in self.minimals:
+            if self.P.leq(p, x):
+                return
+        raise_desc(NotBelongs, 'Point does not belong')
+        
 
 #     def __repr__old(self):  # ≤  ≥
 #         contents = " v ".join("x ≥ %s" % self.P.format(m)

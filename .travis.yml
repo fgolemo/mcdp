@@ -55,3 +55,6 @@ addons:
     # - python-cjson disallowed by Travis!
     # - python-pil not found on Travis
     - graphviz # TODO: add check for existence
+
+notifications:
+  slack: censi:0NIaVPIykirj487M6bjKoAAV

@@ -17,16 +17,16 @@ import os
 extra_space_finite = 0.025
 extra_space_top = 0.05
 
-def generic_report_trace(r, ndp, dp, trace, out):
+def generic_report_trace(r, ndp, dp, trace, out, do_movie=False):
     r.text('dp', dp.repr_long())
     # r.text('trace', trace.format())
     
     for l, trace_loop in enumerate(trace.find_loops()):
         with r.subsection('loop%d' % l) as r2:
-            _report_loop(r2, trace_loop, out)
+            _report_loop(r2, trace_loop, out, do_movie=do_movie)
         
         
-def _report_loop(r, trace_loop, out):
+def _report_loop(r, trace_loop, out, do_movie=True):
     sips = list(trace_loop.get_iteration_values('sip'))
     converged = list(trace_loop.get_iteration_values('converged'))
     
@@ -72,44 +72,28 @@ def _report_loop(r, trace_loop, out):
                         p = plotter.toR2(c)
                         pylab.plot(p[0], p[1], 'go',
                                    markersize=10, markeredgecolor='g')
-                    # pylab.axis(enlarge_topright(axis, extra_space_top * 2))
                     pylab.axis(visualized_axis)
-#
-#                     pylab.gcf().patch.set_facecolor('blue')
-#                     pylab.gcf().patch.set_alpha(0.7)
 
-                node = f.resolve_url('step%d/png' % i)
 
-                safe_makedirs(outdir)
-                fn = os.path.join(outdir, '%05d.png' % i)
-                with open(fn, 'w') as fi:
-                    fi.write(node.raw_data)
+                if do_movie:
 
-            outmp4 = os.path.join(out, 'video-%s.mp4' % name)
+                    node = f.resolve_url('step%d/png' % i)
 
-            try:
-                from procgraph_mplayer.scripts.join_video import join_video_29
-            except ImportError as e:
-                print(e)
-            else:
-                join_video_29(output=outmp4, dirname=outdir,
-                              pattern='.*.png', fps=1.0)
-#
-#             cmd2 = ['pg-video-join',
-#                 '-d', outdir,
-#                 '-p', '.*.png',
-#                 '--fps', '1',
-#                 '-o', outmp4]
-#
-#             try:
-#                 system_cmd_show('.', cmd2)
-#                 metadata = outmp4 + '.metadata.yaml'
-#                 if os.path.exists(metadata):
-#                     os.unlink(metadata)
-#             except CmdException as e:
-#                 if 'No such file or directory' in str(e):
-#                     print('Could not create video - ignoring')
-#                     print(indent(str(e), '> '))
+                    safe_makedirs(outdir)
+                    fn = os.path.join(outdir, '%05d.png' % i)
+                    with open(fn, 'w') as fi:
+                        fi.write(node.raw_data)
+
+            if do_movie:
+                outmp4 = os.path.join(out, 'video-%s.mp4' % name)
+
+                try:
+                    from procgraph_mplayer.scripts.join_video import join_video_29
+                except ImportError as e:
+                    print(e)
+                else:
+                    join_video_29(output=outmp4, dirname=outdir,
+                                  pattern='.*.png', fps=1.0)
 
 
 def generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0)):

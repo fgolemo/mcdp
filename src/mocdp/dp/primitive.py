@@ -285,6 +285,16 @@ class PrimitiveDP(WithInternalLog):
         return head
 
 
+class ApproximableDP(PrimitiveDP):
+    @abstractmethod
+    @contract(n='int,>=0', returns=PrimitiveDP)
+    def get_lower_bound(self, n):
+        pass
+
+    @abstractmethod
+    @contract(n='int,>=0', returns=PrimitiveDP)
+    def get_upper_bound(self, n):
+        pass
 
 
 NormalForm = namedtuple('NormalForm', ['S', 'alpha', 'beta'])

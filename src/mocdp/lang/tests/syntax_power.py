@@ -1,10 +1,15 @@
 from .utils import ok, sem, syn
+from comptests.registrar import comptest
+from contracts import contract
+from mocdp.dp.primitive import ApproximableDP, PrimitiveDP
+from mocdp.lang.parse_actions import parse_ndp
 from mocdp.lang.parts import CDPLanguage
 from mocdp.lang.syntax import Syntax
-from comptests.registrar import comptest
-from mocdp.lang.parse_actions import parse_ndp
-from mocdp.lang.tests.utils import assert_parsable_to_connected_ndp, \
-    assert_semantic_error, parse_wrap_check
+from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp,
+    assert_semantic_error, parse_wrap_check)
+from mocdp.posets.uppersets import UpperSets
+from nose.tools import assert_equal
+from mocdp.dp.dp_transformations import get_dp_bounds
 
 L = CDPLanguage
 
@@ -100,5 +105,44 @@ def check_power7():
     pass
 
 @comptest
-def check_power8():
-    pass
+def check_power8():  # TODO: move to ther files
+
+    ndp = parse_ndp("""
+    mcdp {
+      requires a [R]
+      requires b [R]
+      
+      provides c [R]
+      
+      a + b >= c
+    }
+    """)
+    dp = ndp.get_dp()
+    print(dp.repr_long())
+    nl = 5
+    nu = 5
+    dpL, dpU = get_dp_bounds(dp, nl, nu)
+
+    print(dpL.repr_long())
+    print(dpU.repr_long())
+    f = 10.0
+    UR = UpperSets(dp.get_res_space())
+    Rl = dpL.solve(f)
+    Ru = dpU.solve(f)
+    assert_equal(len(Rl.minimals), nl)
+    assert_equal(len(Ru.minimals), nu)
+    print('Rl: %s' % UR.format(Rl))
+    print('Ru: %s' % UR.format(Ru))
+    UR.check_leq(Rl, Ru)
+    
+    import numpy as np
+    for x in np.linspace(0, f, 100):
+        y = f - x
+        p = (x, y)
+
+        Rl.belongs(p)
+
+
+
+
+
