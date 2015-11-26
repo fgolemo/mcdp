@@ -139,6 +139,8 @@ of monotone problems.)
      </tr>
 </table>
 
+<h2>More information</h2>
 
+For more information, please see <http://mcdp.mit.edu>.
 
 
