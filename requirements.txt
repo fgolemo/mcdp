@@ -1,5 +1,4 @@
-#python-cjson
-pyparsing<=2.0.5
+pyparsing
 networkx
 pint
 watchdog
