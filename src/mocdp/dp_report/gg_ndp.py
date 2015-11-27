@@ -17,6 +17,7 @@ from mocdp.dp.dp_mult_inv import InvMult2, InvPlus2, InvPlus2Nat
 from mocdp.comp.interfaces import NamedDPCoproduct
 from contextlib import contextmanager
 from mocdp.dp.dp_sum import SumNNat
+from mocdp.dp.dp_generic_unary import WrapAMap
 
 
 class GraphDrawingContext():
@@ -325,13 +326,16 @@ def create_simplewrap(gdc, ndp):
 
     best_icon = gdc.get_icon(iconoptions)
 
-    simple = (Min, Max, Identity, GenericUnary)
+    simple = (Min, Max, Identity, GenericUnary, WrapAMap)
     only_string = isinstance(ndp.dp, simple)
     if only_string:
 
         label = type(ndp.dp).__name__
         if isinstance(ndp.dp, GenericUnary):
             label = ndp.dp.function.__name__
+
+        if isinstance(ndp.dp, WrapAMap):
+            label = ndp.dp.diagram_label()
 
         sname = 'simple'
     else:

@@ -114,6 +114,10 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
                 msg = 'Cannot compact primitive NDP.'
                 raise_desc(DPSemanticError, msg, ndp=ndp.repr_long())
 
+        if isinstance(r, CDP.Ellipsis):
+            msg = 'Model is incomplete (ellipsis operator ... used)'
+            raise_desc(DPSemanticError, msg)
+            
     except DPSemanticError as e:
         if e.where is None:
             e = DPSemanticError(str(e), r.where)
@@ -307,6 +311,7 @@ def add_constraint(context, resource, function):
 
         map1, _ = tu.get_embedding(R1, F2)
 
+#         map1.__name__ = '%s -> %s' % (R1, F2)
         conversion = WrapAMap(map1)
         conversion_ndp = dpwrap(conversion, '_in', '_out')
 

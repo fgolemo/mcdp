@@ -6,7 +6,6 @@ from mocdp.posets.rcomp import Rcomp
 from mocdp.posets.space import Map, NotBelongs, NotEqual, Space
 from mocdp.posets.space_product import SpaceProduct
 import numpy as np
-from mocdp.posets.nat import Nat, Int
 
 __all__ = [
     'get_types_universe',
@@ -90,15 +89,15 @@ class TypesUniverse(Preorder):
 
         from mocdp.posets.rcomp_units import RcompUnits
         from mocdp.posets.rcomp_units import format_pint_unit_short
+        from mocdp.posets.nat import Nat, Int
+        from mocdp.posets.maps.identity import IdentityMap
 
-#         if isinstance(A, Nat) and isinstance(B, RcompUnits):
-#             return Identity(A, B), CoerceToInt(B, A)
 
         if isinstance(A, Nat) and isinstance(B, Rcomp):
             return PromoteToFloat(A, B), CoerceToInt(B, A)
 
         if isinstance(A, Nat) and isinstance(B, Int):
-            return Identity(A, B), Identity(B, A)
+            return IdentityMap(A, B), IdentityMap(B, A)
             
         if isinstance(A, RcompUnits) and isinstance(B, RcompUnits):
             assert A.units.dimensionality == B.units.dimensionality
@@ -115,16 +114,16 @@ class TypesUniverse(Preorder):
 
 
         if self.equal(A, B):
-            return Identity(A, B), Identity(B, A)
+            return IdentityMap(A, B), IdentityMap(B, A)
 
         if isinstance(A, Rcomp) and isinstance(B, RcompUnits):
-            return Identity(A, B), Identity(B, A)
+            return IdentityMap(A, B), IdentityMap(B, A)
+
         if isinstance(B, Rcomp) and isinstance(A, RcompUnits):
-            return Identity(A, B), Identity(B, A)
+            return IdentityMap(A, B), IdentityMap(B, A)
 
         if isinstance(A, SpaceProduct) and isinstance(B, SpaceProduct):
             return get_product_embedding(self, A, B)
-
 
         from mocdp.posets.finite_set import FiniteCollectionsInclusion
         if isinstance(A, FiniteCollectionsInclusion) and isinstance(B, FiniteCollectionsInclusion):
@@ -135,10 +134,11 @@ class TypesUniverse(Preorder):
             setattr(m1, '__name__', 'L%s' % b_to_a.__name__)
             return m1, m2
 
-        msg = 'Did not code embedding.'
-        raise_desc(AssertionError, msg, A=A, B=B)
+        msg = 'Spaces are ordered, but you forgot to code embedding.'
+        raise_desc(NotImplementedError, msg, A=A, B=B)
 
 class LiftToFiniteCollections(Map):
+
     @contract(f=Map)
     def __init__(self, f):
         from mocdp.posets.finite_set import FiniteCollectionsInclusion
@@ -146,26 +146,18 @@ class LiftToFiniteCollections(Map):
         cod = FiniteCollectionsInclusion(f.get_codomain())
         self.f = f
         Map.__init__(self, dom=dom, cod=cod)
+
     def _call(self, x):
         elements = x.elements
         elements2 = set(self.f(_) for _ in elements)
-        S2 = self.f.get_codomain()
         from mocdp.posets.finite_set import FiniteCollection
-        return FiniteCollection(elements2, S2)
-
-class Identity(Map):
-
-    @contract(cod=Space, dom=Space)
-    def __init__(self, cod, dom):
-        Map.__init__(self, cod, dom)
-
-    def _call(self, x):
-        return x
+        return FiniteCollection(elements2, self.cod)
 
 class CoerceToInt(Map):
 
     @contract(cod=Space, dom=Space)
     def __init__(self, cod, dom):
+        # todo: check dom is Nat or Int
         Map.__init__(self, cod, dom)
 
     def _call(self, x):
@@ -176,6 +168,7 @@ class PromoteToFloat(Map):
 
     @contract(cod=Space, dom=Space)
     def __init__(self, cod, dom):
+        # todo: check dom is Rcomp or Rcompunits
         Map.__init__(self, cod, dom)
 
     def _call(self, x):

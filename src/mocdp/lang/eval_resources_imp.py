@@ -236,6 +236,13 @@ class CeilAfter(Map):
         y = int(np.ceil(y))
         return y
 
+    def __repr__(self):
+        if hasattr(self.f, '__name__'):
+            fn = getattr(self.f, '__name__')
+            return 'ceil(%s(.))' % fn
+        else:
+            return 'ceil(%s(.))' % self.f
+
 
 
 

@@ -4,16 +4,23 @@ class DPInternalError(Exception):
     """ Internal consistency errors (not user) """
 
 class DPUserError(Exception):
+    """ User mistake """
     pass
 
 class DPSyntaxError(ContractSyntaxError, DPUserError):
 
+
     def with_filename(self, filename):
+        """ Returns the same exception with reference
+            to the given filename. """
         where = self.where.with_filename(filename)
         return type(self)(self.error, where=where)
 
 class DPSemanticError(ContractSyntaxError, DPUserError):
+
     def with_filename(self, filename):
+        """ Returns the same exception with reference
+            to the given filename. """
         where = self.where.with_filename(filename)
         return type(self)(self.error, where=where)
 

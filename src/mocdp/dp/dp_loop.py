@@ -301,12 +301,16 @@ class DPLoop0(PrimitiveDP):
 
                 # print('loop-beta: product of %s and %s' % (fs, rs))
                 # make the dot product
-                x = UpperSet(set(itertools.product(fs.minimals, rs.minimals)), F1R)
-                # this is an elment of U(F1xR2)
-                UF1R.belongs(x)
+                
+                rs2 = set()
+                for r in rs.minimals:
+                    
+                    x = UpperSet(set(itertools.product(fs.minimals, rs.minimals)), F1R)
+                    # this is an elment of U(F1xR2)
+                    UF1R.belongs(x)
 
-                # get what beta0 says
-                s0p = beta0((x, s0))
+                    # get what beta0 says
+                    s0p = beta0((x, s0))
 
                 # get what alpha0 says
                 y0 = alpha0((x, s0))

@@ -14,3 +14,4 @@ from .any import *
 from .nat import *
 
 from .poset_coproduct import *
+from .find_poset_minima import *

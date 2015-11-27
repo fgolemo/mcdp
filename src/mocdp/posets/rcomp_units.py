@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from .any import Any, BottomCompletion, TopCompletion
 from .rcomp import Rcomp
-from contracts.utils import check_isinstance, raise_wrapped, raise_desc
+from contracts import contract
+from contracts.utils import check_isinstance, raise_wrapped
 from mocdp.exceptions import DPSyntaxError
+from mocdp.posets.space import Map
 from pint import UnitRegistry
 from pint.unit import UndefinedUnitError
 import functools
-from contracts import contract
-from mocdp.posets.space import Map
 import math
 
 

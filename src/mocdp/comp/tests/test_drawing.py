@@ -1,3 +1,11 @@
+# -*- coding: utf-8 -*-
+import matplotlib
+from matplotlib.font_manager import FontProperties
+import os
+
+matplotlib.rc('font', **{'sans-serif' : 'Arial',
+                           'family' : 'sans-serif'})
+
 from mocdp.dp_report.report import report_dp1
 from mocdp.posets import Rcomp
 from mocdp.unittests.generation import for_all_nameddps_dyn
@@ -83,18 +91,30 @@ def report_solutions(ndp, solutions):
     return r
 
 
+def pylab_label_generic(pf, s):
+    prop = FontProperties()
+#     f = '/Volumes/1506-env_fault/sw/canopy/User/lib/python2.7/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneral.ttf'
+    fs = ['/Library/Fonts/Microsoft/Cambria Math.ttf']
+    for f in fs:
+        if os.path.exists(f):
+            prop.set_file(f)
+            break
+    sd = s.decode('utf-8')
+    pf(sd, fontproperties=prop)
+
 def pylab_xlabel_unicode(pylab, xl):
-    try:
-        pylab.xlabel(xl)
-    except UnicodeDecodeError as e:
-        print('Cannot set label %s %r: %s' % (xl, xl, e))
+    pylab_label_generic(pylab.xlabel, xl)
 
 
 def pylab_ylabel_unicode(pylab, yl):
-    try:
-        pylab.ylabel(yl)
-    except UnicodeDecodeError as e:
-        print('Cannot set label %s %r: %s' % (yl, yl, e))
+    pylab_label_generic(pylab.ylabel, yl)
+#
+#     try:
+#         pylab.ylabel(yl)
+#     except UnicodeDecodeError as e:
+#         yl = yl.decode('utf-8')
+#         pylab.ylabel(yl)
+#         # print('Cannot set label %s %r: %s' % (yl, yl, e))
 
 
 def solve_ndp(ndp, n=20):

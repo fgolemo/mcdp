@@ -143,6 +143,16 @@ def syntax_doc(data):
     res1 = ('html', 'syntax_doc', res)
     return [res1]
 
+
+@contract(data=dict)
+def ast(data):
+    s = data['s']
+    from mocdp.dp_report.html import ast_to_text
+    res = ast_to_text(s)
+    res1 = ('txt', 'ast', res)
+    return [res1]
+
+
 def tex_form(data):
     filename = data['filename']
     d = os.path.dirname(filename)
@@ -156,6 +166,7 @@ def tex_form(data):
     return [res1]
 
 allplots  = {
+    ('ast', ast),
     ('syntax_doc', syntax_doc),
     ('syntax_frag', syntax_frag),
     ('syntax_pdf', syntax_pdf),

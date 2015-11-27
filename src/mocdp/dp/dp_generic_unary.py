@@ -52,5 +52,11 @@ class WrapAMap(PrimitiveDP):
         r = self.amap(func)
         return self.R.U(r)
 
+    def diagram_label(self):
+        if hasattr(self.amap, '__name__'):
+            return getattr(self.amap, '__name__')
+        else:
+            return self.amap.__repr__()
+
     def __repr__(self):
         return 'WrapAMap(%r)' % self.amap

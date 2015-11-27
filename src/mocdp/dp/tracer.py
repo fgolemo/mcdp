@@ -20,8 +20,9 @@ class Tracer():
         
     """
     
-    def __init__(self):
+    def __init__(self, prefix=""):
         self.chronology = []
+        self.prefix = prefix
 
     @contract(e=TracerEvent)
     def _log_event(self, e):
@@ -29,12 +30,12 @@ class Tracer():
             
     def log(self, s):
         """ Records a string """
-        print(s)
+        print(self.prefix + "|" + s)
         self._log_event(TracerLog(s))
         
     @contextmanager
     def child(self, name):
-        t = Tracer()
+        t = Tracer(prefix=self.prefix + ":" + name)
         yield t
         if t.chronology:
             last = t.chronology[-1]

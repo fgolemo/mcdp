@@ -22,6 +22,7 @@ def jobs_comptests(context):
     from .example_battery import tests  # @Reimport
     from .comp import tests  # @Reimport
     from .lang import tests  # @Reimport
+    from .posets.find_poset_minima import tests  # @Reimport
 
     from mocdp.lang.tests.examples import define_tests
     define_tests(context)

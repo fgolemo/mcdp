@@ -26,7 +26,11 @@ def isolate_comments(s):
 def unzip(iterable):
     return zip(*iterable)
 
-
+@contract(s=str, returns=str)
+def ast_to_text(s):
+    block = parse_wrap(Syntax.dp_rvalue, s)[0]
+    return print_ast(block)
+    
 @contract(s=str)
 def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: False):
 
@@ -53,7 +57,6 @@ def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: 
     block2 = make_tree(block, character_end=len(s))
     # print print_ast(block2)
 
-
     snippets = list(print_html_inner(block2))
     assert len(snippets) == 1
     snippet = snippets[0]
@@ -78,9 +81,10 @@ def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: 
 #             print('orig %d: %s' % (i, s_lines[i]))
 #             print('trans %d: %s' % (i, lines[i]))
         msg = 'Lost some lines while pretty printing: %s, %s' % (len(lines), len(s_comments))
-
         print(msg)
-        print('original string[:10] = %r' % s[:10])
+        if len(s) > 10:
+            print('original string[:10] = %r' % s[:10])
+            print('original string[-10:] = %r' % s[-10:])
     
     out = ""
     for i, (a, comment) in enumerate(zip(lines, s_comments)):

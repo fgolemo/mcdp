@@ -4,9 +4,10 @@ from contracts import contract
 from contracts.utils import raise_desc
 from decent_params import UserError
 from mocdp.comp.context import Context
+from mocdp.dp.dp_transformations import get_dp_bounds
 from mocdp.dp.solver import generic_solve
+from mocdp.dp.solver_iterative import solver_iterative
 from mocdp.dp.tracer import Tracer
-
 from mocdp.lang.eval_constant_imp import eval_constant
 from mocdp.lang.parse_actions import parse_ndp, parse_wrap
 from mocdp.lang.syntax import Syntax
@@ -16,7 +17,7 @@ from quickapp import QuickAppBase
 from reprep import Report
 import logging
 import os
-from mocdp.dp.dp_transformations import get_dp_bounds
+
 
 
 class ExpectationsNotMet(Exception):
@@ -44,6 +45,8 @@ class SolveDP(QuickAppBase):
 
         params.add_flag('advanced',
                         help='Solve by advanced solver (in development)')
+        params.add_flag('intervals',
+                        help='Use intervals')
         params.add_int('lower', default=None,
                        help='Use lower bound approx')
         params.add_int('upper', default=None,
@@ -109,32 +112,36 @@ class SolveDP(QuickAppBase):
         print('query: %s' % F.format(fg))
         max_steps = options.max_steps
 
-        if not options.advanced:
+        if options.intervals:
             trace = Tracer()
-            res = dp.solve_trace(fg, trace)
-            rnames = ndp.get_rnames()
-            x = ", ".join(rnames)
-            print('Minimal resources needed: %s = %s'
-                  % (x, UR.format(res)))
-
+            res = solver_iterative(dp, fg, trace)
         else:
-            try:
-                trace = generic_solve(dp, f=fg, max_steps=max_steps)
-                print('Iteration result: %s' % trace.result)
-                ss = trace.get_s_sequence()
-                S = trace.S
-                print('Fixed-point iteration converged to: %s'
-                      % S.format(ss[-1]))
-                R = trace.dp.get_res_space()
-                UR = UpperSets(R)
-                sr = trace.get_r_sequence()
+            if not options.advanced:
+                trace = Tracer()
+                res = dp.solve_trace(fg, trace)
                 rnames = ndp.get_rnames()
                 x = ", ".join(rnames)
                 print('Minimal resources needed: %s = %s'
-                      % (x, UR.format(sr[-1])))
-
-            except:
-                raise
+                      % (x, UR.format(res)))
+    
+            else:
+                try:
+                    trace = generic_solve(dp, f=fg, max_steps=max_steps)
+                    print('Iteration result: %s' % trace.result)
+                    ss = trace.get_s_sequence()
+                    S = trace.S
+                    print('Fixed-point iteration converged to: %s'
+                          % S.format(ss[-1]))
+                    R = trace.dp.get_res_space()
+                    UR = UpperSets(R)
+                    sr = trace.get_r_sequence()
+                    rnames = ndp.get_rnames()
+                    x = ", ".join(rnames)
+                    print('Minimal resources needed: %s = %s'
+                          % (x, UR.format(sr[-1])))
+    
+                except:
+                    raise
 
         UR.belongs(res)
         nres = len(res.minimals)

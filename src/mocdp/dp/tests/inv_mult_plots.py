@@ -539,7 +539,7 @@ mcdp {
     print res2
     UR.check_equal(res2, expected)
 
-@comptest_fails
+@comptest
 def check_loop_result5a():
 
     mx = 10
