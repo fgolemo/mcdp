@@ -7,7 +7,7 @@ __all__ = [
 ]
 
 @time_poset_minima_func
-@contract(elements='seq')
+@contract(elements='seq|set')
 def poset_minima(elements, leq):
     """ Find the minima of a poset according to given comparison 
         function. For small sets only - O(n^2). """
@@ -31,6 +31,6 @@ def poset_minima(elements, leq):
             res = [r for r in res if not leq(e, r)] + [e]
     return set(res)
 
-@contract(poset=Poset, elements='set')
+@contract(poset=Poset, elements='set|seq')
 def poset_minima_n2(poset, elements):
     return poset_minima(elements, poset.leq)
