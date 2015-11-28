@@ -1,10 +1,13 @@
 from .utils import time_poset_minima_func
+from contracts import contract
+from mocdp.posets.poset import Poset
 
 __all__ = [
     'poset_minima',
 ]
 
 @time_poset_minima_func
+@contract(elements='seq')
 def poset_minima(elements, leq):
     """ Find the minima of a poset according to given comparison 
         function. For small sets only - O(n^2). """
@@ -26,4 +29,8 @@ def poset_minima(elements, leq):
         if should_add:
             # remove the ones that are less than this
             res = [r for r in res if not leq(e, r)] + [e]
-    return res
+    return set(res)
+
+@contract(poset=Poset, elements='set')
+def poset_minima_n2(poset, elements):
+    return poset_minima(elements, poset.leq)
