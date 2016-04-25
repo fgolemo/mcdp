@@ -13,7 +13,7 @@ def poset_minima(elements, leq):
         function. For small sets only - O(n^2). """
     n = len(elements)
     if n == 1:
-        return elements
+        return set(elements)
 
     res = []
     for e in elements:
@@ -33,4 +33,6 @@ def poset_minima(elements, leq):
 
 @contract(poset=Poset, elements='set|seq')
 def poset_minima_n2(poset, elements):
+    """ Baseline implementation of "poset_minima" with 
+        complexity n^2. """
     return poset_minima(elements, poset.leq)
