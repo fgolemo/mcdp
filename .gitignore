@@ -22,3 +22,4 @@ emergency.dot
 dist/PyMCDP-*.tar.gz
 sandbox
 *.prof
+.DS_Store
