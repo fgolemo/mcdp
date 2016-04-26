@@ -38,9 +38,14 @@ class RcompUnits(Rcomp):
         return "R[%s]" % format_pint_unit_short(self.units)
 
     def __getstate__(self):
+        # See: https://github.com/hgrecco/pint/issues/349
         u = self.units
-        units_ex = (u.magnitude, u.units)
-        return {'top': self.top, 'units_ex': units_ex}
+        # This is a hack
+        units_ex = (u.magnitude, u.units._units)
+        # Original was:
+        # units_ex = (u.magnitude, u.units)
+        state = {'top': self.top, 'units_ex': units_ex}
+        return state
 
     def __setstate__(self, x):
         self.top = x['top']
