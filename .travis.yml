@@ -36,8 +36,8 @@ script:
 - QUICKAPP_PROFILE=comptest1.prof make comptests-run-nocontracts
 - make -C examples/example-catalogue
 - make -C examples/example-battery
-# the run with contracts
-- make clean comptests-run
+# the run with contracts: times out
+# - make clean comptests-run
 after_failure:
 - compmake out/comptests -c "ls failed"
 - compmake out/comptests -c "why failed"
