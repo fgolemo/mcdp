@@ -3,7 +3,7 @@
 from contextlib import contextmanager
 from copy import deepcopy
 from mocdp.exceptions import mcdp_dev_warning
-from reprep.constants import MIME_PDF, MIME_PNG
+from reprep.constants import MIME_PDF, MIME_PNG, MIME_GRAPHVIZ
 from system_cmd import CmdException, system_cmd_result
 import networkx as nx  # @UnresolvedImport
 import os
@@ -77,6 +77,7 @@ def get_dot_string(gg):
         contents = contents.replace('</TABLE>"', '</TABLE>>')
         return contents
 
+
 def gg_figure(r, name, ggraph):
     """ Adds a figure to the Report r that displays this graph
         and also its source. """
@@ -101,6 +102,10 @@ def gg_figure(r, name, ggraph):
         with r.data_file('graph_pdf', MIME_PDF) as filename:
             graphviz_run(filename_dot, filename, prog=prog)
 
+        with f.data_file('dot', MIME_GRAPHVIZ) as filename:
+            with open(filename, 'w') as f:
+                f.write(s)
+        
     return f
 
 

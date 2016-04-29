@@ -267,20 +267,24 @@ def parse_ndp_filename(filename):
         raise e.with_filename(filename)
 
 # @contract(returns=NamedDP)
-def parse_ndp(string):
+def parse_ndp(string, context=None):
+    from mocdp.comp.context import Context
+    from mocdp.lang.syntax import Syntax
+    from mocdp.lang.eval_mcdp_type_imp import eval_dp_rvalue
+    from mocdp.comp.interfaces import NamedDP
+
     if os.path.exists(string):
         raise ValueError('expected string, not filename :%s' % string)
-    from mocdp.lang.syntax import Syntax
+
     v = parse_wrap(Syntax.dp_rvalue, string)[0]
 
-    from mocdp.comp.context import Context
-    context = Context()
-    from mocdp.lang.eval_mcdp_type_imp import eval_dp_rvalue
+    if context is None:
+        context = Context()
+
     res = eval_dp_rvalue(v, context)
     # I'm not sure what happens to the context
     # if context.names # error ??
 
-    from mocdp.comp.interfaces import NamedDP
     assert isinstance(res, NamedDP), res
     return res
 

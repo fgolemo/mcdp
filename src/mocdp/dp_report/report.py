@@ -4,13 +4,12 @@ from .gg_utils import gg_figure
 from contracts import contract
 from mocdp.comp.interfaces import NamedDP
 from mocdp.dp import DPLoop0, Mux, Parallel, Series0
-from mocdp.dp.dp_generic_unary import GenericUnary
-from mocdp.posets.poset_product import PosetProduct
-from mocdp.posets import R_dimensionless
-from reprep import Report
 from mocdp.dp.dp_constant import Constant
+from mocdp.dp.dp_generic_unary import GenericUnary
 from mocdp.dp.dp_limit import Limit
 from mocdp.exceptions import mcdp_dev_warning
+from mocdp.posets import PosetProduct, R_dimensionless
+from reprep import Report
 
 @contract(ndp=NamedDP)
 def report_ndp1(ndp):
@@ -19,9 +18,13 @@ def report_ndp1(ndp):
     gg = gvgen_from_ndp(ndp)
     gg_figure(r, 'graph', gg)
 
+    styles = ['greenred', 'clean', 'greenredsym']
+    for style in styles:
+        with r.subsection(style) as r2:
+            gg = gvgen_from_ndp(ndp, style=style)
+            gg_figure(r2, 'graph', gg)
+
     return r
-
-
 
 def report_dp1(dp):
     r = Report()

@@ -21,11 +21,18 @@ class CompositeNamedDP(NamedDP):
         
         Same thing with the resources.
     
-    
     """
 
     def __init__(self, context):
-        self.context = context
+
+        from mocdp.comp.context import Context
+
+        self.context = Context()
+        self.context.names = context.names.copy()
+        self.context.connections = list(context.connections)
+        self.context.fnames = list(context.fnames)
+        self.context.rnames = list(context.rnames)
+
         self._rnames = list(self.context.rnames)
         self._fnames = list(self.context.fnames)
 
@@ -44,16 +51,6 @@ class CompositeNamedDP(NamedDP):
 
     def get_rnames(self):
         return list(self._rnames)
-#
-#     def rindex(self, rn):
-#         if len(self._rnames) == 1:
-#             return ()
-#         return self._rnames.index(rn)
-#
-#     def findex(self, fn):
-#         if len(self._fnames) == 1:
-#             return ()
-#         return self._fnames.index(fn)
 
     def get_rtype(self, rn):
         ndp = self.context.get_ndp_res(rn)

@@ -2,8 +2,10 @@ from .utils_mkdir import mkdirs_thread_safe
 from conf_tools import GlobalConfig
 from conf_tools.utils import expand_string
 from contracts import contract
-from mocdp.dp_report.gg_ndp import gvgen_from_ndp
-from mocdp.dp_report.gg_utils import gg_figure
+from decent_params.utils import UserError
+from mocdp.dp_report.gg_ndp import (STYLE_GREENRED, STYLE_GREENREDSYM,
+    gvgen_from_ndp)
+from mocdp.dp_report.gg_utils import get_dot_string, gg_figure
 from mocdp.dp_report.report import gvgen_from_dp
 from mocdp.exceptions import mcdp_dev_warning
 from mocdp.lang.parse_actions import parse_ndp
@@ -43,9 +45,16 @@ def ndp_visualization(data, style):
     ndp = get_ndp(data) 
     gg = gvgen_from_ndp(ndp, style)
     png, pdf = png_pdf_from_gg(gg)
+
+    # do it again
+    gg = gvgen_from_ndp(ndp, style)
+    dot = get_dot_string(gg)
+
     res1 = ('png', style, png)
     res2 = ('pdf', style, pdf)
-    return [res1, res2]
+    res3 = ('dot', style, dot)
+
+    return [res1, res2, res3]
 
 def create_extra_css(params):
 #     hide = params.get('hide', '')
@@ -170,11 +179,20 @@ allplots  = {
     ('syntax_doc', syntax_doc),
     ('syntax_frag', syntax_frag),
     ('syntax_pdf', syntax_pdf),
-    ('ndp_default', lambda data: ndp_visualization(data, 'default')),
-    ('ndp_clean', lambda data: ndp_visualization(data, 'clean')),
     ('dp_tree', dp_visualization),
     ('tex_form', tex_form),
 }
+
+class Vis():
+    def __init__(self, s):
+        self.s = s
+    def __call__(self, data):
+        return ndp_visualization(data, style=self.s)
+
+for s in [STYLE_GREENRED, 'default', 'clean', STYLE_GREENREDSYM]:
+    x = ('ndp_%s' % s, Vis(s))
+    allplots.add(x)
+
 
 @contract(returns='tuple(str,*)')
 def parse_kv(x):
@@ -205,7 +223,7 @@ def do_plots(filename, plots, outdir, extra_params):
             mcdp_dev_warning('Add better checks of error.')
             print(e)
             continue
-        assert isinstance(res, list)
+        assert isinstance(res, list), res
         for r in res:
             assert isinstance(r, tuple), r
             mime, name, x = r
@@ -227,13 +245,17 @@ def do_plots(filename, plots, outdir, extra_params):
 
 
 class PlotDP(QuickAppBase):
-    """ Plot a design program """
+    """ Plot a DP:
+    
+        mcdp-plot [--watch] [--plots *] [--out outdir] file.mcdp
+        
+    """
+
     def define_program_options(self, params):
         params.add_flag('watch')
         params.accept_extra()
 
         possible = [p for p, _ in allplots]
-
 
         params.add_string('out', help='Output dir', default=None)
         params.add_string('extra_params', help='Add extra params', default="")
@@ -246,10 +268,15 @@ class PlotDP(QuickAppBase):
         options = self.get_options()
         filenames = options.get_extra()
 
+        if len(filenames) == 0:
+            msg = 'Need at least one filename.'
+            raise UserError(msg)
+
         if len(filenames) > 1:
             raise NotImplementedError('Only one filename')
 
         filename = filenames[0]
+
         if options.out is None:
             out = os.path.dirname(filename)
             if not out:
@@ -266,7 +293,10 @@ class PlotDP(QuickAppBase):
                 do_plots(filename, plots, out)
 
             from cdpview.go import watch
-            watch(path=os.path.dirname(options.filename), handler=handler)
+            d = os.path.dirname(filename)
+            if d == '':
+                d = '.'
+            watch(path=d, handler=handler)
 
 
 mcdp_plot_main = PlotDP.get_sys_main()

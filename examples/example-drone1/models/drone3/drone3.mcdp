@@ -1,0 +1,21 @@
+mcdp {  
+ provides payload   [kg]
+
+ battery = instance load battery2
+ actuation = instance load actuation2
+ customer_pref = instance load customer_pref
+
+ capacity provided by battery >= 
+    customer_pref.min_endurance * (power required by actuation)
+ 
+ g = 9.81 m/s^2
+ 
+ lift provided by actuation >=
+    (mass required by battery + payload) * g
+
+	
+	customer_pref.buys_at >= battery.cost + actuation.cost
+
+	requires mass for battery
+
+}

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import indent, raise_desc
+from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.posets import Space
+from mocdp.comp.interfaces import NamedDP
 
 __all__ = [
     'Connection',
@@ -43,7 +44,22 @@ class ValueWithUnits():
 class NoSuchMCDPType(Exception):
     pass
 
+def load_ndp_conftools(load_arg):
+    from mocdp.configuration import get_conftools_nameddps
+    from conf_tools.exceptions import ConfToolsException
+
+    library = get_conftools_nameddps()
+
+    try:
+        _, ndp = library.instance_smarter(load_arg)
+    except ConfToolsException as e:
+        msg = 'Cannot load predefined DP %s.' % load_arg.__repr__()
+        raise_wrapped(DPSemanticError, e, msg, compact=True)
+
+    return ndp
+
 class Context():
+
     def __init__(self):
         self.names = {}  # name -> ndp
         self.connections = []
@@ -51,19 +67,32 @@ class Context():
         self.fnames = []
         self.rnames = []
 
-        # energy = endurance * power
         self.var2resource = {}  # str -> Resource
         self.var2model = {}  # str -> NamedDP
         self.constants = {}  # str -> ValueWithUnits
-
+        
+        self.load_ndp_hooks = [load_ndp_conftools]
 
     def child(self):
         """ A child context preserves the value of the constants
             and the model types. """
         c = Context()
+        c.load_ndp_hooks = self.load_ndp_hooks
         c.var2model.update(self.var2model)
         c.constants.update(self.constants)
         return c
+
+    def load_ndp(self, load_arg):
+        errors = []
+        for hook in self.load_ndp_hooks:
+            try:
+                res = hook(load_arg)
+                assert isinstance(res, NamedDP)
+                return res
+            except DPSemanticError as e:
+                errors.append(str(e))
+        msg = 'Could not load: \n%s' % "\n\n".join(errors)
+        raise DPSemanticError(msg)
 
 
     @contract(s='str', dp='str', returns=CFunction)

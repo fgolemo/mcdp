@@ -1,33 +1,45 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
 from conf_tools.utils.resources import dir_from_package_name
-from contracts.utils import raise_wrapped, raise_desc
+from contextlib import contextmanager
+from contracts.utils import raise_desc, raise_wrapped
 from mocdp.comp import CompositeNamedDP, SimpleWrap
+from mocdp.comp.interfaces import NamedDPCoproduct, NamedDP
 from mocdp.dp import (
     Constant, GenericUnary, Identity, Limit, Max, Min, Product, ProductN, Sum,
     SumN)
+from mocdp.dp.dp_mult_inv import InvMult2, InvPlus2, InvPlus2Nat
+from mocdp.dp.dp_sum import SumNNat
 from mocdp.exceptions import mcdp_dev_warning
 from mocdp.lang.blocks import get_missing_connections
+from mocdp.lang.helpers import Conversion
 from mocdp.posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
+
 from mocdp.dp.dp_mult_inv import InvMult2, InvPlus2, InvPlus2Nat
 from mocdp.comp.interfaces import NamedDPCoproduct
 from contextlib import contextmanager
 from mocdp.dp.dp_sum import SumNNat
 from mocdp.dp.dp_generic_unary import WrapAMap
 
+from contracts import contract
+
+STYLE_GREENRED = 'greenred'
+STYLE_GREENREDSYM = 'greenredsym'
+
+COLOR_DARKGREEN = 'darkgreen'
+# COLOR_DARKGREEN = 'green'
+COLOR_DARKRED = 'red'
 
 class GraphDrawingContext():
-    def __init__(self, gg, parent, yourname, level=0, tmppath=None):
+    def __init__(self, gg, parent, yourname, level=0, tmppath=None, style='default'):
         self.gg = gg
         self.parent = parent
         self.yourname = yourname
         self.level = level
-        
-        self.set_style('default')
         
         if tmppath is None:
             tmppath = mkdtemp(suffix="dp-icons")
@@ -36,6 +48,8 @@ class GraphDrawingContext():
         self.tmppath = tmppath
 
         self.all_nodes = []
+
+        self.set_style(style)
 
     def get_all_nodes(self):
         return self.all_nodes
@@ -47,13 +61,12 @@ class GraphDrawingContext():
         
     def child_context(self, parent, yourname):
         c = GraphDrawingContext(gg=self.gg, parent=parent, yourname=yourname,
-                                level=self.level + 1, tmppath=self.tmppath)
+                                level=self.level + 1, tmppath=self.tmppath, style=self.style)
         return c
 
     @contextmanager
     def child_context_yield(self, parent, yourname):
-        c = GraphDrawingContext(gg=self.gg, parent=parent, yourname=yourname,
-                                level=self.level + 1, tmppath=self.tmppath)
+        c = self.child_context(parent, yourname)
         yield c
         self.all_nodes.extend(c.all_nodes)
 
@@ -68,16 +81,31 @@ class GraphDrawingContext():
         self.gg.styleAppend(a, b, c)
 
     def set_style(self, style):
+        self.style = style
         if style == 'default':
             self.policy_enclose = 'always_except_first'
             self.policy_skip = 'never'
         elif style == 'clean':
             self.policy_enclose = 'only_if_unconnected'
             self.policy_skip = 'if_second_simple'
-            
+        elif style in [STYLE_GREENRED, STYLE_GREENREDSYM]:
+            self.policy_enclose = 'always_except_first'
+            self.policy_skip = 'never'
+
         else: 
             raise ValueError(style)
         
+        if style in [STYLE_GREENRED, STYLE_GREENREDSYM]:
+            self.gg.styleAppend('splitter', 'style', 'filled')
+            self.gg.styleAppend('splitter', 'shape', 'point')
+            self.gg.styleAppend('splitter', 'width', '0.1')
+            self.gg.styleAppend('splitter', 'color', 'red')
+        else:
+            self.gg.styleAppend('splitter', 'style', 'filled')
+            self.gg.styleAppend('splitter', 'shape', 'point')
+            self.gg.styleAppend('splitter', 'width', '0.1')
+            self.gg.styleAppend('splitter', 'color', 'black')
+
     def should_I_enclose(self, ndp):
         if self.level == 0:
             return False
@@ -124,7 +152,59 @@ class GraphDrawingContext():
         best = choose_best_icon(options, imagepath, tmppath)
         return best
 
+    def decorate_arrow_function(self, l1):
+        propertyAppend = self.gg.propertyAppend
+        if self.style == STYLE_GREENRED:
+
+            propertyAppend(l1, 'color', COLOR_DARKGREEN)
+            propertyAppend(l1, 'arrowhead', 'normal')
+            propertyAppend(l1, 'arrowtail', 'none')
+            propertyAppend(l1, 'dir', 'both')
+
+        if self.style == STYLE_GREENREDSYM:
+            propertyAppend(l1, 'color', 'darkgreen')
+            propertyAppend(l1, 'arrowhead', 'dot')
+            propertyAppend(l1, 'arrowtail', 'none')
+            propertyAppend(l1, 'dir', 'both')
+
+
+    def decorate_arrow_resource(self, l2, split=False):
+        propertyAppend = self.gg.propertyAppend
+
+        if self.style == STYLE_GREENRED:
+            propertyAppend(l2, 'color', COLOR_DARKRED)
+            propertyAppend(l2, 'arrowtail', 'inv')
+            propertyAppend(l2, 'arrowhead', 'none')
+            propertyAppend(l2, 'dir', 'both')
+
+        if self.style == STYLE_GREENREDSYM:
+            propertyAppend(l2, 'color', COLOR_DARKRED)
+            propertyAppend(l2, 'arrowtail', 'dot')
+            propertyAppend(l2, 'arrowhead', 'none')
+            propertyAppend(l2, 'dir', 'both')
+
+
+    def decorate_resource_name(self, n):
+        propertyAppend = self.gg.propertyAppend
+
+        if self.style == STYLE_GREENRED:
+            propertyAppend(n, 'fontcolor', COLOR_DARKRED)
+
+    def decorate_function_name(self, n):
+        propertyAppend = self.gg.propertyAppend
+        if self.style == STYLE_GREENRED:
+            propertyAppend(n, 'fontcolor', COLOR_DARKGREEN)
+
+
+#    bidirectional
+#             propertyAppend(l2, 'color', 'red')
+#             propertyAppend(l2, 'arrowtail', 'dot')
+#             propertyAppend(l2, 'arrowhead', 'none')
+#             propertyAppend(l2, 'dir', 'both')
+
+@contract(ndp=NamedDP)
 def gvgen_from_ndp(ndp, style='default'):
+    assert isinstance(ndp, NamedDP)
     import my_gvgen as gvgen
     gg = gvgen.GvGen(options="rankdir=LR")
     if len(ndp.get_fnames()) > 0:
@@ -132,8 +212,6 @@ def gvgen_from_ndp(ndp, style='default'):
 
     gdc = GraphDrawingContext(gg=gg, parent=None, yourname=None)
     gdc.set_style(style)
-
-
 
     gg.styleAppend("external", "shape", "none")
     gg.styleAppend("external_cluster_functions", "shape", "plaintext")
@@ -145,8 +223,8 @@ def gvgen_from_ndp(ndp, style='default'):
     gg.styleAppend("external_cluster_resources", "color", "white")
 #     gg.styleAppend("external_cluster_functions", "color", "#008000")
 
-
     gg.styleAppend("connector", "shape", "plaintext")
+
     gg.styleAppend("simple", "shape", "box")
     gg.styleAppend("simple", "style", "rounded")
 
@@ -176,10 +254,7 @@ def gvgen_from_ndp(ndp, style='default'):
     gg.styleAppend('unconnected', 'width', '0.1')
     gg.styleAppend('unconnected', 'color', 'red')
 
-    gg.styleAppend('splitter', 'style', 'filled')
-    gg.styleAppend('splitter', 'shape', 'point')
-    gg.styleAppend('splitter', 'width', '0.1')
-    gg.styleAppend('splitter', 'color', 'black')
+
     gg.styleAppend('splitter', 'fillcolor', 'black')
     gg.styleAppend('splitter_link', 'dir', 'none')
 
@@ -206,6 +281,9 @@ def gvgen_from_ndp(ndp, style='default'):
                 gg.propertyAppend(l, "headport", "w")
                 gg.propertyAppend(l, "tailport", "e")
 
+            gdc.decorate_arrow_function(l)
+            gdc.decorate_function_name(x)
+
             gg.styleApply("external_cluster_functions", cluster_functions)
 
     if resources:
@@ -219,10 +297,12 @@ def gvgen_from_ndp(ndp, style='default'):
             gg.styleApply("external", x)
 
             l = gg.newLink(n, x)
-
+            gdc.decorate_arrow_resource(l)
+            gdc.decorate_resource_name(x)
             if False:
                 gg.propertyAppend(l, "headport", "w")
                 gg.propertyAppend(l, "tailport", "e")
+
         gg.styleApply("external_cluster_resources", cluster_resources)
 
 
@@ -307,6 +387,7 @@ def create_simplewrap(gdc, ndp):
 
     sname = None  # name of style to apply, if any
 
+    # For these, we only disply the image, without the border
     special = [
         (Sum, ''),
         (SumN, ''),
@@ -316,6 +397,7 @@ def create_simplewrap(gdc, ndp):
         (InvPlus2, ''),
         (InvMult2, ''),
         (InvPlus2Nat, ''),
+        (Conversion, ''),
     ]
 
     classname = type(ndp.dp).__name__
@@ -448,10 +530,12 @@ def create_coproduct(gdc0, ndp):
 
             for fn, fni in zip(ndp.get_fnames(), ndpi.get_fnames()):
                 l = gdc0.newLink(functions[fn], funi[fni])
+                gdci.decorate_arrow_function(l)  # XXX?
                 gdci.styleApply('coproduct_link', l)
 
             for rn, rni in zip(ndp.get_rnames(), ndpi.get_rnames()):
                 l = gdc0.newLink(resi[rni], resources[rn])
+                gdci.decorate_arrow_resource(l)  # XXX?
                 gdci.styleApply('coproduct_link', l)
 
 
@@ -463,7 +547,6 @@ def create_composite(gdc0, ndp):
 
         names2resources = defaultdict(lambda: {})
         names2functions = defaultdict(lambda: {})
-
 
         if gdc0.should_I_enclose(ndp):
             c = gdc0.newItem(gdc0.yourname)
@@ -589,6 +672,7 @@ def create_composite(gdc0, ndp):
                     gdc.gg.propertyAppend(l, "weight", "0")
 
                     gdc.styleApply('splitter_link', l)
+                    gdc.decorate_arrow_resource(l)
                     names2resources[name][rn] = split
 
         ignore_connections = set()
@@ -651,10 +735,12 @@ def create_composite(gdc0, ndp):
                 gdc.styleApply("leq", box)
         
                 l1 = gdc.newLink(box, n_a , label=get_signal_label(c.s2, ua))
+
                 if False:
                     gdc.gg.propertyAppend(l1, "headport", "w")
         
                 l2 = gdc.newLink(n_b, box, label=get_signal_label(c.s1, ub))
+
                 if False:
                     gdc.gg.propertyAppend(l2, "tailport", "e")
 
@@ -672,6 +758,10 @@ def create_composite(gdc0, ndp):
                     gdc.gg.propertyAppend(l2, 'weight', '%s' % weight)
                     gdc.gg.propertyAppend(l1, 'weight', '%s' % weight)
 
+                gdc.decorate_arrow_function(l1)
+                gdc.decorate_arrow_resource(l2)
+
+
         unconnected_fun, unconnected_res = get_missing_connections(ndp.context)
         for (dp, fn) in unconnected_fun:
             x = gdc.newItem('')
@@ -680,6 +770,8 @@ def create_composite(gdc0, ndp):
             n = names2functions[dp][fn]
             F = ndp.context.names[dp].get_ftype(fn)
             l = gdc.newLink(x, n, label=get_signal_label(fn, F))
+
+            gdc.decorate_arrow_function(l)  # XXX?
             gdc.styleApply('unconnected_link', l)
 
         for (dp, rn) in unconnected_res:
@@ -689,6 +781,7 @@ def create_composite(gdc0, ndp):
             n = names2resources[dp][rn]
             R = ndp.context.names[dp].get_rtype(rn)
             l = gdc.newLink(n, x, label=get_signal_label(rn, R))
+            gdc.decorate_arrow_resource(l)  # XXX?
             gdc.styleApply('unconnected_link', l)
     
         functions = {}

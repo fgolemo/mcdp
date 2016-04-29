@@ -1,0 +1,5 @@
+template mcdp {
+	provides lift  [N]
+	requires power [W]
+	requires cost  [$]
+}
