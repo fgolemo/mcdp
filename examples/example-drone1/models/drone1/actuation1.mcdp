@@ -1,0 +1,4 @@
+template mcdp {
+	provides lift  [N]
+	requires power [W]
+}

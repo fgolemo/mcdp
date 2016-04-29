@@ -53,6 +53,9 @@ def get_valuewithunits_as_resource(v, context):
     return context.make_resource(nres, nres)
 
 
+class Conversion(WrapAMap):
+    """ Simple wrap to get icon """
+    pass
 
 def get_conversion(A, B):
     """ Returns None if there is no need. """
@@ -67,6 +70,8 @@ def get_conversion(A, B):
         conversion = None
     else:
         A_to_B, _ = tu.get_embedding(A, B)
-        conversion = WrapAMap(A_to_B)
+        conversion = Conversion(A_to_B)
 
     return conversion
+
+

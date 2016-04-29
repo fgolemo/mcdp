@@ -1,0 +1,5 @@
+template 
+  mcdp {
+    provides buys_at [$]
+    requires min_endurance [s]
+  }

@@ -1,12 +1,12 @@
+from .nat import Int, Nat
+from .poset import NotLeq, Preorder
+from .rcomp import Rcomp
+from .space import Map, NotBelongs, NotEqual, Space
+from .space_product import SpaceProduct
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
-from mocdp.posets.poset import NotLeq, Preorder
-from mocdp.posets.rcomp import Rcomp
-from mocdp.posets.space import Map, NotBelongs, NotEqual, Space
-from mocdp.posets.space_product import SpaceProduct
 import numpy as np
-from mocdp.posets.nat import Nat, Int
 
 __all__ = [
     'get_types_universe',
@@ -37,10 +37,8 @@ class TypesUniverse(Preorder):
             raise_desc(NotEqual, msg, A=A, B=B)
 
     def check_leq(self, A, B):
-        from mocdp.posets.nat import Nat
         from mocdp.posets.finite_set import FiniteCollectionsInclusion
         from mocdp.posets.rcomp_units import RcompUnits
-        from mocdp.posets.nat import Int
 
         if isinstance(A, Nat) and isinstance(B, Nat):
             return

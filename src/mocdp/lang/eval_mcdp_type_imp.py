@@ -9,12 +9,12 @@ from mocdp.comp.context import CFunction, CResource, NoSuchMCDPType
 from mocdp.configuration import get_conftools_nameddps
 from mocdp.dp import Identity
 from mocdp.dp.dp_catalogue import CatalogueDP
-from mocdp.dp.dp_generic_unary import WrapAMap
 from mocdp.dp.dp_series_simplification import make_series
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
 from mocdp.posets import NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.posets.any import Any
+from mocdp.lang.helpers import get_conversion
 
 CDP = CDPLanguage
 
@@ -54,15 +54,8 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             return r
 
         if isinstance(r, CDP.LoadCommand):
-            library = get_conftools_nameddps()
             load_arg = r.load_arg.value
-            try:
-                _, ndp = library.instance_smarter(load_arg)
-            except ConfToolsException as e:
-                msg = 'Cannot load predefined DP %s.' % load_arg.__repr__()
-                raise_wrapped(DPSemanticError, e, msg)
-
-            return ndp
+            return eval_dp_rvalue_load(load_arg, context)
 
         if isinstance(r, CDP.DPWrap):
             return eval_dp_rvalue_dpwrap(r, context)
@@ -122,6 +115,10 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
     raise DPInternalError('Invalid dprvalue: %s' % str(r))
 
 
+def eval_dp_rvalue_load(load_arg, context):
+    return context.load_ndp(load_arg)
+
+
 @contract(r=CDP.DPWrap)
 def eval_dp_rvalue_dpwrap(r, context):
     tu = get_types_universe()
@@ -165,7 +162,6 @@ def eval_dp_rvalue_dpwrap(r, context):
     else:
         want_R = PosetProduct(want_Rs)
 
-    from mocdp.lang.helpers import get_conversion
     dp_prefix = get_conversion(want_F, dp_F)
     dp_postfix = get_conversion(dp_R, want_R)
 
@@ -186,7 +182,6 @@ def eval_dp_rvalue_dpwrap(r, context):
     rtypes_expected = PosetProduct(tuple([eval_space(r.unit, context) for r in res]))
 
     try:
-
         tu.check_equal(ftypes, ftypes_expected)
         tu.check_equal(rtypes, rtypes_expected)
     except NotEqual as e:
@@ -305,9 +300,8 @@ def add_constraint(context, resource, function):
             msg = 'Constraint between incompatible spaces.'
             raise_wrapped(DPSemanticError, e, msg)
 
-        map1, _ = tu.get_embedding(R1, F2)
+        conversion = get_conversion(R1, F2)
 
-        conversion = WrapAMap(map1)
         conversion_ndp = dpwrap(conversion, '_in', '_out')
 
         name = context.new_name('_conversion')
