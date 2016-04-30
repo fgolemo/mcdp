@@ -1,12 +1,12 @@
 from conf_tools.utils import locate_files, raise_x_not_found
 from contracts import contract
+from contracts.utils import raise_desc
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from mocdp.lang.parse_actions import parse_ndp
 import os
 
 __all__ = ['MCDPLibrary']
-
 
 
 class MCDPLibrary():
@@ -49,12 +49,16 @@ class MCDPLibrary():
             raise e.with_filename(realpath)
 
     def _get_file_data(self, basename):
+        """ returns dict with data, realpath """
         if not basename in self.file_to_contents:
             raise_x_not_found('file', basename, self.file_to_contents)
+
         found = self.file_to_contents[basename]
         return found
 
     def add_search_dir(self, d):
+        if not os.path.exists(d):
+            raise_desc(ValueError, 'Directory does not exist', d=d)
         c = self.clone()
         c._add_search_dir(d)
         return c

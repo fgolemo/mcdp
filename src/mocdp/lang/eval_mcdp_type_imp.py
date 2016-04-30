@@ -1,20 +1,18 @@
 # -*- coding: utf-8 -*-
 from .parts import CDPLanguage
-from conf_tools import ConfToolsException
 from contracts import contract, describe_value
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
 from mocdp.comp.context import CFunction, CResource, NoSuchMCDPType
-from mocdp.configuration import get_conftools_nameddps
 from mocdp.dp import Identity
 from mocdp.dp.dp_catalogue import CatalogueDP
 from mocdp.dp.dp_series_simplification import make_series
 from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.lang.helpers import get_conversion
 from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
 from mocdp.posets import NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.posets.any import Any
-from mocdp.lang.helpers import get_conversion
 
 CDP = CDPLanguage
 
@@ -306,8 +304,6 @@ def add_constraint(context, resource, function):
 
         conversion = get_conversion(R1, F2)
 
-#         map1.__name__ = '%s -> %s' % (R1, F2)
-        conversion = WrapAMap(map1)
         conversion_ndp = dpwrap(conversion, '_in', '_out')
 
         name = context.new_name('_conversion')

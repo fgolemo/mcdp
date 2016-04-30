@@ -1,0 +1,20 @@
+
+
+all:
+	./example_drone1.py -c "clean; config echo 1; rparmake"
+
+plots: plot1 plot2 plot3
+
+plot1:
+	mcdp-plot --out=out/drone1 -d models/drone1 drone 
+
+plot2:
+	mcdp-plot --out=out/drone2 -d models/drone2 drone2_cost 
+
+plot3:
+	mcdp-plot --out=out/drone3 -d models/drone3 drone3
+
+	 # {'id': 'drone1', 'dir': 'models/drone1', 'model': 'drone'},
+  #           {'id': 'drone2', 'dir': 'models/drone2', 'model': 'drone2_cost'},
+  #           {'id': 'drone3', 'dir': 'models/drone3', 'model': 'drone3'},
+  #       ]

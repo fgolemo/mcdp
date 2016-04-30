@@ -1,4 +1,7 @@
-template mcdp {
+mcdp {
 	provides lift  [N]
 	requires power [W]
+	
+	c = 0.002 W/N^2
+	power >= lift * lift * c
 }

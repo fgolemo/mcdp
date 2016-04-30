@@ -14,10 +14,16 @@ from reprep import Report
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
+from cdpview.solve_meat import solve_read_model
+from mcdp_library.library import MCDPLibrary
+from contracts.utils import raise_desc
 
 def get_ndp(data):
     if not 'ndp' in data:
-        data['ndp'] = parse_ndp(data['s'])
+        dirs = data['dirs']
+        param = data['model_name']
+        library, basename, ndp = solve_read_model(dirs, param)
+        data['ndp'] = ndp
     return data['ndp']
 
 def get_dp(data):
@@ -206,11 +212,22 @@ def parse_params(p):
 
     return dict(parse_kv(_) for _ in seq)
 
-def do_plots(filename, plots, outdir, extra_params):
-    s = open(filename).read()
+def do_plots(logger, model_name, plots, outdir, extra_params, dirs):
     data = {}
-    data['filename'] = filename
-    data['s'] = s
+
+    data['dirs'] = dirs
+    data['model_name'] = model_name
+
+    GlobalConfig.global_load_dir("mocdp")
+
+    library = MCDPLibrary()
+    for d in dirs:
+        library = library.add_search_dir(d)
+
+    filename = model_name + '.mcdp'
+    x = library._get_file_data(filename)
+    data['s'] = x['data']
+    data['filename'] = x['realpath']
     data['params'] = parse_params(extra_params)
 
     d = dict(allplots)
@@ -221,7 +238,7 @@ def do_plots(filename, plots, outdir, extra_params):
             res = d[p](data)
         except CmdException as e:
             mcdp_dev_warning('Add better checks of error.')
-            print(e)
+            logger.error(e)
             continue
         assert isinstance(res, list), res
         for r in res:
@@ -230,11 +247,10 @@ def do_plots(filename, plots, outdir, extra_params):
             assert isinstance(x, str), x
             ext = mime
 
-            base = os.path.splitext(os.path.basename(filename))[0]
-            base += '-%s.%s' % (name, ext)
+            base = model_name + '-%s.%s' % (name, ext)
 
             out = os.path.join(outdir, base)
-            print('Writing to %s' % out)
+            logger.info('Writing to %s' % out)
             with open(out, 'w') as f:
                 f.write(x)
 
@@ -247,7 +263,7 @@ def do_plots(filename, plots, outdir, extra_params):
 class PlotDP(QuickAppBase):
     """ Plot a DP:
     
-        mcdp-plot [--watch] [--plots *] [--out outdir] file.mcdp
+        mcdp-plot [--watch] [--plots *] [--out outdir] [-d dir] model_name
         
     """
 
@@ -259,21 +275,22 @@ class PlotDP(QuickAppBase):
 
         params.add_string('out', help='Output dir', default=None)
         params.add_string('extra_params', help='Add extra params', default="")
-
         params.add_string('plots', default='*', help='One of: %s' % possible)
+
+        params.add_string('dirs', default='.', short='-d',
+                           help='Library directories containing models.')
 
     def go(self):
         GlobalConfig.global_load_dir("mocdp")
 
         options = self.get_options()
         filenames = options.get_extra()
-
+        print options
         if len(filenames) == 0:
-            msg = 'Need at least one filename.'
-            raise UserError(msg)
+            raise_desc(UserError, 'Need at least one filename.', filenames=filenames)
 
         if len(filenames) > 1:
-            raise NotImplementedError('Only one filename')
+            raise_desc(NotImplementedError, 'Want only 1 filename.', filenames=filenames)
 
         filename = filenames[0]
 
@@ -286,7 +303,9 @@ class PlotDP(QuickAppBase):
         mkdirs_thread_safe(out)
         possible = [p for p, _ in allplots]
         plots = expand_string(options.plots, list(possible))
-        do_plots(filename, plots, out, options.extra_params)
+        logger = self.logger  # HasLogger
+        dirs = options.dirs.split(':')
+        do_plots(logger, filename, plots, out, options.extra_params, dirs=dirs)
 
         if options.watch:
             def handler():
