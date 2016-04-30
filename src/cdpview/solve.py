@@ -39,7 +39,7 @@ class SolveDP(QuickAppBase):
 
     def go(self):
         from conf_tools import logger
-        logger.setLevel(logging.CRITICAL)
+        logger.setLevel(logging.DEBUG)
 
         options = self.get_options()
         if options.expect_nimp is not None:

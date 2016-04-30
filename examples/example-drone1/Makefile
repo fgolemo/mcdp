@@ -3,6 +3,13 @@
 all:
 	./example_drone1.py -c "clean; config echo 1; rparmake"
 
+solve0:
+	mcdp-solve --out=out/drone0 -d models/drone0 battery '<1 hour, 0.1 kg, 1.0 W>'
+
+solve1:
+	mcdp-solve --out=out/drone1 -d models/drone1 drone "<0s, 0kg>"
+
+
 plots: plot1 plot2 plot3
 
 plot1:

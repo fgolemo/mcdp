@@ -59,6 +59,11 @@ class MCDPLibrary():
     def add_search_dir(self, d):
         if not os.path.exists(d):
             raise_desc(ValueError, 'Directory does not exist', d=d)
+
+        import sys
+        # XXX: this needs to change
+        sys.path.insert(0, d)
+
         c = self.clone()
         c._add_search_dir(d)
         return c

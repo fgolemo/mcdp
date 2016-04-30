@@ -1,0 +1,7 @@
+dp {
+    provides capacity [J]
+	requires mass     [kg]
+
+    implemented-by code battery_random.BatteryRandom(seed=1)
+}
+        

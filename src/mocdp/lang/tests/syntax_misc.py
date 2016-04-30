@@ -52,6 +52,7 @@ def check_lang6_composition():
     parse_wrap(Syntax.funcname, 'mocdp.example_battery.Mobility')
     parse_wrap(Syntax.code_spec, 'code mocdp.example_battery.Mobility')
 
+    parse_wrap(Syntax.code_spec_with_args, 'code mocdp.example_battery.Mobility(a=1)')
 
 
 @comptest
