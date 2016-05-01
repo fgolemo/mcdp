@@ -89,7 +89,6 @@ def known_fail(f, *args):
 def define_test_for(context, filename, basename, tests, known_failure=False):
     outdir = os.path.dirname(filename)
     outdir = os.path.join(outdir, 'out')
-
     
     for test in tests:
         n = test.__name__.replace('assert_', '').replace('_ndp', '')
@@ -139,6 +138,7 @@ def define_tests(context):
 
     folder = os.path.join(dir_from_package_name('mocdp'), '../../examples')
     examples2 = list(locate_files(folder, '*.mcdp'))
+    print('Other files found: %s' % examples2)
     filenames.extend(examples2)
 
     for f in filenames:

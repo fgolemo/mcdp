@@ -99,7 +99,7 @@ def pmin1():
     N2 = PosetProduct((Pbase,) * ndim)
 
     method = poset_minima_n2
-    r = stats_for_poset_minima(N2, Ps, method)
+    r = stats_for_poset_minima(N2, Ps, method, maxleq=None)
     print r
 
 #
