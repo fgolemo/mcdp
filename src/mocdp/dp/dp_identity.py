@@ -2,7 +2,7 @@
 from .primitive import PrimitiveDP
 from contracts import contract
 from mocdp.posets import Poset  # @UnusedImport
-from mocdp.posets.poset_product import PosetProduct
+from mocdp.posets import PosetProduct
 
 
 __all__ = [
