@@ -1,7 +1,6 @@
 from .utils import ok, sem, syn
 from comptests.registrar import comptest
-from contracts import contract
-from mocdp.dp.primitive import ApproximableDP, PrimitiveDP
+from mocdp.dp.dp_transformations import get_dp_bounds
 from mocdp.lang.parse_actions import parse_ndp
 from mocdp.lang.parts import CDPLanguage
 from mocdp.lang.syntax import Syntax
@@ -9,7 +8,6 @@ from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp,
     assert_semantic_error, parse_wrap_check)
 from mocdp.posets.uppersets import UpperSets
 from nose.tools import assert_equal
-from mocdp.dp.dp_transformations import get_dp_bounds
 
 L = CDPLanguage
 
