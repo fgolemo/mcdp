@@ -114,7 +114,7 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             e = DPSemanticError(str(e), r.where)
         raise e
 
-    raise DPInternalError('Invalid dprvalue: %s' % str(r))
+    raise_desc(DPInternalError, 'Invalid dprvalue.', r=r)
 
 
 def eval_dp_rvalue_load(load_arg, context):
@@ -369,7 +369,9 @@ def eval_statement(r, context):
                 x = eval_rvalue(right_side, context)
                 # print('adding as resource')
                 context.set_var2resource(name, x)
-            except:
+            except Exception as e:
+                print('Cannot evaluate %r as eval_rvalue: %s ' % (right_side, e))
+                # XXX fix this
                 x = eval_dp_rvalue(right_side, context)
                 context.set_var2model(name, x)
 

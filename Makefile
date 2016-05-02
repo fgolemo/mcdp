@@ -15,6 +15,10 @@ comptests-run-nocontracts:
 	mkdir -p $(out)
 	comptests -o $(out) --nonose $(package) 
 
+comptests-run-nocontracts-console:
+	mkdir -p $(out)
+	comptests -o $(out) --nonose $(package) --console
+
 comptests-run-parallel:
 	mkdir -p $(out)
 	comptests -o $(out) --contracts --nonose -c "rparmake" $(package)  

@@ -7,6 +7,9 @@ from .dp_identity import Identity
 from .dp_parallel import Parallel
 from mocdp.posets import PosetProduct
 from multi_index.get_it_test import compose_indices
+from contracts import contract
+from mocdp.dp.primitive import PrimitiveDP  # @UnusedImport
+from mocdp.dp.dp_parallel_n import ParallelN
 
 __all__ = [
     'make_parallel',
@@ -108,6 +111,30 @@ rules = [
     RuleMuxOutsideB(),
 ]
 
+
+
+@contract(dps='list[>=2]($PrimitiveDP)')
+def make_parallel_n(dps):
+    if len(dps) == 2:
+        return make_parallel(dps[0], dps[1])
+    return ParallelN(dps)
+#
+#     from mocdp.dp.dp_series_simplification import make_series
+#
+#     if len(dps) == 2:
+#         return make_parallel(dps[0], dps[1])
+#     else:
+#         l = make_parallel(dps[-2], dps[-1])
+#         dp0 = make_parallel_n(dps[:-2] + [l])
+#         mm = get_flatten_muxmap(dp0.get_fun_space())
+#         print dp0
+#         R0 = dp0.get_res_space()
+#         flatten = Mux(R0, mm)
+#         print flatten
+#         dp = make_series(dp0, flatten)
+#         # XXX: what about the prefix?
+#         return dp
+    
 def make_parallel(dp1, dp2):
     from mocdp.dp.dp_series_simplification import make_series, is_equiv_to_terminator, equiv_to_identity
 

@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from contracts import contract
-from mocdp.posets.find_poset_minima.baseline_n2 import (poset_minima,
-    poset_minima_n2)
-from mocdp.posets.nat import Nat
+from mocdp.posets.find_poset_minima.baseline_n2 import poset_minima_n2
 from mocdp.posets.poset import Poset
 from mocdp.posets.poset_product import PosetProduct
 from mocdp.posets.rcomp import Rcomp
@@ -73,6 +71,7 @@ def stats_for_poset_minima(P, xs, f, maxleq):
     """
     for s in P:
         s.reset_counters()
+
     xs_ = list(xs)
     random.shuffle(xs_)
     res = f(P, xs_)
@@ -99,7 +98,8 @@ def pmin1():
     N2 = PosetProduct((Pbase,) * ndim)
 
     method = poset_minima_n2
-    r = stats_for_poset_minima(N2, Ps, method, maxleq=None)
+    N2w = wrap_with_counts(N2)
+    r = stats_for_poset_minima(N2w, Ps, method, maxleq=None)
     print r
 
 #

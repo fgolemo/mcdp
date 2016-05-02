@@ -1,7 +1,19 @@
-from contracts import contract
-from mocdp.comp.context import Connection, Context
-from mocdp.dp.dp_identity import Identity
+# -*- coding: utf-8 -*-
 
+from collections import defaultdict
+from contracts import contract
+from contracts.utils import raise_desc
+from mocdp.comp.composite import CompositeNamedDP
+from mocdp.comp.composite_sub import (cndp_num_connected_components,
+    cndp_split_in_components)
+from mocdp.comp.connection import cndp_dpgraph
+from mocdp.comp.context import Connection, Context
+from mocdp.comp.wrap import SimpleWrap
+from mocdp.dp.dp_identity import Identity
+from mocdp.dp.dp_parallel_simplification import make_parallel_n
+from mocdp.posets.poset_product import PosetProduct
+from mocdp.dp.dp_flatten import Mux
+from mocdp.dp.dp_series_simplification import make_series
 
 @contract(returns='list(tuple(str, str, set($Connection)))')
 def find_nodes_with_multiple_connections(context):
@@ -21,7 +33,6 @@ def find_nodes_with_multiple_connections(context):
 
 def dpgraph_making_sure_no_reps(context):
     from mocdp.comp.connection import dpgraph
-    from collections import defaultdict
     # functionname -> list of names that use it
     functions = defaultdict(lambda: list())
     resources = defaultdict(lambda: list())
@@ -40,8 +51,8 @@ def dpgraph_making_sure_no_reps(context):
         for fn in ndp.get_fnames():
 
             if len(functions[fn]) != 0:
-#                 print('need to translate F (%s, %s) because already in %s' %
-#                       (name, fn, functions[fn]))
+                # print('need to translate F (%s, %s) because already in %s' %
+                #       (name, fn, functions[fn]))
 
                 fn2 = '_%s_%s' % (name, fn)
 
@@ -55,8 +66,8 @@ def dpgraph_making_sure_no_reps(context):
         for rn in ndp.get_rnames():
 
             if len(resources[rn]) != 0:
-#                 print('need to translate R (%s, %s) because already in %s' %
-#                        (name, rn, resources[rn]))
+                # print('need to translate R (%s, %s) because already in %s' %
+                #        (name, rn, resources[rn]))
 
                 rn2 = '_%s_%s' % (name, rn)
 
@@ -64,13 +75,94 @@ def dpgraph_making_sure_no_reps(context):
 
             resources[rn].append(name)
 
-    res0 = dpgraph(context.names, context.connections, split=[])
-    res = make_sure_order_functions_and_resources(res0, context.fnames, context.rnames)
+    name2npd = context.names
+    connections = context.connections
+    fnames = context.fnames
+    rnames = context.rnames
+
+    # check if there are disconnected components
+    cndp = CompositeNamedDP.from_context(context)
+
+    n = cndp_num_connected_components(cndp)
+    if n == 1:
+        # This is the base case
+        res0 = dpgraph(name2npd, connections, split=[])
+        res = make_sure_order_functions_and_resources(res0, fnames, rnames)
+        return res
+    else:
+        # This is the more complicated case
+        cndp_list = cndp_split_in_components(cndp)
+        assert len(cndp_list) == n
+
+        # Now call each one in turn
+        simple_wraps = []
+        for cndp in cndp_list:
+            dpi = cndp_dpgraph(cndp)
+            assert isinstance(dpi, SimpleWrap)
+            simple_wraps.append(dpi)
+            
+        final = ndps_parallel(simple_wraps)
+        res = make_sure_order_functions_and_resources(final, fnames, rnames)
+        return res
+
+
+@contract(ndps='list($SimpleWrap)', returns=SimpleWrap)
+def ndps_parallel(ndps):
+    dps = [ndp.get_dp() for ndp in ndps]
+    dp = make_parallel_n(dps)
+    F = dp.get_fun_space()
+    R = dp.get_res_space()
+    fnames = []
+    ftypes = []
+    rnames = []
+    rtypes = []
+
+    coords_postfix = []
+    coords_prefix = []
+    for i, ndp_i in enumerate(ndps):
+        fnames_i = ndp_i.get_fnames()
+        if not fnames_i:
+            coords_prefix.append([])
+        else:
+            mine = []
+            for j, fn in enumerate(fnames_i):
+                ft = ndp_i.get_ftype(fn)
+                F0_index = len(fnames)
+                mine.append(F0_index)
+                fnames.append(fn)
+                ftypes.append(ft)
+            if len(mine) == 1:
+                mine = mine[0]
+            coords_prefix.append(mine)
+
+        rnames_i = ndp_i.get_rnames()
+        for j, rn in enumerate(rnames_i):
+            rt = ndp_i.get_rtype(rn)
+            if len(rnames_i) == 1:
+                coords_postfix.append(i)
+            else:
+                coords_postfix.append((i, j))
+            rnames.append(rn)
+            rtypes.append(rt)
+
+    F0 = PosetProduct(ftypes)
+    prefix = Mux(F0, coords_prefix)
+    assert F == prefix.get_res_space()
+
+    R0 = PosetProduct(rtypes)
+
+    postfix = Mux(R, coords_postfix)
+
+    assert R0 == postfix.get_res_space()
+
+    res_dp = make_series(make_series(prefix, dp), postfix)
+
+    from mocdp.comp.connection import simplify_if_only_one_name
+    res_dp, fnames, rnames = simplify_if_only_one_name(res_dp, fnames, rnames)
+    
+    res = SimpleWrap(res_dp, fnames, rnames)
+
     return res
-
-
-
-
 
 def make_sure_order_functions_and_resources(res, fnames, rnames):
     from mocdp.comp.connection import  connect2

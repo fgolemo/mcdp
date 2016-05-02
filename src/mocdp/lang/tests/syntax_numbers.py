@@ -139,7 +139,6 @@ mcdp {
         requires a [m/s] 
         provides b [m/s]
 
-
         sub motor = instance mcdp { 
           provides vel [mph]
           requires vel2 [mph]

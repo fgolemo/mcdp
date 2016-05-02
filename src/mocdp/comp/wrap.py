@@ -6,6 +6,11 @@ from mocdp.dp import PrimitiveDP
 from mocdp.dp.dp_flatten import get_it
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 from mocdp.posets import PosetProduct
+from mocdp.dp.dp_identity import Identity
+from mocdp.posets.space import  Space
+from mocdp.dp.dp_series_simplification import make_series
+from mocdp.posets.poset import Poset
+from abc import abstractmethod
 
 __all__ = [
     'SimpleWrap',
@@ -161,7 +166,35 @@ class SimpleWrap(NamedDP):
     def repr_long(self):
         return self.desc()
 
+# class LabeledSpace(Poset):
+#
+#     @contract(label=str, space=Space)
+#     def __init__(self, label, space):
+#         self.space = space
+#         self.label = label
+#
+#     def format(self, x):
+#         s = self.space.format(x)
+#         return '%s: %s' % (self.label, s)
+#
+#     def belongs(self, x):
+#         return self.space.belongs(x)
+#
+#     def check_equal(self, x, y):
+#         return self.space.check_equal(x, y)
+#     def check_leq(self, x, y):
+#         return self.space.check_leq(x, y)
+#
+#     def __getattr__(self, attrib):
+#         return getattr(self.space, attrib)
+
 
 @contract(dp=PrimitiveDP, returns=NamedDP, fnames='str|seq(str)', rnames='str|seq(str)')
 def dpwrap(dp, fnames, rnames):
+#     if isinstance(fnames, list):
+#         F = dp.get_fun_space()
+#         F0 = LabeledSpace(str(fnames), F)
+#         F_identity = Identity(F0)
+#         dp = make_series(F_identity, dp)
+
     return SimpleWrap(dp, fnames, rnames)

@@ -46,6 +46,7 @@ class Space(object):
         # Raise NotEqual if not
         pass
 
+
     def equal(self, a, b):
         try:
             self.check_equal(a, b)
@@ -58,6 +59,9 @@ class Space(object):
         """ Returns an element of the space, or raise Uninhabited
             if the space is empty. """
         raise NotImplementedError(type(self))
+
+
+
 
 class Map():
 

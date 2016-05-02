@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from contracts import contract
-from contracts.utils import raise_wrapped, raise_desc
+from contracts.utils import raise_desc, raise_wrapped
 from mocdp.dp.dp_flatten import Mux, get_R_from_F_coords
 from mocdp.dp.dp_identity import Identity
 from mocdp.dp.dp_parallel import Parallel

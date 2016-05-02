@@ -68,8 +68,9 @@ class Parallel(PrimitiveDP):
         return (r1, r2)
 
     def solve(self, f):
-        F = self.get_fun_space()
-        F.belongs(f)
+        if do_extra_checks():
+            F = self.get_fun_space()
+            F.belongs(f)
 
         f1, f2 = f
 
@@ -83,8 +84,9 @@ class Parallel(PrimitiveDP):
 
         res = R.Us(set(s))
 
-        tres = self.get_tradeoff_space()
-        tres.belongs(res)
+        if do_extra_checks():
+            tres = self.get_tradeoff_space()
+            tres.belongs(res)
 
         return res
 

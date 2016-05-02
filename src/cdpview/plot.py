@@ -8,7 +8,6 @@ from mocdp.dp_report.gg_ndp import (STYLE_GREENRED, STYLE_GREENREDSYM,
 from mocdp.dp_report.gg_utils import get_dot_string, gg_figure
 from mocdp.dp_report.report import gvgen_from_dp
 from mocdp.exceptions import mcdp_dev_warning
-from mocdp.lang.parse_actions import parse_ndp
 from quickapp import QuickAppBase
 from reprep import Report
 from system_cmd import CmdException, system_cmd_result
@@ -22,7 +21,7 @@ def get_ndp(data):
     if not 'ndp' in data:
         dirs = data['dirs']
         param = data['model_name']
-        library, basename, ndp = solve_read_model(dirs, param)
+        _library, _basename, ndp = solve_read_model(dirs, param)
         data['ndp'] = ndp
     return data['ndp']
 
@@ -62,7 +61,7 @@ def ndp_visualization(data, style):
 
     return [res1, res2, res3]
 
-def create_extra_css(params):
+def create_extra_css(params):  # @UnusedVariable
 #     hide = params.get('hide', '')
 #     lines = hide.split(':')
     out = ''

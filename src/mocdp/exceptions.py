@@ -31,7 +31,8 @@ def do_extra_checks():
 
     res = not all_disabled()
     if _storage.first:
-        print('do_extra_checks: %s' % res)
+        # logger.info('do_extra_checks: %s' % res)
+        pass
     _storage.first = False
     return res
 

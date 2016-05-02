@@ -6,8 +6,11 @@ all:
 solve0:
 	mcdp-solve --out=out/drone0 -d models/drone0 battery '<1 hour, 0.1 kg, 1.0 W>'
 
-solve1:
-	mcdp-solve --out=out/drone1 -d models/drone1 drone "<0s, 0kg>"
+solve1a:
+	mcdp-solve --out=out/drone1/sa -d models/drone1 drone "<0s, 0kg>"
+
+solve1b:
+	mcdp-solve --out=out/drone1/sb -d models/drone1 drone "<1 hour, 0kg>"
 
 
 plots: plot1 plot2 plot3

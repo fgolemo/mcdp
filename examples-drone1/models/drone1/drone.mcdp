@@ -1,17 +1,18 @@
 mcdp {  
- provides endurance [s] 
- provides payload   [kg]
+  provides endurance [s] 
+  provides payload   [kg]
  
- battery = instance load battery1
- actuation = instance load actuation1
+  battery = instance load battery1
+  actuation = instance load actuation1
 
- capacity provided by battery >= 
+  capacity provided by battery >= 
     endurance * (power required by actuation)
  
- g = 9.81 m/s^2
+  g = 9.81 m/s^2
  
- lift provided by actuation >=
-    (mass required by battery + payload) * g
+  total_mass = (mass required by battery + mass required by actuation + payload)
 
-	requires mass for battery
+  lift provided by actuation >= total_mass * g
+
+  requires mass for battery
 }

@@ -3,10 +3,10 @@ from .context import Connection
 from .interfaces import NamedDP, NotConnected
 from contracts.utils import format_dict_long, format_list_long, raise_wrapped
 from mocdp.exceptions import DPSemanticError
+from contracts import contract
 
 
 __all__ = [
-
     'CompositeNamedDP',
 ]
 
@@ -36,6 +36,49 @@ class CompositeNamedDP(NamedDP):
         self._rnames = list(self.context.rnames)
         self._fnames = list(self.context.fnames)
 
+    @staticmethod
+    def from_context(context):
+        return CompositeNamedDP(context)
+
+    @staticmethod
+    def from_parts(name2ndp, connections, fnames, rnames):
+        from mocdp.comp.context import Context
+        c = Context()
+        c.names = name2ndp
+        c.connections = connections
+        c.fnames = fnames
+        c.rnames = rnames
+        return CompositeNamedDP(c)
+
+    @contract(returns='dict(str:$NamedDP)')
+    def get_name2ndp(self):
+        """ Returns the map from name to nodes """
+        return self.context.names
+
+    @contract(returns='set($Connection)')
+    def get_connections(self):
+        return set(self.context.connections)
+
+    @contract(returns='list(str)')
+    def get_fnames(self):
+        """ Returns list of string """
+        return list(self._fnames)
+
+    @contract(returns='list(str)')
+    def get_rnames(self):
+        """ Returns list of strings """
+        return list(self._rnames)
+
+    # accessories
+
+    def get_rtype(self, rn):
+        ndp = self.context.get_ndp_res(rn)
+        return ndp.get_rtype(ndp.get_rnames()[0])
+
+    def get_ftype(self, fn):
+        ndp = self.context.get_ndp_fun(fn)
+        return ndp.get_ftype(ndp.get_fnames()[0])
+
     def check_fully_connected(self):
         for name, ndp in self.context.names.items():
             try:
@@ -45,20 +88,6 @@ class CompositeNamedDP(NamedDP):
                 raise_wrapped(NotConnected, e, msg, compact=True)
         from mocdp.lang.blocks import check_missing_connections
         check_missing_connections(self.context)
-
-    def get_fnames(self):
-        return list(self._fnames)
-
-    def get_rnames(self):
-        return list(self._rnames)
-
-    def get_rtype(self, rn):
-        ndp = self.context.get_ndp_res(rn)
-        return ndp.get_rtype(ndp.get_rnames()[0])
-
-    def get_ftype(self, fn):
-        ndp = self.context.get_ndp_fun(fn)
-        return ndp.get_ftype(ndp.get_fnames()[0])
 
     # @contract(returns=SimpleWrap)
     def abstract(self):
@@ -98,6 +127,8 @@ def compact_context(context):
     from .context_functions import find_nodes_with_multiple_connections
     from mocdp.dp.dp_flatten import Mux
     from mocdp.comp.wrap import dpwrap
+    from mocdp.dp.dp_identity import Identity
+    from mocdp.comp.connection import connect2
 
     s = find_nodes_with_multiple_connections(context)
     if not s:
@@ -118,12 +149,10 @@ def compact_context(context):
         muxndp = dpwrap(mux, s1s, sname)
 
         R = mux.get_res_space()
-        # demux = Mux(PosetProduct((R,)), [(0, 0), (0, 1)])
-        from mocdp.dp.dp_identity import Identity
+
         demux = Identity(R)
         demuxndp = dpwrap(demux, sname, s2s)
 
-        from mocdp.comp.connection import connect2
 
         replace1 = connect2(ndp1, muxndp,
                             connections=set([Connection('*', s, '*', s) for s in s1s]),

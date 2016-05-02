@@ -4,6 +4,8 @@ from .wrap import dpwrap
 from contracts import contract
 from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
+from mocdp.comp.composite import CompositeNamedDP
+from mocdp.comp.wrap import SimpleWrap
 from mocdp.configuration import get_conftools_nameddps
 from mocdp.dp import Identity, Mux, Terminator, make_parallel, make_series
 from mocdp.dp.dp_loop import make_loop
@@ -68,7 +70,7 @@ def dpconnect(name2dp, connections, split=[]):
     """
     if len(name2dp) == 1:
         if connections:
-            raise NotImplementedError
+            raise_desc(NotImplementedError, '')
         return list(name2dp.values())[0]
 
 #     if len(name2dp) < 2:
@@ -91,7 +93,7 @@ def dpconnect(name2dp, connections, split=[]):
 
     # First, we need to order the dps using topological sorting
     try:
-        order = order_dps(set(name2dp), connections)
+        order = order_dps(name2dp, connections)
     except NetworkXUnfeasible:
         raise TheresALoop()
 
@@ -420,16 +422,7 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
         fnames = fntot
         rnames = rntot
 
-
-        if len(fnames) == 1:
-            fnames = fnames[0]
-            funsp = res_dp.get_fun_space()
-            res_dp = make_series(Mux(funsp[0], [()]), res_dp)
-
-        if len(rnames) == 1:
-            rnames = rnames[0]
-            ressp = res_dp.get_res_space()
-            res_dp = make_series(res_dp, Mux(ressp, 0))
+        res_dp, fnames, rnames = simplify_if_only_one_name(res_dp, fnames, rnames)
 
         # print('res_dp: %s' % res_dp)
 
@@ -440,7 +433,20 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
 
     except Exception as e:
         msg = 'connect2() failed'
-        raise_wrapped(DPInternalError, e, msg, ndp1=ndp1, ndp2=ndp2, connections=connections, split=split)
+        raise_wrapped(DPInternalError, e, msg, ndp1=ndp1, ndp2=ndp2,
+                      connections=connections, split=split)
+
+def simplify_if_only_one_name(res_dp, fnames, rnames):
+    if len(fnames) == 1:
+        fnames = fnames[0]
+        funsp = res_dp.get_fun_space()
+        res_dp = make_series(Mux(funsp[0], [()]), res_dp)
+
+    if len(rnames) == 1:
+        rnames = rnames[0]
+        ressp = res_dp.get_res_space()
+        res_dp = make_series(res_dp, Mux(ressp, 0))
+    return res_dp, fnames, rnames
 
 def there_are_repetitions(x):
     return len(x) != len(set(x))
@@ -465,10 +471,34 @@ def get_connection_graph(names, connections):
         G.add_edge(dp1, dp2)
     return G
 
-@contract(names='set(str)', connections='set($Connection)')
-def order_dps(names, connections):
+@contract(name2dp='dict(str:*)', connections='set($Connection)')
+def order_dps(name2dp, connections):
     """ Returns a total order consistent with the partial order """
+    names = set(name2dp)
+
+    # List the ones that have no functions or no resources
+
+    # a >= 10 g (no functions)
+    # b <= 10 s (no resources)
+
+# #     no_functions = set()
+# #     no_resources = set()
+# #
+# #     for name, ndp in name2dp.items():
+# #         if not ndp.get_fnames():
+# #             no_functions.add(name)
+# #         if not ndp.get_rnames():
+# #             no_resources.add(name)
+#
+#     print('no_functions: %s' % no_functions)
+#     print('no_resources: %s' % no_resources)
+
     G = get_connection_graph(names, connections)
+    # I should probably think more about this
+#     for nf in no_functions:
+#         for nr in no_resources:
+#             G.add_edge(nr, nf)
+
     Gu = G.to_undirected()
     if not is_connected(Gu):
         msg = 'The graph is not weakly connected. (missing constraints?)'
@@ -574,7 +604,12 @@ def dploop0(ndp, lr, lf):
         msg = 'Error while calling dploop0( lr = %s -> lf = %s) ' % (lr, lf)
         raise_wrapped(DPInternalError, e, msg, ndp=ndp.repr_long())
 
-
+@contract(cndp=CompositeNamedDP, returns=SimpleWrap)
+def cndp_dpgraph(cndp):
+    """ Assumes that the graph is weakly connected. """
+    name2dp = cndp.get_name2ndp()
+    connections = cndp.get_connections()
+    return dpgraph(name2dp, connections, split=[])
 
 @contract(name2dp='dict(str:($NamedDP|str|code_spec))',
           connections='set(str|$Connection)|list(str|$Connection)',
@@ -760,7 +795,7 @@ def get_connection_multigraph_weighted(name2dp, connections):
         
         for i in range(len(cycle) - 1):
             val = G.edge[cycle[i]][cycle[i + 1]]['spaces']
-            print('%s -> %s -> %s' % (cycle[i], val, cycle[i + 1]))
+            # print('%s -> %s -> %s' % (cycle[i], val, cycle[i + 1]))
 
     return G
     

@@ -9,7 +9,8 @@ from multi_index import get_it
 
 
 __all__ = [
-    'Flatten', 'Mux',
+    'Flatten',
+    'Mux',
 ]
 
 

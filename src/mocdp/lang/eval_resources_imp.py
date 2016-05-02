@@ -199,8 +199,8 @@ def eval_rvalue(rvalue, context):
             else:
                 assert False
 
-            print('base: %s expo %d %d' % (base, num, den))
-            print('base: %s' % context.get_rtype(base))
+            #print('base: %s expo %d %d' % (base, num, den))
+            #print('base: %s' % context.get_rtype(base))
             
             F = context.get_rtype(base)
             m = RCompUnitsPower(F, num=num, den=den)

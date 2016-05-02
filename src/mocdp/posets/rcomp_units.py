@@ -163,16 +163,28 @@ def rcompunits_pow(a, num, den):
     return RcompUnits(u)
 
 class RCompUnitsPower(Map):
+
     def __init__(self, F, num, den):
         R = rcompunits_pow(F, num, den)
         Map.__init__(self, dom=F, cod=R)
         self.num = num
         self.den = den
+
     def _call(self, x):
+        if self.dom.equal(x, self.dom.get_top()):
+            return self.cod.get_top()
         e = 1.0 * self.num / self.den
-        r = math.pow(x, e)
-        return r
-    def __str__(self):
-        return '^ %s/%s' % (self.num, self.den)
+        try:
+            r = math.pow(x, e)
+            return r
+        except OverflowError:
+            return self.cod.get_top()
+
+    def __repr__(self):
+        s = '^ '
+        s += '%d' % self.num
+        if self.den != 1:
+            s += '/%s' % self.den
+        return s
 
         

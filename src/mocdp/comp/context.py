@@ -17,6 +17,11 @@ class Connection(Connection0):
         return ("Constraint(%s.%s <= %s.%s)" %
                 (self.dp1, self.s1, self.dp2, self.s2))
 
+    def involves_any_of_these_nodes(self, nodes):
+        """ Returns true if any of the two nodes is in the iterable nodes."""
+        return self.dp1 in nodes or self.dp2 in nodes
+
+
 class CFunction():
     @contract(dp=str, s=str)
     def __init__(self, dp, s):
@@ -208,7 +213,6 @@ class Context():
 
     def iterate_new_resources(self):
     # for fname, name, ndp in context.iterate_new_functions():
-
         for rname in self.rnames:
             name = self.get_name_for_res_node(rname)
             ndp = self.names[name]
