@@ -90,6 +90,8 @@ class Rcomp(Poset):
                 return '%d' % int(x)
             else:
                 s = '%.5f' % x
+                s = '%.10f' % x
+                # s = '%f' % x
                 # remove trailing 0s
                 s = s.rstrip('0')
                 return s

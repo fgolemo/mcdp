@@ -23,3 +23,5 @@ dist/PyMCDP-*.tar.gz
 sandbox
 *.prof
 .DS_Store
+a.html
+a.html_resources

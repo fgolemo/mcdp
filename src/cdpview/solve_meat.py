@@ -56,6 +56,24 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
             raise_desc(ExpectationsNotMet, msg,
                        expect_nres=expect_nres, nres=nres)
 
+    if imp:
+        M = dp.get_imp_space_mod_res()
+        nimplementations = 0
+        for r in res.minimals:
+            ms = dp.get_implementations_f_r(f=fg, r=r)
+            nimplementations += len(ms)
+            s = 'r = %s ' % R.format(r)
+            for j, m in enumerate(ms):
+                # print('m = %s' % str(m))
+                s += "\n  implementation %d: m = %s " % (j + 1, M.format(m))
+            print(s)
+        if expect_nimp is not None:
+            if expect_nimp != nimplementations:
+                msg = 'Found wrong number of implementations'
+                raise_desc(ExpectationsNotMet, msg,
+                           expect_nimp=expect_nimp,
+                           nimplementations=nimplementations)
+
     if expect_res is not None:
         value = interpret_string(expect_res)
         print('value: %s' % value)
@@ -89,24 +107,6 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
             except NotEqual as e:
                 raise_wrapped(ExpectationsNotMet, e, 'res is different',
                               res=res, res_expected=res_expected)
-
-    if imp:
-        M = dp.get_imp_space_mod_res()
-        nimplementations = 0
-        for r in res.minimals:
-            ms = dp.get_implementations_f_r(f=fg, r=r)
-            nimplementations += len(ms)
-            s = 'r = %s ' % R.format(r)
-            for j, m in enumerate(ms):
-                # print('m = %s' % str(m))
-                s += "\n  implementation %d: m = %s " % (j + 1, M.format(m))
-            print(s)
-        if expect_nimp is not None:
-            if expect_nimp != nimplementations:
-                msg = 'Found wrong number of implementations'
-                raise_desc(ExpectationsNotMet, msg,
-                           expect_nimp=expect_nimp,
-                           nimplementations=nimplementations)
 
 
     if plot:

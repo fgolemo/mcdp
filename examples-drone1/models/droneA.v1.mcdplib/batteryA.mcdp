@@ -2,6 +2,16 @@ mcdp {
 	provides capacity [J]
 	requires mass     [kg]
 
-	specific_energy_Li_Ion = 500 Wh / kg 
+	specific_energy_Li_Ion = 100 Wh / kg 
+	mass >= capacity / specific_energy_Li_Ion
+}
+
+
+
+discretize(0.001J, 0.001kg) mcdp {
+	provides capacity [J]
+	requires mass     [kg]
+
+	specific_energy_Li_Ion = 100 Wh / kg 
 	mass >= capacity / specific_energy_Li_Ion
 }
