@@ -38,7 +38,7 @@ class SolveDP(QuickAppBase):
                        help='Use upper bound approx')
 
     def go(self):
-        from conf_tools import logger
+        from mocdp import logger
         logger.setLevel(logging.DEBUG)
 
         options = self.get_options()

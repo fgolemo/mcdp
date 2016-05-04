@@ -7,7 +7,7 @@ __all__ = [
 ]
 
 @time_poset_minima_func
-@contract(elements='seq|set')
+@contract(elements='seq|set|$frozenset')
 def poset_minima(elements, leq):
     """ Find the minima of a poset according to given comparison 
         function. For small sets only - O(n^2). """

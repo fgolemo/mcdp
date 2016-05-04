@@ -1,6 +1,11 @@
 # -*- coding: utf-8 -*-
 __version__ = '1.2.0'
 
+import logging
+logging.basicConfig()
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
 from .configuration import *
 from . import posets
 from . import dp
@@ -24,8 +29,13 @@ def jobs_comptests(context):
     from .lang import tests  # @Reimport
     from .posets.find_poset_minima import tests  # @Reimport
 
+    c2 = context.child('mcdplib')
+    from mcdp_library import define_tests_for_mcdplibs
+    define_tests_for_mcdplibs(c2)
+
     from mocdp.lang.tests.examples import define_tests
     define_tests(context)
+
 
     # instantiation
     from comptests import jobs_registrar

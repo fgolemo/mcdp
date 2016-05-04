@@ -16,7 +16,7 @@ __all__ = [
 
 class UpperSet(Space):
     
-    @contract(minimals='set|list', P=Poset)
+    @contract(minimals='set|list|$frozenset', P=Poset)
     def __init__(self, minimals, P):
         self.minimals = frozenset(minimals)
         self.P = P
@@ -35,7 +35,7 @@ class UpperSet(Space):
                 raise NotBelongs(msg)
 
             from .utils import check_minimal
-            check_minimal(minimals, P)
+            check_minimal(self.minimals, P)
 
     @contract(returns=Poset)
     def get_poset(self):
@@ -102,7 +102,7 @@ class UpperSets(Poset):
             raise NotBelongs(msg)
         if not x.P == self.P:
             msg = 'Different poset: %s ≠ %s' % (self.P, x.P)
-            raise NotBelongs(msg)
+            raise_desc(NotBelongs, msg, self=self, x=x)
         return True
 
     def check_equal(self, a, b):

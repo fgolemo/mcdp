@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
+from collections import namedtuple
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.dp.primitive import Feasible, NotFeasible
+from mocdp.dp.tracer import Tracer
+from mocdp.exceptions import do_extra_checks
 from mocdp.posets import Map, NotLeq, PosetProduct, UpperSet, UpperSets
 from mocdp.posets.utils import poset_minima
 import itertools
-from collections import namedtuple
-from mocdp.dp.tracer import Tracer
-from mocdp.exceptions import do_extra_checks
 
 
 __all__ = [
@@ -98,17 +98,20 @@ class DPLoop0(PrimitiveDP):
 
         return options
 
+    def _unpack_m(self, m):
+        from mocdp.dp.dp_series import get_product_compact
+        _, _, unpack = get_product_compact(self.M0, self.F2)
+        m0, f2 = unpack(m)
+        return m0, f2
+
     def evaluate_f_m(self, f1, m):
         """ Returns the resources needed
             by the particular implementation.
             raises NotFeasible 
         """
-        from mocdp.dp.dp_series import get_product_compact
         F2 = self.F2
         F1 = self.F
-
-        _, _, unpack = get_product_compact(self.M0, self.F2)
-        m0, f2 = unpack(m)
+        m0, f2 = self._unpack_m(m)
         f = (f1, f2)
         r = self.dp1.evaluate_f_m(f, m0)
         try:

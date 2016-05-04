@@ -10,6 +10,7 @@ from mocdp.dp.dp_limit import Limit
 from mocdp.exceptions import mcdp_dev_warning
 from mocdp.posets import PosetProduct, R_dimensionless
 from reprep import Report
+from mocdp.dp.primitive import PrimitiveDP
 
 @contract(ndp=NamedDP)
 def report_ndp1(ndp):
@@ -26,9 +27,9 @@ def report_ndp1(ndp):
 
     return r
 
-def report_dp1(dp):
+def report_dp1(dp, imp=None):
     r = Report()
-    gg = gvgen_from_dp(dp)    
+    gg = gvgen_from_dp(dp, imp=imp)
     gg_figure(r, 'graph', gg)
 
     r.text('long', dp.repr_long())
@@ -68,20 +69,23 @@ def report_dp1(dp):
     return r
 
 
-def gvgen_from_dp(dp0):
+@contract(dp0=PrimitiveDP)
+def gvgen_from_dp(dp0, imp=None):
+    do_imp = imp is not None
 
-    def go(dp):
+
+    def go(dp, imp):
         if isinstance(dp, Series0):
-            r = go_series(dp)
+            r = go_series(dp, imp)
         elif isinstance(dp, Parallel):
-            r = go_parallel(dp)
+            r = go_parallel(dp, imp)
         elif isinstance(dp, DPLoop0):
-            r = go_loop(dp)
+            r = go_loop(dp, imp)
         else:
-            r = go_simple(dp)
+            r = go_simple(dp, imp)
         return r
             
-    def go_simple(dp):
+    def go_simple(dp, imp):
         label = type(dp).__name__
         if isinstance(dp, Mux):
             label = 'Mux\n%s' % str(dp.coords)
@@ -93,22 +97,41 @@ def gvgen_from_dp(dp0):
             label = 'Limit\n%s' % x
         if isinstance(dp, GenericUnary):
             label = dp.__repr__()
-        n = gg.newItem(label)
+
+        s = label
+        if imp is not None:
+            s += ' m=%s' % dp.M.format(imp)
+        n = gg.newItem(s)
+
         gg.styleApply("simple", n)
         return (n, n)
             
-    def go_series(dp):
-        (n1i, n1o) = go(dp.dp1)
-        (n2i, n2o) = go(dp.dp2)
+    def go_series(dp, imp):
+        assert isinstance(dp, Series0)
+        if imp is not None:
+            m1, m_extra, m2 = dp._unpack_m(imp)
+        else:
+            m1 = m_extra = m2 = None
+
+        (n1i, n1o) = go(dp.dp1, m1)
+        (n2i, n2o) = go(dp.dp2, m2)
 
         R1 = str(dp.dp1.get_res_space())
-        gg.newLink(n1o, n2i, label=str(R1))
+        label = str(R1)
+        if m_extra is not None:
+            label += ' m_extra: %s' % str(m_extra)
+        gg.newLink(n1o, n2i, label=label)
 
         return (n1i, n2o)
         
-    def go_parallel(dp):
-        (n1i, n1o) = go(dp.dp1)
-        (n2i, n2o) = go(dp.dp2)
+    def go_parallel(dp, imp):
+        if imp is not None:
+            m1, m2 = dp._split_m(imp)
+        else:
+            m1 = m2 = None
+
+        (n1i, n1o) = go(dp.dp1, m1)
+        (n2i, n2o) = go(dp.dp2, m2)
 
         i = gg.newItem("|")
         o = gg.newItem("|")
@@ -122,8 +145,13 @@ def gvgen_from_dp(dp0):
 
         return (i, o)
 
-    def go_loop(dp):
-        (n1i, n1o) = go(dp.dp1)
+    def go_loop(dp, imp):
+        if do_imp:
+            m0, f2 = dp._unpack_m(imp)
+        else:
+            m0 = f2 = None
+
+        (n1i, n1o) = go(dp.dp1, m0)
 
         i = gg.newItem('|')
         gg.propertyAppend(i, "shape", "plaintext")
@@ -146,7 +174,6 @@ def gvgen_from_dp(dp0):
         gg.propertyAppend(l, "headport", "sw")
         gg.propertyAppend(l, "tailport", "s")
 
-
         return (i, o)
 
 
@@ -161,7 +188,7 @@ def gvgen_from_dp(dp0):
 #     gg.styleAppend("simple", "color", "blue")
 
     f0 = gg.newItem("")
-    (f, r) = go(dp0)
+    (f, r) = go(dp0, imp)
     r0 = gg.newItem("")
     gg.newLink(f0, f, label=str(dp0.get_fun_space()))
     gg.newLink(r, r0, label=str(dp0.get_res_space()))

@@ -2,12 +2,14 @@
 from collections import defaultdict
 from conf_tools.utils.resources import dir_from_package_name
 from contextlib import contextmanager
+from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.comp import CompositeNamedDP, SimpleWrap
-from mocdp.comp.interfaces import NamedDPCoproduct, NamedDP
+from mocdp.comp.interfaces import NamedDP, NamedDPCoproduct
 from mocdp.dp import (
     Constant, GenericUnary, Identity, Limit, Max, Min, Product, ProductN, Sum,
     SumN)
+from mocdp.dp.dp_generic_unary import WrapAMap
 from mocdp.dp.dp_mult_inv import InvMult2, InvPlus2, InvPlus2Nat
 from mocdp.dp.dp_sum import SumNNat
 from mocdp.exceptions import mcdp_dev_warning
@@ -19,13 +21,7 @@ from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
 
-from mocdp.dp.dp_mult_inv import InvMult2, InvPlus2, InvPlus2Nat
-from mocdp.comp.interfaces import NamedDPCoproduct
-from contextlib import contextmanager
-from mocdp.dp.dp_sum import SumNNat
-from mocdp.dp.dp_generic_unary import WrapAMap
 
-from contracts import contract
 
 STYLE_GREENRED = 'greenred'
 STYLE_GREENREDSYM = 'greenredsym'

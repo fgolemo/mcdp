@@ -1,24 +1,28 @@
 # -*- coding: utf-8 -*-
+from cdpview.utils_mkdir import mkdirs_thread_safe
 from conf_tools import GlobalConfig
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, raise_wrapped
 from decent_params import UserError
 from mocdp.dp.dp_transformations import get_dp_bounds
 from mocdp.dp.solver import generic_solve
 from mocdp.dp.solver_iterative import solver_iterative
 from mocdp.dp.tracer import Tracer
+from mocdp.dp_report.report import report_dp1, report_ndp1
 from mocdp.posets import PosetProduct, UpperSets, get_types_universe
 from reprep import Report
 import os
-from mcdp_library.library import MCDPLibrary
-from cdpview.utils_mkdir import mkdirs_thread_safe
-
+from cdpview.query_interpretation import interpret_string
+from mocdp.posets.space import NotEqual
 
 class ExpectationsNotMet(Exception):
     pass
 
 def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
                max_steps, query_strings,
-       intervals, _exp_advanced, expect_nres, imp, expect_nimp, plot, do_movie):
+       intervals, _exp_advanced, expect_nres, imp, expect_nimp, plot, do_movie,
+
+       expect_res=None,
+       ):
 
     if out_dir is None:
         out = solve_get_output_dir(prefix='out')
@@ -52,6 +56,40 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
             raise_desc(ExpectationsNotMet, msg,
                        expect_nres=expect_nres, nres=nres)
 
+    if expect_res is not None:
+        value = interpret_string(expect_res)
+        print('value: %s' % value)
+        res_expected = value.value
+        tu = get_types_universe()
+        # If it's a tuple of two elements, then we assume it's upper/lower bounds
+        if isinstance(value.unit, PosetProduct):
+            subs = value.unit.subs
+            assert len(subs) == 2, subs
+
+            lower_UR_expected, upper_UR_expected = subs
+            lower_res_expected, upper_res_expected = value.value
+            
+            lower_bound = tu.get_embedding(lower_UR_expected, UR)[0](lower_res_expected)
+            upper_bound = tu.get_embedding(upper_UR_expected, UR)[0](upper_res_expected)
+
+            print('lower: %s <= %s' % (UR.format(lower_bound), UR.format(res)))
+            print('upper: %s <= %s' % (UR.format(upper_bound), UR.format(res)))
+
+            UR.check_leq(lower_bound, res)
+            UR.check_leq(res, upper_bound)
+        else:
+            # only one element: equality
+            UR_expected = value.unit
+            tu.check_leq(UR_expected, UR)
+            A_to_B, _B_to_A = tu.get_embedding(UR_expected, UR)
+
+            res_expected_f = A_to_B(res_expected)
+            try:
+                UR.check_equal(res, res_expected_f)
+            except NotEqual as e:
+                raise_wrapped(ExpectationsNotMet, e, 'res is different',
+                              res=res, res_expected=res_expected)
+
     if imp:
         M = dp.get_imp_space_mod_res()
         nimplementations = 0
@@ -70,12 +108,6 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
                            expect_nimp=expect_nimp,
                            nimplementations=nimplementations)
 
-#     pp = '-'.join(params)
-#     for forbidden in ['-', ' ', '{', '}', ':']:
-#         pp = pp.replace(forbidden, '')
-#
-#     d = basename + '-' + pp
-#     outd = os.path.join(out, d)
 
     if plot:
         r = Report()
@@ -94,6 +126,19 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
         logger.info('writing to %r' % out_html)
         r.to_html(out_html)
 
+        out_html = os.path.join(out, 'report_ndp1.html')
+        r = report_ndp1(ndp)
+        logger.info('writing to %r' % out_html)
+        r.to_html(out_html)
+
+        out_html = os.path.join(out, 'report_dp1.html')
+        if imp:
+            last_imp = m
+            r = report_dp1(dp, imp=last_imp)
+        else:
+            r = report_dp1(dp)
+        logger.info('writing to %r' % out_html)
+        r.to_html(out_html)
 
 def solve_meat_solve(logger, ndp, dp, fg, intervals, max_steps, _exp_advanced):
     R = dp.get_res_space()
@@ -153,6 +198,8 @@ def solve_read_model(dirs, param):
 
     model_name = param
     basename = model_name
+
+    from mcdp_library.library import MCDPLibrary
 
     library = MCDPLibrary()
     for d in dirs:

@@ -117,6 +117,7 @@ def define_test_for(context, filename, basename, tests, known_failure=False):
         
     
 def define_tests(context):
+    """ Define other tests """
     filenames = []
     folder = dir_from_package_name('mocdp.lang.tests.ok')
     filenames.extend(locate_files(folder, '*.cdp'))

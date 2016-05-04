@@ -57,12 +57,17 @@ class Parallel(PrimitiveDP):
 
         return options
         
+    def _split_m(self, m):
+        _, _, unpack = get_product_compact(self.M1, self.M2)
+
+        m1, m2 = unpack(m)
+        return m1, m2
+
     def evaluate_f_m(self, f, m):
         """ Returns the resources needed
             by the particular implementation m """
-        _, _, unpack = get_product_compact(self.M1, self.M2)
         f1, f2 = f
-        m1, m2 = unpack(m)
+        m1, m2 = self._split_m(m)
         r1 = self.dp1.evaluate_f_m(f1, m1)
         r2 = self.dp2.evaluate_f_m(f2, m2)
         return (r1, r2)

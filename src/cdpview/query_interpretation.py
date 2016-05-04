@@ -57,3 +57,10 @@ def interpret_params_1string(p, F):
     A_to_B, _ = tu.get_embedding(Fd, F)
     fg = A_to_B(fd)
     return fg
+
+@contract(p="str")
+def interpret_string(p):
+    context = Context()
+    res = parse_wrap(Syntax.constant_value, p)[0]
+    vu = eval_constant(res, context)
+    return vu

@@ -68,6 +68,7 @@ def _prod_get_state(s, spaces):
     if is_empty:
         s = (s,)
 
+    # print('s: %s spaces: %s' % (s, spaces))
     assert isinstance(s, tuple)
 
     res = []

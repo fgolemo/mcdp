@@ -30,7 +30,6 @@ class TypesUniverse(Preorder):
         if not isinstance(x, known):
             raise_desc(NotBelongs, x=x, known=known)
 
-
     def check_equal(self, A, B):
         if not(A == B):
             msg = 'Different by direct comparison.'
@@ -69,7 +68,13 @@ class TypesUniverse(Preorder):
 
         if isinstance(A, Rcomp) and isinstance(B, RcompUnits): 
             return
+
         if isinstance(B, Rcomp) and isinstance(A, RcompUnits):
+            return
+
+        from mocdp.posets.uppersets import UpperSets
+        if isinstance(A, UpperSets) and isinstance(B, UpperSets):
+            self.check_leq(A.P, B.P)
             return
         
         if isinstance(A, SpaceProduct) and isinstance(B, SpaceProduct):
@@ -88,7 +93,6 @@ class TypesUniverse(Preorder):
 
         from mocdp.posets.rcomp_units import RcompUnits
         from mocdp.posets.rcomp_units import format_pint_unit_short
-        from mocdp.posets.nat import Nat, Int
         from mocdp.posets.maps.identity import IdentityMap
 
 
@@ -124,6 +128,15 @@ class TypesUniverse(Preorder):
         if isinstance(A, SpaceProduct) and isinstance(B, SpaceProduct):
             return get_product_embedding(self, A, B)
 
+        from mocdp.posets.uppersets import UpperSets
+        if isinstance(A, UpperSets) and isinstance(B, UpperSets):
+            P_A_to_B, P_B_to_A = self.get_embedding(A.P, B.P)
+            m1 = LiftToUpperSets(P_A_to_B)
+            m2 = LiftToUpperSets(P_B_to_A)
+            setattr(m1, '__name__', 'L%s' % P_A_to_B.__name__)
+            setattr(m1, '__name__', 'L%s' % P_B_to_A.__name__)
+            return m1, m2
+
         from mocdp.posets.finite_set import FiniteCollectionsInclusion
         if isinstance(A, FiniteCollectionsInclusion) and isinstance(B, FiniteCollectionsInclusion):
             a_to_b, b_to_a = self.get_embedding(A.S, B.S)
@@ -135,6 +148,22 @@ class TypesUniverse(Preorder):
 
         msg = 'Spaces are ordered, but you forgot to code embedding.'
         raise_desc(NotImplementedError, msg, A=A, B=B)
+
+class LiftToUpperSets(Map):
+    """ Lift the map f to uppersets """
+    @contract(f=Map)
+    def __init__(self, f):
+        from mocdp.posets.uppersets import UpperSets
+        dom = UpperSets(f.get_domain())
+        cod = UpperSets(f.get_codomain())
+        self.f = f
+        Map.__init__(self, dom=dom, cod=cod)
+
+    def _call(self, x):
+        minimals = x.minimals
+        elements2 = set(self.f(_) for _ in minimals)
+        from mocdp.posets.uppersets import UpperSet
+        return UpperSet(elements2, self.cod.P)
 
 class LiftToFiniteCollections(Map):
 

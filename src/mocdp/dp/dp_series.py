@@ -48,20 +48,22 @@ class Series0(PrimitiveDP):
             self.extraM = SpaceProduct(())
         else:
             self.extraM = R1
-        M, _, _ = get_product_compact(self.M1, self.extraM, self.M2)
 
+        M, _, _ = get_product_compact(self.M1, self.extraM, self.M2)
 
         self._solve_cache = {}
         PrimitiveDP.__init__(self, F=F1, R=R2, M=M)
-        
-    def evaluate_f_m(self, f1, m):
-        """ Returns the resources needed
-            by the particular implementation m """
-        # F1 = self.dp1.get_fun_space()
-        # F1.belongs(f1)
+
+    def _unpack_m(self, m):
         _M, _, unpack = get_product_compact(self.M1, self.extraM, self.M2)
         # M.belongs(m)
         m1, m_extra, m2 = unpack(m)
+        return m1, m_extra, m2
+
+    def evaluate_f_m(self, f1, m):
+        """ Returns the resources needed
+            by the particular implementation m """
+        m1, m_extra, m2 = self._unpack_m(m)
 
         if isinstance(self.dp1, (Mux, Identity)):
             f2 = self.dp1.evaluate_f_m(f1, m1)
@@ -70,7 +72,7 @@ class Series0(PrimitiveDP):
             f2 = F2.get_top()
         else:
             f2 = m_extra
-                
+
         r2 = self.dp2.evaluate_f_m(f2, m2)
         return r2
 

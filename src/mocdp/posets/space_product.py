@@ -64,7 +64,9 @@ class SpaceProduct(Space):
 
         ss = []
         for _, (sub, xe) in enumerate(zip(self.subs, x)):
-            ss.append(sub.format(xe))
+            label = getattr(sub, 'label', '?')
+            s = '%s:%s' % (label, sub.format(xe))
+            ss.append(s)
 
     # 'MATHEMATICAL LEFT ANGLE BRACKET' (U+27E8) ⟨
     # 'MATHEMATICAL RIGHT ANGLE BRACKET'   ⟩

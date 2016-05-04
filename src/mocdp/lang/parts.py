@@ -105,6 +105,7 @@ class CDPLanguage():
     FName = namedtuplewhere('FName', 'value')
     RName = namedtuplewhere('RName', 'value')
     Collection = namedtuplewhere('Collection', 'elements')
+    UpperSetFromCollection = namedtuplewhere('UpperSetFromCollection', 'value')
 
     FunStatement = namedtuplewhere('FunStatement', 'keyword fname unit')
     ResStatement = namedtuplewhere('ResStatement', 'keyword rname unit')

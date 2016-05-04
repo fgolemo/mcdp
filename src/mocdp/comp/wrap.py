@@ -92,7 +92,22 @@ class SimpleWrap(NamedDP):
         pass  # it is
 
     def get_dp(self):
-        return self.dp
+        dp = self.dp
+        if self.R_single:
+            dp.R.label = self.Rname
+        else:
+            for i, rname in enumerate(self.Rnames):
+                dp.R[i].label = rname
+
+        if self.F_single:
+            dp.F.label = self.Fname
+        else:
+            for i, rname in enumerate(self.Fnames):
+                dp.F[i].label = rname
+
+#         dp.M.label = 'dpwrap'
+#         dp.I.label = 'dpwrap'
+        return dp
 
     def get_fnames(self):
         if self.F_single:
@@ -105,7 +120,6 @@ class SimpleWrap(NamedDP):
             return [self.Rname]
         else:
             return self.Rnames
-
     
     def rindex(self, r):
         if self.R_single:

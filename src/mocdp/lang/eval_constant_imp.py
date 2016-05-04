@@ -8,6 +8,7 @@ from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
 from mocdp.posets import NotBelongs, PosetProduct, Rcomp, Space
 from mocdp.posets.finite_set import FiniteCollection, FiniteCollectionsInclusion
 from mocdp.posets.nat import Nat, Int
+from mocdp.posets.uppersets import UpperSets, UpperSet
 CDP = CDPLanguage
 
 class NotConstant(Exception):
@@ -33,6 +34,9 @@ def eval_constant(op, context):
 
     if isinstance(op, CDP.Collection):
         return eval_constant_collection(op, context)
+
+    if isinstance(op, CDP.UpperSetFromCollection):
+        return eval_constant_uppersetfromcollection(op, context)
 
     if isinstance(op, (CDP.Resource)):
         raise NotConstant(str(op))
@@ -97,10 +101,20 @@ def eval_constant(op, context):
         F.belongs(v)
         return ValueWithUnits(v, F)
 
-    msg = 'Cannot evaluate %s as constant.' % type(op).__name__
+    msg = 'eval_constant() cannot evaluate %s as constant.' % type(op).__name__
     raise_desc(NotConstant, msg, op=op)
 
 
+def eval_constant_uppersetfromcollection(op, context):
+    x = eval_constant(op.value, context)
+    v = x.value
+    u = x.unit
+    S = u.S
+    value = UpperSet(v.elements, S)
+    unit = UpperSets(S)
+    unit.belongs(value)
+    vu = ValueWithUnits(value, unit)
+    return vu
 
 
 def eval_constant_collection(op, context):
@@ -118,5 +132,4 @@ def eval_constant_collection(op, context):
     value = FiniteCollection(set(elements), u0)
     unit = FiniteCollectionsInclusion(u0)
     vu = ValueWithUnits(value, unit)
-
     return vu
