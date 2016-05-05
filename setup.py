@@ -47,7 +47,7 @@ setup(name='PyMCDP',
         'PyContracts>=1.7.6',
         'ConfTools>=1.7',
         'QuickApp>=1.2',
-        'RepRep>=2.9.2',
+        'RepRep>=2.9.3',
         # 'gvgen==0.9.1',
       ],
       dependency_links  = [
