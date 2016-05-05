@@ -1,9 +1,9 @@
 all: plots solve
 
-dp1=catalogue1.mcdp
-dp2=catalogue_plus_coproduct.mcdp
-dp3=catalogue_plus_coproduct-compact.mcdp
-dp4=sizes.mcdp
+dp1=catalogue1
+dp2=catalogue_plus_coproduct
+dp3=catalogue_plus_coproduct-compact
+dp4=sizes
 outp=--out out/
 
 clean:
@@ -12,7 +12,7 @@ clean:
 plots: plot1 plot2 plot3 plot4
 
 plot1:
-	mcdp-plot $(outp) choose.mcdp
+	mcdp-plot $(outp) choose
 	mcdp-plot $(outp) $(dp1)
 
 plot2:

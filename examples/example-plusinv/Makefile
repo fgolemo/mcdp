@@ -1,13 +1,13 @@
 all: plots solve 
 
 outp=--out out/
-dp1=plusinv1.mcdp
-dp2=plusinv2.mcdp
-dp3=plusinv3.mcdp
-dp4=plusinv4.mcdp
-dp5=plusinv5.mcdp
-dp6=plusinvnat1.mcdp
-dp7=plusinvnat2.mcdp
+dp1=plusinv1
+dp2=plusinv2
+dp3=plusinv3
+dp4=plusinv4
+dp5=plusinv5
+dp6=plusinvnat1
+dp7=plusinvnat2
 
 clean:
 	rm -rf out/
