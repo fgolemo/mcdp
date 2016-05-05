@@ -207,8 +207,10 @@ def its_dp_as_product(ndp):
           split='list(str)',
           returns=NamedDP)
 def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
-    """ Note the argument split must be strings so that orders are preserved
-        and deterministic. """
+    """ 
+        Note the argument split must be a list of strings so 
+        that orders are preserved and deterministic. 
+    """
 
     if ndp1 is ndp2:
         raise ValueError('Equal')

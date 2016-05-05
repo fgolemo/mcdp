@@ -23,12 +23,15 @@ def VariableRef_make(t):
     return res
 
 class Syntax():
+    TOP_LITERAL = 'Top'
+
     keywords = [
         'load', 'compact', 'required', 'provides', 'abstract',
         'dp', 'mcdp', 'template', 'sub', 'for', 'instance',
         'provided', 'requires', 'implemented-by', 'using', 'by',
         'catalogue', 'set-of', 'mcdp-type', 'dptype', 'instance',
-        'Nat', 'Int', 'pow',
+        'Nat', 'Int', 'pow', 'approx',
+        'Top',  # top
     ]
 
     # shortcuts
@@ -45,6 +48,9 @@ class Syntax():
     # load battery
     LOAD = sp(L('load'), lambda t: CDP.LoadKeyword(t[0]))
     SUB = sp(L('sub'), lambda t: CDP.SubKeyword(t[0]))
+
+    TOP = sp(L(TOP_LITERAL), lambda t: CDP.TopKeyword(t[0]))
+
     MCDPTYPE = sp(L('mcdp-type') ^ L('mcdp') ^ L('dptype'), lambda t: CDP.MCDPTypeKeyword(t[0]))
 
     INSTANCE = sp(Combine(L('instance') + O(L('of'))), lambda t: CDP.InstanceKeyword(t[0]))
@@ -77,6 +83,7 @@ class Syntax():
     ABSTRACT = sp(L('abstract'), lambda t: CDP.AbstractKeyword(t[0]))
     COPROD = sp(L('^'), lambda t: CDP.coprod(t[0]))
     CODE = sp(L('code'), lambda t: CDP.CodeKeyword(t[0]))
+    APPROX = sp(L('approx'), lambda t: CDP.ApproxKeyword(t[0]))
 
     # "call"
     C = lambda x, b: x.setResultsName(b)
@@ -164,7 +171,11 @@ class Syntax():
                            lambda t: CDP.SimpleValue(t[0], t[1]))
     number_with_unit3 = sp(integer_or_float + space_expr,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
-    number_with_unit = number_with_unit1 ^ number_with_unit2 ^ number_with_unit3
+
+    number_with_unit4_top = sp(TOP + space_expr,
+                            lambda t: CDP.SimpleValue(t[0], t[1]))
+
+    number_with_unit = number_with_unit1 ^ number_with_unit2 ^ number_with_unit3 ^ number_with_unit4_top
 
     # TODO: change
     ndpname = sp(idn.copy(), lambda t: CDP.FuncName(t[0]))  # XXX
@@ -286,7 +297,12 @@ class Syntax():
     fancy = sp(fname + PROVIDED_BY - dpname,
                 lambda t: CDP.Function(dp=t[2], s=t[0], keyword=t[1]))
 
-    fvalue_operand = lf_new_limit ^ simple ^ fancy ^ lf_new_resource ^ lf_new_resource2 ^ (S(L('(')) - (lf_new_limit ^ simple ^ fancy ^ lf_new_resource) - S(L(')')))
+    fvalue_operand = (lf_new_limit ^ 
+        simple ^ 
+        fancy ^ 
+        lf_new_resource ^ 
+        lf_new_resource2 ^ 
+        (S(L('(')) - (lf_new_limit ^ simple ^ fancy ^ lf_new_resource ^ lf_new_resource2) - S(L(')'))))
 
     # Fractions
 
@@ -390,6 +406,18 @@ class Syntax():
     catalogue_table = sp(OneOrMore(catalogue_row),
                          lambda t: CDP.CatalogueTable(make_list(list(t))))
 
+
+    approx_dp_model = sp(S(APPROX) - S(L('(')) - fname + S(COMMA)
+                         - integer_or_float - S(L('%'))
+                         - S(COMMA) + constant_value  # step
+                         - S(COMMA) + constant_value  # max value
+                        - S(L(')')) - dp_rvalue,
+                         lambda t: CDP.ApproxDPModel(name=t[0],
+                                                     perc=t[1],
+                                                     abs=t[2],
+                                                     max_value=t[3],
+                                                     dp=t[4]))
+
     catalogue_dp = sp(FROMCATALOGUE -
                       S(L('{')) -
                       simple_dp_model_stats -
@@ -407,7 +435,7 @@ class Syntax():
                        lambda t: CDP.MakeTemplate(t[0], t[1]))
 
     dp_operand = (load_expr | simple_dp_model | dp_model | abstract_expr |
-                  template_expr | compact_expr | dp_variable_ref | catalogue_dp)
+                  template_expr | compact_expr | dp_variable_ref | catalogue_dp | approx_dp_model)
 
     dp_rvalue << operatorPrecedence(dp_operand, [
     #     ('-', 1, opAssoc.RIGHT, Unary.parse_action),

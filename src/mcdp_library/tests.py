@@ -53,18 +53,19 @@ def mcdplib_define_tst(context, mcdplib):
     if 'test_solve' in data:
 
         tests = data['test_solve']
-        for name, test_data in tests.items():
-            c = context.child('solve-%s' % name)
-            c.comp(mcdplib_define_tst_solve, mcdplib, name, test_data)
+        if tests is not None:
+            for name, test_data in tests.items():
+                c = context.child(name)
+                c.comp(mcdplib_define_tst_solve, mcdplib, name, test_data, job_id='solve')
 
 
 def mcdplib_define_tst_solve(mcdplib, id_test, test_data):
+    # Reload the data (easier to debug)
     fn = os.path.join(mcdplib, 'mcdp_tests.yaml')
     with open(fn) as f:
         data = yaml.load(f)
     test_data = data['test_solve'][id_test]
 
-    print(test_data)
     from mocdp import logger
     
     defaults = dict(lower=None, upper=None, max_steps=None, 

@@ -51,9 +51,13 @@ def eval_constant(op, context):
         from mocdp.lang.eval_space_imp import eval_unit
         F = eval_unit(op.unit, context)
         assert isinstance(F, Space), op
-        v = op.value.value
-        if isinstance(v, int) and isinstance(F, Rcomp):
-            v = float(v)
+        if isinstance(op.value, CDP.TopKeyword):
+            v = F.get_top()
+        else:
+            v = op.value.value
+
+            if isinstance(v, int) and isinstance(F, Rcomp):
+                v = float(v)
 
         try:
             F.belongs(v)

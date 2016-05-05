@@ -86,21 +86,21 @@ def stats_for_poset_minima(P, xs, f, maxleq):
         print(' nleqf: %d' % s.nleq_false)
     return res
 
+if False:
+    # Rcomp' object has no attribute 'reset_counters'
+    @comptest
+    def pmin1():
+        n = 1000
+        ndim = 3
+        m = 430000
+        Ps = get_random_points(n, ndim, m)
+        Pbase = Rcomp()
+        N2 = PosetProduct((Pbase,) * ndim)
 
-
-@comptest
-def pmin1():
-    n = 1000
-    ndim = 3
-    m = 430000
-    Ps = get_random_points(n, ndim, m)
-    Pbase = Rcomp()
-    N2 = PosetProduct((Pbase,) * ndim)
-
-    method = poset_minima_n2
-    N2w = wrap_with_counts(N2)
-    r = stats_for_poset_minima(N2w, Ps, method, maxleq=None)
-    print r
+        method = poset_minima_n2
+        N2w = wrap_with_counts(N2)
+        r = stats_for_poset_minima(N2w, Ps, method, maxleq=None)
+        print r
 
 #
 # def get_random_antichain(n, point_generation, leq):

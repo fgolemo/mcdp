@@ -3,8 +3,9 @@ from .primitive import PrimitiveDP
 from contracts import contract
 from mocdp.exceptions import mcdp_dev_warning
 from mocdp.posets import PosetProduct
-from mocdp.posets.space import Map
+from mocdp.posets.space import Map, NotBelongs
 import numpy as np
+from contracts.utils import raise_wrapped
 
 
 __all__ = [
@@ -13,7 +14,7 @@ __all__ = [
 ]
 
 class GenericUnary(PrimitiveDP):
-    """ Meant for scalar values...."""
+    """ Meant for scalar values. Top maps to Top"""
     def __init__(self, F, R, function):
         M = PosetProduct(())
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
@@ -49,7 +50,11 @@ class WrapAMap(PrimitiveDP):
         self.amap = amap
 
     def solve(self, func):
-        r = self.amap(func)
+        try:
+            r = self.amap(func)
+        except NotBelongs as e:
+            msg = 'Wrapped map gives inconsistent results.'
+            raise_wrapped(ValueError, e, msg, f=func, amap=self.amap)
         return self.R.U(r)
 
     def diagram_label(self):

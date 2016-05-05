@@ -13,6 +13,8 @@ from mocdp.lang.helpers import get_conversion
 from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
 from mocdp.posets import NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.posets.any import Any
+from mocdp.dp.dp_approximation import make_approximation
+from mocdp.lang.eval_constant_imp import eval_constant
 
 CDP = CDPLanguage
 
@@ -109,12 +111,33 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             msg = 'Model is incomplete (ellipsis operator ... used)'
             raise_desc(DPSemanticError, msg)
             
+        if isinstance(r, CDP.ApproxDPModel):
+            return eval_dp_rvalue_approxdpmodel(r, context)
+
     except DPSemanticError as e:
         if e.where is None:
             e = DPSemanticError(str(e), r.where)
         raise e
 
     raise_desc(DPInternalError, 'Invalid dprvalue.', r=r)
+
+def eval_dp_rvalue_approxdpmodel(r, context):
+    # name of function or resource
+    name = r.name.value
+    approx_perc = float(r.perc.value)
+
+
+
+    approx_abs = float(r.abs.value.value)
+    approx_abs_S = r.abs.unit.value  # should be real
+    ndp0 = eval_dp_rvalue(r.dp, context)
+    x = eval_constant(r.max_value, context)
+    max_value = x.value
+    max_value_S = x.unit
+    return make_approximation(name=name, approx_perc=approx_perc,
+                              approx_abs=approx_abs, approx_abs_S=approx_abs_S,
+                              max_value=max_value, max_value_S=max_value_S,
+                              ndp=ndp0)
 
 
 def eval_dp_rvalue_load(load_arg, context):
