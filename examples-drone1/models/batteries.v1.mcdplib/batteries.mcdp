@@ -1,0 +1,9 @@
+
+        choose(
+bat_NiMH:(load bat_NiMH),
+bat_LCO:(load bat_LCO),
+bat_LMO:(load bat_LMO),
+bat_SLA:(load bat_SLA),
+bat_LiPo:(load bat_LiPo)
+)
+    

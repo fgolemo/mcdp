@@ -1,11 +1,12 @@
-from conf_tools.utils import locate_files, raise_x_not_found
+from conf_tools.utils import raise_x_not_found
 from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from mocdp.lang.parse_actions import parse_ndp
 import os
-from memos.memo_disk_imp import memo_disk, memo_disk_dec
+from memos.memo_disk_imp import memo_disk_dec
+from mcdp_library.utils.locate_files_imp import locate_files
 
 __all__ = ['MCDPLibrary']
 
