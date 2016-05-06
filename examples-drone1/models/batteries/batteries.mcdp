@@ -1,0 +1,2 @@
+        (load bat_NiMH) ^ (load bat_LCO) ^ (load bat_LMO) ^ (load bat_SLA) ^ (load bat_LiPo)
+    

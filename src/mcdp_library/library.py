@@ -5,6 +5,7 @@ from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from mocdp.lang.parse_actions import parse_ndp
 import os
+from memos.memo_disk_imp import memo_disk, memo_disk_dec
 
 __all__ = ['MCDPLibrary']
 
@@ -27,6 +28,8 @@ class MCDPLibrary():
             contents[f] = getattr(self, f).copy()
         return MCDPLibrary(**contents)
 
+    # This simple trick makes caching to disk possible
+    @memo_disk_dec
     @contract(returns='tuple(*, isinstance(NamedDP))')
     def load_ndp(self, id_ndp):
         c = self.clone()

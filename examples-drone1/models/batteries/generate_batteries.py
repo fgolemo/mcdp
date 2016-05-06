@@ -61,10 +61,12 @@ types = {
 def go():
     import string
 
-
+    good = []
+    discarded = []
     for name, v in types.items():
         if not v['specific_cost']:
             print('skipping %s because no specific cost' % name)
+            discarded.append(name)
             continue
 
         v['cycles'] = '%s []'% v['cycles']
@@ -72,10 +74,18 @@ def go():
 
         print s2
         # ndp = parse_ndp(s2)
-        fname = 'bat-%s.mcdp' % name
+        model_name = 'bat_%s' % name
+        fname = model_name + '.mcdp'
         with open(fname, 'w') as f:
             f.write(s2)
 
+        good.append(model_name)
+
+    ss = """
+        %s
+    """ % " ^ ".join("(load %s)" % g for g in good)
+    with open('batteries.mcdp', 'w') as f:
+        f.write(ss)
 
 if __name__ == '__main__':
     go()
