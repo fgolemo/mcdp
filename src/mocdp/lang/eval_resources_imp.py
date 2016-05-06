@@ -121,23 +121,6 @@ def eval_rvalue(rvalue, context):
 
             return add_binary(dp, nprefix, na, nb, nres)
 
-        if isinstance(rvalue, CDP.SimpleValue):
-            # implicit conversion from int to float
-            unit = rvalue.unit.value
-            value = rvalue.value.value
-            # XXX: stuff here
-            if isinstance(unit, Rcomp):
-                if isinstance(value, int):
-                    value = float(value)
-            try:
-                unit.belongs(value)
-            except NotBelongs as e:
-                raise_wrapped(DPSemanticError, e, "Value is not in the give space.")
-
-            c = ValueWithUnits(value, unit)
-            from mocdp.lang.helpers import get_valuewithunits_as_resource
-            return get_valuewithunits_as_resource(c, context)
-
         if isinstance(rvalue, CDP.VariableRef):
             if rvalue.name in context.constants:
                 return eval_rvalue(context.constants[rvalue.name], context)
@@ -210,9 +193,35 @@ def eval_rvalue(rvalue, context):
                              name_prefix='_prod', op_prefix='_factor',
                              res_prefix='_result')
 
+        from mocdp.lang.eval_constant_imp import eval_constant
+        if isinstance(rvalue, (CDP.Collection, CDP.SimpleValue)):
+            res = eval_constant(rvalue, context)
+            assert isinstance(res, ValueWithUnits)
+            from mocdp.lang.helpers import get_valuewithunits_as_resource
+            return get_valuewithunits_as_resource(res, context)
+
+#         if False:
+#             if isinstance(rvalue, CDP.SimpleValue):
+#                 # implicit conversion from int to float
+#                 unit = rvalue.unit.value
+#                 value = rvalue.value.value
+#                 # XXX: stuff here
+#                 if isinstance(unit, Rcomp):
+#                     if isinstance(value, int):
+#                         value = float(value)
+#                 try:
+#                     unit.belongs(value)
+#                 except NotBelongs as e:
+#                     raise_wrapped(DPSemanticError, e, "Value is not in the give space.")
+#
+#                 c = ValueWithUnits(value, unit)
+#                 from mocdp.lang.helpers import get_valuewithunits_as_resource
+#                 return get_valuewithunits_as_resource(c, context)
 
         msg = 'Cannot evaluate as resource.'
         raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
+
+
     except DPSemanticError as e:
         if e.where is None:
             raise DPSemanticError(str(e), where=rvalue.where)

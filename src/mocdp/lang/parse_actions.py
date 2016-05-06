@@ -14,6 +14,8 @@ from mocdp.posets import RcompUnits, Space, mult_table
 from pyparsing import ParseException, ParseFatalException
 import functools
 import os
+from mocdp.posets.nat import Nat
+import warnings
 
 CDP = CDPLanguage
 
@@ -120,7 +122,14 @@ def inv_unit(S):
     return RcompUnits(1 / S.units)
 
 def inv_constant(a):
-    unit = inv_unit(a.unit)
+    from mocdp.posets.rcomp import Rcomp
+    if a.unit == Nat():
+        raise NotImplementedError('division by natural number')
+        warnings.warn('Please think more about this. Now 1/N -> 1.0/N')
+        unit = Rcomp()
+    else:
+        unit = inv_unit(a.unit)
+
     if a.value == 0:
         raise DPSemanticError('Division by zero')
     # TODO: what about integers?

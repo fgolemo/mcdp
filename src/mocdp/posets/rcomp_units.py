@@ -15,6 +15,7 @@ class MyUnitRegistry(UnitRegistry):
     def __init__(self, *args, **kwargs):
         UnitRegistry.__init__(self, *args, **kwargs)
         self.define(' dollars = [cost]')
+        self.define(' flops = [flops]')
 _ureg = MyUnitRegistry()
 
 

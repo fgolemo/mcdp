@@ -59,23 +59,25 @@ def eval_divide_as_rvalue(op, context):
     try:
         from mocdp.lang.eval_constant_imp import eval_constant
         c2 = eval_constant(ops[1], context)
-
     except NotConstant as e:
         msg = 'Cannot divide by a non-constant.'
         raise_wrapped(DPSemanticError, e, msg, ops[0])
+
+    c2_inv = inv_constant(c2)
 
     try:
         c1 = eval_constant(ops[0], context)
         # also the first one is a constant
         from mocdp.lang.parse_actions import mult_constantsN
-        return mult_constantsN([inv_constant(c1), inv_constant(c2)])
+
+        return mult_constantsN([c1, c2_inv])
 
     except NotConstant:
         pass
 
     # then eval as resource
     r = eval_rvalue(ops[0], context)
-    c2_inv = inv_constant(c2)
+
     res = get_mult_op(context, r=r, c=c2_inv)
     return res
 
@@ -161,7 +163,7 @@ def get_mult_op(context, r, c):
     rtype = context.get_rtype(r)
 
     # Case 1: rcompunits, rcompunits
-    if isinstance(rtype, RcompUnits) and  isinstance(c.unit, RcompUnits):
+    if isinstance(rtype, RcompUnits) and isinstance(c.unit, RcompUnits):
         F = rtype
         R = mult_table(rtype, c.unit)
         function = MultValue(c.value)
