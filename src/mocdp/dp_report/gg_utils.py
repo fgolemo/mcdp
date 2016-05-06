@@ -64,7 +64,7 @@ def graphvizgen_plot(ggraph, output, prog='dot'):
 def nx_generic_graphviz_plot(G, output, prog='dot'):
     """ Converts to dot and writes on the file output """
     with tmpfile(".dot") as filename_dot:
-        nx.write_dot(G, filename_dot)
+        nx.write_dot(G, filename_dot)  # @UndefinedVariable
         graphviz_run(filename_dot, output, prog=prog)
 
 def get_dot_string(gg):

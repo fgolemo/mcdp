@@ -4,9 +4,9 @@ from .rcomp import Rcomp
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
 from mocdp.exceptions import DPSyntaxError
-from mocdp.posets.space import Map
-from pint import UnitRegistry
-from pint.unit import UndefinedUnitError
+from mocdp.posets import Map
+from pint import UnitRegistry  # @UnresolvedImport
+from pint.unit import UndefinedUnitError  # @UnresolvedImport
 import functools
 import math
 

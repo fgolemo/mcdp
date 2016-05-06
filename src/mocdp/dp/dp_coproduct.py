@@ -11,12 +11,11 @@ from mocdp.posets.types_universe import get_types_universe
 from mocdp.posets.poset_product import PosetProduct
 from mocdp.posets.uppersets import UpperSets, UpperSet
 from mocdp.posets.space import Map
-from mocdp.posets.poset_coproduct import PosetCoproduct
-
-
+from mocdp.posets.finite_set import FiniteCollectionAsSpace
 
 __all__ = [
     'CoProductDP',
+    'CoProductDPLabels',
 ]
 
 
@@ -64,6 +63,7 @@ class CoProductDP(PrimitiveDP):
             Might raise NotFeasible() """
         res = set()
         es = []
+        ms = None
         for j, dp in enumerate(self.dps):
             try:
                 ms = dp.get_implementations_f_r(f, r)
@@ -190,3 +190,48 @@ class CoProductDP(PrimitiveDP):
                 return tuple(res)
 
         return NormalForm(S, CPAlpha(self), CPBeta(self))
+
+
+
+class CoProductDPLabels(PrimitiveDP):
+    """ Wrap to allow labels for the implementations. """
+
+    @contract(dp=CoProductDP)
+    def __init__(self, dp, labels):
+        self.dp = dp
+        self.labels = labels
+
+        # M0 = dp.get_imp_space()
+        M = FiniteCollectionAsSpace(labels)
+        
+        F = dp.get_fun_space()
+        R = dp.get_res_space()
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+
+    def evaluate_f_m(self, f, m):
+        """ Returns the resources needed
+            by the particular implementation m """
+        m0 = self.labels.index(m)
+        return self.dp.evaluate_f_m(f, m0)
+
+    def get_implementations_f_r(self, f, r):
+        """ Returns a nonempty set of thinks in self.M.
+            Might raise NotFeasible() """
+        m0s = self.dp.get_implementations_f_r(f, r)
+        res = []
+        for m0, other in m0s:
+            m = self.labels[m0]
+            res.append((m, other))
+        return set(res)
+
+    def solve(self, f):
+        return self.dp.solve(f)
+
+    def __repr__(self):
+        s = "^".join('%s:%s' % x for x in zip(self.labels, self.dp.dps))
+        return 'CoProductLabels(%s)' % s
+
+    def repr_long(self):
+        s = "CoProductLabels %s " % self.labels.__repr__()
+        s += '\n' + self.dp.repr_long()
+        return s

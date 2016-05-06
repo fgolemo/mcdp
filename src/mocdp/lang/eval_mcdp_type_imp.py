@@ -6,15 +6,16 @@ from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
 from mocdp.comp.context import CFunction, CResource, NoSuchMCDPType
 from mocdp.dp import Identity
+from mocdp.dp.dp_approximation import make_approximation
 from mocdp.dp.dp_catalogue import CatalogueDP
 from mocdp.dp.dp_series_simplification import make_series
 from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.lang.eval_constant_imp import eval_constant
 from mocdp.lang.helpers import get_conversion
 from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
 from mocdp.posets import NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.posets.any import Any
-from mocdp.dp.dp_approximation import make_approximation
-from mocdp.lang.eval_constant_imp import eval_constant
+from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 CDP = CDPLanguage
 
@@ -40,12 +41,6 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             except NoSuchMCDPType as e:
                 msg = 'Cannot find name.'
                 raise_wrapped(DPSemanticError, e, msg, compact=True)
-
-        if isinstance(r, CDP.FromCatalogue):
-            return eval_dp_rvalue_catalogue(r, context)
-
-        if isinstance(r, CDP.Coproduct):
-            return eval_dp_rvalue_coproduct(r, context)
 
         if isinstance(r, CDP.DPInstance):
             return eval_dp_rvalue(r.dp_rvalue, context)
@@ -111,9 +106,17 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             msg = 'Model is incomplete (ellipsis operator ... used)'
             raise_desc(DPSemanticError, msg)
             
-        if isinstance(r, CDP.ApproxDPModel):
-            return eval_dp_rvalue_approxdpmodel(r, context)
-
+        cases = {
+            CDP.Coproduct:eval_dp_rvalue_coproduct,
+            CDP.CoproductWithNames: eval_dp_rvalue_CoproductWithNames,
+            CDP.ApproxDPModel: eval_dp_rvalue_approxdpmodel,
+            CDP.FromCatalogue: eval_dp_rvalue_catalogue,
+        }
+        
+        for klass, hook in cases.items():
+            if isinstance(r, klass):
+                return hook(r, context)
+        
     except DPSemanticError as e:
         if e.where is None:
             e = DPSemanticError(str(e), r.where)
@@ -121,13 +124,39 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
 
     raise_desc(DPInternalError, 'Invalid dprvalue.', r=r)
 
+def eval_dp_rvalue_coproduct(r, context):
+    assert isinstance(r, CDP.Coproduct)
+    ops = get_odd_ops(unwrap_list(r.ops))
+    ndps = []
+    for _, op in enumerate(ops):
+        ndp = eval_dp_rvalue(op, context)
+        ndps.append(ndp)
+
+    return NamedDPCoproduct(tuple(ndps))
+
+@contract(r=CDP.CoproductWithNames)
+def eval_dp_rvalue_CoproductWithNames(r, context):
+#     from mocdp.comp.interfaces import NamedDPCoproduct
+
+    assert isinstance(r, CDP.CoproductWithNames)
+    elements = r.elements
+    names = [_.value for _ in elements[0::2]]
+    ndps = [eval_dp_rvalue(_, context) for _ in elements[1::2]]
+#
+#     d = {}
+#     for name, ndp in zip(names, ndps):
+#         name = name.value
+#         ndp = eval_dp_rvalue(ndp, context)
+#         d[name] = ndp
+
+    labels = tuple(names)
+    return NamedDPCoproduct(tuple(ndps), labels=labels)
+
 def eval_dp_rvalue_approxdpmodel(r, context):
     # name of function or resource
     name = r.name.value
     approx_perc = float(r.perc.value)
-
-
-
+    
     approx_abs = float(r.abs.value.value)
     approx_abs_S = r.abs.unit.value  # should be real
     ndp0 = eval_dp_rvalue(r.dp, context)
@@ -220,15 +249,6 @@ def eval_dp_rvalue_dpwrap(r, context):
 
     return w
 
-def eval_dp_rvalue_coproduct(r, context):
-    assert isinstance(r, CDP.Coproduct)
-    ops = get_odd_ops(unwrap_list(r.ops))
-    ndps = []
-    for _, op in enumerate(ops):
-        ndp = eval_dp_rvalue(op, context)
-        ndps.append(ndp)
-    from mocdp.comp.interfaces import NamedDPCoproduct
-    return NamedDPCoproduct(tuple(ndps))
 
 def eval_dp_rvalue_catalogue(r, context):
     assert isinstance(r, CDP.FromCatalogue)

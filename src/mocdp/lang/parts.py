@@ -25,6 +25,12 @@ class CDPLanguage():
     MultN = namedtuplewhere('MultN', 'ops')
     Divide = namedtuplewhere('Divide', 'ops')
     Coproduct = namedtuplewhere('Coproduct', 'ops')
+
+    # elements: all strings, coproducts
+    CoproductWithNamesChooseKeyword = namedtuplewhere('CoproductWithNamesChooseKeyword', 'keyword')
+    CoproductWithNamesName = namedtuplewhere('CoproductWithNamesName', 'value')
+    CoproductWithNames = namedtuplewhere('CoproductWithNames', 'keyword elements')
+
     OpMax = namedtuplewhere('Max', 'keyword a b')
     OpMin = namedtuplewhere('Min', 'keyword a b')
 

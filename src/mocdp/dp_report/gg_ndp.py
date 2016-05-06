@@ -5,7 +5,7 @@ from contextlib import contextmanager
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.comp import CompositeNamedDP, SimpleWrap
-from mocdp.comp.interfaces import NamedDP, NamedDPCoproduct
+from mocdp.comp.interfaces import NamedDP
 from mocdp.dp import (
     Constant, GenericUnary, Identity, Limit, Max, Min, Product, ProductN, Sum,
     SumN)
@@ -327,6 +327,8 @@ def gvgen_from_ndp(ndp, style='default'):
     return gg
 
 def create(gdc, ndp):
+    from mocdp.ndp.named_coproduct import NamedDPCoproduct
+
     if isinstance(ndp, SimpleWrap):
         res = create_simplewrap(gdc, ndp)
     elif isinstance(ndp, CompositeNamedDP):

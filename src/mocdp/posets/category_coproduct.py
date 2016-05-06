@@ -2,10 +2,13 @@ from contracts import contract
 from mocdp.posets.space import NotBelongs, NotEqual, Space
 from contracts.utils import raise_wrapped, raise_desc
 
+__all__ = [
+    'Coproduct1',
+]
 
 class Coproduct1(Space):
     """
-        The coproduct of spaces A, B
+        The coproduct of spaces A, B, ..
         
         is represented as tuples of the kind
         

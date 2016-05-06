@@ -28,7 +28,7 @@ def unzip(iterable):
 
 @contract(s=str, returns=str)
 def ast_to_text(s):
-    block = parse_wrap(Syntax.dp_rvalue, s)[0]
+    block = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
     return print_ast(block)
     
 @contract(s=str)
@@ -47,7 +47,7 @@ def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: 
 
     full_lines = s_lines[len(empty_lines):]
     for_pyparsing = "\n".join(full_lines)
-    block = parse_wrap(Syntax.dp_rvalue, for_pyparsing)[0]
+    block = parse_wrap(Syntax.ndpt_dp_rvalue, for_pyparsing)[0]
 
     if not isnamedtuplewhere(block):
         raise ValueError(block)

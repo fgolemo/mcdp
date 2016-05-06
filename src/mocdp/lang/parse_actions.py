@@ -285,7 +285,7 @@ def parse_ndp(string, context=None):
     if os.path.exists(string):
         raise ValueError('expected string, not filename :%s' % string)
 
-    v = parse_wrap(Syntax.dp_rvalue, string)[0]
+    v = parse_wrap(Syntax.ndpt_dp_rvalue, string)[0]
 
     if context is None:
         context = Context()

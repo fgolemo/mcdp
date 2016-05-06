@@ -5,6 +5,37 @@ from mocdp.posets.space import Space, NotBelongs, NotEqual
 from mocdp.exceptions import do_extra_checks
 from contracts.utils import raise_desc
 
+class FiniteCollectionAsSpace(Space):
+    """ 
+        This is a Space created out of a set of arbitrary hashable
+        Python objects. 
+    """
+
+    def __init__(self, universe):
+        self.elements = frozenset(universe)
+
+    def belongs(self, x):
+        return x in self.elements
+
+    def check_equal(self, a, b):
+        if a == b:
+            pass
+        else:
+            raise NotEqual('%s ≠ %s' % (a, b))
+
+    def check_leq(self, a, b):
+        if a == b:
+            pass
+        else:
+            raise_desc(NotLeq, 'Different', a=a, b=b)
+
+    def format(self, x):
+        return x.__repr__()
+
+    def __repr__(self):
+        return "FiniteCollectionAsSpace(%s)" % self.elements
+
+
 class FiniteCollection():
     @contract(elements='set|list', S=Space)
     def __init__(self, elements, S):

@@ -14,7 +14,13 @@ def sp(a, b):
     spa(a, b)
     return a
 
-
+# def simple_identifier(klass):
+#     return sp(Syntax.idn.copy(), lambda t: klass(t[0]))
+    
+@contract(literal=str)
+def simple_keyword_literal(literal, klass):
+    return sp(Literal(literal), lambda t: klass(t[0]))
+   
 def VariableRef_make(t):
     name = t[0]
     if not isinstance(name, str):
@@ -32,15 +38,24 @@ class Syntax():
         'catalogue', 'set-of', 'mcdp-type', 'dptype', 'instance',
         'Nat', 'Int', 'pow', 'approx',
         'Top',  # top
+        'choose',
     ]
 
     # shortcuts
     S = Suppress
     L = Literal
+   
     O = Optional
-
-    PRODUCT = sp(L('x') | L('×'), lambda t: CDP.product(t[0]))
+    
+    
     COMMA = sp(L(','), lambda t: CDP.comma(t[0]))
+    
+    SLPAR = S(L('('))
+    SRPAR = S(L(')'))
+    SCOMMA = S(COMMA)
+    SCOLON = S(L(':'))
+   
+    PRODUCT = sp(L('x') | L('×'), lambda t: CDP.product(t[0]))
     PROVIDES = sp(L('provides'), lambda t: CDP.ProvideKeyword(t[0]))
     REQUIRES = sp(L('requires'), lambda t: CDP.RequireKeyword(t[0]))
     USING = sp(L('using'), lambda t: CDP.UsingKeyword(t[0]))
@@ -180,20 +195,19 @@ class Syntax():
     # TODO: change
     ndpname = sp(idn.copy(), lambda t: CDP.FuncName(t[0]))  # XXX
 
-    load_expr = sp(LOAD - ndpname, lambda t: CDP.LoadCommand(t[0], t[1]))
+    ndpt_load_expr = sp(LOAD - ndpname, lambda t: CDP.LoadCommand(t[0], t[1]))
 
     # An expression that evaluates to a NamedDP
-    dp_rvalue = Forward()
+    ndpt_dp_rvalue = Forward()
 
 
     # <dpname> = ...
     dpname = sp(idn.copy(), lambda t: CDP.DPName(t[0]))
     dptypename = sp(idn.copy(), lambda t: CDP.DPTypeName(t[0]))
 
-    dpinstance_from_type = sp((INSTANCE + dp_rvalue) ^ (INSTANCE + L('(') + dp_rvalue + L(")")),
+    dpinstance_from_type = sp((INSTANCE + ndpt_dp_rvalue) ^ (INSTANCE + L('(') + ndpt_dp_rvalue + L(")")),
                               lambda t: CDP.DPInstance(t[0], t[1]))
 
-    # dpinstance_expr = (dpinstance_from_type ^ dp_rvalue)
     dpinstance_expr = dpinstance_from_type
 
     setsub_expr = sp(SUB - dpname - S(L('=')) - dpinstance_expr,
@@ -201,9 +215,9 @@ class Syntax():
     setsub_expr_implicit = sp(dpname - S(L('=')) - dpinstance_expr,
                      lambda t: CDP.SetName(None, t[0], t[1]))
 
-    setmcdptype_expr = sp(MCDPTYPE - dptypename - L('=') - dp_rvalue,
+    setmcdptype_expr = sp(MCDPTYPE - dptypename - L('=') - ndpt_dp_rvalue,
                      lambda t: CDP.SetMCDPType(t[0], t[1], t[2], t[3]))
-    setmcdptype_expr_implicit = sp(dptypename - L('=') - dp_rvalue,
+    setmcdptype_expr_implicit = sp(dptypename - L('=') - ndpt_dp_rvalue,
                      lambda t: CDP.SetMCDPType(None, t[0], t[1], t[2]))
 
     # An expression that evaluates to a resource
@@ -222,7 +236,8 @@ class Syntax():
                          lambda t: CDP.SetNameGeneric(t[0], t[1], t[2]))
 
     variable_ref = sp(idn.copy(), VariableRef_make)
-    dp_variable_ref = sp(idn.copy(), lambda t: CDP.DPVariableRef(t[0]))
+
+    ndpt_dp_variable_ref = sp(idn.copy(), lambda t: CDP.DPVariableRef(t[0]))
     
     constant_value = Forward()
     tuple_of_constants = sp(OPEN_BRACE + constant_value +
@@ -288,9 +303,6 @@ class Syntax():
                     + C(rvalue, 'op2')) - S(L(')')) ,
                    lambda t: Syntax.binary[t[0].keyword](a=t['op1'], b=t['op2'], keyword=t[0]))
 
-
-
-
     simple = sp(dpname + DOT - fname,
                lambda t: CDP.Function(dp=t[0], s=t[2], keyword=t[1]))
 
@@ -353,15 +365,20 @@ class Syntax():
                              prep_for=t[2],
                              name=t[3]))
 
-    line_expr = (constraint_expr_geq ^ constraint_expr_leq ^
-                 (setname_generic ^ setsub_expr ^ setsub_expr_implicit ^ setmcdptype_expr ^ setmcdptype_expr_implicit)
+    line_expr = (constraint_expr_geq ^ 
+                 constraint_expr_leq ^
+                     (setname_generic ^ 
+                      setsub_expr ^ 
+                      setsub_expr_implicit ^ 
+                      setmcdptype_expr ^ 
+                      setmcdptype_expr_implicit)
                  ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
                  ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3)
 
     dp_model_statements = sp(ZeroOrMore(S(ow) + line_expr),
                              lambda t: make_list(list(t)))
 
-    dp_model = sp(CDPTOKEN - S(L('{')) - dp_model_statements - S(L('}')),
+    ndpt_dp_model = sp(CDPTOKEN - S(L('{')) - dp_model_statements - S(L('}')),
                   lambda t: CDP.BuildProblem(keyword=t[0], statements=t[1]))
 
     # "idn" does not match keywords, but keywords might appear in functions names
@@ -379,7 +396,7 @@ class Syntax():
     code_spec_with_args = sp(CODE + funcname + S(L('(')) + arguments_spec + S(L(')')),
                    lambda t: CDP.PDPCodeSpec(keyword=t[0], function=t[1], arguments=t[2]))
     code_spec = code_spec_with_args ^ code_spec_simple
-    pdpname = sp(idn.copy(), lambda t: CDP.FuncName(t[0]))
+    pdpname = sp(idn.copy(), lambda t: CDP.FuncName(t[0]))  # XXX
     load_pdp = sp(LOAD - pdpname, lambda t: CDP.LoadDP(t[0], t[1]))
 
     pdp_rvalue = load_pdp ^ code_spec
@@ -387,7 +404,7 @@ class Syntax():
     simple_dp_model_stats = sp(ZeroOrMore(S(ow) + fun_statement ^ res_statement),
                                lambda t: make_list(list(t)))
 
-    simple_dp_model = sp(DPTOKEN -
+    ndpt_simple_dp_model = sp(DPTOKEN -
                          S(L('{')) -
                          simple_dp_model_stats -
                          IMPLEMENTEDBY -
@@ -406,38 +423,64 @@ class Syntax():
     catalogue_table = sp(OneOrMore(catalogue_row),
                          lambda t: CDP.CatalogueTable(make_list(list(t))))
 
-
-    approx_dp_model = sp(S(APPROX) - S(L('(')) - fname + S(COMMA)
+     
+    # Example:
+    #    choose(name: <dp>, name2: <dp>)
+    CHOOSE = simple_keyword_literal('choose', CDP.CoproductWithNamesChooseKeyword)
+    assert 'choose' in keywords
+    ndpt_coproduct_with_names_name = \
+        sp(idn.copy(), lambda t: CDP.CoproductWithNamesName(t[0]))
+    ndpt_coproduct_with_names_one = ndpt_coproduct_with_names_name + SCOLON + ndpt_dp_rvalue
+    ndpt_coproduct_with_names = sp(CHOOSE
+                                    - SLPAR + 
+                                    ndpt_coproduct_with_names_one 
+                                    + ZeroOrMore(SCOMMA + ndpt_coproduct_with_names_one) 
+                                    - SRPAR,
+                                    lambda t: CDP.CoproductWithNames(keyword=t[0],
+                                                                     elements=t[1:]))
+    
+    # Example:
+    #   approx(mass,0%,0g,%)
+    ndpt_approx = sp(S(APPROX) - S(L('(')) - fname + S(COMMA)
                          - integer_or_float - S(L('%'))
                          - S(COMMA) + constant_value  # step
                          - S(COMMA) + constant_value  # max value
-                        - S(L(')')) - dp_rvalue,
+                        - S(L(')')) - ndpt_dp_rvalue,
                          lambda t: CDP.ApproxDPModel(name=t[0],
                                                      perc=t[1],
                                                      abs=t[2],
                                                      max_value=t[3],
                                                      dp=t[4]))
-
-    catalogue_dp = sp(FROMCATALOGUE -
+    ndpt_catalogue_dp = sp(FROMCATALOGUE -
                       S(L('{')) -
                       simple_dp_model_stats -
                       catalogue_table -
                       S(L('}')),
                       lambda t: CDP.FromCatalogue(t[0], t[1], t[2]))
 
-    abstract_expr = sp(ABSTRACT - dp_rvalue, 
+    ndpt_abstract_expr = sp(ABSTRACT - ndpt_dp_rvalue,
                        lambda t: CDP.AbstractAway(t[0], t[1]))
     
-    compact_expr = sp(COMPACT - dp_rvalue,
+    ndpt_compact_expr = sp(COMPACT - ndpt_dp_rvalue,
                        lambda t: CDP.Compact(t[0], t[1]))
 
-    template_expr = sp(TEMPLATE - dp_rvalue,
+    ndpt_template_expr = sp(TEMPLATE - ndpt_dp_rvalue,
                        lambda t: CDP.MakeTemplate(t[0], t[1]))
 
-    dp_operand = (load_expr | simple_dp_model | dp_model | abstract_expr |
-                  template_expr | compact_expr | dp_variable_ref | catalogue_dp | approx_dp_model)
+    ndpt_dp_operand = (
+        ndpt_load_expr |
+        ndpt_simple_dp_model |
+        ndpt_dp_model |
+        ndpt_abstract_expr |
+        ndpt_template_expr |
+        ndpt_compact_expr |
+        ndpt_dp_variable_ref |
+        ndpt_catalogue_dp |
+        ndpt_approx |
+        ndpt_coproduct_with_names
+    )
 
-    dp_rvalue << operatorPrecedence(dp_operand, [
+    ndpt_dp_rvalue << operatorPrecedence(ndpt_dp_operand, [
     #     ('-', 1, opAssoc.RIGHT, Unary.parse_action),
         (COPROD, 2, opAssoc.LEFT, coprod_parse_action),
     ])

@@ -105,8 +105,6 @@ class CombinedCeilMap(Map):
         return y
 
 
-
-
 @contract(name=str,
           approx_perc='float|int',
           approx_abs='float|int', approx_abs_S=Space, ndp=NamedDP,

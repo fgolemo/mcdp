@@ -12,7 +12,7 @@ def check_lang():
     parse_wrap(Syntax.idn, 'battery')
     parse_wrap(Syntax.idn + Syntax.ow, 'battery ')
     parse_wrap(Syntax.idn + Syntax.ow + Literal('='), 'battery=')
-    parse_wrap(Syntax.load_expr, 'load battery')
+    parse_wrap(Syntax.ndpt_load_expr, 'load battery')
 
 
 @comptest
@@ -33,7 +33,7 @@ dp {
     implemented-by load times
 }
     """
-    parse_wrap(Syntax.simple_dp_model, s)[0]
+    parse_wrap(Syntax.ndpt_simple_dp_model, s)[0]
 
 
 
@@ -106,7 +106,7 @@ def check_lang9_max():
             
             implemented-by load SimpleNonlinearity1
         }""",
-        Syntax.simple_dp_model)
+        Syntax.ndpt_simple_dp_model)
     
     parse_wrap(Syntax.binary_expr, 'max(f, g)')
     parse_wrap(Syntax.rvalue, 'max(f, g)')

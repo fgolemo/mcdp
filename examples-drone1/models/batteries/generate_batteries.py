@@ -82,8 +82,8 @@ def go():
         good.append(model_name)
 
     ss = """
-        %s
-    """ % " ^ ".join("(load %s)" % g for g in good)
+        choose(\n%s\n)
+    """ % ",\n".join("%s:(load %s)" % (g,g) for g in good)
     with open('batteries.mcdp', 'w') as f:
         f.write(ss)
 
