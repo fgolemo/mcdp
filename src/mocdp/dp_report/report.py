@@ -11,6 +11,7 @@ from mocdp.exceptions import mcdp_dev_warning
 from mocdp.posets import PosetProduct, R_dimensionless
 from reprep import Report
 from mocdp.dp.primitive import PrimitiveDP
+import warnings
 
 @contract(ndp=NamedDP)
 def report_ndp1(ndp):
@@ -34,15 +35,20 @@ def report_dp1(dp, imp=None):
 
     r.text('long', dp.repr_long())
 
-    S, alpha, beta = dp.get_normal_form()
+    try:
+        S, alpha, beta = dp.get_normal_form()
 
-    s = ""
-    s += 'S: %s' % S
-    s += '\nα: %s' % alpha
-    s += '\nβ: %s' % beta
-    r.text('normalform', s)
+        s = ""
+        s += 'S: %s' % S
+        s += '\nα: %s' % alpha
+        s += '\nβ: %s' % beta
 
-    r.text('tree_long', dp.tree_long())
+        r.text('normalform', s)
+        r.text('tree_long', dp.tree_long())
+    except Exception as e:
+        warnings.warn('Normal form not implemented %s' % e)
+
+
 
     M = dp.get_imp_space_mod_res()
     r.text('ImodR', str(M))
