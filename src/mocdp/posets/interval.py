@@ -8,7 +8,6 @@ __all__ = [
    'Interval',
 ]
 
-
 class Interval(Poset):
     def __init__(self, L, U):
         assert L <= U
