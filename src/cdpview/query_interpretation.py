@@ -44,7 +44,6 @@ def interpret_params(params, fnames, F):
 @contract(p="str")
 def interpret_params_1string(p, F):
     context = Context()
-
     res = parse_wrap(Syntax.constant_value, p)[0]
     vu = eval_constant(res, context)
 

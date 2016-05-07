@@ -62,6 +62,8 @@ class Space(object):
 
 
 
+class MapNotDefinedHere(Exception):
+    """ The map is not defined at this point """
 
 class Map():
 
@@ -103,6 +105,7 @@ class Map():
 
     @abstractmethod
     def _call(self, x):
+        """ Might raise MapNotDefinedHere (hack) """
         pass
 
     def __repr__(self):

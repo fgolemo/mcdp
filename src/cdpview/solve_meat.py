@@ -25,7 +25,7 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
        ):
 
     if out_dir is None:
-        out = solve_get_output_dir(prefix='out')
+        out = solve_get_output_dir(prefix='out/out')
     else:
         out = out_dir
 

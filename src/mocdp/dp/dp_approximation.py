@@ -1,6 +1,6 @@
 from contracts import contract
 from mocdp.comp.interfaces import NamedDP
-from mocdp.posets.space import Space, Map
+from mocdp.posets.space import Space, Map, MapNotDefinedHere
 from contracts.utils import raise_desc
 
 import math
@@ -90,14 +90,18 @@ class CombinedCeilMap(Map):
 
         self.alpha = alpha
         self.step = step
+
     def __repr__(self):
-        return 'CombinedCeil(alpha=%s, step=%s, max_value=%s)' % (self.alpha, self.step, self.max_value)
+        return ('CombinedCeil(alpha=%s, step=%s, max_value=%s)' %
+                (self.alpha, self.step, self.max_value))
 
     def _call(self, x):
         top = self.dom.get_top()
+
         if self.max_value is not None:
             if not self.dom.leq(x, self.max_value):
-                return top
+                raise MapNotDefinedHere()
+
         if self.dom.equal(top, x):
             return top
         xx = self.f1(x)

@@ -2,7 +2,7 @@
 
 template = """
     approx(mass,0%,10g,10kg) 
-    approx(cost,0%,1$$,100$$) 
+    approx(cost,0%,1$$,Top$$) 
 
     mcdp {
         provides capacity [J]

@@ -3,7 +3,7 @@ from .primitive import PrimitiveDP
 from contracts import contract
 from mocdp.exceptions import mcdp_dev_warning
 from mocdp.posets import PosetProduct
-from mocdp.posets.space import Map, NotBelongs
+from mocdp.posets.space import Map, NotBelongs, MapNotDefinedHere
 import numpy as np
 from contracts.utils import raise_wrapped
 
@@ -55,6 +55,9 @@ class WrapAMap(PrimitiveDP):
         except NotBelongs as e:
             msg = 'Wrapped map gives inconsistent results.'
             raise_wrapped(ValueError, e, msg, f=func, amap=self.amap)
+        except MapNotDefinedHere as e:
+            return self.R.Us([])
+
         return self.R.U(r)
 
     def diagram_label(self):

@@ -1,14 +1,17 @@
 from conf_tools.utils import raise_x_not_found
 from contracts import contract
 from contracts.utils import raise_desc
+from mcdp_library.utils.locate_files_imp import locate_files
+from memos.memo_disk_imp import memo_disk_dec
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from mocdp.lang.parse_actions import parse_ndp
 import os
-from memos.memo_disk_imp import memo_disk_dec
-from mcdp_library.utils.locate_files_imp import locate_files
+import warnings
 
-__all__ = ['MCDPLibrary']
+__all__ = [
+    'MCDPLibrary',
+]
 
 
 class MCDPLibrary():
@@ -66,6 +69,7 @@ class MCDPLibrary():
 
         import sys
         # XXX: this needs to change
+        warnings.warn('sys.path hack needs to change')
         sys.path.insert(0, d)
 
         c = self.clone()
