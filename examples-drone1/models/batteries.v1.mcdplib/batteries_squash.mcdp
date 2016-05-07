@@ -1,0 +1,13 @@
+approx(cost,0%,1$,Top$) 
+
+mcdp {
+    battery = instance load batteries
+
+    provides capacity <= battery.capacity
+    provides missions <= battery.missions
+
+    requires mass >= battery.mass
+
+    labor = 10 $ / hour
+    requires cost >= battery.cost + battery.maintenance * labor
+}

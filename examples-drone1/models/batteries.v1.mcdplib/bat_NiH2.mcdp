@@ -11,10 +11,10 @@
         
         requires maintenance [s]
 
-        specific_energy =  30 Wh/kg
-        specific_cost =  7.00 Wh/$
+        specific_energy =  45 Wh/kg
+        specific_cost = 10.50 Wh/$
         replace_time = 120 s
-        cycles = 500 []
+        cycles = 20000 []
 
         maintenance >= replace_time * (missions / cycles)
 

@@ -1,9 +1,12 @@
 
         choose(
 bat_NiMH:(load bat_NiMH),
+bat_NiH2:(load bat_NiH2),
 bat_LCO:(load bat_LCO),
 bat_LMO:(load bat_LMO),
+bat_NiCad:(load bat_NiCad),
 bat_SLA:(load bat_SLA),
-bat_LiPo:(load bat_LiPo)
+bat_LiPo:(load bat_LiPo),
+bat_LFP:(load bat_LFP)
 )
     

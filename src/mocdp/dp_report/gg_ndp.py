@@ -520,6 +520,7 @@ def create_coproduct(gdc0, ndp):
 
     for i, ndpi in enumerate(ndp.ndps):
         if gdc0.yourname is not None:
+#             if LABELS
             header = '%s - alternative %s' % (gdc0.yourname, i + 1)
         else:
             header = 'alternative %s' % (i + 1)
@@ -535,7 +536,6 @@ def create_coproduct(gdc0, ndp):
                 l = gdc0.newLink(resi[rni], resources[rn])
                 gdci.decorate_arrow_resource(l)  # XXX?
                 gdci.styleApply('coproduct_link', l)
-
 
     return functions, resources
 

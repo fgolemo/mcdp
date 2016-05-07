@@ -12,7 +12,7 @@
         requires maintenance [s]
 
         specific_energy = 100 Wh/kg
-        specific_cost = 3.41 Wh/$
+        specific_cost =  3.41 Wh/$
         replace_time = 120 s
         cycles = 500 []
 

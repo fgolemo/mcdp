@@ -34,32 +34,34 @@ types = {
                         specific_energy="205 Wh/kg", specific_cost='', cycles="5000"),
     
     'LCO':   dict(desc="Lithium cobalt oxide", 
-                  specific_energy="195 Wh/kg", specific_cost='2.84 Wh/$', cycles="750"),
+                  specific_energy="195 Wh/kg", specific_cost=' 2.84 Wh/$', cycles="750"),
 
     'LiPo':  dict(desc="Lithium polimer",
-                  specific_energy="150 Wh/kg", specific_cost='2.50 Wh/$', cycles="600"),
+                  specific_energy="150 Wh/kg", specific_cost=' 2.50 Wh/$', cycles="600"),
 
     'LMO':   dict(desc="Lithium manganese oxide ",
-                  specific_energy="150 Wh/kg", specific_cost='2.84 Wh/$', cycles="500"),
+                  specific_energy="150 Wh/kg", specific_cost=' 2.84 Wh/$', cycles="500"),
 
     'NiMH':  dict(desc="Nickel-metal hydride",
-                  specific_energy="100 Wh/kg", specific_cost='3.41 Wh/$', cycles="500"),
+                  specific_energy="100 Wh/kg", specific_cost=' 3.41 Wh/$', cycles="500"),
 
     'LFP':   dict(desc="Lithium iron phosphate",
-                  specific_energy=" 90 Wh/kg", specific_cost='', cycles="1500"),
+                  specific_energy=" 90 Wh/kg", specific_cost=' 1.50 Wh/$', cycles="1500"),
 
     'NiH2':  dict(desc="Nickel-hydrogen", 
-                  specific_energy=" 45 Wh/kg", specific_cost='', cycles="20000"),    
+                  specific_energy=" 45 Wh/kg", specific_cost='10.50 Wh/$', cycles="20000"),    
 
     'NiCad': dict(desc="Nickel-cadmium",
-                  specific_energy=" 30 Wh/kg", specific_cost='', cycles="500"),
+                  specific_energy=" 30 Wh/kg", specific_cost=' 7.50 Wh/$', cycles="500"),
 
     'SLA':   dict(desc="Lead-acid", 
-                    specific_energy=" 30 Wh/kg", specific_cost='7 Wh/$', cycles="500"),
+                    specific_energy=" 30 Wh/kg", specific_cost=' 7.00 Wh/$', cycles="500"),
 }
 
 def go():
     import string
+
+    summary = ""
 
     good = []
     discarded = []
@@ -81,6 +83,11 @@ def go():
 
         good.append(model_name)
 
+        summary += '\n%10s %10s %10s %10s  %s' % (name, v['specific_energy'], v['specific_cost'], 
+            v['cycles'], v['desc'])
+    print summary
+    with open('summary.txt', 'w') as f:
+        f.write(summary)
     ss = """
         choose(\n%s\n)
     """ % ",\n".join("%s:(load %s)" % (g,g) for g in good)

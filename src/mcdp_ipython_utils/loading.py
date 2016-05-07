@@ -11,6 +11,29 @@ from mocdp.posets.space import Space
 from mocdp.posets.types_universe import express_value_in_isomorphic_space
 from mocdp.posets.rcomp import RcompTop
 
+def solve_combinations(ndp, combinations, result_like):
+    """
+    combinations = {
+        "capacity": (np.linspace(50, 3000, 10), "Wh"),
+        "missions": ( 1000, "[]"),
+    }
+    result_like = dict(maintenance="s", cost="CHF", mass='kg')
+    what_to_plot_res = result_like
+    what_to_plot_fun = dict(capacity="Wh", missions="[]")
+    
+    """
+
+    queries = list(get_combinations(combinations))
+    results = []
+    queries2 = []
+
+    for query in queries:
+        res = friendly_solve(ndp, query=query, result_like=result_like)
+        q2 = dict([(k, v) for k, (v, _) in query.items()])
+        queries2.append(q2)
+        results.append(res)
+    return dict(queries=queries2, results=results)
+
 
 @contract(ndp=NamedDP, query='dict(str:tuple(float|int,str))')
 def friendly_solve(ndp, query, result_like='dict(str:str)'):
@@ -72,6 +95,7 @@ def friendly_solve(ndp, query, result_like='dict(str:str)'):
         ares.append(fr)
     return ares
 
+
 import numpy as np
 def to_numpy_array(result_like, res):
     """
@@ -84,6 +108,9 @@ def to_numpy_array(result_like, res):
     n = len(res)
     a = np.zeros(n, dtype=dtype)
     
+#     print('res: %s' % str(res))
+#     print('dtype: %s' % dtype)
+#     print('n: %s' % n)
     for i, r in enumerate(res):
         for field in result_like:
             value = r[field]
