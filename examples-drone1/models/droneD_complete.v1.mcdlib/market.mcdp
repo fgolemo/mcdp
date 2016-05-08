@@ -1,0 +1,12 @@
+mcdp {
+	
+	customer = instance load customer
+	engineering = instance load drone_complete
+
+
+	customer.budget >= engineering.total_cost_ownership
+
+	engineering.travel_distance >= customer.travel_distance 
+	engineering.num_missions >= customer.num_missions 
+	engineering.carry_payload >= customer.carry_payload 
+}

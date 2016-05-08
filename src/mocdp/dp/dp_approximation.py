@@ -157,7 +157,7 @@ def get_approx_dp(S, name, approx_perc, approx_abs, approx_abs_S, max_value, max
     max_value_ = express_value_in_isomorphic_space(S1=max_value_S, s1=max_value, S2=S)
 
     alpha = approx_perc / 100.0
-    print('alpha: %s approx_abs: %s' % (alpha, approx_abs_S.format(approx_abs_)))
+    # print('alpha: %s approx_abs: %s' % (alpha, approx_abs_S.format(approx_abs_)))
     ccm = CombinedCeilMap(S, alpha=alpha, step=approx_abs_, max_value=max_value_)
     dp = WrapAMap(ccm)
     ndp = dpwrap(dp, name, name)

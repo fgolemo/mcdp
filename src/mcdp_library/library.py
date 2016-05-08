@@ -6,8 +6,12 @@ from memos.memo_disk_imp import memo_disk_dec
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from mocdp.lang.parse_actions import parse_ndp
+from mocdp import logger
 import os
 import warnings
+import shelve
+from test.test_future2 import result
+from memos.memo_disk_cache_imp import memo_disk_cache2
 
 __all__ = [
     'MCDPLibrary',
@@ -22,7 +26,7 @@ class MCDPLibrary():
             file_to_contents = {}
         self.file_to_contents = file_to_contents
         self.file_to_realpath = {}
-
+        
     def clone(self):
         fields = ['file_to_contents']
         contents = {}
@@ -33,7 +37,7 @@ class MCDPLibrary():
         return MCDPLibrary(**contents)
 
     # This simple trick makes caching to disk possible
-    @memo_disk_dec
+#     @memo_disk_dec
     @contract(returns='tuple(*, isinstance(NamedDP))')
     def load_ndp(self, id_ndp):
         c = self.clone()
@@ -45,15 +49,28 @@ class MCDPLibrary():
         f = self._get_file_data(filename)
         data = f['data']
         realpath = f['realpath']
-        context = Context()
-        def load(load_arg):
-            _c, res = self.load_ndp(load_arg)
-            return res
-        context.load_ndp_hooks = [load]
-        try:
-            return parse_ndp(data, context=context)
-        except (DPSyntaxError, DPSemanticError) as e:
-            raise e.with_filename(realpath)
+
+        def actual_load():
+
+            logger.debug('Parsing %r' % id_ndp)
+
+            def load(load_arg):
+                _c, res = self.load_ndp(load_arg)
+                return res
+
+            context = Context()
+            context.load_ndp_hooks = [load]
+            try:
+                result = parse_ndp(data, context=context)
+            except (DPSyntaxError, DPSemanticError) as e:
+                raise e.with_filename(realpath)
+
+            return result
+
+        cache_file = os.path.join('_cached', '%s.cached' % id_ndp)
+        return memo_disk_cache2(cache_file, data, actual_load)
+
+#         res = memo_disk_cache(filename, key, func, *args, **kwargs)
 
     def _get_file_data(self, basename):
         """ returns dict with data, realpath """

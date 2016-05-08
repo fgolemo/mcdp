@@ -14,8 +14,9 @@ import math
 class MyUnitRegistry(UnitRegistry):
     def __init__(self, *args, **kwargs):
         UnitRegistry.__init__(self, *args, **kwargs)
-        self.define(' dollars = [cost] ')
+        self.define(' dollars = [cost] = USD')
         self.define(' flops = [flops]')
+        self.define(' pixels = [pixels]')
         self.define(' CHF = 1.03 dollars')
         self.define(' EUR = 1.14 dollars')
 
