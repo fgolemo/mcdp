@@ -53,7 +53,7 @@ def go2():
 
 
 if __name__ == '__main__':
-    # go()
+    go()
     go2()
 
 

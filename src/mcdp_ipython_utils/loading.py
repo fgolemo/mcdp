@@ -1,15 +1,17 @@
-from contracts import contract
-from mocdp.comp.interfaces import NamedDP
-from mocdp.posets import UpperSets
-from contracts.utils import raise_desc
 from cdpview.query_interpretation import interpret_params_1string
-from apptools.naming.context import Context
+from contracts import contract
+from contracts.utils import raise_desc
+from mocdp.comp.context import Context
+from mocdp.comp.interfaces import NamedDP
+from mocdp.lang.eval_space_imp import eval_unit
 from mocdp.lang.parse_actions import parse_wrap
 from mocdp.lang.syntax import Syntax
-from mocdp.lang.eval_space_imp import eval_unit
+from mocdp.posets import UpperSets
+from mocdp.posets.rcomp import RcompTop
 from mocdp.posets.space import Space
 from mocdp.posets.types_universe import express_value_in_isomorphic_space
-from mocdp.posets.rcomp import RcompTop
+import itertools
+import numpy as np
 
 def solve_combinations(ndp, combinations, result_like):
     """
@@ -22,11 +24,12 @@ def solve_combinations(ndp, combinations, result_like):
     what_to_plot_fun = dict(capacity="Wh", missions="[]")
     
     """
-
     queries = list(get_combinations(combinations))
+    return solve_queries(ndp, queries, result_like)
+
+def solve_queries(ndp, queries, result_like):
     results = []
     queries2 = []
-
     for query in queries:
         res = friendly_solve(ndp, query=query, result_like=result_like)
         q2 = dict([(k, v) for k, (v, _) in query.items()])
@@ -45,14 +48,13 @@ def friendly_solve(ndp, query, result_like='dict(str:str)'):
         result_like = dict(power="W")
         
         s = solve
-        
     
     """
 
     fnames = ndp.get_fnames()
     rnames = ndp.get_rnames()
-    if not len(fnames) > 1:
-        raise NotImplementedError()
+#     if not len(fnames) > 1:
+#         raise NotImplementedError()
     if not len(rnames) > 1:
         raise NotImplementedError()
     
@@ -69,7 +71,10 @@ def friendly_solve(ndp, query, result_like='dict(str:str)'):
         val = interpret_params_1string(s, F=F)
         value.append(val)
 
-    value = tuple(value)
+    if len(fnames) == 1:
+        value = value[0]
+    else:
+        value = tuple(value)
 
     dp = ndp.get_dp()
     F = dp.get_fun_space()
@@ -95,8 +100,7 @@ def friendly_solve(ndp, query, result_like='dict(str:str)'):
         ares.append(fr)
     return ares
 
-
-import numpy as np
+@contract(res='list(dict(str:*))')
 def to_numpy_array(result_like, res):
     """
         a = 
@@ -119,6 +123,7 @@ def to_numpy_array(result_like, res):
             a[field][i] = value
     return a
 
+
 @contract(p="str", returns=Space)
 def interpret_string_as_space(p):
     context = Context()
@@ -127,9 +132,6 @@ def interpret_string_as_space(p):
     assert isinstance(unit, Space)
     return unit
 
-
-
-import itertools
 def get_combinations(c):
     """
         

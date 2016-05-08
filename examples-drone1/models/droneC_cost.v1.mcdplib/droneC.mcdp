@@ -5,7 +5,7 @@ mcdp {
   provides num_missions [R]
  
   battery = instance load batteries
-  actuation = instance load actuationC
+  actuation = instance load actuation
 
   total_power = power required by actuation + extra_power
   capacity provided by battery >= endurance * total_power
@@ -22,7 +22,7 @@ mcdp {
 
   requires total_mass >= total_mass
   
-  labor_cost = (20 $ / hour) * (maintenance required by battery)
+  labor_cost = (10 $ / hour) * (maintenance required by battery)
 
   requires total_cost >= (
     cost required by actuation + 

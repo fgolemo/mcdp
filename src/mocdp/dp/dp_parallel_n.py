@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
-from contracts.utils import indent
 from mocdp.dp.dp_series import get_product_compact
-from mocdp.dp.primitive import NormalForm
 from mocdp.exceptions import do_extra_checks
-from mocdp.posets import Map, PosetProduct, UpperSet, UpperSets, poset_minima
+from mocdp.posets import PosetProduct
 from contracts import contract
 import warnings
 import itertools
@@ -27,9 +25,9 @@ class ParallelN(PrimitiveDP):
         R = PosetProduct(tuple(Rs))
         Ms = [_.get_imp_space_mod_res() for _ in dps]
 
+        self.Ms = Ms
         self.dps = dps
-        self.M, self.pack, self.unpack = get_product_compact(*tuple(Ms))
-
+        self.M, _, _ = get_product_compact(*tuple(self.Ms))
         PrimitiveDP.__init__(self, F=F, R=R, M=self.M)
 
     def evaluate_f_m(self, f, m):
@@ -48,6 +46,7 @@ class ParallelN(PrimitiveDP):
         if do_extra_checks():
             F = self.get_fun_space()
             F.belongs(f)
+
 
         res = []
         for i, dp in enumerate(self.dps):
@@ -70,6 +69,10 @@ class ParallelN(PrimitiveDP):
         return res
 
     def get_implementations_f_r(self, f, r):
+        _, pack, _ = get_product_compact(*tuple(self.Ms))
+
+
+
         all_imps = []
         for i, dp in enumerate(self.dps):
             fi = f[i]
@@ -78,7 +81,7 @@ class ParallelN(PrimitiveDP):
             all_imps.append(imps)
         options = set()
         for comb in itertools.product(*tuple(all_imps)):
-            m = self.pack(*comb)
+            m = pack(*comb)
             options.add(m)
         if do_extra_checks():
             for _ in options:
