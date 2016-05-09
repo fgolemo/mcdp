@@ -19,6 +19,7 @@ class CDPLanguage():
     MakeTemplate = namedtuplewhere('MakeTemplate', 'keyword dp_rvalue')
     AbstractAway = namedtuplewhere('AbstractAway', 'keyword dp_rvalue')
     Compact = namedtuplewhere('Compact', 'keyword dp_rvalue')
+    Flatten = namedtuplewhere('Flatten', 'keyword dp_rvalue')
 
     DPInstance = namedtuplewhere('DPInstance', 'keyword dp_rvalue')
     PlusN = namedtuplewhere('PlusN', 'ops')
@@ -88,7 +89,7 @@ class CDPLanguage():
     DPWrapToken = namedtuplewhere('DPWrapToken', 'keyword')
     FuncName = namedtuplewhere('FuncName', 'value')  # python function name
     ApproxKeyword = namedtuplewhere('ApproxKeyword', 'keyword')
-
+    FlattenKeyword = namedtuplewhere('FlattenKeyword', 'keyword')
 
     # catalogue =
     FromCatalogueKeyword = namedtuplewhere('FromCatalogueKeyword', 'keyword')  # python function name

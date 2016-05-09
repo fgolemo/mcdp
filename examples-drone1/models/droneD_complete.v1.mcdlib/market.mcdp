@@ -1,5 +1,4 @@
-mcdp {
-	
+ mcdp {
 	customer = instance load customer
 	engineering = instance load drone_complete
 

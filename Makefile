@@ -36,7 +36,7 @@ comptests-run-parallel-nocontracts-prof:
 	DISABLE_CONTRACTS=1 comptests -o $(out) --profile --nonose -c "make; rparmake not *testlang13diagram*" $(package)  
 
 clean:
-	rm -rf $(out)
+	rm -rf $(out) _cached
 
 
 stats-locs:

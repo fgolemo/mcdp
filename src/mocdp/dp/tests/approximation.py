@@ -81,5 +81,5 @@ def check_approximation1():
     UR.check_equal(res, R.U(55.0))
     res = dp.solve(55.1)
     print(res)
-    UR.check_equal(res, R.U(R.get_top()))
+    UR.check_equal(res, R.Us(set()))
 

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from .context import Connection
 from .interfaces import NamedDP, NotConnected
-from contracts.utils import format_dict_long, format_list_long, raise_wrapped
+from contracts.utils import format_dict_long, format_list_long, raise_wrapped, \
+    raise_desc
 from mocdp.exceptions import DPSemanticError
 from contracts import contract
-
 
 __all__ = [
     'CompositeNamedDP',
@@ -24,14 +24,49 @@ class CompositeNamedDP(NamedDP):
     """
 
     def __init__(self, context):
-
         from mocdp.comp.context import Context
+        from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 
         self.context = Context()
         self.context.names = context.names.copy()
         self.context.connections = list(context.connections)
         self.context.fnames = list(context.fnames)
         self.context.rnames = list(context.rnames)
+
+        names = self.context.names
+        for n in names:
+            try:
+                check_good_name(n)
+            except ValueError as e:
+                raise_wrapped(ValueError, e, names=names)
+        for f in self.context.fnames:
+            if not get_name_for_fun_node(f) in  names:
+                msg = 'Expecting to see a node with the name of the function.'
+                raise_desc(ValueError, msg, f=f, names=list(names.keys()))
+
+        for r in self.context.rnames:
+            if not  get_name_for_res_node(r) in  names:
+                msg = 'Expecting to see a node with the name of the resource.'
+                raise_desc(ValueError, msg, r=r, names=list(names.keys()))
+
+        for c in self.context.connections:
+            try:
+                if not c.dp1 in names:
+                    raise ValueError()
+
+                if not c.s1 in names[c.dp1].get_rnames():
+                    raise ValueError()
+
+                if not c.dp2 in names:
+                    raise ValueError()
+
+                if not c.s2 in names[c.dp2].get_fnames():
+                    raise_desc(ValueError, 'Function not found.',
+                               s2=c.s2, rnames=names[c.dp2].get_fnames())
+
+            except ValueError as e:
+                msg = 'Invalid connection'
+                raise_wrapped(ValueError, e, msg, c=c, names=list(names))
 
         self._rnames = list(self.context.rnames)
         self._fnames = list(self.context.fnames)
@@ -119,8 +154,18 @@ class CompositeNamedDP(NamedDP):
         return s
 
     def compact(self):
+        # XXX: not sure what this does
         context = compact_context(self.context)
         return CompositeNamedDP(context)
+
+    def flatten(self):
+        from mocdp.comp.flatten import flatten_composite
+        return flatten_composite(self)
+
+def check_good_name(n):
+    """ Checks that n is a good name for a node """
+    if ' ' in n:
+        raise_desc(ValueError, "Invalid name", n=n)
 
 
 def compact_context(context):

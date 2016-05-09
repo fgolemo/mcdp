@@ -39,6 +39,7 @@ class Syntax():
         'Nat', 'Int', 'pow', 'approx',
         'Top',  # top
         'choose',
+        'flatten',
     ]
 
     # shortcuts
@@ -58,6 +59,8 @@ class Syntax():
     PRODUCT = sp(L('x') | L('×'), lambda t: CDP.product(t[0]))
     PROVIDES = sp(L('provides'), lambda t: CDP.ProvideKeyword(t[0]))
     REQUIRES = sp(L('requires'), lambda t: CDP.RequireKeyword(t[0]))
+    FLATTEN = sp(L('flatten'), lambda t: CDP.FlattenKeyword(t[0]))
+
     USING = sp(L('using'), lambda t: CDP.UsingKeyword(t[0]))
     FOR = sp(L('for'), lambda t: CDP.ForKeyword(t[0]))
     # load battery
@@ -244,6 +247,8 @@ class Syntax():
                             ZeroOrMore(COMMA + constant_value) + CLOSE_BRACE,
                             lambda t: CDP.MakeTupleConstants(t[0], make_list(list(t)[1:-1]), t[-1]))
     
+    # TODO: how to express empty typed list? "{g}"
+
     collection_of_constants = sp(S(L('{')) + constant_value +
                                  ZeroOrMore(COMMA + constant_value) + S(L('}')),
                                  lambda t: CDP.Collection(make_list(list(t))))
@@ -467,6 +472,9 @@ class Syntax():
     ndpt_template_expr = sp(TEMPLATE - ndpt_dp_rvalue,
                        lambda t: CDP.MakeTemplate(t[0], t[1]))
 
+    ndpt_flatten = sp(FLATTEN - ndpt_dp_rvalue,
+                      lambda t: CDP.Flatten(t[0], t[1]))
+
     ndpt_dp_operand = (
         ndpt_load_expr |
         ndpt_simple_dp_model |
@@ -477,7 +485,8 @@ class Syntax():
         ndpt_dp_variable_ref |
         ndpt_catalogue_dp |
         ndpt_approx |
-        ndpt_coproduct_with_names
+        ndpt_coproduct_with_names |
+        ndpt_flatten
     )
 
     ndpt_dp_rvalue << operatorPrecedence(ndpt_dp_operand, [

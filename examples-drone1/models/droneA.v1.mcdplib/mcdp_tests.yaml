@@ -20,12 +20,13 @@ test_solve:
     expect_res: " upperclosure { 0.189 kg} "
     plot: true
 
-  t6_unfeasible:
-    model_name: droneA
-    query_strings: ["<1 hour, 0 kg, 13W>"]
-    #expect_res: " <upperclosure {0.01020 kg}, upperclosure {0.01021 kg}>"
-    expect_res: " upperclosure { Top kg} "
-    plot: true
+    # We don't have a syntax to allow typed empty lists ... 
+  # t6_unfeasible:
+  #   model_name: droneA
+  #   query_strings: ["<1 hour, 0 kg, 13W>"]
+  #   #expect_res: " <upperclosure {0.01020 kg}, upperclosure {0.01021 kg}>"
+  #   expect_res: " upperclosure {} "
+  #   plot: true
 
   t5:
     model_name: droneA

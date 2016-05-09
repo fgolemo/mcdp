@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
 from .parts import CDPLanguage
-from contracts import contract, raise_wrapped
+from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.comp import Connection, dpwrap
-from mocdp.comp.context import CResource, ValueWithUnits
+from mocdp.comp.context import CResource, ValueWithUnits, get_name_for_fun_node
 from mocdp.dp import GenericUnary, Max, Max1, Min, WrapAMap
 from mocdp.exceptions import DPInternalError, DPSemanticError
-from mocdp.posets import Map, Nat, NotBelongs, Rcomp, RcompUnits
+from mocdp.posets import Map, Nat, Rcomp, RcompUnits
 from mocdp.posets.rcomp_units import RCompUnitsPower
 import numpy as np
-
-
 
 
 CDP = CDPLanguage
@@ -40,7 +38,7 @@ def eval_rvalue(rvalue, context):
                 msg += '\n%s' % str(e)
                 raise DPSemanticError(msg, where=rvalue.where)
 
-            return context.make_resource(context.get_name_for_fun_node(fname),
+            return context.make_resource(get_name_for_fun_node(fname),
                             dummy_ndp.get_rnames()[0])
 
         def eval_ops(rvalue):
@@ -136,7 +134,7 @@ def eval_rvalue(rvalue, context):
                 raise DPSemanticError(msg, where=rvalue.where)
 
             s = dummy_ndp.get_rnames()[0]
-            return context.make_resource(context.get_name_for_fun_node(rvalue.name), s)
+            return context.make_resource(get_name_for_fun_node(rvalue.name), s)
 
         if isinstance(rvalue, CDP.GenericNonlinearity):
             op_r = eval_rvalue(rvalue.op1, context)

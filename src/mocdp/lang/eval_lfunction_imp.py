@@ -3,7 +3,7 @@ from .parts import CDPLanguage
 from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.comp import Connection, dpwrap
-from mocdp.comp.context import CFunction
+from mocdp.comp.context import CFunction, get_name_for_res_node
 from mocdp.dp import InvMult2, InvPlus2, Limit
 from mocdp.dp.dp_mult_inv import InvPlus2Nat
 from mocdp.exceptions import DPInternalError, DPSemanticError
@@ -64,7 +64,7 @@ def eval_lfunction(lf, context):
             msg += '\n%s' % str(e)
             raise DPSemanticError(msg, where=lf.where)
 
-        return context.make_function(context.get_name_for_res_node(rname),
+        return context.make_function(get_name_for_res_node(rname),
                         dummy_ndp.get_fnames()[0])
 
     if isinstance(lf, CDP.NewLimit):

@@ -46,6 +46,13 @@ class ValueWithUnits():
     def __repr__(self):
         return 'ValueWithUnits(%r, %r)' % (self.value, self.unit)
 
+def get_name_for_fun_node(name):
+    return '_fun_%s' % name
+
+def get_name_for_res_node(name):
+    return '_res_%s' % name
+
+
 class NoSuchMCDPType(Exception):
     pass
 
@@ -62,6 +69,7 @@ def load_ndp_conftools(load_arg):
         raise_wrapped(DPSemanticError, e, msg, compact=True)
 
     return ndp
+
 
 class Context():
 
@@ -177,15 +185,13 @@ class Context():
             raise DPSemanticError('Repeated identifier %r.' % name)
         self.names[name] = ndp
 
-    def get_name_for_fun_node(self, name):
-        return '_fun_%s' % name
-
     def add_ndp_fun(self, fname, ndp):
-        name = self.get_name_for_fun_node(fname)
+        name = get_name_for_fun_node(fname)
         self.info('Adding new function %r as %r.' % (str(name), fname))
         self.add_ndp(name, ndp)
         self.fnames.append(fname)
 
+    
     def is_new_function(self, name):
         assert name in self.names
         return '_fun_' in name
@@ -194,11 +200,14 @@ class Context():
         assert name in self.names
         return '_res_' in name
 
-    def get_name_for_res_node(self, name):
-        return '_res_%s' % name
+#     def get_name_for_fun_node(self, name):
+#         return '_fun_%s' % name
+#
+#     def get_name_for_res_node(self, name):
+#         return '_res_%s' % name
 
     def add_ndp_res(self, rname, ndp):
-        name = self.get_name_for_res_node(rname)
+        name = get_name_for_res_node(rname)
         self.info('Adding new resource %r as %r ' % (str(name), rname))
         self.add_ndp(name, ndp)
         self.rnames.append(rname)
@@ -207,26 +216,26 @@ class Context():
 
     def iterate_new_functions(self):
         for fname in self.fnames:
-            name = self.get_name_for_fun_node(fname)
+            name = get_name_for_fun_node(fname)
             ndp = self.names[name]
             yield fname, name, ndp
 
     def iterate_new_resources(self):
     # for fname, name, ndp in context.iterate_new_functions():
         for rname in self.rnames:
-            name = self.get_name_for_res_node(rname)
+            name = get_name_for_res_node(rname)
             ndp = self.names[name]
             yield rname, name, ndp
 
     def get_ndp_res(self, rname):
-        name = self.get_name_for_res_node(rname)
+        name = get_name_for_res_node(rname)
         if not name in self.names:
             raise ValueError('Resource name %r (%r) not found in %s.' %
                              (rname, name, list(self.names)))
         return self.names[name]
 
     def get_ndp_fun(self, fname):
-        name = self.get_name_for_fun_node(fname)
+        name = get_name_for_fun_node(fname)
         if not name in self.names:
             raise ValueError('Function name %r (%r) not found in %s.' %
                              (fname, name, list(self.names)))

@@ -33,6 +33,8 @@ class NamedDP():
         else:
             return True
 
+    def flatten(self):
+        return self
     @abstractmethod
     @contract(returns='list(str)')
     def get_fnames(self):

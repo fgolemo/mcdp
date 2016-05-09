@@ -23,7 +23,7 @@ def graphviz_run(filename_dot, output, prog='dot'):
                  display_stderr=False,
                  raise_on_error=True)
         # print('done')
-    except CmdException:
+    except (CmdException, KeyboardInterrupt):
         emergency = 'emergency.dot'
         print('saving to %r' % emergency)  # XXX
         contents = open(filename_dot).read()

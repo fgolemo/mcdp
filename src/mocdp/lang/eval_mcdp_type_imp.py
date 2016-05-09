@@ -4,7 +4,8 @@ from contracts import contract, describe_value
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
-from mocdp.comp.context import CFunction, CResource, NoSuchMCDPType
+from mocdp.comp.context import CFunction, CResource, NoSuchMCDPType, \
+    get_name_for_fun_node, get_name_for_res_node
 from mocdp.dp import Identity
 from mocdp.dp.dp_approximation import make_approximation
 from mocdp.dp.dp_catalogue import CatalogueDP
@@ -54,6 +55,7 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
 
         if isinstance(r, CDP.DPWrap):
             return eval_dp_rvalue_dpwrap(r, context)
+
 
         if isinstance(r, CDP.AbstractAway):
             ndp = eval_dp_rvalue(r.dp_rvalue, context)
@@ -111,6 +113,7 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             CDP.CoproductWithNames: eval_dp_rvalue_CoproductWithNames,
             CDP.ApproxDPModel: eval_dp_rvalue_approxdpmodel,
             CDP.FromCatalogue: eval_dp_rvalue_catalogue,
+            CDP.Flatten: eval_dp_rvalue_flatten,
         }
         
         for klass, hook in cases.items():
@@ -123,6 +126,17 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
         raise e
 
     raise_desc(DPInternalError, 'Invalid dprvalue.', r=r)
+
+def eval_dp_rvalue_flatten(r, context):
+    ndp = eval_dp_rvalue(r.dp_rvalue, context)
+    ndp = ndp.flatten()
+
+#     from mocdp.comp.connection import get_connection_graph
+#     G = get_connection_graph(ndp.get_name2ndp(), ndp.get_connections())
+    from mocdp.comp.connection import choose_connection_to_cut1
+    choose_connection_to_cut1(connections=ndp.get_connections(), name2dp=ndp.get_name2ndp())
+
+    return ndp
 
 def eval_dp_rvalue_coproduct(r, context):
     assert isinstance(r, CDP.Coproduct)
@@ -276,7 +290,7 @@ def eval_dp_rvalue_catalogue(r, context):
         fvalues0 = items[1:1 + len(fun)]
         rvalues0 = items[1 + len(fun):1 + len(fun) + len(res)]
 
-        from mocdp.lang.eval_constant_imp import eval_constant
+#         from mocdp.lang.eval_constant_imp import eval_constant
         fvalues = [eval_constant(_, context) for _ in fvalues0]
         rvalues = [eval_constant(_, context) for _ in rvalues0]
 
@@ -403,7 +417,7 @@ def eval_statement(r, context):
 
         from mocdp.lang.eval_constant_imp import NotConstant
         try:
-            from mocdp.lang.eval_constant_imp import eval_constant
+            # from mocdp.lang.eval_constant_imp import eval_constant
             x = eval_constant(right_side, context)
             context.set_constant(name, x)
         except NotConstant:
@@ -425,14 +439,14 @@ def eval_statement(r, context):
         rname = r.rname.value
         ndp = dpwrap(Identity(F), rname, rname)
         context.add_ndp_res(rname, ndp)
-        return context.make_function(context.get_name_for_res_node(rname), rname)
+        return context.make_function(get_name_for_res_node(rname), rname)
 
     elif isinstance(r, CDP.FunStatement):
         F = eval_space(r.unit, context)
         fname = r.fname.value
         ndp = dpwrap(Identity(F), fname, fname)
         context.add_ndp_fun(fname, ndp)
-        return context.make_resource(context.get_name_for_fun_node(fname), fname)
+        return context.make_resource(get_name_for_fun_node(fname), fname)
 
     elif isinstance(r, CDP.FunShortcut1):  # provides fname using name
         fname = r.fname.value

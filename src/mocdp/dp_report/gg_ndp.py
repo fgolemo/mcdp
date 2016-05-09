@@ -5,6 +5,7 @@ from contextlib import contextmanager
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.comp import CompositeNamedDP, SimpleWrap
+from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 from mocdp.comp.interfaces import NamedDP
 from mocdp.dp import (
     Constant, GenericUnary, Identity, Limit, Max, Min, Product, ProductN, Sum,
@@ -20,6 +21,7 @@ from mocdp.posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
+import warnings
 
 
 
@@ -612,6 +614,7 @@ def create_composite(gdc0, ndp):
                 return True
             else:
                 return False
+
         def is_resource_with_one_connection_that_is_not_a_fun_one(name):
             if is_resource_with_one_connection(name):
                 other = get_connections_to_resource(name)[0].dp1
@@ -627,10 +630,12 @@ def create_composite(gdc0, ndp):
             # do not create these edges
             if is_function_with_one_connection_that_is_not_a_res_one(name):
                 # print('Skipping extra node for is_function_with_one_connection %r' % name)
+#                 warnings.warn('hack')
                 continue
 
             if is_resource_with_one_connection_that_is_not_a_fun_one(name):
                 # print('skipping extra node for %r' % name)
+#                 warnings.warn('hack')
                 continue
 
             if is_function_with_no_connections(name):
@@ -680,8 +685,12 @@ def create_composite(gdc0, ndp):
                 ignore_connections.add(only_one)
 
                 if not only_one.dp2 in names2functions:
-                    raise ValueError('Cannot find function node ref for %r' % only_one.dp2
+                    msg = ('Cannot find function node ref for %r' % only_one.dp2
                                      + ' while drawing one connection %s' % str(only_one))
+#                     warnings.warn('giving up')
+#                     continue
+                    raise_desc(ValueError, msg, names=list(ndp.context.names),
+                               names2functions=list(names2functions))
 
                 node = names2functions[only_one.dp2][only_one.s2]
                 names2functions[name][only_one.s1] = node
@@ -786,11 +795,11 @@ def create_composite(gdc0, ndp):
         resources = {}
     
         for rname in ndp.get_rnames():
-            name = ndp.context.get_name_for_res_node(rname)
+            name = get_name_for_res_node(rname)
             resources[rname] = list(names2resources[name].values())[0]
     
         for fname in ndp.get_fnames():
-            name = ndp.context.get_name_for_fun_node(fname)
+            name = get_name_for_fun_node(fname)
             functions[fname] = list(names2functions[name].values())[0]
 
         if not (gdc is gdc0):
