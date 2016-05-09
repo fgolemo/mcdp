@@ -3,9 +3,12 @@ mcdp {
   provides extra_payload [kg]
   provides extra_power   [W]
   provides num_missions [R]
+  provides velocity [m/s]
+
+  requires total_cost [$]
   
-  battery = from_library('bat_LiPo')
-  actuation = from_library('actuation_a2')
+  battery = new Bat_LiPo
+  actuation = new Actuation_a2_vel
 
   total_power = power required by actuation + extra_power
   capacity provided by battery >= endurance * total_power
@@ -17,20 +20,18 @@ mcdp {
 
   gravity = 9.81 m/s^2
   weight = total_mass * gravity
-   
-  lift provided by actuation >= weight
 
-  requires total_mass >= total_mass
+  lift provided by actuation >= weight
+  velocity provided by actuation >= velocity
   
   labor_cost = (10 $ / hour) * (maintenance required by battery)
 
-  requires total_cost >= (
+  total_cost >= (
     cost required by actuation + 
     cost required by battery + 
     labor_cost)
   
   battery.missions >= num_missions
-
-  provides velocity [m/s]
-  velocity <= 10 m/s
+ 
+  requires total_mass >= total_mass   
 }

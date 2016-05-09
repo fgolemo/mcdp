@@ -1,7 +1,7 @@
 approx(cost,0%,1$,Top$) 
 
 mcdp {
-    battery = instance load batteries
+    battery = new Batteries
 
     provides capacity <= battery.capacity
     provides missions <= battery.missions

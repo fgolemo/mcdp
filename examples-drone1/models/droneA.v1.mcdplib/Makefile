@@ -10,6 +10,6 @@ solve:
 
 
 plot:
-	mcdp-plot --out=out/actuation1 -d . actuation1 
-	mcdp-plot --out=out/drone -d . drone 
+	mcdp-plot --out=out/actuation1 -d . ActuationA
+	mcdp-plot --out=out/drone -d . DroneA
 

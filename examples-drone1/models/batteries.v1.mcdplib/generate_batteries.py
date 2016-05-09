@@ -76,12 +76,12 @@ def go():
 
         print s2
         # ndp = parse_ndp(s2)
-        model_name = 'bat_%s' % name
+        model_name = 'Battery_%s' % name
         fname = model_name + '.mcdp'
         with open(fname, 'w') as f:
             f.write(s2)
 
-        good.append(model_name)
+        good.append(name)
 
         summary += '\n%10s %10s %10s %10s  %s' % (name, v['specific_energy'], v['specific_cost'], 
             v['cycles'], v['desc'])
@@ -89,8 +89,10 @@ def go():
     with open('summary.txt', 'w') as f:
         f.write(summary)
     ss = """
-        choose(\n%s\n)
-    """ % ",\n".join("%s:(load %s)" % (g,g) for g in good)
+choose(
+    %s
+)
+    """ % ",\n    ".join("%8s: (load Battery_%s)" % (g,g) for g in good)
     with open('batteries.mcdp', 'w') as f:
         f.write(ss)
 

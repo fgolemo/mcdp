@@ -20,6 +20,7 @@ from mocdp.posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
+from mocdp import logger
 import os
 import warnings
 
@@ -370,6 +371,7 @@ def resize_icon(filename, tmppath, size):
     return resized
 
 def choose_best_icon(iconoptions, imagepaths, tmppath):
+    # logger.debug('Looking for %s.' % (str(iconoptions)))
     for option in iconoptions:
         if option is None:
             continue
@@ -377,6 +379,7 @@ def choose_best_icon(iconoptions, imagepaths, tmppath):
             imagename = os.path.join(imagepath, option) + '.png'
             if os.path.exists(imagename):
                 return resize_icon(imagename, tmppath, 100)
+    # logger.debug('Could not find PNG icon for %s.' % (str(iconoptions)))
     return None
 
 def is_simple(ndp):

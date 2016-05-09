@@ -4,7 +4,7 @@ all:
 	python plot_actuation.py
 
 clean:
-	rm -rf out/ out-memo_disk
+	rm -rf _cached out out-memo_disk
 
 
 # solve:

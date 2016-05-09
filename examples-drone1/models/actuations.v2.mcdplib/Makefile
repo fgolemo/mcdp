@@ -5,8 +5,8 @@ all:
 	mcdp-plot --out=out/actuation -d . actuation
 
 clean:
-	rm -rf out out-memo_disk 
-	rm -rf actuation_*
+	rm -rf out out-memo_disk _cached
+	rm -rf actuation*.mcdp
 
 plot:
 	python plot_actuation.py
