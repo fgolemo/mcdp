@@ -13,7 +13,9 @@ def add_prefix(ndp, prefix):
         icon = ndp.icon
         if len(fnames) == 1: fnames = fnames[0]
         if len(rnames) == 1: rnames = rnames[0]
-        return SimpleWrap(dp, fnames=fnames, rnames=rnames, icon=icon)
+        sw = SimpleWrap(dp, fnames=fnames, rnames=rnames, icon=icon)
+        print sw
+        return sw
     
 
     if isinstance(ndp, CompositeNamedDP):
@@ -23,8 +25,8 @@ def add_prefix(ndp, prefix):
                 fname = name2[len('_fun_'):]
                 return get_name_for_fun_node('%s_%s' % (prefix, fname))
             elif '_res_' in name2:
-                fname = name2[len('_res_'):]
-                return get_name_for_res_node('%s_%s' % (prefix, fname))
+                rname = name2[len('_res_'):]
+                return get_name_for_res_node('%s_%s' % (prefix, rname))
             else:
                 return "%s_%s" % (prefix, name2)
 
@@ -61,12 +63,16 @@ def flatten_composite(ndp):
     for name, n0 in name2ndp.items():
         n1 = n0.flatten()
         nn = add_prefix(n1, prefix=name)
+        for x in nn.get_fnames():
+            assert name in x
+        for x in nn.get_rnames():
+            assert name in x
 
         if isinstance(nn, CompositeNamedDP):
             
-            def get_new_name(name2):
-                return "%s_%s" % (name, name2)
-            
+#             def get_new_name(name2):
+#                 return "%s_%s" % (name, name2)
+#
             for name2, ndp2 in nn.get_name2ndp().items():
 #                 _ = get_new_name(name2)
                 assert not name2 in names2
@@ -92,22 +98,34 @@ def flatten_composite(ndp):
 
         dp2_was_exploded = isinstance(name2ndp[dp2], CompositeNamedDP)
         if dp2_was_exploded:
-            dp2 = "_fun_%s_%s" % (dp2, s2)
-            if not dp2 in names2:
-                raise_desc(AssertionError, "?", dp2=dp2, c=c, names2=sorted(names2))
+            dp2_ = "_fun_%s_%s" % (dp2, s2)
+            if not dp2_ in names2:
+                raise_desc(AssertionError, "?", dp2_=dp2_, c=c, names2=sorted(names2))
+        else:
+            dp2_ = dp2
 
         dp1_was_exploded = isinstance(name2ndp[dp1], CompositeNamedDP)
         if dp1_was_exploded:
-            dp1 = "_res_%s_%s" % (dp1, s1)
-            if not dp1 in names2:
-                raise_desc(AssertionError, "?", dp1=dp1, c=c, names2=sorted(names2))
+            dp1_ = "_res_%s_%s" % (dp1, s1)
+            if not dp1_ in names2:
+                raise_desc(AssertionError, "?", dp1_=dp1_, c=c, names2=sorted(names2))
+        else:
+            dp1_ = dp1
+        print('name2ndp: %s' % list(name2ndp))
+        print(c)
+        s1_ = '%s_%s' % (dp1_, s1)
 
-        s1 = '%s_%s' % (dp1, s1)
-        assert s1 in names2[dp1].get_rnames(), (s1, dp1, names2[dp1])
-        s2 = '%s_%s' % (dp2, s2)
-        assert s2 in names2[dp2].get_fnames(), (s2, dp2, names2[dp2])
+        assert dp1_ in names2
+        print('s1: %s' % s1_)
+        print('dp1_: %s' % dp1_)
+        print(names2[dp1_])
+        assert s1_ in names2[dp1_].get_rnames() , (s1_, names2[dp1_].get_rnames())
 
-        c2 = Connection(dp1=dp1, s1=s1, dp2=dp2, s2=s2)
+        s2_ = '%s_%s' % (dp2_, s2)
+        assert dp2_ in names2
+        assert s2_ in names2[dp2_].get_fnames(), (s2_, names2[dp2_].get_fnames())
+
+        c2 = Connection(dp1=dp1_, s1=s1_, dp2=dp2_, s2=s2_)
         # (dp2, s2)
         connections2.add(c2)
 

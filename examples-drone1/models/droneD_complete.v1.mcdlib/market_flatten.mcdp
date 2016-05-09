@@ -1,7 +1,7 @@
-flatten mcdp {
-	customer = instance load customer
-	engineering = instance load drone_complete
-
+flatten 
+mcdp {
+	customer = new Customer
+	engineering = new DroneComplete
 
 	customer.budget >= engineering.total_cost_ownership
 

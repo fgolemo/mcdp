@@ -1,9 +1,13 @@
 all:
-	mcdp-plot --out=out/drone -d . market
+	mcdp-plot --out=out -d . market
 
 clean:
 	rm -rf out _cached out-memo_disk
 
 
 bug:
-	rm _cached/market.cached;  mcdp-plot --out=out/drone -d . market_flatten
+	rm -f _cached/market*.cached
+	mcdp-plot --out=out -d . market_flatten
+bug2:
+	rm -f _cached/test*.cached
+	mcdp-plot --out=out -d . test

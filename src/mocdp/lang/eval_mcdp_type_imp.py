@@ -136,13 +136,15 @@ def eval_dp_rvalue_instancefromlibrary(r, context):
 
 def eval_dp_rvalue_flatten(r, context):
     ndp = eval_dp_rvalue(r.dp_rvalue, context)
+
     ndp = ndp.flatten()
 
 #     from mocdp.comp.connection import get_connection_graph
 #     G = get_connection_graph(ndp.get_name2ndp(), ndp.get_connections())
-    from mocdp.comp.connection import choose_connection_to_cut1
-    choose_connection_to_cut1(connections=ndp.get_connections(), name2dp=ndp.get_name2ndp())
-
+    if isinstance(ndp, CompositeNamedDP):
+        from mocdp.comp.connection import choose_connection_to_cut1
+        choose_connection_to_cut1(connections=ndp.get_connections(), name2dp=ndp.get_name2ndp())
+    print ndp
     return ndp
 
 def eval_dp_rvalue_coproduct(r, context):
