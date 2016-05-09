@@ -19,7 +19,15 @@ __all__ = [
 
 
 class MCDPLibrary():
-
+    """
+    
+        to document:
+        
+            '_cached' directory
+            
+            not case sensitive
+        
+    """
     def __init__(self, file_to_contents=None):
         # "x.mcdp" -> string
         if file_to_contents is None:
@@ -74,10 +82,17 @@ class MCDPLibrary():
 
     def _get_file_data(self, basename):
         """ returns dict with data, realpath """
-        if not basename in self.file_to_contents:
-            raise_x_not_found('file', basename, self.file_to_contents)
 
-        found = self.file_to_contents[basename]
+        for fn in self.file_to_contents:
+            if fn.lower() == basename.lower():
+                match = fn
+                break
+        else:
+#         if not basename in self.file_to_contents:
+            raise_desc(DPSemanticError, 'Could not find model in library.',
+                       model_name=basename, contents=sorted(self.file_to_contents))
+            # raise_x_not_found('file', basename, self.file_to_contents)
+        found = self.file_to_contents[match]
         return found
 
     def add_search_dir(self, d):

@@ -4,8 +4,8 @@ mcdp {
   provides extra_power   [W]
   provides num_missions [R]
   
-  battery = instance load bat_LiPo
-  actuation = instance load actuation_a2
+  battery = from_library('bat_LiPo')
+  actuation = from_library('actuation_a2')
 
   total_power = power required by actuation + extra_power
   capacity provided by battery >= endurance * total_power

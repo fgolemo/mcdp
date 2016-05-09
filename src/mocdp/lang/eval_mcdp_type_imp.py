@@ -4,8 +4,8 @@ from contracts import contract, describe_value
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
-from mocdp.comp.context import CFunction, CResource, NoSuchMCDPType, \
-    get_name_for_fun_node, get_name_for_res_node
+from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
+    get_name_for_fun_node, get_name_for_res_node)
 from mocdp.dp import Identity
 from mocdp.dp.dp_approximation import make_approximation
 from mocdp.dp.dp_catalogue import CatalogueDP
@@ -14,9 +14,9 @@ from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.eval_constant_imp import eval_constant
 from mocdp.lang.helpers import get_conversion
 from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
+from mocdp.ndp.named_coproduct import NamedDPCoproduct
 from mocdp.posets import NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.posets.any import Any
-from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 CDP = CDPLanguage
 
@@ -114,6 +114,7 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             CDP.ApproxDPModel: eval_dp_rvalue_approxdpmodel,
             CDP.FromCatalogue: eval_dp_rvalue_catalogue,
             CDP.Flatten: eval_dp_rvalue_flatten,
+            CDP.DPInstanceFromLibrary: eval_dp_rvalue_instancefromlibrary,
         }
         
         for klass, hook in cases.items():
@@ -126,6 +127,12 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
         raise e
 
     raise_desc(DPInternalError, 'Invalid dprvalue.', r=r)
+
+def eval_dp_rvalue_instancefromlibrary(r, context):
+    name = r.dpname.value
+    ndp = eval_dp_rvalue_load(name, context)
+    return ndp
+
 
 def eval_dp_rvalue_flatten(r, context):
     ndp = eval_dp_rvalue(r.dp_rvalue, context)

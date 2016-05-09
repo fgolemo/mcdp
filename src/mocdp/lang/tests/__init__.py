@@ -6,3 +6,4 @@ from .syntax_coproduct import *
 from .syntax_sets import *
 from .syntax_spaces import *
 from .syntax_connections import *
+from .syntax_from_library import *

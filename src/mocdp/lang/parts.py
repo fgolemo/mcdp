@@ -2,7 +2,9 @@
 
 from .namedtuple_tricks import namedtuplewhere
 
-__all__ = ['CDPLanguage']
+__all__ = [
+    'CDPLanguage',
+]
 
 
 class CDPLanguage():
@@ -22,6 +24,8 @@ class CDPLanguage():
     Flatten = namedtuplewhere('Flatten', 'keyword dp_rvalue')
 
     DPInstance = namedtuplewhere('DPInstance', 'keyword dp_rvalue')
+    DPInstanceFromLibrary = namedtuplewhere('DPInstanceFromLibrary', 'keyword dpname')
+
     PlusN = namedtuplewhere('PlusN', 'ops')
     MultN = namedtuplewhere('MultN', 'ops')
     Divide = namedtuplewhere('Divide', 'ops')
@@ -85,6 +89,7 @@ class CDPLanguage():
     InstanceKeyword = namedtuplewhere('InstanceKeyword', 'keyword')
     OpenBraceKeyword = namedtuplewhere('OpenBraceKeyword', 'keyword')
     CloseBraceKeyword = namedtuplewhere('CloseBraceKeyword', 'keyword')
+    FromLibraryKeyword = namedtuplewhere('FromLibraryKeyword', 'keyword')
     OpKeyword = namedtuplewhere('OpKeyword', 'keyword')  # Max
     DPWrapToken = namedtuplewhere('DPWrapToken', 'keyword')
     FuncName = namedtuplewhere('FuncName', 'value')  # python function name

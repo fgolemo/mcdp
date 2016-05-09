@@ -564,7 +564,7 @@ def check_loop_result5a():
         for x, y in pu:
             pylab.plot(x, y, 'rs')
         pylab.axis((-0.5, mx + 0.5, -0.5, my + 0.5))
-    fn = 'a.html'
+    fn = 'out/inv_mult_plots.html'
     r.to_html(fn)
     print('written to %s' % fn)
 

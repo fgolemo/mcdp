@@ -13,7 +13,7 @@ mcdp {
     distance <= endurance * velocity
   }
 
-  ae = instance load actuation_energetics
+  ae = new ActuationEnergetics
 
   ae.endurance >= strategy.endurance
   ae.velocity >= strategy.velocity

@@ -146,8 +146,9 @@ class GraphDrawingContext():
 
     def get_icon(self, options):
         tmppath = self.get_temp_path()
-        imagepath = self.get_imagepath()
-        best = choose_best_icon(options, imagepath, tmppath)
+        # imagepath = self.get_imagepath()
+        imagepaths = ['.', self.get_imagepath()]
+        best = choose_best_icon(options, imagepaths, tmppath)
         return best
 
     def decorate_arrow_function(self, l1):
@@ -368,12 +369,14 @@ def resize_icon(filename, tmppath, size):
             raise
     return resized
 
-def choose_best_icon(iconoptions, imagepath, tmppath):
+def choose_best_icon(iconoptions, imagepaths, tmppath):
     for option in iconoptions:
-        if option is None: continue
-        imagename = os.path.join(imagepath, option) + '.png'
-        if os.path.exists(imagename):
-            return resize_icon(imagename, tmppath, 100)
+        if option is None:
+            continue
+        for imagepath in imagepaths:
+            imagename = os.path.join(imagepath, option) + '.png'
+            if os.path.exists(imagename):
+                return resize_icon(imagename, tmppath, 100)
     return None
 
 def is_simple(ndp):

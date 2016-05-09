@@ -5,7 +5,8 @@ from mocdp.posets import R_dimensionless
 from pyparsing import (
     CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
     NotAny, OneOrMore, Optional, Or, ParserElement, Suppress, Word, ZeroOrMore,
-    alphanums, alphas, nums, oneOf, opAssoc, operatorPrecedence)
+    alphanums, alphas, nums, oneOf, opAssoc, operatorPrecedence,
+    dblQuotedString, sglQuotedString)
 import math
 
 ParserElement.enablePackrat()
@@ -32,14 +33,35 @@ class Syntax():
     TOP_LITERAL = 'Top'
 
     keywords = [
-        'load', 'compact', 'required', 'provides', 'abstract',
-        'dp', 'mcdp', 'template', 'sub', 'for', 'instance',
-        'provided', 'requires', 'implemented-by', 'using', 'by',
-        'catalogue', 'set-of', 'mcdp-type', 'dptype', 'instance',
-        'Nat', 'Int', 'pow', 'approx',
+        'load',
+        'compact',
+        'required',
+        'provides',
+        'abstract',
+        'dp',
+        'mcdp',
+        'template',
+        'sub',
+        'for',
+        'instance',
+        'provided',
+        'requires',
+        'implemented-by',
+        'using',
+        'by',
+        'catalogue',
+        'set-of',
+        'mcdp-type',
+        'dptype',
+        'Nat',
+        'Int',
+        'pow',
+        'approx',
         'Top',  # top
         'choose',
         'flatten',
+        'from_library',
+        'new',  # = from_library
     ]
 
     # shortcuts
@@ -99,6 +121,9 @@ class Syntax():
     COMPACT = sp(L('compact'), lambda t: CDP.CompactKeyword(t[0]))
     TEMPLATE = sp(L('template'), lambda t: CDP.TemplateKeyword(t[0]))
     ABSTRACT = sp(L('abstract'), lambda t: CDP.AbstractKeyword(t[0]))
+
+    FROM_LIBRARY = sp(L('from_library') | L('new'), lambda t: CDP.FromLibraryKeyword(t[0]))
+
     COPROD = sp(L('^'), lambda t: CDP.coprod(t[0]))
     CODE = sp(L('code'), lambda t: CDP.CodeKeyword(t[0]))
     APPROX = sp(L('approx'), lambda t: CDP.ApproxKeyword(t[0]))
@@ -196,9 +221,12 @@ class Syntax():
     number_with_unit = number_with_unit1 ^ number_with_unit2 ^ number_with_unit3 ^ number_with_unit4_top
 
     # TODO: change
-    ndpname = sp(idn.copy(), lambda t: CDP.FuncName(t[0]))  # XXX
 
-    ndpt_load_expr = sp(LOAD - ndpname, lambda t: CDP.LoadCommand(t[0], t[1]))
+    # a quoted string
+    quoted = sp(dblQuotedString | sglQuotedString, lambda t:t[0][1:-1])
+    ndpname = sp(idn.copy() | quoted, lambda t: CDP.FuncName(t[0]))  # XXX
+    ndpt_load_expr = sp(LOAD - (ndpname | SLPAR - ndpname - SRPAR),
+                        lambda t: CDP.LoadCommand(t[0], t[1]))
 
     # An expression that evaluates to a NamedDP
     ndpt_dp_rvalue = Forward()
@@ -208,18 +236,25 @@ class Syntax():
     dpname = sp(idn.copy(), lambda t: CDP.DPName(t[0]))
     dptypename = sp(idn.copy(), lambda t: CDP.DPTypeName(t[0]))
 
-    dpinstance_from_type = sp((INSTANCE + ndpt_dp_rvalue) ^ (INSTANCE + L('(') + ndpt_dp_rvalue + L(")")),
+    dpinstance_from_type = sp((INSTANCE + ndpt_dp_rvalue) ^
+                              (INSTANCE + SLPAR + ndpt_dp_rvalue + SRPAR),
                               lambda t: CDP.DPInstance(t[0], t[1]))
 
-    dpinstance_expr = dpinstance_from_type
+    dpinstance_from_library_shortcut = \
+        sp(FROM_LIBRARY + (ndpname | (SLPAR - ndpname + SRPAR)),
+                    lambda t:CDP.DPInstanceFromLibrary(t[0], t[1]))
+
+    dpinstance_expr = dpinstance_from_type ^ dpinstance_from_library_shortcut
 
     setsub_expr = sp(SUB - dpname - S(L('=')) - dpinstance_expr,
                      lambda t: CDP.SetName(t[0], t[1], t[2]))
+
     setsub_expr_implicit = sp(dpname - S(L('=')) - dpinstance_expr,
                      lambda t: CDP.SetName(None, t[0], t[1]))
 
     setmcdptype_expr = sp(MCDPTYPE - dptypename - L('=') - ndpt_dp_rvalue,
                      lambda t: CDP.SetMCDPType(t[0], t[1], t[2], t[3]))
+
     setmcdptype_expr_implicit = sp(dptypename - L('=') - ndpt_dp_rvalue,
                      lambda t: CDP.SetMCDPType(None, t[0], t[1], t[2]))
 
@@ -319,7 +354,8 @@ class Syntax():
         fancy ^ 
         lf_new_resource ^ 
         lf_new_resource2 ^ 
-        (S(L('(')) - (lf_new_limit ^ simple ^ fancy ^ lf_new_resource ^ lf_new_resource2) - S(L(')'))))
+        (S(L('(')) - (lf_new_limit ^ simple ^ fancy ^
+                      lf_new_resource ^ lf_new_resource2) - S(L(')'))))
 
     # Fractions
 
@@ -328,8 +364,8 @@ class Syntax():
 
     rat_power_exponent = integer_fraction | integer
 
-    power_expr_1 = sp((S(L('pow')) - S(L('(')) - C(rvalue, 'op1') - S(L(','))
-                    + C(rat_power_exponent, 'exponent')) - S(L(')')),
+    power_expr_1 = sp((S(L('pow')) - SLPAR - C(rvalue, 'op1') - S(L(','))
+                    + C(rat_power_exponent, 'exponent')) - SRPAR,
                     power_expr_parse)
 
 
@@ -388,7 +424,8 @@ class Syntax():
 
     # "idn" does not match keywords, but keywords might appear in functions names
     idn_ext = Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))
-    funcname = sp(Combine(idn_ext + ZeroOrMore(L('.') - idn_ext)), lambda t: CDP.FuncName(t[0]))
+    funcname = sp(Combine(idn_ext + ZeroOrMore(L('.') - idn_ext)),
+                   lambda t: CDP.FuncName(t[0]))
 
     code_spec_simple = sp(CODE + funcname,
                           lambda t: CDP.PDPCodeSpecNoArgs(keyword=t[0], function=t[1]))
@@ -427,7 +464,6 @@ class Syntax():
 
     catalogue_table = sp(OneOrMore(catalogue_row),
                          lambda t: CDP.CatalogueTable(make_list(list(t))))
-
      
     # Example:
     #    choose(name: <dp>, name2: <dp>)
