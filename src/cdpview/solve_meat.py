@@ -230,8 +230,9 @@ def solve_get_output_dir(prefix):
         candidate = prefix + '-%03d' % i
         if not os.path.exists(candidate):
             mkdirs_thread_safe(candidate)
-            if os.path.exists(last):
+            if os.path.lexists(last):  # not exists
                 os.unlink(last)
+            assert not os.path.lexists(last)
             os.symlink(candidate, last)
             return candidate
     assert False

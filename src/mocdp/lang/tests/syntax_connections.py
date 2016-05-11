@@ -74,7 +74,7 @@ mcdp {
 def check_lang_connections2aa():
     """ This is considered connected. """
 
-    ndp = assert_parsable_to_connected_ndp("""
+    assert_parsable_to_connected_ndp("""
 mcdp {
     provides f1 [g]
     provides f2 [s]
@@ -88,7 +88,7 @@ mcdp {
 def check_lang_connections2ab():
     """ This is considered connected. """
 
-    ndp = assert_parsable_to_connected_ndp("""
+    assert_parsable_to_connected_ndp("""
 mcdp {
     provides f1 [g]
     requires r1 [J]

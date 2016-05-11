@@ -64,7 +64,9 @@ class TypesUniverse(Preorder):
                 return
             else:
                 msg = "Dimensionality do not match."
-                raise_desc(NotLeq, msg, A=A, B=B)
+                raise_desc(NotLeq, msg,
+                           A_dimensionality=A.units.dimensionality,
+                           B_dimensionality=B.units.dimensionality)
 
         if isinstance(A, Rcomp) and isinstance(B, RcompUnits): 
             return
@@ -210,7 +212,6 @@ class PromoteToFloat(Map):
         return float(x)
 
 
-
 class ProductMap(Map):
     @contract(fs='seq[>=1]($Map)')
     def __init__(self, fs):
@@ -243,7 +244,7 @@ def check_leq_products(tu, A, B):
             tu.check_leq(a, b)
         except NotLeq as e:
             msg = 'Found uncomparable elements'
-            raise_wrapped(NotLeq, e, msg, a=a, b=b)
+            raise_wrapped(NotLeq, e, msg, compact=True, a=a, b=b)
 
 
 class LinearMapComp(Map):

@@ -7,7 +7,7 @@ mcdp {
 
   requires total_cost [$]
   
-  battery = new Bat_LiPo
+  battery = new Battery_LiPo
   actuation = new Actuation_a2_vel
 
   total_power = power required by actuation + extra_power
@@ -24,7 +24,7 @@ mcdp {
   lift provided by actuation >= weight
   velocity provided by actuation >= velocity
   
-  labor_cost = (10 $ / hour) * (maintenance required by battery)
+  labor_cost = (10 $) * (maintenance required by battery)
 
   total_cost >= (
     cost required by actuation + 

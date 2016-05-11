@@ -9,15 +9,18 @@
         requires mass     [g]
         requires cost     [$]
         
-        requires maintenance [s]
+        # Number of replacements
+        requires maintenance [R]
 
+        # Battery properties
         specific_energy = 100 Wh/kg
         specific_cost =  3.41 Wh/$
-        replace_time = 120 s
         cycles = 500 []
 
-        maintenance >= replace_time * (missions / cycles)
+        # How many times should it be replaced?
+        num_replacements = ceil(missions / cycles)
+        maintenance >= num_replacements
 
         mass >= capacity / specific_energy
-        cost >= capacity / specific_cost
+        cost >= (capacity / specific_cost) * num_replacements
     }

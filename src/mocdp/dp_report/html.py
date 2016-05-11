@@ -294,7 +294,8 @@ css = """
         font-weight: bold; 
     }
        
-    span.ImpName { color: #CC6600; }
+    /* There is a bug that prevents this from working correctly. */
+    /* span.ImpName { color: #CC6600; } */
     span.FuncName { color: #CC6600 ; }
 
     span.MCDPKeyword,

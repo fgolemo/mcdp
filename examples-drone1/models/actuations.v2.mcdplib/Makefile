@@ -1,16 +1,14 @@
 
 # all: plot
 all: 
-	python generate_actuations.py
-	mcdp-plot --out=out/actuation -d . actuation
+	./generate_actuations.py
+	mcdp-plot --out=out -d . actuation
+	./plot_actuation.py
 
 clean:
 	rm -rf out out-memo_disk _cached
 	rm -rf actuation*.mcdp
-
-plot:
-	python plot_actuation.py
-
+ 
 # solve:
 # 	mcdp-solve --out=out/solve1 --plot --imp -d . droneC "<0s, 0kg, 0W, 0 []>"
 # 	#mcdp-solve --out=out/drone1/sb -d models/drone1 drone "<1 hour, 0kg>"

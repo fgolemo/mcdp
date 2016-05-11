@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 from .parts import CDPLanguage
-from conf_tools import (SemanticMistakeKeyNotFound,
-    instantiate_spec)
+from conf_tools import SemanticMistakeKeyNotFound, instantiate_spec
+from conf_tools.exceptions import ConfToolsException
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
 from mocdp.configuration import get_conftools_dps
-from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.dp.primitive import PrimitiveDP
+from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.utils_lists import unwrap_list
-from conf_tools.exceptions import ConfToolsException
 
 CDP = CDPLanguage
+
+
 @contract(returns=PrimitiveDP)
 def eval_pdp(r, context):  # @UnusedVariable
     try:
@@ -35,12 +36,14 @@ def eval_pdp(r, context):  # @UnusedVariable
                 res = instantiate_spec([function, kwargs])
             except ConfToolsException as e:
                 msg = 'Could not instantiate code spec.'
-                raise_wrapped(DPSemanticError, e, msg, compact=True, function=function, kwargs=kwargs)
+                raise_wrapped(DPSemanticError, e, msg, compact=True,
+                              function=function, kwargs=kwargs)
             try:
                 check_isinstance(res, PrimitiveDP)
             except ValueError as e:
                 msg = 'Expected the code to give a subclass of PrimitiveDP.'
-                raise_wrapped(DPSemanticError, e, msg, function=function, kwargs=kwargs)
+                raise_wrapped(DPSemanticError, e, msg, function=function,
+                              kwargs=kwargs)
             return res
     except DPSemanticError as e:
         if e.where is None:

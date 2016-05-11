@@ -7,6 +7,10 @@ comptests:
 	mkdir -p $(out)
 	comptests -o $(out) --contracts --nonose --console $(package)
 
+comptests-nocontracts:
+	mkdir -p $(out)
+	comptests -o $(out) --nonose --console $(package)
+
 comptests-run:
 	mkdir -p $(out)
 	comptests -o $(out) --contracts --nonose $(package) 

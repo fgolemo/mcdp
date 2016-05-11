@@ -3,8 +3,8 @@ mcdp {
   provides extra_payload [kg]
   provides extra_power   [W]
  
-  battery = new BatteryA
-  actuation = new ActuationA
+  battery = new Battery
+  actuation = new Actuation
 
   total_power = power required by actuation + extra_power
   capacity provided by battery >= endurance * total_power

@@ -1,9 +1,10 @@
-from conf_tools.utils.resources import dir_from_package_name
-import os
-from conf_tools.utils.locate_files_imp import locate_files
-from contracts.utils import raise_desc
-import yaml
 from cdpview.solve_meat import solve_main
+from conf_tools.utils.locate_files_imp import locate_files
+from conf_tools.utils.resources import dir_from_package_name
+from contracts.utils import raise_desc
+from mocdp import logger
+import os
+import yaml
 
 __all__ = [
     'define_tests_for_mcdplibs',
@@ -20,11 +21,9 @@ def define_tests_for_mcdplibs(context):
     if not os.path.exists(folder):
         raise_desc(ValueError, 'No tests found.' , folder=folder)
 
-    print('Using folder %r' % folder)
 
     mcdplibs = locate_files(folder, '*.mcdplib', include_directories=True,
                             include_files=False)
-    print(mcdplibs)
     n = len(mcdplibs)
     if n <= 1:
         msg = 'Expected more tests.'
@@ -36,10 +35,30 @@ def define_tests_for_mcdplibs(context):
         short = short.replace('.', '_')
         c2 = c.child(short)
         c2.comp_dynamic(mcdplib_define_tst, mcdplib=m)
+        
+        makefile = os.path.join(m, 'Makefile')
+        if os.path.exists(makefile):
+            c2.comp(mcdplib_run_make, mcdplib=m)
+        else:
+            logger.warn('No makefile in %r.' % m)
+            
+def mcdplib_run_make(mcdplib):
+    makefile = os.path.join(mcdplib, 'Makefile')
+    assert os.path.exists(makefile)
+    cwd = mcdplib
+    cmd = ['make', 'clean', 'all']
+    from system_cmd.meat import system_cmd_result
+    system_cmd_result(cwd, cmd,
+                      display_stdout=True,
+                      display_stderr=True,
+                      raise_on_error=True)
 
+    
 def mcdplib_define_tst(context, mcdplib):
     """
         mcdplib: folder
+        
+        loads the tests in mcdp_tests
     """
     assert os.path.exists(mcdplib)
 

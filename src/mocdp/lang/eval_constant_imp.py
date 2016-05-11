@@ -7,8 +7,8 @@ from mocdp.exceptions import DPSemanticError
 from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
 from mocdp.posets import NotBelongs, PosetProduct, Rcomp, Space
 from mocdp.posets.finite_set import FiniteCollection, FiniteCollectionsInclusion
-from mocdp.posets.nat import Nat, Int
-from mocdp.posets.uppersets import UpperSets, UpperSet
+from mocdp.posets.nat import Int, Nat
+from mocdp.posets.uppersets import UpperSet, UpperSets
 CDP = CDPLanguage
 
 class NotConstant(Exception):

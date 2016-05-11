@@ -11,17 +11,20 @@ template = """
         requires mass     [g]
         requires cost     [$$]
         
-        requires maintenance [s]
+        # Number of replacements
+        requires maintenance [R]
 
+        # Battery properties
         specific_energy = $specific_energy
         specific_cost = $specific_cost
-        replace_time = 120 s
         cycles = $cycles
 
-        maintenance >= replace_time * (missions / cycles)
+        # How many times should it be replaced?
+        num_replacements = ceil(missions / cycles)
+        maintenance >= num_replacements
 
         mass >= capacity / specific_energy
-        cost >= capacity / specific_cost
+        cost >= (capacity / specific_cost) * num_replacements
     }
 """
 

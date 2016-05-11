@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from mcdp_ipython_utils.loading import solve_queries
 from mcdp_ipython_utils.plotting import plot_all_directions
 from mcdp_library.library import MCDPLibrary

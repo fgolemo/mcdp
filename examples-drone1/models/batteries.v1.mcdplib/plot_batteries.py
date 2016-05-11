@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import numpy as np
 from reprep import Report
 from mcdp_library.library import MCDPLibrary
@@ -9,7 +10,7 @@ def go():
         "capacity": (np.linspace(50, 3000, 10), "Wh"),
         "missions": ( 1000, "[]"),
     }
-    result_like = dict(maintenance="s", cost="CHF", mass='kg')
+    result_like = dict(maintenance="R", cost="CHF", mass='kg')
     what_to_plot_res = result_like
     what_to_plot_fun = dict(capacity="Wh", missions="[]")
 
@@ -24,7 +25,7 @@ def go():
     plot_all_directions(r, queries=data['queries'], results=data['results'],
                         what_to_plot_res=what_to_plot_res,
                         what_to_plot_fun=what_to_plot_fun)
-    r.to_html('out/c1.html')
+    r.to_html('out/batteries-c1.html')
     
 def go2():
     model_name = 'batteries_squash'
@@ -47,7 +48,7 @@ def go2():
     plot_all_directions(r, queries=data['queries'], results=data['results'],
                         what_to_plot_res=what_to_plot_res,
                         what_to_plot_fun=what_to_plot_fun)
-    r.to_html('out/c1.html')
+    r.to_html('out/batteries_squash-c2.html')
 
     
 

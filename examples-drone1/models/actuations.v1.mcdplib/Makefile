@@ -1,7 +1,7 @@
 
 # all: plot
 all:
-	python plot_actuation.py
+	./plot_actuation.py
 
 clean:
 	rm -rf _cached out out-memo_disk
