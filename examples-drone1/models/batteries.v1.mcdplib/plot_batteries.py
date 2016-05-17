@@ -27,6 +27,7 @@ def go():
                         what_to_plot_fun=what_to_plot_fun)
     r.to_html('out/batteries-c1.html')
     
+
 def go2():
     model_name = 'batteries_squash'
     combinations = {
@@ -49,9 +50,6 @@ def go2():
                         what_to_plot_res=what_to_plot_res,
                         what_to_plot_fun=what_to_plot_fun)
     r.to_html('out/batteries_squash-c2.html')
-
-    
-
 
 if __name__ == '__main__':
     go()

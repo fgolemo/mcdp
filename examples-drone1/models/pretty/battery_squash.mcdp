@@ -6,7 +6,7 @@ mcdp {
 
     requires mass >= battery.mass
 
-    labor_per_replacement = 10 $ 
+    labor_per_replacement = 10 CHF 
     labor_cost = battery.maintenance * labor_per_replacement
     
     requires cost >= battery.cost + labor_cost

@@ -287,6 +287,7 @@ css = """
     span.ProvidedByKeyword,
     span.LoadKeyword,
     span.CodeKeyword,
+    span.FromLibraryKeyword,
     span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
     span.ImplementedbyKeyword , span.FromCatalogueKeyword, span.MCDPTypeKeywor,
     span.InstanceKeyword,
@@ -298,6 +299,7 @@ css = """
     /* span.ImpName { color: #CC6600; } */
     span.FuncName { color: #CC6600 ; }
 
+    span.FromLibraryKeyword,
     span.MCDPKeyword,
     span.SubKeyword,
     span.CompactKeyword,

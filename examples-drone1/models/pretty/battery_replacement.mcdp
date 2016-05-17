@@ -4,14 +4,14 @@ mcdp {
     provides missions [R]
 
     requires mass     [g]
-    requires cost     [$]
+    requires cost     [CHF]
     
     # Number of replacements needed
     requires maintenance [R]
 
     # Battery properties
     specific_energy = 150 Wh/kg
-    specific_cost =  2.50 Wh/$
+    specific_cost =  2.50 Wh/CHF
     cycles = 600 []
 
     # How many times should it be replaced?

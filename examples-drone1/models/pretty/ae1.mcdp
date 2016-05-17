@@ -1,0 +1,9 @@
+mcdp {   
+  battery = new Battery
+  actuation = new Actuation
+
+  gravity = 9.81 m/s^2
+  weight = (mass required by battery) * gravity
+   
+  lift provided by actuation >= weight 
+}
