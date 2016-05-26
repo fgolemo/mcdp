@@ -471,7 +471,9 @@ class Syntax():
     assert 'choose' in keywords
     ndpt_coproduct_with_names_name = \
         sp(idn.copy(), lambda t: CDP.CoproductWithNamesName(t[0]))
-    ndpt_coproduct_with_names_one = ndpt_coproduct_with_names_name + SCOLON + ndpt_dp_rvalue
+    # ndpt_coproduct_with_names_one = ndpt_coproduct_with_names_name + SCOLON + ndpt_dp_rvalue
+    warnings.warn('XXX this is just for show')
+    ndpt_coproduct_with_names_one = ndpt_coproduct_with_names_name + SCOLON + (ndpt_dp_rvalue | dpinstance_expr)
     ndpt_coproduct_with_names = sp(CHOOSE
                                     - SLPAR + 
                                     ndpt_coproduct_with_names_one 

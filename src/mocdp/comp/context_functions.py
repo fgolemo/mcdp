@@ -2,18 +2,17 @@
 
 from collections import defaultdict
 from contracts import contract
-from contracts.utils import raise_desc
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.composite_sub import (cndp_num_connected_components,
     cndp_split_in_components)
 from mocdp.comp.connection import cndp_dpgraph
 from mocdp.comp.context import Connection, Context
 from mocdp.comp.wrap import SimpleWrap
+from mocdp.dp.dp_flatten import Mux
 from mocdp.dp.dp_identity import Identity
 from mocdp.dp.dp_parallel_simplification import make_parallel_n
-from mocdp.posets.poset_product import PosetProduct
-from mocdp.dp.dp_flatten import Mux
 from mocdp.dp.dp_series_simplification import make_series
+from mocdp.posets.poset_product import PosetProduct
 
 @contract(returns='list(tuple(str, str, set($Connection)))')
 def find_nodes_with_multiple_connections(context):

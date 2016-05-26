@@ -1,4 +1,5 @@
 all:
+	mcdp-plot --out out --plots syntax_pdf batteries
 	mcdp-plot --out out --plots syntax_pdf ae1
 
 	mcdp-plot --out out --plots syntax_pdf -d ../batteries.v1.mcdplib:. battery_squash
