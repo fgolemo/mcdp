@@ -14,7 +14,7 @@
 test_solve:
 
   t7_just_feasible:
-    model_name: droneA
+    model_name: drone
     query_strings: ["<1 hour, 0 kg, 12W>"] 
     #expect_res: " <upperclosure {0.01020 kg}, upperclosure {0.01021 kg}>"
     expect_res: " upperclosure { 0.189 kg} "
@@ -29,26 +29,26 @@ test_solve:
   #   plot: true
 
   t5:
-    model_name: droneA
+    model_name: drone
     query_strings: ["<1 hour, 0 kg, 1W>"]
     #expect_res: " <upperclosure {0.01020 kg}, upperclosure {0.01021 kg}>"
     expect_res: " upperclosure {0.011 kg} "
     plot: true
 
   t4:
-    model_name: droneA
+    model_name: drone
     query_strings: ["<0s, 0kg, 0W>"]
     expect_res: " upperclosure {0.0 kg} "
     plot: true
 
   t3:
-    model_name: batteryA
+    model_name: battery
     query_strings: ["1 MJ"]
     expect_res: " upperclosure {2.778 kg} "
     #expect_res: " <upperclosure {0.55555 kg}, upperclosure  {0.55557 kg}>"
   
   t2: 
-    model_name: batteryA
+    model_name: battery
     query_strings: ["0 J"]
     expect_res: " upperclosure {0 kg}"
   

@@ -1,0 +1,11 @@
+flatten 
+mcdp {
+	customer = new Customer
+	engineering = new DroneComplete
+
+	customer.budget >= engineering.total_cost_ownership
+
+	engineering.travel_distance >= customer.travel_distance 
+	engineering.num_missions >= customer.num_missions 
+	engineering.carry_payload >= customer.carry_payload 
+}

@@ -14,10 +14,11 @@
 test_solve:
 
   t1:
-    model_name: droneB
-    query_strings: ["<0 hour, 0 kg, 0W>"]
+    model_name: droneC
+    query_strings: ["<0 hour, 0 kg, 0W, 0 []>"]
     expect_res: " <0 g, 0 $ >"
     plot: true
+
 
   # t4:
   #   model_name: droneA

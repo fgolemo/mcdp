@@ -1,0 +1,19 @@
+flatten     mcdp {
+        provides capacity [J]
+        provides missions [R]
+
+        requires mass     [g]
+        requires cost     [$]
+        
+        requires maintenance [s]
+
+        specific_energy = 150 Wh/kg
+        specific_cost =  2.50 Wh/$
+        replace_time = 120 s
+        cycles = 600 []
+
+        maintenance >= replace_time * (missions / cycles)
+
+        mass >= capacity / specific_energy
+        cost >= capacity / specific_cost
+    }
