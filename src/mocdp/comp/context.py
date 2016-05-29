@@ -28,11 +28,17 @@ class CFunction():
         self.dp = dp
         self.s = s
 
+    def __repr__(self):
+        return 'CFunction(%s.%s)' % (self.dp, self.s)
+
 class CResource():
     @contract(dp=str, s=str)
     def __init__(self, dp, s):
         self.dp = dp
         self.s = s
+
+    def __repr__(self):
+        return 'CResource(%s.%s)' % (self.dp, self.s)
 
 
 class ValueWithUnits():
@@ -150,7 +156,7 @@ class Context():
 
     @contract(name=str)
     def set_var2model(self, name, value):
-        from mocdp.comp.interfaces import NamedDP
+        # from mocdp.comp.interfaces import NamedDP
         assert isinstance(value, NamedDP)
         self._check_good_name(name)
         if name in self.var2model:
@@ -191,7 +197,6 @@ class Context():
         self.add_ndp(name, ndp)
         self.fnames.append(fname)
 
-    
     def is_new_function(self, name):
         assert name in self.names
         return '_fun_' in name
@@ -199,12 +204,6 @@ class Context():
     def is_new_resource(self, name):
         assert name in self.names
         return '_res_' in name
-
-#     def get_name_for_fun_node(self, name):
-#         return '_fun_%s' % name
-#
-#     def get_name_for_res_node(self, name):
-#         return '_res_%s' % name
 
     def add_ndp_res(self, rname, ndp):
         name = get_name_for_res_node(rname)

@@ -1,31 +1,34 @@
 #!/usr/bin/env python2
 
 template = """
-    approx(mass,0%,10g,10kg) 
-    approx(cost,0%,1$$,Top$$) 
+approx(mass,0%,10g,10kg) 
+approx(cost,0%,1$$,Top$$) 
 
-    mcdp {
-        provides capacity [J]
-        provides missions [R]
+mcdp {
+    provides capacity [J]
+    provides missions [R]
 
-        requires mass     [g]
-        requires cost     [$$]
-        
-        # Number of replacements
-        requires maintenance [R]
+    requires mass     [g]
+    requires cost     [$$]
+    
+    # Number of replacements
+    requires maintenance [R]
 
-        # Battery properties
-        specific_energy = $specific_energy
-        specific_cost = $specific_cost
-        cycles = $cycles
+    # Battery properties
+    specific_energy = $specific_energy
+    specific_cost = $specific_cost
+    cycles = $cycles
 
-        # How many times should it be replaced?
-        num_replacements = ceil(missions / cycles)
-        maintenance >= num_replacements
+    # Constraint between mass and capacity
+    mass >= capacity / specific_energy
 
-        mass >= capacity / specific_energy
-        cost >= (capacity / specific_cost) * num_replacements
-    }
+    # How many times should it be replaced?
+    num_replacements = ceil(missions / cycles)
+    maintenance >= num_replacements
+
+    # Cost is proportional to number of replacements
+    cost >= (capacity / specific_cost) * num_replacements
+}
 """
 
 

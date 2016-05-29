@@ -2,7 +2,7 @@
 all: solve plot
 
 clean:
-	rm -rf out/
+	rm -rf out/ _cached
 
 solve:
 	mcdp-solve --out=out/solve1 --plot --imp -d . Drone "<0s, 0kg, 0W>"

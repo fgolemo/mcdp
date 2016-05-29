@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts import contract
-from contracts.utils import check_isinstance
+from contracts.utils import check_isinstance, raise_wrapped
 from mocdp import get_conftools_posets
 from mocdp.posets import (Int, Map, Nat, Poset, PosetProduct, Rcomp, RcompUnits,
     Space)  # @UnusedImport
@@ -116,6 +116,9 @@ class SumN(PrimitiveDP):
         M = SpaceProduct(())
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
+
+        sum_dimensionality_works(Fs, R)
+
     def solve(self, func):
         # self.F.belongs(func)
         res = sum_units(self.Fs, func, self.R)
@@ -123,6 +126,20 @@ class SumN(PrimitiveDP):
 
     def __repr__(self):
         return 'SumN(%s -> %s)' % (self.F, self.R)
+
+def sum_dimensionality_works(Fs, R):
+    """ Raises ValueError if it is not possible to sum Fs to get R. """
+    for Fi in Fs:
+        check_isinstance(Fi, RcompUnits)
+    check_isinstance(R, RcompUnits)
+
+    for Fi in Fs:
+        ratio = R.units / Fi.units
+        try:
+            float(ratio)
+        except Exception as e:
+            raise_wrapped(ValueError, e, 'Could not convert.', Fs=Fs, R=R)
+
 
 # Fs: sequence of Rcompunits
 def sum_units(Fs, values, R):
@@ -134,11 +151,16 @@ def sum_units(Fs, values, R):
             return  R.get_top()
 
         # reasonably sure this is correct...
-        factor = 1.0 / float(R.units / Fi.units)
+        try:
+            factor = 1.0 / float(R.units / Fi.units)
+        except Exception as e:  # DimensionalityError
+            raise_wrapped(Exception, e, 'some error', Fs=Fs, R=R)
+
         res += factor * x
 
     if np.isinf(res):
         return R.get_top()
+
     return res
 
 

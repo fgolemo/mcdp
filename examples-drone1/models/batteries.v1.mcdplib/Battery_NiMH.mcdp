@@ -1,26 +1,26 @@
 
-    approx(mass,0%,10g,10kg) 
-    approx(cost,0%,1$,Top$) 
+approx(mass,0%,10g,10kg) 
+approx(cost,0%,1$,Top$) 
 
-    mcdp {
-        provides capacity [J]
-        provides missions [R]
+mcdp {
+    provides capacity [J]
+    provides missions [R]
 
-        requires mass     [g]
-        requires cost     [$]
-        
-        # Number of replacements
-        requires maintenance [R]
+    requires mass     [g]
+    requires cost     [$]
+    
+    # Number of replacements
+    requires maintenance [R]
 
-        # Battery properties
-        specific_energy = 100 Wh/kg
-        specific_cost =  3.41 Wh/$
-        cycles = 500 []
+    # Battery properties
+    specific_energy = 100 Wh/kg
+    specific_cost =  3.41 Wh/$
+    cycles = 500 []
 
-        # How many times should it be replaced?
-        num_replacements = ceil(missions / cycles)
-        maintenance >= num_replacements
+    # How many times should it be replaced?
+    num_replacements = ceil(missions / cycles)
+    maintenance >= num_replacements
 
-        mass >= capacity / specific_energy
-        cost >= (capacity / specific_cost) * num_replacements
-    }
+    mass >= capacity / specific_energy
+    cost >= (capacity / specific_cost) * num_replacements
+}

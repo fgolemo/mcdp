@@ -1,8 +1,9 @@
-from mocdp.comp.composite import CompositeNamedDP
+# -*- coding: utf-8 -*-
 from contracts import contract
-from mocdp.comp.context import Connection, get_name_for_fun_node, \
-    get_name_for_res_node
 from contracts.utils import raise_desc
+from mocdp.comp.composite import CompositeNamedDP
+from mocdp.comp.context import (Connection, get_name_for_fun_node,
+    get_name_for_res_node)
 from mocdp.comp.wrap import SimpleWrap
 
 def add_prefix(ndp, prefix):
@@ -128,9 +129,5 @@ def flatten_composite(ndp):
         c2 = Connection(dp1=dp1_, s1=s1_, dp2=dp2_, s2=s2_)
         # (dp2, s2)
         connections2.add(c2)
-
-
-    # Connection0 = namedtuple('Connection', 'dp1 s1 dp2 s2')
-    # class Connection(Connection0):
 
     return CompositeNamedDP.from_parts(names2, connections2, fnames, rnames)

@@ -1,22 +1,11 @@
-# model_name: batteryA
-#     query_strings: ["0 J"]
-#     max_steps: null # None
-#     lower: null # 
-#     upper: null 
-#     intervals: False
-#     _exp_advanced: False
-#     expect_nres: null # None
-#     expect_nimp: null # None
-#     imp: False
-#     plot: False 
-#     do_movie: False
+
 
 test_solve:
 
   t1:
     model_name: droneC
     query_strings: ["<0 hour, 0 kg, 0W, 0 []>"]
-    expect_res: " <0 g, 0 $ >"
+    expect_res: "upperclosure{<50 g, 50 $ >}"
     plot: true
 
 

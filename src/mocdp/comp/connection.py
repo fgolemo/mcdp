@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .context import Connection
 from .interfaces import NamedDP
 from .wrap import dpwrap
@@ -13,30 +14,6 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.posets import PosetProduct
 from networkx import DiGraph, MultiDiGraph, NetworkXUnfeasible
 from networkx.algorithms import is_connected, simple_cycles, topological_sort
-import re
-
-
-
-# TODO: can remove
-def _parse(cstring):
-    """ power.a >= battery.b """
-    c = re.compile(r'\s*(\w+)\s*\.(\w+)\s*>=\s*(\w+)\s*\.(\w+)\s*')
-    m = c.match(cstring)
-
-    dp2 = m.group(1)
-    s2 = m.group(2)
-    dp1 = m.group(3)
-    s1 = m.group(4)
-    return Connection(dp1=dp1, s1=s1, dp2=dp2, s2=s2)
-
-
-def parse_connection(s):
-    if isinstance(s, Connection):
-        return s
-    if isinstance(s, str):
-        return _parse(s)
-
-    raise ValueError(s)
 
 class TheresALoop(Exception):
     pass
@@ -83,7 +60,8 @@ def dpconnect(name2dp, connections, split=[]):
     for k, v in name2dp.items():
         _, name2dp[k] = get_conftools_nameddps().instance_smarter(v)
 
-    connections = set(map(parse_connection, connections))
+#     connections = set(map(parse_connection, connections))
+    connections = set(connections)
     check_connections(name2dp, connections)
 
     # A, B, C
@@ -705,7 +683,7 @@ def dpgraph_(name2dp, connections, split):
         for k, v in name2dp.items():
             _, name2dp[k] = get_conftools_nameddps().instance_smarter(v)
 
-        connections = set(map(parse_connection, connections))
+        connections = set(connections)
         check_connections(name2dp, connections)
 
         G = get_connection_multigraph(connections)
@@ -796,7 +774,8 @@ def get_connection_multigraph_weighted(name2dp, connections):
         cycle = cycle + [cycle[0]]
         
         for i in range(len(cycle) - 1):
-            val = G.edge[cycle[i]][cycle[i + 1]]['spaces']
+            # XXX
+            _val = G.edge[cycle[i]][cycle[i + 1]]['spaces']
             # print('%s -> %s -> %s' % (cycle[i], val, cycle[i + 1]))
 
     return G

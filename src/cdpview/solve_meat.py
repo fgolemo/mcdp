@@ -4,7 +4,7 @@ from conf_tools import GlobalConfig
 from contracts.utils import raise_desc, raise_wrapped
 from decent_params import UserError
 from mocdp.dp.dp_transformations import get_dp_bounds
-from mocdp.dp.solver import generic_solve
+# from mocdp.dp.solver import generic_solve
 from mocdp.dp.solver_iterative import solver_iterative
 from mocdp.dp.tracer import Tracer
 from mocdp.dp_report.report import report_dp1, report_ndp1
@@ -106,7 +106,7 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
                 UR.check_equal(res, res_expected_f)
             except NotEqual as e:
                 raise_wrapped(ExpectationsNotMet, e, 'res is different',
-                              res=res, res_expected=res_expected)
+                              res=res, res_expected=res_expected, compact=True)
 
 
     if plot:

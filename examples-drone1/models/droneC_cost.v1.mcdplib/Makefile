@@ -3,7 +3,7 @@ all: solve
 
 
 clean:
-	rm -rf out out-memo_disk
+	rm -rf out out-memo_disk _cached
 
 solve:
 	mcdp-solve --out=out/ --plot --imp -d . droneC "<0s, 0kg, 0W, 0 []>"

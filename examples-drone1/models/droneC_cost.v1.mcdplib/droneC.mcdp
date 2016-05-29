@@ -22,7 +22,7 @@ mcdp {
 
   requires total_mass >= total_mass
   
-  labor_cost = (10 $ / hour) * (maintenance required by battery)
+  labor_cost = (10 $) * (maintenance required by battery)
 
   requires total_cost >= (
     cost required by actuation + 

@@ -88,11 +88,9 @@ def known_fail(f, *args):
 
 def define_test_for(context, filename, basename, tests, known_failure=False):
 
-    outdir = os.path.join(dir_from_package_name('mocdp'), 'out/tests/')
+    mocdp_base = dir_from_package_name('mocdp')
+    outdir = os.path.join(mocdp_base, '../../out/tests/')
     
-#     outdir = os.path.dirname(filename)
-#     outdir = os.path.join(outdir, 'out')
-
     for test in tests:
         n = test.__name__.replace('assert_', '').replace('_ndp', '')
         p_job_id = '%s-%s' % (basename, n)
@@ -123,7 +121,6 @@ def define_tests(context):
     """ Define other tests """
     filenames = []
     folder = dir_from_package_name('mocdp.lang.tests.ok')
-    filenames.extend(locate_files(folder, '*.cdp'))
     filenames.extend(locate_files(folder, '*.mcdp'))
 
     context = context.child('examples')

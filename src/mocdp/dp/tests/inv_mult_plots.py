@@ -1,29 +1,28 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest_dynamic, comptest
-from mocdp.dp.solver import generic_solve
+from comptests.registrar import comptest, comptest_dynamic
+from mocdp.dp.dp_flatten import Mux
+from mocdp.dp.dp_generic_unary import WrapAMap
+from mocdp.dp.dp_loop import make_loop
+from mocdp.dp.dp_mult_inv import InvPlus2Nat
+from mocdp.dp.dp_parallel_simplification import make_parallel
+from mocdp.dp.dp_series_simplification import wrap_series
+from mocdp.dp.dp_sum import SumNNat
+from mocdp.dp.tracer import Tracer
 from mocdp.dp_report.generic_report_utils import generic_report
 from mocdp.drawing import plot_upset_R2
-from mocdp.lang.syntax import parse_ndp
-from mocdp.posets import UpperSets
-from reprep import Report
-
-import numpy as np
-from nose.tools import assert_equal
-from mocdp.posets.space import Map, NotEqual
-from mocdp.posets.nat import Nat
-from mocdp.lang.tests.utils import assert_semantic_error
-from mocdp.dp.dp_generic_unary import WrapAMap
-from mocdp.posets.poset_product import PosetProduct
-import itertools
-from mocdp.dp.dp_parallel_simplification import make_parallel
-from mocdp.dp.dp_mult_inv import InvPlus2Nat
 from mocdp.lang.eval_math import PlusNat
-from mocdp.dp.dp_sum import SumNNat
-from mocdp.dp.dp_series_simplification import wrap_series
-from mocdp.dp.dp_loop import make_loop
-from mocdp.dp.dp_flatten import Mux
-from mocdp.dp.tracer import Tracer
+from mocdp.lang.syntax import parse_ndp
+from mocdp.lang.tests.utils import assert_semantic_error
+from mocdp.posets import UpperSets
+from mocdp.posets.nat import Nat
+from mocdp.posets.poset_product import PosetProduct
+from mocdp.posets.space import Map, NotEqual
+from nose.tools import assert_equal
+from reprep import Report
+import itertools
+import numpy as np
 import warnings
+from mocdp.dp.solver import generic_solve
 
 
 # @comptest_dynamic

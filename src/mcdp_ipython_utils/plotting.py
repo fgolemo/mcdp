@@ -1,9 +1,10 @@
+from contextlib import contextmanager
 from contracts import contract
 from matplotlib.cm import get_cmap
-from reprep.plot_utils.styles import ieee_spines
 from mcdp_ipython_utils.loading import to_numpy_array
-from reprep.plot_utils.axes import y_axis_extra_space, x_axis_extra_space
-from contextlib import contextmanager
+from reprep.plot_utils.axes import x_axis_extra_space, y_axis_extra_space
+from reprep.plot_utils.styles import ieee_spines
+
 def generate_colors(n, colormap_name):
     """ Generates n color strings. """
 #     from itertools import cycle
@@ -93,9 +94,6 @@ def axis_label(what_to_plot, what) :
     st.replace('$', '\\$')
     return st
 
-
-
-                    
 def set_axis_colors(pylab, color_x, color_y):
     ax = pylab.gca()
     ax.spines['bottom'].set_color(color_x)

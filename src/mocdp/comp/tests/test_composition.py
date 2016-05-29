@@ -1,7 +1,8 @@
-
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from contracts.utils import raise_desc
 from mocdp.comp.connection import TheresALoop, dpconnect, dpgraph, dploop0
+from mocdp.comp.context import Connection
 from mocdp.comp.wrap import dpwrap
 from mocdp.dp import Product, Series, Terminator, make_series
 from mocdp.example_battery.dp_bat import BatteryDP
@@ -30,16 +31,17 @@ def check_compose():
     check_ftype(times, 'power', R_Power)
     check_rtype(times, 'energy', R_Energy)
 
-    x = dpconnect(dict(actuation=actuation, times=times), 
-              ['times.power >= actuation.actuation_power'])
+    c = Connection('actuation', 'actuation_power', 'times', 'power')
+    x = dpconnect(dict(actuation=actuation, times=times), [c])
     
     print('WE have obtained x')
     print('x = %s' % x)
     print('x fun: %s' % x.get_dp().get_fun_space())
     print('x res: %s' % x.get_dp().get_res_space())
 
-    _y = dpconnect(dict(battery=battery, x=x),
-               ["battery.capacity >= x.energy"])
+    # "battery.capacity >= x.energy"
+    c = Connection('x', 'energy', 'battery', 'capacity')
+    _y = dpconnect(dict(battery=battery, x=x), [c])
 
 
 
@@ -73,9 +75,12 @@ def check_compose2():
     check_ftype(times, 'power', R_Power)
     check_rtype(times, 'energy', R_Energy)
 
+    # 'times.power >= actuation.actuation_power',
+    c1 = Connection('actuation', 'actuation_power', 'times', 'power')
+    # 'battery.capacity >= times.energy'
+    c2 = Connection('times', 'energy', 'battery', 'capacity')
     res = dpconnect(dict(actuation=actuation, times=times, battery=battery),
-              ['times.power >= actuation.actuation_power',
-               'battery.capacity >= times.energy'])
+              [c1, c2])
 
     print res.desc()
 
@@ -104,10 +109,11 @@ def check_compose2_fail():
                    ['mission_time', 'power'], 'energy')
 
     try:
+        c1 = Connection('actuation', 'actuation_power', 'times', 'power')
+        c2 = Connection('times', 'energy', 'battery', 'capacity')
+        c3 = Connection('battery', 'weight', 'actuation', 'weight')
         dpconnect(dict(actuation=actuation, times=times, battery=battery),
-              ['times.power >= actuation.actuation_power',
-               'battery.capacity >= times.energy',
-               'actuation.weight >= battery.weight'])
+                  [c1,c2,c3])
     except TheresALoop:
         pass
 #
@@ -154,9 +160,11 @@ def check_compose2_loop2():
     times = dpwrap((Product(R_Time, R_Power, R_Energy)),
                    ['mission_time', 'power'], 'energy')
 
+    # 'times.power >= actuation.actuation_power',
+    c1 = Connection('actuation', 'actuation_power', 'times', 'power')
+    c2 = Connection('times', 'energy', 'battery', 'capacity')
     x = dpconnect(dict(actuation=actuation, times=times, battery=battery),
-              ['times.power >= actuation.actuation_power',
-               'battery.capacity >= times.energy'])
+              [c1,c2])
 
     y = dploop0(x, 'battery_weight', 'weight')
 
@@ -192,10 +200,13 @@ def check_compose2_generic():
     times = dpwrap((Product(R_Time, R_Power, R_Energy)),
                    ['mission_time', 'power'], 'energy')
 
+    c1 = Connection('actuation', 'actuation_power', 'times', 'power')
+    c2 = Connection('times', 'energy', 'battery', 'capacity')
+    c3 = Connection('battery', 'battery_weight', 'actuation', 'weight')
+
+
     y = dpgraph(dict(actuation=actuation, times=times, battery=battery),
-              ['times.power >= actuation.actuation_power',
-               'battery.capacity >= times.energy',
-               'actuation.weight >= battery.battery_weight'], split=[])
+              [c1, c2, c3], split=[])
 
     print y.desc()
 

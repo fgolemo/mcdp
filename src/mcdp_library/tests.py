@@ -84,8 +84,6 @@ def mcdplib_define_tst_solve(mcdplib, id_test, test_data):
     with open(fn) as f:
         data = yaml.load(f)
     test_data = data['test_solve'][id_test]
-
-    from mocdp import logger
     
     defaults = dict(lower=None, upper=None, max_steps=None, 
                     intervals=None,

@@ -11,6 +11,7 @@ from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
 from mocdp.posets import (Int, Nat, RcompUnits, Space, get_types_universe,
     mult_table, mult_table_seq)
 from mocdp.posets.space import Map
+from mocdp.dp.dp_sum import sum_dimensionality_works
 CDP = CDPLanguage
 
 def eval_constant_divide(op, context):
@@ -261,7 +262,16 @@ def eval_PlusN(x, context, wants_constant):
         if all(isinstance(_, RcompUnits) for _ in resources_types):
             # addition between floats
             R = resources_types[0]
-            dp = SumN(tuple(resources_types), R)
+            Fs = tuple(resources_types)
+            try:
+                sum_dimensionality_works(Fs, R)
+            except ValueError:
+                msg = ''
+                for r, rt in zip(resources, resources_types):
+                    msg += '- %s has type %s\n' % (r, rt)
+                raise_desc(DPSemanticError, 'Incompatible units:\n%s' % msg)
+
+            dp = SumN(Fs, R)
         elif all(isinstance(_, Nat) for _ in resources_types):
             # natural number
             R = Nat()

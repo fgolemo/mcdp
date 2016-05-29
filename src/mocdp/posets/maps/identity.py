@@ -7,5 +7,7 @@ class IdentityMap(Map):
     def __init__(self, cod, dom):
         Map.__init__(self, cod, dom)
 
+        self.__name__ = 'Identity'
+
     def _call(self, x):
         return x
