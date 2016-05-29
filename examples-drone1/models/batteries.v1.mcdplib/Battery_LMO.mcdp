@@ -17,10 +17,13 @@ mcdp {
     specific_cost =  2.84 Wh/$
     cycles = 500 []
 
+    # Constraint between mass and capacity
+    mass >= capacity / specific_energy
+
     # How many times should it be replaced?
     num_replacements = ceil(missions / cycles)
     maintenance >= num_replacements
 
-    mass >= capacity / specific_energy
+    # Cost is proportional to number of replacements
     cost >= (capacity / specific_cost) * num_replacements
 }
