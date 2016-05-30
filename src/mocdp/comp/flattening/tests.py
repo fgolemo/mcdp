@@ -1,7 +1,11 @@
 from comptests.registrar import comptest
 from mocdp.lang.parse_actions import parse_ndp
 from mocdp.comp.flattening.flatten import flatten_add_prefix
+from mocdp.unittests.generation import for_all_nameddps
 
+@for_all_nameddps
+def check_flattening(id_ndp, ndp):
+    ndp2 = ndp.flatten()
 
 @comptest
 def check_flatten1():

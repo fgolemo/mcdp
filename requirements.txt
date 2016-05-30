@@ -11,4 +11,4 @@ reprep
 -e git+https://github.com/AndreaCensi/conf_tools.git@mcdp#egg=ConfTools
 -e git+https://github.com/AndreaCensi/comptests.git@mcdp#egg=comptests
 -e git+https://github.com/AndreaCensi/gvgen.git@master#egg=gvgen
--e git+https://github.com/AndreaCensi/memos.git@master#egg=memos
+# -e git+https://github.com/AndreaCensi/memos.git@master#egg=memos
