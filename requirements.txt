@@ -2,8 +2,6 @@ pyparsing
 networkx
 pint
 watchdog
-#numpy
-#matplotlib
 -e git+https://github.com/AndreaCensi/contracts.git@mcdp#egg=PyContracts
 reprep
 -e git+https://github.com/AndreaCensi/compmake.git@mcdp#egg=compmake
@@ -12,3 +10,5 @@ reprep
 -e git+https://github.com/AndreaCensi/comptests.git@mcdp#egg=comptests
 -e git+https://github.com/AndreaCensi/gvgen.git@master#egg=gvgen
 # -e git+https://github.com/AndreaCensi/memos.git@master#egg=memos
+#numpy
+#matplotlib

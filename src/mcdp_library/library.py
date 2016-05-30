@@ -1,13 +1,14 @@
+from .utils.locate_files_imp import locate_files
 from contracts import contract
 from contracts.utils import raise_desc
-from .utils.locate_files_imp import locate_files
-from memos.memo_disk_cache_imp import memo_disk_cache2
+from mcdp_library.utils.memos_selection import memo_disk_cache2
 from mocdp import logger
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from mocdp.lang.parse_actions import parse_ndp
 import os
 import warnings
+
 
 
 __all__ = [
