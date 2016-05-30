@@ -36,7 +36,7 @@ install:
 script: 
 # run first without contracts
 #- make comptests-run-parallel-nocontracts
-- QUICKAPP_PROFILE=comptest1.prof make comptests-run-nocontracts
+- QUICKAPP_PROFILE=comptest1.prof travis_wait 30 make comptests-run-nocontracts
 - make -C examples/example-catalogue
 - make -C examples/example-battery
 # the run with contracts: times out
