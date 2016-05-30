@@ -20,10 +20,7 @@ from mocdp.posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
-from mocdp import logger
 import os
-import warnings
-
 
 
 STYLE_GREENRED = 'greenred'

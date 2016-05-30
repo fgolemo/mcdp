@@ -2,6 +2,7 @@
 from .context import Connection
 from .interfaces import NamedDP
 from .wrap import dpwrap
+from collections import Counter
 from contracts import contract
 from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
@@ -14,7 +15,6 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.posets import PosetProduct
 from networkx import DiGraph, MultiDiGraph, NetworkXUnfeasible
 from networkx.algorithms import is_connected, simple_cycles, topological_sort
-from collections import Counter
 
 class TheresALoop(Exception):
     pass
@@ -406,8 +406,6 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
         res_dp, fnames, rnames = simplify_if_only_one_name(res_dp, fnames, rnames)
 
         # print('res_dp: %s' % res_dp)
-
-
         res = dpwrap(res_dp, fnames, rnames)
 
         return res
