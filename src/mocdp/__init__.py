@@ -25,6 +25,9 @@ def jobs_comptests(context):
     from .dp import tests  # @Reimport
     from .dp_report import tests  # @Reimport
     from .example_battery import tests  # @Reimport
+
+    from .comp.flattening import tests  # @Reimport
+
     from .comp import tests  # @Reimport
     from .lang import tests  # @Reimport
     from .posets.find_poset_minima import tests  # @Reimport

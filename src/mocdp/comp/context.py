@@ -59,6 +59,21 @@ def get_name_for_res_node(name):
     return '_res_%s' % name
 
 
+@contract(returns='tuple(bool, str|None)')
+def is_fun_node_name(name):
+    if '_fun_' in name:
+        fname = name[len('_fun_'):]
+        return True, fname
+    return False, None
+
+@contract(returns='tuple(bool, str|None)')
+def is_res_node_name(name):
+    if '_res_' in name:
+        fname = name[len('_res_'):]
+        return True, fname
+    return False, None
+
+
 class NoSuchMCDPType(Exception):
     pass
 

@@ -36,7 +36,6 @@ mcdp {
     requires camera_framerate [Hz]
     requires camera_resolution [pixels/deg]
     requires camera_fov [deg]
-    
   }
   computer.computation >= perception.computation
 

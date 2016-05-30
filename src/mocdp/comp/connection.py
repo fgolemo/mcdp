@@ -14,6 +14,7 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.posets import PosetProduct
 from networkx import DiGraph, MultiDiGraph, NetworkXUnfeasible
 from networkx.algorithms import is_connected, simple_cycles, topological_sort
+from collections import Counter
 
 class TheresALoop(Exception):
     pass
@@ -618,8 +619,16 @@ def dpgraph(name2dp, connections, split):
         all_resources.extend(ndp.get_rnames())
 
     if there_are_repetitions(all_functions) or there_are_repetitions(all_resources):
+
+        find_reps = lambda d: [k for (k, v) in Counter(d).iteritems() if v > 1]
+        repeated_resources = find_reps(all_resources)
+        repeated_functions = find_reps(all_functions)
+
         raise_desc(NotImplementedError, 'Repetitions',
-                   all_functions=all_functions, all_resources=all_resources)
+                   all_functions=all_functions,
+                   all_resources=all_resources,
+                   repeated_resources=repeated_resources,
+                   repeated_functions=repeated_functions)
 
     res = dpgraph_(name2dp, connections, split)
 

@@ -46,6 +46,12 @@ def dp_visualization(data):
     res2 = ('pdf', 'dp_tree', pdf)
     return [res1, res2]
 
+
+def simple_print(data):
+    ndp = get_ndp(data)
+    res1 = ('txt', 'print', str(ndp))
+    return [res1]
+
 def ndp_visualization(data, style):
     ndp = get_ndp(data) 
     gg = gvgen_from_ndp(ndp, style)
@@ -186,6 +192,7 @@ allplots  = {
     ('syntax_pdf', syntax_pdf),
     ('dp_tree', dp_visualization),
     ('tex_form', tex_form),
+    ('print', simple_print),
 }
 
 class Vis():
@@ -214,6 +221,13 @@ def parse_params(p):
 def do_plots(logger, model_name, plots, outdir, extra_params, dirs):
     data = {}
 
+    if '.mcdp' in model_name:
+        model_name2 = model_name.replace('.mcdp', '')
+        msg = 'Arguments should be model names, not file names.'
+        msg += ' Interpreting %r as %r.' % (model_name, model_name2)
+        logger.warn(msg)
+        model_name = model_name2
+
     data['dirs'] = dirs
     data['model_name'] = model_name
 
@@ -234,7 +248,11 @@ def do_plots(logger, model_name, plots, outdir, extra_params, dirs):
     for p in plots:    
         # print('plotting %r ' % p)
         try:
-            res = d[p](data)
+            if p in d:
+                res = d[p](data)
+            else:
+                msg = 'Unknown plot.'
+                raise_desc(ValueError, msg, plot=p, available=sorted(d.keys()))
         except CmdException as e:
             mcdp_dev_warning('Add better checks of error.')
             logger.error(e)

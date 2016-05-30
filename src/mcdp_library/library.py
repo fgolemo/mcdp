@@ -1,17 +1,14 @@
-from conf_tools.utils import raise_x_not_found
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_library.utils.locate_files_imp import locate_files
-from memos.memo_disk_imp import memo_disk_dec
+from .utils.locate_files_imp import locate_files
+from memos.memo_disk_cache_imp import memo_disk_cache2
+from mocdp import logger
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from mocdp.lang.parse_actions import parse_ndp
-from mocdp import logger
 import os
 import warnings
-import shelve
-from test.test_future2 import result
-from memos.memo_disk_cache_imp import memo_disk_cache2
+
 
 __all__ = [
     'MCDPLibrary',
@@ -44,8 +41,6 @@ class MCDPLibrary():
             contents[f] = getattr(self, f).copy()
         return MCDPLibrary(**contents)
 
-    # This simple trick makes caching to disk possible
-#     @memo_disk_dec
     @contract(returns='tuple(*, isinstance(NamedDP))')
     def load_ndp(self, id_ndp):
         c = self.clone()
@@ -78,8 +73,6 @@ class MCDPLibrary():
         cache_file = os.path.join('_cached', '%s.cached' % id_ndp)
         return memo_disk_cache2(cache_file, data, actual_load)
 
-#         res = memo_disk_cache(filename, key, func, *args, **kwargs)
-
     def _get_file_data(self, basename):
         """ returns dict with data, realpath """
 
@@ -88,10 +81,8 @@ class MCDPLibrary():
                 match = fn
                 break
         else:
-#         if not basename in self.file_to_contents:
             raise_desc(DPSemanticError, 'Could not find model in library.',
                        model_name=basename, contents=sorted(self.file_to_contents))
-            # raise_x_not_found('file', basename, self.file_to_contents)
         found = self.file_to_contents[match]
         return found
 

@@ -1,5 +1,5 @@
 
-approx(power,0%,0.1W,100 W) 
+# approx(power,0%,0.1W,100 W) 
 
 mcdp {
     provides lift  [N]

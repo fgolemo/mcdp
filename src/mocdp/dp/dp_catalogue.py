@@ -2,6 +2,7 @@
 from .primitive import PrimitiveDP
 from contracts import contract
 from mocdp.posets import Poset  # @UnusedImport
+from mocdp.posets.utils import poset_minima
 
 
 __all__ = [
@@ -28,7 +29,6 @@ class CatalogueDP(PrimitiveDP):
             if F.leq(f, f_max):
                 options_r.append(r_min)
 
-        from mocdp.posets.utils import poset_minima
         rs = poset_minima(options_r, R.leq)
         return self.R.Us(rs)
 

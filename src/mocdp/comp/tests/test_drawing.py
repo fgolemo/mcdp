@@ -12,16 +12,6 @@ from mocdp.unittests.generation import for_all_nameddps_dyn
 from reprep import Report
 import numpy as np
 
-# @for_all_nameddps_dyn
-# def html_report(context, _id_dp, ndp):
-#     r = context.comp(report_syntax_hl, ndp)
-#     context.add_report(r, 'syntax_hl')
-#
-# def report_syntax_hl(ndp):
-#     r = Report()
-#     h = ast_to_html(s, complete_document=Flase)
-#
-#     return r
 
 
 @for_all_nameddps_dyn

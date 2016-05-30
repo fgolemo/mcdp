@@ -25,7 +25,6 @@ class CompositeNamedDP(NamedDP):
 
     def __init__(self, context):
         from mocdp.comp.context import Context
-        from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 
         self.context = Context()
         self.context.names = context.names.copy()
@@ -33,40 +32,9 @@ class CompositeNamedDP(NamedDP):
         self.context.fnames = list(context.fnames)
         self.context.rnames = list(context.rnames)
 
-        names = self.context.names
-        for n in names:
-            try:
-                check_good_name(n)
-            except ValueError as e:
-                raise_wrapped(ValueError, e, names=names)
-        for f in self.context.fnames:
-            if not get_name_for_fun_node(f) in  names:
-                msg = 'Expecting to see a node with the name of the function.'
-                raise_desc(ValueError, msg, f=f, names=list(names.keys()))
+        check_consistent_data(self.context.names, self.context.fnames,
+                              self.context.rnames, self.context.connections)
 
-        for r in self.context.rnames:
-            if not  get_name_for_res_node(r) in  names:
-                msg = 'Expecting to see a node with the name of the resource.'
-                raise_desc(ValueError, msg, r=r, names=list(names.keys()))
-
-        for c in self.context.connections:
-            try:
-                if not c.dp1 in names:
-                    raise ValueError()
-
-                if not c.s1 in names[c.dp1].get_rnames():
-                    raise ValueError()
-
-                if not c.dp2 in names:
-                    raise ValueError()
-
-                if not c.s2 in names[c.dp2].get_fnames():
-                    raise_desc(ValueError, 'Function not found.',
-                               s2=c.s2, rnames=names[c.dp2].get_fnames())
-
-            except ValueError as e:
-                msg = 'Invalid connection'
-                raise_wrapped(ValueError, e, msg, c=c, names=list(names))
 
         self._rnames = list(self.context.rnames)
         self._fnames = list(self.context.fnames)
@@ -160,11 +128,65 @@ class CompositeNamedDP(NamedDP):
         return CompositeNamedDP(context)
 
     def flatten(self):
-        from mocdp.comp.flatten import flatten_composite
-        return flatten_composite(self)
+        from mocdp.comp.flattening.flatten import cndp_flatten
+        return cndp_flatten(self)
 
 def check_good_name(n):
     """ Checks that n is a good name for a node """
     if ' ' in n:
         raise_desc(ValueError, "Invalid name", n=n)
 
+def check_consistent_data(names, fnames, rnames, connections):
+    from mocdp.comp.context import get_name_for_res_node
+    from mocdp.comp.context import get_name_for_fun_node
+
+    for n in names:
+        try:
+            check_good_name(n)
+        except ValueError as e:
+            raise_wrapped(ValueError, e, names=names)
+    for f in  fnames:
+        fnode = get_name_for_fun_node(f)
+        if not fnode in names:
+            msg = 'Expecting to see a node with the name of the function.'
+            raise_desc(ValueError, msg, f=f, names=list(names.keys()))
+
+        fn = names[fnode]
+        if not f in fn.get_fnames():
+            msg = ('Expecting to see the special function node have function '
+                   'with function name.')
+            raise_desc(ValueError, msg, f=f, fnode=fnode, fn=fn,
+                        fn_fnames=fn.get_fnames())
+
+    for r in  rnames:
+        rnode = get_name_for_res_node(r)
+        if not rnode in names:
+            msg = 'Expecting to see a node with the name of the resource.'
+            raise_desc(ValueError, msg, r=r, names=list(names.keys()))
+
+        rn = names[rnode]
+        if not r in rn.get_rnames():
+            msg = ('Expecting to see the special resource node have resource '
+                   'with resource name.')
+            raise_desc(ValueError, msg, r=r, rnode=rnode, rn=rn,
+                       rn_rnames=rn.get_rnames())
+
+
+    for c in connections:
+        try:
+            if not c.dp1 in names:
+                raise ValueError()
+
+            if not c.s1 in names[c.dp1].get_rnames():
+                raise ValueError()
+
+            if not c.dp2 in names:
+                raise ValueError()
+
+            if not c.s2 in names[c.dp2].get_fnames():
+                raise_desc(ValueError, 'Function not found.',
+                           s2=c.s2, rnames=names[c.dp2].get_fnames())
+
+        except ValueError as e:
+            msg = 'Invalid connection'
+            raise_wrapped(ValueError, e, msg, c=c, names=list(names))
