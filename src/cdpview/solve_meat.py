@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
+from cdpview.query_interpretation import interpret_string
 from cdpview.utils_mkdir import mkdirs_thread_safe
 from conf_tools import GlobalConfig
 from contracts.utils import raise_desc, raise_wrapped
 from decent_params import UserError
 from mocdp.dp.dp_transformations import get_dp_bounds
-# from mocdp.dp.solver import generic_solve
 from mocdp.dp.solver_iterative import solver_iterative
 from mocdp.dp.tracer import Tracer
 from mocdp.dp_report.report import report_dp1, report_ndp1
 from mocdp.posets import PosetProduct, UpperSets, get_types_universe
+from mocdp.posets.space import NotEqual
 from reprep import Report
 import os
-from cdpview.query_interpretation import interpret_string
-from mocdp.posets.space import NotEqual
 
 class ExpectationsNotMet(Exception):
     pass
@@ -46,7 +45,8 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
 
     logger.info('query: %s' % F.format(fg))
 
-    res, trace = solve_meat_solve(logger, ndp, dp, fg, intervals, max_steps, _exp_advanced)
+    tracer = Tracer(logger=logger)
+    res, trace = solve_meat_solve(tracer, ndp, dp, fg, intervals, max_steps, _exp_advanced)
 
     nres = len(res.minimals)
 
@@ -66,7 +66,7 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
             for j, m in enumerate(ms):
                 # print('m = %s' % str(m))
                 s += "\n  implementation %d: m = %s " % (j + 1, M.format(m))
-            print(s)
+            tracer.log(s)
         if expect_nimp is not None:
             if expect_nimp != nimplementations:
                 msg = 'Found wrong number of implementations'
@@ -76,7 +76,7 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
 
     if expect_res is not None:
         value = interpret_string(expect_res)
-        print('value: %s' % value)
+        tracer.log('value: %s' % value)
         res_expected = value.value
         tu = get_types_universe()
         # If it's a tuple of two elements, then we assume it's upper/lower bounds
@@ -90,8 +90,8 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
             lower_bound = tu.get_embedding(lower_UR_expected, UR)[0](lower_res_expected)
             upper_bound = tu.get_embedding(upper_UR_expected, UR)[0](upper_res_expected)
 
-            print('lower: %s <= %s' % (UR.format(lower_bound), UR.format(res)))
-            print('upper: %s <= %s' % (UR.format(upper_bound), UR.format(res)))
+            tracer.log('lower: %s <= %s' % (UR.format(lower_bound), UR.format(res)))
+            tracer.log('upper: %s <= %s' % (UR.format(upper_bound), UR.format(res)))
 
             UR.check_leq(lower_bound, res)
             UR.check_leq(res, upper_bound)
@@ -140,35 +140,34 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
         logger.info('writing to %r' % out_html)
         r.to_html(out_html)
 
-def solve_meat_solve(logger, ndp, dp, fg, intervals, max_steps, _exp_advanced):
+def solve_meat_solve(trace, ndp, dp, fg, intervals, max_steps, _exp_advanced):
     R = dp.get_res_space()
     UR = UpperSets(R)
 
     if intervals:
-        trace = Tracer()
+
         res = solver_iterative(dp, fg, trace)
     else:
         if not _exp_advanced:
-            trace = Tracer()
             res = dp.solve_trace(fg, trace)
             rnames = ndp.get_rnames()
             x = ", ".join(rnames)
-            logger.info('Minimal resources needed: %s = %s' % (x, UR.format(res)))
-
+            # todo: add better formatting
+            trace.log('Minimal resources needed: %s = %s' % (x, UR.format(res)))
         else:
             try:
                 trace = generic_solve(dp, f=fg, max_steps=max_steps)
-                logger.info('Iteration result: %s' % trace.result)
+                trace.log('Iteration result: %s' % trace.result)
                 ss = trace.get_s_sequence()
                 S = trace.S
-                logger.info('Fixed-point iteration converged to: %s'
+                trace.log('Fixed-point iteration converged to: %s'
                       % S.format(ss[-1]))
                 R = trace.dp.get_res_space()
                 UR = UpperSets(R)
                 sr = trace.get_r_sequence()
                 rnames = ndp.get_rnames()
                 x = ", ".join(rnames)
-                logger.info('Minimal resources needed: %s = %s'
+                trace.log('Minimal resources needed: %s = %s'
                       % (x, UR.format(sr[-1])))
             except:
                 raise

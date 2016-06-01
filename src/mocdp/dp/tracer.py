@@ -20,9 +20,13 @@ class Tracer():
         
     """
     
-    def __init__(self, prefix=""):
+    def __init__(self, prefix="", logger=None):
+        """
+            If logger is not None, the output is to the logger as well.
+        """
         self.chronology = []
         self.prefix = prefix
+        self.logger = logger
 
     @contract(e=TracerEvent)
     def _log_event(self, e):
@@ -30,7 +34,8 @@ class Tracer():
             
     def log(self, s):
         """ Records a string """
-        print(self.prefix + "|" + s)
+        if self.logger is not None:
+            self.logger.info(self.prefix + s)
         self._log_event(TracerLog(s))
         
     @contextmanager

@@ -105,4 +105,4 @@ def mcdplib_define_tst_solve(mcdplib, id_test, test_data):
     params['config_dirs'] = [mcdplib]
     params['out_dir'] = os.path.join(mcdplib + '.out/%s' % id_test)
 
-    res = solve_main(**params)
+    solve_main(**params)
