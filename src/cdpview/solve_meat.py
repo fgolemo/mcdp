@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from cdpview.query_interpretation import interpret_string
+from .query_interpretation import (interpret_string,
+    solve_interpret_query_strings)
 from cdpview.utils_mkdir import mkdirs_thread_safe
 from conf_tools import GlobalConfig
 from contracts.utils import raise_desc, raise_wrapped
-from decent_params import UserError
 from mocdp.dp.dp_transformations import get_dp_bounds
 from mocdp.dp.solver_iterative import solver_iterative
 from mocdp.dp.tracer import Tracer
@@ -12,6 +12,7 @@ from mocdp.posets import PosetProduct, UpperSets, get_types_universe
 from mocdp.posets.space import NotEqual
 from reprep import Report
 import os
+
 
 class ExpectationsNotMet(Exception):
     pass
@@ -145,7 +146,6 @@ def solve_meat_solve(trace, ndp, dp, fg, intervals, max_steps, _exp_advanced):
     UR = UpperSets(R)
 
     if intervals:
-
         res = solver_iterative(dp, fg, trace)
     else:
         if not _exp_advanced:
@@ -174,23 +174,6 @@ def solve_meat_solve(trace, ndp, dp, fg, intervals, max_steps, _exp_advanced):
     return res, trace
 
 
-def solve_interpret_query_strings(query_strings, fnames, F):
-    from .query_interpretation import interpret_params
-    from .query_interpretation import interpret_params_1string
-
-    if len(query_strings) > 1:
-        fg = interpret_params(query_strings, fnames, F)
-    elif len(query_strings) == 1:
-        p = query_strings[0]
-        fg = interpret_params_1string(p, F)
-    else:
-        tu = get_types_universe()
-        if tu.equal(F, PosetProduct(())):
-            fg = ()
-        else:
-            msg = 'Please specify query parameter.'
-            raise_desc(UserError, msg, F=F)
-    return fg
 
 def solve_read_model(dirs, param):
     GlobalConfig.global_load_dir("mocdp")
@@ -208,7 +191,10 @@ def solve_read_model(dirs, param):
 
     return library, basename, ndp
 
-def solve_get_dp_from_ndp(basename, ndp, lower, upper):
+def solve_get_dp_from_ndp(basename, ndp, lower, upper, flatten=True):
+    if flatten:
+        ndp = ndp.flatten()
+
     dp = ndp.get_dp()
 
     if upper is not None:

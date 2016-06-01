@@ -6,7 +6,22 @@ from mocdp.lang.eval_constant_imp import eval_constant
 from mocdp.lang.parse_actions import parse_wrap
 from mocdp.lang.syntax import Syntax
 from mocdp.posets import PosetProduct, get_types_universe
+from decent_params import UserError
 
+def solve_interpret_query_strings(query_strings, fnames, F):
+    if len(query_strings) > 1:
+        fg = interpret_params(query_strings, fnames, F)
+    elif len(query_strings) == 1:
+        p = query_strings[0]
+        fg = interpret_params_1string(p, F)
+    else:
+        tu = get_types_universe()
+        if tu.equal(F, PosetProduct(())):
+            fg = ()
+        else:
+            msg = 'Please specify query parameter.'
+            raise_desc(UserError, msg, F=F)
+    return fg
 
 @contract(params="seq(str)")
 def interpret_params(params, fnames, F):
