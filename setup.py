@@ -71,6 +71,7 @@ setup(name='PyMCDP',
             'mcdp_solve = cdpview:mcdp_solve_main',
             'mcdp-plot = cdpview:mcdp_plot_main',
             'mcdp-solve = cdpview:mcdp_solve_main',
+            'mcdp-web = mcdp_web:mcdp_web_main',
         ]
       }
 )

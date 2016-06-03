@@ -74,6 +74,15 @@ class MCDPLibrary():
         cache_file = os.path.join('_cached', '%s.cached' % id_ndp)
         return memo_disk_cache2(cache_file, data, actual_load)
 
+    @contract(returns='set(str)')
+    def get_models(self):
+        """ Returns all models (files *mcdp) """
+        r = []
+        for x in self.file_to_contents:
+            if x.endswith('.mcdp'):
+                r.append(x.replace('.mcdp', ''))
+        return set(r)
+
     def _get_file_data(self, basename):
         """ returns dict with data, realpath """
 

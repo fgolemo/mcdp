@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>List of models</title>
+</head>
+<body>
+
+
+<p> Models: </p>
+
+  <ul>
+    {% for m in models %}
+    <li><a href="models/{{m}}/syntax" target="right">{{m}}</a></li>
+    {% endfor %}
+  </ul>
+        
+</body>
+</html>
