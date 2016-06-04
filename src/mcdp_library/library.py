@@ -8,6 +8,7 @@ from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from mocdp.lang.parse_actions import parse_ndp
 import os
 import warnings
+import shutil
 
 
 
@@ -33,6 +34,12 @@ class MCDPLibrary():
         self.file_to_contents = file_to_contents
         self.file_to_realpath = {}
         
+        self.cache_dir = '_cached'
+
+    def delete_cache(self):
+        if os.path.exists(self.cache_dir):
+            shutil.rmtree(self.cache_dir)
+
     def clone(self):
         fields = ['file_to_contents']
         contents = {}
@@ -58,7 +65,7 @@ class MCDPLibrary():
             logger.debug('Parsing %r' % id_ndp)
             return self._actual_load(data, realpath)
 
-        cache_file = os.path.join('_cached', '%s.cached' % id_ndp)
+        cache_file = os.path.join(self.cache_dir, '%s.cached' % id_ndp)
         return memo_disk_cache2(cache_file, data, actual_load)
 
     def _actual_load(self, data, realpath=None):
@@ -85,6 +92,12 @@ class MCDPLibrary():
             if x.endswith('.mcdp'):
                 r.append(x.replace('.mcdp', ''))
         return set(r)
+
+    def file_exists(self, basename):
+        for fn in self.file_to_contents:
+            if fn.lower() == basename.lower():
+                return True
+        return False
 
     def _get_file_data(self, basename):
         """ returns dict with data, realpath """
@@ -134,4 +147,4 @@ class MCDPLibrary():
             f.write(data)
         # reload
         self._update_file(realpath)
-        
+

@@ -1,4 +1,15 @@
-	
+  <button onclick="showPrompt();">+</button>
+
+  <script type="text/javascript">
+  window.showPrompt = function() {
+    do {
+        var name=prompt("Please enter the name for the new model:");
+    }
+    while(name.length < 4);
+    window.location = "/new_model/" + name
+  }
+  </script>
+  
   <select class='hot_select'>
     {% for m in models %}
     <option value="/models/{{m}}/{{current_view}}"    
@@ -11,6 +22,8 @@
     {% endfor %}
   </select>
  
+  <a href="/edit/{{model_name}}">Edit</a>
+	
   <select class='hot_select'>
     {% for v in views %}
     <option value="/models/{{model_name}}/{{v}}"    
@@ -28,3 +41,9 @@
   window.location = $(this).val();
 });
 </script>
+
+	<a href="{{request.url}}" target="_blank">open a copy</a>
+
+	<a href="/refresh_library">refresh library</a>
+
+	

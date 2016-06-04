@@ -8,6 +8,8 @@ from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from pyramid.request import Request
 from pyramid.renderers import render_to_response
 from mocdp.dp_report.gg_ndp import STYLE_GREENREDSYM
+import os
+from pyramid.httpexceptions import HTTPFound
 
 __all__ = ['mcdp_web_main']
 
@@ -108,6 +110,7 @@ class WebApp():
                 'rows': nrows,
                 'error': None}
 
+
     def view_edit_submit(self, request):
         model_name = str(request.matchdict['model_name'])  # unicode
 
@@ -138,15 +141,43 @@ class WebApp():
         response = request.invoke_subrequest(subreq)
         return response
 
+    def view_new_model(self, request):
+        model_name = str(request.matchdict['model_name'])  # unicode
+        basename = model_name + '.mcdp'
+        l = self.get_library()
+        if l.file_exists(basename):
+            error = 'File %r already exists.' % basename
+            return render_to_response('error_model_exists.jinja2',
+                                      {'error': error,
+                                       'model_name': model_name}, request=request)
+
+        else:
+            source = "mcdp {\n\n}"
+            filename = os.path.join(self.dirname, basename)
+            with open(filename, 'w') as f:
+                f.write(source)
+            l._update_file(filename)
+
+            return render_to_response('ok_model_created.jinja2',
+                                      {'model_name': model_name}, request=request)
+
+    def view_refresh_library(self, request):
+        """ Refreshes the current library (if external files have changed) 
+            then reloads the current url. """
+        l = self.get_library()
+        l.delete_cache()
+        self.library = None
+        raise HTTPFound(request.referrer)
+
     def serve(self):
         config = Configurator()
         config.add_static_view(name='static', path='static')
         config.include('pyramid_jinja2')
 
-        config.add_route('index', '/')
-        config.add_view(self.view_index, route_name='index', renderer='index.jinja2')
+#         config.add_route('index', '/')
+#         config.add_view(self.view_index, route_name='index', renderer='index.jinja2')
 
-        config.add_route('list', '/list')
+        config.add_route('list', '/')
         config.add_view(self.view_list, route_name='list', renderer='list.jinja2')
 
         config.add_route('empty', '/empty')
@@ -169,6 +200,12 @@ class WebApp():
 
         config.add_route('model_ndp_graph_image', '/models/{model_name}/ndp_graph/image/{style}.{format}')
         config.add_view(self.view_model_ndp_graph_image, route_name='model_ndp_graph_image')
+
+        config.add_route('new_model', '/new_model/{model_name}')
+        config.add_view(self.view_new_model, route_name='new_model')
+
+        config.add_route('refresh_library', '/refresh_library')
+        config.add_view(self.view_refresh_library, route_name='refresh_library')
 
         app = config.make_wsgi_app()
         server = make_server('0.0.0.0', 8080, app)

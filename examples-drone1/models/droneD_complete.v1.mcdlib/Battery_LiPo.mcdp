@@ -1,10 +1,12 @@
-
 #    approx(mass,0%,10g,10kg) 
 #    approx(cost,0%,1$,Top$) 
 
     mcdp {
         provides capacity [J]
         provides missions [R]
+
+        provides extraf [W]
+        extraf <= 10W
 
         requires mass     [g]
         requires cost     [$]
