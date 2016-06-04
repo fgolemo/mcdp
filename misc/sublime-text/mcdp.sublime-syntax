@@ -1,0 +1,90 @@
+%YAML 1.2
+---
+name: MCDP
+file_extensions: [mcdp]
+scope: source.mcdp
+
+contexts:
+  main:
+    - match: \b(mcdp|flatten|new)\b
+      scope: keyword.control.mcdp
+
+    - match: "#"
+      scope: comment.mcdp
+      push: comment
+
+    # operators
+    - match: "\\*"
+      scope: operator.mcdp
+    - match: "\\+"
+      scope: operator.mcdp
+    - match: "\\("
+      scope: operator.mcdp
+    - match: "\\)"
+      scope: operator.mcdp
+    - match: "\\{"
+      scope: operator.mcdp
+    - match: "\\}"
+      scope: operator.mcdp
+    - match: ">="
+      scope: operator.mcdp
+    - match: "<="
+      scope: operator.mcdp
+    - match: "="
+      scope: operator.mcdp
+
+    - match: "[a-z]+ provided by"
+      scope: identifier.functionality.mcdp
+
+    - match: "[a-z]+ required by"
+      scope: identifier.resource.mcdp
+    
+
+    - match: \b(provides)\b
+      scope: keyword.functionality.mcdp
+      push: functionality_name
+
+    - match: \b(requires)\b
+      scope: keyword.resource.mcdp
+      push: resource_name
+
+    - match: \b[0-9\.]+\b
+      scope: constant.numeric.mcdp
+
+    - match: '"'
+      push: string
+
+    - match: \[
+      scope: constant.unit.mcdp
+      push: unit
+
+  comment:
+    - meta_scope: comment.mcdp
+    - match: \\.
+      scope: comment.mcdp
+
+    - match: "$"
+      scope: comment.mcdp
+      pop: true
+
+  functionality_name:
+    - match: "[a-z_]+"
+      scope: identifier.functionality.mcdp
+      pop: true
+  
+  resource_name:
+    - match: "[a-z_]+"
+      scope: identifier.resource.mcdp
+      pop: true
+
+  unit:
+    - meta_scope: constant.unit.mcdp
+    - match: \]
+      pop: true
+
+  string:
+    - meta_scope: string.quoted.double.c
+    - match: \\.
+      scope: constant.character.escape.c
+    - match: '"'
+      pop: true
