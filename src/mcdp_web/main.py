@@ -68,8 +68,21 @@ class WebApp():
                 'models': models,
                 'views': self._get_views(),
                 'current_view': 'ndp_graph',
-                'style': STYLE_GREENREDSYM,
-                }
+                'style': STYLE_GREENREDSYM}
+
+    def view_model_ndp_repr(self, request):
+        model_name = str(request.matchdict['model_name'])  # unicode
+        models = self.list_of_models()
+        _, ndp = self.get_library().load_ndp(model_name)
+        ndp_string = ndp.__repr__()
+        ndp_string = ndp_string.decode("utf8")
+
+        return {'model_name': model_name,
+                'models': models,
+                'views': self._get_views(),
+                'content': ndp_string,
+                'current_view': 'ndp_repr'}
+
 
     def view_model_syntax(self, request):
         models = self.list_of_models()
@@ -92,7 +105,7 @@ class WebApp():
                 'current_view': 'syntax'}
 
     def _get_views(self):
-        return ['syntax', 'ndp_graph']
+        return ['syntax', 'ndp_graph', 'ndp_repr']
 
     def view_edit_form(self, request):
         model_name = str(request.matchdict['model_name'])  # unicode
@@ -200,6 +213,10 @@ class WebApp():
 
         config.add_route('model_ndp_graph_image', '/models/{model_name}/ndp_graph/image/{style}.{format}')
         config.add_view(self.view_model_ndp_graph_image, route_name='model_ndp_graph_image')
+
+        config.add_route('model_ndp_repr', '/models/{model_name}/ndp_repr')
+        config.add_view(self.view_model_ndp_repr, route_name='model_ndp_repr',
+                        renderer='model_generic_text_content.jinja2')
 
         config.add_route('new_model', '/new_model/{model_name}')
         config.add_view(self.view_new_model, route_name='new_model')
