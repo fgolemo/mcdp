@@ -72,6 +72,8 @@ class CDPLanguage():
     # Just Keywords
     ProvideKeyword = namedtuplewhere('ProvideKeyword', 'keyword')
     RequireKeyword = namedtuplewhere('RequireKeyword', 'keyword')
+    ProvidedKeyword = namedtuplewhere('ProvidedKeyword', 'keyword')
+    RequiredKeyword = namedtuplewhere('RequiredKeyword', 'keyword')
     MCDPKeyword = namedtuplewhere('MCDPKeyword', 'keyword')
     SubKeyword = namedtuplewhere('SubKeyword', 'keyword')
     TopKeyword = namedtuplewhere('TopKeyword', 'keyword')

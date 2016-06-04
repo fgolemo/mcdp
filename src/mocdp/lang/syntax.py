@@ -105,6 +105,10 @@ class Syntax():
 
     PROVIDED_BY = sp(L('provided') - L('by'),
                     lambda _: CDP.ProvidedByKeyword('provided by'))
+
+    PROVIDED = sp(L('provided'), lambda _: CDP.ProvidedKeyword('provided'))
+    REQUIRED = sp(L('required'), lambda _: CDP.ProvidedKeyword('required'))
+
     GEQ = sp(L('>=') | L('≥') | L('⊇') | L('≽') | L('⊒'), lambda t: CDP.geq(t[0]))
     LEQ = sp(L('<=') | L('≤') | L('⊆') | L('≼') | L('⊑'), lambda t: CDP.leq(t[0]))
 
@@ -308,13 +312,13 @@ class Syntax():
     rvalue_resource = rvalue_resource_simple ^ rvalue_resource_fancy
 
     rvalue_new_function = sp(idn.copy(), VariableRef_make)
-    rvalue_new_function2 = sp(DOT + idn.copy(),
+    rvalue_new_function2 = sp(PROVIDED + idn.copy(),
                               lambda t: CDP.NewFunction(t[1]))
     
     lf_new_resource = sp(idn.copy(),
                          lambda t: CDP.NewResource(t[0]))
 
-    lf_new_resource2 = sp(DOT + idn.copy(), lambda t: CDP.NewResource(t[1]))
+    lf_new_resource2 = sp(REQUIRED + idn.copy(), lambda t: CDP.NewResource(t[1]))
 
 
     lf_new_limit = sp(C(Group(number_with_unit), 'limit'),

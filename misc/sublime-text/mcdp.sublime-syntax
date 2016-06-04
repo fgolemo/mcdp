@@ -6,7 +6,7 @@ scope: source.mcdp
 
 contexts:
   main:
-    - match: \b(mcdp|flatten|new)\b
+    - match: \b(mcdp|flatten|new|ceil|approx)\b
       scope: keyword.control.mcdp
 
     - match: "#"
@@ -26,6 +26,8 @@ contexts:
       scope: operator.mcdp
     - match: "\\}"
       scope: operator.mcdp
+    - match: "/"
+      scope: operator.mcdp
     - match: ">="
       scope: operator.mcdp
     - match: "<="
@@ -33,10 +35,16 @@ contexts:
     - match: "="
       scope: operator.mcdp
 
-    - match: "[a-z]+ provided by"
+    - match: "[a-z_0-9]+ provided by"
       scope: identifier.functionality.mcdp
 
-    - match: "[a-z]+ required by"
+    - match: "[a-z_0-9]+ required by"
+      scope: identifier.resource.mcdp
+    
+    - match: "provided [a-z_0-9]+"
+      scope: identifier.functionality.mcdp
+
+    - match: "required [a-z_0-9]+"
       scope: identifier.resource.mcdp
     
 
