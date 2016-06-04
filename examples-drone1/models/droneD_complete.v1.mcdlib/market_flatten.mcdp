@@ -1,3 +1,4 @@
+# flattened
 flatten 
 mcdp {
 	customer = new Customer
@@ -8,4 +9,4 @@ mcdp {
 	engineering.travel_distance >= customer.travel_distance 
 	engineering.num_missions >= customer.num_missions 
 	engineering.carry_payload >= customer.carry_payload 
-}
+} 

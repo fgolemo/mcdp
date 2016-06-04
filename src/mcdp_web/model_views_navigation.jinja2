@@ -1,0 +1,30 @@
+	
+  <select class='hot_select'>
+    {% for m in models %}
+    <option value="/models/{{m}}/{{current_view}}"    
+	    {% if m == model_name %}
+	    selected = 1
+	    {% endif %}
+    >
+    	{{m}}
+    </option>
+    {% endfor %}
+  </select>
+ 
+  <select class='hot_select'>
+    {% for v in views %}
+    <option value="/models/{{model_name}}/{{v}}"    
+	    {% if v == current_view %}
+	    selected = 1
+	    {% endif %}
+    >
+    	{{v}}
+    </option>
+    {% endfor %}
+  </select>
+  
+<script type = "text/javascript">
+ $('.hot_select').change(function() {
+  window.location = $(this).val();
+});
+</script>

@@ -2,8 +2,14 @@
 <html lang="en">
 <head>
     <title>Source for {{model_name}}</title>
+    {% include 'head.jinja2' %}
 </head>
 <body>
-{{highlight|safe}}
+	{% include 'model_views_navigation.jinja2' %}
+	
+	<a href="/edit/{{model_name}}">Edit</a>
+	
+	{{highlight|safe}}
+
 </body>
 </html>
