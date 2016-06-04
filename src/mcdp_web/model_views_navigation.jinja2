@@ -1,3 +1,9 @@
+<style type='text/css'>
+div.navigation {font-size: smaller; }
+div.navigation span.additional {margin-left: 2em; }
+</style>
+
+<div class="navigation">
   <button onclick="showPrompt();">+</button>
 
   <script type="text/javascript">
@@ -10,6 +16,8 @@
   }
   </script>
   
+  <span class='models'>
+  Models:
   <select class='hot_select'>
     {% for m in models %}
     <option value="/models/{{m}}/{{current_view}}"    
@@ -21,9 +29,16 @@
     </option>
     {% endfor %}
   </select>
- 
-  <a href="/edit/{{model_name}}">Edit</a>
-	
+  </span>
+  
+  <!--<a href="/edit/{{model_name}}">Edit</a>-->
+
+  <form style='display:inline' method="POST" action="/edit/{{model_name}}">
+    <input type="submit" value="Edit"/>
+  </form>
+  
+  <span class='view'>
+  View:
   <select class='hot_select'>
     {% for v in views %}
     <option value="/models/{{model_name}}/{{v}}"    
@@ -35,6 +50,7 @@
     </option>
     {% endfor %}
   </select>
+  </span>
    
   
 <script type = "text/javascript">
@@ -43,8 +59,10 @@
 });
 </script>
 
+	<span class='additional'>
 	<a href="{{request.url}}" target="_blank">open a copy</a>
 
 	<a href="/refresh_library">refresh library</a>
-
+	</span>
 	
+</div>

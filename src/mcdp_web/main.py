@@ -150,9 +150,11 @@ class WebApp():
 
         l.write_to_model(model_name, data)
 
-        subreq = Request.blank('/models/%s/syntax' % model_name)
-        response = request.invoke_subrequest(subreq)
-        return response
+        raise HTTPFound('/models/%s/syntax' % model_name)
+#
+#         subreq = Request.blank('/models/%s/syntax' % model_name)
+#         response = request.invoke_subrequest(subreq)
+#         return response
 
     def view_new_model(self, request):
         model_name = str(request.matchdict['model_name'])  # unicode
