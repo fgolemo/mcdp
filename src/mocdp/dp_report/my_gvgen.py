@@ -573,6 +573,98 @@ class GvGen:
             # Remove our reference to file descriptor
             self.fd = None
 
+    def remove_identity_nodes(self):
+        """
+            Certainly need to remove ADD_ORDER = True
+            
+        """
+        def is_identity(n):
+            return n['properties']['label'] == 'Identity'
+
+        import networkx as nx
+        G = nx.DiGraph()
+
+        leqs = set()
+        identities = set()
+        for n in self.__nodes:
+            if is_identity(n):
+                identities.add(n['id'])
+            if n['style'] == 'leq':
+                leqs.add(n['id'])
+
+        for l in self.__links:
+            from_node = l['from_node']['id']
+            to_node = l['to_node']['id']
+            G.add_edge(from_node, to_node)
+
+        def remove_link(tail , head):
+            def matches(l):
+                return (l['to_node']['id'] == head) and(l['from_node']['id'] == tail)
+            links = []
+            nmatches = 0
+            for l in self.__links:
+                if not matches(l):
+                    links.append(l)
+                    print l['from_node']['id'], l['to_node']['id']
+                else:
+                    nmatches += 1
+            if not nmatches:
+                raise ValueError('No link %s - %s found' % (tail, head))
+            self.__links = links
+
+        def remove_node(n):
+            def matches(x):
+                return x['id'] == n
+            self.__nodes = [x for x in self.__nodes if not matches(x)]
+
+            for l in self.__links:
+                if l['to_node']['id'] == n:
+                    raise ValueError('Found link to node %r' % n)
+                if l['from_node']['id'] == n:
+                    raise ValueError('Found link from node %r' % n)
+
+        def get_node(n):
+            for x in self.__nodes:
+                if x['id'] == n:
+                    return x
+
+        def sub_link_from(old, new):
+            for l in self.__links:
+                if l['from_node']['id'] == old:
+                    l['from_node'] = get_node(new)
+
+
+
+        # look for A -l1--> [prev_leq] -l2-> [Identity n] --l3-> [B]
+        # look for A -l3--> [B]
+        for n in identities:
+            pred = G.predecessors(n)
+            has_prev_leq = len(pred) == 1 and pred[0] in leqs
+            succ = G.successors(n)
+            has_one_succ = len(succ) == 1
+            has_prev_leq_one = has_prev_leq and len(G.predecessors(pred[0])) == 1
+
+            if not has_prev_leq_one or not has_one_succ:
+                print('This one is not eligible (prev_eq')
+                continue
+
+            prev_leq = pred[0]
+            A = G.predecessors(prev_leq)[0]
+
+            # we also want the previous ones to be
+
+            remove_link(A, prev_leq)  # l1
+            remove_link(prev_leq, n)  # l2
+            sub_link_from(old=n, new=A)
+
+            print 'n', n, 'pred', pred, 'succ', succ
+            remove_node(n)
+            remove_node(prev_leq)
+
+
+
+#         self.__links = []
+
 
 def format_property(k, v):
     s = str(v)

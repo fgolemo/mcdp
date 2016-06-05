@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>QR Reader</title>
+	{% include 'head.jinja2' %}
+    <script src="static/html5-qrcode/lib/jsqrcode-combined.min.js"></script>
+    <script src="static/html5-qrcode/lib/html5-qrcode.min.js"></script>
+    <script type='text/javascript'>
+    
+    	function ajax_success(data) {
+    		message = data['message']
+    		output = data['output']
+ 
+    		$('#server_console').html(message)
+    		$('#server_output').html(output);
+    	}
+    	
+    	function ajax_failure(error) {
+    		$('#server_error').html(error);
+    	}
+    
+    	function do_some_ajax(qrstring){
+		    jQuery.ajax({
+		        url     : '/qr_reader_submit',
+		        type    : 'POST',
+		        data: {'qrstring': qrstring},
+		        dataType: 'json',
+		        success : ajax_success,
+		        error : ajax_failure
+		    });
+		}
+    
+		$(document).ready(function(){
+			$('#reader').html5_qrcode(function(data){
+					$('#read').html(data);
+					$('#read_error').html('');
+					$('#vid_error').html('');
+					do_some_ajax(data);
+				},
+				function(error){
+					$('#read').html('');
+					$('#read_error').html(error);
+				}, function(videoError){
+					$('#vid_error').html(videoError);
+				}
+			);
+		});
+    </script>
+</head>
+<body>    
+
+<p>Note: this features works only on Chrome for now and on localhost (a secure origin).</p>
+  
+<p> <a href="/refresh_library">Refresh cache</a></p>
+
+<table>
+<tr>
+<td>
+<div id="reader" style="width:300px;height:250px;"></div>
+</td>
+<td>
+<h6>Parsed string</h6>
+<span id="read" ></span>
+<br>
+<h6 >Read Error (Debug only)</h6>
+<span>Will constantly show a message, can be ignored</span>
+<span id="read_error" ></span>
+
+<h6 >Video Error</h6>
+<span id="vid_error" ></span>
+
+<h6 >Server Error</h6>
+<span id="server_error" ></span>
+
+</td>
+</tr>
+</table>
+
+<div id="server_console">
+</div>
+
+<div id="server_output"></div>
+
+
+
+</body>
+</html>
+
+
+

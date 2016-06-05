@@ -6,9 +6,38 @@ scope: source.mcdp
 
 contexts:
   main:
-    - match: \b(mcdp|flatten|new|ceil|approx)\b
+    - match: \b(mcdp|flatten|new|ceil|approx|instance|compacy|template|sub|for|by|instance|implemented-by|catalogue)\b
       scope: keyword.control.mcdp
-
+    - match: \b(choose|set-of|using|pow|approx|Top)\b
+      scope: keyword.control.mcdp
+# 'load',
+#         'compact',
+#         'required',
+#         'provides',
+#         'abstract',
+#         'dp',
+#         'mcdp',
+#         'template',
+#         'sub',
+#         'for',
+#         'instance',
+#         'provided',
+#         'requires',
+#         'implemented-by',
+#         'using',
+#         'by',
+#         'catalogue',
+#         'set-of',
+#         'mcdp-type',
+#         'dptype',
+#         'Nat',
+#         'Int',
+#         'pow',
+#         'approx',
+#         'Top',  # top
+#         'choose',
+#         'flatten',
+#         'from_library',
     - match: "#"
       scope: comment.mcdp
       push: comment

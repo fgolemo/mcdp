@@ -16,5 +16,5 @@ mcdp {
    
   lift provided by actuation >= weight
 
-  requires mass for battery
+  requires mass >= mass required by battery
 }

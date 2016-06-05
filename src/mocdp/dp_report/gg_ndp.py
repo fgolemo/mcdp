@@ -21,7 +21,6 @@ from mocdp.posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
-import warnings
 
 
 STYLE_GREENRED = 'greenred'
@@ -303,8 +302,8 @@ def gvgen_from_ndp(ndp, style='default'):
 
         gg.styleApply("external_cluster_resources", cluster_resources)
 
-
-    if True:
+    ADD_ORDER = False
+    if ADD_ORDER:
         all_nodes = gdc.get_all_nodes()
 
         for i, n in enumerate(all_nodes):
@@ -326,6 +325,9 @@ def gvgen_from_ndp(ndp, style='default'):
 #     gg.propertyAppend(cluster_resources, "shape", "box")
 #     gg.propertyAppend(cluster_resources, "color", "red")
 
+    if False:
+        gg.remove_identity_nodes()
+             
     return gg
 
 def create(gdc, ndp):

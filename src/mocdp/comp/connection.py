@@ -605,8 +605,6 @@ def dpgraph(name2dp, connections, split):
         assert not split
         dp = Mux(PosetProduct(()), [])
         return dpwrap(dp, [], [])
-    #    msg = 'I only have %d names: %s' % (len(name2dp), list(name2dp))
-    #    raise DPInternalError(msg)
 
     # check that there are no repetitions
     all_functions = []
