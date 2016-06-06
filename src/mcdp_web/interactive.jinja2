@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Interactive solver</title>
+
+	<script type="text/javascript" src="/static/Chart.js"></script>
+    {% include 'head.jinja2' %}
+
+</head>
+<body>
+<style type='text/css'>
+#extents {
+    font-size: 50%;
+}
+</style>
+<table style='margin-top: 5em'>
+<tr>
+<td>
+	<div style='width: 400px; height: 400px'>
+		<canvas id="chart_fun" width="400px" height="400px"></canvas>
+	</div>
+</td>
+<td>
+	<div style='width: 400px; height: 400px'>
+		<canvas id="chart_res" width="400px" height="400px"></canvas>
+	</div>
+</td>
+</tr>
+</table>
+
+<script type="text/javascript">
+
+var data_fun = []
+var datasets_fun = [{data: data_fun}]
+var data_res = []
+var datasets_res = [{data: data_res}]
+
+// datasets_fun = [{'data': [{y: 10, x: 2}, {y: 2, x: 10}]}]
+
+// datasets_fun = [{'data': [{y: 1.4164978716614236, x: 1.2748480844952814}, {y: 1.2748480844952812, x: 1.4164978716614238}, {y: 0.84989872299685421, x: 1.8414472331598508}, {y: 0.56659914866456917, x: 2.1247468074921358}, {y: 2.5496961689905628, x: 0.14164978716614238}, {y: 1.9830970203259932, x: 0.70824893583071191}, {y: 0.99154851016299661, x: 1.6997974459937084}, {y: 1.558147658827566, x: 1.133198297329139}, {y: 1.1331982973291388, x: 1.5581476588275662}, {y: 1.8414472331598508, x: 0.84989872299685421}, {y: 0.7082489358307118, x: 1.9830970203259932}, {y: 0.42494936149842699, x: 2.266396594658278}, {y: 2.1247468074921354, x: 0.56659914866456951}, {y: 2.4080463818244202, x: 0.28329957433228475}, {y: 2.266396594658278, x: 0.4249493614984271}, {y: 2.691345956156705, x: 0.0}, {y: 0.14164978716614218, x: 2.5496961689905628}, {y: 1.6997974459937084, x: 0.99154851016299661}, {y: 0.28329957433228481, x: 2.4080463818244202}, {y: 0.0, x: 2.691345956156705}]}]
+
+
+// datasets_fun = [{'data': [{y: 1.4164978716614236, x: 1.2748480844952814}, {y: 1.2748480844952812, x: 1.4164978716614238}, {y: 0.84989872299685421, x: 1.8414472331598508}, {y: 0.56659914866456917, x: 2.1247468074921358}, {y: 2.5496961689905628, x: 0.14164978716614238}, {y: 1.9830970203259932, x: 0.70824893583071191}, {y: 0.99154851016299661, x: 1.6997974459937084}, {y: 1.558147658827566, x: 1.133198297329139}, {y: 1.1331982973291388, x: 1.5581476588275662}, {y: 1.8414472331598508, x: 0.84989872299685421}, {y: 0.7082489358307118, x: 1.9830970203259932}, {y: 0.42494936149842699, x: 2.266396594658278}, {y: 2.1247468074921354, x: 0.56659914866456951}, {y: 2.4080463818244202, x: 0.28329957433228475}, {y: 2.266396594658278, x: 0.4249493614984271}, {y: 2.691345956156705, x: 0.0}, {y: 0.14164978716614218, x: 2.5496961689905628}]}]
+
+// //datasets_fun = [{'data': [{y: 1.4164978716614236, x: 1.2748480844952814},{y: 1.2748480844952812, x: 1.4164978716614238}, {y: 0.84989872299685421, x: 1.8414472331598508}, {y: 0.56659914866456917, x: 2.1247468074921358}, {y: 2.5496961689905628, x: 0.14164978716614238}]}]
+
+function ajax_success(data) {
+    if (data['ok']) {
+        chart_res.data.datasets = data['datasets_res'];
+        chart_fun.data.datasets = data['datasets_fun'];
+     
+        chart_fun.options['scales']['xAxes'][0]['scaleLabel']['labelString'] = data['fun_xlabel']
+        chart_fun.options['scales']['yAxes'][0]['scaleLabel']['labelString'] = data['fun_ylabel']
+        chart_res.options['scales']['xAxes'][0]['scaleLabel']['labelString'] = data['res_xlabel']
+        chart_res.options['scales']['yAxes'][0]['scaleLabel']['labelString'] = data['res_ylabel']
+    
+        $('#scale_x_label').html(data['fun_xlabel']);
+        $('#scale_y_label').html(data['fun_ylabel']);
+
+        chart_fun.update();
+        chart_res.update();
+    }
+
+    console.log(data);
+}
+    	
+function ajax_failure(error) {
+	$('#server_error').html(error);
+}
+
+function ajax_reset_points(){
+    jQuery.ajax({
+        url     : 'solver_reset',
+        type    : 'POST',
+        data: {},
+        dataType: 'json',
+        success : ajax_success,
+        error : ajax_failure
+    });
+}
+
+
+
+function ajax_send(x, y){
+    jQuery.ajax({
+        url     : 'addpoint',
+        type    : 'POST',
+        data: {x: x, y: y},
+        dataType: 'json',
+        success : ajax_success,
+        error : ajax_failure
+    });
+}
+
+function ajax_get_initial() {
+    jQuery.ajax({
+        url     : 'getdatasets',
+        type    : 'POST',
+        data: {},
+        dataType: 'json',
+        success : ajax_success,
+        error : ajax_failure
+    });   
+}
+
+function onclick(event, elements_at) {
+	chart = chart_fun;
+	var valueX = null, valueY = null;
+
+    for (var scaleName in chart.scales) {
+        var scale = chart.scales[scaleName];
+        if (scale.isHorizontal()) {
+            valueX = scale.getValueForPixel(event.offsetX);
+        } else {
+            valueY = scale.getValueForPixel(event.offsetY);
+        }
+    }
+    //console.log(valueX, valueY);
+    
+    // data_fun.push({x:valueX, y:valueY});
+    ajax_send(valueX, valueY);
+}
+
+var canvas_fun = document.getElementById("chart_fun");
+var canvas_res = document.getElementById("chart_res");
+
+red = "#af0000";
+green = "#00af00";
+
+var chart_fun = new Chart(canvas_fun, {
+    type: 'line',
+    data: { datasets: datasets_fun},
+    options: {
+    	showLines: false, // scatter
+        onClick: onclick,
+        scaleOverride:true,
+        legend: {display: false},
+        scales: {
+            xAxes: [{
+                type: "linear",
+                position: 'bottom',
+                scaleLabel: {
+			        display: true,
+			        labelString: 'functionality',
+                    fontColor: green,
+			    },
+                ticks: {
+                    fontColor: green,
+                    min: 0.0,
+                    max: 1000.0,
+                }
+            }],
+            yAxes: [{
+                type: "linear",
+                position: 'left',
+                scaleLabel: {
+			        display: true,
+                    labelString: 'functionality',
+                    fontColor: green,
+			    },
+                ticks: {
+                    fontColor: green,
+                    min: 0.0,
+                    max: 1000.0,
+                }
+            }]
+        }
+    }
+});
+ 
+
+var chart_res = new Chart(canvas_res, {
+    type: 'line',
+    data: { datasets: datasets_res },
+    options: {
+        legend: {display: false},
+    	showLines: false, // scatter
+        scaleOverride:true,
+    	scales: {
+            xAxes: [{
+                type: "linear",
+                position: 'bottom',
+                scaleLabel: {
+			        display: true,
+			        labelString: 'resource',
+                    fontColor: red,
+			    },
+                ticks: {
+                    fontColor: red,
+                   // min: 0.0,
+                }
+            }],
+            yAxes: [{
+                type: "linear",
+                position: 'left',
+                scaleLabel: {
+			        display: true,
+			        labelString: 'resource',
+                    fontColor: red,
+			    },
+                ticks: {
+                    fontColor: red,
+                 //   min: 0.0,
+                }
+
+            }]
+        }
+    }
+});
+
+ajax_get_initial();
+
+
+$.event.special.inputchange = {
+    setup: function() {
+        var self = this, val;
+        $.data(this, 'timer', window.setInterval(function() {
+            val = self.value;
+            if ( $.data( self, 'cache') != val ) {
+                $.data( self, 'cache', val );
+                $( self ).trigger( 'inputchange' );
+            }
+        }, 20));
+    },
+    teardown: function() {
+        window.clearInterval( $.data(this, 'timer') );
+    },
+    add: function() {
+        $.data(this, 'cache', this.value);
+    }
+};
+
+function validate_and_change_scale(control, chart, chart_axis) {
+    function isNumeric(num){
+       return !isNaN(num)
+    };
+
+    if(isNumeric(control.value) && (parseFloat(control.value) > 0)) {
+
+        val = parseFloat(control.value);
+        chart_axis['ticks']['max'] = val;
+        $(control).css('color', 'black');
+    } else { 
+        console.log('invalid value: '+ control.value);
+        $(control).css('color', 'red');
+    }
+
+    chart.update();
+    console.log(control.value);
+
+};
+
+$(document ).ready(function() {
+     $('#scale_x').on('inputchange', function() { 
+        validate_and_change_scale(this, chart_fun, chart_fun.options['scales']['xAxes'][0]);
+    });
+     $('#scale_y').on('inputchange', function() {
+        validate_and_change_scale(this, chart_fun, chart_fun.options['scales']['yAxes'][0]);
+    });
+
+     $('#reset_points').click(ajax_reset_points);
+});
+
+</script>
+
+<p id='extents'> 
+    Max <span id='scale_x_label'>X</span>: <input id='scale_x' type="text" value="1000"/> <br/>
+    Max <span id='scale_y_label'>Y</span>: <input id='scale_y' type="text" value="1000"/>
+</p>
+
+<!-- // todo make ajax -->
+<!-- <form style='display:inline' method="POST" action="/solver_reset/{{model_name}}"> -->
+<input id="reset_points" type="submit" value="Reset points"/>
+<!-- </form> -->
+  
+ {% for fn in fun_names_other %}
+ <p>{{fn}}: <input id='manual_{{fn}}' type="text" value="0"/> </p>
+ {% endfor %}
+
+<span id='server_error'></span>
+</body>
+</html>

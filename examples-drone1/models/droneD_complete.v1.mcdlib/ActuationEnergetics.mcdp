@@ -1,4 +1,3 @@
-# this is my other comment
 mcdp {  
   provides endurance     [s] 
   provides extra_payload [kg]
@@ -31,9 +30,8 @@ mcdp {
     cost required by actuation + 
     cost required by battery + 
     labor_cost) 
-  
-# come val?
-  battery.missions >= num_missions
+   
+  missions provided by battery >= provided  num_missions
  
   requires total_mass >= total_mass   
 }  

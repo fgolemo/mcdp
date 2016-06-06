@@ -109,7 +109,6 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
                 raise_wrapped(ExpectationsNotMet, e, 'res is different',
                               res=res, res_expected=res_expected, compact=True)
 
-
     if plot:
         r = Report()
         if _exp_advanced:
