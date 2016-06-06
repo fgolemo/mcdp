@@ -8,25 +8,62 @@
 
 </head>
 <body>
+
 <style type='text/css'>
-#extents {
-    font-size: 50%;
-}
+    #extents {
+        font-size: 50%;
+    }
+    .selection { text-align: center; }
 </style>
-<table style='margin-top: 5em'>
-<tr>
-<td>
-	<div style='width: 400px; height: 400px'>
-		<canvas id="chart_fun" width="400px" height="400px"></canvas>
-	</div>
-</td>
-<td>
-	<div style='width: 400px; height: 400px'>
-		<canvas id="chart_res" width="400px" height="400px"></canvas>
-	</div>
-</td>
-</tr>
-</table>
+
+<div style='text-align:center'>
+
+	<img src='compact_graph' style='height: 8em'/> 
+		
+	<table style='width: 800px; margin-top: 0em'>
+		<tr>
+			<td class='selection'>
+				{% include 'solver_alternatives_functions.jinja2' %}
+			</td>
+			<td class='selection'>
+				{% include 'solver_alternatives_resources.jinja2' %}
+			</td>
+		</tr>
+		
+		<tr>
+			<td>
+				<div style='width: 400px; height: 400px'>
+					<canvas id="chart_fun" width="400px" height="400px"></canvas>
+				</div>
+			</td>
+			<td>
+				<div style='width: 400px; height: 400px'>
+					<canvas id="chart_res" width="400px" height="400px"></canvas>
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>
+
+<p id='extents'> 
+    {% if fun_name_x %}
+    Max <span id='scale_x_label'>X</span>: <input id='scale_x' type="text" value="1000"/> <br/>
+    {% endif %}
+    Max <span id='scale_y_label'>Y</span>: <input id='scale_y' type="text" value="1000"/>
+</p>
+
+<!-- // todo make ajax -->
+<!-- <form style='display:inline' method="POST" action="/solver_reset/{{model_name}}"> -->
+<input id="reset_points" type="submit" value="Reset points"/>
+<!-- </form> -->
+  
+ {% for fn in fun_names_other %}
+ <p>{{fn}}: <input class='manual' id='{{fn}}' type="text" value="0"/> </p>
+ {% endfor %}
+
+<span id='server_error'></span>
+<code><pre id='operation_error'></pre></code>
+
 
 <script type="text/javascript">
 
@@ -34,18 +71,13 @@ var data_fun = []
 var datasets_fun = [{data: data_fun}]
 var data_res = []
 var datasets_res = [{data: data_res}]
-
-// datasets_fun = [{'data': [{y: 10, x: 2}, {y: 2, x: 10}]}]
-
-// datasets_fun = [{'data': [{y: 1.4164978716614236, x: 1.2748480844952814}, {y: 1.2748480844952812, x: 1.4164978716614238}, {y: 0.84989872299685421, x: 1.8414472331598508}, {y: 0.56659914866456917, x: 2.1247468074921358}, {y: 2.5496961689905628, x: 0.14164978716614238}, {y: 1.9830970203259932, x: 0.70824893583071191}, {y: 0.99154851016299661, x: 1.6997974459937084}, {y: 1.558147658827566, x: 1.133198297329139}, {y: 1.1331982973291388, x: 1.5581476588275662}, {y: 1.8414472331598508, x: 0.84989872299685421}, {y: 0.7082489358307118, x: 1.9830970203259932}, {y: 0.42494936149842699, x: 2.266396594658278}, {y: 2.1247468074921354, x: 0.56659914866456951}, {y: 2.4080463818244202, x: 0.28329957433228475}, {y: 2.266396594658278, x: 0.4249493614984271}, {y: 2.691345956156705, x: 0.0}, {y: 0.14164978716614218, x: 2.5496961689905628}, {y: 1.6997974459937084, x: 0.99154851016299661}, {y: 0.28329957433228481, x: 2.4080463818244202}, {y: 0.0, x: 2.691345956156705}]}]
-
-
-// datasets_fun = [{'data': [{y: 1.4164978716614236, x: 1.2748480844952814}, {y: 1.2748480844952812, x: 1.4164978716614238}, {y: 0.84989872299685421, x: 1.8414472331598508}, {y: 0.56659914866456917, x: 2.1247468074921358}, {y: 2.5496961689905628, x: 0.14164978716614238}, {y: 1.9830970203259932, x: 0.70824893583071191}, {y: 0.99154851016299661, x: 1.6997974459937084}, {y: 1.558147658827566, x: 1.133198297329139}, {y: 1.1331982973291388, x: 1.5581476588275662}, {y: 1.8414472331598508, x: 0.84989872299685421}, {y: 0.7082489358307118, x: 1.9830970203259932}, {y: 0.42494936149842699, x: 2.266396594658278}, {y: 2.1247468074921354, x: 0.56659914866456951}, {y: 2.4080463818244202, x: 0.28329957433228475}, {y: 2.266396594658278, x: 0.4249493614984271}, {y: 2.691345956156705, x: 0.0}, {y: 0.14164978716614218, x: 2.5496961689905628}]}]
-
-// //datasets_fun = [{'data': [{y: 1.4164978716614236, x: 1.2748480844952814},{y: 1.2748480844952812, x: 1.4164978716614238}, {y: 0.84989872299685421, x: 1.8414472331598508}, {y: 0.56659914866456917, x: 2.1247468074921358}, {y: 2.5496961689905628, x: 0.14164978716614238}]}]
-
+ 
+function ajax_begin() {
+	$('#operation_error').html('sending...');
+}
 function ajax_success(data) {
     if (data['ok']) {
+        console.log(data);
         chart_res.data.datasets = data['datasets_res'];
         chart_fun.data.datasets = data['datasets_fun'];
      
@@ -59,18 +91,23 @@ function ajax_success(data) {
 
         chart_fun.update();
         chart_res.update();
-    }
-
-    console.log(data);
+        
+        $('#operation_error').html('');
+    } else {
+    	error = data['error']
+    	console.log(error);
+    	$('#operation_error').html(error);
+	}
 }
     	
 function ajax_failure(error) {
+	console.log(error);
 	$('#server_error').html(error);
 }
 
 function ajax_reset_points(){
     jQuery.ajax({
-        url     : 'solver_reset',
+        url     : 'reset',
         type    : 'POST',
         data: {},
         dataType: 'json',
@@ -79,14 +116,28 @@ function ajax_reset_points(){
     });
 }
 
+function ajax_send(x, y) {
+    f = {};
+    
+{% if fun_name_x %}
+    f["{{fun_name_x}}"] = x;
+{% endif %}
 
+{% if fun_name_y %}
+    f["{{fun_name_y}}"] = y;
+{% endif %}
 
-function ajax_send(x, y){
+	// We need to capture the values of the manually-entered fields of type: 
+	// <input class='manual' id='{{fn}}' type="text" value="0"/> </p>
+	$('.manual').each(function(i, obj) { 
+    	f[obj.id] = parseFloat(obj.value);
+	});
+
     jQuery.ajax({
         url     : 'addpoint',
-        type    : 'POST',
-        data: {x: x, y: y},
-        dataType: 'json',
+        type    : 'POST', 
+        data: JSON.stringify({'f':f}),
+        contentType: 'application/json; charset=utf-8',
         success : ajax_success,
         error : ajax_failure
     });
@@ -146,8 +197,11 @@ var chart_fun = new Chart(canvas_fun, {
 			    },
                 ticks: {
                     fontColor: green,
+
+                    {% if fun_name_x %}
                     min: 0.0,
                     max: 1000.0,
+                    {% endif %}
                 }
             }],
             yAxes: [{
@@ -263,20 +317,5 @@ $(document ).ready(function() {
 
 </script>
 
-<p id='extents'> 
-    Max <span id='scale_x_label'>X</span>: <input id='scale_x' type="text" value="1000"/> <br/>
-    Max <span id='scale_y_label'>Y</span>: <input id='scale_y' type="text" value="1000"/>
-</p>
-
-<!-- // todo make ajax -->
-<!-- <form style='display:inline' method="POST" action="/solver_reset/{{model_name}}"> -->
-<input id="reset_points" type="submit" value="Reset points"/>
-<!-- </form> -->
-  
- {% for fn in fun_names_other %}
- <p>{{fn}}: <input id='manual_{{fn}}' type="text" value="0"/> </p>
- {% endfor %}
-
-<span id='server_error'></span>
 </body>
 </html>

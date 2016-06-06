@@ -391,6 +391,8 @@ def create_simplewrap(gdc, ndp):
     assert isinstance(ndp, SimpleWrap)
     label = str(ndp)
 
+
+
     sname = None  # name of style to apply, if any
 
     # For these, we only disply the image, without the border
@@ -472,6 +474,10 @@ def create_simplewrap(gdc, ndp):
 #     if label[:2] != '<T':
 #         # Only available in svg or cairo renderer
 #         label = '<I>%s</I>' % label
+
+    # an hack to think about better
+    if hasattr(ndp, '_xxx_label'):
+        label = getattr(ndp, '_xxx_label')
 
     node = gdc.newItem(label)
 

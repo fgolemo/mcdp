@@ -1,197 +1,207 @@
-
-from contracts import contract
-from mocdp.posets.uppersets import UpperSets
-
-class SolverState():
-    def __init__(self, ndp):
-        self.fun = []
-        self.ures = []
-        self.ndp = ndp
-        dp = self.ndp.get_dp()
-        self.dp = dp
-
-    def new_point(self, point):
-        self.fun.append(point)
-        ures = self.dp.solve(point)
-        F = self.dp.get_fun_space()
-        R = self.dp.get_res_space()
-        UR = UpperSets(R)
-        # print('f = %s -> %s' % (F.format(point), UR.format(ures)))
-        self.ures.append(ures)
-
-    @contract(fun_index='seq[2](int)',
-              res_index='seq[2](int)')
-    def get_data_for_js(self, fun_index, res_index):
-        ndp = self.ndp
-        fn1 = ndp.get_fnames()[fun_index[0]]
-        fn2 = ndp.get_fnames()[fun_index[1]]
-        rn1 = ndp.get_rnames()[fun_index[0]]
-        rn2 = ndp.get_rnames()[fun_index[1]]
-
-        res = {}
-        res['datasets_fun'] = self.get_datasets_fun(fun_index)
-        res['datasets_res'] = self.get_datasets_res(res_index)
-
-        def fun_label(fn):
-            return fn + ' [%s]' % self.ndp.get_ftype(fn)
-
-        def res_label(rn):
-            return rn + ' [%s]' % self.ndp.get_rtype(rn)
-
-        res['fun_xlabel'] = fun_label(fn1)
-        res['fun_ylabel'] = fun_label(fn2)
-        res['res_xlabel'] = res_label(rn1)
-        res['res_ylabel'] = res_label(rn2)
-
-        return res
-
-    def get_color(self, i):
-        colors = ['green', 'blue', 'brown']
-        color = colors[ i % len(colors) ]
-        n = len(self.fun)
-        if i < n - 3:
-            color = 'gray'
-
-        infeasible = len(self.ures[i].minimals) == 0
-        if infeasible:
-            return 'red'
-        return color
-
-    def get_datasets_fun(self, fun_index):
-        # one dataset per point in fun
-        def make_point(p):
-            return {'x': p[fun_index[0]], 'y': p[fun_index[1]]}
-#
-#         def get_marker(i):
-#             if len(self.ures[i].minimals) != 0:
-#                 return "cross"
-#             else:
-#                 return "circle"
-
-        datasets = [{'data': [make_point(p)],
-                 'backgroundColor': self.get_color(i)} for i, p in enumerate(self.fun)]
-#         print datasets
-        return datasets
-
-    def get_datasets_res(self, res_index):
-        # one dataset per point in fun
-
-        def make_point(p):
-            return {'x': p[res_index[0]], 'y': p[res_index[1]]}
-
-        def get_points(ui):
-            return [make_point(p) for p in ui.minimals]
-
-        return [{'data': get_points(ui),
-                 'backgroundColor': self.get_color(i)} for i, ui in enumerate(self.ures)]
+import itertools
+from mcdp_web.app_solver_state import SolverState, get_decisions_for_axes
+import traceback
+from mocdp.dp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
+from cdpview.plot import png_pdf_from_gg
+from mcdp_web.utils import response_data
+from pyramid.httpexceptions import HTTPSeeOther
 
 class AppSolver():
     """
-        /solver/batteries/0,1/0,1   presents the gui. 0,1 are the axes
+        /solver/batteries/   - redirects to one with the right amount of axis
     
-        /solver_addpoint/batteries params x, y
-        /solver_getdatasets/batteries params -
-        /solver_reset/batteries params -
-        
+        /solver/batteries/0,1/0,1/   presents the gui. 0,1 are the axes
+    
+        AJAX:
+            /solver/batteries/0,1/0,1/addpoint     params x, y
+            /solver/batteries/0,1/0,1/getdatasets  params -
+            /solver/batteries/0,1/0,1/reset        params -
     """
 
     def __init__(self):
         self.solver_states = {}
 
+    def get_model_name(self, request):
+        return str(request.matchdict['model_name'])  # unicode
+
     def get_solver_state(self, request):
-        params = self.parse_params(request)
-        model_name = params['model_name']
+        model_name = self.get_model_name(request)
         if not model_name in self.solver_states:
             self.reset(request)
         return self.solver_states[model_name]
 
     def reset(self, request):
-        params = self.parse_params(request)
-        model_name = params['model_name']
+        model_name = self.get_model_name(request)
         _, self.ndp = self.get_library().load_ndp(model_name)
         self.solver_states[model_name] = SolverState(self.ndp)
 
     def config(self, config):
-        config.add_route('solver', '/solver/{model_name}/{fun_axes}/{res_axes}/')
-        config.add_view(self.view_solver, route_name='solver',
-                        renderer='interactive.jinja2')
+        base = '/solver/{model_name}/{fun_axes}/{res_axes}/'
 
-        config.add_route('solver_addpoint', '/solver/{model_name}/{fun_axes}/{res_axes}/addpoint')
-        config.add_view(self.view_solver_addpoint,
+        config.add_route('solver_base', "/solver/{model_name}/")
+        config.add_view(self.view_solver_base,
+                        route_name='solver_base', renderer='solver.jinja2')
+
+        config.add_route('solver', base)
+        config.add_view(self.view_solver,
+                        route_name='solver', renderer='solver.jinja2')
+
+        config.add_route('solver_addpoint', base + 'addpoint')
+        config.add_view(self.ajax_solver_addpoint,
                         route_name='solver_addpoint', renderer='json')
 
-        config.add_route('solver_getdatasets', '/solver/{model_name}/{fun_axes}/{res_axes}/getdatasets')
-        config.add_view(self.view_solver_getdatasets, route_name='solver_getdatasets', renderer='json')
+        config.add_route('solver_getdatasets', base + 'getdatasets')
+        config.add_view(self.ajax_solver_getdatasets,
+                        route_name='solver_getdatasets', renderer='json')
 
-        config.add_route('solver_reset', '/solver/{model_name}/{fun_axes}/{res_axes}/reset')
-        config.add_view(self.view_solver_reset,
+        config.add_route('solver_reset', base + 'reset')
+        config.add_view(self.ajax_solver_reset,
                         route_name='solver_reset', renderer='json')
 
+        config.add_route('solver_image', base + 'compact_graph')
+        config.add_view(self.image, route_name='solver_image')
 
-    def view_solver_reset(self, request):
-        self.reset(request)
-        return self.return_new_data(request)
-        
     def parse_params(self, request):
-        model_name = str(request.matchdict['model_name'])  # unicod
+        model_name = self.get_model_name(request)
+
         fun_axes = map(int, request.matchdict['fun_axes'].split(','))
         res_axes = map(int, request.matchdict['res_axes'].split(','))
         return {'model_name': model_name,
-                'fun_axes':fun_axes,
+                'fun_axes': fun_axes,
                 'res_axes': res_axes}
 
+    def view_solver_base(self, request):
+        model_name = self.get_model_name(request)
+
+        solver_state = self.get_solver_state(request)
+        ndp = solver_state.ndp
+        nf = len(ndp.get_fnames())
+        nr = len(ndp.get_rnames())
+
+        base = '/solver/%s' % model_name
+        if nf >= 2 and nr >= 2:
+            url = '/0,1/0,1/'
+            raise HTTPSeeOther(base + url)
+        elif nf == 1 and nr >= 2:
+            url = '/0/0,1/'
+            raise HTTPSeeOther(base + url)
+        else:
+            title = 'Could not find render view for this model. '
+            message = 'Could not find render view for this model. '
+            message += '<br/>'
+            message += str(ndp)
+            return {'title': title, 'message': message}
+
+        
+        
     def view_solver(self, request):
         params = self.parse_params(request)
         solver_state = self.get_solver_state(request)
 
         ndp = solver_state.ndp
-        
         fnames = ndp.get_fnames()
-        rnames = ndp.get_rnames()
-        fun_names = [fnames[i] for i in params['fun_axes']]
-        res_names = [rnames[i] for i in params['res_axes']]
+        fun_axes = params['fun_axes']
+        res_axes = params['res_axes']
+
+        decisions = get_decisions_for_axes(ndp, fun_axes, res_axes)
         # these are not included
-        fun_names_other = [fn for fn in fnames if not fn in fun_names]
+        included = [fnames[_] for _ in fun_axes]
+        fun_names_other = [fn for fn in fnames if not fn in included]
         # check that the axes are compatible
 
-        print fun_names_other
-        return {'model_name': params['model_name'],
-                'fun_names': fun_names,
-                'res_names': res_names,
-                'fun_names_other': fun_names_other}
+        fun_alternatives, res_alternatives = create_alternative_urls(params, ndp)
+
+        res = {'model_name': params['model_name'],
+                'fun_name_x': decisions['fun_name_x'],
+                'fun_name_y': decisions['fun_name_y'],
+                'res_name_x': decisions['res_name_x'],
+                'res_name_y': decisions['res_name_y'],
+                'fun_names_other': fun_names_other,
+                'res_alternatives': res_alternatives,
+                'fun_alternatives': fun_alternatives,
+                'current_url': request.path,
+                'params': params}
+        return res
 
     def return_new_data(self, request):
         solver_state = self.get_solver_state(request)
         params = self.parse_params(request)
-
+        
         fun_axes = params['fun_axes']
         res_axes = params['res_axes']
-#         raise HTTPFound('/solver/%s/%s/%s/getdatasets' % (model_name, fun_axes, res_axes))
-#
 
-# #         try:
-# #             pass
-#         except Exception as e:
-#             res = {}
-#             res['ok'] = False
-#             res['error'] = traceback.format_exc(e)
-#             return res
-#         else:
         res = {}
         res['ok'] = True
         data = solver_state.get_data_for_js(fun_axes, res_axes)
         res.update(**data)
         return res
 
-    def view_solver_getdatasets(self, request):
-        return self.return_new_data(request)
+    def ajax_solver_getdatasets(self, request):
+        def go():
+            return self.return_new_data(request)
+        return ajax_error_catch(go)
 
-    def view_solver_addpoint(self, request):
+    def ajax_solver_addpoint(self, request):        
+        def go():
+            solver_state = self.get_solver_state(request)
+            f = request.json_body['f']
+    
+            solver_state.new_point(f)
+            return self.return_new_data(request)    
+        return ajax_error_catch(go)
+
+    def ajax_solver_reset(self, request):
+        def go():
+            self.reset(request)
+            return self.return_new_data(request)
+        return ajax_error_catch(go)
+
+    # TODO: catch errors when generating images
+    def image(self, request):
+        """ Returns an image """
         solver_state = self.get_solver_state(request)
+        ndp = solver_state.ndp
+        ndp = ndp.abstract()
+        params = self.parse_params(request)
+        # TODO: find a better way
+        setattr(ndp, '_xxx_label', params['model_name'])
+        gg = gvgen_from_ndp(ndp, STYLE_GREENREDSYM)
+        png, _pdf = png_pdf_from_gg(gg)
+        return response_data(request=request, data=png, content_type='image/png')
 
-        x = float(request.params['x'])
-        y = float(request.params['y'])
 
-        solver_state.new_point((x, y))
-        return self.return_new_data(request)
+def ajax_error_catch(f):
+    try:
+        return f()
+    except Exception as e:
+        print(e)
+        res = {}
+        res['ok'] = False
+        res['error'] = traceback.format_exc(e)
+        return res
 
+def create_alternative_urls(params, ndp):
+
+    def make_url(faxes, raxes):
+        faxes = ",".join(map(str, faxes))
+        raxes = ",".join(map(str, raxes))
+        model_name = params['model_name']
+        return '/solver/%s/%s/%s/' % (model_name, faxes, raxes)
+
+    # let's create the urls for different options
+    fnames = ndp.get_fnames()
+    rnames = ndp.get_rnames()
+
+    fun_alternatives = []
+    for option in itertools.permutations(range(len(fnames)), 2):
+        url = make_url(faxes=option, raxes=params['res_axes'])
+        desc = "%s vs %s" % (fnames[option[0]], fnames[option[1]])
+        fun_alternatives.append({'url':url, 'desc':desc})
+
+    res_alternatives = []
+    for option in itertools.permutations(range(len(rnames)), 2):
+        url = make_url(faxes=params['fun_axes'], raxes=option)
+        desc = "%s vs %s" % (rnames[option[0]], rnames[option[1]])
+        res_alternatives.append({'url':url, 'desc':desc})
+
+    return fun_alternatives, res_alternatives

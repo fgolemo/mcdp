@@ -264,8 +264,6 @@ def iterate_notwhere(x):
 
 
 css = """ 
-     span.ProvideKeyword, span.FName { color: darkgreen;}
-     span.RequireKeyword, span.RName  { color: darkred;}
      
      span.NewResource { color: darkred;}
      span.NewFunction { color: darkgreen; }
@@ -274,8 +272,7 @@ css = """
     span.ValueExpr { color: #CC6600 ;}
      
      /*span.Function  { color: darkgreen;}*/
-    span.ProvideKeyword,
-    span.RequireKeyword,     
+      
     span.MCDPKeyword,
     span.SubKeyword,
     span.CompactKeyword,
@@ -283,8 +280,6 @@ css = """
     span.TemplateKeyword,
     span.ForKeyword,
     span.UsingKeyword,
-    span.RequiredByKeyword,
-    span.ProvidedByKeyword,
     span.LoadKeyword,
     span.CodeKeyword,
     span.FromLibraryKeyword,
@@ -292,14 +287,7 @@ css = """
     span.ImplementedbyKeyword , span.FromCatalogueKeyword, span.MCDPTypeKeywor,
     span.InstanceKeyword,
     span.CoproductWithNamesChooseKeyword,
-    span.MCDPTypeKeyword { 
-        font-weight: bold; 
-    }
-       
-    /* There is a bug that prevents this from working correctly. */
-    /* span.ImpName { color: #CC6600; } */
-    span.FuncName { color: #CC6600 ; }
-
+    span.MCDPTypeKeyword,
     span.FromLibraryKeyword,
     span.CoproductWithNamesChooseKeyword,
     span.MCDPKeyword,
@@ -309,17 +297,34 @@ css = """
     span.TemplateKeyword,
     span.ForKeyword,
     span.UsingKeyword,
-    span.RequiredByKeyword,
-    span.ProvidedByKeyword,
     span.LoadKeyword, span.CodeKeyword,
     span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
     span.ImplementedbyKeyword,  
     span.FromCatalogueKeyword, 
     span.MCDPTypeKeyword,
-    span.InstanceKeyword
-    {
-       color: #00a;
+    span.InstanceKeyword,
+    span.FlattenKeyword,
+    span.ApproxKeyword
+    { 
+        font-weight: bold; 
+        color: #00a;
     }
+    
+    span.ProvideKeyword, span.RequireKeyword  {
+        font-weight: bold; 
+        
+    } 
+    
+    span.ProvideKeyword,  span.ProvidedByKeyword, span.FName { color: darkgreen;}
+    span.RequireKeyword, span.RequiredByKeyword, span.RName  { color: darkred;}
+      
+    
+
+       
+    /* There is a bug that prevents this from working correctly. */
+    /* span.ImpName { color: #CC6600; } */
+    span.FuncName { color: #CC6600 ; }
+ 
     
     span.FName, span.RName { } 
     span.DPName {  

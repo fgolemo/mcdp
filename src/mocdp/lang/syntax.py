@@ -488,16 +488,17 @@ class Syntax():
     
     # Example:
     #   approx(mass,0%,0g,%)
-    ndpt_approx = sp(S(APPROX) - S(L('(')) - fname + S(COMMA)
+    ndpt_approx = sp(APPROX - S(L('(')) - fname + S(COMMA)
                          - integer_or_float - S(L('%'))
                          - S(COMMA) + constant_value  # step
                          - S(COMMA) + constant_value  # max value
                         - S(L(')')) - ndpt_dp_rvalue,
-                         lambda t: CDP.ApproxDPModel(name=t[0],
-                                                     perc=t[1],
-                                                     abs=t[2],
-                                                     max_value=t[3],
-                                                     dp=t[4]))
+                         lambda t: CDP.ApproxDPModel(keyword=t[0],
+                                                     name=t[1],
+                                                     perc=t[2],
+                                                     abs=t[3],
+                                                     max_value=t[4],
+                                                     dp=t[5]))
     ndpt_catalogue_dp = sp(FROMCATALOGUE -
                       S(L('{')) -
                       simple_dp_model_stats -

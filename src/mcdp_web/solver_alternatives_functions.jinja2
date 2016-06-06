@@ -1,0 +1,23 @@
+<select class='url_select'>
+{% for fa in fun_alternatives %}
+    <option value="{{fa['url']}}"    
+	    {% if fa['url'] == current_url %}
+	    selected = 1
+	    {% endif %}
+    >
+    	{{fa['desc']}}
+    </option>
+ {% endfor %}
+   
+</select>
+
+
+
+<script type='text/javascript'>
+$(document ).ready(function() {
+	$('.url_select').change(function() {
+	  window.location = $(this).val();
+	});
+});
+</script>
+  

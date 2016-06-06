@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Sorry</title>
+    {% include 'head.jinja2' %}
+    
+</head>
+<body>
+
+<style type='text/css'>
+	#exception {
+		font-weight: bold;
+	}
+</style>
+
+<p> The code created an uncaught exception.  </p>
+
+<pre><code id='exception'>{{exception}}</code></pre>
+        
+</body>
+</html>

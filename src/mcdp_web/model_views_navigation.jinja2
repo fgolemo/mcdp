@@ -1,11 +1,23 @@
 <style type='text/css'>
 div.navigation {font-size: smaller; }
 div.navigation span.additional {margin-left: 2em; }
+
+div.library, div.this_model { 
+	display: inline; 
+	margin: 5px;
+	padding: 5px;
+	background-color: #eee;
+}
+
+div.library span, div.this_model span { font-weight: bold; }
+
 </style>
 
 <div class="navigation">
-  <button onclick="showPrompt();">+</button>
-  <span><a href="/qr_reader">QR+</a></span>
+
+	<div class="library">
+	<span>Library:</span>
+
 
   <script type="text/javascript">
   window.showPrompt = function() {
@@ -18,7 +30,6 @@ div.navigation span.additional {margin-left: 2em; }
   </script>
   
   <span class='models'>
-  Models:
   <select class='hot_select'>
     {% for m in models %}
     <option value="/models/{{m}}/{{current_view}}"    
@@ -32,27 +43,45 @@ div.navigation span.additional {margin-left: 2em; }
   </select>
   </span>
   
-  <a href="/solver/{{model_name}}">Solve</a>
-
-  <form style='display:inline' method="POST" action="/edit/{{model_name}}">
-    <input type="submit" value="Edit"/>
+  <form style='display:inline' method="GET" action="/refresh_library">
+	    <input type="submit" value="&#8634;"/>
   </form>
+   <button onclick="showPrompt();">+</button>
   
-  <span class='view'>
-  View:
-  <select class='hot_select'>
-    {% for v in views %}
-    <option value="/models/{{model_name}}/{{v}}"    
-	    {% if v == current_view %}
-	    selected = 1
-	    {% endif %}
-    >
-    	{{v}}
-    </option>
-    {% endfor %}
-  </select>
-  </span>
-   
+  <form style='display:inline' method="GET" action="/qr_reader">
+	    <input type="submit" value="QR+"/>
+  </form>
+ 
+  
+  </div>
+  
+  <div class="this_model">
+	  <span>Model:</span>
+	 
+	  
+	  <span class='view'>
+	  <select class='hot_select'>
+	    {% for v in views %}
+	    <option value="/models/{{model_name}}/{{v}}"    
+		    {% if v == current_view %}
+		    selected = 1
+		    {% endif %}
+	    >
+	    	{{v}}
+	    </option>
+	    {% endfor %}
+	  </select>
+	  </span>
+	   
+    <form style='display:inline' method="GET" action="/edit/{{model_name}}">
+	    <input type="submit" value="Edit"/>
+	 </form>
+  
+  	<form style='display:inline' method="GET" action="/solver/{{model_name}}/">
+	    <input type="submit" value="Solve"/>
+	 </form>
+  
+  </div>
   
 <script type = "text/javascript">
  $('.hot_select').change(function() {
@@ -63,7 +92,6 @@ div.navigation span.additional {margin-left: 2em; }
 	<span class='additional'>
 	<a href="{{request.url}}" target="_blank">open a copy</a>
 
-	<a href="/refresh_library">refresh library</a>
 	</span>
 	
 </div>

@@ -106,7 +106,7 @@ class CDPLanguage():
     CatalogueTable = namedtuplewhere('CatalogueTable', 'rows')
     FromCatalogue = namedtuplewhere('FromCatalogue', 'keyword funres table')
 
-    ApproxDPModel = namedtuplewhere('ApproxDPModel', 'name perc abs max_value dp')
+    ApproxDPModel = namedtuplewhere('ApproxDPModel', 'keyword name perc abs max_value dp')
 
     # just prepositions
     leq = namedtuplewhere('leq', 'glyph')

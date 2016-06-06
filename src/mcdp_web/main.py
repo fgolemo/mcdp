@@ -7,8 +7,7 @@ from mcdp_web.app_editor import AppEditor
 from mcdp_web.app_qr import AppQR
 from mcdp_web.app_visualization import AppVisualization
 from mcdp_web.app_solver import AppSolver
-
-
+from pyramid.response import Response
 
 
 __all__ = ['mcdp_web_main']
@@ -18,8 +17,6 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver):
     def __init__(self, dirname):
         self.dirname = dirname
 
-        self.counter = 0
-    
         self.library = None
 
         AppEditor.__init__(self)
@@ -58,6 +55,12 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver):
         self._refresh_library()
         raise HTTPFound(request.referrer)
 
+    def view_exception(self, exc, request):
+        import traceback
+        s = traceback.format_exc(exc)
+        s = s.decode('utf-8')
+        print(s)
+        return {'exception': s}
 
     def serve(self):
         config = Configurator()
@@ -78,6 +81,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver):
         config.add_route('refresh_library', '/refresh_library')
         config.add_view(self.view_refresh_library, route_name='refresh_library')
 
+        config.add_view(self.view_exception, context=Exception, renderer='exception.jinja2')
 
         app = config.make_wsgi_app()
         server = make_server('0.0.0.0', 8080, app)
