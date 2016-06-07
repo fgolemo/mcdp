@@ -39,8 +39,10 @@ class AppInteractive():
         return ajax_error_catch(go)
 
     def parse(self, string):
-        expr = Syntax.constant_value
+        expr = Syntax.rvalue
         x = parse_wrap(expr, string)[0]
+
+#         Syntax.rvalue
 
         x = remove_where_info(x)
         context = Context()
@@ -60,5 +62,5 @@ class AppInteractive():
         res['output_formatted'] = space.format(value)
         res['ok'] = True
         
-        print res
+#         print res
         return res

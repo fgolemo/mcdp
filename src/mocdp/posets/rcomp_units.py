@@ -130,7 +130,8 @@ def format_pint_unit_short(units):
 
     x = '{:~}'.format(units)
     x = x.replace('1.0', '')
-    x = x.replace('1', '')
+    if not '/' in x:
+        x = x.replace('1', '')  # otherwise 1 / s -> / s
     x = x.replace('dollars', '$')
     x = x.replace(' ', '')
     x = x.replace('**', '^')

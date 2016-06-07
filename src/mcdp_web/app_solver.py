@@ -187,7 +187,7 @@ def ajax_error_catch(f, quiet=(DPSyntaxError, DPSemanticError)):
         res = {}
         res['ok'] = False
         if isinstance(e, quiet):
-            s = e.__repr__()
+            s = str(e)
         else:
             s = traceback.format_exc(e)
         res['error'] = s

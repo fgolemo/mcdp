@@ -119,7 +119,9 @@ class MultValue():
 @contract(S=RcompUnits)
 def inv_unit(S):
     # S.units is a pint quantity
-    return RcompUnits(1 / S.units)
+    res = RcompUnits(1 / S.units)
+    # print('S: %s inv(S): %s' % (S, res))
+    return res
 
 def inv_constant(a):
     from mocdp.posets.rcomp import Rcomp
@@ -143,7 +145,9 @@ def mult_constants2(a, b):
     return ValueWithUnits(value=value, unit=R)
 
 def mult_constantsN(seq):
-    return functools.reduce(mult_constants2, seq)
+    res = functools.reduce(mult_constants2, seq)
+    # print('seq: %s res: %s' % (seq, res))
+    return res
 
 
 def add_table(F1, F2):

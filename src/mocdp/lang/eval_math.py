@@ -22,9 +22,10 @@ def eval_constant_divide(op, context):
         raise DPSemanticError('divide by more than two')
 
     constants = [eval_constant(_, context) for _ in ops]
-    invs = [inv_constant(_) for _ in constants]
+
+    factors = [constants[0], inv_constant(constants[1])]
     from mocdp.lang.parse_actions import mult_constantsN
-    return mult_constantsN(invs)
+    return mult_constantsN(factors)
 
 
 @contract(unit1=Space, unit2=Space)
