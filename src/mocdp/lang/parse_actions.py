@@ -120,7 +120,6 @@ class MultValue():
 def inv_unit(S):
     # S.units is a pint quantity
     res = RcompUnits(1 / S.units)
-    # print('S: %s inv(S): %s' % (S, res))
     return res
 
 def inv_constant(a):

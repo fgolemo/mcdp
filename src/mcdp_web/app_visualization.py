@@ -2,6 +2,7 @@ from mcdp_web.utils import response_data
 from mocdp.dp_report.gg_ndp import STYLE_GREENREDSYM
 from mocdp.dp_report.html import ast_to_html
 from mocdp.dp_report.report import gvgen_from_dp
+from mcdp_web.app_solver import png_error_catch
 
 class AppVisualization():
 
@@ -32,24 +33,25 @@ class AppVisualization():
                         renderer='model_generic_text_content.jinja2')
 
     def view_model_ndp_graph_image(self, request):
-        model_name = str(request.matchdict['model_name'])  # unicod
-        style = request.matchdict['style']
-        fileformat = request.matchdict['format']
+        def go():
+            model_name = str(request.matchdict['model_name'])  # unicod
+            style = request.matchdict['style']
+            fileformat = request.matchdict['format']
 
-        from mocdp.dp_report.gg_ndp import gvgen_from_ndp
-        from cdpview.plot import png_pdf_from_gg
+            from mocdp.dp_report.gg_ndp import gvgen_from_ndp
+            from cdpview.plot import png_pdf_from_gg
 
-        _, ndp = self.get_library().load_ndp(model_name)
-        gg = gvgen_from_ndp(ndp, style)
-        png, pdf = png_pdf_from_gg(gg)
+            _, ndp = self.get_library().load_ndp(model_name)
+            gg = gvgen_from_ndp(ndp, style)
+            png, pdf = png_pdf_from_gg(gg)
 
-        if fileformat == 'pdf':
-            return response_data(request=request, data=pdf, content_type='image/pdf')
-        elif fileformat == 'png':
-            return response_data(request=request, data=png, content_type='image/png')
-        else:
-            raise ValueError('No known format %r.' % fileformat)
-
+            if fileformat == 'pdf':
+                return response_data(request=request, data=pdf, content_type='image/pdf')
+            elif fileformat == 'png':
+                return response_data(request=request, data=png, content_type='image/png')
+            else:
+                raise ValueError('No known format %r.' % fileformat)
+        return png_error_catch(go, request)
 
     def view_model_ndp_graph(self, request):
         model_name = str(request.matchdict['model_name'])  # unicode
@@ -62,23 +64,25 @@ class AppVisualization():
                 'style': STYLE_GREENREDSYM}
 
     def view_model_dp_graph_image(self, request):
-        model_name = str(request.matchdict['model_name'])  # unicod
-        fileformat = request.matchdict['format']
+        def go():
+            model_name = str(request.matchdict['model_name'])  # unicod
+            fileformat = request.matchdict['format']
 
-        from cdpview.plot import png_pdf_from_gg
+            from cdpview.plot import png_pdf_from_gg
 
-        _, ndp = self.get_library().load_ndp(model_name)
-        dp = ndp.get_dp()
-        gg = gvgen_from_dp(dp)
+            _, ndp = self.get_library().load_ndp(model_name)
+            dp = ndp.get_dp()
+            gg = gvgen_from_dp(dp)
 
-        png, pdf = png_pdf_from_gg(gg)
+            png, pdf = png_pdf_from_gg(gg)
 
-        if fileformat == 'pdf':
-            return response_data(request=request, data=pdf, content_type='image/pdf')
-        elif fileformat == 'png':
-            return response_data(request=request, data=png, content_type='image/png')
-        else:
-            raise ValueError('No known format %r.' % fileformat)
+            if fileformat == 'pdf':
+                return response_data(request=request, data=pdf, content_type='image/pdf')
+            elif fileformat == 'png':
+                return response_data(request=request, data=png, content_type='image/png')
+            else:
+                raise ValueError('No known format %r.' % fileformat)
+        return png_error_catch(go, request)
 
     def view_model_dp_graph(self, request):
         model_name = str(request.matchdict['model_name'])  # unicode

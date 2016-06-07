@@ -164,17 +164,18 @@ class AppSolver():
     # TODO: catch errors when generating images
     def image(self, request):
         """ Returns an image """
-        solver_state = self.get_solver_state(request)
-        ndp = solver_state.ndp
-        ndp = ndp.abstract()
-        model_name = self.get_model_name(request)
+        def go():
+            solver_state = self.get_solver_state(request)
+            ndp = solver_state.ndp
+            ndp = ndp.abstract()
+            model_name = self.get_model_name(request)
 
-        # TODO: find a better way
-        setattr(ndp, '_xxx_label', model_name)
-        gg = gvgen_from_ndp(ndp, STYLE_GREENREDSYM)
-        png, _pdf = png_pdf_from_gg(gg)
-        return response_data(request=request, data=png, content_type='image/png')
-
+            # TODO: find a better way
+            setattr(ndp, '_xxx_label', model_name)
+            gg = gvgen_from_ndp(ndp, STYLE_GREENREDSYM)
+            png, _pdf = png_pdf_from_gg(gg)
+            return response_data(request=request, data=png, content_type='image/png')
+        return png_error_catch(go, request)
 
 def ajax_error_catch(f, quiet=(DPSyntaxError, DPSemanticError)):
     try:
@@ -192,6 +193,39 @@ def ajax_error_catch(f, quiet=(DPSyntaxError, DPSemanticError)):
             s = traceback.format_exc(e)
         res['error'] = s
         return res
+
+def png_error_catch(f, request):
+    try:
+        return f()
+    except Exception as e:
+        try: 
+            print(e)
+        except UnicodeEncodeError:
+            pass
+        s = str(e)
+    
+        from PIL import Image
+        # from PIL import ImageFont
+        from PIL import ImageDraw 
+        img = Image.new("RGB", (512, 512), "red")
+
+        draw = ImageDraw.Draw(img)
+#         font = ImageFont.truetype("sans-serif.ttf", 16)
+        draw.text((0, 0), s, (255, 255, 255))  # , font=font)
+        data = get_png(img)
+
+        return response_data(request=request, data=data, content_type='image/png')
+
+def get_png(image):
+    """ Gets png data from PIL image """
+    import tempfile
+    with tempfile.NamedTemporaryFile(suffix='.png') as tf:
+        fn = tf.name
+        image.save(fn)
+        with open(fn, 'rb') as f:
+            data = f.read()
+        return data
+
 
 def create_alternative_urls(params, ndp):
 

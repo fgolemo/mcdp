@@ -41,9 +41,6 @@ class AppInteractive():
     def parse(self, string):
         expr = Syntax.rvalue
         x = parse_wrap(expr, string)[0]
-
-#         Syntax.rvalue
-
         x = remove_where_info(x)
         context = Context()
 
