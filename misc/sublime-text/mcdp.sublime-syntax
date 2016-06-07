@@ -1,0 +1,127 @@
+%YAML 1.2
+---
+name: MCDP
+file_extensions: [mcdp]
+scope: source.mcdp
+
+contexts:
+  main:
+    - match: \b(mcdp|flatten|new|ceil|approx|instance|compacy|template|sub|for|by|instance|implemented-by|catalogue)\b
+      scope: keyword.control.mcdp
+    - match: \b(choose|set-of|using|pow|approx|Top)\b
+      scope: keyword.control.mcdp
+# 'load',
+#         'compact',
+#         'required',
+#         'provides',
+#         'abstract',
+#         'dp',
+#         'mcdp',
+#         'template',
+#         'sub',
+#         'for',
+#         'instance',
+#         'provided',
+#         'requires',
+#         'implemented-by',
+#         'using',
+#         'by',
+#         'catalogue',
+#         'set-of',
+#         'mcdp-type',
+#         'dptype',
+#         'Nat',
+#         'Int',
+#         'pow',
+#         'approx',
+#         'Top',  # top
+#         'choose',
+#         'flatten',
+#         'from_library',
+    - match: "#"
+      scope: comment.mcdp
+      push: comment
+
+    # operators
+    - match: "\\*"
+      scope: operator.mcdp
+    - match: "\\+"
+      scope: operator.mcdp
+    - match: "\\("
+      scope: operator.mcdp
+    - match: "\\)"
+      scope: operator.mcdp
+    - match: "\\{"
+      scope: operator.mcdp
+    - match: "\\}"
+      scope: operator.mcdp
+    - match: "/"
+      scope: operator.mcdp
+    - match: ">="
+      scope: operator.mcdp
+    - match: "<="
+      scope: operator.mcdp
+    - match: "="
+      scope: operator.mcdp
+
+    - match: "[a-z_0-9]+ provided by"
+      scope: identifier.functionality.mcdp
+
+    - match: "[a-z_0-9]+ required by"
+      scope: identifier.resource.mcdp
+    
+    - match: "provided [a-z_0-9]+"
+      scope: identifier.functionality.mcdp
+
+    - match: "required [a-z_0-9]+"
+      scope: identifier.resource.mcdp
+    
+
+    - match: \b(provides)\b
+      scope: keyword.functionality.mcdp
+      push: functionality_name
+
+    - match: \b(requires)\b
+      scope: keyword.resource.mcdp
+      push: resource_name
+
+    - match: \b[0-9\.]+\b
+      scope: constant.numeric.mcdp
+
+    - match: '"'
+      push: string
+
+    - match: \[
+      scope: constant.unit.mcdp
+      push: unit
+
+  comment:
+    - meta_scope: comment.mcdp
+    - match: \\.
+      scope: comment.mcdp
+
+    - match: "$"
+      scope: comment.mcdp
+      pop: true
+
+  functionality_name:
+    - match: "[a-z_]+"
+      scope: identifier.functionality.mcdp
+      pop: true
+  
+  resource_name:
+    - match: "[a-z_]+"
+      scope: identifier.resource.mcdp
+      pop: true
+
+  unit:
+    - meta_scope: constant.unit.mcdp
+    - match: \]
+      pop: true
+
+  string:
+    - meta_scope: string.quoted.double.c
+    - match: \\.
+      scope: constant.character.escape.c
+    - match: '"'
+      pop: true

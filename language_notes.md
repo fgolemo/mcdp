@@ -1,7 +1,12 @@
+The MCDP Language
+=================
 
 
-Overview
-========
+[TOC]
+
+Overview {: #overview}
+=====================
+
 
 
 
@@ -16,9 +21,10 @@ Natural and real numbers
 
 Use:
 
-	nat:5
-	int:5
-
+~~~~~~
+nat:5
+int:5
+~~~~~~
 
 R+ completion with units
 ------------------------
@@ -51,22 +57,51 @@ Use ``↑`` or ``upperset`` in front of a set:
 Describing co-design problems
 =============================
 
+This is an example of an MCDP:
+
+~~~~~~.mcdp_model
+mcdp {
+	
+}
+~~~~~~
+
+
+~~~~~~.mcdp_model
+mcdp {
+	provides x [J]
+}
+~~~~~~
+
 
 Shortcuts
 ---------
 
-	x = instance load S
+~~~~~~.mcdp_line
+x = instance load S
+~~~~~~
 
-	x = from_library "S"
+~~~~~~.mcdp_line
+x = from_library "S"
+~~~~~~
 
-	x = from_library 'S'
-
+~~~~~~.mcdp_line
+x = from_library 'S'
+~~~~~~
 
 
 To write
 ========
 
 * How to express +infinity?
+
+### New {:#FromLibraryKeyword}
+### Instance {:#InstanceKeyword}
+### Template {:#TemplateKeyword}
+### MCDP {:#MCDPKeyword}
+### Approx {:#ApproxKeyword}
+### Provides {:#ProvideKeyword}
+### Requires {:#RequiresKeyword}
+
 
 Missing features
 ================

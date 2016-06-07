@@ -105,6 +105,10 @@ class Syntax():
 
     PROVIDED_BY = sp(L('provided') - L('by'),
                     lambda _: CDP.ProvidedByKeyword('provided by'))
+
+    PROVIDED = sp(L('provided'), lambda _: CDP.ProvidedKeyword('provided'))
+    REQUIRED = sp(L('required'), lambda _: CDP.ProvidedKeyword('required'))
+
     GEQ = sp(L('>=') | L('≥') | L('⊇') | L('≽') | L('⊒'), lambda t: CDP.geq(t[0]))
     LEQ = sp(L('<=') | L('≤') | L('⊆') | L('≼') | L('⊑'), lambda t: CDP.leq(t[0]))
 
@@ -122,7 +126,7 @@ class Syntax():
     TEMPLATE = sp(L('template'), lambda t: CDP.TemplateKeyword(t[0]))
     ABSTRACT = sp(L('abstract'), lambda t: CDP.AbstractKeyword(t[0]))
 
-    FROM_LIBRARY = sp(L('from_library') | L('new'), lambda t: CDP.FromLibraryKeyword(t[0]))
+    FROM_LIBRARY = sp(L('FROM_LIBRARY') | L('new'), lambda t: CDP.FromLibraryKeyword(t[0]))
 
     COPROD = sp(L('^'), lambda t: CDP.coprod(t[0]))
     CODE = sp(L('code'), lambda t: CDP.CodeKeyword(t[0]))
@@ -224,13 +228,13 @@ class Syntax():
 
     # a quoted string
     quoted = sp(dblQuotedString | sglQuotedString, lambda t:t[0][1:-1])
-    ndpname = sp(idn.copy() | quoted, lambda t: CDP.FuncName(t[0]))  # XXX
+    ndpname = sp(idn.copy() | quoted, lambda t: CDP.NDPName(t[0]))
+
     ndpt_load_expr = sp(LOAD - (ndpname | SLPAR - ndpname - SRPAR),
                         lambda t: CDP.LoadCommand(t[0], t[1]))
 
     # An expression that evaluates to a NamedDP
     ndpt_dp_rvalue = Forward()
-
 
     # <dpname> = ...
     dpname = sp(idn.copy(), lambda t: CDP.DPName(t[0]))
@@ -308,13 +312,13 @@ class Syntax():
     rvalue_resource = rvalue_resource_simple ^ rvalue_resource_fancy
 
     rvalue_new_function = sp(idn.copy(), VariableRef_make)
-    rvalue_new_function2 = sp(DOT + idn.copy(),
+    rvalue_new_function2 = sp(PROVIDED + idn.copy(),
                               lambda t: CDP.NewFunction(t[1]))
     
     lf_new_resource = sp(idn.copy(),
                          lambda t: CDP.NewResource(t[0]))
 
-    lf_new_resource2 = sp(DOT + idn.copy(), lambda t: CDP.NewResource(t[1]))
+    lf_new_resource2 = sp(REQUIRED + idn.copy(), lambda t: CDP.NewResource(t[1]))
 
 
     lf_new_limit = sp(C(Group(number_with_unit), 'limit'),
@@ -484,16 +488,17 @@ class Syntax():
     
     # Example:
     #   approx(mass,0%,0g,%)
-    ndpt_approx = sp(S(APPROX) - S(L('(')) - fname + S(COMMA)
+    ndpt_approx = sp(APPROX - S(L('(')) - fname + S(COMMA)
                          - integer_or_float - S(L('%'))
                          - S(COMMA) + constant_value  # step
                          - S(COMMA) + constant_value  # max value
                         - S(L(')')) - ndpt_dp_rvalue,
-                         lambda t: CDP.ApproxDPModel(name=t[0],
-                                                     perc=t[1],
-                                                     abs=t[2],
-                                                     max_value=t[3],
-                                                     dp=t[4]))
+                         lambda t: CDP.ApproxDPModel(keyword=t[0],
+                                                     name=t[1],
+                                                     perc=t[2],
+                                                     abs=t[3],
+                                                     max_value=t[4],
+                                                     dp=t[5]))
     ndpt_catalogue_dp = sp(FROMCATALOGUE -
                       S(L('{')) -
                       simple_dp_model_stats -

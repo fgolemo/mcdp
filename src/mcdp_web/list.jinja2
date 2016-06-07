@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>List of models</title>
+        {% include 'head.jinja2' %}
+    
+</head>
+<body>
+
+
+<p> Models: </p>
+
+  <ul>
+    {% for m in models %}
+    <li><a href="models/{{m}}/syntax" target="right">{{m}}</a></li>
+    {% endfor %}
+  </ul>
+       
+ <p><a href="/qr_reader">QR import</a></p>
+ 
+  
+</body>
+</html>

@@ -72,6 +72,8 @@ class CDPLanguage():
     # Just Keywords
     ProvideKeyword = namedtuplewhere('ProvideKeyword', 'keyword')
     RequireKeyword = namedtuplewhere('RequireKeyword', 'keyword')
+    ProvidedKeyword = namedtuplewhere('ProvidedKeyword', 'keyword')
+    RequiredKeyword = namedtuplewhere('RequiredKeyword', 'keyword')
     MCDPKeyword = namedtuplewhere('MCDPKeyword', 'keyword')
     SubKeyword = namedtuplewhere('SubKeyword', 'keyword')
     TopKeyword = namedtuplewhere('TopKeyword', 'keyword')
@@ -93,6 +95,7 @@ class CDPLanguage():
     OpKeyword = namedtuplewhere('OpKeyword', 'keyword')  # Max
     DPWrapToken = namedtuplewhere('DPWrapToken', 'keyword')
     FuncName = namedtuplewhere('FuncName', 'value')  # python function name
+    NDPName = namedtuplewhere('NDPName', 'value')  # name in "new <name>"
     ApproxKeyword = namedtuplewhere('ApproxKeyword', 'keyword')
     FlattenKeyword = namedtuplewhere('FlattenKeyword', 'keyword')
 
@@ -104,7 +107,7 @@ class CDPLanguage():
     CatalogueTable = namedtuplewhere('CatalogueTable', 'rows')
     FromCatalogue = namedtuplewhere('FromCatalogue', 'keyword funres table')
 
-    ApproxDPModel = namedtuplewhere('ApproxDPModel', 'name perc abs max_value dp')
+    ApproxDPModel = namedtuplewhere('ApproxDPModel', 'keyword name perc abs max_value dp')
 
     # just prepositions
     leq = namedtuplewhere('leq', 'glyph')

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Rendering for {{model_name}}</title>
+    {% include 'head.jinja2' %}
+    
+</head>
+<body>
+	{% include 'model_views_navigation.jinja2' %}
+
+	 <style type='text/css'>
+		 img#graph {
+		 	width: 100%;
+		 } 
+ 	</style>
+ 
+	<img id="graph" src='/models/{{model_name}}/ndp_graph/image/{{style}}.png'/>
+	
+	<p> 
+	<a href='/models/{{model_name}}/ndp_graph/image/{{style}}.png'>PNG</a>,
+	<a href='/models/{{model_name}}/ndp_graph/image/{{style}}.pdf'>PDF</a>
+	</p>
+	 
+</body>
+</html>

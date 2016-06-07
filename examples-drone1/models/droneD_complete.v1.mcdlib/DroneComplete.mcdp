@@ -21,14 +21,7 @@ mcdp {
   ae.extra_payload >= carry_payload
   strategy.distance >= travel_distance
 
-  computer = instance mcdp {
-    requires power [W]
-    provides computation [flops]
-
-    p0 = 1 W
-    p1 = 100 W/flops
-    power >= p0 + p1 * computation 
-  }
+  computer = new Computer
 
   perception = instance template mcdp {
     provides velocity [m/s]
@@ -55,17 +48,7 @@ mcdp {
   ae.extra_power >= computer.power + sensor.power
 
   # We can take into account the shipping cost
-  shipping = instance  mcdp {
-    provides ships [g]
-    requires postage [$]
-
-    rate_continental_US  =     0.5 $ / lbs
-    rate_low_earth_orbit = 10000.0 $ / lbs
-    rate = rate_continental_US
-    
-    # postage proportional to weight
-    postage >= rate * ships
-  }
+  shipping = new Shipping  
   
   total_mass = ae.total_mass 
 

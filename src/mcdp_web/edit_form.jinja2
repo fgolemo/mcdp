@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  	{% include 'head.jinja2' %}
+    <style type="text/css">
+    .edit_form textarea {
+    	font-family: monospace;
+    }
+    .edit_form #error {
+    	font-weight: bold;
+    	color: red;
+    }
+    .edit_form #error_notice {
+    	color: red;
+    }
+    </style>
+  </head>
+  <body class="edit_form">
+  <p> Editing model <code>{{model_name}}</code></p>
+  
+  
+  {% if error %}
+  <p id="error_notice">
+  	The code did not compile. See error below. 
+  	Correct and resubmit or <a href="/edit/{{model_name}}">discard the changes</a>.
+  </p> 
+  {% endif %}
+
+  <textarea name="source_code" rows="{{rows}}" cols="80" form="the_form">{{source_code|safe}}</textarea>
+  <form id="the_form" method="POST" action="/edit_submit/{{model_name}}">
+    <input type="submit" value="Submit"/>
+  </form>
+  <form method="POST" action="/models/{{model_name}}/syntax">
+  	<input type="submit" value="Discard changes"/>
+  </form>
+  <!--<p><a href="/models/{{model_name}}/syntax">Discard changes</a></p>-->
+  
+  {% if error %}
+  <pre id="error"><code>{{error}}</code></pre>
+  {% endif %}
+  </body>
+</html>

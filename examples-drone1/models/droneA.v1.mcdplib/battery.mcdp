@@ -4,5 +4,5 @@ mcdp {
 	requires mass     [kg]
 
 	specific_energy_Li_Ion = 100 Wh / kg 
-	mass >= capacity / specific_energy_Li_Ion
+	required mass >= provided capacity / specific_energy_Li_Ion
 }

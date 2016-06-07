@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Interactive solver</title>
+
+	<script type="text/javascript" src="/static/Chart.js"></script>
+    {% include 'head.jinja2' %}
+
+</head>
+<body>
+
+<style type='text/css'>
+    #extents {
+        font-size: 50%;
+    }
+    .selection { text-align: center; }
+</style>
+
+<div style='text-align:center'>
+
+	<img src='compact_graph' style='height: 8em'/> 
+		
+	<table style='width: 800px; margin-top: 0em'>
+		<tr>
+			<td class='selection'>
+				{% include 'solver_alternatives_functions.jinja2' %}
+			</td>
+			<td class='selection'>
+				{% include 'solver_alternatives_resources.jinja2' %}
+			</td>
+		</tr>
+		
+		<tr>
+			<td>
+				<div style='width: 400px; height: 400px'>
+					<canvas id="chart_fun" width="400px" height="400px"></canvas>
+				</div>
+			</td>
+			<td>
+				<div style='width: 400px; height: 400px'>
+					<canvas id="chart_res" width="400px" height="400px"></canvas>
+				</div>
+			</td>
+		</tr>
+	</table>
+</div>
+
+<p id='extents'> 
+    {% if fun_name_x %}
+    Max <span id='scale_x_label'>X</span>: <input id='scale_x' type="text" value="1000"/> <br/>
+    {% endif %}
+    Max <span id='scale_y_label'>Y</span>: <input id='scale_y' type="text" value="1000"/>
+</p>
+
+<!-- // todo make ajax -->
+<!-- <form style='display:inline' method="POST" action="/solver_reset/{{model_name}}"> -->
+<input id="reset_points" type="submit" value="Reset points"/>
+<!-- </form> -->
+  
+ {% for fn in fun_names_other %}
+ <p>{{fn}}: <input class='manual' id='{{fn}}' type="text" value="0"/> </p>
+ {% endfor %}
+
+<span id='server_error'></span>
+<code><pre id='operation_error'></pre></code>
+
+
+<script type="text/javascript">
+
+var data_fun = []
+var datasets_fun = [{data: data_fun}]
+var data_res = []
+var datasets_res = [{data: data_res}]
+ 
+function ajax_begin() {
+	$('#operation_error').html('sending...');
+}
+function ajax_success(data) {
+    if (data['ok']) {
+        console.log(data);
+        chart_res.data.datasets = data['datasets_res'];
+        chart_fun.data.datasets = data['datasets_fun'];
+     
+        chart_fun.options['scales']['xAxes'][0]['scaleLabel']['labelString'] = data['fun_xlabel']
+        chart_fun.options['scales']['yAxes'][0]['scaleLabel']['labelString'] = data['fun_ylabel']
+        chart_res.options['scales']['xAxes'][0]['scaleLabel']['labelString'] = data['res_xlabel']
+        chart_res.options['scales']['yAxes'][0]['scaleLabel']['labelString'] = data['res_ylabel']
+    
+        $('#scale_x_label').html(data['fun_xlabel']);
+        $('#scale_y_label').html(data['fun_ylabel']);
+
+        chart_fun.update();
+        chart_res.update();
+        
+        $('#operation_error').html('');
+    } else {
+    	error = data['error']
+    	console.log(error);
+    	$('#operation_error').html(error);
+	}
+}
+    	
+function ajax_failure(error) {
+	console.log(error);
+	$('#server_error').html(error);
+}
+
+function ajax_reset_points(){
+    jQuery.ajax({
+        url     : 'reset',
+        type    : 'POST',
+        data: {},
+        dataType: 'json',
+        success : ajax_success,
+        error : ajax_failure
+    });
+}
+
+function ajax_send(x, y) {
+    f = {};
+    
+{% if fun_name_x %}
+    f["{{fun_name_x}}"] = x;
+{% endif %}
+
+{% if fun_name_y %}
+    f["{{fun_name_y}}"] = y;
+{% endif %}
+
+	// We need to capture the values of the manually-entered fields of type: 
+	// <input class='manual' id='{{fn}}' type="text" value="0"/> </p>
+	$('.manual').each(function(i, obj) { 
+    	f[obj.id] = parseFloat(obj.value);
+	});
+
+    jQuery.ajax({
+        url     : 'addpoint',
+        type    : 'POST', 
+        data: JSON.stringify({'f':f}),
+        contentType: 'application/json; charset=utf-8',
+        success : ajax_success,
+        error : ajax_failure
+    });
+}
+
+function ajax_get_initial() {
+    jQuery.ajax({
+        url     : 'getdatasets',
+        type    : 'POST',
+        data: {},
+        dataType: 'json',
+        success : ajax_success,
+        error : ajax_failure
+    });   
+}
+
+function onclick(event, elements_at) {
+	chart = chart_fun;
+	var valueX = null, valueY = null;
+
+    for (var scaleName in chart.scales) {
+        var scale = chart.scales[scaleName];
+        if (scale.isHorizontal()) {
+            valueX = scale.getValueForPixel(event.offsetX);
+        } else {
+            valueY = scale.getValueForPixel(event.offsetY);
+        }
+    }
+    //console.log(valueX, valueY);
+    
+    // data_fun.push({x:valueX, y:valueY});
+    ajax_send(valueX, valueY);
+}
+
+var canvas_fun = document.getElementById("chart_fun");
+var canvas_res = document.getElementById("chart_res");
+
+red = "#af0000";
+green = "#00af00";
+
+var chart_fun = new Chart(canvas_fun, {
+    type: 'line',
+    data: { datasets: datasets_fun},
+    options: {
+    	showLines: false, // scatter
+        onClick: onclick,
+        scaleOverride:true,
+        legend: {display: false},
+        scales: {
+            xAxes: [{
+                type: "linear",
+                position: 'bottom',
+                scaleLabel: {
+			        display: true,
+			        labelString: 'functionality',
+                    fontColor: green,
+			    },
+                ticks: {
+                    fontColor: green,
+
+                    {% if fun_name_x %}
+                    min: 0.0,
+                    max: 1000.0,
+                    {% endif %}
+                }
+            }],
+            yAxes: [{
+                type: "linear",
+                position: 'left',
+                scaleLabel: {
+			        display: true,
+                    labelString: 'functionality',
+                    fontColor: green,
+			    },
+                ticks: {
+                    fontColor: green,
+                    min: 0.0,
+                    max: 1000.0,
+                }
+            }]
+        }
+    }
+});
+ 
+
+var chart_res = new Chart(canvas_res, {
+    type: 'line',
+    data: { datasets: datasets_res },
+    options: {
+        legend: {display: false},
+    	showLines: false, // scatter
+        scaleOverride:true,
+    	scales: {
+            xAxes: [{
+                type: "linear",
+                position: 'bottom',
+                scaleLabel: {
+			        display: true,
+			        labelString: 'resource',
+                    fontColor: red,
+			    },
+                ticks: {
+                    fontColor: red,
+                   // min: 0.0,
+                }
+            }],
+            yAxes: [{
+                type: "linear",
+                position: 'left',
+                scaleLabel: {
+			        display: true,
+			        labelString: 'resource',
+                    fontColor: red,
+			    },
+                ticks: {
+                    fontColor: red,
+                 //   min: 0.0,
+                }
+
+            }]
+        }
+    }
+});
+
+ajax_get_initial();
+
+
+$.event.special.inputchange = {
+    setup: function() {
+        var self = this, val;
+        $.data(this, 'timer', window.setInterval(function() {
+            val = self.value;
+            if ( $.data( self, 'cache') != val ) {
+                $.data( self, 'cache', val );
+                $( self ).trigger( 'inputchange' );
+            }
+        }, 20));
+    },
+    teardown: function() {
+        window.clearInterval( $.data(this, 'timer') );
+    },
+    add: function() {
+        $.data(this, 'cache', this.value);
+    }
+};
+
+function validate_and_change_scale(control, chart, chart_axis) {
+    function isNumeric(num){
+       return !isNaN(num)
+    };
+
+    if(isNumeric(control.value) && (parseFloat(control.value) > 0)) {
+
+        val = parseFloat(control.value);
+        chart_axis['ticks']['max'] = val;
+        $(control).css('color', 'black');
+    } else { 
+        console.log('invalid value: '+ control.value);
+        $(control).css('color', 'red');
+    }
+
+    chart.update();
+    console.log(control.value);
+
+};
+
+$(document ).ready(function() {
+     $('#scale_x').on('inputchange', function() { 
+        validate_and_change_scale(this, chart_fun, chart_fun.options['scales']['xAxes'][0]);
+    });
+     $('#scale_y').on('inputchange', function() {
+        validate_and_change_scale(this, chart_fun, chart_fun.options['scales']['yAxes'][0]);
+    });
+
+     $('#reset_points').click(ajax_reset_points);
+});
+
+</script>
+
+</body>
+</html>

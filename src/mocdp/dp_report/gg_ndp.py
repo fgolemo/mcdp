@@ -302,8 +302,8 @@ def gvgen_from_ndp(ndp, style='default'):
 
         gg.styleApply("external_cluster_resources", cluster_resources)
 
-
-    if True:
+    ADD_ORDER = False
+    if ADD_ORDER:
         all_nodes = gdc.get_all_nodes()
 
         for i, n in enumerate(all_nodes):
@@ -325,6 +325,9 @@ def gvgen_from_ndp(ndp, style='default'):
 #     gg.propertyAppend(cluster_resources, "shape", "box")
 #     gg.propertyAppend(cluster_resources, "color", "red")
 
+    if False:
+        gg.remove_identity_nodes()
+             
     return gg
 
 def create(gdc, ndp):
@@ -387,6 +390,8 @@ def is_simple(ndp):
 def create_simplewrap(gdc, ndp):
     assert isinstance(ndp, SimpleWrap)
     label = str(ndp)
+
+
 
     sname = None  # name of style to apply, if any
 
@@ -469,6 +474,10 @@ def create_simplewrap(gdc, ndp):
 #     if label[:2] != '<T':
 #         # Only available in svg or cairo renderer
 #         label = '<I>%s</I>' % label
+
+    # an hack to think about better
+    if hasattr(ndp, '_xxx_label'):
+        label = getattr(ndp, '_xxx_label')
 
     node = gdc.newItem(label)
 
@@ -558,90 +567,22 @@ def create_composite(gdc0, ndp):
         else:
             gdc = gdc0
 
-        def get_connections_to_function(name):
-            assert ndp.context.is_new_function(name)
-            res = []
-            for c in ndp.context.connections:
-                if c.dp1 == name:
-                    res.append(c)
-            # print('Connection to %r: %r' % (name, res))
-            return res
-
-        def get_connections_to_resource(name):
-            assert ndp.context.is_new_resource(name)
-            res = []
-            for c in ndp.context.connections:
-                if c.dp2 == name:
-                    res.append(c)
-            # print('Connection to %r: %r' % (name, res))
-            return res
-
-        # it is connected to only one
-        def is_function_with_one_connection(name):
-            return (ndp.context.is_new_function(name)
-                    and len(get_connections_to_function(name)) == 1)
-
-        # it is connected to only one
-        def is_resource_with_one_connection(name):
-            return (ndp.context.is_new_resource(name)
-                    and len(get_connections_to_resource(name)) == 1)
-
-        def is_function_with_no_connections(name):
-            return (ndp.context.is_new_function(name)
-                    and len(get_connections_to_function(name)) == 0)
-
-        def is_resource_with_no_connections(name):
-            return (ndp.context.is_new_resource(name)
-                    and len(get_connections_to_resource(name)) == 0)
-
-        def get_connections_to_dp_resource(name, rn):
-            assert name in ndp.context.names
-            res = []
-            for c in ndp.context.connections:
-                if c.dp1 == name and c.s1 == rn:
-                    res.append(c)
-            return res
-
-        def resource_has_more_than_one_connected(name, rn):
-            res = get_connections_to_dp_resource(name, rn)
-            # print(ndp.context.connections)
-            # print('number connected to %s.%s: %s' % (name, rn, len(res)))
-            return len(res) > 1
-
-        def is_function_with_one_connection_that_is_not_a_res_one(name):
-            if is_function_with_one_connection(name):
-                other = get_connections_to_function(name)[0].dp2
-                assert other != name
-                if is_resource_with_one_connection(other):
-                    return False
-                return True
-            else:
-                return False
-
-        def is_resource_with_one_connection_that_is_not_a_fun_one(name):
-            if is_resource_with_one_connection(name):
-                other = get_connections_to_resource(name)[0].dp1
-                assert other != name
-
-                if is_function_with_one_connection(other):
-                    return False
-                return True
-            else:
-                return False
 
         for name, value in ndp.context.names.items():
             # do not create these edges
-            if is_function_with_one_connection_that_is_not_a_res_one(name):
-                # print('Skipping extra node for is_function_with_one_connection %r' % name)
-#                 warnings.warn('hack')
-                continue
+            if False:
+                if is_function_with_one_connection_that_is_not_a_res_one(ndp, name):
+                    print('Skipping extra node for is_function_with_one_connection %r' % name)
+    #                 warnings.warn('hack')
+                    continue
 
-            if is_resource_with_one_connection_that_is_not_a_fun_one(name):
-                # print('skipping extra node for %r' % name)
-#                 warnings.warn('hack')
-                continue
+            if False:
+                if is_resource_with_one_connection_that_is_not_a_fun_one(ndp, name):
+                    print('skipping extra node for %r' % name)
+    #                 warnings.warn('hack')
+                    continue
 
-            if is_function_with_no_connections(name):
+            if is_function_with_no_connections(ndp, name):
                 # only draw the balloon
                 item = gdc.newItem("%s" % name)
                 gdc.styleApply('unconnected', item)
@@ -651,7 +592,7 @@ def create_composite(gdc0, ndp):
                     names2resources[name][rn] = item
                 continue
 
-            if is_resource_with_no_connections(name):
+            if is_resource_with_no_connections(ndp, name):
                 # only draw the balloon instead of "Identity" node
                 item = gdc.newItem("%s" % name)
                 gdc.styleApply('unconnected', item)
@@ -668,7 +609,7 @@ def create_composite(gdc0, ndp):
             names2functions[name] = f
 
             for rn in names2resources[name]:
-                if resource_has_more_than_one_connected(name, rn):
+                if resource_has_more_than_one_connected(ndp, name, rn):
                     # create new splitter
                     orig = names2resources[name][rn]
                     split = gdc.newItem('')
@@ -681,38 +622,43 @@ def create_composite(gdc0, ndp):
                     gdc.decorate_arrow_resource(l)
                     names2resources[name][rn] = split
 
+
         ignore_connections = set()
-        for name, value in ndp.context.names.items():
-            if is_function_with_one_connection_that_is_not_a_res_one(name):
-                only_one = get_connections_to_function(name)[0]
-                ignore_connections.add(only_one)
+        if False:
+            for name, value in ndp.context.names.items():
+                if is_function_with_one_connection_that_is_not_a_res_one(ndp, name):
+                    only_one = get_connections_to_function(ndp, name)[0]
+                    ignore_connections.add(only_one)
 
-                if not only_one.dp2 in names2functions:
-                    msg = ('Cannot find function node ref for %r' % only_one.dp2
-                                     + ' while drawing one connection %s' % str(only_one))
-#                     warnings.warn('giving up')
-#                     continue
-                    raise_desc(ValueError, msg, names=list(ndp.context.names),
-                               names2functions=list(names2functions))
+                    if not only_one.dp2 in names2functions:
+                        msg = ('Cannot find function node ref for %r' % only_one.dp2
+                                         + ' while drawing one connection %s' % str(only_one))
+    #                     warnings.warn('giving up')
+    #                     continue
+                        raise_desc(ValueError, msg, names=list(ndp.context.names),
+                                   names2functions=list(names2functions))
 
-                node = names2functions[only_one.dp2][only_one.s2]
-                names2functions[name][only_one.s1] = node
-                # XXX: not really sure
-                names2resources[name][only_one.s1] = node
+                    node = names2functions[only_one.dp2][only_one.s2]
+                    names2functions[name][only_one.s1] = node
+                    # XXX: not really sure
+                    names2resources[name][only_one.s1] = node
 
-        for name, value in ndp.context.names.items():
-            if is_resource_with_one_connection_that_is_not_a_fun_one(name):
-                only_one = get_connections_to_resource(name)[0]
-                ignore_connections.add(only_one)
+            for name, value in ndp.context.names.items():
+                if is_resource_with_one_connection_that_is_not_a_fun_one(ndp, name):
+                    only_one = get_connections_to_resource(ndp, name)[0]
+                    ignore_connections.add(only_one)
 
-                if not only_one.dp1 in names2resources:
-                    raise ValueError('Cannot find function node ref for %r' % only_one.dp1
-                                     + ' while drawing one connection %s' % str(only_one))
+                    if not only_one.dp1 in names2resources:
+    #                     warnings.warn('giving up')
+    #                     continue
 
-                node = names2resources[only_one.dp1][only_one.s1]
-                names2resources[name][only_one.s2] = node
-                # XXX: not really sure
-                names2functions[name][only_one.s2] = node
+                        raise ValueError('Cannot find function node ref for %r' % only_one.dp1
+                                         + ' while drawing one connection %s' % str(only_one))
+
+                    node = names2resources[only_one.dp1][only_one.s1]
+                    names2resources[name][only_one.s2] = node
+                    # XXX: not really sure
+                    names2functions[name][only_one.s2] = node
 
 
         for c in ndp.context.connections:
@@ -819,9 +765,14 @@ def get_signal_label(name, unit):
     for i in range(9):
         if str(i) in name:
             name = ""
-
+    
     if '_' in name:
         name = ''
+
+    # a/b/c/signal -> ../signal
+    if '/' in name:
+        name = '../' + name.split('/')[-1]
+
     s2 = format_unit(unit)
     if name:
         return name + ' ' + s2
@@ -829,3 +780,75 @@ def get_signal_label(name, unit):
         return s2
 
 
+
+def get_connections_to_function(ndp, name):
+    assert ndp.context.is_new_function(name)
+    res = []
+    for c in ndp.context.connections:
+        if c.dp1 == name:
+            res.append(c)
+    # print('Connection to %r: %r' % (name, res))
+    return res
+
+def get_connections_to_resource(ndp, name):
+    assert ndp.context.is_new_resource(name)
+    res = []
+    for c in ndp.context.connections:
+        if c.dp2 == name:
+            res.append(c)
+    # print('Connection to %r: %r' % (name, res))
+    return res
+
+# it is connected to only one
+def is_function_with_one_connection(ndp, name):
+    return (ndp.context.is_new_function(name)
+            and len(get_connections_to_function(ndp, name)) == 1)
+
+# it is connected to only one
+def is_resource_with_one_connection(ndp, name):
+    return (ndp.context.is_new_resource(name)
+            and len(get_connections_to_resource(ndp, name)) == 1)
+
+def is_function_with_no_connections(ndp, name):
+    return (ndp.context.is_new_function(name)
+            and len(get_connections_to_function(ndp, name)) == 0)
+
+def is_resource_with_no_connections(ndp, name):
+    return (ndp.context.is_new_resource(name)
+            and len(get_connections_to_resource(ndp, name)) == 0)
+
+
+def get_connections_to_dp_resource(ndp, name, rn):
+    assert name in ndp.context.names
+    res = []
+    for c in ndp.context.connections:
+        if c.dp1 == name and c.s1 == rn:
+            res.append(c)
+    return res
+
+def resource_has_more_than_one_connected(ndp, name, rn):
+    res = get_connections_to_dp_resource(ndp, name, rn)
+    # print(ndp.context.connections)
+    # print('number connected to %s.%s: %s' % (name, rn, len(res)))
+    return len(res) > 1
+
+def is_function_with_one_connection_that_is_not_a_res_one(ndp, name):
+    if is_function_with_one_connection(ndp, name):
+        other = get_connections_to_function(ndp, name)[0].dp2
+        assert other != name
+        if is_resource_with_one_connection(ndp, other):
+            return False
+        return True
+    else:
+        return False
+
+def is_resource_with_one_connection_that_is_not_a_fun_one(ndp, name):
+    if is_resource_with_one_connection(ndp, name):
+        other = get_connections_to_resource(ndp, name)[0].dp1
+        assert other != name
+
+        if is_function_with_one_connection(ndp, other):
+            return False
+        return True
+    else:
+        return False

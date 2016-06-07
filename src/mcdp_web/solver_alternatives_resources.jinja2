@@ -1,0 +1,12 @@
+
+<select class='url_select'>
+{% for ra in res_alternatives %}
+    <option value="{{ra['url']}}"    
+	    {% if ra['url'] == current_url %}
+	    selected = 1
+	    {% endif %}
+    >
+    	{{ra['desc']}}
+    </option>
+ {% endfor %}
+</select>

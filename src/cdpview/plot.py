@@ -205,7 +205,6 @@ for s in [STYLE_GREENRED, 'default', 'clean', STYLE_GREENREDSYM]:
     x = ('ndp_%s' % s, Vis(s))
     allplots.add(x)
 
-
 @contract(returns='tuple(str,*)')
 def parse_kv(x):
     return tuple(x.split('='))

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>author</key>
+	<string>Andrea Censi</string>
+	<key>name</key>
+	<string>MCDP</string>
+	<key>settings</key>
+	<array>
+		<dict>
+			<key>settings</key>
+			<dict>
+				<key>background</key>
+				<string>#ffffff</string>
+				<key>caret</key>
+				<string>#A7A7A7</string>
+				<key>foreground</key>
+				<string>#000000</string>
+				<key>invisibles</key>
+				<string>#FFFFFF40</string>
+				<key>lineHighlight</key>
+				<string>#FFFFFF08</string>
+				<key>selection</key>
+				<string>#DDF0FF33</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>name</key>
+			<string>functionality</string>
+			<key>scope</key>
+			<string>keyword.functionality.mcdp</string>
+			<key>settings</key>
+			<dict>
+				<key>fontStyle</key>
+				<string>bold</string>
+				<key>foreground</key>
+				<string>#007700</string>
+			</dict>
+		</dict>
+		
+		<dict>
+			<key>name</key>
+			<string>resources</string>
+			<key>scope</key>
+			<string>keyword.resource.mcdp</string>
+			<key>settings</key>
+			<dict>
+				<key>fontStyle</key>
+				<string>bold</string>
+				<key>foreground</key>
+				<string>#770000</string>
+			</dict>
+		</dict>
+
+		<dict>
+			<key>name</key>
+			<string>resources</string>
+			<key>scope</key>
+			<string>keyword.control.mcdp</string>
+			<key>settings</key>
+			<dict>
+				<key>fontStyle</key>
+				<string>bold</string>
+				<key>foreground</key>
+				<string>#000077</string>
+			</dict>
+		</dict>
+
+		<dict>
+			<key>name</key>
+			<string>resources</string>
+			<key>scope</key>
+			<string>constant.unit.mcdp</string>
+			<key>settings</key>
+			<dict> 
+				<key>foreground</key>
+				<string>orange</string>
+			</dict>
+		</dict>
+		
+		<dict>
+			<key>scope</key>
+			<string>operator.mcdp</string>
+			<key>settings</key>
+			<dict> 
+				<key>fontStyle</key>
+				<string>bold</string>
+ 				<key>foreground</key>
+				<string>blue</string>
+			</dict>
+		</dict>
+	
+		<dict>
+			<key>name</key>
+			<string>resources</string>
+			<key>scope</key>
+			<string>constant.numeric.mcdp</string>
+			<key>settings</key>
+			<dict> 
+				<key>foreground</key>
+				<string>orange</string>
+			</dict>
+		</dict>
+		
+		<dict>
+			<key>scope</key>
+			<string>identifier.resource.mcdp</string>
+			<key>settings</key>
+			<dict> 
+				<key>foreground</key>
+				<string>#770000</string>
+			</dict>
+		</dict>
+		<dict>
+			<key>scope</key>
+			<string>identifier.functionality.mcdp</string>
+			<key>settings</key>
+			<dict> 
+				<key>foreground</key>
+				<string>#007700</string>
+			</dict>
+		</dict>
+
+		<dict>
+			<key>scope</key>
+			<string>comment.mcdp</string>
+			<key>settings</key>
+			<dict> 
+				<key>foreground</key>
+				<string>#777777</string>
+			</dict>
+		</dict>
+		
+
+
+
+
+
+
+
+
+	</array>
+	<key>uuid</key>
+	<string>766026CB-703D-4610-B070-8DE07D937C5F</string>
+</dict>
+</plist>
