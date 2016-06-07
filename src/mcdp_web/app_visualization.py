@@ -114,6 +114,7 @@ class AppVisualization():
         realpath = f['realpath']
 
         highlight = ast_to_html(source_code, complete_document=False)
+        highlight = self.add_html_links(highlight) 
 
         return {'source_code': source_code,
                 'highlight': highlight,
@@ -122,6 +123,73 @@ class AppVisualization():
                 'models': models,
                 'views': self._get_views(),
                 'current_view': 'syntax'}
+
+    def get_link_to_model(self, name):
+        return "/models/%s/syntax" % name
+
+    def add_html_links(self, frag):
+        """ Puts links to the models. """
+
+        from bs4 import BeautifulSoup
+        soup = BeautifulSoup(frag, 'html.parser')
+        from bs4.element import NavigableString
+
+        # look for links of the type:
+        # <span class="FromLibraryKeyword">new</span>
+        #     <span class="NDPName"> Actuation_a2_vel</span>
+        # </span>
+
+        def break_string(s):
+            """ Returns initial ws, middle, final ws. """
+            middle = s.strip()
+            initial = s[:len(s) - len(s.lstrip())]
+            final = s[len(s.rstrip()):]
+            assert initial + middle + final == s, (initial, middle, final, s)
+            return initial, middle, final
+
+        for tag in soup.select('span.NDPName'):
+            initial, middle, final = break_string(tag.string)
+            tag.string = ''
+            
+            name = middle
+            href = self.get_link_to_model(name)
+
+            attrs = {'class': 'link-to-model', 'href': href, 'target': '_blank'}
+            new_tag = soup.new_tag("a", **attrs)
+            new_tag.string = name
+
+            tag.append(NavigableString(initial))
+            tag.append(new_tag)
+            tag.append(NavigableString(final))
+            
+            img = '/solver/%s/compact_graph' % name
+            attrs = {'src': img, 'class': 'popup'}
+            new_tag = soup.new_tag("img", **attrs)
+            tag.append(new_tag)
+
+
+        # Add documentation links for each span 
+        # that has a class that finishes in "Keyword"
+        def select_tags():
+            for tag in soup.select('span'):
+                if 'class' in tag.attrs:
+                    klass = tag.attrs['class'][0]
+                    if 'Keyword' in klass:
+                        yield tag
+                        
+        manual = '/language'
+
+        for tag in select_tags():
+            keyword = tag.attrs['class'][0]
+            link = manual + '#' + keyword
+            text = tag.string
+            tag.string = ''
+            attrs = {'class': 'link-to-keyword', 'href': link, 'target': '_blank'}
+            new_tag = soup.new_tag("a", **attrs)
+            new_tag.string = text
+            tag.append(new_tag)
+        
+        return soup.prettify()
 
     def _get_views(self):
         return ['syntax', 'ndp_graph', 'dp_graph', 'ndp_repr']

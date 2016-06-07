@@ -16,6 +16,9 @@ class AppSolver():
             /solver/batteries/0,1/0,1/addpoint     params x, y
             /solver/batteries/0,1/0,1/getdatasets  params -
             /solver/batteries/0,1/0,1/reset        params -
+            
+        /solver/batteries/0,1/0,1/compact_graph    png image
+        /solver/batteries/compact_graph    png image
     """
 
     def __init__(self):
@@ -60,6 +63,8 @@ class AppSolver():
 
         config.add_route('solver_image', base + 'compact_graph')
         config.add_view(self.image, route_name='solver_image')
+        config.add_route('solver_image2', '/solver/{model_name}/compact_graph')
+        config.add_view(self.image, route_name='solver_image2')
 
     def parse_params(self, request):
         model_name = self.get_model_name(request)
@@ -92,7 +97,6 @@ class AppSolver():
             message += str(ndp)
             return {'title': title, 'message': message}
 
-        
         
     def view_solver(self, request):
         params = self.parse_params(request)
@@ -162,9 +166,10 @@ class AppSolver():
         solver_state = self.get_solver_state(request)
         ndp = solver_state.ndp
         ndp = ndp.abstract()
-        params = self.parse_params(request)
+        model_name = self.get_model_name(request)
+
         # TODO: find a better way
-        setattr(ndp, '_xxx_label', params['model_name'])
+        setattr(ndp, '_xxx_label', model_name)
         gg = gvgen_from_ndp(ndp, STYLE_GREENREDSYM)
         png, _pdf = png_pdf_from_gg(gg)
         return response_data(request=request, data=png, content_type='image/png')

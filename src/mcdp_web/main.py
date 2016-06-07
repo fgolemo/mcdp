@@ -7,10 +7,12 @@ from mcdp_web.app_editor import AppEditor
 from mcdp_web.app_qr import AppQR
 from mcdp_web.app_visualization import AppVisualization
 from mcdp_web.app_solver import AppSolver
-from pyramid.response import Response
+from mocdp.exceptions import DPSemanticError, DPSyntaxError
 
 
-__all__ = ['mcdp_web_main']
+__all__ = [
+    'mcdp_web_main',
+]
 
 
 class WebApp(AppEditor, AppVisualization, AppQR, AppSolver):
@@ -55,12 +57,37 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver):
         self._refresh_library()
         raise HTTPFound(request.referrer)
 
-    def view_exception(self, exc, request):
+    def view_exception(self, exc, _request):
         import traceback
-        s = traceback.format_exc(exc)
+
+        compact = (DPSemanticError, DPSyntaxError)
+
+        if isinstance(exc, compact):
+            s = str(exc)
+        else:
+            s = traceback.format_exc(exc)
         s = s.decode('utf-8')
         print(s)
         return {'exception': s}
+    
+    def view_language(self, _request):
+        import pkg_resources
+        f = pkg_resources.resource_filename('mcdp_web', '../../language_notes.md')  # @UndefinedVariable
+        import codecs
+        data = codecs.open(f, encoding='utf-8').read()
+        import markdown  # @UnresolvedImport
+
+        extensions = [
+            'markdown.extensions.smarty',
+            'markdown.extensions.toc',
+            'markdown.extensions.attr_list',
+#             'markdown.extensions.extra',
+            'markdown.extensions.fenced_code',
+            'markdown.extensions.admonition',
+        ]
+        html = markdown.markdown(data, extensions)
+
+        return {'contents': html}
 
     def serve(self):
         config = Configurator()
@@ -72,8 +99,14 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver):
         AppQR.config(self, config)
         AppSolver.config(self, config)
 
-        config.add_route('list', '/')
+        config.add_route('index', '/')
+        config.add_view(self.view_index, route_name='index', renderer='index.jinja2')
+
+        config.add_route('list', '/list')
         config.add_view(self.view_list, route_name='list', renderer='list.jinja2')
+
+        config.add_route('language', '/language')
+        config.add_view(self.view_language, route_name='language', renderer='language.jinja2')
 
         config.add_route('empty', '/empty')
         config.add_view(self.view_index, route_name='empty', renderer='empty.jinja2')

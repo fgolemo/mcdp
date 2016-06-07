@@ -29,6 +29,7 @@ class AppEditor():
         source_code = f['data']
         realpath = f['realpath']
         nrows = int(len(source_code.split('\n')) + 6)
+        nrows = min(nrows, 25)
 
         return {'source_code': source_code,
                 'model_name': model_name,
@@ -40,10 +41,10 @@ class AppEditor():
     def view_edit_submit(self, request):
         model_name = str(request.matchdict['model_name'])  # unicode
 
-        filename = '%s.mcdp' % model_name
+        # filename = '%s.mcdp' % model_name
         l = self.get_library()
-        f = l._get_file_data(filename)
-        realpath = f['realpath']
+        # f = l._get_file_data(filename)
+        # realpath = f['realpath']
 
         data = str(request.params['source_code'])
         data = data.replace('\r', '')
@@ -83,5 +84,6 @@ class AppEditor():
                 f.write(source)
             l._update_file(filename)
 
-            return render_to_response('ok_model_created.jinja2',
-                                      {'model_name': model_name}, request=request)
+            raise HTTPFound('/edit/%s' % model_name)
+
+

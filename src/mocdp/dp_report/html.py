@@ -327,7 +327,7 @@ css = """
  
     
     span.FName, span.RName { } 
-    span.DPName {  
+    span.DPName, span.NDPName {  
         color: #a0a;
     }
     

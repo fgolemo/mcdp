@@ -20,12 +20,11 @@ def scrape(qrstring):
     url = qrstring
 
     f = urllib.urlopen(url)
-
     from bs4 import BeautifulSoup
     soup = BeautifulSoup(f, 'html.parser')
     resources = []
 
-#     <link href="aaa_battery-web.png" name='aaa_battery' rel="mcdp/icon" type="image/png"/>
+    # <link href="aaa_battery-web.png" name='aaa_battery' rel="mcdp/icon" type="image/png"/>
 
     for tag in soup.find_all('link'):
         print(tag)

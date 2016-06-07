@@ -77,6 +77,9 @@ class SimpleWrap(NamedDP):
             raise_wrapped(ValueError, e, msg, dp=self.dp, F=F, R=R,
                           fnames=fnames, rnames=rnames)
 
+    def abstract(self):
+        return self
+
     def get_icon(self):
         if self.icon is None:
             return type(self.dp).__name__

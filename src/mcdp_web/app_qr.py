@@ -1,8 +1,9 @@
-import binascii
-import traceback
-import os
-from pyramid.httpexceptions import HTTPFound
 from mcdp_web.utils import response_data
+from pyramid.httpexceptions import HTTPFound
+import binascii
+import os
+import traceback
+
 
 class AppQR():
     def __init__(self):
@@ -25,9 +26,8 @@ class AppQR():
         config.add_view(self.view_qr_import,
                         route_name='qr_import')
 
-    def view_qr_reader(self, request):
+    def view_qr_reader(self, request):  # @UnusedVariable
         return {}
-
 
     def appqr_reset(self):
         # qrstring to resources
@@ -37,7 +37,7 @@ class AppQR():
         
     def _read(self, qrstring):
         if not (qrstring in self.retrieved) and (not qrstring in self.retrieved_error):
-            from mcdp_web.scraping import scrape
+            from .app_qr_scraping import scrape
             try:
                 resources = scrape(qrstring)
                 self.retrieved[qrstring] = resources

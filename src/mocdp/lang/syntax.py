@@ -126,7 +126,7 @@ class Syntax():
     TEMPLATE = sp(L('template'), lambda t: CDP.TemplateKeyword(t[0]))
     ABSTRACT = sp(L('abstract'), lambda t: CDP.AbstractKeyword(t[0]))
 
-    FROM_LIBRARY = sp(L('from_library') | L('new'), lambda t: CDP.FromLibraryKeyword(t[0]))
+    FROM_LIBRARY = sp(L('FROM_LIBRARY') | L('new'), lambda t: CDP.FromLibraryKeyword(t[0]))
 
     COPROD = sp(L('^'), lambda t: CDP.coprod(t[0]))
     CODE = sp(L('code'), lambda t: CDP.CodeKeyword(t[0]))
@@ -228,13 +228,13 @@ class Syntax():
 
     # a quoted string
     quoted = sp(dblQuotedString | sglQuotedString, lambda t:t[0][1:-1])
-    ndpname = sp(idn.copy() | quoted, lambda t: CDP.FuncName(t[0]))  # XXX
+    ndpname = sp(idn.copy() | quoted, lambda t: CDP.NDPName(t[0]))
+
     ndpt_load_expr = sp(LOAD - (ndpname | SLPAR - ndpname - SRPAR),
                         lambda t: CDP.LoadCommand(t[0], t[1]))
 
     # An expression that evaluates to a NamedDP
     ndpt_dp_rvalue = Forward()
-
 
     # <dpname> = ...
     dpname = sp(idn.copy(), lambda t: CDP.DPName(t[0]))

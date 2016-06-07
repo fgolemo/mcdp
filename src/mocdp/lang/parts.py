@@ -95,6 +95,7 @@ class CDPLanguage():
     OpKeyword = namedtuplewhere('OpKeyword', 'keyword')  # Max
     DPWrapToken = namedtuplewhere('DPWrapToken', 'keyword')
     FuncName = namedtuplewhere('FuncName', 'value')  # python function name
+    NDPName = namedtuplewhere('NDPName', 'value')  # name in "new <name>"
     ApproxKeyword = namedtuplewhere('ApproxKeyword', 'keyword')
     FlattenKeyword = namedtuplewhere('FlattenKeyword', 'keyword')
 
