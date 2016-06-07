@@ -50,7 +50,6 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver):
         self.library = None
         self.appqr_reset()
 
-
     def view_refresh_library(self, request):
         """ Refreshes the current library (if external files have changed) 
             then reloads the current url. """

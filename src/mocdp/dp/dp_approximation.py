@@ -1,14 +1,14 @@
 from contracts import contract
-from mocdp.comp.interfaces import NamedDP
-from mocdp.posets.space import Space, Map, MapNotDefinedHere
 from contracts.utils import raise_desc
-
-import math
-from mocdp.comp.context import Connection, get_name_for_fun_node, \
-    get_name_for_res_node
 from mocdp.comp.composite import CompositeNamedDP
-from mocdp.dp.dp_identity import Identity
+from mocdp.comp.context import (Connection, get_name_for_fun_node,
+    get_name_for_res_node)
+from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import dpwrap
+from mocdp.dp.dp_identity import Identity
+from mocdp.posets.space import Map, MapNotDefinedHere, Space
+import math
+
 
 class LinearCeil():
     """
@@ -202,7 +202,6 @@ def make_approximation_f(name, approx_perc, approx_abs, approx_abs_S,
 def get_approx_dp(S, name, approx_perc, approx_abs, approx_abs_S, max_value, max_value_S):
 
     from mocdp.dp.dp_generic_unary import WrapAMap
-    from mocdp.comp.wrap import dpwrap
     from mocdp.posets.types_universe import express_value_in_isomorphic_space
 
     approx_abs_ = express_value_in_isomorphic_space(S1=approx_abs_S, s1=approx_abs, S2=S)
