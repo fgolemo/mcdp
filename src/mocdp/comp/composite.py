@@ -92,7 +92,16 @@ class CompositeNamedDP(NamedDP):
         from mocdp.lang.blocks import check_missing_connections
         check_missing_connections(self.context)
 
-    # @contract(returns=SimpleWrap)
+    def compact(self):
+        # XXX: not sure what this does
+        from mocdp.comp.composite_compact import compact_context
+        context = compact_context(self.context)
+        return CompositeNamedDP(context)
+
+    def flatten(self):
+        from mocdp.comp.flattening.flatten import cndp_flatten
+        return cndp_flatten(self)
+
     def abstract(self):
         try:
             self.check_fully_connected()
@@ -121,15 +130,6 @@ class CompositeNamedDP(NamedDP):
         s += '\n names: \n' + format_dict_long(self.context.names, informal=True)
         return s
 
-    def compact(self):
-        # XXX: not sure what this does
-        from mocdp.comp.composite_compact import compact_context
-        context = compact_context(self.context)
-        return CompositeNamedDP(context)
-
-    def flatten(self):
-        from mocdp.comp.flattening.flatten import cndp_flatten
-        return cndp_flatten(self)
 
 def check_good_name(n):
     """ Checks that n is a good name for a node """
