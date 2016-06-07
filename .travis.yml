@@ -15,7 +15,7 @@ cache:
   directories:
     - $HOME/.cache/pip
 install: 
-- "echo '\nconfig interactive 0\nconfig echo_stdout 0\nconfig echo_stderr 0\nconfig echo False\nconfig status_line_enabled False\nconfig console_status False' >> .compmake.rc "
+#- "echo '\nconfig interactive 0\nconfig echo_stdout 0\nconfig echo_stderr 0\nconfig echo False\nconfig status_line_enabled False\nconfig console_status False' >> .compmake.rc "
 - "cat .compmake.rc"
 #- "pip install compmake>=3.5.3"
 #- "pip install comptests>=1.3.1"
@@ -36,7 +36,7 @@ install:
 script: 
 # run first without contracts
 #- make comptests-run-parallel-nocontracts
-- QUICKAPP_PROFILE=comptest1.prof travis_wait 30 make comptests-run-nocontracts
+- QUICKAPP_PROFILE=comptest1.prof travis_wait 45 make comptests-run-nocontracts
 - make -C examples/example-catalogue
 - make -C examples/example-battery
 # the run with contracts: times out
