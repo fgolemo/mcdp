@@ -16,6 +16,7 @@ cache:
     - $HOME/.cache/pip
 install: 
 #- "echo '\nconfig interactive 0\nconfig echo_stdout 0\nconfig echo_stderr 0\nconfig echo False\nconfig status_line_enabled False\nconfig console_status False' >> .compmake.rc "
+- "echo '\nconfig interactive 0\nconfig echo_stdout 0\nconfig echo_stderr 0\nconfig echo False\nconfig status_line_enabled True \nconfig console_status False' >> .compmake.rc "
 - "cat .compmake.rc"
 #- "pip install compmake>=3.5.3"
 #- "pip install comptests>=1.3.1"
