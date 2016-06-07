@@ -2,7 +2,7 @@
 from .context import Connection
 from .interfaces import NamedDP
 from .wrap import dpwrap
-from collections import Counter
+
 from contracts import contract
 from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
@@ -15,6 +15,8 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.posets import PosetProduct
 from networkx import DiGraph, MultiDiGraph, NetworkXUnfeasible
 from networkx.algorithms import is_connected, simple_cycles, topological_sort
+from mocdp.comp.connection_reps import there_are_reps, there_are_repetitions, \
+    relabel
 
 class TheresALoop(Exception):
     pass
@@ -427,8 +429,6 @@ def simplify_if_only_one_name(res_dp, fnames, rnames):
         res_dp = make_series(res_dp, Mux(ressp, 0))
     return res_dp, fnames, rnames
 
-def there_are_repetitions(x):
-    return len(x) != len(set(x))
 
 def make_name(already):
     for i in range(1, 10):
@@ -607,24 +607,12 @@ def dpgraph(name2dp, connections, split):
         return dpwrap(dp, [], [])
 
     # check that there are no repetitions
-    all_functions = []
-    all_resources = []
-    for _, ndp in name2dp.items():
-        assert isinstance(ndp, NamedDP), ndp
-        all_functions.extend(ndp.get_fnames())
-        all_resources.extend(ndp.get_rnames())
-
-    if there_are_repetitions(all_functions) or there_are_repetitions(all_resources):
-
-        find_reps = lambda d: [k for (k, v) in Counter(d).iteritems() if v > 1]
-        repeated_resources = find_reps(all_resources)
-        repeated_functions = find_reps(all_functions)
-
-        raise_desc(NotImplementedError, 'Repetitions',
-                   all_functions=all_functions,
-                   all_resources=all_resources,
-                   repeated_resources=repeated_resources,
-                   repeated_functions=repeated_functions)
+    if there_are_reps(name2dp):
+        name2dp_, connections_, relabeling = relabel(name2dp, connections)
+        print('relabeling: %s' % relabeling)
+        assert not there_are_reps(name2dp_)
+        # XXX: what do we do with split?
+        return dpgraph(name2dp_, connections_, split)
 
     res = dpgraph_(name2dp, connections, split)
 

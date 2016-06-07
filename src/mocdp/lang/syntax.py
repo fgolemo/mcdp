@@ -126,7 +126,7 @@ class Syntax():
     TEMPLATE = sp(L('template'), lambda t: CDP.TemplateKeyword(t[0]))
     ABSTRACT = sp(L('abstract'), lambda t: CDP.AbstractKeyword(t[0]))
 
-    FROM_LIBRARY = sp(L('FROM_LIBRARY') | L('new'), lambda t: CDP.FromLibraryKeyword(t[0]))
+    FROM_LIBRARY = sp(L('from_library') | L('new'), lambda t: CDP.FromLibraryKeyword(t[0]))
 
     COPROD = sp(L('^'), lambda t: CDP.coprod(t[0]))
     CODE = sp(L('code'), lambda t: CDP.CodeKeyword(t[0]))

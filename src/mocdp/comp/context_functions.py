@@ -179,7 +179,6 @@ def make_sure_order_functions_and_resources(res, fnames, rnames):
         connections = [Connection('*', fn, '*', fn) for fn in rnames]
         return connect2(ndp0, res, set(connections), split=[], repeated_ok=True)
 
-
     if res.get_rnames() != rnames:
         res = reorder_resources(res, rnames)
     if res.get_fnames() != fnames:
