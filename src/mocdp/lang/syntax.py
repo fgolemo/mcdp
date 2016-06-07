@@ -24,13 +24,15 @@ def simple_keyword_literal(literal, klass):
    
 def VariableRef_make(t):
     name = t[0]
-    if not isinstance(name, str):
+    if not isinstance(name, (str, unicode)):
         raise ValueError(t)
+#     name = str(name)
     res = CDP.VariableRef(name)
     return res
 
 class Syntax():
     TOP_LITERAL = 'Top'
+    BOTTOM_LITERAL = 'Bottom'
 
     keywords = [
         'load',
@@ -57,7 +59,8 @@ class Syntax():
         'Int',
         'pow',
         'approx',
-        'Top',  # top
+        TOP_LITERAL,
+        BOTTOM_LITERAL,
         'choose',
         'flatten',
         'from_library',
@@ -69,7 +72,6 @@ class Syntax():
     L = Literal
    
     O = Optional
-    
     
     COMMA = sp(L(','), lambda t: CDP.comma(t[0]))
     
@@ -89,7 +91,8 @@ class Syntax():
     LOAD = sp(L('load'), lambda t: CDP.LoadKeyword(t[0]))
     SUB = sp(L('sub'), lambda t: CDP.SubKeyword(t[0]))
 
-    TOP = sp(L(TOP_LITERAL), lambda t: CDP.TopKeyword(t[0]))
+    TOP = sp(L(TOP_LITERAL) | L('⊤'), lambda t: CDP.TopKeyword(t[0]))
+    BOTTOM = sp(L(BOTTOM_LITERAL) | L('⊥'), lambda t: CDP.BottomKeyword(t[0]))
 
     MCDPTYPE = sp(L('mcdp-type') ^ L('mcdp') ^ L('dptype'), lambda t: CDP.MCDPTypeKeyword(t[0]))
 
@@ -108,6 +111,7 @@ class Syntax():
 
     PROVIDED = sp(L('provided'), lambda _: CDP.ProvidedKeyword('provided'))
     REQUIRED = sp(L('required'), lambda _: CDP.ProvidedKeyword('required'))
+    CHOOSE = simple_keyword_literal('choose', CDP.CoproductWithNamesChooseKeyword)
 
     GEQ = sp(L('>=') | L('≥') | L('⊇') | L('≽') | L('⊒'), lambda t: CDP.geq(t[0]))
     LEQ = sp(L('<=') | L('≤') | L('⊆') | L('≼') | L('⊑'), lambda t: CDP.leq(t[0]))
@@ -199,8 +203,6 @@ class Syntax():
     int_constant = sp(L('int') + L(':') + integer,
                       lambda t: CDP.IntConstant(t[0], t[1], t[2]))
 
-
-
     fname = sp(idn.copy(), lambda t: CDP.FName(t[0]))
     rname = sp(idn.copy(), lambda t: CDP.RName(t[0]))
 
@@ -213,16 +215,24 @@ class Syntax():
     number_with_unit1 = sp(integer_or_float + unitst,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
 
-    dimensionless = sp(L('[') + L(']'), lambda _: CDP.Unit(R_dimensionless))
+    dimensionless = sp(L('[') + L(']'), lambda _: CDP.RcompUnit('m/m'))
     number_with_unit2 = sp(integer_or_float + dimensionless,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
+    
     number_with_unit3 = sp(integer_or_float + space_expr,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
 
     number_with_unit4_top = sp(TOP + space_expr,
-                            lambda t: CDP.SimpleValue(t[0], t[1]))
+                               lambda t: CDP.Top(t[0], t[1]))
 
-    number_with_unit = number_with_unit1 ^ number_with_unit2 ^ number_with_unit3 ^ number_with_unit4_top
+    number_with_unit5_bot = sp(BOTTOM + space_expr,
+                               lambda t: CDP.Bottom(t[0], t[1]))
+
+    number_with_unit = (number_with_unit1 ^
+                        number_with_unit2 ^
+                        number_with_unit3 ^
+                        number_with_unit4_top ^
+                        number_with_unit5_bot)
 
     # TODO: change
 
@@ -471,8 +481,6 @@ class Syntax():
      
     # Example:
     #    choose(name: <dp>, name2: <dp>)
-    CHOOSE = simple_keyword_literal('choose', CDP.CoproductWithNamesChooseKeyword)
-    assert 'choose' in keywords
     ndpt_coproduct_with_names_name = \
         sp(idn.copy(), lambda t: CDP.CoproductWithNamesName(t[0]))
     # ndpt_coproduct_with_names_one = ndpt_coproduct_with_names_name + SCOLON + ndpt_dp_rvalue

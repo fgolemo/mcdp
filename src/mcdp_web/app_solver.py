@@ -5,6 +5,7 @@ from mocdp.dp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from cdpview.plot import png_pdf_from_gg
 from mcdp_web.utils import response_data
 from pyramid.httpexceptions import HTTPSeeOther
+from mocdp.exceptions import DPSemanticError, DPSyntaxError
 
 class AppSolver():
     """
@@ -175,14 +176,21 @@ class AppSolver():
         return response_data(request=request, data=png, content_type='image/png')
 
 
-def ajax_error_catch(f):
+def ajax_error_catch(f, quiet=(DPSyntaxError, DPSemanticError)):
     try:
         return f()
     except Exception as e:
-        print(e)
+        try:
+            print(e)
+        except UnicodeEncodeError:
+            pass
         res = {}
         res['ok'] = False
-        res['error'] = traceback.format_exc(e)
+        if isinstance(e, quiet):
+            s = e.__repr__()
+        else:
+            s = traceback.format_exc(e)
+        res['error'] = s
         return res
 
 def create_alternative_urls(params, ndp):

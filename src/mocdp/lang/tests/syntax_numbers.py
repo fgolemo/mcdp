@@ -2,6 +2,9 @@
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     assert_syntax_error)
 from comptests.registrar import comptest
+from mocdp.comp.context import Context
+from mocdp.lang.eval_constant_imp import eval_constant
+from mocdp.lang.parse_actions import parse_wrap
 from mocdp.lang.parts import CDPLanguage
 from mocdp.lang.syntax import Syntax, parse_ndp
 from mocdp.lang.tests.utils import (TestFailed, parse_wrap_check,
@@ -10,7 +13,6 @@ from mocdp.posets.rcomp_units import R_Weight_g, make_rcompunit
 from mocdp.posets.types_universe import get_types_universe
 from nose.tools import assert_equal
 from numpy.testing.utils import assert_allclose
-from mocdp.lang.eval_constant_imp import eval_constant
 
 CDP = CDPLanguage
 
@@ -22,14 +24,24 @@ def check_numbers1():
     parse_wrap_check('1', Syntax.integer_or_float, CDP.ValueExpr(1))
     parse_wrap_check('1.0', Syntax.integer_or_float, CDP.ValueExpr(1.0))
 
+    def valid_constant(s):
+        parsed = parse_wrap(Syntax.constant_value, s)[0]
+        context = Context()
+        return eval_constant(parsed, context)
+
+    print valid_constant('5 W')
+    print valid_constant('Top Nat')
+    print valid_constant('⊤ ℕ')
+
+
 @comptest
 def check_numbers2():
     parse_wrap_check('1.0 [g]', Syntax.number_with_unit,
-                     CDP.SimpleValue(CDP.ValueExpr(1.0), CDP.Unit(R_Weight_g)))
+                     CDP.SimpleValue(CDP.ValueExpr(1.0), CDP.RcompUnit('g')))
     assert_syntax_error('1', Syntax.number_with_unit)
     # automatic conversion to float
     parse_wrap_check('1 [g]', Syntax.number_with_unit,
-                      CDP.SimpleValue(CDP.ValueExpr(1.0), CDP.Unit(R_Weight_g)))
+                      CDP.SimpleValue(CDP.ValueExpr(1.0), CDP.RcompUnit('g')))
 
 @comptest
 def check_division():
@@ -37,7 +49,6 @@ def check_division():
     c = parse_wrap_check('1.0 [g] / 5 [l]', Syntax.rvalue)
     print parse_wrap_check('(5 g) / 5 l', Syntax.rvalue)
 
-    from mocdp.comp.context import Context
     context = Context()
     r = eval_constant(c, context)
     print r

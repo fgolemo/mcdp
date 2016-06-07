@@ -1,13 +1,13 @@
 mcdp {
-	provides lift  [N]
-	requires power [W]
+  provides lift  [N]
+  requires power [W]
 	
 	
-	# Maximum lift provided	
-	lift <= 10 N
+  # Maximum lift provided	
+  provided lift <= 10 N
 
-	# Power as a function of lift
-	p0 = 1 W
-	p1 = 1.5 W/N^2
-	power >= p0 + p1 * (lift^2) 
+  # Power as a function of lift
+  p0 = 1 W
+  p1 = 1.5 W/N^2
+  required power >= p0 + p1 * pow(provided lift, 2)
 }

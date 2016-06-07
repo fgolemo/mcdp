@@ -6,6 +6,7 @@ from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import CResource, ValueWithUnits, get_name_for_fun_node
 from mocdp.dp import GenericUnary, Max, Max1, Min, WrapAMap
 from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.lang.eval_constant_imp import eval_constant
 from mocdp.posets import Map, Nat, Rcomp, RcompUnits
 from mocdp.posets.rcomp_units import RCompUnitsPower
 import numpy as np
@@ -77,7 +78,8 @@ def eval_rvalue(rvalue, context):
                 b = eval_rvalue(rvalue.b, context)
                 # print('a is constant')
                 name = context.new_name('max1')
-                ndp = dpwrap(Max1(rvalue.a.unit, rvalue.a.value), '_in', '_out')
+                constant = eval_constant(rvalue.a, context)
+                ndp = dpwrap(Max1(constant.unit, constant.value), '_in', '_out')
                 context.add_ndp(name, ndp)
                 c = Connection(dp1=b.dp, s1=b.s, dp2=name, s2='_in')
                 context.add_connection(c)
@@ -87,7 +89,8 @@ def eval_rvalue(rvalue, context):
 
             if isinstance(rvalue.b, CDP.SimpleValue):
                 name = context.new_name('max1')
-                ndp = dpwrap(Max1(rvalue.b.unit.value, rvalue.b.value.value), '_in', '_out')
+                constant = eval_constant(rvalue.b, context)
+                ndp = dpwrap(Max1(constant.unit, constant.value), '_in', '_out')
                 context.add_ndp(name, ndp)
                 c = Connection(dp1=a.dp, s1=a.s, dp2=name, s2='_in')
                 context.add_connection(c)
@@ -191,7 +194,6 @@ def eval_rvalue(rvalue, context):
                              name_prefix='_prod', op_prefix='_factor',
                              res_prefix='_result')
 
-        from mocdp.lang.eval_constant_imp import eval_constant
         if isinstance(rvalue, (CDP.Collection, CDP.SimpleValue)):
             res = eval_constant(rvalue, context)
             assert isinstance(res, ValueWithUnits)

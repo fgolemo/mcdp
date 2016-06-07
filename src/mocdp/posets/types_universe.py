@@ -91,7 +91,7 @@ class TypesUniverse(Preorder):
             self.check_leq(A, B)
         except NotLeq as e:
             msg = 'Cannot get embedding if not preorder holds.'
-            raise_wrapped(DPInternalError, e, msg)
+            raise_wrapped(DPInternalError, e, msg, compact=True)
 
         from mocdp.posets.rcomp_units import RcompUnits
         from mocdp.posets.rcomp_units import format_pint_unit_short

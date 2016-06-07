@@ -323,5 +323,6 @@ def parse_pint_unit(tokens):
     pint_string = " ".join(tokens)
     # print 'parse_pint_unit, tokens = %s, pint_string = %s' % (tokens, pint_string)
 
-    from mocdp.posets.rcomp_units import make_rcompunit
-    return CDP.Unit(make_rcompunit(pint_string))
+    # return CDP.Unit(make_rcompunit(pint_string))
+    return CDP.RcompUnit(pint_string)
+

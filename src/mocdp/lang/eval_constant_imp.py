@@ -45,19 +45,28 @@ def eval_constant(op, context):
         # TODO: can implement optimization
         raise NotConstant(str(op))
 
+    if isinstance(op, CDP.Top):
+        from mocdp.lang.eval_space_imp import eval_space
+        space = eval_space(op.space, context)
+        v = space.get_top()
+        return ValueWithUnits(unit=space, value=v)
+
+    if isinstance(op, CDP.Bottom):
+        from mocdp.lang.eval_space_imp import eval_space  # @Reimport
+        space = eval_space(op.space, context)
+        v = space.get_bottom()
+        return ValueWithUnits(unit=space, value=v)
+
     if isinstance(op, CDP.SimpleValue):
-        assert isinstance(op.unit, CDP.Unit), op
-
-        from mocdp.lang.eval_space_imp import eval_unit
-        F = eval_unit(op.unit, context)
+        # assert isinstance(op.unit, CDP.Unit), op
+        from mocdp.lang.eval_space_imp import eval_space  # @Reimport
+        F = eval_space(op.space, context)
         assert isinstance(F, Space), op
-        if isinstance(op.value, CDP.TopKeyword):
-            v = F.get_top()
-        else:
-            v = op.value.value
 
-            if isinstance(v, int) and isinstance(F, Rcomp):
-                v = float(v)
+        v = op.value.value
+
+        if isinstance(v, int) and isinstance(F, Rcomp):
+            v = float(v)
 
         try:
             F.belongs(v)

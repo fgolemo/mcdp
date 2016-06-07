@@ -8,6 +8,7 @@ from mcdp_web.app_qr import AppQR
 from mcdp_web.app_visualization import AppVisualization
 from mcdp_web.app_solver import AppSolver
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
+from mcdp_web.app_interactive import AppInteractive
 
 
 __all__ = [
@@ -15,7 +16,7 @@ __all__ = [
 ]
 
 
-class WebApp(AppEditor, AppVisualization, AppQR, AppSolver):
+class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive):
     def __init__(self, dirname):
         self.dirname = dirname
 
@@ -25,6 +26,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver):
         AppVisualization.__init__(self)
         AppQR.__init__(self)
         AppSolver.__init__(self)
+        AppInteractive.__init__(self)
 
     def get_library(self):
         if self.library is None:
@@ -83,9 +85,10 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver):
 #             'markdown.extensions.extra',
             'markdown.extensions.fenced_code',
             'markdown.extensions.admonition',
+            'markdown.extensions.tables',
         ]
         html = markdown.markdown(data, extensions)
-
+        print html
         return {'contents': html}
 
     def serve(self):
@@ -97,6 +100,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver):
         AppVisualization.config(self, config)
         AppQR.config(self, config)
         AppSolver.config(self, config)
+        AppInteractive.config(self, config)
 
         config.add_route('index', '/')
         config.add_view(self.view_index, route_name='index', renderer='index.jinja2')

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Interactive parser</title>
+
+    {% include 'head.jinja2' %}
+
+</head>
+<body>
+
+  <textarea id="area" cols=80 rows=5/></textarea>
+
+  
+  <p>
+  Formatted: <code><pre id='output_formatted'></pre></code>
+  </p>
+  <p>
+  Space:
+  <code><pre id='output_space'></pre></code>
+  </p>
+  <p>
+  Raw value:
+  <code><pre id='output_raw'></pre></code>
+  </p>
+
+  <code><pre id='output_parsed'></pre></code>
+
+  <code><pre id='error'></pre></code>
+  
+
+
+<script type="text/javascript">
+ 
+function ajax_begin() {
+	$('#operation_error').html('sending...');
+}
+
+function ajax_success(data) {
+    if (data['ok']) {
+        console.log(data);         
+        $('#error').html('');
+        $('#output_raw').html(data['output_raw']);
+        $('#output_formatted').html(data['output_formatted']);
+        $('#output_parsed').html(data['output_parsed'])
+        $('#output_space').html(data['output_space'])
+
+    } else {
+    	error = data['error']
+    	console.log(error);
+    	$('#error').html(error);
+
+        $('#output_raw').html();
+        $('#output_formatted').html();
+        $('#output_parsed').html();
+        $('#output_space').html();
+	}
+}
+    	
+function ajax_failure(error) {
+	console.log(error);
+	$('#error').html(error);
+}
+
+function ajax_parse(string) {
+    payload = {'string': string};
+    jQuery.ajax({
+        url     : 'parse',
+        type    : 'POST',
+        data: JSON.stringify(payload),
+        contentType: 'application/json; charset=utf-8',
+        success : ajax_success,
+        error : ajax_failure
+    });
+}
+
+$.event.special.inputchange = {
+    setup: function() {
+        var self = this, val;
+        $.data(this, 'timer', window.setInterval(function() {
+            val = self.value;
+            if ( $.data( self, 'cache') != val ) {
+                $.data( self, 'cache', val );
+                $( self ).trigger( 'inputchange' );
+            }
+        }, 20));
+    },
+    teardown: function() {
+        window.clearInterval( $.data(this, 'timer') );
+    },
+    add: function() {
+        $.data(this, 'cache', this.value);
+    }
+};
+ 
+
+$(document ).ready(function() {
+    $('#area').on('inputchange', function() {
+        string = $('#area').val(); 
+        document.location.hash = string;
+        ajax_parse(string);
+    });
+    hash = document.location.hash;
+    if (hash) {
+       string = hash.substring(1);
+       $('#area').val(string);
+    }
+    
+});
+
+</script>
+
+</body>
+</html>

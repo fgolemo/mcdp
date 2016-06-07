@@ -3,7 +3,7 @@ from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.comp.context import Context
 from mocdp.comp.interfaces import NamedDP
-from mocdp.lang.eval_space_imp import eval_unit
+from mocdp.lang.eval_space_imp import  eval_space
 from mocdp.lang.parse_actions import parse_wrap
 from mocdp.lang.syntax import Syntax
 from mocdp.posets import UpperSets
@@ -128,7 +128,7 @@ def to_numpy_array(result_like, res):
 def interpret_string_as_space(p):
     context = Context()
     res = parse_wrap(Syntax.space_expr, p)[0]
-    unit = eval_unit(res, context)
+    unit = eval_space(res, context)
     assert isinstance(unit, Space)
     return unit
 

@@ -14,8 +14,14 @@ class CDPLanguage():
     NewLimit = namedtuplewhere('NewLimit', 'value_with_unit')
 
     ValueExpr = namedtuplewhere('ValueExpr', 'value')
+
+    # now only used for a hack
     Unit = namedtuplewhere('Unit', 'value')
-    SimpleValue = namedtuplewhere('SimpleValue', 'value unit')
+
+    RcompUnit = namedtuplewhere('RcompUnit', 'pint_string')
+    SimpleValue = namedtuplewhere('SimpleValue', 'value space')
+    Top = namedtuplewhere('Top', 'keyword space')
+    Bottom = namedtuplewhere('Bottom', 'keyword space')
     MakeTupleConstants = namedtuplewhere('MakeTupleConstants', 'open ops close')
 
     MakeTemplate = namedtuplewhere('MakeTemplate', 'keyword dp_rvalue')
@@ -77,6 +83,7 @@ class CDPLanguage():
     MCDPKeyword = namedtuplewhere('MCDPKeyword', 'keyword')
     SubKeyword = namedtuplewhere('SubKeyword', 'keyword')
     TopKeyword = namedtuplewhere('TopKeyword', 'keyword')
+    BottomKeyword = namedtuplewhere('BottomKeyword', 'keyword')
     MCDPTypeKeyword = namedtuplewhere('MCDPTypeKeyword', 'keyword')
     CompactKeyword = namedtuplewhere('CompactKeyword', 'keyword')
     AbstractKeyword = namedtuplewhere('AbstractKeyword', 'keyword')

@@ -17,6 +17,7 @@ from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 from mocdp.posets import NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.posets.any import Any
+from mocdp.lang.eval_space_imp import eval_space
 
 CDP = CDPLanguage
 
@@ -181,9 +182,10 @@ def eval_dp_rvalue_approxdpmodel(r, context):
     approx_perc = float(r.perc.value)
     
     approx_abs = float(r.abs.value.value)
-    approx_abs_S = r.abs.unit.value  # should be real
+    approx_abs_S = eval_space(r.abs.space, context)  # should be real
     ndp0 = eval_dp_rvalue(r.dp, context)
     x = eval_constant(r.max_value, context)
+    # assert isinstance(x, ValueWithUnit)
     max_value = x.value
     max_value_S = x.unit
     return make_approximation(name=name, approx_perc=approx_perc,
