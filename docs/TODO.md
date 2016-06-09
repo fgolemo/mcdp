@@ -44,7 +44,7 @@ Misc
 - T: mcddlib: make sure that we parse / run all the models
 
 - B: automatically load CSS from that file.
-
+- B: the units are not highlighted anymore
 
 MCDP-web
 ----------

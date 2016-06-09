@@ -4,7 +4,8 @@
 // used in edit_form_fancy.jinja2
 function getCaretCharacterOffsetWithin(element) {
     var caretOffset = 0;
-    if (typeof window.getSelection() != "undefined") {
+    selection = window.getSelection(); 
+    if (typeof selection != "undefined" && selection.rangeCount > 0) {
         var range = window.getSelection().getRangeAt(0);
         var preCaretRange = range.cloneRange();
         preCaretRange.selectNodeContents(element);

@@ -56,7 +56,7 @@
 		$( "button#save" ).click(click_button_save);
 		$( "button#discard" ).click(click_button_discard);
 
-	    try_to_parse(current_text(), 0);
+	    try_to_parse(current_text());
 	});
 
 	function current_text() {
@@ -85,13 +85,8 @@
 		text = $("#editor").text();
 		
 		element = $('#editor').get(0);
-		pos = getCaretCharacterOffsetWithin(element);
-		if (pos == null){
-			console.log('Cannot get element cursor.');
-			pos = 0;
-		}
-
-		try_to_parse(text, pos);
+		//pos = getCaretCharacterOffsetWithin(element);
+		try_to_parse(text);
 	}
 
 	function on_comm_failure(error) {
@@ -134,11 +129,8 @@
 		$('button#save').enable();
 	}
 
-	function try_to_parse(s, pos) {
+	function try_to_parse(s) {
 		//console.log(JSON.stringify(s));
-		if (pos == null) {
-			throw "Pos is null. String length is " + s.length;
-		}
 
 		function on_proc_failure(res) {
 			console.log(res['error']);
@@ -153,6 +145,13 @@
 				console.log('Slow server: ignoring stale.');
 				return;
 			}
+
+			pos = getCaretCharacterOffsetWithin($("#editor").get(0));
+			if (pos == null){
+				console.log('Cannot get element cursor.');
+				pos = 0;
+			}
+
 			update_text(res['highlight'], pos);		
 		}
 
@@ -171,7 +170,6 @@
 				  click_button_save_failure, click_button_save_success);
 	}
 	
-
 	function click_button_save_success(res) {
 		show_status('success');
 		console.log('success');
