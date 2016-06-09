@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mocdp.lang.parse_actions import parse_wrap
 from mocdp.lang.syntax import Syntax

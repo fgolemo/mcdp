@@ -8,8 +8,24 @@ Keys:
 - T: testing
 
 
+Meat
+----
+
+
+- the meat! make sure we close all the loops at the same time.
+
 Incoming
 ---------
+
+- Expand MCDPLibrary to load types, values, interfaces, as well.
+
+- R: Replace conf_tools completely.
+- R: Remove battery example
+- L: Add something like:
+
+  my_npd.mcdp
+  from-code('module.function', {param1=..., param2=...})
+
 
 - B: change ``/language`` to ``/docs/language_notes``
 

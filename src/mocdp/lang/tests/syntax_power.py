@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .utils import ok, sem, syn
 from comptests.registrar import comptest
 from mocdp.dp.dp_transformations import get_dp_bounds

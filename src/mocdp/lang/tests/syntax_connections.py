@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mocdp.lang.tests.utils import assert_parsable_to_connected_ndp
 from mocdp.posets.uppersets import UpperSets

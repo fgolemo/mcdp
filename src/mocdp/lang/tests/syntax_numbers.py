@@ -2,9 +2,6 @@
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     assert_syntax_error)
 from comptests.registrar import comptest
-from mocdp.comp.context import Context
-from mocdp.lang.eval_constant_imp import eval_constant
-from mocdp.lang.parse_actions import parse_wrap
 from mocdp.lang.parts import CDPLanguage
 from mocdp.lang.syntax import Syntax, parse_ndp
 from mocdp.lang.tests.utils import (TestFailed, parse_wrap_check,
@@ -13,12 +10,7 @@ from mocdp.posets.rcomp_units import make_rcompunit
 from mocdp.posets.types_universe import get_types_universe
 from nose.tools import assert_equal
 from numpy.testing.utils import assert_allclose
-
-def valid_constant(s):
-    """ Evaluates as a constant value (= constant resource) """
-    parsed = parse_wrap(Syntax.rvalue, s)[0]
-    context = Context()
-    return eval_constant(parsed, context)
+from mocdp.lang.tests.utils2 import eval_rvalue_as_constant
 
 CDP = CDPLanguage
 
@@ -31,14 +23,18 @@ def check_numbers1():
     parse_wrap_check('1.0', Syntax.integer_or_float, CDP.ValueExpr(1.0))
 
 
-    print valid_constant('5 W')
-    print valid_constant('Top Nat')
-    print valid_constant('⊤ ℕ')
+@comptest
+def check_top1():
+    print eval_rvalue_as_constant('Top Nat')
 
-    print valid_constant('<1 g, 2J>')
-    print valid_constant('⟨1g, 2J⟩')
+@comptest
+def check_top2():
+    print eval_rvalue_as_constant('⊤ ℕ')
 
-
+@comptest
+def check_tuples():
+    print eval_rvalue_as_constant('<1 g, 2J>')
+    print eval_rvalue_as_constant('⟨1g, 2J⟩')
 
 @comptest
 def check_numbers2():
@@ -52,13 +48,10 @@ def check_numbers2():
 @comptest
 def check_division():
     print parse_wrap_check('(5 g)', Syntax.rvalue)
-    c = parse_wrap_check('1.0 [g] / 5 [l]', Syntax.rvalue)
+    print parse_wrap_check('1.0 [g] / 5 [l]', Syntax.rvalue)
     print parse_wrap_check('(5 g) / 5 l', Syntax.rvalue)
 
-    context = Context()
-    r = eval_constant(c, context)
-    print r
-
+    print eval_rvalue_as_constant('1.0 [g] / 5 [l]')
 
 @comptest
 def check_unit1():
@@ -378,13 +371,3 @@ mcdp {
     
 }
 """)
-
-
-@comptest
-def check_sums1():
-    valid_constant('int:2 + int:2 ')
-
-@comptest
-def check_sums2():
-    valid_constant('nat:2 + int:2')
-

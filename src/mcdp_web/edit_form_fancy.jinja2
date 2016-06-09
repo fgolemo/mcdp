@@ -1,9 +1,5 @@
 <!DOCTYPE html>
-<!---
 
-	TODO: only call ajax after a delay of some seconds.
-	
--->
 <html lang="en">
   <head>
   	{% include 'head.jinja2' %}
@@ -169,8 +165,13 @@
 	    return caretOffset;
 	}
 
-
+	/* TODO: move in common file */
 	function get_elements(editor) {
+		/* Returns a list of dictionary. The length is the size of the text() inside the editor.
+			The k-th one is a dict of type {'char': i, 'text': textNode} 
+			Meaning that the k-th character of the text is actually the i-th char in textNode.
+			This is useful to place the caret at a specific place.
+			*/
 		var walk_the_DOM = function walk(node, func) {
 		    func(node);
 		    node = node.firstChild;

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import register_indep
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
