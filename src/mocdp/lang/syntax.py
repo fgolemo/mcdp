@@ -442,7 +442,7 @@ class Syntax():
 
     # Code specs
     code_spec_simple = sp(CODE + funcname,
-                          lambda t: CDP.PDPCodeSpecNoArgs(keyword=t[0], function=t[1]))
+                          lambda t: CDP.CodeSpecNoArgs(keyword=t[0], function=t[1]))
 
     arg_value = integer_or_float
     arg_name = sp(idn, lambda t: CDP.ArgName(t[0]))
@@ -450,7 +450,7 @@ class Syntax():
     arguments_spec = sp(O(arg_pair) + ZeroOrMore(SCOMMA + arg_pair),
                         lambda t: make_list(list(t)))
     code_spec_with_args = sp(CODE + funcname + SLPAR + arguments_spec + SRPAR,
-                   lambda t: CDP.PDPCodeSpec(keyword=t[0], function=t[1], arguments=t[2]))
+                   lambda t: CDP.CodeSpec(keyword=t[0], function=t[1], arguments=t[2]))
     code_spec = code_spec_with_args ^ code_spec_simple
 
 

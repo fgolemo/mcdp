@@ -141,9 +141,10 @@ class CDPLanguage():
     LoadDP = namedtuplewhere('LoadDP', 'keyword name')
     DPWrap = namedtuplewhere('DPWrap', 'token statements prep impl')
 
+    # Code specs
     ArgName = namedtuplewhere('ArgName', 'value')  # value = string
-    PDPCodeSpec = namedtuplewhere('PDPCodeSpec', 'keyword function arguments')
-    PDPCodeSpecNoArgs = namedtuplewhere('PDPCodeSpecNoArgs', 'keyword function')
+    CodeSpec = namedtuplewhere('PDPCodeSpec', 'keyword function arguments')
+    CodeSpecNoArgs = namedtuplewhere('PDPCodeSpecNoArgs', 'keyword function')
 
     SpaceProduct = namedtuplewhere('SpaceProduct', 'ops')
     InvMult = namedtuplewhere('InvMult', 'ops')

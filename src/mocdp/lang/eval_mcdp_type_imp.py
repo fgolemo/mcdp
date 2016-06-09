@@ -57,7 +57,6 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
         if isinstance(r, CDP.DPWrap):
             return eval_dp_rvalue_dpwrap(r, context)
 
-
         if isinstance(r, CDP.AbstractAway):
             ndp = eval_dp_rvalue(r.dp_rvalue, context)
             if isinstance(ndp, SimpleWrap):
@@ -145,7 +144,7 @@ def eval_dp_rvalue_flatten(r, context):
     if isinstance(ndp, CompositeNamedDP):
         from mocdp.comp.connection import choose_connection_to_cut1
         choose_connection_to_cut1(connections=ndp.get_connections(), name2dp=ndp.get_name2ndp())
-    print ndp
+    # print ndp
     return ndp
 
 def eval_dp_rvalue_coproduct(r, context):
@@ -228,7 +227,7 @@ def eval_dp_rvalue_dpwrap(r, context):
     dp_R = dp.get_res_space()
 
     # Check that the functions are the same
-    from mocdp.lang.eval_space_imp import eval_space
+#     from mocdp.lang.eval_space_imp import eval_space
     want_Fs = tuple([eval_space(f.unit, context) for f in fun])
     if len(want_Fs) == 1:
         want_F = want_Fs[0]
@@ -281,7 +280,7 @@ def eval_dp_rvalue_catalogue(r, context):
     statements = unwrap_list(r.funres)
     fun = [x for x in statements if isinstance(x, CDP.FunStatement)]
     res = [x for x in statements if isinstance(x, CDP.ResStatement)]
-    from mocdp.lang.eval_space_imp import eval_space
+#     from mocdp.lang.eval_space_imp import eval_space
     Fs = [eval_space(_.unit, context) for _ in fun]
     Rs = [eval_space(_.unit, context) for _ in res]
 
@@ -391,7 +390,7 @@ def add_constraint(context, resource, function):
     context.add_connection(c)
 
 def eval_statement(r, context):
-    from mocdp.lang.eval_space_imp import eval_space
+#     from mocdp.lang.eval_space_imp import eval_space
     from mocdp.lang.eval_resources_imp import eval_rvalue
     from mocdp.lang.eval_lfunction_imp import eval_lfunction
 

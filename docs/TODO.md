@@ -27,7 +27,10 @@ Incoming
   from-code('module.function', {param1=..., param2=...})
 
 
-- B: change ``/language`` to ``/docs/language_notes``
+
+
+- add library hooks for types, etc.
+
 
 Misc
 -----
@@ -46,6 +49,7 @@ Misc
 MCDP-web
 ----------
 
+- B: change ``/language`` to ``/docs/language_notes``
 - F: mcdp-web: nice CSS all around
 - T: mcdp-web: Testing of at least all links.
 
