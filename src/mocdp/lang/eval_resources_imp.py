@@ -172,16 +172,16 @@ def eval_rvalue(rvalue, context):
 
         if isinstance(rvalue, CDP.Power):
             base = eval_rvalue(rvalue.op1, context)
-            exponent = rvalue.exponent
 
-            if isinstance(exponent, CDP.IntegerFraction):
-                num = exponent.num
-                den = exponent.den
-            elif isinstance(exponent, int):
-                num = exponent
-                den = 1
-            else:
-                assert False
+            exponent = rvalue.exponent
+            assert isinstance(exponent, CDP.IntegerFraction)
+            num = exponent.num
+            den = exponent.den
+#             elif isinstance(exponent, int):
+#                 num = exponent
+#                 den = 1
+#             else:
+#                 assert False
 
             #print('base: %s expo %d %d' % (base, num, den))
             #print('base: %s' % context.get_rtype(base))

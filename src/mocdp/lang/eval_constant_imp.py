@@ -72,7 +72,7 @@ def eval_constant(op, context):
             F.belongs(v)
         except NotBelongs as e:
             msg = 'Not in space'
-            raise_wrapped(DPSemanticError, e, msg, F=F, v=v)
+            raise_wrapped(DPSemanticError, e, msg, F=F, v=v, op=op)
         return ValueWithUnits(unit=F, value=v)
 
     if isinstance(op, CDP.VariableRef):

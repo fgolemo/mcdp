@@ -115,6 +115,8 @@ class Syntax():
     GEQ = sp(L('>=') | L('≥') | L('⊇') | L('≽') | L('⊒'), lambda t: CDP.geq(t[0]))
     LEQ = sp(L('<=') | L('≤') | L('⊆') | L('≼') | L('⊑'), lambda t: CDP.leq(t[0]))
 
+    EXPONENT = sp(L('^'), lambda t: CDP.exponent(t[0]))
+
     EQ = sp(L('='), lambda t: CDP.eq(t[0]))
     DOT = sp(L('.'), lambda t: CDP.DotPrep(t[0]))
     PLUS = sp(L('+'), lambda t: CDP.plus(t[0]))
@@ -375,12 +377,20 @@ class Syntax():
     integer_fraction = sp(integer + S(L('/')) + integer,
                           lambda t: CDP.IntegerFraction(num=t[0], den=t[1]))
 
-    rat_power_exponent = integer_fraction | integer
+    integer_fraction_one = sp(integer.copy(),
+                              lambda t: CDP.IntegerFraction(num=int(t[0]), den=1))
 
-    power_expr_1 = sp((S(L('pow')) - SLPAR - C(rvalue, 'op1') - S(L(','))
+    rat_power_exponent = integer_fraction | integer_fraction_one
+
+    power_expr_1 = sp((S(L('pow')) - SLPAR - C(rvalue, 'op1') - L(',')  # the glyph
                     + C(rat_power_exponent, 'exponent')) - SRPAR,
-                    power_expr_parse)
+                    lambda t: CDP.Power(op1=t[0], glyph=None, exponent=t[2]))
 
+    power_expr_2 = sp((rvalue_resource ^ rvalue_new_function)
+                      + EXPONENT - rat_power_exponent,
+                      lambda t: CDP.Power(op1=t[0], glyph=t[1], exponent=t[2]))
+
+    power_expr = power_expr_1 ^ power_expr_2
 
     constraint_expr_geq = sp(fvalue + GEQ - rvalue,
                          lambda t: CDP.Constraint(function=t[0],
@@ -549,20 +559,13 @@ class Syntax():
     ])
 
     # I could put "rvalue" here, but then I get a recursive
-    power_expr_2 = sp((rvalue_resource ^ rvalue_new_function)
-                      + S(L('^')) - rat_power_exponent,
-                      lambda t: CDP.Power(op1=t[0], exponent=t[1]))
-
-    power_expr = power_expr_1 ^ power_expr_2
-
     rvalue_operand = (rvalue_new_function ^
                        rvalue_new_function2 ^
                        rvalue_resource ^
                        binary_expr ^
                        unary_expr ^
                        constant_value ^
-                       power_expr_1 ^
-                       power_expr_2)
+                       power_expr)
 
     rvalue << operatorPrecedence(rvalue_operand, [
         (TIMES, 2, opAssoc.LEFT, mult_parse_action),

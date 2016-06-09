@@ -3,9 +3,12 @@
  span.NewFunction { color: darkgreen; }
  
 span.Unit, span.Nat, span.Int  {  color: #aC5600 ;}
-span.ValueExpr { color: #CC6600 ;}
- 
+
+span.ValueExpr, span.IntegerFraction { color: #CC6600 ;}
+
+span.RcompUnit { color: #CC6600 ;}
  /*span.Function  { color: darkgreen;}*/
+
   
 span.MCDPKeyword,
 span.SubKeyword,
@@ -32,7 +35,8 @@ span.TemplateKeyword,
 span.ForKeyword,
 span.UsingKeyword,
 span.LoadKeyword, span.CodeKeyword,
-span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
+span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.exponent,
+span.DPWrapToken,
 span.ImplementedbyKeyword,  
 span.FromCatalogueKeyword, 
 span.MCDPTypeKeyword,
@@ -52,8 +56,6 @@ span.ProvideKeyword, span.RequireKeyword  {
 span.ProvideKeyword,  span.ProvidedByKeyword, span.FName { color: darkgreen;}
 span.RequireKeyword, span.RequiredByKeyword, span.RName  { color: darkred;}
   
-
-
    
 /* There is a bug that prevents this from working correctly. */
 /* span.ImpName { color: #CC6600; } */

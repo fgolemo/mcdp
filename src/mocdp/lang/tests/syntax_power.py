@@ -18,21 +18,27 @@ syn(Syntax.integer_fraction, '1/2.0')
 sem(Syntax.integer_fraction, '1/0')
 syn(Syntax.integer_fraction, '1/')
 
+exponent = L.exponent('^')
+
 ok(Syntax.power_expr, 'pow(x,1/2)',
     L.Power(op1=L.VariableRef('x'),
+            glyph=None,
             exponent=L.IntegerFraction(num=1, den=2)))
 
 ok(Syntax.power_expr, 'x ^ 1/2',
     L.Power(op1=L.VariableRef('x'),
+            glyph=exponent,
             exponent=L.IntegerFraction(num=1, den=2)))
 
 ok(Syntax.power_expr, 'x ^ 2',
     L.Power(op1=L.VariableRef('x'),
-            exponent=int(2)))
+            glyph=exponent,
+            exponent=L.IntegerFraction(num=2, den=1)))
 
 ok(Syntax.power_expr, 'pow(x, 2)',
     L.Power(op1=L.VariableRef('x'),
-            exponent=int(2)))
+            glyph=None,
+            exponent=L.IntegerFraction(num=2, den=1)))
 
 
 @comptest

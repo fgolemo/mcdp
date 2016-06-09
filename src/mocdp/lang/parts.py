@@ -122,6 +122,7 @@ class CDPLanguage():
     geq = namedtuplewhere('geq', 'glyph')
     eq = namedtuplewhere('eq', 'glyph')
     plus = namedtuplewhere('plus', 'glyph')
+    exponent = namedtuplewhere('exponent', 'glyph')
     times = namedtuplewhere('times', 'glyph')
     bar = namedtuplewhere('bar', 'glyph')
     coprod = namedtuplewhere('coprod', 'glyph')
@@ -159,7 +160,7 @@ class CDPLanguage():
     
     IntegerFraction = namedtuplewhere('IntegerFraction', 'num den')
 
-    Power = namedtuplewhere('Power', 'op1 exponent')
+    Power = namedtuplewhere('Power', 'op1 glyph exponent')
     BuildProblem = namedtuplewhere('BuildProblem', 'keyword statements')
 
 

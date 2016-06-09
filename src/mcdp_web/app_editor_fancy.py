@@ -1,8 +1,10 @@
 
 from mocdp.dp_report.html import ast_to_html
 from contracts.utils import raise_wrapped
-from mcdp_web.app_solver import ajax_error_catch
+from mcdp_web.app_solver import ajax_error_catch, \
+    format_exception_for_ajax_response
 from mocdp.lang.parse_actions import parse_ndp
+from mocdp.exceptions import DPSemanticError
 
 class AppEditorFancy():
 
@@ -23,16 +25,12 @@ class AppEditorFancy():
         config.add_view(self.editor_fancy_save, route_name='editor_fancy_save',
                         renderer='json')
 
-#         config.add_route('editor_fancy_discard', '/edit_fancy/{model_name}/discard')
-#         config.add_view(self.editor_fancy_discard, route_name='editor_fancy_discard',
-#                         renderer='json')
 
 
     def editor_fancy_save(self, request):
         string = self.get_text_from_request(request)
         model_name = self.get_model_name(request)
         def go():
-            ndp = parse_ndp(string)
             l = self.get_library()
             l.write_to_model(model_name, string)
             return {'ok': True}
@@ -79,7 +77,7 @@ class AppEditorFancy():
     def ajax_parse(self, request):
 
         string = self.get_text_from_request(request)
-
+        req = {'text': request.json_body['text']}
 
         def go():
             highlight = ast_to_html(string,
@@ -87,10 +85,17 @@ class AppEditorFancy():
                                     add_line_gutter=False,
                                     encapsulate_in_precode=False, add_css=False)
 
-            ndp = parse_ndp(string)
+#             print('****highlight is cool****')
 
-            return {'ok': True, 'highlight': highlight, 'request':
-                    {'text': request.json_body['text']} }
+            try:
+                ndp = parse_ndp(string)
+            except DPSemanticError as e:
+                res = format_exception_for_ajax_response(e, quiet=(DPSemanticError,))
+                res['highlight'] = highlight
+                res['request'] = req
+                return res
+
+            return {'ok': True, 'highlight': highlight, 'request': req}
 
         return ajax_error_catch(go)
     

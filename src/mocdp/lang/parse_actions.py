@@ -304,13 +304,14 @@ def parse_ndp(string, context=None):
 def parse_line(line):
     from mocdp.lang.syntax import Syntax
     return parse_wrap(Syntax.line_expr, line)[0]
-
-
-def power_expr_parse(t):
-    op1 = t[0]
-    exp = t[1]
-    assert isinstance(exp, (CDPLanguage.IntegerFraction, int))
-    return CDP.Power(op1=op1, exponent=exp)
+#
+#
+# def power_expr_parse(t):
+#     op1 = t[0]
+#     exp = t[1]
+#     # assert isinstance(exp, (CDPLanguage.IntegerFraction, int))
+#     assert isinstance(exp, CDPLanguage.IntegerFraction)
+#     return CDP.Power(op1=op1, exponent=exp)
 
 @contract(name= CDP.DPName)
 def funshortcut1m(provides, fnames, prep_using, name):
