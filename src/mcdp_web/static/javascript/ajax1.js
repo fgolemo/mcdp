@@ -10,16 +10,23 @@ function ajax_send(url, payload, on_comm_failure, on_proc_failure, on_success) {
     */
     function failure(error) { 
         //console.log('Request to server failed.')
-        on_comm_failure(error);
+        if (on_comm_failure != null) {
+            on_comm_failure(error);    
+        }
+        
     }
     function success(data) {
         if(data['ok']) {
             //console.log('Request to MCDP succeeded.')
-            on_success(data);
+            if (on_success != null) {
+                on_success(data);
+            }
         } else {
             // console.log('Request to MCDP failed.');
             // console.log(data);
-            on_proc_failure(data);
+            if (on_proc_failure != null) {
+                on_proc_failure(data);
+            }
         }
     }
     jQuery.ajax({

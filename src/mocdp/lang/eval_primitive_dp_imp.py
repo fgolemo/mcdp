@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
+from .eval_codespec_imp import eval_codespec
 from .parts import CDPLanguage
 from conf_tools import SemanticMistakeKeyNotFound
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
 from mocdp.configuration import get_conftools_dps
-from mocdp.dp.primitive import PrimitiveDP
+from mocdp.dp import PrimitiveDP
 from mocdp.exceptions import DPInternalError, DPSemanticError
-from mocdp.lang.eval_codespec_imp import eval_codespec
 
 
 CDP = CDPLanguage

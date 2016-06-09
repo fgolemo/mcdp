@@ -21,8 +21,6 @@ class AppEditor():
 
 
 
-
-
     def view_edit_form(self, request):
         model_name = str(request.matchdict['model_name'])  # unicode
 

@@ -30,6 +30,14 @@
   	<pre ><code contenteditable="true" id='editor'>{{source_code|safe}}</code></pre>
   </div>
   
+  <div id='commands'>
+  	<button id='save'>Save</button>
+  	<button id='discard'>Discard</button>
+  	<br/>
+  	<span id='save_status'></span>
+ 
+  </div>
+
   <pre id='syntax_error'></pre>
   <pre id='comm_failure'></pre>
 
@@ -39,31 +47,39 @@
 	var last_text = null;
 	var last_text_sent_to_server = null;
 
+	var timeoutID = null;
+	var parsing_wait_ms = 400;
+
 	$(document).ready(function() {
-		text = $("#editor").text();
-	    try_to_parse(text, 0);
+
+		$("#editor").keyup(keyup);
+		$( "button#save" ).click(click_button_save);
+		$( "button#discard" ).click(click_button_discard);
+
+	    try_to_parse(current_text(), 0);
 	});
 
-	var timeoutID = null;
+	function current_text() {
+		text = $("#editor").text();
+		return text;
+	}
 
-	 
-
-	$("#editor").keyup(function(){
+	function keyup() {
 		text = $("#editor").text();
 		// do not do it twice
 		if (text == last_text)
 			return;
 		last_text = text;
 
+		$('button#save').disable();
 		$('#around_editor').css('background-color', '#ffe');
-		
 		
 		if (timeoutID != null){
 			window.clearTimeout(timeoutID);
 		}
 
-		timeoutID = window.setTimeout(try_to_parse_it,  500.0);
-	})
+		timeoutID = window.setTimeout(try_to_parse_it, parsing_wait_ms);
+	}
 
 	function try_to_parse_it() {
 		text = $("#editor").text();
@@ -72,24 +88,56 @@
 		pos = getCaretCharacterOffsetWithin(element);
 		if (pos == null){
 			console.log('Cannot get element cursor.');
-			pos =0 ;
+			pos = 0;
 		}
 
 		try_to_parse(text, pos);
-		
-		//console.log(pos);
-	    //$('#caretposition').html(pos);
 	}
+
+	function on_comm_failure(error) {
+		console.log('AJAX error');
+		console.log(error);
+		$('#comm_failure').html(error);
+	}
+
+	function update_text(highlight, pos) {
 	
+		$("#editor").html(highlight);
+		
+		editor = $("#editor").get(0);
+		elements = get_elements(editor);
+
+		if (pos >= elements.length) {
+			pos = elements.length - 1;
+			textNode = elements[pos]['text'];
+			caret = elements[pos]['char'] + 1
+		} else {
+			e = elements[pos];
+			textNode = e['text'];
+			caret = e['char'];
+				
+			if (e == null) {
+				console.log('Could not find element at range ' + pos);
+				console.log(elements);
+			}
+		}
+		
+		var range = document.createRange();
+		range.setStart(textNode, caret);
+		range.setEnd(textNode, caret);
+		var sel = window.getSelection();
+		sel.removeAllRanges();
+		sel.addRange(range);
+
+		$('#around_editor').css('background-color', 'white');
+		$('#syntax_error').html('');
+		$('button#save').enable();
+	}
+
 	function try_to_parse(s, pos) {
-		console.log(JSON.stringify(s));
+		//console.log(JSON.stringify(s));
 		if (pos == null) {
 			throw "Pos is null. String length is " + s.length;
-		}
-
-		function on_comm_failure(error) {
-			console.log('AJAX error');
-			$('#comm_failure').html(error);
 		}
 
 		function on_proc_failure(res) {
@@ -97,106 +145,53 @@
 			$('#syntax_error').html(res['error']);
 			//$('#syntax_error').show();
 			$('#around_editor').css('background-color', '#fee');
+			$('button#save').disable();
 		}	
 
 		function on_success(res) {
-			//$('#syntax_error').hide();
-			// if((last_text_sent_to_server != null) && 
-
 			if (res['request']['text'] != last_text_sent_to_server){
 				console.log('Slow server: ignoring stale.');
 				return;
 			}
-
-			$('#around_editor').css('background-color', 'white');
-			$('#syntax_error').html('');
-			
-			highlight = res['highlight'];
-			$("#editor").html(highlight);
-			
-			editor = $("#editor").get(0);
-			elements = get_elements(editor);
-
-			if (pos >= elements.length) {
-				pos = elements.length - 1;
-				textNode = elements[pos]['text'];
-				caret = elements[pos]['char'] + 1
-			} else {
-				e = elements[pos];
-				textNode = e['text'];
-				caret = e['char'];
-					
-			
-				if (e == null) {
-					console.log('Could not find element at range ' + pos);
-					console.log(elements);
-				}
-			}
-			
-			var range = document.createRange();
-			range.setStart(textNode, caret);
-			range.setEnd(textNode, caret);
-			var sel = window.getSelection();
-			sel.removeAllRanges();
-			sel.addRange(range);
-
-			//now = getCaretCharacterOffsetWithin($('#editor').get(0));
-			//console.log('now to ' + now)
+			update_text(res['highlight'], pos);		
 		}
+
 		last_text_sent_to_server = s;
 		ajax_send("ajax_parse", {'text': s}, on_comm_failure, on_proc_failure, on_success);
 	}
 
-	function getCaretCharacterOffsetWithin(element) {
-	    var caretOffset = 0;
-	    if (typeof window.getSelection() != "undefined") {
-	        var range = window.getSelection().getRangeAt(0);
-	        var preCaretRange = range.cloneRange();
-	        preCaretRange.selectNodeContents(element);
-	        preCaretRange.setEnd(range.endContainer, range.endOffset);
-	        caretOffset = preCaretRange.toString().length;
-	    } else if (typeof document.selection != "undefined" && document.selection.type != "Control") {
-	        var textRange = document.selection.createRange();
-	        var preCaretTextRange = document.body.createTextRange();
-	        preCaretTextRange.moveToElementText(element);
-	        preCaretTextRange.setEndPoint("EndToEnd", textRange);
-	        caretOffset = preCaretTextRange.text.length;
-	    }
-	    return caretOffset;
+	function click_button_discard(res) {
+		location.reload();
 	}
 
-	/* TODO: move in common file */
-	function get_elements(editor) {
-		/* Returns a list of dictionary. The length is the size of the text() inside the editor.
-			The k-th one is a dict of type {'char': i, 'text': textNode} 
-			Meaning that the k-th character of the text is actually the i-th char in textNode.
-			This is useful to place the caret at a specific place.
-			*/
-		var walk_the_DOM = function walk(node, func) {
-		    func(node);
-		    node = node.firstChild;
-		    while (node) {
-		        walk(node, func);
-		        node = node.nextSibling;
-		    }
-		};
-		whole = '';
-		elements = [];
-		walk_the_DOM(editor, function(node) {
-			s = node.nodeValue
-			if (s != null) {
-				whole = whole + s;
-
-				for(i=0;i<s.length;i++) {
-					w = {'char': i, 'text': node};
-					elements.push(w);
-				}
-			} 
-		});
-		//console.log(whole);
-		return elements;
+	function click_button_save() {
+		$('#save_status').html('saving...');
+		data = {'text': current_text()};
+		ajax_send("save", data, on_comm_failure, 
+				  click_button_save_failure, click_button_save_success);
 	}
 	
+
+	function click_button_save_success(res) {
+		show_status('success');
+		console.log('success');
+		console.log(res);
+	}
+
+	function click_button_save_failure(res) {
+		show_status('failed');
+		console.log('failure');	
+		console.log(res);
+	}
+
+	display_timeout = 2000;
+	function clear_status() {
+		$('#save_status').html('');
+	}
+	function show_status(msg) {
+		$('#save_status').html(msg);
+		window.setTimeout(clear_status, display_timeout);
+	}
 
 	</script>
   
