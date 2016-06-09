@@ -6,6 +6,7 @@ from cdpview.plot import png_pdf_from_gg
 from mcdp_web.utils import response_data
 from pyramid.httpexceptions import HTTPSeeOther
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
+import cgi
 
 class AppSolver():
     """
@@ -181,17 +182,19 @@ def ajax_error_catch(f, quiet=(DPSyntaxError, DPSemanticError)):
     try:
         return f()
     except Exception as e:
+
+        s = e.__repr__().decode('ascii', 'ignore')
         try:
-            print(e)
+            print(s)
         except UnicodeEncodeError:
             pass
         res = {}
         res['ok'] = False
         if isinstance(e, quiet):
-            s = str(e)
+            s = unicode(e)
         else:
             s = traceback.format_exc(e)
-        res['error'] = s
+        res['error'] = cgi.escape(s)
         return res
 
 def png_error_catch(f, request):

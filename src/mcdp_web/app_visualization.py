@@ -117,7 +117,9 @@ class AppVisualization():
         source_code = f['data']
         realpath = f['realpath']
 
-        highlight = ast_to_html(source_code, complete_document=False)
+        highlight = ast_to_html(source_code,
+                                complete_document=False,
+                                add_line_gutter=False)
         highlight = self.add_html_links(highlight) 
 
         return {'source_code': source_code,

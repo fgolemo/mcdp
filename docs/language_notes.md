@@ -209,7 +209,30 @@ To write
 ### Requires {:#RequiresKeyword}
 
 
+~~~
+LEQ = sp(L('<=') | L('≤') | L('⊆') | L('≼') | L('⊑'), lambda t: CDP.leq(t[0]))
+~~~
+
+
 Missing features
 ================
 
 * Expressing empty typed sets: https://github.com/AndreaCensi/mcdp/issues/10
+
+
+
+RcompUnit
+
+R 
+
+Nat
+Int
+ceil()
+
+
+
+
+
+
+
+

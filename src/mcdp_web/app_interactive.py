@@ -1,8 +1,10 @@
+from mocdp.comp.context import Context, ValueWithUnits
+from mocdp.lang.eval_constant_imp import eval_constant
+from mocdp.lang.namedtuple_tricks import remove_where_info
 from mocdp.lang.parse_actions import parse_wrap
 from mocdp.lang.syntax import Syntax
-from mocdp.lang.eval_constant_imp import eval_constant
-from mocdp.comp.context import Context, ValueWithUnits
-from mocdp.lang.namedtuple_tricks import remove_where_info
+import cgi
+
 
 class AppInteractive():
     """
@@ -34,6 +36,13 @@ class AppInteractive():
         from mcdp_web.app_solver import ajax_error_catch
 
         string = request.json_body['string']
+        assert isinstance(string, unicode)
+        string = string.encode('utf-8')
+#         print string, type(string)
+#         string = str(string)
+#         string = codecs.decode(string, 'utf-8')
+#         print string, type(string)
+
         def go():
             return self.parse(string)
         return ajax_error_catch(go)
@@ -52,11 +61,12 @@ class AppInteractive():
         space.belongs(value)
 
         res = {}
-        
-        res['output_parsed'] = str(x).replace(', where=None', '')
-        res['output_space'] = space.__repr__() + '\n' + str(type(space))
-        res['output_raw'] = value.__repr__() + '\n' + str(type(value))
-        res['output_formatted'] = space.format(value)
+
+        e = cgi.escape
+        res['output_parsed'] = e(str(x).replace(', where=None', ''))
+        res['output_space'] = e(space.__repr__() + '\n' + str(type(space)))
+        res['output_raw'] = e(value.__repr__() + '\n' + str(type(value)))
+        res['output_formatted'] = e(space.format(value))
         res['ok'] = True
         
 #         print res

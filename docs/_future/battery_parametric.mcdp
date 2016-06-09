@@ -1,0 +1,30 @@
+map {
+    constant specific_energy [Wh/kg] "Energy required "
+    constant specific_cost   [Wh/$]  
+    constant cycles          []
+}
+
+mcdp {
+    """
+        The simplest battery that we have.
+
+
+        #: icon = icon-battery
+    """
+    provides capacity    [J]
+    provides missions    [R]
+
+    requires mass        [g]
+    requires cost        [$]    
+    requires maintenance [Nat]  "Number of times it will need to be changed."
+
+    # Constraint between mass and capacity
+    required mass >= provided capacity / specific_energy
+
+    # How many times should it be replaced?
+    num_replacements = ceil(provided missions / cycles)
+    maintenance >= num_replacements
+
+    # Cost is proportional to number of replacements
+    required cost >= (provided capacity / specific_cost) * num_replacements
+}

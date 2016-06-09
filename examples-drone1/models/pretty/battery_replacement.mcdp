@@ -4,20 +4,20 @@ mcdp {
     provides missions [R]
 
     requires mass     [g]
-    requires cost     [CHF]
+    requires cost     [$]
     # Number of replacements needed
     requires maintenance [R]
 
     specific_energy = 150 Wh/kg
-    specific_cost =  2.50 Wh/CHF
+    specific_cost =  2.50 Wh/$
     cycles = 600 []
 
     # How many times should it be replaced?
-    num_replacements = ceil(missions / cycles)
+    num_replacements = ceil(provided missions / cycles)
     maintenance >= num_replacements
 
-    mass >= capacity / specific_energy
+    mass >= provided capacity / specific_energy
     
-    unit_cost = capacity / specific_cost
-    cost >= unit_cost * num_replacements
+    unit_cost = provided capacity / specific_cost
+    required cost >= unit_cost * num_replacements
 }

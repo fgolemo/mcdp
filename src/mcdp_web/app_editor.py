@@ -20,6 +20,9 @@ class AppEditor():
         config.add_view(self.view_new_model, route_name='new_model')
 
 
+
+
+
     def view_edit_form(self, request):
         model_name = str(request.matchdict['model_name'])  # unicode
 

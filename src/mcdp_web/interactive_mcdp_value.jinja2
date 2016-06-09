@@ -4,29 +4,59 @@
     <title>Interactive parser</title>
 
     {% include 'head.jinja2' %}
-
+	<style type='text/css'>
+	#error {
+		font-size: 50%;
+		color: red;
+	}
+	
+	#output_succces td { vertical-align: top; }
+	#output_success td:first-child { text-align: right; } 
+	</style>
 </head>
 <body>
 
   <textarea id="area" cols=80 rows=5/></textarea>
 
+  <div id='output_success'>
+  <table>
+  <tr>
+  <td >Formatted:</td>
+  <td><code><pre id='output_formatted'></pre></code></td>
+  </tr>
+  <tr>
+  <td>Space:</td>
+  <td><code><pre id='output_space'></pre></code></td>
+  </tr>
+  <tr>
+  <td>Raw value:</td>
+  <td><code><pre id='output_raw'></pre></code></td>
+  </tr>
   
-  <p>
-  Formatted: <code><pre id='output_formatted'></pre></code>
-  </p>
-  <p>
-  Space:
-  <code><pre id='output_space'></pre></code>
-  </p>
-  <p>
-  Raw value:
-  <code><pre id='output_raw'></pre></code>
-  </p>
-
-  <code><pre id='output_parsed'></pre></code>
-
+  
+  </table>
+		<code><pre id='output_parsed'></pre></code>
+  </div>
+  
+  <div id='output_error'>
+  
   <code><pre id='error'></pre></code>
+  </div>
   
+  <!--
+  <p>
+  Useful symbols:
+  
+  <table>
+  <tr>
+  <td>
+  </td>
+  <td>
+    ⟨1g, 2J⟩
+  </td>
+  </tr>
+  </table
+  </p>-->
 
 
 <script type="text/javascript">
@@ -37,7 +67,10 @@ function ajax_begin() {
 
 function ajax_success(data) {
     if (data['ok']) {
-        console.log(data);         
+        console.log(data);
+        $('#output_error').hide();
+        $('#output_success').show();
+                 
         $('#error').html('');
         $('#output_raw').html(data['output_raw']);
         $('#output_formatted').html(data['output_formatted']);
@@ -45,7 +78,10 @@ function ajax_success(data) {
         $('#output_space').html(data['output_space'])
 
     } else {
-    	error = data['error']
+    	$('#output_success').hide();
+        $('#output_error').show();
+        
+        error = data['error']
     	console.log(error);
     	$('#error').html(error);
 
@@ -73,24 +109,6 @@ function ajax_parse(string) {
     });
 }
 
-$.event.special.inputchange = {
-    setup: function() {
-        var self = this, val;
-        $.data(this, 'timer', window.setInterval(function() {
-            val = self.value;
-            if ( $.data( self, 'cache') != val ) {
-                $.data( self, 'cache', val );
-                $( self ).trigger( 'inputchange' );
-            }
-        }, 20));
-    },
-    teardown: function() {
-        window.clearInterval( $.data(this, 'timer') );
-    },
-    add: function() {
-        $.data(this, 'cache', this.value);
-    }
-};
  
 
 $(document ).ready(function() {

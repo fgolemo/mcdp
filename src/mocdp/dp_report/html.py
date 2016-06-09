@@ -32,7 +32,8 @@ def ast_to_text(s):
     return print_ast(block)
     
 @contract(s=str)
-def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: False):
+def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: False,
+                add_line_gutter=True, encapsulate_in_precode=True, add_css=True):
 
     s_lines, s_comments = isolate_comments(s)
     assert len(s_lines) == len(s_comments) 
@@ -96,19 +97,26 @@ def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: 
             pass
         else:
             out += "<span id='line%d'>" % lineno
-            out += "<span class='line-gutter'>%2d</span>" % lineno
-            out += "<span class='line-content'>" + line + "</span>"
+            if add_line_gutter:
+                out += "<span class='line-gutter'>%2d</span>" % lineno
+                out += "<span class='line-content'>" + line + "</span>"
+            else:
+                out += line
             out += "</span>"
             if i != len(lines) - 1:
                 out += '\n'
 
     frag = ""
 
-    frag += '\n<pre><code>'
-    frag += out
-    frag += '\n</code></pre>'
+    if encapsulate_in_precode:
+        frag += '\n<pre><code>'
+        frag += out
+        frag += '\n</code></pre>'
+    else:
+        frag += out
 
-    frag += '\n\n<style type="text/css">\n' + css + '\n' + extra_css + '\n</style>\n\n'
+    if add_css:
+        frag += '\n\n<style type="text/css">\n' + css + '\n' + extra_css + '\n</style>\n\n'
 
     if complete_document:
         s = """<html><head>
@@ -262,7 +270,7 @@ def iterate_notwhere(x):
             continue
         yield k, v
 
-
+# I will put a copy in static
 css = """ 
      
      span.NewResource { color: darkred;}

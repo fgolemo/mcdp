@@ -9,6 +9,7 @@ from mcdp_web.app_visualization import AppVisualization
 from mcdp_web.app_solver import AppSolver
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_web.app_interactive import AppInteractive
+from mcdp_web.app_editor_fancy import AppEditorFancy
 
 
 __all__ = [
@@ -16,7 +17,8 @@ __all__ = [
 ]
 
 
-class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive):
+class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
+             AppEditorFancy):
     def __init__(self, dirname):
         self.dirname = dirname
 
@@ -27,6 +29,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive):
         AppQR.__init__(self)
         AppSolver.__init__(self)
         AppInteractive.__init__(self)
+        AppEditorFancy.__init__(self)
 
     def get_library(self):
         if self.library is None:
@@ -71,9 +74,11 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive):
         print(s)
         return {'exception': s}
     
-    def view_language(self, _request):
+    def view_docs(self, request):
+        docname = str(request.matchdict['document'])  # unicode
+
         import pkg_resources
-        f = pkg_resources.resource_filename('mcdp_web', '../../language_notes.md')  # @UndefinedVariable
+        f = pkg_resources.resource_filename('mcdp_web', '../../docs/%s.md' % docname)  # @UndefinedVariable
         import codecs
         data = codecs.open(f, encoding='utf-8').read()
         import markdown  # @UnresolvedImport
@@ -88,7 +93,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive):
             'markdown.extensions.tables',
         ]
         html = markdown.markdown(data, extensions)
-        print html
+        # print html
         return {'contents': html}
 
     def serve(self):
@@ -101,6 +106,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive):
         AppQR.config(self, config)
         AppSolver.config(self, config)
         AppInteractive.config(self, config)
+        AppEditorFancy.config(self, config)
 
         config.add_route('index', '/')
         config.add_view(self.view_index, route_name='index', renderer='index.jinja2')
@@ -108,8 +114,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive):
         config.add_route('list', '/list')
         config.add_view(self.view_list, route_name='list', renderer='list.jinja2')
 
-        config.add_route('language', '/language')
-        config.add_view(self.view_language, route_name='language', renderer='language.jinja2')
+        config.add_route('docs', '/docs/{document}/')
+        config.add_view(self.view_docs, route_name='docs', renderer='language.jinja2')
 
         config.add_route('empty', '/empty')
         config.add_view(self.view_index, route_name='empty', renderer='empty.jinja2')

@@ -1,0 +1,99 @@
+
+Use '^' to 
+
+mcdp {
+	implements ^battery
+
+	provides x [ ^voltage ]
+
+	a = instance ^Battery
+}
+
+
+
+mcdp_type {
+	elements = a, b, c, d, e
+
+	a <= b <= c
+}
+
+
+poset {
+	a, b, c, d, e
+
+	a <= b <= c
+}
+
+
+widgets.mcdp_type
+~~~~
+set { a, b, c, d, e }
+~~~~
+
+store.mcdp
+~~~~
+mcdp { 
+	provides bom     [bom:subset-of(widgets)]
+	requires payment [spend:USD]
+
+	payment >= spend: 5 USD
+}
+~~~~
+
+The tagged syntax is just sugar on top for the product
+
+	heat-dissipation:W == set({'heat-dissipation'}) x W
+
+likewise:
+
+	heat-dissipation: 5 W == <'heat-dissipation' x W>
+
+
+~~~~
+component = mcdp {
+	provides computation [flops]
+
+	requires waste [heat-dissipation:W]
+
+	waste >= heat-dissipation: (power1 + 5W)
+}
+
+type voltage = set(V)
+
+type energetics = DC: W x voltage
+
+heatsink = mcdp {
+	provides x      [heat-dissipation:W]
+	requires energy [energetics] 
+
+	energy >= DC:<5W, 5V>
+
+	requires cost [cost:USD]
+	cost >= cost: 5 USD
+}
+
+sum = mcdp {
+	provides waste1 [heat-dissipation:W]
+	provides waste2 [heat-dissipation:W]
+	requires waste  [heat-dissipation:W]
+
+	# automatic de-tagging
+	waste >= heat-dissipation: waste1 + waste2
+	
+	# explicit de-tagging using tuple index
+	waste >= heat-dissipation: waste1[1] + waste2[1]
+
+	# Sugar on top?
+	waste >= heat-dissipation: :waste1  + :waste2
+}
+
+
+sum = mcdp {
+	provides waste1 [heat-dissipation:W]
+	provides waste2 [heat-dissipation:W]
+	requires waste  [heat-dissipation:W]
+}
+~~~~
+
+
+~~~~

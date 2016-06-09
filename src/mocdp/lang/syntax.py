@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 from .parse_actions import *  # @UnusedWildImport
 from mocdp.lang.helpers import square
-from mocdp.posets import R_dimensionless
 from pyparsing import (
     CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
     NotAny, OneOrMore, Optional, Or, ParserElement, Suppress, Word, ZeroOrMore,
-    alphanums, alphas, nums, oneOf, opAssoc, operatorPrecedence,
-    dblQuotedString, sglQuotedString)
+    alphanums, alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
+    sglQuotedString)
 import math
 
 ParserElement.enablePackrat()

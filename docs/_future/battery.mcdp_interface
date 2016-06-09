@@ -1,0 +1,6 @@
+interface {
+	provides voltage     [^voltage]
+	provides max_current [current ~ A]
+	requires mass        [transportmass ~ m]
+	requires cost        [budget ~ $]
+}

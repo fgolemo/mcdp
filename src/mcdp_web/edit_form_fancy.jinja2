@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<!---
+
+	TODO: only call ajax after a delay of some seconds.
+	
+-->
+<html lang="en">
+  <head>
+  	{% include 'head.jinja2' %}
+  	
+    <style type="text/css">
+    #syntax_error {
+    	font-weight: bold;
+    	font-size: smaller;
+    	color: red;
+    }
+    #error_notice {
+    	color: red;
+    }
+
+	#editor {
+		font-size: 80%;
+		width: 40em;
+	}
+
+	#editor { outline: 0px solid transparent; }
+
+    </style>
+  </head>
+  
+  <body>
+  
+  <div id='around_editor'>
+  	<pre ><code contenteditable="true" id='editor'>{{source_code|safe}}</code></pre>
+  </div>
+  
+  <pre id='syntax_error'></pre>
+  <pre id='comm_failure'></pre>
+
+  <!-- <div id='caretposition'></div> -->
+	
+<script type='text/javascript'>
+	var last_text = null;
+	var last_text_sent_to_server = null;
+
+	$(document).ready(function() {
+		text = $("#editor").text();
+	    try_to_parse(text, 0);
+	});
+
+	var timeoutID = null;
+
+	 
+
+	$("#editor").keyup(function(){
+		text = $("#editor").text();
+		// do not do it twice
+		if (text == last_text)
+			return;
+		last_text = text;
+
+		$('#around_editor').css('background-color', '#ffe');
+		
+		
+		if (timeoutID != null){
+			window.clearTimeout(timeoutID);
+		}
+
+		timeoutID = window.setTimeout(try_to_parse_it,  500.0);
+	})
+
+	function try_to_parse_it() {
+		text = $("#editor").text();
+		
+		element = $('#editor').get(0);
+		pos = getCaretCharacterOffsetWithin(element);
+		if (pos == null){
+			console.log('Cannot get element cursor.');
+			pos =0 ;
+		}
+
+		try_to_parse(text, pos);
+		
+		//console.log(pos);
+	    //$('#caretposition').html(pos);
+	}
+	
+	function try_to_parse(s, pos) {
+		console.log(JSON.stringify(s));
+		if (pos == null) {
+			throw "Pos is null. String length is " + s.length;
+		}
+
+		function on_comm_failure(error) {
+			console.log('AJAX error');
+			$('#comm_failure').html(error);
+		}
+
+		function on_proc_failure(res) {
+			console.log(res['error']);
+			$('#syntax_error').html(res['error']);
+			//$('#syntax_error').show();
+			$('#around_editor').css('background-color', '#fee');
+		}	
+
+		function on_success(res) {
+			//$('#syntax_error').hide();
+			// if((last_text_sent_to_server != null) && 
+
+			if (res['request']['text'] != last_text_sent_to_server){
+				console.log('Slow server: ignoring stale.');
+				return;
+			}
+
+			$('#around_editor').css('background-color', 'white');
+			$('#syntax_error').html('');
+			
+			highlight = res['highlight'];
+			$("#editor").html(highlight);
+			
+			editor = $("#editor").get(0);
+			elements = get_elements(editor);
+
+			if (pos >= elements.length) {
+				pos = elements.length - 1;
+				textNode = elements[pos]['text'];
+				caret = elements[pos]['char'] + 1
+			} else {
+				e = elements[pos];
+				textNode = e['text'];
+				caret = e['char'];
+					
+			
+				if (e == null) {
+					console.log('Could not find element at range ' + pos);
+					console.log(elements);
+				}
+			}
+			
+			var range = document.createRange();
+			range.setStart(textNode, caret);
+			range.setEnd(textNode, caret);
+			var sel = window.getSelection();
+			sel.removeAllRanges();
+			sel.addRange(range);
+
+			//now = getCaretCharacterOffsetWithin($('#editor').get(0));
+			//console.log('now to ' + now)
+		}
+		last_text_sent_to_server = s;
+		ajax_send("ajax_parse", {'text': s}, on_comm_failure, on_proc_failure, on_success);
+	}
+
+	function getCaretCharacterOffsetWithin(element) {
+	    var caretOffset = 0;
+	    if (typeof window.getSelection() != "undefined") {
+	        var range = window.getSelection().getRangeAt(0);
+	        var preCaretRange = range.cloneRange();
+	        preCaretRange.selectNodeContents(element);
+	        preCaretRange.setEnd(range.endContainer, range.endOffset);
+	        caretOffset = preCaretRange.toString().length;
+	    } else if (typeof document.selection != "undefined" && document.selection.type != "Control") {
+	        var textRange = document.selection.createRange();
+	        var preCaretTextRange = document.body.createTextRange();
+	        preCaretTextRange.moveToElementText(element);
+	        preCaretTextRange.setEndPoint("EndToEnd", textRange);
+	        caretOffset = preCaretTextRange.text.length;
+	    }
+	    return caretOffset;
+	}
+
+
+	function get_elements(editor) {
+		var walk_the_DOM = function walk(node, func) {
+		    func(node);
+		    node = node.firstChild;
+		    while (node) {
+		        walk(node, func);
+		        node = node.nextSibling;
+		    }
+		};
+		whole = '';
+		elements = [];
+		walk_the_DOM(editor, function(node) {
+			s = node.nodeValue
+			if (s != null) {
+				whole = whole + s;
+
+				for(i=0;i<s.length;i++) {
+					w = {'char': i, 'text': node};
+					elements.push(w);
+				}
+			} 
+		});
+		//console.log(whole);
+		return elements;
+	}
+	
+
+	</script>
+  
+  </body>
+</html>

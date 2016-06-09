@@ -9,10 +9,16 @@ from mocdp.lang.parts import CDPLanguage
 from mocdp.lang.syntax import Syntax, parse_ndp
 from mocdp.lang.tests.utils import (TestFailed, parse_wrap_check,
     parse_wrap_syntax_error)
-from mocdp.posets.rcomp_units import R_Weight_g, make_rcompunit
+from mocdp.posets.rcomp_units import make_rcompunit
 from mocdp.posets.types_universe import get_types_universe
 from nose.tools import assert_equal
 from numpy.testing.utils import assert_allclose
+
+def valid_constant(s):
+    """ Evaluates as a constant value (= constant resource) """
+    parsed = parse_wrap(Syntax.rvalue, s)[0]
+    context = Context()
+    return eval_constant(parsed, context)
 
 CDP = CDPLanguage
 
@@ -24,14 +30,14 @@ def check_numbers1():
     parse_wrap_check('1', Syntax.integer_or_float, CDP.ValueExpr(1))
     parse_wrap_check('1.0', Syntax.integer_or_float, CDP.ValueExpr(1.0))
 
-    def valid_constant(s):
-        parsed = parse_wrap(Syntax.constant_value, s)[0]
-        context = Context()
-        return eval_constant(parsed, context)
 
     print valid_constant('5 W')
     print valid_constant('Top Nat')
     print valid_constant('⊤ ℕ')
+
+    print valid_constant('<1 g, 2J>')
+    print valid_constant('⟨1g, 2J⟩')
+
 
 
 @comptest
@@ -372,4 +378,13 @@ mcdp {
     
 }
 """)
+
+
+@comptest
+def check_sums1():
+    valid_constant('int:2 + int:2 ')
+
+@comptest
+def check_sums2():
+    valid_constant('nat:2 + int:2')
 
