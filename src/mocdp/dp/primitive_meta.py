@@ -1,7 +1,7 @@
 from abc import ABCMeta
 from contracts.enabling import all_disabled
 from contracts.utils import raise_wrapped
-from mocdp.posets.space import NotBelongs
+from mcdp_posets.space import NotBelongs
 
 __all__ = [
     'PrimitiveMeta',

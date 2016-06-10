@@ -4,8 +4,8 @@ from mcdp_web.app_solver import (ajax_error_catch,
     format_exception_for_ajax_response, png_error_catch, response_image)
 from mcdp_web.utils import response_data
 from mocdp.comp.composite import CompositeNamedDP
-from mocdp.dp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
-from mocdp.dp_report.html import ast_to_html
+from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
+from mcdp_report.html import ast_to_html
 from mocdp.exceptions import DPSemanticError
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render_to_response
@@ -129,7 +129,7 @@ class AppEditorFancy():
 
             if not model_name in self.last_processed:
                 l = self.get_library()
-                ndp = l.load_ndp2(model_name)[1]
+                ndp = l.load_ndp2(model_name)
             else:
                 ndp = self.last_processed[model_name]
                 if ndp is None:

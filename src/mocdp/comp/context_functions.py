@@ -12,7 +12,7 @@ from mocdp.dp.dp_flatten import Mux
 from mocdp.dp.dp_identity import Identity
 from mocdp.dp.dp_parallel_simplification import make_parallel_n
 from mocdp.dp.dp_series_simplification import make_series
-from mocdp.posets.poset_product import PosetProduct
+from mcdp_posets.poset_product import PosetProduct
 
 @contract(returns='list(tuple(str, str, set($Connection)))')
 def find_nodes_with_multiple_connections(context):

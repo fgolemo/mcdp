@@ -1,8 +1,8 @@
 from contracts import contract
 from contracts.utils import check_isinstance
 from mocdp.dp import PrimitiveDP
-from mocdp.posets import Nat, Poset  # @UnusedImport
-from mocdp.posets import PosetProduct, RcompUnits, poset_minima
+from mcdp_posets import Nat, Poset  # @UnusedImport
+from mcdp_posets import PosetProduct, RcompUnits, poset_minima
 import numpy as np
 from mocdp.dp.primitive import ApproximableDP
 

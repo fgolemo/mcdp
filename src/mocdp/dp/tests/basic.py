@@ -1,6 +1,6 @@
 from mocdp.unittests.generation import for_all_dps
-from mocdp.posets.poset_product import PosetProduct
-from mocdp.posets import Rcomp, R_Weight
+from mcdp_posets.poset_product import PosetProduct
+from mcdp_posets import Rcomp, R_Weight
 from comptests.registrar import comptest
 from mocdp.dp.dp_series import get_product_compact
 from nose.tools import assert_equal
@@ -38,7 +38,7 @@ def check_dp1(id_dp, dp):
 
 @for_all_dps
 def check_dp2(_id_dp, dp):
-    from mocdp.posets.utils import poset_check_chain
+    from mcdp_posets.utils import poset_check_chain
 
     funsp = dp.get_fun_space()
 

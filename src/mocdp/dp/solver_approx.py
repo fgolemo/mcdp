@@ -1,4 +1,4 @@
-from mocdp.posets.uppersets import UpperSets
+from mcdp_posets.uppersets import UpperSets
 from contracts import contract
 from mocdp.dp.solver import MaxStepsReached
 

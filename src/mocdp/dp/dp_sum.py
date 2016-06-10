@@ -3,10 +3,10 @@ from .primitive import PrimitiveDP
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
 from mocdp import get_conftools_posets
-from mocdp.posets import (Int, Map, Nat, Poset, PosetProduct, Rcomp, RcompUnits,
+from mcdp_posets import (Int, Map, Nat, Poset, PosetProduct, Rcomp, RcompUnits,
     Space)  # @UnusedImport
-from mocdp.posets import SpaceProduct
-from mocdp.posets.types_universe import get_types_universe
+from mcdp_posets import SpaceProduct
+from mcdp_posets.types_universe import get_types_universe
 import functools
 import numpy as np
 

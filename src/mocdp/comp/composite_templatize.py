@@ -1,6 +1,6 @@
 from contracts import contract
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.posets.poset_product import PosetProduct
+from mcdp_posets.poset_product import PosetProduct
 from mocdp.comp.composite import CompositeNamedDP
 
 def cndp_templatize_children(cndp):

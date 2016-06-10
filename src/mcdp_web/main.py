@@ -34,7 +34,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
     def get_library(self):
         if self.library is None:
             l = MCDPLibrary()
-            l = l.add_search_dir(self.dirname)
+            l.add_search_dir(self.dirname)
             self.library = l
         return self.library
 

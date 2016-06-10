@@ -1,4 +1,4 @@
-from mocdp.posets.uppersets import UpperSets, UpperSet
+from mcdp_posets.uppersets import UpperSets, UpperSet
 from contracts import contract
 from mocdp.exceptions import do_extra_checks
 from mocdp.dp.dp_loop import DPLoop0

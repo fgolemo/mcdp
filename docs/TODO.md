@@ -70,18 +70,25 @@ MCDP-web
 - F: create static versions of documents
 
 
+- B: we need to escape # in interactive. Maybe hexify?
+http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c  %0A    x <= c <= d # test%0A    e <= a1 # test%0A}
+
+
 
 MCDP-web / QR
 -------------
+
+- put the "new model" link everywhere (list of models, /index)
+- put the navigation bar everywhere
 
 - only give option to import if there are more resources
 - display all imported cards on the gui
 
 
-
 Bugs
 ----
 
+- B: for testing, MCDPLibrary should not use the _cached directory; rather a temp dir. Otherwise there is a race condition.
 - B: FinitePoset does not have Join, Meet
 
 - B: Sometimes Pint does not simplify the units. For example,

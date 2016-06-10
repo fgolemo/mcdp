@@ -3,7 +3,7 @@ from comptests.registrar import comptest
 from mocdp.comp.connection import Connection, connect2
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.dp.primitive import PrimitiveDP
-from mocdp.posets import PosetProduct, Rcomp, SpaceProduct
+from mcdp_posets import PosetProduct, Rcomp, SpaceProduct
 from nose.tools import assert_equal
 
 

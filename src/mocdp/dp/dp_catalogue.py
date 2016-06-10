@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts import contract
-from mocdp.posets import Poset  # @UnusedImport
-from mocdp.posets.utils import poset_minima
+from mcdp_posets import Poset  # @UnusedImport
+from mcdp_posets.utils import poset_minima
 
 
 __all__ = [

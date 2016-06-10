@@ -6,8 +6,8 @@ import os
 matplotlib.rc('font', **{'sans-serif' : 'Arial',
                            'family' : 'sans-serif'})
 
-from mocdp.dp_report.report import report_dp1
-from mocdp.posets import Rcomp
+from mcdp_report.report import report_dp1
+from mcdp_posets import Rcomp
 from mocdp.unittests.generation import for_all_nameddps_dyn
 from reprep import Report
 import numpy as np

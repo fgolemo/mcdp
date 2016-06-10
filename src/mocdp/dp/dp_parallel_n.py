@@ -2,7 +2,7 @@
 from .primitive import PrimitiveDP
 from mocdp.dp.dp_series import get_product_compact
 from mocdp.exceptions import do_extra_checks
-from mocdp.posets import PosetProduct
+from mcdp_posets import PosetProduct
 from contracts import contract
 import warnings
 import itertools

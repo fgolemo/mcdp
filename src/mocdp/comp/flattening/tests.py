@@ -1,5 +1,5 @@
 from comptests.registrar import comptest
-from mocdp.lang import parse_ndp
+from mcdp_lang import parse_ndp
 from mocdp.comp.flattening.flatten import flatten_add_prefix
 from mocdp.unittests.generation import for_all_nameddps
 

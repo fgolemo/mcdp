@@ -2,8 +2,8 @@
 from .primitive import PrimitiveDP
 from contracts import contract
 from mocdp.exceptions import mcdp_dev_warning
-from mocdp.posets import PosetProduct
-from mocdp.posets.space import Map, NotBelongs, MapNotDefinedHere
+from mcdp_posets import PosetProduct
+from mcdp_posets.space import Map, NotBelongs, MapNotDefinedHere
 import numpy as np
 from contracts.utils import raise_wrapped
 

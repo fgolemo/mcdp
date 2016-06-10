@@ -5,7 +5,7 @@ from mocdp.dp.dp_identity import Identity
 from mocdp.dp.dp_parallel import Parallel
 from mocdp.dp.dp_sum import Product, Sum
 from mocdp.dp.primitive import PrimitiveDP
-from mocdp.posets import (PosetProduct, R_Energy, R_Power, R_Time, R_Weight_g,
+from mcdp_posets import (PosetProduct, R_Energy, R_Power, R_Time, R_Weight_g,
     R_dimensionless, Single, SpaceProduct)
 import numpy as np
 
@@ -62,7 +62,7 @@ class TimeEnergyTradeoff(PrimitiveDP):
         for c in choices:
             ressp.belongs(c)
 
-        from mocdp.posets.utils import poset_minima
+        from mcdp_posets.utils import poset_minima
         min_choices = poset_minima(choices, ressp.leq)
 
         return ressp.Us(min_choices)
@@ -95,7 +95,7 @@ class PowerTimeTradeoff(PrimitiveDP):
         for c in choices:
             ressp.belongs(c)
 
-        from mocdp.posets.utils import poset_minima
+        from mcdp_posets.utils import poset_minima
         min_choices = poset_minima(choices, ressp.leq)
 
         return ressp.Us(min_choices)

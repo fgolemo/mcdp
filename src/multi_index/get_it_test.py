@@ -96,8 +96,8 @@ def get_id_indices(x, prefix=None):
     return prefix
     
 def test_get_id_indices():
-    from mocdp.posets.poset_product import PosetProduct
-    from mocdp.posets.rcomp import Rcomp
+    from mcdp_posets.poset_product import PosetProduct
+    from mcdp_posets.rcomp import Rcomp
 
     icases = [
         ('a', ()),
@@ -122,7 +122,7 @@ def check_get_id_indices(a, res):
         raise_desc(ValueError, msg, a=a, res=res, got=got)
 
     # now compute the composition
-    from mocdp.posets.poset_product import PosetProduct
+    from mcdp_posets.poset_product import PosetProduct
     if isinstance(a, PosetProduct):
         reducel = PosetProduct
     else:

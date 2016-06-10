@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from mocdp import get_conftools_posets
-from mocdp.posets import PosetProduct
-from mocdp.posets.space_product import SpaceProduct
+from mcdp_posets import PosetProduct
+from mcdp_posets.space_product import SpaceProduct
 
 
 __all__ = [

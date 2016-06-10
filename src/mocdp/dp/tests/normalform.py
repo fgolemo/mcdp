@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from mocdp.unittests.generation import for_all_dps
-from mocdp.posets.uppersets import UpperSets
+from mcdp_posets.uppersets import UpperSets
 
 if False:
     @for_all_dps

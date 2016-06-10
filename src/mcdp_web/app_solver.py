@@ -1,7 +1,7 @@
 from mcdp_cli.plot import png_pdf_from_gg
 from mcdp_web.app_solver_state import SolverState, get_decisions_for_axes
 from mcdp_web.utils import response_data
-from mocdp.dp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
+from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from pyramid.httpexceptions import HTTPSeeOther
 import cgi

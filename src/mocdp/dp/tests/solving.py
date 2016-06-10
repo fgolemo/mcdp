@@ -1,7 +1,7 @@
 from comptests.registrar import comptest
 from mocdp.dp.solver import (ConvergedToEmpty, ConvergedToFinite,
     ConvergedToInfinite, generic_solve)
-from mocdp.lang import parse_ndp
+from mcdp_lang import parse_ndp
 from numpy.ma.testutils import assert_equal
 
 def get_problem(gamma, add_mass_limit=None):

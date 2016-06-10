@@ -12,7 +12,7 @@ class MOCDPConfig(ConfigMaster):
     def __init__(self):
         ConfigMaster.__init__(self, 'MOCDPConfig')
 
-        from mocdp.posets import Poset
+        from mcdp_posets import Poset
         from mocdp.dp import PrimitiveDP
 
         self.add_class_generic('posets', '*.posets.yaml', Poset)

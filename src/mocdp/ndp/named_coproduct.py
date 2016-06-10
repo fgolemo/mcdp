@@ -1,6 +1,6 @@
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.comp.interfaces import NamedDP
-from mocdp.posets import NotEqual
+from mcdp_posets import NotEqual
 from contracts import contract
 
 __all__ = [
@@ -12,7 +12,7 @@ class NamedDPCoproduct(NamedDP):
     # @contract(ndps='tuple[>=1]($NamedDP)')
     @contract(labels='None|(tuple,seq(str))')
     def __init__(self, ndps, labels=None):
-        from mocdp.posets.types_universe import get_types_universe
+        from mcdp_posets.types_universe import get_types_universe
         if not isinstance(ndps, tuple) or not len(ndps) >= 1:
             raise_desc(ValueError, 'Expected a nonempty tuple.', ndps=ndps)
 

@@ -3,9 +3,9 @@
   code:
   - mocdp.dp.Flatten
   - F: 
-    - mocdp.posets.PosetProduct
+    - mcdp_posets.PosetProduct
     - subs:
-      - - mocdp.posets.PosetProduct
+      - - mcdp_posets.PosetProduct
         - subs: [Rcomp_J, Rcomp_g]
       - Rcomp
 
@@ -14,19 +14,19 @@
   desc: Identity
   code:
   - mocdp.dp.Identity
-  - F: ['mocdp.posets.Rcomp', {}]
+  - F: ['mcdp_posets.Rcomp', {}]
 
 - id: test_sum
   desc: Sum
   code:
   - mocdp.dp.Sum
-  - F: ['mocdp.posets.Rcomp', {}]
+  - F: ['mcdp_posets.Rcomp', {}]
 
 - id: test_split
   desc: Split
   code:
   - mocdp.dp.Split
-  - F: ['mocdp.posets.Rcomp', {}]
+  - F: ['mcdp_posets.Rcomp', {}]
 
 
 - id: test_linear

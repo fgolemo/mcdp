@@ -5,7 +5,7 @@ from .primitive import PrimitiveDP
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.dp.primitive import Feasible, NormalForm, NotFeasible
 from mocdp.exceptions import DPInternalError, do_extra_checks
-from mocdp.posets import (Map, PosetProduct, SpaceProduct, UpperSets,
+from mcdp_posets import (Map, PosetProduct, SpaceProduct, UpperSets,
     get_product_compact)
 from mocdp.dp.tracer import Tracer
 
@@ -218,7 +218,7 @@ class Series0(PrimitiveDP):
             # trace.log('using cache for %s' % str(func))
             return trace.result(self._solve_cache[func])
         trace.values(type='series')
-        from mocdp.posets import UpperSet, poset_minima
+        from mcdp_posets import UpperSet, poset_minima
 
         with trace.child('dp1') as t:
             u1 = self.dp1.solve_trace(func, t)

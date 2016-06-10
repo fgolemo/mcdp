@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from mocdp.dp import PrimitiveDP
-from mocdp.posets import (PosetProduct, R_Energy, R_Power, R_Time,
+from mcdp_posets import (PosetProduct, R_Energy, R_Power, R_Time,
     SpaceProduct)
 import numpy as np
-from mocdp.posets.rcomp_units import R_Weight_g
+from mcdp_posets.rcomp_units import R_Weight_g
 
 
 class BatteryDP(PrimitiveDP):
@@ -138,7 +138,7 @@ class Payload2ET(PrimitiveDP):
         for c in choices:
             ressp.belongs(c)
 
-        from mocdp.posets.utils import poset_minima
+        from mcdp_posets.utils import poset_minima
         min_choices = poset_minima(choices, ressp.leq)
 
         # print('Choices: %d down to %d' % (len(choices), len(min_choices)))

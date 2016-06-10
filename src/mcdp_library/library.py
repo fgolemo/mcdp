@@ -6,8 +6,8 @@ from mocdp import logger
 from mocdp.comp.context import Context
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
-from mocdp.lang import parse_ndp, parse_poset
-from mocdp.posets.poset import Poset
+from mcdp_lang import parse_ndp, parse_poset
+from mcdp_posets.poset import Poset
 import os
 import shutil
 import warnings

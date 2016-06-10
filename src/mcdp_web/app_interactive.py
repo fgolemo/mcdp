@@ -1,8 +1,8 @@
 from mocdp.comp.context import Context, ValueWithUnits
-from mocdp.lang.eval_constant_imp import eval_constant
-from mocdp.lang.namedtuple_tricks import remove_where_info
-from mocdp.lang.parse_actions import parse_wrap
-from mocdp.lang.syntax import Syntax
+from mcdp_lang.eval_constant_imp import eval_constant
+from mcdp_lang.namedtuple_tricks import remove_where_info
+from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.syntax import Syntax
 import cgi
 
 

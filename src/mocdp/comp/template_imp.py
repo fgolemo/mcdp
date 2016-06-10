@@ -1,7 +1,7 @@
 # from .wrap import SimpleWrap
 from mocdp.dp import PrimitiveDP
-# from mocdp.lang.syntax import Syntax, parse_wrap
-from mocdp.posets import SpaceProduct, UpperSet
+# from mcdp_lang.syntax import Syntax, parse_wrap
+from mcdp_posets import SpaceProduct, UpperSet
 
 __all__ = [
     'Dummy',

@@ -7,7 +7,7 @@ from mocdp.comp.wrap import dpwrap
 from mocdp.dp import Product, Series, Terminator, make_series
 from mocdp.example_battery.dp_bat import BatteryDP
 from mocdp.example_battery.dp_bat2 import Mobility
-from mocdp.posets import (PosetProduct, R_Energy, R_Power, R_Time, R_Weight_g,
+from mcdp_posets import (PosetProduct, R_Energy, R_Power, R_Time, R_Weight_g,
     Rcomp)
 
 @comptest

@@ -1,9 +1,9 @@
-from mocdp.dp_report.gg_ndp import gvgen_from_ndp
+from mcdp_report.gg_ndp import gvgen_from_ndp
 from mcdp_cli.plot import png_pdf_from_gg
 from mcdp_web.utils import response_data
-from mocdp.dp_report.gg_ndp import STYLE_GREENREDSYM
-from mocdp.dp_report.html import ast_to_html
-from mocdp.dp_report.report import gvgen_from_dp
+from mcdp_report.gg_ndp import STYLE_GREENREDSYM
+from mcdp_report.html import ast_to_html
+from mcdp_report.report import gvgen_from_dp
 from mcdp_web.app_solver import png_error_catch
 
 class AppVisualization():

@@ -6,10 +6,10 @@ from contracts import contract
 from contracts.utils import indent, raise_desc
 from decent_logs import WithInternalLog
 from mocdp.exceptions import do_extra_checks
-from mocdp.posets import (
+from mcdp_posets import (
     Map, Poset, PosetProduct, Space, SpaceProduct, UpperSet, UpperSets,
     poset_minima)
-from mocdp.posets.ncomp import Ncomp
+from mcdp_posets.ncomp import Ncomp
 
 
 __all__ = [

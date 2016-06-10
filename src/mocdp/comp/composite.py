@@ -89,7 +89,7 @@ class CompositeNamedDP(NamedDP):
             except NotConnected as e:
                 msg = 'Sub-design problem %r is not connected.' % name
                 raise_wrapped(NotConnected, e, msg, compact=True)
-        from mocdp.lang.blocks import check_missing_connections
+        from mcdp_lang.blocks import check_missing_connections
         check_missing_connections(self.context)
 
     def compact(self):

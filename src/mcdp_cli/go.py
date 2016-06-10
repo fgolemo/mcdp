@@ -1,10 +1,11 @@
 from conf_tools.global_config import GlobalConfig
+from mcdp_lang import parse_ndp
+from mcdp_posets.uppersets import UpperSets
+from mcdp_report.report import report_dp1, report_ndp1
+from mcdp_report.utils import safe_makedirs
 from mocdp.comp.interfaces import NotConnected
 from mocdp.dp.solver import generic_solve
-from mocdp.dp_report.report import report_dp1, report_ndp1
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
-from mocdp.lang import parse_ndp
-from mocdp.posets.uppersets import UpperSets
 from reprep import Report
 import logging
 import os
@@ -13,14 +14,11 @@ import time
 logger = logging.getLogger(__name__)
 
 
-def safe_makedirs(dirname):
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
 
 def watch_main():
     GlobalConfig.global_load_dir("mocdp")
     filename = sys.argv[1]
-    if not '.cdp' in filename and not '.mcdp' in filename:
+    if  not '.mcdp' in filename:
         raise ValueError(filename)
 
     path = os.path.dirname(filename)

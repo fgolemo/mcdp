@@ -1,7 +1,7 @@
 - id: Complete_example
   desc: ""
   code: 
-  - mocdp.lang.parse_ndp
+  - mcdp_lang.parse_ndp
   - string: |
         mcdp {  
           sub motor = instance template mcdp {

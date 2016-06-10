@@ -2,9 +2,9 @@
 from contracts import contract
 
 from contracts.utils import raise_wrapped
-from mocdp.posets.space import NotBelongs
-from mocdp.posets.rcomp_units import RcompUnits
-from mocdp.dp_report.gg_ndp import format_unit
+from mcdp_posets.space import NotBelongs
+from mcdp_posets.rcomp_units import RcompUnits
+from mcdp_report.gg_ndp import format_unit
 
 class SolverState():
     def __init__(self, ndp):

@@ -3,13 +3,13 @@ from contracts.utils import raise_desc
 from mcdp_cli.query_interpretation import interpret_params_1string
 from mocdp.comp.context import Context
 from mocdp.comp.interfaces import NamedDP
-from mocdp.lang.eval_space_imp import eval_space
-from mocdp.lang.parse_actions import parse_wrap
-from mocdp.lang.syntax import Syntax
-from mocdp.posets import UpperSets
-from mocdp.posets.rcomp import RcompTop
-from mocdp.posets.space import Space
-from mocdp.posets.types_universe import express_value_in_isomorphic_space
+from mcdp_lang.eval_space_imp import eval_space
+from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.syntax import Syntax
+from mcdp_posets import UpperSets
+from mcdp_posets.rcomp import RcompTop
+from mcdp_posets.space import Space
+from mcdp_posets.types_universe import express_value_in_isomorphic_space
 import itertools
 import numpy as np
 

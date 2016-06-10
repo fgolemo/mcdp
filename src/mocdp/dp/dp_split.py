@@ -2,7 +2,7 @@
 from .primitive import PrimitiveDP
 from mocdp import get_conftools_posets
 from mocdp.exceptions import mcdp_dev_warning
-from mocdp.posets import PosetProduct, SpaceProduct
+from mcdp_posets import PosetProduct, SpaceProduct
 
 __all__ = [
     'Split',

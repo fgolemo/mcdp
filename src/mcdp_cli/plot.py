@@ -6,10 +6,10 @@ from contracts import contract
 from contracts.utils import raise_desc
 from decent_params.utils import UserError
 from mcdp_library import MCDPLibrary
-from mocdp.dp_report.gg_ndp import (STYLE_GREENRED, STYLE_GREENREDSYM,
+from mcdp_report.gg_ndp import (STYLE_GREENRED, STYLE_GREENREDSYM,
     gvgen_from_ndp)
-from mocdp.dp_report.gg_utils import get_dot_string, gg_figure
-from mocdp.dp_report.report import gvgen_from_dp
+from mcdp_report.gg_utils import get_dot_string, gg_figure
+from mcdp_report.report import gvgen_from_dp
 from mocdp.exceptions import mcdp_dev_warning
 from quickapp import QuickAppBase
 from reprep import Report
@@ -87,7 +87,7 @@ def get_lines_to_hide(params):
     return [int(_) for _ in lines]
 
 def syntax_pdf(data):
-    from mocdp.dp_report.html import ast_to_html
+    from mcdp_report.html import ast_to_html
     s = data['s']
     s = s.replace('\t', '    ')
     extra_css = create_extra_css(data['params'])
@@ -142,7 +142,7 @@ def syntax_pdf(data):
         
 @contract(data=dict)
 def syntax_frag(data):
-    from mocdp.dp_report.html import ast_to_html
+    from mcdp_report.html import ast_to_html
     s = data['s']
     extra_css = create_extra_css(data['params'])
     res = ast_to_html(s, complete_document=False, extra_css=extra_css)
@@ -151,7 +151,7 @@ def syntax_frag(data):
 
 @contract(data=dict)
 def syntax_doc(data):
-    from mocdp.dp_report.html import ast_to_html
+    from mcdp_report.html import ast_to_html
     s = data['s']
     extra_css = create_extra_css(data['params'])
     lines_to_hide = get_lines_to_hide(data['params'])
@@ -167,7 +167,7 @@ def syntax_doc(data):
 @contract(data=dict)
 def ast(data):
     s = data['s']
-    from mocdp.dp_report.html import ast_to_text
+    from mcdp_report.html import ast_to_text
     res = ast_to_text(s)
     res1 = ('txt', 'ast', res)
     return [res1]

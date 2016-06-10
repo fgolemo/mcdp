@@ -5,7 +5,7 @@ from mocdp.configuration import get_conftools_dps
 from mocdp.dp import PrimitiveDP
 from mocdp.dp.dp_flatten import get_it
 from mocdp.exceptions import DPInternalError
-from mocdp.posets import PosetProduct
+from mcdp_posets import PosetProduct
 
 __all__ = [
     'SimpleWrap',

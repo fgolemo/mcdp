@@ -5,8 +5,8 @@ from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.dp.primitive import Feasible, NotFeasible
 from mocdp.dp.tracer import Tracer
 from mocdp.exceptions import do_extra_checks
-from mocdp.posets import Map, NotLeq, PosetProduct, UpperSet, UpperSets
-from mocdp.posets.utils import poset_minima
+from mcdp_posets import Map, NotLeq, PosetProduct, UpperSet, UpperSets
+from mcdp_posets.utils import poset_minima
 import itertools
 
 

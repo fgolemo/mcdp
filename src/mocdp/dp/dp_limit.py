@@ -2,8 +2,8 @@
 from .primitive import PrimitiveDP
 from contracts import contract
 from mocdp.exceptions import mcdp_dev_warning
-from mocdp.posets import Poset  # @UnusedImport
-from mocdp.posets import PosetProduct, UpperSet
+from mcdp_posets import Poset  # @UnusedImport
+from mcdp_posets import PosetProduct, UpperSet
 
 
 __all__ = [

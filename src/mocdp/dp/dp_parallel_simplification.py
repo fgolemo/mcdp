@@ -5,7 +5,7 @@ from mocdp.exceptions import DPInternalError
 from .dp_flatten import Mux
 from .dp_identity import Identity
 from .dp_parallel import Parallel
-from mocdp.posets import PosetProduct
+from mcdp_posets import PosetProduct
 from multi_index.get_it_test import compose_indices
 from contracts import contract
 from mocdp.dp.primitive import PrimitiveDP  # @UnusedImport

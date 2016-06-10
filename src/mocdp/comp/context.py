@@ -4,10 +4,10 @@ from contracts import contract
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
-from mocdp.posets import Space
+from mcdp_posets import Space
 from mocdp.comp.wrap import dpwrap
 from mocdp.dp.dp_identity import Identity
-from mocdp.posets.poset import Poset
+from mcdp_posets.poset import Poset
 
 __all__ = [
     'Connection',

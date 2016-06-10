@@ -1,7 +1,7 @@
 from abc import ABCMeta, abstractmethod
 from contracts import contract
 # from mocdp.configuration import get_conftools_nameddps
-from mocdp.posets import PosetProduct
+from mcdp_posets import PosetProduct
 
 __all__ = [
     'NotConnected',

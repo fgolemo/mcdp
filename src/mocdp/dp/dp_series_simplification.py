@@ -7,7 +7,7 @@ from mocdp.dp.dp_parallel import Parallel
 from mocdp.dp.dp_parallel_simplification import make_parallel
 from mocdp.dp.dp_series import Series
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
-from mocdp.posets.poset_product import PosetProduct
+from mcdp_posets.poset_product import PosetProduct
 from multi_index.get_it_test import compose_indices, get_id_indices
 
 __all__ = [

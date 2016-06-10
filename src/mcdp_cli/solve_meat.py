@@ -7,9 +7,9 @@ from contracts.utils import raise_desc, raise_wrapped
 from mocdp.dp.dp_transformations import get_dp_bounds
 from mocdp.dp.solver_iterative import solver_iterative
 from mocdp.dp.tracer import Tracer
-from mocdp.dp_report.report import report_dp1, report_ndp1
-from mocdp.posets import PosetProduct, UpperSets, get_types_universe
-from mocdp.posets.space import NotEqual
+from mcdp_report.report import report_dp1, report_ndp1
+from mcdp_posets import PosetProduct, UpperSets, get_types_universe
+from mcdp_posets.space import NotEqual
 from reprep import Report
 import os
 
@@ -112,14 +112,14 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
     if plot:
         r = Report()
         if _exp_advanced:
-            from mocdp.dp_report.generic_report_utils import generic_report
+            from mcdp_report.generic_report_utils import generic_report
             generic_report(r, dp, trace,
                            annotation=None, axis0=(0, 0, 0, 0))
         else:
             f = r.figure()
-            from mocdp.dp_report.generic_report_utils import generic_plot
+            from mcdp_report.generic_report_utils import generic_plot
             generic_plot(f, space=UR, value=res)
-            from mocdp.dp_report.generic_report_utils import generic_report_trace
+            from mcdp_report.generic_report_utils import generic_report_trace
             generic_report_trace(r, ndp, dp, trace, out, do_movie=do_movie)
 
         out_html = os.path.join(out, 'report.html')

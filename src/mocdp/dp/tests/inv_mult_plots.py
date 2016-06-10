@@ -8,15 +8,15 @@ from mocdp.dp.dp_parallel_simplification import make_parallel
 from mocdp.dp.dp_series_simplification import wrap_series
 from mocdp.dp.dp_sum import SumNNat
 from mocdp.dp.tracer import Tracer
-from mocdp.dp_report.generic_report_utils import generic_report
+from mcdp_report.generic_report_utils import generic_report
 from mocdp.drawing import plot_upset_R2
-from mocdp.lang.eval_math import PlusNat
-from mocdp.lang import parse_ndp
-from mocdp.lang.tests.utils import assert_semantic_error
-from mocdp.posets import UpperSets
-from mocdp.posets.nat import Nat
-from mocdp.posets.poset_product import PosetProduct
-from mocdp.posets.space import Map, NotEqual
+from mcdp_lang.eval_math import PlusNat
+from mcdp_lang import parse_ndp
+from mcdp_lang.tests.utils import assert_semantic_error
+from mcdp_posets import UpperSets
+from mcdp_posets.nat import Nat
+from mcdp_posets.poset_product import PosetProduct
+from mcdp_posets.space import Map, NotEqual
 from nose.tools import assert_equal
 from reprep import Report
 import itertools

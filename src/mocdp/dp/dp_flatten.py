@@ -4,7 +4,7 @@ from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
 from mocdp import get_conftools_posets
 from mocdp.exceptions import DPInternalError, do_extra_checks
-from mocdp.posets import PosetProduct
+from mcdp_posets import PosetProduct
 from multi_index import get_it
 
 

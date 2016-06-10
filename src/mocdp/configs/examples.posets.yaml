@@ -2,50 +2,50 @@
 - id: single
   desc: Single element
   code:
-  - mocdp.posets.Single
+  - mcdp_posets.Single
   - element: "*"
 
 - id: interval01
   desc: Test interval
   code:
-  - mocdp.posets.Interval
+  - mcdp_posets.Interval
   - L: 0.0
     U: 1.0
 
 - id: Rcomp
   desc: "[0, ...] U [infinity]"
   code:
-  - mocdp.posets.Rcomp
+  - mcdp_posets.Rcomp
   - {}
 
 - id: Rcomp_g
   desc: grams
   code:
-  - mocdp.posets.make_rcompunit
+  - mcdp_posets.make_rcompunit
   - units: g
 
 - id: Rcomp_J
   desc: Joules
   code:
-  - mocdp.posets.make_rcompunit
+  - mcdp_posets.make_rcompunit
   - units: J
 
 - id: U_Rcomp
   desc: upper sets of Rcomp
   code:
-  - mocdp.posets.UpperSets
+  - mcdp_posets.UpperSets
   - P: 'Rcomp'
 
 - id: U_interval01
   desc: upper sets of interval
   code:
-  - mocdp.posets.UpperSets
+  - mcdp_posets.UpperSets
   - P: 'interval01'
 
 - id: square
   desc: "[0,1]x[0,1]"
   code:
-  - mocdp.posets.PosetProduct
+  - mcdp_posets.PosetProduct
   - subs: 
     - interval01
     - interval01
@@ -54,13 +54,13 @@
 - id: R_dimensionless
   desc: dimensionless
   code:
-  - mocdp.posets.make_rcompunit
+  - mcdp_posets.make_rcompunit
   - units: 'm/m'
 
 
 - id: Nat
   desc: Natural numbers
   code:
-  - mocdp.posets.Nat
+  - mcdp_posets.Nat
   - {}
 
