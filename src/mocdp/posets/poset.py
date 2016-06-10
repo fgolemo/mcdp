@@ -56,9 +56,17 @@ class Poset(Preorder):
 
     def get_test_chain(self, n):  # @UnusedVariable
         """
-            Returns a test chain of length n
+            Returns a test chain of length up to n.
+            
+            Might raise Uninhabited.
         """
-        return [self.get_bottom(), self.get_top()]
+        chain = [self.get_bottom()]
+        try:
+            top = self.get_top()
+            chain.append(top)
+        except NotBounded:
+            pass
+        return chain
 
 
     def join(self, a, b):  # "max" ∨

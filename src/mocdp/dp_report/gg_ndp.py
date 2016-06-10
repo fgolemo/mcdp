@@ -362,8 +362,9 @@ def create(gdc, ndp):
 
 def resize_icon(filename, tmppath, size):
     
-    from cdpview.go import safe_makedirs
+
     res = os.path.join(tmppath, 'resized', str(size))
+    from mcdp_cli.go import safe_makedirs
     safe_makedirs(res)
     resized = os.path.join(res, os.path.basename(filename))
     if not os.path.exists(resized):

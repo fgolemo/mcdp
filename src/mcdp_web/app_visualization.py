@@ -1,3 +1,5 @@
+from mocdp.dp_report.gg_ndp import gvgen_from_ndp
+from mcdp_cli.plot import png_pdf_from_gg
 from mcdp_web.utils import response_data
 from mocdp.dp_report.gg_ndp import STYLE_GREENREDSYM
 from mocdp.dp_report.html import ast_to_html
@@ -38,10 +40,9 @@ class AppVisualization():
             style = request.matchdict['style']
             fileformat = request.matchdict['format']
 
-            from mocdp.dp_report.gg_ndp import gvgen_from_ndp
-            from cdpview.plot import png_pdf_from_gg
 
-            _, ndp = self.get_library().load_ndp(model_name)
+
+            ndp = self.get_library().load_ndp(model_name)
             gg = gvgen_from_ndp(ndp, style)
             png, pdf = png_pdf_from_gg(gg)
 
@@ -68,9 +69,9 @@ class AppVisualization():
             model_name = str(request.matchdict['model_name'])  # unicod
             fileformat = request.matchdict['format']
 
-            from cdpview.plot import png_pdf_from_gg
 
-            _, ndp = self.get_library().load_ndp(model_name)
+
+            ndp = self.get_library().load_ndp2(model_name)
             dp = ndp.get_dp()
             gg = gvgen_from_dp(dp)
 
@@ -96,7 +97,7 @@ class AppVisualization():
     def view_model_ndp_repr(self, request):
         model_name = str(request.matchdict['model_name'])  # unicode
         models = self.list_of_models()
-        _, ndp = self.get_library().load_ndp(model_name)
+        ndp = self.get_library().load_ndp2(model_name)
         ndp_string = ndp.__repr__()
         ndp_string = ndp_string.decode("utf8")
 

@@ -67,10 +67,10 @@ setup(name='PyMCDP',
 
       entry_points={
          'console_scripts': [
-            'mcdp_plot = cdpview:mcdp_plot_main',
-            'mcdp_solve = cdpview:mcdp_solve_main',
-            'mcdp-plot = cdpview:mcdp_plot_main',
-            'mcdp-solve = cdpview:mcdp_solve_main',
+            'mcdp_plot = mcdp_cli:mcdp_plot_main',
+            'mcdp_solve = mcdp_cli:mcdp_solve_main',
+            'mcdp-plot = mcdp_cli:mcdp_plot_main',
+            'mcdp-solve = mcdp_cli:mcdp_solve_main',
             'mcdp-web = mcdp_web:mcdp_web_main',
         ]
       }

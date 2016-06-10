@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from abc import ABCMeta, abstractmethod
-from cdpview.go import safe_makedirs
+
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.drawing import plot_upset_R2
@@ -79,6 +79,7 @@ def _report_loop(r, trace_loop, out, do_movie=True):
 
                     node = f.resolve_url('step%d/png' % i)
 
+                    from mcdp_cli.go import safe_makedirs
                     safe_makedirs(outdir)
                     fn = os.path.join(outdir, '%05d.png' % i)
                     with open(fn, 'w') as fi:

@@ -6,7 +6,6 @@ from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
 from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
     get_name_for_fun_node, get_name_for_res_node)
-from mocdp.dp import Identity
 from mocdp.dp.dp_approximation import make_approximation
 from mocdp.dp.dp_catalogue import CatalogueDP
 from mocdp.dp.dp_series_simplification import make_series

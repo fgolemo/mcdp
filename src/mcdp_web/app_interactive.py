@@ -10,10 +10,9 @@ class AppInteractive():
     """
         /interactive/mcdp_value/
         /interactive/mcdp_value/parse
+        
         /interactive/mcdp_type/
         
-        /interactive/mcdp_model  
-    
     """
 
     def __init__(self):
@@ -50,6 +49,9 @@ class AppInteractive():
         context = Context()
 
         result = eval_constant(x, context)
+
+#         result = parse_value(string, context)
+
 
         assert isinstance(result, ValueWithUnits)
         value = result.value

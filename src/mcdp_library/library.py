@@ -4,11 +4,14 @@ from contracts.utils import raise_desc
 from mcdp_library.utils.memos_selection import memo_disk_cache2
 from mocdp import logger
 from mocdp.comp.context import Context
+from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
-from mocdp.lang.parse_actions import parse_ndp
+from mocdp.lang import parse_ndp, parse_poset
+from mocdp.posets.poset import Poset
 import os
-import warnings
 import shutil
+import warnings
+from copy import deepcopy
 
 
 
@@ -25,59 +28,80 @@ class MCDPLibrary():
             '_cached' directory
             
             not case sensitive
+            
+        delete_cache(): deletes the _cached directory
         
     """
-    def __init__(self, file_to_contents=None):
-        # "x.mcdp" -> string
+
+    # These are all the extensions that we care about
+    ext_ndps = 'mcdp'
+    ext_posets = 'mcdp_poset'
+    ext_values = 'mcdp_value'
+    ext_templates = 'mcdp_template'
+    all_extensions = [ext_ndps, ext_posets, ext_values, ext_templates]
+
+    def __init__(self, cache_dir=None, file_to_contents=None):
+        # basename "x.mcdp" -> dict
         if file_to_contents is None:
             file_to_contents = {}
         self.file_to_contents = file_to_contents
         self.file_to_realpath = {}
         
-        self.cache_dir = '_cached'
+        if cache_dir is None:
+            cache_dir = '_cached'
+
+        self.cache_dir = cache_dir
+
+    def clone(self):
+        fields = ['file_to_contents', 'cache_dir']
+        contents = {}
+        for f in fields:
+            if not hasattr(self, f):
+                raise ValueError(f)
+            contents[f] = deepcopy(getattr(self, f))
+        return MCDPLibrary(**contents)
 
     def delete_cache(self):
         if os.path.exists(self.cache_dir):
             shutil.rmtree(self.cache_dir)
 
-    def clone(self):
-        fields = ['file_to_contents']
-        contents = {}
-        for f in fields:
-            if not hasattr(self, f):
-                raise ValueError(f)
-            contents[f] = getattr(self, f).copy()
-        return MCDPLibrary(**contents)
-
-    @contract(returns='tuple(*, isinstance(NamedDP))')
+    @contract(returns=NamedDP)
     def load_ndp(self, id_ndp):
-        c = self.clone()
-        res = c._load_ndp(id_ndp)
-        return c, res
+        return self._load_generic(id_ndp, MCDPLibrary.ext_ndps, MCDPLibrary.parse_ndp)
 
-    def _load_ndp(self, id_ndp):
-        filename = '%s.mcdp' % id_ndp
+    @contract(returns=Poset)
+    def load_poset(self, id_poset):
+        return self._load_generic(id_poset, MCDPLibrary.ext_posets, MCDPLibrary.parse_poset)
+
+    def _load_generic(self, name, extension, parsing):
+        filename = '%s.%s' % (name, extension)
         f = self._get_file_data(filename)
         data = f['data']
         realpath = f['realpath']
 
         def actual_load():
-            logger.debug('Parsing %r' % id_ndp)
-            return self.parse_ndp(data, realpath)
+            # maybe we should clone
+            l = self.clone()
+            logger.debug('Parsing %r' % name)
+            return parsing(l, data, realpath)
 
-        cache_file = os.path.join(self.cache_dir, '%s.cached' % id_ndp)
+        cache_file = os.path.join(self.cache_dir, parsing.__name__, '%s.cached' % name)
         return memo_disk_cache2(cache_file, data, actual_load)
+
+    load_ndp2 = load_ndp
 
     def parse_ndp(self, string, realpath=None):
         """ This is the wrapper around parse_ndp that adds the hooks. """
-        def load(load_arg):
-            _c, res = self.load_ndp(load_arg)
-            return res
+        return self._parse_with_hooks(parse_ndp, string, realpath)
 
-        context = Context()
-        context.load_ndp_hooks = [load]
+    def parse_poset(self, string, realpath=None):
+        return self._parse_with_hooks(parse_poset, string, realpath)
+
+    def _parse_with_hooks(self, parse_ndp_like, string, realpath):
+        context = self._generate_context_with_hooks()
+
         try:
-            result = parse_ndp(string, context=context)
+            result = parse_ndp_like(string, context=context)
         except (DPSyntaxError, DPSemanticError) as e:
             if realpath is not None:
                 raise e.with_filename(realpath)
@@ -85,14 +109,32 @@ class MCDPLibrary():
                 raise e
         return result
 
+    def _generate_context_with_hooks(self):
+        context = Context()
+        context.load_ndp_hooks = [self.load_ndp]
+        context.load_poset_hooks = [self.load_poset]
+        return context
+
     @contract(returns='set(str)')
-    def get_models(self):
-        """ Returns all models (files *mcdp) """
+    def list_ndps(self):
+        """ Returns all models defined in this library with .mcdp files. """
+        return self._list_with_extension(MCDPLibrary.ext_ndps)
+
+    get_models = list_ndps
+
+    @contract(returns='set(str)')
+    def list_posets(self):
+        """ Returns all models defined in this library with .mcdp files. """
+        return self._list_with_extension(MCDPLibrary.ext_posets)
+
+    def _list_with_extension(self, ext):
         r = []
         for x in self.file_to_contents:
-            if x.endswith('.mcdp'):
-                r.append(x.replace('.mcdp', ''))
-        return set(r)
+            p = '.' + ext
+            if x.endswith(p):
+                r.append(x.replace(p, ''))
+        res = set(r)
+        return res
 
     def file_exists(self, basename):
         for fn in self.file_to_contents:
@@ -122,16 +164,16 @@ class MCDPLibrary():
         warnings.warn('sys.path hack needs to change')
         sys.path.insert(0, d)
 
-        c = self.clone()
-        c._add_search_dir(d)
-        return c
+        self._add_search_dir(d)
 
     def _add_search_dir(self, d):
         """ Adds the directory to the search directory list. """
-        files_mcdp = locate_files(directory=d, pattern='*.mcdp', followlinks=True)
-        for f in files_mcdp:
-            self._update_file(f)
-            
+        for ext in MCDPLibrary.all_extensions:
+            pattern = '*.%s' % ext
+            files_mcdp = locate_files(directory=d, pattern=pattern, followlinks=True)
+            for f in files_mcdp:
+                self._update_file(f)
+
     def _update_file(self, f):
         basename = os.path.basename(f)
         data = open(f).read()
@@ -148,4 +190,8 @@ class MCDPLibrary():
             f.write(data)
         # reload
         self._update_file(realpath)
+
+    # Support for parsing types
+
+
 

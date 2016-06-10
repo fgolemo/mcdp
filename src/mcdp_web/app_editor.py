@@ -1,7 +1,7 @@
 from pyramid.renderers import render_to_response
 from pyramid.httpexceptions import HTTPFound
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
-import os
+
 
 class AppEditor():
 

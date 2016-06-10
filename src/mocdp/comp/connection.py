@@ -2,11 +2,12 @@
 from .context import Connection
 from .interfaces import NamedDP
 from .wrap import dpwrap
-
 from contracts import contract
 from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
 from mocdp.comp.composite import CompositeNamedDP
+from mocdp.comp.connection_reps import (relabel, there_are_repetitions,
+    there_are_reps)
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.configuration import get_conftools_nameddps
 from mocdp.dp import Identity, Mux, Terminator, make_parallel, make_series
@@ -15,8 +16,7 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.posets import PosetProduct
 from networkx import DiGraph, MultiDiGraph, NetworkXUnfeasible
 from networkx.algorithms import is_connected, simple_cycles, topological_sort
-from mocdp.comp.connection_reps import there_are_reps, there_are_repetitions, \
-    relabel
+
 
 class TheresALoop(Exception):
     pass

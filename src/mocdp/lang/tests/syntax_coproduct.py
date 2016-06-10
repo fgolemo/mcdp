@@ -2,7 +2,7 @@
 from mocdp.lang.tests.utils import parse_wrap_check
 from mocdp.lang.syntax import Syntax
 from comptests.registrar import comptest
-from mocdp.lang.parse_actions import parse_ndp
+from mocdp.lang import parse_ndp
 from mocdp.posets.uppersets import UpperSets
 
 @comptest

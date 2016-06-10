@@ -13,7 +13,6 @@ from reprep import Report
 import numpy as np
 
 
-
 @for_all_nameddps_dyn
 def nameddp1_report(context, _id_dp, ndp):
     dp = ndp.get_dp()

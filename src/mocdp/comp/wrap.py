@@ -4,7 +4,7 @@ from contracts.utils import indent, raise_desc
 from mocdp.configuration import get_conftools_dps
 from mocdp.dp import PrimitiveDP
 from mocdp.dp.dp_flatten import get_it
-from mocdp.exceptions import DPInternalError, mcdp_dev_warning
+from mocdp.exceptions import DPInternalError
 from mocdp.posets import PosetProduct
 
 __all__ = [

@@ -28,7 +28,9 @@ def compact_context(context):
         s1s = [c.s1 for c in their_connections]
         s2s = [c.s2 for c in their_connections]
 
-        print 'compacting', their_connections
+        #
+
+        # print 'compacting', their_connections
         ndp1 = context.names[name1]
         ndp2 = context.names[name2]
         sname = '_'.join(s1s)

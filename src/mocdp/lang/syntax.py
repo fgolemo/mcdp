@@ -60,6 +60,7 @@ class Syntax():
         'approx',
         TOP_LITERAL,
         BOTTOM_LITERAL,
+        'finite_poset',
         'choose',
         'flatten',
         'from_library',
@@ -160,6 +161,28 @@ class Syntax():
 
     space_expr = Forward() 
 
+    # "load <name>"
+    name_poset = sp(idn.copy(), lambda t: CDP.PosetName(t[0]))
+    load_poset = sp(LOAD - name_poset, lambda t: CDP.LoadPoset(t[0], t[1]))
+
+    # " finite_poset {
+    #     a
+    #     b  c  d  e
+    #
+    #     a <= b <= c
+    #   }
+    #
+
+    FINITE_POSET = sp(L('finite_poset'), lambda t: CDP.FinitePosetKeyword(t[0]))
+    finite_poset_el = sp(idn.copy(), lambda t: CDP.FinitePosetElement(t[0]))
+    finite_poset_chain = sp(finite_poset_el + ZeroOrMore(LEQ + finite_poset_el),
+                               lambda t: make_list(t))
+
+
+    finite_poset = sp(FINITE_POSET + S(L('{')) + ZeroOrMore(finite_poset_chain) + S(L('}')),
+                      lambda t: CDP.FinitePoset(t[0], make_list(t[1:])))
+
+
     power_set_expr = sp((L('℘') | L('set-of')) - L('(') + space_expr + L(')'),
                         lambda t: CDP.PowerSet(t[0], t[1],
                                                t[2], t[3]))
@@ -171,7 +194,12 @@ class Syntax():
     nat_expr = sp(L('Nat') | L('ℕ'), lambda t: CDP.Nat(t[0]))
     int_expr = sp(L('Int') | L('ℤ'), lambda t: CDP.Int(t[0]))
 
-    space_operand = (pint_unit ^ power_set_expr ^ nat_expr ^ int_expr)
+    space_operand = (pint_unit ^
+                     power_set_expr ^
+                     nat_expr ^
+                     int_expr ^
+                     load_poset ^
+                     finite_poset)
 
     space_expr << operatorPrecedence(space_operand, [
                 (PRODUCT, 2, opAssoc.LEFT, space_product_parse_action),
@@ -187,6 +215,7 @@ class Syntax():
                         lambda t: int(t[0]))
     integer = sp(Combine(O(plusorminus) + number),
                     lambda t: int(t[0]))
+
     # Note that '42' is not a valid float...
     floatnumber = sp((Combine(integer + point + O(number) + O(e + integer)) |
                       Combine(integer + e + integer)),
@@ -243,6 +272,8 @@ class Syntax():
 
     ndpt_load_expr = sp(LOAD - (ndpname | SLPAR - ndpname - SRPAR),
                         lambda t: CDP.LoadCommand(t[0], t[1]))
+
+
 
     # An expression that evaluates to a NamedDP
     ndpt_dp_rvalue = Forward()
@@ -467,6 +498,7 @@ class Syntax():
 
     pdpname = sp(idn.copy(), lambda t: CDP.FuncName(t[0]))  # XXX
     load_pdp = sp(LOAD - pdpname, lambda t: CDP.LoadDP(t[0], t[1]))
+
 
     pdp_rvalue = load_pdp ^ code_spec
 

@@ -3,7 +3,7 @@ from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     assert_syntax_error)
 from comptests.registrar import comptest
 from mocdp.lang.parts import CDPLanguage
-from mocdp.lang.syntax import Syntax, parse_ndp
+from mocdp.lang import parse_ndp
 from mocdp.lang.tests.utils import (TestFailed, parse_wrap_check,
     parse_wrap_syntax_error)
 from mocdp.posets.rcomp_units import make_rcompunit
@@ -11,6 +11,7 @@ from mocdp.posets.types_universe import get_types_universe
 from nose.tools import assert_equal
 from numpy.testing.utils import assert_allclose
 from mocdp.lang.tests.utils2 import eval_rvalue_as_constant
+from mocdp.lang.syntax import Syntax
 
 CDP = CDPLanguage
 

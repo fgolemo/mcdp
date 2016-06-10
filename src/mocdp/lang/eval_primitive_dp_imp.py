@@ -11,7 +11,6 @@ from mocdp.exceptions import DPInternalError, DPSemanticError
 
 CDP = CDPLanguage
 
-
 @contract(returns=PrimitiveDP)
 def eval_pdp(r, context):  # @UnusedVariable
     try:

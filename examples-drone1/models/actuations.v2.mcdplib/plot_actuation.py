@@ -32,8 +32,8 @@ def go():
 
 def go_(model_name, queries, result_like, what_to_plot_res, what_to_plot_fun, fn):
     lib = MCDPLibrary()
-    lib = lib.add_search_dir('.')
-    _, ndp = lib.load_ndp(model_name)
+    lib.add_search_dir('.')
+    ndp = lib.load_ndp(model_name)
 
     data = solve_queries(ndp, queries, result_like)
 

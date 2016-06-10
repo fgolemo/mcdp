@@ -7,6 +7,7 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.posets import Space
 from mocdp.comp.wrap import dpwrap
 from mocdp.dp.dp_identity import Identity
+from mocdp.posets.poset import Poset
 
 __all__ = [
     'Connection',
@@ -79,11 +80,26 @@ def is_res_node_name(name):
 class NoSuchMCDPType(Exception):
     pass
 
-def load_ndp_conftools(load_arg):
+def conftools_load_ndp(load_arg):
     from mocdp.configuration import get_conftools_nameddps
     from conf_tools.exceptions import ConfToolsException
 
     library = get_conftools_nameddps()
+
+    try:
+        _, ndp = library.instance_smarter(load_arg)
+    except ConfToolsException as e:
+        msg = 'Cannot load predefined DP %s.' % load_arg.__repr__()
+        raise_wrapped(DPSemanticError, e, msg, compact=True)
+
+    return ndp
+
+
+def conftools_load_poset(load_arg):
+    from conf_tools.exceptions import ConfToolsException
+    from mocdp.configuration import get_conftools_posets
+
+    library = get_conftools_posets()
 
     try:
         _, ndp = library.instance_smarter(load_arg)
@@ -107,7 +123,8 @@ class Context():
         self.var2model = {}  # str -> NamedDP
         self.constants = {}  # str -> ValueWithUnits
         
-        self.load_ndp_hooks = [load_ndp_conftools]
+        self.load_ndp_hooks = [conftools_load_ndp]
+        self.load_posets_hooks = [conftools_load_poset]
 
     def child(self):
         """ A child context preserves the value of the constants
@@ -119,11 +136,17 @@ class Context():
         return c
 
     def load_ndp(self, load_arg):
+        return self._load_hooks(load_arg, self.load_ndp_hooks, NamedDP)
+
+    def load_poset(self, load_arg):
+        return self._load_hooks(load_arg, self.load_poset_hooks, Poset)
+
+    def _load_hooks(self, load_arg, hooks, expected):
         errors = []
-        for hook in self.load_ndp_hooks:
+        for hook in hooks:
             try:
                 res = hook(load_arg)
-                assert isinstance(res, NamedDP)
+                assert isinstance(res, expected)
                 return res
             except DPSemanticError as e:
                 errors.append(str(e))

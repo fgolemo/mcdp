@@ -82,6 +82,8 @@ MCDP-web / QR
 Bugs
 ----
 
+- B: FinitePoset does not have Join, Meet
+
 - B: Sometimes Pint does not simplify the units. For example,
       J * kg / Wh has the same dimensionality of kg
 

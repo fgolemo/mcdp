@@ -4,7 +4,7 @@ from mocdp.lang.tests.utils import parse_wrap_check
 from mocdp.lang.syntax import Syntax
 from mocdp.comp.context import Context
 
-from mocdp.lang.parse_actions import parse_ndp
+from mocdp.lang import parse_ndp
 from mocdp.lang.eval_space_imp import eval_space
 
 

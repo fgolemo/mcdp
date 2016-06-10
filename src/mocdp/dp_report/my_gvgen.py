@@ -666,7 +666,7 @@ class GvGen:
 #         self.__links = []
 
 
-def format_property(k, v):
+def format_property(k, v):  # @UnusedVariable
     s = str(v)
     def escape(x):
         return x.replace('\n', '\\n')

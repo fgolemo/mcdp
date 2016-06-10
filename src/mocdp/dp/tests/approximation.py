@@ -1,5 +1,5 @@
 from comptests.registrar import comptest
-from mocdp.lang.parse_actions import parse_ndp
+from mocdp.lang import parse_ndp
 from mocdp.dp.dp_approximation import CombinedCeil
 from mocdp.posets.uppersets import UpperSets
 

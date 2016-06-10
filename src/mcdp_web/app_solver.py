@@ -1,13 +1,12 @@
-import itertools
+from mcdp_cli.plot import png_pdf_from_gg
 from mcdp_web.app_solver_state import SolverState, get_decisions_for_axes
-import traceback
-from mocdp.dp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
-from cdpview.plot import png_pdf_from_gg
 from mcdp_web.utils import response_data
-from pyramid.httpexceptions import HTTPSeeOther
+from mocdp.dp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
+from pyramid.httpexceptions import HTTPSeeOther
 import cgi
-from PIL import ImageFont
+import itertools
+import traceback
 
 
 class AppSolver():
@@ -39,7 +38,7 @@ class AppSolver():
 
     def reset(self, request):
         model_name = self.get_model_name(request)
-        _, self.ndp = self.get_library().load_ndp(model_name)
+        self.ndp = self.get_library().load_ndp2(model_name)
         self.solver_states[model_name] = SolverState(self.ndp)
 
     def config(self, config):

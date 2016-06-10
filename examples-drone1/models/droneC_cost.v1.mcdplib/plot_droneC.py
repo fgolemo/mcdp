@@ -30,8 +30,8 @@ def go():
     what_to_plot_fun = dict(extra_payload="g", endurance="minutes")
 
     lib = MCDPLibrary()
-    lib = lib.add_search_dir('.')
-    _, ndp = lib.load_ndp(model_name)
+    lib.add_search_dir('.')
+    ndp = lib.load_ndp2(model_name)
 
     data = solve_queries(ndp, queries, result_like)
 

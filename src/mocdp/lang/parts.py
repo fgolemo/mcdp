@@ -139,7 +139,10 @@ class CDPLanguage():
     FunStatement = namedtuplewhere('FunStatement', 'keyword fname unit')
     ResStatement = namedtuplewhere('ResStatement', 'keyword rname unit')
 
+    PosetName = namedtuplewhere('PosetName', 'value')
     LoadDP = namedtuplewhere('LoadDP', 'keyword name')
+    LoadPoset = namedtuplewhere('LoadPoset', 'keyword name')
+
     DPWrap = namedtuplewhere('DPWrap', 'token statements prep impl')
 
     # Code specs
@@ -163,6 +166,10 @@ class CDPLanguage():
     Power = namedtuplewhere('Power', 'op1 glyph exponent')
     BuildProblem = namedtuplewhere('BuildProblem', 'keyword statements')
 
+    # Finite posets
+    FinitePosetKeyword = namedtuplewhere('FinitePosetKeyword', 'keyword')
+    FinitePosetElement = namedtuplewhere('FinitePosetElement', 'identifier')
+    FinitePoset = namedtuplewhere('FinitePoset', 'keyword chains')
 
 
 

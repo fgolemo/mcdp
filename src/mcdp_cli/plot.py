@@ -1,8 +1,11 @@
+from .solve_meat import solve_read_model
 from .utils_mkdir import mkdirs_thread_safe
 from conf_tools import GlobalConfig
 from conf_tools.utils import expand_string
 from contracts import contract
+from contracts.utils import raise_desc
 from decent_params.utils import UserError
+from mcdp_library import MCDPLibrary
 from mocdp.dp_report.gg_ndp import (STYLE_GREENRED, STYLE_GREENREDSYM,
     gvgen_from_ndp)
 from mocdp.dp_report.gg_utils import get_dot_string, gg_figure
@@ -13,9 +16,6 @@ from reprep import Report
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
-from cdpview.solve_meat import solve_read_model
-from mcdp_library.library import MCDPLibrary
-from contracts.utils import raise_desc
 
 def get_ndp(data):
     if not 'ndp' in data:
@@ -234,7 +234,7 @@ def do_plots(logger, model_name, plots, outdir, extra_params, dirs):
 
     library = MCDPLibrary()
     for d in dirs:
-        library = library.add_search_dir(d)
+        library.add_search_dir(d)
 
     filename = model_name + '.mcdp'
     x = library._get_file_data(filename)
@@ -327,7 +327,7 @@ class PlotDP(QuickAppBase):
             def handler():
                 do_plots(filename, plots, out)
 
-            from cdpview.go import watch
+            from .go import watch
             d = os.path.dirname(filename)
             if d == '':
                 d = '.'

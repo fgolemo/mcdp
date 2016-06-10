@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mocdp.lang.syntax import Syntax
-from mocdp.lang.parse_actions import parse_ndp
+from mocdp.lang import parse_ndp
 
 from .utils import ok
 

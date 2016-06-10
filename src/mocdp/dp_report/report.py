@@ -13,6 +13,7 @@ from reprep import Report
 from mocdp.dp.primitive import PrimitiveDP
 import warnings
 
+
 @contract(ndp=NamedDP)
 def report_ndp1(ndp):
     r = Report()

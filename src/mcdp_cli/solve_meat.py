@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from .query_interpretation import (interpret_string,
     solve_interpret_query_strings)
-from cdpview.utils_mkdir import mkdirs_thread_safe
+from .utils_mkdir import mkdirs_thread_safe
 from conf_tools import GlobalConfig
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.dp.dp_transformations import get_dp_bounds
@@ -172,8 +172,6 @@ def solve_meat_solve(trace, ndp, dp, fg, intervals, max_steps, _exp_advanced):
                 raise
     return res, trace
 
-
-
 def solve_read_model(dirs, param):
     GlobalConfig.global_load_dir("mocdp")
 
@@ -184,9 +182,9 @@ def solve_read_model(dirs, param):
 
     library = MCDPLibrary()
     for d in dirs:
-        library = library.add_search_dir(d)
+        library.add_search_dir(d)
 
-    library, ndp = library.load_ndp(model_name)
+    ndp = library.load_ndp(model_name)
 
     return library, basename, ndp
 

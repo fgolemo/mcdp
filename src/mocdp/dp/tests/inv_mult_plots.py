@@ -11,7 +11,7 @@ from mocdp.dp.tracer import Tracer
 from mocdp.dp_report.generic_report_utils import generic_report
 from mocdp.drawing import plot_upset_R2
 from mocdp.lang.eval_math import PlusNat
-from mocdp.lang.syntax import parse_ndp
+from mocdp.lang import parse_ndp
 from mocdp.lang.tests.utils import assert_semantic_error
 from mocdp.posets import UpperSets
 from mocdp.posets.nat import Nat

@@ -1,7 +1,7 @@
 from comptests.registrar import comptest
 from mocdp.dp.dp_series import get_product_compact
 from mocdp.dp.primitive import Feasible, NotFeasible
-from mocdp.lang.syntax import parse_ndp
+from mocdp.lang import parse_ndp
 from mocdp.posets import PosetProduct, SpaceProduct
 from mocdp.posets import R_Energy, R_Time, R_Weight, R_dimensionless
 from mocdp.unittests.generation import for_all_dps

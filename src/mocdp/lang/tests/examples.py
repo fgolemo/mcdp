@@ -1,6 +1,7 @@
 from StringIO import StringIO
 from conf_tools.utils import dir_from_package_name, locate_files
 from contracts.utils import raise_desc
+from mocdp.lang import parse_ndp_filename
 from mocdp.lang.tests.utils import (assert_parsable_to_connected_ndp_fn,
     assert_parsable_to_unconnected_ndp_fn, assert_semantic_error_fn,
     assert_syntax_error_fn)
@@ -51,12 +52,11 @@ def syntax_test(contents):
 
 
 def test_one(test, filename):
-#     with open(filename) as f:
-#         contents = f.read()
     test(filename)
 
+
 def test_report_dp1(filename, outdir, basename):
-    from mocdp.lang.syntax import parse_ndp_filename
+
     ndp = parse_ndp_filename(filename)
     dp = ndp.get_dp()
     from mocdp.dp_report.report import report_dp1
@@ -67,7 +67,6 @@ def test_report_dp1(filename, outdir, basename):
     return r
 
 def test_report_ndp1(filename, outdir, basename):
-    from mocdp.lang.syntax import parse_ndp_filename
     ndp = parse_ndp_filename(filename)
     from mocdp.dp_report.report import report_ndp1
     r = report_ndp1(ndp)

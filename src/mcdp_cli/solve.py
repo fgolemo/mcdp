@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from cdpview.solve_meat import solve_main
+from .solve_meat import solve_main
 from decent_params import UserError
 from quickapp import QuickAppBase
 import logging

@@ -15,8 +15,8 @@ def go():
     what_to_plot_fun = dict(capacity="Wh", missions="[]")
 
     lib = MCDPLibrary()
-    lib = lib.add_search_dir('.')
-    _, ndp = lib.load_ndp('batteries')
+    lib.add_search_dir('.')
+    ndp = lib.load_ndp2('batteries')
 
     data = solve_combinations(ndp, combinations, result_like)
 
@@ -39,8 +39,8 @@ def go2():
     what_to_plot_fun = dict(capacity="Wh", missions="[]")
 
     lib = MCDPLibrary()
-    lib = lib.add_search_dir('.')
-    _, ndp = lib.load_ndp(model_name)
+    lib.add_search_dir('.')
+    ndp = lib.load_ndp2(model_name)
 
     data = solve_combinations(ndp, combinations, result_like)
 

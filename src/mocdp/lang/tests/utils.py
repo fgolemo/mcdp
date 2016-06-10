@@ -6,9 +6,10 @@ from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPSyntaxError, DPSemanticError
 from mocdp.lang.namedtuple_tricks import remove_where_info
-from mocdp.lang.syntax import parse_ndp, parse_wrap
+from mocdp.lang.syntax import parse_wrap
 from nose.tools import assert_equal
-from mocdp.lang.parse_actions import parse_ndp_filename, parse_wrap_filename
+from mocdp.lang.parse_actions import  parse_wrap_filename
+from mocdp.lang.parse_interface import parse_ndp_filename, parse_ndp
 
 def assert_syntax_error(s, expr, desc=None):
     if isinstance(expr, ParsingElement):

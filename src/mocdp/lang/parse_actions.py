@@ -4,17 +4,16 @@ from .utils import parse_action
 from compmake.jobs.dependencies import isnamedtupleinstance
 from contracts import contract
 from contracts.interface import Where
-from contracts.utils import indent, raise_desc, raise_wrapped, check_isinstance
+from contracts.utils import check_isinstance, indent, raise_desc, raise_wrapped
 from mocdp.comp.context import ValueWithUnits
 from mocdp.dp.dp_sum import sum_units
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mocdp.lang.namedtuple_tricks import get_copy_with_where
 from mocdp.lang.utils_lists import make_list
 from mocdp.posets import RcompUnits, Space, mult_table
+from mocdp.posets.nat import Nat
 from pyparsing import ParseException, ParseFatalException
 import functools
-import os
-from mocdp.posets.nat import Nat
 import warnings
 
 CDP = CDPLanguage
@@ -269,37 +268,7 @@ def remove_comments(s):
             return line
     return "\n".join(map(remove_comment, lines))
 
-def parse_ndp_filename(filename):
-    """ Reads the file and returns as NamedDP.
-        The exception are annotated with filename. """
-    with open(filename) as f:
-        contents = f.read()
-    try:
-        return parse_ndp(contents)
-    except (DPSyntaxError, DPSemanticError) as e:
-        raise e.with_filename(filename)
 
-# @contract(returns=NamedDP)
-def parse_ndp(string, context=None):
-    from mocdp.comp.context import Context
-    from mocdp.lang.syntax import Syntax
-    from mocdp.lang.eval_mcdp_type_imp import eval_dp_rvalue
-    from mocdp.comp.interfaces import NamedDP
-
-    if os.path.exists(string):
-        raise ValueError('expected string, not filename :%s' % string)
-
-    v = parse_wrap(Syntax.ndpt_dp_rvalue, string)[0]
-
-    if context is None:
-        context = Context()
-
-    res = eval_dp_rvalue(v, context)
-    # I'm not sure what happens to the context
-    # if context.names # error ??
-
-    assert isinstance(res, NamedDP), res
-    return res
 
 def parse_line(line):
     from mocdp.lang.syntax import Syntax

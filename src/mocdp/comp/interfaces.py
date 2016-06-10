@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from contracts import contract
-from mocdp.configuration import get_conftools_nameddps
+# from mocdp.configuration import get_conftools_nameddps
 from mocdp.posets import PosetProduct
 
 __all__ = [
@@ -11,7 +11,6 @@ __all__ = [
 
 class NotConnected(Exception):
     pass
-
 
 class NamedDP():
     """ A DP with names """
@@ -83,8 +82,11 @@ class NamedDP():
         return PosetProduct(tuple(types))
 
 
+# this is only used in the tests, called through the YAML files
+# candidate to go away
 def dp_from_ndp(ndp):
     """ Unwrap """
+    from mocdp.configuration import get_conftools_nameddps
     _, ndp = get_conftools_nameddps().instance_smarter(ndp)
     # unwrap
     return ndp.get_dp()

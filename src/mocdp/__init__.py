@@ -13,12 +13,8 @@ from . import dp
 import numpy
 numpy.seterr('raise')
 
-def jobs_comptests(context):
-    # configuration
-    from conf_tools import GlobalConfig
-    GlobalConfig.global_load_dir("mocdp")
-
-    # tests
+def load_tests_modules():
+    """ Loads all the tests that register using comptests facilities. """
     from . import unittests
 
     from .posets import tests
@@ -31,6 +27,13 @@ def jobs_comptests(context):
     from .comp import tests  # @Reimport
     from .lang import tests  # @Reimport
     from .posets.find_poset_minima import tests  # @Reimport
+
+def jobs_comptests(context):
+    # configuration
+    from conf_tools import GlobalConfig
+    GlobalConfig.global_load_dir("mocdp")
+
+    load_tests_modules()
 
     c2 = context.child('mcdplib')
     from mcdp_library import define_tests_for_mcdplibs
