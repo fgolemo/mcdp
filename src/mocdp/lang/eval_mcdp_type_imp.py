@@ -12,12 +12,12 @@ from mocdp.dp.dp_catalogue import CatalogueDP
 from mocdp.dp.dp_series_simplification import make_series
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.lang.eval_constant_imp import eval_constant
+from mocdp.lang.eval_space_imp import eval_space
 from mocdp.lang.helpers import get_conversion
 from mocdp.lang.utils_lists import get_odd_ops, unwrap_list
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 from mocdp.posets import NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.posets.any import Any
-from mocdp.lang.eval_space_imp import eval_space
 
 CDP = CDPLanguage
 
@@ -70,32 +70,6 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             ndpa = ndp.abstract()
             return ndpa
 
-        if isinstance(r, CDP.MakeTemplate):
-            ndp = eval_dp_rvalue(r.dp_rvalue, context)
-
-            fnames = ndp.get_fnames()
-            ftypes = ndp.get_ftypes(fnames)
-            rnames = ndp.get_rnames()
-            rtypes = ndp.get_rtypes(rnames)
-
-            if len(fnames) == 1:
-                fnames = fnames[0]
-                F = ftypes[0]
-            else:
-                F = PosetProduct(tuple(ftypes))
-
-            if len(rnames) == 1:
-                rnames = rnames[0]
-                R = rtypes[0]
-            else:
-                R = PosetProduct(tuple(rtypes))
-
-            from mocdp.comp.template_imp import Dummy
-
-            dp = Dummy(F, R)
-            res = SimpleWrap(dp, fnames, rnames)
-            return res
-
         if isinstance(r, CDP.Compact):
             ndp = eval_dp_rvalue(r.dp_rvalue, context)
             if isinstance(ndp, CompositeNamedDP):
@@ -109,6 +83,7 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             raise_desc(DPSemanticError, msg)
             
         cases = {
+            CDP.MakeTemplate: eval_make_template,
             CDP.Coproduct:eval_dp_rvalue_coproduct,
             CDP.CoproductWithNames: eval_dp_rvalue_CoproductWithNames,
             CDP.ApproxDPModel: eval_dp_rvalue_approxdpmodel,
@@ -445,17 +420,18 @@ def eval_statement(r, context):
     elif isinstance(r, CDP.ResStatement):
         # requires r.rname [r.unit]
 
-        F = eval_space(r.unit, context)
+        R = eval_space(r.unit, context)
         rname = r.rname.value
-        ndp = dpwrap(Identity(F), rname, rname)
-        context.add_ndp_res(rname, ndp)
+        context.add_ndp_res_node(rname, R)
+        
         return context.make_function(get_name_for_res_node(rname), rname)
 
     elif isinstance(r, CDP.FunStatement):
         F = eval_space(r.unit, context)
         fname = r.fname.value
-        ndp = dpwrap(Identity(F), fname, fname)
-        context.add_ndp_fun(fname, ndp)
+
+        context.add_ndp_fun_node(fname, F)
+
         return context.make_resource(get_name_for_fun_node(fname), fname)
 
     elif isinstance(r, CDP.FunShortcut1):  # provides fname using name
@@ -517,3 +493,9 @@ def interpret_commands(res, context):
             raise
 
     return CompositeNamedDP(context=context)
+
+def eval_make_template(r, context):
+    ndp = eval_dp_rvalue(r.dp_rvalue, context)
+    from mocdp.comp.composite_templatize import ndp_templatize
+    return ndp_templatize(ndp)
+

@@ -1,15 +1,25 @@
-
-from mocdp.dp_report.html import ast_to_html
 from contracts.utils import raise_wrapped
-from mcdp_web.app_solver import ajax_error_catch, \
-    format_exception_for_ajax_response
-from mocdp.lang.parse_actions import parse_ndp
+from mcdp_web.app_solver import (ajax_error_catch,
+    format_exception_for_ajax_response, png_error_catch, response_image)
+from mocdp.dp_report.html import ast_to_html
 from mocdp.exceptions import DPSemanticError
+from pyramid.renderers import render_to_response
+import os
+from pyramid.httpexceptions import HTTPFound
+from mocdp.dp_report.gg_ndp import gvgen_from_ndp, STYLE_GREENREDSYM
+from cdpview.plot import png_pdf_from_gg
+from mcdp_web.utils import response_data
+from mocdp.comp.composite import CompositeNamedDP
+from mocdp.comp.context import Context, Connection
+
 
 class AppEditorFancy():
 
     def __init__(self):
-        pass
+
+        # model_name -> ndp
+        self.last_processed = {}
+
 
     def config(self, config):
 
@@ -25,6 +35,12 @@ class AppEditorFancy():
         config.add_view(self.editor_fancy_save, route_name='editor_fancy_save',
                         renderer='json')
 
+        config.add_route('new_model', '/new_model/{model_name}')
+        config.add_view(self.view_new_model, route_name='new_model')
+
+
+        config.add_route('graph', '/edit_fancy/{model_name}/graph.png')
+        config.add_view(self.graph, route_name='graph')
 
 
     def editor_fancy_save(self, request):
@@ -75,29 +91,122 @@ class AppEditorFancy():
         return string
          
     def ajax_parse(self, request):
-
+        model_name = self.get_model_name(request)
         string = self.get_text_from_request(request)
         req = {'text': request.json_body['text']}
 
         def go():
-            highlight = ast_to_html(string,
+            try:
+                highlight = ast_to_html(string,
                                     complete_document=False,
                                     add_line_gutter=False,
                                     encapsulate_in_precode=False, add_css=False)
 
-#             print('****highlight is cool****')
+                try:
 
-            try:
-                ndp = parse_ndp(string)
-            except DPSemanticError as e:
-                res = format_exception_for_ajax_response(e, quiet=(DPSemanticError,))
-                res['highlight'] = highlight
-                res['request'] = req
-                return res
+                    l = self.get_library()
+                    ndp = l.parse_ndp(string)
+
+                except DPSemanticError as e:
+                    self.last_processed[model_name] = None  # XXX
+                    res = format_exception_for_ajax_response(e, quiet=(DPSemanticError,))
+                    res['highlight'] = highlight
+                    res['request'] = req
+                    return res
+
+                self.last_processed[model_name] = ndp
+            except:
+                self.last_processed[model_name] = None  # XXX
+
+                raise
 
             return {'ok': True, 'highlight': highlight, 'request': req}
 
         return ajax_error_catch(go)
-    
+
+    def graph(self, request):
+        def go():
+            model_name = self.get_model_name(request)
+
+            if not model_name in self.last_processed:
+                l = self.get_library()
+                ndp = l.load_ndp(model_name)[1]
+            else:
+                ndp = self.last_processed[model_name]
+                if ndp is None:
+                    return response_image(request, 'Could not parse model.')
+
+            # ndp2 = ndp
+            if isinstance(ndp, CompositeNamedDP):
+                ndp2 = ndp.templatize_children()
+                setattr(ndp2, '_hack_force_enclose', True)
+            else:
+                ndp2 = ndp
+                setattr(ndp2, '_xxx_label', model_name)
+            # print ndp2.__attr__()
 
 
+            # ndp2 = cndp_get_suitable_for_drawing(model_name, ndp)
+
+            gg = gvgen_from_ndp(ndp2, STYLE_GREENREDSYM, direction='TB')
+            png, _pdf = png_pdf_from_gg(gg)
+
+#             if fileformat == 'pdf':
+#                 return response_data(request=request, data=pdf, content_type='image/pdf')
+#             elif fileformat == 'png':
+            return response_data(request=request, data=png, content_type='image/png')
+#             else:
+#                 raise ValueError('No known format %r.' % fileformat)
+        return png_error_catch(go, request)
+
+    def view_new_model(self, request):
+        model_name = str(request.matchdict['model_name'])  # unicode
+        basename = model_name + '.mcdp'
+        l = self.get_library()
+        if l.file_exists(basename):
+            error = 'File %r already exists.' % basename
+            return render_to_response('error_model_exists.jinja2',
+                                      {'error': error,
+                                       'model_name': model_name}, request=request)
+
+        else:
+            source = "mcdp {\n\n}"
+            filename = os.path.join(self.dirname, 'created', basename)
+
+            d = os.path.dirname(filename)
+            if not os.path.exists(d):
+                os.makedirs(d)
+
+            with open(filename, 'w') as f:
+                f.write(source)
+            l._update_file(filename)
+
+            raise HTTPFound('/edit_fancy/%s/' % model_name)
+
+
+# def cndp_get_suitable_for_drawing(model_name, ndp):
+#
+#     ndp = ndp.templatize_children()
+#
+#     ONE = model_name
+#     c = Context()
+#
+#     c.add_ndp(ONE, ndp)
+#
+#     for fname in ndp.get_fnames():
+#         F = ndp.get_ftype(fname)
+#         fn = c.add_ndp_fun_node(fname, F)
+#
+#         cc = Connection(dp1=fn, s1=fname, dp2=ONE, s2=fname)
+#         c.add_connection(cc)
+#
+#     for rname in ndp.get_rnames():
+#         R = ndp.get_rtype(rname)
+#         rn = c.add_ndp_res_node(rname, R)
+#
+#         cc = Connection(dp1=ONE, s1=rname, dp2=rn, s2=rname)
+#         c.add_connection(cc)
+#
+#     ndp2 = CompositeNamedDP.from_context(c)
+#
+#     return ndp2

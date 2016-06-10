@@ -103,6 +103,9 @@ class GraphDrawingContext():
             self.gg.styleAppend('splitter', 'color', 'black')
 
     def should_I_enclose(self, ndp):
+        if hasattr(ndp, '_hack_force_enclose'):
+            return True
+
         if self.level == 0:
             return False
 
@@ -184,12 +187,12 @@ class GraphDrawingContext():
     def decorate_resource_name(self, n):
         propertyAppend = self.gg.propertyAppend
 
-        if self.style == STYLE_GREENRED:
+        if self.style in  [STYLE_GREENRED, STYLE_GREENREDSYM]:
             propertyAppend(n, 'fontcolor', COLOR_DARKRED)
 
     def decorate_function_name(self, n):
         propertyAppend = self.gg.propertyAppend
-        if self.style == STYLE_GREENRED:
+        if self.style in  [STYLE_GREENRED, STYLE_GREENREDSYM]:
             propertyAppend(n, 'fontcolor', COLOR_DARKGREEN)
 
 
@@ -200,10 +203,12 @@ class GraphDrawingContext():
 #             propertyAppend(l2, 'dir', 'both')
 
 @contract(ndp=NamedDP)
-def gvgen_from_ndp(ndp, style='default'):
+def gvgen_from_ndp(ndp, style='default', direction='LR'):
     assert isinstance(ndp, NamedDP)
     import my_gvgen as gvgen
-    gg = gvgen.GvGen(options="rankdir=LR")
+    # gg = gvgen.GvGen(options="rankdir=LR")
+    gg = gvgen.GvGen(options="rankdir=%s" % direction)
+
     if len(ndp.get_fnames()) > 0:
         cluster_functions = gg.newItem("")
 
@@ -212,11 +217,11 @@ def gvgen_from_ndp(ndp, style='default'):
 
     gg.styleAppend("external", "shape", "none")
     gg.styleAppend("external_cluster_functions", "shape", "plaintext")
-    gg.styleAppend("external_cluster_functions", "bgcolor", "#d0FFd0")
+    # gg.styleAppend("external_cluster_functions", "bgcolor", "#d0FFd0")
     gg.styleAppend("external_cluster_functions", "color", "white")
 #     gg.styleAppend("external_cluster_functions", "color", "#008000")
     gg.styleAppend("external_cluster_resources", "shape", "plaintext")
-    gg.styleAppend("external_cluster_resources", "bgcolor", "#FFd0d0")
+    # gg.styleAppend("external_cluster_resources", "bgcolor", "#FFd0d0")
     gg.styleAppend("external_cluster_resources", "color", "white")
 #     gg.styleAppend("external_cluster_functions", "color", "#008000")
 
@@ -225,12 +230,16 @@ def gvgen_from_ndp(ndp, style='default'):
     gg.styleAppend("simple", "shape", "box")
     gg.styleAppend("simple", "style", "rounded")
 
+    # constant resource (min r. needed)
     gg.styleAppend("constant", "shape", "plaintext")
+    # constant function (max f. to be implemented)
+    gg.styleAppend("limit", "shape", "plaintext")
 
     gg.styleAppend("unconnected_node", "shape", "plaintext")
-    gg.styleAppend("unconnected_node", "fontcolor", "red")
-    gg.styleAppend("unconnected_link", "color", "red")
-    gg.styleAppend("unconnected_link", "fontcolor", "red")
+    unconnected_color = 'purple'
+    gg.styleAppend("unconnected_node", "fontcolor", unconnected_color)
+    gg.styleAppend("unconnected_link", "color", unconnected_color)
+    gg.styleAppend("unconnected_link", "fontcolor", unconnected_color)
 
     gg.styleAppend("container", "shape", "box")
     gg.styleAppend("container", "style", "rounded")
@@ -390,8 +399,6 @@ def is_simple(ndp):
 def create_simplewrap(gdc, ndp):
     assert isinstance(ndp, SimpleWrap)
     label = str(ndp)
-
-
 
     sname = None  # name of style to apply, if any
 
@@ -561,12 +568,15 @@ def create_composite(gdc0, ndp):
         names2functions = defaultdict(lambda: {})
 
         if gdc0.should_I_enclose(ndp):
-            c = gdc0.newItem(gdc0.yourname)
+            if gdc0.yourname is None:
+                container_label = ''
+            else:
+                container_label = gdc0.yourname
+            c = gdc0.newItem(container_label)
             gdc0.styleApply('container', c)
             gdc = gdc0.child_context(parent=c, yourname=gdc0.yourname)
         else:
             gdc = gdc0
-
 
         for name, value in ndp.context.names.items():
             # do not create these edges
@@ -582,25 +592,27 @@ def create_composite(gdc0, ndp):
     #                 warnings.warn('hack')
                     continue
 
-            if is_function_with_no_connections(ndp, name):
-                # only draw the balloon
-                item = gdc.newItem("%s" % name)
-                gdc.styleApply('unconnected', item)
-                for fn in value.get_fnames():
-                    names2functions[name][fn] = item
-                for rn in value.get_rnames():
-                    names2resources[name][rn] = item
-                continue
+            if False:
+                # this makes the nodes appear as red dots
+                if is_function_with_no_connections(ndp, name):
+                    # only draw the balloon
+                    item = gdc.newItem("%s" % name)
+                    gdc.styleApply('unconnected', item)
+                    for fn in value.get_fnames():
+                        names2functions[name][fn] = item
+                    for rn in value.get_rnames():
+                        names2resources[name][rn] = item
+                    continue
 
-            if is_resource_with_no_connections(ndp, name):
-                # only draw the balloon instead of "Identity" node
-                item = gdc.newItem("%s" % name)
-                gdc.styleApply('unconnected', item)
-                for fn in value.get_fnames():
-                    names2functions[name][fn] = item
-                for rn in value.get_rnames():
-                    names2resources[name][rn] = item
-                continue
+                if is_resource_with_no_connections(ndp, name):
+                    # only draw the balloon instead of "Identity" node
+                    item = gdc.newItem("%s" % name)
+                    gdc.styleApply('unconnected', item)
+                    for fn in value.get_fnames():
+                        names2functions[name][fn] = item
+                    for rn in value.get_rnames():
+                        names2resources[name][rn] = item
+                    continue
 
             with gdc.child_context_yield(yourname=name, parent=gdc.parent) as child:
                 f, r = create(child, value)

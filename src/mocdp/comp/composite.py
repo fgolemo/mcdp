@@ -102,6 +102,10 @@ class CompositeNamedDP(NamedDP):
         from mocdp.comp.flattening.flatten import cndp_flatten
         return cndp_flatten(self)
 
+    def templatize_children(self):
+        from .composite_templatize import cndp_templatize_children
+        return cndp_templatize_children(self)
+
     def abstract(self):
         try:
             self.check_fully_connected()
@@ -175,17 +179,20 @@ def check_consistent_data(names, fnames, rnames, connections):
     for c in connections:
         try:
             if not c.dp1 in names:
-                raise ValueError()
+                raise_desc(ValueError, 'First DP not found.', name=c.dp1,
+                           available=list(names))
 
             if not c.s1 in names[c.dp1].get_rnames():
-                raise ValueError()
+                raise_desc(ValueError, 'Resource not found',
+                           rname=c.s1, available=names[c.dp1].get_rnames())
 
             if not c.dp2 in names:
-                raise ValueError()
+                raise_desc(ValueError, 'Second DP not found.', name=c.dp2,
+                           available=list(names))
 
             if not c.s2 in names[c.dp2].get_fnames():
                 raise_desc(ValueError, 'Function not found.',
-                           s2=c.s2, rnames=names[c.dp2].get_fnames())
+                           s2=c.s2, available=names[c.dp2].get_fnames())
 
         except ValueError as e:
             msg = 'Invalid connection'

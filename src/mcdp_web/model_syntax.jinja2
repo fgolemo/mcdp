@@ -7,6 +7,8 @@
 <body>
 	{% include 'model_views_navigation.jinja2' %}
 	
+	
+	
 	<style type='text/css'>
 		a.link-to-keyword {
 			color: inherit;
@@ -18,15 +20,25 @@
 		}
 		
 		img.popup {
-			float: right;
+			// DO NOT DISPLAY
+			display: none;
+			/*float: right;
 			height: 8em;
-			clear: right;
+			clear: right;*/
 		}
 		
 		.line-gutter { display: none; }
+		
+		table#main td { vertical-align: top; }
 	</style>
 	
+	<table id='main'>
+	<tr><td>
 	{{highlight|safe}}
-	
+	</td><td>
+	<img style='float:right; width: 50%' src='/edit_fancy/{{model_name}}/graph.png'/>
+	</td>
+	</tr>
+	</table>
 </body>
 </html>

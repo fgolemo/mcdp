@@ -38,10 +38,6 @@ class AppInteractive():
         string = request.json_body['string']
         assert isinstance(string, unicode)
         string = string.encode('utf-8')
-#         print string, type(string)
-#         string = str(string)
-#         string = codecs.decode(string, 'utf-8')
-#         print string, type(string)
 
         def go():
             return self.parse(string)
@@ -68,6 +64,5 @@ class AppInteractive():
         res['output_raw'] = e(value.__repr__() + '\n' + str(type(value)))
         res['output_formatted'] = e(space.format(value))
         res['ok'] = True
-        
-#         print res
+
         return res

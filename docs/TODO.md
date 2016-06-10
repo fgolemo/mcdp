@@ -44,17 +44,19 @@ Misc
 - T: mcddlib: make sure that we parse / run all the models
 
 - B: automatically load CSS from that file.
-- B: the units are not highlighted anymore
+
+
 
 MCDP-web
 ----------
-
+- F: send to non-fancy for internet explorer
 - B: change ``/language`` to ``/docs/language_notes``
 - F: mcdp-web: nice CSS all around
 - T: mcdp-web: Testing of at least all links.
 
 - F: mcdp-web/fancy_editor: Submit changes 
-- F: mcdp-web/fancy_editor: Auto visualize model
+
+- B: fancy_editor: the syntax highlighting skips the whitespace at the end of the model
 
 - R: mcdp-web: reorganize by folder
 
@@ -67,6 +69,8 @@ MCDP-web
 - F: automatically parse and execute the snippets in the documents
 - F: create static versions of documents
 
+
+
 MCDP-web / QR
 -------------
 
@@ -78,6 +82,10 @@ MCDP-web / QR
 Bugs
 ----
 
+- B: Sometimes Pint does not simplify the units. For example,
+      J * kg / Wh has the same dimensionality of kg
+
+- B: compact() is bugged - it has to do with splits. Try compact DroneComplete.
 
 - B: "(provided lift)^2" does not parse
 - B: "nat:2 / 1 []"

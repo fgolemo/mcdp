@@ -2,9 +2,11 @@
 from collections import namedtuple
 from contracts import contract
 from contracts.utils import indent, raise_desc, raise_wrapped
+from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.posets import Space
-from mocdp.comp.interfaces import NamedDP
+from mocdp.comp.wrap import dpwrap
+from mocdp.dp.dp_identity import Identity
 
 __all__ = [
     'Connection',
@@ -206,11 +208,14 @@ class Context():
             raise DPSemanticError('Repeated identifier %r.' % name)
         self.names[name] = ndp
 
-    def add_ndp_fun(self, fname, ndp):
+    @contract(returns=str)
+    def add_ndp_fun_node(self, fname, F):
+        ndp = dpwrap(Identity(F), fname, fname)
         name = get_name_for_fun_node(fname)
         self.info('Adding new function %r as %r.' % (str(name), fname))
         self.add_ndp(name, ndp)
         self.fnames.append(fname)
+        return name
 
     def is_new_function(self, name):
         assert name in self.names
@@ -220,12 +225,17 @@ class Context():
         assert name in self.names
         return '_res_' in name
 
-    def add_ndp_res(self, rname, ndp):
+    @contract(returns=str)
+    def add_ndp_res_node(self, rname, R):
+        """ returns the name of the node """
+        ndp = dpwrap(Identity(R), rname, rname)
+#         context.add_ndp_res(rname, ndp)
+#     def add_ndp_res(self, rname, ndp):
         name = get_name_for_res_node(rname)
         self.info('Adding new resource %r as %r ' % (str(name), rname))
         self.add_ndp(name, ndp)
         self.rnames.append(rname)
-
+        return name
         # self.newresources[rname] = ndp
 
     def iterate_new_functions(self):

@@ -6,10 +6,14 @@ __all__ = [
 ]
 
 def compact_context(context):
+    """
+        If there are two subs with multiple connections,
+        we take the product of their wires.
+    
+    """
     from .context_functions import find_nodes_with_multiple_connections
     from mocdp.dp.dp_flatten import Mux
     from mocdp.comp.wrap import dpwrap
-    from mocdp.dp.dp_identity import Identity
     from mocdp.comp.connection import connect2
 
     s = find_nodes_with_multiple_connections(context)
@@ -24,15 +28,27 @@ def compact_context(context):
         s1s = [c.s1 for c in their_connections]
         s2s = [c.s2 for c in their_connections]
 
+        print 'compacting', their_connections
         ndp1 = context.names[name1]
         ndp2 = context.names[name2]
         sname = '_'.join(s1s)
-        mux = Mux(ndp1.get_rtypes(s1s), [0, 1])
+
+        #  space -- [mux] -- R -- [demux]
+        space = ndp1.get_rtypes(s1s)
+
+        N = len(their_connections)
+        mux = Mux(space, [list(range(N))])
         muxndp = dpwrap(mux, s1s, sname)
 
         R = mux.get_res_space()
 
-        demux = Identity(R)
+        coords = [(0, i) for i in range(N)]
+        demux = Mux(R, coords)
+        R2 = demux.get_res_space()
+        assert space == R2, (space, R2)
+
+        # example: R = PosetProduct((PosetProduct((A, B, C)),))
+        #
         demuxndp = dpwrap(demux, sname, s2s)
 
 

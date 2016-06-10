@@ -167,11 +167,13 @@ class AppVisualization():
             tag.append(NavigableString(initial))
             tag.append(new_tag)
             tag.append(NavigableString(final))
-            
-            img = '/solver/%s/compact_graph' % name
-            attrs = {'src': img, 'class': 'popup'}
-            new_tag = soup.new_tag("img", **attrs)
-            tag.append(new_tag)
+
+            if False:
+                # TODO: add this as a feature
+                img = '/solver/%s/compact_graph' % name
+                attrs = {'src': img, 'class': 'popup'}
+                new_tag = soup.new_tag("img", **attrs)
+                tag.append(new_tag)
 
 
         # Add documentation links for each span 
@@ -183,7 +185,7 @@ class AppVisualization():
                     if 'Keyword' in klass:
                         yield tag
                         
-        manual = '/language'
+        manual = '/docs/language_notes/'
 
         for tag in select_tags():
             keyword = tag.attrs['class'][0]

@@ -6,4 +6,7 @@ mcdp {
   weight = (mass required by battery) * gravity
    
   lift provided by actuation >= weight 
+
+  requires power for actuation
+  provides capacity using battery
 }

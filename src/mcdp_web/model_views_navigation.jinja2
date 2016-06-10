@@ -25,7 +25,18 @@ div.library span, div.this_model span { font-weight: bold; }
         var name=prompt("Please enter the name for the new model:");
     }
     while(name.length < 4);
-    window.location = "/new_model/" + name
+    
+    url = "/new_model/" + name
+    
+    var win = window.open(url, '_blank');
+	if (win) {
+	    //Browser has allowed it to be opened
+	    win.focus();
+	} else {
+	    //Browser has blocked it
+	    alert('Please allow popups for this website');
+	}
+    
   }
   </script>
   
@@ -71,13 +82,14 @@ div.library span, div.this_model span { font-weight: bold; }
 	    {% endfor %}
 	  </select>
 	  </span>
-	   
-    <form style='display:inline' method="GET" action="/edit/{{model_name}}">
-	    <input type="submit" value="Edit"/>
-	 </form>
+	 
+	 <!-- todo: if explorer... -->  
+    <!--<form style='display:inline' method="GET" action="/edit/{{model_name}}">
+	    <input type="submit" value="Edit (basic)"/>
+	 </form>-->
 	 
      <form style='display:inline' method="GET" action="/edit_fancy/{{model_name}}/">
-	    <input type="submit" value="Edit+"/>
+	    <input type="submit" value="Edit"/>
 	 </form>
   
   	<form style='display:inline' method="GET" action="/solver/{{model_name}}/">

@@ -9,31 +9,32 @@ mcdp {
 
   ae = new ActuationEnergetics
 
-  ae.endurance >= strategy.endurance
-  ae.velocity >= strategy.velocity
-  ae.num_missions >= num_missions
-  ae.extra_payload >= carry_payload
-  strategy.distance >= travel_distance
+  #ae.endurance >= strategy.endurance
+#  ae.velocity >= strategy.velocity
+ # ae.num_missions >= num_missions
+  #ae.extra_payload >= carry_payload
+  #strategy.distance >= travel_distance
 
   computer = new Computer 
   perception = new Perception 
-  computer.computation >= perception.computation
+#  computer.computation >= perception.computation
 
 
-  sensor =  new Sensor 
+  sensor =  new Sensor
+
   sensor.resolution >= perception.camera_resolution
   sensor.framerate >= perception.camera_framerate
   sensor.fov >= perception.camera_fov
   
-  perception.velocity >= strategy.velocity
-  ae.extra_power >= computer.power + sensor.power
+  #perception.velocity >= strategy.velocity
+  #ae.extra_power >= computer.power + sensor.power
 
   # We can take into account the shipping cost
   shipping = new Shipping
   
-  total_mass = ae.total_mass 
+ # total_mass = ae.total_mass 
 
-  shipping.ships >= total_mass
+  #shipping.ships >= total_mass
 
-  total_cost_ownership >= shipping.postage + ae.total_cost
+ # total_cost_ownership >= shipping.postage + ae.total_cost
 }

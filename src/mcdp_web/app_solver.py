@@ -7,6 +7,8 @@ from mcdp_web.utils import response_data
 from pyramid.httpexceptions import HTTPSeeOther
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 import cgi
+from PIL import ImageFont
+
 
 class AppSolver():
     """
@@ -204,23 +206,31 @@ def png_error_catch(f, request):
     try:
         return f()
     except Exception as e:
+        s = traceback.format_exc(e)
+
         try: 
-            print(e)
+            print(s)
         except UnicodeEncodeError:
             pass
-        s = str(e)
+
+        s = str(s)
+
+        return response_image(request, s)
     
-        from PIL import Image
-        # from PIL import ImageFont
-        from PIL import ImageDraw 
-        img = Image.new("RGB", (512, 512), "red")
+def response_image(request, s):
+    from PIL import Image
+    # from PIL import ImageFont
+    from PIL import ImageDraw
+    img = Image.new("RGB", (512, 512), "white")
 
-        draw = ImageDraw.Draw(img)
+    draw = ImageDraw.Draw(img)
 #         font = ImageFont.truetype("sans-serif.ttf", 16)
-        draw.text((0, 0), s, (255, 255, 255))  # , font=font)
-        data = get_png(img)
+#         font = ImageFont.truetype("arial.ttf", 16)
 
-        return response_data(request=request, data=data, content_type='image/png')
+    draw.text((0, 0), s, (255, 0, 0))  # , font=font)
+    data = get_png(img)
+
+    return response_data(request=request, data=data, content_type='image/png')
 
 def get_png(image):
     """ Gets png data from PIL image """

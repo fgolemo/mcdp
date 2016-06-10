@@ -63,12 +63,13 @@ class MCDPLibrary():
 
         def actual_load():
             logger.debug('Parsing %r' % id_ndp)
-            return self._actual_load(data, realpath)
+            return self.parse_ndp(data, realpath)
 
         cache_file = os.path.join(self.cache_dir, '%s.cached' % id_ndp)
         return memo_disk_cache2(cache_file, data, actual_load)
 
-    def _actual_load(self, data, realpath=None):
+    def parse_ndp(self, string, realpath=None):
+        """ This is the wrapper around parse_ndp that adds the hooks. """
         def load(load_arg):
             _c, res = self.load_ndp(load_arg)
             return res
@@ -76,7 +77,7 @@ class MCDPLibrary():
         context = Context()
         context.load_ndp_hooks = [load]
         try:
-            result = parse_ndp(data, context=context)
+            result = parse_ndp(string, context=context)
         except (DPSyntaxError, DPSemanticError) as e:
             if realpath is not None:
                 raise e.with_filename(realpath)

@@ -50,16 +50,38 @@ class SimpleWrap(NamedDP):
                     self.F_single = True
                     self.Fname = fnames
 
-            if isinstance(rnames, list):
-                if not isinstance(R, PosetProduct):
-                    raise ValueError("R incompatible")
-                self.Rnames = rnames
-                self.R_single = False
-            else:
+
+            if isinstance(rnames, str):
                 self.R_single = True
                 self.Rname = rnames
+            else:
+                if isinstance(R, PosetProduct):
+                    if not isinstance(rnames, list) or not len(R) == len(rnames):
+                        raise ValueError("R incompatible")
+                    self.R_single = False
+                    self.Rnames = rnames
+                else:
+                    if not isinstance(rnames, str):
+                        msg = "R and rnames incompatible: not a string"
+                        raise_desc(ValueError, msg, R=R, rnames=rnames)
+                    self.R_single = True
+                    self.Rname = rnames
 
-            mcdp_dev_warning('very late night')
+#             if isinstance(rnames, list):
+#                 if not isinstance(R, PosetProduct):
+#                     raise ValueError("R incompatible")
+#                 self.Rnames = rnames
+#                 self.R_single = False
+#
+#                 R = self.dp.R
+#                 assert isinstance(R, PosetProduct)
+#                 assert len(R) == len(self.Rnames)
+#
+#             else:
+#                 self.R_single = True
+#                 self.Rname = rnames
+
+#             mcdp_dev_warning('very late night')
 #             if isinstance(R, PosetProduct):
 #                 if not isinstance(rnames, list) or not len(R) == len(rnames):
 #                     raise ValueError("R incompatible")
@@ -91,6 +113,7 @@ class SimpleWrap(NamedDP):
 
     def get_dp(self):
         dp = self.dp
+
         if self.R_single:
             dp.R.label = self.Rname
         else:

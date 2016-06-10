@@ -16,8 +16,6 @@ class AppEditor():
         config.add_route('edit_submit', '/edit_submit/{model_name}')
         config.add_view(self.view_edit_submit, route_name='edit_submit')
 
-        config.add_route('new_model', '/new_model/{model_name}')
-        config.add_view(self.view_new_model, route_name='new_model')
 
 
 
@@ -66,25 +64,4 @@ class AppEditor():
         l.write_to_model(model_name, data)
 
         raise HTTPFound('/models/%s/syntax' % model_name)
-
-
-    def view_new_model(self, request):
-        model_name = str(request.matchdict['model_name'])  # unicode
-        basename = model_name + '.mcdp'
-        l = self.get_library()
-        if l.file_exists(basename):
-            error = 'File %r already exists.' % basename
-            return render_to_response('error_model_exists.jinja2',
-                                      {'error': error,
-                                       'model_name': model_name}, request=request)
-
-        else:
-            source = "mcdp {\n\n}"
-            filename = os.path.join(self.dirname, basename)
-            with open(filename, 'w') as f:
-                f.write(source)
-            l._update_file(filename)
-
-            raise HTTPFound('/edit/%s' % model_name)
-
 

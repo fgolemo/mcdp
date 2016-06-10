@@ -19,40 +19,66 @@
 		width: 40em;
 	}
 
-	#editor { outline: 0px solid transparent; }
+	#around_editor {margin: 0; padding: 0;}
+	#around_editor pre { margin: 0; padding: 0;}
+	code#editor { outline: 0px solid transparent; }
 
     </style>
   </head>
   
   <body>
+  	{% include 'model_views_navigation.jinja2' %}
   
-  <div id='around_editor'>
-  	<pre ><code contenteditable="true" id='editor'>{{source_code|safe}}</code></pre>
-  </div>
   
-  <div id='commands'>
+  <style type='text/css'>
+  	table td { vertical-align: top; }
+  	html, body { height: 100%; border: solid 1px red; padding: 0; margin: 0; }
+  </style>
+  
+  <table style='width: 100%; border: solid 1px black'>
+  <tr style=''><td style=' border: solid 1px gray; width: 50%'>
+	  <div id='around_editor'>
+	  	<pre ><code contenteditable="true" id='editor'>{{source_code|safe}}</code></pre>
+	  </div>
+  </td>
+
+	<td style='border: solid 1px gray; text-align: center'>
+	  <div style='height: 100%; border: solid 1px yellow'>
+	  	<img id='graph' src='graph.png' style='max-height: 20em; max-width: 100%'/>
+	  </div>
+  	</td>
+  </tr>
+
+  <tr>
+  <td>
+    <div id='commands'>
   	<button id='save'>Save</button>
   	<button id='discard'>Discard</button>
-  	<br/>
-  	<span id='save_status'></span>
-  	<span id='server_status'></span>
- 
+  	<!-- <br/> -->
+  	
   </div>
-
+<td>
+</td>
+<tr>
+<td colspan=2>
+<span id='save_status'></span>
+  	<span id='server_status'></span>
   <pre id='syntax_error'></pre>
   <pre id='comm_failure'></pre>
+  </td></tr>
+ 
+  </table>
+  
+
 
   
 	
 <script type='text/javascript'>
-	
 	var last_text_sent_to_server = null;
-
 	var last_rendered_text = null;
-
-
 	var timeoutID = null;
 	var parsing_wait_ms = 400;
+	// var image_refresh_interval_ms = 5000
 
 	$(document).ready(function() {
 
@@ -69,14 +95,19 @@
 	}
 
 	function keyup() {
+		/* We do not ask for parsing every time a key is pressed */
 		text = current_text();
+		
 		// do not do it twice
 		if (text == last_rendered_text)
 			return; 
+		if (text == last_text_sent_to_server)
+			return;
 
 		$('button#save').disable();
 		$('#around_editor').css('background-color', '#ffe');
 		
+		// and we wait that the user stops editing
 		if (timeoutID != null){
 			window.clearTimeout(timeoutID);
 		}
@@ -84,12 +115,14 @@
 		timeoutID = window.setTimeout(try_to_parse_it, parsing_wait_ms);
 	}
 
+
 	function try_to_parse_it() {
 		text = current_text();
 		
 		element = $('#editor').get(0);
 		
 		try_to_parse(text);
+		update_image();
 	}
 
 	function on_comm_failure(error) {
@@ -241,6 +274,15 @@
 			},
 			display_timeout);
 	}
+
+	function update_image() {
+		text = current_text();
+		hash = hex_sha1(text);
+		$("img#graph").attr("src", "graph.png?"+hash);		
+	}
+	// setInterval(function() {
+	// 	//d = new Date();
+	// }, image_refresh_interval_ms);
 
 	</script>
   
