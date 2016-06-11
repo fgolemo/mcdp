@@ -1,50 +1,49 @@
 # -*- coding: utf-8 -*-
-# from mcdp_lang import *  # @UnusedWildImport
-from mcdp_lang.helpers import square
+from .helpers import square
+from .parse_actions import (coprod_parse_action, divide_parse_action,
+    funshortcut1m, mult_inv_parse_action, mult_parse_action, parse_pint_unit,
+    plus_inv_parse_action, plus_parse_action, resshortcut1m,
+    space_product_parse_action)
+from .parts import CDPLanguage
+from .syntax_utils import (COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR,
+    VariableRef_make, simple_keyword_literal, sp)
+from mcdp_lang.utils_lists import make_list
 from pyparsing import (
     CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
-    NotAny, OneOrMore, Optional, Or, ParserElement, Suppress, Word, ZeroOrMore,
-    alphanums, alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
+    NotAny, OneOrMore, Optional, Or, ParserElement, Word, ZeroOrMore, alphanums,
+    alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
     sglQuotedString)
 import math
-from contracts import contract
-from mcdp_lang.parse_actions import parse_pint_unit, space_product_parse_action, \
-    funshortcut1m, resshortcut1m, coprod_parse_action, mult_parse_action, \
-    divide_parse_action, plus_parse_action, mult_inv_parse_action, \
-    plus_inv_parse_action
-from mcdp_lang.utils_lists import make_list
 import warnings
+
 
 ParserElement.enablePackrat()
 
-def sp(a, b):
-    from mcdp_lang.parse_actions import spa
-    spa(a, b)
-    return a
-
-# def simple_identifier(klass):
-#     return sp(Syntax.idn.copy(), lambda t: klass(t[0]))
-    
-@contract(literal=str)
-def simple_keyword_literal(literal, klass):
-    return sp(Literal(literal), lambda t: klass(t[0]))
-   
-from .parts import CDPLanguage
 CDP = CDPLanguage
 
-def VariableRef_make(t):
-    name = t[0]
-    if not isinstance(name, (str, unicode)):
-        raise ValueError(t)
-#     name = str(name)
 
-    res = CDPLanguage.VariableRef(name)
-    return res
+class SyntaxBasics():
+    # numbers
+    number = Word(nums)
+    point = Literal('.')
+    e = CaselessLiteral('E')
+    plus = Literal('+')
+    plusorminus = plus | Literal('-')
+    nonneg_integer = sp(Combine(O(plus) + number),
+                        lambda t: int(t[0]))
+    integer = sp(Combine(O(plusorminus) + number),
+                    lambda t: int(t[0]))
 
-class Syntax():
-    TOP_LITERAL = 'Top'
-    BOTTOM_LITERAL = 'Bottom'
+    # Note that '42' is not a valid float...
+    floatnumber = sp((Combine(integer + point + O(number) + O(e + integer)) |
+                      Combine(integer + e + integer)),
+                      lambda t: float(t[0]))
 
+    integer_or_float = sp(integer ^ floatnumber,
+                          lambda t: CDP.ValueExpr(t[0]))
+
+class SyntaxIdentifiers():
+    # unfortunately this needs to be maintained manually
     keywords = [
         'load',
         'compact',
@@ -70,28 +69,30 @@ class Syntax():
         'Int',
         'pow',
         'approx',
-        TOP_LITERAL,
-        BOTTOM_LITERAL,
+        'Top',
+        'Bottom',
         'finite_poset',
         'choose',
         'flatten',
         'from_library',
         'new',  # = from_library
     ]
+    # remember to .copy() this otherwise things don't work
+    _idn = (NotAny(MatchFirst([Keyword(_) for _ in keywords])) +
+            Combine(oneOf(list(alphas)) +
+                    Optional(Word('_' + alphanums)))).setResultsName('idn')
 
-    # shortcuts
-    S = Suppress
-    L = Literal
-   
-    O = Optional
-    
-    COMMA = sp(L(','), lambda t: CDP.comma(t[0]))
-    
-    SLPAR = S(L('('))
-    SRPAR = S(L(')'))
-    SCOMMA = S(COMMA)
-    SCOLON = S(L(':'))
-   
+    @staticmethod
+    def get_idn():
+        return SyntaxIdentifiers._idn.copy()
+
+
+class Syntax():
+    TOP_LITERAL = 'Top'
+    BOTTOM_LITERAL = 'Bottom'
+
+
+
     PRODUCT = sp(L('x') | L('×'), lambda t: CDP.product(t[0]))
     PROVIDES = sp(L('provides'), lambda t: CDP.ProvideKeyword(t[0]))
     REQUIRES = sp(L('requires'), lambda t: CDP.RequireKeyword(t[0]))
@@ -106,7 +107,7 @@ class Syntax():
     TOP = sp(L(TOP_LITERAL) | L('⊤'), lambda t: CDP.TopKeyword(t[0]))
     BOTTOM = sp(L(BOTTOM_LITERAL) | L('⊥'), lambda t: CDP.BottomKeyword(t[0]))
 
-    MCDPTYPE = sp(L('mcdp-type') ^ L('mcdp') ^ L('dptype'), lambda t: CDP.MCDPTypeKeyword(t[0]))
+    MCDPTYPE = sp(L('mcdp'), lambda t: CDP.MCDPTypeKeyword(t[0]))
 
     INSTANCE = sp(Combine(L('instance') + O(L('of'))), lambda t: CDP.InstanceKeyword(t[0]))
 
@@ -147,22 +148,23 @@ class Syntax():
     FROM_LIBRARY = sp(L('from_library') | L('new'), lambda t: CDP.FromLibraryKeyword(t[0]))
 
     COPROD = sp(L('^'), lambda t: CDP.coprod(t[0]))
-    CODE = sp(L('code'), lambda t: CDP.CodeKeyword(t[0]))
+
     APPROX = sp(L('approx'), lambda t: CDP.ApproxKeyword(t[0]))
 
     # "call"
     C = lambda x, b: x.setResultsName(b)
 
     # optional whitespace
-    ow = S(ZeroOrMore(L(' '))) 
+    ow = S(ZeroOrMore(L(' ')))
 
-    # identifier
-    idn = (NotAny(MatchFirst([Keyword(_) for _ in keywords])) +
-            Combine(oneOf(list(alphas)) +
-                    Optional(Word('_' + alphanums)))).setResultsName('idn')
  
-    disallowed = oneOf(keywords + ['x'])
-    pint_unit_base = NotAny(oneOf(keywords + ['x'])) + Word(alphas + '$')
+    # do not load earlier
+    from .syntax_codespec import get_code_spec_expr
+    code_spec = get_code_spec_expr()
+
+
+#     disallowed = oneOf(keywords + ['x'])
+    pint_unit_base = NotAny(oneOf(SyntaxIdentifiers.keywords + ['x'])) + Word(alphas + '$')
 
     pint_unit_power = L('^') + Word(nums)
     pint_unit_simple = pint_unit_base + O(pint_unit_power)
@@ -173,8 +175,9 @@ class Syntax():
 
     space_expr = Forward() 
 
+    get_idn = SyntaxIdentifiers.get_idn
     # "load <name>"
-    name_poset = sp(idn.copy(), lambda t: CDP.PosetName(t[0]))
+    name_poset = sp(get_idn(), lambda t: CDP.PosetName(t[0]))
     load_poset = sp(LOAD - name_poset, lambda t: CDP.LoadPoset(t[0], t[1]))
 
     # " finite_poset {
@@ -184,9 +187,9 @@ class Syntax():
     #     a <= b <= c
     #   }
     #
-
+    # evaluates to CDP.FinitePoset
     FINITE_POSET = sp(L('finite_poset'), lambda t: CDP.FinitePosetKeyword(t[0]))
-    finite_poset_el = sp(idn.copy(), lambda t: CDP.FinitePosetElement(t[0]))
+    finite_poset_el = sp(get_idn(), lambda t: CDP.FinitePosetElement(t[0]))
     finite_poset_chain = sp(finite_poset_el + ZeroOrMore(LEQ + finite_poset_el),
                                lambda t: make_list(t))
 
@@ -211,42 +214,25 @@ class Syntax():
                      nat_expr ^
                      int_expr ^
                      load_poset ^
+                     code_spec ^
                      finite_poset)
 
     space_expr << operatorPrecedence(space_operand, [
                 (PRODUCT, 2, opAssoc.LEFT, space_product_parse_action),
     ])
 
-    # numbers
-    number = Word(nums)
-    point = Literal('.')
-    e = CaselessLiteral('E')
-    plus = Literal('+')
-    plusorminus = plus | Literal('-')
-    nonneg_integer = sp(Combine(O(plus) + number),
-                        lambda t: int(t[0]))
-    integer = sp(Combine(O(plusorminus) + number),
-                    lambda t: int(t[0]))
-
-    # Note that '42' is not a valid float...
-    floatnumber = sp((Combine(integer + point + O(number) + O(e + integer)) |
-                      Combine(integer + e + integer)),
-                     lambda t: float(t[0]))
-
-    integer_or_float = sp(integer ^ floatnumber,
-                          lambda t: CDP.ValueExpr(t[0]))
 
     unitst = S(L('[')) + C(space_expr, 'unit') + S(L(']'))
 
 
-    nat_constant = sp(L('nat') + L(':') + nonneg_integer,
+    nat_constant = sp(L('nat') + L(':') + SyntaxBasics.nonneg_integer,
                       lambda t: CDP.NatConstant(t[0], t[1], t[2]))
 
-    int_constant = sp(L('int') + L(':') + integer,
+    int_constant = sp(L('int') + L(':') + SyntaxBasics.integer,
                       lambda t: CDP.IntConstant(t[0], t[1], t[2]))
 
-    fname = sp(idn.copy(), lambda t: CDP.FName(t[0]))
-    rname = sp(idn.copy(), lambda t: CDP.RName(t[0]))
+    fname = sp(get_idn(), lambda t: CDP.FName(t[0]))
+    rname = sp(get_idn(), lambda t: CDP.RName(t[0]))
 
     fun_statement = sp(PROVIDES + C(fname, 'fname') + unitst,
                        lambda t: CDP.FunStatement(t[0], t[1], t[2]))
@@ -254,14 +240,14 @@ class Syntax():
     res_statement = sp(REQUIRES + C(rname, 'rname') + unitst,
                        lambda t: CDP.ResStatement(t[0], t[1], t[2]))
 
-    number_with_unit1 = sp(integer_or_float + unitst,
+    number_with_unit1 = sp(SyntaxBasics.integer_or_float + unitst,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
 
     dimensionless = sp(L('[') + L(']'), lambda _: CDP.RcompUnit('m/m'))
-    number_with_unit2 = sp(integer_or_float + dimensionless,
+    number_with_unit2 = sp(SyntaxBasics.integer_or_float + dimensionless,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
     
-    number_with_unit3 = sp(integer_or_float + space_expr,
+    number_with_unit3 = sp(SyntaxBasics.integer_or_float + space_expr,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
 
     number_with_unit4_top = sp(TOP + space_expr,
@@ -280,19 +266,17 @@ class Syntax():
 
     # a quoted string
     quoted = sp(dblQuotedString | sglQuotedString, lambda t:t[0][1:-1])
-    ndpname = sp(idn.copy() | quoted, lambda t: CDP.NDPName(t[0]))
+    ndpname = sp(get_idn() | quoted, lambda t: CDP.NDPName(t[0]))
 
     ndpt_load_expr = sp(LOAD - (ndpname | SLPAR - ndpname - SRPAR),
                         lambda t: CDP.LoadCommand(t[0], t[1]))
-
-
 
     # An expression that evaluates to a NamedDP
     ndpt_dp_rvalue = Forward()
 
     # <dpname> = ...
-    dpname = sp(idn.copy(), lambda t: CDP.DPName(t[0]))
-    dptypename = sp(idn.copy(), lambda t: CDP.DPTypeName(t[0]))
+    dpname = sp(get_idn(), lambda t: CDP.DPName(t[0]))
+    dptypename = sp(get_idn(), lambda t: CDP.DPTypeName(t[0]))
 
     dpinstance_from_type = sp((INSTANCE + ndpt_dp_rvalue) ^
                               (INSTANCE + SLPAR + ndpt_dp_rvalue + SRPAR),
@@ -325,15 +309,15 @@ class Syntax():
     ELLIPSIS = sp(L('...'), lambda t: CDP.Ellipsis(t[0]))
     setname_rightside = ELLIPSIS | rvalue  # ^ dp_rvalue
  
-    setname_generic_var = sp(idn.copy(),
+    setname_generic_var = sp(get_idn(),
                               lambda t: CDP.SetNameGenericVar(t[0]))
 
     setname_generic = sp(setname_generic_var + EQ + setname_rightside,
                          lambda t: CDP.SetNameGeneric(t[0], t[1], t[2]))
 
-    variable_ref = sp(idn.copy(), VariableRef_make)
+    variable_ref = sp(get_idn(), VariableRef_make)
 
-    ndpt_dp_variable_ref = sp(idn.copy(), lambda t: CDP.DPVariableRef(t[0]))
+    ndpt_dp_variable_ref = sp(get_idn(), lambda t: CDP.DPVariableRef(t[0]))
     
     constant_value = Forward()
     tuple_of_constants = sp(OPEN_BRACE + constant_value +
@@ -365,14 +349,14 @@ class Syntax():
 
     rvalue_resource = rvalue_resource_simple ^ rvalue_resource_fancy
 
-    rvalue_new_function = sp(idn.copy(), VariableRef_make)
-    rvalue_new_function2 = sp(PROVIDED + idn.copy(),
+    rvalue_new_function = sp(get_idn(), VariableRef_make)
+    rvalue_new_function2 = sp(PROVIDED + get_idn(),
                               lambda t: CDP.NewFunction(t[1]))
     
-    lf_new_resource = sp(idn.copy(),
+    lf_new_resource = sp(get_idn(),
                          lambda t: CDP.NewResource(t[0]))
 
-    lf_new_resource2 = sp(REQUIRED + idn.copy(), lambda t: CDP.NewResource(t[1]))
+    lf_new_resource2 = sp(REQUIRED + get_idn(), lambda t: CDP.NewResource(t[1]))
 
 
     lf_new_limit = sp(C(Group(number_with_unit), 'limit'),
@@ -417,10 +401,10 @@ class Syntax():
 
     # Fractions
 
-    integer_fraction = sp(integer + S(L('/')) + integer,
+    integer_fraction = sp(SyntaxBasics.integer + S(L('/')) + SyntaxBasics.integer,
                           lambda t: CDP.IntegerFraction(num=t[0], den=t[1]))
 
-    integer_fraction_one = sp(integer.copy(),
+    integer_fraction_one = sp(SyntaxBasics.integer.copy(),
                               lambda t: CDP.IntegerFraction(num=int(t[0]), den=1))
 
     rat_power_exponent = integer_fraction | integer_fraction_one
@@ -488,31 +472,12 @@ class Syntax():
     ndpt_dp_model = sp(CDPTOKEN - S(L('{')) - dp_model_statements - S(L('}')),
                   lambda t: CDP.BuildProblem(keyword=t[0], statements=t[1]))
 
-    # "idn" does not match keywords, but keywords might appear in functions names
-    idn_ext = Combine(oneOf(list(alphas)) + Optional(Word('_' + alphanums)))
-    funcname = sp(Combine(idn_ext + ZeroOrMore(L('.') - idn_ext)),
-                   lambda t: CDP.FuncName(t[0]))
+    # load
+    primitivedp_name = sp(get_idn(), lambda t: CDP.FuncName(t[0]))  # XXX
+    primitivedp_load = sp(LOAD - primitivedp_name, lambda t: CDP.LoadDP(t[0], t[1]))
 
-    # Code specs
-    code_spec_simple = sp(CODE + funcname,
-                          lambda t: CDP.CodeSpecNoArgs(keyword=t[0], function=t[1]))
-
-    arg_value = integer_or_float
-    arg_name = sp(idn, lambda t: CDP.ArgName(t[0]))
-    arg_pair = arg_name + S(L('=')) + arg_value
-    arguments_spec = sp(O(arg_pair) + ZeroOrMore(SCOMMA + arg_pair),
-                        lambda t: make_list(list(t)))
-    code_spec_with_args = sp(CODE + funcname + SLPAR + arguments_spec + SRPAR,
-                   lambda t: CDP.CodeSpec(keyword=t[0], function=t[1], arguments=t[2]))
-    code_spec = code_spec_with_args ^ code_spec_simple
-
-
-
-    pdpname = sp(idn.copy(), lambda t: CDP.FuncName(t[0]))  # XXX
-    load_pdp = sp(LOAD - pdpname, lambda t: CDP.LoadDP(t[0], t[1]))
-
-
-    pdp_rvalue = load_pdp ^ code_spec
+    primitivedp_expr = (primitivedp_load ^
+                        code_spec)
 
     simple_dp_model_stats = sp(ZeroOrMore(S(ow) + fun_statement ^ res_statement),
                                lambda t: make_list(list(t)))
@@ -521,13 +486,13 @@ class Syntax():
                          S(L('{')) -
                          simple_dp_model_stats -
                          IMPLEMENTEDBY -
-                         pdp_rvalue -
+                         primitivedp_expr -
                          S(L('}')),
                          lambda t: CDP.DPWrap(token=t[0], statements=t[1],
                                               prep=t[2], impl=t[3]))
 
     entry = rvalue
-    imp_name = sp(idn.copy(), lambda t: CDP.ImpName(t[0]))
+    imp_name = sp(get_idn(), lambda t: CDP.ImpName(t[0]))
     col_separator = L('|') ^ L('│')  # box drawing
     catalogue_row = sp(imp_name +  # S(L('[')) + entry +
                        ZeroOrMore(S(col_separator) + entry),  # + S(L(']')),
@@ -539,7 +504,7 @@ class Syntax():
     # Example:
     #    choose(name: <dp>, name2: <dp>)
     ndpt_coproduct_with_names_name = \
-        sp(idn.copy(), lambda t: CDP.CoproductWithNamesName(t[0]))
+        sp(get_idn(), lambda t: CDP.CoproductWithNamesName(t[0]))
     # ndpt_coproduct_with_names_one = ndpt_coproduct_with_names_name + SCOLON + ndpt_dp_rvalue
     warnings.warn('XXX this is just for show')
     ndpt_coproduct_with_names_one = ndpt_coproduct_with_names_name + SCOLON + (ndpt_dp_rvalue | dpinstance_expr)
@@ -554,7 +519,7 @@ class Syntax():
     # Example:
     #   approx(mass,0%,0g,%)
     ndpt_approx = sp(APPROX - S(L('(')) - fname + S(COMMA)
-                         - integer_or_float - S(L('%'))
+                         - SyntaxBasics.integer_or_float - S(L('%'))
                          - S(COMMA) + constant_value  # step
                          - S(COMMA) + constant_value  # max value
                         - S(L(')')) - ndpt_dp_rvalue,
@@ -585,6 +550,7 @@ class Syntax():
 
     ndpt_dp_operand = (
         ndpt_load_expr |
+        code_spec |
         ndpt_simple_dp_model |
         ndpt_dp_model |
         ndpt_abstract_expr |
@@ -621,7 +587,3 @@ class Syntax():
         ('*', 2, opAssoc.LEFT, mult_inv_parse_action),
         ('+', 2, opAssoc.LEFT, plus_inv_parse_action),
     ])
-
-#     divide_constants = sp(constant_value + BAR + constant_value,
-#                               lambda t: CDP.Divide(make_list([t[0], t[1], t[2]])))
-

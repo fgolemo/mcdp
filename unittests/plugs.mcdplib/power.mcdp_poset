@@ -1,0 +1,5 @@
+# we care about the plug type and the current
+load plug_types x A
+
+# Example of future syntax
+# namedtuple(plug: plug_types, current: A)

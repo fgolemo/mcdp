@@ -37,8 +37,9 @@ class MCDPLibrary():
     ext_ndps = 'mcdp'
     ext_posets = 'mcdp_poset'
     ext_values = 'mcdp_value'
-    ext_templates = 'mcdp_template'
-    all_extensions = [ext_ndps, ext_posets, ext_values, ext_templates]
+    ext_templates = 'mcdp_template'  # not implemented yet
+    ext_primitivedps = 'mcdp_primitivedp'
+    all_extensions = [ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps]
 
     def __init__(self, cache_dir=None, file_to_contents=None):
         # basename "x.mcdp" -> dict
@@ -67,11 +68,18 @@ class MCDPLibrary():
 
     @contract(returns=NamedDP)
     def load_ndp(self, id_ndp):
-        return self._load_generic(id_ndp, MCDPLibrary.ext_ndps, MCDPLibrary.parse_ndp)
+        return self._load_generic(id_ndp, MCDPLibrary.ext_ndps,
+                                  MCDPLibrary.parse_ndp)
 
     @contract(returns=Poset)
     def load_poset(self, id_poset):
-        return self._load_generic(id_poset, MCDPLibrary.ext_posets, MCDPLibrary.parse_poset)
+        return self._load_generic(id_poset, MCDPLibrary.ext_posets,
+                                  MCDPLibrary.parse_poset)
+
+    @contract(returns=Poset)
+    def load_primitivedp(self, id_primitivedp):
+        return self._load_generic(id_primitivedp, MCDPLibrary.ext_primitivedps,
+                                  MCDPLibrary.parse_primitivedp)
 
     def _load_generic(self, name, extension, parsing):
         filename = '%s.%s' % (name, extension)
@@ -96,6 +104,11 @@ class MCDPLibrary():
 
     def parse_poset(self, string, realpath=None):
         return self._parse_with_hooks(parse_poset, string, realpath)
+
+    def parse_primitivedp(self, string, realpath=None):
+        from mcdp_lang.parse_interface import parse_primitivedp
+        return self._parse_with_hooks(parse_primitivedp, string, realpath)
+
 
     def _parse_with_hooks(self, parse_ndp_like, string, realpath):
         context = self._generate_context_with_hooks()
@@ -126,6 +139,11 @@ class MCDPLibrary():
     def list_posets(self):
         """ Returns all models defined in this library with .mcdp files. """
         return self._list_with_extension(MCDPLibrary.ext_posets)
+
+    @contract(returns='set(str)')
+    def list_primitivedps(self):
+        """ Returns all models defined in this library with .mcdp files. """
+        return self._list_with_extension(MCDPLibrary.ext_primitivedps)
 
     def _list_with_extension(self, ext):
         r = []

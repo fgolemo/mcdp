@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
-
-from mcdp_lang.syntax import Syntax
+from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.syntax import Syntax, SyntaxIdentifiers
+from mcdp_lang.syntax_codespec import SyntaxCodeSpec
 from mcdp_lang.tests.utils import (assert_parsable_to_connected_ndp,
     assert_semantic_error, parse_wrap_check)
 from nose.tools import assert_equal
 from pyparsing import Literal
-from mcdp_lang.parse_actions import parse_wrap
 
 @comptest
 def check_lang():
-    parse_wrap(Syntax.idn, 'battery')
-    parse_wrap(Syntax.idn + Syntax.ow, 'battery ')
-    parse_wrap(Syntax.idn + Syntax.ow + Literal('='), 'battery=')
+    idn = SyntaxIdentifiers.get_idn()
+    parse_wrap(idn, 'battery')
+    parse_wrap(idn + Syntax.ow, 'battery ')
+    parse_wrap(idn + Syntax.ow + Literal('='), 'battery=')
     parse_wrap(Syntax.ndpt_load_expr, 'load battery')
-
 
 @comptest
 def check_lang3_times():
@@ -37,23 +37,22 @@ dp {
     parse_wrap(Syntax.ndpt_simple_dp_model, s)[0]
 
 
-
 @comptest
 def check_lang5_composition():
     parse_wrap(Syntax.rvalue, 'mission_time')
 
-    parse_wrap(Syntax.funcname, 'mocdp.example_battery.Mobility')
-    parse_wrap(Syntax.code_spec, 'code mocdp.example_battery.Mobility')
+    parse_wrap(SyntaxCodeSpec.funcname, 'mocdp.example_battery.Mobility')
+    parse_wrap(SyntaxCodeSpec.code_spec, 'code mocdp.example_battery.Mobility')
 
 
 @comptest
 def check_lang6_composition():
     parse_wrap(Syntax.rvalue, 'mission_time')
 
-    parse_wrap(Syntax.funcname, 'mocdp.example_battery.Mobility')
-    parse_wrap(Syntax.code_spec, 'code mocdp.example_battery.Mobility')
+    parse_wrap(SyntaxCodeSpec.funcname, 'mocdp.example_battery.Mobility')
+    parse_wrap(SyntaxCodeSpec.code_spec, 'code mocdp.example_battery.Mobility')
 
-    parse_wrap(Syntax.code_spec_with_args, 'code mocdp.example_battery.Mobility(a=1)')
+    parse_wrap(SyntaxCodeSpec.code_spec_with_args, 'code mocdp.example_battery.Mobility(a=1)')
 
 
 @comptest

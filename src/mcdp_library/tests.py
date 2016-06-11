@@ -6,6 +6,9 @@ from mcdp_library.library import MCDPLibrary
 from mocdp import logger
 import os
 import yaml
+from contextlib import contextmanager
+import tempfile
+import shutil
 
 __all__ = [
     'define_tests_for_mcdplibs',
@@ -41,6 +44,7 @@ def define_tests_for_mcdplibs(context):
         
         c2.child('ndp').comp_dynamic(mcdplib_test_setup_nameddps, mcdplib=m)
         c2.child('poset').comp_dynamic(mcdplib_test_setup_posets, mcdplib=m)
+        c2.child('primitivedps').comp_dynamic(mcdplib_test_setup_primitivedps, mcdplib=m)
 
         makefile = os.path.join(m, 'Makefile')
         if os.path.exists(makefile):
@@ -89,13 +93,6 @@ def mcdplib_test_setup_nameddps(context, mcdplib):
             c.comp(ftest, model_name, ndp)
 
 
-def _load_ndp(mcdplib, model_name):
-    l = MCDPLibrary()
-    l.add_search_dir(mcdplib)
-    l.delete_cache()
-    ndp = l.load_ndp(model_name)
-    return ndp
-
 
 def mcdplib_test_setup_posets(context, mcdplib):
     """ 
@@ -125,12 +122,54 @@ def mcdplib_test_setup_posets(context, mcdplib):
             c.comp(ftest, id_poset, ndp)
 
 
-def _load_poset(mcdplib, model_name):
+def mcdplib_test_setup_primitivedps(context, mcdplib):
+    from mocdp import load_tests_modules
+
     l = MCDPLibrary()
     l.add_search_dir(mcdplib)
+    dps = l.list_primitivedps()
+
+    from mocdp.unittests.generation import for_all_dps
+    load_tests_modules()
+    registered = for_all_dps.registered
+
+    print('Mcdplib: %s' % mcdplib)
+    print('Found: %r' % dps)
+    print('Registered: %r' % registered)
+
+    for id_dp in dps:
+        c = context.child(id_dp)
+
+        ndp = c.comp(_load_primitivedp, mcdplib, id_dp, job_id='load_poset')
+
+        for ftest in registered:
+            c.comp(ftest, id_dp, ndp)
+
+def _load_primitivedp(mcdplib, model_name):
+    with templib(mcdplib) as l:
+        return l.load_primitivedp(model_name)
+
+def _load_poset(mcdplib, model_name):
+    with templib(mcdplib) as l:
+        return l.load_poset(model_name)
+
+def _load_ndp(mcdplib, model_name):
+    with templib(mcdplib) as l:
+        return l.load_ndp(model_name)
+
+@contextmanager
+def templib(mcdplib):
+    tmpdir = tempfile.mkdtemp(prefix='mcdplibrary_tmdpir')
+    l = MCDPLibrary()
+
+    l.add_search_dir(mcdplib)
     l.delete_cache()
-    ndp = l.load_poset(model_name)
-    return ndp
+    try:
+        yield l
+    finally:
+        shutil.rmtree(tmpdir)
+    
+
 
 
 def mcdplib_define_tst(context, mcdplib):

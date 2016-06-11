@@ -7,6 +7,8 @@ from .syntax_sets import *
 from .syntax_spaces import *
 from .syntax_connections import *
 from .syntax_from_library import *
+from .syntax_tuples import *
+
 from .failures_parsing import *
 from .failures_simplification import *
 
@@ -25,7 +27,8 @@ from .failures_simplification import *
     assert_parsable_to_connected_ndp
     assert_parsable_to_unconnected_ndp
     
-    
-    eval_rvalue_as_constant
+    Also useful:
+        
+        eval_rvalue_as_constant
 
 """

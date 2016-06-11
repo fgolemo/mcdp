@@ -11,17 +11,17 @@ from mcdp_posets.types_universe import get_types_universe
 from nose.tools import assert_equal
 from numpy.testing.utils import assert_allclose
 from mcdp_lang.tests.utils2 import eval_rvalue_as_constant
-from mcdp_lang.syntax import Syntax
+from mcdp_lang.syntax import Syntax, SyntaxBasics
 
 CDP = CDPLanguage
 
 @comptest
 def check_numbers1():
-    parse_wrap_check('1.0', Syntax.floatnumber, 1.0)
-    assert_syntax_error('1', Syntax.floatnumber)
-    parse_wrap_check('1', Syntax.integer, 1)
-    parse_wrap_check('1', Syntax.integer_or_float, CDP.ValueExpr(1))
-    parse_wrap_check('1.0', Syntax.integer_or_float, CDP.ValueExpr(1.0))
+    parse_wrap_check('1.0', SyntaxBasics.floatnumber, 1.0)
+    assert_syntax_error('1', SyntaxBasics.floatnumber)
+    parse_wrap_check('1', SyntaxBasics.integer, 1)
+    parse_wrap_check('1', SyntaxBasics.integer_or_float, CDP.ValueExpr(1))
+    parse_wrap_check('1.0', SyntaxBasics.integer_or_float, CDP.ValueExpr(1.0))
 
 
 @comptest
@@ -63,7 +63,7 @@ def check_unit1():
     print parse_wrap_check('N*m', Syntax.pint_unit)
     parse_wrap_check('y', Syntax.pint_unit_simple)
     parse_wrap_syntax_error('x', Syntax.pint_unit_simple)
-    parse_wrap_check('x', Syntax.disallowed)
+#     parse_wrap_check('x', Syntax.disallowed)
     print('unit_base:')
     parse_wrap_syntax_error('V x m', Syntax.pint_unit_simple)
 

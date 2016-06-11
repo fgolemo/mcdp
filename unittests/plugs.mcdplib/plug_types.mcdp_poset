@@ -1,0 +1,14 @@
+# The types of plugs
+finite_poset {
+	european  # 2 pins
+	european_with_ground # 3 pins
+	american # 2 pins
+	american_with_ground # 3 pins
+	japanese
+
+	# from the point of view of functionality
+	# we can use a 3 pin one to behave as a 2 pin one
+
+	european_with_ground <= european
+	american_with_ground <= american
+}

@@ -1,23 +1,38 @@
 # -*- coding: utf-8 -*-
+from .namedtuple_tricks import get_copy_with_where
 from .parts import CDPLanguage
-
+from .utils import isnamedtupleinstance, parse_action
+from .utils_lists import make_list
+from contextlib import contextmanager
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import check_isinstance, indent, raise_desc, raise_wrapped
-from mocdp.comp.context import ValueWithUnits
+from mcdp_posets import Nat, RcompUnits, Space, mult_table
 from mocdp.dp.dp_sum import sum_units
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
-from mcdp_lang.namedtuple_tricks import get_copy_with_where
-from mcdp_lang.utils_lists import make_list
-from mcdp_posets import RcompUnits, Space, mult_table
-from mcdp_posets.nat import Nat
 from pyparsing import ParseException, ParseFatalException
 import functools
 import warnings
-from mcdp_lang.utils import parse_action
-from compmake.jobs.dependencies import isnamedtupleinstance
+
+# from compmake.jobs.dependencies import isnamedtupleinstance
 
 CDP = CDPLanguage
+
+@contextmanager
+def add_where_information(where):
+    """ Adds where field to DPSyntaxError or DPSemanticError thrown by code. """
+    try:
+        yield     
+    except DPSyntaxError as e:
+        e = DPSyntaxError(str(e))
+        if e.where is None:
+            e.where = where
+        raise e
+    except DPSemanticError as e:
+        e = DPSemanticError(str(e))
+        if e.where is None:
+            e.where = where
+        raise e
 
 def wheredecorator(b):
     def bb(tokens, loc, s):
@@ -135,12 +150,14 @@ def inv_constant(a):
         raise DPSemanticError('Division by zero')
     # TODO: what about integers?
     value = 1.0 / a.value
+    from mocdp.comp.context import ValueWithUnits
     return ValueWithUnits(value=value, unit=unit)
 
 
 def mult_constants2(a, b):
     R = mult_table(a.unit, b.unit)
     value = a.value * b.value
+    from mocdp.comp.context import ValueWithUnits
     return ValueWithUnits(value=value, unit=R)
 
 def mult_constantsN(seq):
@@ -160,6 +177,7 @@ def plus_constants2(a, b):
     Fs = [a.unit, b.unit]
     values = [a.value, b.value]
     res = sum_units(Fs, values, R)
+    from mocdp.comp.context import ValueWithUnits
     return ValueWithUnits(value=res, unit=R)
 
 def plus_constantsN(constants):

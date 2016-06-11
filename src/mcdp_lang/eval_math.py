@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mocdp.comp.context import CResource, ValueWithUnits
-from mocdp.dp import GenericUnary, ProductN, SumN, SumNInt, SumNNat, WrapAMap
-from mocdp.exceptions import DPInternalError, DPSemanticError
+from mcdp_lang.eval_constant_imp import NotConstant
+from mcdp_lang.eval_resources_imp import eval_rvalue
 from mcdp_lang.parse_actions import inv_constant
+from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.utils_lists import get_odd_ops, unwrap_list
 from mcdp_posets import (Int, Nat, RcompUnits, Space, get_types_universe,
     mult_table, mult_table_seq)
 from mcdp_posets.space import Map
+from mocdp.comp.context import CResource, ValueWithUnits
+from mocdp.dp import GenericUnary, ProductN, SumN, SumNInt, SumNNat, WrapAMap
 from mocdp.dp.dp_sum import sum_dimensionality_works
-from mcdp_lang.parts import CDPLanguage
-from mcdp_lang.eval_constant_imp import NotConstant
-from mcdp_lang.eval_resources_imp import eval_rvalue
+from mocdp.exceptions import DPInternalError, DPSemanticError
 CDP = CDPLanguage
 
 def eval_constant_divide(op, context):
@@ -107,9 +107,8 @@ def flatten_multN(ops):
 
 def eval_MultN(x, context, wants_constant):
     """ Raises NotConstant if wants_constant is True. """
-    from mcdp_lang.parse_actions import mult_constantsN
-    from mcdp_lang.eval_constant_imp import eval_constant
-    from mcdp_lang.eval_constant_imp import NotConstant
+    from .parse_actions import mult_constantsN
+    from .eval_constant_imp import eval_constant
 
     assert isinstance(x, CDP.MultN)
 
@@ -129,7 +128,6 @@ def eval_MultN(x, context, wants_constant):
             if wants_constant:
                 msg = 'Product not constant because one op is not constant.'
                 raise_wrapped(NotConstant, e, msg, op=op)
-            from mcdp_lang.eval_resources_imp import eval_rvalue
             x = eval_rvalue(op, context)
             assert isinstance(x, CResource)
             resources.append(x)

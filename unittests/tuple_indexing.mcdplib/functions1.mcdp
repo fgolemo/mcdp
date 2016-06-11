@@ -1,0 +1,6 @@
+mcdp {
+	provides f [g x J]
+
+	f[0] <= 10 g
+	f[1] <= 50 J
+}

@@ -4,6 +4,9 @@ import os
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_posets.poset import Poset
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
+from mocdp.dp.primitive import PrimitiveDP
+from contracts import contract
+
 
 __all__ = [
     'parse_ndp',
@@ -15,18 +18,15 @@ __all__ = [
 def parse_ndp(string, context=None):
     from mocdp.comp.context import Context
     from mcdp_lang.syntax import Syntax
-    from mcdp_lang.eval_mcdp_type_imp import eval_dp_rvalue
+    from mcdp_lang.eval_ndp_imp import eval_ndp
     from mocdp.comp.interfaces import NamedDP
-
-    if os.path.exists(string):
-        raise ValueError('expected string, not filename :%s' % string)
 
     v = parse_wrap(Syntax.ndpt_dp_rvalue, string)[0]
 
     if context is None:
         context = Context()
 
-    res = eval_dp_rvalue(v, context)
+    res = eval_ndp(v, context)
     # I'm not sure what happens to the context
     # if context.names # error ??
 
@@ -43,13 +43,11 @@ def parse_ndp_filename(filename, context=None):
     except (DPSyntaxError, DPSemanticError) as e:
         raise e.with_filename(filename)
 
+@contract(returns=Poset)
 def parse_poset(string, context=None):
     from mocdp.comp.context import Context
     from mcdp_lang.syntax import Syntax
     from mcdp_lang.eval_space_imp import eval_space
-
-    if os.path.exists(string):
-        raise ValueError('expected string, not filename :%s' % string)
 
     v = parse_wrap(Syntax.space_expr, string)[0]
 
@@ -59,4 +57,21 @@ def parse_poset(string, context=None):
     res = eval_space(v, context)
 
     assert isinstance(res, Poset), res
+    return res
+
+
+@contract(returns=PrimitiveDP)
+def parse_primitivedp(string, context=None):
+    from mocdp.comp.context import Context
+    from mcdp_lang.syntax import Syntax
+    from mcdp_lang.eval_primitivedp_imp import eval_primitivedp
+
+    v = parse_wrap(Syntax.primitivedp_expr, string)[0]
+
+    if context is None:
+        context = Context()
+
+    res = eval_primitivedp(v, context)
+
+    assert isinstance(res, PrimitiveDP), res
     return res

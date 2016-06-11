@@ -1,11 +1,11 @@
-from mcdp_cli.plot import png_pdf_from_gg
 from contracts.utils import raise_wrapped
+from mcdp_cli.plot import png_pdf_from_gg
+from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
+from mcdp_report.html import ast_to_html
 from mcdp_web.app_solver import (ajax_error_catch,
     format_exception_for_ajax_response, png_error_catch, response_image)
 from mcdp_web.utils import response_data
 from mocdp.comp.composite import CompositeNamedDP
-from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
-from mcdp_report.html import ast_to_html
 from mocdp.exceptions import DPSemanticError
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render_to_response
@@ -135,27 +135,18 @@ class AppEditorFancy():
                 if ndp is None:
                     return response_image(request, 'Could not parse model.')
 
-            # ndp2 = ndp
             if isinstance(ndp, CompositeNamedDP):
                 ndp2 = ndp.templatize_children()
                 setattr(ndp2, '_hack_force_enclose', True)
             else:
                 ndp2 = ndp
                 setattr(ndp2, '_xxx_label', model_name)
-            # print ndp2.__attr__()
-
 
             # ndp2 = cndp_get_suitable_for_drawing(model_name, ndp)
 
             gg = gvgen_from_ndp(ndp2, STYLE_GREENREDSYM, direction='TB')
             png, _pdf = png_pdf_from_gg(gg)
-
-#             if fileformat == 'pdf':
-#                 return response_data(request=request, data=pdf, content_type='image/pdf')
-#             elif fileformat == 'png':
             return response_data(request=request, data=png, content_type='image/png')
-#             else:
-#                 raise ValueError('No known format %r.' % fileformat)
         return png_error_catch(go, request)
 
     def view_new_model(self, request):

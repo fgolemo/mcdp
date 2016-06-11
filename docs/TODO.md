@@ -120,6 +120,20 @@ There is already a connection to function 'r1' of '_res_r1'.
             here or nearby
 ```
 
+- B: there is an asymmetri for functions and resources
+
+mcdp {
+ provides f [g]
+ requires r [g]
+ required r >= 10 g
+ provided f <= 14 g
+
+# this is ok
+ provided f <= 10 g
+# this will cause an error:
+# required r >= 20 g
+}
+
 
 Language additions
 ------------------
@@ -150,5 +164,12 @@ mcdp {
   provides x [J] "This is a comment for the description"
 }
 ```
+
+- L: named tuples
+
+  T = namedtuple(T: Type, U: Type)
+
+
+
 
 

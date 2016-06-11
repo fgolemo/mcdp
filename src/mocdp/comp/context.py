@@ -2,12 +2,12 @@
 from collections import namedtuple
 from contracts import contract
 from contracts.utils import indent, raise_desc, raise_wrapped
-from mocdp.comp.interfaces import NamedDP
-from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mcdp_posets import Space
+from mcdp_posets.poset import Poset
+from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import dpwrap
 from mocdp.dp.dp_identity import Identity
-from mcdp_posets.poset import Poset
+from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 
 __all__ = [
     'Connection',
@@ -45,7 +45,7 @@ class CResource():
 
 
 class ValueWithUnits():
-
+    """ unit should have been "space" """
     @contract(unit=Space)
     def __init__(self, value, unit):
         unit.belongs(value)

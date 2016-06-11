@@ -1,0 +1,16 @@
+# This converts from europen to american
+mcdp {
+	provides out [load power]
+	requires in  [load power]
+	requires cost [USD]
+
+	# We require that the input is european or more
+	in[0] >= plug_types : european 
+
+	# We provide the american output
+	out[0] <= plug_types : american 
+
+	in[1] >= out[1]
+
+	cost >= 5 USD
+}

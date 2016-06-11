@@ -5,6 +5,7 @@ from contracts.utils import check_isinstance, raise_wrapped
 from mocdp.exceptions import DPSemanticError
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.utils_lists import unwrap_list
+from mcdp_lang.parse_actions import add_where_information
 
 CDP = CDPLanguage
 
@@ -12,7 +13,7 @@ __all__ = [
     'eval_codespec',
 ]
 
-def eval_codespec(r):
+def eval_codespec(r, expect):
     assert isinstance(r, (CDP.CodeSpecNoArgs, CDP.CodeSpec))
 
     function = r.function.value
@@ -22,13 +23,24 @@ def eval_codespec(r):
     else:
         kwargs = {}
     check_isinstance(function, str)
-    try:
-        res = instantiate_spec([function, kwargs])
-    except ConfToolsException as e:
-        msg = 'Could not instantiate code spec.'
-        raise_wrapped(DPSemanticError, e, msg, compact=True,
-                      function=function, kwargs=kwargs)
-    return res
+
+    with add_where_information(r.where):
+        try:
+            res = instantiate_spec([function, kwargs])
+        except ConfToolsException as e:
+            msg = 'Could not instantiate code spec.'
+            raise_wrapped(DPSemanticError, e, msg, compact=True,
+                          function=function, kwargs=kwargs)
+
+        try:
+            check_isinstance(res, expect)
+        except ValueError as e:
+            msg = 'The code did not return the correct type.'
+            raise_wrapped(DPSemanticError, e, msg, r=r, res=res, expect=expect)
+
+        return res
+
+
 
 
 @contract(returns='tuple(tuple, dict)')

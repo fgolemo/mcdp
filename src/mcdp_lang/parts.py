@@ -147,8 +147,8 @@ class CDPLanguage():
 
     # Code specs
     ArgName = namedtuplewhere('ArgName', 'value')  # value = string
-    CodeSpec = namedtuplewhere('PDPCodeSpec', 'keyword function arguments')
-    CodeSpecNoArgs = namedtuplewhere('PDPCodeSpecNoArgs', 'keyword function')
+    CodeSpec = namedtuplewhere('CodeSpec', 'keyword function arguments')
+    CodeSpecNoArgs = namedtuplewhere('CodeSpecNoArgs', 'keyword function')
 
     SpaceProduct = namedtuplewhere('SpaceProduct', 'ops')
     InvMult = namedtuplewhere('InvMult', 'ops')

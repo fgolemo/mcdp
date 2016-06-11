@@ -28,7 +28,7 @@ def check_spaces2():
     ndp = parse_ndp("""
     mcdp {
          
-        mcdp-type a = catalogue {
+        a = catalogue {
 
         provides voltage [set-of(V)]
         provides capacity [J]

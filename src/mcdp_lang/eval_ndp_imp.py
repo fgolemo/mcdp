@@ -1,7 +1,13 @@
 # -*- coding: utf-8 -*-
 from .parts import CDPLanguage
 from contracts import contract, describe_value
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from mcdp_lang.eval_constant_imp import eval_constant
+from mcdp_lang.eval_space_imp import eval_space
+from mcdp_lang.helpers import get_conversion
+from mcdp_lang.utils_lists import get_odd_ops, unwrap_list
+from mcdp_posets import NotEqual, NotLeq, PosetProduct, get_types_universe
+from mcdp_posets.any import Any
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
 from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
@@ -10,18 +16,12 @@ from mocdp.dp.dp_approximation import make_approximation
 from mocdp.dp.dp_catalogue import CatalogueDP
 from mocdp.dp.dp_series_simplification import make_series
 from mocdp.exceptions import DPInternalError, DPSemanticError
-from mcdp_lang.eval_constant_imp import eval_constant
-from mcdp_lang.eval_space_imp import eval_space
-from mcdp_lang.helpers import get_conversion
-from mcdp_lang.utils_lists import get_odd_ops, unwrap_list
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
-from mcdp_posets import NotEqual, NotLeq, PosetProduct, get_types_universe
-from mcdp_posets.any import Any
 
 CDP = CDPLanguage
 
 @contract(returns=NamedDP)
-def eval_dp_rvalue(r, context):  # @UnusedVariable
+def eval_ndp(r, context):  # @UnusedVariable
     try:
         if isinstance(r, CDP.BuildProblem):
             special_list = r.statements
@@ -44,7 +44,7 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
                 raise_wrapped(DPSemanticError, e, msg, compact=True)
 
         if isinstance(r, CDP.DPInstance):
-            return eval_dp_rvalue(r.dp_rvalue, context)
+            return eval_ndp(r.dp_rvalue, context)
 
         if isinstance(r, NamedDP):
             return r
@@ -57,7 +57,7 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             return eval_dp_rvalue_dpwrap(r, context)
 
         if isinstance(r, CDP.AbstractAway):
-            ndp = eval_dp_rvalue(r.dp_rvalue, context)
+            ndp = eval_ndp(r.dp_rvalue, context)
             if isinstance(ndp, SimpleWrap):
                 return ndp
             try:
@@ -70,7 +70,7 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             return ndpa
 
         if isinstance(r, CDP.Compact):
-            ndp = eval_dp_rvalue(r.dp_rvalue, context)
+            ndp = eval_ndp(r.dp_rvalue, context)
             if isinstance(ndp, CompositeNamedDP):
                 return ndp.compact()
             else:
@@ -89,6 +89,8 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
             CDP.FromCatalogue: eval_dp_rvalue_catalogue,
             CDP.Flatten: eval_dp_rvalue_flatten,
             CDP.DPInstanceFromLibrary: eval_dp_rvalue_instancefromlibrary,
+            CDP.CodeSpecNoArgs: eval_ndp_code_spec,
+            CDP.CodeSpec: eval_ndp_code_spec,
         }
         
         for klass, hook in cases.items():
@@ -102,6 +104,13 @@ def eval_dp_rvalue(r, context):  # @UnusedVariable
 
     raise_desc(DPInternalError, 'Invalid dprvalue.', r=r)
 
+
+
+def eval_ndp_code_spec(r, _context):
+    from .eval_codespec_imp import eval_codespec
+    res = eval_codespec(r, expect=NamedDP)
+    return res
+
 def eval_dp_rvalue_instancefromlibrary(r, context):
     name = r.dpname.value
     ndp = eval_dp_rvalue_load(name, context)
@@ -109,7 +118,7 @@ def eval_dp_rvalue_instancefromlibrary(r, context):
 
 
 def eval_dp_rvalue_flatten(r, context):
-    ndp = eval_dp_rvalue(r.dp_rvalue, context)
+    ndp = eval_ndp(r.dp_rvalue, context)
 
     ndp = ndp.flatten()
 
@@ -126,7 +135,7 @@ def eval_dp_rvalue_coproduct(r, context):
     ops = get_odd_ops(unwrap_list(r.ops))
     ndps = []
     for _, op in enumerate(ops):
-        ndp = eval_dp_rvalue(op, context)
+        ndp = eval_ndp(op, context)
         ndps.append(ndp)
 
     return NamedDPCoproduct(tuple(ndps))
@@ -138,12 +147,12 @@ def eval_dp_rvalue_CoproductWithNames(r, context):
     assert isinstance(r, CDP.CoproductWithNames)
     elements = r.elements
     names = [_.value for _ in elements[0::2]]
-    ndps = [eval_dp_rvalue(_, context) for _ in elements[1::2]]
+    ndps = [eval_ndp(_, context) for _ in elements[1::2]]
 #
 #     d = {}
 #     for name, ndp in zip(names, ndps):
 #         name = name.value
-#         ndp = eval_dp_rvalue(ndp, context)
+#         ndp = eval_ndp(ndp, context)
 #         d[name] = ndp
 
     labels = tuple(names)
@@ -156,7 +165,7 @@ def eval_dp_rvalue_approxdpmodel(r, context):
     
     approx_abs = float(r.abs.value.value)
     approx_abs_S = eval_space(r.abs.space, context)  # should be real
-    ndp0 = eval_dp_rvalue(r.dp, context)
+    ndp0 = eval_ndp(r.dp, context)
     x = eval_constant(r.max_value, context)
     # assert isinstance(x, ValueWithUnit)
     max_value = x.value
@@ -182,8 +191,8 @@ def eval_dp_rvalue_dpwrap(r, context):
     assert len(fun) + len(res) == len(statements), statements
     impl = r.impl
 
-    from mcdp_lang.eval_primitive_dp_imp import eval_pdp
-    dp = eval_pdp(impl, context)
+    from mcdp_lang.eval_primitivedp_imp import eval_primitivedp
+    dp = eval_primitivedp(impl, context)
 
     fnames = [f.fname.value for f in fun]
     rnames = [r.rname.value for r in res]
@@ -378,13 +387,13 @@ def eval_statement(r, context):
 
     elif isinstance(r, CDP.SetName):
         name = r.name.value
-        ndp = eval_dp_rvalue(r.dp_rvalue, context)
+        ndp = eval_ndp(r.dp_rvalue, context)
         context.add_ndp(name, ndp)
 
     elif isinstance(r, CDP.SetMCDPType):
         name = r.name.value
         right_side = r.right_side
-        x = eval_dp_rvalue(right_side, context)
+        x = eval_ndp(right_side, context)
         context.set_var2model(name, x)
 
     elif isinstance(r, CDP.SetNameGeneric):
@@ -413,7 +422,7 @@ def eval_statement(r, context):
             except Exception as e:
                 print('Cannot evaluate %r as eval_rvalue: %s ' % (right_side, e))
                 # XXX fix this
-                x = eval_dp_rvalue(right_side, context)
+                x = eval_ndp(right_side, context)
                 context.set_var2model(name, x)
 
     elif isinstance(r, CDP.ResStatement):
@@ -494,7 +503,7 @@ def interpret_commands(res, context):
     return CompositeNamedDP(context=context)
 
 def eval_make_template(r, context):
-    ndp = eval_dp_rvalue(r.dp_rvalue, context)
+    ndp = eval_ndp(r.dp_rvalue, context)
     from mocdp.comp.composite_templatize import ndp_templatize
     return ndp_templatize(ndp)
 

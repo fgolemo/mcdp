@@ -1,0 +1,6 @@
+mcdp {
+	provides f [g x J]
+
+	# out of bounds
+	f[2] <= 50 J
+}

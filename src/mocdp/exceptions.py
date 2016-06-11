@@ -9,11 +9,10 @@ class DPUserError(Exception):
 
 class DPSyntaxError(ContractSyntaxError, DPUserError):
 
-
     def with_filename(self, filename):
         """ Returns the same exception with reference
             to the given filename. """
-        where = self.where.with_filename(filename)
+        where = _get_where_with_filename(self, filename)
         return type(self)(self.error, where=where)
 
 class DPSemanticError(ContractSyntaxError, DPUserError):
@@ -21,8 +20,18 @@ class DPSemanticError(ContractSyntaxError, DPUserError):
     def with_filename(self, filename):
         """ Returns the same exception with reference
             to the given filename. """
-        where = self.where.with_filename(filename)
+        where = _get_where_with_filename(self, filename)
         return type(self)(self.error, where=where)
+
+def _get_where_with_filename(e, filename):
+    where = e.where
+    if where is None:
+        print('warning, where is None here: %s' % e)
+        where = None
+    else:
+        where = where.with_filename(filename)
+    return where
+
 
 class _storage:
     first = True
