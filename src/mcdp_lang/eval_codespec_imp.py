@@ -1,11 +1,11 @@
-from conf_tools import  instantiate_spec
+from .parse_actions import add_where_information
+from .parts import CDPLanguage
+from .utils_lists import unwrap_list
+from conf_tools import instantiate_spec
 from conf_tools.exceptions import ConfToolsException
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
 from mocdp.exceptions import DPSemanticError
-from mcdp_lang.parts import CDPLanguage
-from mcdp_lang.utils_lists import unwrap_list
-from mcdp_lang.parse_actions import add_where_information
 
 CDP = CDPLanguage
 
@@ -39,8 +39,6 @@ def eval_codespec(r, expect):
             raise_wrapped(DPSemanticError, e, msg, r=r, res=res, expect=expect)
 
         return res
-
-
 
 
 @contract(returns='tuple(tuple, dict)')

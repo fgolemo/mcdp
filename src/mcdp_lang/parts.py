@@ -22,7 +22,7 @@ class CDPLanguage():
     SimpleValue = namedtuplewhere('SimpleValue', 'value space')
     Top = namedtuplewhere('Top', 'keyword space')
     Bottom = namedtuplewhere('Bottom', 'keyword space')
-    MakeTupleConstants = namedtuplewhere('MakeTupleConstants', 'open ops close')
+    MakeTuple = namedtuplewhere('MakeTuple', 'open ops close')
 
     MakeTemplate = namedtuplewhere('MakeTemplate', 'keyword dp_rvalue')
     AbstractAway = namedtuplewhere('AbstractAway', 'keyword dp_rvalue')
@@ -172,4 +172,4 @@ class CDPLanguage():
     FinitePoset = namedtuplewhere('FinitePoset', 'keyword chains')
 
 
-
+    TupleIndex = namedtuplewhere('TupleIndex', 'value index')

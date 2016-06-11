@@ -14,24 +14,17 @@ from pyparsing import ParseException, ParseFatalException
 import functools
 import warnings
 
-# from compmake.jobs.dependencies import isnamedtupleinstance
-
 CDP = CDPLanguage
 
 @contextmanager
 def add_where_information(where):
     """ Adds where field to DPSyntaxError or DPSemanticError thrown by code. """
     try:
-        yield     
-    except DPSyntaxError as e:
-        e = DPSyntaxError(str(e))
-        if e.where is None:
-            e.where = where
-        raise e
-    except DPSemanticError as e:
-        e = DPSemanticError(str(e))
-        if e.where is None:
-            e.where = where
+        yield
+    except (DPSemanticError, DPSyntaxError) as e:
+        use_where = e.where if e.where is not None else where
+        s = str(e)
+        e = type(e)(s, where=use_where)
         raise e
 
 def wheredecorator(b):
@@ -49,6 +42,7 @@ def wheredecorator(b):
         except BaseException as e:
             raise_wrapped(DPInternalError, e, "Error while parsing.",
                           where=where.__str__(), tokens=tokens)
+
         if isnamedtupleinstance(res) and res.where is None:  # or isinstance(res, ValueWithUnits):
             res = get_copy_with_where(res, where=where)
 

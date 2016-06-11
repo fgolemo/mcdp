@@ -60,7 +60,7 @@ class WrapAMap(PrimitiveDP):
 
         return self.R.U(r)
 
-    def diagram_label(self):
+    def diagram_label(self):  # XXX
         if hasattr(self.amap, '__name__'):
             return getattr(self.amap, '__name__')
         else:

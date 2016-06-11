@@ -1,25 +1,35 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import  raise_wrapped
-from mocdp.comp import (Connection, dpwrap)
+from contracts.utils import raise_wrapped
+from mcdp_posets import NotLeq, get_types_universe
+from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import ValueWithUnits
-
 from mocdp.dp import Constant
-
 from mocdp.dp.dp_generic_unary import WrapAMap
-
 from mocdp.exceptions import DPSemanticError
 
-from mcdp_posets import (NotLeq, get_types_universe)
-
-def square(x):
-    res = x * x
-    return res
-
-
+# def square(x):
+#     res = x * x
+#     return res
 
 @contract(resources='seq')
 def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix):
+    """
+    
+        This is useful to create operations that take possibly many inputs
+        and produce one output.
+        
+        Example use:
+        
+            R = mult_table_seq(resources_types)
+            dp = ProductN(tuple(resources_types), R)
+    
+            from mcdp_lang.helpers import create_operation
+            r = create_operation(context, dp, resources,
+                                 name_prefix='_prod', op_prefix='_factor',
+                                 res_prefix='_result')
+    
+    """
     name = context.new_name(name_prefix)
     name_result = context.new_res_name(res_prefix)
 
@@ -43,6 +53,30 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
     res = context.make_resource(name, name_result)
     return res
 
+
+def create_operation_lf(context, dp, functions, name_prefix, op_prefix, res_prefix):
+    name = context.new_name(name_prefix)
+    name_result = context.new_res_name(res_prefix)
+
+    connections = []
+    rnames = []
+    for i, f in enumerate(functions):
+        ni = context.new_fun_name('%s%s' % (op_prefix, i))
+        c = Connection(dp2=f.dp, s2=f.s, dp1=name, s1=ni)
+        rnames.append(ni)
+        connections.append(c)
+
+    if len(rnames) == 1:
+        rnames = rnames[0]
+
+    ndp = dpwrap(dp, name_result, rnames)
+    context.add_ndp(name, ndp)
+
+    for c in connections:
+        context.add_connection(c)
+
+    res = context.make_function(name, name_result)
+    return res
 
 @contract(v=ValueWithUnits)
 def get_valuewithunits_as_resource(v, context):

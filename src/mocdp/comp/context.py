@@ -8,6 +8,9 @@ from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import dpwrap
 from mocdp.dp.dp_identity import Identity
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+from networkx.algorithms.dag import ancestors
+from mocdp.dp.dp_constant import Constant
+from mocdp.dp.dp_generic_unary import WrapAMap
 
 __all__ = [
     'Connection',
@@ -126,6 +129,17 @@ class Context():
         self.load_ndp_hooks = [conftools_load_ndp]
         self.load_posets_hooks = [conftools_load_poset]
 
+    def __repr__(self):
+        s = 'Context:'
+        s += '\n' + '  names: %s' % list(self.names)
+        s += '\n' + '  connections: %s' % self.connections
+        s += '\n' + '  var2resource: %s' % self.var2resource
+        s += '\n' + '  var2model: %s' % self.var2model
+        s += '\n' + '  constants: %s' % self.constants
+
+        return s
+
+
     def child(self):
         """ A child context preserves the value of the constants
             and the model types. """
@@ -180,6 +194,7 @@ class Context():
 
         return CResource(dp, s)
 
+    # TODO: move away
     def _check_good_name(self, name):
         forbidden = ['(', ']', ')', ' ']
         for f in forbidden:
@@ -252,8 +267,6 @@ class Context():
     def add_ndp_res_node(self, rname, R):
         """ returns the name of the node """
         ndp = dpwrap(Identity(R), rname, rname)
-#         context.add_ndp_res(rname, ndp)
-#     def add_ndp_res(self, rname, ndp):
         name = get_name_for_res_node(rname)
         self.info('Adding new resource %r as %r ' % (str(name), rname))
         self.add_ndp(name, ndp)
@@ -268,7 +281,6 @@ class Context():
             yield fname, name, ndp
 
     def iterate_new_resources(self):
-    # for fname, name, ndp in context.iterate_new_functions():
         for rname in self.rnames:
             name = get_name_for_res_node(rname)
             ndp = self.names[name]
@@ -396,9 +408,3 @@ class Context():
             raise_desc(DPSemanticError, msg, ndp=dp.repr_long())
         return dp.get_ftype(a.s)
 
-    def get_connections_for(self, name1, name2):
-        s = set()
-        for c in self.connections:
-            if c.dp1 == name1 and c.dp2 == name2:
-                s.add(c)
-        return s

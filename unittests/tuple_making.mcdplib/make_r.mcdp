@@ -1,10 +1,10 @@
 mcdp {
-	# this is equivalent to a mux
-	requires ra [g]
-	requires rb [J]
+        # this is equivalent to a mux
+        requires ra [g]
+        requires rb [J]
 
-	provides f [g x J]
+        provides f [g x J]
 
-	f <= <ra, rb>
+        f <= <ra, rb + 2 J>
 
 }

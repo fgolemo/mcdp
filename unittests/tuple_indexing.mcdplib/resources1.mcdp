@@ -1,6 +1,6 @@
 mcdp {
 	requires r [g x J]
 
-	r[0] >= 10 g
-	r[1] >= 50 J
+	take(r, 0) >= 10 g
+	take(r, 1) >= 50 J
 }

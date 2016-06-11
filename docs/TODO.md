@@ -135,6 +135,9 @@ mcdp {
 }
 
 
+- F: nice icon for take operation
+
+
 Language additions
 ------------------
 

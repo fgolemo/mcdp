@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
+from .eval_constant_imp import eval_constant
+from .eval_space_imp import eval_space
+from .helpers import get_conversion
 from .parts import CDPLanguage
+from .utils_lists import get_odd_ops, unwrap_list
 from contracts import contract, describe_value
-from contracts.utils import raise_desc, raise_wrapped, check_isinstance
-from mcdp_lang.eval_constant_imp import eval_constant
-from mcdp_lang.eval_space_imp import eval_space
-from mcdp_lang.helpers import get_conversion
-from mcdp_lang.utils_lists import get_odd_ops, unwrap_list
-from mcdp_posets import NotEqual, NotLeq, PosetProduct, get_types_universe
-from mcdp_posets.any import Any
+from contracts.utils import raise_desc, raise_wrapped
+from mcdp_posets import Any, NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
 from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
@@ -17,12 +16,13 @@ from mocdp.dp.dp_catalogue import CatalogueDP
 from mocdp.dp.dp_series_simplification import make_series
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
+from mcdp_lang.parse_actions import add_where_information
 
 CDP = CDPLanguage
 
 @contract(returns=NamedDP)
 def eval_ndp(r, context):  # @UnusedVariable
-    try:
+    with add_where_information(r.where):
         if isinstance(r, CDP.BuildProblem):
             special_list = r.statements
             statements = unwrap_list(special_list)
@@ -97,11 +97,7 @@ def eval_ndp(r, context):  # @UnusedVariable
             if isinstance(r, klass):
                 return hook(r, context)
         
-    except DPSemanticError as e:
-        if e.where is None:
-            e = DPSemanticError(str(e), r.where)
-        raise e
-
+   
     raise_desc(DPInternalError, 'Invalid dprvalue.', r=r)
 
 

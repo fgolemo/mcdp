@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 
+from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from conf_tools import SemanticMistakeKeyNotFound
 from contracts import contract
-from contracts.utils import check_isinstance, raise_wrapped, raise_desc
+from contracts.utils import raise_desc
 from mocdp.configuration import get_conftools_dps
 from mocdp.dp import PrimitiveDP
 from mocdp.exceptions import DPInternalError, DPSemanticError
-from mcdp_lang.parse_actions import add_where_information
 
 
 CDP = CDPLanguage

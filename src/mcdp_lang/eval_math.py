@@ -54,8 +54,6 @@ def eval_MultN_as_rvalue(x, context):
 
 
 def eval_divide_as_rvalue(op, context):
-    from mcdp_lang.eval_resources_imp import eval_rvalue
-    from mcdp_lang.eval_constant_imp import NotConstant
     from mcdp_lang.eval_constant_imp import eval_constant
 
     ops = get_odd_ops(unwrap_list(op.ops))

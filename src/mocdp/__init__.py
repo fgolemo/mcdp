@@ -8,7 +8,7 @@ logger.setLevel(logging.DEBUG)
 
 from .configuration import *
 import mcdp_posets
-from . import dp
+# from . import dp
 
 import numpy
 numpy.seterr('raise')

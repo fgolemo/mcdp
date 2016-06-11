@@ -10,6 +10,7 @@ from mocdp.exceptions import DPSemanticError
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render_to_response
 import os
+import cgi
 
 
 class AppEditorFancy():
@@ -66,6 +67,7 @@ class AppEditorFancy():
         nrows = int(len(source_code.split('\n')) + 6)
         nrows = min(nrows, 25)
 
+        source_code = cgi.escape(source_code)
         return {'source_code': source_code,
                 'model_name': model_name,
                 'realpath': realpath,

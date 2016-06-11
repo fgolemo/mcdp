@@ -24,11 +24,11 @@ def find_nodes_with_multiple_connections(context):
     seq = []
     for name1 in context.names:
         for name2 in context.names:
-            connections = context.get_connections_for(name1, name2)
+            from mocdp.comp.context_eval_as_constant import get_connections_for
+            connections = get_connections_for(context, name1, name2)
             if len(connections) > 1:
                 seq.append((name1, name2, connections))
     return seq
-
 
 def dpgraph_making_sure_no_reps(context):
     from mocdp.comp.connection import dpgraph

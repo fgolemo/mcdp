@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .helpers import square
+# from .helpers import square
 from .parse_actions import (coprod_parse_action, divide_parse_action,
     funshortcut1m, mult_inv_parse_action, mult_parse_action, parse_pint_unit,
     plus_inv_parse_action, plus_parse_action, resshortcut1m,
@@ -15,6 +15,7 @@ from pyparsing import (
     sglQuotedString)
 import math
 import warnings
+
 
 
 ParserElement.enablePackrat()
@@ -45,6 +46,7 @@ class SyntaxBasics():
 class SyntaxIdentifiers():
     # unfortunately this needs to be maintained manually
     keywords = [
+                'take',
         'load',
         'compact',
         'required',
@@ -322,7 +324,7 @@ class Syntax():
     constant_value = Forward()
     tuple_of_constants = sp(OPEN_BRACE + constant_value +
                             ZeroOrMore(COMMA + constant_value) + CLOSE_BRACE,
-                            lambda t: CDP.MakeTupleConstants(t[0], make_list(list(t)[1:-1]), t[-1]))
+                            lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1]), t[-1]))
     
     # TODO: how to express empty typed list? "{g}"
 
@@ -353,10 +355,23 @@ class Syntax():
     rvalue_new_function2 = sp(PROVIDED + get_idn(),
                               lambda t: CDP.NewFunction(t[1]))
     
+    # oops, infinite recursion
+#     rvalue_tuple_indexing = sp(rvalue + S(L('[')) + SyntaxBasics.integer + S(L(']')),
+#                                lambda t: CDP.TupleIndex(value=t[0], index=t[1]))
+
+    # take(<a, b>, 0)
+    TAKE = S(L('take'))
+    rvalue_tuple_indexing = sp(TAKE + SLPAR + rvalue + SCOMMA +
+                                  SyntaxBasics.integer + SRPAR,
+                               lambda t: CDP.TupleIndex(value=t[0], index=t[1]))
+
+    
+
     lf_new_resource = sp(get_idn(),
                          lambda t: CDP.NewResource(t[0]))
 
-    lf_new_resource2 = sp(REQUIRED + get_idn(), lambda t: CDP.NewResource(t[1]))
+    lf_new_resource2 = sp(REQUIRED + get_idn(),
+                          lambda t: CDP.NewResource(t[1]))
 
 
     lf_new_limit = sp(C(Group(number_with_unit), 'limit'),
@@ -365,7 +380,7 @@ class Syntax():
     unary = {
         'sqrt': lambda op1: CDP.GenericNonlinearity(math.sqrt, op1, lambda F: F),
         'ceil': lambda op1: CDP.GenericNonlinearity(math.ceil, op1, lambda F: F),
-        'square': lambda op1: CDP.GenericNonlinearity(square, op1, lambda F: F),
+        # 'square': lambda op1: CDP.GenericNonlinearity(square, op1, lambda F: F),
     }
 
     unary_op = Or([L(x) for x in unary])
@@ -391,13 +406,19 @@ class Syntax():
     fancy = sp(fname + PROVIDED_BY - dpname,
                 lambda t: CDP.Function(dp=t[2], s=t[0], keyword=t[1]))
 
+
+    lf_make_tuple = sp(OPEN_BRACE + fvalue + ZeroOrMore(COMMA + fvalue) + CLOSE_BRACE,
+                       lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1]), t[-1]))
+
+
     fvalue_operand = (lf_new_limit ^ 
         simple ^ 
         fancy ^ 
         lf_new_resource ^ 
         lf_new_resource2 ^ 
+        lf_make_tuple ^
         (S(L('(')) - (lf_new_limit ^ simple ^ fancy ^
-                      lf_new_resource ^ lf_new_resource2) - S(L(')'))))
+                      lf_new_resource ^ lf_new_resource2 ^ lf_make_tuple) - S(L(')'))))
 
     # Fractions
 
@@ -575,7 +596,8 @@ class Syntax():
                        binary_expr ^
                        unary_expr ^
                        constant_value ^
-                       power_expr)
+                       power_expr ^
+                       rvalue_tuple_indexing)
 
     rvalue << operatorPrecedence(rvalue_operand, [
         (TIMES, 2, opAssoc.LEFT, mult_parse_action),
