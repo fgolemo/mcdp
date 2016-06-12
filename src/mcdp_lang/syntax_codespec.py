@@ -2,11 +2,8 @@ from .parts import CDPLanguage
 from .syntax import SyntaxBasics, SyntaxIdentifiers
 from .syntax_utils import L, O, S, SCOMMA, SLPAR, SRPAR, sp
 from .utils_lists import make_list
-from pyparsing import (
-    CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
-    NotAny, OneOrMore, Optional, Or, ParserElement, Suppress, Word, ZeroOrMore,
-    alphanums, alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
-    sglQuotedString)
+from pyparsing import (Combine, Optional, Word, ZeroOrMore, alphanums, alphas,
+    oneOf)
 
 CDP = CDPLanguage
 

@@ -1,11 +1,7 @@
 from contracts import contract
-
-from pyparsing import (
-    CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
-    NotAny, OneOrMore, Optional, Or, ParserElement, Suppress, Word, ZeroOrMore,
-    alphanums, alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
-    sglQuotedString)
 from mcdp_lang.parts import CDPLanguage
+from pyparsing import Literal, Optional, Suppress
+
 CDP = CDPLanguage
 
 def sp(a, b):
@@ -13,13 +9,14 @@ def sp(a, b):
     spa(a, b)
     return a
 
+
 # shortcuts
 S = Suppress
 L = Literal
 O = Optional
-COMMA = sp(L(','), lambda t: CDP.comma(t[0]))
 SLPAR = S(L('('))
 SRPAR = S(L(')'))
+COMMA = sp(L(','), lambda t: CDP.comma(t[0]))
 SCOMMA = S(COMMA)
 SCOLON = S(L(':'))
 

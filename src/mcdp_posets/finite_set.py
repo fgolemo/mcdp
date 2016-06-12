@@ -38,7 +38,8 @@ class FiniteCollectionAsSpace(Space):
 mcdp_dev_warning('Join and Meet are not implemented')
 
 class FinitePoset(FiniteCollectionAsSpace, Poset):
-    @contract(universe='set', relations='seq(tuple(*,*))')
+
+    @contract(universe='set')  # , relations='collection(tuple(*,*))')
     def __init__(self, universe, relations):
         FiniteCollectionAsSpace.__init__(self, universe)
         closure = transitive_closure(relations)
@@ -53,6 +54,17 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
             for a, b in self.relations:
                 assert a in universe
                 assert b in universe
+
+    def __eq__(self, b):
+        same_elements = self.get_elements() == b.get_elements()
+        same_relations = self.relations == b.relations
+        return same_elements and same_relations
+
+    def get_elements(self):
+        return self.elements
+
+    def __repr__(self):
+        return "FinitePoset(%s)" % self.elements
 
     def join(self, a, b):
         raise NotImplementedError()

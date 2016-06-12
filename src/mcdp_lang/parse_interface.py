@@ -1,11 +1,9 @@
-
 """ Contains the main parsing interface """
-import os
+from contracts import contract
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_posets.poset import Poset
-from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from mocdp.dp.primitive import PrimitiveDP
-from contracts import contract
+from mocdp.exceptions import MCDPExceptionWithWhere
 
 
 __all__ = [
@@ -40,7 +38,7 @@ def parse_ndp_filename(filename, context=None):
         contents = f.read()
     try:
         return parse_ndp(contents, context)
-    except (DPSyntaxError, DPSemanticError) as e:
+    except MCDPExceptionWithWhere as e:
         raise e.with_filename(filename)
 
 @contract(returns=Poset)

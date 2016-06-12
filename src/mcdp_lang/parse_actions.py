@@ -9,7 +9,8 @@ from contracts.interface import Where
 from contracts.utils import check_isinstance, indent, raise_desc, raise_wrapped
 from mcdp_posets import Nat, RcompUnits, Space, mult_table
 from mocdp.dp.dp_sum import sum_units
-from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
+from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError, \
+    MCDPExceptionWithWhere
 from pyparsing import ParseException, ParseFatalException
 import functools
 import warnings
@@ -21,10 +22,11 @@ def add_where_information(where):
     """ Adds where field to DPSyntaxError or DPSemanticError thrown by code. """
     try:
         yield
-    except (DPSemanticError, DPSyntaxError) as e:
-        use_where = e.where if e.where is not None else where
-        s = str(e)
-        e = type(e)(s, where=use_where)
+    except MCDPExceptionWithWhere as e:
+#         raise  # XXX
+        existing = getattr(e, 'where', None)
+        use_where = existing if existing is not None else where
+        e = type(e)(e.error, where=use_where)
         raise e
 
 def wheredecorator(b):
@@ -246,7 +248,7 @@ def parse_wrap_filename(expr, filename):
         contents = f.read()
     try:
         return parse_wrap(expr, contents)
-    except (DPSyntaxError, DPSemanticError) as e:
+    except MCDPExceptionWithWhere  as e:
         raise e.with_filename(filename)
 
 def parse_wrap(expr, string):

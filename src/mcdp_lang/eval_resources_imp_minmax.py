@@ -1,15 +1,9 @@
-
 from .eval_constant_imp import eval_constant
-from .parse_actions import add_where_information
 from .parts import CDPLanguage
-from contracts import contract
-from contracts.utils import raise_desc
-from mcdp_maps.ceil_after import CeilAfter
-from mcdp_posets import Nat, RCompUnitsPower, Rcomp, RcompUnits
+from mcdp_lang.helpers import create_operation
 from mocdp.comp import Connection, dpwrap
-from mocdp.comp.context import CResource, ValueWithUnits, get_name_for_fun_node
-from mocdp.dp import GenericUnary, Max, Max1, Min, WrapAMap
-from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.dp import Max, Max1, Min
+from mocdp.exceptions import DPSemanticError
 CDP = CDPLanguage
 
 
@@ -54,26 +48,23 @@ def eval_OpMax(rvalue, context):
     from mcdp_lang.eval_resources_imp import eval_rvalue
 
     if isinstance(rvalue.a, CDP.SimpleValue):
-        b = eval_rvalue(rvalue.b, context)
         # print('a is constant')
-        name = context.new_name('max1')
+        b = eval_rvalue(rvalue.b, context)
         constant = eval_constant(rvalue.a, context)
-        ndp = dpwrap(Max1(constant.unit, constant.value), '_in', '_out')
-        context.add_ndp(name, ndp)
-        c = Connection(dp1=b.dp, s1=b.s, dp2=name, s2='_in')
-        context.add_connection(c)
-        return context.make_resource(name, '_out')
+        dp = Max1(constant.unit, constant.value)
+
+        return create_operation(context, dp, [b],
+                                 name_prefix='_max1a', op_prefix='_op', res_prefix='_result')
 
     a = eval_rvalue(rvalue.a, context)
 
     if isinstance(rvalue.b, CDP.SimpleValue):
-        name = context.new_name('max1')
+        # print('b is constant')
         constant = eval_constant(rvalue.b, context)
-        ndp = dpwrap(Max1(constant.unit, constant.value), '_in', '_out')
-        context.add_ndp(name, ndp)
-        c = Connection(dp1=a.dp, s1=a.s, dp2=name, s2='_in')
-        context.add_connection(c)
-        return context.make_resource(name, '_out')
+        dp = Max1(constant.unit, constant.value)
+        return create_operation(context, dp, [a],
+                                 name_prefix='_max1b', op_prefix='_op', res_prefix='_result')
+
 
     b = eval_rvalue(rvalue.b, context)
 

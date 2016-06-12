@@ -47,6 +47,9 @@ def eval_constant(op, context):
             # TODO: can implement optimization
             raise NotConstant(str(op))
 
+        if isinstance(op, (CDP.SpaceCustomValue)):
+            return eval_constant_space_custom_value(op, context)
+
         if isinstance(op, CDP.Top):
             from mcdp_lang.eval_space_imp import eval_space
             space = eval_space(op.space, context)
@@ -121,6 +124,24 @@ def eval_constant(op, context):
         msg = 'eval_constant() cannot evaluate this value as constant.'
         raise_desc(NotConstant, msg, op=str(op))
 
+
+def eval_constant_space_custom_value(op, context):
+    from mcdp_lang.eval_space_imp import eval_space
+    assert isinstance(op, CDP.SpaceCustomValue)
+    space = eval_space(op.space, context)
+    
+    from mcdp_posets.finite_set import FiniteCollectionAsSpace
+    if isinstance(space, FiniteCollectionAsSpace):
+        try:
+            space.belongs(op.custom_string)
+        except NotBelongs as e:
+            msg = 'The value is not an element of this space.'
+            raise_wrapped(DPSemanticError, e, msg, compact=True,
+                          custom_string=op.custom_string, space=space)
+
+        return ValueWithUnits(unit=space, value=op.custom_string)
+    
+    raise_desc(NotImplementedError, space=space)
 
 def eval_constant_uppersetfromcollection(op, context):
     x = eval_constant(op.value, context)

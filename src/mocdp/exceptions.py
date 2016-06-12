@@ -1,27 +1,41 @@
-from contracts import ContractSyntaxError, all_disabled
+from contracts import all_disabled
 
-class DPInternalError(Exception):
+class MCDPException(Exception):
+    pass
+
+class MCDPExceptionWithWhere(MCDPException):
+
+    def __init__(self, error, where=None):
+        self.error = error
+        self.where = where
+        MCDPException.__init__(self, error, where)
+
+    def __str__(self):
+        error, where = self.args
+        s = error
+        if where is not None:
+            from contracts.interface import add_prefix
+            s += "\n\n" + add_prefix(where.__str__(), ' ')
+        return s
+
+    def with_filename(self, filename):
+        """ Returns the same exception with reference
+            to the given filename. """
+        where = _get_where_with_filename(self, filename)
+        return type(self)(self.error, where=where)
+
+class DPInternalError(MCDPExceptionWithWhere):
     """ Internal consistency errors (not user) """
 
-class DPUserError(Exception):
+class DPUserError(MCDPExceptionWithWhere):
     """ User mistake """
     pass
 
-class DPSyntaxError(ContractSyntaxError, DPUserError):
+class DPSyntaxError(DPUserError):
+    pass
 
-    def with_filename(self, filename):
-        """ Returns the same exception with reference
-            to the given filename. """
-        where = _get_where_with_filename(self, filename)
-        return type(self)(self.error, where=where)
-
-class DPSemanticError(ContractSyntaxError, DPUserError):
-
-    def with_filename(self, filename):
-        """ Returns the same exception with reference
-            to the given filename. """
-        where = _get_where_with_filename(self, filename)
-        return type(self)(self.error, where=where)
+class DPSemanticError(DPUserError):
+    pass
 
 def _get_where_with_filename(e, filename):
     where = e.where

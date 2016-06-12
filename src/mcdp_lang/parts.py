@@ -173,3 +173,5 @@ class CDPLanguage():
 
 
     TupleIndex = namedtuplewhere('TupleIndex', 'value index')
+
+    SpaceCustomValue = namedtuplewhere('SpaceCustomValue', 'space keyword custom_string')

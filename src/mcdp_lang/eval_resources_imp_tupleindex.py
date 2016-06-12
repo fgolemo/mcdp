@@ -1,11 +1,9 @@
-from .parts import CDPLanguage 
-from mcdp_posets import RCompUnitsPower
-from mocdp.dp import   WrapAMap 
+from .parts import CDPLanguage
 from contracts import contract
-from mcdp_posets.poset_product import PosetProduct
-from mocdp.exceptions import DPSemanticError, DPInternalError
 from contracts.utils import raise_desc
+from mcdp_posets.poset_product import PosetProduct
 from mocdp.dp.dp_flatten import Mux
+from mocdp.exceptions import DPInternalError, DPSemanticError
 
 CDP = CDPLanguage
 

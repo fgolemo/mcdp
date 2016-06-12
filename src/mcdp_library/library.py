@@ -1,17 +1,19 @@
 from .utils.locate_files_imp import locate_files
+from contextlib import contextmanager
 from contracts import contract
 from contracts.utils import raise_desc
+from copy import deepcopy
+from mcdp_lang import parse_ndp, parse_poset
 from mcdp_library.utils.memos_selection import memo_disk_cache2
+from mcdp_posets.poset import Poset
 from mocdp import logger
 from mocdp.comp.context import Context
 from mocdp.comp.interfaces import NamedDP
-from mocdp.exceptions import DPSemanticError, DPSyntaxError
-from mcdp_lang import parse_ndp, parse_poset
-from mcdp_posets.poset import Poset
+from mocdp.exceptions import (DPSemanticError,
+    MCDPExceptionWithWhere)
 import os
 import shutil
-import warnings
-from copy import deepcopy
+import sys
 
 
 
@@ -41,20 +43,26 @@ class MCDPLibrary():
     ext_primitivedps = 'mcdp_primitivedp'
     all_extensions = [ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps]
 
-    def __init__(self, cache_dir=None, file_to_contents=None):
-        # basename "x.mcdp" -> dict
+    def __init__(self, cache_dir=None, file_to_contents=None, search_dirs=None):
+        """ 
+            IMPORTANT: modify clone() if you add state
+        """
+        # basename "x.mcdp" -> dict(data, realpath)
         if file_to_contents is None:
             file_to_contents = {}
         self.file_to_contents = file_to_contents
-        self.file_to_realpath = {}
         
         if cache_dir is None:
             cache_dir = '_cached'
 
         self.cache_dir = cache_dir
 
+        if search_dirs is None:
+            search_dirs = []
+        self.search_dirs = search_dirs
+
     def clone(self):
-        fields = ['file_to_contents', 'cache_dir']
+        fields = ['file_to_contents', 'cache_dir', 'search_dirs']
         contents = {}
         for f in fields:
             if not hasattr(self, f):
@@ -109,23 +117,41 @@ class MCDPLibrary():
         from mcdp_lang.parse_interface import parse_primitivedp
         return self._parse_with_hooks(parse_primitivedp, string, realpath)
 
+    @contextmanager
+    def _sys_path_adjust(self):
+        previous = list(sys.path)
 
-    def _parse_with_hooks(self, parse_ndp_like, string, realpath):
-        context = self._generate_context_with_hooks()
+        # print('search dirs: %s' % self.search_dirs)
+        for d in self.search_dirs:
+            sys.path.insert(0, d)
 
         try:
-            result = parse_ndp_like(string, context=context)
-        except (DPSyntaxError, DPSemanticError) as e:
-            if realpath is not None:
-                raise e.with_filename(realpath)
-            else:
-                raise e
-        return result
+            yield
+        finally:
+            sys.path = previous
+
+    def _parse_with_hooks(self, parse_ndp_like, string, realpath):
+        with self._sys_path_adjust():
+            context = self._generate_context_with_hooks()
+
+            try:
+                result = parse_ndp_like(string, context=context)
+            except MCDPExceptionWithWhere as e:
+                type, value, traceback = sys.exc_info()
+                if realpath is not None:
+                    e = e.with_filename(realpath)
+                else:
+                    e = e
+
+                raise e, None, traceback
+
+            return result
 
     def _generate_context_with_hooks(self):
         context = Context()
         context.load_ndp_hooks = [self.load_ndp]
-        context.load_poset_hooks = [self.load_poset]
+        context.load_posets_hooks = [self.load_poset]
+        context.load_primitivedp_hooks = [self.load_primitivedp]
         return context
 
     @contract(returns='set(str)')
@@ -174,13 +200,11 @@ class MCDPLibrary():
         return found
 
     def add_search_dir(self, d):
+        print('adding search dir %s' % d)
+        self.search_dirs.append(d)
+
         if not os.path.exists(d):
             raise_desc(ValueError, 'Directory does not exist', d=d)
-
-        import sys
-        # XXX: this needs to change
-        warnings.warn('sys.path hack needs to change')
-        sys.path.insert(0, d)
 
         self._add_search_dir(d)
 

@@ -64,18 +64,20 @@ def check_lang8_addition():
         provides extra_payload [g]
         requires total_weight [g]
         
-        sub battery = instance dp {
+        sub battery = instance mcdp {
             provides capacity [J]
             requires weight   [kg]
             
-            implemented-by load BatteryDP
+            specific_weight = 1 J/kg
+            weight >= capacity / specific_weight
         }
         
-        sub actuation = instance dp {
+        sub actuation = instance mcdp {
             provides payload [g]
             requires power   [W]
             
-            implemented-by code mocdp.example_battery.Mobility
+            c = 1 W/g
+            power >= c * payload
         }
                 
         capacity provided by battery >= mission_time * (power required by actuation)    
@@ -112,23 +114,23 @@ def check_lang9_max():
     parse_wrap(Syntax.rvalue, 'max(f, g)')
     parse_wrap(Syntax.constraint_expr_geq, 'hnlin.x >= max(f, g)')
 
-    p = assert_parsable_to_connected_ndp("""
-    mcdp {
-        provides f [R]
-        
-        sub hnlin = instance dp {
-            provides x [R]
-            requires r [R]
-            
-            implemented-by load SimpleNonlinearity1
-        }
-        
-        hnlin.x >= max(f, hnlin.r)        
-    }
-    """)
-
-    assert_equal(p.get_rnames(), [])
-    assert_equal(p.get_fnames(), ['f'])
+#     p = assert_parsable_to_connected_ndp("""
+#     mcdp {
+#         provides f [R]
+#
+#         sub hnlin = instance dp {
+#             provides x [R]
+#             requires r [R]
+#
+#             implemented-by load SimpleNonlinearity1
+#         }
+#
+#         hnlin.x >= max(f, hnlin.r)
+#     }
+#     """)
+#
+#     assert_equal(p.get_rnames(), [])
+#     assert_equal(p.get_fnames(), ['f'])
 
 
 @comptest
@@ -137,11 +139,11 @@ def check_lang10_comments():
     mcdp {
         provides f [R]
         
-        sub hnlin = instance dp {
+        sub hnlin = instance mcdp {
             provides x [R]
             requires r [R]
             
-            implemented-by load SimpleNonlinearity1
+            r >= pow(x, 2)
         }
         
         hnlin.x >= max(f, hnlin.r)        
@@ -160,11 +162,11 @@ def check_lang11_resources():
         provides f [R]
         requires z [R]
         
-       sub hnlin = instance dp {
+       sub hnlin = instance mcdp {
             provides x [R]
             requires r [R]
             
-            implemented-by load SimpleNonlinearity1
+            r >= pow(x, 2)
         }
         
         hnlin.x >= max(f, hnlin.r)

@@ -1,13 +1,10 @@
 from comptests.registrar import comptest
-from mcdp_lang.tests.utils2 import eval_rvalue_as_constant_same, \
-    eval_rvalue_as_constant
+from mcdp_lang.tests.utils2 import eval_rvalue_as_constant_same
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mocdp.comp.context import Context
 from mcdp_lang.eval_resources_imp import eval_rvalue
 from mcdp_lang.parse_interface import parse_ndp
-from mocdp.comp.context_eval_as_constant import eval_constant_resource, \
-    can_resource_be_constant
 
 same = eval_rvalue_as_constant_same
 
@@ -42,13 +39,10 @@ def check_tuples3():
     print res
 
 
-
 @comptest
 def check_tuples4():
     eval_rvalue_as_constant_same("max(1 g, 0 g)", "1g")
     eval_rvalue_as_constant_same("1 g + 1 kg", "1001 g")
-
-    # look for "BUG1 here"
     eval_rvalue_as_constant_same("max(1 g, 0 kg)", "1g")
 
 @comptest

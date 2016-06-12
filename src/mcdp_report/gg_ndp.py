@@ -16,13 +16,13 @@ from mocdp.dp.dp_mult_inv import InvMult2, InvPlus2, InvPlus2Nat
 from mocdp.dp.dp_sum import SumNNat
 from mocdp.exceptions import mcdp_dev_warning
 from mcdp_lang.blocks import get_missing_connections
-from mcdp_lang.helpers import Conversion
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
 from mcdp_report.utils import safe_makedirs
+from mocdp.dp.conversion import Conversion
 
 
 STYLE_GREENRED = 'greenred'

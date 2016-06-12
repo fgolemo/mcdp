@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
+from mcdp_posets import Map, Poset, PosetProduct, SpaceProduct
 from mocdp import get_conftools_posets
-from mcdp_posets import PosetProduct
-from mcdp_posets.space_product import SpaceProduct
-from mcdp_posets.space import Map
 from mocdp.dp.dp_generic_unary import WrapAMap
 
 
@@ -30,7 +28,8 @@ class Max(PrimitiveDP):
     def solve(self, func):
         f1, f2 = func
 
-        r = self.F0.join(f1, f2)
+        # F = self.get_fun_space()
+        r = self.F.join(f1, f2)
 
         return self.R.U(r)
 
@@ -46,7 +45,7 @@ class Max1Map(Map):
         self.F.belongs(value)
         
     def _call(self, x):
-        self.F.belongs(x)
+        # self.F.belongs(x)
         r = self.F.join(x, self.value)
         return r
         
@@ -54,6 +53,7 @@ class Max1Map(Map):
 class Max1(WrapAMap):
 
     def __init__(self, F, value):
+        assert isinstance(F, Poset)
         m = Max1Map(F, value)
         WrapAMap.__init__(self, m)
         self.value = value
@@ -65,6 +65,7 @@ class Min(PrimitiveDP):
     """ Meet on a poset """
 
     def __init__(self, F):  #
+        assert isinstance(F, Poset)
         FF = PosetProduct((F, F))
         R = F
         self.F0 = F

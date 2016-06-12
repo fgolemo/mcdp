@@ -6,6 +6,8 @@ from mocdp import get_conftools_posets
 from mocdp.exceptions import DPInternalError, do_extra_checks
 from mcdp_posets import PosetProduct
 from multi_index import get_it
+from mcdp_posets.space import Map
+from mocdp.dp.dp_generic_unary import WrapAMap
 
 
 __all__ = [
@@ -13,13 +15,8 @@ __all__ = [
     'Mux',
 ]
 
-
-class Mux(PrimitiveDP):
-
-    @contract(coords='seq(int|tuple|list)|int')
+class MuxMap(Map):
     def __init__(self, F, coords):
-        library = get_conftools_posets()
-        _, F = library.instance_smarter(F)
         try:
             R = get_R_from_F_coords(F, coords)
         except ValueError as e:
@@ -27,24 +24,66 @@ class Mux(PrimitiveDP):
             raise_wrapped(DPInternalError, e, msg, F=F, coords=coords)
 
         self.coords = coords
+        Map.__init__(self, F, R)
+
+    def _call(self, x):
+        r = get_it(x, self.coords, reduce_list=tuple)
+        return r
+
+
+class Mux(WrapAMap):
+
+    @contract(coords='seq(int|tuple|list)|int')
+    def __init__(self, F, coords):
+        library = get_conftools_posets()
+        _, F = library.instance_smarter(F)
         
-        M = PosetProduct(())
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        self.amap = MuxMap(F, coords)
 
-    def solve(self, func):
-        if do_extra_checks():
-            self.F.belongs(func)
+        WrapAMap.__init__(self, self.amap)
 
-        r = get_it(func, self.coords, reduce_list=tuple)
-
-        return self.R.U(r)
+        # This is used by many things (e.g. series simplification)
+        self.coords = coords
 
     def __repr__(self):
         return 'Mux(%r → %r, %s)' % (self.F, self.R, self.coords)
 
     def repr_long(self):
-        s = 'Mux(%s)' % self.coords.__repr__()
+        s = 'Mux(%s)' % self.amap.coords.__repr__()
         return s
+
+#
+# class Mux(PrimitiveDP):
+#
+#     @contract(coords='seq(int|tuple|list)|int')
+#     def __init__(self, F, coords):
+#         library = get_conftools_posets()
+#         _, F = library.instance_smarter(F)
+#         try:
+#             R = get_R_from_F_coords(F, coords)
+#         except ValueError as e:
+#             msg = 'Cannot create Mux'
+#             raise_wrapped(DPInternalError, e, msg, F=F, coords=coords)
+#
+#         self.coords = coords
+#
+#         M = PosetProduct(())
+#         PrimitiveDP.__init__(self, F=F, R=R, M=M)
+#
+#     def solve(self, func):
+#         if do_extra_checks():
+#             self.F.belongs(func)
+#
+#         r = get_it(func, self.coords, reduce_list=tuple)
+#
+#         return self.R.U(r)
+#
+#     def __repr__(self):
+#         return 'Mux(%r → %r, %s)' % (self.F, self.R, self.coords)
+#
+#     def repr_long(self):
+#         s = 'Mux(%s)' % self.coords.__repr__()
+#         return s
 
 def get_R_from_F_coords(F, coords):
     return get_it(F, coords, reduce_list=PosetProduct)

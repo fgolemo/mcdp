@@ -11,6 +11,7 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from networkx.algorithms.dag import ancestors
 from mocdp.dp.dp_constant import Constant
 from mocdp.dp.dp_generic_unary import WrapAMap
+from mocdp.dp.primitive import PrimitiveDP
 
 __all__ = [
     'Connection',
@@ -112,6 +113,20 @@ def conftools_load_poset(load_arg):
 
     return ndp
 
+def conftools_load_primitivedp(load_arg):
+    from conf_tools.exceptions import ConfToolsException
+    from mocdp.configuration import get_conftools_dps
+
+    library = get_conftools_dps()
+
+    try:
+        _, ndp = library.instance_smarter(load_arg)
+    except ConfToolsException as e:
+        msg = 'Cannot load PrimitiveDP %s.' % load_arg.__repr__()
+        raise_wrapped(DPSemanticError, e, msg, compact=True)
+
+    return ndp
+
 
 class Context():
 
@@ -128,6 +143,7 @@ class Context():
         
         self.load_ndp_hooks = [conftools_load_ndp]
         self.load_posets_hooks = [conftools_load_poset]
+        self.load_primitivedp_hooks = [conftools_load_primitivedp]
 
     def __repr__(self):
         s = 'Context:'
@@ -144,7 +160,9 @@ class Context():
         """ A child context preserves the value of the constants
             and the model types. """
         c = Context()
-        c.load_ndp_hooks = self.load_ndp_hooks
+        c.load_ndp_hooks = list(self.load_ndp_hooks)
+        c.load_posets_hooks = list(self.load_posets_hooks)
+        c.load_primitivedp_hooks = list(self.load_primitivedp_hooks)
         c.var2model.update(self.var2model)
         c.constants.update(self.constants)
         return c
@@ -152,15 +170,20 @@ class Context():
     def load_ndp(self, load_arg):
         return self._load_hooks(load_arg, self.load_ndp_hooks, NamedDP)
 
+    def load_primitivedp(self, load_arg):
+        return self._load_hooks(load_arg, self.load_primitivedp_hooks, PrimitiveDP)
+
     def load_poset(self, load_arg):
-        return self._load_hooks(load_arg, self.load_poset_hooks, Poset)
+        return self._load_hooks(load_arg, self.load_posets_hooks, Poset)
 
     def _load_hooks(self, load_arg, hooks, expected):
         errors = []
         for hook in hooks:
             try:
                 res = hook(load_arg)
-                assert isinstance(res, expected)
+                if not isinstance(res, expected):
+                    msg = 'The hook did not return the expected type.'
+                    raise_desc(DPSemanticError, msg, res=res, expected=expected)
                 return res
             except DPSemanticError as e:
                 errors.append(str(e))
@@ -345,8 +368,9 @@ class Context():
         F2 = ndp2.get_ftype(c.s2)
         # print('connecting R1 %s to R2 %s' % (R1, F2))
         if not (R1 == F2):
-            msg = 'Connection between different spaces'
-            raise_desc(DPSemanticError, msg, F2=F2, R1=R1, ndp1=ndp1,
+            msg = 'Connection between different spaces.'
+            raise_desc(DPSemanticError, msg, c=c,
+                       F2=F2, R1=R1, ndp1=ndp1,
                        ndp2=ndp2)
 
         self.connections.append(c)

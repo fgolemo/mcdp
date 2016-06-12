@@ -1,6 +1,6 @@
 from conf_tools.utils.locate_files_imp import locate_files
 from conf_tools.utils.resources import dir_from_package_name
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, raise_wrapped
 from mcdp_cli.solve_meat import solve_main
 from mcdp_library.library import MCDPLibrary
 from mocdp import logger
@@ -9,6 +9,8 @@ import yaml
 from contextlib import contextmanager
 import tempfile
 import shutil
+from mocdp.unittests.generation import for_all_source_mcdp
+from mocdp.exceptions import DPSemanticError
 
 __all__ = [
     'define_tests_for_mcdplibs',
@@ -34,7 +36,6 @@ def define_tests_for_mcdplibs(context):
         msg = 'Expected more tests.'
         raise_desc(ValueError, msg, folder, mcdplibs=mcdplibs)
 
-    # c = context.child('mcdplib')
     c = context
     for m in mcdplibs:
         short = os.path.splitext(os.path.basename(m))[0]
@@ -45,6 +46,7 @@ def define_tests_for_mcdplibs(context):
         c2.child('ndp').comp_dynamic(mcdplib_test_setup_nameddps, mcdplib=m)
         c2.child('poset').comp_dynamic(mcdplib_test_setup_posets, mcdplib=m)
         c2.child('primitivedps').comp_dynamic(mcdplib_test_setup_primitivedps, mcdplib=m)
+        c2.child('source_mcdp').comp_dynamic(mcdplib_test_setup_source_mcdp, mcdplib=m)
 
         makefile = os.path.join(m, 'Makefile')
         if os.path.exists(makefile):
@@ -85,13 +87,80 @@ def mcdplib_test_setup_nameddps(context, mcdplib):
     print('Found registered: %r' % registered)
 
     for model_name in models:
-        c = context.child(model_name)
 
-        ndp = c.comp(_load_ndp, mcdplib, model_name, job_id='load_ndp')
+        source = l._get_file_data(model_name + '.mcdp')['data']
 
-        for ftest in registered:
-            c.comp(ftest, model_name, ndp)
+        if gives_syntax_error(source):
+            print('Skipping because syntax error')
+            # TODO: actually check syntax error
+        elif gives_semantic_error(source):
+            print('Skipping because semantic error')
+            context.comp(mcdplib_assert_semantic_error_fn, mcdplib, model_name)
+        else:
+            c = context.child(model_name)
+            ndp = c.comp(_load_ndp, mcdplib, model_name, job_id='load_ndp')
 
+            for ftest in registered:
+                c.comp(ftest, model_name, ndp)
+
+def mcdplib_test_setup_source_mcdp(context, mcdplib):
+    from mocdp import load_tests_modules
+
+    l = MCDPLibrary()
+    l.add_search_dir(mcdplib)
+
+    load_tests_modules()
+    registered = for_all_source_mcdp.registered
+
+    print('Mcdplib: %s' % mcdplib)
+    print('Found registered: %r' % registered)
+
+    for basename in l.file_to_contents:
+        model_name, ext = os.path.splitext(basename)
+        if ext != ".mcdp":
+            # print basename, ext
+            continue
+
+        source = l._get_file_data(basename)['data']
+
+        if gives_syntax_error(source):
+            print('Skipping because syntax error')
+            # TODO: actually check syntax error
+        elif gives_semantic_error(source):
+            print('Skipping because semantic error')
+
+        else:            
+
+            c = context.child(basename)
+    
+            for ftest in registered:
+                c.comp(ftest, basename, source)
+
+def get_keywords(source):
+    line1 = source.split('\n')[0]
+    return line1.split()
+
+def gives_semantic_error(source):
+    keywords = get_keywords(source)
+    return 'semantic_error' in keywords
+
+def gives_syntax_error(source):
+    keywords = get_keywords(source)
+    return 'syntax_error' in keywords
+
+def mcdplib_assert_semantic_error_fn(mcdplib, model_name):
+    try:
+        with templib(mcdplib) as l:
+            res = l.load_ndp(model_name)
+        res.abstract()
+    except DPSemanticError:
+        pass
+    except BaseException as e:
+        msg = "Expected semantic error, got %s." % type(e)
+        raise_wrapped(Exception, e, msg)
+    else:
+        msg = "Expected an exception, instead succesfull instantiation."
+        raise_desc(Exception, msg, model_name=model_name, res=res.repr_long())
 
 
 def mcdplib_test_setup_posets(context, mcdplib):

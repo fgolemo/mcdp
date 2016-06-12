@@ -22,7 +22,7 @@ def load_tests_modules():
     from mcdp_report import tests  # @Reimport
 
     from .dp import tests  # @Reimport
-    from .example_battery import tests  # @Reimport
+    # from .example_battery import tests  # @Reimport
 
     from .comp.flattening import tests  # @Reimport
 

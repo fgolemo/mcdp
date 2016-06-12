@@ -5,11 +5,11 @@ from collections import namedtuple
 from contracts import contract
 from contracts.utils import indent, raise_desc
 from decent_logs import WithInternalLog
-from mocdp.exceptions import do_extra_checks
 from mcdp_posets import (
     Map, Poset, PosetProduct, Space, SpaceProduct, UpperSet, UpperSets,
     poset_minima)
 from mcdp_posets.ncomp import Ncomp
+from mocdp.exceptions import do_extra_checks
 
 
 __all__ = [

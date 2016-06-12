@@ -27,7 +27,7 @@ Incoming
   from-code('module.function', {param1=..., param2=...})
 
 
-
+- B: the @comptests inside example_battery are not used now. Use make w/ comptest command?
 
 - add library hooks for types, etc.
 
@@ -84,6 +84,7 @@ MCDP-web / QR
 - only give option to import if there are more resources
 - display all imported cards on the gui
 
+- B: unicode characters such as ⟨ give server-side error
 
 Bugs
 ----

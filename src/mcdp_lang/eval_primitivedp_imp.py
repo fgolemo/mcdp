@@ -2,12 +2,10 @@
 
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
-from conf_tools import SemanticMistakeKeyNotFound
 from contracts import contract
 from contracts.utils import raise_desc
-from mocdp.configuration import get_conftools_dps
 from mocdp.dp import PrimitiveDP
-from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.exceptions import DPInternalError
 
 
 CDP = CDPLanguage
@@ -16,14 +14,9 @@ CDP = CDPLanguage
 def eval_primitivedp(r, context):  # @UnusedVariable
     with add_where_information(r.where):
         if isinstance(r, CDP.LoadDP):
+            # XXX: use Context to do it
             name = r.name.value
-            try:
-                _, dp = get_conftools_dps().instance_smarter(name)
-            except SemanticMistakeKeyNotFound as e:
-                raise DPSemanticError(str(e), r.where)
-
-            return dp
-
+            return context.load_primitivedp(name)
 
         if isinstance(r, (CDP.CodeSpecNoArgs, CDP.CodeSpec)):
             return eval_primitivedp_code_spec(r, context)

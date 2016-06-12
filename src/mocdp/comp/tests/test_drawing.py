@@ -114,7 +114,5 @@ def solve_ndp(ndp, n=20):
     return zip(chain, results)
 
         
-        
-        
 def is_scalar(space):
     return isinstance(space, Rcomp)

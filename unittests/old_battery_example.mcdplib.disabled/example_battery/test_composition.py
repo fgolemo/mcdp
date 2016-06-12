@@ -5,19 +5,19 @@ from mocdp.comp.connection import TheresALoop, dpconnect, dpgraph, dploop0
 from mocdp.comp.context import Connection
 from mocdp.comp.wrap import dpwrap
 from mocdp.dp import Product, Series, Terminator, make_series
-from mocdp.example_battery.dp_bat import BatteryDP
-from mocdp.example_battery.dp_bat2 import Mobility
 from mcdp_posets import (PosetProduct, R_Energy, R_Power, R_Time, R_Weight_g,
     Rcomp)
 
 @comptest
 def check_compose():
+    from mocdp.example_battery.dp_bat import BatteryDP
+    from mocdp.example_battery.dp_bat2 import Mobility
 
     actuation = dpwrap(Mobility(), 'weight', 'actuation_power')
 
     check_ftype(actuation, 'weight', R_Weight_g)
     check_rtype(actuation, 'actuation_power', R_Power)
-    
+
     battery = dpwrap(BatteryDP(energy_density=100.0),
                      'capacity', 'weight')
 
@@ -26,14 +26,14 @@ def check_compose():
 
     times = dpwrap(Product(R_Time, R_Power, R_Energy),
                    ['mission_time', 'power'], 'energy')
-    
+
     check_ftype(times, 'mission_time', R_Time)
     check_ftype(times, 'power', R_Power)
     check_rtype(times, 'energy', R_Energy)
 
     c = Connection('actuation', 'actuation_power', 'times', 'power')
     x = dpconnect(dict(actuation=actuation, times=times), [c])
-    
+
     print('WE have obtained x')
     print('x = %s' % x)
     print('x fun: %s' % x.get_dp().get_fun_space())
@@ -55,44 +55,44 @@ def check_ftype(ndp, f, expected):
     got = ndp.get_ftype(f)
     if not got == expected:
         raise_desc(ValueError, 'mismatch', f=f, expected=expected, got=got)
-
-@comptest
-def check_compose2():
-
-    actuation = dpwrap((Mobility()),
-                       'weight', 'actuation_power')
-
-    battery = dpwrap((BatteryDP(energy_density=100.0)),
-                     'capacity', 'weight')
-
-    check_rtype(battery, 'weight', R_Weight_g)
-    check_ftype(battery, 'capacity', R_Energy)
-
-    times = dpwrap((Product(R_Time, R_Power, R_Energy)),
-                   ['mission_time', 'power'], 'energy')
-
-    check_ftype(times, 'mission_time', R_Time)
-    check_ftype(times, 'power', R_Power)
-    check_rtype(times, 'energy', R_Energy)
-
-    # 'times.power >= actuation.actuation_power',
-    c1 = Connection('actuation', 'actuation_power', 'times', 'power')
-    # 'battery.capacity >= times.energy'
-    c2 = Connection('times', 'energy', 'battery', 'capacity')
-    res = dpconnect(dict(actuation=actuation, times=times, battery=battery),
-              [c1, c2])
-
-    print res.desc()
-
-    check_rtype(res, 'weight', R_Weight_g)
-    check_ftype(res, 'mission_time', R_Time)
-    check_ftype(res, 'weight', R_Weight_g)
-
-    dp = res.get_dp()
-    funsp = dp.get_fun_space()
-    ressp = dp.get_res_space()
-    assert funsp == PosetProduct((R_Weight_g, R_Time)), funsp
-    assert ressp == R_Weight_g, ressp
+#
+# @comptest
+# def check_compose2():
+#
+#     actuation = dpwrap((Mobility()),
+#                        'weight', 'actuation_power')
+#
+#     battery = dpwrap((BatteryDP(energy_density=100.0)),
+#                      'capacity', 'weight')
+#
+#     check_rtype(battery, 'weight', R_Weight_g)
+#     check_ftype(battery, 'capacity', R_Energy)
+#
+#     times = dpwrap((Product(R_Time, R_Power, R_Energy)),
+#                    ['mission_time', 'power'], 'energy')
+#
+#     check_ftype(times, 'mission_time', R_Time)
+#     check_ftype(times, 'power', R_Power)
+#     check_rtype(times, 'energy', R_Energy)
+#
+#     # 'times.power >= actuation.actuation_power',
+#     c1 = Connection('actuation', 'actuation_power', 'times', 'power')
+#     # 'battery.capacity >= times.energy'
+#     c2 = Connection('times', 'energy', 'battery', 'capacity')
+#     res = dpconnect(dict(actuation=actuation, times=times, battery=battery),
+#               [c1, c2])
+#
+#     print res.desc()
+#
+#     check_rtype(res, 'weight', R_Weight_g)
+#     check_ftype(res, 'mission_time', R_Time)
+#     check_ftype(res, 'weight', R_Weight_g)
+#
+#     dp = res.get_dp()
+#     funsp = dp.get_fun_space()
+#     ressp = dp.get_res_space()
+#     assert funsp == PosetProduct((R_Weight_g, R_Time)), funsp
+#     assert ressp == R_Weight_g, ressp
 
 
 @comptest
@@ -113,7 +113,7 @@ def check_compose2_fail():
         c2 = Connection('times', 'energy', 'battery', 'capacity')
         c3 = Connection('battery', 'weight', 'actuation', 'weight')
         dpconnect(dict(actuation=actuation, times=times, battery=battery),
-                  [c1,c2,c3])
+                  [c1, c2, c3])
     except TheresALoop:
         pass
 #

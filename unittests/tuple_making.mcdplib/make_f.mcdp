@@ -1,10 +1,8 @@
 mcdp {
-	# this is equivalent to a mux
-	provides fa [g]
-	provides fb [J]
+   provides fa [g]
+   provides fb [J]
 
-	requires r [g x J]
+   requires r [g x J]
 
-	r >= <fa, fb>
-
+   r >= <fa, fb>
 }

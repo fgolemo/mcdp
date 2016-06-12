@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
 from .eval_constant_imp import eval_constant
 from .eval_space_imp import eval_space
-from .helpers import get_conversion
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
 from contracts import contract, describe_value
 from contracts.utils import raise_desc, raise_wrapped
+from mcdp_lang.parse_actions import add_where_information
 from mcdp_posets import Any, NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
 from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
     get_name_for_fun_node, get_name_for_res_node)
+from mocdp.dp.conversion import get_conversion
 from mocdp.dp.dp_approximation import make_approximation
 from mocdp.dp.dp_catalogue import CatalogueDP
 from mocdp.dp.dp_series_simplification import make_series
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
-from mcdp_lang.parse_actions import add_where_information
+
 
 CDP = CDPLanguage
 
@@ -341,12 +342,21 @@ def add_constraint(context, resource, function):
 
     tu = get_types_universe()
 
+
     if not tu.equal(R1, F2):
+
+#         try:
+#             tu.check_equal(R1, F2)
+#         except NotEqual as e:
+#             pass
+#         else:
+#             assert False
+
         try:
             tu.check_leq(R1, F2)
         except NotLeq as e:
             msg = 'Constraint between incompatible spaces.'
-            raise_wrapped(DPSemanticError, e, msg)
+            raise_wrapped(DPSemanticError, e, msg, compact=True)
 
         conversion = get_conversion(R1, F2)
 

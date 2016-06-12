@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# from .helpers import square
+from .helpers import square
 from .parse_actions import (coprod_parse_action, divide_parse_action,
     funshortcut1m, mult_inv_parse_action, mult_parse_action, parse_pint_unit,
     plus_inv_parse_action, plus_parse_action, resshortcut1m,
@@ -103,7 +103,7 @@ class Syntax():
     USING = sp(L('using'), lambda t: CDP.UsingKeyword(t[0]))
     FOR = sp(L('for'), lambda t: CDP.ForKeyword(t[0]))
     # load battery
-    LOAD = sp(L('load'), lambda t: CDP.LoadKeyword(t[0]))
+    LOAD = sp(L('load') | L('`'), lambda t: CDP.LoadKeyword(t[0]))
     SUB = sp(L('sub'), lambda t: CDP.SubKeyword(t[0]))
 
     TOP = sp(L(TOP_LITERAL) | L('⊤'), lambda t: CDP.TopKeyword(t[0]))
@@ -115,7 +115,7 @@ class Syntax():
 
     # 'MATHEMATICAL LEFT ANGLE BRACKET' (U+27E8) ⟨
     # 'MATHEMATICAL RIGHT ANGLE BRACKET'   ⟩
-
+# ⟨⟩
     OPEN_BRACE = sp(L('<') ^ L('⟨'), lambda t: CDP.OpenBraceKeyword(t[0]))
     CLOSE_BRACE = sp(L('>') ^ L('⟩'), lambda t: CDP.CloseBraceKeyword(t[0]))
     REQUIRED_BY = sp((L('required') | L('req.')) - L('by'),
@@ -325,6 +325,11 @@ class Syntax():
     tuple_of_constants = sp(OPEN_BRACE + constant_value +
                             ZeroOrMore(COMMA + constant_value) + CLOSE_BRACE,
                             lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1]), t[-1]))
+
+
+    make_tuple = sp(OPEN_BRACE + rvalue +
+                    ZeroOrMore(COMMA + rvalue) + CLOSE_BRACE,
+                    lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1]), t[-1]))
     
     # TODO: how to express empty typed list? "{g}"
 
@@ -335,13 +340,18 @@ class Syntax():
     upper_set_from_collection = sp(S(L("upperclosure")) + collection_of_constants,
                    lambda t: CDP.UpperSetFromCollection(t[0]))
 
+    # <space> : identifier
+    sapce_custom_value1 = sp(space_expr + L(":") + SyntaxIdentifiers.get_idn(),
+                          lambda t: CDP.SpaceCustomValue(t[0], t[1], t[2]))
+
     constant_value << (number_with_unit
                        ^ variable_ref
                        ^ collection_of_constants
-                       ^ tuple_of_constants
+                        ^ tuple_of_constants
                        ^ nat_constant
                        ^ int_constant
-                       ^ upper_set_from_collection)
+                       ^ upper_set_from_collection
+                       ^ sapce_custom_value1)
 
     rvalue_resource_simple = sp(dpname + DOT - rname,
                                 lambda t: CDP.Resource(s=t[2], keyword=t[1], dp=t[0]))
@@ -365,7 +375,9 @@ class Syntax():
                                   SyntaxBasics.integer + SRPAR,
                                lambda t: CDP.TupleIndex(value=t[0], index=t[1]))
 
-    
+#     lf_tuple_indexing = sp(TAKE + SLPAR + fvalue + SCOMMA +
+#                                   SyntaxBasics.integer + SRPAR,
+#                                lambda t: CDP.TupleIndex(value=t[0], index=t[1]))
 
     lf_new_resource = sp(get_idn(),
                          lambda t: CDP.NewResource(t[0]))
@@ -380,7 +392,7 @@ class Syntax():
     unary = {
         'sqrt': lambda op1: CDP.GenericNonlinearity(math.sqrt, op1, lambda F: F),
         'ceil': lambda op1: CDP.GenericNonlinearity(math.ceil, op1, lambda F: F),
-        # 'square': lambda op1: CDP.GenericNonlinearity(square, op1, lambda F: F),
+        'square': lambda op1: CDP.GenericNonlinearity(square, op1, lambda F: F),
     }
 
     unary_op = Or([L(x) for x in unary])
@@ -417,8 +429,11 @@ class Syntax():
         lf_new_resource ^ 
         lf_new_resource2 ^ 
         lf_make_tuple ^
+#         lf_tuple_indexing ^
         (S(L('(')) - (lf_new_limit ^ simple ^ fancy ^
-                      lf_new_resource ^ lf_new_resource2 ^ lf_make_tuple) - S(L(')'))))
+                      lf_new_resource ^ lf_new_resource2 ^ lf_make_tuple
+#                       ^ lf_tuple_indexing
+                      ) - S(L(')'))))
 
     # Fractions
 
@@ -597,7 +612,8 @@ class Syntax():
                        unary_expr ^
                        constant_value ^
                        power_expr ^
-                       rvalue_tuple_indexing)
+                       rvalue_tuple_indexing ^
+                       make_tuple)
 
     rvalue << operatorPrecedence(rvalue_operand, [
         (TIMES, 2, opAssoc.LEFT, mult_parse_action),

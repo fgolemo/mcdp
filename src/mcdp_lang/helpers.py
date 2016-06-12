@@ -1,16 +1,12 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_wrapped
-from mcdp_posets import NotLeq, get_types_universe
 from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import ValueWithUnits
 from mocdp.dp import Constant
-from mocdp.dp.dp_generic_unary import WrapAMap
-from mocdp.exceptions import DPSemanticError
+from mcdp_posets.types_universe import get_types_universe
+from mocdp.dp.conversion import get_conversion
 
-# def square(x):
-#     res = x * x
-#     return res
+
 
 @contract(resources='seq')
 def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix):
@@ -30,6 +26,7 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
                                  res_prefix='_result')
     
     """
+    # new name for the ndp
     name = context.new_name(name_prefix)
     name_result = context.new_res_name(res_prefix)
 
@@ -37,15 +34,41 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
     fnames = []
     for i, r in enumerate(resources):
         ni = context.new_fun_name('%s%s' % (op_prefix, i))
-        c = Connection(dp1=r.dp, s1=r.s, dp2=name, s2=ni)
         fnames.append(ni)
+
+
+    fnames_ = fnames if len(fnames) > 1 else fnames[0]
+    ndp = dpwrap(dp, fnames_, name_result)
+    context.add_ndp(name, ndp)
+
+    tu = get_types_universe()
+
+    for i, r in enumerate(resources):
+        # this is where we check for types
+
+        # source resource
+        R = context.get_rtype(r)
+        # function
+        F = ndp.get_ftype(fnames[i])
+
+        if not tu.equal(F, R):
+            conversion = get_conversion(R, F)
+            if conversion is None:
+                pass
+            else:
+                r = create_operation(context, conversion, [r],
+                                     name_prefix='_conv', op_prefix='_op',
+                                     res_prefix='_res')
+
+        R = context.get_rtype(r)
+        assert tu.equal(F, R)
+
+        c = Connection(dp1=r.dp, s1=r.s, dp2=name, s2=fnames[i])
         connections.append(c)
 
     if len(fnames) == 1:
         fnames = fnames[0]
 
-    ndp = dpwrap(dp, fnames, name_result)
-    context.add_ndp(name, ndp)
 
     for c in connections:
         context.add_connection(c)
@@ -87,25 +110,7 @@ def get_valuewithunits_as_resource(v, context):
     return context.make_resource(nres, nres)
 
 
-class Conversion(WrapAMap):
-    """ Simple wrap to get icon """
-    pass
-
-def get_conversion(A, B):
-    """ Returns None if there is no need. """
-    tu = get_types_universe()
-    try:
-        tu.check_leq(A, B)
-    except NotLeq as e:
-        msg = 'Wrapping with incompatible units.'
-        raise_wrapped(DPSemanticError, e, msg, A=A, B=B)
-
-    if tu.equal(A, B):
-        conversion = None
-    else:
-        A_to_B, _ = tu.get_embedding(A, B)
-        conversion = Conversion(A_to_B)
-
-    return conversion
-
+def square(x):
+    res = x * x
+    return res
 

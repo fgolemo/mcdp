@@ -31,9 +31,22 @@ class TypesUniverse(Preorder):
             raise_desc(NotBelongs, x=x, known=known)
 
     def check_equal(self, A, B):
+        from mcdp_posets.poset_product import PosetProduct
+        if isinstance(A, PosetProduct) and isinstance(B, PosetProduct):
+            if len(A) != len(B):
+                msg = 'Different length.'
+                raise_desc(NotEqual, msg, A=A, B=B)
+            for i, (sa, sb) in enumerate(zip(A.subs, B.subs)):
+                try:
+                    self.check_equal(sa, sb)
+                except NotEqual as e:
+                    msg = 'Element %d not equal.' % i
+                    raise_wrapped(NotEqual, e, msg)
+
         if not(A == B):
             msg = 'Different by direct comparison.'
             raise_desc(NotEqual, msg, A=A, B=B)
+
 
     def check_leq(self, A, B):
         from mcdp_posets.finite_set import FiniteCollectionsInclusion
@@ -81,6 +94,17 @@ class TypesUniverse(Preorder):
         
         if isinstance(A, SpaceProduct) and isinstance(B, SpaceProduct):
             return check_leq_products(self, A, B)
+
+        from mcdp_posets.finite_set import FinitePoset
+        if isinstance(A, FinitePoset) and isinstance(B, FinitePoset):
+            # A <= B if
+            # TODO: check inclusion
+            if A.get_elements() == B.get_elements():
+                # TODO: check relations!
+                return True
+            raise NotImplementedError
+            return
+
 
         msg = "Do not know how to compare types."
         raise_desc(NotLeq, msg, A=A, B=B)
@@ -147,6 +171,7 @@ class TypesUniverse(Preorder):
             setattr(m1, '__name__', 'L%s' % a_to_b.__name__)
             setattr(m1, '__name__', 'L%s' % b_to_a.__name__)
             return m1, m2
+
 
         msg = 'Spaces are ordered, but you forgot to code embedding.'
         raise_desc(NotImplementedError, msg, A=A, B=B)
