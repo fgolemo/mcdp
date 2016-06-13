@@ -1,4 +1,4 @@
-from compmake.utils.safe_pickle import safe_pickle_dump, safe_pickle_load
+from .safe_pickling import safe_pickle_dump, safe_pickle_load
 from contracts import contract
 import os
 

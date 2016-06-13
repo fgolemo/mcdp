@@ -1,3 +1,5 @@
+# test syntax_error
+
 T = 10 s	
 	
 explicit {

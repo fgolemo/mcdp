@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
-from mcdp_lang.tests.utils2 import eval_rvalue_as_constant
+from .utils2 import eval_rvalue_as_constant
 
 
 @comptest

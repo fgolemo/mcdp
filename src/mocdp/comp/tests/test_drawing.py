@@ -8,7 +8,7 @@ matplotlib.rc('font', **{'sans-serif' : 'Arial',
 
 from mcdp_report.report import report_dp1
 from mcdp_posets import Rcomp
-from mocdp.unittests.generation import for_all_nameddps_dyn
+from mcdp_tests.generation import for_all_nameddps_dyn
 from reprep import Report
 import numpy as np
 

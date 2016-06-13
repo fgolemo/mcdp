@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
-from mcdp_lang.tests.utils import assert_parsable_to_connected_ndp
-from mcdp_posets.uppersets import UpperSets
+from .utils import assert_parsable_to_connected_ndp
+from mcdp_posets import UpperSets
 
 @comptest
 def check_lang_connections1():

@@ -1,10 +1,10 @@
 
-basic-remake:
-	compmake out/comptests -c "remake mcdplib-basic-*setup*; make mcdplib-basic-poset-*"
+#basic-remake:
+#	compmake out/comptests -c "remake mcdplib-basic-*setup*; make mcdplib-basic-poset-*"
 
 out=out/comptests
 
-package=mocdp
+package=mcdp_tests
 
 comptests:
 	mkdir -p $(out)

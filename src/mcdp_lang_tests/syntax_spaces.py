@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
-from mcdp_lang.tests.utils import parse_wrap_check
+from .utils import parse_wrap_check
 from mcdp_lang.syntax import Syntax
 from mocdp.comp.context import Context
 

@@ -1,3 +1,4 @@
+# test syntax_error
 energetics := interface {
 	provides capacity [J] 
 	requires mass    [kg]

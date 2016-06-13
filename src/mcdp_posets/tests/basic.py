@@ -1,4 +1,4 @@
-from mocdp.unittests.generation import for_all_posets, for_some_posets
+from mcdp_tests.generation import for_all_posets, for_some_posets
 from comptests.registrar import comptest
 from mcdp_posets.poset import NotBounded
 from mcdp_posets.space import Uninhabited

@@ -12,7 +12,7 @@ from mcdp_report.generic_report_utils import generic_report
 from mocdp.drawing import plot_upset_R2
 from mcdp_lang.eval_math import PlusNat
 from mcdp_lang import parse_ndp
-from mcdp_lang.tests.utils import assert_semantic_error
+from mcdp_lang_tests.utils import assert_semantic_error
 from mcdp_posets import UpperSets
 from mcdp_posets.nat import Nat
 from mcdp_posets.poset_product import PosetProduct

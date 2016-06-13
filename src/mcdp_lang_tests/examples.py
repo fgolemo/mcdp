@@ -2,7 +2,7 @@ from StringIO import StringIO
 from conf_tools.utils import dir_from_package_name, locate_files
 from contracts.utils import raise_desc
 from mcdp_lang import parse_ndp_filename
-from mcdp_lang.tests.utils import (assert_parsable_to_connected_ndp_fn,
+from mcdp_lang_tests.utils import (assert_parsable_to_connected_ndp_fn,
     assert_parsable_to_unconnected_ndp_fn, assert_semantic_error_fn,
     assert_syntax_error_fn)
 import os
@@ -88,7 +88,7 @@ def known_fail(f, *args):
 def define_test_for(context, filename, basename, tests, known_failure=False):
 
     mocdp_base = dir_from_package_name('mocdp')
-    outdir = os.path.join(mocdp_base, '../../out/tests/')
+    outdir = os.path.join(mocdp_base, '../../out/mcdp_lang_tests/')
     
     for test in tests:
         n = test.__name__.replace('assert_', '').replace('_ndp', '')
@@ -117,9 +117,10 @@ def define_test_for(context, filename, basename, tests, known_failure=False):
         
     
 def define_tests(context):
-    """ Define other tests """
+    """ Define other mcdp_lang_tests """
     filenames = []
-    folder = dir_from_package_name('mcdp_lang.tests.ok')
+    folder = dir_from_package_name('mcdp_lang_tests.ok')
+    folder_notok = dir_from_package_name('mcdp_lang_tests.notok')
     filenames.extend(locate_files(folder, '*.mcdp'))
 
     context = context.child('examples')
@@ -155,8 +156,6 @@ def define_tests(context):
             tests = get_marked_tests(f)
         define_test_for(context, f, basename, tests)
 
-
-    folder_notok = 'mcdp_lang.tests.ok'
     filenames = []
     filenames.extend(locate_files(folder_notok, '*.mcdp'))
 

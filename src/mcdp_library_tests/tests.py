@@ -9,7 +9,7 @@ import yaml
 from contextlib import contextmanager
 import tempfile
 import shutil
-from mocdp.unittests.generation import for_all_source_mcdp
+from mcdp_tests.generation import for_all_source_mcdp
 from mocdp.exceptions import DPSemanticError
 
 __all__ = [
@@ -27,13 +27,13 @@ def define_tests_for_mcdplibs(context):
     folder = os.path.join(dir_from_package_name('mocdp'), '..', '..', '..')
 
     if not os.path.exists(folder):
-        raise_desc(ValueError, 'No tests found.' , folder=folder)
+        raise_desc(ValueError, 'No mcdp_lang_tests found.' , folder=folder)
 
     mcdplibs = locate_files(folder, '*.mcdplib', include_directories=True,
                             include_files=False)
     n = len(mcdplibs)
     if n <= 1:
-        msg = 'Expected more tests.'
+        msg = 'Expected more mcdp_lang_tests.'
         raise_desc(ValueError, msg, folder, mcdplibs=mcdplibs)
 
     c = context
@@ -69,16 +69,16 @@ def mcdplib_run_make(mcdplib):
 
 def mcdplib_test_setup_nameddps(context, mcdplib):
     """ 
-        Loads all tests that were specified by comptests
+        Loads all mcdp_lang_tests that were specified by comptests
         using the for_all_nameddps decorator. 
     """
-    from mocdp import load_tests_modules
+    from mcdp_tests import load_tests_modules
 
     l = MCDPLibrary()
     l.add_search_dir(mcdplib)
     models = l.get_models()
 
-    from mocdp.unittests.generation import for_all_nameddps
+    from mcdp_tests.generation import for_all_nameddps
     load_tests_modules()
     registered = for_all_nameddps.registered
 
@@ -104,7 +104,8 @@ def mcdplib_test_setup_nameddps(context, mcdplib):
                 c.comp(ftest, model_name, ndp)
 
 def mcdplib_test_setup_source_mcdp(context, mcdplib):
-    from mocdp import load_tests_modules
+    from mcdp_tests import load_tests_modules
+
 
     l = MCDPLibrary()
     l.add_search_dir(mcdplib)
@@ -165,16 +166,17 @@ def mcdplib_assert_semantic_error_fn(mcdplib, model_name):
 
 def mcdplib_test_setup_posets(context, mcdplib):
     """ 
-        Loads all tests that were specified by comptests
+        Loads all mcdp_lang_tests that were specified by comptests
         using the for_all_nameddps decorator. 
     """
-    from mocdp import load_tests_modules
+    from mcdp_tests import load_tests_modules
+
 
     l = MCDPLibrary()
     l.add_search_dir(mcdplib)
     posets = l.list_posets()
 
-    from mocdp.unittests.generation import for_all_posets
+    from mcdp_tests.generation import for_all_posets
     load_tests_modules()
     registered = for_all_posets.registered
 
@@ -192,13 +194,13 @@ def mcdplib_test_setup_posets(context, mcdplib):
 
 
 def mcdplib_test_setup_primitivedps(context, mcdplib):
-    from mocdp import load_tests_modules
+    from mcdp_tests import load_tests_modules
 
     l = MCDPLibrary()
     l.add_search_dir(mcdplib)
     dps = l.list_primitivedps()
 
-    from mocdp.unittests.generation import for_all_dps
+    from mcdp_tests.generation import for_all_dps
     load_tests_modules()
     registered = for_all_dps.registered
 
@@ -245,7 +247,7 @@ def mcdplib_define_tst(context, mcdplib):
     """
         mcdplib: folder
         
-        loads the tests in mcdp_tests.yaml
+        loads the mcdp_lang_tests in mcdp_tests.yaml
     """
     assert os.path.exists(mcdplib)
 

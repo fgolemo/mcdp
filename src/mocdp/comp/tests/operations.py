@@ -1,4 +1,4 @@
-from mocdp.unittests.generation import for_all_nameddps
+from mcdp_tests.generation import for_all_nameddps
 
 
 @for_all_nameddps

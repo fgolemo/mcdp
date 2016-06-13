@@ -2,7 +2,7 @@
 from mocdp.comp.context import Connection
 
 __all__ = [
-    'compmake_context',
+    'compact_context',
 ]
 
 def compact_context(context):

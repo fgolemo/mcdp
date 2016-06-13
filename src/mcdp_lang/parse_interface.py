@@ -1,7 +1,7 @@
 """ Contains the main parsing interface """
 from contracts import contract
-from mcdp_lang.parse_actions import parse_wrap
-from mcdp_posets.poset import Poset
+from .parse_actions import parse_wrap
+from mcdp_posets import Poset
 from mocdp.dp.primitive import PrimitiveDP
 from mocdp.exceptions import MCDPExceptionWithWhere
 
@@ -10,7 +10,6 @@ __all__ = [
     'parse_ndp',
     'parse_ndp_filename',
     'parse_poset',
-
 ]
 
 def parse_ndp(string, context=None):
@@ -74,9 +73,8 @@ def parse_primitivedp(string, context=None):
     assert isinstance(res, PrimitiveDP), res
     return res
 
-@contract(returns=PrimitiveDP)
+@contract(returns='isinstance(ValueWithUnits)')
 def parse_constant(string, context=None):
-    from mocdp.comp.context import Context
     from mcdp_lang.syntax import Syntax
     from mocdp.comp.context import ValueWithUnits
     from mcdp_lang.eval_constant_imp import eval_constant

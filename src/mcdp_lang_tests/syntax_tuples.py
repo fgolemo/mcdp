@@ -1,10 +1,10 @@
+from .utils2 import eval_rvalue_as_constant_same
 from comptests.registrar import comptest
-from mcdp_lang.tests.utils2 import eval_rvalue_as_constant_same
+from mcdp_lang.eval_resources_imp import eval_rvalue
 from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.parse_interface import parse_ndp
 from mcdp_lang.syntax import Syntax
 from mocdp.comp.context import Context
-from mcdp_lang.eval_resources_imp import eval_rvalue
-from mcdp_lang.parse_interface import parse_ndp
 
 same = eval_rvalue_as_constant_same
 

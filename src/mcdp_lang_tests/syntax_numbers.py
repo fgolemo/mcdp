@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 
+from .utils import (TestFailed, assert_parsable_to_connected_ndp,
+    assert_semantic_error, assert_syntax_error, parse_wrap_check,
+    parse_wrap_syntax_error)
+from .utils2 import (eval_rvalue_as_constant,
+    eval_rvalue_as_constant_same_exactly)
 from comptests.registrar import comptest
-from mcdp_lang.parts import CDPLanguage
 from mcdp_lang import parse_ndp
-from mcdp_lang.tests.utils import (TestFailed, parse_wrap_check,
-    parse_wrap_syntax_error, assert_syntax_error,
-    assert_parsable_to_connected_ndp, assert_semantic_error)
+from mcdp_lang.parts import CDPLanguage
+from mcdp_lang.syntax import Syntax, SyntaxBasics
 from mcdp_posets.rcomp_units import make_rcompunit
 from mcdp_posets.types_universe import get_types_universe
 from nose.tools import assert_equal
 from numpy.testing.utils import assert_allclose
-from mcdp_lang.tests.utils2 import eval_rvalue_as_constant, \
-    eval_rvalue_as_constant_same_exactly
-from mcdp_lang.syntax import Syntax, SyntaxBasics
 
 CDP = CDPLanguage
 

@@ -1,4 +1,4 @@
-from mocdp.unittests.generation import for_all_dps
+from mcdp_tests.generation import for_all_dps
 from mcdp_posets.poset_product import PosetProduct
 from mcdp_posets import Rcomp, R_Weight
 from comptests.registrar import comptest

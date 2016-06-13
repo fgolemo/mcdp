@@ -82,7 +82,7 @@ class NamedDP():
         return PosetProduct(tuple(types))
 
 
-# this is only used in the tests, called through the YAML files
+# this is only used in the mcdp_lang_tests, called through the YAML files
 # candidate to go away
 def dp_from_ndp(ndp):
     """ Unwrap """

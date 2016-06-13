@@ -1,8 +1,8 @@
 from comptests import (comptests_for_all, comptests_for_all_dynamic,
     comptests_for_some)
-from comptests.registrar import comptests_for_some_dynamic
 from mocdp.configuration import (get_conftools_dps, get_conftools_nameddps,
     get_conftools_posets)
+# from comptests.registrar import comptests_for_some_dynamic
 
 library_posets = get_conftools_posets()
 library_dps = get_conftools_dps()
