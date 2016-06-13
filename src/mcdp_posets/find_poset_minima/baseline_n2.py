@@ -7,6 +7,10 @@ __all__ = [
     'poset_minima',
 ]
 
+def poset_maxima(elements, leq):
+    geq = lambda a, b: leq(b, a)
+    return poset_minima(elements, geq)
+
 @time_poset_minima_func
 @contract(elements='seq|set|$frozenset')
 def poset_minima(elements, leq):

@@ -1,15 +1,16 @@
 from mcdp_library.library import MCDPLibrary
+from mcdp_web.editor.app_editor import AppEditor
+from mcdp_web.interactive.app_interactive import AppInteractive
+from mcdp_web.qr.app_qr import AppQR
+from mcdp_web.solver.app_solver import AppSolver
+from mcdp_web.visualization.app_visualization import AppVisualization
+from mcdp_web.editor_fancy.app_editor_fancy import AppEditorFancy
+from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPFound
 from quickapp.quick_app_base import QuickAppBase
 from wsgiref.simple_server import make_server
-from mcdp_web.app_editor import AppEditor
-from mcdp_web.app_qr import AppQR
-from mcdp_web.app_visualization import AppVisualization
-from mcdp_web.app_solver import AppSolver
-from mocdp.exceptions import DPSemanticError, DPSyntaxError
-from mcdp_web.app_interactive import AppInteractive
-from mcdp_web.app_editor_fancy import AppEditorFancy
+import os
 
 
 __all__ = [
@@ -34,6 +35,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
     def get_library(self):
         if self.library is None:
             l = MCDPLibrary()
+            cache_dir = os.path.join(self.dirname, '_mcdpweb_cache')
+            l.use_cache_dir(cache_dir)
             l.add_search_dir(self.dirname)
             self.library = l
         return self.library

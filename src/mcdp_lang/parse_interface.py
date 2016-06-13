@@ -73,3 +73,23 @@ def parse_primitivedp(string, context=None):
 
     assert isinstance(res, PrimitiveDP), res
     return res
+
+@contract(returns=PrimitiveDP)
+def parse_constant(string, context=None):
+    from mocdp.comp.context import Context
+    from mcdp_lang.syntax import Syntax
+    from mocdp.comp.context import ValueWithUnits
+    from mcdp_lang.eval_constant_imp import eval_constant
+
+    expr = Syntax.rvalue
+    x = parse_wrap(expr, string)[0]
+
+    result = eval_constant(x, context)
+
+    assert isinstance(result, ValueWithUnits)
+    value = result.value
+    space = result.unit
+    space.belongs(value)
+
+    return result
+

@@ -23,7 +23,7 @@ class AppInteractive():
 
         config.add_route('mcdp_value', base + 'mcdp_value/')
         config.add_view(self.view_mcdp_value, route_name='mcdp_value', 
-                        renderer='interactive_mcdp_value.jinja2')
+                        renderer='interactive/interactive_mcdp_value.jinja2')
         config.add_route('mcdp_value_parse', base + 'mcdp_value/parse')
         config.add_view(self.view_mcdp_value_parse, route_name='mcdp_value_parse',
                         renderer='json')
@@ -32,7 +32,7 @@ class AppInteractive():
         return {}
 
     def view_mcdp_value_parse(self, request):
-        from mcdp_web.app_solver import ajax_error_catch
+        from mcdp_web.solver.app_solver import ajax_error_catch
 
         string = request.json_body['string']
         assert isinstance(string, unicode)
@@ -43,25 +43,21 @@ class AppInteractive():
         return ajax_error_catch(go)
 
     def parse(self, string):
-        expr = Syntax.rvalue
-        x = parse_wrap(expr, string)[0]
-        x = remove_where_info(x)
-        context = Context()
-
-        result = eval_constant(x, context)
-
-#         result = parse_value(string, context)
-
-
-        assert isinstance(result, ValueWithUnits)
-        value = result.value
+        l = self.get_library()
+        result = l.parse_constant(string)
+#         expr = Syntax.rvalue
+#         x = parse_wrap(expr, string)[0]
+#         x = remove_where_info(x)
+#         context = Context()
+#
+#         result = eval_constant(x, context)
         space = result.unit
-        space.belongs(value)
+        value = result.value
 
         res = {}
 
         e = cgi.escape
-        res['output_parsed'] = e(str(x).replace(', where=None', ''))
+        # res['output_parsed'] = e(str(x).replace(', where=None', ''))
         res['output_space'] = e(space.__repr__() + '\n' + str(type(space)))
         res['output_raw'] = e(value.__repr__() + '\n' + str(type(value)))
         res['output_formatted'] = e(space.format(value))

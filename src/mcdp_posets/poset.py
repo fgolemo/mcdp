@@ -3,6 +3,7 @@ from .space import Space
 from abc import abstractmethod
 from contracts import contract, describe_value
 from mocdp.exceptions import do_extra_checks
+from contracts.utils import raise_desc
 
 __all__ = [
     'Poset',
@@ -43,6 +44,18 @@ class Preorder(Space):
             return False
         
 class Poset(Preorder):
+
+    @contract(returns='set')
+    def get_minimal_elements(self):
+        """ Returns a set of minimal elements. 
+            If there is a bottom, this is set([bottom])
+        """
+        try:
+            bottom = self.get_bottom()
+            return set([bottom])
+        except NotBounded:
+            msg = 'Not bounded so not implemented.'
+            raise_desc(NotImplementedError, msg, type=type(self))
 
     def get_bottom(self):
         msg = 'Bottom not available for %s.' % describe_value(self)

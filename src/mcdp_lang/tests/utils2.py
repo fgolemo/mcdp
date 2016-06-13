@@ -33,14 +33,25 @@ def eval_rvalue_as_constant2(s):
     value = eval_constant_resource(context, r)
     return value
 
+def eval_rvalue_as_constant_same_exactly(s1, s2):
+    """ 
+        Checks that the two strings evaluate to the same constant
+        considering equivalent types to be different.
+    """
+
+    p1 = eval_rvalue_as_constant2(s1)
+    p2 = eval_rvalue_as_constant2(s2)
+    print('Checking that %s === %s' % (p1, p2))
+
+    assert p1.unit == p2.unit, (p1, p2)
+    p1.unit.check_equal(p1.value, p2.value)
 
 def eval_rvalue_as_constant_same(s1, s2):
     """ 
         Checks that the two strings evaluate to the same constant.
-        
+        (up to conversions)
         
         Example:
-            
             
             eval_rvalue_as_constant_same("1 g + 1 kg", "1001 g")
             

@@ -1,5 +1,5 @@
 from mcdp_cli.plot import png_pdf_from_gg
-from mcdp_web.app_solver_state import SolverState, get_decisions_for_axes
+from mcdp_web.solver.app_solver_state import SolverState, get_decisions_for_axes
 from mcdp_web.utils import response_data
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
@@ -46,11 +46,11 @@ class AppSolver():
 
         config.add_route('solver_base', "/solver/{model_name}/")
         config.add_view(self.view_solver_base,
-                        route_name='solver_base', renderer='solver.jinja2')
+                        route_name='solver_base', renderer='solver/solver.jinja2')
 
         config.add_route('solver', base)
         config.add_view(self.view_solver,
-                        route_name='solver', renderer='solver.jinja2')
+                        route_name='solver', renderer='solver/solver.jinja2')
 
         config.add_route('solver_addpoint', base + 'addpoint')
         config.add_view(self.ajax_solver_addpoint,

@@ -5,6 +5,7 @@ from mocdp.comp.context import ValueWithUnits
 from mocdp.dp import Constant
 from mcdp_posets.types_universe import get_types_universe
 from mocdp.dp.conversion import get_conversion
+from mocdp.dp.dp_limit import Limit
 
 
 
@@ -108,6 +109,15 @@ def get_valuewithunits_as_resource(v, context):
     ndp = dpwrap(dp, [], nres)
     context.add_ndp(nres, ndp)
     return context.make_resource(nres, nres)
+
+@contract(v=ValueWithUnits)
+def get_valuewithunits_as_function(v, context):
+    dp = Limit(v.unit, v.value)
+    n = context.new_name('lim')
+    sn = context.new_fun_name('l')
+    ndp = dpwrap(dp, sn, [])
+    context.add_ndp(n, ndp)
+    return context.make_function(n, sn)
 
 
 def square(x):

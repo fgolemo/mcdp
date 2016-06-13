@@ -11,7 +11,7 @@ class CDPLanguage():
 
     GenericNonlinearity = namedtuplewhere('GenericNonlinearity', 'function op1 R_from_F')
 
-    NewLimit = namedtuplewhere('NewLimit', 'value_with_unit')
+#     NewLimit = namedtuplewhere('NewLimit', 'value_with_unit')
 
     ValueExpr = namedtuplewhere('ValueExpr', 'value')
 
@@ -171,7 +171,10 @@ class CDPLanguage():
     FinitePosetElement = namedtuplewhere('FinitePosetElement', 'identifier')
     FinitePoset = namedtuplewhere('FinitePoset', 'keyword chains')
 
-
-    TupleIndex = namedtuplewhere('TupleIndex', 'value index')
+    TakeKeyword = namedtuplewhere('TakeKeyword', 'keyword')
+    TupleIndex = namedtuplewhere('TupleIndex', 'keyword value index')
 
     SpaceCustomValue = namedtuplewhere('SpaceCustomValue', 'space keyword custom_string')
+
+    # solve( <0 g>, `model )
+    SolveModel = namedtuplewhere('SolveModel', 'keyword f model')

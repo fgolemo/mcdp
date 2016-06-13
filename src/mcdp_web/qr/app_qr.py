@@ -13,7 +13,7 @@ class AppQR():
 
         config.add_route('qr_reader', '/qr_reader')
         config.add_view(self.view_qr_reader, route_name='qr_reader',
-                        renderer='qr_reader.jinja2')
+                        renderer='qr/qr_reader.jinja2')
 
         config.add_route('qr_reader_submit', '/qr_reader_submit')
         config.add_view(self.qr_reader_submit,
@@ -37,7 +37,7 @@ class AppQR():
         
     def _read(self, qrstring):
         if not (qrstring in self.retrieved) and (not qrstring in self.retrieved_error):
-            from .app_qr_scraping import scrape
+            from mcdp_web.qr.app_qr_scraping import scrape
             try:
                 resources = scrape(qrstring)
                 self.retrieved[qrstring] = resources

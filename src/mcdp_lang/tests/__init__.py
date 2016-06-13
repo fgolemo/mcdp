@@ -8,7 +8,7 @@ from .syntax_spaces import *
 from .syntax_connections import *
 from .syntax_from_library import *
 from .syntax_tuples import *
-
+from .syntax_load import *
 from .failures_parsing import *
 from .failures_simplification import *
 
@@ -30,5 +30,10 @@ from .failures_simplification import *
     Also useful:
         
         eval_rvalue_as_constant
+        
+        eval_rvalue_as_constant_same
+        
+        eval_rvalue_as_constant_same_exactly
+        
 
 """

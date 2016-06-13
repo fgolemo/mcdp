@@ -45,7 +45,9 @@ span.FromCatalogueKeyword,
 span.MCDPTypeKeyword,
 span.InstanceKeyword,
 span.FlattenKeyword,
-span.ApproxKeyword
+span.ApproxKeyword,
+span.TakeKeyword
+
 { 
     font-weight: bold; 
     color: #00a;
@@ -66,7 +68,7 @@ span.FuncName { color: #CC6600 ; }
 
 
 span.FName, span.RName { } 
-span.DPName, span.NDPName {  
+span.DPName, span.NDPName, span.PosetName {  
     color: #a0a;
 }
 

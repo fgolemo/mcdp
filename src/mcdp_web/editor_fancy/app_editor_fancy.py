@@ -2,7 +2,7 @@ from contracts.utils import raise_wrapped
 from mcdp_cli.plot import png_pdf_from_gg
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from mcdp_report.html import ast_to_html
-from mcdp_web.app_solver import (ajax_error_catch,
+from mcdp_web.solver.app_solver import (ajax_error_catch,
     format_exception_for_ajax_response, png_error_catch, response_image)
 from mcdp_web.utils import response_data
 from mocdp.comp.composite import CompositeNamedDP
@@ -25,7 +25,7 @@ class AppEditorFancy():
 
         config.add_route('edit_form_fancy', '/edit_fancy/{model_name}/')
         config.add_view(self.view_edit_form_fancy, route_name='edit_form_fancy',
-                        renderer='edit_form_fancy.jinja2')
+                        renderer='editor_fancy/edit_form_fancy.jinja2')
 
         config.add_route('ajax_parse', '/edit_fancy/{model_name}/ajax_parse')
         config.add_view(self.ajax_parse, route_name='ajax_parse',
@@ -157,7 +157,7 @@ class AppEditorFancy():
         l = self.get_library()
         if l.file_exists(basename):
             error = 'File %r already exists.' % basename
-            return render_to_response('error_model_exists.jinja2',
+            return render_to_response('editor_fancy/error_model_exists.jinja2',
                                       {'error': error,
                                        'model_name': model_name}, request=request)
 

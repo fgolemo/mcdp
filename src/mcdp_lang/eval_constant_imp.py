@@ -2,14 +2,15 @@
 from .parts import CDPLanguage
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPSemanticError
-from mcdp_lang.utils_lists import get_odd_ops, unwrap_list
-from mcdp_posets import NotBelongs, PosetProduct, Rcomp, Space
-from mcdp_posets.finite_set import FiniteCollection, FiniteCollectionsInclusion
-from mcdp_posets.nat import Int, Nat
-from mcdp_posets.uppersets import UpperSet, UpperSets
 from mcdp_lang.parse_actions import add_where_information
+from mcdp_lang.utils_lists import get_odd_ops, unwrap_list
+from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
+    NotBelongs, PosetProduct, Rcomp, Space, UpperSet, UpperSets)
+from mocdp.comp.context import ValueWithUnits
+from mocdp.exceptions import DPSemanticError, mcdp_dev_warning
+from mcdp_posets.poset import NotLeq
+from mcdp_posets.types_universe import get_types_universe
+
 CDP = CDPLanguage
 
 class NotConstant(DPSemanticError):
@@ -121,6 +122,25 @@ def eval_constant(op, context):
             F.belongs(v)
             return ValueWithUnits(v, F)
 
+        if isinstance(op, CDP.SolveModel):
+            from mcdp_lang.eval_ndp_imp import eval_ndp
+            from mcdp_posets.types_universe import express_value_in_isomorphic_space
+            ndp = eval_ndp(op.model, context)
+            dp = ndp.get_dp()
+            f0 = eval_constant(op.f, context)
+            F = dp.get_fun_space()
+            mcdp_dev_warning('I never understand this...')
+            tu = get_types_universe()
+            try:
+                tu.check_leq(F, f0.unit)
+            except NotLeq as e:
+                msg = 'Input not correct.'
+                raise_wrapped(DPSemanticError, e, msg, compact=True)
+            f = express_value_in_isomorphic_space(f0.unit, f0.value, F)
+            res = dp.solve(f)
+            UR = UpperSets(dp.get_res_space())
+            return ValueWithUnits(res, UR)
+
         msg = 'eval_constant() cannot evaluate this value as constant.'
         raise_desc(NotConstant, msg, op=str(op))
 
@@ -134,6 +154,7 @@ def eval_constant_space_custom_value(op, context):
     if isinstance(space, FiniteCollectionAsSpace):
         try:
             space.belongs(op.custom_string)
+            mcdp_dev_warning('this does not seem to work...')
         except NotBelongs as e:
             msg = 'The value is not an element of this space.'
             raise_wrapped(DPSemanticError, e, msg, compact=True,

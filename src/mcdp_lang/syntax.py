@@ -104,6 +104,7 @@ class Syntax():
     FOR = sp(L('for'), lambda t: CDP.ForKeyword(t[0]))
     # load battery
     LOAD = sp(L('load') | L('`'), lambda t: CDP.LoadKeyword(t[0]))
+    TAKE = sp(L('take') | L('`'), lambda t: CDP.TakeKeyword(t[0]))
     SUB = sp(L('sub'), lambda t: CDP.SubKeyword(t[0]))
 
     TOP = sp(L(TOP_LITERAL) | L('⊤'), lambda t: CDP.TopKeyword(t[0]))
@@ -322,6 +323,11 @@ class Syntax():
     ndpt_dp_variable_ref = sp(get_idn(), lambda t: CDP.DPVariableRef(t[0]))
     
     constant_value = Forward()
+
+    # solve( <0 g>, `model )
+    solve_model = sp(L('solve') + SLPAR + constant_value + SCOMMA + ndpt_dp_rvalue + SRPAR,
+               lambda t: CDP.SolveModel(keyword=t[0], f=t[1], model=t[2]))
+
     tuple_of_constants = sp(OPEN_BRACE + constant_value +
                             ZeroOrMore(COMMA + constant_value) + CLOSE_BRACE,
                             lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1]), t[-1]))
@@ -341,7 +347,8 @@ class Syntax():
                    lambda t: CDP.UpperSetFromCollection(t[0]))
 
     # <space> : identifier
-    sapce_custom_value1 = sp(space_expr + L(":") + SyntaxIdentifiers.get_idn(),
+    # `plugs : european
+    space_custom_value1 = sp(space_expr + L(":") + SyntaxIdentifiers.get_idn(),
                           lambda t: CDP.SpaceCustomValue(t[0], t[1], t[2]))
 
     constant_value << (number_with_unit
@@ -351,7 +358,8 @@ class Syntax():
                        ^ nat_constant
                        ^ int_constant
                        ^ upper_set_from_collection
-                       ^ sapce_custom_value1)
+                       ^ space_custom_value1
+                       ^ solve_model)
 
     rvalue_resource_simple = sp(dpname + DOT - rname,
                                 lambda t: CDP.Resource(s=t[2], keyword=t[1], dp=t[0]))
@@ -370,10 +378,9 @@ class Syntax():
 #                                lambda t: CDP.TupleIndex(value=t[0], index=t[1]))
 
     # take(<a, b>, 0)
-    TAKE = S(L('take'))
     rvalue_tuple_indexing = sp(TAKE + SLPAR + rvalue + SCOMMA +
                                   SyntaxBasics.integer + SRPAR,
-                               lambda t: CDP.TupleIndex(value=t[0], index=t[1]))
+                               lambda t: CDP.TupleIndex(keyword=t[0], value=t[1], index=t[2]))
 
 #     lf_tuple_indexing = sp(TAKE + SLPAR + fvalue + SCOMMA +
 #                                   SyntaxBasics.integer + SRPAR,
@@ -386,8 +393,8 @@ class Syntax():
                           lambda t: CDP.NewResource(t[1]))
 
 
-    lf_new_limit = sp(C(Group(number_with_unit), 'limit'),
-                      lambda t: CDP.NewLimit(t['limit'][0]))
+#     lf_new_limit = sp(C(Group(number_with_unit), 'limit'),
+#                       lambda t: CDP.NewLimit(t['limit'][0]))
 
     unary = {
         'sqrt': lambda op1: CDP.GenericNonlinearity(math.sqrt, op1, lambda F: F),
@@ -423,14 +430,14 @@ class Syntax():
                        lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1]), t[-1]))
 
 
-    fvalue_operand = (lf_new_limit ^ 
+    fvalue_operand = (constant_value ^
         simple ^ 
         fancy ^ 
         lf_new_resource ^ 
         lf_new_resource2 ^ 
         lf_make_tuple ^
 #         lf_tuple_indexing ^
-        (S(L('(')) - (lf_new_limit ^ simple ^ fancy ^
+        (S(L('(')) - (constant_value ^ simple ^ fancy ^
                       lf_new_resource ^ lf_new_resource2 ^ lf_make_tuple
 #                       ^ lf_tuple_indexing
                       ) - S(L(')'))))

@@ -6,11 +6,14 @@ from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import (Connection, get_name_for_fun_node,
     get_name_for_res_node, is_fun_node_name, is_res_node_name)
 from mocdp.comp.wrap import SimpleWrap
+from mocdp.exceptions import mcdp_dev_warning
+from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 __all__ = [
     'cndp_flatten',
     'flatten_add_prefix',
 ]
+
 sep = '/'
 
 def flatten_add_prefix(ndp, prefix):
@@ -66,9 +69,6 @@ def flatten_add_prefix(ndp, prefix):
             ndp_ = transform(name2, ndp2)
             assert not name_ in names2
             names2[name_] = ndp_
-            
-#             print('name_: %s' % name_)
-#             print('ndp_: %s' % add_prefix(str(ndp_), '> '))
         
         for c in ndp.get_connections():
             dp1, s1, dp2, s2 = c.dp1, c.s1, c.dp2, c.s2
@@ -76,9 +76,6 @@ def flatten_add_prefix(ndp, prefix):
             dp2 = get_new_name(dp2)
             s1_ = "%s%s%s" % (prefix, sep, s1)
             s2_ = "%s%s%s" % (prefix, sep, s2)
-#             print('dp1_: %s' % dp1)
-#             print('s1_: %s' % s1_)
-#             print('dp1: %s' % names2[dp1])
             assert s1_ in names2[dp1].get_rnames()
             assert s2_ in names2[dp2].get_fnames()
             c2 = Connection(dp1=dp1, s1=s1_, dp2=dp2, s2=s2_)
@@ -86,11 +83,18 @@ def flatten_add_prefix(ndp, prefix):
             
         fnames2 = ['%s%s%s' % (prefix, sep, _) for _ in ndp.get_fnames()]
         rnames2 = ['%s%s%s' % (prefix, sep, _) for _ in ndp.get_rnames()]
-#         fnames2 = ndp.get_fnames()
-#         rnames2 = ndp.get_rnames()
 
         return CompositeNamedDP.from_parts(names2, connections2, fnames2, rnames2)
-    assert False
+
+    # XXX
+    # mocdp.ndp.named_coproduct.NamedDPCoproduct
+    if isinstance(ndp, NamedDPCoproduct):
+        children = ndp.ndps
+        children2 = tuple([flatten_add_prefix(_, prefix) for _ in children])
+        labels2 = ndp.labels
+        return NamedDPCoproduct(children2, labels2)
+
+    assert False, ndp
     
 @contract(ndp=CompositeNamedDP)
 def cndp_flatten(ndp):

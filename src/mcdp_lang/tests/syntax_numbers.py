@@ -10,7 +10,8 @@ from mcdp_posets.rcomp_units import make_rcompunit
 from mcdp_posets.types_universe import get_types_universe
 from nose.tools import assert_equal
 from numpy.testing.utils import assert_allclose
-from mcdp_lang.tests.utils2 import eval_rvalue_as_constant
+from mcdp_lang.tests.utils2 import eval_rvalue_as_constant, \
+    eval_rvalue_as_constant_same_exactly
 from mcdp_lang.syntax import Syntax, SyntaxBasics
 
 CDP = CDPLanguage
@@ -45,6 +46,18 @@ def check_numbers2():
     # automatic conversion to float
     parse_wrap_check('1 [g]', Syntax.number_with_unit,
                       CDP.SimpleValue(CDP.ValueExpr(1.0), CDP.RcompUnit('g')))
+
+@comptest
+def check_sum_nat():
+    eval_rvalue_as_constant_same_exactly('nat:1 + nat:1', 'nat:2')
+
+@comptest
+def check_sum_int():
+    eval_rvalue_as_constant_same_exactly('int:1 + int:1', 'int:2')
+
+@comptest
+def check_sum_nat_int():
+    eval_rvalue_as_constant_same_exactly('int:1 + nat:1', 'int:2')
 
 @comptest
 def check_division():

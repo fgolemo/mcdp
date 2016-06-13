@@ -23,6 +23,7 @@ from tempfile import mkdtemp
 import os
 from mcdp_report.utils import safe_makedirs
 from mocdp.dp.conversion import Conversion
+from mocdp.dp.dp_flatten import MuxMap
 
 
 STYLE_GREENRED = 'greenred'
@@ -431,11 +432,15 @@ def create_simplewrap(gdc, ndp):
     if only_string:
 
         label = type(ndp.dp).__name__
+
         if isinstance(ndp.dp, GenericUnary):
             label = ndp.dp.function.__name__
 
-        if isinstance(ndp.dp, WrapAMap):
+        elif isinstance(ndp.dp, WrapAMap):
             label = ndp.dp.diagram_label()
+
+            if isinstance(ndp.dp.amap, MuxMap):
+                label = 'Mux(%s)' % ndp.dp.amap.coords
 
         sname = 'simple'
     else:
@@ -521,6 +526,9 @@ def format_unit(R):
         return '[%s]' % format_pint_unit_short(R.units)
     elif isinstance(R, Rcomp):
         return '[R]'
+    elif hasattr(R, '__mcdplibrary_load_name'):
+        n = getattr(R, '__mcdplibrary_load_name')
+        return '[`%s]' % n
     else:
         return '[%s]' % str(R)
             

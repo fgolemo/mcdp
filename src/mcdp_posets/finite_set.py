@@ -4,6 +4,8 @@ from contracts import contract
 from .space import Space, NotBelongs, NotEqual, Uninhabited
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 from contracts.utils import raise_desc
+from mcdp_posets.poset import NotJoinable, NotMeetable
+from networkx.algorithms.dag import descendants, ancestors
 
 class FiniteCollectionAsSpace(Space):
     """ 
@@ -56,6 +58,8 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
                 assert b in universe
 
     def __eq__(self, b):
+        if not isinstance(b, FinitePoset):
+            return False
         same_elements = self.get_elements() == b.get_elements()
         same_relations = self.relations == b.relations
         return same_elements and same_relations
@@ -64,13 +68,7 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
         return self.elements
 
     def __repr__(self):
-        return "FinitePoset(%s)" % self.elements
-
-    def join(self, a, b):
-        raise NotImplementedError()
-
-    def meet(self, a, b):
-        raise NotImplementedError()
+        return "FinitePoset(%d els)" % len(self.elements)
 
     def get_test_chain(self, n):  # @UnusedVariable
         if not self.elements:
@@ -96,6 +94,56 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
                 G.add_edge(a, b)
         return G
 
+    def _get_upper_closure(self, a):
+        """ Returns a set of the upper closure of a """
+        G = self._get_graph_closure_no_cycles()
+        d = set(descendants(G, a))
+        d.add(a)
+        return d
+
+    def _get_lower_closure(self, a):
+        """ Returns a set of the upper closure of a """
+        G = self._get_graph_closure_no_cycles()
+        d = set(ancestors(G, a))
+        d.add(a)
+        return d
+
+    def join(self, a, b):
+        from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima, poset_maxima
+
+        # find all descendants
+        da = self._get_upper_closure(a)
+        db = self._get_upper_closure(b)
+        # take intersection
+        inter = set(da) & set(db)
+        if not inter:
+            msg = 'There exists no join because upper closures separate.'
+            raise_desc(NotJoinable, msg, a=self.format(a), b=self.format(b),
+                       da=da, db=db)
+        minima = poset_minima(inter, self.leq)
+        if len(minima) > 1:
+            msg = 'There exists no least element of intersection of upper closure.'
+            raise_desc(NotJoinable, msg)
+        return list(minima)[0]
+
+    def meet(self, a, b):
+        from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima, poset_maxima
+
+        # find all descendants
+        da = self._get_lower_closure(a)
+        db = self._get_lower_closure(b)
+        # take intersection
+        inter = set(da) & set(db)
+        if not inter:
+            msg = 'There exists no join because lower closures separate.'
+            raise_desc(NotMeetable, msg, a=self.format(a), b=self.format(b),
+                       da=da, db=db)
+        maxima = poset_maxima(inter, self.leq)
+        if len(maxima) > 1:
+            msg = 'There exists no least element of intersection of lower closure.'
+            raise_desc(NotMeetable, msg)
+        return list(maxima)[0]
+
     def get_bottom(self):
         if self._bottom is None:
             raise NotBounded()
@@ -108,26 +156,26 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
         else:
             return self._top
 
-    def _get_minimal_elements(self):
+    def get_minimal_elements(self):
         from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
         minima = poset_minima(self.elements, self.leq)
         return minima
 
-    def _get_maximal_elements(self):
+    def get_maximal_elements(self):
         geq = lambda a, b: self.leq(b, a)
         from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
         maxima = poset_minima(self.elements, geq)
         return maxima
 
     def _find_top(self):
-        maxima = self._get_maximal_elements()
+        maxima = self.get_maximal_elements()
         if len(maxima) == 1:
             self._top = list(maxima)[0]
         else:
             self._top = None
 
     def _find_bottom(self):
-        minima = self._get_minimal_elements()
+        minima = self.get_minimal_elements()
         if len(minima) == 1:
             self._bottom = list(minima)[0]
         else:

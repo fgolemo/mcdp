@@ -4,6 +4,7 @@ from .space_product import SpaceProduct
 from contracts import contract
 from contracts.utils import indent, raise_desc
 from mocdp.exceptions import do_extra_checks
+import itertools
 
 __all__ = [
     'PosetProduct',
@@ -12,6 +13,7 @@ __all__ = [
 
 class PosetProduct(SpaceProduct, Poset):
     """ A product of Posets with the product order. """
+
     @contract(subs='seq(str|$Poset|code_spec)')
     def __init__(self, subs):
         from mocdp.configuration import get_conftools_posets
@@ -20,6 +22,10 @@ class PosetProduct(SpaceProduct, Poset):
         SpaceProduct.__init__(self, subs)
 
     def leq(self, a, b):
+        if do_extra_checks():
+            self.belongs(a)
+            self.belongs(b)
+
         for sub, x, y in zip(self.subs, a, b):
             if not sub.leq(x, y):
                 return False
@@ -47,6 +53,10 @@ class PosetProduct(SpaceProduct, Poset):
 
     def get_bottom(self):
         return tuple([s.get_bottom() for s in self.subs])
+
+    def get_minimal_elements(self):
+        s = [_.get_minimal_elements() for _ in self.subs]
+        return set(itertools.product(*tuple(s)))
 
     def get_test_chain(self, n):
         """

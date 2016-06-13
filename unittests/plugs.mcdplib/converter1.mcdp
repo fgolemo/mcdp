@@ -1,31 +1,20 @@
-# test syntax_error
-# This converts from europen to american
+# This converts from European to American
 mcdp {
-	provides out [`power]
-	requires in  [`power]
-	requires cost [USD]
+    provides out [`power]
+    requires in  [`power] 
+    requires cost [USD]
 
-	# This device costs $5 
-	cost >= 5 USD
+    # This device costs $5 
+    cost >= 5 USD
 
-	# We require that the input is european or more
-	# and that it provides a good amount of power (take)
-	req_amperes = take(out, 1)
-	#req_amperes = 0 A
-	# in >= < `plug_types { european },  req_amperes >
-	in >= < `plug_types : european, req_amperes >
+    # We require that the input is european or more
+    # and that it provides a good amount of power (take)
+    req_amperes = take(out, 1)
+    in >= < `plug_types : european, req_amperes >
 
-	# We provide the american output
-	# take(out, 0) <= `american 
+    # We can only provide the american output
+    take(out, 0) <= `plug_types : american 
 }
 
 
-# `space : nat 
-
-# Nat : 1
-
-# `space : power 
-
-
-# european.mcdp_value
-# european = `plug_types : european 
+# solve( <`plug_types: american, 10 A>, `converter1 )

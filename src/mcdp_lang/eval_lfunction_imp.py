@@ -12,6 +12,7 @@ from mcdp_posets import mult_table
 from mcdp_posets.nat import Nat
 from mcdp_posets.rcomp_units import RcompUnits
 from mcdp_lang.parse_actions import add_where_information
+from mcdp_lang.helpers import get_valuewithunits_as_function
 
 
 CDP = CDPLanguage
@@ -75,16 +76,42 @@ def eval_lfunction(lf, context):
             from .eval_lfunction_imp_maketuple import eval_MakeTuple_as_lfunction
             return eval_MakeTuple_as_lfunction(lf, context)
 
-        if isinstance(lf, CDP.NewLimit):
-            from mcdp_lang.eval_constant_imp import eval_constant
-            A = eval_constant(lf.value_with_unit, context)
-            dp = Limit(A.unit, A.value)
-            n = context.new_name('lim')
-            sn = context.new_fun_name('l')
-            ndp = dpwrap(dp, sn, [])
-            context.add_ndp(n, ndp)
+        from mocdp.comp.context import ValueWithUnits
 
-            return context.make_function(n, sn)
+        if isinstance(lf, CDP.VariableRef):
+            if lf.name in context.constants:
+                c = context.constants[lf.name]
+                assert isinstance(c, ValueWithUnits)
+                return get_valuewithunits_as_function(c, context)
+
+            # Not implemented for resources yet?
+#             elif lf.name in context.var2resource:
+#                 return context.var2resource[rvalue.name]
+
+            try:
+                dummy_ndp = context.get_ndp_res(lf.name)
+            except ValueError as e:
+                msg = 'New resource name %r not declared.' % lf.name
+                msg += '\n%s' % str(e)
+                raise DPSemanticError(msg, where=lf.where)
+
+            s = dummy_ndp.get_rnames()[0]
+            return context.make_function(get_name_for_res_node(lf.name), s)
+
+
+        constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue)
+        if isinstance(lf, constants):
+            from mcdp_lang.eval_constant_imp import eval_constant
+            res = eval_constant(lf, context)
+            assert isinstance(res, ValueWithUnits)
+            return get_valuewithunits_as_function(res, context)
+
+#         if isinstance(lf, CDP.Constant):
+#
+#             from mcdp_lang.eval_constant_imp import eval_constant
+#
+#
+#             return context.make_function(n, sn)
 
         msg = 'eval_lfunction() cannot evaluate as a function.'
         raise_desc(DPInternalError, msg, lf=lf)

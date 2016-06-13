@@ -4,7 +4,7 @@ from mcdp_web.utils import response_data
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM
 from mcdp_report.html import ast_to_html
 from mcdp_report.report import gvgen_from_dp
-from mcdp_web.app_solver import png_error_catch
+from mcdp_web.solver.app_solver import png_error_catch
 
 class AppVisualization():
 
@@ -14,25 +14,25 @@ class AppVisualization():
     def config(self, config):
         config.add_route('model_syntax', '/models/{model_name}/syntax')
         config.add_view(self.view_model_syntax, route_name='model_syntax',
-                        renderer='model_syntax.jinja2')
+                        renderer='visualization/model_syntax.jinja2')
 
         config.add_route('model_ndp_graph', '/models/{model_name}/ndp_graph')
         config.add_view(self.view_model_ndp_graph, route_name='model_ndp_graph',
-                        renderer='model_ndp_graph.jinja2')
+                        renderer='visualization/model_ndp_graph.jinja2')
 
         config.add_route('model_ndp_graph_image', '/models/{model_name}/ndp_graph/image/{style}.{format}')
         config.add_view(self.view_model_ndp_graph_image, route_name='model_ndp_graph_image')
 
         config.add_route('model_dp_graph', '/models/{model_name}/dp_graph')
         config.add_view(self.view_model_dp_graph, route_name='model_dp_graph',
-                        renderer='model_dp_graph.jinja2')
+                        renderer='visualization/model_dp_graph.jinja2')
 
         config.add_route('model_dp_graph_image', '/models/{model_name}/dp_graph/image/default.{format}')
         config.add_view(self.view_model_dp_graph_image, route_name='model_dp_graph_image')
 
         config.add_route('model_ndp_repr', '/models/{model_name}/ndp_repr')
         config.add_view(self.view_model_ndp_repr, route_name='model_ndp_repr',
-                        renderer='model_generic_text_content.jinja2')
+                        renderer='visualization/model_generic_text_content.jinja2')
 
     def view_model_ndp_graph_image(self, request):
         def go():

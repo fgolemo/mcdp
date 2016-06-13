@@ -51,6 +51,11 @@ div.library span, div.this_model span { font-weight: bold; }
     	{{m}}
     </option>
     {% endfor %}
+    
+    <!-- Also add the same but with hidden links -->
+	{% for m in models %}
+        <a style='display:none' href=""/models/{{m}}/{{current_view}}""></a>
+    {% endfor %}
   </select>
   </span>
   
@@ -70,6 +75,8 @@ div.library span, div.this_model span { font-weight: bold; }
 	  <span>Model:</span>
 	  
 	  <span class='view'>
+	  
+	  
 	  <select class='hot_select'>
 	    {% for v in views %}
 	    <option value="/models/{{model_name}}/{{v}}"    
@@ -81,6 +88,14 @@ div.library span, div.this_model span { font-weight: bold; }
 	    </option>
 	    {% endfor %}
 	  </select>
+	  
+	  <!-- Also add the same but with hidden links -->
+	   {% for v in views %}
+	    <a style='display:none' href="/models/{{model_name}}/{{v}}"></a>
+	   {% endfor %}    
+		
+	  
+	  
 	  </span>
 	 
 	 <!-- todo: if explorer... -->  

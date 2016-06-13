@@ -9,8 +9,7 @@ from mcdp_posets.poset import Poset
 from mocdp import logger
 from mocdp.comp.context import Context
 from mocdp.comp.interfaces import NamedDP
-from mocdp.exceptions import (DPSemanticError,
-    MCDPExceptionWithWhere)
+from mocdp.exceptions import DPSemanticError, MCDPExceptionWithWhere
 import os
 import shutil
 import sys
@@ -52,13 +51,11 @@ class MCDPLibrary():
             file_to_contents = {}
         self.file_to_contents = file_to_contents
         
-        if cache_dir is None:
-            cache_dir = '_cached'
-
         self.cache_dir = cache_dir
 
         if search_dirs is None:
             search_dirs = []
+
         self.search_dirs = search_dirs
 
     def clone(self):
@@ -70,9 +67,13 @@ class MCDPLibrary():
             contents[f] = deepcopy(getattr(self, f))
         return MCDPLibrary(**contents)
 
+    def use_cache_dir(self, cache_dir):
+        self.cache_dir = cache_dir
+
     def delete_cache(self):
-        if os.path.exists(self.cache_dir):
-            shutil.rmtree(self.cache_dir)
+        if self.cache_dir:
+            if os.path.exists(self.cache_dir):
+                shutil.rmtree(self.cache_dir)
 
     @contract(returns=NamedDP)
     def load_ndp(self, id_ndp):
@@ -99,10 +100,16 @@ class MCDPLibrary():
             # maybe we should clone
             l = self.clone()
             logger.debug('Parsing %r' % name)
-            return parsing(l, data, realpath)
+            res = parsing(l, data, realpath)
+            setattr(res, '__mcdplibrary_load_name', name)
+            return res
 
-        cache_file = os.path.join(self.cache_dir, parsing.__name__, '%s.cached' % name)
-        return memo_disk_cache2(cache_file, data, actual_load)
+        if not self.cache_dir:
+            return actual_load()
+        else:
+            cache_file = os.path.join(self.cache_dir, parsing.__name__,
+                                      '%s.cached' % name)
+            return memo_disk_cache2(cache_file, data, actual_load)
 
     load_ndp2 = load_ndp
 
@@ -116,6 +123,11 @@ class MCDPLibrary():
     def parse_primitivedp(self, string, realpath=None):
         from mcdp_lang.parse_interface import parse_primitivedp
         return self._parse_with_hooks(parse_primitivedp, string, realpath)
+
+    def parse_constant(self, string):
+        from mcdp_lang.parse_interface import parse_constant
+        return self._parse_with_hooks(parse_constant, string, None)
+
 
     @contextmanager
     def _sys_path_adjust(self):
@@ -200,7 +212,6 @@ class MCDPLibrary():
         return found
 
     def add_search_dir(self, d):
-        print('adding search dir %s' % d)
         self.search_dirs.append(d)
 
         if not os.path.exists(d):

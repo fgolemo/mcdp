@@ -265,13 +265,13 @@ def get_product_embedding(tu, A, B):
 
 def check_leq_products(tu, A, B):
     if len(A) != len(B):
-        msg = 'Different length'
+        msg = 'Different length.'
         raise_desc(NotLeq, msg, A=A, B=B)
     for a, b in zip(A, B):
         try:
             tu.check_leq(a, b)
         except NotLeq as e:
-            msg = 'Found uncomparable elements'
+            msg = 'Found uncomparable elements.'
             raise_wrapped(NotLeq, e, msg, compact=True, a=a, b=b)
 
 

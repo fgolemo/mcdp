@@ -11,7 +11,7 @@ class AppEditor():
     def config(self, config):
         config.add_route('edit_form', '/edit/{model_name}')
         config.add_view(self.view_edit_form, route_name='edit_form',
-                        renderer='edit_form.jinja2')
+                        renderer='editor/edit_form.jinja2')
 
         config.add_route('edit_submit', '/edit_submit/{model_name}')
         config.add_view(self.view_edit_submit, route_name='edit_submit')
@@ -58,7 +58,7 @@ class AppEditor():
                       'error': error,
                       'rows': nrows}
 
-            return render_to_response('edit_form.jinja2',
+            return render_to_response('editor/edit_form.jinja2',
                                       params, request=request)
 
         l.write_to_model(model_name, data)

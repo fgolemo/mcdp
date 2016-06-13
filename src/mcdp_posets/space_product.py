@@ -78,6 +78,9 @@ class SpaceProduct(Space):
 
     def __repr__(self):
         def f(x):
+            if hasattr(x, '__mcdplibrary_load_name'):
+                return getattr(x, '__mcdplibrary_load_name')
+
             r = x.__repr__()
             if  r[-1] != ')' and (isinstance(x, SpaceProduct) or ("×" in r)):
                 return "(%s)" % r
