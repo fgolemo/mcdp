@@ -1,14 +1,23 @@
-include *.rst
 include *.md
-include *.txt
-include *.cfg
-include *.mk
-
 include *.mcdp
 include *.mcdp_value
 include *.mcdp_poset
 include *.mcdp_primitivedp
 
-recursive-include src/mocdp *
-recursive-include src/mocdp/dp_report/icons *
+#recursive-include src *.jinja2
+#recursive-include src *.png
+#recursive-include src *.css
+#recursive-include src *.js
 
+recursive-include src *
+recursive-include examples *.mcdp
+recursive-include examples *.mcdp_value
+recursive-include examples *.mcdp_poset
+recursive-include examples *.mcdp_primitivedp
+recursive-include examples Makefile
+
+#recursive-include src/mocdp/dp_report/icons *
+
+
+recursive-include misc *.tmTheme
+recursive-include misc *.sublime-syntax
