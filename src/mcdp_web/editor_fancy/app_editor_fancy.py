@@ -23,23 +23,27 @@ class AppEditorFancy():
 
     def config(self, config):
 
-        config.add_route('edit_form_fancy', '/edit_fancy/{model_name}/')
+        config.add_route('edit_form_fancy', 
+                         self.get_lmv_url('{library}', '{model_name}', 'edit_fancy'))
         config.add_view(self.view_edit_form_fancy, route_name='edit_form_fancy',
                         renderer='editor_fancy/edit_form_fancy.jinja2')
 
-        config.add_route('ajax_parse', '/edit_fancy/{model_name}/ajax_parse')
+        config.add_route('ajax_parse', 
+                         self.get_lmv_url('{library}', '{model_name}', 'edit_fancy') + 'ajax_parse')
+        
         config.add_view(self.ajax_parse, route_name='ajax_parse',
                         renderer='json')
 
-        config.add_route('editor_fancy_save', '/edit_fancy/{model_name}/save')
+        config.add_route('editor_fancy_save',
+                         self.get_lmv_url('{library}', '{model_name}', 'edit_fancy') + 'save')
+        
         config.add_view(self.editor_fancy_save, route_name='editor_fancy_save',
                         renderer='json')
 
-        config.add_route('new_model', '/new_model/{model_name}')
+        config.add_route('new_model', '/libraries/{library}/new_model/{model_name}')
         config.add_view(self.view_new_model, route_name='new_model')
 
-
-        config.add_route('graph', '/edit_fancy/{model_name}/graph.png')
+        config.add_route('graph', self.get_lmv_url('{library}', '{model_name}', 'edit_fancy') + 'graph.png')
         config.add_view(self.graph, route_name='graph')
 
 
@@ -47,7 +51,7 @@ class AppEditorFancy():
         string = self.get_text_from_request(request)
         model_name = self.get_model_name(request)
         def go():
-            l = self.get_library()
+            l = self.get_library(request)
             l.write_to_model(model_name, string)
             return {'ok': True}
 
@@ -60,7 +64,7 @@ class AppEditorFancy():
     def view_edit_form_fancy(self, request):
         model_name = self.get_model_name(request)
         filename = '%s.mcdp' % model_name
-        l = self.get_library()
+        l = self.get_library(request)
         f = l._get_file_data(filename)
         source_code = f['data']
         realpath = f['realpath']
@@ -72,6 +76,7 @@ class AppEditorFancy():
                 'model_name': model_name,
                 'realpath': realpath,
                 'rows': nrows,
+                'navigation': self.get_navigation_links(request),
                 'error': None}
 
     def get_text_from_request(self, request):
@@ -105,7 +110,7 @@ class AppEditorFancy():
 
                 try:
 
-                    l = self.get_library()
+                    l = self.get_library(request)
                     ndp = l.parse_ndp(string)
 
                 except DPSemanticError as e:
@@ -130,7 +135,7 @@ class AppEditorFancy():
             model_name = self.get_model_name(request)
 
             if not model_name in self.last_processed:
-                l = self.get_library()
+                l = self.get_library(request)
                 ndp = l.load_ndp2(model_name)
             else:
                 ndp = self.last_processed[model_name]
@@ -152,18 +157,22 @@ class AppEditorFancy():
         return png_error_catch(go, request)
 
     def view_new_model(self, request):
+        library = self.get_current_library_name(request)
         model_name = str(request.matchdict['model_name'])  # unicode
         basename = model_name + '.mcdp'
-        l = self.get_library()
+        l = self.get_library(request)
         if l.file_exists(basename):
             error = 'File %r already exists.' % basename
             return render_to_response('editor_fancy/error_model_exists.jinja2',
                                       {'error': error,
+                                       'url_edit': self.get_lmv_url(library, model_name, 'edit_fancy'),
                                        'model_name': model_name}, request=request)
 
         else:
+
+            path = self.libraries[library]['path']
             source = "mcdp {\n\n}"
-            filename = os.path.join(self.dirname, 'created', basename)
+            filename = os.path.join(path, 'created', basename)
 
             d = os.path.dirname(filename)
             if not os.path.exists(d):
@@ -173,7 +182,7 @@ class AppEditorFancy():
                 f.write(source)
             l._update_file(filename)
 
-            raise HTTPFound('/edit_fancy/%s/' % model_name)
+            raise HTTPFound('/libraries/%s/models/%s/views/edit_fancy/' % (library, model_name))
 
 
 # def cndp_get_suitable_for_drawing(model_name, ndp):

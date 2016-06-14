@@ -16,7 +16,7 @@ div.library span, div.this_model span { font-weight: bold; }
 <div class="navigation">
 
 	<div class="library">
-	<span>Library:</span>
+	
 
 
   <script type="text/javascript">
@@ -26,7 +26,7 @@ div.library span, div.this_model span { font-weight: bold; }
     }
     while(name.length < 4);
     
-    url = "/new_model/" + name
+    url = "../../../../new_model/" + name
     
     var win = window.open(url, '_blank');
 	if (win) {
@@ -40,21 +40,42 @@ div.library span, div.this_model span { font-weight: bold; }
   }
   </script>
   
-  <span class='models'>
+  <span class='libraries'>
+  <span>Libraries:</span>
   <select class='hot_select'>
-    {% for m in models %}
-    <option value="/models/{{m}}/{{current_view}}"    
-	    {% if m == model_name %}
+    {% for li in navigation['libraries'] %}
+    <option value="{{li['url']}}"    
+	    {% if li['current'] %}
 	    selected = 1
 	    {% endif %}
     >
-    	{{m}}
+    	{{li['name']}}
     </option>
     {% endfor %}
     
     <!-- Also add the same but with hidden links -->
-	{% for m in models %}
-        <a style='display:none' href=""/models/{{m}}/{{current_view}}""></a>
+	{% for li in navigation['libraries'] %}
+        <a style='display:none' href="{{li['url']}}""></a>
+    {% endfor %}
+  </select>
+  </span>
+  
+  <span class='models'>
+  <span>Models:</span>
+  <select class='hot_select'>
+    {% for mi in navigation['models'] %}
+    <option value="{{mi['url']}}"    
+	    {% if mi['current'] %}
+	    selected = 1
+	    {% endif %}
+    >
+    	{{mi['name']}}
+    </option>
+    {% endfor %}
+    
+    <!-- Also add the same but with hidden links -->
+	{% for mi in navigation['models'] %}
+        <a style='display:none' href="{{mi['url']}}""></a>
     {% endfor %}
   </select>
   </span>
@@ -72,42 +93,40 @@ div.library span, div.this_model span { font-weight: bold; }
   </div>
   
   <div class="this_model">
-	  <span>Model:</span>
+	 <span class='view'>
 	  
-	  <span class='view'>
-	  
-	  
-	  <select class='hot_select'>
-	    {% for v in views %}
-	    <option value="/models/{{model_name}}/{{v}}"    
-		    {% if v == current_view %}
-		    selected = 1
-		    {% endif %}
-	    >
-	    	{{v}}
-	    </option>
-	    {% endfor %}
-	  </select>
-	  
-	  <!-- Also add the same but with hidden links -->
-	   {% for v in views %}
-	    <a style='display:none' href="/models/{{model_name}}/{{v}}"></a>
-	   {% endfor %}    
-		
-	  
+
+  <span>Views:</span>
+  <select class='hot_select'>
+    {% for vi in navigation['views'] %}
+    <option value="{{vi['url']}}"    
+	    {% if vi['current'] %}
+	    selected = 1
+	    {% endif %}
+    >
+    	{{vi['name']}}
+    </option>
+    {% endfor %}
+    
+    <!-- Also add the same but with hidden links -->
+	{% for vi in navigation['views'] %}
+        <a style='display:none' href="{{vi['url']}}""></a>
+    {% endfor %}
+  </select>
+  </span>
 	  
 	  </span>
 	 
 	 <!-- todo: if explorer... -->  
-    <!--<form style='display:inline' method="GET" action="/edit/{{model_name}}">
+    <!--<form style='display:inline' method="GET" action="../edit/">
 	    <input type="submit" value="Edit (basic)"/>
 	 </form>-->
 	 
-     <form style='display:inline' method="GET" action="/edit_fancy/{{model_name}}/">
+     <form style='display:inline' method="GET" action="../edit_fancy/">
 	    <input type="submit" value="Edit"/>
 	 </form>
   
-  	<form style='display:inline' method="GET" action="/solver/{{model_name}}/">
+  	<form style='display:inline' method="GET" action="../solver/">
 	    <input type="submit" value="Solve"/>
 	 </form>
   

@@ -3,8 +3,8 @@
 <head>
     <title>QR Reader</title>
 	{% include 'head.jinja2' %}
-    <script src="static/html5-qrcode/lib/jsqrcode-combined.min.js"></script>
-    <script src="static/html5-qrcode/lib/html5-qrcode.min.js"></script>
+    <script src="/static/html5-qrcode/lib/jsqrcode-combined.min.js"></script>
+    <script src="/static/html5-qrcode/lib/html5-qrcode.min.js"></script>
     <script type='text/javascript'>
     
     	function ajax_success(data) {
@@ -21,7 +21,7 @@
     
     	function do_some_ajax(qrstring){
 		    jQuery.ajax({
-		        url     : '/qr_reader_submit',
+		        url     : 'qr_reader_submit',
 		        type    : 'POST',
 		        data: {'qrstring': qrstring},
 		        dataType: 'json',
@@ -51,7 +51,7 @@
 
 <p>Note: this features works only on Chrome for now and on localhost (a secure origin).</p>
   
-<p> <a href="/refresh_library">Refresh cache</a></p>
+<!--<p> <a href="/refresh_library">Refresh cache</a></p>-->
 
 <table>
 <tr>

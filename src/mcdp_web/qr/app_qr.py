@@ -11,18 +11,22 @@ class AppQR():
 
     def config(self, config):
 
-        config.add_route('qr_reader', '/qr_reader')
+        config.add_route('qr_reader',
+                         '/libraries/{library}/qr_reader/')
         config.add_view(self.view_qr_reader, route_name='qr_reader',
                         renderer='qr/qr_reader.jinja2')
 
-        config.add_route('qr_reader_submit', '/qr_reader_submit')
+        config.add_route('qr_reader_submit',
+                         '/libraries/{library}/qr_reader/qr_reader_submit')
         config.add_view(self.qr_reader_submit,
                         route_name='qr_reader_submit', renderer='json')
 
-        config.add_route('scraped', '/scraped/{hex}/{num}')
+        config.add_route('scraped',
+                         '/libraries/{library}/qr_reader/scraped/{hex}/{num}')
         config.add_view(self.serve_scraped, route_name='scraped')
 
-        config.add_route('qr_import', '/qr_import/{hex}')
+        config.add_route('qr_import',
+                         '/libraries/{library}/qr_reader/qr_import/{hex}')
         config.add_view(self.view_qr_import,
                         route_name='qr_import')
 
@@ -68,14 +72,14 @@ class AppQR():
 
             output = ''
             output += """
-                     <form method="POST" action="/qr_import/%s">
+                     <form method="POST" action="qr_import/%s">
                         <input type="submit" value="Import"/>
                       </form>
                     """ % encoded
 
             for i, r in enumerate(resources):
                 if r.type == 'mcdp/icon':
-                    path = '/scraped/%s/%s' % (encoded, i)
+                    path = 'scraped/%s/%s' % (encoded, i)
                     output += '<img src="%s" style="width: 12em"/>' % path
 
             res = {}
@@ -87,7 +91,11 @@ class AppQR():
         hexified = request.matchdict['hex']
         qrstring = binascii.unhexlify(hexified)
         resources = self.retrieved[qrstring]
-        where = os.path.join(self.dirname, 'imported')
+
+        library = self.get_current_library_name(request)
+        path = self.libraries[library]['path']
+
+        where = os.path.join(path, 'imported')
         if not os.path.exists(where):
             os.makedirs(where)
 
@@ -113,8 +121,8 @@ class AppQR():
             with open(filename, 'wb') as f:
                 f.write(r.content)
             
-        self._refresh_library()
-        raise HTTPFound('/')
+        self._refresh_library(request)
+        raise HTTPFound('/libraries/%s/list' % library)
 
     def serve_scraped(self, request):
         hexified = request.matchdict['hex']

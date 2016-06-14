@@ -149,11 +149,11 @@ def eval_constant_space_custom_value(op, context):
     from mcdp_lang.eval_space_imp import eval_space
     assert isinstance(op, CDP.SpaceCustomValue)
     space = eval_space(op.space, context)
-    
+    custom_string = op.custom_string
     from mcdp_posets.finite_set import FiniteCollectionAsSpace
     if isinstance(space, FiniteCollectionAsSpace):
         try:
-            space.belongs(op.custom_string)
+            space.belongs(custom_string)
             mcdp_dev_warning('this does not seem to work...')
         except NotBelongs as e:
             msg = 'The value is not an element of this space.'
@@ -162,7 +162,8 @@ def eval_constant_space_custom_value(op, context):
 
         return ValueWithUnits(unit=space, value=op.custom_string)
     
-    raise_desc(NotImplementedError, space=space)
+    msg = 'Custom parsing not implemented for space.'
+    raise_desc(NotImplementedError, msg, space=space, custom_string=custom_string)
 
 def eval_constant_uppersetfromcollection(op, context):
     x = eval_constant(op.value, context)

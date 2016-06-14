@@ -3,7 +3,7 @@ from mcdp_web.solver.app_solver_state import SolverState, get_decisions_for_axes
 from mcdp_web.utils import response_data
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
-from pyramid.httpexceptions import HTTPSeeOther
+from pyramid.httpexceptions import HTTPSeeOther, HTTPFound
 import cgi
 import itertools
 import traceback
@@ -11,17 +11,17 @@ import traceback
 
 class AppSolver():
     """
-        /solver/batteries/   - redirects to one with the right amount of axis
+        /libraries/{}/models/{}/views/solver/   - redirects to one with the right amount of axis
     
-        /solver/batteries/0,1/0,1/   presents the gui. 0,1 are the axes
+        /libraries/{}/models/{}/views/solver/0,1/0,1/   presents the gui. 0,1 are the axes
     
         AJAX:
-            /solver/batteries/0,1/0,1/addpoint     params x, y
-            /solver/batteries/0,1/0,1/getdatasets  params -
-            /solver/batteries/0,1/0,1/reset        params -
+            /libraries/{}/models/{}/views/solver/0,1/0,1/addpoint     params x, y
+            /libraries/{}/models/{}/views/solver/0,1/0,1/getdatasets  params -
+            /libraries/{}/models/{}/views/solver/0,1/0,1/reset        params -
             
-        /solver/batteries/0,1/0,1/compact_graph    png image
-        /solver/batteries/compact_graph    png image
+        /libraries/{}/models/{}/views/solver/0,1/0,1/compact_graph    png image
+        /libraries/{}/models/{}/views/solver/compact_graph    png image
     """
 
     def __init__(self):
@@ -38,15 +38,16 @@ class AppSolver():
 
     def reset(self, request):
         model_name = self.get_model_name(request)
-        self.ndp = self.get_library().load_ndp2(model_name)
+        self.ndp = self.get_library(request).load_ndp2(model_name)
         self.solver_states[model_name] = SolverState(self.ndp)
 
     def config(self, config):
-        base = '/solver/{model_name}/{fun_axes}/{res_axes}/'
-
-        config.add_route('solver_base', "/solver/{model_name}/")
+        config.add_route('solver_base',
+                         '/libraries/{library}/models/{model_name}/views/solver/')
         config.add_view(self.view_solver_base,
-                        route_name='solver_base', renderer='solver/solver.jinja2')
+                        route_name='solver_base', renderer='solver/solver_message.jinja2')
+
+        base = '/libraries/{library}/models/{model_name}/views/solver/{fun_axes}/{res_axes}/'
 
         config.add_route('solver', base)
         config.add_view(self.view_solver,
@@ -64,44 +65,58 @@ class AppSolver():
         config.add_view(self.ajax_solver_reset,
                         route_name='solver_reset', renderer='json')
 
-        config.add_route('solver_image', base + 'compact_graph')
+        config.add_route('solver_image', '/libraries/{library}/models/{model_name}/views/solver/compact_graph')
         config.add_view(self.image, route_name='solver_image')
-        config.add_route('solver_image2', '/solver/{model_name}/compact_graph')
+        config.add_route('solver_image2', '/libraries/{library}/models/{model_name}/views/solver/{fun_axes}/{res_axes}/compact_graph')
         config.add_view(self.image, route_name='solver_image2')
+#         config.add_route('solver_image2', '/solver/{model_name}/compact_graph')
+#         config.add_view(self.image, route_name='solver_image2')
 
     def parse_params(self, request):
         model_name = self.get_model_name(request)
+        library = self.get_current_library_name(request)
 
         fun_axes = map(int, request.matchdict['fun_axes'].split(','))
         res_axes = map(int, request.matchdict['res_axes'].split(','))
         return {'model_name': model_name,
                 'fun_axes': fun_axes,
-                'res_axes': res_axes}
+                'res_axes': res_axes,
+                'library': library}
 
     def view_solver_base(self, request):
         model_name = self.get_model_name(request)
+        library = self.get_current_library_name(request)
 
         solver_state = self.get_solver_state(request)
         ndp = solver_state.ndp
         nf = len(ndp.get_fnames())
         nr = len(ndp.get_rnames())
 
-        base = '/solver/%s' % model_name
+        base = '/libraries/%s/models/%s/views/solver/' % (library, model_name)
         if nf >= 2 and nr >= 2:
-            url = '/0,1/0,1/'
-            raise HTTPSeeOther(base + url)
+            url = base + '0,1/0,1/'
+            raise HTTPSeeOther(url)
         elif nf == 1 and nr >= 2:
-            url = '/0/0,1/'
-            raise HTTPSeeOther(base + url)
+            url = base + '0/0,1/'
+            raise HTTPSeeOther(url)
+        elif nf == 1 and nr == 1:
+            url = base + '0/0/'
+            raise HTTPSeeOther(url)
         else:
             title = 'Could not find render view for this model. '
             message = 'Could not find render view for this model. '
             message += '<br/>'
-            message += str(ndp)
-            return {'title': title, 'message': message}
+            ndp_string = ndp.__repr__() 
+            ndp_string = ndp_string.decode("utf8")
+            message += '<pre>' + ndp_string + '</pre>'
+            # message = message.decode('utf-8')
+            return {'title': title,
+                    'message': message,
+                    'navigation': self.get_navigation_links(request)}
 
         
     def view_solver(self, request):
+        print('View solver')
         params = self.parse_params(request)
         solver_state = self.get_solver_state(request)
 
@@ -127,7 +142,8 @@ class AppSolver():
                 'res_alternatives': res_alternatives,
                 'fun_alternatives': fun_alternatives,
                 'current_url': request.path,
-                'params': params}
+                'params': params,
+                'navigation': self.get_navigation_links(request)}
         return res
 
     def return_new_data(self, request):
@@ -243,12 +259,12 @@ def get_png(image):
 
 
 def create_alternative_urls(params, ndp):
-
+    library = params['library']
+    model_name = params['model_name']
     def make_url(faxes, raxes):
         faxes = ",".join(map(str, faxes))
         raxes = ",".join(map(str, raxes))
-        model_name = params['model_name']
-        return '/solver/%s/%s/%s/' % (model_name, faxes, raxes)
+        return '/libraries/%s/models/%s/solver/%s/%s/' % (library, model_name, faxes, raxes)
 
     # let's create the urls for different options
     fnames = ndp.get_fnames()

@@ -22,18 +22,18 @@
   {% if error %}
   <p id="error_notice">
   	The code did not compile. See error below. 
-  	Correct and resubmit or <a href="/edit/{{model_name}}">discard the changes</a>.
+  	Correct and resubmit or <a href="../edit/">discard the changes</a>.
   </p> 
   {% endif %}
 
   <textarea name="source_code" rows="{{rows}}" cols="80" form="the_form">{{source_code|safe}}</textarea>
-  <form id="the_form" method="POST" action="/edit_submit/{{model_name}}">
+  <form id="the_form" method="POST" action="submit">
     <input type="submit" value="Submit"/>
   </form>
-  <form method="POST" action="/models/{{model_name}}/syntax">
+  <form method="POST" action="../syntax/">
   	<input type="submit" value="Discard changes"/>
   </form>
-  <!--<p><a href="/models/{{model_name}}/syntax">Discard changes</a></p>-->
+  <!--<p><a href="../syntax/">Discard changes</a></p>-->
   
   {% if error %}
   <pre id="error"><code>{{error}}</code></pre>

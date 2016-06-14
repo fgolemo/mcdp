@@ -348,7 +348,8 @@ class Syntax():
 
     # <space> : identifier
     # `plugs : european
-    space_custom_value1 = sp(space_expr + L(":") + SyntaxIdentifiers.get_idn(),
+    short_identifiers = Word(nums + alphas)
+    space_custom_value1 = sp(space_expr + L(":") + short_identifiers,
                           lambda t: CDP.SpaceCustomValue(t[0], t[1], t[2]))
 
     constant_value << (number_with_unit

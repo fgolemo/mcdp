@@ -7,8 +7,8 @@ from mcdp_posets.poset import Poset
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import dpwrap
 from mocdp.dp.dp_identity import Identity
-from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.dp.primitive import PrimitiveDP
+from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 
 __all__ = [
     'Connection',
@@ -18,11 +18,11 @@ __all__ = [
 Connection0 = namedtuple('Connection', 'dp1 s1 dp2 s2')
 class Connection(Connection0):
     def __repr__(self):
-#         return ("Constraint(%s.%s <= %s.%s)" %
-#                 (self.dp1, self.s1, self.dp2, self.s2))
-
-        return ("Constraint(dp1,s1 %s, %s <= dp2,s2 %s, %s)" %
+        return ("Constraint(%s.%s <= %s.%s)" %
                 (self.dp1, self.s1, self.dp2, self.s2))
+
+#         return ("Constraint(dp1,s1 %s, %s <= dp2,s2 %s, %s)" %
+#                 (self.dp1, self.s1, self.dp2, self.s2))
 
     def involves_any_of_these_nodes(self, nodes):
         """ Returns true if any of the two nodes is in the iterable nodes."""

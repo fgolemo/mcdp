@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest_fails
+from comptests.registrar import comptest_fails, comptest
 from mcdp_lang_tests.utils import assert_parsable_to_connected_ndp
 from mcdp_lang_tests.utils2 import eval_rvalue_as_constant
 
 
-@comptest_fails
-def bug_resource_mix():
+@comptest
+def ok_resource_mix():
     assert_parsable_to_connected_ndp("""
 mcdp {
   provides f1 [R] 

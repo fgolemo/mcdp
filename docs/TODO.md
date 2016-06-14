@@ -35,13 +35,11 @@ Incoming
 Misc
 -----
 
-- R: change cdp_view -> ``mcdp_cli``
 - R: add license information
 
 
 
 - T: mcdplib: create stand-alone ``mcdp-test`` for each ``.mcdplib``
-- T: mcddlib: make sure that we parse / run all the models
 
 - B: automatically load CSS from that file.
 
@@ -49,9 +47,11 @@ Misc
 
 MCDP-web
 ----------
+
 - F: send to non-fancy for internet explorer
-- B: change ``/language`` to ``/docs/language_notes``
+
 - F: mcdp-web: nice CSS all around
+
 - T: mcdp-web: Testing of at least all links.
 
 - F: mcdp-web/fancy_editor: Submit changes 
@@ -62,18 +62,16 @@ MCDP-web
 
 - B: mcdp-web: make sure that everything works when packaged
 
-- F: mcdp-web: allow browsing multiple libraries 
+- F: automatically parse and execute the snippets in the Markdown documents
 
-- F: the created models are in a folder "created/" (just like imported/)
-
-- F: automatically parse and execute the snippets in the documents
 - F: create static versions of documents
 
 
 - B: we need to escape # in interactive. Maybe hexify?
 http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c  %0A    x <= c <= d # test%0A    e <= a1 # test%0A}
 
-
+- F: rename model
+- F: delete model
 
 MCDP-web / QR
 -------------

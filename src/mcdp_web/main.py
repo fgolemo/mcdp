@@ -1,4 +1,6 @@
+from contracts import contract
 from mcdp_library.library import MCDPLibrary
+from mcdp_library.utils.locate_files_imp import locate_files
 from mcdp_web.editor.app_editor import AppEditor
 from mcdp_web.editor_fancy.app_editor_fancy import AppEditorFancy
 from mcdp_web.interactive.app_interactive import AppInteractive
@@ -17,13 +19,31 @@ __all__ = [
     'mcdp_web_main',
 ]
 
+def load_libraries(dirname):
+    """ Returns a dictionary
+            
+            library_name -> {'path': ...}
+    """
+    libraries = locate_files(dirname, "*.mcdplib", followlinks=False,
+                     include_directories=True,
+                     include_files=False)
+    res = {}
+    for path in libraries:
+        library_name = os.path.splitext(os.path.basename(path))[0]
+
+        l = MCDPLibrary()
+        cache_dir = os.path.join(path, '_mcdpweb_cache')
+        l.use_cache_dir(cache_dir)
+        l.add_search_dir(path)
+
+        res[library_name] = dict(path=path, library=l)
+    return res
 
 class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
              AppEditorFancy):
-    def __init__(self, dirname):
-        self.dirname = dirname
 
-        self.library = None
+    def __init__(self, dirname):
+        self.libraries = load_libraries(dirname)
 
         AppEditor.__init__(self)
         AppVisualization.__init__(self)
@@ -32,36 +52,44 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         AppInteractive.__init__(self)
         AppEditorFancy.__init__(self)
 
-    def get_library(self):
-        if self.library is None:
-            l = MCDPLibrary()
-            cache_dir = os.path.join(self.dirname, '_mcdpweb_cache')
-            l.use_cache_dir(cache_dir)
-            l.add_search_dir(self.dirname)
-            self.library = l
-        return self.library
+    def get_current_library_name(self, request):
+        library_name = str(request.matchdict['library'])  # unicod
+        return library_name
 
-    def list_of_models(self):
-        l = self.get_library()
+    def get_library(self, request):
+        library_name = self.get_current_library_name(request)
+        return self.libraries[library_name]['library']
+
+    def list_of_models(self, request):
+        l = self.get_library(request)
         return l.get_models()
+    
+    @contract(returns='list(str)')
+    def list_libraries(self):
+        """ Returns the list of libraries """
+        return list(self.libraries)
 
     def view_index(self, request):  # @UnusedVariable
         return {}
 
     def view_list(self, request):  # @UnusedVariable
-        models = self.list_of_models()
+        models = self.list_of_models(request)
         return {'models': sorted(models)}
 
-    def _refresh_library(self):
-        l = self.get_library()
+    def view_list_libraries(self, request):  # @UnusedVariable
+        libraries = self.list_libraries()
+        return {'libraries': sorted(libraries)}
+
+
+    def _refresh_library(self, request):
+        l = self.get_library(request)
         l.delete_cache()
-        self.library = None
         self.appqr_reset()
 
     def view_refresh_library(self, request):
         """ Refreshes the current library (if external files have changed) 
             then reloads the current url. """
-        self._refresh_library()
+        self._refresh_library(request)
         raise HTTPFound(request.referrer)
 
     def view_exception(self, exc, _request):
@@ -90,7 +118,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
             'markdown.extensions.smarty',
             'markdown.extensions.toc',
             'markdown.extensions.attr_list',
-#             'markdown.extensions.extra',
+            # 'markdown.extensions.extra',
             'markdown.extensions.fenced_code',
             'markdown.extensions.admonition',
             'markdown.extensions.tables',
@@ -98,6 +126,77 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         html = markdown.markdown(data, extensions)
         # print html
         return {'contents': html}
+
+    # This is where we keep all the URLS
+    def get_lmv_url(self, library, model, view):
+        url = '/libraries/%s/models/%s/views/%s/' % (library, model, view)
+        return url
+
+    def _get_views(self):
+        return ['syntax',
+                # put in this order
+                'ndp_graph',
+                'dp_graph', 'ndp_repr',
+                # XXX: put editor_fancy before editor
+                'edit_fancy',
+                'edit',
+                'solver']
+
+    def get_model_name(self, request):
+        model_name = str(request.matchdict['model_name'])  # unicod
+        return model_name
+
+    def get_current_view(self, request):
+        url = request.url
+        for x in self._get_views():
+            if x in url:
+                return x
+        assert False, request.url
+
+    def get_navigation_links(self, request):
+        """ Pass this as "navigation" to the page. """
+        current_model = self.get_model_name(request)
+        current_library = self.get_current_library_name(request)
+        current_view = self.get_current_view(request)
+        
+        d = {}
+        
+        models = self.list_of_models(request)
+        
+        d['models'] = []
+        for m in models:
+            is_current = m == current_model
+
+            url = self.get_lmv_url(library=current_library,
+                                   model=m,
+                                   view=current_view)
+
+            desc = dict(name=m, url=url, current=is_current)
+            d['models'].append(desc)
+
+        d['views'] = []
+        views = self._get_views()
+        for v in views:
+            is_current = v == current_view
+
+            url = self.get_lmv_url(library=current_library,
+                                   model=current_model,
+                                   view=v)
+
+            desc = dict(name=v, url=url, current=is_current)
+            d['views'].append(desc)
+
+        libraries = self.list_libraries()
+
+        d['libraries'] = []
+        for l in libraries:
+            is_current = l == current_library
+            url = '/libraries/%s/list' % l
+            desc = dict(name=l, url=url, current=is_current)
+            d['libraries'].append(desc)
+
+        return d
+
 
     def serve(self):
         config = Configurator()
@@ -114,8 +213,11 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         config.add_route('index', '/')
         config.add_view(self.view_index, route_name='index', renderer='index.jinja2')
 
-        config.add_route('list', '/list')
-        config.add_view(self.view_list, route_name='list', renderer='list.jinja2')
+        config.add_route('list_libraries', '/list')
+        config.add_view(self.view_list_libraries, route_name='list_libraries', renderer='list_libraries.jinja2')
+
+        config.add_route('list', '/libraries/{library}/list')
+        config.add_view(self.view_list, route_name='list', renderer='list_models.jinja2')
 
         config.add_route('docs', '/docs/{document}/')
         config.add_view(self.view_docs, route_name='docs', renderer='language.jinja2')
@@ -123,7 +225,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         config.add_route('empty', '/empty')
         config.add_view(self.view_index, route_name='empty', renderer='empty.jinja2')
 
-        config.add_route('refresh_library', '/refresh_library')
+        config.add_route('refresh_library', '/libraries/{library}/refresh_library')
         config.add_view(self.view_refresh_library, route_name='refresh_library')
 
         config.add_view(self.view_exception, context=Exception, renderer='exception.jinja2')

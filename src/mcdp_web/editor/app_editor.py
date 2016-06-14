@@ -9,13 +9,16 @@ class AppEditor():
         pass
 
     def config(self, config):
-        config.add_route('edit_form', '/edit/{model_name}')
+        config.add_route('edit_form', 
+                         self.get_lmv_url('{library}', '{model_name}', 'edit'))
+
         config.add_view(self.view_edit_form, route_name='edit_form',
                         renderer='editor/edit_form.jinja2')
 
-        config.add_route('edit_submit', '/edit_submit/{model_name}')
-        config.add_view(self.view_edit_submit, route_name='edit_submit')
+        config.add_route('edit_submit',
+                         self.get_lmv_url('{library}', '{model_name}', 'edit') + 'submit')
 
+        config.add_view(self.view_edit_submit, route_name='edit_submit')
 
 
 
@@ -23,7 +26,7 @@ class AppEditor():
         model_name = str(request.matchdict['model_name'])  # unicode
 
         filename = '%s.mcdp' % model_name
-        l = self.get_library()
+        l = self.get_library(request)
         f = l._get_file_data(filename)
         source_code = f['data']
         realpath = f['realpath']
@@ -34,6 +37,7 @@ class AppEditor():
                 'model_name': model_name,
                 'realpath': realpath,
                 'rows': nrows,
+                'navigation': self.get_navigation_links(request),
                 'error': None}
 
 
@@ -41,7 +45,7 @@ class AppEditor():
         model_name = str(request.matchdict['model_name'])  # unicode
 
         # filename = '%s.mcdp' % model_name
-        l = self.get_library()
+        l = self.get_library(request)
         # f = l._get_file_data(filename)
         # realpath = f['realpath']
 
@@ -49,13 +53,14 @@ class AppEditor():
         data = data.replace('\r', '')
         # validation:
         try:
-            _parsed = l._actual_load(data, realpath=None)
+            _parsed = l.parse_ndp(data, realpath=None)
         except (DPSemanticError, DPSyntaxError) as e:
             error = str(e)
             nrows = int(len(data.split('\n')) + 6)
             params = {'source_code': data,
                       'model_name': model_name,
                       'error': error,
+                      'navigation': self.get_navigation_links(request),
                       'rows': nrows}
 
             return render_to_response('editor/edit_form.jinja2',

@@ -60,8 +60,8 @@ class SolverState():
         # print('f = %s -> %s' % (F.format(point), UR.format(ures)))
         self.ures.append(ures)
 
-    @contract(fun_index='seq[2](int)',
-              res_index='seq[2](int)')
+    @contract(fun_index='seq[>=1](int)',
+              res_index='seq[>=1](int)')
     def get_data_for_js(self, fun_index, res_index):
         ndp = self.ndp
 

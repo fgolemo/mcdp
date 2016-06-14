@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>List of libraries</title>
+    
+    {% include 'head.jinja2' %}
+    
+</head>
+<body>
+
+
+<p> Libraries: </p>
+
+  <ul>
+    {% for l in libraries %}
+    <li><a href="libraries/{{l}}/list" target="_blank">{{l}}</a></li>
+    {% endfor %}
+  </ul>
+ 
+</body>
+</html>
