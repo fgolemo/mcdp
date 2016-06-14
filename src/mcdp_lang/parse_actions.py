@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from .namedtuple_tricks import get_copy_with_where
-from .parts import CDPLanguage
+
 from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list
 from contextlib import contextmanager
@@ -14,6 +14,7 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError, \
 from pyparsing import ParseException, ParseFatalException
 import functools
 import warnings
+from mcdp_lang.parts import CDPLanguage
 
 CDP = CDPLanguage
 
@@ -22,6 +23,8 @@ def add_where_information(where):
     """ Adds where field to DPSyntaxError or DPSemanticError thrown by code. """
     try:
         yield
+    except DPInternalError as e:
+        raise
     except MCDPExceptionWithWhere as e:
 #         raise  # XXX
         existing = getattr(e, 'where', None)

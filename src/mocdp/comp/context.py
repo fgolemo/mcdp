@@ -8,9 +8,6 @@ from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import dpwrap
 from mocdp.dp.dp_identity import Identity
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
-from networkx.algorithms.dag import ancestors
-from mocdp.dp.dp_constant import Constant
-from mocdp.dp.dp_generic_unary import WrapAMap
 from mocdp.dp.primitive import PrimitiveDP
 
 __all__ = [
@@ -21,7 +18,10 @@ __all__ = [
 Connection0 = namedtuple('Connection', 'dp1 s1 dp2 s2')
 class Connection(Connection0):
     def __repr__(self):
-        return ("Constraint(%s.%s <= %s.%s)" %
+#         return ("Constraint(%s.%s <= %s.%s)" %
+#                 (self.dp1, self.s1, self.dp2, self.s2))
+
+        return ("Constraint(dp1,s1 %s, %s <= dp2,s2 %s, %s)" %
                 (self.dp1, self.s1, self.dp2, self.s2))
 
     def involves_any_of_these_nodes(self, nodes):
@@ -345,10 +345,10 @@ class Context():
             raise_desc(DPSemanticError, msg, c=c)
 
         # Find if there is already a connection to c.dp2,c.s2
-        for c0 in self.connections:
-            if c0.dp2 == c.dp2 and c0.s2 == c.s2:
-                msg = 'There is already a connection to function %r of %r.' % (c.s2, c.dp2)
-                raise_desc(DPSemanticError, msg)
+        # for c0 in self.connections:
+        #    if c0.dp2 == c.dp2 and c0.s2 == c.s2:
+        #        msg = 'There is already a connection to function %r of %r.' % (c.s2, c.dp2)
+        #        raise_desc(DPSemanticError, msg)
 
         ndp1 = self.names[c.dp1]
         ndp2 = self.names[c.dp2]

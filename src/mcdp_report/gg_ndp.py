@@ -5,25 +5,24 @@ from conf_tools.utils.resources import dir_from_package_name
 from contextlib import contextmanager
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
+from mcdp_lang.blocks import get_missing_connections
+from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
+    RcompUnits, TopCompletion, format_pint_unit_short)
+from mcdp_report.utils import safe_makedirs
 from mocdp.comp import CompositeNamedDP, SimpleWrap
 from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 from mocdp.comp.interfaces import NamedDP
-from mocdp.dp import (
-    Constant, GenericUnary, Identity, Limit, Max, Min, Product, ProductN, Sum,
-    SumN)
+from mocdp.dp import (Constant, GenericUnary, Identity, Limit, Max, Min,
+                       Product, ProductN, Sum, SumN)
+from mocdp.dp.conversion import Conversion
+from mocdp.dp.dp_flatten import MuxMap
 from mocdp.dp.dp_generic_unary import WrapAMap
 from mocdp.dp.dp_mult_inv import InvMult2, InvPlus2, InvPlus2Nat
 from mocdp.dp.dp_sum import SumNNat
 from mocdp.exceptions import mcdp_dev_warning
-from mcdp_lang.blocks import get_missing_connections
-from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
-    RcompUnits, TopCompletion, format_pint_unit_short)
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
-from mcdp_report.utils import safe_makedirs
-from mocdp.dp.conversion import Conversion
-from mocdp.dp.dp_flatten import MuxMap
 
 
 STYLE_GREENRED = 'greenred'
@@ -573,7 +572,17 @@ def create_coproduct(gdc0, ndp):
 
 def create_composite(gdc0, ndp):
     try:
+        return create_composite_(gdc0, ndp, SKIP_INITIAL=True)
+    except Exception as e:
+        print e
+        return create_composite_(gdc0, ndp, SKIP_INITIAL=False)
+
+def create_composite_(gdc0, ndp, SKIP_INITIAL):
+        
+    try:
         assert isinstance(ndp, CompositeNamedDP)
+
+        # names2functions[name][fn] = item
 
         names2resources = defaultdict(lambda: {})
         names2functions = defaultdict(lambda: {})
@@ -588,16 +597,15 @@ def create_composite(gdc0, ndp):
             gdc = gdc0.child_context(parent=c, yourname=gdc0.yourname)
         else:
             gdc = gdc0
-
         for name, value in ndp.context.names.items():
             # do not create these edges
-            if False:
+            if SKIP_INITIAL:
                 if is_function_with_one_connection_that_is_not_a_res_one(ndp, name):
                     print('Skipping extra node for is_function_with_one_connection %r' % name)
     #                 warnings.warn('hack')
                     continue
 
-            if False:
+            if SKIP_INITIAL:
                 if is_resource_with_one_connection_that_is_not_a_fun_one(ndp, name):
                     print('skipping extra node for %r' % name)
     #                 warnings.warn('hack')
@@ -627,6 +635,7 @@ def create_composite(gdc0, ndp):
 
             with gdc.child_context_yield(yourname=name, parent=gdc.parent) as child:
                 f, r = create(child, value)
+                
             # print('name %s -> functions %s , resources = %s' % (name, list(f), list(r)))
             names2resources[name] = r
             names2functions[name] = f
@@ -647,7 +656,7 @@ def create_composite(gdc0, ndp):
 
 
         ignore_connections = set()
-        if False:
+        if SKIP_INITIAL:
             for name, value in ndp.context.names.items():
                 if is_function_with_one_connection_that_is_not_a_res_one(ndp, name):
                     only_one = get_connections_to_function(ndp, name)[0]

@@ -196,13 +196,33 @@ mcdp {
     empty = R.Us(set())
     UR.check_equal(ur, empty)
 
-
     imps = dp.get_implementations_f_r(f=(0.4, 0.4), r=2.0)
     print('imps: %s' % imps)
 
 
 @comptest
 def check_lang_connections4():
+    """ Example with double connections """
+    assert_parsable_to_connected_ndp("""
+
+        mcdp {
+          requires r1 [s]
+          r1 >= 10s
+          r1 >= 5s
+        }
+""")
+
+    assert_parsable_to_connected_ndp("""
+    
+            mcdp {
+              provides f1 [s]
+              f1 <= 10s
+              f1 <= 5s
+            }
+    """)
+
+@comptest
+def check_lang_connections5():
     assert_parsable_to_connected_ndp("""
     mcdp {
     provides lift  [N]
@@ -215,3 +235,6 @@ def check_lang_connections4():
     mass >= 50 g
 }
 """)
+    
+    
+

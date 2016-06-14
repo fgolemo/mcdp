@@ -16,16 +16,6 @@ mcdp {
 
 }""")
 
-@comptest_fails
-def future_indexing_syntax():
-    assert_parsable_to_connected_ndp("""
-    mcdp {
-       provides f [X x USD]
-       requires cost [USD]
-
-       cost >= f[1]
-    }
-""")
 
 
 @comptest_fails

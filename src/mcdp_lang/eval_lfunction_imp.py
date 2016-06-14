@@ -99,7 +99,9 @@ def eval_lfunction(lf, context):
             return context.make_function(get_name_for_res_node(lf.name), s)
 
 
-        constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue)
+        constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
+                     CDP.Top, CDP.Bottom)
+
         if isinstance(lf, constants):
             from mcdp_lang.eval_constant_imp import eval_constant
             res = eval_constant(lf, context)

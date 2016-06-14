@@ -16,6 +16,7 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mcdp_posets import PosetProduct
 from networkx import DiGraph, MultiDiGraph, NetworkXUnfeasible
 from networkx.algorithms import is_connected, simple_cycles, topological_sort
+from collections import Counter
 
 
 class TheresALoop(Exception):
@@ -590,13 +591,37 @@ def cndp_dpgraph(cndp):
     connections = cndp.get_connections()
     return dpgraph(name2dp, connections, split=[])
 
+
+@contract(returns='set(tuple(str, str))')
+def find_resources_with_multiple_connections(connections):
+    all_of_them = [(c.dp1, c.s1) for c in connections]
+    counter = Counter(all_of_them)
+    multiple = [k for k, v in counter.items() if v >= 2]
+    return set(multiple)
+
+
+@contract(returns='set(tuple(str, str))')
+def find_functions_with_multiple_connections(connections):
+    all_of_them = [(c.dp2, c.s2) for c in connections]
+    counter = Counter(all_of_them)
+    multiple = [k for k, v in counter.items() if v >= 2]
+    return set(multiple)
+    
+
 @contract(name2dp='dict(str:($NamedDP|str|code_spec))',
           connections='set(str|$Connection)|list(str|$Connection)',
           returns=NamedDP)
 def dpgraph(name2dp, connections, split):
-    """ This assumes that the graph is weakly connected
+    """ 
+    
+        This assumes that the graph is weakly connected
         and that there are no repetitions of names of resources
-        or functions."""
+        or functions.
+        
+        It also assumes that there each function/resource 
+        is connected to exactly one function/resource.
+        
+    """
     if not len(set(split)) == len(split):
         raise ValueError('dpgraph: Repeated signals in split: %s' % str(split))
 
@@ -605,6 +630,18 @@ def dpgraph(name2dp, connections, split):
         assert not split
         dp = Mux(PosetProduct(()), [])
         return dpwrap(dp, [], [])
+
+    rmc = find_resources_with_multiple_connections(connections)
+    if rmc:
+        msg = 'These resources have multiple connections.'
+        raise_desc(ValueError, msg, rmc=rmc)
+
+    fmc = find_functions_with_multiple_connections(connections)
+    if fmc:
+        msg = 'These resources have multiple connections.'
+        raise_desc(ValueError, msg, fmc=fmc)
+
+
 
     # check that there are no repetitions
     if there_are_reps(name2dp):

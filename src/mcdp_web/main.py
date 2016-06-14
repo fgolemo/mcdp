@@ -1,10 +1,10 @@
 from mcdp_library.library import MCDPLibrary
 from mcdp_web.editor.app_editor import AppEditor
+from mcdp_web.editor_fancy.app_editor_fancy import AppEditorFancy
 from mcdp_web.interactive.app_interactive import AppInteractive
 from mcdp_web.qr.app_qr import AppQR
 from mcdp_web.solver.app_solver import AppSolver
 from mcdp_web.visualization.app_visualization import AppVisualization
-from mcdp_web.editor_fancy.app_editor_fancy import AppEditorFancy
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPFound

@@ -3,12 +3,15 @@ from .primitive import PrimitiveDP
 from mcdp_posets import Map, Poset, PosetProduct, SpaceProduct
 from mocdp import get_conftools_posets
 from mocdp.dp.dp_generic_unary import WrapAMap
+from contracts import contract
+from mocdp.dp.dp_flatten import Mux
 
 
 __all__ = [
     'Max',
     'Max1',
     'Min',
+    'JoinNDP',
 ]
 
 class Max(PrimitiveDP):
@@ -83,5 +86,34 @@ class Min(PrimitiveDP):
     def __repr__(self):
         return 'Min(%r)' % self.F0
 
+class JoinN(Map):
+    """ A map that joins n arguments. """
 
+    @contract(n='int,>=1', P=Poset)
+    def __init__(self, n, P):
+        dom = PosetProduct((P,) * n)
+        cod = P
+        Map.__init__(self, dom, cod)
+        self.P = P
 
+    def _call(self, xs):
+        res = xs[0]
+        for x in xs[1:]:
+            res = self.P.join(res, x)
+        return res
+    
+class JoinNDP(WrapAMap):
+    def __init__(self, n, P):
+        amap = JoinN(n, P)
+        WrapAMap.__init__(self, amap)
+
+class MeetNDual(Mux):
+    """ This is just a Mux """
+    def __init__(self, n, P):
+        coords = [()] * n
+        Mux.__init__(self, P, coords)
+
+        
+        
+        
+        

@@ -17,6 +17,8 @@ from mocdp.dp.dp_catalogue import CatalogueDP
 from mocdp.dp.dp_series_simplification import make_series
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
+from mocdp.dp.dp_max import JoinNDP, MeetNDual
+
 
 
 CDP = CDPLanguage
@@ -24,10 +26,9 @@ CDP = CDPLanguage
 @contract(returns=NamedDP)
 def eval_ndp(r, context):  # @UnusedVariable
     with add_where_information(r.where):
+
         if isinstance(r, CDP.BuildProblem):
-            special_list = r.statements
-            statements = unwrap_list(special_list)
-            return interpret_commands(statements, context)
+            return eval_build_problem(r, context)
 
         # TODO: remove
         if isinstance(r, CDP.VariableRef):
@@ -495,18 +496,89 @@ def eval_statement(r, context):
     else:
         raise DPInternalError('Cannot interpret %s' % describe_value(r))
 
-def interpret_commands(res, context):
+def eval_build_problem(r, context):
     context = context.child()
 
-    for r in res:
-        try:
-            eval_statement(r, context)
-        except DPSemanticError as e:
-            if e.where is None:
-                raise DPSemanticError(str(e), where=r.where)
-            raise
+    statements = unwrap_list(r.statements)
 
-    return CompositeNamedDP(context=context)
+    for s in statements:
+        with add_where_information(s.where):
+            eval_statement(s, context)
+
+    # at this point we need to fix the case where there might be multiple
+    # functions / resources
+    fix_functions_with_multiple_connections(context)
+    fix_resources_with_multiple_connections(context)
+
+    return CompositeNamedDP.from_context(context)
+
+def fix_functions_with_multiple_connections(context):
+    # tuples (ndp, res)
+    from mocdp.comp.connection import find_functions_with_multiple_connections
+    res = find_functions_with_multiple_connections(context.connections)
+    for id_ndp, fname in res:
+        matches = lambda c: c.dp2 == id_ndp and c.s2 == fname
+        its = [c for c in context.connections if matches(c)]
+        assert len(its) >= 2
+
+        for c in its:
+            context.connections.remove(c)
+
+        P = context.get_ftype(CFunction(id_ndp, fname))
+        new_name = context.new_name('_join_fname')
+        dp = JoinNDP(n=len(its), P=P)
+
+        new_connections = []
+        fnames = []
+        rname = '_a'
+        for i, c in enumerate(its):
+            fn = '_%s_%d' % (fname, i)
+            fnames.append(fn)
+            c2 = Connection(dp1=c.dp1, s1=c.s1, dp2=new_name, s2=fn)
+            new_connections.append(c2)
+
+        ndp = dpwrap(dp, fnames, rname)
+        context.add_ndp(new_name, ndp)
+        for c2 in new_connections:
+            context.add_connection(c2)
+
+        cc = Connection(dp1=new_name, s1=rname, dp2=id_ndp, s2=fname)
+        context.add_connection(cc)
+
+
+def fix_resources_with_multiple_connections(context):
+    # tuples (ndp, res)
+    from mocdp.comp.connection import find_resources_with_multiple_connections
+    res = find_resources_with_multiple_connections(context.connections)
+    for id_ndp, rname in res:
+        matches = lambda c: c.dp1 == id_ndp and c.s1 == rname
+        its = [c for c in context.connections if matches(c)]
+        assert len(its) >= 2
+
+        for c in its:
+            context.connections.remove(c)
+
+        P = context.get_rtype(CResource(id_ndp, rname))
+        new_name = context.new_name('_join_fname')
+        dp = MeetNDual(n=len(its), P=P)
+
+        new_connections = []
+        rnames = []
+        for i, c in enumerate(its):
+            rn = '_%s_%d' % (rname, i)
+            rnames.append(rn)
+            c2 = Connection(dp1=new_name, s1=rn, dp2=c.dp2, s2=c.s2)
+            new_connections.append(c2)
+
+        fname = '_a'
+        ndp = dpwrap(dp, fname, rnames)
+        context.add_ndp(new_name, ndp)
+        for c2 in new_connections:
+            context.add_connection(c2)
+
+        # [ id_ndp : rname ] -> [ new_name ]
+        cc = Connection(dp2=new_name, s2=fname, dp1=id_ndp, s1=rname)
+        context.add_connection(cc)
 
 def eval_make_template(r, context):
     ndp = eval_ndp(r.dp_rvalue, context)

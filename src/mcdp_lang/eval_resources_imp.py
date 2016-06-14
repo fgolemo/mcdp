@@ -23,7 +23,8 @@ def eval_rvalue(rvalue, context):
     # wants Resource or NewFunction
     with add_where_information(rvalue.where):
 
-        constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue)
+        constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
+                     CDP.Top, CDP.Bottom)
         if isinstance(rvalue, constants):
             res = eval_constant(rvalue, context)
             assert isinstance(res, ValueWithUnits)

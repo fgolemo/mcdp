@@ -1,7 +1,7 @@
 # This converts from European to American
 mcdp {
-    provides out [`power]
-    requires in  [`power] 
+    provides out [V x A]
+    requires in  [V x A] 
     requires cost [USD]
 
     # This device costs $5 
@@ -9,9 +9,8 @@ mcdp {
 
     # We require that the input is european or more
     # and that it provides a good amount of power (take)
-    req_amperes = take(out, 1)
-    in >= < `plug_types : european, req_amperes >
+    in >= < 0 V , take(out, 1) >
 
     # We can only provide the american output
-    take(out, 0) <= `plug_types : american 
+    out <= < 100 V, Top A>
 }

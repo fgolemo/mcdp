@@ -1,4 +1,3 @@
-# test semantic_error
 mcdp {  
   sub motor = instance template mcdp {
     provides speed [R]

@@ -1,20 +1,6 @@
-# test semantic_error
 mcdp {
 	requires r [g x J]
 
-#	take(r, 0) >= 10 g
 	r >= < 10 g, 0 J>
 	r >= < 0 g, 50 J>
-#	take(r, 1) >= 50 J
 }
-
-# DPSemanticError: There is already a connection to function 'r' of '_res_r'.                                              
-#                                                                                                                          
-#                                                                                                                          
-#  In file '/Volumes/1604-mcdp/data/env_mcdp/src/mcdp/unittests/tuple_indexing.mcdplib/resources1.mcdp':                   
-#  line  4 #                                                                                                               
-#  line  5 #        r >= < 10 g, 0 J#                                                                                      
-#  line  6 #        r >= < 0 g, 50 J#                                                                                      
-#                   ^                                                                                                      
-#                   |                                                                                                      
-#                   here or nearby         
