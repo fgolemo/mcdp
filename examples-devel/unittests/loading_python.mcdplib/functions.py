@@ -7,7 +7,7 @@ def get_poset():
 	return Nat()
 	
 def get_primitivedp():
-	from mocdp.dp import Identity
+	from mcdp_dp import Identity
 	from mcdp_posets import Nat
 	return Identity(Nat())
 

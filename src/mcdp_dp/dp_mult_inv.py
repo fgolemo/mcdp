@@ -1,9 +1,8 @@
-from .primitive import ApproximableDP
+from .primitive import ApproximableDP, PrimitiveDP
 from contracts import contract
 from contracts.utils import check_isinstance
 from mcdp_posets import Nat, Poset  # @UnusedImport
 from mcdp_posets import PosetProduct, RcompUnits, poset_minima
-from mocdp.dp import PrimitiveDP
 import numpy as np
 
 __all__ = [

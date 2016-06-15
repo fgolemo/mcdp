@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
+from .dp_generic_unary import WrapAMap
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
+from mcdp_posets import Map, PosetProduct
 from mocdp.exceptions import DPInternalError
-from mcdp_posets import PosetProduct
 from multi_index import get_it
-from mcdp_posets.space import Map
-from mocdp.dp.dp_generic_unary import WrapAMap
 
 
 __all__ = [

@@ -1,13 +1,13 @@
+from .dp_flatten import Mux, get_R_from_F_coords
+from .dp_identity import Identity
+from .dp_parallel import Parallel
+from .dp_parallel_simplification import make_parallel
+from .dp_series import Series
 from abc import ABCMeta, abstractmethod
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mocdp.dp.dp_flatten import Mux, get_R_from_F_coords
-from mocdp.dp.dp_identity import Identity
-from mocdp.dp.dp_parallel import Parallel
-from mocdp.dp.dp_parallel_simplification import make_parallel
-from mocdp.dp.dp_series import Series
+from mcdp_posets import PosetProduct
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
-from mcdp_posets.poset_product import PosetProduct
 from multi_index.get_it_test import compose_indices, get_id_indices
 
 __all__ = [
@@ -224,7 +224,7 @@ def equiv_to_identity(dp):
     return False
 #
 # def is_permutation(dp):
-#     from mocdp.dp.dp_flatten import Mux
+#     from mcdp_dp.dp_flatten import Mux
 #     if not isinstance(dp, Mux):
 #         return False
 #
@@ -233,17 +233,17 @@ def equiv_to_identity(dp):
 #     # TODO: more options
 #     return False
 # def is_permutation_invariant(dp):
-#     from mocdp.dp import Product, Sum, Min, Max
+#     from mcdp_dp import Product, Sum, Min, Max
 #     if isinstance(dp, (Max, Min, Sum, Product)):
 #         return True
 #     # TODO: more options
 #     return False
 
 def is_equiv_to_terminator(dp):
-    from mocdp.dp.dp_terminator import Terminator
+    from mcdp_dp.dp_terminator import Terminator
     if isinstance(dp, Terminator):
         return True
-#     from mocdp.dp.dp_flatten import Mux
+#     from mcdp_dp.dp_flatten import Mux
 #     if isinstance(dp, Mux) and dp.coords == []:
 #         return True
     return False
@@ -263,10 +263,10 @@ def make_series(dp1, dp2):
 
     # Series(X(F,R), Terminator(R)) => Terminator(F)
     # but X not loop
-#     from mocdp.dp.dp_loop import DPLoop0
+#     from mcdp_dp.dp_loop import DPLoop0
     if is_equiv_to_terminator(dp2) and isinstance(dp1, Mux):
 
-        from mocdp.dp.dp_terminator import Terminator
+        from mcdp_dp.dp_terminator import Terminator
         res = Terminator(dp1.get_fun_space())
         assert res.get_fun_space() == dp1.get_fun_space()
         return res

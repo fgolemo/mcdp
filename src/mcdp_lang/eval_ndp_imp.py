@@ -11,13 +11,13 @@ from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
 from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
     get_name_for_fun_node, get_name_for_res_node)
-from mocdp.dp.conversion import get_conversion
-from mocdp.dp.dp_approximation import make_approximation
-from mocdp.dp.dp_catalogue import CatalogueDP
-from mocdp.dp.dp_series_simplification import make_series
+from mcdp_dp.conversion import get_conversion
+from mcdp_dp.dp_approximation import make_approximation
+from mcdp_dp.dp_catalogue import CatalogueDP
+from mcdp_dp.dp_series_simplification import make_series
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
-from mocdp.dp.dp_max import JoinNDP, MeetNDual
+from mcdp_dp.dp_max import JoinNDP, MeetNDual
 
 
 

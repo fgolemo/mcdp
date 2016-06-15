@@ -2,7 +2,7 @@ from mcdp_tests.generation import for_all_dps
 from mcdp_posets.poset_product import PosetProduct
 from mcdp_posets import Rcomp, R_Weight
 from comptests.registrar import comptest
-from mocdp.dp.dp_series import get_product_compact
+from mcdp_dp.dp_series import get_product_compact
 from nose.tools import assert_equal
 
 

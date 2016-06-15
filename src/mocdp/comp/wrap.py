@@ -1,8 +1,8 @@
 from .interfaces import NamedDP
 from contracts import contract, raise_wrapped
 from contracts.utils import indent, raise_desc
-from mocdp.dp import PrimitiveDP
-from mocdp.dp.dp_flatten import get_it
+from mcdp_dp import PrimitiveDP
+from mcdp_dp.dp_flatten import get_it
 from mocdp.exceptions import DPInternalError
 from mcdp_posets import PosetProduct
 

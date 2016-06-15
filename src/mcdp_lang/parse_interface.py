@@ -2,7 +2,7 @@
 from contracts import contract
 from .parse_actions import parse_wrap
 from mcdp_posets import Poset
-from mocdp.dp.primitive import PrimitiveDP
+from mcdp_dp.primitive import PrimitiveDP
 from mocdp.exceptions import MCDPExceptionWithWhere
 
 

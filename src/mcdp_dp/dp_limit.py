@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts import contract
-from mocdp.exceptions import mcdp_dev_warning
 from mcdp_posets import Poset  # @UnusedImport
 from mcdp_posets import PosetProduct, UpperSet
+from mocdp.exceptions import mcdp_dev_warning
 
 
 __all__ = [

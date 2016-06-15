@@ -49,14 +49,14 @@ class NamedDPCoproduct(NamedDP):
 
     def get_dp(self):
         options = [ndp.get_dp() for ndp in self.ndps]
-        from mocdp.dp.dp_coproduct import CoProductDP
+        from mcdp_dp.dp_coproduct import CoProductDP
         dp = CoProductDP(tuple(options))
 #         return dp
     # XXX
         if self.labels is None:
             return dp
         else:
-            from mocdp.dp.dp_coproduct import CoProductDPLabels
+            from mcdp_dp.dp_coproduct import CoProductDPLabels
             dp2 = CoProductDPLabels(dp, self.labels)
 
             assert dp2.get_fun_space() == dp.get_fun_space(), (dp, dp2)

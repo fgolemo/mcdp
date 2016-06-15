@@ -22,5 +22,5 @@ class PlusValueMap(Map):
     def _call(self, x):
         values = [self.c_value, x]
         Fs = [self.c_space, self.F]
-        from mocdp.dp.dp_sum import sum_units
+        from mcdp_dp.dp_sum import sum_units
         return sum_units(Fs, values, self.R)

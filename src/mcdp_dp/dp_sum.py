@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-from .primitive import PrimitiveDP
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
+from .primitive import PrimitiveDP
 from mcdp_posets import (Int, Map, Nat, Poset, PosetProduct, Rcomp, RcompUnits,
-    Space)  # @UnusedImport
-from mcdp_posets import SpaceProduct, get_types_universe
-# from mocdp import get_conftools_posets
+    Space, SpaceProduct, get_types_universe)  # @UnusedImport
 import functools
 import numpy as np
+# from mocdp import get_conftools_posets
 
 
 

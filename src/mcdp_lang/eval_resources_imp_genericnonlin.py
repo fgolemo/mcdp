@@ -4,7 +4,7 @@ from contracts.utils import raise_desc
 from mcdp_maps.ceil_after import CeilAfter
 from mcdp_posets import Nat, Rcomp, RcompUnits
 from mocdp.comp import Connection, dpwrap
-from mocdp.dp import GenericUnary, WrapAMap
+from mcdp_dp import GenericUnary, WrapAMap
 from mocdp.exceptions import DPInternalError
 
 CDP = CDPLanguage

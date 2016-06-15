@@ -1,10 +1,11 @@
-from .dp_generic_unary import WrapAMap
+
 from contracts.utils import raise_wrapped
 from mcdp_posets.poset import NotLeq
 from mcdp_posets.types_universe import get_types_universe
 from mocdp.exceptions import DPSemanticError
 from contracts import contract
-from mocdp.dp.primitive import PrimitiveDP
+from .primitive import PrimitiveDP
+from mcdp_dp.dp_generic_unary import WrapAMap
 
 __all__ = [
     'Conversion',

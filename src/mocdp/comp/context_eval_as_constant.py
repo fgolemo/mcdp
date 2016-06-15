@@ -1,7 +1,7 @@
 from contracts import contract
 from mocdp.comp.context import CResource, ValueWithUnits
-from mocdp.dp.dp_constant import Constant
-from mocdp.dp.dp_generic_unary import WrapAMap
+from mcdp_dp.dp_constant import Constant
+from mcdp_dp.dp_generic_unary import WrapAMap
 
 def get_connections_for(context, name1, name2):
     s = set()

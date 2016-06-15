@@ -1,11 +1,11 @@
 from contracts import contract
-from mocdp.dp.primitive import PrimitiveDP, ApproximableDP
+from .primitive import PrimitiveDP, ApproximableDP
 
 @contract(dp=PrimitiveDP, returns=PrimitiveDP)
 def dp_transform(dp, f):
-    from mocdp.dp.dp_series import Series0
-    from mocdp.dp.dp_loop import DPLoop0
-    from mocdp.dp.dp_parallel import Parallel
+    from mcdp_dp.dp_series import Series0
+    from mcdp_dp.dp_loop import DPLoop0
+    from mcdp_dp.dp_parallel import Parallel
 
     if isinstance(dp, Series0):
         return Series0(dp_transform(dp.dp1, f),

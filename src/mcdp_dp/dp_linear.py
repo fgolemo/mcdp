@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .primitive import PrimitiveDP
+from mcdp_dp import PrimitiveDP
 from contracts import contract
 from mcdp_posets import Rcomp
 from mcdp_posets.poset_product import PosetProduct

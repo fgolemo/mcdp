@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
+from .dp_series import get_product_compact
 from .primitive import PrimitiveDP
-from mocdp.dp.dp_series import get_product_compact
-from mocdp.exceptions import do_extra_checks
-from mcdp_posets import PosetProduct
 from contracts import contract
-import warnings
+from mcdp_posets import PosetProduct
+from mocdp.exceptions import do_extra_checks
 import itertools
+import warnings
 
 
 __all__ = [

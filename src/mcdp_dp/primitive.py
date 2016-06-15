@@ -286,6 +286,7 @@ class PrimitiveDP(WithInternalLog):
 
 
 class ApproximableDP(PrimitiveDP):
+
     @abstractmethod
     @contract(n='int,>=0', returns=PrimitiveDP)
     def get_lower_bound(self, n):

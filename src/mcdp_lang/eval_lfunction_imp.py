@@ -8,7 +8,7 @@ from contracts.utils import raise_desc
 from mcdp_posets import Nat, RcompUnits, mult_table
 from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import CFunction, get_name_for_res_node
-from mocdp.dp import InvMult2, InvPlus2, InvPlus2Nat
+from mcdp_dp import InvMult2, InvPlus2, InvPlus2Nat
 from mocdp.exceptions import DPInternalError, DPSemanticError
 
 

@@ -1,5 +1,5 @@
 # from .wrap import SimpleWrap
-from mocdp.dp import PrimitiveDP
+from mcdp_dp import PrimitiveDP
 # from mcdp_lang.syntax import Syntax, parse_wrap
 from mcdp_posets import SpaceProduct, UpperSet
 

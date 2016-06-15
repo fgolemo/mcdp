@@ -4,11 +4,11 @@ from mcdp_posets import PosetProduct, R_dimensionless
 from mcdp_report.gg_ndp import gvgen_from_ndp
 from mcdp_report.gg_utils import gg_figure
 from mocdp.comp.interfaces import NamedDP
-from mocdp.dp import DPLoop0, Mux, Parallel, Series0
-from mocdp.dp.dp_constant import Constant
-from mocdp.dp.dp_generic_unary import GenericUnary
-from mocdp.dp.dp_limit import Limit
-from mocdp.dp.primitive import PrimitiveDP
+from mcdp_dp import DPLoop0, Mux, Parallel, Series0
+from mcdp_dp.dp_constant import Constant
+from mcdp_dp.dp_generic_unary import GenericUnary
+from mcdp_dp.dp_limit import Limit
+from mcdp_dp.primitive import PrimitiveDP
 from mocdp.exceptions import mcdp_dev_warning
 from reprep import Report
 import warnings

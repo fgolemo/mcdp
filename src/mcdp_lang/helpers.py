@@ -2,10 +2,10 @@
 from contracts import contract
 from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import ValueWithUnits
-from mocdp.dp import Constant
+from mcdp_dp import Constant
 from mcdp_posets.types_universe import get_types_universe
-from mocdp.dp.conversion import get_conversion
-from mocdp.dp.dp_limit import Limit
+from mcdp_dp.conversion import get_conversion
+from mcdp_dp.dp_limit import Limit
 
 
 

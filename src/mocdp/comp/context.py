@@ -6,8 +6,8 @@ from mcdp_posets import Space
 from mcdp_posets.poset import Poset
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import dpwrap
-from mocdp.dp.dp_identity import Identity
-from mocdp.dp.primitive import PrimitiveDP
+from mcdp_dp.dp_identity import Identity
+from mcdp_dp.primitive import PrimitiveDP
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 
 __all__ = [

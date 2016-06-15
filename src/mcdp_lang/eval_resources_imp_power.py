@@ -1,7 +1,7 @@
 
 from .parts import CDPLanguage
 from mcdp_posets import RCompUnitsPower
-from mocdp.dp import WrapAMap
+from mcdp_dp import WrapAMap
 
 CDP = CDPLanguage
 

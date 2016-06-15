@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 from .dp_flatten import Mux
 from .dp_identity import Identity
-from .primitive import PrimitiveDP
+from .primitive import Feasible, NormalForm, NotFeasible, PrimitiveDP
+from .tracer import Tracer
 from contracts.utils import indent, raise_desc, raise_wrapped
-from mocdp.dp.primitive import Feasible, NormalForm, NotFeasible
-from mocdp.exceptions import DPInternalError, do_extra_checks
 from mcdp_posets import (Map, PosetProduct, SpaceProduct, UpperSets,
     get_product_compact)
-from mocdp.dp.tracer import Tracer
+from mocdp.exceptions import DPInternalError, do_extra_checks
 
 
 __all__ = [
@@ -123,7 +122,7 @@ class Series0(PrimitiveDP):
 
 
     def _is_equiv_to_terminator(self, dp):
-        from mocdp.dp.dp_terminator import Terminator
+        from mcdp_dp.dp_terminator import Terminator
         if isinstance(dp, Terminator):
             return True
         if isinstance(dp, Mux) and dp.coords == []:

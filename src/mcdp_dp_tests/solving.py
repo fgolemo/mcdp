@@ -1,5 +1,5 @@
 from comptests.registrar import comptest
-from mocdp.dp.solver import (ConvergedToEmpty, ConvergedToFinite,
+from mcdp_dp.solver import (ConvergedToEmpty, ConvergedToFinite,
     ConvergedToInfinite, generic_solve)
 from mcdp_lang import parse_ndp
 from numpy.ma.testutils import assert_equal

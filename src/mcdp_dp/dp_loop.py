@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-from .primitive import PrimitiveDP
+from .primitive import Feasible, NotFeasible, PrimitiveDP
+from .tracer import Tracer
 from collections import namedtuple
 from contracts.utils import indent, raise_desc, raise_wrapped
-from mocdp.dp.primitive import Feasible, NotFeasible
-from mocdp.dp.tracer import Tracer
-from mocdp.exceptions import do_extra_checks
 from mcdp_posets import Map, NotLeq, PosetProduct, UpperSet, UpperSets
 from mcdp_posets.utils import poset_minima
+from mocdp.exceptions import do_extra_checks
 import itertools
 
 
@@ -16,12 +15,12 @@ __all__ = [
 ]
 
 def make_loop(dp):
-    from mocdp.dp.dp_series_simplification import unwrap_series
-    from mocdp.dp.dp_series_simplification import wrap_series
-    from mocdp.dp.dp_flatten import Mux
-    from mocdp.dp.dp_series_simplification import make_series
-    from mocdp.dp.dp_identity import Identity
-    from mocdp.dp.dp_parallel_simplification import make_parallel
+    from mcdp_dp.dp_series_simplification import unwrap_series
+    from mcdp_dp.dp_series_simplification import wrap_series
+    from mcdp_dp.dp_flatten import Mux
+    from mcdp_dp.dp_series_simplification import make_series
+    from mcdp_dp.dp_identity import Identity
+    from mcdp_dp.dp_parallel_simplification import make_parallel
 
     dps = unwrap_series(dp)
 
@@ -70,8 +69,8 @@ class DPLoop0(PrimitiveDP):
         F = F1
         R = R0
         # M = M0
-        # from mocdp.dp.dp_series import prod_make
-        from mocdp.dp.dp_series import get_product_compact
+        # from mcdp_dp.dp_series import prod_make
+        from mcdp_dp.dp_series import get_product_compact
         M, _, _ = get_product_compact(M0, F2)
         self.M0 = M0
         self.F2 = F2
@@ -84,7 +83,7 @@ class DPLoop0(PrimitiveDP):
         f = (f1, f2)
         m0s = self.dp1.get_implementations_f_r(f, r)
         options = set()
-        from mocdp.dp.dp_series import get_product_compact
+        from mcdp_dp.dp_series import get_product_compact
 
         M, M_pack, _ = get_product_compact(self.M0, self.F2)
 
@@ -100,7 +99,7 @@ class DPLoop0(PrimitiveDP):
         return options
 
     def _unpack_m(self, m):
-        from mocdp.dp.dp_series import get_product_compact
+        from mcdp_dp.dp_series import get_product_compact
         _, _, unpack = get_product_compact(self.M0, self.F2)
         m0, f2 = unpack(m)
         return m0, f2
@@ -127,7 +126,7 @@ class DPLoop0(PrimitiveDP):
         return r
 
     def check_unfeasible(self, f1, m, r):
-        from mocdp.dp.dp_series import get_product_compact
+        from mcdp_dp.dp_series import get_product_compact
         F2 = self.F2
         F1 = self.F
 
@@ -149,7 +148,7 @@ class DPLoop0(PrimitiveDP):
                 raise_wrapped(Feasible, e, msg, compact=True, dp1=self.dp1.repr_long())
 
     def check_feasible(self, f1, m, r):
-        from mocdp.dp.dp_series import get_product_compact
+        from mcdp_dp.dp_series import get_product_compact
         F2 = self.F2
         F1 = self.F
 
@@ -178,7 +177,7 @@ class DPLoop0(PrimitiveDP):
 
 #
 #     def is_feasible(self, f1, m, r):
-#         from mocdp.dp.dp_series import get_product_compact
+#         from mcdp_dp.dp_series import get_product_compact
 #         _, _, unpack = get_product_compact(self.M0, self.F2)
 #         m0, f2 = unpack(m)
 #         f = (f1, f2)
@@ -213,9 +212,9 @@ class DPLoop0(PrimitiveDP):
 
 #         S = PosetProduct((S0, UR))
 
-        # from mocdp.dp.dp_series import prod_make
+        # from mcdp_dp.dp_series import prod_make
         # S = prod_make(S0, UR)
-        from mocdp.dp.dp_series import get_product_compact
+        from mcdp_dp.dp_series import get_product_compact
         S, pack, unpack = get_product_compact(S0, UR)
 
         UF1 = UpperSets(F1)
@@ -224,7 +223,7 @@ class DPLoop0(PrimitiveDP):
         UF1R = UpperSets(F1R)
 
 #         UR1R2 = UpperSets(PosetProduct((self.R1, R2)))
-#         from mocdp.dp.dp_series import prod_get_state
+#         from mcdp_dp.dp_series import prod_get_state
 
         """
         S = S0 x UR is a Poset

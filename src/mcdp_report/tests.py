@@ -1,17 +1,17 @@
 from .gg_ndp import gvgen_from_ndp
 from .report import report_dp1, report_ndp1
+from mcdp_report.html import ast_to_html
 from mcdp_tests.generation import (for_all_dps_dyn, for_all_nameddps,
     for_all_nameddps_dyn, for_all_source_mcdp)
-from mcdp_report.html import ast_to_html
 
 @for_all_source_mcdp
 def check_syntax(filename, source):
-    print filename
+    # print filename
     html = ast_to_html(source,
                        complete_document=False, extra_css="",
                        ignore_line=lambda _lineno: False,
                        add_line_gutter=True, encapsulate_in_precode=True, add_css=True)
-    print html
+    # print html
 
 @for_all_dps_dyn
 def dp1_report(context, _id_dp, dp):

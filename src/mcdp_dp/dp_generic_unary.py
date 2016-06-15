@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-from .primitive import PrimitiveDP
 from contracts import contract
-from mocdp.exceptions import mcdp_dev_warning
-from mcdp_posets import PosetProduct
-from mcdp_posets.space import Map, NotBelongs, MapNotDefinedHere
-import numpy as np
 from contracts.utils import raise_wrapped
+from mcdp_dp import PrimitiveDP
+from mcdp_posets import Map, MapNotDefinedHere, NotBelongs, PosetProduct
+from mocdp.exceptions import mcdp_dev_warning
+import numpy as np
 
 
 __all__ = [

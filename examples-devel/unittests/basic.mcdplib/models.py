@@ -1,11 +1,11 @@
 
 from contracts import contract
-from mocdp.dp import make_series
-from mocdp.dp.dp_flatten import Mux
-from mocdp.dp.dp_identity import Identity
-from mocdp.dp.dp_parallel import Parallel
-from mocdp.dp.dp_sum import Product, Sum
-from mocdp.dp.primitive import PrimitiveDP
+from mcdp_dp import make_series
+from mcdp_dp.dp_flatten import Mux
+from mcdp_dp.dp_identity import Identity
+from mcdp_dp.dp_parallel import Parallel
+from mcdp_dp.dp_sum import Product, Sum
+from mcdp_dp.primitive import PrimitiveDP
 from mcdp_posets import (PosetProduct, R_Energy, R_Power, R_Time, R_Weight_g,
     R_dimensionless, Single, SpaceProduct)
 import numpy as np

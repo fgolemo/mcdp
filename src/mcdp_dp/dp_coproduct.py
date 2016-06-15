@@ -1,17 +1,11 @@
 # -*- coding: utf-8 -*-
-from .primitive import PrimitiveDP
+from .primitive import NormalForm, NotFeasible, PrimitiveDP
 from contracts import contract
 from contracts.utils import indent, raise_desc
-from mocdp.dp.primitive import NotFeasible, NormalForm
-from mocdp.exceptions import do_extra_checks
-from mcdp_posets import poset_minima
+from mcdp_posets import (FiniteCollectionAsSpace, Map, NotBelongs, NotEqual,
+    PosetProduct, UpperSet, UpperSets, get_types_universe, poset_minima)
 from mcdp_posets.category_coproduct import Coproduct1
-from mcdp_posets import NotBelongs, NotEqual
-from mcdp_posets.types_universe import get_types_universe
-from mcdp_posets.poset_product import PosetProduct
-from mcdp_posets.uppersets import UpperSets, UpperSet
-from mcdp_posets.space import Map
-from mcdp_posets.finite_set import FiniteCollectionAsSpace
+from mocdp.exceptions import do_extra_checks
 
 __all__ = [
     'CoProductDP',

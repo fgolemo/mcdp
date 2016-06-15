@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
+from .dp_flatten import Mux
+from .dp_generic_unary import WrapAMap
 from .primitive import PrimitiveDP
+from contracts import contract
 from mcdp_posets import Map, Poset, PosetProduct, SpaceProduct
 # from mocdp import get_conftools_posets
-from mocdp.dp.dp_generic_unary import WrapAMap
-from contracts import contract
-from mocdp.dp.dp_flatten import Mux
 
 
 __all__ = [

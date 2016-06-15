@@ -10,8 +10,8 @@ from mcdp_maps import MultNat, PlusNat, PlusValueMap
 from mcdp_posets import (Int, Nat, RcompUnits, Space, get_types_universe,
     mult_table, mult_table_seq)
 from mocdp.comp.context import CResource, ValueWithUnits
-from mocdp.dp import GenericUnary, ProductN, SumN, SumNInt, SumNNat, WrapAMap
-from mocdp.dp.dp_sum import sum_dimensionality_works
+from mcdp_dp import GenericUnary, ProductN, SumN, SumNInt, SumNNat, WrapAMap
+from mcdp_dp.dp_sum import sum_dimensionality_works
 from mocdp.exceptions import DPInternalError, DPSemanticError
 
 CDP = CDPLanguage

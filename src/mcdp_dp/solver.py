@@ -1,7 +1,7 @@
 from mcdp_posets.uppersets import UpperSets, UpperSet
 from contracts import contract
 from mocdp.exceptions import do_extra_checks
-from mocdp.dp.dp_loop import DPLoop0
+from mcdp_dp.dp_loop import DPLoop0
 
 MaxStepsReached = 'MaxStepsReached'
 ConvergedToFinite = 'ConvergedToFinite'

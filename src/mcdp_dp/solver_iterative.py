@@ -1,7 +1,7 @@
 from contracts import contract
-from mocdp.dp.solver import SolverTrace
+from mcdp_dp.solver import SolverTrace
 from mocdp.exceptions import do_extra_checks
-from mocdp.dp.dp_transformations import get_dp_bounds
+from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_posets.uppersets import UpperSets
 
 def solver_iterative(dp, f, tracer):

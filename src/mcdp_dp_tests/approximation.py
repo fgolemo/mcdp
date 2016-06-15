@@ -1,6 +1,6 @@
 from comptests.registrar import comptest
 from mcdp_lang import parse_ndp
-from mocdp.dp.dp_approximation import CombinedCeil
+from mcdp_dp.dp_approximation import CombinedCeil
 from mcdp_posets.uppersets import UpperSets
 
 

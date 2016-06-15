@@ -7,7 +7,7 @@ from mcdp_lang import parse_ndp
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
 from mcdp_posets.uppersets import UpperSets
-from mocdp.dp.dp_transformations import get_dp_bounds
+from mcdp_dp.dp_transformations import get_dp_bounds
 from nose.tools import assert_equal
 
 L = CDPLanguage

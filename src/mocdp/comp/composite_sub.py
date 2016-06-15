@@ -4,7 +4,7 @@ from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.interfaces import NamedDP  # @UnusedImport contracts
 import networkx as nx
 
-@contract(cndp=CompositeNamedDP, returns='int, >=1')
+@contract(cndp=CompositeNamedDP, returns='int, >=0')
 def cndp_num_connected_components(cndp):
     """ Returns the number of connected components """
     components = cndp_connected_components(cndp)

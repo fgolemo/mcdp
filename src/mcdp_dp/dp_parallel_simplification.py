@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
-from abc import abstractmethod, ABCMeta
-from contracts.utils import raise_wrapped
-from mocdp.exceptions import DPInternalError
 from .dp_flatten import Mux
 from .dp_identity import Identity
 from .dp_parallel import Parallel
-from mcdp_posets import PosetProduct
-from multi_index.get_it_test import compose_indices
+from .dp_parallel_n import ParallelN
+from .primitive import PrimitiveDP  # @UnusedImport
+from abc import ABCMeta, abstractmethod
 from contracts import contract
-from mocdp.dp.primitive import PrimitiveDP  # @UnusedImport
-from mocdp.dp.dp_parallel_n import ParallelN
+from contracts.utils import raise_wrapped
+from mcdp_posets import PosetProduct
+from mocdp.exceptions import DPInternalError
+from multi_index.get_it_test import compose_indices
 
 __all__ = [
     'make_parallel',
@@ -34,7 +34,7 @@ class ParSimplificationRule():
                           dp2=dp2.repr_long(), rule=self)
 
         try:
-            from mocdp.dp.dp_series_simplification import check_same_spaces
+            from mcdp_dp.dp_series_simplification import check_same_spaces
             check_same_spaces(dp0, res)
         except AssertionError as e:
             msg = 'Invalid Parallel simplification for rule.'
@@ -59,14 +59,14 @@ class RuleMuxOutside(ParSimplificationRule):
 #     #  -------|
 
     def applies(self, dp1, _):
-        from .dp_series_simplification import unwrap_as_series_start_last
 
+        from mcdp_dp.dp_series_simplification import unwrap_as_series_start_last
         _, dp1_last = unwrap_as_series_start_last(dp1)
         return isinstance(dp1_last, Mux)
 
     def _execute(self, dp1, dp2):
-        from .dp_series_simplification import unwrap_as_series_start_last, make_series
 
+        from mcdp_dp.dp_series_simplification import unwrap_as_series_start_last
         dp1_start, dp1_last = unwrap_as_series_start_last(dp1)
         a = dp1_last.coords
         R = Parallel(dp1_start, dp2).get_res_space()
@@ -76,6 +76,7 @@ class RuleMuxOutside(ParSimplificationRule):
 
         x = make_parallel(dp1_start, dp2)
 
+        from .dp_series_simplification import make_series
         return make_series(x, m)
 
 
@@ -88,14 +89,12 @@ class RuleMuxOutsideB(ParSimplificationRule):
 #     #  --p2---|
 
     def applies(self, _, dp2):
-        from .dp_series_simplification import unwrap_as_series_start_last
-
+        from mcdp_dp.dp_series_simplification import unwrap_as_series_start_last
         _, dp2_last = unwrap_as_series_start_last(dp2)
         return isinstance(dp2_last, Mux)
 
     def _execute(self, dp1, dp2):
-        from .dp_series_simplification import unwrap_as_series_start_last, make_series
-
+        from mcdp_dp.dp_series_simplification import unwrap_as_series_start_last
         dp2_start, dp2_last = unwrap_as_series_start_last(dp2)
         a = dp2_last.coords
         R = Parallel(dp1, dp2_start).get_res_space()
@@ -104,6 +103,7 @@ class RuleMuxOutsideB(ParSimplificationRule):
         m = Mux(R, coords)
         x = make_parallel(dp1, dp2_start)
 
+        from .dp_series_simplification import make_series
         return make_series(x, m)
 
 rules = [
@@ -119,7 +119,7 @@ def make_parallel_n(dps):
         return make_parallel(dps[0], dps[1])
     return ParallelN(dps)
 #
-#     from mocdp.dp.dp_series_simplification import make_series
+#     from mcdp_dp.dp_series_simplification import make_series
 #
 #     if len(dps) == 2:
 #         return make_parallel(dps[0], dps[1])
@@ -136,7 +136,7 @@ def make_parallel_n(dps):
 #         return dp
     
 def make_parallel(dp1, dp2):
-    from mocdp.dp.dp_series_simplification import make_series, is_equiv_to_terminator, equiv_to_identity
+    from mcdp_dp.dp_series_simplification import make_series, is_equiv_to_terminator, equiv_to_identity
 
 #     # if none is a mux, we cannot do anything
 #     if not isinstance(dp1, Mux) and not isinstance(dp2, Mux):

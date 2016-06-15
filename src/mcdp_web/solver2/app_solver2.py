@@ -2,7 +2,7 @@ from mcdp_cli.solve_meat import solve_meat_solve
 from mcdp_posets.types_universe import (express_value_in_isomorphic_space,
     get_types_universe)
 from mcdp_web.utils import ajax_error_catch, memoize_simple
-from mocdp.dp.tracer import Tracer
+from mcdp_dp.tracer import Tracer
 import cgi
 
 

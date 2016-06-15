@@ -4,7 +4,7 @@ from mcdp_posets.uppersets import UpperSets
 from mcdp_report.report import report_dp1, report_ndp1
 from mcdp_report.utils import safe_makedirs
 from mocdp.comp.interfaces import NotConnected
-from mocdp.dp.solver import generic_solve
+from mcdp_dp.solver import generic_solve
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from reprep import Report
 import logging

@@ -2,7 +2,7 @@ from .parts import CDPLanguage
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_posets.poset_product import PosetProduct
-from mocdp.dp.dp_flatten import Mux
+from mcdp_dp.dp_flatten import Mux
 from mocdp.exceptions import DPInternalError, DPSemanticError
 
 CDP = CDPLanguage

@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest, comptest_dynamic
-from mocdp.dp.dp_flatten import Mux
-from mocdp.dp.dp_generic_unary import WrapAMap
-from mocdp.dp.dp_loop import make_loop
-from mocdp.dp.dp_mult_inv import InvPlus2Nat
-from mocdp.dp.dp_parallel_simplification import make_parallel
-from mocdp.dp.dp_series_simplification import wrap_series
-from mocdp.dp.dp_sum import SumNNat
-from mocdp.dp.tracer import Tracer
+from mcdp_dp.dp_flatten import Mux
+from mcdp_dp.dp_generic_unary import WrapAMap
+from mcdp_dp.dp_loop import make_loop
+from mcdp_dp.dp_mult_inv import InvPlus2Nat
+from mcdp_dp.dp_parallel_simplification import make_parallel
+from mcdp_dp.dp_series_simplification import wrap_series
+from mcdp_dp.dp_sum import SumNNat
+from mcdp_dp.tracer import Tracer
 from mcdp_report.generic_report_utils import generic_report
 from mocdp.drawing import plot_upset_R2
 from mcdp_lang.eval_math import PlusNat
@@ -22,7 +22,7 @@ from reprep import Report
 import itertools
 import numpy as np
 import warnings
-from mocdp.dp.solver import generic_solve
+from mcdp_dp.solver import generic_solve
 
 
 # @comptest_dynamic
@@ -43,7 +43,7 @@ def check_invmult(context):
     context.add_report(r, 'check_invmult_report')
 
 def check_invmult_report(dp):
-#     from mocdp.dp.dp_loop import SimpleLoop
+#     from mcdp_dp.dp_loop import SimpleLoop
 #     funsp = dp.get_fun_space()
 
 #     assert isinstance(dp, SimpleLoop)

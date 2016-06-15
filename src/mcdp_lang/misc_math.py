@@ -2,7 +2,7 @@ from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_posets import Nat, RcompUnits, mult_table
 from mocdp.comp.context import ValueWithUnits
-from mocdp.dp.dp_sum import sum_units
+from mcdp_dp.dp_sum import sum_units
 from mocdp.exceptions import DPSemanticError
 import functools
 import warnings

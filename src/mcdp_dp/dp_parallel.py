@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts.utils import indent
-from mocdp.dp.dp_series import get_product_compact
-from mocdp.dp.primitive import NormalForm
+from .dp_series import get_product_compact
+from .primitive import NormalForm
 from mocdp.exceptions import do_extra_checks
 from mcdp_posets import Map, PosetProduct, UpperSet, UpperSets, poset_minima
 import itertools
