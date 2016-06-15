@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts import contract
-from mcdp_posets import Poset  # @UnusedImport
+from mcdp_posets import Poset 
 from mcdp_posets import PosetProduct
 
 
@@ -12,10 +12,8 @@ __all__ = [
 
 class Identity(PrimitiveDP):
 
-    @contract(F='$Poset|str|code_spec')
+    @contract(F=Poset)
     def __init__(self, F):
-        from mocdp import get_conftools_posets
-        _, F = get_conftools_posets().instance_smarter(F)
         R = F
         M = PosetProduct(())
         PrimitiveDP.__init__(self, F=F, R=R, M=M)

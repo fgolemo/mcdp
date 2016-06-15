@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
+from .eval_constant_imp import NotConstant
+from .eval_resources_imp import eval_rvalue
+from .misc_math import inv_constant
+from .parts import CDPLanguage
+from .utils_lists import get_odd_ops, unwrap_list
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_lang.eval_constant_imp import NotConstant
-from mcdp_lang.eval_resources_imp import eval_rvalue
-from mcdp_lang.parse_actions import inv_constant
-from mcdp_lang.parts import CDPLanguage
-from mcdp_lang.utils_lists import get_odd_ops, unwrap_list
+from mcdp_maps import MultNat, PlusNat, PlusValueMap
 from mcdp_posets import (Int, Nat, RcompUnits, Space, get_types_universe,
     mult_table, mult_table_seq)
-from mcdp_posets.space import Map
 from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.dp import GenericUnary, ProductN, SumN, SumNInt, SumNNat, WrapAMap
 from mocdp.dp.dp_sum import sum_dimensionality_works
 from mocdp.exceptions import DPInternalError, DPSemanticError
+
 CDP = CDPLanguage
 
 def eval_constant_divide(op, context):
-    from mcdp_lang.eval_constant_imp import eval_constant
+    from .eval_constant_imp import eval_constant
 
     ops = get_odd_ops(unwrap_list(op.ops))
     if len(ops) != 2:
@@ -25,7 +26,7 @@ def eval_constant_divide(op, context):
     constants = [eval_constant(_, context) for _ in ops]
 
     factors = [constants[0], inv_constant(constants[1])]
-    from mcdp_lang.parse_actions import mult_constantsN
+    from .misc_math import mult_constantsN
     return mult_constantsN(factors)
 
 
@@ -47,14 +48,14 @@ def eval_MultN_as_constant(x, context):
 def eval_MultN_as_rvalue(x, context):
     res = eval_MultN(x, context, wants_constant=False)
     if isinstance(res, ValueWithUnits):
-        from mcdp_lang.helpers import get_valuewithunits_as_resource
+        from .helpers import get_valuewithunits_as_resource
         return get_valuewithunits_as_resource(res, context)
     else:
         return res
 
 
 def eval_divide_as_rvalue(op, context):
-    from mcdp_lang.eval_constant_imp import eval_constant
+    from .eval_constant_imp import eval_constant
 
     ops = get_odd_ops(unwrap_list(op.ops))
 
@@ -69,7 +70,7 @@ def eval_divide_as_rvalue(op, context):
     try:
         c1 = eval_constant(ops[0], context)
         # also the first one is a constant
-        from mcdp_lang.parse_actions import mult_constantsN
+        from .misc_math import mult_constantsN
 
         return mult_constantsN([c1, c2_inv])
 
@@ -87,7 +88,7 @@ def eval_divide_as_rvalue(op, context):
 def eval_PlusN_as_rvalue(x, context):
     res = eval_PlusN(x, context, wants_constant=False)
     if isinstance(res, ValueWithUnits):
-        from mcdp_lang.helpers import get_valuewithunits_as_resource
+        from .helpers import get_valuewithunits_as_resource
         return get_valuewithunits_as_resource(res, context)
     else:
         return res
@@ -105,7 +106,7 @@ def flatten_multN(ops):
 
 def eval_MultN(x, context, wants_constant):
     """ Raises NotConstant if wants_constant is True. """
-    from .parse_actions import mult_constantsN
+    from .misc_math import mult_constantsN
     from .eval_constant_imp import eval_constant
 
     assert isinstance(x, CDP.MultN)
@@ -144,7 +145,7 @@ def eval_MultN(x, context, wants_constant):
         R = mult_table_seq(resources_types)
         dp = ProductN(tuple(resources_types), R)
 
-        from mcdp_lang.helpers import create_operation
+        from .helpers import create_operation
         r = create_operation(context, dp, resources,
                              name_prefix='_prod', op_prefix='_factor',
                              res_prefix='_result')
@@ -155,10 +156,10 @@ def eval_MultN(x, context, wants_constant):
             c = mult_constantsN(constants)
             return get_mult_op(context, r, c)
 
+
 @contract(r=CResource, c=ValueWithUnits)
 def get_mult_op(context, r, c):
-    from mcdp_lang.parse_actions import MultValue
-    from mcdp_lang.helpers import create_operation
+    from .misc_math import MultValue
     rtype = context.get_rtype(r)
 
     # Case 1: rcompunits, rcompunits
@@ -174,38 +175,12 @@ def get_mult_op(context, r, c):
     else:
         msg = 'Cannot create multiplication operation.'
         raise_desc(DPInternalError, msg, rtype=rtype, c=c)
+
+    from .helpers import create_operation
     r2 = create_operation(context, dp, resources=[r],
                           name_prefix='_mult', op_prefix='_x',
                           res_prefix='_y')
     return r2
-
-class MultNat(Map):
-    @contract(value=int)
-    def __init__(self, value):
-        self.value = value
-        self.N = Nat()
-        Map.__init__(self, dom=self.N, cod=self.N)
-    def _call(self, x):
-        if self.N.equal(self.N.get_top(), x):
-            return x
-        # TODO: check
-        res = x * self.value
-        assert isinstance(res, int), res
-        return res
-
-class PlusNat(Map):
-    @contract(value=int)
-    def __init__(self, value):
-        self.value = value
-        self.N = Nat()
-        Map.__init__(self, dom=self.N, cod=self.N)
-    def _call(self, x):
-        if self.N.equal(self.N.get_top(), x):
-            return x
-        # TODO: check overflow
-        res = x + self.value
-        assert isinstance(res, int), res
-        return res
 
 
 def flatten_plusN(ops):
@@ -219,8 +194,8 @@ def flatten_plusN(ops):
 
 def eval_PlusN(x, context, wants_constant):
     """ Raises NotConstant if wants_constant is True. """
-    from mcdp_lang.eval_constant_imp import eval_constant
-    from mcdp_lang.parse_actions import plus_constantsN
+    from .eval_constant_imp import eval_constant
+    from .misc_math import plus_constantsN
 
     assert isinstance(x, CDP.PlusN)
     assert len(x.ops) > 1
@@ -281,7 +256,7 @@ def eval_PlusN(x, context, wants_constant):
             msg = 'Cannot find sum operator for mixed types.'
             raise_desc(DPInternalError, msg, resources_types=resources_types)
 
-        from mcdp_lang.helpers import create_operation
+        from .helpers import create_operation
         r = create_operation(context, dp, resources,
                              name_prefix='_sum', op_prefix='_term',
                              res_prefix='_result')
@@ -294,16 +269,14 @@ def eval_PlusN(x, context, wants_constant):
 
 @contract(r=CResource, c=ValueWithUnits)
 def get_plus_op(context, r, c):
-    from mcdp_lang.parse_actions import PlusValue
-
     rtype = context.get_rtype(r)
 
     if isinstance(rtype, RcompUnits) and  isinstance(c.unit, RcompUnits):
         F = rtype
         R = rtype
-        function = PlusValue(F=F, R=R, c=c)
-        setattr(function, '__name__', '+ %s' % (c.unit.format(c.value)))
-        dp = GenericUnary(F, R, function)  # XXX
+        amap = PlusValueMap(F=F, c_value=c.value, c_space=c.unit, R=R)
+        setattr(amap, '__name__', '+ %s' % (c.unit.format(c.value))) 
+        dp = WrapAMap(amap)
     elif isinstance(rtype, Nat) and isinstance(c.unit, Nat):
         amap = PlusNat(c.value)
         dp = WrapAMap(amap)
@@ -311,10 +284,7 @@ def get_plus_op(context, r, c):
         msg = 'Cannot create addition operation.'
         raise_desc(DPInternalError, msg, rtype=rtype, c=c)
 
-
-    # TODO: dp = WrapAMap(map)
-
-    from mcdp_lang.helpers import create_operation
+    from .helpers import create_operation
     r2 = create_operation(context, dp, resources=[r],
                           name_prefix='_plus', op_prefix='_x',
                           res_prefix='_y')

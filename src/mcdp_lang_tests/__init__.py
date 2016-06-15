@@ -9,6 +9,7 @@ from .syntax_connections import *
 from .syntax_from_library import *
 from .syntax_tuples import *
 from .syntax_load import *
+from .syntax_canonical import *
 from .failures_parsing import *
 from .failures_simplification import *
 

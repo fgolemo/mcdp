@@ -332,7 +332,7 @@ mcdp {
         provides c [Nat]
 
         # semantic error: does not exist
-        implemented-by code mocdp.dp.tests.inv_mult_plots.CounterMap___(n=3)
+        implemented-by code mcdp_dp_tests.inv_mult_plots.CounterMap___(n=3)
     }
    
 }"""
@@ -345,7 +345,7 @@ mcdp {
         provides c [Nat]
 
         # semantic error: not a DP
-        implemented-by code mocdp.dp.tests.inv_mult_plots.CounterMap(n=3)
+        implemented-by code mcdp_dp_tests.inv_mult_plots.CounterMap(n=3)
     }
    
 }"""
@@ -357,7 +357,7 @@ mcdp {
         requires x [Nat]
         provides c [Nat]
 
-        implemented-by code mocdp.dp.tests.inv_mult_plots.CounterDP(n=3)
+        implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=3)
     }
 
     s = instance adp1 
@@ -383,14 +383,14 @@ mcdp {
         requires x [Nat]
         provides c [Nat]
 
-        implemented-by code mocdp.dp.tests.inv_mult_plots.CounterDP(n=3)
+        implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=3)
     }
     
     adp2 = dp {
         requires x [Nat]
         provides c [Nat]
 
-        implemented-by code mocdp.dp.tests.inv_mult_plots.CounterDP(n=2)
+        implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=2)
     }
 
     s = instance adp1 ^ adp2
@@ -419,14 +419,14 @@ mcdp {
         requires x [Nat]
         provides c [Nat]
 
-        implemented-by code mocdp.dp.tests.inv_mult_plots.CounterDP(n=3)
+        implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=3)
     }
     
     adp2 = dp {
         requires x [Nat]
         provides c [Nat]
 
-        implemented-by code mocdp.dp.tests.inv_mult_plots.CounterDP(n=2)
+        implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=2)
     }
     
     t1 = mcdp {
@@ -479,14 +479,14 @@ mcdp {
         requires x [Nat]
         provides c [Nat]
 
-        implemented-by code mocdp.dp.tests.inv_mult_plots.CounterDP(n=3)
+        implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=3)
     }
     
     adp2 = dp {
         requires x [Nat]
         provides c [Nat]
 
-        implemented-by code mocdp.dp.tests.inv_mult_plots.CounterDP(n=2)
+        implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=2)
     }
     
     t1 = mcdp {

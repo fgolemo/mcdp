@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import indent, raise_desc, raise_wrapped
+from contracts.utils import indent, raise_desc
 from mcdp_posets import Space
 from mcdp_posets.poset import Poset
 from mocdp.comp.interfaces import NamedDP
@@ -84,48 +84,48 @@ def is_res_node_name(name):
 class NoSuchMCDPType(Exception):
     pass
 
-def conftools_load_ndp(load_arg):
-    from mocdp.configuration import get_conftools_nameddps
-    from conf_tools.exceptions import ConfToolsException
-
-    library = get_conftools_nameddps()
-
-    try:
-        _, ndp = library.instance_smarter(load_arg)
-    except ConfToolsException as e:
-        msg = 'Cannot load predefined DP %s.' % load_arg.__repr__()
-        raise_wrapped(DPSemanticError, e, msg, compact=True)
-
-    return ndp
-
-
-def conftools_load_poset(load_arg):
-    from conf_tools.exceptions import ConfToolsException
-    from mocdp.configuration import get_conftools_posets
-
-    library = get_conftools_posets()
-
-    try:
-        _, ndp = library.instance_smarter(load_arg)
-    except ConfToolsException as e:
-        msg = 'Cannot load predefined DP %s.' % load_arg.__repr__()
-        raise_wrapped(DPSemanticError, e, msg, compact=True)
-
-    return ndp
-
-def conftools_load_primitivedp(load_arg):
-    from conf_tools.exceptions import ConfToolsException
-    from mocdp.configuration import get_conftools_dps
-
-    library = get_conftools_dps()
-
-    try:
-        _, ndp = library.instance_smarter(load_arg)
-    except ConfToolsException as e:
-        msg = 'Cannot load PrimitiveDP %s.' % load_arg.__repr__()
-        raise_wrapped(DPSemanticError, e, msg, compact=True)
-
-    return ndp
+# def conftools_load_ndp(load_arg):
+#     from mocdp.configuration import get_conftools_nameddps
+#     from conf_tools.exceptions import ConfToolsException
+#
+#     library = get_conftools_nameddps()
+#
+#     try:
+#         _, ndp = library.instance_smarter(load_arg)
+#     except ConfToolsException as e:
+#         msg = 'Cannot load predefined DP %s.' % load_arg.__repr__()
+#         raise_wrapped(DPSemanticError, e, msg, compact=True)
+#
+#     return ndp
+#
+#
+# def conftools_load_poset(load_arg):
+#     from conf_tools.exceptions import ConfToolsException
+#     from mocdp.configuration import get_conftools_posets
+#
+#     library = get_conftools_posets()
+#
+#     try:
+#         _, ndp = library.instance_smarter(load_arg)
+#     except ConfToolsException as e:
+#         msg = 'Cannot load predefined DP %s.' % load_arg.__repr__()
+#         raise_wrapped(DPSemanticError, e, msg, compact=True)
+#
+#     return ndp
+#
+# def conftools_load_primitivedp(load_arg):
+#     from conf_tools.exceptions import ConfToolsException
+#     from mocdp.configuration import get_conftools_dps
+#
+#     library = get_conftools_dps()
+#
+#     try:
+#         _, ndp = library.instance_smarter(load_arg)
+#     except ConfToolsException as e:
+#         msg = 'Cannot load PrimitiveDP %s.' % load_arg.__repr__()
+#         raise_wrapped(DPSemanticError, e, msg, compact=True)
+#
+#     return ndp
 
 
 class Context():
@@ -141,9 +141,13 @@ class Context():
         self.var2model = {}  # str -> NamedDP
         self.constants = {}  # str -> ValueWithUnits
         
-        self.load_ndp_hooks = [conftools_load_ndp]
-        self.load_posets_hooks = [conftools_load_poset]
-        self.load_primitivedp_hooks = [conftools_load_primitivedp]
+#         self.load_ndp_hooks = [conftools_load_ndp]
+#         self.load_posets_hooks = [conftools_load_poset]
+#         self.load_primitivedp_hooks = [conftools_load_primitivedp]
+
+        self.load_ndp_hooks = []
+        self.load_posets_hooks = []
+        self.load_primitivedp_hooks = []
 
     def __repr__(self):
         s = 'Context:'

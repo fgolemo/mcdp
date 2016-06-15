@@ -1,12 +1,10 @@
 from abc import ABCMeta, abstractmethod
 from contracts import contract
-# from mocdp.configuration import get_conftools_nameddps
 from mcdp_posets import PosetProduct
 
 __all__ = [
     'NotConnected',
     'NamedDP',
-    'dp_from_ndp',
 ]
 
 class NotConnected(Exception):
@@ -84,12 +82,12 @@ class NamedDP():
 
 # this is only used in the mcdp_lang_tests, called through the YAML files
 # candidate to go away
-def dp_from_ndp(ndp):
-    """ Unwrap """
-    from mocdp.configuration import get_conftools_nameddps
-    _, ndp = get_conftools_nameddps().instance_smarter(ndp)
-    # unwrap
-    return ndp.get_dp()
+# def dp_from_ndp(ndp):
+#     """ Unwrap """
+#     from mocdp.configuration import get_conftools_nameddps
+#     _, ndp = get_conftools_nameddps().instance_smarter(ndp)
+#     # unwrap
+#     return ndp.get_dp()
 
 
 

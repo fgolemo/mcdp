@@ -13,10 +13,8 @@ __all__ = [
 
 class Limit(PrimitiveDP):
 
-    @contract(F='$Poset|str|code_spec')
+    @contract(F='$Poset')
     def __init__(self, F, value):
-        from mocdp import get_conftools_posets
-        _, F = get_conftools_posets().instance_smarter(F)
         F.belongs(value)
         self.limit = value
 

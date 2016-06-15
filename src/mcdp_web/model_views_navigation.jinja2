@@ -80,7 +80,7 @@ div.library span, div.this_model span { font-weight: bold; }
   </select>
   </span>
   
-  <form style='display:inline' method="GET" action="/refresh_library">
+  <form style='display:inline' method="GET" action="/libraries/{{navigation['current_library']}}/refresh_library">
 	    <input type="submit" value="&#8634;"/>
   </form>
    <button onclick="showPrompt();">+</button>

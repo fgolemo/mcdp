@@ -78,7 +78,10 @@ class SyntaxIdentifiers():
         'flatten',
         'from_library',
         'new',  # = from_library
+        'canonical',
+        'UpperSets',
     ]
+
     # remember to .copy() this otherwise things don't work
     _idn = (NotAny(MatchFirst([Keyword(_) for _ in keywords])) +
             Combine(oneOf(list(alphas)) +
@@ -98,7 +101,6 @@ class Syntax():
     PRODUCT = sp(L('x') | L('×'), lambda t: CDP.product(t[0]))
     PROVIDES = sp(L('provides'), lambda t: CDP.ProvideKeyword(t[0]))
     REQUIRES = sp(L('requires'), lambda t: CDP.RequireKeyword(t[0]))
-    FLATTEN = sp(L('flatten'), lambda t: CDP.FlattenKeyword(t[0]))
 
     USING = sp(L('using'), lambda t: CDP.UsingKeyword(t[0]))
     FOR = sp(L('for'), lambda t: CDP.ForKeyword(t[0]))
@@ -143,10 +145,6 @@ class Syntax():
     IMPLEMENTEDBY = sp(L('implemented-by'), lambda t: CDP.ImplementedbyKeyword(t[0]))
     CDPTOKEN = sp(L('mcdp'), lambda t: CDP.MCDPKeyword(t[0]))
 
-    FROMCATALOGUE = sp(L('catalogue'), lambda t:CDP.FromCatalogueKeyword(t[0]))
-    COMPACT = sp(L('compact'), lambda t: CDP.CompactKeyword(t[0]))
-    TEMPLATE = sp(L('template'), lambda t: CDP.TemplateKeyword(t[0]))
-    ABSTRACT = sp(L('abstract'), lambda t: CDP.AbstractKeyword(t[0]))
 
     FROM_LIBRARY = sp(L('from_library') | L('new'), lambda t: CDP.FromLibraryKeyword(t[0]))
 
@@ -183,6 +181,11 @@ class Syntax():
     name_poset = sp(get_idn(), lambda t: CDP.PosetName(t[0]))
     load_poset = sp(LOAD - name_poset, lambda t: CDP.LoadPoset(t[0], t[1]))
 
+    # UpperSets(<poset>)
+    UPPERSETS = sp(L('UpperSets'), lambda t: CDP.UpperSetsKeyword(t[0]))
+    uppersets = sp(UPPERSETS + SLPAR + space_expr + SRPAR,
+                   lambda t: CDP.MakeUpperSets(t[0], t[1]))
+
     # " finite_poset {
     #     a
     #     b  c  d  e
@@ -195,7 +198,6 @@ class Syntax():
     finite_poset_el = sp(get_idn(), lambda t: CDP.FinitePosetElement(t[0]))
     finite_poset_chain = sp(finite_poset_el + ZeroOrMore(LEQ + finite_poset_el),
                                lambda t: make_list(t))
-
 
     finite_poset = sp(FINITE_POSET + S(L('{')) + ZeroOrMore(finite_poset_chain) + S(L('}')),
                       lambda t: CDP.FinitePoset(t[0], make_list(t[1:])))
@@ -218,7 +220,8 @@ class Syntax():
                      int_expr ^
                      load_poset ^
                      code_spec ^
-                     finite_poset)
+                     finite_poset ^
+                     uppersets)
 
     space_expr << operatorPrecedence(space_operand, [
                 (PRODUCT, 2, opAssoc.LEFT, space_product_parse_action),
@@ -573,6 +576,9 @@ class Syntax():
                                                      abs=t[3],
                                                      max_value=t[4],
                                                      dp=t[5]))
+
+    FROMCATALOGUE = sp(L('catalogue'), lambda t:CDP.FromCatalogueKeyword(t[0]))
+
     ndpt_catalogue_dp = sp(FROMCATALOGUE -
                       S(L('{')) -
                       simple_dp_model_stats -
@@ -580,31 +586,40 @@ class Syntax():
                       S(L('}')),
                       lambda t: CDP.FromCatalogue(t[0], t[1], t[2]))
 
-    ndpt_abstract_expr = sp(ABSTRACT - ndpt_dp_rvalue,
+    ABSTRACT = sp(L('abstract'), lambda t: CDP.AbstractKeyword(t[0]))
+    ndpt_abstract = sp(ABSTRACT - ndpt_dp_rvalue,
                        lambda t: CDP.AbstractAway(t[0], t[1]))
     
-    ndpt_compact_expr = sp(COMPACT - ndpt_dp_rvalue,
+    COMPACT = sp(L('compact'), lambda t: CDP.CompactKeyword(t[0]))
+    ndpt_compact = sp(COMPACT - ndpt_dp_rvalue,
                        lambda t: CDP.Compact(t[0], t[1]))
 
-    ndpt_template_expr = sp(TEMPLATE - ndpt_dp_rvalue,
+    TEMPLATE = sp(L('template'), lambda t: CDP.TemplateKeyword(t[0]))
+    ndpt_template = sp(TEMPLATE - ndpt_dp_rvalue,
                        lambda t: CDP.MakeTemplate(t[0], t[1]))
 
+    FLATTEN = sp(L('flatten'), lambda t: CDP.FlattenKeyword(t[0]))
     ndpt_flatten = sp(FLATTEN - ndpt_dp_rvalue,
                       lambda t: CDP.Flatten(t[0], t[1]))
+
+    CANONICAL = sp(L('canonical'), lambda t: CDP.FlattenKeyword(t[0]))
+    ndpt_canonical = sp(CANONICAL - ndpt_dp_rvalue,
+                            lambda t: CDP.MakeCanonical(t[0], t[1]))
 
     ndpt_dp_operand = (
         ndpt_load_expr |
         code_spec |
         ndpt_simple_dp_model |
         ndpt_dp_model |
-        ndpt_abstract_expr |
-        ndpt_template_expr |
-        ndpt_compact_expr |
-        ndpt_dp_variable_ref |
+        ndpt_abstract |
+        ndpt_template |
+        ndpt_compact |
         ndpt_catalogue_dp |
         ndpt_approx |
         ndpt_coproduct_with_names |
-        ndpt_flatten
+        ndpt_flatten |
+        ndpt_canonical |
+        ndpt_dp_variable_ref
     )
 
     ndpt_dp_rvalue << operatorPrecedence(ndpt_dp_operand, [

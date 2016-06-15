@@ -10,6 +10,8 @@ __all__ = [
     'parse_ndp',
     'parse_ndp_filename',
     'parse_poset',
+    'parse_primitivedp',
+    'parse_constant'
 ]
 
 def parse_ndp(string, context=None):

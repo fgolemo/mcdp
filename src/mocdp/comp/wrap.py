@@ -1,7 +1,6 @@
 from .interfaces import NamedDP
 from contracts import contract, raise_wrapped
 from contracts.utils import indent, raise_desc
-from mocdp.configuration import get_conftools_dps
 from mocdp.dp import PrimitiveDP
 from mocdp.dp.dp_flatten import get_it
 from mocdp.exceptions import DPInternalError
@@ -16,8 +15,8 @@ __all__ = [
 class SimpleWrap(NamedDP):
     
     def __init__(self, dp, fnames, rnames, icon=None):
-        
-        _ , self.dp = get_conftools_dps().instance_smarter(dp)
+        self.dp = dp
+        # _ , self.dp = get_conftools_dps().instance_smarter(dp)
 
         F = self.dp.get_fun_space()
         R = self.dp.get_res_space()

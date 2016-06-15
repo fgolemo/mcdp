@@ -1,12 +1,13 @@
 
 from contracts import contract
-
 from contracts.utils import raise_wrapped
-from mcdp_posets.space import NotBelongs
 from mcdp_posets.rcomp_units import RcompUnits
+from mcdp_posets.space import NotBelongs
 from mcdp_report.gg_ndp import format_unit
 
+
 class SolverState():
+
     def __init__(self, ndp):
         self.fun = []
         self.ures = []
@@ -21,7 +22,6 @@ class SolverState():
             This is permissive; for example, ints are converted to floats.
             
         """
-
         def permissive_parse(F, v):
             if isinstance(F, RcompUnits) and isinstance(v, int):
                 v = float(v)

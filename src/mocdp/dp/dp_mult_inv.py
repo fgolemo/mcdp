@@ -9,6 +9,7 @@ import numpy as np
 __all__ = [
     'InvMult2',
     'InvPlus2',
+    'InvPlus2Nat',
 ]
 
 

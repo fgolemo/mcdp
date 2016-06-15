@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
-from mocdp import get_conftools_posets
 from mocdp.exceptions import DPInternalError
 from mcdp_posets import PosetProduct
 from multi_index import get_it
@@ -34,8 +33,8 @@ class Mux(WrapAMap):
 
     @contract(coords='seq(int|tuple|list)|int')
     def __init__(self, F, coords):
-        library = get_conftools_posets()
-        _, F = library.instance_smarter(F)
+#         library = get_conftools_posets()
+#         _, F = library.instance_smarter(F)
         
         self.amap = MuxMap(F, coords)
 
@@ -100,10 +99,10 @@ def get_flatten_muxmap(F0):
 
 class Flatten(Mux):
     def __init__(self, F):
-        library = get_conftools_posets()
-        _, F0 = library.instance_smarter(F)
-        coords = get_flatten_muxmap(F0)
-        Mux.__init__(self, F0, coords)
+#         library = get_conftools_posets()
+#         _, F0 = library.instance_smarter(F)
+        coords = get_flatten_muxmap(F)
+        Mux.__init__(self, F, coords)
 
     def __repr__(self):
         return 'Flatten(%r→%r, %s)' % (self.F, self.R, self.coords)

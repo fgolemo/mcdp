@@ -6,6 +6,7 @@ from mcdp_web.editor_fancy.app_editor_fancy import AppEditorFancy
 from mcdp_web.interactive.app_interactive import AppInteractive
 from mcdp_web.qr.app_qr import AppQR
 from mcdp_web.solver.app_solver import AppSolver
+from mcdp_web.solver2.app_solver2 import AppSolver2
 from mcdp_web.visualization.app_visualization import AppVisualization
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from pyramid.config import Configurator
@@ -19,28 +20,9 @@ __all__ = [
     'mcdp_web_main',
 ]
 
-def load_libraries(dirname):
-    """ Returns a dictionary
-            
-            library_name -> {'path': ...}
-    """
-    libraries = locate_files(dirname, "*.mcdplib", followlinks=False,
-                     include_directories=True,
-                     include_files=False)
-    res = {}
-    for path in libraries:
-        library_name = os.path.splitext(os.path.basename(path))[0]
-
-        l = MCDPLibrary()
-        cache_dir = os.path.join(path, '_mcdpweb_cache')
-        l.use_cache_dir(cache_dir)
-        l.add_search_dir(path)
-
-        res[library_name] = dict(path=path, library=l)
-    return res
 
 class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
-             AppEditorFancy):
+             AppEditorFancy, AppSolver2):
 
     def __init__(self, dirname):
         self.libraries = load_libraries(dirname)
@@ -51,6 +33,26 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         AppSolver.__init__(self)
         AppInteractive.__init__(self)
         AppEditorFancy.__init__(self)
+        AppSolver2.__init__(self)
+
+        # name -> dict(desc: )
+        self.views = {}
+
+        for x in ['syntax',
+                # put in this order
+                'ndp_graph',
+                'dp_graph', 'ndp_repr',
+                # XXX: put editor_fancy before editor
+                'edit_fancy',
+                'edit',
+                'solver']:
+            self.add_model_view(x, x)
+
+    def add_model_view(self, name, desc):
+        self.views[name] = dict(desc=desc)
+
+    def _get_views(self):
+        return sorted(self.views)
 
     def get_current_library_name(self, request):
         library_name = str(request.matchdict['library'])  # unicod
@@ -132,15 +134,6 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         url = '/libraries/%s/models/%s/views/%s/' % (library, model, view)
         return url
 
-    def _get_views(self):
-        return ['syntax',
-                # put in this order
-                'ndp_graph',
-                'dp_graph', 'ndp_repr',
-                # XXX: put editor_fancy before editor
-                'edit_fancy',
-                'edit',
-                'solver']
 
     def get_model_name(self, request):
         model_name = str(request.matchdict['model_name'])  # unicod
@@ -149,7 +142,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
     def get_current_view(self, request):
         url = request.url
         for x in self._get_views():
-            if x in url:
+            if '/' + x + '/' in url:
                 return x
         assert False, request.url
 
@@ -163,6 +156,11 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         
         models = self.list_of_models(request)
         
+        d['current_library'] = current_library
+
+        # d['current_view'] = current_view
+        # d['current_model'] = current_model
+
         d['models'] = []
         for m in models:
             is_current = m == current_model
@@ -210,6 +208,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         AppInteractive.config(self, config)
         AppEditorFancy.config(self, config)
 
+        AppSolver2.config(self, config)
+
         config.add_route('index', '/')
         config.add_view(self.view_index, route_name='index', renderer='index.jinja2')
 
@@ -234,6 +234,27 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         server = make_server('0.0.0.0', 8080, app)
         server.serve_forever()
 
+
+def load_libraries(dirname):
+    """ Returns a dictionary
+            
+            library_name -> {'path': ...}
+    """
+    libraries = locate_files(dirname, "*.mcdplib", followlinks=False,
+                     include_directories=True,
+                     include_files=False)
+    res = {}
+    for path in libraries:
+        library_name = os.path.splitext(os.path.basename(path))[0]
+
+        l = MCDPLibrary()
+        cache_dir = os.path.join(path, '_mcdpweb_cache')
+        l.use_cache_dir(cache_dir)
+        l.add_search_dir(path)
+
+        res[library_name] = dict(path=path, library=l)
+    return res
+
 class MCDPWeb(QuickAppBase):
 
     def define_program_options(self, params):
@@ -247,4 +268,5 @@ class MCDPWeb(QuickAppBase):
         wa.serve()
 
 mcdp_web_main = MCDPWeb.get_sys_main()
+
 

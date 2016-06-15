@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 
+from .utils import safe_makedirs
 from abc import ABCMeta, abstractmethod
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_posets.poset import NotLeq
-from mcdp_posets.poset_product import PosetProduct
-from mcdp_posets.rcomp import Rcomp
-from mcdp_posets.types_universe import get_types_universe
-from mcdp_posets.uppersets import UpperSet, UpperSets
+from mcdp_posets import (NotLeq, PosetProduct, Rcomp, UpperSet, UpperSets,
+    get_types_universe)
 from mocdp.drawing import plot_upset_R2
 from reprep.config import RepRepDefaults
 import functools
 import os
-from mcdp_report.utils import safe_makedirs
 
 
 extra_space_finite = 0.025

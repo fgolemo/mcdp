@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from mcdp_posets import Map, Poset, PosetProduct, SpaceProduct
-from mocdp import get_conftools_posets
+# from mocdp import get_conftools_posets
 from mocdp.dp.dp_generic_unary import WrapAMap
 from contracts import contract
 from mocdp.dp.dp_flatten import Mux
@@ -17,9 +17,9 @@ __all__ = [
 class Max(PrimitiveDP):
     """ Join on a poset """
 
-    def __init__(self, F):
-        library = get_conftools_posets()
-        _, F0 = library.instance_smarter(F)
+    def __init__(self, F0):
+#         library = get_conftools_posets()
+#         _, F0 = library.instance_smarter(F)
 
         F = PosetProduct((F0, F0))
         R = F0

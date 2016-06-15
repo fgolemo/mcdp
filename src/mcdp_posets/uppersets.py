@@ -66,10 +66,11 @@ class UpperSet(Space):
 
 class UpperSets(Poset):
 
-    @contract(P='$Poset|str')
+    @contract(P='$Poset')
     def __init__(self, P):
-        from mocdp.configuration import get_conftools_posets
-        _, self.P = get_conftools_posets().instance_smarter(P)
+        self.P = P
+#         from mocdp.configuration import get_conftools_posets
+#         _, self.P = get_conftools_posets().instance_smarter(P)
 
         if do_extra_checks:
             try:

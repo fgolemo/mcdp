@@ -1,7 +1,9 @@
-from mcdp_tests.generation import for_all_posets, for_some_posets
+from mcdp_tests.generation import for_all_posets
 from comptests.registrar import comptest
 from mcdp_posets.poset import NotBounded
 from mcdp_posets.space import Uninhabited
+from mcdp_posets.interval import Interval
+from mcdp_posets.poset_product import PosetProduct
 
 
 @for_all_posets
@@ -32,9 +34,10 @@ def check_poset1_chain(_id_poset, poset):
     except Uninhabited:
         pass
 
-@for_some_posets('square')
-def check_square(_id_poset, poset):
-    P = poset
+@comptest
+def check_square():
+    I = Interval(0.0, 1.0)
+    P = PosetProduct((I, I))
 
     assert P.get_bottom() == (0.0, 0.0)
     assert P.get_top() == (1.0, 1.0)

@@ -4,7 +4,6 @@ from mocdp.exceptions import do_extra_checks
 from mocdp.dp.dp_transformations import get_dp_bounds
 from mcdp_posets.uppersets import UpperSets
 
-
 def solver_iterative(dp, f, tracer):
     F = dp.get_fun_space()
     R = dp.get_res_space()

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from contracts import contract
-from contracts.utils import check_isinstance, raise_wrapped
 from .any import Any, BottomCompletion, TopCompletion
 from .rcomp import Rcomp
 from .space import Map
+from contracts import contract
+from contracts.utils import check_isinstance, raise_wrapped
 from mocdp.exceptions import DPSyntaxError, mcdp_dev_warning
 from pint import UnitRegistry  # @UnresolvedImport
 from pint.unit import UndefinedUnitError  # @UnresolvedImport
@@ -91,8 +91,9 @@ def parse_pint(s0):
     except (UndefinedUnitError, SyntaxError) as e:
         msg = 'Cannot parse units %r.' % s0
         raise_wrapped(DPSyntaxError, e, msg, compact=True)
+        # ? for some reason compact does not have effect here
     except Exception as e:
-        msg = 'Cannot parse units %r.' % s0
+        msg = 'Cannot parse units %r (%s).' % (s0, type(e))
         raise_wrapped(DPSyntaxError, e, msg)
 
 def make_rcompunit(units):

@@ -1,3 +1,4 @@
+# test connected
 mcdp {  
   sub motor = instance template mcdp {
     provides speed [R]

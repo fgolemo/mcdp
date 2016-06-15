@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import logging
+from comptests.registrar import jobs_registrar_simple
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -19,7 +20,7 @@ def load_tests_modules():
     import mcdp_lang_tests  # @Reimport
     from mcdp_report import tests  # @Reimport
 
-    from mocdp.dp import tests  # @Reimport
+    import mcdp_dp_tests
     # from .example_battery import mcdp_lang_tests  # @Reimport
 
     from mocdp.comp.flattening import tests  # @Reimport
@@ -28,11 +29,11 @@ def load_tests_modules():
 
 
 def jobs_comptests(context):
-    from mocdp.configuration import get_conftools_mocdp_config
+#     from mocdp.configuration import get_conftools_mocdp_config
 
     # configuration
-    from conf_tools import GlobalConfig
-    GlobalConfig.global_load_dir("mocdp")
+#     from conf_tools import GlobalConfig
+#     GlobalConfig.global_load_dir("mocdp")
 
     load_tests_modules()
 
@@ -45,6 +46,7 @@ def jobs_comptests(context):
 
     # instantiation
     from comptests import jobs_registrar
-    jobs_registrar(context, get_conftools_mocdp_config())
+    jobs_registrar_simple(context)
+    # jobs_registrar(context, get_conftools_mocdp_config())
 
 

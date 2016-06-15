@@ -1,20 +1,15 @@
 # -*- coding: utf-8 -*-
 from .namedtuple_tricks import get_copy_with_where
-
+from .parts import CDPLanguage
 from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list
 from contextlib import contextmanager
 from contracts import contract
 from contracts.interface import Where
-from contracts.utils import check_isinstance, indent, raise_desc, raise_wrapped
-from mcdp_posets import Nat, RcompUnits, Space, mult_table
-from mocdp.dp.dp_sum import sum_units
-from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError, \
-    MCDPExceptionWithWhere
+from contracts.utils import indent, raise_desc, raise_wrapped
+from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
+    MCDPExceptionWithWhere, mcdp_dev_warning)
 from pyparsing import ParseException, ParseFatalException
-import functools
-import warnings
-from mcdp_lang.parts import CDPLanguage
 
 CDP = CDPLanguage
 
@@ -26,7 +21,7 @@ def add_where_information(where):
     except DPInternalError as e:
         raise
     except MCDPExceptionWithWhere as e:
-#         raise  # XXX
+        mcdp_dev_warning('add magic traceback handling here')
         existing = getattr(e, 'where', None)
         use_where = existing if existing is not None else where
         e = type(e)(e.error, where=use_where)
@@ -95,7 +90,6 @@ def mult_parse_action(tokens):
     res = CDP.MultN(l, where=l.where)
     return res
 
-
 @parse_action
 @wheredecorator
 def divide_parse_action(tokens):
@@ -115,117 +109,16 @@ def coprod_parse_action(tokens):
     res = CDP.Coproduct(l, where=l.where)
     return res
 
-
-class MultType():
-    def __init__(self, factor):
-        self.factor = factor
-    def __call__(self, F):
-        return mult_table(F, self.factor)
-
-class MultValue():
-
-    def __init__(self, res):
-        self.res = res
-
-    def __call__(self, x):
-        return x * self.res
-
-@contract(S=RcompUnits)
-def inv_unit(S):
-    # S.units is a pint quantity
-    res = RcompUnits(1 / S.units)
-    return res
-
-def inv_constant(a):
-    from mcdp_posets.rcomp import Rcomp
-    if a.unit == Nat():
-        raise NotImplementedError('division by natural number')
-        warnings.warn('Please think more about this. Now 1/N -> 1.0/N')
-        unit = Rcomp()
-    else:
-        unit = inv_unit(a.unit)
-
-    if a.value == 0:
-        raise DPSemanticError('Division by zero')
-    # TODO: what about integers?
-    value = 1.0 / a.value
-    from mocdp.comp.context import ValueWithUnits
-    return ValueWithUnits(value=value, unit=unit)
-
-
-def mult_constants2(a, b):
-    R = mult_table(a.unit, b.unit)
-    value = a.value * b.value
-    from mocdp.comp.context import ValueWithUnits
-    return ValueWithUnits(value=value, unit=R)
-
-def mult_constantsN(seq):
-    res = functools.reduce(mult_constants2, seq)
-    # print('seq: %s res: %s' % (seq, res))
-    return res
-
-
-def add_table(F1, F2):
-    if not F1 == F2:
-        msg = 'Incompatible units for addition.'
-        raise_desc(DPSemanticError, msg, F1=F1, F2=F2)
-    return F1
-
-def plus_constants2(a, b):
-    R = a.unit 
-    Fs = [a.unit, b.unit]
-    values = [a.value, b.value]
-    res = sum_units(Fs, values, R)
-    from mocdp.comp.context import ValueWithUnits
-    return ValueWithUnits(value=res, unit=R)
-
-def plus_constantsN(constants):
-    return functools.reduce(plus_constants2, constants)
-
-
 @parse_action
 @wheredecorator
 def plus_parse_action(tokens):
     tokens = list(tokens[0])
-#
-#     ops = []
-#     glyphs = []
-#     for i, t in enumerate(tokens):
-#         if i % 2 == 0:
-#             ops.append(t)
-#         else:
-# #             assert t == '+'
-#             assert isinstance(t, CDP.plus)
-#             glyphs.append(t)
-
-
     l = make_list(tokens)
     assert l.where.character_end is not None
     res = CDP.PlusN(l, where=l.where)
     return res
 
 
-class PlusType():
-    @contract(factor=Space)
-    def __init__(self, factor):
-        self.factor = factor
-    def __call__(self, F):
-        return add_table(F, self.factor)
-
-class PlusValue():
-
-    def __init__(self, F, R, c):
-        check_isinstance(F, RcompUnits)
-        check_isinstance(c.unit, RcompUnits)
-        self.F = F
-        self.c = c
-        c.unit
-        c.value
-        self.R = R
-    def __call__(self, x):
-        values = [self.c.value, x]
-        Fs = [self.c.unit, self.F]
-        return sum_units(Fs, values, self.R)
 
 
 @parse_action
@@ -286,19 +179,9 @@ def remove_comments(s):
             return line
     return "\n".join(map(remove_comment, lines))
 
-
-
 def parse_line(line):
     from mcdp_lang.syntax import Syntax
     return parse_wrap(Syntax.line_expr, line)[0]
-#
-#
-# def power_expr_parse(t):
-#     op1 = t[0]
-#     exp = t[1]
-#     # assert isinstance(exp, (CDPLanguage.IntegerFraction, int))
-#     assert isinstance(exp, CDPLanguage.IntegerFraction)
-#     return CDP.Power(op1=op1, exponent=exp)
 
 @contract(name= CDP.DPName)
 def funshortcut1m(provides, fnames, prep_using, name):

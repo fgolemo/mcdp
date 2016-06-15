@@ -1,16 +1,17 @@
+
 from contracts.utils import raise_wrapped
 from mcdp_cli.plot import png_pdf_from_gg
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from mcdp_report.html import ast_to_html
-from mcdp_web.solver.app_solver import (ajax_error_catch,
-    format_exception_for_ajax_response, png_error_catch, response_image)
-from mcdp_web.utils import response_data
+from mcdp_web.utils import (
+    ajax_error_catch, format_exception_for_ajax_response, png_error_catch,
+    response_data, response_image)
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.exceptions import DPSemanticError
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render_to_response
-import os
 import cgi
+import os
 
 
 class AppEditorFancy():
@@ -182,7 +183,8 @@ class AppEditorFancy():
                 f.write(source)
             l._update_file(filename)
 
-            raise HTTPFound('/libraries/%s/models/%s/views/edit_fancy/' % (library, model_name))
+            url = '/libraries/%s/models/%s/views/edit_fancy/' % (library, model_name)
+            raise HTTPFound(url)
 
 
 # def cndp_get_suitable_for_drawing(model_name, ndp):

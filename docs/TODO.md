@@ -48,6 +48,8 @@ Misc
 MCDP-web
 ----------
 
+- F: navigation for libraries
+
 - F: send to non-fancy for internet explorer
 
 - F: mcdp-web: nice CSS all around
@@ -87,7 +89,6 @@ MCDP-web / QR
 Bugs
 ----
 
-- B: for testing, MCDPLibrary should not use the _cached directory; rather a temp dir. Otherwise there is a race condition.
 - B: FinitePoset does not have Join, Meet
 
 - B: Sometimes Pint does not simplify the units. For example,
@@ -97,16 +98,6 @@ Bugs
 
 - B: "(provided lift)^2" does not parse
 - B: "nat:2 / 1 []"
-- B: This does not parse cleanly:
-```
-mcdp {
-  provides f1 [R] 
-  requires r1 [R]
-  requires r2 [R]
-
-  f1  <= 1 [] + (r1 * (r2 + r1)  )
-
-}
 
 There is already a connection to function 'r1' of '_res_r1'.
 
@@ -117,25 +108,13 @@ There is already a connection to function 'r1' of '_res_r1'.
             ^
             |
             here or nearby
-```
+``` 
 
-- B: there is an asymmetri for functions and resources
-
-mcdp {
- provides f [g]
- requires r [g]
- required r >= 10 g
- provided f <= 14 g
-
-# this is ok
- provided f <= 10 g
-# this will cause an error:
-# required r >= 20 g
-}
+- F: nice icon for  operations: take
+- F: nice icon for  operations: meet, Join
 
 
-- F: nice icon for take operation
-
+- B: there is now an ugly hack (Catch exception ) when plotting in gg_*
 
 Language additions
 ------------------

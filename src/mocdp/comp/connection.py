@@ -11,12 +11,12 @@ from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.connection_reps import (relabel, there_are_repetitions,
     there_are_reps)
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.configuration import get_conftools_nameddps
 from mocdp.dp import Identity, Mux, Terminator, make_parallel, make_series
 from mocdp.dp.dp_loop import make_loop
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from networkx import DiGraph, MultiDiGraph, NetworkXUnfeasible
 from networkx.algorithms import is_connected, simple_cycles, topological_sort
+# from mocdp.configuration import get_conftools_nameddps
 
 
 class TheresALoop(Exception):
@@ -42,7 +42,7 @@ def check_connections(name2dp, connections):
         except ValueError as e:
             raise_wrapped(ValueError, e, 'Unknown signal.', s2=c.s2, c=c, ndp2=ndp2)
  
-@contract(name2dp='dict(str:($NamedDP|str|code_spec))',
+@contract(name2dp='dict(str:($NamedDP))',
           connections='set(str|$Connection)|list(str|$Connection)',
           returns=NamedDP)
 def dpconnect(name2dp, connections, split=[]):
@@ -61,8 +61,8 @@ def dpconnect(name2dp, connections, split=[]):
 #                    connections=format_list_long(connections),
 #                    split=split)
 
-    for k, v in name2dp.items():
-        _, name2dp[k] = get_conftools_nameddps().instance_smarter(v)
+#     for k, v in name2dp.items():
+#         _, name2dp[k] = get_conftools_nameddps().instance_smarter(v)
 
 #     connections = set(map(parse_connection, connections))
     connections = set(connections)
@@ -608,7 +608,7 @@ def find_functions_with_multiple_connections(connections):
     return set(multiple)
     
 
-@contract(name2dp='dict(str:($NamedDP|str|code_spec))',
+@contract(name2dp='dict(str:$NamedDP)',
           connections='set(str|$Connection)|list(str|$Connection)',
           returns=NamedDP)
 def dpgraph(name2dp, connections, split):
@@ -703,15 +703,15 @@ def choose_connection_to_cut1(connections, name2dp):
     return its_connection
 
 
-@contract(name2dp='dict(str:($NamedDP|str|code_spec))',
+@contract(name2dp='dict(str:($NamedDP))',
           connections='set(str|$Connection)|list(str|$Connection)',
           returns=NamedDP)
 def dpgraph_(name2dp, connections, split):
 
     try:
 
-        for k, v in name2dp.items():
-            _, name2dp[k] = get_conftools_nameddps().instance_smarter(v)
+#         for k, v in name2dp.items():
+#             _, name2dp[k] = get_conftools_nameddps().instance_smarter(v)
 
         connections = set(connections)
         check_connections(name2dp, connections)

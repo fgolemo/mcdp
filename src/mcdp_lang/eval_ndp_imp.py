@@ -80,7 +80,7 @@ def eval_ndp(r, context):  # @UnusedVariable
                 raise_desc(DPSemanticError, msg, ndp=ndp.repr_long())
 
         if isinstance(r, CDP.Ellipsis):
-            msg = 'Model is incomplete (ellipsis operator ... used)'
+            msg = 'Model is incomplete (the ellipsis operator "..." was used)'
             raise_desc(DPSemanticError, msg)
             
         cases = {
@@ -93,6 +93,7 @@ def eval_ndp(r, context):  # @UnusedVariable
             CDP.DPInstanceFromLibrary: eval_dp_rvalue_instancefromlibrary,
             CDP.CodeSpecNoArgs: eval_ndp_code_spec,
             CDP.CodeSpec: eval_ndp_code_spec,
+            CDP.MakeCanonical: eval_ndp_makecanonical,
         }
         
         for klass, hook in cases.items():
@@ -102,6 +103,11 @@ def eval_ndp(r, context):  # @UnusedVariable
    
     raise_desc(DPInternalError, 'Invalid dprvalue.', r=r)
 
+
+def eval_ndp_makecanonical(r, context):
+    ndp = eval_ndp(r.dp_rvalue, context)
+    print ndp
+    raise NotImplementedError
 
 
 def eval_ndp_code_spec(r, _context):
@@ -140,19 +146,10 @@ def eval_dp_rvalue_coproduct(r, context):
 
 @contract(r=CDP.CoproductWithNames)
 def eval_dp_rvalue_CoproductWithNames(r, context):
-#     from mocdp.comp.interfaces import NamedDPCoproduct
-
     assert isinstance(r, CDP.CoproductWithNames)
     elements = r.elements
     names = [_.value for _ in elements[0::2]]
     ndps = [eval_ndp(_, context) for _ in elements[1::2]]
-#
-#     d = {}
-#     for name, ndp in zip(names, ndps):
-#         name = name.value
-#         ndp = eval_ndp(ndp, context)
-#         d[name] = ndp
-
     labels = tuple(names)
     return NamedDPCoproduct(tuple(ndps), labels=labels)
 

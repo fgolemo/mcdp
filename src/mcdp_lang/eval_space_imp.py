@@ -9,6 +9,7 @@ from mcdp_posets.nat import Int, Nat
 from mcdp_posets.poset import Poset
 from mcdp_posets.space import Space
 from mocdp.exceptions import DPInternalError
+from mcdp_posets.uppersets import UpperSets
 
 CDP = CDPLanguage
 
@@ -43,12 +44,19 @@ def eval_space(r, context):
         if isinstance(r, (CDP.CodeSpecNoArgs, CDP.CodeSpec)):
             return eval_space_code_spec(r, context)
 
+        if isinstance(r, CDP.MakeUpperSets):
+            return eval_space_makeuppersets(r, context)
+
         # This should be removed...
         if isinstance(r, CDP.Unit):
             return r.value
 
         raise DPInternalError('Invalid value to eval_space: %s' % str(r))
 
+
+def eval_space_makeuppersets(r, context):
+    P = eval_space(r.space, context)
+    return UpperSets(P)
 
 def eval_space_code_spec(r, _context):
     from .eval_codespec_imp import eval_codespec
@@ -74,15 +82,3 @@ def eval_poset_load(r, context):
     load_arg = r.name.value
     return context.load_poset(load_arg)
 
-
-#
-# @contract(returns=Space)
-# def eval_unit(x, context):  # @UnusedVariable
-#
-#     if isinstance(x, CDP.Unit):
-#         S = x.value
-#         assert isinstance(S, Space), S
-#         return S
-#
-#     msg = 'Cannot evaluate %s as unit.' % x.__repr__()
-#     raise ValueError(msg)

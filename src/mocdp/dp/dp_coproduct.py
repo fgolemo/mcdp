@@ -24,9 +24,9 @@ class CoProductDP(PrimitiveDP):
 
     @contract(dps='tuple,seq[>=1]($PrimitiveDP)')
     def __init__(self, dps):
-        from mocdp import get_conftools_dps
-        library = get_conftools_dps()
-        dps = [library.instance_smarter(_)[1] for _ in dps]
+#         from mocdp import get_conftools_dps
+#         library = get_conftools_dps()
+#         dps = [library.instance_smarter(_)[1] for _ in dps]
         tu = get_types_universe()
 
         F1 = dps[0].get_fun_space()

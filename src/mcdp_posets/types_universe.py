@@ -193,10 +193,13 @@ class LiftToUpperSets(Map):
         return UpperSet(elements2, self.cod.P)
 
 
+
+
 def express_value_in_isomorphic_space(S1, s1, S2):
     """ 
         expresses s1 in S2 
-    
+
+        assumes S1 <= S2 
     """
     A_to_B, _ = tu.get_embedding(S1, S2)
     return A_to_B(s1)

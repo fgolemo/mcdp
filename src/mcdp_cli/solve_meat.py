@@ -2,7 +2,7 @@
 from .query_interpretation import (interpret_string,
     solve_interpret_query_strings)
 from .utils_mkdir import mkdirs_thread_safe
-from conf_tools import GlobalConfig
+# from conf_tools import GlobalConfig
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.dp.dp_transformations import get_dp_bounds
 from mocdp.dp.solver_iterative import solver_iterative
@@ -173,7 +173,7 @@ def solve_meat_solve(trace, ndp, dp, fg, intervals, max_steps, _exp_advanced):
     return res, trace
 
 def solve_read_model(dirs, param):
-    GlobalConfig.global_load_dir("mocdp")
+#     GlobalConfig.global_load_dir("mocdp")
 
     model_name = param
     basename = model_name

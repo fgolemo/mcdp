@@ -2,11 +2,10 @@
 from .primitive import PrimitiveDP
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
-from mocdp import get_conftools_posets
 from mcdp_posets import (Int, Map, Nat, Poset, PosetProduct, Rcomp, RcompUnits,
     Space)  # @UnusedImport
-from mcdp_posets import SpaceProduct
-from mcdp_posets.types_universe import get_types_universe
+from mcdp_posets import SpaceProduct, get_types_universe
+# from mocdp import get_conftools_posets
 import functools
 import numpy as np
 
@@ -27,8 +26,9 @@ __all__ = [
 class Sum(PrimitiveDP):
 
     def __init__(self, F):
-        library = get_conftools_posets()
-        _, F0 = library.instance_smarter(F)
+        F0 = F
+#         library = get_conftools_posets()
+#         _, F0 = library.instance_smarter(F)
 
         F = PosetProduct((F0, F0))
         R = F0
@@ -214,10 +214,12 @@ def check_sum_units_compatible(Fs):
 class Product(PrimitiveDP):
 
     def __init__(self, F1, F2, R):
-        library = get_conftools_posets()
-        _, self.F1 = library.instance_smarter(F1)
-        _, self.F2 = library.instance_smarter(F2)
-        _, R = library.instance_smarter(R)
+#         library = get_conftools_posets()
+        self.F1 = F1
+        self.F2 = F2
+#         _, self.F1 = library.instance_smarter(F1)
+#         _, self.F2 = library.instance_smarter(F2)
+#         _, R = library.instance_smarter(R)
 
         F = PosetProduct((F1, F2))
 

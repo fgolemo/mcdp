@@ -1,5 +1,5 @@
-from conf_tools.global_config import GlobalConfig
-from mcdp_lang import parse_ndp
+# from conf_tools.global_config import GlobalConfig
+from mcdp_lang.parse_interface import parse_ndp
 from mcdp_posets.uppersets import UpperSets
 from mcdp_report.report import report_dp1, report_ndp1
 from mcdp_report.utils import safe_makedirs
@@ -11,12 +11,13 @@ import logging
 import os
 import sys
 import time
+
 logger = logging.getLogger(__name__)
 
 
 
 def watch_main():
-    GlobalConfig.global_load_dir("mocdp")
+#     GlobalConfig.global_load_dir("mocdp")
     filename = sys.argv[1]
     if  not '.mcdp' in filename:
         raise ValueError(filename)
@@ -87,7 +88,7 @@ def watch_main():
             return
 
         F = dp.get_fun_space()
-        f = F.get_bottom()
+        # f = F.get_bottom()
         print('Querying with %s %s' % (F, F.format(f)))
         try: 
             trace = generic_solve(dp, f=f, max_steps=None)

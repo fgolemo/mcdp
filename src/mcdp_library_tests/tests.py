@@ -1,16 +1,16 @@
-from conf_tools.utils.locate_files_imp import locate_files
-from conf_tools.utils.resources import dir_from_package_name
+from contextlib import contextmanager
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_cli.solve_meat import solve_main
 from mcdp_library.library import MCDPLibrary
-from mocdp import logger
-import os
-import yaml
-from contextlib import contextmanager
-import tempfile
-import shutil
+from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
+from mcdp_library.utils.locate_files_imp import locate_files
 from mcdp_tests.generation import for_all_source_mcdp
+from mocdp import logger
 from mocdp.exceptions import DPSemanticError
+import os
+import shutil
+import tempfile
+import yaml
 
 __all__ = [
     'define_tests_for_mcdplibs',

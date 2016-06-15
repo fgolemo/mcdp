@@ -25,6 +25,7 @@ class CDPLanguage():
     MakeTuple = namedtuplewhere('MakeTuple', 'open ops close')
 
     MakeTemplate = namedtuplewhere('MakeTemplate', 'keyword dp_rvalue')
+    MakeCanonical = namedtuplewhere('MakeCanonical', 'keyword dp_rvalue')
     AbstractAway = namedtuplewhere('AbstractAway', 'keyword dp_rvalue')
     Compact = namedtuplewhere('Compact', 'keyword dp_rvalue')
     Flatten = namedtuplewhere('Flatten', 'keyword dp_rvalue')
@@ -147,6 +148,7 @@ class CDPLanguage():
 
     # Code specs
     ArgName = namedtuplewhere('ArgName', 'value')  # value = string
+    ArgValue = namedtuplewhere('ArgValue', 'python_value')  # int, float, string
     CodeSpec = namedtuplewhere('CodeSpec', 'keyword function arguments')
     CodeSpecNoArgs = namedtuplewhere('CodeSpecNoArgs', 'keyword function')
 
@@ -172,9 +174,14 @@ class CDPLanguage():
     FinitePoset = namedtuplewhere('FinitePoset', 'keyword chains')
 
     TakeKeyword = namedtuplewhere('TakeKeyword', 'keyword')
+
     TupleIndex = namedtuplewhere('TupleIndex', 'keyword value index')
 
     SpaceCustomValue = namedtuplewhere('SpaceCustomValue', 'space keyword custom_string')
 
     # solve( <0 g>, `model )
     SolveModel = namedtuplewhere('SolveModel', 'keyword f model')
+
+    UpperSetsKeyword = namedtuplewhere('UpperSetsKeyword', 'keyword')
+
+    MakeUpperSets = namedtuplewhere('MakeUpperSets', 'keyword space')

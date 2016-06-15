@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict
-from conf_tools.utils.resources import dir_from_package_name
 from contextlib import contextmanager
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_lang.blocks import get_missing_connections
+from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
 from mcdp_report.utils import safe_makedirs
 from mocdp.comp import CompositeNamedDP, SimpleWrap
 from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 from mocdp.comp.interfaces import NamedDP
-from mocdp.dp import (Constant, GenericUnary, Identity, Limit, Max, Min,
-                       Product, ProductN, Sum, SumN)
+from mocdp.dp import (
+    Constant, GenericUnary, Identity, Limit, Max, Min, Product, ProductN, Sum,
+    SumN)
 from mocdp.dp.conversion import Conversion
 from mocdp.dp.dp_flatten import MuxMap
 from mocdp.dp.dp_generic_unary import WrapAMap

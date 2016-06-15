@@ -1,13 +1,12 @@
 from .solve_meat import solve_read_model
 from .utils_mkdir import mkdirs_thread_safe
-from conf_tools import GlobalConfig
-from conf_tools.utils import expand_string
+# from conf_tools import GlobalConfig
+# from conf_tools.utils import expand_string
 from contracts import contract
 from contracts.utils import raise_desc
 from decent_params.utils import UserError
 from mcdp_library import MCDPLibrary
-from mcdp_report.gg_ndp import (STYLE_GREENRED, STYLE_GREENREDSYM,
-    gvgen_from_ndp)
+from mcdp_report.gg_ndp import STYLE_GREENRED, STYLE_GREENREDSYM, gvgen_from_ndp
 from mcdp_report.gg_utils import get_dot_string, gg_figure
 from mcdp_report.report import gvgen_from_dp
 from mocdp.exceptions import mcdp_dev_warning
@@ -16,6 +15,7 @@ from reprep import Report
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
+from mcdp_cli.utils_wildcard import expand_string
 
 def get_ndp(data):
     if not 'ndp' in data:
@@ -230,7 +230,7 @@ def do_plots(logger, model_name, plots, outdir, extra_params, dirs):
     data['dirs'] = dirs
     data['model_name'] = model_name
 
-    GlobalConfig.global_load_dir("mocdp")
+#     GlobalConfig.global_load_dir("mocdp")
 
     library = MCDPLibrary()
     for d in dirs:
@@ -297,7 +297,7 @@ class PlotDP(QuickAppBase):
                            help='Library directories containing models.')
 
     def go(self):
-        GlobalConfig.global_load_dir("mocdp")
+#         GlobalConfig.global_load_dir("mocdp")
 
         options = self.get_options()
         filenames = options.get_extra()

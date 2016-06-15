@@ -42,6 +42,13 @@ comptests-run-parallel-nocontracts-prof:
 	mkdir -p $(out)
 	DISABLE_CONTRACTS=1 comptests -o $(out) --profile --nonose -c "make; rparmake not *testlang13diagram*" $(package)  
 
+
+coverage:
+	-DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "exit" $(package)
+	-coverage2 run `which compmake` $(out) -c "rparmake"
+	coverage html -d out_coverage --include '*src/mcdp*'
+
+
 clean:
 	rm -rf $(out) _cached
 

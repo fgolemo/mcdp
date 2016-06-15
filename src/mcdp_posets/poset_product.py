@@ -14,11 +14,9 @@ __all__ = [
 class PosetProduct(SpaceProduct, Poset):
     """ A product of Posets with the product order. """
 
-    @contract(subs='seq(str|$Poset|code_spec)')
+    @contract(subs='seq($Poset)')
     def __init__(self, subs):
-        from mocdp.configuration import get_conftools_posets
-        library = get_conftools_posets()
-        subs = tuple([library.instance_smarter(s)[1] for s in subs])
+        subs = tuple(subs)
         SpaceProduct.__init__(self, subs)
 
     def leq(self, a, b):
@@ -30,6 +28,18 @@ class PosetProduct(SpaceProduct, Poset):
             if not sub.leq(x, y):
                 return False
         return True
+
+    def join(self, a, b):
+        res = []
+        for sub, x, y in zip(self.subs, a, b):
+            res.append(sub.join(x, y))
+        return tuple(res)
+
+    def meet(self, a, b):
+        res = []
+        for sub, x, y in zip(self.subs, a, b):
+            res.append(sub.meet(x, y))
+        return tuple(res)
 
     def check_leq(self, a, b):
         if do_extra_checks():

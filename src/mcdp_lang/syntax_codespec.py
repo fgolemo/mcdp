@@ -3,7 +3,7 @@ from .syntax import SyntaxBasics, SyntaxIdentifiers
 from .syntax_utils import L, O, S, SCOMMA, SLPAR, SRPAR, sp
 from .utils_lists import make_list
 from pyparsing import (Combine, Optional, Word, ZeroOrMore, alphanums, alphas,
-    oneOf)
+    oneOf, quotedString)
 
 CDP = CDPLanguage
 
@@ -15,7 +15,7 @@ def get_code_spec_expr():
             code my.python.function
             code my.python.function(a=1,b=2,...)
         
-        For now, the value of the arguments are only integers or float.
+        For now, the value of the arguments are only integers, float, strings.
     
         Evaluates to either CDP.CodeSpecNoArgs or CDP.CodeSpec.
     """
@@ -36,7 +36,11 @@ class SyntaxCodeSpec():
     code_spec_simple = sp(CODE + funcname,
                           lambda t: CDP.CodeSpecNoArgs(keyword=t[0], function=t[1]))
 
-    arg_value = SyntaxBasics.integer_or_float
+    string_content = sp(quotedString,
+                        lambda t: t[0][1:-1])
+
+    arg_value = sp(SyntaxBasics.integer ^ SyntaxBasics.floatnumber ^ string_content,
+                   lambda t: CDP.ArgValue(t[0]))
     arg_name = sp(SyntaxIdentifiers.get_idn(), lambda t: CDP.ArgName(t[0]))
     arg_pair = arg_name + S(L('=')) + arg_value
     arguments_spec = sp(O(arg_pair) + ZeroOrMore(SCOMMA + arg_pair),

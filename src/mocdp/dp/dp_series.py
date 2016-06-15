@@ -19,11 +19,12 @@ __all__ = [
 class Series0(PrimitiveDP):
 
     def __init__(self, dp1, dp2):
-        from mocdp import get_conftools_dps
-        library = get_conftools_dps()
-        _, self.dp1 = library.instance_smarter(dp1)
-        _, self.dp2 = library.instance_smarter(dp2)
-
+#         from mocdp import get_conftools_dps
+#         library = get_conftools_dps()
+#         _, self.dp1 = library.instance_smarter(dp1)
+#         _, self.dp2 = library.instance_smarter(dp2)
+        self.dp1 = dp1
+        self.dp2 = dp2
         # if equiv_to_identity(self.dp1) or equiv_to_identity(self.dp2):
         #    raise ValueError('should not happen series\n- %s\n -%s' % (self.dp1, self.dp2))
 
