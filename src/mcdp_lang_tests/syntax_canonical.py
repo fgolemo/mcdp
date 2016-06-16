@@ -4,8 +4,24 @@ from comptests.registrar import comptest
 @comptest
 def check_canonical1():
     ndp = assert_parsable_to_connected_ndp("""
-        canonical mcdp { } 
-""")
+canonical mcdp {
+    f = instance mcdp  {
+        provides a [Nat]
+        
+        requires x [Nat]
+        requires y [Nat]
+        
+        x + y >= a
+    }
+
+    provides z [Nat]
+
+    f.a >= f.x + f.y + z 
+
+    requires x, y for f
+}
+"""
+ )
 
 
 

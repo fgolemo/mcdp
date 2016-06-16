@@ -6,8 +6,6 @@ from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.exceptions import do_extra_checks
 
-
-
 __all__ = [
     'UpperSet',
     'UpperSets',

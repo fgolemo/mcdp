@@ -49,7 +49,7 @@ class CResource():
 
 
 class ValueWithUnits():
-    """ unit should have been "space" """
+    """ "unit" should have been "space" """
     @contract(unit=Space)
     def __init__(self, value, unit):
         unit.belongs(value)
@@ -84,48 +84,6 @@ def is_res_node_name(name):
 class NoSuchMCDPType(Exception):
     pass
 
-# def conftools_load_ndp(load_arg):
-#     from mocdp.configuration import get_conftools_nameddps
-#     from conf_tools.exceptions import ConfToolsException
-#
-#     library = get_conftools_nameddps()
-#
-#     try:
-#         _, ndp = library.instance_smarter(load_arg)
-#     except ConfToolsException as e:
-#         msg = 'Cannot load predefined DP %s.' % load_arg.__repr__()
-#         raise_wrapped(DPSemanticError, e, msg, compact=True)
-#
-#     return ndp
-#
-#
-# def conftools_load_poset(load_arg):
-#     from conf_tools.exceptions import ConfToolsException
-#     from mocdp.configuration import get_conftools_posets
-#
-#     library = get_conftools_posets()
-#
-#     try:
-#         _, ndp = library.instance_smarter(load_arg)
-#     except ConfToolsException as e:
-#         msg = 'Cannot load predefined DP %s.' % load_arg.__repr__()
-#         raise_wrapped(DPSemanticError, e, msg, compact=True)
-#
-#     return ndp
-#
-# def conftools_load_primitivedp(load_arg):
-#     from conf_tools.exceptions import ConfToolsException
-#     from mocdp.configuration import get_conftools_dps
-#
-#     library = get_conftools_dps()
-#
-#     try:
-#         _, ndp = library.instance_smarter(load_arg)
-#     except ConfToolsException as e:
-#         msg = 'Cannot load PrimitiveDP %s.' % load_arg.__repr__()
-#         raise_wrapped(DPSemanticError, e, msg, compact=True)
-#
-#     return ndp
 
 
 class Context():
@@ -140,10 +98,6 @@ class Context():
         self.var2resource = {}  # str -> Resource
         self.var2model = {}  # str -> NamedDP
         self.constants = {}  # str -> ValueWithUnits
-        
-#         self.load_ndp_hooks = [conftools_load_ndp]
-#         self.load_posets_hooks = [conftools_load_poset]
-#         self.load_primitivedp_hooks = [conftools_load_primitivedp]
 
         self.load_ndp_hooks = []
         self.load_posets_hooks = []
@@ -159,7 +113,6 @@ class Context():
 
         return s
 
-
     def child(self):
         """ A child context preserves the value of the constants
             and the model types. """
@@ -167,6 +120,7 @@ class Context():
         c.load_ndp_hooks = list(self.load_ndp_hooks)
         c.load_posets_hooks = list(self.load_posets_hooks)
         c.load_primitivedp_hooks = list(self.load_primitivedp_hooks)
+        c.var2resource = {}  # XXX?
         c.var2model.update(self.var2model)
         c.constants.update(self.constants)
         return c
@@ -299,7 +253,6 @@ class Context():
         self.add_ndp(name, ndp)
         self.rnames.append(rname)
         return name
-        # self.newresources[rname] = ndp
 
     def iterate_new_functions(self):
         for fname in self.fnames:
@@ -340,12 +293,13 @@ class Context():
 
         mcdp_dev_warning('redo this check')
 
+
         if self.is_new_function(c.dp2):
-            msg = "Cannot add connection to external interface %r." % c.dp1
+            msg = "Cannot add connection to new function %r." % c.dp2
             raise_desc(DPSemanticError, msg, c=c)
 
         if self.is_new_resource(c.dp1):
-            msg = "Cannot add connection to external interface %r." % c.dp2
+            msg = "Cannot add connection to new resource %r." % c.dp1
             raise_desc(DPSemanticError, msg, c=c)
 
         # Find if there is already a connection to c.dp2,c.s2

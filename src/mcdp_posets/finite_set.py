@@ -109,7 +109,7 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
         return d
 
     def join(self, a, b):
-        from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima, poset_maxima
+        from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
 
         # find all descendants
         da = self._get_upper_closure(a)
@@ -127,7 +127,7 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
         return list(minima)[0]
 
     def meet(self, a, b):
-        from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima, poset_maxima
+        from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
 
         # find all descendants
         da = self._get_lower_closure(a)

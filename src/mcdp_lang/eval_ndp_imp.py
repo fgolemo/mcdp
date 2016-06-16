@@ -5,19 +5,20 @@ from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
 from contracts import contract, describe_value
 from contracts.utils import raise_desc, raise_wrapped
+from mcdp_dp.conversion import get_conversion
+from mcdp_dp.dp_approximation import make_approximation
+from mcdp_dp.dp_catalogue import CatalogueDP
+from mcdp_dp.dp_max import JoinNDP, MeetNDual
+from mcdp_dp.dp_series_simplification import make_series
 from mcdp_lang.parse_actions import add_where_information
 from mcdp_posets import Any, NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
+from mocdp.comp.composite_makecanonical import cndp_makecanonical
 from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
     get_name_for_fun_node, get_name_for_res_node)
-from mcdp_dp.conversion import get_conversion
-from mcdp_dp.dp_approximation import make_approximation
-from mcdp_dp.dp_catalogue import CatalogueDP
-from mcdp_dp.dp_series_simplification import make_series
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
-from mcdp_dp.dp_max import JoinNDP, MeetNDual
 
 
 
@@ -106,8 +107,8 @@ def eval_ndp(r, context):  # @UnusedVariable
 
 def eval_ndp_makecanonical(r, context):
     ndp = eval_ndp(r.dp_rvalue, context)
-    print ndp
-    raise NotImplementedError
+    return cndp_makecanonical(ndp)
+
 
 
 def eval_ndp_code_spec(r, _context):

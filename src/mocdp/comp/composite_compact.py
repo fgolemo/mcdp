@@ -12,7 +12,7 @@ def compact_context(context):
     
     """
     from .context_functions import find_nodes_with_multiple_connections
-    from mcdp_dp.dp_flatten import Mux
+    from mcdp_dp import Mux
     from mocdp.comp.wrap import dpwrap
     from mocdp.comp.connection import connect2
 

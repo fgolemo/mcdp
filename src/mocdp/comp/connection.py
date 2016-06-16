@@ -641,8 +641,6 @@ def dpgraph(name2dp, connections, split):
         msg = 'These resources have multiple connections.'
         raise_desc(ValueError, msg, fmc=fmc)
 
-
-
     # check that there are no repetitions
     if there_are_reps(name2dp):
         name2dp_, connections_, relabeling = relabel(name2dp, connections)
@@ -709,10 +707,6 @@ def choose_connection_to_cut1(connections, name2dp):
 def dpgraph_(name2dp, connections, split):
 
     try:
-
-#         for k, v in name2dp.items():
-#             _, name2dp[k] = get_conftools_nameddps().instance_smarter(v)
-
         connections = set(connections)
         check_connections(name2dp, connections)
 
