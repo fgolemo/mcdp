@@ -1,4 +1,3 @@
-
 from contracts.utils import raise_wrapped
 from mcdp_cli.plot import png_pdf_from_gg
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp

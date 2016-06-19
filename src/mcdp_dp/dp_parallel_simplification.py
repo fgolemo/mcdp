@@ -8,7 +8,7 @@ from abc import ABCMeta, abstractmethod
 from contracts import contract
 from contracts.utils import raise_wrapped
 from mcdp_posets import PosetProduct
-from mocdp.exceptions import DPInternalError
+from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 from multi_index.get_it_test import compose_indices
 
 __all__ = [
@@ -112,11 +112,15 @@ rules = [
 ]
 
 
-
-@contract(dps='list[>=2]($PrimitiveDP)')
+# @contract(dps='list[>=2]($PrimitiveDP)')
+@contract(dps='list[>=0]($PrimitiveDP)')
 def make_parallel_n(dps):
     if len(dps) == 2:
         return make_parallel(dps[0], dps[1])
+
+    if len(dps) == 0:
+        mcdp_dev_warning('This works but should be a special case.')
+
     return ParallelN(dps)
 #
 #     from mcdp_dp.dp_series_simplification import make_series

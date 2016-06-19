@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.interface import add_prefix
 from contracts.utils import raise_desc
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import (Connection, get_name_for_fun_node,
     get_name_for_res_node, is_fun_node_name, is_res_node_name)
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.exceptions import mcdp_dev_warning
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
+from _collections import defaultdict
 
 __all__ = [
     'cndp_flatten',
@@ -105,6 +104,11 @@ def cndp_flatten(ndp):
     names2 = {}
     connections2 = set()
 
+    #
+    proxy_functions = defaultdict(lambda: dict())
+    proxy_resources = defaultdict(lambda: dict())
+    # proxy[name][fname]
+
     for name, n0 in name2ndp.items():
         n1 = n0.flatten()
         # print('n1: %s' % add_prefix(str(n1), '| '))
@@ -118,17 +122,47 @@ def cndp_flatten(ndp):
         if isinstance(nn, CompositeNamedDP):
             for name2, ndp2 in nn.get_name2ndp().items():
                 assert not name2 in names2
-                names2[name2] = ndp2
+                isitf, _ = is_fun_node_name(name2)
+                isitr, _ = is_res_node_name(name2)
+                if isitf or isitr:
+                    # do not add the identity nodes
+                    # that represent functions or resources
+                    print('skipping %r' % name2)
+                    continue
+                else:
+                    names2[name2] = ndp2
             
             for c in nn.get_connections():
-                dp1, s1, dp2, s2 = c.dp1, c.s1, c.dp2, c.s2
+                # is it a connection to a function
+                isitf, fn = is_fun_node_name(c.dp1)
+                isitr, rn = is_res_node_name(c.dp2)
+                
+                if isitf and isitr:
+                    raise NotImplementedError
+                
+                if isitf:
+                    proxy_functions[name][fn] = (c.dp2, c.s2)
+                    continue
 
-                assert s1 in names2[dp1].get_rnames()
-                assert s2 in names2[dp2].get_fnames()
-                c2 = Connection(dp1=dp1, s1=s1, dp2=dp2, s2=s2)
+                if isitr:
+                    proxy_resources[name][rn] = (c.dp1, c.s1)
+                    continue
+
+                assert c.s1 in names2[c.dp1].get_rnames()
+                assert c.s2 in names2[c.dp2].get_fnames()
+                c2 = Connection(dp1=c.dp1, s1=c.s1, dp2=c.dp2, s2=c.s2)
                 connections2.add(c2)
         else:
+            for fn in nn.get_fnames():
+                proxy_functions[name][fn] = (name, fn)
+
+            for rn in nn.get_rnames():
+                proxy_resources[name][rn] = (name, rn)
+
             names2[name] = nn
+
+    print proxy_functions
+    print proxy_resources
 
     for c in connections:
         dp2 = c.dp2
@@ -136,22 +170,31 @@ def cndp_flatten(ndp):
         dp1 = c.dp1
         s1 = c.s1
 
+
+
+
+
+
         dp2_was_exploded = isinstance(name2ndp[dp2], CompositeNamedDP)
         if dp2_was_exploded:
-            dp2_ = "_fun_%s%s%s" % (dp2, sep, s2)
+            (dp2_, s2_) = proxy_functions[dp2]["%s/%s" % (dp2, s2)]
+#
+#             dp2_ = "_fun_%s%s%s" % (dp2, sep, s2)
             if not dp2_ in names2:
                 raise_desc(AssertionError, "?", dp2_=dp2_, c=c, names2=sorted(names2))
-            s2_ = '%s%s%s' % (dp2, sep, s2)
+#             s2_ = '%s%s%s' % (dp2, sep, s2)
         else:
             dp2_ = dp2
             s2_ = s2
 
         dp1_was_exploded = isinstance(name2ndp[dp1], CompositeNamedDP)
         if dp1_was_exploded:
-            dp1_ = "_res_%s%s%s" % (dp1, sep, s1)
-            if not dp1_ in names2:
-                raise_desc(AssertionError, "?", dp1_=dp1_, c=c, names2=sorted(names2))
-            s1_ = '%s%s%s' % (dp1, sep, s1)
+            (dp1_, s1_) = proxy_resources[dp1]["%s/%s" % (dp1, s1)]
+#
+#             dp1_ = "_res_%s%s%s" % (dp1, sep, s1)
+#             if not dp1_ in names2:
+#                 raise_desc(AssertionError, "?", dp1_=dp1_, c=c, names2=sorted(names2))
+#             s1_ = '%s%s%s' % (dp1, sep, s1)
         else:
             dp1_ = dp1
             s1_ = s1
@@ -163,8 +206,7 @@ def cndp_flatten(ndp):
         assert dp2_ in names2
         assert s2_ in names2[dp2_].get_fnames(), (s2_, names2[dp2_].get_fnames())
 
-        c2 = Connection(dp1=dp1_, s1=s1_, dp2=dp2_, s2=s2_)
-        # (dp2, s2)
+        c2 = Connection(dp1=dp1_, s1=s1_, dp2=dp2_, s2=s2_) 
         connections2.add(c2)
 
     return CompositeNamedDP.from_parts(names2, connections2, fnames, rnames)

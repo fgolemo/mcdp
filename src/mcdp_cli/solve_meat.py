@@ -2,14 +2,13 @@
 from .query_interpretation import (interpret_string,
     solve_interpret_query_strings)
 from .utils_mkdir import mkdirs_thread_safe
-# from conf_tools import GlobalConfig
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.solver_iterative import solver_iterative
 from mcdp_dp.tracer import Tracer
-from mcdp_report.report import report_dp1, report_ndp1
 from mcdp_posets import PosetProduct, UpperSets, get_types_universe
 from mcdp_posets.space import NotEqual
+from mcdp_report.report import report_dp1, report_ndp1
 from reprep import Report
 import os
 

@@ -1,11 +1,8 @@
-
-from contracts.utils import raise_wrapped
-from mcdp_posets.poset import NotLeq
-from mcdp_posets.types_universe import get_types_universe
-from mocdp.exceptions import DPSemanticError
 from contracts import contract
-from .primitive import PrimitiveDP
-from mcdp_dp.dp_generic_unary import WrapAMap
+from contracts.utils import raise_wrapped
+from mcdp_dp import WrapAMap, PrimitiveDP  # @UnusedImport
+from mcdp_posets import NotLeq, get_types_universe
+from mocdp.exceptions import DPSemanticError
 
 __all__ = [
     'Conversion',
@@ -16,7 +13,7 @@ class Conversion(WrapAMap):
     """ Simple wrap to get icon """
     pass
 
-@contract(returns=PrimitiveDP)
+@contract(returns='None|$PrimitiveDP')
 def get_conversion(A, B):
     """ Returns None if there is no need or a Conversion Map """
     tu = get_types_universe()

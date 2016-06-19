@@ -5,6 +5,7 @@ from contracts import contract
 from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
 from mocdp.exceptions import DPSemanticError
+from mocdp.comp.context import is_fun_node_name
 
 __all__ = [
     'CompositeNamedDP',
@@ -140,15 +141,28 @@ def check_good_name(n):
     if ' ' in n:
         raise_desc(ValueError, "Invalid name", n=n)
 
+
 def check_consistent_data(names, fnames, rnames, connections):
-    from mocdp.comp.context import get_name_for_res_node
-    from mocdp.comp.context import get_name_for_fun_node
+    from mocdp.comp.context import get_name_for_res_node, get_name_for_fun_node
+    from mocdp.comp.context import is_res_node_name
 
     for n in names:
         try:
             check_good_name(n)
         except ValueError as e:
             raise_wrapped(ValueError, e, names=names)
+
+        isit, x = is_fun_node_name(n)
+        if isit and not x in fnames:
+            msg = 'The name for the node seems to be the one for a function.'
+            raise_desc(ValueError, msg, n=n, fnames=fnames)
+
+        isit, x = is_res_node_name(n)
+        if isit and not x in rnames:
+            if not n in rnames:
+                msg = 'The name for the node seems to be the one for a resource.'
+                raise_desc(ValueError, msg, n=n, rnames=rnames)
+
     for f in  fnames:
         fnode = get_name_for_fun_node(f)
         if not fnode in names:

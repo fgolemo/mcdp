@@ -48,7 +48,6 @@ Misc
 MCDP-web
 ----------
 
-- F: navigation for libraries
 
 - F: send to non-fancy for internet explorer
 
@@ -82,8 +81,6 @@ MCDP-web / QR
 - put the "new model" link everywhere (list of models, /index)
 - put the navigation bar everywhere
 
-- only give option to import if there are more resources
-- display all imported cards on the gui
 
 - B: unicode characters such as ⟨ give server-side error
 
