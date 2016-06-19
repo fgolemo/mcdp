@@ -555,8 +555,7 @@ class Syntax():
         sp(get_idn(), lambda t: CDP.CoproductWithNamesName(t[0]))
     # ndpt_coproduct_with_names_one = ndpt_coproduct_with_names_name + SCOLON + ndpt_dp_rvalue
     ndpt_coproduct_with_names_one = ndpt_coproduct_with_names_name + SCOLON + (ndpt_dp_rvalue | dpinstance_expr)
-    ndpt_coproduct_with_names = sp(CHOOSE - SLPAR +
-                                    ndpt_coproduct_with_names_one 
+    ndpt_coproduct_with_names = sp(CHOOSE - SLPAR + ndpt_coproduct_with_names_one
                                     + ZeroOrMore(SCOMMA + ndpt_coproduct_with_names_one) 
                                     - SRPAR,
                                     lambda t: CDP.CoproductWithNames(keyword=t[0],

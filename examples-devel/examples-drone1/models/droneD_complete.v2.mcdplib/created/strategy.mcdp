@@ -1,7 +1,7 @@
 mcdp {
- provides distance [km]
+    provides distance [km]
     requires endurance [s]
     requires velocity [m/s]
 
-    distance <= endurance * velocity
+    provided distance <= required endurance * required velocity
 }
