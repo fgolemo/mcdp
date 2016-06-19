@@ -1,6 +1,6 @@
-from pyramid.renderers import render_to_response
-from pyramid.httpexceptions import HTTPFound
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
+from pyramid.httpexceptions import HTTPFound
+from pyramid.renderers import render_to_response
 
 
 class AppEditor():
@@ -19,7 +19,6 @@ class AppEditor():
                          self.get_lmv_url('{library}', '{model_name}', 'edit') + 'submit')
 
         config.add_view(self.view_edit_submit, route_name='edit_submit')
-
 
 
     def view_edit_form(self, request):

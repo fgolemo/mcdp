@@ -9,7 +9,8 @@ from mcdp_posets.poset import Poset
 from mocdp import logger
 from mocdp.comp.context import Context
 from mocdp.comp.interfaces import NamedDP
-from mocdp.exceptions import DPSemanticError, MCDPExceptionWithWhere
+from mocdp.exceptions import DPSemanticError, MCDPExceptionWithWhere, \
+    extend_with_filename
 import os
 import shutil
 import sys
@@ -146,18 +147,9 @@ class MCDPLibrary():
         with self._sys_path_adjust():
             context = self._generate_context_with_hooks()
 
-            try:
+            with extend_with_filename(realpath):
                 result = parse_ndp_like(string, context=context)
-            except MCDPExceptionWithWhere as e:
-                type, value, traceback = sys.exc_info()
-                if realpath is not None:
-                    e = e.with_filename(realpath)
-                else:
-                    e = e
-
-                raise e, None, traceback
-
-            return result
+                return result
 
     def _generate_context_with_hooks(self):
         context = Context()
@@ -206,8 +198,8 @@ class MCDPLibrary():
                 match = fn
                 break
         else:
-            raise_desc(DPSemanticError, 'Could not find model in library.',
-                       model_name=basename, contents=sorted(self.file_to_contents))
+            raise_desc(DPSemanticError, 'Could not find file in library.',
+                       filename=basename, available=sorted(self.file_to_contents))
         found = self.file_to_contents[match]
         return found
 
@@ -238,7 +230,7 @@ class MCDPLibrary():
         basename = model_name + '.mcdp'
         d = self._get_file_data(basename)
         realpath = d['realpath']
-        print('writing to %r' % realpath)
+        logger.info('writing to %r' % realpath)
         with open(realpath, 'w') as f:
             f.write(data)
         # reload

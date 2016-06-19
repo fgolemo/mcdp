@@ -56,6 +56,8 @@ MCDP-web
 
 - T: mcdp-web: Testing of at least all links.
 
+- F: mcdp-web: let images be zoomable
+
 - F: mcdp-web/fancy_editor: Submit changes 
 
 - B: fancy_editor: the syntax highlighting skips the whitespace at the end of the model
@@ -67,7 +69,6 @@ MCDP-web
 - F: automatically parse and execute the snippets in the Markdown documents
 
 - F: create static versions of documents
-
 
 - B: we need to escape # in interactive. Maybe hexify?
 http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c  %0A    x <= c <= d # test%0A    e <= a1 # test%0A}

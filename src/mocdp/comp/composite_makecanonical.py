@@ -85,7 +85,6 @@ def cndp_create_one_without_some_connections(ndp, exclude_connections, names):
         S = context.get_rtype(CResource(e.dp1, e.s1))
         fn = context.add_ndp_fun_node(name, S)
         rn = context.add_ndp_res_node(name, S)
-        print rn
         c1 = Connection(e.dp1, e.s1, rn, name)
         c2 = Connection(fn, name, e.dp2, e.s2)
         context.connections.append(c1)
@@ -104,12 +103,8 @@ def find_one(connections, a, b):
     assert False
 
 def choose_connections_to_cut(connections, name2dp):
-    from mocdp.comp.connection import simple_cycles_as_edges
-
     # Compute the graph representation
     G = get_connection_multigraph(connections)
-
-    from collections import defaultdict
     
     def space_weight(R):
         if isinstance(R, PosetProduct):
@@ -124,7 +119,7 @@ def choose_connections_to_cut(connections, name2dp):
         return space_weight(R)
 
     edges_to_remove = enumerate_minimal_solution(G, edge_weight)
-    connection_to_remove = [ _ for _ in connections if (_.dp1, _.dp2) in edges_to_remove]
+    connection_to_remove = [_ for _ in connections if (_.dp1, _.dp2) in edges_to_remove]
 
     return connection_to_remove
 # #
@@ -167,6 +162,7 @@ def enumerate_minimal_solution(G, edge_weight):
     
     # initial states
     all_edges = set(G.edges())
+    best_weight = np.inf
     
     current_partial_solutions[freeze([])] = State(cycles=simple_cycles_as_edges(G), weight=0.0)
     
@@ -174,7 +170,7 @@ def enumerate_minimal_solution(G, edge_weight):
         # choose the solution to expand with minimum weight
         removed, state = pop_solution_minimum_weight(current_partial_solutions)
         examined.add(removed)
-        print('%s / %s / %s' % (len(current_solutions), len(current_partial_solutions), removed))
+        print('%s best %s / %s / %s' % (len(current_solutions), best_weight, len(current_partial_solutions), removed))
 
         # now look at edges that we could remove
         to_remove = all_edges - removed
@@ -194,8 +190,10 @@ def enumerate_minimal_solution(G, edge_weight):
             ss = State(cycles=cycles, weight=new_weight)
             if not cycles:
                 current_solutions[removed2] = ss
+                best_weight = min(best_weight, new_weight)
             else:
-                current_partial_solutions[removed2] = ss
+                if new_weight < best_weight:
+                    current_partial_solutions[removed2] = ss
 
     solutions = list(current_solutions)
     weights = [current_solutions[k].weight for k in solutions]

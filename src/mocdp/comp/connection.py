@@ -671,6 +671,7 @@ def simple_cycles_as_edges(G):
 
     return [list(c2e(c)) for c in cycles]
 
+@contract(returns=Connection)
 def choose_connection_to_cut1(connections, name2dp):
     G = get_connection_multigraph(connections)
 
@@ -678,6 +679,9 @@ def choose_connection_to_cut1(connections, name2dp):
     counts = defaultdict(lambda: 0)
 
     c_as_e = simple_cycles_as_edges(G)
+    if not c_as_e:
+        msg = 'There are no connections to cut.'
+        raise_desc(ValueError, msg)
     
     for cycle in c_as_e:
         for edge in cycle:

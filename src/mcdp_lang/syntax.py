@@ -14,8 +14,6 @@ from pyparsing import (
     alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
     sglQuotedString)
 import math
-import warnings
-
 
 
 ParserElement.enablePackrat()
@@ -99,8 +97,7 @@ class Syntax():
 
 
     PRODUCT = sp(L('x') | L('×'), lambda t: CDP.product(t[0]))
-    PROVIDES = sp(L('provides'), lambda t: CDP.ProvideKeyword(t[0]))
-    REQUIRES = sp(L('requires'), lambda t: CDP.RequireKeyword(t[0]))
+
 
     USING = sp(L('using'), lambda t: CDP.UsingKeyword(t[0]))
     FOR = sp(L('for'), lambda t: CDP.ForKeyword(t[0]))
@@ -129,7 +126,7 @@ class Syntax():
 
     PROVIDED = sp(L('provided'), lambda _: CDP.ProvidedKeyword('provided'))
     REQUIRED = sp(L('required'), lambda _: CDP.ProvidedKeyword('required'))
-    CHOOSE = simple_keyword_literal('choose', CDP.CoproductWithNamesChooseKeyword)
+
 
     GEQ = sp(L('>=') | L('≥') | L('⊇') | L('≽') | L('⊒'), lambda t: CDP.geq(t[0]))
     LEQ = sp(L('<=') | L('≤') | L('⊆') | L('≼') | L('⊑'), lambda t: CDP.leq(t[0]))
@@ -141,8 +138,7 @@ class Syntax():
     PLUS = sp(L('+'), lambda t: CDP.plus(t[0]))
     TIMES = sp(L('*'), lambda t: CDP.times(t[0]))
     BAR = sp(L('/'), lambda t: CDP.bar(t[0]))
-    DPTOKEN = sp(L('dp'), lambda t: CDP.DPWrapToken(t[0]))
-    IMPLEMENTEDBY = sp(L('implemented-by'), lambda t: CDP.ImplementedbyKeyword(t[0]))
+
     CDPTOKEN = sp(L('mcdp'), lambda t: CDP.MCDPKeyword(t[0]))
 
 
@@ -150,7 +146,7 @@ class Syntax():
 
     COPROD = sp(L('^'), lambda t: CDP.coprod(t[0]))
 
-    APPROX = sp(L('approx'), lambda t: CDP.ApproxKeyword(t[0]))
+
 
     # "call"
     C = lambda x, b: x.setResultsName(b)
@@ -240,9 +236,11 @@ class Syntax():
     fname = sp(get_idn(), lambda t: CDP.FName(t[0]))
     rname = sp(get_idn(), lambda t: CDP.RName(t[0]))
 
+    PROVIDES = sp(L('provides'), lambda t: CDP.ProvideKeyword(t[0]))
     fun_statement = sp(PROVIDES + C(fname, 'fname') + unitst,
                        lambda t: CDP.FunStatement(t[0], t[1], t[2]))
 
+    REQUIRES = sp(L('requires'), lambda t: CDP.RequireKeyword(t[0]))
     res_statement = sp(REQUIRES + C(rname, 'rname') + unitst,
                        lambda t: CDP.ResStatement(t[0], t[1], t[2]))
 
@@ -516,6 +514,7 @@ class Syntax():
     dp_model_statements = sp(ZeroOrMore(S(ow) + line_expr),
                              lambda t: make_list(list(t)))
 
+    DPTOKEN = sp(L('dp'), lambda t: CDP.DPWrapToken(t[0]))
     ndpt_dp_model = sp(CDPTOKEN - S(L('{')) - dp_model_statements - S(L('}')),
                   lambda t: CDP.BuildProblem(keyword=t[0], statements=t[1]))
 
@@ -529,6 +528,7 @@ class Syntax():
     simple_dp_model_stats = sp(ZeroOrMore(S(ow) + fun_statement ^ res_statement),
                                lambda t: make_list(list(t)))
 
+    IMPLEMENTEDBY = sp(L('implemented-by'), lambda t: CDP.ImplementedbyKeyword(t[0]))
     ndpt_simple_dp_model = sp(DPTOKEN -
                          S(L('{')) -
                          simple_dp_model_stats -
@@ -550,21 +550,21 @@ class Syntax():
      
     # Example:
     #    choose(name: <dp>, name2: <dp>)
+    CHOOSE = simple_keyword_literal('choose', CDP.CoproductWithNamesChooseKeyword)
     ndpt_coproduct_with_names_name = \
         sp(get_idn(), lambda t: CDP.CoproductWithNamesName(t[0]))
     # ndpt_coproduct_with_names_one = ndpt_coproduct_with_names_name + SCOLON + ndpt_dp_rvalue
-    warnings.warn('XXX this is just for show')
     ndpt_coproduct_with_names_one = ndpt_coproduct_with_names_name + SCOLON + (ndpt_dp_rvalue | dpinstance_expr)
-    ndpt_coproduct_with_names = sp(CHOOSE
-                                    - SLPAR + 
+    ndpt_coproduct_with_names = sp(CHOOSE - SLPAR +
                                     ndpt_coproduct_with_names_one 
                                     + ZeroOrMore(SCOMMA + ndpt_coproduct_with_names_one) 
                                     - SRPAR,
                                     lambda t: CDP.CoproductWithNames(keyword=t[0],
-                                                                     elements=t[1:]))
+                                                                     elements=make_list(t[1:])))
     
     # Example:
     #   approx(mass,0%,0g,%)
+    APPROX = sp(L('approx'), lambda t: CDP.ApproxKeyword(t[0]))
     ndpt_approx = sp(APPROX - S(L('(')) - fname + S(COMMA)
                          - SyntaxBasics.integer_or_float - S(L('%'))
                          - S(COMMA) + constant_value  # step
@@ -578,7 +578,6 @@ class Syntax():
                                                      dp=t[5]))
 
     FROMCATALOGUE = sp(L('catalogue'), lambda t:CDP.FromCatalogueKeyword(t[0]))
-
     ndpt_catalogue_dp = sp(FROMCATALOGUE -
                       S(L('{')) -
                       simple_dp_model_stats -

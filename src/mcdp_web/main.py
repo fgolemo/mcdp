@@ -25,7 +25,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
              AppEditorFancy, AppSolver2):
 
     def __init__(self, dirname):
-        self.libraries = load_libraries(dirname)
+        self.dirname = dirname
+        self.libraries = load_libraries(self.dirname)
 
         AppEditor.__init__(self)
         AppVisualization.__init__(self)
@@ -69,30 +70,39 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
     @contract(returns='list(str)')
     def list_libraries(self):
         """ Returns the list of libraries """
-        return list(self.libraries)
+        return sorted(self.libraries)
 
     def view_index(self, request):  # @UnusedVariable
         return {}
 
-    def view_list(self, request):  # @UnusedVariable
+    def view_list(self, request):
         models = self.list_of_models(request)
-        return {'models': sorted(models)}
+        return {
+            'models': sorted(models),
+            'navigation': self.get_navigation_links(request),
+        }
 
     def view_list_libraries(self, request):  # @UnusedVariable
         libraries = self.list_libraries()
         return {'libraries': sorted(libraries)}
 
 
-    def _refresh_library(self, request):
-        l = self.get_library(request)
-        l.delete_cache()
-        self.appqr_reset()
+    def _refresh_library(self, _request):
+        # nuclear option
+        self.libraries = load_libraries(self.dirname)
+        for l in [_['library'] for _ in self.libraries.values()]:
+            l.delete_cache()
+#         l = self.get_library(request)
+#
+#         self.appqr_reset()
 
     def view_refresh_library(self, request):
         """ Refreshes the current library (if external files have changed) 
             then reloads the current url. """
         self._refresh_library(request)
         raise HTTPFound(request.referrer)
+
+
 
     def view_exception(self, exc, _request):
         import traceback
@@ -148,9 +158,16 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
     def get_navigation_links(self, request):
         """ Pass this as "navigation" to the page. """
-        current_model = self.get_model_name(request)
+
+        if 'model_name' in request.matchdict:
+            current_model = self.get_model_name(request)
+            current_view = self.get_current_view(request)
+        else:
+            current_model = None
+            current_view = None
+
+
         current_library = self.get_current_library_name(request)
-        current_view = self.get_current_view(request)
         
         d = {}
         

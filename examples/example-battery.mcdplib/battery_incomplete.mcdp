@@ -1,3 +1,4 @@
+# test semantic_error
 mcdp {  
     # We need to fly for this duration
     provides endurance [s] 

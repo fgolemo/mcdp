@@ -107,11 +107,11 @@ def cndp_flatten(ndp):
 
     for name, n0 in name2ndp.items():
         n1 = n0.flatten()
-        print('n1: %s' % add_prefix(str(n1), '| '))
+        # print('n1: %s' % add_prefix(str(n1), '| '))
 
         if isinstance(n1, CompositeNamedDP):
             nn = flatten_add_prefix(n1, prefix=name)
-            print('nn: %s' % add_prefix(str(nn), '| '))
+            # print('nn: %s' % add_prefix(str(nn), '| '))
         else:
             nn = n1
 

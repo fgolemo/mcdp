@@ -7,7 +7,7 @@
 </head>
 <body>
 
-
+{% if models %}
 <p> Models: </p>
 
   <ul>
@@ -15,10 +15,16 @@
     <li><a href="models/{{m}}/views/syntax/" target="_blank">{{m}}</a></li>
     {% endfor %}
   </ul>
-       
+  {% else %}
+  <p>No models defined in this library yet.</p>
+  {% endif %}
+
+ <p>Add a model: {% include 'new_model.jinja2' %}</p>       
  <p><a href="qr_reader/">QR import</a></p>
  <p><a href="interactive/mcdp_value/">Interactive evaluation</a></p>
  
+  {% include 'refresh_library.jinja2' %}
+  
   
 </body>
 </html>

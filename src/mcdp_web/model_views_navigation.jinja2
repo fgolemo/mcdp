@@ -16,29 +16,7 @@ div.library span, div.this_model span { font-weight: bold; }
 <div class="navigation">
 
 	<div class="library">
-	
 
-
-  <script type="text/javascript">
-  window.showPrompt = function() {
-    do {
-        var name=prompt("Please enter the name for the new model:");
-    }
-    while(name.length < 4);
-    
-    url = "../../../../new_model/" + name
-    
-    var win = window.open(url, '_blank');
-	if (win) {
-	    //Browser has allowed it to be opened
-	    win.focus();
-	} else {
-	    //Browser has blocked it
-	    alert('Please allow popups for this website');
-	}
-    
-  }
-  </script>
   
   <span class='libraries'>
   <span>Libraries:</span>
@@ -80,11 +58,11 @@ div.library span, div.this_model span { font-weight: bold; }
   </select>
   </span>
   
-  <form style='display:inline' method="GET" action="/libraries/{{navigation['current_library']}}/refresh_library">
-	    <input type="submit" value="&#8634;"/>
-  </form>
-   <button onclick="showPrompt();">+</button>
-  
+   {% include 'refresh_library.jinja2' %}
+   
+   {% include 'new_model.jinja2' %}
+  	
+  	
   <form style='display:inline' method="GET" action="/qr_reader">
 	    <input type="submit" value="QR+"/>
   </form>

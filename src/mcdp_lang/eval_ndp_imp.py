@@ -129,9 +129,9 @@ def eval_dp_rvalue_flatten(r, context):
 
 #     from mocdp.comp.connection import get_connection_graph
 #     G = get_connection_graph(ndp.get_name2ndp(), ndp.get_connections())
-    if isinstance(ndp, CompositeNamedDP):
-        from mocdp.comp.connection import choose_connection_to_cut1
-        choose_connection_to_cut1(connections=ndp.get_connections(), name2dp=ndp.get_name2ndp())
+    # if isinstance(ndp, CompositeNamedDP):
+    #    from mocdp.comp.connection import choose_connection_to_cut1
+    #    choose_connection_to_cut1(connections=ndp.get_connections(), name2dp=ndp.get_name2ndp())
     # print ndp
     return ndp
 
@@ -148,7 +148,7 @@ def eval_dp_rvalue_coproduct(r, context):
 @contract(r=CDP.CoproductWithNames)
 def eval_dp_rvalue_CoproductWithNames(r, context):
     assert isinstance(r, CDP.CoproductWithNames)
-    elements = r.elements
+    elements = unwrap_list(r.elements)
     names = [_.value for _ in elements[0::2]]
     ndps = [eval_ndp(_, context) for _ in elements[1::2]]
     labels = tuple(names)

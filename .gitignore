@@ -27,3 +27,9 @@ a.html
 a.html_resources
 _cached
 _mcdpweb_cache
+./dist
+./build
+ouit_coverage
+dist/PyMCDP-1.2.0.tar.gz
+dist/mcdp-plot
+dist/mcdp-web

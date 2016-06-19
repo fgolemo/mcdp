@@ -3,6 +3,7 @@ from pyramid.httpexceptions import HTTPFound
 import binascii
 import os
 import traceback
+import time
 
 
 class AppQR():
@@ -26,25 +27,46 @@ class AppQR():
         config.add_view(self.serve_scraped, route_name='scraped')
 
         config.add_route('qr_import',
-                         '/libraries/{library}/qr_reader/qr_import/{hex}')
+                         '/libraries/{library}/qr_reader/qr_import/{hex}'
+                          )
         config.add_view(self.view_qr_import,
-                        route_name='qr_import')
+                        route_name='qr_import', renderer='json')
 
     def view_qr_reader(self, request):  # @UnusedVariable
         return {}
 
     def appqr_reset(self):
-        # qrstring to resources
+        # qrstring to dict(resources=..., imported=False)
         self.retrieved = {}
         # qrstring to error message
         self.retrieved_error = {}
         
     def _read(self, qrstring):
+        """
+        
+        """
+
+        # split by ","
+
+        entries = qrstring.split(',')
+
+        def abbrev(x):
+            if 'http' in x:
+                return x
+            else:
+                return 'http://minimality.mit.edu/rdg/decks/1/cards/%s.html' % x
+
+        entries = map(abbrev, entries)
+        for e in entries:
+            self.__read(e)
+
+    def __read(self, qrstring):
         if not (qrstring in self.retrieved) and (not qrstring in self.retrieved_error):
             from mcdp_web.qr.app_qr_scraping import scrape
             try:
                 resources = scrape(qrstring)
-                self.retrieved[qrstring] = resources
+                self.retrieved[qrstring] = dict(time=time.time(), resources=resources,
+                                                imported=False)
             except Exception as e:
                 self.retrieved_error[qrstring] = Exception(traceback.format_exc(e))
             
@@ -56,42 +78,94 @@ class AppQR():
             
     def qr_reader_submit(self, request):
         qrstring = request.params['qrstring']
-        print(qrstring)
+
+        if qrstring == 'dummy':  # just display
+            res = {}
+            res['message_error'] = ''
+            res['message'] = ''
+            res['output'] = self.format_all()
+            return res
+
         try:
-            resources = self._read(qrstring)
+            self._read(qrstring)
 
         except Exception as e:
             res = {}
-            res['message'] = 'Error occurred'
             s = 'While loading %r:' % qrstring
             s += '\n' + traceback.format_exc(e)
-            res['output'] = '<pre><code>' + s + '</code></pre>'
+            res['message'] = ''
+            res['message_error'] = '<pre><code>' + s + '</code></pre>'
+            res['output'] = self.format_all()
             return res
         else:
-            encoded = binascii.hexlify(qrstring)
-
-            output = ''
-            output += """
-                     <form method="POST" action="qr_import/%s">
-                        <input type="submit" value="Import"/>
-                      </form>
-                    """ % encoded
-
-            for i, r in enumerate(resources):
-                if r.type == 'mcdp/icon':
-                    path = 'scraped/%s/%s' % (encoded, i)
-                    output += '<img src="%s" style="width: 12em"/>' % path
-
             res = {}
-            res['message'] = 'Found %d resources.' % len(resources)
-            res['output'] = output
+            res['message_error'] = ''
+            res['message'] = 'Read successfully.'
+            res['output'] = self.format_all()
             return res
 
+    def format_one(self, qrstring, record):
+        resources = record['resources']
+        imported = record['imported']
+        encoded = binascii.hexlify(qrstring)
+        s = '<div class="resource-pack">'
+
+        s += """
+<script type="text/javascript">
+  window.importasset = function(asset) {
+  
+       jQuery.ajax({
+            url     : 'qr_import/'+asset,
+            type    : 'POST',
+            data: {},
+            dataType: 'json',
+            success : ajax_success,
+            error : ajax_failure
+        });
+        
+  }
+</script>
+
+        """
+
+        for i, r in enumerate(resources):
+            if r.type == 'mcdp/icon':
+                path = 'scraped/%s/%s' % (encoded, i)
+                s += '<img src="%s"/>' % path
+
+        if imported:
+            s += 'Imported.'
+        else:
+            if len(resources) > 1:
+                n = len(resources) - 1
+#                 s += """
+#                  <form method="POST" action="qr_import/%s">
+#                     <input type="submit" value="Import %d assets"/>
+#                   </form>
+#                 """ % (encoded, n)
+                s += """
+                <button onclick="importasset('%s');">Import %d assets</button>
+""" % (encoded, n)
+
+
+        s += '</div>'
+        return s
+    
+    def format_all(self):
+        """ Generates HTML list of all resources """
+        s = ""
+        ordered = sorted(self.retrieved,
+                         key=lambda _: self.retrieved[_]['time'])
+        for name in ordered:
+            record = self.retrieved[name]
+            s += self.format_one(name, record)
+        return s
+        
     def view_qr_import(self, request):
         hexified = request.matchdict['hex']
         qrstring = binascii.unhexlify(hexified)
-        resources = self.retrieved[qrstring]
-
+        resources = self.retrieved[qrstring]['resources']
+        self.retrieved[qrstring]['imported'] = True
         library = self.get_current_library_name(request)
         path = self.libraries[library]['path']
 
@@ -122,14 +196,21 @@ class AppQR():
                 f.write(r.content)
             
         self._refresh_library(request)
-        raise HTTPFound('/libraries/%s/list' % library)
+        
+        res = {}
+        res['message_error'] = ''
+        res['message'] = 'Assets imported.'
+        res['output'] = self.format_all()
+        return res
+        
+#         raise HTTPFound('/libraries/%s/list' % library)
 
     def serve_scraped(self, request):
         hexified = request.matchdict['hex']
         num = int(request.matchdict['num'])
 
         qrstring = binascii.unhexlify(hexified)
-        resource = self.retrieved[qrstring][num]
+        resource = self.retrieved[qrstring]['resources'][num]
         return response_data(request=request, data=resource.content,
                              content_type=resource.content_type)
 

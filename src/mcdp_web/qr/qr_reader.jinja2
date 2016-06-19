@@ -7,12 +7,19 @@
     <script src="/static/html5-qrcode/lib/html5-qrcode.min.js"></script>
     <script type='text/javascript'>
     
-    	function ajax_success(data) {
-    		message = data['message']
-    		output = data['output']
- 
+    	function display(data) {
+    		message = data['message'];
+    		message_error = data['message_error'];
+    		output = data['output'];
+    		
     		$('#server_console').html(message)
     		$('#server_output').html(output);
+    		$('#server_error').html(message_error);
+  	
+    	}
+    	
+    	function ajax_success(data) {
+    		display(data);
     	}
     	
     	function ajax_failure(error) {
@@ -32,6 +39,7 @@
     
 		$(document).ready(function(){
 			$('#reader').html5_qrcode(function(data){
+					console.log(data);
 					$('#read').html(data);
 					$('#read_error').html('');
 					$('#vid_error').html('');
@@ -44,38 +52,59 @@
 					$('#vid_error').html(videoError);
 				}
 			);
+			
+			do_some_ajax('dummy');
 		});
     </script>
+    <style type='text/css'>
+    div.resource-pack { 
+		display: block;
+		float: left;
+		text-align: center;
+		width: 20%;
+    } 
+    div.resource-pack img { width: 100%; }
+    h6 { display: none; }
+    #read_error {display: none; }
+    </style>
 </head>
 <body>    
 
-<p>Note: this features works only on Chrome for now and on localhost (a secure origin).</p>
-  
-<!--<p> <a href="/refresh_library">Refresh cache</a></p>-->
 
 <table>
 <tr>
-<td style='width:300px'>
-<div id="reader" style="width:300px;height:250px;"></div>
-</td>
-<td style='height:500px'>
+	<td style=''>
+	
+		<!-- Note: do not make a smaller window otherwise QR reader doesn't work. -->
+		<div id="reader" style="width:300px;height:200px;"></div>
+		<br/>
+		{% include 'qr_reader_manual_url.jinja2' %}
+		
+	</td>
+	<td style=''>
+		<div id="server_console"></div>
+	</td>
 
-<div id="server_console">
-</div>
-
-<div id="server_output"></div>
-
-</td>
+</tr>
+<tr>
+	<td colspan=2 width="100%" style='width: 100%'>
+		<div id="server_output">
+		</div>
+	</td>
 </tr>
 </table>
 
+<div id="server_error" style='font-size: 70%'>
+</div>
 
 <h6>Parsed string</h6>
 <span id="read" ></span>
 <br>
-<h6 >Read Error (Debug only)</h6>
-<span>Will constantly show a message, can be ignored</span>
+<h6>Status</h6>
 <span id="read_error" ></span>
+
+<!--<p>Note: this features works only on Chrome for now and on localhost (a secure origin).</p>-->
+
 
 <h6 >Video Error</h6>
 <span id="vid_error" ></span>
