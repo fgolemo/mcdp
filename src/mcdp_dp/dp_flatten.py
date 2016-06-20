@@ -10,6 +10,7 @@ from multi_index import get_it
 __all__ = [
     'Flatten',
     'Mux',
+    'MuxMap',
 ]
 
 class MuxMap(Map):

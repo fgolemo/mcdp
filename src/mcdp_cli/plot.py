@@ -1,7 +1,5 @@
 from .solve_meat import solve_read_model
 from .utils_mkdir import mkdirs_thread_safe
-# from conf_tools import GlobalConfig
-# from conf_tools.utils import expand_string
 from contracts import contract
 from contracts.utils import raise_desc
 from decent_params.utils import UserError

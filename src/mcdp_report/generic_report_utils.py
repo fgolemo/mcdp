@@ -111,12 +111,16 @@ def generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0)):
         generic_try_plotters(rr, plotters, space, sequence, axis0=axis0,
                              annotation=annotation)
 
+def get_best_plotter(space):
+    p = list(get_plotters(plotters, space))
+    return p[0][1]
+
 def get_plotters(plotters, space):
     for name, plotter in plotters.items():
         try:
             plotter.check_plot_space(space)
             yield name, plotter
-        except NotPlottable as e:
+        except NotPlottable:
             pass
 
 
@@ -147,6 +151,8 @@ def join_axes(a, b):
             max(a[1], b[1]),
             min(a[2], b[2]),
             max(a[3], b[3]))
+
+
 
 
 def generic_plot(f, space, value):
@@ -293,6 +299,7 @@ class PlotterUR2(Plotter):
         params0 = dict(color_shadow=[1.0, 0.8, 0.8], markers='k.',
                        markers_params={})
         params0.update(params)
+
         color_shadow = params0['color_shadow']
         markers = params0['markers']
 
@@ -301,11 +308,10 @@ class PlotterUR2(Plotter):
 
         minimals = [self._get_screen_coords(_, axis) for _ in value.minimals]
 
-        # R2 = PosetProduct((Rcomp(), Rcomp()))
         v = space.P.Us(minimals)
-#         print('drawing v= %s' % str(v))
+
         plot_upset_R2(pylab, v, axis, extra_space_shadow=extra_space_finite,
-                      color_shadow=color_shadow)
+                      color_shadow=color_shadow, markers=markers)
 
 
 # Upsets((R[s]×R[s])×R[s])

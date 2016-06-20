@@ -1,6 +1,7 @@
 from contracts import contract
 from contracts.utils import raise_wrapped
-from mcdp_dp import WrapAMap, PrimitiveDP  # @UnusedImport
+from mcdp_dp import PrimitiveDP  # @UnusedImport
+from mcdp_dp import WrapAMap
 from mcdp_posets import NotLeq, get_types_universe
 from mocdp.exceptions import DPSemanticError
 

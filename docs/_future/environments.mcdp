@@ -1,29 +1,11 @@
 
-Use '^' to 
-
 mcdp {
-	implements ^battery
 
-	provides x [ ^voltage ]
+	requires r [s x m]
 
-	a = instance ^Battery
+	<r1, r2> >= r
 }
-
-
-
-mcdp_type {
-	elements = a, b, c, d, e
-
-	a <= b <= c
-}
-
-
-poset {
-	a, b, c, d, e
-
-	a <= b <= c
-}
-
+ 
 
 widgets.mcdp_type
 ~~~~
@@ -36,7 +18,7 @@ mcdp {
 	provides bom     [bom:subset-of(widgets)]
 	requires payment [spend:USD]
 
-	payment >= spend: 5 USD
+	payment >= spend ~ 5 USD
 }
 ~~~~
 

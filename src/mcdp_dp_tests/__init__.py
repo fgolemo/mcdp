@@ -6,3 +6,4 @@ from .solving import *
 from .approx import *
 from .approximation import *
 
+from .invmult2_tests import *

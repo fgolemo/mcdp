@@ -20,4 +20,7 @@ from .dp_constant import *
 from .dp_limit import *
 from .dp_generic_unary import *
 
-from .dp_mult_inv import *
+from .dp_inv_mult import *
+from .dp_inv_plus import *
+from .dp_inv_plus_nat import *
+from .conversion import *

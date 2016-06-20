@@ -4,22 +4,17 @@ from collections import defaultdict
 from contextlib import contextmanager
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
+from mcdp_dp import (Constant, Conversion, GenericUnary, Identity, InvMult2,
+    InvPlus2, InvPlus2Nat, Limit, Max, Min, MuxMap, Product, ProductN, Sum, SumN,
+    SumNNat, WrapAMap)
 from mcdp_lang.blocks import get_missing_connections
-from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
+from mcdp_library.utils import dir_from_package_name
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
 from mcdp_report.utils import safe_makedirs
 from mocdp.comp import CompositeNamedDP, SimpleWrap
 from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 from mocdp.comp.interfaces import NamedDP
-from mcdp_dp import (
-    Constant, GenericUnary, Identity, Limit, Max, Min, Product, ProductN, Sum,
-    SumN)
-from mcdp_dp.conversion import Conversion
-from mcdp_dp.dp_flatten import MuxMap
-from mcdp_dp.dp_generic_unary import WrapAMap
-from mcdp_dp.dp_mult_inv import InvMult2, InvPlus2, InvPlus2Nat
-from mcdp_dp.dp_sum import SumNNat
 from mocdp.exceptions import mcdp_dev_warning
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp

@@ -11,8 +11,97 @@
 <body>
 	{% include 'model_views_navigation.jinja2' %}
 	
-  <p>Enter query:</p>
-  <textarea id="area" cols=80 rows=5/></textarea>
+  
+  <style type='text/css'>
+  #slider-ln { width: 10em; }
+  #slider-un { width: 10em; }
+  </style>
+
+  <table>
+  <tr>
+  <td>
+  Query:
+  </td>
+  <td>
+  <textarea id="area" cols=40 rows=3/></textarea>
+  </td>
+  </tr>
+  <tr>
+  <td>
+  Lower bound n
+  </td>
+  <td>
+    <input type="text" id="slider-ln-value" value="1" readonly/>
+    </td>
+    <td>
+    <div id='slider-ln'></div> </td>
+    </tr>
+  <tr>
+  <td>
+  Upper bound n:
+  </td>
+  <td>
+  <input type="text" id="slider-un-value" value="1" readonly "/>
+  </td>
+  <td>
+  <div id='slider-un'></div> </p>
+  </td>
+  </tr>
+</table>
+    
+  	
+      
+  
+  <script type="text/javascript">
+    var timeoutID = null;
+    var wait_ms = 1000;
+
+    function call_after_pause(func, ms) {
+      if (timeoutID != null)
+        window.clearTimeout(timeoutID);
+
+      timeoutID = window.setTimeout(func, ms);
+    }
+
+   function update_l(event, ui) {
+      v = $('#slider-un').slider('value');
+      console.log('value from 1: ' + v)
+      if (ui)
+        v = ui.value;
+        console.log('value from ui: ' + v)
+      //console.log(v);
+      $("#slider-ln-value").val(v);
+      call_after_pause(evaluate, wait_ms);
+   };
+
+   function update_u(event, ui) {
+      v = $('#slider-ln').slider('value');
+      console.log('value from 1: ' + v)
+      if (ui)
+        v = ui.value;
+        console.log('value from ui: ' + v)
+      //console.log(v);
+      $("#slider-un-value").val(v);
+      call_after_pause(evaluate, wait_ms);
+   };
+
+  $(document).ready(function() {
+		$('#slider-ln').slider({
+			    min: 1,
+      		max: 100,
+      		slide: update_l
+    });
+		$('#slider-un').slider({
+          min: 1,
+          max: 100,
+          slide: update_u
+    });
+    update_u(null, null);
+    update_l(null, null);
+	});
+  </script>
+
+  <img id='output_img' src="/static/evaluating.gif" style='width: 20em; height: 20em'/>
 
   <p>{{space_description}}</p>
   
@@ -45,6 +134,8 @@ function ajax_success(data) {
         $('#output_result').html(data['output_result'])
         $('#output_trace').html(data['output_trace'])
 
+        $('#output_img').attr("src",data['output_image']);
+
     } else {
     	console.log(data);
     	$('.output_success').html();
@@ -53,6 +144,7 @@ function ajax_success(data) {
     	console.log(error);
     	
     	$('#output_error').html(error);
+      $('#output_img').attr("src",'/static/error.png');
 	}
 }
     	
@@ -62,8 +154,20 @@ function ajax_failure(error) {
 	$('#ajax_error').html(error);
 }
 
-function ajax_parse(string) {
-    payload = {'string': string};
+function evaluate() {
+    string = $('#area').val(); 
+    // console.log('string: "'+string+"'");
+    if (string.length == 0){
+        //console.log('String not present yet.');
+        return;
+    }
+    nl = $('#slider-ln').slider('value');
+    nu = $('#slider-un').slider('value');
+    //console.log("nl,nu: " + nl + "," + nu);
+
+    $('#output_img').attr("src",'/static/evaluating.gif');
+
+    payload = {'string': string, 'nl': nl, 'nu': nu};
     jQuery.ajax({
         url     : 'submit',
         type    : 'POST',
@@ -77,9 +181,8 @@ function ajax_parse(string) {
 
 $(document ).ready(function() {
     $('#area').on('inputchange', function() {
-        string = $('#area').val(); 
         document.location.hash = string;
-        ajax_parse(string);
+        call_after_pause(evaluate, wait_ms);
     });
     hash = document.location.hash;
     if (hash) {
