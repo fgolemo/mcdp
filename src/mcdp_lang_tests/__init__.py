@@ -1,17 +1,19 @@
+from .examples import *
+from .failures_parsing import *
+from .failures_simplification import *
+from .syntax_canonical import *
+from .syntax_connections import *
+from .syntax_coproduct import *
+from .syntax_from_library import *
+from .syntax_load import *
 from .syntax_misc import *
 from .syntax_numbers import *
 from .syntax_power import *
-from .examples import *
-from .syntax_coproduct import *
 from .syntax_sets import *
 from .syntax_spaces import *
-from .syntax_connections import *
-from .syntax_from_library import *
 from .syntax_tuples import *
-from .syntax_load import *
-from .syntax_canonical import *
-from .failures_parsing import *
-from .failures_simplification import *
+from .templates_test import *
+
 
 """
     

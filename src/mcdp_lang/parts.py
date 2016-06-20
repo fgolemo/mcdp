@@ -63,6 +63,12 @@ class CDPLanguage():
     IntConstant = namedtuplewhere('IntConstant', 's1 s2 value')  # value = int
 
     LoadCommand = namedtuplewhere('LoadCommand', 'keyword load_arg')
+
+    LoadNDP = namedtuplewhere('LoadNDP', 'keyword load_arg')
+    LoadConstant = namedtuplewhere('LoadConstant', 'keyword load_arg')
+    LoadPoset = namedtuplewhere('LoadPoset', 'keyword load_arg')
+    LoadTemplate = namedtuplewhere('LoadTemplate', 'keyword load_arg')
+
     SetName = namedtuplewhere('SetName', 'keyword name dp_rvalue')
     SetMCDPType = namedtuplewhere('SetMCDPType', 'keyword name eq right_side')
 
@@ -106,6 +112,12 @@ class CDPLanguage():
     NDPName = namedtuplewhere('NDPName', 'value')  # name in "new <name>"
     ApproxKeyword = namedtuplewhere('ApproxKeyword', 'keyword')
     FlattenKeyword = namedtuplewhere('FlattenKeyword', 'keyword')
+    SpecializeKeyword = namedtuplewhere('SpecializeKeyword', 'keyword')
+    WithKeyword = namedtuplewhere('WithKeyword', 'keyword')
+    TemplateSpec = namedtuplewhere('TemplateSpec', 'keyword params ndpt')
+
+    Specialize = namedtuplewhere('Specialize', 'keyword template params')
+    TemplateParamName = namedtuplewhere('TemplateParamName', 'value')
 
     # catalogue =
     FromCatalogueKeyword = namedtuplewhere('FromCatalogueKeyword', 'keyword')  # python function name

@@ -24,3 +24,4 @@ from .dp_inv_mult import *
 from .dp_inv_plus import *
 from .dp_inv_plus_nat import *
 from .conversion import *
+from .dp_catalogue import *

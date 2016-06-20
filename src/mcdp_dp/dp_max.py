@@ -12,6 +12,7 @@ __all__ = [
     'Max1',
     'Min',
     'JoinNDP',
+    'MeetNDual',
 ]
 
 class Max(PrimitiveDP):

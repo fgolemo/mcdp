@@ -1,0 +1,7 @@
+# test semantic_error
+mcdp {
+	a = instance specialize  [
+		B1: `simple_batteries, 
+		B1: `simple_batteries, 
+		B2: `simple_batteries] `sum_battery
+}

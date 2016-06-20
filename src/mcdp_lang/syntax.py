@@ -78,6 +78,8 @@ class SyntaxIdentifiers():
         'new',  # = from_library
         'canonical',
         'UpperSets',
+        'specialize',
+        'with',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -94,10 +96,7 @@ class Syntax():
     TOP_LITERAL = 'Top'
     BOTTOM_LITERAL = 'Bottom'
 
-
-
     PRODUCT = sp(L('x') | L('×'), lambda t: CDP.product(t[0]))
-
 
     USING = sp(L('using'), lambda t: CDP.UsingKeyword(t[0]))
     FOR = sp(L('for'), lambda t: CDP.ForKeyword(t[0]))
@@ -272,11 +271,12 @@ class Syntax():
     quoted = sp(dblQuotedString | sglQuotedString, lambda t:t[0][1:-1])
     ndpname = sp(get_idn() | quoted, lambda t: CDP.NDPName(t[0]))
 
-    ndpt_load_expr = sp(LOAD - (ndpname | SLPAR - ndpname - SRPAR),
-                        lambda t: CDP.LoadCommand(t[0], t[1]))
+    ndpt_load = sp(LOAD - (ndpname | SLPAR - ndpname - SRPAR),
+                        lambda t: CDP.LoadNDP(t[0], t[1]))
 
     # An expression that evaluates to a NamedDP
     ndpt_dp_rvalue = Forward()
+    template = Forward()
 
     # <dpname> = ...
     dpname = sp(get_idn(), lambda t: CDP.DPName(t[0]))
@@ -393,10 +393,6 @@ class Syntax():
 
     lf_new_resource2 = sp(REQUIRED + get_idn(),
                           lambda t: CDP.NewResource(t[1]))
-
-
-#     lf_new_limit = sp(C(Group(number_with_unit), 'limit'),
-#                       lambda t: CDP.NewLimit(t['limit'][0]))
 
     unary = {
         'sqrt': lambda op1: CDP.GenericNonlinearity(math.sqrt, op1, lambda F: F),
@@ -604,9 +600,27 @@ class Syntax():
     ndpt_canonical = sp(CANONICAL - ndpt_dp_rvalue,
                             lambda t: CDP.MakeCanonical(t[0], t[1]))
 
+    template_load = sp(LOAD - (ndpname | SLPAR - ndpname - SRPAR),   
+                       lambda t: CDP.LoadTemplate(t[0], t[1]))
+    
+    template_spec_param_name = sp(get_idn(), lambda t: CDP.TemplateParamName(t[0]))
+    template_spec_param = template_spec_param_name + S(L(':')) + ndpt_dp_rvalue
+    parameters = O(template_spec_param) + ZeroOrMore(SCOMMA + template_spec_param) 
+    template_spec = sp(TEMPLATE - S(L('[')) + Group(parameters) + S(L(']'))
+                       + ndpt_dp_rvalue,
+                       lambda t: CDP.TemplateSpec(keyword=t[0], params=make_list(t[1]), ndpt=t[2]))
+    template << (code_spec | template_load | template_spec)
+
+    SPECIALIZE = sp(L('specialize'), lambda t: CDP.SpecializeKeyword(t[0]))
+
+    ndpt_specialize = sp(SPECIALIZE + S(L('[')) + Group(parameters) + S(L(']'))
+                                                                        + ndpt_dp_rvalue,
+                         lambda t: CDP.Specialize(keyword=t[0],
+                                                  params=make_list(t[1]),
+                                                  template=t[2]))
+
     ndpt_dp_operand = (
-        ndpt_load_expr |
-        code_spec |
+        ndpt_load |
         ndpt_simple_dp_model |
         ndpt_dp_model |
         ndpt_abstract |
@@ -617,8 +631,12 @@ class Syntax():
         ndpt_coproduct_with_names |
         ndpt_flatten |
         ndpt_canonical |
-        ndpt_dp_variable_ref
+        ndpt_dp_variable_ref |
+        ndpt_specialize
     )
+
+ 
+
 
     ndpt_dp_rvalue << operatorPrecedence(ndpt_dp_operand, [
     #     ('-', 1, opAssoc.RIGHT, Unary.parse_action),

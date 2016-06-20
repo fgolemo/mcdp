@@ -9,6 +9,7 @@ from mocdp.comp.wrap import dpwrap
 from mcdp_dp.dp_identity import Identity
 from mcdp_dp.primitive import PrimitiveDP
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 
 __all__ = [
     'Connection',
@@ -102,6 +103,7 @@ class Context():
         self.load_ndp_hooks = []
         self.load_posets_hooks = []
         self.load_primitivedp_hooks = []
+        self.load_template_hooks = []
 
     def __repr__(self):
         s = 'Context:'
@@ -120,6 +122,7 @@ class Context():
         c.load_ndp_hooks = list(self.load_ndp_hooks)
         c.load_posets_hooks = list(self.load_posets_hooks)
         c.load_primitivedp_hooks = list(self.load_primitivedp_hooks)
+        c.load_template_hooks = list(self.load_template_hooks)
         c.var2resource = {}  # XXX?
         c.var2model.update(self.var2model)
         c.constants.update(self.constants)
@@ -133,6 +136,9 @@ class Context():
 
     def load_poset(self, load_arg):
         return self._load_hooks(load_arg, self.load_posets_hooks, Poset)
+
+    def load_template(self, load_arg):
+        return self._load_hooks(load_arg, self.load_template_hooks, TemplateForNamedDP)
 
     def _load_hooks(self, load_arg, hooks, expected):
         errors = []

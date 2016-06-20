@@ -1,18 +1,14 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest, comptest_dynamic
-from mcdp_dp import InvPlus2Nat, Mux, WrapAMap, make_loop
+from mcdp_dp import InvPlus2Nat, Mux, SumNNat, WrapAMap, make_loop
 from mcdp_dp.dp_parallel_simplification import make_parallel
 from mcdp_dp.dp_series_simplification import wrap_series
-from mcdp_dp.dp_sum import SumNNat
 from mcdp_dp.solver import generic_solve
 from mcdp_dp.tracer import Tracer
 from mcdp_lang import parse_ndp
 from mcdp_lang.eval_math import PlusNat
 from mcdp_lang_tests.utils import assert_semantic_error
-from mcdp_posets import UpperSets
-from mcdp_posets.nat import Nat
-from mcdp_posets.poset_product import PosetProduct
-from mcdp_posets.space import Map, NotEqual
+from mcdp_posets import Map, Nat, NotEqual, PosetProduct, UpperSets
 from mcdp_report.generic_report_utils import generic_report
 from mocdp.drawing import plot_upset_R2
 from nose.tools import assert_equal

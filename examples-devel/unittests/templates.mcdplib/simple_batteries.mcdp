@@ -1,0 +1,4 @@
+# these are all the simple batteries
+choose(b1:`battery1, b2: `battery2)
+
+# choose(simple*)

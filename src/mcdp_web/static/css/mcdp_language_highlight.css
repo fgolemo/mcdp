@@ -46,7 +46,8 @@ span.MCDPTypeKeyword,
 span.InstanceKeyword,
 span.FlattenKeyword,
 span.ApproxKeyword,
-span.TakeKeyword
+span.TakeKeyword,
+span.SpecializeKeyword
 
 { 
     font-weight: bold; 
@@ -68,11 +69,11 @@ span.FuncName { color: #CC6600 ; }
 
 
 span.FName, span.RName { } 
-span.DPName, span.NDPName, span.PosetName {  
+span.DPName, span.NDPName, span.PosetName, span.TemplateParamName {  
     color: #a0a;
 }
 
-span.DPTypeName, span.DPVariableRef { 
+span.DPTypeName, span.DPVariableRef {
     color:  #00F; 
     font-weight: bold; 
 }

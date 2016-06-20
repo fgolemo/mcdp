@@ -5,11 +5,12 @@ from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
 from contracts import contract, describe_value
 from contracts.utils import raise_desc, raise_wrapped
+from mcdp_dp import JoinNDP, MeetNDual
 from mcdp_dp.conversion import get_conversion
 from mcdp_dp.dp_approximation import make_approximation
 from mcdp_dp.dp_catalogue import CatalogueDP
-from mcdp_dp.dp_max import JoinNDP, MeetNDual
 from mcdp_dp.dp_series_simplification import make_series
+from mcdp_lang.eval_template_imp import eval_template
 from mcdp_lang.parse_actions import add_where_information
 from mcdp_posets import Any, NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
@@ -46,15 +47,16 @@ def eval_ndp(r, context):  # @UnusedVariable
                 msg = 'Cannot find name.'
                 raise_wrapped(DPSemanticError, e, msg, compact=True)
 
-        if isinstance(r, CDP.DPInstance):
-            return eval_ndp(r.dp_rvalue, context)
 
         if isinstance(r, NamedDP):
             return r
 
-        if isinstance(r, CDP.LoadCommand):
-            load_arg = r.load_arg.value
-            return eval_dp_rvalue_load(load_arg, context)
+        # XXX
+        if isinstance(r, CDP.DPInstance):
+            return eval_ndp(r.dp_rvalue, context)
+
+        if isinstance(r, CDP.LoadNDP):
+            return eval_dp_rvalue_load(r, context)
 
         if isinstance(r, CDP.DPWrap):
             return eval_dp_rvalue_dpwrap(r, context)
@@ -95,21 +97,35 @@ def eval_ndp(r, context):  # @UnusedVariable
             CDP.CodeSpecNoArgs: eval_ndp_code_spec,
             CDP.CodeSpec: eval_ndp_code_spec,
             CDP.MakeCanonical: eval_ndp_makecanonical,
+            CDP.Specialize: eval_ndp_specialize,
         }
         
         for klass, hook in cases.items():
             if isinstance(r, klass):
                 return hook(r, context)
-        
-   
+
     raise_desc(DPInternalError, 'Invalid dprvalue.', r=r)
 
+def eval_ndp_specialize(r, context):
+    assert isinstance(r, CDP.Specialize)
+
+    params_ops = unwrap_list(r.params)
+    if params_ops:
+        keys = params_ops[::2]
+        values = params_ops[1::2]
+        keys = [_.value for _ in keys]
+        values = [eval_ndp(_, context) for _ in values]
+        d = dict(zip(keys, values))
+        params = d
+    else:
+        params = {}
+
+    template = eval_template(r.template, context)
+    return template.specialize(params, context)
 
 def eval_ndp_makecanonical(r, context):
     ndp = eval_ndp(r.dp_rvalue, context)
     return cndp_makecanonical(ndp)
-
-
 
 def eval_ndp_code_spec(r, _context):
     from .eval_codespec_imp import eval_codespec
@@ -124,16 +140,9 @@ def eval_dp_rvalue_instancefromlibrary(r, context):
 
 def eval_dp_rvalue_flatten(r, context):
     ndp = eval_ndp(r.dp_rvalue, context)
-
     ndp = ndp.flatten()
-
-#     from mocdp.comp.connection import get_connection_graph
-#     G = get_connection_graph(ndp.get_name2ndp(), ndp.get_connections())
-    # if isinstance(ndp, CompositeNamedDP):
-    #    from mocdp.comp.connection import choose_connection_to_cut1
-    #    choose_connection_to_cut1(connections=ndp.get_connections(), name2dp=ndp.get_name2ndp())
-    # print ndp
     return ndp
+
 
 def eval_dp_rvalue_coproduct(r, context):
     assert isinstance(r, CDP.Coproduct)
@@ -145,6 +154,7 @@ def eval_dp_rvalue_coproduct(r, context):
 
     return NamedDPCoproduct(tuple(ndps))
 
+
 @contract(r=CDP.CoproductWithNames)
 def eval_dp_rvalue_CoproductWithNames(r, context):
     assert isinstance(r, CDP.CoproductWithNames)
@@ -153,6 +163,7 @@ def eval_dp_rvalue_CoproductWithNames(r, context):
     ndps = [eval_ndp(_, context) for _ in elements[1::2]]
     labels = tuple(names)
     return NamedDPCoproduct(tuple(ndps), labels=labels)
+
 
 def eval_dp_rvalue_approxdpmodel(r, context):
     # name of function or resource
@@ -172,7 +183,8 @@ def eval_dp_rvalue_approxdpmodel(r, context):
                               ndp=ndp0)
 
 
-def eval_dp_rvalue_load(load_arg, context):
+def eval_dp_rvalue_load(r, context):
+    load_arg = r.load_arg.value
     return context.load_ndp(load_arg)
 
 
@@ -206,7 +218,6 @@ def eval_dp_rvalue_dpwrap(r, context):
     dp_R = dp.get_res_space()
 
     # Check that the functions are the same
-#     from mcdp_lang.eval_space_imp import eval_space
     want_Fs = tuple([eval_space(f.unit, context) for f in fun])
     if len(want_Fs) == 1:
         want_F = want_Fs[0]
@@ -259,7 +270,6 @@ def eval_dp_rvalue_catalogue(r, context):
     statements = unwrap_list(r.funres)
     fun = [x for x in statements if isinstance(x, CDP.FunStatement)]
     res = [x for x in statements if isinstance(x, CDP.ResStatement)]
-#     from mcdp_lang.eval_space_imp import eval_space
     Fs = [eval_space(_.unit, context) for _ in fun]
     Rs = [eval_space(_.unit, context) for _ in res]
 
@@ -279,7 +289,6 @@ def eval_dp_rvalue_catalogue(r, context):
         fvalues0 = items[1:1 + len(fun)]
         rvalues0 = items[1 + len(fun):1 + len(fun) + len(res)]
 
-#         from mcdp_lang.eval_constant_imp import eval_constant
         fvalues = [eval_constant(_, context) for _ in fvalues0]
         rvalues = [eval_constant(_, context) for _ in rvalues0]
 

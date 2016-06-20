@@ -80,9 +80,13 @@ def parse_constant(string, context=None):
     from mcdp_lang.syntax import Syntax
     from mocdp.comp.context import ValueWithUnits
     from mcdp_lang.eval_constant_imp import eval_constant
+    from mocdp.comp.context import Context
 
     expr = Syntax.rvalue
     x = parse_wrap(expr, string)[0]
+
+    if context is None:
+        context = Context()
 
     result = eval_constant(x, context)
 
@@ -93,3 +97,20 @@ def parse_constant(string, context=None):
 
     return result
 
+@contract(returns='isinstance(TemplateForNamedDP)')
+def parse_template(string, context=None):
+    from mcdp_lang.syntax import Syntax
+    from mocdp.comp.context import Context
+    from mcdp_lang.eval_template_imp import eval_template
+    from mocdp.comp.template_for_nameddp import TemplateForNamedDP
+
+    expr = Syntax.template
+    x = parse_wrap(expr, string)[0]
+
+    if context is None:
+        context = Context()
+
+    result = eval_template(x, context)
+
+    assert isinstance(result, TemplateForNamedDP)
+    return result

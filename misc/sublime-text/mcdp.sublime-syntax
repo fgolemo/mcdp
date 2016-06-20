@@ -1,7 +1,7 @@
 %YAML 1.2
 ---
 name: MCDP
-file_extensions: [mcdp]
+file_extensions: [mcdp, mcdp_template]
 scope: source.mcdp
 
 contexts:

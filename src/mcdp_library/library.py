@@ -14,6 +14,7 @@ from mocdp.exceptions import DPSemanticError, MCDPExceptionWithWhere, \
 import os
 import shutil
 import sys
+from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 
 
 
@@ -39,7 +40,7 @@ class MCDPLibrary():
     ext_ndps = 'mcdp'
     ext_posets = 'mcdp_poset'
     ext_values = 'mcdp_value'
-    ext_templates = 'mcdp_template'  # not implemented yet
+    ext_templates = 'mcdp_template'
     ext_primitivedps = 'mcdp_primitivedp'
     all_extensions = [ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps]
 
@@ -91,6 +92,12 @@ class MCDPLibrary():
         return self._load_generic(id_primitivedp, MCDPLibrary.ext_primitivedps,
                                   MCDPLibrary.parse_primitivedp)
 
+    @contract(returns=TemplateForNamedDP)
+    def load_template(self, id_ndp):
+        return self._load_generic(id_ndp, MCDPLibrary.ext_templates,
+                                  MCDPLibrary.parse_template)
+
+
     def _load_generic(self, name, extension, parsing):
         filename = '%s.%s' % (name, extension)
         f = self._get_file_data(filename)
@@ -129,6 +136,9 @@ class MCDPLibrary():
         from mcdp_lang.parse_interface import parse_constant
         return self._parse_with_hooks(parse_constant, string, None)
 
+    def parse_template(self, string, realpath=None):
+        from mcdp_lang.parse_interface import parse_template
+        return self._parse_with_hooks(parse_template, string, realpath)
 
     @contextmanager
     def _sys_path_adjust(self):
@@ -156,6 +166,7 @@ class MCDPLibrary():
         context.load_ndp_hooks = [self.load_ndp]
         context.load_posets_hooks = [self.load_poset]
         context.load_primitivedp_hooks = [self.load_primitivedp]
+        context.load_template_hooks = [self.load_template]
         return context
 
     @contract(returns='set(str)')
