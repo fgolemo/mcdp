@@ -134,7 +134,7 @@ def eval_ndp_code_spec(r, _context):
 
 def eval_dp_rvalue_instancefromlibrary(r, context):
     name = r.dpname.value
-    ndp = eval_dp_rvalue_load(name, context)
+    ndp = context.load_ndp(name)
     return ndp
 
 

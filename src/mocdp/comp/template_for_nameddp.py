@@ -1,9 +1,8 @@
 from contracts import contract
-from mocdp.exceptions import DPSemanticError
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_posets.types_universe import get_types_universe
 from mcdp_posets.poset import NotLeq
-
+from mcdp_posets.types_universe import get_types_universe
+from mocdp.exceptions import DPSemanticError
 
 __all__ = [
     'TemplateForNamedDP'
@@ -11,7 +10,7 @@ __all__ = [
 
 class TemplateForNamedDP():
 
-    @contract(parameters='dict(str:NamedDP)')
+    @contract(parameters='dict(str:isinstance(NamedDP))')
     def __init__(self, parameters, template_code):
         """
         
@@ -19,7 +18,7 @@ class TemplateForNamedDP():
         self.parameters = parameters
         self.template_code = template_code
 
-    @contract(parameters='dict(str:NamedDP)')
+    @contract(parameter_assignment='dict(str:isinstance(NamedDP))')
     def specialize(self, parameter_assignment, context):
         
         for k, v in self.parameters.items():

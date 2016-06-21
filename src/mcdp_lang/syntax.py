@@ -614,12 +614,13 @@ class Syntax():
     SPECIALIZE = sp(L('specialize'), lambda t: CDP.SpecializeKeyword(t[0]))
 
     ndpt_specialize = sp(SPECIALIZE + S(L('[')) + Group(parameters) + S(L(']'))
-                                                                        + ndpt_dp_rvalue,
+                                                                        + template,
                          lambda t: CDP.Specialize(keyword=t[0],
                                                   params=make_list(t[1]),
                                                   template=t[2]))
 
     ndpt_dp_operand = (
+        code_spec |
         ndpt_load |
         ndpt_simple_dp_model |
         ndpt_dp_model |
@@ -634,9 +635,6 @@ class Syntax():
         ndpt_dp_variable_ref |
         ndpt_specialize
     )
-
- 
-
 
     ndpt_dp_rvalue << operatorPrecedence(ndpt_dp_operand, [
     #     ('-', 1, opAssoc.RIGHT, Unary.parse_action),

@@ -24,7 +24,7 @@ def eval_template(r, context):  # @UnusedVariable
     raise_desc(DPInternalError, 'Invalid template.', r=r)
 
 def eval_template_load(r, context):
-    assert isinstance(r, CDP.LoadCommand)
+    assert isinstance(r, CDP.LoadTemplate)
     name = r.load_arg.value
     return context.load_template(name)
 
