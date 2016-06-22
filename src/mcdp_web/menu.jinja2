@@ -1,0 +1,101 @@
+<div id='outer'>
+<ul id="menu">
+<li>&#9776;
+<ul>
+  <li class="l1">New&hellip;
+    <ul>
+      <li><a id='new_model'>model&hellip;</a></li>
+      <li><a id='new_template'>template&hellip;</a></li>
+      <li><a id='new_poset'>poset&hellip;</a></li>
+      <li><a id='new_value'>value&hellip;</a></li>
+    </ul>
+  </li>
+  <li class="l1">Other
+  <ul>
+  <li>
+    <a href="/libraries/{{navigation['current_library']}}/qr_reader">Import using QR</a>
+  </li>
+  <li>
+    <a href="/libraries/{{navigation['current_library']}}/refresh_library">Refresh library caches</a>
+  </li>
+  <li>
+    	<a href="{{request.url}}" target="_blank">open a copy</a>
+   </li>
+  </ul>
+  </li>
+</ul>
+</li>
+</ul>
+<!--<div style='display:block;clear:both'> </div>-->
+</div>
+
+<script type='text/javascript'>
+$(document).ready(function() {
+  options = { position: { my: "left top", at: "left bottom" } };
+  $('#menu').menu(options);
+})
+</script>
+
+<style type='text/css'>
+#outer {
+	font-size: 80%;
+}
+#outer { 	
+  width: 5em;
+  font-size: 70%;
+ }
+
+ .l1 { 
+  
+  }
+</style>
+
+
+<!-- new models -->
+<script type="text/javascript">
+function prompt_user(what, url_base) {
+  s  = "Please enter the name for the new " + what + ":";
+  var name=prompt(s);
+  url = url_base + name;
+  var win = window.open(url, '_blank');
+  if (win) {
+      //Browser has allowed it to be opened
+      win.focus();
+  } else {
+      //Browser has blocked it
+      alert('Please allow popups for this application.');
+  }
+}
+
+$(document).ready(function() {
+  url_base = "/libraries/{{navigation['current_library']}}/";
+
+  function new_model() {
+    url = url_base + 'models/new/';
+    prompt_user('model', url);
+  }
+  
+  function new_template() {
+    url = url_base + 'templates/new/';
+    prompt_user('template', url);
+  }
+  
+  function new_value() {
+    url = url_base + 'values/new/';
+    prompt_user('value', url);
+  }
+
+  function new_poset() {
+    url = url_base + 'posets/new/';
+    prompt_user('poset', url);
+  }
+
+  $('#new_model').click(new_model);
+  $('#new_poset').click(new_poset);
+  $('#new_template').click(new_template);
+  $('#new_value').click(new_value);
+
+});
+
+</script> 
+

@@ -9,106 +9,71 @@ div.library, div.this_model {
 	background-color: #eee;
 }
 
-div.library span, div.this_model span { font-weight: bold; }
+div.library span, div.this_model span { font-size: 80%; }
 
 </style>
 
-<div class="navigation">
 
-	<div class="library">
+<table>
+<tr>
+	<td>
+		{% include 'menu.jinja2' %}
+	</td>
+	<td>
 
-  
-  <span class='libraries'>
-  <span>Libraries:</span>
-  <select class='hot_select'>
-    {% for li in navigation['libraries'] %}
-    <option value="{{li['url']}}"    
-	    {% if li['current'] %}
-	    selected = 1
-	    {% endif %}
-    >
-    	{{li['name']}}
-    </option>
-    {% endfor %}
-    
-    <!-- Also add the same but with hidden links -->
-	{% for li in navigation['libraries'] %}
-        <a style='display:none' href="{{li['url']}}""></a>
-    {% endfor %}
-  </select>
-  </span>
-  
-  <span class='models'>
-  <span>Models:</span>
-  <select class='hot_select'>
-    {% for mi in navigation['models'] %}
-    <option value="{{mi['url']}}"    
-	    {% if mi['current'] %}
-	    selected = 1
-	    {% endif %}
-    >
-    	{{mi['name']}}
-    </option>
-    {% endfor %}
-    
-    <!-- Also add the same but with hidden links -->
-	{% for mi in navigation['models'] %}
-        <a style='display:none' href="{{mi['url']}}""></a>
-    {% endfor %}
-  </select>
-  </span>
-  
-   {% include 'refresh_library.jinja2' %}
-   
-   {% include 'new_model.jinja2' %}
-  	
-  	
-  <form style='display:inline' method="GET" action="/qr_reader">
-	    <input type="submit" value="QR+"/>
-  </form>
- 
-  
-  </div>
-  
-  <div class="this_model">
-	 <span class='view'>
+		<div class="library">
+	
+	  <select class='hot_select'>
+	    {% for li in navigation['libraries'] %}
+	    <option value="{{li['url']}}" {% if li['current'] %} selected = 1 {% endif %}>
+	    	{{li['name']}}
+	    </option>
+	    {% endfor %}
+	  </select>
+	    
+	    <!-- Also add the same but with hidden links -->
+		{% for li in navigation['libraries'] %}
+	        <a style='display:none' href="{{li['url']}}"></a>
+	    {% endfor %}
 	  
-
-  <span>Views:</span>
-  <select class='hot_select'>
-    {% for vi in navigation['views'] %}
-    <option value="{{vi['url']}}"    
-	    {% if vi['current'] %}
-	    selected = 1
-	    {% endif %}
-    >
-    	{{vi['name']}}
-    </option>
-    {% endfor %}
-    
-    <!-- Also add the same but with hidden links -->
-	{% for vi in navigation['views'] %}
-        <a style='display:none' href="{{vi['url']}}""></a>
-    {% endfor %}
-  </select>
-  </span>
+	  <select class='hot_select'>
+	    {% for mi in navigation['models'] + navigation['templates'] + navigation['posets'] + navigation['values'] %}
+	    <option value="{{mi['url']}}" {% if mi['current'] %} selected = 1 {% endif %}>
+	    	{{mi['name']}}
+	    </option>
+	    {% endfor %}
+	  </select>
+	 
+	    <!-- Also add the same but with hidden links -->
+		{% for mi in navigation['models'] %}
+	        <a style='display:none' href="{{mi['url']}}"></a>
+	    {% endfor %}
 	  
-	  </span>
-	 
-	 <!-- todo: if explorer... -->  
-    <!--<form style='display:inline' method="GET" action="../edit/">
-	    <input type="submit" value="Edit (basic)"/>
-	 </form>-->
-	 
-     <form style='display:inline' method="GET" action="../edit_fancy/">
-	    <input type="submit" value="Edit"/>
-	 </form>
-  
-  	<form style='display:inline' method="GET" action="../solver/">
-	    <input type="submit" value="Solve"/>
-	 </form>
-  
-  </div>
+	  	
+	  </div> <!-- .library -->
+	     
+	  
+	  {% if navigation['current_model'] %}
+	  <div class="this_model" style="">  
+			  <span>Views:</span>
+			  
+			  <select class='hot_select'>
+			    {% for vi in navigation['views'] %}
+			    <option value="{{vi['url']}}" {% if vi['current'] %} selected = 1 {% endif %}>
+			    	{{vi['name']}}
+			    </option>
+			    {% endfor %}
+			  </select>
+			    
+			    <!-- Also add the same but with hidden links -->
+				{% for vi in navigation['views'] %}
+			        <a style='display:none' href="{{vi['url']}}""></a>
+			    {% endfor %}
+	  </div>
+	  {% endif %} 
+</td>
+</tr>
+</table>
   
 <script type = "text/javascript">
  $('.hot_select').change(function() {
@@ -116,9 +81,5 @@ div.library span, div.this_model span { font-weight: bold; }
 });
 </script>
 
-	<span class='additional'>
-	<a href="{{request.url}}" target="_blank">open a copy</a>
-
-	</span>
 	
 </div>

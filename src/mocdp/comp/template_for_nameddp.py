@@ -1,7 +1,6 @@
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_posets.poset import NotLeq
-from mcdp_posets.types_universe import get_types_universe
+from mcdp_posets import NotLeq, get_types_universe
 from mocdp.exceptions import DPSemanticError
 
 __all__ = [
@@ -39,6 +38,25 @@ class TemplateForNamedDP():
 
         from mcdp_lang.eval_ndp_imp import eval_ndp
         return eval_ndp(self.template_code, c)
+    
+    
+    def get_template_with_holes(self):
+        """ Returns a CompositeNamedDP with special "Hole" nodes. """
+        from mocdp.comp.context import Context
+        from mocdp.comp.composite_templatize import ndp_templatize
+
+        context = Context()
+
+        parameters = dict(**self.parameters)
+        for k in parameters:
+            p = ndp_templatize(parameters[k])
+            setattr(p, 'template_parameter', k)
+
+            print id(p), type(p), hasattr(p, 'template_parameter')
+            parameters[k] = p
+
+
+        return self.specialize(parameters, context)
 
 
 class DifferentInterface(Exception):

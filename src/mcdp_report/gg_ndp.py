@@ -359,7 +359,6 @@ def create(gdc, ndp):
     return res
 
 def resize_icon(filename, tmppath, size):
-    
 
     res = os.path.join(tmppath, 'resized', str(size))
 
@@ -397,6 +396,8 @@ def is_simple(ndp):
 
 def create_simplewrap(gdc, ndp):
     assert isinstance(ndp, SimpleWrap)
+    from mocdp.comp.composite_templatize import OnlyTemplate
+    print 'simple', id(ndp), type(ndp), isinstance(ndp, OnlyTemplate), hasattr(ndp, 'template_parameter')
     label = str(ndp)
 
     sname = None  # name of style to apply, if any
@@ -422,7 +423,7 @@ def create_simplewrap(gdc, ndp):
 
     best_icon = gdc.get_icon(iconoptions)
 
-    simple = (Min, Max, Identity, GenericUnary, WrapAMap)
+    simple = (Min, Max, Identity, GenericUnary, WrapAMap,)
     only_string = isinstance(ndp.dp, simple)
     if only_string:
 
@@ -489,10 +490,19 @@ def create_simplewrap(gdc, ndp):
     if hasattr(ndp, '_xxx_label'):
         label = getattr(ndp, '_xxx_label')
 
+    # This does not work, for some reason
+#     if hasattr(ndp, 'template_parameter'):
+#         print('found it')
+#         label = getattr(ndp, 'template_parameter')
+
     node = gdc.newItem(label)
 
     if isinstance(ndp.dp, (Sum, SumN)):
         gdc.styleApply("sum", node)
+
+    if isinstance(ndp, OnlyTemplate):
+        gdc.gg.propertyAppend(node, 'color', 'blue')
+        gdc.gg.propertyAppend(node, 'style', 'dashed')
 
     if sname:
         gdc.styleApply(sname, node)

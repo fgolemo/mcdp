@@ -4,17 +4,16 @@ from contracts import contract
 from contracts.utils import raise_desc
 from copy import deepcopy
 from mcdp_lang import parse_ndp, parse_poset
-from mcdp_library.utils.memos_selection import memo_disk_cache2
-from mcdp_posets.poset import Poset
+from mcdp_library.utils import memo_disk_cache2
+from mcdp_posets import Poset
 from mocdp import logger
 from mocdp.comp.context import Context
 from mocdp.comp.interfaces import NamedDP
-from mocdp.exceptions import DPSemanticError, MCDPExceptionWithWhere, \
-    extend_with_filename
+from mocdp.comp.template_for_nameddp import TemplateForNamedDP
+from mocdp.exceptions import DPSemanticError, extend_with_filename
 import os
 import shutil
 import sys
-from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 
 
 
@@ -88,6 +87,11 @@ class MCDPLibrary():
                                   MCDPLibrary.parse_poset)
 
     @contract(returns=Poset)
+    def load_constant(self, id_poset):
+        return self._load_generic(id_poset, MCDPLibrary.ext_values,
+                                  MCDPLibrary.parse_constant)
+
+    @contract(returns=Poset)
     def load_primitivedp(self, id_primitivedp):
         return self._load_generic(id_primitivedp, MCDPLibrary.ext_primitivedps,
                                   MCDPLibrary.parse_primitivedp)
@@ -132,9 +136,9 @@ class MCDPLibrary():
         from mcdp_lang.parse_interface import parse_primitivedp
         return self._parse_with_hooks(parse_primitivedp, string, realpath)
 
-    def parse_constant(self, string):
+    def parse_constant(self, string, realpath=None):
         from mcdp_lang.parse_interface import parse_constant
-        return self._parse_with_hooks(parse_constant, string, None)
+        return self._parse_with_hooks(parse_constant, string, realpath)
 
     def parse_template(self, string, realpath=None):
         from mcdp_lang.parse_interface import parse_template
@@ -186,6 +190,15 @@ class MCDPLibrary():
         """ Returns all models defined in this library with .mcdp files. """
         return self._list_with_extension(MCDPLibrary.ext_primitivedps)
 
+    @contract(returns='set(str)')
+    def list_templates(self):
+        """ Returns all models defined in this library with .mcdp files. """
+        return self._list_with_extension(MCDPLibrary.ext_templates)
+
+    @contract(returns='set(str)')
+    def list_values(self):
+        return self._list_with_extension(MCDPLibrary.ext_values)
+
     def _list_with_extension(self, ext):
         r = []
         for x in self.file_to_contents:
@@ -209,8 +222,9 @@ class MCDPLibrary():
                 match = fn
                 break
         else:
+            available = sorted(self.file_to_contents)
             raise_desc(DPSemanticError, 'Could not find file in library.',
-                       filename=basename, available=sorted(self.file_to_contents))
+                       filename=basename, available=available)
         found = self.file_to_contents[match]
         return found
 
@@ -226,7 +240,8 @@ class MCDPLibrary():
         """ Adds the directory to the search directory list. """
         for ext in MCDPLibrary.all_extensions:
             pattern = '*.%s' % ext
-            files_mcdp = locate_files(directory=d, pattern=pattern, followlinks=True)
+            files_mcdp = locate_files(directory=d, pattern=pattern,
+                                      followlinks=True)
             for f in files_mcdp:
                 self._update_file(f)
 
@@ -237,8 +252,28 @@ class MCDPLibrary():
         res = dict(data=data, realpath=realpath)
         self.file_to_contents[basename] = res
 
-    def write_to_model(self, model_name, data):
-        basename = model_name + '.mcdp'
+
+    def write_to_model(self, name, data):
+        basename = '%s.%s' % (name, MCDPLibrary.ext_ndps)
+        self._write_generic(basename, data)
+
+    def write_to_template(self, name, data):
+        basename = '%s.%s' % (name, MCDPLibrary.ext_templates)
+        self._write_generic(basename, data)
+
+    def write_to_constant(self, name, data):
+        basename = '%s.%s' % (name, MCDPLibrary.ext_values)
+        self._write_generic(basename, data)
+
+    def write_to_primitivedp(self, name, data):
+        basename = '%s.%s' % (name, MCDPLibrary.ext_primitivedps)
+        self._write_generic(basename, data)
+
+    def write_to_poset(self, name, data):
+        basename = '%s.%s' % (name, MCDPLibrary.ext_posets)
+        self._write_generic(basename, data)
+
+    def _write_generic(self, basename, data):
         d = self._get_file_data(basename)
         realpath = d['realpath']
         logger.info('writing to %r' % realpath)

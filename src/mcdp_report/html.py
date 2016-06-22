@@ -33,7 +33,8 @@ def ast_to_text(s):
     
 @contract(s=str)
 def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: False,
-                add_line_gutter=True, encapsulate_in_precode=True, add_css=True):
+                add_line_gutter=True, encapsulate_in_precode=True, add_css=True,
+                parse_expr=Syntax.ndpt_dp_rvalue):
 
     s_lines, s_comments = isolate_comments(s)
     assert len(s_lines) == len(s_comments) 
@@ -48,7 +49,7 @@ def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: 
 
     full_lines = s_lines[len(empty_lines):]
     for_pyparsing = "\n".join(full_lines)
-    block = parse_wrap(Syntax.ndpt_dp_rvalue, for_pyparsing)[0]
+    block = parse_wrap(parse_expr, for_pyparsing)[0]
 
     if not isnamedtuplewhere(block):
         raise ValueError(block)

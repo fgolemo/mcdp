@@ -2,7 +2,7 @@ from contracts import contract
 from mcdp_library.library import MCDPLibrary
 from mcdp_library.utils.locate_files_imp import locate_files
 from mcdp_web.editor.app_editor import AppEditor
-from mcdp_web.editor_fancy.app_editor_fancy import AppEditorFancy
+
 from mcdp_web.interactive.app_interactive import AppInteractive
 from mcdp_web.qr.app_qr import AppQR
 from mcdp_web.solver.app_solver import AppSolver
@@ -11,9 +11,10 @@ from mcdp_web.visualization.app_visualization import AppVisualization
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPFound
-from quickapp.quick_app_base import QuickAppBase
+from quickapp import QuickAppBase
 from wsgiref.simple_server import make_server
 import os
+from mcdp_web.editor_fancy.app_editor_fancy_generic import AppEditorFancyGeneric
 
 
 __all__ = [
@@ -22,7 +23,7 @@ __all__ = [
 
 
 class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
-             AppEditorFancy, AppSolver2):
+              AppSolver2, AppEditorFancyGeneric):
 
     def __init__(self, dirname):
         self.dirname = dirname
@@ -33,8 +34,9 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         AppQR.__init__(self)
         AppSolver.__init__(self)
         AppInteractive.__init__(self)
-        AppEditorFancy.__init__(self)
+        # AppEditorFancy.__init__(self)
         AppSolver2.__init__(self)
+        AppEditorFancyGeneric.__init__(self)
 
         # name -> dict(desc: )
         self.views = {}
@@ -144,6 +146,10 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         url = '/libraries/%s/models/%s/views/%s/' % (library, model, view)
         return url
 
+    def get_lib_template_view_url(self, library, template, view):
+        url = '/libraries/%s/templates/%s/views/%s/' % (library, template, view)
+        return url
+
 
     def get_model_name(self, request):
         model_name = str(request.matchdict['model_name'])  # unicod
@@ -166,6 +172,21 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
             current_model = None
             current_view = None
 
+        if 'template_name' in request.matchdict:
+            current_template = str(request.matchdict['template_name'])
+        else:
+            current_template = None
+
+        if 'poset_name' in request.matchdict:
+            current_poset = str(request.matchdict['poset_name'])
+        else:
+            current_poset = None
+
+        if 'value_name' in request.matchdict:
+            current_value = str(request.matchdict['value_name'])
+        else:
+            current_value = None
+
 
         current_library = self.get_current_library_name(request)
         
@@ -174,9 +195,10 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         models = self.list_of_models(request)
         
         d['current_library'] = current_library
-
-        # d['current_view'] = current_view
-        # d['current_model'] = current_model
+        d['current_template'] = current_template
+        d['current_poset'] = current_poset
+        d['current_view'] = current_view
+        d['current_model'] = current_model
 
         d['models'] = []
         for m in models:
@@ -184,10 +206,45 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
             url = self.get_lmv_url(library=current_library,
                                    model=m,
-                                   view=current_view)
+                                   view='syntax')
 
-            desc = dict(name=m, url=url, current=is_current)
+            name = "Model %s" % m
+            desc = dict(name=name, url=url, current=is_current)
             d['models'].append(desc)
+
+        library = self.get_library(request)
+
+        templates = library.list_templates()
+        d['templates'] = []
+        for t in templates:
+            is_current = (t == current_template)
+
+            url = self.get_lib_template_view_url(library=current_library,
+                                                 template=t,
+                                                 view='edit_fancy')  # XXX
+
+            name = "Template %s" % t
+            desc = dict(name=name, url=url, current=is_current)
+            d['templates'].append(desc)
+
+        posets = library.list_posets()
+        d['posets'] = []
+        for p in posets:
+            is_current = (p == current_poset)
+            url = '/libraries/%s/posets/%s/views/edit_fancy/' % (current_library, p)
+            name = "Poset %s" % p
+            desc = dict(name=name, url=url, current=is_current)
+            d['posets'].append(desc)
+
+        values = library.list_values()
+        d['values'] = []
+        for v in values:
+            is_current = (v == current_value)
+            url = '/libraries/%s/values/%s/views/edit_fancy/' % (current_library, v)
+            name = "Value %s" % v
+            desc = dict(name=name, url=url, current=is_current)
+            d['values'].append(desc)
+
 
         d['views'] = []
         views = self._get_views()
@@ -198,7 +255,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
                                    model=current_model,
                                    view=v)
 
-            desc = dict(name=v, url=url, current=is_current)
+            name = v  # XXX
+            desc = dict(name=name, url=url, current=is_current)
             d['views'].append(desc)
 
         libraries = self.list_libraries()
@@ -207,7 +265,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         for l in libraries:
             is_current = l == current_library
             url = '/libraries/%s/list' % l
-            desc = dict(name=l, url=url, current=is_current)
+            name = "Library %s" % l
+            desc = dict(name=name, url=url, current=is_current)
             d['libraries'].append(desc)
 
         return d
@@ -223,7 +282,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         AppQR.config(self, config)
         AppSolver.config(self, config)
         AppInteractive.config(self, config)
-        AppEditorFancy.config(self, config)
+#         AppEditorFancy.config(self, config)
+        AppEditorFancyGeneric.config(self, config)
 
         AppSolver2.config(self, config)
 
@@ -257,9 +317,10 @@ def load_libraries(dirname):
             
             library_name -> {'path': ...}
     """
-    libraries = locate_files(dirname, "*.mcdplib", followlinks=False,
-                     include_directories=True,
-                     include_files=False)
+    libraries = locate_files(dirname, "*.mcdplib",
+                             followlinks=False,
+                             include_directories=True,
+                             include_files=False)
     res = {}
     for path in libraries:
         library_name = os.path.splitext(os.path.basename(path))[0]

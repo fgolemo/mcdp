@@ -43,5 +43,13 @@ def ndp_templatize(ndp):
     from mocdp.comp.template_imp import Dummy
 
     dp = Dummy(F, R)
-    res = SimpleWrap(dp, fnames, rnames)
+    res = OnlyTemplate(dp, fnames, rnames)
+
+#     setattr(res, 'template_parameter', 'ciao')
     return res
+
+
+class OnlyTemplate(SimpleWrap):
+    pass
+
+
