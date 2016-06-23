@@ -12,6 +12,7 @@ Meat
 ----
 
 
+
 - the meat! make sure we close all the loops at the same time.
 
 Incoming
@@ -48,6 +49,11 @@ Misc
 MCDP-web
 ----------
 
+- F: better initial list for each library
+
+- B: fix the "new model" link for each library
+
+- B: when drawing images, use a unicode font
 
 - F: send to non-fancy for internet explorer
 

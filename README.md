@@ -40,14 +40,12 @@ Install Git:
 
     $ sudo apt-get install git
 
-Clone the repo. If you have a github account:
-
-	$ git clone git@github.com:AndreaCensi/mcdp.git
-
-otherwise: 
+Clone the repo using: 
 
     $ git clone https://github.com/AndreaCensi/mcdp.git
 
+Jump into the directory:
+    
 	$ cd mcdp
 
 Install the dependencies:
