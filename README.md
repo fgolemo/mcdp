@@ -61,7 +61,7 @@ Then point your browser to the address <http://127.0.0.1:8080/>.
 
 The program ``mcdp-solve`` is a solver.
 
-    $ mcdp-solve <filename>.mcdp <f1> <f2> ...
+    $ mcdp-solve -d <library> <model_name>  <functionality>
     
 For example, to solve the MCDP specified in the file ``battery.mcdp`` in
 the library ``examples/example-battery.mcdplib``, use:
