@@ -500,9 +500,11 @@ def create_simplewrap(gdc, ndp):
     if isinstance(ndp.dp, (Sum, SumN)):
         gdc.styleApply("sum", node)
 
-    if isinstance(ndp, OnlyTemplate):
-        gdc.gg.propertyAppend(node, 'color', 'blue')
-        gdc.gg.propertyAppend(node, 'style', 'dashed')
+    if False:
+        mcdp_dev_warning('bug here')
+        if isinstance(ndp, OnlyTemplate):
+            gdc.gg.propertyAppend(node, 'color', 'blue')
+            gdc.gg.propertyAppend(node, 'style', 'dashed')
 
     if sname:
         gdc.styleApply(sname, node)

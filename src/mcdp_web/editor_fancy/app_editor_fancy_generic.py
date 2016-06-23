@@ -81,7 +81,6 @@ class AppEditorFancyGeneric():
         route = spec.url_part + '_edit_form_fancy'
         url = self.get_glmv_url('{library}', spec.url_part, '{%s}' % spec.url_variable,
                                  'edit_fancy')
-        print url
         renderer = 'editor_fancy/edit_form_fancy_generic.jinja2'
         view = lambda req: self.view_edit_form_fancy_generic(req, spec=spec)
         config.add_route(route, url)
@@ -109,7 +108,6 @@ class AppEditorFancyGeneric():
         new = lambda req: self.view_new_model_generic(req, spec)
         route = spec.url_part + '_new'
         url2 = '/libraries/{library}/' + spec.url_part + '/new/{%s}' % spec.url_variable
-        print url2
         config.add_route(route, url2)
         config.add_view(new, route_name=route)
 

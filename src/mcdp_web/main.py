@@ -334,6 +334,7 @@ def load_libraries(dirname):
     return res
 
 class MCDPWeb(QuickAppBase):
+    """ Runs the MCDP web interface. """
 
     def define_program_options(self, params):
         params.add_string('dir', default='.', short='-d',
@@ -343,6 +344,14 @@ class MCDPWeb(QuickAppBase):
         options = self.get_options()
         dirname = options.dir
         wa = WebApp(dirname)
+        msg = """
+To access the interface, open your browser at the address
+    
+    http://127.0.0.1:8080/
+    
+Use Chrome, Firefox, or Opera - Internet Explorer is not supported.
+"""
+        print(msg)
         wa.serve()
 
 mcdp_web_main = MCDPWeb.get_sys_main()
