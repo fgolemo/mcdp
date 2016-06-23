@@ -605,19 +605,23 @@ class Syntax():
     
     template_spec_param_name = sp(get_idn(), lambda t: CDP.TemplateParamName(t[0]))
     template_spec_param = template_spec_param_name + S(L(':')) + ndpt_dp_rvalue
-    parameters = O(template_spec_param) + ZeroOrMore(SCOMMA + template_spec_param) 
-    template_spec = sp(TEMPLATE - S(L('[')) + Group(parameters) + S(L(']'))
+    parameters = O(template_spec_param) + ZeroOrMore(SCOMMA + template_spec_param)
+    LSQ = sp(L('['), lambda t: CDP.LSQ(t[0]))
+    RSQ = sp(L(']'), lambda t: CDP.RSQ(t[0]))
+
+    template_spec = sp(TEMPLATE - LSQ + Group(parameters) + RSQ
                        + ndpt_dp_rvalue,
-                       lambda t: CDP.TemplateSpec(keyword=t[0], params=make_list(t[1]), ndpt=t[2]))
+                       lambda t: CDP.TemplateSpec(keyword=t[0],
+                                                  params=make_list(t[2], t[1].where),
+                                                  ndpt=t[4]))
     template << (code_spec | template_load | template_spec)
 
     SPECIALIZE = sp(L('specialize'), lambda t: CDP.SpecializeKeyword(t[0]))
 
-    ndpt_specialize = sp(SPECIALIZE + S(L('[')) + Group(parameters) + S(L(']'))
-                                                                        + template,
+    ndpt_specialize = sp(SPECIALIZE + LSQ + Group(parameters) + RSQ + template,
                          lambda t: CDP.Specialize(keyword=t[0],
-                                                  params=make_list(t[1]),
-                                                  template=t[2]))
+                                                  params=make_list(t[2], t[1].where),
+                                                  template=t[4]))
 
     ndpt_dp_operand = (
         code_spec |

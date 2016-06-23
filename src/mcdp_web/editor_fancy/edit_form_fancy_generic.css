@@ -14,7 +14,7 @@
 
 #around_editor {margin: 0; padding: 0.5em;}
 #around_editor pre { margin: 0; padding: 0.4em; background-color: #f4f4f4;}
-code#editor { outline: 0px solid transparent; }
+#editor { outline: 0px solid transparent; }
 
 	table td { vertical-align: top; }
   	html, body { height: 100%; border: solid 0px red; padding: 0; margin: 0; }

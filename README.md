@@ -24,9 +24,8 @@ along with the MCDPL snippet that describes it (right)*
 
 On Ubuntu:
 
-    sudo apt-get install python-numpy python-matplotlib python-yaml
-    sudo apt-get install graphviz
-    sudo apt-get install wkhtmltopdf
+    $ sudo apt-get install python-numpy python-matplotlib python-yaml python-pip
+    $ sudo apt-get install graphviz wkhtmltopdf
 
 ### Installation with pip
 
@@ -37,18 +36,29 @@ Run this:
 
 ### Installation from source
 
-Clone the repo:
+Install Git:
+
+    $ sudo apt-get install git
+
+Clone the repo. If you have a github account:
 
 	$ git clone git@github.com:AndreaCensi/mcdp.git
+
+otherwise: 
+
+    $ git clone https://github.com/AndreaCensi/mcdp.git
+
 	$ cd mcdp
 
 Install the dependencies:
 
-    $ pip install -r requirements.txt
+    $ sudo pip install -r requirements.txt
 
 Then install the main module:
     
-    $ python setup.py develop 
+    $ sudo python setup.py develop 
+
+Omit the sudo if you have a virtual env installed.
 
 
 ## Getting started

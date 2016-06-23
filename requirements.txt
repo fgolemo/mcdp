@@ -2,6 +2,9 @@ pyparsing
 networkx
 pint
 watchdog
+pyramid
+pyramid_jinja2
+bs4
 -e git+https://github.com/AndreaCensi/contracts.git@mcdp#egg=PyContracts
 reprep
 -e git+https://github.com/AndreaCensi/compmake.git@mcdp#egg=compmake

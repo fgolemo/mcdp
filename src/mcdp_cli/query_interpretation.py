@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc
-from mocdp.comp.context import Context
+from decent_params import UserError
 from mcdp_lang.eval_constant_imp import eval_constant
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_posets import PosetProduct, get_types_universe
-from decent_params import UserError
+from mocdp.comp.context import Context
 
 def solve_interpret_query_strings(query_strings, fnames, F):
     if len(query_strings) > 1:

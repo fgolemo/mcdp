@@ -201,6 +201,8 @@ class AppEditorFancyGeneric():
 
                 raise
 
+            # print string.__repr__()
+            # print highlight.__repr__()
             return {'ok': True, 'highlight': highlight, 'request': req}
 
         return ajax_error_catch(go)

@@ -131,6 +131,8 @@ class CDPLanguage():
 
     # just prepositions
     leq = namedtuplewhere('leq', 'glyph')
+    LSQ = namedtuplewhere('LSQ', 'glyph')
+    RSQ = namedtuplewhere('RSQ', 'glyph')
     product = namedtuplewhere('product', 'glyph')
     geq = namedtuplewhere('geq', 'glyph')
     eq = namedtuplewhere('eq', 'glyph')

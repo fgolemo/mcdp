@@ -106,11 +106,11 @@ def mcdplib_test_setup_nameddps(context, mcdplib):
 def mcdplib_test_setup_source_mcdp(context, mcdplib):
     from mcdp_tests import load_tests_modules
 
-
     l = MCDPLibrary()
     l.add_search_dir(mcdplib)
 
     load_tests_modules()
+
     registered = for_all_source_mcdp.registered
 
     print('Mcdplib: %s' % mcdplib)
