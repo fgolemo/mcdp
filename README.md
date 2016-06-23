@@ -126,19 +126,19 @@ of monotone problems.)
 
 <table>
     <tr><td colspan="2">
-        <img src="examples/example-plusinv/animations/model.png" width="500px"/>
+        <img src="examples/example-plusinv.mcdplib/animations/model.png" width="500px"/>
     </td></tr>
     <tr>
-     <td><img src="examples/example-plusinv/animations/plusinvnat2-nat4-problem.png" width="300px"/></td>
-     <td><img src="examples/example-plusinv/animations/plusinvnat2-nat10-problem.png" width="300px"/>
+     <td><img src="examples/example-plusinv.mcdplib/animations/plusinvnat2-nat4-problem.png" width="300px"/></td>
+     <td><img src="examples/example-plusinv.mcdplib/animations/plusinvnat2-nat10-problem.png" width="300px"/>
      </td>
      </tr>
      <tr>
-     <td><img src="examples/example-plusinv/animations/plusinvnat2-nat4.gif" width="300px"/></td>
-     <td><img src="examples/example-plusinv/animations/plusinvnat2-nat10.gif" width="300px"/></td>
+     <td><img src="examples/example-plusinv.mcdplib/animations/plusinvnat2-nat4.gif" width="300px"/></td>
+     <td><img src="examples/example-plusinv.mcdplib/animations/plusinvnat2-nat10.gif" width="300px"/></td>
      </tr>
      <tr>
-     <td colspan="2"><img src="examples/example-plusinv/animations/legend.png" width="500px"/></td>
+     <td colspan="2"><img src="examples/example-plusinv.mcdplib/animations/legend.png" width="500px"/></td>
      </tr>
 </table>
 
