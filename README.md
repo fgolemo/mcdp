@@ -12,8 +12,8 @@ along with the MCDPL snippet that describes it (right)*
 
 <table>
  <tr>
- <td><img src="examples/example-battery/out_expected/battery_minimal-clean.png" width="400px"/></td>
- <td><img src="examples/example-battery/out_expected/battery_minimal-syntax_pdf.png" width="300px"/>
+ <td><img src="examples/example-battery.mcdplib/out_expected/battery_minimal-clean.png" width="400px"/></td>
+ <td><img src="examples/example-battery.mcdplib/out_expected/battery_minimal-syntax_pdf.png" width="300px"/>
  </td>
  </tr>
 </table>
@@ -25,20 +25,10 @@ along with the MCDPL snippet that describes it (right)*
 On Ubuntu:
 
     $ sudo apt-get install python-numpy python-matplotlib python-yaml python-pip
-    $ sudo apt-get install graphviz wkhtmltopdf
-
-### Installation with pip
-
-Run this:
-
-	$ pip install -U PyMCDP 
-
+    $ sudo apt-get install graphviz wkhtmltopdf git 
+    $ sudo apt-get install texlive-extra-utils  # pdfcrop
 
 ### Installation from source
-
-Install Git:
-
-    $ sudo apt-get install git
 
 Clone the repo using: 
 
@@ -48,20 +38,23 @@ Jump into the directory:
     
 	$ cd mcdp
 
-Install the dependencies:
-
-    $ sudo pip install -r requirements.txt
-
 Then install the main module:
     
     $ sudo python setup.py develop 
 
-Omit the sudo if you have a virtual env installed.
+Omit the sudo if you have a virtual environment.
 
 
 ## Getting started
 
-<!-- 	 -->
+
+#### Running the web interface
+
+Run the command:
+
+    $ mcdp-web
+
+Then point your browser to the address <http://127.0.0.1:8080/>.
 
 
 #### Solving Monotone Co-Design Problems
@@ -70,9 +63,10 @@ The program ``mcdp-solve`` is a solver.
 
     $ mcdp-solve <filename>.mcdp <f1> <f2> ...
     
-For example, to solve the problem specified in ``examples/example-battery/battery.mcdp``, use:
+For example, to solve the MCDP specified in the file ``battery.mcdp`` in
+the library ``examples/example-battery.mcdplib``, use:
 
-    $ mcdp-solve examples/example-battery/battery.mcdp "<1 hour, 0.1 kg, 1 W>"
+    $ mcdp-solve -d examples/example-battery.mcdplib battery "<1 hour, 0.1 kg, 1 W>"
 
 The expected output is:
 
@@ -83,7 +77,7 @@ The expected output is:
 
 This is the case of unreasonable demands (1 kg of extra payload):
 
-    $ mcdp-solve examples/example-battery/battery.mcdp "<1 hour, 1.0 kg, 1 W>"
+    $ mcdp-solve -d examples/example-battery.mcdplib battery "<1 hour, 1.0 kg, 1 W>"
 
 This is the expected output:
 
@@ -95,26 +89,26 @@ This is the expected output:
 
 The programs ``mcdp-plot`` will parse and plot the MCDP in a variety of representations.
 
-    $ mcdp-plot <filename>.mcdp
+    $ mcdp-plot  -d <library> <model name>
 
 For example, the command
 
-    $ mcdp-plot examples/example-battery/battery.mcdp 
+    $ mcdp-plot  -d examples/example-battery.mcdplib battery
     
 will produce these graphs:
 
 <table>
     <tr>
         <td>Syntax highlighting</td>
-        <td><a href="examples/example-battery/out_expected/battery-syntax_pdf.png">
-            <img src="examples/example-battery/out_expected/battery-syntax_pdf.png" height="500px"/>
+        <td><a href="examples/example-battery.mcdplib/out_expected/battery-syntax_pdf.png">
+            <img src="examples/example-battery.mcdplib/out_expected/battery-syntax_pdf.png" height="500px"/>
             </a>
         </td>
     </tr>
-    <tr><td>Verbose graph</td><td><a href="examples/example-battery/out_expected/battery-default.png"><img src="examples/example-battery/out_expected/battery-default.png"/></a></td></tr>
-    <tr><td>Cleaned-up graph</td><td ><a href="examples/example-battery/out_expected/battery-clean.png">
-    <img src="examples/example-battery/out_expected/battery-clean.png" height="300px"/></a></td></tr>
-    <tr><td>Tree representation</td><td><img src="examples/example-battery/out_expected/battery-dp_tree.png"/></td></tr>
+    <tr><td>Verbose graph</td><td><a href="examples/example-battery.mcdplib/out_expected/battery-default.png"><img src="examples/example-battery.mcdplib/out_expected/battery-default.png"/></a></td></tr>
+    <tr><td>Cleaned-up graph</td><td ><a href="examples/example-battery.mcdplib/out_expected/battery-clean.png">
+    <img src="examples/example-battery.mcdplib/out_expected/battery-clean.png" height="300px"/></a></td></tr>
+    <tr><td>Tree representation</td><td><img src="examples/example-battery.mcdplib/out_expected/battery-dp_tree.png"/></td></tr>
     </tr>
 </table>
 
