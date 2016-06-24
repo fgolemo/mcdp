@@ -19,6 +19,9 @@ from mocdp.exceptions import mcdp_dev_warning
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
+from mocdp.ndp.named_coproduct import NamedDPCoproduct
+from mcdp_dp.dp_flatten import Mux
+from mcdp_dp.dp_max import MeetNDual
 
 
 STYLE_GREENRED = 'greenred'
@@ -338,7 +341,6 @@ def gvgen_from_ndp(ndp, style='default', direction='LR'):
     return gg
 
 def create(gdc, ndp):
-    from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
     if isinstance(ndp, SimpleWrap):
         res = create_simplewrap(gdc, ndp)
@@ -397,7 +399,7 @@ def is_simple(ndp):
 def create_simplewrap(gdc, ndp):
     assert isinstance(ndp, SimpleWrap)
     from mocdp.comp.composite_templatize import OnlyTemplate
-    print 'simple', id(ndp), type(ndp), isinstance(ndp, OnlyTemplate), hasattr(ndp, 'template_parameter')
+
     label = str(ndp)
 
     sname = None  # name of style to apply, if any
@@ -418,13 +420,20 @@ def create_simplewrap(gdc, ndp):
     classname = type(ndp.dp).__name__
 
     icon = ndp.get_icon()
+    
+
+
+
+    simple = (Min, Max, Identity, GenericUnary, WrapAMap)
+    only_string = isinstance(ndp.dp, simple)
+
+    if isinstance(ndp.dp, MeetNDual):
+        icon = 'split2'
+        only_string = False
 
     iconoptions = [gdc.yourname, icon, classname, 'default']
-
     best_icon = gdc.get_icon(iconoptions)
 
-    simple = (Min, Max, Identity, GenericUnary, WrapAMap,)
-    only_string = isinstance(ndp.dp, simple)
     if only_string:
 
         label = type(ndp.dp).__name__
@@ -440,16 +449,25 @@ def create_simplewrap(gdc, ndp):
 
         sname = 'simple'
     else:
-        for t, _ in special:
-            if isinstance(ndp.dp, t):
-                sname = t
-                gdc.styleAppend(sname, 'image', best_icon)
-                gdc.styleAppend(sname, 'imagescale', 'true')
-                gdc.styleAppend(sname, 'fixedsize', 'true')
-                gdc.styleAppend(sname, 'height', '1.0')
-                gdc.styleAppend(sname, "shape", "none")
-                label = ''
-                break
+
+        def is_special_dp(dp):
+            if isinstance(dp, Mux):
+                coords = dp.coords
+                if coords == [(), ()]:
+                    return True
+            for t, _ in special:
+                if isinstance(dp, t):
+                    return True
+            return False
+
+        if is_special_dp(ndp.dp):
+            sname = 'style%s' % id(ndp)
+            gdc.styleAppend(sname, 'image', best_icon)
+            gdc.styleAppend(sname, 'imagescale', 'true')
+            gdc.styleAppend(sname, 'fixedsize', 'true')
+            gdc.styleAppend(sname, 'height', '1.0')
+            gdc.styleAppend(sname, "shape", "none")
+            label = ''
         else:
             if best_icon is not None:
                 if gdc.yourname is not None:
@@ -500,11 +518,9 @@ def create_simplewrap(gdc, ndp):
     if isinstance(ndp.dp, (Sum, SumN)):
         gdc.styleApply("sum", node)
 
-    if False:
-        mcdp_dev_warning('bug here')
-        if isinstance(ndp, OnlyTemplate):
-            gdc.gg.propertyAppend(node, 'color', 'blue')
-            gdc.gg.propertyAppend(node, 'style', 'dashed')
+    if isinstance(ndp, OnlyTemplate):
+        gdc.gg.propertyAppend(node, 'color', 'blue')
+        gdc.gg.propertyAppend(node, 'style', 'dashed')
 
     if sname:
         gdc.styleApply(sname, node)
@@ -539,6 +555,7 @@ def format_unit(R):
     else:
         return '[%s]' % str(R)
             
+@contract(ndp=NamedDPCoproduct)
 def create_coproduct(gdc0, ndp):
     
 #     cluster = gdc0.newItem('mycluster-%s' % gdc0.yourname)
@@ -557,12 +574,22 @@ def create_coproduct(gdc0, ndp):
         functions[fname] = c
         gdc0.styleApply('coproduct_function', c)
 
+    if ndp.labels is not None:
+        altnames = ndp.labels
+    else:
+        n = len(ndp.ndps)
+        altnames = ['alternative %d' % (i + 1) for i in range(n)]
+
     for i, ndpi in enumerate(ndp.ndps):
+        
+        altname = altnames[i]
+
         if gdc0.yourname is not None:
 #             if LABELS
-            header = '%s - alternative %s' % (gdc0.yourname, i + 1)
+            header = '%s - %s' % (gdc0.yourname, altname)
         else:
-            header = 'alternative %s' % (i + 1)
+            header = altname
+
         with gdc0.child_context_yield(parent=gdc0.parent, yourname=header) as gdci:
             funi, resi = create(gdci, ndpi)
 

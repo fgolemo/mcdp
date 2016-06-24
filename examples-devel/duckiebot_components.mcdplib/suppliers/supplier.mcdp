@@ -1,0 +1,5 @@
+mcdp {
+	provides component [multiset(`components)]
+	requires budget        [USD]
+	requires delivery_time [t]
+}

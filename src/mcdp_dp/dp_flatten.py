@@ -33,9 +33,7 @@ class Mux(WrapAMap):
 
     @contract(coords='seq(int|tuple|list)|int')
     def __init__(self, F, coords):
-#         library = get_conftools_posets()
-#         _, F = library.instance_smarter(F)
-        
+
         self.amap = MuxMap(F, coords)
 
         WrapAMap.__init__(self, self.amap)
