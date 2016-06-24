@@ -2,7 +2,7 @@ from contracts import contract
 from mcdp_library.library import MCDPLibrary
 from mcdp_library.utils.locate_files_imp import locate_files
 from mcdp_web.editor.app_editor import AppEditor
-
+from mcdp_web.editor_fancy.app_editor_fancy_generic import AppEditorFancyGeneric
 from mcdp_web.interactive.app_interactive import AppInteractive
 from mcdp_web.qr.app_qr import AppQR
 from mcdp_web.solver.app_solver import AppSolver
@@ -14,7 +14,7 @@ from pyramid.httpexceptions import HTTPFound
 from quickapp import QuickAppBase
 from wsgiref.simple_server import make_server
 import os
-from mcdp_web.editor_fancy.app_editor_fancy_generic import AppEditorFancyGeneric
+
 
 
 __all__ = [
@@ -94,17 +94,12 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         self.libraries = load_libraries(self.dirname)
         for l in [_['library'] for _ in self.libraries.values()]:
             l.delete_cache()
-#         l = self.get_library(request)
-#
-#         self.appqr_reset()
 
     def view_refresh_library(self, request):
         """ Refreshes the current library (if external files have changed) 
             then reloads the current url. """
         self._refresh_library(request)
         raise HTTPFound(request.referrer)
-
-
 
     def view_exception(self, exc, _request):
         import traceback
@@ -122,8 +117,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
     def view_docs(self, request):
         docname = str(request.matchdict['document'])  # unicode
 
-        import pkg_resources
-        f = pkg_resources.resource_filename('mcdp_web', '../../docs/%s.md' % docname)  # @UndefinedVariable
+        from pkg_resources import resource_filename  # @UnresolvedImport
+        f = resource_filename('mcdp_web', '../../docs/%s.md' % docname)
         import codecs
         data = codecs.open(f, encoding='utf-8').read()
         import markdown  # @UnresolvedImport

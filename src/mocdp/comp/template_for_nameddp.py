@@ -33,7 +33,7 @@ class TemplateForNamedDP():
                 raise_wrapped(DPSemanticError, e, msg, proposed=proposed, v=v)
         
         c = context.child()
-        for k, v in self.parameters.items():
+        for k, v in parameter_assignment.items():
             c.var2model[k] = v
 
         from mcdp_lang.eval_ndp_imp import eval_ndp

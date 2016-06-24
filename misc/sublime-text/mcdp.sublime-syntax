@@ -10,6 +10,8 @@ contexts:
       scope: keyword.control.mcdp
     - match: \b(choose|set-of|using|pow|approx|Top)\b
       scope: keyword.control.mcdp
+    - match: \b(take|specialize|template)\b
+      scope: keyword.control.mcdp
 # 'load',
 #         'compact',
 #         'required',
@@ -70,10 +72,10 @@ contexts:
     - match: "[a-z_0-9]+ required by"
       scope: identifier.resource.mcdp
     
-    - match: "provided [a-z_0-9]+"
+    - match: "provided [A-Za-z_0-9]+"
       scope: identifier.functionality.mcdp
 
-    - match: "required [a-z_0-9]+"
+    - match: "required [A-Za-z_0-9]+"
       scope: identifier.resource.mcdp
     
 

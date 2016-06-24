@@ -5,9 +5,8 @@ from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from mcdp_report.html import ast_to_html
-from mcdp_web.utils import ajax_error_catch, format_exception_for_ajax_response
-from mcdp_web.utils.image_error_catch_imp import png_error_catch, response_image, \
-    create_image_with_string
+from mcdp_web.utils import (ajax_error_catch, create_image_with_string,
+    format_exception_for_ajax_response, png_error_catch, response_image)
 from mcdp_web.utils.response import response_data
 from mocdp import logger
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
@@ -111,12 +110,6 @@ class AppEditorFancyGeneric():
         config.add_route(route, url2)
         config.add_view(new, route_name=route)
 
-#
-#         config.add_route('new_model', '/libraries/{library}/new_model/{model_name}')
-#         config.add_view(self.view_new_model, route_name='new_model')
-#
-
-#
     def get_widget_name(self, request, spec):
         widget_name = str(request.matchdict[spec.url_variable])  # unicode
         return widget_name
@@ -176,11 +169,12 @@ class AppEditorFancyGeneric():
 
         def go():
             try:
-                highlight = ast_to_html(string, parse_expr=spec.parse_expr,
-                                    complete_document=False,
-                                    add_line_gutter=False,
-                                    encapsulate_in_precode=False, add_css=False)
-
+                highlight = ast_to_html(string,
+                                        parse_expr=spec.parse_expr,
+                                        complete_document=False,
+                                        add_line_gutter=False,
+                                        encapsulate_in_precode=False,
+                                        add_css=False)
                 try:
 
                     l = self.get_library(request)
@@ -188,7 +182,8 @@ class AppEditorFancyGeneric():
 
                 except DPSemanticError as e:
                     self.last_processed[spec][widget_name] = None  # XXX
-                    res = format_exception_for_ajax_response(e, quiet=(DPSemanticError,))
+                    res = format_exception_for_ajax_response(e,
+                                     quiet=(DPSemanticError,))
                     res['highlight'] = highlight
                     res['request'] = req
                     return res
@@ -219,7 +214,7 @@ class AppEditorFancyGeneric():
 
             png = spec.get_png_data(widget_name, thing)
 
-            return response_data(request=request, data=png, content_type='image/png')
+            return response_data(request, png, 'image/png')
         return png_error_catch(go, request)
 
 
@@ -231,14 +226,15 @@ class AppEditorFancyGeneric():
         basename = '%s.%s' % (widget_name, spec.extension)
         l = self.get_library(request)
 
-        url_edit = '/libraries/%s/%s/%s/views/edit_fancy/' % (library, spec.url_part, widget_name)
+        url_edit = ('/libraries/%s/%s/%s/views/edit_fancy/' %
+                    (library, spec.url_part, widget_name))
         
         if l.file_exists(basename):
             error = 'File %r already exists.' % basename
-            return render_to_response('editor_fancy/error_model_exists_generic.jinja2',
-                                      {'error': error,
-                                       'url_edit': url_edit,
-                                       'widget_name': widget_name}, request=request)
+            template = 'editor_fancy/error_model_exists_generic.jinja2'
+            params = {'error': error, 'url_edit': url_edit,
+                      'widget_name': widget_name}
+            return render_to_response(template, params, request=request)
 
         else:
 
