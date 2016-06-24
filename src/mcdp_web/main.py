@@ -1,8 +1,8 @@
 from contracts import contract
-from mcdp_library.library import MCDPLibrary
-from mcdp_library.utils.locate_files_imp import locate_files
+from mcdp_library import MCDPLibrary
+from mcdp_library.utils import locate_files
 from mcdp_web.editor.app_editor import AppEditor
-
+from mcdp_web.editor_fancy.app_editor_fancy_generic import AppEditorFancyGeneric
 from mcdp_web.interactive.app_interactive import AppInteractive
 from mcdp_web.qr.app_qr import AppQR
 from mcdp_web.solver.app_solver import AppSolver
@@ -14,7 +14,6 @@ from pyramid.httpexceptions import HTTPFound
 from quickapp import QuickAppBase
 from wsgiref.simple_server import make_server
 import os
-from mcdp_web.editor_fancy.app_editor_fancy_generic import AppEditorFancyGeneric
 
 
 __all__ = [

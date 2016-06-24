@@ -9,8 +9,9 @@ __all__ = [
 
 def format_exception_for_ajax_response(e, quiet=()):
     s = e.__repr__().decode('ascii', 'ignore')
+    from mocdp import logger
     try:
-        print(s)
+        logger.error(s)
     except UnicodeEncodeError:
         pass
     res = {}

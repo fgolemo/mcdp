@@ -2,14 +2,16 @@ from .response import response_data
 import traceback
 
 
+
 def png_error_catch(f, request):
+    from mocdp import logger
     try:
         return f()
     except Exception as e:
         s = traceback.format_exc(e)
 
         try:
-            print(s)
+            logger.error(s)
         except UnicodeEncodeError:
             pass
 

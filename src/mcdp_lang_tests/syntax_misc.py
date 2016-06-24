@@ -14,7 +14,7 @@ def check_lang():
     parse_wrap(idn, 'battery')
     parse_wrap(idn + Syntax.ow, 'battery ')
     parse_wrap(idn + Syntax.ow + Literal('='), 'battery=')
-    parse_wrap(Syntax.ndpt_load_expr, 'load battery')
+    parse_wrap(Syntax.ndpt_load, 'load battery')
 
 @comptest
 def check_lang3_times():

@@ -1,4 +1,4 @@
-from collections import namedtuple
+from collections import defaultdict, namedtuple
 from contracts.utils import raise_wrapped
 from mcdp_cli.plot import png_pdf_from_gg
 from mcdp_lang.syntax import Syntax
@@ -6,8 +6,8 @@ from mcdp_library import MCDPLibrary
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from mcdp_report.html import ast_to_html
 from mcdp_web.utils import ajax_error_catch, format_exception_for_ajax_response
-from mcdp_web.utils.image_error_catch_imp import png_error_catch, response_image, \
-    create_image_with_string
+from mcdp_web.utils.image_error_catch_imp import (create_image_with_string,
+    png_error_catch, response_image)
 from mcdp_web.utils.response import response_data
 from mocdp import logger
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
@@ -24,8 +24,9 @@ class AppEditorFancyGeneric():
 
     def __init__(self):
 
-        # spec ->  dict(text : ndp)
-        self.last_processed = {}
+        # library_name x spec ->  dict(text : ndp)
+        # self.last_processed2[library_name x spec][text] = ndp
+        self.last_processed2 = defaultdict(lambda: dict())
 
     def config(self, config):
         spec_models = Spec(url_part='models', url_variable='model_name',
@@ -77,7 +78,6 @@ class AppEditorFancyGeneric():
         """
             what = templates, values, posets
         """
-        self.last_processed[spec] = {}
         route = spec.url_part + '_edit_form_fancy'
         url = self.get_glmv_url('{library}', spec.url_part, '{%s}' % spec.url_variable,
                                  'edit_fancy')
@@ -173,6 +173,8 @@ class AppEditorFancyGeneric():
         widget_name = self.get_widget_name(request, spec)
         string = self.get_text_from_request2(request)
         req = {'text': request.json_body['text']}
+        library_name = self.get_current_library_name(request)
+        key = (library_name, spec, widget_name)
 
         def go():
             try:
@@ -187,15 +189,15 @@ class AppEditorFancyGeneric():
                     thing = spec.parse(l, string)
 
                 except DPSemanticError as e:
-                    self.last_processed[spec][widget_name] = None  # XXX
+                    self.last_processed2[key] = None  # XXX
                     res = format_exception_for_ajax_response(e, quiet=(DPSemanticError,))
                     res['highlight'] = highlight
                     res['request'] = req
                     return res
 
-                self.last_processed[spec][widget_name] = thing
+                self.last_processed2[key] = thing
             except:
-                self.last_processed[spec][widget_name] = None  # XXX
+                self.last_processed2[key] = None  # XXX
 
                 raise
 
@@ -208,12 +210,14 @@ class AppEditorFancyGeneric():
     def graph_generic(self, request, spec):
         def go():
             widget_name = self.get_widget_name(request, spec)
+            library_name = self.get_current_library_name(request)
+            key = (library_name, spec, widget_name)
 
-            if not widget_name in self.last_processed[spec]:
+            if not key in self.last_processed2:
                 l = self.get_library(request)
                 thing = spec.load(l, widget_name)
             else:
-                thing = self.last_processed[spec][widget_name]
+                thing = self.last_processed2[key]
                 if thing is None:
                     return response_image(request, 'Could not parse model.')
 
