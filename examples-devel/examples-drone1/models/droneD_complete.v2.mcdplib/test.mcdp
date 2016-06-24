@@ -1,4 +1,4 @@
-flatten     mcdp {
+mcdp {
         provides capacity [J]
         provides missions [R]
 
@@ -14,6 +14,8 @@ flatten     mcdp {
 
         maintenance >= replace_time * (missions / cycles)
 
-        mass >= capacity / specific_energy
-        cost >= capacity / specific_cost
-    }
+        required mass >= provided capacity / specific_energy
+        required cost >= provided capacity / specific_cost
+
+
+}

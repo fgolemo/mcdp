@@ -10,10 +10,13 @@ from .syntax_misc import *
 from .syntax_numbers import *
 from .syntax_power import *
 from .syntax_sets import *
-from .syntax_spaces import *
-from .syntax_tuples import *
+from .syntax_spaces  import *
+from .syntax_tuples  import *
 from .templates_test import *
 
+from .syntax_multisets import *
+from .syntax_intervals import *
+from .syntax_conversion import *
 
 """
     

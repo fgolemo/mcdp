@@ -60,7 +60,6 @@ def eval_rvalue_as_constant_same(s1, s2):
     p1 = eval_rvalue_as_constant2(s1)
     p2 = eval_rvalue_as_constant2(s2)
 
-
     v2 = express_value_in_isomorphic_space(p2.unit, p2.value, p1.unit)
 
     # print('Converted: %s' % p1.unit.format(v2))
