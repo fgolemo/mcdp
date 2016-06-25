@@ -24,7 +24,6 @@ def eval_rvalue_Uncertain(r, context):
                             res_prefix='_result')
 
 
-
 def eval_lfunction_Uncertain(r, context):
     from .eval_lfunction_imp import eval_lfunction
     from mcdp_dp import UncertainGateSym

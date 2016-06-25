@@ -6,7 +6,41 @@ import numpy as np
 
 __all__ = [
    'Interval',
+   'GenericInterval',
 ]
+
+class GenericInterval(Poset):
+    """ The interval [a, b] in the poset P. """
+    def __init__(self, P, a, b):
+        self.P = P
+        self.a = a
+        self.b = b
+
+        # make sure that the interval is not empty
+        self.P.check_leq(a, b)
+
+    def __repr__(self):
+        return 'GenericInterval(%r,%r,%r)' % (self.P, self.a, self.b)
+
+    def get_bottom(self):
+        return self.a
+
+    def get_top(self):
+        return self.b
+
+    def belongs(self, x):
+        self.check_leq(self.a, x)
+        self.check_leq(x, self.b)
+
+    def check_equal(self, a, b):
+        self.P.check_equal(a, b)
+
+    def check_leq(self, a, b):
+        return self.P.check_leq(a, b)
+
+    def format(self, x):
+        return self.P.format(x)
+
 
 class Interval(Poset):
     def __init__(self, L, U):

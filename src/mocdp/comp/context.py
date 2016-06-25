@@ -2,14 +2,13 @@
 from collections import namedtuple
 from contracts import contract
 from contracts.utils import indent, raise_desc
-from mcdp_posets import Space
-from mcdp_posets.poset import Poset
-from mocdp.comp.interfaces import NamedDP
-from mocdp.comp.wrap import dpwrap
 from mcdp_dp.dp_identity import Identity
 from mcdp_dp.primitive import PrimitiveDP
-from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+from mcdp_posets import Poset, Space
+from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
+from mocdp.comp.wrap import dpwrap
+from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 
 __all__ = [
     'Connection',

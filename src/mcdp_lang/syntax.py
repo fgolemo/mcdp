@@ -72,7 +72,7 @@ class SyntaxIdentifiers():
         'approx',
         'Top',
         'Bottom',
-        'space_finite_poset',
+        'finite_poset',
         'choose',
         'flatten',
         'from_library',
@@ -82,6 +82,7 @@ class SyntaxIdentifiers():
         'specialize',
         'with',
         'Uncertain',
+        'Interval',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -167,6 +168,8 @@ class Syntax():
                    parse_pint_unit)
 
     space = Forward() 
+    constant_value = Forward()
+
 
     get_idn = SyntaxIdentifiers.get_idn
     # "load <name>"
@@ -178,7 +181,7 @@ class Syntax():
     space_uppersets = sp(UPPERSETS + SLPAR + space + SRPAR,
                    lambda t: CDP.MakeUpperSets(t[0], t[1]))
 
-    #  space_finite_poset {
+    # finite_poset {
     #     a
     #     b  c  d  e
     #
@@ -186,7 +189,7 @@ class Syntax():
     #   }
     #
     # evaluates to CDP.FinitePoset
-    FINITE_POSET = sp(L('space_finite_poset'), lambda t: CDP.FinitePosetKeyword(t[0]))
+    FINITE_POSET = sp(L('finite_poset'), lambda t: CDP.FinitePosetKeyword(t[0]))
     finite_poset_el = sp(get_idn(), lambda t: CDP.FinitePosetElement(t[0]))
     finite_poset_chain = sp(finite_poset_el + ZeroOrMore(LEQ + finite_poset_el),
                                lambda t: make_list(t))
@@ -202,7 +205,11 @@ class Syntax():
 #     power_set_expr2 = sp((Combine(L('set') + L('of'))) + space ,
 #                         lambda t: CDP.PowerSet(t[0], t[1],
 #                                                t[2], t[3]))
-
+    INTERVAL = sp(L('Interval'), lambda t: CDP.IntervalKeyword(t[0]))
+    
+    space_interval = sp(INTERVAL + SLPAR + constant_value + SCOMMA + constant_value + SRPAR,
+                        lambda t: CDP.SpaceInterval(keyword=t[0], a=t[1], b=t[2]))
+    
     space_nat = sp(L('Nat') | L('ℕ'), lambda t: CDP.Nat(t[0]))
     space_int = sp(L('Int') | L('ℤ'), lambda t: CDP.Int(t[0]))
 
@@ -213,10 +220,11 @@ class Syntax():
                      load_poset ^
                      code_spec ^
                      space_finite_poset ^
-                     space_uppersets)
+                     space_uppersets ^
+                     space_interval)
 
     space << operatorPrecedence(space_operand, [
-                (PRODUCT, 2, opAssoc.LEFT, space_product_parse_action),
+        (PRODUCT, 2, opAssoc.LEFT, space_product_parse_action),
     ])
 
 
@@ -325,7 +333,6 @@ class Syntax():
 
     ndpt_dp_variable_ref = sp(get_idn(), lambda t: CDP.DPVariableRef(t[0]))
     
-    constant_value = Forward()
 
     # solve( <0 g>, `model )
     solve_model = sp(L('solve') + SLPAR + constant_value + SCOMMA + ndpt_dp_rvalue + SRPAR,

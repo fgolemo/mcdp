@@ -7,6 +7,8 @@ from mcdp_posets import (
     FiniteCollectionsInclusion, FinitePoset, Int, Nat, Poset, PosetProduct,
     Space, UpperSets)
 from mocdp.exceptions import DPInternalError
+from mocdp.comp.context import ValueWithUnits
+from mcdp_posets.interval import GenericInterval
 
 CDP = CDPLanguage
 
@@ -44,12 +46,34 @@ def eval_space(r, context):
         if isinstance(r, CDP.MakeUpperSets):
             return eval_space_makeuppersets(r, context)
 
+        cases = {
+            CDP.SpaceInterval: eval_space_interval,
+        }
+
+        for klass, hook in cases.items():
+            if isinstance(r, klass):
+                return hook(r, context)
+                            
         # This should be removed...
         if isinstance(r, CDP.Unit):
             return r.value
 
         raise DPInternalError('Invalid value to eval_space: %s' % str(r))
 
+def express_vu_in_isomorphic_space(vb, va):
+    """ Returns vb in va's units """
+    from mcdp_posets.types_universe import express_value_in_isomorphic_space
+    value = express_value_in_isomorphic_space(vb.unit, vb.value, va.unit)
+    return ValueWithUnits(value=value, unit=va.unit)
+
+
+def eval_space_interval(r, context):
+    from mcdp_lang.eval_constant_imp import eval_constant
+    va = eval_constant(r.a, context)
+    vb = eval_constant(r.b, context)
+    vb2 = express_vu_in_isomorphic_space(vb, va)
+    P = GenericInterval(va.unit, va.value, vb2.value)
+    return P
 
 def eval_space_makeuppersets(r, context):
     P = eval_space(r.space, context)

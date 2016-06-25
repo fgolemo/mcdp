@@ -5,12 +5,12 @@ from mcdp_lang.parse_interface import parse_poset
 @comptest
 def check_lang_interval1():
     tu = get_types_universe()
-    P = parse_poset('interval(0g, 1g)')
+    P = parse_poset('Interval(0g, 1g)')
 
 
 @comptest
 def check_lang_interval2():
-    one = 'interval(0.0 [], 1.0 [])'
+    one = 'Interval(0.0 [], 1.0 [])'
     rgb = "x".join([one] * 3)
     P = parse_poset(rgb)
 

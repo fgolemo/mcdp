@@ -20,7 +20,7 @@ from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
     get_name_for_fun_node, get_name_for_res_node)
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
-from mcdp_lang.namedtuple_tricks import clean_print, recursive_print
+# from mcdp_lang.namedtuple_tricks import clean_print, recursive_print
 
 
 

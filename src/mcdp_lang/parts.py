@@ -207,3 +207,7 @@ class CDPLanguage():
     UncertainRes = namedtuplewhere('UncertainRes', 'keyword lower upper')
     UncertainFun = namedtuplewhere('UncertainFun', 'keyword lower upper')
 
+    # Interval(a, b)
+    IntervalKeyword = namedtuplewhere('IntervalKeyword', 'keyword')
+    SpaceInterval = namedtuplewhere('SpaceInterval', 'keyword a b')
+
