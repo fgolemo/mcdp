@@ -17,16 +17,17 @@ def get_version(filename):
 
 version = get_version(filename='src/mocdp/__init__.py')
 
+
 setup(name='PyMCDP_devel',
       url='http://github.com/AndreaCensi/mcdp',
       maintainer="Andrea Censi",
       maintainer_email="andrea@censi.org",
-      description='PyMCDP is an nterpreter and solver for Monotone Co-Design Problems',
+      description='PyMCDP is an interpreter and solver for Monotone Co-Design Problems',
       long_description='',
       package_data={'':['*.*', '*.mcdp*', '*.js', '*.png', '*.css']},
       include_package_data=True,
       keywords="Optimization",
-      license="MIT",
+      license="GPLv2",
       classifiers=[
         'Development Status :: 4 - Beta',
       ],
@@ -35,8 +36,8 @@ setup(name='PyMCDP_devel',
       download_url=
         'http://github.com/AndreaCensi/mcdp/tarball/%s' % version,
 
-      package_dir={'':'src'},
-      packages=find_packages('src'),
+      package_dir={'':'src', 'libraries':'libraries'},
+      packages=find_packages('src') + ['libraries'],
       install_requires=[
         #'ConfTools>=1.0,<2',
         # '#quickapp', 
