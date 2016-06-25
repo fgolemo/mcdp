@@ -10,6 +10,7 @@ from mcdp_posets import PosetProduct, Space
 from mcdp_posets.poset import NotLeq
 from mcdp_posets.space import Map
 from mocdp.exceptions import DPSemanticError
+from mcdp_dp.primitive import NotSolvableNeedsApprox
 
 
 __all__ = [
@@ -33,7 +34,7 @@ class UncertainGate(ApproximableDP):
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, func):
-        raise ValueError('Not solvable')
+        raise NotSolvableNeedsApprox(type(self))
 
     def __repr__(self):
         return 'UncertainGate(%r)' % self.F0
@@ -84,7 +85,7 @@ class UncertainGateSym(ApproximableDP):
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, func):
-        raise ValueError('Not solvable')
+        raise NotSolvableNeedsApprox(type(self))
 
     def __repr__(self):
         return 'UncertainGateSym(%r)' % self.F0

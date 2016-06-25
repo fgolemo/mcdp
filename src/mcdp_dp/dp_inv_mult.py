@@ -3,6 +3,7 @@ from contracts import contract
 from mcdp_posets import Nat, Poset  # @UnusedImport
 from mcdp_posets import PosetProduct, UpperSet
 import numpy as np
+from mcdp_dp.primitive import NotSolvableNeedsApprox
 
 __all__ = [
     'InvMult2',
@@ -23,16 +24,18 @@ class InvMult2(ApproximableDP):
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
     def solve(self, f):
-        if self.F.equal(f, self.F.get_bottom()):
-            return self.R.U(self.R.get_bottom())
+        raise NotSolvableNeedsApprox(type(self))
 
-        n = 20
-        options = np.exp(np.linspace(-2, 2, n))
-        s = set()
-        for o in options:
-            s.add((o, f / o))
-
-        return self.R.Us(s)
+#         if self.F.equal(f, self.F.get_bottom()):
+#             return self.R.U(self.R.get_bottom())
+#
+#         n = 20
+#         options = np.exp(np.linspace(-2, 2, n))
+#         s = set()
+#         for o in options:
+#             s.add((o, f / o))
+#
+#         return self.R.Us(s)
 
     def evaluate_f_m(self, f, m):
         if m == 0.0:
@@ -112,7 +115,6 @@ class InvMult2L(PrimitiveDP):
         else:  
             points = set()
             pu = sorted(samplec(n - 1, f), key=lambda _: _[0])
-            # print('pu: %s' % pu)
             # assert len(pu) == n - 1
             nu = len(pu)
 
@@ -121,5 +123,7 @@ class InvMult2L(PrimitiveDP):
             for i in range(nu - 1):
                 p = (pu[i][0], pu[i + 1][1])
                 points.add(p)
-    
+
+            # s = " ".join(['%s*%s=%s ' % (a, b, a * b) for a, b in sorted(points, key=lambda _: _[0])])
+
         return UpperSet(minimals=points, P=self.R)

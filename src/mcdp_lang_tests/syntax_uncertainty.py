@@ -57,36 +57,6 @@ def check_uncertainty2():
     UR.check_equal(sl, sl_expected)
     UR.check_equal(su, su_expected)
 
-@comptest
-def check_uncertainty3():
-
-    s = """
-mcdp {
-  provides capacity [J]
-  requires mass     [kg]
-
-  required mass * Uncertain(2 J/kg, 3 J/kg) >= provided capacity
-}
-"""
-    ndp = parse_ndp(s)
-    dp = ndp.get_dp()
-    R = dp.get_res_space()
-    UR = UpperSets(R)
-    dpl, dpu = get_dp_bounds(dp, 100, 100)
-    f0 = 1.0  # N
-    sl = dpl.solve(f0)
-    su = dpu.solve(f0)
-    print sl
-    print su
-    UR.check_leq(sl, su)
-
-    real_lb = UpperSet(set([0.333333]), R)
-    real_ub = UpperSet(set([0.500000]), R)
-
-    # now dpl will provide a lower bound from below
-    UR.check_leq(sl, real_lb)
-    # and dpu will provide the upper bound from above
-    UR.check_leq(real_ub, su)
 
 
 @comptest
@@ -126,10 +96,78 @@ mcdp {
 
 
 @comptest
+def check_uncertainty3():
+
+    s = """
+mcdp {
+  provides capacity [J]
+  requires mass     [kg]
+
+  required mass * Uncertain(2 J/kg, 3 J/kg) >= provided capacity
+}
+"""
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    R = dp.get_res_space()
+    UR = UpperSets(R)
+    dpl, dpu = get_dp_bounds(dp, 100, 100)
+    f0 = 1.0  # J
+    sl = dpl.solve(f0)
+    su = dpu.solve(f0)
+    print sl
+    print su
+    UR.check_leq(sl, su)
+
+    real_lb = UpperSet(set([0.333333]), R)
+    real_ub = UpperSet(set([0.500000]), R)
+
+    # now dpl will provide a lower bound from below
+    UR.check_leq(sl, real_lb)
+    # and dpu will provide the upper bound from above
+    UR.check_leq(real_ub, su)
+
+
+@comptest
 def check_uncertainty5():
-    pass
+
+    s = """
+mcdp {
+  provides capacity [Wh]
+  requires mass     [kg]
+
+  required mass * Uncertain(100 Wh/kg, 120 Wh/kg) >= provided capacity
+
+}"""
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    R = dp.get_res_space()
+    UR = UpperSets(R)
+    dpl, dpu = get_dp_bounds(dp, 1000, 1000)
+    f0 = 1.0  # J
+    sl = dpl.solve(f0)
+    su = dpu.solve(f0)
+    UR.check_leq(sl, su)
+    print sl
+    print su
+
 
 @comptest
 def check_uncertainty6():
     pass
+#     s = """
+# mcdp {
+#   provides capacity [J]
+#   requires mass     [kg]
+#
+#   required mass * Uncertain(100 J/kg, 120 J/kg) >= provided capacity
+#
+# }"""
+#     ndp = parse_ndp(s)
+#     dp = ndp.get_dp()
+#     dpl, dpu = get_dp_bounds(dp, 100, 100)
+#     f0 = 1.0  # J
+#     sl = dpl.solve(f0)
+#     su = dpu.solve(f0)
+#     print sl
+#     print su
 

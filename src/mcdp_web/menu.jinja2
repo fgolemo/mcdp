@@ -1,6 +1,6 @@
 <div id='outer'>
 <ul id="menu">
-<li>&#9776;
+<li id='root'>&#9776;
 <ul>
   <li class="l1">New&hellip;
     <ul>
@@ -35,17 +35,25 @@
 
 <script type='text/javascript'>
 $(document).ready(function() {
-  options = { position: { my: "left top", at: "left bottom" } };
+  options = { position: { my: "left top", at: "right top" } };
   $('#menu').menu(options);
 })
 </script>
 
 <style type='text/css'>
+#menu {
+	font-size: 80%;
+}
+#menu li li li {
+	width: 14em;
+}
+li#root {width: 1em;}
+
 #outer {
 	font-size: 80%;
 }
 #outer { 	
-  width: 5em;
+
   font-size: 70%;
  }
 

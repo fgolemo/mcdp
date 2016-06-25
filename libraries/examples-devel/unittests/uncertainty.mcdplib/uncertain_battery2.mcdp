@@ -5,5 +5,4 @@ mcdp {
 
   required mass * Uncertain(100 Wh/kg, 120 Wh/kg) >= provided capacity
 
-  requires cost >= 1 USD
 }

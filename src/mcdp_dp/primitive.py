@@ -14,13 +14,20 @@ from mocdp.exceptions import do_extra_checks
 
 __all__ = [
     'PrimitiveDP',
+    'NotFeasible',
+    'Feasible',
+    'NotSolvableNeedsApprox',
 ]
+
 
 
 class NotFeasible(Exception):
     pass
 
 class Feasible(Exception):
+    pass
+
+class NotSolvableNeedsApprox(Exception):
     pass
 
 class PrimitiveDP(WithInternalLog):
@@ -286,6 +293,7 @@ class PrimitiveDP(WithInternalLog):
 
 
 class ApproximableDP(PrimitiveDP):
+    """ these will throw NotSolvableNeedsApprox for solve() """
 
     @abstractmethod
     @contract(n='int,>=0', returns=PrimitiveDP)
