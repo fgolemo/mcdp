@@ -59,3 +59,8 @@ stats-locs:
 stats-locs-tests:
 	wc -l `find . -type f -name '*.py' | grep test`
 
+
+
+bump-upload:
+	bumpversion patch
+	python setup.py sdist upload
