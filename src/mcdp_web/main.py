@@ -1,6 +1,7 @@
 from contracts import contract
 from mcdp_library import MCDPLibrary
 from mcdp_library.utils import locate_files
+from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
 from mcdp_web.editor.app_editor import AppEditor
 from mcdp_web.editor_fancy.app_editor_fancy_generic import AppEditorFancyGeneric
 from mcdp_web.interactive.app_interactive import AppInteractive
@@ -27,6 +28,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
     def __init__(self, dirname):
         self.dirname = dirname
         self.libraries = load_libraries(self.dirname)
+        logger.info('Found %d libraries underneath %r.' % (len(self.libraries), self.dirname))
 
         AppEditor.__init__(self)
         AppVisualization.__init__(self)
@@ -91,6 +93,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
     def _refresh_library(self, _request):
         # nuclear option
         self.libraries = load_libraries(self.dirname)
+
         for l in [_['library'] for _ in self.libraries.values()]:
             l.delete_cache()
 
@@ -116,8 +119,11 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
     def view_docs(self, request):
         docname = str(request.matchdict['document'])  # unicode
 
-        from pkg_resources import resource_filename  # @UnresolvedImport
-        f = resource_filename('mcdp_web', '../../docs/%s.md' % docname)
+        # from pkg_resources import resource_filename  # @UnresolvedImport
+
+        package = dir_from_package_name('mcdp_data')
+        docs = os.path.join(package, 'docs')
+        f = os.path.join(docs, '%s.md' % docname)
         import codecs
         data = codecs.open(f, encoding='utf-8').read()
         import markdown  # @UnresolvedImport
@@ -276,7 +282,6 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         AppQR.config(self, config)
         AppSolver.config(self, config)
         AppInteractive.config(self, config)
-#         AppEditorFancy.config(self, config)
         AppEditorFancyGeneric.config(self, config)
 
         AppSolver2.config(self, config)
@@ -327,25 +332,36 @@ def load_libraries(dirname):
         res[library_name] = dict(path=path, library=l)
     return res
 
+from mocdp import logger
+
 class MCDPWeb(QuickAppBase):
     """ Runs the MCDP web interface. """
 
     def define_program_options(self, params):
-        params.add_string('dir', default='.', short='-d',
+        params.add_string('dir', default=None, short='-d',
                            help='Library directories containing models.')
 
     def go(self):
         options = self.get_options()
         dirname = options.dir
+        if dirname is None:
+            package = dir_from_package_name('mcdp_data')
+            libraries = os.path.join(package, 'libraries')
+            msg = ('Command "-d" not passed, so I will open the default libraries '
+                   'shipped with PyMCDP.')
+            logger.info(msg)
+            dirname = libraries
+
         wa = WebApp(dirname)
-        msg = """
+        msg = """Welcome to PyMCDP!
+        
 To access the interface, open your browser at the address
     
     http://127.0.0.1:8080/
     
 Use Chrome, Firefox, or Opera - Internet Explorer is not supported.
 """
-        print(msg)
+        logger.info(msg)
         wa.serve()
 
 mcdp_web_main = MCDPWeb.get_sys_main()
