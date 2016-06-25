@@ -12,8 +12,8 @@ along with the MCDPL snippet that describes it (right)*
 
 <table>
  <tr>
- <td><img src="libraries/examples/example-battery.mcdplib/out_expected/battery_minimal-clean.png" width="400px"/></td>
- <td><img src="libraries/examples/example-battery.mcdplib/out_expected/battery_minimal-syntax_pdf.png" width="300px"/>
+ <td><img src="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery_minimal-clean.png" width="400px"/></td>
+ <td><img src="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery_minimal-syntax_pdf.png" width="300px"/>
  </td>
  </tr>
 </table>
@@ -64,9 +64,9 @@ The program ``mcdp-solve`` is a solver.
     $ mcdp-solve -d <library> <model_name>  <functionality>
     
 For example, to solve the MCDP specified in the file ``battery.mcdp`` in
-the library ``libraries/examples/example-battery.mcdplib``, use:
+the library ``mcdp_data/libraries/examples/example-battery.mcdplib``, use:
 
-    $ mcdp-solve -d libraries/examples/example-battery.mcdplib battery "<1 hour, 0.1 kg, 1 W>"
+    $ mcdp-solve -d mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 0.1 kg, 1 W>"
 
 The expected output is:
 
@@ -77,7 +77,7 @@ The expected output is:
 
 This is the case of unreasonable demands (1 kg of extra payload):
 
-    $ mcdp-solve -d libraries/examples/example-battery.mcdplib battery "<1 hour, 1.0 kg, 1 W>"
+    $ mcdp-solve -d mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 1.0 kg, 1 W>"
 
 This is the expected output:
 
@@ -93,22 +93,22 @@ The programs ``mcdp-plot`` will parse and plot the MCDP in a variety of represen
 
 For example, the command
 
-    $ mcdp-plot  -d libraries/examples/example-battery.mcdplib battery
+    $ mcdp-plot  -d mcdp_data/libraries/examples/example-battery.mcdplib battery
     
 will produce these graphs:
 
 <table>
     <tr>
         <td>Syntax highlighting</td>
-        <td><a href="libraries/examples/example-battery.mcdplib/out_expected/battery-syntax_pdf.png">
-            <img src="libraries/examples/example-battery.mcdplib/out_expected/battery-syntax_pdf.png" height="500px"/>
+        <td><a href="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery-syntax_pdf.png">
+            <img src="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery-syntax_pdf.png" height="500px"/>
             </a>
         </td>
     </tr>
-    <tr><td>Verbose graph</td><td><a href="libraries/examples/example-battery.mcdplib/out_expected/battery-default.png"><img src="libraries/examples/example-battery.mcdplib/out_expected/battery-default.png"/></a></td></tr>
-    <tr><td>Cleaned-up graph</td><td ><a href="libraries/examples/example-battery.mcdplib/out_expected/battery-clean.png">
-    <img src="libraries/examples/example-battery.mcdplib/out_expected/battery-clean.png" height="300px"/></a></td></tr>
-    <tr><td>Tree representation</td><td><img src="libraries/examples/example-battery.mcdplib/out_expected/battery-dp_tree.png"/></td></tr>
+    <tr><td>Verbose graph</td><td><a href="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery-default.png"><img src="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery-default.png"/></a></td></tr>
+    <tr><td>Cleaned-up graph</td><td ><a href="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery-clean.png">
+    <img src="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery-clean.png" height="300px"/></a></td></tr>
+    <tr><td>Tree representation</td><td><img src="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery-dp_tree.png"/></td></tr>
     </tr>
 </table>
 
@@ -126,19 +126,19 @@ of monotone problems.)
 
 <table>
     <tr><td colspan="2">
-        <img src="libraries/examples/example-plusinv.mcdplib/animations/model.png" width="500px"/>
+        <img src="mcdp_data/libraries/examples/example-plusinv.mcdplib/animations/model.png" width="500px"/>
     </td></tr>
     <tr>
-     <td><img src="libraries/examples/example-plusinv.mcdplib/animations/plusinvnat2-nat4-problem.png" width="300px"/></td>
-     <td><img src="libraries/examples/example-plusinv.mcdplib/animations/plusinvnat2-nat10-problem.png" width="300px"/>
+     <td><img src="mcdp_data/libraries/examples/example-plusinv.mcdplib/animations/plusinvnat2-nat4-problem.png" width="300px"/></td>
+     <td><img src="mcdp_data/libraries/examples/example-plusinv.mcdplib/animations/plusinvnat2-nat10-problem.png" width="300px"/>
      </td>
      </tr>
      <tr>
-     <td><img src="libraries/examples/example-plusinv.mcdplib/animations/plusinvnat2-nat4.gif" width="300px"/></td>
-     <td><img src="libraries/examples/example-plusinv.mcdplib/animations/plusinvnat2-nat10.gif" width="300px"/></td>
+     <td><img src="mcdp_data/libraries/examples/example-plusinv.mcdplib/animations/plusinvnat2-nat4.gif" width="300px"/></td>
+     <td><img src="mcdp_data/libraries/examples/example-plusinv.mcdplib/animations/plusinvnat2-nat10.gif" width="300px"/></td>
      </tr>
      <tr>
-     <td colspan="2"><img src="libraries/examples/example-plusinv.mcdplib/animations/legend.png" width="500px"/></td>
+     <td colspan="2"><img src="mcdp_data/libraries/examples/example-plusinv.mcdplib/animations/legend.png" width="500px"/></td>
      </tr>
 </table>
 

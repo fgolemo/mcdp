@@ -7,12 +7,12 @@ recursive-include src *
 recursive-include misc *.tmTheme
 recursive-include misc *.sublime-syntax
 
-recursive-include libraries Makefile
-recursive-include libraries *.mcdp
-recursive-include libraries *.mcdp_value
-recursive-include libraries *.mcdp_poset
-recursive-include libraries *.mcdp_template
-recursive-include libraries *.mcdp_primitivedp
+recursive-include mcdp_data Makefile
+recursive-include mcdp_data *.mcdp
+recursive-include mcdp_data *.mcdp_value
+recursive-include mcdp_data *.mcdp_poset
+recursive-include mcdp_data *.mcdp_template
+recursive-include mcdp_data *.mcdp_primitivedp
  
 
 
