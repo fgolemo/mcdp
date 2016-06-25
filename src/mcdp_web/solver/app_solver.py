@@ -63,9 +63,9 @@ class AppSolver():
         config.add_view(self.ajax_solver_reset,
                         route_name='solver_reset', renderer='json')
 
-        config.add_route('solver_image', '/libraries/{library}/models/{model_name}/views/solver/compact_graph')
+        config.add_route('solver_image', '/libraries/{library}/models/{model_name}/views/solver/compact_graph.png')
         config.add_view(self.image, route_name='solver_image')
-        config.add_route('solver_image2', '/libraries/{library}/models/{model_name}/views/solver/{fun_axes}/{res_axes}/compact_graph')
+        config.add_route('solver_image2', '/libraries/{library}/models/{model_name}/views/solver/{fun_axes}/{res_axes}/compact_graph.png')
         config.add_view(self.image, route_name='solver_image2')
 #         config.add_route('solver_image2', '/solver/{model_name}/compact_graph')
 #         config.add_view(self.image, route_name='solver_image2')
@@ -200,7 +200,7 @@ def create_alternative_urls(params, ndp):
     def make_url(faxes, raxes):
         faxes = ",".join(map(str, faxes))
         raxes = ",".join(map(str, raxes))
-        return '/libraries/%s/models/%s/solver/%s/%s/' % (library, model_name, faxes, raxes)
+        return '/libraries/%s/models/%s/views/solver/%s/%s/' % (library, model_name, faxes, raxes)
 
     # let's create the urls for different options
     fnames = ndp.get_fnames()

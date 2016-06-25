@@ -113,6 +113,9 @@ def generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0)):
 
 def get_best_plotter(space):
     p = list(get_plotters(plotters, space))
+    if not p:
+        msg = 'Could not find any plotter.'
+        raise_desc(ValueError, msg, space=space)
     return p[0][1]
 
 def get_plotters(plotters, space):

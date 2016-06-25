@@ -29,6 +29,6 @@ mcdp {
     cost required by battery + 
     labor_cost)
   
-  battery.missions >= num_missions
+  missions provided by battery  >= provided num_missions
 
 }

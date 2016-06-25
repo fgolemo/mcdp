@@ -38,6 +38,9 @@ class AppSolver2():
         config.add_route('solver2_display', base + 'display.png')
         config.add_view(self.view_solver2_display, route_name='solver2_display')
 
+        config.add_route('solver2_image', base + 'compact_graph.png')
+        config.add_view(self.image, route_name='solver2_image')
+
     @memoize_simple
     def _get_ndp_dp(self, library_name, model_name):
         library = self.libraries[library_name]['library']
@@ -61,7 +64,7 @@ class AppSolver2():
             string = request.json_body['string']
             assert isinstance(string, unicode)
             string = string.encode('utf-8')
-            print('string: %r' % string)
+
             nl = int(request.json_body['nl'])
             nu = int(request.json_body['nu'])
             return self.process(request, string, nl, nu)

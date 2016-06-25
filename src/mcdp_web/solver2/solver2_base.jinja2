@@ -5,12 +5,13 @@
 
     {% include 'head.jinja2' %}
 	<style type='text/css'>
-	  
+	  .output_error {font-size: smaller; color: red; font-weight: bold; }
 	</style>
 </head>
 <body>
 	{% include 'model_views_navigation.jinja2' %}
 	
+  	<img src='compact_graph.png' style='height: 8em; float: right'/> 
   
   <style type='text/css'>
   #slider-ln { width: 10em; }
@@ -20,7 +21,8 @@
   <table>
   <tr>
   <td>
-  Query:
+  Query<br/>
+  {{space_description}}
   </td>
   <td>
   <textarea id="area" cols=40 rows=3/></textarea>
@@ -49,7 +51,20 @@
   </tr>
 </table>
     
-  	
+  <pre class='output_error' id='output_error'></pre>
+
+  <img id='output_img' src="/static/white.png" style='width: 20em; height: 20em'/>
+
+  <p>{{space_description}}</p>
+  
+  <pre class='output_success' id='output_parsed'></pre>
+  <pre class='output_success'  id='output_format'></pre>
+  <pre class='output_success' id='output_space'></pre>
+  <pre class='output_success' id='output_trace'></pre>
+  <pre class='output_success' id='output_result'></pre>
+  
+  <pre class='output_error' id='ajax_error'></pre>
+  </div>
       
   
   <script type="text/javascript">
@@ -101,19 +116,7 @@
 	});
   </script>
 
-  <img id='output_img' src="/static/evaluating.gif" style='width: 20em; height: 20em'/>
-
-  <p>{{space_description}}</p>
-  
-  <pre class='output_success' id='output_parsed'></pre>
-  <pre class='output_success'  id='output_format'></pre>
-  <pre class='output_success' id='output_space'></pre>
-  <pre class='output_success' id='output_trace'></pre>
-  <pre class='output_success' id='output_result'></pre>
-  
-  <pre class='output_error' id='output_error'></pre>
-  <pre class='output_error' id='ajax_error'></pre>
-  </div>
+ 
   	
 
 <script type="text/javascript">
@@ -124,8 +127,9 @@ function ajax_begin() {
 
 function ajax_success(data) {
     if (data['ok']) {
+    	console.log('ok');
         console.log(data);
-        $('.output_error').html();
+        $('.output_error').html('');
                 
         $('#output_raw').html(data['output_raw']);
         $('#output_formatted').html(data['output_formatted']);
@@ -138,7 +142,7 @@ function ajax_success(data) {
 
     } else {
     	console.log(data);
-    	$('.output_success').html();
+    	$('.output_success').html('');
     	
         error = data['error']
     	console.log(error);

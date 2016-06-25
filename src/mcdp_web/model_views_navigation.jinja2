@@ -37,6 +37,13 @@ div.library span, div.this_model span { font-size: 80%; }
 	    {% endfor %}
 	  
 	  <select class='hot_select'>
+	  	{% if not navigation['current_model'] and not navigation['current_template'] 
+	  		and not navigation['current_poset'] %}
+	  		
+	  		<option value="#"  selected = 1> Select one... </option>
+	  		
+	  	{% endif %}
+	  
 	    {% for mi in navigation['models'] + navigation['templates'] + navigation['posets'] + navigation['values'] %}
 	    <option value="{{mi['url']}}" {% if mi['current'] %} selected = 1 {% endif %}>
 	    	{{mi['name']}}

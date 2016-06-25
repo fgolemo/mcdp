@@ -14,7 +14,7 @@ from .syntax_spaces  import *
 from .syntax_tuples  import *
 from .templates_test import *
 
-from .syntax_multisets import *
+from .syntax_multiset import *
 from .syntax_intervals import *
 from .syntax_conversion import *
 
