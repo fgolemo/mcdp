@@ -137,7 +137,7 @@ def define_tests(context):
             found.add(orig)
             return orig
 
-    folder = os.path.join(dir_from_package_name('mocdp'), '../../examples')
+    folder = os.path.join(dir_from_package_name('mocdp'), '../../libraries')
     examples2 = list(locate_files(folder, '*.mcdp'))
     print('Other files found: %s' % examples2)
     filenames.extend(examples2)

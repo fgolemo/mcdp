@@ -22,7 +22,7 @@ setup(name='PyMCDP',
       maintainer="Andrea Censi",
       description='PyMCDP is an nterpreter and solver for Monotone Co-Design Problems',
       long_description='',
-      package_data={'':['*.*', '*.mcdp', '*.cdp', '*.png']},
+      package_data={'':['*.*', '*.mcdp*', '*.js', '*.png']},
       keywords="Optimization",
       license="MIT",
       classifiers=[
@@ -68,8 +68,8 @@ setup(name='PyMCDP',
 
       entry_points={
          'console_scripts': [
-            'mcdp_plot = mcdp_cli:mcdp_plot_main',
-            'mcdp_solve = mcdp_cli:mcdp_solve_main',
+            # 'mcdp_plot = mcdp_cli:mcdp_plot_main',
+            # 'mcdp_solve = mcdp_cli:mcdp_solve_main',
             'mcdp-plot = mcdp_cli:mcdp_plot_main',
             'mcdp-solve = mcdp_cli:mcdp_solve_main',
             'mcdp-web = mcdp_web:mcdp_web_main',

@@ -1,0 +1,167 @@
+
+body { font-family: Verdana, Tahoma; padding: 0; margin: 0;}
+
+img { border: solid 1px black;}
+h { 
+	font-family: monospace; 
+	font-size: 120%; 
+	color: black; 
+	font-weight: bold;  
+	display: block;
+}
+
+sssection { border: solid 2px gray; display: block; clear: both; padding: 1em; margin: 1em;}
+
+.report-node { 
+	display: block; padding: 0.2em; 
+
+    margin-left: 0em;
+    margin-right: 0em;
+    margin-top: 0.2em;
+    margin-bottom: 1em;
+    
+
+	 border-left: solid 0.2em #eee; 
+	 border-top : solid 0.2em #eee;
+     width: 97%;
+}
+
+.report-figure { display: block; 
+    padding: 5px;
+    width: 97%;
+    margin-left: 0em;
+    margin-right: 0em;
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+	background-color: #eee;
+}
+
+
+.report-figure-caption { display: block; clear: both;  }
+.report-subfigure {  
+    padding: 5px; 
+    padding-bottom: 0; 
+    margin: 0; 
+    display: block;}
+    
+.report-subfigure-caption { 
+    clear: both; 
+    display: block; 
+    font-weight: bold; text-align: center;  
+}
+
+div.imgzoom {
+	/*border: solid 2px red;*/
+}
+
+div.imgzoom img { 
+	background-color: white;
+}
+
+.node-class { margin:1em; float: right; font-family: monospace; color: blue;}
+.node-id {margin:1em;  float: right; font-family: monospace; font-weight: bold; color: green;}
+.datanode { font-family: monospace; font-weight: bold; }
+.datanode-children { margin-left: 0.2em; }
+
+.report-table td {
+    padding: 5px;
+    text-align: right;
+}
+.report-table tr th {
+    padding-left: 2em;
+}
+
+.report-table tr.even {
+    background-color: #EEF;
+}
+
+.report-table caption {
+    font-size: 150%;
+
+}
+.report-table {
+    margin-top: 1em;
+    padding: 1em;
+    border: solid 2px gray;
+}
+
+p.reprep-credits {
+	font-size: 90%; 
+	font-weight: bold;
+}
+
+div.report-text-node {
+	/*background-color:  #aaa;*/
+	overflow: auto;
+	padding: 0;
+}
+
+span.report-text-node-id {
+	float: left;
+	display: block;
+	font-weight: bold;
+	/*border: solid 1px green;*/
+	padding-left: 1em;
+	padding-right: 2em;
+	padding-top: 1em;
+	padding-bottom: 3em;
+}
+
+div.report-text-node-content {
+	display: block;
+	float: left;
+	padding: 3px;
+	background-color:  #eee;
+	/*border: solid 1px red;*/
+}
+
+p#reprep-head {
+	margin: 0;
+	background-color: #ccc;
+	padding: 0.5em;
+	color: white;
+	font-size: 100%; 
+}
+p#reprep-head A { color: white;}
+
+
+/*** Images ***/ 
+
+
+div.report-figure {
+    width: 100%;
+    display: block;
+    margin: 0;
+    padding: 0;
+    /*border: solid 1px red;*/
+}
+
+div.report-subfigure {
+    display: block;
+    float: left;
+    padding: 0;
+    margin: -1px;
+    /*border: solid 1px black;*/
+    text-align: center;
+}
+div.report-subfigure img { width: 95%;}
+
+div.first-col { clear: left;}
+/* div.ncols-1 { width: 99%; } */
+div.ncols-1 { width: 49%; } /* minimum 2 figures */
+div.ncols-2 { width: 49%; }
+div.ncols-3 { width: 33%; }
+div.ncols-4 { width: 25%; }
+div.ncols-5 { width: 20%; }
+div.ncols-6 { width: 16%; }
+div.ncols-7 { width: 14%; }
+div.ncols-8 { width: 12%; }
+div.ncols-9 { width: 11%; }
+div.ncols-10 { width: 10%; }
+div.ncols-11 { width: 9%; }
+div.ncols-12 { width: 8%; }
+div.ncols-13 { width: 7%; }
+div.ncols-14 { width: 6%; }
+div.ncols-15 { width: 6%; }
+div.ncols-16 { width: 6%; }
+

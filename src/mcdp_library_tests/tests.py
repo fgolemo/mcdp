@@ -23,8 +23,8 @@ def define_tests_for_mcdplibs(context):
         
         It also looks for the files *.mcdp_tests.yaml inside.
     """
-
-    folder = os.path.join(dir_from_package_name('mocdp'), '..', '..', '..')
+    package = os.path.join(dir_from_package_name('mocdp'), '..', '..')
+    folder = os.path.join(package, 'libraries')
 
     if not os.path.exists(folder):
         raise_desc(ValueError, 'No mcdp_lang_tests found.' , folder=folder)

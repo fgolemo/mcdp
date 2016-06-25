@@ -1,0 +1,205 @@
+
+<html>
+<head>  
+    <meta charset="utf-8" /> 
+    <script type="text/javascript" 
+        src="plusinvnat2_dp1.html_resources/static/jquery/jquery.js"></script>
+    
+    <!-- Use imagezoom plugin --> 
+    <script type="text/javascript" 
+        src="plusinvnat2_dp1.html_resources/static/jquery/jquery.imageZoom.js"></script>
+    <link rel="stylesheet" 
+          href="plusinvnat2_dp1.html_resources/static/jquery/jquery.imageZoom.css"/>
+    <script type="text/javascript"> 
+        $(document).ready( function () {
+            $('.zoomable').imageZoom();
+        });       
+    </script>
+    
+    
+    <!-- Use tablesorter plugin -->
+    <script type="text/javascript" 
+            src="plusinvnat2_dp1.html_resources/static/jquery/tablesorter/jquery.tablesorter.js"></script> 
+    <link rel="stylesheet" 
+          href="plusinvnat2_dp1.html_resources/static/jquery/tablesorter/themes/blue/style.css"/>
+    <script type="text/javascript">
+    $(document).ready(function() { 
+        $(".tablesorter").tablesorter(); 
+    } 
+    ); 
+    </script>
+    
+    
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        TeX: { 
+            equationNumbers: { autoNumber: "AMS" },
+            extensions: ["AMSmath.js", "AMSsymbols.js"] 
+        },
+        extensions: ["tex2jax.js"],
+        jax: ["input/TeX", "output/SVG"], //" "output/HTML-CSS"],
+        tex2jax: {
+          inlineMath: [ ['$','$']],
+          displayMath: [ ['$$','$$'] ], 
+          processEscapes: true
+        },
+        "HTML-CSS": { availableFonts: ["TeX"] }
+      });
+      //MathJax.Ajax.loadComplete("/media/tex/symbols.js");
+    </script>
+    
+    <script type='text/javascript' 
+            src='http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+
+
+
+    
+    <style type="text/css">
+    /* Extra CSS passed by user. */
+        
+    </style>
+
+    
+    <link rel="stylesheet" 
+          href="plusinvnat2_dp1.html_resources/static/reprep/default_style.css"/>
+
+    <title> None </title>
+<body>
+
+<p id="reprep-head"> 
+    Report created on 2016-05-08-21:57:22
+    by <a href="http://purl.org/censi/2010/RepRep">RepRep</a>.
+    Show:
+    <input type="submit" name="datanode_toggle" 
+           value="data nodes" id="datanode_toggle" /> 
+</p>
+
+
+
+<script type="text/javascript">
+ $(document).ready(function() {
+   $('.datanode').hide();
+   $('#datanode_toggle').click(function(){
+     $('.datanode').toggle();
+   });
+ });
+</script>
+
+
+
+    <div class='report-node' id="anonymous">
+    <h><a href="#anonymous">None</a></h><section> 
+<div class="report-nongui-nodes">
+<div style="clear:left" class='report-figure None' id='anonymous-graph'>
+    <h>graph</h><div class="report-subfigure ncols-1 first-col last-col"> 
+                <a href="plusinvnat2_dp1.html_resources/anonymous-graph-graph.png" class="zoomable">
+                    <img src="plusinvnat2_dp1.html_resources/anonymous-graph-graph.png"/>
+                </a>    
+            <p class="report-subfigure-caption">graph</p></div> 
+
+<p class="report-figure-caption"></p><div class="report-nongui-nodes">
+<p class="datanode"><a href="plusinvnat2_dp1.html_resources/anonymous-graph-graph.png">graph</a>:  image/png</p>
+<p class="datanode"><a href="plusinvnat2_dp1.html_resources/anonymous-graph-dot.gv">dot</a>:  text/vnd.graphviz</p>
+</div>
+</div><p class="datanode"><a href="plusinvnat2_dp1.html_resources/anonymous-graph.pdf">graph_pdf</a>:  application/pdf</p>
+
+<div class="textnode report-text-node"> 
+
+    <span class="textid report-text-node-id"> long </span> 
+   
+   <div class="report-text-node-content">
+     <pre class="report-text report-text-plain">Series: %  ℕ -&gt; ℕ×ℕ
+\ DPLoop0:   ℕ -&gt; (ℕ×ℕ)×ℕ
+. L Series: %  ℕ×((ℕ×ℕ)×ℕ) -&gt; (ℕ×ℕ)×ℕ
+. L \ Mux([(1, 1), 0])
+. L \ Series: %  ℕ×ℕ -&gt; (ℕ×ℕ)×ℕ
+. L . \ Parallel  % ℕ×ℕ -&gt; ((ℕ×ℕ×ℕ)×ℕ)×ℕ
+. L . . \ Series: %  ℕ -&gt; (ℕ×ℕ×ℕ)×ℕ
+. L . . . \ InvPlus2Nat(ℕ -&gt; ℕ×ℕ)
+. L . . . \ Series: %  ℕ×ℕ -&gt; (ℕ×ℕ×ℕ)×ℕ
+. L . . . . \ Mux([[0, 1], 1])
+. L . . . . \ Series: %  (ℕ×ℕ)×ℕ -&gt; (ℕ×ℕ×ℕ)×ℕ
+. L . . . . . \ Parallel  % (ℕ×ℕ)×ℕ -&gt; (ℕ×ℕ)×ℕ
+. L . . . . . . \ Id(ℕ×ℕ)
+. L . . . . . . \ WrapAMap(ceil(sqrt(.)))
+. L . . . . . \ Series: %  (ℕ×ℕ)×ℕ -&gt; (ℕ×ℕ×ℕ)×ℕ
+. L . . . . . . \ Mux([[1, (0, 1), (0, 0)], (0, 0)])
+. L . . . . . . \ Parallel  % (ℕ×ℕ×ℕ)×ℕ -&gt; (ℕ×ℕ×ℕ)×ℕ
+. L . . . . . . . \ Id(ℕ×ℕ×ℕ)
+. L . . . . . . . \ WrapAMap(ceil(sqrt(.)))
+. L . . \ Id(ℕ)
+. L . \ Series: %  ((ℕ×ℕ×ℕ)×ℕ)×ℕ -&gt; (ℕ×ℕ)×ℕ
+. L . . \ Mux([[(0, 0, 1), (0, 0, 2)], [(0, 1), (0, 0, 0), 1]])
+. L . . \ Parallel  % (ℕ×ℕ)×(ℕ×ℕ×ℕ) -&gt; (ℕ×ℕ)×ℕ
+. L . . . \ Id(ℕ×ℕ)
+. L . . . \ SumNNat(ℕ×ℕ×ℕ -&gt; ℕ)
+\ Mux([(0, 1), (0, 0)])</pre>
+   </div>
+     
+</div>  
+
+<div class="textnode report-text-node"> 
+
+    <span class="textid report-text-node-id"> normalform </span> 
+   
+   <div class="report-text-node-content">
+     <pre class="report-text report-text-plain">S: U((ℕ×ℕ)×ℕ)
+α: SeriesAlpha:U(ℕ)×U((ℕ×ℕ)×ℕ)→U(ℕ×ℕ)
+β: SeriesBeta:U(ℕ)×U((ℕ×ℕ)×ℕ)→U((ℕ×ℕ)×ℕ)</pre>
+   </div>
+     
+</div>  
+
+<div class="textnode report-text-node"> 
+
+    <span class="textid report-text-node-id"> tree_long </span> 
+   
+   <div class="report-text-node-content">
+     <pre class="report-text report-text-plain">Series0                       [F = ℕ              R = ℕ×ℕ         M = ℕ×ℕ×ℕ×(ℕ×ℕ)×...  S = U((ℕ×ℕ)×ℕ)                  ]
+  DPLoop0                     [F = ℕ              R = (ℕ×ℕ)×ℕ     M = ℕ×ℕ×ℕ×(ℕ×ℕ)×...  S = U((ℕ×ℕ)×ℕ)                  ]
+    Series0                   [F = ℕ×((ℕ×ℕ)×ℕ)    R = (ℕ×ℕ)×ℕ     M = ℕ×ℕ×ℕ×(ℕ×ℕ)×...  S = 𝟙                          ]
+      Mux                     [F = ℕ×((ℕ×ℕ)×ℕ)    R = ℕ×ℕ         M = 𝟙               S = 𝟙                          ]
+      Series0                 [F = ℕ×ℕ            R = (ℕ×ℕ)×ℕ     M = ℕ×ℕ×ℕ×(ℕ×ℕ)×...  S = 𝟙                          ]
+        Parallel              [F = ℕ×ℕ            R = ((ℕ×ℕ×ℕ...  M = ℕ×ℕ×ℕ×(ℕ×ℕ)×ℕ    S = 𝟙                          ]
+          Series0             [F = ℕ              R = (ℕ×ℕ×ℕ)×ℕ   M = ℕ×ℕ×ℕ×(ℕ×ℕ)×ℕ    S = 𝟙                          ]
+            InvPlus2Nat       [F = ℕ              R = ℕ×ℕ         M = ℕ                S = 𝟙                          ]
+            Series0           [F = ℕ×ℕ            R = (ℕ×ℕ×ℕ)×ℕ   M = (ℕ×ℕ)×ℕ          S = 𝟙                          ]
+              Mux             [F = ℕ×ℕ            R = (ℕ×ℕ)×ℕ     M = 𝟙               S = 𝟙                          ]
+              Series0         [F = (ℕ×ℕ)×ℕ        R = (ℕ×ℕ×ℕ)×ℕ   M = (ℕ×ℕ)×ℕ          S = 𝟙                          ]
+                Parallel      [F = (ℕ×ℕ)×ℕ        R = (ℕ×ℕ)×ℕ     M = 𝟙               S = 𝟙                          ]
+                  Identity    [F = ℕ×ℕ            R = ℕ×ℕ         M = 𝟙               S = 𝟙                          ]
+                  WrapAMap    [F = ℕ              R = ℕ           M = 𝟙               S = 𝟙                          ]
+                Series0       [F = (ℕ×ℕ)×ℕ        R = (ℕ×ℕ×ℕ)×ℕ   M = 𝟙               S = 𝟙                          ]
+                  Mux         [F = (ℕ×ℕ)×ℕ        R = (ℕ×ℕ×ℕ)×ℕ   M = 𝟙               S = 𝟙                          ]
+                  Parallel    [F = (ℕ×ℕ×ℕ)×ℕ      R = (ℕ×ℕ×ℕ)×ℕ   M = 𝟙               S = 𝟙                          ]
+                    Identity   [F = ℕ×ℕ×ℕ          R = ℕ×ℕ×ℕ       M = 𝟙               S = 𝟙                          ]
+                    WrapAMap   [F = ℕ              R = ℕ           M = 𝟙               S = 𝟙                          ]
+          Identity            [F = ℕ              R = ℕ           M = 𝟙               S = 𝟙                          ]
+        Series0               [F = ((ℕ×ℕ×ℕ)×ℕ)×ℕ  R = (ℕ×ℕ)×ℕ     M = 𝟙               S = 𝟙                          ]
+          Mux                 [F = ((ℕ×ℕ×ℕ)×ℕ)×ℕ  R = (ℕ×ℕ)×(...  M = 𝟙               S = 𝟙                          ]
+          Parallel            [F = (ℕ×ℕ)×(ℕ×ℕ×ℕ)  R = (ℕ×ℕ)×ℕ     M = 𝟙               S = 𝟙                          ]
+            Identity          [F = ℕ×ℕ            R = ℕ×ℕ         M = 𝟙               S = 𝟙                          ]
+            SumNNat           [F = ℕ×ℕ×ℕ          R = ℕ           M = 𝟙               S = 𝟙                          ]
+  Mux                         [F = (ℕ×ℕ)×ℕ        R = ℕ×ℕ         M = 𝟙               S = 𝟙                          ]</pre>
+   </div>
+     
+</div>  
+
+<div class="textnode report-text-node"> 
+
+    <span class="textid report-text-node-id"> ImodR </span> 
+   
+   <div class="report-text-node-content">
+     <pre class="report-text report-text-plain">ℕ×ℕ×ℕ×(ℕ×ℕ)×ℕ×((ℕ×ℕ×ℕ)×ℕ)×ℕ×(ℕ×ℕ)×ℕ×(ℕ×ℕ)×ℕ</pre>
+   </div>
+     
+</div>  
+</div>
+</section> 
+</div> 
+
+ 
+
+
+</body>
+</html>
