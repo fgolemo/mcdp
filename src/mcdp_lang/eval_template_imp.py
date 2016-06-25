@@ -1,10 +1,10 @@
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_lang.parse_actions import add_where_information
+from mcdp_lang.parts import CDPLanguage
+from mcdp_lang.utils_lists import unwrap_list
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.exceptions import DPInternalError
-from mcdp_lang.parts import CDPLanguage
-from mcdp_lang.utils_lists import unwrap_list, get_odd_ops
 
 
 CDP = CDPLanguage

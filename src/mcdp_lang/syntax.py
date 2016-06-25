@@ -80,6 +80,7 @@ class SyntaxIdentifiers():
         'UpperSets',
         'specialize',
         'with',
+        'Uncertain',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -375,6 +376,14 @@ class Syntax():
     rvalue_new_function2 = sp(PROVIDED + get_idn(),
                               lambda t: CDP.NewFunction(t[1]))
     
+    # Uncertain(<lower>, <upper>)
+    UNCERTAIN = sp(L('Uncertain'), lambda t: CDP.UncertainKeyword(t[0]))
+    rvalue_uncertain = sp(UNCERTAIN + SLPAR + rvalue + SCOMMA + rvalue + SRPAR,
+                          lambda t: CDP.UncertainRes(keyword=t[0], lower=t[1], upper=t[2]))
+
+    fvalue_uncertain = sp(UNCERTAIN + SLPAR + fvalue + SCOMMA + fvalue + SRPAR,
+                          lambda t: CDP.UncertainFun(keyword=t[0], lower=t[1], upper=t[2]))
+
     # oops, infinite recursion
 #     rvalue_tuple_indexing = sp(rvalue + S(L('[')) + SyntaxBasics.integer + S(L(']')),
 #                                lambda t: CDP.TupleIndex(value=t[0], index=t[1]))
@@ -428,17 +437,7 @@ class Syntax():
                        lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1]), t[-1]))
 
 
-    fvalue_operand = (constant_value ^
-        simple ^ 
-        fancy ^ 
-        lf_new_resource ^ 
-        lf_new_resource2 ^ 
-        lf_make_tuple ^
-#         lf_tuple_indexing ^
-        (S(L('(')) - (constant_value ^ simple ^ fancy ^
-                      lf_new_resource ^ lf_new_resource2 ^ lf_make_tuple
-#                       ^ lf_tuple_indexing
-                      ) - S(L(')'))))
+
 
     # Fractions
 
@@ -654,13 +653,28 @@ class Syntax():
                        constant_value ^
                        power_expr ^
                        rvalue_tuple_indexing ^
-                       make_tuple)
+                       make_tuple ^
+                       rvalue_uncertain)
 
     rvalue << operatorPrecedence(rvalue_operand, [
         (TIMES, 2, opAssoc.LEFT, mult_parse_action),
         (BAR, 2, opAssoc.LEFT, divide_parse_action),
         (PLUS, 2, opAssoc.LEFT, plus_parse_action),
     ])
+
+    fvalue_operand = (constant_value ^
+        simple ^
+        fancy ^
+        lf_new_resource ^
+        lf_new_resource2 ^
+        lf_make_tuple ^
+        fvalue_uncertain ^
+#         lf_tuple_indexing ^
+        (SLPAR - (constant_value ^ simple ^ fancy ^
+                      lf_new_resource ^ lf_new_resource2 ^ lf_make_tuple
+                      ^ fvalue_uncertain
+#                       ^ lf_tuple_indexing
+                      ) - SRPAR))
 
     fvalue << operatorPrecedence(fvalue_operand, [
         ('*', 2, opAssoc.LEFT, mult_inv_parse_action),

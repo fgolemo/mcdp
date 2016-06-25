@@ -11,8 +11,6 @@ class CDPLanguage():
 
     GenericNonlinearity = namedtuplewhere('GenericNonlinearity', 'function op1 R_from_F')
 
-#     NewLimit = namedtuplewhere('NewLimit', 'value_with_unit')
-
     ValueExpr = namedtuplewhere('ValueExpr', 'value')
 
     # now only used for a hack
@@ -196,6 +194,12 @@ class CDPLanguage():
     # solve( <0 g>, `model )
     SolveModel = namedtuplewhere('SolveModel', 'keyword f model')
 
+    # UpperSets(<space>)
     UpperSetsKeyword = namedtuplewhere('UpperSetsKeyword', 'keyword')
-
     MakeUpperSets = namedtuplewhere('MakeUpperSets', 'keyword space')
+
+    # Uncertain(L, U)
+    UncertainKeyword = namedtuplewhere('UncertainKeyword', 'keyword')
+    UncertainRes = namedtuplewhere('UncertainRes', 'keyword lower upper')
+    UncertainFun = namedtuplewhere('UncertainFun', 'keyword lower upper')
+
