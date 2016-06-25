@@ -10,7 +10,7 @@ from mocdp.exceptions import DPInternalError
 CDP = CDPLanguage
 
 
-def eval_GenericNonlinearity(rvalue, context):
+def eval_rvalue_GenericNonlinearity(rvalue, context):
     from mcdp_lang.eval_resources_imp import eval_rvalue
     op_r = eval_rvalue(rvalue.op1, context)
     # this is supposed to be a numpy function that takes a scalar float

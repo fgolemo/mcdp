@@ -3,6 +3,7 @@ from .utils_mkdir import mkdirs_thread_safe
 from contracts import contract
 from contracts.utils import raise_desc
 from decent_params.utils import UserError
+from mcdp_cli.utils_wildcard import expand_string
 from mcdp_library import MCDPLibrary
 from mcdp_report.gg_ndp import STYLE_GREENRED, STYLE_GREENREDSYM, gvgen_from_ndp
 from mcdp_report.gg_utils import get_dot_string, gg_figure
@@ -13,7 +14,6 @@ from reprep import Report
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
-from mcdp_cli.utils_wildcard import expand_string
 
 def get_ndp(data):
     if not 'ndp' in data:

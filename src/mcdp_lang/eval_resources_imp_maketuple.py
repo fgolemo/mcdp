@@ -9,7 +9,7 @@ CDP = CDPLanguage
 
 
 @contract(mt=CDP.MakeTuple)
-def eval_MakeTuple_as_rvalue(mt, context):
+def eval_rvalue_MakeTuple(mt, context):
     from mcdp_lang.eval_resources_imp import eval_rvalue
 
     ops = get_odd_ops(unwrap_list(mt.ops))

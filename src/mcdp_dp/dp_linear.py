@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-from mcdp_dp import PrimitiveDP
 from contracts import contract
-from mcdp_posets import Rcomp
-from mcdp_posets.poset_product import PosetProduct
+from mcdp_dp import PrimitiveDP
+from mcdp_posets import PosetProduct, Rcomp
 
 
 __all__ = [
@@ -13,15 +12,10 @@ class Linear(PrimitiveDP):
 
     @contract(a='float|int', F='$Rcomp|str|None', R='$Rcomp|str|None')
     def __init__(self, a, F=None, R=None):
-#         from mocdp import get_conftools_posets
-
         if F is None:
             F = Rcomp()
         if R is None:
             R = Rcomp()
-#         library = get_conftools_posets()
-#         _, F = library.instance_smarter(F)
-#         _, R = library.instance_smarter(R)
         self.a = float(a)
 
         M = PosetProduct(())

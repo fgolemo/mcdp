@@ -75,26 +75,28 @@ def eval_rvalue(rvalue, context):
             return context.make_resource(get_name_for_fun_node(rvalue.name), s)
 
 
-        from .eval_resources_imp_power import eval_Power
-        from .eval_math import eval_divide_as_rvalue
-        from .eval_math import eval_MultN_as_rvalue
-        from .eval_math import eval_PlusN_as_rvalue
-        from .eval_resources_imp_minmax import eval_OpMax
-        from .eval_resources_imp_minmax import eval_OpMin
-        from .eval_resources_imp_genericnonlin import eval_GenericNonlinearity
-        from .eval_resources_imp_tupleindex import eval_TupleIndex_as_rvalue
-        from .eval_resources_imp_maketuple import eval_MakeTuple_as_rvalue
+        from .eval_resources_imp_power import eval_rvalue_Power
+        from .eval_math import eval_rvalue_divide
+        from .eval_math import eval_rvalue_MultN
+        from .eval_math import eval_rvalue_PlusN
+        from .eval_resources_imp_minmax import eval_rvalue_OpMax
+        from .eval_resources_imp_minmax import eval_rvalue_OpMin
+        from .eval_resources_imp_genericnonlin import eval_rvalue_GenericNonlinearity
+        from .eval_resources_imp_tupleindex import eval_rvalue_TupleIndex
+        from .eval_resources_imp_maketuple import eval_rvalue_MakeTuple
+        from .eval_uncertainty import eval_rvalue_Uncertain
 
         cases = {
-            CDP.GenericNonlinearity : eval_GenericNonlinearity,
-            CDP.Power: eval_Power,
-            CDP.Divide: eval_divide_as_rvalue,
-            CDP.MultN: eval_MultN_as_rvalue,
-            CDP.PlusN: eval_PlusN_as_rvalue,
-            CDP.OpMax: eval_OpMax,
-            CDP.OpMin: eval_OpMin,
-            CDP.TupleIndex: eval_TupleIndex_as_rvalue,
-            CDP.MakeTuple: eval_MakeTuple_as_rvalue,
+            CDP.GenericNonlinearity : eval_rvalue_GenericNonlinearity,
+            CDP.Power: eval_rvalue_Power,
+            CDP.Divide: eval_rvalue_divide,
+            CDP.MultN: eval_rvalue_MultN,
+            CDP.PlusN: eval_rvalue_PlusN,
+            CDP.OpMax: eval_rvalue_OpMax,
+            CDP.OpMin: eval_rvalue_OpMin,
+            CDP.TupleIndex: eval_rvalue_TupleIndex,
+            CDP.MakeTuple: eval_rvalue_MakeTuple,
+            CDP.UncertainRes: eval_rvalue_Uncertain,
         }
 
         for klass, hook in cases.items():

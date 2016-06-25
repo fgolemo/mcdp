@@ -1,8 +1,8 @@
 from .eval_constant_imp import eval_constant
 from .parts import CDPLanguage
+from mcdp_dp import Max, Max1, Min
 from mcdp_lang.helpers import create_operation
 from mocdp.comp import Connection, dpwrap
-from mcdp_dp import Max, Max1, Min
 from mocdp.exceptions import DPSemanticError
 CDP = CDPLanguage
 
@@ -22,7 +22,7 @@ def add_binary2(context, a, b, dp, nprefix, na, nb, nres):
     return context.make_resource(name, nres)
 
 
-def eval_OpMin(rvalue, context):
+def eval_rvalue_OpMin(rvalue, context):
     a, F1, b, F2 = eval_ops2(context, rvalue)
     if not (F1 == F2):
         msg = 'Incompatible units: %s and %s' % (F1, F2)
@@ -44,7 +44,7 @@ def eval_ops2(context, rvalue):
     return a, F1, b, F2
 
 
-def eval_OpMax(rvalue, context):
+def eval_rvalue_OpMax(rvalue, context):
     from mcdp_lang.eval_resources_imp import eval_rvalue
 
     if isinstance(rvalue.a, CDP.SimpleValue):
@@ -54,7 +54,9 @@ def eval_OpMax(rvalue, context):
         dp = Max1(constant.unit, constant.value)
 
         return create_operation(context, dp, [b],
-                                 name_prefix='_max1a', op_prefix='_op', res_prefix='_result')
+                                 name_prefix='_max1a',
+                                 op_prefix='_op',
+                                 res_prefix='_result')
 
     a = eval_rvalue(rvalue.a, context)
 
@@ -63,7 +65,9 @@ def eval_OpMax(rvalue, context):
         constant = eval_constant(rvalue.b, context)
         dp = Max1(constant.unit, constant.value)
         return create_operation(context, dp, [a],
-                                 name_prefix='_max1b', op_prefix='_op', res_prefix='_result')
+                                 name_prefix='_max1b',
+                                 op_prefix='_op',
+                                 res_prefix='_result')
 
 
     b = eval_rvalue(rvalue.b, context)

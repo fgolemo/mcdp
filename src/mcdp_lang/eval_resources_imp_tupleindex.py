@@ -9,7 +9,7 @@ CDP = CDPLanguage
 
 
 @contract(ti=CDP.TupleIndex)
-def eval_TupleIndex_as_rvalue(ti, context):
+def eval_rvalue_TupleIndex(ti, context):
     # TupleIndex = namedtuplewhere('TupleIndex', 'value index')
     # value evaluates as resources
     # index is an integer

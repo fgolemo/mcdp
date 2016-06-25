@@ -5,9 +5,9 @@ from mcdp_tests.generation import (for_all_dps_dyn, for_all_nameddps,
     for_all_nameddps_dyn, for_all_source_mcdp)
 
 @for_all_source_mcdp
-def check_syntax(filename, source):
+def check_syntax(filename, source):  # @UnusedVariable
     # print filename
-    html = ast_to_html(source,
+    _html = ast_to_html(source,
                        complete_document=False, extra_css="",
                        ignore_line=lambda _lineno: False,
                        add_line_gutter=True, encapsulate_in_precode=True, add_css=True)

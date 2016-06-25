@@ -51,6 +51,16 @@ def eval_lfunction(lf, context):
             res = eval_constant(lf, context)
             assert isinstance(res, ValueWithUnits)
             return get_valuewithunits_as_function(res, context)
+        
+        from mcdp_lang.eval_uncertainty import eval_lfunction_Uncertain
+
+        cases = {
+            CDP.UncertainFun: eval_lfunction_Uncertain,
+        }
+
+        for klass, hook in cases.items():
+            if isinstance(lf, klass):
+                return hook(lf, context)
 
         msg = 'eval_lfunction() cannot evaluate as a function.'
         raise_desc(DPInternalError, msg, lf=lf)
@@ -156,4 +166,4 @@ def eval_lfunction_newresource(lf, context):
         raise DPSemanticError(msg, where=lf.where)
 
     return context.make_function(get_name_for_res_node(rname),
-                    dummy_ndp.get_fnames()[0])
+                                 dummy_ndp.get_fnames()[0])

@@ -16,16 +16,20 @@ CDP = CDPLanguage
 @contextmanager
 def add_where_information(where):
     """ Adds where field to DPSyntaxError or DPSemanticError thrown by code. """
-    try:
+    active = True
+    if not active:
         yield
-    except DPInternalError as e:
-        raise
-    except MCDPExceptionWithWhere as e:
-        mcdp_dev_warning('add magic traceback handling here')
-        existing = getattr(e, 'where', None)
-        use_where = existing if existing is not None else where
-        e = type(e)(e.error, where=use_where)
-        raise e
+    else:
+        try:
+            yield
+        except DPInternalError as e:
+            raise
+        except MCDPExceptionWithWhere as e:
+            mcdp_dev_warning('add magic traceback handling here')
+            existing = getattr(e, 'where', None)
+            use_where = existing if existing is not None else where
+            e = type(e)(e.error, where=use_where)
+            raise e
 
 def wheredecorator(b):
     def bb(tokens, loc, s):

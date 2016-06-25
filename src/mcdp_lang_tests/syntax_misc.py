@@ -110,7 +110,7 @@ def check_lang9_max():
         }""",
         Syntax.ndpt_simple_dp_model)
     
-    parse_wrap(Syntax.binary_expr, 'max(f, g)')
+    parse_wrap(Syntax.rvalue_binary, 'max(f, g)')
     parse_wrap(Syntax.rvalue, 'max(f, g)')
     parse_wrap(Syntax.constraint_expr_geq, 'hnlin.x >= max(f, g)')
 

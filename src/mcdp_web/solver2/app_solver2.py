@@ -1,15 +1,14 @@
 from mcdp_cli.solve_meat import solve_meat_solve
+from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.tracer import Tracer
+from mcdp_posets import UpperSets
 from mcdp_posets.types_universe import (express_value_in_isomorphic_space,
     get_types_universe)
-from mcdp_web.utils import ajax_error_catch, memoize_simple
-import cgi
-from mcdp_dp.dp_transformations import get_dp_bounds
-from mcdp_posets.uppersets import UpperSets
+from mcdp_report.generic_report_utils import get_best_plotter
+from mcdp_web.utils import (ajax_error_catch, memoize_simple, png_error_catch,
+    response_data)
 from reprep import Report
-from mcdp_report.generic_report_utils import generic_plot, get_best_plotter
-from mcdp_web.utils.response import response_data
-from mcdp_web.utils.image_error_catch_imp import png_error_catch
+import cgi
 
 
 class AppSolver2():
@@ -74,21 +73,22 @@ class AppSolver2():
 
     def process(self, request, string, nl, nu):
         l = self.get_library(request)
-        result = l.parse_constant(string)
+        parsed = l.parse_constant(string)
 
-        space = result.unit
-        value = result.value
+        space = parsed.unit
+        value = parsed.value
 
         model_name = self.get_model_name(request)
         library = self.get_current_library_name(request)
         ndp, dp = self._get_ndp_dp(library, model_name)
 
         F = dp.get_fun_space()
+        UR = UpperSets(dp.get_res_space())
 
         tu = get_types_universe()
-        tu.check_leq(result.unit, F)
+        tu.check_leq(parsed.unit, F)
 
-        f = express_value_in_isomorphic_space(result.unit, result.value, F)
+        f = express_value_in_isomorphic_space(parsed.unit, parsed.value, F)
 
         print('query: %s ...' % F.format(f))
 
@@ -104,11 +104,10 @@ class AppSolver2():
 
         result_u, trace = solve_meat_solve(tracer, ndp, dpu, f,
                                          intervals, max_steps, False)
-        print result_l, result_u
 
 
         key = (string, nl, nu)
-        print key
+
         res = dict(result_l=result_l, result_u=result_u, dpl=dpl, dpu=dpu)
         self.solutions[key] = res
 
@@ -120,7 +119,8 @@ class AppSolver2():
         res['output_raw'] = e(value.__repr__() + '\n' + str(type(value)))
         res['output_formatted'] = e(space.format(value))
 
-        res['output_result'] = str(result)
+        res['output_result'] = 'Lower: %s\nUpper: %s' % (UR.format(result_l),
+                                                         UR.format(result_u))
         res['output_trace'] = str(trace)
 
         encoded = "nl=%s&nu=%s&string=%s" % (nl, nu, string)

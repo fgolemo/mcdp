@@ -56,10 +56,10 @@ def eval_ndp(r, context):  # @UnusedVariable
             return eval_ndp(r.dp_rvalue, context)
 
         if isinstance(r, CDP.LoadNDP):
-            return eval_dp_rvalue_load(r, context)
+            return eval_ndp_load(r, context)
 
         if isinstance(r, CDP.DPWrap):
-            return eval_dp_rvalue_dpwrap(r, context)
+            return eval_ndp_dpwrap(r, context)
 
         if isinstance(r, CDP.AbstractAway):
             ndp = eval_ndp(r.dp_rvalue, context)
@@ -87,13 +87,13 @@ def eval_ndp(r, context):  # @UnusedVariable
             raise_desc(DPSemanticError, msg)
             
         cases = {
-            CDP.MakeTemplate: eval_make_template,
-            CDP.Coproduct:eval_dp_rvalue_coproduct,
-            CDP.CoproductWithNames: eval_dp_rvalue_CoproductWithNames,
-            CDP.ApproxDPModel: eval_dp_rvalue_approxdpmodel,
-            CDP.FromCatalogue: eval_dp_rvalue_catalogue,
-            CDP.Flatten: eval_dp_rvalue_flatten,
-            CDP.DPInstanceFromLibrary: eval_dp_rvalue_instancefromlibrary,
+            CDP.MakeTemplate: eval_ndp_make_template,
+            CDP.Coproduct:eval_ndp_coproduct,
+            CDP.CoproductWithNames: eval_ndp_CoproductWithNames,
+            CDP.ApproxDPModel: eval_ndp_approxdpmodel,
+            CDP.FromCatalogue: eval_ndp_catalogue,
+            CDP.Flatten: eval_ndp_flatten,
+            CDP.DPInstanceFromLibrary: eval_ndp_instancefromlibrary,
             CDP.CodeSpecNoArgs: eval_ndp_code_spec,
             CDP.CodeSpec: eval_ndp_code_spec,
             CDP.MakeCanonical: eval_ndp_makecanonical,
@@ -132,19 +132,19 @@ def eval_ndp_code_spec(r, _context):
     res = eval_codespec(r, expect=NamedDP)
     return res
 
-def eval_dp_rvalue_instancefromlibrary(r, context):
+def eval_ndp_instancefromlibrary(r, context):
     name = r.dpname.value
     ndp = context.load_ndp(name)
     return ndp
 
 
-def eval_dp_rvalue_flatten(r, context):
+def eval_ndp_flatten(r, context):
     ndp = eval_ndp(r.dp_rvalue, context)
     ndp = ndp.flatten()
     return ndp
 
 
-def eval_dp_rvalue_coproduct(r, context):
+def eval_ndp_coproduct(r, context):
     assert isinstance(r, CDP.Coproduct)
     ops = get_odd_ops(unwrap_list(r.ops))
     ndps = []
@@ -156,7 +156,7 @@ def eval_dp_rvalue_coproduct(r, context):
 
 
 @contract(r=CDP.CoproductWithNames)
-def eval_dp_rvalue_CoproductWithNames(r, context):
+def eval_ndp_CoproductWithNames(r, context):
     assert isinstance(r, CDP.CoproductWithNames)
     elements = unwrap_list(r.elements)
     names = [_.value for _ in elements[0::2]]
@@ -165,7 +165,7 @@ def eval_dp_rvalue_CoproductWithNames(r, context):
     return NamedDPCoproduct(tuple(ndps), labels=labels)
 
 
-def eval_dp_rvalue_approxdpmodel(r, context):
+def eval_ndp_approxdpmodel(r, context):
     # name of function or resource
     name = r.name.value
     approx_perc = float(r.perc.value)
@@ -183,13 +183,13 @@ def eval_dp_rvalue_approxdpmodel(r, context):
                               ndp=ndp0)
 
 
-def eval_dp_rvalue_load(r, context):
+def eval_ndp_load(r, context):
     load_arg = r.load_arg.value
     return context.load_ndp(load_arg)
 
 
 @contract(r=CDP.DPWrap)
-def eval_dp_rvalue_dpwrap(r, context):
+def eval_ndp_dpwrap(r, context):
     tu = get_types_universe()
 
     statements = unwrap_list(r.statements)
@@ -264,7 +264,7 @@ def eval_dp_rvalue_dpwrap(r, context):
     return w
 
 
-def eval_dp_rvalue_catalogue(r, context):
+def eval_ndp_catalogue(r, context):
     assert isinstance(r, CDP.FromCatalogue)
     # FIXME:need to check for re-ordering
     statements = unwrap_list(r.funres)
@@ -387,7 +387,6 @@ def add_constraint(context, resource, function):
     context.add_connection(c)
 
 def eval_statement(r, context):
-#     from mcdp_lang.eval_space_imp import eval_space
     from mcdp_lang.eval_resources_imp import eval_rvalue
     from mcdp_lang.eval_lfunction_imp import eval_lfunction
 
@@ -587,7 +586,7 @@ def fix_resources_with_multiple_connections(context):
         cc = Connection(dp2=new_name, s2=fname, dp1=id_ndp, s1=rname)
         context.add_connection(cc)
 
-def eval_make_template(r, context):
+def eval_ndp_make_template(r, context):
     ndp = eval_ndp(r.dp_rvalue, context)
     from mocdp.comp.composite_templatize import ndp_templatize
     return ndp_templatize(ndp)

@@ -1,12 +1,12 @@
 from contracts import contract
 from contracts.utils import raise_desc
+from mcdp_dp.dp_identity import Identity
+from mcdp_posets.space import Map, MapNotDefinedHere, Space
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import (Connection, get_name_for_fun_node,
     get_name_for_res_node)
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import dpwrap
-from mcdp_dp.dp_identity import Identity
-from mcdp_posets.space import Map, MapNotDefinedHere, Space
 import math
 
 

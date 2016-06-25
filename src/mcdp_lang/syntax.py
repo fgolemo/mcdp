@@ -330,17 +330,15 @@ class Syntax():
     solve_model = sp(L('solve') + SLPAR + constant_value + SCOMMA + ndpt_dp_rvalue + SRPAR,
                lambda t: CDP.SolveModel(keyword=t[0], f=t[1], model=t[2]))
 
-    tuple_of_constants = sp(OPEN_BRACE + constant_value +
-                            ZeroOrMore(COMMA + constant_value) + CLOSE_BRACE,
-                            lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1]), t[-1]))
-
+    tuple_of_constants = sp(OPEN_BRACE + O(constant_value +
+                            ZeroOrMore(COMMA + constant_value)) + CLOSE_BRACE,
+                            lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1], where=t[0].where), t[-1]))
 
     make_tuple = sp(OPEN_BRACE + rvalue +
                     ZeroOrMore(COMMA + rvalue) + CLOSE_BRACE,
                     lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1]), t[-1]))
     
     # TODO: how to express empty typed list? "{g}"
-
     collection_of_constants = sp(S(L('{')) + constant_value +
                                  ZeroOrMore(COMMA + constant_value) + S(L('}')),
                                  lambda t: CDP.Collection(make_list(list(t))))
@@ -397,11 +395,11 @@ class Syntax():
 #                                   SyntaxBasics.integer + SRPAR,
 #                                lambda t: CDP.TupleIndex(value=t[0], index=t[1]))
 
-    lf_new_resource = sp(get_idn(),
-                         lambda t: CDP.NewResource(t[0]))
+    fvalue_new_resource = sp(get_idn(),
+                             lambda t: CDP.NewResource(t[0]))
 
-    lf_new_resource2 = sp(REQUIRED + get_idn(),
-                          lambda t: CDP.NewResource(t[1]))
+    fvalue_new_resource2 = sp(REQUIRED + get_idn(),
+                              lambda t: CDP.NewResource(t[1]))
 
     unary = {
         'sqrt': lambda op1: CDP.GenericNonlinearity(math.sqrt, op1, lambda F: F),
@@ -410,8 +408,8 @@ class Syntax():
     }
 
     unary_op = Or([L(x) for x in unary])
-    unary_expr = sp((C(unary_op, 'opname') - S(L('('))
-                    + C(rvalue, 'op1')) - S(L(')')),
+    unary_expr = sp((C(unary_op, 'opname') - SLPAR
+                    + C(rvalue, 'op1')) - SRPAR,
                     lambda t: Syntax.unary[t['opname']](t['op1']))
 
     binary = {
@@ -421,22 +419,20 @@ class Syntax():
 
     opname = sp(Or([L(x) for x in binary]), lambda t: CDP.OpKeyword(t[0]))
 
-    binary_expr = sp((opname - S(L('(')) +
-                    C(rvalue, 'op1') - S(L(','))
-                    + C(rvalue, 'op2')) - S(L(')')) ,
-                   lambda t: Syntax.binary[t[0].keyword](a=t['op1'], b=t['op2'], keyword=t[0]))
+    rvalue_binary = sp((opname - SLPAR +
+                    C(rvalue, 'op1') - SCOMMA
+                    + C(rvalue, 'op2')) - SRPAR ,
+                       lambda t: Syntax.binary[t[0].keyword](a=t['op1'], b=t['op2'], keyword=t[0]))
 
-    simple = sp(dpname + DOT - fname,
-               lambda t: CDP.Function(dp=t[0], s=t[2], keyword=t[1]))
+    fvalue_simple = sp(dpname + DOT - fname,
+                       lambda t: CDP.Function(dp=t[0], s=t[2], keyword=t[1]))
 
-    fancy = sp(fname + PROVIDED_BY - dpname,
-                lambda t: CDP.Function(dp=t[2], s=t[0], keyword=t[1]))
+    fvalue_fancy = sp(fname + PROVIDED_BY - dpname,
+                      lambda t: CDP.Function(dp=t[2], s=t[0], keyword=t[1]))
 
 
-    lf_make_tuple = sp(OPEN_BRACE + fvalue + ZeroOrMore(COMMA + fvalue) + CLOSE_BRACE,
+    fvalue_maketuple = sp(OPEN_BRACE + fvalue + ZeroOrMore(COMMA + fvalue) + CLOSE_BRACE,
                        lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1]), t[-1]))
-
-
 
 
     # Fractions
@@ -460,12 +456,14 @@ class Syntax():
     power_expr = power_expr_1 ^ power_expr_2
 
     constraint_expr_geq = sp(fvalue + GEQ - rvalue,
-                         lambda t: CDP.Constraint(function=t[0],
-                                                  rvalue=t[2], prep=t[1]))
+                             lambda t: CDP.Constraint(function=t[0],
+                                                      rvalue=t[2],
+                                                      prep=t[1]))
 
     constraint_expr_leq = sp(rvalue + LEQ - fvalue,
-                          lambda t: CDP.Constraint(function=t[2],
-                                                   rvalue=t[0], prep=t[1]))
+                             lambda t: CDP.Constraint(function=t[2],
+                                                      rvalue=t[0],
+                                                      prep=t[1]))
 
     fun_shortcut1 = sp(PROVIDES + fname + USING + dpname,
                        lambda t: CDP.FunShortcut1(provides=t[0],
@@ -482,14 +480,16 @@ class Syntax():
     res_shortcut2 = sp(REQUIRES + rname + GEQ - rvalue,
                        lambda t: CDP.ResShortcut2(t[0], t[1], t[2], t[3]))
 
-    fun_shortcut3 = sp(PROVIDES + C(Group(fname + OneOrMore(S(L(',')) + fname)), 'fnames')
+    fun_shortcut3 = sp(PROVIDES +
+                       C(Group(fname + OneOrMore(S(L(',')) + fname)), 'fnames')
                        + USING + dpname,
                        lambda t: funshortcut1m(provides=t[0],
-                             fnames=make_list(list(t['fnames'])),
-                             prep_using=t[2],
-                             name=t[3]))
+                                               fnames=make_list(list(t['fnames'])),
+                                               prep_using=t[2],
+                                               name=t[3]))
 
-    res_shortcut3 = sp(REQUIRES + C(Group(rname + OneOrMore(S(L(',')) + rname)), 'rnames')
+    res_shortcut3 = sp(REQUIRES +
+                       C(Group(rname + OneOrMore(S(L(',')) + rname)), 'rnames')
                        + FOR + dpname,
                        lambda t: resshortcut1m(requires=t[0],
                              rnames=make_list(list(t['rnames'])),
@@ -648,7 +648,7 @@ class Syntax():
     rvalue_operand = (rvalue_new_function ^
                        rvalue_new_function2 ^
                        rvalue_resource ^
-                       binary_expr ^
+                       rvalue_binary ^
                        unary_expr ^
                        constant_value ^
                        power_expr ^
@@ -663,15 +663,15 @@ class Syntax():
     ])
 
     fvalue_operand = (constant_value ^
-        simple ^
-        fancy ^
-        lf_new_resource ^
-        lf_new_resource2 ^
-        lf_make_tuple ^
+        fvalue_simple ^
+        fvalue_fancy ^
+        fvalue_new_resource ^
+        fvalue_new_resource2 ^
+        fvalue_maketuple ^
         fvalue_uncertain ^
 #         lf_tuple_indexing ^
-        (SLPAR - (constant_value ^ simple ^ fancy ^
-                      lf_new_resource ^ lf_new_resource2 ^ lf_make_tuple
+        (SLPAR - (constant_value ^ fvalue_simple ^ fvalue_fancy ^
+                      fvalue_new_resource ^ fvalue_new_resource2 ^ fvalue_maketuple
                       ^ fvalue_uncertain
 #                       ^ lf_tuple_indexing
                       ) - SRPAR))

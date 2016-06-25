@@ -16,17 +16,21 @@
   <style type='text/css'>
   #slider-ln { width: 10em; }
   #slider-un { width: 10em; }
+  table#params { font-size: 80%; }
   </style>
 
-  <table>
+  <table id='params'>
   <tr>
-  <td>
-  Query<br/>
-  {{space_description}}
+  <td style='width: 10em'>
+  Query
+  
   </td>
   <td>
   <textarea id="area" cols=40 rows=3/></textarea>
   </td>
+	  <td style='text-align: left'>
+	  	{{space_description}}
+	  </td>
   </tr>
   <tr>
   <td>
@@ -52,7 +56,8 @@
 </table>
     
   <pre class='output_error' id='output_error'></pre>
-
+  <pre class='output_success' id='output_result'></pre>
+  
   <img id='output_img' src="/static/white.png" style='width: 20em; height: 20em'/>
 
   <p>{{space_description}}</p>
@@ -61,7 +66,6 @@
   <pre class='output_success'  id='output_format'></pre>
   <pre class='output_success' id='output_space'></pre>
   <pre class='output_success' id='output_trace'></pre>
-  <pre class='output_success' id='output_result'></pre>
   
   <pre class='output_error' id='ajax_error'></pre>
   </div>

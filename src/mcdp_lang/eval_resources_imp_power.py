@@ -6,7 +6,7 @@ from mcdp_dp import WrapAMap
 CDP = CDPLanguage
 
 
-def eval_Power(rvalue, context):
+def eval_rvalue_Power(rvalue, context):
     from mcdp_lang.eval_resources_imp import eval_rvalue
     base = eval_rvalue(rvalue.op1, context)
 

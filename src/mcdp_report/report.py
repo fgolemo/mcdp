@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
+from .gg_ndp import gvgen_from_ndp
+from .gg_utils import gg_figure
 from contracts import contract
+from mcdp_dp import (Constant, DPLoop0, GenericUnary, Limit, Mux, Parallel,
+    PrimitiveDP, Series0)
 from mcdp_posets import PosetProduct, R_dimensionless
-from mcdp_report.gg_ndp import gvgen_from_ndp
-from mcdp_report.gg_utils import gg_figure
 from mocdp.comp.interfaces import NamedDP
-from mcdp_dp import DPLoop0, Mux, Parallel, Series0
-from mcdp_dp.dp_constant import Constant
-from mcdp_dp.dp_generic_unary import GenericUnary
-from mcdp_dp.dp_limit import Limit
-from mcdp_dp.primitive import PrimitiveDP
 from mocdp.exceptions import mcdp_dev_warning
 from reprep import Report
 import warnings
@@ -155,9 +152,9 @@ def gvgen_from_dp(dp0, imp=None):
 
     def go_loop(dp, imp):
         if do_imp:
-            m0, f2 = dp._unpack_m(imp)
+            m0, _f2 = dp._unpack_m(imp)
         else:
-            m0 = f2 = None
+            m0 = _f2 = None
 
         (n1i, n1o) = go(dp.dp1, m0)
 
