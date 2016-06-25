@@ -24,6 +24,7 @@ setup(name='PyMCDP_devel',
       description='PyMCDP is an nterpreter and solver for Monotone Co-Design Problems',
       long_description='',
       package_data={'':['*.*', '*.mcdp*', '*.js', '*.png', '*.css']},
+      include_package_data=True,
       keywords="Optimization",
       license="MIT",
       classifiers=[

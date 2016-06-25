@@ -1,7 +1,0 @@
-# test connected
-mcdp {
-
-    requires weight >= 1.0 g
-    provides capacity <= 2.0 J
-
-}

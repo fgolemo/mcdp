@@ -48,7 +48,8 @@ def syntax_test(contents):
         s = StringIO(html)
         _doc = ETree.parse(s)
     except ETree.ParseError :
-        print("ERROR in {0} : {1}".format(ETree.ParseError.filename, ETree.ParseError.msg))
+        print("ERROR in {0} : {1}".format(ETree.ParseError.filename,
+                                          ETree.ParseError.msg))
 
 
 def test_one(test, filename):
@@ -120,7 +121,7 @@ def define_tests(context):
     """ Define other mcdp_lang_tests """
     filenames = []
     folder = dir_from_package_name('mcdp_lang_tests.ok')
-    folder_notok = dir_from_package_name('mcdp_lang_tests.notok')
+
     filenames.extend(locate_files(folder, '*.mcdp'))
 
     context = context.child('examples')
@@ -159,13 +160,13 @@ def define_tests(context):
             tests = get_marked_tests(f)
         define_test_for(context, f, basename, tests)
 
-    filenames = []
-    filenames.extend(locate_files(folder_notok, '*.mcdp'))
+#     filenames = []
+#     filenames.extend(locate_files(folder_notok, '*.mcdp'))
 
-    context = context.child('notok')
-    for f in filenames:
-        basename = os.path.splitext(os.path.basename(f))[0]
-        tests = get_marked_tests(f)
-        define_test_for(context, f, basename, tests, known_failure=True)
+#     context = context.child('notok')
+#     for f in filenames:
+#         basename = os.path.splitext(os.path.basename(f))[0]
+#         tests = get_marked_tests(f)
+#         define_test_for(context, f, basename, tests, known_failure=True)
 
 
