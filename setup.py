@@ -17,12 +17,13 @@ def get_version(filename):
 
 version = get_version(filename='src/mocdp/__init__.py')
 
-setup(name='PyMCDP',
+setup(name='PyMCDP_devel',
       url='http://github.com/AndreaCensi/mcdp',
       maintainer="Andrea Censi",
+      maintainer_email="andrea@censi.org",
       description='PyMCDP is an nterpreter and solver for Monotone Co-Design Problems',
       long_description='',
-      package_data={'':['*.*', '*.mcdp*', '*.js', '*.png']},
+      package_data={'':['*.*', '*.mcdp*', '*.js', '*.png', '*.css']},
       keywords="Optimization",
       license="MIT",
       classifiers=[

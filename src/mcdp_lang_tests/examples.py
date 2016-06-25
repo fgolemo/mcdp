@@ -87,8 +87,8 @@ def known_fail(f, *args):
 
 def define_test_for(context, filename, basename, tests, known_failure=False):
 
-    mocdp_base = dir_from_package_name('mocdp')
-    outdir = os.path.join(mocdp_base, '../../out/mcdp_lang_tests/')
+    mocdp_base = os.path.join(dir_from_package_name('mocdp'), '..', '..')
+    outdir = os.path.join(mocdp_base, 'out', 'mcdp_lang_tests')
     
     for test in tests:
         n = test.__name__.replace('assert_', '').replace('_ndp', '')
@@ -137,15 +137,18 @@ def define_tests(context):
             found.add(orig)
             return orig
 
-    folder = os.path.join(dir_from_package_name('mocdp'), '../../libraries')
-    examples2 = list(locate_files(folder, '*.mcdp'))
-    print('Other files found: %s' % examples2)
-    filenames.extend(examples2)
+    if False:
+        folder = os.path.join(dir_from_package_name('mocdp'), '../../libraries')
+        examples2 = list(locate_files(folder, '*.mcdp'))
+        print('Other files found: %s' % examples2)
+        filenames.extend(examples2)
+    else:
+        examples2 = []
 
     for f in filenames:
 
         basename = get_unique_basename(f)
-        print('defining %s' % basename)
+        print('defining %s - %s' % (basename, f))
         if f in examples2:
             contents = open(f).read()
             if '...' in contents:
