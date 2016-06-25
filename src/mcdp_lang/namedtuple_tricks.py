@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
+from contracts.utils import indent
 
 
 def isnamedtupleinstance(x):
@@ -48,3 +49,28 @@ def remove_where_info(x):
     T = type(x)
     x1 = T(**d)
     return x1
+
+def clean_print(x):
+    y = remove_where_info(x)
+    s = str(y)
+    s = s.replace(', where=None', '')
+    return s
+
+def recursive_print(x):
+    if not isnamedtupleinstance(x):
+        return x.__repr__()
+    s = type(x).__name__
+    s += ':\n'
+    for k, v in x._asdict().items():
+        if k == 'where': continue
+        first = ' %s: ' % k
+        prefix = ' '* len(first)
+        first += '|'
+        prefix += '|'
+        r = recursive_print(v).strip()
+        s += indent(r, prefix, first=first)
+        s += '\n'
+    return s
+        
+    
+    

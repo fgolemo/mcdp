@@ -313,8 +313,13 @@ class Syntax():
     setname_generic_var = sp(get_idn(),
                               lambda t: CDP.SetNameGenericVar(t[0]))
 
+    # a = ...
+    # a = 10 g
     setname_generic = sp(setname_generic_var + EQ + setname_rightside,
                          lambda t: CDP.SetNameGeneric(t[0], t[1], t[2]))
+
+    setname_fvalue = sp(setname_generic_var + EQ + fvalue,
+                        lambda t: CDP.SetNameFValue(t[0], t[1], t[2]))
 
     variable_ref = sp(get_idn(), VariableRef_make)
 
@@ -390,6 +395,12 @@ class Syntax():
 #     lf_tuple_indexing = sp(TAKE + SLPAR + fvalue + SCOMMA +
 #                                   SyntaxBasics.integer + SRPAR,
 #                                lambda t: CDP.TupleIndex(value=t[0], index=t[1]))
+
+    fvalue_disambiguation_tag = sp(Combine(L('(') + L('f') + L(')')),
+                                   lambda t: CDP.DisambiguationFunTag(t[0]))
+
+    fvalue_disambiguation = sp(fvalue_disambiguation_tag + fvalue,
+                               lambda t: CDP.DisambiguationFun(tag=t[0], fvalue=t[1]))
 
     fvalue_new_resource = sp(get_idn(),
                              lambda t: CDP.NewResource(t[0]))
@@ -495,6 +506,7 @@ class Syntax():
     line_expr = (constraint_expr_geq ^ 
                  constraint_expr_leq ^
                      (setname_generic ^ 
+                      setname_fvalue ^
                       setsub_expr ^ 
                       setsub_expr_implicit ^ 
                       setmcdptype_expr ^ 
@@ -665,10 +677,12 @@ class Syntax():
         fvalue_new_resource2 ^
         fvalue_maketuple ^
         fvalue_uncertain ^
+        fvalue_disambiguation ^
 #         lf_tuple_indexing ^
         (SLPAR - (constant_value ^ fvalue_simple ^ fvalue_fancy ^
                       fvalue_new_resource ^ fvalue_new_resource2 ^ fvalue_maketuple
                       ^ fvalue_uncertain
+                      ^ fvalue_disambiguation
 #                       ^ lf_tuple_indexing
                       ) - SRPAR))
 

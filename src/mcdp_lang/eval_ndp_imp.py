@@ -18,8 +18,9 @@ from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
 from mocdp.comp.composite_makecanonical import cndp_makecanonical
 from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
     get_name_for_fun_node, get_name_for_res_node)
-from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
+from mcdp_lang.namedtuple_tricks import clean_print, recursive_print
 
 
 
@@ -421,23 +422,48 @@ def eval_statement(r, context):
             msg = 'Resource %r already set.' % name
             raise DPSemanticError(msg, where=r.where)
 
+        if name in context.var2function:
+            msg = 'Name %r already used.' % name
+            raise DPSemanticError(msg, where=r.where)
+
         from mcdp_lang.eval_constant_imp import NotConstant
         try:
             # from mcdp_lang.eval_constant_imp import eval_constant
             x = eval_constant(right_side, context)
             context.set_constant(name, x)
         except NotConstant:
-            # print('Cannot evaluate %r as constant: %s ' % (right_side, e))
+            #  Cannot evaluate %r as constant
             try:
                 x = eval_rvalue(right_side, context)
-                # print('adding as resource')
+                # adding as resource
                 context.set_var2resource(name, x)
             except Exception as e:
+                mcdp_dev_warning('fix this')
                 print('Cannot evaluate %r as eval_rvalue: %s ' % (right_side, e))
                 # XXX fix this
                 x = eval_ndp(right_side, context)
                 context.set_var2model(name, x)
 
+    elif isinstance(r, CDP.SetNameFValue):
+        name = r.name.value
+        right_side = r.right_side
+
+        if name in context.constants:
+            msg = 'Constant %r already set.' % name
+            raise DPSemanticError(msg, where=r.where)
+
+        if name in context.var2resource:
+            msg = 'Resource %r already set.' % name
+            raise DPSemanticError(msg, where=r.where)
+
+        if name in context.var2function:
+            msg = 'Name %r already used.' % name
+            raise DPSemanticError(msg, where=r.where)
+
+        fv = eval_lfunction(right_side, context)
+        context.set_var2function(name, fv)
+
+        
     elif isinstance(r, CDP.ResStatement):
         # requires r.rname [r.unit]
 
@@ -509,6 +535,7 @@ def eval_build_problem(r, context):
 
     for s in statements:
         with add_where_information(s.where):
+            # nt recursive_print(s)
             eval_statement(s, context)
 
     # at this point we need to fix the case where there might be multiple

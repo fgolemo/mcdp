@@ -97,6 +97,7 @@ class Context():
         self.rnames = []
 
         self.var2resource = {}  # str -> Resource
+        self.var2function = {}  # str -> Function
         self.var2model = {}  # str -> NamedDP
         self.constants = {}  # str -> ValueWithUnits
 
@@ -110,6 +111,7 @@ class Context():
         s += '\n' + '  names: %s' % list(self.names)
         s += '\n' + '  connections: %s' % self.connections
         s += '\n' + '  var2resource: %s' % self.var2resource
+        s += '\n' + '  var2function: %s' % self.var2function
         s += '\n' + '  var2model: %s' % self.var2model
         s += '\n' + '  constants: %s' % self.constants
 
@@ -124,6 +126,7 @@ class Context():
         c.load_primitivedp_hooks = list(self.load_primitivedp_hooks)
         c.load_template_hooks = list(self.load_template_hooks)
         c.var2resource = {}  # XXX?
+        c.var2function = {}  # XXX?
         c.var2model.update(self.var2model)
         c.constants.update(self.constants)
         return c
@@ -196,6 +199,14 @@ class Context():
 
         self.var2resource[name] = value
 
+    @contract(name=str)
+    def set_var2function(self, name, value):
+        self._check_good_name(name)
+        if name in self.var2function:
+            raise ValueError(name)
+
+        self.var2function[name] = value
+        
     @contract(name=str)
     def set_var2model(self, name, value):
         # from mocdp.comp.interfaces import NamedDP

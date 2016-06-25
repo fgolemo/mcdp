@@ -7,7 +7,7 @@ class MapComposition(Map):
 
     """ Composition of a series of maps """
 
-    @contract(maps='seq(Map)')
+    @contract(maps='seq($Map)')
     def __init__(self, maps):
         self.maps = tuple(maps)
 

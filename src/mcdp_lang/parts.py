@@ -75,6 +75,7 @@ class CDPLanguage():
 
     SetNameGenericVar = namedtuplewhere('SetNameGenericVar', 'value')
     SetNameGeneric = namedtuplewhere('SetNameGeneric', 'name eq right_side')
+    SetNameFValue = namedtuplewhere('SetNameFValue', 'name eq right_side')
 
     PowerSet = namedtuplewhere('PowerSet', 'symbol p1 space p2')
     # natural numbers
@@ -113,6 +114,9 @@ class CDPLanguage():
     SpecializeKeyword = namedtuplewhere('SpecializeKeyword', 'keyword')
     WithKeyword = namedtuplewhere('WithKeyword', 'keyword')
     TemplateSpec = namedtuplewhere('TemplateSpec', 'keyword params ndpt')
+
+    DisambiguationFun = namedtuplewhere('DisambiguationFun', 'tag fvalue')
+    DisambiguationFunTag = namedtuplewhere('DisambiguationFunTag', 'glyph')
 
     Specialize = namedtuplewhere('Specialize', 'keyword template params')
     TemplateParamName = namedtuplewhere('TemplateParamName', 'value')

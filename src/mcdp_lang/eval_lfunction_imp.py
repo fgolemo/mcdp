@@ -56,6 +56,7 @@ def eval_lfunction(lf, context):
 
         cases = {
             CDP.UncertainFun: eval_lfunction_Uncertain,
+            CDP.DisambiguationFun: eval_lfunction_disambiguation,
         }
 
         for klass, hook in cases.items():
@@ -65,6 +66,9 @@ def eval_lfunction(lf, context):
         msg = 'eval_lfunction() cannot evaluate as a function.'
         raise_desc(DPInternalError, msg, lf=lf)
 
+def eval_lfunction_disambiguation(lf, context):
+    return eval_lfunction(lf.fvalue, context)
+
 def eval_lfunction_variableref(lf, context):
     from mocdp.comp.context import ValueWithUnits
 
@@ -73,14 +77,13 @@ def eval_lfunction_variableref(lf, context):
         assert isinstance(c, ValueWithUnits)
         return get_valuewithunits_as_function(c, context)
 
-    # Not implemented for resources yet?
-#             elif lf.name in context.var2resource:
-#                 return context.var2resource[rvalue.name]
+    if lf.name in context.var2function:
+        return context.var2function[lf.name]
 
     try:
         dummy_ndp = context.get_ndp_res(lf.name)
     except ValueError as e:
-        msg = 'New resource name %r not declared.' % lf.name
+        msg = 'New function name %r not declared.' % lf.name
         msg += '\n%s' % str(e)
         raise DPSemanticError(msg, where=lf.where)
 
