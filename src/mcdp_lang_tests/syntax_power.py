@@ -20,22 +20,22 @@ syn(Syntax.integer_fraction, '1/')
 
 exponent = L.exponent('^')
 
-ok(Syntax.power_expr, 'pow(x,1/2)',
+ok(Syntax.rvalue_power_expr, 'pow(x,1/2)',
     L.Power(op1=L.VariableRef('x'),
             glyph=None,
             exponent=L.IntegerFraction(num=1, den=2)))
 
-ok(Syntax.power_expr, 'x ^ 1/2',
+ok(Syntax.rvalue_power_expr, 'x ^ 1/2',
     L.Power(op1=L.VariableRef('x'),
             glyph=exponent,
             exponent=L.IntegerFraction(num=1, den=2)))
 
-ok(Syntax.power_expr, 'x ^ 2',
+ok(Syntax.rvalue_power_expr, 'x ^ 2',
     L.Power(op1=L.VariableRef('x'),
             glyph=exponent,
             exponent=L.IntegerFraction(num=2, den=1)))
 
-ok(Syntax.power_expr, 'pow(x, 2)',
+ok(Syntax.rvalue_power_expr, 'pow(x, 2)',
     L.Power(op1=L.VariableRef('x'),
             glyph=None,
             exponent=L.IntegerFraction(num=2, den=1)))
@@ -88,7 +88,7 @@ def check_power4():
 
 @comptest
 def check_power5():
-    print parse_wrap_check("pow(lift, 2/1)", Syntax.power_expr)
+    print parse_wrap_check("pow(lift, 2/1)", Syntax.rvalue_power_expr)
     print parse_wrap_check("pow(lift, 2/1)", Syntax.rvalue)
     print parse_wrap_check("power >= pow(lift, 2/1)", Syntax.constraint_expr_geq)
 

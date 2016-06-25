@@ -14,6 +14,7 @@ from pyparsing import (
     alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
     sglQuotedString)
 import math
+from mocdp.exceptions import mcdp_dev_warning
 
 
 ParserElement.enablePackrat()
@@ -71,7 +72,7 @@ class SyntaxIdentifiers():
         'approx',
         'Top',
         'Bottom',
-        'finite_poset',
+        'space_finite_poset',
         'choose',
         'flatten',
         'from_library',
@@ -120,8 +121,8 @@ class Syntax():
     CLOSE_BRACE = sp(L('>') ^ L('⟩'), lambda t: CDP.CloseBraceKeyword(t[0]))
     REQUIRED_BY = sp((L('required') | L('req.')) - L('by'),
                     lambda _: CDP.RequiredByKeyword('required by'))
-
-    PROVIDED_BY = sp(L('provided') - L('by'),
+    mcdp_dev_warning('these variations are not tested')
+    PROVIDED_BY = sp((L('provided') | L('prov.')) - L('by'),
                     lambda _: CDP.ProvidedByKeyword('provided by'))
 
     PROVIDED = sp(L('provided'), lambda _: CDP.ProvidedKeyword('provided'))
@@ -146,31 +147,26 @@ class Syntax():
 
     COPROD = sp(L('^'), lambda t: CDP.coprod(t[0]))
 
-
-
     # "call"
     C = lambda x, b: x.setResultsName(b)
 
     # optional whitespace
     ow = S(ZeroOrMore(L(' ')))
-
  
     # do not load earlier
     from .syntax_codespec import get_code_spec_expr
     code_spec = get_code_spec_expr()
 
-
-#     disallowed = oneOf(keywords + ['x'])
     pint_unit_base = NotAny(oneOf(SyntaxIdentifiers.keywords + ['x'])) + Word(alphas + '$')
 
     pint_unit_power = L('^') + Word(nums)
     pint_unit_simple = pint_unit_base + O(pint_unit_power)
     pint_unit_connector = L('/') | L('*')
  
-    pint_unit = sp((pint_unit_simple + ZeroOrMore(pint_unit_connector + pint_unit_simple)),
+    space_pint_unit = sp((pint_unit_simple + ZeroOrMore(pint_unit_connector + pint_unit_simple)),
                    parse_pint_unit)
 
-    space_expr = Forward() 
+    space = Forward() 
 
     get_idn = SyntaxIdentifiers.get_idn
     # "load <name>"
@@ -179,10 +175,10 @@ class Syntax():
 
     # UpperSets(<poset>)
     UPPERSETS = sp(L('UpperSets'), lambda t: CDP.UpperSetsKeyword(t[0]))
-    uppersets = sp(UPPERSETS + SLPAR + space_expr + SRPAR,
+    space_uppersets = sp(UPPERSETS + SLPAR + space + SRPAR,
                    lambda t: CDP.MakeUpperSets(t[0], t[1]))
 
-    # " finite_poset {
+    #  space_finite_poset {
     #     a
     #     b  c  d  e
     #
@@ -190,41 +186,41 @@ class Syntax():
     #   }
     #
     # evaluates to CDP.FinitePoset
-    FINITE_POSET = sp(L('finite_poset'), lambda t: CDP.FinitePosetKeyword(t[0]))
+    FINITE_POSET = sp(L('space_finite_poset'), lambda t: CDP.FinitePosetKeyword(t[0]))
     finite_poset_el = sp(get_idn(), lambda t: CDP.FinitePosetElement(t[0]))
     finite_poset_chain = sp(finite_poset_el + ZeroOrMore(LEQ + finite_poset_el),
                                lambda t: make_list(t))
 
-    finite_poset = sp(FINITE_POSET + S(L('{')) + ZeroOrMore(finite_poset_chain) + S(L('}')),
+    space_finite_poset = sp(FINITE_POSET + S(L('{')) + ZeroOrMore(finite_poset_chain) + S(L('}')),
                       lambda t: CDP.FinitePoset(t[0], make_list(t[1:])))
 
 
-    power_set_expr = sp((L('℘') | L('set-of')) - L('(') + space_expr + L(')'),
+    space_powerset = sp((L('℘') | L('set-of')) - L('(') + space + L(')'),
                         lambda t: CDP.PowerSet(t[0], t[1],
                                                t[2], t[3]))
 #
-#     power_set_expr2 = sp((Combine(L('set') + L('of'))) + space_expr ,
+#     power_set_expr2 = sp((Combine(L('set') + L('of'))) + space ,
 #                         lambda t: CDP.PowerSet(t[0], t[1],
 #                                                t[2], t[3]))
 
-    nat_expr = sp(L('Nat') | L('ℕ'), lambda t: CDP.Nat(t[0]))
-    int_expr = sp(L('Int') | L('ℤ'), lambda t: CDP.Int(t[0]))
+    space_nat = sp(L('Nat') | L('ℕ'), lambda t: CDP.Nat(t[0]))
+    space_int = sp(L('Int') | L('ℤ'), lambda t: CDP.Int(t[0]))
 
-    space_operand = (pint_unit ^
-                     power_set_expr ^
-                     nat_expr ^
-                     int_expr ^
+    space_operand = (space_pint_unit ^
+                     space_powerset ^
+                     space_nat ^
+                     space_int ^
                      load_poset ^
                      code_spec ^
-                     finite_poset ^
-                     uppersets)
+                     space_finite_poset ^
+                     space_uppersets)
 
-    space_expr << operatorPrecedence(space_operand, [
+    space << operatorPrecedence(space_operand, [
                 (PRODUCT, 2, opAssoc.LEFT, space_product_parse_action),
     ])
 
 
-    unitst = S(L('[')) + C(space_expr, 'unit') + S(L(']'))
+    unitst = S(L('[')) + C(space, 'unit') + S(L(']'))
 
 
     nat_constant = sp(L('nat') + L(':') + SyntaxBasics.nonneg_integer,
@@ -251,13 +247,13 @@ class Syntax():
     number_with_unit2 = sp(SyntaxBasics.integer_or_float + dimensionless,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
     
-    number_with_unit3 = sp(SyntaxBasics.integer_or_float + space_expr,
+    number_with_unit3 = sp(SyntaxBasics.integer_or_float + space,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
 
-    number_with_unit4_top = sp(TOP + space_expr,
+    number_with_unit4_top = sp(TOP + space,
                                lambda t: CDP.Top(t[0], t[1]))
 
-    number_with_unit5_bot = sp(BOTTOM + space_expr,
+    number_with_unit5_bot = sp(BOTTOM + space,
                                lambda t: CDP.Bottom(t[0], t[1]))
 
     number_with_unit = (number_with_unit1 ^
@@ -334,7 +330,7 @@ class Syntax():
                             ZeroOrMore(COMMA + constant_value)) + CLOSE_BRACE,
                             lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1], where=t[0].where), t[-1]))
 
-    make_tuple = sp(OPEN_BRACE + rvalue +
+    rvalue_make_tuple = sp(OPEN_BRACE + rvalue +
                     ZeroOrMore(COMMA + rvalue) + CLOSE_BRACE,
                     lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1]), t[-1]))
     
@@ -349,7 +345,7 @@ class Syntax():
     # <space> : identifier
     # `plugs : european
     short_identifiers = Word(nums + alphas)
-    space_custom_value1 = sp(space_expr + L(":") + short_identifiers,
+    space_custom_value1 = sp(space + L(":") + short_identifiers,
                           lambda t: CDP.SpaceCustomValue(t[0], t[1], t[2]))
 
     constant_value << (number_with_unit
@@ -408,7 +404,7 @@ class Syntax():
     }
 
     unary_op = Or([L(x) for x in unary])
-    unary_expr = sp((C(unary_op, 'opname') - SLPAR
+    rvalue_unary_expr = sp((C(unary_op, 'opname') - SLPAR
                     + C(rvalue, 'op1')) - SRPAR,
                     lambda t: Syntax.unary[t['opname']](t['op1']))
 
@@ -445,15 +441,15 @@ class Syntax():
 
     rat_power_exponent = integer_fraction | integer_fraction_one
 
-    power_expr_1 = sp((S(L('pow')) - SLPAR - C(rvalue, 'op1') - L(',')  # the glyph
-                    + C(rat_power_exponent, 'exponent')) - SRPAR,
-                    lambda t: CDP.Power(op1=t[0], glyph=None, exponent=t[2]))
+    rvalue_power_expr_1 = sp((S(L('pow')) - SLPAR - C(rvalue, 'op1') - L(',')  # the glyph
+                              + C(rat_power_exponent, 'exponent')) - SRPAR,
+                             lambda t: CDP.Power(op1=t[0], glyph=None, exponent=t[2]))
 
-    power_expr_2 = sp((rvalue_resource ^ rvalue_new_function)
-                      + EXPONENT - rat_power_exponent,
-                      lambda t: CDP.Power(op1=t[0], glyph=t[1], exponent=t[2]))
+    rvalue_power_expr_2 = sp((rvalue_resource ^ rvalue_new_function)
+                             + EXPONENT - rat_power_exponent,
+                             lambda t: CDP.Power(op1=t[0], glyph=t[1], exponent=t[2]))
 
-    power_expr = power_expr_1 ^ power_expr_2
+    rvalue_power_expr = rvalue_power_expr_1 ^ rvalue_power_expr_2
 
     constraint_expr_geq = sp(fvalue + GEQ - rvalue,
                              lambda t: CDP.Constraint(function=t[0],
@@ -649,11 +645,11 @@ class Syntax():
                        rvalue_new_function2 ^
                        rvalue_resource ^
                        rvalue_binary ^
-                       unary_expr ^
+                       rvalue_unary_expr ^
                        constant_value ^
-                       power_expr ^
+                       rvalue_power_expr ^
                        rvalue_tuple_indexing ^
-                       make_tuple ^
+                       rvalue_make_tuple ^
                        rvalue_uncertain)
 
     rvalue << operatorPrecedence(rvalue_operand, [

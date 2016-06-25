@@ -73,7 +73,7 @@ def check_unit1():
     print('parsing as unit_simple:')
     print parse_wrap_syntax_error('N*m', Syntax.pint_unit_simple)
     print('parsing as pint_unit:')
-    print parse_wrap_check('N*m', Syntax.pint_unit)
+    print parse_wrap_check('N*m', Syntax.space_pint_unit)
     parse_wrap_check('y', Syntax.pint_unit_simple)
     parse_wrap_syntax_error('x', Syntax.pint_unit_simple)
 #     parse_wrap_check('x', Syntax.disallowed)
@@ -97,11 +97,11 @@ def check_unit1():
         parse_wrap_syntax_error('V x m', Syntax.pint_unit_simple)
 
         print('pint_unit:')
-        parse_wrap_syntax_error('V x m', Syntax.pint_unit)
+        parse_wrap_syntax_error('V x m', Syntax.space_pint_unit)
 
-        parse_wrap_syntax_error('*', Syntax.pint_unit)
-        parse_wrap_syntax_error('/', Syntax.pint_unit)
-        parse_wrap_syntax_error('^2', Syntax.pint_unit)
+        parse_wrap_syntax_error('*', Syntax.space_pint_unit)
+        parse_wrap_syntax_error('/', Syntax.space_pint_unit)
+        parse_wrap_syntax_error('^2', Syntax.space_pint_unit)
         good = ['g', 'g^2', 'g^ 2', 'g ^ 2', 'm/g ^2',
                 'm^2/g^2', 'N*m', '$', 'V', 'A', 'm/s',
                 'any',
@@ -109,7 +109,7 @@ def check_unit1():
         results = []
         for g in good:
             try:
-                r = parse_wrap_check(g, Syntax.pint_unit)
+                r = parse_wrap_check(g, Syntax.space_pint_unit)
             except TestFailed as e:
                 results.append((g, False, e, None))
             else:

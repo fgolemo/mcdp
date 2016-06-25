@@ -12,7 +12,7 @@ from mcdp_lang.eval_space_imp import eval_space
 def check_spaces1():
     def p(s):
         c = Context()
-        r = parse_wrap_check(s, Syntax.space_expr)
+        r = parse_wrap_check(s, Syntax.space)
         print r
         x = eval_space(r, c)
         print x

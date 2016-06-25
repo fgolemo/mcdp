@@ -238,18 +238,18 @@ def check_lang49():
 @comptest
 def check_lang51():
     """ Shortcuts "using" """
-    print parse_wrap(Syntax.pint_unit, 'R')
+    print parse_wrap(Syntax.space_pint_unit, 'R')
     print parse_wrap(Syntax.unitst, '[R]')
 
 
 
     parse_wrap(Syntax.number_with_unit, '4.0 [R]')
 
-    parse_wrap(Syntax.pint_unit, "N")
-    parse_wrap(Syntax.pint_unit, "m")
-    parse_wrap(Syntax.pint_unit, "N*m")
-    parse_wrap(Syntax.pint_unit, "m / s^2")
-    parse_wrap(Syntax.pint_unit, "m/s^2")
+    parse_wrap(Syntax.space_pint_unit, "N")
+    parse_wrap(Syntax.space_pint_unit, "m")
+    parse_wrap(Syntax.space_pint_unit, "N*m")
+    parse_wrap(Syntax.space_pint_unit, "m / s^2")
+    parse_wrap(Syntax.space_pint_unit, "m/s^2")
     
     parse_wrap(Syntax.number_with_unit, '1 m')
     parse_wrap(Syntax.number_with_unit, '1 m/s')

@@ -21,6 +21,6 @@ def check_from_library1():
 
 
     parse_wrap(Syntax.code_spec, "code functions.call() ")
-    parse_wrap(Syntax.space_expr, "code functions.call() ")
+    parse_wrap(Syntax.space, "code functions.call() ")
     parse_wrap(Syntax.ndpt_dp_operand, "code functions.call() ")
     parse_wrap(Syntax.ndpt_dp_rvalue, "code functions.call() ")

@@ -48,7 +48,7 @@ def parse_poset(string, context=None):
     from mcdp_lang.syntax import Syntax
     from mcdp_lang.eval_space_imp import eval_space
 
-    v = parse_wrap(Syntax.space_expr, string)[0]
+    v = parse_wrap(Syntax.space, string)[0]
 
     if context is None:
         context = Context()

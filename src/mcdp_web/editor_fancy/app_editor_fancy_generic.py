@@ -63,7 +63,7 @@ class AppEditorFancyGeneric():
 
         spec_posets = Spec(url_part='posets', url_variable='poset_name',
                            extension=MCDPLibrary.ext_posets,
-                           parse_expr=Syntax.space_expr,
+                           parse_expr=Syntax.space,
                            parse=MCDPLibrary.parse_poset,
                            load=MCDPLibrary.load_poset,
                            get_png_data=get_png_data_unavailable,
