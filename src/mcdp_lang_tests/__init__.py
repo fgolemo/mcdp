@@ -16,7 +16,7 @@ from .templates_test import *
 
 from .syntax_multiset import *
 from .syntax_intervals import *
-from .syntax_conversion import *
+from .syntax_conversions import *
 
 """
     

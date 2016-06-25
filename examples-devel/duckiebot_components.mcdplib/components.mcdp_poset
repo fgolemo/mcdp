@@ -1,4 +1,5 @@
 finite_poset {
 	Explorer_HAT
 	Explorer_HAT_Pro	
+	Adafruit_DC_Hat
 }

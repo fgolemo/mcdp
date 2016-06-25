@@ -1,4 +1,4 @@
-interval(0[], 1[]) x 
-interval(0[], 1[]) x 
-interval(0[], 1[])
+finite_poset {
 
+	green blue red yellow
+}

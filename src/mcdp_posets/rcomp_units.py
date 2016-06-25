@@ -104,7 +104,7 @@ def make_rcompunit(units):
         if s.startswith('set of'):
             t = s.split('set of')
             u = make_rcompunit(t[1])
-            from mcdp_posets.finite_set import FiniteCollectionsInclusion
+            from mcdp_posets import FiniteCollectionsInclusion
             return FiniteCollectionsInclusion(u)
 
         if s == 'any':

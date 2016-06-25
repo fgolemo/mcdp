@@ -5,11 +5,10 @@ from contracts.utils import raise_desc, raise_wrapped
 from mcdp_lang.parse_actions import add_where_information
 from mcdp_lang.utils_lists import get_odd_ops, unwrap_list
 from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
-    NotBelongs, PosetProduct, Rcomp, Space, UpperSet, UpperSets)
+    NotBelongs, NotLeq, PosetProduct, Rcomp, Space, UpperSet, UpperSets,
+    get_types_universe)
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPSemanticError, mcdp_dev_warning
-from mcdp_posets.poset import NotLeq
-from mcdp_posets.types_universe import get_types_universe
 
 CDP = CDPLanguage
 
@@ -146,11 +145,13 @@ def eval_constant(op, context):
 
 
 def eval_constant_space_custom_value(op, context):
-    from mcdp_lang.eval_space_imp import eval_space
+    from .eval_space_imp import eval_space
+    from mcdp_posets import FiniteCollectionAsSpace
+
     assert isinstance(op, CDP.SpaceCustomValue)
     space = eval_space(op.space, context)
     custom_string = op.custom_string
-    from mcdp_posets.finite_set import FiniteCollectionAsSpace
+
     if isinstance(space, FiniteCollectionAsSpace):
         try:
             space.belongs(custom_string)

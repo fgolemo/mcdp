@@ -12,6 +12,12 @@ from .category_product import *
 from .types_universe import *
 from .any import *
 from .nat import *
-from .finite_set import *
 from .poset_coproduct import *
 from .find_poset_minima import *
+from .multiset import *
+
+
+from .finite_poset import *
+from .finite_collection import *
+from .finite_collections_inclusion import *
+from .finite_collection_as_space import *

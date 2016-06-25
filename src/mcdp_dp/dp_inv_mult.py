@@ -1,10 +1,8 @@
 from .primitive import ApproximableDP, PrimitiveDP
 from contracts import contract
-from contracts.utils import check_isinstance
 from mcdp_posets import Nat, Poset  # @UnusedImport
-from mcdp_posets import PosetProduct, RcompUnits, poset_minima
+from mcdp_posets import PosetProduct, UpperSet
 import numpy as np
-from mcdp_posets.uppersets import UpperSet
 
 __all__ = [
     'InvMult2',

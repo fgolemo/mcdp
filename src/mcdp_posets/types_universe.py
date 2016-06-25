@@ -1,12 +1,10 @@
 from .nat import Int, Nat
 from .poset import NotLeq, Preorder
 from .rcomp import Rcomp
-from .space import Map, NotBelongs, NotEqual, Space
+from .space import NotBelongs, NotEqual
 from .space_product import SpaceProduct
-from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mocdp.exceptions import DPInternalError, mcdp_dev_warning
-import numpy as np
+from mocdp.exceptions import DPInternalError
 
 __all__ = [
     'get_types_universe',
@@ -49,8 +47,8 @@ class TypesUniverse(Preorder):
 
 
     def check_leq(self, A, B):
-        from mcdp_posets.finite_set import FiniteCollectionsInclusion
-        from mcdp_posets.rcomp_units import RcompUnits
+        from mcdp_posets import FiniteCollectionsInclusion
+        from mcdp_posets import RcompUnits
 
         if isinstance(A, Nat) and isinstance(B, Nat):
             return
@@ -87,7 +85,7 @@ class TypesUniverse(Preorder):
         if isinstance(B, Rcomp) and isinstance(A, RcompUnits):
             return
 
-        from mcdp_posets.uppersets import UpperSets
+        from mcdp_posets import UpperSets
         if isinstance(A, UpperSets) and isinstance(B, UpperSets):
             self.check_leq(A.P, B.P)
             return
@@ -95,7 +93,7 @@ class TypesUniverse(Preorder):
         if isinstance(A, SpaceProduct) and isinstance(B, SpaceProduct):
             return check_leq_products(self, A, B)
 
-        from mcdp_posets.finite_set import FinitePoset
+        from mcdp_posets import FinitePoset
         if isinstance(A, FinitePoset) and isinstance(B, FinitePoset):
             # A <= B if
             # TODO: check inclusion
@@ -117,12 +115,14 @@ class TypesUniverse(Preorder):
             msg = 'Cannot get embedding if not preorder holds.'
             raise_wrapped(DPInternalError, e, msg, compact=True)
 
-        from mcdp_posets.rcomp_units import RcompUnits
-        from mcdp_posets.rcomp_units import format_pint_unit_short
+        from mcdp_posets import RcompUnits
+        from mcdp_posets import format_pint_unit_short
         from mcdp_posets.maps.identity import IdentityMap
 
 
         if isinstance(A, Nat) and isinstance(B, Rcomp):
+            from mcdp_posets.maps.coerce_to_int import CoerceToInt
+            from mcdp_posets.maps.promote_to_float import PromoteToFloat
             return PromoteToFloat(A, B), CoerceToInt(B, A)
 
         if isinstance(A, Nat) and isinstance(B, Int):
@@ -132,6 +132,7 @@ class TypesUniverse(Preorder):
             assert A.units.dimensionality == B.units.dimensionality
 
             factor = float(B.units / A.units)
+            from mcdp_posets.maps.linearmapcomp import LinearMapComp
             B_to_A = LinearMapComp(B, A, factor)
             A_to_B = LinearMapComp(A, B, 1.0 / factor)
 
@@ -154,18 +155,21 @@ class TypesUniverse(Preorder):
         if isinstance(A, SpaceProduct) and isinstance(B, SpaceProduct):
             return get_product_embedding(self, A, B)
 
-        from mcdp_posets.uppersets import UpperSets
+        from mcdp_posets import UpperSets
         if isinstance(A, UpperSets) and isinstance(B, UpperSets):
             P_A_to_B, P_B_to_A = self.get_embedding(A.P, B.P)
+            from mcdp_posets.maps.lift_to_uppersets import LiftToUpperSets
             m1 = LiftToUpperSets(P_A_to_B)
             m2 = LiftToUpperSets(P_B_to_A)
             setattr(m1, '__name__', 'L%s' % P_A_to_B.__name__)
             setattr(m1, '__name__', 'L%s' % P_B_to_A.__name__)
             return m1, m2
 
-        from mcdp_posets.finite_set import FiniteCollectionsInclusion
-        if isinstance(A, FiniteCollectionsInclusion) and isinstance(B, FiniteCollectionsInclusion):
+        from mcdp_posets import FiniteCollectionsInclusion
+        if (isinstance(A, FiniteCollectionsInclusion) and
+            isinstance(B, FiniteCollectionsInclusion)):
             a_to_b, b_to_a = self.get_embedding(A.S, B.S)
+            from mcdp_posets.maps.lift_to_finitecollections import LiftToFiniteCollections
             m1 = LiftToFiniteCollections(a_to_b)
             m2 = LiftToFiniteCollections(b_to_a)
             setattr(m1, '__name__', 'L%s' % a_to_b.__name__)
@@ -175,22 +179,6 @@ class TypesUniverse(Preorder):
 
         msg = 'Spaces are ordered, but you forgot to code embedding.'
         raise_desc(NotImplementedError, msg, A=A, B=B)
-
-class LiftToUpperSets(Map):
-    """ Lift the map f to uppersets """
-    @contract(f=Map)
-    def __init__(self, f):
-        from mcdp_posets.uppersets import UpperSets
-        dom = UpperSets(f.get_domain())
-        cod = UpperSets(f.get_codomain())
-        self.f = f
-        Map.__init__(self, dom=dom, cod=cod)
-
-    def _call(self, x):
-        minimals = x.minimals
-        elements2 = set(self.f(_) for _ in minimals)
-        from mcdp_posets.uppersets import UpperSet
-        return UpperSet(elements2, self.cod.P)
 
 
 
@@ -205,63 +193,14 @@ def express_value_in_isomorphic_space(S1, s1, S2):
     return A_to_B(s1)
 
 
-class LiftToFiniteCollections(Map):
-
-    @contract(f=Map)
-    def __init__(self, f):
-        from mcdp_posets.finite_set import FiniteCollectionsInclusion
-        dom = FiniteCollectionsInclusion(f.get_domain())
-        cod = FiniteCollectionsInclusion(f.get_codomain())
-        self.f = f
-        Map.__init__(self, dom=dom, cod=cod)
-
-    def _call(self, x):
-        elements = x.elements
-        elements2 = set(self.f(_) for _ in elements)
-        from mcdp_posets.finite_set import FiniteCollection
-        return FiniteCollection(elements2, self.cod)
-
-class CoerceToInt(Map):
-
-    @contract(cod=Space, dom=Space)
-    def __init__(self, cod, dom):
-        # todo: check dom is Nat or Int
-        Map.__init__(self, cod, dom)
-
-    def _call(self, x):
-        return int(x)
-
-
-class PromoteToFloat(Map):
-
-    @contract(cod=Space, dom=Space)
-    def __init__(self, cod, dom):
-        # todo: check dom is Rcomp or Rcompunits
-        Map.__init__(self, cod, dom)
-
-    def _call(self, x):
-        return float(x)
-
-
-class ProductMap(Map):
-    @contract(fs='seq[>=1]($Map)')
-    def __init__(self, fs):
-        fs = tuple(fs)
-        self.fs = fs
-        mcdp_dev_warning('add promotion to SpaceProduct')
-        dom = SpaceProduct(tuple(fi.get_domain() for fi in fs))
-        cod = SpaceProduct(tuple(fi.get_codomain() for fi in fs))
-        Map.__init__(self, dom=dom, cod=cod)
-
-    def _call(self, x):
-        x = tuple(x)
-        return tuple(fi(xi) for fi, xi in zip(self.fs, x))
 
 def get_product_embedding(tu, A, B):
     pairs = [tu.get_embedding(a, b) for a, b in zip(A, B)]
     fs = [x for x, _ in pairs]
     finv = [y for _, y in pairs]
 
+
+    from mcdp_posets.maps.product_map import ProductMap
     res = ProductMap(fs), ProductMap(finv)
     return res
 
@@ -277,23 +216,6 @@ def check_leq_products(tu, A, B):
             msg = 'Found uncomparable elements.'
             raise_wrapped(NotLeq, e, msg, compact=True, a=a, b=b)
 
-
-class LinearMapComp(Map):
-    """ Linear multiplication on R + top """
-
-    def __init__(self, A, B, factor):
-        Map.__init__(self, A, B)
-        self.A = A
-        self.B = B
-        self.factor = factor
-    
-    def _call(self, x):
-        if self.A.equal(x, self.A.get_top()):
-            return self.B.get_top()
-        res = x * self.factor
-        if np.isinf(res):
-            return self.B.get_top()
-        return res
 
 tu = TypesUniverse()
 

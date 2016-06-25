@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
-from .parts import CDPLanguage
-from contracts import contract
 from .parse_actions import add_where_information
+from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from mcdp_posets import PosetProduct
-from mcdp_posets.finite_set import FiniteCollectionsInclusion, FinitePoset
-from mcdp_posets.nat import Int, Nat
-from mcdp_posets.poset import Poset
-from mcdp_posets.space import Space
+from contracts import contract
+from mcdp_posets import (
+    FiniteCollectionsInclusion, FinitePoset, Int, Nat, Poset, PosetProduct,
+    Space, UpperSets)
 from mocdp.exceptions import DPInternalError
-from mcdp_posets.uppersets import UpperSets
 
 CDP = CDPLanguage
 
