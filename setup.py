@@ -52,6 +52,9 @@ setup(name='PyMCDP_devel',
         'PyContracts>=1.7.6',
         # 'ConfTools>=1.7',
         # 'RepRep>=2.9.3', 
+        'DecentLogs',
+        'QuickApp>=1.2',
+        'compmake',
       ],
       dependency_links  = [
           # 'https://github.com/AndreaCensi/contracts/archive/env_mcdp.zip#egg=PyContracts',
@@ -63,11 +66,8 @@ setup(name='PyMCDP_devel',
       ],
 
       tests_require=[
-        'nose>=1.1.2,<2',
+#        'nose>=1.1.2,<2',
         'comptests',
-        'compmake',
-        'DecentLogs',
-        'QuickApp>=1.2',
       ],
 
       entry_points={

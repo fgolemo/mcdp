@@ -20,3 +20,9 @@ except ImportError as e:
     logger.error(e)
     suggest_package('python-numpy')
     raise SystemExit(1)
+
+from PIL import Image
+import conf_tools
+import decent_params
+import decent_logs
+import quickapp

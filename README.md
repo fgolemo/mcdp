@@ -32,7 +32,7 @@ On Ubuntu:
 
 Run this command:
 
-    $ sudo pip install PyMCDP 
+    $ sudo pip install -U PyMCDP conftools quickapp decentparams decentlogs
 
 Note that if you omit the ``sudo``, modern Ubuntu 16 will install 
 correctly in the directory ``~/.local/``. In this case,

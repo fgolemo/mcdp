@@ -8,7 +8,7 @@ bs4
 nose
 reprep
 PyContracts
-decent_logs
+decentlogs
 #-e git+https://github.com/AndreaCensi/contracts.git@mcdp#egg=PyContracts
 -e git+https://github.com/AndreaCensi/compmake.git@mcdp#egg=compmake
 -e git+https://github.com/AndreaCensi/quickapp.git@mcdp#egg=quickapp
