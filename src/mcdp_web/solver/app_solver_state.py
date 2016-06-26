@@ -4,6 +4,8 @@ from contracts.utils import raise_wrapped
 from mcdp_posets.rcomp_units import RcompUnits
 from mcdp_posets.space import NotBelongs
 from mcdp_report.gg_ndp import format_unit
+from mcdp_posets.nat import Nat
+from mcdp_dp.tracer import Tracer
 
 
 class SolverState():
@@ -25,6 +27,10 @@ class SolverState():
         def permissive_parse(F, v):
             if isinstance(F, RcompUnits) and isinstance(v, int):
                 v = float(v)
+
+            if isinstance(F, Nat) and isinstance(v, float):
+                v = int(v)
+
             # TODO: parse floats as ints
             return v
 
@@ -53,7 +59,12 @@ class SolverState():
         except NotBelongs as e:
             raise_wrapped(ValueError, e, "Point does not belong.", compact=True)
         self.fun.append(fv)
-        ures = self.dp.solve(fv)
+
+        from mocdp import logger
+        trace = Tracer(logger=logger)
+        print('solving... %s' % F.format(fv))
+        ures = self.dp.solve_trace(fv, trace)
+
 #         F = self.dp.get_fun_space()
 #         R = self.dp.get_res_space()
 #         UR = UpperSets(R)

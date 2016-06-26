@@ -20,7 +20,6 @@ from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
     get_name_for_fun_node, get_name_for_res_node)
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
-# from mcdp_lang.namedtuple_tricks import clean_print, recursive_print
 
 
 
@@ -138,12 +137,10 @@ def eval_ndp_instancefromlibrary(r, context):
     ndp = context.load_ndp(name)
     return ndp
 
-
 def eval_ndp_flatten(r, context):
     ndp = eval_ndp(r.dp_rvalue, context)
     ndp = ndp.flatten()
     return ndp
-
 
 def eval_ndp_coproduct(r, context):
     assert isinstance(r, CDP.Coproduct)

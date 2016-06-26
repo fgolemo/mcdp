@@ -1,16 +1,18 @@
 from collections import namedtuple
 from contracts import contract
 from contracts.utils import raise_wrapped
+from mcdp_dp import Identity, Mux
+from mcdp_posets import PosetProduct, get_types_universe
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.connection import get_connection_multigraph
+from mocdp.comp.context import (CResource, Connection, get_name_for_fun_node,
+    get_name_for_res_node, is_fun_node_name, is_res_node_name)
 from mocdp.comp.flattening.flatten import cndp_flatten
 from mocdp.comp.interfaces import NotConnected
+from mocdp.comp.wrap import SimpleWrap, dpwrap
 from mocdp.exceptions import DPSemanticError
 from networkx.algorithms.cycles import simple_cycles
 import numpy as np
-from mcdp_posets.poset_product import PosetProduct
-from mocdp.comp.context import CResource, Connection, is_res_node_name, \
-    is_fun_node_name
 
 @contract(ndp=CompositeNamedDP)
 def cndp_makecanonical(ndp):
@@ -44,7 +46,75 @@ def cndp_makecanonical(ndp):
     n = len(connections_to_cut)
     names = list(['cut%d' % _ for _ in range(n)])
     ndp_inner = cndp_create_one_without_some_connections(ndp, connections_to_cut, names)
-    return ndp_inner
+
+
+    name2ndp = {}
+    name_inner = 'inner'
+    name2ndp[name_inner] = ndp_inner
+    connections = []
+    fnames = []
+    rnames = []
+
+    for fname in ndp_inner.get_fnames():
+        if fname in names:
+            continue
+
+        F = ndp_inner.get_ftype(fname)
+        nn = get_name_for_fun_node(fname)
+        name2ndp[nn] = dpwrap(Identity(F), fname, fname)
+
+        connections.append(Connection(nn, fname, name_inner, fname))
+        fnames.append(fname)
+
+    for rname in ndp_inner.get_rnames():
+        if rname in names:
+            continue
+
+        R = ndp_inner.get_rtype(rname)
+        nn = get_name_for_res_node(rname)
+        name2ndp[nn] = dpwrap(Identity(F), rname, rname)
+
+        connections.append(Connection(name_inner, rname, nn, rname))
+        rnames.append(rname)
+
+    if len(names) == 1:
+        c = Connection(name_inner, names[0], name_inner, names[0])
+        connections.append(c)
+    else:
+
+
+        F = PosetProduct(ndp_inner.get_ftypes(names))
+        # [0, 1, 2]
+        coords = list(range(len(names)))
+        mux = Mux(F, coords)
+        nto1 = SimpleWrap(mux, fnames=names, rnames='_muxed')
+
+
+        # [0, 1, 2]
+        coords = list(range(len(names)))
+        R = mux.get_res_space()
+        mux2 = Mux(R, coords)
+        _1ton = SimpleWrap(mux2, fnames='_muxed', rnames=names)
+        F2 = mux2.get_res_space()
+        tu = get_types_universe()
+        tu.check_equal(F, F2)
+
+        mux1_name = '_mux1'
+        mux2_name = '_mux2'
+        name2ndp[mux1_name] = nto1
+        name2ndp[mux2_name] = _1ton
+
+        connections.append(Connection(mux1_name, '_muxed', mux2_name, '_muxed'))
+        for n in names:
+            connections.append(Connection(name_inner, n, mux1_name, n))
+        for n in names:
+            connections.append(Connection(mux2_name, n, name_inner, n))
+
+    outer = CompositeNamedDP.from_parts(name2ndp=name2ndp,
+                                        connections=connections,
+                                        fnames=fnames, rnames=rnames)
+    return outer
+
 
 
 @contract(names='list[N]', exclude_connections='list[N]')

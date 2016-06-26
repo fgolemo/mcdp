@@ -29,7 +29,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
     def __init__(self, dirname):
         self.dirname = dirname
         self.libraries = load_libraries(self.dirname)
-        logger.info('Found %d libraries underneath %r.' % (len(self.libraries), self.dirname))
+        logger.info('Found %d libraries underneath %r.' %
+                    (len(self.libraries), self.dirname))
 
         AppEditor.__init__(self)
         AppVisualization.__init__(self)
@@ -48,6 +49,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         self.add_model_view('edit', 'Simple editor for IE')
         self.add_model_view('ndp_graph', 'Graph representation')
         self.add_model_view('ndp_repr', 'Text representation')
+        self.add_model_view('dp_graph', 'Internal graph representation')
         self.add_model_view('solver', 'Simple solver')
 
     def add_model_view(self, name, desc):
