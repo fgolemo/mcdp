@@ -6,5 +6,17 @@ logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-import numpy
-numpy.seterr('raise')
+def suggest_package(name):
+    msg = """You could try installing the package using:
+    
+    sudo apt-get install %s
+""" % name
+    logger.info(msg)
+    
+try:
+    import numpy
+    numpy.seterr('raise')
+except ImportError as e:
+    logger.error(e)
+    suggest_package('python-numpy')
+    raise SystemExit(1)

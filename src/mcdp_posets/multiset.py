@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-from mcdp_posets.poset import Poset, NotLeq
+from .frozendict import frozendict2
+from .poset import NotLeq, Poset
+from .space import NotBelongs, NotEqual, Space
+from collections import defaultdict
 from contracts import contract
-from mcdp_posets.space import Space, NotBelongs, NotEqual
-from compmake.utils.frozen import frozendict2  # XXX
 from contracts.utils import raise_desc
 from mocdp.exceptions import mcdp_dev_warning
-from collections import defaultdict
 import itertools
 
 __all__ = [
@@ -16,6 +16,7 @@ __all__ = [
 class Multiset():
     @contract(elements='dict(*:int,>=1)', S=Space)
     def __init__(self, elements, S):
+
         self._elements = frozendict2(elements)
         self._S = S
 
