@@ -19,28 +19,30 @@ try:
 except ImportError as e:
     logger.error(e)
     suggest_package('python-numpy')
-    raise SystemExit(1)
+    raise Exception('Numpy not available')
 
 try:
     from PIL import Image
 except ImportError as e:
     logger.error(e)
     suggest_package('python-pil')
-    raise SystemExit(1)
+    raise Exception('PIL not available')
 
 try:
     import matplotlib
 except ImportError as e:
     logger.error(e)
     suggest_package('python-matplotlib')
-    raise SystemExit(1)
+    raise Exception('Matplotlib not available')
 
 try:
     import yaml
 except ImportError as e:
     logger.error(e)
     suggest_package('python-yaml')
-    raise SystemExit(1)
+    raise Exception('YAML not available')
+
+# command dot -> graphviz
 
 import conf_tools
 import decent_params
