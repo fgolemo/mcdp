@@ -33,7 +33,10 @@ install:
 - "python -c 'import compmake;   print  compmake.__version__'"
 - "python -c 'import comptests;  print  comptests.__version__'"
 - "python -c 'import reprep;     print    reprep.__version__'"
+- "python -c 'import mocdp;  print mocdp.__version__'"
+- "python -c 'import mcdp_data'"
 # command to run tests
+
 script: 
 # run first without contracts
 #- make comptests-run-parallel-nocontracts

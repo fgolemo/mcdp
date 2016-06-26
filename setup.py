@@ -36,7 +36,7 @@ setup(name='PyMCDP_devel',
       download_url=
         'http://github.com/AndreaCensi/mcdp/tarball/%s' % version,
 
-      package_dir={'':'src', 'mcdp_data':'mcdp_data'},
+      package_dir={'':'src', 'mcdp_data':''},
       packages=find_packages('src') + ['mcdp_data'],
       install_requires=[
         #'ConfTools>=1.0,<2',
