@@ -9,6 +9,7 @@ from mcdp_web.qr.app_qr import AppQR
 from mcdp_web.solver.app_solver import AppSolver
 from mcdp_web.solver2.app_solver2 import AppSolver2
 from mcdp_web.visualization.app_visualization import AppVisualization
+from mocdp import logger
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPFound
@@ -332,7 +333,6 @@ def load_libraries(dirname):
         res[library_name] = dict(path=path, library=l)
     return res
 
-from mocdp import logger
 
 class MCDPWeb(QuickAppBase):
     """ Runs the MCDP web interface. """
@@ -347,8 +347,8 @@ class MCDPWeb(QuickAppBase):
         if dirname is None:
             package = dir_from_package_name('mcdp_data')
             libraries = os.path.join(package, 'libraries')
-            msg = ('Command "-d" not passed, so I will open the default libraries '
-                   'shipped with PyMCDP.')
+            msg = ('Option "-d" not passed, so I will open the default libraries '
+                   'shipped with PyMCDP. These might not be writable depending on your setup.')
             logger.info(msg)
             dirname = libraries
 
