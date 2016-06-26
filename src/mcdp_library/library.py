@@ -52,7 +52,8 @@ class MCDPLibrary():
             file_to_contents = {}
         self.file_to_contents = file_to_contents
         
-        self.cache_dir = cache_dir
+        if cache_dir is not None:
+            self.use_cache_dir(cache_dir)
 
         if search_dirs is None:
             search_dirs = []
@@ -69,7 +70,21 @@ class MCDPLibrary():
         return MCDPLibrary(**contents)
 
     def use_cache_dir(self, cache_dir):
-        self.cache_dir = cache_dir
+        try:
+            if not os.path.exists(cache_dir):
+                os.makedirs(cache_dir)
+            fn = os.path.join(cache_dir, 'touch')
+            if os.path.exists(fn):
+                os.unlink(fn)
+            with open(fn, 'w') as f:
+                f.write('touch')
+            os.unlink(fn)
+        except Exception as e:
+            print e
+            logger.debug('Cannot write to folder %r. Not using caches.' % cache_dir)
+            self.cache_dir = None
+        else:
+            self.cache_dir = cache_dir
 
     def delete_cache(self):
         if self.cache_dir:

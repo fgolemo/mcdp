@@ -11,7 +11,7 @@ Keys:
 Meat
 ----
 
-- sets and intervals
+- intervals - what happens 
 
 - the meat! make sure we close all the loops at the same time.
 
@@ -44,7 +44,7 @@ Misc
 
 - B: automatically load CSS from that file.
 
-
+- B: do not use cache if it is not writable
 
 MCDP-web
 ----------
