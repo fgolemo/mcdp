@@ -2,20 +2,42 @@ include *.md
 include Makefile
 include requirements.txt
 
-recursive-include src *
-
 recursive-include misc *.tmTheme
 recursive-include misc *.sublime-syntax
 
-recursive-include mcdp_data Makefile
-recursive-include mcdp_data *.mcdp
-recursive-include mcdp_data *.mcdp_value
-recursive-include mcdp_data *.mcdp_poset
-recursive-include mcdp_data *.mcdp_template
-recursive-include mcdp_data *.mcdp_primitivedp
+
+recursive-include src/mcdp_cli *
+recursive-include src/mcdp_dp *
+recursive-include src/mcdp_dp_tests *
+recursive-include src/mcdp_ext_libraries *
+recursive-include src/mcdp_ipython_utils *
+recursive-include src/mcdp_lang *
+recursive-include src/mcdp_lang_tests *
+recursive-include src/mcdp_library *
+recursive-include src/mcdp_library_tests *
+recursive-include src/mcdp_maps *
+recursive-include src/mcdp_posets *
+recursive-include src/mcdp_report *
+recursive-include src/mcdp_tests * 
+recursive-include src/mcdp_web *
+recursive-include src/mocdp *
+recursive-include src/multi_index *
+
+recursive-include src/mcdp_data Makefile
+recursive-include src/mcdp_data *.mcdp
+recursive-include src/mcdp_data *.md
+recursive-include src/mcdp_data *.txt
+recursive-include src/mcdp_data *.mcdp_value
+recursive-include src/mcdp_data *.mcdp_poset
+recursive-include src/mcdp_data *.mcdp_template
+recursive-include src/mcdp_data *.mcdp_primitivedp
  
+recursive-exclude src out
+recursive-exclude src _mcdpweb_cache
+global-exclude out out_expected _attic _mcdpweb_cache
 
 
+prune src/mcdp_data/libraries/examples/example-plusinv.mcdplib/out_expected
 
-global-exclude out out_expected _attic
+
 

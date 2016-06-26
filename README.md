@@ -12,8 +12,8 @@ along with the MCDPL snippet that describes it (right)*
 
 <table>
  <tr>
- <td><img src="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery_minimal-clean.png" width="400px"/></td>
- <td><img src="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery_minimal-syntax_pdf.png" width="300px"/>
+ <td><img src="out_expected/battery_minimal-clean.png" width="400px"/></td>
+ <td><img src="out_expected/battery_minimal-syntax_pdf.png" width="300px"/>
  </td>
  </tr>
 </table>
@@ -110,15 +110,15 @@ will produce these graphs:
 <table>
     <tr>
         <td>Syntax highlighting</td>
-        <td><a href="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery-syntax_pdf.png">
-            <img src="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery-syntax_pdf.png" height="500px"/>
+        <td><a href="out_expected/battery-syntax_pdf.png">
+            <img src="out_expected/battery-syntax_pdf.png" height="500px"/>
             </a>
         </td>
     </tr>
-    <tr><td>Verbose graph</td><td><a href="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery-default.png"><img src="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery-default.png"/></a></td></tr>
-    <tr><td>Cleaned-up graph</td><td ><a href="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery-clean.png">
-    <img src="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery-clean.png" height="300px"/></a></td></tr>
-    <tr><td>Tree representation</td><td><img src="mcdp_data/libraries/examples/example-battery.mcdplib/out_expected/battery-dp_tree.png"/></td></tr>
+    <tr><td>Verbose graph</td><td><a href="out_expected/battery-default.png"><img src="out_expected/battery-default.png"/></a></td></tr>
+    <tr><td>Cleaned-up graph</td><td ><a href="out_expected/battery-clean.png">
+    <img src="out_expected/battery-clean.png" height="300px"/></a></td></tr>
+    <tr><td>Tree representation</td><td><img src="out_expected/battery-dp_tree.png"/></td></tr>
     </tr>
 </table>
 
@@ -136,19 +136,19 @@ of monotone problems.)
 
 <table>
     <tr><td colspan="2">
-        <img src="mcdp_data/libraries/examples/example-plusinv.mcdplib/animations/model.png" width="500px"/>
+        <img src="animations/model.png" width="500px"/>
     </td></tr>
     <tr>
-     <td><img src="mcdp_data/libraries/examples/example-plusinv.mcdplib/animations/plusinvnat2-nat4-problem.png" width="300px"/></td>
-     <td><img src="mcdp_data/libraries/examples/example-plusinv.mcdplib/animations/plusinvnat2-nat10-problem.png" width="300px"/>
+     <td><img src="animations/plusinvnat2-nat4-problem.png" width="300px"/></td>
+     <td><img src="animations/plusinvnat2-nat10-problem.png" width="300px"/>
      </td>
      </tr>
      <tr>
-     <td><img src="mcdp_data/libraries/examples/example-plusinv.mcdplib/animations/plusinvnat2-nat4.gif" width="300px"/></td>
-     <td><img src="mcdp_data/libraries/examples/example-plusinv.mcdplib/animations/plusinvnat2-nat10.gif" width="300px"/></td>
+     <td><img src="animations/plusinvnat2-nat4.gif" width="300px"/></td>
+     <td><img src="animations/plusinvnat2-nat10.gif" width="300px"/></td>
      </tr>
      <tr>
-     <td colspan="2"><img src="mcdp_data/libraries/examples/example-plusinv.mcdplib/animations/legend.png" width="500px"/></td>
+     <td colspan="2"><img src="animations/legend.png" width="500px"/></td>
      </tr>
 </table>
 
