@@ -11,6 +11,8 @@ Keys:
 Meat
 ----
 
+- finish the "canonical form"
+
 - intervals - what happens 
 
 - the meat! make sure we close all the loops at the same time.
@@ -49,9 +51,18 @@ Misc
 MCDP-web
 ----------
 
-- F: better initial list for each library
 
-- B: fix the "new model" link for each library
+- F: rename model
+
+- F: delete model
+
+
+
+
+- B: do not navigate away if there are changes - saved should not be set 
+  to true if there were some changes in the mean time.
+  
+- F: better initial list for each library
 
 - B: when drawing images, use a unicode font
 
@@ -62,8 +73,6 @@ MCDP-web
 - T: mcdp-web: Testing of at least all links.
 
 - F: mcdp-web: let images be zoomable
-
-- F: mcdp-web/fancy_editor: Submit changes 
 
 - B: fancy_editor: the syntax highlighting skips the whitespace at the end of the model
 
@@ -77,9 +86,6 @@ MCDP-web
 
 - B: we need to escape # in interactive. Maybe hexify?
 http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c  %0A    x <= c <= d # test%0A    e <= a1 # test%0A}
-
-- F: rename model
-- F: delete model
 
 MCDP-web / QR
 -------------

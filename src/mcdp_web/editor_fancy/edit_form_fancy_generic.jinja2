@@ -108,7 +108,9 @@
 		// $('button#save').disable();
 		$('#around_editor').css('background-color', '#ffe');
 		$('#syntax_error').html('');
-		$("a#graph img").attr("src", '/static/white.png');		
+		$("a#graph img").attr("src", '/static/white.png');	
+		$('a#graph').imageZoom();	
+		saved = false;
 	}
 
 
@@ -257,6 +259,8 @@
 		show_status('#save_status', 'success');
 		console.log('success');
 		console.log(res);
+		/// XXX not if the text has changed in the mean time
+		saved = true;
 	}
 
 	function click_button_save_failure(res) {
@@ -279,9 +283,23 @@
 		text = current_text();
 		hash = hex_sha1(text);
 		url = "graph.png?"+hash;
-		$("a#graph").attr("href", url);		
+		//$("a#graph").attr("href", url);		
 		$("a#graph img").attr("src", url);		
+		$('a#graph').imageZoom();
 	} 
+
+
+
+	var saved = true; 
+
+	window.onbeforeunload = confirmExit;
+	function confirmExit() {
+    	if (!saved) {
+        	return "You did not save, do you want to do it now?";
+    	}
+	}
+</script>
+
 
 	</script>
   

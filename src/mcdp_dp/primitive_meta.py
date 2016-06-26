@@ -18,6 +18,8 @@ class PrimitiveMeta(ABCMeta):
             # print('disabling checks on Primitive')
             pass
         else:
+            from mcdp_dp.primitive import NotSolvableNeedsApprox
+
             if 'solve' in cls.__dict__:
                 solve = cls.__dict__['solve']
 
@@ -39,6 +41,8 @@ class PrimitiveMeta(ABCMeta):
                     except NotImplementedError as e:
                         raise_wrapped(NotImplementedError, e,
                             'Solve not implemented for class %s.' % name)
+                    except NotSolvableNeedsApprox:
+                        raise
                     except Exception as e:
                         raise_wrapped(Exception, e,
                             'Solve failed', f=f, self=self)
