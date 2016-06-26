@@ -28,7 +28,17 @@ On Ubuntu:
     $ sudo apt-get install graphviz wkhtmltopdf git 
     $ sudo apt-get install texlive-extra-utils  # pdfcrop
 
-### Installation from source
+### Option 2: Install using pip
+
+Run this command:
+
+    $ sudo pip install PyMCDP 
+
+Note that if you omit the ``sudo``, modern Ubuntu 16 will install 
+correctly in the directory ``~/.local/``. In this case,
+make sure you have ``~/.local/bin/`` in your ``PATH``.
+
+### Option 1: Installation from source
 
 Clone the repo using: 
 
@@ -42,7 +52,7 @@ Then install the main module:
     
     $ sudo python setup.py develop 
 
-Omit the sudo if you have a virtual environment.
+Omit the sudo if you have already set up a virtual environment.
 
 
 ## Getting started

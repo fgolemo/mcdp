@@ -66,6 +66,7 @@ setup(name='PyMCDP_devel',
         'nose>=1.1.2,<2',
         'comptests',
         'compmake',
+        'DecentLogs',
         'QuickApp>=1.2',
       ],
 
