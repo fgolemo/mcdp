@@ -27,22 +27,28 @@ try:
 except ImportError as e:
     logger.error(e)
     suggest_package('python-pil')
+    msg = 'PIL not available'
     # raise Exception('PIL not available')
-    raise_wrapped(Exception, e, 'PIL not available')
+    logger.error(msg)
+    # raise_wrapped(Exception, e, msg)
 
 try:
     import matplotlib
 except ImportError as e:
     logger.error(e)
     suggest_package('python-matplotlib')
-    raise_wrapped(Exception, e, 'Matplotlib not available')
+    msg = 'Matplotlib not available'
+    logger.error(msg)
+    # raise_wrapped(Exception, e, 'Matplotlib not available')
 
 try:
     import yaml
 except ImportError as e:
     logger.error(e)
     suggest_package('python-yaml')
-    raise Exception('YAML not available')
+    msg = 'YAML package not available'
+    logger.error(msg)
+#     raise Exception('YAML not available')
 
 # command dot -> graphviz
 

@@ -560,8 +560,11 @@ def format_unit(R):
 @contract(ndp=NamedDPCoproduct)
 def create_coproduct(gdc0, ndp):
     
-#     cluster = gdc0.newItem('mycluster-%s' % gdc0.yourname)
-#     gdc0 = gdc0.child_context(parent=cluster, yourname=None)
+    label = gdc0.yourname if gdc0.yourname else ''
+    cluster = gdc0.newItem(label)
+    gdc0.gg.propertyAppend(cluster, 'style', 'dashed')
+
+    gdc0 = gdc0.child_context(parent=cluster, yourname=None)
 
     functions = {}
     resources = {}
@@ -611,7 +614,8 @@ def create_composite(gdc0, ndp):
     try:
         return create_composite_(gdc0, ndp, SKIP_INITIAL=True)
     except Exception as e:
-        print e
+        logger.error(e)
+        logger.error('I will try again without the SKIP_INITIAL parameter.')
         return create_composite_(gdc0, ndp, SKIP_INITIAL=False)
 
 def create_composite_(gdc0, ndp, SKIP_INITIAL):

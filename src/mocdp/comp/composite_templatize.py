@@ -2,6 +2,7 @@ from contracts import contract
 from mocdp.comp.wrap import SimpleWrap
 from mcdp_posets.poset_product import PosetProduct
 from mocdp.comp.composite import CompositeNamedDP
+from mocdp.comp.interfaces import NamedDP
 
 def cndp_templatize_children(cndp):
     """ Replaces all sub composites with the corresponding template """
@@ -20,7 +21,7 @@ def cndp_templatize_children(cndp):
 
     return CompositeNamedDP.from_parts(name2ndp, connections, fnames, rnames)
 
-@contract(ndp=CompositeNamedDP, returns=SimpleWrap)
+@contract(ndp=NamedDP, returns=SimpleWrap)
 def ndp_templatize(ndp, mark_as_template=False):
     """ Creates a template based on the interface. """
     fnames = ndp.get_fnames()
