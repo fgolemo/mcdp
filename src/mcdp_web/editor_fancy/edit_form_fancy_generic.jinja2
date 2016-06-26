@@ -14,6 +14,24 @@
   
   
   <table style='width: 100%; border: solid 0px black'>
+    <tr>
+  <td colspan=2>
+    <div id='commands'>
+	  	<button id='save'>Save</button>
+	  	<button id='discard'>Discard</button>
+	  	<span id='save_status'></span>
+  	</div>
+  	<script type='text/javascript'>
+	  	$(document).ready(function() {  		
+		  	function nodefault(event) { 
+		  		event.preventDefault(); 
+		  	}
+	    	$("button").button().click(nodefault);
+		});
+	 </script>
+</td>
+</tr>
+
   <tr style=''><td style=' border: solid 0px gray; width: 50%'>
 	  <div id='around_editor'>
 	  	<!--<code><pre contenteditable="true" id='editor'></pre></code>-->
@@ -35,19 +53,9 @@
   	</td>
   </tr>
 
-  <tr>
-  <td>
-    <div id='commands'>
-  	<button id='save'>Save</button>
-  	<button id='discard'>Discard</button>
-  	<!-- <br/> -->
-  	
-  </div>
-<td>
-</td>
 <tr>
 <td colspan=2>
-<span id='save_status'></span>
+	
   <span id='server_status'></span>
   <pre id='syntax_error'></pre>
   <pre id='comm_failure'></pre>
@@ -60,8 +68,7 @@
 	var last_text_sent_to_server = null;
 	var last_rendered_text = null;
 	var timeoutID = null;
-	var parsing_wait_ms = 400;
-	// var image_refresh_interval_ms = 5000
+	var parsing_wait_ms = 800;
 
 	$(document).ready(function() {
 
@@ -88,7 +95,6 @@
 			return;
 
 		text_has_changed();
-
 		
 		// and we wait that the user stops editing
 		if (timeoutID != null){
@@ -107,9 +113,10 @@
 
 
 	function try_to_parse_it() {
+		console.log('asking server');
 		text = current_text();
 		
-		element = $('#editor').get(0);
+		//element = $('#editor').get(0);
 		
 		try_to_parse(text);
 		update_image();
@@ -196,8 +203,8 @@
 			$('#syntax_error').html(res['error']);
 			//$('#syntax_error').show();
 			$('#around_editor').css('background-color', '#fee');
-			$('button#save').text('Save (even though there are errors)');
-			$('button#save').enable();
+			//$('button#save').text('Save (even though there are errors)');
+			//$('button#save').enable();
 
 			if ('highlight' in res) {
 				relevant = still_relevant(res['request']['text']);
@@ -224,8 +231,8 @@
 
 			$('#around_editor').css('background-color', 'white');
 			$('#syntax_error').html('');
-			$('button#save').text('Save');
-			$('button#save').enable();
+			//$('button#save').text('Save');
+			//$('button#save').enable();
 
 			update_text_with_highlight(res['request']['text'], res['highlight']);
 		}

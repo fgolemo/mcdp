@@ -156,5 +156,12 @@ mcdp {
 
 
 
+- Bug in the dot drawing for this one:
 
-
+choose(
+        NiMH: mcdp { a = instance mcdp {
+provides f1 <= 10g
+requires r1 >= f1
+}
+}
+)

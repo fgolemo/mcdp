@@ -69,10 +69,12 @@ def nx_generic_graphviz_plot(G, output, prog='dot'):
 
 def get_dot_string(gg):
     with tmpfile(".dot") as filename_dot:
-        with open(filename_dot, 'w') as fo:
-            gg.dot(fo)
-        contents = open(filename_dot).read()
-
+        if False:
+            with open(filename_dot, 'w') as fo:
+                gg.dot(fo)
+            contents = open(filename_dot).read()
+        else:
+            contents = gg.dot2()
         contents = contents.replace('"<TABLE', '<<TABLE')
         contents = contents.replace('</TABLE>"', '</TABLE>>')
         return contents

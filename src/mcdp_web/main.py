@@ -36,28 +36,25 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         AppQR.__init__(self)
         AppSolver.__init__(self)
         AppInteractive.__init__(self)
-        # AppEditorFancy.__init__(self)
         AppSolver2.__init__(self)
         AppEditorFancyGeneric.__init__(self)
 
         # name -> dict(desc: )
         self.views = {}
 
-        for x in ['syntax',
-                # put in this order
-                'ndp_graph',
-                'dp_graph', 'ndp_repr',
-                # XXX: put editor_fancy before editor
-                'edit_fancy',
-                'edit',
-                'solver']:
-            self.add_model_view(x, x)
+        
+        self.add_model_view('syntax', 'Simple display')
+        self.add_model_view('edit_fancy', 'Fancy editor')
+        self.add_model_view('edit', 'Simple editor for IE')
+        self.add_model_view('ndp_graph', 'Graph representation')
+        self.add_model_view('ndp_repr', 'Text representation')
+        self.add_model_view('solver', 'Simple solver')
 
     def add_model_view(self, name, desc):
-        self.views[name] = dict(desc=desc)
+        self.views[name] = dict(desc=desc, order=len(self.views))
 
     def _get_views(self):
-        return sorted(self.views)
+        return sorted(self.views, key=lambda _:self.views[_]['order'])
 
     def get_current_library_name(self, request):
         library_name = str(request.matchdict['library'])  # unicod
@@ -114,7 +111,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         else:
             s = traceback.format_exc(exc)
         s = s.decode('utf-8')
-        print(s)
+        logger.error(s)
         return {'exception': s}
     
     def view_docs(self, request):
@@ -209,7 +206,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
                                    model=m,
                                    view='syntax')
 
-            name = "Model %s" % m
+            name = "Model: %s" % m
             desc = dict(name=name, url=url, current=is_current)
             d['models'].append(desc)
 
@@ -224,7 +221,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
                                                  template=t,
                                                  view='edit_fancy')  # XXX
 
-            name = "Template %s" % t
+            name = "Template: %s" % t
             desc = dict(name=name, url=url, current=is_current)
             d['templates'].append(desc)
 
@@ -233,7 +230,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         for p in posets:
             is_current = (p == current_poset)
             url = '/libraries/%s/posets/%s/views/edit_fancy/' % (current_library, p)
-            name = "Poset %s" % p
+            name = "Poset: %s" % p
             desc = dict(name=name, url=url, current=is_current)
             d['posets'].append(desc)
 
@@ -242,7 +239,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         for v in values:
             is_current = (v == current_value)
             url = '/libraries/%s/values/%s/views/edit_fancy/' % (current_library, v)
-            name = "Value %s" % v
+            name = "Value: %s" % v
             desc = dict(name=name, url=url, current=is_current)
             d['values'].append(desc)
 
@@ -250,13 +247,14 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         d['views'] = []
         views = self._get_views()
         for v in views:
+            view = self.views[v]
             is_current = v == current_view
 
             url = self.get_lmv_url(library=current_library,
                                    model=current_model,
                                    view=v)
 
-            name = v  # XXX
+            name = "View: %s" % view['desc']
             desc = dict(name=name, url=url, current=is_current)
             d['views'].append(desc)
 
@@ -266,7 +264,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         for l in libraries:
             is_current = l == current_library
             url = '/libraries/%s/list' % l
-            name = "Library %s" % l
+            name = "Library: %s" % l
             desc = dict(name=name, url=url, current=is_current)
             d['libraries'].append(desc)
 

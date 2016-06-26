@@ -215,7 +215,7 @@ class AppEditorFancyGeneric():
             else:
                 thing = self.last_processed2[key]
                 if thing is None:
-                    return response_image(request, 'Could not parse model.')
+                    return response_image(request, 'Could not parse.')
 
             png = spec.get_png_data(widget_name, thing)
 

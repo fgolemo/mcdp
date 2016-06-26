@@ -12,6 +12,7 @@ from mcdp_library.utils import dir_from_package_name
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
 from mcdp_report.utils import safe_makedirs
+from mocdp import logger
 from mocdp.comp import CompositeNamedDP, SimpleWrap
 from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 from mocdp.comp.interfaces import NamedDP
@@ -50,7 +51,10 @@ class GraphDrawingContext():
         return self.all_nodes
 
     def newItem(self, label):
+
         n = self.gg.newItem(label, parent=self.parent)
+        # print('New item %r sub of %r' % (n['id'], self.parent['id'] if self.parent else '-'))
+
         self.all_nodes.append(n)
         return n
         
@@ -61,7 +65,7 @@ class GraphDrawingContext():
 
     @contextmanager
     def child_context_yield(self, parent, yourname):
-        c = self.child_context(parent, yourname)
+        c = self.child_context(parent=parent, yourname=yourname)
         yield c
         self.all_nodes.extend(c.all_nodes)
 
@@ -628,19 +632,21 @@ def create_composite_(gdc0, ndp, SKIP_INITIAL):
             c = gdc0.newItem(container_label)
             gdc0.styleApply('container', c)
             gdc = gdc0.child_context(parent=c, yourname=gdc0.yourname)
+
         else:
+
             gdc = gdc0
         for name, value in ndp.context.names.items():
             # do not create these edges
             if SKIP_INITIAL:
                 if is_function_with_one_connection_that_is_not_a_res_one(ndp, name):
-                    print('Skipping extra node for is_function_with_one_connection %r' % name)
+                    # print('Skipping extra node for is_function_with_one_connection %r' % name)
     #                 warnings.warn('hack')
                     continue
 
             if SKIP_INITIAL:
                 if is_resource_with_one_connection_that_is_not_a_fun_one(ndp, name):
-                    print('skipping extra node for %r' % name)
+                    # print('skipping extra node for %r' % name)
     #                 warnings.warn('hack')
                     continue
 
@@ -738,12 +744,10 @@ def create_composite_(gdc0, ndp, SKIP_INITIAL):
 
             skip = gdc.should_I_skip_leq(ndp.context, c)
 
-
             second_simple = is_simple(ndp.context.names[c.dp2])
             first_simple = is_simple(ndp.context.names[c.dp1])
             any_simple = second_simple or first_simple
             both_simple = second_simple and first_simple
-
 
             ua = ndp.context.names[c.dp2].get_ftype(c.s2)
             ub = ndp.context.names[c.dp1].get_rtype(c.s1)

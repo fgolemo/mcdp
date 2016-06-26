@@ -49,15 +49,23 @@ class AppVisualization():
             style = request.matchdict['style']
             fileformat = request.matchdict['format']
 
-
             ndp = self.get_library(request).load_ndp(model_name)
             gg = gvgen_from_ndp(ndp, style)
-            png, pdf = png_pdf_from_gg(gg)
+
+            from reprep import Report
+            from mcdp_report.gg_utils import gg_figure
+            r = Report()
+            gg_figure(r, 'graph', gg)
+            png = r.resolve_url('graph/graph').get_raw_data()
+            pdf = r.resolve_url('graph_pdf').get_raw_data()
+            dot = r.resolve_url('dot').get_raw_data()
 
             if fileformat == 'pdf':
-                return response_data(request=request, data=pdf, content_type='image/pdf')
+                return response_data(request, pdf, 'image/pdf')
             elif fileformat == 'png':
-                return response_data(request=request, data=png, content_type='image/png')
+                return response_data(request, png, 'image/png')
+            elif fileformat == 'dot':
+                return response_data(request, dot, 'text/plain')
             else:
                 raise ValueError('No known format %r.' % fileformat)
         return png_error_catch(go, request)
@@ -66,20 +74,15 @@ class AppVisualization():
         model_name = str(request.matchdict['model_name'])  # unicode
 
         return {'model_name': model_name,
-#                 'models': models,
                 'views': self._get_views(),
                 'current_view': 'ndp_graph',
-
                 'navigation': self.get_navigation_links(request),
-
                 'style': STYLE_GREENREDSYM}
 
     def view_model_dp_graph_image(self, request):
         def go():
             model_name = str(request.matchdict['model_name'])  # unicod
             fileformat = request.matchdict['format']
-
-
 
             ndp = self.get_library(request).load_ndp2(model_name)
             dp = ndp.get_dp()

@@ -20,13 +20,14 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 """
 
 from sys import stdout
+from StringIO import StringIO
 
 gvgen_version = "0.9.1"
 
 debug = 0
 debug_tree_unroll = 0
 
-class GvGen:
+class GvGen():
     """
     Graphviz dot language Generation Class
     For example of usage, please see the __main__ function
@@ -393,6 +394,8 @@ class GvGen:
         Core function to output dot which sorts out parents and children
         and do it in the right order
         """
+#         print('%stree(level %s, ID %s, %s)' % ('  ' * level, level, node['id'],
+#                                                 len(children) if children else 'no children'))
         if debug:
             print "/* Grabed node = %s*/" % str(node['id'])
 
@@ -411,6 +414,9 @@ class GvGen:
         if children:
             node['lock'] = 1
             self.fd.write(level * self.padding_str)
+
+            # print('level %d Starting subcluster for %d %r' % (level, node['id'], node.get('label', '(no label)')))
+
             self.fd.write(self.padding_str + "subgraph cluster%d {\n" % node['id'])
             properties = self.propertiesAsStringGet(node, props)
             self.fd.write(level * self.padding_str)
@@ -419,7 +425,7 @@ class GvGen:
         else:
             # We grab appropriate properties
             properties = self.propertiesAsStringGet(node, props)
-
+# "node%d %s;\n" % (node['id'], properties))
             # We get the latest opened elements
             if self.__opened_braces:
                 last_cluster,last_level = self.__opened_braces[-1]
@@ -488,8 +494,93 @@ class GvGen:
         else:
             cb(self.__browse_level, node, None)
             self.__browse_level = 0
-#            if debug:
-#                print "This node is not a child: " + str(node)
+
+    def browse2_(self, G, id_node, cb, level):
+        """
+            cb(level, node_data, children_results)
+        """
+        children_result = {}
+        children = G.successors(id_node)
+        for c in children:
+            rec = self.browse2_(G=G, id_node=c, cb=cb, level=level + 1)
+            children_result[c] = rec
+        node_data = G.node[id_node]['data']
+        return cb(level, node_data, children_result)
+    
+    def browse2(self, cb):
+        import networkx as nx
+        G = nx.DiGraph()
+        G.add_node('root', data=dict(id='root'))
+        for n in self.__nodes:
+            G.add_node(n['id'], data=n)
+        
+        for n in self.__nodes:
+            parent = n['parent']
+            if parent is None:
+                id_parent = 'root'
+            else:
+                id_parent = parent['id']
+            G.add_edge(id_parent, n['id'])
+
+        return self.browse2_(G=G, id_node='root', cb=cb, level=0)
+
+    def structure(self):
+        def example(level, node, children_results):  # @UnusedVariable
+            if children_results:
+                c = ", ".join(["%s" % (v) for k, v in children_results.items()])  # @UnusedVariable
+                return "%s { %s } " % (node['id'], c)
+            else:
+                return node['id']
+        return self.browse2(example)
+
+    def dot2(self):
+        from contracts.utils import indent
+        def indented_results(children_results):
+            s = ""
+            for cs in children_results.values():
+                s += indent(cs, '   ') + '\n'
+            return s
+
+        def render_dot_root(level, node, children_results):
+            s = "digraph G { \n"
+            if self.options:
+                for key, value in self.options.iteritems():
+                    s += ("    %s=%s;" % (key, value))
+                s += ("\n")
+
+            s += indented_results(children_results)
+
+            self.fd = StringIO()
+            for n in self.__nodes:            
+                self.dotLinks(n)
+
+            s += indent(self.fd.getvalue(), '   ')
+            s += '}'
+            return s
+
+        def render_dot_subgraph(level, node, children_results):
+            s = "subgraph cluster%d { \n" % node['id']
+            properties = self.propertiesAsStringGet(node, node['properties'])
+            s += indent('   ', properties)
+            s += indented_results(children_results)
+            s += '}'
+            return s
+
+        def render_dot_node(level, node, children_results):
+            properties = self.propertiesAsStringGet(node, node['properties'])
+            return "node%d %s;\n" % (node['id'], properties)
+
+        def render_dot(level, node, children_results):  # @UnusedVariable
+            
+            if node['id'] == 'root':
+                return render_dot_root(level, node, children_results)
+            
+            if children_results:
+                return render_dot_subgraph(level, node, children_results)
+            else:
+                return render_dot_node(level, node, children_results)
+
+        return self.browse2(render_dot)
 
     def dotLinks(self, node):
         """

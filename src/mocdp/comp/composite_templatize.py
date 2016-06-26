@@ -21,7 +21,7 @@ def cndp_templatize_children(cndp):
     return CompositeNamedDP.from_parts(name2ndp, connections, fnames, rnames)
 
 @contract(ndp=CompositeNamedDP, returns=SimpleWrap)
-def ndp_templatize(ndp):
+def ndp_templatize(ndp, mark_as_template=False):
     """ Creates a template based on the interface. """
     fnames = ndp.get_fnames()
     ftypes = ndp.get_ftypes(fnames)
@@ -43,9 +43,12 @@ def ndp_templatize(ndp):
     from mocdp.comp.template_imp import Dummy
 
     dp = Dummy(F, R)
-    res = OnlyTemplate(dp, fnames, rnames)
+    if mark_as_template:
+        klass = OnlyTemplate
+    else:
+        klass = SimpleWrap
+    res = klass(dp, fnames, rnames)
 
-#     setattr(res, 'template_parameter', 'ciao')
     return res
 
 

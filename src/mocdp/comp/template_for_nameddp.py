@@ -49,10 +49,10 @@ class TemplateForNamedDP():
 
         parameters = dict(**self.parameters)
         for k in parameters:
-            p = ndp_templatize(parameters[k])
+            # mark_as_template makes it use a special class that
+            # is then recognized by gg_ndp and plotted as dashed
+            p = ndp_templatize(parameters[k], mark_as_template=True)
             setattr(p, 'template_parameter', k)
-
-            print id(p), type(p), hasattr(p, 'template_parameter')
             parameters[k] = p
 
 

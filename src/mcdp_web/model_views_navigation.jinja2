@@ -6,11 +6,13 @@ div.library, div.this_model {
 	display: inline; 
 	margin: 5px;
 	padding: 5px;
-	background-color: #eee;
+	/*background-color: #eee;*/
 }
 
 div.library span, div.this_model span { font-size: 80%; }
 
+#select_view { width: 18em; }
+#select_model { width: 18em; }
 </style>
 
 
@@ -23,7 +25,7 @@ div.library span, div.this_model span { font-size: 80%; }
 
 		<div class="library">
 	
-	  <select class='hot_select'>
+	  <select id='select_library' class='hot_select'>
 	    {% for li in navigation['libraries'] %}
 	    <option value="{{li['url']}}" {% if li['current'] %} selected = 1 {% endif %}>
 	    	{{li['name']}}
@@ -36,7 +38,7 @@ div.library span, div.this_model span { font-size: 80%; }
 	        <a style='display:none' href="{{li['url']}}"></a>
 	    {% endfor %}
 	  
-	  <select class='hot_select'>
+	  <select id='select_model' class='hot_select'>
 	  	{% if not navigation['current_model'] and not navigation['current_template'] 
 	  		and not navigation['current_poset'] %}
 	  		
@@ -62,9 +64,9 @@ div.library span, div.this_model span { font-size: 80%; }
 	  
 	  {% if navigation['current_model'] %}
 	  <div class="this_model" style="">  
-			  <span>Views:</span>
 			  
-			  <select class='hot_select'>
+			  
+			  <select id='select_view' class='hot_select'>
 			    {% for vi in navigation['views'] %}
 			    <option value="{{vi['url']}}" {% if vi['current'] %} selected = 1 {% endif %}>
 			    	{{vi['name']}}
@@ -83,8 +85,14 @@ div.library span, div.this_model span { font-size: 80%; }
 </table>
   
 <script type = "text/javascript">
- $('.hot_select').change(function() {
-  window.location = $(this).val();
+$(document).ready(function() {
+
+	function handle(event, ui) {
+	 console.log('change');
+	  window.location = $(this).val();
+	}
+	
+	$('.hot_select').selectmenu({change: handle});
 });
 </script>
 
