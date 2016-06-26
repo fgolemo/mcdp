@@ -24,11 +24,10 @@
 	<td style='border: solid 0px gray; text-align: center'>
 	  <div style='height: 100%; border: solid 0px yellow'>
 	  <a id='graph' href="graph.png">
-	  	<img  src='graph.png' style='max-height: 20em; max-width: 100%'/>
+	  	<img src='graph.png' style='max-height: 20em; max-width: 100%'/>
 	  </a>
 	  	<script type='text/javascript'>
 	  	$(document).ready(function() {
-	  	console.log('ready');
 	  		$('#graph').imageZoom();
 		});
 	  	</script>
@@ -49,7 +48,7 @@
 <tr>
 <td colspan=2>
 <span id='save_status'></span>
-  	<span id='server_status'></span>
+  <span id='server_status'></span>
   <pre id='syntax_error'></pre>
   <pre id='comm_failure'></pre>
   </td></tr>
@@ -88,8 +87,8 @@
 		if (text == last_text_sent_to_server)
 			return;
 
-		$('button#save').disable();
-		$('#around_editor').css('background-color', '#ffe');
+		text_has_changed();
+
 		
 		// and we wait that the user stops editing
 		if (timeoutID != null){
@@ -97,6 +96,13 @@
 		}
 
 		timeoutID = window.setTimeout(try_to_parse_it, parsing_wait_ms);
+	}
+
+	function text_has_changed() {
+		// $('button#save').disable();
+		$('#around_editor').css('background-color', '#ffe');
+		$('#syntax_error').html('');
+		$("a#graph img").attr("src", '/static/white.png');		
 	}
 
 
@@ -184,7 +190,9 @@
 		//console.log(JSON.stringify(s));
 
 		function on_proc_failure(res) {
-			console.log(res['error']);
+			//console.log('on_proc_failure ' + ('highlight' in res) + res['highlight'])
+			//console.log('res: ' + (JSON.stringify(res)))
+			// console.log(res['error']);
 			$('#syntax_error').html(res['error']);
 			//$('#syntax_error').show();
 			$('#around_editor').css('background-color', '#fee');
@@ -193,7 +201,7 @@
 
 			if ('highlight' in res) {
 				relevant = still_relevant(res['request']['text']);
-
+				console.log('relevant ' +relevant)
 				if (relevant)
 					update_text_with_highlight(res['request']['text'], res['highlight']);
 				else {
@@ -223,7 +231,8 @@
 		}
 
 		last_text_sent_to_server = s;
-		ajax_send("ajax_parse", {'text': s}, on_comm_failure, on_proc_failure, on_success);
+		ajax_send("ajax_parse", {'text': s}, 
+				 on_comm_failure, on_proc_failure, on_success);
 	}
 
 	function click_button_discard(res) {
@@ -262,7 +271,9 @@
 	function update_image() {
 		text = current_text();
 		hash = hex_sha1(text);
-		$("img#graph").attr("src", "graph.png?"+hash);		
+		url = "graph.png?"+hash;
+		$("a#graph").attr("href", url);		
+		$("a#graph img").attr("src", url);		
 	} 
 
 	</script>

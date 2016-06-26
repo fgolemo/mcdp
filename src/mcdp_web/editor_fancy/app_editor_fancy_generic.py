@@ -5,21 +5,16 @@ from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from mcdp_report.html import ast_to_html
-from mcdp_web.utils import (ajax_error_catch, ajax_error_catch,
-    create_image_with_string, format_exception_for_ajax_response,
+from mcdp_web.utils import (ajax_error_catch, create_image_with_string,
     format_exception_for_ajax_response, png_error_catch, response_image)
-from mcdp_web.utils.image_error_catch_imp import (create_image_with_string,
-    png_error_catch, response_image)
 from mcdp_web.utils.response import response_data
 from mocdp import logger
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-from mocdp.exceptions import DPSemanticError
+from mocdp.exceptions import DPSemanticError, DPInternalError
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render_to_response
 import cgi
 import os
-
-
 
 
 Spec = namedtuple('Spec', 'url_part url_variable extension parse_expr parse'
@@ -188,18 +183,18 @@ class AppEditorFancyGeneric():
                     l = self.get_library(request)
                     thing = spec.parse(l, string)
 
-                except DPSemanticError as e:
+                except (DPSemanticError, DPInternalError) as e:
 
                     self.last_processed2[key] = None  # XXX
                     res = format_exception_for_ajax_response(e, quiet=(DPSemanticError,))
                     res['highlight'] = highlight
                     res['request'] = req
+
                     return res
 
                 self.last_processed2[key] = thing
             except:
                 self.last_processed2[key] = None  # XXX
-
                 raise
 
             # print string.__repr__()
@@ -265,12 +260,12 @@ class AppEditorFancyGeneric():
             raise HTTPFound(url_edit)
 
 
-def get_png_data_unavailable(name, x):
+def get_png_data_unavailable(name, x):  # @UnusedVariable
     s = str(x)
     return create_image_with_string(s, size=(512, 512), color=(0, 0, 255))
 
 
-def get_png_data_template(name, x):
+def get_png_data_template(name, x):  # @UnusedVariable
     assert isinstance(x, TemplateForNamedDP)
 
     ndp = x.get_template_with_holes()

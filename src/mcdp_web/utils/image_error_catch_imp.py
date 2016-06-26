@@ -20,6 +20,14 @@ def png_error_catch(f, request):
         return response_image(request, s)
 
 def response_image(request, s):
+
+    # only use the
+    maxlines = 30
+    lines = s.split("\n")
+    if len(lines) > maxlines:
+        lines = lines[-maxlines:]
+    s = "\n".join(lines)
+
     data = create_image_with_string(s, size=(512, 512), color=(255, 0, 0))
     return response_data(request=request, data=data, content_type='image/png')
 
