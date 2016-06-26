@@ -54,6 +54,7 @@ addons:
     - python-matplotlib
     - python-numpy
     - python-yaml
+    - python-pil
     - wkhtmltopdf
     - pypy-dev
     - python-cffi  # for pypy/numpy
