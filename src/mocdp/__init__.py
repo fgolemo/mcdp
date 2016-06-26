@@ -2,6 +2,7 @@
 __version__ = '2.0.11'
 
 import logging
+from contracts.utils import raise_wrapped
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -26,14 +27,15 @@ try:
 except ImportError as e:
     logger.error(e)
     suggest_package('python-pil')
-    raise Exception('PIL not available')
+    # raise Exception('PIL not available')
+    raise_wrapped(Exception, e, 'PIL not available')
 
 try:
     import matplotlib
 except ImportError as e:
     logger.error(e)
     suggest_package('python-matplotlib')
-    raise Exception('Matplotlib not available')
+    raise_wrapped(Exception, e, 'Matplotlib not available')
 
 try:
     import yaml
