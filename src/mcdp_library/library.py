@@ -54,6 +54,8 @@ class MCDPLibrary():
         
         if cache_dir is not None:
             self.use_cache_dir(cache_dir)
+        else:
+            self.cache_dir = None
 
         if search_dirs is None:
             search_dirs = []
