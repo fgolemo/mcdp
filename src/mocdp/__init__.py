@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-__version__ = '2.0.11'
+__version__ = '2.0.12'
 
 import logging
 from contracts.utils import raise_wrapped
