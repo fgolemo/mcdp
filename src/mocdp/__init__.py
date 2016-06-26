@@ -21,7 +21,27 @@ except ImportError as e:
     suggest_package('python-numpy')
     raise SystemExit(1)
 
-from PIL import Image
+try:
+    from PIL import Image
+except ImportError as e:
+    logger.error(e)
+    suggest_package('python-pil')
+    raise SystemExit(1)
+
+try:
+    import matplotlib
+except ImportError as e:
+    logger.error(e)
+    suggest_package('python-matplotlib')
+    raise SystemExit(1)
+
+try:
+    import yaml
+except ImportError as e:
+    logger.error(e)
+    suggest_package('python-yaml')
+    raise SystemExit(1)
+
 import conf_tools
 import decent_params
 import decent_logs
