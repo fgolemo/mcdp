@@ -16,7 +16,7 @@ CDP = CDPLanguage
 @contextmanager
 def add_where_information(where):
     """ Adds where field to DPSyntaxError or DPSemanticError thrown by code. """
-    active = False
+    active = True
     if not active:
         mcdp_dev_warning('add_where_information is disabled')
         yield

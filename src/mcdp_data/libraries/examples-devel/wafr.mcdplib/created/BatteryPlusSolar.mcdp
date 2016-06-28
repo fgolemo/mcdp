@@ -1,0 +1,12 @@
+mcdp {
+  battery = new Battery
+  solar_panels = new solar_panels
+
+  provides power_profile using battery
+  charging_profile required by battery <= power_profile provided by solar_panels
+ 
+  requires cost >= battery.cost + solar_panels.cost
+  requires mass >= battery.mass + solar_panels.mass
+  requires area,solar_radiation for solar_panels
+
+}

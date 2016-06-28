@@ -108,8 +108,13 @@
 		// $('button#save').disable();
 		$('#around_editor').css('background-color', '#ffe');
 		$('#syntax_error').html('');
-		$("a#graph img").attr("src", '/static/white.png');	
-		$('a#graph').imageZoom();	
+		
+		current =$("a#graph img").attr("src");
+		desired = '/static/white.png';
+		if (current != desired) {
+			$("a#graph img").attr("src", desired);	
+			$('a#graph').imageZoom();	
+		}
 		saved = false;
 	}
 
@@ -245,6 +250,8 @@
 	}
 
 	function click_button_discard(res) {
+		// Override safety mechanism
+		saved = true;
 		location.reload();
 	}
 
@@ -292,12 +299,19 @@
 
 	var saved = true; 
 
-	window.onbeforeunload = confirmExit;
 	function confirmExit() {
     	if (!saved) {
         	return "You did not save, do you want to do it now?";
     	}
 	}
+	window.onbeforeunload = confirmExit;
+	
+	$(window).keydown(function (e){
+    if ((e.metaKey || e.ctrlKey) && e.keyCode == 83) { /*ctrl+s or command+s*/
+        e.preventDefault();
+        click_button_save();
+    }
+});
 </script>
 
 

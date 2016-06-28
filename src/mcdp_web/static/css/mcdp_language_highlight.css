@@ -47,7 +47,8 @@ span.InstanceKeyword,
 span.FlattenKeyword,
 span.ApproxKeyword,
 span.TakeKeyword,
-span.SpecializeKeyword
+span.SpecializeKeyword,
+span.FinitePosetKeyword
 
 { 
     font-weight: bold; 
@@ -69,7 +70,8 @@ span.FuncName { color: #CC6600 ; }
 
 
 span.FName, span.RName { } 
-span.DPName, span.NDPName, span.PosetName, span.TemplateParamName {  
+span.DPName, span.NDPName, span.PosetName, span.TemplateParamName,
+span.FinitePosetElement {  
     color: #a0a;
 }
 

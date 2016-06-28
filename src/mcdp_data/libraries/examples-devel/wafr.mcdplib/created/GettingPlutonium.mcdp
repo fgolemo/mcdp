@@ -1,0 +1,20 @@
+mcdp {
+
+  provides plutonium [g]
+ 
+  Obama = catalogue {
+     provides plutonium [g]
+     requires science [`scientific_objectives]
+     _ | 50g | `scientific_objectives : find_ancient_life
+  }  
+
+  Putin = catalogue {
+     provides plutonium [g]
+     requires science [`scientific_objectives]
+     _ | 100g | `scientific_objectives : find_current_life
+  }
+
+  friend = instance choose(US:Obama, Ru:Putin)
+  provided plutonium <=  plutonium provided by friend
+  requires science for friend
+}

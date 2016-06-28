@@ -62,6 +62,10 @@ class MCDPLibrary():
 
         self.search_dirs = search_dirs
 
+    def get_images_paths(self):
+        """ Returns a list of paths to search for images assets. """
+        return list(self.search_dirs)
+
     def clone(self):
         fields = ['file_to_contents', 'cache_dir', 'search_dirs']
         contents = {}

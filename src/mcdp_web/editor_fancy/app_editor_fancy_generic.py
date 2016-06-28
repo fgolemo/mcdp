@@ -10,7 +10,7 @@ from mcdp_web.utils import (ajax_error_catch, create_image_with_string,
 from mcdp_web.utils.response import response_data
 from mocdp import logger
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-from mocdp.exceptions import DPSemanticError, DPInternalError
+from mocdp.exceptions import DPInternalError, DPSemanticError
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render_to_response
 import cgi
@@ -205,6 +205,7 @@ class AppEditorFancyGeneric():
 
     def graph_generic(self, request, spec):
         def go():
+            library = self.get_library(request)
             widget_name = self.get_widget_name(request, spec)
             library_name = self.get_current_library_name(request)
             key = (library_name, spec, widget_name)
@@ -217,7 +218,7 @@ class AppEditorFancyGeneric():
                 if thing is None:
                     return response_image(request, 'Could not parse.')
 
-            png = spec.get_png_data(widget_name, thing)
+            png = spec.get_png_data(library, widget_name, thing)
 
             return response_data(request, png, 'image/png')
         return png_error_catch(go, request)
@@ -260,23 +261,24 @@ class AppEditorFancyGeneric():
             raise HTTPFound(url_edit)
 
 
-def get_png_data_unavailable(name, x):  # @UnusedVariable
+def get_png_data_unavailable(library, name, x):  # @UnusedVariable
     s = str(x)
     return create_image_with_string(s, size=(512, 512), color=(0, 0, 255))
 
-
-def get_png_data_template(name, x):  # @UnusedVariable
+def get_png_data_template(library, name, x):  # @UnusedVariable
     assert isinstance(x, TemplateForNamedDP)
 
     ndp = x.get_template_with_holes()
 
     setattr(ndp, '_hack_force_enclose', True)
 
-    gg = gvgen_from_ndp(ndp, STYLE_GREENREDSYM, direction='TB')
+    images_paths = library.get_images_paths()
+    gg = gvgen_from_ndp(ndp, STYLE_GREENREDSYM, direction='TB',
+                        images_paths=images_paths)
     png, _pdf = png_pdf_from_gg(gg)
     return png
 
-def get_png_data_model(name, ndp):
+def get_png_data_model(library, name, ndp):
     from mocdp.comp.composite import CompositeNamedDP
     if isinstance(ndp, CompositeNamedDP):
         ndp2 = ndp.templatize_children()
@@ -286,8 +288,9 @@ def get_png_data_model(name, ndp):
         setattr(ndp2, '_xxx_label', name)
 
     # ndp2 = cndp_get_suitable_for_drawing(model_name, ndp)
-
-    gg = gvgen_from_ndp(ndp2, STYLE_GREENREDSYM, direction='TB')
+    images_paths = library.get_images_paths()
+    gg = gvgen_from_ndp(ndp2, STYLE_GREENREDSYM, direction='TB',
+                        images_paths=images_paths)
     png, _pdf = png_pdf_from_gg(gg)
 
     return png

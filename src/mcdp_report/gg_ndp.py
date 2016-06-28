@@ -1,27 +1,19 @@
 # -*- coding: utf-8 -*-
-
 from collections import defaultdict
-from contextlib import contextmanager
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (Constant, Conversion, GenericUnary, Identity, InvMult2,
     InvPlus2, InvPlus2Nat, Limit, Max, MeetNDual, Min, Mux, MuxMap, Product,
     ProductN, Sum, SumN, SumNNat, WrapAMap)
 from mcdp_lang.blocks import get_missing_connections
-from mcdp_library.utils import dir_from_package_name
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
-from mcdp_report.utils import safe_makedirs
 from mocdp import logger
 from mocdp.comp import CompositeNamedDP, SimpleWrap
 from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning
 from mocdp.ndp import NamedDPCoproduct
-from system_cmd import CmdException, system_cmd_result
-from tempfile import mkdtemp
-import os
-
 
 STYLE_GREENRED = 'greenred'
 STYLE_GREENREDSYM = 'greenredsym'
@@ -30,175 +22,6 @@ COLOR_DARKGREEN = 'darkgreen'
 # COLOR_DARKGREEN = 'green'
 COLOR_DARKRED = 'red'
 
-class GraphDrawingContext():
-    def __init__(self, gg, parent, yourname, level=0, tmppath=None, style='default'):
-        self.gg = gg
-        self.parent = parent
-        self.yourname = yourname
-        self.level = level
-        
-        if tmppath is None:
-            tmppath = mkdtemp(suffix="dp-icons")
-            mcdp_dev_warning('need to share icons')
-            # print('created tmp directory %r' % tmppath)
-        self.tmppath = tmppath
-
-        self.all_nodes = []
-
-        self.set_style(style)
-
-    def get_all_nodes(self):
-        return self.all_nodes
-
-    def newItem(self, label):
-
-        n = self.gg.newItem(label, parent=self.parent)
-        # print('New item %r sub of %r' % (n['id'], self.parent['id'] if self.parent else '-'))
-
-        self.all_nodes.append(n)
-        return n
-        
-    def child_context(self, parent, yourname):
-        c = GraphDrawingContext(gg=self.gg, parent=parent, yourname=yourname,
-                                level=self.level + 1, tmppath=self.tmppath, style=self.style)
-        return c
-
-    @contextmanager
-    def child_context_yield(self, parent, yourname):
-        c = self.child_context(parent=parent, yourname=yourname)
-        yield c
-        self.all_nodes.extend(c.all_nodes)
-
-
-    def styleApply(self, sname, n):
-        self.gg.styleApply(sname, n)
-
-    def newLink(self, a, b, label=None):
-        return self.gg.newLink(a, b, label)
-
-    def styleAppend(self, a, b, c):
-        self.gg.styleAppend(a, b, c)
-
-    def set_style(self, style):
-        self.style = style
-        if style == 'default':
-            self.policy_enclose = 'always_except_first'
-            self.policy_skip = 'never'
-        elif style == 'clean':
-            self.policy_enclose = 'only_if_unconnected'
-            self.policy_skip = 'if_second_simple'
-        elif style in [STYLE_GREENRED, STYLE_GREENREDSYM]:
-            self.policy_enclose = 'always_except_first'
-            self.policy_skip = 'never'
-
-        else: 
-            raise ValueError(style)
-        
-        if style in [STYLE_GREENRED, STYLE_GREENREDSYM]:
-            self.gg.styleAppend('splitter', 'style', 'filled')
-            self.gg.styleAppend('splitter', 'shape', 'point')
-            self.gg.styleAppend('splitter', 'width', '0.1')
-            self.gg.styleAppend('splitter', 'color', 'red')
-        else:
-            self.gg.styleAppend('splitter', 'style', 'filled')
-            self.gg.styleAppend('splitter', 'shape', 'point')
-            self.gg.styleAppend('splitter', 'width', '0.1')
-            self.gg.styleAppend('splitter', 'color', 'black')
-
-    def should_I_enclose(self, ndp):
-        if hasattr(ndp, '_hack_force_enclose'):
-            return True
-
-        if self.level == 0:
-            return False
-
-        if self.policy_enclose == 'always_except_first':
-            return True
-        elif self.policy_enclose == 'only_if_unconnected':
-            unconnected = not ndp.is_fully_connected() 
-            if unconnected:
-                return True
-            else:
-                return self.yourname is not None
-        else:
-            raise ValueError(self.policy_enclose)
-
-    def should_I_skip_leq(self, context, c):
-        if self.policy_skip == 'never':
-            return False
-        elif self.policy_skip == 'if_second_simple':
-            second_simple = is_simple(context.names[c.dp2])
-            # first_simple = is_simple(context.names[c.dp1])
-            # any_simple = second_simple or first_simple
-            # both_simple = second_simple and first_simple
-
-            mcdp_dev_warning('Add options here')
-            skip = second_simple
-            return skip
-        else:
-            assert False, self.policy_skip
-
-    def get_temp_path(self):
-        return self.tmppath
-
-    def get_imagepath(self):
-        base = dir_from_package_name('mcdp_report')
-        imagepath = os.path.join(base, 'icons')
-        if not os.path.exists(imagepath):
-            raise ValueError('Icons path does not exist: %r' % imagepath)
-        return imagepath
-
-    def get_icon(self, options):
-        tmppath = self.get_temp_path()
-        # imagepath = self.get_imagepath()
-        imagepaths = ['.', self.get_imagepath()]
-        best = choose_best_icon(options, imagepaths, tmppath)
-        return best
-
-    def decorate_arrow_function(self, l1):
-        propertyAppend = self.gg.propertyAppend
-        if self.style == STYLE_GREENRED:
-
-            propertyAppend(l1, 'color', COLOR_DARKGREEN)
-            propertyAppend(l1, 'arrowhead', 'normal')
-            propertyAppend(l1, 'arrowtail', 'none')
-            propertyAppend(l1, 'dir', 'both')
-
-        if self.style == STYLE_GREENREDSYM:
-            propertyAppend(l1, 'color', 'darkgreen')
-            propertyAppend(l1, 'arrowhead', 'dot')
-            propertyAppend(l1, 'arrowtail', 'none')
-            propertyAppend(l1, 'dir', 'both')
-
-
-    def decorate_arrow_resource(self, l2, split=False):
-        propertyAppend = self.gg.propertyAppend
-
-        if self.style == STYLE_GREENRED:
-            propertyAppend(l2, 'color', COLOR_DARKRED)
-            propertyAppend(l2, 'arrowtail', 'inv')
-            propertyAppend(l2, 'arrowhead', 'none')
-            propertyAppend(l2, 'dir', 'both')
-
-        if self.style == STYLE_GREENREDSYM:
-            propertyAppend(l2, 'color', COLOR_DARKRED)
-            propertyAppend(l2, 'arrowtail', 'dot')
-            propertyAppend(l2, 'arrowhead', 'none')
-            propertyAppend(l2, 'dir', 'both')
-
-
-    def decorate_resource_name(self, n):
-        propertyAppend = self.gg.propertyAppend
-
-        if self.style in  [STYLE_GREENRED, STYLE_GREENREDSYM]:
-            propertyAppend(n, 'fontcolor', COLOR_DARKRED)
-
-    def decorate_function_name(self, n):
-        propertyAppend = self.gg.propertyAppend
-        if self.style in  [STYLE_GREENRED, STYLE_GREENREDSYM]:
-            propertyAppend(n, 'fontcolor', COLOR_DARKGREEN)
-
-
 #    bidirectional
 #             propertyAppend(l2, 'color', 'red')
 #             propertyAppend(l2, 'arrowtail', 'dot')
@@ -206,7 +29,7 @@ class GraphDrawingContext():
 #             propertyAppend(l2, 'dir', 'both')
 
 @contract(ndp=NamedDP)
-def gvgen_from_ndp(ndp, style='default', direction='LR'):
+def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[]):
     assert isinstance(ndp, NamedDP)
     import my_gvgen as gvgen
     # gg = gvgen.GvGen(options="rankdir=LR")
@@ -215,7 +38,9 @@ def gvgen_from_ndp(ndp, style='default', direction='LR'):
     if len(ndp.get_fnames()) > 0:
         cluster_functions = gg.newItem("")
 
-    gdc = GraphDrawingContext(gg=gg, parent=None, yourname=None)
+    from .gdc import GraphDrawingContext
+    gdc = GraphDrawingContext(gg=gg, parent=None,
+                              yourname=None, images_paths=images_paths)
     gdc.set_style(style)
 
     gg.styleAppend("external", "shape", "none")
@@ -362,36 +187,7 @@ def create(gdc, ndp):
 
     return res
 
-def resize_icon(filename, tmppath, size):
 
-    res = os.path.join(tmppath, 'resized', str(size))
-
-    safe_makedirs(res)
-    resized = os.path.join(res, os.path.basename(filename))
-    if not os.path.exists(resized):
-        cmd = ['convert', filename, '-resize', '%s' % size, resized]
-        try:
-            # print('running graphviz')
-            system_cmd_result(cwd='.', cmd=cmd,
-                     display_stdout=False,
-                     display_stderr=False,
-                     raise_on_error=True)
-            # print('done')
-        except CmdException:
-            raise
-    return resized
-
-def choose_best_icon(iconoptions, imagepaths, tmppath):
-    # logger.debug('Looking for %s.' % (str(iconoptions)))
-    for option in iconoptions:
-        if option is None:
-            continue
-        for imagepath in imagepaths:
-            imagename = os.path.join(imagepath, option) + '.png'
-            if os.path.exists(imagename):
-                return resize_icon(imagename, tmppath, 100)
-    # logger.debug('Could not find PNG icon for %s.' % (str(iconoptions)))
-    return None
 
 def is_simple(ndp):
     return isinstance(ndp, SimpleWrap) and isinstance(ndp.dp,
@@ -424,8 +220,6 @@ def create_simplewrap(gdc, ndp):
     icon = ndp.get_icon()
     
 
-
-
     simple = (Min, Max, Identity, GenericUnary, WrapAMap)
     only_string = isinstance(ndp.dp, simple)
 
@@ -433,7 +227,9 @@ def create_simplewrap(gdc, ndp):
         icon = 'split2'
         only_string = False
 
-    iconoptions = [gdc.yourname, icon, classname, 'default']
+    load_name = getattr(ndp, '__mcdplibrary_load_name', '(unavailable)')
+
+    iconoptions = [gdc.yourname, icon, load_name, classname, 'default']
     best_icon = gdc.get_icon(iconoptions)
 
     if only_string:

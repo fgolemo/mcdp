@@ -1,0 +1,53 @@
+#priority
+- id: 100USD
+  # priority: 1
+  tags: [budget]
+  name: 100 USD 
+  desc: USD 100
+
+  resources:
+  - name: USD100
+    type: mcdp/model
+    content-type: text/mcdp
+    content: >
+        mcdp {
+          provides budget [USD]
+          budget <= 100 USD
+        }
+
+  - name: sum_budget
+    type: mcdp/model
+    content-type: text/mcdp
+    content: >
+        mcdp {
+          provides budget [USD]
+          requires budget1 [USD]
+          requires budget2 [USD]
+          provided budget <= required budget1 + required budget2
+        }
+
+- id: 1USD 
+  tags: [budget]
+  name: 1 USD (better)
+  desc: USD 1
+
+  resources:
+  - name: USD1
+    type: mcdp/model
+    content-type: text/mcdp
+    content: >
+        mcdp {
+          provides budget [USD]
+          budget <= 1 USD
+        }
+
+  - name: sum_budget
+    type: mcdp/model
+    content-type: text/mcdp
+    content: >
+        mcdp {
+          provides budget [USD]
+          requires budget1 [USD]
+          requires budget2 [USD]
+          provided budget <= required budget1 + required budget2
+        }

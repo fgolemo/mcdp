@@ -16,7 +16,6 @@ import numpy as np
 
 @contract(ndp=CompositeNamedDP)
 def cndp_makecanonical(ndp):
-
     try:
         ndp.check_fully_connected()
     except NotConnected as e:

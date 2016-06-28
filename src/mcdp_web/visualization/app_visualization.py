@@ -49,8 +49,10 @@ class AppVisualization():
             style = request.matchdict['style']
             fileformat = request.matchdict['format']
 
-            ndp = self.get_library(request).load_ndp(model_name)
-            gg = gvgen_from_ndp(ndp, style)
+            library = self.get_library(request)
+            ndp = library.load_ndp(model_name)
+            images_paths = library.get_images_paths()
+            gg = gvgen_from_ndp(ndp, style, images_paths=images_paths)
 
             from reprep import Report
             from mcdp_report.gg_utils import gg_figure

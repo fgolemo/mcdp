@@ -4,9 +4,9 @@ from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mcdp_lang.namedtuple_tricks import isnamedtuplewhere
 from mcdp_lang.parse_actions import parse_wrap
-
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
+
 
 
 def isolate_comments(s):
@@ -34,7 +34,7 @@ def ast_to_text(s):
 @contract(s=str)
 def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: False,
                 add_line_gutter=True, encapsulate_in_precode=True, add_css=True,
-                parse_expr=Syntax.ndpt_dp_rvalue):
+                parse_expr=Syntax.ndpt_dp_rvalue, add_line_spans=False):
 
     s_lines, s_comments = isolate_comments(s)
     assert len(s_lines) == len(s_comments) 
@@ -97,13 +97,15 @@ def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: 
         if ignore_line(lineno):
             pass
         else:
-            out += "<span id='line%d'>" % lineno
+            if add_line_spans:
+                out += "<span id='line%d'>" % lineno
             if add_line_gutter:
                 out += "<span class='line-gutter'>%2d</span>" % lineno
                 out += "<span class='line-content'>" + line + "</span>"
             else:
                 out += line
-            out += "</span>"
+            if add_line_spans:
+                out += "</span>"
             if i != len(lines) - 1:
                 out += '\n'
 

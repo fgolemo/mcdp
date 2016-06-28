@@ -1,0 +1,64 @@
+- id: compose_battery_series
+  name: Put batteries in series
+  tags: [power]
+  mcdp:
+  - library: lib
+    assets: ['*.mcdp', '*.jpg']
+
+- id: compose_battery_parallel
+  name: Put batteries in parallel
+  tags: [power]
+  mcdp:
+  - library: lib
+    assets: ['*.mcdp', '*.jpg']
+
+# - id: riteg
+#   mcdp:
+#   - library: wafr
+#     assets: ['riteg.*', 'plutonium.*', 'thermocouple.*']
+
+- id: library_batteries
+  name: All the batteries that we know
+  tags: [power]
+  mcdp:
+  - library: batteries
+    assets: ['*']
+
+
+- id: revolute_joint
+  name: Revolute joint
+  tags: [actuator]
+  mcdp:
+  - library: kinematics
+    assets: ['revolute_*']
+
+- id: prismatic_joint
+  name: Prismatic joint
+  tags: [actuator]
+  mcdp:
+  - library: kinematics
+    assets: ['revolute_*']
+
+- id: compose_kinematics
+  name: Compose kinematics in series
+  tags: [actuator]
+  mcdp:
+  - library: lib
+    assets: ['*.mcdp', '*.jpg']
+
+
+  # resources:
+  # - name: propellers
+  #   type: mcdp/model
+  #   content-type: text/mcdp
+  #   content: >
+  #       mcdp {
+  #         provides lift [N]
+  #         requires torque [N m]
+          
+  #         lift <= 10 N
+  #         l = provided lift
+  #         c0 = 1 W
+  #         c1 = 2 W / N^2
+  #         required torque >= c0 + c1 * l
+  #       }

@@ -27,21 +27,21 @@ class NamedDPCoproduct(NamedDP):
         ftypes = first.get_ftypes(first.get_fnames())
         rtypes = first.get_rtypes(first.get_rnames())
 
-        for _, ndp in enumerate(ndps):
+        for i, ndp in enumerate(ndps):
             ftypes_i = ndp.get_ftypes(ndp.get_fnames())
             rtypes_i = ndp.get_rtypes(ndp.get_rnames())
-
+            name = 'model #2' % i if not self.labels else self.labels[i].__repr__()
             try:
                 tu.check_equal(ftypes, ftypes_i)
             except NotEqual as e:
-                msg = 'Cannot create co-product: ftypes do not match.'
+                msg = 'Cannot create co-product: ftypes of %s do not match the first.' % name
                 raise_wrapped(ValueError, e, msg,
                               ftypes=ftypes, ftypes_i=ftypes_i)
 
             try:
                 tu.check_equal(rtypes, rtypes_i)
             except NotEqual as e:
-                msg = 'Cannot create co-product: rtypes do not match.'
+                msg = 'Cannot create co-product: rtypes of %s not match the first.' % name
                 raise_wrapped(ValueError, e, msg,
                               rtypes=rtypes, rtypes_i=rtypes_i)
 

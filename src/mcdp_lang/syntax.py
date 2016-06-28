@@ -8,13 +8,13 @@ from .parts import CDPLanguage
 from .syntax_utils import (COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR,
     VariableRef_make, simple_keyword_literal, sp)
 from mcdp_lang.utils_lists import make_list
+from mocdp.exceptions import mcdp_dev_warning
 from pyparsing import (
     CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
     NotAny, OneOrMore, Optional, Or, ParserElement, Word, ZeroOrMore, alphanums,
     alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
     sglQuotedString)
 import math
-from mocdp.exceptions import mcdp_dev_warning
 
 
 ParserElement.enablePackrat()
@@ -87,7 +87,7 @@ class SyntaxIdentifiers():
 
     # remember to .copy() this otherwise things don't work
     _idn = (NotAny(MatchFirst([Keyword(_) for _ in keywords])) +
-            Combine(oneOf(list(alphas)) +
+            Combine(oneOf(list('_' + alphas)) +
                     Optional(Word('_' + alphanums)))).setResultsName('idn')
 
     @staticmethod
@@ -356,7 +356,7 @@ class Syntax():
 
     # <space> : identifier
     # `plugs : european
-    short_identifiers = Word(nums + alphas)
+    short_identifiers = Word(nums + alphas + '_')
     space_custom_value1 = sp(space + L(":") + short_identifiers,
                           lambda t: CDP.SpaceCustomValue(t[0], t[1], t[2]))
 
@@ -551,13 +551,20 @@ class Syntax():
     entry = rvalue
     imp_name = sp(get_idn(), lambda t: CDP.ImpName(t[0]))
     col_separator = L('|') ^ L('│')  # box drawing
-    catalogue_row = sp(imp_name +  # S(L('[')) + entry +
-                       ZeroOrMore(S(col_separator) + entry),  # + S(L(']')),
+    catalogue_row = sp(imp_name +
+                       ZeroOrMore(S(col_separator) + entry),
                        lambda t: make_list(list(t)))
 
     catalogue_table = sp(OneOrMore(catalogue_row),
                          lambda t: CDP.CatalogueTable(make_list(list(t))))
-     
+
+    FROMCATALOGUE = sp(L('catalogue'), lambda t:CDP.FromCatalogueKeyword(t[0]))
+    ndpt_catalogue_dp = sp(FROMCATALOGUE -
+                      S(L('{')) -
+                      simple_dp_model_stats -
+                      catalogue_table -
+                      S(L('}')),
+                      lambda t: CDP.FromCatalogue(t[0], t[1], t[2]))
     # Example:
     #    choose(name: <dp>, name2: <dp>)
     CHOOSE = simple_keyword_literal('choose', CDP.CoproductWithNamesChooseKeyword)
@@ -586,13 +593,7 @@ class Syntax():
                                                      max_value=t[4],
                                                      dp=t[5]))
 
-    FROMCATALOGUE = sp(L('catalogue'), lambda t:CDP.FromCatalogueKeyword(t[0]))
-    ndpt_catalogue_dp = sp(FROMCATALOGUE -
-                      S(L('{')) -
-                      simple_dp_model_stats -
-                      catalogue_table -
-                      S(L('}')),
-                      lambda t: CDP.FromCatalogue(t[0], t[1], t[2]))
+
 
     ABSTRACT = sp(L('abstract'), lambda t: CDP.AbstractKeyword(t[0]))
     ndpt_abstract = sp(ABSTRACT - ndpt_dp_rvalue,

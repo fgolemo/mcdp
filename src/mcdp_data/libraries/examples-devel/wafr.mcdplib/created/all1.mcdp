@@ -1,0 +1,6 @@
+mcdp {
+
+  energetics = new EnergySources
+  getting_plutonium = new GettingPlutonium
+  plutonium required by energetics <= plutonium provided by getting_plutonium
+}

@@ -18,6 +18,7 @@ from .syntax_multiset import *
 from .syntax_intervals import *
 from .syntax_conversions import *
 from .syntax_uncertainty import *
+from .syntax_catalogue import *
 
 """
     

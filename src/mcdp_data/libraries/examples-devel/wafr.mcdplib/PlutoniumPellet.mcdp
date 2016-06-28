@@ -1,0 +1,5 @@
+template mcdp {
+  provides heat [W]
+  requires plutonium [g]
+  requires mass [g]
+}

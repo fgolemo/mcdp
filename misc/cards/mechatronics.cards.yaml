@@ -1,0 +1,18 @@
+- id: 2propellers
+  name: Propellers
+  tags: [actuator]
+  resources:
+  - name: propellers
+    type: mcdp/model
+    content-type: text/mcdp
+    content: >
+        mcdp {
+          provides lift [N]
+          requires torque [N m]
+          
+          lift <= 10 N
+          l = provided lift
+          c0 = 1 W
+          c1 = 2 W / N^2
+          required torque >= c0 + c1 * l
+        }

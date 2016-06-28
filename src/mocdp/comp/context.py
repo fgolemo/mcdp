@@ -161,8 +161,16 @@ class Context():
     def make_function(self, dp, s):
         assert isinstance(dp, str)
         if not dp in self.names:
-            msg = 'Unknown dp (%r.%r)' % (dp, s)
+            msg = 'Unknown design problem %r.' % dp
             raise DPSemanticError(msg)
+
+        ndp = self.names[dp]
+
+        if not s in ndp.get_fnames():
+            msg = 'Unknown function %r for design problem %r.' % (s, dp)
+            msg += 'Known functions: %s.' % format_list(ndp.get_fnames())
+            raise DPSemanticError(msg)
+
         return CFunction(dp, s)
 
     @contract(s='str', dp='str', returns=CResource)
@@ -170,15 +178,14 @@ class Context():
         if not isinstance(dp, str):
             raise DPInternalError((dp, s))
         if not dp in self.names:
-            msg = 'Unknown dp (%r.%r)' % (dp, s)
+            msg = 'Unknown design problem %r.' % dp
             raise DPSemanticError(msg)
 
         ndp = self.names[dp]
 
         if not s in ndp.get_rnames():
-            msg = 'Unknown resource %r.' % (s)
-            msg += '\nThe design problem %r evaluates to:' % dp
-            msg += '\n' + indent(ndp.repr_long(), '  ')
+            msg = 'Unknown resource %r for design problem %r.' % (s, dp)
+            msg += 'Known functions: %s.' % format_list(ndp.get_rnames())
             raise DPSemanticError(msg)
 
         return CResource(dp, s)
@@ -405,4 +412,11 @@ class Context():
             msg = "Design problem %r does not have function %r." % (a.dp, a.s)
             raise_desc(DPSemanticError, msg, ndp=dp.repr_long())
         return dp.get_ftype(a.s)
+
+def format_list(l):
+    """ Returns a nicely formatted list. """
+    if not l:
+        return '(empty)'
+    else:
+        return ", ".join(_.__repr__() for _ in l)
 
