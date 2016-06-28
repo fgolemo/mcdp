@@ -7,7 +7,7 @@ mcdp {
      requires science [`scientific_objectives]
      _ | 50g | `scientific_objectives : find_ancient_life
   }  
-
+ 
   Putin = catalogue {
      provides plutonium [g]
      requires science [`scientific_objectives]
