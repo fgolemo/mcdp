@@ -86,6 +86,7 @@ def eval_rvalue(rvalue, context):
         from .eval_resources_imp_maketuple import eval_rvalue_MakeTuple
         from .eval_uncertainty import eval_rvalue_Uncertain
 
+        from mcdp_lang.eval_resources_imp_tupleindex import eval_rvalue_resource_label_index
         cases = {
             CDP.GenericNonlinearity : eval_rvalue_GenericNonlinearity,
             CDP.Power: eval_rvalue_Power,
@@ -97,6 +98,7 @@ def eval_rvalue(rvalue, context):
             CDP.TupleIndex: eval_rvalue_TupleIndex,
             CDP.MakeTuple: eval_rvalue_MakeTuple,
             CDP.UncertainRes: eval_rvalue_Uncertain,
+            CDP.ResourceLabelIndex: eval_rvalue_resource_label_index,
         }
 
         for klass, hook in cases.items():

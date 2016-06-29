@@ -8,7 +8,6 @@ from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
 
 
-
 def isolate_comments(s):
     lines = s.split("\n")
     def isolate_comment(line):

@@ -18,7 +18,7 @@ from .poset_coproduct import *
 from .find_poset_minima import *
 from .multiset import *
 
-
+from .poset_product_with_labels import *
 from .finite_poset import *
 from .finite_collection import *
 from .finite_collections_inclusion import *

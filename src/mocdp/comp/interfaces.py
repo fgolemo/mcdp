@@ -32,6 +32,10 @@ class NamedDP():
 
     def flatten(self):
         return self
+
+    def compact(self):
+        return self
+
     @abstractmethod
     @contract(returns='list(str)')
     def get_fnames(self):
@@ -79,15 +83,6 @@ class NamedDP():
         types = [self.get_rtype(s) for s in signals]
         return PosetProduct(tuple(types))
 
-
-# this is only used in the mcdp_lang_tests, called through the YAML files
-# candidate to go away
-# def dp_from_ndp(ndp):
-#     """ Unwrap """
-#     from mocdp.configuration import get_conftools_nameddps
-#     _, ndp = get_conftools_nameddps().instance_smarter(ndp)
-#     # unwrap
-#     return ndp.get_dp()
 
 
 

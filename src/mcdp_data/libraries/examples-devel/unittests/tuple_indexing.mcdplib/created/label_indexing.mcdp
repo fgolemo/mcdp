@@ -1,0 +1,8 @@
+
+mcdp {
+
+    requires capability [ product(weight: g, energy: J) ]
+    
+    capability..weight >= 1g
+    
+}

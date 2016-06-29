@@ -211,3 +211,10 @@ class CDPLanguage():
     IntervalKeyword = namedtuplewhere('IntervalKeyword', 'keyword')
     SpaceInterval = namedtuplewhere('SpaceInterval', 'keyword a b')
 
+    # product(a: x, b: X)
+    ProductKeyword = namedtuplewhere('ProductKeyword', 'keyword')
+    ProductWithLabelsLabel = namedtuplewhere('ProductWithLabelsLabel', 'label')
+    ProductWithLabels = namedtuplewhere('ProductWithLabels', 'keyword entries')
+    IndexLabel = namedtuplewhere('IndexLabel', 'label')
+    ResourceLabelIndex = namedtuplewhere('ResourceLabelIndex', 'rvalue label')
+    FunctionLabelIndex = namedtuplewhere('FunctionLabelIndex', 'fvalue label')

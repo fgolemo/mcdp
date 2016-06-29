@@ -53,10 +53,12 @@ def eval_lfunction(lf, context):
             return get_valuewithunits_as_function(res, context)
         
         from mcdp_lang.eval_uncertainty import eval_lfunction_Uncertain
+        from mcdp_lang.eval_lfunction_imp_label_index import eval_lfunction_label_index
 
         cases = {
             CDP.UncertainFun: eval_lfunction_Uncertain,
             CDP.DisambiguationFun: eval_lfunction_disambiguation,
+            CDP.FunctionLabelIndex: eval_lfunction_label_index,
         }
 
         for klass, hook in cases.items():

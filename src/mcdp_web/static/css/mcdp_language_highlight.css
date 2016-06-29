@@ -48,7 +48,8 @@ span.FlattenKeyword,
 span.ApproxKeyword,
 span.TakeKeyword,
 span.SpecializeKeyword,
-span.FinitePosetKeyword
+span.FinitePosetKeyword,
+span.ProductKeyword
 
 { 
     font-weight: bold; 
@@ -59,6 +60,10 @@ span.ProvideKeyword, span.RequireKeyword  {
     font-weight: bold; 
     
 } 
+
+span.ProductWithLabelsLabel, span.IndexLabel  {
+	color: #CC6600;
+}
 
 span.ProvideKeyword,  span.ProvidedByKeyword, span.FName { color: darkgreen;}
 span.RequireKeyword, span.RequiredByKeyword, span.RName  { color: darkred;}

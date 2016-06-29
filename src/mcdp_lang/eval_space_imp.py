@@ -9,6 +9,7 @@ from mcdp_posets import (
 from mocdp.exceptions import DPInternalError
 from mocdp.comp.context import ValueWithUnits
 from mcdp_posets.interval import GenericInterval
+from mcdp_posets.poset_product_with_labels import PosetProductWithLabels
 
 CDP = CDPLanguage
 
@@ -48,6 +49,7 @@ def eval_space(r, context):
 
         cases = {
             CDP.SpaceInterval: eval_space_interval,
+            CDP.ProductWithLabels : eval_space_productwithlabels,
         }
 
         for klass, hook in cases.items():
@@ -59,6 +61,14 @@ def eval_space(r, context):
             return r.value
 
         raise DPInternalError('Invalid value to eval_space: %s' % str(r))
+
+def eval_space_productwithlabels(r, context):
+    assert isinstance(r, CDP.ProductWithLabels)
+    entries = unwrap_list(r.entries)
+    labels = [_.label for _ in entries[::2]]
+    spaces = [eval_space(_, context) for _ in entries[1::2]]
+    return PosetProductWithLabels(subs=spaces, labels=labels)
+
 
 def express_vu_in_isomorphic_space(vb, va):
     """ Returns vb in va's units """

@@ -83,6 +83,7 @@ class SyntaxIdentifiers():
         'with',
         'Uncertain',
         'Interval',
+        'product',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -105,7 +106,7 @@ class Syntax():
     FOR = sp(L('for'), lambda t: CDP.ForKeyword(t[0]))
     # load battery
     LOAD = sp(L('load') | L('`'), lambda t: CDP.LoadKeyword(t[0]))
-    TAKE = sp(L('take') | L('`'), lambda t: CDP.TakeKeyword(t[0]))
+
     SUB = sp(L('sub'), lambda t: CDP.SubKeyword(t[0]))
 
     TOP = sp(L(TOP_LITERAL) | L('⊤'), lambda t: CDP.TopKeyword(t[0]))
@@ -201,10 +202,16 @@ class Syntax():
     space_powerset = sp((L('℘') | L('set-of')) - L('(') + space + L(')'),
                         lambda t: CDP.PowerSet(t[0], t[1],
                                                t[2], t[3]))
-#
-#     power_set_expr2 = sp((Combine(L('set') + L('of'))) + space ,
-#                         lambda t: CDP.PowerSet(t[0], t[1],
-#                                                t[2], t[3]))
+
+    PRODUCT = sp(L('product'), lambda t: CDP.ProductKeyword(t[0]))
+    space_product_label = sp(get_idn(), lambda t: CDP.ProductWithLabelsLabel(t[0]))
+    space_product_entry = space_product_label + SCOLON + space
+    space_product_with_labels = sp(PRODUCT + SLPAR + O(space_product_entry) +
+                                   ZeroOrMore(SCOMMA + space_product_entry) + SRPAR,
+                                   lambda t: 
+                                   CDP.ProductWithLabels(keyword=t[0],
+                                                         entries=make_list(t[1:])))
+
     INTERVAL = sp(L('Interval'), lambda t: CDP.IntervalKeyword(t[0]))
     
     space_interval = sp(INTERVAL + SLPAR + constant_value + SCOMMA + constant_value + SRPAR,
@@ -221,7 +228,9 @@ class Syntax():
                      code_spec ^
                      space_finite_poset ^
                      space_uppersets ^
-                     space_interval)
+                     space_interval
+                     # ^ space_product_with_labels
+                     )
 
     space << operatorPrecedence(space_operand, [
         (PRODUCT, 2, opAssoc.LEFT, space_product_parse_action),
@@ -395,9 +404,15 @@ class Syntax():
 #                                lambda t: CDP.TupleIndex(value=t[0], index=t[1]))
 
     # take(<a, b>, 0)
+    TAKE = sp(L('take') | L('`'), lambda t: CDP.TakeKeyword(t[0]))
     rvalue_tuple_indexing = sp(TAKE + SLPAR + rvalue + SCOMMA +
                                   SyntaxBasics.integer + SRPAR,
                                lambda t: CDP.TupleIndex(keyword=t[0], value=t[1], index=t[2]))
+    ICOMMA = L('..')
+    index_label = sp(get_idn(), lambda t: CDP.IndexLabel(t[0]))
+    # rvalue instead of rvalue_new_function
+    rvalue_label_indexing = sp(rvalue_new_function + S(ICOMMA) + index_label,
+                               lambda t: CDP.ResourceLabelIndex(rvalue=t[0], label=t[1]))
 
 #     lf_tuple_indexing = sp(TAKE + SLPAR + fvalue + SCOMMA +
 #                                   SyntaxBasics.integer + SRPAR,
@@ -414,6 +429,9 @@ class Syntax():
 
     fvalue_new_resource2 = sp(REQUIRED + get_idn(),
                               lambda t: CDP.NewResource(t[1]))
+
+    fvalue_label_indexing = sp(fvalue_new_resource + S(ICOMMA) + index_label,
+                               lambda t: CDP.FunctionLabelIndex(fvalue=t[0], label=t[1]))
 
     unary = {
         'sqrt': lambda op1: CDP.GenericNonlinearity(math.sqrt, op1, lambda F: F),
@@ -670,7 +688,8 @@ class Syntax():
                        rvalue_power_expr ^
                        rvalue_tuple_indexing ^
                        rvalue_make_tuple ^
-                       rvalue_uncertain)
+                       rvalue_uncertain ^
+                       rvalue_label_indexing)
 
     rvalue << operatorPrecedence(rvalue_operand, [
         (TIMES, 2, opAssoc.LEFT, mult_parse_action),
@@ -686,11 +705,13 @@ class Syntax():
         fvalue_maketuple ^
         fvalue_uncertain ^
         fvalue_disambiguation ^
+        fvalue_label_indexing ^
 #         lf_tuple_indexing ^
         (SLPAR - (constant_value ^ fvalue_simple ^ fvalue_fancy ^
                       fvalue_new_resource ^ fvalue_new_resource2 ^ fvalue_maketuple
                       ^ fvalue_uncertain
                       ^ fvalue_disambiguation
+                      ^ fvalue_label_indexing
 #                       ^ lf_tuple_indexing
                       ) - SRPAR))
 

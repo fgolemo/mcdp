@@ -1,0 +1,17 @@
+Travel.mcdp: 
+ product(task: 1(travel), distance: m, velocity: m/s )
+
+mcdp {
+ requires f [`Travel] 
+
+  f >= < S(travel):_, 10m/s, 100 m)
+
+  f.task >= S(travel):*
+  f.distance
+}
+
+
+finite_poset {
+ find_eggs
+ travel
+}  product( capability: S(travel), distance: m, velocity: m/s)

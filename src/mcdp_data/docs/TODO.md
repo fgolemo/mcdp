@@ -1,4 +1,6 @@
 
+
+
 Keys:
 
 - R: refactoring / reorganization
@@ -171,3 +173,37 @@ requires r1 >= f1
 }
 }
 )
+
+- F: "choose()" without labels
+   (get rid of ^?)
+
+
+- F: better catalouge syntax - implicit point
+
+
+  Putin = catalogue {
+     provides plutonium [g]
+     requires science [`scientific_objectives]
+     100g | `scientific_objectives : find_current_life
+     implicit : 100g | `scientific_objectives : find_current_life
+  }
+
+  catalouge { 
+     provides resolution [pixels]
+     requires latency [s]
+
+
+     500 pixels => 10
+  }
+
+
+
+
+
+
+
+
+
+
+
+

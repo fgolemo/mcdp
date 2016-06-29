@@ -97,6 +97,7 @@ def flatten_add_prefix(ndp, prefix):
     
 @contract(ndp=CompositeNamedDP)
 def cndp_flatten(ndp):
+    assert isinstance(ndp, CompositeNamedDP)
     name2ndp = ndp.get_name2ndp()
     connections = ndp.get_connections()
     fnames = ndp.get_fnames()
