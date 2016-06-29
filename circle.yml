@@ -1,3 +1,9 @@
+dependencies:
+  pre:
+    - sudo apt-get update -y
+    - sudo apt-get install -y python-numpy python-matplotlib python-yaml python-pip
+    - sudo apt-get install -y graphviz wkhtmltopdf git
+
 test:
   override:
-    - make clean comptests-run
+    - make clean comptests-run-parallel
