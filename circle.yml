@@ -1,6 +1,7 @@
 dependencies:
   pre:
     - sudo apt-get update -y
+    - sudo apt-get install -y libgvc6
     - sudo apt-get install -y python-numpy python-matplotlib python-yaml python-pip
     - sudo apt-get install -y graphviz wkhtmltopdf git
 
