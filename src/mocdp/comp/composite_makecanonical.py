@@ -40,7 +40,7 @@ def cndp_makecanonical(ndp):
                                 connections=ndp.get_connections(),
                                 name2dp=ndp.get_name2ndp())
 
-        print('connections to cut: %s' % connections_to_cut)
+#        print('connections to cut: %s' % connections_to_cut)
 
         connections_to_cut = list(connections_to_cut)
         n = len(connections_to_cut)
@@ -52,8 +52,6 @@ def cndp_makecanonical(ndp):
     name_inner = 'inner'
     name2ndp[name_inner] = ndp_inner
     connections = []
-#     fnames = []
-#     rnames = []
 
     for fname in ndp_inner.get_fnames():
         if fname in cycles_names:
@@ -64,7 +62,6 @@ def cndp_makecanonical(ndp):
         name2ndp[nn] = dpwrap(Identity(F), fname, fname)
 
         connections.append(Connection(nn, fname, name_inner, fname))
-#         fnames.append(fname)
 
     for rname in ndp_inner.get_rnames():
         if rname in cycles_names:
@@ -75,7 +72,6 @@ def cndp_makecanonical(ndp):
         name2ndp[nn] = dpwrap(Identity(R), rname, rname)
 
         connections.append(Connection(name_inner, rname, nn, rname))
-#         rnames.append(rname)
 
     # add the loops
     if len(cycles_names) == 1:
@@ -83,7 +79,8 @@ def cndp_makecanonical(ndp):
         connections.append(c)
     else:
 
-        F = PosetProduct(ndp_inner.get_ftypes(cycles_names))
+        types = ndp_inner.get_ftypes(cycles_names)
+        F = PosetProduct(types.subs)
         # [0, 1, 2]
         coords = list(range(len(cycles_names)))
         mux = Mux(F, coords)
@@ -126,32 +123,32 @@ def cndp_create_one_without_some_connections(ndp, exclude_connections, names):
     from mocdp.comp.context import Context
     context = Context()
     
-    print ndp
-    print ndp.get_rnames()
-    print ndp.get_fnames()
+    # print ndp
+    # print ndp.get_rnames()
+    # print ndp.get_fnames()
     for _name, _ndp in ndp.get_name2ndp().items():
         isf, fname = is_fun_node_name(_name)
         isr, rname = is_res_node_name(_name)
 
         if isf and fname in ndp.get_fnames():
-            print('fname: %r' % fname)
+            # print('fname: %r' % fname)
             F = ndp.get_ftype(fname)
             context.add_ndp_fun_node(fname, F)
         elif isr and rname in ndp.get_rnames():
-            print('rname: %r' % rname)
+            # print('rname: %r' % rname)
             R = ndp.get_rtype(rname)
             context.add_ndp_res_node(rname, R)
         else:
-            print('regular: %r' % _name)
+            # print('regular: %r' % _name)
             context.add_ndp(_name, _ndp)
 
     for c in ndp.get_connections():
         if c in exclude_connections:
             continue
-        print('adding connection %s' % str(c))
+        # print('adding connection %s' % str(c))
         context.connections.append(c)
 
-    print('done')
+    # print('done')
     # for each cut connection
     for e, name in zip(exclude_connections, names):
         S = context.get_rtype(CResource(e.dp1, e.s1))
@@ -254,7 +251,7 @@ def enumerate_minimal_solution(G, edge_weight):
             removed2 = frozenset(removed2)
 
             if removed2 in examined:
-                print('do not consider')
+                # print('do not consider')
                 continue
 
             cycles = [c for c in state.cycles if not edge in c]
@@ -272,7 +269,7 @@ def enumerate_minimal_solution(G, edge_weight):
     best = solutions[np.argmin(weights)]
     state = current_solutions[best]
 
-    print('best: %s %s' % (best, state))
+    # print('best: %s %s' % (best, state))
     return best
 
 
