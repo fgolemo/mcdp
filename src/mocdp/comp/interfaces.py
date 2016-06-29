@@ -37,6 +37,11 @@ class NamedDP():
         return self
 
     @abstractmethod
+    @contract(returns='isinstance(SimpleWrap)')
+    def abstract(self):
+        """ Returns a SimpleWrap """
+
+    @abstractmethod
     @contract(returns='list(str)')
     def get_fnames(self):
         pass

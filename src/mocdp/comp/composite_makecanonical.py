@@ -31,20 +31,21 @@ def cndp_makecanonical(ndp):
     G = get_connection_multigraph(ndp.get_connections())
     cycles = list(simple_cycles(G))
     if not cycles:
-        msg = 'This problem has no cycles.'
-        raise NotImplementedError(msg)
+        ndp_inner = ndp
+        names = []
+    else:
 
-    # then we choose which edges to remove
-    connections_to_cut = choose_connections_to_cut(
-                            connections=ndp.get_connections(),
-                            name2dp=ndp.get_name2ndp())
+        # then we choose which edges to remove
+        connections_to_cut = choose_connections_to_cut(
+                                connections=ndp.get_connections(),
+                                name2dp=ndp.get_name2ndp())
 
-    print('connections to cut: %s' % connections_to_cut)
+        print('connections to cut: %s' % connections_to_cut)
 
-    connections_to_cut = list(connections_to_cut)
-    n = len(connections_to_cut)
-    names = list(['cut%d' % _ for _ in range(n)])
-    ndp_inner = cndp_create_one_without_some_connections(ndp, connections_to_cut, names)
+        connections_to_cut = list(connections_to_cut)
+        n = len(connections_to_cut)
+        names = list(['cut%d' % _ for _ in range(n)])
+        ndp_inner = cndp_create_one_without_some_connections(ndp, connections_to_cut, names)
 
 
     name2ndp = {}
@@ -76,11 +77,11 @@ def cndp_makecanonical(ndp):
         connections.append(Connection(name_inner, rname, nn, rname))
         rnames.append(rname)
 
+    # add the loops
     if len(names) == 1:
         c = Connection(name_inner, names[0], name_inner, names[0])
         connections.append(c)
     else:
-
 
         F = PosetProduct(ndp_inner.get_ftypes(names))
         # [0, 1, 2]

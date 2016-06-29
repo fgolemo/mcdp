@@ -4,6 +4,8 @@ from mcdp_posets.poset_product import PosetProduct
 from mcdp_posets.space import NotBelongs
 from contracts.utils import raise_desc
 
+from mcdp_posets.poset import Poset  # @UnusedImport
+
 __all__ = [
     'PosetProductWithLabels',
 ]

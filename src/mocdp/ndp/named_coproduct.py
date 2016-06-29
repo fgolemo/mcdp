@@ -2,6 +2,7 @@ from contracts.utils import raise_desc, raise_wrapped
 from mocdp.comp.interfaces import NamedDP
 from mcdp_posets import NotEqual
 from contracts import contract
+from mocdp.comp.wrap import SimpleWrap
 
 __all__ = [
     'NamedDPCoproduct',
@@ -30,7 +31,7 @@ class NamedDPCoproduct(NamedDP):
         for i, ndp in enumerate(ndps):
             ftypes_i = ndp.get_ftypes(ndp.get_fnames())
             rtypes_i = ndp.get_rtypes(ndp.get_rnames())
-            name = 'model #2' % i if not self.labels else self.labels[i].__repr__()
+            name = 'model #%d' % i if not self.labels else self.labels[i].__repr__()
             try:
                 tu.check_equal(ftypes, ftypes_i)
             except NotEqual as e:
@@ -47,12 +48,21 @@ class NamedDPCoproduct(NamedDP):
 
         self.ndps = ndps
 
+    def abstract(self):
+        dp = self.get_dp()
+        fnames = self.get_fnames()
+        rnames = self.get_rnames()
+        if len(fnames) == 1:
+            fnames = fnames[0]
+        if len(rnames) == 1:
+            rnames = rnames[0]
+        return SimpleWrap(dp, fnames=fnames, rnames=rnames)
+        
     def get_dp(self):
         options = [ndp.get_dp() for ndp in self.ndps]
         from mcdp_dp.dp_coproduct import CoProductDP
         dp = CoProductDP(tuple(options))
-#         return dp
-    # XXX
+
         if self.labels is None:
             return dp
         else:
@@ -78,3 +88,5 @@ class NamedDPCoproduct(NamedDP):
 
     def get_ftype(self, fname):
         return self.ndps[0].get_ftype(fname)
+
+    

@@ -124,8 +124,6 @@ def plus_parse_action(tokens):
     return res
 
 
-
-
 @parse_action
 def space_product_parse_action(tokens):
     tokens = list(tokens[0])
@@ -164,6 +162,7 @@ def parse_wrap(expr, string):
         return expr.parseString(string0, parseAll=True)  # [0]
     except (ParseException, ParseFatalException) as e:
         # ... so we can use "string" here.
+        # raise
         where = Where(string, line=e.lineno, column=e.col)
         raise DPSyntaxError(str(e), where=where)
     except DPSemanticError as e:

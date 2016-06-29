@@ -100,7 +100,6 @@ class Syntax():
     TOP_LITERAL = 'Top'
     BOTTOM_LITERAL = 'Bottom'
 
-    PRODUCT = sp(L('x') | L('×'), lambda t: CDP.product(t[0]))
 
     USING = sp(L('using'), lambda t: CDP.UsingKeyword(t[0]))
     FOR = sp(L('for'), lambda t: CDP.ForKeyword(t[0]))
@@ -203,10 +202,10 @@ class Syntax():
                         lambda t: CDP.PowerSet(t[0], t[1],
                                                t[2], t[3]))
 
-    PRODUCT = sp(L('product'), lambda t: CDP.ProductKeyword(t[0]))
+    PRODUCTWITHLABELS = sp(L('product'), lambda t: CDP.ProductKeyword(t[0]))
     space_product_label = sp(get_idn(), lambda t: CDP.ProductWithLabelsLabel(t[0]))
     space_product_entry = space_product_label + SCOLON + space
-    space_product_with_labels = sp(PRODUCT + SLPAR + O(space_product_entry) +
+    space_product_with_labels = sp(PRODUCTWITHLABELS + SLPAR + O(space_product_entry) +
                                    ZeroOrMore(SCOMMA + space_product_entry) + SRPAR,
                                    lambda t: 
                                    CDP.ProductWithLabels(keyword=t[0],
@@ -232,6 +231,7 @@ class Syntax():
                      # ^ space_product_with_labels
                      )
 
+    PRODUCT = sp(L('x') | L('×'), lambda t: CDP.product(t[0]))
     space << operatorPrecedence(space_operand, [
         (PRODUCT, 2, opAssoc.LEFT, space_product_parse_action),
     ])
