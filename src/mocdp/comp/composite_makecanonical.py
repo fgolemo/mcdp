@@ -32,7 +32,7 @@ def cndp_makecanonical(ndp):
     cycles = list(simple_cycles(G))
     if not cycles:
         ndp_inner = ndp
-        names = []
+        cycles_names = []
     else:
 
         # then we choose which edges to remove
@@ -44,19 +44,19 @@ def cndp_makecanonical(ndp):
 
         connections_to_cut = list(connections_to_cut)
         n = len(connections_to_cut)
-        names = list(['cut%d' % _ for _ in range(n)])
-        ndp_inner = cndp_create_one_without_some_connections(ndp, connections_to_cut, names)
+        cycles_names = list(['cut%d' % _ for _ in range(n)])
+        ndp_inner = cndp_create_one_without_some_connections(ndp, connections_to_cut, cycles_names)
 
 
     name2ndp = {}
     name_inner = 'inner'
     name2ndp[name_inner] = ndp_inner
     connections = []
-    fnames = []
-    rnames = []
+#     fnames = []
+#     rnames = []
 
     for fname in ndp_inner.get_fnames():
-        if fname in names:
+        if fname in cycles_names:
             continue
 
         F = ndp_inner.get_ftype(fname)
@@ -64,37 +64,37 @@ def cndp_makecanonical(ndp):
         name2ndp[nn] = dpwrap(Identity(F), fname, fname)
 
         connections.append(Connection(nn, fname, name_inner, fname))
-        fnames.append(fname)
+#         fnames.append(fname)
 
     for rname in ndp_inner.get_rnames():
-        if rname in names:
+        if rname in cycles_names:
             continue
 
         R = ndp_inner.get_rtype(rname)
         nn = get_name_for_res_node(rname)
-        name2ndp[nn] = dpwrap(Identity(F), rname, rname)
+        name2ndp[nn] = dpwrap(Identity(R), rname, rname)
 
         connections.append(Connection(name_inner, rname, nn, rname))
-        rnames.append(rname)
+#         rnames.append(rname)
 
     # add the loops
-    if len(names) == 1:
-        c = Connection(name_inner, names[0], name_inner, names[0])
+    if len(cycles_names) == 1:
+        c = Connection(name_inner, cycles_names[0], name_inner, cycles_names[0])
         connections.append(c)
     else:
 
-        F = PosetProduct(ndp_inner.get_ftypes(names))
+        F = PosetProduct(ndp_inner.get_ftypes(cycles_names))
         # [0, 1, 2]
-        coords = list(range(len(names)))
+        coords = list(range(len(cycles_names)))
         mux = Mux(F, coords)
-        nto1 = SimpleWrap(mux, fnames=names, rnames='_muxed')
+        nto1 = SimpleWrap(mux, fnames=cycles_names, rnames='_muxed')
 
 
         # [0, 1, 2]
-        coords = list(range(len(names)))
+        coords = list(range(len(cycles_names)))
         R = mux.get_res_space()
         mux2 = Mux(R, coords)
-        _1ton = SimpleWrap(mux2, fnames='_muxed', rnames=names)
+        _1ton = SimpleWrap(mux2, fnames='_muxed', rnames=cycles_names)
         F2 = mux2.get_res_space()
         tu = get_types_universe()
         tu.check_equal(F, F2)
@@ -105,11 +105,13 @@ def cndp_makecanonical(ndp):
         name2ndp[mux2_name] = _1ton
 
         connections.append(Connection(mux1_name, '_muxed', mux2_name, '_muxed'))
-        for n in names:
+        for n in cycles_names:
             connections.append(Connection(name_inner, n, mux1_name, n))
-        for n in names:
+        for n in cycles_names:
             connections.append(Connection(mux2_name, n, name_inner, n))
 
+    fnames = ndp.get_fnames()
+    rnames = ndp.get_rnames()
     outer = CompositeNamedDP.from_parts(name2ndp=name2ndp,
                                         connections=connections,
                                         fnames=fnames, rnames=rnames)

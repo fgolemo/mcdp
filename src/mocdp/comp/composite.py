@@ -145,6 +145,8 @@ def check_good_name(n):
 def check_consistent_data(names, fnames, rnames, connections):
     from mocdp.comp.context import get_name_for_res_node, get_name_for_fun_node
     from mocdp.comp.context import is_res_node_name
+    from mcdp_posets.types_universe import get_types_universe
+    tu = get_types_universe()
 
     for n in names:
         try:
@@ -207,6 +209,11 @@ def check_consistent_data(names, fnames, rnames, connections):
             if not c.s2 in names[c.dp2].get_fnames():
                 raise_desc(ValueError, 'Function not found.',
                            s2=c.s2, available=names[c.dp2].get_fnames())
+
+            R = names[c.dp1].get_rtype(c.s1)
+            F = names[c.dp2].get_ftype(c.s2)
+            tu.check_equal(R, F)
+
 
         except ValueError as e:
             msg = 'Invalid connection'

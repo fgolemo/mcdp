@@ -32,8 +32,22 @@ def check_makecanonical(_, ndp):
 
 
 def check_same_interface(ndp, ndp2):
-    assert ndp.get_fnames() == ndp2.get_fnames(), (ndp.get_fnames(), ndp2.get_fnames())
-    assert ndp.get_rnames() == ndp2.get_rnames(), (ndp.get_rnames(), ndp2.get_rnames())
-    assert ndp.get_ftypes() == ndp2.get_ftypes(), (ndp.get_ftypes(), ndp2.get_ftypes())
-    assert ndp.get_rtypes() == ndp2.get_rtypes(), (ndp.get_rtypes(), ndp2.get_rtypes())
+    try:
+        assert ndp.get_fnames() == ndp2.get_fnames(), (ndp.get_fnames(), ndp2.get_fnames())
+        assert ndp.get_rnames() == ndp2.get_rnames(), (ndp.get_rnames(), ndp2.get_rnames())
+        fnames = ndp.get_fnames()
+        rnames = ndp.get_rnames()
+        fnames2 = ndp2.get_fnames()
+        rnames2 = ndp2.get_rnames()
+        ftypes = ndp.get_ftypes(fnames)
+        rtypes = ndp.get_rtypes(rnames)
+        ftypes2 = ndp2.get_ftypes(fnames)
+        rtypes2 = ndp2.get_rtypes(rnames)
+
+        assert ftypes == ftypes2, (ftypes, ftypes2)
+        assert rtypes == rtypes2, (rtypes, rtypes2)
+    except:
+        print 'ndp', ndp
+        print 'ndp2', ndp2
+        raise
     
