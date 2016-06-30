@@ -228,7 +228,7 @@ class Syntax():
                      space_finite_poset ^
                      space_uppersets ^
                      space_interval
-                     # ^ space_product_with_labels
+                    ^ space_product_with_labels
                      )
 
     PRODUCT = sp(L('x') | L('×'), lambda t: CDP.product(t[0]))
