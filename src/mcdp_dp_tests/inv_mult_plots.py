@@ -17,6 +17,7 @@ import itertools
 import numpy as np
 import warnings
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
+from mcdp_dp.dp_transformations import get_dp_bounds
 
 
 # @comptest_dynamic
@@ -102,7 +103,8 @@ def check_invmult2_report():
 """
     )
      
-    dp = ndp.get_dp()
+    dp0 = ndp.get_dp()
+    _, dp = get_dp_bounds(dp0, nl=1, nu=20)
 
 
     r = Report()
@@ -196,7 +198,8 @@ mcdp {
 }"""
     )
 
-    dp = ndp.get_dp()
+    dp0 = ndp.get_dp()
+    _, dp = get_dp_bounds(dp0, nl=1, nu=20)
 
 
     r = Report()

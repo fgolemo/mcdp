@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_dp.dp_flatten import Mux
@@ -29,8 +30,9 @@ def cndp_abstract_loop2(ndp):
     res = get_canonical_elements(ndp)
 
     cycles = res['cycles']
-    if len(cycles) != 1:
-        msg = 'I expected that the cycles were already compacted.'
+    if len(cycles) > 1:
+        msg = ('I expected that the cycles were already compacted, while %s remain.' %
+               cycles)
         raise_desc(NotImplementedError, msg, res=res)
 
     inner = res['inner']
@@ -39,6 +41,10 @@ def cndp_abstract_loop2(ndp):
     extraf = res['extraf']
     extrar = res['extrar']
 
+    # print 'ndp', ndp.get_fnames(), ndp.get_rnames()
+    # print 'inner', inner.get_fnames(), inner.get_rnames()
+    # print 'extra', extraf, extrar
+    # print 'cycles', res['cycles']
     assert extraf == ndp.get_fnames(), (extraf, ndp.get_fnames())
     assert extrar == ndp.get_rnames(), (extrar, ndp.get_rnames())
 
@@ -51,11 +57,6 @@ def cndp_abstract_loop2(ndp):
     F2 = inner.get_rtype(cycles[0])
     R2 = F2
     
-    print 'F1', F1
-    print 'R1', R1
-    print 'F2', F2
-    print 'R2', R2
-
     dp0F = PosetProduct((F1,F2))
     
     coords1 = []

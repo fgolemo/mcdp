@@ -428,7 +428,10 @@ def create_composite_(gdc0, ndp, SKIP_INITIAL):
             if gdc0.yourname is None:
                 container_label = ''
             else:
-                container_label = gdc0.yourname
+                if gdc0.yourname[0] == '_':
+                    container_label = ''
+                else:
+                    container_label = gdc0.yourname
             c = gdc0.newItem(container_label)
             gdc0.styleApply('container', c)
             gdc = gdc0.child_context(parent=c, yourname=gdc0.yourname)

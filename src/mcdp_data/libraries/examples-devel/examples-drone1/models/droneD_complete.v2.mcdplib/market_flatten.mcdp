@@ -2,9 +2,9 @@ canonical flatten
 mcdp {
         customer = new Customer
         engineering = new DroneComplete
-     provides budget using customer
+     #provides budget using customer
      requires tco >=  engineering.total_cost_ownership
-       # customer.budget >= engineering.total_cost_ownership
+       customer.budget >= engineering.total_cost_ownership
 
         engineering.travel_distance >= customer.travel_distance 
         engineering.num_missions >= customer.num_missions 

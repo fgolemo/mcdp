@@ -1,16 +1,13 @@
-    # solution = R.Us([(0, 7), (3, 6), (4, 4), (6, 3), (7, 0)])
-
-flatten mcdp {
+ 
+mcdp {  
     f = instance mcdp {
-        requires x [Nat]
-        requires y [Nat]
-        provides z [Nat] 
-        x + y >= z
+        provides a [R]
+            
+        requires c [R]
+            
+        c >= square(a)
     }
-    
-    requires x, y for f
-    #provides v [Nat]
-    
-    f.z >= sqrt(f.x) + sqrt(f.y) + nat:4
-    
-}
+
+    f.a >= square(f.c)
+  
+  }

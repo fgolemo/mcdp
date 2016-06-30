@@ -7,6 +7,7 @@ from mocdp.comp.context import (Connection, get_name_for_fun_node,
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 from _collections import defaultdict
+from mcdp_dp.dp_identity import Identity
 
 __all__ = [
     'cndp_flatten',
@@ -106,9 +107,9 @@ def cndp_flatten(ndp):
     connections2 = set()
 
     #
-    proxy_functions = defaultdict(lambda: dict())
+    proxy_functions = defaultdict(lambda: dict())  # proxy[name][fname]
     proxy_resources = defaultdict(lambda: dict())
-    # proxy[name][fname]
+
 
     for name, n0 in name2ndp.items():
         n1 = n0.flatten()
@@ -128,7 +129,7 @@ def cndp_flatten(ndp):
                 if isitf or isitr:
                     # do not add the identity nodes
                     # that represent functions or resources
-                    print('skipping %r' % name2)
+                    # print('skipping %r' % name2)
                     continue
                 else:
                     names2[name2] = ndp2
@@ -137,9 +138,27 @@ def cndp_flatten(ndp):
                 # is it a connection to a function
                 isitf, fn = is_fun_node_name(c.dp1)
                 isitr, rn = is_res_node_name(c.dp2)
-                
+
+
                 if isitf and isitr:
-                    raise NotImplementedError
+                    # This is the case where there is a straight connection
+                    # from function to resource:
+                    #
+                    # f = instance mcdp {
+                    #     provides a [R]
+                    #     requires c [R]
+                    #
+                    #     c >= a
+                    # }
+                    # In this case, we need to add an identity
+                    new_name = '_%s_pass_through_%s' % (name, c.s2)
+                    F = nn.get_name2ndp()[c.dp1].get_ftype(c.s1)
+                    ndp_pass = SimpleWrap(Identity(F), fnames=fn, rnames=rn)
+                    names2[new_name] = ndp_pass
+                    proxy_functions[name][fn] = (new_name, fn)
+                    proxy_resources[name][rn] = (new_name, rn)
+                    continue
+
                 
                 if isitf:
                     proxy_functions[name][fn] = (c.dp2, c.s2)
@@ -162,8 +181,8 @@ def cndp_flatten(ndp):
 
             names2[name] = nn
 
-    print proxy_functions
-    print proxy_resources
+    # print proxy_functions
+    # print proxy_resources
 
     for c in connections:
         dp2 = c.dp2

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mcdp_dp.dp_series import get_product_compact
 from mcdp_dp.primitive import Feasible, NotFeasible
@@ -81,26 +82,30 @@ def check_evaluation():
 
     f.a >= square(f.c)
   
+      # a^2 > c^2
   }
     """)
     dp = ndp.get_dp()
     print(dp.repr_long())
-    # M = dp.get_imp_space_mod_res()
-    
-    # assert_equal(M, SpaceProduct((R_dimensionless, R_dimensionless)))
+    M = dp.get_imp_space_mod_res()
+    assert_equal(M, SpaceProduct((R_dimensionless,) * 4))
     assert_equal(dp.get_res_space(), SpaceProduct(()))
     assert_equal(dp.get_fun_space(), SpaceProduct(()))
 
-    assert_feasible(dp, (), (0.0, 0.0), ())
-    assert_feasible(dp, (), (1.0, 1.0), ())
-    assert_unfeasible(dp, (), (0.0, 1.0), ())
-    assert_unfeasible(dp, (), (0.0, 0.9), ())
-    assert_feasible(dp, (), (0.5, 0.5), ())
+    print dp.solve(())  # = ↑{⟨⟩}
+    imps = dp.get_implementations_f_r((), ())
+    print imps
+    # here, (x,y) => (x,y,y,y) actually I'm not sure
+    assert_feasible(dp, (), (0.0, 0.0, 0.0, 0.0), ())
+    assert_feasible(dp, (), (1.0, 1.0, 1.0, 1.0), ())
+    assert_unfeasible(dp, (), (0.0, 1.0, 1.0, 1.0), ())
+    assert_unfeasible(dp, (), (0.0, 0.9, 0.9, 0.9), ())
+    assert_feasible(dp, (), (0.5, 0.5, 0.5, 0.5), ())
 
-    assert_unfeasible(dp, (), (1.0, 0.0), ())
-    assert_unfeasible(dp, (), (1.1, 1.1), ())
+    assert_unfeasible(dp, (), (1.0, 0.0, 0.0, 0.0), ())
+    assert_unfeasible(dp, (), (1.1, 1.1, 1.1, 1.1), ())
 
-    assert_unfeasible(dp, (), (0.9, 0.0), ())
+    assert_unfeasible(dp, (), (0.9, 0.0, 0.0, 0.0), ())
 
 
     import numpy as np
@@ -153,21 +158,52 @@ def check_evaluation2():
     print(dp.repr_long())
     M = dp.get_imp_space_mod_res()
 
-    assert_equal(M, SpaceProduct((R_dimensionless, R_dimensionless)))
+    assert_equal(M, SpaceProduct((R_dimensionless,) * 4))
     assert_equal(dp.get_res_space(), SpaceProduct(()))
     assert_equal(dp.get_fun_space(), SpaceProduct(()))
 
-    assert_feasible(dp, (), (0.0, 0.0), ())
-    assert_feasible(dp, (), (1.0, 1.0), ())
-    assert_feasible(dp, (), (1.1, 1.1), ())
-    assert_unfeasible(dp, (), (0.5, 0.5), ())
-    assert_unfeasible(dp, (), (2.0, 1.0), ())
-    assert_unfeasible(dp, (), (1.0, 2.0), ())
+    assert_feasible(dp, (), (0.0, 0.0, 0.0, 0.0), ())
+    assert_feasible(dp, (), (1.0, 1.0, 1.0, 1.0), ())
+    assert_feasible(dp, (), (1.1, 1.1, 1.1, 1.1), ())
+    assert_unfeasible(dp, (), (0.5, 0.5, 0.5, 0.5), ())
+    assert_unfeasible(dp, (), (2.0, 1.0, 1.0, 1.0), ())
+    assert_unfeasible(dp, (), (1.0, 2.0, 2.0, 2.0), ())
 
     import numpy as np
     xs = np.linspace(0, 3.5, 30)
     ys = np.linspace(0, 3.5, 30)
     print_diagram(dp, xs, ys)
+
+# y =        3.5  000000000000000011111111111111
+# y =      3.379  000000000000000011111111111111
+# y =      3.258  000000000000000111111111111111
+# y =      3.137  000000000000000111111111111111
+# y =      3.017  000000000000000111111111111111
+# y =      2.896  000000000000000111111111111111
+# y =      2.775  000000000000001111111111111111
+# y =      2.655  000000000000001111111111111111
+# y =      2.534  000000000000001111111111111111
+# y =      2.413  000000000000011111111111111111
+# y =      2.293  000000000000011111111111111111
+# y =      2.172  000000000000011111111111111111
+# y =      2.051  000000000000111111111111111111
+# y =      1.931  000000000000111111111111111111
+# y =      1.810  000000000000111111111111111100
+# y =      1.689  000000000001111111111111000000
+# y =      1.568  000000000001111111111000000000
+# y =      1.448  000000000011111111000000000000
+# y =      1.327  000000000011111000000000000000
+# y =      1.206  000000000011100000000000000000
+# y =      1.086  000000000100000000000000000000
+# y =      0.965  000000000000000000000000000000
+# y =      0.844  000000000000000000000000000000
+# y =      0.724  000000000000000000000000000000
+# y =      0.603  000000000000000000000000000000
+# y =      0.482  000000000000000000000000000000
+# y =      0.362  000000000000000000000000000000
+# y =      0.241  000000000000000000000000000000
+# y =      0.120  000000000000000000000000000000
+# y =        0.0  100000000000000000000000000000
 
 def assert_check_feasible_raises(dp, *args):
     try:
@@ -204,7 +240,7 @@ def print_diagram(dp, xs, ys):
         for x in xs:
             f = ()
             r = ()
-            m = (x, y)
+            m = (x, y, y, y)
             try:
                 dp.check_feasible(f, m, r)
             except NotFeasible:

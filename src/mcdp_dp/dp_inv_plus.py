@@ -5,10 +5,13 @@ from mcdp_posets import Nat, Poset  # @UnusedImport
 from mcdp_posets import PosetProduct, RcompUnits
 import numpy as np
 from mocdp.exceptions import mcdp_dev_warning
+from mcdp_dp.primitive import NotSolvableNeedsApprox
 
 __all__ = [
     'InvPlus2',
 ]
+
+mcdp_dev_warning('FIXME: bug - are we taking into account the units?')
 
 class InvPlus2(ApproximableDP):
     @contract(Rs='tuple[2],seq[2]($RcompUnits)', F=RcompUnits)
@@ -21,16 +24,20 @@ class InvPlus2(ApproximableDP):
         M = R[0]
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
-    def solve(self, f):
-        mcdp_dev_warning('Needs to raise Not?')
-        n = 20
-        options = np.linspace(0, f, n)
-        mcdp_dev_warning('FIXME: bug - are we taking into account the units?')
-        s = set()
-        for o in options:
-            s.add((o, f - o))
 
-        return self.R.Us(s)
+    def solve(self, f):
+        raise NotSolvableNeedsApprox(type(self))
+#
+#     def solve(self, f):
+#         mcdp_dev_warning('Needs to raise Not?')
+#         n = 20
+#         options = np.linspace(0, f, n)
+#         mcdp_dev_warning('FIXME: bug - are we taking into account the units?')
+#         s = set()
+#         for o in options:
+#             s.add((o, f - o))
+#
+#         return self.R.Us(s)
 
 
     @contract(n='int,>=0')

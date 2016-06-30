@@ -1,5 +1,6 @@
 from contracts import contract
 from .primitive import PrimitiveDP, ApproximableDP
+from mcdp_dp.dp_loop2 import DPLoop2
 
 @contract(dp=PrimitiveDP, returns=PrimitiveDP)
 def dp_transform(dp, f):
@@ -18,6 +19,8 @@ def dp_transform(dp, f):
         # todo: parallel n
     elif isinstance(dp, DPLoop0):
         return DPLoop0(dp_transform(dp.dp1, f))
+    elif isinstance(dp, DPLoop2):
+        return DPLoop2(dp_transform(dp.dp1, f))
     else:
         r = f(dp)
         # assert isinstance(r, PrimitiveDP)

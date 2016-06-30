@@ -186,9 +186,9 @@ def gvgen_from_dp(dp0, imp=None):
 
     def go_loop2(dp, imp):
         if do_imp:
-            m0, _f2 = dp._unpack_m(imp)
+            m0, _f2, _r2 = dp._unpack_m(imp)
         else:
-            m0 = _f2 = None
+            m0 = _f2 = _r2 = None
 
         (n1i, n1o) = go(dp.dp1, m0)
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mcdp_dp.primitive import Feasible, NotFeasible, PrimitiveDP
 from mcdp_dp.tracer import Tracer
@@ -9,6 +10,7 @@ from mocdp.exceptions import do_extra_checks
 from mcdp_posets.uppersets import UpperSets, UpperSet
 from mcdp_dp.dp_loop import Iteration
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
+
 
 class DPLoop2(PrimitiveDP):
     """
@@ -46,10 +48,9 @@ class DPLoop2(PrimitiveDP):
 
         F = F1
         R = R1
-        # M = M0
-        # from mcdp_dp.dp_series import prod_make
+
         from mcdp_dp.dp_series import get_product_compact
-        M, _, _ = get_product_compact(M0, F2)
+        M, _, _ = get_product_compact(M0, F2, R2)
         self.M0 = M0
         self.F1 = F1
         self.F2 = F2
@@ -59,32 +60,36 @@ class DPLoop2(PrimitiveDP):
         self._solve_cache = {}
         PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
-    def get_implementations_f_r(self, f1, r):
-        raise NotImplementedError
-        f2 = r
-        f = (f1, f2)
-        m0s = self.dp1.get_implementations_f_r(f, r)
-        options = set()
+    def _unpack_m(self, m):
+        if do_extra_checks():
+            self.M.belongs(m)
         from mcdp_dp.dp_series import get_product_compact
+        _, _, unpack = get_product_compact(self.M0, self.F2, self.R2)
+        m0, f2, r2 = unpack(m)
+        return m0, f2, r2
 
-        M, M_pack, _ = get_product_compact(self.M0, self.F2)
+    def get_implementations_f_r(self, f1, r1):
+        from mcdp_posets.category_product import get_product_compact
+        M, M_pack, _ = get_product_compact(self.M0, self.F2, self.R2)
+        options = set()
 
+        R = self.solve_all_cached(f1, Tracer())
+        res = R['res_all']
 
-        for m0 in m0s:
-            m = M_pack(m0, r)
-            options.add(m)
-
+        for (r1_, r2_) in res.minimals:
+            if self.R1.leq(r1_, r1):
+                f2 = r2_
+                m0s = self.dp1.get_implementations_f_r((f1, f2), (r1_, r2_))
+                for m0 in m0s:
+                    m = M_pack(m0, f2, r2_)
+                    options.add(m)
+            
         if do_extra_checks():
             for _ in options:
                 M.belongs(_)
 
         return options
 
-    def _unpack_m(self, m):
-        from mcdp_dp.dp_series import get_product_compact
-        _, _, unpack = get_product_compact(self.M0, self.F2)
-        m0, f2 = unpack(m)
-        return m0, f2
 
     def evaluate_f_m(self, f1, m):
         """ Returns the resources needed
@@ -108,38 +113,28 @@ class DPLoop2(PrimitiveDP):
         self.R.belongs(r)
         return r
 
-    def check_unfeasible(self, f1, m, r):
-        raise NotImplementedError
-        from mcdp_dp.dp_series import get_product_compact
-        F2 = self.F2
-        F1 = self.F
-
-        M, _, unpack = get_product_compact(self.M0, F2)
-        M.belongs(m)
-        m0, f2 = unpack(m)
+    def check_unfeasible(self, f1, m, r1):
+        m0, f2, r2 = self._unpack_m(m)
+        r = (r1, r2)
         f = (f1, f2)
-
+        F1 = self.F1
+        F2 = self.F2
         try:
             self.dp1.check_unfeasible(f, m0, r)
         except Feasible as e:
             used = self.dp1.evaluate_f_m(f, m0)
-            if F2.leq(used, f2):
+            R0 = self.dp1.R
+            if R0.leq(used, r):
                 msg = 'loop: asking to show it is unfeasible (%s, %s, %s)' % (f1, m, r)
                 msg += '\nBut inner is feasible and loop constraint *is* satisfied.'
                 msg += "\n f1 = %10s -->| ->[ m0= %s ] --> %s <= %s" % (F1.format(f1), self.M0.format(m0),
-                                                                    F2.format(used), F2.format(r))
+                                                                        R0.format(used), R0.format(r))
                 msg += "\n f2 = %10s -->|" % F2.format(f2)
                 raise_wrapped(Feasible, e, msg, compact=True, dp1=self.dp1.repr_long())
 
-    def check_feasible(self, f1, m, r):
-        raise NotImplementedError
-        from mcdp_dp.dp_series import get_product_compact
-        F2 = self.F2
-        F1 = self.F
-
-        M, _, unpack = get_product_compact(self.M0, F2)
-        M.belongs(m)
-        m0, f2 = unpack(m)
+    def check_feasible(self, f1, m, r1):
+        m0, f2, r2 = self._unpack_m(m)
+        r = (r1, r2)
         f = (f1, f2)
 
         try:
@@ -148,19 +143,7 @@ class DPLoop2(PrimitiveDP):
             msg = 'loop: Asking loop if feasible (f1=%s, m=%s, r=%s)' % (f1, m, r)
             msg += '\nInternal was not feasible when asked for (f=%s, m0=%s, r=%r)' % (f, m0, r)
             raise_wrapped(NotFeasible, e, msg, dp1=self.dp1.repr_long(), compact=True)
-
-        used = self.dp1.evaluate_f_m(f, m0)
-        if F2.leq(used, f2):
-            pass
-        else:
-            msg = 'loop: Asking loop to show feasible (f1=%s, m=%s, r=%s)' % (f1, m, r)
-            msg += '\nbut loop constraint is *not* satisfied.'
-            msg += "\n f1 = %10s -->| ->[ %s ] --> used = %s <= r = %s" % (F1.format(f1), self.dp1,
-                                                                F2.format(used), F2.format(r))
-            msg += "\n f2 = %10s -->|" % F2.format(f2)
-            raise_desc(NotFeasible, msg)
-
-
+ 
     def __repr__(self):
         return 'DPLoop2(%r)' % self.dp1
 
@@ -173,12 +156,21 @@ class DPLoop2(PrimitiveDP):
         t = Tracer()
         res = self.solve_trace(f1, t)
         return res
-
+    
     def solve_trace(self, f1, trace):
-        if f1 in self._solve_cache:
-            # trace.log('using cache for %s' % str(func))
-            return trace.result(self._solve_cache[f1])
+        res = self.solve_all_cached(f1, trace)
+        return res['res_r1']
 
+    def solve_all_cached(self, f1, trace):
+        if not f1 in self._solve_cache:
+            R = self.solve_all(f1, trace)
+            self._solve_cache[f1] = R
+            
+        return trace.result(self._solve_cache[f1])
+    
+    def solve_all(self, f1, trace):
+        """ Returns ur1, ur """
+        
         F1 = self.F1
         R1 = self.R1
         R2 = self.R2
@@ -227,30 +219,11 @@ class DPLoop2(PrimitiveDP):
                     break
 
 
-        res = S[-1].s
+        res_all = S[-1].s
 
-        trace.log('res: %s' % UR.format(res))
-        res = R1.Us(poset_minima([r1 for (r1, _) in res.minimals], leq=R1.leq))
-
-        # Now we have the minimal R2
-#         # but the result should be in A(R1)
-#
-#         r1_res = set()
-#         for r2 in r2_res.minimals:
-#             hr = dp0.solve_trace((f1, r2), trace)
-#             for (r1, r2b) in hr.minimals:
-#                 if R2.leq(r2, r2b):
-#                     r1_res.add(r1)
-#
-#         r1_res = poset_minima(r1_res, R1.leq)
-#
-
-#         res = R1.Us(r1_res)
-#         res = trace.result(solutions_r1)
-#         assert isinstance(res, UpperSet)
-
-        self._solve_cache[f1] = res
-        return res
+        trace.log('res_all: %s' % UR.format(res_all))
+        res_r1 = R1.Us(poset_minima([r1 for (r1, _) in res_all.minimals], leq=R1.leq))
+        return dict(res_all=res_all, res_r1=res_r1)
 
 def dploop2_iterate(dp0, f1, R, S, trace):
     """ Returns the next iteration  si \in UR 

@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, raise_desc
 from mcdp_dp import Identity, Mux
 from mcdp_posets import PosetProduct, get_types_universe
 from mocdp.comp.composite import CompositeNamedDP
@@ -15,17 +16,30 @@ from networkx.algorithms.cycles import simple_cycles
 import numpy as np
 
 @contract(ndp=CompositeNamedDP)
-def cndp_makecanonical(ndp):
+def cndp_makecanonical(ndp, name_inner_muxed='_inner_muxed', s_muxed='_muxed'):
+    """ 
+        Returns a composite with only one ndp, called "named_inner_muxed".
+        If there were cycles, then this will also have a signal caled s_muxed
+        and there will be one connection to it.
+    """
+
     try:
         ndp.check_fully_connected()
     except NotConnected as e:
         msg = 'Cannot put in canonical form because not all subproblems are connected.'
         raise_wrapped(DPSemanticError, e, msg, compact=True)
 
+    fnames = ndp.get_fnames()
+    rnames = ndp.get_rnames()
+
     # First, we flatten it
     ndp = cndp_flatten(ndp)
+    assert ndp.get_fnames() == fnames
+    assert ndp.get_rnames() == rnames
     # then we compact it
     ndp = ndp.compact()
+    assert ndp.get_fnames() == fnames
+    assert ndp.get_rnames() == rnames
 
     # Check that we have some cycles
     G = get_connection_multigraph(ndp.get_connections())
@@ -40,81 +54,150 @@ def cndp_makecanonical(ndp):
                                 connections=ndp.get_connections(),
                                 name2dp=ndp.get_name2ndp())
 
-#        print('connections to cut: %s' % connections_to_cut)
 
         connections_to_cut = list(connections_to_cut)
         n = len(connections_to_cut)
         cycles_names = list(['cut%d' % _ for _ in range(n)])
         ndp_inner = cndp_create_one_without_some_connections(ndp, connections_to_cut, cycles_names)
 
+    assert ndp_inner.get_fnames() == fnames + cycles_names
+    assert ndp_inner.get_rnames() == rnames + cycles_names
+
+    if cycles_names:
+#     if len(cycles_names) > 1:
+        ndp_inner_muxed = add_muxes(ndp_inner, cs=cycles_names, s_muxed=s_muxed)
+        mux_signal = s_muxed
+        assert ndp_inner_muxed.get_fnames() == fnames + [mux_signal]
+        assert ndp_inner_muxed.get_rnames() == rnames + [mux_signal]
+#     elif len(cycles_names) == 1:
+#         ndp_inner_muxed = ndp_inner
+#         mux_signal = cycles_names[0]
+    else:
+        ndp_inner_muxed = ndp_inner
+        pass
+
 
     name2ndp = {}
-    name_inner = 'inner'
-    name2ndp[name_inner] = ndp_inner
+    name2ndp[name_inner_muxed] = ndp_inner_muxed
     connections = []
 
-    for fname in ndp_inner.get_fnames():
-        if fname in cycles_names:
-            continue
+    connect_functions_to_outside(name2ndp, connections, ndp_name=name_inner_muxed, fnames=fnames)
+    connect_resources_to_outside(name2ndp, connections, ndp_name=name_inner_muxed, rnames=rnames)
 
-        F = ndp_inner.get_ftype(fname)
-        nn = get_name_for_fun_node(fname)
-        name2ndp[nn] = dpwrap(Identity(F), fname, fname)
+    if cycles_names:
+        connections.append(Connection(name_inner_muxed, mux_signal, name_inner_muxed, mux_signal))
 
-        connections.append(Connection(nn, fname, name_inner, fname))
+    outer = CompositeNamedDP.from_parts(name2ndp=name2ndp,
+                                        connections=connections,
+                                        fnames=fnames, rnames=rnames)
+    return outer
 
-    for rname in ndp_inner.get_rnames():
-        if rname in cycles_names:
-            continue
+@contract(cs='list(str)', s_muxed=str, returns=CompositeNamedDP)
+def add_muxes(inner, cs, s_muxed, inner_name='_inner0', mux1_name='_mux1', mux2_name='_mux2'):
+    """
+        Add muxes before and after inner 
+        
+       
+                  ---(extraf)--|       |---(extrar)--
+                     |--c1-----| inner |--c1--|
+             s_muxed-|--c2-----|       |--c2--|--s_muxed
+           
+    """
 
-        R = ndp_inner.get_rtype(rname)
-        nn = get_name_for_res_node(rname)
-        name2ndp[nn] = dpwrap(Identity(R), rname, rname)
+    extraf = [f for f in inner.get_fnames() if not f in cs]
+    extrar = [r for r in inner.get_rnames() if not r in cs]
+    
+    fnames = extraf + [s_muxed]
+    rnames = extrar + [s_muxed]
 
-        connections.append(Connection(name_inner, rname, nn, rname))
-
-    # add the loops
-    if len(cycles_names) == 1:
-        c = Connection(name_inner, cycles_names[0], name_inner, cycles_names[0])
-        connections.append(c)
+    name2ndp = {}
+    connections = []
+    name2ndp[inner_name] = inner
+    
+    # Second mux
+    if len(cs) == 1:
+        F = inner.get_ftype(cs[0])
+        nto1 = SimpleWrap(Identity(F), fnames=cs[0], rnames=s_muxed)
     else:
-
-        types = ndp_inner.get_ftypes(cycles_names)
+        types = inner.get_ftypes(cs)
         F = PosetProduct(types.subs)
         # [0, 1, 2]
-        coords = list(range(len(cycles_names)))
+        coords = list(range(len(cs)))
         mux = Mux(F, coords)
-        nto1 = SimpleWrap(mux, fnames=cycles_names, rnames='_muxed')
+        nto1 = SimpleWrap(mux, fnames=cs, rnames=s_muxed)
 
+    if len(cs) == 1:
+        R = inner.get_rtype(cs[0])
+        _1ton = SimpleWrap(Identity(R), fnames=s_muxed, rnames=cs[0])
+    else:
 
-        # [0, 1, 2]
-        coords = list(range(len(cycles_names)))
+        # First mux
+        coords = list(range(len(cs)))
         R = mux.get_res_space()
         mux2 = Mux(R, coords)
-        _1ton = SimpleWrap(mux2, fnames='_muxed', rnames=cycles_names)
+        _1ton = SimpleWrap(mux2, fnames=s_muxed, rnames=cs)
         F2 = mux2.get_res_space()
         tu = get_types_universe()
         tu.check_equal(F, F2)
+    
+    name2ndp[mux1_name] = nto1
+    name2ndp[mux2_name] = _1ton
 
-        mux1_name = '_mux1'
-        mux2_name = '_mux2'
-        name2ndp[mux1_name] = nto1
-        name2ndp[mux2_name] = _1ton
+    for n in cs:
+        connections.append(Connection(inner_name, n, mux1_name, n))
+    for n in cs:
+        connections.append(Connection(mux2_name, n, inner_name, n))
 
-        connections.append(Connection(mux1_name, '_muxed', mux2_name, '_muxed'))
-        for n in cycles_names:
-            connections.append(Connection(name_inner, n, mux1_name, n))
-        for n in cycles_names:
-            connections.append(Connection(mux2_name, n, name_inner, n))
+    # Now add the remaining names
+    connect_functions_to_outside(name2ndp, connections, ndp_name=inner_name, fnames=extraf)
+    connect_resources_to_outside(name2ndp, connections, ndp_name=inner_name, rnames=extrar)
+    
+    connect_resources_to_outside(name2ndp, connections, ndp_name=mux1_name, rnames=[s_muxed])
+    connect_functions_to_outside(name2ndp, connections, ndp_name=mux2_name, fnames=[s_muxed])
 
-    fnames = ndp.get_fnames()
-    rnames = ndp.get_rnames()
     outer = CompositeNamedDP.from_parts(name2ndp=name2ndp,
                                         connections=connections,
                                         fnames=fnames, rnames=rnames)
     return outer
 
 
+def connect_resources_to_outside(name2ndp, connections, ndp_name, rnames):
+    """ 
+        For each function in fnames of ndp_name,
+        create a new outside function node and connect it to ndp_name.
+    """
+    assert ndp_name in name2ndp
+    ndp = name2ndp[ndp_name]
+
+    if not set(rnames).issubset(ndp.get_rnames()):
+        msg = 'Some of the resources are not present.'
+        raise_desc(ValueError, msg, rnames=rnames, ndp=ndp)
+
+    for rn in rnames:
+        nn = get_name_for_res_node(rn)
+        R = ndp.get_rtype(rn)
+        name2ndp[nn] = dpwrap(Identity(R), rn, rn)
+        connections.append(Connection(ndp_name, rn, nn, rn))
+
+def connect_functions_to_outside(name2ndp, connections, ndp_name, fnames):
+    """ 
+        For each function in fnames of ndp_name,
+        create a new outside function node and connect it to ndp_name.
+    """
+    assert ndp_name in name2ndp
+    ndp = name2ndp[ndp_name]
+
+    if not set(fnames).issubset(ndp.get_fnames()):
+        msg = 'Some of the functions are not present.'
+        raise_desc(ValueError, msg, fnames=fnames, ndp=ndp)
+
+    for fname in fnames:
+
+        F = ndp.get_ftype(fname)
+        nn = get_name_for_fun_node(fname)
+        name2ndp[nn] = dpwrap(Identity(F), fname, fname)
+
+        connections.append(Connection(nn, fname, ndp_name, fname))
 
 @contract(names='list[N]', exclude_connections='list[N]')
 def cndp_create_one_without_some_connections(ndp, exclude_connections, names):
@@ -203,27 +286,6 @@ def choose_connections_to_cut(connections, name2dp):
     connection_to_remove = [_ for _ in connections if (_.dp1, _.dp2) in edges_to_remove]
 
     return connection_to_remove
-# #
-# #     # Returns the list of cycles as a sequence of edges
-# #     c_as_e = simple_cycles_as_edges(G)
-# #
-# #     counts = defaultdict(lambda: 0)
-# #     for cycle in c_as_e:
-# #         for edge in cycle:
-# #             counts[edge] += 1
-# #
-# #     ncycles = len(c_as_e)
-# #     best_edge, ncycles_broken = max(list(counts.items()), key=lambda x: x[1])
-#
-#
-#
-#     its_connection = find_one(best_edge[0], best_edge[1])
-#     F = name2dp[its_connection.dp1].get_rtype(its_connection.s1)
-#     print('Min cut: breaking %d of %d cycles by removing %s, space = %s.' %
-#         (ncycles_broken, ncycles, str(its_connection), F))
-#     # print('its connection is %s' % str(its_connection))
-#     # print('querying F = %s ' % name2dp[its_connection.dp1].get_rtype(its_connection.s1))
-#     return its_connection
 
 
 def enumerate_minimal_solution(G, edge_weight):
@@ -311,7 +373,7 @@ def pop_solution_minimum_weight(sols):
         
 
 
-def get_canonical_elements(ndp):
+def get_canonical_elements(ndp0):
     """
         returns
         
@@ -321,18 +383,16 @@ def get_canonical_elements(ndp):
             res['extrar'] => list of extra resources
     """
 
-    ndp = cndp_makecanonical(ndp)
-    subs = ndp.get_name2ndp()
     INNER = 'inner'
+    MUXED = '_muxed'
+    ndp = cndp_makecanonical(ndp0, name_inner_muxed=INNER, s_muxed=MUXED)
+    subs = ndp.get_name2ndp()
     inner = subs[INNER]
 
-    # these are the ones for which there exists a connection
-    # to/from inner
-    connections = ndp.get_connections()
-    cycles = []
-    for c in connections:
-        if (c.dp1 == INNER) and (c.dp2 == INNER):
-            cycles.append(c.s1)
+    if MUXED in inner.get_fnames():
+        cycles = [MUXED]
+    else:
+        cycles  = []
 
     extraf = [f for f in inner.get_fnames() if not f in cycles]
     extrar = [r for r in inner.get_rnames() if not r in cycles]
