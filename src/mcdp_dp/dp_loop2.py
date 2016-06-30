@@ -1,15 +1,12 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import indent, raise_desc, raise_wrapped
+from mcdp_dp.dp_loop import Iteration
 from mcdp_dp.primitive import Feasible, NotFeasible, PrimitiveDP
 from mcdp_dp.tracer import Tracer
-from mcdp_posets.poset import NotLeq
-from mcdp_posets.poset_product import PosetProduct
-from mcdp_posets.space import NotEqual
-from mcdp_posets.types_universe import get_types_universe
-from mocdp.exceptions import do_extra_checks
-from mcdp_posets.uppersets import UpperSets, UpperSet
-from mcdp_dp.dp_loop import Iteration
+from mcdp_posets import (NotEqual, NotLeq, PosetProduct, UpperSets,
+    get_types_universe)
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
+from mocdp.exceptions import do_extra_checks
 
 
 class DPLoop2(PrimitiveDP):

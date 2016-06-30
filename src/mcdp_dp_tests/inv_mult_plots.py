@@ -18,6 +18,7 @@ import numpy as np
 import warnings
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
 from mcdp_dp.dp_transformations import get_dp_bounds
+from mocdp.exceptions import mcdp_dev_warning
 
 
 # @comptest_dynamic
@@ -117,7 +118,12 @@ def check_invmult2_report():
     rmin = dp.solve(())
     print('Rmin: %s' % UR.format(rmin))
     S, alpha, beta = dp.get_normal_form()
-
+    # S: 𝟙                                                                                                                                  roc
+    if not isinstance(S, UpperSets):
+        mcdp_dev_warning('This test worked only with the loop0 definiton in which S was an upper set')
+        return
+        
+    print('S: %s' % S)
     s0 = S.get_bottom()
 
     ss = [s0]
@@ -126,9 +132,11 @@ def check_invmult2_report():
     nsteps = 5
     for i in range(nsteps):
         s_last = ss[-1]
+        S.belongs(s_last)
         print('Computing step')
         s_next = beta((f, s_last))
-
+        S.belongs(s_next)
+        print('snext: %s' % str(s_next))
         if S.equal(ss[-1], s_next):
             print('%d: breaking because converged' % i)
             break

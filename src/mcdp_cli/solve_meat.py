@@ -59,7 +59,7 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
         M = dp.get_imp_space_mod_res()
         nimplementations = 0
         for r in res.minimals:
-            ms = dp.get_implementations_f_r(f=fg, r=r)
+            ms = dp.get_implementations_f_r(fg, r)
             nimplementations += len(ms)
             s = 'r = %s ' % R.format(r)
             for j, m in enumerate(ms):
