@@ -66,6 +66,7 @@ def check_prob_feasibility_1():
     gamma = '1.0 W/N'
     trace = get_trace_solution(T=T, W0=W0, P0=P0, one_over_alpha=one_over_alpha,
                                gamma=gamma, add_mass_limit=add_mass_limit)
+
     assert_equal(trace.result, ConvergedToInfinite)
 
 @comptest

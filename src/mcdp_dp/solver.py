@@ -30,7 +30,6 @@ class SolverTrace():
         self.rtrace = rtrace
         self.result = result
 
-
     def get_s_sequence(self):
         return list(self.strace)
     
@@ -154,6 +153,7 @@ def generic_solve(dp, f, max_steps=None):
                 m1 = list(s_next.minimals)[0]
                 if S.P.equal(S.P.get_top(), m1):
                     result = ConvergedToInfinite
+                    print('%d: converged to infinite' % i)
                     break
 
     if result != MaxStepsReached:
