@@ -6,6 +6,8 @@ from mcdp_lang.syntax import Syntax
 
 @comptest
 def check_lang_namedtuple1():
+    parse_wrap(Syntax.PRODUCTWITHLABELS, 'product')
+    parse_wrap(Syntax.space_product_with_labels, 'product(weight: g, energy: J)')
     P = parse_poset('product(weight: g, energy: J)')
     print P
     print P.format((2.0, 1.0))

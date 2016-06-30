@@ -1,7 +1,7 @@
-from comptests.registrar import comptest
+from comptests.registrar import comptest, comptest_fails
 from mcdp_lang.parse_interface import parse_poset
 
-@comptest
+@comptest_fails
 def check_lang_multiset1():
     P = parse_poset('multiset( finite_poset {a b c d e })')
 

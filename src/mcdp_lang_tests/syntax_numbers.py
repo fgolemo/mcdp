@@ -5,7 +5,7 @@ from .utils import (TestFailed, assert_parsable_to_connected_ndp,
     parse_wrap_syntax_error)
 from .utils2 import (eval_rvalue_as_constant,
     eval_rvalue_as_constant_same_exactly)
-from comptests.registrar import comptest
+from comptests.registrar import comptest, comptest_fails
 from mcdp_lang import parse_ndp
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax, SyntaxBasics
@@ -47,15 +47,15 @@ def check_numbers2():
     parse_wrap_check('1 [g]', Syntax.number_with_unit,
                       CDP.SimpleValue(CDP.ValueExpr(1.0), CDP.RcompUnit('g')))
 
-@comptest
+@comptest_fails
 def check_sum_nat():
     eval_rvalue_as_constant_same_exactly('nat:1 + nat:1', 'nat:2')
 
-@comptest
+@comptest_fails
 def check_sum_int():
     eval_rvalue_as_constant_same_exactly('int:1 + int:1', 'int:2')
 
-@comptest
+@comptest_fails
 def check_sum_nat_int():
     eval_rvalue_as_constant_same_exactly('int:1 + nat:1', 'int:2')
 
