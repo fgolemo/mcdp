@@ -6,17 +6,16 @@ from collections import Counter
 from contracts import contract
 from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
+from mcdp_dp import Identity, Mux, Terminator, make_parallel, make_series
+from mcdp_dp.dp_loop import make_loop
 from mcdp_posets import PosetProduct
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.connection_reps import (relabel, there_are_repetitions,
     there_are_reps)
 from mocdp.comp.wrap import SimpleWrap
-from mcdp_dp import Identity, Mux, Terminator, make_parallel, make_series
-from mcdp_dp.dp_loop import make_loop
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from networkx import DiGraph, MultiDiGraph, NetworkXUnfeasible
 from networkx.algorithms import is_connected, simple_cycles, topological_sort
-# from mocdp.configuration import get_conftools_nameddps
 
 
 class TheresALoop(Exception):
@@ -54,17 +53,6 @@ def dpconnect(name2dp, connections, split=[]):
             raise_desc(NotImplementedError, '')
         return list(name2dp.values())[0]
 
-#     if len(name2dp) < 2:
-#
-#         msg = 'Less than two DPs: %s' % name2dp
-#         raise_desc(DPInternalError, msg, name2dp=format_dict_long(name2dp),
-#                    connections=format_list_long(connections),
-#                    split=split)
-
-#     for k, v in name2dp.items():
-#         _, name2dp[k] = get_conftools_nameddps().instance_smarter(v)
-
-#     connections = set(map(parse_connection, connections))
     connections = set(connections)
     check_connections(name2dp, connections)
 

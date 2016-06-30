@@ -16,6 +16,7 @@ from pyramid.httpexceptions import HTTPFound
 from quickapp import QuickAppBase
 from wsgiref.simple_server import make_server
 import os
+import mocdp
 
 
 __all__ = [
@@ -76,7 +77,9 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         return sorted(self.libraries)
 
     def view_index(self, request):  # @UnusedVariable
-        return {}
+        d = {}
+        d['version'] = lambda: mocdp.__version__
+        return d
 
     def view_list(self, request):
         models = self.list_of_models(request)
@@ -118,9 +121,11 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
     
     def view_docs(self, request):
         docname = str(request.matchdict['document'])  # unicode
-
         # from pkg_resources import resource_filename  # @UnresolvedImport
+        html = self.render_markdown_doc(docname)
+        return {'contents': html}
 
+    def render_markdown_doc(self, docname):
         package = dir_from_package_name('mcdp_data')
         docs = os.path.join(package, 'docs')
         f = os.path.join(docs, '%s.md' % docname)
@@ -139,7 +144,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         ]
         html = markdown.markdown(data, extensions)
         # print html
-        return {'contents': html}
+        return html
 
     # This is where we keep all the URLS
     def get_lmv_url(self, library, model, view):
@@ -272,6 +277,12 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         return d
 
+    def get_template_functions(self):
+        """ Returns a set of useful template functions. """
+        d = {}
+        d['version'] = lambda: mocdp.__version__
+        d['render_markdown_doc'] = lambda docname: self.render_markdown_doc(docname)
+        return d
 
     def serve(self):
         config = Configurator()

@@ -126,18 +126,30 @@ def cndp_create_one_without_some_connections(ndp, exclude_connections, names):
     # print ndp
     # print ndp.get_rnames()
     # print ndp.get_fnames()
+    # Create the fun/res node in the original order
+    for fname in ndp.get_fnames():
+        F = ndp.get_ftype(fname)
+        context.add_ndp_fun_node(fname, F)  # this updates the internal fnames
+
+    for rname in ndp.get_rnames():
+        R = ndp.get_rtype(rname)
+        context.add_ndp_res_node(rname, R)  # this udpates the internal rnames
+
+
     for _name, _ndp in ndp.get_name2ndp().items():
         isf, fname = is_fun_node_name(_name)
         isr, rname = is_res_node_name(_name)
 
         if isf and fname in ndp.get_fnames():
             # print('fname: %r' % fname)
-            F = ndp.get_ftype(fname)
-            context.add_ndp_fun_node(fname, F)
+            # F = ndp.get_ftype(fname)
+            # context.add_ndp_fun_node(fname, F)
+            pass
         elif isr and rname in ndp.get_rnames():
             # print('rname: %r' % rname)
-            R = ndp.get_rtype(rname)
-            context.add_ndp_res_node(rname, R)
+            # R = ndp.get_rtype(rname)
+            # context.add_ndp_res_node(rname, R)
+            pass
         else:
             # print('regular: %r' % _name)
             context.add_ndp(_name, _ndp)
@@ -297,6 +309,40 @@ def pop_solution_minimum_weight(sols):
     
     
         
+
+
+def get_canonical_elements(ndp):
+    """
+        returns
+        
+            res['inner']
+            res['cycles'] => variables
+            res['extraf'] => list of extra functions
+            res['extrar'] => list of extra resources
+    """
+
+    ndp = cndp_makecanonical(ndp)
+    subs = ndp.get_name2ndp()
+    INNER = 'inner'
+    inner = subs[INNER]
+
+    # these are the ones for which there exists a connection
+    # to/from inner
+    connections = ndp.get_connections()
+    cycles = []
+    for c in connections:
+        if (c.dp1 == INNER) and (c.dp2 == INNER):
+            cycles.append(c.s1)
+
+    extraf = [f for f in inner.get_fnames() if not f in cycles]
+    extrar = [r for r in inner.get_rnames() if not r in cycles]
+
+    res = {}
+    res['inner'] = inner
+    res['extraf'] = extraf
+    res['extrar'] = extrar
+    res['cycles'] = cycles
+    return res
     
     
 

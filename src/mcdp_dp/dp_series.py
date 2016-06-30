@@ -18,10 +18,6 @@ __all__ = [
 class Series0(PrimitiveDP):
 
     def __init__(self, dp1, dp2):
-#         from mocdp import get_conftools_dps
-#         library = get_conftools_dps()
-#         _, self.dp1 = library.instance_smarter(dp1)
-#         _, self.dp2 = library.instance_smarter(dp2)
         self.dp1 = dp1
         self.dp2 = dp2
         # if equiv_to_identity(self.dp1) or equiv_to_identity(self.dp2):
@@ -217,19 +213,24 @@ class Series0(PrimitiveDP):
         if func in self._solve_cache:
             # trace.log('using cache for %s' % str(func))
             return trace.result(self._solve_cache[func])
+
         trace.values(type='series')
         from mcdp_posets import UpperSet, poset_minima
 
         with trace.child('dp1') as t:
             u1 = self.dp1.solve_trace(func, t)
         # ressp1 = self.dp1.get_res_space()
-        # tr1 = UpperSets(ressp1)
-        # tr1.belongs(u1)
+
+        if do_extra_checks():
+            R1 = self.dp1.get_res_space()
+            tr1 = UpperSets(R1)
+            tr1.belongs(u1)
 
         mins = set([])
         for u in u1.minimals:
             with trace.child('dp2') as t:
                 v = self.dp2.solve_trace(u, t)
+                assert isinstance(v, UpperSet), (type(self.dp2), v)
             mins.update(v.minimals)
 
         ressp = self.get_res_space()

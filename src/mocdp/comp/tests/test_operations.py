@@ -37,8 +37,6 @@ def check_same_interface(ndp, ndp2):
         assert ndp.get_rnames() == ndp2.get_rnames(), (ndp.get_rnames(), ndp2.get_rnames())
         fnames = ndp.get_fnames()
         rnames = ndp.get_rnames()
-        fnames2 = ndp2.get_fnames()
-        rnames2 = ndp2.get_rnames()
         ftypes = ndp.get_ftypes(fnames)
         rtypes = ndp.get_rtypes(rnames)
         ftypes2 = ndp2.get_ftypes(fnames)

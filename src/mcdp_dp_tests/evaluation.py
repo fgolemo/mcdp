@@ -85,9 +85,9 @@ def check_evaluation():
     """)
     dp = ndp.get_dp()
     print(dp.repr_long())
-    M = dp.get_imp_space_mod_res()
+    # M = dp.get_imp_space_mod_res()
     
-    assert_equal(M, SpaceProduct((R_dimensionless, R_dimensionless)))
+    # assert_equal(M, SpaceProduct((R_dimensionless, R_dimensionless)))
     assert_equal(dp.get_res_space(), SpaceProduct(()))
     assert_equal(dp.get_fun_space(), SpaceProduct(()))
 

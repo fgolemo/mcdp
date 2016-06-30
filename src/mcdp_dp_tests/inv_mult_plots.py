@@ -16,6 +16,7 @@ from reprep import Report
 import itertools
 import numpy as np
 import warnings
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
 
 
 # @comptest_dynamic
@@ -547,7 +548,12 @@ def check_loop_result5a():
 
     pf = [p for p in points if feasible(p[0], p[1])]
     pu = [p for p in points if not feasible(p[0], p[1])]
-
+    print 'pf', pf
+    print 'pu', pu
+    N2 = PosetProduct((Nat(), Nat()))
+    Min_pf = N2.Us(poset_minima(pf, leq=N2.leq))
+    print 'Min(pf)', Min_pf
+    assert(Min_pf.minimals == set([(6, 3), (4, 4), (7, 0), (3, 6), (0, 7)]))
     r = Report()
     f = r.figure()
     with f.plot('real') as pylab:
@@ -570,7 +576,6 @@ mcdp {
     }
     
     requires x, y for f
-    #provides v [Nat]
     
     f.z >= sqrt(f.x) + sqrt(f.y) + nat:4
     
@@ -582,19 +587,22 @@ mcdp {
     print dp
     print dp.repr_long()
     f0 = ()
-    res1 = dp.solve(f0)
-    print('res1: %s' % res1)
+    from mocdp import logger
+    trace1 = Tracer(logger=logger)
+    res1 = dp.solve_trace(f0, trace1)
+    UR.belongs(res1)
+    print('res1: %s' % UR.format(res1))
 
     trace = generic_solve(dp, f=f0, max_steps=None)
     res2 = trace.get_r_sequence()[-1]
-    print('res2: %s' % res2)
+    UR.belongs(res2)
+    print('res2: %s' % UR.format(res2))
 
-    solution = R.Us([(0, 7), (3, 6), (4, 4), (6, 3), (7, 0)])
-    UR.check_equal(res1, solution)
+    UR.check_equal(res1, Min_pf)
 
     warnings.warn('Disabled check because it fails')
     if False:
-        UR.check_equal(res2, solution)
+        UR.check_equal(res2, Min_pf)
     print(res2)
 
 

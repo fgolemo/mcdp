@@ -21,11 +21,9 @@ Meat
 
 Incoming
 ---------
+ 
 
-- Expand MCDPLibrary to load types, values, interfaces, as well.
-
-- R: Replace conf_tools completely.
-- R: Remove battery example
+- R: Replace conf_tools completely. 
 - L: Add something like:
 
   my_npd.mcdp
@@ -33,8 +31,7 @@ Incoming
 
 
 - B: the @comptests inside example_battery are not used now. Use make w/ comptest command?
-
-- add library hooks for types, etc.
+ 
 
 
 Misc
@@ -47,8 +44,7 @@ Misc
 - T: mcdplib: create stand-alone ``mcdp-test`` for each ``.mcdplib``
 
 - B: automatically load CSS from that file.
-
-- B: do not use cache if it is not writable
+ 
 
 MCDP-web
 ----------
@@ -58,11 +54,7 @@ MCDP-web
 
 - F: delete model
 
-
-
-
-- B: do not navigate away if there are changes - saved should not be set 
-  to true if there were some changes in the mean time.
+ 
   
 - F: better initial list for each library
 
@@ -197,6 +189,8 @@ requires r1 >= f1
   }
 
 
+
+- g: visualize PlusNat as "+ x"
 
 
 

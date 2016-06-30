@@ -40,7 +40,7 @@ class Tracer():
         
     @contextmanager
     def child(self, name):
-        t = Tracer(prefix=self.prefix + ":" + name)
+        t = Tracer(prefix=self.prefix + ":" + name, logger=self.logger)
         yield t
         if t.chronology:
             last = t.chronology[-1]

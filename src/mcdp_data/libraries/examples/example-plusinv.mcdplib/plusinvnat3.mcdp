@@ -1,17 +1,28 @@
-mcdp {
-	f = instance mcdp  {
-	    provides a [Nat]
-	    
-	    requires x [Nat]
-	    requires y [Nat]
-	    
-	    x + y >= a
-	}
+# This is an example of an infeasible problem. 
+# 
+# The problem can be rewritten as:
+#    minimize (x,y)
+#    s.t.  x + y >= x + y + z
+#  with z a parameter. 
+# The solution is: 
+#    z = 0   |->  (x,y) = (0,0)
+#    z > 0   |->  empty set
+#  Trying to solve this problem with the standard MCDP solver 
+#  will create a (practically) infinite loop as the program 
+#  tries to explore most of the antichains of N^2.
+flatten mcdp {
+        f = instance mcdp  {
+            provides a [Nat]
+            
+            requires x [Nat]
+            requires y [Nat]
+            
+            x + y >= a
+        }
 
-	provides z [Nat]
+        provides z [Nat]
 
-	f.a >= f.x + f.y + z 
+        f.a >= f.x + f.y + z 
 
-	requires x, y for f
+        requires x, y for f
 }
- 

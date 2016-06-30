@@ -114,10 +114,13 @@ class CompositeNamedDP(NamedDP):
             msg = 'Cannot abstract because not all subproblems are connected.'
             raise_wrapped(DPSemanticError, e, msg, compact=True)
 
-        from mocdp.comp.context_functions import dpgraph_making_sure_no_reps
-        res = dpgraph_making_sure_no_reps(self.context)
-        assert res.get_fnames() == self.context.fnames
-        assert res.get_rnames() == self.context.rnames
+        from mocdp.comp.composite_abstraction import cndp_abstract
+        res = cndp_abstract(self)
+
+        # from mocdp.comp.context_functions import dpgraph_making_sure_no_reps
+        # res = dpgraph_making_sure_no_reps(self.context)
+        assert res.get_fnames() == self.context.fnames, (res.get_fnames(), self.context.fnames)
+        assert res.get_rnames() == self.context.rnames, (res.get_rnames(), self.context.rnames)
         return res
 
     def get_dp(self):

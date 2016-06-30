@@ -9,6 +9,7 @@ from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning
 from reprep import Report
 import warnings
+from mcdp_dp.dp_loop2 import DPLoop2
 
 
 
@@ -86,6 +87,8 @@ def gvgen_from_dp(dp0, imp=None):
             r = go_parallel(dp, imp)
         elif isinstance(dp, DPLoop0):
             r = go_loop(dp, imp)
+        elif isinstance(dp, DPLoop2):
+            r = go_loop2(dp, imp)
         else:
             r = go_simple(dp, imp)
         return r
@@ -167,6 +170,37 @@ def gvgen_from_dp(dp0, imp=None):
 
         gg.newLink(n1o, o, label=str(dp.dp1.get_res_space()))
         loop_label = str(dp.dp1.get_res_space())
+
+        mcdp_dev_warning('add option')
+        if False:
+            M = dp.get_imp_space_mod_res()
+            M0 = dp.dp1.get_imp_space_mod_res()
+            loop_label += ' M0: %s' % M0
+            loop_label += ' M: %s' % M
+        l = gg.newLink(o, i, label=loop_label)
+        gg.propertyAppend(l, "color", "red")
+        gg.propertyAppend(l, "headport", "sw")
+        gg.propertyAppend(l, "tailport", "s")
+
+        return (i, o)
+
+    def go_loop2(dp, imp):
+        if do_imp:
+            m0, _f2 = dp._unpack_m(imp)
+        else:
+            m0 = _f2 = None
+
+        (n1i, n1o) = go(dp.dp1, m0)
+
+        i = gg.newItem('|')
+        gg.propertyAppend(i, "shape", "plaintext")
+        o = gg.newItem('|')
+        gg.propertyAppend(o, "shape", "plaintext")
+
+        gg.newLink(i, n1i, label=str(dp.dp1.get_fun_space()))
+
+        gg.newLink(n1o, o, label=str(dp.dp1.get_res_space()))
+        loop_label = str(dp.F2)
 
         mcdp_dev_warning('add option')
         if False:
