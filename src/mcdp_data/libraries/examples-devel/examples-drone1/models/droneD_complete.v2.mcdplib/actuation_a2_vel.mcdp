@@ -6,6 +6,7 @@ mcdp {
     requires actuator_mass [g]
     requires cost [$]
     
+    lift <= 100N
     p0 = 2 W
     p1 = 1.5 W/N^2
 

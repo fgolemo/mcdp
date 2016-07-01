@@ -133,8 +133,8 @@ def make_approximation(name, approx_perc, approx_abs, approx_abs_S, max_value, m
     raise_desc(ValueError, msg, fnames=fnames, rnames=rnames, name=name)
 
 
-NAME_ORIGINAL = 'original'
-NAME_APPROX = 'approx'
+NAME_ORIGINAL = '_original'
+NAME_APPROX = '_approx'
 
 def make_approximation_r(name, approx_perc, approx_abs, approx_abs_S,
                          max_value, max_value_S, ndp):

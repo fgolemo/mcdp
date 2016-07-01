@@ -6,6 +6,7 @@ from mcdp_posets.space import NotBelongs
 from mcdp_report.gg_ndp import format_unit
 from mcdp_posets.nat import Nat
 from mcdp_dp.tracer import Tracer
+from mcdp_posets.rcomp import RcompTop
 
 
 class SolverState():
@@ -65,10 +66,6 @@ class SolverState():
         print('solving... %s' % F.format(fv))
         ures = self.dp.solve_trace(fv, trace)
 
-#         F = self.dp.get_fun_space()
-#         R = self.dp.get_res_space()
-#         UR = UpperSets(R)
-        # print('f = %s -> %s' % (F.format(point), UR.format(ures)))
         self.ures.append(ures)
 
     @contract(fun_index='seq[>=1](int)',
@@ -130,24 +127,18 @@ class SolverState():
             p = make_tuple(p)
             res = {}
             if wx is not None:
-                res['x'] = p[xi]
+                res['x'] = make_value(p[xi])
             else:
                 res['x'] = 0
             if wy is not None:
-                res['y'] = p[yi]
+                res['y'] = make_value(p[yi])
             else:
                 res['y'] = 0
             return res
-#
-#         def get_marker(i):
-#             if len(self.ures[i].minimals) != 0:
-#                 return "cross"
-#             else:
-#                 return "circle"
 
         datasets = [{'data': [make_point(p)],
                  'backgroundColor': self.get_color(i)} for i, p in enumerate(self.fun)]
-#         print datasets
+        print datasets
         return datasets
 
     def get_datasets_res(self, wx, wy):
@@ -168,11 +159,11 @@ class SolverState():
             p = make_tuple(p)
             res = {}
             if wx is not None:
-                res['x'] = p[xi]
+                res['x'] = make_value(p[xi])
             else:
                 res['x'] = 0
             if wy is not None:
-                res['y'] = p[yi]
+                res['y'] = make_value(p[yi])
             else:
                 res['y'] = 0
             return res
@@ -180,9 +171,22 @@ class SolverState():
         def get_points(ui):
             return [make_point(p) for p in ui.minimals]
 
-        return [{'data': get_points(ui),
+        datasets = [{'data': get_points(ui),
                  'backgroundColor': self.get_color(i)} for i, ui in enumerate(self.ures)]
+        print datasets
+        return datasets
 
+def make_value(x):
+    """ Converts the value to something we can send over json.
+        Primarely used for dealing with Top. 
+        
+    """
+    if isinstance(x, RcompTop):
+        return np.inf
+    else:
+        return x
+
+import numpy as np
 
 def get_decisions_for_axes(ndp, fun_axes, res_axes):
     fnames = ndp.get_fnames()

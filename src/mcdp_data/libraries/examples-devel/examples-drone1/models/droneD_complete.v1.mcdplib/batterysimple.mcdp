@@ -13,8 +13,7 @@ mcdp {
 
     # How many times should it be replaced?
     num_replacements = ceil(provided missions / cycles)
-
-# test
+ 
     required mass >=  provided capacity / specific_energy
     required cost >= (provided capacity / specific_cost) * num_replacements
 }

@@ -22,7 +22,7 @@ Meat
 Incoming
 ---------
  
-
+- solver2: clean up interface
 - R: Replace conf_tools completely. 
 - L: Add something like:
 
@@ -38,6 +38,8 @@ Misc
 -----
 
 - R: add license information
+
+- F: create operator approx(10g, -)
 
 
 
