@@ -32,6 +32,10 @@
 		table#main td { vertical-align: top; }
 	</style>
 	
+	{% if explanation1_html %}
+		{{explanation1_html|safe}}
+	{% endif %}
+	
 	<table id='main'>
 	<tr><td>
 	{{highlight|safe}}
@@ -47,5 +51,10 @@
 	</td>
 	</tr>
 	</table>
+
+	{% if explanation2_html %}
+		{{explanation2_html|safe}}
+	{% endif %}
+
 </body>
 </html>

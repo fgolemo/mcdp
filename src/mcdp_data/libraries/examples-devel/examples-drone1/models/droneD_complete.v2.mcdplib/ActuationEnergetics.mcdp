@@ -8,7 +8,7 @@ mcdp {
   requires total_cost [$]
   
   battery = new Battery_LiPo
-  actuation = new Actuation_a2_vel
+  actuation = new Actuation 
 
   total_power = power required by actuation + extra_power
   capacity provided by battery >= endurance * total_power

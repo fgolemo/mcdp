@@ -3,6 +3,7 @@ from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from mcdp_report.html import ast_to_html
 from mcdp_report.report import gvgen_from_dp
 from mcdp_web.utils import png_error_catch, response_data
+from mcdp_library.library import MCDPLibrary
 
 class AppVisualization():
 
@@ -126,11 +127,25 @@ class AppVisualization():
 
         model_name = str(request.matchdict['model_name'])  # unicode
 
-        filename = '%s.mcdp' % model_name
+        filename = '%s.%s' % (model_name, MCDPLibrary.ext_ndps)
         l = self.get_library(request)
         f = l._get_file_data(filename)
         source_code = f['data']
         realpath = f['realpath']
+        
+        md1 = '%s.%s' % (model_name, MCDPLibrary.ext_explanation1)
+        if l.file_exists(md1):
+            fd = l._get_file_data(md1)
+            html1 = self.render_markdown(fd['data'])
+        else:
+            html1 = None
+
+        md2 = '%s.%s' % (model_name, MCDPLibrary.ext_explanation2)
+        if l.file_exists(md2):
+            fd = l._get_file_data(md2)
+            html2 = self.render_markdown(fd['data'])
+        else:
+            html2 = None
 
         highlight = ast_to_html(source_code,
                                 complete_document=False,
@@ -142,7 +157,9 @@ class AppVisualization():
                 'model_name': model_name,
                 'realpath': realpath,
                 'navigation': self.get_navigation_links(request),
-                'current_view': 'syntax'}
+                'current_view': 'syntax',
+                'explanation1_html': html1,
+                'explanation2_html': html2, }
 
 #     def get_link_to_model(self, library, model):
 #         return "/library/%s/models/%s/syntax" % (library, model)

@@ -49,7 +49,8 @@ span.ApproxKeyword,
 span.TakeKeyword,
 span.SpecializeKeyword,
 span.FinitePosetKeyword,
-span.ProductKeyword
+span.ProductKeyword,
+span.UncertainKeyword
 
 { 
     font-weight: bold; 

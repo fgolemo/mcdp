@@ -1,5 +1,2 @@
 # we care about the plug type and the current
-`plug_types x A
-
-# Example of future syntax
-# namedtuple(plug: plug_types, current: A)
+`plug_types x A 

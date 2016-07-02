@@ -16,6 +16,7 @@ from pyramid.httpexceptions import HTTPFound
 from quickapp import QuickAppBase
 from wsgiref.simple_server import make_server
 import os
+from mcdp_web.images.images import WebAppImages
 
 
 __all__ = [
@@ -24,7 +25,7 @@ __all__ = [
 
 
 class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
-              AppSolver2, AppEditorFancyGeneric):
+              AppSolver2, AppEditorFancyGeneric, WebAppImages):
 
     def __init__(self, dirname):
         self.dirname = dirname
@@ -39,6 +40,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         AppInteractive.__init__(self)
         AppSolver2.__init__(self)
         AppEditorFancyGeneric.__init__(self)
+        WebAppImages.__init__(self)
 
         # name -> dict(desc: )
         self.views = {}
@@ -126,6 +128,12 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         f = os.path.join(docs, '%s.md' % docname)
         import codecs
         data = codecs.open(f, encoding='utf-8').read()
+        html = self.render_markdown(data)
+        # print html
+        return {'contents': html}
+
+    def render_markdown(self, s):
+        """ Returns an HTML string """
         import markdown  # @UnresolvedImport
 
         extensions = [
@@ -137,9 +145,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
             'markdown.extensions.admonition',
             'markdown.extensions.tables',
         ]
-        html = markdown.markdown(data, extensions)
-        # print html
-        return {'contents': html}
+        html = markdown.markdown(s, extensions)
+        return html
 
     # This is where we keep all the URLS
     def get_lmv_url(self, library, model, view):
@@ -209,7 +216,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
                                    view='syntax')
 
             name = "Model: %s" % m
-            desc = dict(name=name, url=url, current=is_current)
+            desc = dict(id_ndp=m, name=name, url=url, current=is_current)
             d['models'].append(desc)
 
         library = self.get_library(request)
@@ -284,6 +291,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         AppSolver.config(self, config)
         AppInteractive.config(self, config)
         AppEditorFancyGeneric.config(self, config)
+        WebAppImages.config(self, config)
 
         AppSolver2.config(self, config)
 

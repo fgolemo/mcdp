@@ -23,7 +23,10 @@ def cndp_templatize_children(cndp):
 
 @contract(ndp=NamedDP, returns=SimpleWrap)
 def ndp_templatize(ndp, mark_as_template=False):
-    """ Creates a template based on the interface. """
+    """ Creates a template based on the interface. 
+    
+        Copies attributes: ATTR_LOAD_NAME
+    """
     fnames = ndp.get_fnames()
     ftypes = ndp.get_ftypes(fnames)
     rnames = ndp.get_rnames()
@@ -50,6 +53,10 @@ def ndp_templatize(ndp, mark_as_template=False):
         klass = SimpleWrap
     res = klass(dp, fnames, rnames)
 
+    from mcdp_library.library import ATTR_LOAD_NAME
+    if hasattr(ndp, ATTR_LOAD_NAME):
+        x = getattr(ndp, ATTR_LOAD_NAME)
+        setattr(res, ATTR_LOAD_NAME, x)
     return res
 
 

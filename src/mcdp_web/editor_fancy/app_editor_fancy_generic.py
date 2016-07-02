@@ -274,7 +274,7 @@ def get_png_data_template(library, name, x):  # @UnusedVariable
 
     images_paths = library.get_images_paths()
     gg = gvgen_from_ndp(ndp, STYLE_GREENREDSYM, direction='TB',
-                        images_paths=images_paths)
+                        images_paths=images_paths, yourname=name)
     png, _pdf = png_pdf_from_gg(gg)
     return png
 
@@ -285,12 +285,13 @@ def get_png_data_model(library, name, ndp):
         setattr(ndp2, '_hack_force_enclose', True)
     else:
         ndp2 = ndp
-        setattr(ndp2, '_xxx_label', name)
 
-    # ndp2 = cndp_get_suitable_for_drawing(model_name, ndp)
     images_paths = library.get_images_paths()
+
+    # we actually don't want the name on top
+    yourname = None  # name
     gg = gvgen_from_ndp(ndp2, STYLE_GREENREDSYM, direction='TB',
-                        images_paths=images_paths)
+                        images_paths=images_paths, yourname=yourname)
     png, _pdf = png_pdf_from_gg(gg)
 
     return png

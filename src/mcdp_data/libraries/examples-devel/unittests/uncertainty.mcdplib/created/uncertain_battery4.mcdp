@@ -1,0 +1,11 @@
+
+mcdp {
+  provides capacity [J]
+  requires mass     [kg]
+  capacity <= 1MJ
+  mass1 = provided capacity/120 Wh/kg
+  mass2 = provided capacity/100 Wh/kg
+  required mass >= Uncertain(mass1, mass2)
+
+  mass >= 2g
+}

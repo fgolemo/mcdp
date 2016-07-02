@@ -126,6 +126,10 @@ class CompositeNamedDP(NamedDP):
 
     def __repr__(self):
         s = 'CompositeNDP'
+        from mcdp_library.library import ATTR_LOAD_NAME
+        if hasattr(self, ATTR_LOAD_NAME):
+            s += ' (loaded as %r)' % getattr(self, ATTR_LOAD_NAME)
+
         for f in self._fnames:
             s += '\n provides %s  [%s]' % (f, self.get_ftype(f))
         for r in self._rnames:
