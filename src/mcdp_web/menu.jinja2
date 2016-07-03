@@ -2,7 +2,7 @@
 <ul id="menu">
 <li id='root'>&#9776;
 <ul>
-  <li class="l1">New&hellip;
+  <li class="l1" id='menu_new'>New&hellip;
     <ul>
       <li><a id='new_model'>model&hellip;</a></li>
       <li><a id='new_template'>template&hellip;</a></li>
@@ -37,6 +37,23 @@
 $(document).ready(function() {
   options = { position: { my: "left top", at: "right top" } };
   $('#menu').menu(options);
+  
+  
+	$(window).keydown(function (e){
+		//console.log(e);
+		CODE_N = 78;
+		CODE_L = 76;
+		CODE_R = 82;
+		
+
+	    if (e.altKey && e.keyCode == CODE_R) { 
+	        e.preventDefault();
+	        //console.log('ciao');
+	        //$('#menu').menu('expand');
+	        window.location ='/libraries/{{navigation['current_library']}}/refresh_library';
+	    }
+	});
+	
 })
 </script>
 
@@ -108,8 +125,11 @@ $(document).ready(function() {
   $('#new_poset').click(new_poset);
   $('#new_template').click(new_template);
   $('#new_value').click(new_value);
-
+	
+	
+  $("#outer").show();
 });
 
+  $("#outer").hide();
 </script> 
 

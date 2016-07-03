@@ -1,18 +1,7 @@
 <style type='text/css'>
-div.navigation {font-size: smaller; }
-div.navigation span.additional {margin-left: 2em; }
 
-div.library, div.this_model { 
-	display: inline; 
-	margin: 5px;
-	padding: 5px;
-	/*background-color: #eee;*/
-}
-
-div.library span, div.this_model span { font-size: 80%; }
-
-#select_view { width: 18em; }
-#select_model { width: 18em; }
+	#select_view { width: 18em; }
+	#select_model { width: 18em; }
 </style>
 
 
@@ -22,9 +11,8 @@ div.library span, div.this_model span { font-size: 80%; }
 		{% include 'menu.jinja2' %}
 	</td>
 	<td>
-
-		<div class="library">
 	
+	{% if not navigation['current_model'] %}
 	  <select id='select_library' class='hot_select'>
 	    {% for li in navigation['libraries'] %}
 	    <option value="{{li['url']}}" {% if li['current'] %} selected = 1 {% endif %}>
@@ -32,11 +20,28 @@ div.library span, div.this_model span { font-size: 80%; }
 	    </option>
 	    {% endfor %}
 	  </select>
+	 {% else %}
+	 	<a id='back_to_library' href="/libraries/{{navigation['current_library']}}/list">
+	 		Library
+	 		 <span class="library_name">
+	 		 	{{navigation['current_library']}}
+	 		 </span>
+	 	</a> 
+	 	
+	 	<script type='text/javascript'>
+	 	$(document).ready(function() {  		
+	    	$("#back_to_library").button();
+		});
+		</script>
+	 {% endif %}
 	    
 	    <!-- Also add the same but with hidden links -->
 		{% for li in navigation['libraries'] %}
 	        <a style='display:none' href="{{li['url']}}"></a>
 	    {% endfor %}
+	    
+	  </td>
+	  <td>
 	  
 	  <select id='select_model' class='hot_select'>
 	  	{% if not navigation['current_model'] and not navigation['current_template'] 
@@ -57,43 +62,45 @@ div.library span, div.this_model span { font-size: 80%; }
 		{% for mi in navigation['models'] %}
 	        <a style='display:none' href="{{mi['url']}}"></a>
 	    {% endfor %}
-	  
+	  </td>
 	  	
-	  </div> <!-- .library -->
-	     
+	  <td>   
 	  
 	  {% if navigation['current_model'] %}
-	  <div class="this_model" style="">  
-			  
-			  
-			  <select id='select_view' class='hot_select'>
-			    {% for vi in navigation['views'] %}
-			    <option value="{{vi['url']}}" {% if vi['current'] %} selected = 1 {% endif %}>
-			    	{{vi['name']}}
-			    </option>
-			    {% endfor %}
-			  </select>
+    	  
+		  <select id='select_view' class='hot_select'>
+		    {% for vi in navigation['views'] %}
+		    <option value="{{vi['url']}}" {% if vi['current'] %} selected = 1 {% endif %}>
+		    	{{vi['name']}}
+		    </option>
+		    {% endfor %}
+		  </select>
 			    
-			    <!-- Also add the same but with hidden links -->
-				{% for vi in navigation['views'] %}
-			        <a style='display:none' href="{{vi['url']}}""></a>
-			    {% endfor %}
-	  </div>
+			{# Also add the same but with hidden links #}
+			{% for vi in navigation['views'] %}
+			    <a style='display:none' href="{{vi['url']}}""></a>
+			{% endfor %}
+  
 	  {% endif %} 
+	  </td>
 </td>
 </tr>
 </table>
   
 <script type = "text/javascript">
-$(document).ready(function() {
-
-	function handle(event, ui) {
-	 console.log('change');
-	  window.location = $(this).val();
-	}
 	
-	$('.hot_select').selectmenu({change: handle});
-});
+	
+
+	$(document).ready(function() {
+	
+		function handle(event, ui) {
+		 console.log('change');
+		  window.location = $(this).val();
+		}
+		
+		$('.hot_select').selectmenu({change: handle});
+	//	$('.hot_select').show();
+	});
 </script>
 
 	

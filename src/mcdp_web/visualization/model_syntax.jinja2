@@ -32,6 +32,10 @@
 		table#main td { vertical-align: top; }
 	</style>
 	
+	{% if explanation1_html %}
+		{{explanation1_html|safe}}
+	{% endif %}
+	
 	<table id='main'>
 	<tr><td>
 	{{highlight|safe}}
@@ -43,9 +47,26 @@
   		$('#graph').imageZoom();
   	</script>
 
-	
 	</td>
 	</tr>
 	</table>
+
+	{% if explanation2_html %}
+		{{explanation2_html|safe}}
+	{% endif %}
+
+	{% set url_edit = ("/libraries/" + navigation['current_library'] + 
+	              "/models/" + navigation['current_model'] + 
+	              "/views/edit_fancy/" )%}
+	<a class='make_button' href="{{url_edit}}">
+	 		Edit
+ 	</a> 
+	 	
+ 	<script type='text/javascript'>
+ 	$(document).ready(function() {  		
+    	$(".make_button").button();
+	});
+	</script>
+
 </body>
 </html>

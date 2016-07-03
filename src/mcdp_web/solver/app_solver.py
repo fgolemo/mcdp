@@ -1,7 +1,4 @@
-from mcdp_cli.plot import png_pdf_from_gg
-from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from mcdp_web.solver.app_solver_state import SolverState, get_decisions_for_axes
-from mcdp_web.utils import png_error_catch, response_data
 from pyramid.httpexceptions import HTTPSeeOther
 import itertools
 from mcdp_web.utils.ajax_errors import ajax_error_catch
@@ -36,7 +33,7 @@ class AppSolver():
 
     def reset(self, request):
         model_name = self.get_model_name(request)
-        self.ndp = self.get_library(request).load_ndp2(model_name)
+        self.ndp = self.get_library(request).load_ndp(model_name)
         self.solver_states[model_name] = SolverState(self.ndp)
 
     def config(self, config):
@@ -63,10 +60,6 @@ class AppSolver():
         config.add_view(self.ajax_solver_reset,
                         route_name='solver_reset', renderer='json')
 
-        config.add_route('solver_image', '/libraries/{library}/models/{model_name}/views/solver/compact_graph.png')
-        config.add_view(self.image, route_name='solver_image')
-        config.add_route('solver_image2', '/libraries/{library}/models/{model_name}/views/solver/{fun_axes}/{res_axes}/compact_graph.png')
-        config.add_view(self.image, route_name='solver_image2')
 #         config.add_route('solver_image2', '/solver/{model_name}/compact_graph')
 #         config.add_view(self.image, route_name='solver_image2')
 
@@ -177,21 +170,6 @@ class AppSolver():
             return self.return_new_data(request)
         return ajax_error_catch(go)
 
-    # TODO: catch errors when generating images
-    def image(self, request):
-        """ Returns an image """
-        def go():
-            solver_state = self.get_solver_state(request)
-            ndp = solver_state.ndp
-            ndp = ndp.abstract()
-            model_name = self.get_model_name(request)
-
-            # TODO: find a better way
-            setattr(ndp, '_xxx_label', model_name)
-            gg = gvgen_from_ndp(ndp, STYLE_GREENREDSYM)
-            png, _pdf = png_pdf_from_gg(gg)
-            return response_data(request=request, data=png, content_type='image/png')
-        return png_error_catch(go, request)
 
 
 def create_alternative_urls(params, ndp):

@@ -3,7 +3,8 @@ mcdp {
   provides capacity [J]
   requires mass     [kg]
  
-  required mass >= Uncertain(provided capacity/120 Wh/kg ,
-provided capacity/100 Wh/kg )
+  required mass >= 
+    Uncertain(provided capacity/120 Wh/kg ,
+              provided capacity/100 Wh/kg )
   
 }

@@ -13,6 +13,9 @@ Keys:
 Meat
 ----
 
+- R: drop "/list"
+
+
 - finish the "canonical form"
 
 - intervals - what happens 

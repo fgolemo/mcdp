@@ -1,0 +1,10 @@
+mcdp {
+        customer = new Customer
+        robot = new DroneComplete
+
+        budget provided by customer >= total_cost_ownership required by robot
+
+        travel_distance provided by robot >= travel_distance required by customer
+        num_missions    provided by robot >= num_missions    required by customer
+        carry_payload   provided by robot >= carry_payload   required by customer
+}

@@ -14,6 +14,7 @@ from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning
 from mocdp.ndp import NamedDPCoproduct
+from mcdp_dp.dp_max import JoinNDP
 
 STYLE_GREENRED = 'greenred'
 STYLE_GREENREDSYM = 'greenredsym'
@@ -29,7 +30,7 @@ COLOR_DARKRED = 'red'
 #             propertyAppend(l2, 'dir', 'both')
 
 @contract(ndp=NamedDP)
-def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[]):
+def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourname=None):
     assert isinstance(ndp, NamedDP)
     import my_gvgen as gvgen
     # gg = gvgen.GvGen(options="rankdir=LR")
@@ -40,7 +41,7 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[]):
 
     from .gdc import GraphDrawingContext
     gdc = GraphDrawingContext(gg=gg, parent=None,
-                              yourname=None, images_paths=images_paths)
+                              yourname=yourname, images_paths=images_paths)
     gdc.set_style(style)
 
     gg.styleAppend("external", "shape", "none")
@@ -161,10 +162,10 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[]):
 #     gg.propertyAppend(cluster_functions, "color", "white")
 #     gg.propertyAppend(cluster_resources, "shape", "box")
 #     gg.propertyAppend(cluster_resources, "color", "red")
-
-    if False:
-        gg.remove_identity_nodes()
-             
+#
+#     if False:
+#         gg.remove_identity_nodes()
+#
     return gg
 
 def create(gdc, ndp):
@@ -202,7 +203,13 @@ def create_simplewrap(gdc, ndp):
 
     sname = None  # name of style to apply, if any
 
+
+    # special = we display only the image
+    # simple = we display only the string
+    # If special and simple, then special wins.
     # For these, we only disply the image, without the border
+
+    # This is a list of either PrimitiveDP or Maps
     special = [
         (Sum, ''),
         (SumN, ''),
@@ -213,25 +220,41 @@ def create_simplewrap(gdc, ndp):
         (InvMult2, ''),
         (InvPlus2Nat, ''),
         (Conversion, ''),
+        (MeetNDual, ''),
+        (JoinNDP, ''),
     ]
+
+    def is_special_dp(dp):
+        if isinstance(dp, Mux):
+            coords = dp.coords
+            if coords == [(), ()]:
+                return True
+        for t, _ in special:
+            if isinstance(dp, t):
+                return True
+
+            if isinstance(dp, WrapAMap) and isinstance(dp.amap, t):
+                return True
+        return False
 
     classname = type(ndp.dp).__name__
 
     icon = ndp.get_icon()
     
+    is_special = is_special_dp(ndp.dp)
 
-    simple = (Min, Max, Identity, GenericUnary, WrapAMap)
-    only_string = isinstance(ndp.dp, simple)
+    simple = (Min, Max, Identity, GenericUnary, WrapAMap, MeetNDual)
+    only_string = not is_special and isinstance(ndp.dp, simple)
 
-    if isinstance(ndp.dp, MeetNDual):
-        icon = 'split2'
-        only_string = False
 
-    load_name = getattr(ndp, '__mcdplibrary_load_name', '(unavailable)')
+    from mcdp_library.library import ATTR_LOAD_NAME
+    load_name = getattr(ndp, ATTR_LOAD_NAME, '(ATTR_LOAD_NAME unavailable)')
 
     iconoptions = [gdc.yourname, icon, load_name, classname, 'default']
     best_icon = gdc.get_icon(iconoptions)
-
+#     print('best_icon: %r' % best_icon)
+#     print('only_string: %r' % only_string)
+#     print('is special: %r' % is_special)
     if only_string:
 
         label = type(ndp.dp).__name__
@@ -248,17 +271,8 @@ def create_simplewrap(gdc, ndp):
         sname = 'simple'
     else:
 
-        def is_special_dp(dp):
-            if isinstance(dp, Mux):
-                coords = dp.coords
-                if coords == [(), ()]:
-                    return True
-            for t, _ in special:
-                if isinstance(dp, t):
-                    return True
-            return False
-
         if is_special_dp(ndp.dp):
+#             print('special')
             sname = 'style%s' % id(ndp)
             gdc.styleAppend(sname, 'image', best_icon)
             gdc.styleAppend(sname, 'imagescale', 'true')
@@ -269,7 +283,10 @@ def create_simplewrap(gdc, ndp):
         else:
             if best_icon is not None:
                 if gdc.yourname is not None:
-                    shortlabel = gdc.yourname
+                    if gdc.yourname[0] == '_':
+                        shortlabel = ""
+                    else:
+                        shortlabel = gdc.yourname
                 else:
                     shortlabel = classname
                 # shortlabel = '<I><B>%sa</B></I>' % shortlabel
@@ -282,7 +299,7 @@ def create_simplewrap(gdc, ndp):
                 "<TR><TD><IMG SRC='%s' SCALE='TRUE'/></TD></TR></TABLE>")
                 label = label % (shortlabel, best_icon)
             else:
-                # print('Image %r not found' % imagename)
+#                 print('Image %r not found' % imagename)
                 sname = None
 
 
@@ -303,8 +320,8 @@ def create_simplewrap(gdc, ndp):
 #         label = '<I>%s</I>' % label
 
     # an hack to think about better
-    if hasattr(ndp, '_xxx_label'):
-        label = getattr(ndp, '_xxx_label')
+    # if hasattr(ndp, '_xxx_label'):
+    #    label = getattr(ndp, '_xxx_label')
 
     # This does not work, for some reason
 #     if hasattr(ndp, 'template_parameter'):
@@ -633,17 +650,19 @@ def create_composite_(gdc0, ndp, SKIP_INITIAL):
                       names2resources=names2resources, ndp=ndp)
 
 def get_signal_label(name, unit):
-    # no label for automatically generated ones
-    for i in range(9):
-        if str(i) in name:
-            name = ""
-    
-    if '_' in name:
-        name = ''
 
     # a/b/c/signal -> ../signal
     if '/' in name:
         name = '../' + name.split('/')[-1]
+
+    # no label for automatically generated ones
+#     for i in range(9):
+#         if str(i) in name:
+#             name = ""
+    
+    if len(name) >= 1 and name[0] == '_':
+        name = ''
+
 
     s2 = format_unit(unit)
     if name:

@@ -7,12 +7,12 @@ mcdp {
 
   strategy = new Strategy
 
-  ae = new ActuationEnergetics
+  actuation_energetics = new ActuationEnergetics
 
-  ae.endurance >= strategy.endurance
-  ae.velocity >= strategy.velocity
-  ae.num_missions >= num_missions
-  ae.extra_payload >= carry_payload
+  actuation_energetics.endurance >= strategy.endurance
+  actuation_energetics.velocity >= strategy.velocity
+  actuation_energetics.num_missions >= num_missions
+  actuation_energetics.extra_payload >= carry_payload
   strategy.distance >= travel_distance
 
   computer = new Computer 
@@ -26,14 +26,14 @@ mcdp {
   sensor.fov >= perception.camera_fov
   
   perception.velocity >= strategy.velocity
-  ae.extra_power >= computer.power + sensor.power
+  actuation_energetics.extra_power >= computer.power + sensor.power
 
   # We can take into account the shipping cost
   shipping = new Shipping
   
-  total_mass = ae.total_mass 
+  total_mass = actuation_energetics.total_mass 
 
   shipping.ships >= total_mass
 
-  total_cost_ownership >= shipping.postage + ae.total_cost
+  total_cost_ownership >= shipping.postage + actuation_energetics.total_cost
 }

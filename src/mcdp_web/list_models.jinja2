@@ -27,6 +27,38 @@
 
 <p>Click &#9776; in the upper left and select "new" to add a new model.</p>
 
+<style type='text/css'>
+div.compact { display: block; float: left; width: 20em; height: 13em; }
+div.compact { 
+	margin: 2em;
+	text-align: center;
+}
+div.compact span { margin-bottom: 1em; }
+div.compact:hover {
+box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    
+}
+div.compact span {display: block; text-align: center; }
+div.compact img { max-width: 20em; max-height: 10em; } 
+</style>
+{% for m in navigation['models'] %}
+
+<a class='modellink' href="{{m['url']}}">
+<div class="compact">
+	<span class="name">
+		
+			{{ m['id_ndp'] }}
+	</span>
+		
+{#	/libraries/{library}/models/{models}/views/solver2/compact_graph.png #}
+        
+		<img src="/libraries/{{navigation['current_library']}}/models/{{m['id_ndp']}}/views/solver2/compact_graph.png"/>
+</div>
+</a>
+
+
+{% endfor %}
+
 <!-- <p>Add a model: {% include 'new_model.jinja2' %}</p>       
  <p><a href="qr_reader/">QR import</a></p>
  <p><a href="interactive/mcdp_value/">Interactive evaluation</a></p>-->

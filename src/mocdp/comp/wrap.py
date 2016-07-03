@@ -187,6 +187,9 @@ class SimpleWrap(NamedDP):
 
     def desc(self):
         s = 'SimpleWrap'
+        from mcdp_library.library import ATTR_LOAD_NAME
+        if hasattr(self, ATTR_LOAD_NAME):
+            s += ' (loaded as %r)' % getattr(self, ATTR_LOAD_NAME)
         for f in self.get_fnames():
             s += '\n  provides %10s (%s) ' % (f, self.get_ftype(f))
         for r in self.get_rnames():

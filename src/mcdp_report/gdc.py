@@ -142,6 +142,7 @@ class GraphDrawingContext():
         # imagepath = self.get_imagepath()
         imagepaths = [self._get_default_imagepath()]
         imagepaths.extend(self.images_paths)
+#         print('options: %s in %r' % (options, self.images_paths))
         best = choose_best_icon(options, imagepaths, tmppath)
         return best
 
@@ -193,6 +194,7 @@ class GraphDrawingContext():
 def choose_best_icon(iconoptions, imagepaths, tmppath):
     # logger.debug('Looking for %s.' % (str(iconoptions)))
     exts = ['png', 'jpg']
+    mcdp_dev_warning('This is case-dependent')
     for option in iconoptions:
         if option is None:
             continue
@@ -203,6 +205,9 @@ def choose_best_icon(iconoptions, imagepaths, tmppath):
                 if files:
                     f = files[0]
                     return resize_icon(f, tmppath, 100)
+                else:
+                    pass
+                    # print('no %r in %r' % (basename, imagepath))
     # logger.debug('Could not find PNG icon for %s.' % (str(iconoptions)))
     return None
 

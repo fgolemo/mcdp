@@ -21,6 +21,7 @@ __all__ = [
     'MCDPLibrary',
 ]
 
+ATTR_LOAD_NAME = '__mcdplibrary_load_name'
 
 class MCDPLibrary():
     """
@@ -41,7 +42,11 @@ class MCDPLibrary():
     ext_values = 'mcdp_value'
     ext_templates = 'mcdp_template'
     ext_primitivedps = 'mcdp_primitivedp'
-    all_extensions = [ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps]
+    ext_explanation1 = 'expl1.md'
+    ext_explanation2 = 'expl2.md'
+
+    all_extensions = [ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps,
+                      ext_explanation1, ext_explanation2]
 
     def __init__(self, cache_dir=None, file_to_contents=None, search_dirs=None):
         """ 
@@ -134,7 +139,7 @@ class MCDPLibrary():
             l = self.clone()
             logger.debug('Parsing %r' % name)
             res = parsing(l, data, realpath)
-            setattr(res, '__mcdplibrary_load_name', name)
+            setattr(res, ATTR_LOAD_NAME, name)
             return res
 
         if not self.cache_dir:
@@ -144,7 +149,6 @@ class MCDPLibrary():
                                       '%s.cached' % name)
             return memo_disk_cache2(cache_file, data, actual_load)
 
-    load_ndp2 = load_ndp
 
     def parse_ndp(self, string, realpath=None):
         """ This is the wrapper around parse_ndp that adds the hooks. """
@@ -268,6 +272,9 @@ class MCDPLibrary():
 
     def _update_file(self, f):
         basename = os.path.basename(f)
+        # This will fail because then in pyparsing everything is unicode
+        # import codecs
+        # data = codecs.open(f, encoding='utf-8').read()
         data = open(f).read()
         realpath = os.path.realpath(f)
         res = dict(data=data, realpath=realpath)

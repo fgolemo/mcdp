@@ -3,6 +3,7 @@ from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from mcdp_report.html import ast_to_html
 from mcdp_report.report import gvgen_from_dp
 from mcdp_web.utils import png_error_catch, response_data
+from mcdp_library.library import MCDPLibrary
 
 class AppVisualization():
 
@@ -23,54 +24,17 @@ class AppVisualization():
         config.add_view(self.view_model_ndp_graph, route_name='model_ndp_graph',
                         renderer='visualization/model_ndp_graph.jinja2')
 
-        config.add_route('model_ndp_graph_image',
-                         self.get_lmv_url('{library}', '{model_name}', 'ndp_graph') +
-                         'image/{style}.{format}')
-        config.add_view(self.view_model_ndp_graph_image, route_name='model_ndp_graph_image')
 
         config.add_route('model_dp_graph',
                          self.get_lmv_url('{library}', '{model_name}', 'dp_graph'))
         config.add_view(self.view_model_dp_graph, route_name='model_dp_graph',
                         renderer='visualization/model_dp_graph.jinja2')
 
-        config.add_route('model_dp_graph_image',
-                         self.get_lmv_url('{library}', '{model_name}', 'dp_graph') +
-                         'image/default.{format}')
-        config.add_view(self.view_model_dp_graph_image, route_name='model_dp_graph_image')
-
         config.add_route('model_ndp_repr',
                          self.get_lmv_url('{library}', '{model_name}', 'ndp_repr'))
         config.add_view(self.view_model_ndp_repr, route_name='model_ndp_repr',
                         renderer='visualization/model_generic_text_content.jinja2')
 
-    def view_model_ndp_graph_image(self, request):
-        def go():
-            model_name = str(request.matchdict['model_name'])  # unicod
-            style = request.matchdict['style']
-            fileformat = request.matchdict['format']
-
-            library = self.get_library(request)
-            ndp = library.load_ndp(model_name)
-            images_paths = library.get_images_paths()
-            gg = gvgen_from_ndp(ndp, style, images_paths=images_paths)
-
-            from reprep import Report
-            from mcdp_report.gg_utils import gg_figure
-            r = Report()
-            gg_figure(r, 'graph', gg)
-            png = r.resolve_url('graph/graph').get_raw_data()
-            pdf = r.resolve_url('graph_pdf').get_raw_data()
-            dot = r.resolve_url('dot').get_raw_data()
-
-            if fileformat == 'pdf':
-                return response_data(request, pdf, 'image/pdf')
-            elif fileformat == 'png':
-                return response_data(request, png, 'image/png')
-            elif fileformat == 'dot':
-                return response_data(request, dot, 'text/plain')
-            else:
-                raise ValueError('No known format %r.' % fileformat)
-        return png_error_catch(go, request)
 
     def view_model_ndp_graph(self, request):
         model_name = str(request.matchdict['model_name'])  # unicode
@@ -81,24 +45,7 @@ class AppVisualization():
                 'navigation': self.get_navigation_links(request),
                 'style': STYLE_GREENREDSYM}
 
-    def view_model_dp_graph_image(self, request):
-        def go():
-            model_name = str(request.matchdict['model_name'])  # unicod
-            fileformat = request.matchdict['format']
 
-            ndp = self.get_library(request).load_ndp2(model_name)
-            dp = ndp.get_dp()
-            gg = gvgen_from_dp(dp)
-
-            png, pdf = png_pdf_from_gg(gg)
-
-            if fileformat == 'pdf':
-                return response_data(request=request, data=pdf, content_type='image/pdf')
-            elif fileformat == 'png':
-                return response_data(request=request, data=png, content_type='image/png')
-            else:
-                raise ValueError('No known format %r.' % fileformat)
-        return png_error_catch(go, request)
 
     def view_model_dp_graph(self, request):
         model_name = str(request.matchdict['model_name'])  # unicode
@@ -112,7 +59,7 @@ class AppVisualization():
     def view_model_ndp_repr(self, request):
         model_name = str(request.matchdict['model_name'])  # unicode
 
-        ndp = self.get_library(request).load_ndp2(model_name)
+        ndp = self.get_library(request).load_ndp(model_name)
         ndp_string = ndp.__repr__()
         ndp_string = ndp_string.decode("utf8")
 
@@ -126,11 +73,25 @@ class AppVisualization():
 
         model_name = str(request.matchdict['model_name'])  # unicode
 
-        filename = '%s.mcdp' % model_name
+        filename = '%s.%s' % (model_name, MCDPLibrary.ext_ndps)
         l = self.get_library(request)
         f = l._get_file_data(filename)
         source_code = f['data']
         realpath = f['realpath']
+        
+        md1 = '%s.%s' % (model_name, MCDPLibrary.ext_explanation1)
+        if l.file_exists(md1):
+            fd = l._get_file_data(md1)
+            html1 = self.render_markdown(fd['data'])
+        else:
+            html1 = None
+
+        md2 = '%s.%s' % (model_name, MCDPLibrary.ext_explanation2)
+        if l.file_exists(md2):
+            fd = l._get_file_data(md2)
+            html2 = self.render_markdown(fd['data'])
+        else:
+            html2 = None
 
         highlight = ast_to_html(source_code,
                                 complete_document=False,
@@ -142,7 +103,9 @@ class AppVisualization():
                 'model_name': model_name,
                 'realpath': realpath,
                 'navigation': self.get_navigation_links(request),
-                'current_view': 'syntax'}
+                'current_view': 'syntax',
+                'explanation1_html': html1,
+                'explanation2_html': html2, }
 
 #     def get_link_to_model(self, library, model):
 #         return "/library/%s/models/%s/syntax" % (library, model)
