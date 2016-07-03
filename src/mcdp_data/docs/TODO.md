@@ -13,9 +13,7 @@ Keys:
 Meat
 ----
 
-- F: edit button on models
-- F: simple way to go back to all the library models
-- F: drop "/list"
+- R: drop "/list"
 
 
 - finish the "canonical form"
