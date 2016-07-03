@@ -1,4 +1,4 @@
-canonical flatten mcdp {
+mcdp {
         customer = new Customer
         robot = new DroneComplete
 

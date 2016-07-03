@@ -149,7 +149,6 @@ class MCDPLibrary():
                                       '%s.cached' % name)
             return memo_disk_cache2(cache_file, data, actual_load)
 
-    load_ndp2 = load_ndp
 
     def parse_ndp(self, string, realpath=None):
         """ This is the wrapper around parse_ndp that adds the hooks. """

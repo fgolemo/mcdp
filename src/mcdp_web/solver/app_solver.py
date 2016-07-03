@@ -33,7 +33,7 @@ class AppSolver():
 
     def reset(self, request):
         model_name = self.get_model_name(request)
-        self.ndp = self.get_library(request).load_ndp2(model_name)
+        self.ndp = self.get_library(request).load_ndp(model_name)
         self.solver_states[model_name] = SolverState(self.ndp)
 
     def config(self, config):
