@@ -1,6 +1,7 @@
 #!/usr/bin/env python2
 
 template = """
+flatten
 approx(mass,0%,10g,10kg) 
 approx(cost,0%,1$$,Top$$) 
 

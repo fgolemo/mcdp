@@ -95,7 +95,7 @@ class AppEditorFancyGeneric():
 
         graph = lambda req: self.graph_generic(req, spec)
         route = spec.url_part + '_graph'
-        url2 = url + 'graph.png'
+        url2 = url + 'graph.{data_format}'
         config.add_route(route, url2)
         config.add_view(graph, route_name=route)
 
@@ -205,6 +205,7 @@ class AppEditorFancyGeneric():
 
     def graph_generic(self, request, spec):
         def go():
+            data_format = str(request.matchdict['data_format'])  # unicode
             library = self.get_library(request)
             widget_name = self.get_widget_name(request, spec)
             library_name = self.get_current_library_name(request)
@@ -218,9 +219,10 @@ class AppEditorFancyGeneric():
                 if thing is None:
                     return response_image(request, 'Could not parse.')
 
-            png = spec.get_png_data(library, widget_name, thing)
-
-            return response_data(request, png, 'image/png')
+            data = spec.get_png_data(library, widget_name, thing, data_format=data_format)
+            from mcdp_web.images.images import get_mime_for_format
+            mime = get_mime_for_format(data_format)
+            return response_data(request, data, mime)
         return png_error_catch(go, request)
 
 
@@ -261,11 +263,11 @@ class AppEditorFancyGeneric():
             raise HTTPFound(url_edit)
 
 
-def get_png_data_unavailable(library, name, x):  # @UnusedVariable
+def get_png_data_unavailable(library, name, x, data_format):
     s = str(x)
     return create_image_with_string(s, size=(512, 512), color=(0, 0, 255))
 
-def get_png_data_template(library, name, x):  # @UnusedVariable
+def get_png_data_template(library, name, x, data_format):
     assert isinstance(x, TemplateForNamedDP)
 
     ndp = x.get_template_with_holes()
@@ -278,10 +280,10 @@ def get_png_data_template(library, name, x):  # @UnusedVariable
     png, _pdf = png_pdf_from_gg(gg)
     return png
 
-def get_png_data_model(library, name, ndp):
+def get_png_data_model(library, name, ndp, data_format):
     from mcdp_web.images.images import ndp_graph_enclosed
     return ndp_graph_enclosed(library, ndp, style=STYLE_GREENREDSYM,
-                              yourname=None, data_format='png')
+                              yourname=None, data_format=data_format)
 #
 #     from mocdp.comp.composite import CompositeNamedDP
 #     if isinstance(ndp, CompositeNamedDP):

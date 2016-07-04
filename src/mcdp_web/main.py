@@ -5,7 +5,7 @@ from mcdp_library.utils import locate_files
 from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
 from mcdp_web.editor.app_editor import AppEditor
 from mcdp_web.editor_fancy.app_editor_fancy_generic import AppEditorFancyGeneric
-from mcdp_web.images.images import WebAppImages
+from mcdp_web.images.images import WebAppImages, get_mime_for_format
 from mcdp_web.interactive.app_interactive import AppInteractive
 from mcdp_web.qr.app_qr import AppQR
 from mcdp_web.solver.app_solver import AppSolver
@@ -214,7 +214,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         d['current_model'] = current_model
 
         d['models'] = []
-        for m in models:
+        for m in sorted(models):
             is_current = m == current_model
 
             url = self.get_lmv_url(library=current_library,
@@ -229,7 +229,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         templates = library.list_templates()
         d['templates'] = []
-        for t in templates:
+        for t in sorted(templates):
             is_current = (t == current_template)
 
             url = self.get_lib_template_view_url(library=current_library,
@@ -242,7 +242,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         posets = library.list_posets()
         d['posets'] = []
-        for p in posets:
+        for p in sorted(posets):
             is_current = (p == current_poset)
             url = '/libraries/%s/posets/%s/views/edit_fancy/' % (current_library, p)
             name = "Poset: %s" % p
@@ -326,6 +326,17 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         res.update(self.get_jinja_hooks(request))
         return res
 
+    def view_library_asset(self, request):
+        l = self.get_library(request)
+        asset = str(request.matchdict['asset'])
+        ext = str(request.matchdict['ext'])
+        filename = '%s.%s' % (asset, ext)
+        f = l._get_file_data(filename)
+        data = f['data']
+        content_type = get_mime_for_format(ext)
+        from mcdp_web.utils.response import response_data
+        return response_data(request, data, content_type)
+
     def serve(self):
         config = Configurator()
         config.add_static_view(name='static', path='static')
@@ -354,6 +365,9 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         config.add_view(self.view_library_doc,
                         route_name='library_doc',
                         renderer='library_doc.jinja2')
+
+        config.add_route('library_asset', '/libraries/{library}/{asset}.{ext}')
+        config.add_view(self.view_library_asset, route_name='library_asset')
 
         config.add_route('docs', '/docs/{document}/')
         config.add_view(self.view_docs, route_name='docs', renderer='language.jinja2')

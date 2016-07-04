@@ -31,20 +31,21 @@ Graphically, this is how the interface is represented:
 
 <pre class='ndp_graph_templatized'>`model1</pre>
 
-	 
+<!--
 The MCDP defined above is, however, unusable, because we have 
 not specified how ``capacity`` and ``mass`` relate to one another.
 Graphically, this is represented using purple unconnected arrows:
 
 <pre class='ndp_graph_expand'>`model1</pre>
-
+-->
 
 ### Constant functionality and resources
 
 The following is a minimal example of a complete MCDP.
 We have given hard bounds to both ``capacity`` and ``mass``.
 
-<pre class='mcdp' id='model2'>
+<table><tr><td>
+<pre class='mcdp' id='model2' style='width: 25ex'>
 mcdp {
 	provides capacity [J]
 	requires mass [g]
@@ -53,9 +54,9 @@ mcdp {
 	mass >= 100g
 }
 </pre>
-
+</td><td>
 <pre class='ndp_graph_expand'>`model2</pre>
-
+</td></tr></table>
 
 ### Describing relations between functionality and resources
 
@@ -97,4 +98,4 @@ mcdp {
 </pre>
 
 <pre class='ndp_graph_expand'>`model5</pre>
-
+ 

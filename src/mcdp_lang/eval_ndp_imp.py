@@ -433,6 +433,14 @@ def eval_statement(r, context):
                 #  Cannot evaluate %r as constant
                 try:
                     x = eval_rvalue(right_side, context)
+                    if False:
+                        mcdp_dev_warning('This might be very risky, but cute.')
+                        ndp = context.names[x.dp]
+                        if isinstance(ndp, SimpleWrap):
+                            if ndp.R_single:
+                                ndp.Rname = name
+
+                        x = context.make_resource(x.dp, name)
                     # adding as resource
                     context.set_var2resource(name, x)
                 except Exception as e:

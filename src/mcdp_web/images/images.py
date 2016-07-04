@@ -1,7 +1,6 @@
 from mcdp_web.utils.response import response_data
 from mcdp_cli.plot import png_pdf_from_gg
 from mcdp_report.gg_ndp import gvgen_from_ndp
-from mcdp_report.gdc import STYLE_GREENREDSYM
 from mcdp_web.utils.image_error_catch_imp import png_error_catch
 from mocdp.comp.composite_templatize import ndp_templatize
 from mcdp_report.report import gvgen_from_dp
@@ -103,6 +102,8 @@ def get_mime_for_format(data_format):
 def ndp_graph_templatized(library, ndp, yourname=None, data_format='png', direction='LR'):
     ndp = ndp_templatize(ndp, mark_as_template=False)
     images_paths = library.get_images_paths()
+    from mcdp_report.gdc import STYLE_GREENREDSYM
+
     gg = gvgen_from_ndp(ndp, STYLE_GREENREDSYM, yourname=yourname,
                         images_paths=images_paths, direction=direction)
     return gg_get_format(gg, data_format)
@@ -139,7 +140,6 @@ def ndp_graph_enclosed(library, ndp, style, yourname, data_format, direction='TB
 
 def ndp_graph_expand(library, ndp, style, yourname, data_format, direction='TB'):
     """ This expands the children, forces the enclosure """
-    from mocdp.comp.composite import CompositeNamedDP
     setattr(ndp, '_hack_force_enclose', True)
 
     images_paths = library.get_images_paths()

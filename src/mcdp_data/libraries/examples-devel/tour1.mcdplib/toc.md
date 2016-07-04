@@ -9,6 +9,12 @@
 [Catalogues](tour_catalogue.html)
 
 
+[Finite posets](tour_finite_posets.html)
+
+[Poset products](tour_poset_products.html)
+
+[Mixed posets](tour_mixed.html)
+
 [Coproducts](tour_coproduct.html)
 
 **Solution**
@@ -33,6 +39,7 @@
 **Extended examples**
 
 [Space Rovers](space_rovers.html)
+[Plugs and converters](plugs.html)
 
 
 <style type='text/css'>

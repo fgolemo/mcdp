@@ -5,7 +5,7 @@
 Suppose we define a simple model called ``Battery`` as follows:
 
 <table>
-<tr><td width='50%'>
+<tr><td >
 <pre class="mcdp" id='Battery' label='Battery.mcdp'>
 mcdp {
 	provides capacity [J]
@@ -16,7 +16,7 @@ mcdp {
 </pre>
 </td>
 <td>
-<pre class='ndp_graph_templatized_labeled' direction='LR'>`Battery</pre>
+<pre class='ndp_graph_templatized_labeled' direction='LR' >`Battery</pre>
 </td>
 </tr>
 </table>
@@ -24,7 +24,7 @@ mcdp {
 Let's also define the MCDP ``actuation``:
 
 <table>
-<tr><td  width='50%'>
+<tr><td >
 <pre class="mcdp" id='Actuation' label='Actuation.mcdp'>
 mcdp {
 	provides lift [N]
@@ -44,23 +44,29 @@ mcdp {
 </tr>
 </table>
 
+<pre class='ndp_graph_enclosed' direction='LR'>`Actuation</pre>
+
 
 Then we can combine these two together.
 
 We can re-use previously defined MCDPs using the 
-keyword ``new``:
+keyword ``new``. This creates two sub-design problems, for now unconnected.
 
+<table>
+<tr>
+<td>
 <pre class="mcdp" id='combined1'>
 mcdp {	
 	actuation = new Actuation
 	battery = new Battery
 }
 </pre>
-
-This creates two sub-design problems, for now unconnected:
-
+</td>
+<td>
 <pre class='ndp_graph_enclosed' direction='LR'>`combined1</pre>
-
+</td>
+</tr>
+</table>
 To create a complete MCDP, take "endurance" as a high-level
 functionality. Then the energy required is equal to 
 endurance &times; power. 
@@ -78,7 +84,7 @@ mcdp {
 }
 </pre>
 
-<pre class='ndp_graph_enclosed' direction='LR'>`combined2</pre>
+<pre class='ndp_graph_enclosed' direction='LR' >`combined2</pre>
 
 We can create a model with a loop by introducing another constraint.
 
@@ -87,7 +93,9 @@ Take ``extra_payload`` to represent the user payload that we must carry.
 Then the lift provided by the actuator must be at least the mass
 of the battery plus the mass of the payload times gravity:
 
-
+<table>
+<tr>
+<td>
 <pre class="mcdp" id='composition' label='Composition.mcdp'>
 mcdp {
 	
@@ -113,11 +121,13 @@ mcdp {
 	requires mass [g]
 	mass >= total_mass
 }
-
-
 </pre>
-
-<pre class='ndp_graph_enclosed' direction='LR'>`Composition</pre>
+</td>
+<td style='vertical-align: top'>
+<pre class='ndp_graph_enclosed' style='max-height: 90ch' direction='TB'>`Composition</pre>
+</td>
+</tr>
+</table>
 
 ### Abstraction and flattening
 
@@ -128,10 +138,20 @@ We can completely abstract an MCDP:
 And we can also completely **flatten** it, by first expanding 
 the sub components:
 
-<pre class='ndp_graph_expand' direction='LR'>`Composition</pre>
+<pre class='ndp_graph_expand' direction='LR' >`Composition</pre>
 
 and then erasing their borders:
 
 <pre class='ndp_graph_expand' direction='LR'>flatten `Composition</pre>
 
 
+
+
+<style type='text/css'>
+td{ vertical-align: top; }
+td:first-child { 
+	/*border: solid 1px red; */
+	/*width: 25em; */
+
+}
+</style>

@@ -16,7 +16,7 @@ def go():
 
     lib = MCDPLibrary()
     lib.add_search_dir('.')
-    ndp = lib.load_ndp2('batteries')
+    ndp = lib.load_ndp('batteries')
 
     data = solve_combinations(ndp, combinations, result_like)
 
@@ -40,7 +40,7 @@ def go2():
 
     lib = MCDPLibrary()
     lib.add_search_dir('.')
-    ndp = lib.load_ndp2(model_name)
+    ndp = lib.load_ndp(model_name)
 
     data = solve_combinations(ndp, combinations, result_like)
 

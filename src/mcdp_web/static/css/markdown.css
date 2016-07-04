@@ -9,11 +9,21 @@ body {
 pre {
 	background-color: #eee;
 	margin-left: 2em;
-	padding: 7px;
+	margin-top: 2em;
+	padding: 10px;
+	border-radius: 10px ;
 	/*display: inline-block;*/
+	 box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	margin-right: 1em;
+
+	/*white-space: pre-wrap;                 /* CSS3 browsers  */
+	/*white-space: -moz-pre-wrap !important; /* 1999+ Mozilla  */
+	/*white-space: -pre-wrap;                /* Opera 4 thru 6 */
+	/*white-space: -o-pre-wrap;              /* Opera 7 and up */
+	/*word-wrap: break-word;                 /* IE 5.5+ and up */
 }
 
-pre.DPSemanticError, pre.DPSyntaxError {
+pre.error, pre.DPSemanticError, pre.DPSyntaxError {
 	color: red;
 	font-weight: bold;
 }
@@ -23,7 +33,7 @@ pre.DPSemanticError, pre.DPSyntaxError {
 .ndp_graph_normal,
 .ndp_graph_templatized,
 .ndp_graph_templatized_labeled {
-	max-width: 50em;
+	max-width: 100%;
 	/*height: auto;*/
 }
 
@@ -43,11 +53,16 @@ pre.DPSemanticError, pre.DPSyntaxError {
 
 
 pre span.label { float: right; 
+	font-style:italic;
+	border-radius: 10px ;
 	/*border: solid 1px black; */
 	background-color: #eee;
 	padding: 5px;
 	padding-left: 1em;
 	padding-right: 1em;
-	margin-top: -1.2em;
+	margin-top: -1.8em;
 	margin-right: 1em;
 }
+
+/*svg text {color: red !important;}
+svg { border: solid 1px red; }*/

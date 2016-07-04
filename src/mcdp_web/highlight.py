@@ -5,17 +5,20 @@ from mcdp_web.images.images import (ndp_graph_enclosed, ndp_graph_expand,
     ndp_graph_normal, ndp_graph_templatized)
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 import base64
+from mcdp_library.library import MCDPLibrary
+from mcdp_lang.syntax import Syntax
+import traceback
 
 def html_interpret(library, html):
     # clone linrary?
     library = library.clone()
-    load_fragments(library, html)
-    html = highlight_mcdp_code(html)
-    html = make_figures(library, html)
+    load_fragments(library, html, realpath='unavailable')
+    html = highlight_mcdp_code(library, html)
+    html = make_figures(library, html,
+                        raise_error_dp=False, raise_error_others=False)
     return html.decode('utf-8')
 
-
-def load_fragments(library, frag):
+def load_fragments(library, frag, realpath):
     """
         loads all the codes 
         
@@ -26,22 +29,43 @@ def load_fragments(library, frag):
     soup = BeautifulSoup(frag, 'html.parser')
 
     for tag in soup.select('pre.mcdp'):
+        if tag.string is None:
+            continue
+
         if tag.has_attr('id'):
             id_ndp = tag['id']
             source_code = str(tag.string)
 
-            basename = '%s.mcdp' % id_ndp
-            res = dict(data=source_code, realpath="(unavailable)")
+            basename = '%s.%s' % (id_ndp, MCDPLibrary.ext_ndps)
+            res = dict(data=source_code, realpath=realpath)
 
             if basename in library.file_to_contents:
-                msg = 'Duplicated model.'
+                msg = 'Duplicated entry.'
+                raise_desc(ValueError, msg, tag=str(tag),
+                           known=library.file_to_contents[basename])
+
+            library.file_to_contents[basename] = res
+
+    for tag in soup.select('pre.mcdp_poset'):
+        if tag.string is None:
+            continue
+
+        if tag.has_attr('id'):
+            id_ndp = tag['id']
+            source_code = str(tag.string)
+
+            basename = '%s.%s' % (id_ndp, MCDPLibrary.ext_posets)
+            res = dict(data=source_code, realpath=realpath)
+
+            if basename in library.file_to_contents:
+                msg = 'Duplicated entry.'
                 raise_desc(ValueError, msg, tag=str(tag),
                            known=library.file_to_contents[basename])
 
             library.file_to_contents[basename] = res
 
 
-def highlight_mcdp_code(frag):
+def highlight_mcdp_code(library, frag):
     """ Looks for codes like:
     
     <pre class="mcdp">mcdp {
@@ -54,37 +78,62 @@ def highlight_mcdp_code(frag):
 
     soup = BeautifulSoup(frag, 'html.parser')
 
-    for tag in soup.select('pre.mcdp'):
-        source_code = tag.string
-        while source_code[0] == '\n':
-            source_code = source_code[1:]
-
-
+    def go(selector, parse_expr, extension):
+        for tag in soup.select(selector):
             
-        try:
-            html = ast_to_html(source_code,
-                        complete_document=False,
-                        add_line_gutter=False)            
-            frag2 = BeautifulSoup(html,'lxml')
-            rendered = frag2.pre
-            print rendered
-            if tag.has_attr('label'):
-                tag_label = soup.new_tag('span', **{'class': 'label'})
-                tag_label.append(tag['label'])
-                rendered.insert(0, tag_label)
+            if tag.string is None:
+                if not tag.has_attr('id'):
+                    msg = "If <pre> is empty then it needs to have an id."
+                    raise_desc(ValueError, msg, tag=tag)
+                # load it
+                basename = '%s.%s' % (tag['id'], extension)
+                data = library._get_file_data(basename)
+                source_code = data['data']
+            else:
+                source_code = tag.string
+                while source_code and source_code[0] == '\n':
+                    source_code = source_code[1:]
 
-            tag.replaceWith(rendered)
-            
-        except DPSyntaxError as e:
-            print(e)
-            t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
-            t.string = str(e)
-            tag.insert_after(t)
+            source_code = source_code.replace('\t', ' ' * 4)
+            try:
+                html = ast_to_html(source_code, parse_expr=parse_expr,
+                                            complete_document=False,
+                                            add_line_gutter=False)
+                frag2 = BeautifulSoup(html, 'lxml')
+                rendered = frag2.pre
+                if tag.has_attr('label'):
+                    tag_label = soup.new_tag('span', **{'class': 'label'})
+                    tag_label.append(tag['label'])
+                    rendered.insert(0, tag_label)
 
+#                 if tag.has_attr('style'):
+#                     rendered['style'] = tag['style']
 
+                max_len = max(map(len, source_code.split('\n')))
+                # account for the label
+                if tag.has_attr('label'):
+                    max_len = max(max_len, len(tag['label']) + 6)
+
+                style = 'width: %dex;' % (max_len + 3)
+                if tag.has_attr('style'):
+                    style = style + tag['style']
+
+                rendered['style'] = style
+                tag.replaceWith(rendered)
+
+            except DPSyntaxError as e:
+                print(e)  # XXX
+                t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
+                t.string = str(e)
+                tag.insert_after(t)
+
+    go('pre.mcdp', Syntax.ndpt_dp_rvalue, "mcdp")
+    go('pre.mcdp_poset', Syntax.space, "mcdp_poset")
+    go('pre.mcdp_value', Syntax.rvalue, "mcdp_value")
+    go('pre.mcdp_template', Syntax.template, "mcdp_template")
     return str(soup)
 
-def make_figures(library, frag):
+def make_figures(library, frag, raise_error_dp, raise_error_others):
     """ Looks for codes like:
 
     <pre><code class="mcdp_ndp_graph_templatized">mcdp {
@@ -102,11 +151,21 @@ def make_figures(library, frag):
         for tag in soup.select(selector):
             try:
                 r = func(tag) 
+                if tag.has_attr('style'):
+                    r['style'] = tag['style']
                 tag.replaceWith(r)
             except (DPSyntaxError, DPSemanticError) as e:
+                if raise_error_dp:
+                    raise
                 print(e)
                 t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
                 t.string = str(e)
+                tag.insert_after(t)
+            except Exception as e:
+                if raise_error_others:
+                    raise
+                t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
+                t.string = traceback.format_exc(e)
                 tag.insert_after(t)
     
     from mcdp_report.gdc import STYLE_GREENREDSYM

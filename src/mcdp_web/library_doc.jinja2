@@ -17,39 +17,35 @@
 	a.make_button { font-size: 70%; }
 	a.make_button { display: none; }
 	
-	td#content {
-		vertical-align: top;
-		padding-left: 13em;
+	div#content {
+		margin-left: 13em;
 		padding-right: 2em;
-		max-width: 50em;
 	}
-	td#toc {
-		vertical-align: top;
-		width: 12em;
+	div#content {
+		/*overflow: hidden;*/
+	}
+	div#toc strong {padding-top: 0.5em;   display: block}
+	div#toc {
+		float: left;
+		width: 10em;
 		display: block;
-		position: fixed;	 
 	}
-	td#toc strong {padding-top: 0.5em;   display: block}
-	div#toc2 {
-	display: block;
-	padding-right: 2em;
-	}
-	td#toc p {
+	div#toc p {
 	margin: 0;
 	padding: 0;
 	}
-	td#toc a {
+	div#toc a {
 		text-decoration: none;
 		color:black;
 		display: block;	
 		width: 100%;
 		padding: 0.3em;
 	}
-	td#toc a:hover {
+	div#toc a:hover {
 		background-color: #f0f0ff;
 	 
 	}
-	td#toc a.current {
+	div#toc a.current {
 	 background-color: #eee;
 	 
 	}
@@ -67,20 +63,16 @@
 {% if print %}
 {{contents | safe }}
 {% else %}
-<table>
-<tr>
-<td id='toc'>
-<div id='toc2'>
+<div id='toc'>
 {% if has_library_doc('toc') %}
 {{ render_library_doc('toc') | safe }}
 {% endif %}
 </div>
-</td>
-<td id='content'>
+
+<div id='content'>
 {{contents | safe }}
-</td>
-</tr>
-</table>
+</div>
+
 {% endif %}
 </body>
 </html>

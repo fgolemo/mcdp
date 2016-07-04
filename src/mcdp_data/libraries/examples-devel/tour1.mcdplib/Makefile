@@ -1,20 +1,9 @@
-
-markdowns=\
-	tour_intro.md\
-	tour_composition.md\
-	tour_catalogue.md\
-	tour_coproduct.md\
-	tour_solution.md\
-	tour_approximations.md\
-	tour_uncertainty.md\
-	tour_templates.md\
-	space_rovers.md
+markdowns=$(shell python get_list.py < toc.md)
 
 tmpdir=.downloads
 pdfs=$(markdowns:%.md=$(tmpdir)/%.pdf)
 
 all: tour.pdf
-
 
 tour.pdf: $(pdfs)
 	pdftk  $^ output $@

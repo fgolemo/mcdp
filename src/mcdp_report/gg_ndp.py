@@ -659,7 +659,11 @@ def get_signal_label(name, unit):
 
     # a/b/c/signal -> ../signal
     if '/' in name:
-        name = '../' + name.split('/')[-1]
+        last = name.split('/')[-1]
+        if len(last) >= 1 and last[0] == '_':
+            name = ''
+        else:
+            name = '../' + last
 
     # no label for automatically generated ones
 #     for i in range(9):

@@ -8,6 +8,7 @@ from mocdp.comp.context import (Connection, get_name_for_fun_node,
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import dpwrap
 import math
+from mocdp.exceptions import mcdp_dev_warning
 
 
 class LinearCeil():
@@ -96,8 +97,12 @@ class CombinedCeilMap(Map):
         self.step = step
 
     def __repr__(self):
-        return ('CombinedCeil(alpha=%s, step=%s, max_value=%s)' %
-                (self.alpha, self.step, self.max_value))
+        if self.alpha > 0:  # or self.max_value > 0:
+            mcdp_dev_warning('todo: self.max_value')
+            return ('CombinedCeil(alpha=%s, step=%s, max_value=%s)' %
+                    (self.alpha, self.step, self.max_value))
+        else:
+            return 'Discretize(%s)' % self.dom.format(self.step)
 
     def _call(self, x):
         top = self.dom.get_top()

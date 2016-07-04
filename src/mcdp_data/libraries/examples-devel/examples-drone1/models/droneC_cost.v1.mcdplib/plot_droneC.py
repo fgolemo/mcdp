@@ -31,7 +31,7 @@ def go():
 
     lib = MCDPLibrary()
     lib.add_search_dir('.')
-    ndp = lib.load_ndp2(model_name)
+    ndp = lib.load_ndp(model_name)
 
     data = solve_queries(ndp, queries, result_like)
 

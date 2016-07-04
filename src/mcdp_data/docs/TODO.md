@@ -10,7 +10,9 @@ Keys:
 - T: testing
 
 
-
+- B: if the syntax is not correct, it is not displayed at all.
+  http://127.0.0.1:8080/libraries/duckiebot_components/models/pimoroni_inc/views/syntax/
+- F: SVG for dpgraph http://127.0.0.1:8080/libraries/droneD_complete.v2/models/perception/views/dp_graph/
 
 Meat
 ----

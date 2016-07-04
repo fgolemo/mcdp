@@ -27,9 +27,9 @@ def eval_rvalue_GenericNonlinearity(rvalue, context):
         msg = 'Cannot create unary operator'
         raise_desc(DPInternalError, msg, function=function, F=F)
 
-    fnames = context.new_fun_name('s')
+    fnames = context.new_fun_name('_s')
     name = context.new_name(function.__name__)
-    rname = context.new_res_name('res')
+    rname = context.new_res_name('_res')
 
     ndp = dpwrap(dp, fnames, rname)
     context.add_ndp(name, ndp)

@@ -167,10 +167,16 @@ def get_mult_op(context, r, c):
         F = rtype
         R = mult_table(rtype, c.unit)
         function = MultValue(c.value)
-#
-        mcdp_dev_warning('remove')
+        mcdp_dev_warning('make it better')
 
-        setattr(function, '__name__', '× %s' % (c.unit.format(c.value)))
+        label = '× %s' % (c.unit.format(c.value))
+
+        from mcdp_posets.rcomp_units import format_pint_unit_short
+        label = '× %.5f %s' % (c.value, format_pint_unit_short(c.unit.units))
+
+        setattr(function, '__name__', label)
+
+
         dp = GenericUnary(F, R, function)
     elif isinstance(rtype, Nat) and isinstance(c.unit, Nat):
         amap = MultNat(c.value)

@@ -76,8 +76,8 @@ def flatten_add_prefix(ndp, prefix):
             dp2 = get_new_name(dp2)
             s1_ = "%s%s%s" % (prefix, sep, s1)
             s2_ = "%s%s%s" % (prefix, sep, s2)
-            assert s1_ in names2[dp1].get_rnames()
-            assert s2_ in names2[dp2].get_fnames()
+            assert s1_ in names2[dp1].get_rnames(), (s1_, names2[dp1].get_rnames())
+            assert s2_ in names2[dp2].get_fnames(), (s2_, names2[dp1].get_fnames())
             c2 = Connection(dp1=dp1, s1=s1_, dp2=dp2, s2=s2_)
             connections2.add(c2)
             
