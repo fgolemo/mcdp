@@ -64,6 +64,9 @@
 	 		 </span>
 </a> 
 
+{% if print %}
+{{contents | safe }}
+{% else %}
 <table>
 <tr>
 <td id='toc'>
@@ -78,6 +81,6 @@
 </td>
 </tr>
 </table>
- 
+{% endif %}
 </body>
 </html>

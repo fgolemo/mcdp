@@ -3,19 +3,26 @@
 from contextlib import contextmanager
 from copy import deepcopy
 from mocdp.exceptions import mcdp_dev_warning
-from reprep.constants import MIME_PDF, MIME_PNG, MIME_PLAIN
+from reprep.constants import MIME_PDF, MIME_PNG, MIME_PLAIN, MIME_SVG
 from system_cmd import CmdException, system_cmd_result
 import networkx as nx  # @UnresolvedImport
 import os
 import traceback
+from bs4 import BeautifulSoup
+import base64
+import codecs
 
 
 def graphviz_run(filename_dot, output, prog='dot'):
     suff = os.path.splitext(output)[1][1:]
-    if not suff in ['png', 'pdf', 'ps']:
+    if not suff in ['png', 'pdf', 'ps', 'svg']:
         raise ValueError((output, suff))
 
-    cmd = [prog, '-T%s' % suff, '-o', output, filename_dot]
+    encoder = suff
+#     if encoder == 'svg':
+#         encoder = 'svg:cairo'
+
+    cmd = [prog, '-T%s' % encoder, '-o', output, filename_dot]
     try:
         # print('running graphviz')
         system_cmd_result(cwd='.', cmd=cmd,
@@ -103,6 +110,23 @@ def gg_figure(r, name, ggraph):
 
         with r.data_file('graph_pdf', MIME_PDF) as filename:
             graphviz_run(filename_dot, filename, prog=prog)
+
+        with r.data_file('graph_svg', MIME_SVG) as filename:
+            graphviz_run(filename_dot, filename, prog=prog)
+
+            soup = BeautifulSoup(open(filename).read())
+            for tag in soup.select('image'):
+                href = tag['xlink:href']
+                if 'png' in href:
+                    with open(href) as ff:
+                        png = ff.read()
+                    encoded = base64.b64encode(png)
+                    src = 'data:image/png;base64,%s' % encoded
+                    tag['xlink:href'] = src
+# tag.replaceWith(rendered)
+
+            with codecs.open(filename, 'w', encoding='utf-8') as ff:
+                ff.write(soup.prettify())
 
         # MIME_GRAPHVIZ
         with f.data_file('dot', MIME_PLAIN) as filename:

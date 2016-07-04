@@ -12,7 +12,7 @@ def html_interpret(library, html):
     load_fragments(library, html)
     html = highlight_mcdp_code(html)
     html = make_figures(library, html)
-    return html
+    return html.decode('utf-8')
 
 
 def load_fragments(library, frag):
@@ -82,7 +82,7 @@ def highlight_mcdp_code(frag):
             tag.insert_after(t)
 
 
-    return soup.prettify()
+    return str(soup)
 
 def make_figures(library, frag):
     """ Looks for codes like:
@@ -113,6 +113,18 @@ def make_figures(library, frag):
 
     default_direction = 'LR'
 
+    def call(func, klass, **args):
+        if False:
+            png = func(data_format='png', **args)
+            r = create_img_png_base64(soup, png, **{'class': klass})
+            return r
+        else:
+            svg = func(data_format='svg', **args)
+            tag = BeautifulSoup(svg, 'lxml').svg
+            tag['class'] = klass
+            return tag
+
+
     def func1(tag):
         source_code = tag.string
         source_code = str(source_code)  # unicode
@@ -121,13 +133,12 @@ def make_figures(library, frag):
 
         direction = str(tag.get('direction', default_direction))
 
-        png = ndp_graph_normal(library=library, ndp=ndp, style=STYLE_GREENREDSYM,
-                               yourname=yourname, data_format='png',
-                               direction=direction)
-
-        r = create_img_png_base64(soup, png, **{'class': 'ndp_graph_normal'})
-        return r
-
+        
+        return call(ndp_graph_normal, library=library, ndp=ndp,
+                    style=STYLE_GREENREDSYM,
+                           yourname=yourname,
+                         direction=direction, klass='ndp_graph_normal')
+        
     def func2(tag):
         source_code = tag.string
         source_code = str(source_code)  # unicode
@@ -136,10 +147,8 @@ def make_figures(library, frag):
         yourname = ''
         direction = str(tag.get('direction', default_direction))
 
-        png = ndp_graph_templatized(library, ndp, yourname=yourname, data_format='png',
-                                    direction=direction)
-        r = create_img_png_base64(soup, png, **{'class': 'ndp_graph_templatized'})
-        return r
+        return call(ndp_graph_templatized, library=library, ndp=ndp, yourname=yourname,
+                                    direction=direction, klass='ndp_graph_templatized')
 
     def func2b(tag):
         source_code = tag.string
@@ -152,10 +161,10 @@ def make_figures(library, frag):
             yourname = getattr(ndp, ATTR_LOAD_NAME)
         direction = str(tag.get('direction', default_direction))
 
-        png = ndp_graph_templatized(library, ndp, yourname=yourname, data_format='png',
-                                    direction=direction)
-        r = create_img_png_base64(soup, png, **{'class': 'ndp_graph_templatized'})
-        return r
+        return call(ndp_graph_templatized, library=library, ndp=ndp,
+                    direction=direction,
+                    yourname=yourname, klass='ndp_graph_templatized_labeled')
+
     
     def func3(tag):
         source_code = tag.string
@@ -165,11 +174,10 @@ def make_figures(library, frag):
 
         direction = str(tag.get('direction', default_direction))
 
-        png = ndp_graph_enclosed(library, ndp, style=STYLE_GREENREDSYM, 
-                                 yourname=yourname, data_format='png',
-                                 direction=direction)
-        r = create_img_png_base64(soup, png, **{'class': 'ndp_graph_enclosed'})
-        return r
+        return call(ndp_graph_enclosed, library=library, ndp=ndp, style=STYLE_GREENREDSYM,
+                                 yourname=yourname,
+                                 direction=direction, klass='ndp_graph_enclosed')
+
 
     def func4(tag):
         source_code = tag.string
@@ -180,19 +188,19 @@ def make_figures(library, frag):
 
         direction = str(tag.get('direction', default_direction))
 
-        png = ndp_graph_expand(library, ndp, style=STYLE_GREENREDSYM,
-                                 yourname=yourname, data_format='png',
-                                 direction=direction)
-        r = create_img_png_base64(soup, png, **{'class': 'ndp_graph_expand'})
-        return r
+        return call(ndp_graph_expand, library=library, ndp=ndp, style=STYLE_GREENREDSYM,
+                                 yourname=yourname,
+                                 direction=direction,
+                                 klass='ndp_graph_expand')
 
     go('pre.ndp_graph_normal', func1)
     go('pre.ndp_graph_templatized', func2)
     go('pre.ndp_graph_templatized_labeled', func2b)
     go('pre.ndp_graph_enclosed', func3)
     go('pre.ndp_graph_expand', func4)
-
-    return soup.prettify()
+#
+#     return soup.prettify()
+    return str(soup)
 
 def create_img_png_base64(soup, png, **attrs):
     encoded = base64.b64encode(png)

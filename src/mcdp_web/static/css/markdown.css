@@ -18,12 +18,29 @@ pre.DPSemanticError, pre.DPSyntaxError {
 	font-weight: bold;
 }
 
-img.ndp_graph_expand,
-img.ndp_graph_enclosed,
-img.ndp_graph_normal,
-img.ndp_graph_templatized {
-	max-width: 90%;
+.ndp_graph_expand,
+.ndp_graph_enclosed,
+.ndp_graph_normal,
+.ndp_graph_templatized,
+.ndp_graph_templatized_labeled {
+	max-width: 50em;
+	/*height: auto;*/
 }
+
+	/* This screws up wkhtomlpdf */
+@media screen {
+
+.ndp_graph_expand,
+.ndp_graph_enclosed,
+.ndp_graph_normal,
+.ndp_graph_templatized,
+.ndp_graph_templatized_labeled {
+	height: auto;
+}
+
+
+}
+
 
 pre span.label { float: right; 
 	/*border: solid 1px black; */

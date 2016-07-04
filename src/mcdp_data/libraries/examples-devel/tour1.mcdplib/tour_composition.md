@@ -108,6 +108,10 @@ mcdp {
 	weight = total_mass * gravity
 
 	lift provided by actuation >= weight
+
+	# minimize total mass
+	requires mass [g]
+	mass >= total_mass
 }
 
 

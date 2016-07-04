@@ -78,19 +78,26 @@ mcdp {
 These two batteries do not dominate each other.
 
 We can define the **coproduct** of the two using
-the keyword ``choose``:
+the keyword ``choose``. Graphically, the choice is indicated through dashed lines.
 
-
+<table>
+<tr>
+<td valign="top">
 <pre class='mcdp' id='Batteries' label='Batteries.mcdp'>
 choose(
 	NiH2: `Battery_LiPo,
 	LiPo: `Battery_NiH2
 )
 </pre>
-
-Graphically, the choice is indicated through dashed lines:
-
+</td>
+<td valign="top">
 <pre class='ndp_graph_enclosed'>`Batteries</pre>
+</td>
+</tr>
+</table>
+
+
+
 
 
 

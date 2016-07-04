@@ -3,11 +3,11 @@
 
 [Basics](tour_intro.html)
 
-[Catalogues](tour_catalogue.html)
 
 [Composition](tour_composition.html)
 
-[Trade-offs](tour_tradeoffs.html)
+[Catalogues](tour_catalogue.html)
+
 
 [Coproducts](tour_coproduct.html)
 

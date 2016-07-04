@@ -5,6 +5,7 @@ from mcdp_library.utils import locate_files
 from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
 from mcdp_web.editor.app_editor import AppEditor
 from mcdp_web.editor_fancy.app_editor_fancy_generic import AppEditorFancyGeneric
+from mcdp_web.images.images import WebAppImages
 from mcdp_web.interactive.app_interactive import AppInteractive
 from mcdp_web.qr.app_qr import AppQR
 from mcdp_web.solver.app_solver import AppSolver
@@ -16,9 +17,8 @@ from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPFound
 from quickapp import QuickAppBase
 from wsgiref.simple_server import make_server
-import os
 import mocdp
-from mcdp_web.images.images import WebAppImages
+import os
 
 
 __all__ = [
@@ -321,6 +321,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         res['contents'] = html
         res['title'] = document
         res['navigation'] = self.get_navigation_links(request)
+        res['print'] = bool(request.params.get('print', False))
+        print request.params, res['print']
         res.update(self.get_jinja_hooks(request))
         return res
 

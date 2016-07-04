@@ -86,7 +86,7 @@ class WebAppImages():
             data = ndp_graph_normal(library=library, ndp=ndp, style=style,
                                     yourname=id_ndp,
                                     data_format=fileformat)
-            return response_data(request, data, get_mime_for_format(data))
+            return response_data(request, data, get_mime_for_format(fileformat))
 
 
         return png_error_catch(go, request)
@@ -96,6 +96,7 @@ def get_mime_for_format(data_format):
          'pdf': 'image/pdf',
          'png': 'image/png',
          'dot': 'text/plain',
+         'svg': 'image/svg+xml',
     }
     return d[data_format]
 
@@ -156,6 +157,7 @@ def gg_get_format(gg, data_format):
     gg_figure(r, 'graph', gg)
     png = r.resolve_url('graph/graph').get_raw_data()
     pdf = r.resolve_url('graph_pdf').get_raw_data()
+    svg = r.resolve_url('graph_svg').get_raw_data()
     dot = r.resolve_url('dot').get_raw_data()
 
     if data_format == 'pdf':
@@ -164,5 +166,7 @@ def gg_get_format(gg, data_format):
         return png
     elif data_format == 'dot':
         return dot
+    elif data_format == 'svg':
+        return svg
     else:
         raise ValueError('No known format %r.' % data_format)
