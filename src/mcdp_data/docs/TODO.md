@@ -10,13 +10,21 @@ Keys:
 - T: testing
 
 
+
+
 Meat
 ----
+
+
+- demo: uncertainty in batteries
+
+
+- finish the "canonical form"
+
 
 - R: drop "/list"
 
 
-- finish the "canonical form"
 
 - intervals - what happens 
 

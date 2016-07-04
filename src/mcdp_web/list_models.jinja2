@@ -9,21 +9,9 @@
 
 {% include 'model_views_navigation.jinja2' %}
 
-
-<!--
-{% if models %}
-<p> Models: </p>
-
-  <ul>
-    {% for m in models %}
-    <li><a href="models/{{m}}/views/syntax/" target="_blank">{{m}}</a></li>
-    {% endfor %}
-  </ul>
-  {% else %}
-  <p>No models defined in this library yet.</p>
-  {% endif %}
-
--->
+{% if has_library_doc('index') %}
+{{ render_library_doc('index') | safe }}
+{% else %}
 
 <p>Click &#9776; in the upper left and select "new" to add a new model.</p>
 
@@ -56,14 +44,8 @@ div.compact img { max-width: 20em; max-height: 10em; }
 </div>
 </a>
 
-
 {% endfor %}
-
-<!-- <p>Add a model: {% include 'new_model.jinja2' %}</p>       
- <p><a href="qr_reader/">QR import</a></p>
- <p><a href="interactive/mcdp_value/">Interactive evaluation</a></p>-->
- 
- <!-- {% include 'refresh_library.jinja2' %} -->
+{%endif%}
   
   
 </body>

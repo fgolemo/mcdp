@@ -15,6 +15,7 @@ from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning
 from mocdp.ndp import NamedDPCoproduct
 from mcdp_dp.dp_max import JoinNDP
+from types import NoneType
 
 STYLE_GREENRED = 'greenred'
 STYLE_GREENREDSYM = 'greenredsym'
@@ -29,9 +30,12 @@ COLOR_DARKRED = 'red'
 #             propertyAppend(l2, 'arrowhead', 'none')
 #             propertyAppend(l2, 'dir', 'both')
 
-@contract(ndp=NamedDP)
+@contract(ndp=NamedDP, direction='str', yourname='str')
 def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourname=None):
     assert isinstance(ndp, NamedDP)
+    assert isinstance(direction, str), direction.__repr__()
+    assert isinstance(yourname, (NoneType, str)), yourname.__repr__()
+
     import my_gvgen as gvgen
     # gg = gvgen.GvGen(options="rankdir=LR")
     gg = gvgen.GvGen(options="rankdir=%s" % direction)
@@ -283,7 +287,7 @@ def create_simplewrap(gdc, ndp):
         else:
             if best_icon is not None:
                 if gdc.yourname is not None:
-                    if gdc.yourname[0] == '_':
+                    if len(gdc.yourname) >= 1 and gdc.yourname[0] == '_':
                         shortlabel = ""
                     else:
                         shortlabel = gdc.yourname
@@ -350,6 +354,8 @@ def create_simplewrap(gdc, ndp):
     return functions, resources
 
 def format_unit(R):
+    from mcdp_library.library import ATTR_LOAD_NAME
+
     if R == BottomCompletion(TopCompletion(Any())):
         return '[*]'
     mcdp_dev_warning('fix bug')
@@ -364,8 +370,8 @@ def format_unit(R):
         return '[%s]' % format_pint_unit_short(R.units)
     elif isinstance(R, Rcomp):
         return '[R]'
-    elif hasattr(R, '__mcdplibrary_load_name'):
-        n = getattr(R, '__mcdplibrary_load_name')
+    elif hasattr(R, ATTR_LOAD_NAME):
+        n = getattr(R, ATTR_LOAD_NAME)
         return '[`%s]' % n
     else:
         return '[%s]' % str(R)

@@ -7,6 +7,7 @@ from mcdp_report.utils import safe_makedirs
 from system_cmd.meat import system_cmd_result
 from system_cmd.structures import CmdException
 from mcdp_library.utils.locate_files_imp import locate_files
+from mcdp_web.utils.memoize_simple_imp import memoize_simple
 
 __all__ = ['GraphDrawingContext']
 
@@ -143,8 +144,10 @@ class GraphDrawingContext():
         imagepaths = [self._get_default_imagepath()]
         imagepaths.extend(self.images_paths)
 #         print('options: %s in %r' % (options, self.images_paths))
-        best = choose_best_icon(options, imagepaths, tmppath)
-        return best
+        best = choose_best_icon(options, imagepaths)
+
+        resized = resize_icon(best, tmppath, 150)
+        return resized
 
     def decorate_arrow_function(self, l1):
         propertyAppend = self.gg.propertyAppend
@@ -189,24 +192,36 @@ class GraphDrawingContext():
         if self.style in  [STYLE_GREENRED, STYLE_GREENREDSYM]:
             propertyAppend(n, 'fontcolor', COLOR_DARKGREEN)
 
+@memoize_simple
+def get_images(dirname, exts=('png', 'jpg', 'PNG', 'JPG')):
+    """ Returns a dict from lowercase basename to realpath """
+    allfiles = {}
+    for ext in exts:
+        search = '*.%s' % ext
+        files = locate_files(dirname, search)
+        for f in files:
+            basename = os.path.basename(f)
+            basename = basename.lower()
+            allfiles[basename] = f
+    return allfiles
 
-
-def choose_best_icon(iconoptions, imagepaths, tmppath):
+def choose_best_icon(iconoptions, imagepaths):
     # logger.debug('Looking for %s.' % (str(iconoptions)))
-    exts = ['png', 'jpg']
-    mcdp_dev_warning('This is case-dependent')
+    exts = ['png', 'jpg', 'PNG', 'JPG']
+
+    files = {}
+    for path in reversed(imagepaths):
+        files.update(get_images(path))
+
     for option in iconoptions:
         if option is None:
             continue
-        for imagepath in imagepaths:
-            for ext in exts:
-                basename = '%s.%s' % (option, ext)
-                files = locate_files(imagepath, basename)
-                if files:
-                    f = files[0]
-                    return resize_icon(f, tmppath, 100)
-                else:
-                    pass
+
+        for ext in exts:
+            basename = '%s.%s' % (option, ext)
+            basename = basename.lower()
+            if basename in files:
+                return files[basename]
                     # print('no %r in %r' % (basename, imagepath))
     # logger.debug('Could not find PNG icon for %s.' % (str(iconoptions)))
     return None

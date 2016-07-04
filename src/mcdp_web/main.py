@@ -85,11 +85,10 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         return d
 
     def view_list(self, request):
-        models = self.list_of_models(request)
-        return {
-            'models': sorted(models),
-            'navigation': self.get_navigation_links(request),
-        }
+        res = {}
+        res['navigation'] = self.get_navigation_links(request)
+        res.update(self.get_jinja_hooks(request))
+        return res
 
     def view_list_libraries(self, request):  # @UnusedVariable
         libraries = self.list_libraries()
@@ -126,7 +125,9 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         docname = str(request.matchdict['document'])  # unicode
         # from pkg_resources import resource_filename  # @UnresolvedImport
         html = self.render_markdown_doc(docname)
-        return {'contents': html}
+        res = {'contents': html}
+        res.update(self.get_jinja_hooks(request))
+        return res
 
     def render_markdown_doc(self, docname):
         package = dir_from_package_name('mcdp_data')
@@ -162,7 +163,6 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
     def get_lib_template_view_url(self, library, template, view):
         url = '/libraries/%s/templates/%s/views/%s/' % (library, template, view)
         return url
-
 
     def get_model_name(self, request):
         model_name = str(request.matchdict['model_name'])  # unicod
@@ -285,12 +285,44 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         return d
 
-    def get_template_functions(self):
+    def get_jinja_hooks(self, request):
         """ Returns a set of useful template functions. """
         d = {}
         d['version'] = lambda: mocdp.__version__
-        d['render_markdown_doc'] = lambda docname: self.render_markdown_doc(docname)
+        d['render_library_doc'] = lambda docname: self._render_library_doc(request, docname)
+        d['has_library_doc'] = lambda docname: self._has_library_doc(request, docname)
         return d
+
+    def _has_library_doc(self, request, document):
+        l = self.get_library(request)
+        filename = '%s.%s' % (document, MCDPLibrary.ext_doc_md)
+        return l.file_exists(filename)
+
+    def _render_library_doc(self, request, document):
+        import codecs
+        l = self.get_library(request)
+
+        filename = '%s.%s' % (document, MCDPLibrary.ext_doc_md)
+        f = l._get_file_data(filename)
+        realpath = f['realpath']
+        data = codecs.open(realpath, encoding='utf-8').read()
+        html = self.render_markdown(data)
+
+        from mcdp_web.highlight import html_interpret
+        return html_interpret(l, html)
+
+    def view_library_doc(self, request):
+        """ '/libraries/{library}/{document}.html' """
+        # f['data'] not utf-8
+        # reopen as utf-8
+        document = str(request.matchdict['document'])
+        html = self._render_library_doc(request, document)
+        res = {}
+        res['contents'] = html
+        res['title'] = document
+        res['navigation'] = self.get_navigation_links(request)
+        res.update(self.get_jinja_hooks(request))
+        return res
 
     def serve(self):
         config = Configurator()
@@ -315,6 +347,11 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         config.add_route('list', '/libraries/{library}/list')
         config.add_view(self.view_list, route_name='list', renderer='list_models.jinja2')
+
+        config.add_route('library_doc', '/libraries/{library}/{document}.html')
+        config.add_view(self.view_library_doc,
+                        route_name='library_doc',
+                        renderer='library_doc.jinja2')
 
         config.add_route('docs', '/docs/{document}/')
         config.add_view(self.view_docs, route_name='docs', renderer='language.jinja2')

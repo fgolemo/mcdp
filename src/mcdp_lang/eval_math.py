@@ -12,7 +12,7 @@ from mcdp_maps import MultNat, PlusNat, PlusValueMap
 from mcdp_posets import (Int, Nat, RcompUnits, Space, get_types_universe,
     mult_table, mult_table_seq)
 from mocdp.comp.context import CResource, ValueWithUnits
-from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 
 CDP = CDPLanguage
 
@@ -167,6 +167,9 @@ def get_mult_op(context, r, c):
         F = rtype
         R = mult_table(rtype, c.unit)
         function = MultValue(c.value)
+#
+        mcdp_dev_warning('remove')
+
         setattr(function, '__name__', '× %s' % (c.unit.format(c.value)))
         dp = GenericUnary(F, R, function)
     elif isinstance(rtype, Nat) and isinstance(c.unit, Nat):

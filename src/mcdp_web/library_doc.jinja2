@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{title}}</title>
+    
+    {% include 'head.jinja2' %}
+    {% include 'head_markdown.jinja2' %}
+    
+	 	
+	 <script type='text/javascript'>
+	 	$(document).ready(function() {  		
+	    	$(".make_button").button();
+		});
+	</script>
+
+	<style type='text/css'>
+	a.make_button { font-size: 70%; }
+	a.make_button { display: none; }
+	
+	td#content {
+		vertical-align: top;
+		padding-left: 13em;
+		padding-right: 2em;
+		max-width: 50em;
+	}
+	td#toc {
+		vertical-align: top;
+		width: 12em;
+		display: block;
+		position: fixed;	 
+	}
+	td#toc strong {padding-top: 0.5em;   display: block}
+	div#toc2 {
+	display: block;
+	padding-right: 2em;
+	}
+	td#toc p {
+	margin: 0;
+	padding: 0;
+	}
+	td#toc a {
+		text-decoration: none;
+		color:black;
+		display: block;	
+		width: 100%;
+		padding: 0.3em;
+	}
+	td#toc a:hover {
+		background-color: #f0f0ff;
+	 
+	}
+	td#toc a.current {
+	 background-color: #eee;
+	 
+	}
+	</style>		    
+</head>
+<body class='markdown'>
+
+<a class='make_button' href="/libraries/{{navigation['current_library']}}/list">
+	Library
+	 		 <span class="library_name">
+	 		 	{{navigation['current_library']}}
+	 		 </span>
+</a> 
+
+<table>
+<tr>
+<td id='toc'>
+<div id='toc2'>
+{% if has_library_doc('toc') %}
+{{ render_library_doc('toc') | safe }}
+{% endif %}
+</div>
+</td>
+<td id='content'>
+{{contents | safe }}
+</td>
+</tr>
+</table>
+ 
+</body>
+</html>

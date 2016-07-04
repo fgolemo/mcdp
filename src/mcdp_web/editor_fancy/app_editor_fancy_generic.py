@@ -279,20 +279,24 @@ def get_png_data_template(library, name, x):  # @UnusedVariable
     return png
 
 def get_png_data_model(library, name, ndp):
-    from mocdp.comp.composite import CompositeNamedDP
-    if isinstance(ndp, CompositeNamedDP):
-        ndp2 = ndp.templatize_children()
-        setattr(ndp2, '_hack_force_enclose', True)
-    else:
-        ndp2 = ndp
-
-    images_paths = library.get_images_paths()
-
-    # we actually don't want the name on top
-    yourname = None  # name
-    gg = gvgen_from_ndp(ndp2, STYLE_GREENREDSYM, direction='TB',
-                        images_paths=images_paths, yourname=yourname)
-    png, _pdf = png_pdf_from_gg(gg)
-
-    return png
+    from mcdp_web.images.images import ndp_graph_enclosed
+    return ndp_graph_enclosed(library, ndp, style=STYLE_GREENREDSYM,
+                              yourname=None, data_format='png')
+#
+#     from mocdp.comp.composite import CompositeNamedDP
+#     if isinstance(ndp, CompositeNamedDP):
+#         ndp2 = ndp.templatize_children()
+#         setattr(ndp2, '_hack_force_enclose', True)
+#     else:
+#         ndp2 = ndp
+#
+#     images_paths = library.get_images_paths()
+#
+#     # we actually don't want the name on top
+#     yourname = None  # name
+#     gg = gvgen_from_ndp(ndp2, STYLE_GREENREDSYM, direction='TB',
+#                         images_paths=images_paths, yourname=yourname)
+#     png, _pdf = png_pdf_from_gg(gg)
+#
+#     return png
 

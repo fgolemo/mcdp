@@ -1,5 +1,6 @@
+# -*- coding: utf-8 -*-
 from mcdp_report.my_gvgen import GvGen
-from mcdp_report.gg_ndp import GraphDrawingContext
+from mcdp_report.gdc import GraphDrawingContext
 
 gg = GvGen()
 gdc = GraphDrawingContext(gg, parent=None, yourname='root')
@@ -13,7 +14,7 @@ with gdc.child_context_yield(l0, "l0") as gdc2:
     with gdc2.child_context_yield(l1, "l1") as gdc3:
         gdc3.newItem('l2a')
         gdc3.newItem('l2b')
-        l2c = gdc3.newItem('l2c')
+        l2c = gdc3.newItem('l2c ²')
 
         with gdc2.child_context_yield(l2c, "l2c") as gdc4:
             gdc4.newItem('A')

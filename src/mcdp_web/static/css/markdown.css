@@ -1,0 +1,36 @@
+
+body {
+	/*padding-left: 3em;*/
+	/*width: 50em;*/
+
+	font-family: Palatino;
+}
+
+pre {
+	background-color: #eee;
+	margin-left: 2em;
+	padding: 7px;
+	/*display: inline-block;*/
+}
+
+pre.DPSemanticError, pre.DPSyntaxError {
+	color: red;
+	font-weight: bold;
+}
+
+img.ndp_graph_expand,
+img.ndp_graph_enclosed,
+img.ndp_graph_normal,
+img.ndp_graph_templatized {
+	max-width: 90%;
+}
+
+pre span.label { float: right; 
+	/*border: solid 1px black; */
+	background-color: #eee;
+	padding: 5px;
+	padding-left: 1em;
+	padding-right: 1em;
+	margin-top: -1.2em;
+	margin-right: 1em;
+}

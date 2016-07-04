@@ -295,7 +295,6 @@ class GvGen():
         #
         allProps.update(props)
 
-
         if self.__has_children(node):
             propStringList = ["%s=%s;\n" % (k, format_property(k, v)) for k, v in allProps.iteritems()]
             properties = ''.join(propStringList)
@@ -538,7 +537,7 @@ class GvGen():
         def indented_results(children_results):
             s = ""
             for cs in children_results.values():
-                s += indent(cs, '   ') + '\n'
+                s += indentu(cs, '   ') + '\n'
             return s
 
         def render_dot_root(level, node, children_results):
@@ -547,8 +546,16 @@ class GvGen():
                 for key, value in self.options.iteritems():
                     s += ("    %s=%s;" % (key, value))
                 s += ("\n")
-
-            s += indented_results(children_results)
+            assert isinstance(s, str), s.__repr__()
+            r = indented_results(children_results)  # .decode("unicode_escape")
+            try:
+                s += r
+            except UnicodeDecodeError:
+                # print r[210:220].__repr__()
+#                 print type(r), type(s)
+#                 print r[1200:1230].__repr__()
+#                 print r.__repr__()
+                raise
 
             self.fd = StringIO()
             for n in self.__nodes:            
@@ -813,3 +820,22 @@ if __name__ == "__main__":
 
 
     graph.dot()
+
+
+def indentu(s, prefix, first=None):
+    assert isinstance(prefix, str)
+    lines = s.split('\n')
+    if not lines: return ''
+
+    if first is None:
+        first = prefix
+
+    m = max(len(prefix), len(first))
+
+    prefix = ' ' * (m - len(prefix)) + prefix
+    first = ' ' * (m - len(first)) + first
+
+    # differnet first prefix
+    res = ['%s%s' % (prefix, line.rstrip()) for line in lines]
+    res[0] = '%s%s' % (first, lines[0].rstrip())
+    return '\n'.join(res)

@@ -42,11 +42,11 @@ class MCDPLibrary():
     ext_values = 'mcdp_value'
     ext_templates = 'mcdp_template'
     ext_primitivedps = 'mcdp_primitivedp'
-    ext_explanation1 = 'expl1.md'
-    ext_explanation2 = 'expl2.md'
-
+    ext_explanation1 = 'expl1.md'  # before the model
+    ext_explanation2 = 'expl2.md'  # after the model
+    ext_doc_md = 'md'  # library document
     all_extensions = [ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps,
-                      ext_explanation1, ext_explanation2]
+                      ext_explanation1, ext_explanation2, ext_doc_md]
 
     def __init__(self, cache_dir=None, file_to_contents=None, search_dirs=None):
         """ 

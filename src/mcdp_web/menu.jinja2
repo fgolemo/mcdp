@@ -1,3 +1,5 @@
+<style type='text/css'>
+</style>
 <div id='outer'>
 <ul id="menu">
 <li id='root'>&#9776;
@@ -30,7 +32,7 @@
 </ul>
 </li>
 </ul>
-<!--<div style='display:block;clear:both'> </div>-->
+
 </div>
 
 <script type='text/javascript'>
@@ -58,6 +60,11 @@ $(document).ready(function() {
 </script>
 
 <style type='text/css'>
+/* This makes the link fill all of the menu item
+  otherwise it is hard to click */
+li a { display: block; width: 100%; }
+
+
 .ui-widget {
     font-size:70%;
 }

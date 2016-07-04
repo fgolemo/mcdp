@@ -3,10 +3,11 @@ from mocdp.comp.wrap import SimpleWrap
 from mcdp_posets.poset_product import PosetProduct
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.interfaces import NamedDP
+from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 def cndp_templatize_children(cndp):
     """ Replaces all sub composites with the corresponding template """
-
+    assert isinstance(cndp, CompositeNamedDP), cndp
     fnames = cndp.get_fnames()
     rnames = cndp.get_rnames()
     connections = cndp.get_connections()
@@ -14,12 +15,22 @@ def cndp_templatize_children(cndp):
     def filter_child(child):
         if isinstance(child, CompositeNamedDP):
             return ndp_templatize(child)
+        elif isinstance(child, NamedDPCoproduct):
+            return ndpcoproduct_templatize(child)
         else:
             return child
 
     name2ndp = dict([(k, filter_child(v)) for k, v in cndp.get_name2ndp().items()])
 
     return CompositeNamedDP.from_parts(name2ndp, connections, fnames, rnames)
+
+def ndpcoproduct_templatize(ndp):
+    ndps = tuple([ndp_templatize(c) for c in ndp.ndps])
+    labels = ndp.labels
+    res = NamedDPCoproduct(ndps=ndps, labels=labels)
+    # attr_load_name?
+    return res
+
 
 @contract(ndp=NamedDP, returns=SimpleWrap)
 def ndp_templatize(ndp, mark_as_template=False):

@@ -1,0 +1,80 @@
+### syntax highlighting
+
+Use ``<pre>`` tags.
+
+~~~
+<pre class="mcdp" id='model'>
+mcdp {
+	provides capacity [J]
+	requires mass [g]
+
+	# incomplete
+}
+</pre>
+~~~
+
+
+<pre class="mcdp" id='model'>
+mcdp {
+	provides capacity [J]
+	requires mass [g]
+
+	s = instance mcdp  {
+		provides c2 [J]
+		requires m2 [g]
+		m2 >= 10g
+		c2 <= 10J
+	}
+	mass>= s.m2
+	capacity <=  s.c2
+}
+</pre>
+ 
+### mcdp_ndp_graph_templatized
+
+~~~
+<pre class='ndp_graph_templatized'>`model</pre>
+~~~
+
+<pre class='ndp_graph_templatized'>`model</pre>
+
+### mcdp_ndp_graph_templatized_labeled
+
+~~~
+<pre class='ndp_graph_templatized_labeled'>`model</pre>
+~~~
+
+<pre class='ndp_graph_templatized_labeled'>`model</pre>
+
+
+###  mcdp_ndp_graph_normal
+
+~~~
+<pre class='ndp_graph_normal'>`model</pre>
+~~~
+
+<pre class='ndp_graph_normal'>`model</pre>
+
+### ndp_graph_enclosed
+
+~~~
+<pre class='ndp_graph_enclosed'>`model</pre>
+~~~
+
+<pre class='ndp_graph_enclosed'>`model</pre>
+
+
+### ndp_graph_expand
+
+~~~
+<pre class='ndp_graph_expand' direction='LR'>`model</pre>
+~~~
+
+<pre class='ndp_graph_expand' direction='LR'>`model</pre>
+
+~~~
+<pre class='ndp_graph_expand' direction='TB'>`model</pre>
+~~~
+
+<pre class='ndp_graph_expand' direction='TB'>`model</pre>
+

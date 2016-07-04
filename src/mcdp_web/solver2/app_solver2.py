@@ -241,8 +241,10 @@ class AppSolver2():
                 
                 mcdp_dev_warning('should use join instead of min')
         
-                rli = min(filter(extract_ri, rl.minimals))
-                rui = max(filter(extract_ri, ru.minimals))
+                values = filter(extract_ri, rl.minimals)
+                rli = min(values) if values else None
+                values = filter(extract_ri, ru.minimals)
+                rui = max(values) if values else None
 
                 ru_samples.append(rui)
                 rl_samples.append(rli)

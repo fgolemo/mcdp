@@ -1,15 +1,11 @@
-from mcdp_cli.plot import png_pdf_from_gg
-from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
+from mcdp_report.gg_ndp import STYLE_GREENREDSYM
 from mcdp_report.html import ast_to_html
-from mcdp_report.report import gvgen_from_dp
-from mcdp_web.utils import png_error_catch, response_data
 from mcdp_library.library import MCDPLibrary
 
 class AppVisualization():
 
     def __init__(self):
         pass
-    
 
     def config(self, config):
         config.add_route('model_syntax',
@@ -133,7 +129,7 @@ class AppVisualization():
         for tag in soup.select('span.NDPName'):
             initial, middle, final = break_string(tag.string)
             tag.string = ''
-            
+
             name = middle
             href = self.get_lmv_url(library, name, 'syntax')
 
@@ -153,7 +149,7 @@ class AppVisualization():
                 tag.append(new_tag)
 
 
-        # Add documentation links for each span 
+        # Add documentation links for each span
         # that has a class that finishes in "Keyword"
         def select_tags():
             for tag in soup.select('span'):
@@ -161,7 +157,7 @@ class AppVisualization():
                     klass = tag.attrs['class'][0]
                     if 'Keyword' in klass:
                         yield tag
-                        
+
         manual = '/docs/language_notes/'
 
         for tag in select_tags():
@@ -173,7 +169,7 @@ class AppVisualization():
             new_tag = soup.new_tag("a", **attrs)
             new_tag.string = text
             tag.append(new_tag)
-        
+
         return soup.prettify()
 
 

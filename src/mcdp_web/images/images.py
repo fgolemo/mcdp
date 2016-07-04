@@ -47,14 +47,10 @@ class WebAppImages():
             id_ndp = self.get_model_name(request)
             ndp = l.load_ndp(id_ndp)
 
-            ndp = ndp_templatize(ndp, mark_as_template=False)
-
             model_name = self.get_model_name(request)
+            png = ndp_graph_templatized(library=l, ndp=ndp,
+                                        yourname=model_name, data_format='png')
 
-            images_paths = l.get_images_paths()
-            gg = gvgen_from_ndp(ndp, STYLE_GREENREDSYM, yourname=model_name,
-                                images_paths=images_paths)
-            png, _pdf = png_pdf_from_gg(gg)
             return response_data(request=request, data=png, content_type='image/png')
 
         return png_error_catch(go, request)
@@ -86,23 +82,87 @@ class WebAppImages():
 
             library = self.get_library(request)
             ndp = library.load_ndp(id_ndp)
-            images_paths = library.get_images_paths()
-            gg = gvgen_from_ndp(ndp, style, images_paths=images_paths)
 
-            from reprep import Report
-            from mcdp_report.gg_utils import gg_figure
-            r = Report()
-            gg_figure(r, 'graph', gg)
-            png = r.resolve_url('graph/graph').get_raw_data()
-            pdf = r.resolve_url('graph_pdf').get_raw_data()
-            dot = r.resolve_url('dot').get_raw_data()
+            data = ndp_graph_normal(library=library, ndp=ndp, style=style,
+                                    yourname=id_ndp,
+                                    data_format=fileformat)
+            return response_data(request, data, get_mime_for_format(data))
 
-            if fileformat == 'pdf':
-                return response_data(request, pdf, 'image/pdf')
-            elif fileformat == 'png':
-                return response_data(request, png, 'image/png')
-            elif fileformat == 'dot':
-                return response_data(request, dot, 'text/plain')
-            else:
-                raise ValueError('No known format %r.' % fileformat)
+
         return png_error_catch(go, request)
+
+def get_mime_for_format(data_format):
+    d = {
+         'pdf': 'image/pdf',
+         'png': 'image/png',
+         'dot': 'text/plain',
+    }
+    return d[data_format]
+
+def ndp_graph_templatized(library, ndp, yourname=None, data_format='png', direction='LR'):
+    ndp = ndp_templatize(ndp, mark_as_template=False)
+    images_paths = library.get_images_paths()
+    gg = gvgen_from_ndp(ndp, STYLE_GREENREDSYM, yourname=yourname,
+                        images_paths=images_paths, direction=direction)
+    return gg_get_format(gg, data_format)
+    
+def ndp_graph_normal(library, ndp, style, yourname, data_format, direction='LR'):
+    """ This is not enclosed """
+    images_paths = library.get_images_paths()
+    gg = gvgen_from_ndp(ndp, style, images_paths=images_paths,
+                        yourname=yourname, direction=direction)
+    return gg_get_format(gg, data_format)
+
+def ndp_graph_enclosed(library, ndp, style, yourname, data_format, direction='TB'):
+    """ This templatizes the children and forces the enclosure """
+    from mocdp.comp.composite import CompositeNamedDP
+    from mocdp.ndp.named_coproduct import NamedDPCoproduct
+    from mocdp.comp.composite_templatize import cndp_templatize_children
+    from mocdp.comp.composite_templatize import ndpcoproduct_templatize
+    if isinstance(ndp, CompositeNamedDP):
+        ndp2 = cndp_templatize_children(ndp)
+        setattr(ndp2, '_hack_force_enclose', True)
+    elif isinstance(ndp, NamedDPCoproduct):
+        ndp2 = ndpcoproduct_templatize(ndp)
+    else:
+        ndp2 = ndp
+
+    images_paths = library.get_images_paths()
+    # we actually don't want the name on top
+    yourname = None  # name
+    gg = gvgen_from_ndp(ndp2, style, direction=direction,
+                        images_paths=images_paths, yourname=yourname)
+
+    return gg_get_format(gg, data_format)
+
+
+def ndp_graph_expand(library, ndp, style, yourname, data_format, direction='TB'):
+    """ This expands the children, forces the enclosure """
+    from mocdp.comp.composite import CompositeNamedDP
+    setattr(ndp, '_hack_force_enclose', True)
+
+    images_paths = library.get_images_paths()
+    # we actually don't want the name on top
+    yourname = None  # name
+    gg = gvgen_from_ndp(ndp, style, direction=direction,
+                        images_paths=images_paths, yourname=yourname)
+
+    return gg_get_format(gg, data_format)
+
+def gg_get_format(gg, data_format):
+    from reprep import Report
+    from mcdp_report.gg_utils import gg_figure
+    r = Report()
+    gg_figure(r, 'graph', gg)
+    png = r.resolve_url('graph/graph').get_raw_data()
+    pdf = r.resolve_url('graph_pdf').get_raw_data()
+    dot = r.resolve_url('dot').get_raw_data()
+
+    if data_format == 'pdf':
+        return pdf
+    elif data_format == 'png':
+        return png
+    elif data_format == 'dot':
+        return dot
+    else:
+        raise ValueError('No known format %r.' % data_format)

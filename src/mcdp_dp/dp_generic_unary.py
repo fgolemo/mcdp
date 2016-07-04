@@ -35,7 +35,7 @@ class GenericUnary(PrimitiveDP):
         return self.R.U(r)
 
     def __repr__(self):
-        return "GenericUnary(%s)" % self.function.__name__
+        return "GenericUnary(%s)" % self.function  # .__name__
 
 
 class WrapAMap(PrimitiveDP):
