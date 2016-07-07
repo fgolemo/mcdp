@@ -114,15 +114,19 @@ def gg_figure(r, name, ggraph):
         with r.data_file('graph_svg', MIME_SVG) as filename:
             graphviz_run(filename_dot, filename, prog=prog)
 
-            soup = BeautifulSoup(open(filename).read())
+            soup = BeautifulSoup(open(filename).read(), 'lxml')
             for tag in soup.select('image'):
                 href = tag['xlink:href']
-                if 'png' in href:
-                    with open(href) as ff:
-                        png = ff.read()
-                    encoded = base64.b64encode(png)
-                    src = 'data:image/png;base64,%s' % encoded
-                    tag['xlink:href'] = src
+                extensions = ['png', 'jpg']
+                for ext in extensions:
+                    if ext in href:
+                        with open(href) as ff:
+                            png = ff.read()
+                        encoded = base64.b64encode(png)
+                        from mcdp_web.images.images import get_mime_for_format
+                        mime = get_mime_for_format(ext)
+                        src = 'data:%s;base64,%s' % (mime, encoded)
+                        tag['xlink:href'] = src
 # tag.replaceWith(rendered)
 
             with codecs.open(filename, 'w', encoding='utf-8') as ff:

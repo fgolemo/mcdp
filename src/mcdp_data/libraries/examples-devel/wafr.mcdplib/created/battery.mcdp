@@ -1,6 +1,6 @@
 template mcdp {
-   provides power_profile [W]
-   requires charging_profile [W]
-   requires cost [USD]
-   requires mass [g]
+    provides power_profile [W]
+    requires charging_profile [W]
+    requires cost [USD]
+    requires mass [g]
 }

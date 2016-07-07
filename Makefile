@@ -63,4 +63,5 @@ stats-locs-tests:
 
 bump-upload:
 	bumpversion patch
+	git push --tags
 	python setup.py sdist upload

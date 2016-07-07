@@ -143,16 +143,16 @@ class GraphDrawingContext():
         # imagepath = self.get_imagepath()
         imagepaths = [self._get_default_imagepath()]
         imagepaths.extend(self.images_paths)
-#         print('options: %s in %r' % (options, self.images_paths))
+        # print('options: %s in %r' % (options, self.images_paths))
         best = choose_best_icon(options, imagepaths)
-
+        # print('best: %s' % best)
         resized = resize_icon(best, tmppath, 150)
         return resized
 
     def decorate_arrow_function(self, l1):
         propertyAppend = self.gg.propertyAppend
-        if self.style == STYLE_GREENRED:
 
+        if self.style == STYLE_GREENRED:
             propertyAppend(l1, 'color', COLOR_DARKGREEN)
             propertyAppend(l1, 'arrowhead', 'normal')
             propertyAppend(l1, 'arrowtail', 'none')
@@ -160,16 +160,23 @@ class GraphDrawingContext():
 
         if self.style == STYLE_GREENREDSYM:
             propertyAppend(l1, 'color', 'darkgreen')
+            propertyAppend(l1, 'fontcolor', COLOR_DARKGREEN)
             propertyAppend(l1, 'arrowhead', 'dot')
             propertyAppend(l1, 'arrowtail', 'none')
             propertyAppend(l1, 'dir', 'both')
 
+        mcdp_dev_warning('this above has no effect')
+        propertyAppend(l1, 'fontcolor', COLOR_DARKGREEN)
 
     def decorate_arrow_resource(self, l2, split=False):
         propertyAppend = self.gg.propertyAppend
 
+        mcdp_dev_warning('this above has no effect')
+        propertyAppend(l2, 'fontcolor', COLOR_DARKRED)
+
         if self.style == STYLE_GREENRED:
             propertyAppend(l2, 'color', COLOR_DARKRED)
+            propertyAppend(l2, 'fontcolor', COLOR_DARKRED)
             propertyAppend(l2, 'arrowtail', 'inv')
             propertyAppend(l2, 'arrowhead', 'none')
             propertyAppend(l2, 'dir', 'both')
@@ -198,7 +205,8 @@ def get_images(dirname, exts=('png', 'jpg', 'PNG', 'JPG')):
     allfiles = {}
     for ext in exts:
         search = '*.%s' % ext
-        files = locate_files(dirname, search)
+        files = locate_files(dirname, search, followlinks=True,
+                             normalize=False)
         for f in files:
             basename = os.path.basename(f)
             basename = basename.lower()
@@ -213,6 +221,7 @@ def choose_best_icon(iconoptions, imagepaths):
     for path in reversed(imagepaths):
         files.update(get_images(path))
 
+#     print('avail: %s' % sorted(files))
     for option in iconoptions:
         if option is None:
             continue

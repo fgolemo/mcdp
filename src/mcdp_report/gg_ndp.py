@@ -16,6 +16,7 @@ from mocdp.exceptions import mcdp_dev_warning
 from mocdp.ndp import NamedDPCoproduct
 from mcdp_dp.dp_max import JoinNDP
 from types import NoneType
+from mcdp_dp.dp_constant import ConstantMinimals
 
 STYLE_GREENRED = 'greenred'
 STYLE_GREENREDSYM = 'greenredsym'
@@ -310,13 +311,19 @@ def create_simplewrap(gdc, ndp):
     if isinstance(ndp.dp, Constant):
         R = ndp.dp.get_res_space()
         c = ndp.dp.c
-        label = R.format(c)  # + ' ' + format_unit(R)
+        label = R.format(c)
+        sname = 'constant'
+
+    if isinstance(ndp.dp, ConstantMinimals):
+        R = ndp.dp.get_res_space()
+        values = ndp.dp.values
+        label = "{" + ", ".join(R.format(c) for c in values) + "}"
         sname = 'constant'
 
     if isinstance(ndp.dp, Limit):
         F = ndp.dp.get_fun_space()
         c = ndp.dp.limit
-        label = F.format(c)  # + ' ' + format_unit(F)
+        label = F.format(c)
         sname = 'limit'
 
 #     if label[:2] != '<T':
@@ -608,6 +615,9 @@ def create_composite_(gdc0, ndp, SKIP_INITIAL):
                 if any_simple:
                     gdc.gg.propertyAppend(l2, 'weight', '%s' % weight)
                     gdc.gg.propertyAppend(l1, 'weight', '%s' % weight)
+
+                # gdc.gg.propertyAppend(l2, 'color', 'blue')
+                # gdc.gg.propertyAppend(l1, 'color', 'blue')
 
                 gdc.decorate_arrow_function(l1)
                 gdc.decorate_arrow_resource(l2)

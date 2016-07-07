@@ -16,13 +16,8 @@ __all__ = [
     'define_tests_for_mcdplibs',
 ]
 
-
-def define_tests_for_mcdplibs(context):
-    """
-        Looks for directories called *.mcdplib in the root of the package.
-        
-        It also looks for the files *.mcdp_tests.yaml inside.
-    """
+def enumerate_test_libraries():
+    """ Returns list of (short_name, path) """
     package = dir_from_package_name('mcdp_data')
     folder = os.path.join(package, 'libraries')
 
@@ -33,14 +28,23 @@ def define_tests_for_mcdplibs(context):
                             include_files=False)
     n = len(mcdplibs)
     if n <= 1:
-        msg = 'Expected more mcdp_lang_tests.'
+        msg = 'Expected more libraries.'
         raise_desc(ValueError, msg, folder, mcdplibs=mcdplibs)
 
-    c = context
     for m in mcdplibs:
         short = os.path.splitext(os.path.basename(m))[0]
         short = short.replace('.', '_')
-        c2 = c.child(short)
+        yield short, m
+
+
+def define_tests_for_mcdplibs(context):
+    """
+        Looks for directories called *.mcdplib in the root of the package.
+        
+        It also looks for the files *.mcdp_tests.yaml inside.
+    """
+    for short, m in enumerate_test_libraries():
+        c2 = context.child(short)
         c2.comp_dynamic(mcdplib_define_tst, mcdplib=m)
         
         c2.child('ndp').comp_dynamic(mcdplib_test_setup_nameddps, mcdplib=m)

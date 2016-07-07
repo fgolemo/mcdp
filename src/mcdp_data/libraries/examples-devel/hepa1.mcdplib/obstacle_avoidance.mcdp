@@ -1,0 +1,12 @@
+mcdp {
+
+  provides control_signal [Hz]
+  requires image_acquisition [Hz]
+
+  # algo = choose between algo1, algo2
+  # processor \in {parallela, jetson}
+
+ 
+  total_graph = computation_graph1 + computation_graph2
+  # processor runs the processing graphs 
+}

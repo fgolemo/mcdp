@@ -14,43 +14,51 @@ Keys:
   http://127.0.0.1:8080/libraries/duckiebot_components/models/pimoroni_inc/views/syntax/
 - F: SVG for dpgraph http://127.0.0.1:8080/libraries/droneD_complete.v2/models/perception/views/dp_graph/
 
+- F: if strict is passed as parameter, then all errors are raised
+   (for compiling tour.pdf)
+
+
+- library list: templates
+
+
 Meat
 ----
-
 
 - demo: uncertainty in batteries
 
 
-- finish the "canonical form"
-
-
-- R: drop "/list"
-
-
-
 - intervals - what happens 
 
-- the meat! make sure we close all the loops at the same time.
 
-Incoming
----------
- 
-- solver2: clean up interface
-- R: Replace conf_tools completely. 
 - L: Add something like:
 
   my_npd.mcdp
   from-code('module.function', {param1=..., param2=...})
 
 
-- B: the @comptests inside example_battery are not used now. Use make w/ comptest command?
+- F: better compiler that re-uses previous uses of take()
+# This converts from TypeC to TypeL
+mcdp {
+    provides out [`power]
+    requires in  [`power] 
+    requires cost [USD]
+
+    # This device costs $5 
+    cost >= 5 USD
+
+    take(in,  0) >= `socket_type : TypeL
+    take(out, 0) <= `socket_type : TypeC 
  
+    take(in, 1) >=  take(out, 1) # voltages
+    take(in, 2) >=  take(out, 2) # amperes
+}
 
 
 Misc
 -----
 
 - R: add license information
+- F: add credits to free sw in the initial page
 
 - F: create operator approx(10g, -)
 
@@ -64,37 +72,35 @@ Misc
 MCDP-web
 ----------
 
+- R: drop "/list"
+
+
+- F: list links to *.md documents in the initial library page
+- F: better initial list for each library
 
 - F: rename model
 
 - F: delete model
 
- 
-  
-- F: better initial list for each library
+- T: mcdp-web: Testing of at least all links.
 
-- B: when drawing images, use a unicode font
 
+- B: (low) when drawing images, use a unicode font
 - F: send to non-fancy for internet explorer
 
 - F: mcdp-web: nice CSS all around
-
-- T: mcdp-web: Testing of at least all links.
 
 - F: mcdp-web: let images be zoomable
 
 - B: fancy_editor: the syntax highlighting skips the whitespace at the end of the model
 
-- R: mcdp-web: reorganize by folder
-
 - B: mcdp-web: make sure that everything works when packaged
-
-- F: automatically parse and execute the snippets in the Markdown documents
 
 - F: create static versions of documents
 
 - B: we need to escape # in interactive. Maybe hexify?
 http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c  %0A    x <= c <= d # test%0A    e <= a1 # test%0A}
+
 
 MCDP-web / QR
 -------------
@@ -104,6 +110,7 @@ MCDP-web / QR
 
 
 - B: unicode characters such as ⟨ give server-side error
+
 
 Bugs
 ----

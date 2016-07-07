@@ -2,6 +2,7 @@
 from .poset import NotLeq
 from .space import NotEqual, Space
 from contracts.utils import raise_desc
+from mcdp_posets.space import NotBelongs
 
 
 __all__ = ['FiniteCollectionAsSpace']
@@ -17,7 +18,9 @@ class FiniteCollectionAsSpace(Space):
         self.elements = frozenset(universe)
 
     def belongs(self, x):
-        return x in self.elements
+        if not x in self.elements:
+            msg = 'Element does not belong to poset.'
+            raise_desc(NotBelongs, msg=msg, x=x, elements=self.elements)
 
     def check_equal(self, a, b):
         if a == b:

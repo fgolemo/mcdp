@@ -1,2 +1,2 @@
-# we care about the plug type and the current
-`plug_types x A 
+# we care about the plug type, the voltage, and the current
+`socket_type x `voltages x A 

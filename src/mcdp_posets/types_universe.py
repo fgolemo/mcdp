@@ -4,7 +4,8 @@ from .rcomp import Rcomp
 from .space import NotBelongs, NotEqual
 from .space_product import SpaceProduct
 from contracts.utils import raise_desc, raise_wrapped
-from mocdp.exceptions import DPInternalError
+from mocdp.exceptions import DPInternalError, mcdp_dev_warning
+from mcdp_posets.uppersets import UpperSets
 
 __all__ = [
     'get_types_universe',
@@ -39,8 +40,20 @@ class TypesUniverse(Preorder):
                     self.check_equal(sa, sb)
                 except NotEqual as e:
                     msg = 'Element %d not equal.' % i
-                    raise_wrapped(NotEqual, e, msg)
+                    raise_wrapped(NotEqual, e, msg, compact=True)
 
+        if isinstance(A, UpperSets) and isinstance(B, UpperSets):
+            try:
+                self.check_equal(A.P, B.P)
+                return
+            except NotEqual as e:
+                msg = 'Spaces do not match'
+                raise_wrapped(NotEqual, e, msg, compact=True,
+                              A=A.P, B=B.P)
+
+        
+        mcdp_dev_warning('many things to do here...')
+        
         if not(A == B):
             msg = 'Different by direct comparison.'
             raise_desc(NotEqual, msg, A=A, B=B)
@@ -97,10 +110,12 @@ class TypesUniverse(Preorder):
         if isinstance(A, FinitePoset) and isinstance(B, FinitePoset):
             # A <= B if
             # TODO: check inclusion
-            if A.get_elements() == B.get_elements():
-                # TODO: check relations!
-                return True
-            raise NotImplementedError
+            mcdp_dev_warning('XXX check relations')
+            SB = set(B.get_elements())
+            SA = set(A.get_elements())
+            if not SA.issubset(SB):
+                msg = 'The posets do not have the same elements '
+                raise_desc(NotLeq, msg, SA=SA, SB=SB)
             return
 
 

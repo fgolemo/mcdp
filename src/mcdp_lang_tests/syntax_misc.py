@@ -282,4 +282,13 @@ def check_lang52():
 
 @comptest
 def check_lang53():
+    assert_parsable_to_connected_ndp("""
+    approx_lower(10, mcdp {
+    provides a [s]
+    
+    requires x [s]
+    requires y [s]
+    
+    x + y >= a
+})""")
     pass

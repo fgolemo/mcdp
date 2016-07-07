@@ -55,10 +55,12 @@ def eval_lfunction(lf, context):
         from mcdp_lang.eval_uncertainty import eval_lfunction_Uncertain
         from mcdp_lang.eval_lfunction_imp_label_index import eval_lfunction_label_index
 
+        from mcdp_lang.eval_lfunction_imp_label_index import eval_lfunction_tupleindexfun
         cases = {
             CDP.UncertainFun: eval_lfunction_Uncertain,
             CDP.DisambiguationFun: eval_lfunction_disambiguation,
             CDP.FunctionLabelIndex: eval_lfunction_label_index,
+            CDP.TupleIndexFun: eval_lfunction_tupleindexfun,
         }
 
         for klass, hook in cases.items():

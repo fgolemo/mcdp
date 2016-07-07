@@ -70,6 +70,8 @@ class SyntaxIdentifiers():
         'Int',
         'pow',
         'approx',
+        'approx_lower',
+        'approx_upper',
         'Top',
         'Bottom',
         'finite_poset',
@@ -347,6 +349,7 @@ class Syntax():
     solve_model = sp(L('solve') + SLPAR + constant_value + SCOMMA + ndpt_dp_rvalue + SRPAR,
                lambda t: CDP.SolveModel(keyword=t[0], f=t[1], model=t[2]))
 
+
     tuple_of_constants = sp(OPEN_BRACE + O(constant_value +
                             ZeroOrMore(COMMA + constant_value)) + CLOSE_BRACE,
                             lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1], where=t[0].where), t[-1]))
@@ -408,15 +411,18 @@ class Syntax():
     rvalue_tuple_indexing = sp(TAKE + SLPAR + rvalue + SCOMMA +
                                   SyntaxBasics.integer + SRPAR,
                                lambda t: CDP.TupleIndex(keyword=t[0], value=t[1], index=t[2]))
+
+    TAKEF = sp(L('take') | L('`'), lambda t: CDP.TakeKeyword(t[0]))
+    lf_tuple_indexing = sp(TAKEF + SLPAR + fvalue + SCOMMA +
+                                  SyntaxBasics.integer + SRPAR,
+                               lambda t: CDP.TupleIndexFun(keyword=t[0], value=t[1], index=t[2]))
+
     ICOMMA = L('..')
     index_label = sp(get_idn(), lambda t: CDP.IndexLabel(t[0]))
     # rvalue instead of rvalue_new_function
     rvalue_label_indexing = sp(rvalue_new_function + S(ICOMMA) + index_label,
                                lambda t: CDP.ResourceLabelIndex(rvalue=t[0], label=t[1]))
 
-#     lf_tuple_indexing = sp(TAKE + SLPAR + fvalue + SCOMMA +
-#                                   SyntaxBasics.integer + SRPAR,
-#                                lambda t: CDP.TupleIndex(value=t[0], index=t[1]))
 
     fvalue_disambiguation_tag = sp(Combine(L('(') + L('f') + L(')')),
                                    lambda t: CDP.DisambiguationFunTag(t[0]))
@@ -633,6 +639,17 @@ class Syntax():
     ndpt_canonical = sp(CANONICAL - ndpt_dp_rvalue,
                             lambda t: CDP.MakeCanonical(t[0], t[1]))
 
+    APPROX_LOWER = sp(L('approx_lower'), lambda t: CDP.ApproxLowerKeyword(t[0]))
+    ndpt_approx_lower = sp(APPROX_LOWER - SLPAR + SyntaxBasics.integer +
+                            SCOMMA + ndpt_dp_rvalue + SRPAR,
+                       lambda t: CDP.ApproxLower(t[0], t[1], t[2]))
+
+    APPROX_UPPER = sp(L('approx_upper'), lambda t: CDP.ApproxUpperKeyword(t[0]))
+    ndpt_approx_upper = sp(APPROX_UPPER - SLPAR + SyntaxBasics.integer +
+                            SCOMMA + ndpt_dp_rvalue + SRPAR,
+                       lambda t: CDP.ApproxUpper(t[0], t[1], t[2]))
+
+
     template_load = sp(LOAD - (ndpname | SLPAR - ndpname - SRPAR),   
                        lambda t: CDP.LoadTemplate(t[0], t[1]))
     
@@ -665,6 +682,8 @@ class Syntax():
         ndpt_template |
         ndpt_compact |
         ndpt_catalogue_dp |
+        ndpt_approx_lower |
+        ndpt_approx_upper |
         ndpt_approx |
         ndpt_coproduct_with_names |
         ndpt_flatten |
@@ -706,13 +725,13 @@ class Syntax():
         fvalue_uncertain ^
         fvalue_disambiguation ^
         fvalue_label_indexing ^
-#         lf_tuple_indexing ^
+        lf_tuple_indexing ^
         (SLPAR - (constant_value ^ fvalue_simple ^ fvalue_fancy ^
                       fvalue_new_resource ^ fvalue_new_resource2 ^ fvalue_maketuple
                       ^ fvalue_uncertain
                       ^ fvalue_disambiguation
                       ^ fvalue_label_indexing
-#                       ^ lf_tuple_indexing
+                    ^ lf_tuple_indexing
                       ) - SRPAR))
 
     fvalue << operatorPrecedence(fvalue_operand, [

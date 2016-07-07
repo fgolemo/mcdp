@@ -20,6 +20,8 @@ from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
     get_name_for_fun_node, get_name_for_res_node)
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
+from mcdp_lang.eval_ndp_approx import eval_ndp_approx_lower, \
+    eval_ndp_approx_upper
 
 
 
@@ -98,6 +100,8 @@ def eval_ndp(r, context):  # @UnusedVariable
             CDP.CodeSpec: eval_ndp_code_spec,
             CDP.MakeCanonical: eval_ndp_makecanonical,
             CDP.Specialize: eval_ndp_specialize,
+            CDP.ApproxLower: eval_ndp_approx_lower,
+            CDP.ApproxUpper: eval_ndp_approx_upper,
         }
         
         for klass, hook in cases.items():
@@ -105,6 +109,8 @@ def eval_ndp(r, context):  # @UnusedVariable
                 return hook(r, context)
 
     raise_desc(DPInternalError, 'Invalid dprvalue.', r=r)
+
+
 
 def eval_ndp_specialize(r, context):
     assert isinstance(r, CDP.Specialize)

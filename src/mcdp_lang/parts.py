@@ -28,6 +28,11 @@ class CDPLanguage():
     Compact = namedtuplewhere('Compact', 'keyword dp_rvalue')
     Flatten = namedtuplewhere('Flatten', 'keyword dp_rvalue')
 
+    ApproxUpperKeyword = namedtuplewhere('ApproxUpperKeyword', 'keyword')
+    ApproxLowerKeyword = namedtuplewhere('ApproxLowerKeyword', 'keyword')
+    ApproxUpper = namedtuplewhere('ApproxUpper', 'keyword level ndp')
+    ApproxLower = namedtuplewhere('ApproxLower', 'keyword level ndp')
+
     DPInstance = namedtuplewhere('DPInstance', 'keyword dp_rvalue')
     DPInstanceFromLibrary = namedtuplewhere('DPInstanceFromLibrary', 'keyword dpname')
 
@@ -192,6 +197,7 @@ class CDPLanguage():
     TakeKeyword = namedtuplewhere('TakeKeyword', 'keyword')
 
     TupleIndex = namedtuplewhere('TupleIndex', 'keyword value index')
+    TupleIndexFun = namedtuplewhere('TupleIndexFun', 'keyword value index')
 
     SpaceCustomValue = namedtuplewhere('SpaceCustomValue', 'space keyword custom_string')
 

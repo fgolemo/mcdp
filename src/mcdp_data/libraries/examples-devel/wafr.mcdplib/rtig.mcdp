@@ -1,11 +1,11 @@
 mcdp { 
-        plutonium_pellet = new PlutoniumPellet
-        thermocouple = new Thermocouple
+    plutonium_pellet = new PlutoniumPellet
+    thermocouple = new Thermocouple
 
-        heat provided by plutonium_pellet >= heat required by thermocouple
+    heat provided by plutonium_pellet >= heat required by thermocouple
 
-        requires plutonium for plutonium_pellet
-        provides power_profile <= thermocouple.power
-        requires cost >= thermocouple.cost
-        requires mass >= thermocouple.mass + plutonium_pellet.mass
+    requires plutonium for plutonium_pellet
+    provides power_profile <= thermocouple.power
+    requires cost >= thermocouple.cost
+    requires mass >= thermocouple.mass + plutonium_pellet.mass
 }

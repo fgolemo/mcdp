@@ -6,7 +6,7 @@ from mcdp_library import MCDPLibrary
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from mcdp_report.html import ast_to_html
 from mcdp_web.utils import (ajax_error_catch, create_image_with_string,
-    format_exception_for_ajax_response, png_error_catch, response_image)
+    format_exception_for_ajax_response, response_image)
 from mcdp_web.utils.response import response_data
 from mocdp import logger
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
@@ -223,7 +223,7 @@ class AppEditorFancyGeneric():
             from mcdp_web.images.images import get_mime_for_format
             mime = get_mime_for_format(data_format)
             return response_data(request, data, mime)
-        return png_error_catch(go, request)
+        return self.png_error_catch2(request, go)
 
 
     def view_new_model_generic(self, request, spec):
@@ -263,11 +263,11 @@ class AppEditorFancyGeneric():
             raise HTTPFound(url_edit)
 
 
-def get_png_data_unavailable(library, name, x, data_format):
+def get_png_data_unavailable(library, name, x, data_format):  # @UnusedVariable
     s = str(x)
     return create_image_with_string(s, size=(512, 512), color=(0, 0, 255))
 
-def get_png_data_template(library, name, x, data_format):
+def get_png_data_template(library, name, x, data_format):  # XXX
     assert isinstance(x, TemplateForNamedDP)
 
     ndp = x.get_template_with_holes()

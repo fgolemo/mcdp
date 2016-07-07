@@ -2,13 +2,14 @@
 from .utils import safe_makedirs
 from abc import ABCMeta, abstractmethod
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, indent
 from mcdp_posets import (NotLeq, PosetProduct, Rcomp, UpperSet, UpperSets,
     get_types_universe)
 from mocdp.drawing import plot_upset_R2
 from reprep.config import RepRepDefaults
 import functools
 import os
+import traceback
 
 
 extra_space_finite = 0.025
@@ -119,12 +120,20 @@ def get_best_plotter(space):
     return p[0][1]
 
 def get_plotters(plotters, space):
+    available = []
+    errors = []
     for name, plotter in plotters.items():
         try:
             plotter.check_plot_space(space)
-            yield name, plotter
-        except NotPlottable:
-            pass
+            available.append((name, plotter))
+        except NotPlottable as e:
+            errors.append((name, e))
+    if available:
+        return available
+    msg = 'Could not find any plotter.'
+    for name, e in errors:
+        msg += '%r:\n%s' % (name, indent(traceback.format_exc(e), '  '))
+    raise_desc(NotPlottable, msg)
 
 
 def generic_try_plotters(r, plotters, space, sequence,
@@ -317,6 +326,44 @@ class PlotterUR(Plotter):
         plot_upset_R2(pylab, v, axis, extra_space_shadow=extra_space_finite,
                       color_shadow=color_shadow, markers=markers)
 
+class Plotter_Tuple2_UR2(Plotter):
+    """ Plots a tuple of ur2 as min/max bounds """
+    def __init__(self):
+        self.p = PlotterUR2()
+
+    def check_plot_space(self, space):
+        tu = get_types_universe()
+        print('testing %r' % space)
+        if not (isinstance(space, PosetProduct) and len(space.subs) == 2):
+            msg = 'I can only plot 2-tuples of upper sets.'
+            raise_desc(NotPlottable, msg, space=space)
+
+        tu.check_equal(space[0], space[1])
+
+        try:
+            self.p.check_plot_space(space[0])
+        except NotPlottable as e:
+            print('didnt like: %s' % e)
+            msg = 'It is a 2-tuple, but cannot plot inside. '
+            raise_wrapped(NotPlottable, e, msg, compact=True)
+
+        print('ok!')
+
+    def axis_for_sequence(self, space, seq):
+        s = []
+        for a, b in seq:
+            s.append(a)
+            s.append(b)
+        P = space.subs[0]
+        return self.p.axis_for_sequence(P, s)
+    
+    def plot(self, pylab, axis, space, value, params={}):
+        v1, v2 = value
+        params1 = dict(color_shadow=[1.0, 0.8, 0.8], markers='k.')
+        params2 = dict(color_shadow=[0.8, 0.8, 1.0], markers='g.')
+        P = space.subs[0]
+        self.p.plot(pylab, axis, P, v1, params1)
+        self.p.plot(pylab, axis, P, v2, params2)
 
 class PlotterUR2(Plotter):
 
@@ -388,7 +435,7 @@ class PlotterUR2(Plotter):
 
     def plot(self, pylab, axis, space, value, params={}):
         params0 = dict(color_shadow=[1.0, 0.8, 0.8], markers='k.',
-                       markers_params={})
+                       markers_params={})  # XXX markers_params?
         params0.update(params)
 
         color_shadow = params0['color_shadow']
@@ -558,6 +605,7 @@ def min_comp(xs, d):
 
 plotters = {
        'UR2': PlotterUR2(),
+        'Tuple2_UR2': Plotter_Tuple2_UR2(),
        'URRpR_12': PlotterURRpR_12(),
        'URRpR_13': PlotterURRpR_13(),
        'URRpR_23': PlotterURRpR_23(),

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 from contracts import contract
 from mcdp_library import MCDPLibrary
@@ -8,6 +9,8 @@ from mcdp_web.editor_fancy.app_editor_fancy_generic import AppEditorFancyGeneric
 from mcdp_web.images.images import WebAppImages, get_mime_for_format
 from mcdp_web.interactive.app_interactive import AppInteractive
 from mcdp_web.qr.app_qr import AppQR
+from mcdp_web.renderdoc.main import render_complete
+from mcdp_web.renderdoc.markd import render_markdown
 from mcdp_web.solver.app_solver import AppSolver
 from mcdp_web.solver2.app_solver2 import AppSolver2
 from mcdp_web.visualization.app_visualization import AppVisualization
@@ -19,6 +22,7 @@ from quickapp import QuickAppBase
 from wsgiref.simple_server import make_server
 import mocdp
 import os
+from contracts.utils import indent
 
 
 __all__ = [
@@ -46,7 +50,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         # name -> dict(desc: )
         self.views = {}
-
+        self.exceptions = []
         
         self.add_model_view('syntax', 'Simple display')
         self.add_model_view('edit_fancy', 'Fancy editor')
@@ -108,24 +112,65 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         self._refresh_library(request)
         raise HTTPFound(request.referrer)
 
+    def view_not_found(self, request):
+        url = request.host_url
+        referrer = request.referrer
+        self.exceptions.append('Not found %s from %s' % (url, referrer))
+        return {'url': url}
+
+    def view_exceptions_occurred(self, request):
+        import traceback
+        exceptions = []
+        for e in self.exceptions:
+            exceptions.append(e)
+        return {'exceptions': exceptions}
+
+
     def view_exception(self, exc, _request):
         import traceback
-
         compact = (DPSemanticError, DPSyntaxError)
-
         if isinstance(exc, compact):
             s = str(exc)
         else:
             s = traceback.format_exc(exc)
         s = s.decode('utf-8')
+        # add to state so that it can be visualized in /exceptions
+        self.exceptions.append(s)
         logger.error(s)
         return {'exception': s}
     
-    def view_docs(self, request):
+    def png_error_catch2(self, request, func):
+        """ func is supposed to return an image response.
+            If it raises an exception, we create
+            an image with the error and then we add the exception
+            to the list of exceptions. """
+        try:
+            return func()
+        except Exception as e:
+            import traceback
+            s = traceback.format_exc(e)
+
+            try:
+                logger.error(s)
+            except UnicodeEncodeError:
+                pass
+
+            s = str(s)
+            url = request.host_url
+            referrer = request.referrer
+            n = 'Error during rendering an image.'
+            n+= '\n url: %s' % url
+            n+= '\n referrer: %s' % referrer
+            n += '\n' + indent(s, '| ')
+            self.exceptions.append(n)
+            from mcdp_web.utils.image_error_catch_imp import response_image
+            return response_image(request, s)
+
+    def view_docs(self, request):  # XXX check this
         docname = str(request.matchdict['document'])  # unicode
         # from pkg_resources import resource_filename  # @UnresolvedImport
-        html = self.render_markdown_doc(docname)
-        res = {'contents': html}
+        res = self.render_markdown_doc(docname)
+
         res.update(self.get_jinja_hooks(request))
         return res
 
@@ -135,25 +180,9 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         f = os.path.join(docs, '%s.md' % docname)
         import codecs
         data = codecs.open(f, encoding='utf-8').read()
-        html = self.render_markdown(data)
+        html = render_markdown(data)
         # print html
         return {'contents': html}
-
-    def render_markdown(self, s):
-        """ Returns an HTML string """
-        import markdown  # @UnresolvedImport
-
-        extensions = [
-            'markdown.extensions.smarty',
-            'markdown.extensions.toc',
-            'markdown.extensions.attr_list',
-            # 'markdown.extensions.extra',
-            'markdown.extensions.fenced_code',
-            'markdown.extensions.admonition',
-            'markdown.extensions.tables',
-        ]
-        html = markdown.markdown(s, extensions)
-        return html
 
     # This is where we keep all the URLS
     def get_lmv_url(self, library, model, view):
@@ -298,6 +327,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         filename = '%s.%s' % (document, MCDPLibrary.ext_doc_md)
         return l.file_exists(filename)
 
+    @contract(returns=str)
     def _render_library_doc(self, request, document):
         import codecs
         l = self.get_library(request)
@@ -306,10 +336,9 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         f = l._get_file_data(filename)
         realpath = f['realpath']
         data = codecs.open(realpath, encoding='utf-8').read()
-        html = self.render_markdown(data)
 
-        from mcdp_web.highlight import html_interpret
-        return html_interpret(l, html)
+        html = render_complete(library=l, s=data, raise_errors=False)
+        return html
 
     def view_library_doc(self, request):
         """ '/libraries/{library}/{document}.html' """
@@ -322,7 +351,6 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         res['title'] = document
         res['navigation'] = self.get_navigation_links(request)
         res['print'] = bool(request.params.get('print', False))
-        print request.params, res['print']
         res.update(self.get_jinja_hooks(request))
         return res
 
@@ -336,6 +364,10 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         content_type = get_mime_for_format(ext)
         from mcdp_web.utils.response import response_data
         return response_data(request, data, content_type)
+
+    def exit(self, request):  # @UnusedVariable
+        setattr(self.server, '_BaseServer__shutdown_request', True)
+        return {}
 
     def serve(self):
         config = Configurator()
@@ -380,9 +412,17 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         config.add_view(self.view_exception, context=Exception, renderer='exception.jinja2')
 
+        config.add_route('exit', '/exit')
+        config.add_view(self.exit, route_name='exit', renderer='empty.jinja2')
+
+        config.add_route('exceptions', '/exceptions')
+        config.add_view(self.view_exceptions_occurred, route_name='exceptions', renderer='json')
+
+        config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
+
         app = config.make_wsgi_app()
-        server = make_server('0.0.0.0', 8080, app)
-        server.serve_forever()
+        self.server = make_server('0.0.0.0', 8080, app)
+        self.server.serve_forever()
 
 
 def load_libraries(dirname):
@@ -399,7 +439,7 @@ def load_libraries(dirname):
         library_name = os.path.splitext(os.path.basename(path))[0]
 
         l = MCDPLibrary()
-        cache_dir = os.path.join(path, '_mcdpweb_cache')
+        cache_dir = os.path.join(path, '_cached/mcdpweb_cache')
         l.use_cache_dir(cache_dir)
         l.add_search_dir(path)
 

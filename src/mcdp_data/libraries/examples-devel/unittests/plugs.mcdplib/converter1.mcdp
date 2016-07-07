@@ -1,4 +1,4 @@
-# This converts from European to American
+# This converts from TypeC to TypeL
 mcdp {
     provides out [`power]
     requires in  [`power] 
@@ -7,11 +7,9 @@ mcdp {
     # This device costs $5 
     cost >= 5 USD
 
-    # We require that the input is european or more
-    # and that it provides a good amount of power (take)
-    req_amperes = take(out, 1)
-    in >= < `plug_types : european, req_amperes >
-
-    # We can only provide the american output
-    take(out, 0) <= `plug_types : american 
+    take(in,  0) >= `socket_type : TypeL
+    take(out, 0) <= `socket_type : TypeC 
+ 
+    take(in, 1) >=  take(out, 1) # voltages
+    take(in, 2) >=  take(out, 2) # amperes
 }

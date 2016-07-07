@@ -6,6 +6,7 @@ from mcdp_dp import Constant
 from mcdp_posets.types_universe import get_types_universe
 from mcdp_dp.conversion import get_conversion
 from mcdp_dp.dp_limit import Limit
+from mcdp_dp.dp_constant import ConstantMinimals
 
 
 
@@ -102,10 +103,21 @@ def create_operation_lf(context, dp, functions, name_prefix, op_prefix, res_pref
     res = context.make_function(name, name_result)
     return res
 
+
 @contract(v=ValueWithUnits)
 def get_valuewithunits_as_resource(v, context):
     dp = Constant(R=v.unit, value=v.value)
-    nres = context.new_res_name('c')
+    nres = context.new_res_name('_c')
+    ndp = dpwrap(dp, [], nres)
+    context.add_ndp(nres, ndp)
+    return context.make_resource(nres, nres)
+
+def get_constant_minimals_as_resources(R, values, context):
+    for v in values:
+        R.belongs(v)
+
+    dp = ConstantMinimals(R=R, values=values)
+    nres = context.new_res_name('_c')
     ndp = dpwrap(dp, [], nres)
     context.add_ndp(nres, ndp)
     return context.make_resource(nres, nres)
@@ -113,8 +125,8 @@ def get_valuewithunits_as_resource(v, context):
 @contract(v=ValueWithUnits)
 def get_valuewithunits_as_function(v, context):
     dp = Limit(v.unit, v.value)
-    n = context.new_name('lim')
-    sn = context.new_fun_name('l')
+    n = context.new_name('_lim')
+    sn = context.new_fun_name('_l')
     ndp = dpwrap(dp, sn, [])
     context.add_ndp(n, ndp)
     return context.make_function(n, sn)

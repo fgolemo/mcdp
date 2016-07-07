@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from .query_interpretation import (interpret_string,
-    solve_interpret_query_strings)
+from .query_interpretation import (interpret_string,)
 from .utils_mkdir import mkdirs_thread_safe
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp.dp_transformations import get_dp_bounds
@@ -10,6 +9,7 @@ from mcdp_posets import NotEqual, PosetProduct, UpperSets, get_types_universe
 from mcdp_report.report import report_dp1, report_ndp1
 from reprep import Report
 import os
+from mcdp_posets.types_universe import express_value_in_isomorphic_space
 
 
 class ExpectationsNotMet(Exception):
@@ -29,18 +29,20 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
 
     logger.info('Using output dir %r' % out)
 
-    _library, basename, ndp = solve_read_model(dirs=config_dirs, param=model_name)
+    library, basename, ndp = solve_read_model(dirs=config_dirs, param=model_name)
 
     basename, dp = solve_get_dp_from_ndp(basename=basename, ndp=ndp,
                                    lower=lower, upper=upper)
 
-    fnames = ndp.get_fnames()
 
     F = dp.get_fun_space()
     R = dp.get_res_space()
     UR = UpperSets(R)
 
-    fg = solve_interpret_query_strings(query_strings=query_strings, fnames=fnames, F=F)
+    query = " ".join(query_strings)
+    c = library.parse_constant(query)
+
+    fg = express_value_in_isomorphic_space(F, c.value, c.unit)
 
     logger.info('query: %s' % F.format(fg))
 

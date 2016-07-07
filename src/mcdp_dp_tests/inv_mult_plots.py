@@ -121,7 +121,7 @@ def check_invmult2_report():
     # S: 𝟙                                                                                                                                  roc
     if not isinstance(S, UpperSets):
         mcdp_dev_warning('This test worked only with the loop0 definiton in which S was an upper set')
-        return
+        return r
         
     print('S: %s' % S)
     s0 = S.get_bottom()

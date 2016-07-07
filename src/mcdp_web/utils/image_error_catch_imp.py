@@ -1,23 +1,23 @@
 from .response import response_data
 import traceback
 
-
-
-def png_error_catch(f, request):
-    from mocdp import logger
-    try:
-        return f()
-    except Exception as e:
-        s = traceback.format_exc(e)
-
-        try:
-            logger.error(s)
-        except UnicodeEncodeError:
-            pass
-
-        s = str(s)
-
-        return response_image(request, s)
+#
+#
+# def png_error_catch(f, request):
+#     from mocdp import logger
+#     try:
+#         return f()
+#     except Exception as e:
+#         s = traceback.format_exc(e)
+#
+#         try:
+#             logger.error(s)
+#         except UnicodeEncodeError:
+#             pass
+#
+#         s = str(s)
+#
+#         return response_image(request, s)
 
 def response_image(request, s):
 

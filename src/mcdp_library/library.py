@@ -248,7 +248,8 @@ class MCDPLibrary():
                 match = fn
                 break
         else:
-            available = sorted(self.file_to_contents)
+            ext = os.path.splitext(basename)[1].replace('.', '')
+            available = sorted(self._list_with_extension(ext))
             raise_desc(DPSemanticError, 'Could not find file in library.',
                        filename=basename, available=available)
         found = self.file_to_contents[match]

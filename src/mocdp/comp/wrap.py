@@ -14,7 +14,9 @@ __all__ = [
 
 class SimpleWrap(NamedDP):
     
+    @contract(dp=PrimitiveDP)
     def __init__(self, dp, fnames, rnames, icon=None):
+        assert isinstance(dp, PrimitiveDP), type(dp)
         self.dp = dp
         # _ , self.dp = get_conftools_dps().instance_smarter(dp)
 

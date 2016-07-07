@@ -45,7 +45,7 @@ The following is a minimal example of a complete MCDP.
 We have given hard bounds to both ``capacity`` and ``mass``.
 
 <table><tr><td>
-<pre class='mcdp' id='model2' style='width: 25ex'>
+<pre class='mcdp' id='model2'>
 mcdp {
 	provides capacity [J]
 	requires mass [g]

@@ -1,27 +1,26 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc
-from decent_params import UserError
 from mcdp_lang.eval_constant_imp import eval_constant
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_posets import PosetProduct, get_types_universe
 from mocdp.comp.context import Context
-
-def solve_interpret_query_strings(query_strings, fnames, F):
-    if len(query_strings) > 1:
-        fg = interpret_params(query_strings, fnames, F)
-    elif len(query_strings) == 1:
-        p = query_strings[0]
-        fg = interpret_params_1string(p, F)
-    else:
-        tu = get_types_universe()
-        if tu.equal(F, PosetProduct(())):
-            fg = ()
-        else:
-            msg = 'Please specify query parameter.'
-            raise_desc(UserError, msg, F=F)
-    return fg
+#
+# def solve_interpret_query_strings(query_strings, fnames, F):
+#     if len(query_strings) > 1:
+#         fg = interpret_params(query_strings, fnames, F)
+#     elif len(query_strings) == 1:
+#         p = query_strings[0]
+#         fg = interpret_params_1string(p, F)
+#     else:
+#         tu = get_types_universe()
+#         if tu.equal(F, PosetProduct(())):
+#             fg = ()
+#         else:
+#             msg = 'Please specify query parameter.'
+#             raise_desc(UserError, msg, F=F)
+#     return fg
 
 @contract(params="seq(str)")
 def interpret_params(params, fnames, F):
@@ -57,8 +56,9 @@ def interpret_params(params, fnames, F):
     return fg
 
 @contract(p="str")
-def interpret_params_1string(p, F):
-    context = Context()
+def interpret_params_1string(p, F, context=None):
+    if context is None:
+        context = Context()
     res = parse_wrap(Syntax.constant_value, p)[0]
     vu = eval_constant(res, context)
 

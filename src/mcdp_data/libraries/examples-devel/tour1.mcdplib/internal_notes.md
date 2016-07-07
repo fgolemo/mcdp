@@ -78,3 +78,18 @@ mcdp {
 
 <pre class='ndp_graph_expand' direction='TB'>`model</pre>
 
+
+
+### plot_generic_value
+
+~~~
+<img class='plot_value_generic' style='width: 10em'>upperclosure{<1 g, 0m>, <2 g, 1m>} </img>
+~~~
+
+<img class='plot_value_generic' style='width: 10em'>upperclosure{<1 g, 0m>, <2 g, 1m>} </img>
+
+
+<img class='plot_value_generic'>
+&lt;upperclosure {<0g, 1J>}, upperclosure {<1g, 0.5J>}&gt;
+</img>
+

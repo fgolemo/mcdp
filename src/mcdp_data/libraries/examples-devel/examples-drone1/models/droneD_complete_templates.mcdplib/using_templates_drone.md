@@ -1,0 +1,3 @@
+Example of using interfaces
+---------------------------
+

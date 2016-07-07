@@ -1,22 +1,122 @@
 from bs4 import BeautifulSoup
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, raise_wrapped
+from mcdp_lang.syntax import Syntax
+from mcdp_library.library import MCDPLibrary
+from mcdp_report.generic_report_utils import (
+    NotPlottable, enlarge, get_plotters, plotters)
 from mcdp_report.html import ast_to_html
 from mcdp_web.images.images import (ndp_graph_enclosed, ndp_graph_expand,
     ndp_graph_normal, ndp_graph_templatized)
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
+from reprep import Report
 import base64
-from mcdp_library.library import MCDPLibrary
-from mcdp_lang.syntax import Syntax
 import traceback
 
-def html_interpret(library, html):
+
+def html_interpret(library, html, raise_errors=False):
     # clone linrary?
     library = library.clone()
     load_fragments(library, html, realpath='unavailable')
     html = highlight_mcdp_code(library, html)
     html = make_figures(library, html,
-                        raise_error_dp=False, raise_error_others=False)
+                        raise_error_dp=raise_errors, raise_error_others=raise_errors)
+    html = make_plots(library, html, raise_errors=raise_errors)
     return html.decode('utf-8')
+
+def make_image_tag_from_png(f):
+    soup = BeautifulSoup("", 'html.parser')
+    def ff(*args, **kwargs):
+        png = f(*args, **kwargs)
+        rendered = create_img_png_base64(soup, png)
+        return rendered
+    return ff
+
+# def get_string_or_cdata(tag):
+#     print tag
+#     if tag.string is not None:
+#         return tag.string
+#     for cd in tag.findAll(text=True):
+#         if isinstance(cd, bs4.CData):
+#             print 'CData value: %r' % cd
+#             return cd
+#     assert False
+
+def make_plots(library, frag, raise_errors):
+    """
+        Looks for things like:
+        
+        
+        <img class="value_plot_generic">VALUE</img>
+        
+        <img class="value_plot_generic" id='value"/>
+    
+    """
+    soup = BeautifulSoup(frag, 'html.parser')
+
+    def go(selector, plotter):
+        for tag in soup.select(selector):
+
+#             source_code = get_string_or_cdata(tag)
+            # load value with units in vu
+            if tag.string is None:
+                if not tag.has_attr('id'):
+                    msg = "If <img> is empty then it needs to have an id."
+                    raise_desc(ValueError, msg, tag=str(tag))
+                # load it
+                vu = library.load_constant(tag['id'])
+            else:
+                source_code = tag.string
+                vu = library.parse_constant(source_code)
+
+            try:
+                rendered = plotter(tag, vu)
+
+                if tag.has_attr('style'):
+                    style = tag['style']
+                else:
+                    style = ''
+
+                if style:
+                    rendered['style'] = style
+                tag.replaceWith(rendered)
+
+            except DPSyntaxError as e:
+                print(e)  # XXX
+                t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
+                t.string = str(e)
+                tag.insert_after(t)
+            except Exception as e:
+                if raise_errors:
+                    raise
+                t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
+                t.string = traceback.format_exc(e)
+                tag.insert_after(t)
+    
+    @make_image_tag_from_png
+    def plot_value_generic(tag, vu):
+        r = Report()
+        f = r.figure()
+        # generic_plot(f, space=vu.unit, value=vu.value)
+        try:
+            available = dict(get_plotters(plotters, vu.unit))
+            assert available
+        except NotPlottable as e:
+            msg = 'No plotters available for %s' % vu.unit
+            raise_wrapped(ValueError, e, msg, compact=True)
+
+        plotter = list(available.values())[0]
+
+        axis = plotter.axis_for_sequence(vu.unit, [vu.value])
+        axis = enlarge(axis, 0.15)
+        with f.plot('generic') as pylab:
+            plotter.plot(pylab, axis, vu.unit, vu.value, params={})
+            pylab.axis(axis)
+        png_node = r.resolve_url('png')
+        png = png_node.get_raw_data()
+        return  png
+    
+    go("img.plot_value_generic", plot_value_generic)
+    return str(soup)
 
 def load_fragments(library, frag, realpath):
     """
@@ -84,7 +184,7 @@ def highlight_mcdp_code(library, frag):
             if tag.string is None:
                 if not tag.has_attr('id'):
                     msg = "If <pre> is empty then it needs to have an id."
-                    raise_desc(ValueError, msg, tag=tag)
+                    raise_desc(ValueError, msg, tag=str(tag))
                 # load it
                 basename = '%s.%s' % (tag['id'], extension)
                 data = library._get_file_data(basename)
@@ -114,7 +214,7 @@ def highlight_mcdp_code(library, frag):
                 if tag.has_attr('label'):
                     max_len = max(max_len, len(tag['label']) + 6)
 
-                style = 'width: %dex;' % (max_len + 3)
+                style = 'width: %dch;' % (max_len + 3)
                 if tag.has_attr('style'):
                     style = style + tag['style']
 
@@ -225,16 +325,17 @@ def make_figures(library, frag, raise_error_dp, raise_error_others):
                     yourname=yourname, klass='ndp_graph_templatized_labeled')
 
     
-    def func3(tag):
+    def func3(tag):  # ndp_graph_enclosed
         source_code = tag.string
         source_code = str(source_code)  # unicode
         ndp = library.parse_ndp(source_code)
         yourname = ''
 
         direction = str(tag.get('direction', default_direction))
-
+        enclosed = bool_from_string(tag.get('enclosed', 'True'))
+#         print "enclosed: %r %r" % (tag.get('enclosed', False), enclosed)
         return call(ndp_graph_enclosed, library=library, ndp=ndp, style=STYLE_GREENREDSYM,
-                                 yourname=yourname,
+                                 yourname=yourname, enclosed=enclosed,
                                  direction=direction, klass='ndp_graph_enclosed')
 
 
@@ -266,5 +367,13 @@ def create_img_png_base64(soup, png, **attrs):
     src = 'data:image/png;base64,%s' % encoded
     return soup.new_tag('img', src=src, **attrs)
 
-    
+def bool_from_string(b):
+    yes = ['True', 'true', '1', 'yes']
+    no = ['False', 'false', '0', 'no']
+    if b in yes:
+        return True
+    if b in no:
+        return False
+    msg = 'Cannot interpret string as boolean.'
+    raise_desc(ValueError, msg, b=b)
     

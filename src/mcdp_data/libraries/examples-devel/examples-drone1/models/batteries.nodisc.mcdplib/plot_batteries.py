@@ -10,7 +10,7 @@ def go():
         "capacity": (np.linspace(50, 3000, 10), "Wh"),
         "missions": ( 1000, "[]"),
     }
-    result_like = dict(maintenance="R", cost="CHF", mass='kg')
+    result_like = dict(maintenance="R", cost="USD", mass='kg')
     what_to_plot_res = result_like
     what_to_plot_fun = dict(capacity="Wh", missions="[]")
 
@@ -34,7 +34,7 @@ def go2():
         "capacity": (np.linspace(50, 3000, 10), "Wh"),
         "missions": (1000, "[]"),
     }
-    result_like = dict(cost="CHF", mass='kg')
+    result_like = dict(cost="USD", mass='kg')
     what_to_plot_res = result_like
     what_to_plot_fun = dict(capacity="Wh", missions="[]")
 

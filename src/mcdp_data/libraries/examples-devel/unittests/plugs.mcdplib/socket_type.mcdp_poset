@@ -1,0 +1,19 @@
+finite_poset {
+  TypeA TypeB TypeC TypeD TypeE TypeF  TypeG  TypeH  
+  TypeI2 TypeI3 TypeJ TypeK TypeL TypeM TypeN  TypeO
+
+  # if it fits in A, it also fits in B
+  TypeA <= TypeB
+  TypeC <= TypeD   
+  TypeE <= TypeD   
+  TypeF <= TypeD   
+  TypeC <= TypeE
+  TypeF <= TypeE
+  TypeC <= TypeH
+  TypeI2 <= TypeI3
+  TypeC <= TypeJ
+  TypeK <= TypeC
+  TypeC <= TypeL
+  TypeC <= TypeN
+  TypeC <= TypeO
+}

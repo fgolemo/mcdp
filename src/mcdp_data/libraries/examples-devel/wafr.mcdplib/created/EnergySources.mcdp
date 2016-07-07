@@ -34,6 +34,4 @@ mcdp {
   requires area, solar_radiation for battery_plus_solar
   requires plutonium >= 0 g
 }
-
-
 )

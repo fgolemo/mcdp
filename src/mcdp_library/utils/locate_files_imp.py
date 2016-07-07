@@ -12,7 +12,8 @@ __all__ = [
           pattern='str', followlinks='bool')
 def locate_files(directory, pattern, followlinks=True,
                  include_directories=False,
-                 include_files=True):
+                 include_files=True,
+                 normalize=True):
     # print('locate_files %r %r' % (directory, pattern))
     filenames = []
 
@@ -29,22 +30,23 @@ def locate_files(directory, pattern, followlinks=True,
                     filename = os.path.join(root, d)
                     filenames.append(filename)
 
+    if normalize:
+        real2norm = defaultdict(lambda: [])
+        for norm in filenames:
+            real = os.path.realpath(norm)
+            real2norm[real].append(norm)
+            # print('%s -> %s' % (real, norm))
 
-    real2norm = defaultdict(lambda: [])
-    for norm in filenames:
-        real = os.path.realpath(norm)
-        real2norm[real].append(norm)
-        # print('%s -> %s' % (real, norm))
+    #     for k, v in real2norm.items():
+    #         if len(v) > 1:
+    #             msg = 'In directory:\n\t%s\n' % directory
+    #             msg += 'I found %d paths that refer to the same file:\n'
+    #             for n in v:
+    #                 msg += '\t%s\n' % n
+    #             msg += 'refer to the same file:\n\t%s\n' % k
+    #             msg += 'I will silently eliminate redundancies.'
+    #             logger.warning(v)
 
-#     for k, v in real2norm.items():
-#         if len(v) > 1:
-#             msg = 'In directory:\n\t%s\n' % directory
-#             msg += 'I found %d paths that refer to the same file:\n'
-#             for n in v:
-#                 msg += '\t%s\n' % n
-#             msg += 'refer to the same file:\n\t%s\n' % k
-#             msg += 'I will silently eliminate redundancies.'
-#             logger.warning(v)
-
-    return list(real2norm.keys())
-
+        return list(real2norm.keys())
+    else:
+        return filenames
