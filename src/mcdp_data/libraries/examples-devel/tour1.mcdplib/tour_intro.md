@@ -9,11 +9,11 @@ mcdp {
 }
 </pre>
 
-That is an empty MCDP - no functionality or resources.
- 
+That is an empty MCDP - it has no functionality or resources.
+
 
 The interface of an MCDP is defined using
-the ``provides`` and ``requires`` keywords:
+the keywords ``provides`` and ``requires``:
 
 <pre class='mcdp' id='model1'>
 mcdp {
@@ -24,8 +24,8 @@ mcdp {
 }
 </pre>
 
-This defines a DP with one functionality, ``capacity``, measured in joules, 
-and one resource, ``mass``, measured in grams. 
+The code above defines an MCDP with one functionality, ``capacity``, measured in joules, 
+and one resource, ``mass``, measured in grams. ([See how to describe types.](types.html))
 
 Graphically, this is how the interface is represented:
 

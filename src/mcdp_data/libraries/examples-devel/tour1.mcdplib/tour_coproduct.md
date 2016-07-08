@@ -1,4 +1,4 @@
-# Coproducts (alternatives)
+## Coproducts (alternatives)
 
 
 Let us consider the model of a battery in which we take 

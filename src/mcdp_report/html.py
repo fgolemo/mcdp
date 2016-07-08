@@ -111,9 +111,9 @@ def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: 
     frag = ""
 
     if encapsulate_in_precode:
-        frag += '\n<pre><code>'
+        frag += '<pre><code>'
         frag += out
-        frag += '\n</code></pre>'
+        frag += '</code></pre>'
     else:
         frag += out
 

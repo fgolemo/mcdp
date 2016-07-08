@@ -8,11 +8,35 @@ all: tour.pdf
 tour.pdf: $(pdfs)
 	pdftk  $^ output $@
 
-$(tmpdir)/%.pdf: %.md
+$(tmpdir)/%.pdf: #: %.md
 	mkdir -p $(tmpdir)
-	wkhtmltopdf --print-media-type  http://127.0.0.1:8080/libraries/tour1/$*.html\?print=1 $@
+	rm -f $@
+	wkhtmltopdf --print-media-type http://127.0.0.1:8080/libraries/tour1/$*.html\?print=1\&strict=1 $@.tmp.pdf
+	mv $@.tmp.pdf $@
+	
+
+htmltmpdir=.html
+htmls=$(markdowns:%.md=$(htmltmpdir)/%.html)
+
+$(htmltmpdir)/%.html:
+	mkdir -p $(htmltmpdir)
+	cd $(htmltmpdir) && wget -k -p -nd -nc http://127.0.0.1:8080/libraries/tour1/$*.html\?print=1\&strict=1
+	mv $(htmltmpdir)/$*.html\?print=1\&strict=1 $(htmltmpdir)/$*.html
+
+manual: $(htmltmpdir)/manual.html
+
+$(htmltmpdir)/manual.html: $(htmls)
+	python ./join_manual.py $(htmls) > $@
+	python ./embed_images.py $(htmltmpdir)/manual.html
+	
+manual.pdf: 
+	wkhtmltopdf --print-media-type  $(htmltmpdir)/manual.html $@
+
+manual2:
+	python ./join_manual.py $(htmls) > $(htmltmpdir)/manual.html
+	python ./embed_images.py $(htmltmpdir)/manual.html
 
 clean:
 	rm -f $(pdfs)
-	rmdir $(tmpdir)
-
+	rm -f $(htmls)
+	#rmdir $(tmpdir)

@@ -53,12 +53,14 @@
 </head>
 <body class='markdown'>
 
+{% if not print %}
 <a class='make_button' href="/libraries/{{navigation['current_library']}}/list">
 	Library
 	 		 <span class="library_name">
 	 		 	{{navigation['current_library']}}
 	 		 </span>
 </a> 
+{% endif %}
 
 {% if print %}
 {{contents | safe }}

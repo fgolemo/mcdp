@@ -1,45 +1,46 @@
 
-**Definitions**
+**Basic Definitions**
+
+<a class='hidden' href='tour.html'/>
 
 [Basics](tour_intro.html)
-
 
 [Composition](tour_composition.html)
 
 [Catalogues](tour_catalogue.html)
 
-
-[Finite posets](tour_finite_posets.html)
-
-[Poset products](tour_poset_products.html)
-
-[Mixed posets](tour_mixed.html)
-
 [Coproducts](tour_coproduct.html)
 
-**Solution**
+[Templates](tour_templates.html)
 
-[Solving MCDPs](tour_solution.html)
+[Uncertainty](tour_uncertainty.html)
+
+**Language reference**
+
+<a class='hidden' href='reference.html'/>
+
+[**Posets**](types.html)
+
+[Scalars](types_scalar.html)
+[Discrete Posets](types_finite_posets.html)
+[Products](types_poset_products.html)
+
 
 
 **Approximations**
 
-[Upper/lower bounds of MCPDs](tour_approximations.html)
-
-
-**Uncertainty**
-
-[Uncertainty](tour_uncertainty.html)
-
-**Templating**
-
-[Defining templates](tour_templates.html)
+[Upper/lower bounds of MCPDs](adv_approximations.html)
 
 
 **Extended examples**
 
-[Space Rovers](space_rovers.html)
-[Plugs and converters](plugs.html)
+<a href='scenarios.html'/>
+
+[Space Rovers energetics](energy_choices.html)
+[Space Rovers energetics](energy_choices2.html)
+[Space Rovers energetics](energy_choices3.html)
+
+[The plug/socket domain](plugs.html)
 
 
 <style type='text/css'>
@@ -60,6 +61,4 @@ $("a").each(function(){
            $(this).addClass("current");
    }
 });
-
-
 </script>

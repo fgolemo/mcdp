@@ -1,5 +1,4 @@
-Plugs and converters
-====================
+## Plugs and converters
 
 <img src="Battery_NiH2.png"/>
 

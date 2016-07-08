@@ -13,18 +13,21 @@ import base64
 import traceback
 
 
+def bs(fragment):
+    return BeautifulSoup(fragment, 'html.parser', from_encoding='utf-8')
+
 def html_interpret(library, html, raise_errors=False, realpath='unavailable'):
     # clone linrary?
     library = library.clone()
     load_fragments(library, html, realpath=realpath)
-    html = highlight_mcdp_code(library, html)
+    html = highlight_mcdp_code(library, html, raise_errors=raise_errors)
     html = make_figures(library, html,
                         raise_error_dp=raise_errors, raise_error_others=raise_errors)
     html = make_plots(library, html, raise_errors=raise_errors)
     return html.decode('utf-8')
 
 def make_image_tag_from_png(f):
-    soup = BeautifulSoup("", 'html.parser')
+    soup = bs("")
     def ff(*args, **kwargs):
         png = f(*args, **kwargs)
         rendered = create_img_png_base64(soup, png)
@@ -32,7 +35,7 @@ def make_image_tag_from_png(f):
     return ff
 
 def make_pre(f):
-    soup = BeautifulSoup("", 'html.parser')
+    soup = bs("")
     def ff(*args, **kwargs):
         res = f(*args, **kwargs)
         t = soup.new_tag('pre')  #  **{'class': 'print_value'})
@@ -62,8 +65,8 @@ def make_plots(library, frag, raise_errors):
         <pre class="print_value">VALUE</img>
     
     """
-    soup = BeautifulSoup(frag, 'html.parser')
-    print 'raise_errors', raise_errors
+    soup = bs(frag)
+
     def go(selector, plotter, load, parse):
         for tag in soup.select(selector):
 
@@ -150,7 +153,7 @@ def load_fragments(library, frag, realpath):
             code
             </pre>
     """
-    soup = BeautifulSoup(frag, 'html.parser')
+    soup = bs(frag)
 
     for tag in soup.select('pre.mcdp'):
         if tag.string is None:
@@ -189,7 +192,25 @@ def load_fragments(library, frag, realpath):
             library.file_to_contents[basename] = res
 
 
-def highlight_mcdp_code(library, frag):
+def get_source_code(tag):
+    """ Gets the string attribute. 
+    
+        encodes as utf-8
+        removes initial whitespace newlines
+        converts tabs to spaces
+    """
+    if tag.string is None:
+        raise ValueError(str(tag))
+
+    source_code = tag.string.encode('utf-8')
+
+    while source_code and source_code[0] == '\n':
+        source_code = source_code[1:]
+
+    source_code = source_code.replace('\t', ' ' * 4)
+    return source_code
+
+def highlight_mcdp_code(library, frag, raise_errors=False):
     """ Looks for codes like:
     
     <pre class="mcdp">mcdp {
@@ -200,9 +221,9 @@ def highlight_mcdp_code(library, frag):
         and does syntax hihglighting.
     """
 
-    soup = BeautifulSoup(frag, 'html.parser')
+    soup = bs(frag)
 
-    def go(selector, parse_expr, extension):
+    def go(selector, parse_expr, extension, use_pre=True):
         for tag in soup.select(selector):
             
             if tag.string is None:
@@ -213,46 +234,62 @@ def highlight_mcdp_code(library, frag):
                 basename = '%s.%s' % (tag['id'], extension)
                 data = library._get_file_data(basename)
                 source_code = data['data']
+                source_code = source_code.replace('\t', ' ' * 4)
             else:
-                source_code = tag.string.encode('utf-8')
+                source_code = get_source_code(tag)
 
-                while source_code and source_code[0] == '\n':
-                    source_code = source_code[1:]
-
-            source_code = source_code.replace('\t', ' ' * 4)
             try:
                 html = ast_to_html(source_code, parse_expr=parse_expr,
-                                            complete_document=False,
-                                            add_line_gutter=False)
-                frag2 = BeautifulSoup(html, 'lxml')
-                rendered = frag2.pre
-                if tag.has_attr('label'):
-                    tag_label = soup.new_tag('span', **{'class': 'label'})
-                    tag_label.append(tag['label'])
-                    rendered.insert(0, tag_label)
+                                                complete_document=False,
+                                                add_line_gutter=False,
+                                                add_css=False)
 
-                max_len = max(map(len, source_code.split('\n')))
-                # account for the label
-                if tag.has_attr('label'):
-                    max_len = max(max_len, len(tag['label']) + 6)
+                frag2 = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
 
-                style = 'width: %dch;' % (max_len + 3)
+                if use_pre:
+                    rendered = frag2.pre
+                    if tag.has_attr('label'):
+                        tag_label = soup.new_tag('span', **{'class': 'label'})
+                        tag_label.append(tag['label'])
+                        rendered.insert(0, tag_label)
+
+                    max_len = max(map(len, source_code.split('\n')))
+                    # account for the label
+                    if tag.has_attr('label'):
+                        max_len = max(max_len, len(tag['label']) + 6)
+
+                    style = 'width: %dch;' % (max_len + 3)
+                else:
+                    # using <code>
+                    rendered = frag2.pre.code
+                    style = ''
+
+                print 'rendered', rendered
+
                 if tag.has_attr('style'):
                     style = style + tag['style']
-
-                rendered['style'] = style
+                if style:
+                    rendered['style'] = style
                 tag.replaceWith(rendered)
 
             except DPSyntaxError as e:
+                if raise_errors:
+                    raise
                 print(e)  # XXX
                 t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
                 t.string = str(e)
                 tag.insert_after(t)
 
-    go('pre.mcdp', Syntax.ndpt_dp_rvalue, "mcdp")
-    go('pre.mcdp_poset', Syntax.space, "mcdp_poset")
-    go('pre.mcdp_value', Syntax.rvalue, "mcdp_value")
-    go('pre.mcdp_template', Syntax.template, "mcdp_template")
+    go('pre.mcdp', Syntax.ndpt_dp_rvalue, "mcdp", use_pre=True)
+    go('pre.mcdp_poset', Syntax.space, "mcdp_poset", use_pre=True)
+    go('pre.mcdp_value', Syntax.rvalue, "mcdp_value", use_pre=True)
+    go('pre.mcdp_template', Syntax.template, "mcdp_template", use_pre=True)
+
+    go('code.mcdp', Syntax.ndpt_dp_rvalue, "mcdp", use_pre=False)
+    go('code.mcdp_poset', Syntax.space, "mcdp_poset", use_pre=False)
+    go('code.mcdp_value', Syntax.rvalue, "mcdp_value", use_pre=False)
+    go('code.mcdp_template', Syntax.template, "mcdp_template", use_pre=False)
+
     return str(soup)
 
 def make_figures(library, frag, raise_error_dp, raise_error_others):
@@ -266,7 +303,7 @@ def make_figures(library, frag, raise_error_dp, raise_error_others):
         and creates a link to the image
     """
 
-    soup = BeautifulSoup(frag, 'html.parser')
+    soup = bs(frag)
 
     def go(selector, func):
 
@@ -301,7 +338,7 @@ def make_figures(library, frag, raise_error_dp, raise_error_others):
             return r
         else:
             svg = func(data_format='svg', **args)
-            tag = BeautifulSoup(svg, 'lxml').svg
+            tag = BeautifulSoup(svg, 'lxml', from_encoding='utf-8').svg
             tag['class'] = klass
             return tag
 

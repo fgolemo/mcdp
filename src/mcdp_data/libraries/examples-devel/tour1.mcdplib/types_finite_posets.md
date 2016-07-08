@@ -1,5 +1,4 @@
-Finite Posets
--------------
+### Finite Posets
 
 
 You can define your own posets.

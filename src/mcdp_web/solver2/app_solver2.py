@@ -267,7 +267,7 @@ class AppSolver2():
                 ax.tick_params(axis='y', colors=YCOLOR)
                 ax.yaxis.label.set_color(YCOLOR)
                 ax.xaxis.label.set_color(XCOLOR)
-                print list(ax.spines)
+
                 ax.spines['bottom'].set_color(XCOLOR)
                 ax.spines['left'].set_color(YCOLOR)
 
@@ -281,9 +281,9 @@ class AppSolver2():
 
 def get_samples(request, ndp):
     xaxis = str(request.params['xaxis'])
-    yaxis = str(request.params['yaxis'])
-    xmin = request.params['xmin']
-    xmax = request.params['xmax']
+    # yaxis = str(request.params['yaxis'])
+    xmin = request.params['xmin'].encode('utf-8')
+    xmax = request.params['xmax'].encode('utf-8')
     nsamples = int(request.params['nsamples'])
 
     fnames = ndp.get_fnames()

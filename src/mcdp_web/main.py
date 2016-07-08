@@ -131,6 +131,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         return {'exceptions': exceptions}
 
     def view_exception(self, exc, request):
+        request.response.status = 500  # Internal Server Error
+
         import traceback
         compact = (DPSemanticError, DPSyntaxError)
         if isinstance(exc, compact):
@@ -150,14 +152,22 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         n += '\n' + indent(ss, '| ')
         self.exceptions.append(n)
 
+        if 'library' in request.matchdict:
+            library = self.get_current_library_name(request)
+            url_refresh = '/libraries/%s/refresh_library' % library
+        else:
+            url_refresh = None
+
         logger.error(s)
-        return {'exception': s}
+        return {'exception': s, 'url_refresh': url_refresh}
     
     def png_error_catch2(self, request, func):
         """ func is supposed to return an image response.
             If it raises an exception, we create
             an image with the error and then we add the exception
-            to the list of exceptions. """
+            to the list of exceptions.
+            
+             """
         try:
             return func()
         except Exception as e:
@@ -354,12 +364,15 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         import codecs
         l = self.get_library(request)
 
+        strict = int(request.params.get('strict', '0'))
+
         filename = '%s.%s' % (document, MCDPLibrary.ext_doc_md)
         f = l._get_file_data(filename)
         realpath = f['realpath']
         data = codecs.open(realpath, encoding='utf-8').read()
 
-        html = render_complete(library=l, s=data, raise_errors=False)
+        raise_errors = bool(strict)
+        html = render_complete(library=l, s=data, raise_errors=raise_errors)
         return html
 
     def view_library_doc(self, request):

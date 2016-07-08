@@ -19,5 +19,11 @@
 
 <pre><code id='exception'>{{exception}}</code></pre>
         
+
+{% if url_refresh %}
+<p> If the problem is that something is not found
+because of stale caches, <a href='{{url_refresh}}'>try to refresh the library</a>.
+{% endif %}
+
 </body>
 </html>

@@ -1,6 +1,5 @@
 
-
-# Composing MCDPs
+## Composing MCDPs
 
 Suppose we define a simple model called ``Battery`` as follows:
 
@@ -143,8 +142,6 @@ the sub components:
 and then erasing their borders:
 
 <pre class='ndp_graph_expand' direction='LR'>flatten `Composition</pre>
-
-
 
 
 <style type='text/css'>

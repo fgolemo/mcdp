@@ -10,6 +10,8 @@ from mcdp_dp.conversion import get_conversion
 from mcdp_dp.dp_approximation import make_approximation
 from mcdp_dp.dp_catalogue import CatalogueDP
 from mcdp_dp.dp_series_simplification import make_series
+from mcdp_lang.eval_ndp_approx import (eval_ndp_approx_lower,
+    eval_ndp_approx_upper)
 from mcdp_lang.eval_template_imp import eval_template
 from mcdp_lang.parse_actions import add_where_information
 from mcdp_posets import Any, NotEqual, NotLeq, PosetProduct, get_types_universe
@@ -20,8 +22,6 @@ from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
     get_name_for_fun_node, get_name_for_res_node)
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
-from mcdp_lang.eval_ndp_approx import eval_ndp_approx_lower, \
-    eval_ndp_approx_upper
 
 
 

@@ -233,6 +233,7 @@ class Syntax():
                     ^ space_product_with_labels
                      )
 
+
     PRODUCT = sp(L('x') | L('×'), lambda t: CDP.product(t[0]))
     space << operatorPrecedence(space_operand, [
         (PRODUCT, 2, opAssoc.LEFT, space_product_parse_action),

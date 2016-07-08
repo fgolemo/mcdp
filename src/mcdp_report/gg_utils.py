@@ -114,7 +114,7 @@ def gg_figure(r, name, ggraph):
         with r.data_file('graph_svg', MIME_SVG) as filename:
             graphviz_run(filename_dot, filename, prog=prog)
 
-            soup = BeautifulSoup(open(filename).read(), 'lxml')
+            soup = BeautifulSoup(open(filename).read(), 'lxml', from_encoding='utf-8')
             for tag in soup.select('image'):
                 href = tag['xlink:href']
                 extensions = ['png', 'jpg']
@@ -127,10 +127,9 @@ def gg_figure(r, name, ggraph):
                         mime = get_mime_for_format(ext)
                         src = 'data:%s;base64,%s' % (mime, encoded)
                         tag['xlink:href'] = src
-# tag.replaceWith(rendered)
 
             with codecs.open(filename, 'w', encoding='utf-8') as ff:
-                ff.write(soup.prettify())
+                ff.write(str(soup))
 
         # MIME_GRAPHVIZ
         with f.data_file('dot', MIME_PLAIN) as filename:
@@ -138,6 +137,25 @@ def gg_figure(r, name, ggraph):
                 f.write(s)
         
     return f
+
+
+def embed_images(html, basedir):
+    """ Embeds png and Jpg images using data """
+    soup = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
+    for tag in soup.select('img'):
+        href = tag['src']
+        extensions = ['png', 'jpg']
+        for ext in extensions:
+            if ext in href and not 'data:' in href:
+                resolve = os.path.join(basedir, href)
+                with open(resolve) as ff:
+                    data = ff.read()
+                encoded = base64.b64encode(data)
+                from mcdp_web.images.images import get_mime_for_format
+                mime = get_mime_for_format(ext)
+                src = 'data:%s;base64,%s' % (mime, encoded)
+                tag['src'] = src
+    return str(soup)
 
 
 @contextmanager

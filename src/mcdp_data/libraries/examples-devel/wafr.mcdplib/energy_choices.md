@@ -1,10 +1,10 @@
 
-Space Rovers Energetics
-=======================
+## Space Rovers Energetics
 
 
 <img src="space_rovers.small.jpg" style='width: 20em'/>
 
+### One option: thermocouple
 
 A thermocouple is a device that converts heat into electrical power.
 

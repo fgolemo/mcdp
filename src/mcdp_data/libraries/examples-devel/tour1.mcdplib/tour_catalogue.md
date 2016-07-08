@@ -1,5 +1,4 @@
-Catalogues
-==========
+## Catalogues
 
 We can also enumerate an arbitrary relation, as follows:
 
