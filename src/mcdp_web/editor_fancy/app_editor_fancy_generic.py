@@ -1,15 +1,13 @@
 from collections import defaultdict, namedtuple
 from contracts.utils import raise_wrapped
-from mcdp_cli.plot import png_pdf_from_gg
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
-from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
+from mcdp_report.gg_ndp import STYLE_GREENREDSYM
 from mcdp_report.html import ast_to_html
 from mcdp_web.utils import (ajax_error_catch, create_image_with_string,
     format_exception_for_ajax_response, response_image)
 from mcdp_web.utils.response import response_data
 from mocdp import logger
-from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from pyramid.httpexceptions import HTTPFound
 from pyramid.renderers import render_to_response
@@ -29,6 +27,8 @@ class AppEditorFancyGeneric():
         self.last_processed2 = defaultdict(lambda: dict())
 
     def config(self, config):
+        from mcdp_web.images.images import ndp_template_enclosed
+
         spec_models = Spec(url_part='models', url_variable='model_name',
                               extension=MCDPLibrary.ext_ndps,
                               parse_expr=Syntax.ndpt_dp_rvalue,
@@ -43,7 +43,7 @@ class AppEditorFancyGeneric():
                               parse_expr=Syntax.template,
                               parse=MCDPLibrary.parse_template,
                               load=MCDPLibrary.load_template,
-                              get_png_data=get_png_data_template,
+                              get_png_data=ndp_template_enclosed,
                               write=MCDPLibrary.write_to_template,
                               minimal_source_code="template []\n\nmcdp {\n\n}")
 
@@ -267,18 +267,18 @@ def get_png_data_unavailable(library, name, x, data_format):  # @UnusedVariable
     s = str(x)
     return create_image_with_string(s, size=(512, 512), color=(0, 0, 255))
 
-def get_png_data_template(library, name, x, data_format):  # XXX
-    assert isinstance(x, TemplateForNamedDP)
-
-    ndp = x.get_template_with_holes()
-
-    setattr(ndp, '_hack_force_enclose', True)
-
-    images_paths = library.get_images_paths()
-    gg = gvgen_from_ndp(ndp, STYLE_GREENREDSYM, direction='TB',
-                        images_paths=images_paths, yourname=name)
-    png, _pdf = png_pdf_from_gg(gg)
-    return png
+# def get_png_data_template(library, name, x, data_format):  # XXX
+#     assert isinstance(x, TemplateForNamedDP)
+#
+#     ndp = x.get_template_with_holes()
+#
+#     setattr(ndp, '_hack_force_enclose', True)
+#
+#     images_paths = library.get_images_paths()
+#     gg = gvgen_from_ndp(ndp, STYLE_GREENREDSYM, direction='TB',
+#                         images_paths=images_paths, yourname=name)
+#     png, _pdf = png_pdf_from_gg(gg)
+#     return png
 
 def get_png_data_model(library, name, ndp, data_format):
     from mcdp_web.images.images import ndp_graph_enclosed

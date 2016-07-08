@@ -26,13 +26,15 @@ pre {
 pre.error, pre.DPSemanticError, pre.DPSyntaxError {
 	color: red;
 	font-weight: bold;
+	white-space: pre-wrap;
 }
 
 .ndp_graph_expand,
 .ndp_graph_enclosed,
 .ndp_graph_normal,
 .ndp_graph_templatized,
-.ndp_graph_templatized_labeled {
+.ndp_graph_templatized_labeled,
+.template_graph_enclosed {
 	max-width: 100%;
 	/*height: auto;*/
 }
@@ -44,7 +46,8 @@ pre.error, pre.DPSemanticError, pre.DPSyntaxError {
 .ndp_graph_enclosed,
 .ndp_graph_normal,
 .ndp_graph_templatized,
-.ndp_graph_templatized_labeled {
+.ndp_graph_templatized_labeled,
+.template_graph_enclosed {
 	height: auto;
 }
 

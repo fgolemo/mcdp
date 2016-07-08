@@ -7,17 +7,24 @@ class MCDPException(Exception):
 
 class MCDPExceptionWithWhere(MCDPException):
 
+
     def __init__(self, error, where=None):
+        if not isinstance(error, str):
+            raise ValueError('Expected string, got %r.' % type(error))
+
         self.error = error
         self.where = where
         MCDPException.__init__(self, error, where)
 
     def __str__(self):
         error, where = self.args
+        assert isinstance(error, str), error
         s = error
         if where is not None:
             from contracts.interface import add_prefix
-            s += "\n\n" + add_prefix(where.__str__(), ' ')
+            ws = where.__str__()
+            assert isinstance(ws, str), (ws, type(where))
+            s += "\n\n" + add_prefix(ws, ' ')
         return s
 
     def with_filename(self, filename):

@@ -4,6 +4,7 @@ from mcdp_library_tests.tests import enumerate_test_libraries
 from mcdp_web.renderdoc.main import render_complete
 import tempfile
 import shutil
+from mcdp_web_tests.test_server import test_mcdpweb_server
 
 
 def define_tests_mcdp_web(context):
@@ -15,6 +16,7 @@ def define_tests_mcdp_web(context):
     for short, dirname in enumerate_test_libraries():
         c2 = context.child(short)
         c2.comp_dynamic(define_tests_rendering, dirname)
+        c2.comp(test_mcdpweb_server, dirname)
 
 
 def define_tests_rendering(context, dirname):
@@ -27,7 +29,7 @@ def define_tests_rendering(context, dirname):
         context.comp(check_rendering, dirname, docname, realpath, job_id=job_id)
 
 
-def check_rendering(dirname, docname, filename):
+def check_rendering(dirname, docname, filename):  # @UnusedVariable
     import codecs
     data = codecs.open(filename, encoding='utf-8').read()
 
@@ -37,6 +39,6 @@ def check_rendering(dirname, docname, filename):
     tmpdir = tempfile.mkdtemp(prefix='mcdplibrary_cache')
     library.use_cache_dir(tmpdir)
 
-    html = render_complete(library, data, raise_errors=True)
+    render_complete(library, data, raise_errors=True, realpath=filename)
 
     shutil.rmtree(tmpdir)

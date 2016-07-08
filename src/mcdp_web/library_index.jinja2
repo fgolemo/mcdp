@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Library {{navigation['current_library']}}</title>
+    {% include 'head.jinja2' %}
+</head>
+<body>
+
+{% include 'model_views_navigation.jinja2' %}
+
+{% if has_library_doc('index') %}
+	{{ render_library_doc('index') | safe }}
+{% else %}
+
+<p>Click &#9776; in the upper left and select "new" to add a new model.</p>
+
+
+{% if navigation['documents'] %}
+<ul>
+	{% for d in navigation['documents'] %}
+	<li><a href='{{d['url']}}'>{{d['name']}}</a></li>
+	{% endfor %}
+</ul>
+{% endif %}
+
+
+
+<style type='text/css'>
+	div.compact { display: block; float: left; width: 20em; height: 13em; }
+	div.compact { 
+		margin: 2em;
+		text-align: center;
+		border-radius: 8px;
+		padding-top: 0.5em;
+	}
+	div.compact span { margin-bottom: 1em; }
+		div.compact:hover {
+		box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);    
+	}
+	div.compact span {display: block; text-align: center; }
+	div.compact img { max-width: 20em; max-height: 10em; } 
+</style>
+
+{% for m in navigation['models'] %}
+
+<a class='modellink' href="{{m['url']}}">
+<div class="compact">
+	<span class="name">
+		
+			{{ m['id_ndp'] }}
+	</span>
+		
+{#	/libraries/{library}/models/{models}/views/solver2/compact_graph.png #}
+        
+		<img src="/libraries/{{navigation['current_library']}}/models/{{m['id_ndp']}}/views/solver2/compact_graph.png"/>
+</div>
+</a>
+
+{% endfor %}
+{%endif%}
+  
+  
+</body>
+</html>

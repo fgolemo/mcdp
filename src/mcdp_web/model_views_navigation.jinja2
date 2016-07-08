@@ -21,7 +21,7 @@
 	    {% endfor %}
 	  </select>
 	 {% else %}
-	 	<a id='back_to_library' href="/libraries/{{navigation['current_library']}}/list">
+	 	<a id='back_to_library' href="/libraries/{{navigation['current_library']}}/">
 	 		Library
 	 		 <span class="library_name">
 	 		 	{{navigation['current_library']}}
@@ -87,10 +87,7 @@
 </tr>
 </table>
   
-<script type = "text/javascript">
-	
-	
-
+<script type = "text/javascript"> 
 	$(document).ready(function() {
 	
 		function handle(event, ui) {

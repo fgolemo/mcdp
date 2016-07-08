@@ -5,7 +5,7 @@ from mcdp_web.renderdoc.highlight import html_interpret
 
 
 @contract(returns='str', s=str, library=MCDPLibrary)
-def render_complete(library, s, raise_errors):
+def render_complete(library, s, raise_errors, realpath='unavailable'):
     """
         Transforms markdown into html and then renders the mcdp snippets inside.
         
@@ -14,5 +14,5 @@ def render_complete(library, s, raise_errors):
         Returns an HTML string.
     """
     html = render_markdown(s)
-    html2 = html_interpret(library, html, raise_errors=raise_errors)
+    html2 = html_interpret(library, html, raise_errors=raise_errors, realpath=realpath)
     return html2

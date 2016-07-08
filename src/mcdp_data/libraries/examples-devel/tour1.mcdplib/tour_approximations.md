@@ -4,7 +4,7 @@
 # Multiplication dual
 
 <pre class='mcdp' id='invmult'>
-mcdpgit  {
+mcdp  {
     provides a [R]
     requires b [R]
     requires c [R]

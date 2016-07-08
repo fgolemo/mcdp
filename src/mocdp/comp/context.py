@@ -168,7 +168,7 @@ class Context():
 
         if not s in ndp.get_fnames():
             msg = 'Unknown function %r for design problem %r.' % (s, dp)
-            msg += 'Known functions: %s.' % format_list(ndp.get_fnames())
+            msg += ' Known functions: %s.' % format_list(ndp.get_fnames())
             raise DPSemanticError(msg)
 
         return CFunction(dp, s)
@@ -185,7 +185,7 @@ class Context():
 
         if not s in ndp.get_rnames():
             msg = 'Unknown resource %r for design problem %r.' % (s, dp)
-            msg += 'Known functions: %s.' % format_list(ndp.get_rnames())
+            msg += ' Known functions: %s.' % format_list(ndp.get_rnames())
             raise DPSemanticError(msg)
 
         return CResource(dp, s)

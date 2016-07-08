@@ -333,7 +333,6 @@ class Plotter_Tuple2_UR2(Plotter):
 
     def check_plot_space(self, space):
         tu = get_types_universe()
-        print('testing %r' % space)
         if not (isinstance(space, PosetProduct) and len(space.subs) == 2):
             msg = 'I can only plot 2-tuples of upper sets.'
             raise_desc(NotPlottable, msg, space=space)
@@ -343,11 +342,8 @@ class Plotter_Tuple2_UR2(Plotter):
         try:
             self.p.check_plot_space(space[0])
         except NotPlottable as e:
-            print('didnt like: %s' % e)
             msg = 'It is a 2-tuple, but cannot plot inside. '
             raise_wrapped(NotPlottable, e, msg, compact=True)
-
-        print('ok!')
 
     def axis_for_sequence(self, space, seq):
         s = []

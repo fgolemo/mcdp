@@ -78,7 +78,19 @@ mcdp {
 
 <pre class='ndp_graph_expand' direction='TB'>`model</pre>
 
+###  ndp_template_graph_enclosed
 
+~~~
+<pre class='template_graph_enclosed'>`ActuationEnergeticsTemplate</pre>
+~~~
+
+
+<pre class='template_graph_enclosed'>
+template [A:mcdp{}]
+mcdp {
+	a = instance A
+}
+</pre>
 
 ### plot_generic_value
 
@@ -89,7 +101,19 @@ mcdp {
 <img class='plot_value_generic' style='width: 10em'>upperclosure{<1 g, 0m>, <2 g, 1m>} </img>
 
 
-<img class='plot_value_generic'>
+<img class='plot_value_generic' style='width: 10em'>
 &lt;upperclosure {<0g, 1J>}, upperclosure {<1g, 0.5J>}&gt;
 </img>
 
+
+### print_value
+
+~~~
+<pre class='print_value'>
+&lt;upperclosure {<0g, 1J>}, upperclosure {<1g, 0.5J>}&gt;
+</pre>
+~~~
+
+<pre class='print_value'>
+&lt;upperclosure {<0g, 1J>}, upperclosure {<1g, 0.5J>}&gt;
+</pre>

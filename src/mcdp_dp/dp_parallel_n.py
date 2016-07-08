@@ -6,6 +6,7 @@ from mcdp_posets import PosetProduct
 from mocdp.exceptions import do_extra_checks
 import itertools
 import warnings
+from contracts.utils import indent
 
 
 __all__ = [
@@ -112,14 +113,13 @@ class ParallelN(PrimitiveDP):
 
     def __repr__(self):
         return 'ParallelN(%s)' % ",".join(_.__repr__() for _ in self.dps)
-#
-#     def repr_long(self):
-#         r1 = self.dp1.repr_long()
-#         r2 = self.dp2.repr_long()
-#         s = 'Parallel  %% %s -> %s' % (self.get_fun_space(), self.get_res_space())
-#         s += '\n' + indent(r1, '. ', first='\ ')
-#         s += '\n' + indent(r2, '. ', first='\ ')
-#         return s
+
+    def repr_long(self):
+        s = 'ParallelN  %% %s -> %s' % (self.get_fun_space(), self.get_res_space())
+        for dp in self.dps:
+            r = dp.repr_long()
+            s += '\n' + indent(r, '. ', first='\ ')
+        return s
 
     def get_normal_form(self):
         raise NotImplementedError()

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from contracts import contract
+from contracts.utils import indent, raise_desc
 from mcdp_library import MCDPLibrary
 from mcdp_library.utils import locate_files
 from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
@@ -18,11 +19,11 @@ from mocdp import logger
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPFound
+from pyramid.response import Response
 from quickapp import QuickAppBase
 from wsgiref.simple_server import make_server
 import mocdp
 import os
-from contracts.utils import indent
 
 
 __all__ = [
@@ -36,8 +37,9 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
     def __init__(self, dirname):
         self.dirname = dirname
         self.libraries = load_libraries(self.dirname)
+
         logger.info('Found %d libraries underneath %r.' %
-                    (len(self.libraries), self.dirname))
+                        (len(self.libraries), self.dirname))
 
         AppEditor.__init__(self)
         AppVisualization.__init__(self)
@@ -72,6 +74,9 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
     def get_library(self, request):
         library_name = self.get_current_library_name(request)
+        if not library_name in self.libraries:
+            msg = 'Could not find library %r.' % library_name
+            raise_desc(ValueError, msg, available=self.libraries)
         return self.libraries[library_name]['library']
 
     def list_of_models(self, request):
@@ -113,20 +118,19 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         raise HTTPFound(request.referrer)
 
     def view_not_found(self, request):
-        url = request.host_url
+        request.response.status = 404
+        url = request.url
         referrer = request.referrer
-        self.exceptions.append('Not found %s from %s' % (url, referrer))
-        return {'url': url}
+        self.exceptions.append('Path not found.\n url: %s\n ref: %s' % (url, referrer))
+        return {'url': url, 'referrer': referrer}
 
-    def view_exceptions_occurred(self, request):
-        import traceback
+    def view_exceptions_occurred(self, request):  # @UnusedVariable
         exceptions = []
         for e in self.exceptions:
             exceptions.append(e)
         return {'exceptions': exceptions}
 
-
-    def view_exception(self, exc, _request):
+    def view_exception(self, exc, request):
         import traceback
         compact = (DPSemanticError, DPSyntaxError)
         if isinstance(exc, compact):
@@ -135,7 +139,17 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
             s = traceback.format_exc(exc)
         s = s.decode('utf-8')
         # add to state so that it can be visualized in /exceptions
-        self.exceptions.append(s)
+
+        s = str(s)
+        url = request.url
+        referrer = request.referrer
+        n = 'Error during serving this URL:'
+        n += '\n url: %s' % url
+        n += '\n referrer: %s' % referrer
+        ss = traceback.format_exc(exc).decode('utf-8')
+        n += '\n' + indent(ss, '| ')
+        self.exceptions.append(n)
+
         logger.error(s)
         return {'exception': s}
     
@@ -156,7 +170,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
                 pass
 
             s = str(s)
-            url = request.host_url
+            url = request.url
             referrer = request.referrer
             n = 'Error during rendering an image.'
             n+= '\n url: %s' % url
@@ -231,7 +245,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
 
         current_library = self.get_current_library_name(request)
-        
+        library = self.get_library(request)
+
         d = {}
         
         models = self.list_of_models(request)
@@ -241,6 +256,14 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         d['current_poset'] = current_poset
         d['current_view'] = current_view
         d['current_model'] = current_model
+
+        documents = library._list_with_extension(MCDPLibrary.ext_doc_md)
+
+        d['documents'] = []
+        for id_doc in documents:
+            url = '/libraries/%s/%s.html' % (current_library, id_doc)
+            desc = dict(id_document=id_doc, name=id_doc, url=url, current=False)
+            d['documents'].append(desc)
 
         d['models'] = []
         for m in sorted(models):
@@ -254,7 +277,6 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
             desc = dict(id_ndp=m, name=name, url=url, current=is_current)
             d['models'].append(desc)
 
-        library = self.get_library(request)
 
         templates = library.list_templates()
         d['templates'] = []
@@ -307,7 +329,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         d['libraries'] = []
         for l in libraries:
             is_current = l == current_library
-            url = '/libraries/%s/list' % l
+            url = '/libraries/%s/' % l
             name = "Library: %s" % l
             desc = dict(name=name, url=url, current=is_current)
             d['libraries'].append(desc)
@@ -369,7 +391,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         setattr(self.server, '_BaseServer__shutdown_request', True)
         return {}
 
-    def serve(self):
+    def serve(self, port):
         config = Configurator()
         config.add_static_view(name='static', path='static')
         config.include('pyramid_jinja2')
@@ -390,8 +412,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         config.add_route('list_libraries', '/list')
         config.add_view(self.view_list_libraries, route_name='list_libraries', renderer='list_libraries.jinja2')
 
-        config.add_route('list', '/libraries/{library}/list')
-        config.add_view(self.view_list, route_name='list', renderer='list_models.jinja2')
+        config.add_route('library_index', '/libraries/{library}/')
+        config.add_view(self.view_list, route_name='library_index', renderer='library_index.jinja2')
 
         config.add_route('library_doc', '/libraries/{library}/{document}.html')
         config.add_view(self.view_library_doc,
@@ -418,10 +440,20 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         config.add_route('exceptions', '/exceptions')
         config.add_view(self.view_exceptions_occurred, route_name='exceptions', renderer='json')
 
+        # mainly used for wget
+        config.add_route('robots', '/robots.txt')
+        def serve_robots(request):  # @UnusedVariable
+            body = "User-agent: *\nDisallow:"
+            return Response(content_type='text/plain', body=body)
+
+        config.add_view(serve_robots, route_name='robots')
+
+
+
         config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
 
         app = config.make_wsgi_app()
-        self.server = make_server('0.0.0.0', 8080, app)
+        self.server = make_server('0.0.0.0', port, app)
         self.server.serve_forever()
 
 
@@ -430,6 +462,14 @@ def load_libraries(dirname):
             
             library_name -> {'path': ...}
     """
+    if 'mcdplib' in dirname:
+        short = os.path.splitext(os.path.basename(dirname))[0]
+        l = MCDPLibrary()
+        cache_dir = os.path.join(dirname, '_cached/mcdpweb_cache')
+        l.use_cache_dir(cache_dir)
+        l.add_search_dir(dirname)
+        return {short: dict(path=dirname, library=l)}
+
     libraries = locate_files(dirname, "*.mcdplib",
                              followlinks=False,
                              include_directories=True,
@@ -453,6 +493,9 @@ class MCDPWeb(QuickAppBase):
     def define_program_options(self, params):
         params.add_string('dir', default=None, short='-d',
                            help='Library directories containing models.')
+        params.add_int('port', default=8080,
+                           help='Port to listen to.')
+        params.add_flag('delete_cache', help='Removes the cached files before starting.')
 
     def go(self):
         options = self.get_options()
@@ -470,12 +513,15 @@ class MCDPWeb(QuickAppBase):
         
 To access the interface, open your browser at the address
     
-    http://127.0.0.1:8080/
+    http://127.0.0.1:%s/
     
 Use Chrome, Firefox, or Opera - Internet Explorer is not supported.
-"""
+""" % options.port
+
         logger.info(msg)
-        wa.serve()
+        if options.delete_cache:
+            wa._refresh_library(None)
+        wa.serve(port=options.port)
 
 mcdp_web_main = MCDPWeb.get_sys_main()
 

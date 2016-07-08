@@ -328,19 +328,19 @@ def eval_ndp_catalogue(r, context):
     fnames = [_.fname.value for  _ in fun]
     rnames = [_.rname.value for  _ in res]
 
-    if len(Fs) > 1:
-        F = PosetProduct(tuple(Fs))
-    else:
+    if len(Fs) == 1:
         F = Fs[0]
         fnames = fnames[0]
         entries = [(a, b[0], c) for (a, b, c) in entries]
-
-    if len(Rs) > 1:
-        R = PosetProduct(tuple(Rs))
     else:
+        F = PosetProduct(tuple(Fs))
+
+    if len(Rs) == 1:
         R = Rs[0]
         rnames = rnames[0]
         entries = [(a, b, c[0]) for (a, b, c) in entries]
+    else:
+        R = PosetProduct(tuple(Rs))
 
     dp = CatalogueDP(F=F, R=R, M=M, entries=tuple(entries))
     ndp = dpwrap(dp, fnames=fnames, rnames=rnames)

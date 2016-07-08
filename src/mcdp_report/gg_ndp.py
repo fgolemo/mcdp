@@ -31,7 +31,7 @@ COLOR_DARKRED = 'red'
 #             propertyAppend(l2, 'arrowhead', 'none')
 #             propertyAppend(l2, 'dir', 'both')
 
-@contract(ndp=NamedDP, direction='str', yourname='str')
+@contract(ndp=NamedDP, direction='str', yourname='str|None')
 def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourname=None):
     assert isinstance(ndp, NamedDP)
     assert isinstance(direction, str), direction.__repr__()
@@ -458,7 +458,7 @@ def create_composite_(gdc0, ndp, SKIP_INITIAL):
             if gdc0.yourname is None:
                 container_label = ''
             else:
-                if gdc0.yourname[0] == '_':
+                if gdc0.yourname and gdc0.yourname[0] == '_':
                     container_label = ''
                 else:
                     container_label = gdc0.yourname

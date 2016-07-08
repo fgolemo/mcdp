@@ -3,6 +3,8 @@ from mcdp_cli.plot import png_pdf_from_gg
 from mcdp_report.gg_ndp import gvgen_from_ndp
 from mocdp.comp.composite_templatize import ndp_templatize
 from mcdp_report.report import gvgen_from_dp
+from mocdp.comp.template_for_nameddp import TemplateForNamedDP
+from mcdp_report.gdc import STYLE_GREENREDSYM
 
 
 
@@ -101,7 +103,6 @@ def get_mime_for_format(data_format):
 def ndp_graph_templatized(library, ndp, yourname=None, data_format='png', direction='LR'):
     ndp = ndp_templatize(ndp, mark_as_template=False)
     images_paths = library.get_images_paths()
-    from mcdp_report.gdc import STYLE_GREENREDSYM
 
     gg = gvgen_from_ndp(ndp, STYLE_GREENREDSYM, yourname=yourname,
                         images_paths=images_paths, direction=direction)
@@ -138,6 +139,24 @@ def ndp_graph_enclosed(library, ndp, style, yourname, data_format, direction='TB
                         images_paths=images_paths, yourname=yourname)
 
     return gg_get_format(gg, data_format)
+
+def ndp_template_enclosed(library, name, x, data_format):
+    return ndp_template_graph_enclosed(library, x, style=STYLE_GREENREDSYM, yourname=name,
+                                       data_format=data_format, direction='TB', enclosed=True)
+
+def ndp_template_graph_enclosed(library, template, style, yourname, data_format, direction, enclosed):
+    assert isinstance(template, TemplateForNamedDP)
+
+    ndp = template.get_template_with_holes()
+
+    if enclosed:
+        setattr(ndp, '_hack_force_enclose', True)
+
+    images_paths = library.get_images_paths()
+    gg = gvgen_from_ndp(ndp, style=style, direction=direction,
+                        images_paths=images_paths, yourname=yourname)
+    return gg_get_format(gg, data_format)
+
 #
 # def ndp_graph_notenclosed(library, ndp, style, yourname, data_format, direction='TB'):
 #     """ This templatizes the children and forces the enclosure """

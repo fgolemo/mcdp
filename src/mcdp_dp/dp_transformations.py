@@ -1,6 +1,7 @@
 from contracts import contract
 from .primitive import PrimitiveDP, ApproximableDP
 from mcdp_dp.dp_loop2 import DPLoop2
+from mcdp_dp.dp_parallel_n import ParallelN
 
 @contract(dp=PrimitiveDP, returns=PrimitiveDP)
 def dp_transform(dp, f):
@@ -16,7 +17,9 @@ def dp_transform(dp, f):
     elif isinstance(dp, Parallel):
         return Parallel(dp_transform(dp.dp1, f),
                        dp_transform(dp.dp2, f))
-        # todo: parallel n
+    elif isinstance(dp, ParallelN):
+        dps = tuple(dp_transform(_, f) for _ in dp.dps)
+        return ParallelN(dps)
     elif isinstance(dp, DPLoop0):
         return DPLoop0(dp_transform(dp.dp1, f))
     elif isinstance(dp, DPLoop2):

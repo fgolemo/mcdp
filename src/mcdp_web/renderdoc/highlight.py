@@ -13,10 +13,10 @@ import base64
 import traceback
 
 
-def html_interpret(library, html, raise_errors=False):
+def html_interpret(library, html, raise_errors=False, realpath='unavailable'):
     # clone linrary?
     library = library.clone()
-    load_fragments(library, html, realpath='unavailable')
+    load_fragments(library, html, realpath=realpath)
     html = highlight_mcdp_code(library, html)
     html = make_figures(library, html,
                         raise_error_dp=raise_errors, raise_error_others=raise_errors)
@@ -29,6 +29,15 @@ def make_image_tag_from_png(f):
         png = f(*args, **kwargs)
         rendered = create_img_png_base64(soup, png)
         return rendered
+    return ff
+
+def make_pre(f):
+    soup = BeautifulSoup("", 'html.parser')
+    def ff(*args, **kwargs):
+        res = f(*args, **kwargs)
+        t = soup.new_tag('pre')  #  **{'class': 'print_value'})
+        t.string = res
+        return t
     return ff
 
 # def get_string_or_cdata(tag):
@@ -45,30 +54,31 @@ def make_plots(library, frag, raise_errors):
     """
         Looks for things like:
         
-        
+         
         <img class="value_plot_generic">VALUE</img>
-        
         <img class="value_plot_generic" id='value"/>
+        
+        <pre class="print_value" id='value"/>
+        <pre class="print_value">VALUE</img>
     
     """
     soup = BeautifulSoup(frag, 'html.parser')
-
-    def go(selector, plotter):
+    print 'raise_errors', raise_errors
+    def go(selector, plotter, load, parse):
         for tag in soup.select(selector):
 
-#             source_code = get_string_or_cdata(tag)
-            # load value with units in vu
-            if tag.string is None:
-                if not tag.has_attr('id'):
-                    msg = "If <img> is empty then it needs to have an id."
-                    raise_desc(ValueError, msg, tag=str(tag))
-                # load it
-                vu = library.load_constant(tag['id'])
-            else:
-                source_code = tag.string
-                vu = library.parse_constant(source_code)
-
             try:
+                # load value with units in vu
+                if tag.string is None:
+                    if not tag.has_attr('id'):
+                        msg = "If <img> is empty then it needs to have an id."
+                        raise_desc(ValueError, msg, tag=str(tag))
+                    # load it
+                    vu = load(tag['id'])
+                else:
+                    source_code = tag.string.encode('utf-8')
+                    vu = parse(source_code)
+
                 rendered = plotter(tag, vu)
 
                 if tag.has_attr('style'):
@@ -80,7 +90,9 @@ def make_plots(library, frag, raise_errors):
                     rendered['style'] = style
                 tag.replaceWith(rendered)
 
-            except DPSyntaxError as e:
+            except (DPSyntaxError, DPSemanticError) as e:
+                if raise_errors:
+                    raise
                 print(e)  # XXX
                 t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
                 t.string = str(e)
@@ -93,10 +105,9 @@ def make_plots(library, frag, raise_errors):
                 tag.insert_after(t)
     
     @make_image_tag_from_png
-    def plot_value_generic(tag, vu):
+    def plot_value_generic(tag, vu):  # @UnusedVariable
         r = Report()
         f = r.figure()
-        # generic_plot(f, space=vu.unit, value=vu.value)
         try:
             available = dict(get_plotters(plotters, vu.unit))
             assert available
@@ -113,9 +124,22 @@ def make_plots(library, frag, raise_errors):
             pylab.axis(axis)
         png_node = r.resolve_url('png')
         png = png_node.get_raw_data()
-        return  png
+        return png
     
-    go("img.plot_value_generic", plot_value_generic)
+    @make_pre
+    def print_value(tag, vu):  # @UnusedVariable
+        s = vu.unit.format(vu.value)
+        return s
+    
+    @make_pre
+    def print_mcdp(tag, ndp):  # @UnusedVariable
+        return ndp.__str__()
+    
+    const = dict(load=library.load_constant, parse=library.parse_constant)
+    mcdp = dict(load=library.load_ndp, parse=library.parse_ndp)
+    go("img.plot_value_generic", plot_value_generic, **const)
+    go("pre.print_value", print_value, **const)
+    go("pre.print_mcdp", print_mcdp, **mcdp)
     return str(soup)
 
 def load_fragments(library, frag, realpath):
@@ -134,7 +158,7 @@ def load_fragments(library, frag, realpath):
 
         if tag.has_attr('id'):
             id_ndp = tag['id']
-            source_code = str(tag.string)
+            source_code = tag.string.encode('utf-8')
 
             basename = '%s.%s' % (id_ndp, MCDPLibrary.ext_ndps)
             res = dict(data=source_code, realpath=realpath)
@@ -152,7 +176,7 @@ def load_fragments(library, frag, realpath):
 
         if tag.has_attr('id'):
             id_ndp = tag['id']
-            source_code = str(tag.string)
+            source_code = tag.string.encode('utf-8')
 
             basename = '%s.%s' % (id_ndp, MCDPLibrary.ext_posets)
             res = dict(data=source_code, realpath=realpath)
@@ -190,7 +214,8 @@ def highlight_mcdp_code(library, frag):
                 data = library._get_file_data(basename)
                 source_code = data['data']
             else:
-                source_code = tag.string
+                source_code = tag.string.encode('utf-8')
+
                 while source_code and source_code[0] == '\n':
                     source_code = source_code[1:]
 
@@ -205,9 +230,6 @@ def highlight_mcdp_code(library, frag):
                     tag_label = soup.new_tag('span', **{'class': 'label'})
                     tag_label.append(tag['label'])
                     rendered.insert(0, tag_label)
-
-#                 if tag.has_attr('style'):
-#                     rendered['style'] = tag['style']
 
                 max_len = max(map(len, source_code.split('\n')))
                 # account for the label
@@ -333,7 +355,6 @@ def make_figures(library, frag, raise_error_dp, raise_error_others):
 
         direction = str(tag.get('direction', default_direction))
         enclosed = bool_from_string(tag.get('enclosed', 'True'))
-#         print "enclosed: %r %r" % (tag.get('enclosed', False), enclosed)
         return call(ndp_graph_enclosed, library=library, ndp=ndp, style=STYLE_GREENREDSYM,
                                  yourname=yourname, enclosed=enclosed,
                                  direction=direction, klass='ndp_graph_enclosed')
@@ -353,13 +374,25 @@ def make_figures(library, frag, raise_error_dp, raise_error_others):
                                  direction=direction,
                                  klass='ndp_graph_expand')
 
+    def func5(tag):  # ndp_graph_enclosed
+        source_code = tag.string
+        source_code = str(source_code)  # unicode
+        template = library.parse_template(source_code)
+        yourname = ''
+        direction = str(tag.get('direction', default_direction))
+        enclosed = bool_from_string(tag.get('enclosed', 'True'))
+        from mcdp_web.images.images import ndp_template_graph_enclosed
+        return call(ndp_template_graph_enclosed, library=library, template=template, style=STYLE_GREENREDSYM,
+                                 yourname=yourname, enclosed=enclosed,
+                                 direction=direction, klass='template_graph_enclosed')
+
     go('pre.ndp_graph_normal', func1)
     go('pre.ndp_graph_templatized', func2)
     go('pre.ndp_graph_templatized_labeled', func2b)
     go('pre.ndp_graph_enclosed', func3)
     go('pre.ndp_graph_expand', func4)
-#
-#     return soup.prettify()
+    go('pre.template_graph_enclosed', func5)
+
     return str(soup)
 
 def create_img_png_base64(soup, png, **attrs):

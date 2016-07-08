@@ -151,6 +151,11 @@ def parse_wrap_filename(expr, filename):
         raise e.with_filename(filename)
 
 def parse_wrap(expr, string):
+    if isinstance(string, unicode):
+        msg = 'The string is unicode. It should be a str with utf-8 encoding.'
+        msg += '\n' + string.encode('utf-8').__repr__()
+        raise ValueError(msg)
+
     # Nice trick: the removE_comments doesn't change the number of lines
     # it only truncates them...
     string0 = remove_comments(string)
