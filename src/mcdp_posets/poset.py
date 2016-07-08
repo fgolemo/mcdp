@@ -119,3 +119,17 @@ class Poset(Preorder):
             check_minimal(elements, poset=self)
         from mcdp_posets import UpperSet
         return UpperSet(set(elements), self)
+    
+    def L(self, a):
+        """ Returns the principal lower set corresponding to the given a. """
+        if do_extra_checks():
+            self.belongs(a)
+        from mcdp_posets import LowerSet
+        return LowerSet(set([a]), self)
+
+    @contract(elements='seq|set')
+    def Ls(self, elements):
+        from mcdp_posets import LowerSet
+        return LowerSet(set(elements), self)
+   
+    

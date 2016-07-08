@@ -20,8 +20,6 @@ class Series0(PrimitiveDP):
     def __init__(self, dp1, dp2):
         self.dp1 = dp1
         self.dp2 = dp2
-        # if equiv_to_identity(self.dp1) or equiv_to_identity(self.dp2):
-        #    raise ValueError('should not happen series\n- %s\n -%s' % (self.dp1, self.dp2))
 
         R1 = self.dp1.get_res_space()
         F2 = self.dp2.get_fun_space()
@@ -37,29 +35,28 @@ class Series0(PrimitiveDP):
         self.M1 = self.dp1.get_imp_space_mod_res()
         self.M2 = self.dp2.get_imp_space_mod_res()
 
-
-        if isinstance(self.dp1, (Mux, Identity)):
-            self.extraM = SpaceProduct(())
-        elif self._is_equiv_to_terminator(self.dp2):
-            self.extraM = SpaceProduct(())
-        else:
-            self.extraM = R1
-
-        M, _, _ = get_product_compact(self.M1, self.extraM, self.M2)
+        M, _, _ = get_product_compact(self.M1, self.M2)
 
         self._solve_cache = {}
-        PrimitiveDP.__init__(self, F=F1, R=R2, M=M)
+        PrimitiveDP.__init__(self, F=F1, R=R2, I=M)
 
     def _unpack_m(self, m):
-        _M, _, unpack = get_product_compact(self.M1, self.extraM, self.M2)
-        # M.belongs(m)
-        m1, m_extra, m2 = unpack(m)
-        return m1, m_extra, m2
+        M, _, unpack = get_product_compact(self.M1, self.M2)
+        if do_extra_checks():
+            M.belongs(m)
+        m1, m2 = unpack(m)
+        return m1, m2
+
+    def evaluate(self, i):
+        m1, m2 = self._unpack_m(i)
+        fs, _ = self.dp1.evaluate(m1)
+        _, rs = self.dp2.evaluate(m2)
+        return fs, rs
 
     def evaluate_f_m(self, f1, m):
         """ Returns the resources needed
             by the particular implementation m """
-        m1, m_extra, m2 = self._unpack_m(m)
+        m1, m2 = self._unpack_m(m)
 
         if isinstance(self.dp1, (Mux, Identity)):
             f2 = self.dp1.evaluate_f_m(f1, m1)

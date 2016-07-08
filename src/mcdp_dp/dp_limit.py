@@ -19,8 +19,14 @@ class Limit(PrimitiveDP):
         self.limit = value
 
         R = PosetProduct(())
-        M = PosetProduct(())
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        I = PosetProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, I=I)
+
+    def evaluate(self, i):
+        assert i == ()
+        rs = self.R.U(self.R.get_bottom())
+        fs = self.F.L(self.c)
+        return fs, rs
 
     def solve(self, f):
         if self.F.leq(f, self.limit):

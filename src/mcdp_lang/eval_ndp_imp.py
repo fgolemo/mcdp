@@ -22,6 +22,7 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 from mcdp_lang.eval_ndp_approx import eval_ndp_approx_lower, \
     eval_ndp_approx_upper
+from mcdp_posets.finite_collection_as_space import FiniteCollectionAsSpace
 
 
 
@@ -321,7 +322,9 @@ def eval_ndp_catalogue(r, context):
 
         entries.append((name, tuple(fvalues_), tuple(rvalues_)))
 
-    M = Any()
+    
+    names = set([name for (name, _, _) in entries])
+    M = FiniteCollectionAsSpace(names)
     # use integers
     # entries = [(float(i), b, c) for i, (_, b, c) in enumerate(entries)]
 
@@ -342,7 +345,7 @@ def eval_ndp_catalogue(r, context):
     else:
         R = PosetProduct(tuple(Rs))
 
-    dp = CatalogueDP(F=F, R=R, M=M, entries=tuple(entries))
+    dp = CatalogueDP(F=F, R=R, I=M, entries=tuple(entries))
     ndp = dpwrap(dp, fnames=fnames, rnames=rnames)
     return ndp
 

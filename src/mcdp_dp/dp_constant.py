@@ -14,11 +14,18 @@ class Constant(PrimitiveDP):
 
     @contract(R=Poset)
     def __init__(self, R, value):
-        F = PosetProduct(())
         self.c = value
-        M = PosetProduct(())
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
+        F = PosetProduct(())
+        I = PosetProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, I=I)
+
+    def evaluate(self, i):
+        assert i == ()
+        fs = self.F.L(self.F.get_top())
+        rs = self.R.U(self.c)
+        return fs, rs
+        
     def solve(self, _):
         return self.R.U(self.c)
 
@@ -31,9 +38,15 @@ class ConstantMinimals(PrimitiveDP):
     @contract(R=Poset)
     def __init__(self, R, values):
         F = PosetProduct(())
+        I = PosetProduct(())
         self.values = values
-        M = PosetProduct(())
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        PrimitiveDP.__init__(self, F=F, R=R, I=I)
+
+    def evaluate(self, i):
+        assert i == ()
+        fs = self.F.L(self.F.get_top())
+        rs = self.R.Us(self.c)
+        return fs, rs
 
     def solve(self, _):
         return self.R.Us(self.values)

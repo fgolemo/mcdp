@@ -6,7 +6,7 @@ from contracts import contract
 from contracts.utils import indent, raise_desc
 from decent_logs import WithInternalLog
 from mcdp_posets import (Map, Ncomp, Poset, PosetProduct, Space, SpaceProduct,
-    UpperSet, UpperSets, poset_minima)
+    UpperSet, UpperSets, poset_minima, LowerSet)  # @UnusedImport
 from mocdp.exceptions import do_extra_checks
 
 
@@ -15,6 +15,7 @@ __all__ = [
     'NotFeasible',
     'Feasible',
     'NotSolvableNeedsApprox',
+    'EmptyDP',
 ]
 
 
@@ -30,78 +31,38 @@ class NotSolvableNeedsApprox(Exception):
 
 class PrimitiveDP(WithInternalLog):
     """ 
-                        I = F * M
-               F      Res    M=I/F
-        Sum   RxR     R       []
+        There are F, R, I.
+        
+        solve : F -> U(R)
+        get_implementations_f_r: F x R -> set(I)
+            (note that F is not optimal by each I, merely feasible...)
+                
+        evaluate: I -> L(F), U(R)
+        
+        f' is feasible for I if f' \in eval(I).f
     
     """
     __metaclass__ = PrimitiveMeta
 
-    @contract(F=Space, R=Poset, M=Space)
-    def __init__(self, F, R, M):
+    @contract(F=Space, R=Poset, I=Space)
+    def __init__(self, F, R, I):
         self._inited = True
         self.F = F
         self.R = R
-        self.M = M
-        self.I = SpaceProduct((R, M))
+        self.I = I
 
-    def _assert_inited(self):
-        if not '_inited' in self.__dict__:
-            msg = 'Class %s not inited.' % (type(self))
-            raise Exception(msg)
+    @abstractmethod
+    @contract(returns=UpperSet)
+    def solve(self, f):
+        '''
+            Given one f point, returns an UpperSet of resources.
+        '''
+        pass
 
-    @contract(returns=Space)
-    def get_fun_space(self):
-        return self.F
-
-    @contract(returns=Poset)
-    def get_res_space(self):
-        return self.R
-
-    @contract(returns=Space)
-    def get_imp_space(self):
-        return self.I
-
-    @contract(returns=Space)
-    def get_imp_space_mod_res(self):
-        return self.M
-
-    @contract(returns=Poset)
-    def get_tradeoff_space(self):
-        return UpperSets(self.R)
-
-    def is_feasible(self, func, m, r):
-        try:
-            self.check_feasible(func, m, r)
-        except NotFeasible:
-            return False
-        else:
-            return True
-
-    def check_unfeasible(self, f, m, r):
-        try:
-            used = self.evaluate_f_m(f, m)
-        except NotFeasible:
-            return
-        if self.R.leq(used, r):
-            msg = 'Generic implementation of check_feasible(), says:\n'
-            msg += ('f = %s -> [ m = %s ] -> used = %s <= r = %s' %
-                (f, m, self.R.format(used), self.R.format(r)))
-            raise_desc(Feasible, msg)
-
-    def check_feasible(self, f, m, r):
-        if do_extra_checks():
-            self.F.belongs(f)
-            self.M.belongs(m)
-            self.R.belongs(r)
-        used = self.evaluate_f_m(f, m)
-        if do_extra_checks():
-            self.R.belongs(used)
-        if not self.R.leq(used, r):
-            msg = 'Generic implementation of check_feasible(), says:\n'
-            msg += 'f = %s -> [self(%s)] -> %s <~= %s' % (
-                        self.F.format(f), self.M.format(m), self.R.format(used), self.R.format(r))
-            raise_desc(NotFeasible, msg)  # f=f, m=m, r=r, used=used)
+    @abstractmethod
+    @contract(returns='tuple($LowerSet, $UpperSet)')
+    def evaluate(self, i):
+        """ Evaluates an implementation. """
 
     def get_implementations_f_r(self, f, r):  # @UnusedVariable
         """ Returns the set of implementations that realize the pair (f, r).
@@ -140,14 +101,78 @@ class PrimitiveDP(WithInternalLog):
             raise_desc(NotImplementedError, msg,
                        classname=type(self), func=func, M=M, m=m,)
 
-    @abstractmethod
-    @contract(returns=UpperSet)
-    def solve(self, func):
-        '''
-            Given one func point,
-            Returns an UpperSet 
-        '''
-        pass
+
+
+    def _assert_inited(self):
+        if not '_inited' in self.__dict__:
+            msg = 'Class %s not inited.' % (type(self))
+            raise Exception(msg)
+
+    @contract(returns=Space)
+    def get_fun_space(self):
+        return self.F
+
+    @contract(returns=Poset)
+    def get_res_space(self):
+        return self.R
+
+    @contract(returns=Space)
+    def get_imp_space(self):
+        return self.I
+
+    @contract(returns=Space)
+    def get_imp_space_mod_res(self):
+        return self.get_imp_space()
+
+    @contract(returns=Poset)
+    def get_tradeoff_space(self):
+        return UpperSets(self.R)
+
+    def is_feasible(self, f, i, r):
+        if do_extra_checks():
+            self.F.belongs(f)
+            self.I.belongs(i)
+            self.R.belongs(r)
+        try:
+            self.check_feasible(f, i, r)
+        except NotFeasible:
+            return False
+        else:
+            return True
+
+    def check_unfeasible(self, f, i, r):
+
+        if do_extra_checks():
+            self.F.belongs(f)
+            self.I.belongs(i)
+            self.R.belongs(r)
+
+        try:
+            used = self.evaluate_f_m(f, m)
+        except NotFeasible:
+            return
+        if self.R.leq(used, r):
+            msg = 'Generic implementation of check_feasible(), says:\n'
+            msg += ('f = %s -> [ m = %s ] -> used = %s <= r = %s' %
+                (f, m, self.R.format(used), self.R.format(r)))
+            raise_desc(Feasible, msg)
+
+    def check_feasible(self, f, m, r):
+        if do_extra_checks():
+            self.F.belongs(f)
+            self.M.belongs(m)
+            self.R.belongs(r)
+        used = self.evaluate_f_m(f, m)
+        if do_extra_checks():
+            self.R.belongs(used)
+        if not self.R.leq(used, r):
+            msg = 'Generic implementation of check_feasible(), says:\n'
+            msg += 'f = %s -> [self(%s)] -> %s <~= %s' % (
+                        self.F.format(f), self.M.format(m), self.R.format(used), self.R.format(r))
+            raise_desc(NotFeasible, msg)  # f=f, m=m, r=r, used=used)
+
+
+
 
     @contract(returns=UpperSet)
     def solve_trace(self, func, tracer):  # @UnusedVariable
@@ -288,6 +313,25 @@ class PrimitiveDP(WithInternalLog):
             head += '\n' + indent(x.tree_long(n - 2), '  ')
 
         return head
+
+
+class EmptyDP(PrimitiveDP):
+    """ 
+        This is a DP for which implementations = functions.
+         
+    """
+
+    def __init__(self, F, R):
+        I = F
+        PrimitiveDP.__init__(self, F=F, R=R, I=I)
+
+    def evaluate(self, i):
+        if do_extra_checks():
+            self.I.belongs(i)
+        f = i
+        rs = self.solve(f)
+        fs = LowerSet(set([f]), self.F)
+        return fs, rs
 
 
 class ApproximableDP(PrimitiveDP):

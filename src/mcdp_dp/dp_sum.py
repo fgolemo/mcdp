@@ -6,6 +6,8 @@ from mcdp_posets import (Int, Map, Nat, Poset, PosetProduct, Rcomp, RcompUnits,
     Space, SpaceProduct, get_types_universe)  # @UnusedImport
 import functools
 import numpy as np
+from mcdp_dp.primitive import EmptyDP
+from mocdp.exceptions import do_extra_checks
 # from mocdp import get_conftools_posets
 
 
@@ -235,16 +237,17 @@ class Product(PrimitiveDP):
     def __repr__(self):
         return 'Product(%r×%r→%r)' % (self.F1, self.F2, self.R)
 
-class ProductN(PrimitiveDP):
+class ProductN(EmptyDP):
 
     @contract(Fs='tuple[>=2]')
     def __init__(self, Fs, R):
-        for _ in Fs:
-            check_isinstance(_, RcompUnits)
-        check_isinstance(R, RcompUnits)
+        if do_extra_checks():
+            for _ in Fs:
+                check_isinstance(_, RcompUnits)
+            check_isinstance(R, RcompUnits)
+
         F = PosetProduct(Fs)
-        M = SpaceProduct(())
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        EmptyDP.__init__(self, F=F, R=R)
 
     def solve(self, f):
         # first, find out if there are any tops

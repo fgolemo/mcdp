@@ -5,6 +5,7 @@ from mcdp_dp import PrimitiveDP
 from mcdp_posets import Map, MapNotDefinedHere, NotBelongs, PosetProduct
 from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
+from mcdp_dp.primitive import EmptyDP
 
 
 __all__ = [
@@ -12,15 +13,13 @@ __all__ = [
     'WrapAMap',
 ]
 
-class GenericUnary(PrimitiveDP):
+# # XXX: this should be replaced by GenericUnaryMap
+
+class GenericUnary(EmptyDP):
     """ Meant for scalar values. Top maps to Top"""
     def __init__(self, F, R, function):
-        M = PosetProduct(())
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        EmptyDP.__init__(self, F=F, R=R)
         self.function = function
-
-    def get_implementations_f_r(self, f, r):  # @UnusedVariable
-        return set([()])
 
     def solve(self, func):
         if self.F.equal(func, self.F.get_top()):
@@ -38,14 +37,13 @@ class GenericUnary(PrimitiveDP):
         return "GenericUnary(%s)" % self.function  # .__name__
 
 
-class WrapAMap(PrimitiveDP):
+class WrapAMap(EmptyDP):
 
     @contract(amap=Map)
     def __init__(self, amap):
-        M = PosetProduct(())
         F = amap.get_domain()
         R = amap.get_codomain()
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        EmptyDP.__init__(self, F=F, R=R)
         self.amap = amap
 
     def solve(self, func):

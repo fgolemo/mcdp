@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-from .primitive import PrimitiveDP
-from contracts.utils import indent
 from .dp_series import get_product_compact
-from .primitive import NormalForm
+from .primitive import NormalForm, PrimitiveDP
+from contracts.utils import indent
+from mcdp_posets import (
+    Map, PosetProduct, UpperSet, UpperSets, lowerset_product, poset_minima,
+    upperset_product)
 from mocdp.exceptions import do_extra_checks
-from mcdp_posets import Map, PosetProduct, UpperSet, UpperSets, poset_minima
 import itertools
 
 
@@ -16,10 +17,6 @@ __all__ = [
 class Parallel(PrimitiveDP):
 
     def __init__(self, dp1, dp2):
-#         from mocdp import get_conftools_dps
-#         library = get_conftools_dps()
-#         _, self.dp1 = library.instance_smarter(dp1)
-#         _, self.dp2 = library.instance_smarter(dp2)
         self.dp1 = dp1
         self.dp2 = dp2
 
@@ -33,12 +30,11 @@ class Parallel(PrimitiveDP):
 
         M1 = self.dp1.get_imp_space_mod_res()
         M2 = self.dp2.get_imp_space_mod_res()
-        # M = SpaceProduct((M1, M2))
         M, _, _ = get_product_compact(M1, M2)
         self.M1 = M1
         self.M2 = M2
 
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
         
     def get_implementations_f_r(self, f, r):
         f1, f2 = f
@@ -64,6 +60,17 @@ class Parallel(PrimitiveDP):
 
         m1, m2 = unpack(m)
         return m1, m2
+
+    def evaluate(self, i):
+        m1, m2 = self._split_m(i)
+
+        fs1, rs1 = self.dp1.evaluate(m1)
+        fs2, rs2 = self.dp2.evaluate(m2)
+
+        fs = lowerset_product(fs1, fs2)
+        rs = upperset_product(rs1, rs2)
+
+        return fs, rs
 
     def evaluate_f_m(self, f, m):
         """ Returns the resources needed

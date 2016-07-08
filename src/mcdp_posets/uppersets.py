@@ -5,10 +5,14 @@ from .space import NotBelongs, NotEqual, Space
 from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.exceptions import do_extra_checks
+from mcdp_posets.poset_product import PosetProduct
 
 __all__ = [
     'UpperSet',
     'UpperSets',
+    'LowerSet',
+    'lowerset_product',
+    'upperset_product',
 ]
 
 class UpperSet(Space):
@@ -48,12 +52,49 @@ class UpperSet(Space):
                 return
         raise_desc(NotBelongs, 'Point does not belong')
         
+    def __repr__(self):
+        contents = ", ".join(self.P.format(m)
+                        for m in sorted(self.minimals))
 
-#     def __repr__old(self):  # ≤  ≥
-#         contents = " v ".join("x ≥ %s" % self.P.format(m)
-#                         for m in sorted(self.minimals))
-#
-#         return "{x ∣ %s }" % contents
+        return "↑{%s}" % contents
+
+
+class LowerSet(Space):
+
+    @contract(minimals='set|list|$frozenset', P=Poset)
+    def __init__(self, minimals, P):
+        self.minimals = frozenset(minimals)
+        self.P = P
+
+        if do_extra_checks():
+            # XXX
+            problems = []
+            for m in minimals:
+                try:
+                    self.P.belongs(m)
+                except NotBelongs as e:
+                    problems.append(e)
+            if problems:
+                msg = "Cannot create lower set:\n"
+                msg += "\n".join(str(p) for p in problems)
+                raise NotBelongs(msg)
+
+            from mcdp_posets import check_maximal
+            check_maximal(self.minimals, P)
+
+    @contract(returns=Poset)
+    def get_poset(self):
+        return self.P
+
+    def check_equal(self, x, y):
+        self.P.check_equal(x, y)
+
+    def belongs(self, x):
+        self.P.belongs(x)
+        for p in self.minimals:
+            if self.P.leq(p, x):
+                return
+        raise_desc(NotBelongs, 'Point does not belong')
 
     def __repr__(self):
         contents = ", ".join(self.P.format(m)
@@ -178,3 +219,21 @@ class UpperSets(Poset):
 
     def __repr__(self):
         return "U(%r)" % self.P
+
+@contract(s1=LowerSet, s2=LowerSet, returns=LowerSet)
+def lowerset_product(s1, s2):
+    assert isinstance(s1, LowerSet), s1
+    assert isinstance(s2, LowerSet), s2
+    res = set(zip(s1.minimals, s2.minimals))
+    P = PosetProduct((s1.P, s2.P))
+    return LowerSet(res, P)
+
+@contract(s1=UpperSet, s2=UpperSet, returns=UpperSet)
+def upperset_product(s1, s2):
+    assert isinstance(s1, UpperSet), s1
+    assert isinstance(s2, UpperSet), s2
+    res = set(zip(s1.minimals, s2.minimals))
+    P = PosetProduct((s1.P, s2.P))
+    return UpperSet(res, P)
+
+

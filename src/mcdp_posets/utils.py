@@ -3,11 +3,19 @@
 from .find_poset_minima.baseline_n2 import poset_minima
 from contracts import raise_wrapped
 from mcdp_posets import NotLeq
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
 
 __all__ = [
     'check_minimal',
+    'check_maximal',
     'poset_check_chain',
 ]
+
+def check_maximal(elements, poset):
+    m2 = poset_maxima(elements, poset.leq)
+    if not len(m2) == len(elements):
+        msg = 'Set of elements is not minimal: %s' % elements
+        raise ValueError(msg)
 
 def check_minimal(elements, poset):
     m2 = poset_minima(elements, poset.leq)
