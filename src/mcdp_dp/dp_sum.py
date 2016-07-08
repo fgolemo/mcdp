@@ -101,7 +101,7 @@ class SumNInt(Map):
         return r
     
 
-class SumN(PrimitiveDP):
+class SumN(EmptyDP):
     """ Sum of real values with units. """
     @contract(Fs='tuple, seq[>=2]($RcompUnits)', R=RcompUnits)
     def __init__(self, Fs, R):
@@ -114,10 +114,8 @@ class SumN(PrimitiveDP):
         F = PosetProduct(self.Fs)
         R = R
 
-        M = SpaceProduct(())
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
-
+        EmptyDP.__init__(self, F=F, R=R)
         sum_dimensionality_works(Fs, R)
 
     def solve(self, func):
