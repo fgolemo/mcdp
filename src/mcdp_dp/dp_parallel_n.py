@@ -2,11 +2,10 @@
 from .dp_series import get_product_compact
 from .primitive import PrimitiveDP
 from contracts import contract
+from contracts.utils import indent
 from mcdp_posets import PosetProduct
 from mocdp.exceptions import do_extra_checks
 import itertools
-import warnings
-from contracts.utils import indent
 
 
 __all__ = [
@@ -19,7 +18,6 @@ class ParallelN(PrimitiveDP):
 
     @contract(dps='tuple,seq($PrimitiveDP)')
     def __init__(self, dps):
-        warnings.warn('None of the following is implemented')
         Fs = [_.get_fun_space() for _ in dps]
         F = PosetProduct(tuple(Fs))
         Rs = [_.get_res_space() for _ in dps]

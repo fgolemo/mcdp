@@ -203,9 +203,9 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         docs = os.path.join(package, 'docs')
         f = os.path.join(docs, '%s.md' % docname)
         import codecs
-        data = codecs.open(f, encoding='utf-8').read()
+        data = codecs.open(f, encoding='utf-8').read()  # XXX
         html = render_markdown(data)
-        # print html
+
         return {'contents': html}
 
     # This is where we keep all the URLS
@@ -369,10 +369,11 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         filename = '%s.%s' % (document, MCDPLibrary.ext_doc_md)
         f = l._get_file_data(filename)
         realpath = f['realpath']
-        data = codecs.open(realpath, encoding='utf-8').read()
-
+        # read unicode
+        data_unicode = codecs.open(realpath, encoding='utf-8').read()
+        data_str = data_unicode.encode('utf-8')
         raise_errors = bool(strict)
-        html = render_complete(library=l, s=data, raise_errors=raise_errors)
+        html = render_complete(library=l, s=data_str, raise_errors=raise_errors)
         return html
 
     def view_library_doc(self, request):
@@ -381,6 +382,10 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         # reopen as utf-8
         document = str(request.matchdict['document'])
         html = self._render_library_doc(request, document)
+        # we work with utf-8 strings
+        assert isinstance(html, str)
+        # but we need to convert to unicode later
+        html = unicode(html, 'utf-8')
         res = {}
         res['contents'] = html
         res['title'] = document

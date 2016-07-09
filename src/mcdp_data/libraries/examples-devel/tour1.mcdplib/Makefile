@@ -3,7 +3,9 @@ markdowns=$(shell python get_list.py < toc.md)
 tmpdir=.downloads
 pdfs=$(markdowns:%.md=$(tmpdir)/%.pdf)
 
-all: tour.pdf
+all: 
+	echo "try: make manual"
+
 
 tour.pdf: $(pdfs)
 	pdftk  $^ output $@

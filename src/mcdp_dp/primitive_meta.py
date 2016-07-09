@@ -7,6 +7,7 @@ __all__ = [
     'PrimitiveMeta',
 ]
 
+
 class PrimitiveMeta(ABCMeta):
     # we use __init__ rather than __new__ here because we want
     # to modify attributes of the class *after* they have been
@@ -19,6 +20,7 @@ class PrimitiveMeta(ABCMeta):
             pass
         else:
             from mcdp_dp.primitive import NotSolvableNeedsApprox
+            from mcdp_dp.primitive import WrongUseOfUncertain
 
             if 'solve' in cls.__dict__:
                 solve = cls.__dict__['solve']
@@ -42,6 +44,8 @@ class PrimitiveMeta(ABCMeta):
                         raise_wrapped(NotImplementedError, e,
                             'Solve not implemented for class %s.' % name)
                     except NotSolvableNeedsApprox:
+                        raise
+                    except WrongUseOfUncertain:
                         raise
                     except Exception as e:
                         raise_wrapped(Exception, e,

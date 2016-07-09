@@ -10,7 +10,7 @@ from mcdp_posets import PosetProduct, Space
 from mcdp_posets.poset import NotLeq
 from mcdp_posets.space import Map
 from mocdp.exceptions import DPSemanticError
-from mcdp_dp.primitive import NotSolvableNeedsApprox
+from mcdp_dp.primitive import NotSolvableNeedsApprox, WrongUseOfUncertain
 
 
 __all__ = [
@@ -53,14 +53,14 @@ class CheckOrder(Map):
     def __init__(self, F0):
         self.F0 = F0
         F = PosetProduct((F0, F0))
-        Map.__init__(self, dom=F, cod=F0)
+        Map.__init__(self, dom=F, cod=F)
     def _call(self, x):
         l, u = x
         try:
             self.F0.check_leq(l, u)
         except NotLeq as e:
             msg = 'Run-time check failed; wrong use of "Uncertain" operator.'
-            raise_wrapped(DPSemanticError, e, msg, l=l, u=u, compact=True)
+            raise_wrapped(WrongUseOfUncertain, e, msg, l=l, u=u, compact=True)
         return x
 
 

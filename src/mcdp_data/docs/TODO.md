@@ -1,4 +1,31 @@
+Goals:
 
+(*) [branch: devel] Stabilize unit-tests in devel
+
+- B: mcdplib-example_plusinv-ndp-plusinvnat3b_inf-test_conversion 
+
+(*) Release new version
+- put manual.html on website
+- change website?
+
+(*) Automatically generated iteration figures
+
+(*) Feature-parity with new Loop2, including normal transform
+
+(*) [branch: ???] Symmetrization for functionality/resources
+
+(*) Examples for WAFR paper
+
+(*) Compelling demo for uncertainty
+
+(*) Create a video?
+
+(*) Demo for QR code
+
+(*) Other features
+
+
+--------------------
 
 
 Keys:
@@ -10,23 +37,19 @@ Keys:
 - T: testing
 
 
+Bugs
+-----
+
 - B: if the syntax is not correct, it is not displayed at all.
   http://127.0.0.1:8080/libraries/duckiebot_components/models/pimoroni_inc/views/syntax/
+
 - F: SVG for dpgraph http://127.0.0.1:8080/libraries/droneD_complete.v2/models/perception/views/dp_graph/
 
-- F: if strict is passed as parameter, then all errors are raised
-   (for compiling tour.pdf)
 
 
-- library list: templates
-
-
-- B: mcdplib-example_plusinv-ndp-plusinvnat3b_inf-test_conversion 
 
 Meat
 ----
-
-- demo: uncertainty in batteries
 
 
 - intervals - what happens 
@@ -59,20 +82,20 @@ mcdp {
 Misc
 -----
 
-- R: add license information
-- F: add credits to free sw in the initial page
-
 - F: create operator approx(10g, -)
 
-
-
-- T: mcdplib: create stand-alone ``mcdp-test`` for each ``.mcdplib``
-
-- B: automatically load CSS from that file.
+- B: automatically load CSS from that file. (introduces dependency on mcdp_web)
  
 
 MCDP-web
 ----------
+
+- R: add license information
+
+- F: add credits to free sw in the initial page
+
+- F: library list: templates
+
 
 - R: drop "/list"
 

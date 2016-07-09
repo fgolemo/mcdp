@@ -28,6 +28,9 @@ class Feasible(Exception):
 class NotSolvableNeedsApprox(Exception):
     pass
 
+class WrongUseOfUncertain(Exception):
+    pass
+
 class PrimitiveDP(WithInternalLog):
     """ 
                         I = F * M

@@ -3,6 +3,7 @@ from mcdp_library.library_utils import list_library_files
 from mcdp_library_tests.tests import enumerate_test_libraries
 from mcdp_web.renderdoc.main import render_complete
 from mcdp_web_tests.test_server import test_mcdpweb_server
+from mocdp.exceptions import mcdp_dev_warning
 import shutil
 import tempfile
 
@@ -16,7 +17,10 @@ def define_tests_mcdp_web(context):
     for short, dirname in enumerate_test_libraries():
         c2 = context.child(short)
         c2.comp_dynamic(define_tests_rendering, dirname)
-        c2.comp(test_mcdpweb_server, dirname)
+        if False:
+            c2.comp(test_mcdpweb_server, dirname)
+        else:
+            mcdp_dev_warning('test_mcdpweb_server() is not enabled')
 
 
 def define_tests_rendering(context, dirname):

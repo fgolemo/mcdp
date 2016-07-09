@@ -16,7 +16,7 @@ class NatTop():
     def __eq__(self, x):
         return isinstance(x, NatTop)
     def __hash__(self):
-        return 43  # "RCompTop"
+        return 43
 
 class Nat(Poset):
     """
@@ -35,17 +35,24 @@ class Nat(Poset):
         return self.get_bottom()
 
     def belongs(self, x):
-        if x == self.top:
-            return
+        if isinstance(x, int):
+            if x >= 0:
+                return
+            else:
+                msg = '%s ≰ %s' % (0, x)
+                raise_desc(NotBelongs, msg, x=x)
+        else:
+            if x == self.top:
+                return
 
-        if not isinstance(x, int):
-            raise_desc(NotBelongs, 'Not an int.', x=x)
+            raise_desc(NotBelongs, 'Not a valid Nat.', x=x)
 
-        if not 0 <= x:
-            msg = '%s ≰ %s' % (0, x)
-            raise_desc(NotBelongs, msg, x=x)
 
     def join(self, a, b):
+        # first the common case
+        if isinstance(a, int) and isinstance(b, int):
+            return max(a, b)
+        # generic case
         if self.leq(a, b):
             return b
         if self.leq(b, a):
@@ -53,6 +60,10 @@ class Nat(Poset):
         assert False
 
     def meet(self, a, b):
+        # first the common case
+        if isinstance(a, int) and isinstance(b, int):
+            return max(a, b)
+        # generic case
         if self.leq(a, b):
             return a
         if self.leq(b, a):
@@ -76,12 +87,19 @@ class Nat(Poset):
         return "ℕ"
 
     def format(self, x):
-        if x == self.top:
-            return self.top.__repr__()
-        else:
+        if isinstance(x, int):
             return '%d' % x
+        else:
+            if x == self.top:
+                return self.top.__repr__()
+            else:
+                raise NotBelongs(x)
 
     def _leq(self, a, b):
+        # common case
+        if isinstance(a, int) and isinstance(b, int):
+            return a <= b
+        # generic case
         if a == b:
             return True
         if a == self.top:

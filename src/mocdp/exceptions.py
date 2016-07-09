@@ -48,6 +48,7 @@ class DPSemanticError(DPUserError):
 class DPSemanticErrorNotConnected(DPSemanticError):
     pass
 
+
 @contextmanager
 def extend_with_filename(realpath):
     try:
