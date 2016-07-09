@@ -7,6 +7,7 @@ from  .utils import (assert_parsable_to_connected_ndp,
     assert_semantic_error, parse_wrap_check)
 from nose.tools import assert_equal
 from pyparsing import Literal
+from mcdp_posets.uppersets import UpperSets, UpperSet
 
 @comptest
 def check_lang():
@@ -274,9 +275,6 @@ mcdp {
 
 
 
-@comptest
-def check_lang52():
-    pass
 
 
 
@@ -291,4 +289,64 @@ def check_lang53():
     
     x + y >= a
 })""")
+
+def add_def_poset(l, name, data):
+    fn = '%s.mcdp_poset' % name
+    l.file_to_contents[fn] = dict(realpath='#', data=data)
+
+@comptest
+def check_lang52():  # TODO: rename
+    """ A test for finite posets where the join might not exist. """
+    from mcdp_library.library import MCDPLibrary
+    l = MCDPLibrary()
+
+    add_def_poset(l, 'P', """
+    finite_poset {
+        a <= b <= c
+        A <= B <= C
+    }
+    """)
+
+    ndp = l.parse_ndp("""
+        mcdp {
+            provides x [`P]
+            provides y [`P]
+            requires z [`P]
+            
+            z >= x
+            z >= y
+        }
+    """)
+    dp = ndp.get_dp()
+
+    res1 = dp.solve(('a', 'b'))
+
+    P = l.load_poset('P')
+    UR = UpperSets(P)
+    UR.check_equal(res1, UpperSet(['b'], P))
+
+    res2 = dp.solve(('a', 'A'))
+
+    UR.check_equal(res2, UpperSet([], P))
+
+
+@comptest
+def check_lang54():  # TODO: rename
     pass
+
+@comptest
+def check_lang55():  # TODO: rename
+    pass
+
+@comptest
+def check_lang56():  # TODO: rename
+    pass
+
+@comptest
+def check_lang57():  # TODO: rename
+    pass
+
+@comptest
+def check_lang58():  # TODO: rename
+    pass
+

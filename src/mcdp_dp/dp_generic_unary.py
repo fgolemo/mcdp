@@ -39,6 +39,12 @@ class GenericUnary(PrimitiveDP):
 
 
 class WrapAMap(PrimitiveDP):
+    """
+        solve(f) = map(f)
+        
+        If map is not defined at f (raises MapNotDefinedHere),
+        then it returns an empty set. 
+    """
 
     @contract(amap=Map)
     def __init__(self, amap):

@@ -4,6 +4,9 @@ from .dp_generic_unary import WrapAMap
 from .primitive import PrimitiveDP
 from contracts import contract
 from mcdp_posets import Map, Poset, PosetProduct, SpaceProduct
+from mcdp_posets.poset import NotJoinable
+from mcdp_posets.space import MapNotDefinedHere
+from contracts.utils import raise_wrapped
 # from mocdp import get_conftools_posets
 
 
@@ -88,7 +91,12 @@ class Min(PrimitiveDP):
         return 'Min(%r)' % self.F0
 
 class JoinN(Map):
-    """ A map that joins n arguments. """
+    """ 
+    
+        A map that joins n arguments. 
+    
+        Raises MapNotDefinedHere if the elements are not joinable.
+    """
 
     @contract(n='int,>=1', P=Poset)
     def __init__(self, n, P):
@@ -98,15 +106,20 @@ class JoinN(Map):
         self.P = P
 
     def _call(self, xs):
-        res = xs[0]
-        for x in xs[1:]:
-            res = self.P.join(res, x)
-        return res
-    
+        try:
+            res = xs[0]
+            for x in xs[1:]:
+                res = self.P.join(res, x)
+            return res
+        except NotJoinable as e:
+            msg = 'Cannot join all elements.'
+            raise_wrapped(MapNotDefinedHere, e, msg)
+            
 class JoinNDP(WrapAMap):
     def __init__(self, n, P):
         amap = JoinN(n, P)
         WrapAMap.__init__(self, amap)
+
 
 class MeetNDual(Mux):
     """ This is just a Mux """
