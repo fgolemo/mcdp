@@ -44,4 +44,8 @@ clean:
 	#rmdir $(tmpdir)
 
 publish: $(htmltmpdir)/manual.html
-	cp $(htmltmpdir)/manual.html ~/env_mcdp/src/mcdp-gh-pages/media/pymcdp-manual.html
+	cp $< ~/env_mcdp/src/mcdp-gh-pages/media/pymcdp-manual.html
+	cp $< ../../../../mcdp_web/static/manual.html
+
+
+

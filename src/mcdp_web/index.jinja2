@@ -1,30 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>MCDP-web</title>
+    <title>PyMCDP Interactive Environment</title>
     {% include 'head.jinja2' %}
+    <style type='text/css'>
+    	h
+    </style>
 </head>
 <body>
 
-<h1>MCDP Interactive Environment Version {{ version() }}</h1>
+<h2>PyMCDP Interactive Environment (version {{version()}})</h2>
 
 
 
+<h3>Do</h3>
 
-<h2>Do</h2>
+<p>
+	<a href='/list'>The list of libraries available.</a>
+</p>
 
-<p><a href='/list'>The list of libraries available.</a>
+<p>
+	Some interesting starting points: 
+		<a href="/libraries/droneD_complete.v2/">the drone example</a>,
+	 	<a href="/libraries/plugs/">the plugs domain</a>
+</p>
 
 
-<h2>Learn</h2>
+<h3>Learn</h3>
 
-<p><a href="/docs/language_notes/">The MCDP language specification</a></p>
+<!--<p><a href="/docs/language_notes/">The MCDP language specification</a></p>-->
 
-<h2>Help</h2>
+<p><a href="/static/manual.html">The PyMCDP Manual</a></p>
+
+<h3>Help</h3>
 
 <p>Please file bug reports at the <a href="https://github.com/AndreaCensi/mcdp/issues">Github 
 website</a></p> 
 
+<!--
 <p>Shortcuts:</p>
 <ul>
 	<li>Alt+R: refresh library (re-loads all cached files)</li>
@@ -33,7 +46,7 @@ website</a></p>
 <ul>
 <li><a href="/docs/TODO/">TODO</a></li>
 </ul>
-
+-->
 
 </body>
 </html>
