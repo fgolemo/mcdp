@@ -40,3 +40,6 @@ clean:
 	rm -f $(pdfs)
 	rm -f $(htmls)
 	#rmdir $(tmpdir)
+
+publish: $(htmltmpdir)/manual.html
+	cp $(htmltmpdir)/manual.html ~/env_mcdp/src/mcdp-gh-pages/media/pymcdp-manual.html

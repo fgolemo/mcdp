@@ -25,7 +25,7 @@ def go():
 
     </head>
     <body>
-    <h1 class='main'>The PyMCDP user manual</h1>
+    <h1 id='booktitle'>The PyMCDP user manual</h1>
     <div id='toc'/>
     <div id='body'/>
     </body>
@@ -59,10 +59,12 @@ def go():
     
     toc = generate_doc(main_body)
     toc = BeautifulSoup(toc, 'lxml')
+    toc['class'] = 'toc'
+    toc['id'] = 'toc'
     toc_place = d.select('div#toc')[0]
     body_place = d.select('div#body')[0]
     toc_place.replaceWith(toc)
-    debug(body_place)
+     
     body_place.replaceWith(main_body)
 
     print str(d)
@@ -75,7 +77,8 @@ def generate_doc(soup):
     header_id = 1
 
     class Item():
-        def __init__(self, depth, name, id, items):
+        def __init__(self, tag, depth, name, id, items):
+            self.tag = tag
             self.name = name
             self.depth = depth
             self.id = id
@@ -94,7 +97,7 @@ def generate_doc(soup):
                 s += '</ul>'
             return s
 
-    stack = [ Item(0, 'root', 'root', []) ]
+    stack = [ Item(None, 0, 'root', 'root', []) ]
 
     for header in soup.findAll(['h1', 'h2', 'h3']):
         header['id'] = header_id
@@ -103,7 +106,7 @@ def generate_doc(soup):
 
         # previous_depth = stack[-1].depth
 
-        item = Item(depth, header.string, header['id'], [])
+        item = Item(header, depth, header.string, header['id'], [])
 
         while(stack[-1].depth >= depth):
             stack.pop()
@@ -113,6 +116,14 @@ def generate_doc(soup):
 
 
     root = stack[0]
+
+    for item in root.items:
+        s = item.__str__(root=True)
+        stoc = BeautifulSoup(s, 'lxml')
+        stoc['class'] = 'toc'
+        item.tag.insert_after(stoc)
+
+
     return root.__str__(root=True)
 
 

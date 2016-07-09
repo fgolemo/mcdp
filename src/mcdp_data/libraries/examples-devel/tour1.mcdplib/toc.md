@@ -42,6 +42,7 @@
 
 [The plug/socket domain](plugs.html)
 
+<!-- <a href='using_templates_drone.html'>Templates</a> -->
 
 <style type='text/css'>
 .current { color: red; }

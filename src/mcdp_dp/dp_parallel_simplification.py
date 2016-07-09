@@ -121,7 +121,7 @@ def make_parallel_n(dps):
     if len(dps) == 0:
         mcdp_dev_warning('This works but should be a special case.')
 
-    return ParallelN(dps)
+    return ParallelN(tuple(dps))
 #
 #     from mcdp_dp.dp_series_simplification import make_series
 #

@@ -2,9 +2,9 @@ from mcdp_library.library import MCDPLibrary
 from mcdp_library.library_utils import list_library_files
 from mcdp_library_tests.tests import enumerate_test_libraries
 from mcdp_web.renderdoc.main import render_complete
-import tempfile
-import shutil
 from mcdp_web_tests.test_server import test_mcdpweb_server
+import shutil
+import tempfile
 
 
 def define_tests_mcdp_web(context):
@@ -31,7 +31,7 @@ def define_tests_rendering(context, dirname):
 
 def check_rendering(dirname, docname, filename):  # @UnusedVariable
     import codecs
-    data = codecs.open(filename, encoding='utf-8').read()
+    data = codecs.open(filename, encoding='utf-8').read().encode('utf-8')
 
     library = MCDPLibrary()
     library.add_search_dir(dirname)

@@ -13,7 +13,6 @@ def render_complete(library, s, raise_errors, realpath='unavailable'):
         
         Returns an HTML string.
     """
-    print('raise_erorrs: %s' % raise_errors)
     html = render_markdown(s)
     html2 = html_interpret(library, html, raise_errors=raise_errors, realpath=realpath)
     return html2

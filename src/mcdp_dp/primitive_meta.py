@@ -30,7 +30,7 @@ class PrimitiveMeta(ABCMeta):
                     except NotBelongs as e:
                         msg = "Function passed to solve() is not in function space."
                         raise_wrapped(NotBelongs, e, msg,
-                                      F=F, f=f, self=self)
+                                      F=F, f=f, dp=self.repr_long())
 
                     try:
                         res = solve(self, f)

@@ -1,7 +1,7 @@
-# Approximations
+## Approximations
 
 
-# Multiplication dual
+### Multiplication dual
 
 <pre class='mcdp' id='invmult'>
 mcdp  {
@@ -57,7 +57,7 @@ mcdp  {
 </table>
 
 
-# Addition dual
+### Addition dual
 
 <pre class='mcdp' id='invplus'>
 mcdp {

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from .parts import CDPLanguage
 from contracts.utils import indent
 from mocdp.comp import NotConnected
-from .parts import CDPLanguage
 
 
 CDP = CDPLanguage

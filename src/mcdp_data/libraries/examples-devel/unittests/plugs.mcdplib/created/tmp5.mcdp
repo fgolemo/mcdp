@@ -1,0 +1,7 @@
+mcdp {
+  provides a [`socket_type x A]
+  requires b [`socket_type x A]
+#  take(a, 0) <= `socket_type: TypeA 
+
+ take(b, 0) >= `socket_type: TypeB 
+}

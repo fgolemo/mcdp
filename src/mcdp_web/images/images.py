@@ -4,7 +4,7 @@ from mcdp_report.gg_ndp import gvgen_from_ndp
 from mocdp.comp.composite_templatize import ndp_templatize
 from mcdp_report.report import gvgen_from_dp
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-from mcdp_report.gdc import STYLE_GREENREDSYM
+from reprep.constants import MIME_PNG, MIME_PDF, MIME_SVG
 
 
 
@@ -62,14 +62,15 @@ class WebAppImages():
             dp = ndp.get_dp()
             gg = gvgen_from_dp(dp)
 
-            png, pdf = png_pdf_from_gg(gg)
-
             fileformat = request.matchdict['format']
+            data = gg_get_format(gg, fileformat)
 
             if fileformat == 'pdf':
-                return response_data(request=request, data=pdf, content_type='image/pdf')
+                return response_data(request=request, data=data, content_type=MIME_PDF)
             elif fileformat == 'png':
-                return response_data(request=request, data=png, content_type='image/png')
+                return response_data(request=request, data=data, content_type=MIME_PNG)
+            elif fileformat == 'svg':
+                return response_data(request=request, data=data, content_type=MIME_SVG)
             else:
                 raise ValueError('No known format %r.' % fileformat)
         return self.png_error_catch2(request, go)
@@ -103,6 +104,7 @@ def get_mime_for_format(data_format):
 def ndp_graph_templatized(library, ndp, yourname=None, data_format='png', direction='LR'):
     ndp = ndp_templatize(ndp, mark_as_template=False)
     images_paths = library.get_images_paths()
+    from mcdp_report.gdc import STYLE_GREENREDSYM
 
     gg = gvgen_from_ndp(ndp, STYLE_GREENREDSYM, yourname=yourname,
                         images_paths=images_paths, direction=direction)
@@ -141,6 +143,8 @@ def ndp_graph_enclosed(library, ndp, style, yourname, data_format, direction='TB
     return gg_get_format(gg, data_format)
 
 def ndp_template_enclosed(library, name, x, data_format):
+    from mcdp_report.gdc import STYLE_GREENREDSYM
+
     return ndp_template_graph_enclosed(library, x, style=STYLE_GREENREDSYM, yourname=name,
                                        data_format=data_format, direction='TB', enclosed=True)
 
@@ -196,19 +200,24 @@ def gg_get_format(gg, data_format):
     from reprep import Report
     from mcdp_report.gg_utils import gg_figure
     r = Report()
-    gg_figure(r, 'graph', gg)
-    png = r.resolve_url('graph/graph').get_raw_data()
-    pdf = r.resolve_url('graph_pdf').get_raw_data()
-    svg = r.resolve_url('graph_svg').get_raw_data()
-    dot = r.resolve_url('dot').get_raw_data()
+    do_dot = data_format == 'dot'
+    do_png = data_format == 'png'
+    do_pdf = data_format == 'pdf'
+    do_svg = data_format == 'svg'
+    gg_figure(r, 'graph', gg, do_dot=do_dot,
+              do_png=do_png, do_pdf=do_pdf, do_svg=do_svg)
 
     if data_format == 'pdf':
+        pdf = r.resolve_url('graph_pdf').get_raw_data()
         return pdf
     elif data_format == 'png':
+        png = r.resolve_url('graph/graph').get_raw_data()
         return png
     elif data_format == 'dot':
+        dot = r.resolve_url('dot').get_raw_data()
         return dot
     elif data_format == 'svg':
+        svg = r.resolve_url('graph_svg').get_raw_data()
         return svg
     else:
         raise ValueError('No known format %r.' % data_format)

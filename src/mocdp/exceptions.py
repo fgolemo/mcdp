@@ -1,13 +1,12 @@
 from contextlib import contextmanager
 from contracts import all_disabled
 import sys
+import warnings
 
 class MCDPException(Exception):
     pass
 
 class MCDPExceptionWithWhere(MCDPException):
-
-
     def __init__(self, error, where=None):
         if not isinstance(error, str):
             raise ValueError('Expected string, got %r.' % type(error))
@@ -46,6 +45,9 @@ class DPSyntaxError(DPUserError):
 class DPSemanticError(DPUserError):
     pass
 
+class DPSemanticErrorNotConnected(DPSemanticError):
+    pass
+
 @contextmanager
 def extend_with_filename(realpath):
     try:
@@ -61,25 +63,27 @@ def extend_with_filename(realpath):
 def _get_where_with_filename(e, filename):
     where = e.where
     if where is None:
-        print('warning, where is None here: %s' % e)
+        mcdp_dev_warning('warning, where is None here: %s' % e)
         where = None
     else:
         where = where.with_filename(filename)
     return where
 
-
-class _storage:
-    first = True
+import getpass
+user = getpass.getuser()
+# class _storage:
+#     first = True
 
 def do_extra_checks():
-
     res = not all_disabled()
-    if _storage.first:
-        # logger.info('do_extra_checks: %s' % res)
-        pass
-    _storage.first = False
+#     if _storage.first:
+#         # logger.info('do_extra_checks: %s' % res)
+#         pass
+#     _storage.first = False
     return res
 
-def mcdp_dev_warning(s):
-    # warnings.warn(s)
-    pass
+def mcdp_dev_warning(s):  # @UnusedVariable
+    if user == 'andrea':
+        # warnings.warn(s)
+        pass
+

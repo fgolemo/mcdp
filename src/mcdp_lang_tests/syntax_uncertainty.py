@@ -35,7 +35,7 @@ def check_uncertainty2():
 
     R = dp.get_res_space()
     UR = UpperSets(R)
-    f0 = 0  # N
+    f0 = 0.0  # N
     sl = dpl.solve(f0)
     su = dpu.solve(f0)
     UR.check_leq(sl, su)

@@ -53,7 +53,7 @@ def check_tuples5():
 def check_tuples6():
     parsef = lambda s: parse_wrap(Syntax.fvalue, s)[0]
 
-    parsef('takef(out, 1)')
+    parsef('take(out, 1)')
 
 @comptest
 def check_tuples7():

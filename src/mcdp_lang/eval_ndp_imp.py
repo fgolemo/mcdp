@@ -20,7 +20,8 @@ from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
 from mocdp.comp.composite_makecanonical import cndp_makecanonical
 from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
     get_name_for_fun_node, get_name_for_res_node)
-from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+from mocdp.exceptions import (DPInternalError, DPSemanticError,
+    DPSemanticErrorNotConnected, mcdp_dev_warning)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 
@@ -71,7 +72,7 @@ def eval_ndp(r, context):  # @UnusedVariable
                 ndp.check_fully_connected()
             except NotConnected as e:
                 msg = 'Cannot abstract away the design problem because it is not connected.'
-                raise_wrapped(DPSemanticError, e, msg, compact=True)
+                raise_wrapped(DPSemanticErrorNotConnected, e, msg, compact=True)
 
             ndpa = ndp.abstract()
             return ndpa
@@ -120,6 +121,9 @@ def eval_ndp_specialize(r, context):
         keys = params_ops[::2]
         values = params_ops[1::2]
         keys = [_.value for _ in keys]
+        if len(keys) != len(set(keys)):
+            msg = 'Repeated parameters in specialize.'
+            raise_desc(DPSemanticError, msg, keys=keys)
         values = [eval_ndp(_, context) for _ in values]
         d = dict(zip(keys, values))
         params = d

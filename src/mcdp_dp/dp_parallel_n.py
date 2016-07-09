@@ -17,7 +17,7 @@ __all__ = [
 class ParallelN(PrimitiveDP):
     """ Generalization to N problems """
 
-    @contract(dps='list($PrimitiveDP)')
+    @contract(dps='tuple,seq($PrimitiveDP)')
     def __init__(self, dps):
         warnings.warn('None of the following is implemented')
         Fs = [_.get_fun_space() for _ in dps]
@@ -27,7 +27,7 @@ class ParallelN(PrimitiveDP):
         Ms = [_.get_imp_space_mod_res() for _ in dps]
 
         self.Ms = Ms
-        self.dps = dps
+        self.dps = tuple(dps)
         self.M, _, _ = get_product_compact(*tuple(self.Ms))
         PrimitiveDP.__init__(self, F=F, R=R, M=self.M)
 

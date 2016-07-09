@@ -1,0 +1,5 @@
+mcdp {
+  provides a [`socket_type]
+  requires b [`socket_type]
+  b >= a
+}

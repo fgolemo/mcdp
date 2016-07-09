@@ -14,7 +14,10 @@ def render_markdown(s):
         'markdown.extensions.admonition',
         'markdown.extensions.tables',
     ]
-    html = markdown.markdown(s, extensions)
+
+    # markdown takes and returns unicode
+    u = s.decode('utf-8')
+    html = markdown.markdown(u, extensions)
     html = html.encode('utf-8')
     return html
 

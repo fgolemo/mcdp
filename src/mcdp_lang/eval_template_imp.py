@@ -4,7 +4,7 @@ from mcdp_lang.parse_actions import add_where_information
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.utils_lists import unwrap_list
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-from mocdp.exceptions import DPInternalError
+from mocdp.exceptions import DPInternalError, DPSemanticError
 
 
 CDP = CDPLanguage
@@ -37,6 +37,11 @@ def eval_template_spec(r, context):
         keys = params_ops[::2]
         values =  params_ops[1::2]
         keys = [_.value for _ in keys]
+
+        if len(set(keys)) != len(keys):
+            msg = 'Repeated parameters.'
+            raise_desc(DPSemanticError, msg, keys=keys)
+
         values = [eval_ndp(_, context) for _ in values]
         d = dict(zip(keys, values))
         params = d

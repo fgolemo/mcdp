@@ -9,6 +9,7 @@ from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
     get_types_universe)
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPSemanticError, mcdp_dev_warning
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
 
 CDP = CDPLanguage
 
@@ -171,7 +172,8 @@ def eval_constant_uppersetfromcollection(op, context):
     v = x.value
     u = x.unit
     S = u.S
-    value = UpperSet(v.elements, S)
+    minimals = poset_minima(v.elements, S.leq)
+    value = UpperSet(minimals, S)
     unit = UpperSets(S)
     unit.belongs(value)
     vu = ValueWithUnits(value, unit)

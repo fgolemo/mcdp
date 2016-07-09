@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import raise_wrapped, raise_desc
+from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import Identity, Mux
 from mcdp_posets import PosetProduct, get_types_universe
 from mocdp.comp.composite import CompositeNamedDP
@@ -11,7 +11,7 @@ from mocdp.comp.context import (CResource, Connection, get_name_for_fun_node,
 from mocdp.comp.flattening.flatten import cndp_flatten
 from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.wrap import SimpleWrap, dpwrap
-from mocdp.exceptions import DPSemanticError
+from mocdp.exceptions import DPSemanticError, DPSemanticErrorNotConnected
 from networkx.algorithms.cycles import simple_cycles
 import numpy as np
 
@@ -21,13 +21,15 @@ def cndp_makecanonical(ndp, name_inner_muxed='_inner_muxed', s_muxed='_muxed'):
         Returns a composite with only one ndp, called "named_inner_muxed".
         If there were cycles, then this will also have a signal caled s_muxed
         and there will be one connection to it.
+        
+        raises DPSemanticErrorNotConnected
     """
 
     try:
         ndp.check_fully_connected()
     except NotConnected as e:
         msg = 'Cannot put in canonical form because not all subproblems are connected.'
-        raise_wrapped(DPSemanticError, e, msg, compact=True)
+        raise_wrapped(DPSemanticErrorNotConnected, e, msg, compact=True)
 
     fnames = ndp.get_fnames()
     rnames = ndp.get_rnames()

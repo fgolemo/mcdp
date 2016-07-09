@@ -1,6 +1,7 @@
 from mcdp_tests.generation import for_all_nameddps
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.wrap import SimpleWrap
+from mocdp.exceptions import DPSemanticErrorNotConnected
 
 
 @for_all_nameddps
@@ -27,8 +28,11 @@ def check_makecanonical(_, ndp):
         return
 
     from mocdp.comp.composite_makecanonical import cndp_makecanonical
-    ndp2 = cndp_makecanonical(ndp)
-    check_same_interface(ndp, ndp2)
+    try:
+        ndp2 = cndp_makecanonical(ndp)
+        check_same_interface(ndp, ndp2)
+    except DPSemanticErrorNotConnected:
+        pass
 
 
 def check_same_interface(ndp, ndp2):

@@ -11,11 +11,13 @@ from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from reprep import Report
 import base64
 import traceback
+from contracts import contract
 
 
 def bs(fragment):
     return BeautifulSoup(fragment, 'html.parser', from_encoding='utf-8')
 
+@contract(returns=str, html=str)
 def html_interpret(library, html, raise_errors=False, realpath='unavailable'):
     # clone linrary?
     library = library.clone()
@@ -24,7 +26,8 @@ def html_interpret(library, html, raise_errors=False, realpath='unavailable'):
     html = make_figures(library, html,
                         raise_error_dp=raise_errors, raise_error_others=raise_errors)
     html = make_plots(library, html, raise_errors=raise_errors)
-    return html.decode('utf-8')
+
+    return html
 
 def make_image_tag_from_png(f):
     soup = bs("")
@@ -43,16 +46,7 @@ def make_pre(f):
         return t
     return ff
 
-# def get_string_or_cdata(tag):
-#     print tag
-#     if tag.string is not None:
-#         return tag.string
-#     for cd in tag.findAll(text=True):
-#         if isinstance(cd, bs4.CData):
-#             print 'CData value: %r' % cd
-#             return cd
-#     assert False
-
+@contract(frag=str, returns=str)
 def make_plots(library, frag, raise_errors):
     """
         Looks for things like:
@@ -264,8 +258,6 @@ def highlight_mcdp_code(library, frag, raise_errors=False):
                     rendered = frag2.pre.code
                     style = ''
 
-                print 'rendered', rendered
-
                 if tag.has_attr('style'):
                     style = style + tag['style']
                 if style:
@@ -292,6 +284,7 @@ def highlight_mcdp_code(library, frag, raise_errors=False):
 
     return str(soup)
 
+@contract(frag=str, returns=str)
 def make_figures(library, frag, raise_error_dp, raise_error_others):
     """ Looks for codes like:
 
