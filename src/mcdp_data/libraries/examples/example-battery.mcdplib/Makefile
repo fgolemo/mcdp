@@ -18,4 +18,5 @@ solve:
 plots:
 	mcdp-plot --out out/visualization $(dp1)
 	mcdp-plot --out out/visualization battery_compact
+	mcdp-plot --out out/visualization battery_minimal
 	
