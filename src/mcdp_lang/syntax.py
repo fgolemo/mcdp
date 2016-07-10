@@ -86,6 +86,7 @@ class SyntaxIdentifiers():
         'Uncertain',
         'Interval',
         'product',
+        'S',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -199,8 +200,8 @@ class Syntax():
     space_finite_poset = sp(FINITE_POSET + S(L('{')) + ZeroOrMore(finite_poset_chain) + S(L('}')),
                       lambda t: CDP.FinitePoset(t[0], make_list(t[1:])))
 
-
-    space_powerset = sp((L('℘') | L('set-of')) - L('(') + space + L(')'),
+    space_powerset_keyword = sp(L('℘') | L('set-of'), lambda t: CDP.PowerSetKeyword(t[0]))
+    space_powerset = sp(space_powerset_keyword - L('(') + space + L(')'),
                         lambda t: CDP.PowerSet(t[0], t[1],
                                                t[2], t[3]))
 
@@ -221,16 +222,27 @@ class Syntax():
     space_nat = sp(L('Nat') | L('ℕ'), lambda t: CDP.Nat(t[0]))
     space_int = sp(L('Int') | L('ℤ'), lambda t: CDP.Int(t[0]))
 
+
+#     SingleElementPosetKeyword = namedtuplewhere('SingleElementPosetKeyword', 'keyword')
+#     SingleElementPosetTag = namedtuplewhere('SingleElementPosetTag', 'value')
+#     SingleElementPoset = namedtuplewhere('SingleElementPoset', 'keyword tag')
+    space_single_element_poset_tag = sp(get_idn(), lambda t: CDP.SingleElementPosetTag(t[0]))
+    space_single_element_poset_keyword = sp(L('S'), lambda t: CDP.SingleElementPosetKeyword(t[0]))
+    space_single_element_poset = sp(space_single_element_poset_keyword +
+                                    SLPAR + space_single_element_poset_tag + SRPAR,
+                              lambda t: CDP.SingleElementPoset(t[0], t[1]))
+
     space_operand = (space_pint_unit ^
                      space_powerset ^
                      space_nat ^
                      space_int ^
                      load_poset ^
                      code_spec ^
-                     space_finite_poset ^
-                     space_uppersets ^
-                     space_interval
-                    ^ space_product_with_labels
+                     space_finite_poset
+                     ^ space_uppersets
+                     ^ space_interval
+                     ^ space_product_with_labels
+                     ^ space_single_element_poset
                      )
 
 
@@ -364,13 +376,14 @@ class Syntax():
                                  ZeroOrMore(COMMA + constant_value) + S(L('}')),
                                  lambda t: CDP.Collection(make_list(list(t))))
 
-    upper_set_from_collection = sp(S(L("upperclosure")) + collection_of_constants,
-                   lambda t: CDP.UpperSetFromCollection(t[0]))
+    upper_set_from_collection_keyword = sp(L('upperclosure'), lambda t: CDP.UpperSetFromCollectionKeyword(t[0]))
+    upper_set_from_collection = sp(upper_set_from_collection_keyword + collection_of_constants,
+                   lambda t: CDP.UpperSetFromCollection(t[0], t[1]))
 
     # <space> : identifier
     # `plugs : european
     short_identifiers = Word(nums + alphas + '_')
-    space_custom_value1 = sp(space + L(":") + short_identifiers,
+    space_custom_value1 = sp(space + L(":") + (short_identifiers ^ L('*')),
                           lambda t: CDP.SpaceCustomValue(t[0], t[1], t[2]))
 
     constant_value << (number_with_unit

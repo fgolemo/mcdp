@@ -154,6 +154,13 @@ def eval_constant_space_custom_value(op, context):
     custom_string = op.custom_string
 
     if isinstance(space, FiniteCollectionAsSpace):
+        if custom_string == '*':
+            if len(space.elements) == 1:
+                value = list(space.elements)[0]
+                return ValueWithUnits(unit=space, value=value)
+            else:
+                msg = 'You can use "*" only if the space has one element.'
+                raise_desc(DPSemanticError, msg, elements=space.elements)
         try:
             space.belongs(custom_string)
             mcdp_dev_warning('this does not seem to work...')

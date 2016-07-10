@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .eval_constant_imp import eval_constant
 from .parts import CDPLanguage
 from mcdp_dp import Max, Max1, Min

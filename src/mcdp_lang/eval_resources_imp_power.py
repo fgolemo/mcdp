@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 from .parts import CDPLanguage
 from mcdp_posets import RCompUnitsPower
 from mcdp_dp import WrapAMap

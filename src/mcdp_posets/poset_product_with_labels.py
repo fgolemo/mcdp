@@ -18,7 +18,6 @@ class PosetProductWithLabels(PosetProduct):
         self.labels = labels
         PosetProduct.__init__(self, subs)
 
-
     def format(self, x):
         if not isinstance(x, tuple):
             raise_desc(NotBelongs, 'Not a tuple', x=x, self=self)

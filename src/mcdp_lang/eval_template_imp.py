@@ -5,6 +5,7 @@ from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.utils_lists import unwrap_list
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.exceptions import DPInternalError, DPSemanticError
+from mcdp_lang.namedtuple_tricks import recursive_print
 
 
 CDP = CDPLanguage
@@ -21,6 +22,7 @@ def eval_template(r, context):  # @UnusedVariable
             if isinstance(r, klass):
                 return hook(r, context)
 
+    r = recursive_print(r)
     raise_desc(DPInternalError, 'Invalid template.', r=r)
 
 def eval_template_load(r, context):

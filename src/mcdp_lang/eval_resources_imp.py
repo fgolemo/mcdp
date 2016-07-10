@@ -5,6 +5,7 @@ from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from contracts import contract
 from contracts.utils import raise_desc
+from mcdp_lang.namedtuple_tricks import recursive_print
 from mocdp.comp.context import CResource, ValueWithUnits, get_name_for_fun_node
 from mocdp.exceptions import DPSemanticError
 
@@ -29,13 +30,6 @@ def eval_rvalue(rvalue, context):
             res = eval_constant(rvalue, context)
             assert isinstance(res, ValueWithUnits)
             return get_valuewithunits_as_resource(res, context)
-
-#         try:
-#             res = eval_constant(rvalue, context)  # should we clone the context?
-#             assert isinstance(res, ValueWithUnits)
-#             return get_valuewithunits_as_resource(res, context)
-#         except NotConstant:
-#             pass
 
         if isinstance(rvalue, CDP.Resource):
             return context.make_resource(dp=rvalue.dp.value, s=rvalue.s.value)
@@ -74,7 +68,6 @@ def eval_rvalue(rvalue, context):
             s = dummy_ndp.get_rnames()[0]
             return context.make_resource(get_name_for_fun_node(rvalue.name), s)
 
-
         from .eval_resources_imp_power import eval_rvalue_Power
         from .eval_math import eval_rvalue_divide
         from .eval_math import eval_rvalue_MultN
@@ -85,8 +78,8 @@ def eval_rvalue(rvalue, context):
         from .eval_resources_imp_tupleindex import eval_rvalue_TupleIndex
         from .eval_resources_imp_maketuple import eval_rvalue_MakeTuple
         from .eval_uncertainty import eval_rvalue_Uncertain
-
         from mcdp_lang.eval_resources_imp_tupleindex import eval_rvalue_resource_label_index
+
         cases = {
             CDP.GenericNonlinearity : eval_rvalue_GenericNonlinearity,
             CDP.Power: eval_rvalue_Power,
@@ -105,6 +98,7 @@ def eval_rvalue(rvalue, context):
             if isinstance(rvalue, klass):
                 return hook(rvalue, context)
 
-        msg = 'Cannot evaluate as resource.'
+        msg = 'eval_rvalue(): Cannot evaluate as resource.'
+        rvalue = recursive_print(rvalue)
         raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
 

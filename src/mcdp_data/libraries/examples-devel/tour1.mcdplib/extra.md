@@ -1,0 +1,187 @@
+<style type='text/css'>
+.keyword {  
+    font-weight: bold; 
+    color: #00a;
+}
+.ph { /* placeholder */
+    font-style: italic;
+}
+</style>
+## Space expressions
+
+
+### set-of
+
+<pre class='mcdp_poset'>
+℘(V)
+</pre>
+
+<pre class='mcdp_poset'>
+set-of(V)
+</pre>
+
+### UpperSets
+
+The syntax is
+
+<pre><code><span class="keyword">UpperSets</span>(<span class='ph'>poset</span>)</code></pre>
+
+For example:
+
+<pre class='mcdp_poset'>
+UpperSets(V)
+</pre>
+
+### Interval
+
+The syntax is
+
+<pre><code><span class="keyword">Interval</span>(<span class='ph'>lower bound</span>,<span class='ph'>upper bound</span>)</code></pre>
+
+For example:
+
+<pre class='mcdp_poset'>
+Interval(1g, 10g)
+</pre>
+
+
+## Constant expressions
+
+### Top, Bottom
+
+The syntax is:
+
+    ⊤ <space>
+    Top <space>
+    ⊥ <space>
+    Bottom <space>
+
+For example:
+
+<pre class='mcdp_value'>
+    Top V
+</pre>
+
+<pre class='mcdp_value'>
+    ⊤ V
+</pre>
+
+
+<pre class='mcdp_value'>
+    Bottom V
+</pre>
+
+<pre class='mcdp_value'>
+    ⊥ V
+</pre>
+### set making
+
+The syntax is:
+
+    {<element>, <element>, ..., <element> }
+
+For example:
+
+<pre class='mcdp_constant'>
+{0 g, 1 g}
+</pre>
+
+
+### upperclosure
+
+The syntax is:
+
+    upperclosure <set>
+
+For example:
+
+<pre class='mcdp_value'>
+upperclosure {0 g, 1 g}
+</pre>
+
+
+## Operations
+
+### tuple making
+
+The syntax is:
+
+    < element, element, ... >
+    ⟨ element, element, ... ⟩
+
+Fancy:
+
+<pre class='mcdp_value'>
+⟨0 g, 1 g⟩
+</pre>
+    
+Regular:
+
+<pre class='mcdp_value'>
+&lt;0 g, 1 g&gt;
+</pre>
+
+### tuple accessing
+
+    take(value, index)
+
+For example:
+
+<pre class='mcdp_value'>
+take( ⟨0g, 3g⟩, 1 )
+</pre>
+
+
+### available math operators
+
+    ceil
+    sqrt
+    square
+    pow
+    max 
+    min
+
+## Operations on NDPs
+
+### implemented-by
+
+### approx
+
+    approx()
+
+
+### abstract
+
+    abstract <ndp>
+
+### compact
+
+    compact <ndp>
+
+### template
+
+    template <ndp>
+
+### flatten
+
+    flatten <ndp>
+
+### canonical
+
+    canonical <ndp>
+
+### approx_lower, approx_upper
+
+    approx_lower(<n>, <ndp>)
+    approx_upper(<n>, <ndp>)
+
+
+
+
+### solve
+
+    solve(value, <mcdp>)
+
+
+### Uncertain
+

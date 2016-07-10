@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, raise_desc
 from mcdp_dp import PrimitiveDP
 from mcdp_posets import Map, MapNotDefinedHere, NotBelongs, PosetProduct
-from mocdp.exceptions import mcdp_dev_warning
+from mocdp.exceptions import mcdp_dev_warning, DPSemanticError
 import numpy as np
 
 
@@ -23,6 +23,10 @@ class GenericUnary(PrimitiveDP):
         return set([()])
 
     def solve(self, func):
+        if isinstance(func, int):
+            msg = 'Expecting a float, not an int.'
+            mcdp_dev_warning('Which exception to throw?')
+            raise_desc(ValueError, msg, func=func)
         if self.F.equal(func, self.F.get_top()):
             r = self.R.get_top()
         else:

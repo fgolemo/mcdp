@@ -50,7 +50,14 @@ span.TakeKeyword,
 span.SpecializeKeyword,
 span.FinitePosetKeyword,
 span.ProductKeyword,
-span.UncertainKeyword
+span.UncertainKeyword,
+span.UpperSetsKeyword,
+span.MakeUpperSetsKyword,
+span.PowerSetKeyword,
+span.IntervalKeyword,
+span.UpperSetFromCollectionKeyword,
+span.TopKeyword,
+span.BottomKeyword
 
 { 
     font-weight: bold; 

@@ -127,7 +127,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
     def view_exceptions_occurred(self, request):  # @UnusedVariable
         exceptions = []
         for e in self.exceptions:
-            exceptions.append(e)
+            u = unicode(e, 'utf-8')
+            exceptions.append(u)
         return {'exceptions': exceptions}
 
     def view_exception(self, exc, request):
@@ -136,19 +137,16 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         import traceback
         compact = (DPSemanticError, DPSyntaxError)
         if isinstance(exc, compact):
-            s = str(exc)
+            s = exc.__str__()
         else:
             s = traceback.format_exc(exc)
-        s = s.decode('utf-8')
-        # add to state so that it can be visualized in /exceptions
 
-        s = str(s)
         url = request.url
         referrer = request.referrer
         n = 'Error during serving this URL:'
         n += '\n url: %s' % url
         n += '\n referrer: %s' % referrer
-        ss = traceback.format_exc(exc).decode('utf-8')
+        ss = traceback.format_exc(exc)
         n += '\n' + indent(ss, '| ')
         self.exceptions.append(n)
 
@@ -158,8 +156,9 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         else:
             url_refresh = None
 
-        logger.error(s)
-        return {'exception': s, 'url_refresh': url_refresh}
+        u = unicode(s, 'utf-8')
+        logger.error(u)
+        return {'exception': u, 'url_refresh': url_refresh}
     
     def png_error_catch2(self, request, func):
         """ func is supposed to return an image response.
@@ -457,6 +456,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         config.add_route('exceptions', '/exceptions')
         config.add_view(self.view_exceptions_occurred, route_name='exceptions', renderer='json')
+        config.add_route('exceptions_formatted', '/exceptions_formatted')
+        config.add_view(self.view_exceptions_occurred, route_name='exceptions_formatted', renderer='exceptions_formatted.jinja2')
 
         # mainly used for wget
         config.add_route('robots', '/robots.txt')

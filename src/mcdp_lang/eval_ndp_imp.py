@@ -23,6 +23,7 @@ from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
 from mocdp.exceptions import (DPInternalError, DPSemanticError,
     DPSemanticErrorNotConnected, mcdp_dev_warning)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
+from mcdp_lang.namedtuple_tricks import recursive_print
 
 
 
@@ -109,8 +110,9 @@ def eval_ndp(r, context):  # @UnusedVariable
             if isinstance(r, klass):
                 return hook(r, context)
 
-    raise_desc(DPInternalError, 'Invalid dprvalue.', r=r)
-
+    r = recursive_print(r)
+    msg = 'eval_ndp(): cannot evaluate r as an NDP.'
+    raise_desc(DPInternalError, msg, r=r)
 
 
 def eval_ndp_specialize(r, context):

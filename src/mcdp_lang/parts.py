@@ -82,7 +82,10 @@ class CDPLanguage():
     SetNameGeneric = namedtuplewhere('SetNameGeneric', 'name eq right_side')
     SetNameFValue = namedtuplewhere('SetNameFValue', 'name eq right_side')
 
+    # set-of(<space>)
+    PowerSetKeyword = namedtuplewhere('PowerSetKeyword', 'keyword')
     PowerSet = namedtuplewhere('PowerSet', 'symbol p1 space p2')
+
     # natural numbers
     Nat = namedtuplewhere('Nat', 'symbol')
     Int = namedtuplewhere('Int', 'symbol')
@@ -156,7 +159,10 @@ class CDPLanguage():
     FName = namedtuplewhere('FName', 'value')
     RName = namedtuplewhere('RName', 'value')
     Collection = namedtuplewhere('Collection', 'elements')
-    UpperSetFromCollection = namedtuplewhere('UpperSetFromCollection', 'value')
+
+    # upperset {0g,1g}
+    UpperSetFromCollectionKeyword = namedtuplewhere('UpperSetFromCollectionKeyword', 'keyword')
+    UpperSetFromCollection = namedtuplewhere('UpperSetFromCollection', 'keyword value')
 
     FunStatement = namedtuplewhere('FunStatement', 'keyword fname unit')
     ResStatement = namedtuplewhere('ResStatement', 'keyword rname unit')
@@ -190,9 +196,16 @@ class CDPLanguage():
     BuildProblem = namedtuplewhere('BuildProblem', 'keyword statements')
 
     # Finite posets
+    # finite_poset { a <= b }
     FinitePosetKeyword = namedtuplewhere('FinitePosetKeyword', 'keyword')
     FinitePosetElement = namedtuplewhere('FinitePosetElement', 'identifier')
     FinitePoset = namedtuplewhere('FinitePoset', 'keyword chains')
+
+    # Single-element poset
+    # S(tag)
+    SingleElementPosetKeyword = namedtuplewhere('SingleElementPosetKeyword', 'keyword')
+    SingleElementPosetTag = namedtuplewhere('SingleElementPosetTag', 'value')
+    SingleElementPoset = namedtuplewhere('SingleElementPoset', 'keyword tag')
 
     TakeKeyword = namedtuplewhere('TakeKeyword', 'keyword')
 

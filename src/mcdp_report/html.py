@@ -6,6 +6,7 @@ from mcdp_lang.namedtuple_tricks import isnamedtuplewhere
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
+from mocdp.exceptions import mcdp_dev_warning
 
 
 def isolate_comments(s):
@@ -184,6 +185,11 @@ def print_html_inner(x):
     orig0 = x.where.string[x.where.character:x.where.character_end]
 
     klass = type(x).__name__
+    # special case: OpenBraceKeyword
+    if out == '<':
+        out = '&lt;'
+    if out == '>':
+        out = '&gt;'
     transformed0 = "<span class='%s'>%s</span>" % (klass, out)
     yield Snippet(op=x, orig=orig0, a=x.where.character, b=x.where.character_end,
                   transformed=transformed0)
@@ -272,7 +278,8 @@ def iterate_notwhere(x):
             continue
         yield k, v
 
-# I will put a copy in static
+mcdp_dev_warning('TODO: copy from static/')
+
 css = """ 
      
      span.NewResource { color: darkred;}

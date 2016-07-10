@@ -3,7 +3,7 @@ from mcdp_lang.parse_interface import parse_poset
 
 @comptest_fails
 def check_lang_multiset1():
-    P = parse_poset('multiset( finite_poset {a b c d e })')
+    parse_poset('multiset( finite_poset {a b c d e })')
 
 
 @comptest
