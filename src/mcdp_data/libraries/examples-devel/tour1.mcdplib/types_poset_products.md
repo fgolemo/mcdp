@@ -10,9 +10,4 @@ J × A
 
 This represents a product of Joules and Amperes.
 
-### Named products (in development)
-
-<pre class='mcdp_poset'>
-product(energy:J, current:A)
-</pre>
 

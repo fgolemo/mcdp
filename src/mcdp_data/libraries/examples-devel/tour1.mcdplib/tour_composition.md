@@ -10,7 +10,7 @@ mcdp {
 	provides capacity [J]
 	requires mass [g]
 	specific_energy = 100 kWh / kg
-	mass >= capacity / specific_energy
+	required mass >= provided capacity / specific_energy
 }
 </pre>
 </td>
@@ -33,7 +33,7 @@ mcdp {
 	p0 = 5 W
 	p1 = 6 W/N
 	p2 = 7 W/N^2
-	power >= p0 + p1 * l + p2 * l^2
+	required power >= p0 + p1 * l + p2 * l^2
 }
 </pre>
 </td>
@@ -77,7 +77,7 @@ mcdp {
 
 	# battery must provide power for actuation
 	provides endurance [s]	
-	energy = endurance * (power required by actuation)
+	energy = provided endurance * (power required by actuation)
 
 	capacity provided by battery >= energy
 }
@@ -103,7 +103,7 @@ mcdp {
 
 	# battery must provide power for actuation
 	provides endurance [s]	
-	energy = endurance * (power required by actuation)
+	energy = provided endurance * (power required by actuation)
 
 	capacity provided by battery >= energy
 
@@ -118,7 +118,7 @@ mcdp {
 
 	# minimize total mass
 	requires mass [g]
-	mass >= total_mass
+	required mass >= total_mass
 }
 </pre>
 </td>

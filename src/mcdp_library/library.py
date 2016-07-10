@@ -265,11 +265,19 @@ class MCDPLibrary():
 
     def _add_search_dir(self, d):
         """ Adds the directory to the search directory list. """
+
+        ignore_patterns = ['out-']
+
         for ext in MCDPLibrary.all_extensions:
             pattern = '*.%s' % ext
             files_mcdp = locate_files(directory=d, pattern=pattern,
                                       followlinks=True)
             for f in files_mcdp:
+                for i in ignore_patterns:
+                    if i in f:
+                        logger.debug('Ignoring %r because of pattern %r.' % (f, i))
+                        continue
+
                 self._update_file(f)
 
     def _update_file(self, f):

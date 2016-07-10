@@ -1,8 +1,5 @@
 Goals:
 
-(*) [branch: devel] Stabilize unit-tests in devel
-
-- B: mcdplib-example_plusinv-ndp-plusinvnat3b_inf-test_conversion 
 
 (*) Release new version
 - put manual.html on website
@@ -39,6 +36,8 @@ Keys:
 
 Bugs
 -----
+
+- now the edges that are not connected are not purple
 
 - B: if the syntax is not correct, it is not displayed at all.
   http://127.0.0.1:8080/libraries/duckiebot_components/models/pimoroni_inc/views/syntax/

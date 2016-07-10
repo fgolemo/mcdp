@@ -50,8 +50,8 @@ mcdp {
 	provides capacity [J]
 	requires mass [g]
 
-	capacity <= 500 J
-	mass >= 100g
+	provided capacity <= 500 J
+	required mass >= 100g
 }
 </pre>
 </td><td>

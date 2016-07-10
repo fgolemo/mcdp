@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_lang.syntax import Syntax
 from mcdp_library.library import MCDPLibrary
@@ -11,7 +12,6 @@ from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from reprep import Report
 import base64
 import traceback
-from contracts import contract
 
 
 def bs(fragment):
@@ -22,10 +22,13 @@ def html_interpret(library, html, raise_errors=False, realpath='unavailable'):
     # clone linrary?
     library = library.clone()
     load_fragments(library, html, realpath=realpath)
-    html = highlight_mcdp_code(library, html, raise_errors=raise_errors)
+    html = highlight_mcdp_code(library, html, raise_errors=raise_errors,
+                               realpath=realpath)
     html = make_figures(library, html,
-                        raise_error_dp=raise_errors, raise_error_others=raise_errors)
-    html = make_plots(library, html, raise_errors=raise_errors)
+                        raise_error_dp=raise_errors, raise_error_others=raise_errors,
+                        realpath=realpath)
+    html = make_plots(library, html, raise_errors=raise_errors,
+                      realpath=realpath)
 
     return html
 
@@ -47,7 +50,7 @@ def make_pre(f):
     return ff
 
 @contract(frag=str, returns=str)
-def make_plots(library, frag, raise_errors):
+def make_plots(library, frag, raise_errors, realpath):
     """
         Looks for things like:
         
@@ -74,7 +77,7 @@ def make_plots(library, frag, raise_errors):
                     vu = load(tag['id'])
                 else:
                     source_code = tag.string.encode('utf-8')
-                    vu = parse(source_code)
+                    vu = parse(source_code, realpath=realpath)
 
                 rendered = plotter(tag, vu)
 
@@ -132,6 +135,7 @@ def make_plots(library, frag, raise_errors):
     def print_mcdp(tag, ndp):  # @UnusedVariable
         return ndp.__str__()
     
+    # parse(string, realpath)
     const = dict(load=library.load_constant, parse=library.parse_constant)
     mcdp = dict(load=library.load_ndp, parse=library.parse_ndp)
     go("img.plot_value_generic", plot_value_generic, **const)
@@ -204,7 +208,7 @@ def get_source_code(tag):
     source_code = source_code.replace('\t', ' ' * 4)
     return source_code
 
-def highlight_mcdp_code(library, frag, raise_errors=False):
+def highlight_mcdp_code(library, frag, realpath, raise_errors=False):
     """ Looks for codes like:
     
     <pre class="mcdp">mcdp {
@@ -252,7 +256,8 @@ def highlight_mcdp_code(library, frag, raise_errors=False):
                     if tag.has_attr('label'):
                         max_len = max(max_len, len(tag['label']) + 6)
 
-                    style = 'width: %dch;' % (max_len + 3)
+                    bonus = 0
+                    style = 'width: %dch;' % (max_len + bonus)
                 else:
                     # using <code>
                     rendered = frag2.pre.code
@@ -262,6 +267,12 @@ def highlight_mcdp_code(library, frag, raise_errors=False):
                     style = style + tag['style']
                 if style:
                     rendered['style'] = style
+
+                if tag.has_attr('class'):
+                    rendered['class'] = tag['class']
+                if tag.has_attr('id'):
+                    rendered['id'] = tag['id']
+
                 tag.replaceWith(rendered)
 
             except DPSyntaxError as e:
@@ -285,7 +296,7 @@ def highlight_mcdp_code(library, frag, raise_errors=False):
     return str(soup)
 
 @contract(frag=str, returns=str)
-def make_figures(library, frag, raise_error_dp, raise_error_others):
+def make_figures(library, frag, raise_error_dp, raise_error_others, realpath):
     """ Looks for codes like:
 
     <pre><code class="mcdp_ndp_graph_templatized">mcdp {
@@ -305,6 +316,10 @@ def make_figures(library, frag, raise_error_dp, raise_error_others):
                 r = func(tag) 
                 if tag.has_attr('style'):
                     r['style'] = tag['style']
+                if tag.has_attr('class'):
+                    r['class'] = tag['class']
+                if tag.has_attr('id'):
+                    r['id'] = tag['id']
                 tag.replaceWith(r)
             except (DPSyntaxError, DPSemanticError) as e:
                 if raise_error_dp:

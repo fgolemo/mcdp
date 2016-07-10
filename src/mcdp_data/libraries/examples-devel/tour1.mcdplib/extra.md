@@ -7,16 +7,24 @@
     font-style: italic;
 }
 </style>
+
+# Draft documentation
+
 ## Space expressions
 
+### Named products  
+
+<pre class='mcdp_poset'>
+product(energy:J, current:A)
+</pre>
 
 ### set-of
 
-<pre class='mcdp_poset'>
+<pre class='mcdp_poset ex1'>
 ℘(V)
 </pre>
 
-<pre class='mcdp_poset'>
+<pre class='mcdp_poset ex1'>
 set-of(V)
 </pre>
 
@@ -82,7 +90,7 @@ The syntax is:
 
 For example:
 
-<pre class='mcdp_constant'>
+<pre class='mcdp_value'>
 {0 g, 1 g}
 </pre>
 

@@ -17,7 +17,7 @@ $(tmpdir)/%.pdf: #: %.md
 	mv $@.tmp.pdf $@
 	
 
-htmltmpdir=.html
+htmltmpdir=out-html
 htmls=$(markdowns:%.md=$(htmltmpdir)/%.html)
 
 $(htmltmpdir)/%.html:
@@ -25,18 +25,19 @@ $(htmltmpdir)/%.html:
 	cd $(htmltmpdir) && wget -k -p -nd -nc http://127.0.0.1:8080/libraries/tour1/$*.html\?print=1\&strict=1
 	mv $(htmltmpdir)/$*.html\?print=1\&strict=1 $(htmltmpdir)/$*.html
 
-manual: $(htmltmpdir)/manual.html
+manual_html=$(htmltmpdir)/manual.html
+manual: $(manual_html)
 
-$(htmltmpdir)/manual.html: $(htmls)
+$(manual_html): $(htmls)
 	python ./join_manual.py $(htmls) > $@
-	python ./embed_images.py $(htmltmpdir)/manual.html
+	python ./embed_images.py $@
 	
 manual.pdf: 
-	wkhtmltopdf --print-media-type  $(htmltmpdir)/manual.html $@
+	wkhtmltopdf --print-media-type $(manual_html) $@
 
 manual2:
-	python ./join_manual.py $(htmls) > $(htmltmpdir)/manual.html
-	python ./embed_images.py $(htmltmpdir)/manual.html
+	python ./join_manual.py $(htmls) > $(manual_html)
+	python ./embed_images.py $(manual_html)
 
 clean:
 	rm -f $(pdfs)
