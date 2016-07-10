@@ -17,8 +17,9 @@ def get_version(filename):
 
 version = get_version(filename='src/mocdp/__init__.py')
 
+name = 'PyMCDP'
 
-setup(name='PyMCDP_devel',
+setup(name=name,
       url='http://github.com/AndreaCensi/mcdp',
       maintainer="Andrea Censi",
       maintainer_email="andrea@censi.org",
@@ -51,10 +52,12 @@ setup(name='PyMCDP_devel',
         'nose',
         'PyContracts>=1.7.6',
         # 'ConfTools>=1.7',
-        # 'RepRep>=2.9.3', 
+        'RepRep>=2.9.3', 
         'DecentLogs',
         'QuickApp>=1.2',
         'compmake',
+          'psutil',
+          'setproctitle',
       ],
       dependency_links  = [
           # 'https://github.com/AndreaCensi/contracts/archive/env_mcdp.zip#egg=PyContracts',
