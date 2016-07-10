@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
+from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
+    parse_wrap_check)
 from comptests.registrar import comptest
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax, SyntaxIdentifiers
 from mcdp_lang.syntax_codespec import SyntaxCodeSpec
-from  .utils import (assert_parsable_to_connected_ndp,
-    assert_semantic_error, parse_wrap_check)
+from mcdp_posets.uppersets import UpperSet, UpperSets
 from nose.tools import assert_equal
 from pyparsing import Literal
-from mcdp_posets.uppersets import UpperSets, UpperSet
 
 @comptest
 def check_lang():
