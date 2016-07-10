@@ -1,10 +1,5 @@
 Goals:
 
-
-(*) Release new version
-- put manual.html on website
-- change website?
-
 (*) Automatically generated iteration figures
 
 (*) Feature-parity with new Loop2, including normal transform
@@ -16,6 +11,8 @@ Goals:
 (*) Compelling demo for uncertainty
 
 (*) Create a video?
+
+(*) Interface with cvxpy
 
 (*) Demo for QR code
 

@@ -17,6 +17,7 @@ from mocdp.ndp import NamedDPCoproduct
 from mcdp_dp.dp_max import JoinNDP
 from types import NoneType
 from mcdp_dp.dp_constant import ConstantMinimals
+from mcdp_dp.dp_flatten import TakeRes, TakeFun
 
 STYLE_GREENRED = 'greenred'
 STYLE_GREENREDSYM = 'greenredsym'
@@ -227,6 +228,8 @@ def create_simplewrap(gdc, ndp):
         (Conversion, ''),
         (MeetNDual, ''),
         (JoinNDP, ''),
+        (TakeFun, ''),
+        (TakeRes, ''),
     ]
 
     def is_special_dp(dp):

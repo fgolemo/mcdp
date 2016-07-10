@@ -5,7 +5,7 @@ from mocdp.comp.context import ValueWithUnits
 from mcdp_dp import Constant
 from mcdp_posets.types_universe import get_types_universe
 from mcdp_dp.conversion import get_conversion
-from mcdp_dp.dp_limit import Limit
+from mcdp_dp.dp_limit import Limit, LimitMaximals
 from mcdp_dp.dp_constant import ConstantMinimals
 
 
@@ -121,6 +121,16 @@ def get_constant_minimals_as_resources(R, values, context):
     ndp = dpwrap(dp, [], nres)
     context.add_ndp(nres, ndp)
     return context.make_resource(nres, nres)
+
+def get_constant_maximals_as_function(F, values, context):
+    for v in values:
+        F.belongs(v)
+
+    dp = LimitMaximals(F=F, values=values)
+    nres = context.new_res_name('_c')
+    ndp = dpwrap(dp, nres, [])
+    context.add_ndp(nres, ndp)
+    return context.make_function(nres, nres)
 
 @contract(v=ValueWithUnits)
 def get_valuewithunits_as_function(v, context):

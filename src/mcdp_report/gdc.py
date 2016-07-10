@@ -140,7 +140,6 @@ class GraphDrawingContext():
 
     def get_icon(self, options):
         tmppath = self.get_temp_path()
-        # imagepath = self.get_imagepath()
         imagepaths = [self._get_default_imagepath()]
         imagepaths.extend(self.images_paths)
         # print('options: %s in %r' % (options, self.images_paths))
@@ -221,7 +220,7 @@ def choose_best_icon(iconoptions, imagepaths):
     for path in reversed(imagepaths):
         files.update(get_images(path))
 
-#     print('avail: %s' % sorted(files))
+    # print('avail: %s' % sorted(files))
     for option in iconoptions:
         if option is None:
             continue

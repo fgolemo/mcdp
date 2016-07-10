@@ -3,11 +3,14 @@ from .primitive import PrimitiveDP
 from contracts import contract
 from mcdp_posets import Poset  # @UnusedImport
 from mcdp_posets import PosetProduct, UpperSet
-from mocdp.exceptions import mcdp_dev_warning
+from mocdp.exceptions import mcdp_dev_warning, do_extra_checks
+from mcdp_posets.uppersets import LowerSet
+from mcdp_posets.space import NotBelongs
 
 
 __all__ = [
     'Limit',
+    'LimitMaximals',
 ]
 
 
@@ -36,4 +39,29 @@ class Limit(PrimitiveDP):
     def __repr__(self):
         return 'Limit(%s <= %s)' % (self.F, self.F.format(self.limit))
 
+class LimitMaximals(PrimitiveDP):
+
+    @contract(F='$Poset', values='seq')
+    def __init__(self, F, values):
+        if do_extra_checks():
+            for value in values:
+                F.belongs(value)
+
+        self.limit = LowerSet(values, F)
+
+        R = PosetProduct(())
+        M = PosetProduct(())
+        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+
+    def solve(self, f):
+        try:
+            self.limit.belongs(f)
+            res = UpperSet(set([()]), self.R)
+            return res
+        except NotBelongs:
+            empty = UpperSet(set(), self.R)
+            return empty
+
+    def __repr__(self):
+        return 'Limit(%s <= %s)' % (self.F, self.F.format(self.limit))
 

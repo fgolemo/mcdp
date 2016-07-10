@@ -1,6 +1,7 @@
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM
 from mcdp_report.html import ast_to_html
 from mcdp_library.library import MCDPLibrary
+from mocdp.exceptions import DPSyntaxError
 
 class AppVisualization():
 
@@ -89,12 +90,19 @@ class AppVisualization():
         else:
             html2 = None
 
-        highlight = ast_to_html(source_code,
-                                complete_document=False,
-                                add_line_gutter=False)
-        highlight = self.add_html_links(request, highlight)
-
+        try:
+            highlight = ast_to_html(source_code,
+                                    complete_document=False,
+                                    add_line_gutter=False)
+            
+            highlight = self.add_html_links(request, highlight)
+            error = None
+        except DPSyntaxError as e:
+            highlight = '<pre class="source_code_with_error">%s</pre>' % source_code
+            error = e.__str__()
+            
         return {'source_code': source_code,
+                'error': unicode(error, 'utf-8'),
                 'highlight': highlight,
                 'model_name': model_name,
                 'realpath': realpath,

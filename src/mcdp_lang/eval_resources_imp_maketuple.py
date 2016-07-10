@@ -4,7 +4,7 @@ from .parts import CDPLanguage
 from contracts import contract
 from mcdp_lang.utils_lists import get_odd_ops, unwrap_list
 from mcdp_posets.poset_product import PosetProduct
-from mcdp_dp.dp_flatten import Mux
+from mcdp_dp.dp_flatten import Mux, TakeRes, TakeFun
 
 CDP = CDPLanguage
 
@@ -19,8 +19,9 @@ def eval_rvalue_MakeTuple(mt, context):
     F = PosetProduct(tuple(Fs))
 
     # Now it's easy - this corresponds to a simple Mux operation
-    coords = list(range(len(Fs)))
-    dp = Mux(F, coords)
+    n = len(Fs)
+    coords = list(range(n))
+    dp = TakeFun(F, coords)
 
     return create_operation(context, dp=dp, resources=resources,
                             name_prefix='_make_tuple', op_prefix='_factors',

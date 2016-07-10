@@ -427,7 +427,6 @@ class Context():
             for fname in ndp.get_fnames():
                 connected = connectedfun(created, fname)
                 F = ndp.get_ftype(fname)
-                print('%s %s -> %s' % (created, fname, connected))
                 if not connected:
                     try:
                         zero = F.get_bottom()
@@ -439,21 +438,86 @@ class Context():
                     c = Connection(dp1=res.dp, s1=res.s, dp2=created, s2=fname)
                     self.add_connection(c)
 
+    def ires_finish(self):
+        """ Searches for all the automatically created DPs and closes them
+            by adding 0 constants. """
+        from mcdp_lang.helpers import get_valuewithunits_as_function
+        from mcdp_lang.helpers import get_constant_maximals_as_function
+
+        def connectedres(ndp_name, s):
+            assert ndp_name in self.names
+            assert s in self.names[ndp_name].get_rnames()
+            for c in self.connections:
+                if c.dp1 == ndp_name and c.s1 == s:
+                    return True
+            return False
+
+        for created in self.indexed_res.values():
+
+            ndp = self.names[created]
+            for rname in ndp.get_rnames():
+                connected = connectedres(created, rname)
+                R = ndp.get_rtype(rname)
+                if not connected:
+                    try:
+                        top = R.get_top()
+                        vu = ValueWithUnits(value=top, unit=R)
+                        res = get_valuewithunits_as_function(vu, self)
+                    except NotBounded:
+                        maximals = R.get_maximal_elements()
+                        res = get_constant_maximals_as_function(R, maximals, self)
+                    c = Connection(dp2=res.dp, s2=res.s, dp1=created, s1=rname)
+                    self.add_connection(c)
+
+    @contract(cr=CResource, index=int, returns=CResource)
+    def ires_get_index(self, cr, index):
+        from mcdp_dp.dp_flatten import TakeRes
+        from mocdp.comp.wrap import SimpleWrap
+
+        if not cr in self.indexed_res:
+            R = self.get_rtype(cr)
+            n = len(R.subs)
+
+            # todo: use labels
+            rnames = ['_r%d' % i for i in range(n)]
+            coords = list(range(n))
+            dp = TakeRes(R, coords)
+            ndp_out = '_muxed'
+            ndp = SimpleWrap(dp, fnames=ndp_out, rnames=rnames)
+            ndp_name = self.new_name('_label_index')
+
+            self.add_ndp(ndp_name, ndp)
+            c = Connection(dp2=ndp_name, s2=ndp_out, dp1=cr.dp, s1=cr.s)
+            self.add_connection(c)
+
+            self.indexed_res[cr] = ndp_name
+
+        ndp_name = self.indexed_res[cr]
+
+        ndp = self.names[ndp_name]
+        rnames = ndp.get_rnames()
+        n = len(rnames)
+        s = rnames[index]
+        if not (0 <= index < n):
+            msg = 'Out of bounds.'
+            raise_desc(DPSemanticError, msg, index=index, R=R)
+
+        res = self.make_resource(ndp_name, s)
+        return res
 
     @contract(cf=CFunction, index=int, returns=CFunction)
     def ifun_get_index(self, cf, index):
-        from mcdp_dp.dp_flatten import Mux
+        from mcdp_dp.dp_flatten import TakeFun
         from mocdp.comp.wrap import SimpleWrap
 
         if not cf in self.indexed_fun:
-            print('Creating index for %s' % str(cf))
             F = self.get_ftype(cf)
             n = len(F.subs)
 
             # todo: use labels
             fnames = ['_f%d' % i for i in range(n)]
             coords = list(range(n))
-            dp = Mux(F, coords)
+            dp = TakeFun(F, coords)
             ndp_out = '_muxed'
             ndp = SimpleWrap(dp, fnames=fnames, rnames=ndp_out)
             ndp_name = self.new_name('_label_index')
@@ -463,8 +527,6 @@ class Context():
             self.add_connection(c)
 
             self.indexed_fun[cf] = ndp_name
-        else:
-            print('reusing index for %s' % str(cf))
 
         ndp_name = self.indexed_fun[cf]
 

@@ -2,6 +2,7 @@ from contracts import contract
 from mocdp.comp.context import CResource, ValueWithUnits
 from mcdp_dp.dp_constant import Constant
 from mcdp_dp.dp_generic_unary import WrapAMap
+from mcdp_posets.poset_product import PosetProduct
 
 def get_connections_for(context, name1, name2):
     s = set()
@@ -42,6 +43,7 @@ def eval_constant_resource(context, r):
 
     @contract(functions=dict)
     def run_ndp(ndp, functions):
+        rnames = ndp.get_rnames()
         f = []
         for fn in ndp.get_fnames():
             vu = functions[fn]
@@ -54,11 +56,17 @@ def eval_constant_resource(context, r):
             res = ValueWithUnits(dp.c, dp.R)
         elif isinstance(dp, WrapAMap):
             amap = dp.amap
-            res = ValueWithUnits(amap(f), dp.get_res_space())
+            if len(rnames) == 1:
+                res = ValueWithUnits(amap(f), dp.get_res_space())
+            else:
+                res_R = ndp.get_rtypes(rnames)
+                r = amap(f)
+                assert isinstance(res_R, PosetProduct) and len(res_R) == len(rnames)
+                assert isinstance(r, tuple) and len(r) == len(rnames)
+                res = [ValueWithUnits(value=value, unit=unit)
+                for value, unit in zip(r, res_R.subs)]
         else:
             raise NotImplementedError(type(dp))
-
-        rnames = ndp.get_rnames()
 
         if len(rnames) == 1:
             resources = {rnames[0]: res}

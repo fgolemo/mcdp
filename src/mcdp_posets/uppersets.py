@@ -4,7 +4,7 @@ from .poset import NotBounded, NotLeq, Poset
 from .space import NotBelongs, NotEqual, Space
 from contracts import contract
 from contracts.utils import raise_desc
-from mocdp.exceptions import do_extra_checks
+from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 
 __all__ = [
     'UpperSet',
@@ -47,13 +47,6 @@ class UpperSet(Space):
             if self.P.leq(p, x):
                 return
         raise_desc(NotBelongs, 'Point does not belong')
-        
-
-#     def __repr__old(self):  # ≤  ≥
-#         contents = " v ".join("x ≥ %s" % self.P.format(m)
-#                         for m in sorted(self.minimals))
-#
-#         return "{x ∣ %s }" % contents
 
     def __repr__(self):
         contents = ", ".join(self.P.format(m)
@@ -67,9 +60,6 @@ class UpperSets(Poset):
     @contract(P='$Poset')
     def __init__(self, P):
         self.P = P
-#         from mocdp.configuration import get_conftools_posets
-#         _, self.P = get_conftools_posets().instance_smarter(P)
-
         if do_extra_checks:
             try:
                 self.top = self.get_top()
@@ -178,3 +168,48 @@ class UpperSets(Poset):
 
     def __repr__(self):
         return "U(%r)" % self.P
+
+
+class LowerSet(Space):
+
+    @contract(maximals='set|list|$frozenset', P=Poset)
+    def __init__(self, maximals, P):
+        self.maximals = frozenset(maximals)
+        self.P = P
+
+        if do_extra_checks():
+            # XXX
+            problems = []
+            for m in maximals:
+                try:
+                    self.P.belongs(m)
+                except NotBelongs as e:
+                    problems.append(e)
+            if problems:
+                msg = "Cannot create upper set:\n"
+                msg += "\n".join(str(p) for p in problems)
+                raise NotBelongs(msg)
+
+            mcdp_dev_warning('check_maximal()')
+            # from mcdp_posets import check_maximal
+            # check_maximal(self.minimals, P)
+
+    @contract(returns=Poset)
+    def get_poset(self):
+        return self.P
+
+    def check_equal(self, x, y):
+        self.P.check_equal(x, y)
+
+    def belongs(self, x):
+        self.P.belongs(x)
+        for p in self.minimals:
+            if self.P.leq(x, p):
+                return
+        raise_desc(NotBelongs, 'Point does not belong to lower set.')
+
+    def __repr__(self):
+        contents = ", ".join(self.P.format(m)
+                        for m in sorted(self.minimals))
+
+        return "↓{%s}" % contents

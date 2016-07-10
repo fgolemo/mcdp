@@ -1,12 +1,8 @@
-from .helpers import get_valuewithunits_as_resource
 from .parts import CDPLanguage
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_dp import Mux
 from mcdp_posets import PosetProductWithLabels
-from mocdp.comp.context import Connection, ValueWithUnits
-from mocdp.comp.wrap import SimpleWrap
-from mocdp.exceptions import DPSemanticError, mcdp_dev_warning
+from mocdp.exceptions import DPSemanticError
 
 CDP = CDPLanguage
 
@@ -47,6 +43,4 @@ def eval_lfunction_label_index(r, context):
 
     index = R.labels.index(label)
     return context.ifun_get_index(fvalue, index)
-
-
     

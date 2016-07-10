@@ -24,7 +24,6 @@ def check_tuples2():
     ret = eval_rvalue(parsed, context)
     print ret
 
-
     same("take(<1g, 5J>, 1)", "5 J")
 
 @comptest
