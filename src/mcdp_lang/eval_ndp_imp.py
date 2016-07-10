@@ -558,6 +558,9 @@ def eval_build_problem(r, context):
             # nt recursive_print(s)
             eval_statement(s, context)
 
+    # take() optimization
+    context.ifun_finish()
+    context.ires_finish()
     # at this point we need to fix the case where there might be multiple
     # functions / resources
     fix_functions_with_multiple_connections(context)
