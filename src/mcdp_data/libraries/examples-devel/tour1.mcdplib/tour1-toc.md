@@ -42,6 +42,12 @@
 
 [The plug/socket domain](plugs.html)
 
+
+**Draft documentation**
+
+[extra](extra.html)
+
+
 <!-- <a href='using_templates_drone.html'>Templates</a> -->
 
 <style type='text/css'>

@@ -1,4 +1,9 @@
 
+This library contains the main documentation for PyMCDP.
+
+Start reading at [Defining MCDPs](tour_intro.html).
+
+<!-- 
 This is a tour of the main PyMCDP features:
 
 * [Defining MCDPs](tour_intro.html)
@@ -9,3 +14,4 @@ This is a tour of the main PyMCDP features:
 * [Upper/lower bounds of MCPDs](tour_approximations.html)
 * [Defining Templates](tour_templates.html)
 * [Defining MCDPs with uncertainty](tour_uncertainty.html)
+ -->

@@ -1,4 +1,4 @@
-markdowns=$(shell python get_list.py < toc.md)
+markdowns=$(shell python get_list.py < tour1-toc.md)
 
 tmpdir=.downloads
 pdfs=$(markdowns:%.md=$(tmpdir)/%.pdf)
