@@ -20,25 +20,26 @@ along with the MCDPL snippet that describes it (right)*
 
 ## Installation
 
+The code has been tested on Ubuntu 14.04, Ubuntu 16.04, and OS X using Enthought Python distribution.
+
+
 ### Prerequisites
 
 On Ubuntu:
 
-    $ sudo apt-get install python-numpy python-matplotlib python-yaml python-pip
-    $ sudo apt-get install graphviz wkhtmltopdf git 
-    $ sudo apt-get install texlive-extra-utils  # pdfcrop
+    $ sudo apt-get install python-numpy python-matplotlib python-yaml python-pip python-dev python-setproctitle python-psutil graphviz wkhtmltopdf git 
 
-### Option 2: Install using pip
+### Option 1: Install using pip
 
 Run this command:
 
-    $ sudo pip install -U PyMCDP conftools quickapp decentparams decentlogs
+    $ sudo pip install -U PyMCDP conftools quickapp decentlogs systemcmd
 
 Note that if you omit the ``sudo``, modern Ubuntu 16 will install 
 correctly in the directory ``~/.local/``. In this case,
 make sure you have ``~/.local/bin/`` in your ``PATH``.
 
-### Option 1: Installation from source
+### Option 2: Installation from source (preferred)
 
 Clone the repo using: 
 
