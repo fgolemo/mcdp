@@ -1,3 +1,5 @@
+## Using the web interface
+
 ### syntax highlighting
 
 Use ``<pre>`` tags.

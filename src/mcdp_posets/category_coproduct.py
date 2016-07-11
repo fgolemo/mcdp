@@ -92,6 +92,9 @@ class Coproduct1(Space):
 
     def unpack(self, x):
         """ Returns index, and the active element. """
+        if not (isinstance(x, tuple) and len(x) == 2 and isinstance(x[0], int)):
+            msg = 'This is not a valid element.'
+            raise_desc(ValueError, msg, x=x, self=self)
         i, active = x
         return i, active[i]
 

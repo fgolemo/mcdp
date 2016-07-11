@@ -65,6 +65,10 @@ contexts:
       scope: operator.mcdp
     - match: "="
       scope: operator.mcdp
+    - match: "∈"
+      scope: operator.mcdp
+    - match: "↑"
+      scope: operator.mcdp
 
     - match: "[a-z_0-9]+ provided by"
       scope: identifier.functionality.mcdp

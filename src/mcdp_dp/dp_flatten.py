@@ -10,6 +10,8 @@ from multi_index import get_it
 __all__ = [
     'Mux',
     'MuxMap',
+    'TakeFun',
+    'TakeRes',
 ]
 
 class MuxMap(Map):

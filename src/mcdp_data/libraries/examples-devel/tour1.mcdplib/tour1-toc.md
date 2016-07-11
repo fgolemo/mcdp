@@ -40,7 +40,7 @@
 [Space Rovers energetics](energy_choices2.html)
 [Space Rovers energetics](energy_choices3.html)
 
-[The plug/socket domain](plugs.html)
+[The plug/socket domain](sockets.html)
 
 
 **Draft documentation**

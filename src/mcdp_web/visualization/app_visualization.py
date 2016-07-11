@@ -96,7 +96,7 @@ class AppVisualization():
                                     add_line_gutter=False)
             
             highlight = self.add_html_links(request, highlight)
-            error = None
+            error = ''
         except DPSyntaxError as e:
             highlight = '<pre class="source_code_with_error">%s</pre>' % source_code
             error = e.__str__()

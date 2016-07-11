@@ -54,8 +54,14 @@ def check_tuples6():
 
     parsef('take(out, 1)')
 
+    parse_wrap(Syntax.lf_tuple_indexing, 'take(required out, 1)')
+
+    parsef('take(required out, 1)')
+
 @comptest
 def check_tuples7():
+
+
     pass
 
 @comptest

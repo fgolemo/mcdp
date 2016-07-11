@@ -1,0 +1,19 @@
+mcdp {
+    provides out1 [`AC_power]
+    provides out2 [`AC_power]
+    requires in  [`AC_power] 
+    requires budget [USD]
+
+    budget >= 6.31 USD
+ 
+    take(required in,  1) >= `socket_type : TypeM
+
+    take(provided out1, 1) <= any-of({`socket_type : TypeA, `socket_type : TypeC})
+    take(provided out2, 1) <= any-of({`socket_type : TypeA, `socket_type : TypeC})
+
+    # this forces the two voltages to be the same
+    take(required in,  2) >=  take(provided out1, 2) # voltages
+    take(required in,  2) >=  take(provided out2, 2) # voltages
+    # this says that the power sums
+    take(required in,  3) >=  take(provided out1, 3) + take(provided out2, 3)# power
+}

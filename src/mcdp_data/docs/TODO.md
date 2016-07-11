@@ -33,6 +33,9 @@ Keys:
 
 Bugs
 -----
+- F: parse custom string for PosetCoproduct
+- B: refresh library does not reset the icon caches
+- B: what happens with recursive definitions? (a.poset = "`a")
 
 - now the edges that are not connected are not purple
 

@@ -9,6 +9,7 @@ from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 __all__ = [
     'UpperSet',
     'UpperSets',
+    'LowerSet',
 ]
 
 class UpperSet(Space):
@@ -116,9 +117,6 @@ class UpperSets(Poset):
             raise NotLeq('a = my ⊤')
 
         self.my_leq_(a, b)
-        # XXX: not sure I should add this, with inverted
-#         self.my_leq_(b, a, inverted)
-
     def my_leq_(self, A, B):
         # there exists an a in A that a <= b
         def dominated(b):
@@ -203,13 +201,13 @@ class LowerSet(Space):
 
     def belongs(self, x):
         self.P.belongs(x)
-        for p in self.minimals:
+        for p in self.maximals:
             if self.P.leq(x, p):
                 return
         raise_desc(NotBelongs, 'Point does not belong to lower set.')
 
     def __repr__(self):
         contents = ", ".join(self.P.format(m)
-                        for m in sorted(self.minimals))
+                        for m in sorted(self.maximals))
 
         return "↓{%s}" % contents

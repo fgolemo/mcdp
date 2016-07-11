@@ -50,7 +50,7 @@ def go():
 
     for tag in main_body.select("a"):
         href = tag['href']
-        debug(href)
+        #debug(href)
         # http://127.0.0.1:8080/libraries/tour1/types.html
         if href.endswith('html'):
             page = href.split('/')[-1]

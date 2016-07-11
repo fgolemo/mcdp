@@ -59,6 +59,11 @@ class Series0(PrimitiveDP):
     def evaluate_f_m(self, f1, m):
         """ Returns the resources needed
             by the particular implementation m """
+
+        if do_extra_checks():
+            M = self.get_imp_space_mod_res()
+            M.belongs(m)
+
         m1, m_extra, m2 = self._unpack_m(m)
 
         if isinstance(self.dp1, (Mux, Identity)):
@@ -102,7 +107,14 @@ class Series0(PrimitiveDP):
                 # print('Found f1=%s r1=%s r2=%s' % (f1, r1, r2))
                 for m1 in m1s:
                     for m2 in m2s:
+                        print('m1', m1, 'm_extra', m_extra, 'm2', m2)
+                        M1 = self.dp1.M
+                        M1.belongs(m1)
+                        M2 = self.dp2.M
+                        M2.belongs(m2)
+
                         m = pack(m1, m_extra, m2)
+                        self.M.belongs(m)
                         res.add(m)
         if not res:
             msg = 'The (f,r) pair was not feasible.'

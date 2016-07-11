@@ -10,6 +10,7 @@ from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPSemanticError, mcdp_dev_warning
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
+from mcdp_lang.namedtuple_tricks import recursive_print
 
 CDP = CDPLanguage
 
@@ -56,6 +57,22 @@ def eval_constant(op, context):
             space = eval_space(op.space, context)
             v = space.get_top()
             return ValueWithUnits(unit=space, value=v)
+
+        if isinstance(op, CDP.Maximals):
+            from mcdp_lang.eval_space_imp import eval_space  # @Reimport
+            space = eval_space(op.space, context)
+            elements = space.get_maximal_elements()
+            v = FiniteCollection(elements=elements, S=space)
+            S = FiniteCollectionsInclusion(space)
+            return ValueWithUnits(unit=S, value=v)
+
+        if isinstance(op, CDP.Minimals):
+            from mcdp_lang.eval_space_imp import eval_space  # @Reimport
+            space = eval_space(op.space, context)
+            elements = space.get_minimal_elements()
+            v = FiniteCollection(elements=elements, S=space)
+            S = FiniteCollectionsInclusion(space)
+            return ValueWithUnits(unit=S, value=v)
 
         if isinstance(op, CDP.Bottom):
             from mcdp_lang.eval_space_imp import eval_space  # @Reimport
@@ -129,10 +146,10 @@ def eval_constant(op, context):
             dp = ndp.get_dp()
             f0 = eval_constant(op.f, context)
             F = dp.get_fun_space()
-            mcdp_dev_warning('I never understand this...')
+
             tu = get_types_universe()
             try:
-                tu.check_leq(F, f0.unit)
+                tu.check_leq(f0.unit, F)
             except NotLeq as e:
                 msg = 'Input not correct.'
                 raise_wrapped(DPSemanticError, e, msg, compact=True)
@@ -141,8 +158,9 @@ def eval_constant(op, context):
             UR = UpperSets(dp.get_res_space())
             return ValueWithUnits(res, UR)
 
-        msg = 'eval_constant() cannot evaluate this value as constant.'
-        raise_desc(NotConstant, msg, op=str(op))
+        msg = 'eval_constant(): Cannot evaluate this as constant.'
+        op = recursive_print(op)
+        raise_desc(NotConstant, msg, op=op)
 
 
 def eval_constant_space_custom_value(op, context):

@@ -10,6 +10,12 @@
 
 # Draft documentation
 
+## Load
+
+    load <name>
+
+    ` <name>
+
 ## Space expressions
 
 ### Named products  
@@ -51,6 +57,12 @@ For example:
 <pre class='mcdp_poset'>
 Interval(1g, 10g)
 </pre>
+
+### Singletons
+
+    S(tag)
+
+    S(tag):*
 
 
 ## Constant expressions
@@ -140,6 +152,27 @@ take( ⟨0g, 3g⟩, 1 )
 </pre>
 
 
+### ignore
+
+
+Suppose f has type F. Then:
+
+    ignore f provided by x 
+
+is equivalent to
+
+    f provided by x >= any-of(Minimals F)
+
+
+Equivalently,
+
+    ignore r required by x 
+
+is equivalent to
+
+    r required by x <= any-of(Maximals R)
+
+
 ### available math operators
 
     ceil
@@ -182,8 +215,6 @@ take( ⟨0g, 3g⟩, 1 )
 
     approx_lower(<n>, <ndp>)
     approx_upper(<n>, <ndp>)
-
-
 
 
 ### solve

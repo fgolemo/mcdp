@@ -2,9 +2,9 @@
 from .helpers import create_operation
 from .parts import CDPLanguage
 from contracts import contract
+from mcdp_dp import TakeFun
 from mcdp_lang.utils_lists import get_odd_ops, unwrap_list
-from mcdp_posets.poset_product import PosetProduct
-from mcdp_dp.dp_flatten import Mux, TakeRes, TakeFun
+from mcdp_posets import PosetProduct
 
 CDP = CDPLanguage
 

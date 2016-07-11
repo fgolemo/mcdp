@@ -6,7 +6,7 @@ from .utils_lists import get_odd_ops, unwrap_list
 from contracts import contract, describe_value
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import JoinNDP, MeetNDual
-from mcdp_dp.conversion import get_conversion
+from mcdp_dp.conversion import get_conversion, Conversion
 from mcdp_dp.dp_approximation import make_approximation
 from mcdp_dp.dp_catalogue import CatalogueDP
 from mcdp_dp.dp_series_simplification import make_series
@@ -24,8 +24,7 @@ from mocdp.exceptions import (DPInternalError, DPSemanticError,
     DPSemanticErrorNotConnected, mcdp_dev_warning)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 from mcdp_lang.namedtuple_tricks import recursive_print
-
-
+from mcdp_lang.helpers import create_operation
 
 CDP = CDPLanguage
 
@@ -360,41 +359,43 @@ def add_constraint(context, resource, function):
 
     tu = get_types_universe()
 
+    if tu.equal(R1, F2):
+        c = Connection(dp1=resource.dp, s1=resource.s,
+                       dp2=function.dp, s2=function.s)
+        context.add_connection(c)
 
-    if not tu.equal(R1, F2):
+    elif tu.leq(R1, F2):
+        ##  F2    ---- (<=) ----   =>  ----(<=)--- [R1_to_F2] ----
+        ##   |     R1       F2          R1      R1             F2
+        ##  R1
+        R1_to_F2, _F2_to_R1 = tu.get_embedding(R1, F2)
+        conversion = Conversion(R1_to_F2)
 
-#         try:
-#             tu.check_equal(R1, F2)
-#         except NotEqual as e:
-#             pass
-#         else:
-#             assert False
-
-        try:
-            tu.check_leq(R1, F2)
-        except NotLeq as e:
-            msg = 'Constraint between incompatible spaces.'
-            raise_wrapped(DPSemanticError, e, msg, compact=True)
-
-        conversion = get_conversion(R1, F2)
-
-        conversion_ndp = dpwrap(conversion, '_in', '_out')
-
-        name = context.new_name('_conversion')
-        context.add_ndp(name, conversion_ndp)
-
-        c1 = Connection(dp1=resource.dp, s1=resource.s,
-                   dp2=name, s2='_in')
-        context.add_connection(c1)
-        resource = context.make_resource(name, '_out')
-
+        resource2 = create_operation(context=context, dp=conversion,
+                                    resources=[resource], name_prefix='_conversion',
+                                     op_prefix='_in', res_prefix='_out')
+        c = Connection(dp1=resource2.dp, s1=resource2.s,
+                       dp2=function.dp, s2=function.s)
+        context.add_connection(c)
+    elif tu.leq(F2, R1):
+        ##  R1     ---- (<=) ----   =>  ----(<=)--- [F2_to_R1^L] ----
+        ##   |h     R1       F2          R1      R1               F2
+        ##  F2
+        
+        _F2_to_R1, R1_to_F2 = tu.get_embedding(F2, R1)
+        conversion = Conversion(R1_to_F2)
+        resource2 = create_operation(context=context, dp=conversion,
+                                    resources=[resource], name_prefix='_conversion',
+                                     op_prefix='_in', res_prefix='_out')
+        c = Connection(dp1=resource2.dp, s1=resource2.s,
+                       dp2=function.dp, s2=function.s)
+        context.add_connection(c)
     else:
-        # print('Spaces are equal: %s and %s' % (R1, F2))
-        pass
+        msg = 'Constraint between incompatible spaces.'
+        raise_desc(DPSemanticError, msg, R1=R1, F2=F2)
 
-    c = Connection(dp1=resource.dp, s1=resource.s,
-                   dp2=function.dp, s2=function.s)
-    context.add_connection(c)
+
+
 
 def eval_statement(r, context):
     with add_where_information(r.where):
@@ -481,7 +482,6 @@ def eval_statement(r, context):
             fv = eval_lfunction(right_side, context)
             context.set_var2function(name, fv)
 
-
         elif isinstance(r, CDP.ResStatement):
             # requires r.rname [r.unit]
 
@@ -494,7 +494,6 @@ def eval_statement(r, context):
         elif isinstance(r, CDP.FunStatement):
             F = eval_space(r.unit, context)
             fname = r.fname.value
-
             context.add_ndp_fun_node(fname, F)
 
             return context.make_resource(get_name_for_fun_node(fname), fname)
@@ -545,8 +544,35 @@ def eval_statement(r, context):
             # B >= A
             add_constraint(context, resource=A, function=B)
 
+        elif isinstance(r, CDP.IgnoreFun):
+            # equivalent to f >= any-of(Minimals S)
+            lf = eval_lfunction(r.fvalue, context)
+            F = context.get_ftype(lf)
+            values = F.get_minimal_elements()
+            from mcdp_dp.dp_constant import ConstantMinimals
+            dp = ConstantMinimals(F, values)
+            ndp = SimpleWrap(dp, fnames=[], rnames='_out')
+            name = context.new_name('_constant')
+            context.add_ndp(name, ndp)
+            r = context.make_resource(name, '_out')
+            add_constraint(context, resource=r, function=lf)
+
+        elif isinstance(r, CDP.IgnoreRes):
+            # equivalent to r <= any-of(Maximals S)
+            rv = eval_rvalue(r.rvalue, context)
+            R = context.get_rtype(rv)
+            values = R.get_maximal_elements()
+            from mcdp_dp.dp_limit import LimitMaximals
+            dp = LimitMaximals(R, values)
+            ndp = SimpleWrap(dp, fnames='_limit', rnames=[])
+            name = context.new_name('_limit')
+            context.add_ndp(name, ndp)
+            f = context.make_function(name, '_limit')
+            add_constraint(context, resource=rv, function=f)
         else:
-            raise DPInternalError('Cannot interpret %s' % describe_value(r))
+            msg = 'eval_statement(): cannot interpret.'
+            r = recursive_print(r)
+            raise_desc(DPInternalError, msg, r=r)
 
 def eval_build_problem(r, context):
     context = context.child()

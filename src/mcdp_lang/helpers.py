@@ -39,7 +39,7 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
         fnames.append(ni)
 
 
-    fnames_ = fnames if len(fnames) > 1 else fnames[0]
+    fnames_ = fnames[0] if len(fnames) == 1 else fnames
     ndp = dpwrap(dp, fnames_, name_result)
     context.add_ndp(name, ndp)
 
@@ -70,7 +70,6 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
 
     if len(fnames) == 1:
         fnames = fnames[0]
-
 
     for c in connections:
         context.add_connection(c)
@@ -127,10 +126,10 @@ def get_constant_maximals_as_function(F, values, context):
         F.belongs(v)
 
     dp = LimitMaximals(F=F, values=values)
-    nres = context.new_res_name('_c')
-    ndp = dpwrap(dp, nres, [])
+    nres = context.new_name('_c')
+    ndp = dpwrap(dp, '_max', [])
     context.add_ndp(nres, ndp)
-    return context.make_function(nres, nres)
+    return context.make_function(nres, '_max')
 
 @contract(v=ValueWithUnits)
 def get_valuewithunits_as_function(v, context):

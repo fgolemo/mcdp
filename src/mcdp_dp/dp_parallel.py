@@ -16,10 +16,6 @@ __all__ = [
 class Parallel(PrimitiveDP):
 
     def __init__(self, dp1, dp2):
-#         from mocdp import get_conftools_dps
-#         library = get_conftools_dps()
-#         _, self.dp1 = library.instance_smarter(dp1)
-#         _, self.dp2 = library.instance_smarter(dp2)
         self.dp1 = dp1
         self.dp2 = dp2
 
@@ -33,7 +29,7 @@ class Parallel(PrimitiveDP):
 
         M1 = self.dp1.get_imp_space_mod_res()
         M2 = self.dp2.get_imp_space_mod_res()
-        # M = SpaceProduct((M1, M2))
+
         M, _, _ = get_product_compact(M1, M2)
         self.M1 = M1
         self.M2 = M2

@@ -8,11 +8,11 @@ from mcdp_report.generic_report_utils import (
 from mcdp_report.html import ast_to_html
 from mcdp_web.images.images import (ndp_graph_enclosed, ndp_graph_expand,
     ndp_graph_normal, ndp_graph_templatized)
+from mocdp import logger
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from reprep import Report
 import base64
 import traceback
-
 
 def bs(fragment):
     return BeautifulSoup(fragment, 'html.parser', from_encoding='utf-8')
@@ -224,19 +224,19 @@ def highlight_mcdp_code(library, frag, realpath, raise_errors=False):
     def go(selector, parse_expr, extension, use_pre=True):
         for tag in soup.select(selector):
             
-            if tag.string is None:
-                if not tag.has_attr('id'):
-                    msg = "If <pre> is empty then it needs to have an id."
-                    raise_desc(ValueError, msg, tag=str(tag))
-                # load it
-                basename = '%s.%s' % (tag['id'], extension)
-                data = library._get_file_data(basename)
-                source_code = data['data']
-                source_code = source_code.replace('\t', ' ' * 4)
-            else:
-                source_code = get_source_code(tag)
-
             try:
+                if tag.string is None:
+                    if not tag.has_attr('id'):
+                        msg = "If <pre> is empty then it needs to have an id."
+                        raise_desc(ValueError, msg, tag=str(tag))
+                    # load it
+                    basename = '%s.%s' % (tag['id'], extension)
+                    data = library._get_file_data(basename)
+                    source_code = data['data']
+                    source_code = source_code.replace('\t', ' ' * 4)
+                else:
+                    source_code = get_source_code(tag)
+
                 html = ast_to_html(source_code, parse_expr=parse_expr,
                                                 complete_document=False,
                                                 add_line_gutter=False,
@@ -270,6 +270,7 @@ def highlight_mcdp_code(library, frag, realpath, raise_errors=False):
 
                 if tag.has_attr('class'):
                     rendered['class'] = tag['class']
+
                 if tag.has_attr('id'):
                     rendered['id'] = tag['id']
 
@@ -278,10 +279,23 @@ def highlight_mcdp_code(library, frag, realpath, raise_errors=False):
             except DPSyntaxError as e:
                 if raise_errors:
                     raise
-                print(e)  # XXX
+                logger.error(unicode(e.__str__(), 'utf-8'))
                 t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
                 t.string = str(e)
                 tag.insert_after(t)
+
+                if tag.string is None:
+                    tag.string = "`%s" % tag['id']
+
+            except DPSemanticError as e:
+                if raise_errors:
+                    raise
+                logger.error(unicode(e.__str__(), 'utf-8'))
+                t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
+                t.string = str(e)
+                tag.insert_after(t)
+                if tag.string is None:
+                    tag.string = "`%s" % tag['id']
 
     go('pre.mcdp', Syntax.ndpt_dp_rvalue, "mcdp", use_pre=True)
     go('pre.mcdp_poset', Syntax.space, "mcdp_poset", use_pre=True)

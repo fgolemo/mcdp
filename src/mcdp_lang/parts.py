@@ -9,7 +9,8 @@ __all__ = [
 
 class CDPLanguage():
 
-    GenericNonlinearity = namedtuplewhere('GenericNonlinearity', 'function op1 R_from_F')
+    GenericNonlinearity = namedtuplewhere('GenericNonlinearity',
+                                          'function op1 R_from_F')
 
     ValueExpr = namedtuplewhere('ValueExpr', 'value')
 
@@ -18,8 +19,25 @@ class CDPLanguage():
 
     RcompUnit = namedtuplewhere('RcompUnit', 'pint_string')
     SimpleValue = namedtuplewhere('SimpleValue', 'value space')
+
+    # Top <space>
+    TopKeyword = namedtuplewhere('TopKeyword', 'keyword')
     Top = namedtuplewhere('Top', 'keyword space')
+    # Bottom <space>
     Bottom = namedtuplewhere('Bottom', 'keyword space')
+    BottomKeyword = namedtuplewhere('BottomKeyword', 'keyword')
+    # Maximals <space>
+    Maximals = namedtuplewhere('Maximals', 'keyword space')
+    MaximalsKeyword = namedtuplewhere('MaximalsKeyword', 'keyword')
+    # Minimals <space>
+    Minimals = namedtuplewhere('Minimals', 'keyword space')
+    MinimalsKeyword = namedtuplewhere('MinimalsKeyword', 'keyword')
+    # ignore x provided by y
+    # ignore x required by y
+    IgnoreKeyword = namedtuplewhere('IgnoreKeyword', 'keyword')
+    IgnoreFun = namedtuplewhere('IgnoreFun', 'keyword fvalue')
+    IgnoreRes = namedtuplewhere('IgnoreRes', 'keyword rvalue')
+
     MakeTuple = namedtuplewhere('MakeTuple', 'open ops close')
 
     MakeTemplate = namedtuplewhere('MakeTemplate', 'keyword dp_rvalue')
@@ -96,8 +114,6 @@ class CDPLanguage():
     RequiredKeyword = namedtuplewhere('RequiredKeyword', 'keyword')
     MCDPKeyword = namedtuplewhere('MCDPKeyword', 'keyword')
     SubKeyword = namedtuplewhere('SubKeyword', 'keyword')
-    TopKeyword = namedtuplewhere('TopKeyword', 'keyword')
-    BottomKeyword = namedtuplewhere('BottomKeyword', 'keyword')
     MCDPTypeKeyword = namedtuplewhere('MCDPTypeKeyword', 'keyword')
     CompactKeyword = namedtuplewhere('CompactKeyword', 'keyword')
     AbstractKeyword = namedtuplewhere('AbstractKeyword', 'keyword')
@@ -215,6 +231,7 @@ class CDPLanguage():
     SpaceCustomValue = namedtuplewhere('SpaceCustomValue', 'space keyword custom_string')
 
     # solve( <0 g>, `model )
+    SolveModelKeyword = namedtuplewhere('SolveModelKeyword', 'keyword')
     SolveModel = namedtuplewhere('SolveModel', 'keyword f model')
 
     # UpperSets(<space>)
@@ -237,3 +254,15 @@ class CDPLanguage():
     IndexLabel = namedtuplewhere('IndexLabel', 'label')
     ResourceLabelIndex = namedtuplewhere('ResourceLabelIndex', 'rvalue label')
     FunctionLabelIndex = namedtuplewhere('FunctionLabelIndex', 'fvalue label')
+
+    # any-of({1,2})
+    AnyOfKeyword = namedtuplewhere('AnyOfKeyword', 'keyword')
+    AnyOfFun = namedtuplewhere('AnyOfFun', 'keyword value')
+    AnyOfRes = namedtuplewhere('AnyOfRes', 'keyword value')
+
+    # coproduct(space1, space2)
+    SpaceCoproductKeyword = namedtuplewhere('SpaceCoproductKeyword', 'keyword')
+    SpaceCoproduct = namedtuplewhere('SpaceCoproduct', 'keyword entries')
+
+
+

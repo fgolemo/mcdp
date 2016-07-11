@@ -1,0 +1,12 @@
+finite_poset {
+    tip_sleeve_2_5mm
+    tip_sleeve_3_5mm
+    barrel_5mm
+    # EIAJ-01 (2.35mm barrel, 0.7mm inner diameter)
+    barrel_2_35mm
+    barrel_3_35mm_1_35mm
+    # EIAJ-02 (4.0mm barrel, 1.7mm inner diameter)
+    barrel_4mm_1_7mm
+    barrel_4mm_1_5mm
+    barrel_4mm_2_5mm
+}

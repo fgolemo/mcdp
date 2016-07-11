@@ -74,6 +74,8 @@ class SyntaxIdentifiers():
         'approx_upper',
         'Top',
         'Bottom',
+        'Maximals',
+        'Minimals',
         'finite_poset',
         'choose',
         'flatten',
@@ -87,6 +89,9 @@ class SyntaxIdentifiers():
         'Interval',
         'product',
         'S',
+        'any-of',
+        'coproduct',
+        'ignore',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -213,6 +218,15 @@ class Syntax():
                                    lambda t: 
                                    CDP.ProductWithLabels(keyword=t[0],
                                                          entries=make_list(t[1:])))
+    COPRODUCT = sp(L('coproduct'), lambda t: CDP.SpaceCoproductKeyword(t[0]))
+    space_coproduct_label = sp(get_idn(), lambda t: CDP.ProductWithLabelsLabel(t[0]))
+    space_coproduct_entry = space_product_label + SCOLON + space
+    space_coproduct = sp(COPRODUCT + SLPAR +
+                         O(space) + ZeroOrMore(SCOMMA + space) + SRPAR,
+                           lambda t:
+                                   CDP.SpaceCoproduct(keyword=t[0],
+                                                      entries=make_list(t[1:])))
+
 
     INTERVAL = sp(L('Interval'), lambda t: CDP.IntervalKeyword(t[0]))
     
@@ -243,6 +257,7 @@ class Syntax():
                      ^ space_interval
                      ^ space_product_with_labels
                      ^ space_single_element_poset
+                     ^ space_coproduct
                      )
 
 
@@ -287,12 +302,20 @@ class Syntax():
 
     number_with_unit5_bot = sp(BOTTOM + space,
                                lambda t: CDP.Bottom(t[0], t[1]))
+    MINIMALS = sp(L('Minimals'), lambda t: CDP.MinimalsKeyword(t[0]))
+    number_with_unit_minimals = sp(MINIMALS + space,
+                                   lambda t: CDP.Minimals(t[0], t[1]))
+    MAXIMALS = sp(L('Maximals'), lambda t: CDP.MaximalsKeyword(t[0]))
+    number_with_unit_maximals = sp(MAXIMALS + space,
+                                   lambda t: CDP.Maximals(t[0], t[1]))
 
     number_with_unit = (number_with_unit1 ^
                         number_with_unit2 ^
                         number_with_unit3 ^
                         number_with_unit4_top ^
-                        number_with_unit5_bot)
+                        number_with_unit5_bot ^
+                        number_with_unit_minimals ^
+                        number_with_unit_maximals)
 
     # TODO: change
 
@@ -359,7 +382,8 @@ class Syntax():
     
 
     # solve( <0 g>, `model )
-    solve_model = sp(L('solve') + SLPAR + constant_value + SCOMMA + ndpt_dp_rvalue + SRPAR,
+    SOLVE = sp(L('solve'), lambda t: CDP.SolveModelKeyword(t[0]))
+    solve_model = sp(SOLVE + SLPAR + constant_value + SCOMMA + ndpt_dp_rvalue + SRPAR,
                lambda t: CDP.SolveModel(keyword=t[0], f=t[1], model=t[2]))
 
 
@@ -407,7 +431,12 @@ class Syntax():
     rvalue_new_function = sp(get_idn(), VariableRef_make)
     rvalue_new_function2 = sp(PROVIDED + get_idn(),
                               lambda t: CDP.NewFunction(t[1]))
-    
+    ANYOF = sp(L('any-of'), lambda t: CDP.AnyOfKeyword(t[0]))
+    rvalue_any_of = sp(ANYOF + SLPAR + constant_value + SRPAR,
+                       lambda t: CDP.AnyOfRes(t[0], t[1]))
+    fvalue_any_of = sp(ANYOF + SLPAR + constant_value + SRPAR,
+                       lambda t: CDP.AnyOfFun(t[0], t[1]))
+
     # Uncertain(<lower>, <upper>)
     UNCERTAIN = sp(L('Uncertain'), lambda t: CDP.UncertainKeyword(t[0]))
     rvalue_uncertain = sp(UNCERTAIN + SLPAR + rvalue + SCOMMA + rvalue + SRPAR,
@@ -482,6 +511,7 @@ class Syntax():
     fvalue_fancy = sp(fname + PROVIDED_BY - dpname,
                       lambda t: CDP.Function(dp=t[2], s=t[0], keyword=t[1]))
 
+    fvalue_function = fvalue_simple ^ fvalue_fancy
 
     fvalue_maketuple = sp(OPEN_BRACE + fvalue + ZeroOrMore(COMMA + fvalue) + CLOSE_BRACE,
                        lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1]), t[-1]))
@@ -548,6 +578,12 @@ class Syntax():
                              prep_for=t[2],
                              name=t[3]))
 
+    IGNORE = sp(L('ignore'), lambda t: CDP.IgnoreKeyword(t[0]))
+    ignore_fun = sp(IGNORE + fvalue_function,
+                    lambda t: CDP.IgnoreFun(t[0], t[1]))
+    ignore_res = sp(IGNORE + rvalue_resource,
+                    lambda t: CDP.IgnoreRes(t[0], t[1]))
+
     line_expr = (constraint_expr_geq ^ 
                  constraint_expr_leq ^
                      (setname_generic ^ 
@@ -557,7 +593,9 @@ class Syntax():
                       setmcdptype_expr ^ 
                       setmcdptype_expr_implicit)
                  ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
-                 ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3)
+                 ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3
+                 ^ ignore_res
+                 ^ ignore_fun)
 
     dp_model_statements = sp(ZeroOrMore(S(ow) + line_expr),
                              lambda t: make_list(list(t)))
@@ -722,7 +760,8 @@ class Syntax():
                        rvalue_tuple_indexing ^
                        rvalue_make_tuple ^
                        rvalue_uncertain ^
-                       rvalue_label_indexing)
+                       rvalue_label_indexing
+                       ^ rvalue_any_of)
 
     rvalue << operatorPrecedence(rvalue_operand, [
         (TIMES, 2, opAssoc.LEFT, mult_parse_action),
@@ -739,13 +778,15 @@ class Syntax():
         fvalue_uncertain ^
         fvalue_disambiguation ^
         fvalue_label_indexing ^
-        lf_tuple_indexing ^
-        (SLPAR - (constant_value ^ fvalue_simple ^ fvalue_fancy ^
+        lf_tuple_indexing
+        ^ fvalue_any_of
+        ^ (SLPAR - (constant_value ^ fvalue_simple ^ fvalue_fancy ^
                       fvalue_new_resource ^ fvalue_new_resource2 ^ fvalue_maketuple
                       ^ fvalue_uncertain
                       ^ fvalue_disambiguation
                       ^ fvalue_label_indexing
                     ^ lf_tuple_indexing
+                    ^ fvalue_any_of
                       ) - SRPAR))
 
     fvalue << operatorPrecedence(fvalue_operand, [

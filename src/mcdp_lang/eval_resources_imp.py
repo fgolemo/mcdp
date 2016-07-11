@@ -25,7 +25,7 @@ def eval_rvalue(rvalue, context):
     with add_where_information(rvalue.where):
 
         constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
-                     CDP.Top, CDP.Bottom)
+                     CDP.Top, CDP.Bottom, CDP.Maximals, CDP.Minimals)
         if isinstance(rvalue, constants):
             res = eval_constant(rvalue, context)
             assert isinstance(res, ValueWithUnits)
@@ -92,6 +92,7 @@ def eval_rvalue(rvalue, context):
             CDP.MakeTuple: eval_rvalue_MakeTuple,
             CDP.UncertainRes: eval_rvalue_Uncertain,
             CDP.ResourceLabelIndex: eval_rvalue_resource_label_index,
+            CDP.AnyOfRes: eval_rvalue_anyofres,
         }
 
         for klass, hook in cases.items():
@@ -102,3 +103,27 @@ def eval_rvalue(rvalue, context):
         rvalue = recursive_print(rvalue)
         raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
 
+def eval_rvalue_anyofres(r, context):
+    from mcdp_posets import FiniteCollectionsInclusion
+    from mcdp_posets import FiniteCollection
+    from mcdp_dp.dp_constant import ConstantMinimals
+    from mcdp_lang.helpers import create_operation
+
+    assert isinstance(r, CDP.AnyOfRes)
+    constant = eval_constant(r.value, context)
+    if not isinstance(constant.unit, FiniteCollectionsInclusion):
+        msg = 'I expect that the argument to any-of evaluates to a finite collection.'
+        raise_desc(DPSemanticError, msg, constant=constant)
+    assert isinstance(constant.unit, FiniteCollectionsInclusion)
+    P = constant.unit.S
+    assert isinstance(constant.value, FiniteCollection)
+    values = set(constant.value.elements)
+
+    dp = ConstantMinimals(R=P, values=values)
+    return create_operation(context, dp=dp, resources=[],
+                               name_prefix='_anyof', op_prefix='_',
+                                res_prefix='_result')
+
+
+
+    

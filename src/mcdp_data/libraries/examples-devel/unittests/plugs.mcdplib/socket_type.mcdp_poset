@@ -2,7 +2,7 @@ finite_poset {
   TypeA TypeB TypeC TypeD TypeE TypeF  TypeG  TypeH  
   TypeI2 TypeI3 TypeJ TypeK TypeL TypeM TypeN  TypeO
 
-  # if it fits in A, it also fits in B
+  # A <= B: if it fits in A, it also fits in B
   TypeA <= TypeB
   TypeC <= TypeD   
   TypeE <= TypeD   

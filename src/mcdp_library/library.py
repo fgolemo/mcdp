@@ -7,13 +7,14 @@ from mcdp_lang import parse_ndp, parse_poset
 from mcdp_library.utils import memo_disk_cache2
 from mcdp_posets import Poset
 from mocdp import logger
-from mocdp.comp.context import Context
+from mocdp.comp.context import Context, ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.exceptions import DPSemanticError, extend_with_filename
 import os
 import shutil
 import sys
+from mcdp_dp.primitive import PrimitiveDP
 
 
 
@@ -113,12 +114,12 @@ class MCDPLibrary():
         return self._load_generic(id_poset, MCDPLibrary.ext_posets,
                                   MCDPLibrary.parse_poset)
 
-    @contract(returns=Poset)
+    @contract(returns=ValueWithUnits)
     def load_constant(self, id_poset):
         return self._load_generic(id_poset, MCDPLibrary.ext_values,
                                   MCDPLibrary.parse_constant)
 
-    @contract(returns=Poset)
+    @contract(returns=PrimitiveDP)
     def load_primitivedp(self, id_primitivedp):
         return self._load_generic(id_primitivedp, MCDPLibrary.ext_primitivedps,
                                   MCDPLibrary.parse_primitivedp)
@@ -268,16 +269,20 @@ class MCDPLibrary():
 
         ignore_patterns = ['out-']
 
+        def should_ignore(f):
+            for i in ignore_patterns:
+                if i in f:
+                    # logger.debug('Ignoring %r because of pattern %r.' % (f, i))
+                    return True
+            return False
+
         for ext in MCDPLibrary.all_extensions:
             pattern = '*.%s' % ext
             files_mcdp = locate_files(directory=d, pattern=pattern,
                                       followlinks=True)
             for f in files_mcdp:
-                for i in ignore_patterns:
-                    if i in f:
-                        logger.debug('Ignoring %r because of pattern %r.' % (f, i))
-                        continue
-
+                if should_ignore(f):
+                    continue
                 self._update_file(f)
 
     def _update_file(self, f):

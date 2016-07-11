@@ -1,0 +1,24 @@
+mcdp {
+    provides out1 [`DC_power]
+    provides out2 [`DC_power]
+    requires in  [`AC_power] 
+    requires budget [USD]
+
+    budget >= 10.99 USD    
+
+    take(required in,  1) >= `socket_type : TypeM
+
+    take(provided out1, 2) <= `DC_Voltages: v5
+    take(provided out2, 2) <= `DC_Voltages: v5
+    take(provided out1, 1) <= `USB_connectors:USB_Std_A 
+    take(provided out2, 1) <= `USB_connectors:USB_Std_A
+
+    # this forces the two voltages to be the same
+    # this says that the power sums
+    amps = take(provided out1, 3) + take(provided out2, 3)
+    amps <= 2.4 A
+    power = 5 V * (amps)
+
+    take(required in, 3) >= power
+
+}

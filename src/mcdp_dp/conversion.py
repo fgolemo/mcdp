@@ -11,12 +11,12 @@ __all__ = [
 ]
 
 class Conversion(WrapAMap):
-    """ Simple wrap to get icon """
-    pass
+    """ Simple wrap to WrapAMap to get a custom icon. """
+
 
 @contract(returns='None|$PrimitiveDP')
 def get_conversion(A, B):
-    """ Returns None if there is no need or a Conversion Map """
+    """ Returns None if there is no need for a Conversion Map """
     tu = get_types_universe()
     try:
         tu.check_leq(A, B)

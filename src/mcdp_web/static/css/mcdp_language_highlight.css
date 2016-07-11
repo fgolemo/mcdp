@@ -57,8 +57,11 @@ span.PowerSetKeyword,
 span.IntervalKeyword,
 span.UpperSetFromCollectionKeyword,
 span.TopKeyword,
-span.BottomKeyword
-
+span.BottomKeyword,
+span.SingleElementPosetKeyword,
+span.SpaceCoproductKeyword,
+span.IgnoreKeyword,
+span.SolveModelKeyword
 { 
     font-weight: bold; 
     color: #00a;
@@ -84,7 +87,8 @@ span.FuncName { color: #CC6600 ; }
 
 span.FName, span.RName { } 
 span.DPName, span.NDPName, span.PosetName, span.TemplateParamName,
-span.FinitePosetElement {  
+span.FinitePosetElement,
+span.SingleElementPosetTag {  
     color: #a0a;
 }
 

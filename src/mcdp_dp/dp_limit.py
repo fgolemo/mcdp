@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts import contract
-from mcdp_posets import Poset  # @UnusedImport
+from mcdp_posets import LowerSet, NotBelongs, Poset  # @UnusedImport
 from mcdp_posets import PosetProduct, UpperSet
-from mocdp.exceptions import mcdp_dev_warning, do_extra_checks
-from mcdp_posets.uppersets import LowerSet
-from mcdp_posets.space import NotBelongs
+from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 
 
 __all__ = [
@@ -37,11 +35,11 @@ class Limit(PrimitiveDP):
             return empty
 
     def __repr__(self):
-        return 'Limit(%s <= %s)' % (self.F, self.F.format(self.limit))
+        return 'Limit(%s, %s)' % (self.F, self.F.format(self.limit))
 
 class LimitMaximals(PrimitiveDP):
 
-    @contract(F='$Poset', values='seq')
+    @contract(F='$Poset', values='seq|set')
     def __init__(self, F, values):
         if do_extra_checks():
             for value in values:
@@ -63,5 +61,5 @@ class LimitMaximals(PrimitiveDP):
             return empty
 
     def __repr__(self):
-        return 'Limit(%s <= %s)' % (self.F, self.F.format(self.limit))
+        return 'LimitMaximals(%s, %s)' % (self.F, self.limit)
 

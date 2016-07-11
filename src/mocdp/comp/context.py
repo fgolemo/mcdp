@@ -235,7 +235,8 @@ class Context():
         self.info('Adding name %r = %r' % (name, ndp))
         if name in self.names:
             # where?
-            raise DPSemanticError('Repeated identifier %r.' % name)
+            msg = 'Repeated identifier'
+            raise_desc(DPInternalError, msg, name=name)
         self.names[name] = ndp
 
     @contract(returns=str)

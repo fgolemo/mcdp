@@ -10,6 +10,8 @@ from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import CFunction, get_name_for_res_node
 from mcdp_dp import InvMult2, InvPlus2, InvPlus2Nat
 from mocdp.exceptions import DPInternalError, DPSemanticError
+from mcdp_lang.namedtuple_tricks import recursive_print
+from mcdp_posets.finite_collection_as_space import FiniteCollectionAsSpace
 
 
 CDP = CDPLanguage
@@ -61,14 +63,37 @@ def eval_lfunction(lf, context):
             CDP.DisambiguationFun: eval_lfunction_disambiguation,
             CDP.FunctionLabelIndex: eval_lfunction_label_index,
             CDP.TupleIndexFun: eval_lfunction_tupleindexfun,
+            CDP.AnyOfFun: eval_lfunction_anyoffun,
         }
 
         for klass, hook in cases.items():
             if isinstance(lf, klass):
                 return hook(lf, context)
 
-        msg = 'eval_lfunction() cannot evaluate as a function.'
-        raise_desc(DPInternalError, msg, lf=lf)
+        r = recursive_print(lf)
+        msg = 'eval_lfunction(): cannot evaluate as a function.'
+        raise_desc(DPInternalError, msg, r=r)
+
+def eval_lfunction_anyoffun(lf, context):
+    from mcdp_lang.eval_constant_imp import eval_constant
+    from mcdp_posets.finite_collections_inclusion import FiniteCollectionsInclusion
+    from mcdp_dp.dp_limit import LimitMaximals
+    from mcdp_posets.finite_collection import FiniteCollection
+    from mcdp_lang.helpers import create_operation_lf
+
+    assert isinstance(lf, CDP.AnyOfFun)
+    constant = eval_constant(lf.value, context)
+    if not isinstance(constant.unit, FiniteCollectionsInclusion):
+        msg = 'I expect that the argument to any-of evaluates to a finite collection.'
+        raise_desc(DPSemanticError, msg, constant=constant)
+    assert isinstance(constant.unit, FiniteCollectionsInclusion)
+    P = constant.unit.S
+    assert isinstance(constant.value, FiniteCollection)
+    values = set(constant.value.elements)
+    dp = LimitMaximals(values=values, F=P)
+    return create_operation_lf(context, dp=dp, functions=[],
+                               name_prefix='_anyof', op_prefix='_',
+                                res_prefix='_result')
 
 def eval_lfunction_disambiguation(lf, context):
     return eval_lfunction(lf.fvalue, context)

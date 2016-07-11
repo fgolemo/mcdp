@@ -145,10 +145,11 @@ and then erasing their borders:
 
 
 <style type='text/css'>
-td{ vertical-align: top; }
-td:first-child { 
-	/*border: solid 1px red; */
-	/*width: 25em; */
-
-}
+	td { 
+		vertical-align: top; 
+	}
+	td:first-child { 
+		/*border: solid 1px red; */
+		/*width: 25em; */
+	}
 </style>
