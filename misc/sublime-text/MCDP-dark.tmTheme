@@ -486,6 +486,16 @@
 				<string>#777777</string>
 			</dict>
 		</dict>
+
+		<dict>
+			<key>scope</key>
+			<string>load_arg.mcdp</string>
+			<key>settings</key>
+			<dict> 
+				<key>foreground</key>
+				<string>#CC6600</string>
+			</dict>
+		</dict>
 		
 
 

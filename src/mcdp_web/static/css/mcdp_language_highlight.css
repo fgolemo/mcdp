@@ -61,7 +61,8 @@ span.BottomKeyword,
 span.SingleElementPosetKeyword,
 span.SpaceCoproductKeyword,
 span.IgnoreKeyword,
-span.SolveModelKeyword
+span.SolveModelKeyword,
+span.AnyOfKeyword
 { 
     font-weight: bold; 
     color: #00a;

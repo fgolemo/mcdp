@@ -1,1 +1,6 @@
-S(DC_power) x `DC_connectors x `DC_voltages x A
+product(
+      task: S(DC_power), 
+ connector: `DC_connectors,
+   voltage: `DC_voltages,
+      amps: A
+)

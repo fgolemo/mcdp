@@ -68,16 +68,13 @@ class AppSolver2():
 
         F = dp.get_fun_space()
 
-        space_description = str(F).decode('utf-8')
+        space_description = unicode(str(F), 'utf-8')
         return {'navigation': self.get_navigation_links(request),
                 'space_description': space_description}
 
     def view_solver2_submit(self, request):
         def go():
-            string = request.json_body['string']
-            assert isinstance(string, unicode)
-            string = string.encode('utf-8')
-
+            string = request.json_body['string'].encode('utf-8')
             nl = int(request.json_body['nl'])
             nu = int(request.json_body['nu'])
             return self.process(request, string, nl, nu)
@@ -145,9 +142,10 @@ class AppSolver2():
 
     def view_solver2_display(self, request):
         def go():
-            key = (str(request.params['string']),
-                   int(request.params['nl']),
-                   int(request.params['nu']))
+            string = request.params['string'].encode('utf-8')
+            nl = int(request.params['nl'])
+            nu = int(request.params['nu'])
+            key = (string, nl, nu)
             s = self.solutions[key]
 
             result_l = s['result_l']

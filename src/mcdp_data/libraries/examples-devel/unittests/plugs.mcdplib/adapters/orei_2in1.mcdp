@@ -14,6 +14,8 @@ mcdp {
     # this forces the two voltages to be the same
     take(required in,  2) >=  take(provided out1, 2) # voltages
     take(required in,  2) >=  take(provided out2, 2) # voltages
+    take(required in,  3) >=  take(provided out1, 3) # frequencies
+    take(required in,  3) >=  take(provided out2, 3) # frequencies
     # this says that the power sums
-    take(required in,  3) >=  take(provided out1, 3) + take(provided out2, 3)# power
+    take(required in,  4) >=  take(provided out1, 4) + take(provided out2, 4)# power
 }

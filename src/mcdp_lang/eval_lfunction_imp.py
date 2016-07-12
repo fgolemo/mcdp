@@ -12,6 +12,7 @@ from mcdp_dp import InvMult2, InvPlus2, InvPlus2Nat
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from mcdp_lang.namedtuple_tricks import recursive_print
 from mcdp_posets.finite_collection_as_space import FiniteCollectionAsSpace
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
 
 
 CDP = CDPLanguage
@@ -88,9 +89,15 @@ def eval_lfunction_anyoffun(lf, context):
         raise_desc(DPSemanticError, msg, constant=constant)
     assert isinstance(constant.unit, FiniteCollectionsInclusion)
     P = constant.unit.S
+
     assert isinstance(constant.value, FiniteCollection)
-    values = set(constant.value.elements)
-    dp = LimitMaximals(values=values, F=P)
+    elements = set(constant.value.elements)
+    maximals = poset_maxima(elements, P.leq)
+    if len(elements) != len(maximals):
+        msg = 'The elements are not maximals.'
+        raise_desc(DPSemanticError, msg, elements=elements, maximals=maximals)
+
+    dp = LimitMaximals(values=maximals, F=P)
     return create_operation_lf(context, dp=dp, functions=[],
                                name_prefix='_anyof', op_prefix='_',
                                 res_prefix='_result')

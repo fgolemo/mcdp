@@ -49,7 +49,5 @@ def check_same_interface(ndp, ndp2):
         assert ftypes == ftypes2, (ftypes, ftypes2)
         assert rtypes == rtypes2, (rtypes, rtypes2)
     except:
-        print 'ndp', ndp
-        print 'ndp2', ndp2
         raise
     

@@ -16,11 +16,21 @@ def test_conversion(id_ndp, ndp):
     F = dp.get_fun_space()
 
     fs = F.get_minimal_elements()
+
+    max_elements = 5
+    if len(fs) >= max_elements:
+        fs = list(fs)[:max_elements]
+
     UR = UpperSets(dp.get_res_space())
     for f in fs:
         try:
             res = dp.solve(f)
             print('%s -> %s' % (F.format(f), UR.format(res)))
+
+            for r in res.minimals:
+                imps = dp.get_implementations_f_r(f, r)
+                print imps
+
         except NotSolvableNeedsApprox:
             pass
 

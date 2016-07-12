@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from .eval_constant_imp import eval_constant
 from .helpers import get_valuewithunits_as_resource
+from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_lang.namedtuple_tricks import recursive_print
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
 from mocdp.comp.context import CResource, ValueWithUnits, get_name_for_fun_node
 from mocdp.exceptions import DPSemanticError
 
@@ -117,13 +118,15 @@ def eval_rvalue_anyofres(r, context):
     assert isinstance(constant.unit, FiniteCollectionsInclusion)
     P = constant.unit.S
     assert isinstance(constant.value, FiniteCollection)
-    values = set(constant.value.elements)
 
-    dp = ConstantMinimals(R=P, values=values)
+    elements = constant.value.elements
+    minimals = poset_minima(elements, P.leq)
+    if len(elements) != len(minimals):
+        msg = 'The elements are not minimal.'
+        raise_desc(DPSemanticError, msg, elements=elements, minimals=minimals)
+
+    dp = ConstantMinimals(R=P, values=minimals)
     return create_operation(context, dp=dp, resources=[],
                                name_prefix='_anyof', op_prefix='_',
                                 res_prefix='_result')
 
-
-
-    

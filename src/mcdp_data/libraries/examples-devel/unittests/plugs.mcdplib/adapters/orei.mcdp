@@ -11,5 +11,6 @@ mcdp {
     take(provided out, 1) <= any-of({`socket_type : TypeA, `socket_type : TypeC})
 
     take(required in,  2) >=  take(provided out, 2) # voltages
-    take(required in,  3) >=  take(provided out, 3) # power
+    take(required in,  3) >=  take(provided out, 3) # frequencies
+    take(required in,  4) >=  take(provided out, 4) # power
 }

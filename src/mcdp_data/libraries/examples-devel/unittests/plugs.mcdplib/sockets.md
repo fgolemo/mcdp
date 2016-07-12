@@ -64,7 +64,14 @@ preferable to <code class='mcdp_value'>110V</code>.
 
 Thus we create a discrete poset as follows:
 
-<pre class='mcdp_poset' id='voltages' label='voltages.mcdp_poset'></pre>
+<pre class='mcdp_poset' id='AC_voltages' label='AC_voltages.mcdp_poset'></pre>
+
+### Frequencies
+
+Similarly, we model different frequencies with the poset
+
+
+<pre class='mcdp_poset' id='AC_frequencies' label='AC_frequencies.mcdp_poset'></pre>
 
 
 ### Power consumption
@@ -74,10 +81,12 @@ to provide power. This function is parameterized (at least) by:
 
 * The socket shape, indicated by <code class='mcdp_poset'>`socket_type</code>
 
-* The voltage, indicated by <code class='mcdp_poset'>`voltages</code>
+* The voltage, indicated by <code class='mcdp_poset'>`AC_voltages</code>
 
-* The maximum power draw, measured in Watts. Alternatively, this 
-could be parameterized by current.
+* The frequency, indicated by <code class='mcdp_poset'>`AC_frequencies</code>
+
+* The maximum power draw, measured in Watts. (Alternatively, this 
+could be parameterized by current.)
 
 Therefore, we can create the poset <code class='mcdp_poset'>`AC_power</code> as follows:
 
@@ -131,6 +140,8 @@ This one provides 2 outputs:
 We can forget all this complexity and consider the block:
 
 <pre class='ndp_graph_templatized'>`orei_2in1</pre>
+
+
 
 ### DC connectors
 
@@ -200,7 +211,7 @@ from AC power to DC power.
     </tr>
 </table>
 
-[converter]: https://www.amazon.com/Universal-Charger-Portable-Adapter-Samsung
+[converter]: https://www.amazon.com/RAVPower-Charger-Technology-Foldable-indicator/dp/B00OQ1I2C2/
 
 <pre class='mcdp' id='Ravpower' label='Ravpower.mcdp'></pre>
 
@@ -232,16 +243,25 @@ at least 10.99 USD to buy the component.
 This is an example of composition of the <a href="#Ravpower">Ravpower charger</a>
 and the <a href="#Orei_2in1">Orei_2in1 adapter</a>. 
 
-<pre class='mcdp' id='composition' label='composition.mcdp'></pre>
+<pre class='mcdp' id='orei_plus_ravpower' label='orei_plus_ravpower.mcdp'></pre>
 
 Note the use of the keyword "<code class='keyword'>ignore</code>" to ignore the 
 functionality that we do not need.
 
-<pre class='ndp_graph_enclosed'>`composition</pre>
+<pre class='ndp_graph_enclosed'>`orei_plus_ravpower</pre>
+
+We can ask now for what resources we would need for a 0.5 A load:
+
+<pre class='mcdp_value'>solve(
+    ⟨S(DC_power):*, `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩,
+    `orei_plus_ravpower)</pre>
+
+
+and obtain
 
 <pre class='print_value'>solve(
     ⟨S(DC_power):*, `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩,
 
-    `composition)</pre>
+    `orei_plus_ravpower)</pre>
 
 

@@ -10,7 +10,7 @@ contexts:
       scope: keyword.control.mcdp
     - match: \b(choose|set-of|using|pow|approx|Top)\b
       scope: keyword.control.mcdp
-    - match: \b(take|specialize|template)\b
+    - match: \b(take|specialize|template|any-of)\b
       scope: keyword.control.mcdp
 # 'load',
 #         'compact',
@@ -70,10 +70,10 @@ contexts:
     - match: "↑"
       scope: operator.mcdp
 
-    - match: "[a-z_0-9]+ provided by"
+    - match: "[A-Za-z_0-9]+ provided by"
       scope: identifier.functionality.mcdp
 
-    - match: "[a-z_0-9]+ required by"
+    - match: "[A-Za-z_0-9]+ required by"
       scope: identifier.resource.mcdp
     
     - match: "provided [A-Za-z_0-9]+"
@@ -101,6 +101,14 @@ contexts:
       scope: constant.unit.mcdp
       push: unit
 
+    - match: '`'
+      push: load
+
+  load:
+    - match: "[A-Za-z_][A-Za-z_0-9]*"
+      scope: load_arg.mcdp
+      pop: true
+
   comment:
     - meta_scope: comment.mcdp
     - match: \\.
@@ -111,12 +119,12 @@ contexts:
       pop: true
 
   functionality_name:
-    - match: "[a-z_]+"
+    - match: "[A-Za-z_][A-Za-z_0-9]*"
       scope: identifier.functionality.mcdp
       pop: true
   
   resource_name:
-    - match: "[a-z_]+"
+    - match: "[A-Za-z_][A-Za-z_0-9]*"
       scope: identifier.resource.mcdp
       pop: true
 
