@@ -11,6 +11,7 @@ CDP = CDPLanguage
 def eval_rvalue_resource_label_index(r, context):
     from .eval_resources_imp import eval_rvalue
     assert isinstance(r, CDP.ResourceLabelIndex)
+    assert isinstance(r.label, CDP.IndexLabel), r.label
     label = r.label.label
     rvalue = eval_rvalue(r.rvalue, context)
 
@@ -28,7 +29,7 @@ def eval_rvalue_resource_label_index(r, context):
 
     return context.ires_get_index(rvalue, i)
 
-@contract(ti=CDP.TupleIndex)
+@contract(ti=CDP.TupleIndexRes)
 def eval_rvalue_TupleIndex(ti, context):
     # TupleIndex = namedtuplewhere('TupleIndex', 'value index')
     # value evaluates as resources

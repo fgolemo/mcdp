@@ -6,26 +6,26 @@ mcdp {
    requires in [`AC_power]
  
    # the AC output 1 is v110 and takes types A, B (A<=B)
-   take(provided out1, 1) <= `socket_type: TypeB 
-   take(provided out1, 2) <= `AC_voltages:v110
-   take(provided out1, 3) <= take(required in, 3) # same frequency
-   power1 = take(provided out1, 4)
+   take(provided out1, socket) <= `socket_type: TypeB 
+   take(provided out1, voltage) <= `AC_voltages:v110
+   take(provided out1, frequency) <= take(required in, frequency) # same frequency
+   power1 = take(provided out1, watts)
 
    # the AC output 2 is v220 and takes types C, D, E, F, G, H (D,G minimals)
-   take(provided out2, 1) <= any-of({ `socket_type: TypeD, `socket_type: TypeG })
-   take(provided out2, 2) <= `AC_voltages:v220
-   take(provided out2, 3) <= take(required in, 3) # same frequency
-   power2 = take(provided out2, 4)
+   take(provided out2, socket) <= any-of({ `socket_type: TypeD, `socket_type: TypeG })
+   take(provided out2, voltage) <= `AC_voltages:v220
+   take(provided out2, frequency) <= take(required in, frequency) # same frequency
+   power2 = take(provided out2, watts)
 
    # the DC output is 5v, USB Type A
-   take(provided out3, 1) <= `USB_connectors: USB_Std_A
-   take(provided out3, 2) <= `DC_voltages: v5
-   amp3 = take(provided out3, 3)
+   take(provided out3, connector) <= `USB_connectors: USB_Std_A
+   take(provided out3, voltage) <= `DC_voltages: v5
+   amp3 = take(provided out3, amps)
    power3 = 5 V * (amp3)
    
    power = power1 + power2 + power3
-   take(required in, 4) >= power
+   take(required in, watts) >= power
 
    # input is either typeC or typeD (C<=D)
-   take(required in, 1) >= `socket_type: TypeC
+   take(required in, socket) >= `socket_type: TypeC
 }

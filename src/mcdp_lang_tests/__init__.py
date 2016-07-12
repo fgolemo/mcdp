@@ -23,6 +23,8 @@
         eval_rvalue_as_constant_same_exactly
         
 
+    parse_wrap_semantic_error
+
 """
 
 from .examples import *

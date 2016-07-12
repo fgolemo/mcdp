@@ -223,10 +223,14 @@ class CDPLanguage():
     SingleElementPosetTag = namedtuplewhere('SingleElementPosetTag', 'value')
     SingleElementPoset = namedtuplewhere('SingleElementPoset', 'keyword tag')
 
+    # take( <>, <index>)
     TakeKeyword = namedtuplewhere('TakeKeyword', 'keyword')
-
-    TupleIndex = namedtuplewhere('TupleIndex', 'keyword value index')
+    TupleIndexRes = namedtuplewhere('TupleIndexRes', 'keyword value index')
     TupleIndexFun = namedtuplewhere('TupleIndexFun', 'keyword value index')
+    # take( <>, <label>)
+#     TupleIndexLabel = namedtuplewhere('TupleIndexLabel', 'string')
+#     TupleIndexLabelRes = namedtuplewhere('TupleIndexLabelRes', 'keyword value label')
+#     TupleIndexLabelFun = namedtuplewhere('TupleIndexLabelFun', 'keyword value label')
 
     SpaceCustomValue = namedtuplewhere('SpaceCustomValue', 'space keyword custom_string')
 
@@ -252,8 +256,8 @@ class CDPLanguage():
     ProductWithLabelsLabel = namedtuplewhere('ProductWithLabelsLabel', 'label')
     ProductWithLabels = namedtuplewhere('ProductWithLabels', 'keyword entries')
     IndexLabel = namedtuplewhere('IndexLabel', 'label')
-    ResourceLabelIndex = namedtuplewhere('ResourceLabelIndex', 'rvalue label')
-    FunctionLabelIndex = namedtuplewhere('FunctionLabelIndex', 'fvalue label')
+    ResourceLabelIndex = namedtuplewhere('ResourceLabelIndex', 'keyword rvalue label')
+    FunctionLabelIndex = namedtuplewhere('FunctionLabelIndex', 'keyword fvalue label')
 
     # any-of({1,2})
     AnyOfKeyword = namedtuplewhere('AnyOfKeyword', 'keyword')

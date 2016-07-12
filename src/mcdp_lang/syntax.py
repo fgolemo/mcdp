@@ -450,10 +450,10 @@ class Syntax():
 #                                lambda t: CDP.TupleIndex(value=t[0], index=t[1]))
 
     # take(<a, b>, 0)
-    TAKE = sp(L('take') | L('`'), lambda t: CDP.TakeKeyword(t[0]))
-    rvalue_tuple_indexing = sp(TAKE + SLPAR + rvalue + SCOMMA +
+    TAKER = sp(L('take') | L('`'), lambda t: CDP.TakeKeyword(t[0]))
+    rvalue_tuple_indexing = sp(TAKER + SLPAR + rvalue + SCOMMA +
                                   SyntaxBasics.integer + SRPAR,
-                               lambda t: CDP.TupleIndex(keyword=t[0], value=t[1], index=t[2]))
+                               lambda t: CDP.TupleIndexRes(keyword=t[0], value=t[1], index=t[2]))
 
     TAKEF = sp(L('take') | L('`'), lambda t: CDP.TakeKeyword(t[0]))
     lf_tuple_indexing = sp(TAKEF + SLPAR + fvalue + SCOMMA +
@@ -463,8 +463,15 @@ class Syntax():
     ICOMMA = L('..')
     index_label = sp(get_idn(), lambda t: CDP.IndexLabel(t[0]))
     # rvalue instead of rvalue_new_function
-    rvalue_label_indexing = sp(rvalue_new_function + S(ICOMMA) + index_label,
-                               lambda t: CDP.ResourceLabelIndex(rvalue=t[0], label=t[1]))
+
+    # take(provided a, sub)
+    rvalue_label_indexing2 = sp(TAKEF + SLPAR + rvalue + S(COMMA) + index_label + SRPAR,
+                               lambda t: CDP.ResourceLabelIndex(keyword=t[0],
+                                                                rvalue=t[1], label=t[2]))
+
+    rvalue_label_indexing = sp(rvalue_new_function + ICOMMA + index_label,
+                               lambda t: CDP.ResourceLabelIndex(keyword=t[1],
+                                                                rvalue=t[0], label=t[2]))
 
 
     fvalue_disambiguation_tag = sp(Combine(L('(') + L('f') + L(')')),
@@ -479,8 +486,13 @@ class Syntax():
     fvalue_new_resource2 = sp(REQUIRED + get_idn(),
                               lambda t: CDP.NewResource(t[1]))
 
-    fvalue_label_indexing = sp(fvalue_new_resource + S(ICOMMA) + index_label,
-                               lambda t: CDP.FunctionLabelIndex(fvalue=t[0], label=t[1]))
+    fvalue_label_indexing = sp(fvalue_new_resource + ICOMMA + index_label,
+                               lambda t: CDP.FunctionLabelIndex(keyword=t[1],
+                                                                fvalue=t[0], label=t[2]))
+    # take(provided a, sub)
+    fvalue_label_indexing2 = sp(TAKEF + SLPAR + fvalue + S(COMMA) + index_label + SRPAR,
+                               lambda t: CDP.FunctionLabelIndex(keyword=t[0],
+                                                                fvalue=t[1], label=t[2]))
 
     unary = {
         'sqrt': lambda op1: CDP.GenericNonlinearity(math.sqrt, op1, lambda F: F),
@@ -761,6 +773,7 @@ class Syntax():
                        rvalue_make_tuple ^
                        rvalue_uncertain ^
                        rvalue_label_indexing
+                       ^ rvalue_label_indexing2
                        ^ rvalue_any_of)
 
     rvalue << operatorPrecedence(rvalue_operand, [
@@ -769,25 +782,31 @@ class Syntax():
         (PLUS, 2, opAssoc.LEFT, plus_parse_action),
     ])
 
-    fvalue_operand = (constant_value ^
-        fvalue_simple ^
-        fvalue_fancy ^
-        fvalue_new_resource ^
-        fvalue_new_resource2 ^
-        fvalue_maketuple ^
-        fvalue_uncertain ^
-        fvalue_disambiguation ^
-        fvalue_label_indexing ^
-        lf_tuple_indexing
-        ^ fvalue_any_of
-        ^ (SLPAR - (constant_value ^ fvalue_simple ^ fvalue_fancy ^
-                      fvalue_new_resource ^ fvalue_new_resource2 ^ fvalue_maketuple
-                      ^ fvalue_uncertain
-                      ^ fvalue_disambiguation
-                      ^ fvalue_label_indexing
+    fvalue_operand = (constant_value
+                      ^ fvalue_simple
+                    ^ fvalue_fancy
+                    ^ fvalue_new_resource
+                    ^ fvalue_new_resource2
+                    ^ fvalue_maketuple
+                    ^ fvalue_uncertain
+                    ^ fvalue_disambiguation
+                    ^ fvalue_label_indexing
+                    ^ fvalue_label_indexing2
                     ^ lf_tuple_indexing
                     ^ fvalue_any_of
-                      ) - SRPAR))
+                    ^ (SLPAR - (constant_value
+                                  ^ fvalue_simple
+                                  ^ fvalue_fancy
+                                  ^ fvalue_new_resource
+                                  ^ fvalue_new_resource2
+                                  ^ fvalue_maketuple
+                                  ^ fvalue_uncertain
+                                  ^ fvalue_disambiguation
+                                  ^ fvalue_label_indexing
+                                  ^ fvalue_label_indexing2
+                                  ^ lf_tuple_indexing
+                                  ^ fvalue_any_of
+                                  ) - SRPAR))
 
     fvalue << operatorPrecedence(fvalue_operand, [
         ('*', 2, opAssoc.LEFT, mult_inv_parse_action),

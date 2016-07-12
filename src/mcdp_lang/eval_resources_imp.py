@@ -89,7 +89,7 @@ def eval_rvalue(rvalue, context):
             CDP.PlusN: eval_rvalue_PlusN,
             CDP.OpMax: eval_rvalue_OpMax,
             CDP.OpMin: eval_rvalue_OpMin,
-            CDP.TupleIndex: eval_rvalue_TupleIndex,
+            CDP.TupleIndexRes: eval_rvalue_TupleIndex,
             CDP.MakeTuple: eval_rvalue_MakeTuple,
             CDP.UncertainRes: eval_rvalue_Uncertain,
             CDP.ResourceLabelIndex: eval_rvalue_resource_label_index,

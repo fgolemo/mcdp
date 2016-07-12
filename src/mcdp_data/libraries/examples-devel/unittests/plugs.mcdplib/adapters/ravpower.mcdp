@@ -6,19 +6,19 @@ mcdp {
 
     budget >= 10.99 USD    
 
-    take(required in,  1) >= `socket_type : TypeA
+    take(required in,  socket) >= `socket_type : TypeA
 
-    take(provided out1, 2) <= `DC_Voltages: v5
-    take(provided out2, 2) <= `DC_Voltages: v5
-    take(provided out1, 1) <= `USB_connectors:USB_Std_A 
-    take(provided out2, 1) <= `USB_connectors:USB_Std_A
+    take(provided out1, voltage) <= `DC_Voltages: v5
+    take(provided out2, voltage) <= `DC_Voltages: v5
+    take(provided out1, connector) <= `USB_connectors:USB_Std_A 
+    take(provided out2, connector) <= `USB_connectors:USB_Std_A
 
     # this forces the two voltages to be the same
     # this says that the power sums
-    amps = take(provided out1, 3) + take(provided out2, 3)
+    amps = take(provided out1, amps) + take(provided out2, amps)
     amps <= 2.4 A
     power = 5 V * (amps)
 
-    take(required in, 4) >= power
+    take(required in, watts) >= power
 
 }

@@ -3,6 +3,7 @@ from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_posets import PosetProductWithLabels
 from mocdp.exceptions import DPSemanticError
+from mcdp_lang.namedtuple_tricks import recursive_print
 
 CDP = CDPLanguage
 
@@ -27,6 +28,7 @@ def eval_lfunction_tupleindexfun(f, context):
 def eval_lfunction_label_index(r, context):
     from mcdp_lang.eval_lfunction_imp import eval_lfunction
     assert isinstance(r, CDP.FunctionLabelIndex)
+    assert isinstance(r.label, CDP.IndexLabel), r.label
 
     label = r.label.label
     fvalue = eval_lfunction(r.fvalue, context)
