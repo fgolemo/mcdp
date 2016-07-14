@@ -48,7 +48,7 @@ def check_spaces2():
 @comptest
 def check_spaces3():  # changename
     parse_wrap_check('instance simple_cell', Syntax.dpinstance_from_type)
-    parse_wrap_check('sub cell = instance simple_cell', Syntax.setsub_expr)
+    parse_wrap_check('sub cell = instance simple_cell', Syntax.setname_ndp_instance1)
 
 @comptest
 def check_spaces4():

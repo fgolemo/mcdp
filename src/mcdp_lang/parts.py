@@ -74,7 +74,7 @@ class CDPLanguage():
     Function = namedtuplewhere('Function', 'dp s keyword')
 
     VariableRef = namedtuplewhere('VariableRef', 'name')
-    DPVariableRef = namedtuplewhere('DPVariableRef', 'name')
+    VariableRefNDPType = namedtuplewhere('VariableRefNDPType', 'name')
 
     NewResource = namedtuplewhere('NewResource', 'name')
     NewFunction = namedtuplewhere('NewFunction', 'name')
@@ -90,14 +90,13 @@ class CDPLanguage():
     LoadPoset = namedtuplewhere('LoadPoset', 'keyword load_arg')
     LoadTemplate = namedtuplewhere('LoadTemplate', 'keyword load_arg')
 
-    SetName = namedtuplewhere('SetName', 'keyword name dp_rvalue')
-    SetMCDPType = namedtuplewhere('SetMCDPType', 'keyword name eq right_side')
-
     # an incomplete model
     Ellipsis = namedtuplewhere('Ellipsis', 'token')
 
     SetNameGenericVar = namedtuplewhere('SetNameGenericVar', 'value')
-    SetNameGeneric = namedtuplewhere('SetNameGeneric', 'name eq right_side')
+    SetNameNDPInstance = namedtuplewhere('SetNameNDPInstance', 'keyword name dp_rvalue')
+    SetNameMCDPType = namedtuplewhere('SetNameMCDPType', 'keyword name eq right_side')
+    SetNameRValue = namedtuplewhere('SetNameRValue', 'name eq right_side')
     SetNameFValue = namedtuplewhere('SetNameFValue', 'name eq right_side')
 
     # set-of(<space>)

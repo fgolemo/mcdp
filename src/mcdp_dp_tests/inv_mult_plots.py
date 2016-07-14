@@ -19,6 +19,8 @@ import warnings
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mocdp.exceptions import mcdp_dev_warning
+from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.syntax import Syntax
 
 
 # @comptest_dynamic
@@ -330,6 +332,22 @@ class CounterDP(WrapAMap):
 
 @comptest
 def check_loop_result3():
+    
+    
+    parse_wrap(Syntax.primitivedp_expr,
+                     'code mcdp_dp_tests.inv_mult_plots.CounterMap___(n=3)')[0]
+
+    parse_wrap(Syntax.ndpt_simple_dp_model,
+                     """
+                     dp {
+        requires x [Nat]
+        provides c [Nat]
+
+        implemented-by code mcdp_dp_tests.inv_mult_plots.CounterMap___(n=3)
+    }
+                     """)[0]
+
+
     assert_semantic_error("""
 mcdp {
     s = instance dp {
@@ -398,7 +416,7 @@ mcdp {
         implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=2)
     }
 
-    s = instance adp1 ^ adp2
+    s = instance choose(a: adp1, b: adp2)
     
     s.c >= s.x
    
@@ -454,7 +472,7 @@ mcdp {
         time  >= nat:0 * w.x 
     }
 
-    s = instance t1 ^ t2
+    s = instance choose (t1:t1, t2: t2)
     
     requires money, time for s
 }"""
@@ -520,7 +538,7 @@ mcdp {
         time  >= nat:0 * w.x 
     }
 
-    s = instance t1 ^ t2
+    s = instance choose(t1:t1, t2: t2)
     
     s.c >= s.x
     

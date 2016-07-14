@@ -7,7 +7,7 @@ from mcdp_posets.uppersets import UpperSets
 
 @comptest
 def check_coproducts0():
-    parse_wrap_check('a ^ b', Syntax.ndpt_dp_rvalue)
+    parse_wrap_check('choose(a:a, b:b)', Syntax.ndpt_dp_rvalue)
 
 
 @comptest

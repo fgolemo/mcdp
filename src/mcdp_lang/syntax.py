@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from .helpers import square
-from .parse_actions import (coprod_parse_action, divide_parse_action,
+from .parse_actions import (divide_parse_action,
     funshortcut1m, mult_inv_parse_action, mult_parse_action, parse_pint_unit,
     plus_inv_parse_action, plus_parse_action, resshortcut1m,
     space_product_parse_action)
 from .parts import CDPLanguage
-from .syntax_utils import (COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR,
-    VariableRef_make, simple_keyword_literal, sp)
+from .syntax_utils import COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, sp
+from mcdp_lang.syntax_utils import spk
 from mcdp_lang.utils_lists import make_list
 from mocdp.exceptions import mcdp_dev_warning
 from pyparsing import (
@@ -105,56 +105,42 @@ class SyntaxIdentifiers():
 
 
 class Syntax():
-    TOP_LITERAL = 'Top'
-    BOTTOM_LITERAL = 'Bottom'
+
+    # An expression that evaluates to a constant value
+    constant_value = Forward()
+    # An expression that evaluates to a resource reference
+    rvalue = Forward()
+    # An expression that evaluates to a function reference
+    fvalue = Forward()
+    # An expression that evaluates to a Poset
+    space = Forward()
+    # An expression that evaluates to a NamedDP
+    ndpt_dp_rvalue = Forward()
+    # An expression that evaluates to a Template
+    template = Forward()
 
 
-    USING = sp(L('using'), lambda t: CDP.UsingKeyword(t[0]))
-    FOR = sp(L('for'), lambda t: CDP.ForKeyword(t[0]))
-    # load battery
-    LOAD = sp(L('load') | L('`'), lambda t: CDP.LoadKeyword(t[0]))
 
-    SUB = sp(L('sub'), lambda t: CDP.SubKeyword(t[0]))
-
-    TOP = sp(L(TOP_LITERAL) | L('⊤'), lambda t: CDP.TopKeyword(t[0]))
-    BOTTOM = sp(L(BOTTOM_LITERAL) | L('⊥'), lambda t: CDP.BottomKeyword(t[0]))
-
-    MCDPTYPE = sp(L('mcdp'), lambda t: CDP.MCDPTypeKeyword(t[0]))
-
-    INSTANCE = sp(Combine(L('instance') + O(L('of'))), lambda t: CDP.InstanceKeyword(t[0]))
-
-    # 'MATHEMATICAL LEFT ANGLE BRACKET' (U+27E8) ⟨
-    # 'MATHEMATICAL RIGHT ANGLE BRACKET'   ⟩
-# ⟨⟩
-    OPEN_BRACE = sp(L('<') ^ L('⟨'), lambda t: CDP.OpenBraceKeyword(t[0]))
-    CLOSE_BRACE = sp(L('>') ^ L('⟩'), lambda t: CDP.CloseBraceKeyword(t[0]))
-    REQUIRED_BY = sp((L('required') | L('req.')) - L('by'),
+    REQUIRED_BY = sp((L('required') | L('req.') | L('r.')) - L('by'),
                     lambda _: CDP.RequiredByKeyword('required by'))
     mcdp_dev_warning('these variations are not tested')
-    PROVIDED_BY = sp((L('provided') | L('prov.')) - L('by'),
+    PROVIDED_BY = sp((L('provided') | L('prov.') | L('p.')) - L('by'),
                     lambda _: CDP.ProvidedByKeyword('provided by'))
 
-    PROVIDED = sp(L('provided'), lambda _: CDP.ProvidedKeyword('provided'))
-    REQUIRED = sp(L('required'), lambda _: CDP.ProvidedKeyword('required'))
+    PROVIDED = spk(L('provided'), CDP.ProvidedKeyword)
+    REQUIRED = spk(L('required'), CDP.RequiredKeyword)
+
+    # | L('⊇') | L('≽') | L('⊒')
+    # | L('⊆') | L('≼') | L('⊑')
+    GEQ = spk(L('>=') | L('≥') , CDP.geq)
+    LEQ = spk(L('<=') | L('≤') , CDP.leq)
 
 
-    GEQ = sp(L('>=') | L('≥') | L('⊇') | L('≽') | L('⊒'), lambda t: CDP.geq(t[0]))
-    LEQ = sp(L('<=') | L('≤') | L('⊆') | L('≼') | L('⊑'), lambda t: CDP.leq(t[0]))
-
-    EXPONENT = sp(L('^'), lambda t: CDP.exponent(t[0]))
-
-    EQ = sp(L('='), lambda t: CDP.eq(t[0]))
-    DOT = sp(L('.'), lambda t: CDP.DotPrep(t[0]))
-    PLUS = sp(L('+'), lambda t: CDP.plus(t[0]))
-    TIMES = sp(L('*'), lambda t: CDP.times(t[0]))
-    BAR = sp(L('/'), lambda t: CDP.bar(t[0]))
-
-    CDPTOKEN = sp(L('mcdp'), lambda t: CDP.MCDPKeyword(t[0]))
-
-
-    FROM_LIBRARY = sp(L('from_library') | L('new'), lambda t: CDP.FromLibraryKeyword(t[0]))
-
-    COPROD = sp(L('^'), lambda t: CDP.coprod(t[0]))
+    EQ = spk(L('='), CDP.eq)
+    DOT = spk(L('.'), CDP.DotPrep)
+    PLUS = spk(L('+'), CDP.plus)
+    TIMES = spk(L('*'), CDP.times)
+    BAR = spk(L('/'), CDP.bar)
 
     # "call"
     C = lambda x, b: x.setResultsName(b)
@@ -175,17 +161,16 @@ class Syntax():
     space_pint_unit = sp((pint_unit_simple + ZeroOrMore(pint_unit_connector + pint_unit_simple)),
                    parse_pint_unit)
 
-    space = Forward() 
-    constant_value = Forward()
 
 
     get_idn = SyntaxIdentifiers.get_idn
-    # "load <name>"
+    # load <name>
+    LOAD = spk(L('load') | L('`'), CDP.LoadKeyword)
     name_poset = sp(get_idn(), lambda t: CDP.PosetName(t[0]))
     load_poset = sp(LOAD - name_poset, lambda t: CDP.LoadPoset(t[0], t[1]))
 
     # UpperSets(<poset>)
-    UPPERSETS = sp(L('UpperSets'), lambda t: CDP.UpperSetsKeyword(t[0]))
+    UPPERSETS = spk(L('UpperSets'), CDP.UpperSetsKeyword)
     space_uppersets = sp(UPPERSETS + SLPAR + space + SRPAR,
                    lambda t: CDP.MakeUpperSets(t[0], t[1]))
 
@@ -197,7 +182,7 @@ class Syntax():
     #   }
     #
     # evaluates to CDP.FinitePoset
-    FINITE_POSET = sp(L('finite_poset'), lambda t: CDP.FinitePosetKeyword(t[0]))
+    FINITE_POSET = spk(L('finite_poset'), CDP.FinitePosetKeyword)
     finite_poset_el = sp(get_idn(), lambda t: CDP.FinitePosetElement(t[0]))
     finite_poset_chain = sp(finite_poset_el + ZeroOrMore(LEQ + finite_poset_el),
                                lambda t: make_list(t))
@@ -205,12 +190,12 @@ class Syntax():
     space_finite_poset = sp(FINITE_POSET + S(L('{')) + ZeroOrMore(finite_poset_chain) + S(L('}')),
                       lambda t: CDP.FinitePoset(t[0], make_list(t[1:])))
 
-    space_powerset_keyword = sp(L('℘') | L('set-of'), lambda t: CDP.PowerSetKeyword(t[0]))
+    space_powerset_keyword = spk(L('℘') | L('set-of'), CDP.PowerSetKeyword)
     space_powerset = sp(space_powerset_keyword - L('(') + space + L(')'),
                         lambda t: CDP.PowerSet(t[0], t[1],
                                                t[2], t[3]))
 
-    PRODUCTWITHLABELS = sp(L('product'), lambda t: CDP.ProductKeyword(t[0]))
+    PRODUCTWITHLABELS = spk(L('product'), CDP.ProductKeyword)
     space_product_label = sp(get_idn(), lambda t: CDP.ProductWithLabelsLabel(t[0]))
     space_product_entry = space_product_label + SCOLON + space
     space_product_with_labels = sp(PRODUCTWITHLABELS + SLPAR + O(space_product_entry) +
@@ -218,7 +203,7 @@ class Syntax():
                                    lambda t: 
                                    CDP.ProductWithLabels(keyword=t[0],
                                                          entries=make_list(t[1:])))
-    COPRODUCT = sp(L('coproduct'), lambda t: CDP.SpaceCoproductKeyword(t[0]))
+    COPRODUCT = spk(L('coproduct'), CDP.SpaceCoproductKeyword)
     space_coproduct_label = sp(get_idn(), lambda t: CDP.ProductWithLabelsLabel(t[0]))
     space_coproduct_entry = space_product_label + SCOLON + space
     space_coproduct = sp(COPRODUCT + SLPAR +
@@ -228,7 +213,7 @@ class Syntax():
                                                       entries=make_list(t[1:])))
 
 
-    INTERVAL = sp(L('Interval'), lambda t: CDP.IntervalKeyword(t[0]))
+    INTERVAL = spk(L('Interval'), CDP.IntervalKeyword)
     
     space_interval = sp(INTERVAL + SLPAR + constant_value + SCOMMA + constant_value + SRPAR,
                         lambda t: CDP.SpaceInterval(keyword=t[0], a=t[1], b=t[2]))
@@ -241,7 +226,7 @@ class Syntax():
 #     SingleElementPosetTag = namedtuplewhere('SingleElementPosetTag', 'value')
 #     SingleElementPoset = namedtuplewhere('SingleElementPoset', 'keyword tag')
     space_single_element_poset_tag = sp(get_idn(), lambda t: CDP.SingleElementPosetTag(t[0]))
-    space_single_element_poset_keyword = sp(L('S'), lambda t: CDP.SingleElementPosetKeyword(t[0]))
+    space_single_element_poset_keyword = spk(L('S'), CDP.SingleElementPosetKeyword)
     space_single_element_poset = sp(space_single_element_poset_keyword +
                                     SLPAR + space_single_element_poset_tag + SRPAR,
                               lambda t: CDP.SingleElementPoset(t[0], t[1]))
@@ -269,7 +254,6 @@ class Syntax():
 
     unitst = S(L('[')) + C(space, 'unit') + S(L(']'))
 
-
     nat_constant = sp(L('nat') + L(':') + SyntaxBasics.nonneg_integer,
                       lambda t: CDP.NatConstant(t[0], t[1], t[2]))
 
@@ -279,43 +263,58 @@ class Syntax():
     fname = sp(get_idn(), lambda t: CDP.FName(t[0]))
     rname = sp(get_idn(), lambda t: CDP.RName(t[0]))
 
-    PROVIDES = sp(L('provides'), lambda t: CDP.ProvideKeyword(t[0]))
+    PROVIDES = spk(L('provides'), CDP.ProvideKeyword)
     fun_statement = sp(PROVIDES + C(fname, 'fname') + unitst,
                        lambda t: CDP.FunStatement(t[0], t[1], t[2]))
 
-    REQUIRES = sp(L('requires'), lambda t: CDP.RequireKeyword(t[0]))
+    REQUIRES = spk(L('requires'), CDP.RequireKeyword)
     res_statement = sp(REQUIRES + C(rname, 'rname') + unitst,
                        lambda t: CDP.ResStatement(t[0], t[1], t[2]))
 
-    number_with_unit1 = sp(SyntaxBasics.integer_or_float + unitst,
-                           lambda t: CDP.SimpleValue(t[0], t[1]))
+    valuewithunit_numbers = sp(SyntaxBasics.integer_or_float + unitst,
+                               lambda t: CDP.SimpleValue(t[0], t[1]))
 
     dimensionless = sp(L('[') + L(']'), lambda _: CDP.RcompUnit('m/m'))
-    number_with_unit2 = sp(SyntaxBasics.integer_or_float + dimensionless,
+
+    valuewithunits_numbers_dimensionless = sp(SyntaxBasics.integer_or_float + dimensionless,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
     
-    number_with_unit3 = sp(SyntaxBasics.integer_or_float + space,
+    valuewithunit_number_with_units = sp(SyntaxBasics.integer_or_float + space_pint_unit,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
 
-    number_with_unit4_top = sp(TOP + space,
+    # Top <space>
+    TOP_LITERAL = 'Top'
+    TOP = spk(L(TOP_LITERAL) | L('⊤'), CDP.TopKeyword)
+
+    valuewithunit_top = sp(TOP + space,
                                lambda t: CDP.Top(t[0], t[1]))
 
-    number_with_unit5_bot = sp(BOTTOM + space,
-                               lambda t: CDP.Bottom(t[0], t[1]))
-    MINIMALS = sp(L('Minimals'), lambda t: CDP.MinimalsKeyword(t[0]))
-    number_with_unit_minimals = sp(MINIMALS + space,
-                                   lambda t: CDP.Minimals(t[0], t[1]))
-    MAXIMALS = sp(L('Maximals'), lambda t: CDP.MaximalsKeyword(t[0]))
-    number_with_unit_maximals = sp(MAXIMALS + space,
-                                   lambda t: CDP.Maximals(t[0], t[1]))
+    # Bottom <space>
+    BOTTOM_LITERAL = 'Bottom'
+    BOTTOM = spk(L(BOTTOM_LITERAL) | L('⊥'), CDP.BottomKeyword)
 
-    number_with_unit = (number_with_unit1 ^
-                        number_with_unit2 ^
-                        number_with_unit3 ^
-                        number_with_unit4_top ^
-                        number_with_unit5_bot ^
-                        number_with_unit_minimals ^
-                        number_with_unit_maximals)
+
+    valuewithunit_bottom = sp(BOTTOM + space,
+                               lambda t: CDP.Bottom(t[0], t[1]))
+
+    # Minimals <space>
+    MINIMALS = spk(L('Minimals'), CDP.MinimalsKeyword)
+    valuewithunit_minimals = sp(MINIMALS + space,
+                                lambda t: CDP.Minimals(t[0], t[1]))
+
+    # Maximals <space>
+    MAXIMALS = spk(L('Maximals'), CDP.MaximalsKeyword)
+    valuewithunit_maximals = sp(MAXIMALS + space,
+                                lambda t: CDP.Maximals(t[0], t[1]))
+
+    valuewithunit = (
+        valuewithunit_numbers ^
+        valuewithunits_numbers_dimensionless ^
+        valuewithunit_number_with_units ^
+        valuewithunit_top ^
+        valuewithunit_bottom ^
+        valuewithunit_minimals ^
+        valuewithunit_maximals)
 
     # TODO: change
 
@@ -326,67 +325,70 @@ class Syntax():
     ndpt_load = sp(LOAD - (ndpname | SLPAR - ndpname - SRPAR),
                         lambda t: CDP.LoadNDP(t[0], t[1]))
 
-    # An expression that evaluates to a NamedDP
-    ndpt_dp_rvalue = Forward()
-    template = Forward()
 
     # <dpname> = ...
     dpname = sp(get_idn(), lambda t: CDP.DPName(t[0]))
     dptypename = sp(get_idn(), lambda t: CDP.DPTypeName(t[0]))
 
+    # instance <type>
+    INSTANCE = spk(L('instance'), CDP.InstanceKeyword)
     dpinstance_from_type = sp((INSTANCE + ndpt_dp_rvalue) ^
                               (INSTANCE + SLPAR + ndpt_dp_rvalue + SRPAR),
                               lambda t: CDP.DPInstance(t[0], t[1]))
 
+    # new Name ~= instance `Name
+    NEW = spk(L('new'), CDP.FromLibraryKeyword)
     dpinstance_from_library_shortcut = \
-        sp(FROM_LIBRARY + (ndpname | (SLPAR - ndpname + SRPAR)),
+        sp(NEW + (ndpname | (SLPAR - ndpname + SRPAR)),
                     lambda t:CDP.DPInstanceFromLibrary(t[0], t[1]))
 
     dpinstance_expr = dpinstance_from_type ^ dpinstance_from_library_shortcut
 
-    setsub_expr = sp(SUB - dpname - S(L('=')) - dpinstance_expr,
-                     lambda t: CDP.SetName(t[0], t[1], t[2]))
+    SUB = spk(L('sub'), CDP.SubKeyword)
+    setname_ndp_instance1 = sp(SUB - dpname - S(EQ) - dpinstance_expr,
+                     lambda t: CDP.SetNameNDPInstance(t[0], t[1], t[2]))
 
-    setsub_expr_implicit = sp(dpname - S(L('=')) - dpinstance_expr,
-                     lambda t: CDP.SetName(None, t[0], t[1]))
+    setname_ndp_instance2 = sp(dpname - S(EQ) - dpinstance_expr,
+                     lambda t: CDP.SetNameNDPInstance(None, t[0], t[1]))
 
-    setmcdptype_expr = sp(MCDPTYPE - dptypename - L('=') - ndpt_dp_rvalue,
-                     lambda t: CDP.SetMCDPType(t[0], t[1], t[2], t[3]))
+    MCDPTYPE = spk(L('mcdp'), CDP.MCDPTypeKeyword)
+    setname_ndp_type1 = sp(MCDPTYPE - dptypename - EQ - ndpt_dp_rvalue,
+                     lambda t: CDP.SetNameMCDPType(t[0], t[1], t[2], t[3]))
 
-    setmcdptype_expr_implicit = sp(dptypename - L('=') - ndpt_dp_rvalue,
-                     lambda t: CDP.SetMCDPType(None, t[0], t[1], t[2]))
+    setname_ndp_type2 = sp(dptypename - EQ - ndpt_dp_rvalue,
+                     lambda t: CDP.SetNameMCDPType(None, t[0], t[1], t[2]))
 
-    # An expression that evaluates to a resource
-    rvalue = Forward()
-    # An expression that evaluates to a function
-    fvalue = Forward()
 
     # For pretty printing
     ELLIPSIS = sp(L('...'), lambda t: CDP.Ellipsis(t[0]))
-    setname_rightside = ELLIPSIS | rvalue  # ^ dp_rvalue
- 
+
+
     setname_generic_var = sp(get_idn(),
                               lambda t: CDP.SetNameGenericVar(t[0]))
-
     # a = ...
     # a = 10 g
-    setname_generic = sp(setname_generic_var + EQ + setname_rightside,
-                         lambda t: CDP.SetNameGeneric(t[0], t[1], t[2]))
+    setname_rvalue = sp(setname_generic_var + EQ + (ELLIPSIS | rvalue),
+                         lambda t: CDP.SetNameRValue(t[0], t[1], t[2]))
 
     setname_fvalue = sp(setname_generic_var + EQ + fvalue,
                         lambda t: CDP.SetNameFValue(t[0], t[1], t[2]))
 
-    variable_ref = sp(get_idn(), VariableRef_make)
+    variable_ref = sp(get_idn(), 
+                      lambda t: CDPLanguage.VariableRef(t[0]))
 
-    ndpt_dp_variable_ref = sp(get_idn(), lambda t: CDP.DPVariableRef(t[0]))
+    ndpt_dp_variable_ref = sp(get_idn(), 
+                              lambda t: CDP.VariableRefNDPType(t[0]))
     
 
     # solve( <0 g>, `model )
-    SOLVE = sp(L('solve'), lambda t: CDP.SolveModelKeyword(t[0]))
+    SOLVE = spk(L('solve'), CDP.SolveModelKeyword)
     solve_model = sp(SOLVE + SLPAR + constant_value + SCOMMA + ndpt_dp_rvalue + SRPAR,
                lambda t: CDP.SolveModel(keyword=t[0], f=t[1], model=t[2]))
 
 
+    # <> or ⟨⟩
+    OPEN_BRACE = spk(L('<') ^ L('⟨'), CDP.OpenBraceKeyword)
+    CLOSE_BRACE = spk(L('>') ^ L('⟩'), CDP.CloseBraceKeyword)
     tuple_of_constants = sp(OPEN_BRACE + O(constant_value +
                             ZeroOrMore(COMMA + constant_value)) + CLOSE_BRACE,
                             lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1], where=t[0].where), t[-1]))
@@ -400,9 +402,12 @@ class Syntax():
                                  ZeroOrMore(COMMA + constant_value) + S(L('}')),
                                  lambda t: CDP.Collection(make_list(list(t))))
 
-    upper_set_from_collection_keyword = sp(L('upperclosure'), lambda t: CDP.UpperSetFromCollectionKeyword(t[0]))
+    # upperclosure <set>
+    # ↑ <set>
+    upper_set_from_collection_keyword = spk(L('upperclosure') | L('↑'),
+                                           CDP.UpperSetFromCollectionKeyword)
     upper_set_from_collection = sp(upper_set_from_collection_keyword + collection_of_constants,
-                   lambda t: CDP.UpperSetFromCollection(t[0], t[1]))
+                                   lambda t: CDP.UpperSetFromCollection(t[0], t[1]))
 
     # <space> : identifier
     # `plugs : european
@@ -410,10 +415,10 @@ class Syntax():
     space_custom_value1 = sp(space + L(":") + (short_identifiers ^ L('*')),
                           lambda t: CDP.SpaceCustomValue(t[0], t[1], t[2]))
 
-    constant_value << (number_with_unit
+    constant_value << (valuewithunit
                        ^ variable_ref
                        ^ collection_of_constants
-                        ^ tuple_of_constants
+                       ^ tuple_of_constants
                        ^ nat_constant
                        ^ int_constant
                        ^ upper_set_from_collection
@@ -428,17 +433,23 @@ class Syntax():
 
     rvalue_resource = rvalue_resource_simple ^ rvalue_resource_fancy
 
-    rvalue_new_function = sp(get_idn(), VariableRef_make)
+    # Just <name>
+    rvalue_new_function = sp(get_idn(),
+                             lambda t: CDPLanguage.VariableRef(t[0]))
+
+    # provided <name>
     rvalue_new_function2 = sp(PROVIDED + get_idn(),
                               lambda t: CDP.NewFunction(t[1]))
-    ANYOF = sp(L('any-of'), lambda t: CDP.AnyOfKeyword(t[0]))
+
+    # any-of(set)
+    ANYOF = spk(L('any-of'), CDP.AnyOfKeyword)
     rvalue_any_of = sp(ANYOF + SLPAR + constant_value + SRPAR,
                        lambda t: CDP.AnyOfRes(t[0], t[1]))
     fvalue_any_of = sp(ANYOF + SLPAR + constant_value + SRPAR,
                        lambda t: CDP.AnyOfFun(t[0], t[1]))
 
     # Uncertain(<lower>, <upper>)
-    UNCERTAIN = sp(L('Uncertain'), lambda t: CDP.UncertainKeyword(t[0]))
+    UNCERTAIN = spk(L('Uncertain'), CDP.UncertainKeyword)
     rvalue_uncertain = sp(UNCERTAIN + SLPAR + rvalue + SCOMMA + rvalue + SRPAR,
                           lambda t: CDP.UncertainRes(keyword=t[0], lower=t[1], upper=t[2]))
 
@@ -450,13 +461,12 @@ class Syntax():
 #                                lambda t: CDP.TupleIndex(value=t[0], index=t[1]))
 
     # take(<a, b>, 0)
-    TAKER = sp(L('take') | L('`'), lambda t: CDP.TakeKeyword(t[0]))
-    rvalue_tuple_indexing = sp(TAKER + SLPAR + rvalue + SCOMMA +
+    TAKE = spk(L('take'), CDP.TakeKeyword)
+    rvalue_tuple_indexing = sp(TAKE + SLPAR + rvalue + SCOMMA +
                                   SyntaxBasics.integer + SRPAR,
                                lambda t: CDP.TupleIndexRes(keyword=t[0], value=t[1], index=t[2]))
 
-    TAKEF = sp(L('take') | L('`'), lambda t: CDP.TakeKeyword(t[0]))
-    lf_tuple_indexing = sp(TAKEF + SLPAR + fvalue + SCOMMA +
+    lf_tuple_indexing = sp(TAKE + SLPAR + fvalue + SCOMMA +
                                   SyntaxBasics.integer + SRPAR,
                                lambda t: CDP.TupleIndexFun(keyword=t[0], value=t[1], index=t[2]))
 
@@ -465,7 +475,7 @@ class Syntax():
     # rvalue instead of rvalue_new_function
 
     # take(provided a, sub)
-    rvalue_label_indexing2 = sp(TAKEF + SLPAR + rvalue + S(COMMA) + index_label + SRPAR,
+    rvalue_label_indexing2 = sp(TAKE + SLPAR + rvalue + S(COMMA) + index_label + SRPAR,
                                lambda t: CDP.ResourceLabelIndex(keyword=t[0],
                                                                 rvalue=t[1], label=t[2]))
 
@@ -474,12 +484,12 @@ class Syntax():
                                lambda t: CDP.ResourceLabelIndex(keyword=t[1],
                                                                 rvalue=t[0], label=t[2]))
 
-
+    # TODO: remove
     rvalue_label_indexing = sp(rvalue_new_function + ICOMMA + index_label,
                                lambda t: CDP.ResourceLabelIndex(keyword=t[1],
                                                                 rvalue=t[0], label=t[2]))
 
-
+    # TODO: remove
     fvalue_disambiguation_tag = sp(Combine(L('(') + L('f') + L(')')),
                                    lambda t: CDP.DisambiguationFunTag(t[0]))
 
@@ -496,7 +506,7 @@ class Syntax():
                                lambda t: CDP.FunctionLabelIndex(keyword=t[1],
                                                                 fvalue=t[0], label=t[2]))
     # take(provided a, sub)
-    fvalue_label_indexing2 = sp(TAKEF + SLPAR + fvalue + S(COMMA) + index_label + SRPAR,
+    fvalue_label_indexing2 = sp(TAKE + SLPAR + fvalue + S(COMMA) + index_label + SRPAR,
                                lambda t: CDP.FunctionLabelIndex(keyword=t[0],
                                                                 fvalue=t[1], label=t[2]))
 
@@ -554,6 +564,8 @@ class Syntax():
                               + C(rat_power_exponent, 'exponent')) - SRPAR,
                              lambda t: CDP.Power(op1=t[0], glyph=None, exponent=t[2]))
 
+    EXPONENT = spk(L('^'), CDP.exponent)
+
     rvalue_power_expr_2 = sp((rvalue_resource ^ rvalue_new_function)
                              + EXPONENT - rat_power_exponent,
                              lambda t: CDP.Power(op1=t[0], glyph=t[1], exponent=t[2]))
@@ -570,12 +582,14 @@ class Syntax():
                                                       rvalue=t[0],
                                                       prep=t[1]))
 
+    USING = spk(L('using'), CDP.UsingKeyword)
     fun_shortcut1 = sp(PROVIDES + fname + USING + dpname,
                        lambda t: CDP.FunShortcut1(provides=t[0],
                                                   fname=t[1],
                                                   prep_using=t[2],
                                                   name=t[3]))
 
+    FOR = spk(L('for'), CDP.ForKeyword)
     res_shortcut1 = sp(REQUIRES + rname + FOR + dpname,
                        lambda t: CDP.ResShortcut1(t[0], t[1], t[2], t[3]))
 
@@ -601,7 +615,7 @@ class Syntax():
                              prep_for=t[2],
                              name=t[3]))
 
-    IGNORE = sp(L('ignore'), lambda t: CDP.IgnoreKeyword(t[0]))
+    IGNORE = spk(L('ignore'), CDP.IgnoreKeyword)
     ignore_fun = sp(IGNORE + fvalue_function,
                     lambda t: CDP.IgnoreFun(t[0], t[1]))
     ignore_res = sp(IGNORE + rvalue_resource,
@@ -609,12 +623,12 @@ class Syntax():
 
     line_expr = (constraint_expr_geq ^ 
                  constraint_expr_leq ^
-                     (setname_generic ^ 
+                     (setname_rvalue ^ 
                       setname_fvalue ^
-                      setsub_expr ^ 
-                      setsub_expr_implicit ^ 
-                      setmcdptype_expr ^ 
-                      setmcdptype_expr_implicit)
+                      setname_ndp_instance1 ^ 
+                      setname_ndp_instance2 ^ 
+                      setname_ndp_type1 ^ 
+                      setname_ndp_type2)
                  ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
                  ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3
                  ^ ignore_res
@@ -623,7 +637,8 @@ class Syntax():
     dp_model_statements = sp(ZeroOrMore(S(ow) + line_expr),
                              lambda t: make_list(list(t)))
 
-    DPTOKEN = sp(L('dp'), lambda t: CDP.DPWrapToken(t[0]))
+
+    CDPTOKEN = spk(L('mcdp'), CDP.MCDPKeyword)
     ndpt_dp_model = sp(CDPTOKEN - S(L('{')) - dp_model_statements - S(L('}')),
                   lambda t: CDP.BuildProblem(keyword=t[0], statements=t[1]))
 
@@ -637,7 +652,8 @@ class Syntax():
     simple_dp_model_stats = sp(ZeroOrMore(S(ow) + fun_statement ^ res_statement),
                                lambda t: make_list(list(t)))
 
-    IMPLEMENTEDBY = sp(L('implemented-by'), lambda t: CDP.ImplementedbyKeyword(t[0]))
+    DPTOKEN = spk(L('dp'), CDP.DPWrapToken)
+    IMPLEMENTEDBY = spk(L('implemented-by'), CDP.ImplementedbyKeyword)
     ndpt_simple_dp_model = sp(DPTOKEN -
                          S(L('{')) -
                          simple_dp_model_stats -
@@ -657,7 +673,7 @@ class Syntax():
     catalogue_table = sp(OneOrMore(catalogue_row),
                          lambda t: CDP.CatalogueTable(make_list(list(t))))
 
-    FROMCATALOGUE = sp(L('catalogue'), lambda t:CDP.FromCatalogueKeyword(t[0]))
+    FROMCATALOGUE = spk(L('catalogue'), CDP.FromCatalogueKeyword)
     ndpt_catalogue_dp = sp(FROMCATALOGUE -
                       S(L('{')) -
                       simple_dp_model_stats -
@@ -666,10 +682,9 @@ class Syntax():
                       lambda t: CDP.FromCatalogue(t[0], t[1], t[2]))
     # Example:
     #    choose(name: <dp>, name2: <dp>)
-    CHOOSE = simple_keyword_literal('choose', CDP.CoproductWithNamesChooseKeyword)
+    CHOOSE = spk(L('choose'), CDP.CoproductWithNamesChooseKeyword)
     ndpt_coproduct_with_names_name = \
         sp(get_idn(), lambda t: CDP.CoproductWithNamesName(t[0]))
-    # ndpt_coproduct_with_names_one = ndpt_coproduct_with_names_name + SCOLON + ndpt_dp_rvalue
     ndpt_coproduct_with_names_one = ndpt_coproduct_with_names_name + SCOLON + (ndpt_dp_rvalue | dpinstance_expr)
     ndpt_coproduct_with_names = sp(CHOOSE - SLPAR + ndpt_coproduct_with_names_one
                                     + ZeroOrMore(SCOMMA + ndpt_coproduct_with_names_one) 
@@ -679,7 +694,7 @@ class Syntax():
     
     # Example:
     #   approx(mass,0%,0g,%)
-    APPROX = sp(L('approx'), lambda t: CDP.ApproxKeyword(t[0]))
+    APPROX = spk(L('approx'), CDP.ApproxKeyword)
     ndpt_approx = sp(APPROX - S(L('(')) - fname + S(COMMA)
                          - SyntaxBasics.integer_or_float - S(L('%'))
                          - S(COMMA) + constant_value  # step
@@ -694,32 +709,32 @@ class Syntax():
 
 
 
-    ABSTRACT = sp(L('abstract'), lambda t: CDP.AbstractKeyword(t[0]))
+    ABSTRACT = spk(L('abstract'), CDP.AbstractKeyword)
     ndpt_abstract = sp(ABSTRACT - ndpt_dp_rvalue,
                        lambda t: CDP.AbstractAway(t[0], t[1]))
     
-    COMPACT = sp(L('compact'), lambda t: CDP.CompactKeyword(t[0]))
+    COMPACT = spk(L('compact'), CDP.CompactKeyword)
     ndpt_compact = sp(COMPACT - ndpt_dp_rvalue,
                        lambda t: CDP.Compact(t[0], t[1]))
 
-    TEMPLATE = sp(L('template'), lambda t: CDP.TemplateKeyword(t[0]))
+    TEMPLATE = spk(L('template'), CDP.TemplateKeyword)
     ndpt_template = sp(TEMPLATE - ndpt_dp_rvalue,
                        lambda t: CDP.MakeTemplate(t[0], t[1]))
 
-    FLATTEN = sp(L('flatten'), lambda t: CDP.FlattenKeyword(t[0]))
+    FLATTEN = spk(L('flatten'), CDP.FlattenKeyword)
     ndpt_flatten = sp(FLATTEN - ndpt_dp_rvalue,
                       lambda t: CDP.Flatten(t[0], t[1]))
 
-    CANONICAL = sp(L('canonical'), lambda t: CDP.FlattenKeyword(t[0]))
+    CANONICAL = spk(L('canonical'), CDP.FlattenKeyword)
     ndpt_canonical = sp(CANONICAL - ndpt_dp_rvalue,
                             lambda t: CDP.MakeCanonical(t[0], t[1]))
 
-    APPROX_LOWER = sp(L('approx_lower'), lambda t: CDP.ApproxLowerKeyword(t[0]))
+    APPROX_LOWER = spk(L('approx_lower'), CDP.ApproxLowerKeyword)
     ndpt_approx_lower = sp(APPROX_LOWER - SLPAR + SyntaxBasics.integer +
                             SCOMMA + ndpt_dp_rvalue + SRPAR,
                        lambda t: CDP.ApproxLower(t[0], t[1], t[2]))
 
-    APPROX_UPPER = sp(L('approx_upper'), lambda t: CDP.ApproxUpperKeyword(t[0]))
+    APPROX_UPPER = spk(L('approx_upper'), CDP.ApproxUpperKeyword)
     ndpt_approx_upper = sp(APPROX_UPPER - SLPAR + SyntaxBasics.integer +
                             SCOMMA + ndpt_dp_rvalue + SRPAR,
                        lambda t: CDP.ApproxUpper(t[0], t[1], t[2]))
@@ -731,17 +746,18 @@ class Syntax():
     template_spec_param_name = sp(get_idn(), lambda t: CDP.TemplateParamName(t[0]))
     template_spec_param = template_spec_param_name + S(L(':')) + ndpt_dp_rvalue
     parameters = O(template_spec_param) + ZeroOrMore(SCOMMA + template_spec_param)
-    LSQ = sp(L('['), lambda t: CDP.LSQ(t[0]))
-    RSQ = sp(L(']'), lambda t: CDP.RSQ(t[0]))
+    LSQ = spk(L('['), CDP.LSQ)
+    RSQ = spk(L(']'), CDP.RSQ)
 
     template_spec = sp(TEMPLATE - LSQ + Group(parameters) + RSQ
                        + ndpt_dp_rvalue,
                        lambda t: CDP.TemplateSpec(keyword=t[0],
                                                   params=make_list(t[2], t[1].where),
                                                   ndpt=t[4]))
-    template << (code_spec | template_load | template_spec)
 
-    SPECIALIZE = sp(L('specialize'), lambda t: CDP.SpecializeKeyword(t[0]))
+    template << (code_spec | template_load | template_spec)  # mind the (...)
+
+    SPECIALIZE = spk(L('specialize'), CDP.SpecializeKeyword)
 
     ndpt_specialize = sp(SPECIALIZE + LSQ + Group(parameters) + RSQ + template,
                          lambda t: CDP.Specialize(keyword=t[0],
@@ -767,26 +783,27 @@ class Syntax():
         ndpt_specialize
     )
 
-    ndpt_dp_rvalue << operatorPrecedence(ndpt_dp_operand, [
-    #     ('-', 1, opAssoc.RIGHT, Unary.parse_action),
-        (COPROD, 2, opAssoc.LEFT, coprod_parse_action),
-    ])
+    # TODO: remove?
+    ndpt_dp_rvalue << (ndpt_dp_operand ^ (SLPAR - ndpt_dp_operand - SRPAR))
+    # ndpt_dp_rvalue << operatorPrecedence(ndpt_dp_operand, [
+    #     (COPROD, 2, opAssoc.LEFT, coprod_parse_action),
+    # ])
 
-    # I could put "rvalue" here, but then I get a recursive
-    rvalue_operand = (rvalue_new_function ^
-                       rvalue_new_function2 ^
-                       rvalue_resource ^
-                       rvalue_binary ^
-                       rvalue_unary_expr ^
-                       constant_value ^
-                       rvalue_power_expr ^
-                       rvalue_tuple_indexing ^
-                       rvalue_make_tuple ^
-                       rvalue_uncertain ^
-                       rvalue_label_indexing
-                       ^ rvalue_label_indexing2
-                       ^ rvalue_label_indexing3
-                       ^ rvalue_any_of)
+    rvalue_operand = (
+          rvalue_new_function
+        ^ rvalue_new_function2
+        ^ rvalue_resource
+        ^ rvalue_binary
+        ^ rvalue_unary_expr
+        ^ constant_value
+        ^ rvalue_power_expr
+        ^ rvalue_tuple_indexing
+        ^ rvalue_make_tuple
+        ^ rvalue_uncertain
+        ^ rvalue_label_indexing
+        ^ rvalue_label_indexing2
+        ^ rvalue_label_indexing3
+        ^ rvalue_any_of)
 
     rvalue << operatorPrecedence(rvalue_operand, [
         (TIMES, 2, opAssoc.LEFT, mult_parse_action),
@@ -794,33 +811,22 @@ class Syntax():
         (PLUS, 2, opAssoc.LEFT, plus_parse_action),
     ])
 
-    fvalue_operand = (constant_value
-                      ^ fvalue_simple
-                    ^ fvalue_fancy
-                    ^ fvalue_new_resource
-                    ^ fvalue_new_resource2
-                    ^ fvalue_maketuple
-                    ^ fvalue_uncertain
-                    ^ fvalue_disambiguation
-                    ^ fvalue_label_indexing
-                    ^ fvalue_label_indexing2
-                    ^ fvalue_label_indexing3
-                    ^ lf_tuple_indexing
-                    ^ fvalue_any_of
-                    ^ (SLPAR - (constant_value
-                                  ^ fvalue_simple
-                                  ^ fvalue_fancy
-                                  ^ fvalue_new_resource
-                                  ^ fvalue_new_resource2
-                                  ^ fvalue_maketuple
-                                  ^ fvalue_uncertain
-                                  ^ fvalue_disambiguation
-                                  ^ fvalue_label_indexing
-                                  ^ fvalue_label_indexing2
-                                  ^ fvalue_label_indexing3
-                                  ^ lf_tuple_indexing
-                                  ^ fvalue_any_of
-                                  ) - SRPAR))
+    fvalue_operands = (
+          constant_value
+        ^ fvalue_simple
+        ^ fvalue_fancy
+        ^ fvalue_new_resource
+        ^ fvalue_new_resource2
+        ^ fvalue_maketuple
+        ^ fvalue_uncertain
+        ^ fvalue_disambiguation
+        ^ fvalue_label_indexing
+        ^ fvalue_label_indexing2
+        ^ fvalue_label_indexing3
+        ^ lf_tuple_indexing
+        ^ fvalue_any_of)
+
+    fvalue_operand = (fvalue_operands ^ (SLPAR - fvalue_operands - SRPAR))
 
     fvalue << operatorPrecedence(fvalue_operand, [
         ('*', 2, opAssoc.LEFT, mult_inv_parse_action),

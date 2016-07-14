@@ -7,11 +7,14 @@ from mcdp_tests.generation import (for_all_dps_dyn, for_all_nameddps,
 @for_all_source_mcdp
 def check_syntax(filename, source):  # @UnusedVariable
     # print filename
-    _html = ast_to_html(source,
-                       complete_document=False, extra_css="",
-                       ignore_line=lambda _lineno: False,
-                       add_line_gutter=True, encapsulate_in_precode=True, add_css=True)
-    # print html
+    try:
+        _html = ast_to_html(source,
+                           complete_document=False, extra_css="",
+                           ignore_line=lambda _lineno: False,
+                           add_line_gutter=True, encapsulate_in_precode=True, add_css=True)
+    except:
+        print filename
+        raise
 
 @for_all_dps_dyn
 def dp1_report(context, _id_dp, dp):

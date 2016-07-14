@@ -76,7 +76,7 @@ def check_sets3():
         capacity <= cell.capacity
     }
 
-    battery = instance (simple_cell ^ cell_plus_converter)
+    battery = instance choose(simple: simple_cell, conv: cell_plus_converter)
 
 }
     """)

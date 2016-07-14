@@ -43,7 +43,7 @@ def eval_ndp(r, context):  # @UnusedVariable
                 msg = 'Cannot find name.'
                 raise_wrapped(DPSemanticError, e, msg, compact=True)
 
-        if isinstance(r, CDP.DPVariableRef):
+        if isinstance(r, CDP.VariableRefNDPType):
             try:
                 return context.get_var2model(r.name)
             except NoSuchMCDPType as e:
@@ -410,18 +410,18 @@ def eval_statement(r, context):
             function = eval_lfunction(r.function, context)
             add_constraint(context, resource, function)
 
-        elif isinstance(r, CDP.SetName):
+        elif isinstance(r, CDP.SetNameNDPInstance):
             name = r.name.value
             ndp = eval_ndp(r.dp_rvalue, context)
             context.add_ndp(name, ndp)
 
-        elif isinstance(r, CDP.SetMCDPType):
+        elif isinstance(r, CDP.SetNameMCDPType):
             name = r.name.value
             right_side = r.right_side
             x = eval_ndp(right_side, context)
             context.set_var2model(name, x)
 
-        elif isinstance(r, CDP.SetNameGeneric):
+        elif isinstance(r, CDP.SetNameRValue):
             name = r.name.value
             right_side = r.right_side
 

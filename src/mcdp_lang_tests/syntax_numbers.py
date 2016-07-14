@@ -40,11 +40,11 @@ def check_tuples():
 
 @comptest
 def check_numbers2():
-    parse_wrap_check('1.0 [g]', Syntax.number_with_unit,
+    parse_wrap_check('1.0 [g]', Syntax.valuewithunit,
                      CDP.SimpleValue(CDP.ValueExpr(1.0), CDP.RcompUnit('g')))
-    assert_syntax_error('1', Syntax.number_with_unit)
+    assert_syntax_error('1', Syntax.valuewithunit)
     # automatic conversion to float
-    parse_wrap_check('1 [g]', Syntax.number_with_unit,
+    parse_wrap_check('1 [g]', Syntax.valuewithunit,
                       CDP.SimpleValue(CDP.ValueExpr(1.0), CDP.RcompUnit('g')))
 
 @comptest_fails
@@ -80,7 +80,7 @@ def check_unit1():
     print('unit_base:')
     parse_wrap_syntax_error('V x m', Syntax.pint_unit_simple)
 
-    nu = Syntax.number_with_unit3
+    nu = Syntax.valuewithunit_number_with_units
 #     Syntax.space_expr.setWhiteSpaceChars(' \t')
     print('skip: %r white: %r copydef: %r' % (nu.skipWhitespace, nu.whiteChars,
             nu.copyDefaultWhiteChars))
@@ -378,7 +378,7 @@ mcdp {
         mass >= capacity / specific_energy + m0
     }
     
-    sub battery = instance (battery1 ^ battery2)
+    sub battery = instance choose(b1: battery1, b2: battery2)
 
     requires mass for battery
     provides capacity using battery

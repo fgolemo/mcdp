@@ -248,7 +248,7 @@ def check_lang51():
 
 
 
-    parse_wrap(Syntax.number_with_unit, '4.0 [R]')
+    parse_wrap(Syntax.valuewithunit, '4.0 [R]')
 
     parse_wrap(Syntax.space_pint_unit, "N")
     parse_wrap(Syntax.space_pint_unit, "m")
@@ -256,9 +256,9 @@ def check_lang51():
     parse_wrap(Syntax.space_pint_unit, "m / s^2")
     parse_wrap(Syntax.space_pint_unit, "m/s^2")
     
-    parse_wrap(Syntax.number_with_unit, '1 m')
-    parse_wrap(Syntax.number_with_unit, '1 m/s')
-    parse_wrap(Syntax.number_with_unit, '1 m/s^2')
+    parse_wrap(Syntax.valuewithunit, '1 m')
+    parse_wrap(Syntax.valuewithunit, '1 m/s')
+    parse_wrap(Syntax.valuewithunit, '1 m/s^2')
 
 
 

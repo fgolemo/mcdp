@@ -161,8 +161,6 @@ def parse_wrap(expr, string):
     # it only truncates them...
     string0 = remove_comments(string)
 
-#     print('parsing string0 %s %r %s' % (string0, string0, type(string0)))
-    # m = boxit
     m = lambda x: x
     try:
         return expr.parseString(string0, parseAll=True)  # [0]
