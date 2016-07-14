@@ -469,6 +469,12 @@ class Syntax():
                                lambda t: CDP.ResourceLabelIndex(keyword=t[0],
                                                                 rvalue=t[1], label=t[2]))
 
+    # (provided a).label
+    rvalue_label_indexing3 = sp(SLPAR + rvalue + SRPAR + DOT + index_label,
+                               lambda t: CDP.ResourceLabelIndex(keyword=t[1],
+                                                                rvalue=t[0], label=t[2]))
+
+
     rvalue_label_indexing = sp(rvalue_new_function + ICOMMA + index_label,
                                lambda t: CDP.ResourceLabelIndex(keyword=t[1],
                                                                 rvalue=t[0], label=t[2]))
@@ -493,6 +499,11 @@ class Syntax():
     fvalue_label_indexing2 = sp(TAKEF + SLPAR + fvalue + S(COMMA) + index_label + SRPAR,
                                lambda t: CDP.FunctionLabelIndex(keyword=t[0],
                                                                 fvalue=t[1], label=t[2]))
+
+    # (provided a).label
+    fvalue_label_indexing3 = sp(SLPAR + fvalue + SRPAR + DOT + index_label,
+                               lambda t: CDP.FunctionLabelIndex(keyword=t[1],
+                                                                fvalue=t[0], label=t[2]))
 
     unary = {
         'sqrt': lambda op1: CDP.GenericNonlinearity(math.sqrt, op1, lambda F: F),
@@ -774,6 +785,7 @@ class Syntax():
                        rvalue_uncertain ^
                        rvalue_label_indexing
                        ^ rvalue_label_indexing2
+                       ^ rvalue_label_indexing3
                        ^ rvalue_any_of)
 
     rvalue << operatorPrecedence(rvalue_operand, [
@@ -792,6 +804,7 @@ class Syntax():
                     ^ fvalue_disambiguation
                     ^ fvalue_label_indexing
                     ^ fvalue_label_indexing2
+                    ^ fvalue_label_indexing3
                     ^ lf_tuple_indexing
                     ^ fvalue_any_of
                     ^ (SLPAR - (constant_value
@@ -804,6 +817,7 @@ class Syntax():
                                   ^ fvalue_disambiguation
                                   ^ fvalue_label_indexing
                                   ^ fvalue_label_indexing2
+                                  ^ fvalue_label_indexing3
                                   ^ lf_tuple_indexing
                                   ^ fvalue_any_of
                                   ) - SRPAR))

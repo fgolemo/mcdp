@@ -9,7 +9,6 @@ from mcdp_maps import MapComposition
 from mcdp_posets import PosetProduct, Space
 from mcdp_posets.poset import NotLeq
 from mcdp_posets.space import Map
-from mocdp.exceptions import DPSemanticError
 from mcdp_dp.primitive import NotSolvableNeedsApprox, WrongUseOfUncertain
 
 

@@ -379,8 +379,6 @@ def format_unit(R):
     if isinstance(R, BottomCompletion):
         return '[*]'
     if R == R_dimensionless:
-        # return '[R]'
-#         return '[]'
         # TODO: make option
         return ''
     elif isinstance(R, RcompUnits):

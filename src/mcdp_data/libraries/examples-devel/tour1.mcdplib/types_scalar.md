@@ -17,7 +17,7 @@ are indicated using units, such as:
     <code class='mcdp_poset'>m</code>,
     <code class='mcdp_poset'>s</code>,
     <code class='mcdp_poset'>m/s</code>,
-     ...
+     &hellip;
 </quote>
 
 Their values are indicated as follows:
@@ -28,5 +28,5 @@ Their values are indicated as follows:
     <code class='mcdp_value'>10 m</code>,
     <code class='mcdp_value'>10 s</code>,
     <code class='mcdp_value'>23 m/s</code>,
-     ...
+     &hellip;
 </quote>

@@ -55,11 +55,11 @@ class Space(object):
         else:
             return True
         
+    @abstractmethod
     def witness(self):
         """ Returns an element of the space, or raise Uninhabited
             if the space is empty. """
-        raise NotImplementedError(type(self))
-
+        pass
 
 
 class MapNotDefinedHere(Exception):

@@ -22,9 +22,6 @@ class Max(PrimitiveDP):
     """ Join on a poset """
 
     def __init__(self, F0):
-#         library = get_conftools_posets()
-#         _, F0 = library.instance_smarter(F)
-
         F = PosetProduct((F0, F0))
         R = F0
         self.F0 = F0
@@ -35,8 +32,7 @@ class Max(PrimitiveDP):
     def solve(self, func):
         f1, f2 = func
 
-        # F = self.get_fun_space()
-        r = self.F.join(f1, f2)
+        r = self.F0.join(f1, f2)
 
         return self.R.U(r)
 

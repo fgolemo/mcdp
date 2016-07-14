@@ -6,11 +6,10 @@ mcdp {
 
     budget >= 7.31 USD
 
-    take(required in, socket) >= `socket_type : TypeL
-    take(required in, voltage)   >=  take(provided out, voltage)
-    take(required in, frequency) >=  take(provided out, frequency) 
-    take(required in, watts)     >=  take(provided out, watts) 
+    (required in).socket >= `socket_type : TypeL
+    (required in).voltage   >=  (provided out).voltage
+    (required in).frequency >=  (provided out).frequency
+    (required in).watts     >=  (provided out).watts
 
-    take(provided out, socket) <= any-of({`socket_type : TypeA, `socket_type : TypeC})
-
+    (provided out).socket <= any-of({`socket_type : TypeA, `socket_type : TypeC})
 }

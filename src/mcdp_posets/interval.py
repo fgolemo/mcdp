@@ -22,6 +22,9 @@ class GenericInterval(Poset):
     def __repr__(self):
         return 'GenericInterval(%r,%r,%r)' % (self.P, self.a, self.b)
 
+    def witness(self):
+        return self.a
+
     def get_bottom(self):
         return self.a
 
@@ -50,6 +53,9 @@ class Interval(Poset):
         self.belongs(self.L)
         self.belongs(self.U)
         assert self.leq(self.L, self.U)
+
+    def witness(self):
+        return self.L
 
     def get_test_chain(self, n):
         res = np.linspace(self.L, self.U, n)

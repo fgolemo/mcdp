@@ -1,12 +1,20 @@
 ## Coproducts (alternatives)
 
+The *coproduct* construct allows to describe the idea of 
+"alternatives". The name comes from [the category-theoretical concept
+of coproduct][cat-coproduct].
+
+[cat-coproduct]: https://en.wikipedia.org/wiki/Coproduct
+
+As an example, let us consider how to model the choice
+between different battery technologies.
 
 Let us consider the model of a battery in which we take 
 the functionality to be the capacity 
 and the resources to be the mass [g] and the cost [$].
 
-<div style='display:none'>
-<pre class='mcdp' id='Battery'>
+
+<pre class='mcdp' id='Battery' style='display:none'>
 mcdp {
 	provides capacity [J]
 	requires mass [g]
@@ -19,7 +27,6 @@ mcdp {
 	required cost >= provided capacity / specific_cost
 }
 </pre>
-</div>
 
 <pre class='ndp_graph_templatized_labeled'>`Battery</pre>
 
@@ -28,9 +35,17 @@ Consider two different battery technologies,
 characterized by their specific energy (Joules per gram)
 and specific cost (USD per gram).
 
-In this example, the numbers are chosen such that
-one technology leads to cheaper but heavier batteries
-and viceversa.
+Specifically, consider [Nickel-Hidrogen batteries][NiH2]
+and [Lithium-Polymer][LiPo] batteries. 
+On technology is cheaper but leads to heavier batteries
+and viceversa. Because of this fact, there might be designs
+in which we prefer either.
+
+[NiH2]: https://en.wikipedia.org/wiki/Nickel%E2%80%93hydrogen_battery
+[Lipo]: https://en.wikipedia.org/wiki/Lithium_polymer_battery
+
+First we model the two battery technologies separately
+as two MCDP using the same interface (same resources and same functionality).
 
 <table>
 <tr>
@@ -65,20 +80,19 @@ mcdp {
 </pre>
 </td>
 </tr>
-<tr>
-<td>
-<pre class='ndp_graph_templatized_labeled'>`Battery_LiPo</pre>
-</td>
-<td>
-<pre class='ndp_graph_templatized_labeled'>`Battery_NiH2</pre>
-</td>
-</tr>
+	<tr>
+		<td>
+			<pre class='ndp_graph_templatized_labeled'>`Battery_LiPo</pre>
+		</td>
+		<td>
+			<pre class='ndp_graph_templatized_labeled'>`Battery_NiH2</pre>
+		</td>
+	</tr>
 </table>
 
-These two batteries do not dominate each other.
-
-We can define the **coproduct** of the two using
-the keyword ``choose``. Graphically, the choice is indicated through dashed lines.
+Then we can define the **coproduct** of the two using
+the keyword <code><span class="CoproductWithNamesChooseKeyword">choose</span></code>.
+Graphically, the choice is indicated through dashed lines.
 
 <table>
 <tr>
@@ -95,7 +109,6 @@ choose(
 </td>
 </tr>
 </table>
-
 
 
 

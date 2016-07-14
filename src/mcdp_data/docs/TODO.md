@@ -239,6 +239,11 @@ requires r1 >= f1
 - g: visualize PlusNat as "+ x"
 
 
+- bug: This should have a better error message 
+   <code class='mcdp_value'>`my_poset: <em>element</em></code>.
+
+    ValueError: If <pre> is empty then it needs to have an id.
+    tag: <code class="mcdp_value">`my_poset: <em>element</em></code>
 
 
 

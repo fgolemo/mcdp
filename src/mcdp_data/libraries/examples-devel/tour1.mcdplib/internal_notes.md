@@ -119,3 +119,14 @@ mcdp {
 <pre class='print_value'>
 &lt;upperclosure {<0g, 1J>}, upperclosure {<1g, 0.5J>}&gt;
 </pre>
+
+
+### ``<code>``
+
+
+This is P: <code class='mcdp_poset'>`my_poset</code>.
+
+This is P: <code class='mcdp_value'>Nat:0</code>.
+
+<!-- This is not ok: <code class='mcdp_value'>`my_poset: <em>element</em></code>.
+ -->

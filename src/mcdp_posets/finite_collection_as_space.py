@@ -3,6 +3,7 @@ from .poset import NotLeq
 from .space import NotEqual, Space
 from contracts.utils import raise_desc
 from mcdp_posets.space import NotBelongs
+import random
 
 
 __all__ = ['FiniteCollectionAsSpace']
@@ -22,6 +23,11 @@ class FiniteCollectionAsSpace(Space):
             msg = 'Element does not belong to poset.'
             raise_desc(NotBelongs, msg=msg, x=x, elements=self.elements)
 
+    def witness(self):
+        n = len(self.elements)
+        i = random.randint(0, n-1)
+        return list(self.elements)[i]
+        
     def check_equal(self, a, b):
         if a == b:
             pass

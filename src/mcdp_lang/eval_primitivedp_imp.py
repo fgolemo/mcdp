@@ -14,7 +14,6 @@ CDP = CDPLanguage
 def eval_primitivedp(r, context):  # @UnusedVariable
     with add_where_information(r.where):
         if isinstance(r, CDP.LoadDP):
-            # XXX: use Context to do it
             name = r.name.value
             return context.load_primitivedp(name)
 

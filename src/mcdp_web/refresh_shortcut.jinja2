@@ -1,0 +1,18 @@
+
+<script type='text/javascript'>
+$(document).ready(function() {
+	$(window).keydown(function (e){
+		//console.log(e);
+		CODE_N = 78;
+		CODE_L = 76;
+		CODE_R = 82;
+
+	    if (e.altKey && e.keyCode == CODE_R) { 
+	        e.preventDefault();
+	        //console.log('ciao');
+	        //$('#menu').menu('expand');
+	        window.location ='/libraries/{{navigation['current_library']}}/refresh_library';
+	    }
+	});	
+})
+</script>

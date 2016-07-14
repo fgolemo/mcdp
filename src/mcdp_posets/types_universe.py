@@ -8,6 +8,7 @@ from .uppersets import UpperSets
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
+from mcdp_posets.poset import Poset
 
 __all__ = [
     'get_types_universe',
@@ -25,11 +26,12 @@ class TypesUniverse(Preorder):
     
     """
 
+    def witness(self):
+        return Nat()
+
     def belongs(self, x):
-        from mcdp_posets.rcomp_units import RcompUnits
-        known = (RcompUnits, Rcomp)
-        if not isinstance(x, known):
-            raise_desc(NotBelongs, x=x, known=known)
+        from mcdp_posets.space import Space
+        return isinstance(x, Space)
 
     def check_equal(self, A, B):
         from mcdp_posets.poset_product import PosetProduct

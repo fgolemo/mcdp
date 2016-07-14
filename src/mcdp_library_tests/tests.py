@@ -1,9 +1,8 @@
 from contextlib import contextmanager
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_cli.solve_meat import solve_main
-from mcdp_library.library import MCDPLibrary
-from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
-from mcdp_library.utils.locate_files_imp import locate_files
+from mcdp_library import MCDPLibrary
+from mcdp_library.utils import dir_from_package_name, locate_files
 from mcdp_tests.generation import for_all_source_mcdp
 from mocdp import logger
 from mocdp.exceptions import DPSemanticError
@@ -213,7 +212,7 @@ def mcdplib_test_setup_posets(context, mcdplib):
     for id_poset in posets:
         c = context.child(id_poset)
 
-        ndp = c.comp(_load_poset, mcdplib, id_poset, job_id='load_poset')
+        ndp = c.comp(_load_poset, mcdplib, id_poset, job_id='load')
 
         for ftest in registered:
             c.comp(ftest, id_poset, ndp)
@@ -237,7 +236,7 @@ def mcdplib_test_setup_primitivedps(context, mcdplib):
     for id_dp in dps:
         c = context.child(id_dp)
 
-        ndp = c.comp(_load_primitivedp, mcdplib, id_dp, job_id='load_poset')
+        ndp = c.comp(_load_primitivedp, mcdplib, id_dp, job_id='load')
 
         for ftest in registered:
             c.comp(ftest, id_dp, ndp)

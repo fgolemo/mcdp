@@ -1,7 +1,10 @@
+<style>
+    code strong { font-weight: bold; color: blue; }
+</style>
+
 ### Finite Posets
 
-
-You can define your own posets.
+It is possible to define and use your own arbitrary finite posets.
 
 For example, create a file named ``my_poset.mcdp_poset``
 containing the following definition:
@@ -19,9 +22,9 @@ and with the given order relations.
 
 Now that this poset has been defined, it can be used in the 
 definition of an MCDP, by referring to it by name using
-the backtick notation ```my_poset``.
+the backtick notation, as in  &ldquo;<code class='mcdp_poset'>`my_poset</code>&rdquo;.
 
-To refer to its element, use the notation ```my_poset: element``.
+To refer to its elements, use the notation <code class='mcdp_value'>`my_poset: element</code>.
 
 For example:
 

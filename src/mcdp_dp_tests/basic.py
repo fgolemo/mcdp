@@ -1,8 +1,9 @@
-from mcdp_tests.generation import for_all_dps
-from mcdp_posets.poset_product import PosetProduct
-from mcdp_posets import Rcomp, R_Weight
 from comptests.registrar import comptest
 from mcdp_dp.dp_series import get_product_compact
+from mcdp_dp import NotSolvableNeedsApprox
+from mcdp_posets import R_Weight, Rcomp
+from mcdp_posets import PosetProduct
+from mcdp_tests.generation import for_all_dps
 from nose.tools import assert_equal
 
 
@@ -26,9 +27,11 @@ def check_dp1(id_dp, dp):
 
 #     if isinstance(dp, DPLoop0):
 #         return
-
-    u0 = dp.solve(f_bot)
-    u1 = dp.solve(f_top)
+    try:
+        u0 = dp.solve(f_bot)
+        u1 = dp.solve(f_top)
+    except NotSolvableNeedsApprox:
+        return
 
     print('u0', u0)
     print('u1', u1)
@@ -45,10 +48,10 @@ def check_dp2(_id_dp, dp):
     chain = funsp.get_test_chain(n=5)
     poset_check_chain(funsp, chain)
 
-#     if isinstance(dp, DPLoop):
-#         return
-
-    trchain = map(dp.solve, chain)
+    try:
+        trchain = map(dp.solve, chain)
+    except NotSolvableNeedsApprox:
+        return
 
     trsp = dp.get_tradeoff_space()
     poset_check_chain(trsp, trchain)

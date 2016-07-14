@@ -5,9 +5,11 @@ from .poset import NotBounded, NotLeq, Poset
 from .space import NotBelongs, NotEqual, Space
 from contracts import contract
 from contracts.utils import raise_desc
-from mocdp.exceptions import mcdp_dev_warning, do_extra_checks
+from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 
-__all__ = ['FiniteCollectionsInclusion']
+__all__ = [
+    'FiniteCollectionsInclusion',
+]
 
 class FiniteCollectionsInclusion(Poset):
     """ Lattice of finite collections 
@@ -19,6 +21,12 @@ class FiniteCollectionsInclusion(Poset):
     @contract(S=Space)
     def __init__(self, S):
         self.S = S
+
+    def witness(self):
+        w = self.S.witness()
+        elements = [w]
+        S = self.S
+        return FiniteCollection(elements=elements, S=S)
 
     # This can only be implemented if we can enumerate the elements of Space
     def get_top(self):
@@ -65,11 +73,13 @@ class FiniteCollectionsInclusion(Poset):
             raise_desc(NotLeq, msg, e1=e1, e2=e2)
 
     def join(self, a, b):  # union
-        from mcdp_posets.finite_collection import FiniteCollection
         elements = set()
         elements.update(a.elements)
         elements.update(b.elements)
         return FiniteCollection(elements, self.S)
+
+    def meet(self, a, b):  # union
+        raise NotImplementedError
 
     def format(self, x):
         contents = ", ".join(self.S.format(m)

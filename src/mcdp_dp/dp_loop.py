@@ -43,10 +43,6 @@ class DPLoop0(PrimitiveDP):
               `-----------/
     """
     def __init__(self, dp1):
-#         from mocdp import get_conftools_dps
-#
-#         library = get_conftools_dps()
-#         _, self.dp1 = library.instance_smarter(dp1)
         self.dp1 = dp1
 
         F0 = self.dp1.get_fun_space()

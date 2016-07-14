@@ -28,7 +28,7 @@ Let's also define the MCDP ``actuation``:
 mcdp {
 	provides lift [N]
 	requires power [W]
-	
+
 	l = lift
 	p0 = 5 W
 	p1 = 6 W/N
@@ -48,14 +48,14 @@ mcdp {
 
 Then we can combine these two together.
 
-We can re-use previously defined MCDPs using the 
+We can re-use previously defined MCDPs using the
 keyword ``new``. This creates two sub-design problems, for now unconnected.
 
 <table>
 <tr>
 <td>
 <pre class="mcdp" id='combined1'>
-mcdp {	
+mcdp {
 	actuation = new Actuation
 	battery = new Battery
 }
@@ -67,16 +67,16 @@ mcdp {
 </tr>
 </table>
 To create a complete MCDP, take "endurance" as a high-level
-functionality. Then the energy required is equal to 
-endurance &times; power. 
+functionality. Then the energy required is equal to
+endurance &times; power.
 
 <pre class="mcdp" id='combined2'>
-mcdp {	
+mcdp {
 	actuation = new Actuation
 	battery = new Battery
 
 	# battery must provide power for actuation
-	provides endurance [s]	
+	provides endurance [s]
 	energy = provided endurance * (power required by actuation)
 
 	capacity provided by battery >= energy
@@ -97,12 +97,11 @@ of the battery plus the mass of the payload times gravity:
 <td>
 <pre class="mcdp" id='composition' label='Composition.mcdp'>
 mcdp {
-	
 	actuation = new Actuation
 	battery = new Battery
 
 	# battery must provide power for actuation
-	provides endurance [s]	
+	provides endurance [s]
 	energy = provided endurance * (power required by actuation)
 
 	capacity provided by battery >= energy
@@ -122,33 +121,21 @@ mcdp {
 }
 </pre>
 </td>
-<td style='vertical-align: top'>
-<pre class='ndp_graph_enclosed' style='max-height: 90ch' direction='TB'>`Composition</pre>
-</td>
+	<td style='vertical-align: top'>
+		<pre class='ndp_graph_enclosed' style='max-height: 90ch' direction='TB'>
+			`Composition
+		</pre>
+	</td>
 </tr>
 </table>
 
-### Abstraction and flattening
-
-We can completely abstract an MCDP:
-
-<pre class='ndp_graph_templatized_labeled' direction='LR'>`Composition</pre>
-
-And we can also completely **flatten** it, by first expanding 
-the sub components:
-
-<pre class='ndp_graph_expand' direction='LR' >`Composition</pre>
-
-and then erasing their borders:
-
-<pre class='ndp_graph_expand' direction='LR'>flatten `Composition</pre>
 
 
 <style type='text/css'>
-	td { 
-		vertical-align: top; 
+	td {
+		vertical-align: top;
 	}
-	td:first-child { 
+	td:first-child {
 		/*border: solid 1px red; */
 		/*width: 25em; */
 	}

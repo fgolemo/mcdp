@@ -8,7 +8,7 @@ from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
     NotBelongs, NotLeq, PosetProduct, Rcomp, Space, UpperSet, UpperSets,
     get_types_universe)
 from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPSemanticError, mcdp_dev_warning
+from mocdp.exceptions import DPSemanticError, mcdp_dev_warning, DPInternalError
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
 from mcdp_lang.namedtuple_tricks import recursive_print
 
@@ -189,8 +189,18 @@ def eval_constant_space_custom_value(op, context):
 
         return ValueWithUnits(unit=space, value=op.custom_string)
     
+    if isinstance(space, Nat):
+        mcdp_dev_warning('Top?')
+        value = int(custom_string)
+        return ValueWithUnits(unit=Nat(), value=value)
+
+    if isinstance(space, Int):
+        mcdp_dev_warning('Top?')
+        value = int(custom_string)
+        return ValueWithUnits(unit=Int(), value=value)
+        
     msg = 'Custom parsing not implemented for space.'
-    raise_desc(NotImplementedError, msg, space=space, custom_string=custom_string)
+    raise_desc(DPInternalError, msg, space=space, custom_string=custom_string)
 
 def eval_constant_uppersetfromcollection(op, context):
     x = eval_constant(op.value, context)

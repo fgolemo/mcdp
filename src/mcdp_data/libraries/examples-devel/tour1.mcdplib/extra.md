@@ -1,6 +1,6 @@
 <style type='text/css'>
-.keyword {  
-    font-weight: bold; 
+.keyword {
+    font-weight: bold;
     color: #00a;
 }
 .ph { /* placeholder */
@@ -14,15 +14,9 @@
 
     load <name>
 
-    ` <name>
+    `<name>
 
 ## Space expressions
-
-### Named products  
-
-<pre class='mcdp_poset'>
-product(energy:J, current:A)
-</pre>
 
 ### set-of
 
@@ -122,42 +116,13 @@ upperclosure {0 g, 1 g}
 
 ## Operations
 
-### tuple making
-
-The syntax is:
-
-    < element, element, ... >
-    ⟨ element, element, ... ⟩
-
-Fancy:
-
-<pre class='mcdp_value'>
-⟨0 g, 1 g⟩
-</pre>
-    
-Regular:
-
-<pre class='mcdp_value'>
-&lt;0 g, 1 g&gt;
-</pre>
-
-### tuple accessing
-
-    take(value, index)
-
-For example:
-
-<pre class='mcdp_value'>
-take( ⟨0g, 3g⟩, 1 )
-</pre>
-
 
 ### ignore
 
 
 Suppose f has type F. Then:
 
-    ignore f provided by x 
+    ignore f provided by x
 
 is equivalent to
 
@@ -166,7 +131,7 @@ is equivalent to
 
 Equivalently,
 
-    ignore r required by x 
+    ignore r required by x
 
 is equivalent to
 
@@ -179,10 +144,16 @@ is equivalent to
     sqrt
     square
     pow
-    max 
+    max
     min
 
 ## Operations on NDPs
+
+
+
+
+    provides f using c
+    requires r for   c
 
 ### implemented-by
 
@@ -223,4 +194,3 @@ is equivalent to
 
 
 ### Uncertain
-

@@ -1,16 +1,16 @@
 from .primitive import ApproximableDP, PrimitiveDP
 from contracts import contract
+from mcdp_dp.primitive import NotSolvableNeedsApprox
 from mcdp_posets import Nat, Poset  # @UnusedImport
 from mcdp_posets import PosetProduct, UpperSet
 import numpy as np
-from mcdp_dp.primitive import NotSolvableNeedsApprox
+from mocdp.exceptions import mcdp_dev_warning
 
 __all__ = [
     'InvMult2',
     'InvMult2U',
     'InvMult2L',
 ]
-
 
 
 class InvMult2(ApproximableDP):
@@ -26,29 +26,16 @@ class InvMult2(ApproximableDP):
     def solve(self, f):
         raise NotSolvableNeedsApprox(type(self))
 
-#         if self.F.equal(f, self.F.get_bottom()):
-#             return self.R.U(self.R.get_bottom())
-#
-#         n = 20
-#         options = np.exp(np.linspace(-2, 2, n))
-#         s = set()
-#         for o in options:
-#             s.add((o, f / o))
-#
-#         return self.R.Us(s)
-
     def evaluate_f_m(self, f, m):
         if m == 0.0:
             return (0.0, 0.0)
         return (m, f / m)
-    
 
     def get_lower_bound(self, n):
         return InvMult2L(self.F, self.Rs, n)
 
     def get_upper_bound(self, n):
         return InvMult2U(self.F, self.Rs, n)
-
 
     def __repr__(self):
         return 'InvMult2(%s -> %s)' % (self.F, self.R)
@@ -68,6 +55,14 @@ class InvMult2U(PrimitiveDP):
         self.n = n
 
     def solve(self, f):
+        top = self.F.get_top()
+        if f == top:
+            mcdp_dev_warning('FIXME Need much more thought about this')
+            top1 = self.Rs[0].get_top()
+            top2 = self.Rs[1].get_top()
+            s = set([(top1, top2)])
+            return self.R.Us(s)
+
         ps = samplec(self.n, f)
         return UpperSet(minimals=ps, P=self.R)
 
@@ -106,6 +101,14 @@ class InvMult2L(PrimitiveDP):
         self.n = n
 
     def solve(self, f):
+        top = self.F.get_top()
+        if f == top:
+            mcdp_dev_warning('FIXME Need much more thought about this')
+            top1 = self.Rs[0].get_top()
+            top2 = self.Rs[1].get_top()
+            s = set([(top1, 0.0), (0.0, top2)])
+            return self.R.Us(s)
+
         n = self.n
 
         if n == 1:

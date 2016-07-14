@@ -72,6 +72,15 @@ def check_tuples7():
     """)
     print res
 
+    res = parse_ndp("""
+    mcdp {
+        requires r [ product(a:J, b:g) ]
+        
+        (required r).a >= 1 J
+        (required r).b >= 1 g
+    }
+    """)
+    print res
 
 @comptest
 def check_tuples8():
@@ -85,6 +94,16 @@ def check_tuples8():
     """)
     print res
 
+    res = parse_ndp("""
+    mcdp {
+        provides f [ product(a:J, b:g) ]
+        
+        (provided f).a <= 1 J
+        (provided f).b <= 1 g
+    }
+    """)
+    print res
+    
 @comptest
 def check_tuples9():
     """ unknown name """

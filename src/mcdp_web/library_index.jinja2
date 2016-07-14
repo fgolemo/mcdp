@@ -3,8 +3,10 @@
 <head>
     <title>Library {{navigation['current_library']}}</title>
     {% include 'head.jinja2' %}
+    
 </head>
 <body>
+{% include 'refresh_shortcut.jinja2' %}
 
 {% include 'model_views_navigation.jinja2' %}
 {% set index_doc = navigation['current_library'] + '-index' %}

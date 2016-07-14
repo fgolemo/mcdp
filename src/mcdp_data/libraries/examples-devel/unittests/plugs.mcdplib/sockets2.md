@@ -10,8 +10,10 @@ Next, we are going to model a
 
 This is a device with 1 input and 3 outputs:
 
-<pre class='ndp_graph_templatized'>`goldsource_STU_200</pre>
 
 <pre class='mcdp' id='goldsource_STU_200' label='goldsource_STU_200.mcdp'></pre>
 
-<pre class='ndp_graph_enclosed'>`goldsource_STU_200</pre>
+<div style='text-align:center'>
+    <pre class='ndp_graph_templatized'>`goldsource_STU_200</pre>
+    <pre class='ndp_graph_enclosed'>`goldsource_STU_200</pre>
+</div>

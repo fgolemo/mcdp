@@ -118,6 +118,7 @@ A plug adapter can be modeled as follows:
 
 <pre class='mcdp' id='orei' label='orei.mcdp'></pre>
 
+<pre class='ndp_graph_templatized'>`orei</pre>
 <pre class='ndp_graph_enclosed'>`orei</pre>
 
 
@@ -135,12 +136,12 @@ This one provides 2 outputs:
 
 <pre class='mcdp' id='orei_2in1' label='orei_2in1.mcdp'></pre>
 
-<pre class='ndp_graph_enclosed'>`orei_2in1</pre>
-
 We can forget all this complexity and consider the block:
 
-<pre class='ndp_graph_templatized'>`orei_2in1</pre>
-
+<div style='text-align: center'>
+    <pre class='ndp_graph_templatized'>`orei_2in1</pre>
+    <pre class='ndp_graph_enclosed'>`orei_2in1</pre>
+</div>
 
 
 ### DC connectors
@@ -199,24 +200,16 @@ of the two sets:
 [This wall charger][converter] can be used to convert
 from AC power to DC power.
 
-<table>
-    <tr>
-        <td>
-            <img src='ravpower.png' style='height: 8em'/>
-        </td>
-        <td>
-            <pre class='ndp_graph_templatized'
-                style='height: 8em'>`Ravpower</pre>
-        </td>
-    </tr>
-</table>
-
+<img src='ravpower.png' style='height: 8em'/>
+    
 [converter]: https://www.amazon.com/RAVPower-Charger-Technology-Foldable-indicator/dp/B00OQ1I2C2/
 
 <pre class='mcdp' id='Ravpower' label='Ravpower.mcdp'></pre>
 
-<pre class='ndp_graph_enclosed'>`Ravpower</pre>
-
+<div style='text-align: center'>
+    <pre class='ndp_graph_templatized'>`Ravpower</pre>
+    <pre class='ndp_graph_enclosed'>`Ravpower</pre>
+</div>
 
 We can query the model as follows. Suppose we need 2 outputs, each of 0.5A.
 
@@ -255,7 +248,6 @@ We can ask now for what resources we would need for a 0.5 A load:
 <pre class='mcdp_value'>solve(
     ⟨S(DC_power):*, `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩,
     `orei_plus_ravpower)</pre>
-
 
 and obtain
 

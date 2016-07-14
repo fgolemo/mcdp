@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from .find_poset_minima.baseline_n2 import poset_minima
 from .poset import NotBounded, NotLeq, Poset
-from .space import NotBelongs, NotEqual, Space
+from .space import NotBelongs, NotEqual, Space, Uninhabited
 from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
+import random
 
 __all__ = [
     'UpperSet',
@@ -34,6 +35,13 @@ class UpperSet(Space):
 
             from mcdp_posets import check_minimal
             check_minimal(self.minimals, P)
+
+    def witness(self):
+        if not self.minimals:
+            raise Uninhabited()
+        n = len(self.minimals)
+        i = random.randint(0, n - 1)
+        return list(self.minimals)[i]
 
     @contract(returns=Poset)
     def get_poset(self):
@@ -72,6 +80,10 @@ class UpperSets(Poset):
             except NotBounded:
                 pass
 
+    def witness(self):
+        w = self.P.witness()
+        return UpperSet([w], self.P)
+        
     def get_bottom(self):
         x = self.P.get_bottom()
         return UpperSet(set([x]), self.P)
@@ -191,6 +203,14 @@ class LowerSet(Space):
             mcdp_dev_warning('check_maximal()')
             # from mcdp_posets import check_maximal
             # check_maximal(self.minimals, P)
+
+    def witness(self):
+        if not self.maximals:
+            raise Uninhabited()
+        else:
+            n = len(self.maximals)
+            i = random.randint(0, n - 1)
+            return list(self.maximals)[i]
 
     @contract(returns=Poset)
     def get_poset(self):
