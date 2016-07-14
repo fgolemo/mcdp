@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 from .eval_constant_imp import eval_constant
+from .eval_ndp_approx import eval_ndp_approx_lower, eval_ndp_approx_upper
 from .eval_space_imp import eval_space
+from .eval_template_imp import eval_template
+from .helpers import create_operation
+from .namedtuple_tricks import recursive_print
+from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from contracts import contract, describe_value
+from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_dp import JoinNDP, MeetNDual
-from mcdp_dp.conversion import get_conversion, Conversion
+from mcdp_dp import CatalogueDP, JoinNDP, MeetNDual
+from mcdp_dp.conversion import Conversion, get_conversion
 from mcdp_dp.dp_approximation import make_approximation
-from mcdp_dp.dp_catalogue import CatalogueDP
 from mcdp_dp.dp_series_simplification import make_series
-from mcdp_lang.eval_ndp_approx import (eval_ndp_approx_lower,
-    eval_ndp_approx_upper)
-from mcdp_lang.eval_template_imp import eval_template
-from mcdp_lang.parse_actions import add_where_information
 from mcdp_posets import Any, NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
@@ -23,8 +23,6 @@ from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
 from mocdp.exceptions import (DPInternalError, DPSemanticError,
     DPSemanticErrorNotConnected, mcdp_dev_warning)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
-from mcdp_lang.namedtuple_tricks import recursive_print
-from mcdp_lang.helpers import create_operation
 
 CDP = CDPLanguage
 
