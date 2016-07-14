@@ -8,28 +8,11 @@ from .utils import ok
 ok(Syntax.collection_of_constants, "{ 1.5 V, 5 V }")
 ok(Syntax.constant_value, "{ 1.5 V, 5 V }")
 
-# @comptest
-# def check_sets1():
-#     r = parse_wrap_check("{ 1.5 V, 5 V }",
-#                      Syntax.collection_of_constants)
-#     print r
-#
-#     r = parse_wrap_check("{ 1.5 V, 5 V }",
-#                      Syntax.constant_value)
-#     print r
-
 
 ok(Syntax.unitst, "[set-of(V)]")
 
 ok(Syntax.unitst, "[℘(V)]")
 
-# @comptest
-# def check_sets2():
-#     r = parse_wrap_check("[set-of(V)]",
-#                      Syntax.unitst)
-#     print r
-#     r = parse_wrap_check("[℘(V)]",
-#                      Syntax.unitst)
 
 @comptest
 def check_sets3():
@@ -80,7 +63,6 @@ def check_sets3():
 
 }
     """)
-    pass
 
 @comptest
 def check_sets4():

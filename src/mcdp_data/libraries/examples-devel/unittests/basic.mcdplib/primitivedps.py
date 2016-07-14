@@ -5,7 +5,7 @@ from mcdp_dp import (CatalogueDP, CoProductDP, CoProductDPLabels, Constant,
     UncertainGate, UncertainGateSym)
 from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct
-from mocdp.comp.template_imp import Template
+from mcdp_dp.dp_dummy import Template
 
 def CatalogueDP1():
     m1 = 'A'

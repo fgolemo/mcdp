@@ -6,4 +6,4 @@ from .interfaces import *
 from .composite import *
 from .wrap import *
 
-from .template_imp import *
+from mcdp_dp.dp_dummy import *

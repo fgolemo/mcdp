@@ -55,7 +55,7 @@ def ndp_templatize(ndp, mark_as_template=False):
     else:
         R = PosetProduct(tuple(rtypes))
 
-    from mocdp.comp.template_imp import Dummy
+    from mcdp_dp.dp_dummy import Dummy
 
     dp = Dummy(F, R)
     if mark_as_template:
