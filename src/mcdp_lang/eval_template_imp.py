@@ -4,7 +4,8 @@ from mcdp_lang.parse_actions import add_where_information
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.utils_lists import unwrap_list
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-from mocdp.exceptions import DPInternalError
+from mocdp.exceptions import DPInternalError, DPSemanticError
+from mcdp_lang.namedtuple_tricks import recursive_print
 
 
 CDP = CDPLanguage
@@ -21,6 +22,7 @@ def eval_template(r, context):  # @UnusedVariable
             if isinstance(r, klass):
                 return hook(r, context)
 
+    r = recursive_print(r)
     raise_desc(DPInternalError, 'Invalid template.', r=r)
 
 def eval_template_load(r, context):
@@ -37,6 +39,11 @@ def eval_template_spec(r, context):
         keys = params_ops[::2]
         values =  params_ops[1::2]
         keys = [_.value for _ in keys]
+
+        if len(set(keys)) != len(keys):
+            msg = 'Repeated parameters.'
+            raise_desc(DPSemanticError, msg, keys=keys)
+
         values = [eval_ndp(_, context) for _ in values]
         d = dict(zip(keys, values))
         params = d

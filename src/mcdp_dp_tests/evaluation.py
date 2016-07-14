@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mcdp_dp.dp_series import get_product_compact
-from mcdp_dp.primitive import Feasible, NotFeasible
+from mcdp_dp.primitive import Feasible, NotFeasible, NotSolvableNeedsApprox
 from mcdp_lang import parse_ndp
 from mcdp_posets import PosetProduct, SpaceProduct
 from mcdp_posets import R_Energy, R_Time, R_Weight, R_dimensionless
@@ -18,12 +18,14 @@ def check_evaluate_f_m1(id_dp, dp):
     
     f0 = F.get_bottom()
     m0 = M.witness()
+
     try:
         r = dp.evaluate_f_m(f0, m0)
         R.belongs(r)
     except NotFeasible:
         pass
-
+    except NotSolvableNeedsApprox:
+        pass
 
 @comptest
 def check_products():

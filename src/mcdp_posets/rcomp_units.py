@@ -75,10 +75,10 @@ class RcompUnits(Rcomp):
 
     def format(self, x):
         if x == self.top:
-            return self.top.__repr__()
+            s = self.top.__repr__()
         else:
             s = Rcomp.format(self, x)
-            return '%s %s' % (s, format_pint_unit_short(self.units))
+        return '%s %s' % (s, format_pint_unit_short(self.units))
 
 
 def parse_pint(s0):

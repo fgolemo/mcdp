@@ -9,19 +9,19 @@ mcdp {
 
   actuation_energetics = new ActuationEnergetics
 
-  actuation_energetics.endurance >= strategy.endurance
-  actuation_energetics.velocity >= strategy.velocity
-  actuation_energetics.num_missions >= num_missions
-  actuation_energetics.extra_payload >= carry_payload
-  strategy.distance >= travel_distance
+  endurance prov. by actuation_energetics>= endurance req. by strategy
+  velocity prov. by actuation_energetics>= velocity req. by strategy
+  num_missions prov. by actuation_energetics >= provided num_missions
+  extra_payload prov. by actuation_energetics>= provided carry_payload
+  distance prov. by strategy >= provided travel_distance
 
   computer = new Computer 
   perception = new Perception 
-  computer.computation >= perception.computation
+  computation prov. by computer>= computation req. by perception
 
 
   sensor =  new Sensor 
-  sensor.resolution >= perception.camera_resolution
+  resolution prov. by sensor >= camera_resolution req. by perception
   sensor.framerate >= perception.camera_framerate
   sensor.fov >= perception.camera_fov
   

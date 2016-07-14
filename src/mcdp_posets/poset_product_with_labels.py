@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
+from .poset import Poset  # @UnusedImport
+from .poset_product import PosetProduct
+from .space import NotBelongs
 from contracts import contract
-from mcdp_posets.poset_product import PosetProduct
-from mcdp_posets.space import NotBelongs
 from contracts.utils import raise_desc
 
-from mcdp_posets.poset import Poset  # @UnusedImport
 
 __all__ = [
     'PosetProductWithLabels',
@@ -14,10 +14,11 @@ class PosetProductWithLabels(PosetProduct):
 
     @contract(subs='seq[N]($Poset)', labels='seq[N](str)')
     def __init__(self, subs, labels):
+        labels = tuple(labels)
+        subs = tuple(subs)
         assert len(subs) == len(labels)
         self.labels = labels
         PosetProduct.__init__(self, subs)
-
 
     def format(self, x):
         if not isinstance(x, tuple):

@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
-from .poset import NotLeq, Poset
+from .finite_collection import FiniteCollection
+from .finite_collection_as_space import FiniteCollectionAsSpace
+from .poset import NotBounded, NotLeq, Poset
 from .space import NotBelongs, NotEqual, Space
 from contracts import contract
 from contracts.utils import raise_desc
+from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 
-__all__ = ['FiniteCollectionsInclusion']
+__all__ = [
+    'FiniteCollectionsInclusion',
+]
 
 class FiniteCollectionsInclusion(Poset):
     """ Lattice of finite collections 
@@ -17,28 +22,34 @@ class FiniteCollectionsInclusion(Poset):
     def __init__(self, S):
         self.S = S
 
-# This can only be implemented if we can enumerate the elements of Space
-#     def get_top(self):
-#         return
-#
+    def witness(self):
+        w = self.S.witness()
+        elements = [w]
+        S = self.S
+        return FiniteCollection(elements=elements, S=S)
+
+    # This can only be implemented if we can enumerate the elements of Space
+    def get_top(self):
+        if isinstance(self.S, FiniteCollectionAsSpace):
+            res = FiniteCollection(elements=self.S.elements,
+                                    S=self.S)
+            if do_extra_checks():
+                self.belongs(res)
+
+            return res
+
+        mcdp_dev_warning('This should really be NotImplementedError')
+        msg = 'Cannot enumerate the elements of this space.'
+        raise_desc(NotBounded, msg, space=self.S)
+
     def get_bottom(self):
-        from .finite_collection import FiniteCollection
         return FiniteCollection(set([]), self.S)
 
     def __eq__(self, other):
         return isinstance(other, FiniteCollectionsInclusion) and self.S == other.S
-#
-#     def get_top(self):
-#         x = self.P.get_top()
-#         return UpperSet(set([x]), self.P)
 
-#     def get_test_chain(self, n):
-#         chain = self.P.get_test_chain(n)
-#         f = lambda x: UpperSet(set([x]), self.P)
-#         return map(f, chain)
 
     def belongs(self, x):
-        from .finite_collection import FiniteCollection
         if not isinstance(x, FiniteCollection):
             msg = 'Not a finite collection: %s' % x.__repr__()
             raise_desc(NotBelongs, msg, x=x)
@@ -62,11 +73,13 @@ class FiniteCollectionsInclusion(Poset):
             raise_desc(NotLeq, msg, e1=e1, e2=e2)
 
     def join(self, a, b):  # union
-        from mcdp_posets.finite_collection import FiniteCollection
         elements = set()
         elements.update(a.elements)
         elements.update(b.elements)
         return FiniteCollection(elements, self.S)
+
+    def meet(self, a, b):  # union
+        raise NotImplementedError
 
     def format(self, x):
         contents = ", ".join(self.S.format(m)

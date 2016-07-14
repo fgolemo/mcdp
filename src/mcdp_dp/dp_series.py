@@ -4,7 +4,7 @@ from .dp_identity import Identity
 from .primitive import Feasible, NormalForm, NotFeasible, PrimitiveDP
 from .tracer import Tracer
 from contracts.utils import indent, raise_desc, raise_wrapped
-from mcdp_posets import (Map, PosetProduct, SpaceProduct, UpperSets,
+from mcdp_posets import (Map, NotBelongs, PosetProduct, SpaceProduct, UpperSets,
     get_product_compact)
 from mocdp.exceptions import DPInternalError, do_extra_checks
 
@@ -56,7 +56,13 @@ class Series0(PrimitiveDP):
     def evaluate_f_m(self, f1, m):
         """ Returns the resources needed
             by the particular implementation m """
+
+        if do_extra_checks():
+            M = self.get_imp_space_mod_res()
+            M.belongs(m)
+
         m1, m2 = self._unpack_m(m)
+
 
         if isinstance(self.dp1, (Mux, Identity)):
             f2 = self.dp1.evaluate_f_m(f1, m1)
@@ -78,6 +84,16 @@ class Series0(PrimitiveDP):
         r1s = self.dp1.solve(f)
         for r1 in r1s.minimals:
             m1s = self.dp1.get_implementations_f_r(f1, r1)
+            if do_extra_checks():
+                try:
+                    M1 = self.dp1.M
+                    for m1 in m1s:
+                        M1.belongs(m1)
+                except NotBelongs as e:
+                    msg = 'Invalid result from dp1 (%s)' % type(self.dp1)
+                    raise_wrapped(DPInternalError, e, msg, M1=M1, m1=m1,
+                                  dp1=self.dp1.repr_long())
+
             assert m1s, (self.dp1, f1, r1)
             
             f2 = r1
@@ -96,7 +112,6 @@ class Series0(PrimitiveDP):
                 if not R2.leq(r2, r):
                     continue
                 m2s = self.dp2.get_implementations_f_r(f2, r2)
-                # print('Found f1=%s r1=%s r2=%s' % (f1, r1, r2))
                 for m1 in m1s:
                     for m2 in m2s:
                         m = pack(m1, m_extra, m2)

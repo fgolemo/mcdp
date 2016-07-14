@@ -1,33 +1,34 @@
 from mcdp_tests.generation import for_all_dps
 from mcdp_posets.uppersets import UpperSets
 
-@for_all_dps
-def check_normalform_approx(id_dp, dp):
-    S, gamma, delta = dp.get_normal_form_approx()
-    print('design problem %s = %s' % (id_dp, dp))
-    print('S: %s' % S)
-    print('gamma: %s' % gamma)
-    print('delta: %s' % delta)
+if False:
+    @for_all_dps
+    def check_normalform_approx(id_dp, dp):
+        S, gamma, delta = dp.get_normal_form_approx()
+        print('design problem %s = %s' % (id_dp, dp))
+        print('S: %s' % S)
+        print('gamma: %s' % gamma)
+        print('delta: %s' % delta)
 
 
-    F = dp.get_fun_space()
-    UF = UpperSets(F)
-    _R = dp.get_res_space()
+        F = dp.get_fun_space()
+        UF = UpperSets(F)
+        _R = dp.get_res_space()
 
-    uf_bot = UF.get_bottom()
-    S_bot = S.get_bottom()
+        uf_bot = UF.get_bottom()
+        S_bot = S.get_bottom()
 
-    x = (uf_bot, S_bot, 0, 0)
-    gamma.get_domain().belongs(x)
+        x = (uf_bot, S_bot, 0, 0)
+        gamma.get_domain().belongs(x)
 
-    y = gamma(x)
-    gamma.get_codomain().belongs(y)
+        y = gamma(x)
+        gamma.get_codomain().belongs(y)
 
-    z = delta(x)
+        z = delta(x)
 
-    print('codomain: %s' % delta.get_codomain())
-    print('z = %s' % str(z))
-    delta.get_codomain().belongs(z)
+        print('codomain: %s' % delta.get_codomain())
+        print('z = %s' % str(z))
+        delta.get_codomain().belongs(z)
 
 
     # Start with bottom

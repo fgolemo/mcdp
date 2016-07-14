@@ -1,9 +1,11 @@
 from contracts import contract
-from mocdp.comp.wrap import SimpleWrap
-from mcdp_posets.poset_product import PosetProduct
+from mcdp_dp import Dummy
+from mcdp_posets import PosetProduct
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.interfaces import NamedDP
+from mocdp.comp.wrap import SimpleWrap
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
+
 
 def cndp_templatize_children(cndp):
     """ Replaces all sub composites with the corresponding template """
@@ -55,7 +57,6 @@ def ndp_templatize(ndp, mark_as_template=False):
     else:
         R = PosetProduct(tuple(rtypes))
 
-    from mocdp.comp.template_imp import Dummy
 
     dp = Dummy(F, R)
     if mark_as_template:

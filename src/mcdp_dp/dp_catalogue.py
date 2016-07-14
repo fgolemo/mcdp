@@ -15,8 +15,9 @@ __all__ = [
 
 class CatalogueDP(PrimitiveDP):
 
-    @contract(entries='tuple, seq[>=1](tuple(str, *, *))')
+    @contract(entries='seq[>=1](tuple(str, *, *))')
     def __init__(self, F, R, I, entries):
+        entries = tuple(entries)
         if do_extra_checks():
             for m, f_max, r_min in entries:
                 I.belongs(m)
@@ -66,5 +67,6 @@ class CatalogueDP(PrimitiveDP):
 
     def __repr__(self):
         return 'CatalogueDP(%r|%r)' % (self.F, self.R)
+
 
 

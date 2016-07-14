@@ -29,6 +29,9 @@ class Feasible(Exception):
 class NotSolvableNeedsApprox(Exception):
     pass
 
+class WrongUseOfUncertain(Exception):
+    pass
+
 class PrimitiveDP(WithInternalLog):
     """ 
         There are F, R, I.
@@ -177,30 +180,6 @@ class PrimitiveDP(WithInternalLog):
     @contract(returns=UpperSet)
     def solve_trace(self, func, tracer):  # @UnusedVariable
         return self.solve(func)
-
-#     @contract(returns='tuple($UpperSet, $UpperSet)')
-#     def solve_approx(self, f, nl, nu):  # @UnusedVariable
-#         x = self.solve(f)
-#         return x, x
-
-#     @contract(ufunc=UpperSet)
-#     def solveU_approx(self, ufunc, nl, nu):
-#         if do_extra_checks():
-#             UF = UpperSets(self.get_fun_space())
-#             UF.belongs(ufunc)
-#
-#         R = self.get_res_space()
-#
-#         res_l = set([])
-#         res_u = set([])
-#         for m in ufunc.minimals:
-#             l, u = self.solve_approx(m, nl, nu)
-#             res_u.update(u.minimals)
-#             res_l.update(l.minimals)
-#
-#         l = R.Us(poset_minima(res_l, R.leq))
-#         u = R.Us(poset_minima(res_u, R.leq))
-#         return l, u
 
     @contract(ufunc=UpperSet)
     def solveU(self, ufunc):

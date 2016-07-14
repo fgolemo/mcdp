@@ -1,3 +1,0 @@
-# Solving MCDPs
-
-(to write)

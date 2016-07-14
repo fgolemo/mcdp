@@ -30,6 +30,7 @@ class Parallel(PrimitiveDP):
 
         M1 = self.dp1.get_imp_space_mod_res()
         M2 = self.dp2.get_imp_space_mod_res()
+
         M, _, _ = get_product_compact(M1, M2)
         self.M1 = M1
         self.M2 = M2

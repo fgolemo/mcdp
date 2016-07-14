@@ -2,11 +2,11 @@
 from .dp_series import get_product_compact
 from .primitive import PrimitiveDP
 from contracts import contract
+from contracts.utils import indent
 from mcdp_posets import PosetProduct
 from mocdp.exceptions import do_extra_checks
 import itertools
-import warnings
-from contracts.utils import indent
+from mcdp_posets.uppersets import lowerset_product_multi, upperset_product_multi
 
 
 __all__ = [
@@ -17,9 +17,8 @@ __all__ = [
 class ParallelN(PrimitiveDP):
     """ Generalization to N problems """
 
-    @contract(dps='list($PrimitiveDP)')
+    @contract(dps='tuple,seq($PrimitiveDP)')
     def __init__(self, dps):
-        warnings.warn('None of the following is implemented')
         Fs = [_.get_fun_space() for _ in dps]
         F = PosetProduct(tuple(Fs))
         Rs = [_.get_res_space() for _ in dps]
@@ -27,9 +26,9 @@ class ParallelN(PrimitiveDP):
         Ms = [_.get_imp_space_mod_res() for _ in dps]
 
         self.Ms = Ms
-        self.dps = dps
+        self.dps = tuple(dps)
         self.M, _, _ = get_product_compact(*tuple(self.Ms))
-        PrimitiveDP.__init__(self, F=F, R=R, M=self.M)
+        PrimitiveDP.__init__(self, F=F, R=R, I=self.M)
 
     def evaluate_f_m(self, f, m):
         raise NotImplementedError()
@@ -68,6 +67,23 @@ class ParallelN(PrimitiveDP):
             tres.belongs(res)
 
         return res
+
+    @contract(returns='tuple($LowerSet, $UpperSet)')
+    def evaluate(self, m):
+        _, _, unpack = get_product_compact(*tuple(self.Ms))
+
+        ms = unpack(m)
+        LFs = []
+        URs = []
+        for i, dp in enumerate(self.dps):
+            mi = ms[i]
+            LFi, URi = dp.evaluate(mi)
+            LFs.append(LFi)
+            URs.append(URi)
+
+        UR = upperset_product_multi(URs)
+        LF = lowerset_product_multi(LFs)
+        return LF, UR
 
     def get_implementations_f_r(self, f, r):
         _, pack, _ = get_product_compact(*tuple(self.Ms))

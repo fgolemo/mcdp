@@ -2,9 +2,9 @@
 from .primitive import NormalForm, NotFeasible, PrimitiveDP
 from contracts import contract
 from contracts.utils import indent, raise_desc
-from mcdp_posets import (FiniteCollectionAsSpace, Map, NotBelongs, NotEqual,
-    PosetProduct, UpperSet, UpperSets, get_types_universe, poset_minima)
-from mcdp_posets.category_coproduct import Coproduct1
+from mcdp_posets import (
+    Coproduct1, Coproduct1Labels, Map, NotBelongs, NotEqual, PosetProduct,
+    UpperSet, UpperSets, get_types_universe, poset_minima)
 from mocdp.exceptions import do_extra_checks
 
 __all__ = [
@@ -18,9 +18,6 @@ class CoProductDP(PrimitiveDP):
 
     @contract(dps='tuple,seq[>=1]($PrimitiveDP)')
     def __init__(self, dps):
-#         from mocdp import get_conftools_dps
-#         library = get_conftools_dps()
-#         dps = [library.instance_smarter(_)[1] for _ in dps]
         tu = get_types_universe()
 
         F1 = dps[0].get_fun_space()
@@ -43,12 +40,15 @@ class CoProductDP(PrimitiveDP):
 
         self.dps = dps
         M = Coproduct1(tuple(Ms))
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
+
+    def evaluate(self, m):
+        i, mi = self.M.unpack(m)
+        return self.dps[i].evaluate(mi)
 
     def evaluate_f_m(self, f, m):
         """ Returns the resources needed
             by the particular implementation m """
-
         i, xi = self.M.unpack(m)
         return self.dps[i].evaluate_f_m(f, xi)
 
@@ -192,20 +192,32 @@ class CoProductDPLabels(PrimitiveDP):
 
     @contract(dp=CoProductDP)
     def __init__(self, dp, labels):
+        assert isinstance(dp, CoProductDP), type(dp)
+
         self.dp = dp
         self.labels = labels
 
-        # M0 = dp.get_imp_space()
-        M = FiniteCollectionAsSpace(labels)
+        M0 = dp.get_imp_space_mod_res()
+
+        assert isinstance(M0, Coproduct1), M0
+        M = Coproduct1Labels(M0.spaces, labels)
         
         F = dp.get_fun_space()
         R = dp.get_res_space()
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
 
+    def evaluate(self, m):
+        label = m[0]
+        i = self.labels.index(label)
+        m0 = i, m[1]
+        return self.dp.evaluate(m0)
+        
     def evaluate_f_m(self, f, m):
         """ Returns the resources needed
             by the particular implementation m """
-        m0 = self.labels.index(m)
+        label = m[0]
+        i = self.labels.index(label)
+        m0 = i, m[1]
         return self.dp.evaluate_f_m(f, m0)
 
     def get_implementations_f_r(self, f, r):
@@ -213,9 +225,12 @@ class CoProductDPLabels(PrimitiveDP):
             Might raise NotFeasible() """
         m0s = self.dp.get_implementations_f_r(f, r)
         res = []
-        for m0, other in m0s:
-            m = self.labels[m0]
-            res.append((m, other))
+        for m0 in m0s:
+            i = m0[0]
+            label = self.labels[i]
+            m = label, m0[1]
+
+            res.append(m)
         return set(res)
 
     def solve(self, f):

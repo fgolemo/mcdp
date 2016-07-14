@@ -8,9 +8,10 @@ from multi_index import get_it
 
 
 __all__ = [
-    'Flatten',
     'Mux',
     'MuxMap',
+    'TakeFun',
+    'TakeRes',
 ]
 
 class MuxMap(Map):
@@ -48,38 +49,18 @@ class Mux(WrapAMap):
         s = 'Mux(%s)' % self.amap.coords.__repr__()
         return s
 
-#
-# class Mux(PrimitiveDP):
-#
-#     @contract(coords='seq(int|tuple|list)|int')
-#     def __init__(self, F, coords):
-#         library = get_conftools_posets()
-#         _, F = library.instance_smarter(F)
-#         try:
-#             R = get_R_from_F_coords(F, coords)
-#         except ValueError as e:
-#             msg = 'Cannot create Mux'
-#             raise_wrapped(DPInternalError, e, msg, F=F, coords=coords)
-#
-#         self.coords = coords
-#
-#         M = PosetProduct(())
-#         PrimitiveDP.__init__(self, F=F, R=R, M=M)
-#
-#     def solve(self, func):
-#         if do_extra_checks():
-#             self.F.belongs(func)
-#
-#         r = get_it(func, self.coords, reduce_list=tuple)
-#
-#         return self.R.U(r)
-#
-#     def __repr__(self):
-#         return 'Mux(%r → %r, %s)' % (self.F, self.R, self.coords)
-#
-#     def repr_long(self):
-#         s = 'Mux(%s)' % self.coords.__repr__()
-#         return s
+class TakeFun(Mux):
+    """ used by Context.ires_get_index 
+    
+        Only used for having an appropriate icon (one red, many green)
+    """
+    pass
+
+class TakeRes(Mux):
+    """ Used by Context.ifun_get_index.
+        Only used for having an appropriate icon (one green, many red). """
+    pass
+
 
 def get_R_from_F_coords(F, coords):
     return get_it(F, coords, reduce_list=PosetProduct)
@@ -95,12 +76,10 @@ def get_flatten_muxmap(F0):
             coords.append(i)
     return coords
 
-class Flatten(Mux):
-    def __init__(self, F):
-#         library = get_conftools_posets()
-#         _, F0 = library.instance_smarter(F)
-        coords = get_flatten_muxmap(F)
-        Mux.__init__(self, F, coords)
-
-    def __repr__(self):
-        return 'Flatten(%r→%r, %s)' % (self.F, self.R, self.coords)
+# class Flatten(Mux):
+#     def __init__(self, F):
+#         coords = get_flatten_muxmap(F)
+#         Mux.__init__(self, F, coords)
+#
+#     def __repr__(self):
+#         return 'Flatten(%r→%r, %s)' % (self.F, self.R, self.coords)

@@ -9,6 +9,8 @@ from mcdp_dp.primitive import NotSolvableNeedsApprox
 
 __all__ = [
     'InvPlus2',
+    'InvPlus2U',
+    'InvPlus2L',
 ]
 
 mcdp_dev_warning('FIXME: bug - are we taking into account the units?')
@@ -72,6 +74,12 @@ class InvPlus2L(PrimitiveDP):
         self.nl = nl
 
     def solve(self, f):
+        if self.F.equal(f, self.F.get_top()):
+            # +infinity
+            top1 = self.R[0].get_top()
+            top2 = self.R[1].get_top()
+            s = set([(top1, 0.0), (0.0, top2)])
+            return self.R.Us(s)
         n = self.nl
         o0 = np.linspace(0, f, n + 1)
         # FIXME: bug - are we taking into account the units?
@@ -101,6 +109,14 @@ class InvPlus2U(PrimitiveDP):
         self.nu = nu
 
     def solve(self, f):
+
+        if self.F.equal(f, self.F.get_top()):
+            # +infinity
+            top1 = self.R[0].get_top()
+            top2 = self.R[1].get_top()
+            s = set([(top1, 0.0), (0.0, top2)])
+            return self.R.Us(s)
+
         n = self.nu
 
         options = np.linspace(0, f, n)

@@ -3,22 +3,24 @@ from comptests.registrar import comptest, comptest_dynamic
 from mcdp_dp import InvPlus2Nat, Mux, SumNNat, WrapAMap, make_loop
 from mcdp_dp.dp_parallel_simplification import make_parallel
 from mcdp_dp.dp_series_simplification import wrap_series
+from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.solver import generic_solve
 from mcdp_dp.tracer import Tracer
 from mcdp_lang import parse_ndp
 from mcdp_lang.eval_math import PlusNat
+from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import assert_semantic_error
 from mcdp_posets import Map, Nat, NotEqual, PosetProduct, UpperSets
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
 from mcdp_report.generic_report_utils import generic_report
 from mocdp.drawing import plot_upset_R2
+from mocdp.exceptions import mcdp_dev_warning
 from nose.tools import assert_equal
 from reprep import Report
 import itertools
 import numpy as np
 import warnings
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
-from mcdp_dp.dp_transformations import get_dp_bounds
-from mocdp.exceptions import mcdp_dev_warning
 
 
 # @comptest_dynamic
@@ -330,6 +332,22 @@ class CounterDP(WrapAMap):
 
 @comptest
 def check_loop_result3():
+    
+    
+    parse_wrap(Syntax.primitivedp_expr,
+                     'code mcdp_dp_tests.inv_mult_plots.CounterMap___(n=3)')[0]
+
+    parse_wrap(Syntax.ndpt_simple_dp_model,
+                     """
+                     dp {
+        requires x [Nat]
+        provides c [Nat]
+
+        implemented-by code mcdp_dp_tests.inv_mult_plots.CounterMap___(n=3)
+    }
+                     """)[0]
+
+
     assert_semantic_error("""
 mcdp {
     s = instance dp {
@@ -398,7 +416,7 @@ mcdp {
         implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=2)
     }
 
-    s = instance adp1 ^ adp2
+    s = instance choose(a: adp1, b: adp2)
     
     s.c >= s.x
    
@@ -454,7 +472,7 @@ mcdp {
         time  >= nat:0 * w.x 
     }
 
-    s = instance t1 ^ t2
+    s = instance choose (t1:t1, t2: t2)
     
     requires money, time for s
 }"""
@@ -520,7 +538,7 @@ mcdp {
         time  >= nat:0 * w.x 
     }
 
-    s = instance t1 ^ t2
+    s = instance choose(t1:t1, t2: t2)
     
     s.c >= s.x
     

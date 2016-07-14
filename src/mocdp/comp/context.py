@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import indent, raise_desc
+from contracts.utils import  raise_desc
 from mcdp_dp.dp_identity import Identity
 from mcdp_dp.primitive import PrimitiveDP
 from mcdp_posets import Poset, Space
@@ -9,43 +9,28 @@ from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.comp.wrap import dpwrap
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+from mcdp_posets.poset import NotBounded
+
 
 __all__ = [
     'Connection',
     'Context',
 ]
 
+CFunction = namedtuple('CFunction', 'dp s')
+CResource = namedtuple('CResource', 'dp s')
 Connection0 = namedtuple('Connection', 'dp1 s1 dp2 s2')
+
+
 class Connection(Connection0):
     def __repr__(self):
         return ("Constraint(%s.%s <= %s.%s)" %
                 (self.dp1, self.s1, self.dp2, self.s2))
 
-#         return ("Constraint(dp1,s1 %s, %s <= dp2,s2 %s, %s)" %
-#                 (self.dp1, self.s1, self.dp2, self.s2))
-
     def involves_any_of_these_nodes(self, nodes):
         """ Returns true if any of the two nodes is in the iterable nodes."""
         return self.dp1 in nodes or self.dp2 in nodes
 
-
-class CFunction():
-    @contract(dp=str, s=str)
-    def __init__(self, dp, s):
-        self.dp = dp
-        self.s = s
-
-    def __repr__(self):
-        return 'CFunction(%s.%s)' % (self.dp, self.s)
-
-class CResource():
-    @contract(dp=str, s=str)
-    def __init__(self, dp, s):
-        self.dp = dp
-        self.s = s
-
-    def __repr__(self):
-        return 'CResource(%s.%s)' % (self.dp, self.s)
 
 
 class ValueWithUnits():
@@ -100,6 +85,9 @@ class Context():
         self.var2model = {}  # str -> NamedDP
         self.constants = {}  # str -> ValueWithUnits
 
+        self.ifun_init()
+        self.ires_init()
+        
         self.load_ndp_hooks = []
         self.load_posets_hooks = []
         self.load_primitivedp_hooks = []
@@ -247,7 +235,8 @@ class Context():
         self.info('Adding name %r = %r' % (name, ndp))
         if name in self.names:
             # where?
-            raise DPSemanticError('Repeated identifier %r.' % name)
+            msg = 'Repeated identifier'
+            raise_desc(DPInternalError, msg, name=name)
         self.names[name] = ndp
 
     @contract(returns=str)
@@ -413,6 +402,148 @@ class Context():
             raise_desc(DPSemanticError, msg, ndp=dp.repr_long())
         return dp.get_ftype(a.s)
 
+    def ires_init(self):
+        self.indexed_res = {}
+
+    def ifun_init(self):
+        self.indexed_fun =  {}
+    
+    def ifun_finish(self):
+        """ Searches for all the automatically created DPs and closes them
+            by adding 0 constants. """
+        from mcdp_lang.helpers import get_valuewithunits_as_resource
+        from mcdp_lang.helpers import get_constant_minimals_as_resources
+
+        def connectedfun(ndp_name, s):
+            assert ndp_name in self.names
+            assert s in self.names[ndp_name].get_fnames()
+            for c in self.connections:
+                if c.dp2 == ndp_name and c.s2 == s:
+                    return True
+            return False
+            
+        for created in self.indexed_fun.values():
+            
+            ndp = self.names[created]
+            for fname in ndp.get_fnames():
+                connected = connectedfun(created, fname)
+                F = ndp.get_ftype(fname)
+                if not connected:
+                    try:
+                        zero = F.get_bottom()
+                        vu = ValueWithUnits(value=zero, unit=F)
+                        res = get_valuewithunits_as_resource(vu, self)
+                    except NotBounded:
+                        minimals = F.get_minimal_elements()
+                        res = get_constant_minimals_as_resources(F, minimals, self)
+                    c = Connection(dp1=res.dp, s1=res.s, dp2=created, s2=fname)
+                    self.add_connection(c)
+
+    def ires_finish(self):
+        """ Searches for all the automatically created DPs and closes them
+            by adding 0 constants. """
+        from mcdp_lang.helpers import get_valuewithunits_as_function
+        from mcdp_lang.helpers import get_constant_maximals_as_function
+
+        def connectedres(ndp_name, s):
+            assert ndp_name in self.names
+            assert s in self.names[ndp_name].get_rnames()
+            for c in self.connections:
+                if c.dp1 == ndp_name and c.s1 == s:
+                    return True
+            return False
+
+        for created in self.indexed_res.values():
+
+            ndp = self.names[created]
+            for rname in ndp.get_rnames():
+                connected = connectedres(created, rname)
+                R = ndp.get_rtype(rname)
+                if not connected:
+                    try:
+                        top = R.get_top()
+                        vu = ValueWithUnits(value=top, unit=R)
+                        res = get_valuewithunits_as_function(vu, self)
+                    except NotBounded:
+                        maximals = R.get_maximal_elements()
+                        res = get_constant_maximals_as_function(R, maximals, self)
+                    c = Connection(dp2=res.dp, s2=res.s, dp1=created, s1=rname)
+                    self.add_connection(c)
+
+    @contract(cr=CResource, index=int, returns=CResource)
+    def ires_get_index(self, cr, index):
+        from mcdp_dp.dp_flatten import TakeRes
+        from mocdp.comp.wrap import SimpleWrap
+
+        if not cr in self.indexed_res:
+            R = self.get_rtype(cr)
+            n = len(R.subs)
+
+            # todo: use labels
+            rnames = ['_r%d' % i for i in range(n)]
+            coords = list(range(n))
+            dp = TakeRes(R, coords)
+            ndp_out = '_muxed'
+            ndp = SimpleWrap(dp, fnames=ndp_out, rnames=rnames)
+            ndp_name = self.new_name('_label_index')
+
+            self.add_ndp(ndp_name, ndp)
+            c = Connection(dp2=ndp_name, s2=ndp_out, dp1=cr.dp, s1=cr.s)
+            self.add_connection(c)
+
+            self.indexed_res[cr] = ndp_name
+
+        ndp_name = self.indexed_res[cr]
+
+        ndp = self.names[ndp_name]
+        rnames = ndp.get_rnames()
+        n = len(rnames)
+        s = rnames[index]
+        if not (0 <= index < n):
+            msg = 'Out of bounds.'
+            raise_desc(DPSemanticError, msg, index=index, R=R)
+
+        res = self.make_resource(ndp_name, s)
+        return res
+
+    @contract(cf=CFunction, index=int, returns=CFunction)
+    def ifun_get_index(self, cf, index):
+        from mcdp_dp.dp_flatten import TakeFun
+        from mocdp.comp.wrap import SimpleWrap
+
+        if not cf in self.indexed_fun:
+            F = self.get_ftype(cf)
+            n = len(F.subs)
+
+            # todo: use labels
+            fnames = ['_f%d' % i for i in range(n)]
+            coords = list(range(n))
+            dp = TakeFun(F, coords)
+            ndp_out = '_muxed'
+            ndp = SimpleWrap(dp, fnames=fnames, rnames=ndp_out)
+            ndp_name = self.new_name('_label_index')
+
+            self.add_ndp(ndp_name, ndp)
+            c = Connection(dp1=ndp_name, s1=ndp_out, dp2=cf.dp, s2=cf.s)
+            self.add_connection(c)
+
+            self.indexed_fun[cf] = ndp_name
+
+        ndp_name = self.indexed_fun[cf]
+
+        ndp = self.names[ndp_name]
+        fnames = ndp.get_fnames()
+        n = len(fnames)
+        s = fnames[index]
+        if not (0 <= index < n):
+            msg = 'Out of bounds.'
+            raise_desc(DPSemanticError, msg, index=index, F=F)
+
+        res = self.make_function(ndp_name, s)
+        return res
+
+
+#
 def format_list(l):
     """ Returns a nicely formatted list. """
     if not l:

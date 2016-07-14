@@ -1,9 +1,8 @@
 from contextlib import contextmanager
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_cli.solve_meat import solve_main
-from mcdp_library.library import MCDPLibrary
-from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
-from mcdp_library.utils.locate_files_imp import locate_files
+from mcdp_library import MCDPLibrary
+from mcdp_library.utils import dir_from_package_name, locate_files
 from mcdp_tests.generation import for_all_source_mcdp
 from mocdp import logger
 from mocdp.exceptions import DPSemanticError
@@ -32,6 +31,10 @@ def enumerate_test_libraries():
         raise_desc(ValueError, msg, folder, mcdplibs=mcdplibs)
 
     for m in mcdplibs:
+        f = os.path.join(m, '.mcdp_test_ignore')
+        if os.path.exists(f):
+            continue
+
         short = os.path.splitext(os.path.basename(m))[0]
         short = short.replace('.', '_')
         yield short, m
@@ -70,6 +73,18 @@ def mcdplib_run_make(mcdplib):
                       display_stderr=True,
                       raise_on_error=True)
 
+def belongs_to_lib(f, d):
+    """ Returns true if the file is physically inside d
+        and not, for example, symlinked """
+    rf = os.path.realpath(f)
+    rd = os.path.realpath(d)
+    assert os.path.isdir(rd), rd
+    assert not os.path.isdir(rf), rf
+
+    if rd in rf:
+        return True
+    else:
+        return False
 
 def mcdplib_test_setup_nameddps(context, mcdplib):
     """ 
@@ -91,8 +106,10 @@ def mcdplib_test_setup_nameddps(context, mcdplib):
     print('Found registered: %r' % registered)
 
     for model_name in models:
-
-        source = l._get_file_data(model_name + '.mcdp')['data']
+        f = l._get_file_data(model_name + '.' + MCDPLibrary.ext_ndps)
+        if not belongs_to_lib(f['realpath'], mcdplib):
+            continue
+        source = f['data']
 
         if gives_syntax_error(source):
             print('Skipping because syntax error')
@@ -126,7 +143,11 @@ def mcdplib_test_setup_source_mcdp(context, mcdplib):
             # print basename, ext
             continue
 
-        source = l._get_file_data(basename)['data']
+        f = l._get_file_data(basename)
+        if not belongs_to_lib(f['realpath'], mcdplib):
+            continue
+
+        source = f['data']
 
         if gives_syntax_error(source):
             print('Skipping because syntax error')
@@ -191,7 +212,7 @@ def mcdplib_test_setup_posets(context, mcdplib):
     for id_poset in posets:
         c = context.child(id_poset)
 
-        ndp = c.comp(_load_poset, mcdplib, id_poset, job_id='load_poset')
+        ndp = c.comp(_load_poset, mcdplib, id_poset, job_id='load')
 
         for ftest in registered:
             c.comp(ftest, id_poset, ndp)
@@ -215,7 +236,7 @@ def mcdplib_test_setup_primitivedps(context, mcdplib):
     for id_dp in dps:
         c = context.child(id_dp)
 
-        ndp = c.comp(_load_primitivedp, mcdplib, id_dp, job_id='load_poset')
+        ndp = c.comp(_load_primitivedp, mcdplib, id_dp, job_id='load')
 
         for ftest in registered:
             c.comp(ftest, id_dp, ndp)

@@ -20,7 +20,7 @@ def invmult2_check1():
 
     UR = UpperSets(im.get_res_space())
 
-    for i in [1, 5, 10]:
+    for i in [1.0, 5.0, 10.0]:
         rl = iml.solve(i)
         ru = imu.solve(i)
         print UR.format(rl)

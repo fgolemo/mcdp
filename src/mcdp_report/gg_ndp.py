@@ -17,6 +17,7 @@ from mocdp.ndp import NamedDPCoproduct
 from mcdp_dp.dp_max import JoinNDP
 from types import NoneType
 from mcdp_dp.dp_constant import ConstantMinimals
+from mcdp_dp.dp_flatten import TakeRes, TakeFun
 
 STYLE_GREENRED = 'greenred'
 STYLE_GREENREDSYM = 'greenredsym'
@@ -227,6 +228,8 @@ def create_simplewrap(gdc, ndp):
         (Conversion, ''),
         (MeetNDual, ''),
         (JoinNDP, ''),
+        (TakeFun, ''),
+        (TakeRes, ''),
     ]
 
     def is_special_dp(dp):
@@ -277,7 +280,6 @@ def create_simplewrap(gdc, ndp):
     else:
 
         if is_special_dp(ndp.dp):
-#             print('special')
             sname = 'style%s' % id(ndp)
             gdc.styleAppend(sname, 'image', best_icon)
             gdc.styleAppend(sname, 'imagescale', 'true')
@@ -304,40 +306,48 @@ def create_simplewrap(gdc, ndp):
                 "<TR><TD><IMG SRC='%s' SCALE='TRUE'/></TD></TR></TABLE>")
                 label = label % (shortlabel, best_icon)
             else:
-#                 print('Image %r not found' % imagename)
+                # print('Image %r not found' % imagename)
                 sname = None
 
+    def make_short_label(l, max_length=25):
+        if len(l) >= max_length:
+            l = l[:max_length] + '...'
+        return l
 
     if isinstance(ndp.dp, Constant):
         R = ndp.dp.get_res_space()
         c = ndp.dp.c
         label = R.format(c)
+        label = make_short_label(label)
         sname = 'constant'
 
     if isinstance(ndp.dp, ConstantMinimals):
         R = ndp.dp.get_res_space()
         values = ndp.dp.values
-        label = "{" + ", ".join(R.format(c) for c in values) + "}"
+        label = "↑{" + ", ".join(R.format(c) for c in values) + "}"
+        label = make_short_label(label)
         sname = 'constant'
 
     if isinstance(ndp.dp, Limit):
         F = ndp.dp.get_fun_space()
         c = ndp.dp.limit
         label = F.format(c)
+        label = make_short_label(label)
         sname = 'limit'
+
+    from mcdp_dp.dp_limit import LimitMaximals
+    if isinstance(ndp.dp, LimitMaximals):
+        F = ndp.dp.get_fun_space()
+        values = ndp.dp.limit.maximals
+        label = "↓{" + ", ".join(F.format(c) for c in values) + "}"
+        label = make_short_label(label)
+        sname = 'limit'
+
 
 #     if label[:2] != '<T':
 #         # Only available in svg or cairo renderer
 #         label = '<I>%s</I>' % label
 
-    # an hack to think about better
-    # if hasattr(ndp, '_xxx_label'):
-    #    label = getattr(ndp, '_xxx_label')
-
-    # This does not work, for some reason
-#     if hasattr(ndp, 'template_parameter'):
-#         print('found it')
-#         label = getattr(ndp, 'template_parameter')
 
     node = gdc.newItem(label)
 
@@ -369,8 +379,6 @@ def format_unit(R):
     if isinstance(R, BottomCompletion):
         return '[*]'
     if R == R_dimensionless:
-        # return '[R]'
-#         return '[]'
         # TODO: make option
         return ''
     elif isinstance(R, RcompUnits):

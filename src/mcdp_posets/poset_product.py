@@ -5,6 +5,7 @@ from contracts import contract
 from contracts.utils import indent, raise_desc
 from mocdp.exceptions import do_extra_checks
 import itertools
+import collections
 
 __all__ = [
     'PosetProduct',
@@ -16,6 +17,9 @@ class PosetProduct(SpaceProduct, Poset):
 
     @contract(subs='seq($Poset)')
     def __init__(self, subs):
+        if not isinstance(subs, collections.Iterable):
+            msg = 'PosetProduct expects a sequence of Posets.'
+            raise_desc(ValueError, msg, subs=subs)
         subs = tuple(subs)
         SpaceProduct.__init__(self, subs)
 
@@ -30,6 +34,8 @@ class PosetProduct(SpaceProduct, Poset):
         return True
 
     def join(self, a, b):
+        assert isinstance(a, tuple), a
+        assert isinstance(b, tuple), b
         res = []
         for sub, x, y in zip(self.subs, a, b):
             res.append(sub.join(x, y))

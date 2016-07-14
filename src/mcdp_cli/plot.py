@@ -31,7 +31,7 @@ def get_dp(data):
 
 def png_pdf_from_gg(gg):
     r = Report()
-    gg_figure(r, 'graph', gg)
+    gg_figure(r, 'graph', gg, do_svg=False, do_dot=False)
     png_node = r.resolve_url('graph/graph')
     pdf_node = r.resolve_url('graph_pdf')
     return png_node.get_raw_data(), pdf_node.get_raw_data()

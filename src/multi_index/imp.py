@@ -21,7 +21,7 @@ def get_it(seq, coords, reduce_list):
             return seq
 
         if isinstance(coords, list):
-            subs = [get_it(seq, c, reduce_list=reduce_list) for c in coords]
+            subs = tuple([get_it(seq, c, reduce_list=reduce_list) for c in coords])
             R = reduce_list(subs)
             return R
 

@@ -54,7 +54,19 @@ class Poset(Preorder):
             bottom = self.get_bottom()
             return set([bottom])
         except NotBounded:
-            msg = 'Not bounded so not implemented.'
+            msg = 'Not bounded so get_minimal_elements() not implemented.'
+            raise_desc(NotImplementedError, msg, type=type(self))
+
+    @contract(returns='set')
+    def get_maximal_elements(self):
+        """ Returns a set of maximal elements. 
+            If there is a top, this is set([top])
+        """
+        try:
+            top = self.get_top()
+            return set([top])
+        except NotBounded:
+            msg = 'Not bounded so get_maximal_elements() not implemented.'
             raise_desc(NotImplementedError, msg, type=type(self))
 
     def get_bottom(self):

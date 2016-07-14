@@ -2,7 +2,9 @@ from contracts import contract
 from mcdp_posets.rcomp_units import RcompUnits
 from mcdp_posets.space import Map
 
-__all__ = ['PlusValueMap']
+__all__ = [
+    'PlusValueMap',
+]
 
 
 class PlusValueMap(Map):

@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 from .dp_flatten import Mux
 from .dp_generic_unary import WrapAMap
-from .primitive import PrimitiveDP
-from contracts import contract
-from mcdp_posets import Map, Poset, PosetProduct, SpaceProduct
-# from mocdp import get_conftools_posets
+from mcdp_maps import JoinNMap, Max1Map, MeetNMap
+from mcdp_posets import Poset
 
 
 __all__ = [
@@ -15,44 +13,8 @@ __all__ = [
     'MeetNDual',
 ]
 
-class Max(PrimitiveDP):
-    """ Join on a poset """
-
-    def __init__(self, F0):
-#         library = get_conftools_posets()
-#         _, F0 = library.instance_smarter(F)
-
-        F = PosetProduct((F0, F0))
-        R = F0
-        self.F0 = F0
-
-        M = SpaceProduct(())
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
-
-    def solve(self, func):
-        f1, f2 = func
-
-        # F = self.get_fun_space()
-        r = self.F.join(f1, f2)
-
-        return self.R.U(r)
-
-    def __repr__(self):
-        return 'Max(%r)' % self.F0
 
 
-class Max1Map(Map):
-    def __init__(self, F, value):
-        Map.__init__(self, F, F)
-        self.value = value
-        self.F = F
-        self.F.belongs(value)
-        
-    def _call(self, x):
-        # self.F.belongs(x)
-        r = self.F.join(x, self.value)
-        return r
-        
 
 class Max1(WrapAMap):
 
@@ -65,48 +27,25 @@ class Max1(WrapAMap):
     def __repr__(self):
         return 'Max1(%r, %s)' % (self.F, self.value)
 
-class Min(PrimitiveDP):
+
+class Min(WrapAMap):
     """ Meet on a poset """
 
     def __init__(self, F):  #
         assert isinstance(F, Poset)
-        FF = PosetProduct((F, F))
-        R = F
+        amap = MeetNMap(2, F)
+        WrapAMap.__init__(self, amap)
+        
         self.F0 = F
-
-        M = SpaceProduct(())
-        PrimitiveDP.__init__(self, F=FF, R=R, M=M)
-
-    def solve(self, func):
-        f1, f2 = func
-
-        r = self.F0.meet(f1, f2)
-
-        return self.R.U(r)
 
     def __repr__(self):
         return 'Min(%r)' % self.F0
 
-class JoinN(Map):
-    """ A map that joins n arguments. """
-
-    @contract(n='int,>=1', P=Poset)
-    def __init__(self, n, P):
-        dom = PosetProduct((P,) * n)
-        cod = P
-        Map.__init__(self, dom, cod)
-        self.P = P
-
-    def _call(self, xs):
-        res = xs[0]
-        for x in xs[1:]:
-            res = self.P.join(res, x)
-        return res
-    
 class JoinNDP(WrapAMap):
     def __init__(self, n, P):
-        amap = JoinN(n, P)
+        amap = JoinNMap(n, P)
         WrapAMap.__init__(self, amap)
+
 
 class MeetNDual(Mux):
     """ This is just a Mux """
@@ -116,5 +55,32 @@ class MeetNDual(Mux):
 
         
         
-        
-        
+class Max(JoinNDP):
+    def __init__(self, F0):
+        JoinNDP.__init__(self, 2, F0)
+        self.F0 = F0
+
+    def __repr__(self):
+        return 'Max(%r)' % self.F0
+
+
+# class Max(PrimitiveDP):
+#     """ Join on a poset """
+#
+#     def __init__(self, F0):
+#         F = PosetProduct((F0, F0))
+#         R = F0
+#         self.F0 = F0
+#
+#         M = SpaceProduct(())
+#         PrimitiveDP.__init__(self, F=F, R=R, M=M)
+#
+#     def solve(self, func):
+#         f1, f2 = func
+#
+#         r = self.F0.join(f1, f2)
+#
+#         return self.R.U(r)
+#
+#     def __repr__(self):
+#         return 'Max(%r)' % self.F0

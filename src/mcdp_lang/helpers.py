@@ -5,7 +5,7 @@ from mocdp.comp.context import ValueWithUnits
 from mcdp_dp import Constant
 from mcdp_posets.types_universe import get_types_universe
 from mcdp_dp.conversion import get_conversion
-from mcdp_dp.dp_limit import Limit
+from mcdp_dp.dp_limit import Limit, LimitMaximals
 from mcdp_dp.dp_constant import ConstantMinimals
 
 
@@ -39,7 +39,7 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
         fnames.append(ni)
 
 
-    fnames_ = fnames if len(fnames) > 1 else fnames[0]
+    fnames_ = fnames[0] if len(fnames) == 1 else fnames
     ndp = dpwrap(dp, fnames_, name_result)
     context.add_ndp(name, ndp)
 
@@ -70,7 +70,6 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
 
     if len(fnames) == 1:
         fnames = fnames[0]
-
 
     for c in connections:
         context.add_connection(c)
@@ -121,6 +120,16 @@ def get_constant_minimals_as_resources(R, values, context):
     ndp = dpwrap(dp, [], nres)
     context.add_ndp(nres, ndp)
     return context.make_resource(nres, nres)
+
+def get_constant_maximals_as_function(F, values, context):
+    for v in values:
+        F.belongs(v)
+
+    dp = LimitMaximals(F=F, values=values)
+    nres = context.new_name('_c')
+    ndp = dpwrap(dp, '_max', [])
+    context.add_ndp(nres, ndp)
+    return context.make_function(nres, '_max')
 
 @contract(v=ValueWithUnits)
 def get_valuewithunits_as_function(v, context):

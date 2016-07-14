@@ -127,37 +127,46 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
     def view_exceptions_occurred(self, request):  # @UnusedVariable
         exceptions = []
         for e in self.exceptions:
-            exceptions.append(e)
+            u = unicode(e, 'utf-8')
+            exceptions.append(u)
         return {'exceptions': exceptions}
 
     def view_exception(self, exc, request):
+        request.response.status = 500  # Internal Server Error
+
         import traceback
         compact = (DPSemanticError, DPSyntaxError)
         if isinstance(exc, compact):
-            s = str(exc)
+            s = exc.__str__()
         else:
             s = traceback.format_exc(exc)
-        s = s.decode('utf-8')
-        # add to state so that it can be visualized in /exceptions
 
-        s = str(s)
         url = request.url
         referrer = request.referrer
         n = 'Error during serving this URL:'
         n += '\n url: %s' % url
         n += '\n referrer: %s' % referrer
-        ss = traceback.format_exc(exc).decode('utf-8')
+        ss = traceback.format_exc(exc)
         n += '\n' + indent(ss, '| ')
         self.exceptions.append(n)
 
-        logger.error(s)
-        return {'exception': s}
+        if 'library' in request.matchdict:
+            library = self.get_current_library_name(request)
+            url_refresh = '/libraries/%s/refresh_library' % library
+        else:
+            url_refresh = None
+
+        u = unicode(s, 'utf-8')
+        logger.error(u)
+        return {'exception': u, 'url_refresh': url_refresh}
     
     def png_error_catch2(self, request, func):
         """ func is supposed to return an image response.
             If it raises an exception, we create
             an image with the error and then we add the exception
-            to the list of exceptions. """
+            to the list of exceptions.
+            
+             """
         try:
             return func()
         except Exception as e:
@@ -193,9 +202,9 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         docs = os.path.join(package, 'docs')
         f = os.path.join(docs, '%s.md' % docname)
         import codecs
-        data = codecs.open(f, encoding='utf-8').read()
+        data = codecs.open(f, encoding='utf-8').read()  # XXX
         html = render_markdown(data)
-        # print html
+
         return {'contents': html}
 
     # This is where we keep all the URLS
@@ -354,12 +363,16 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         import codecs
         l = self.get_library(request)
 
+        strict = int(request.params.get('strict', '0'))
+
         filename = '%s.%s' % (document, MCDPLibrary.ext_doc_md)
         f = l._get_file_data(filename)
         realpath = f['realpath']
-        data = codecs.open(realpath, encoding='utf-8').read()
-
-        html = render_complete(library=l, s=data, raise_errors=False)
+        # read unicode
+        data_unicode = codecs.open(realpath, encoding='utf-8').read()
+        data_str = data_unicode.encode('utf-8')
+        raise_errors = bool(strict)
+        html = render_complete(library=l, s=data_str, raise_errors=raise_errors)
         return html
 
     def view_library_doc(self, request):
@@ -368,6 +381,10 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         # reopen as utf-8
         document = str(request.matchdict['document'])
         html = self._render_library_doc(request, document)
+        # we work with utf-8 strings
+        assert isinstance(html, str)
+        # but we need to convert to unicode later
+        html = unicode(html, 'utf-8')
         res = {}
         res['contents'] = html
         res['title'] = document
@@ -439,6 +456,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         config.add_route('exceptions', '/exceptions')
         config.add_view(self.view_exceptions_occurred, route_name='exceptions', renderer='json')
+        config.add_route('exceptions_formatted', '/exceptions_formatted')
+        config.add_view(self.view_exceptions_occurred, route_name='exceptions_formatted', renderer='exceptions_formatted.jinja2')
 
         # mainly used for wget
         config.add_route('robots', '/robots.txt')

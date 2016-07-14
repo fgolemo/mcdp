@@ -1,0 +1,6 @@
+product(
+      task: S(DC_power), 
+ connector: `DC_connectors,
+   voltage: `DC_voltages,
+      amps: A
+)

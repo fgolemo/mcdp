@@ -7,6 +7,7 @@ from mcdp_posets import Map, NotLeq, PosetProduct, UpperSet, UpperSets
 from mcdp_posets.utils import poset_minima
 from mocdp.exceptions import do_extra_checks
 import itertools
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
 
 
 __all__ = [
@@ -43,10 +44,6 @@ class DPLoop0(PrimitiveDP):
               `-----------/
     """
     def __init__(self, dp1):
-#         from mocdp import get_conftools_dps
-#
-#         library = get_conftools_dps()
-#         _, self.dp1 = library.instance_smarter(dp1)
         self.dp1 = dp1
 
         F0 = self.dp1.get_fun_space()
@@ -76,7 +73,7 @@ class DPLoop0(PrimitiveDP):
         self.F2 = F2
 
         self._solve_cache = {}
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
 
     def get_implementations_f_r(self, f1, r):
         f2 = r
@@ -104,6 +101,18 @@ class DPLoop0(PrimitiveDP):
         m0, f2 = unpack(m)
         return m0, f2
 
+    def evaluate(self, m):
+        m0, f2 = self._unpack_m(m)
+        LF0, UR = self.dp.evaluate(m0)
+        # now extract first components f1 and r1
+        f1s = set()
+        for fi in LF0.maximals:
+            fi1, _ = fi
+            f1s.add(fi1)
+        f1s = poset_maxima(f1s, self.F.leq)
+        LF = self.F.Ls(f1s)
+        return LF, UR
+        
     def evaluate_f_m(self, f1, m):
         """ Returns the resources needed
             by the particular implementation.

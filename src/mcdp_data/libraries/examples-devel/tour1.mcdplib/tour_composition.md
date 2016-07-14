@@ -1,6 +1,5 @@
 
-
-# Composing MCDPs
+## Composing MCDPs
 
 Suppose we define a simple model called ``Battery`` as follows:
 
@@ -11,7 +10,7 @@ mcdp {
 	provides capacity [J]
 	requires mass [g]
 	specific_energy = 100 kWh / kg
-	mass >= capacity / specific_energy
+	required mass >= provided capacity / specific_energy
 }
 </pre>
 </td>
@@ -29,12 +28,12 @@ Let's also define the MCDP ``actuation``:
 mcdp {
 	provides lift [N]
 	requires power [W]
-	
+
 	l = lift
 	p0 = 5 W
 	p1 = 6 W/N
 	p2 = 7 W/N^2
-	power >= p0 + p1 * l + p2 * l^2
+	required power >= p0 + p1 * l + p2 * l^2
 }
 </pre>
 </td>
@@ -49,14 +48,14 @@ mcdp {
 
 Then we can combine these two together.
 
-We can re-use previously defined MCDPs using the 
+We can re-use previously defined MCDPs using the
 keyword ``new``. This creates two sub-design problems, for now unconnected.
 
 <table>
 <tr>
 <td>
 <pre class="mcdp" id='combined1'>
-mcdp {	
+mcdp {
 	actuation = new Actuation
 	battery = new Battery
 }
@@ -68,17 +67,17 @@ mcdp {
 </tr>
 </table>
 To create a complete MCDP, take "endurance" as a high-level
-functionality. Then the energy required is equal to 
-endurance &times; power. 
+functionality. Then the energy required is equal to
+endurance &times; power.
 
 <pre class="mcdp" id='combined2'>
-mcdp {	
+mcdp {
 	actuation = new Actuation
 	battery = new Battery
 
 	# battery must provide power for actuation
-	provides endurance [s]	
-	energy = endurance * (power required by actuation)
+	provides endurance [s]
+	energy = provided endurance * (power required by actuation)
 
 	capacity provided by battery >= energy
 }
@@ -98,13 +97,12 @@ of the battery plus the mass of the payload times gravity:
 <td>
 <pre class="mcdp" id='composition' label='Composition.mcdp'>
 mcdp {
-	
 	actuation = new Actuation
 	battery = new Battery
 
 	# battery must provide power for actuation
-	provides endurance [s]	
-	energy = endurance * (power required by actuation)
+	provides endurance [s]
+	energy = provided endurance * (power required by actuation)
 
 	capacity provided by battery >= energy
 
@@ -119,39 +117,26 @@ mcdp {
 
 	# minimize total mass
 	requires mass [g]
-	mass >= total_mass
+	required mass >= total_mass
 }
 </pre>
 </td>
-<td style='vertical-align: top'>
-<pre class='ndp_graph_enclosed' style='max-height: 90ch' direction='TB'>`Composition</pre>
-</td>
+	<td style='vertical-align: top'>
+		<pre class='ndp_graph_enclosed' style='max-height: 90ch' direction='TB'>
+			`Composition
+		</pre>
+	</td>
 </tr>
 </table>
-
-### Abstraction and flattening
-
-We can completely abstract an MCDP:
-
-<pre class='ndp_graph_templatized_labeled' direction='LR'>`Composition</pre>
-
-And we can also completely **flatten** it, by first expanding 
-the sub components:
-
-<pre class='ndp_graph_expand' direction='LR' >`Composition</pre>
-
-and then erasing their borders:
-
-<pre class='ndp_graph_expand' direction='LR'>flatten `Composition</pre>
-
 
 
 
 <style type='text/css'>
-td{ vertical-align: top; }
-td:first-child { 
-	/*border: solid 1px red; */
-	/*width: 25em; */
-
-}
+	td {
+		vertical-align: top;
+	}
+	td:first-child {
+		/*border: solid 1px red; */
+		/*width: 25em; */
+	}
 </style>

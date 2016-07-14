@@ -1,25 +1,3 @@
-from .examples import *
-from .failures_parsing import *
-from .failures_simplification import *
-from .syntax_canonical import *
-from .syntax_connections import *
-from .syntax_coproduct import *
-from .syntax_from_library import *
-from .syntax_load import *
-from .syntax_misc import *
-from .syntax_numbers import *
-from .syntax_power import *
-from .syntax_sets import *
-from .syntax_spaces  import *
-from .syntax_tuples  import *
-from .templates_test import *
-
-from .syntax_multiset import *
-from .syntax_intervals import *
-from .syntax_conversions import *
-from .syntax_uncertainty import *
-from .syntax_catalogue import *
-from .syntax_named_tuples import *
 
 """
     
@@ -45,4 +23,32 @@ from .syntax_named_tuples import *
         eval_rvalue_as_constant_same_exactly
         
 
+    parse_wrap_semantic_error
+
 """
+
+from .examples import *
+from .failures_parsing import *
+from .failures_simplification import *
+from .syntax_canonical import *
+from .syntax_connections import *
+from .syntax_coproduct import *
+from .syntax_from_library import *
+from .syntax_load import *
+from .syntax_misc import *
+from .syntax_numbers import *
+from .syntax_power import *
+from .syntax_sets import *
+from .syntax_spaces  import *
+from .syntax_tuples  import *
+from .templates_test import *
+
+from .syntax_multiset import *
+from .syntax_intervals import *
+from .syntax_conversions import *
+from .syntax_uncertainty import *
+from .syntax_catalogue import *
+from .syntax_named_tuples import *
+from .syntax_single_space import *
+
+from .take_optimization import *

@@ -19,8 +19,6 @@ def graphviz_run(filename_dot, output, prog='dot'):
         raise ValueError((output, suff))
 
     encoder = suff
-#     if encoder == 'svg':
-#         encoder = 'svg:cairo'
 
     cmd = [prog, '-T%s' % encoder, '-o', output, filename_dot]
     try:
@@ -87,7 +85,8 @@ def get_dot_string(gg):
         return contents
 
 
-def gg_figure(r, name, ggraph):
+def gg_figure(r, name, ggraph, do_png=True, do_pdf=True, do_svg=True,
+              do_dot=True):
     """ Adds a figure to the Report r that displays this graph
         and also its source. """
     f = r.figure(name, cols=1)
@@ -98,46 +97,70 @@ def gg_figure(r, name, ggraph):
             s = get_dot_string(ggraph)
             fo.write(s)
 
-        if False:
-            ff = '%s.dot' % id(r)
-            print('writing to %r' % ff)
-            with open(ff, 'w') as f2:
-                f2.write(s)
+#         if False:
+#             ff = '%s.dot' % id(r)
+#             print('writing to %r' % ff)
+#             with open(ff, 'w') as f2:
+#                 f2.write(s)
 
         prog = 'dot'
-        with f.data_file('graph', MIME_PNG) as filename:
-            graphviz_run(filename_dot, filename, prog=prog)
+        if do_png:
+            with f.data_file('graph', MIME_PNG) as filename:
+                graphviz_run(filename_dot, filename, prog=prog)
 
-        with r.data_file('graph_pdf', MIME_PDF) as filename:
-            graphviz_run(filename_dot, filename, prog=prog)
+        if do_pdf:
+            with r.data_file('graph_pdf', MIME_PDF) as filename:
+                graphviz_run(filename_dot, filename, prog=prog)
 
-        with r.data_file('graph_svg', MIME_SVG) as filename:
-            graphviz_run(filename_dot, filename, prog=prog)
+        if do_svg:
+            with r.data_file('graph_svg', MIME_SVG) as filename:
+                graphviz_run(filename_dot, filename, prog=prog)
 
-            soup = BeautifulSoup(open(filename).read(), 'lxml')
-            for tag in soup.select('image'):
-                href = tag['xlink:href']
-                extensions = ['png', 'jpg']
-                for ext in extensions:
-                    if ext in href:
-                        with open(href) as ff:
-                            png = ff.read()
-                        encoded = base64.b64encode(png)
-                        from mcdp_web.images.images import get_mime_for_format
-                        mime = get_mime_for_format(ext)
-                        src = 'data:%s;base64,%s' % (mime, encoded)
-                        tag['xlink:href'] = src
-# tag.replaceWith(rendered)
+                soup = BeautifulSoup(open(filename).read(), 'lxml', from_encoding='utf-8')
+                for tag in soup.select('image'):
+                    href = tag['xlink:href']
+                    extensions = ['png', 'jpg']
+                    for ext in extensions:
+                        if ext in href:
+                            with open(href) as ff:
+                                png = ff.read()
+                            encoded = base64.b64encode(png)
+                            from mcdp_web.images.images import get_mime_for_format
+                            mime = get_mime_for_format(ext)
+                            src = 'data:%s;base64,%s' % (mime, encoded)
+                            tag['xlink:href'] = src
 
-            with codecs.open(filename, 'w', encoding='utf-8') as ff:
-                ff.write(soup.prettify())
+                with codecs.open(filename, 'w', encoding='utf-8') as ff:
+                    s = str(soup)
+                    u = unicode(s, 'utf-8')
+                    ff.write(u)
 
         # MIME_GRAPHVIZ
-        with f.data_file('dot', MIME_PLAIN) as filename:
-            with open(filename, 'w') as f:
-                f.write(s)
+        if do_dot:
+            with f.data_file('dot', MIME_PLAIN) as filename:
+                with open(filename, 'w') as f:
+                    f.write(s)
         
     return f
+
+
+def embed_images(html, basedir):
+    """ Embeds png and Jpg images using data """
+    soup = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
+    for tag in soup.select('img'):
+        href = tag['src']
+        extensions = ['png', 'jpg']
+        for ext in extensions:
+            if ext in href and not 'data:' in href:
+                resolve = os.path.join(basedir, href)
+                with open(resolve) as ff:
+                    data = ff.read()
+                encoded = base64.b64encode(data)
+                from mcdp_web.images.images import get_mime_for_format
+                mime = get_mime_for_format(ext)
+                src = 'data:%s;base64,%s' % (mime, encoded)
+                tag['src'] = src
+    return str(soup)
 
 
 @contextmanager

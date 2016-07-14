@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 from .find_poset_minima.baseline_n2 import poset_minima
 from .poset import NotBounded, NotLeq, Poset
-from .space import NotBelongs, NotEqual, Space
+from .poset_product import PosetProduct
+from .space import NotBelongs, NotEqual, Space, Uninhabited
 from contracts import contract
 from contracts.utils import raise_desc
-from mocdp.exceptions import do_extra_checks
-from mcdp_posets.poset_product import PosetProduct
+from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
+import random
 
 __all__ = [
     'UpperSet',
     'UpperSets',
     'LowerSet',
+    # 'LowerSets',
     'lowerset_product',
     'upperset_product',
 ]
@@ -38,6 +40,13 @@ class UpperSet(Space):
             from mcdp_posets import check_minimal
             check_minimal(self.minimals, P)
 
+    def witness(self):
+        if not self.minimals:
+            raise Uninhabited()
+        n = len(self.minimals)
+        i = random.randint(0, n - 1)
+        return list(self.minimals)[i]
+
     @contract(returns=Poset)
     def get_poset(self):
         return self.P
@@ -51,6 +60,7 @@ class UpperSet(Space):
             if self.P.leq(p, x):
                 return
         raise_desc(NotBelongs, 'Point does not belong')
+
         
     def __repr__(self):
         contents = ", ".join(self.P.format(m)
@@ -59,48 +69,6 @@ class UpperSet(Space):
         return "↑{%s}" % contents
 
 
-class LowerSet(Space):
-
-    @contract(minimals='set|list|$frozenset', P=Poset)
-    def __init__(self, minimals, P):
-        self.minimals = frozenset(minimals)
-        self.P = P
-
-        if do_extra_checks():
-            # XXX
-            problems = []
-            for m in minimals:
-                try:
-                    self.P.belongs(m)
-                except NotBelongs as e:
-                    problems.append(e)
-            if problems:
-                msg = "Cannot create lower set:\n"
-                msg += "\n".join(str(p) for p in problems)
-                raise NotBelongs(msg)
-
-            from mcdp_posets import check_maximal
-            check_maximal(self.minimals, P)
-
-    @contract(returns=Poset)
-    def get_poset(self):
-        return self.P
-
-    def check_equal(self, x, y):
-        self.P.check_equal(x, y)
-
-    def belongs(self, x):
-        self.P.belongs(x)
-        for p in self.minimals:
-            if self.P.leq(p, x):
-                return
-        raise_desc(NotBelongs, 'Point does not belong')
-
-    def __repr__(self):
-        contents = ", ".join(self.P.format(m)
-                        for m in sorted(self.minimals))
-
-        return "↑{%s}" % contents
 
 
 class UpperSets(Poset):
@@ -108,9 +76,6 @@ class UpperSets(Poset):
     @contract(P='$Poset')
     def __init__(self, P):
         self.P = P
-#         from mocdp.configuration import get_conftools_posets
-#         _, self.P = get_conftools_posets().instance_smarter(P)
-
         if do_extra_checks:
             try:
                 self.top = self.get_top()
@@ -122,6 +87,10 @@ class UpperSets(Poset):
             except NotBounded:
                 pass
 
+    def witness(self):
+        w = self.P.witness()
+        return UpperSet([w], self.P)
+        
     def get_bottom(self):
         x = self.P.get_bottom()
         return UpperSet(set([x]), self.P)
@@ -167,9 +136,6 @@ class UpperSets(Poset):
             raise NotLeq('a = my ⊤')
 
         self.my_leq_(a, b)
-        # XXX: not sure I should add this, with inverted
-#         self.my_leq_(b, a, inverted)
-
     def my_leq_(self, A, B):
         # there exists an a in A that a <= b
         def dominated(b):
@@ -220,13 +186,7 @@ class UpperSets(Poset):
     def __repr__(self):
         return "U(%r)" % self.P
 
-@contract(s1=LowerSet, s2=LowerSet, returns=LowerSet)
-def lowerset_product(s1, s2):
-    assert isinstance(s1, LowerSet), s1
-    assert isinstance(s2, LowerSet), s2
-    res = set(zip(s1.minimals, s2.minimals))
-    P = PosetProduct((s1.P, s2.P))
-    return LowerSet(res, P)
+
 
 @contract(s1=UpperSet, s2=UpperSet, returns=UpperSet)
 def upperset_product(s1, s2):
@@ -236,4 +196,79 @@ def upperset_product(s1, s2):
     P = PosetProduct((s1.P, s2.P))
     return UpperSet(res, P)
 
+class LowerSet(Space):
 
+    @contract(maximals='set|list|$frozenset', P=Poset)
+    def __init__(self, maximals, P):
+        self.maximals = frozenset(maximals)
+        self.P = P
+
+        if do_extra_checks():
+            # XXX
+            problems = []
+            for m in maximals:
+                try:
+                    self.P.belongs(m)
+                except NotBelongs as e:
+                    problems.append(e)
+            if problems:
+                msg = "Cannot create upper set:\n"
+                msg += "\n".join(str(p) for p in problems)
+                raise NotBelongs(msg)
+
+            mcdp_dev_warning('check_maximal()')
+            # from mcdp_posets import check_maximal
+            # check_maximal(self.minimals, P)
+
+    def witness(self):
+        if not self.maximals:
+            raise Uninhabited()
+        else:
+            n = len(self.maximals)
+            i = random.randint(0, n - 1)
+            return list(self.maximals)[i]
+
+    @contract(returns=Poset)
+    def get_poset(self):
+        return self.P
+
+    def check_equal(self, x, y):
+        self.P.check_equal(x, y)
+
+    def belongs(self, x):
+        self.P.belongs(x)
+        for p in self.maximals:
+            if self.P.leq(x, p):
+                return
+        raise_desc(NotBelongs, 'Point does not belong to lower set.')
+
+    def __repr__(self):
+        contents = ", ".join(self.P.format(m)
+                        for m in sorted(self.maximals))
+
+        return "↓{%s}" % contents
+
+@contract(s1=LowerSet, s2=LowerSet, returns=LowerSet)
+def lowerset_product(s1, s2):
+    assert isinstance(s1, LowerSet), s1
+    assert isinstance(s2, LowerSet), s2
+    res = set(zip(s1.minimals, s2.minimals))
+    P = PosetProduct((s1.P, s2.P))
+    return LowerSet(res, P)
+
+
+@contract(ss='tuple($LowerSet)', returns=LowerSet)
+def lowerset_product_multi(ss):
+    Ps = tuple(_.P for _ in ss)
+    mins = tuple(_.maximals for _ in ss)
+    res = set(zip(*mins))
+    P = PosetProduct(Ps)
+    return LowerSet(res, P)
+
+@contract(ss='tuple($UpperSet)', returns=UpperSet)
+def upperset_product_multi(ss):
+    Ps = tuple(_.P for _ in ss)
+    mins = tuple(_.minimals for _ in ss)
+    res = set(zip(*mins))
+    P = PosetProduct(Ps)
+    return UpperSet(res, P)

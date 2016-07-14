@@ -1,11 +1,14 @@
 from .nat import Int, Nat
 from .poset import NotLeq, Preorder
+from .poset_coproduct import PosetCoproduct
 from .rcomp import Rcomp
-from .space import NotBelongs, NotEqual
+from .space import Map, MapNotDefinedHere, NotBelongs, NotEqual
 from .space_product import SpaceProduct
+from .uppersets import UpperSets
+from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
-from mcdp_posets.uppersets import UpperSets
+from mcdp_posets.poset import Poset
 
 __all__ = [
     'get_types_universe',
@@ -23,11 +26,12 @@ class TypesUniverse(Preorder):
     
     """
 
+    def witness(self):
+        return Nat()
+
     def belongs(self, x):
-        from mcdp_posets.rcomp_units import RcompUnits
-        known = (RcompUnits, Rcomp)
-        if not isinstance(x, known):
-            raise_desc(NotBelongs, x=x, known=known)
+        from mcdp_posets.space import Space
+        return isinstance(x, Space)
 
     def check_equal(self, A, B):
         from mcdp_posets.poset_product import PosetProduct
@@ -98,7 +102,6 @@ class TypesUniverse(Preorder):
         if isinstance(B, Rcomp) and isinstance(A, RcompUnits):
             return
 
-        from mcdp_posets import UpperSets
         if isinstance(A, UpperSets) and isinstance(B, UpperSets):
             self.check_leq(A.P, B.P)
             return
@@ -117,6 +120,14 @@ class TypesUniverse(Preorder):
                 msg = 'The posets do not have the same elements '
                 raise_desc(NotLeq, msg, SA=SA, SB=SB)
             return
+        
+        if isinstance(B, PosetCoproduct):
+            for x in B.spaces:
+                try:
+                    self.check_leq(A, x)
+                    return
+                except:
+                    pass
 
 
         msg = "Do not know how to compare types."
@@ -170,7 +181,6 @@ class TypesUniverse(Preorder):
         if isinstance(A, SpaceProduct) and isinstance(B, SpaceProduct):
             return get_product_embedding(self, A, B)
 
-        from mcdp_posets import UpperSets
         if isinstance(A, UpperSets) and isinstance(B, UpperSets):
             P_A_to_B, P_B_to_A = self.get_embedding(A.P, B.P)
             from mcdp_posets.maps.lift_to_uppersets import LiftToUpperSets
@@ -191,10 +201,51 @@ class TypesUniverse(Preorder):
             setattr(m1, '__name__', 'L%s' % b_to_a.__name__)
             return m1, m2
 
+        if isinstance(B, PosetCoproduct):
+            for i, x in enumerate(B.spaces):
+                try:
+                    self.check_leq(A, x)
+                    return get_coproduct_embedding(A, B, i)
+                except NotLeq:
+                    pass
 
         msg = 'Spaces are ordered, but you forgot to code embedding.'
         raise_desc(NotImplementedError, msg, A=A, B=B)
 
+
+def get_coproduct_embedding(A, B, i):
+    # assume that A <= B.spaces[i]
+    A_to_B = Coprod_A_to_B_map(A=A, B=B, i=i)
+    B_to_A = Coprod_B_to_A_map(A=A, B=B, i=i)
+    return A_to_B, B_to_A
+
+class Coprod_A_to_B_map(Map):
+    @contract(B=PosetCoproduct, i='int')
+    def __init__(self, A, B, i):
+        dom = A
+        cod = B
+        self.B = B
+        self.i = i 
+        Map.__init__(self, dom=dom, cod=cod)
+    def _call(self, a):
+        b = self.B.pack(self.i, a)
+        return b
+
+class Coprod_B_to_A_map(Map):
+    @contract(B=PosetCoproduct, i='int')
+    def __init__(self, A, B, i):
+        dom = B
+        cod = A
+        self.B = B
+        self.A = A
+        self.i = i
+        Map.__init__(self, dom=dom, cod=cod)
+    def _call(self, b):
+        j, a = self.B.unpack(b)
+        if j != self.i:
+            msg = 'Cannot convert element %s (in %s) to %s.' % (b, self.B, self.A)
+            raise_desc(MapNotDefinedHere, msg, j=j, i=self.i, b=b, a=a)
+        return a
 
 
 

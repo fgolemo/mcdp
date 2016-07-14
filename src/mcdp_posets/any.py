@@ -15,6 +15,8 @@ class Any(Poset):
         and trivial leq.  
     """
 
+    def witness(self):
+        return 0
     def belongs(self, x):
         pass  # true
 

@@ -8,6 +8,7 @@ body {
 
 pre {
 	background-color: #eee;
+	white-space: pre-wrap;
 	margin-left: 2em;
 	margin-top: 2em;
 	padding: 10px;

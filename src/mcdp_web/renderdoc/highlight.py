@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_lang.syntax import Syntax
 from mcdp_library.library import MCDPLibrary
@@ -7,24 +8,32 @@ from mcdp_report.generic_report_utils import (
 from mcdp_report.html import ast_to_html
 from mcdp_web.images.images import (ndp_graph_enclosed, ndp_graph_expand,
     ndp_graph_normal, ndp_graph_templatized)
+from mocdp import logger
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from reprep import Report
 import base64
 import traceback
 
+def bs(fragment):
+    return BeautifulSoup(fragment, 'html.parser', from_encoding='utf-8')
 
+@contract(returns=str, html=str)
 def html_interpret(library, html, raise_errors=False, realpath='unavailable'):
     # clone linrary?
     library = library.clone()
     load_fragments(library, html, realpath=realpath)
-    html = highlight_mcdp_code(library, html)
+    html = highlight_mcdp_code(library, html, raise_errors=raise_errors,
+                               realpath=realpath)
     html = make_figures(library, html,
-                        raise_error_dp=raise_errors, raise_error_others=raise_errors)
-    html = make_plots(library, html, raise_errors=raise_errors)
-    return html.decode('utf-8')
+                        raise_error_dp=raise_errors, raise_error_others=raise_errors,
+                        realpath=realpath)
+    html = make_plots(library, html, raise_errors=raise_errors,
+                      realpath=realpath)
+
+    return html
 
 def make_image_tag_from_png(f):
-    soup = BeautifulSoup("", 'html.parser')
+    soup = bs("")
     def ff(*args, **kwargs):
         png = f(*args, **kwargs)
         rendered = create_img_png_base64(soup, png)
@@ -32,7 +41,7 @@ def make_image_tag_from_png(f):
     return ff
 
 def make_pre(f):
-    soup = BeautifulSoup("", 'html.parser')
+    soup = bs("")
     def ff(*args, **kwargs):
         res = f(*args, **kwargs)
         t = soup.new_tag('pre')  #  **{'class': 'print_value'})
@@ -40,17 +49,8 @@ def make_pre(f):
         return t
     return ff
 
-# def get_string_or_cdata(tag):
-#     print tag
-#     if tag.string is not None:
-#         return tag.string
-#     for cd in tag.findAll(text=True):
-#         if isinstance(cd, bs4.CData):
-#             print 'CData value: %r' % cd
-#             return cd
-#     assert False
-
-def make_plots(library, frag, raise_errors):
+@contract(frag=str, returns=str)
+def make_plots(library, frag, raise_errors, realpath):
     """
         Looks for things like:
         
@@ -62,8 +62,8 @@ def make_plots(library, frag, raise_errors):
         <pre class="print_value">VALUE</img>
     
     """
-    soup = BeautifulSoup(frag, 'html.parser')
-    print 'raise_errors', raise_errors
+    soup = bs(frag)
+
     def go(selector, plotter, load, parse):
         for tag in soup.select(selector):
 
@@ -77,7 +77,7 @@ def make_plots(library, frag, raise_errors):
                     vu = load(tag['id'])
                 else:
                     source_code = tag.string.encode('utf-8')
-                    vu = parse(source_code)
+                    vu = parse(source_code, realpath=realpath)
 
                 rendered = plotter(tag, vu)
 
@@ -135,6 +135,7 @@ def make_plots(library, frag, raise_errors):
     def print_mcdp(tag, ndp):  # @UnusedVariable
         return ndp.__str__()
     
+    # parse(string, realpath)
     const = dict(load=library.load_constant, parse=library.parse_constant)
     mcdp = dict(load=library.load_ndp, parse=library.parse_ndp)
     go("img.plot_value_generic", plot_value_generic, **const)
@@ -150,7 +151,7 @@ def load_fragments(library, frag, realpath):
             code
             </pre>
     """
-    soup = BeautifulSoup(frag, 'html.parser')
+    soup = bs(frag)
 
     for tag in soup.select('pre.mcdp'):
         if tag.string is None:
@@ -189,7 +190,25 @@ def load_fragments(library, frag, realpath):
             library.file_to_contents[basename] = res
 
 
-def highlight_mcdp_code(library, frag):
+def get_source_code(tag):
+    """ Gets the string attribute. 
+    
+        encodes as utf-8
+        removes initial whitespace newlines
+        converts tabs to spaces
+    """
+    if tag.string is None:
+        raise ValueError(str(tag))
+
+    source_code = tag.string.encode('utf-8')
+
+    while source_code and source_code[0] == '\n':
+        source_code = source_code[1:]
+
+    source_code = source_code.replace('\t', ' ' * 4)
+    return source_code
+
+def highlight_mcdp_code(library, frag, realpath, raise_errors=False):
     """ Looks for codes like:
     
     <pre class="mcdp">mcdp {
@@ -200,62 +219,98 @@ def highlight_mcdp_code(library, frag):
         and does syntax hihglighting.
     """
 
-    soup = BeautifulSoup(frag, 'html.parser')
+    soup = bs(frag)
 
-    def go(selector, parse_expr, extension):
+    def go(selector, parse_expr, extension, use_pre=True):
         for tag in soup.select(selector):
             
-            if tag.string is None:
-                if not tag.has_attr('id'):
-                    msg = "If <pre> is empty then it needs to have an id."
-                    raise_desc(ValueError, msg, tag=str(tag))
-                # load it
-                basename = '%s.%s' % (tag['id'], extension)
-                data = library._get_file_data(basename)
-                source_code = data['data']
-            else:
-                source_code = tag.string.encode('utf-8')
-
-                while source_code and source_code[0] == '\n':
-                    source_code = source_code[1:]
-
-            source_code = source_code.replace('\t', ' ' * 4)
             try:
+                if tag.string is None:
+                    if not tag.has_attr('id'):
+                        msg = "If <pre> is empty then it needs to have an id."
+                        raise_desc(ValueError, msg, tag=str(tag))
+                    # load it
+                    basename = '%s.%s' % (tag['id'], extension)
+                    data = library._get_file_data(basename)
+                    source_code = data['data']
+                    source_code = source_code.replace('\t', ' ' * 4)
+                else:
+                    source_code = get_source_code(tag)
+
                 html = ast_to_html(source_code, parse_expr=parse_expr,
-                                            complete_document=False,
-                                            add_line_gutter=False)
-                frag2 = BeautifulSoup(html, 'lxml')
-                rendered = frag2.pre
-                if tag.has_attr('label'):
-                    tag_label = soup.new_tag('span', **{'class': 'label'})
-                    tag_label.append(tag['label'])
-                    rendered.insert(0, tag_label)
+                                                complete_document=False,
+                                                add_line_gutter=False,
+                                                add_css=False)
 
-                max_len = max(map(len, source_code.split('\n')))
-                # account for the label
-                if tag.has_attr('label'):
-                    max_len = max(max_len, len(tag['label']) + 6)
+                frag2 = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
 
-                style = 'width: %dch;' % (max_len + 3)
+                if use_pre:
+                    rendered = frag2.pre
+                    if tag.has_attr('label'):
+                        tag_label = soup.new_tag('span', **{'class': 'label'})
+                        tag_label.append(tag['label'])
+                        rendered.insert(0, tag_label)
+
+                    max_len = max(map(len, source_code.split('\n')))
+                    # account for the label
+                    if tag.has_attr('label'):
+                        max_len = max(max_len, len(tag['label']) + 6)
+
+                    bonus = 0
+                    style = 'width: %dch;' % (max_len + bonus)
+                else:
+                    # using <code>
+                    rendered = frag2.pre.code
+                    style = ''
+
                 if tag.has_attr('style'):
                     style = style + tag['style']
+                if style:
+                    rendered['style'] = style
 
-                rendered['style'] = style
+                if tag.has_attr('class'):
+                    rendered['class'] = tag['class']
+
+                if tag.has_attr('id'):
+                    rendered['id'] = tag['id']
+
                 tag.replaceWith(rendered)
 
             except DPSyntaxError as e:
-                print(e)  # XXX
+                if raise_errors:
+                    raise
+                logger.error(unicode(e.__str__(), 'utf-8'))
                 t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
                 t.string = str(e)
                 tag.insert_after(t)
 
-    go('pre.mcdp', Syntax.ndpt_dp_rvalue, "mcdp")
-    go('pre.mcdp_poset', Syntax.space, "mcdp_poset")
-    go('pre.mcdp_value', Syntax.rvalue, "mcdp_value")
-    go('pre.mcdp_template', Syntax.template, "mcdp_template")
+                if tag.string is None:
+                    tag.string = "`%s" % tag['id']
+
+            except DPSemanticError as e:
+                if raise_errors:
+                    raise
+                logger.error(unicode(e.__str__(), 'utf-8'))
+                t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
+                t.string = str(e)
+                tag.insert_after(t)
+                if tag.string is None:
+                    tag.string = "`%s" % tag['id']
+
+    go('pre.mcdp', Syntax.ndpt_dp_rvalue, "mcdp", use_pre=True)
+    go('pre.mcdp_poset', Syntax.space, "mcdp_poset", use_pre=True)
+    go('pre.mcdp_value', Syntax.rvalue, "mcdp_value", use_pre=True)
+    go('pre.mcdp_template', Syntax.template, "mcdp_template", use_pre=True)
+
+    go('code.mcdp', Syntax.ndpt_dp_rvalue, "mcdp", use_pre=False)
+    go('code.mcdp_poset', Syntax.space, "mcdp_poset", use_pre=False)
+    go('code.mcdp_value', Syntax.rvalue, "mcdp_value", use_pre=False)
+    go('code.mcdp_template', Syntax.template, "mcdp_template", use_pre=False)
+
     return str(soup)
 
-def make_figures(library, frag, raise_error_dp, raise_error_others):
+@contract(frag=str, returns=str)
+def make_figures(library, frag, raise_error_dp, raise_error_others, realpath):
     """ Looks for codes like:
 
     <pre><code class="mcdp_ndp_graph_templatized">mcdp {
@@ -266,7 +321,7 @@ def make_figures(library, frag, raise_error_dp, raise_error_others):
         and creates a link to the image
     """
 
-    soup = BeautifulSoup(frag, 'html.parser')
+    soup = bs(frag)
 
     def go(selector, func):
 
@@ -275,6 +330,10 @@ def make_figures(library, frag, raise_error_dp, raise_error_others):
                 r = func(tag) 
                 if tag.has_attr('style'):
                     r['style'] = tag['style']
+                if tag.has_attr('class'):
+                    r['class'] = tag['class']
+                if tag.has_attr('id'):
+                    r['id'] = tag['id']
                 tag.replaceWith(r)
             except (DPSyntaxError, DPSemanticError) as e:
                 if raise_error_dp:
@@ -301,7 +360,7 @@ def make_figures(library, frag, raise_error_dp, raise_error_others):
             return r
         else:
             svg = func(data_format='svg', **args)
-            tag = BeautifulSoup(svg, 'lxml').svg
+            tag = BeautifulSoup(svg, 'lxml', from_encoding='utf-8').svg
             tag['class'] = klass
             return tag
 

@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-from .poset import NotBounded, NotLeq, Poset
+from .finite_collection_as_space import FiniteCollectionAsSpace
+from .poset import NotBounded, NotJoinable, NotLeq, NotMeetable, Poset
 from .space import Uninhabited
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_posets.finite_collection_as_space import FiniteCollectionAsSpace
-from mcdp_posets.poset import NotJoinable, NotMeetable
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 from networkx.algorithms.dag import ancestors, descendants
 

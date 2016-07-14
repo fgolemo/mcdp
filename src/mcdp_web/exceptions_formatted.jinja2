@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>List of exceptions</title>
+    {% include 'head.jinja2' %}
+    
+</head>
+<body>
+
+<style type='text/css'>
+	.exception {
+		font-weight: bold;
+		color: red;
+		white-space: pre-wrap;
+		margin-bottom: 3em;
+	}
+</style>
+
+{% if exceptions | length == 0 %}
+	<p>No exceptions were generated. </p>	
+{% else %}
+	<p>These are the exceptions obtained so far (most recent first):</p>
+{% endif %}
+
+{% for e in exceptions | reverse %}
+<pre class='exception'>{{e}}</pre>
+{% endfor %}
+
+{% if url_refresh %}
+<p> If the problem is that something is not found
+because of stale caches, <a href='{{url_refresh}}'>try to refresh the library</a>.
+{% endif %}
+
+</body>
+</html>

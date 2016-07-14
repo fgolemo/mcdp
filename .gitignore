@@ -36,3 +36,11 @@ dist/mcdp-web
 ./build
 build
 dist
+make
+parmake
+remake
+t
+failed_*
+misc/cards.out
+minimality_game
+tc

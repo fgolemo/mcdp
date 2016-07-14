@@ -5,7 +5,7 @@ from mcdp_dp.primitive import Feasible, NotFeasible, PrimitiveDP
 from mcdp_dp.tracer import Tracer
 from mcdp_posets import (NotEqual, NotLeq, PosetProduct, UpperSets,
     get_types_universe)
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima, poset_maxima
 from mocdp.exceptions import do_extra_checks
 
 
@@ -55,7 +55,8 @@ class DPLoop2(PrimitiveDP):
         self.R2 = R2
 
         self._solve_cache = {}
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
+
 
     def _unpack_m(self, m):
         if do_extra_checks():
@@ -64,6 +65,29 @@ class DPLoop2(PrimitiveDP):
         _, _, unpack = get_product_compact(self.M0, self.F2, self.R2)
         m0, f2, r2 = unpack(m)
         return m0, f2, r2
+
+    def evaluate(self, m):
+        from mcdp_posets.category_product import get_product_compact
+        _, _, unpack = get_product_compact(self.M0, self.F2, self.R2)
+        m0, f2, r2 = unpack(m)
+
+        LF0, UR0 = self.dp.evaluate(m0)
+
+        # now extract first components f1 and r1
+        f1s = set()
+        for fi in LF0.maximals:
+            fi1, _ = fi
+            f1s.add(fi1)
+        f1s = poset_maxima(f1s, self.F.leq)
+        LF = self.F.Ls(f1s)
+        r1s = set()
+        for ri in UR0.minimals:
+            ri1, _ = ri
+            r1s.add(ri1)
+        r1s = poset_minima(r1s, self.F.leq)
+        UR = self.R.Us(r1s)
+        return LF, UR
+
 
     def get_implementations_f_r(self, f1, r1):
         from mcdp_posets.category_product import get_product_compact

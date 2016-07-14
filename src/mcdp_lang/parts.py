@@ -9,7 +9,8 @@ __all__ = [
 
 class CDPLanguage():
 
-    GenericNonlinearity = namedtuplewhere('GenericNonlinearity', 'function op1 R_from_F')
+    GenericNonlinearity = namedtuplewhere('GenericNonlinearity',
+                                          'function op1 R_from_F')
 
     ValueExpr = namedtuplewhere('ValueExpr', 'value')
 
@@ -18,8 +19,25 @@ class CDPLanguage():
 
     RcompUnit = namedtuplewhere('RcompUnit', 'pint_string')
     SimpleValue = namedtuplewhere('SimpleValue', 'value space')
+
+    # Top <space>
+    TopKeyword = namedtuplewhere('TopKeyword', 'keyword')
     Top = namedtuplewhere('Top', 'keyword space')
+    # Bottom <space>
     Bottom = namedtuplewhere('Bottom', 'keyword space')
+    BottomKeyword = namedtuplewhere('BottomKeyword', 'keyword')
+    # Maximals <space>
+    Maximals = namedtuplewhere('Maximals', 'keyword space')
+    MaximalsKeyword = namedtuplewhere('MaximalsKeyword', 'keyword')
+    # Minimals <space>
+    Minimals = namedtuplewhere('Minimals', 'keyword space')
+    MinimalsKeyword = namedtuplewhere('MinimalsKeyword', 'keyword')
+    # ignore x provided by y
+    # ignore x required by y
+    IgnoreKeyword = namedtuplewhere('IgnoreKeyword', 'keyword')
+    IgnoreFun = namedtuplewhere('IgnoreFun', 'keyword fvalue')
+    IgnoreRes = namedtuplewhere('IgnoreRes', 'keyword rvalue')
+
     MakeTuple = namedtuplewhere('MakeTuple', 'open ops close')
 
     MakeTemplate = namedtuplewhere('MakeTemplate', 'keyword dp_rvalue')
@@ -56,7 +74,7 @@ class CDPLanguage():
     Function = namedtuplewhere('Function', 'dp s keyword')
 
     VariableRef = namedtuplewhere('VariableRef', 'name')
-    DPVariableRef = namedtuplewhere('DPVariableRef', 'name')
+    VariableRefNDPType = namedtuplewhere('VariableRefNDPType', 'name')
 
     NewResource = namedtuplewhere('NewResource', 'name')
     NewFunction = namedtuplewhere('NewFunction', 'name')
@@ -72,17 +90,19 @@ class CDPLanguage():
     LoadPoset = namedtuplewhere('LoadPoset', 'keyword load_arg')
     LoadTemplate = namedtuplewhere('LoadTemplate', 'keyword load_arg')
 
-    SetName = namedtuplewhere('SetName', 'keyword name dp_rvalue')
-    SetMCDPType = namedtuplewhere('SetMCDPType', 'keyword name eq right_side')
-
     # an incomplete model
     Ellipsis = namedtuplewhere('Ellipsis', 'token')
 
     SetNameGenericVar = namedtuplewhere('SetNameGenericVar', 'value')
-    SetNameGeneric = namedtuplewhere('SetNameGeneric', 'name eq right_side')
+    SetNameNDPInstance = namedtuplewhere('SetNameNDPInstance', 'keyword name dp_rvalue')
+    SetNameMCDPType = namedtuplewhere('SetNameMCDPType', 'keyword name eq right_side')
+    SetNameRValue = namedtuplewhere('SetNameRValue', 'name eq right_side')
     SetNameFValue = namedtuplewhere('SetNameFValue', 'name eq right_side')
 
+    # set-of(<space>)
+    PowerSetKeyword = namedtuplewhere('PowerSetKeyword', 'keyword')
     PowerSet = namedtuplewhere('PowerSet', 'symbol p1 space p2')
+
     # natural numbers
     Nat = namedtuplewhere('Nat', 'symbol')
     Int = namedtuplewhere('Int', 'symbol')
@@ -93,8 +113,6 @@ class CDPLanguage():
     RequiredKeyword = namedtuplewhere('RequiredKeyword', 'keyword')
     MCDPKeyword = namedtuplewhere('MCDPKeyword', 'keyword')
     SubKeyword = namedtuplewhere('SubKeyword', 'keyword')
-    TopKeyword = namedtuplewhere('TopKeyword', 'keyword')
-    BottomKeyword = namedtuplewhere('BottomKeyword', 'keyword')
     MCDPTypeKeyword = namedtuplewhere('MCDPTypeKeyword', 'keyword')
     CompactKeyword = namedtuplewhere('CompactKeyword', 'keyword')
     AbstractKeyword = namedtuplewhere('AbstractKeyword', 'keyword')
@@ -156,7 +174,10 @@ class CDPLanguage():
     FName = namedtuplewhere('FName', 'value')
     RName = namedtuplewhere('RName', 'value')
     Collection = namedtuplewhere('Collection', 'elements')
-    UpperSetFromCollection = namedtuplewhere('UpperSetFromCollection', 'value')
+
+    # upperset {0g,1g}
+    UpperSetFromCollectionKeyword = namedtuplewhere('UpperSetFromCollectionKeyword', 'keyword')
+    UpperSetFromCollection = namedtuplewhere('UpperSetFromCollection', 'keyword value')
 
     FunStatement = namedtuplewhere('FunStatement', 'keyword fname unit')
     ResStatement = namedtuplewhere('ResStatement', 'keyword rname unit')
@@ -190,18 +211,30 @@ class CDPLanguage():
     BuildProblem = namedtuplewhere('BuildProblem', 'keyword statements')
 
     # Finite posets
+    # finite_poset { a <= b }
     FinitePosetKeyword = namedtuplewhere('FinitePosetKeyword', 'keyword')
     FinitePosetElement = namedtuplewhere('FinitePosetElement', 'identifier')
     FinitePoset = namedtuplewhere('FinitePoset', 'keyword chains')
 
-    TakeKeyword = namedtuplewhere('TakeKeyword', 'keyword')
+    # Single-element poset
+    # S(tag)
+    SingleElementPosetKeyword = namedtuplewhere('SingleElementPosetKeyword', 'keyword')
+    SingleElementPosetTag = namedtuplewhere('SingleElementPosetTag', 'value')
+    SingleElementPoset = namedtuplewhere('SingleElementPoset', 'keyword tag')
 
-    TupleIndex = namedtuplewhere('TupleIndex', 'keyword value index')
+    # take( <>, <index>)
+    TakeKeyword = namedtuplewhere('TakeKeyword', 'keyword')
+    TupleIndexRes = namedtuplewhere('TupleIndexRes', 'keyword value index')
     TupleIndexFun = namedtuplewhere('TupleIndexFun', 'keyword value index')
+    # take( <>, <label>)
+#     TupleIndexLabel = namedtuplewhere('TupleIndexLabel', 'string')
+#     TupleIndexLabelRes = namedtuplewhere('TupleIndexLabelRes', 'keyword value label')
+#     TupleIndexLabelFun = namedtuplewhere('TupleIndexLabelFun', 'keyword value label')
 
     SpaceCustomValue = namedtuplewhere('SpaceCustomValue', 'space keyword custom_string')
 
     # solve( <0 g>, `model )
+    SolveModelKeyword = namedtuplewhere('SolveModelKeyword', 'keyword')
     SolveModel = namedtuplewhere('SolveModel', 'keyword f model')
 
     # UpperSets(<space>)
@@ -222,5 +255,17 @@ class CDPLanguage():
     ProductWithLabelsLabel = namedtuplewhere('ProductWithLabelsLabel', 'label')
     ProductWithLabels = namedtuplewhere('ProductWithLabels', 'keyword entries')
     IndexLabel = namedtuplewhere('IndexLabel', 'label')
-    ResourceLabelIndex = namedtuplewhere('ResourceLabelIndex', 'rvalue label')
-    FunctionLabelIndex = namedtuplewhere('FunctionLabelIndex', 'fvalue label')
+    ResourceLabelIndex = namedtuplewhere('ResourceLabelIndex', 'keyword rvalue label')
+    FunctionLabelIndex = namedtuplewhere('FunctionLabelIndex', 'keyword fvalue label')
+
+    # any-of({1,2})
+    AnyOfKeyword = namedtuplewhere('AnyOfKeyword', 'keyword')
+    AnyOfFun = namedtuplewhere('AnyOfFun', 'keyword value')
+    AnyOfRes = namedtuplewhere('AnyOfRes', 'keyword value')
+
+    # coproduct(space1, space2)
+    SpaceCoproductKeyword = namedtuplewhere('SpaceCoproductKeyword', 'keyword')
+    SpaceCoproduct = namedtuplewhere('SpaceCoproduct', 'keyword entries')
+
+
+

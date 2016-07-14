@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-
+from .parts import CDPLanguage
 from contracts.utils import indent
 from mocdp.comp import NotConnected
-from .parts import CDPLanguage
-
 
 CDP = CDPLanguage
-#
 
 def get_missing_connections(context):
     connected_fun = set()  # contains (name, f)
@@ -71,12 +68,6 @@ def check_missing_connections(context):
             msg += indent(fix, '    ')
             s += '\n' + indent(msg, 'help: ')
 
-
-    # This should count as unconnected:
-# cdp {
-#     a = template cdp {}
-#     b = template cdp {}
-# }
     for name, ndp in context.names.items():
         # anything that has both zero functions and zero resources is unconnected
         rnames = ndp.get_rnames()
@@ -87,5 +78,3 @@ def check_missing_connections(context):
     if s:
         raise NotConnected(s)
     
-
-

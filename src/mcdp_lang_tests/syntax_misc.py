@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
+from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
+    parse_wrap_check)
 from comptests.registrar import comptest
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax, SyntaxIdentifiers
 from mcdp_lang.syntax_codespec import SyntaxCodeSpec
-from  .utils import (assert_parsable_to_connected_ndp,
-    assert_semantic_error, parse_wrap_check)
+from mcdp_posets.uppersets import UpperSet, UpperSets, LowerSet
 from nose.tools import assert_equal
 from pyparsing import Literal
+from mcdp_lang.parse_interface import parse_ndp, parse_constant
 
 @comptest
 def check_lang():
@@ -246,7 +248,7 @@ def check_lang51():
 
 
 
-    parse_wrap(Syntax.number_with_unit, '4.0 [R]')
+    parse_wrap(Syntax.valuewithunit, '4.0 [R]')
 
     parse_wrap(Syntax.space_pint_unit, "N")
     parse_wrap(Syntax.space_pint_unit, "m")
@@ -254,9 +256,9 @@ def check_lang51():
     parse_wrap(Syntax.space_pint_unit, "m / s^2")
     parse_wrap(Syntax.space_pint_unit, "m/s^2")
     
-    parse_wrap(Syntax.number_with_unit, '1 m')
-    parse_wrap(Syntax.number_with_unit, '1 m/s')
-    parse_wrap(Syntax.number_with_unit, '1 m/s^2')
+    parse_wrap(Syntax.valuewithunit, '1 m')
+    parse_wrap(Syntax.valuewithunit, '1 m/s')
+    parse_wrap(Syntax.valuewithunit, '1 m/s^2')
 
 
 
@@ -274,9 +276,6 @@ mcdp {
 
 
 
-@comptest
-def check_lang52():
-    pass
 
 
 
@@ -291,4 +290,149 @@ def check_lang53():
     
     x + y >= a
 })""")
+
+def add_def_poset(l, name, data):
+    fn = '%s.mcdp_poset' % name
+    l.file_to_contents[fn] = dict(realpath='#', data=data)
+
+@comptest
+def check_lang52():  # TODO: rename
+    """ A test for finite posets where the join might not exist. """
+    from mcdp_library.library import MCDPLibrary
+    l = MCDPLibrary()
+
+    add_def_poset(l, 'P', """
+    finite_poset {
+        a <= b <= c
+        A <= B <= C
+    }
+    """)
+
+    ndp = l.parse_ndp("""
+        mcdp {
+            provides x [`P]
+            provides y [`P]
+            requires z [`P]
+            
+            z >= x
+            z >= y
+        }
+    """)
+    dp = ndp.get_dp()
+
+    res1 = dp.solve(('a', 'b'))
+
+    P = l.load_poset('P')
+    UR = UpperSets(P)
+    UR.check_equal(res1, UpperSet(['b'], P))
+
+    res2 = dp.solve(('a', 'A'))
+
+    UR.check_equal(res2, UpperSet([], P))
+
+
+@comptest
+def check_lang54():  # TODO: rename
+    ndp = parse_ndp("""
+        mcdp {
+            requires x [g x g]
+            
+            x >= any-of({<0g,1g>, <1g, 0g>})
+        }
+    """)
+    dp = ndp.get_dp()
+    R = dp.get_res_space()
+    UR = UpperSets(R)
+    res = dp.solve(())
+    UR.check_equal(res, UpperSet([(0.0,1.0),(1.0,0.0)], R))
+
+
+@comptest
+def check_lang55():  # TODO: rename
+    ndp = parse_ndp("""
+        mcdp {
+            provides x [g x g]
+            
+            x <= any-of({<0g,1g>, <1g, 0g>})
+        }
+    """)
+    dp = ndp.get_dp()
+    R = dp.get_res_space()
+    F = dp.get_fun_space()
+    UR = UpperSets(R)
+    res = dp.solve((0.5, 0.5))
+
+    l = LowerSet(P=F, maximals=[(0.0, 1.0), (1.0, 0.0)])
+    l.belongs((0.0, 0.5))
+    l.belongs((0.5, 0.0))
+
+    UR.check_equal(res, UpperSet([], R))
+    res = dp.solve((0.0, 0.5))
+
+    UR.check_equal(res, UpperSet([()], R))
+    res = dp.solve((0.5, 0.0))
+
+    UR.check_equal(res, UpperSet([()], R))
+
+@comptest
+def check_lang56():  # TODO: rename
+    p = parse_constant('Minimals V')
+    print p
+    p = parse_constant('Minimals finite_poset{ a b}')
+    print p
+
+@comptest
+def check_lang57():  # TODO: rename
+    p = parse_constant('Maximals V')
+    print p
+
+@comptest
+def check_lang58():  # TODO: rename
+    assert_parsable_to_connected_ndp("""
+        mcdp {
+            a = instance mcdp {
+                provides f [s]
+                f <= 10 s
+            }
+            ignore f provided by a
+        }
+    """)
+
+
+    assert_parsable_to_connected_ndp("""
+        mcdp {
+            a = instance mcdp {
+                requires r [s]
+                r >= 10 s
+            }
+            ignore r required by a
+        }
+    """)
+
+
+#     assert_parsable_to_connected_ndp("""
+#         mcdp {
+#             a = instance mcdp {
+#                 provides f [s]
+#             }
+#             ignore a.f
+#         }
+#     """)
+#     assert_parsable_to_connected_ndp("""
+#         mcdp {
+#             a = instance mcdp {
+#                 requires r [s]
+#             }
+#             ignore a.r
+#         }
+#     """)
+@comptest
+def check_lang59():  # TODO: rename
     pass
+@comptest
+def check_lang60():  # TODO: rename
+    pass
+@comptest
+def check_lang61():  # TODO: rename
+    pass
+

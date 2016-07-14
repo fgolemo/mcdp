@@ -30,6 +30,7 @@
 		.line-gutter { display: none; }
 		
 		table#main td { vertical-align: top; }
+		.DPSyntaxError { color: red; font-weight: bold; font-size: smaller; }
 	</style>
 	
 	{% if explanation1_html %}
@@ -39,18 +40,27 @@
 	<table id='main'>
 	<tr><td>
 	{{highlight|safe}}
-	</td><td>
-	<a id='graph' href='../edit_fancy/graph.png'>
-		<img style='float:right; width: 50%' src='../edit_fancy/graph.png'/>
-	</a>
-	<script type='text/javascript'>
-  		$('#graph').imageZoom();
-  	</script>
+	</td>
+	<td>
+		{% if error %}
+		<p>(Syntax error; cannot display image.)</p>
+		{% else %}
+		<a id='graph' href='../edit_fancy/graph.png'>
+			<img style='float:right; width: 50%' src='../edit_fancy/graph.png'/>
+		</a>
+		<script type='text/javascript'>
+	  		$('#graph').imageZoom();
+	  	</script>
+	  	{% endif %}
 
 	</td>
 	</tr>
 	</table>
 
+	{% if error %}
+	<pre class="DPSyntaxError">{{error}}</pre>
+	{% endif %}
+	
 	{% if explanation2_html %}
 		{{explanation2_html|safe}}
 	{% endif %}

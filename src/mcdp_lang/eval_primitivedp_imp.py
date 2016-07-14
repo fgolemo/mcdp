@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from contracts import contract
@@ -14,7 +14,6 @@ CDP = CDPLanguage
 def eval_primitivedp(r, context):  # @UnusedVariable
     with add_where_information(r.where):
         if isinstance(r, CDP.LoadDP):
-            # XXX: use Context to do it
             name = r.name.value
             return context.load_primitivedp(name)
 
@@ -22,7 +21,10 @@ def eval_primitivedp(r, context):  # @UnusedVariable
             return eval_primitivedp_code_spec(r, context)
         
         assert not isinstance(r, CDP.CodeSpec)
-    raise_desc(DPInternalError, 'Invalid primitivedp expression', r=r)
+
+    r = recursive_print(r)
+    msg = 'eval_primitivedp(): cannot evaluate r as a PrimitiveDP.'
+    raise_desc(DPInternalError, msg, r=r)
 
 def eval_primitivedp_code_spec(r, context):  # @UnusedVariable
     from .eval_codespec_imp import eval_codespec

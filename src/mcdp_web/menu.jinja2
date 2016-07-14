@@ -39,26 +39,9 @@
 $(document).ready(function() {
   options = { position: { my: "left top", at: "right top" } };
   $('#menu').menu(options);
-  
-  
-	$(window).keydown(function (e){
-		//console.log(e);
-		CODE_N = 78;
-		CODE_L = 76;
-		CODE_R = 82;
-		
-
-	    if (e.altKey && e.keyCode == CODE_R) { 
-	        e.preventDefault();
-	        //console.log('ciao');
-	        //$('#menu').menu('expand');
-	        window.location ='/libraries/{{navigation['current_library']}}/refresh_library';
-	    }
-	});
-	
 })
 </script>
-
+  
 <style type='text/css'>
 /* This makes the link fill all of the menu item
   otherwise it is hard to click */

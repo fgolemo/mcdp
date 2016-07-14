@@ -1,5 +1,4 @@
-Example of using templates
----------------------------
+## Example of using templates
 
 
 Define the ActuationEnergeticsTemplate as follows

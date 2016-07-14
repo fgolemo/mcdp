@@ -8,7 +8,9 @@ from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
     NotBelongs, NotLeq, PosetProduct, Rcomp, Space, UpperSet, UpperSets,
     get_types_universe)
 from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPSemanticError, mcdp_dev_warning
+from mocdp.exceptions import DPSemanticError, mcdp_dev_warning, DPInternalError
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
+from mcdp_lang.namedtuple_tricks import recursive_print
 
 CDP = CDPLanguage
 
@@ -55,6 +57,22 @@ def eval_constant(op, context):
             space = eval_space(op.space, context)
             v = space.get_top()
             return ValueWithUnits(unit=space, value=v)
+
+        if isinstance(op, CDP.Maximals):
+            from mcdp_lang.eval_space_imp import eval_space  # @Reimport
+            space = eval_space(op.space, context)
+            elements = space.get_maximal_elements()
+            v = FiniteCollection(elements=elements, S=space)
+            S = FiniteCollectionsInclusion(space)
+            return ValueWithUnits(unit=S, value=v)
+
+        if isinstance(op, CDP.Minimals):
+            from mcdp_lang.eval_space_imp import eval_space  # @Reimport
+            space = eval_space(op.space, context)
+            elements = space.get_minimal_elements()
+            v = FiniteCollection(elements=elements, S=space)
+            S = FiniteCollectionsInclusion(space)
+            return ValueWithUnits(unit=S, value=v)
 
         if isinstance(op, CDP.Bottom):
             from mcdp_lang.eval_space_imp import eval_space  # @Reimport
@@ -128,10 +146,10 @@ def eval_constant(op, context):
             dp = ndp.get_dp()
             f0 = eval_constant(op.f, context)
             F = dp.get_fun_space()
-            mcdp_dev_warning('I never understand this...')
+
             tu = get_types_universe()
             try:
-                tu.check_leq(F, f0.unit)
+                tu.check_leq(f0.unit, F)
             except NotLeq as e:
                 msg = 'Input not correct.'
                 raise_wrapped(DPSemanticError, e, msg, compact=True)
@@ -140,8 +158,9 @@ def eval_constant(op, context):
             UR = UpperSets(dp.get_res_space())
             return ValueWithUnits(res, UR)
 
-        msg = 'eval_constant() cannot evaluate this value as constant.'
-        raise_desc(NotConstant, msg, op=str(op))
+        msg = 'eval_constant(): Cannot evaluate this as constant.'
+        op = recursive_print(op)
+        raise_desc(NotConstant, msg, op=op)
 
 
 def eval_constant_space_custom_value(op, context):
@@ -153,6 +172,13 @@ def eval_constant_space_custom_value(op, context):
     custom_string = op.custom_string
 
     if isinstance(space, FiniteCollectionAsSpace):
+        if custom_string == '*':
+            if len(space.elements) == 1:
+                value = list(space.elements)[0]
+                return ValueWithUnits(unit=space, value=value)
+            else:
+                msg = 'You can use "*" only if the space has one element.'
+                raise_desc(DPSemanticError, msg, elements=space.elements)
         try:
             space.belongs(custom_string)
             mcdp_dev_warning('this does not seem to work...')
@@ -163,15 +189,26 @@ def eval_constant_space_custom_value(op, context):
 
         return ValueWithUnits(unit=space, value=op.custom_string)
     
+    if isinstance(space, Nat):
+        mcdp_dev_warning('Top?')
+        value = int(custom_string)
+        return ValueWithUnits(unit=Nat(), value=value)
+
+    if isinstance(space, Int):
+        mcdp_dev_warning('Top?')
+        value = int(custom_string)
+        return ValueWithUnits(unit=Int(), value=value)
+        
     msg = 'Custom parsing not implemented for space.'
-    raise_desc(NotImplementedError, msg, space=space, custom_string=custom_string)
+    raise_desc(DPInternalError, msg, space=space, custom_string=custom_string)
 
 def eval_constant_uppersetfromcollection(op, context):
     x = eval_constant(op.value, context)
     v = x.value
     u = x.unit
     S = u.S
-    value = UpperSet(v.elements, S)
+    minimals = poset_minima(v.elements, S.leq)
+    value = UpperSet(minimals, S)
     unit = UpperSets(S)
     unit.belongs(value)
     vu = ValueWithUnits(value, unit)

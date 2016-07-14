@@ -1,0 +1,42 @@
+
+mcdp {
+    # 4 dc outputs
+    provides out1 [`DC_motor_control]
+    provides out2 [`DC_motor_control]
+    provides out3 [`DC_motor_control]
+    provides out4 [`DC_motor_control]
+
+    # requires an external DC power
+    requires in [`DC_power]
+    requires mass [g]
+    requires shape [m x m x m]
+    requires pi_connection [`PI_interface]
+
+    (provided out1).amps <= 1.5 A
+    (provided out2).amps <= 1.5 A
+    (provided out3).amps <= 1.5 A
+    (provided out4).amps <= 1.5 A
+    (provided out1).max_voltage <= 13.5 V
+    (provided out2).max_voltage <= 13.5 V
+    (provided out3).max_voltage <= 13.5 V
+    (provided out4).max_voltage <= 13.5 V
+
+    total_current =
+        (provided out1).amps +
+        (provided out2).amps +
+        (provided out3).amps +
+        (provided out4).amps
+
+    (required in).amps >= total_current
+    (required in).voltage >= `DC_voltages: v5
+    (required in).connector >= `barrel_connectors: barrel_5mm
+
+    requires budget [USD]
+    budget >= 22.50 USD
+
+    mass >= 15 g
+
+    required shape >= <65mm, 56mm, 13mm>
+
+    (required pi_connection).amps >= 50 mA
+}

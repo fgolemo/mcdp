@@ -2,17 +2,17 @@ from comptests.registrar import comptest
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_lang import parse_ndp
 from mcdp_posets import UpperSet, UpperSets
-from mocdp.exceptions import DPSemanticError
+from mcdp_dp.primitive import WrongUseOfUncertain
+from contracts.utils import raise_desc
 
 @comptest
 def check_uncertainty1():
     ndp = parse_ndp("""
-mcdp {
-    requires r1 [USD]
-    r1 >= Uncertain(1 USD, 2USD)
-}
-"""
- )
+        mcdp {
+            requires r1 [USD]
+            r1 >= Uncertain(1 USD, 2USD)
+        }
+    """)
     dp = ndp.get_dp()
     dpl, dpu = get_dp_bounds(dp, 1, 1)
     UR = UpperSets(dp.get_res_space())
@@ -28,14 +28,14 @@ def check_uncertainty2():
             provides f1 [N]
             f1 <= Uncertain(1 N, 2 N)
         }
-""")
+    """)
     
     dp = ndp.get_dp()
     dpl, dpu = get_dp_bounds(dp, 1, 1)
 
     R = dp.get_res_space()
     UR = UpperSets(R)
-    f0 = 0  # N
+    f0 = 0.0  # N
     sl = dpl.solve(f0)
     su = dpu.solve(f0)
     UR.check_leq(sl, su)
@@ -81,18 +81,19 @@ mcdp {
     f = ()
     try:
         dpl.solve(f)
-    except DPSemanticError as e:
-        if 'Uncertain' in str(e):
-            pass
-        else:
-            raise
+    except WrongUseOfUncertain as e:
+        pass
+    else:
+        msg = 'Expected WrongUseOfUncertain.'
+        raise_desc(Exception, msg)
+
     try:
         dpu.solve(f)
-    except DPSemanticError as e:
-        if 'Uncertain' in str(e):
-            pass
-        else:
-            raise
+    except WrongUseOfUncertain as e:
+        pass
+    else:
+        msg = 'Expected WrongUseOfUncertain.'
+        raise_desc(Exception, msg)
 
 
 @comptest

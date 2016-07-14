@@ -10,6 +10,7 @@ from .single import *
 from .utils import *
 from .space_product import *
 from .category_product import *
+from .category_coproduct import *
 from .types_universe import *
 from .any import *
 from .nat import *

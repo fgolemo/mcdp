@@ -1,29 +1,35 @@
 # -*- coding: utf-8 -*-
 from .eval_constant_imp import eval_constant
+from .eval_ndp_approx import eval_ndp_approx_lower, eval_ndp_approx_upper
 from .eval_space_imp import eval_space
+from .eval_template_imp import eval_template
+from .helpers import create_operation
+from .namedtuple_tricks import recursive_print
+from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from contracts import contract, describe_value
+from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_dp import JoinNDP, MeetNDual
-from mcdp_dp.conversion import get_conversion
+from mcdp_dp import CatalogueDP, JoinNDP, MeetNDual
+from mcdp_dp.conversion import Conversion, get_conversion
 from mcdp_dp.dp_approximation import make_approximation
-from mcdp_dp.dp_catalogue import CatalogueDP
 from mcdp_dp.dp_series_simplification import make_series
+
 from mcdp_lang.eval_ndp_approx import (eval_ndp_approx_lower,
     eval_ndp_approx_upper)
 from mcdp_lang.eval_template_imp import eval_template
 from mcdp_lang.parse_actions import add_where_information
 from mcdp_posets import NotEqual, NotLeq, PosetProduct, get_types_universe
 from mcdp_posets.finite_collection_as_space import FiniteCollectionAsSpace
+from mcdp_posets import Any, NotEqual, NotLeq, PosetProduct, get_types_universe
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
 from mocdp.comp.composite_makecanonical import cndp_makecanonical
 from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
     get_name_for_fun_node, get_name_for_res_node)
-from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+from mocdp.exceptions import (DPInternalError, DPSemanticError,
+    DPSemanticErrorNotConnected, mcdp_dev_warning)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
-
 
 
 CDP = CDPLanguage
@@ -43,7 +49,7 @@ def eval_ndp(r, context):  # @UnusedVariable
                 msg = 'Cannot find name.'
                 raise_wrapped(DPSemanticError, e, msg, compact=True)
 
-        if isinstance(r, CDP.DPVariableRef):
+        if isinstance(r, CDP.VariableRefNDPType):
             try:
                 return context.get_var2model(r.name)
             except NoSuchMCDPType as e:
@@ -71,7 +77,7 @@ def eval_ndp(r, context):  # @UnusedVariable
                 ndp.check_fully_connected()
             except NotConnected as e:
                 msg = 'Cannot abstract away the design problem because it is not connected.'
-                raise_wrapped(DPSemanticError, e, msg, compact=True)
+                raise_wrapped(DPSemanticErrorNotConnected, e, msg, compact=True)
 
             ndpa = ndp.abstract()
             return ndpa
@@ -108,8 +114,9 @@ def eval_ndp(r, context):  # @UnusedVariable
             if isinstance(r, klass):
                 return hook(r, context)
 
-    raise_desc(DPInternalError, 'Invalid dprvalue.', r=r)
-
+    r = recursive_print(r)
+    msg = 'eval_ndp(): cannot evaluate r as an NDP.'
+    raise_desc(DPInternalError, msg, r=r)
 
 
 def eval_ndp_specialize(r, context):
@@ -120,6 +127,9 @@ def eval_ndp_specialize(r, context):
         keys = params_ops[::2]
         values = params_ops[1::2]
         keys = [_.value for _ in keys]
+        if len(keys) != len(set(keys)):
+            msg = 'Repeated parameters in specialize.'
+            raise_desc(DPSemanticError, msg, keys=keys)
         values = [eval_ndp(_, context) for _ in values]
         d = dict(zip(keys, values))
         params = d
@@ -356,41 +366,43 @@ def add_constraint(context, resource, function):
 
     tu = get_types_universe()
 
+    if tu.equal(R1, F2):
+        c = Connection(dp1=resource.dp, s1=resource.s,
+                       dp2=function.dp, s2=function.s)
+        context.add_connection(c)
 
-    if not tu.equal(R1, F2):
+    elif tu.leq(R1, F2):
+        ##  F2    ---- (<=) ----   =>  ----(<=)--- [R1_to_F2] ----
+        ##   |     R1       F2          R1      R1             F2
+        ##  R1
+        R1_to_F2, _F2_to_R1 = tu.get_embedding(R1, F2)
+        conversion = Conversion(R1_to_F2)
 
-#         try:
-#             tu.check_equal(R1, F2)
-#         except NotEqual as e:
-#             pass
-#         else:
-#             assert False
-
-        try:
-            tu.check_leq(R1, F2)
-        except NotLeq as e:
-            msg = 'Constraint between incompatible spaces.'
-            raise_wrapped(DPSemanticError, e, msg, compact=True)
-
-        conversion = get_conversion(R1, F2)
-
-        conversion_ndp = dpwrap(conversion, '_in', '_out')
-
-        name = context.new_name('_conversion')
-        context.add_ndp(name, conversion_ndp)
-
-        c1 = Connection(dp1=resource.dp, s1=resource.s,
-                   dp2=name, s2='_in')
-        context.add_connection(c1)
-        resource = context.make_resource(name, '_out')
-
+        resource2 = create_operation(context=context, dp=conversion,
+                                    resources=[resource], name_prefix='_conversion',
+                                     op_prefix='_in', res_prefix='_out')
+        c = Connection(dp1=resource2.dp, s1=resource2.s,
+                       dp2=function.dp, s2=function.s)
+        context.add_connection(c)
+    elif tu.leq(F2, R1):
+        ##  R1     ---- (<=) ----   =>  ----(<=)--- [F2_to_R1^L] ----
+        ##   |h     R1       F2          R1      R1               F2
+        ##  F2
+        
+        _F2_to_R1, R1_to_F2 = tu.get_embedding(F2, R1)
+        conversion = Conversion(R1_to_F2)
+        resource2 = create_operation(context=context, dp=conversion,
+                                    resources=[resource], name_prefix='_conversion',
+                                     op_prefix='_in', res_prefix='_out')
+        c = Connection(dp1=resource2.dp, s1=resource2.s,
+                       dp2=function.dp, s2=function.s)
+        context.add_connection(c)
     else:
-        # print('Spaces are equal: %s and %s' % (R1, F2))
-        pass
+        msg = 'Constraint between incompatible spaces.'
+        raise_desc(DPSemanticError, msg, R1=R1, F2=F2)
 
-    c = Connection(dp1=resource.dp, s1=resource.s,
-                   dp2=function.dp, s2=function.s)
-    context.add_connection(c)
+
+
 
 def eval_statement(r, context):
     with add_where_information(r.where):
@@ -405,18 +417,18 @@ def eval_statement(r, context):
             function = eval_lfunction(r.function, context)
             add_constraint(context, resource, function)
 
-        elif isinstance(r, CDP.SetName):
+        elif isinstance(r, CDP.SetNameNDPInstance):
             name = r.name.value
             ndp = eval_ndp(r.dp_rvalue, context)
             context.add_ndp(name, ndp)
 
-        elif isinstance(r, CDP.SetMCDPType):
+        elif isinstance(r, CDP.SetNameMCDPType):
             name = r.name.value
             right_side = r.right_side
             x = eval_ndp(right_side, context)
             context.set_var2model(name, x)
 
-        elif isinstance(r, CDP.SetNameGeneric):
+        elif isinstance(r, CDP.SetNameRValue):
             name = r.name.value
             right_side = r.right_side
 
@@ -477,7 +489,6 @@ def eval_statement(r, context):
             fv = eval_lfunction(right_side, context)
             context.set_var2function(name, fv)
 
-
         elif isinstance(r, CDP.ResStatement):
             # requires r.rname [r.unit]
 
@@ -490,7 +501,6 @@ def eval_statement(r, context):
         elif isinstance(r, CDP.FunStatement):
             F = eval_space(r.unit, context)
             fname = r.fname.value
-
             context.add_ndp_fun_node(fname, F)
 
             return context.make_resource(get_name_for_fun_node(fname), fname)
@@ -541,8 +551,35 @@ def eval_statement(r, context):
             # B >= A
             add_constraint(context, resource=A, function=B)
 
+        elif isinstance(r, CDP.IgnoreFun):
+            # equivalent to f >= any-of(Minimals S)
+            lf = eval_lfunction(r.fvalue, context)
+            F = context.get_ftype(lf)
+            values = F.get_minimal_elements()
+            from mcdp_dp.dp_constant import ConstantMinimals
+            dp = ConstantMinimals(F, values)
+            ndp = SimpleWrap(dp, fnames=[], rnames='_out')
+            name = context.new_name('_constant')
+            context.add_ndp(name, ndp)
+            r = context.make_resource(name, '_out')
+            add_constraint(context, resource=r, function=lf)
+
+        elif isinstance(r, CDP.IgnoreRes):
+            # equivalent to r <= any-of(Maximals S)
+            rv = eval_rvalue(r.rvalue, context)
+            R = context.get_rtype(rv)
+            values = R.get_maximal_elements()
+            from mcdp_dp.dp_limit import LimitMaximals
+            dp = LimitMaximals(R, values)
+            ndp = SimpleWrap(dp, fnames='_limit', rnames=[])
+            name = context.new_name('_limit')
+            context.add_ndp(name, ndp)
+            f = context.make_function(name, '_limit')
+            add_constraint(context, resource=rv, function=f)
         else:
-            raise DPInternalError('Cannot interpret %s' % describe_value(r))
+            msg = 'eval_statement(): cannot interpret.'
+            r = recursive_print(r)
+            raise_desc(DPInternalError, msg, r=r)
 
 def eval_build_problem(r, context):
     context = context.child()
@@ -554,6 +591,9 @@ def eval_build_problem(r, context):
             # nt recursive_print(s)
             eval_statement(s, context)
 
+    # take() optimization
+    context.ifun_finish()
+    context.ires_finish()
     # at this point we need to fix the case where there might be multiple
     # functions / resources
     fix_functions_with_multiple_connections(context)
