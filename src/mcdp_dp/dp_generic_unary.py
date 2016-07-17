@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
+from .primitive import EmptyDP
 from contracts import contract
-from contracts.utils import raise_wrapped, raise_desc
-from mcdp_dp import PrimitiveDP
-from mcdp_posets import Map, MapNotDefinedHere, NotBelongs, PosetProduct
-from mocdp.exceptions import mcdp_dev_warning, DPSemanticError
+from contracts.utils import raise_desc, raise_wrapped
+from mcdp_posets import Map, MapNotDefinedHere, NotBelongs
+from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
-from mcdp_dp.primitive import EmptyDP
 
 
 __all__ = [
@@ -51,6 +50,7 @@ class WrapAMap(EmptyDP):
 
     @contract(amap=Map)
     def __init__(self, amap):
+        assert isinstance(amap, Map), amap
         F = amap.get_domain()
         R = amap.get_codomain()
         EmptyDP.__init__(self, F=F, R=R)

@@ -29,3 +29,4 @@ from .dp_catalogue import *
 from .dp_uncertain import *
 from .dp_coproduct import *
 from .dp_dummy import *
+from .dp_sum_n_nats import *

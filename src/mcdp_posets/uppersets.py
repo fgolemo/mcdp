@@ -7,12 +7,13 @@ from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 import random
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
 
 __all__ = [
     'UpperSet',
     'UpperSets',
     'LowerSet',
-    # 'LowerSets',
+    'LowerSets',
     'lowerset_product',
     'upperset_product',
 ]
@@ -76,28 +77,26 @@ class UpperSets(Poset):
     @contract(P='$Poset')
     def __init__(self, P):
         self.P = P
+        self.top = self.get_top()
+        self.bot = self.get_bottom()
         if do_extra_checks:
-            try:
-                self.top = self.get_top()
-                self.belongs(self.top)
-                self.bot = self.get_bottom()
-                self.belongs(self.bot)
-                assert self.leq(self.bot, self.top)
-                assert not self.leq(self.top, self.bot)  # unless empty
-            except NotBounded:
-                pass
+            self.belongs(self.top)
+            self.belongs(self.bot)
+            assert self.leq(self.bot, self.top)
+            assert not self.leq(self.top, self.bot)  # unless empty
+
 
     def witness(self):
         w = self.P.witness()
         return UpperSet([w], self.P)
         
     def get_bottom(self):
-        x = self.P.get_bottom()
-        return UpperSet(set([x]), self.P)
+        minimals = self.P.get_minimal_elements()
+        return UpperSet(minimals, self.P)
 
     def get_top(self):
-        x = self.P.get_top()
-        return UpperSet(set([x]), self.P)
+        """ The top is the empty set. """
+        return UpperSet([], self.P)
 
     def get_test_chain(self, n):
         chain = self.P.get_test_chain(n)
@@ -188,6 +187,121 @@ class UpperSets(Poset):
 
 
 
+
+
+class LowerSets(Poset):
+
+    @contract(P='$Poset')
+    def __init__(self, P):
+        self.P = P
+        self.top = self.get_top()
+        self.bot = self.get_bottom()
+        if do_extra_checks:
+            self.belongs(self.top)
+            self.belongs(self.bot)
+            assert self.leq(self.bot, self.top)
+            assert not self.leq(self.top, self.bot)  # unless empty
+
+    def witness(self):
+        w = self.P.witness()
+        return LowerSet([w], self.P)
+
+    mcdp_dev_warning('need to think about this')
+    def get_top(self):
+        maximals = self.P.get_maximal_elements()
+        return LowerSet(set(maximals), self.P)
+
+    def get_bottom(self):
+        return LowerSet(set(), self.P)
+
+    def get_test_chain(self, n):
+        chain = reversed(self.P.get_test_chain(n))
+        f = lambda x: LowerSet(set([x]), self.P)
+        return map(f, chain)
+
+    def belongs(self, x):
+        if not isinstance(x, LowerSet):
+            msg = 'Not a lower set.'
+            raise NotBelongs(msg)
+        if not x.P == self.P:
+            mcdp_dev_warning('should we try casting?')
+            msg = 'Different poset: %s ≠ %s' % (self.P, x.P)
+            raise_desc(NotBelongs, msg, self=self, x=x)
+        return True
+
+    def check_equal(self, a, b):
+        m1 = a.maximals
+        m2 = b.maximals
+        if not (m1 == m2):
+            msg = 'The two sets are not equal\n   %s\n!= %s' % (self.format(a), self.format(b))
+            raise NotEqual(msg)
+
+    def check_leq(self, a, b):
+        if do_extra_checks():
+            self.belongs(a)
+            self.belongs(b)
+        if a == b:
+            return True
+        if a == self.bot:
+            return True
+        if b == self.top:
+            return True
+        if b == self.bot:
+            raise NotLeq('b = my ⊥')
+        if a == self.top:
+            raise NotLeq('a = my ⊤')
+
+        self.my_leq_(a, b)
+    def my_leq_(self, A, B):
+        # there exists an a in A that a >= b
+        def dominated(b):
+            problems = []
+            for a in A.maximals:
+                try:
+                    # if inverted: self.P.check_leq(b, a)
+                    self.P.check_leq(b, a)
+                    return True, None
+                except NotLeq as e:
+                    problems.append(e)
+            return False, problems
+
+        # for all elements in B
+        for b in B.maximals:
+            is_dominated, whynot = dominated(b)
+            if not is_dominated:
+                msg = "b = %s not dominated by any a in %s" % (b, A.maximals)
+                msg += '\n' + '\n- '.join(map(str, whynot))
+                raise NotLeq(msg)
+
+    def meet(self, a, b):  # "min" ∨
+        # To compute the meet (min) of two upper sets
+        # just take the union of the minimal elements
+        # (without redundant elements)
+        elements = set()
+        elements.update(a.maximals)
+        elements.update(b.maximals)
+        elements0 = poset_maxima(elements, self.P.leq)
+        r = LowerSet(elements0, self.P)
+        self.check_leq(r, a)
+        self.check_leq(r, b)
+        return r
+
+    def format0(self, x):
+        contents = " v ".join("x ≥ %s" % self.P.format(m)
+                        for m in sorted(x.maximals))
+
+        return "{x ∣ %s }" % contents
+
+    def format(self, x):
+        contents = ", ".join(self.P.format(m)
+                        for m in sorted(x.maximals))
+
+        return "↓{%s}" % contents
+
+    def __repr__(self):
+        return "L(%r)" % self.P
+
+
 @contract(s1=UpperSet, s2=UpperSet, returns=UpperSet)
 def upperset_product(s1, s2):
     assert isinstance(s1, UpperSet), s1
@@ -217,8 +331,6 @@ class LowerSet(Space):
                 raise NotBelongs(msg)
 
             mcdp_dev_warning('check_maximal()')
-            # from mcdp_posets import check_maximal
-            # check_maximal(self.minimals, P)
 
     def witness(self):
         if not self.maximals:
@@ -252,7 +364,7 @@ class LowerSet(Space):
 def lowerset_product(s1, s2):
     assert isinstance(s1, LowerSet), s1
     assert isinstance(s2, LowerSet), s2
-    res = set(zip(s1.minimals, s2.minimals))
+    res = set(zip(s1.maximals, s2.maximals))
     P = PosetProduct((s1.P, s2.P))
     return LowerSet(res, P)
 

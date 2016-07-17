@@ -1,11 +1,11 @@
 from .primitive import ApproximableDP, PrimitiveDP
 from contracts import contract
 from contracts.utils import check_isinstance
+from mcdp_dp.primitive import NotSolvableNeedsApprox
 from mcdp_posets import Nat, Poset  # @UnusedImport
 from mcdp_posets import PosetProduct, RcompUnits
-import numpy as np
 from mocdp.exceptions import mcdp_dev_warning
-from mcdp_dp.primitive import NotSolvableNeedsApprox
+import numpy as np
 
 __all__ = [
     'InvPlus2',
@@ -23,24 +23,15 @@ class InvPlus2(ApproximableDP):
         check_isinstance(F, RcompUnits)
         self.Rs = Rs
         R = PosetProduct(Rs)
-        M = R[0]
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
-
+        mcdp_dev_warning('Should I use the empty set?')
+        M = PosetProduct((F, R))
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
 
     def solve(self, f):
         raise NotSolvableNeedsApprox(type(self))
-#
-#     def solve(self, f):
-#         mcdp_dev_warning('Needs to raise Not?')
-#         n = 20
-#         options = np.linspace(0, f, n)
-#         mcdp_dev_warning('FIXME: bug - are we taking into account the units?')
-#         s = set()
-#         for o in options:
-#             s.add((o, f - o))
-#
-#         return self.R.Us(s)
 
+    def evaluate(self, m):
+        raise NotSolvableNeedsApprox(type(self))
 
     @contract(n='int,>=0')
     def get_lower_bound(self, n):
@@ -69,9 +60,15 @@ class InvPlus2L(PrimitiveDP):
             check_isinstance(_, RcompUnits)
         check_isinstance(F, RcompUnits)
         R = PosetProduct(Rs)
-        M = R[0]
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        M = PosetProduct((F, R))
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
         self.nl = nl
+
+    def evaluate(self, m):
+        f, r = m
+        ur = self.R.U(r)
+        lf = self.F.L(f)
+        return lf, ur
 
     def solve(self, f):
         if self.F.equal(f, self.F.get_top()):
@@ -104,9 +101,15 @@ class InvPlus2U(PrimitiveDP):
             check_isinstance(_, RcompUnits)
         check_isinstance(F, RcompUnits)
         R = PosetProduct(Rs)
-        M = R[0]
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        M = PosetProduct((F, R))
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
         self.nu = nu
+
+    def evaluate(self, m):
+        f, r = m
+        ur = self.R.U(r)
+        lf = self.F.L(f)
+        return lf, ur
 
     def solve(self, f):
 

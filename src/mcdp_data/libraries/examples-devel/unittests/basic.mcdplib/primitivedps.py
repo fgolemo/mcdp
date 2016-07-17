@@ -17,8 +17,8 @@ def CatalogueDP1():
     
     entries = [
         (m1, 1.0, 2.0),
-        (m1, 2.0, 4.0),
-        (m1, 3.0, 6.0),
+        (m2, 2.0, 4.0),
+        (m3, 3.0, 6.0),
     ]
     return CatalogueDP(F, R, M, entries)
 

@@ -94,7 +94,8 @@ class PrimitiveMeta(ABCMeta):
                             M.belongs(m)
                     except NotBelongs as e:
                         raise_wrapped(NotBelongs, e,
-                            'Result of get_implementations_f_r not in M.', self=self, m=m, M=M)
+                                      'Result of get_implementations_f_r not in M.',
+                                      self=self, m=m, M=M)
 
                     return res
 

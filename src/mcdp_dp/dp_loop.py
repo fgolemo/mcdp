@@ -103,7 +103,7 @@ class DPLoop0(PrimitiveDP):
 
     def evaluate(self, m):
         m0, f2 = self._unpack_m(m)
-        LF0, UR = self.dp.evaluate(m0)
+        LF0, UR = self.dp1.evaluate(m0)
         # now extract first components f1 and r1
         f1s = set()
         for fi in LF0.maximals:

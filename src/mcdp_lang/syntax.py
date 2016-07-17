@@ -172,7 +172,11 @@ class Syntax():
     # UpperSets(<poset>)
     UPPERSETS = spk(L('UpperSets'), CDP.UpperSetsKeyword)
     space_uppersets = sp(UPPERSETS + SLPAR + space + SRPAR,
-                   lambda t: CDP.MakeUpperSets(t[0], t[1]))
+                         lambda t: CDP.MakeUpperSets(t[0], t[1]))
+
+    LOWERSETS = spk(L('LowerSets'), CDP.LowerSetsKeyword)
+    space_lowersets = sp(LOWERSETS + SLPAR + space + SRPAR,
+                         lambda t: CDP.MakeLowerSets(t[0], t[1]))
 
     # finite_poset {
     #     a
@@ -231,19 +235,21 @@ class Syntax():
                                     SLPAR + space_single_element_poset_tag + SRPAR,
                               lambda t: CDP.SingleElementPoset(t[0], t[1]))
 
-    space_operand = (space_pint_unit ^
-                     space_powerset ^
-                     space_nat ^
-                     space_int ^
-                     load_poset ^
-                     code_spec ^
-                     space_finite_poset
-                     ^ space_uppersets
-                     ^ space_interval
-                     ^ space_product_with_labels
-                     ^ space_single_element_poset
-                     ^ space_coproduct
-                     )
+    space_operand = (
+        space_pint_unit
+        ^ space_powerset
+        ^ space_nat
+        ^ space_int
+        ^ load_poset
+        ^ code_spec
+        ^ space_finite_poset
+        ^ space_uppersets
+        ^ space_lowersets
+        ^ space_interval
+        ^ space_product_with_labels
+        ^ space_single_element_poset
+        ^ space_coproduct
+    )
 
 
     PRODUCT = sp(L('x') | L('×'), lambda t: CDP.product(t[0]))
@@ -287,7 +293,7 @@ class Syntax():
     TOP = spk(L(TOP_LITERAL) | L('⊤'), CDP.TopKeyword)
 
     valuewithunit_top = sp(TOP + space,
-                               lambda t: CDP.Top(t[0], t[1]))
+                           lambda t: CDP.Top(t[0], t[1]))
 
     # Bottom <space>
     BOTTOM_LITERAL = 'Bottom'
@@ -314,7 +320,8 @@ class Syntax():
         valuewithunit_top ^
         valuewithunit_bottom ^
         valuewithunit_minimals ^
-        valuewithunit_maximals)
+        valuewithunit_maximals
+    )
 
     # TODO: change
 

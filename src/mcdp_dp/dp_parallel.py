@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from .dp_series import get_product_compact
 from .primitive import NormalForm, PrimitiveDP
-from contracts.utils import indent
+from contracts.utils import indent, raise_wrapped
 from mcdp_posets import (
     Map, PosetProduct, UpperSet, UpperSets, lowerset_product, poset_minima,
     upperset_product)
 from mocdp.exceptions import do_extra_checks
 import itertools
+from mcdp_posets.space import NotBelongs
 
 
 __all__ = [
@@ -45,6 +46,18 @@ class Parallel(PrimitiveDP):
         m1s = self.dp1.get_implementations_f_r(f1, r1)
         m2s = self.dp2.get_implementations_f_r(f2, r2)
         options = set()
+
+        if do_extra_checks():
+            for m1 in m1s:
+                self.M1.belongs(m1)
+
+            try:
+                for m2 in m2s:
+                    self.M2.belongs(m2)
+            except NotBelongs as e:
+                msg = ' Invalid result from dp2'
+                raise_wrapped(NotBelongs, e, msg, dp2=self.dp2.repr_long())
+
         for m1 in m1s:
             for m2 in m2s:
                 m = pack(m1, m2)
@@ -52,7 +65,7 @@ class Parallel(PrimitiveDP):
 
         if do_extra_checks():
             for _ in options:
-                self.M.belongs(_)
+                self.I.belongs(_)
 
         return options
         

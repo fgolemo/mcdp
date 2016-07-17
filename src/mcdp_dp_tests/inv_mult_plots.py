@@ -577,11 +577,9 @@ def check_loop_result5a():
 
     pf = [p for p in points if feasible(p[0], p[1])]
     pu = [p for p in points if not feasible(p[0], p[1])]
-    print 'pf', pf
-    print 'pu', pu
     N2 = PosetProduct((Nat(), Nat()))
     Min_pf = N2.Us(poset_minima(pf, leq=N2.leq))
-    print 'Min(pf)', Min_pf
+    print('Min(pf): %s' % Min_pf)
     assert(Min_pf.minimals == set([(6, 3), (4, 4), (7, 0), (3, 6), (0, 7)]))
     r = Report()
     f = r.figure()
@@ -606,14 +604,13 @@ mcdp {
     
     requires x, y for f
     
-    f.z >= sqrt(f.x) + sqrt(f.y) + nat:4
+    f.z >= sqrt(f.x) + sqrt(f.y) + Nat:4
     
 }"""
     )
     dp = ndp.get_dp()
     R = dp.get_res_space()
     UR = UpperSets(R)
-    print dp
     print dp.repr_long()
     f0 = ()
     from mocdp import logger
@@ -650,8 +647,6 @@ def get_simple_equiv():
     s2 = SumNNat((Nat(), Nat()), Nat())
     s3 = WrapAMap(PlusNat(4))
     s4 = InvPlus2Nat(Nat(), (Nat(), Nat()))
-    print s0
-    print s1
     dp0 = wrap_series(s1.get_fun_space(), [s0, s1, s2, s3, s4])
     dp = make_loop(dp0)
     return dp0, dp
@@ -664,7 +659,6 @@ def check_loop_result5c():
 
     res = dp.solve(())
     print res
-
 
     R = dp0.get_res_space()
     UR = UpperSets(R)
@@ -723,9 +717,6 @@ def check_loop_result5c():
     converged = list(trace.get_iteration_values('converged'))
 
     print converged
-#     for i, r in enumerate(result):
-#         print('%d: %s' % (i, UR.format(r.s)))
-#         print('converged: %s' % str(r.converged))
 
     expected = [
         [(0, 0)],

@@ -5,8 +5,9 @@ from collections import namedtuple
 from contracts import contract
 from contracts.utils import indent, raise_desc
 from decent_logs import WithInternalLog
-from mcdp_posets import (Map, Ncomp, Poset, PosetProduct, Space, SpaceProduct,
-    UpperSet, UpperSets, poset_minima, LowerSet)  # @UnusedImport
+from mcdp_posets import LowerSet  # @UnusedImport
+from mcdp_posets import (Map, Ncomp, NotBelongs, Poset, PosetProduct, Space,
+    SpaceProduct, UpperSet, UpperSets, poset_minima)
 from mocdp.exceptions import do_extra_checks
 
 
@@ -42,6 +43,9 @@ class PrimitiveDP(WithInternalLog):
                 
         evaluate: I -> L(F), U(R)
         
+        future:
+            solve : F -> U(R)
+        
         f' is feasible for I if f' \in eval(I).f
     
     """
@@ -53,6 +57,7 @@ class PrimitiveDP(WithInternalLog):
         self.F = F
         self.R = R
         self.I = I
+        self.M = I
 
     @abstractmethod
     @contract(returns=UpperSet)
@@ -150,32 +155,28 @@ class PrimitiveDP(WithInternalLog):
             self.I.belongs(i)
             self.R.belongs(r)
 
+        lf, ur = self.evaluate(i)
         try:
-            used = self.evaluate_f_m(f, m)
-        except NotFeasible:
-            return
-        if self.R.leq(used, r):
-            msg = 'Generic implementation of check_feasible(), says:\n'
-            msg += ('f = %s -> [ m = %s ] -> used = %s <= r = %s' %
-                (f, m, self.R.format(used), self.R.format(r)))
-            raise_desc(Feasible, msg)
+            lf.belongs(f)
+            ur.belongs(r)
+        except NotBelongs:
+            pass
+        else:
+            msg = 'check_feasible failed.'
+            raise_desc(NotFeasible, msg, f=f, i=i, r=r, lf=lf, ur=ur)
 
     def check_feasible(self, f, m, r):
         if do_extra_checks():
             self.F.belongs(f)
             self.M.belongs(m)
             self.R.belongs(r)
-        used = self.evaluate_f_m(f, m)
-        if do_extra_checks():
-            self.R.belongs(used)
-        if not self.R.leq(used, r):
-            msg = 'Generic implementation of check_feasible(), says:\n'
-            msg += 'f = %s -> [self(%s)] -> %s <~= %s' % (
-                        self.F.format(f), self.M.format(m), self.R.format(used), self.R.format(r))
-            raise_desc(NotFeasible, msg)  # f=f, m=m, r=r, used=used)
-
-
-
+        lf, ur = self.evaluate(m)
+        try:
+            lf.belongs(f)
+            ur.belongs(r)
+        except NotBelongs:
+            msg = 'check_feasible failed.'
+            raise_desc(NotFeasible, msg, f=f, m=m, r=r, lf=lf, ur=ur)
 
     @contract(returns=UpperSet)
     def solve_trace(self, func, tracer):  # @UnusedVariable
@@ -311,6 +312,10 @@ class EmptyDP(PrimitiveDP):
         rs = self.solve(f)
         fs = LowerSet(set([f]), self.F)
         return fs, rs
+
+    def get_implementations_f_r(self, f, r):  # @UnusedVariable
+        i = f
+        return set([i])
 
 
 class ApproximableDP(PrimitiveDP):

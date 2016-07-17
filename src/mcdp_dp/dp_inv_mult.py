@@ -18,21 +18,16 @@ class InvMult2(ApproximableDP):
     @contract(Rs='tuple[2],seq[2]($Poset)')
     def __init__(self, F, Rs):
         R = PosetProduct(Rs)
-        M = R[0]
         self.F = F
         self.Rs = Rs
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        M = PosetProduct((F, R))
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
 
     def evaluate(self, m):
         raise NotSolvableNeedsApprox(type(self))
 
     def solve(self, f):
         raise NotSolvableNeedsApprox(type(self))
-
-    def evaluate_f_m(self, f, m):
-        if m == 0.0:
-            return (0.0, 0.0)
-        return (m, f / m)
 
     def get_lower_bound(self, n):
         return InvMult2L(self.F, self.Rs, n)
@@ -49,13 +44,20 @@ class InvMult2U(PrimitiveDP):
     @contract(Rs='tuple[2],seq[2]($Poset)')
     def __init__(self, F, Rs, n):
         R = PosetProduct(Rs)
-        M = R[0]
+
+        M = PosetProduct((F, R))
         self.F = F
         self.Rs = Rs
         self.R = R
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
 
         self.n = n
+
+    def evaluate(self, m):
+        f, r = m
+        ur = self.R.U(r)
+        lf = self.F.L(f)
+        return lf, ur
 
     def solve(self, f):
         top = self.F.get_top()
@@ -89,19 +91,25 @@ def sample(n):
     points.update(zip(ys, xs))
     return list(points)
 
-
 class InvMult2L(PrimitiveDP):
 
     @contract(Rs='tuple[2],seq[2]($Poset)')
     def __init__(self, F, Rs, n):
         R = PosetProduct(Rs)
-        M = R[0]
+        M = PosetProduct((F, R))
         self.F = F
         self.Rs = Rs
 
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
         self.R = R
         self.n = n
+
+
+    def evaluate(self, m):
+        f, r = m
+        ur = self.R.U(r)
+        lf = self.F.L(f)
+        return lf, ur
 
     def solve(self, f):
         top = self.F.get_top()

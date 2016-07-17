@@ -39,8 +39,8 @@ class CoProductDP(PrimitiveDP):
         Ms = [dp.get_imp_space_mod_res() for dp in dps]
 
         self.dps = dps
-        M = Coproduct1(tuple(Ms))
-        PrimitiveDP.__init__(self, F=F, R=R, I=M)
+        self.M = Coproduct1(tuple(Ms))
+        PrimitiveDP.__init__(self, F=F, R=R, I=self.M)
 
     def evaluate(self, m):
         i, mi = self.M.unpack(m)

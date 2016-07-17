@@ -1,5 +1,5 @@
 from mcdp_dp import PrimitiveDP
-from mcdp_posets import SpaceProduct, UpperSet
+from mcdp_posets import LowerSet, SpaceProduct, UpperSet
 from mocdp.exceptions import mcdp_dev_warning
 
 __all__ = [
@@ -21,10 +21,10 @@ class Template(PrimitiveDP):
     def evaluate(self, m):
         assert m == ()
         minimals = self.R.get_minimal_elements()
+        ur = UpperSet(minimals, self.R)
         maximals = self.F.get_maximal_elements()
-        UR = UpperSet(minimals, self.R)
-        LF = UpperSet(maximals, self.F)
-        return UR, LF
+        lf = LowerSet(maximals, self.F)
+        return lf, ur
 
 mcdp_dev_warning('Remove Dummy name')
 

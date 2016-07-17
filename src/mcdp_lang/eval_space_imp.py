@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
+from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_lang.namedtuple_tricks import recursive_print
 from mcdp_posets import (
-    Coproduct1, FiniteCollectionsInclusion, FinitePoset, Int, Nat, Poset,
-    PosetProduct, PosetProductWithLabels, Space, UpperSets)
-from mcdp_posets.interval import GenericInterval
+    FiniteCollectionsInclusion, FinitePoset, GenericInterval, Int, LowerSets,
+    Nat, Poset, PosetCoproduct, PosetProduct, PosetProductWithLabels, Space,
+    UpperSets)
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPInternalError
-from mcdp_posets.poset_coproduct import PosetCoproduct
 
 CDP = CDPLanguage
 
@@ -28,6 +27,7 @@ def eval_space(r, context):
             CDP.CodeSpecNoArgs: eval_space_code_spec,
             CDP.CodeSpec: eval_space_code_spec,
             CDP.MakeUpperSets: eval_space_makeuppersets,
+            CDP.MakeLowerSets: eval_space_makelowersets,
             CDP.SpaceInterval: eval_space_interval,
             CDP.ProductWithLabels: eval_space_productwithlabels,
             CDP.SingleElementPoset: eval_space_single_element_poset,
@@ -70,9 +70,11 @@ def eval_space_spacecoproduct(r, context):
     Ss = [eval_space(_, context) for _ in ops]
     return PosetCoproduct(tuple(Ss))
 
+
 def eval_space_powerset(r, context):
     P = eval_space(r.space, context)
     return FiniteCollectionsInclusion(P)
+
 
 def eval_space_productwithlabels(r, context):
     assert isinstance(r, CDP.ProductWithLabels)
@@ -97,14 +99,22 @@ def eval_space_interval(r, context):
     P = GenericInterval(va.unit, va.value, vb2.value)
     return P
 
+
 def eval_space_makeuppersets(r, context):
     P = eval_space(r.space, context)
     return UpperSets(P)
+
+
+def eval_space_makelowersets(r, context):
+    P = eval_space(r.space, context)
+    return LowerSets(P)
+
 
 def eval_space_code_spec(r, _context):
     from .eval_codespec_imp import eval_codespec
     res = eval_codespec(r, expect=Poset)
     return res
+
 
 def eval_space_finite_poset(r, context):  # @UnusedVariable
     chains = unwrap_list(r.chains) 
@@ -120,6 +130,7 @@ def eval_space_finite_poset(r, context):  # @UnusedVariable
             relations.add((a, b))
 
     return FinitePoset(universe=universe, relations=relations)
+
 
 def eval_poset_load(r, context):
     load_arg = r.name.value

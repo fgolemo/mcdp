@@ -44,9 +44,9 @@ class ConstantMinimals(PrimitiveDP):
 
     def evaluate(self, i):
         assert i == ()
-        fs = self.F.L(self.F.get_top())
-        rs = self.R.Us(self.c)
-        return fs, rs
+        lf = self.F.L(self.F.get_top())
+        ur = self.R.Us(self.values)
+        return lf, ur
 
     def solve(self, _):
         return self.R.Us(self.values)

@@ -6,3 +6,4 @@ from .map_composition import *
 from .join_map import *
 from .meet_map import *
 from .max1map import *
+from .sum_nats_n import *

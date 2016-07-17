@@ -16,19 +16,14 @@ class InvPlus2Nat(PrimitiveDP):
             check_isinstance(_, Nat)
         check_isinstance(F, Nat)
         R = PosetProduct(Rs)
-        M = R
+        M = PosetProduct((F, R))
         PrimitiveDP.__init__(self, F=F, R=R, I=M)
 
     def evaluate(self, m):
-        a, b = m
-        top = self.R.get_top()
-        if top in (a,b):
-            s = top
-        else:
-            s = a + b
-        UR = self.R.U((a, b))
-        LF = self.F.L(s)
-        return LF, UR
+        f, r = m
+        ur = self.R.U(r)
+        lf = self.F.L(f)
+        return lf, ur
 
     def solve(self, f):
         # FIXME: what about the top?
@@ -45,9 +40,8 @@ class InvPlus2Nat(PrimitiveDP):
 
         return self.R.Us(s)
 
-    def get_implementations_f_r(self, f, r):  # @UnusedVariable
-        r1, r2 = r  # @UnusedVariable
-        return set([r1])
+    def get_implementations_f_r(self, f, r):
+        return set([(f, r)])
 
     def evaluate_f_m(self, f, m):
         return (m, f - m)

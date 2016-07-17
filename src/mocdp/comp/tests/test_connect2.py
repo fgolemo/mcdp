@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
+from mcdp_dp.dp_dummy import Dummy
+from mcdp_posets import PosetProduct, Rcomp
 from mocdp.comp.connection import Connection, connect2
 from mocdp.comp.wrap import SimpleWrap
-from mcdp_dp.primitive import PrimitiveDP
-from mcdp_posets import PosetProduct, Rcomp, SpaceProduct
 from nose.tools import assert_equal
 
 
@@ -17,19 +17,19 @@ def get_dummy(fnames, rnames):
     if len(rnames) == 1:
         R = R[0]
 
-    class Dummy(PrimitiveDP):
-        def __init__(self):
-            M = SpaceProduct(())
-            PrimitiveDP.__init__(self, F=F, R=R, M=M)
-        def solve(self, _func):
-            return self.R.bottom()
+#     class Dummy(PrimitiveDP):
+#         def __init__(self):
+#             M = SpaceProduct(())
+#             PrimitiveDP.__init__(self, F=F, R=R, M=M)
+#         def solve(self, _func):
+#             return self.R.bottom()
 
     if len(fnames) == 1:
         fnames = fnames[0]
     if len(rnames) == 1:
         rnames = rnames[0]
 
-    return SimpleWrap(Dummy(), fnames, rnames)
+    return SimpleWrap(Dummy(F, R), fnames, rnames)
     
 @comptest
 def check_connect2_a():

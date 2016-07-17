@@ -7,6 +7,7 @@ from mcdp_posets import (NotEqual, NotLeq, PosetProduct, UpperSets,
     get_types_universe)
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima, poset_maxima
 from mocdp.exceptions import do_extra_checks
+from mcdp_posets.uppersets import UpperSet, LowerSet
 
 
 class DPLoop2(PrimitiveDP):
@@ -71,7 +72,9 @@ class DPLoop2(PrimitiveDP):
         _, _, unpack = get_product_compact(self.M0, self.F2, self.R2)
         m0, f2, r2 = unpack(m)
 
-        LF0, UR0 = self.dp.evaluate(m0)
+        LF0, UR0 = self.dp1.evaluate(m0)
+        assert isinstance(LF0, LowerSet), (LF0, self.dp1)
+        assert isinstance(UR0, UpperSet), (UR0, self.dp1)
 
         # now extract first components f1 and r1
         f1s = set()

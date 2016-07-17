@@ -17,7 +17,9 @@ __all__ = [
 
 
 class Max1(WrapAMap):
-
+    """
+        f -> max(value, f)
+    """
     def __init__(self, F, value):
         assert isinstance(F, Poset)
         m = Max1Map(F, value)

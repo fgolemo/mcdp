@@ -240,6 +240,9 @@ class CDPLanguage():
     # UpperSets(<space>)
     UpperSetsKeyword = namedtuplewhere('UpperSetsKeyword', 'keyword')
     MakeUpperSets = namedtuplewhere('MakeUpperSets', 'keyword space')
+    # LowerSets(<space>)
+    LowerSetsKeyword = namedtuplewhere('LowerSetsKeyword', 'keyword')
+    MakeLowerSets = namedtuplewhere('MakeLowerSets', 'keyword space')
 
     # Uncertain(L, U)
     UncertainKeyword = namedtuplewhere('UncertainKeyword', 'keyword')

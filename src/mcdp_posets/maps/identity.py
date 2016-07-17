@@ -1,5 +1,9 @@
-from mcdp_posets.space import Map, Space
 from contracts import contract
+from mcdp_posets import Map, Space
+
+__all__ = [
+    'IdentityMap',
+]
 
 class IdentityMap(Map):
 

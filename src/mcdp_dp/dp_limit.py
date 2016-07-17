@@ -26,7 +26,7 @@ class Limit(PrimitiveDP):
     def evaluate(self, i):
         assert i == ()
         rs = self.R.U(self.R.get_bottom())
-        fs = self.F.L(self.c)
+        fs = self.F.L(self.limit)
         return fs, rs
 
     def solve(self, f):

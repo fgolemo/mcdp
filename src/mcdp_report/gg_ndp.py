@@ -4,7 +4,7 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (Constant, Conversion, GenericUnary, Identity, InvMult2,
     InvPlus2, InvPlus2Nat, Limit, Max, MeetNDual, Min, Mux, MuxMap, Product,
-    ProductN, Sum, SumN, SumNNat, WrapAMap)
+    ProductN, Sum, SumN, WrapAMap)
 from mcdp_lang.blocks import get_missing_connections
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
@@ -18,6 +18,7 @@ from mcdp_dp.dp_max import JoinNDP
 from types import NoneType
 from mcdp_dp.dp_constant import ConstantMinimals
 from mcdp_dp.dp_flatten import TakeRes, TakeFun
+from mcdp_dp.dp_sum_n_nats import SumNNat
 
 STYLE_GREENRED = 'greenred'
 STYLE_GREENREDSYM = 'greenredsym'

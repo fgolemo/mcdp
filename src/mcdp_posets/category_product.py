@@ -3,6 +3,7 @@ from .poset_product import PosetProduct
 from .space_product import SpaceProduct
 from contracts import contract
 from .space import Space  # @UnusedImport
+from mocdp.exceptions import do_extra_checks
 
 __all__ = [
     'get_product_compact',
@@ -43,6 +44,8 @@ def _prod_make(spaces):
     return S
 
 def _prod_make_state(elements, spaces):
+    assert isinstance(elements, tuple), elements
+    assert isinstance(spaces, tuple), spaces
 
     def get_state(X, x):
         if isinstance(X, SpaceProduct):
@@ -52,6 +55,8 @@ def _prod_make_state(elements, spaces):
 
     s = ()
     for space, e in zip(spaces, elements):
+        if do_extra_checks():
+            space.belongs(e)
         s = s + get_state(space, e)
 
     if len(s) == 1:

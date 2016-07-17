@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from .primitive import PrimitiveDP
 from mcdp_posets import Poset
-from mcdp_dp.primitive import EmptyDP
+from mcdp_dp.dp_generic_unary import WrapAMap
+from mcdp_posets.maps.identity import IdentityMap
 
 
 __all__ = [
@@ -11,18 +11,14 @@ __all__ = [
 ]
 
 
-class IdentityDP(EmptyDP):
+class IdentityDP(WrapAMap):
 
     @contract(F=Poset)
     def __init__(self, F):
-        R = F
-        EmptyDP.__init__(self, F=F, R=R)
-
-    def solve(self, f):
-        return self.R.U(f)
+        amap = IdentityMap(F, F)
+        WrapAMap.__init__(self, amap)
 
     def __repr__(self):
         return 'Id(%r)' % self.F
-
 
 Identity = IdentityDP

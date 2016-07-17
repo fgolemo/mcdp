@@ -1,73 +1,44 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
-from mcdp_dp.dp_series import get_product_compact
+from contracts.utils import raise_desc
 from mcdp_dp.primitive import Feasible, NotFeasible, NotSolvableNeedsApprox
 from mcdp_lang import parse_ndp
-from mcdp_posets import PosetProduct, SpaceProduct
-from mcdp_posets import R_Energy, R_Time, R_Weight, R_dimensionless
+from mcdp_posets import LowerSets, R_dimensionless, SpaceProduct, UpperSets
 from mcdp_tests.generation import for_all_dps
 from nose.tools import assert_equal
 
 
 @for_all_dps
-def check_evaluate_f_m1(id_dp, dp):
+def check_evaluate(id_dp, dp):
+    """ Test for PrimitiveDP:evaluate() """
     print('Testing %s: %s' % (id_dp, dp))
     F = dp.get_fun_space()
     R = dp.get_res_space()
+    UR = UpperSets(R)
+    LF = LowerSets(F)
     M = dp.get_imp_space_mod_res()
     
-    f0 = F.get_bottom()
+    # We get a random m
     m0 = M.witness()
 
     try:
-        r = dp.evaluate_f_m(f0, m0)
-        R.belongs(r)
-    except NotFeasible:
-        pass
+        lf, ur = dp.evaluate(m0)
     except NotSolvableNeedsApprox:
-        pass
+        return
 
-@comptest
-def check_products():
-    F1 = R_Weight
-    F2 = R_Time
-    F3 = R_Energy
-    M, pack, unpack = get_product_compact(F1, F2, F3)
+    UR.belongs(ur)
+    LF.belongs(lf)
 
-    print(M)
-    s = pack(F1.get_top(), F2.get_bottom(), F3.get_top())
-    print(s)
-    u = unpack(s)
-    assert_equal(u, s)
+    if not lf.maximals or not ur.minimals:
+        msg = 'No points'
+        raise_desc(ValueError, msg, lf=lf, ur=ur, m0=m0, M=M, dp=dp.repr_long())
 
-    F1 = R_Time
-    F2 = PosetProduct(())
-    F3 = R_Energy
-    F = PosetProduct((F1, F2, F3))
-    print('F: %s' % F)
-    M, pack, unpack = get_product_compact(F1, F2, F3)
-
-    print('M: %s' % M)
-    element = (F1.get_top(), F2.get_bottom(), F3.get_top())
-    print('elements: %s' % F.format(element))
-    s = pack(*element)
-    print('packed: %s' % str(s))
-    u = unpack(s)
-    print('depacked: %s' % str(u))
-    assert_equal(u, element)
-
-
-    F1 = PosetProduct(())
-    M, pack, unpack = get_product_compact(F1)
-
-    print('M: %s' % M)
-    element = ((),)
-    print('elements: %s' % F.format(*element))
-    s = pack(*element)
-    print('packed: %s' % str(s))
-    u = unpack(s)
-    print('depacked: %s' % str(u))
-    assert_equal(u, element)
+    # take one possible feasible pair
+    f = list(lf.maximals)[0]
+    r = list(ur.minimals)[0]
+    # this should be feasible
+    # no, this is not feasible, because m0 was chosen randomly
+    # dp.check_feasible(f, m0, r)
 
 
 @comptest
@@ -159,6 +130,9 @@ def check_evaluation2():
     dp = ndp.get_dp()
     print(dp.repr_long())
     M = dp.get_imp_space_mod_res()
+
+    Is = dp.get_implementations_f_r((), ())
+    print Is
 
     assert_equal(M, SpaceProduct((R_dimensionless,) * 4))
     assert_equal(dp.get_res_space(), SpaceProduct(()))

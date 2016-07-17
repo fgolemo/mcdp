@@ -6,6 +6,9 @@ from mocdp.exceptions import do_extra_checks
 __all__ = ['Max1Map']
 
 class Max1Map(Map):
+    """
+        f -> max(value, f)
+    """
     def __init__(self, F, value):
         if do_extra_checks():
             F.belongs(value)

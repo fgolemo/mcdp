@@ -46,7 +46,8 @@ class Mux(WrapAMap):
         return 'Mux(%r → %r, %s)' % (self.F, self.R, self.coords)
 
     def repr_long(self):
-        s = 'Mux(%s)' % self.amap.coords.__repr__()
+        s = 'Mux(%r -> %r, %s)    I = %s' % (self.F, self.R,
+                                             self.amap.coords.__repr__(), self.get_imp_space())
         return s
 
 class TakeFun(Mux):
@@ -75,11 +76,3 @@ def get_flatten_muxmap(F0):
         else:
             coords.append(i)
     return coords
-
-# class Flatten(Mux):
-#     def __init__(self, F):
-#         coords = get_flatten_muxmap(F)
-#         Mux.__init__(self, F, coords)
-#
-#     def __repr__(self):
-#         return 'Flatten(%r→%r, %s)' % (self.F, self.R, self.coords)

@@ -68,7 +68,6 @@ class ParallelN(PrimitiveDP):
 
         return res
 
-    @contract(returns='tuple($LowerSet, $UpperSet)')
     def evaluate(self, m):
         _, _, unpack = get_product_compact(*tuple(self.Ms))
 
