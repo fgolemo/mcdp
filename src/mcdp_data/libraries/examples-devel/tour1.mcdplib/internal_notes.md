@@ -15,23 +15,26 @@ mcdp {
 </pre>
 ~~~
 
+<pre class="mcdp" id='submodel'>
+mcdp  {
+	provides c2 [J]
+	requires m2 [g]
+	m2 >= 10g
+	c2 <= 10J
+}
+</pre>
+
 
 <pre class="mcdp" id='model'>
 mcdp {
 	provides capacity [J]
 	requires mass [g]
-
-	s = instance mcdp  {
-		provides c2 [J]
-		requires m2 [g]
-		m2 >= 10g
-		c2 <= 10J
-	}
-	mass>= s.m2
-	capacity <=  s.c2
+	s = instance `submodel
+	mass >= s.m2
+	capacity <= s.c2
 }
 </pre>
- 
+
 ### mcdp_ndp_graph_templatized
 
 ~~~

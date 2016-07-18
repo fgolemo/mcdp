@@ -130,7 +130,11 @@ class MCDPLibrary():
                                   MCDPLibrary.parse_template)
 
 
+    @contract(name=str, extension=str)
     def _load_generic(self, name, extension, parsing):
+        if not isinstance(name, str):
+            msg = 'Expected a string for the name.'
+            raise_desc(ValueError, msg, name=name)
         filename = '%s.%s' % (name, extension)
         f = self._get_file_data(filename)
         data = f['data']
