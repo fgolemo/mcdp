@@ -26,7 +26,6 @@
 [Products](types_poset_products.html)
 
 
-
 **Approximations**
 
 [Upper/lower bounds of MCPDs](adv_approximations.html)
@@ -36,12 +35,14 @@
 
 <a href='scenarios.html'/>
 
-[Space Rovers energetics](energy_choices.html)
-[Space Rovers energetics](energy_choices2.html)
-[Space Rovers energetics](energy_choices3.html)
+[The UAV model](drone_complete.html)
 
 [The plug/socket domain](sockets.html)
 [The plug/socket domain](sockets2.html)
+
+[Space Rovers energetics](energy_choices.html)
+[Space Rovers energetics](energy_choices2.html)
+[Space Rovers energetics](energy_choices3.html)
 
 
 **Draft documentation**
