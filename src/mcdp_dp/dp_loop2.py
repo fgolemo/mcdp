@@ -216,6 +216,7 @@ class DPLoop2(PrimitiveDP):
         UR.belongs(s0)
         trace.log('Iterating in UR = %s' % UR)
         trace.log('Starting from %s' % UR.format(s0))
+        trace.log('dp0: %s' % self.dp1.repr_long())
 
         S = [Iteration(s=s0, converged=set())]
         for i in range(1000000):  # XXX
@@ -269,6 +270,9 @@ def dploop2_iterate(dp0, f1, R, S, trace):
     for (r1, r2) in S.minimals:
         # what are the results of solve(f1, f2)?
         hr = dp0.solve_trace((f1, r2), trace)
+
+        print('(f1,r2)=(%s,%s)' % (f1, r2))
+        print('| -> %s ' % hr)
 
         for (r1b, r2b) in hr.minimals:
             valid = R1.leq(r1, r1b)
