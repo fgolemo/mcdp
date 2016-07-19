@@ -189,6 +189,7 @@ class DPLoop2(PrimitiveDP):
         UR.belongs(s0)
         trace.log('Iterating in UR = %s' % UR)
         trace.log('Starting from %s' % UR.format(s0))
+        trace.log('dp0: %s' % self.dp1.repr_long())
 
         S = [Iteration(s=s0, converged=set())]
         for i in range(1000000):  # XXX

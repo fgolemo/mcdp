@@ -84,7 +84,8 @@ class Nat(Poset):
         return not self.__eq__(other)
 
     def __repr__(self):
-        return "ℕ"
+        # return "ℕ"
+        return "N"
 
     def format(self, x):
         if isinstance(x, int):
