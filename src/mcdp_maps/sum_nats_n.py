@@ -26,8 +26,9 @@ class SumNatsN(Map):
         for xi in x:
             if N.equal(x, top):
                 return top
-        res += xi
+            res += xi
         if np.isinf(res):
             return top
+
         return res
 

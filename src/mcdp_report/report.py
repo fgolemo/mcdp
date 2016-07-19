@@ -117,7 +117,8 @@ def gvgen_from_dp(dp0, imp=None):
     def go_series(dp, imp):
         assert isinstance(dp, Series0)
         if imp is not None:
-            m1, m_extra, m2 = dp._unpack_m(imp)
+            m1, m2 = dp._unpack_m(imp)
+            m_extra = None
         else:
             m1 = m_extra = m2 = None
 

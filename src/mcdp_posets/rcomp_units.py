@@ -45,6 +45,7 @@ class RcompUnits(Rcomp):
         # graphviz does not support three-byte unicode
         # c = "ℝ̅"
         c = "ℝᶜ"
+        c = 'R'
 
         if self.units == R_dimensionless.units:
             return '%s[]' % c
