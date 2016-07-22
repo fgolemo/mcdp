@@ -9,6 +9,8 @@ __all__ = [
 
 class CDPLanguage():
 
+    # min(), max(), etc.
+    ProcName = namedtuplewhere('ProcName', 'name')
     GenericNonlinearity = namedtuplewhere('GenericNonlinearity',
                                           'function op1 R_from_F')
 
@@ -209,6 +211,8 @@ class CDPLanguage():
 
     Power = namedtuplewhere('Power', 'op1 glyph exponent')
     BuildProblem = namedtuplewhere('BuildProblem', 'keyword statements')
+
+    ModelStatements = namedtuplewhere('ModelStatements', 'statements')
 
     # Finite posets
     # finite_poset { a <= b }

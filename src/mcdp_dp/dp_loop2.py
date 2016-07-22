@@ -271,6 +271,9 @@ def dploop2_iterate(dp0, f1, R, S, trace):
         # what are the results of solve(f1, f2)?
         hr = dp0.solve_trace((f1, r2), trace)
 
+        print('(f1,r2)=(%s,%s)' % (f1, r2))
+        print('| -> %s ' % hr)
+
         for (r1b, r2b) in hr.minimals:
             valid = R1.leq(r1, r1b)
 

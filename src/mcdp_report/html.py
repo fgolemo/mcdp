@@ -6,8 +6,8 @@ from mcdp_lang.namedtuple_tricks import isnamedtuplewhere
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
+from mocdp import logger
 from mocdp.exceptions import mcdp_dev_warning
-
 
 def isolate_comments(s):
     lines = s.split("\n")
@@ -54,21 +54,22 @@ def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: 
     if not isnamedtuplewhere(block):
         raise ValueError(block)
 
-    # print print_ast(block)
+    print print_ast(block)
     # XXX: this should not be necessary anymore
     block2 = make_tree(block, character_end=len(s))
     # print print_ast(block2)
 
     snippets = list(print_html_inner(block2))
-    assert len(snippets) == 1
+    # the len is > 1 for mcdp_statements
+    assert len(snippets) == 1, snippets
     snippet = snippets[0]
+    transformed_p = snippet.transformed
+    # transformed_p = "".join(snippet.transformed for snippet in snippets)
 
     def sanitize_comment(x):
         x = x.replace('>', '&gt;')
         x = x.replace('<', '&lt;')
         return x
-
-    transformed_p = (snippet.transformed)
 
     # add back the white space
     if empty_lines:
@@ -83,11 +84,11 @@ def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: 
 #             print('orig %d: %s' % (i, s_lines[i]))
 #             print('trans %d: %s' % (i, lines[i]))
         msg = 'Lost some lines while pretty printing: %s, %s' % (len(lines), len(s_comments))
-        print(msg)
+        logger.debug(msg)
         if len(s) > 10:
-            print('original string[:10] = %r' % s[:10])
-            print('original string[-10:] = %r' % s[-10:])
-    
+            logger.debug('original string[:10] = %r' % s[:10])
+            logger.debug('original string[-10:] = %r' % s[-10:])
+
     out = ""
     for i, (a, comment) in enumerate(zip(lines, s_comments)):
         line = a

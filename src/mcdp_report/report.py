@@ -92,7 +92,7 @@ def gvgen_from_dp(dp0, imp=None):
         else:
             r = go_simple(dp, imp)
         return r
-            
+
     def go_simple(dp, imp):
         label = type(dp).__name__
         if isinstance(dp, Mux):
@@ -113,7 +113,7 @@ def gvgen_from_dp(dp0, imp=None):
 
         gg.styleApply("simple", n)
         return (n, n)
-            
+
     def go_series(dp, imp):
         assert isinstance(dp, Series0)
         if imp is not None:
@@ -132,7 +132,7 @@ def gvgen_from_dp(dp0, imp=None):
         gg.newLink(n1o, n2i, label=label)
 
         return (n1i, n2o)
-        
+
     def go_parallel(dp, imp):
         if imp is not None:
             m1, m2 = dp._split_m(imp)
