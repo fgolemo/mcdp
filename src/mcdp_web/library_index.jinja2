@@ -14,9 +14,11 @@
 	{{ render_library_doc(index_doc) | safe }}
 {% else %}
 
-<p>Click &#9776; in the upper left and select "new" to add a new model.</p>
+<!--<p>Click &#9776; in the upper left and select "new" to add a new model.</p>-->
 
 {% if navigation['documents'] %}
+<p> Documents available as part of the <code>{{navigation['current_library']}}</code>
+	current library:</p>
 <ul>
 	{% for d in navigation['documents'] %}
 	<li><a href='{{d['url']}}'>{{d['name']}}</a></li>
