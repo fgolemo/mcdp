@@ -46,11 +46,10 @@ class InvPlus2(ApproximableDP):
         return InvPlus2U(F, Rs, n)
 
     def get_implementations_f_r(self, f, r):  # @UnusedVariable
-        r1, r2 = r  # @UnusedVariable
-        return set([r1])
+        raise NotSolvableNeedsApprox(type(self))
 
-    def evaluate_f_m(self, f, m):
-        return (m, f - m)
+#     def evaluate_f_m(self, f, m):
+#         return (m, f - m)
 
 class InvPlus2L(PrimitiveDP):
 
@@ -69,6 +68,9 @@ class InvPlus2L(PrimitiveDP):
         ur = self.R.U(r)
         lf = self.F.L(f)
         return lf, ur
+
+    def get_implementations_f_r(self, f, r):  # @UnusedVariable
+        return set([(f, r)])
 
     def solve(self, f):
         if self.F.equal(f, self.F.get_top()):
@@ -104,6 +106,9 @@ class InvPlus2U(PrimitiveDP):
         M = PosetProduct((F, R))
         PrimitiveDP.__init__(self, F=F, R=R, I=M)
         self.nu = nu
+
+    def get_implementations_f_r(self, f, r):  # @UnusedVariable
+        return set([(f, r)])
 
     def evaluate(self, m):
         f, r = m

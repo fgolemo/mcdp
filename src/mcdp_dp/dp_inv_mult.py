@@ -59,6 +59,10 @@ class InvMult2U(PrimitiveDP):
         lf = self.F.L(f)
         return lf, ur
 
+    def get_implementations_f_r(self, f, r):  # @UnusedVariable
+        # TODO: check feasible
+        return set([(f, r)])
+
     def solve(self, f):
         top = self.F.get_top()
         if f == top:
@@ -104,6 +108,9 @@ class InvMult2L(PrimitiveDP):
         self.R = R
         self.n = n
 
+    def get_implementations_f_r(self, f, r):  # @UnusedVariable
+        # TODO: check feasible
+        return set([(f, r)])
 
     def evaluate(self, m):
         f, r = m
