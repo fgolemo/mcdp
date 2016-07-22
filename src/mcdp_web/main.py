@@ -203,9 +203,10 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         f = os.path.join(docs, '%s.md' % docname)
         import codecs
         data = codecs.open(f, encoding='utf-8').read()  # XXX
-        html = render_markdown(data)
-
-        return {'contents': html}
+        data_str = data.encode('utf-8')
+        html = render_markdown(data_str)
+        html_u = unicode(html, 'utf-8')
+        return {'contents': html_u}
 
     # This is where we keep all the URLS
     def get_lmv_url(self, library, model, view):
