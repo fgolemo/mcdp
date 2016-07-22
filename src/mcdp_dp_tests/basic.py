@@ -1,7 +1,6 @@
 from mcdp_dp import NotSolvableNeedsApprox
+from mcdp_posets import NotBounded, UpperSets
 from mcdp_tests.generation import for_all_dps
-from mcdp_posets.poset import NotBounded
-from mcdp_posets.uppersets import UpperSets
 
 
 @for_all_dps

@@ -102,7 +102,7 @@ class DPLoop0(PrimitiveDP):
         return m0, f2
 
     def evaluate(self, m):
-        m0, f2 = self._unpack_m(m)
+        m0, _f2 = self._unpack_m(m)
         LF0, UR = self.dp1.evaluate(m0)
         # now extract first components f1 and r1
         f1s = set()
@@ -183,27 +183,6 @@ class DPLoop0(PrimitiveDP):
                                                                 F2.format(used), F2.format(r))
             msg += "\n f2 = %10s -->|" % F2.format(f2)
             raise_desc(NotFeasible, msg)
-
-#
-#     def is_feasible(self, f1, m, r):
-#         from mcdp_dp.dp_series import get_product_compact
-#         _, _, unpack = get_product_compact(self.M0, self.F2)
-#         m0, f2 = unpack(m)
-#         f = (f1, f2)
-#         print('checking feasilbility for loop')
-#         print('f = %s' % str(f))
-#         print('m0 = %s, f2 = %s' % (m0, f2))
-#
-#         if not self.dp1.is_feasible(f, m0, r):
-#             print('The internal one is not feasibile with (%s, %s, %s)' % (f, m0, r))
-#             return False
-#         used = self.evaluate_f_m(f, m0)
-#         print('used = %s' % str(used))
-#         ok1 = self.R.leq(used, r)
-#         ok2 = self.R.leq(r, f2)
-#         print('ok1 = %s' % ok1)
-#         print('ok2 = %s' % ok2)
-#         return ok1 and ok2
 
     def get_normal_form(self):
         """
