@@ -1,39 +1,39 @@
-mcdp {  
-  provides travel_distance [km]
-  provides num_missions [R]
-  provides carry_payload [g] 
+mcdp {
+    provides travel_distance [km]
+    provides num_missions [R]
+    provides carry_payload [g]
 
-  requires total_cost_ownership [$]
+    requires total_cost_ownership [$]
 
-  strategy = new Strategy
+    strategy = new Strategy
 
-  actuation_energetics = new ActuationEnergetics
+    actuation_energetics = new ActuationEnergetics
 
-  endurance prov. by actuation_energetics>= endurance req. by strategy
-  velocity prov. by actuation_energetics>= velocity req. by strategy
-  num_missions prov. by actuation_energetics >= provided num_missions
-  extra_payload prov. by actuation_energetics>= provided carry_payload
-  distance prov. by strategy >= provided travel_distance
+    endurance prov. by actuation_energetics>= endurance req. by strategy
+    velocity prov. by actuation_energetics>= velocity req. by strategy
+    num_missions prov. by actuation_energetics >= provided num_missions
+    extra_payload prov. by actuation_energetics>= provided carry_payload
+    distance prov. by strategy >= provided travel_distance
 
-  computer = new Computer 
-  perception = new Perception 
-  computation prov. by computer>= computation req. by perception
+    computer = new Computer
+    perception = new Perception
+    computation prov. by computer>= computation req. by perception
 
 
-  sensor =  new Sensor 
-  resolution prov. by sensor >= camera_resolution req. by perception
-  sensor.framerate >= perception.camera_framerate
-  sensor.fov >= perception.camera_fov
-  
-  perception.velocity >= strategy.velocity
-  actuation_energetics.extra_power >= computer.power + sensor.power
+    sensor = new Sensor
+    resolution prov. by sensor >= camera_resolution req. by perception
+    sensor.framerate >= perception.camera_framerate
+    sensor.fov >= perception.camera_fov
 
-  # We can take into account the shipping cost
-  shipping = new Shipping
-  
-  total_mass = actuation_energetics.total_mass 
+    perception.velocity >= strategy.velocity
+    actuation_energetics.extra_power >= computer.power + sensor.power
 
-  shipping.ships >= total_mass
+    # We can take into account the shipping cost
+    shipping = new Shipping
 
-  total_cost_ownership >= shipping.postage + actuation_energetics.total_cost
+    total_mass = actuation_energetics.total_mass
+
+    shipping.ships >= total_mass
+
+    total_cost_ownership >= shipping.postage + actuation_energetics.total_cost
 }

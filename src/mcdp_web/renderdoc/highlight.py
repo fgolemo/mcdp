@@ -256,7 +256,8 @@ def highlight_mcdp_code(library, frag, realpath, raise_errors=False):
                     if tag.has_attr('label'):
                         max_len = max(max_len, len(tag['label']) + 6)
 
-                    bonus = 0
+                    # need at least 1 to account for padding etc.
+                    bonus = 1
                     style = 'width: %dch;' % (max_len + bonus)
                 else:
                     # using <code>
@@ -301,6 +302,7 @@ def highlight_mcdp_code(library, frag, realpath, raise_errors=False):
     go('pre.mcdp_poset', Syntax.space, "mcdp_poset", use_pre=True)
     go('pre.mcdp_value', Syntax.rvalue, "mcdp_value", use_pre=True)
     go('pre.mcdp_template', Syntax.template, "mcdp_template", use_pre=True)
+    go('pre.mcdp_statements', Syntax.dp_model_statements, "mcdp_statements", use_pre=True)
 
     go('code.mcdp', Syntax.ndpt_dp_rvalue, "mcdp", use_pre=False)
     go('code.mcdp_poset', Syntax.space, "mcdp_poset", use_pre=False)

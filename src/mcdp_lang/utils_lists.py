@@ -20,6 +20,8 @@ def is_a_special_list(x):
     return 'List' in type(x).__name__
 
 def make_list(x, where=None):
+#     if where is None:
+#         raise ValueError()
     try:
         if not len(x):
             return list_types[0](dummy='dummy', where=where)

@@ -4,5 +4,5 @@ mcdp {
 
     p0 = 1 W
     p1 = 100 W/flops
-    power >= p0 + p1 * computation 
- }
+    power >= p0 + p1 * computation
+}

@@ -20,11 +20,11 @@ mcdp {
 </tr>
 </table>
 
-Let's also define the MCDP ``actuation``:
+Let's also define the MCDP ``Actuation1``:
 
 <table>
 <tr><td >
-<pre class="mcdp" id='Actuation' label='Actuation.mcdp'>
+<pre class="mcdp" id='Actuation1' label='Actuation1.mcdp'>
 mcdp {
 	provides lift [N]
 	requires power [W]
@@ -38,12 +38,12 @@ mcdp {
 </pre>
 </td>
 <td>
-<pre class='ndp_graph_templatized_labeled' direction='LR'>`Actuation</pre>
+<pre class='ndp_graph_templatized_labeled' direction='LR'>`Actuation1</pre>
 </td>
 </tr>
 </table>
 
-<pre class='ndp_graph_enclosed' direction='LR'>`Actuation</pre>
+<pre class='ndp_graph_enclosed' direction='LR'>`Actuation1</pre>
 
 
 Then we can combine these two together.
@@ -56,7 +56,7 @@ keyword ``new``. This creates two sub-design problems, for now unconnected.
 <td>
 <pre class="mcdp" id='combined1'>
 mcdp {
-	actuation = new Actuation
+	actuation = new Actuation1
 	battery = new Battery
 }
 </pre>
@@ -72,7 +72,7 @@ endurance &times; power.
 
 <pre class="mcdp" id='combined2'>
 mcdp {
-	actuation = new Actuation
+	actuation = new Actuation1
 	battery = new Battery
 
 	# battery must provide power for actuation
@@ -97,7 +97,7 @@ of the battery plus the mass of the payload times gravity:
 <td>
 <pre class="mcdp" id='composition' label='Composition.mcdp'>
 mcdp {
-	actuation = new Actuation
+	actuation = new Actuation1
 	battery = new Battery
 
 	# battery must provide power for actuation

@@ -521,10 +521,11 @@ class Syntax():
         'square': lambda op1: CDP.GenericNonlinearity(square, op1, lambda F: F),
     }
 
-    unary_op = Or([L(x) for x in unary])
+    unary_op = Or([sp(L(x), lambda t: CDP.ProcName(t[0]))
+                   for x in unary])
     rvalue_unary_expr = sp((C(unary_op, 'opname') - SLPAR
                     + C(rvalue, 'op1')) - SRPAR,
-                    lambda t: Syntax.unary[t['opname']](t['op1']))
+                    lambda t: Syntax.unary[t['opname'].name](t['op1']))
 
     binary = {
         'max': CDP.OpMax,
@@ -634,13 +635,17 @@ class Syntax():
                  ^ ignore_res
                  ^ ignore_fun)
 
-    dp_model_statements = sp(ZeroOrMore(S(ow) + line_expr),
-                             lambda t: make_list(list(t)))
-
+    dp_model_statements = sp(OneOrMore(S(ow) + line_expr),
+                             lambda t: CDP.ModelStatements(make_list(list(t))))
 
     CDPTOKEN = spk(L('mcdp'), CDP.MCDPKeyword)
-    ndpt_dp_model = sp(CDPTOKEN - S(L('{')) - dp_model_statements - S(L('}')),
-                  lambda t: CDP.BuildProblem(keyword=t[0], statements=t[1]))
+    ndpt_dp_model = sp(CDPTOKEN - S(L('{')) -
+                       ZeroOrMore(S(ow) + line_expr)
+                        - S(L('}')),
+                  lambda t: CDP.BuildProblem(keyword=t[0],
+                                             statements=make_list(list(t[1:]),
+                                                                  where=t[0].where)))
+
 
     # load
     primitivedp_name = sp(get_idn(), lambda t: CDP.FuncName(t[0]))  # XXX
