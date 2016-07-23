@@ -56,7 +56,7 @@ def go():
             page = href.split('/')[-1]
             new_ref= '#%s' % page
             tag['href'] = new_ref
-    
+
     toc = generate_doc(main_body)
     toc = BeautifulSoup(toc, 'lxml')
     toc['class'] = 'toc'
@@ -64,7 +64,7 @@ def go():
     toc_place = d.select('div#toc')[0]
     body_place = d.select('div#body')[0]
     toc_place.replaceWith(toc)
-     
+
     body_place.replaceWith(main_body)
 
     print str(d)
@@ -86,10 +86,41 @@ def generate_doc(soup):
             for i in items:
                 assert isinstance(items)
 
+            self.number = None
+
+        def number_items(self, prefix, level):
+            self.number = prefix
+
+            if self.tag:
+                self.tag.string =  prefix + ' - ' + self.tag.string
+
+            def get_number(i, level):
+                if level == 0 or level == 1:
+                    headings = ['%d' % (j+1) for j in range(20)]
+                elif level == 2:
+                    headings =  ['A','B','C','D','E','F','G','H','I','J','K','L',
+                        'M','N','O']
+                else:
+                    return ''
+
+                if i >= len(headings):
+                    msg = 'i = %d level %s headings = %s' % (i, level, headings)
+                    raise ValueError(msg)
+                return headings[i]
+
+            if prefix:
+                prefix = prefix + '.'
+            for i, item in enumerate(self.items):
+                item_prefix = prefix + get_number(i, level)
+                item.number_items(item_prefix, level+1)
+
+
+
+
         def __str__(self, root=False):
             s = ''
             if not root:
-                s += '<a href="#%s">%s</a>' % (self.id, self.name)
+                s += '<a href="#%s">%s - %s</a>' % (self.id, self.number, self.name)
             if self.items:
                 s += '<ul>'
                 for item in self.items:
@@ -116,6 +147,8 @@ def generate_doc(soup):
 
 
     root = stack[0]
+
+    root.number_items(prefix='', level=0)
 
     for item in root.items:
         s = item.__str__(root=True)

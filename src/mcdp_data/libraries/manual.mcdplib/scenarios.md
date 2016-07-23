@@ -1,1 +1,1 @@
-# Scenarios
+# Example domains 

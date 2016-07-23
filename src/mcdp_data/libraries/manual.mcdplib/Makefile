@@ -34,8 +34,9 @@ manual.pdf:
 	wkhtmltopdf --print-media-type $(manual_html) $@
 
 manual2:
-	python ./join_manual.py $(htmls) > $(manual_html)
-	python ./embed_images.py $(manual_html)
+	python ./join_manual.py $(htmls)  > $(manual_html)
+
+	# python ./embed_images.py $(manual_html)
 
 clean:
 	rm -f $(pdfs)
@@ -44,4 +45,4 @@ clean:
 
 publish: $(htmltmpdir)/manual.html
 	cp $< ~/env_mcdp/src/mcdp-gh-pages/media/pymcdp-manual.html
-	cp $< ../../../../mcdp_web/static/manual.html
+	cp $< ~/env_mcdp/src/mcdp/src/mcdp_web/static/manual.html
