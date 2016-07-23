@@ -1,0 +1,6 @@
+product (
+   resolution: deg,
+   torque: N*m,
+   span: deg, 
+   transit_time_60deg: s
+)

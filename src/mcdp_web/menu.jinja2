@@ -72,11 +72,31 @@ li#root {width: 1em;}
 </style>
 
 
-<!-- new models -->
 <script type="text/javascript">
+function valid_identifier(s) {
+	var reg = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/g;
+	var match = reg.test(s);
+	console.log(reg);
+	console.log(s);
+	console.log(match);
+	if(!match) {
+		return false;
+	} else {
+		return true;
+	}
+}
+
 function prompt_user(what, url_base) {
   s  = "Please enter the name for the new " + what + ":";
   var name=prompt(s);
+  if(name == null) {
+  	return;
+  }
+  if(!valid_identifier(name)) {
+    msg = 'The string "'+name+'" is not a valid identifier.';
+  	alert(msg);
+  	return;
+  }
   url = url_base + name;
   var win = window.open(url, '_blank');
   if (win) {

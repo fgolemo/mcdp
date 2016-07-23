@@ -1,0 +1,100 @@
+## The servo/motors domain
+
+This is a formalization of the domain of servos/DC motors and accessories.
+
+### Continuous rotation
+
+The functionality <code>ContinuousRotation</code> describes
+a device that can provided continuous rotation along an axis.
+
+This functionality is parameterized by:
+
+* ``torque``: maximum torque provided;
+* ``velocity``: maximum velocity (rad/s).
+
+<pre class='mcdp_poset' id='ContinuousRotation' label='ContinuousRotation.mcdp_poset'></pre>
+
+
+### Rotation placement
+
+The functionality ``AngularPlacement`` describes what a servo mechanism provides:
+precise placement along a rotational axis.
+
+This functionality is parameterized by:
+
+* ``torque``;
+* ``span [deg]``: how much it can travel;
+* ``transit_time_60deg``: the time it takes for the servo to travel 60 deg;
+* ``resolution [deg]``: how precisely it reaches the desired position.
+
+<pre class='mcdp_poset' id='AngularPlacement' label='AngularPlacement.mcdp_poset'></pre>
+
+
+### PWM and PPM
+
+The two main ways to drive motors are
+[Pulse-Width Modulation (PWM)][PWM] and [Pulse-Position Modulation (PPM)][PPM].
+
+<img src='pwm-ppm-signal-example.jpg' style='width: 20em'/>
+
+[PPM]: https://en.wikipedia.org/wiki/Pulse-position_modulation
+[PWM]: https://en.wikipedia.org/wiki/Pulse-width_modulation
+
+
+For PWM, the variables of interest are:
+
+* ``voltage_max``: the maximum voltage;
+* ``amp_max``: maximum current that can be provided;
+* ``freq_max``: the maximum switching frequency.
+
+<pre class='mcdp_poset' id='PWM' label='PWM.mcdp_poset'></pre>
+
+For PPM, the variables of interest are:
+
+* ``voltage_max``: maximum voltage ;
+* ``amp_max``: maximum current;
+* ``freq_max``: the maximum frequency;
+* ``resolution``: resolution of the generated PPM.
+
+<pre class='mcdp_poset' id='PPM' label='PPM.mcdp_poset'></pre>
+
+
+### Example: servo motor driven by PPM
+
+A servo motor like the [Traxxas 2075 Digital High-Torque Waterproof Servo][Traxxas_2075]
+is a device that provides the <code class='mcdp_poset'>&#96;AngularPlacement</code> functionality,
+and to do so requires the <code class='mcdp_poset'> &#96;PPM</code> resource.
+
+[Traxxas_2075]: https://www.amazon.com/Traxxas-Digital-High-Torque-Waterproof-Servo/dp/B002PGW31G
+
+
+<pre class='ndp_graph_templatized_labeled'>`Traxxas_2075</pre>
+
+<pre class='mcdp' id='Traxxas_2075' label='Traxxas_2075.mcdp'></pre>
+
+### Example: brushless motor driven by PWM
+
+A brushless motor like the [Traxxas 3351][Traxxas_3351]
+provides the <code class='mcdp_poset'> &#96;ContinuousRotation</code> functionality
+and requires the <code class='mcdp_poset'> &#96;PWM</code> resource.
+
+[Traxxas_3351]: https://www.amazon.com/Traxxas-3351-Velineon-Brushless-Motor/dp/B000SU3VCG
+
+
+<pre class='ndp_graph_templatized_labeled'>`Traxxas_3351</pre>
+
+<pre class='mcdp' id='Traxxas_3351' label='Traxxas_3351.mcdp'></pre>
+
+<!-- See also:
+# http://www.ultimaterc.com/forums/showthread.php?t=115618 -->
+
+
+### Example: Electronic Speed Controller
+
+An electronic speed controller (ESC) like the [VESC][vesc]
+can drive servos/motors using PPM/PWM.
+
+[vesc]: http://vedder.se/2015/01/vesc-open-source-esc/
+
+<pre class='ndp_graph_templatized_labeled'>`VESC</pre>
+<pre class='mcdp' id='VESC'></pre>

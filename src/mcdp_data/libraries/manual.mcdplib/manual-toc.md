@@ -15,6 +15,24 @@
 
 [Uncertainty](tour_uncertainty.html)
 
+
+**Extended examples**
+
+<a href='scenarios.html'/>
+
+[The UAV model](drone_complete.html)
+
+[The plug/socket domain](sockets.html)
+[The plug/socket domain](sockets2.html)
+
+[Motors and controllers](actuation_tour.html)
+
+[Space Rovers energetics](energy_choices.html)
+[Space Rovers energetics](energy_choices2.html)
+[Space Rovers energetics](energy_choices3.html)
+
+
+
 **Language reference**
 
 <a class='hidden' href='reference.html'/>
@@ -30,19 +48,6 @@
 
 [Upper/lower bounds of MCPDs](adv_approximations.html)
 
-
-**Extended examples**
-
-<a href='scenarios.html'/>
-
-[The UAV model](drone_complete.html)
-
-[The plug/socket domain](sockets.html)
-[The plug/socket domain](sockets2.html)
-
-[Space Rovers energetics](energy_choices.html)
-[Space Rovers energetics](energy_choices2.html)
-[Space Rovers energetics](energy_choices3.html)
 
 
 **Draft documentation**

@@ -1,0 +1,23 @@
+mcdp {
+   provides cr [`ContinuousRotation]
+   requires pwm [`PWM]
+   requires budget [USD]   
+   requires shape [m x m x m]
+   requires mass [kg]
+   required budget >= 99.28 USD
+   required mass >= 1.6 pounds
+   required shape >= <6.5in, 2in, 5.8in>
+
+  (provided cr).torque <= 0 N*m
+  (provided cr).velocity <= 5000 rpm
+
+   (required pwm).freq_max >= 1600 Hz
+
+   rating = 3500 rpm / V 
+   (required pwm).voltage_max >= (provided cr).velocity / rating
+
+   # the amps are related to the torque
+   eff = 0.75 []
+   (required pwm).amp_max *  (required pwm). voltage_max
+       >= eff * (provided cr).torque *  (provided cr).velocity 
+}

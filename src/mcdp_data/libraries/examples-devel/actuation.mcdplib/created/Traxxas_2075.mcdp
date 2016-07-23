@@ -1,0 +1,22 @@
+mcdp {
+   provides angular_placement [`AngularPlacement]
+   requires ppm [`PPM]
+
+   requires budget [USD]
+   requires shape [m x m x m]
+   requires mass [kg]
+
+   (required ppm).voltage_max >= 6 V
+   (required ppm).amp_max >= 1 A # XXX
+   (required ppm).freq_max >= 50 Hz
+   (required ppm).resolution >= 0.0028   []
+   (provided angular_placement).transit_time_60deg <= 0.17s   
+   (provided angular_placement).torque <= 0.882 N * m
+   (provided angular_placement).resolution <= 1 deg # XXX
+   (provided angular_placement).span <= 360 deg # XXX
+   
+   required budget >= 27.99 USD
+   required shape >= <55mm, 20mm, 42.3mm>
+   required mass >= 45 g
+  
+}

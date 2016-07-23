@@ -33,6 +33,24 @@ Keys:
 
 Bugs
 -----
+
+- throw semanticerror instead of internalerror when there are repeated identifiers
+mcdp {
+   requires shape [m x m x m]
+   requires shape >= <6.5in, 2in, 5.8in>
+
+
+
+- is a device that provides the <code class='mcdp_poset'>`AngularPlacement</code> functionality
+and to do so requires the <code class='mcdp_poset'>`PPM</code> functionality.
+
+
+ValueError: If <pre> is empty then it needs to have an id.
+tag: <code class="mcdp_poset"><code>AngularPlacement&lt;/code&gt; functionality
+     and to do so requires the &lt;code class='mcdp_poset'&gt;</code>PPM</code>
+
+==> use backtick escape  &#96;
+
 - F: parse custom string for PosetCoproduct
 - B: refresh library does not reset the icon caches
 - B: what happens with recursive definitions? (a.poset = "`a")
@@ -49,9 +67,9 @@ Bugs
 
 Meat
 ----
+- "op(Poset)" => constructs opposite poset
 
-
-- intervals - what happens 
+- intervals - what happens
 
 
 - L: Add something like:
@@ -64,15 +82,15 @@ Meat
 # This converts from TypeC to TypeL
 mcdp {
     provides out [`power]
-    requires in  [`power] 
+    requires in  [`power]
     requires cost [USD]
 
-    # This device costs $5 
+    # This device costs $5
     cost >= 5 USD
 
     take(in,  0) >= `socket_type : TypeL
-    take(out, 0) <= `socket_type : TypeC 
- 
+    take(out, 0) <= `socket_type : TypeC
+
     take(in, 1) >=  take(out, 1) # voltages
     take(in, 2) >=  take(out, 2) # amperes
 }
@@ -84,7 +102,7 @@ Misc
 - F: create operator approx(10g, -)
 
 - B: automatically load CSS from that file. (introduces dependency on mcdp_web)
- 
+
 
 MCDP-web
 ----------
@@ -158,7 +176,7 @@ There is already a connection to function 'r1' of '_res_r1'.
             ^
             |
             here or nearby
-``` 
+```
 
 - F: nice icon for  operations: take
 - F: nice icon for  operations: meet, Join
@@ -183,7 +201,7 @@ Language additions
 	}
 	```
 
-- L: Syntax for empty sets. ``{} g`` or  ``empty g`` 
+- L: Syntax for empty sets. ``{} g`` or  ``empty g``
 
 
 - L: Implement Python-style comments for more literate programming.
@@ -226,7 +244,7 @@ requires r1 >= f1
      implicit : 100g | `scientific_objectives : find_current_life
   }
 
-  catalouge { 
+  catalouge {
      provides resolution [pixels]
      requires latency [s]
 
@@ -239,16 +257,8 @@ requires r1 >= f1
 - g: visualize PlusNat as "+ x"
 
 
-- bug: This should have a better error message 
+- bug: This should have a better error message
    <code class='mcdp_value'>`my_poset: <em>element</em></code>.
 
     ValueError: If <pre> is empty then it needs to have an id.
     tag: <code class="mcdp_value">`my_poset: <em>element</em></code>
-
-
-
-
-
-
-
-
