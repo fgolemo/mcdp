@@ -1,0 +1,14 @@
+    mcdp {
+          #
+          provides x [s]                                                                      
+          #
+          sub battery = instance load battery
+          sub times = instance load energy_times
+          sub actuation = instance load mobility
+          #
+          times.mission_time >= x
+          #     
+          times.power >= actuation.actuation_power
+          battery.capacity >= times.energy
+          actuation.weight >= battery.battery_weight
+      }

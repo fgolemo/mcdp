@@ -1,0 +1,26 @@
+mcdp {
+  provides ppm [`PPM]
+  provides pwm [`PWM]
+ 
+  requires dc_in [`DC_power]
+  requires budget [USD]
+  requires mass [g]
+
+  required budget >= 115 USD
+  required mass >= 10 g
+
+# (provided pwm).voltage_max <= 
+# (provided pwm).amp_max  <=
+# (provided pwm).freq_max <=
+# (provided pwm).resolution <= 
+ 
+# (provided pwm).voltage_max <= 
+# (provided pwm).amp_max  <=
+# (provided pwm).freq_max <=
+# (provided pwm).resolution <= 
+
+# (required dc_in).connector >=
+# (required dc_in).voltage >=
+# (required dc_in).amps >=
+ 
+}

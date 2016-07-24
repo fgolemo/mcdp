@@ -1,1 +1,0 @@
-specialize [B1: `battery1, B2: `battery1] `sum_battery

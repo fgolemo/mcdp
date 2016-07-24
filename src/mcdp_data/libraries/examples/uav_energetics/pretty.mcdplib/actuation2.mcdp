@@ -1,0 +1,19 @@
+mcdp {
+  provides lift  [N]
+  requires power [W]
+  requires actuator_mass [g]
+
+  # Maximum lift provided	
+  lift <= 10 N
+        
+  # Mass of this actuator
+  actuator_mass >= 150 g
+  
+  # Power as a function of lift
+  p0 = 1 W
+  p1 = 1.5 W/N^2
+  
+  l = provided lift
+  required power >= p0 + p1 * (l^2) 
+ 
+}

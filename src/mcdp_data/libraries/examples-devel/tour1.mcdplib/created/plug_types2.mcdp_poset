@@ -1,3 +1,0 @@
-finite_poset {
-a <= b <= c
-} 

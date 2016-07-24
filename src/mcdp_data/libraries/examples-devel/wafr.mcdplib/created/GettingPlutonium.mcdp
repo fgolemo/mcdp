@@ -1,7 +1,0 @@
-mcdp {
-  provides plutonium [g]  
-  requires objectives [`scientific_objectives]
-  friend = instance choose(US:`Obama, Ru:`Putin)
-  provided plutonium <=  plutonium provided by friend
-  required objectives >= objectives required by friend
-}

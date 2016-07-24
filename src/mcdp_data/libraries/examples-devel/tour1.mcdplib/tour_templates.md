@@ -1,4 +1,0 @@
-<!-- ## Using templates
-
-### template
-### specialize -->

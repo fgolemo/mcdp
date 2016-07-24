@@ -1,0 +1,10 @@
+mcdp {
+    energetics = new EnergySources
+    getting_plutonium = new GettingPlutonium
+    plutonium required by energetics <= plutonium provided by getting_plutonium
+
+    enclosure = new Enclosure
+    area_to_expose provided by enclosure >= area required by energetics
+
+    total_mass = enclosure.mass + energetics.mass
+}

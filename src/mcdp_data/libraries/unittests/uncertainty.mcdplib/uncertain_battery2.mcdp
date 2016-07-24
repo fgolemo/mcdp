@@ -1,0 +1,8 @@
+
+mcdp {
+  provides capacity [J]
+  requires mass     [kg]
+
+  required mass * Uncertain(100 Wh/kg, 120 Wh/kg) >= provided capacity
+
+}

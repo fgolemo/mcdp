@@ -1,0 +1,29 @@
+@page {
+    margin: 0.5cm;
+}
+
+h1 { color: black; }
+h2 { color: blue; }
+h3 { color: magenta; }
+
+h1 { page-break-before: always; text-align: center;}
+h1#booktitle  { page-break-before: avoid; }
+h2 { }
+
+
+.toc a { text-decoration: none; }
+
+
+/* Good for safari */
+pre {
+     box-shadow: none;
+}
+
+.ndp_graph_expand,
+.ndp_graph_enclosed,
+.ndp_graph_normal,
+.ndp_graph_templatized,
+.ndp_graph_templatized_labeled,
+.template_graph_enclosed {
+    max-width: 50em;
+}

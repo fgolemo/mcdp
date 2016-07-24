@@ -1,6 +1,0 @@
-mcdp {
-  provides capacity [J]
-  requires mass     [kg]
- 
-  required mass * Uncertain(2 J/kg, 3 J/kg) >= provided capacity
-}

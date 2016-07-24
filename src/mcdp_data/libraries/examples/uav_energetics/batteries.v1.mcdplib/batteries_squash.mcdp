@@ -1,0 +1,13 @@
+approx(cost,0%,1$,Top$) 
+
+mcdp {
+    battery = new Batteries
+
+    provides capacity <= battery.capacity
+    provides missions <= battery.missions
+
+    requires mass >= battery.mass
+
+    labor_per_replacement = 10 $ 
+    requires cost >= battery.cost + battery.maintenance * labor_per_replacement
+}

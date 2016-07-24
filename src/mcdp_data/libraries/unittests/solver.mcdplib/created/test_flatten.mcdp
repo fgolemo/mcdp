@@ -1,0 +1,24 @@
+mcdp { 
+    M = instance mcdp {
+      requires r1 [R]
+      requires r2 [R]
+      
+      provides f1 [R]
+      
+      f1 <= r1 * r2
+    }
+    N = instance mcdp {
+      requires r1 [R]
+      requires r2 [R]
+      
+      provides f1 [R]
+      
+      f1 <= r1 * r2
+    }
+    provides M1 <= M.f1
+    requires R1 >= M.r1
+    requires R2 >= M.r2
+    provides NF1 <= N.f1
+    requires NR1 >= N.r1
+    requires NR2 >= N.r2
+ }

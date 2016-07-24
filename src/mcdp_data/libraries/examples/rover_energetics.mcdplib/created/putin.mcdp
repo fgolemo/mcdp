@@ -1,0 +1,5 @@
+catalogue {
+     provides plutonium [g]
+     requires objectives [`scientific_objectives]    
+    _ | 50 g | `scientific_objectives : find_ancient_life
+}

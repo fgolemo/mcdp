@@ -1,0 +1,4 @@
+choose (
+   LiPo: new Battery_LiPO,
+   LMO:  new Battery_LMO
+)    

@@ -1,4 +1,0 @@
-template mcdp {
-	provides capacity [J]	
-	requires mass [g]
-}

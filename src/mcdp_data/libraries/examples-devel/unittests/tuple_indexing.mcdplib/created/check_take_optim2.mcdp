@@ -1,8 +1,0 @@
-mcdp {
-        requires r [s x J] 
-        
-        provides f1 [s]
-        
-        provided f1 <= take(required r, 0)
-
-}

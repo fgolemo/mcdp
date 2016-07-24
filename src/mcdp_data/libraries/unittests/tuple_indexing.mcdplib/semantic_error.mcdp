@@ -1,0 +1,7 @@
+# test semantic_error
+mcdp {
+	provides f [g x J]
+
+	# out of bounds
+	take(f, 2) <= 50 J
+}

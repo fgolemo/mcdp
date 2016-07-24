@@ -1,8 +1,0 @@
-mcdp {
-  provides f1 [R] 
-  requires r1 [R]
-  requires r2 [R]
-
-  f1  <= 1 [] + (r1 * r2  )
-
-}

@@ -1,0 +1,28 @@
+
+- id: battery_complete_parsed
+  desc: ""
+  code: 
+  - mcdp_lang.parse_ndp
+  - string: |
+  
+
+- id: testmax
+  desc: "Test with max"
+  code: 
+  - mcdp_lang.parse_ndp
+  - string: |
+
+
+- id: testmin
+  desc: "Test with min"
+  code: 
+  - mcdp_lang.parse_ndp
+  - string: |
+     
+
+- id: testminsq
+  desc: "Test with min"
+  code: 
+  - mcdp_lang.parse_ndp
+  - string: |
+ 

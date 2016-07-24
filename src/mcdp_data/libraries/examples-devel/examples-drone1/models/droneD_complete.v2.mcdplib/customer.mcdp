@@ -1,7 +1,0 @@
-template mcdp {
-    provides budget [$]
-
-    requires travel_distance [km]
-    requires num_missions [R]
-    requires carry_payload [g]
-}

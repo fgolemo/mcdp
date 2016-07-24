@@ -1,0 +1,3 @@
+mcdp {
+  requires cost >= Uncertain(5 USD, 7 USD)
+}

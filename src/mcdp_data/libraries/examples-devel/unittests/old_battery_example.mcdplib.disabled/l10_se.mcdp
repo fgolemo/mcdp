@@ -1,4 +1,0 @@
-# test unconnected
-mcdp {
-    sub battery = instance load battery
-}
