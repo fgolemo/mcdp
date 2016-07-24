@@ -30,6 +30,7 @@ def enumerate_test_libraries():
         msg = 'Expected more libraries.'
         raise_desc(ValueError, msg, folder, mcdplibs=mcdplibs)
 
+    entries = {}
     for m in mcdplibs:
         f = os.path.join(m, '.mcdp_test_ignore')
         if os.path.exists(f):
@@ -37,7 +38,18 @@ def enumerate_test_libraries():
 
         short = os.path.splitext(os.path.basename(m))[0]
         short = short.replace('.', '_')
-        yield short, m
+
+
+        if short in entries:
+            msg = 'Repeated entry.'
+            raise_desc(Exception, msg, short=short,
+                       orig=entries[short],
+                       new=m)
+
+        entries[short] = m
+
+    return entries.items()
+    return entries
 
 
 def define_tests_for_mcdplibs(context):

@@ -57,7 +57,6 @@ def eval_space_rcompunit(r, context):  # @UnusedVariable
     from mcdp_posets.rcomp_units import make_rcompunit
     return make_rcompunit(r.pint_string)
  
-
 def eval_space_spaceproduct(r, context):
     ops = get_odd_ops(unwrap_list(r.ops))
     Ss = [eval_space(_, context) for _ in ops]

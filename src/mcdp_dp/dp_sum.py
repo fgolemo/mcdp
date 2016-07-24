@@ -193,6 +193,10 @@ class ProductMap(Map):
         self.Fs = Fs
         self.R = R
 
+        dom = PosetProduct(Fs)
+        cod = PosetProduct(R)
+        Map.__init__(self, dom=dom, cod=cod)
+
     def _call(self, x):
         def is_there_a_top():
             for Fi, fi in zip(self.Fs, x):

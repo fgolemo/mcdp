@@ -9,6 +9,7 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 from mcdp_posets.poset import Poset
+from mcdp_posets.poset_product import PosetProduct
 
 __all__ = [
     'get_types_universe',
@@ -178,8 +179,11 @@ class TypesUniverse(Preorder):
         if isinstance(B, Rcomp) and isinstance(A, RcompUnits):
             return IdentityMap(A, B), IdentityMap(B, A)
 
+        if isinstance(A, PosetProduct) and isinstance(B, PosetProduct):
+            return get_poset_product_embedding(self, A, B)
+
         if isinstance(A, SpaceProduct) and isinstance(B, SpaceProduct):
-            return get_product_embedding(self, A, B)
+            return get_space_product_embedding(self, A, B)
 
         if isinstance(A, UpperSets) and isinstance(B, UpperSets):
             P_A_to_B, P_B_to_A = self.get_embedding(A.P, B.P)
@@ -260,14 +264,23 @@ def express_value_in_isomorphic_space(S1, s1, S2):
 
 
 
-def get_product_embedding(tu, A, B):
+def get_space_product_embedding(tu, A, B):
     pairs = [tu.get_embedding(a, b) for a, b in zip(A, B)]
     fs = [x for x, _ in pairs]
     finv = [y for _, y in pairs]
 
+    from mcdp_posets.maps.product_map import SpaceProductMap
+    res = SpaceProductMap(fs), SpaceProductMap(finv)
+    return res
 
-    from mcdp_posets.maps.product_map import ProductMap
-    res = ProductMap(fs), ProductMap(finv)
+
+def get_poset_product_embedding(tu, A, B):
+    pairs = [tu.get_embedding(a, b) for a, b in zip(A, B)]
+    fs = [x for x, _ in pairs]
+    finv = [y for _, y in pairs]
+
+    from mcdp_posets.maps.product_map import PosetProductMap
+    res = PosetProductMap(fs), PosetProductMap(finv)
     return res
 
 

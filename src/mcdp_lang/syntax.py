@@ -199,7 +199,7 @@ class Syntax():
                         lambda t: CDP.PowerSet(t[0], t[1],
                                                t[2], t[3]))
 
-    PRODUCTWITHLABELS = spk(L('product'), CDP.ProductKeyword)
+    PRODUCTWITHLABELS = spk(L('product') | L('namedproduct'), CDP.ProductKeyword)
     space_product_label = sp(get_idn(), lambda t: CDP.ProductWithLabelsLabel(t[0]))
     space_product_entry = space_product_label + SCOLON + space
     space_product_with_labels = sp(PRODUCTWITHLABELS + SLPAR + O(space_product_entry) +

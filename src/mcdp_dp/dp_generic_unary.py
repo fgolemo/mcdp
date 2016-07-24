@@ -5,6 +5,7 @@ from contracts.utils import raise_desc, raise_wrapped
 from mcdp_posets import Map, MapNotDefinedHere, NotBelongs
 from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
+from mcdp_posets.poset import Poset
 
 
 __all__ = [
@@ -16,6 +17,7 @@ __all__ = [
 
 class GenericUnary(EmptyDP):
     """ Meant for scalar values. Top maps to Top"""
+    @contract(F=Poset, R=Poset)
     def __init__(self, F, R, function):
         EmptyDP.__init__(self, F=F, R=R)
         self.function = function
@@ -34,6 +36,7 @@ class GenericUnary(EmptyDP):
             if isinstance(r, float) and np.isinf(r):
                 r = self.R.get_top()
             
+        assert isinstance(self.R, Poset)
         return self.R.U(r)
 
     def __repr__(self):
@@ -53,6 +56,13 @@ class WrapAMap(EmptyDP):
         assert isinstance(amap, Map), amap
         F = amap.get_domain()
         R = amap.get_codomain()
+        if not isinstance(F, Poset):
+            msg = 'Expect that F is a Poset.'
+            raise_desc(ValueError, msg, F=F, amap=amap)
+        if not isinstance(R, Poset):
+            msg = 'Expect that R is a Poset.'
+            raise_desc(ValueError, msg, R=R, amap=amap)
+
         EmptyDP.__init__(self, F=F, R=R)
         self.amap = amap
 

@@ -9,7 +9,8 @@ __all__ = [
 
 
 class SpaceProduct(Space):
-    """ A product of Posets with the product order. """
+    """ A product of Spaces. """
+
     @contract(subs='seq($Space)')
     def __init__(self, subs):
         assert isinstance(subs, tuple)
