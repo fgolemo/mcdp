@@ -9,6 +9,7 @@ from pint import UnitRegistry  # @UnresolvedImport
 from pint.unit import UndefinedUnitError  # @UnresolvedImport
 import functools
 import math
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 
 
 
@@ -38,6 +39,8 @@ class RcompUnits(Rcomp):
         Rcomp.__init__(self)
         self.units = pint_unit
 
+        self.units_formatted = format_pint_unit_short(self.units)
+
     def __repr__(self):
         # need to call it to make sure dollars i defined
         ureg = get_ureg()  # @UnusedVariable
@@ -50,7 +53,7 @@ class RcompUnits(Rcomp):
         if self.units == R_dimensionless.units:
             return '%s[]' % c
 
-        return "%s[%s]" % (c, format_pint_unit_short(self.units))
+        return "%s[%s]" % (c, self.units_formatted)
 
     def __getstate__(self):
         # See: https://github.com/hgrecco/pint/issues/349
@@ -59,7 +62,11 @@ class RcompUnits(Rcomp):
         units_ex = (u.magnitude, u.units._units)
         # Original was:
         # units_ex = (u.magnitude, u.units)
-        state = {'top': self.top, 'units_ex': units_ex}
+        state = {'top': self.top, 'units_ex': units_ex,
+                 'units_formatted': self.units_formatted}
+
+        if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
+            state[ATTRIBUTE_NDP_RECURSIVE_NAME] = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
         return state
 
     def __setstate__(self, x):
@@ -67,6 +74,9 @@ class RcompUnits(Rcomp):
         units_ex = x['units_ex']
         ureg = get_ureg()
         self.units = ureg.Quantity(units_ex[0], units_ex[1])
+        self.units_formatted = x['units_formatted']
+        if ATTRIBUTE_NDP_RECURSIVE_NAME in x:
+            setattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME, x[ATTRIBUTE_NDP_RECURSIVE_NAME])
 
     def __eq__(self, other):
         if isinstance(other, RcompUnits):
@@ -79,7 +89,7 @@ class RcompUnits(Rcomp):
             s = self.top.__repr__()
         else:
             s = Rcomp.format(self, x)
-        return '%s %s' % (s, format_pint_unit_short(self.units))
+        return '%s %s' % (s, self.units_formatted)
 
 
 def parse_pint(s0):
@@ -119,17 +129,23 @@ def make_rcompunit(units):
         raise_wrapped(DPSyntaxError, e, msg)
     return RcompUnits(unit)
 
+R_Power_units = parse_pint('W')
+R_Energy_units = parse_pint('J')
+R_Weight_units = parse_pint('kg')
+R_Weight_g_units = parse_pint('g')
+R_Force_units = parse_pint('N')
+
 def format_pint_unit_short(units):
     # some preferred ways
-    if units == R_Power.units:  # units = A*V*s
+    if units == R_Power_units:  # units = A*V*s
         return 'W'
-    if units == R_Energy.units:
+    if units == R_Energy_units:
         return 'J'
-    if units == R_Weight.units:
+    if units == R_Weight_units:
         return 'kg'
-    if units == R_Weight_g.units:
+    if units == R_Weight_g_units:
         return 'g'
-    if units == R_Force.units:
+    if units == R_Force_units:
         return 'N'
 
     x = '{:~}'.format(units)

@@ -1,3 +1,4 @@
+
 from .interfaces import NamedDP
 from contracts import contract, raise_wrapped
 from contracts.utils import indent, raise_desc
@@ -5,6 +6,7 @@ from mcdp_dp import PrimitiveDP
 from mcdp_dp.dp_flatten import get_it
 from mocdp.exceptions import DPInternalError
 from mcdp_posets import PosetProduct
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 
 __all__ = [
     'SimpleWrap',
@@ -18,7 +20,6 @@ class SimpleWrap(NamedDP):
     def __init__(self, dp, fnames, rnames, icon=None):
         assert isinstance(dp, PrimitiveDP), type(dp)
         self.dp = dp
-        # _ , self.dp = get_conftools_dps().instance_smarter(dp)
 
         F = self.dp.get_fun_space()
         R = self.dp.get_res_space()
@@ -67,33 +68,6 @@ class SimpleWrap(NamedDP):
                         raise_desc(ValueError, msg, R=R, rnames=rnames)
                     self.R_single = True
                     self.Rname = rnames
-
-#             if isinstance(rnames, list):
-#                 if not isinstance(R, PosetProduct):
-#                     raise ValueError("R incompatible")
-#                 self.Rnames = rnames
-#                 self.R_single = False
-#
-#                 R = self.dp.R
-#                 assert isinstance(R, PosetProduct)
-#                 assert len(R) == len(self.Rnames)
-#
-#             else:
-#                 self.R_single = True
-#                 self.Rname = rnames
-
-#             mcdp_dev_warning('very late night')
-#             if isinstance(R, PosetProduct):
-#                 if not isinstance(rnames, list) or not len(R) == len(rnames):
-#                     raise ValueError("R incompatible")
-#                 self.R_single = False
-#                 self.Rnames = rnames
-#
-#             else:
-#                 if not isinstance(rnames, str):
-#                     raise ValueError("R and rnames incompatible: want one string")
-#                 self.R_single = True
-#                 self.Rname = rnames
             self.icon = icon
         except Exception as e:
             msg = 'Cannot wrap primitive DP.'
@@ -127,8 +101,10 @@ class SimpleWrap(NamedDP):
             for i, rname in enumerate(self.Fnames):
                 dp.F[i].label = rname
 
-#         dp.M.label = 'dpwrap'
-#         dp.I.label = 'dpwrap'
+        if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
+            x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
+            setattr(dp, ATTRIBUTE_NDP_RECURSIVE_NAME, x)
+
         return dp
 
     def get_fnames(self):
@@ -205,35 +181,7 @@ class SimpleWrap(NamedDP):
     def repr_long(self):
         return self.desc()
 
-# class LabeledSpace(Poset):
-#
-#     @contract(label=str, space=Space)
-#     def __init__(self, label, space):
-#         self.space = space
-#         self.label = label
-#
-#     def format(self, x):
-#         s = self.space.format(x)
-#         return '%s: %s' % (self.label, s)
-#
-#     def belongs(self, x):
-#         return self.space.belongs(x)
-#
-#     def check_equal(self, x, y):
-#         return self.space.check_equal(x, y)
-#     def check_leq(self, x, y):
-#         return self.space.check_leq(x, y)
-#
-#     def __getattr__(self, attrib):
-#         return getattr(self.space, attrib)
-
 
 @contract(dp=PrimitiveDP, returns=NamedDP, fnames='str|seq(str)', rnames='str|seq(str)')
 def dpwrap(dp, fnames, rnames):
-#     if isinstance(fnames, list):
-#         F = dp.get_fun_space()
-#         F0 = LabeledSpace(str(fnames), F)
-#         F_identity = Identity(F0)
-#         dp = make_series(F_identity, dp)
-
     return SimpleWrap(dp, fnames, rnames)

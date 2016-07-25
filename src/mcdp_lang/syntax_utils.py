@@ -1,4 +1,3 @@
-from contracts import contract
 from mcdp_lang.parts import CDPLanguage
 from pyparsing import Literal, Optional, Suppress
 

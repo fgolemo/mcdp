@@ -92,6 +92,7 @@ class SyntaxIdentifiers():
         'any-of',
         'coproduct',
         'ignore',
+        'addmake',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -719,6 +720,14 @@ class Syntax():
                                                      max_value=t[4],
                                                      dp=t[5]))
 
+    # Example:
+    # addmake(code module.func) mcdp { ... }
+    ADDMAKE = spk(L('addmake'), CDP.AddMakeKeyword)
+    from mcdp_lang.syntax_codespec import SyntaxCodeSpec
+
+    ndpt_addmake = sp(ADDMAKE - SLPAR - SyntaxCodeSpec.code_spec_simple - SRPAR
+                      - ndpt_dp_rvalue,
+                      lambda t: CDP.AddMake(keyword=t[0], code=t[1], dp_rvalue=t[2]))
 
 
     ABSTRACT = spk(L('abstract'), CDP.AbstractKeyword)
@@ -792,7 +801,8 @@ class Syntax():
         ndpt_flatten |
         ndpt_canonical |
         ndpt_dp_variable_ref |
-        ndpt_specialize
+        ndpt_specialize |
+        ndpt_addmake
     )
 
     # TODO: remove?

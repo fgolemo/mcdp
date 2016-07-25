@@ -27,8 +27,18 @@ class ParallelN(PrimitiveDP):
 
         self.Ms = Ms
         self.dps = tuple(dps)
-        self.M, _, _ = get_product_compact(*tuple(self.Ms))
+        self.M, _, _ = self._get_product()
         PrimitiveDP.__init__(self, F=F, R=R, I=self.M)
+
+    def __getstate__(self):
+        state = dict(**self.__dict__)
+        state.pop('prod', None)
+        return state
+
+    def _get_product(self):
+        if not hasattr(self, 'prod'):
+            self.prod = _, _, _ = get_product_compact(*tuple(self.Ms))
+        return self.prod
 
     def evaluate_f_m(self, f, m):
         raise NotImplementedError()
@@ -69,7 +79,7 @@ class ParallelN(PrimitiveDP):
         return res
 
     def evaluate(self, m):
-        _, _, unpack = get_product_compact(*tuple(self.Ms))
+        _, _, unpack = self._get_product()
 
         ms = unpack(m)
         LFs = []
@@ -85,7 +95,7 @@ class ParallelN(PrimitiveDP):
         return LF, UR
 
     def get_implementations_f_r(self, f, r):
-        _, pack, _ = get_product_compact(*tuple(self.Ms))
+        _, pack, _ = self._get_product()
 
 
 
@@ -131,6 +141,7 @@ class ParallelN(PrimitiveDP):
 
     def repr_long(self):
         s = 'ParallelN  %% %s -> %s' % (self.get_fun_space(), self.get_res_space())
+        s += self._add_extra_info()
         for dp in self.dps:
             r = dp.repr_long()
             s += '\n' + indent(r, '. ', first='\ ')

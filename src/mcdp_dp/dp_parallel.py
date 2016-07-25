@@ -32,16 +32,28 @@ class Parallel(PrimitiveDP):
         M1 = self.dp1.get_imp_space_mod_res()
         M2 = self.dp2.get_imp_space_mod_res()
 
-        M, _, _ = get_product_compact(M1, M2)
+
         self.M1 = M1
         self.M2 = M2
 
+        M, _, _ = self._get_product()
+
         PrimitiveDP.__init__(self, F=F, R=R, I=M)
-        
+
+    def __getstate__(self):
+        state = dict(**self.__dict__)
+        state.pop('prod', None)
+        return state
+
+    def _get_product(self):
+        if not hasattr(self, 'prod'):
+            self.prod = _, _, _ = get_product_compact(self.M1, self.M2)
+        return self.prod
+
     def get_implementations_f_r(self, f, r):
         f1, f2 = f
         r1, r2 = r
-        _, pack, _ = get_product_compact(self.M1, self.M2)
+        _, pack, _ = self._get_product()
 
         m1s = self.dp1.get_implementations_f_r(f1, r1)
         m2s = self.dp2.get_implementations_f_r(f2, r2)
@@ -70,7 +82,7 @@ class Parallel(PrimitiveDP):
         return options
         
     def _split_m(self, m):
-        _, _, unpack = get_product_compact(self.M1, self.M2)
+        _, _, unpack = self._get_product()
 
         m1, m2 = unpack(m)
         return m1, m2
@@ -124,7 +136,8 @@ class Parallel(PrimitiveDP):
     def repr_long(self):
         r1 = self.dp1.repr_long()
         r2 = self.dp2.repr_long()
-        s = 'Parallel  %% %s -> %s' % (self.get_fun_space(), self.get_res_space())
+        s = 'Parallel2  %% %s -> %s' % (self.get_fun_space(), self.get_res_space())
+        s += self._add_extra_info()
         s += '\n' + indent(r1, '. ', first='\ ')
         s += '\n' + indent(r2, '. ', first='\ ')
         return s

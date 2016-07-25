@@ -231,6 +231,11 @@ class CoProductDPLabels(PrimitiveDP):
             m = label, m0[1]
 
             res.append(m)
+
+        if do_extra_checks():
+            for imp in res:
+                self.I.belongs(imp)
+
         return set(res)
 
     def solve(self, f):

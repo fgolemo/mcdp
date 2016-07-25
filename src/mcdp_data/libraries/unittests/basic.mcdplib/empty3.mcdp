@@ -1,0 +1,5 @@
+mcdp {
+    a = instance mcdp {
+
+    }
+}

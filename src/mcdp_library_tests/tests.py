@@ -150,7 +150,7 @@ def mcdplib_test_setup_source_mcdp(context, mcdplib):
     print('Found registered: %r' % registered)
 
     for basename in l.file_to_contents:
-        model_name, ext = os.path.splitext(basename)
+        _model_name, ext = os.path.splitext(basename)
         if ext != ".mcdp":
             # print basename, ext
             continue
@@ -304,7 +304,7 @@ def mcdplib_define_tst(context, mcdplib):
                 c.comp(mcdplib_define_tst_solve, mcdplib, name, test_data, job_id='solve')
 
 
-def mcdplib_define_tst_solve(mcdplib, id_test, test_data):
+def mcdplib_define_tst_solve(mcdplib, id_test, test_data):  # @UnusedVariable
     # Reload the data (easier to debug)
     fn = os.path.join(mcdplib, 'mcdp_tests.yaml')
     with open(fn) as f:

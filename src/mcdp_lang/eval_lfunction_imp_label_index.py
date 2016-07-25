@@ -3,7 +3,6 @@ from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_posets import PosetProductWithLabels
 from mocdp.exceptions import DPSemanticError
-from mcdp_lang.namedtuple_tricks import recursive_print
 
 CDP = CDPLanguage
 

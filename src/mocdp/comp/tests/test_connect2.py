@@ -17,13 +17,6 @@ def get_dummy(fnames, rnames):
     if len(rnames) == 1:
         R = R[0]
 
-#     class Dummy(PrimitiveDP):
-#         def __init__(self):
-#             M = SpaceProduct(())
-#             PrimitiveDP.__init__(self, F=F, R=R, M=M)
-#         def solve(self, _func):
-#             return self.R.bottom()
-
     if len(fnames) == 1:
         fnames = fnames[0]
     if len(rnames) == 1:

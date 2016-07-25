@@ -7,7 +7,7 @@ from mocdp.exceptions import DPSemanticErrorNotConnected
 @for_all_nameddps
 def check_abstraction(_, ndp):
     ndp2 = ndp.abstract()
-    assert isinstance(ndp2, SimpleWrap)
+    assert isinstance(ndp2, SimpleWrap), type(ndp2)
     check_same_interface(ndp, ndp2)
     
 @for_all_nameddps

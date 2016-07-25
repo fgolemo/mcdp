@@ -67,13 +67,14 @@ def check_missing_connections(context):
             fix += '\n' + "%s >= %s" % (rn2, ref)
             msg += indent(fix, '    ')
             s += '\n' + indent(msg, 'help: ')
-
-    for name, ndp in context.names.items():
-        # anything that has both zero functions and zero resources is unconnected
-        rnames = ndp.get_rnames()
-        fnames = ndp.get_fnames()
-        if not rnames and not fnames:
-            s += "\nBlock %r has no functions or resources." % name
+#
+#     if False:
+#         for name, ndp in context.names.items():
+#             # anything that has both zero functions and zero resources is unconnected
+#             rnames = ndp.get_rnames()
+#             fnames = ndp.get_fnames()
+#             if not rnames and not fnames:
+#                 s += "\nBlock %r has no functions or resources." % name
 
     if s:
         raise NotConnected(s)

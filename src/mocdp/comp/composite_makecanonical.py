@@ -11,20 +11,21 @@ from mocdp.comp.context import (CResource, Connection, get_name_for_fun_node,
 from mocdp.comp.flattening.flatten import cndp_flatten
 from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.wrap import SimpleWrap, dpwrap
-from mocdp.exceptions import DPSemanticError, DPSemanticErrorNotConnected
+from mocdp.exceptions import DPSemanticErrorNotConnected
 from networkx.algorithms.cycles import simple_cycles
 import numpy as np
 
 @contract(ndp=CompositeNamedDP)
 def cndp_makecanonical(ndp, name_inner_muxed='_inner_muxed', s_muxed='_muxed'):
     """ 
-        Returns a composite with only one ndp, called "named_inner_muxed".
+        Returns a composite with only one ndp, called <named_inner_muxed>.
         If there were cycles, then this will also have a signal caled s_muxed
         and there will be one connection to it.
         
         raises DPSemanticErrorNotConnected
     """
 
+    assert isinstance(ndp, CompositeNamedDP), type(ndp)
     try:
         ndp.check_fully_connected()
     except NotConnected as e:

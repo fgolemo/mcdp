@@ -1,5 +1,4 @@
 from comptests.registrar import comptest
-from mcdp_posets.types_universe import get_types_universe
 from mcdp_lang.parse_interface import parse_poset
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax

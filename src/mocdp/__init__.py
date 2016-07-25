@@ -56,3 +56,10 @@ import conf_tools
 import decent_params
 import decent_logs
 import quickapp
+
+# some constants
+
+# Added to NamedDPs and spaces and dps
+ATTRIBUTE_NDP_RECURSIVE_NAME = 'ndp_recursive_name'
+# added to NamedDPs
+ATTRIBUTE_NDP_MAKE_FUNCTION = 'make'

@@ -9,6 +9,8 @@ from mcdp_posets import LowerSet  # @UnusedImport
 from mcdp_posets import (Map, Ncomp, NotBelongs, Poset, PosetProduct, Space,
     SpaceProduct, UpperSet, UpperSets, poset_minima)
 from mocdp.exceptions import do_extra_checks
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
+from copy import deepcopy
 
 
 __all__ = [
@@ -126,7 +128,19 @@ class PrimitiveDP(WithInternalLog):
 
     @contract(returns=Space)
     def get_imp_space(self):
-        return self.I
+        I = self.I
+        # This is a mess
+        #
+        # The first time the dp is created there is no attribute
+        # So we need to redo it
+        # if not hasattr(self, 'Imarked'):
+        if not hasattr(self, 'Imarked') or not hasattr(self.Imarked, ATTRIBUTE_NDP_RECURSIVE_NAME):
+            self.Imarked = deepcopy(I)
+            if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
+                x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
+                setattr(self.Imarked, ATTRIBUTE_NDP_RECURSIVE_NAME, x)
+
+        return self.Imarked
 
     @contract(returns=Space)
     def get_imp_space_mod_res(self):
@@ -254,10 +268,29 @@ class PrimitiveDP(WithInternalLog):
     def __repr__(self):
         return '%s(%s→%s)' % (type(self).__name__, self.F, self.R)
 
-    def repr_long(self):
-        return self.__repr__()
+    def _add_extra_info(self):
+        s = ""
 
-    def _children(self):
+        if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
+            x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
+            s += ' named: ' + x.__str__()
+
+        s3 = self.get_imp_space().__repr__()
+        s += ' I = %s' % s3
+
+        from mocdp.comp.recursive_name_labeling import get_names_used
+        if isinstance(self.I, SpaceProduct):
+            names = get_names_used(self.I)
+            # names = filter(None, names)
+            if names:
+                s += ' names: %s' % names
+        return s
+
+    def repr_long(self):
+        s = self.__repr__()
+        return s + self._add_extra_info()
+
+    def _children(self):  # XXX: is this still used?
         l = []
         if hasattr(self, 'dp1'):
             l.append(self.dp1)

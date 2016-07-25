@@ -2,7 +2,6 @@ from .space import NotBelongs, NotEqual, Space
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 import random
-from mcdp_posets.space import Uninhabited
 
 __all__ = [
     'Coproduct1',
@@ -32,16 +31,16 @@ class Coproduct1(Space):
         return "Coproduct1(%s)" % s
 
     def witness(self):
+        import numpy as np
         n = len(self.spaces)
-        k = random.randint(0, n - 1)
-        for i in range(n):
-            ii = (i + k) % n
-            S = self.spaces[ii]
-            try:
-                return S.witness()
-            except Uninhabited:
-                pass
-        raise Uninhabited()
+        i = int(np.random.randint(n))
+        res = []
+        for j in range(n):
+            if j == i:
+                res.append(self.spaces[j].witness())
+            else:
+                res.append(Coproduct1.fill)
+        return (i, tuple(res))
 
     def belongs(self, x):
         try:
@@ -83,17 +82,6 @@ class Coproduct1(Space):
             msg = ''
             raise_wrapped(NotEqual, e, msg, a=a, b=b)
 
-    def witness(self):
-        import numpy as np
-        n = len(self.spaces)
-        i = int(np.random.randint(n))
-        res = []
-        for j in range(n):
-            if j == i:
-                res.append(self.spaces[j].witness())
-            else:
-                res.append(Coproduct1.fill)
-        return (i, tuple(res))
 
     def pack(self, i, xi):
         def m(j):

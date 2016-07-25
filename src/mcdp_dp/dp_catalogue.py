@@ -63,6 +63,7 @@ class CatalogueDP(PrimitiveDP):
         for name, f_max, r_min in self.entries:
             if F.leq(f, f_max) and R.leq(r_min, r):
                 options_m.add(name)
+
         return options_m
 
     def __repr__(self):

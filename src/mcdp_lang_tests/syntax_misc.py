@@ -8,7 +8,11 @@ from mcdp_lang.syntax_codespec import SyntaxCodeSpec
 from mcdp_posets.uppersets import UpperSet, UpperSets, LowerSet
 from nose.tools import assert_equal
 from pyparsing import Literal
-from mcdp_lang.parse_interface import parse_ndp, parse_constant
+from mcdp_lang.parse_interface import parse_ndp, parse_constant, parse_poset
+from mocdp.comp.recursive_name_labeling import get_names_used
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
+from mcdp_posets.category_product import get_product_compact
+from mcdp_posets import PosetProduct
 
 @comptest
 def check_lang():
@@ -409,30 +413,54 @@ def check_lang58():  # TODO: rename
         }
     """)
 
-
-#     assert_parsable_to_connected_ndp("""
-#         mcdp {
-#             a = instance mcdp {
-#                 provides f [s]
-#             }
-#             ignore a.f
-#         }
-#     """)
-#     assert_parsable_to_connected_ndp("""
-#         mcdp {
-#             a = instance mcdp {
-#                 requires r [s]
-#             }
-#             ignore a.r
-#         }
-#     """)
+def f():
+    pass
 @comptest
 def check_lang59():  # TODO: rename
-    pass
+    parse_wrap_check(""" addmake(code mcdp_lang_tests.syntax_misc.f) mcdp {} """,
+                     Syntax.ndpt_addmake)
+
+    ndp = parse_ndp(""" addmake(code mcdp_lang_tests.syntax_misc.f) mcdp {} """)
+
+    assert ndp.make == f, ndp.make
+
 @comptest
 def check_lang60():  # TODO: rename
     pass
 @comptest
 def check_lang61():  # TODO: rename
-    pass
+
+    
+# . L . . . . . . . \ Parallel2  % R[kg]×(R[N]×R[N]) -> R[kg]×R[W] I = PosetProduct(R[kg],PosetProduct(R[N],R[N]){actuati
+# on/_prod1},R[N²]) names: [('actuation', '_prod1')]
+# . L . . . . . . . . \ Id(R[kg]) I = R[kg]
+# . L . . . . . . . . \ Series: %  R[N]×R[N] -> R[W] I = PosetProduct(PosetProduct(R[N],R[N]){actuation/_prod1},R[N²]) nam
+# es: [('actuation', '_prod1'), ('actuation', '_mult1')]
+# . L . . . . . . . . . \ ProductN(R[N]×R[N] -> R[N²]) named: ('actuation', '_prod1') I = PosetProduct(R[N],R[N])
+# . L . . . . . . . . . \ GenericUnary(<mcdp_lang.misc_math.MultValue instance at 0x10d8dcbd8>) named: ('actuation', '_mult1
+# ') I = R[N²]
+
+    S1 = parse_poset('N')
+    setattr(S1, ATTRIBUTE_NDP_RECURSIVE_NAME, ('S1',))
+    S2 = parse_poset('kg')
+    setattr(S2, ATTRIBUTE_NDP_RECURSIVE_NAME, ('S2',))
+    S12 = PosetProduct((S1, S2))
+    names = get_names_used(S12)
+    assert names == [('S1',), ('S2',)], names
+    P = parse_poset('J x W')
+    setattr(P, ATTRIBUTE_NDP_RECURSIVE_NAME, ('prod',))
+
+    S, _pack, _unpack = get_product_compact(P, S12)
+    print S.__repr__()
+    assert get_names_used(S) == [('prod',), ('S1',), ('S2',)]
+    
+    
+
+
+
+
+     
+
+
+
 

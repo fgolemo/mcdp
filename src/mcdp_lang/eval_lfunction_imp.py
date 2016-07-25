@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 from .helpers import get_valuewithunits_as_function
+from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
 from contracts import contract
 from contracts.utils import raise_desc
+from mcdp_dp import InvMult2, InvPlus2, InvPlus2Nat
 from mcdp_posets import Nat, RcompUnits, mult_table
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
 from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import CFunction, get_name_for_res_node
-from mcdp_dp import InvMult2, InvPlus2, InvPlus2Nat
 from mocdp.exceptions import DPInternalError, DPSemanticError
-from mcdp_lang.namedtuple_tricks import recursive_print
-from mcdp_posets.finite_collection_as_space import FiniteCollectionAsSpace
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
 
 
 CDP = CDPLanguage

@@ -4,8 +4,11 @@ from .interfaces import NamedDP, NotConnected
 from contracts import contract
 from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
-from mocdp.exceptions import DPSemanticError
+from mcdp_dp.dp_flatten import Mux
+from mcdp_posets.poset_product import PosetProduct
 from mocdp.comp.context import is_fun_node_name
+from mocdp.comp.wrap import SimpleWrap
+from mocdp.exceptions import DPSemanticError
 
 __all__ = [
     'CompositeNamedDP',
@@ -108,15 +111,22 @@ class CompositeNamedDP(NamedDP):
         return cndp_templatize_children(self)
 
     def abstract(self):
+        if not self.context.names:
+            # this means that there are nor children, nor functions nor resources
+            dp = Mux(PosetProduct(()), ())
+            ndp = SimpleWrap(dp, fnames=[], rnames=[])
+            return ndp
+
         try:
             self.check_fully_connected()
         except NotConnected as e:
             msg = 'Cannot abstract because not all subproblems are connected.'
-            raise_wrapped(DPSemanticError, e, msg, compact=True)
+            raise_wrapped(DPSemanticError, e, msg, compact=True,
+                          self_=self.repr_long())
 
         from mocdp.comp.composite_abstraction import cndp_abstract
         res = cndp_abstract(self)
-
+        assert isinstance(res, SimpleWrap), type(res)
         # from mocdp.comp.context_functions import dpgraph_making_sure_no_reps
         # res = dpgraph_making_sure_no_reps(self.context)
         assert res.get_fnames() == self.context.fnames, (res.get_fnames(), self.context.fnames)
@@ -125,7 +135,13 @@ class CompositeNamedDP(NamedDP):
 
     def get_dp(self):
         ndp = self.abstract()
-        return ndp.get_dp()
+        dp = ndp.get_dp()
+
+#         if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
+#             x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
+#             setattr(dp, ATTRIBUTE_NDP_RECURSIVE_NAME, x)
+
+        return dp
 
     def __repr__(self):
         s = 'CompositeNDP'
@@ -225,3 +241,47 @@ def check_consistent_data(names, fnames, rnames, connections):
         except ValueError as e:
             msg = 'Invalid connection'
             raise_wrapped(ValueError, e, msg, c=c, names=list(names))
+
+@contract(cndp=CompositeNamedDP, returns='list(tuple(str, $NamedDP))')
+def cndp_iterate_res_nodes(cndp):
+    res = []
+    from mocdp.comp.context import is_res_node_name
+
+    for name2, ndp2 in cndp.get_name2ndp().items():
+        isitr, rname = is_res_node_name(name2)
+        if isitr:
+            res.append((rname, ndp2))
+    return res
+
+
+@contract(cndp=CompositeNamedDP, returns='list(tuple(str, $NamedDP))')
+def cndp_iterate_fun_nodes(cndp):
+    res = []
+    from mocdp.comp.context import is_fun_node_name
+
+    for name2, ndp2 in cndp.get_name2ndp().items():
+        isitr, fname = is_fun_node_name(name2)
+        if isitr:
+            res.append((fname, ndp2))
+    return res
+
+
+
+@contract(cndp=CompositeNamedDP, returns='list(tuple(str, $NamedDP))')
+def cndp_get_name_ndp_notfunres(cndp):
+    """ Yields a sequence of name, ndp excluding 
+        the fake ones that represent function or resource. """
+    assert isinstance(cndp, CompositeNamedDP)
+    from mocdp.comp.context import is_res_node_name, is_fun_node_name
+
+    res = []
+    for name2, ndp2 in cndp.get_name2ndp().items():
+        isitf, _ = is_fun_node_name(name2)
+        isitr, _ = is_res_node_name(name2)
+        if isitf or isitr:
+            # do not add the identity nodes
+            # that represent functions or resources
+            continue
+        else:
+            res.append((name2, ndp2))
+    return res

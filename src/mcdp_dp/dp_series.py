@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from .primitive import Feasible, NormalForm, NotFeasible, PrimitiveDP
+from .primitive import NormalForm, NotFeasible, PrimitiveDP
 from .tracer import Tracer
 from contracts import contract
 from contracts.utils import indent, raise_desc, raise_wrapped
@@ -32,16 +32,27 @@ class Series0(PrimitiveDP):
         F1 = self.dp1.get_fun_space()
         R2 = self.dp2.get_res_space()
 
-        self.M1 = self.dp1.get_imp_space_mod_res()
-        self.M2 = self.dp2.get_imp_space_mod_res()
+        self.M1 = self.dp1.get_imp_space()
+        self.M2 = self.dp2.get_imp_space()
 
-        M, _, _ = get_product_compact(self.M1, self.M2)
-
+        M, _, _ = self._get_product()
         self._solve_cache = {}
         PrimitiveDP.__init__(self, F=F1, R=R2, I=M)
 
+    def __getstate__(self):
+        state = dict(**self.__dict__)
+        state.pop('prod', None)
+        return state
+
+    def _get_product(self):
+        if not hasattr(self, 'prod'):
+            self.prod = _, _, _ = get_product_compact(self.M1, self.M2)
+            assert hasattr(self, 'prod')
+
+        return self.prod
+
     def _unpack_m(self, m):
-        M, _, unpack = get_product_compact(self.M1, self.M2)
+        M, _, unpack = self._get_product()
         if do_extra_checks():
             M.belongs(m)
         m1, m2 = unpack(m)
@@ -55,7 +66,7 @@ class Series0(PrimitiveDP):
 
     def get_implementations_f_r(self, f, r):
         f1 = f
-        _, pack, _ = get_product_compact(self.M1, self.M2)
+        _, pack, _ = self._get_product()
         R2 = self.dp2.get_res_space()
         res = set()
         # First let's solve again for r1
@@ -97,7 +108,7 @@ class Series0(PrimitiveDP):
 
     def check_feasible(self, f1, m, r2):
         # print('series:check_feasible(%s,%s,%s)' % (f1, m, r))
-        M, _, unpack = get_product_compact(self.M1, self.M2)
+        M, _, unpack = self._get_product()
         if do_extra_checks():
             M.belongs(m)
         m1, m2 = unpack(m)
@@ -178,8 +189,7 @@ class Series0(PrimitiveDP):
         r2 = self.dp2.repr_long()
         s1 = 'Series:'
         s2 = ' %s -> %s' % (self.get_fun_space(), self.get_res_space())
-        s3 = '%s' % self.get_imp_space()
-        s = s1 + ' % ' + s2 + '   I = ' + s3
+        s = s1 + ' % ' + s2 + self._add_extra_info()
         s += '\n' + indent(r1, '. ', first='\ ')
         s += '\n' + indent(r2, '. ', first='\ ')
         return s
@@ -211,7 +221,6 @@ class Series0(PrimitiveDP):
         beta: UF1 x S -> S
 """     
         S, pack, unpack = get_product_compact(S1, S2)
-
 
         D = PosetProduct((UF1, S))
                          

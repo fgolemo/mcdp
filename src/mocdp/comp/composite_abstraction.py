@@ -5,13 +5,13 @@ from mcdp_dp.dp_flatten import Mux
 from mcdp_dp.dp_loop2 import DPLoop2
 from mcdp_dp.dp_series_simplification import make_series
 from mcdp_posets.poset_product import PosetProduct
-from mocdp.comp.composite import CompositeNamedDP
-from mocdp.comp.wrap import SimpleWrap
 from mcdp_posets.types_universe import get_types_universe
-from networkx.algorithms.cycles import simple_cycles
+from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context_functions import dpgraph_making_sure_no_reps
+from mocdp.comp.wrap import SimpleWrap
+from networkx.algorithms.cycles import simple_cycles
 
-@contract(ndp=CompositeNamedDP)
+@contract(ndp=CompositeNamedDP, returns=SimpleWrap)
 def cndp_abstract(ndp):
     from mocdp.comp.connection import get_connection_multigraph
     

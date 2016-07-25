@@ -2,7 +2,7 @@
 from collections import namedtuple
 from contracts import contract
 from contracts.utils import  raise_desc
-from mcdp_dp.dp_identity import Identity
+from mcdp_dp.dp_identity import Identity, ResourceNode, FunctionNode
 from mcdp_dp.primitive import PrimitiveDP
 from mcdp_posets import Poset, Space
 from mocdp.comp.interfaces import NamedDP
@@ -241,7 +241,7 @@ class Context():
 
     @contract(returns=str)
     def add_ndp_fun_node(self, fname, F):
-        ndp = dpwrap(Identity(F), fname, fname)
+        ndp = dpwrap(FunctionNode(F), fname, fname)
         name = get_name_for_fun_node(fname)
         self.info('Adding new function %r as %r.' % (str(name), fname))
         self.add_ndp(name, ndp)
@@ -259,7 +259,7 @@ class Context():
     @contract(returns=str)
     def add_ndp_res_node(self, rname, R):
         """ returns the name of the node """
-        ndp = dpwrap(Identity(R), rname, rname)
+        ndp = dpwrap(ResourceNode(R), rname, rname)
         name = get_name_for_res_node(rname)
         self.info('Adding new resource %r as %r ' % (str(name), rname))
         self.add_ndp(name, ndp)

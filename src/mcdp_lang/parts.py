@@ -275,4 +275,9 @@ class CDPLanguage():
     SpaceCoproduct = namedtuplewhere('SpaceCoproduct', 'keyword entries')
 
 
+    # addmake(code module.func) mcdp { ... }
+    # code = CodeSpecNoArgs = namedtuplewhere('CodeSpecNoArgs', 'keyword function')
+    AddMakeKeyword = namedtuplewhere('AddMakeKeyword', 'keyword')
+    AddMake = namedtuplewhere('AddMake', 'keyword code dp_rvalue')
+
 

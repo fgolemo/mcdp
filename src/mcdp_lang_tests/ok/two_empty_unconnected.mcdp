@@ -1,5 +1,5 @@
-# test unconnected
+# test connected
 mcdp {
-	sub a = instance mcdp { }
-	sub b = instance mcdp { }
+	a = instance mcdp { }
+	b = instance mcdp { }
 }

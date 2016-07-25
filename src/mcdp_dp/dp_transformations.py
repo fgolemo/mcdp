@@ -2,6 +2,7 @@ from contracts import contract
 from .primitive import PrimitiveDP, ApproximableDP
 from mcdp_dp.dp_loop2 import DPLoop2
 from mcdp_dp.dp_parallel_n import ParallelN
+from mocdp import ATTRIBUTE_NDP_MAKE_FUNCTION, ATTRIBUTE_NDP_RECURSIVE_NAME
 
 @contract(dp=PrimitiveDP, returns=PrimitiveDP)
 def dp_transform(dp, f):
@@ -29,6 +30,16 @@ def dp_transform(dp, f):
         # assert isinstance(r, PrimitiveDP)
         return r
 
+def preserve_attributes(f):
+    """ returns a function that applies f but also preserves attributes """
+    def ff(x):
+        y = f(x)
+        attrs = [ATTRIBUTE_NDP_RECURSIVE_NAME, ATTRIBUTE_NDP_MAKE_FUNCTION]
+        for a in attrs:
+            if hasattr(x, a):
+                setattr(y, a, getattr(x, a))
+        return y
+    return ff
 
 @contract(dp=PrimitiveDP, nl='int,>=1', nu='int,>=1')
 def get_dp_bounds(dp, nl, nu):
@@ -46,8 +57,9 @@ def get_dp_bounds(dp, nl, nu):
         else:
             return dp
 
-    dpU = dp_transform(dp, lambda _: transform_upper(_, nu))
-    dpL = dp_transform(dp, lambda _: transform_lower(_, nl))
+
+    dpU = dp_transform(dp, preserve_attributes(lambda _: transform_upper(_, nu)))
+    dpL = dp_transform(dp, preserve_attributes(lambda _: transform_lower(_, nl)))
 
     return dpL, dpU
 

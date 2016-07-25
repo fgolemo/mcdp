@@ -1,7 +1,7 @@
-# test unconnected
+# test connected
 # allow empty models
-   mcdp {
-  
-    sub DP1 = instance template mcdp { }
-  
-  }
+mcdp {
+
+    DP1 = instance template mcdp { }
+
+}

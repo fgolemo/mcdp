@@ -43,7 +43,7 @@ def check_take_optim2():
 
 @comptest
 def check_take_optim3():
-    ndp = assert_parsable_to_connected_ndp("""
+    assert_parsable_to_connected_ndp("""
     
     mcdp {
     
@@ -56,7 +56,6 @@ def check_take_optim3():
     }
     
     """)
-    pass
 
 @comptest
 def check_take_optim4():

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from .eval_codespec_imp_utils_instantiate import ImportFailure, import_name
 from .eval_constant_imp import eval_constant
 from .eval_ndp_approx import eval_ndp_approx_lower, eval_ndp_approx_upper
 from .eval_space_imp import eval_space
@@ -14,14 +15,9 @@ from mcdp_dp import CatalogueDP, JoinNDP, MeetNDual
 from mcdp_dp.conversion import Conversion, get_conversion
 from mcdp_dp.dp_approximation import make_approximation
 from mcdp_dp.dp_series_simplification import make_series
-
-from mcdp_lang.eval_ndp_approx import (eval_ndp_approx_lower,
-    eval_ndp_approx_upper)
-from mcdp_lang.eval_template_imp import eval_template
-from mcdp_lang.parse_actions import add_where_information
-from mcdp_posets import NotEqual, NotLeq, PosetProduct, get_types_universe
-from mcdp_posets.finite_collection_as_space import FiniteCollectionAsSpace
-from mcdp_posets import Any, NotEqual, NotLeq, PosetProduct, get_types_universe
+from mcdp_posets import (
+    FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe)
+from mocdp import ATTRIBUTE_NDP_MAKE_FUNCTION
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
 from mocdp.comp.composite_makecanonical import cndp_makecanonical
@@ -32,14 +28,14 @@ from mocdp.exceptions import (DPInternalError, DPSemanticError,
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 
+
+
 CDP = CDPLanguage
 
 @contract(returns=NamedDP)
 def eval_ndp(r, context):  # @UnusedVariable
     with add_where_information(r.where):
 
-        if isinstance(r, CDP.BuildProblem):
-            return eval_build_problem(r, context)
 
         # TODO: remove
         if isinstance(r, CDP.VariableRef):
@@ -63,11 +59,6 @@ def eval_ndp(r, context):  # @UnusedVariable
         if isinstance(r, CDP.DPInstance):
             return eval_ndp(r.dp_rvalue, context)
 
-        if isinstance(r, CDP.LoadNDP):
-            return eval_ndp_load(r, context)
-
-        if isinstance(r, CDP.DPWrap):
-            return eval_ndp_dpwrap(r, context)
 
         if isinstance(r, CDP.AbstractAway):
             ndp = eval_ndp(r.dp_rvalue, context)
@@ -95,6 +86,9 @@ def eval_ndp(r, context):  # @UnusedVariable
             raise_desc(DPSemanticError, msg)
             
         cases = {
+            CDP.BuildProblem: eval_build_problem,
+            CDP.LoadNDP: eval_ndp_load,
+            CDP.DPWrap : eval_ndp_dpwrap,
             CDP.MakeTemplate: eval_ndp_make_template,
             CDP.Coproduct:eval_ndp_coproduct,
             CDP.CoproductWithNames: eval_ndp_CoproductWithNames,
@@ -108,6 +102,7 @@ def eval_ndp(r, context):  # @UnusedVariable
             CDP.Specialize: eval_ndp_specialize,
             CDP.ApproxLower: eval_ndp_approx_lower,
             CDP.ApproxUpper: eval_ndp_approx_upper,
+            CDP.AddMake: eval_ndp_addmake,
         }
         
         for klass, hook in cases.items():
@@ -117,6 +112,19 @@ def eval_ndp(r, context):  # @UnusedVariable
     r = recursive_print(r)
     msg = 'eval_ndp(): cannot evaluate r as an NDP.'
     raise_desc(DPInternalError, msg, r=r)
+
+def eval_ndp_addmake(r, context):
+    assert isinstance(r, CDP.AddMake)
+    ndp = eval_ndp(r.dp_rvalue, context)
+    function_name = r.code.function.value
+    try:
+        function = import_name(function_name)
+    except ImportFailure as e:
+        msg = 'Could not import Python function name.'
+        raise_wrapped(DPSemanticError, e, msg, function_name=function_name,
+                      compact=True)
+    setattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION, function)
+    return ndp
 
 
 def eval_ndp_specialize(r, context):
@@ -490,7 +498,7 @@ def eval_statement(r, context):
             context.set_var2function(name, fv)
 
         elif isinstance(r, CDP.ResStatement):
-            # requires r.rname [r.unit]
+            # "requires r.rname [r.unit]"
 
             R = eval_space(r.unit, context)
             rname = r.rname.value
@@ -588,7 +596,6 @@ def eval_build_problem(r, context):
 
     for s in statements:
         with add_where_information(s.where):
-            # nt recursive_print(s)
             eval_statement(s, context)
 
     # take() optimization

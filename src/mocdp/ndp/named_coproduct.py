@@ -3,6 +3,7 @@ from mocdp.comp.interfaces import NamedDP
 from mcdp_posets import NotEqual
 from contracts import contract
 from mocdp.comp.wrap import SimpleWrap
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 
 __all__ = [
     'NamedDPCoproduct',
@@ -64,14 +65,20 @@ class NamedDPCoproduct(NamedDP):
         dp = CoProductDP(tuple(options))
 
         if self.labels is None:
-            return dp
+            res = dp
         else:
             from mcdp_dp.dp_coproduct import CoProductDPLabels
             dp2 = CoProductDPLabels(dp, self.labels)
 
             assert dp2.get_fun_space() == dp.get_fun_space(), (dp, dp2)
             assert dp2.get_res_space() == dp.get_res_space(), (dp, dp2)
-            return dp2
+            res = dp2
+
+        if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
+            x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
+            setattr(res, ATTRIBUTE_NDP_RECURSIVE_NAME, x)
+
+        return res
 
     def check_fully_connected(self):
         for ndp in self.ndps:

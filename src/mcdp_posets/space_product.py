@@ -2,6 +2,7 @@
 from .space import NotBelongs, NotEqual, Space
 from contracts import contract
 from contracts.utils import check_isinstance, indent, raise_desc
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 
 __all__ = [
     'SpaceProduct',
@@ -81,15 +82,32 @@ class SpaceProduct(Space):
         return tuple(x.witness() for x in self.subs)
 
     def __repr__(self):
+        name = type(self).__name__
+        args = []
+        for s in self.subs:
+            res = s.__repr__()
+            if hasattr(s, ATTRIBUTE_NDP_RECURSIVE_NAME):
+                a = getattr(s, ATTRIBUTE_NDP_RECURSIVE_NAME)
+                res += '{%s}' % "/".join(a)
+            args.append(res)
+
+        return '%s(%d: %s)' % (name, len(self.subs), ",".join(args))
+
+    def __str__(self):
         def f(x):
             if hasattr(x, '__mcdplibrary_load_name'):
-                return getattr(x, '__mcdplibrary_load_name')
-
-            r = x.__repr__()
-            if  r[-1] != ')' and (isinstance(x, SpaceProduct) or ("×" in r)):
-                return "(%s)" % r
+                res = '`' + getattr(x, '__mcdplibrary_load_name')
             else:
-                return r
+                r = x.__str__()
+                if  r[-1] != ')' and (isinstance(x, SpaceProduct) or ("×" in r)):
+                    res = "(%s)" % r
+                else:
+                    res = r
+
+            if hasattr(x, ATTRIBUTE_NDP_RECURSIVE_NAME):
+                a = getattr(x, ATTRIBUTE_NDP_RECURSIVE_NAME)
+                res += '{%s}' % "/".join(a)
+            return res
 
         if len(self.subs) == 0:
             return "𝟙"

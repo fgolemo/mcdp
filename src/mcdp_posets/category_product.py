@@ -4,6 +4,8 @@ from .space_product import SpaceProduct
 from contracts import contract
 from .space import Space  # @UnusedImport
 from mocdp.exceptions import do_extra_checks
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
+from contracts.utils import raise_desc
 
 __all__ = [
     'get_product_compact',
@@ -14,7 +16,23 @@ def get_product_compact(*spaces):
     """
         S, pack, unpack = get_product_compact(S1, S2)
     """
+#     names = set()
+#     for s in spaces:
+#         from mocdp.comp.recursive_name_labeling import get_names_used
+#         names.update(get_names_used(s))
+
     S = _prod_make(spaces)
+
+#     S_names = set(get_names_used(S))
+#     for i, s in enumerate(spaces):
+#         print('spaces[%d] =  %s' % (i, s.__repr__()))
+#     print('S      =  %s' % S.__repr__())
+#
+#     if S_names != names:
+#         msg = 'invalid'
+#         raise_desc(ValueError, msg, spaces=spaces, S=S, names=names, S_names=S_names)
+
+
     def pack(*elements):
         return _prod_make_state(elements, spaces)
     def unpack(s):
@@ -22,6 +40,9 @@ def get_product_compact(*spaces):
     return S, pack, unpack
 
 def get_subs(x):
+    if hasattr(x,  ATTRIBUTE_NDP_RECURSIVE_NAME):
+        # do not break the spaces that have a name
+        return (x,)
     if isinstance(x, SpaceProduct):
         return x.subs
     else:
@@ -32,6 +53,9 @@ def _prod_make(spaces):
     subs = ()
     for space in spaces:
         subs = subs + get_subs(space)
+#
+#         print('space: %s %s %s' % (id(space), space.__repr__(),
+#                                    getattr(space, ATTRIBUTE_NDP_RECURSIVE_NAME, '-')))
 
     if len(subs) == 1:
         return subs[0]
@@ -40,6 +64,12 @@ def _prod_make(spaces):
         S = PosetProduct(subs)
     else:
         S = SpaceProduct(subs)
+#
+#
+#     for i, sub in enumerate(subs):
+#         print('name of %r = %s' % (sub, getattr(sub, ATTRIBUTE_NDP_RECURSIVE_NAME, '-')))
+
+#     print('found: %s %r' % (id(S), S.__repr__()))
 
     return S
 
@@ -48,6 +78,9 @@ def _prod_make_state(elements, spaces):
     assert isinstance(spaces, tuple), spaces
 
     def get_state(X, x):
+        if hasattr(X, ATTRIBUTE_NDP_RECURSIVE_NAME):
+            # do not break the spaces that have a name
+            return (x,)
         if isinstance(X, SpaceProduct):
             return x
         else:
