@@ -8,43 +8,51 @@ from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.composite_makecanonical import cndp_makecanonical
 from mocdp.comp.recursive_name_labeling import (get_imp_as_recursive_dict,
-    get_names_used, label_with_recursive_names, ndp_make)
-
-
-# mocdp.comp.test.tests.test_imp_space.make_one
-def make_root(ndp, res, context):  # @UnusedVariable
-    print('make_root(%s)' % res)
-    assert res['a']['status'] == 'make_a_ok'
-    assert res['b']['status'] == 'make_b_ok'
-    bom = set(res['a']['bom'] + res['b']['bom'])
+    get_names_used, label_with_recursive_names, ndp_make, MakeArguments)
+from contracts import contract
+@contract(a=MakeArguments)
+def make_root(a):
+    print('make_root(%s)' % a.__str__())
+    assert a.key == 'root'
+    sub = a.subresult
+    assert sub['a']['status'] == 'make_a_ok'
+    assert sub['b']['status'] == 'make_b_ok'
+    bom = set(sub['a']['bom'] + sub['b']['bom'])
     return {'bom': bom, 'status': 'make_root_ok'}
 
-def make_a(ndp, res, context):  # @UnusedVariable
-    print('make_a(%r)' % res)
+@contract(a=MakeArguments)
+def make_a(a):
+    print('make_a(%s)' % a.__str__())
+    res = a.subresult
     assert res['a2']['status'] == 'make_a2_ok'
 
     return {'bom': res['a2']['bom'], 'status': 'make_a_ok'}
 
-def make_b(ndp, res, context):  # @UnusedVariable
+@contract(a=MakeArguments)
+def make_b(a):
+    res = a.subresult
     assert res in ['model3', 'model4']
     return {'bom': [res], 'status': 'make_b_ok'}
 
-def make_a2(ndp, res, context):  # @UnusedVariable
+@contract(a=MakeArguments)
+def make_a2(a):
+    res = a.subresult
     assert res in ['model1', 'model2']
     return {'bom': [res], 'status': 'make_a2_ok'}
 
 @comptest
 def test_imp_space_2():
     ndp0 = parse_ndp("""
-addmake(code mocdp.comp.tests.test_imp_space.make_root)
+addmake(root: code mocdp.comp.tests.test_imp_space.make_root)
 mcdp {
     a = instance 
-        addmake(code mocdp.comp.tests.test_imp_space.make_a)
+        
+        addmake(root: code mocdp.comp.tests.test_imp_space.make_a)
         mcdp {
         
         a2 = instance 
         
-        addmake(code mocdp.comp.tests.test_imp_space.make_a2) 
+        addmake(root: code mocdp.comp.tests.test_imp_space.make_a2) 
         catalogue {
             provides capacity [J]
             requires mass [g]
@@ -58,7 +66,7 @@ mcdp {
     }
     
     b = instance 
-    addmake(code mocdp.comp.tests.test_imp_space.make_b)
+    addmake(root: code mocdp.comp.tests.test_imp_space.make_b)
     catalogue {
         provides capacity [J]
         requires mass [g]
@@ -114,7 +122,6 @@ def test_imp_dict_1(id_ndp, ndp):
     print ndp.repr_long()
     print dp0.repr_long()
     print('I: %s' % I)
-#     print('get_names_used: %s' % get_names_used(I))
 
     f = list(F.get_minimal_elements())[0]
     try:

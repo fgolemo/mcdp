@@ -724,11 +724,11 @@ class Syntax():
     # addmake(code module.func) mcdp { ... }
     ADDMAKE = spk(L('addmake'), CDP.AddMakeKeyword)
     from mcdp_lang.syntax_codespec import SyntaxCodeSpec
-
-    ndpt_addmake = sp(ADDMAKE - SLPAR - SyntaxCodeSpec.code_spec_simple - SRPAR
+    addmake_what = sp(get_idn(), lambda t: CDP.AddMakeWhat(t[0]))
+    ndpt_addmake = sp(ADDMAKE - SLPAR - addmake_what - SCOLON - SyntaxCodeSpec.code_spec_simple - SRPAR
                       - ndpt_dp_rvalue,
-                      lambda t: CDP.AddMake(keyword=t[0], code=t[1], dp_rvalue=t[2]))
-
+                      lambda t: CDP.AddMake(keyword=t[0], what=t[1],
+                                            code=t[2], dp_rvalue=t[3]))
 
     ABSTRACT = spk(L('abstract'), CDP.AbstractKeyword)
     ndpt_abstract = sp(ABSTRACT - ndpt_dp_rvalue,

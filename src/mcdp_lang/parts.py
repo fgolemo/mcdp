@@ -278,6 +278,7 @@ class CDPLanguage():
     # addmake(code module.func) mcdp { ... }
     # code = CodeSpecNoArgs = namedtuplewhere('CodeSpecNoArgs', 'keyword function')
     AddMakeKeyword = namedtuplewhere('AddMakeKeyword', 'keyword')
-    AddMake = namedtuplewhere('AddMake', 'keyword code dp_rvalue')
+    AddMakeWhat = namedtuplewhere('AddMakeWhat', 'value')
+    AddMake = namedtuplewhere('AddMake', 'keyword what code dp_rvalue')
 
 

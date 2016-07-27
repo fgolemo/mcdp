@@ -1,15 +1,14 @@
 from .nat import Int, Nat
 from .poset import NotLeq, Preorder
 from .poset_coproduct import PosetCoproduct
+from .poset_product import PosetProduct
 from .rcomp import Rcomp
-from .space import Map, MapNotDefinedHere, NotBelongs, NotEqual
+from .space import Map, MapNotDefinedHere, NotEqual
 from .space_product import SpaceProduct
 from .uppersets import UpperSets
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
-from mcdp_posets.poset import Poset
-from mcdp_posets.poset_product import PosetProduct
 
 __all__ = [
     'get_types_universe',
@@ -35,7 +34,6 @@ class TypesUniverse(Preorder):
         return isinstance(x, Space)
 
     def check_equal(self, A, B):
-        from mcdp_posets.poset_product import PosetProduct
         if isinstance(A, PosetProduct) and isinstance(B, PosetProduct):
             if len(A) != len(B):
                 msg = 'Different length.'

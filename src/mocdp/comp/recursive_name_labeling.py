@@ -49,6 +49,7 @@ from contracts import contract
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 from mcdp_dp.dp_flatten import Mux
 from mcdp_dp.dp_identity import IdentityDP
+from collections import namedtuple
 
 __all__ = [
     'label_with_recursive_names',
@@ -71,9 +72,6 @@ def visit_hierarchy(ndp0, func):
     def visit(parents_name, yourname, ndp):
 
         if isinstance(ndp, CompositeNamedDP):
-#             if not ndp.get_name2ndp():
-#                 func(parents_name, yourname, ndp)
-#             else:
                 for name, child in cndp_get_name_ndp_notfunres(ndp):
                     visit(parents_name + (yourname,), name, child)
 
@@ -178,15 +176,23 @@ def get_imp_as_recursive_dict(I, imp):  # , ignore_hidden=True):
 
     return group(res)
 
+MakeArguments = namedtuple('MakeArguments', [
+    'ndp',  # reference to CompositeNDP or SimpleWrap model
+    'subresult',  # the result of the children
+    'result',  # the result being built
+    'key',  # the key for this make function
+    'context',  # generic context
+])
 
-def make_identity(ndp, res, context):  # @UnusedVariable
-    return res
+@contract(a=MakeArguments)
+def make_identity(a):  # @UnusedVariable
+    return a.subresult
 
-def get_make_function(ndp):
+def get_make_functions(ndp):
     if hasattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION):
         return getattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION)
     else:
-        return make_identity
+        return [ ('default', make_identity) ]
 
 def ndp_make(ndp, imp_dict, context):
     """ A top-down make function.
@@ -216,11 +222,12 @@ def ndp_make(ndp, imp_dict, context):
             else:
                 child_imp = imp_dict[child_name]
                 children_artifact[child_name] = ndp_make(child, child_imp, context)
-        make = get_make_function(ndp)
-        return make(ndp, children_artifact, context)
+
+        return run_make(ndp, children_artifact, context)
+
     elif isinstance(ndp, SimpleWrap):
-        make = get_make_function(ndp)
-        return make(ndp, imp_dict, context)
+        return run_make(ndp, imp_dict, context)
+
     elif isinstance(ndp, NamedDPCoproduct):
         # print('imp_dict: %s' % imp_dict.__repr__())
         # if True:
@@ -228,16 +235,35 @@ def ndp_make(ndp, imp_dict, context):
             if label in imp_dict:
                 index = ndp.labels.index(label)
                 child = ndp.ndps[index]
-                make = get_make_function(child)
                 value = imp_dict[label]
-                return make(ndp, value, context)
-        assert False
-#
-#         I = ndp.get_dp().get_imp_space()
-#         I.belongs(imp_dict)
-#         index, value = I.unpack(imp_dict)
-#         child = ndp.ndps[index]
-#         make = get_make_function(child)
-#         return make(ndp, value, context)
+                return run_make(child, value, context)
+        assert False 
     else:
         raise NotImplementedError(type(ndp))
+    
+def run_make(ndp, subresult, context):
+    makes = get_make_functions(ndp)
+    assert isinstance(makes, list)
+    res = {}
+
+    # removing the
+    if isinstance(subresult, dict):
+        subresult = dict((k, v) for (k, v) in subresult.items() if k[0] != '_')
+
+    for k, function in makes:
+        a = MakeArguments(ndp=ndp,
+                          subresult=subresult,
+                          result=res,
+                          key=k,
+                          context=context)
+        result = function(a)
+        if result is None:
+            msg = 'Did not expect None as a result from %r.' % function
+            raise_desc(ValueError, msg, result=result, function=function)
+        if k == 'root':
+            res.update(result)
+        else:
+            res[k] = result
+    return res
+    
+    

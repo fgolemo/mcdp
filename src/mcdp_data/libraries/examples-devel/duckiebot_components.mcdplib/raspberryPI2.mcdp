@@ -1,21 +1,17 @@
 mcdp {
-	provides core1 [flops]
-	provides core2 [flops]
-	provides core3 [flops]
-	provides core4 [flops]
+    provides computation [flops]
 
-	requires voltage [set-of(V)]
-	requires power   [W] 
-	requires cost    [$]
+    requires in [`DC_power]
+    (required in).connector >= `barrel_connectors: barrel_4mm_1_7mm
+    (required in).voltages >= `DC_voltages: v5
 
-	core1 <= 1000 flops
-	core2 <= 1000 flops
-	core3 <= 1000 flops
-	core4 <= 1000 flops
+    requires cost [$]
+    required cost >= 30.00 $
 
-	c = 10 W/flops
-	power >= 0.5 W + (core1 + core2 + core3 + core4)  * c
+    computation <= 1000 Mflops
 
-	voltage >= {5V}
-	cost >= 30$
+    c0 = 100 mA
+    c = 0.001 mA/flops
+    amps = c0 + computation  * c
+    (required in).amps >= amps
 }

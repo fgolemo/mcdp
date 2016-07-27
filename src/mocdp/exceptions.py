@@ -1,10 +1,11 @@
 from contextlib import contextmanager
 from contracts import all_disabled
 import sys
-import warnings
+
 
 class MCDPException(Exception):
     pass
+
 
 class MCDPExceptionWithWhere(MCDPException):
     def __init__(self, error, where=None):
@@ -32,18 +33,23 @@ class MCDPExceptionWithWhere(MCDPException):
         where = _get_where_with_filename(self, filename)
         return type(self)(self.error, where=where)
 
+
 class DPInternalError(MCDPExceptionWithWhere):
     """ Internal consistency errors (not user) """
+
 
 class DPUserError(MCDPExceptionWithWhere):
     """ User mistake """
     pass
 
+
 class DPSyntaxError(DPUserError):
     pass
 
+
 class DPSemanticError(DPUserError):
     pass
+
 
 class DPSemanticErrorNotConnected(DPSemanticError):
     pass

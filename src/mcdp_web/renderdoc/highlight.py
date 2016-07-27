@@ -21,13 +21,20 @@ def bs(fragment):
 def html_interpret(library, html, raise_errors=False, realpath='unavailable'):
     # clone linrary?
     library = library.clone()
-    load_fragments(library, html, realpath=realpath)
-    html = highlight_mcdp_code(library, html, raise_errors=raise_errors,
+    load_fragments(library, html,
+                   realpath=realpath)
+
+    html = highlight_mcdp_code(library, html,
+                               raise_errors=raise_errors,
                                realpath=realpath)
+
     html = make_figures(library, html,
-                        raise_error_dp=raise_errors, raise_error_others=raise_errors,
+                        raise_error_dp=raise_errors,
+                        raise_error_others=raise_errors,
                         realpath=realpath)
-    html = make_plots(library, html, raise_errors=raise_errors,
+
+    html = make_plots(library, html,
+                      raise_errors=raise_errors,
                       realpath=realpath)
 
     return html

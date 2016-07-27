@@ -34,8 +34,8 @@ def check_evaluate(id_dp, dp):
         raise_desc(ValueError, msg, lf=lf, ur=ur, m0=m0, M=M, dp=dp.repr_long())
 
     # take one possible feasible pair
-    f = list(lf.maximals)[0]
-    r = list(ur.minimals)[0]
+    _f = list(lf.maximals)[0]
+    _r = list(ur.minimals)[0]
     # this should be feasible
     # no, this is not feasible, because m0 was chosen randomly
     # dp.check_feasible(f, m0, r)

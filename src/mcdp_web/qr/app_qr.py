@@ -1,9 +1,8 @@
 from mcdp_web.utils import response_data
-from pyramid.httpexceptions import HTTPFound
 import binascii
 import os
-import traceback
 import time
+import traceback
 
 
 class AppQR():

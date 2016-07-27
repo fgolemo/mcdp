@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
-from .find_poset_minima.baseline_n2 import poset_minima
-from .poset import NotBounded, NotLeq, Poset
+from .find_poset_minima.baseline_n2 import poset_maxima, poset_minima
+from .poset import NotLeq, Poset
 from .poset_product import PosetProduct
 from .space import NotBelongs, NotEqual, Space, Uninhabited
 from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 import random
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
 
 __all__ = [
     'UpperSet',

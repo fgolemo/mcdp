@@ -1,10 +1,9 @@
-from mcdp_web.utils.response import response_data
-from mcdp_cli.plot import png_pdf_from_gg
 from mcdp_report.gg_ndp import gvgen_from_ndp
-from mocdp.comp.composite_templatize import ndp_templatize
 from mcdp_report.report import gvgen_from_dp
+from mcdp_web.utils.response import response_data
+from mocdp.comp.composite_templatize import ndp_templatize
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-from reprep.constants import MIME_PNG, MIME_PDF, MIME_SVG
+from reprep.constants import MIME_PDF, MIME_PNG, MIME_SVG
 
 
 

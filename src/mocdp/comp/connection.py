@@ -118,8 +118,7 @@ def dpconnect(name2dp, connections, split=[]):
             raise_desc(Exception, msg, s=s, first_connections=first_connections, connections=connections, split1=split)
 
 
-    dp = connect2(name2dp[first], name2dp[second], set(first_connections), split=split1,
-                  label1=first, label2=first)
+    dp = connect2(name2dp[first], name2dp[second], set(first_connections), split=split1)
 
     others = list(order)
     others.remove(first)
@@ -178,8 +177,7 @@ def its_dp_as_product(ndp):
           connections='set($Connection)',
           split='list(str)',
           returns=SimpleWrap)
-def connect2(ndp1, ndp2, connections, split, repeated_ok=False,
-             label1=None, label2=None):
+def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
     """ 
         Note the argument split must be a list of strings so 
         that orders are preserved and deterministic. 

@@ -10,6 +10,8 @@ from mcdp_report.report import report_dp1, report_ndp1
 from reprep import Report
 import os
 from mcdp_posets.types_universe import express_value_in_isomorphic_space
+from mocdp.comp.recursive_name_labeling import get_imp_as_recursive_dict, \
+    ndp_make, label_with_recursive_names
 
 
 class ExpectationsNotMet(Exception):
@@ -19,7 +21,9 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
                max_steps, query_strings,
        intervals, _exp_advanced, expect_nres, imp, expect_nimp, plot, do_movie,
 
-       expect_res=None,
+       # expect_res=None,
+       expect_res,
+       make
        ):
 
     if out_dir is None:
@@ -30,6 +34,9 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
     logger.info('Using output dir %r' % out)
 
     library, basename, ndp = solve_read_model(dirs=config_dirs, param=model_name)
+
+    if make:
+        label_with_recursive_names(ndp)
 
     basename, dp = solve_get_dp_from_ndp(basename=basename, ndp=ndp,
                                    lower=lower, upper=upper)
@@ -58,7 +65,7 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
                        expect_nres=expect_nres, nres=nres)
 
     if imp:
-        M = dp.get_imp_space_mod_res()
+        M = dp.get_imp_space()
         nimplementations = 0
         for r in res.minimals:
             ms = dp.get_implementations_f_r(fg, r)
@@ -67,7 +74,18 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
             for j, m in enumerate(ms):
                 # print('m = %s' % str(m))
                 s += "\n  implementation %d: m = %s " % (j + 1, M.format(m))
+
+                if make:
+                    imp_dict = get_imp_as_recursive_dict(M, m)  # , ignore_hidden=False)
+                    print('imp dict: %r' % imp_dict)
+                    context = {}
+                    artifact = ndp_make(ndp, imp_dict, context)
+
+                    print('artifact: %s' % artifact)
+
             tracer.log(s)
+
+
         if expect_nimp is not None:
             if expect_nimp != nimplementations:
                 msg = 'Found wrong number of implementations'

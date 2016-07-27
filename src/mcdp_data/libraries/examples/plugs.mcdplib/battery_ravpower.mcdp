@@ -1,0 +1,41 @@
+mcdp {
+    requires shape [m x m x m]
+    required shape >= <5.47 in, 2.24 in, 0.87 in>
+    requires mass [kg]
+    required mass >= 120 g
+    provides out1 [`DC_power]
+    provides out2 [`DC_power]
+
+    provides endurance  [s]
+
+    requires in1 [`DC_power]
+    requires charging_time [s]
+
+    (provided out1).connector <= `USB_connectors:USB_Std_A
+    (provided out1).voltage <= `DC_voltages: v5
+    amps1 = (provided out1).amps
+
+    (provided out2).connector <= `USB_connectors:USB_Std_A
+    (provided out2).voltage <= `DC_voltages: v5
+    amps2 = (provided out2).amps
+
+    (required in1).connector >= `USB_connectors:USB_Micro_B
+    (required in1).voltage >= `DC_voltages: v5
+
+    amps1 <= 2 A
+    amps2 <= 2 A
+    total_amps = amps1 + amps2
+    power = 5V * (total_amps)
+    used_capacity = power * provided endurance
+    capacity = 5V * (10400 mA*hour )
+
+    used_capacity <= capacity
+
+    rate =  10400 mA*hour
+
+    amps_in = 2 A
+    power_in = 2 A * 5 V
+    (required in1).amps >= amps_in
+
+    required charging_time >= used_capacity/power_in
+}

@@ -110,7 +110,7 @@ class AppSolver2():
 
         intervals = False
         max_steps = 10000
-        result_l, trace = solve_meat_solve(tracer, ndp, dpl, f,
+        result_l, _trace = solve_meat_solve(tracer, ndp, dpl, f,
                                          intervals, max_steps, False)
 
         result_u, trace = solve_meat_solve(tracer, ndp, dpu, f,
@@ -152,7 +152,7 @@ class AppSolver2():
             result_u = s['result_u']
             # print result_l, result_u
             dpl = s['dpl']
-            dpu = s['dpu']
+            _dpu = s['dpu']
 
             R = dpl.get_res_space()
             UR = UpperSets(R)

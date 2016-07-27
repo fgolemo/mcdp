@@ -116,6 +116,7 @@ def eval_ndp(r, context):  # @UnusedVariable
 def eval_ndp_addmake(r, context):
     assert isinstance(r, CDP.AddMake)
     ndp = eval_ndp(r.dp_rvalue, context)
+    what = r.what.value
     function_name = r.code.function.value
     try:
         function = import_name(function_name)
@@ -123,7 +124,11 @@ def eval_ndp_addmake(r, context):
         msg = 'Could not import Python function name.'
         raise_wrapped(DPSemanticError, e, msg, function_name=function_name,
                       compact=True)
-    setattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION, function)
+    if not hasattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION):
+        setattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION, [])
+
+    res = getattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION)
+    res.append((what, function))
     return ndp
 
 

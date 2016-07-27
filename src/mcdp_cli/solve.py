@@ -24,6 +24,7 @@ class SolveDP(QuickAppBase):
         params.add_flag('plot', help='Show iterations graphically')
         params.add_flag('movie', help='Create animation.')
         params.add_flag('imp', help='Compute and show implementations.')
+        params.add_flag('make', help='Runs the make procedure on the implementations.')
 
         params.add_string('dirs', default='.', short='-d',
                            help='Library directories containing models, separated by :.')
@@ -68,11 +69,17 @@ class SolveDP(QuickAppBase):
         intervals = options.intervals
         imp = options.imp
         expect_nimp = options.expect_nimp
+        make = options.make
+        if make: imp = True
 
         plot = options.plot
         do_movie = options.movie
 
+        expect_res = None
+
         solve_main(logger, config_dirs, model_name, lower, upper, out_dir, max_steps, query_strings,
-                   intervals, _exp_advanced, expect_nres, imp, expect_nimp, plot, do_movie)
+                   intervals, _exp_advanced, expect_nres, imp, expect_nimp, plot, do_movie,
+                   expect_res,
+                   make)
 
 mcdp_solve_main = SolveDP.get_sys_main()

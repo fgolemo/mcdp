@@ -8,6 +8,8 @@ from mcdp_posets.maps.identity import IdentityMap
 __all__ = [
     'Identity',
     'IdentityDP',
+    'FunctionNode',
+    'ResourceNode',
 ]
 
 
