@@ -53,8 +53,7 @@ def friendly_solve(ndp, query, result_like='dict(str:str)'):
 
     fnames = ndp.get_fnames()
     rnames = ndp.get_rnames()
-#     if not len(fnames) > 1:
-#         raise NotImplementedError()
+
     if not len(rnames) > 1:
         raise NotImplementedError()
     
@@ -76,10 +75,13 @@ def friendly_solve(ndp, query, result_like='dict(str:str)'):
     else:
         value = tuple(value)
 
-    dp = ndp.get_dp()
+    if hasattr(ndp, '_cache_dp'):
+        dp = ndp._cache_dp
+    else:
+        dp = ndp._cache_dp = ndp.get_dp()
+
     F = dp.get_fun_space()
     F.belongs(value)
-#     print('query: %s' % F.format(value))
 
     res = dp.solve(value)
     R = dp.get_res_space()

@@ -281,4 +281,10 @@ class CDPLanguage():
     AddMakeWhat = namedtuplewhere('AddMakeWhat', 'value')
     AddMake = namedtuplewhere('AddMake', 'keyword what code dp_rvalue')
 
+    # approximating a resource
+    ApproxKeyword = namedtuplewhere('ApproxKeyword', 'keyword')
+    # approx(<rvalue>, 5g)
+    ApproxStepRes = namedtuplewhere('ApproxRes', 'keyword rvalue step')
+
+
 

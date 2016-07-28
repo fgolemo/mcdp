@@ -482,6 +482,15 @@ class Syntax():
     index_label = sp(get_idn(), lambda t: CDP.IndexLabel(t[0]))
     # rvalue instead of rvalue_new_function
 
+    # approximating a resource
+#    ApproxKeyword = namedtuplewhere('ApproxKeyword', 'keyword')
+#   ApproxStepRes = namedtuplewhere('ApproxRes', 'keyword rvalue step')
+
+    # approx(<rvalue>, 5g)
+    APPROXRES = spk(L('approx'), CDP.ApproxKeyword)
+    rvalue_approx_step = sp(APPROXRES + SLPAR + rvalue + SCOMMA + constant_value + SRPAR,
+                            lambda t: CDP.ApproxStepRes(t[0], t[1], t[2]))
+
     # take(provided a, sub)
     rvalue_label_indexing2 = sp(TAKE + SLPAR + rvalue + S(COMMA) + index_label + SRPAR,
                                lambda t: CDP.ResourceLabelIndex(keyword=t[0],
@@ -646,8 +655,8 @@ class Syntax():
     dp_model_statements = sp(OneOrMore(S(ow) + line_expr),
                              lambda t: CDP.ModelStatements(make_list(list(t))))
 
-    CDPTOKEN = spk(L('mcdp'), CDP.MCDPKeyword)
-    ndpt_dp_model = sp(CDPTOKEN - S(L('{')) -
+    MCDPTOKEN = spk(L('mcdp'), CDP.MCDPKeyword)
+    ndpt_dp_model = sp(MCDPTOKEN - S(L('{')) -
                        ZeroOrMore(S(ow) + line_expr)
                         - S(L('}')),
                   lambda t: CDP.BuildProblem(keyword=t[0],
@@ -825,7 +834,8 @@ class Syntax():
         ^ rvalue_label_indexing
         ^ rvalue_label_indexing2
         ^ rvalue_label_indexing3
-        ^ rvalue_any_of)
+        ^ rvalue_any_of
+        ^ rvalue_approx_step)
 
     rvalue << operatorPrecedence(rvalue_operand, [
         (TIMES, 2, opAssoc.LEFT, mult_parse_action),

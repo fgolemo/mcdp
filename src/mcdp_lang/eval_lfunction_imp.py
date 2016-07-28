@@ -117,9 +117,9 @@ def eval_lfunction_variableref(lf, context):
 
     try:
         dummy_ndp = context.get_ndp_res(lf.name)
-    except ValueError as e:
-        msg = 'New function name %r not declared.' % lf.name
-        msg += '\n%s' % str(e)
+    except ValueError:
+        msg = 'Function %r not declared.' % lf.name
+#         msg += '\n%s' % str(e)
         raise DPSemanticError(msg, where=lf.where)
 
     s = dummy_ndp.get_rnames()[0]

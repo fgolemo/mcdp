@@ -79,7 +79,7 @@ def identity(x):
 
 class CombinedCeilMap(Map):
 
-    def __init__(self, S, alpha, step, max_value):
+    def __init__(self, S, alpha, step, max_value=None):
         Map.__init__(self, dom=S, cod=S)
         self.max_value = max_value
 

@@ -1,15 +1,11 @@
 
-flatten
-approx(mass,0%,10g,10kg) 
-approx(cost,0%,1$,Top$) 
-
 mcdp {
     provides capacity [J]
     provides missions [R]
 
     requires mass     [g]
     requires cost     [$]
-    
+
     # Number of replacements
     requires maintenance [R]
 
@@ -19,12 +15,15 @@ mcdp {
     cycles = 600 []
 
     # Constraint between mass and capacity
-    mass >= capacity / specific_energy
+    massc = provided capacity / specific_energy
 
     # How many times should it be replaced?
-    num_replacements = ceil(missions / cycles)
-    maintenance >= num_replacements
+    num_replacements = ceil(provided missions / cycles)
+    required maintenance >= num_replacements
 
     # Cost is proportional to number of replacements
-    cost >= (capacity / specific_cost) * num_replacements
+    costc = (provided capacity / specific_cost) * num_replacements
+
+    required cost >= approx(costc, 1 USD)
+    required mass >= approx(massc, 10 g)
 }

@@ -129,17 +129,22 @@ class PrimitiveDP(WithInternalLog):
     @contract(returns=Space)
     def get_imp_space(self):
         I = self.I
-        # This is a mess
+        # This is a mess... on the up side, the rest of the code is great.
         #
-        # The first time the dp is created there is no attribute
+        # Note: the first time the dp is created, there is no attribute.
+        #   dp = Series(...)
+        #      <internally calls get_imp_space()>
+        #   setattr(dp, ..., name)
         # So we need to redo it
         # if not hasattr(self, 'Imarked'):
-        if not hasattr(self, 'Imarked') or not hasattr(self.Imarked, ATTRIBUTE_NDP_RECURSIVE_NAME):
+        if not hasattr(self, 'Imarked') or (hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME) and not hasattr(self.Imarked, ATTRIBUTE_NDP_RECURSIVE_NAME)):
             self.Imarked = deepcopy(I)
             if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
                 x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
                 setattr(self.Imarked, ATTRIBUTE_NDP_RECURSIVE_NAME, x)
 
+#             assert hasattr(self, 'Imarked')
+#             assert hasattr(self.Imarked, ATTRIBUTE_NDP_RECURSIVE_NAME)
         return self.Imarked
 
     @contract(returns=Space)
