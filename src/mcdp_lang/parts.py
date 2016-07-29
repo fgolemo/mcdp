@@ -286,5 +286,8 @@ class CDPLanguage():
     # approx(<rvalue>, 5g)
     ApproxStepRes = namedtuplewhere('ApproxRes', 'keyword rvalue step')
 
+    # approxu(<rvalue>, 5g)
+    ApproxUKeyword = namedtuplewhere('ApproxUKeyword', 'keyword')
+    ApproxURes = namedtuplewhere('ApproxURes', 'keyword rvalue step')
 
 

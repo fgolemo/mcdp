@@ -153,7 +153,13 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
         else:
             self._bottom = None
 
-        
+    def leq(self, a, b):
+        if self.equal(a, b):
+            return True
+        if (a, b) in self.relations:
+            return True
+        return False
+
     def check_leq(self, a, b):
         if self.equal(a, b):
             return

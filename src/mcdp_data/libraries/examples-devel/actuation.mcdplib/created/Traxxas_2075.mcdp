@@ -17,6 +17,5 @@ mcdp {
    
    required budget >= 27.99 USD
    required shape >= <55mm, 20mm, 42.3mm>
-   required mass >= 45 g
-  
+   required mass >= 45 g 
 }

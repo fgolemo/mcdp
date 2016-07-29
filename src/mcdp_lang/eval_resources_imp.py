@@ -5,16 +5,17 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
-from mocdp.comp.context import CResource, ValueWithUnits, get_name_for_fun_node
-from mocdp.exceptions import DPSemanticError
-from mcdp_posets.types_universe import express_value_in_isomorphic_space, \
-    get_types_universe
+from contracts.utils import raise_desc
 from mcdp_dp.dp_approximation import CombinedCeilMap
 from mcdp_dp.dp_generic_unary import WrapAMap
 from mcdp_lang.helpers import create_operation
-from mcdp_posets.poset import NotLeq
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
+from mcdp_posets import NotLeq
+from mcdp_posets.types_universe import (express_value_in_isomorphic_space,
+    get_types_universe)
+from mocdp.comp.context import CResource, ValueWithUnits, get_name_for_fun_node
+from mocdp.exceptions import DPSemanticError
+from mcdp_maps.plus_value_map import PlusValueMap
 
 
 CDP = CDPLanguage
@@ -101,6 +102,7 @@ def eval_rvalue(rvalue, context):
             CDP.ResourceLabelIndex: eval_rvalue_resource_label_index,
             CDP.AnyOfRes: eval_rvalue_anyofres,
             CDP.ApproxStepRes: eval_rvalue_approx_step,
+            CDP.ApproxURes: eval_rvalue_approx_u,
         }
 
         for klass, hook in cases.items():
@@ -110,6 +112,50 @@ def eval_rvalue(rvalue, context):
         msg = 'eval_rvalue(): Cannot evaluate as resource.'
         rvalue = recursive_print(rvalue)
         raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
+
+
+def eval_rvalue_approx_u(r, context):
+    assert isinstance(r, CDP.ApproxURes)
+
+    #
+    #  r1-approx-r2----------------- Uncertainty gate
+    #          |____(+ step)--[r3]|
+
+    r1 = eval_rvalue(r.rvalue, context)
+    step = eval_constant(r.step, context)
+
+    R = context.get_rtype(r1)
+    tu = get_types_universe()
+    try:
+        tu.check_leq(step.unit, R)
+    except NotLeq:
+        msg = ('The step is specified in a unit (%s), which is not compatible '
+               'with the resource (%s).' % (step.unit, R))
+        raise_desc(DPSemanticError, msg)
+
+    stepu = express_value_in_isomorphic_space(S1=step.unit, s1=step.value, S2=R)
+    ccm = CombinedCeilMap(R, alpha=0.0, step=stepu, max_value=None)
+    dp = WrapAMap(ccm)
+
+    r2 = create_operation(context, dp=dp, resources=[r1],
+                               name_prefix='_approx', op_prefix='_toapprox',
+                                res_prefix='_result')
+
+    dpsum = WrapAMap(PlusValueMap(R, step.value, step.unit, R))
+    r3 = create_operation(context, dp=dpsum, resources=[r2],
+                               name_prefix='_sum', op_prefix='_op',
+                                res_prefix='_result')
+
+
+    from mcdp_dp.dp_uncertain import UncertainGate
+    dpu = UncertainGate(R)
+
+    return create_operation(context, dp=dpu, resources=[r2, r3],
+                            name_prefix='_uncertain', op_prefix='_resources',
+                            res_prefix='_result')
+
+
+
 
 
 def eval_rvalue_approx_step(r, context):
@@ -142,7 +188,6 @@ def eval_rvalue_anyofres(r, context):
     from mcdp_posets import FiniteCollectionsInclusion
     from mcdp_posets import FiniteCollection
     from mcdp_dp.dp_constant import ConstantMinimals
-    from mcdp_lang.helpers import create_operation
 
     assert isinstance(r, CDP.AnyOfRes)
     constant = eval_constant(r.value, context)

@@ -43,3 +43,21 @@ one DC input (USB Micro B).
     <pre class='ndp_graph_templatized'>`battery_ravpower</pre>
     <pre class='ndp_graph_enclosed'>`battery_ravpower</pre>
 </div>
+
+
+### A Micro USB charger
+
+Suitable for charging the battery above.
+
+<pre class='ndp_graph_enclosed'>`USBMicroCharger</pre>
+<pre class='mcdp' id='USBMicroCharger' label='USBMicroCharger.mcdp'></pre>
+
+
+
+### A barrel charger
+
+Used by Roomba.
+
+
+<pre class='ndp_graph_enclosed'>`BarrelCharger</pre>
+<pre class='mcdp' id='BarrelCharger' label='BarrelCharger.mcdp'></pre>

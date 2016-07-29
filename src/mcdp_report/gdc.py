@@ -142,7 +142,7 @@ class GraphDrawingContext():
         tmppath = self.get_temp_path()
         imagepaths = [self._get_default_imagepath()]
         imagepaths.extend(self.images_paths)
-        # print('options: %s in %r' % (options, self.images_paths))
+        # print('options: %s in %r' % (options, imagepaths))
         best = choose_best_icon(options, imagepaths)
         # print('best: %s' % best)
         resized = resize_icon(best, tmppath, 150)
@@ -198,6 +198,7 @@ class GraphDrawingContext():
         if self.style in  [STYLE_GREENRED, STYLE_GREENREDSYM]:
             propertyAppend(n, 'fontcolor', COLOR_DARKGREEN)
 
+# reset with: get_images.cache = {}
 @memoize_simple
 def get_images(dirname, exts=('png', 'jpg', 'PNG', 'JPG')):
     """ Returns a dict from lowercase basename to realpath """
@@ -212,15 +213,16 @@ def get_images(dirname, exts=('png', 'jpg', 'PNG', 'JPG')):
             allfiles[basename] = f
     return allfiles
 
+from mocdp import logger
 def choose_best_icon(iconoptions, imagepaths):
-    # logger.debug('Looking for %s.' % (str(iconoptions)))
+#     logger.debug('Looking for %s in %s.' % (str(iconoptions), imagepaths))
     exts = ['png', 'jpg', 'PNG', 'JPG']
 
     files = {}
     for path in reversed(imagepaths):
         files.update(get_images(path))
 
-    # print('avail: %s' % sorted(files))
+#     print('avail: %s' % sorted(files))
     for option in iconoptions:
         if option is None:
             continue

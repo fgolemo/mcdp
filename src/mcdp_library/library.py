@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from contracts import contract
 from contracts.utils import raise_desc
 from copy import deepcopy
+from mcdp_dp.primitive import PrimitiveDP
 from mcdp_lang import parse_ndp, parse_poset
 from mcdp_library.utils import memo_disk_cache2
 from mcdp_posets import Poset
@@ -14,7 +15,6 @@ from mocdp.exceptions import DPSemanticError, extend_with_filename
 import os
 import shutil
 import sys
-from mcdp_dp.primitive import PrimitiveDP
 
 
 

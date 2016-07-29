@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
 from contracts import contract
-from mcdp_dp.dp_flatten import Mux
-from mcdp_dp.dp_identity import Identity
+from mcdp_dp import Identity, Mux
 from mcdp_dp.dp_parallel_simplification import make_parallel_n
 from mcdp_dp.dp_series_simplification import make_series
-from mcdp_posets.poset_product import PosetProduct
+from mcdp_posets import PosetProduct
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.composite_sub import (cndp_num_connected_components,
     cndp_split_in_components)

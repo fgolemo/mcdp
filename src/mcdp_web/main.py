@@ -111,6 +111,9 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         for l in [_['library'] for _ in self.libraries.values()]:
             l.delete_cache()
 
+        from mcdp_report.gdc import get_images
+        get_images.cache = {}
+
     def view_refresh_library(self, request):
         """ Refreshes the current library (if external files have changed) 
             then reloads the current url. """
@@ -480,7 +483,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 def load_libraries(dirname):
     """ Returns a dictionary
             
-            library_name -> {'path': ...}
+            library_name -> {'path': ...,
+                              'library': ...}
     """
     if 'mcdplib' in dirname:
         short = os.path.splitext(os.path.basename(dirname))[0]

@@ -14,6 +14,7 @@ def load_tests_modules():
     import mcdp_lang_tests
     import mcdp_dp_tests
     import mcdp_web_tests
+    import mcdp_opt_tests
 
     from mcdp_report import tests  # @Reimport
 

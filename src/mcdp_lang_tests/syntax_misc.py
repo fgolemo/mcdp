@@ -417,16 +417,13 @@ def f():
     pass
 @comptest
 def check_lang59():  # TODO: rename
-    parse_wrap_check(""" addmake(code mcdp_lang_tests.syntax_misc.f) mcdp {} """,
+    parse_wrap_check(""" addmake(root: code mcdp_lang_tests.syntax_misc.f) mcdp {} """,
                      Syntax.ndpt_addmake)
 
-    ndp = parse_ndp(""" addmake(code mcdp_lang_tests.syntax_misc.f) mcdp {} """)
+    ndp = parse_ndp(""" addmake(root: code mcdp_lang_tests.syntax_misc.f) mcdp {} """)
 
-    assert ndp.make == f, ndp.make
+    assert ndp.make == [('root', f)], ndp.make
 
-@comptest
-def check_lang60():  # TODO: rename
-    pass
 @comptest
 def check_lang61():  # TODO: rename
 
@@ -456,10 +453,28 @@ def check_lang61():  # TODO: rename
     
     
 
+@comptest
+def check_lang60():  # TODO: rename
+    pass
+#     s = """
+#     canonical mcdp {
+#
+#         provides f [m]
+#
+#         f + 10 m + 20 m <= 10 m
+#
+#     }
+#
+#     """
+#     ndp = parse_ndp(s)
+#     dp = ndp.get_dp()
+#     pass
 
 
 
      
+
+
 
 
 

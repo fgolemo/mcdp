@@ -1,0 +1,31 @@
+mcdp {
+   provides dc [`PortableDCPower]
+   provides motion [`Motion]
+   provides payload [`Payload]
+
+   requires budget [USD]
+
+   requires in [`DC_Charging]
+
+   # uses a barrel charger
+   ((required in).dc).connector >= `barrel_connectors: barrel_2_35mm
+   ((required in).dc).voltage >= `DC_voltages: v5
+   ((required in).dc).amps >= 1 A
+   (required in).duration >= 1 hour
+
+   required budget >= 199.99 USD
+
+   (provided payload).mass <= 2 kg
+   shape = (provided payload).shape 
+   take(shape, 0) <= 30 cm
+   take(shape, 1) <= 30 cm
+
+   (provided motion).endurance <= 1 hour
+   (provided motion).velocity <= 1.0 m/s
+
+   ((provided dc).dc).connector <= `barrel_connectors: barrel_2_35mm
+   ((provided dc).dc).voltage <= `DC_voltages: v5
+   ((provided dc).dc).amps <= 1 A
+    (provided dc).duration <= 2 hour
+   # Todo: math for energy use
+}

@@ -98,3 +98,37 @@ can drive servos/motors using PPM/PWM.
 
 <pre class='ndp_graph_templatized_labeled'>`VESC</pre>
 <pre class='mcdp' id='VESC'></pre>
+
+
+
+
+### Example: Actuation
+
+<pre class='mcdp_poset' id='Motion'></pre>
+
+<pre class='mcdp_poset' id='Payload'></pre>
+
+
+### Example: Dagu Chassis
+
+
+Dagu Chassis used for the Duckiebot.
+
+<pre class='ndp_graph_templatized_labeled'>`DaguChassis</pre>
+<pre class='mcdp' id='DaguChassis'></pre>
+
+### The Youbot Base
+
+Youbot base
+
+<pre class='ndp_graph_templatized_labeled'>`YoubotBase</pre>
+<pre class='mcdp' id='YoubotBase'></pre>
+
+
+
+### iRobot Create
+
+iRobot Create
+
+<pre class='ndp_graph_templatized_labeled'>`IRobotCreate</pre>
+<pre class='mcdp' id='IRobotCreate'></pre>

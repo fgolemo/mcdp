@@ -11,6 +11,7 @@ from mcdp_posets import (Map, Ncomp, NotBelongs, Poset, PosetProduct, Space,
 from mocdp.exceptions import do_extra_checks
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from copy import deepcopy
+import copy
 
 
 __all__ = [
@@ -138,7 +139,7 @@ class PrimitiveDP(WithInternalLog):
         # So we need to redo it
         # if not hasattr(self, 'Imarked'):
         if not hasattr(self, 'Imarked') or (hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME) and not hasattr(self.Imarked, ATTRIBUTE_NDP_RECURSIVE_NAME)):
-            self.Imarked = deepcopy(I)
+            self.Imarked = copy.copy(I)
             if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
                 x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
                 setattr(self.Imarked, ATTRIBUTE_NDP_RECURSIVE_NAME, x)

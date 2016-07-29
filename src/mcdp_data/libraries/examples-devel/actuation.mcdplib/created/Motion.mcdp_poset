@@ -1,0 +1,4 @@
+product (
+  velocity: m/s,
+  endurance: s
+)

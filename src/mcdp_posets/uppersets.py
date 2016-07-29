@@ -7,6 +7,7 @@ from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 import random
+import itertools
 
 __all__ = [
     'UpperSet',
@@ -301,13 +302,6 @@ class LowerSets(Poset):
         return "L(%r)" % self.P
 
 
-@contract(s1=UpperSet, s2=UpperSet, returns=UpperSet)
-def upperset_product(s1, s2):
-    assert isinstance(s1, UpperSet), s1
-    assert isinstance(s2, UpperSet), s2
-    res = set(zip(s1.minimals, s2.minimals))
-    P = PosetProduct((s1.P, s2.P))
-    return UpperSet(res, P)
 
 class LowerSet(Space):
 
@@ -359,6 +353,15 @@ class LowerSet(Space):
 
         return "↓{%s}" % contents
 
+
+@contract(s1=UpperSet, s2=UpperSet, returns=UpperSet)
+def upperset_product(s1, s2):
+    assert isinstance(s1, UpperSet), s1
+    assert isinstance(s2, UpperSet), s2
+    res = set(zip(s1.minimals, s2.minimals))
+    P = PosetProduct((s1.P, s2.P))
+    return UpperSet(res, P)
+
 @contract(s1=LowerSet, s2=LowerSet, returns=LowerSet)
 def lowerset_product(s1, s2):
     assert isinstance(s1, LowerSet), s1
@@ -366,7 +369,6 @@ def lowerset_product(s1, s2):
     res = set(zip(s1.maximals, s2.maximals))
     P = PosetProduct((s1.P, s2.P))
     return LowerSet(res, P)
-
 
 @contract(ss='tuple($LowerSet)', returns=LowerSet)
 def lowerset_product_multi(ss):
@@ -380,6 +382,29 @@ def lowerset_product_multi(ss):
 def upperset_product_multi(ss):
     Ps = tuple(_.P for _ in ss)
     mins = tuple(_.minimals for _ in ss)
-    res = set(zip(*mins))
+    res = set(itertools.product(*mins))
     P = PosetProduct(Ps)
+
+    from operator import mul
+    nout = len(res)
+    lengths = [len(_.minimals) for _ in ss]
+    ns = reduce(mul, lengths)
+    assert nout == ns, (nout, lengths, ns)
+
     return UpperSet(res, P)
+
+@contract(ur='$UpperSet', i='int,>=0')
+def upperset_project(ur, i):
+    """ Projects an upperset on a posetproduct to the i-th component. """
+    assert isinstance(ur, UpperSet), ur
+    assert isinstance(ur.P, PosetProduct), ur
+    if not (0 <= i < len(ur.P)):
+        msg = 'Index %d not valid.' % i
+        raise_desc(ValueError, msg, P=ur.P)
+    minimals = set()
+    Pi = ur.P.subs[i]
+    for m in ur.minimals:
+        mi = m[i]
+        minimals.add(mi)
+    return UpperSet(poset_minima(minimals, leq=Pi.leq), P=Pi)
+

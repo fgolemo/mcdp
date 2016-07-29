@@ -9,4 +9,7 @@ finite_poset {
     barrel_4mm_1_7mm
     barrel_4mm_1_5mm
     barrel_4mm_2_5mm
+
+    # used by Youbot charger
+    Neutrik_NC4MXX
 }

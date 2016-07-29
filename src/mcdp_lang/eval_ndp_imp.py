@@ -41,7 +41,7 @@ def eval_ndp(r, context):  # @UnusedVariable
         if isinstance(r, CDP.VariableRef):
             try:
                 return context.get_var2model(r.name)
-            except NoSuchMCDPType as e:
+            except NoSuchMCDPType as e:  # XXX: fixme
                 msg = 'Cannot find name.'
                 raise_wrapped(DPSemanticError, e, msg, compact=True)
 
@@ -415,8 +415,6 @@ def add_constraint(context, resource, function):
         raise_desc(DPSemanticError, msg, R1=R1, F2=F2)
 
 
-
-
 def eval_statement(r, context):
     with add_where_information(r.where):
         from mcdp_lang.eval_resources_imp import eval_rvalue
@@ -466,14 +464,14 @@ def eval_statement(r, context):
                 #  Cannot evaluate %r as constant
                 try:
                     x = eval_rvalue(right_side, context)
-                    if False:
-                        mcdp_dev_warning('This might be very risky, but cute.')
-                        ndp = context.names[x.dp]
-                        if isinstance(ndp, SimpleWrap):
-                            if ndp.R_single:
-                                ndp.Rname = name
-
-                        x = context.make_resource(x.dp, name)
+#                     if False:
+#                         mcdp_dev_warning('This might be very risky, but cute.')
+#                         ndp = context.names[x.dp]
+#                         if isinstance(ndp, SimpleWrap):
+#                             if ndp.R_single:
+#                                 ndp.Rname = name
+#
+#                         x = context.make_resource(x.dp, name)
                     # adding as resource
                     context.set_var2resource(name, x)
                 except Exception as e:
@@ -601,7 +599,11 @@ def eval_build_problem(r, context):
 
     for s in statements:
         with add_where_information(s.where):
-            eval_statement(s, context)
+            try:
+                eval_statement(s, context)
+            except DPInternalError:
+                print(recursive_print(s))
+                raise
 
     # take() optimization
     context.ifun_finish()

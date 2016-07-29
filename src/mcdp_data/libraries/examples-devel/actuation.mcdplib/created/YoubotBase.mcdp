@@ -1,0 +1,31 @@
+mcdp {
+   provides out [`PortableDCPower]
+   provides computation [flops]
+   provides motion [`Motion]
+   provides payload [`Payload]
+
+   requires budget [USD]
+   requires in [`DC_Charging]
+
+   (provided motion).velocity <= 5 m/s
+   budget >= 10000 USD
+
+   computer = instance `YoubotBaseComputer
+   battery = instance `YoubotBaseBattery
+   
+   provided computation <= computation provided by computer
+   (provided motion).endurance <= endurance provided by computer
+
+   mass = (provided payload).mass
+   shape = (provided payload).shape
+ 
+  # limit x and y
+   take(shape, 0) <= 30m
+   take(shape, 1) <= 50cm
+
+   mass <= 10 kg
+
+   out1 provided by battery >= dc required by computer
+   out2 provided by battery >= provided out
+   in required by battery <= required in        
+}

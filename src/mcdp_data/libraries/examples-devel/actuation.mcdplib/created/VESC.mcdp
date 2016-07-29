@@ -1,26 +1,28 @@
 mcdp {
-  provides ppm [`PPM]
-  provides pwm [`PWM]
- 
-  requires dc_in [`DC_power]
-  requires budget [USD]
-  requires mass [g]
+    provides ppm [`PPM]
+    provides pwm [`PWM]
 
-  required budget >= 115 USD
-  required mass >= 10 g
+    requires in [`PortableDCPower]
+    requires budget [USD]
+    requires mass [g]
 
-# (provided pwm).voltage_max <= 
-# (provided pwm).amp_max  <=
-# (provided pwm).freq_max <=
-# (provided pwm).resolution <= 
- 
-# (provided pwm).voltage_max <= 
-# (provided pwm).amp_max  <=
-# (provided pwm).freq_max <=
-# (provided pwm).resolution <= 
+    required budget >= 115 USD
+    required mass >= 10 g
 
-# (required dc_in).connector >=
-# (required dc_in).voltage >=
-# (required dc_in).amps >=
- 
+    # XXX: these numbers were made up
+    (provided pwm).voltage_max <= 5 V
+    (provided pwm).amp_max  <= 2 A
+    (provided pwm).freq_max <= 120 Hz
+    #(provided pwm).resolution <= 0.01 []
+
+    # XXX: these numbers were made up
+    (provided ppm).voltage_max <= 5 V
+    (provided ppm).amp_max  <= 50 mA
+    (provided ppm).freq_max <= 120 Hz
+    (provided ppm).resolution <= 0.01 []
+
+    dc_in = (required in).dc
+    (dc_in).connector >= `barrel_connectors: barrel_5mm # incorrect
+    (dc_in).voltage >= `DC_voltages: v5
+    (dc_in).amps >= 2 A
 }

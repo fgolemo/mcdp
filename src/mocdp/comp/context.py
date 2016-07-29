@@ -2,10 +2,8 @@
 from collections import namedtuple
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_dp import FunctionNode, ResourceNode
-from mcdp_dp import PrimitiveDP
-from mcdp_posets import Poset, Space
-from mcdp_posets import NotBounded
+from mcdp_dp import FunctionNode, PrimitiveDP, ResourceNode
+from mcdp_posets import NotBounded, Poset, Space
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.comp.wrap import dpwrap
@@ -68,7 +66,6 @@ def is_res_node_name(name):
 
 class NoSuchMCDPType(Exception):
     pass
-
 
 
 class Context():
@@ -427,8 +424,8 @@ class Context():
             ndp = self.names[created]
             for fname in ndp.get_fnames():
                 connected = connectedfun(created, fname)
-                F = ndp.get_ftype(fname)
                 if not connected:
+                    F = ndp.get_ftype(fname)
                     try:
                         zero = F.get_bottom()
                         vu = ValueWithUnits(value=zero, unit=F)
@@ -543,7 +540,6 @@ class Context():
         return res
 
 
-#
 def format_list(l):
     """ Returns a nicely formatted list. """
     if not l:

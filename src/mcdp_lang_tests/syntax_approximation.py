@@ -2,7 +2,8 @@ from comptests.registrar import comptest
 from mcdp_lang_tests.utils import parse_wrap_check
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.parse_interface import parse_ndp
-from mocdp.exceptions import DPSemanticError
+from mocdp.exceptions import DPSemanticError, DPSyntaxError
+from mcdp_dp.dp_transformations import get_dp_bounds
 
 @comptest
 def check_approx_res1():
@@ -49,7 +50,7 @@ def check_approx_res3():
 
 
 @comptest
-def check_approx_res4():
+def check_approx_res4(): # check_error line
     s = ("""
     
     
@@ -70,12 +71,37 @@ def check_approx_res4():
         r >= f f
     
     """)
-
-    parse_wrap_check(s, Syntax.ndpt_dp_model)
+    try:
+        parse_ndp(s)  # , Syntax.ndpt_dp_rvalue)
+    except DPSyntaxError as e:
+        s = str(e)
+        assert  'line 18' in s
+        return
+    else:
+        raise Exception()
+#     parse_wrap_check(s, Syntax.ndpt_dp_operand)
+    # parse_wrap_check(s, Syntax.ndpt_dp_model)
 
 @comptest
 def check_approx_res5():
-    pass
+    s = """
+        mcdp {
+            requires y [m]
+            
+            provides x [m]
+            
+            y >= approxu(x, 1 cm)
+        }
+    """
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    dpl, dpu = get_dp_bounds(dp, 1, 1)
+    resl = dpl.solve(0.016)
+    resu = dpu.solve(0.016)
+    print resl
+    print resu
+    assert resl.minimals == set([0.02])
+    assert resu.minimals == set([0.03])
 
 
 @comptest

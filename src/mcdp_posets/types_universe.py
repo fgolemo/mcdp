@@ -120,7 +120,21 @@ class TypesUniverse(Preorder):
                 raise_desc(NotLeq, msg, SA=SA, SB=SB)
             return
         
+        if isinstance(A, PosetCoproduct) and isinstance(B, PosetCoproduct):
+            # if all the subs are equal then it's fine
+            if len(A.spaces) == len(B.spaces):
+                try:
+                    for sa, sb in zip(A.spaces, B.spaces):
+                        self.check_leq(sa, sb)
+                except NotLeq:
+                    pass
+                else:
+                    # OK, they are
+                    return
+            mcdp_dev_warning('Not implemented the case where the order is different')
+        
         if isinstance(B, PosetCoproduct):
+            # A <= PosetCoproduct((b1,...,bn)) if there exists bn: A <= bn
             for x in B.spaces:
                 try:
                     self.check_leq(A, x)

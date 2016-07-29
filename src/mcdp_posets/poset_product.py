@@ -24,6 +24,11 @@ class PosetProduct(SpaceProduct, Poset):
         SpaceProduct.__init__(self, subs)
 
     def leq(self, a, b):
+        assert isinstance(a, tuple), (self, a)
+        assert isinstance(b, tuple), (self, b)
+        assert len(a) == len(self.subs), (self, a)
+        assert len(b) == len(self.subs), (self, b)
+
         if do_extra_checks():
             self.belongs(a)
             self.belongs(b)
@@ -36,6 +41,9 @@ class PosetProduct(SpaceProduct, Poset):
     def join(self, a, b):
         assert isinstance(a, tuple), a
         assert isinstance(b, tuple), b
+        assert len(a) == len(self.subs), (self, a)
+        assert len(b) == len(self.subs), (self, b)
+
         res = []
         for sub, x, y in zip(self.subs, a, b):
             res.append(sub.join(x, y))

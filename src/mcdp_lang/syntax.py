@@ -79,10 +79,10 @@ class SyntaxIdentifiers():
         'finite_poset',
         'choose',
         'flatten',
-        'from_library',
-        'new',  # = from_library
+        'new',
         'canonical',
         'UpperSets',
+        'LowerSets',  # TODO
         'specialize',
         'with',
         'Uncertain',
@@ -93,6 +93,7 @@ class SyntaxIdentifiers():
         'coproduct',
         'ignore',
         'addmake',
+        'approxu',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -483,13 +484,16 @@ class Syntax():
     # rvalue instead of rvalue_new_function
 
     # approximating a resource
-#    ApproxKeyword = namedtuplewhere('ApproxKeyword', 'keyword')
-#   ApproxStepRes = namedtuplewhere('ApproxRes', 'keyword rvalue step')
 
     # approx(<rvalue>, 5g)
     APPROXRES = spk(L('approx'), CDP.ApproxKeyword)
     rvalue_approx_step = sp(APPROXRES + SLPAR + rvalue + SCOMMA + constant_value + SRPAR,
                             lambda t: CDP.ApproxStepRes(t[0], t[1], t[2]))
+
+    # approxu(<rvalue>, 5g)
+    APPROXU = spk(L('approxu'), CDP.ApproxKeyword)
+    rvalue_approx_u = sp(APPROXU + SLPAR + rvalue + SCOMMA + constant_value + SRPAR,
+                            lambda t: CDP.ApproxURes(t[0], t[1], t[2]))
 
     # take(provided a, sub)
     rvalue_label_indexing2 = sp(TAKE + SLPAR + rvalue + S(COMMA) + index_label + SRPAR,
@@ -815,7 +819,7 @@ class Syntax():
     )
 
     # TODO: remove?
-    ndpt_dp_rvalue << (ndpt_dp_operand ^ (SLPAR - ndpt_dp_operand - SRPAR))
+    ndpt_dp_rvalue << (ndpt_dp_operand | (SLPAR - ndpt_dp_operand - SRPAR))
     # ndpt_dp_rvalue << operatorPrecedence(ndpt_dp_operand, [
     #     (COPROD, 2, opAssoc.LEFT, coprod_parse_action),
     # ])
@@ -835,7 +839,8 @@ class Syntax():
         ^ rvalue_label_indexing2
         ^ rvalue_label_indexing3
         ^ rvalue_any_of
-        ^ rvalue_approx_step)
+        ^ rvalue_approx_step
+        ^ rvalue_approx_u)
 
     rvalue << operatorPrecedence(rvalue_operand, [
         (TIMES, 2, opAssoc.LEFT, mult_parse_action),

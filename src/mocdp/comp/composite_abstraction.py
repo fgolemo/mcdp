@@ -9,6 +9,7 @@ from mcdp_posets.types_universe import get_types_universe
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context_functions import dpgraph_making_sure_no_reps
 from mocdp.comp.wrap import SimpleWrap
+from mocdp.exceptions import mcdp_dev_warning
 from networkx.algorithms.cycles import simple_cycles
 
 @contract(ndp=CompositeNamedDP, returns=SimpleWrap)
@@ -53,7 +54,23 @@ def cndp_abstract_loop2(ndp):
     F1 = ndp.get_ftypes(extraf)
     R1 = ndp.get_rtypes(extrar)
     
-    assert len(cycles) == 1
+#     if len(cycles) > 1:
+#         msg = 'Expected there would be at most one cycle, found: %d.' % len(cycles)
+#         raise_desc(Exception, msg, ndp=ndp)
+
+    if len(cycles) == 0:
+        # raise NotImplementedError()
+        mcdp_dev_warning('this needs much more testing')
+        dp = inner_dp
+        fnames = extraf
+        rnames = extrar
+        if len(fnames) == 1:
+            fnames = fnames[0]
+        if len(rnames) == 1:
+            rnames = rnames[0]
+        from mocdp.comp.wrap import dpwrap
+        return dpwrap(dp, fnames, rnames)
+
     F2 = inner.get_rtype(cycles[0])
     R2 = F2
     

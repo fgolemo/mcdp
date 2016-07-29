@@ -1,0 +1,17 @@
+mcdp {
+    provides out [`DC_power] 
+    requires in  [`AC_power] 
+    requires budget [USD]
+
+    budget >= 10.99 USD    
+
+    (required in).socket >= `socket_type : TypeA
+
+    (provided out).voltage   <= `DC_Voltages: v5
+    (provided out).connector <= `USB_connectors:USB_Std_A 
+    amps = (provided out).amps 
+    amps <=  2.4 A
+    power = 5 V * (amps)
+
+    (required in).watts >= power
+}

@@ -1,0 +1,12 @@
+mcdp {
+    provides computation [flops]
+    provides endurance [s]
+    requires dc [`PortableDCPower]
+
+    ((required dc).dc).connector >= `barrel_connectors: Neutrik_NC4MXX
+    ((required dc).dc).voltage >= `DC_voltages: v5
+    ((required dc).dc).amps >= 1 A
+    (required dc).duration >= endurance
+
+    provided computation <= 1 Gflops
+}

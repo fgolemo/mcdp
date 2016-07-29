@@ -330,5 +330,5 @@ def mcdplib_define_tst_solve(mcdplib, id_test, test_data):  # @UnusedVariable
     params['logger'] = logger
     params['config_dirs'] = [mcdplib]
     params['out_dir'] = os.path.join(mcdplib + '.out/%s' % id_test)
-
+    params['make'] = False
     solve_main(**params)

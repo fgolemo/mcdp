@@ -1,0 +1,28 @@
+mcdp {
+     provides out1 [`PortableDCPower]
+     provides out2 [`PortableDCPower]
+
+     requires in [`DC_Charging]
+
+     dc = (required in).dc
+     (dc).connector >= `barrel_connectors: Neutrik_NC4MXX
+     (dc).voltage >= `DC_voltages: v5
+     (dc).amps >= 2 A
+
+     dc1 = (provided out1).dc
+     dc2 = (provided out2).dc
+     (dc1).connector <= `barrel_connectors: Neutrik_NC4MXX
+     (dc1).voltage <= `DC_voltages: v5
+     amp1 = (dc1).amps
+
+     (dc2).connector <= `barrel_connectors: Neutrik_NC4MXX
+     (dc2).voltage <= `DC_voltages: v5
+     amp2 = (dc2).amps 
+
+     amp1 + amp2 <= 2 A
+
+     (provided out1).duration <= 2 hour
+     (provided out2).duration <= 2 hour
+
+     (required in).duration >= 2 hour
+}
