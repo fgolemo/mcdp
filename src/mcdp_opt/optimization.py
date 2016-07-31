@@ -8,6 +8,9 @@ from mcdp_web.utils.memoize_simple_imp import memoize_simple
 from mocdp.comp.context import CResource, get_name_for_fun_node
 from mocdp.comp.interfaces import NotConnected
 from mocdp.exceptions import mcdp_dev_warning
+from mcdp_library.library import ATTR_LOAD_NAME
+from mcdp_opt.compare_different_resources import CompareDifferentResources, \
+    less_resources2
 _ = UpperSet, CResource, Poset
 
 __all__ = ['Optimization']
@@ -63,7 +66,15 @@ class Optimization():
 
     @memoize_simple
     def load_ndp(self, id_ndp):
-        return self.library.load_ndp(id_ndp)
+        ndp = self.library.load_ndp(id_ndp)
+
+        a = getattr(ndp, ATTR_LOAD_NAME, None)
+
+        # TODO: check if there is a loop
+        ndp = ndp.abstract()
+        if a:
+            setattr(ndp, ATTR_LOAD_NAME, a)
+        return ndp
 
     @memoize_simple
     def load_dp(self, id_ndp):
@@ -88,7 +99,9 @@ class Optimization():
             assert s in self.done
         else:
             if not actions:
-                setattr(s, 'msg', 'No actions possible')
+                # setattr(s, 'msg', 'No actions possible')
+                if not hasattr(s, 'msg'):
+                    s.msg = "No actions available."
                 self.abandoned.append(s)
                 assert s in self.abandoned
             else:
@@ -107,11 +120,38 @@ class Optimization():
                         if len(ur.minimals) == 0:
                             msg = 'Unfortunately this is not feasible (%s)' % s1.ur.P
                             msg += '%s' % s1.lower_bounds
-                            setattr(s, 'msg', msg)
+                            s1.msg = msg
                             print msg
-                            self.abandoned.append(s)
+                            self.abandoned.append(s1)
                         else:
-                            self.states.append(s1)
+                            dominated, by_what = self.is_dominated_by_open(s1)
+                            if dominated:
+                                msg = 'Dominated by %s' % by_what
+                                s1.msg = msg
+                                self.abandoned.append(s1)
+                            else:
+                                self.states.append(s1)
+
+    def is_dominated_by_open(self, s1):
+        for a in self.states:
+            if self.dominates(a, s1):
+                return True, s1.ur
+        return False, None
+
+
+    def dominates(self ,s1, s2):
+        from mcdp_posets.nat import Nat
+        from mcdp_posets.poset_product import PosetProduct
+        
+        n1 = (40 - s1.num_connection_options,)
+        n2 = (40 - s2.num_connection_options,)
+        N = PosetProduct((Nat(),))
+        # create a joint one
+        from mcdp_opt_tests.test_basic import add_extra
+        l1b = add_extra(s1.ur, N, n1)
+        l2b = add_extra(s2.ur, N, n2)
+        # cdr = CompareDifferentResources()
+        return less_resources2(l1b, l2b)
 
     def does_provider_provide(self, id_ndp, fname, R, lb):
         assert lb.P == R
@@ -167,7 +207,7 @@ class Optimization():
             if self.does_provider_provide(id_ndp, fname, R, lb):
                 options.append((id_ndp, fname))
 
-        # print('Options for %s: %r' % (R, options))
+        print('Options for %s >= %s: %r' % (R, lb, options))
         return options
     
     @memoize_simple

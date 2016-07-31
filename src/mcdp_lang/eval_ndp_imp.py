@@ -462,7 +462,7 @@ def eval_statement(r, context):
                 context.set_constant(name, x)
             except NotConstant:
                 #  Cannot evaluate %r as constant
-                try:
+#                 try:
                     x = eval_rvalue(right_side, context)
 #                     if False:
 #                         mcdp_dev_warning('This might be very risky, but cute.')
@@ -474,12 +474,12 @@ def eval_statement(r, context):
 #                         x = context.make_resource(x.dp, name)
                     # adding as resource
                     context.set_var2resource(name, x)
-                except Exception as e:
-                    mcdp_dev_warning('fix this')
-                    print('Cannot evaluate %r as eval_rvalue: %s ' % (right_side, e))
-                    # XXX fix this
-                    x = eval_ndp(right_side, context)
-                    context.set_var2model(name, x)
+#                 except Exception as e:
+#                     mcdp_dev_warning('fix this')
+#                     print('Cannot evaluate %r as eval_rvalue: %s ' % (right_side, e))
+#                     # XXX fix this
+#                     x = eval_ndp(right_side, context)
+#                     context.set_var2model(name, x)
 
         elif isinstance(r, CDP.SetNameFValue):
             name = r.name.value
@@ -502,16 +502,23 @@ def eval_statement(r, context):
 
         elif isinstance(r, CDP.ResStatement):
             # "requires r.rname [r.unit]"
-
-            R = eval_space(r.unit, context)
             rname = r.rname.value
+            if rname in context.rnames:
+                msg = 'Repeated resource name %r.' % rname
+                raise DPSemanticError(msg, where=r.rname.where)
+            R = eval_space(r.unit, context)
+
             context.add_ndp_res_node(rname, R)
 
             return context.make_function(get_name_for_res_node(rname), rname)
 
         elif isinstance(r, CDP.FunStatement):
-            F = eval_space(r.unit, context)
             fname = r.fname.value
+            if fname in context.fnames:
+                msg = 'Repeated function name %r.' % fname
+                raise DPSemanticError(msg, where=r.fname.where)
+
+            F = eval_space(r.unit, context)
             context.add_ndp_fun_node(fname, F)
 
             return context.make_resource(get_name_for_fun_node(fname), fname)

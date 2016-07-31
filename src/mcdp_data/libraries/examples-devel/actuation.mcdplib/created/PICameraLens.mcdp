@@ -1,0 +1,4 @@
+mcdp {
+    requires budget >= 10 USD
+
+}

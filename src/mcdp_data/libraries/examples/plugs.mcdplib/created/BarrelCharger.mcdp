@@ -11,14 +11,12 @@ mcdp {
 
     ((provided out).dc).voltage   <= `DC_Voltages: v5
     ((provided out).dc).connector <= `barrel_connectors: barrel_2_35mm
-
  
     amps = ((provided out).dc).amps 
     amps <=  1.5 A
     power = 5 V * (amps)
 
     ((required in).ac).watts >= power
-
 
     (required in).duration >= (provided out).duration
 }

@@ -19,7 +19,8 @@ def get_ndp(data):
     if not 'ndp' in data:
         dirs = data['dirs']
         param = data['model_name']
-        _library, _basename, ndp = solve_read_model(dirs, param)
+        library = data['library']
+        _library, _basename, ndp = solve_read_model(dirs, param, library=library)
         data['ndp'] = ndp
     return data['ndp']
 
@@ -202,6 +203,19 @@ class Vis():
 for s in [STYLE_GREENRED, 'default', 'clean', STYLE_GREENREDSYM]:
     x = ('ndp_%s' % s, Vis(s))
     allplots.add(x)
+    
+def ndp_graph_enclosed_(data):
+    library = data['library']
+    ndp = get_ndp(data)
+    style = STYLE_GREENREDSYM
+    yourname = None
+    data_format = 'png'
+    from mcdp_web.images.images import ndp_graph_enclosed
+    png = ndp_graph_enclosed(library, ndp, style, yourname, data_format, direction='TB',
+                       enclosed=True)
+    return [('png', 'ndp_graph_enclosed', png)]
+
+allplots.add(('ndp_graph_enclosed', ndp_graph_enclosed_))
 
 @contract(returns='tuple(str,*)')
 def parse_kv(x):
@@ -215,7 +229,7 @@ def parse_params(p):
 
     return dict(parse_kv(_) for _ in seq)
 
-def do_plots(logger, model_name, plots, outdir, extra_params, dirs):
+def do_plots(logger, model_name, plots, outdir, extra_params, dirs, use_cache):
     data = {}
 
     if '.mcdp' in model_name:
@@ -230,15 +244,24 @@ def do_plots(logger, model_name, plots, outdir, extra_params, dirs):
 
 #     GlobalConfig.global_load_dir("mocdp")
 
-    library = MCDPLibrary()
+
+    if use_cache:
+        cache_dir = os.path.join(outdir, 'mcdp_plot_cache')
+        print('using cache %s' % cache_dir)
+    else:
+        cache_dir = None
+
+    library = MCDPLibrary(cache_dir=cache_dir)
     for d in dirs:
         library.add_search_dir(d)
+
 
     filename = model_name + '.mcdp'
     x = library._get_file_data(filename)
     data['s'] = x['data']
     data['filename'] = x['realpath']
     data['params'] = parse_params(extra_params)
+    data['library'] = library
 
     d = dict(allplots)
     results = []
@@ -289,10 +312,13 @@ class PlotDP(QuickAppBase):
 
         params.add_string('out', help='Output dir', default=None)
         params.add_string('extra_params', help='Add extra params', default="")
+        print possible
         params.add_string('plots', default='*', help='One of: %s' % possible)
 
         params.add_string('dirs', default='.', short='-d',
                            help='Library directories containing models.')
+
+        params.add_flag('cache')
 
     def go(self):
 #         GlobalConfig.global_load_dir("mocdp")
@@ -319,7 +345,9 @@ class PlotDP(QuickAppBase):
         plots = expand_string(options.plots, list(possible))
         logger = self.logger  # HasLogger
         dirs = options.dirs.split(':')
-        do_plots(logger, filename, plots, out, options.extra_params, dirs=dirs)
+        use_cache = options.cache
+        do_plots(logger, filename, plots, out, options.extra_params, dirs=dirs,
+                 use_cache=use_cache)
 
         if options.watch:
             def handler():

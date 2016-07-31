@@ -198,9 +198,13 @@ def eval_lfunction_newresource(lf, context):
     rname = lf.name
     try:
         dummy_ndp = context.get_ndp_res(rname)
-    except ValueError as e:
+    except ValueError:
         msg = 'New resource name %r not declared.' % rname
-        msg += '\n%s' % str(e)
+        if context.rnames:
+            msg += ' Available: %s.' % ", ".join(context.rnames)
+        else:
+            msg += ' No resources declared so far.'
+        # msg += '\n%s' % str(e)
         raise DPSemanticError(msg, where=lf.where)
 
     return context.make_function(get_name_for_res_node(rname),

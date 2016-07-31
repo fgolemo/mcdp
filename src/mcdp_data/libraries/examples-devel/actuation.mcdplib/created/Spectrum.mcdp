@@ -1,0 +1,11 @@
+mcdp {
+    requires wlan1 [`WifiCom]
+    provides wlan1 [`WifiCom]
+    requires wlan2 [`WifiCom]
+    provides wlan2 [`WifiCom]
+    #requires wlan3 [`WifiCom]
+    #provides wlan3 [`WifiCom]
+    #requires wlan4 [`WifiCom]
+    #provides wlan4 [`WifiCom]
+    
+}

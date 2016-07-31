@@ -1,0 +1,6 @@
+template mcdp {
+
+    provides out1 [`PortableDCPower]
+    provides out2 [`PortableDCPower]
+    requires in [`PortableDCPower]
+}

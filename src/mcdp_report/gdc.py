@@ -200,7 +200,9 @@ class GraphDrawingContext():
 
 # reset with: get_images.cache = {}
 @memoize_simple
-def get_images(dirname, exts=('png', 'jpg', 'PNG', 'JPG')):
+def get_images(dirname, exts=None):
+    if exts is None:
+        exts = ('png', 'jpg', 'PNG', 'JPG')
     """ Returns a dict from lowercase basename to realpath """
     allfiles = {}
     for ext in exts:
@@ -215,14 +217,14 @@ def get_images(dirname, exts=('png', 'jpg', 'PNG', 'JPG')):
 
 from mocdp import logger
 def choose_best_icon(iconoptions, imagepaths):
-#     logger.debug('Looking for %s in %s.' % (str(iconoptions), imagepaths))
-    exts = ['png', 'jpg', 'PNG', 'JPG']
+    # logger.debug('Looking for %s in %s.' % (str(iconoptions), imagepaths))
+    exts = ('png', 'jpg', 'PNG', 'JPG', 'jpeg', 'JPEG')
 
     files = {}
     for path in reversed(imagepaths):
-        files.update(get_images(path))
+        files.update(get_images(path, exts=exts))
 
-#     print('avail: %s' % sorted(files))
+    # print('avail: %s' % sorted(files))
     for option in iconoptions:
         if option is None:
             continue

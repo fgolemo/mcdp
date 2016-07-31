@@ -1,0 +1,31 @@
+mcdp {
+    requires budget >= 40 USD # XXX    
+
+    requires payload [`Payload]
+
+    (required payload).mass >= 4 g # XXX
+    (required payload).shape >= <0mm, 0mm, 0mm> # XXX
+
+
+    provides rgb1 [`RGBLEDDriver]
+    provides rgb2 [`RGBLEDDriver]
+    provides rgb3 [`RGBLEDDriver]
+    provides rgb4 [`RGBLEDDriver]
+    provides rgb5 [`RGBLEDDriver]
+
+    requires pwm1 [`PWM]
+    requires pwm2 [`PWM]
+    requires pwm3 [`PWM]
+    requires pwm4 [`PWM]
+    requires pwm5 [`PWM]
+    requires pwm6 [`PWM]
+    requires pwm7 [`PWM]
+    requires pwm8 [`PWM]
+    requires pwm9 [`PWM]
+    requires pwm10 [`PWM]
+    requires pwm11 [`PWM]
+    requires pwm12 [`PWM]
+    requires pwm13 [`PWM]
+    requires pwm14 [`PWM]
+    requires pwm15 [`PWM]
+}

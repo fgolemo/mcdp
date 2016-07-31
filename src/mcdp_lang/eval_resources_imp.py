@@ -28,7 +28,7 @@ def eval_rvalue(rvalue, context):
     """
         raises DoesNotEvalToResource
     """
-    assert not isinstance(rvalue, ValueWithUnits)
+    # assert not isinstance(rvalue, ValueWithUnits)
     # wants Resource or NewFunction
     with add_where_information(rvalue.where):
 
@@ -46,9 +46,12 @@ def eval_rvalue(rvalue, context):
             fname = rvalue.name
             try:
                 dummy_ndp = context.get_ndp_fun(fname)
-            except ValueError as e:
+            except ValueError:
                 msg = 'New resource name %r not declared.' % fname
-                msg += '\n%s' % str(e)
+                if context.rnames:
+                    msg += ' Available: %s.' % ", ".join(context.rnames)
+                else:
+                    msg += ' No resources declared so far.'
                 raise DPSemanticError(msg, where=rvalue.where)
 
             return context.make_resource(get_name_for_fun_node(fname),
@@ -68,9 +71,13 @@ def eval_rvalue(rvalue, context):
 
             try:
                 dummy_ndp = context.get_ndp_fun(rvalue.name)
-            except ValueError as e:
-                msg = 'Resource %r not declared.' % rvalue.name
-#                 msg += '\n%s' % str(e)
+            except ValueError:  # as e:
+                msg = 'Function %r not declared.' % rvalue.name
+
+                if context.fnames:
+                    msg += ' Available: %s.' % ", ".join(context.fnames)
+                else:
+                    msg += ' No function declared so far.'
                 raise DPSemanticError(msg, where=rvalue.where)
 
             s = dummy_ndp.get_rnames()[0]

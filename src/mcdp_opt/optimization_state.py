@@ -26,18 +26,20 @@ class OptimizationState():
         self.context = context
         self.executed = executed
         self.forbidden = forbidden
+        self.lower_bounds = lower_bounds
+        self.ur = ur
 
         tu = get_types_universe()
         # We expect that for each unconnected resource, we have a lower bound
-        _, unconnected_res = get_missing_connections(self.context)
+        unconnected_fun, unconnected_res = get_missing_connections(self.context)
         for dp, s in unconnected_res:
             r = CResource(dp,s)
             if not r in lower_bounds:
                 msg = 'There is no lower bound for this resource.'
                 raise_desc(ValueError, msg, r=r, lower_bounds=lower_bounds)
-            ur = lower_bounds[r]
+            r_ur = lower_bounds[r]
             R =  self.context.get_rtype(r)
-            tu.check_equal(ur.P, R)
+            tu.check_equal(r_ur.P, R)
 
         # make sure we don't have extra
         for r in lower_bounds:
@@ -45,8 +47,28 @@ class OptimizationState():
             R = self.context.get_rtype(r)
             assert (r.dp, r.s) in unconnected_res, (r, unconnected_res)
 
-        self.lower_bounds = lower_bounds
-        self.ur = ur
+        # count the number
+
+        self.num_connection_options = self._compute_connection_options()
+
+    def _compute_connection_options(self):
+        unconnected_fun, unconnected_res = get_missing_connections(self.context)
+        n = 0
+        usd = parse_poset('USD')
+        for (dp, s) in unconnected_res:
+            r = CResource(dp, s)
+            R = self.context.get_rtype(r)
+            foptions = get_compatible_unconnected_functions(R, self.context, unconnected_fun)
+            ok = []
+            for f in foptions:
+                if R == usd and would_introduce_cycle(self.context, r=r, f=f):
+                    print('skipping %r - %r because it adds a cycle' % (r, f))
+                    continue
+                ok.append(f)
+                unconnected_fun.remove((f.dp, f.s))
+            if ok:
+                n += 1
+        return n
 
     @contract(returns='tuple($CompositeNamedDP, dict(*:str))')
     def get_lower_bound_ndp(self):
@@ -96,34 +118,35 @@ class OptimizationState():
                 print('Nobody can provide for %s %s' % (r, lb))
 
             for id_ndp, fname in options:
-                def avoid(action):
-                    for a in self.executed:
-                        if isinstance(a, ActionAddNDP) and (a.id_ndp == action.id_ndp):
-                            return True
-                    return False
+#                 def avoid(action):
+#                     for a in self.executed:
+#                         if isinstance(a, ActionAddNDP) and (a.id_ndp == action.id_ndp):
+#                             return True
+#                     return False
 
                 action = ActionAddNDP(id_ndp, fname, r)
-                if avoid(action):
-                    continue
-
-                def forbidden(action):
-                    return False
-
-                    for f in self.forbidden:
-                        if action.__eq__(f):
-                            return True
-                    return False
-
-                if forbidden(action):
-                    print('pruning')
-                else:
-                    r_actions.append(action)
+                # if avoid(action):
+                #     continue
+#
+#                 def forbidden(action):
+#                     return False
+#
+#                     for f in self.forbidden:
+#                         if action.__eq__(f):
+#                             return True
+#                     return False
+#
+#                 if forbidden(action):
+#                     print('pruning')
+#                 else:
+                r_actions.append(action)
 
             # connecting one available resource
             foptions = get_compatible_unconnected_functions(R, self.context, unconnected_fun)
             usd = parse_poset('USD')
             for f in foptions:
-                if R == usd and would_introduce_cycle(self.context, r, f):
+                if R == usd and would_introduce_cycle(self.context, r=r, f=f):
+                    print('skipping %r - %r because it adds a cycle' % (r, f))
                     continue
                 
                 action = ActionConnect(r=r, f=f)
@@ -131,7 +154,10 @@ class OptimizationState():
 
             if not r_actions:
                 # this is a resource that cannot be satisfied...
-                print('Nobody can provide for %s %s and no unconnected compatible' % (r, lb))
+                msg = ('Nobody can provide for resource %s %s and no unconnected compatible' % (r, lb))
+                msg += '\n unconn: %s' % unconnected_fun
+                print(msg)
+                self.msg = msg
                 return []
 
             actions.extend(r_actions)
@@ -139,6 +165,8 @@ class OptimizationState():
         return actions
 
 def would_introduce_cycle(context, f, r):
+    if f.dp == r.dp:
+        return True
     from mocdp.comp.connection import get_connection_multigraph
     from networkx.algorithms.cycles import simple_cycles
 
@@ -148,8 +176,14 @@ def would_introduce_cycle(context, f, r):
     
     G1 = get_connection_multigraph(connections1)
     G2 = get_connection_multigraph(connections2)
-    c1 = len(list(simple_cycles(G1)))
-    c2 = len(list(simple_cycles(G2)))
+    cycles1 = list(simple_cycles(G1))
+    cycles2 = list(simple_cycles(G2))
+    c1 = len(cycles1)
+    c2 = len(cycles2)
+#     if c1 != c2:
+#         print G2.edges()
+#         print('c1: %s' % cycles1)
+#         print('c2: %s' % cycles2)
 
     return c1 != c2
 

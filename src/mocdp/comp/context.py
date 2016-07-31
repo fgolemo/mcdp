@@ -381,11 +381,11 @@ class Context():
         if not a.dp in self.names:
             msg = "Cannot find design problem %r." % str(a)
             raise DPSemanticError(msg)
-        dp = self.names[a.dp]
-        if not a.s in dp.get_rnames():
+        ndp = self.names[a.dp]
+        if not a.s in ndp.get_rnames():
             msg = "Design problem %r does not have resource %r." % (a.dp, a.s)
-            raise_desc(DPSemanticError, msg, ndp=dp.repr_long())
-        return dp.get_rtype(a.s)
+            raise_desc(DPSemanticError, msg, rnames=ndp.get_rnames())
+        return ndp.get_rtype(a.s)
 
     @contract(a=CFunction)
     def get_ftype(self, a):
@@ -396,7 +396,7 @@ class Context():
         dp = self.names[a.dp]
         if not a.s in dp.get_fnames():
             msg = "Design problem %r does not have function %r." % (a.dp, a.s)
-            raise_desc(DPSemanticError, msg, ndp=dp.repr_long())
+            raise_desc(DPSemanticError, msg, fnames=dp.get_fnames())
         return dp.get_ftype(a.s)
 
     def ires_init(self):

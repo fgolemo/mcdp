@@ -54,6 +54,7 @@ class MCDPLibrary():
         """ 
             IMPORTANT: modify clone() if you add state
         """
+
         # basename "x.mcdp" -> dict(data, realpath)
         if file_to_contents is None:
             file_to_contents = {}
@@ -143,7 +144,8 @@ class MCDPLibrary():
         def actual_load():
             # maybe we should clone
             l = self.clone()
-            logger.debug('Parsing %r' % name)
+            logger.debug('Parsing %r' % (name))
+#             logger.debug('Parsing %r (%s) %s' % (name, realpath, parsing))
             res = parsing(l, data, realpath)
             setattr(res, ATTR_LOAD_NAME, name)
             return res

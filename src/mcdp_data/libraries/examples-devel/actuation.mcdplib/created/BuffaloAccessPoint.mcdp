@@ -1,0 +1,18 @@
+mcdp {
+
+    #provides wifi [Any]
+
+    requires budget >= 40 USD
+
+    requires in [`PortableDCPower]
+ 
+    requires payload [`Payload]
+
+    (required payload).mass >= 4 g # XXX
+    (required payload).shape >= <0mm, 0mm, 0mm> # XXX
+
+    requires wlan [`WifiCom]
+    provides eth [`ETHCom]
+    requires eth [`ETHCom]
+    provides wlan [`WifiCom]
+}

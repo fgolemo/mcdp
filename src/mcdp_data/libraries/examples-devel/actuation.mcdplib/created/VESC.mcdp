@@ -4,10 +4,12 @@ mcdp {
 
     requires in [`PortableDCPower]
     requires budget [USD]
-    requires mass [g]
+    requires payload [`Payload]
 
     required budget >= 115 USD
-    required mass >= 10 g
+    
+    (required payload).shape >= <2cm, 2cm, 1cm>
+    (required payload).mass  >= 10 g
 
     # XXX: these numbers were made up
     (provided pwm).voltage_max <= 5 V

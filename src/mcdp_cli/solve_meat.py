@@ -190,17 +190,18 @@ def solve_meat_solve(trace, ndp, dp, fg, intervals, max_steps, _exp_advanced):
                 raise
     return res, trace
 
-def solve_read_model(dirs, param):
+def solve_read_model(dirs, param, library=None):
 #     GlobalConfig.global_load_dir("mocdp")
 
     model_name = param
     basename = model_name
 
-    from mcdp_library.library import MCDPLibrary
-
-    library = MCDPLibrary()
-    for d in dirs:
-        library.add_search_dir(d)
+    if library is None:
+        from mcdp_library.library import MCDPLibrary
+    
+        library = MCDPLibrary()
+        for d in dirs:
+            library.add_search_dir(d)
 
     ndp = library.load_ndp(model_name)
 

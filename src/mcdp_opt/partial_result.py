@@ -11,9 +11,19 @@ def get_lower_bound_ndp(context):
     """
         We create an NDP where each open resource becomes a new resource.
         and all the functions are given a lower bound of 0.
+        
+        Exception: the unconnected resources are ignored
     """
     context = clone_context(context)
+    
     unconnected_fun, unconnected_res = get_missing_connections(context)
+    
+    # let's remove the new resources that are unconnected
+    for rname, name, _ndp in context.iterate_new_resources():
+        assert (name, rname) in unconnected_fun
+        unconnected_fun.remove((name, rname))
+        del context.names[name]
+        context.rnames.remove(rname)
 
     # create a new resource for each unconnected resource
     resource2var = {} # CResource -> str

@@ -1,0 +1,48 @@
+
+mcdp {
+    # 4 dc outputs
+    provides out1 [`PWM]
+    provides out2 [`PWM]
+    provides out3 [`PWM]
+    provides out4 [`PWM]
+
+    requires in [`PortableDCPower]
+
+    
+    # requires an external DC power
+    # requires in [`DC_power]
+
+    requires payload [`Payload]
+
+    (required payload).mass >= 15 g
+    (required payload).shape >= <65mm, 56mm, 13mm>
+
+
+    (provided out1).amp_max <= 1.5 A
+    (provided out2).amp_max <= 1.5 A
+    (provided out3).amp_max <= 1.5 A
+    (provided out4).amp_max <= 1.5 A
+    (provided out1).voltage_max <= 13.5 V
+    (provided out2).voltage_max <= 13.5 V
+    (provided out3).voltage_max <= 13.5 V
+    (provided out4).voltage_max <= 13.5 V
+
+    total_current =
+        (provided out1).amp_max +
+        (provided out2).amp_max +
+        (provided out3).amp_max +
+        (provided out4).amp_max
+
+    ((required in).dc).amps >= total_current
+    ((required in).dc).voltage >= `DC_voltages: v5
+    ((required in).dc).connector >= `barrel_connectors: barrel_5mm
+    (required in).duration >= 0s # XXX
+
+    requires budget [USD]
+    budget >= 22.50 USD
+ 
+    # (required pi_connection).amps >= 50 mA
+
+    provides pisocketcom1 [`PISocketCom] 
+    requires pisocketcom1 [`PISocketCom]
+}

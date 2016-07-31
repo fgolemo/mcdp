@@ -1,0 +1,63 @@
+mcdp {
+
+    requires in [`PortableDCPower]
+
+    ((required in).dc).connector >= `barrel_connectors: barrel_4mm_1_7mm
+    ((required in).dc).voltage >= `DC_voltages: v5
+
+    requires budget [$]
+    required budget >= 30.00 $
+
+    requires payload [`Payload]
+
+    (required payload).mass >= 4 g # XXX
+    (required payload).shape >= <0mm, 0mm, 0mm> # XXX
+
+    
+    # Com = finite_poset {}
+    processor = instance template mcdp {
+        provides com [`Com]
+        requires com [`Com]
+        requires flops [flops]
+    }
+
+    c0 = 100 mA
+    c = 0.001 mA/flops
+    amps = c0 + processor.flops  * c
+    ((required in).dc).amps >= amps
+
+    processor.flops <= 1000 Mflops
+
+    requires usbcom1 [`USBCom]
+    requires gpiocom [`GPIOCom]
+    
+    requires ethcom [`ETHCom]
+    provides ethcom [`ETHCom]
+
+    provides pisocketcom [`PISocketCom] 
+
+    route_in = instance template mcdp {
+        provides pisocketcom [`PISocketCom]
+        provides ethcom [`ETHCom]
+        requires com [`Com] 
+    }
+
+    route_out = instance template mcdp {
+        provides com [`Com]
+
+        requires usbcom1 [`USBCom]
+        requires ethcom [`ETHCom]
+        requires gpiocom [`GPIOCom]
+    }
+
+    processor.com >= route_in.com
+    route_in.ethcom >= provided ethcom
+    route_in.pisocketcom >= provided pisocketcom
+
+    processor.com <= route_out.com 
+
+    route_out.usbcom1 <= required usbcom1 
+    route_out.ethcom <= required ethcom 
+    route_out.gpiocom <= required gpiocom 
+    
+}

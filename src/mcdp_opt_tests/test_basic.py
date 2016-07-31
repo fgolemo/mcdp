@@ -1,7 +1,14 @@
 from comptests.registrar import comptest
+from contracts import contract
+from mcdp_lang.parse_interface import parse_constant, parse_poset
 from mcdp_library import MCDPLibrary
 from mcdp_library.utils import dir_from_package_name
+from mcdp_opt.compare_different_resources import less_resources2
 from mcdp_opt.optimization import Optimization
+from mcdp_posets.nat import Nat
+from mcdp_posets.poset import Poset
+from mcdp_posets.poset_product import PosetProduct
+from mcdp_posets.uppersets import UpperSet
 from mcdp_report.gdc import STYLE_GREENREDSYM
 from mcdp_report.gg_ndp import gvgen_from_ndp
 from mcdp_report.gg_utils import gg_figure
@@ -29,8 +36,8 @@ def opt_basic_1():
     library = get_test_library(libnames)
 
     options = library.list_ndps()
-    options.remove('DaguChassis')
-#     options.remove('IRobotCreate')
+#     options.remove('DaguChassis')
+    options.remove('IRobotCreate')
     options.remove('YoubotBase')
     print('libraries: %s' % libnames)
     print('options: %s' % options)
@@ -54,7 +61,7 @@ def opt_basic_1():
     r = Report()
 
     i = 0
-    maxit = 60
+    maxit = 100
     while opt.states and i <= maxit:
         opt.print_status()
         opt.step()
@@ -68,13 +75,21 @@ def opt_basic_1():
 
     for i, state in enumerate(opt.states):
         ndp = state.get_current_ndp()
-        plot_ndp(r, 'open%d' % i, ndp, library)
+        with r.subsection('open%d' % i) as s:
+            plot_ndp(s, 'open%d' % i, ndp, library)
+            msg = 'ur: %s' % state.ur
+            msg += '\n num_connection_options: %s' % state.num_connection_options
+            s.text('info', msg)
 
     for i, state in enumerate(opt.abandoned):
         with r.subsection('abandoned%d' % i) as s:
             ndp = state.get_current_ndp()
             plot_ndp(s, 'abandoned%d' % i, ndp, library)
             msg = getattr(state, 'msg', '(no message)')
+
+
+            msg += '\n ur: %s' % state.ur
+            msg += '\n num_connection_options: %s' % state.num_connection_options
             s.text('info', msg)
 
 
@@ -98,17 +113,61 @@ def plot_ndp(r, name, ndp, library):
               do_dot=False)
 @comptest
 def opt_basic_2():
-    pass
+    l1 = parse_poset('J').U(1.0)
+    l2 = parse_poset('m x J').U((1.0, 1.0))
+    n1 = (1,)
+    n2 = (1,)
+    N = PosetProduct((Nat(),))
+
+    # create a joint one
+    l1b = add_extra(l1, N, n1)
+    l2b = add_extra(l2, N, n2)
+
+    print l1b
+    print l2b
+
+    assert less_resources2(l1b, l2b)
+    assert not less_resources2(l2b, l1b)
+
+@contract(lb=UpperSet, P=Poset, returns=UpperSet)
+def add_extra(lb, P, v):
+    P.belongs(v)
+    P1 = lb.P
+    if not isinstance(P1, PosetProduct):
+        P1 = PosetProduct((P1,))
+        minimals = set((a,) for a in lb.minimals)
+    else:
+        minimals = lb.minimals
+    P1b = PosetProduct(P1.subs + (P,))
+    def mm(x):
+        return x + (v,)
+    l1b = P1b.Us(map(mm, minimals))
+    return l1b
 
 
 @comptest
 def opt_basic_3():
-    pass
+    l1b = parse_constant('upperclosure { < 10 g > }').value
+    l2b = parse_constant('upperclosure { < 20 g > }').value
+    assert less_resources2(l1b, l2b)
+    assert not less_resources2(l2b, l1b)
+
+    l1b = parse_constant('upperclosure { < 10 g > }').value
+    l2b = parse_constant('upperclosure { < 20 mg > }').value
+    assert not less_resources2(l1b, l2b)
+    assert  less_resources2(l2b, l1b)
 
 
 @comptest
 def opt_basic_4():
-    pass
+
+
+
+    l1b = parse_constant('upperclosure { < 10 g, 2 J > }').value
+    l2b = parse_constant('upperclosure { < 2 J, 20 mg > }').value
+
+    assert not less_resources2(l1b, l2b)
+    assert less_resources2(l2b, l1b)
 
 
 @comptest

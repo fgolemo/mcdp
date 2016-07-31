@@ -9,6 +9,8 @@ from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 import random
 import itertools
 
+
+
 __all__ = [
     'UpperSet',
     'UpperSets',
@@ -408,3 +410,21 @@ def upperset_project(ur, i):
         minimals.add(mi)
     return UpperSet(poset_minima(minimals, leq=Pi.leq), P=Pi)
 
+@contract(ur='$UpperSet', f='isinstance(Map)', returns='$UpperSet')
+def upperset_project_map(ur, f):
+    """ Projects the upper set through the given map. """
+    assert isinstance(ur, UpperSet), ur
+    from mcdp_posets.space import Map
+    assert isinstance(f, Map)
+    from mcdp_posets.types_universe import get_types_universe
+    tu = get_types_universe()
+    tu.check_equal(ur.P, f.get_domain())
+    Q = f.get_codomain()
+    assert isinstance(Q, Poset)
+    minimals = set()
+    for m in ur.minimals:
+        mi = f(m)
+        minimals.add(mi)
+    minimals = poset_minima(minimals, leq=Q.leq)
+    return UpperSet(minimals, P=Q)
+    

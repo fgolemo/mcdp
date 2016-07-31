@@ -1,0 +1,165 @@
+ # mcdp-plot --cache --plots ndp_graph_enclosed -d . duckiebot1
+ mcdp {
+  dagu_chassis = instance `DaguChassis
+  battery_ravpower = instance `BatteryRavpower
+  buffalo = instance `BuffaloAccessPoint
+  pi = instance `RaspberryPI2
+  dc_hat = instance `AdafruitDCHat
+  servo_hat = instance `AdafruitServoHat
+  lsd_hat = instance `LSDHat
+  duckie = instance `Duckie
+  provides cuteness using duckie
+
+  rgb_led1 = instance `RGBLED
+  rgb_led2 = instance `RGBLED
+  rgb_led3 = instance `RGBLED
+  rgb_led4 = instance `RGBLED
+  rgb_led5 = instance `RGBLED
+
+  pi_camera = instance `PICamera
+  joystick = instance `LogitechGamepadF710
+  joystick_receiver = instance `LogitechReceiver
+
+  joystick_receiver.com <= joystick.com
+  usb_to_barrel = instance `USB_to_barrel
+  pi.gpiocom <= pi_camera.com
+  pi.usbcom1 <= joystick_receiver.com
+
+  pi.ethcom <= buffalo.eth
+  pi.ethcom >= buffalo.eth
+
+  router = instance `Linksys
+
+  USBMicroCharger = instance mcdp {
+      a = instance `USBMicroCharger
+      requires in [`AC_Charging]
+      provides out [`DC_Charging]
+      (in).duration >= (out).duration
+      (in).ac >= a.in
+      a.out >= (out).dc
+
+      requires budget >= a.budget
+    }
+
+  requires ac >= USBMicroCharger.in
+
+  splitter = instance `USBSplitter
+
+  battery_ravpower.in <= USBMicroCharger.out 
+  splitter.in <= battery_ravpower.out1
+  pi.in <= splitter.out1
+  buffalo.in <= splitter.out2
+  # battery below
+  battery_ravpower.payload <= dagu_chassis.payload_bottom
+
+  usb_to_barrel.in <= battery_ravpower.out2
+  usb_to_barrel.out >= servo_hat.in
+  servo_hat.out >= dc_hat.in
+  fit = instance template mcdp {
+      provides p1 [`Payload]
+      provides p2 [`Payload]
+      provides p3 [`Payload]
+      provides p4 [`Payload]
+      provides p5 [`Payload]
+      provides p6 [`Payload]
+      provides p7 [`Payload]
+      requires payload [`Payload]
+  }
+ 
+
+  fit.p1 >= buffalo.payload
+  fit.p2 >= pi.payload
+  fit.p3 >= dc_hat.payload
+  fit.p4 >= servo_hat.payload
+  fit.p5 >= lsd_hat.payload
+  fit.p6 >= duckie.payload
+
+  fit.payload <= dagu_chassis.payload_top
+
+  position = instance mcdp {
+    requires led1 [`LEDBlinking]
+    requires led2 [`LEDBlinking]
+    requires led3 [`LEDBlinking]
+    requires led4 [`LEDBlinking]
+  }
+  communication = instance mcdp {
+    requires led [`LEDBlinking]
+  }
+  going_around = instance mcdp {
+    requires motion [`Motion]
+  }
+  joystick_control = instance mcdp {
+    requires motion [`Motion]
+  }
+
+  joystick_control.motion <= dagu_chassis.motion 
+  going_around.motion <= dagu_chassis.motion 
+
+  communication.led <= rgb_led1.blinking
+  position.led1 <= rgb_led2.blinking
+  position.led2 <= rgb_led3.blinking
+  position.led3 <= rgb_led4.blinking
+  position.led4 <= rgb_led5.blinking
+
+  lsd_hat.rgb1 >= rgb_led1.driver
+  lsd_hat.rgb2 >= rgb_led2.driver
+  lsd_hat.rgb3 >= rgb_led3.driver
+  lsd_hat.rgb4 >= rgb_led4.driver
+  lsd_hat.rgb5 >= rgb_led5.driver
+
+  servo_hat.pwm1 >= lsd_hat.pwm1
+  servo_hat.pwm2 >= lsd_hat.pwm2
+  servo_hat.pwm3 >= lsd_hat.pwm3
+  servo_hat.pwm4 >= lsd_hat.pwm4
+  servo_hat.pwm5 >= lsd_hat.pwm5
+  servo_hat.pwm6 >= lsd_hat.pwm6
+  servo_hat.pwm7 >= lsd_hat.pwm7
+  servo_hat.pwm8 >= lsd_hat.pwm8
+  servo_hat.pwm9 >= lsd_hat.pwm9
+  servo_hat.pwm10 >= lsd_hat.pwm10
+  servo_hat.pwm11 >= lsd_hat.pwm11
+  servo_hat.pwm12 >= lsd_hat.pwm12
+  servo_hat.pwm13 >= lsd_hat.pwm13
+  servo_hat.pwm14 >= lsd_hat.pwm14
+  servo_hat.pwm15 >= lsd_hat.pwm15
+
+
+  spectrum = instance `Spectrum
+  buffalo.wlan >= spectrum.wlan1
+  buffalo.wlan <= spectrum.wlan1
+  router.wlan >= spectrum.wlan2
+  router.wlan <= spectrum.wlan2
+
+  duckietop = instance `Duckietop
+  router.eth >= duckietop.eth
+  router.eth <= duckietop.eth
+
+  servo_hat.pisocketcom <= dc_hat.pisocketcom1
+  dc_hat.pisocketcom1 <= pi.pisocketcom
+
+  dc_hat.out1 >= dagu_chassis.pwm1
+  dc_hat.out2 >= dagu_chassis.pwm2
+
+  requires budget [USD]
+
+  required budget >= (
+    budget required by dagu_chassis +
+     budget required by battery_ravpower + 
+     budget required by buffalo + 
+     budget required by pi + 
+     budget required by dc_hat + 
+     budget required by servo_hat + 
+     budget required by lsd_hat + 
+     budget required by rgb_led1 +
+     budget required by rgb_led2 +
+     budget required by rgb_led3 +
+     budget required by rgb_led4 +
+     budget required by rgb_led5 +
+     budget required by pi_camera +
+     budget required by joystick +
+     budget required by usb_to_barrel +
+     budget required by USBMicroCharger +
+     budget required by router + 
+     budget required by duckie
+  )
+}

@@ -1,0 +1,5 @@
+mcdp {
+
+    provides eth [`ETHCom]
+    requires eth [`ETHCom]    
+}
