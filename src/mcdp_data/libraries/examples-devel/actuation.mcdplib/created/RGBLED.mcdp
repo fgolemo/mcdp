@@ -1,4 +1,4 @@
-mcdp {
+template mcdp {
     requires budget >= 1 USD
 
     requires driver [`RGBLEDDriver]

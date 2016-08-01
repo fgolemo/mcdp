@@ -39,11 +39,40 @@ def opt_basic_1():
 #     options.remove('DaguChassis')
     options.remove('IRobotCreate')
     options.remove('YoubotBase')
+    options.remove('duckiebot1')
+    options.remove('duckiebot1_flatten')
     print('libraries: %s' % libnames)
     print('options: %s' % options)
 
+#     s = """
+#     mcdp = {
+#         design = instance mcdp {
+#             provides motion [`Motion]
+#
+#             motion >= <0.1, 600.0 g>
+#
+#             total_budget = 1000 USD
+#
+#             cost = mcdp {
+#                 provides budget1 [USD]
+#                 provides budget2 [USD]
+#                 provides budget3 [USD]
+#                 provides budget4 [USD]
+#
+#                 budget1+budget2+budget3+budget4 <= total_budget
+#             }
+#
+#             var ac [`AC_charging]
+#         }
+#
+#         design.motion >=
+#         design.ac <=
+#         design.total_budget <= 1000 USD
+#
+#     """
+
     poset = library.parse_poset
-#     value = library.parse_value
+
 
     flabels, F0s, f0s = zip(*(
         ('motion', poset('`Motion'), (0.1, 600.0)),
@@ -160,9 +189,6 @@ def opt_basic_3():
 
 @comptest
 def opt_basic_4():
-
-
-
     l1b = parse_constant('upperclosure { < 10 g, 2 J > }').value
     l2b = parse_constant('upperclosure { < 2 J, 20 mg > }').value
 
@@ -172,7 +198,12 @@ def opt_basic_4():
 
 @comptest
 def opt_basic_5():
-    pass
+    """ It should be able to re-order """
+    l1b = parse_constant('upperclosure { < 1 g, 4 g > }').value
+    l2b = parse_constant('upperclosure { < 5 g, 3 g > }').value
+
+    assert not less_resources2(l1b, l2b)
+    assert less_resources2(l2b, l1b)
 
 
 @comptest

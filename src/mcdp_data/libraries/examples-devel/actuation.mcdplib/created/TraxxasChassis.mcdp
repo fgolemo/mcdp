@@ -1,0 +1,10 @@
+mcdp {
+    requires budget >= 300 USD
+    provides payload [`Payload]
+
+    provides motion [`Motion]
+
+    requires cr [`ContinuousRotation]
+    requires angular_placement [`AngularPlacement]
+
+}

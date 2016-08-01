@@ -3,6 +3,8 @@ mcdp {
     provides pwm [`PWM]
 
     requires in [`PortableDCPower]
+    requires usb [`USBCom]
+
     requires budget [USD]
     requires payload [`Payload]
 

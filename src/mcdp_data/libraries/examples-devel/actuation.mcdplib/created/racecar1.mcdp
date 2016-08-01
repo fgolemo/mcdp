@@ -1,0 +1,60 @@
+ # mcdp-plot --cache --plots ndp_graph_enclosed -d . racecar1
+
+mcdp {
+    jetson = instance `NVIDIAJetson
+    servo = instance `Traxxas_2075
+    tmotor = instance `Traxxas_3351
+    hokuyo = instance `HokuyoURG10LX
+    hub = instance `USBHub
+    batt = instance `TraxxasNIMH_3000mAh
+    charger = instance `TraxxasCharger
+    adapter = instance `TraxxasAdapter
+    sensor = instance `StructureIOSensor
+    traxxas_chassis = instance `TraxxasChassis
+    vesc = instance `VESC
+
+    provides motion using traxxas_chassis
+    traxxas_chassis.cr <= tmotor.cr
+    traxxas_chassis.angular_placement <= servo.angular_placement
+
+    vesc.ppm >= servo.ppm
+    vesc.pwm >= tmotor.pwm
+
+    vesc.usb <= jetson.usb
+
+    fit = instance template mcdp {
+      provides p1 [`Payload]
+      provides p2 [`Payload]
+      provides p3 [`Payload]
+      provides p4 [`Payload]
+      provides p5 [`Payload]
+      provides p6 [`Payload]
+      provides p7 [`Payload]
+      requires payload [`Payload]
+  }
+ 
+  fit.p1 >= jetson.payload
+  fit.p2 >= servo.payload
+  fit.p3 >= tmotor.payload
+  fit.p4 >= hokuyo.payload
+  fit.p5 >= hub.payload
+  fit.p6 >= batt.payload
+  fit.p7 >= sensor.payload
+  fit.payload <= traxxas_chassis.payload
+
+    requires budget [USD]
+
+    budget >= (
+        jetson.budget + 
+        servo.budget + 
+        tmotor.budget + 
+        hokuyo.budget + 
+        hub.budget + 
+        batt.budget + 
+        charger.budget + 
+        adapter.budget + 
+        sensor.budget + 
+        traxxas_chassis.budget +
+        vesc.budget
+    )
+}

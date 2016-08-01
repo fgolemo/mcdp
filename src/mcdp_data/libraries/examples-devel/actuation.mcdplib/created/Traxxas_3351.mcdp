@@ -2,11 +2,12 @@ mcdp {
    provides cr [`ContinuousRotation]
    requires pwm [`PWM]
    requires budget [USD]   
-   requires shape [m x m x m]
-   requires mass [kg]
+
+   requires payload [`Payload]
+   
    required budget >= 99.28 USD
-   required mass >= 1.6 pounds
-   required shape >= <6.5in, 2in, 5.8in>
+   (required payload).mass >= 1.6 pounds
+   (required payload).shape >= <6.5in, 2in, 5.8in>
 
   (provided cr).torque <= 0 N*m
   (provided cr).velocity <= 5000 rpm

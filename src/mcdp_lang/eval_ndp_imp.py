@@ -24,7 +24,7 @@ from mocdp.comp.composite_makecanonical import cndp_makecanonical
 from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
     get_name_for_fun_node, get_name_for_res_node)
 from mocdp.exceptions import (DPInternalError, DPSemanticError,
-    DPSemanticErrorNotConnected, mcdp_dev_warning)
+    DPSemanticErrorNotConnected)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 

@@ -1,0 +1,6 @@
+mcdp {
+    requires budget >= 200 USD
+    requires payload [`Payload]
+
+    provides usb [`USBCom]
+}

@@ -3,11 +3,11 @@
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error, ok,
     parse_wrap_check, sem, syn)
 from comptests.registrar import comptest
+from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_lang import parse_ndp
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
-from mcdp_posets.uppersets import UpperSets
-from mcdp_dp.dp_transformations import get_dp_bounds
+from mcdp_posets import UpperSets
 from nose.tools import assert_equal
 
 L = CDPLanguage
