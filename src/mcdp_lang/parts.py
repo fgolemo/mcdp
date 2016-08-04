@@ -290,4 +290,12 @@ class CDPLanguage():
     ApproxUKeyword = namedtuplewhere('ApproxUKeyword', 'keyword')
     ApproxURes = namedtuplewhere('ApproxURes', 'keyword rvalue step')
 
+    # from a import symbol1, symbol2
+    # import symbol.a
+    ImportSymbolsKeywordFrom = namedtuplewhere('ImportSymbolsKeywordFrom', 'keyword')
+    ImportSymbolsKeywordImport = namedtuplewhere('ImportSymbolsKeywordImport', 'keyword')
+    ImportSymbolsLibname = namedtuplewhere('ImportSymbolsLibname', 'value')
+    ImportSymbolsSymbolname = namedtuplewhere('ImportSymbolsSymbolname', 'value')
+    ImportSymbols = namedtuplewhere('ImportSymbols', 'keyword1 libname keyword2 symbols')
+
 

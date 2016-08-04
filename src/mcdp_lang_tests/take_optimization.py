@@ -5,7 +5,7 @@ from mcdp_lang_tests.utils import assert_parsable_to_connected_ndp
 
 @comptest
 def check_take_optim1():
-    ndp = parse_ndp(""" 
+    parse_ndp(""" 
     mcdp {
     
         provides f [s x J] 
@@ -21,7 +21,7 @@ def check_take_optim1():
 
 @comptest
 def check_take_optim2():
-    ndp = parse_ndp("""
+    parse_ndp("""
     
     mcdp {
     

@@ -1,52 +1,52 @@
 
 mcdp {
-    provides digital_in_1 [sensed :: V] 
-    provides digital_in_2 [sensed :: V] 
-    provides digital_in_3 [sensed :: V] 
-    provides digital_in_4 [sensed :: V] 
+    # provides digital_in_1 [sensed :: V] 
+    # provides digital_in_2 [sensed :: V] 
+    # provides digital_in_3 [sensed :: V] 
+    # provides digital_in_4 [sensed :: V] 
 
-    provides digital_out_1 [controlled_out :: (`interfaces x set-of(V) x A)]
-    provides digital_out_2 [controlled_out :: (`interfaces x set-of(V) x A)]
-    provides digital_out_3 [controlled_out :: (`interfaces x set-of(V) x A)]
-    provides digital_out_4 [controlled_out :: (`interfaces x set-of(V) x A)]
+    # provides digital_out_1 [controlled_out :: (`interfaces x set-of(V) x A)]
+    # provides digital_out_2 [controlled_out :: (`interfaces x set-of(V) x A)]
+    # provides digital_out_3 [controlled_out :: (`interfaces x set-of(V) x A)]
+    # provides digital_out_4 [controlled_out :: (`interfaces x set-of(V) x A)]
 
-    provides LED_display_1 [set-of(`color) x lux]
-    provides LED_display_2 [set-of(`color) x lux]
-    provides LED_display_3 [set-of(`color) x lux]
-    provides LED_display_4 [set-of(`color) x lux] 
+    # provides LED_display_1 [set-of(`color) x lux]
+    # provides LED_display_2 [set-of(`color) x lux]
+    # provides LED_display_3 [set-of(`color) x lux]
+    # provides LED_display_4 [set-of(`color) x lux] 
 
-    digital_in_1 <= 5 V
-    digital_in_2 <= 5 V
-    digital_in_3 <= 5 V
-    digital_in_4 <= 5 V
+    # digital_in_1 <= 5 V
+    # digital_in_2 <= 5 V
+    # digital_in_3 <= 5 V
+    # digital_in_4 <= 5 V
 
-    digital_out_1 <=  < {5V}, 500 mA>
-    digital_out_2 <=  < {5V}, 500 mA>
-    digital_out_3 <=  < {5V}, 500 mA>
-    digital_out_4 <=  < {5V}, 500 mA>
+    # digital_out_1 <=  < {5V}, 500 mA>
+    # digital_out_2 <=  < {5V}, 500 mA>
+    # digital_out_3 <=  < {5V}, 500 mA>
+    # digital_out_4 <=  < {5V}, 500 mA>
 
-    LED_display_1 <= < `color: red,    1 A >
-    LED_display_2 <= < `color: yellow, 1 A >
-    LED_display_3 <= < `color: blue,   1 A >
-    LED_display_4 <= < `color: green,  1 A >
+    # LED_display_1 <= < `color: red,    1 A >
+    # LED_display_2 <= < `color: yellow, 1 A >
+    # LED_display_3 <= < `color: blue,   1 A >
+    # LED_display_4 <= < `color: green,  1 A >
 
-    requires connection [`interfaces x A]
+    # requires connection [`interfaces x A]
 
-    take(::connection, 0) >= `interfaces : RaspberryPIConnector
+    # take(::connection, 0) >= `interfaces : RaspberryPIConnector
     
-    c1 = take(digital_out_1, 1)
-    c2 = take(digital_out_2, 1)
-    c3 = take(digital_out_3, 1)
-    c4 = take(digital_out_4, 1)
+    # c1 = take(digital_out_1, 1)
+    # c2 = take(digital_out_2, 1)
+    # c3 = take(digital_out_3, 1)
+    # c4 = take(digital_out_4, 1)
 
-    total_current = c1+c2+c3+c4
-    take(connection, 1) >= total_current
+    # total_current = c1+c2+c3+c4
+    # take(connection, 1) >= total_current
 
     requires mass [g]
 
     mass >= 20g 
 
-    requires components >= {1 of `components: Explorer_Hat}
+    # requires components >= {1 of `components: Explorer_Hat}
 
     requires shape [cm x cm x cm]
 
@@ -54,7 +54,7 @@ mcdp {
     
     requires budget [USD]
 
-    budget >= $22.95
+    budget >= 22.95 USD
 
 }
 

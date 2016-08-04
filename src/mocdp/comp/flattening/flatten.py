@@ -8,6 +8,7 @@ from mocdp.comp.wrap import SimpleWrap
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 from _collections import defaultdict
 from mcdp_dp.dp_identity import Identity
+from contracts.interface import add_prefix
 
 __all__ = [
     'cndp_flatten',
@@ -106,30 +107,35 @@ def cndp_flatten(ndp):
     names2 = {}
     connections2 = set()
 
-    #
     proxy_functions = defaultdict(lambda: dict())  # proxy[name][fname]
     proxy_resources = defaultdict(lambda: dict())
 
-
     for name, n0 in name2ndp.items():
+        # add empty (in case they have no functions/resources)
+        proxy_functions[name] = {}
+        proxy_resources[name] = {}
+
         n1 = n0.flatten()
-        # print('n1: %s' % add_prefix(str(n1), '| '))
+#         print('n1: %s' % add_prefix(str(n1), '| '))
 
         if isinstance(n1, CompositeNamedDP):
             nn = flatten_add_prefix(n1, prefix=name)
-            # print('nn: %s' % add_prefix(str(nn), '| '))
+#             print('nn: %s' % add_prefix(str(nn), '| '))
         else:
             nn = n1
 
+#         print(' name: %s' % name)
         if isinstance(nn, CompositeNamedDP):
             for name2, ndp2 in nn.get_name2ndp().items():
+#                 print(' name2: %s' % name2)
                 assert not name2 in names2
                 isitf, _ = is_fun_node_name(name2)
                 isitr, _ = is_res_node_name(name2)
                 if isitf or isitr:
                     # do not add the identity nodes
                     # that represent functions or resources
-                    # print('skipping %r' % name2)
+                    # except if they are unconnected
+
                     continue
                 else:
                     names2[name2] = ndp2
@@ -138,7 +144,6 @@ def cndp_flatten(ndp):
                 # is it a connection to a function
                 isitf, fn = is_fun_node_name(c.dp1)
                 isitr, rn = is_res_node_name(c.dp2)
-
 
                 if isitf and isitr:
                     # This is the case where there is a straight connection
@@ -159,7 +164,6 @@ def cndp_flatten(ndp):
                     proxy_resources[name][rn] = (new_name, rn)
                     continue
 
-                
                 if isitf:
                     proxy_functions[name][fn] = (c.dp2, c.s2)
                     continue
@@ -181,8 +185,37 @@ def cndp_flatten(ndp):
 
             names2[name] = nn
 
-    # print proxy_functions
-    # print proxy_resources
+    # check that these were correctly generated:
+    #  proxy_functions
+    #  proxy_resources
+    def exploded(name):
+        return isinstance(name2ndp[name], CompositeNamedDP)
+    print list(proxy_resources)
+    errors = []
+    for name, n0 in name2ndp.items():
+        try:
+
+            assert name in proxy_functions, name
+            assert name in proxy_resources
+            if exploded(name):
+                for fname in n0.get_fnames():
+                    newfname = "%s/%s" % (name, fname)
+                    assert newfname in proxy_functions[name], (newfname, proxy_functions[name])
+                for rname in n0.get_rnames():
+                    newrname = "%s/%s" % (name, rname)
+                    assert newrname in proxy_resources[name], (newrname, proxy_resources[name])
+            else:
+                for fname in n0.get_fnames():
+                    assert fname in proxy_functions[name], (fname, proxy_functions[name])
+                for rname in n0.get_rnames():
+                    assert rname in proxy_resources[name]
+        except Exception as e:
+            s = '%s:\n %s %s \n\n%s' % (name, proxy_resources[name], proxy_functions[name], e)
+            errors.append(s)
+    if errors:
+        s = "\n\n".join(errors)
+        s += '%s %s' % (proxy_resources, proxy_functions)
+        raise Exception(s)
 
     for c in connections:
         dp2 = c.dp2
@@ -190,13 +223,13 @@ def cndp_flatten(ndp):
         dp1 = c.dp1
         s1 = c.s1
 
-
-
-
-
-
         dp2_was_exploded = isinstance(name2ndp[dp2], CompositeNamedDP)
         if dp2_was_exploded:
+            if not dp2 in proxy_functions:
+                msg = 'Bug: cannot find dp2.'
+                raise_desc(Exception, msg, dp2=dp2, keys=list(proxy_functions),
+                           c=c)
+
             (dp2_, s2_) = proxy_functions[dp2]["%s/%s" % (dp2, s2)]
 #
 #             dp2_ = "_fun_%s%s%s" % (dp2, sep, s2)

@@ -94,6 +94,8 @@ class SyntaxIdentifiers():
         'ignore',
         'addmake',
         'approxu',
+        'import',
+        'from',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -278,6 +280,20 @@ class Syntax():
     REQUIRES = spk(L('requires'), CDP.RequireKeyword)
     res_statement = sp(REQUIRES + C(rname, 'rname') + unitst,
                        lambda t: CDP.ResStatement(t[0], t[1], t[2]))
+
+    # import statements:
+    #    from libname import a, b
+    IMPORT = spk(L('import'), CDP.ImportSymbolsKeywordImport)
+    FROM = spk(L('from'), CDP.ImportSymbolsKeywordFrom)
+    import_libname = sp(get_idn(), lambda t: CDP.ImportSymbolsLibname(t[0]))
+    import_symbol = sp(get_idn(), lambda t: CDP.ImportSymbolsSymbolname(t[0]))
+    import_statement = sp(FROM + import_libname +
+                          IMPORT + import_symbol + ZeroOrMore(SCOMMA + import_symbol),
+                          lambda t:
+                            CDP.ImportSymbols(keyword1=t[0],
+                                              keyword2=t[2],
+                                              libname=t[1],
+                                              symbols=make_list(t[3:], where=t[2].where)))
 
     valuewithunit_numbers = sp(SyntaxBasics.integer_or_float + unitst,
                                lambda t: CDP.SimpleValue(t[0], t[1]))
