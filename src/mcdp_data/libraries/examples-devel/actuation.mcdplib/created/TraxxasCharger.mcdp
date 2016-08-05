@@ -1,3 +1,6 @@
 mcdp {
     requires budget [USD]    
+
+    requires in [`DC_Charging]
+    provides out [`DC_Charging]
 }

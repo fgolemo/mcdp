@@ -161,10 +161,43 @@ def eval_ndp_code_spec(r, _context):
     res = eval_codespec(r, expect=NamedDP)
     return res
 
+
+def eval_ndp_load(r, context):
+    assert isinstance(r, CDP.LoadNDP)
+    assert isinstance(r.load_arg, (CDP.NDPName, CDP.NDPNameWithLibrary))
+
+    arg = r.load_arg
+
+    if isinstance(arg, CDP.NDPNameWithLibrary):
+        libname = arg.library
+        name = arg.name
+        library = context.load_library(libname)
+        return library.load_ndp(name)
+
+    if isinstance(arg, CDP.NDPName):
+        name = arg.value
+        ndp = context.load_ndp(name)
+        return ndp
+
+    raise NotImplementedError(r)
+
 def eval_ndp_instancefromlibrary(r, context):
-    name = r.dpname.value
-    ndp = context.load_ndp(name)
-    return ndp
+    assert isinstance(r, CDP.DPInstanceFromLibrary)
+    assert isinstance(r.dpname, (CDP.NDPName, CDP.NDPNameWithLibrary))
+    arg = r.dpname
+
+    if isinstance(arg, CDP.NDPNameWithLibrary):
+        libname = arg.library
+        name = arg.name
+        library = context.load_library(libname)
+        return library.load_ndp(name)
+
+    if isinstance(arg, CDP.NDPName):
+        name = arg.value
+        ndp = context.load_ndp(name)
+        return ndp
+
+    raise NotImplementedError(r)
 
 def eval_ndp_flatten(r, context):
     ndp = eval_ndp(r.dp_rvalue, context)
@@ -210,9 +243,6 @@ def eval_ndp_approxdpmodel(r, context):
                               ndp=ndp0)
 
 
-def eval_ndp_load(r, context):
-    load_arg = r.load_arg.value
-    return context.load_ndp(load_arg)
 
 
 @contract(r=CDP.DPWrap)

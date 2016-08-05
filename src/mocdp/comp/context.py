@@ -89,6 +89,7 @@ class Context():
         self.load_posets_hooks = []
         self.load_primitivedp_hooks = []
         self.load_template_hooks = []
+        self.load_library_hooks = []
 
     def __repr__(self):
         s = 'Context:'
@@ -109,6 +110,7 @@ class Context():
         c.load_posets_hooks = list(self.load_posets_hooks)
         c.load_primitivedp_hooks = list(self.load_primitivedp_hooks)
         c.load_template_hooks = list(self.load_template_hooks)
+        c.load_library_hooks = list(self.load_library_hooks)
         c.var2resource = {}  # XXX?
         c.var2function = {}  # XXX?
         c.var2model.update(self.var2model)
@@ -127,6 +129,10 @@ class Context():
     def load_template(self, load_arg):
         return self._load_hooks(load_arg, self.load_template_hooks, TemplateForNamedDP)
 
+    def load_library(self, load_arg):
+        from mcdp_library.library import MCDPLibrary
+        return self._load_hooks(load_arg, self.load_library_hooks, MCDPLibrary)
+
     def _load_hooks(self, load_arg, hooks, expected):
         errors = []
         for hook in hooks:
@@ -137,9 +143,13 @@ class Context():
                     raise_desc(DPSemanticError, msg, res=res, expected=expected)
                 return res
             except DPSemanticError as e:
-                errors.append(str(e))
-        msg = 'Could not load: \n%s' % "\n\n".join(errors)
-        raise DPSemanticError(msg)
+                errors.append(e)
+        if len(hooks) == 1:
+            raise errors[0]
+        else:
+            s = "\n\n".join(map(str, errors))
+            msg = 'Could not load: \n%s' % s
+            raise DPSemanticError(msg)
 
 
     @contract(s='str', dp='str', returns=CFunction)

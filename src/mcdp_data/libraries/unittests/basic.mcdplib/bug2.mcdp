@@ -1,6 +1,0 @@
-# test semantic_error
-mcdp {
-    # this should give a semantic error, but now it gives an internal error
-    a = instance mcdp {}
-    b = instance mcdp {}
-}

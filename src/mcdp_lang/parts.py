@@ -85,8 +85,6 @@ class CDPLanguage():
     NatConstant = namedtuplewhere('NatConstant', 's1 s2 value')  # value = int, >=0
     IntConstant = namedtuplewhere('IntConstant', 's1 s2 value')  # value = int
 
-    LoadCommand = namedtuplewhere('LoadCommand', 'keyword load_arg')
-
     LoadNDP = namedtuplewhere('LoadNDP', 'keyword load_arg')
     LoadConstant = namedtuplewhere('LoadConstant', 'keyword load_arg')
     LoadPoset = namedtuplewhere('LoadPoset', 'keyword load_arg')
@@ -134,6 +132,7 @@ class CDPLanguage():
     DPWrapToken = namedtuplewhere('DPWrapToken', 'keyword')
     FuncName = namedtuplewhere('FuncName', 'value')  # python function name
     NDPName = namedtuplewhere('NDPName', 'value')  # name in "new <name>"
+    NDPNameWithLibrary = namedtuplewhere('NDPNameWithLibrary', 'library glyph name')  # name in "new <name>"
     ApproxKeyword = namedtuplewhere('ApproxKeyword', 'keyword')
     FlattenKeyword = namedtuplewhere('FlattenKeyword', 'keyword')
     SpecializeKeyword = namedtuplewhere('SpecializeKeyword', 'keyword')
@@ -185,6 +184,8 @@ class CDPLanguage():
     ResStatement = namedtuplewhere('ResStatement', 'keyword rname unit')
 
     PosetName = namedtuplewhere('PosetName', 'value')
+    PosetNameWithLibrary = namedtuplewhere('PosetNameWithLibrary', 'library glyph name')
+
     LoadDP = namedtuplewhere('LoadDP', 'keyword name')
     LoadPoset = namedtuplewhere('LoadPoset', 'keyword name')
 
@@ -292,10 +293,10 @@ class CDPLanguage():
 
     # from a import symbol1, symbol2
     # import symbol.a
-    ImportSymbolsKeywordFrom = namedtuplewhere('ImportSymbolsKeywordFrom', 'keyword')
-    ImportSymbolsKeywordImport = namedtuplewhere('ImportSymbolsKeywordImport', 'keyword')
-    ImportSymbolsLibname = namedtuplewhere('ImportSymbolsLibname', 'value')
-    ImportSymbolsSymbolname = namedtuplewhere('ImportSymbolsSymbolname', 'value')
-    ImportSymbols = namedtuplewhere('ImportSymbols', 'keyword1 libname keyword2 symbols')
+#     ImportSymbolsKeywordFrom = namedtuplewhere('ImportSymbolsKeywordFrom', 'keyword')
+#     ImportSymbolsKeywordImport = namedtuplewhere('ImportSymbolsKeywordImport', 'keyword')
+#     ImportSymbolsLibname = namedtuplewhere('ImportSymbolsLibname', 'value')
+#     ImportSymbolsSymbolname = namedtuplewhere('ImportSymbolsSymbolname', 'value')
+#     ImportSymbols = namedtuplewhere('ImportSymbols', 'keyword1 libname keyword2 symbols')
 
 

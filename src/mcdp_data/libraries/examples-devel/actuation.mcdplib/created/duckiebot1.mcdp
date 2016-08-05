@@ -30,16 +30,7 @@
 
   router = instance `Linksys
 
-  USBMicroCharger = instance mcdp {
-      a = instance `USBMicroCharger
-      requires in [`AC_Charging]
-      provides out [`DC_Charging]
-      (in).duration >= (out).duration
-      (in).ac >= a.in
-      a.out >= (out).dc
-
-      requires budget >= a.budget
-    }
+  USBMicroCharger = instance `USBMicroCharging
 
   requires ac >= USBMicroCharger.in
 
@@ -73,6 +64,8 @@
   fit.p4 >= servo_hat.payload
   fit.p5 >= lsd_hat.payload
   fit.p6 >= duckie.payload
+  fit.p7 >= pi_camera.payload
+
 
   fit.payload <= dagu_chassis.payload_top
 
@@ -139,6 +132,8 @@
 
   dc_hat.out1 >= dagu_chassis.pwm1
   dc_hat.out2 >= dagu_chassis.pwm2
+  ignore out3 provided by dc_hat
+  ignore out4 provided by dc_hat
 
   requires budget [USD]
 

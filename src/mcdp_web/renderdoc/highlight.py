@@ -81,7 +81,8 @@ def make_plots(library, frag, raise_errors, realpath):
                         msg = "If <img> is empty then it needs to have an id."
                         raise_desc(ValueError, msg, tag=str(tag))
                     # load it
-                    vu = load(tag['id'])
+                    tag_id = tag['id'].encode('utf-8')
+                    vu = load(tag_id)
                 else:
                     source_code = tag.string.encode('utf-8')
                     vu = parse(source_code, realpath=realpath)
@@ -237,7 +238,8 @@ def highlight_mcdp_code(library, frag, realpath, raise_errors=False):
                         msg = "If <pre> is empty then it needs to have an id."
                         raise_desc(ValueError, msg, tag=str(tag))
                     # load it
-                    basename = '%s.%s' % (tag['id'], extension)
+                    tag_id = tag['id'].encode('utf-8')
+                    basename = '%s.%s' % (tag_id, extension)
                     data = library._get_file_data(basename)
                     source_code = data['data']
                     source_code = source_code.replace('\t', ' ' * 4)

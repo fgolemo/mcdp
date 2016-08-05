@@ -18,7 +18,7 @@ mcdp {
 },
 battery:
 mcdp {
-  battery = new Battery
+  battery = new BatteryPower
   charging_profile required by battery <= 0 W
   provides power_profile using battery
   requires mass, cost for battery

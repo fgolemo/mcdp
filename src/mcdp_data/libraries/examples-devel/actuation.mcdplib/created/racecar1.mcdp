@@ -1,4 +1,4 @@
- # mcdp-plot --cache --plots ndp_graph_enclosed -d . racecar1
+ # mcdp-plot --cache --plots ndp_graph_enclosed -D ../.. -d . racecar1
 
 mcdp {
     jetson = instance `NVIDIAJetson
@@ -6,12 +6,17 @@ mcdp {
     tmotor = instance `Traxxas_3351
     hokuyo = instance `HokuyoURG10LX
     hub = instance `USBHub
-    batt = instance `TraxxasNIMH_3000mAh
+
+    motor_battery = instance `Traxxas_2923X
+    other_battery = instance `Energizer_XP8000AW
     charger = instance `TraxxasCharger
     adapter = instance `TraxxasAdapter
-    sensor = instance `StructureIOSensor
+    structure_io_sensor = instance `StructureIOSensor
     traxxas_chassis = instance `TraxxasChassis
     vesc = instance `VESC
+    USBMicroCharger = instance `USBMicroCharging
+    power_strip = instance `Amazon_PowerStrip
+    
 
     provides motion using traxxas_chassis
     traxxas_chassis.cr <= tmotor.cr
@@ -20,8 +25,39 @@ mcdp {
     vesc.ppm >= servo.ppm
     vesc.pwm >= tmotor.pwm
 
-    vesc.usb <= jetson.usb
+    vesc.usb <= jetson.usb_out
+    jetson.usb_in <= hokuyo.usb
+ 
+    in required by hub <= out1 provided by other_battery
+    splitter = instance mcdp {
+      requires in [`PortableDCPower]
+      provides out1 [`PortableDCPower]
+      provides out2 [`PortableDCPower]
+    }
+    in required by splitter <= out2 provided by other_battery
 
+    in required by hokuyo <= out1 provided by splitter
+    in required by jetson <= out2 provided by splitter
+
+    in required by vesc <= out provided by motor_battery
+
+    in required by motor_battery <= out provided by charger
+    in required by charger <= out provided by adapter 
+    in required by other_battery <= out provided by USBMicroCharger
+
+
+    requires charging [`AC_Charging]
+
+    in required by adapter <= out1 provided by power_strip
+    in required by USBMicroCharger <= out2 provided by power_strip
+
+    required charging >= in required by power_strip
+    ignore out3 provided by power_strip
+    ignore out4 provided by power_strip
+    ignore out5 provided by power_strip
+    ignore out6 provided by power_strip
+    
+    
     fit = instance template mcdp {
       provides p1 [`Payload]
       provides p2 [`Payload]
@@ -30,6 +66,8 @@ mcdp {
       provides p5 [`Payload]
       provides p6 [`Payload]
       provides p7 [`Payload]
+      provides p8 [`Payload]
+      provides p9 [`Payload]
       requires payload [`Payload]
   }
  
@@ -38,8 +76,10 @@ mcdp {
   fit.p3 >= tmotor.payload
   fit.p4 >= hokuyo.payload
   fit.p5 >= hub.payload
-  fit.p6 >= batt.payload
-  fit.p7 >= sensor.payload
+  fit.p6 >= motor_battery.payload
+  fit.p7 >= structure_io_sensor.payload
+  fit.p8 >= other_battery.payload
+  fit.p9 >= vesc.payload
   fit.payload <= traxxas_chassis.payload
 
     requires budget [USD]
@@ -50,11 +90,14 @@ mcdp {
         tmotor.budget + 
         hokuyo.budget + 
         hub.budget + 
-        batt.budget + 
+        motor_battery.budget + 
+        other_battery.budget + 
         charger.budget + 
         adapter.budget + 
-        sensor.budget + 
+        structure_io_sensor.budget + 
         traxxas_chassis.budget +
-        vesc.budget
+        vesc.budget +
+        USBMicroCharger.budget +
+        power_strip.budget
     )
 }

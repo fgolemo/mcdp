@@ -40,7 +40,10 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
         return self.elements
 
     def __repr__(self):
-        return "FinitePoset(%d els)" % len(self.elements)
+        if len(self.elements) == 1:
+            return 'FinitePoset(1 el = %s)' % list(self.elements)[0].__repr__()
+        else:
+            return "FinitePoset(%d els)" % len(self.elements)
 
     def get_test_chain(self, n):  # @UnusedVariable
         if not self.elements:

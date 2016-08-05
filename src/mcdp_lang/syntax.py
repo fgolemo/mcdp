@@ -170,8 +170,13 @@ class Syntax():
     get_idn = SyntaxIdentifiers.get_idn
     # load <name>
     LOAD = spk(L('load') | L('`'), CDP.LoadKeyword)
+
     name_poset = sp(get_idn(), lambda t: CDP.PosetName(t[0]))
-    load_poset = sp(LOAD - name_poset, lambda t: CDP.LoadPoset(t[0], t[1]))
+    name_poset_library = sp(get_idn() + L('.') + get_idn(),
+        lambda t: CDP.PosetNameWithLibrary(library=t[0], glyph=t[1], name=t[2]))
+
+    load_poset = sp(LOAD - (name_poset_library | name_poset),
+                    lambda t: CDP.LoadPoset(t[0], t[1]))
 
     # UpperSets(<poset>)
     UPPERSETS = spk(L('UpperSets'), CDP.UpperSetsKeyword)
@@ -283,17 +288,17 @@ class Syntax():
 
     # import statements:
     #    from libname import a, b
-    IMPORT = spk(L('import'), CDP.ImportSymbolsKeywordImport)
-    FROM = spk(L('from'), CDP.ImportSymbolsKeywordFrom)
-    import_libname = sp(get_idn(), lambda t: CDP.ImportSymbolsLibname(t[0]))
-    import_symbol = sp(get_idn(), lambda t: CDP.ImportSymbolsSymbolname(t[0]))
-    import_statement = sp(FROM + import_libname +
-                          IMPORT + import_symbol + ZeroOrMore(SCOMMA + import_symbol),
-                          lambda t:
-                            CDP.ImportSymbols(keyword1=t[0],
-                                              keyword2=t[2],
-                                              libname=t[1],
-                                              symbols=make_list(t[3:], where=t[2].where)))
+#     IMPORT = spk(L('import'), CDP.ImportSymbolsKeywordImport)
+#     FROM = spk(L('from'), CDP.ImportSymbolsKeywordFrom)
+#     import_libname = sp(get_idn(), lambda t: CDP.ImportSymbolsLibname(t[0]))
+#     import_symbol = sp(get_idn(), lambda t: CDP.ImportSymbolsSymbolname(t[0]))
+#     import_statement = sp(FROM + import_libname +
+#                           IMPORT + import_symbol + ZeroOrMore(SCOMMA + import_symbol),
+#                           lambda t:
+#                             CDP.ImportSymbols(keyword1=t[0],
+#                                               keyword2=t[2],
+#                                               libname=t[1],
+#                                               symbols=make_list(t[3:], where=t[2].where)))
 
     valuewithunit_numbers = sp(SyntaxBasics.integer_or_float + unitst,
                                lambda t: CDP.SimpleValue(t[0], t[1]))
@@ -346,8 +351,10 @@ class Syntax():
     # a quoted string
     quoted = sp(dblQuotedString | sglQuotedString, lambda t:t[0][1:-1])
     ndpname = sp(get_idn() | quoted, lambda t: CDP.NDPName(t[0]))
+    ndpname_with_library = sp(get_idn() + L('.') + get_idn(),
+        lambda t: CDP.NDPNameWithLibrary(library=t[0], glyph=t[1], name=t[2]))
 
-    ndpt_load = sp(LOAD - (ndpname | SLPAR - ndpname - SRPAR),
+    ndpt_load = sp(LOAD - (ndpname_with_library | ndpname | SLPAR - ndpname - SRPAR),
                         lambda t: CDP.LoadNDP(t[0], t[1]))
 
 
@@ -364,7 +371,7 @@ class Syntax():
     # new Name ~= instance `Name
     NEW = spk(L('new'), CDP.FromLibraryKeyword)
     dpinstance_from_library_shortcut = \
-        sp(NEW + (ndpname | (SLPAR - ndpname + SRPAR)),
+        sp(NEW + (ndpname_with_library | ndpname | (SLPAR - ndpname + SRPAR)),
                     lambda t:CDP.DPInstanceFromLibrary(t[0], t[1]))
 
     dpinstance_expr = dpinstance_from_type ^ dpinstance_from_library_shortcut

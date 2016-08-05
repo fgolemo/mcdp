@@ -1,17 +1,17 @@
 template mcdp {
-   provides dc [`DC_power]
-   provides endurance [`Endurance]
+   provides dc [`PortableDCPower]
    provides motion [`Motion]
    provides payload [`Payload]
 
    requires budget [USD]
 
-   requires dc [`DC_power]
-   requires charging_time [`ChargingTime]
+   requires in [`DC_Charging]
+
+   requires usbcom [`USBCom]
 
    # uses a barrel charger
-   (required dc).connector >= `barrel_connectors: barrel_2_35mm
+   ((required in).dc).connector >= `barrel_connectors: barrel_2_35mm
+   (required in).duration >= 1 hour
 
    required budget >= 199.99 USD
- 
 }

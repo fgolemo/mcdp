@@ -1,5 +1,5 @@
 mcdp {
-    battery = new Battery
+    battery = new BatteryPower
     solar_panels = new solar_panels
 
     provides power_profile using battery

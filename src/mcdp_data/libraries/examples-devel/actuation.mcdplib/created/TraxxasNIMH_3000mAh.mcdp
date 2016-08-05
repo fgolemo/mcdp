@@ -1,4 +1,0 @@
-mcdp {
-    requires budget >= 11 USD
-    requires payload [`Payload]
-}

@@ -29,8 +29,11 @@ class TemplateForNamedDP():
             try:
                 check_same_interface(v,  proposed)
             except DifferentInterface as e:
-                msg = 'The interface is different.'
-                raise_wrapped(DPSemanticError, e, msg, proposed=proposed, v=v)
+                msg = 'Cannot specialize the template because the interface is different.'
+                raise_wrapped(DPSemanticError, e, msg,
+                              interface=describe_interface(v),
+                              proposed=describe_interface(proposed),
+                              compact=True)
         
         c = context.child()
         for k, v in parameter_assignment.items():
@@ -81,8 +84,9 @@ def check_same_interface(interface, ndp):
                  or missing_resources)
     
     if problems:
-        msg = 'Different interface'
-        raise_desc(DifferentInterface, msg, interface=interface, ndp=ndp)
+        msg = 'Different number of functions and resources.'
+        raise_desc(DifferentInterface, msg)
+
 
     tu = get_types_universe()
 
@@ -105,7 +109,12 @@ def check_same_interface(interface, ndp):
             raise_desc(DPSemanticError, e, msg, r=r, R1=R1, R2=R2)
 
 
-
+def describe_interface(ndp):
+    fnames = ndp.get_fnames()
+    ftypes = ndp.get_ftypes(fnames)
+    rnames = ndp.get_rnames()
+    rtypes = ndp.get_rtypes(rnames)
+    return "fnames: %s\nftypes: %s\nrnames: %s\nrtypes: %s" % (fnames, ftypes, rnames, rtypes)
 
 
 

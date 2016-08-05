@@ -9,6 +9,7 @@ from mcdp_posets.poset_product import PosetProduct
 from mocdp.comp.context import is_fun_node_name
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPSemanticError
+from mcdp_posets.space import NotEqual
 
 __all__ = [
     'CompositeNamedDP',
@@ -234,7 +235,12 @@ def check_consistent_data(names, fnames, rnames, connections):
 
             R = names[c.dp1].get_rtype(c.s1)
             F = names[c.dp2].get_ftype(c.s2)
-            tu.check_equal(R, F)
+
+            try:
+                tu.check_equal(R, F)
+            except NotEqual as e:
+                msg = 'Invalid connection %s' % c.__repr__()
+                raise_wrapped(ValueError, e, msg, R=R, F=F)
 
 
         except ValueError as e:

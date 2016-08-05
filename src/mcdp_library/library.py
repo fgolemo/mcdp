@@ -1,7 +1,7 @@
 from .utils.locate_files_imp import locate_files
 from contextlib import contextmanager
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, raise_wrapped, format_obs
 from copy import deepcopy
 from mcdp_dp.primitive import PrimitiveDP
 from mcdp_lang import parse_ndp, parse_poset
@@ -47,10 +47,12 @@ class MCDPLibrary():
     ext_explanation2 = 'expl2.md'  # after the model
     ext_doc_md = 'md'  # library document
 
+    exts_images = ["png", 'jpg', 'PNG', 'JPG', 'JPEG', 'jpeg']
     all_extensions = [ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps,
-                      ext_explanation1, ext_explanation2, ext_doc_md, "png", 'jpg', 'PNG', 'JPG']
+                      ext_explanation1, ext_explanation2, ext_doc_md] + exts_images
 
-    def __init__(self, cache_dir=None, file_to_contents=None, search_dirs=None):
+    def __init__(self, cache_dir=None, file_to_contents=None, search_dirs=None,
+                 load_library_hooks=None):
         """ 
             IMPORTANT: modify clone() if you add state
         """
@@ -70,12 +72,23 @@ class MCDPLibrary():
 
         self.search_dirs = search_dirs
 
+        if load_library_hooks is None:
+            load_library_hooks = []
+        self.load_library_hooks = load_library_hooks
+
     def get_images_paths(self):
         """ Returns a list of paths to search for images assets. """
-        return list(self.search_dirs)
+        dirs = set()
+        for basename, d in self.file_to_contents.items():
+            ext = os.path.splitext(basename)[1][1:]
+            if ext in MCDPLibrary.exts_images:
+                dirname = os.path.dirname(d['realpath'])
+                dirs.add(dirname)
+        return list(dirs)
+#         return list(self.search_dirs)
 
     def clone(self):
-        fields = ['file_to_contents', 'cache_dir', 'search_dirs']
+        fields = ['file_to_contents', 'cache_dir', 'search_dirs', 'load_library_hooks']
         contents = {}
         for f in fields:
             if not hasattr(self, f):
@@ -204,6 +217,7 @@ class MCDPLibrary():
         context.load_posets_hooks = [self.load_poset]
         context.load_primitivedp_hooks = [self.load_primitivedp]
         context.load_template_hooks = [self.load_template]
+        context.load_library_hooks = list(self.load_library_hooks)
         return context
 
     @contract(returns='set(str)')
@@ -247,6 +261,7 @@ class MCDPLibrary():
                 return True
         return False
 
+    @contract(basename=str)
     def _get_file_data(self, basename):
         """ returns dict with data, realpath """
 
@@ -257,8 +272,13 @@ class MCDPLibrary():
         else:
             ext = os.path.splitext(basename)[1].replace('.', '')
             available = sorted(self._list_with_extension(ext))
-            raise_desc(DPSemanticError, 'Could not find file in library.',
-                       filename=basename, available=available)
+
+            available = ", ".join(available)
+
+            msg = ('Could not find file %r. Available files with %r extension: %s.' %
+                   (basename, ext, available))
+            print msg
+            raise_desc(DPSemanticError, msg)
         found = self.file_to_contents[match]
         return found
 
@@ -268,12 +288,17 @@ class MCDPLibrary():
         if not os.path.exists(d):
             raise_desc(ValueError, 'Directory does not exist', d=d)
 
-        self._add_search_dir(d)
+        try:
+            self._add_search_dir(d)
+        except DPSemanticError as e:
+            msg = 'Error while adding search dir %r.' % d
+            raise_wrapped(DPSemanticError, e, msg, search_dirs=self.search_dirs,
+                          compact=True)
 
     def _add_search_dir(self, d):
         """ Adds the directory to the search directory list. """
 
-        ignore_patterns = ['out-']
+        ignore_patterns = ['/out/', '/out-html/']
 
         def should_ignore(f):
             for i in ignore_patterns:
@@ -298,7 +323,33 @@ class MCDPLibrary():
         # data = codecs.open(f, encoding='utf-8').read()
         data = open(f).read()
         realpath = os.path.realpath(f)
-        res = dict(data=data, realpath=realpath)
+        res = dict(data=data, realpath=realpath, path=f)
+
+        strict = False
+        if basename in self.file_to_contents:
+            realpath1 = self.file_to_contents[basename]['realpath']
+            path1 = self.file_to_contents[basename]['path']
+            if res['realpath'] == realpath1:
+                msg = 'File %r reached twice.' % basename
+                if not strict:
+                    logger.warning(msg + "\n" +
+                                   format_obs(dict(path1=path1,
+                                              path2=res['path'])))
+                else:
+                    raise_desc(DPSemanticError, msg,
+                               path1=path1,
+                               path2=res['path'])
+
+            else:
+                msg = 'Found duplicated file %r.' % basename
+                if not strict:
+                    logger.warning(msg + "\n" +
+                                   format_obs(dict(path1=realpath1,
+                                              path2=res['realpath'])))
+                else:
+                    raise_desc(DPSemanticError, msg,
+                               path1=realpath1,
+                               path2=res['realpath'])
         self.file_to_contents[basename] = res
 
 

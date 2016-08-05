@@ -105,7 +105,7 @@ def cndp_flatten(ndp):
     fnames = ndp.get_fnames()
     rnames = ndp.get_rnames()
     names2 = {}
-    connections2 = set()
+    connections2 = []
 
     proxy_functions = defaultdict(lambda: dict())  # proxy[name][fname]
     proxy_resources = defaultdict(lambda: dict())
@@ -126,23 +126,29 @@ def cndp_flatten(ndp):
 
 #         print(' name: %s' % name)
         if isinstance(nn, CompositeNamedDP):
+            nn_connections = nn.get_connections()
             for name2, ndp2 in nn.get_name2ndp().items():
 #                 print(' name2: %s' % name2)
                 assert not name2 in names2
                 isitf, is_fname = is_fun_node_name(name2)
                 isitr, is_rname = is_res_node_name(name2)
-                connected_to_something = is_dp_connected(name2, connections)
+                connected_to_something = is_dp_connected(name2, nn_connections)
                 if (isitf or isitr):
                     # do not add the identity nodes
                     # that represent functions or resources
                     # except if they are unconnected
+
                     if connected_to_something:
                         continue
                     else:
+                        # think of the case where there are a f and r with
+                        # same name
                         if isitf:
-                            use_name = is_fname
+                            use_name = is_fname + '_f'
                         if isitr:
-                            use_name = is_rname
+                            use_name = is_rname + '_r'
+
+                        assert not use_name in names2, use_name
                         names2[use_name] = ndp2
 
                         if isitf:
@@ -152,6 +158,7 @@ def cndp_flatten(ndp):
                             proxy_resources[name][is_rname] = (use_name, ndp2.get_rnames()[0])
 
                 else:
+                    assert not name2 in names2
                     names2[name2] = ndp2
             
             for c in nn.get_connections():
@@ -173,6 +180,7 @@ def cndp_flatten(ndp):
                     new_name = '_%s_pass_through_%s' % (name, c.s2)
                     F = nn.get_name2ndp()[c.dp1].get_ftype(c.s1)
                     ndp_pass = SimpleWrap(Identity(F), fnames=fn, rnames=rn)
+                    assert not new_name in names2
                     names2[new_name] = ndp_pass
                     proxy_functions[name][fn] = (new_name, fn)
                     proxy_resources[name][rn] = (new_name, rn)
@@ -189,7 +197,7 @@ def cndp_flatten(ndp):
                 assert c.s1 in names2[c.dp1].get_rnames()
                 assert c.s2 in names2[c.dp2].get_fnames()
                 c2 = Connection(dp1=c.dp1, s1=c.s1, dp2=c.dp2, s2=c.s2)
-                connections2.add(c2)
+                connections2.append(c2)
         else:
             for fn in nn.get_fnames():
                 proxy_functions[name][fn] = (name, fn)
@@ -197,6 +205,7 @@ def cndp_flatten(ndp):
             for rn in nn.get_rnames():
                 proxy_resources[name][rn] = (name, rn)
 
+            assert not name in names2
             names2[name] = nn
 
     # check that these were correctly generated:
@@ -274,6 +283,6 @@ def cndp_flatten(ndp):
         assert s2_ in names2[dp2_].get_fnames(), (s2_, names2[dp2_].get_fnames())
 
         c2 = Connection(dp1=dp1_, s1=s1_, dp2=dp2_, s2=s2_) 
-        connections2.add(c2)
+        connections2.append(c2)
 
     return CompositeNamedDP.from_parts(names2, connections2, fnames, rnames)

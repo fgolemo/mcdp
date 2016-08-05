@@ -34,8 +34,8 @@ mcdp {
         (provided out4).amp_max
 
     ((required in).dc).amps >= total_current
-    ((required in).dc).voltage >= `DC_voltages: v5
-    ((required in).dc).connector >= `barrel_connectors: barrel_5mm
+    ((required in).dc).voltage >= `plugs.DC_voltages: v5
+    ((required in).dc).connector >= `plugs.barrel_connectors: barrel_5mm
     (required in).duration >= 0s # XXX
 
     requires budget [USD]

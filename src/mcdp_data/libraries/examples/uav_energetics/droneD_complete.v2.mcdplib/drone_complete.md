@@ -19,7 +19,7 @@ and resources
 * <span class=R>inertial mass</span>;
 * <span class=R>maintenance</span> (number of times the battery needs to be replaced).
 
-<pre class='ndp_graph_templatized'>`Battery_LiPo</pre>
+<pre class='ndp_graph_templatized'>`Battery_LiPo1</pre>
 
 The parameters for the model are the specific energy, the specific cost, and
 the number of cycles:
@@ -51,11 +51,11 @@ required cost >= unit_cost  * num_replacements
 
 The code below is the complete model for the battery:
 
-<pre class='mcdp' id='Battery_LiPo' label='Battery_LiPo.mcdp'></pre>
+<pre class='mcdp' id='Battery_LiPo1' label='Battery_LiPo1.mcdp'></pre>
 
 This is a graphical representation of the network of constraints:
 
-<pre class='ndp_graph_expand'>`Battery_LiPo</pre>
+<pre class='ndp_graph_expand'>`Battery_LiPo1</pre>
 
 ### Actuation
 

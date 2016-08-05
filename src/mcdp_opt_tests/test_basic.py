@@ -12,19 +12,23 @@ from mcdp_posets.uppersets import UpperSet
 from mcdp_report.gdc import STYLE_GREENREDSYM
 from mcdp_report.gg_ndp import gvgen_from_ndp
 from mcdp_report.gg_utils import gg_figure
-from mcdp_web.main import load_libraries
 from mocdp.comp.composite_templatize import cndp_templatize_children
 from reprep import Report
 import os
+from mcdp_library.libraries import Librarian
 
-def get_test_library(libnames):
+def get_test_library2(libnames):
     package = dir_from_package_name('mcdp_data')
-    libraries = os.path.join(package, 'libraries')
-    d = load_libraries(libraries)
+    all_libraries = os.path.join(package, 'libraries')
+
+    librarian = Librarian()
+    librarian.find_libraries(all_libraries)
+
     
     l = MCDPLibrary()
     for lib in libnames:
-        path = d[lib]['path']
+        data = librarian.libraries[lib]
+        path = data['path']
         l.add_search_dir(path)
 
     l.use_cache_dir('out/mcdp_opt_tests_cache')
@@ -33,7 +37,7 @@ def get_test_library(libnames):
 @comptest
 def opt_basic_1():
     libnames = ['actuation']
-    library = get_test_library(libnames)
+    library = get_test_library2(libnames)
 
     options = library.list_ndps()
 #     options.remove('DaguChassis')

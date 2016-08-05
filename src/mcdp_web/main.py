@@ -24,6 +24,7 @@ from quickapp import QuickAppBase
 from wsgiref.simple_server import make_server
 import mocdp
 import os
+from mcdp_library.libraries import Librarian
 
 
 __all__ = [
@@ -36,7 +37,9 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
     def __init__(self, dirname):
         self.dirname = dirname
-        self.libraries = load_libraries(self.dirname)
+
+        self._load_libraries()
+
 
         logger.info('Found %d libraries underneath %r.' %
                         (len(self.libraries), self.dirname))
@@ -103,16 +106,28 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         libraries = self.list_libraries()
         return {'libraries': sorted(libraries)}
 
-
     def _refresh_library(self, _request):
         # nuclear option
-        self.libraries = load_libraries(self.dirname)
+        self._load_libraries()
 
         for l in [_['library'] for _ in self.libraries.values()]:
             l.delete_cache()
 
         from mcdp_report.gdc import get_images
+        assert hasattr(get_images, 'cache')  # in case it changes later
         get_images.cache = {}
+
+    def _load_libraries(self):
+        """ Loads libraries in the "self.dirname" dir. """
+        self.librarian = Librarian()
+        self.librarian.find_libraries(self.dirname)
+        self.libraries = self.librarian.get_libraries()
+        for _short, data in self.libraries.items():
+            l = data['library']
+            path = data['path']
+            cache_dir = os.path.join(path, '_cached/mcdpweb_cache')
+            l.use_cache_dir(cache_dir)
+
 
     def view_refresh_library(self, request):
         """ Refreshes the current library (if external files have changed) 
@@ -479,36 +494,36 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         self.server = make_server('0.0.0.0', port, app)
         self.server.serve_forever()
 
-
-def load_libraries(dirname):
-    """ Returns a dictionary
-            
-            library_name -> {'path': ...,
-                              'library': ...}
-    """
-    if 'mcdplib' in dirname:
-        short = os.path.splitext(os.path.basename(dirname))[0]
-        l = MCDPLibrary()
-        cache_dir = os.path.join(dirname, '_cached/mcdpweb_cache')
-        l.use_cache_dir(cache_dir)
-        l.add_search_dir(dirname)
-        return {short: dict(path=dirname, library=l)}
-
-    libraries = locate_files(dirname, "*.mcdplib",
-                             followlinks=False,
-                             include_directories=True,
-                             include_files=False)
-    res = {}
-    for path in libraries:
-        library_name = os.path.splitext(os.path.basename(path))[0]
-
-        l = MCDPLibrary()
-        cache_dir = os.path.join(path, '_cached/mcdpweb_cache')
-        l.use_cache_dir(cache_dir)
-        l.add_search_dir(path)
-
-        res[library_name] = dict(path=path, library=l)
-    return res
+#
+# def load_libraries(dirname):
+#     """ Returns a dictionary
+#
+#             library_name -> {'path': ...,
+#                               'library': ...}
+#     """
+#     if 'mcdplib' in dirname:
+#         short = os.path.splitext(os.path.basename(dirname))[0]
+#         l = MCDPLibrary()
+#         cache_dir = os.path.join(dirname, '_cached/mcdpweb_cache')
+#         l.use_cache_dir(cache_dir)
+#         l.add_search_dir(dirname)
+#         return {short: dict(path=dirname, library=l)}
+#
+#     libraries = locate_files(dirname, "*.mcdplib",
+#                              followlinks=False,
+#                              include_directories=True,
+#                              include_files=False)
+#     res = {}
+#     for path in libraries:
+#         library_name = os.path.splitext(os.path.basename(path))[0]
+#
+#         l = MCDPLibrary()
+#         cache_dir = os.path.join(path, '_cached/mcdpweb_cache')
+#         l.use_cache_dir(cache_dir)
+#         l.add_search_dir(path)
+#
+#         res[library_name] = dict(path=path, library=l)
+#     return res
 
 
 class MCDPWeb(QuickAppBase):

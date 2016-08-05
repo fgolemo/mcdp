@@ -1,30 +1,26 @@
 mcdp {
-   provides dc [`DC_power]
+   provides out [`PortableDCPower]
    provides computation [flops]
    provides motion [`Motion]
    provides payload [`Payload]
 
    requires budget [USD]
-   requires ac [`AC_power]
-   provides endurance [`Endurance]
-   requires charging_time [`ChargingTime]
+   requires in [`AC_Charging] 
 
    (provided motion).velocity <= 5 m/s
    budget >= 10000 USD
 
    computer = instance template mcdp {
      provides computation [flops]
-     requires dc [`DC_power]
+     requires dc [`PortableDCPower]
       # todo
    }
    provided computation <= computation provided by computer
 
    battery = instance template mcdp {
-     provides dc1 [`DC_power]
-     provides dc2 [`DC_power]
-     provides endurance [`Endurance]
-     requires charging_time [`ChargingTime]
-     requires ac [`AC_power]
+     provides out1 [`PortableDCPower]
+     provides out2 [`PortableDCPower]
+     requires in [`AC_Charging]
      # todo
    }
    mass = (provided payload).mass
@@ -36,9 +32,7 @@ mcdp {
 
    mass <= 10 kg
 
-   endurance provided by battery >= provided endurance
-   dc1 provided by battery >= dc required by computer
-   dc2 provided by battery >= provided dc
-   charging_time required by battery <= required charging_time
-   ac required by battery <= required ac        
+   out1 provided by battery >= dc required by computer
+   out2 provided by battery >= provided out
+   in required by battery <= required in        
 }

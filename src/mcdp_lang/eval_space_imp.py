@@ -132,6 +132,12 @@ def eval_space_finite_poset(r, context):  # @UnusedVariable
 
 
 def eval_poset_load(r, context):
-    load_arg = r.name.value
-    return context.load_poset(load_arg)
-
+    if isinstance(r.name, CDP.PosetName):
+        load_arg = r.name.value
+        return context.load_poset(load_arg)
+    if isinstance(r.name, CDP.PosetNameWithLibrary):
+        libname = r.name.library
+        name = r.name.name
+        library = context.load_library(libname)
+        return library.load_poset(name)
+    raise NotImplementedError(r.name)
