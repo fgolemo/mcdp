@@ -8,7 +8,7 @@ from mocdp.comp.wrap import SimpleWrap
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 from _collections import defaultdict
 from mcdp_dp.dp_identity import Identity
-from contracts.interface import add_prefix
+from mocdp.comp.context_functions import is_dp_connected
 
 __all__ = [
     'cndp_flatten',
@@ -129,14 +129,28 @@ def cndp_flatten(ndp):
             for name2, ndp2 in nn.get_name2ndp().items():
 #                 print(' name2: %s' % name2)
                 assert not name2 in names2
-                isitf, _ = is_fun_node_name(name2)
-                isitr, _ = is_res_node_name(name2)
-                if isitf or isitr:
+                isitf, is_fname = is_fun_node_name(name2)
+                isitr, is_rname = is_res_node_name(name2)
+                connected_to_something = is_dp_connected(name2, connections)
+                if (isitf or isitr):
                     # do not add the identity nodes
                     # that represent functions or resources
                     # except if they are unconnected
+                    if connected_to_something:
+                        continue
+                    else:
+                        if isitf:
+                            use_name = is_fname
+                        if isitr:
+                            use_name = is_rname
+                        names2[use_name] = ndp2
 
-                    continue
+                        if isitf:
+                            proxy_functions[name][is_fname] = (use_name, ndp2.get_fnames()[0])
+
+                        if isitr:
+                            proxy_resources[name][is_rname] = (use_name, ndp2.get_rnames()[0])
+
                 else:
                     names2[name2] = ndp2
             

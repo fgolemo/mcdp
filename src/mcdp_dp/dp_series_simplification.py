@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_posets import PosetProduct
-from mocdp.exceptions import DPInternalError, mcdp_dev_warning
+from mocdp.exceptions import DPInternalError, mcdp_dev_warning, do_extra_checks
 from multi_index.get_it_test import compose_indices, get_id_indices
 
 __all__ = [
@@ -24,21 +24,31 @@ class SeriesSimplificationRule():
 
     def execute(self, dp1, dp2):
         """ Returns the simplified version. """
-        # check that everything is correct
-        dp0 = Series(dp1, dp2)
         try:
             res = self._execute(dp1, dp2)
+        except DPInternalError:
+            raise
         except BaseException as e:
             msg = 'Error while executing Series simplification rule.'
-            raise_wrapped(DPInternalError, e, msg, dp1=dp1.repr_long(),
-                          dp2=dp2.repr_long(), rule=self)
+            raise_wrapped(DPInternalError, e, msg, rule=self)
+#                           dp1=dp1.repr_long(),
+#                           dp2=dp2.repr_long(),
 
-        try:
-            check_same_spaces(dp0, res)
-        except AssertionError as e:
-            msg = 'Invalid Series simplification rule.'
-            raise_wrapped(DPInternalError, e, msg, dp1=dp1.repr_long(),
-                          dp2=dp2.repr_long(), rule=self, res=res.repr_long())
+#         print('\n\nExecuting simplification %s' % (type(self).__name__))
+#         print('dp1----\n%s' % dp1.repr_long())
+#         print('dp2----\n%s' % dp2.repr_long())
+#         print('result-----\n%s' % res.repr_long())
+
+
+        if do_extra_checks():
+            dp0 = Series(dp1, dp2)
+            try:
+                check_same_spaces(dp0, res)
+            except AssertionError as e:
+                msg = 'Invalid Series simplification rule.'
+                raise_wrapped(DPInternalError, e, msg, rule=self)
+#                           dp1=dp1.repr_long(),
+#                           dp2=dp2.repr_long(), rule=self, res=res.repr_long())
         return res
 
     @abstractmethod
@@ -222,30 +232,11 @@ def equiv_to_identity(dp):
         if s == ():
             return True
     return False
-#
-# def is_permutation(dp):
-#     from mcdp_dp.dp_flatten import Mux
-#     if not isinstance(dp, Mux):
-#         return False
-#
-#     if dp.coords == [1, 0]:
-#         return True
-#     # TODO: more options
-#     return False
-# def is_permutation_invariant(dp):
-#     from mcdp_dp import Product, Sum, Min, Max
-#     if isinstance(dp, (Max, Min, Sum, Product)):
-#         return True
-#     # TODO: more options
-#     return False
 
 def is_equiv_to_terminator(dp):
     from mcdp_dp.dp_terminator import Terminator
     if isinstance(dp, Terminator):
         return True
-#     from mcdp_dp.dp_flatten import Mux
-#     if isinstance(dp, Mux) and dp.coords == []:
-#         return True
     return False
 
 rules = [
@@ -263,7 +254,7 @@ def make_series(dp1, dp2):
 
     # Series(X(F,R), Terminator(R)) => Terminator(F)
     # but X not loop
-#     from mcdp_dp.dp_loop import DPLoop0
+
     if is_equiv_to_terminator(dp2) and isinstance(dp1, Mux):
 
         from mcdp_dp.dp_terminator import Terminator
@@ -358,7 +349,8 @@ def make_series(dp1, dp2):
 
         res = make_series(m2, make_parallel(rest, dp2.dp2))
 
-        check_same_spaces(Series(dp1, dp2), res)
+        if do_extra_checks():
+            check_same_spaces(Series(dp1, dp2), res)
         return res
 
     if isinstance(dp1, Mux) and isinstance(dp2, Parallel) \
@@ -379,7 +371,8 @@ def make_series(dp1, dp2):
 
         res = make_series(m2, make_parallel(dp2.dp1, rest))
 
-        check_same_spaces(Series(dp1, dp2), res)
+        if do_extra_checks():
+            check_same_spaces(Series(dp1, dp2), res)
         return res
 
 

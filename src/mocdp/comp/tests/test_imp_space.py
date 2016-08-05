@@ -10,6 +10,8 @@ from mocdp.comp.composite_makecanonical import cndp_makecanonical
 from mocdp.comp.recursive_name_labeling import (get_imp_as_recursive_dict,
     get_names_used, label_with_recursive_names, ndp_make, MakeArguments)
 from contracts import contract
+from mocdp.comp.interfaces import NotConnected
+
 @contract(a=MakeArguments)
 def make_root(a):
     print('make_root(%s)' % a.__str__())
@@ -116,6 +118,12 @@ def test_imp_dict_1(id_ndp, ndp):
     if '_inf' in id_ndp:  # infinite
         return
     label_with_recursive_names(ndp)
+    try:
+        ndp.check_fully_connected()
+    except NotConnected:
+        print('Skipping test_imp_dict_1 because %r not connected.' % id_ndp)
+        return
+
     dp0 = ndp.get_dp()
     F = dp0.get_fun_space()
     I = dp0.get_imp_space()

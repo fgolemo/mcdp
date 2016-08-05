@@ -121,8 +121,7 @@ class CompositeNamedDP(NamedDP):
             self.check_fully_connected()
         except NotConnected as e:
             msg = 'Cannot abstract because not all subproblems are connected.'
-            raise_wrapped(DPSemanticError, e, msg, compact=True,
-                          self_=self.repr_long())
+            raise_wrapped(DPSemanticError, e, msg, compact=True)
 
         from mocdp.comp.composite_abstraction import cndp_abstract
         res = cndp_abstract(self)

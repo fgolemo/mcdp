@@ -21,8 +21,8 @@ outputs. It requires a Raspberry PI to work as well as an extra DC power input.
 [Adafruit_dc_motor_hat]: https://www.adafruit.com/product/2348
 
 
-<pre class='mcdp' id='adafruit_dc_hat' label='adafruit_dc_hat.mcdp'></pre>
+<pre class='mcdp' id='AdafruitDCHat' label='AdafruitDCHat.mcdp'></pre>
 
 
-<pre class='ndp_graph_templatized'>`adafruit_dc_hat</pre>
-<pre class='ndp_graph_enclosed'>`adafruit_dc_hat</pre>
+<pre class='ndp_graph_templatized'>`AdafruitDCHat</pre>
+<pre class='ndp_graph_enclosed'>`AdafruitDCHat</pre>

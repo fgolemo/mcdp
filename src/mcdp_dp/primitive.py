@@ -275,6 +275,7 @@ class PrimitiveDP(WithInternalLog):
         return '%s(%s→%s)' % (type(self).__name__, self.F, self.R)
 
     def _add_extra_info(self):
+        return ""
         s = ""
 
         if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
@@ -325,6 +326,8 @@ class PrimitiveDP(WithInternalLog):
         s2 = '   [F = %s  R = %s  M = %s  S = %s]' % (clip(self.F, 13),
                        clip(self.R, 10), clip(self.M, 15),
                            clip(S, 28))
+
+        s2 = ""
 
         head = s + ' ' * (n - ulen(s) - ulen(s2)) + s2
 

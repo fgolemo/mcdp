@@ -175,7 +175,6 @@ class DPLoop2(PrimitiveDP):
         s = 'DPLoop2:   %s -> %s\n' % (self.get_fun_space(), self.get_res_space())
         return s + indent(self.dp1.repr_long(), 'L ')
 
-
     def solve(self, f1):
         t = Tracer()
         res = self.solve_trace(f1, t)
@@ -203,7 +202,6 @@ class DPLoop2(PrimitiveDP):
 
         if do_extra_checks():
             F1.belongs(f1)
-
 
         UR = UpperSets(R)
 
@@ -243,7 +241,6 @@ class DPLoop2(PrimitiveDP):
                     t.log(' solution is %s' % (UR.format(sip)))
                     break
 
-
         res_all = S[-1].s
 
         trace.log('res_all: %s' % UR.format(res_all))
@@ -265,7 +262,6 @@ def dploop2_iterate(dp0, f1, R, S, trace):
     converged = set()  # subset of solutions for which they converged
     nextit = set()
     # find the set of all r2s
-#     r2s = set([r2 for (r1, r2) in S.minimals])
 
     for (r1, r2) in S.minimals:
         # what are the results of solve(f1, f2)?
@@ -286,6 +282,6 @@ def dploop2_iterate(dp0, f1, R, S, trace):
 
     nextit = R.Us(poset_minima(nextit, R.leq))
     converged = R.Us(poset_minima(converged, R.leq))
-    # print('iterations: %s' % UR.format(res))
+
     return nextit, converged
 
