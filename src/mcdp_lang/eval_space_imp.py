@@ -138,6 +138,13 @@ def eval_poset_load(r, context):
     if isinstance(r.name, CDP.PosetNameWithLibrary):
         libname = r.name.library
         name = r.name.name
+
         library = context.load_library(libname)
+
+#         try:
+#
+#         except (DPSemanticError, NotSuchLibrary) as e:
+#             msg = 'Could not load library %r.' % libname
+#             raise_wrapped(DPSemanticError, e, msg)
         return library.load_poset(name)
     raise NotImplementedError(r.name)

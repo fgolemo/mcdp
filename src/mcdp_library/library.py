@@ -1,7 +1,7 @@
 from .utils.locate_files_imp import locate_files
 from contextlib import contextmanager
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped, format_obs
+from contracts.utils import format_obs, raise_desc, raise_wrapped
 from copy import deepcopy
 from mcdp_dp.primitive import PrimitiveDP
 from mcdp_lang import parse_ndp, parse_poset
@@ -12,10 +12,10 @@ from mocdp.comp.context import Context, ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.exceptions import DPSemanticError, extend_with_filename
+from mocdp.memoize_simple_imp import memoize_simple
 import os
 import shutil
 import sys
-
 
 
 __all__ = [
@@ -118,26 +118,31 @@ class MCDPLibrary():
             if os.path.exists(self.cache_dir):
                 shutil.rmtree(self.cache_dir)
 
+    @memoize_simple
     @contract(returns=NamedDP)
     def load_ndp(self, id_ndp):
         return self._load_generic(id_ndp, MCDPLibrary.ext_ndps,
                                   MCDPLibrary.parse_ndp)
 
+    @memoize_simple
     @contract(returns=Poset)
     def load_poset(self, id_poset):
         return self._load_generic(id_poset, MCDPLibrary.ext_posets,
                                   MCDPLibrary.parse_poset)
 
+    @memoize_simple
     @contract(returns=ValueWithUnits)
     def load_constant(self, id_poset):
         return self._load_generic(id_poset, MCDPLibrary.ext_values,
                                   MCDPLibrary.parse_constant)
 
+    @memoize_simple
     @contract(returns=PrimitiveDP)
     def load_primitivedp(self, id_primitivedp):
         return self._load_generic(id_primitivedp, MCDPLibrary.ext_primitivedps,
                                   MCDPLibrary.parse_primitivedp)
 
+    @memoize_simple
     @contract(returns=TemplateForNamedDP)
     def load_template(self, id_ndp):
         return self._load_generic(id_ndp, MCDPLibrary.ext_templates,
@@ -158,7 +163,6 @@ class MCDPLibrary():
             # maybe we should clone
             l = self.clone()
             logger.debug('Parsing %r' % (name))
-#             logger.debug('Parsing %r (%s) %s' % (name, realpath, parsing))
             res = parsing(l, data, realpath)
             setattr(res, ATTR_LOAD_NAME, name)
             return res

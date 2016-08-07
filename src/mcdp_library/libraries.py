@@ -1,8 +1,9 @@
-from mcdp_library.utils.locate_files_imp import locate_files
-from contracts.utils import raise_desc
-from mcdp_library.library import MCDPLibrary
-import os
 from contracts import contract
+from contracts.utils import raise_desc
+from .library import MCDPLibrary
+from .utils import locate_files
+from mocdp.exceptions import DPSemanticError
+import os
 
 
 __all__ = [
@@ -10,8 +11,8 @@ __all__ = [
     'NotSuchLibrary',
 ]
 
-class NotSuchLibrary(Exception):
-    pass
+# class NotSuchLibrary(Exception):
+#     pass
 
 class Librarian():
     
@@ -70,12 +71,11 @@ class Librarian():
             for basename, d in allimages.items():
                 if not basename in l.file_to_contents:
                     l.file_to_contents[basename] = d
-        
-
-
 
     @contract(dirname=str, returns='tuple(str, dict)')
     def _load_entry(self, dirname):
+        if dirname == '.':
+            dirname = os.path.realpath(dirname)
         library_name = os.path.splitext(os.path.basename(dirname))[0]
         library_name = library_name.replace('.', '_')
 
@@ -91,8 +91,8 @@ class Librarian():
         """ hook to pass to MCDPLibrary instances to find their sisters. """
         if not libname in self.libraries:
             s = ", ".join(sorted(self.libraries))
-            msg = 'Cannot find library %r. Available: %s' % (libname, s)
-            raise_desc(NotSuchLibrary, msg)
+            msg = 'Cannot find library %r. Available: %s.' % (libname, s)
+            raise_desc(DPSemanticError, msg)
         l = self.libraries[libname]['library']
         return l
      
@@ -110,9 +110,6 @@ class Librarian():
             if rp(data['path']) == rp(dirname):
                 return data['library']
         # otherwise load it
-        # Note this
+        # Note this does not add it to the list
         _short, data = self._load_entry(dirname)
         return data['library']
-
-
-

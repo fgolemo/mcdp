@@ -7,7 +7,7 @@ from mcdp_report.utils import safe_makedirs
 from system_cmd.meat import system_cmd_result
 from system_cmd.structures import CmdException
 from mcdp_library.utils.locate_files_imp import locate_files
-from mcdp_web.utils.memoize_simple_imp import memoize_simple
+from mocdp.memoize_simple_imp import memoize_simple
 
 __all__ = ['GraphDrawingContext']
 

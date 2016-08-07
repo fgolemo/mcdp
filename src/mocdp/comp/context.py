@@ -135,6 +135,9 @@ class Context():
 
     def _load_hooks(self, load_arg, hooks, expected):
         errors = []
+        if not hooks:
+            msg = 'Could not load %r because no loading hooks provided.' % load_arg
+            raise_desc(DPSemanticError, msg)
         for hook in hooks:
             try:
                 res = hook(load_arg)
@@ -143,13 +146,14 @@ class Context():
                     raise_desc(DPSemanticError, msg, res=res, expected=expected)
                 return res
             except DPSemanticError as e:
-                errors.append(e)
-        if len(hooks) == 1:
-            raise errors[0]
-        else:
-            s = "\n\n".join(map(str, errors))
-            msg = 'Could not load: \n%s' % s
-            raise DPSemanticError(msg)
+                if len(hooks) == 1:
+                    raise
+                else:
+                    errors.append(e)
+
+        s = "\n\n".join(map(str, errors))
+        msg = 'Could not load %r: \n%s' % (load_arg, s)
+        raise DPSemanticError(msg)
 
 
     @contract(s='str', dp='str', returns=CFunction)

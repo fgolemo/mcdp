@@ -243,7 +243,8 @@ def do_plots(logger, model_name, plots, outdir, extra_params, maindir, extra_dir
         librarian.find_libraries(e)
 
     library = librarian.get_library_by_dir(maindir)
-    library.use_cache_dir(cache_dir)
+    if cache_dir is not None:
+        library.use_cache_dir(cache_dir)
 
 
     filename = model_name + '.mcdp'

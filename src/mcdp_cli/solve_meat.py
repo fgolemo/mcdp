@@ -1,23 +1,27 @@
 # -*- coding: utf-8 -*-
-from .query_interpretation import (interpret_string,)
+from .query_interpretation import interpret_string
 from .utils_mkdir import mkdirs_thread_safe
 from contracts.utils import raise_desc, raise_wrapped
+from decent_params.utils.script_utils import UserError
 from mcdp_dp.dp_transformations import get_dp_bounds
+from mcdp_dp.solver import generic_solve
 from mcdp_dp.solver_iterative import solver_iterative
 from mcdp_dp.tracer import Tracer
+from mcdp_library.libraries import Librarian
 from mcdp_posets import NotEqual, PosetProduct, UpperSets, get_types_universe
+from mcdp_posets.poset import NotLeq
+from mcdp_posets.types_universe import express_value_in_isomorphic_space
 from mcdp_report.report import report_dp1, report_ndp1
+from mocdp.comp.recursive_name_labeling import (get_imp_as_recursive_dict,
+    label_with_recursive_names, ndp_make)
 from reprep import Report
 import os
-from mcdp_posets.types_universe import express_value_in_isomorphic_space
-from mocdp.comp.recursive_name_labeling import get_imp_as_recursive_dict, \
-    ndp_make, label_with_recursive_names
 
 
 class ExpectationsNotMet(Exception):
     pass
 
-def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
+def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper, out_dir,
                max_steps, query_strings,
        intervals, _exp_advanced, expect_nres, imp, expect_nimp, plot, do_movie,
 
@@ -33,7 +37,16 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
 
     logger.info('Using output dir %r' % out)
 
-    library, basename, ndp = solve_read_model(dirs=config_dirs, param=model_name)
+    librarian = Librarian()
+    for e in config_dirs:
+        librarian.find_libraries(e)
+
+    library = librarian.get_library_by_dir(maindir)
+    if cache_dir is not None:
+        library.use_cache_dir(cache_dir)
+
+    ndp = library.load_ndp(model_name)
+    basename = model_name
 
     if make:
         label_with_recursive_names(ndp)
@@ -48,7 +61,12 @@ def solve_main(logger, config_dirs, model_name, lower, upper, out_dir,
 
     query = " ".join(query_strings)
     c = library.parse_constant(query)
-
+    tu = get_types_universe()
+    try:
+        tu.check_leq(c.unit, F)
+    except NotLeq as e:
+        msg = 'The value given cannot be converted to functionality space.'
+        raise_wrapped(UserError, e, msg, unit=c.unit, F=F, compact=True)
     fg = express_value_in_isomorphic_space(F, c.value, c.unit)
 
     logger.info('query: %s' % F.format(fg))
@@ -189,23 +207,23 @@ def solve_meat_solve(trace, ndp, dp, fg, intervals, max_steps, _exp_advanced):
             except:
                 raise
     return res, trace
-
-def solve_read_model(dirs, param, library=None):
-#     GlobalConfig.global_load_dir("mocdp")
-
-    model_name = param
-    basename = model_name
-
-    if library is None:
-        from mcdp_library.library import MCDPLibrary
-    
-        library = MCDPLibrary()
-        for d in dirs:
-            library.add_search_dir(d)
-
-    ndp = library.load_ndp(model_name)
-
-    return library, basename, ndp
+#
+# def solve_read_model(dirs, param, library=None):
+# #     GlobalConfig.global_load_dir("mocdp")
+#
+#     model_name = param
+#     basename = model_name
+#
+#     if library is None:
+#         from mcdp_library.library import MCDPLibrary
+#
+#         library = MCDPLibrary()
+#         for d in dirs:
+#             library.add_search_dir(d)
+#
+#     ndp = library.load_ndp(model_name)
+#
+#     return library, basename, ndp
 
 def solve_get_dp_from_ndp(basename, ndp, lower, upper, flatten=True):
     if flatten:

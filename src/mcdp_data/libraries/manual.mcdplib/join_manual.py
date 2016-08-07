@@ -99,7 +99,8 @@ def generate_doc(soup):
                     headings = ['%d' % (j+1) for j in range(20)]
                 elif level == 2:
                     headings =  ['A','B','C','D','E','F','G','H','I','J','K','L',
-                        'M','N','O']
+                        'M','N','O','P','Q','R','S','T','U','V','Z']
+                        
                 else:
                     return ''
 

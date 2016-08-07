@@ -10,7 +10,7 @@ from mocdp import logger
 from mocdp.exceptions import DPSemanticError, mcdp_dev_warning
 import os
 import yaml
-from mcdp_web.utils.memoize_simple_imp import memoize_simple  # XXX: move sooner
+from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
 import tempfile
 
 __all__ = [
@@ -353,6 +353,9 @@ def mcdplib_define_tst_solve(mcdplib, id_test, test_data):  # @UnusedVariable
     
     params['logger'] = logger
     params['config_dirs'] = [mcdplib]
+    params['maindir'] = mcdplib
+    params['cache_dir'] = None
     params['out_dir'] = os.path.join(mcdplib + '.out/%s' % id_test)
     params['make'] = False
+
     solve_main(**params)

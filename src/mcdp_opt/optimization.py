@@ -4,7 +4,7 @@ from mcdp_library import MCDPLibrary
 from mcdp_opt.context_utils import create_context0
 from mcdp_posets import Poset, get_types_universe
 from mcdp_posets.uppersets import UpperSet, upperset_project
-from mcdp_web.utils.memoize_simple_imp import memoize_simple
+from mocdp.memoize_simple_imp import memoize_simple
 from mocdp.comp.context import CResource, get_name_for_fun_node
 from mocdp.comp.interfaces import NotConnected
 from mocdp.exceptions import mcdp_dev_warning
