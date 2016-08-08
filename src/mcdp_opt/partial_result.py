@@ -20,10 +20,10 @@ def get_lower_bound_ndp(context):
     
     # let's remove the new resources that are unconnected
     for rname, name, _ndp in context.iterate_new_resources():
-        assert (name, rname) in unconnected_fun
-        unconnected_fun.remove((name, rname))
-        del context.names[name]
-        context.rnames.remove(rname)
+        if (name, rname) in unconnected_fun:
+            unconnected_fun.remove((name, rname))
+            del context.names[name]
+            context.rnames.remove(rname)
 
     # create a new resource for each unconnected resource
     resource2var = {} # CResource -> str

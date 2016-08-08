@@ -37,6 +37,8 @@ mcdp {
     provides capability [ product(weight: g, energy: J) ]
     
     capability..weight <= 1g
+    capability..energy <= 2J
+    
     
 }
     
@@ -46,7 +48,6 @@ mcdp {
 
 @comptest_fails
 def check_lang_namedtuple4():
-    parse_wrap(Syntax.rvalue_label_indexing, "(capability)..weight ")[0]
 
     parse_ndp("""
     
@@ -54,7 +55,8 @@ mcdp {
 
     provides capability [ product(weight: g, energy: J) ]
     
-    (capability)..weight <= 1g
+    (capability).weight <= 1g
+    # (capability).energy <= 1J
     
 }
     
@@ -71,6 +73,7 @@ mcdp {
     requires capability [ product(weight: g, energy: J) ]
     
     capability..weight >= 1g
+    capability..energy >= 1J
     
 }
     

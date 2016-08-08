@@ -96,6 +96,7 @@ class SyntaxIdentifiers():
         'approxu',
         'import',
         'from',
+        'upperclosure',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -430,9 +431,11 @@ class Syntax():
                     lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1]), t[-1]))
     
     # TODO: how to express empty typed list? "{g}"
-    collection_of_constants = sp(S(L('{')) + constant_value +
+    collection_of_constants1 = sp(S(L('{')) + constant_value +
                                  ZeroOrMore(COMMA + constant_value) + S(L('}')),
                                  lambda t: CDP.Collection(make_list(list(t))))
+    collection_of_constants2 = valuewithunit_minimals
+    collection_of_constants = collection_of_constants1 | collection_of_constants2
 
     # upperclosure <set>
     # ↑ <set>

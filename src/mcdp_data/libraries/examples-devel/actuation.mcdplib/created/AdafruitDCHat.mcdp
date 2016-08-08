@@ -26,6 +26,11 @@ mcdp {
     (provided out2).voltage_max <= 13.5 V
     (provided out3).voltage_max <= 13.5 V
     (provided out4).voltage_max <= 13.5 V
+    (provided out1).freq_max <= 100 Hz
+    (provided out2).freq_max <= 100 Hz
+    (provided out3).freq_max <= 100 Hz
+    (provided out4).freq_max <= 100 Hz
+
 
     total_current =
         (provided out1).amp_max +
@@ -36,7 +41,17 @@ mcdp {
     ((required in).dc).amps >= total_current
     ((required in).dc).voltage >= `plugs.DC_voltages: v5
     ((required in).dc).connector >= `plugs.barrel_connectors: barrel_5mm
-    (required in).duration >= 0s # XXX
+
+    rigid_body1 = max( (provided out1).rigid_body, (provided out2).rigid_body)
+    rigid_body2 = max( (provided out3).rigid_body, (provided out4).rigid_body)
+    rigid_body = max(rigid_body1, rigid_body2)
+    (required in).rigid_body >= rigid_body
+    (required payload).rigid_body >= rigid_body
+
+    endurance1 = max( (provided out1).duration, (provided out2).duration )
+    endurance2 = max( (provided out3).duration, (provided out4).duration )
+    endurance = max(endurance1, endurance2)
+    (required in).duration >= endurance
 
     requires budget [USD]
     budget >= 22.50 USD

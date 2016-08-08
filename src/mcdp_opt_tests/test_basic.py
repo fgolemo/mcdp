@@ -1,21 +1,18 @@
 from comptests.registrar import comptest
 from contracts import contract
-from mcdp_lang.parse_interface import parse_constant, parse_poset
-from mcdp_library import MCDPLibrary
+from mcdp_lang import parse_constant, parse_poset
+from mcdp_library import Librarian, MCDPLibrary
 from mcdp_library.utils import dir_from_package_name
 from mcdp_opt.compare_different_resources import less_resources2
 from mcdp_opt.optimization import Optimization
-from mcdp_posets.nat import Nat
-from mcdp_posets.poset import Poset
-from mcdp_posets.poset_product import PosetProduct
-from mcdp_posets.uppersets import UpperSet
+from mcdp_posets import Nat, Poset, PosetProduct, UpperSet
 from mcdp_report.gdc import STYLE_GREENREDSYM
 from mcdp_report.gg_ndp import gvgen_from_ndp
 from mcdp_report.gg_utils import gg_figure
 from mocdp.comp.composite_templatize import cndp_templatize_children
 from reprep import Report
 import os
-from mcdp_library.libraries import Librarian
+import shutil
 
 def get_test_library2(libnames):
     package = dir_from_package_name('mcdp_data')
@@ -24,22 +21,30 @@ def get_test_library2(libnames):
     librarian = Librarian()
     librarian.find_libraries(all_libraries)
 
-    
     l = MCDPLibrary()
     for lib in libnames:
         data = librarian.libraries[lib]
         path = data['path']
         l.add_search_dir(path)
 
-    l.use_cache_dir('out/mcdp_opt_tests_cache')
+    
+
+    l.load_library_hooks.append(librarian.load_library)
     return l
 
 @comptest
 def opt_basic_1():
     libnames = ['actuation']
     library = get_test_library2(libnames)
+    
+    outdir = 'out/opt_basic_1'
+    
+    library.use_cache_dir(os.path.join(outdir, 'cache'))
 
     options = library.list_ndps()
+    options.remove('RigidBodyAssignID')
+    # XXX: this should not be case-sensitive
+#     options.remove('raspberryPI2')  # does not compile
 #     options.remove('DaguChassis')
     options.remove('IRobotCreate')
     options.remove('YoubotBase')
@@ -48,38 +53,38 @@ def opt_basic_1():
     print('libraries: %s' % libnames)
     print('options: %s' % options)
 
-#     s = """
-#     mcdp = {
-#         design = instance mcdp {
-#             provides motion [`Motion]
-#
-#             motion >= <0.1, 600.0 g>
-#
-#             total_budget = 1000 USD
-#
-#             cost = mcdp {
-#                 provides budget1 [USD]
-#                 provides budget2 [USD]
-#                 provides budget3 [USD]
-#                 provides budget4 [USD]
-#
-#                 budget1+budget2+budget3+budget4 <= total_budget
-#             }
-#
-#             var ac [`AC_charging]
-#         }
-#
-#         design.motion >=
-#         design.ac <=
-#         design.total_budget <= 1000 USD
-#
-#     """
+    initial_string = """
+        mcdp {    
+            provides motion [`Motion]
+            
+            assign_id = instance `RigidBodyAssignID
+            
+            add_budget = instance mcdp {    
+                provides budget1 [USD]
+                provides budget2 [USD]
+                provides budget3 [USD]
+                provides budget4 [USD]
+            
+                requires budget [USD]
+            
+                required budget >= (
+                    provided budget1 + 
+                    provided budget2 +
+                    provided budget3 +
+                    provided budget4 
+                )
+            }
+            
+            requires budget >= budget required by add_budget
+        }
+    """
+    
 
     poset = library.parse_poset
 
 
     flabels, F0s, f0s = zip(*(
-        ('motion', poset('`Motion'), (0.1, 600.0)),
+        ('motion', poset('`Motion'), ('rb1', 0.1, 600.0)),
     ))
 
     rlabels, R0s, r0s = zip(*(
@@ -87,16 +92,24 @@ def opt_basic_1():
         ('budget', poset('USD'), 1000.0),
     ))
 
+    initial = library.parse_ndp(initial_string)
+
     opt = Optimization(library=library, options=options,
                        flabels=flabels, F0s=F0s, f0s=f0s,
-                       rlabels=rlabels, R0s=R0s, r0s=r0s)
+                       rlabels=rlabels, R0s=R0s, r0s=r0s,
+                       initial=initial)
 
     r = Report()
 
     i = 0
-    maxit = 100
+    maxit = 13
+    out_draw_tree = os.path.join(outdir, 'optim_tree')
+    if os.path.exists(out_draw_tree):
+        shutil.rmtree(out_draw_tree)
+
     while opt.states and i <= maxit:
         opt.print_status()
+        opt.draw_tree(out_draw_tree)
         opt.step()
         i += 1
 
@@ -125,9 +138,7 @@ def opt_basic_1():
             msg += '\n num_connection_options: %s' % state.num_connection_options
             s.text('info', msg)
 
-
-
-    fn = 'out/opt_basic_1.html'
+    fn = os.path.join(outdir, 'opt_basic_1.html')
     print fn
     r.to_html(fn)
 

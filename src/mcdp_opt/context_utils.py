@@ -22,22 +22,28 @@ def clone_context(c):
     c2.rnames = list(c.rnames)
     return c2
 
-
 def create_context0(
          flabels, F0s, f0s,
-         rlabels, R0s, r0s):
+         rlabels, R0s, r0s,
+         initial):
 
     for fname, F0, f0 in zip(flabels, F0s, f0s):
         F0.belongs(f0)
     for rname, R0, r0 in zip(flabels, R0s, r0s):
         R0.belongs(r0)
 
-    context = Context()
+#     # No names
+#     assert not initial.get_rnames()
+#     assert not initial.get_fnames()
 
-    for fname, F in zip(flabels, F0s):
-        context.add_ndp_fun_node(fname, F)
+    context = initial.context
 
-    for rname, R in zip(rlabels, R0s):
-        context.add_ndp_res_node(rname, R)
+#     # context = Context()
+#
+#     for fname, F in zip(flabels, F0s):
+#         context.add_ndp_fun_node(fname, F)
+#
+#     for rname, R in zip(rlabels, R0s):
+#         context.add_ndp_res_node(rname, R)
 
     return context

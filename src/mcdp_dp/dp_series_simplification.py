@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .dp_flatten import Mux, get_R_from_F_coords
 from .dp_identity import Identity
 from .dp_parallel import Parallel
@@ -6,8 +7,9 @@ from .dp_series import Series
 from abc import ABCMeta, abstractmethod
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
+from mcdp_dp.dp_terminator import Terminator
 from mcdp_posets import PosetProduct
-from mocdp.exceptions import DPInternalError, mcdp_dev_warning, do_extra_checks
+from mocdp.exceptions import DPInternalError, do_extra_checks, mcdp_dev_warning
 from multi_index.get_it_test import compose_indices, get_id_indices
 
 __all__ = [
@@ -31,8 +33,6 @@ class SeriesSimplificationRule():
         except BaseException as e:
             msg = 'Error while executing Series simplification rule.'
             raise_wrapped(DPInternalError, e, msg, rule=self)
-#                           dp1=dp1.repr_long(),
-#                           dp2=dp2.repr_long(),
 
 #         print('\n\nExecuting simplification %s' % (type(self).__name__))
 #         print('dp1----\n%s' % dp1.repr_long())
@@ -47,8 +47,7 @@ class SeriesSimplificationRule():
             except AssertionError as e:
                 msg = 'Invalid Series simplification rule.'
                 raise_wrapped(DPInternalError, e, msg, rule=self)
-#                           dp1=dp1.repr_long(),
-#                           dp2=dp2.repr_long(), rule=self, res=res.repr_long())
+
         return res
 
     @abstractmethod
@@ -233,8 +232,8 @@ def equiv_to_identity(dp):
             return True
     return False
 
+
 def is_equiv_to_terminator(dp):
-    from mcdp_dp.dp_terminator import Terminator
     if isinstance(dp, Terminator):
         return True
     return False
@@ -256,8 +255,6 @@ def make_series(dp1, dp2):
     # but X not loop
 
     if is_equiv_to_terminator(dp2) and isinstance(dp1, Mux):
-
-        from mcdp_dp.dp_terminator import Terminator
         res = Terminator(dp1.get_fun_space())
         assert res.get_fun_space() == dp1.get_fun_space()
         return res

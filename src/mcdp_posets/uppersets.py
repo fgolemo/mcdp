@@ -8,6 +8,8 @@ from contracts.utils import raise_desc
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 import random
 import itertools
+from mocdp.memoize_simple_imp import memoize_simple
+
 
 
 
@@ -79,23 +81,24 @@ class UpperSets(Poset):
     @contract(P='$Poset')
     def __init__(self, P):
         self.P = P
-        self.top = self.get_top()
-        self.bot = self.get_bottom()
-        if do_extra_checks:
-            self.belongs(self.top)
-            self.belongs(self.bot)
-            assert self.leq(self.bot, self.top)
-            assert not self.leq(self.top, self.bot)  # unless empty
-
+        if do_extra_checks():
+            top = self.get_top()
+            bot = self.get_bottom()
+            self.belongs(top)
+            self.belongs(bot)
+            assert self.leq(bot, top)
+            assert not self.leq(top, bot)  # unless empty
 
     def witness(self):
         w = self.P.witness()
         return UpperSet([w], self.P)
         
+    @memoize_simple
     def get_bottom(self):
         minimals = self.P.get_minimal_elements()
         return UpperSet(minimals, self.P)
 
+    @memoize_simple
     def get_top(self):
         """ The top is the empty set. """
         return UpperSet([], self.P)
@@ -122,21 +125,22 @@ class UpperSets(Poset):
             raise NotEqual(msg)
 
     def check_leq(self, a, b):
-        self.belongs(a)
-        self.belongs(b)
         if a == b:
             return True
-        if a == self.bot:
+        bot = self.get_bottom()
+        top = self.get_top()
+        if a == bot:
             return True
-        if b == self.top:
+        if b == top:
             return True
-        if b == self.bot:
+        if b == bot:
             raise NotLeq('b = my ⊥')
 
-        if a == self.top:
+        if a == top:
             raise NotLeq('a = my ⊤')
 
         self.my_leq_(a, b)
+
     def my_leq_(self, A, B):
         # there exists an a in A that a <= b
         def dominated(b):
@@ -198,7 +202,7 @@ class LowerSets(Poset):
         self.P = P
         self.top = self.get_top()
         self.bot = self.get_bottom()
-        if do_extra_checks:
+        if do_extra_checks():
             self.belongs(self.top)
             self.belongs(self.bot)
             assert self.leq(self.bot, self.top)
@@ -209,6 +213,8 @@ class LowerSets(Poset):
         return LowerSet([w], self.P)
 
     mcdp_dev_warning('need to think about this')
+
+
     def get_top(self):
         maximals = self.P.get_maximal_elements()
         return LowerSet(set(maximals), self.P)
@@ -418,7 +424,8 @@ def upperset_project_map(ur, f):
     assert isinstance(f, Map)
     from mcdp_posets.types_universe import get_types_universe
     tu = get_types_universe()
-    tu.check_equal(ur.P, f.get_domain())
+    if do_extra_checks():
+        tu.check_equal(ur.P, f.get_domain())
     Q = f.get_codomain()
     assert isinstance(Q, Poset)
     minimals = set()

@@ -10,8 +10,13 @@ template mcdp {
    requires usbcom [`USBCom]
 
    # uses a barrel charger
-   ((required in).dc).connector >= `barrel_connectors: barrel_2_35mm
-   (required in).duration >= 1 hour
+   # ((required in).dc).connector >= `barrel_connectors: barrel_2_35mm
+   # (required in).duration >= 1 hour
+   # (required in).voltage >= `DC_voltages: v5 # XXX
+
+   # provides usb out
+
+
 
    required budget >= 199.99 USD
 }

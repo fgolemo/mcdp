@@ -28,4 +28,6 @@ mcdp {
 
    # input is either typeC or typeD (C<=D)
    (required in).socket >= `socket_type: TypeC
+   (required in).frequency >= `AC_frequencies: f50 # XXX
+   (required in).voltage >= `AC_voltages: v110 # XXX
 }

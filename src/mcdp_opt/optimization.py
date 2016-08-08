@@ -1,26 +1,36 @@
 from contracts import contract
-from contracts.utils import raise_wrapped
+from mcdp_dp.dp_limit import Limit
 from mcdp_library import MCDPLibrary
+from mcdp_library.library import ATTR_LOAD_NAME
+from mcdp_opt.compare_different_resources import less_resources2
 from mcdp_opt.context_utils import create_context0
-from mcdp_posets import Poset, get_types_universe
+from mcdp_posets import NotBounded, Poset, get_types_universe
 from mcdp_posets.uppersets import UpperSet, upperset_project
-from mocdp.memoize_simple_imp import memoize_simple
+from mcdp_report import my_gvgen
+from mcdp_report.gg_utils import gg_figure
+from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import CResource, get_name_for_fun_node
 from mocdp.comp.interfaces import NotConnected
+from mocdp.comp.wrap import dpwrap, SimpleWrap
 from mocdp.exceptions import mcdp_dev_warning
-from mcdp_library.library import ATTR_LOAD_NAME
-from mcdp_opt.compare_different_resources import CompareDifferentResources, \
-    less_resources2
+from mocdp.memoize_simple_imp import memoize_simple
+from reprep import Report
+import networkx as nx
+import os
+from mcdp_opt.cachedp import CacheDP
+import gc
+
 _ = UpperSet, CResource, Poset
 
 __all__ = ['Optimization']
 
+
 class Optimization():
 
-    @contract(library=MCDPLibrary)
+    @contract(library=MCDPLibrary, initial=CompositeNamedDP)
     def __init__(self, library, options,
                  flabels, F0s, f0s,
-                 rlabels, R0s, r0s):
+                 rlabels, R0s, r0s, initial):
 
         for _fname, F0, f0 in zip(flabels, F0s, f0s):
             F0.belongs(f0)
@@ -36,17 +46,26 @@ class Optimization():
         self.r0s = r0s
         self.f0s = f0s
         
-        context = create_context0(flabels, F0s, f0s, rlabels, R0s, r0s)
+        context = create_context0(flabels, F0s, f0s, rlabels, R0s, r0s, initial=initial)
 
         from mcdp_opt.optimization_state import OptimizationState
 
+        unconnected = []
         for o in options:
             ndp = library.load_ndp(o)
             try:
                 ndp.check_fully_connected()
             except NotConnected as e:
-                msg = 'The base option %r is not connected.' % o
-                raise_wrapped(ValueError, e, msg, id_ndp=o, compact=True)
+                if o.lower() == "raspberrypi2":
+                    print e
+                unconnected.append(o)
+
+
+        for u in unconnected:
+            options.remove(u)
+
+        print('Removing the unusable options %s' % sorted(unconnected))
+        print('Remaining with %s' % sorted(options))
 
         lower_bounds = {}
         for fname, F0, f0 in zip(flabels, F0s, f0s):
@@ -57,30 +76,106 @@ class Optimization():
         (_R, ur), _tableres = self.get_lower_bounds(ndp, table)
         s0 = OptimizationState(self, options, context, executed=[], forbidden=[],
                                lower_bounds=lower_bounds, ur=ur)
+        s0.creation_order = 0
+        self.num_created = 1
 
+        self.root = s0
         self.states = [s0]
         # connected
         self.done = []
         # impossible
         self.abandoned = []
 
-    @memoize_simple
-    def load_ndp(self, id_ndp):
-        ndp = self.library.load_ndp(id_ndp)
+        # extra ndps not present in library
+        self.additional = {}  # str -> NamedDP
 
-        a = getattr(ndp, ATTR_LOAD_NAME, None)
+        self.iteration = 0
 
-        # TODO: check if there is a loop
-        ndp = ndp.abstract()
-        if a:
-            setattr(ndp, ATTR_LOAD_NAME, a)
-        return ndp
+        # for visualization
+        self.G = nx.DiGraph()
 
-    @memoize_simple
-    def load_dp(self, id_ndp):
-        ndp = self.load_ndp(id_ndp)
-        dp = ndp.get_dp()
-        return dp
+    @contract(s='isinstance(OptimizationState)',
+              s1='isinstance(OptimizationState)')
+    def note_edge(self, s, a, s1):
+        """ Note that there was a state s1 generated that
+            led from s using action a """
+        self.G.add_node(s)
+        self.G.add_node(s1)
+        self.G.add_edge(s, s1, action=a)
+
+    def draw_tree(self, outdir):
+#         out_nodes = os.path.join(outdir, 'nodes')
+#         out_steps = os.path.join(outdir, 'steps')
+#         out = os.path.join(out_steps, 'step%03d' % self.iteration)
+
+        out_nodes = out_steps = out = outdir
+#         for d in [out_nodes, out_steps]:
+#             if os.path.exists(d):
+#                 shutil.rmtree(d)
+
+        if not os.path.exists(out):
+            os.makedirs(out)
+
+        fn = os.path.join(outdir, 'step%03d_tree.html' % self.iteration)
+        gg = self.draw_tree_get_tree()
+        r = Report()
+        gg_figure(r, 'tree', gg, do_png=True, do_dot=False, do_svg=False)
+        print('writing to %r' % fn)
+        r.to_html(fn)
+        
+        for s in self.G.nodes():
+            order = s.creation_order
+            fn = os.path.join(out_nodes, 'node%03d.html' % order)
+            if os.path.exists(fn):
+                continue
+            r = Report()
+
+            from mcdp_opt_tests.test_basic import plot_ndp
+            plot_ndp(r, 'current', s.get_current_ndp(), self.library)
+
+            r.text('msg', s.get_info())
+
+            print('writing to %r' % fn)
+            r.to_html(fn)
+
+
+    def draw_tree_get_tree(self):
+        gg = my_gvgen.GvGen(options="rankdir=TB")
+        n2ggn = {}
+        G = self.G
+        def label_for_node(n):
+            s = '#%s' % n.creation_order
+            s += ' (%d)' % len(n.context.names)
+            return s
+        def label_for_edge(n1, a, n2):  # @UnusedVariable
+            return a.__repr__()
+        def get_ggn_node(n):
+            assert n in G.nodes()
+            if not n in n2ggn:
+#                 preds = G.predecessors(n)
+#                 if preds:
+#                     parent = preds[0]
+#                     parent = get_ggn_node(parent)
+#                 else:
+                parent = None
+                label = label_for_node(n)
+                ggn = gg.newItem(label, parent=parent)
+
+                n2ggn[n] = ggn
+
+            return n2ggn[n]
+
+        for n in G.nodes():
+            get_ggn_node(n)
+
+        for n1, n2 in G.edges():
+            a = G.get_edge_data(n1, n2)['action']
+            gn1 = get_ggn_node(n1)
+            gn2 = get_ggn_node(n2)
+            label = label_for_edge(n1, a, n2)
+            gg.newLink(gn1, gn2, label)
+        return gg
+        
 
     def print_status(self):
         print('open: %3d  done: %3d  abandoned: %3d' % (len(self.states),
@@ -88,25 +183,34 @@ class Optimization():
                                                         len(self.abandoned)))
 
     def step(self):
-        # self.print_status()
-        # if policy ...
+        self.iteration += 1
+
         s = self.states.pop(0)
+        s.info('Popped at iteration %d' % self.iteration)
 
         done, actions = s.iteration()
+
+        s.info('Generated %d actions' % len(actions))
+
 
         if done:
             self.done.append(s)
             assert s in self.done
         else:
             if not actions:
-                # setattr(s, 'msg', 'No actions possible')
-                if not hasattr(s, 'msg'):
-                    s.msg = "No actions available."
+                s.info("No actions available, placing in abandoned")
                 self.abandoned.append(s)
                 assert s in self.abandoned
             else:
                 for i, a in enumerate(actions):
+                    gc.collect()
                     s1 = a(self, s)
+                    s1.info('created using %s' % a)
+                    s1.creation_order = self.num_created
+                    self.num_created += 1
+
+                    self.note_edge(s, a, s1)
+
                     # mark the rest as forbidden
                     rest = [a2 for i2, a2 in enumerate(actions) if i2 != i]
                     s1.forbidden.extend(rest)
@@ -120,17 +224,19 @@ class Optimization():
                         if len(ur.minimals) == 0:
                             msg = 'Unfortunately this is not feasible (%s)' % s1.ur.P
                             msg += '%s' % s1.lower_bounds
-                            s1.msg = msg
-                            print msg
+                            s1.info(msg)
                             self.abandoned.append(s1)
                         else:
                             dominated, by_what = self.is_dominated_by_open(s1)
                             if dominated:
-                                msg = 'Dominated by %s' % by_what
-                                s1.msg = msg
+                                s1.info('Dominated by %s' % by_what)
                                 self.abandoned.append(s1)
                             else:
                                 self.states.append(s1)
+                    else:
+                        s1.info('I was a double')
+
+                s.info('Expanded.')
 
     def is_dominated_by_open(self, s1):
         for a in self.states:
@@ -139,7 +245,7 @@ class Optimization():
         return False, None
 
 
-    def dominates(self ,s1, s2):
+    def dominates(self, s1, s2):
         from mcdp_posets.nat import Nat
         from mcdp_posets.poset_product import PosetProduct
         
@@ -201,8 +307,29 @@ class Optimization():
             Returns a list of (name, fname) that implements R, with lb
             being a lower bound. 
         """
-        type_options = self.get_providers_for_type(R)
         options = []
+        # check that if it is a bottom
+        if len(lb.minimals) == 1:
+            try:
+                bot = R.get_bottom()
+            except NotBounded:
+                pass
+            else:
+                if R.equal(bot, list(lb.minimals)[0]):
+                    # we can provide an "unused" box
+                    dp = Limit(R, bot)
+                    ndp = dpwrap(dp, 'limit', [])
+                    
+                    def sanitize(s):
+                        import re
+                        s = re.sub('[^0-9a-zA-Z]+', '_', s)
+                        return s
+                        
+                    newname = sanitize('limit_%s' % R)
+                    options.append((newname, 'limit'))
+                    self.additional[newname] = ndp
+
+        type_options = self.get_providers_for_type(R)
         for id_ndp, fname in type_options:
             if self.does_provider_provide(id_ndp, fname, R, lb):
                 options.append((id_ndp, fname))
@@ -252,7 +379,35 @@ class Optimization():
             tableres[cresource] = uri
         R = ur.P
         return (R, ur), tableres
-        
+
+    @memoize_simple
+    def load_ndp(self, id_ndp):
+        if id_ndp in self.additional:
+            return self.additional[id_ndp]
+
+        ndp = self.library.load_ndp(id_ndp)
+
+        a = getattr(ndp, ATTR_LOAD_NAME, None)
+
+        # TODO: check if there is a loop
+        ndp = ndp.abstract()
+        if a:
+            setattr(ndp, ATTR_LOAD_NAME, a)
+
+        assert isinstance(ndp, SimpleWrap)
+
+        dp0 = ndp.dp
+        dp_cached = CacheDP(dp0)
+        ndp.dp = dp_cached
+
+        return ndp
+
+    @memoize_simple
+    def load_dp(self, id_ndp):
+        ndp = self.load_ndp(id_ndp)
+        dp0 = ndp.get_dp()
+        # dp = CacheDP(dp0)
+        return dp0
         
         
         

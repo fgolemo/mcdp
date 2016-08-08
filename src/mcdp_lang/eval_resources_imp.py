@@ -34,6 +34,7 @@ def eval_rvalue(rvalue, context):
 
         constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
                      CDP.Top, CDP.Bottom, CDP.Maximals, CDP.Minimals)
+
         if isinstance(rvalue, constants):
             res = eval_constant(rvalue, context)
             assert isinstance(res, ValueWithUnits)

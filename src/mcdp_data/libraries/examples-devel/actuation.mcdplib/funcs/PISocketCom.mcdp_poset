@@ -1,0 +1,5 @@
+product(
+    tag: S(PiSocketCom),
+    duration: s,
+    rigid_body: `RigidBodyID
+)

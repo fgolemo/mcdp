@@ -10,7 +10,8 @@ mcdp {
     # We require that the input is european or more
     # and that it provides a good amount of power (take)
     in >= < 0 V , take(out, 1) >
-
+    take(out, 0) <= Top V
+    
     # We can only provide the american output
     out <= < 100 V, Top A>
 }

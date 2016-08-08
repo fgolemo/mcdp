@@ -5,6 +5,7 @@ mcdp {
 
   ((required in).ac).socket >= `socket_type: TypeA
   ((required in).ac).frequency >= `AC_frequencies: f50
+  ((required in).ac).voltage >= `AC_voltages: v110
   ((required in).ac).watts >= 50 W # XXX
 
   required budget >= 250 USD

@@ -10,6 +10,7 @@ from mcdp_posets import get_types_universe
 from mcdp_posets.uppersets import UpperSet
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import CResource, Connection
+from mocdp.memoize_simple_imp import memoize_simple
 
 _ = UpperSet
 
@@ -51,6 +52,30 @@ class OptimizationState():
 
         self.num_connection_options = self._compute_connection_options()
 
+        self.hash = self._compute_hash()
+
+        self._msg = ""
+
+    def get_info(self):
+        return self._msg
+
+    def info(self, msg):
+        """ Writes a message for this node. """
+        print(msg)
+        self._msg += msg
+        self._msg += "\n"
+
+    def _compute_hash(self):
+        names = frozenset(self.context.names)
+        connections = frozenset(self.context.connections)
+        attrs = (names, connections)
+        return attrs.__hash__()
+
+    # @memoize_simple
+    def __hash__(self):
+        return self.hash
+
+        
     def _compute_connection_options(self):
         unconnected_fun, unconnected_res = get_missing_connections(self.context)
         n = 0
@@ -81,65 +106,40 @@ class OptimizationState():
         return set(c2.names) == set(c1.names) and set(c2.connections) == set(c1.connections)
 
     def iteration(self):
-        unconnected_fun, unconnected_res = get_missing_connections(self.context)
+        _, unconnected_res = get_missing_connections(self.context)
 
         if not unconnected_res:
             # we are done
             return True, []
         else:
             actions = self.generate_actions()
-
-            if not actions:
-#                 openR = [self.context.get_rtype(CResource(dp, s)) for dp, s in
-#                          unconnected_res]
-                # print('Cannot find anything to provide %r' % openR)
-                pass
             return False, actions
 
-
+    @memoize_simple
     def get_current_ndp(self):
         return CompositeNamedDP.from_context(self.context)
-
 
     def generate_actions(self):
         """ Returns a list of actions. Actions are hashable and 
             given an OptimizationState they return another """
-        actions = []
+        self.info('generating actions')
 
         unconnected_fun, unconnected_res = get_missing_connections(self.context)
-        for dp, rname in unconnected_res:
-            r = CResource(dp, rname)
+        unconnected = [CResource(*u) for u in unconnected_res
+                       ]
+        r2actions = {}  # list of list
+        for r in unconnected:
             r_actions = []
             R = self.context.get_rtype(r)
             # print('need to look for somebody implementing %s' % R)
             lb = self.lower_bounds[r]
             options = self.opt.get_providers(R=R, lb=lb)
             if not options:
-                print('Nobody can provide for %s %s' % (r, lb))
-
-            for id_ndp, fname in options:
-#                 def avoid(action):
-#                     for a in self.executed:
-#                         if isinstance(a, ActionAddNDP) and (a.id_ndp == action.id_ndp):
-#                             return True
-#                     return False
-
-                action = ActionAddNDP(id_ndp, fname, r)
-                # if avoid(action):
-                #     continue
-#
-#                 def forbidden(action):
-#                     return False
-#
-#                     for f in self.forbidden:
-#                         if action.__eq__(f):
-#                             return True
-#                     return False
-#
-#                 if forbidden(action):
-#                     print('pruning')
-#                 else:
-                r_actions.append(action)
+                self.info('Nobody can provide for %s %s' % (r, lb))
+            else:
+                for id_ndp, fname in options:
+                    action = ActionAddNDP(id_ndp, fname, r)
+                    r_actions.append(action)
 
             # connecting one available resource
             foptions = get_compatible_unconnected_functions(R, self.context, unconnected_fun)
@@ -152,16 +152,30 @@ class OptimizationState():
                 action = ActionConnect(r=r, f=f)
                 r_actions.append(action)
 
+            r2actions[r] = r_actions
+
+        # If there are no options
+        for r, r_actions in r2actions.items():
+
             if not r_actions:
                 # this is a resource that cannot be satisfied...
                 msg = ('Nobody can provide for resource %s %s and no unconnected compatible' % (r, lb))
                 msg += '\n unconn: %s' % unconnected_fun
-                print(msg)
-                self.msg = msg
+                self.info(msg)
                 return []
 
-            actions.extend(r_actions)
+        # If one option is obligated
+        for r, r_actions in r2actions.items():
 
+            if len(r_actions) == 1:
+                # If there is only one available we do that first
+                self.info('There is only one action availbale for %s' % (r.__str__()))
+                return r_actions
+
+        # concatenate all
+        actions = []
+        for r_actions in r2actions.values():
+            actions.extend(r_actions)
         return actions
 
 def would_introduce_cycle(context, f, r):

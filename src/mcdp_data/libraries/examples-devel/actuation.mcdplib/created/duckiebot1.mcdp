@@ -28,6 +28,9 @@
   pi.ethcom <= buffalo.eth
   pi.ethcom >= buffalo.eth
 
+  ignore usbcom1 provided by pi
+  ignore usbcom2 provided by pi
+
   router = instance `Linksys
 
   USBMicroCharger = instance `USBMicroCharging
@@ -74,19 +77,17 @@
     requires led2 [`LEDBlinking]
     requires led3 [`LEDBlinking]
     requires led4 [`LEDBlinking]
+    provides position_signal [`DuckiebotPositionSignal]
   }
   communication = instance mcdp {
     requires led [`LEDBlinking]
-  }
-  going_around = instance mcdp {
-    requires motion [`Motion]
-  }
-  joystick_control = instance mcdp {
-    requires motion [`Motion]
+    provides intersection_signal [`DuckiebotIntersectionSignal]
   }
 
-  joystick_control.motion <= dagu_chassis.motion 
-  going_around.motion <= dagu_chassis.motion 
+  provides position_signal using position
+  provides intersection_signal using communication
+  
+  provides motion using dagu_chassis
 
   communication.led <= rgb_led1.blinking
   position.led1 <= rgb_led2.blinking
@@ -117,15 +118,18 @@
   servo_hat.pwm15 >= lsd_hat.pwm15
 
 
-  spectrum = instance `Spectrum
-  buffalo.wlan >= spectrum.wlan1
-  buffalo.wlan <= spectrum.wlan1
-  router.wlan >= spectrum.wlan2
-  router.wlan <= spectrum.wlan2
+  wifi = instance `Spectrum
+  buffalo.wlan >= wifi.wlan1
+  buffalo.wlan <= wifi.wlan1
+  router.wlan >= wifi.wlan2
+  router.wlan <= wifi.wlan2
+  requires spectrum_occupation for wifi
 
   duckietop = instance `Duckietop
   router.eth >= duckietop.eth
   router.eth <= duckietop.eth
+
+  provides visualization using duckietop
 
   servo_hat.pisocketcom <= dc_hat.pisocketcom1
   dc_hat.pisocketcom1 <= pi.pisocketcom
@@ -134,11 +138,9 @@
   dc_hat.out2 >= dagu_chassis.pwm2
   ignore out3 provided by dc_hat
   ignore out4 provided by dc_hat
-
-  requires budget [USD]
-
-  required budget >= (
-    budget required by dagu_chassis +
+ 
+  requires budget_platform >= (
+     budget required by dagu_chassis +
      budget required by battery_ravpower + 
      budget required by buffalo + 
      budget required by pi + 
@@ -151,10 +153,14 @@
      budget required by rgb_led4 +
      budget required by rgb_led5 +
      budget required by pi_camera +
-     budget required by joystick +
      budget required by usb_to_barrel +
      budget required by USBMicroCharger +
-     budget required by router + 
      budget required by duckie
+  )
+
+  requires budget_station >= (
+     budget required by joystick +
+     budget required by router + 
+     budget required by duckietop
   )
 }

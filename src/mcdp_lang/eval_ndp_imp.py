@@ -616,7 +616,12 @@ def eval_statement(r, context):
             # equivalent to r <= any-of(Maximals S)
             rv = eval_rvalue(r.rvalue, context)
             R = context.get_rtype(rv)
-            values = R.get_maximal_elements()
+            try:
+                values = R.get_maximal_elements()
+            except NotImplementedError as e:
+                msg = 'Could not call get_maximal_elements().'
+                raise_wrapped(DPInternalError, e, msg, R=R)
+
             from mcdp_dp.dp_limit import LimitMaximals
             dp = LimitMaximals(R, values)
             ndp = SimpleWrap(dp, fnames='_limit', rnames=[])

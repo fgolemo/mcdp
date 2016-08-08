@@ -36,8 +36,12 @@ def ndpcoproduct_templatize(ndp):
 
 @contract(ndp=NamedDP, returns=SimpleWrap)
 def ndp_templatize(ndp, mark_as_template=False):
-    """ Creates a template based on the interface. 
+    """ 
+        Creates a template based on the interface. 
     
+        The dp is Dummy
+        
+        The ndp is either OnlyTemplate or SimpleWrap
         Copies attributes: ATTR_LOAD_NAME
     """
     fnames = ndp.get_fnames()
@@ -56,7 +60,6 @@ def ndp_templatize(ndp, mark_as_template=False):
         R = rtypes[0]
     else:
         R = PosetProduct(tuple(rtypes))
-
 
     dp = Dummy(F, R)
     if mark_as_template:

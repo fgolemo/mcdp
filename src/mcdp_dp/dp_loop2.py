@@ -8,6 +8,7 @@ from mcdp_posets import (NotEqual, NotLeq, PosetProduct, UpperSets,
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima, poset_maxima
 from mocdp.exceptions import do_extra_checks
 from mcdp_posets.uppersets import UpperSet, LowerSet
+import itertools
 
 
 class DPLoop2(PrimitiveDP):
@@ -209,8 +210,10 @@ class DPLoop2(PrimitiveDP):
 
         # we consider a set of iterates
         # we start from the bottom
-        zero = R2.get_bottom()
-        s0 = dp0.solve_trace((f1, zero), trace)
+        zeros = R2.get_minimal_elements()
+        minimals = set(itertools.product((f1,), zeros))
+        f0s = self.F.Us(minimals)
+        s0 = dp0.solveU(f0s)
         UR.belongs(s0)
         trace.log('Iterating in UR = %s' % UR)
         trace.log('Starting from %s' % UR.format(s0))

@@ -1,8 +1,7 @@
 mcdp {
-
     requires in [`PortableDCPower]
 
-    ((required in).dc).connector >= `barrel_connectors: barrel_4mm_1_7mm
+    ((required in).dc).connector >= `barrel_connectors: barrel_5mm
     ((required in).dc).voltage >= `DC_voltages: v5
 
     requires budget [$]
@@ -32,6 +31,9 @@ mcdp {
     requires gpiocom [`GPIOCom]
     
     requires ethcom [`ETHCom]
+
+    provides usbcom1 [`USBCom]
+    provides usbcom2 [`USBCom]
     provides ethcom [`ETHCom]
 
     provides pisocketcom [`PISocketCom] 
@@ -39,6 +41,8 @@ mcdp {
     route_in = instance template mcdp {
         provides pisocketcom [`PISocketCom]
         provides ethcom [`ETHCom]
+        provides usbcom1 [`USBCom]
+        provides usbcom2 [`USBCom]
         requires com [`Com] 
     }
 
@@ -53,11 +57,29 @@ mcdp {
     processor.com >= route_in.com
     route_in.ethcom >= provided ethcom
     route_in.pisocketcom >= provided pisocketcom
+    route_in.usbcom1 >= provided usbcom1
+    route_in.usbcom2 >= provided usbcom2
 
     processor.com <= route_out.com 
 
     route_out.usbcom1 <= required usbcom1 
     route_out.ethcom <= required ethcom 
     route_out.gpiocom <= required gpiocom 
-    
+
+    endurance1 =  max( (provided ethcom).duration, (provided pisocketcom).duration)
+    endurance2 =  max( (provided usbcom1).duration, (provided usbcom2).duration)
+    endurance = max(endurance1, endurance2)
+
+    (required in).duration >= endurance
+    rigid_body1 = max((provided ethcom).rigid_body, (provided pisocketcom).rigid_body)
+    rigid_body2 = max((provided usbcom1).rigid_body, (provided usbcom2).rigid_body)
+    rigid_body = max(rigid_body1, rigid_body2)
+    (required in).rigid_body >= rigid_body
+    (required payload).rigid_body >= rigid_body 
+    (required usbcom1).rigid_body >= rigid_body
+    (required usbcom1).duration >= endurance
+    (required gpiocom).rigid_body >= rigid_body
+    (required gpiocom).duration >= endurance
+    (required ethcom).rigid_body >= rigid_body
+    (required ethcom).duration >= endurance
 }

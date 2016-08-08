@@ -1,9 +1,7 @@
 from comptests.registrar import comptest
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
-from mcdp_lang.utils_lists import unwrap_list
 from mcdp_lang_tests.utils import parse_wrap_check
-from mcdp_lang_tests.utils2 import check_properties
 
 CDP = CDPLanguage
 #
@@ -52,7 +50,6 @@ def syntax_import2():
     assert isinstance(m.load_arg, CDP.NDPNameWithLibrary)
     assert m.load_arg.library == 'library'
     assert m.load_arg.name == 'model'
-
 
 @comptest
 def syntax_import3():

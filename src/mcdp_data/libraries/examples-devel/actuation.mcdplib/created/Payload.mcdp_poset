@@ -1,5 +1,0 @@
-product(
-  tag: S(payload),
-  mass: kg,
-  shape: m x m x m
-)

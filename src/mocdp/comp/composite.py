@@ -175,7 +175,8 @@ def check_consistent_data(names, fnames, rnames, connections):
         try:
             check_good_name(n)
         except ValueError as e:
-            raise_wrapped(ValueError, e, names=names)
+            msg = 'This name is not good.'
+            raise_wrapped(ValueError, e, msg, names=names)
 
         isit, x = is_fun_node_name(n)
         if isit and not x in fnames:

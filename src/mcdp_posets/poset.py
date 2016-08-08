@@ -55,7 +55,7 @@ class Poset(Preorder):
             return set([bottom])
         except NotBounded:
             msg = 'Not bounded so get_minimal_elements() not implemented.'
-            raise_desc(NotImplementedError, msg, type=type(self))
+            raise_desc(NotImplementedError, msg, type=type(self).__name__)
 
     @contract(returns='set')
     def get_maximal_elements(self):
@@ -67,7 +67,7 @@ class Poset(Preorder):
             return set([top])
         except NotBounded:
             msg = 'Not bounded so get_maximal_elements() not implemented.'
-            raise_desc(NotImplementedError, msg, type=type(self))
+            raise_desc(NotImplementedError, msg, type=type(self).__name__)
 
     def get_bottom(self):
         msg = 'Bottom not available for %s.' % describe_value(self)

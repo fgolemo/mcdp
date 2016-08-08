@@ -1,12 +1,12 @@
 mcdp {
-    provides computation [flops]
-    provides endurance [s]
+    provides usbcom [`USBCom]
     requires dc [`PortableDCPower]
 
     ((required dc).dc).connector >= `barrel_connectors: Neutrik_NC4MXX
     ((required dc).dc).voltage >= `DC_voltages: v5
     ((required dc).dc).amps >= 1 A
-    (required dc).duration >= endurance
 
-    provided computation <= 1 Gflops
+    (required dc).duration >=  (provided usbcom).duration
+    (required dc).rigid_body >= (provided usbcom).rigid_body
+
 }

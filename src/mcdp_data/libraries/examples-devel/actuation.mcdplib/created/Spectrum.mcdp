@@ -7,5 +7,7 @@ mcdp {
     #provides wlan3 [`WifiCom]
     #requires wlan4 [`WifiCom]
     #provides wlan4 [`WifiCom]
-    
+
+
+    requires spectrum_occupation [`SpectrumOccupation]
 }

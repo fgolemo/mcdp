@@ -8,11 +8,8 @@ import os
 
 __all__ = [
     'Librarian',
-    'NotSuchLibrary',
 ]
 
-# class NotSuchLibrary(Exception):
-#     pass
 
 class Librarian():
     

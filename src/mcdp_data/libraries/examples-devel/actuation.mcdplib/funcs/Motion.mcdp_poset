@@ -1,4 +1,5 @@
 product (
+  rigid_body: `RigidBodyID,
   velocity: m/s,
   endurance: s
 )

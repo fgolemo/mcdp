@@ -23,6 +23,9 @@ mcdp {
     ((required in).dc).connector >= `USB_connectors:USB_Micro_B
     ((required in).dc).voltage >= `DC_voltages: v5
 
+    (required payload).rigid_body >= (provided out1).rigid_body
+    (required payload).rigid_body >= (provided out2).rigid_body
+
     amps1 <= 2 A
     amps2 <= 2 A
     total_amps = amps1 + amps2

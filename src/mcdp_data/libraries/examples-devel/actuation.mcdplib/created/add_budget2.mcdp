@@ -1,8 +1,0 @@
-mcdp {    
-    provides budget1 [USD]
-    provides budget2 [USD]
-
-    requires budget [USD]
-
-    required budget >= provided budget1 + provided budget2 
-}

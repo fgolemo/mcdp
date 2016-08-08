@@ -37,13 +37,13 @@ def less_resources2(ua, ub):
 
     # first we create a projection for Pb
     m1 = MuxMap(F=Pb, coords=matches)
-#     Pb2 = m1.get_codomain()
+
     ub2 = upperset_project_map(ub, m1)
     Pb2 = ub2.P
     UPb2 = UpperSets(Pb2)
 
     # now we create the embedding
-    A_to_B, B_to_A = tu.get_embedding(Pa, Pb2)
+    A_to_B, _ = tu.get_embedding(Pa, Pb2)
     ua2 = upperset_project_map(ua, A_to_B)
 
     print('Pa: %s' % Pa)
@@ -52,12 +52,6 @@ def less_resources2(ua, ub):
     print('ub2: %s' % ub2)
 
     return UPb2.leq(ua2, ub2)
-    # first, we create a permutation that puts P in the correct order
-
-
-    # then we create the embedding
-
-
 
 
 

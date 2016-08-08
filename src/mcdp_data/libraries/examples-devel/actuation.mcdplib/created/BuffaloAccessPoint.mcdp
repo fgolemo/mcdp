@@ -1,7 +1,5 @@
 mcdp {
 
-    #provides wifi [Any]
-
     requires budget >= 40 USD
 
     requires in [`PortableDCPower]
@@ -10,9 +8,18 @@ mcdp {
 
     (required payload).mass >= 4 g # XXX
     (required payload).shape >= <0mm, 0mm, 0mm> # XXX
+    
 
     requires wlan [`WifiCom]
     provides eth [`ETHCom]
     requires eth [`ETHCom]
     provides wlan [`WifiCom]
+
+    rigid_body = (provided eth).rigid_body
+    (required eth).rigid_body >= rigid_body
+    (required payload).rigid_body >= rigid_body
+
+    duration = max( (provided eth).duration, (provided wlan).duration)
+    (required eth).duration >= duration
+    (required wlan).duration >= duration
 }

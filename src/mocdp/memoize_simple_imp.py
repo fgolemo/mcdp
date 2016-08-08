@@ -7,6 +7,8 @@ def memoize_simple(obj):
         key = (args)
         if key not in cache:
             cache[key] = f(*args)
+        assert key in cache
+
         try:
             cached = cache[key]
             return cached

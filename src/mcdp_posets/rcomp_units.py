@@ -3,13 +3,13 @@ from .any import Any, BottomCompletion, TopCompletion
 from .rcomp import Rcomp
 from .space import Map
 from contracts import contract
-from contracts.utils import check_isinstance, raise_wrapped
+from contracts.utils import raise_wrapped
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import DPSyntaxError, mcdp_dev_warning
 from pint import UnitRegistry  # @UnresolvedImport
 from pint.unit import UndefinedUnitError  # @UnresolvedImport
 import functools
 import math
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 
 
 
@@ -33,8 +33,8 @@ def get_ureg():
 class RcompUnits(Rcomp):
 
     def __init__(self, pint_unit):
-        ureg = get_ureg()
-        check_isinstance(pint_unit, ureg.Quantity)
+        # ureg = get_ureg()
+        # check_isinstance(pint_unit, ureg.Quantity)
             
         Rcomp.__init__(self)
         self.units = pint_unit
@@ -42,12 +42,12 @@ class RcompUnits(Rcomp):
         self.units_formatted = format_pint_unit_short(self.units)
 
     def __repr__(self):
-        # need to call it to make sure dollars i defined
+        # need to call it to make sure dollars is defined
         ureg = get_ureg()  # @UnusedVariable
 
         # graphviz does not support three-byte unicode
         # c = "ℝ̅"
-        c = "ℝᶜ"
+        # c = "ℝᶜ"
         c = 'R'
 
         if self.units == R_dimensionless.units:
@@ -118,6 +118,7 @@ def make_rcompunit(units):
             from mcdp_posets import FiniteCollectionsInclusion
             return FiniteCollectionsInclusion(u)
 
+        mcdp_dev_warning('obsolete?')
         if s == 'any':
             return BottomCompletion(TopCompletion(Any()))
     

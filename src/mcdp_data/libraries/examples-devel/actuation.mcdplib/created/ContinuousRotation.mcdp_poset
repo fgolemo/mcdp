@@ -1,4 +1,0 @@
-product( 
-  torque: N*m,
-  velocity: rad/s
-)

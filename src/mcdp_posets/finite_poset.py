@@ -40,8 +40,8 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
         return self.elements
 
     def __repr__(self):
-        if len(self.elements) == 1:
-            return 'FinitePoset(1 el = %s)' % list(self.elements)[0].__repr__()
+        if len(self.elements) <= 2:
+            return 'FinitePoset(%d el = %s)' % (len(self.elements), list(self.elements).__repr__())
         else:
             return "FinitePoset(%d els)" % len(self.elements)
 

@@ -3,6 +3,7 @@ mcdp {
 
     requires capability [ product(weight: g, energy: J) ]
     
-    capability..weight >= 1g
+    capability..weight >= 1 g
+    capability..energy >= 1 J
     
 }

@@ -1,38 +1,49 @@
 mcdp {
    provides out [`PortableDCPower]
-   provides computation [flops]
+   provides usbcom [`USBCom]
    provides motion [`Motion]
    provides payload [`Payload]
 
    requires budget [USD]
-   requires in [`AC_Charging] 
+   
 
    (provided motion).velocity <= 5 m/s
-   budget >= 10000 USD
+   required budget >= 10000 USD
 
-   computer = instance template mcdp {
-     provides computation [flops]
-     requires dc [`PortableDCPower]
-      # todo
-   }
-   provided computation <= computation provided by computer
+   computer = instance `YoubotBaseComputer 
 
-   battery = instance template mcdp {
-     provides out1 [`PortableDCPower]
-     provides out2 [`PortableDCPower]
-     requires in [`AC_Charging]
-     # todo
-   }
+   provided usbcom <= usbcom provided by computer 
+
+   battery = instance `YoubotBaseBattery
+
    mass = (provided payload).mass
    shape = (provided payload).shape
  
-  # limit x and y
-   take(shape, 0) <= 30m
-   take(shape, 1) <= 50cm
 
+   endurance1 = max( (provided usbcom).duration, (provided motion).endurance)
+   #endurance2 = (provided out).duration
+
+#   (provided out).dc
+   
+   endurance = endurance1
+   # max(endurance1, endurance2)
+
+   motors = instance mcdp {
+      provides endurance [s]
+      requires in [`PortableDCPower]
+   }
+
+   motors.endurance >= endurance
+
+   in required by motors  <= out3 provided by battery
+
+  # limit x and y
+   shape <= <30cm, 50cm, 50cm>
+   
    mass <= 10 kg
 
    out1 provided by battery >= dc required by computer
    out2 provided by battery >= provided out
-   in required by battery <= required in        
+ 
+   requires in for battery
 }

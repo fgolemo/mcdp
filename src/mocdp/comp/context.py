@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from mocdp import logger
 from collections import namedtuple
 from contracts import contract
 from contracts.utils import raise_desc
@@ -8,7 +9,9 @@ from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.comp.wrap import dpwrap
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
-
+from mcdp_posets.poset_product_with_labels import PosetProductWithLabels
+from mcdp_posets.finite_poset import FinitePoset
+_ = logger
 
 __all__ = [
     'Connection',
@@ -433,13 +436,19 @@ class Context():
                     return True
             return False
             
-        for created in self.indexed_fun.values():
-            
+        for which, created in self.indexed_fun.items():
             ndp = self.names[created]
             for fname in ndp.get_fnames():
                 connected = connectedfun(created, fname)
                 if not connected:
                     F = ndp.get_ftype(fname)
+                    if not self._can_ignore_unconnected(F):
+                        msg = 'Missing value %r for %r.' % (fname, which)
+                        raise_desc(DPSemanticError, msg)
+                    else:
+                        msg = 'Using default value for unconnected resource %s %s' % (created, fname)
+                        # logger.warn(msg)
+
                     try:
                         zero = F.get_bottom()
                         vu = ValueWithUnits(value=zero, unit=F)
@@ -464,13 +473,19 @@ class Context():
                     return True
             return False
 
-        for created in self.indexed_res.values():
+        for which, created in self.indexed_res.items():
 
             ndp = self.names[created]
             for rname in ndp.get_rnames():
                 connected = connectedres(created, rname)
                 R = ndp.get_rtype(rname)
                 if not connected:
+                    if not self._can_ignore_unconnected(R):
+                        msg = 'Missing value %r for %r.' % (rname, which)
+                        raise_desc(DPSemanticError, msg)
+                    else:
+                        msg = 'Using default value for unconnected function %s %s' % (created, rname)
+                        # logger.warn(msg)
                     try:
                         top = R.get_top()
                         vu = ValueWithUnits(value=top, unit=R)
@@ -480,6 +495,12 @@ class Context():
                         res = get_constant_maximals_as_function(R, maximals, self)
                     c = Connection(dp2=res.dp, s2=res.s, dp1=created, s1=rname)
                     self.add_connection(c)
+
+    def _can_ignore_unconnected(self, P):
+        if isinstance(P, FinitePoset) and len(P.elements) == 1:
+            return True
+        else:
+            return False
 
     @contract(cr=CResource, index=int, returns=CResource)
     def ires_get_index(self, cr, index):
@@ -491,12 +512,15 @@ class Context():
             n = len(R.subs)
 
             # todo: use labels
-            rnames = ['_r%d' % i for i in range(n)]
+            if isinstance(R, PosetProductWithLabels):
+                rnames = list(R.labels)
+            else:
+                rnames = ['_r%d' % i for i in range(n)]
             coords = list(range(n))
             dp = TakeRes(R, coords)
             ndp_out = '_muxed'
             ndp = SimpleWrap(dp, fnames=ndp_out, rnames=rnames)
-            ndp_name = self.new_name('_label_index')
+            ndp_name = self.new_name('_indexing')
 
             self.add_ndp(ndp_name, ndp)
             c = Connection(dp2=ndp_name, s2=ndp_out, dp1=cr.dp, s1=cr.s)
@@ -527,12 +551,15 @@ class Context():
             n = len(F.subs)
 
             # todo: use labels
-            fnames = ['_f%d' % i for i in range(n)]
+            if isinstance(F, PosetProductWithLabels):
+                fnames = list(F.labels)
+            else:
+                fnames = ['_f%d' % i for i in range(n)]
             coords = list(range(n))
             dp = TakeFun(F, coords)
             ndp_out = '_muxed'
             ndp = SimpleWrap(dp, fnames=fnames, rnames=ndp_out)
-            ndp_name = self.new_name('_label_index')
+            ndp_name = self.new_name('_indexing')
 
             self.add_ndp(ndp_name, ndp)
             c = Connection(dp1=ndp_name, s1=ndp_out, dp2=cf.dp, s2=cf.s)

@@ -20,5 +20,8 @@ mcdp {
     power = 5 V * (amps)
 
     (required in).watts >= power
+    (required in).voltage >= `AC_voltages: v110
+    (required in).socket >= `socket_type: TypeA
+    (required in).frequency >= `AC_frequencies: f50
 
 }

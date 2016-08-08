@@ -52,7 +52,7 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
         label_with_recursive_names(ndp)
 
     basename, dp = solve_get_dp_from_ndp(basename=basename, ndp=ndp,
-                                   lower=lower, upper=upper)
+                                         lower=lower, upper=upper)
 
 
     F = dp.get_fun_space()

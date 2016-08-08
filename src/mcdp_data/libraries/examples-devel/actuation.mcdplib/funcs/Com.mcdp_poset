@@ -1,0 +1,4 @@
+product(
+    tag: S(Com),
+    duration: s
+)

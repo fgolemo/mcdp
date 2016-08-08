@@ -5,6 +5,10 @@ from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (Constant, Conversion, GenericUnary, Identity, InvMult2,
     InvPlus2, InvPlus2Nat, Limit, Max, MeetNDual, Min, Mux, MuxMap, Product,
     ProductN, Sum, SumN, WrapAMap)
+from mcdp_dp.dp_constant import ConstantMinimals
+from mcdp_dp.dp_flatten import TakeFun, TakeRes
+from mcdp_dp.dp_max import JoinNDP
+from mcdp_dp.dp_sum_n_nats import SumNNat
 from mcdp_lang.blocks import get_missing_connections
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
@@ -14,11 +18,7 @@ from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning
 from mocdp.ndp import NamedDPCoproduct
-from mcdp_dp.dp_max import JoinNDP
 from types import NoneType
-from mcdp_dp.dp_constant import ConstantMinimals
-from mcdp_dp.dp_flatten import TakeRes, TakeFun
-from mcdp_dp.dp_sum_n_nats import SumNNat
 
 STYLE_GREENRED = 'greenred'
 STYLE_GREENREDSYM = 'greenredsym'
@@ -175,8 +175,8 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
 #
     return gg
 
-def create(gdc, ndp):
 
+def create(gdc, ndp):
     if isinstance(ndp, SimpleWrap):
         res = create_simplewrap(gdc, ndp)
     elif isinstance(ndp, CompositeNamedDP):
@@ -194,7 +194,6 @@ def create(gdc, ndp):
         assert rn in resources
 
     return res
-
 
 
 def is_simple(ndp):

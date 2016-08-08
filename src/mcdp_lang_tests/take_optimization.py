@@ -47,6 +47,7 @@ def check_take_optim3():
         provides f1 [s]
         
         provided f1 <= take(required r, 0)
+        take(required r, 1) >= 2 J
          
     }
     

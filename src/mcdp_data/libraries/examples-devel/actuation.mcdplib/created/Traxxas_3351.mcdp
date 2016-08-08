@@ -8,6 +8,9 @@ mcdp {
    required budget >= 99.28 USD
    (required payload).mass >= 1.6 pounds
    (required payload).shape >= <6.5in, 2in, 5.8in>
+   rigid_body = (provided cr).rigid_body
+   (required payload).rigid_body >= rigid_body
+   (required pwm).rigid_body >= rigid_body
 
   (provided cr).torque <= 0 N*m
   (provided cr).velocity <= 5000 rpm
@@ -21,4 +24,6 @@ mcdp {
    eff = 0.75 []
    (required pwm).amp_max *  (required pwm). voltage_max
        >= eff * (provided cr).torque *  (provided cr).velocity 
+
+  (required pwm).duration >= (provided cr).duration
 }

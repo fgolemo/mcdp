@@ -1,11 +1,11 @@
+from .utils import memo_disk_cache2
 from .utils.locate_files_imp import locate_files
 from contextlib import contextmanager
 from contracts import contract
 from contracts.utils import format_obs, raise_desc, raise_wrapped
 from copy import deepcopy
-from mcdp_dp.primitive import PrimitiveDP
+from mcdp_dp import PrimitiveDP
 from mcdp_lang import parse_ndp, parse_poset
-from mcdp_library.utils import memo_disk_cache2
 from mcdp_posets import Poset
 from mocdp import logger
 from mocdp.comp.context import Context, ValueWithUnits
@@ -16,6 +16,7 @@ from mocdp.memoize_simple_imp import memoize_simple
 import os
 import shutil
 import sys
+
 
 
 __all__ = [
@@ -356,7 +357,6 @@ class MCDPLibrary():
                                path2=res['realpath'])
         self.file_to_contents[basename] = res
 
-
     def write_to_model(self, name, data):
         basename = '%s.%s' % (name, MCDPLibrary.ext_ndps)
         self._write_generic(basename, data)
@@ -385,8 +385,4 @@ class MCDPLibrary():
             f.write(data)
         # reload
         self._update_file(realpath)
-
-    # Support for parsing types
-
-
 

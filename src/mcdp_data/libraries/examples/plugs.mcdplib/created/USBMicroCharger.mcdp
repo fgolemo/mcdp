@@ -6,6 +6,8 @@ mcdp {
     budget >= 10.99 USD    
 
     (required in).socket >= `socket_type : TypeA
+    (required in).voltage >= `AC_voltages : v110
+    (required in).frequency >= `AC_frequencies : f50
 
     (provided out).voltage   <= `DC_Voltages: v5
     (provided out).connector <= `USB_connectors:USB_Std_A 
