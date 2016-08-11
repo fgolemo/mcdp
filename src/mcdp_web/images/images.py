@@ -150,7 +150,9 @@ def ndp_template_enclosed(library, name, x, data_format):
 def ndp_template_graph_enclosed(library, template, style, yourname, data_format, direction, enclosed):
     assert isinstance(template, TemplateForNamedDP)
 
-    ndp = template.get_template_with_holes()
+    context = library._generate_context_with_hooks()
+
+    ndp = template.get_template_with_holes(context)
 
     if enclosed:
         setattr(ndp, '_hack_force_enclose', True)

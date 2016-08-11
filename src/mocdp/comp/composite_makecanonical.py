@@ -256,8 +256,6 @@ def cndp_create_one_without_some_connections(ndp, exclude_connections, names):
         c2 = Connection(fn, name, e.dp2, e.s2)
         context.connections.append(c1)
         context.connections.append(c2)
-#         context.add_connection(c1)
-#         context.add_connection(c2)
 
     return CompositeNamedDP.from_context(context)
 
@@ -296,6 +294,8 @@ def enumerate_minimal_solution(G, edge_weight):
         G: a graph
         edge_weight: a map from edge (i,j) of G to nonnegative weight
     """
+    # Next optimization: consider equivalence classes of edges:
+    # edges that belong to the same cycle. Then only keep the small ones.
     from mocdp.comp.connection import simple_cycles_as_edges
     
     State = namedtuple('State', 'cycles weight')
@@ -308,18 +308,35 @@ def enumerate_minimal_solution(G, edge_weight):
     
     # initial states
     all_edges = set(G.edges())
+
+    all_cycles = simple_cycles_as_edges(G)
+
+    def belongs_to_cycles(e):
+        for c in all_cycles:
+            assert isinstance(c, tuple)
+            if e in c:
+                return True
+        return False
+
+    # these are the ones we care about
+    edges_belonging_to_cycles = set([e for e in all_edges if belongs_to_cycles(e)])
+    print('Deciding between %s hot of %d edges' % (len(edges_belonging_to_cycles), len(all_edges)))
+
     best_weight = np.inf
     
-    current_partial_solutions[freeze([])] = State(cycles=simple_cycles_as_edges(G), weight=0.0)
+
+    current_partial_solutions[freeze([])] = \
+        State(cycles=all_cycles, weight=0.0)
     
     while current_partial_solutions:
         # choose the solution to expand with minimum weight
         removed, state = pop_solution_minimum_weight(current_partial_solutions)
         examined.add(removed)
-        print('%s best %s / %s / %s' % (len(current_solutions), best_weight, len(current_partial_solutions), removed))
+        print('nsolutions %s best w %s / current_partial_solutions %s / removed %s' %
+              (len(current_solutions), best_weight, len(current_partial_solutions), removed))
 
         # now look at edges that we could remove
-        to_remove = all_edges - removed
+        to_remove = edges_belonging_to_cycles - removed
 
         for edge in to_remove:
             new_weight = state.weight + edge_weight(edge)
@@ -331,7 +348,7 @@ def enumerate_minimal_solution(G, edge_weight):
                 # print('do not consider')
                 continue
 
-            cycles = [c for c in state.cycles if not edge in c]
+            cycles = set([c for c in state.cycles if not edge in c])
 
             ss = State(cycles=cycles, weight=new_weight)
             if not cycles:
@@ -346,7 +363,7 @@ def enumerate_minimal_solution(G, edge_weight):
     best = solutions[np.argmin(weights)]
     state = current_solutions[best]
 
-    # print('best: %s %s' % (best, state))
+    print('best: %s %s' % (best, state))
     return best
 
 

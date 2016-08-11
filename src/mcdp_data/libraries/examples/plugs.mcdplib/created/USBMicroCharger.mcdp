@@ -5,12 +5,13 @@ mcdp {
 
     budget >= 10.99 USD    
 
-    (required in).socket >= `socket_type : TypeA
-    (required in).voltage >= `AC_voltages : v110
-    (required in).frequency >= `AC_frequencies : f50
+    (required in).socket >= `socket_type: TypeA
+    (required in).voltage >= `AC_voltages: v110
+    (required in).frequency >= `AC_frequencies: f50
 
     (provided out).voltage   <= `DC_Voltages: v5
-    (provided out).connector <= `USB_connectors:USB_Std_A 
+    (provided out).connector <= `USB_connectors: USB_Micro_A_male
+     
     amps = (provided out).amps 
     amps <=  2.4 A
     power = 5 V * (amps)

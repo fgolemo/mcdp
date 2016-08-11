@@ -1,6 +1,5 @@
 
 mcdp {
-    # 4 dc outputs
     provides out1 [`PWM]
     provides out2 [`PWM]
     provides out3 [`PWM]
@@ -8,15 +7,10 @@ mcdp {
 
     requires in [`PortableDCPower]
 
-    
-    # requires an external DC power
-    # requires in [`DC_power]
-
     requires payload [`Payload]
 
     (required payload).mass >= 15 g
     (required payload).shape >= <65mm, 56mm, 13mm>
-
 
     (provided out1).amp_max <= 1.5 A
     (provided out2).amp_max <= 1.5 A
@@ -30,7 +24,6 @@ mcdp {
     (provided out2).freq_max <= 100 Hz
     (provided out3).freq_max <= 100 Hz
     (provided out4).freq_max <= 100 Hz
-
 
     total_current =
         (provided out1).amp_max +
@@ -60,4 +53,13 @@ mcdp {
 
     provides pisocketcom1 [`PISocketCom] 
     requires pisocketcom1 [`PISocketCom]
+
+    core = instance `AdafruitDCHatCore
+    provided pisocketcom1 <= core.pisocketcom1
+    provided out1 <= core.out1
+    provided out2 <= core.out2
+    provided out3 <= core.out3
+    provided out4 <= core.out4
+    core.pisocketcom1 <= required pisocketcom1
 }
+

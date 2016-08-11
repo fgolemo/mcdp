@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
+from .namedtuple_tricks import recursive_print
+from .parse_actions import add_where_information
 from .parts import CDPLanguage
+from .utils_lists import get_odd_ops, unwrap_list
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_lang.parse_actions import add_where_information
-from mcdp_lang.utils_lists import get_odd_ops, unwrap_list
 from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
     NotBelongs, NotLeq, PosetProduct, Rcomp, Space, UpperSet, UpperSets,
     get_types_universe)
-from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPSemanticError, mcdp_dev_warning, DPInternalError
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
-from mcdp_lang.namedtuple_tricks import recursive_print
+from mocdp.comp.context import ValueWithUnits
+from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 
 CDP = CDPLanguage
 

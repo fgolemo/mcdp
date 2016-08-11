@@ -2,23 +2,26 @@ from contracts import contract
 from mcdp_dp.dp_limit import Limit
 from mcdp_library import MCDPLibrary
 from mcdp_library.library import ATTR_LOAD_NAME
+from mcdp_opt.cachedp import CacheDP
 from mcdp_opt.compare_different_resources import less_resources2
 from mcdp_opt.context_utils import create_context0
 from mcdp_posets import NotBounded, Poset, get_types_universe
+from mcdp_posets.types_universe import express_value_in_isomorphic_space
 from mcdp_posets.uppersets import UpperSet, upperset_project
 from mcdp_report import my_gvgen
 from mcdp_report.gg_utils import gg_figure
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import CResource, get_name_for_fun_node
 from mocdp.comp.interfaces import NotConnected
-from mocdp.comp.wrap import dpwrap, SimpleWrap
+from mocdp.comp.wrap import SimpleWrap, dpwrap
 from mocdp.exceptions import mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
 from reprep import Report
+import gc
 import networkx as nx
 import os
-from mcdp_opt.cachedp import CacheDP
-import gc
+import shutil
+from mcdp_opt.report_utils import get_optim_state_report
 
 _ = UpperSet, CResource, Poset
 
@@ -32,10 +35,22 @@ class Optimization():
                  flabels, F0s, f0s,
                  rlabels, R0s, r0s, initial):
 
-        for _fname, F0, f0 in zip(flabels, F0s, f0s):
+        f0s = list(f0s)
+        F0s = list(F0s)
+        r0s = list(r0s)
+        R0s = list(R0s)
+
+        for i, (fname, F0, f0) in enumerate(zip(flabels, F0s, f0s)):
             F0.belongs(f0)
-        for _rname, R0, r0 in zip(flabels, R0s, r0s):
+            F = initial.get_ftype(fname)
+            f0s[i] = express_value_in_isomorphic_space(F0, f0, F)
+            F0s[i] = F
+
+        for i, (rname, R0, r0) in enumerate(zip(rlabels, R0s, r0s)):
             R0.belongs(r0)
+            R = initial.get_rtype(rname)
+            r0s[i] = express_value_in_isomorphic_space(R0, r0, R)
+            R0s[i] = R
 
         self.library = library
         self.options = options
@@ -74,17 +89,23 @@ class Optimization():
         from mcdp_opt.partial_result import get_lower_bound_ndp
         ndp, table = get_lower_bound_ndp(context)
         (_R, ur), _tableres = self.get_lower_bounds(ndp, table)
+
+        self.num_created = 0
         s0 = OptimizationState(self, options, context, executed=[], forbidden=[],
-                               lower_bounds=lower_bounds, ur=ur)
-        s0.creation_order = 0
-        self.num_created = 1
+                               lower_bounds=lower_bounds, ur=ur,
+                               creation_order=self.get_next_creation())
 
         self.root = s0
+        # open nodes
         self.states = [s0]
+        self.actions = [(s0, ActionExpand())]  # tuples of state, action
+        
         # connected
         self.done = []
         # impossible
         self.abandoned = []
+        # expanded
+        self.expanded = []
 
         # extra ndps not present in library
         self.additional = {}  # str -> NamedDP
@@ -93,75 +114,122 @@ class Optimization():
 
         # for visualization
         self.G = nx.DiGraph()
+        self.G_dom = nx.DiGraph()  # domination graph
+
+    def mark_abandoned(self, s):
+        self.abandoned.append(s)
+
+    def mark_done(self, s):
+        self.done.append(s)
+
+    def mark_expanded(self, s):
+        self.expanded.append(s)
 
     @contract(s='isinstance(OptimizationState)',
               s1='isinstance(OptimizationState)')
     def note_edge(self, s, a, s1):
         """ Note that there was a state s1 generated that
             led from s using action a """
+        # print('%s --> %s' % (s.creation_order, s1.creation_order))
         self.G.add_node(s)
         self.G.add_node(s1)
         self.G.add_edge(s, s1, action=a)
 
+    @contract(dominated='isinstance(OptimizationState)',
+              dominator='isinstance(OptimizationState)')
+    def note_domination_relation(self, dominated, dominator):
+        """ s is-dominated-by s1 """
+        self.G_dom.add_node(dominated)
+        self.G_dom.add_node(dominator)
+        self.G_dom.add_edge(dominated, dominator)
+
     def draw_tree(self, outdir):
-#         out_nodes = os.path.join(outdir, 'nodes')
-#         out_steps = os.path.join(outdir, 'steps')
-#         out = os.path.join(out_steps, 'step%03d' % self.iteration)
-
-        out_nodes = out_steps = out = outdir
-#         for d in [out_nodes, out_steps]:
-#             if os.path.exists(d):
-#                 shutil.rmtree(d)
-
+        out_nodes = out = outdir
         if not os.path.exists(out):
             os.makedirs(out)
 
+        fn0 = os.path.join(outdir, 'stepLAST_tree.html')
         fn = os.path.join(outdir, 'step%03d_tree.html' % self.iteration)
-        gg = self.draw_tree_get_tree()
-        r = Report()
-        gg_figure(r, 'tree', gg, do_png=True, do_dot=False, do_svg=False)
-        print('writing to %r' % fn)
+
+        r = self.get_tree_report()
+        print('writing to %s   %s ' % (fn, fn0))
         r.to_html(fn)
+
+        shutil.copy(fn, fn0)
         
         for s in self.G.nodes():
             order = s.creation_order
             fn = os.path.join(out_nodes, 'node%03d.html' % order)
             if os.path.exists(fn):
                 continue
-            r = Report()
-
-            from mcdp_opt_tests.test_basic import plot_ndp
-            plot_ndp(r, 'current', s.get_current_ndp(), self.library)
-
-            r.text('msg', s.get_info())
-
+            r = get_optim_state_report(s)
             print('writing to %r' % fn)
             r.to_html(fn)
 
+    def get_tree_report(self):
 
-    def draw_tree_get_tree(self):
-        gg = my_gvgen.GvGen(options="rankdir=TB")
-        n2ggn = {}
-        G = self.G
+        r = Report()
+        with r.subsection('regular') as rr:
+            gg = self.draw_tree_get_tree_expand()
+            gg_figure(rr, 'tree', gg, do_png=True, do_dot=False, do_svg=False)
+
+        with r.subsection('compact') as rr:
+            gg = self.draw_tree_get_tree_compact()
+            gg_figure(r, 'tree', gg, do_png=True, do_dot=False, do_svg=False)
+        return r
+
+    def draw_tree_get_tree_expand(self):
         def label_for_node(n):
             s = '#%s' % n.creation_order
             s += ' (%d)' % len(n.context.names)
             return s
+
         def label_for_edge(n1, a, n2):  # @UnusedVariable
             return a.__repr__()
+        
+        return self.draw_tree_get_tree(label_for_edge, label_for_node)
+
+    def draw_tree_get_tree_compact(self):
+        def label_for_node(n):
+            nactions = len([() for (s, _) in self.actions if s is n])
+            s = '#%s' % n.creation_order
+
+            #             s += ' (%d)' % len(n.context.names)
+            if nactions:
+                s += ' (%d)' % nactions
+            return s
+
+        def label_for_edge(n1, a, n2):  # @UnusedVariable
+            return a.__repr__()[:1]  # first letter
+
+        return self.draw_tree_get_tree(label_for_edge, label_for_node)
+
+    def draw_tree_get_tree(self, label_for_edge, label_for_node):
+        gg = my_gvgen.GvGen(options="rankdir=TB")
+        n2ggn = {}
+        G = self.G
+
+        open_states = [s for (s, _) in self.actions]
         def get_ggn_node(n):
             assert n in G.nodes()
             if not n in n2ggn:
-#                 preds = G.predecessors(n)
-#                 if preds:
-#                     parent = preds[0]
-#                     parent = get_ggn_node(parent)
-#                 else:
                 parent = None
                 label = label_for_node(n)
                 ggn = gg.newItem(label, parent=parent)
 
                 n2ggn[n] = ggn
+                if n in open_states:
+                    color = 'blue'  # open
+                elif n in self.done:
+                    color = 'green'
+                elif n in self.abandoned:
+                    color = 'red'  # closed
+                elif n in self.expanded:
+                    color = 'gray'  #
+                else:
+                    color = 'black'
+
+                gg.propertyAppend(ggn, 'color', color)
 
             return n2ggn[n]
 
@@ -174,84 +242,82 @@ class Optimization():
             gn2 = get_ggn_node(n2)
             label = label_for_edge(n1, a, n2)
             gg.newLink(gn1, gn2, label)
+
+        # domination is dashed
+        for n1, n2 in self.G_dom.edges():
+            # print('drawing dom %s -> %s' % (n1.creation_order, n2.creation_order))
+            gn1 = get_ggn_node(n1)
+            gn2 = get_ggn_node(n2)
+            label = "D"
+            l = gg.newLink(gn1, gn2, label)
+            gg.propertyAppend(l, 'style', 'dashed')
+
         return gg
         
 
     def print_status(self):
-        print('open: %3d  done: %3d  abandoned: %3d' % (len(self.states),
+        print('nactions: %3d open: %3d  done: %3d  abandoned: %3d' %
+              (len(self.actions), len(self.states),
                                                         len(self.done),
                                                         len(self.abandoned)))
 
+    def is_done(self):
+        return not self.actions
+
     def step(self):
+        gc.collect()
         self.iteration += 1
+        
+        if not self.actions:
+            print('Done - no actions left')
+            return
+            
+        (s0, a0) = self.choose_action()
+        s0.info('Popped at iteration %d with %s' % (self.iteration, a0))
+        
+        new_actions = a0.__call__(self, s0)
 
-        s = self.states.pop(0)
-        s.info('Popped at iteration %d' % self.iteration)
+        for (s, a) in new_actions:
 
-        done, actions = s.iteration()
-
-        s.info('Generated %d actions' % len(actions))
-
-
-        if done:
-            self.done.append(s)
-            assert s in self.done
+            print('%s -> %s' % (a0, a))
+            self.actions.append((s,a))
+            
+    def already_known(self, s1): 
+        if ((not s1 in self.states) and
+            (not s1 in self.done) and
+            (not s1 in self.abandoned) and
+            (not s1 in self.expanded)):
+            return False
         else:
-            if not actions:
-                s.info("No actions available, placing in abandoned")
-                self.abandoned.append(s)
-                assert s in self.abandoned
-            else:
-                for i, a in enumerate(actions):
-                    gc.collect()
-                    s1 = a(self, s)
-                    s1.info('created using %s' % a)
-                    s1.creation_order = self.num_created
-                    self.num_created += 1
+            return True
 
-                    self.note_edge(s, a, s1)
-
-                    # mark the rest as forbidden
-                    rest = [a2 for i2, a2 in enumerate(actions) if i2 != i]
-                    s1.forbidden.extend(rest)
-
-                    if ((not s1 in self.states) and
-                        (not s1 in self.done) and
-                        (not s1 in self.abandoned)):
-
-                        ur = s1.ur
-
-                        if len(ur.minimals) == 0:
-                            msg = 'Unfortunately this is not feasible (%s)' % s1.ur.P
-                            msg += '%s' % s1.lower_bounds
-                            s1.info(msg)
-                            self.abandoned.append(s1)
-                        else:
-                            dominated, by_what = self.is_dominated_by_open(s1)
-                            if dominated:
-                                s1.info('Dominated by %s' % by_what)
-                                self.abandoned.append(s1)
-                            else:
-                                self.states.append(s1)
-                    else:
-                        s1.info('I was a double')
-
-                s.info('Expanded.')
+    def choose_action(self):
+        # choose connect actions first
+        if not self.actions: raise ValueError('no actions')
+        for i, (_s, a) in enumerate(self.actions):
+            from mcdp_opt.actions import ActionConnect
+            if isinstance(a, ActionConnect):
+                return self.actions.pop(i)  # (s, a)
+        # otherwise breadth-first
+        return self.actions.pop(0)
 
     def is_dominated_by_open(self, s1):
-        for a in self.states:
-            if self.dominates(a, s1):
-                return True, s1.ur
+        for s in self.states:
+            if s1 is s:
+                raise ValueError('same state')
+            if s1.creation_order == s.creation_order:
+                raise ValueError('same id, different state?')
+            if self.dominates(s, s1):
+                return True, s
         return False, None
-
 
     def dominates(self, s1, s2):
         from mcdp_posets.nat import Nat
         from mcdp_posets.poset_product import PosetProduct
         
-        n1 = (40 - s1.num_connection_options,)
-        n2 = (40 - s2.num_connection_options,)
-        N = PosetProduct((Nat(),))
+        n1 = (40 - s1.num_connection_options, s1.num_resources_need_connecting)
+        n2 = (40 - s2.num_connection_options, s2.num_resources_need_connecting)
+        N = PosetProduct((Nat(), Nat()))
         # create a joint one
         from mcdp_opt_tests.test_basic import add_extra
         l1b = add_extra(s1.ur, N, n1)
@@ -363,13 +429,13 @@ class Optimization():
         f = self.f0s
         if len(self.flabels) == 1:
             f = f[0]
+        print('Solving')
+
         dp = ndp.get_dp()
+        # print(ndp)
+        # print(dp.repr_long())
 
         ur = dp.solve(f)
-        
-        if len(rnames) == 1:
-            # needs to do the same above for resources
-            raise NotImplementedError()
         
         tableres = {}
         for cresource, rname in table.items():
@@ -410,5 +476,31 @@ class Optimization():
         return dp0
         
         
+    def get_next_creation(self):
+        n = self.num_created
+        self.num_created += 1
+        return n
         
+class ActionExpand():
+    def __init__(self):
+        pass
 
+    @contract(returns=list)    
+    def __call__(self, opt, s):
+        """ Returns a list of (state, action) """
+        done, actions = s.iteration()
+        if done:
+            opt.mark_done(s)
+            return []
+
+        s.info('Generated %d actions' % len(actions))
+
+        if not actions:
+            s.info("No actions available, placing in abandoned")
+            opt.mark_abandoned(s)
+            return []
+                
+        expanded = [(s, a) for  a in actions]
+        opt.mark_expanded(s)
+        return expanded
+                     

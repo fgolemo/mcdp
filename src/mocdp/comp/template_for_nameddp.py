@@ -42,13 +42,10 @@ class TemplateForNamedDP():
         from mcdp_lang.eval_ndp_imp import eval_ndp
         return eval_ndp(self.template_code, c)
     
-    
-    def get_template_with_holes(self):
+    @contract(context='isinstance(Context)')
+    def get_template_with_holes(self, context):
         """ Returns a CompositeNamedDP with special "Hole" nodes. """
-        from mocdp.comp.context import Context
-        from mocdp.comp.composite_templatize import ndp_templatize
-
-        context = Context()
+        from .composite_templatize import ndp_templatize
 
         parameters = dict(**self.parameters)
         for k in parameters:
@@ -58,9 +55,7 @@ class TemplateForNamedDP():
             setattr(p, 'template_parameter', k)
             parameters[k] = p
 
-
         return self.specialize(parameters, context)
-
 
 class DifferentInterface(Exception):
     pass

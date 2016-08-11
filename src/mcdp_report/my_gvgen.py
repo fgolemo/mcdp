@@ -58,7 +58,7 @@ class GvGen():
         self.padding_str="   "                   # Left padding to make children and parent look nice
         self.__styles = {}
         self.__default_style = []
-        self.smart_mode = 0                      # Disabled by default
+#         self.smart_mode = 0                      # Disabled by default
 
         # The graph has a legend
         if legend_name:
@@ -107,43 +107,43 @@ class GvGen():
 
         return node
 
-    def __link_smart(self, link):
-        """
-        Creates a smart link if smart_mode activated:
-          if a -> b exists, and we now add a <- b,
-          instead of doing:  a -> b
-                               <-
-          we do: a <-> b
-        """
+#     def __link_smart(self, link):
+#         """
+#         Creates a smart link if smart_mode activated:
+#           if a -> b exists, and we now add a <- b,
+#           instead of doing:  a -> b
+#                                <-
+#           we do: a <-> b
+#         """
 
-        linkfrom = self.__link_exists(link['from_node'], link['to_node'])
-        linkto = self.__link_exists(link['to_node'], link['from_node'])
+        # linkfrom = self.__link_exists(link['from_node'], link['to_node'])
+        # linkto = self.__link_exists(link['to_node'], link['from_node'])
 
-        if self.smart_mode:
-            if linkto:
-                self.__links.remove(linkto)
-                self.propertyAppend(link, "dir", "both")
+#         if self.smart_mode:
+#             if linkto:
+#                 self.__links.remove(linkto)
+#                 self.propertyAppend(link, "dir", "both")
+#
+#             pw = self.propertyGet(linkfrom, "penwidth")
+#             if pw:
+#                 pw = float(pw)
+#                 pw += self.line_factor
+#                 if pw < self.max_line_width:
+#                     self.propertyAppend(linkfrom, "penwidth", str(pw))
+#             else:
+#                 self.propertyAppend(link, "penwidth", str(self.initial_line_width))
+#
+#             aw = self.propertyGet(linkfrom, "arrowsize")
+#             if aw:
+#                 aw = float(aw)
+#                 if aw < self.max_arrow_width:
+#                     aw += self.arrow_factor
+#                     self.propertyAppend(linkfrom, "arrowsize", str(aw))
+#             else:
+#                 self.propertyAppend(link, "arrowsize", str(self.initial_arrow_width))
 
-            pw = self.propertyGet(linkfrom, "penwidth")
-            if pw:
-                pw = float(pw)
-                pw += self.line_factor
-                if pw < self.max_line_width:
-                    self.propertyAppend(linkfrom, "penwidth", str(pw))
-            else:
-                self.propertyAppend(link, "penwidth", str(self.initial_line_width))
-
-            aw = self.propertyGet(linkfrom, "arrowsize")
-            if aw:
-                aw = float(aw)
-                if aw < self.max_arrow_width:
-                    aw += self.arrow_factor
-                    self.propertyAppend(linkfrom, "arrowsize", str(aw))
-            else:
-                self.propertyAppend(link, "arrowsize", str(self.initial_arrow_width))
-
-        if not linkfrom:
-            self.__links.append(link)
+        # if not linkfrom:
+#         self.__links.append(link)
 
 
     def __link_new(self, from_node, to_node, label = None, cl_from_node=None, cl_to_node=None):
@@ -172,24 +172,26 @@ class GvGen():
             link['cl_to_node'] = cl_to_node
 
         # We let smart link work for us
-        self.__link_smart(link)
+        # self.__link_smart(link)
+
+        self.__links.append(link)
 
         return link
 
-    def __link_exists(self, from_node, to_node):
-        """
-        Find if a link exists
-        @from_node: The node the link comes from
-        @to_node: The node the link goes to
-
-        Returns: true if the given link already exists
-        """
-
-        for link in self.__links:
-            if link['from_node'] == from_node and link['to_node'] == to_node:
-                return link
-
-        return None
+#     def __link_exists(self, from_node, to_node):
+#         """
+#         Find if a link exists
+#         @from_node: The node the link comes from
+#         @to_node: The node the link goes to
+#
+#         Returns: true if the given link already exists
+#         """
+#
+#         for link in self.__links:
+#             if link['from_node'] == from_node and link['to_node'] == to_node:
+#                 return link
+#
+#         return None
 
 
     def __has_children(self, parent):

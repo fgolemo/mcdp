@@ -1,7 +1,13 @@
 mcdp {
+    provides usbcom1 [`USBCom]
+    provides usbcom2 [`USBCom]
+    provides ethcom [`ETHCom]
+
+    provides pisocketcom [`PISocketCom] 
+
     requires in [`PortableDCPower]
 
-    ((required in).dc).connector >= `barrel_connectors: barrel_5mm
+    ((required in).dc).connector >= `USB_connectors: USB_Micro_B_male
     ((required in).dc).voltage >= `DC_voltages: v5
 
     requires budget [$]
@@ -23,7 +29,9 @@ mcdp {
     c0 = 100 mA
     c = 0.001 mA/flops
     amps = c0 + processor.flops  * c
-    ((required in).dc).amps >= amps
+
+    socket_amps = (provided pisocketcom).amp_max
+    ((required in).dc).amps >= amps + socket_amps
 
     processor.flops <= 1000 Mflops
 
@@ -32,11 +40,6 @@ mcdp {
     
     requires ethcom [`ETHCom]
 
-    provides usbcom1 [`USBCom]
-    provides usbcom2 [`USBCom]
-    provides ethcom [`ETHCom]
-
-    provides pisocketcom [`PISocketCom] 
 
     route_in = instance template mcdp {
         provides pisocketcom [`PISocketCom]

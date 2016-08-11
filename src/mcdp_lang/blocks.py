@@ -25,11 +25,11 @@ def get_missing_connections(context):
             for rn in ndp.get_rnames():
                 available_res.add((n, rn))
 
-
     unconnected_fun = available_fun - connected_fun
     unconnected_res = available_res - connected_res
 
     return unconnected_fun, unconnected_res
+
 
 def check_missing_connections(context):
     """ Checks that all resources and functions are connected. """

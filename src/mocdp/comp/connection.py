@@ -417,7 +417,7 @@ def simplify_if_only_one_name(res_dp, fnames, rnames):
 
 
 def make_name(already):
-    for i in range(1, 10):
+    for i in range(1, 1000):
         candidate = 'group%d' % i
         if not candidate in already:
             return candidate
@@ -646,6 +646,7 @@ def dpgraph(name2dp, connections, split):
                    split=split)
     return res
 
+@contract(returns='set(tuple,seq(tuple(str, str)))')
 def simple_cycles_as_edges(G):
     cycles = list(simple_cycles(G))
     def c2e(c):
@@ -654,7 +655,7 @@ def simple_cycles_as_edges(G):
             n2 = c[(i + 1) % len(c)]
             yield n1, n2
 
-    return [list(c2e(c)) for c in cycles]
+    return set([tuple(c2e(c)) for c in cycles])
 
 @contract(returns=Connection)
 def choose_connection_to_cut1(connections, name2dp):

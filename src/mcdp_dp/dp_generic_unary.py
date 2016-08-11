@@ -22,21 +22,26 @@ class GenericUnary(EmptyDP):
         EmptyDP.__init__(self, F=F, R=R)
         self.function = function
 
+        self.top = self.F.get_top()
+
     def solve(self, func):
         if isinstance(func, int):
             msg = 'Expecting a float, not an int.'
             mcdp_dev_warning('Which exception to throw?')
             raise_desc(ValueError, msg, func=func)
-        if self.F.equal(func, self.F.get_top()):
-            r = self.R.get_top()
-        else:
+
+        if isinstance(func, float):
             r = self.function(func)
 
-            mcdp_dev_warning('give much more thoguth')
+            # mcdp_dev_warning('give much more thoguth')
             if isinstance(r, float) and np.isinf(r):
                 r = self.R.get_top()
-            
-        assert isinstance(self.R, Poset)
+        else:
+            if self.F.equal(func, self.top):
+                r = self.R.get_top()
+            else:
+                raise ValueError(func)
+
         return self.R.U(r)
 
     def __repr__(self):

@@ -1,20 +1,73 @@
+from abc import ABCMeta, abstractmethod
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, check_isinstance
 from mcdp_opt.context_utils import clone_context
 from mcdp_posets.uppersets import upperset_product_multi, upperset_project
 from mocdp.comp.context import CFunction, CResource, Connection
 
 class Action():
-    pass
 
-class ActionConnect():
+    def __call__(self, opt, s):
+        raise NotImplementedError(type(self))
+
+class ActionCreate(Action):
+
+    __metaclass__ = ABCMeta
+
+    def __init__(self):
+        # actions that will be forbidden from now on
+        self.forbidden = set()
+
+    def add_forbidden(self, a):
+        check_isinstance(a, Action)
+        self.forbidden.add(a)
+
+    def __call__(self, opt, s):
+        s2 = self.call(opt, s)
+
+        s.info('Created from #%s.' % s.creation_order)
+        s.info('Using action %s' % self)
+
+        opt.note_edge(s, self, s2)
+
+        if opt.already_known(s2):
+            print('already known')
+            return []
+
+        if len(s2.ur.minimals) == 0:
+            msg = 'Unfortunately this is not feasible (%s)' % s2.ur.P
+            msg += '%s' % s2.lower_bounds
+            s2.info(msg)
+            opt.mark_abandoned(s2)
+            return []
+
+        dominated, by_what = opt.is_dominated_by_open(s2)
+
+        if dominated:
+            s2.info('Dominated by #%s' % by_what.creation_order)
+            opt.mark_abandoned(s2)
+            opt.note_domination_relation(dominated=s2, dominator=by_what)
+            return []
+
+        s.info('Expanded.')
+
+        opt.mark_expanded(s)
+        opt.states.append(s2)
+
+        from mcdp_opt.optimization import ActionExpand
+        return [(s2, ActionExpand())]
+
+    @abstractmethod
+    def call(self):
+        pass
+
+class ActionConnect(ActionCreate):
     @contract(f=CFunction, r=CResource)
     def __init__(self, f, r):
         self.cfunction = f
         self.cresource = r
 
-    def __call__(self, opt, c):
-        print self
+    def call(self, opt, c):
         context = clone_context(c.context)
 
         con = Connection(self.cresource.dp, self.cresource.s,
@@ -31,19 +84,22 @@ class ActionConnect():
         lower_bounds = tableres
 
         from mcdp_opt.optimization_state import OptimizationState
-        return OptimizationState(opt=opt, options=c.options,
+        s2 = OptimizationState(opt=opt, options=c.options,
                                  context=context, executed=executed,
                                  forbidden=forbidden, lower_bounds=lower_bounds,
-                                 ur=ur)
+                                 ur=ur, creation_order=opt.get_next_creation())
+        return s2
+
 
     def __repr__(self):
-        return "Connect(%s->%s)" % (self.cresource, self.cfunction)
+        return "Connect(%s:%s->%s:%s)" % (self.cresource.dp, self.cresource.s,
+                                          self.cfunction.dp, self.cfunction.s)
 
     def __eq__(self, a):
         return isinstance(a, ActionAddNDP) and \
             (a.cfunction, a.cresource) == (self.cfunction, self.cresource)
 
-class ActionAddNDP():
+class ActionAddNDP(ActionCreate):
     """ Instance id_ndp and connect to cresource """
 
     def __eq__(self, a):
@@ -56,8 +112,7 @@ class ActionAddNDP():
         self.fname = fname
         self.cresource = cresource
 
-    def __call__(self, opt, c):
-        print self
+    def call(self, opt, c):
         context = clone_context(c.context)
 
         ndp = opt.load_ndp(self.id_ndp)
@@ -100,9 +155,15 @@ class ActionAddNDP():
         (_R, ur), _tableres = opt.get_lower_bounds(ndp, table)
 
         from mcdp_opt.optimization_state import OptimizationState
-        return OptimizationState(opt=opt, options=c.options,
+        s2 = OptimizationState(opt=opt, options=c.options,
                                  context=context, executed=executed,
-                                 forbidden=forbidden, lower_bounds=lower_bounds, ur=ur)
+                                 forbidden=forbidden, lower_bounds=lower_bounds, ur=ur,
+                                 creation_order=opt.get_next_creation())
+
+        s2.info('Parent: #%s' % c.creation_order)
+        s2.info('Action: #%s' % self)
+        return s2
+
 
     def __repr__(self):
         return "AddNDP(%s:%s provides %s:%s)" % (self.id_ndp, self.fname,

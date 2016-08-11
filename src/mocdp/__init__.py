@@ -63,3 +63,6 @@ import quickapp
 ATTRIBUTE_NDP_RECURSIVE_NAME = 'ndp_recursive_name'
 # added to NamedDPs
 ATTRIBUTE_NDP_MAKE_FUNCTION = 'make'
+
+ATTR_LOAD_NAME = '__mcdplibrary_load_name'
+

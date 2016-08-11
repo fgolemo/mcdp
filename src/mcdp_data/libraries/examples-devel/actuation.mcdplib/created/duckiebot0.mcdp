@@ -13,6 +13,7 @@
 
   pi.gpiocom <= pi_camera.com 
  
+  cable = instance `USB_A_to_Micro_B_cable
 
   USBMicroCharger = instance `USBMicroCharging
 
@@ -20,7 +21,8 @@
 
   in required by battery_ravpower <= out provided by USBMicroCharger
   
-  in required by pi <= out1 provided by battery_ravpower 
+  in required by pi <= out provided by cable
+  in required by cable <= out1 provided by battery_ravpower 
   
   # battery below
   battery_ravpower.payload <= dagu_chassis.payload_bottom
@@ -39,7 +41,6 @@
       requires payload [`Payload]
   }
  
-
   
   fit.p1 >= pi.payload
   fit.p2 >= dc_hat.payload

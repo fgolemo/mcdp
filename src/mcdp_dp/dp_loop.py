@@ -3,11 +3,10 @@ from .primitive import Feasible, NotFeasible, PrimitiveDP
 from .tracer import Tracer
 from collections import namedtuple
 from contracts.utils import indent, raise_desc, raise_wrapped
-from mcdp_posets import Map, NotLeq, PosetProduct, UpperSet, UpperSets
-from mcdp_posets.utils import poset_minima
+from mcdp_posets import (Map, NotLeq, PosetProduct, UpperSet, UpperSets,
+    poset_maxima, poset_minima)
 from mocdp.exceptions import do_extra_checks
 import itertools
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
 
 
 __all__ = [

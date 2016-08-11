@@ -33,12 +33,24 @@ class OpaqueIdentity(WrapAMap):
         WrapAMap.__init__(self, amap)
 
     def __repr__(self):
-        return 'OpaqueIdentity(%r)' % self.F
+        n = type(self).__name__
+        return '%s(%r)' % (n, self.F)
 
-class ResourceNode(OpaqueIdentity):
-    pass
+if False:
+    class ResourceNode(IdentityDP):
+        pass
 
-class FunctionNode(OpaqueIdentity):
-    pass
+    class FunctionNode(IdentityDP):
+        pass
+
+else:
+    class ResourceNode(OpaqueIdentity):
+        pass
+
+    class FunctionNode(OpaqueIdentity):
+        pass
+
+
+
 
 Identity = IdentityDP

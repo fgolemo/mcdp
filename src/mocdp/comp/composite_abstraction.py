@@ -12,16 +12,19 @@ from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import mcdp_dev_warning
 from networkx.algorithms.cycles import simple_cycles
 
+
 @contract(ndp=CompositeNamedDP, returns=SimpleWrap)
 def cndp_abstract(ndp):
     from mocdp.comp.connection import get_connection_multigraph
     
     G = get_connection_multigraph(ndp.get_connections())
     cycles = list(simple_cycles(G))
+    print('cndp_abstract: %d cycles' % len(cycles))
     if not cycles:
         return dpgraph_making_sure_no_reps(ndp.context)
     else:
         return cndp_abstract_loop2(ndp)
+
 
 @contract(ndp=CompositeNamedDP, returns=SimpleWrap)
 def cndp_abstract_loop2(ndp):

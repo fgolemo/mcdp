@@ -2,12 +2,10 @@
 from .dp_series import get_product_compact
 from .primitive import NormalForm, PrimitiveDP
 from contracts.utils import indent, raise_wrapped
-from mcdp_posets import (
-    Map, PosetProduct, UpperSet, UpperSets, lowerset_product, poset_minima,
-    upperset_product)
+from mcdp_posets import (Map, NotBelongs, PosetProduct, UpperSet, UpperSets,
+    lowerset_product, poset_minima, upperset_product)
 from mocdp.exceptions import do_extra_checks
 import itertools
-from mcdp_posets.space import NotBelongs
 
 
 __all__ = [

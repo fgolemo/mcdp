@@ -30,7 +30,7 @@ class Constant(PrimitiveDP):
         return self.R.U(self.c)
 
     def __repr__(self):
-        return 'Constant(%s:%r)' % (self.R, self.c)
+        return 'Constant(%s:%s)' % (self.R, self.c)
 
 
 class ConstantMinimals(PrimitiveDP):
@@ -52,5 +52,6 @@ class ConstantMinimals(PrimitiveDP):
         return self.R.Us(self.values)
 
     def __repr__(self):
-        return 'ConstantMins(%s:%r)' % (self.R, self.values)
+        s = len(self.values)
+        return 'ConstantMins(%s:%s)' % (self.R, s)
 

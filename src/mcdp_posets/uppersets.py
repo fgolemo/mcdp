@@ -141,6 +141,9 @@ class UpperSets(Poset):
 
         self.my_leq_(a, b)
 
+    def leq(self, a, b):
+        return self._my_leq_fast(a, b)
+
     def my_leq_(self, A, B):
         # there exists an a in A that a <= b
         def dominated(b):
@@ -154,7 +157,6 @@ class UpperSets(Poset):
                     problems.append(e)
             return False, problems
 
-
         # for all elements in B
         for b in B.minimals:
             is_dominated, whynot = dominated(b)
@@ -162,6 +164,22 @@ class UpperSets(Poset):
                 msg = "b = %s not dominated by any a in %s" % (b, A.minimals)
                 msg += '\n' + '\n- '.join(map(str, whynot))
                 raise NotLeq(msg)
+
+    def _my_leq_fast(self, A, B):
+        # there exists an a in A that a <= b
+        def dominated(b):
+            for a in A.minimals:
+                if self.P.leq(a, b):
+                    return True
+            return False
+
+        # for all elements in B
+        for b in B.minimals:
+            is_dominated = dominated(b)
+            if not is_dominated:
+                return False
+
+        return True
 
     def meet(self, a, b):  # "min" ∨
         # To compute the meet (min) of two upper sets
@@ -190,10 +208,7 @@ class UpperSets(Poset):
 
     def __repr__(self):
         return "U(%r)" % self.P
-
-
-
-
+ 
 
 class LowerSets(Poset):
 

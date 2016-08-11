@@ -4,9 +4,9 @@ from .space_product import SpaceProduct
 from contracts import contract
 from contracts.utils import indent, raise_desc
 from mocdp.exceptions import do_extra_checks
-import itertools
-import collections
 from mocdp.memoize_simple_imp import memoize_simple
+import collections
+import itertools
 
 __all__ = [
     'PosetProduct',
@@ -98,5 +98,3 @@ class PosetProduct(SpaceProduct, Poset):
         chains = [s.get_test_chain(n) for s in self.subs]
         res = zip(*tuple(chains))
         return res
-
-

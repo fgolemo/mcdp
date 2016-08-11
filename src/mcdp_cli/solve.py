@@ -3,6 +3,7 @@ from .solve_meat import solve_main
 from decent_params import UserError
 from quickapp import QuickAppBase
 import logging
+import os
 
 
 class SolveDP(QuickAppBase):
@@ -21,6 +22,7 @@ class SolveDP(QuickAppBase):
                        help='Expected number of resources.',
                         default=None)
         params.accept_extra()
+        params.add_flag('cache')
         params.add_flag('plot', help='Show iterations graphically')
         params.add_flag('movie', help='Create animation.')
         params.add_flag('imp', help='Compute and show implementations.')
@@ -81,7 +83,10 @@ class SolveDP(QuickAppBase):
 
         config_dirs = options.config_dirs.split(":")
         maindir = options.maindir
-        cache_dir = None
+        if options.cache:
+            cache_dir = os.path.join(out_dir, '_cached', 'solve')
+        else:
+            cache_dir = None
 
         solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper, out_dir, max_steps, query_strings,
                    intervals, _exp_advanced, expect_nres, imp, expect_nimp, plot, do_movie,

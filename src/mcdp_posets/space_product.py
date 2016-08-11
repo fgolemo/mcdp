@@ -2,7 +2,7 @@
 from .space import NotBelongs, NotEqual, Space
 from contracts import contract
 from contracts.utils import check_isinstance, indent, raise_desc
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME, ATTR_LOAD_NAME
 
 __all__ = [
     'SpaceProduct',
@@ -94,9 +94,12 @@ class SpaceProduct(Space):
         return '%s(%d: %s)' % (name, len(self.subs), ",".join(args))
 
     def __str__(self):
+        if hasattr(self, ATTR_LOAD_NAME):
+            return "`" + getattr(self, ATTR_LOAD_NAME)
+
         def f(x):
-            if hasattr(x, '__mcdplibrary_load_name'):
-                res = '`' + getattr(x, '__mcdplibrary_load_name')
+            if hasattr(x, ATTR_LOAD_NAME):
+                res = '`' + getattr(x, ATTR_LOAD_NAME)
             else:
                 r = x.__str__()
                 if  r[-1] != ')' and (isinstance(x, SpaceProduct) or ("×" in r)):

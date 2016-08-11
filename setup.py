@@ -55,6 +55,7 @@ setup(name='PyMCDP_devel',
         'DecentLogs',
         'QuickApp>=1.2',
         'compmake',
+        'markdown',
       ],
       dependency_links  = [
           # 'https://github.com/AndreaCensi/contracts/archive/env_mcdp.zip#egg=PyContracts',

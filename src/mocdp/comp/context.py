@@ -28,6 +28,7 @@ class Connection(Connection0):
         return ("Constraint(%s.%s <= %s.%s)" %
                 (self.dp1, self.s1, self.dp2, self.s2))
 
+    @contract(nodes='set(str)|seq(str)')
     def involves_any_of_these_nodes(self, nodes):
         """ Returns true if any of the two nodes is in the iterable nodes."""
         return self.dp1 in nodes or self.dp2 in nodes

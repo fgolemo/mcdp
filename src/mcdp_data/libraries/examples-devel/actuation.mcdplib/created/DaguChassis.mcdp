@@ -14,8 +14,9 @@ mcdp {
    shape_top = (provided payload_top).shape
    shape_bottom = (provided payload_bottom).shape
  
-   shape_top <= <10cm, 11cm, 30cm>
-   shape_bottom <= <10cm, 11cm, 3cm>
+
+   shape_top <= <14cm, 11cm, 30cm>
+   shape_bottom <= <14cm, 11cm, 3cm>
 
    (provided motion).velocity <= 35 cm/ s
 

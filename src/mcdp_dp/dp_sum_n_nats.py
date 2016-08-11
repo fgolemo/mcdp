@@ -5,9 +5,13 @@ from mcdp_maps import SumNatsN
 from mcdp_posets import Nat
 
 
-__all__ = ['SumNNat']
+__all__ = [
+    'SumNNat',
+]
+
 
 class SumNNat(WrapAMap):
+
     @contract(Fs='tuple, seq[>=2]($Nat)', R=Nat)
     def __init__(self, Fs, R):
         for _ in Fs:

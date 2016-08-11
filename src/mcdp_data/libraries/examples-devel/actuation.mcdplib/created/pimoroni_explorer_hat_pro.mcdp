@@ -1,5 +1,9 @@
 
 mcdp {
+
+    provides pwm1 [`PWM]
+    provides pwm2 [`PWM]
+    requires pisocket [`PISocketCom] 
     # provides digital_in_1 [sensed :: V] 
     # provides digital_in_2 [sensed :: V] 
     # provides digital_in_3 [sensed :: V] 
@@ -42,20 +46,29 @@ mcdp {
     # total_current = c1+c2+c3+c4
     # take(connection, 1) >= total_current
 
-    requires mass [g]
+    requires payload [`Payload]
+    (provided pwm1).voltage_max <= 5 V
+    (provided pwm2).voltage_max <= 5 V 
+    (provided pwm1).freq_max <= 60 Hz
+    (provided pwm2).freq_max <= 60 Hz
 
-    mass >= 20g 
+    amp1 = (provided pwm1).amp_max
+    amp2 = (provided pwm2).amp_max
 
-    # requires components >= {1 of `components: Explorer_Hat}
-
-    requires shape [cm x cm x cm]
-
-    shape >= <8cm, 3cm, 1cm>
+    duration = max( (provided pwm1).duration,(provided pwm2).duration)
     
+    amp_max = amp1 + amp2
+    rigid_body = max( (provided pwm1).rigid_body, (provided pwm2).rigid_body)
+    (required payload).mass >= 20g
+    (required payload).shape >= <8cm, 3cm, 1cm>
+    (required payload).rigid_body >= rigid_body
+    
+    (required pisocket).amp_max >= amp_max
+    (required pisocket).duration >= duration
+    (required pisocket).rigid_body >= rigid_body
+
     requires budget [USD]
 
-    budget >= 22.95 USD
+    budget >= 22.95 USD 
 
 }
-
-

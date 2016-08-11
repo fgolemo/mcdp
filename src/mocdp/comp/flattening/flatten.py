@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
+from _collections import defaultdict
 from contracts import contract
 from contracts.utils import raise_desc
+from mcdp_dp.dp_identity import Identity
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import (Connection, get_name_for_fun_node,
     get_name_for_res_node, is_fun_node_name, is_res_node_name)
+from mocdp.comp.context_functions import is_dp_connected
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
-from _collections import defaultdict
-from mcdp_dp.dp_identity import Identity
-from mocdp.comp.context_functions import is_dp_connected
 
 __all__ = [
     'cndp_flatten',
@@ -87,8 +87,6 @@ def flatten_add_prefix(ndp, prefix):
 
         return CompositeNamedDP.from_parts(names2, connections2, fnames2, rnames2)
 
-    # XXX
-    # mocdp.ndp.named_coproduct.NamedDPCoproduct
     if isinstance(ndp, NamedDPCoproduct):
         children = ndp.ndps
         children2 = tuple([flatten_add_prefix(_, prefix) for _ in children])
@@ -116,19 +114,16 @@ def cndp_flatten(ndp):
         proxy_resources[name] = {}
 
         n1 = n0.flatten()
-#         print('n1: %s' % add_prefix(str(n1), '| '))
+
 
         if isinstance(n1, CompositeNamedDP):
             nn = flatten_add_prefix(n1, prefix=name)
-#             print('nn: %s' % add_prefix(str(nn), '| '))
         else:
             nn = n1
 
-#         print(' name: %s' % name)
         if isinstance(nn, CompositeNamedDP):
             nn_connections = nn.get_connections()
             for name2, ndp2 in nn.get_name2ndp().items():
-#                 print(' name2: %s' % name2)
                 assert not name2 in names2
                 isitf, is_fname = is_fun_node_name(name2)
                 isitr, is_rname = is_res_node_name(name2)
@@ -213,7 +208,7 @@ def cndp_flatten(ndp):
     #  proxy_resources
     def exploded(name):
         return isinstance(name2ndp[name], CompositeNamedDP)
-    print list(proxy_resources)
+    # print list(proxy_resources)
     errors = []
     for name, n0 in name2ndp.items():
         try:

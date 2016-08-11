@@ -39,8 +39,10 @@ mcdp {
      
      # same rigid body
      #max( (provided out1).rigid_body,  (provided out2).rigid_body) <= any-of({ `RigidBodyID: rb1, `RigidBodyID: rb2, `RigidBodyID: rb3})
-
-     max( (provided out1).rigid_body,  (provided out2).rigid_body) <= any-of(Minimals `RigidBodyID)
+     rb1 = max( (provided out1).rigid_body,  (provided out2).rigid_body) 
+     rb2 = (provided out3).rigid_body
+     rb = max(rb1, rb2)
+     rb <= any-of(Minimals `RigidBodyID)
      # 
 
 }

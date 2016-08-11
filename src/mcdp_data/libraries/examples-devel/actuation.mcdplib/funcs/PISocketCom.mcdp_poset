@@ -1,5 +1,6 @@
 product(
     tag: S(PiSocketCom),
+    amp_max: A,
     duration: s,
     rigid_body: `RigidBodyID
 )

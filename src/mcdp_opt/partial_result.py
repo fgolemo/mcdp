@@ -12,7 +12,7 @@ def get_lower_bound_ndp(context):
         We create an NDP where each open resource becomes a new resource.
         and all the functions are given a lower bound of 0.
         
-        Exception: the unconnected resources are ignored
+        The new resources are given a name like: dummy<i>
     """
     context = clone_context(context)
     

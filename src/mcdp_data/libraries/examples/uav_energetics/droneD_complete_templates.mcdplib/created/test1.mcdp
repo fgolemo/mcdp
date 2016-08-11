@@ -1,0 +1,7 @@
+specialize [
+   Battery: `Battery_LiPo1, 
+   Actuation: `Actuation, 
+   Perception: `Perception1,
+   PowerApprox: `PowerApprox
+] 
+`DroneCompleteTemplate

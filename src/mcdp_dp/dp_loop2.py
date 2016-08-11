@@ -3,12 +3,14 @@ from contracts.utils import indent, raise_desc, raise_wrapped
 from mcdp_dp.dp_loop import Iteration
 from mcdp_dp.primitive import Feasible, NotFeasible, PrimitiveDP
 from mcdp_dp.tracer import Tracer
-from mcdp_posets import (NotEqual, NotLeq, PosetProduct, UpperSets,
-    get_types_universe)
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima, poset_maxima
+from mcdp_posets import (LowerSet, NotEqual, NotLeq, PosetProduct, UpperSet,
+    UpperSets, get_types_universe, poset_maxima, poset_minima)
 from mocdp.exceptions import do_extra_checks
-from mcdp_posets.uppersets import UpperSet, LowerSet
 import itertools
+
+__all__ = [
+    'DPLoop2',
+]
 
 
 class DPLoop2(PrimitiveDP):
@@ -217,7 +219,7 @@ class DPLoop2(PrimitiveDP):
         UR.belongs(s0)
         trace.log('Iterating in UR = %s' % UR)
         trace.log('Starting from %s' % UR.format(s0))
-        trace.log('dp0: %s' % self.dp1.repr_long())
+        # trace.log('dp0: %s' % self.dp1.repr_long())
 
         S = [Iteration(s=s0, converged=set())]
         for i in range(1000000):  # XXX

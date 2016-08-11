@@ -5,6 +5,7 @@ from .utils import time_poset_minima_func
 
 __all__ = [
     'poset_minima',
+    'poset_maxima',
 ]
 
 def poset_maxima(elements, leq):

@@ -16,14 +16,14 @@ from mocdp.memoize_simple_imp import memoize_simple
 import os
 import shutil
 import sys
-
+from mocdp import ATTR_LOAD_NAME
 
 
 __all__ = [
     'MCDPLibrary',
+    'ATTR_LOAD_NAME',
 ]
 
-ATTR_LOAD_NAME = '__mcdplibrary_load_name'
 
 class MCDPLibrary():
     """
@@ -119,31 +119,31 @@ class MCDPLibrary():
             if os.path.exists(self.cache_dir):
                 shutil.rmtree(self.cache_dir)
 
-    @memoize_simple
+    # @memoize_simple
     @contract(returns=NamedDP)
     def load_ndp(self, id_ndp):
         return self._load_generic(id_ndp, MCDPLibrary.ext_ndps,
                                   MCDPLibrary.parse_ndp)
 
-    @memoize_simple
+    # @memoize_simple
     @contract(returns=Poset)
     def load_poset(self, id_poset):
         return self._load_generic(id_poset, MCDPLibrary.ext_posets,
                                   MCDPLibrary.parse_poset)
 
-    @memoize_simple
+    # @memoize_simple
     @contract(returns=ValueWithUnits)
     def load_constant(self, id_poset):
         return self._load_generic(id_poset, MCDPLibrary.ext_values,
                                   MCDPLibrary.parse_constant)
 
-    @memoize_simple
+    # @memoize_simple
     @contract(returns=PrimitiveDP)
     def load_primitivedp(self, id_primitivedp):
         return self._load_generic(id_primitivedp, MCDPLibrary.ext_primitivedps,
                                   MCDPLibrary.parse_primitivedp)
 
-    @memoize_simple
+    # @memoize_simple
     @contract(returns=TemplateForNamedDP)
     def load_template(self, id_ndp):
         return self._load_generic(id_ndp, MCDPLibrary.ext_templates,

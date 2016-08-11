@@ -91,7 +91,7 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
             s = 'r = %s ' % R.format(r)
             for j, m in enumerate(ms):
                 # print('m = %s' % str(m))
-                s += "\n  implementation %d: m = %s " % (j + 1, M.format(m))
+                s += "\n  implementation %d of %d: m = %s " % (j + 1, len(ms), M.format(m))
 
                 if make:
                     imp_dict = get_imp_as_recursive_dict(M, m)  # , ignore_hidden=False)

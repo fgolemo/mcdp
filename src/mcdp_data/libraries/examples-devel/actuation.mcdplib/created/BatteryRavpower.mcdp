@@ -20,7 +20,7 @@ mcdp {
     ((provided out2).dc).voltage <= `DC_voltages: v5
     amps2 = ((provided out2).dc).amps
 
-    ((required in).dc).connector >= `USB_connectors:USB_Micro_B
+    ((required in).dc).connector >= `USB_connectors: USB_Micro_A_male
     ((required in).dc).voltage >= `DC_voltages: v5
 
     (required payload).rigid_body >= (provided out1).rigid_body

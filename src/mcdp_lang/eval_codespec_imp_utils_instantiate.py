@@ -1,11 +1,12 @@
+from contracts import contract
+from contracts.utils import indent, raise_desc
+import sys
 import traceback
 
-from contracts import contract
-from contracts.utils import raise_desc, indent
-import sys
-
-
-__all__ = ['import_name', 'instantiate']
+__all__ = [
+    'import_name',
+    'instantiate',
+]
 
 class SemanticMistake(Exception):
     pass

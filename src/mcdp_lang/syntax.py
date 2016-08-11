@@ -140,7 +140,6 @@ class Syntax():
     GEQ = spk(L('>=') | L('≥') , CDP.geq)
     LEQ = spk(L('<=') | L('≤') , CDP.leq)
 
-
     EQ = spk(L('='), CDP.eq)
     DOT = spk(L('.'), CDP.DotPrep)
     PLUS = spk(L('+'), CDP.plus)

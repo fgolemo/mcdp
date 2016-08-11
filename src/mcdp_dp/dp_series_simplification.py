@@ -95,7 +95,8 @@ class RuleSimplifyLift(SeriesSimplificationRule):
 
         P = make_parallel(dp2.dp1, make_series(m2, dp2.dp2))
 
-        res = make_series(m1, P)
+#         res = make_series(m1, P)
+        res = Series(m1, P)
         return res
 
 
@@ -138,7 +139,8 @@ class RuleSimplifyLiftB(SeriesSimplificationRule):
 
         P = make_parallel(make_series(m2, dp2.dp1), dp2.dp2)
 
-        res = make_series(m1, P)
+        # res = make_series(m1, P)
+        res = Series(m1, P)
         return res
 
 
@@ -160,7 +162,6 @@ class RuleMuxComposition(SeriesSimplificationRule):
         assert isinstance(dp2, Mux)
         return mux_composition(dp1, dp2)
 
-
             
 class RuleSimplifyPermPar(SeriesSimplificationRule):
     """ 
@@ -178,7 +179,8 @@ class RuleSimplifyPermPar(SeriesSimplificationRule):
         if not isinstance(dp2, Parallel):
             return False
 
-        if not isinstance(dp1, Mux) or not is_two_permutation(dp1.get_fun_space(), dp1.coords):
+        if not isinstance(dp1, Mux) or \
+            not is_two_permutation(dp1.get_fun_space(), dp1.coords):
             return False
 
         return True
@@ -275,12 +277,6 @@ def make_series(dp1, dp2):
         return mux_composition(dp1, dp2)
 
     if isinstance(dp1, Mux):
-#         if isinstance(dp2, Series):
-#             dps = unwrap_series(dp2)
-#             if isinstance(dps[0], Mux):
-#                 first = mux_composition(dp1, dps[0])
-#                 rest = reduce(make_series, dps[1:])
-#                 return make_series(first, rest)
 
         def has_null_fun(dp):
             F = dp.get_fun_space()

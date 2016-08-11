@@ -275,7 +275,7 @@ def cndp_iterate_fun_nodes(cndp):
 
 @contract(cndp=CompositeNamedDP, returns='list(tuple(str, $NamedDP))')
 def cndp_get_name_ndp_notfunres(cndp):
-    """ Yields a sequence of name, ndp excluding 
+    """ Yields a sequence of (name, ndp) excluding 
         the fake ones that represent function or resource. """
     assert isinstance(cndp, CompositeNamedDP)
     from mocdp.comp.context import is_res_node_name, is_fun_node_name

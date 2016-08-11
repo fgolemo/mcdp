@@ -4,14 +4,26 @@ from mocdp.comp.context import CFunction, Context
 
 
 @contract(returns='list($CFunction)')
-def get_compatible_unconnected_functions(R, context, unconnected_fun):
+def get_compatible_unconnected_functions(R, context, unconnected_fun,
+                                         only_one_per_dp=True):
     tu = get_types_universe()
     res = []
+    used_dps = set()
     for dp1, fname in unconnected_fun:
+        # skip if we already used it
+        # TODO: maybe only allow this for numbered options?
+        if only_one_per_dp:
+            if dp1 in used_dps:
+                continue
+
         f = CFunction(dp1, fname)
         F = context.get_ftype(f)
         if tu.leq(R, F):
             res.append(f)
+            used_dps.add(dp1)
+
+#     print('get_compatible_unconnected_functions(): %s -> %s ' % (R, res))
+    
     return res
 
 def clone_context(c):

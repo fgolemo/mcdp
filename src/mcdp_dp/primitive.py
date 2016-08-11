@@ -5,14 +5,13 @@ from collections import namedtuple
 from contracts import contract
 from contracts.utils import indent, raise_desc
 from decent_logs import WithInternalLog
-from mcdp_posets import LowerSet  # @UnusedImport
-from mcdp_posets import (Map, Ncomp, NotBelongs, Poset, PosetProduct, Space,
-    SpaceProduct, UpperSet, UpperSets, poset_minima)
-from mocdp.exceptions import do_extra_checks
+from mcdp_posets import (LowerSet, Map, Ncomp, NotBelongs, Poset, PosetProduct,
+    Space, SpaceProduct, UpperSet, UpperSets, poset_minima)
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
-from copy import deepcopy
+from mocdp.exceptions import do_extra_checks
 import copy
 
+_ = LowerSet  # used by PyContracts
 
 __all__ = [
     'PrimitiveDP',

@@ -74,5 +74,6 @@ class LimitMaximals(PrimitiveDP):
         return res
 
     def __repr__(self):
-        return 'LimitMaximals(%s, %s)' % (self.F, self.limit)
+        s = len(self.limit.maximals)
+        return 'LimitMaximals(%s, %s els)' % (self.F, s)
 

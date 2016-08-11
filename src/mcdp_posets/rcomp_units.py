@@ -3,9 +3,10 @@ from .any import Any, BottomCompletion, TopCompletion
 from .rcomp import Rcomp
 from .space import Map
 from contracts import contract
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, check_isinstance
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
-from mocdp.exceptions import DPSyntaxError, mcdp_dev_warning
+from mocdp.exceptions import DPSyntaxError, mcdp_dev_warning, do_extra_checks
+from mocdp.memoize_simple_imp import memoize_simple
 from pint import UnitRegistry  # @UnresolvedImport
 from pint.unit import UndefinedUnitError  # @UnresolvedImport
 import functools
@@ -33,14 +34,16 @@ def get_ureg():
 class RcompUnits(Rcomp):
 
     def __init__(self, pint_unit):
-        # ureg = get_ureg()
-        # check_isinstance(pint_unit, ureg.Quantity)
+        if do_extra_checks():
+            ureg = get_ureg()
+            check_isinstance(pint_unit, ureg.Quantity)
             
         Rcomp.__init__(self)
         self.units = pint_unit
 
         self.units_formatted = format_pint_unit_short(self.units)
 
+    @memoize_simple
     def __repr__(self):
         # need to call it to make sure dollars is defined
         ureg = get_ureg()  # @UnusedVariable
@@ -107,6 +110,8 @@ def parse_pint(s0):
         msg = 'Cannot parse units %r (%s).' % (s0, type(e))
         raise_wrapped(DPSyntaxError, e, msg)
 
+# @memoize_simple
+# cannot use memoize because we use setattr later
 def make_rcompunit(units):
     try:
         s = units.strip()
