@@ -222,8 +222,6 @@ class PrimitiveDP(WithInternalLog):
             beta:  U(F) x S -> S 
         """
         One = PosetProduct(())
-#         UOne = UpperSets(One)
-#         S = UOne
         S = One
 
         class DefaultAlphaMap(Map):
@@ -241,7 +239,6 @@ class PrimitiveDP(WithInternalLog):
                 Res = self.dp.solveU(F)
                 return Res
 
-
         class DefaultBeta(Map):
             def __init__(self, dp):
                 self.dp = dp
@@ -253,9 +250,6 @@ class PrimitiveDP(WithInternalLog):
 
             def _call(self, x):
                 _F, s = x
-
-                # print('Beta() for %s' % (self.dp))
-                # print(' f = %s s = %s -> unchanged ' % (_F, s))
                 return s
 
         alpha = DefaultAlphaMap(self)
@@ -263,34 +257,34 @@ class PrimitiveDP(WithInternalLog):
 
         return NormalForm(S=S, alpha=alpha, beta=beta)
 
-    def get_normal_form_approx(self):
-        gamma = DefaultGamma(self)
-        delta = DefaultDelta(self)
-        S = PosetProduct(())
-        return NormalFormApprox(S=S, gamma=gamma, delta=delta)
-
+#     def get_normal_form_approx(self):
+#         gamma = DefaultGamma(self)
+#         delta = DefaultDelta(self)
+#         S = PosetProduct(())
+#         return NormalFormApprox(S=S, gamma=gamma, delta=delta)
 
     def __repr__(self):
         return '%s(%s→%s)' % (type(self).__name__, self.F, self.R)
 
     def _add_extra_info(self):
-        return ""
-        s = ""
+        if False:
+            s = ""
 
-        if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
-            x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
-            s += ' named: ' + x.__str__()
+            if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
+                x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
+                s += ' named: ' + x.__str__()
 
-        s3 = self.get_imp_space().__repr__()
-        s += ' I = %s' % s3
+            s3 = self.get_imp_space().__repr__()
+            s += ' I = %s' % s3
 
-        from mocdp.comp.recursive_name_labeling import get_names_used
-        if isinstance(self.I, SpaceProduct):
-            names = get_names_used(self.I)
-            # names = filter(None, names)
-            if names:
-                s += ' names: %s' % names
-        return s
+            from mocdp.comp.recursive_name_labeling import get_names_used
+            if isinstance(self.I, SpaceProduct):
+                names = get_names_used(self.I)
+                # names = filter(None, names)
+                if names:
+                    s += ' names: %s' % names
+        else:
+            return ""
 
     def repr_long(self):
         s = self.__repr__()
@@ -375,48 +369,45 @@ class ApproximableDP(PrimitiveDP):
 
 NormalForm = namedtuple('NormalForm', ['S', 'alpha', 'beta'])
 
-NormalFormApprox = namedtuple('NormalFormApprox', ['S', 'gamma', 'delta'])
-
-
-
-
-class DefaultGamma(Map):
-    """
-    
-        F x S, Nl, Nu
-    """
-    def __init__(self, dp):
-        self.dp = dp
-        F = dp.get_fun_space()
-        R = dp.get_res_space()
-        UF = UpperSets(F)
-        UR = UpperSets(R)
-        S = PosetProduct(())
-        N = Ncomp()
-        dom = PosetProduct((UF, S, N, N))
-        cod = PosetProduct((UR, UR))
-        Map.__init__(self, dom, cod)
-
-    def _call(self, x):
-        F, _s, nl, nu = x
-        Res = self.dp.solveU_approx(F, nl, nu)
-        return Res
-
-
-class DefaultDelta(Map):
-    def __init__(self, dp):
-        self.dp = dp
-        F = dp.get_fun_space()
-        UF = UpperSets(F)
-
-        S = PosetProduct(())
-        N = Ncomp()
-        dom = PosetProduct((UF, S, N, N))
-        cod = PosetProduct((S, S))
-        Map.__init__(self, dom, cod)
-
-    def _call(self, x):
-        _F, s, _nl, _nu = x
-        # print('Beta() for %s' % (self.dp))
-        # print(' f = %s s = %s -> unchanged ' % (_F, s))
-        return s, s
+# NormalFormApprox = namedtuple('NormalFormApprox', ['S', 'gamma', 'delta'])
+#
+# class DefaultGamma(Map):
+#     """
+#
+#         F x S, Nl, Nu
+#     """
+#     def __init__(self, dp):
+#         self.dp = dp
+#         F = dp.get_fun_space()
+#         R = dp.get_res_space()
+#         UF = UpperSets(F)
+#         UR = UpperSets(R)
+#         S = PosetProduct(())
+#         N = Ncomp()
+#         dom = PosetProduct((UF, S, N, N))
+#         cod = PosetProduct((UR, UR))
+#         Map.__init__(self, dom, cod)
+#
+#     def _call(self, x):
+#         F, _s, nl, nu = x
+#         Res = self.dp.solveU_approx(F, nl, nu)
+#         return Res
+#
+#
+# class DefaultDelta(Map):
+#     def __init__(self, dp):
+#         self.dp = dp
+#         F = dp.get_fun_space()
+#         UF = UpperSets(F)
+#
+#         S = PosetProduct(())
+#         N = Ncomp()
+#         dom = PosetProduct((UF, S, N, N))
+#         cod = PosetProduct((S, S))
+#         Map.__init__(self, dom, cod)
+#
+#     def _call(self, x):
+#         _F, s, _nl, _nu = x
+#         # print('Beta() for %s' % (self.dp))
+#         # print(' f = %s s = %s -> unchanged ' % (_F, s))
+#         return s, s

@@ -214,7 +214,7 @@ class DPLoop2(PrimitiveDP):
         # we start from the bottom
         zeros = R2.get_minimal_elements()
         minimals = set(itertools.product((f1,), zeros))
-        f0s = self.F.Us(minimals)
+        f0s = dp0.F.Us(minimals)
         s0 = dp0.solveU(f0s)
         UR.belongs(s0)
         trace.log('Iterating in UR = %s' % UR)
