@@ -111,6 +111,9 @@ def generic_solve(dp, f, max_steps=None):
     # UR = UpperSets(dp.get_res_space())
 
     S, alpha, beta = dp.get_normal_form()
+    print('S: %s' % S)
+    print('alpha: %s' % alpha)
+    print('beta: %s' % beta)
 
     s0 = S.get_bottom()
     print('s0: %s' % str(s0))

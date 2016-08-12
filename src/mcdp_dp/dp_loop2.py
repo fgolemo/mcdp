@@ -7,6 +7,8 @@ from mcdp_posets import (LowerSet, NotEqual, NotLeq, PosetProduct, UpperSet,
     UpperSets, get_types_universe, poset_maxima, poset_minima)
 from mocdp.exceptions import do_extra_checks
 import itertools
+from mcdp_posets.space import Map
+
 
 __all__ = [
     'DPLoop2',
@@ -86,14 +88,15 @@ class DPLoop2(PrimitiveDP):
             f1s.add(fi1)
         f1s = poset_maxima(f1s, self.F.leq)
         LF = self.F.Ls(f1s)
+
         r1s = set()
         for ri in UR0.minimals:
             ri1, _ = ri
             r1s.add(ri1)
         r1s = poset_minima(r1s, self.F.leq)
         UR = self.R.Us(r1s)
-        return LF, UR
 
+        return LF, UR
 
     def get_implementations_f_r(self, f1, r1):
         from mcdp_posets.category_product import get_product_compact
@@ -251,6 +254,125 @@ class DPLoop2(PrimitiveDP):
         trace.log('res_all: %s' % UR.format(res_all))
         res_r1 = R1.Us(poset_minima([r1 for (r1, _) in res_all.minimals], leq=R1.leq))
         return dict(res_all=res_all, res_r1=res_r1)
+
+    def get_normal_form(self):
+        """
+            S0 is a Poset
+            alpha0: U(F0) x S0 -> UR0
+            beta0:  U(F0) x S0 -> S0
+        """
+
+        S0, alpha0, beta0 = self.dp1.get_normal_form()
+
+        F = self.dp1.get_fun_space()
+        R = self.dp1.get_res_space()
+        F1 = F[0]
+        R1 = R[0]
+        R2 = R[1]
+        UR = UpperSets(R2)
+
+        from mcdp_dp.dp_series import get_product_compact
+        S, pack, unpack = get_product_compact(S0, UR)
+
+        UF1 = UpperSets(F1)
+        F1R2 = PosetProduct((F1, R2))
+        UF1R2 = UpperSets(F1R2)
+
+
+        """
+        S = S0 x UR is a Poset
+        alpha: UF1 x S -> UR
+        beta: UF1 x (S0 x UR) -> (S0 x UR)
+"""
+        class DPAlpha(Map):
+            def __init__(self, dp):
+                self.dp = dp
+
+                dom = PosetProduct((UF1, S))
+                cod = UR
+                Map.__init__(self, dom, cod)
+
+            def _call(self, x):
+                (fs, s) = x
+                (s0, rs) = unpack(s)
+
+                # fs is an upper set of F1
+                UF1.belongs(fs)
+                # rs is an upper set of R2
+                UR.belongs(rs)
+
+                solutions = set()
+                # for each r
+                for f2 in rs.minimals:
+                    # take the product
+
+                    x = UpperSet(set((_, f2) for _ in fs.minimals), F1R2)
+                    # this is an elment of U(F1xR)
+                    UF1R2.belongs(x)
+
+                    # get what alpha0 says
+                    y0 = alpha0((x, s0))
+                    # this is in UR
+                    UR.belongs(y0)
+
+                    # now check which ones are ok
+                    for r in y0.minimals:
+                        if R.leq(r, f2):
+                            solutions.add(r)
+
+                u = poset_minima(solutions, R.leq)
+                a1 = UpperSet(u, R)
+                return a1
+
+
+        class DPBeta(Map):
+            def __init__(self, dp):
+                self.dp = dp
+
+                dom = PosetProduct((UF1, S))
+                cod = S
+                Map.__init__(self, dom, cod)
+
+            def _call(self, x):
+                # beta0: U(F0) x S0 -> S0
+                # beta0: U(F1xR1) x S0 -> S0
+
+                # beta: UF1 x S -> S
+                # beta: UF1 x (S0 x UR) -> (S0 x UR)
+                fs, s = x
+                # (s0, rs) = prod_get_state(S0, UR, s)
+                (s0, rs) = unpack(s)
+
+                # fs is an upper set of F1
+                UF1.belongs(fs)
+                # rs is an upper set of R2
+                UR.belongs(rs)
+
+                # print('loop-beta: product of %s and %s' % (fs, rs))
+                # make the dot product
+
+                rs2 = set()
+                for r in rs.minimals:
+
+                    x = UpperSet(set(itertools.product(fs.minimals, rs.minimals)), F1R)
+                    # this is an elment of U(F1xR2)
+                    UF1R.belongs(x)
+
+                    # get what beta0 says
+                    s0p = beta0((x, s0))
+
+                # get what alpha0 says
+                y0 = alpha0((x, s0))
+                # this is in UR1R2
+                UR.belongs(y0)
+
+                res = pack(s0p, y0)
+                # beta: UF1 x (S0 x UR)  -> (S0 x UR)
+                #       <fs , <s0, rs>> |->
+
+                return res
+
+        return S, DPAlpha(self), DPBeta(self)
 
 def dploop2_iterate(dp0, f1, R, S, trace):
     """ Returns the next iteration  si \in UR 
