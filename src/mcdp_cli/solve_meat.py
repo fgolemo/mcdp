@@ -191,19 +191,21 @@ def solve_meat_solve(trace, ndp, dp, fg, intervals, max_steps, _exp_advanced):
             trace.log('Minimal resources needed: %s = %s' % (x, UR.format(res)))
         else:
             try:
-                trace = generic_solve(dp, f=fg, max_steps=max_steps)
-                trace.log('Iteration result: %s' % trace.result)
-                ss = trace.get_s_sequence()
-                S = trace.S
+                trace2 = generic_solve(dp, f=fg, max_steps=max_steps)
+                trace.log('Iteration result: %s' % trace2.result)
+                ss = trace2.get_s_sequence()
+                S = trace2.S
                 trace.log('Fixed-point iteration converged to: %s'
                       % S.format(ss[-1]))
-                R = trace.dp.get_res_space()
+                R = trace2.dp.get_res_space()
                 UR = UpperSets(R)
-                sr = trace.get_r_sequence()
+                sr = trace2.get_r_sequence()
                 rnames = ndp.get_rnames()
                 x = ", ".join(rnames)
                 trace.log('Minimal resources needed: %s = %s'
                       % (x, UR.format(sr[-1])))
+
+                res = sr[-1]
             except:
                 raise
     return res, trace

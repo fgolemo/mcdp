@@ -105,6 +105,16 @@ def sum_units(Fs, values, R):
 
     return res
 
+@contract(Fs='seq[N]', returns='seq[N](float)')
+def sum_units_factors(Fs, R):
+    factors = []
+    for Fi in Fs:
+        try:
+            factor = 1.0 / float(R.units / Fi.units)
+        except Exception as e:  # DimensionalityError
+            raise_wrapped(Exception, e, 'some error', Fs=Fs, R=R)
+        factors.append(factor)
+    return tuple(factors)
 
 class SumUnitsNotCompatible(Exception):
     pass
