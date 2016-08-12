@@ -1,16 +1,16 @@
 """ Utils for graphgen """
 
+from bs4 import BeautifulSoup
 from contextlib import contextmanager
 from copy import deepcopy
 from mocdp.exceptions import mcdp_dev_warning
-from reprep.constants import MIME_PDF, MIME_PNG, MIME_PLAIN, MIME_SVG
+from reprep.constants import MIME_PDF, MIME_PLAIN, MIME_PNG, MIME_SVG
 from system_cmd import CmdException, system_cmd_result
+import base64
+import codecs
 import networkx as nx  # @UnresolvedImport
 import os
 import traceback
-from bs4 import BeautifulSoup
-import base64
-import codecs
 
 
 def graphviz_run(filename_dot, output, prog='dot'):
@@ -143,6 +143,47 @@ def gg_figure(r, name, ggraph, do_png=True, do_pdf=True, do_svg=True,
         
     return f
 
+allowed_formats = ['png', 'pdf', 'svg', 'dot']
+
+def gg_get_formats(gg, data_formats):
+    res = []
+    mcdp_dev_warning('TODO: optimize')
+    for data_format in data_formats:
+        if not data_format in allowed_formats:
+            raise ValueError(data_format)
+
+        if data_format == 'dot':
+            d = get_dot_string(gg)
+        else:
+            d = gg_get_format(gg, data_format)
+
+        res.append(d)
+    return res
+
+def gg_get_format(gg, data_format):
+    from reprep import Report
+    r = Report()
+    do_dot = data_format == 'dot'
+    do_png = data_format == 'png'
+    do_pdf = data_format == 'pdf'
+    do_svg = data_format == 'svg'
+    gg_figure(r, 'graph', gg, do_dot=do_dot,
+              do_png=do_png, do_pdf=do_pdf, do_svg=do_svg)
+
+    if data_format == 'pdf':
+        pdf = r.resolve_url('graph_pdf').get_raw_data()
+        return pdf
+    elif data_format == 'png':
+        png = r.resolve_url('graph/graph').get_raw_data()
+        return png
+    elif data_format == 'dot':
+        dot = r.resolve_url('dot').get_raw_data()
+        return dot
+    elif data_format == 'svg':
+        svg = r.resolve_url('graph_svg').get_raw_data()
+        return svg
+    else:
+        raise ValueError('No known format %r.' % data_format)
 
 def embed_images(html, basedir):
     """ Embeds png and Jpg images using data """

@@ -6,7 +6,7 @@ from mocdp import ATTRIBUTE_NDP_MAKE_FUNCTION, ATTRIBUTE_NDP_RECURSIVE_NAME
 
 @contract(dp=PrimitiveDP, returns=PrimitiveDP)
 def dp_transform(dp, f):
-    """ Recursive application of a map f that commutes with
+    """ Recursive application of a map f that is equivariant with
         series and parallel operations. """
     from mcdp_dp.dp_series import Series0
     from mcdp_dp.dp_loop import DPLoop0

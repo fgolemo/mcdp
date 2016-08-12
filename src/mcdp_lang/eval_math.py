@@ -177,7 +177,6 @@ def get_mult_op(context, r, c):
 
         setattr(function, '__name__', label)
 
-
         dp = GenericUnary(F, R, function)
     elif isinstance(rtype, Nat) and isinstance(c.unit, Nat):
         amap = MultNat(c.value)

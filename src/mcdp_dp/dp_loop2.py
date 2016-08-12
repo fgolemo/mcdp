@@ -189,6 +189,7 @@ class DPLoop2(PrimitiveDP):
 
     def solve_all_cached(self, f1, trace):
         if not f1 in self._solve_cache:
+            print('solving again %s' % f1.__str__())
             R = self.solve_all(f1, trace)
             self._solve_cache[f1] = R
             

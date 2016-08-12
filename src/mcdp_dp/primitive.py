@@ -143,8 +143,6 @@ class PrimitiveDP(WithInternalLog):
                 x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
                 setattr(self.Imarked, ATTRIBUTE_NDP_RECURSIVE_NAME, x)
 
-#             assert hasattr(self, 'Imarked')
-#             assert hasattr(self.Imarked, ATTRIBUTE_NDP_RECURSIVE_NAME)
         return self.Imarked
 
     @contract(returns=Space)
@@ -354,7 +352,7 @@ class EmptyDP(PrimitiveDP):
 
 
 class ApproximableDP(PrimitiveDP):
-    """ these will throw NotSolvableNeedsApprox for solve() """
+    """ These will throw NotSolvableNeedsApprox for solve() """
 
     @abstractmethod
     @contract(n='int,>=0', returns=PrimitiveDP)

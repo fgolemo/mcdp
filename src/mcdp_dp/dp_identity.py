@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from mcdp_posets import Poset
 from mcdp_dp.dp_generic_unary import WrapAMap
-from mcdp_posets.maps.identity import IdentityMap
+from mcdp_posets import Poset
+from mcdp_posets.maps import IdentityMap
 
 
 __all__ = [
@@ -49,8 +49,6 @@ else:
 
     class FunctionNode(OpaqueIdentity):
         pass
-
-
 
 
 Identity = IdentityDP

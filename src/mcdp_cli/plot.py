@@ -3,16 +3,16 @@ from contracts import contract
 from contracts.utils import raise_desc
 from decent_params.utils import UserError
 from mcdp_cli.utils_wildcard import expand_string
+from mcdp_library.libraries import Librarian
+from mcdp_report.dp_graph_flow_imp import dp_graph_flow
+from mcdp_report.dp_graph_tree_imp import dp_graph_tree
 from mcdp_report.gg_ndp import STYLE_GREENRED, STYLE_GREENREDSYM, gvgen_from_ndp
-from mcdp_report.gg_utils import get_dot_string, gg_figure
-from mcdp_report.report import gvgen_from_dp
+from mcdp_report.gg_utils import gg_get_formats
 from mocdp.exceptions import mcdp_dev_warning
 from quickapp import QuickAppBase
-from reprep import Report
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
-from mcdp_library.libraries import Librarian
 
 def get_ndp(data):
     if not 'ndp' in data:
@@ -28,21 +28,27 @@ def get_dp(data):
         data['dp'] = ndp.get_dp()
     return data['dp']
 
-def png_pdf_from_gg(gg):
-    r = Report()
-    gg_figure(r, 'graph', gg, do_svg=False, do_dot=False)
-    png_node = r.resolve_url('graph/graph')
-    pdf_node = r.resolve_url('graph_pdf')
-    return png_node.get_raw_data(), pdf_node.get_raw_data()
+def return_formats2(gg, prefix):
+    formats = ['png', 'pdf', 'svg']
+    data = gg_get_formats(gg, formats)
+    res = [ (data_format, prefix, d)
+            for data_format, d in zip(formats, data)]
+    return res
 
-def dp_visualization(data):
+def dp_graph_flow_(data):
     dp = get_dp(data)
-    gg = gvgen_from_dp(dp)
-    png, pdf = png_pdf_from_gg(gg)
-    res1 = ('png', 'dp_tree', png)
-    res2 = ('pdf', 'dp_tree', pdf)
-    return [res1, res2]
+    gg = dp_graph_flow(dp)
+    return return_formats2(gg, 'dp_graph_flow')
 
+def dp_graph_tree_(data):
+    dp = get_dp(data)
+    gg = dp_graph_tree(dp, compact=False)
+    return return_formats2(gg, 'dp_graph_tree')
+
+def dp_graph_tree_compact_(data):
+    dp = get_dp(data)
+    gg = dp_graph_tree(dp, compact=True)
+    return return_formats2(gg, 'dp_graph_tree_compact')
 
 def simple_print(data):
     ndp = get_ndp(data)
@@ -52,17 +58,7 @@ def simple_print(data):
 def ndp_visualization(data, style):
     ndp = get_ndp(data) 
     gg = gvgen_from_ndp(ndp, style)
-    png, pdf = png_pdf_from_gg(gg)
-
-    # do it again
-    gg = gvgen_from_ndp(ndp, style)
-    dot = get_dot_string(gg)
-
-    res1 = ('png', style, png)
-    res2 = ('pdf', style, pdf)
-    res3 = ('dot', style, dot)
-
-    return [res1, res2, res3]
+    return return_formats2(gg, 'ndp_%s' % style)
 
 def create_extra_css(params):  # @UnusedVariable
     out = ''
@@ -179,7 +175,9 @@ allplots  = {
     ('syntax_doc', syntax_doc),
     ('syntax_frag', syntax_frag),
     ('syntax_pdf', syntax_pdf),
-    ('dp_tree', dp_visualization),
+    ('dp_graph_tree', dp_graph_tree_),
+    ('dp_graph_tree_compact', dp_graph_tree_compact_),
+    ('dp_graph_flow', dp_graph_flow_),
     ('tex_form', tex_form),
     ('print', simple_print),
 }

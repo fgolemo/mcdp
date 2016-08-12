@@ -3,10 +3,10 @@ from .primitive import NormalForm, NotFeasible, PrimitiveDP
 from .tracer import Tracer
 from contracts import contract
 from contracts.utils import indent, raise_desc, raise_wrapped
-from mcdp_posets import (Map, NotBelongs, PosetProduct, UpperSets,
-    get_product_compact, poset_minima)
-from mcdp_posets import LowerSet, UpperSet
+from mcdp_posets import (LowerSet, Map, NotBelongs, PosetProduct, UpperSet,
+    UpperSets, get_product_compact, poset_minima)
 from mocdp.exceptions import DPInternalError, do_extra_checks, mcdp_dev_warning
+from mocdp.memoize_simple_imp import memoize_simple
 
 
 __all__ = [
@@ -64,7 +64,9 @@ class Series0(PrimitiveDP):
         _, rs = self.dp2.evaluate(m2)
         return fs, rs
 
+    @memoize_simple
     def get_implementations_f_r(self, f, r):
+        # print('%s get_implementaion(%s, %s)' % (id(self), f, r))
         f1 = f
         _, pack, _ = self._get_product()
         R2 = self.dp2.get_res_space()
@@ -147,7 +149,7 @@ class Series0(PrimitiveDP):
 #             msg = 'It is feasible.'
 #             raise_desc(Feasible, msg, f1=f1, m=m, r2=r2)
 
-
+    # @memoize_simple
     def solve(self, func):
         trace = Tracer()
         return self.solve_trace(func, trace)

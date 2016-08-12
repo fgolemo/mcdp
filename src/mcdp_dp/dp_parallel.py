@@ -6,6 +6,7 @@ from mcdp_posets import (Map, NotBelongs, PosetProduct, UpperSet, UpperSets,
     lowerset_product, poset_minima, upperset_product)
 from mocdp.exceptions import do_extra_checks
 import itertools
+from mocdp.memoize_simple_imp import memoize_simple
 
 
 __all__ = [
@@ -105,6 +106,7 @@ class Parallel(PrimitiveDP):
         r2 = self.dp2.evaluate_f_m(f2, m2)
         return (r1, r2)
 
+    # @memoize_simple
     def solve(self, f):
         if do_extra_checks():
             F = self.get_fun_space()

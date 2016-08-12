@@ -1,8 +1,6 @@
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_cli.query_interpretation import interpret_params_1string
-from mocdp.comp.context import Context
-from mocdp.comp.interfaces import NamedDP
 from mcdp_lang.eval_space_imp import eval_space
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
@@ -10,6 +8,8 @@ from mcdp_posets import UpperSets
 from mcdp_posets.rcomp import RcompTop
 from mcdp_posets.space import Space
 from mcdp_posets.types_universe import express_value_in_isomorphic_space
+from mocdp.comp.context import Context
+from mocdp.comp.interfaces import NamedDP
 import itertools
 import numpy as np
 
@@ -51,6 +51,7 @@ def friendly_solve(ndp, query, result_like='dict(str:str)'):
     
     """
 
+    # TODO: replace with convert_string_query(ndp, query, context):
     fnames = ndp.get_fnames()
     rnames = ndp.get_rnames()
 
@@ -58,6 +59,7 @@ def friendly_solve(ndp, query, result_like='dict(str:str)'):
         raise NotImplementedError()
     
     value = []
+
     for fname in fnames:
         if not fname in query:
             msg = 'Missing function'

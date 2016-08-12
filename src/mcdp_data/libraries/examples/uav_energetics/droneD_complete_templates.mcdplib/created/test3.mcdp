@@ -1,0 +1,7 @@
+specialize [
+   Battery: `batteries_nodisc.batteries,
+   Actuation: `Actuation, 
+   Perception: `Perception1,
+   PowerApprox: `PowerApprox100mw
+] 
+`DroneCompleteTemplate

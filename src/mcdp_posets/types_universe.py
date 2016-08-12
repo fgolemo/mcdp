@@ -160,8 +160,8 @@ class TypesUniverse(Preorder):
 
 
         if isinstance(A, Nat) and isinstance(B, Rcomp):
-            from mcdp_posets.maps.coerce_to_int import CoerceToInt
-            from mcdp_posets.maps.promote_to_float import PromoteToFloat
+            from .maps.coerce_to_int import CoerceToInt
+            from .maps.promote_to_float import PromoteToFloat
             return PromoteToFloat(A, B), CoerceToInt(B, A)
 
         if isinstance(A, Nat) and isinstance(B, Int):
@@ -171,7 +171,7 @@ class TypesUniverse(Preorder):
             assert A.units.dimensionality == B.units.dimensionality
 
             factor = float(B.units / A.units)
-            from mcdp_posets.maps.linearmapcomp import LinearMapComp
+            from .maps.linearmapcomp import LinearMapComp
             B_to_A = LinearMapComp(B, A, factor)
             A_to_B = LinearMapComp(A, B, 1.0 / factor)
 
@@ -199,7 +199,7 @@ class TypesUniverse(Preorder):
 
         if isinstance(A, UpperSets) and isinstance(B, UpperSets):
             P_A_to_B, P_B_to_A = self.get_embedding(A.P, B.P)
-            from mcdp_posets.maps.lift_to_uppersets import LiftToUpperSets
+            from .maps.lift_to_uppersets import LiftToUpperSets
             m1 = LiftToUpperSets(P_A_to_B)
             m2 = LiftToUpperSets(P_B_to_A)
             setattr(m1, '__name__', 'L%s' % P_A_to_B.__name__)

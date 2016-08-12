@@ -1,5 +1,5 @@
-from .gg_ndp import gvgen_from_ndp
-from .report import report_dp1, report_ndp1
+from mcdp_report.gg_ndp import gvgen_from_ndp
+from mcdp_report.report import report_dp1, report_ndp1
 from mcdp_report.html import ast_to_html
 from mcdp_tests.generation import (for_all_dps_dyn, for_all_nameddps,
     for_all_nameddps_dyn, for_all_source_mcdp)

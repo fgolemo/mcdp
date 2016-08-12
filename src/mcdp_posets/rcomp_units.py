@@ -3,12 +3,12 @@ from .any import Any, BottomCompletion, TopCompletion
 from .rcomp import Rcomp
 from .space import Map
 from contracts import contract
-from contracts.utils import raise_wrapped, check_isinstance
+from contracts.utils import check_isinstance, raise_wrapped
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
-from mocdp.exceptions import DPSyntaxError, mcdp_dev_warning, do_extra_checks
+from mocdp.exceptions import DPSyntaxError, do_extra_checks, mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
 from pint import UnitRegistry  # @UnresolvedImport
-from pint.unit import UndefinedUnitError  # @UnresolvedImport
+from pint.errors import UndefinedUnitError  # @UnresolvedImport
 import functools
 import math
 
@@ -33,13 +33,16 @@ def get_ureg():
 
 class RcompUnits(Rcomp):
 
-    def __init__(self, pint_unit):
+    def __init__(self, pint_unit, string):
         if do_extra_checks():
             ureg = get_ureg()
             check_isinstance(pint_unit, ureg.Quantity)
             
         Rcomp.__init__(self)
         self.units = pint_unit
+        self.string = string
+        u = parse_pint(string)
+        assert u == self.units, (self.units, u, string)
 
         self.units_formatted = format_pint_unit_short(self.units)
 
@@ -58,26 +61,33 @@ class RcompUnits(Rcomp):
 
         return "%s[%s]" % (c, self.units_formatted)
 
+    def __copy__(self):
+        other = RcompUnits(self.units, self.string)
+        return other
+
     def __getstate__(self):
+        # print('__getstate__  %s %s' % (id(self), self.__dict__))
+
         # See: https://github.com/hgrecco/pint/issues/349
-        u = self.units
         # This is a hack
-        units_ex = (u.magnitude, u.units._units)
-        # Original was:
-        # units_ex = (u.magnitude, u.units)
-        state = {'top': self.top, 'units_ex': units_ex,
-                 'units_formatted': self.units_formatted}
+
+        state = {
+            'top': self.top,
+            'string': self.string,
+            'units_formatted': self.units_formatted,
+        }
 
         if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
             state[ATTRIBUTE_NDP_RECURSIVE_NAME] = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
         return state
 
     def __setstate__(self, x):
+        # print('__setstate__ %s %r' % (id(self), x))
         self.top = x['top']
-        units_ex = x['units_ex']
-        ureg = get_ureg()
-        self.units = ureg.Quantity(units_ex[0], units_ex[1])
+        self.string = x['string']
+        self.units = parse_pint(self.string)
         self.units_formatted = x['units_formatted']
+
         if ATTRIBUTE_NDP_RECURSIVE_NAME in x:
             setattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME, x[ATTRIBUTE_NDP_RECURSIVE_NAME])
 
@@ -94,7 +104,7 @@ class RcompUnits(Rcomp):
             s = Rcomp.format(self, x)
         return '%s %s' % (s, self.units_formatted)
 
-
+@memoize_simple
 def parse_pint(s0):
     """ thin wrapper taking care of dollars not recognized """
     s = s0.replace('$', ' dollars ')
@@ -133,7 +143,7 @@ def make_rcompunit(units):
     except DPSyntaxError as e:
         msg = 'Cannot parse %r.' % units
         raise_wrapped(DPSyntaxError, e, msg)
-    return RcompUnits(unit)
+    return RcompUnits(unit, s)
 
 R_Power_units = parse_pint('W')
 R_Energy_units = parse_pint('J')
@@ -184,7 +194,8 @@ def mult_table_seq(seq):
 @contract(a=RcompUnits, b=RcompUnits)
 def mult_table(a, b):
     unit2 = a.units * b.units
-    return RcompUnits(unit2)
+    s = '%s' % unit2
+    return RcompUnits(unit2, s)
 
 @contract(a=RcompUnits, num='int', den='int')
 def rcompunits_pow(a, num, den):
@@ -193,7 +204,8 @@ def rcompunits_pow(a, num, den):
     """
     x = 1.0 * num / den
     u = a.units ** x
-    return RcompUnits(u)
+    s = '%s' % u
+    return RcompUnits(u, s)
 
 class RCompUnitsPower(Map):
 

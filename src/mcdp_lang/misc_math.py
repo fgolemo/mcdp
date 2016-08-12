@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc
+from mcdp_dp.dp_sum import sum_units
 from mcdp_posets import Nat, RcompUnits, mult_table
 from mocdp.comp.context import ValueWithUnits
-from mcdp_dp.dp_sum import sum_units
 from mocdp.exceptions import DPSemanticError
 import functools
 import warnings
@@ -16,7 +16,10 @@ class MultValue():
 
     def __call__(self, x):
         return x * self.res
-#
+
+    def __str__(self):
+        return 'Mult(%s)' % self.res
+
 # class MultValueMap(Map):
 #     """ Implements _ -> _ * x on RCompUnits """
 #
@@ -27,7 +30,9 @@ class MultValue():
 @contract(S=RcompUnits)
 def inv_unit(S):
     # S.units is a pint quantity
-    res = RcompUnits(1 / S.units)
+    unit = 1 / S.units
+    string = '%s' % unit
+    res = RcompUnits(1 / S.units, string)
     return res
 
 def inv_constant(a):

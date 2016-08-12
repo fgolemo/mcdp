@@ -151,6 +151,7 @@ def get_imp_as_recursive_dict(I, imp):  # , ignore_hidden=True):
     """
     I.belongs(imp)
     res = collect(I, imp)
+
     # now res has some keys that are tuples of length >= 0
     # res = {('a','b'): ., ('a','c'), ...}
     def group(res):
