@@ -11,6 +11,8 @@ __all__ = [
 ]
 
 class RcompTop():
+    def __str__(self):
+        return self.__repr__()
     def __repr__(self):
         # return "⊤"
         return "∞"

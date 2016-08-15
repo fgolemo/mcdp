@@ -42,6 +42,7 @@ def cndp_abstract_loop2(ndp):
     inner = res['inner']
 
     inner_dp = inner.get_dp()
+
     extraf = res['extraf']
     extrar = res['extrar']
 

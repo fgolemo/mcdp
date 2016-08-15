@@ -7,7 +7,7 @@ template [
   provides extra_payload [kg]
   provides extra_power   [W]
   provides num_missions [R]
-  provides velocity [m/s]
+  provides velocity  [m/s]
 
   requires total_cost [$]
   
@@ -35,7 +35,7 @@ template [
   
   labor_cost = (10 $) * (maintenance required by battery)
 
-  total_cost >= (
+  required total_cost >= (
     cost required by actuation + 
     cost required by battery + 
     labor_cost)

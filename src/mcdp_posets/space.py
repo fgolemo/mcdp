@@ -61,6 +61,9 @@ class Space(object):
             if the space is empty. """
         pass
 
+    def repr_long(self):
+        return self.__repr__()
+
 
 class MapNotDefinedHere(Exception):
     """ The map is not defined at this point """

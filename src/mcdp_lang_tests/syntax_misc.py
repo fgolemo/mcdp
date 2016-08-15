@@ -422,7 +422,11 @@ def check_lang59():  # TODO: rename
 
     ndp = parse_ndp(""" addmake(root: code mcdp_lang_tests.syntax_misc.f) mcdp {} """)
 
-    assert ndp.make == [('root', f)], ndp.make
+    assert len(ndp.make) == 1
+    assert ndp.make[0][0] == 'root'
+    from mcdp_lang.eval_ndp_imp import ImportedFunction
+    assert isinstance(ndp.make[0][1], ImportedFunction)
+    # assert ndp.make == [('root', f)], ndp.make
 
 @comptest
 def check_lang61():  # TODO: rename

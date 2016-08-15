@@ -248,9 +248,13 @@ rules = [
     RuleJoinPar(),
 ]
 
+disable_optimization = False
+
 def make_series(dp1, dp2):
     """ Creates a Series if needed.
         Simplifies the identity and muxes """
+    if disable_optimization:
+        return Series(dp1, dp2)
     # first, check that the series would be created correctly
 
     # Series(X(F,R), Terminator(R)) => Terminator(F)

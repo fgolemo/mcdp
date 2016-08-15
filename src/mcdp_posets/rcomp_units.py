@@ -102,7 +102,11 @@ class RcompUnits(Rcomp):
             s = self.top.__repr__()
         else:
             s = Rcomp.format(self, x)
-        return '%s %s' % (s, self.units_formatted)
+
+        if self.units_formatted:
+            return '%s %s' % (s, self.units_formatted)
+        else:
+            return s
 
 @memoize_simple
 def parse_pint(s0):

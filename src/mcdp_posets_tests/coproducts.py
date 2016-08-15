@@ -1,4 +1,4 @@
-from comptests.registrar import comptest
+from comptests.registrar import comptest, comptest_fails
 from mcdp_posets.poset_product import PosetProduct
 from mcdp_posets.category_coproduct import Coproduct1
 from mcdp_posets.rcomp_units import R_Weight, R_Energy, R_Time
@@ -63,7 +63,7 @@ def check_coproduct_embedding2():
     tu.check_leq(P1, P2)
     tu.check_leq(P2, P1)
 
-@comptest
+@comptest_fails
 def check_coproduct_embedding3():
     """ A + B != B + A, but A + B ~= B + A """
     A = FinitePoset(set(['a1', 'a2', 'a3']), [])

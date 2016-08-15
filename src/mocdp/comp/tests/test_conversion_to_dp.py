@@ -1,6 +1,7 @@
 from mcdp_dp.primitive import NotSolvableNeedsApprox
 from mcdp_posets import UpperSets
 from mcdp_tests.generation import for_all_nameddps
+from mocdp.comp.interfaces import NotConnected
 
 @for_all_nameddps
 def test_conversion(id_ndp, ndp):
@@ -9,6 +10,12 @@ def test_conversion(id_ndp, ndp):
         print('Assuming that the suffix "_inf" in %r means that this will not converge'
               % (id_ndp))
         print('Skipping this test')
+        return
+
+    try:
+        ndp.check_fully_connected()
+    except NotConnected:
+        print('Skipping test_conversion because %r not connected.' % id_ndp)
         return
 
     dp = ndp.get_dp()

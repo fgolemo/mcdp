@@ -5,11 +5,11 @@ from collections import namedtuple
 from contracts import contract
 from contracts.utils import indent, raise_desc
 from decent_logs import WithInternalLog
-from mcdp_posets import (LowerSet, Map, Ncomp, NotBelongs, Poset, PosetProduct,
-    Space, SpaceProduct, UpperSet, UpperSets, poset_minima)
+from mcdp_posets import (LowerSet, Map, NotBelongs, Poset, PosetProduct, Space,
+    SpaceProduct, UpperSet, UpperSets, poset_minima)
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import do_extra_checks
-import copy
+
 
 _ = LowerSet  # used by PyContracts
 
@@ -128,22 +128,7 @@ class PrimitiveDP(WithInternalLog):
 
     @contract(returns=Space)
     def get_imp_space(self):
-        I = self.I
-        # This is a mess... on the up side, the rest of the code is great.
-        #
-        # Note: the first time the dp is created, there is no attribute.
-        #   dp = Series(...)
-        #      <internally calls get_imp_space()>
-        #   setattr(dp, ..., name)
-        # So we need to redo it
-        # if not hasattr(self, 'Imarked'):
-        if not hasattr(self, 'Imarked') or (hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME) and not hasattr(self.Imarked, ATTRIBUTE_NDP_RECURSIVE_NAME)):
-            self.Imarked = copy.copy(I)
-            if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
-                x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
-                setattr(self.Imarked, ATTRIBUTE_NDP_RECURSIVE_NAME, x)
-
-        return self.Imarked
+        return self.I
 
     @contract(returns=Space)
     def get_imp_space_mod_res(self):
@@ -299,7 +284,7 @@ class PrimitiveDP(WithInternalLog):
     def tree_long(self, n=None):
         if n is None: n = 120
         s = type(self).__name__
-        S, _, _ = self.get_normal_form()
+
         u = lambda x: x.decode('utf-8')
         ulen = lambda x: len(u(x))
 
@@ -314,9 +299,10 @@ class PrimitiveDP(WithInternalLog):
                 s = x.encode('utf-8')
             return s
 
-        s2 = '   [F = %s  R = %s  M = %s  S = %s]' % (clip(self.F, 13),
-                       clip(self.R, 10), clip(self.M, 15),
-                           clip(S, 28))
+        # S, _, _ = self.get_normal_form()
+#         s2 = '   [F = %s  R = %s  M = %s  S = %s]' % (clip(self.F, 13),
+#                        clip(self.R, 10), clip(self.M, 15),
+#                            clip(S, 28))
 
         s2 = ""
 

@@ -2,7 +2,7 @@
 from .utils import safe_makedirs
 from abc import ABCMeta, abstractmethod
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped, indent
+from contracts.utils import indent, raise_desc, raise_wrapped
 from mcdp_posets import (NotLeq, PosetProduct, Rcomp, UpperSet, UpperSets,
     get_types_universe)
 from mocdp.drawing import plot_upset_R2
@@ -16,7 +16,7 @@ extra_space_finite = 0.025
 extra_space_top = 0.05
 
 
-def generic_report_trace(r, ndp, dp, trace, out, do_movie=False):
+def generic_report_trace(r, ndp, dp, trace, out, do_movie=False):  # @UnusedVariable
     r.text('dp', dp.repr_long())
     # r.text('trace', trace.format())
     

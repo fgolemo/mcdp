@@ -7,6 +7,7 @@ from mcdp_posets import (LowerSet, Map, NotBelongs, PosetProduct, UpperSet,
     UpperSets, get_product_compact, poset_minima)
 from mocdp.exceptions import DPInternalError, do_extra_checks, mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 
 
 __all__ = [
@@ -193,7 +194,17 @@ class Series0(PrimitiveDP):
         s2 = ' %s -> %s' % (self.get_fun_space(), self.get_res_space())
         s = s1 + ' % ' + s2 + self._add_extra_info()
         s += '\n' + indent(r1, '. ', first='\ ')
+
+        if hasattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME):
+            a = getattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME)
+            s += '\n (labeled as %s)' % a.__str__()
+
         s += '\n' + indent(r2, '. ', first='\ ')
+
+        if hasattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME):
+            a = getattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME)
+            s += '\n (labeled as %s)' % a.__str__()
+
         return s
 
     def get_normal_form(self):

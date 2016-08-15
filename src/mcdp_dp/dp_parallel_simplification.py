@@ -140,21 +140,11 @@ def make_parallel_n(dps):
 #         return dp
     
 def make_parallel(dp1, dp2):
+    from mcdp_dp.dp_series_simplification import disable_optimization
+    if disable_optimization:
+        return Parallel(dp1, dp2)
+
     from mcdp_dp.dp_series_simplification import make_series, is_equiv_to_terminator, equiv_to_identity
-
-#     # if none is a mux, we cannot do anything
-#     if not isinstance(dp1, Mux) and not isinstance(dp2, Mux):
-#         return Parallel(dp1, dp2)
-#
-#     def identity_as_mux(x):
-#         if isinstance(x, Identity):
-#             F = x.get_fun_space()
-#             return Mux(F, ())
-#         return x
-#
-#     dp1 = identity_as_mux(dp1)
-#     dp2 = identity_as_mux(dp2)
-
 
     # change identity to Mux
     a = Parallel(dp1, dp2)

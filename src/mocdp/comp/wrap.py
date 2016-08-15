@@ -1,12 +1,12 @@
-
+# -*- coding: utf-8 -*-
 from .interfaces import NamedDP
 from contracts import contract, raise_wrapped
 from contracts.utils import indent, raise_desc
 from mcdp_dp import PrimitiveDP
 from mcdp_dp.dp_flatten import get_it
-from mocdp.exceptions import DPInternalError
 from mcdp_posets import PosetProduct
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
+from mocdp.exceptions import DPInternalError
+
 
 __all__ = [
     'SimpleWrap',
@@ -101,10 +101,6 @@ class SimpleWrap(NamedDP):
             for i, rname in enumerate(self.Fnames):
                 dp.F[i].label = rname
 
-        if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
-            x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
-            setattr(dp, ATTRIBUTE_NDP_RECURSIVE_NAME, x)
-
         return dp
 
     def get_fnames(self):
@@ -167,7 +163,7 @@ class SimpleWrap(NamedDP):
         s = 'SimpleWrap'
         from mcdp_library.library import ATTR_LOAD_NAME
         if hasattr(self, ATTR_LOAD_NAME):
-            s += ' (loaded as %r)' % getattr(self, ATTR_LOAD_NAME)
+            s += '\n (loaded as %r)' % getattr(self, ATTR_LOAD_NAME)
         for f in self.get_fnames():
             s += '\n  provides %10s (%s) ' % (f, self.get_ftype(f))
         for r in self.get_rnames():

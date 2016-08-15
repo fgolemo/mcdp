@@ -2,10 +2,11 @@ from .primitive import ApproximableDP, PrimitiveDP
 from contracts import contract
 from contracts.utils import check_isinstance
 from mcdp_dp.primitive import NotSolvableNeedsApprox
-from mcdp_posets import Nat, Poset  # @UnusedImport
-from mcdp_posets import PosetProduct, RcompUnits
+from mcdp_posets import Nat, Poset, PosetProduct, RcompUnits
 from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
+
+_ = Nat, Poset
 
 __all__ = [
     'InvPlus2',
@@ -37,19 +38,21 @@ class InvPlus2(ApproximableDP):
     def get_lower_bound(self, n):
         F = self.F
         Rs = self.Rs
-        return InvPlus2L(F, Rs, n)
+        dp = InvPlus2L(F, Rs, n)
+        # preserve_dp_attributes(self, dp)
+        return dp
 
     @contract(n='int,>=0')
     def get_upper_bound(self, n):
         F = self.F
         Rs = self.Rs
-        return InvPlus2U(F, Rs, n)
+        dp = InvPlus2U(F, Rs, n)
+        # preserve_dp_attributes(self, dp)
+        return dp
 
     def get_implementations_f_r(self, f, r):  # @UnusedVariable
         raise NotSolvableNeedsApprox(type(self))
 
-#     def evaluate_f_m(self, f, m):
-#         return (m, f - m)
 
 class InvPlus2L(PrimitiveDP):
 

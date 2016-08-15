@@ -12,8 +12,10 @@ from mocdp.comp.context import Context
 from mocdp.comp.interfaces import NamedDP
 import itertools
 import numpy as np
+from mcdp_dp.dp_transformations import get_dp_bounds
+from mcdp_dp.tracer import Tracer
 
-def solve_combinations(ndp, combinations, result_like):
+def solve_combinations(ndp, combinations, result_like, lower=None, upper=None):
     """
     combinations = {
         "capacity": (np.linspace(50, 3000, 10), "Wh"),
@@ -25,13 +27,14 @@ def solve_combinations(ndp, combinations, result_like):
     
     """
     queries = list(get_combinations(combinations))
-    return solve_queries(ndp, queries, result_like)
+    return solve_queries(ndp, queries, result_like, lower=lower, upper=upper)
 
-def solve_queries(ndp, queries, result_like):
+def solve_queries(ndp, queries, result_like, lower=None, upper=None):
     results = []
     queries2 = []
     for query in queries:
-        res = friendly_solve(ndp, query=query, result_like=result_like)
+        res = friendly_solve(ndp, query=query, result_like=result_like,
+                             upper=upper, lower=lower)
         q2 = dict([(k, v) for k, (v, _) in query.items()])
         queries2.append(q2)
         results.append(res)
@@ -39,7 +42,7 @@ def solve_queries(ndp, queries, result_like):
 
 
 @contract(ndp=NamedDP, query='dict(str:tuple(float|int,str))')
-def friendly_solve(ndp, query, result_like='dict(str:str)'):
+def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=None):
     """
         Returns a set of dict(rname:)
         
@@ -80,12 +83,24 @@ def friendly_solve(ndp, query, result_like='dict(str:str)'):
     if hasattr(ndp, '_cache_dp'):
         dp = ndp._cache_dp
     else:
-        dp = ndp._cache_dp = ndp.get_dp()
+        
+        dp0 = ndp.get_dp()
+        
+        if upper is not None:
+            _, dp = get_dp_bounds(dp0, nl=1, nu=upper)
+        elif lower is not None:
+            dp, _ = get_dp_bounds(dp0, nl=lower, nu=1)
+        else:
+            dp = dp0
+        
+        ndp._cache_dp= dp 
 
     F = dp.get_fun_space()
     F.belongs(value)
 
-    res = dp.solve(value)
+    from mocdp import logger
+    trace = Tracer(logger=logger)
+    res = dp.solve_trace(value, trace)
     R = dp.get_res_space()
     UR = UpperSets(R)
     print('results: %s' % UR.format(res))

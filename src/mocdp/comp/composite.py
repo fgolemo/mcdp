@@ -4,12 +4,12 @@ from .interfaces import NamedDP, NotConnected
 from contracts import contract
 from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
-from mcdp_dp.dp_flatten import Mux
-from mcdp_posets.poset_product import PosetProduct
+from mcdp_dp import Mux
+from mcdp_posets import NotEqual, PosetProduct
+from mocdp import ATTR_LOAD_NAME
 from mocdp.comp.context import is_fun_node_name
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPSemanticError
-from mcdp_posets.space import NotEqual
 
 __all__ = [
     'CompositeNamedDP',
@@ -127,28 +127,24 @@ class CompositeNamedDP(NamedDP):
         from mocdp.comp.composite_abstraction import cndp_abstract
         res = cndp_abstract(self)
         assert isinstance(res, SimpleWrap), type(res)
-        # from mocdp.comp.context_functions import dpgraph_making_sure_no_reps
-        # res = dpgraph_making_sure_no_reps(self.context)
-        assert res.get_fnames() == self.context.fnames, (res.get_fnames(), self.context.fnames)
-        assert res.get_rnames() == self.context.rnames, (res.get_rnames(), self.context.rnames)
+
+        assert res.get_fnames() == self.context.fnames
+        assert res.get_rnames() == self.context.rnames
+        
         return res
 
     def get_dp(self):
         ndp = self.abstract()
         dp = ndp.get_dp()
-
-#         if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
-#             x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
-#             setattr(dp, ATTRIBUTE_NDP_RECURSIVE_NAME, x)
-
         return dp
 
     def __repr__(self):
         s = 'CompositeNDP'
-        from mcdp_library.library import ATTR_LOAD_NAME
-        if hasattr(self, ATTR_LOAD_NAME):
-            s += ' (loaded as %r)' % getattr(self, ATTR_LOAD_NAME)
 
+        if hasattr(self, ATTR_LOAD_NAME):
+            s += '\n (loaded as %r)' % getattr(self, ATTR_LOAD_NAME)
+#         if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
+#             s += '\n (labeled as %s)' % getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME).__str__()
         for f in self._fnames:
             s += '\n provides %s  [%s]' % (f, self.get_ftype(f))
         for r in self._rnames:

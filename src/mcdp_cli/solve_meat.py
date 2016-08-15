@@ -13,7 +13,7 @@ from mcdp_posets.poset import NotLeq
 from mcdp_posets.types_universe import express_value_in_isomorphic_space
 from mcdp_report.report import report_dp1, report_ndp1
 from mocdp.comp.recursive_name_labeling import (get_imp_as_recursive_dict,
-    label_with_recursive_names, ndp_make)
+    get_labelled_version, ndp_make)
 from reprep import Report
 import os
 
@@ -49,9 +49,11 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
     basename = model_name
 
     if make:
-        label_with_recursive_names(ndp)
+        ndp_labelled = get_labelled_version(ndp)
+    else:
+        ndp_labelled = ndp
 
-    basename, dp = solve_get_dp_from_ndp(basename=basename, ndp=ndp,
+    basename, dp = solve_get_dp_from_ndp(basename=basename, ndp=ndp_labelled,
                                          lower=lower, upper=upper)
 
 

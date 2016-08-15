@@ -26,6 +26,7 @@ def cndp_makecanonical(ndp, name_inner_muxed='_inner_muxed', s_muxed='_muxed'):
     """
 
     assert isinstance(ndp, CompositeNamedDP), type(ndp)
+
     try:
         ndp.check_fully_connected()
     except NotConnected as e:
@@ -35,14 +36,19 @@ def cndp_makecanonical(ndp, name_inner_muxed='_inner_muxed', s_muxed='_muxed'):
     fnames = ndp.get_fnames()
     rnames = ndp.get_rnames()
 
+
     # First, we flatten it
     ndp = cndp_flatten(ndp)
+
     assert ndp.get_fnames() == fnames
     assert ndp.get_rnames() == rnames
+
+
     # then we compact it
     ndp = ndp.compact()
     assert ndp.get_fnames() == fnames
     assert ndp.get_rnames() == rnames
+
 
     # Check that we have some cycles
     G = get_connection_multigraph(ndp.get_connections())
@@ -67,18 +73,12 @@ def cndp_makecanonical(ndp, name_inner_muxed='_inner_muxed', s_muxed='_muxed'):
     assert ndp_inner.get_rnames() == rnames + cycles_names
 
     if cycles_names:
-#     if len(cycles_names) > 1:
         ndp_inner_muxed = add_muxes(ndp_inner, cs=cycles_names, s_muxed=s_muxed)
         mux_signal = s_muxed
         assert ndp_inner_muxed.get_fnames() == fnames + [mux_signal]
         assert ndp_inner_muxed.get_rnames() == rnames + [mux_signal]
-#     elif len(cycles_names) == 1:
-#         ndp_inner_muxed = ndp_inner
-#         mux_signal = cycles_names[0]
     else:
         ndp_inner_muxed = ndp_inner
-        pass
-
 
     name2ndp = {}
     name2ndp[name_inner_muxed] = ndp_inner_muxed
@@ -209,32 +209,30 @@ def cndp_create_one_without_some_connections(ndp, exclude_connections, names):
     from mocdp.comp.context import Context
     context = Context()
     
-    # print ndp
     # print ndp.get_rnames()
     # print ndp.get_fnames()
     # Create the fun/res node in the original order
     for fname in ndp.get_fnames():
-        F = ndp.get_ftype(fname)
-        context.add_ndp_fun_node(fname, F)  # this updates the internal fnames
+        # simply copy the functionnode - it might be a LabeledNDP
+        name = get_name_for_fun_node(fname)
+        fndp = ndp.get_name2ndp()[name]
+        context.fnames.append(fname)
+        context.add_ndp(name, fndp)
 
     for rname in ndp.get_rnames():
-        R = ndp.get_rtype(rname)
-        context.add_ndp_res_node(rname, R)  # this udpates the internal rnames
-
+        # simply copy the functionnode - it might be a LabeledNDP
+        name = get_name_for_res_node(rname)
+        rndp = ndp.get_name2ndp()[name]
+        context.rnames.append(rname)
+        context.add_ndp(name, rndp)
 
     for _name, _ndp in ndp.get_name2ndp().items():
         isf, fname = is_fun_node_name(_name)
         isr, rname = is_res_node_name(_name)
 
         if isf and fname in ndp.get_fnames():
-            # print('fname: %r' % fname)
-            # F = ndp.get_ftype(fname)
-            # context.add_ndp_fun_node(fname, F)
             pass
         elif isr and rname in ndp.get_rnames():
-            # print('rname: %r' % rname)
-            # R = ndp.get_rtype(rname)
-            # context.add_ndp_res_node(rname, R)
             pass
         else:
             # print('regular: %r' % _name)
@@ -377,20 +375,6 @@ def pop_solution_minimum_weight(sols):
     return k, res
 
 
-
-# Returns the list of cycles as a sequence of edges
-#     c_as_e = simple_cycles_as_edges(G)
-#
-#     counts = defaultdict(lambda: 0)
-#     for cycle in c_as_e:
-#         for edge in cycle:
-#             counts[edge] += 1
-#
-#     ncycles = len(c_as_e)
-#     best_edge, ncycles_broken = max(list(counts.items()), key=lambda x: x[1])
-    
-    
-        
 
 
 def get_canonical_elements(ndp0):

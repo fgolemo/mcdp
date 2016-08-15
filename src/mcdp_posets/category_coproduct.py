@@ -1,7 +1,8 @@
 from .space import NotBelongs, NotEqual, Space
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, indent
 import random
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 
 __all__ = [
     'Coproduct1',
@@ -131,6 +132,17 @@ class Coproduct1Labels(Space):
     def __repr__(self):
         s = "+".join('%s:%s' % (l, sub) for l, sub in zip(self.labels, self.spaces))
         return "Coproduct1Labels(%s)" % s
+
+    def repr_long(self):
+        s = "%s[%s]" % (type(self).__name__, len(self.spaces))
+        for label, S in zip(self.labels, self.spaces):
+            prefix0 = " %s. " % label
+            prefix1 = " " * len(prefix0)
+            s += "\n" + indent(S.repr_long(), prefix1, first=prefix0)
+            if hasattr(S, ATTRIBUTE_NDP_RECURSIVE_NAME):
+                a = getattr(S, ATTRIBUTE_NDP_RECURSIVE_NAME)
+                s += '\n  labeled as %s' % a.__str__()
+        return s
 
     def belongs(self, x):
         try:

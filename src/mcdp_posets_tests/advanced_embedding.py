@@ -1,16 +1,28 @@
 from comptests.registrar import comptest
 from mcdp_lang.parse_interface import parse_poset
 from mcdp_posets.types_universe import get_types_universe
+from mcdp_posets.poset import NotLeq
 
 
 @comptest
 def adv_embed_1():
-    """ PosetProduct takes into account permutations. """
+    """ PosetProduct does not take into account permutations. """
     P1 = parse_poset('m x J')
     P2 = parse_poset('J x m')
     tu = get_types_universe()
-    tu.check_leq(P1, P2)
-    tu.check_leq(P2, P1)
+    try:
+        tu.check_leq(P1, P2)
+    except NotLeq:
+        pass
+    else:
+        assert False
+    try:
+        tu.check_leq(P2, P1)
+    except NotLeq:
+        pass
+    else:
+        assert False
+
 
 @comptest
 def adv_embed_2():

@@ -13,6 +13,7 @@ from quickapp import QuickAppBase
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
+from mocdp.comp.recursive_name_labeling import get_labelled_version
 
 def get_ndp(data):
     if not 'ndp' in data:
@@ -45,14 +46,46 @@ def dp_graph_tree_(data):
     gg = dp_graph_tree(dp, compact=False)
     return return_formats2(gg, 'dp_graph_tree')
 
+def dp_graph_tree_labeled_(data):
+    ndp = get_ndp(data)
+    ndp = get_labelled_version(ndp)
+    dp = ndp.get_dp()
+    gg = dp_graph_tree(dp, compact=False)
+    return return_formats2(gg, 'dp_graph_tree_labeled')
+
 def dp_graph_tree_compact_(data):
     dp = get_dp(data)
     gg = dp_graph_tree(dp, compact=True)
     return return_formats2(gg, 'dp_graph_tree_compact')
 
-def simple_print(data):
+def dp_graph_tree_compact_labeled_(data):
     ndp = get_ndp(data)
-    res1 = ('txt', 'print', str(ndp))
+    ndp = get_labelled_version(ndp)
+    dp = ndp.get_dp()
+    gg = dp_graph_tree(dp, compact=True)
+    return return_formats2(gg, 'dp_graph_tree_compact_labeled')
+
+def ndp_repr_long(data):
+    ndp = get_ndp(data)
+    res1 = ('txt', 'ndp_repr_long', ndp.repr_long())
+    return [res1]
+
+def ndp_repr_long_labeled(data):
+    ndp = get_ndp(data)
+    ndp = get_labelled_version(ndp)
+    res1 = ('txt', 'ndp_repr_long_labeled', ndp.repr_long())
+    return [res1]
+
+def dp_repr_long(data):
+    dp = get_dp(data)
+    res1 = ('txt', 'dp_repr_long', dp.repr_long())
+    return [res1]
+
+def dp_repr_long_labeled(data):
+    ndp = get_ndp(data)
+    ndp = get_labelled_version(ndp)
+    dp = ndp.get_dp()
+    res1 = ('txt', 'dp_repr_long_labeled', dp.repr_long())
     return [res1]
 
 def ndp_visualization(data, style):
@@ -177,9 +210,14 @@ allplots  = {
     ('syntax_pdf', syntax_pdf),
     ('dp_graph_tree', dp_graph_tree_),
     ('dp_graph_tree_compact', dp_graph_tree_compact_),
+    ('dp_graph_tree_labeled', dp_graph_tree_labeled_),
+    ('dp_graph_tree_compact_labeled', dp_graph_tree_compact_labeled_),
     ('dp_graph_flow', dp_graph_flow_),
     ('tex_form', tex_form),
-    ('print', simple_print),
+    ('dp_repr_long', dp_repr_long),
+    ('ndp_repr_long', ndp_repr_long),
+    ('dp_repr_long_labeled', dp_repr_long_labeled),
+    ('ndp_repr_long_labeled', ndp_repr_long_labeled),
 }
 
 class Vis():

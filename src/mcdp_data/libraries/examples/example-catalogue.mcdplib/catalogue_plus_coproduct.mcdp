@@ -43,7 +43,7 @@
         capacity <= cell.capacity
     }
 
-    battery = instance choose(simple: simple_cell, converter: cell_plus_converter)
+    battery = instance choose(alt_simple: simple_cell, alt_converter: cell_plus_converter)
     requires cost, mass for battery
     provides voltage, capacity using battery
 }

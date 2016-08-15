@@ -13,8 +13,7 @@ from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.connection_reps import (relabel, there_are_repetitions,
     there_are_reps)
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.exceptions import (DPInternalError, DPSemanticError, do_extra_checks,
-    mcdp_dev_warning)
+from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 from networkx import DiGraph, MultiDiGraph, NetworkXUnfeasible
 from networkx.algorithms import is_connected, simple_cycles, topological_sort
 
@@ -53,8 +52,8 @@ def dpconnect(name2dp, connections, split=[]):
         if connections:
             raise_desc(NotImplementedError, '')
         res = list(name2dp.values())[0]
+
         return res.abstract()
-        return res
 
     connections = set(connections)
 #     if do_extra_checks():

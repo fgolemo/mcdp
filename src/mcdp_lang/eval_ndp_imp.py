@@ -26,6 +26,8 @@ from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
 from mocdp.exceptions import (DPInternalError, DPSemanticError,
     DPSemanticErrorNotConnected)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
+import sys
+from contextlib import contextmanager
 
 
 
@@ -59,7 +61,6 @@ def eval_ndp(r, context):  # @UnusedVariable
         if isinstance(r, CDP.DPInstance):
             return eval_ndp(r.dp_rvalue, context)
 
-
         if isinstance(r, CDP.AbstractAway):
             ndp = eval_ndp(r.dp_rvalue, context)
             if isinstance(ndp, SimpleWrap):
@@ -71,6 +72,11 @@ def eval_ndp(r, context):  # @UnusedVariable
                 raise_wrapped(DPSemanticErrorNotConnected, e, msg, compact=True)
 
             ndpa = ndp.abstract()
+
+            assert isinstance(ndpa, SimpleWrap)
+            from mcdp_dp.opaque_dp import OpaqueDP
+            ndpa.dp = OpaqueDP(ndpa.dp)
+
             return ndpa
 
         if isinstance(r, CDP.Compact):
@@ -118,18 +124,48 @@ def eval_ndp_addmake(r, context):
     ndp = eval_ndp(r.dp_rvalue, context)
     what = r.what.value
     function_name = r.code.function.value
-    try:
-        function = import_name(function_name)
-    except ImportFailure as e:
-        msg = 'Could not import Python function name.'
-        raise_wrapped(DPSemanticError, e, msg, function_name=function_name,
-                      compact=True)
+
+    function = ImportedFunction(function_name)
+    
     if not hasattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION):
         setattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION, [])
 
     res = getattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION)
     res.append((what, function))
     return ndp
+
+class ImportedFunction():
+    def __init__(self, function_name):
+        self.function_name = function_name
+        self.sys_path = sys.path
+        # check that it exists
+        _check = self._import()
+        
+    def _import(self):
+        with _sys_path_adjust(self.sys_path):
+            try:
+                function = import_name(self.function_name)
+                return function
+            except ImportFailure as e:
+                msg = 'Could not import Python function name.'
+                raise_wrapped(DPSemanticError, e, msg, function_name=self.function_name,
+                              compact=True)
+
+    def __call__(self, *args, **kwargs):
+        function = self._import()
+        return function(*args, **kwargs)
+
+
+@contextmanager
+def _sys_path_adjust(sys_path):
+
+    previous = list(sys.path)
+    sys.path = sys_path
+
+    try:
+        yield
+    finally:
+        sys.path = previous
 
 
 def eval_ndp_specialize(r, context):

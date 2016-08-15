@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest
+from comptests.registrar import comptest, comptest_fails
 from contracts.utils import raise_desc
 from mcdp_dp.primitive import Feasible, NotFeasible, NotSolvableNeedsApprox
 from mcdp_lang import parse_ndp
@@ -41,7 +41,7 @@ def check_evaluate(id_dp, dp):
     # dp.check_feasible(f, m0, r)
 
 
-@comptest
+@comptest_fails
 def check_evaluation():
     ndp = parse_ndp("""
     mcdp {  
@@ -111,7 +111,7 @@ def check_evaluation():
 # y =        0.0  100000000000000000000000000000
 
 
-@comptest
+@comptest_fails
 def check_evaluation2():
     ndp = parse_ndp("""
     mcdp {  

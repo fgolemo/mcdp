@@ -4,7 +4,6 @@ from .dp_generic_unary import WrapAMap
 from mcdp_maps import JoinNMap, Max1Map, MeetNMap
 from mcdp_posets import Poset
 
-
 __all__ = [
     'Max',
     'Max1',
@@ -12,8 +11,6 @@ __all__ = [
     'JoinNDP',
     'MeetNDual',
 ]
-
-
 
 
 class Max1(WrapAMap):

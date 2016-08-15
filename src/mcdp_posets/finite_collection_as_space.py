@@ -19,6 +19,9 @@ class FiniteCollectionAsSpace(Space):
         self.elements = frozenset(universe)
 
     def belongs(self, x):
+        if isinstance(x, dict):  # unhashable
+            msg = 'Value is not hashable.'
+            raise_desc(NotBelongs, msg, x=x, elements=self.elements)
         if not x in self.elements:
             msg = 'Element does not belong to poset.'
             raise_desc(NotBelongs, msg=msg, x=x, elements=self.elements)

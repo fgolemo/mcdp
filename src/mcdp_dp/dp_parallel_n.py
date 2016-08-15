@@ -7,6 +7,7 @@ from mcdp_posets import PosetProduct
 from mocdp.exceptions import do_extra_checks
 import itertools
 from mcdp_posets.uppersets import lowerset_product_multi, upperset_product_multi
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 
 
 __all__ = [
@@ -145,6 +146,11 @@ class ParallelN(PrimitiveDP):
         for dp in self.dps:
             r = dp.repr_long()
             s += '\n' + indent(r, '. ', first='\ ')
+
+        if hasattr(dp, ATTRIBUTE_NDP_RECURSIVE_NAME):
+            a = getattr(dp, ATTRIBUTE_NDP_RECURSIVE_NAME)
+            s += '\n (labeled as %s)' % a.__str__()
+
         return s
 
     def get_normal_form(self):

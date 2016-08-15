@@ -17,3 +17,10 @@ This is a device with 1 input and 3 outputs:
     <pre class='ndp_graph_templatized'>`goldsource_STU_200</pre>
     <pre class='ndp_graph_enclosed'>`goldsource_STU_200</pre>
 </div>
+
+### A Micro USB charger
+
+
+<pre class='ndp_graph_enclosed'>`USBMicroCharger</pre>
+<pre class='mcdp' id='USBMicroCharger' label='USBMicroCharger.mcdp'></pre>
+

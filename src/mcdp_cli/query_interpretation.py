@@ -21,9 +21,9 @@ def convert_string_query(ndp, query, context):
     """
     # first: make sure the names are the same
 
-    fnames = set(ndp.get_fnames())
+    fnames = ndp.get_fnames()
     fnames2 = set(query)
-    if fnames != fnames2:
+    if set(fnames) != fnames2:
         msg = 'Missing values in query or too many values.'
         raise_desc(ValueError, msg, fnames=fnames, query=query)
 

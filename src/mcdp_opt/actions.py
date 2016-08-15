@@ -7,6 +7,8 @@ from mocdp.comp.context import CFunction, CResource, Connection
 
 class Action():
 
+    __metaclass__ = ABCMeta
+
     def __call__(self, opt, s):
         raise NotImplementedError(type(self))
 
@@ -58,7 +60,7 @@ class ActionCreate(Action):
         return [(s2, ActionExpand())]
 
     @abstractmethod
-    def call(self):
+    def call(self, opt, s):
         pass
 
 class ActionConnect(ActionCreate):

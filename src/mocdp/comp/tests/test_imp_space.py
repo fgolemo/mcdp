@@ -1,16 +1,21 @@
+
 from comptests.registrar import comptest
+from contracts import contract
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.primitive import NotSolvableNeedsApprox
 from mcdp_lang.parse_interface import parse_ndp
 from mcdp_posets.space_product import SpaceProduct
+from mcdp_report.gg_ndp import gvgen_from_ndp
+from mcdp_report_ndp_tests.test1 import GetValues
 from mcdp_tests.generation import for_all_nameddps
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.composite_makecanonical import cndp_makecanonical
-from mocdp.comp.recursive_name_labeling import (get_imp_as_recursive_dict,
-    get_names_used, label_with_recursive_names, ndp_make, MakeArguments)
-from contracts import contract
 from mocdp.comp.interfaces import NotConnected
+from mocdp.comp.recursive_name_labeling import (MakeArguments,
+    get_imp_as_recursive_dict, get_names_used,
+    ndp_make, get_labelled_version)
+import os
 
 @contract(a=MakeArguments)
 def make_root(a):
@@ -83,9 +88,9 @@ mcdp {
 
     """)
     assert isinstance(ndp0, CompositeNamedDP)
-    label_with_recursive_names(ndp0)
-    ndp = cndp_makecanonical(ndp0)
-    dp0 = ndp.get_dp()
+    ndp_labeled = get_labelled_version(ndp0)
+    ndp_canonical = cndp_makecanonical(ndp_labeled)
+    dp0 = ndp_canonical.get_dp()
     print dp0.repr_long()
     dp, _ = get_dp_bounds(dp0, 5, 5)
     f = 0.0
@@ -106,8 +111,8 @@ mcdp {
             I.belongs(imp)
             imp_dict = get_imp_as_recursive_dict(I, imp)  # , ignore_hidden=False)
             print('imp dict: %r' % imp_dict)
-            assert set(imp_dict) == set(['a', 'b', '_sum1', '_invplus1', 'capacity', 'mass']), imp_dict
-            assert set(imp_dict['a']) == set(['_plus1', 'a2', ]), imp_dict['a']
+            assert set(imp_dict) == set(['a', 'b', '_sum1', '_invplus1', '_fun_capacity', '_res_mass']), imp_dict
+            assert set(imp_dict['a']) == set(['_plus1', 'a2', '_fun_capacity', '_res_mass' ]), imp_dict['a']
             context = {}
             artifact = ndp_make(ndp0, imp_dict, context)
             print('artifact: %s' % artifact)
@@ -117,19 +122,22 @@ mcdp {
 def test_imp_dict_1(id_ndp, ndp):
     if '_inf' in id_ndp:  # infinite
         return
-    label_with_recursive_names(ndp)
+
     try:
         ndp.check_fully_connected()
     except NotConnected:
         print('Skipping test_imp_dict_1 because %r not connected.' % id_ndp)
         return
 
-    dp0 = ndp.get_dp()
+    ndp_labeled = get_labelled_version(ndp)
+
+    dp0 = ndp_labeled.get_dp()
     F = dp0.get_fun_space()
     I = dp0.get_imp_space()
-    print ndp.repr_long()
+    print ndp_labeled.repr_long()
     print dp0.repr_long()
-    print('I: %s' % I)
+    print('I: %s' % I.repr_long())
+    
 
     f = list(F.get_minimal_elements())[0]
     try:
@@ -137,15 +145,36 @@ def test_imp_dict_1(id_ndp, ndp):
     except NotSolvableNeedsApprox:
         return
 
+    imp_dict = None
     for r in ur.minimals:
         imps = dp0.get_implementations_f_r(f, r)
         for imp in imps:
             I.belongs(imp)
             context = {}
             imp_dict = get_imp_as_recursive_dict(I, imp)
+            print('imp_dict: {}'.format(imp_dict))
             artifact = ndp_make(ndp, imp_dict, context)
-            print('artifact: %s' % artifact.__repr__())
+            print('artifact: {}'.format(artifact))
             
+    # Let's just do it with one
+    if imp_dict is not None:
+
+        gv = GetValues(ndp=ndp, imp_dict=imp_dict, nu=None, nl=None)
+
+        images_paths = []  # library.get_images_paths()
+        from mcdp_report.gdc import STYLE_GREENREDSYM
+        gg = gvgen_from_ndp(ndp=ndp, style=STYLE_GREENREDSYM, images_paths=images_paths,
+                            plotting_info=gv)
+
+        from reprep import Report
+        from mcdp_report.gg_utils import gg_figure
+        report = Report()
+        gg_figure(report, 'figure', gg, do_png=True, do_pdf=False, do_svg=False, do_dot=False)
+        fn = os.path.join('out', 'test_imp_dict_1', '%s.html' % id_ndp)
+        print('written to %s' % fn)
+        report.to_html(fn)
+
+
 
 @for_all_nameddps
 def test_imp_dict_2_makecanonical(id_ndp, ndp0):
@@ -156,9 +185,16 @@ def test_imp_dict_2_makecanonical(id_ndp, ndp0):
     if not isinstance(ndp0, CompositeNamedDP):
         print('skipping because not CompositeNamedDP: %s' % type(ndp0).__name__)
         return
-    label_with_recursive_names(ndp0)
+
+    try:
+        ndp0.check_fully_connected()
+    except NotConnected:
+        print('skipping because not connected')
+        return
+
+    ndp_labeled = get_labelled_version(ndp0)
     ndp = cndp_makecanonical(ndp0)
-    dp0 = ndp.get_dp()
+    dp0 = ndp_labeled.get_dp()
     F = dp0.get_fun_space()
     I = dp0.get_imp_space()
     assert isinstance(I, SpaceProduct)
@@ -235,10 +271,9 @@ mcdp {
 
     """)
     assert isinstance(ndp0, CompositeNamedDP)
-    label_with_recursive_names(ndp0)
-#     ndp = cndp_makecanonical(ndp0)
+    ndp0_labeled = get_labelled_version(ndp0)
     ndp = ndp0
-    dp = ndp.get_dp()
+    dp = ndp0_labeled.get_dp()
     print ndp.repr_long()
     print dp.repr_long()
     f = 0.0
@@ -259,9 +294,9 @@ mcdp {
             I.belongs(imp)
             imp_dict = get_imp_as_recursive_dict(I, imp)
             print('imp dict: %r' % imp_dict)
-            assert set(imp_dict) == set(['power', 'lift', 'actuation']), imp_dict
+            assert set(imp_dict) == set(['_res_power', '_fun_lift', 'actuation']), imp_dict
             assert set(imp_dict['actuation']) == \
-                set(['_mult1', 'a', 'power', '_c1', '_prod1', 'lift']), imp_dict['actuation']
+                set(['_mult1', 'a', '_res_power', '_c1', '_prod1', '_fun_lift', '_join_fname1']), imp_dict['actuation']
 
             context = {}
             artifact = ndp_make(ndp0, imp_dict, context)

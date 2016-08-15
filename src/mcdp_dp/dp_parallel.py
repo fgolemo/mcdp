@@ -6,7 +6,7 @@ from mcdp_posets import (Map, NotBelongs, PosetProduct, UpperSet, UpperSets,
     lowerset_product, poset_minima, upperset_product)
 from mocdp.exceptions import do_extra_checks
 import itertools
-from mocdp.memoize_simple_imp import memoize_simple
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 
 
 __all__ = [
@@ -139,7 +139,17 @@ class Parallel(PrimitiveDP):
         s = 'Parallel2  %% %s -> %s' % (self.get_fun_space(), self.get_res_space())
         s += self._add_extra_info()
         s += '\n' + indent(r1, '. ', first='\ ')
+
+        if hasattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME):
+            a = getattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME)
+            s += '\n (labeled as %s)' % a.__str__()
+
         s += '\n' + indent(r2, '. ', first='\ ')
+
+        if hasattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME):
+            a = getattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME)
+            s += '\n (labeled as %s)' % a.__str__()
+
         return s
 
     def get_normal_form(self):

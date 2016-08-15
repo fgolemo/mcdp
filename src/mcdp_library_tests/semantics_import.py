@@ -1,6 +1,7 @@
+from .create_mockups import create_hierarchy
 from comptests.registrar import comptest
-from mcdp_library_tests.create_mockups import create_hierarchy
-from mcdp_library.libraries import Librarian
+from mcdp_library import Librarian
+
 
 @comptest
 def feat_import1():
@@ -19,9 +20,9 @@ def feat_import1():
     assert 'library' in libraries['lib1']
 
     lib1 = librarian.load_library('lib1')
-    poset1 = lib1.load_poset('poset1')
+    _poset1 = lib1.load_poset('poset1')
     lib2 = librarian.load_library('lib2')
-    poset2 = lib2.load_poset('poset2')
+    _poset2 = lib2.load_poset('poset2')
 
 
 @comptest
@@ -41,10 +42,10 @@ def feat_import2():
     librarian = Librarian()
     librarian.find_libraries(d)
     lib1 = librarian.load_library('lib1')
-    model1 = lib1.load_ndp('model1')
+    _model1 = lib1.load_ndp('model1')
     lib2 = librarian.load_library('lib2')
-    model2 = lib2.load_ndp('model2')
-    model3 = lib2.load_ndp('model3')
+    _model2 = lib2.load_ndp('model2')
+    _model3 = lib2.load_ndp('model3')
 
 @comptest
 def feat_import3():

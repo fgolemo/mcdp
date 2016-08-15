@@ -38,61 +38,77 @@
     
     cakk 
 """
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME, ATTRIBUTE_NDP_MAKE_FUNCTION
-from mocdp.comp.composite import CompositeNamedDP, cndp_get_name_ndp_notfunres, \
-    cndp_iterate_res_nodes, cndp_iterate_fun_nodes
-from mocdp.comp.wrap import SimpleWrap
-from contracts.utils import raise_desc
-from mcdp_posets.space_product import SpaceProduct
-from mcdp_posets.category_coproduct import Coproduct1Labels
-from contracts import contract
-from mocdp.ndp.named_coproduct import NamedDPCoproduct
-from mcdp_dp.dp_flatten import Mux
-from mcdp_dp.dp_identity import IdentityDP
 from collections import namedtuple
+from contracts import contract
+from contracts.utils import raise_desc
+from mcdp_dp import IdentityDP, Mux
+from mcdp_posets import Coproduct1Labels, SpaceProduct
+from mocdp import ATTRIBUTE_NDP_MAKE_FUNCTION, ATTRIBUTE_NDP_RECURSIVE_NAME
+from mocdp.comp.composite import CompositeNamedDP, cndp_get_name_ndp_notfunres
+from mocdp.comp.context import Context
+from mocdp.comp.interfaces import NamedDP
+from mocdp.comp.labelers import LabelerNDP
+from mocdp.comp.wrap import SimpleWrap
+from mocdp.exceptions import DPInternalError, mcdp_dev_warning
+from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 __all__ = [
-    'label_with_recursive_names',
+    'get_labelled_version',
 ]
 
-def label_with_recursive_names(ndp):
-    visit_hierarchy(ndp, label_with_recursive_name_)
 
-def label_with_recursive_name_(parents_names, yourname, ndp):
-    recursive_name = filter(None, parents_names + (yourname,))
-    print('labeling %s' % recursive_name.__repr__())
-    if recursive_name != ():
-        setattr(ndp, ATTRIBUTE_NDP_RECURSIVE_NAME, recursive_name)
+def get_labelled_version(ndp):
+    return visit_hierarchy(ndp)
 
-def visit_hierarchy(ndp0, func):
+@contract(returns=NamedDP)
+def visit_hierarchy(ndp0):
     """
-        Visits the hierarchy in deep first
+        Visits the hierarchy in deep first.
     """
 
-    def visit(parents_name, yourname, ndp):
+    def visit(recname, ndp):
 
         if isinstance(ndp, CompositeNamedDP):
-                for name, child in cndp_get_name_ndp_notfunres(ndp):
-                    visit(parents_name + (yourname,), name, child)
+            # NOTE: Does not label CompositeNamedDP
+            context = Context()
+            for child_name, child_ndp in ndp.get_name2ndp().items():
+                child_ndp2 = visit(recname + (child_name,), child_ndp)
+                context.add_ndp(child_name, child_ndp2)
 
-                for fname, child in cndp_iterate_fun_nodes(ndp):
-                    visit(parents_name + (yourname,), fname, child)
+            for c in ndp.get_connections():
+                context.add_connection(c)
+                
+            context.fnames = ndp.get_fnames()
+            context.rnames = ndp.get_rnames()
+            res = CompositeNamedDP.from_context(context)
+            return res
 
-                for rname, child in cndp_iterate_res_nodes(ndp):
-                    visit(parents_name + (yourname,), rname, child)
+            # res2 = LabelerNDP(res, recname)
+            # return res2
 
         elif isinstance(ndp, SimpleWrap):
-            func(parents_name, yourname, ndp)
-            pass
-        elif isinstance(ndp, NamedDPCoproduct):
-            # func(parents_name, yourname, ndp)
-            assert len(ndp.ndps) == len(ndp.labels), ndp
-            for child, label in zip(ndp.ndps, ndp.labels):
-                visit(parents_name + (yourname,), label, child)
-        else:
-            assert False
+            ndp2 = LabelerNDP(ndp, recname)
+            return ndp2
 
-    visit(parents_name=(), yourname=None, ndp=ndp0)
+        elif isinstance(ndp, NamedDPCoproduct):
+            assert len(ndp.ndps) == len(ndp.labels), ndp
+            children = []
+            labels = []
+            for child_ndp, child_label in zip(ndp.ndps, ndp.labels):
+                child2 = visit(recname + (child_label,), child_ndp)
+                children.append(child2)
+                labels.append(child_label)
+                
+            res = NamedDPCoproduct(tuple(children), tuple(labels))
+            res2 = LabelerNDP(res, recname)
+            return res2
+        elif isinstance(ndp, LabelerNDP):
+            msg = 'Trying to re-label this as {}'.format(recname)
+            raise_desc(DPInternalError, msg, ndp=ndp)
+        else:
+            raise NotImplementedError(type(ndp))
+
+    return visit(recname=(), ndp=ndp0)
 
 def get_names_used(I):
     """
@@ -105,7 +121,7 @@ def get_names_used(I):
     
     if isinstance(I, SpaceProduct):
         res = []
-        for j, sub in enumerate(I.subs):
+        for sub in I.subs:
             if hasattr(sub, ATTRIBUTE_NDP_RECURSIVE_NAME):
                 name = getattr(sub, ATTRIBUTE_NDP_RECURSIVE_NAME)
                 assert isinstance(name, tuple)
@@ -119,22 +135,25 @@ def get_names_used(I):
         
 @contract(returns=dict)
 def collect(I, imp):
-    if hasattr(I, ATTRIBUTE_NDP_RECURSIVE_NAME):
-        name = getattr(I, ATTRIBUTE_NDP_RECURSIVE_NAME)
-        return {name: imp}
-
     I.belongs(imp)
     res = {}
+
     if isinstance(I, SpaceProduct):
         for j, sub in enumerate(I.subs):
             res.update(**collect(sub, imp[j]))
 
     elif isinstance(I, Coproduct1Labels):
         i, xi = I.unpack(imp)
-        res.update(**collect(I.spaces[i], xi))
+        Ii = I.spaces[i]
+
+        res.update(**collect(Ii, xi))
     else:
         pass
-        # raise(NotImplementedError(type(I)))
+        
+    mcdp_dev_warning('a little more thought')
+    if not res and hasattr(I, ATTRIBUTE_NDP_RECURSIVE_NAME):
+        name = getattr(I, ATTRIBUTE_NDP_RECURSIVE_NAME)
+        return {name: imp}
 
     return res
 
@@ -151,6 +170,11 @@ def get_imp_as_recursive_dict(I, imp):  # , ignore_hidden=True):
     """
     I.belongs(imp)
     res = collect(I, imp)
+
+    # print('collected: %s' % res)
+
+    if len(res) == 1 and list(res)[0] == ():
+        return res[()]
 
     # now res has some keys that are tuples of length >= 0
     # res = {('a','b'): ., ('a','c'), ...}
@@ -217,9 +241,11 @@ def ndp_make(ndp, imp_dict, context):
                     children_artifact[child_name] = ndp_make(child, child_imp, context)
                     continue
                 else: 
-                    msg = 'Could not find artifact for child'
-                    raise_desc(Exception, msg, child_name=child_name, imp_dict=imp_dict,
-                               child=child.repr_long())
+                    msg = 'Could not find artifact for child.'
+                    raise_desc(DPInternalError, msg,
+                                child_name=child_name,
+                                imp_dict=imp_dict,
+                                child=child.repr_long())
             else:
                 child_imp = imp_dict[child_name]
                 children_artifact[child_name] = ndp_make(child, child_imp, context)
@@ -230,8 +256,6 @@ def ndp_make(ndp, imp_dict, context):
         return run_make(ndp, imp_dict, context)
 
     elif isinstance(ndp, NamedDPCoproduct):
-        # print('imp_dict: %s' % imp_dict.__repr__())
-        # if True:
         for label in ndp.labels:
             if label in imp_dict:
                 index = ndp.labels.index(label)
@@ -239,6 +263,9 @@ def ndp_make(ndp, imp_dict, context):
                 value = imp_dict[label]
                 return run_make(child, value, context)
         assert False 
+    elif isinstance(ndp, LabelerNDP):
+        msg = 'Bug: you should not run make() on the labeled version.'
+        raise_desc(DPInternalError, msg)
     else:
         raise NotImplementedError(type(ndp))
     
@@ -249,7 +276,8 @@ def run_make(ndp, subresult, context):
 
     # removing the
     if isinstance(subresult, dict):
-        subresult = dict((k, v) for (k, v) in subresult.items() if k[0] != '_')
+        # subresult = dict((k, v) for (k, v) in subresult.items() if k[0] != '_')
+        subresult = dict((k, v) for (k, v) in subresult.items())
 
     for k, function in makes:
         a = MakeArguments(ndp=ndp,

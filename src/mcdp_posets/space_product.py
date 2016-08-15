@@ -93,6 +93,19 @@ class SpaceProduct(Space):
 
         return '%s(%d: %s)' % (name, len(self.subs), ",".join(args))
 
+    def repr_long(self):
+        s = "%s[%s]" % (type(self).__name__, len(self.subs))
+        for i, S in enumerate(self.subs):
+            prefix0 = " %d. " % i
+            prefix1 = "    "
+            s += "\n" + indent(S.repr_long(), prefix1, first=prefix0)
+            if hasattr(S, ATTRIBUTE_NDP_RECURSIVE_NAME):
+                a = getattr(S, ATTRIBUTE_NDP_RECURSIVE_NAME)
+                s += '\n  labeled as %s' % a.__str__()
+
+        return s
+
+
     def __str__(self):
         if hasattr(self, ATTR_LOAD_NAME):
             return "`" + getattr(self, ATTR_LOAD_NAME)

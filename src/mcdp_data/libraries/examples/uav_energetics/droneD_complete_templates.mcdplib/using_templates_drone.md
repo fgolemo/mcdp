@@ -38,7 +38,12 @@ mcdp {
 and use it inside:
 
 <pre class='mcdp' id='AE1' label='AE1.mcdp'>
-specialize [Battery: `BatteryUncertain, Actuation: `actuation] `ActuationEnergeticsTemplate
+specialize [
+  Battery: `BatteryUncertain, 
+  Actuation: `actuation,
+  PowerApprox: `PowerApprox
+] 
+`ActuationEnergeticsTemplate
 </pre>
 
 <!-- <pre class='ndp_graph_enclosed'>`AE1</pre> -->

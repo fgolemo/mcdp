@@ -162,7 +162,7 @@ class Optimization():
             fn = os.path.join(out_nodes, 'node%03d.html' % order)
             if os.path.exists(fn):
                 continue
-            r = get_optim_state_report(s)
+            r = get_optim_state_report(s, opt=self)
             print('writing to %r' % fn)
             r.to_html(fn)
 

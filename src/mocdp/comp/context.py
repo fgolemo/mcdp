@@ -258,7 +258,7 @@ class Context():
     def add_ndp_fun_node(self, fname, F):
         ndp = dpwrap(FunctionNode(F), fname, fname)
         name = get_name_for_fun_node(fname)
-        self.info('Adding new function %r as %r.' % (str(name), fname))
+        # print('Adding new function %r as %r.' % (str(name), fname))
         self.add_ndp(name, ndp)
         self.fnames.append(fname)
         return name
@@ -276,7 +276,7 @@ class Context():
         """ returns the name of the node """
         ndp = dpwrap(ResourceNode(R), rname, rname)
         name = get_name_for_res_node(rname)
-        self.info('Adding new resource %r as %r ' % (str(name), rname))
+        # self.info('Adding new resource %r as %r ' % (str(name), rname))
         self.add_ndp(name, ndp)
         self.rnames.append(rname)
         return name

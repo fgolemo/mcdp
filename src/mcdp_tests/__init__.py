@@ -16,6 +16,9 @@ def load_tests_modules():
     import mcdp_web_tests
     import mcdp_opt_tests
 
+    from mocdp.comp.flattening import tests  # @Reimport
+    from mocdp.comp import tests  # @Reimport
+
     import mcdp_report_ndp_tests
 
 

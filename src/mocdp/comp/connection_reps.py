@@ -4,8 +4,10 @@ from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.comp.context import Connection
 
+
 class ThereAreReps(ValueError):
     pass
+
 
 def check_no_reps(name2dp):
     """ raises ThereAreReps if some are repeated """
@@ -92,6 +94,7 @@ def relabel(name2dp, connections):
 
     return name2dp_, connections_, relabeling
 
+
 def connections_relabel(connections, fun_map, res_map):
     def f(c):
         key = (c.dp1, c.s1)
@@ -100,6 +103,7 @@ def connections_relabel(connections, fun_map, res_map):
         dp2, s2 = fun_map.get(key, key)
         return Connection(dp1=dp1, s1=s1, dp2=dp2, s2=s2)
     return map(f, connections)
+
     
 def simplewrap_relabel(sw, fun_map, res_map):
     fnames2 = [ fun_map.get(_, _) for _ in sw.get_fnames()]
@@ -110,6 +114,7 @@ def simplewrap_relabel(sw, fun_map, res_map):
         rnames2 = rnames2[0]
     return SimpleWrap(sw.dp, fnames2, rnames2, icon=sw.icon)
         
+
 def there_are_reps(name2dp):
     try:
         check_no_reps(name2dp)

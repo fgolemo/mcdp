@@ -3,6 +3,8 @@ from contracts import contract
 from mcdp_dp import (Constant, DPLoop0, DPLoop2, GenericUnary, Limit, Mux,
     Parallel, PrimitiveDP, Series0)
 from mcdp_dp.dp_coproduct import CoProductDPLabels
+from mcdp_dp.dp_labeler import LabelerDP
+from mcdp_dp.opaque_dp import OpaqueDP
 from mcdp_dp.primitive import ApproximableDP
 
 __all__ = [
@@ -49,13 +51,33 @@ def dp_graph_tree(dp0, imp=None, compact=False):
             r = go_loop(dp, imp)
         elif isinstance(dp, DPLoop2):
             r = go_loop2(dp, imp)
+        elif isinstance(dp, OpaqueDP):
+            r = go_opaque(dp, imp)
         elif isinstance(dp, ApproximableDP):
             r = go_simple_uncertain(dp, imp)
         elif isinstance(dp, CoProductDPLabels):
             r = go_coproductdplabels(dp, imp)
+        elif isinstance(dp, LabelerDP):
+            r = go_labeler(dp, imp)
         else:
             r = go_simple(dp, imp)
         return r
+
+    def go_labeler(dp, imp):
+        if add_junction_text:
+            label = 'labeler\n{}'.format(dp.recname)
+        else:
+            label = ""
+        n = gg.newItem(label)
+
+        gg.styleApply('junction', n)
+        gg.styleApply('junction_labeler', n)
+
+        n1 = go(dp.dp, imp)
+
+        create_edge(n, n1, dp.dp)
+
+        return n
 
     def go_coproductdplabels(dp, imp):
         assert isinstance(dp, CoProductDPLabels)
@@ -193,6 +215,22 @@ def dp_graph_tree(dp0, imp=None, compact=False):
         create_edge(n, n1, dp.dp1)
 
         return n
+    
+    def go_opaque(dp, imp):
+        if add_junction_text:
+            label = 'opaque'
+        else:
+            label = ""
+        n = gg.newItem(label)
+
+        gg.styleApply('junction', n)
+        gg.styleApply('junction_opaque', n)
+
+        n1 = go(dp.dp, imp)
+
+        create_edge(n, n1, dp.dp)
+
+        return n
 
     def get_edge_label(dp):
         F = dp.get_fun_space()
@@ -218,12 +256,22 @@ def dp_graph_tree(dp0, imp=None, compact=False):
 
     gg.styleAppend("junction_series", "style", "filled")
     gg.styleAppend("junction_series", "fillcolor", "yellow")
+
     gg.styleAppend("junction_loop", "style", "filled")
     gg.styleAppend("junction_loop", "fillcolor", "red")
+
+    gg.styleAppend("junction_opaque", "style", "filled")
+    gg.styleAppend("junction_opaque", "fillcolor", "gray")
+
     gg.styleAppend("junction_par", "style", "filled")
     gg.styleAppend("junction_par", "fillcolor", "green")
+
     gg.styleAppend("junction_coproduct", "style", "filled")
     gg.styleAppend("junction_coproduct", "fillcolor", "magenta")
+
+    gg.styleAppend("junction_labeler", "shape", "box")
+    gg.styleAppend("junction_labeler", "style", "filled")
+    gg.styleAppend("junction_labeler", "fillcolor", "gray")
 
     gg.styleAppend("edge", "arrowhead", "none")
 

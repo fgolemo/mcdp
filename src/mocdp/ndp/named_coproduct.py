@@ -1,9 +1,9 @@
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, indent
 from mocdp.comp.interfaces import NamedDP
 from mcdp_posets import NotEqual
 from contracts import contract
 from mocdp.comp.wrap import SimpleWrap
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME, ATTR_LOAD_NAME
 
 __all__ = [
     'NamedDPCoproduct',
@@ -96,4 +96,23 @@ class NamedDPCoproduct(NamedDP):
     def get_ftype(self, fname):
         return self.ndps[0].get_ftype(fname)
 
+    def __repr__(self):
+        s = 'NamedDPCoproduct'
+
+        if hasattr(self, ATTR_LOAD_NAME):
+            s += '\n (loaded as %r)' % getattr(self, ATTR_LOAD_NAME)
+
+        if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
+            s += '\n (labeled as %s)' % getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME).__str__()
+
+        for f in self.get_fnames():
+            s += '\n provides %s  [%s]' % (f, self.get_ftype(f))
+        for r in self.get_rnames():
+            s += '\n requires %s  [%s]' % (r, self.get_rtype(r))
+
+        for label, ndp in zip(self.labels, self.ndps):
+            prefix = '- %s: ' % label
+            prefix2 = ' ' * len(prefix)
+            s += '\n' + indent(ndp, prefix2, prefix)
+        return s
     

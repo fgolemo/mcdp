@@ -2,10 +2,18 @@ from mcdp_tests.generation import for_all_nameddps
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPSemanticErrorNotConnected
+from mocdp.comp.interfaces import NotConnected
 
 
 @for_all_nameddps
-def check_abstraction(_, ndp):
+def check_abstraction(id_ndp, ndp):
+
+    try:
+        ndp.check_fully_connected()
+    except NotConnected:
+        print('Skipping check_abstraction because %r not connected.' % id_ndp)
+        return
+
     ndp2 = ndp.abstract()
     assert isinstance(ndp2, SimpleWrap), type(ndp2)
     check_same_interface(ndp, ndp2)

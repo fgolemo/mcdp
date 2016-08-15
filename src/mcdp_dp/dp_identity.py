@@ -22,21 +22,21 @@ class IdentityDP(WrapAMap):
 
     def __repr__(self):
         return 'Id(%r)' % self.F
+#
+#
+# class OpaqueIdentity(WrapAMap):
+#     """ This is an identity that is never normalized out
+#         by series() """
+#     @contract(F=Poset)
+#     def __init__(self, F):
+#         amap = IdentityMap(F, F)
+#         WrapAMap.__init__(self, amap)
+#
+#     def __repr__(self):
+#         n = type(self).__name__
+#         return '%s(%r)' % (n, self.F)
 
-
-class OpaqueIdentity(WrapAMap):
-    """ This is an identity that is never normalized out 
-        by series() """
-    @contract(F=Poset)
-    def __init__(self, F):
-        amap = IdentityMap(F, F)
-        WrapAMap.__init__(self, amap)
-
-    def __repr__(self):
-        n = type(self).__name__
-        return '%s(%r)' % (n, self.F)
-
-if False:
+if True:
     class ResourceNode(IdentityDP):
         pass
 
@@ -44,11 +44,12 @@ if False:
         pass
 
 else:
-    class ResourceNode(OpaqueIdentity):
-        pass
-
-    class FunctionNode(OpaqueIdentity):
-        pass
+    pass
+#     class ResourceNode(OpaqueIdentity):
+#         pass
+#
+#     class FunctionNode(OpaqueIdentity):
+#         pass
 
 
 Identity = IdentityDP

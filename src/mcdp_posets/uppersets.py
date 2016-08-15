@@ -431,6 +431,21 @@ def upperset_project(ur, i):
         minimals.add(mi)
     return UpperSet(poset_minima(minimals, leq=Pi.leq), P=Pi)
 
+@contract(lf='$LowerSet', i='int,>=0')
+def lowerset_project(lf, i):
+    assert isinstance(lf, LowerSet), lf
+    assert isinstance(lf.P, PosetProduct), lf
+    if not (0 <= i < len(lf.P)):
+        msg = 'Index %d not valid.' % i
+        raise_desc(ValueError, msg, P=lf.P)
+    maximals = set()
+    Pi = lf.P.subs[i]
+    for m in lf.maximals:
+        mi = m[i]
+        maximals.add(mi)
+    return LowerSet(poset_maxima(maximals, leq=Pi.leq), P=Pi)
+
+
 @contract(ur='$UpperSet', f='isinstance(Map)', returns='$UpperSet')
 def upperset_project_map(ur, f):
     """ Projects the upper set through the given map. """

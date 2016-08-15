@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from _collections import defaultdict
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, check_isinstance
 from mcdp_dp.dp_identity import Identity
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import (Connection, get_name_for_fun_node,
@@ -9,6 +9,7 @@ from mocdp.comp.context import (Connection, get_name_for_fun_node,
 from mocdp.comp.context_functions import is_dp_connected
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
+from mocdp.comp.labelers import LabelerNDP
 
 __all__ = [
     'cndp_flatten',
@@ -48,19 +49,30 @@ def flatten_add_prefix(ndp, prefix):
             isf, fname = is_fun_node_name(name2)
             isr, rname = is_res_node_name(name2)
             
-            if isf:
-                dp = ndp2.dp
-                fnames = "%s%s%s" % (prefix, sep, fname)
-                rnames = "%s%s%s" % (prefix, sep, fname)
-                ndp = SimpleWrap(dp=dp, fnames=fnames, rnames=rnames, icon=ndp2.icon)
-            elif isr:
-                dp = ndp2.dp
-                fnames = "%s%s%s" % (prefix, sep, rname)
-                rnames = "%s%s%s" % (prefix, sep, rname)
-                ndp = SimpleWrap(dp=dp, fnames=fnames, rnames=rnames, icon=ndp2.icon)
+            if isf or isr:
+
+                if isinstance(ndp2, SimpleWrap):
+
+                    if isf:
+                        fnames = "%s%s%s" % (prefix, sep, fname)
+                        rnames = "%s%s%s" % (prefix, sep, fname)
+                    if isr:
+                        fnames = "%s%s%s" % (prefix, sep, rname)
+                        rnames = "%s%s%s" % (prefix, sep, rname)
+
+                    dp = ndp2.dp
+                    res = SimpleWrap(dp=dp, fnames=fnames, rnames=rnames)
+
+                elif isinstance(ndp2, LabelerNDP):
+                    ndp_inside = transform(name2, ndp2.ndp)
+                    return LabelerNDP(ndp_inside, ndp2.recursive_name)
+                else:
+                    raise NotImplementedError(type(ndp2))
+
             else:
-                ndp = flatten_add_prefix(ndp2, prefix)
-            return ndp
+                res = flatten_add_prefix(ndp2, prefix)
+
+            return res
 
 
         names2 = {}
@@ -93,15 +105,21 @@ def flatten_add_prefix(ndp, prefix):
         labels2 = ndp.labels
         return NamedDPCoproduct(children2, labels2)
 
-    assert False, ndp
+    if isinstance(ndp, LabelerNDP):
+        x = flatten_add_prefix(ndp.ndp, prefix)
+        return LabelerNDP(x, ndp.recursive_name)
+
+    assert False, type(ndp)
     
 @contract(ndp=CompositeNamedDP)
 def cndp_flatten(ndp):
-    assert isinstance(ndp, CompositeNamedDP)
+    check_isinstance(ndp, CompositeNamedDP)
+
     name2ndp = ndp.get_name2ndp()
     connections = ndp.get_connections()
     fnames = ndp.get_fnames()
     rnames = ndp.get_rnames()
+
     names2 = {}
     connections2 = []
 
@@ -115,7 +133,6 @@ def cndp_flatten(ndp):
 
         n1 = n0.flatten()
 
-
         if isinstance(n1, CompositeNamedDP):
             nn = flatten_add_prefix(n1, prefix=name)
         else:
@@ -127,13 +144,17 @@ def cndp_flatten(ndp):
                 assert not name2 in names2
                 isitf, is_fname = is_fun_node_name(name2)
                 isitr, is_rname = is_res_node_name(name2)
-                connected_to_something = is_dp_connected(name2, nn_connections)
+
                 if (isitf or isitr):
+                    connected_to_something = is_dp_connected(name2, nn_connections)
                     # do not add the identity nodes
                     # that represent functions or resources
                     # except if they are unconnected
 
-                    if connected_to_something:
+                    # add_identities = not connected_to_something
+                    add_identities = True
+
+                    if not add_identities:
                         continue
                     else:
                         # think of the case where there are a f and r with
@@ -158,40 +179,58 @@ def cndp_flatten(ndp):
             
             for c in nn.get_connections():
                 # is it a connection to a function
+
+                if False:
+                    isitf, fn = is_fun_node_name(c.dp1)
+                    isitr, rn = is_res_node_name(c.dp2)
+
+                    if isitf and isitr:
+                        # This is the case where there is a straight connection
+                        # from function to resource:
+                        #
+                        # f = instance mcdp {
+                        #     provides a [R]
+                        #     requires c [R]
+                        #
+                        #     c >= a
+                        # }
+                        # In this case, we need to add an identity
+                        new_name = '_%s_pass_through_%s' % (name, c.s2)
+                        F = nn.get_name2ndp()[c.dp1].get_ftype(c.s1)
+                        ndp_pass = SimpleWrap(Identity(F), fnames=fn, rnames=rn)
+                        assert not new_name in names2
+                        names2[new_name] = ndp_pass
+                        proxy_functions[name][fn] = (new_name, fn)
+                        proxy_resources[name][rn] = (new_name, rn)
+                        continue
+
+                    if isitf:
+                        proxy_functions[name][fn] = (c.dp2, c.s2)
+                        continue
+
+                    if isitr:
+                        proxy_resources[name][rn] = (c.dp1, c.s1)
+                        continue
+
                 isitf, fn = is_fun_node_name(c.dp1)
-                isitr, rn = is_res_node_name(c.dp2)
-
-                if isitf and isitr:
-                    # This is the case where there is a straight connection
-                    # from function to resource:
-                    #
-                    # f = instance mcdp {
-                    #     provides a [R]
-                    #     requires c [R]
-                    #
-                    #     c >= a
-                    # }
-                    # In this case, we need to add an identity
-                    new_name = '_%s_pass_through_%s' % (name, c.s2)
-                    F = nn.get_name2ndp()[c.dp1].get_ftype(c.s1)
-                    ndp_pass = SimpleWrap(Identity(F), fnames=fn, rnames=rn)
-                    assert not new_name in names2
-                    names2[new_name] = ndp_pass
-                    proxy_functions[name][fn] = (new_name, fn)
-                    proxy_resources[name][rn] = (new_name, rn)
-                    continue
-
                 if isitf:
-                    proxy_functions[name][fn] = (c.dp2, c.s2)
-                    continue
+                    dp1 = fn + '_f'
+                    assert dp1 in names2
+                else:
+                    dp1 = c.dp1
 
+                isitr, rn = is_res_node_name(c.dp2)
                 if isitr:
-                    proxy_resources[name][rn] = (c.dp1, c.s1)
-                    continue
+                    dp2 = rn + '_r'
+                    assert dp2 in names2
+                else:
+                    dp2 = c.dp2
 
-                assert c.s1 in names2[c.dp1].get_rnames()
-                assert c.s2 in names2[c.dp2].get_fnames()
-                c2 = Connection(dp1=c.dp1, s1=c.s1, dp2=c.dp2, s2=c.s2)
+                assert dp1 in names2
+                assert dp2 in names2
+                assert c.s1 in names2[dp1].get_rnames()
+                assert c.s2 in names2[dp2].get_fnames()
+                c2 = Connection(dp1=dp1, s1=c.s1, dp2=dp2, s2=c.s2)
                 connections2.append(c2)
         else:
             for fn in nn.get_fnames():
@@ -280,4 +319,7 @@ def cndp_flatten(ndp):
         c2 = Connection(dp1=dp1_, s1=s1_, dp2=dp2_, s2=s2_) 
         connections2.append(c2)
 
-    return CompositeNamedDP.from_parts(names2, connections2, fnames, rnames)
+    ndp_res = CompositeNamedDP.from_parts(names2, connections2, fnames, rnames)
+
+
+    return ndp_res

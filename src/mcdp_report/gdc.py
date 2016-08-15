@@ -1,15 +1,17 @@
-from tempfile import mkdtemp
-from mocdp.exceptions import mcdp_dev_warning
 from contextlib import contextmanager
 from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
-import os
+from mcdp_library.utils.locate_files_imp import locate_files
 from mcdp_report.utils import safe_makedirs
+from mocdp.exceptions import mcdp_dev_warning
+from mocdp.memoize_simple_imp import memoize_simple
 from system_cmd.meat import system_cmd_result
 from system_cmd.structures import CmdException
-from mcdp_library.utils.locate_files_imp import locate_files
-from mocdp.memoize_simple_imp import memoize_simple
+from tempfile import mkdtemp
+import os
 
-__all__ = ['GraphDrawingContext']
+__all__ = [
+    'GraphDrawingContext',
+]
 
 STYLE_GREENRED = 'greenred'
 STYLE_GREENREDSYM = 'greenredsym'
@@ -17,7 +19,8 @@ COLOR_DARKGREEN = 'darkgreen'
 COLOR_DARKRED = 'red'
 
 class GraphDrawingContext():
-    def __init__(self, gg, parent, yourname, level=0, tmppath=None, style='default',
+    def __init__(self, gg, parent, yourname, level=0,
+                 tmppath=None, style='default',
                  images_paths=[]):
         self.gg = gg
         self.parent = parent
@@ -27,7 +30,7 @@ class GraphDrawingContext():
         if tmppath is None:
             tmppath = mkdtemp(suffix="dp-icons")
             mcdp_dev_warning('need to share icons')
-            # print('created tmp directory %r' % tmppath)
+
         self.tmppath = tmppath
         self.images_paths = images_paths
 
@@ -47,8 +50,12 @@ class GraphDrawingContext():
         return n
 
     def child_context(self, parent, yourname):
-        c = GraphDrawingContext(gg=self.gg, parent=parent, yourname=yourname,
-                                level=self.level + 1, tmppath=self.tmppath, style=self.style,
+        c = GraphDrawingContext(gg=self.gg,
+                                parent=parent,
+                                yourname=yourname,
+                                level=self.level + 1,
+                                tmppath=self.tmppath,
+                                style=self.style,
                                 images_paths=self.images_paths)
         return c
 
@@ -57,7 +64,6 @@ class GraphDrawingContext():
         c = self.child_context(parent=parent, yourname=yourname)
         yield c
         self.all_nodes.extend(c.all_nodes)
-
 
     def styleApply(self, sname, n):
         self.gg.styleApply(sname, n)
@@ -167,7 +173,7 @@ class GraphDrawingContext():
         mcdp_dev_warning('this above has no effect')
         propertyAppend(l1, 'fontcolor', COLOR_DARKGREEN)
 
-    def decorate_arrow_resource(self, l2, split=False):
+    def decorate_arrow_resource(self, l2):
         propertyAppend = self.gg.propertyAppend
 
         mcdp_dev_warning('this above has no effect')
@@ -215,7 +221,6 @@ def get_images(dirname, exts=None):
             allfiles[basename] = f
     return allfiles
 
-from mocdp import logger
 def choose_best_icon(iconoptions, imagepaths):
     # logger.debug('Looking for %s in %s.' % (str(iconoptions), imagepaths))
     exts = ('png', 'jpg', 'PNG', 'JPG', 'jpeg', 'JPEG')
@@ -240,7 +245,6 @@ def choose_best_icon(iconoptions, imagepaths):
 
 
 def resize_icon(filename, tmppath, size):
-
     res = os.path.join(tmppath, 'resized', str(size))
 
     safe_makedirs(res)
@@ -248,12 +252,12 @@ def resize_icon(filename, tmppath, size):
     if not os.path.exists(resized):
         cmd = ['convert', filename, '-resize', '%s' % size, resized]
         try:
-            # print('running graphviz')
+
             system_cmd_result(cwd='.', cmd=cmd,
                      display_stdout=False,
                      display_stderr=False,
                      raise_on_error=True)
-            # print('done')
+
         except CmdException:
             raise
     return resized
