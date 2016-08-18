@@ -488,7 +488,7 @@ mcdp {
 #     UNat.check_equal(res, N.U(2))
     print('***')
     print('Now using the generic solver')
-    trace = generic_solve(dp, f=(), max_steps=None)
+    _trace = generic_solve(dp, f=(), max_steps=None)
 
 
 @comptest
@@ -740,12 +740,12 @@ def check_loop_result5c():
 
 @comptest
 def check_loop_result5():
-    dp0, dp = get_simple_equiv()
+    _dp0, dp = get_simple_equiv()
     print dp.repr_long()
 
-    dp0, dp = get_simple_equiv()
+    _dp0, dp = get_simple_equiv()
 
-    R = dp0.get_res_space()
+    # R = dp0.get_res_space()
 
     S, alpha, beta = dp.get_normal_form()
     One = PosetProduct(())

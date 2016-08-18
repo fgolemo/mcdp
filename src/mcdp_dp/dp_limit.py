@@ -11,7 +11,6 @@ __all__ = [
     'LimitMaximals',
 ]
 
-
 class Limit(PrimitiveDP):
 
     @contract(F='$Poset')

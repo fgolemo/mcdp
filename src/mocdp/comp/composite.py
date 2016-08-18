@@ -7,7 +7,7 @@ from contracts.utils import (format_dict_long, format_list_long, raise_desc,
 from mcdp_dp import Mux
 from mcdp_posets import NotEqual, PosetProduct
 from mocdp import ATTR_LOAD_NAME
-from mocdp.comp.context import is_fun_node_name
+from mocdp.comp.context import is_fun_node_name, Context
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPSemanticError
 
@@ -43,6 +43,14 @@ class CompositeNamedDP(NamedDP):
 
         self._rnames = list(self.context.rnames)
         self._fnames = list(self.context.fnames)
+
+    def __copy__(self):
+        c = Context()
+        c.names = dict(**self.context.names)
+        c.connections = list(self.context.connections)
+        c.fnames = list(self.context.fnames)
+        c.rnames = list(self.context.rnames)
+        return CompositeNamedDP(c)
 
     @staticmethod
     def from_context(context):

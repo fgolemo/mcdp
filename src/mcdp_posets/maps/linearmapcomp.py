@@ -1,5 +1,6 @@
 from mcdp_posets import Map
 import numpy as np
+from mcdp_posets.rcomp import tiny
 
 class LinearMapComp(Map):
     """ Linear multiplication on R + top """
@@ -13,7 +14,14 @@ class LinearMapComp(Map):
     def _call(self, x):
         if self.A.equal(x, self.A.get_top()):
             return self.B.get_top()
-        res = x * self.factor
+
+        try:
+            res = x * self.factor
+        except FloatingPointError as e:
+            assert 'underflow' in str(e)
+            # print x, self.factor
+            res = tiny
+
         if np.isinf(res):
             return self.B.get_top()
         return res

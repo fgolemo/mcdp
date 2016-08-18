@@ -12,6 +12,7 @@ def poset_maxima(elements, leq):
     geq = lambda a, b: leq(b, a)
     return poset_minima(elements, geq)
 
+
 @time_poset_minima_func
 @contract(elements='seq|set|$frozenset')
 def poset_minima(elements, leq):
@@ -36,6 +37,7 @@ def poset_minima(elements, leq):
             # remove the ones that are less than this
             res = [r for r in res if not leq(e, r)] + [e]
     return set(res)
+
 
 @contract(poset=Poset, elements='set|seq')
 def poset_minima_n2(poset, elements):

@@ -1,11 +1,11 @@
 from comptests.registrar import comptest, comptest_fails
-from mcdp_posets.poset_product import PosetProduct
 from mcdp_posets.category_coproduct import Coproduct1
-from mcdp_posets.rcomp_units import R_Weight, R_Energy, R_Time
-from mcdp_posets.poset_coproduct import PosetCoproduct
-from mcdp_posets.types_universe import express_value_in_isomorphic_space, \
-    get_types_universe
 from mcdp_posets.finite_poset import FinitePoset
+from mcdp_posets.poset_coproduct import PosetCoproduct
+from mcdp_posets.poset_product import PosetProduct
+from mcdp_posets.rcomp_units import R_Energy, R_Time, R_Weight
+from mcdp_posets.types_universe import (express_value_in_isomorphic_space,
+    get_types_universe)
 
 @comptest
 def check_coproduct1():
@@ -76,8 +76,8 @@ def check_coproduct_embedding3():
     tu.check_leq(P1, P2)
     tu.check_leq(P2, P1)
 
-    A_to_B1, B_to_A1 = tu.get_embedding(A, B)
-    B_to_A2, A_to_B2 = tu.get_embedding(B, A)
+    A_to_B1, B_to_A1 = tu.get_embedding(A, B)  # @UnusedVariable
+    B_to_A2, A_to_B2 = tu.get_embedding(B, A)  # @UnusedVariable
 
 @comptest
 def check_coproduct_embedding4():

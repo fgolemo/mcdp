@@ -3,8 +3,11 @@ from contracts import contract
 from mcdp_dp.primitive import NotSolvableNeedsApprox
 from mcdp_posets import Nat, Poset  # @UnusedImport
 from mcdp_posets import PosetProduct, UpperSet
+from mcdp_posets.rcomp import RcompTop
+from mocdp.exceptions import mcdp_dev_warning, do_extra_checks
 import numpy as np
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp_posets.utils import check_minimal
+from contracts.utils import raise_desc
 
 __all__ = [
     'InvMult2',
@@ -14,6 +17,10 @@ __all__ = [
 
 
 class InvMult2(ApproximableDP):
+
+    ALGO_UNIFORM = 'uniform'
+    ALGO_VAN_DER_CORPUT = 'van_der_corput'
+    ALGO = ALGO_VAN_DER_CORPUT
 
     @contract(Rs='tuple[2],seq[2]($Poset)')
     def __init__(self, F, Rs):
@@ -64,6 +71,9 @@ class InvMult2U(PrimitiveDP):
         return set([(f, r)])
 
     def solve(self, f):
+        if f == 0.0:
+            return  UpperSet(minimals=set([(0.0, 0.0)]), P=self.R)
+
         top = self.F.get_top()
         if f == top:
             mcdp_dev_warning('FIXME Need much more thought about this')
@@ -71,11 +81,18 @@ class InvMult2U(PrimitiveDP):
             top2 = self.Rs[1].get_top()
             s = set([(top1, top2)])
             return self.R.Us(s)
-
-        ps = samplec(self.n, f)
+        if InvMult2.ALGO == InvMult2.ALGO_UNIFORM:
+            ps = samplec(self.n, f)
+        elif InvMult2.ALGO == InvMult2.ALGO_VAN_DER_CORPUT:
+            x1, x2 = generate_exp_van_der_corput_sequence(n=self.n, C=f)
+            ps = zip(x1, x2)
+        else:
+            assert False
+            
         return UpperSet(minimals=ps, P=self.R)
 
 def samplec(n, c):
+    """ Samples n points on the curve xy=c """
     ps = sample(n)
     s = np.sqrt(c)
     ps = [(x * s, y * s) for x, y in ps]
@@ -119,6 +136,9 @@ class InvMult2L(PrimitiveDP):
         return lf, ur
 
     def solve(self, f):
+        if f == 0.0:
+            return  UpperSet(minimals=set([(0.0, 0.0)]), P=self.R)
+
         top = self.F.get_top()
         if f == top:
             mcdp_dev_warning('FIXME Need much more thought about this')
@@ -129,22 +149,90 @@ class InvMult2L(PrimitiveDP):
 
         n = self.n
 
-        if n == 1:
-            points = [(0.0, 0.0)]
-        elif n == 2:
-            points = [(0.0, 0.0)]
-        else:  
-            points = set()
-            pu = sorted(samplec(n - 1, f), key=lambda _: _[0])
-            # assert len(pu) == n - 1
-            nu = len(pu)
+        if InvMult2.ALGO == InvMult2.ALGO_UNIFORM:
+            if n == 1:
+                points = [(0.0, 0.0)]
+            elif n == 2:
+                points = [(0.0, 0.0)]
+            else:
 
-            points.add((0.0, pu[0][1]))
-            points.add((pu[-1][0], 0.0))
-            for i in range(nu - 1):
-                p = (pu[i][0], pu[i + 1][1])
-                points.add(p)
+                pu = sorted(samplec(n - 1, f), key=lambda _: _[0])
+                # assert len(pu) == n - 1
+                nu = len(pu)
 
-            # s = " ".join(['%s*%s=%s ' % (a, b, a * b) for a, b in sorted(points, key=lambda _: _[0])])
+                points = set()
+                points.add((0.0, pu[0][1]))
+                points.add((pu[-1][0], 0.0))
+                for i in range(nu - 1):
+                    p = (pu[i][0], pu[i + 1][1])
+                    points.add(p)
+
+        elif InvMult2.ALGO == InvMult2.ALGO_VAN_DER_CORPUT:
+
+            if n == 1:
+                points = set([(0.0, 0.0)])
+            else:
+                x1, x2 = generate_exp_van_der_corput_sequence(n=self.n - 1, C=f)
+                pu = zip(x1, x2)
+                # ur = UpperSet(pu, self.R)
+                assert len(pu) == self.n - 1, pu
+
+                if do_extra_checks():
+                    check_minimal(pu, self.get_res_space())
+
+                nu = len(pu)
+                points = []
+                points.append((0.0, pu[0][1]))
+
+                for i in range(nu - 1):
+                    p = (pu[i][0], pu[i + 1][1])
+                    points.append(p)
+
+                points.append((pu[-1][0], 0.0))
+
+                points = set(points)
+        else:
+            assert False
+
+        assert len(points) == self.n, points
 
         return UpperSet(minimals=points, P=self.R)
+
+@contract(n='int,>=1', returns='tuple(*,*)')
+def generate_exp_van_der_corput_sequence(n, C=1.0, mapping_function=None):
+    """
+        mapping_function: something that maps [0, 1] to [-inf, inf]
+        
+        Returns a pair of numpy arrays
+        
+        so that x1*x2 = C.
+    """
+    if C <= 0.0:
+        raise_desc(ValueError, 'Need positive C, got %r.' % C)
+
+
+    from .dp_inv_plus import van_der_corput_sequence
+    v = np.array(van_der_corput_sequence(n))
+
+    if mapping_function is None:
+        mapping_function = lambda x: np.tan(((x - 0.5) * 2) * (np.pi / 2))
+    v2 = np.array(map(mapping_function, v))
+    M = np.log(C)
+    logx1 = v2
+    logx2 = M - v2
+    finfo = np.finfo(float)
+
+    eps = finfo.tiny
+    maxi = finfo.max
+    def myexp(x):
+        try:
+            return np.exp(x)
+        except FloatingPointError:
+            if x < 0:
+                return eps
+            else:
+                return maxi
+
+    x1 = np.array(map(myexp, logx1))
+    x2 = np.array(map(myexp, logx2))
+    return x1, x2

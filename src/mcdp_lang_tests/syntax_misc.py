@@ -13,6 +13,8 @@ from mocdp.comp.recursive_name_labeling import get_names_used
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mcdp_posets.category_product import get_product_compact
 from mcdp_posets import PosetProduct
+from contracts.utils import raise_desc
+from mocdp.exceptions import DPSemanticError, DPNotImplementedError
 
 @comptest
 def check_lang():
@@ -211,32 +213,6 @@ mcdp {
 }""", "the name 'f' can't be used as a function")
 
 
-
-
-
-# TODO:
-#     assert_parsable_to_unconnected_ndp("""
-# cdp {
-#   motor = abstract cdp {
-#     provides torque [R]
-#     requires weight [R]
-#
-#     weight >= 1.0 [R]
-#     torque <= 1.0 [R]
-#   }
-# }
-# """)
-
-
-
-
-
-
-
-
-
-
-
 @comptest
 def check_lang49():
     """ Shortcuts "for" """
@@ -278,9 +254,44 @@ mcdp {
     x + y >= a
 }""")
 
+    s = """
+    mcdp {
+        provides a [s]
+        
+        requires x [s]
+        requires y [s]
+        requires z [s]
+        
+        x + y * z >= a
+    }"""
+    try:
+        parse_ndp(s)
+    except DPSemanticError as e:
+        if 'Inconsistent units' in str(e):
+            pass
+        else:
+            msg = 'Expected inconsistent unit error.'
+            raise_desc(Exception, msg)
+    else:
+        msg = 'Expected exception'
+        raise_desc(Exception, msg)
 
-
-
+    s = """
+    mcdp {
+        provides a [s]
+        
+        requires x [s]
+        requires y [hour]
+        
+        x + y >= a
+    }"""
+    try:
+        parse_ndp(s)
+    except DPNotImplementedError as e:
+        pass
+    else:
+        msg = 'Expected DPNotImplementedError'
+        raise_desc(Exception, msg)
 
 
 @comptest
@@ -460,13 +471,16 @@ def check_lang61():  # TODO: rename
 @comptest
 def check_lang60():  # TODO: rename
     pass
+
+
+
+
 #     s = """
 #     canonical mcdp {
 #
 #         provides f [m]
 #
 #         f + 10 m + 20 m <= 10 m
-#
 #     }
 #
 #     """

@@ -6,11 +6,9 @@ from .space import NotBelongs, NotEqual, Space, Uninhabited
 from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
-import random
-import itertools
 from mocdp.memoize_simple_imp import memoize_simple
-
-
+import itertools
+import random
 
 
 __all__ = [

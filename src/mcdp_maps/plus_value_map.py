@@ -21,6 +21,9 @@ class PlusValueMap(Map):
         self.F = F
         self.R = R
 
+    def __repr__(self):
+        return "+ %s" % self.c_space.format(self.c_value)
+
     def _call(self, x):
         values = [self.c_value, x]
         Fs = [self.c_space, self.F]

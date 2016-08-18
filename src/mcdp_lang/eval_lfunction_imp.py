@@ -11,7 +11,9 @@ from mcdp_posets import Nat, RcompUnits, mult_table
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
 from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import CFunction, get_name_for_res_node
-from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.exceptions import DPInternalError, DPSemanticError, \
+    DPNotImplementedError
+from mcdp_posets.types_universe import get_types_universe
 
 
 CDP = CDPLanguage
@@ -142,7 +144,18 @@ def eval_lfunction_invplus(lf, context):
     R = Fs[0]
 
     if all(isinstance(_, RcompUnits) for _ in Fs):
+        
+        tu = get_types_universe()
+        if not tu.leq(Fs[1], Fs[0]):
+            msg = 'Inconsistent units %s and %s.' % (Fs[1], Fs[0])
+            raise_desc(DPSemanticError, msg, Fs0=Fs[0], Fs1=Fs[1])
+
+        if not tu.equal(Fs[1], Fs[0]):
+            msg = 'This case was not implemented yet. Differing units %s and %s.' % (Fs[1], Fs[0])
+            raise_desc(DPNotImplementedError, msg, Fs0=Fs[0], Fs1=Fs[1])
+        
         dp = InvPlus2(R, tuple(Fs))
+        
     elif all(isinstance(_, Nat) for _ in Fs):
         dp = InvPlus2Nat(R, tuple(Fs))
     else:

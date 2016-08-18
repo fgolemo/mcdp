@@ -100,8 +100,8 @@ def check_approx_res5():
     resu = dpu.solve(0.016)
     print resl
     print resu
-    assert resl.minimals == set([0.02])
-    assert resu.minimals == set([0.03])
+    assert resl.minimals == set([0.01])
+    assert resu.minimals == set([0.02])
 
 
 @comptest

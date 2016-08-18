@@ -90,7 +90,7 @@ def sum_units(Fs, values, R):
     res = 0.0
     for Fi, x in zip(Fs, values):
         if Fi.equal(x, Fi.get_top()):
-            return  R.get_top()
+            return R.get_top()
 
         # reasonably sure this is correct...
         try:
@@ -174,8 +174,14 @@ class ProductN(EmptyDP):
             return False
         if is_there_a_top():
             return self.R.U(self.R.get_top())
+
         mult = lambda x, y: x * y
-        r = functools.reduce(mult, f)
+        try:
+            r = functools.reduce(mult, f)
+        except FloatingPointError as e:
+            # assuming this is overflow
+            assert 'overflow' in str(e)
+            r = np.inf
         if np.isinf(r):
             r = self.R.get_top()
         return self.R.U(r)

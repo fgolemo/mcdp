@@ -1,8 +1,8 @@
 """ Contains the main parsing interface """
-from contracts import contract
 from .parse_actions import parse_wrap
+from contracts import contract
+from mcdp_dp import PrimitiveDP
 from mcdp_posets import Poset
-from mcdp_dp.primitive import PrimitiveDP
 from mocdp.exceptions import MCDPExceptionWithWhere
 
 
@@ -11,7 +11,8 @@ __all__ = [
     'parse_ndp_filename',
     'parse_poset',
     'parse_primitivedp',
-    'parse_constant'
+    'parse_constant',
+    'parse_template',
 ]
 
 def parse_ndp(string, context=None):

@@ -6,7 +6,7 @@ from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_dp.dp_approximation import CombinedCeilMap
+from mcdp_dp.dp_approximation import CombinedCeilMap, FloorStepMap
 from mcdp_dp.dp_generic_unary import WrapAMap
 from mcdp_lang.helpers import create_operation
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
@@ -142,7 +142,11 @@ def eval_rvalue_approx_u(r, context):
         raise_desc(DPSemanticError, msg)
 
     stepu = express_value_in_isomorphic_space(S1=step.unit, s1=step.value, S2=R)
-    ccm = CombinedCeilMap(R, alpha=0.0, step=stepu, max_value=None)
+    if stepu == 0.0:
+        return r1
+
+    ccm = FloorStepMap(R, step=stepu)
+    # ccm = CombinedCeilMap(R, alpha=0.0, step=stepu, max_value=None)
     dp = WrapAMap(ccm)
 
     r2 = create_operation(context, dp=dp, resources=[r1],

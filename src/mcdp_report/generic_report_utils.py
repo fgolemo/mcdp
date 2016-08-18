@@ -10,6 +10,7 @@ from reprep.config import RepRepDefaults
 import functools
 import os
 import traceback
+from mcdp_posets.rcomp import finfo
 
 
 extra_space_finite = 0.025
@@ -557,9 +558,19 @@ def enlarge_y(b, f):
 def enlarge(b, f):
     w = b[1] - b[0]
     h = b[3] - b[2]
-    dw = f * w
-    dh = h * f
-    return (b[0] - dw, b[1] + dw, b[2] - dh, b[3] + dh)
+    # print b, f, w, h
+    dw = fix_underflow(f) * fix_underflow(w)
+    dh = fix_underflow(h) * fix_underflow(f)
+
+    a = (b[0] - dw, b[1] + dw, b[2] - dh, b[3] + dh)
+    return tuple(map(fix_underflow, a))
+
+
+def fix_underflow(x):
+    # using finfo.tiny gives problems to matplotlib
+    return np.maximum(x, finfo.eps)
+
+import numpy as np
 
 def enlarge_topright(b, f):
     w = b[1] - b[0]

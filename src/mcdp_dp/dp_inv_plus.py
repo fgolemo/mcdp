@@ -1,10 +1,9 @@
 from .primitive import ApproximableDP, PrimitiveDP
 from contracts import contract
-from contracts.utils import check_isinstance
+from contracts.utils import check_isinstance, raise_desc
 from mcdp_dp.primitive import NotSolvableNeedsApprox
-from mcdp_posets import Nat, Poset, PosetProduct, RcompUnits
-from mocdp.exceptions import mcdp_dev_warning
-import numpy as np
+from mcdp_posets import Nat, Poset, PosetProduct, RcompUnits, get_types_universe
+from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 
 _ = Nat, Poset
 
@@ -24,7 +23,12 @@ class InvPlus2(ApproximableDP):
         check_isinstance(F, RcompUnits)
         self.Rs = Rs
         R = PosetProduct(Rs)
-        mcdp_dev_warning('Should I use the empty set?')
+
+        tu = get_types_universe()
+        if not tu.equal(Rs[0], Rs[1]) or not tu.equal(F, Rs[0]):
+            msg = 'InvPlus only available for consistent units.'
+            raise_desc(DPInternalError, msg, F=F, Rs=Rs)
+
         M = PosetProduct((F, R))
         PrimitiveDP.__init__(self, F=F, R=R, I=M)
 
@@ -83,11 +87,12 @@ class InvPlus2L(PrimitiveDP):
             s = set([(top1, 0.0), (0.0, top2)])
             return self.R.Us(s)
         n = self.nl
-        o0 = np.linspace(0, f, n + 1)
-        # FIXME: bug - are we taking into account the units?
+
+        options = van_der_corput_sequence(n + 1)
+
         s = []
-        for o in o0:
-            s.append((o, f - o))
+        for o in options:
+            s.append((f * o, f * (1 - o)))
 
         options = set()
         for i in range(n):
@@ -105,6 +110,7 @@ class InvPlus2U(PrimitiveDP):
         for _ in Rs:
             check_isinstance(_, RcompUnits)
         check_isinstance(F, RcompUnits)
+
         R = PosetProduct(Rs)
         M = PosetProduct((F, R))
         PrimitiveDP.__init__(self, F=F, R=R, I=M)
@@ -130,9 +136,21 @@ class InvPlus2U(PrimitiveDP):
 
         n = self.nu
 
-        options = np.linspace(0, f, n)
+        options = van_der_corput_sequence(n)
+
         # FIXME: bug - are we taking into account the units?
         s = set()
         for o in options:
-            s.add((o, f - o))
+            s.add((f * o, f * (1 - o)))
         return self.R.Us(s)
+
+def van_der_corput_sequence(n):
+    return sorted([1.0] + [float(van_der_corput(_)) for _ in range(n - 1)])
+
+def van_der_corput(n, base=2):
+    vdc, denom = 0, 1
+    while n:
+        denom *= base
+        n, remainder = divmod(n, base)
+        vdc += remainder * 1.0 / denom
+    return vdc

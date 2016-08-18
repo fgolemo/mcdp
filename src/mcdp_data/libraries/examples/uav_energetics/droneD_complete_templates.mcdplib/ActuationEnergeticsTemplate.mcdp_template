@@ -20,7 +20,7 @@ template [
   total_power0 <= power_approx.power
   total_power = power required by power_approx
 
-  capacity provided by battery >= endurance * total_power
+  capacity provided by battery >= provided endurance * total_power
  
   total_mass = (
       mass required by battery + 

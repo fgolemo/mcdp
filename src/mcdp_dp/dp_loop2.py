@@ -255,6 +255,7 @@ class DPLoop2(PrimitiveDP):
                     break
 
         res_all = S[-1].s
+        t.values(num_iterations=i)
 
         trace.log('res_all: %s' % UR.format(res_all))
         res_r1 = R1.Us(poset_minima([r1 for (r1, _) in res_all.minimals], leq=R1.leq))

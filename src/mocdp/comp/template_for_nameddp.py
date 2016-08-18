@@ -1,7 +1,8 @@
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_posets import NotLeq, get_types_universe
 from mocdp.exceptions import DPSemanticError
+from mocdp.comp.interfaces import NamedDP
 
 __all__ = [
     'TemplateForNamedDP'
@@ -19,8 +20,11 @@ class TemplateForNamedDP():
 
     @contract(parameter_assignment='dict(str:isinstance(NamedDP))')
     def specialize(self, parameter_assignment, context):
-        
+        for v in parameter_assignment.values():
+            check_isinstance(v, NamedDP)
+
         for k, v in self.parameters.items():
+
             if not k in parameter_assignment:
                 msg = 'Parameter not specified.'
                 raise_desc(DPSemanticError, msg, missing=k)

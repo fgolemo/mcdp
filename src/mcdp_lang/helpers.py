@@ -7,6 +7,7 @@ from mcdp_posets.types_universe import get_types_universe
 from mcdp_dp.conversion import get_conversion
 from mcdp_dp.dp_limit import Limit, LimitMaximals
 from mcdp_dp.dp_constant import ConstantMinimals
+from mcdp_posets.rcomp import finfo
 
 
 
@@ -142,6 +143,14 @@ def get_valuewithunits_as_function(v, context):
 
 
 def square(x):
-    res = x * x
+    try:
+        res = x * x
+    except FloatingPointError as e:
+        if 'underflow' in str(e):
+            return finfo.tiny
+        elif 'overflow' in str(e):
+            return finfo.max
+        else:
+            raise
     return res
 

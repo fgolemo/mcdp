@@ -21,6 +21,16 @@ def check_minimal(elements, poset):
     m2 = poset_minima(elements, poset.leq)
     if not len(m2) == len(elements):
         msg = 'Set of elements is not minimal: %s' % elements
+        extra = set(elements) - set(m2)
+        x = ", ".join([ '%s %r' % (poset.format(s), s) for s in extra])
+        msg += '\nThese points were dominated: %s' %x 
+        if len(extra) == 1:
+            e = list(extra)[0]
+            for e2 in elements:
+                if e2 == e: continue
+                if poset.leq(e2, e):
+                    msg += '\nDominated by %s %r' % (poset.format(e2), e2)
+
         raise ValueError(msg)
 
 

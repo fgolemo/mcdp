@@ -21,6 +21,15 @@ class RcompTop():
     def __hash__(self):
         return 42  # "RCompTop"
 
+    # used for visualization
+    def __float__(self):
+        return np.inf
+
+finfo = np.finfo(float)
+tiny = finfo.tiny
+eps = finfo.eps
+maxf = finfo.max
+
 class Rcomp(Poset):
     """
         [0, inf) U {T}
@@ -85,6 +94,7 @@ class Rcomp(Poset):
 
     def format(self, x):
         self.belongs(x)
+
         if x == self.top:
             return self.top.__repr__()
         else:
@@ -92,6 +102,15 @@ class Rcomp(Poset):
             if x == int(x):
                 return '%d' % int(x)
             else:
+                if x == tiny:
+                    return 'tiny'
+
+                if x == eps:
+                    return 'eps'
+
+                if x == maxf:
+                    return 'max'
+
                 s = '%.5f' % x
                 s = '%.10f' % x
                 # s = '%f' % x

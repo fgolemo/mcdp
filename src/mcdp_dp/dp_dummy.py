@@ -8,7 +8,6 @@ __all__ = [
     'Template',
 ]
 
-
 class Template(PrimitiveDP):
 
     def __init__(self, F, R):
@@ -36,3 +35,4 @@ class Template(PrimitiveDP):
 mcdp_dev_warning('Remove Dummy name')
 
 Dummy = Template
+

@@ -1,0 +1,5 @@
+specialize [
+  Battery: `batteries_nodisc.batteries, 
+  Actuation: `Actuation, 
+  PowerApprox: `PowerApprox100mw
+] `ActuationEnergeticsTemplate

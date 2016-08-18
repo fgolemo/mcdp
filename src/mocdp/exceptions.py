@@ -50,6 +50,9 @@ class DPSyntaxError(DPUserError):
 class DPSemanticError(DPUserError):
     pass
 
+class DPNotImplementedError(DPInternalError):
+    pass
+
 
 class DPSemanticErrorNotConnected(DPSemanticError):
     pass

@@ -4,6 +4,11 @@ from reprep import Report
 from mcdp_library.library import MCDPLibrary
 from mcdp_ipython_utils.loading import solve_combinations
 from mcdp_ipython_utils.plotting import plot_all_directions
+from quickapp.quick_app import QuickApp
+
+def go():
+    lib = get_library()
+    return process(lib)
 
 def get_library():
     lib = MCDPLibrary()
@@ -11,7 +16,7 @@ def get_library():
     lib.add_search_dir('.')
     return lib
 
-def go(lib):
+def process(lib):
     ndp = lib.load_ndp('test1')
     print ndp.get_rnames()
 
@@ -22,48 +27,38 @@ def go(lib):
     }
 
     result_like = dict(total_cost_ownership="USD", total_mass='kg')
-    what_to_plot_res = result_like
-    what_to_plot_fun = dict(travel_distance="km", carry_payload="g")
 
     nu = 100
     data = solve_combinations(ndp, combinations, result_like, upper=nu, lower=None)
+    return data
 
+def report(data):
+    what_to_plot_res = dict(total_cost_ownership="USD", total_mass='kg')
+    what_to_plot_fun = dict(travel_distance="km", carry_payload="g")
     r = Report()
 
-    plot_all_directions(r, queries=data['queries'], results=data['results'],
+    plot_all_directions(r,
+                        queries=data['queries'],
+                        results=data['results'],
                         what_to_plot_res=what_to_plot_res,
                         what_to_plot_fun=what_to_plot_fun)
     
-    fn = 'out/drone_uncertainty/go1.html'
-    print('Writing on %s' % fn)
-    r.to_html(fn)
+    return r
 
-#
-# def go2(lib):
-#     model_name = 'batteries_squash'
-#     combinations = {
-#         "capacity": (np.linspace(50, 3000, 10), "Wh"),
-#         "missions": (1000, "[]"),
-#     }
-#     result_like = dict(cost="USD", mass='kg')
-#     what_to_plot_res = result_like
-#     what_to_plot_fun = dict(capacity="Wh", missions="[]")
-#
-#     ndp = lib.load_ndp(model_name)
-#
-#     data = solve_combinations(ndp, combinations, result_like)
-#
-#     r = Report()
-#
-#     plot_all_directions(r, queries=data['queries'], results=data['results'],
-#                         what_to_plot_res=what_to_plot_res,
-#                         what_to_plot_fun=what_to_plot_fun)
-#     r.to_html('out/batteries_squash-c2.html')
+class DroneU(QuickApp):
+
+    def define_options(self, params):
+        pass
+
+    def define_jobs_context(self, context):
+        result = context.comp(go)
+        r = context.comp(report, result)
+        context.add_report(r, 'report')
+
 
 if __name__ == '__main__':
-    lib = get_library()
-    go(lib)
-    # go2(lib)
+    main = DroneU.get_sys_main()
+    main()
 
 
 

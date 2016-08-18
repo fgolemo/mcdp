@@ -10,6 +10,7 @@ from mocdp.comp.context_functions import is_dp_connected
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 from mocdp.comp.labelers import LabelerNDP
+from mocdp.comp.simplify_identities_imp import simplify_identities
 
 __all__ = [
     'cndp_flatten',
@@ -321,5 +322,5 @@ def cndp_flatten(ndp):
 
     ndp_res = CompositeNamedDP.from_parts(names2, connections2, fnames, rnames)
 
-
-    return ndp_res
+    ndp_simplified = simplify_identities(ndp_res)
+    return ndp_simplified

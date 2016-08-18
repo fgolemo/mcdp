@@ -8,12 +8,13 @@ from mcdp_report.dp_graph_flow_imp import dp_graph_flow
 from mcdp_report.dp_graph_tree_imp import dp_graph_tree
 from mcdp_report.gg_ndp import STYLE_GREENRED, STYLE_GREENREDSYM, gvgen_from_ndp
 from mcdp_report.gg_utils import gg_get_formats
+from mocdp.comp.recursive_name_labeling import get_labelled_version
 from mocdp.exceptions import mcdp_dev_warning
 from quickapp import QuickAppBase
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
-from mocdp.comp.recursive_name_labeling import get_labelled_version
+from mocdp.comp.simplify_identities_imp import simplify_identities
 
 def get_ndp(data):
     if not 'ndp' in data:
@@ -90,6 +91,8 @@ def dp_repr_long_labeled(data):
 
 def ndp_visualization(data, style):
     ndp = get_ndp(data) 
+
+    setattr(ndp, '_hack_force_enclose', True)
     gg = gvgen_from_ndp(ndp, style)
     return return_formats2(gg, 'ndp_%s' % style)
 

@@ -7,16 +7,14 @@ from copy import deepcopy
 from mcdp_dp import PrimitiveDP
 from mcdp_lang import parse_ndp, parse_poset
 from mcdp_posets import Poset
-from mocdp import logger
+from mocdp import ATTR_LOAD_NAME, logger
 from mocdp.comp.context import Context, ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.exceptions import DPSemanticError, extend_with_filename
-from mocdp.memoize_simple_imp import memoize_simple
 import os
 import shutil
 import sys
-from mocdp import ATTR_LOAD_NAME
 
 
 __all__ = [
@@ -86,7 +84,6 @@ class MCDPLibrary():
                 dirname = os.path.dirname(d['realpath'])
                 dirs.add(dirname)
         return list(dirs)
-#         return list(self.search_dirs)
 
     def clone(self):
         fields = ['file_to_contents', 'cache_dir', 'search_dirs', 'load_library_hooks']
@@ -98,6 +95,7 @@ class MCDPLibrary():
         return MCDPLibrary(**contents)
 
     def use_cache_dir(self, cache_dir):
+
         try:
             if not os.path.exists(cache_dir):
                 os.makedirs(cache_dir)
@@ -108,7 +106,6 @@ class MCDPLibrary():
                 f.write('touch')
             os.unlink(fn)
         except Exception as e:
-            print e
             logger.debug('Cannot write to folder %r. Not using caches.' % cache_dir)
             self.cache_dir = None
         else:
@@ -152,6 +149,7 @@ class MCDPLibrary():
 
     @contract(name=str, extension=str)
     def _load_generic(self, name, extension, parsing):
+
         if not isinstance(name, str):
             msg = 'Expected a string for the name.'
             raise_desc(ValueError, msg, name=name)
@@ -222,8 +220,28 @@ class MCDPLibrary():
         context.load_posets_hooks = [self.load_poset]
         context.load_primitivedp_hooks = [self.load_primitivedp]
         context.load_template_hooks = [self.load_template]
-        context.load_library_hooks = list(self.load_library_hooks)
+        context.load_library_hooks = [self.load_library]
         return context
+
+    def load_library(self, id_library):
+        errors = []
+        for hook in self.load_library_hooks:
+            try:
+                library = hook(id_library)
+            except DPSemanticError as e:
+                if len(hook) == 1:
+                    raise
+                errors.append(e)
+                continue
+
+            if self.cache_dir is not None:
+                # XXX we should create a new one
+                library.use_cache_dir(self.cache_dir)
+            return library
+
+        msg = 'Could not load library %r.' % id_library
+        msg += "\n---\n".join([str(_) for _ in errors])
+        raise_desc(DPSemanticError, msg)
 
     @contract(returns='set(str)')
     def list_ndps(self):
@@ -282,7 +300,7 @@ class MCDPLibrary():
 
             msg = ('Could not find file %r. Available files with %r extension: %s.' %
                    (basename, ext, available))
-            print msg
+
             raise_desc(DPSemanticError, msg)
         found = self.file_to_contents[match]
         return found
@@ -303,7 +321,7 @@ class MCDPLibrary():
     def _add_search_dir(self, d):
         """ Adds the directory to the search directory list. """
 
-        ignore_patterns = ['/out/', '/out-html/']
+        ignore_patterns = ['/out/', '/out-html/', '/reprep-static/']
 
         def should_ignore(f):
             for i in ignore_patterns:

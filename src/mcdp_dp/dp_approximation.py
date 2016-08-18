@@ -1,14 +1,15 @@
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import check_isinstance, raise_desc
 from mcdp_dp.dp_identity import Identity
-from mcdp_posets.space import Map, MapNotDefinedHere, Space
+from mcdp_posets import Map, MapNotDefinedHere, RcompUnits, Space
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import (Connection, get_name_for_fun_node,
     get_name_for_res_node)
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import dpwrap
-import math
 from mocdp.exceptions import mcdp_dev_warning
+import math
+from mcdp_posets.rcomp import finfo
 
 
 class LinearCeil():
@@ -28,7 +29,12 @@ class LinearCeil():
         if x == 0.0:
             return 0.0
 
-        m = x / self.alpha
+        try:
+            m = x / self.alpha
+        except FloatingPointError as e:
+            assert 'overflow' in str(e)
+            m = finfo.max
+
         n = math.ceil(m)
         y = n * self.alpha
 
@@ -117,6 +123,58 @@ class CombinedCeilMap(Map):
         y = self.f2(xx)
         return y
 
+#
+# class LinearCeil():
+#     """
+#
+#         y = ( alpha * ceil(x) / alpha) )
+#
+#     """
+#
+#     def __init__(self, alpha):
+#         self.alpha = alpha
+#
+#     def __call__(self, x):
+#         assert isinstance(x, float) and x >= 0, x
+#         if math.isinf(x):
+#             return float('inf')
+#         if x == 0.0:
+#             return 0.0
+#
+#         m = x / self.alpha
+#         n = math.ceil(m)
+#         y = n * self.alpha
+#
+#         res = float(y)
+#
+#         return res
+
+class FloorStepMap(Map):
+
+    def __init__(self, S, step):
+        check_isinstance(S, RcompUnits)
+        Map.__init__(self, dom=S, cod=S)
+        self.step = step
+
+    def __repr__(self):
+        return 'FloorStep(%s)' % self.dom.format(self.step)
+
+    def _call(self, x):
+        top = self.dom.get_top()
+        if self.dom.equal(top, x):
+            return top
+
+        assert isinstance(x, float)
+
+        try:
+            m = x / self.step
+        except FloatingPointError as e:
+            assert 'overflow' in str(e)
+            m = finfo.max
+
+        n = math.floor(m)
+        y = n * self.step
+        return y
 
 @contract(name=str,
           approx_perc='float|int',

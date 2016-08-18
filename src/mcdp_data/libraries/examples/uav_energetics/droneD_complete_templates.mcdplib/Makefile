@@ -10,8 +10,13 @@ all:
 	mcdp-solve -D ../../ -d . --out out --upper 100  test2  '<5 km, 600 [], 100 g>'
 
 
-plot:
+plot1:
+	#rm -rf out/plot_test1
 	mcdp-plot --cache -D ../../ -d . --out out/plot_test1 test1 
+
+plot1f:
+	#rm -rf out/plot_test1
+	mcdp-plot --cache -D ../../ -d . --out out/plot_test1_flatten test1_flatten 
 
 #plot2:
 #	mcdp-plot --cache -D ../../ -d . --out out/plot_test1 --plots dp_graph_tree,dp_graph_flow test2

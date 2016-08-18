@@ -1,6 +1,8 @@
 from contracts import contract
+from mcdp_posets.rcomp import finfo
 from mcdp_posets.uppersets import UpperSet
 from mocdp.exceptions import mcdp_dev_warning
+import numpy as np
 
 
 def plot_upset_minima(pylab, us):
@@ -36,12 +38,22 @@ def plot_upset_R2(pylab, us, axis, color_shadow,
     # cuteness
     if markers is not None:
         for p in points:
+            # This is to avoid underflow
+            # when using "finfo.tiny"
+            eps = finfo.eps
+            p = np.maximum(p, eps)
             pylab.plot(p[0], p[1], markers)
 
 
 def plot_cone(pylab, p, axis, color_shadow, color_lines):
+    # This is to avoid underflow
+    # when using "finfo.tiny"
+    eps = finfo.eps
+    p = np.maximum(p, eps)
+
     from matplotlib import patches
     [_, xmax, _, ymax] = axis
+
 
     ax1 = pylab.gca()
     ax1.add_patch(
@@ -52,6 +64,9 @@ def plot_cone(pylab, p, axis, color_shadow, color_lines):
         facecolor=color_shadow,
         edgecolor='none',
     ))
+
+
+
     pylab.plot([p[0], p[0]], [p[1], ymax], '-', color=color_lines)
     pylab.plot([p[0], xmax], [p[1], p[1]], '-', color=color_lines)
 

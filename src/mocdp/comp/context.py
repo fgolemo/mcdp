@@ -346,7 +346,7 @@ class Context():
         fnames = ndp2.get_fnames()
         if not c.s2 in fnames:
             msg = "Function %r does not exist (known: %s)" % (c.s2, ", ".join(fnames))
-            raise_desc(DPSemanticError, msg, known=rnames)
+            raise_desc(DPSemanticError, msg, known=fnames)
 
 
         R1 = ndp1.get_rtype(c.s1)
