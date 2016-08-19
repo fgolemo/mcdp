@@ -1,4 +1,4 @@
-from mcdp_report import dp_graph_flow_imp
+from mcdp_report.dp_graph_flow_imp import dp_graph_flow
 from mcdp_report.gg_ndp import gvgen_from_ndp
 from mcdp_report.gg_utils import gg_get_format
 from mcdp_web.utils.response import response_data
@@ -57,7 +57,7 @@ class WebAppImages():
 
             ndp = library.load_ndp(id_ndp)
             dp = ndp.get_dp()
-            gg = dp_graph_flow_imp(dp)
+            gg = dp_graph_flow(dp)
 
             data = gg_get_format(gg, fileformat)
             mime = get_mime_for_format(fileformat)

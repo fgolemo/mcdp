@@ -1,13 +1,12 @@
-from .primitive import ApproximableDP, PrimitiveDP
+from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
 from contracts import contract
-from mcdp_dp.primitive import NotSolvableNeedsApprox
-from mcdp_posets import Nat, Poset  # @UnusedImport
-from mcdp_posets import PosetProduct, UpperSet
-from mcdp_posets.rcomp import RcompTop
-from mocdp.exceptions import mcdp_dev_warning, do_extra_checks
-import numpy as np
-from mcdp_posets.utils import check_minimal
 from contracts.utils import raise_desc
+from mcdp_posets import Nat, Poset, PosetProduct, UpperSet
+from mcdp_posets.utils import check_minimal
+from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
+import numpy as np
+
+_ = Nat, Poset
 
 __all__ = [
     'InvMult2',
@@ -94,6 +93,7 @@ class InvMult2U(PrimitiveDP):
 def samplec(n, c):
     """ Samples n points on the curve xy=c """
     ps = sample(n)
+    assert len(ps) == n, (n, len(ps), ps)
     s = np.sqrt(c)
     ps = [(x * s, y * s) for x, y in ps]
     return ps
@@ -103,11 +103,13 @@ def sample(n):
     """ Samples n points on the curve xy=1 """
     assert n >= 1
     points = set()
-    points.add((1.0, 1.0))
+
     # divide the interval [0,1] equally in n/2 intervals
     m = n / 2
     xs = np.linspace(0.0, 1.0, m + 2)[1:-1]
     ys = 1.0 / xs
+    if m * 2 < n:  # odd
+        points.add((1.0, 1.0))
     points.update(zip(xs, ys))
     points.update(zip(ys, xs))
     return list(points)
@@ -157,7 +159,7 @@ class InvMult2L(PrimitiveDP):
             else:
 
                 pu = sorted(samplec(n - 1, f), key=lambda _: _[0])
-                # assert len(pu) == n - 1
+                assert len(pu) == n - 1, (len(pu), n - 1)
                 nu = len(pu)
 
                 points = set()
@@ -166,6 +168,7 @@ class InvMult2L(PrimitiveDP):
                 for i in range(nu - 1):
                     p = (pu[i][0], pu[i + 1][1])
                     points.add(p)
+
 
         elif InvMult2.ALGO == InvMult2.ALGO_VAN_DER_CORPUT:
 
@@ -194,7 +197,7 @@ class InvMult2L(PrimitiveDP):
         else:
             assert False
 
-        assert len(points) == self.n, points
+        assert len(points) == self.n, (self.n, len(points), points)
 
         return UpperSet(minimals=points, P=self.R)
 

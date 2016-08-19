@@ -11,7 +11,6 @@ from mocdp.comp.context import Context
 from mocdp.comp.ignore_some_imp import ignore_some
 from quickapp import QuickApp
 from reprep import Report
-from reprep.plot_utils.styles import ieee_spines
 import numpy as np
 from plot_utils import ieee_fonts_zoom3, ieee_spines_zoom3
 

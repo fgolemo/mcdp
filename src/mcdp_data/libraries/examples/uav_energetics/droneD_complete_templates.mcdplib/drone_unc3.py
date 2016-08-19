@@ -26,7 +26,7 @@ def create_ndp(context):
 
     return ndp
 
-def go():
+def go(algo):
     librarian = Librarian()
     librarian.find_libraries('../..')
     library = librarian.load_library('droneD_complete_templates')
@@ -43,14 +43,14 @@ def go():
     res['results'] = []
     for n in res['n']:
         ndp = create_ndp(context)
-        result = solve_stats(ndp, n)
+        result = solve_stats(ndp=ndp, n=n, algo=algo)
         result['ndp'] = ndp
         res['results'].append(result)
 
     return res
 
 
-def solve_stats(ndp, n):
+def solve_stats(ndp, n, algo):
 
 
     res = {}
@@ -70,7 +70,7 @@ def solve_stats(ndp, n):
     F.belongs(f)
 
     logger = None
-    InvMult2.ALGO = InvMult2.ALGO_VAN_DER_CORPUT
+    InvMult2.ALGO = algo
     traceL = Tracer(logger=logger)
     resL = dpL.solve_trace(f, traceL)
     traceU = Tracer(logger=logger)
@@ -238,9 +238,11 @@ class DroneUnc3(QuickApp):
         pass
 
     def define_jobs_context(self, context):
-        result = context.comp(go)
-        r = context.comp(report, result)
-        context.add_report(r, 'report')
+        for algo in [InvMult2.ALGO_VAN_DER_CORPUT, InvMult2.ALGO_UNIFORM]:
+            c2 = context.child(algo)
+            result = c2.comp(go, algo=algo)
+            r = c2.comp(report, result)
+            c2.add_report(r, 'report', algo=algo)
 
 
 if __name__ == '__main__':

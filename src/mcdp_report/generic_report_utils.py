@@ -354,7 +354,7 @@ class Plotter_Tuple2_UR2(Plotter):
         P = space.subs[0]
         return self.p.axis_for_sequence(P, s)
     
-    def plot(self, pylab, axis, space, value, params={}):
+    def plot(self, pylab, axis, space, value, params={}):  # @UnusedVariable
         v1, v2 = value
         params1 = dict(color_shadow=[1.0, 0.8, 0.8], markers='k.')
         params2 = dict(color_shadow=[0.8, 0.8, 1.0], markers='g.')
@@ -492,7 +492,7 @@ class PlotterURRpR(Plotter):
         params0.update(params)
         color_shadow = params0['color_shadow']
         markers = params0['markers']
-        markers_params = params0['markers_params']
+        _markers_params = params0['markers_params']
         self.check_plot_space(space)
         tu = get_types_universe()
         P_TO_S, _ = tu.get_embedding(space.P, self.S)
@@ -542,13 +542,13 @@ class PlotterURRpR_23(PlotterURRpR):
 
 def enlarge_x(b, f):
     w = b[1] - b[0]
-    h = b[3] - b[2]
+    # h = b[3] - b[2]
     dw = f * w
     dh = 0
     return (b[0] - dw, b[1] + dw, b[2] - dh, b[3] + dh)
 
 def enlarge_y(b, f):
-    w = b[1] - b[0]
+    # w = b[1] - b[0]
     h = b[3] - b[2]
     dw = 0
     dh = h * f
