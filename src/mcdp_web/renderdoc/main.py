@@ -6,7 +6,7 @@ from contracts.utils import raise_desc
 
 
 @contract(returns='str', s=str, library=MCDPLibrary, raise_errors=bool)
-def render_complete(library, s, raise_errors, realpath='unavailable'):
+def render_complete(library, s, raise_errors, realpath):
     """
         Transforms markdown into html and then renders the mcdp snippets inside.
         

@@ -8,6 +8,8 @@ from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
 from mocdp import logger
 from mocdp.exceptions import mcdp_dev_warning
+import os
+from conf_tools.utils.resources import dir_from_package_name
 
 def isolate_comments(s):
     lines = s.split("\n")
@@ -32,10 +34,14 @@ def ast_to_text(s):
     return print_ast(block)
     
 @contract(s=str)
-def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: False,
+def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
                 add_line_gutter=True, encapsulate_in_precode=True, add_css=True,
                 parse_expr=Syntax.ndpt_dp_rvalue, add_line_spans=False):
 
+    if ignore_line is None:
+        ignore_line = lambda _lineno: False
+    if extra_css is None:
+        extra_css = ''
     s_lines, s_comments = isolate_comments(s)
     assert len(s_lines) == len(s_comments) 
     # Problem: initial comment, '# test connected\nmcdp'
@@ -120,7 +126,7 @@ def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: 
         frag += out
 
     if add_css:
-        frag += '\n\n<style type="text/css">\n' + css + '\n' + extra_css + '\n</style>\n\n'
+        frag += '\n\n<style type="text/css">\n' + get_language_css() + '\n' + extra_css + '\n</style>\n\n'
 
     if complete_document:
         s = """<html><head>
@@ -279,87 +285,10 @@ def iterate_notwhere(x):
             continue
         yield k, v
 
-mcdp_dev_warning('TODO: copy from static/')
+def get_language_css():
+    package = dir_from_package_name('mcdp_web')
+    fn = os.path.join(package, 'static', 'css', 'mcdp_language_highlight.css')
+    with open(fn) as f:
+        css = f.read()
+    return css
 
-css = """ 
-     
-     span.NewResource { color: darkred;}
-     span.NewFunction { color: darkgreen; }
-     
-    span.Unit, span.Nat, span.Int  {  color: #aC5600 ;}
-    span.ValueExpr { color: #CC6600 ;}
-     
-     /*span.Function  { color: darkgreen;}*/
-      
-    span.MCDPKeyword,
-    span.SubKeyword,
-    span.CompactKeyword,
-    span.AbstractKeyword,
-    span.TemplateKeyword,
-    span.ForKeyword,
-    span.UsingKeyword,
-    span.LoadKeyword,
-    span.CodeKeyword,
-    span.FromLibraryKeyword,
-    span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
-    span.ImplementedbyKeyword , span.FromCatalogueKeyword, span.MCDPTypeKeywor,
-    span.InstanceKeyword,
-    span.CoproductWithNamesChooseKeyword,
-    span.MCDPTypeKeyword,
-    span.FromLibraryKeyword,
-    span.CoproductWithNamesChooseKeyword,
-    span.MCDPKeyword,
-    span.SubKeyword,
-    span.CompactKeyword,
-    span.AbstractKeyword,
-    span.TemplateKeyword,
-    span.ForKeyword,
-    span.UsingKeyword,
-    span.LoadKeyword, span.CodeKeyword,
-    span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
-    span.ImplementedbyKeyword,  
-    span.FromCatalogueKeyword, 
-    span.MCDPTypeKeyword,
-    span.InstanceKeyword,
-    span.FlattenKeyword,
-    span.ApproxKeyword
-    { 
-        font-weight: bold; 
-        color: #00a;
-    }
-    
-    span.ProvideKeyword, span.RequireKeyword  {
-        font-weight: bold; 
-        
-    } 
-    
-    span.ProvideKeyword,  span.ProvidedByKeyword, span.FName { color: darkgreen;}
-    span.RequireKeyword, span.RequiredByKeyword, span.RName  { color: darkred;}
-      
-    
-
-       
-    /* There is a bug that prevents this from working correctly. */
-    /* span.ImpName { color: #CC6600; } */
-    span.FuncName { color: #CC6600 ; }
- 
-    
-    span.FName, span.RName { } 
-    span.DPName, span.NDPName {  
-        color: #a0a;
-    }
-    
-    span.DPTypeName, span.DPVariableRef { 
-        color:  #00F; 
-        font-weight: bold; 
-    }
-      
-    span.comment { 
-        color: grey;
-    }
-
-    span.line-gutter {    
-        margin-right: 1em; 
-        color: grey; 
-    }
-"""

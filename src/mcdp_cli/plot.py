@@ -14,7 +14,6 @@ from quickapp import QuickAppBase
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
-from mocdp.comp.simplify_identities_imp import simplify_identities
 
 def get_ndp(data):
     if not 'ndp' in data:
@@ -108,6 +107,7 @@ def get_lines_to_hide(params):
     return [int(_) for _ in lines]
 
 def syntax_pdf(data):
+    """ Returns a PDF string """
     from mcdp_report.html import ast_to_html
     s = data['s']
     s = s.replace('\t', '    ')

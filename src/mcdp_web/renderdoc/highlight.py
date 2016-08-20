@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from bs4.element import NavigableString
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_lang.syntax import Syntax
@@ -6,12 +7,17 @@ from mcdp_library.library import MCDPLibrary
 from mcdp_report.generic_report_utils import (
     NotPlottable, enlarge, get_plotters, plotters)
 from mcdp_report.html import ast_to_html
-from mcdp_web.images.images import (ndp_graph_enclosed, ndp_graph_expand,
-    ndp_graph_normal, ndp_graph_templatized)
-from mocdp import logger
+from mcdp_web.images.images import (get_mime_for_format, ndp_graph_enclosed,
+    ndp_graph_expand, ndp_graph_normal, ndp_graph_templatized)
+from mocdp import ATTR_LOAD_NAME, logger
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from reprep import Report
+from system_cmd.meat import system_cmd_result
+from system_cmd.structures import CmdException
+from tempfile import mkdtemp
 import base64
+import hashlib
+import os
 import traceback
 
 def bs(fragment):
@@ -216,6 +222,53 @@ def get_source_code(tag):
     source_code = source_code.replace('\t', ' ' * 4)
     return source_code
 
+def get_ast_as_pdf(s, parse_expr):
+    s = s.replace('\t', '    ')
+    html = ast_to_html(s, complete_document=True, extra_css=None,
+                       ignore_line=None, parse_expr=parse_expr,
+                       add_line_gutter=False)
+
+    d = mkdtemp()
+    
+    f_html = os.path.join(d, 'file.html')
+    with open(f_html, 'w') as f:
+        f.write(html)
+        
+    try:
+        f_pdf = os.path.join(d, 'file.pdf')
+        cmd= ['wkhtmltopdf','-s','A1',f_html,f_pdf]
+        system_cmd_result(
+                d, cmd, 
+                display_stdout=False,
+                display_stderr=False,
+                raise_on_error=True)
+
+        with open(f_pdf) as f:
+            data = f.read()
+        
+        data = crop_pdf(data, margins=0)
+
+        return data
+    except CmdException as e:
+        raise e
+
+def crop_pdf(pdf, margins=0):
+    d = mkdtemp()
+    f_pdf = os.path.join(d, 'file.pdf')
+    with open(f_pdf, 'w') as f:
+        f.write(pdf)
+    f_pdf_crop = os.path.join(d, 'file_crop.pdf')
+    cmd = ['pdfcrop', '--margins', str(margins), f_pdf, f_pdf_crop]
+    system_cmd_result(
+            d, cmd,
+            display_stdout=False,
+            display_stderr=False,
+            raise_on_error=True)
+
+    with open(f_pdf_crop) as f:
+        data = f.read()
+    return data
+
 def highlight_mcdp_code(library, frag, realpath, raise_errors=False):
     """ Looks for codes like:
     
@@ -274,7 +327,8 @@ def highlight_mcdp_code(library, frag, realpath, raise_errors=False):
                     style = ''
 
                 if tag.has_attr('style'):
-                    style = style + tag['style']
+                    style = style + tag['style'] 
+                    
                 if style:
                     rendered['style'] = style
 
@@ -284,7 +338,26 @@ def highlight_mcdp_code(library, frag, realpath, raise_errors=False):
                 if tag.has_attr('id'):
                     rendered['id'] = tag['id']
 
-                tag.replaceWith(rendered)
+                if use_pre:
+                    pdf = get_ast_as_pdf(source_code, parse_expr)
+                    if tag.has_attr('id'):
+                        basename = tag['id']
+                    else:
+                        hashcode = hashlib.sha224(source_code).hexdigest()[-8:]
+                        basename = 'code-%s' % (hashcode)
+
+                    docname = os.path.splitext(os.path.basename(realpath))[0]
+                    download = docname + '.' + basename + '.source_code.pdf'
+                    a = create_a_to_data(soup, download=download,
+                                         data_format='pdf', data=pdf)
+                    a['class'] = 'pdf_data'
+                    a.append(NavigableString(download))
+                    div = soup.new_tag('div')
+                    div.append(rendered)
+                    div.append(a)
+                    tag.replaceWith(div)
+                else:
+                    tag.replaceWith(rendered)
 
             except DPSyntaxError as e:
                 if raise_errors:
@@ -339,12 +412,6 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath):
         for tag in soup.select(selector):
             try:
                 r = func(tag) 
-                if tag.has_attr('style'):
-                    r['style'] = tag['style']
-                if tag.has_attr('class'):
-                    r['class'] = tag['class']
-                if tag.has_attr('id'):
-                    r['id'] = tag['id']
                 tag.replaceWith(r)
             except (DPSyntaxError, DPSemanticError) as e:
                 if raise_error_dp:
@@ -364,106 +431,138 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath):
 
     default_direction = 'LR'
 
-    def call(func, klass, **args):
+    def call(tag0, func, klass, **args):
         if False:
             png = func(data_format='png', **args)
             r = create_img_png_base64(soup, png, **{'class': klass})
             return r
         else:
             svg = func(data_format='svg', **args)
-            tag = BeautifulSoup(svg, 'lxml', from_encoding='utf-8').svg
-            tag['class'] = klass
-            return tag
+            pdf = func(data_format='pdf', **args)
+            pdf = crop_pdf(pdf, margins=0)
+            tag_svg = BeautifulSoup(svg, 'lxml', from_encoding='utf-8').svg
+            tag_svg['class'] = klass
 
+            if tag0.has_attr('style'):
+                tag_svg['style'] = tag0['style']
+            if tag0.has_attr('id'):
+                tag_svg['id'] = tag0['id']
 
-    def func1(tag):
-        source_code = tag.string
-        source_code = str(source_code)  # unicode
+            div = soup.new_tag('div')
+
+            if tag0.has_attr('id'):
+                basename = tag0['id']
+            elif 'ndp' in args and hasattr(args['ndp'], ATTR_LOAD_NAME):
+                basename = getattr(args['ndp'], ATTR_LOAD_NAME)
+            elif 'template' in args and hasattr(args['template'], ATTR_LOAD_NAME):
+                basename = getattr(args['template'], ATTR_LOAD_NAME)
+            else:
+                hashcode = hashlib.sha224(tag0.string).hexdigest()[-8:]
+                basename = 'code-%s' % (hashcode)
+
+            docname = os.path.splitext(os.path.basename(realpath))[0]
+
+            download = docname + "." + basename + "." + klass + '.pdf'
+            a = create_a_to_data(soup, download=download, data_format='pdf', data=pdf)
+            a['class'] = 'pdf_data'
+            a.append(NavigableString(download))
+            div.append(tag_svg)
+            div.append(a)
+            return div
+
+    def ndp_graph_normal_(tag):
+        source_code = tag.string.encode('utf-8')
         ndp = library.parse_ndp(source_code)
         yourname = ''
-
         direction = str(tag.get('direction', default_direction))
-
         
-        return call(ndp_graph_normal, library=library, ndp=ndp,
+        return call(tag, ndp_graph_normal,
+                    library=library,
+                    ndp=ndp,
                     style=STYLE_GREENREDSYM,
-                           yourname=yourname,
-                         direction=direction, klass='ndp_graph_normal')
+                    yourname=yourname,
+                    direction=direction,
+                    klass='ndp_graph_normal')
         
-    def func2(tag):
-        source_code = tag.string
-        source_code = str(source_code)  # unicode
-        ndp = library.parse_ndp(source_code)
-        # note
+    def ndp_graph_templatized_(tag):
+        source_code = tag.string.encode('utf-8')
+        ndp = library.parse_ndp(source_code) 
         yourname = ''
         direction = str(tag.get('direction', default_direction))
 
-        return call(ndp_graph_templatized, library=library, ndp=ndp, yourname=yourname,
-                                    direction=direction, klass='ndp_graph_templatized')
+        return call(tag, ndp_graph_templatized, library=library, ndp=ndp,
+                    yourname=yourname,
+                    direction=direction, klass='ndp_graph_templatized')
 
-    def func2b(tag):
-        source_code = tag.string
-        source_code = str(source_code)  # unicode
-        ndp = library.parse_ndp(source_code)
-        # note
-        yourname = None
-        from mcdp_library.library import ATTR_LOAD_NAME
+    def ndp_graph_templatized_labeled_(tag):
+        source_code = tag.string.encode('utf-8')
+        ndp = library.parse_ndp(source_code) 
+        yourname = None 
         if hasattr(ndp, ATTR_LOAD_NAME):
             yourname = getattr(ndp, ATTR_LOAD_NAME)
         direction = str(tag.get('direction', default_direction))
 
-        return call(ndp_graph_templatized, library=library, ndp=ndp,
+        return call(tag, ndp_graph_templatized, library=library, ndp=ndp,
                     direction=direction,
                     yourname=yourname, klass='ndp_graph_templatized_labeled')
 
-    
-    def func3(tag):  # ndp_graph_enclosed
-        source_code = tag.string
-        source_code = str(source_code)  # unicode
+    def ndp_graph_enclosed_(tag):  # ndp_graph_enclosed
+        source_code = tag.string.encode('utf-8')
         ndp = library.parse_ndp(source_code)
         yourname = ''
 
         direction = str(tag.get('direction', default_direction))
         enclosed = bool_from_string(tag.get('enclosed', 'True'))
-        return call(ndp_graph_enclosed, library=library, ndp=ndp, style=STYLE_GREENREDSYM,
-                                 yourname=yourname, enclosed=enclosed,
-                                 direction=direction, klass='ndp_graph_enclosed')
+        return call(tag, ndp_graph_enclosed, library=library, ndp=ndp,
+                    style=STYLE_GREENREDSYM,
+                     yourname=yourname, enclosed=enclosed,
+                     direction=direction, klass='ndp_graph_enclosed')
 
-
-    def func4(tag):
-        source_code = tag.string
-        source_code = str(source_code)  # unicode
+    def ndp_graph_expand_(tag):
+        source_code = tag.string.encode('utf-8')
         ndp = library.parse_ndp(source_code)
 
         yourname = ''
 
         direction = str(tag.get('direction', default_direction))
 
-        return call(ndp_graph_expand, library=library, ndp=ndp, style=STYLE_GREENREDSYM,
-                                 yourname=yourname,
-                                 direction=direction,
-                                 klass='ndp_graph_expand')
+        return call(tag, ndp_graph_expand, library=library, ndp=ndp,
+                    style=STYLE_GREENREDSYM,
+                     yourname=yourname,
+                     direction=direction,
+                     klass='ndp_graph_expand')
 
-    def func5(tag):  # ndp_graph_enclosed
-        source_code = tag.string
-        source_code = str(source_code)  # unicode
+    def template_graph_enclosed_(tag):  # ndp_graph_enclosed
+        source_code = tag.string.encode('utf-8')
         template = library.parse_template(source_code)
         yourname = ''
         direction = str(tag.get('direction', default_direction))
         enclosed = bool_from_string(tag.get('enclosed', 'True'))
         from mcdp_web.images.images import ndp_template_graph_enclosed
-        return call(ndp_template_graph_enclosed, library=library, template=template, style=STYLE_GREENREDSYM,
-                                 yourname=yourname, enclosed=enclosed,
-                                 direction=direction, klass='template_graph_enclosed')
+        return call(tag, ndp_template_graph_enclosed, library=library,
+                    template=template, style=STYLE_GREENREDSYM,
+                     yourname=yourname, enclosed=enclosed,
+                     direction=direction, klass='template_graph_enclosed')
 
-    go('pre.ndp_graph_normal', func1)
-    go('pre.ndp_graph_templatized', func2)
-    go('pre.ndp_graph_templatized_labeled', func2b)
-    go('pre.ndp_graph_enclosed', func3)
-    go('pre.ndp_graph_expand', func4)
-    go('pre.template_graph_enclosed', func5)
+    go('pre.ndp_graph_normal', ndp_graph_normal_)
+    go('pre.ndp_graph_templatized', ndp_graph_templatized_)
+    go('pre.ndp_graph_templatized_labeled', ndp_graph_templatized_labeled_)
+    go('pre.ndp_graph_enclosed', ndp_graph_enclosed_)
+    go('pre.ndp_graph_expand', ndp_graph_expand_)
+    go('pre.template_graph_enclosed', template_graph_enclosed_)
 
     return str(soup)
+
+@contract(data_format=str, data=str, download=str)
+def create_a_to_data(soup, download, data_format, data):
+    """ Returns a tag with base64 encoded data """
+    assert data_format in ['pdf', 'png']
+    mime = get_mime_for_format(data_format)
+    encoded = base64.b64encode(data)
+    href = 'data:%s;base64,%s' % (mime, encoded)
+    attrs = dict(href=href, download=download)
+    print('download: %s' % download)
+    return soup.new_tag('a', **attrs)
 
 def create_img_png_base64(soup, png, **attrs):
     encoded = base64.b64encode(png)

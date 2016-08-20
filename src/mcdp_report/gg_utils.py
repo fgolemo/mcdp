@@ -11,6 +11,8 @@ import codecs
 import networkx as nx  # @UnresolvedImport
 import os
 import traceback
+from contracts import contract
+
 
 
 def graphviz_run(filename_dot, output, prog='dot'):
@@ -202,6 +204,46 @@ def embed_images(html, basedir):
                 src = 'data:%s;base64,%s' % (mime, encoded)
                 tag['src'] = src
     return str(soup)
+
+def extract_assets(html, basedir):
+    """ Extracts all embedded assets. """
+    if not os.path.exists(basedir):
+        os.makedirs(basedir)
+    soup = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
+    for tag in soup.select('a'):
+        href = tag['href']
+        if href.startswith('data:'):
+            mime, data = link_data(href)
+#             from mcdp_web.images.images import get_ext_for_mime
+#             ext = get_ext_for_mime(mime)
+            if tag.has_attr('download'):
+                basename = tag['download']
+            else:
+                print('cannot find attr "download" in tag')
+                # print tag
+                continue
+            filename = os.path.join(basedir, basename)
+            with open(filename, 'w') as f:
+                f.write(data)
+            print('written to %s' % filename)
+
+@contract(returns='tuple(str,str)')
+def link_data(data_ref):
+    """ data_ref: data:<mime>;base64, 
+    
+        Returns mime, data.
+    """
+    assert data_ref.startswith('data:')
+    first, second = data_ref.split(';')
+    mime = first[len('data:'):]
+    assert second.startswith('base64,')
+    data = second[len('base64,'):]
+    # print('link %r' % data_ref[:100])
+    # print('decoding %r' % data[:100])
+    decoded = base64.b64decode(data)
+    return mime, decoded
+
+
 
 
 @contextmanager

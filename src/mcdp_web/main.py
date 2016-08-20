@@ -391,7 +391,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         data_unicode = codecs.open(realpath, encoding='utf-8').read()
         data_str = data_unicode.encode('utf-8')
         raise_errors = bool(strict)
-        html = render_complete(library=l, s=data_str, raise_errors=raise_errors)
+        html = render_complete(library=l, s=data_str, realpath=realpath, raise_errors=raise_errors)
         return html
 
     def view_library_doc(self, request):
