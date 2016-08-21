@@ -163,7 +163,7 @@ def report(data):
         ieee_spines_zoom3(pylab)
         pylab.plot(num, res_L, **LOWER)
         pylab.plot(num, res_U, **UPPER)
-        pylab.ylabel('total_mass [g]')
+        pylab.ylabel('total mass [g]')
         pylab.xlabel('n')
 
 
@@ -202,14 +202,14 @@ def report(data):
         pylab.plot(num_invalid, res_L_invalid, 'ko', **attrs)
 
         pylab.xlabel('n')
-        pylab.ylabel('total_mass [g]')
+        pylab.ylabel('total mass [g]')
 #
 #     with f.plot('mass2_log') as pylab:
 #         ieee_spines(pylab)
 #         pylab.loglog(intervals, res_L, LOWER, **attrs)
 #         pylab.loglog(intervals, res_U, UPPER, **attrs)
 #         pylab.xlabel('tolerance [mW]')
-#         pylab.ylabel('total_mass [g]')
+#         pylab.ylabel('total mass [g]')
 
     with f.plot('accuracy', **fig) as pylab:
         ieee_spines_zoom3(pylab)

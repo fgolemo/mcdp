@@ -14,6 +14,7 @@ from mcdp_posets import (Int, Nat, RcompUnits, Space, get_types_universe,
     mult_table, mult_table_seq)
 from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+from mcdp_lang.helpers import get_valuewithunits_as_resource
 
 CDP = CDPLanguage
 
@@ -54,7 +55,7 @@ def eval_rvalue_MultN(x, context):
     else:
         return res
 
-
+@contract(returns=CResource)
 def eval_rvalue_divide(op, context):
     from .eval_constant_imp import eval_constant
 
@@ -73,7 +74,9 @@ def eval_rvalue_divide(op, context):
         # also the first one is a constant
         from .misc_math import mult_constantsN
 
-        return mult_constantsN([c1, c2_inv])
+        c = mult_constantsN([c1, c2_inv])
+        assert isinstance(c, ValueWithUnits)
+        return get_valuewithunits_as_resource(c, context)
 
     except NotConstant:
         pass

@@ -11,6 +11,7 @@ def ieee_fonts_zoom3(pylab):
     # See http://matplotlib.sourceforge.net/users/customizing.html#matplotlibrc-sample
     z = 3
     params = {
+            'text.usetex': True,
           'axes.labelsize': 8 * z,
 #           'text.fontsize': 8,
           'font.size': 8 * z,
@@ -57,6 +58,7 @@ def ieee_fonts_zoom3(pylab):
     from matplotlib import rc
     # cmr10 works but no '-' sign
     rc('font', **{'family': 'serif',
-                 'serif': ['Bitstream Vera Serif', 'Times New Roman',
+                 'serif': ['Times', 'Times New Roman', 
+                           'Bitstream Vera Serif', 
                            'Palatino'],
-                  'size': 8.0})
+                  'size': 12.0})

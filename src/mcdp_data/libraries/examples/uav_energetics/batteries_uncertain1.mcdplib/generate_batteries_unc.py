@@ -1,33 +1,35 @@
 #!/usr/bin/env python2
 
-template = """
-
-
+template = """\
 mcdp {
     provides capacity [J]
     provides missions [R]
 
     requires mass     [g]
-    requires cost     [$$]
-    
+    requires cost     [USD]
+
     # Number of replacements
     requires maintenance [R]
 
     # Battery properties
-    specific_energy = $specific_energy
-    specific_cost = $specific_cost
-    cycles = $cycles
+    specific_energy_inv = Uncertain(1.0 []/ $specific_energy_U, 1.0 [] /  $specific_energy_L)
+    specific_cost_inv = Uncertain(1.0 [] / $specific_cost_U, 1.0 [] / $specific_cost_L)
+    cycles_inv = Uncertain(1.0 []/$cycles_U, 1.0[]/ $cycles_L)
 
     # Constraint between mass and capacity
-    mass >= capacity / specific_energy
+    massc = provided capacity * specific_energy_inv
 
     # How many times should it be replaced?
-    num_replacements = ceil(missions / cycles)
-    maintenance >= num_replacements
+    num_replacements = ceil(provided missions * cycles_inv)
+    required maintenance >= num_replacements
 
     # Cost is proportional to number of replacements
-    cost >= (capacity / specific_cost) * num_replacements
+    costc = (provided capacity * specific_cost_inv) * num_replacements
+
+    required cost >= costc
+    required mass >= massc
 }
+
 """
 
 
@@ -63,7 +65,23 @@ types = {
                   specific_energy=" 30 Wh/kg", specific_cost=' 7.00 Wh/$', cycles="500"),
 }
 
-def go():
+from mcdp_lang import parse_constant
+
+def enlarge(value_string, alpha):
+    c = parse_constant(value_string)
+
+    l = c.value * (1-alpha)
+    u = c.value * (1+alpha)
+
+    ls = c.unit.format(l)
+    us = c.unit.format(u)
+
+    if '[]' in value_string:
+        ls = '%s []' % l
+        us = '%s []' % u
+    return ls, us
+
+def go(alpha):
     import string
 
     summary = ""
@@ -77,7 +95,23 @@ def go():
             continue
 
         v['cycles'] = '%s []'% v['cycles']
-        s2 = string.Template(template).substitute(v) 
+
+        values = {}
+
+        l,u = enlarge(v['specific_cost'], alpha)
+        values['specific_cost_L'] = l
+        values['specific_cost_U'] = u
+
+        l,u = enlarge(v['specific_energy'], alpha)
+        values['specific_energy_L'] = l
+        values['specific_energy_U'] =  u
+
+        l,u = enlarge(v['cycles'], alpha)
+        values['cycles_L'] = l
+        values['cycles_U'] = u
+
+
+        s2 = string.Template(template).substitute(values) 
 
         print s2
         # ndp = parse_ndp(s2)
@@ -101,23 +135,11 @@ choose(
     with open('batteries.mcdp', 'w') as f:
         f.write(ss)
 
+import sys
 if __name__ == '__main__':
-    go()
-
-# class BatteryRandom(PrimitiveDP):
-
-#     def __init__(self, seed):
-
-#         F = R_Energy_J
-#         R = R_Weight_g
-
-#         M = SpaceProduct(())
-#         PrimitiveDP.__init__(self, F=F, R=R, M=M)
-
-#     def solve(self, func):
-#         if func == self.F.get_top():
-#             r = self.R.get_top()
-#         else:
-#             r = Pa_from_weight(func)
-
-#         return self.R.U(r)
+    alpha = float(sys.argv[1])
+    if not alpha > 0:
+        raise ValueError(sys.argv[1])
+    print('alpha: %s' % alpha)
+    go(alpha)
+ 

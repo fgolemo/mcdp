@@ -12,6 +12,7 @@ from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 
 __all__ = [
     'get_types_universe',
+    'express_value_in_isomorphic_space',
 ]
 
 

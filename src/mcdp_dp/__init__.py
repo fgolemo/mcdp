@@ -32,3 +32,4 @@ from .dp_dummy import *
 from .dp_sum_n_nats import *
 
 from .dp_labeler import *
+from .opaque_dp import *

@@ -1,19 +1,18 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_cli.query_interpretation import interpret_params_1string
+from mcdp_dp.dp_transformations import get_dp_bounds
+from mcdp_dp.tracer import Tracer
 from mcdp_lang.eval_space_imp import eval_space
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
-from mcdp_posets import UpperSets
+from mcdp_posets import Space, UpperSets, express_value_in_isomorphic_space
 from mcdp_posets.rcomp import RcompTop
-from mcdp_posets.space import Space
-from mcdp_posets.types_universe import express_value_in_isomorphic_space
 from mocdp.comp.context import Context
 from mocdp.comp.interfaces import NamedDP
 import itertools
 import numpy as np
-from mcdp_dp.dp_transformations import get_dp_bounds
-from mcdp_dp.tracer import Tracer
 
 def solve_combinations(ndp, combinations, result_like, lower=None, upper=None):
     """
@@ -53,7 +52,7 @@ def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=No
         s = solve
     
     """
-
+    print('friendly_solve(upper=%s, lower=%s)' % (upper, lower))
     # TODO: replace with convert_string_query(ndp, query, context):
     fnames = ndp.get_fnames()
     rnames = ndp.get_rnames()
@@ -81,19 +80,20 @@ def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=No
         value = tuple(value)
 
     if hasattr(ndp, '_cache_dp'):
-        dp = ndp._cache_dp
+        dp0 = ndp._cache_dp0
     else:
         
         dp0 = ndp.get_dp()
+        ndp._cache_dp0 = dp0
         
-        if upper is not None:
-            _, dp = get_dp_bounds(dp0, nl=1, nu=upper)
-        elif lower is not None:
-            dp, _ = get_dp_bounds(dp0, nl=lower, nu=1)
-        else:
-            dp = dp0
+    if upper is not None:
+        _, dp = get_dp_bounds(dp0, nl=1, nu=upper)
+
+    elif lower is not None:
+        dp, _ = get_dp_bounds(dp0, nl=lower, nu=1)
+    else:
+        dp = dp0
         
-        ndp._cache_dp= dp 
 
     F = dp.get_fun_space()
     F.belongs(value)
@@ -108,9 +108,13 @@ def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=No
     ares = []
 
     for r in res.minimals:
+        rnames = ndp.get_rnames()
         fr = dict()
         for rname, sunit in result_like.items():
-            i = ndp.get_rnames().index(rname)
+            if not rname in rnames:
+                msg = 'Could not find resource %r.' % rname
+                raise_desc(ValueError, msg, rnames=rnames)
+            i = rnames.index(rname)
             unit = interpret_string_as_space(sunit)
             Ri = ndp.get_rtype(rname)
             ri = r[i]
@@ -130,15 +134,14 @@ def to_numpy_array(result_like, res):
         dtype.append((field, 'float'))
     n = len(res)
     a = np.zeros(n, dtype=dtype)
-    
-#     print('res: %s' % str(res))
-#     print('dtype: %s' % dtype)
-#     print('n: %s' % n)
+     
     for i, r in enumerate(res):
         for field in result_like:
             value = r[field]
             if isinstance(value, RcompTop):
                 value = np.inf
+
+
             a[field][i] = value
     return a
 

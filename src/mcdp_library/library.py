@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .utils import memo_disk_cache2
 from .utils.locate_files_imp import locate_files
 from contextlib import contextmanager
@@ -12,7 +13,6 @@ from mocdp.comp.context import Context, ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.exceptions import DPSemanticError, extend_with_filename
-import inspect
 import os
 import shutil
 import sys
@@ -56,12 +56,6 @@ class MCDPLibrary():
         """ 
             IMPORTANT: modify clone() if you add state
         """
-#
-#         curframe = inspect.currentframe()
-#         calframe = inspect.getouterframes(curframe, 2)
-#
-#         print('MCDPlibrary() %s' % id(self))
-#         print 'caller name:', calframe[1][3]
 
         # basename "x.mcdp" -> dict(data, realpath)
         if file_to_contents is None:
@@ -125,31 +119,26 @@ class MCDPLibrary():
             if os.path.exists(self.cache_dir):
                 shutil.rmtree(self.cache_dir)
 
-    # @memoize_simple
     @contract(returns=NamedDP)
     def load_ndp(self, id_ndp):
         return self._load_generic(id_ndp, MCDPLibrary.ext_ndps,
                                   MCDPLibrary.parse_ndp)
 
-    # @memoize_simple
     @contract(returns=Poset)
     def load_poset(self, id_poset):
         return self._load_generic(id_poset, MCDPLibrary.ext_posets,
                                   MCDPLibrary.parse_poset)
 
-    # @memoize_simple
     @contract(returns=ValueWithUnits)
     def load_constant(self, id_poset):
         return self._load_generic(id_poset, MCDPLibrary.ext_values,
                                   MCDPLibrary.parse_constant)
 
-    # @memoize_simple
     @contract(returns=PrimitiveDP)
     def load_primitivedp(self, id_primitivedp):
         return self._load_generic(id_primitivedp, MCDPLibrary.ext_primitivedps,
                                   MCDPLibrary.parse_primitivedp)
 
-    # @memoize_simple
     @contract(returns=TemplateForNamedDP)
     def load_template(self, id_ndp):
         return self._load_generic(id_ndp, MCDPLibrary.ext_templates,
@@ -173,8 +162,6 @@ class MCDPLibrary():
             logger.debug('Parsing %r' % (name))
             res = parsing(l, data, realpath)
             setattr(res, ATTR_LOAD_NAME, name)
-#             if not hasattr(res, ATTR_LOAD_LIBNAME):
-#                 setattr(res, ATTR_LOAD_LIBNAME, self.library_name)
             return res
 
         if not self.cache_dir:
@@ -239,7 +226,6 @@ class MCDPLibrary():
         context.load_primitivedp_hooks = [self.load_primitivedp]
         context.load_template_hooks = [self.load_template]
         context.load_library_hooks = [self.load_library]
-#         context.default_library_name = getattr(self, 'library_name', None)
         return context
 
     def load_library(self, id_library):
@@ -255,7 +241,9 @@ class MCDPLibrary():
 
             if self.cache_dir is not None:
                 # XXX we should create a new one
-                library.use_cache_dir(self.cache_dir)
+                library_name = library.library_name
+                new_cache = os.path.join(self.cache_dir, 'sublibrary', library_name)
+                library.use_cache_dir(new_cache)
             return library
 
         msg = 'Could not load library %r.' % id_library

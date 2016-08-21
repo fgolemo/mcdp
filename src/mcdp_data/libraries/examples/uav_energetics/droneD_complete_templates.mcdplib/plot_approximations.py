@@ -77,7 +77,7 @@ def go():
             with r2.subsection('invplus2') as rr:
                 go1(rr, ns, dp, plot_nominal_invplus, axis)
 
-    fn = 'out/plot_approximations/report.html'
+    fn = 'out-plot_approximations/report.html'
     print('writing to %s' % fn)
     r.to_html(fn)
 

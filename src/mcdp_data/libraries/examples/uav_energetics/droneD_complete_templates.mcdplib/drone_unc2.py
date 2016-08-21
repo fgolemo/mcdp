@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_cli.query_interpretation import convert_string_query
 from mcdp_dp.dp_transformations import get_dp_bounds
@@ -13,6 +14,7 @@ from plot_utils import ieee_fonts_zoom3, ieee_spines_zoom3
 from quickapp import QuickApp
 from reprep import Report
 import numpy as np
+from mcdp_ipython_utils.plotting import set_axis_colors
 
 @contract(interval_mw='float,>=0')
 def create_power_approx(interval_mw, context):
@@ -140,53 +142,63 @@ def report(data):
     UPPER2 = dict(color='purple', linewidth=4, linestyle='-', clip_on=False)
     LOWER2.update(markers)
     UPPER2.update(markers)
+    color_resources = '#700000'
+    # color_functions = '#007000'
+    color_tolerance = '#000000'
 
 
     attrs = dict(clip_on=False)
     
     fig = dict(figsize=(4.5, 4))
 
+#     label_tolerance = u'tolerance α [mW]'
+    label_tolerance = 'tolerance $\\alpha$ [mW]'
+
     with f.plot('fig_num_iterations', **fig) as pylab:
         ieee_spines_zoom3(pylab)
         pylab.plot(intervals, num_iterations_L, **LOWER2)
         pylab.plot(intervals, num_iterations_U, **UPPER2)
-        pylab.xlabel('tolerance [mW]')
+        pylab.xlabel(label_tolerance)
         pylab.ylabel('iterations')
 
     with f.plot('fig_num_iterations_log', **fig) as pylab:
         ieee_spines_zoom3(pylab)
         pylab.loglog(intervals, num_iterations_L, **LOWER2)
         pylab.loglog(intervals, num_iterations_U, **UPPER2)
-        pylab.xlabel('tolerance [mW]')
+        pylab.xlabel(label_tolerance)
         pylab.ylabel('iterations')
 
     with f.plot('mass', **fig) as pylab:
         ieee_spines_zoom3(pylab)
         pylab.plot(intervals, res_L, LOWER, **attrs)
         pylab.plot(intervals, res_U, UPPER, **attrs)
-        pylab.xlabel('tolerance [mW]')
-        pylab.ylabel('total_mass [g]')
+        pylab.xlabel(label_tolerance)
+        pylab.ylabel('total mass [g]')
+        set_axis_colors(pylab, color_tolerance, color_resources)
 
     with f.plot('mass3', **fig) as pylab:
         ieee_spines_zoom3(pylab)
         pylab.plot(intervals, res_L, **LOWER2)
         pylab.plot(intervals, res_U, **UPPER2)
-        pylab.xlabel('tolerance [mW]')
-        pylab.ylabel('total_mass [g]')
- 
+        pylab.xlabel(label_tolerance)
+        pylab.ylabel('total mass [g]')
+        set_axis_colors(pylab, color_tolerance, color_resources)
+
     with f.plot('mass3log', **fig) as pylab:
         ieee_spines_zoom3(pylab)
         pylab.semilogx(intervals, res_L, **LOWER2)
         pylab.semilogx(intervals, res_U, **UPPER2)
-        pylab.xlabel('tolerance [mW]')
-        pylab.ylabel('total_mass [g]')
+        pylab.xlabel(label_tolerance)
+        pylab.ylabel('total mass [g]')
+        set_axis_colors(pylab, color_tolerance, color_resources)
 
     with f.plot('mass_log', **fig) as pylab:
         ieee_spines_zoom3(pylab)
         pylab.loglog(intervals, res_L, LOWER, **attrs)
         pylab.loglog(intervals, res_U, UPPER, **attrs)
-        pylab.xlabel('tolerance [mW]')
-        pylab.ylabel('total_mass [g]')
+        pylab.xlabel(label_tolerance)
+        pylab.ylabel('total mass [g]')
+        set_axis_colors(pylab, color_tolerance, color_resources)
 
     with f.plot('mass2', **fig) as pylab:
         ieee_spines_zoom3(pylab)
@@ -207,15 +219,17 @@ def report(data):
             b.set_clip_on(False)
             b.set_linewidth(2)
 
-        pylab.xlabel('tolerance [mW]')
-        pylab.ylabel('total_mass [g]')
+        pylab.xlabel(label_tolerance)
+        pylab.ylabel('total mass [g]')
+        set_axis_colors(pylab, color_tolerance, color_resources)
 
     with f.plot('mass2_log',  **fig) as pylab:
         ieee_spines_zoom3(pylab)
         pylab.loglog(intervals, res_L, LOWER, **attrs)
         pylab.loglog(intervals, res_U, UPPER, **attrs)
-        pylab.xlabel('tolerance [mW]')
-        pylab.ylabel('total_mass [g]')
+        pylab.xlabel(label_tolerance)
+        pylab.ylabel('total mass [g]')
+        set_axis_colors(pylab, color_tolerance, color_resources)
 
     with f.plot('accuracy',  **fig) as pylab:
         ieee_spines_zoom3(pylab)
