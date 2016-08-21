@@ -7,11 +7,12 @@ from copy import deepcopy
 from mcdp_dp import PrimitiveDP
 from mcdp_lang import parse_ndp, parse_poset
 from mcdp_posets import Poset
-from mocdp import ATTR_LOAD_NAME, logger
+from mocdp import ATTR_LOAD_NAME, logger, ATTR_LOAD_LIBNAME
 from mocdp.comp.context import Context, ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.exceptions import DPSemanticError, extend_with_filename
+import inspect
 import os
 import shutil
 import sys
@@ -55,6 +56,12 @@ class MCDPLibrary():
         """ 
             IMPORTANT: modify clone() if you add state
         """
+#
+#         curframe = inspect.currentframe()
+#         calframe = inspect.getouterframes(curframe, 2)
+#
+#         print('MCDPlibrary() %s' % id(self))
+#         print 'caller name:', calframe[1][3]
 
         # basename "x.mcdp" -> dict(data, realpath)
         if file_to_contents is None:
@@ -92,7 +99,9 @@ class MCDPLibrary():
             if not hasattr(self, f):
                 raise ValueError(f)
             contents[f] = deepcopy(getattr(self, f))
-        return MCDPLibrary(**contents)
+        res = MCDPLibrary(**contents)
+        res.library_name = getattr(self, 'library_name', None)
+        return res
 
     def use_cache_dir(self, cache_dir):
 
@@ -105,7 +114,7 @@ class MCDPLibrary():
             with open(fn, 'w') as f:
                 f.write('touch')
             os.unlink(fn)
-        except Exception as e:
+        except Exception:
             logger.debug('Cannot write to folder %r. Not using caches.' % cache_dir)
             self.cache_dir = None
         else:
@@ -164,6 +173,8 @@ class MCDPLibrary():
             logger.debug('Parsing %r' % (name))
             res = parsing(l, data, realpath)
             setattr(res, ATTR_LOAD_NAME, name)
+#             if not hasattr(res, ATTR_LOAD_LIBNAME):
+#                 setattr(res, ATTR_LOAD_LIBNAME, self.library_name)
             return res
 
         if not self.cache_dir:
@@ -191,7 +202,14 @@ class MCDPLibrary():
 
     def parse_template(self, string, realpath=None):
         from mcdp_lang.parse_interface import parse_template
-        return self._parse_with_hooks(parse_template, string, realpath)
+        template = self._parse_with_hooks(parse_template, string, realpath)
+        if hasattr(template, ATTR_LOAD_LIBNAME):
+            _prev = getattr(template, ATTR_LOAD_LIBNAME)
+            # print('library %r gets something from %r' % (self.library_name, _prev))
+        else:
+            # print('parsed original template at %s' % self.library_name)
+            setattr(template, ATTR_LOAD_LIBNAME, self.library_name)
+        return template
 
     @contextmanager
     def _sys_path_adjust(self):
@@ -221,6 +239,7 @@ class MCDPLibrary():
         context.load_primitivedp_hooks = [self.load_primitivedp]
         context.load_template_hooks = [self.load_template]
         context.load_library_hooks = [self.load_library]
+#         context.default_library_name = getattr(self, 'library_name', None)
         return context
 
     def load_library(self, id_library):

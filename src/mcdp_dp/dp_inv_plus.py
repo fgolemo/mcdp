@@ -4,6 +4,7 @@ from contracts.utils import check_isinstance, raise_desc
 from mcdp_dp.primitive import NotSolvableNeedsApprox
 from mcdp_posets import Nat, Poset, PosetProduct, RcompUnits, get_types_universe
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
+import numpy as np
 
 _ = Nat, Poset
 
@@ -16,6 +17,10 @@ __all__ = [
 mcdp_dev_warning('FIXME: bug - are we taking into account the units?')
 
 class InvPlus2(ApproximableDP):
+    ALGO_UNIFORM = 'uniform'
+    ALGO_VAN_DER_CORPUT = 'van_der_corput'
+    ALGO = ALGO_VAN_DER_CORPUT
+
     @contract(Rs='tuple[2],seq[2]($RcompUnits)', F=RcompUnits)
     def __init__(self, F, Rs):
         for _ in Rs:
@@ -88,11 +93,16 @@ class InvPlus2L(PrimitiveDP):
             return self.R.Us(s)
         n = self.nl
 
-        options = van_der_corput_sequence(n + 1)
+        if InvPlus2.ALGO == InvPlus2.ALGO_VAN_DER_CORPUT:
+            options = van_der_corput_sequence(n + 1)
+        elif InvPlus2.ALGO == InvPlus2.ALGO_UNIFORM:
+            options = np.linspace(0.0, 1.0, n + 1)
+        else:
+            assert False, InvPlus2.ALGO
 
         s = []
         for o in options:
-            s.append((f * o, f * (1 - o)))
+            s.append((f * o, f * (1.0 - o)))
 
         options = set()
         for i in range(n):
@@ -135,14 +145,19 @@ class InvPlus2U(PrimitiveDP):
             return self.R.Us(s)
 
         n = self.nu
+        
+        if InvPlus2.ALGO == InvPlus2.ALGO_VAN_DER_CORPUT:
+            options = van_der_corput_sequence(n)
+        elif InvPlus2.ALGO == InvPlus2.ALGO_UNIFORM:
+            options = np.linspace(0.0, 1.0, n)
+        else:
+            assert False, InvPlus2.ALGO
 
-        options = van_der_corput_sequence(n)
-
-        # FIXME: bug - are we taking into account the units?
         s = set()
         for o in options:
             s.add((f * o, f * (1 - o)))
         return self.R.Us(s)
+
 
 def van_der_corput_sequence(n):
     return sorted([1.0] + [float(van_der_corput(_)) for _ in range(n - 1)])

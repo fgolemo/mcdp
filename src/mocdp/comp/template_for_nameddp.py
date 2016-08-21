@@ -3,6 +3,8 @@ from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_posets import NotLeq, get_types_universe
 from mocdp.exceptions import DPSemanticError
 from mocdp.comp.interfaces import NamedDP
+from numpy.ctypeslib import load_library
+from mocdp import ATTR_LOAD_LIBNAME
 
 __all__ = [
     'TemplateForNamedDP'
@@ -39,7 +41,12 @@ class TemplateForNamedDP():
                               proposed=describe_interface(proposed),
                               compact=True)
         
-        c = context.child()
+        libname = getattr(self, ATTR_LOAD_LIBNAME)
+        print('The libname is %r ' % libname)
+        library = context.load_library(libname)
+        c = library._generate_context_with_hooks()
+
+        # c = self.original_context.child()
         for k, v in parameter_assignment.items():
             c.var2model[k] = v
 

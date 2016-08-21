@@ -1,6 +1,6 @@
 specialize [
-   Battery: `Battery_LiPo1, 
-   Actuation: `Actuation, 
+   Battery: `batteries_nodisc.Battery_LiPo, 
+   Actuation: `droneD_complete_v2.Actuation, 
    Perception: `Perception1,
    PowerApprox: `PowerApprox
 ] 

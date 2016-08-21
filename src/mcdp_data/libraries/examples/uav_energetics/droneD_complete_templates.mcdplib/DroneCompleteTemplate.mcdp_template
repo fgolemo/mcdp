@@ -11,7 +11,7 @@ mcdp {
   requires total_cost_ownership [$]
   requires total_mass [g]
 
-  strategy = instance `Strategy
+  strategy = instance `droneD_complete_v2.Strategy
  
   actuation_energetics = 
     instance specialize [

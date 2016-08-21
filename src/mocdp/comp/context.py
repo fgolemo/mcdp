@@ -106,6 +106,10 @@ class Context():
 
         return s
 
+#     def get_default_library_name(self):
+#         """ hack used for Template """
+#         return getattr(self, 'default_library_name', None)
+
     def child(self):
         """ A child context preserves the value of the constants
             and the model types. """

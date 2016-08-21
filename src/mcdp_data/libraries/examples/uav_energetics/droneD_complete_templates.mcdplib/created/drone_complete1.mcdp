@@ -5,9 +5,9 @@ flatten mcdp {
 
     requires total_cost_ownership [$]
 
-    strategy = new Strategy
+    strategy = instance `droneD_complete_v2.Strategy
 
-    actuation_energetics = new ActuationEnergetics
+    actuation_energetics = instance `droneD_complete_v2.ActuationEnergetics
 
     endurance provided by actuation_energetics>= endurance required by strategy
     velocity provided by actuation_energetics>= velocity required by strategy
@@ -24,7 +24,6 @@ flatten mcdp {
 
 
     requires total_mass for actuation_energetics
-
 
     total_cost_ownership >= total_cost required by actuation_energetics
 }

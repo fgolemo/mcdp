@@ -81,6 +81,7 @@ class Librarian():
         l.add_search_dir(dirname)
 
         data = dict(path=dirname, library=l)
+        l.library_name = library_name
         return library_name, data
         
     @contract(libname=str, returns='isinstance(MCDPLibrary)')
@@ -109,4 +110,5 @@ class Librarian():
         # otherwise load it
         # Note this does not add it to the list
         _short, data = self._load_entry(dirname)
+        data['library'].library_name = _short
         return data['library']

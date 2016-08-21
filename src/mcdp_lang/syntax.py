@@ -799,7 +799,7 @@ class Syntax():
                        lambda t: CDP.ApproxUpper(t[0], t[1], t[2]))
 
 
-    template_load = sp(LOAD - (ndpname | SLPAR - ndpname - SRPAR),   
+    template_load = sp(LOAD - (ndpname_with_library | ndpname | SLPAR - ndpname - SRPAR),
                        lambda t: CDP.LoadTemplate(t[0], t[1]))
     
     template_spec_param_name = sp(get_idn(), lambda t: CDP.TemplateParamName(t[0]))

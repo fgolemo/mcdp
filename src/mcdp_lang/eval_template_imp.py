@@ -27,10 +27,24 @@ def eval_template(r, context):  # @UnusedVariable
 
 def eval_template_load(r, context):
     assert isinstance(r, CDP.LoadTemplate)
-    name = r.load_arg.value
-    return context.load_template(name)
+    assert isinstance(r.load_arg, (CDP.NDPName, CDP.NDPNameWithLibrary))
+
+    arg = r.load_arg
+
+    if isinstance(arg, CDP.NDPNameWithLibrary):
+        libname = arg.library
+        name = arg.name
+        library = context.load_library(libname)
+        return library.load_template(name)
+
+    if isinstance(arg, CDP.NDPName):
+        name = r.load_arg.value
+        return context.load_template(name)
+
+    raise NotImplementedError(r)
 
 def eval_template_spec(r, context):
+
     assert isinstance(r, CDP.TemplateSpec)
     from .eval_ndp_imp import eval_ndp
 
@@ -50,5 +64,10 @@ def eval_template_spec(r, context):
     else:
         params = {}
     ndpt = r.ndpt
+
+#     libname = context.get_default_library_name()
+#     if libname is None:
+#         raise ValueError()
+#     print('libname: %s' % libname)
     return TemplateForNamedDP(parameters=params, template_code=ndpt)
 

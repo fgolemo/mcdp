@@ -11,6 +11,7 @@ import functools
 import os
 import traceback
 from mcdp_posets.rcomp import finfo
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
 
 
 extra_space_finite = 0.025
@@ -356,8 +357,12 @@ class Plotter_Tuple2_UR2(Plotter):
     
     def plot(self, pylab, axis, space, value, params={}):  # @UnusedVariable
         v1, v2 = value
-        params1 = dict(color_shadow=[1.0, 0.8, 0.8], markers='k.')
-        params2 = dict(color_shadow=[0.8, 0.8, 1.0], markers='g.')
+        default_params = dict(color_shadow_L='#FFC35C',  # [1.0, 0.8, 0.8],
+                              color_shadow_U='#C390D4', #[0.8, 0.8, 1.0])
+                              )
+        default_params.update(params)
+        params1 = dict(color_shadow=default_params['color_shadow_L'], markers='k.')
+        params2 = dict(color_shadow=default_params['color_shadow_U'], markers='k.')
         P = space.subs[0]
         self.p.plot(pylab, axis, P, v1, params1)
         self.p.plot(pylab, axis, P, v2, params2)
@@ -443,6 +448,7 @@ class PlotterUR2(Plotter):
 
         minimals = [self._get_screen_coords(_, axis) for _ in value.minimals]
 
+        minimals = poset_minima(minimals, space.P.leq)
         v = space.P.Us(minimals)
 
         plot_upset_R2(pylab, v, axis, extra_space_shadow=extra_space_finite,

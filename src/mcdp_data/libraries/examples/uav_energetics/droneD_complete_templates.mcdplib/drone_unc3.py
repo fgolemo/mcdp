@@ -36,7 +36,7 @@ def go(algo):
     res = {}
     res['n'] = [1, 5, 10, 15, 25, 50, 61, 75, 92, 100, 125, 150, 160,
                  175, 182, 200,
-                300, 400, 500, 600, 1000, 2000]
+                300, 400, 500, 600, 1000, 1500]
 
 #     res['n'] = [1, 5, 10, 15, 25, 50, 61, 100]
 #     res['n'] = [3000]
@@ -91,6 +91,7 @@ def solve_stats(ndp, n, algo):
 
 
 def report(data):
+    print('report()')
 #     font = {'family' : 'Times',
 #         'size'   : 24}
 #     import matplotlib
@@ -130,17 +131,22 @@ def report(data):
     print('Plotting')
     f = r.figure('fig1', cols=2)
 
-    LOWER = 'bo-'
-    UPPER = 'mo-'
-
+    
     attrs = dict(clip_on=False)
-#     fig = dict(figsize=(14.4, 14.4))
-    fig = dict()
+    
+    markers = dict(markeredgecolor='none', markerfacecolor='black', markersize=2,
+                   marker='o')
+    LOWER = dict(color='orange', linewidth=4, linestyle='-', clip_on=False)
+    UPPER = dict(color='purple', linewidth=4, linestyle='-', clip_on=False)
+    LOWER.update(markers)
+    UPPER.update(markers)
+
+    fig = dict(figsize=(4.5, 3.4))
 
     with f.plot('fig_num_iterations', **fig) as pylab:
         ieee_spines_zoom3(pylab)
-        pylab.plot(num, num_iterations_L, LOWER, **attrs)
-        pylab.plot(num, num_iterations_U, UPPER, **attrs)
+        pylab.plot(num, num_iterations_L, **LOWER)
+        pylab.plot(num, num_iterations_U, **UPPER)
         pylab.ylabel('iterations')
         pylab.xlabel('n')
 
@@ -148,24 +154,18 @@ def report(data):
     if False:
         with f.plot('fig_num_iterations_log', **fig) as pylab:
             ieee_spines_zoom3(pylab)
-            pylab.loglog(num, num_iterations_L, LOWER, **attrs)
-            pylab.loglog(num, num_iterations_U, UPPER, **attrs)
+            pylab.loglog(num, num_iterations_L, **LOWER)
+            pylab.loglog(num, num_iterations_U, **UPPER)
             pylab.ylabel('iterations')
             pylab.xlabel('n')
 
     with f.plot('mass', **fig) as pylab:
         ieee_spines_zoom3(pylab)
-        pylab.plot(num, res_L, LOWER, **attrs)
-        pylab.plot(num, res_U, UPPER, **attrs)
+        pylab.plot(num, res_L, **LOWER)
+        pylab.plot(num, res_U, **UPPER)
         pylab.ylabel('total_mass [g]')
         pylab.xlabel('n')
 
-#     with f.plot('mass_log') as pylab:
-#         ieee_spines(pylab)
-#         pylab.loglog(intervals, res_L, LOWER, **attrs)
-#         pylab.loglog(intervals, res_U, UPPER, **attrs)
-#         pylab.xlabel('tolerance [mW]')
-#         pylab.ylabel('total_mass [g]')
 
     with f.plot('mass2', **fig) as pylab:
         ieee_spines_zoom3(pylab)

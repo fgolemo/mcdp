@@ -2,13 +2,10 @@
 from collections import defaultdict
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_dp import (Constant, Conversion, GenericUnary, Identity, InvMult2,
-    InvPlus2, InvPlus2Nat, Limit, Max, MeetNDual, Min, Mux, MuxMap, Product,
-    ProductN, Sum, SumN, WrapAMap)
-from mcdp_dp.dp_constant import ConstantMinimals
-from mcdp_dp.dp_flatten import TakeFun, TakeRes
-from mcdp_dp.dp_max import JoinNDP
-from mcdp_dp.dp_sum_n_nats import SumNNat
+from mcdp_dp import (Constant, ConstantMinimals, Conversion, GenericUnary,
+    Identity, InvMult2, InvPlus2, InvPlus2Nat, JoinNDP, Limit, Max, MeetNDual,
+    Min, Mux, MuxMap, Product, ProductN, Sum, SumN, SumNNat, TakeFun, TakeRes,
+    WrapAMap)
 from mcdp_lang.blocks import get_missing_connections
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
@@ -84,8 +81,20 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
     assert direction in ['LR', 'TB']
     gg = gvgen.GvGen(options="rankdir=%s" % direction)
 
-    if len(ndp.get_fnames()) > 0:
+
+    # if True, create clusters for functions and resources
+    do_cluster_res_fun = False
+
+    if do_cluster_res_fun and len(ndp.get_fnames()) > 0:
         cluster_functions = gg.newItem("")
+    else:
+        cluster_functions = None
+
+    if do_cluster_res_fun and len(ndp.get_rnames()) > 0:
+        cluster_resources = gg.newItem("")
+    else:
+        cluster_resources = None
+
 
     from .gdc import GraphDrawingContext
     gdc = GraphDrawingContext(gg=gg, parent=None,
@@ -147,48 +156,48 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
 
     functions, resources = create(gdc, ndp, plotting_info)
 
-    if functions:
-        nodes_functions = []
-        for fname, n in functions.items():
-            F = ndp.get_ftype(fname)
-            label = fname + ' ' + format_unit(F)
-            x = gg.newItem(label, parent=cluster_functions)
-            nodes_functions.append(x)
-            gg.styleApply("external", x)
 
-            l_label = plotting_info.get_fname_label(ndp_name=(), fname=fname)
-            if not l_label: l_label = ""
+    for fname, n in functions.items():
+        F = ndp.get_ftype(fname)
+        label = fname + ' ' + format_unit(F)
+        x = gg.newItem(label, parent=cluster_functions)
 
-            l = gg.newLink(x, n, l_label)
-            if False:
-                gg.propertyAppend(l, "headport", "w")
-                gg.propertyAppend(l, "tailport", "e")
+        gg.styleApply("external", x)
 
-            gdc.decorate_arrow_function(l)
-            gdc.decorate_function_name(x)
+        l_label = plotting_info.get_fname_label(ndp_name=(), fname=fname)
+        if not l_label: l_label = ""
 
-            gg.styleApply("external_cluster_functions", cluster_functions)
+        l = gg.newLink(x, n, l_label)
+        if False:
+            gg.propertyAppend(l, "headport", "w")
+            gg.propertyAppend(l, "tailport", "e")
 
-    if resources:
-        cluster_resources = gg.newItem("")
-        nodes_resources = []
-        for rname, n in resources.items():
-            R = ndp.get_rtype(rname)
-            label = rname + ' ' + format_unit(R)
-            x = gg.newItem(label, parent=cluster_resources)
-            nodes_resources.append(x)
-            gg.styleApply("external", x)
+        gdc.decorate_arrow_function(l)
+        gdc.decorate_function_name(x)
 
-            l_label = plotting_info.get_rname_label(ndp_name=(), rname=rname)
-            if not l_label: l_label = ""
 
-            l = gg.newLink(n, x, l_label)
-            gdc.decorate_arrow_resource(l)
-            gdc.decorate_resource_name(x)
-            if False:
-                gg.propertyAppend(l, "headport", "w")
-                gg.propertyAppend(l, "tailport", "e")
+    for rname, n in resources.items():
+        R = ndp.get_rtype(rname)
+        label = rname + ' ' + format_unit(R)
+        x = gg.newItem(label, parent=cluster_resources)
 
+        gg.styleApply("external", x)
+
+        l_label = plotting_info.get_rname_label(ndp_name=(), rname=rname)
+        if not l_label: l_label = ""
+
+        l = gg.newLink(n, x, l_label)
+        gdc.decorate_arrow_resource(l)
+        gdc.decorate_resource_name(x)
+        if False:
+            gg.propertyAppend(l, "headport", "w")
+            gg.propertyAppend(l, "tailport", "e")
+
+
+    if cluster_functions is not None:
+        gg.styleApply("external_cluster_functions", cluster_functions)
+
+    if cluster_resources is not None:
         gg.styleApply("external_cluster_resources", cluster_resources)
 #
 #     ADD_ORDER = False

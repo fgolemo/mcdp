@@ -14,7 +14,6 @@ from quickapp import QuickAppBase
 from system_cmd import CmdException, system_cmd_result
 from tempfile import mkdtemp
 import os
-from mocdp.comp.simplify_identities_imp import simplify_identities
 
 def get_ndp(data):
     if not 'ndp' in data:
@@ -285,6 +284,7 @@ def do_plots(logger, model_name, plots, outdir, extra_params, maindir, extra_dir
     if cache_dir is not None:
         library.use_cache_dir(cache_dir)
 
+    assert library.library_name is not None
 
     filename = model_name + '.mcdp'
     x = library._get_file_data(filename)

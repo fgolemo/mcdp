@@ -29,7 +29,7 @@ class Tracer():
         self.logger = logger
 
     def __repr__(self):
-        return 'Tracer(%s)' % self.chronology
+        return 'Tracer(%s)' % len(self.chronology)
 
     def repr_long(self):
         return self.__repr__()

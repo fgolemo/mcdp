@@ -32,8 +32,13 @@ class LinearCeil():
         try:
             m = x / self.alpha
         except FloatingPointError as e:
-            assert 'overflow' in str(e)
-            m = finfo.max
+            s = str(e)
+            if 'overflow' in s:
+                m = finfo.max
+            elif 'underflow' in s:
+                m = finfo.tiny
+            else:
+                raise
 
         n = math.ceil(m)
         y = n * self.alpha

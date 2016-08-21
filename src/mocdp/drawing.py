@@ -10,7 +10,7 @@ def plot_upset_minima(pylab, us):
 
     # write once for axis
     for p in points:
-        pylab.plot(p[0], p[1], 'k.')
+        pylab.plot(p[0], p[1], 'k.', clip_on=False)
 
 
 @contract(us=UpperSet)
@@ -42,7 +42,7 @@ def plot_upset_R2(pylab, us, axis, color_shadow,
             # when using "finfo.tiny"
             eps = finfo.eps
             p = np.maximum(p, eps)
-            pylab.plot(p[0], p[1], markers)
+            pylab.plot(p[0], p[1], markers, clip_on=False)
 
 
 def plot_cone(pylab, p, axis, color_shadow, color_lines):
