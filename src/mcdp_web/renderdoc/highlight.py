@@ -166,7 +166,7 @@ def load_fragments(library, frag, realpath):
             continue
 
         if tag.has_attr('id'):
-            id_ndp = tag['id']
+            id_ndp = tag['id'].encode('utf-8')
             source_code = tag.string.encode('utf-8')
 
             basename = '%s.%s' % (id_ndp, MCDPLibrary.ext_ndps)
@@ -184,7 +184,7 @@ def load_fragments(library, frag, realpath):
             continue
 
         if tag.has_attr('id'):
-            id_ndp = tag['id']
+            id_ndp = tag['id'].encode('utf-8')
             source_code = tag.string.encode('utf-8')
 
             basename = '%s.%s' % (id_ndp, MCDPLibrary.ext_posets)

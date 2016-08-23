@@ -168,16 +168,19 @@ class Syntax():
 
 
     get_idn = SyntaxIdentifiers.get_idn
+
+    library_name = sp(get_idn(), lambda t: CDP.LibraryName(t[0]))
+
     # load <name>
     LOAD = spk(L('load') | L('`'), CDP.LoadKeyword)
 
-    name_poset = sp(get_idn(), lambda t: CDP.PosetName(t[0]))
-    name_poset_library = sp(get_idn() + L('.') + get_idn(),
+    posetname = sp(get_idn(), lambda t: CDP.PosetName(t[0]))
+    posetname_with_library = sp(library_name + L('.') + posetname,
         lambda t: CDP.PosetNameWithLibrary(library=t[0], glyph=t[1], name=t[2]))
 
-    load_poset = sp(LOAD - (name_poset_library | name_poset),
-                    lambda t: CDP.LoadPoset(t[0], t[1]))
-
+    load_poset = sp(LOAD - (posetname_with_library | posetname),
+                    lambda t: CDP.LoadPoset(keyword=t[0], load_arg=t[1]))
+#
     # UpperSets(<poset>)
     UPPERSETS = spk(L('UpperSets'), CDP.UpperSetsKeyword)
     space_uppersets = sp(UPPERSETS + SLPAR + space + SRPAR,
@@ -350,13 +353,15 @@ class Syntax():
 
     # a quoted string
     quoted = sp(dblQuotedString | sglQuotedString, lambda t:t[0][1:-1])
+
+
     ndpname = sp(get_idn() | quoted, lambda t: CDP.NDPName(t[0]))
-    ndpname_with_library = sp(get_idn() + L('.') + get_idn(),
+
+    ndpname_with_library = sp(library_name + L('.') + ndpname,
         lambda t: CDP.NDPNameWithLibrary(library=t[0], glyph=t[1], name=t[2]))
 
     ndpt_load = sp(LOAD - (ndpname_with_library | ndpname | SLPAR - ndpname - SRPAR),
                         lambda t: CDP.LoadNDP(t[0], t[1]))
-
 
     # <dpname> = ...
     dpname = sp(get_idn(), lambda t: CDP.DPName(t[0]))
@@ -799,7 +804,12 @@ class Syntax():
                        lambda t: CDP.ApproxUpper(t[0], t[1], t[2]))
 
 
-    template_load = sp(LOAD - (ndpname_with_library | ndpname | SLPAR - ndpname - SRPAR),
+
+    templatename = sp(get_idn() | quoted, lambda t: CDP.TemplateName(t[0]))
+    templatename_with_library = sp(library_name + L('.') + templatename,
+        lambda t: CDP.TemplateNameWithLibrary(library=t[0], glyph=t[1], name=t[2]))
+
+    template_load = sp(LOAD - (templatename_with_library | templatename | SLPAR - templatename - SRPAR),
                        lambda t: CDP.LoadTemplate(t[0], t[1]))
     
     template_spec_param_name = sp(get_idn(), lambda t: CDP.TemplateParamName(t[0]))

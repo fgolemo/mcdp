@@ -12,6 +12,7 @@ from mocdp.comp.flattening.flatten import cndp_flatten
 from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.wrap import SimpleWrap, dpwrap
 from mocdp.exceptions import DPSemanticErrorNotConnected
+from mocdp.memoize_simple_imp import memoize_simple
 from networkx.algorithms.cycles import simple_cycles
 import numpy as np
 
@@ -275,6 +276,7 @@ def choose_connections_to_cut(connections, name2dp):
         else:
             return 1
 
+    @memoize_simple
     def edge_weight(e):
         (dp1, dp2) = e
         c = find_one(connections, dp1, dp2)
@@ -316,9 +318,59 @@ def enumerate_minimal_solution(G, edge_weight):
                 return True
         return False
 
+    def cycles_for_edge(e):
+        cycles = set()
+        for c in all_cycles:
+            assert isinstance(c, tuple)
+            if e in c:
+                cycles.add(c)
+        return freeze(cycles)
+
     # these are the ones we care about
     edges_belonging_to_cycles = set([e for e in all_edges if belongs_to_cycles(e)])
-    print('Deciding between %s hot of %d edges' % (len(edges_belonging_to_cycles), len(all_edges)))
+
+    def get_edges_to_consider():
+        # For each set of cycles, find which edges are in the equivalence class
+        from collections import defaultdict
+        cycles2edges = defaultdict(lambda: set())
+        for e in edges_belonging_to_cycles:
+            cycles = freeze(cycles_for_edge(e))
+            cycles2edges[cycles].add(e)
+
+
+        cycles2champion = {}
+        cycles2weight = {}
+        for cycles, edges in cycles2edges.items():
+            print('Found %s edges that remove a set of %s cycles' % (len(edges), len(cycles)))
+
+            best = min(edges, key=edge_weight)
+
+            cycles2champion[cycles] = best
+            cycles2weight[cycles] = edge_weight(best)
+
+        def a_contains_b(ca, cb):
+            return cb.issubset(ca)
+
+        consider = set()
+        for cycles1 in cycles2weight:
+            print('cycles')
+            for cycles2 in cycles2weight:
+                w1 = cycles2weight[cycles1]
+                w2 = cycles2weight[cycles2]
+                if a_contains_b(cycles2, cycles1) and w2 < w1:
+                    print('dominated')
+                    break
+            else:
+                # not dominated
+                consider.add(cycles2champion[cycles1])
+
+        print('From %d to %d edges to consider' % (len(edges_belonging_to_cycles), len(consider)))
+        return consider
+
+
+    edges_to_consider = get_edges_to_consider()
+
+    print('Deciding between %s hot of %d edges' % (len(edges_to_consider), len(all_edges)))
 
     best_weight = np.inf
     
@@ -334,7 +386,7 @@ def enumerate_minimal_solution(G, edge_weight):
               (len(current_solutions), best_weight, len(current_partial_solutions), removed))
 
         # now look at edges that we could remove
-        to_remove = edges_belonging_to_cycles - removed
+        to_remove = edges_to_consider - removed
 
         for edge in to_remove:
             new_weight = state.weight + edge_weight(edge)

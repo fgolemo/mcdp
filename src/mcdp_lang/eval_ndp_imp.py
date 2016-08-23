@@ -200,13 +200,14 @@ def eval_ndp_code_spec(r, _context):
 
 def eval_ndp_load(r, context):
     assert isinstance(r, CDP.LoadNDP)
-    assert isinstance(r.load_arg, (CDP.NDPName, CDP.NDPNameWithLibrary))
-
     arg = r.load_arg
+    assert isinstance(arg, (CDP.NDPName, CDP.NDPNameWithLibrary))
 
     if isinstance(arg, CDP.NDPNameWithLibrary):
-        libname = arg.library
-        name = arg.name
+        assert isinstance(arg.library, CDP.LibraryName), arg
+        assert isinstance(arg.name, CDP.NDPName), arg
+        libname = arg.library.value
+        name = arg.name.value
         library = context.load_library(libname)
         return library.load_ndp(name)
 
@@ -223,8 +224,11 @@ def eval_ndp_instancefromlibrary(r, context):
     arg = r.dpname
 
     if isinstance(arg, CDP.NDPNameWithLibrary):
-        libname = arg.library
-        name = arg.name
+        assert isinstance(arg.library, CDP.LibraryName), arg
+        assert isinstance(arg.name, CDP.NDPName), arg
+
+        libname = arg.library.value
+        name = arg.name.value
         library = context.load_library(libname)
         return library.load_ndp(name)
 

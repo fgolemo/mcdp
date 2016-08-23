@@ -132,7 +132,10 @@ class CDPLanguage():
     DPWrapToken = namedtuplewhere('DPWrapToken', 'keyword')
     FuncName = namedtuplewhere('FuncName', 'value')  # python function name
     NDPName = namedtuplewhere('NDPName', 'value')  # name in "new <name>"
+    TemplateName = namedtuplewhere('TemplateName', 'value')  # name in "new <name>"
+    LibraryName = namedtuplewhere('LibraryName', 'value')  # name in "new <name>"
     NDPNameWithLibrary = namedtuplewhere('NDPNameWithLibrary', 'library glyph name')  # name in "new <name>"
+    TemplateNameWithLibrary = namedtuplewhere('TemplateNameWithLibrary', 'library glyph name')  # name in "new <name>"
     ApproxKeyword = namedtuplewhere('ApproxKeyword', 'keyword')
     FlattenKeyword = namedtuplewhere('FlattenKeyword', 'keyword')
     SpecializeKeyword = namedtuplewhere('SpecializeKeyword', 'keyword')
@@ -187,7 +190,6 @@ class CDPLanguage():
     PosetNameWithLibrary = namedtuplewhere('PosetNameWithLibrary', 'library glyph name')
 
     LoadDP = namedtuplewhere('LoadDP', 'keyword name')
-    LoadPoset = namedtuplewhere('LoadPoset', 'keyword name')
 
     DPWrap = namedtuplewhere('DPWrap', 'token statements prep impl')
 

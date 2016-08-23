@@ -30,13 +30,13 @@ def syntax_import1():
     """ syntax for posets """
     m = parse_wrap_check("`poset", Syntax.load_poset)
     assert isinstance(m, CDP.LoadPoset)
-    assert isinstance(m.name, CDP.PosetName)
-    assert m.name.value == 'poset'
+    assert isinstance(m.load_arg, CDP.PosetName)
+    assert m.load_arg.value == 'poset'
 
     m = parse_wrap_check("`library.poset", Syntax.load_poset)
-    assert isinstance(m.name, CDP.PosetNameWithLibrary)
-    assert m.name.library == 'library'
-    assert m.name.name == 'poset'
+    assert isinstance(m.load_arg, CDP.PosetNameWithLibrary)
+    assert m.load_arg.library.value == 'library'
+    assert m.load_arg.name.value == 'poset'
 
 @comptest
 def syntax_import2():
@@ -48,8 +48,8 @@ def syntax_import2():
 
     m = parse_wrap_check("`library.model", Syntax.ndpt_load)
     assert isinstance(m.load_arg, CDP.NDPNameWithLibrary)
-    assert m.load_arg.library == 'library'
-    assert m.load_arg.name == 'model'
+    assert m.load_arg.library.value == 'library'
+    assert m.load_arg.name.value == 'model'
 
 @comptest
 def syntax_import3():

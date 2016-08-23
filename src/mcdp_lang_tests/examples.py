@@ -41,15 +41,20 @@ def syntax_test_fn(filename):
 
 def syntax_test(contents):
     from mcdp_report.html import ast_to_html
-    html = ast_to_html(contents, complete_document=False)
 
+    html = ast_to_html(contents, complete_document=False, add_css=False)
+
+    s = StringIO(html)
     import xml.etree.ElementTree as ETree
     try:
-        s = StringIO(html)
         _doc = ETree.parse(s)
-    except ETree.ParseError :
-        print("ERROR in {0} : {1}".format(ETree.ParseError.filename,
-                                          ETree.ParseError.msg))
+    except ETree.ParseError:
+        print('---')
+        print(html)
+        print('---')
+        raise
+#         print("ERROR in {0} : {1}".format(ETree.ParseError.filename,
+#                                           ETree.ParseError.msg))
 
 
 def test_one(test, filename):

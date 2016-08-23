@@ -8,6 +8,7 @@ from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
 from mocdp import logger
 from mocdp.exceptions import mcdp_dev_warning
+import warnings
 
 def isolate_comments(s):
     lines = s.split("\n")
@@ -22,7 +23,6 @@ def isolate_comments(s):
 
     return unzip(map(isolate_comment, lines))
 
-
 def unzip(iterable):
     return zip(*iterable)
 
@@ -34,8 +34,14 @@ def ast_to_text(s):
 @contract(s=str)
 def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: False,
                 add_line_gutter=True, encapsulate_in_precode=True, add_css=True,
-                parse_expr=Syntax.ndpt_dp_rvalue, add_line_spans=False):
+                parse_expr=None, add_line_spans=False):
+    if parse_expr is None:
+        warnings.warn('Please add specific parse_expr (default=Syntax.ndpt_dp_rvalue)', stacklevel=2)
+        parse_expr = Syntax.ndpt_dp_rvalue
+    if add_css:
+        warnings.warn('check we really need add_css = True', stacklevel=2)
 
+    add_css = False
     s_lines, s_comments = isolate_comments(s)
     assert len(s_lines) == len(s_comments) 
     # Problem: initial comment, '# test connected\nmcdp'

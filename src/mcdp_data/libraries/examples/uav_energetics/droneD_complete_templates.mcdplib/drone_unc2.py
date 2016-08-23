@@ -150,9 +150,10 @@ def report(data):
     attrs = dict(clip_on=False)
     
     fig = dict(figsize=(4.5, 4))
+    fig_tall = dict(figsize=(3.5    , 7))
 
-#     label_tolerance = u'tolerance α [mW]'
-    label_tolerance = 'tolerance $\\alpha$ [mW]'
+    label_tolerance = u'tolerance α [mW]'
+#     label_tolerance = 'tolerance $\\alpha$ [mW]'
 
     with f.plot('fig_num_iterations', **fig) as pylab:
         ieee_spines_zoom3(pylab)
@@ -168,7 +169,7 @@ def report(data):
         pylab.xlabel(label_tolerance)
         pylab.ylabel('iterations')
 
-    with f.plot('mass', **fig) as pylab:
+    with f.plot('mass', **fig_tall) as pylab:
         ieee_spines_zoom3(pylab)
         pylab.plot(intervals, res_L, LOWER, **attrs)
         pylab.plot(intervals, res_U, UPPER, **attrs)
@@ -176,7 +177,7 @@ def report(data):
         pylab.ylabel('total mass [g]')
         set_axis_colors(pylab, color_tolerance, color_resources)
 
-    with f.plot('mass3', **fig) as pylab:
+    with f.plot('mass3', **fig_tall) as pylab:
         ieee_spines_zoom3(pylab)
         pylab.plot(intervals, res_L, **LOWER2)
         pylab.plot(intervals, res_U, **UPPER2)
@@ -233,15 +234,15 @@ def report(data):
 
     with f.plot('accuracy',  **fig) as pylab:
         ieee_spines_zoom3(pylab)
-        pylab.plot(num_iterations, accuracy, 'o', **attrs)
-        pylab.xlabel('iterations')
-        pylab.ylabel('solution uncertainty [g]')
+        pylab.plot(accuracy, num_iterations, 'o', **attrs)
+        pylab.ylabel('iterations')
+        pylab.xlabel('solution uncertainty [g]')
 
     with f.plot('accuracy_log',  **fig) as pylab:
         ieee_spines_zoom3(pylab)
-        pylab.loglog(num_iterations, accuracy, 'o', **attrs)
-        pylab.xlabel('iterations')
-        pylab.ylabel('solution uncertainty [g]')
+        pylab.loglog(accuracy, num_iterations, 'o', **attrs)
+        pylab.ylabel('iterations')
+        pylab.xlabel('solution uncertainty [g]')
 
     return r
     

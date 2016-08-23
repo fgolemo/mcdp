@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-
 from contracts import contract
 from contracts.utils import indent, raise_desc
-from mcdp_library import MCDPLibrary
-from mcdp_library.utils import locate_files
+from mcdp_library import Librarian, MCDPLibrary
 from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
 from mcdp_web.editor.app_editor import AppEditor
 from mcdp_web.editor_fancy.app_editor_fancy_generic import AppEditorFancyGeneric
@@ -17,14 +15,13 @@ from mcdp_web.solver2.app_solver2 import AppSolver2
 from mcdp_web.visualization.app_visualization import AppVisualization
 from mocdp import logger
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
-from pyramid.config import Configurator
-from pyramid.httpexceptions import HTTPFound
-from pyramid.response import Response
+from pyramid.config import Configurator  # @UnresolvedImport
+from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
+from pyramid.response import Response  # @UnresolvedImport
 from quickapp import QuickAppBase
 from wsgiref.simple_server import make_server
 import mocdp
 import os
-from mcdp_library.libraries import Librarian
 
 
 __all__ = [
@@ -231,6 +228,14 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         url = '/libraries/%s/models/%s/views/%s/' % (library, model, view)
         return url
 
+    def get_ltv_url(self, library, template, view):
+        url = '/libraries/%s/templates/%s/views/%s/' % (library, template, view)
+        return url
+
+    def get_lpv_url(self, library, poset, view):
+        url = '/libraries/%s/posets/%s/views/%s/' % (library, poset, view)
+        return url
+
     def get_lib_template_view_url(self, library, template, view):
         url = '/libraries/%s/templates/%s/views/%s/' % (library, template, view)
         return url
@@ -248,26 +253,27 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
     def get_navigation_links(self, request):
         """ Pass this as "navigation" to the page. """
+        current_thing = None
 
         if 'model_name' in request.matchdict:
-            current_model = self.get_model_name(request)
+            current_thing = current_model = self.get_model_name(request)
             current_view = self.get_current_view(request)
         else:
             current_model = None
             current_view = None
 
         if 'template_name' in request.matchdict:
-            current_template = str(request.matchdict['template_name'])
+            current_thing = current_template = str(request.matchdict['template_name'])
         else:
             current_template = None
 
         if 'poset_name' in request.matchdict:
-            current_poset = str(request.matchdict['poset_name'])
+            current_thing = current_poset = str(request.matchdict['poset_name'])
         else:
             current_poset = None
 
         if 'value_name' in request.matchdict:
-            current_value = str(request.matchdict['value_name'])
+            current_thing = current_value = str(request.matchdict['value_name'])
         else:
             current_value = None
 
@@ -279,11 +285,13 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         
         models = self.list_of_models(request)
         
+        d['current_thing'] = current_thing
         d['current_library'] = current_library
         d['current_template'] = current_template
         d['current_poset'] = current_poset
-        d['current_view'] = current_view
         d['current_model'] = current_model
+
+        d['current_view'] = current_view
 
         documents = library._list_with_extension(MCDPLibrary.ext_doc_md)
 
@@ -313,7 +321,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
             url = self.get_lib_template_view_url(library=current_library,
                                                  template=t,
-                                                 view='edit_fancy')  # XXX
+                                                 view='syntax')  # XXX
 
             name = "Template: %s" % t
             desc = dict(name=name, url=url, current=is_current)
@@ -323,7 +331,11 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         d['posets'] = []
         for p in sorted(posets):
             is_current = (p == current_poset)
-            url = '/libraries/%s/posets/%s/views/edit_fancy/' % (current_library, p)
+            url = self.get_lpv_url(library=current_library,
+                                   poset=p,
+                                   view='syntax')
+
+#             url = '/libraries/%s/posets/%s/views/edit_fancy/' % (current_library, p)
             name = "Poset: %s" % p
             desc = dict(name=name, url=url, current=is_current)
             d['posets'].append(desc)
@@ -486,44 +498,11 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         config.add_view(serve_robots, route_name='robots')
 
-
-
         config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
 
         app = config.make_wsgi_app()
         self.server = make_server('0.0.0.0', port, app)
         self.server.serve_forever()
-
-#
-# def load_libraries(dirname):
-#     """ Returns a dictionary
-#
-#             library_name -> {'path': ...,
-#                               'library': ...}
-#     """
-#     if 'mcdplib' in dirname:
-#         short = os.path.splitext(os.path.basename(dirname))[0]
-#         l = MCDPLibrary()
-#         cache_dir = os.path.join(dirname, '_cached/mcdpweb_cache')
-#         l.use_cache_dir(cache_dir)
-#         l.add_search_dir(dirname)
-#         return {short: dict(path=dirname, library=l)}
-#
-#     libraries = locate_files(dirname, "*.mcdplib",
-#                              followlinks=False,
-#                              include_directories=True,
-#                              include_files=False)
-#     res = {}
-#     for path in libraries:
-#         library_name = os.path.splitext(os.path.basename(path))[0]
-#
-#         l = MCDPLibrary()
-#         cache_dir = os.path.join(path, '_cached/mcdpweb_cache')
-#         l.use_cache_dir(cache_dir)
-#         l.add_search_dir(path)
-#
-#         res[library_name] = dict(path=path, library=l)
-#     return res
 
 
 class MCDPWeb(QuickAppBase):

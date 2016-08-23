@@ -41,7 +41,7 @@
 	
 	
 	{% set url_edit = ("/libraries/" + navigation['current_library'] + 
-	              "/models/" + navigation['current_model'] + 
+	              "/templates/" + navigation['current_template'] + 
 	              "/views/edit_fancy/" )%}
 	<a class='make_button' href="{{url_edit}}">
 	 		Edit
@@ -52,7 +52,6 @@
     	$(".make_button").button();
 	});
 	</script>
-	
 	
 	</td>
 	<td>
@@ -78,6 +77,7 @@
 	{% if explanation2_html %}
 		{{explanation2_html|safe}}
 	{% endif %}
+
 
 </body>
 </html>

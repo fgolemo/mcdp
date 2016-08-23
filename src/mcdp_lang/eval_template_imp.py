@@ -27,17 +27,21 @@ def eval_template(r, context):  # @UnusedVariable
 
 def eval_template_load(r, context):
     assert isinstance(r, CDP.LoadTemplate)
-    assert isinstance(r.load_arg, (CDP.NDPName, CDP.NDPNameWithLibrary))
+    assert isinstance(r.load_arg, (CDP.TemplateName, CDP.TemplateNameWithLibrary))
 
     arg = r.load_arg
 
-    if isinstance(arg, CDP.NDPNameWithLibrary):
-        libname = arg.library
-        name = arg.name
+    if isinstance(arg, CDP.TemplateNameWithLibrary):
+        assert isinstance(arg.library, CDP.LibraryName), arg
+        assert isinstance(arg.name, CDP.TemplateName), arg
+
+        name = arg.name.value
+        libname = arg.library.value
+
         library = context.load_library(libname)
         return library.load_template(name)
 
-    if isinstance(arg, CDP.NDPName):
+    if isinstance(arg, CDP.TemplateName):
         name = r.load_arg.value
         return context.load_template(name)
 

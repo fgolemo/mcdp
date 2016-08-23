@@ -31,11 +31,11 @@ class PlottingInfo():
 
     @contract(ndp_name='tuple')
     def get_fname_label(self, ndp_name, fname):  # @UnusedVariable
-        return ""
+        return None
 
     @contract(ndp_name='tuple')
     def get_rname_label(self, ndp_name, rname):  # @UnusedVariable
-        return ""
+        return None
 
 
 class RecursiveEdgeLabeling(PlottingInfo):
@@ -476,10 +476,10 @@ def create_coproduct(gdc0, ndp, plotting_info):
         
         should_I = plotting_info.should_I_expand(ndp_name=(), alternative=altname)
         if not should_I:
-            print('Not expanding alternative %s' % altname)
+            # print('Not expanding alternative %s' % altname)
             continue
         else:
-            print('Expanding %r' % altname)
+            # print('Expanding %r' % altname)
             pass
 
         if gdc0.yourname is not None:
@@ -669,6 +669,8 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
                 dec = plotting_info.get_fname_label(ndp_name=(c.dp2,), fname=c.s2)
                 if dec is not None:
                     l1_label = get_signal_label_namepart(c.s2) + '\n' + dec
+
+#                 print('Creating label with %r %s' % l1_label)
                 l1 = gdc.newLink(box, n_a , label=l1_label)
 
 #                 if False:

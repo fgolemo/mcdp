@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from contracts import contract
+from mcdp_posets import Poset, PosetProduct, Rcomp
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima_n2
-from mcdp_posets.poset import Poset
-from mcdp_posets.poset_product import PosetProduct
-from mcdp_posets.rcomp import Rcomp
 import numpy as np
 import random
 
@@ -44,6 +42,9 @@ def wrap_with_counts(P, maxleq=None):
 
         def check_leq(self, a, b):
             return self.check_leq(a, b)
+
+        def witness(self):
+            return self.P.witness()
 
         def leq(self, a, b):
             res = self.P.leq(a, b)

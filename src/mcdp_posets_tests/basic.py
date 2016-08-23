@@ -1,9 +1,6 @@
-from mcdp_tests.generation import for_all_posets
 from comptests.registrar import comptest
-from mcdp_posets.poset import NotBounded
-from mcdp_posets.space import Uninhabited
-from mcdp_posets.interval import Interval
-from mcdp_posets.poset_product import PosetProduct
+from mcdp_posets import Interval, NotBounded, PosetProduct, Uninhabited
+from mcdp_tests.generation import for_all_posets
 
 
 @for_all_posets

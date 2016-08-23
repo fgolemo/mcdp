@@ -1,5 +1,5 @@
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, check_isinstance
 from .library import MCDPLibrary
 from .utils import locate_files
 from mocdp.exceptions import DPSemanticError
@@ -86,6 +86,7 @@ class Librarian():
         
     @contract(libname=str, returns='isinstance(MCDPLibrary)')
     def load_library(self, libname):
+        check_isinstance(libname, str)
         """ hook to pass to MCDPLibrary instances to find their sisters. """
         if not libname in self.libraries:
             s = ", ".join(sorted(self.libraries))

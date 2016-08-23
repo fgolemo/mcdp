@@ -1,10 +1,6 @@
 from comptests.registrar import comptest, comptest_fails
-from mcdp_posets.category_coproduct import Coproduct1
-from mcdp_posets.finite_poset import FinitePoset
-from mcdp_posets.poset_coproduct import PosetCoproduct
-from mcdp_posets.poset_product import PosetProduct
-from mcdp_posets.rcomp_units import R_Energy, R_Time, R_Weight
-from mcdp_posets.types_universe import (express_value_in_isomorphic_space,
+from mcdp_posets import (Coproduct1, FinitePoset, PosetCoproduct, PosetProduct,
+    R_Energy, R_Time, R_Weight, express_value_in_isomorphic_space,
     get_types_universe)
 
 @comptest

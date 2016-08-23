@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_dp.dp_flatten import Mux
-from mcdp_dp.dp_loop2 import DPLoop2
+from mcdp_dp import DPLoop2, Mux
 from mcdp_dp.dp_series_simplification import make_series
-from mcdp_posets.poset_product import PosetProduct
-from mcdp_posets.types_universe import get_types_universe
+from mcdp_posets import PosetProduct, get_types_universe
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context_functions import dpgraph_making_sure_no_reps
 from mocdp.comp.wrap import SimpleWrap

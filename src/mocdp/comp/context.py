@@ -2,7 +2,7 @@
 from mocdp import logger
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, check_isinstance
 from mcdp_dp import FunctionNode, PrimitiveDP, ResourceNode
 from mcdp_posets import NotBounded, Poset, Space
 from mocdp.comp.interfaces import NamedDP
@@ -138,6 +138,7 @@ class Context():
         return self._load_hooks(load_arg, self.load_template_hooks, TemplateForNamedDP)
 
     def load_library(self, load_arg):
+        check_isinstance(load_arg, str)
         from mcdp_library.library import MCDPLibrary
         return self._load_hooks(load_arg, self.load_library_hooks, MCDPLibrary)
 

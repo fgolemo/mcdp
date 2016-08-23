@@ -3,12 +3,13 @@ from .utils import memo_disk_cache2
 from .utils.locate_files_imp import locate_files
 from contextlib import contextmanager
 from contracts import contract
-from contracts.utils import format_obs, raise_desc, raise_wrapped
+from contracts.utils import (check_isinstance, format_obs, raise_desc,
+    raise_wrapped)
 from copy import deepcopy
 from mcdp_dp import PrimitiveDP
 from mcdp_lang import parse_ndp, parse_poset
 from mcdp_posets import Poset
-from mocdp import ATTR_LOAD_NAME, logger, ATTR_LOAD_LIBNAME
+from mocdp import ATTR_LOAD_LIBNAME, ATTR_LOAD_NAME, logger
 from mocdp.comp.context import Context, ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
@@ -234,7 +235,7 @@ class MCDPLibrary():
             try:
                 library = hook(id_library)
             except DPSemanticError as e:
-                if len(hook) == 1:
+                if len(self.load_library_hooks) == 1:
                     raise
                 errors.append(e)
                 continue
@@ -276,12 +277,16 @@ class MCDPLibrary():
     def list_values(self):
         return self._list_with_extension(MCDPLibrary.ext_values)
 
+    @contract(ext=str)
     def _list_with_extension(self, ext):
         r = []
         for x in self.file_to_contents:
+            assert isinstance(x, str), x.__repr__()
             p = '.' + ext
             if x.endswith(p):
-                r.append(x.replace(p, ''))
+                fn = x.replace(p, '')
+                assert isinstance(fn, str), (x, p, fn)
+                r.append(fn)
         res = set(r)
         return res
 
@@ -301,7 +306,8 @@ class MCDPLibrary():
                 break
         else:
             ext = os.path.splitext(basename)[1].replace('.', '')
-            available = sorted(self._list_with_extension(ext))
+            available = sorted(self._list_with_extension(ext),
+                               key=lambda x: x.lower())
 
             available = ", ".join(available)
 
@@ -312,7 +318,9 @@ class MCDPLibrary():
         found = self.file_to_contents[match]
         return found
 
+    @contract(d=str)
     def add_search_dir(self, d):
+        check_isinstance(d, str)
         self.search_dirs.append(d)
 
         if not os.path.exists(d):
@@ -325,6 +333,7 @@ class MCDPLibrary():
             raise_wrapped(DPSemanticError, e, msg, search_dirs=self.search_dirs,
                           compact=True)
 
+    @contract(d=str)
     def _add_search_dir(self, d):
         """ Adds the directory to the search directory list. """
 
@@ -344,10 +353,13 @@ class MCDPLibrary():
             for f in files_mcdp:
                 if should_ignore(f):
                     continue
+                assert isinstance(f, str)
                 self._update_file(f)
 
+    @contract(f=str)
     def _update_file(self, f):
         basename = os.path.basename(f)
+        check_isinstance(basename, str)
         # This will fail because then in pyparsing everything is unicode
         # import codecs
         # data = codecs.open(f, encoding='utf-8').read()
@@ -380,6 +392,9 @@ class MCDPLibrary():
                     raise_desc(DPSemanticError, msg,
                                path1=realpath1,
                                path2=res['realpath'])
+
+        assert isinstance(basename, str), basename
+#         print('adding %r' % basename)
         self.file_to_contents[basename] = res
 
     def write_to_model(self, name, data):

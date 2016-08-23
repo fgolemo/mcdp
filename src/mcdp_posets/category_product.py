@@ -14,23 +14,8 @@ __all__ = [
 def get_product_compact(*spaces):
     """
         S, pack, unpack = get_product_compact(S1, S2)
-    """
-#     names = set()
-#     for s in spaces:
-#         from mocdp.comp.recursive_name_labeling import get_names_used
-#         names.update(get_names_used(s))
-
-    S = _prod_make(spaces)
-
-#     S_names = set(get_names_used(S))
-#     for i, s in enumerate(spaces):
-#         print('spaces[%d] =  %s' % (i, s.__repr__()))
-#     print('S      =  %s' % S.__repr__())
-#
-#     if S_names != names:
-#         msg = 'invalid'
-#         raise_desc(ValueError, msg, spaces=spaces, S=S, names=names, S_names=S_names)
-
+    """ 
+    S = _prod_make(spaces) 
 
     def pack(*elements):
         return _prod_make_state(elements, spaces)
@@ -48,13 +33,9 @@ def get_subs(x):
         return (x,)
 
 def _prod_make(spaces):
-
     subs = ()
     for space in spaces:
         subs = subs + get_subs(space)
-#
-#         print('space: %s %s %s' % (id(space), space.__repr__(),
-#                                    getattr(space, ATTRIBUTE_NDP_RECURSIVE_NAME, '-')))
 
     if len(subs) == 1:
         return subs[0]
@@ -62,13 +43,7 @@ def _prod_make(spaces):
     if all(isinstance(x, Poset) for x in subs):
         S = PosetProduct(subs)
     else:
-        S = SpaceProduct(subs)
-#
-#
-#     for i, sub in enumerate(subs):
-#         print('name of %r = %s' % (sub, getattr(sub, ATTRIBUTE_NDP_RECURSIVE_NAME, '-')))
-
-#     print('found: %s %r' % (id(S), S.__repr__()))
+        S = SpaceProduct(subs) 
 
     return S
 

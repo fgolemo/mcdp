@@ -132,19 +132,22 @@ def eval_space_finite_poset(r, context):  # @UnusedVariable
 
 
 def eval_poset_load(r, context):
-    if isinstance(r.name, CDP.PosetName):
-        load_arg = r.name.value
+    assert isinstance(r, CDP.LoadPoset)
+
+    arg = r.load_arg
+    assert isinstance(arg, (CDP.PosetName, CDP.PosetNameWithLibrary)), r
+
+    if isinstance(arg, CDP.PosetName):
+        load_arg = arg.value
         return context.load_poset(load_arg)
-    if isinstance(r.name, CDP.PosetNameWithLibrary):
-        libname = r.name.library
-        name = r.name.name
+
+    if isinstance(arg, CDP.PosetNameWithLibrary):
+        assert isinstance(arg.library, CDP.LibraryName), r
+        assert isinstance(arg.name, CDP.PosetName), r
+
+        libname = arg.library.value
+        name = arg.name.value
 
         library = context.load_library(libname)
-
-#         try:
-#
-#         except (DPSemanticError, NotSuchLibrary) as e:
-#             msg = 'Could not load library %r.' % libname
-#             raise_wrapped(DPSemanticError, e, msg)
         return library.load_poset(name)
     raise NotImplementedError(r.name)

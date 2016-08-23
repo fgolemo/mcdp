@@ -11,11 +11,12 @@ def ieee_fonts_zoom3(pylab):
     # See http://matplotlib.sourceforge.net/users/customizing.html#matplotlibrc-sample
     z = 3
     params = {
-            'text.usetex': True,
-          'axes.labelsize': 8 * z,
+#             'text.usetex': True,
+          'axes.labelsize': 10 * z,
 #           'text.fontsize': 8,
-          'font.size': 8 * z,
-          'legend.fontsize': 8 * z,
+#           'font.size': 12 * z,
+          'legend.fontsize': 7 * z,
+          
           'lines.markersize': 3 * z,
           'lines.markeredgewidth': 0.5 * z,
 
@@ -32,7 +33,7 @@ def ieee_fonts_zoom3(pylab):
           'legend.columnspacing': 1,
           'legend.borderaxespad': 0.1,
           'errorbar.capsize' : 3 * z,
-        'xtick.labelsize': 6 * z,
+        'xtick.labelsize': 8 * z,
         'xtick.major.size'     : 6 * z,  # major tick size in points
         'xtick.minor.size'     : 4 * z,  # minor tick size in points
         'xtick.major.width'    : 0.5 * z,  # major tick width in points
@@ -40,18 +41,14 @@ def ieee_fonts_zoom3(pylab):
         'xtick.major.pad'      : 4 * z,  # distance to major tick label in points
         'xtick.minor.pad'      : 4 * z,
 
-          'ytick.labelsize': 6 * z,
+          'ytick.labelsize': 8 * z,
         'ytick.major.size'     : 4 * z,  # major tick size in points
         'ytick.minor.size'     : 2 * z,  # minor tick size in points
         'ytick.major.width'    : 0.5 * z,  # major tick width in points
         'ytick.minor.width'    : 0.5 * z,  # minor tick width in points
         'ytick.major.pad'      : 4 * z,  # distance to major tick label in points
         'ytick.minor.pad'      : 4 * z,
-
-#          'font.family': 'Times New Roman',
-#          'font.serif': ['Times New Roman', 'Times'],
-#          'font.size': 8
-    #      'text.usetex': True
+ 
     }
     pylab.rcParams.update(params)
 
@@ -61,4 +58,5 @@ def ieee_fonts_zoom3(pylab):
                  'serif': ['Times', 'Times New Roman', 
                            'Bitstream Vera Serif', 
                            'Palatino'],
-                  'size': 12.0})
+#                   'size': 16.0
+                  })
