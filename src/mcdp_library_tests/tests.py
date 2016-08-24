@@ -184,6 +184,7 @@ def mcdplib_test_setup_source_mcdp(context, libname):
 #             continue
 
         source = f['data']
+        filename = f['realpath']
 
         if gives_syntax_error(source):
             print('Skipping because syntax error')
@@ -196,7 +197,7 @@ def mcdplib_test_setup_source_mcdp(context, libname):
             c = context.child(basename)
     
             for ftest in registered:
-                c.comp(ftest, basename, source)
+                c.comp(ftest, filename, source)
 
 def get_keywords(source):
     line1 = source.split('\n')[0]

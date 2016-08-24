@@ -3,7 +3,7 @@ from .utils import parse_wrap_check
 from mcdp_lang.syntax import Syntax
 from comptests.registrar import comptest
 from mcdp_lang import parse_ndp
-from mcdp_posets.uppersets import UpperSets
+from mcdp_posets import UpperSets
 
 @comptest
 def check_coproducts0():

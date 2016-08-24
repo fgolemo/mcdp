@@ -1,5 +1,6 @@
 from mcdp_lang.parts import CDPLanguage
-from pyparsing import Literal, Optional, Suppress
+from pyparsing import Literal, Optional, Suppress, Keyword
+from contracts.utils import check_isinstance
 
 CDP = CDPLanguage
 
@@ -10,6 +11,19 @@ def sp(a, b):
 
 def spk(a, part):
     """ Simple keyword literal """
+    from mcdp_lang.parse_actions import spa
+    spa(a, lambda t: part(t[0]))
+    return a
+
+def keyword(a, part):
+    """ 
+        a must be a string
+        
+        we create Keyword(a)
+    """
+    check_isinstance(a, str)
+
+    a = Keyword(a)
     from mcdp_lang.parse_actions import spa
     spa(a, lambda t: part(t[0]))
     return a

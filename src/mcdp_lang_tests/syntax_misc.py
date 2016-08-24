@@ -323,6 +323,14 @@ def check_lang52():  # TODO: rename
     }
     """)
 
+
+#     parse_wrap(Syntax.LOAD, '`')
+#     parse_wrap(Syntax.posetname, 'P')
+#     print Syntax.load_poset
+#     parse_wrap(Syntax.load_poset, '`P')
+#     parse_wrap(Syntax.space_operand, '`P')
+#     parse_wrap(Syntax.fun_statement, "provides x [`P]")
+
     ndp = l.parse_ndp("""
         mcdp {
             provides x [`P]

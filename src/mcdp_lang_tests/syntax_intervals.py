@@ -11,7 +11,7 @@ def check_lang_interval1():
 @comptest
 def check_lang_interval2():
     one = 'Interval(0.0 [], 1.0 [])'
-    rgb = "x".join([one] * 3)
+    rgb = " x ".join([one] * 3)
     print parse_poset(rgb)
 
 @comptest

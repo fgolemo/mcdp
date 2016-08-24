@@ -1,6 +1,6 @@
 from .parts import CDPLanguage
 from .syntax import SyntaxBasics, SyntaxIdentifiers
-from .syntax_utils import L, O, S, SCOMMA, SLPAR, SRPAR, sp
+from .syntax_utils import L, O, S, SCOMMA, SLPAR, SRPAR, sp,keyword
 from .utils_lists import make_list
 from pyparsing import (Combine, Optional, Word, ZeroOrMore, alphanums, alphas,
     oneOf, quotedString)
@@ -24,7 +24,7 @@ def get_code_spec_expr():
 
 
 class SyntaxCodeSpec():
-    CODE = sp(L('code'), lambda t: CDP.CodeKeyword(t[0]))
+    CODE = keyword('code', CDP.CodeKeyword)
 
     # Code specs
     # code my.module(a=1, b=2)

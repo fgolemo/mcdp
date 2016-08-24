@@ -3,6 +3,8 @@ from .utils2 import eval_rvalue_as_constant
 from comptests.registrar import comptest
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
+from mocdp.exceptions import DPSyntaxError
+from mcdp_lang_tests.utils import TestFailed
 
 CDP = CDPLanguage
 
@@ -39,8 +41,22 @@ def check_syntax_load4():
 
 @comptest
 def check_syntax_load5():
-    pass
+
+    parse_wrap_check("code mcdp_posets.Int()", Syntax.code_spec)
+    parse_wrap_check("code mcdp_posets.Int()", Syntax.space)
 
 @comptest
 def check_syntax_load6():
+    parse_wrap_check("$", Syntax.space)
+    parse_wrap_check("Top $", Syntax.constant_value)
+    try:
+        parse_wrap_check("Top$", Syntax.constant_value)
+    except TestFailed:
+        pass
+
+    parse_wrap_check("approx(cost,0%,1$,Top $) mcdp {} ", Syntax.ndpt_approx)
+    try:
+        parse_wrap_check("approx(cost,0%,1$,Top$) mcdp {} ", Syntax.ndpt_approx)
+    except TestFailed:
+        pass
     pass

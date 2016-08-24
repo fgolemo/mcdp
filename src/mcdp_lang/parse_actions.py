@@ -57,6 +57,7 @@ def wheredecorator(b):
 def spa(x, b):
     @parse_action
     def p(tokens, loc, s):
+#         print('pasing %r %r %r ' % (tokens, loc, s))
         bb = wheredecorator(b)
         res = bb(tokens, loc, s)
         # if we are here, then it means the parse was succesful
