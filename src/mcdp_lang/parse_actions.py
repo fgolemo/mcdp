@@ -8,7 +8,7 @@ from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
-    MCDPExceptionWithWhere, mcdp_dev_warning)
+    MCDPExceptionWithWhere, mcdp_dev_warning, do_extra_checks)
 from pyparsing import ParseException, ParseFatalException
 
 CDP = CDPLanguage
@@ -55,20 +55,20 @@ def wheredecorator(b):
     return bb
 
 def spa(x, b):
+    x2 = x.copy()
+    x2.setParseAction()
+    bb = wheredecorator(b)
     @parse_action
     def p(tokens, loc, s):
-#         print('pasing %r %r %r ' % (tokens, loc, s))
-        bb = wheredecorator(b)
+        # print('parsing %r %r %r ' % (tokens, loc, s))
         res = bb(tokens, loc, s)
         # if we are here, then it means the parse was succesful
-        # we try again
+        # we try again to get loc_end
 
-        # not this, it would be recursive
-        # x.parseString(s[loc:])
+        # Do not this, it would be recursive
+        #   x.parseString(s[loc:])
+        # Rather, use a copy of x, x2, created once above
 
-        x2 = x.copy()
-        x2.setParseAction()
-        # a = x2.parseString(s[loc:])
         loc_end, tokens = x2._parse(s[loc:], 0)
         character_end = loc + loc_end
 
@@ -76,13 +76,14 @@ def spa(x, b):
             w2 = Where(s, character_end=character_end, character=loc)
             res = get_copy_with_where(res, where=w2)
 
-        if not isinstance(res, (float, int, str)):
-            if res.where is None:
-                msg = 'Found element with no where'
-                raise_desc(ValueError, msg, res=res)
+        if do_extra_checks():
+            if not isinstance(res, (float, int, str)):
+                if res.where is None:
+                    msg = 'Found element with no where'
+                    raise_desc(ValueError, msg, res=res)
 
-        if hasattr(res, 'where'):
-            assert res.where.character_end is not None, (res, isnamedtupleinstance(res))
+            if hasattr(res, 'where'):
+                assert res.where.character_end is not None, (res, isnamedtupleinstance(res))
 
         return res
     x.setParseAction(p)
