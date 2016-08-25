@@ -12,6 +12,8 @@ import os
 import yaml
 from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
 import tempfile
+from contextlib import contextmanager
+import time
 
 __all__ = [
     'define_tests_for_mcdplibs',
@@ -272,17 +274,28 @@ def mcdplib_test_setup_primitivedps(context, libname):
         for ftest in registered:
             c.comp(ftest, id_dp, ndp)
 
+@contextmanager
+def timeit(desc):
+    t0 = time.clock()
+    yield
+    t1 = time.clock()
+    delta = t1 - t0
+    print('timeit %s: %.2f s' % (desc, delta))
+
 def _load_primitivedp(libname, model_name):
     l = get_test_library(libname)
-    return l.load_primitivedp(model_name)
+    with timeit(model_name):
+        return l.load_primitivedp(model_name)
 
 def _load_poset(libname, model_name):
     l = get_test_library(libname)
-    return l.load_poset(model_name)
+    with timeit(model_name):
+        return l.load_poset(model_name)
 
 def _load_ndp(libname, model_name):
     l = get_test_library(libname)
-    return l.load_ndp(model_name)
+    with timeit(model_name):
+        return l.load_ndp(model_name)
     
 #
 # @contextmanager
