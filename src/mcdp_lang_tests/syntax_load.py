@@ -3,7 +3,6 @@ from .utils2 import eval_rvalue_as_constant
 from comptests.registrar import comptest
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
-from mocdp.exceptions import DPSyntaxError
 from mcdp_lang_tests.utils import TestFailed
 
 CDP = CDPLanguage
