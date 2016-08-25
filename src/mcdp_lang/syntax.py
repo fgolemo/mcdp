@@ -443,7 +443,7 @@ class Syntax():
 
     # upperclosure <set>
     # ↑ <set>
-    upper_set_from_collection_keyword = spk(K('upperclosure') | K('↑'),
+    upper_set_from_collection_keyword = spk(K('upperclosure') | L('↑'),
                                            CDP.UpperSetFromCollectionKeyword)
     upper_set_from_collection = sp(upper_set_from_collection_keyword + collection_of_constants,
                                    lambda t: CDP.UpperSetFromCollection(t[0], t[1]))
@@ -454,15 +454,17 @@ class Syntax():
     space_custom_value1 = sp(space + L(":") + (short_identifiers ^ L('*')),
                           lambda t: CDP.SpaceCustomValue(t[0], t[1], t[2]))
 
-    constant_value << (valuewithunit
-                       ^ variable_ref
-                       ^ collection_of_constants
-                       ^ tuple_of_constants
-                       ^ nat_constant
-                       ^ int_constant
-                       ^ upper_set_from_collection
-                       ^ space_custom_value1
-                       ^ solve_model)
+    constant_value << (
+                         collection_of_constants
+                       | tuple_of_constants
+                       | nat_constant
+                       | int_constant
+                       | upper_set_from_collection
+                       | solve_model
+                       | space_custom_value1
+                       | valuewithunit
+                       | variable_ref
+                       )
 
     rvalue_resource_simple = sp(dpname + DOT - rname,
                                 lambda t: CDP.Resource(s=t[2], keyword=t[1], dp=t[0]))
@@ -517,12 +519,12 @@ class Syntax():
 
     # approx(<rvalue>, 5g)
     APPROXRES = keyword('approx', CDP.ApproxKeyword)
-    rvalue_approx_step = sp(APPROXRES + SLPAR + rvalue + SCOMMA + constant_value + SRPAR,
+    rvalue_approx_step = sp(APPROXRES - SLPAR + rvalue + SCOMMA + constant_value + SRPAR,
                             lambda t: CDP.ApproxStepRes(t[0], t[1], t[2]))
 
     # approxu(<rvalue>, 5g)
     APPROXU = keyword('approxu', CDP.ApproxUKeyword)
-    rvalue_approx_u = sp(APPROXU + SLPAR + rvalue + SCOMMA + constant_value + SRPAR,
+    rvalue_approx_u = sp(APPROXU - SLPAR + rvalue + SCOMMA + constant_value + SRPAR,
                             lambda t: CDP.ApproxURes(t[0], t[1], t[2]))
 
     # take(provided a, sub)
@@ -599,7 +601,7 @@ class Syntax():
 
     fvalue_function = fvalue_simple ^ fvalue_fancy
 
-    fvalue_maketuple = sp(OPEN_BRACE + fvalue + ZeroOrMore(COMMA + fvalue) + CLOSE_BRACE,
+    fvalue_maketuple = sp(OPEN_BRACE - fvalue + ZeroOrMore(COMMA + fvalue) + CLOSE_BRACE,
                        lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1]), t[-1]))
 
 
