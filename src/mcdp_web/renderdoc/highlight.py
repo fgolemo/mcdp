@@ -246,6 +246,8 @@ def highlight_mcdp_code(library, frag, realpath, raise_errors=False):
                 else:
                     source_code = get_source_code(tag)
 
+                # we are not using it
+                _realpath = realpath
                 html = ast_to_html(source_code, parse_expr=parse_expr,
                                                 complete_document=False,
                                                 add_line_gutter=False,
@@ -379,7 +381,7 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath):
     def func1(tag):
         source_code = tag.string
         source_code = str(source_code)  # unicode
-        ndp = library.parse_ndp(source_code)
+        ndp = library.parse_ndp(source_code, realpath=realpath)
         yourname = ''
 
         direction = str(tag.get('direction', default_direction))
@@ -393,7 +395,7 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath):
     def func2(tag):
         source_code = tag.string
         source_code = str(source_code)  # unicode
-        ndp = library.parse_ndp(source_code)
+        ndp = library.parse_ndp(source_code, realpath=realpath)
         # note
         yourname = ''
         direction = str(tag.get('direction', default_direction))
@@ -404,7 +406,7 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath):
     def func2b(tag):
         source_code = tag.string
         source_code = str(source_code)  # unicode
-        ndp = library.parse_ndp(source_code)
+        ndp = library.parse_ndp(source_code, realpath=realpath)
         # note
         yourname = None
         from mcdp_library.library import ATTR_LOAD_NAME
@@ -420,7 +422,7 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath):
     def func3(tag):  # ndp_graph_enclosed
         source_code = tag.string
         source_code = str(source_code)  # unicode
-        ndp = library.parse_ndp(source_code)
+        ndp = library.parse_ndp(source_code, realpath=realpath)
         yourname = ''
 
         direction = str(tag.get('direction', default_direction))
@@ -433,7 +435,7 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath):
     def func4(tag):
         source_code = tag.string
         source_code = str(source_code)  # unicode
-        ndp = library.parse_ndp(source_code)
+        ndp = library.parse_ndp(source_code, realpath=realpath)
 
         yourname = ''
 
@@ -447,7 +449,7 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath):
     def func5(tag):  # ndp_graph_enclosed
         source_code = tag.string
         source_code = str(source_code)  # unicode
-        template = library.parse_template(source_code)
+        template = library.parse_template(source_code, realpath=realpath)
         yourname = ''
         direction = str(tag.get('direction', default_direction))
         enclosed = bool_from_string(tag.get('enclosed', 'True'))

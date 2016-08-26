@@ -11,10 +11,10 @@ from mcdp_lang.eval_math import PlusNat
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import assert_semantic_error
-from mcdp_posets import Map, Nat, NotEqual, PosetProduct, UpperSets
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
+from mcdp_posets import (Map, Nat, NotEqual, PosetProduct, UpperSets,
+    poset_minima)
+from mcdp_report.drawing import plot_upset_R2
 from mcdp_report.generic_report_utils import generic_report
-from mocdp.drawing import plot_upset_R2
 from mocdp.exceptions import mcdp_dev_warning
 from nose.tools import assert_equal
 from reprep import Report

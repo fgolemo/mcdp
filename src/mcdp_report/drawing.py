@@ -1,6 +1,6 @@
 from contracts import contract
 from mcdp_posets.rcomp import finfo
-from mcdp_posets.uppersets import UpperSet
+from mcdp_posets import UpperSet
 from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
 

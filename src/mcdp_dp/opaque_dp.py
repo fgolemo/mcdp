@@ -1,7 +1,7 @@
-from mcdp_dp.primitive import PrimitiveDP
-from contracts.utils import indent, check_isinstance
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
+from .primitive import PrimitiveDP
 from contracts import contract
+from contracts.utils import check_isinstance, indent
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 
 __all__ = [
     'OpaqueDP',
