@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .eval_codespec_imp_utils import InstantiationException, instantiate_spec
 from .parse_actions import add_where_information
 from .parts import CDPLanguage

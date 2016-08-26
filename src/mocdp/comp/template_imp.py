@@ -1,7 +1,5 @@
 from mcdp_dp import PrimitiveDP
-from mcdp_posets import UpperSet
-from mcdp_posets.finite_collection_as_space import FiniteCollectionAsSpace
-from mcdp_posets.uppersets import LowerSet
+from mcdp_posets import FiniteCollectionAsSpace, LowerSet, UpperSet
 
 __all__ = [
     'Dummy',

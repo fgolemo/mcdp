@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
 from .eval_constant_imp import NotConstant
 from .eval_resources_imp import eval_rvalue
+from .helpers import get_valuewithunits_as_resource
 from .misc_math import inv_constant
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_dp import GenericUnary, ProductN, SumN, SumNNat, WrapAMap
-from mcdp_dp.dp_sum import sum_dimensionality_works
-from mcdp_maps import MultNat, PlusNat, PlusValueMap
-from mcdp_maps.sum_n_intlike import SumNInt
+from mcdp_dp import (GenericUnary, ProductN, SumN, SumNNat, WrapAMap,
+    sum_dimensionality_works)
+from mcdp_maps import MultNat, PlusNat, PlusValueMap, SumNInt
 from mcdp_posets import (Int, Nat, RcompUnits, Space, get_types_universe,
     mult_table, mult_table_seq)
 from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
-from mcdp_lang.helpers import get_valuewithunits_as_resource
 
 CDP = CDPLanguage
 
@@ -50,7 +49,6 @@ def eval_MultN_as_constant(x, context):
 def eval_rvalue_MultN(x, context):
     res = eval_MultN(x, context, wants_constant=False)
     if isinstance(res, ValueWithUnits):
-        from .helpers import get_valuewithunits_as_resource
         return get_valuewithunits_as_resource(res, context)
     else:
         return res
@@ -92,7 +90,6 @@ def eval_rvalue_divide(op, context):
 def eval_rvalue_PlusN(x, context):
     res = eval_PlusN(x, context, wants_constant=False)
     if isinstance(res, ValueWithUnits):
-        from .helpers import get_valuewithunits_as_resource
         return get_valuewithunits_as_resource(res, context)
     else:
         return res

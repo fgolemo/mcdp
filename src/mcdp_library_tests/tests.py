@@ -1,19 +1,18 @@
-
+# -*- coding: utf-8 -*-
 from collections import namedtuple
+from contextlib import contextmanager
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_cli.solve_meat import solve_main
-from mcdp_library import MCDPLibrary
-from mcdp_library.libraries import Librarian
+from mcdp_library import Librarian, MCDPLibrary
 from mcdp_library.utils import dir_from_package_name
 from mcdp_tests.generation import for_all_source_mcdp
 from mocdp import logger
 from mocdp.exceptions import DPSemanticError, mcdp_dev_warning
-import os
-import yaml
 from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
+import os
 import tempfile
-from contextlib import contextmanager
 import time
+import yaml
 
 __all__ = [
     'define_tests_for_mcdplibs',
@@ -86,21 +85,14 @@ def define_tests_for_mcdplibs(context):
         
         c2.child('ndp').comp_dynamic(mcdplib_test_setup_nameddps, libname=libname)
         c2.child('poset').comp_dynamic(mcdplib_test_setup_posets, libname=libname)
-        c2.child('primitivedps').comp_dynamic(mcdplib_test_setup_primitivedps, libname=libname)
+        c2.child('primitivedp').comp_dynamic(mcdplib_test_setup_primitivedps, libname=libname)
         c2.child('source_mcdp').comp_dynamic(mcdplib_test_setup_source_mcdp, libname=libname)
+        c2.child('value').comp_dynamic(mcdplib_test_setup_value, libname=libname)
 
         path = librarian.libraries[libname]['path']
         makefile = os.path.join(path, 'Makefile')
         if os.path.exists(makefile):
             c2.comp(mcdplib_run_make, mcdplib=path)
-#
-# def load_which(which):
-#     assert isinstance(which, tuple) and len(which) == 2
-#     bigpath, libname = which
-#     librarian = Librarian()
-#     librarian.find_libraries(bigpath)
-#     library = librarian.get_library(libname)
-#     return library
 
 
 def mcdplib_run_make(mcdplib):
@@ -226,6 +218,27 @@ def mcdplib_assert_semantic_error_fn(libname, model_name):
         msg = "Expected an exception, instead succesfull instantiation."
         raise_desc(Exception, msg, model_name=model_name, res=res.repr_long())
 
+def mcdplib_test_setup_value(context, libname):
+    from mcdp_tests import load_tests_modules
+
+    l = get_test_library(libname)
+
+    values = l.list_values()
+
+    from mcdp_tests.generation import for_all_values
+    load_tests_modules()
+    registered = for_all_values.registered
+
+    print('Found values: %r' % values)
+    print('Found registered: %r' % registered)
+
+    for id_value in values:
+        c = context.child(id_value)
+
+        ndp = c.comp(_load_value, libname, id_value, job_id='load')
+
+        for ftest in registered:
+            c.comp(ftest, id_value, ndp)
 
 def mcdplib_test_setup_posets(context, libname):
     """ 
@@ -286,6 +299,11 @@ def _load_primitivedp(libname, model_name):
     l = get_test_library(libname)
     with timeit(model_name):
         return l.load_primitivedp(model_name)
+
+def _load_value(libname, name):
+    l = get_test_library(libname)
+    vu = l.load_constant(name)
+    return vu
 
 def _load_poset(libname, model_name):
     l = get_test_library(libname)

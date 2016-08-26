@@ -1,5 +1,6 @@
 from contextlib import contextmanager
 from contracts import all_disabled
+import getpass
 import sys
 
 
@@ -58,6 +59,13 @@ class DPSemanticErrorNotConnected(DPSemanticError):
     pass
 
 
+class DPUserAssertion(MCDPExceptionWithWhere):
+    """ 
+        Assertion thrown by user using assert_leq, etc. 
+    """
+    pass
+
+
 @contextmanager
 def extend_with_filename(realpath):
     try:
@@ -80,7 +88,6 @@ def _get_where_with_filename(e, filename):
         where = where.with_filename(filename)
     return where
 
-import getpass
 user = getpass.getuser()
 # class _storage:
 #     first = True

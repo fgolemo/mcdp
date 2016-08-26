@@ -1,4 +1,5 @@
-from mcdp_lang.namedtuple_tricks import namedtuplewhere
+# -*- coding: utf-8 -*-
+from .namedtuple_tricks import namedtuplewhere
 from contracts.utils import raise_desc, raise_wrapped
 from contracts.interface import Where
 from mocdp.exceptions import DPInternalError

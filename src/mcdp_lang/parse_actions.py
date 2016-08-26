@@ -48,7 +48,7 @@ def wheredecorator(b):
             raise_wrapped(DPInternalError, e, "Error while parsing.",
                           where=where.__str__(), tokens=tokens)
 
-        if isnamedtupleinstance(res) and res.where is None:  # or isinstance(res, ValueWithUnits):
+        if isnamedtupleinstance(res) and res.where is None:
             res = get_copy_with_where(res, where=where)
 
         return res

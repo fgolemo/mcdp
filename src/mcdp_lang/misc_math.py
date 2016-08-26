@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_dp.dp_sum import sum_units
+from mcdp_dp import sum_units
 from mcdp_posets import Nat, RcompUnits, mult_table
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPSemanticError

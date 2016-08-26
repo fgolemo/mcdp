@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from .eval_constant_asserts import (eval_assert_empty, eval_assert_equal,
+    eval_assert_geq, eval_assert_gt, eval_assert_leq, eval_assert_lt,
+    eval_assert_nonempty)
 from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
@@ -7,8 +10,7 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
     NotBelongs, NotLeq, PosetProduct, Rcomp, Space, UpperSet, UpperSets,
-    get_types_universe)
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
+    get_types_universe, poset_minima)
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 
@@ -157,6 +159,20 @@ def eval_constant(op, context):
             res = dp.solve(f)
             UR = UpperSets(dp.get_res_space())
             return ValueWithUnits(res, UR)
+
+        cases = {
+            CDP.AssertEqual: eval_assert_equal,
+            CDP.AssertLEQ: eval_assert_leq,
+            CDP.AssertGEQ: eval_assert_geq,
+            CDP.AssertLT: eval_assert_lt,
+            CDP.AssertGT: eval_assert_gt,
+            CDP.AssertNonempty: eval_assert_nonempty,
+            CDP.AssertEmpty: eval_assert_empty,
+        }
+        
+        for klass, hook in cases.items():
+            if isinstance(op, klass):
+                return hook(op, context)
 
         msg = 'eval_constant(): Cannot evaluate this as constant.'
         op = recursive_print(op)

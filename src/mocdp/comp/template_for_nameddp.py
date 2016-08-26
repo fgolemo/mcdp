@@ -1,9 +1,9 @@
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from contracts.utils import check_isinstance, raise_desc, raise_wrapped
 from mcdp_posets import NotLeq, get_types_universe
-from mocdp.exceptions import DPSemanticError
-from mocdp.comp.interfaces import NamedDP
 from mocdp import ATTR_LOAD_LIBNAME
+from mocdp.comp.interfaces import NamedDP
+from mocdp.exceptions import DPSemanticError
 
 __all__ = [
     'TemplateForNamedDP'

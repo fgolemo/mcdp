@@ -7,7 +7,7 @@ from contracts.utils import (format_dict_long, format_list_long, raise_desc,
 from mcdp_dp import Mux
 from mcdp_posets import NotEqual, PosetProduct
 from mocdp import ATTR_LOAD_NAME
-from mocdp.comp.context import is_fun_node_name, Context
+from mocdp.comp.context import Context, is_fun_node_name
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPSemanticError
 
@@ -29,8 +29,6 @@ class CompositeNamedDP(NamedDP):
     """
 
     def __init__(self, context):
-        from mocdp.comp.context import Context
-
         self.context = Context()
         self.context.names = context.names.copy()
         self.context.connections = list(context.connections)
@@ -58,7 +56,6 @@ class CompositeNamedDP(NamedDP):
 
     @staticmethod
     def from_parts(name2ndp, connections, fnames, rnames):
-        from mocdp.comp.context import Context
         c = Context()
         c.names = name2ndp
         c.connections = connections
@@ -267,8 +264,6 @@ def cndp_iterate_res_nodes(cndp):
 @contract(cndp=CompositeNamedDP, returns='list(tuple(str, $NamedDP))')
 def cndp_iterate_fun_nodes(cndp):
     res = []
-    from mocdp.comp.context import is_fun_node_name
-
     for name2, ndp2 in cndp.get_name2ndp().items():
         isitr, fname = is_fun_node_name(name2)
         if isitr:
@@ -282,7 +277,7 @@ def cndp_get_name_ndp_notfunres(cndp):
     """ Yields a sequence of (name, ndp) excluding 
         the fake ones that represent function or resource. """
     assert isinstance(cndp, CompositeNamedDP)
-    from mocdp.comp.context import is_res_node_name, is_fun_node_name
+    from mocdp.comp.context import is_res_node_name
 
     res = []
     for name2, ndp2 in cndp.get_name2ndp().items():

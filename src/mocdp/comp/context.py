@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-from mocdp import logger
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import raise_desc, check_isinstance
+from contracts.utils import check_isinstance, raise_desc
 from mcdp_dp import FunctionNode, PrimitiveDP, ResourceNode
 from mcdp_posets import NotBounded, Poset, Space
+from mcdp_posets import FinitePoset
+from mcdp_posets import PosetProductWithLabels
+from mocdp import logger
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.comp.wrap import dpwrap
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
-from mcdp_posets.poset_product_with_labels import PosetProductWithLabels
-from mcdp_posets.finite_poset import FinitePoset
 _ = logger
 
 __all__ = [

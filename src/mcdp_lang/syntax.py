@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 from .helpers import square
-from .parse_actions import (divide_parse_action,
-    funshortcut1m, mult_inv_parse_action, mult_parse_action, parse_pint_unit,
+from .parse_actions import (divide_parse_action, funshortcut1m,
+    mult_inv_parse_action, mult_parse_action, parse_pint_unit,
     plus_inv_parse_action, plus_parse_action, resshortcut1m,
     space_product_parse_action)
 from .parts import CDPLanguage
-from .syntax_utils import COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, sp
-from mcdp_lang.syntax_utils import spk
-from mcdp_lang.utils_lists import make_list
+from .syntax_utils import COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, sp, spk
+from .utils_lists import make_list
 from mocdp.exceptions import mcdp_dev_warning
 from pyparsing import (
     CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
@@ -97,6 +96,13 @@ class SyntaxIdentifiers():
         'import',
         'from',
         'upperclosure',
+        'assert_equal',
+        'assert_leq',
+        'assert_geq',
+        'assert_lt',
+        'assert_gt',
+        'assert_empty',
+        'assert_nonempty',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -454,6 +460,47 @@ class Syntax():
     space_custom_value1 = sp(space + L(":") + (short_identifiers ^ L('*')),
                           lambda t: CDP.SpaceCustomValue(t[0], t[1], t[2]))
 
+
+    # assert_equal(v1, v2)
+    # assert_leq(v1, v2)
+    # assert_geq(v1, v2)
+    # assert_lt(v1, v2)
+    # assert_gt(v1, v2)
+    # assert_nonempty(v1, v2)
+    # assert_empty(v1, v2)
+#     AssertEqual = namedtuplewhere('AssertEqual', 'keyword v1 v2')
+#     AssertLEQ = namedtuplewhere('AssertLEQ', 'v1 v2')
+#     AssertGEQ = namedtuplewhere('AssertGEQ', 'v1 v2')
+#     AssertLT = namedtuplewhere('AssertLT', 'v1 v2')
+#     AssertGT = namedtuplewhere('AssertGT', 'v1 v2')
+#     AssertNonempty = namedtuplewhere('AssertNonempty', 'v1 v2')
+    K = Keyword
+    ASSERT_EQUAL = spk(K('assert_equal'), CDP.AssertEqualKeyword)
+    ASSERT_LEQ = spk(K('assert_leq'), CDP.AssertLEQKeyword)
+    ASSERT_GEQ = spk(K('assert_geq'), CDP.AssertGEQKeyword)
+    ASSERT_LT = spk(K('assert_lt'), CDP.AssertLTKeyword)
+    ASSERT_GT = spk(K('assert_gt'), CDP.AssertGTKeyword)
+    ASSERT_NONEMPTY = spk(K('assert_nonempty'), CDP.AssertNonemptyKeyword)
+    ASSERT_EMPTY = spk(K('assert_empty'), CDP.AssertEmptyKeyword)
+
+    assert_equal = sp(ASSERT_EQUAL + SLPAR + constant_value + SCOMMA + constant_value + SRPAR,
+                      lambda t: CDP.AssertEqual(keyword=t[0], v1=t[1], v2=t[2]))
+    assert_leq = sp(ASSERT_LEQ + SLPAR + constant_value + SCOMMA + constant_value + SRPAR,
+                      lambda t: CDP.AssertLEQ(keyword=t[0], v1=t[1], v2=t[2]))
+    assert_geq = sp(ASSERT_GEQ + SLPAR + constant_value + SCOMMA + constant_value + SRPAR,
+                      lambda t: CDP.AssertGEQ(keyword=t[0], v1=t[1], v2=t[2]))
+    assert_lt = sp(ASSERT_LT + SLPAR + constant_value + SCOMMA + constant_value + SRPAR,
+                      lambda t: CDP.AssertLT(keyword=t[0], v1=t[1], v2=t[2]))
+    assert_gt = sp(ASSERT_GT + SLPAR + constant_value + SCOMMA + constant_value + SRPAR,
+                      lambda t: CDP.AssertGT(keyword=t[0], v1=t[1], v2=t[2]))
+    assert_nonempty = sp(ASSERT_NONEMPTY + SLPAR + constant_value + SRPAR,
+                      lambda t: CDP.AssertNonempty(keyword=t[0], value=t[1]))
+    assert_empty = sp(ASSERT_EMPTY + SLPAR + constant_value + SRPAR,
+                      lambda t: CDP.AssertEmpty(keyword=t[0], value=t[1]))
+
+    asserts = (assert_equal | assert_leq | assert_leq | assert_geq
+               | assert_lt | assert_gt | assert_nonempty | assert_empty)
+
     constant_value << (valuewithunit
                        ^ variable_ref
                        ^ collection_of_constants
@@ -462,7 +509,8 @@ class Syntax():
                        ^ int_constant
                        ^ upper_set_from_collection
                        ^ space_custom_value1
-                       ^ solve_model)
+                       ^ solve_model
+                       ^ asserts)
 
     rvalue_resource_simple = sp(dpname + DOT - rname,
                                 lambda t: CDP.Resource(s=t[2], keyword=t[1], dp=t[0]))
