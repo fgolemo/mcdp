@@ -78,6 +78,7 @@ setup(name='PyMCDP_devel',
             'mcdp-plot = mcdp_cli:mcdp_plot_main',
             'mcdp-solve = mcdp_cli:mcdp_solve_main',
             'mcdp-web = mcdp_web:mcdp_web_main',
+            'mcdp-eval = mcdp_cli:mcdp_eval_main',
         ]
       }
 )

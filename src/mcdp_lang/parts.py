@@ -59,6 +59,8 @@ class CDPLanguage():
     PlusN = namedtuplewhere('PlusN', 'ops')
     MultN = namedtuplewhere('MultN', 'ops')
     Divide = namedtuplewhere('Divide', 'ops')
+    # all constants
+    ConstantMinus = namedtuplewhere('ConstantMinus', 'ops')
     Coproduct = namedtuplewhere('Coproduct', 'ops')
 
     # elements: all strings, coproducts
@@ -324,4 +326,4 @@ class CDPLanguage():
     AssertEmpty = namedtuplewhere('AssertEmpty', 'keyword value')
 
 
-
+    ConstantMinusConstant = namedtuplewhere('ConstantMinusConstant', 'c1 c2')

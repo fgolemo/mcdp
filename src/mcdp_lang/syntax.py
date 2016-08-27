@@ -14,6 +14,7 @@ from pyparsing import (
     alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
     sglQuotedString)
 import math
+from mcdp_lang.parse_actions import constant_minus_parse_action
 
 
 ParserElement.enablePackrat()
@@ -501,7 +502,10 @@ class Syntax():
     asserts = (assert_equal | assert_leq | assert_leq | assert_geq
                | assert_lt | assert_gt | assert_nonempty | assert_empty)
 
-    constant_value << (valuewithunit
+    constant_minus_constant = sp(constant_value + L('-') + constant_value,
+                                 lambda t: CDP.ConstantMinusConstant(t[0], t[1], t[2]))
+
+    constant_value_op = (valuewithunit
                        ^ variable_ref
                        ^ collection_of_constants
                        ^ tuple_of_constants
@@ -511,6 +515,12 @@ class Syntax():
                        ^ space_custom_value1
                        ^ solve_model
                        ^ asserts)
+
+    constant_value << operatorPrecedence(constant_value_op, [
+        ('-', 2, opAssoc.LEFT, constant_minus_parse_action),
+    ])
+
+
 
     rvalue_resource_simple = sp(dpname + DOT - rname,
                                 lambda t: CDP.Resource(s=t[2], keyword=t[1], dp=t[0]))

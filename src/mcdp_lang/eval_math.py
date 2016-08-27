@@ -10,8 +10,9 @@ from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (GenericUnary, ProductN, SumN, SumNNat, WrapAMap,
     sum_dimensionality_works)
 from mcdp_maps import MultNat, PlusNat, PlusValueMap, SumNInt
-from mcdp_posets import (Int, Nat, RcompUnits, Space, get_types_universe,
-    mult_table, mult_table_seq)
+from mcdp_posets import (Int, Nat, RcompUnits, Space,
+    express_value_in_isomorphic_space, get_types_universe, mult_table,
+    mult_table_seq)
 from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 
@@ -30,6 +31,30 @@ def eval_constant_divide(op, context):
     from .misc_math import mult_constantsN
     return mult_constantsN(factors)
 
+
+def eval_constant_minus(op, context):
+    from .eval_constant_imp import eval_constant
+
+    ops = get_odd_ops(unwrap_list(op.ops))
+    constants = [eval_constant(_, context) for _ in ops]
+
+    R0 = constants[0].unit
+    if not isinstance(R0, RcompUnits):
+        msg = 'Cannot evaluate "-" on this space.'
+        raise_desc(DPSemanticError, msg, R0=R0)
+
+    # convert each factor to R0
+    v0 = constants[0].value
+    for c in constants[1:]:
+        vi = express_value_in_isomorphic_space(c.unit, c.value, R0)
+
+        if v0 < vi:
+            msg = 'Underflow: %s - %s gives a negative number' % (c.unit.format(v0), c.unit.format(vi))
+            raise_desc(DPSemanticError, msg)
+
+        v0 = v0 - vi
+
+    return ValueWithUnits(unit=R0, value=v0)
 
 @contract(unit1=Space, unit2=Space)
 def convert_vu(value, unit1, unit2, context):  # @UnusedVariable

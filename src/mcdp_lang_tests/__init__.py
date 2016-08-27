@@ -56,3 +56,5 @@ from .syntax_approximation import *
 
 from .syntax_asserts import *
 
+from .math import *
+

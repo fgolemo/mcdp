@@ -14,6 +14,7 @@ from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 
+
 CDP = CDPLanguage
 
 class NotConstant(DPSemanticError):
@@ -122,14 +123,7 @@ def eval_constant(op, context):
         if isinstance(op, CDP.GenericNonlinearity):
             raise_desc(NotConstant, 'GenericNonlinearity is not constant', op=op)
 
-        if isinstance(op, CDP.PlusN):
-            from mcdp_lang.eval_math import eval_PlusN_as_constant
-            return eval_PlusN_as_constant(op, context)
-
-        if isinstance(op, CDP.MultN):
-            from mcdp_lang.eval_math import eval_MultN_as_constant
-            return eval_MultN_as_constant(op, context)
-
+     
         if isinstance(op, CDP.MakeTuple):
             ops = get_odd_ops(unwrap_list(op.ops))
             constants = [eval_constant(_, context) for _ in ops]
@@ -160,6 +154,10 @@ def eval_constant(op, context):
             UR = UpperSets(dp.get_res_space())
             return ValueWithUnits(res, UR)
 
+        from mcdp_lang.eval_math import eval_constant_minus
+        from mcdp_lang.eval_math import eval_PlusN_as_constant
+        from mcdp_lang.eval_math import eval_MultN_as_constant
+
         cases = {
             CDP.AssertEqual: eval_assert_equal,
             CDP.AssertLEQ: eval_assert_leq,
@@ -168,6 +166,9 @@ def eval_constant(op, context):
             CDP.AssertGT: eval_assert_gt,
             CDP.AssertNonempty: eval_assert_nonempty,
             CDP.AssertEmpty: eval_assert_empty,
+            CDP.ConstantMinus: eval_constant_minus,
+            CDP.PlusN: eval_PlusN_as_constant,
+            CDP.MultN: eval_MultN_as_constant,
         }
         
         for klass, hook in cases.items():

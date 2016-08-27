@@ -107,6 +107,16 @@ def divide_parse_action(tokens):
 
 @parse_action
 @wheredecorator
+def constant_minus_parse_action(tokens):
+    tokens = list(tokens[0])
+    l = make_list(tokens)
+    assert l.where.character_end is not None
+    res = CDP.ConstantMinus(l, where=l.where)
+    return res
+
+
+@parse_action
+@wheredecorator
 def coprod_parse_action(tokens):
     tokens = list(tokens[0])
     l = make_list(tokens)

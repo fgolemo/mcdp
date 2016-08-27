@@ -3,6 +3,7 @@ from .parts import CDPLanguage
 from contracts.utils import raise_desc
 from mcdp_posets import (FiniteCollectionsInclusion, LowerSets, PosetProduct,
     UpperSets, express_value_in_isomorphic_space)
+from mocdp import logger
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPSemanticError, DPUserAssertion
 
@@ -71,10 +72,26 @@ def eval_assert_nonempty(r, context):
     check = len(seq) > 0
 
     if check:
+        logger.info(v.__repr__())
         return passed_value()
 
     msg = 'Assertion assert_nonempty() failed.'
     raise_desc(DPUserAssertion, msg, v=v)
+
+def eval_assert_empty(r, context):
+    from .eval_constant_imp import eval_constant
+    assert isinstance(r, CDP.AssertEmpty)
+    v = eval_constant(r.value, context)
+    seq = get_sequence(v)
+    check = len(seq) == 0
+
+    if check:
+        logger.info(v.__repr__())
+        return passed_value()
+
+    msg = 'Assertion assert_nonempty() failed.'
+    raise_desc(DPUserAssertion, msg, v=v)
+
 
 def get_sequence(vu):
     if isinstance(vu.unit, UpperSets):
@@ -87,18 +104,6 @@ def get_sequence(vu):
         msg = 'Could not get sequence from element %s.' % type(vu.unit)
         raise_desc(DPSemanticError, msg, vu=vu)
 
-def eval_assert_empty(r, context):
-    from .eval_constant_imp import eval_constant
-    assert isinstance(r, CDP.AssertEmpty)
-    v = eval_constant(r.value, context)
-    seq = get_sequence(v)
-    check = len(seq) == 0
-
-    if check:
-        return passed_value()
-
-    msg = 'Assertion assert_nonempty() failed.'
-    raise_desc(DPUserAssertion, msg, v=v)
 
 def passed_value():
     return ValueWithUnits((), PosetProduct(()))
