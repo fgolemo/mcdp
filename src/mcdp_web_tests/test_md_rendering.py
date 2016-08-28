@@ -44,7 +44,11 @@ def check_rendering(libname, filename):
     library.use_cache_dir(tmpdir)
 
     html = render_complete(library, data, raise_errors=True, realpath=filename)
-    fn = os.path.join('out', 'check_rendering', libname, filename + '.html')
+    basename = os.path.basename(filename)
+    fn = os.path.join('out', 'check_rendering', libname, basename + '.html')
+    d = os.path.dirname(fn)
+    if not os.path.exists(d):
+        os.makedirs(d)
     with open(fn, 'w') as f:
         f.write(html)
     print('written to %r ' % fn)

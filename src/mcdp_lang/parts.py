@@ -59,6 +59,8 @@ class CDPLanguage():
     PlusN = namedtuplewhere('PlusN', 'ops')
     MultN = namedtuplewhere('MultN', 'ops')
     Divide = namedtuplewhere('Divide', 'ops')
+    # all constants
+    ConstantMinus = namedtuplewhere('ConstantMinus', 'ops')
     Coproduct = namedtuplewhere('Coproduct', 'ops')
 
     # elements: all strings, coproducts
@@ -132,7 +134,10 @@ class CDPLanguage():
     DPWrapToken = namedtuplewhere('DPWrapToken', 'keyword')
     FuncName = namedtuplewhere('FuncName', 'value')  # python function name
     NDPName = namedtuplewhere('NDPName', 'value')  # name in "new <name>"
+    TemplateName = namedtuplewhere('TemplateName', 'value')  # name in "new <name>"
+    LibraryName = namedtuplewhere('LibraryName', 'value')  # name in "new <name>"
     NDPNameWithLibrary = namedtuplewhere('NDPNameWithLibrary', 'library glyph name')  # name in "new <name>"
+    TemplateNameWithLibrary = namedtuplewhere('TemplateNameWithLibrary', 'library glyph name')  # name in "new <name>"
     ApproxKeyword = namedtuplewhere('ApproxKeyword', 'keyword')
     FlattenKeyword = namedtuplewhere('FlattenKeyword', 'keyword')
     SpecializeKeyword = namedtuplewhere('SpecializeKeyword', 'keyword')
@@ -187,7 +192,6 @@ class CDPLanguage():
     PosetNameWithLibrary = namedtuplewhere('PosetNameWithLibrary', 'library glyph name')
 
     LoadDP = namedtuplewhere('LoadDP', 'keyword name')
-    LoadPoset = namedtuplewhere('LoadPoset', 'keyword name')
 
     DPWrap = namedtuplewhere('DPWrap', 'token statements prep impl')
 
@@ -299,4 +303,27 @@ class CDPLanguage():
 #     ImportSymbolsSymbolname = namedtuplewhere('ImportSymbolsSymbolname', 'value')
 #     ImportSymbols = namedtuplewhere('ImportSymbols', 'keyword1 libname keyword2 symbols')
 
+    # assert_equal(v1, v2)
+    # assert_leq(v1, v2)
+    # assert_geq(v1, v2)
+    # assert_lt(v1, v2)
+    # assert_gt(v1, v2)
+    # assert_nonempty(v1, v2)
+    AssertEqualKeyword = namedtuplewhere('AssertEqualKeyword', 'keyword')
+    AssertLEQKeyword = namedtuplewhere('AssertEqualKeyword', 'keyword')
+    AssertGEQKeyword = namedtuplewhere('AssertEqualKeyword', 'keyword')
+    AssertLTKeyword = namedtuplewhere('AssertEqualKeyword', 'keyword')
+    AssertGTKeyword = namedtuplewhere('AssertEqualKeyword', 'keyword')
+    AssertNonemptyKeyword = namedtuplewhere('AssertNonemptyKeyword', 'keyword')
+    AssertEmptyKeyword = namedtuplewhere('AssertEmptyKeyword', 'keyword')
 
+    AssertEqual = namedtuplewhere('AssertEqual', 'keyword v1 v2')
+    AssertLEQ = namedtuplewhere('AssertLEQ', 'keyword v1 v2')
+    AssertGEQ = namedtuplewhere('AssertGEQ', 'keyword v1 v2')
+    AssertLT = namedtuplewhere('AssertLT', 'keyword v1 v2')
+    AssertGT = namedtuplewhere('AssertGT', 'keyword v1 v2')
+    AssertNonempty = namedtuplewhere('AssertNonempty', 'keyword value')
+    AssertEmpty = namedtuplewhere('AssertEmpty', 'keyword value')
+
+
+    ConstantMinusConstant = namedtuplewhere('ConstantMinusConstant', 'c1 c2')

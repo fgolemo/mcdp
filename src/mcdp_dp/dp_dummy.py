@@ -1,7 +1,7 @@
+from contracts.utils import raise_desc
 from mcdp_dp import PrimitiveDP
 from mcdp_posets import LowerSet, SpaceProduct, UpperSet
-from mocdp.exceptions import mcdp_dev_warning, DPInternalError
-from contracts.utils import raise_desc
+from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 
 __all__ = [
     'Dummy',

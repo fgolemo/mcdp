@@ -72,7 +72,8 @@ mcdp {
 	requires mass [g]
 
 	specific_energy = 4 J / g
-	required mass >= provided capacity / specific_energy
+	required mass >= provided capacity / 
+	                 specific_energy
 }
 </pre>
 
@@ -93,7 +94,8 @@ mcdp {
 	requires mass [g]
 
 	specific_energy = 200 kWh / kg
-	required mass >= provided capacity / specific_energy
+	required mass >= provided capacity / 
+	                 specific_energy
 }
 </pre>
 

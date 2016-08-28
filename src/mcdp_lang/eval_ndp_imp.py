@@ -9,12 +9,11 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from contextlib import contextmanager
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_dp import CatalogueDP, JoinNDP, MeetNDual
-from mcdp_dp.conversion import Conversion, get_conversion
-from mcdp_dp.dp_approximation import make_approximation
-from mcdp_dp.dp_series_simplification import make_series
+from mcdp_dp import (
+    CatalogueDP, Conversion, JoinNDP, MeetNDual, get_conversion, make_series)
 from mcdp_posets import (
     FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe)
 from mocdp import ATTRIBUTE_NDP_MAKE_FUNCTION
@@ -23,11 +22,11 @@ from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
 from mocdp.comp.composite_makecanonical import cndp_makecanonical
 from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
     get_name_for_fun_node, get_name_for_res_node)
+from mocdp.comp.make_approximation_imp import make_approximation
 from mocdp.exceptions import (DPInternalError, DPSemanticError,
     DPSemanticErrorNotConnected)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 import sys
-from contextlib import contextmanager
 
 
 
@@ -200,13 +199,14 @@ def eval_ndp_code_spec(r, _context):
 
 def eval_ndp_load(r, context):
     assert isinstance(r, CDP.LoadNDP)
-    assert isinstance(r.load_arg, (CDP.NDPName, CDP.NDPNameWithLibrary))
-
     arg = r.load_arg
+    assert isinstance(arg, (CDP.NDPName, CDP.NDPNameWithLibrary))
 
     if isinstance(arg, CDP.NDPNameWithLibrary):
-        libname = arg.library
-        name = arg.name
+        assert isinstance(arg.library, CDP.LibraryName), arg
+        assert isinstance(arg.name, CDP.NDPName), arg
+        libname = arg.library.value
+        name = arg.name.value
         library = context.load_library(libname)
         return library.load_ndp(name)
 
@@ -223,8 +223,11 @@ def eval_ndp_instancefromlibrary(r, context):
     arg = r.dpname
 
     if isinstance(arg, CDP.NDPNameWithLibrary):
-        libname = arg.library
-        name = arg.name
+        assert isinstance(arg.library, CDP.LibraryName), arg
+        assert isinstance(arg.name, CDP.NDPName), arg
+
+        libname = arg.library.value
+        name = arg.name.value
         library = context.load_library(libname)
         return library.load_ndp(name)
 

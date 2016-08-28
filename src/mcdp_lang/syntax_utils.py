@@ -1,4 +1,5 @@
-from mcdp_lang.parts import CDPLanguage
+# -*- coding: utf-8 -*-
+from .parts import CDPLanguage
 from pyparsing import Literal, Optional, Suppress
 
 CDP = CDPLanguage

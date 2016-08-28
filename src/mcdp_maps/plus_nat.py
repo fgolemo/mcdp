@@ -19,5 +19,5 @@ class PlusNat(Map):
         assert isinstance(res, int), res
         return res
 
-    def __str__(self):
+    def __repr__(self):
         return '+ %s' % self.value

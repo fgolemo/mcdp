@@ -1,15 +1,10 @@
-from contracts import contract
-from contracts.utils import check_isinstance, raise_desc
-from mcdp_dp.dp_identity import Identity
-from mcdp_posets import Map, MapNotDefinedHere, RcompUnits, Space
-from mocdp.comp.composite import CompositeNamedDP
-from mocdp.comp.context import (Connection, get_name_for_fun_node,
-    get_name_for_res_node)
-from mocdp.comp.interfaces import NamedDP
+# -*- coding: utf-8 -*-
+from contracts.utils import check_isinstance
+from mcdp_posets import Map, MapNotDefinedHere, RcompUnits
+from mcdp_posets.rcomp import finfo
 from mocdp.comp.wrap import dpwrap
 from mocdp.exceptions import mcdp_dev_warning
 import math
-from mcdp_posets.rcomp import finfo
 
 
 class LinearCeil():
@@ -32,8 +27,13 @@ class LinearCeil():
         try:
             m = x / self.alpha
         except FloatingPointError as e:
-            assert 'overflow' in str(e)
-            m = finfo.max
+            s = str(e)
+            if 'overflow' in s:
+                m = finfo.max
+            elif 'underflow' in s:
+                m = finfo.tiny
+            else:
+                raise
 
         n = math.ceil(m)
         y = n * self.alpha
@@ -123,31 +123,6 @@ class CombinedCeilMap(Map):
         y = self.f2(xx)
         return y
 
-#
-# class LinearCeil():
-#     """
-#
-#         y = ( alpha * ceil(x) / alpha) )
-#
-#     """
-#
-#     def __init__(self, alpha):
-#         self.alpha = alpha
-#
-#     def __call__(self, x):
-#         assert isinstance(x, float) and x >= 0, x
-#         if math.isinf(x):
-#             return float('inf')
-#         if x == 0.0:
-#             return 0.0
-#
-#         m = x / self.alpha
-#         n = math.ceil(m)
-#         y = n * self.alpha
-#
-#         res = float(y)
-#
-#         return res
 
 class FloorStepMap(Map):
 
@@ -175,91 +150,6 @@ class FloorStepMap(Map):
         n = math.floor(m)
         y = n * self.step
         return y
-
-@contract(name=str,
-          approx_perc='float|int',
-          approx_abs='float|int', approx_abs_S=Space, ndp=NamedDP,
-          returns=NamedDP)
-def make_approximation(name, approx_perc, approx_abs, approx_abs_S, max_value, max_value_S, ndp):
-    fnames = ndp.get_fnames()
-    rnames = ndp.get_rnames()
-
-    if name in fnames:
-        return make_approximation_f(name, approx_perc, approx_abs, approx_abs_S,
-                                    max_value, max_value_S, ndp)
-
-    if name in rnames:
-        return make_approximation_r(name, approx_perc, approx_abs, approx_abs_S,
-                                    max_value, max_value_S, ndp)
-
-    msg = 'Could not find name in either functions or resources.'
-    raise_desc(ValueError, msg, fnames=fnames, rnames=rnames, name=name)
-
-
-NAME_ORIGINAL = '_original'
-NAME_APPROX = '_approx'
-
-def make_approximation_r(name, approx_perc, approx_abs, approx_abs_S,
-                         max_value, max_value_S, ndp):
-    R = ndp.get_rtype(name)
-    ndp_after = get_approx_dp(R, name, approx_perc, approx_abs, approx_abs_S, max_value, max_value_S)
-
-    name2ndp = {NAME_ORIGINAL: ndp, NAME_APPROX: ndp_after}
-    fnames = ndp.get_fnames()
-    rnames = ndp.get_rnames()
-
-    connections = []
-    connections.append(Connection(NAME_ORIGINAL, name, NAME_APPROX, name))
-
-    for fn in fnames:
-        F = ndp.get_ftype(fn)
-        fn_ndp = dpwrap(Identity(F), fn, fn)
-        fn_name = get_name_for_fun_node(fn)
-        name2ndp[fn_name] = fn_ndp
-        connections.append(Connection(fn_name, fn, NAME_ORIGINAL, fn))
-
-    for rn in rnames:
-        R = ndp.get_rtype(rn)
-        rn_ndp = dpwrap(Identity(R), rn, rn)
-        rn_name = get_name_for_res_node(rn)
-        name2ndp[rn_name] = rn_ndp
-        if rn == name:
-            connections.append(Connection(NAME_APPROX, rn, rn_name, rn))
-        else:
-            connections.append(Connection(NAME_ORIGINAL, rn, rn_name, rn))
-
-    return CompositeNamedDP.from_parts(name2ndp, connections, fnames, rnames)
-
-def make_approximation_f(name, approx_perc, approx_abs, approx_abs_S,
-                         max_value, max_value_S, ndp):
-    F = ndp.get_ftype(name)
-    ndp_before = get_approx_dp(F, name, approx_perc, approx_abs, approx_abs_S, max_value, max_value_S)
-
-    name2ndp = {NAME_ORIGINAL: ndp, NAME_APPROX: ndp_before}
-    fnames = ndp.get_fnames()
-    rnames = ndp.get_rnames()
-
-    connections = []
-    connections.append(Connection(NAME_APPROX, name, NAME_ORIGINAL, name))
-
-    for fn in fnames:
-        F = ndp.get_ftype(fn)
-        fn_ndp = dpwrap(Identity(F), fn, fn)
-        fn_name = get_name_for_fun_node(fn)
-        name2ndp[fn_name] = fn_ndp
-        if fn == name:
-            connections.append(Connection(fn_name, fn, NAME_APPROX, fn))
-        else:
-            connections.append(Connection(fn_name, fn, NAME_ORIGINAL, fn))
-
-    for rn in rnames:
-        R = ndp.get_rtype(rn)
-        rn_ndp = dpwrap(Identity(R), rn, rn)
-        rn_name = get_name_for_res_node(rn)
-        name2ndp[rn_name] = rn_ndp
-        connections.append(Connection(NAME_ORIGINAL, rn, rn_name, rn))
-
-    return CompositeNamedDP.from_parts(name2ndp, connections, fnames, rnames)
 
 
 def get_approx_dp(S, name, approx_perc, approx_abs, approx_abs_S, max_value, max_value_S):

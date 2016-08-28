@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .helpers import create_operation
 from .parts import CDPLanguage
 from mocdp.exceptions import mcdp_dev_warning
@@ -10,7 +11,9 @@ def eval_rvalue_Uncertain(r, context):
 
     assert isinstance(r, CDP.UncertainRes)
 
+    # print 'evaluating %s ' % recursive_print(r.lower)
     rl = eval_rvalue(r.lower, context)
+    # print 'evaluating %s ' % recursive_print(r.upper)
     ru = eval_rvalue(r.upper, context)
 
     Rl = context.get_rtype(rl)

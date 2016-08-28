@@ -1,4 +1,5 @@
 from collections import namedtuple
+from conf_tools.utils import dir_from_package_name
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
@@ -7,9 +8,8 @@ from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
 from mocdp import logger
-from mocdp.exceptions import mcdp_dev_warning
 import os
-from conf_tools.utils.resources import dir_from_package_name
+import warnings
 
 def isolate_comments(s):
     lines = s.split("\n")
@@ -24,7 +24,6 @@ def isolate_comments(s):
 
     return unzip(map(isolate_comment, lines))
 
-
 def unzip(iterable):
     return zip(*iterable)
 
@@ -36,12 +35,22 @@ def ast_to_text(s):
 @contract(s=str)
 def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
                 add_line_gutter=True, encapsulate_in_precode=True, add_css=True,
-                parse_expr=Syntax.ndpt_dp_rvalue, add_line_spans=False):
+                parse_expr=None, add_line_spans=False):
+    if parse_expr is None:
+        warnings.warn('Please add specific parse_expr (default=Syntax.ndpt_dp_rvalue)', stacklevel=2)
+        parse_expr = Syntax.ndpt_dp_rvalue
+    if add_css:
+        warnings.warn('check we really need add_css = True', stacklevel=2)
+
+    if complete_document:
+        warnings.warn('please do not use complete_document', stacklevel=2)
+    add_css = False
 
     if ignore_line is None:
         ignore_line = lambda _lineno: False
     if extra_css is None:
         extra_css = ''
+
     s_lines, s_comments = isolate_comments(s)
     assert len(s_lines) == len(s_comments) 
     # Problem: initial comment, '# test connected\nmcdp'
@@ -288,6 +297,13 @@ def iterate_notwhere(x):
 def get_language_css():
     package = dir_from_package_name('mcdp_web')
     fn = os.path.join(package, 'static', 'css', 'mcdp_language_highlight.css')
+    with open(fn) as f:
+        css = f.read()
+    return css
+
+def get_markdown_css():
+    package = dir_from_package_name('mcdp_web')
+    fn = os.path.join(package, 'static', 'css', 'markdown.css')
     with open(fn) as f:
         css = f.read()
     return css

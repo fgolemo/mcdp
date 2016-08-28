@@ -1,5 +1,6 @@
-from mocdp.exceptions import mcdp_dev_warning
+# -*- coding: utf-8 -*-
 from mocdp.comp.wrap import SimpleWrap
+from mocdp.exceptions import mcdp_dev_warning
 
 
 

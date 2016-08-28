@@ -49,11 +49,31 @@ def feat_import2():
 
 @comptest
 def feat_import3():
-    pass
+    """ NDP load """
+    data = {
+        'lib1.mcdplib/model0.mcdp': "mcdp {}",
+        'lib1.mcdplib/model1.mcdp': "`model0",
+        'lib2.mcdplib/model2.mcdp': "`lib1.model1",
+    }
+    d = create_hierarchy(data)
+    librarian = Librarian()
+    librarian.find_libraries(d)
+    lib2 = librarian.load_library('lib2')
+    _model2 = lib2.load_ndp('model2')
 
 @comptest
 def feat_import4():
-    pass
+    data = {
+        'lib1.mcdplib/model0.mcdp': "mcdp {}",
+        'lib1.mcdplib/template1.mcdp_template': "template [] mcdp { a = instance `model0 }",
+        'lib2.mcdplib/template2.mcdp_template': "`lib1.template1",
+        'lib2.mcdplib/model2.mcdp': "specialize [] `template2",
+    }
+    d = create_hierarchy(data)
+    librarian = Librarian()
+    librarian.find_libraries(d)
+    lib2 = librarian.load_library('lib2')
+    _model2 = lib2.load_ndp('model2')
 
 @comptest
 def feat_import5():

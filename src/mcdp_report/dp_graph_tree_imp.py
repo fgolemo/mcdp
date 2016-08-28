@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from mcdp_dp import (Constant, DPLoop0, DPLoop2, GenericUnary, Limit, Mux,
-    Parallel, PrimitiveDP, Series0)
-from mcdp_dp.dp_coproduct import CoProductDPLabels
-from mcdp_dp.dp_labeler import LabelerDP
-from mcdp_dp.opaque_dp import OpaqueDP
-from mcdp_dp.primitive import ApproximableDP
+from mcdp_dp import (ApproximableDP, CoProductDPLabels, Constant, DPLoop0,
+    DPLoop2, GenericUnary, LabelerDP, Limit, Mux, OpaqueDP, Parallel,
+    PrimitiveDP, Series0)
 
 __all__ = [
     'dp_graph_tree',

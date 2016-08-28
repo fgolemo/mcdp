@@ -40,7 +40,7 @@ and use it inside:
 <pre class='mcdp' id='AE1' label='AE1.mcdp'>
 specialize [
   Battery: `BatteryUncertain, 
-  Actuation: `actuation,
+  Actuation: `droneD_complete_v2.actuation,
   PowerApprox: `PowerApprox
 ] 
 `ActuationEnergeticsTemplate

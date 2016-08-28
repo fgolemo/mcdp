@@ -7,13 +7,12 @@ from .utils_lists import get_odd_ops, unwrap_list
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_dp import InvMult2, InvPlus2, InvPlus2Nat
-from mcdp_posets import Nat, RcompUnits, mult_table
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
+from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table,
+    poset_maxima)
 from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import CFunction, get_name_for_res_node
-from mocdp.exceptions import DPInternalError, DPSemanticError, \
-    DPNotImplementedError
-from mcdp_posets.types_universe import get_types_universe
+from mocdp.exceptions import (DPInternalError, DPNotImplementedError,
+    DPSemanticError)
 
 
 CDP = CDPLanguage

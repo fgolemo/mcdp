@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from .poset import NotLeq
-from .space import NotEqual, Space
+from .space import NotBelongs, NotEqual, Space
 from contracts.utils import raise_desc
-from mcdp_posets.space import NotBelongs
 import random
 
 

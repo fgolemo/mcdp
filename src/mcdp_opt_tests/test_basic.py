@@ -1,4 +1,4 @@
-from comptests.registrar import comptest
+from comptests.registrar import comptest, comptest_fails
 from contracts import contract
 from mcdp_lang import parse_constant, parse_poset
 from mcdp_library import Librarian, MCDPLibrary
@@ -220,7 +220,7 @@ def opt_basic_4():
     assert not less_resources2(l1b, l2b)
     assert less_resources2(l2b, l1b)
 
-@comptest
+@comptest_fails
 def opt_basic_5():
     """ It should be able to re-order, but it doesn't.... """
     l1b = parse_constant('upperclosure { < 1 g, 4 g > }').value
@@ -245,8 +245,9 @@ def opt_basic_6():
                'USBMicroCharging']
 
     for o in options:
+        print('Trying %r' % o)
         ndp = library.load_ndp(o)
-        dp = ndp.get_dp()
+        _dp = ndp.get_dp()
 
     initial_string = """
         mcdp {    

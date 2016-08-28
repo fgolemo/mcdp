@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-from mocdp import logger
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import check_isinstance, raise_desc
 from mcdp_dp import FunctionNode, PrimitiveDP, ResourceNode
 from mcdp_posets import NotBounded, Poset, Space
+from mcdp_posets import FinitePoset
+from mcdp_posets import PosetProductWithLabels
+from mocdp import logger
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.comp.wrap import dpwrap
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
-from mcdp_posets.poset_product_with_labels import PosetProductWithLabels
-from mcdp_posets.finite_poset import FinitePoset
 _ = logger
 
 __all__ = [
@@ -106,6 +106,10 @@ class Context():
 
         return s
 
+#     def get_default_library_name(self):
+#         """ hack used for Template """
+#         return getattr(self, 'default_library_name', None)
+
     def child(self):
         """ A child context preserves the value of the constants
             and the model types. """
@@ -134,6 +138,7 @@ class Context():
         return self._load_hooks(load_arg, self.load_template_hooks, TemplateForNamedDP)
 
     def load_library(self, load_arg):
+        check_isinstance(load_arg, str)
         from mcdp_library.library import MCDPLibrary
         return self._load_hooks(load_arg, self.load_library_hooks, MCDPLibrary)
 

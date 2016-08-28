@@ -1,9 +1,10 @@
 #!/usr/bin/env python
 from contracts import contract
 from mcdp_cli.query_interpretation import convert_string_query
-from mcdp_dp.dp_inv_mult import InvMult2
+from mcdp_dp import InvMult2
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.tracer import Tracer
+from mcdp_ipython_utils.plotting import set_axis_colors
 from mcdp_lang import parse_ndp
 from mcdp_library import Librarian
 from mcdp_posets import UpperSets
@@ -36,7 +37,7 @@ def go(algo):
     res = {}
     res['n'] = [1, 5, 10, 15, 25, 50, 61, 75, 92, 100, 125, 150, 160,
                  175, 182, 200,
-                300, 400, 500, 600, 1000, 2000]
+                300, 400, 500, 600, 1000, 1500]
 
 #     res['n'] = [1, 5, 10, 15, 25, 50, 61, 100]
 #     res['n'] = [3000]
@@ -65,7 +66,6 @@ def solve_stats(ndp, n, algo):
     dp0 = ndp.get_dp()
     dpL, dpU = get_dp_bounds(dp0, nl=n, nu=n)
 
-
     F = dp0.get_fun_space()
     F.belongs(f)
 
@@ -91,11 +91,7 @@ def solve_stats(ndp, n, algo):
 
 
 def report(data):
-#     font = {'family' : 'Times',
-#         'size'   : 24}
-#     import matplotlib
-#     
-#     matplotlib.rc('font', **font)
+    print('report()')
     from matplotlib import pylab
     
     ieee_fonts_zoom3(pylab)
@@ -130,17 +126,26 @@ def report(data):
     print('Plotting')
     f = r.figure('fig1', cols=2)
 
-    LOWER = 'bo-'
-    UPPER = 'mo-'
-
+    
     attrs = dict(clip_on=False)
-#     fig = dict(figsize=(14.4, 14.4))
-    fig = dict()
+    
+    markers = dict(markeredgecolor='none', markerfacecolor='black', markersize=6,
+                   marker='o')
+    LOWER = dict(color='orange', linewidth=4, linestyle='-', clip_on=False)
+    UPPER = dict(color='purple', linewidth=4, linestyle='-', clip_on=False)
+    LOWER.update(markers)
+    UPPER.update(markers)
+    color_resources = '#700000'
+    # color_functions = '#007000'
+    color_tolerance = '#000000'
+
+
+    fig = dict(figsize=(4.5, 3.4))
 
     with f.plot('fig_num_iterations', **fig) as pylab:
         ieee_spines_zoom3(pylab)
-        pylab.plot(num, num_iterations_L, LOWER, **attrs)
-        pylab.plot(num, num_iterations_U, UPPER, **attrs)
+        pylab.plot(num, num_iterations_L, **LOWER)
+        pylab.plot(num, num_iterations_U, **UPPER)
         pylab.ylabel('iterations')
         pylab.xlabel('n')
 
@@ -148,24 +153,19 @@ def report(data):
     if False:
         with f.plot('fig_num_iterations_log', **fig) as pylab:
             ieee_spines_zoom3(pylab)
-            pylab.loglog(num, num_iterations_L, LOWER, **attrs)
-            pylab.loglog(num, num_iterations_U, UPPER, **attrs)
+            pylab.loglog(num, num_iterations_L, **LOWER)
+            pylab.loglog(num, num_iterations_U, **UPPER)
             pylab.ylabel('iterations')
             pylab.xlabel('n')
 
     with f.plot('mass', **fig) as pylab:
         ieee_spines_zoom3(pylab)
-        pylab.plot(num, res_L, LOWER, **attrs)
-        pylab.plot(num, res_U, UPPER, **attrs)
-        pylab.ylabel('total_mass [g]')
+        pylab.plot(num, res_L, **LOWER)
+        pylab.plot(num, res_U, **UPPER)
+        pylab.ylabel('total mass [g]')
         pylab.xlabel('n')
+        set_axis_colors(pylab, color_tolerance, color_resources)
 
-#     with f.plot('mass_log') as pylab:
-#         ieee_spines(pylab)
-#         pylab.loglog(intervals, res_L, LOWER, **attrs)
-#         pylab.loglog(intervals, res_U, UPPER, **attrs)
-#         pylab.xlabel('tolerance [mW]')
-#         pylab.ylabel('total_mass [g]')
 
     with f.plot('mass2', **fig) as pylab:
         ieee_spines_zoom3(pylab)
@@ -184,9 +184,9 @@ def report(data):
         e = pylab.errorbar(num_valid, mean, yerr=err,
                            color='black', linewidth=2,
                            linestyle="None", **attrs)
-#         plotline: Line2D instance #         x, y plot markers and/or line
-#         caplines: list of error bar cap#         Line2D instances
-#         barlinecols: list of         LineCollection instances for the horizontal and vertical error ranges.
+        #         plotline: Line2D instance #         x, y plot markers and/or line
+        #         caplines: list of error bar cap#         Line2D instances
+        #         barlinecols: list of         LineCollection instances for the horizontal and vertical error ranges.
         e[0].set_clip_on(False)
         for b in e[1]:
             b.set_clip_on(False)
@@ -202,26 +202,16 @@ def report(data):
         pylab.plot(num_invalid, res_L_invalid, 'ko', **attrs)
 
         pylab.xlabel('n')
-        pylab.ylabel('total_mass [g]')
-#
-#     with f.plot('mass2_log') as pylab:
-#         ieee_spines(pylab)
-#         pylab.loglog(intervals, res_L, LOWER, **attrs)
-#         pylab.loglog(intervals, res_U, UPPER, **attrs)
-#         pylab.xlabel('tolerance [mW]')
-#         pylab.ylabel('total_mass [g]')
+        pylab.ylabel('total mass [g]')
+        set_axis_colors(pylab, color_tolerance, color_resources)
+
 
     with f.plot('accuracy', **fig) as pylab:
         ieee_spines_zoom3(pylab)
         pylab.plot(num_iterations, accuracy, 'o', **attrs)
         pylab.xlabel('iterations')
         pylab.ylabel('solution uncertainty [g]')
-#
-#     with f.plot('accuracy_log', **fig) as pylab:
-#         ieee_spines_zoom3(pylab)
-#         pylab.loglog(num_iterations, accuracy, 'o', **attrs)
-#         pylab.xlabel('iterations')
-#         pylab.ylabel('solution uncertainty [g]')
+
 
     return r
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
+from .dp_generic_unary import WrapAMap
 from contracts import contract
-from mcdp_dp.dp_generic_unary import WrapAMap
 from mcdp_posets import Poset
 from mcdp_posets.maps import IdentityMap
 

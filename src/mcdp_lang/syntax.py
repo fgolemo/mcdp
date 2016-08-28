@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 from .helpers import square
-from .parse_actions import (divide_parse_action,
-    funshortcut1m, mult_inv_parse_action, mult_parse_action, parse_pint_unit,
+from .parse_actions import (divide_parse_action, funshortcut1m,
+    mult_inv_parse_action, mult_parse_action, parse_pint_unit,
     plus_inv_parse_action, plus_parse_action, resshortcut1m,
     space_product_parse_action)
 from .parts import CDPLanguage
-from .syntax_utils import COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, sp
-from mcdp_lang.syntax_utils import spk
-from mcdp_lang.utils_lists import make_list
+from .syntax_utils import COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, sp, spk
+from .utils_lists import make_list
 from mocdp.exceptions import mcdp_dev_warning
 from pyparsing import (
     CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
@@ -15,6 +14,7 @@ from pyparsing import (
     alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
     sglQuotedString)
 import math
+from mcdp_lang.parse_actions import constant_minus_parse_action
 
 
 ParserElement.enablePackrat()
@@ -97,6 +97,13 @@ class SyntaxIdentifiers():
         'import',
         'from',
         'upperclosure',
+        'assert_equal',
+        'assert_leq',
+        'assert_geq',
+        'assert_lt',
+        'assert_gt',
+        'assert_empty',
+        'assert_nonempty',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -168,16 +175,19 @@ class Syntax():
 
 
     get_idn = SyntaxIdentifiers.get_idn
+
+    library_name = sp(get_idn(), lambda t: CDP.LibraryName(t[0]))
+
     # load <name>
     LOAD = spk(L('load') | L('`'), CDP.LoadKeyword)
 
-    name_poset = sp(get_idn(), lambda t: CDP.PosetName(t[0]))
-    name_poset_library = sp(get_idn() + L('.') + get_idn(),
+    posetname = sp(get_idn(), lambda t: CDP.PosetName(t[0]))
+    posetname_with_library = sp(library_name + L('.') + posetname,
         lambda t: CDP.PosetNameWithLibrary(library=t[0], glyph=t[1], name=t[2]))
 
-    load_poset = sp(LOAD - (name_poset_library | name_poset),
-                    lambda t: CDP.LoadPoset(t[0], t[1]))
-
+    load_poset = sp(LOAD - (posetname_with_library | posetname),
+                    lambda t: CDP.LoadPoset(keyword=t[0], load_arg=t[1]))
+#
     # UpperSets(<poset>)
     UPPERSETS = spk(L('UpperSets'), CDP.UpperSetsKeyword)
     space_uppersets = sp(UPPERSETS + SLPAR + space + SRPAR,
@@ -350,13 +360,15 @@ class Syntax():
 
     # a quoted string
     quoted = sp(dblQuotedString | sglQuotedString, lambda t:t[0][1:-1])
+
+
     ndpname = sp(get_idn() | quoted, lambda t: CDP.NDPName(t[0]))
-    ndpname_with_library = sp(get_idn() + L('.') + get_idn(),
+
+    ndpname_with_library = sp(library_name + L('.') + ndpname,
         lambda t: CDP.NDPNameWithLibrary(library=t[0], glyph=t[1], name=t[2]))
 
     ndpt_load = sp(LOAD - (ndpname_with_library | ndpname | SLPAR - ndpname - SRPAR),
                         lambda t: CDP.LoadNDP(t[0], t[1]))
-
 
     # <dpname> = ...
     dpname = sp(get_idn(), lambda t: CDP.DPName(t[0]))
@@ -449,7 +461,51 @@ class Syntax():
     space_custom_value1 = sp(space + L(":") + (short_identifiers ^ L('*')),
                           lambda t: CDP.SpaceCustomValue(t[0], t[1], t[2]))
 
-    constant_value << (valuewithunit
+
+    # assert_equal(v1, v2)
+    # assert_leq(v1, v2)
+    # assert_geq(v1, v2)
+    # assert_lt(v1, v2)
+    # assert_gt(v1, v2)
+    # assert_nonempty(v1, v2)
+    # assert_empty(v1, v2)
+#     AssertEqual = namedtuplewhere('AssertEqual', 'keyword v1 v2')
+#     AssertLEQ = namedtuplewhere('AssertLEQ', 'v1 v2')
+#     AssertGEQ = namedtuplewhere('AssertGEQ', 'v1 v2')
+#     AssertLT = namedtuplewhere('AssertLT', 'v1 v2')
+#     AssertGT = namedtuplewhere('AssertGT', 'v1 v2')
+#     AssertNonempty = namedtuplewhere('AssertNonempty', 'v1 v2')
+    K = Keyword
+    ASSERT_EQUAL = spk(K('assert_equal'), CDP.AssertEqualKeyword)
+    ASSERT_LEQ = spk(K('assert_leq'), CDP.AssertLEQKeyword)
+    ASSERT_GEQ = spk(K('assert_geq'), CDP.AssertGEQKeyword)
+    ASSERT_LT = spk(K('assert_lt'), CDP.AssertLTKeyword)
+    ASSERT_GT = spk(K('assert_gt'), CDP.AssertGTKeyword)
+    ASSERT_NONEMPTY = spk(K('assert_nonempty'), CDP.AssertNonemptyKeyword)
+    ASSERT_EMPTY = spk(K('assert_empty'), CDP.AssertEmptyKeyword)
+
+    assert_equal = sp(ASSERT_EQUAL + SLPAR + constant_value + SCOMMA + constant_value + SRPAR,
+                      lambda t: CDP.AssertEqual(keyword=t[0], v1=t[1], v2=t[2]))
+    assert_leq = sp(ASSERT_LEQ + SLPAR + constant_value + SCOMMA + constant_value + SRPAR,
+                      lambda t: CDP.AssertLEQ(keyword=t[0], v1=t[1], v2=t[2]))
+    assert_geq = sp(ASSERT_GEQ + SLPAR + constant_value + SCOMMA + constant_value + SRPAR,
+                      lambda t: CDP.AssertGEQ(keyword=t[0], v1=t[1], v2=t[2]))
+    assert_lt = sp(ASSERT_LT + SLPAR + constant_value + SCOMMA + constant_value + SRPAR,
+                      lambda t: CDP.AssertLT(keyword=t[0], v1=t[1], v2=t[2]))
+    assert_gt = sp(ASSERT_GT + SLPAR + constant_value + SCOMMA + constant_value + SRPAR,
+                      lambda t: CDP.AssertGT(keyword=t[0], v1=t[1], v2=t[2]))
+    assert_nonempty = sp(ASSERT_NONEMPTY + SLPAR + constant_value + SRPAR,
+                      lambda t: CDP.AssertNonempty(keyword=t[0], value=t[1]))
+    assert_empty = sp(ASSERT_EMPTY + SLPAR + constant_value + SRPAR,
+                      lambda t: CDP.AssertEmpty(keyword=t[0], value=t[1]))
+
+    asserts = (assert_equal | assert_leq | assert_leq | assert_geq
+               | assert_lt | assert_gt | assert_nonempty | assert_empty)
+
+    constant_minus_constant = sp(constant_value + L('-') + constant_value,
+                                 lambda t: CDP.ConstantMinusConstant(t[0], t[1], t[2]))
+
+    constant_value_op = (valuewithunit
                        ^ variable_ref
                        ^ collection_of_constants
                        ^ tuple_of_constants
@@ -457,7 +513,14 @@ class Syntax():
                        ^ int_constant
                        ^ upper_set_from_collection
                        ^ space_custom_value1
-                       ^ solve_model)
+                       ^ solve_model
+                       ^ asserts)
+
+    constant_value << operatorPrecedence(constant_value_op, [
+        ('-', 2, opAssoc.LEFT, constant_minus_parse_action),
+    ])
+
+
 
     rvalue_resource_simple = sp(dpname + DOT - rname,
                                 lambda t: CDP.Resource(s=t[2], keyword=t[1], dp=t[0]))
@@ -799,7 +862,12 @@ class Syntax():
                        lambda t: CDP.ApproxUpper(t[0], t[1], t[2]))
 
 
-    template_load = sp(LOAD - (ndpname | SLPAR - ndpname - SRPAR),   
+
+    templatename = sp(get_idn() | quoted, lambda t: CDP.TemplateName(t[0]))
+    templatename_with_library = sp(library_name + L('.') + templatename,
+        lambda t: CDP.TemplateNameWithLibrary(library=t[0], glyph=t[1], name=t[2]))
+
+    template_load = sp(LOAD - (templatename_with_library | templatename | SLPAR - templatename - SRPAR),
                        lambda t: CDP.LoadTemplate(t[0], t[1]))
     
     template_spec_param_name = sp(get_idn(), lambda t: CDP.TemplateParamName(t[0]))

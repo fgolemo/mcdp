@@ -1,4 +1,4 @@
-from pyramid.response import FileResponse
+from pyramid.response import FileResponse  # @UnresolvedImport
 
 def response_data(request, data, content_type):
     import tempfile

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_cli.query_interpretation import convert_string_query
 from mcdp_dp.dp_transformations import get_dp_bounds
@@ -9,10 +10,11 @@ from mcdp_posets import UpperSets
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import Context
 from mocdp.comp.ignore_some_imp import ignore_some
+from plot_utils import ieee_fonts_zoom3, ieee_spines_zoom3
 from quickapp import QuickApp
 from reprep import Report
 import numpy as np
-from plot_utils import ieee_fonts_zoom3, ieee_spines_zoom3
+from mcdp_ipython_utils.plotting import set_axis_colors
 
 @contract(interval_mw='float,>=0')
 def create_power_approx(interval_mw, context):
@@ -33,7 +35,7 @@ def create_power_approx(interval_mw, context):
 def create_ndp(context, interval_mw):
     template = parse_template('`ActuationEnergeticsTemplate', context)
     Battery = parse_ndp('`batteries_nodisc.batteries', context)
-    Actuation = parse_ndp('`Actuation', context)
+    Actuation = parse_ndp('`droneD_complete_v2.Actuation', context)
     PowerApprox = create_power_approx(interval_mw=interval_mw, context=context)
     params = dict(Battery=Battery,
                   PowerApprox=PowerApprox,
@@ -134,37 +136,72 @@ def report(data):
     LOWER = 'bo-'
     UPPER = 'mo-'
 
+    markers = dict(markeredgecolor='none', markerfacecolor='black', markersize=6,
+                   marker='o')
+    LOWER2 = dict(color='orange', linewidth=4, linestyle='-', clip_on=False)
+    UPPER2 = dict(color='purple', linewidth=4, linestyle='-', clip_on=False)
+    LOWER2.update(markers)
+    UPPER2.update(markers)
+    color_resources = '#700000'
+    # color_functions = '#007000'
+    color_tolerance = '#000000'
+
+
     attrs = dict(clip_on=False)
+    
+    fig = dict(figsize=(4.5, 4))
+    fig_tall = dict(figsize=(3.5    , 7))
 
-    with f.plot('fig_num_iterations') as pylab:
+    label_tolerance = u'tolerance α [mW]'
+#     label_tolerance = 'tolerance $\\alpha$ [mW]'
+
+    with f.plot('fig_num_iterations', **fig) as pylab:
         ieee_spines_zoom3(pylab)
-        pylab.plot(intervals, num_iterations_L, LOWER, **attrs)
-        pylab.plot(intervals, num_iterations_U, UPPER, **attrs)
-        pylab.xlabel('tolerance [mW]')
+        pylab.plot(intervals, num_iterations_L, **LOWER2)
+        pylab.plot(intervals, num_iterations_U, **UPPER2)
+        pylab.xlabel(label_tolerance)
         pylab.ylabel('iterations')
 
-    with f.plot('fig_num_iterations_log') as pylab:
+    with f.plot('fig_num_iterations_log', **fig) as pylab:
         ieee_spines_zoom3(pylab)
-        pylab.loglog(intervals, num_iterations_L, LOWER, **attrs)
-        pylab.loglog(intervals, num_iterations_U, UPPER, **attrs)
-        pylab.xlabel('tolerance [mW]')
+        pylab.loglog(intervals, num_iterations_L, **LOWER2)
+        pylab.loglog(intervals, num_iterations_U, **UPPER2)
+        pylab.xlabel(label_tolerance)
         pylab.ylabel('iterations')
 
-    with f.plot('mass') as pylab:
+    with f.plot('mass', **fig_tall) as pylab:
         ieee_spines_zoom3(pylab)
         pylab.plot(intervals, res_L, LOWER, **attrs)
         pylab.plot(intervals, res_U, UPPER, **attrs)
-        pylab.xlabel('tolerance [mW]')
-        pylab.ylabel('total_mass [g]')
+        pylab.xlabel(label_tolerance)
+        pylab.ylabel('total mass [g]')
+        set_axis_colors(pylab, color_tolerance, color_resources)
 
-    with f.plot('mass_log') as pylab:
+    with f.plot('mass3', **fig_tall) as pylab:
+        ieee_spines_zoom3(pylab)
+        pylab.plot(intervals, res_L, **LOWER2)
+        pylab.plot(intervals, res_U, **UPPER2)
+        pylab.xlabel(label_tolerance)
+        pylab.ylabel('total mass [g]')
+        set_axis_colors(pylab, color_tolerance, color_resources)
+
+    with f.plot('mass3log', **fig) as pylab:
+        ieee_spines_zoom3(pylab)
+        pylab.semilogx(intervals, res_L, **LOWER2)
+        pylab.semilogx(intervals, res_U, **UPPER2)
+        pylab.xlabel(label_tolerance)
+        pylab.ylabel('total mass [g]')
+        set_axis_colors(pylab, color_tolerance, color_resources)
+
+    with f.plot('mass_log', **fig) as pylab:
         ieee_spines_zoom3(pylab)
         pylab.loglog(intervals, res_L, LOWER, **attrs)
         pylab.loglog(intervals, res_U, UPPER, **attrs)
-        pylab.xlabel('tolerance [mW]')
-        pylab.ylabel('total_mass [g]')
+        pylab.xlabel(label_tolerance)
+        pylab.ylabel('total mass [g]')
+        set_axis_colors(pylab, color_tolerance, color_resources)
 
-    with f.plot('mass2') as pylab:
+    with f.plot('mass2', **fig) as pylab:
         ieee_spines_zoom3(pylab)
 
         mean = np.array(res_L) * 0.5 + np.array(res_U) * 0.5
@@ -183,27 +220,29 @@ def report(data):
             b.set_clip_on(False)
             b.set_linewidth(2)
 
-        pylab.xlabel('tolerance [mW]')
-        pylab.ylabel('total_mass [g]')
+        pylab.xlabel(label_tolerance)
+        pylab.ylabel('total mass [g]')
+        set_axis_colors(pylab, color_tolerance, color_resources)
 
-    with f.plot('mass2_log') as pylab:
+    with f.plot('mass2_log',  **fig) as pylab:
         ieee_spines_zoom3(pylab)
         pylab.loglog(intervals, res_L, LOWER, **attrs)
         pylab.loglog(intervals, res_U, UPPER, **attrs)
-        pylab.xlabel('tolerance [mW]')
-        pylab.ylabel('total_mass [g]')
+        pylab.xlabel(label_tolerance)
+        pylab.ylabel('total mass [g]')
+        set_axis_colors(pylab, color_tolerance, color_resources)
 
-    with f.plot('accuracy') as pylab:
+    with f.plot('accuracy',  **fig) as pylab:
         ieee_spines_zoom3(pylab)
-        pylab.plot(num_iterations, accuracy, 'o', **attrs)
-        pylab.xlabel('iterations')
-        pylab.ylabel('solution uncertainty [g]')
+        pylab.plot(accuracy, num_iterations, 'o', **attrs)
+        pylab.ylabel('iterations')
+        pylab.xlabel('solution uncertainty [g]')
 
-    with f.plot('accuracy_log') as pylab:
+    with f.plot('accuracy_log',  **fig) as pylab:
         ieee_spines_zoom3(pylab)
-        pylab.loglog(num_iterations, accuracy, 'o', **attrs)
-        pylab.xlabel('iterations')
-        pylab.ylabel('solution uncertainty [g]')
+        pylab.loglog(accuracy, num_iterations, 'o', **attrs)
+        pylab.ylabel('iterations')
+        pylab.xlabel('solution uncertainty [g]')
 
     return r
     

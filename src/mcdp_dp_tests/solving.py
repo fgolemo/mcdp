@@ -1,4 +1,4 @@
-from comptests.registrar import comptest
+from comptests.registrar import comptest, comptest_fails
 from mcdp_dp.solver import (ConvergedToEmpty, ConvergedToFinite,
     ConvergedToInfinite, generic_solve)
 from mcdp_lang import parse_ndp
@@ -56,7 +56,7 @@ def get_trace_solution(T, W0, P0, one_over_alpha, gamma, add_mass_limit):
     trace = generic_solve(dp, f, max_steps=None)
     return trace
 
-@comptest
+@comptest_fails
 def check_prob_feasibility_1():
     T = 1.0
     W0 = 1.0

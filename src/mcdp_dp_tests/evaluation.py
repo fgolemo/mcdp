@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest, comptest_fails
+from comptests.registrar import comptest_fails
 from contracts.utils import raise_desc
-from mcdp_dp.primitive import Feasible, NotFeasible, NotSolvableNeedsApprox
+from mcdp_dp import Feasible, NotFeasible, NotSolvableNeedsApprox
 from mcdp_lang import parse_ndp
 from mcdp_posets import LowerSets, R_dimensionless, SpaceProduct, UpperSets
 from mcdp_tests.generation import for_all_dps

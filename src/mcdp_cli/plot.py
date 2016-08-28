@@ -285,6 +285,7 @@ def do_plots(logger, model_name, plots, outdir, extra_params, maindir, extra_dir
     if cache_dir is not None:
         library.use_cache_dir(cache_dir)
 
+    assert library.library_name is not None
 
     filename = model_name + '.mcdp'
     x = library._get_file_data(filename)

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from .eval_constant_imp import eval_constant
+from .helpers import create_operation
 from .parts import CDPLanguage
 from mcdp_dp import Max, Max1, Min
-from mcdp_lang.helpers import create_operation
 from mocdp.comp import Connection, dpwrap
 from mocdp.exceptions import DPSemanticError
 CDP = CDPLanguage

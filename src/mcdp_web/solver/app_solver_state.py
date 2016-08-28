@@ -1,12 +1,11 @@
 
 from contracts import contract
 from contracts.utils import raise_wrapped
-from mcdp_posets.rcomp_units import RcompUnits
-from mcdp_posets.space import NotBelongs
-from mcdp_report.gg_ndp import format_unit
-from mcdp_posets.nat import Nat
 from mcdp_dp.tracer import Tracer
+from mcdp_posets import Nat, NotBelongs, RcompUnits
 from mcdp_posets.rcomp import RcompTop
+from mcdp_report.gg_ndp import format_unit
+import numpy as np
 
 
 class SolverState():
@@ -186,7 +185,6 @@ def make_value(x):
     else:
         return x
 
-import numpy as np
 
 def get_decisions_for_axes(ndp, fun_axes, res_axes):
     fnames = ndp.get_fnames()

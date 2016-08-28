@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts import contract
-from mcdp_posets import Poset  # @UnusedImport
-from mcdp_posets.utils import poset_minima
+from mcdp_posets import LowerSet, Poset, UpperSet, poset_maxima, poset_minima
 from mocdp.exceptions import do_extra_checks
-from mcdp_posets.uppersets import UpperSet, LowerSet
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
 
+_ = Poset
 
 __all__ = [
     'CatalogueDP',

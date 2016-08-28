@@ -2,20 +2,19 @@
 from .query_interpretation import interpret_string
 from .utils_mkdir import mkdirs_thread_safe
 from contracts.utils import raise_desc, raise_wrapped
-from decent_params.utils.script_utils import UserError
+from decent_params.utils import UserError
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.solver import generic_solve
 from mcdp_dp.solver_iterative import solver_iterative
 from mcdp_dp.tracer import Tracer
-from mcdp_library.libraries import Librarian
-from mcdp_posets import NotEqual, PosetProduct, UpperSets, get_types_universe
-from mcdp_posets.poset import NotLeq
-from mcdp_posets.types_universe import express_value_in_isomorphic_space
-from mcdp_report.report import report_dp1, report_ndp1
+from mcdp_library import Librarian
+from mcdp_posets import (NotEqual, NotLeq, PosetProduct, UpperSets,
+    express_value_in_isomorphic_space, get_types_universe)
 from mocdp.comp.recursive_name_labeling import (get_imp_as_recursive_dict,
     get_labelled_version, ndp_make)
 from reprep import Report
 import os
+
 
 
 class ExpectationsNotMet(Exception):
@@ -48,7 +47,7 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
     ndp = library.load_ndp(model_name)
     basename = model_name
 
-    if make:
+    if make or (plot and imp):
         ndp_labelled = get_labelled_version(ndp)
     else:
         ndp_labelled = ndp
@@ -69,7 +68,7 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
     except NotLeq as e:
         msg = 'The value given cannot be converted to functionality space.'
         raise_wrapped(UserError, e, msg, unit=c.unit, F=F, compact=True)
-    fg = express_value_in_isomorphic_space(F, c.value, c.unit)
+    fg = express_value_in_isomorphic_space(c.unit, c.value, F)
 
     logger.info('query: %s' % F.format(fg))
 
@@ -164,19 +163,34 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
         logger.info('writing to %r' % out_html)
         r.to_html(out_html)
 
-        out_html = os.path.join(out, 'report_ndp1.html')
-        r = report_ndp1(ndp)
-        logger.info('writing to %r' % out_html)
-        r.to_html(out_html)
+    if plot and imp:
+        from mcdp_report_ndp_tests.test1 import GetValues
+        from mcdp_report.gg_ndp import gvgen_from_ndp
+        from mcdp_report.gdc import STYLE_GREENREDSYM
+        from mcdp_report.gg_utils import gg_figure
+        M = dp.get_imp_space()
 
-        out_html = os.path.join(out, 'report_dp1.html')
-        if imp:
-            last_imp = m
-            r = report_dp1(dp, imp=last_imp)
-        else:
-            r = report_dp1(dp)
+        report_solutions = Report()
+        for i, r in enumerate(res.minimals):
+            ms = dp.get_implementations_f_r(fg, r)
+            for j, m in enumerate(ms):
+
+                imp_dict = get_imp_as_recursive_dict(M, m)
+                images_paths = library.get_images_paths()
+                gv = GetValues(ndp=ndp, imp_dict=imp_dict, nu=upper, nl=1)
+
+                gg = gvgen_from_ndp(ndp=ndp, style=STYLE_GREENREDSYM,
+                                    images_paths=images_paths,
+                                    plotting_info=gv)
+
+                with report_solutions.subsection('sol-%s-%s' % (i, j)) as rr:
+                    gg_figure(rr, 'figure', gg, do_png=True, do_pdf=True,
+                              do_svg=False, do_dot=False)
+
+        out_html = os.path.join(out, 'report_solutions.html')
         logger.info('writing to %r' % out_html)
-        r.to_html(out_html)
+        report_solutions.to_html(out_html)
+
 
 def solve_meat_solve(trace, ndp, dp, fg, intervals, max_steps, _exp_advanced):
     R = dp.get_res_space()

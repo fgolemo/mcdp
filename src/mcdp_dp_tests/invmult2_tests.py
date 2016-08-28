@@ -1,14 +1,14 @@
 from comptests.registrar import comptest
-from mcdp_lang.parse_interface import parse_poset
 from mcdp_dp import InvMult2
+from mcdp_dp.dp_inv_plus import InvPlus2
 from mcdp_dp.primitive import ApproximableDP
-from mcdp_posets.uppersets import UpperSets
+from mcdp_lang.parse_interface import parse_poset
 from mcdp_posets.poset import NotLeq
-import numpy as np
-from reprep import Report
-from mcdp_dp.dp_inv_plus import InvPlus2, van_der_corput_sequence
-from numpy.testing.utils import assert_allclose
+from mcdp_posets.uppersets import UpperSets
 from mcdp_posets.utils import check_minimal
+from numpy.testing.utils import assert_allclose
+from reprep import Report
+import numpy as np
 
 @comptest
 def invmult2_check1():
@@ -138,8 +138,8 @@ def invmult2_check3():
     R = im.get_res_space()
     UR = UpperSets(R)
 
-    ns = [1, 2, 3, 4, 10, 15]
-    ns = [1, 5, 10, 15, 25, 50, 61, 100]
+#     ns = [1, 2, 3, 4, 10, 15]
+#     ns = [1, 5, 10, 15, 25, 50, 61, 100]
     ns = [1, 2, 3, 4, 5, 10]
     resL = []
     resU = []

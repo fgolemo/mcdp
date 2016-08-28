@@ -61,6 +61,9 @@ def convert_string_query(ndp, query, context):
     tu.check_leq(Fd, F)
     A_to_B, _ = tu.get_embedding(Fd, F)
     fg = A_to_B(fd)
+
+    print('Fd: %s' % Fd.format(fd))
+    print('F: %s' % F.format(fg))
     return fg
 
 
@@ -93,6 +96,8 @@ def interpret_params(params, fnames, F):
     tu.check_leq(Fd, F)
     A_to_B, _ = tu.get_embedding(Fd, F)
     fg = A_to_B(fd)
+    print('Fd: %s' % Fd.format(fd))
+    print('F: %s' % F.format(fg))
     return fg
 
 @contract(p="str")

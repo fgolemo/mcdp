@@ -1,4 +1,4 @@
-template mcdp {
+mcdp {
    provides dc [`PortableDCPower]
    provides motion [`Motion]
    provides payload [`Payload]
@@ -9,14 +9,42 @@ template mcdp {
 
    requires usbcom [`USBCom]
 
-   # uses a barrel charger
-   # ((required in).dc).connector >= `barrel_connectors: barrel_2_35mm
-   # (required in).duration >= 1 hour
-   # (required in).voltage >= `DC_voltages: v5 # XXX
+   payload_mass = (provided payload).mass
+   payload_shape = (provided payload).shape
+   payload_shape <= < 24cm, 24cm, 40cm >
+
+   max_mass = 5kg
+   payload_mass <= max_mass
 
    # provides usb out
+   velocity = (provided motion).velocity
+   endurance = (provided motion).endurance
+   
+   v1 = 18.5 in/sec
+   v0 = 10 in/sec
+   # portion of total mass
+   f = payload_mass / max_mass
+   # velocity <= v1 - (v1-v0) * f 
+   velocity + (v1 - v0) * f <= v1
+   e1 = 2 hours
+   e0 = 30 min
+   # endurance <= e1 - (e1 - e0) * f
+   endurance + (e1-e0) * f <= e1
 
+   #  enforce that all rigid body IDs are the same
+   rigid_body1 = (provided motion).rigid_body 
+   rigid_body2 = (provided dc).rigid_body 
+   rigid_body3 = (provided payload).rigid_body
+   rigid_body = max(max(rigid_body1, rigid_body2), rigid_body3)
+   rigid_body <= any-of(Maximals(`RigidBodyID))
 
-
+   out = (provided dc).dc 
+   (provided dc).duration <= 1 hour
+   (out).connector <= `barrel_connectors: barrel_2_35mm # XXX
+   (out).amps <= 1 A  
+   (out).voltage <= `DC_voltages: v5 # XXX
    required budget >= 199.99 USD
+
+   ignore usbcom provided by _res_usbcom # XXX
+   ignore in provided by _res_in # XXX
 }

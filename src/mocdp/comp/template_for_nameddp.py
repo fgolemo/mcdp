@@ -1,8 +1,9 @@
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from contracts.utils import check_isinstance, raise_desc, raise_wrapped
 from mcdp_posets import NotLeq, get_types_universe
-from mocdp.exceptions import DPSemanticError
+from mocdp import ATTR_LOAD_LIBNAME
 from mocdp.comp.interfaces import NamedDP
+from mocdp.exceptions import DPSemanticError
 
 __all__ = [
     'TemplateForNamedDP'
@@ -13,6 +14,9 @@ class TemplateForNamedDP():
     @contract(parameters='dict(str:isinstance(NamedDP))')
     def __init__(self, parameters, template_code):
         """
+        
+            plus, the attribute ATTR_LOAD_LIBNAME is used
+            to describe the original library context
         
         """
         self.parameters = parameters
@@ -39,7 +43,15 @@ class TemplateForNamedDP():
                               proposed=describe_interface(proposed),
                               compact=True)
         
-        c = context.child()
+        if hasattr(self, ATTR_LOAD_LIBNAME):
+            libname = getattr(self, ATTR_LOAD_LIBNAME)
+            print('The libname is %r ' % libname)
+            library = context.load_library(libname)
+            c = library._generate_context_with_hooks()
+        else:
+            c = context.child()
+
+
         for k, v in parameter_assignment.items():
             c.var2model[k] = v
 

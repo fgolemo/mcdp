@@ -205,6 +205,31 @@ def embed_images(html, basedir):
                 tag['src'] = src
     return str(soup)
 
+def embed_images_from_library(html, library):
+    """ Resolves images from library """
+
+    def resolve(href):
+        print('resolving %r' % href)
+        f = library._get_file_data(href)
+        data = f['data']
+        # realpath = f['realpath']
+        return data
+
+    soup = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
+    for tag in soup.select('img'):
+        href = tag['src']
+        extensions = ['png', 'jpg']
+        for ext in extensions:
+            if ext in href and not 'data:' in href:
+                data = resolve(href)
+                encoded = base64.b64encode(data)
+                from mcdp_web.images.images import get_mime_for_format
+                mime = get_mime_for_format(ext)
+                src = 'data:%s;base64,%s' % (mime, encoded)
+                tag['src'] = src
+    return str(soup)
+    
+
 def extract_assets(html, basedir):
     """ Extracts all embedded assets. """
     if not os.path.exists(basedir):

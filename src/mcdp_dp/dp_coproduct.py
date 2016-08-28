@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from .primitive import NormalForm, NotFeasible, PrimitiveDP
 from contracts import contract
-from contracts.utils import indent, raise_desc
+from contracts.utils import check_isinstance, indent, raise_desc
 from mcdp_posets import (
     Coproduct1, Coproduct1Labels, Map, NotBelongs, NotEqual, PosetProduct,
     UpperSet, UpperSets, get_types_universe, poset_minima)
@@ -18,6 +18,7 @@ class CoProductDP(PrimitiveDP):
 
     @contract(dps='tuple,seq[>=1]($PrimitiveDP)')
     def __init__(self, dps):
+        check_isinstance(dps, tuple)
         tu = get_types_universe()
 
         F1 = dps[0].get_fun_space()
@@ -192,7 +193,7 @@ class CoProductDPLabels(PrimitiveDP):
 
     @contract(dp=CoProductDP)
     def __init__(self, dp, labels):
-        assert isinstance(dp, CoProductDP), type(dp)
+        check_isinstance(dp, CoProductDP)
 
         self.dp = dp
         self.labels = labels
@@ -243,9 +244,9 @@ class CoProductDPLabels(PrimitiveDP):
 
     def __repr__(self):
         s = "^".join('%s:%s' % x for x in zip(self.labels, self.dp.dps))
-        return 'CoProductLabels(%s)' % s
+        return 'CoProductDPLabels(%s)' % s
 
     def repr_long(self):
-        s = "CoProductLabels %s " % self.labels.__repr__()
+        s = "CoProductDPLabels %s " % self.labels.__repr__()
         s += '\n' + self.dp.repr_long()
         return s

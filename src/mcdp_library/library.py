@@ -1,13 +1,15 @@
+# -*- coding: utf-8 -*-
 from .utils import memo_disk_cache2
 from .utils.locate_files_imp import locate_files
 from contextlib import contextmanager
 from contracts import contract
-from contracts.utils import format_obs, raise_desc, raise_wrapped
+from contracts.utils import (check_isinstance, format_obs, raise_desc,
+    raise_wrapped)
 from copy import deepcopy
 from mcdp_dp import PrimitiveDP
 from mcdp_lang import parse_ndp, parse_poset
 from mcdp_posets import Poset
-from mocdp import ATTR_LOAD_NAME, logger
+from mocdp import ATTR_LOAD_LIBNAME, ATTR_LOAD_NAME, logger
 from mocdp.comp.context import Context, ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
@@ -92,7 +94,9 @@ class MCDPLibrary():
             if not hasattr(self, f):
                 raise ValueError(f)
             contents[f] = deepcopy(getattr(self, f))
-        return MCDPLibrary(**contents)
+        res = MCDPLibrary(**contents)
+        res.library_name = getattr(self, 'library_name', None)
+        return res
 
     def use_cache_dir(self, cache_dir):
 
@@ -105,7 +109,7 @@ class MCDPLibrary():
             with open(fn, 'w') as f:
                 f.write('touch')
             os.unlink(fn)
-        except Exception as e:
+        except Exception:
             logger.debug('Cannot write to folder %r. Not using caches.' % cache_dir)
             self.cache_dir = None
         else:
@@ -116,31 +120,26 @@ class MCDPLibrary():
             if os.path.exists(self.cache_dir):
                 shutil.rmtree(self.cache_dir)
 
-    # @memoize_simple
     @contract(returns=NamedDP)
     def load_ndp(self, id_ndp):
         return self._load_generic(id_ndp, MCDPLibrary.ext_ndps,
                                   MCDPLibrary.parse_ndp)
 
-    # @memoize_simple
     @contract(returns=Poset)
     def load_poset(self, id_poset):
         return self._load_generic(id_poset, MCDPLibrary.ext_posets,
                                   MCDPLibrary.parse_poset)
 
-    # @memoize_simple
     @contract(returns=ValueWithUnits)
     def load_constant(self, id_poset):
         return self._load_generic(id_poset, MCDPLibrary.ext_values,
                                   MCDPLibrary.parse_constant)
 
-    # @memoize_simple
     @contract(returns=PrimitiveDP)
     def load_primitivedp(self, id_primitivedp):
         return self._load_generic(id_primitivedp, MCDPLibrary.ext_primitivedps,
                                   MCDPLibrary.parse_primitivedp)
 
-    # @memoize_simple
     @contract(returns=TemplateForNamedDP)
     def load_template(self, id_ndp):
         return self._load_generic(id_ndp, MCDPLibrary.ext_templates,
@@ -191,7 +190,14 @@ class MCDPLibrary():
 
     def parse_template(self, string, realpath=None):
         from mcdp_lang.parse_interface import parse_template
-        return self._parse_with_hooks(parse_template, string, realpath)
+        template = self._parse_with_hooks(parse_template, string, realpath)
+        if hasattr(template, ATTR_LOAD_LIBNAME):
+            _prev = getattr(template, ATTR_LOAD_LIBNAME)
+            # print('library %r gets something from %r' % (self.library_name, _prev))
+        else:
+            # print('parsed original template at %s' % self.library_name)
+            setattr(template, ATTR_LOAD_LIBNAME, self.library_name)
+        return template
 
     @contextmanager
     def _sys_path_adjust(self):
@@ -229,14 +235,16 @@ class MCDPLibrary():
             try:
                 library = hook(id_library)
             except DPSemanticError as e:
-                if len(hook) == 1:
+                if len(self.load_library_hooks) == 1:
                     raise
                 errors.append(e)
                 continue
 
             if self.cache_dir is not None:
                 # XXX we should create a new one
-                library.use_cache_dir(self.cache_dir)
+                library_name = library.library_name
+                new_cache = os.path.join(self.cache_dir, 'sublibrary', library_name)
+                library.use_cache_dir(new_cache)
             return library
 
         msg = 'Could not load library %r.' % id_library
@@ -269,12 +277,16 @@ class MCDPLibrary():
     def list_values(self):
         return self._list_with_extension(MCDPLibrary.ext_values)
 
+    @contract(ext=str)
     def _list_with_extension(self, ext):
         r = []
         for x in self.file_to_contents:
+            assert isinstance(x, str), x.__repr__()
             p = '.' + ext
             if x.endswith(p):
-                r.append(x.replace(p, ''))
+                fn = x.replace(p, '')
+                assert isinstance(fn, str), (x, p, fn)
+                r.append(fn)
         res = set(r)
         return res
 
@@ -294,7 +306,8 @@ class MCDPLibrary():
                 break
         else:
             ext = os.path.splitext(basename)[1].replace('.', '')
-            available = sorted(self._list_with_extension(ext))
+            available = sorted(self._list_with_extension(ext),
+                               key=lambda x: x.lower())
 
             available = ", ".join(available)
 
@@ -305,7 +318,9 @@ class MCDPLibrary():
         found = self.file_to_contents[match]
         return found
 
+    @contract(d=str)
     def add_search_dir(self, d):
+        check_isinstance(d, str)
         self.search_dirs.append(d)
 
         if not os.path.exists(d):
@@ -318,6 +333,7 @@ class MCDPLibrary():
             raise_wrapped(DPSemanticError, e, msg, search_dirs=self.search_dirs,
                           compact=True)
 
+    @contract(d=str)
     def _add_search_dir(self, d):
         """ Adds the directory to the search directory list. """
 
@@ -337,10 +353,13 @@ class MCDPLibrary():
             for f in files_mcdp:
                 if should_ignore(f):
                     continue
+                assert isinstance(f, str)
                 self._update_file(f)
 
+    @contract(f=str)
     def _update_file(self, f):
         basename = os.path.basename(f)
+        check_isinstance(basename, str)
         # This will fail because then in pyparsing everything is unicode
         # import codecs
         # data = codecs.open(f, encoding='utf-8').read()
@@ -373,6 +392,9 @@ class MCDPLibrary():
                     raise_desc(DPSemanticError, msg,
                                path1=realpath1,
                                path2=res['realpath'])
+
+        assert isinstance(basename, str), basename
+#         print('adding %r' % basename)
         self.file_to_contents[basename] = res
 
     def write_to_model(self, name, data):

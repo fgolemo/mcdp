@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
+from mcdp_dp import (Constant, ConstantMinimals, Limit, LimitMaximals,
+    get_conversion)
+from mcdp_posets import get_types_universe
+from mcdp_posets.rcomp import finfo
 from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import ValueWithUnits
-from mcdp_dp import Constant
-from mcdp_posets.types_universe import get_types_universe
-from mcdp_dp.conversion import get_conversion
-from mcdp_dp.dp_limit import Limit, LimitMaximals
-from mcdp_dp.dp_constant import ConstantMinimals
-from mcdp_posets.rcomp import finfo
 
 
 

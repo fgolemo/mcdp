@@ -1,8 +1,8 @@
-from mcdp_dp.primitive import PrimitiveDP
 from contracts import contract
-import copy
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from contracts.utils import indent
+from mcdp_dp.primitive import PrimitiveDP
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
+import copy
 
 __all__ = [
     'LabelerDP',

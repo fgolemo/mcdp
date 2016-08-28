@@ -1,5 +1,5 @@
-from contracts import contract
 from contextlib import contextmanager
+from contracts import contract
 from contracts.utils import indent, raise_desc
 
 
@@ -29,7 +29,7 @@ class Tracer():
         self.logger = logger
 
     def __repr__(self):
-        return 'Tracer(%s)' % self.chronology
+        return 'Tracer(%s)' % len(self.chronology)
 
     def repr_long(self):
         return self.__repr__()

@@ -4,9 +4,9 @@ from .primitive import NormalForm, PrimitiveDP
 from contracts.utils import indent, raise_wrapped
 from mcdp_posets import (Map, NotBelongs, PosetProduct, UpperSet, UpperSets,
     lowerset_product, poset_minima, upperset_product)
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import do_extra_checks
 import itertools
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 
 
 __all__ = [

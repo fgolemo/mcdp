@@ -33,7 +33,7 @@ mcdp {
 
 types = {
     'NCA':   dict(desc="Lithium nickel cobalt aluminum oxide", 
-                    specific_energy="220 Wh/kg", specific_cost='', cycles="1500"),
+                  specific_energy="220 Wh/kg", specific_cost='', cycles="1500"),
     
     'NMC':   dict(desc="Lithium nickel manganese cobalt oxide", 
                         specific_energy="205 Wh/kg", specific_cost='', cycles="5000"),
@@ -60,7 +60,7 @@ types = {
                   specific_energy=" 30 Wh/kg", specific_cost=' 7.50 Wh/$', cycles="500"),
 
     'SLA':   dict(desc="Lead-acid", 
-                    specific_energy=" 30 Wh/kg", specific_cost=' 7.00 Wh/$', cycles="500"),
+                  specific_energy=" 30 Wh/kg", specific_cost=' 7.00 Wh/$', cycles="500"),
 }
 
 def go():

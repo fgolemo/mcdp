@@ -2,10 +2,9 @@
 from .primitive import EmptyDP
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_posets import Map, MapNotDefinedHere, NotBelongs
+from mcdp_posets import Map, MapNotDefinedHere, NotBelongs, Poset
 from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
-from mcdp_posets.poset import Poset
 
 
 __all__ = [

@@ -1,5 +1,5 @@
 specialize [
   Battery: `batteries_nodisc.batteries, 
-  Actuation: `Actuation, 
+  Actuation: `droneD_complete_v2.Actuation, 
   PowerApprox: `PowerApprox100mw
 ] `ActuationEnergeticsTemplate

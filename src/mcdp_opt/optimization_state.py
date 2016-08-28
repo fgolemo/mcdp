@@ -10,8 +10,8 @@ from mcdp_posets import get_types_universe
 from mcdp_posets.uppersets import UpperSet, UpperSets
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import CResource, Connection
-from mocdp.memoize_simple_imp import memoize_simple
 from mocdp.exceptions import do_extra_checks
+from mocdp.memoize_simple_imp import memoize_simple
 
 _ = UpperSet
 
@@ -75,7 +75,6 @@ class OptimizationState():
             if not UR.equal(lb, UR.get_bottom()):
                 n += 1
         return n
-
 
     def get_info(self):
         return self._msg

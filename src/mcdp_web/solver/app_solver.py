@@ -1,7 +1,7 @@
 from mcdp_web.solver.app_solver_state import SolverState, get_decisions_for_axes
-from pyramid.httpexceptions import HTTPSeeOther
-import itertools
 from mcdp_web.utils.ajax_errors import ajax_error_catch
+from pyramid.httpexceptions import HTTPSeeOther  # @UnresolvedImport
+import itertools
 
 
 class AppSolver():
