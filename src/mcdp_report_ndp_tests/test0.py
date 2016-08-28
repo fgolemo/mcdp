@@ -3,15 +3,17 @@ from mcdp_report.report import report_dp1, report_ndp1
 from mcdp_report.html import ast_to_html
 from mcdp_tests.generation import (for_all_dps_dyn, for_all_nameddps,
     for_all_nameddps_dyn, for_all_source_mcdp)
+from mcdp_lang.syntax import Syntax
 
 @for_all_source_mcdp
 def check_syntax(filename, source):  # @UnusedVariable
     # print filename
     try:
         _html = ast_to_html(source,
+                            parse_expr=Syntax.ndpt_dp_rvalue,
                            complete_document=False, extra_css="",
                            ignore_line=lambda _lineno: False,
-                           add_line_gutter=True, encapsulate_in_precode=True, add_css=True)
+                           add_line_gutter=True, encapsulate_in_precode=True, add_css=False)
     except:
         print filename
         raise

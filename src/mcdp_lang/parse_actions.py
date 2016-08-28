@@ -8,7 +8,7 @@ from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
-    MCDPExceptionWithWhere, mcdp_dev_warning, do_extra_checks)
+    MCDPExceptionWithWhere, do_extra_checks, mcdp_dev_warning)
 from pyparsing import ParseException, ParseFatalException
 
 CDP = CDPLanguage
@@ -175,7 +175,18 @@ def parse_wrap(expr, string):
 
     m = lambda x: x
     try:
-        return expr.parseString(string0, parseAll=True)  # [0]
+        from mcdp_lang_tests.utils import find_parsing_element
+        from mcdp_library_tests.tests import timeit
+        try:
+            w = str(find_parsing_element(expr))
+        except ValueError:
+            w = '(unknown)'
+        with timeit(w, 0.5):
+            return expr.parseString(string0, parseAll=True)  # [0]
+    except RuntimeError as e:
+        msg = 'We have a recursive grammar.'
+        msg += "\n\n" + indent(m(string), '  ') + '\n'
+        raise_desc(DPInternalError, msg)
     except (ParseException, ParseFatalException) as e:
         # ... so we can use "string" here.
         # raise

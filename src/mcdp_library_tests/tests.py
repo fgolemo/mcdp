@@ -289,11 +289,14 @@ def mcdplib_test_setup_primitivedps(context, libname):
             c.comp(ftest, id_dp, ndp)
 
 @contextmanager
-def timeit(desc):
+def timeit(desc, minimum=None):
     t0 = time.clock()
     yield
     t1 = time.clock()
     delta = t1 - t0
+    if minimum is not None:
+        if delta < minimum:
+            return
     print('timeit %s: %.2f s' % (desc, delta))
 
 def _load_primitivedp(libname, model_name):

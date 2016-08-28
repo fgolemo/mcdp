@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from mcdp_lang.parts import CDPLanguage
-from pyparsing import Literal, Optional, Suppress, Keyword
 from contracts.utils import check_isinstance
+from mcdp_lang.parts import CDPLanguage
+from pyparsing import Keyword, Literal, Optional, Suppress
 
 CDP = CDPLanguage
 

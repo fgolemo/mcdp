@@ -95,6 +95,7 @@ def eval_rvalue(rvalue, context):
         cases = {
             CDP.GenericNonlinearity : eval_rvalue_GenericNonlinearity,
             CDP.Power: eval_rvalue_Power,
+            CDP.PowerShort: eval_rvalue_Power,
             CDP.Divide: eval_rvalue_divide,
             CDP.MultN: eval_rvalue_MultN,
             CDP.PlusN: eval_rvalue_PlusN,

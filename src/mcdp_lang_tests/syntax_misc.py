@@ -20,8 +20,8 @@ from pyparsing import Literal
 def check_lang():
     idn = SyntaxIdentifiers.get_idn()
     parse_wrap(idn, 'battery')
-    parse_wrap(idn + Syntax.ow, 'battery ')
-    parse_wrap(idn + Syntax.ow + Literal('='), 'battery=')
+    parse_wrap(idn, 'battery ')
+    parse_wrap(idn + Literal('='), 'battery=')
     parse_wrap(Syntax.ndpt_load, 'load battery')
 
 @comptest
@@ -104,6 +104,9 @@ def check_lang8_addition():
 def check_lang9_max():
     parse_wrap_check("""provides x [R]""",
                      Syntax.fun_statement)
+    parse_wrap_check("""requires x [R]""",
+                     Syntax.res_statement)
+
     parse_wrap_check("""
             provides x [R]
             requires r [R]
@@ -121,24 +124,7 @@ def check_lang9_max():
     parse_wrap(Syntax.rvalue_binary, 'max(f, g)')
     parse_wrap(Syntax.rvalue, 'max(f, g)')
     parse_wrap(Syntax.constraint_expr_geq, 'hnlin.x >= max(f, g)')
-
-#     p = assert_parsable_to_connected_ndp("""
-#     mcdp {
-#         provides f [R]
-#
-#         sub hnlin = instance dp {
-#             provides x [R]
-#             requires r [R]
-#
-#             implemented-by load SimpleNonlinearity1
-#         }
-#
-#         hnlin.x >= max(f, hnlin.r)
-#     }
-#     """)
-#
-#     assert_equal(p.get_rnames(), [])
-#     assert_equal(p.get_fnames(), ['f'])
+ 
 
 
 @comptest
@@ -478,6 +464,17 @@ def check_lang61():  # TODO: rename
 
 @comptest
 def check_lang60():  # TODO: rename
+    print('check_lang60()')
+    parse_wrap_check("required in", Syntax.fvalue_new_resource2)
+    parse_wrap_check("required in", Syntax.fvalue_operand)
+    parse_wrap_check("required in", Syntax.fvalue)
+    parse_wrap_check("(required in).dc", Syntax.fvalue_label_indexing3)
+    parse_wrap_check("((required in).dc).connector", Syntax.fvalue_label_indexing3)
+
+    parse_wrap_check("((required in).dc).connector >= `USB_connectors: USB_Std_A",
+                     Syntax.line_expr)
+    
+    
     pass
 
 
