@@ -466,20 +466,14 @@ class Syntax():
     # assert_gt(v1, v2)
     # assert_nonempty(v1, v2)
     # assert_empty(v1, v2)
-#     AssertEqual = namedtuplewhere('AssertEqual', 'keyword v1 v2')
-#     AssertLEQ = namedtuplewhere('AssertLEQ', 'v1 v2')
-#     AssertGEQ = namedtuplewhere('AssertGEQ', 'v1 v2')
-#     AssertLT = namedtuplewhere('AssertLT', 'v1 v2')
-#     AssertGT = namedtuplewhere('AssertGT', 'v1 v2')
-#     AssertNonempty = namedtuplewhere('AssertNonempty', 'v1 v2')
-    K = Keyword
-    ASSERT_EQUAL = spk(K('assert_equal'), CDP.AssertEqualKeyword)
-    ASSERT_LEQ = spk(K('assert_leq'), CDP.AssertLEQKeyword)
-    ASSERT_GEQ = spk(K('assert_geq'), CDP.AssertGEQKeyword)
-    ASSERT_LT = spk(K('assert_lt'), CDP.AssertLTKeyword)
-    ASSERT_GT = spk(K('assert_gt'), CDP.AssertGTKeyword)
-    ASSERT_NONEMPTY = spk(K('assert_nonempty'), CDP.AssertNonemptyKeyword)
-    ASSERT_EMPTY = spk(K('assert_empty'), CDP.AssertEmptyKeyword)
+
+    ASSERT_EQUAL = keyword('assert_equal', CDP.AssertEqualKeyword)
+    ASSERT_LEQ = keyword('assert_leq', CDP.AssertLEQKeyword)
+    ASSERT_GEQ = keyword('assert_geq', CDP.AssertGEQKeyword)
+    ASSERT_LT = keyword('assert_lt', CDP.AssertLTKeyword)
+    ASSERT_GT = keyword('assert_gt', CDP.AssertGTKeyword)
+    ASSERT_NONEMPTY = keyword('assert_nonempty', CDP.AssertNonemptyKeyword)
+    ASSERT_EMPTY = keyword('assert_empty', CDP.AssertEmptyKeyword)
 
     assert_equal = sp(ASSERT_EQUAL - SLPAR - constant_value - SCOMMA - constant_value - SRPAR,
                       lambda t: CDP.AssertEqual(keyword=t[0], v1=t[1], v2=t[2]))
