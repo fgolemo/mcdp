@@ -4,12 +4,9 @@ from .dp_generic_unary import WrapAMap
 from .primitive import ApproximableDP
 from contracts import contract
 from contracts.utils import raise_wrapped
-from mcdp_dp import PrimitiveDP
+from mcdp_dp import NotSolvableNeedsApprox, PrimitiveDP, WrongUseOfUncertain
 from mcdp_maps import MapComposition
-from mcdp_posets import PosetProduct, Space
-from mcdp_posets.poset import NotLeq
-from mcdp_posets.space import Map
-from mcdp_dp.primitive import NotSolvableNeedsApprox, WrongUseOfUncertain
+from mcdp_posets import Map, NotLeq, PosetProduct, Space
 import copy
 
 

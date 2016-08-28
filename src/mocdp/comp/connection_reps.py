@@ -1,8 +1,8 @@
-from contracts.utils import raise_desc
 from collections import Counter
+from contracts.utils import raise_desc
+from mocdp.comp.context import Connection
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.comp.context import Connection
 
 
 class ThereAreReps(ValueError):

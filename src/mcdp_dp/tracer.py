@@ -1,5 +1,5 @@
-from contracts import contract
 from contextlib import contextmanager
+from contracts import contract
 from contracts.utils import indent, raise_desc
 
 

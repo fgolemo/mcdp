@@ -12,4 +12,15 @@ finite_poset {
 
     # used by Youbot charger
     Neutrik_NC4MXX
+
+    barrel_none
+    barrel_none <= tip_sleeve_2_5mm
+    barrel_none <= tip_sleeve_3_5mm
+    barrel_none <= barrel_5mm
+    barrel_none <= barrel_2_35mm
+    barrel_none <= barrel_3_35mm_1_35mm
+    barrel_none <= barrel_4mm_1_7mm
+    barrel_none <= barrel_4mm_1_5mm
+    barrel_none <= barrel_4mm_2_5mm
+    barrel_none <= Neutrik_NC4MXX
 }

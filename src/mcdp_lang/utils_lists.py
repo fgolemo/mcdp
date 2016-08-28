@@ -1,6 +1,7 @@
-from mcdp_lang.namedtuple_tricks import namedtuplewhere
-from contracts.utils import raise_desc, raise_wrapped
+# -*- coding: utf-8 -*-
+from .namedtuple_tricks import namedtuplewhere
 from contracts.interface import Where
+from contracts.utils import raise_desc, raise_wrapped
 from mocdp.exceptions import DPInternalError
 
 # Create a type for each length of lists

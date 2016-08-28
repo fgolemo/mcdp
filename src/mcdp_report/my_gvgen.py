@@ -542,7 +542,7 @@ class GvGen():
                 s += indentu(cs, '   ') + '\n'
             return s
 
-        def render_dot_root(level, node, children_results):
+        def render_dot_root(level, node, children_results):  # @UnusedVariable
             s = "digraph G { \n"
             if self.options:
                 for key, value in self.options.iteritems():
@@ -567,7 +567,7 @@ class GvGen():
             s += '}'
             return s
 
-        def render_dot_subgraph(level, node, children_results):
+        def render_dot_subgraph(level, node, children_results):  # @UnusedVariable
             s = "subgraph cluster%d { \n" % node['id']
             properties = self.propertiesAsStringGet(node, node['properties'])
             s += indent('   ', properties)
@@ -575,7 +575,7 @@ class GvGen():
             s += '}'
             return s
 
-        def render_dot_node(level, node, children_results):
+        def render_dot_node(level, node, children_results):  # @UnusedVariable
             properties = self.propertiesAsStringGet(node, node['properties'])
             return "node%d %s;\n" % (node['id'], properties)
 

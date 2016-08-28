@@ -4,6 +4,7 @@ from mcdp_report.gg_utils import gg_get_format
 from mcdp_web.utils.response import response_data
 from mocdp.comp.composite_templatize import ndp_templatize
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
+from contracts.utils import raise_desc
 
 class WebAppImages():
 
@@ -80,8 +81,20 @@ class WebAppImages():
             return response_data(request, data, get_mime_for_format(fileformat))
 
         return self.png_error_catch2(request, go)
+#
+# def get_ext_for_mime(mime):
+#     table = get_mime_table()
+#     inverse = dict([v, k] for k, v in table.items())
+#     if not mime in inverse:
+#         msg = 'Could not find mime type in table.'
+#         raise_desc(ValueError, msg, available=list(inverse))
+#     return inverse[mime]
 
 def get_mime_for_format(data_format):
+    table = get_mime_table()
+    return table[data_format]
+
+def get_mime_table():
     d = {
          'pdf': 'image/pdf',
          'png': 'image/png',
@@ -89,7 +102,7 @@ def get_mime_for_format(data_format):
          'dot': 'text/plain',
          'svg': 'image/svg+xml',
     }
-    return d[data_format]
+    return d
 
 def ndp_graph_templatized(library, ndp, yourname=None, data_format='png', direction='LR'):
     ndp = ndp_templatize(ndp, mark_as_template=False)

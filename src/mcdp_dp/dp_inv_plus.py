@@ -1,7 +1,6 @@
-from .primitive import ApproximableDP, PrimitiveDP
+from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
-from mcdp_dp.primitive import NotSolvableNeedsApprox
 from mcdp_posets import Nat, Poset, PosetProduct, RcompUnits, get_types_universe
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 import numpy as np

@@ -1,8 +1,7 @@
-from mcdp_dp.primitive import PrimitiveDP
+from .primitive import PrimitiveDP
 from contracts import contract
-from mcdp_posets.nat import Nat
 from contracts.utils import check_isinstance
-from mcdp_posets.poset_product import PosetProduct
+from mcdp_posets import Nat, PosetProduct
 
 __all__ = [
     'InvPlus2Nat',

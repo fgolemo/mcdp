@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+from .eval_constant_asserts import (eval_assert_empty, eval_assert_equal,
+    eval_assert_geq, eval_assert_gt, eval_assert_leq, eval_assert_lt,
+    eval_assert_nonempty)
 from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
@@ -7,10 +10,10 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
     NotBelongs, NotLeq, PosetProduct, Rcomp, Space, UpperSet, UpperSets,
-    get_types_universe)
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
+    get_types_universe, poset_minima)
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+
 
 CDP = CDPLanguage
 
@@ -120,14 +123,7 @@ def eval_constant(op, context):
         if isinstance(op, CDP.GenericNonlinearity):
             raise_desc(NotConstant, 'GenericNonlinearity is not constant', op=op)
 
-        if isinstance(op, CDP.PlusN):
-            from mcdp_lang.eval_math import eval_PlusN_as_constant
-            return eval_PlusN_as_constant(op, context)
-
-        if isinstance(op, CDP.MultN):
-            from mcdp_lang.eval_math import eval_MultN_as_constant
-            return eval_MultN_as_constant(op, context)
-
+     
         if isinstance(op, CDP.MakeTuple):
             ops = get_odd_ops(unwrap_list(op.ops))
             constants = [eval_constant(_, context) for _ in ops]
@@ -157,6 +153,27 @@ def eval_constant(op, context):
             res = dp.solve(f)
             UR = UpperSets(dp.get_res_space())
             return ValueWithUnits(res, UR)
+
+        from mcdp_lang.eval_math import eval_constant_minus
+        from mcdp_lang.eval_math import eval_PlusN_as_constant
+        from mcdp_lang.eval_math import eval_MultN_as_constant
+
+        cases = {
+            CDP.AssertEqual: eval_assert_equal,
+            CDP.AssertLEQ: eval_assert_leq,
+            CDP.AssertGEQ: eval_assert_geq,
+            CDP.AssertLT: eval_assert_lt,
+            CDP.AssertGT: eval_assert_gt,
+            CDP.AssertNonempty: eval_assert_nonempty,
+            CDP.AssertEmpty: eval_assert_empty,
+            CDP.ConstantMinus: eval_constant_minus,
+            CDP.PlusN: eval_PlusN_as_constant,
+            CDP.MultN: eval_MultN_as_constant,
+        }
+        
+        for klass, hook in cases.items():
+            if isinstance(op, klass):
+                return hook(op, context)
 
         msg = 'eval_constant(): Cannot evaluate this as constant.'
         op = recursive_print(op)

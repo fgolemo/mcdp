@@ -1,11 +1,44 @@
 #!/usr/bin/env python
 from bs4 import BeautifulSoup
-import sys, os, urllib2, codecs
+from contracts import contract
+import sys
+from mcdp_report.html import get_language_css, get_markdown_css
 
-files = sys.argv[1:]
+manual_css = """
+
+@page {
+    margin: 0.5cm;
+}
+
+h1 { color: black; }
+h2 { color: blue; }
+h3 { color: magenta; }
+
+h1 { page-break-before: always; text-align: center;}
+h1#booktitle  { page-break-before: avoid; }
+h2 { }
 
 
-def go():
+.toc a { text-decoration: none; }
+
+
+/* Good for safari */
+pre {
+     box-shadow: none;
+}
+
+.ndp_graph_expand,
+.ndp_graph_enclosed,
+.ndp_graph_normal,
+.ndp_graph_templatized,
+.ndp_graph_templatized_labeled,
+.template_graph_enclosed {
+    max-width: 50em;
+}
+"""
+
+@contract(files_contents='list( tuple( tuple(str,str), str) )', returns='str')
+def manual_join(files_contents):
 
     template = """
     <!DOCTYPE html>
@@ -32,29 +65,30 @@ def go():
     </html>
     """
 
-    css = urllib2.urlopen('http://127.0.0.1:8080/static/css/mcdp_language_highlight.css').read()
-    other =  urllib2.urlopen('http://127.0.0.1:8080/static/css/markdown.css').read()
-    extra = open('manual.css').read()
-    template = template.replace('CSS', css + '\n' + other + '\n' + extra)
+    # css = urllib2.urlopen('http://127.0.0.1:8080/static/css/mcdp_language_highlight.css').read()
+    # other = urllib2.urlopen('http://127.0.0.1:8080/static/css/markdown.css').read()
+#     extra = open('manual.css').read()
+    markdown_css = get_markdown_css()
+    mcdp_css = get_language_css()
+    template = template.replace('CSS', mcdp_css + '\n' + manual_css + '\n' + markdown_css)
     d = BeautifulSoup(template, 'lxml')
     main_body = BeautifulSoup("", 'lxml')
 
-    for f in files:
-        data = codecs.open(f,'r',encoding='utf8').read()
+    for (libname, docname), data in files_contents:
         doc = BeautifulSoup(data, 'lxml', from_encoding='utf-8')
 
         body = doc.body
         body.name = 'div'
-        body['id'] = os.path.basename(f)
+        body['id'] = docname
         main_body.append(body)
 
     for tag in main_body.select("a"):
         href = tag['href']
-        #debug(href)
+        # debug(href)
         # http://127.0.0.1:8080/libraries/tour1/types.html
         if href.endswith('html'):
             page = href.split('/')[-1]
-            new_ref= '#%s' % page
+            new_ref = '#%s' % page
             tag['href'] = new_ref
 
     toc = generate_doc(main_body)
@@ -67,7 +101,7 @@ def go():
 
     body_place.replaceWith(main_body)
 
-    print str(d)
+    return str(d)
 
 def debug(s):
     sys.stderr.write(str(s) + ' \n')
@@ -83,8 +117,8 @@ def generate_doc(soup):
             self.depth = depth
             self.id = id
             self.items = items
-            for i in items:
-                assert isinstance(items)
+#             for i in items:
+#                 assert isinstance(items)
 
             self.number = None
 
@@ -92,15 +126,15 @@ def generate_doc(soup):
             self.number = prefix
 
             if self.tag:
-                self.tag.string =  prefix + ' - ' + self.tag.string
+                self.tag.string = prefix + ' - ' + self.tag.string
 
             def get_number(i, level):
                 if level == 0 or level == 1:
-                    headings = ['%d' % (j+1) for j in range(20)]
+                    headings = ['%d' % (j + 1) for j in range(20)]
                 elif level == 2:
-                    headings =  ['A','B','C','D','E','F','G','H','I','J','K','L',
-                        'M','N','O','P','Q','R','S','T','U','V','Z']
-                        
+                    headings = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
+                        'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'Z']
+
                 else:
                     return ''
 
@@ -113,7 +147,7 @@ def generate_doc(soup):
                 prefix = prefix + '.'
             for i, item in enumerate(self.items):
                 item_prefix = prefix + get_number(i, level)
-                item.number_items(item_prefix, level+1)
+                item.number_items(item_prefix, level + 1)
 
 
 
@@ -160,6 +194,3 @@ def generate_doc(soup):
 
     return root.__str__(root=True)
 
-
-
-go()

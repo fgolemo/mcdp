@@ -1,11 +1,12 @@
+# -*- coding: utf-8 -*-
+from .namedtuple_tricks import recursive_print
+from .parse_actions import add_where_information
+from .parts import CDPLanguage
+from .utils_lists import unwrap_list
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_lang.parse_actions import add_where_information
-from mcdp_lang.parts import CDPLanguage
-from mcdp_lang.utils_lists import unwrap_list
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.exceptions import DPInternalError, DPSemanticError
-from mcdp_lang.namedtuple_tricks import recursive_print
 
 
 CDP = CDPLanguage

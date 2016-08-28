@@ -1,48 +1,24 @@
-libname=manual
 
-markdowns=$(shell python get_list.py < $(libname)-toc.md)
-
-tmpdir=.downloads
-pdfs=$(markdowns:%.md=$(tmpdir)/%.pdf)
-
-all:
-	echo "try: make manual"
-
-$(tmpdir)/%.pdf: #: %.md
-	mkdir -p $(tmpdir)
-	rm -f $@
-	wkhtmltopdf --print-media-type http://127.0.0.1:8080/libraries/$(libname)/$*.html\?print=1\&strict=1 $@.tmp.pdf
-	mv $@.tmp.pdf $@
+all: manual
 
 
 htmltmpdir=out-html
-htmls=$(markdowns:%.md=$(htmltmpdir)/%.html)
 
-$(htmltmpdir)/%.html:
-	mkdir -p $(htmltmpdir)
-	cd $(htmltmpdir) && wget -k -p -nd -nc http://127.0.0.1:8080/libraries/$(libname)/$*.html\?print=1\&strict=1
-	mv $(htmltmpdir)/$*.html\?print=1\&strict=1 $(htmltmpdir)/$*.html
 
 manual_html=$(htmltmpdir)/manual.html
+
 manual: $(manual_html)
 
-$(manual_html): $(htmls)
-	python ./join_manual.py $(htmls) > $@
-	python ./embed_images.py $@
+$(manual_html): 
+	DISABLE_CONTRACTS=1 mcdp-render-manual --output_file $@
 
-manual.pdf:
-	wkhtmltopdf --print-media-type $(manual_html) $@
-
-manual2:
-	python ./join_manual.py $(htmls)  > $(manual_html)
-
-	# python ./embed_images.py $(manual_html)
+manual.pdf: $(manual_html)  
+	wkhtmltopdf --print-media-type $(manual_html) $@ 
 
 clean:
-	rm -f $(pdfs)
-	rm -f $(htmls)
-	#rmdir $(tmpdir)
+	rm -rf out-mcdp-render-manual
+	rm -rf $(manual_html)
 
-publish: $(htmltmpdir)/manual.html
+publish: $(manual_html)
 	cp $< ~/env_mcdp/src/mcdp-gh-pages/media/pymcdp-manual.html
 	cp $< ~/env_mcdp/src/mcdp/src/mcdp_web/static/manual.html

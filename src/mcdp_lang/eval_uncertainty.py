@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .helpers import create_operation
 from .parts import CDPLanguage
 from mocdp.exceptions import mcdp_dev_warning

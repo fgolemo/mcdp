@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 from .eval_constant_imp import NotConstant
 from .eval_resources_imp import eval_rvalue
+from .helpers import get_valuewithunits_as_resource
 from .misc_math import inv_constant
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_dp import GenericUnary, ProductN, SumN, SumNNat, WrapAMap
-from mcdp_dp.dp_sum import sum_dimensionality_works
-from mcdp_maps import MultNat, PlusNat, PlusValueMap
-from mcdp_maps.sum_n_intlike import SumNInt
-from mcdp_posets import (Int, Nat, RcompUnits, Space, get_types_universe,
-    mult_table, mult_table_seq)
+from mcdp_dp import (GenericUnary, ProductN, SumN, SumNNat, WrapAMap,
+    sum_dimensionality_works)
+from mcdp_maps import MultNat, PlusNat, PlusValueMap, SumNInt
+from mcdp_posets import (Int, Nat, RcompUnits, Space,
+    express_value_in_isomorphic_space, get_types_universe, mult_table,
+    mult_table_seq)
 from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
-from mcdp_lang.helpers import get_valuewithunits_as_resource
 
 CDP = CDPLanguage
 
@@ -31,6 +31,30 @@ def eval_constant_divide(op, context):
     from .misc_math import mult_constantsN
     return mult_constantsN(factors)
 
+
+def eval_constant_minus(op, context):
+    from .eval_constant_imp import eval_constant
+
+    ops = get_odd_ops(unwrap_list(op.ops))
+    constants = [eval_constant(_, context) for _ in ops]
+
+    R0 = constants[0].unit
+    if not isinstance(R0, RcompUnits):
+        msg = 'Cannot evaluate "-" on this space.'
+        raise_desc(DPSemanticError, msg, R0=R0)
+
+    # convert each factor to R0
+    v0 = constants[0].value
+    for c in constants[1:]:
+        vi = express_value_in_isomorphic_space(c.unit, c.value, R0)
+
+        if v0 < vi:
+            msg = 'Underflow: %s - %s gives a negative number' % (c.unit.format(v0), c.unit.format(vi))
+            raise_desc(DPSemanticError, msg)
+
+        v0 = v0 - vi
+
+    return ValueWithUnits(unit=R0, value=v0)
 
 @contract(unit1=Space, unit2=Space)
 def convert_vu(value, unit1, unit2, context):  # @UnusedVariable
@@ -50,7 +74,6 @@ def eval_MultN_as_constant(x, context):
 def eval_rvalue_MultN(x, context):
     res = eval_MultN(x, context, wants_constant=False)
     if isinstance(res, ValueWithUnits):
-        from .helpers import get_valuewithunits_as_resource
         return get_valuewithunits_as_resource(res, context)
     else:
         return res
@@ -92,7 +115,6 @@ def eval_rvalue_divide(op, context):
 def eval_rvalue_PlusN(x, context):
     res = eval_PlusN(x, context, wants_constant=False)
     if isinstance(res, ValueWithUnits):
-        from .helpers import get_valuewithunits_as_resource
         return get_valuewithunits_as_resource(res, context)
     else:
         return res

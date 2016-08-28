@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
+from .drawing import plot_upset_R2
 from .utils import safe_makedirs
 from abc import ABCMeta, abstractmethod
 from contracts import contract
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mcdp_posets import (NotLeq, PosetProduct, Rcomp, UpperSet, UpperSets,
     get_types_universe)
-from mocdp.drawing import plot_upset_R2
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
+from mcdp_posets.rcomp import finfo
 from reprep.config import RepRepDefaults
 import functools
+import numpy as np
 import os
 import traceback
-from mcdp_posets.rcomp import finfo
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
 
 
 extra_space_finite = 0.025
@@ -576,7 +577,6 @@ def fix_underflow(x):
     # using finfo.tiny gives problems to matplotlib
     return np.maximum(x, finfo.eps)
 
-import numpy as np
 
 def enlarge_topright(b, f):
     w = b[1] - b[0]

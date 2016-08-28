@@ -19,6 +19,8 @@ __all__ = [
     'Feasible',
     'NotSolvableNeedsApprox',
     'EmptyDP',
+    'ApproximableDP',
+    'WrongUseOfUncertain',
 ]
 
 

@@ -107,6 +107,7 @@ def get_lines_to_hide(params):
     return [int(_) for _ in lines]
 
 def syntax_pdf(data):
+    """ Returns a PDF string """
     from mcdp_report.html import ast_to_html
     s = data['s']
     s = s.replace('\t', '    ')

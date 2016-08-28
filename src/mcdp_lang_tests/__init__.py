@@ -53,3 +53,8 @@ from .syntax_single_space import *
 from .syntax_import import *
 from .take_optimization import *
 from .syntax_approximation import *
+
+from .syntax_asserts import *
+
+from .math import *
+

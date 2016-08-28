@@ -1,21 +1,17 @@
 # -*- coding: utf-8 -*-
 from .eval_constant_imp import eval_constant
-from .helpers import get_valuewithunits_as_resource
+from .helpers import create_operation, get_valuewithunits_as_resource
 from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_dp.dp_approximation import CombinedCeilMap, FloorStepMap
-from mcdp_dp.dp_generic_unary import WrapAMap
-from mcdp_lang.helpers import create_operation
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
-from mcdp_posets import NotLeq
-from mcdp_posets.types_universe import (express_value_in_isomorphic_space,
-    get_types_universe)
+from mcdp_dp import CombinedCeilMap, FloorStepMap, WrapAMap
+from mcdp_maps import PlusValueMap
+from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
+    get_types_universe, poset_minima)
 from mocdp.comp.context import CResource, ValueWithUnits, get_name_for_fun_node
 from mocdp.exceptions import DPSemanticError
-from mcdp_maps.plus_value_map import PlusValueMap
 
 
 CDP = CDPLanguage

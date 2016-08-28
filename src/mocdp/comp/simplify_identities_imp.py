@@ -7,6 +7,9 @@ from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPInternalError
 
+__all__ = [
+    'simplify_identities',
+]
 
 @contract(ndp=CompositeNamedDP, returns=CompositeNamedDP)
 def simplify_identities(ndp):

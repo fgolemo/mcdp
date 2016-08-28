@@ -1,10 +1,11 @@
-from mocdp.comp.composite import CompositeNamedDP
+# -*- coding: utf-8 -*-
 from contracts import contract
-from mcdp_lang.blocks import get_missing_connections
-from mocdp.comp.context import CResource, CFunction, Connection
-from mcdp_dp.dp_limit import LimitMaximals
-from mocdp.comp.wrap import dpwrap
 from mcdp_dp.dp_constant import ConstantMinimals
+from mcdp_dp.dp_limit import LimitMaximals
+from mcdp_lang.blocks import get_missing_connections
+from mocdp.comp.composite import CompositeNamedDP
+from mocdp.comp.context import CFunction, CResource, Connection
+from mocdp.comp.wrap import dpwrap
 
 
 @contract(cndp=CompositeNamedDP, returns=CompositeNamedDP,

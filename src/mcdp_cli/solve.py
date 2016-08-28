@@ -49,6 +49,7 @@ class SolveDP(QuickAppBase):
         options = self.get_options()
         if options.expect_nimp is not None:
             options.imp = True
+
         params = options.get_extra()
 
         if len(params) < 1:

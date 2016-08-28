@@ -1,10 +1,9 @@
-from mocdp.comp.composite import CompositeNamedDP
 from contracts import contract
+from mcdp_dp import Constant, LimitMaximals
+from mocdp.comp.composite import CompositeNamedDP
+from mocdp.comp.context import Connection, Context
 from mocdp.comp.interfaces import NamedDP
-from mocdp.comp.context import Context, Connection
-from mcdp_dp.dp_constant import Constant
 from mocdp.comp.wrap import dpwrap
-from mcdp_dp.dp_limit import LimitMaximals
 
 __all__ = [
     'IgnoreSome',

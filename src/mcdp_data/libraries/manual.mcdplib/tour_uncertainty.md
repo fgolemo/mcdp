@@ -27,7 +27,9 @@ which joins two branches, the optimistic and the pessimistic branch.
 <pre class='ndp_graph_expand'>`uncertain1</pre>
 
 
-<img style='max-width: 30em' src="/libraries/uncertainty/models/uncertain_battery4/views/solver2/display1u.png?xaxis=capacity&amp;yaxis=mass&amp;xmin=0J&amp;xmax=1MJ&amp;nsamples=50"/>
+<!-- 
+    <img style='max-width: 30em' src="/libraries/uncertainty/models/uncertain_battery4/views/solver2/display1u.png?xaxis=capacity&amp;yaxis=mass&amp;xmin=0J&amp;xmax=1MJ&amp;nsamples=50"/> 
+-->
 
 <!--
 

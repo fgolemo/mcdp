@@ -1,8 +1,7 @@
 from contracts import contract
+from mcdp_dp import Constant, WrapAMap
+from mcdp_posets import PosetProduct
 from mocdp.comp.context import CResource, ValueWithUnits
-from mcdp_dp.dp_constant import Constant
-from mcdp_dp.dp_generic_unary import WrapAMap
-from mcdp_posets.poset_product import PosetProduct
 
 def get_connections_for(context, name1, name2):
     s = set()
