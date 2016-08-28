@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from .helpers import square
-from .parse_actions import (divide_parse_action, funshortcut1m,
-    mult_inv_parse_action, mult_parse_action, parse_pint_unit,
+from .parse_actions import (constant_minus_parse_action, divide_parse_action,
+    funshortcut1m, mult_inv_parse_action, mult_parse_action, parse_pint_unit,
     plus_inv_parse_action, plus_parse_action, resshortcut1m,
     space_product_parse_action)
 from .parts import CDPLanguage
@@ -14,7 +14,6 @@ from pyparsing import (
     alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
     sglQuotedString)
 import math
-from mcdp_lang.parse_actions import constant_minus_parse_action
 
 
 ParserElement.enablePackrat()
