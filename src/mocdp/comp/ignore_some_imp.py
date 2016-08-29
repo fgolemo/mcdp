@@ -4,6 +4,7 @@ from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import Connection, Context
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import dpwrap
+from contracts.utils import check_isinstance, raise_desc
 
 __all__ = [
     'IgnoreSome',
@@ -12,6 +13,17 @@ __all__ = [
 @contract(ndp=NamedDP, returns=CompositeNamedDP)
 def ignore_some(ndp, ignore_fnames, ignore_rnames):
     """ Ignores some functionalities or resources """
+    fnames0 = ndp.get_fnames()
+    rnames0 = ndp.get_rnames()
+    for fname in ignore_fnames:
+        check_isinstance(fname, str)
+        if not fname in fnames0:
+            raise_desc(ValueError, fname=fname, fnames=fnames0)
+    for rname in ignore_rnames:
+        check_isinstance(rname, str)
+        if not rname in rnames0:
+            raise_desc(ValueError, rname=rname, rnames=rnames0)
+
     c = Context()
     orig = '_orig'
     c.add_ndp(orig, ndp)
@@ -27,7 +39,6 @@ def ignore_some(ndp, ignore_fnames, ignore_rnames):
             n = c.add_ndp_fun_node(fname, F)
         con = Connection(n, fname, orig, fname)
         c.add_connection(con)
-
 
     for rname in ndp.get_rnames():
         R = ndp.get_rtype(rname)

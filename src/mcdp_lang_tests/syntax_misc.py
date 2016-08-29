@@ -470,7 +470,19 @@ def check_lang61():  # TODO: rename
 
 @comptest
 def check_lang60():  # TODO: rename
-    pass
+
+    ndp = parse_ndp("""
+        ignore_resources(total_cost)
+        mcdp {
+            requires mass [g]
+            requires total_cost [USD]
+        }
+    
+    """)
+    rnames = ndp.get_rnames()
+    print rnames
+    assert rnames == ['mass']
+
 
 
 

@@ -103,6 +103,7 @@ class SyntaxIdentifiers():
         'assert_gt',
         'assert_empty',
         'assert_nonempty',
+        'ignore_resources',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -709,12 +710,20 @@ class Syntax():
                        lambda t: CDP.ResShortcut2(t[0], t[1], t[2], t[3]))
 
     fun_shortcut3 = sp(PROVIDES +
-                       C(Group(fname + OneOrMore(S(L(',')) + fname)), 'fnames')
+                       C(Group(fname + OneOrMore(SCOMMA + fname)), 'fnames')
                        + USING + dpname,
                        lambda t: funshortcut1m(provides=t[0],
                                                fnames=make_list(list(t['fnames'])),
                                                prep_using=t[2],
                                                name=t[3]))
+
+    IGNORE_RESOURCES = sp(K('ignore_resources'), CDP.IgnoreResourcesKeyword)
+    ndpt_ignore_resources = sp(IGNORE_RESOURCES - SLPAR - rname
+                          - ZeroOrMore(SCOMMA + rname) + SRPAR + ndpt_dp_rvalue,
+                          lambda t: CDP.IgnoreResources(keyword=t[0],
+                                                        rnames=make_list(list(t[1:-1])),
+                                                        dp_rvalue=t[-1]))
+
 
     res_shortcut3 = sp(REQUIRES +
                        C(Group(rname + OneOrMore(S(L(',')) + rname)), 'rnames')
@@ -907,7 +916,8 @@ class Syntax():
         ndpt_canonical |
         ndpt_dp_variable_ref |
         ndpt_specialize |
-        ndpt_addmake
+        ndpt_addmake |
+        ndpt_ignore_resources
     )
 
     # TODO: remove?

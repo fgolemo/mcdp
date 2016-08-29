@@ -7,9 +7,10 @@ from plot_utils import ieee_fonts_zoom3, ieee_spines_zoom3
 from quickapp import QuickApp
 from reprep import Report
 import numpy as np
+import os
 
 
-def get_ndp(library, battery):
+def get_ndp_code(battery):
     s = """\
 specialize [
   Battery: %s, 
@@ -22,15 +23,16 @@ specialize [
    }
 ] `ActuationEnergeticsTemplate
 """ % battery
-    return  library.parse_ndp(s)
+    return s
+    
 
-def process(battery):
+def process(s):
     librarian = Librarian()
     librarian.find_libraries('../..')
     library = librarian.load_library('droneD_complete_templates')
     library.use_cache_dir('_cached/drone_unc1')
 
-    ndp = get_ndp(library, battery)
+    ndp = library.parse_ndp(s)
 
     combinations = {
         "endurance": (np.linspace(1, 1.5, 10), "hour"),
@@ -126,10 +128,21 @@ class DroneU(QuickApp):
         pass
 
     def define_jobs_context(self, context):
-        for l in ['batteries_uncertain1', 'batteries_uncertain2',
+        for l in ['batteries_uncertain1',
+                  'batteries_uncertain2',
                   'batteries_uncertain3']:
             battery = '`%s.batteries' % l
-            result = context.comp(process, battery)
+            s = get_ndp_code(battery)
+
+            fn = os.path.join('generated', 'drone_unc1', 'drone_unc1_%s.mcdp' % (l))
+            dn = os.path.dirname(fn)
+            if not os.path.exists(dn):
+                os.makedirs(dn)
+            with open(fn, 'w') as f:
+                f.write(s)
+            print('Generated %s' % fn)
+
+            result = context.comp(process, s)
             r = context.comp(report, result)
             context.add_report(r, 'report', l=l)
 

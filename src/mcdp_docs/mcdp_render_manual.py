@@ -37,7 +37,7 @@ manual_contents = [
 ]
 
 class RenderManual(QuickApp):
-    """ Evaluates one of the constants """
+    """ Renders the PyMCDP manual """
 
     def define_options(self, params):
         params.add_string('output_file', help='Output file')

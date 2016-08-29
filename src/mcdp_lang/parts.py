@@ -327,3 +327,7 @@ class CDPLanguage():
 
 
     ConstantMinusConstant = namedtuplewhere('ConstantMinusConstant', 'c1 c2')
+
+    # ignore_resources(a, b) mcdp { }
+    IgnoreResourcesKeyword = namedtuplewhere('IgnoreResourcesKeyword', 'keyword')
+    IgnoreResources = namedtuplewhere('IgnoreResources', 'keyword rnames dp_rvalue')

@@ -4,46 +4,61 @@ from contracts import contract
 from mcdp_cli.query_interpretation import convert_string_query
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.tracer import Tracer
-from mcdp_lang import parse_ndp, parse_template
+from mcdp_ipython_utils.plotting import set_axis_colors
+from mcdp_lang import parse_ndp
 from mcdp_library import Librarian
 from mcdp_posets import UpperSets
-from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import Context
-from mocdp.comp.ignore_some_imp import ignore_some
 from plot_utils import ieee_fonts_zoom3, ieee_spines_zoom3
 from quickapp import QuickApp
 from reprep import Report
 import numpy as np
-from mcdp_ipython_utils.plotting import set_axis_colors
+import os
+#
+# def create_power_approx(interval_mw, context):
+#     s = """
+#     mcdp {
+#     provides power [W]
+#     requires power [W]
+#
+#     required power  >= approxu(provided power, %s mW)
+#     }
+#     """ % interval_mw
+#
+#     ndp = parse_ndp(s, context)
+#
+#     return ndp
 
 @contract(interval_mw='float,>=0')
-def create_power_approx(interval_mw, context):
-    s = """
-    mcdp {
+def get_ndp_code(interval_mw):
+    s = """\
+ignore_resources(total_cost)
+specialize [
+  Battery: `batteries_nodisc.batteries, 
+  Actuation: `droneD_complete_v2.Actuation, 
+  PowerApprox: mcdp {
     provides power [W]
     requires power [W]
 
     required power  >= approxu(provided power, %s mW)
-    }
-    """ % interval_mw
-    
-    ndp = parse_ndp(s, context)
+   }
+] `ActuationEnergeticsTemplate
+""" % interval_mw
+    return s
 
-    return ndp
-
-@contract(interval_mw='float,>=0', returns=CompositeNamedDP)
-def create_ndp(context, interval_mw):
-    template = parse_template('`ActuationEnergeticsTemplate', context)
-    Battery = parse_ndp('`batteries_nodisc.batteries', context)
-    Actuation = parse_ndp('`droneD_complete_v2.Actuation', context)
-    PowerApprox = create_power_approx(interval_mw=interval_mw, context=context)
-    params = dict(Battery=Battery,
-                  PowerApprox=PowerApprox,
-                  Actuation=Actuation)
-    ndp = template.specialize(params, context)
-
-    ndp = ignore_some(ndp, ignore_fnames=[], ignore_rnames=['total_cost'])
-    return ndp
+# @contract(interval_mw='float,>=0', returns=CompositeNamedDP)
+# def create_ndp(context, interval_mw):
+#     template = parse_template('`ActuationEnergeticsTemplate', context)
+#     Battery = parse_ndp('`batteries_nodisc.batteries', context)
+#     Actuation = parse_ndp('`droneD_complete_v2.Actuation', context)
+#     PowerApprox = create_power_approx(interval_mw=interval_mw, context=context)
+#     params = dict(Battery=Battery,
+#                   PowerApprox=PowerApprox,
+#                   Actuation=Actuation)
+#     ndp = template.specialize(params, context)
+#
+#     ndp = ignore_some(ndp, ignore_fnames=[], ignore_rnames=['total_cost'])
+#     return ndp
 
 def go():
     librarian = Librarian()
@@ -55,8 +70,19 @@ def go():
     res = {}
     res['intervals'] = [0, 0.01, 0.1, 1.0, 5.0, 10.0, 50, 100.0, 250, 500, 1000]
     res['results'] = []
-    for interval_mw in res['intervals']:
-        ndp = create_ndp(context=context, interval_mw=interval_mw)
+    for i, interval_mw in enumerate(res['intervals']):
+        s = get_ndp_code(interval_mw=interval_mw)
+        ndp = parse_ndp(s, context=context)
+
+        basename = ('drone_unc2_%02d_%s_mw' % (i, interval_mw)).replace('.', '_')
+        fn = os.path.join('generated', 'drone_unc2', basename + '.mcdp')
+        dn = os.path.dirname(fn)
+        if not os.path.exists(dn):
+            os.makedirs(dn)
+        with open(fn, 'w') as f:
+            f.write(s)
+        print('Generated %s' % fn)
+
         result = solve_stats(ndp)
         result['ndp'] = ndp
         res['results'].append(result)
