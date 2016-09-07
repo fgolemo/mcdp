@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -e
+set -x
+compmake out/comptests -c "$1 $2 $3 $4"

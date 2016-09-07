@@ -83,10 +83,13 @@ def render(library, docname, data, realpath, out_dir, generate_pdf):
                                     s=data, raise_errors=True, realpath=realpath,
                                     generate_pdf=generate_pdf)
 
-    html_contents = embed_images_from_library(html=html_contents, library=library)
+#     html_contents = embed_images_from_library(html=html_contents, library=library)
 
     doc = get_minimal_document(html_contents, add_markdown_css=True)
 
+    d = os.path.dirname(out)
+    if not os.path.exists(d):
+        os.makedirs(d)
     with open(out, 'w') as f:
         f.write(doc)
 
