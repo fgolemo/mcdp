@@ -5,6 +5,10 @@ from .parts import CDPLanguage
 from mcdp_dp import Max, Max1, Min
 from mocdp.comp import Connection, dpwrap
 from mocdp.exceptions import DPSemanticError
+from mcdp_posets.types_universe import get_types_universe
+from mcdp_posets.poset import NotLeq
+from contracts.utils import raise_wrapped
+from mcdp_lang.helpers import get_resource_possibly_converted
 CDP = CDPLanguage
 
 
@@ -70,18 +74,13 @@ def eval_rvalue_OpMax(rvalue, context):
                                  op_prefix='_op',
                                  res_prefix='_result')
 
-
     b = eval_rvalue(rvalue.b, context)
 
     F1 = context.get_rtype(a)
-    F2 = context.get_rtype(b)
-
-    if not (F1 == F2):  # ## BUG1 here
-        msg = 'Incompatible units for Max(): %s and %s' % (F1, F2)
-        msg += '%s and %s' % (type(F1), type(F2))
-        raise DPSemanticError(msg, where=rvalue.where)
+    # possibly convert b to type of a
+    b = get_resource_possibly_converted(b, F1, context)
 
     dp = Max(F1)
-    nprefix, na, nb, nres = 'opmax', 'm0', 'm1', 'max'
+    nprefix, na, nb, nres = 'max', '_m0', '_m1', '_max'
 
     return add_binary2(context, a, b, dp, nprefix, na, nb, nres)

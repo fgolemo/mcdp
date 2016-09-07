@@ -15,6 +15,7 @@ from mcdp_posets import (Int, Nat, RcompUnits, Space,
     mult_table_seq)
 from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+from mcdp_dp.dp_sum import ProductNatN
 
 CDP = CDPLanguage
 
@@ -28,8 +29,8 @@ def eval_constant_divide(op, context):
     constants = [eval_constant(_, context) for _ in ops]
 
     factors = [constants[0], inv_constant(constants[1])]
-    from .misc_math import mult_constantsN
-    return mult_constantsN(factors)
+    from .misc_math import generic_mult_constantsN
+    return generic_mult_constantsN(factors)
 
 
 def eval_constant_minus(op, context):
@@ -95,9 +96,9 @@ def eval_rvalue_divide(op, context):
     try:
         c1 = eval_constant(ops[0], context)
         # also the first one is a constant
-        from .misc_math import mult_constantsN
+        from .misc_math import generic_mult_constantsN
 
-        c = mult_constantsN([c1, c2_inv])
+        c = generic_mult_constantsN([c1, c2_inv])
         assert isinstance(c, ValueWithUnits)
         return get_valuewithunits_as_resource(c, context)
 
@@ -130,16 +131,22 @@ def flatten_multN(ops):
     return res
 
 
+@contract(x=CDP.MultN, wants_constant=bool)
 def eval_MultN(x, context, wants_constant):
     """ Raises NotConstant if wants_constant is True. """
-    from .misc_math import mult_constantsN
+    from .misc_math import generic_mult_constantsN
     from .eval_constant_imp import eval_constant
+    from mcdp_lang.misc_math import generic_mult_table
+    from mcdp_lang.helpers import get_resource_possibly_converted
+    from .helpers import create_operation
+
 
     assert isinstance(x, CDP.MultN)
 
     ops = flatten_multN(get_odd_ops(unwrap_list(x.ops)))
     assert len(ops) > 1
 
+    # divide constants and resources
     constants = []
     resources = []
 
@@ -159,27 +166,39 @@ def eval_MultN(x, context, wants_constant):
 
     # it's a constant value
     if len(resources) == 0:
-        return mult_constantsN(constants)
+        return generic_mult_constantsN(constants)
+
+    # it's only resource * (c1*c2*c3*...)
     if len(resources) == 1:
-        c = mult_constantsN(constants)
+        c = generic_mult_constantsN(constants)
         return get_mult_op(context, r=resources[0], c=c)
+
     else:
         # there are some resources
         resources_types = [context.get_rtype(_) for _ in resources]
+        promoted, R = generic_mult_table(resources_types)
 
-        # create multiplication for the resources
-        R = mult_table_seq(resources_types)
-        dp = ProductN(tuple(resources_types), R)
+        resources2 = []
+        for resource, P in zip(resources, promoted):
+            resources2.append(get_resource_possibly_converted(resource, P, context))
+        
+        if isinstance(R, Nat):
+            n = len(resources2)
+            dp = WrapAMap(ProductNatN(n))
 
-        from .helpers import create_operation
-        r = create_operation(context, dp, resources,
+        else:
+
+            resources_types2 = [context.get_rtype(_) for _ in resources2]
+            dp = ProductN(tuple(resources_types2), R)
+
+        r = create_operation(context, dp, resources2,
                              name_prefix='_prod', op_prefix='_factor',
                              res_prefix='_result')
 
         if not constants:
             return r
         else:
-            c = mult_constantsN(constants)
+            c = generic_mult_constantsN(constants)
             return get_mult_op(context, r, c)
 
 

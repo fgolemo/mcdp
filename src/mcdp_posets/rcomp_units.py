@@ -197,6 +197,9 @@ def mult_table_seq(seq):
 
 @contract(a=RcompUnits, b=RcompUnits)
 def mult_table(a, b):
+    check_isinstance(a, RcompUnits)
+    check_isinstance(b, RcompUnits)
+
     unit2 = a.units * b.units
     s = '%s' % unit2
     return RcompUnits(unit2, s)

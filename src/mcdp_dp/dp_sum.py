@@ -4,7 +4,7 @@ from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
 from mcdp_dp.primitive import EmptyDP
 from mcdp_posets import Map, Nat, PosetProduct, Rcomp, RcompUnits, SpaceProduct
-from mocdp.exceptions import do_extra_checks
+from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 import functools
 import numpy as np
 
@@ -188,6 +188,39 @@ class ProductN(EmptyDP):
 
     def __repr__(self):
         return 'ProductN(%s -> %s)' % (self.F, self.R)
+
+
+
+class ProductNatN(Map):
+
+    """ Multiplies several Nats together """
+
+    @contract(n='int,>=2')
+    def __init__(self, n):
+        self.P = Nat()
+        dom = PosetProduct( (self.P,) * n)
+        cod = self.P
+        Map.__init__(self, dom=dom, cod=cod)
+        self.n = n
+                     
+    def _call(self, x):
+        def is_there_a_top():
+            for xi in x:
+                if self.P.equal(self.P.get_top(), xi):
+                    return True
+            return False
+
+        if is_there_a_top():
+            return self.R.U(self.R.get_top())
+        
+        mult = lambda a, b : a * b
+        r = functools.reduce(mult, x)
+        mcdp_dev_warning('lacks overflow')
+        # # XXX: overflow
+        return r
+
+    def __repr__(self):
+        return 'ProductNatN(%s)' % (self.n)
 
 
 class ProductMap(Map):
