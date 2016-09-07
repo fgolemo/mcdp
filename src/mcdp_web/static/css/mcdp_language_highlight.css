@@ -64,7 +64,8 @@ span.IgnoreKeyword,
 span.SolveModelKeyword,
 span.AnyOfKeyword,
 span.MaximalsKeyword,
-span.MinimalsKeyword
+span.MinimalsKeyword,
+span.IgnoreResourcesKeyword
 { 
     font-weight: bold; 
     color: #00a;
@@ -89,7 +90,8 @@ span.FuncName { color: #CC6600 ; }
 
 
 span.FName, span.RName { } 
-span.DPName, span.NDPName, span.PosetName, span.TemplateParamName,
+span.DPName, span.NDPName, span.PosetName, span.TemplateName,
+span.TemplateParamName,
 span.FinitePosetElement,
 span.SingleElementPosetTag {  
     color: #a0a;

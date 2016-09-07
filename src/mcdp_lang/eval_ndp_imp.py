@@ -27,6 +27,7 @@ from mocdp.exceptions import (DPInternalError, DPSemanticError,
     DPSemanticErrorNotConnected)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 import sys
+from mocdp.comp.ignore_some_imp import ignore_some
 
 
 
@@ -108,6 +109,7 @@ def eval_ndp(r, context):  # @UnusedVariable
             CDP.ApproxLower: eval_ndp_approx_lower,
             CDP.ApproxUpper: eval_ndp_approx_upper,
             CDP.AddMake: eval_ndp_addmake,
+            CDP.IgnoreResources: eval_ndp_ignoreresources,
         }
         
         for klass, hook in cases.items():
@@ -118,6 +120,13 @@ def eval_ndp(r, context):  # @UnusedVariable
     msg = 'eval_ndp(): cannot evaluate r as an NDP.'
     raise_desc(DPInternalError, msg, r=r)
 
+def eval_ndp_ignoreresources(r, context):
+    assert isinstance(r, CDP.IgnoreResources)
+    rnames = [_.value for _ in unwrap_list(r.rnames)]
+    ndp = eval_ndp(r.dp_rvalue, context)
+    # print('ignoring %r' % rnames)
+    return ignore_some(ndp, ignore_rnames=rnames, ignore_fnames=[])
+    
 def eval_ndp_addmake(r, context):
     assert isinstance(r, CDP.AddMake)
     ndp = eval_ndp(r.dp_rvalue, context)

@@ -4,7 +4,6 @@ from mcdp_report.gg_utils import gg_get_format
 from mcdp_web.utils.response import response_data
 from mocdp.comp.composite_templatize import ndp_templatize
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-from contracts.utils import raise_desc
 
 class WebAppImages():
 

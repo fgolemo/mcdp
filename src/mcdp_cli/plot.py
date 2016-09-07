@@ -8,6 +8,7 @@ from mcdp_report.dp_graph_flow_imp import dp_graph_flow
 from mcdp_report.dp_graph_tree_imp import dp_graph_tree
 from mcdp_report.gg_ndp import STYLE_GREENRED, STYLE_GREENREDSYM, gvgen_from_ndp
 from mcdp_report.gg_utils import gg_get_formats
+from mcdp_web.renderdoc.highlight import get_minimal_document
 from mocdp.comp.recursive_name_labeling import get_labelled_version
 from mocdp.exceptions import mcdp_dev_warning
 from quickapp import QuickAppBase
@@ -115,8 +116,9 @@ def syntax_pdf(data):
     lines_to_hide = get_lines_to_hide(data['params'])
     def ignore_line(lineno):
         return lineno  in lines_to_hide
-    html = ast_to_html(s, complete_document=True, extra_css=extra_css,
+    contents = ast_to_html(s, complete_document=False, extra_css=extra_css,
                        ignore_line=ignore_line)
+    html = get_minimal_document(contents)
 
     d = mkdtemp()
     
@@ -238,12 +240,15 @@ def ndp_graph_enclosed_(data):
     ndp = get_ndp(data)
     style = STYLE_GREENREDSYM
     yourname = None
-    data_format = 'png'
     from mcdp_web.images.images import ndp_graph_enclosed
     png = ndp_graph_enclosed(library, ndp, style, yourname,
-                            data_format, direction='TB',
+                            data_format='png', direction='TB',
                             enclosed=True)
-    return [('png', 'ndp_graph_enclosed', png)]
+    pdf = ndp_graph_enclosed(library, ndp, style, yourname,
+                            data_format='pdf', direction='TB',
+                            enclosed=True)
+    return [('png', 'ndp_graph_enclosed', png),
+            ('pdf', 'ndp_graph_enclosed', pdf)]
 
 allplots.add(('ndp_graph_enclosed', ndp_graph_enclosed_))
 

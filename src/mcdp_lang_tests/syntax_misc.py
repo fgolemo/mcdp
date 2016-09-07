@@ -473,10 +473,18 @@ def check_lang60():  # TODO: rename
 
     parse_wrap_check("((required in).dc).connector >= `USB_connectors: USB_Std_A",
                      Syntax.line_expr)
-    
-    
-    pass
 
+    ndp = parse_ndp("""
+        ignore_resources(total_cost)
+        mcdp {
+            requires mass [g]
+            requires total_cost [USD]
+        }
+    
+    """)
+    rnames = ndp.get_rnames()
+    print rnames
+    assert rnames == ['mass']
 
 
 

@@ -253,7 +253,7 @@ def get_ast_as_pdf(s, parse_expr):
     s = s.replace('\t', '    ')
     contents = ast_to_html(s, complete_document=False, extra_css=None,
                        ignore_line=None, parse_expr=parse_expr,
-                       add_line_gutter=False)
+                       add_line_gutter=False, add_css=False)
     html = get_minimal_document(contents)
     d = mkdtemp()
     
