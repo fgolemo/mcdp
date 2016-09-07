@@ -11,16 +11,17 @@ from mcdp_posets.rcomp_units import R_dimensionless, mult_table_seq
 from mcdp_posets.types_universe import express_value_in_isomorphic_space
 
 
-class MultValue():
-
-    def __init__(self, res):
-        self.res = res
-
-    def __call__(self, x):
-        return x * self.res
-
-    def __str__(self):
-        return 'Mult(%s)' % self.res
+#
+# class MultValue():
+#
+#     def __init__(self, res):
+#         self.res = res
+#
+#     def __call__(self, x):
+#         return x * self.res
+#
+#     def __str__(self):
+#         return 'Mult(%s)' % self.res
 
 # class MultValueMap(Map):
 #     """ Implements _ -> _ * x on RCompUnits """

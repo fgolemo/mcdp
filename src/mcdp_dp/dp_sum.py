@@ -261,3 +261,27 @@ class ProductMap(Map):
                 return self.R.top()
 
 
+class MultValueMap(Map):
+    """ multiplies by <value> """
+    """ Implements _ -> _ * x on RCompUnits """
+    def __init__(self, F, R, value):
+        check_isinstance(F, RcompUnits)
+        check_isinstance(R, RcompUnits)
+        dom = F
+        cod = R
+        self.value = value
+        Map.__init__(self, dom=dom, cod=cod)
+
+    def _eval(self, x):
+        if self.dom.equal(x, self.dom.get_top()):
+            return self.cod.get_top()
+
+        res = x * self.value
+
+        if bool(np.isfinite(res)):
+            return res
+        else:
+            return self.cod.get_top()
+
+
+

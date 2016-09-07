@@ -7,15 +7,13 @@ from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_dp import (GenericUnary, ProductN, SumN, SumNNat, WrapAMap,
-    sum_dimensionality_works)
+from mcdp_dp import ProductN, SumN, SumNNat, WrapAMap, sum_dimensionality_works
+from mcdp_dp.dp_sum import MultValueMap, ProductNatN
 from mcdp_maps import MultNat, PlusNat, PlusValueMap, SumNInt
 from mcdp_posets import (Int, Nat, RcompUnits, Space,
-    express_value_in_isomorphic_space, get_types_universe, mult_table,
-    mult_table_seq)
+    express_value_in_isomorphic_space, get_types_universe, mult_table)
 from mocdp.comp.context import CResource, ValueWithUnits
-from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
-from mcdp_dp.dp_sum import ProductNatN
+from mocdp.exceptions import DPInternalError, DPSemanticError
 
 CDP = CDPLanguage
 
@@ -187,7 +185,6 @@ def eval_MultN(x, context, wants_constant):
             dp = WrapAMap(ProductNatN(n))
 
         else:
-
             resources_types2 = [context.get_rtype(_) for _ in resources2]
             dp = ProductN(tuple(resources_types2), R)
 
@@ -204,24 +201,22 @@ def eval_MultN(x, context, wants_constant):
 
 @contract(r=CResource, c=ValueWithUnits)
 def get_mult_op(context, r, c):
-    from .misc_math import MultValue
+    from mcdp_posets.rcomp_units import format_pint_unit_short
+
     rtype = context.get_rtype(r)
 
     # Case 1: rcompunits, rcompunits
     if isinstance(rtype, RcompUnits) and isinstance(c.unit, RcompUnits):
         F = rtype
         R = mult_table(rtype, c.unit)
-        function = MultValue(c.value)
-        mcdp_dev_warning('make it better')
 
-        label = '× %s' % (c.unit.format(c.value))
-
-        from mcdp_posets.rcomp_units import format_pint_unit_short
+        mvmap = MultValueMap(F=F, R=R, value=c.value)
         label = '× %.5f %s' % (c.value, format_pint_unit_short(c.unit.units))
+#         label = '× %s' % (c.unit.format(c.value))
+        setattr(mvmap, '__name__', label)
 
-        setattr(function, '__name__', label)
+        dp = WrapAMap(mvmap)
 
-        dp = GenericUnary(F, R, function)
     elif isinstance(rtype, Nat) and isinstance(c.unit, Nat):
         amap = MultNat(c.value)
         dp = WrapAMap(amap)

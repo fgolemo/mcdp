@@ -65,6 +65,9 @@ class RenderManual(QuickApp):
 
 
 def write(s, out):
+    dn = os.path.dirname(out)
+    if not os.path.exists(dn):
+        os.makedirs(dn)
     with open(out, 'w') as f:
         f.write(s)
     print('Written %s ' % out)
