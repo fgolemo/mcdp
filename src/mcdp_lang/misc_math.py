@@ -1,34 +1,15 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc, check_isinstance
+from contracts.utils import check_isinstance, raise_desc
 from mcdp_dp import sum_units
 from mcdp_posets import Nat, RcompUnits, mult_table
+from mcdp_posets.rcomp_units import R_dimensionless, mult_table_seq
+from mcdp_posets.types_universe import express_value_in_isomorphic_space
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPSemanticError
 import functools
 import warnings
-from mcdp_posets.rcomp_units import R_dimensionless, mult_table_seq
-from mcdp_posets.types_universe import express_value_in_isomorphic_space
 
-
-#
-# class MultValue():
-#
-#     def __init__(self, res):
-#         self.res = res
-#
-#     def __call__(self, x):
-#         return x * self.res
-#
-#     def __str__(self):
-#         return 'Mult(%s)' % self.res
-
-# class MultValueMap(Map):
-#     """ Implements _ -> _ * x on RCompUnits """
-#
-#     def __init__(self, F, R, constant):
-#
-#
 
 @contract(S=RcompUnits)
 def inv_unit(S):
@@ -86,10 +67,6 @@ def generic_mult_constantsN(seq):
             res *= value2
         return ValueWithUnits(res, R)
         # XXX needs to check overflow
-
-    
-#     res = functools.reduce(mult_constants2, seq)
-    # print('seq: %s res: %s' % (seq, res))
     return res
 
 def generic_mult_table(seq):
@@ -117,19 +94,6 @@ def generic_mult_table(seq):
     
     else: # it's all Nats
         return seq, Nat()
-    
-#
-# def mult_table_seq(seq):
-#     return functools.reduce(mult_table, seq)
-#
-# @contract(a=RcompUnits, b=RcompUnits)
-# def mult_table(a, b):
-#     check_isinstance(a, RcompUnits)
-#     check_isinstance(b, RcompUnits)
-#
-#     unit2 = a.units * b.units
-#     s = '%s' % unit2
-#     return RcompUnits(unit2, s
 
 def add_table(F1, F2):
     if not F1 == F2:

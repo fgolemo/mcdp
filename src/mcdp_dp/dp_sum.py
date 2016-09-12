@@ -272,7 +272,7 @@ class MultValueMap(Map):
         self.value = value
         Map.__init__(self, dom=dom, cod=cod)
 
-    def _eval(self, x):
+    def _call(self, x):
         if self.dom.equal(x, self.dom.get_top()):
             return self.cod.get_top()
 

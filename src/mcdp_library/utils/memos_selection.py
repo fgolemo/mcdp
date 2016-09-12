@@ -25,11 +25,14 @@ def memo_disk_cache2(cache_file, data, f):
 
     if os.path.exists(cache_file):
         # logger.info('Reading from cache %r.' % cache_file)
-        res = safe_pickle_load(cache_file)
-        if data != res['data']:
-            logger.info('Stale cache, recomputing.')
-        else:
-            return res['result']
+        try:
+            res = safe_pickle_load(cache_file)
+            if data != res['data']:
+                logger.info('Stale cache, recomputing.')
+            else:
+                return res['result']
+        except Exception as e:
+            logger.error(e)
 
     result = f()
 

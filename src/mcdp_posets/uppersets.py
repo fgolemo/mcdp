@@ -391,7 +391,7 @@ def lowerset_product(s1, s2):
     P = PosetProduct((s1.P, s2.P))
     return LowerSet(res, P)
 
-@contract(ss='tuple($LowerSet)', returns=LowerSet)
+@contract(ss='seq($LowerSet)', returns=LowerSet)
 def lowerset_product_multi(ss):
     Ps = tuple(_.P for _ in ss)
     mins = tuple(_.maximals for _ in ss)
@@ -399,7 +399,7 @@ def lowerset_product_multi(ss):
     P = PosetProduct(Ps)
     return LowerSet(res, P)
 
-@contract(ss='tuple($UpperSet)', returns=UpperSet)
+@contract(ss='seq($UpperSet)', returns=UpperSet)
 def upperset_product_multi(ss):
     Ps = tuple(_.P for _ in ss)
     mins = tuple(_.minimals for _ in ss)

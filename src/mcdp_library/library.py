@@ -170,8 +170,8 @@ class MCDPLibrary():
         else:
             cache_file = os.path.join(self.cache_dir, parsing.__name__,
                                       '%s.cached' % name)
-            return memo_disk_cache2(cache_file, data, actual_load)
 
+            return memo_disk_cache2(cache_file, data, actual_load)
 
     def parse_ndp(self, string, realpath=None):
         """ This is the wrapper around parse_ndp that adds the hooks. """
