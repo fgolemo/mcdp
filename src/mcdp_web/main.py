@@ -458,6 +458,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         config.add_view(self.view_index, route_name='index', renderer='index.jinja2')
 
         config.add_route('list_libraries', '/list')
+        config.add_route('list_libraries', '/libraries/')
         config.add_view(self.view_list_libraries, route_name='list_libraries', renderer='list_libraries.jinja2')
 
         config.add_route('library_index', '/libraries/{library}/')
