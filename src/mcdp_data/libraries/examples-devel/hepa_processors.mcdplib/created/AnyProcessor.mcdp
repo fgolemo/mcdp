@@ -1,0 +1,6 @@
+choose(
+  jetson_cpu: `JetsonCPU,
+  jetson_gpu: `JetsonGPU,
+  intel_cpu: `IntelCPU,
+  jetson_cpu_plus_intel: `JetsonPlusIntel
+)

@@ -1,0 +1,28 @@
+template [P1: `ProcessorModel, P2: `ProcessorModel]
+
+mcdp {
+  requires power [W]
+  requires budget [USD]
+  requires mass [g]
+  provides resolution [pixels/deg]
+  provides min_throughput [Hz]
+  provides inverse_of_max_latency [1/s]
+
+  p1 = instance P1
+  p2 = instance P2
+
+  # the two processors run with the same resolution
+  provided resolution <= resolution provided by p1
+  provided resolution <= resolution provided by p2
+  # same constraint on the latency
+  provided inverse_of_max_latency <= inverse_of_max_latency provided by p1
+  provided inverse_of_max_latency <= inverse_of_max_latency provided by p2
+  # however each needs to provide half of the throughput
+  provided min_throughput * 0.5 dimensionless <=  min_throughput provided by p1
+  provided min_throughput * 0.5 dimensionless <=  min_throughput provided by p2
+
+  # mass, power, and budget are simply summed together
+  required mass   >= mass   required by p1 + mass   required by p2
+  required power  >= power  required by p1 + power  required by p2
+  required budget >= budget required by p1 + budget required by p2
+}

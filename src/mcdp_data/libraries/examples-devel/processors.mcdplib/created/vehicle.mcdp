@@ -1,0 +1,8 @@
+template mcdp {
+    provides velocity [mph]
+    provides sweep_edge [m]
+
+    requires mass [kg]
+    requires volume [m^3]
+    requires cost [USD]
+}
