@@ -475,7 +475,21 @@ def check_lang60():  # TODO: rename
                      Syntax.line_expr)
     
     
-    pass
+
+@comptest
+def check_lang60b():
+    ndp = parse_ndp("""
+        ignore_resources(total_cost)
+        mcdp {
+            requires mass [g]
+            requires total_cost [USD]
+        }
+    
+    """)
+    rnames = ndp.get_rnames()
+    print rnames
+    assert rnames == ['mass']
+
 
 
 

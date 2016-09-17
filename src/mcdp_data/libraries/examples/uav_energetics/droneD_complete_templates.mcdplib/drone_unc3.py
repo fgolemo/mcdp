@@ -20,7 +20,7 @@ import numpy as np
 @contract(returns=CompositeNamedDP)
 def create_ndp(context):
 
-    ndp = parse_ndp('`test1', context)
+    ndp = parse_ndp('`drone_unc3', context)
     ndp = ignore_some(ndp,
                       ignore_fnames=[],
                       ignore_rnames=['total_cost_ownership'])

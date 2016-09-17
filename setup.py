@@ -79,6 +79,7 @@ setup(name='PyMCDP_devel',
             'mcdp-eval = mcdp_cli:mcdp_eval_main',
             'mcdp-render = mcdp_docs:mcdp_render_main',
             'mcdp-render-manual = mcdp_docs:mcdp_render_manual_main',
+            'mcdp-depgraph = mcdp_depgraph:mcdp_depgraph_main',
         ]
       }
 )

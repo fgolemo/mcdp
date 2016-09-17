@@ -1,0 +1,10 @@
+specialize [
+  Battery: `batteries_uncertain3.batteries, 
+  Actuation: `droneD_complete_v2.Actuation, 
+  PowerApprox: mcdp {
+    provides power [W]
+    requires power [W]
+
+    required power  >= approxu(provided power, 1 mW)
+   }
+] `ActuationEnergeticsTemplate

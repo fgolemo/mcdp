@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
+from contracts.utils import raise_wrapped
 from mcdp_dp import (Constant, ConstantMinimals, Limit, LimitMaximals,
     get_conversion)
-from mcdp_posets import get_types_universe
+from mcdp_posets import NotLeq, Poset, get_types_universe
 from mcdp_posets.rcomp import finfo
 from mocdp.comp import Connection, dpwrap
-from mocdp.comp.context import ValueWithUnits
+from mocdp.comp.context import CResource, ValueWithUnits
+from mocdp.exceptions import DPSemanticError
 
 
 
@@ -138,6 +140,32 @@ def get_valuewithunits_as_function(v, context):
     ndp = dpwrap(dp, sn, [])
     context.add_ndp(n, ndp)
     return context.make_function(n, sn)
+
+@contract(returns=CResource, r=CResource, P=Poset)
+def get_resource_possibly_converted(r, P, context):
+    """ Returns a resource possibly converted to the space P """
+    assert isinstance(r, CResource)
+
+    R = context.get_rtype(r)
+    tu = get_types_universe()
+    
+    if tu.equal(R, P):
+        return r
+    else:
+        try:
+            tu.check_leq(R, P)
+        except NotLeq as e:
+            msg = 'Cannot convert %s to %s.'
+            raise_wrapped(DPSemanticError, e, msg)  # , where=rvalue.where)
+
+        conversion = get_conversion(R, P)
+        if conversion is None:
+            return r
+        else:
+            r2 = create_operation(context, conversion, [r],
+                                 name_prefix='_conv', op_prefix='_op',
+                                 res_prefix='_res')
+            return r2
 
 
 def square(x):

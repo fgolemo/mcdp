@@ -227,7 +227,7 @@ def check_ndp_grap_imp3():
 @comptest
 def check_ndp_grap_imp4():
     libname = 'droneD_complete_templates'
-    ndpname = 'test1'
+    ndpname = 'drone_unc3'
     query = dict(num_missions='600 []',
                  travel_distance='10 km',
                  carry_payload='10g')
