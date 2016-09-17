@@ -1,9 +1,9 @@
 from comptests.registrar import comptest
-from mcdp_lang_tests.utils import parse_wrap_check
-from mcdp_lang.syntax import Syntax
-from mcdp_lang.parse_interface import parse_ndp
-from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from mcdp_dp.dp_transformations import get_dp_bounds
+from mcdp_lang.parse_interface import parse_ndp
+from mcdp_lang.syntax import Syntax
+from mcdp_lang_tests.utils import parse_wrap_check
+from mocdp.exceptions import DPSemanticError, DPSyntaxError
 
 @comptest
 def check_approx_res1():
