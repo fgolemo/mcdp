@@ -13,6 +13,8 @@ from mcdp_posets.rcomp_units import make_rcompunit
 from mcdp_posets.types_universe import get_types_universe
 from nose.tools import assert_equal
 from numpy.testing.utils import assert_allclose
+from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.namedtuple_tricks import recursive_print
 
 CDP = CDPLanguage
 
@@ -314,10 +316,39 @@ def check_conversion2():
     print(r)
     assert_equal(r.minimals, set([5.0]))
 
+@comptest
+def check_conversion3():
+    print "How does it work with negative numbers?"
+
+    string = """
+    mcdp {
+        provides x [g]
+        requires y [g]
+    
+        c = -0.1 kg
+        required y >= provided x + c
+    }"""
+
+    # parse_wrap(Syntax.ndpt_dp_rvalue, string)[0]
+    # print recursive_print(p)
+    ndp = parse_ndp(string)
+
+
+    dp = ndp.get_dp()
+
+    # no solutions for 0
+    r = dp.solve(0.0)
+    assert not r.minimals, r
+    # one solution for 100 g
+    r = dp.solve(100)
+    assert r.minimals == set([0.0]), r
+    r = dp.solve(200)
+    assert r.minimals == set([100.0]), r
+
 
 
 @comptest
-def check_conversion3():
+def check_conversion3b():
     ndp = parse_ndp("""
     mcdp {
            provides capacity [J]

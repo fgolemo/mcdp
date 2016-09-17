@@ -91,9 +91,10 @@ def dp_repr_long_labeled(data):
 
 def ndp_visualization(data, style):
     ndp = get_ndp(data) 
-
     setattr(ndp, '_hack_force_enclose', True)
-    gg = gvgen_from_ndp(ndp, style)
+    library = data['library']
+    images_paths = library.get_images_paths()
+    gg = gvgen_from_ndp(ndp, style, images_paths=images_paths)
     return return_formats2(gg, 'ndp_%s' % style)
 
 def create_extra_css(params):  # @UnusedVariable

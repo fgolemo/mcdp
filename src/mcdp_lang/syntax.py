@@ -34,8 +34,8 @@ class SyntaxBasics():
                     lambda t: int(t[0]))
 
     # Note that '42' is not a valid float...
-    floatnumber = sp((Combine(integer + point + O(number) + O(e + integer)) |
-                      Combine(integer + e + integer)),
+    floatnumber = sp((Combine(O(plusorminus) + number + point + O(number) + O(e + integer)) |
+                      Combine(O(plusorminus) + number + e + number)),
                       lambda t: float(t[0]))
 
     integer_or_float = sp(integer ^ floatnumber,
@@ -53,6 +53,7 @@ class SyntaxIdentifiers():
         'dp',
         'mcdp',
         'template',
+        'interface',
         'sub',
         'for',
         'instance',
@@ -851,7 +852,8 @@ class Syntax():
                        lambda t: CDP.Compact(t[0], t[1]))
 
     TEMPLATE = spk(L('template'), CDP.TemplateKeyword)
-    ndpt_template = sp(TEMPLATE - ndpt_dp_rvalue,
+    INTERFACE = spk(L('interface'), CDP.TemplateKeyword)
+    ndpt_template = sp((TEMPLATE | INTERFACE) - ndpt_dp_rvalue,
                        lambda t: CDP.MakeTemplate(t[0], t[1]))
 
     FLATTEN = spk(L('flatten'), CDP.FlattenKeyword)

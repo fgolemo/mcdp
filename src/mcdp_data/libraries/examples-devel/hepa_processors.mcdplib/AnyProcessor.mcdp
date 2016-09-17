@@ -1,0 +1,6 @@
+choose(
+  arm_a15: `ARM_A15,
+  nvidia_kepler: `NVidiaKepler,
+  intel_i7: `Intel_i7,
+  arm_plus_intel: `ARM_plus_Intel
+)

@@ -119,6 +119,7 @@ class CDPLanguage():
     CompactKeyword = namedtuplewhere('CompactKeyword', 'keyword')
     AbstractKeyword = namedtuplewhere('AbstractKeyword', 'keyword')
     TemplateKeyword = namedtuplewhere('TemplateKeyword', 'keyword')
+
     ForKeyword = namedtuplewhere('ForKeyword', 'keyword')
     UsingKeyword = namedtuplewhere('UsingKeyword', 'keyword')
     RequiredByKeyword = namedtuplewhere('RequiredByKeyword', 'keyword')

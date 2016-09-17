@@ -13,11 +13,14 @@ from mocdp import ATTR_LOAD_LIBNAME, ATTR_LOAD_NAME, logger
 from mocdp.comp.context import Context, ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-from mocdp.exceptions import DPSemanticError, extend_with_filename
+from mocdp.exceptions import DPSemanticError, extend_with_filename, \
+    mcdp_dev_warning
 import os
 import shutil
 import sys
 
+mcdp_dev_warning('move away')
+log_duplicates = False
 
 __all__ = [
     'MCDPLibrary',
@@ -385,9 +388,10 @@ class MCDPLibrary():
             else:
                 msg = 'Found duplicated file %r.' % basename
                 if not strict:
-                    logger.warning(msg + "\n" +
-                                   format_obs(dict(path1=realpath1,
-                                              path2=res['realpath'])))
+                    if log_duplicates:
+                        logger.warning(msg + "\n" +
+                                       format_obs(dict(path1=realpath1,
+                                                  path2=res['realpath'])))
                 else:
                     raise_desc(DPSemanticError, msg,
                                path1=realpath1,

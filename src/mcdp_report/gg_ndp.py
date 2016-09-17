@@ -306,11 +306,16 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
     simple = (Min, Max, Identity, GenericUnary, WrapAMap, MeetNDual)
     only_string = not is_special and isinstance(ndp.dp, simple)
 
-
     from mcdp_library.library import ATTR_LOAD_NAME
     load_name = getattr(ndp, ATTR_LOAD_NAME, '(ATTR_LOAD_NAME unavailable)')
 
-    iconoptions = [gdc.yourname, icon, load_name, classname, 'default']
+    iconoptions = [
+        gdc.yourname,
+        load_name,
+        icon,
+        classname,
+        'default',
+    ]
     best_icon = gdc.get_icon(iconoptions)
 #     print('best_icon: %r' % best_icon)
 #     print('only_string: %r' % only_string)
@@ -347,7 +352,10 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
                     else:
                         shortlabel = gdc.yourname
                 else:
-                    shortlabel = classname
+                    mcdp_dev_warning('double check this (sep 16)')
+                    # shortlabel = classname
+                    shortlabel = None
+
                 # shortlabel = '<I><B>%sa</B></I>' % shortlabel
                 sname = classname
                 gdc.styleAppend(sname, 'imagescale', 'true')
@@ -356,6 +364,9 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
                 gdc.styleAppend(sname, "style", "rounded")
                 label = ("<TABLE CELLBORDER='0' BORDER='0'><TR><TD>%s</TD></TR>"
                 "<TR><TD><IMG SRC='%s' SCALE='TRUE'/></TD></TR></TABLE>")
+
+                if shortlabel is None:
+                    shortlabel = ''
                 label = label % (shortlabel, best_icon)
             else:
                 # print('Image %r not found' % imagename)
