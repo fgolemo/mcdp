@@ -226,7 +226,6 @@ def get_mult_op(context, r, c):
         msg = 'Cannot create multiplication operation.'
         raise_desc(DPInternalError, msg, rtype=rtype, c=c)
 
-    from .helpers import create_operation
     r2 = create_operation(context, dp, resources=[r],
                           name_prefix='_mult', op_prefix='_x',
                           res_prefix='_y')
@@ -260,7 +259,7 @@ def eval_PlusN(x, context, wants_constant):
             x = eval_constant(op, context)
             assert isinstance(x, ValueWithUnits)
 
-            if isinstance(x.unit, RcompUnits):
+            if isinstance(x.unit, (RcompUnits, Nat)):
                 pos_constants.append(x)
             elif isinstance(x.unit, RbicompUnits):
                 neg_constants.append(x)
@@ -302,7 +301,6 @@ def eval_PlusN(x, context, wants_constant):
                               name_prefix='_minus', op_prefix='_x',
                               res_prefix='_y')
             return r2
-
 
 
 
