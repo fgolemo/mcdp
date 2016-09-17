@@ -104,6 +104,7 @@ class SyntaxIdentifiers():
         'assert_empty',
         'assert_nonempty',
         'ignore_resources',
+        'dimensionless',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -169,7 +170,7 @@ class Syntax():
     pint_unit_simple = pint_unit_base + O(pint_unit_power)
     pint_unit_connector = L('/') | L('*')
  
-    space_pint_unit = sp((pint_unit_simple + ZeroOrMore(pint_unit_connector + pint_unit_simple)),
+    space_pint_unit = sp(((Keyword('1') | pint_unit_simple) + ZeroOrMore(pint_unit_connector + pint_unit_simple)),
                    parse_pint_unit)
 
 
@@ -313,7 +314,9 @@ class Syntax():
     valuewithunit_numbers = sp(SyntaxBasics.integer_or_float + unitst,
                                lambda t: CDP.SimpleValue(t[0], t[1]))
 
-    dimensionless = sp(L('[') + L(']'), lambda _: CDP.RcompUnit('m/m'))
+    mcdp_dev_warning('dimensionless not tested')
+    dimensionless = sp((L('[') + L(']')) ^ Keyword('dimensionless'),
+                       lambda _: CDP.RcompUnit('m/m'))
 
     valuewithunits_numbers_dimensionless = sp(SyntaxBasics.integer_or_float + dimensionless,
                            lambda t: CDP.SimpleValue(t[0], t[1]))

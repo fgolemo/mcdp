@@ -1,0 +1,20 @@
+mcdp {
+
+    sweeping = instance `Sweeping
+    vehicle_design = instance `Vehicle
+
+    velocity required by sweeping <= velocity provided by vehicle_design
+    sweep_edge required by sweeping <= sweep_edge provided by vehicle_design
+
+    n = num_vehicles required by sweeping
+
+
+
+    total_cost = n * cost required by vehicle_design
+    total_mass = n * mass required by vehicle_design
+    total_volume = n * volume required by vehicle_design
+
+    total_volume <= 100 m^3 
+    total_cost <= Top USD
+    total_mass <= 1000 kg
+}
