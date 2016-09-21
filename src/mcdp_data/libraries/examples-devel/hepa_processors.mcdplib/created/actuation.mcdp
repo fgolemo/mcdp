@@ -1,0 +1,13 @@
+mcdp {
+     provides lift [N]
+     requires power [W]
+
+      requires budget [USD]
+      required budget >= 1000 USD
+      requires mass >= 1 kg
+      l = provided lift
+      p0 = 1 W
+      p1 = 1 W / N
+      p2 = 1 W / N^2
+      required power >= p0 + p1 * l + p2 * l^2
+}

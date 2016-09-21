@@ -1,9 +1,11 @@
+import os
+
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
+from mocdp.exceptions import DPSemanticError
+
 from .library import MCDPLibrary
 from .utils import locate_files
-from mocdp.exceptions import DPSemanticError
-import os
 
 
 __all__ = [

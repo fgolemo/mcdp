@@ -79,7 +79,7 @@ def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=No
     else:
         value = tuple(value)
 
-    if hasattr(ndp, '_cache_dp'):
+    if hasattr(ndp, '_cache_dp0'):
         dp0 = ndp._cache_dp0
     else:
         
@@ -103,6 +103,7 @@ def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=No
     res = dp.solve_trace(value, trace)
     R = dp.get_res_space()
     UR = UpperSets(R)
+    print('value: %s' % F.format(value))
     print('results: %s' % UR.format(res))
 
     ares = []

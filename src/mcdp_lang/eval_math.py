@@ -10,13 +10,11 @@ from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import ProductN, SumN, SumNNat, WrapAMap, sum_dimensionality_works
 from mcdp_dp.dp_sum import MultValueMap, ProductNatN
 from mcdp_lang.helpers import create_operation
-from mcdp_maps import MultNat, PlusNat, PlusValueMap, SumNInt
-from mcdp_maps.plus_value_map import MinusValueMap
-from mcdp_posets import (Int, Nat, RcompUnits, Space,
+from mcdp_maps import MinusValueMap, MultNat, PlusNat, PlusValueMap, SumNInt
+from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits, Space,
     express_value_in_isomorphic_space, get_types_universe, mult_table)
 from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError
-from mcdp_posets.rcomp_units import RbicompUnits
 
 CDP = CDPLanguage
 

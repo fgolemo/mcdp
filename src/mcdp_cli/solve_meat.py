@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-from .query_interpretation import interpret_string
-from .utils_mkdir import mkdirs_thread_safe
+import os
+
 from contracts.utils import raise_desc, raise_wrapped
 from decent_params.utils import UserError
 from mcdp_dp.dp_transformations import get_dp_bounds
@@ -13,8 +13,9 @@ from mcdp_posets import (NotEqual, NotLeq, PosetProduct, UpperSets,
 from mocdp.comp.recursive_name_labeling import (get_imp_as_recursive_dict,
     get_labelled_version, ndp_make)
 from reprep import Report
-import os
 
+from .query_interpretation import interpret_string
+from .utils_mkdir import mkdirs_thread_safe
 
 
 class ExpectationsNotMet(Exception):
@@ -223,23 +224,6 @@ def solve_meat_solve(trace, ndp, dp, fg, intervals, max_steps, _exp_advanced):
             except:
                 raise
     return res, trace
-#
-# def solve_read_model(dirs, param, library=None):
-# #     GlobalConfig.global_load_dir("mocdp")
-#
-#     model_name = param
-#     basename = model_name
-#
-#     if library is None:
-#         from mcdp_library.library import MCDPLibrary
-#
-#         library = MCDPLibrary()
-#         for d in dirs:
-#             library.add_search_dir(d)
-#
-#     ndp = library.load_ndp(model_name)
-#
-#     return library, basename, ndp
 
 def solve_get_dp_from_ndp(basename, ndp, lower, upper, flatten=True):
     if flatten:

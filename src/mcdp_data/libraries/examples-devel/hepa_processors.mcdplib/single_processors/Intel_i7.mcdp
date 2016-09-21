@@ -11,8 +11,6 @@ mcdp {
   l0 = -0.00045554 s
   l1 = +0.00074915 s * deg / pixels
   l2 = +0.00011316 s * deg^2 / pixels^2
-  # x86/latency: [ 0.00011316  0.00074915 -0.00045554] * (x^2 x 1)
-  #  latency at 5.3: 0.00669366120715 seconds
   r = provided resolution
   latency = l0 + l1 * r + l2 * r^2
 
@@ -26,21 +24,26 @@ mcdp {
   usage <= 100 dimensionless
 
   # Constraint for throughput:
-  #   latency <= 1 / min_throughput
+  #    latency <= 1 / min_throughput
   # rewritten as:
-  min_throughput * latency <= 1 dimensionless 
+  provided min_throughput * latency <= 1 dimensionless 
 
   # Constraint for latency:
-  #  latency <= max_latency
+  #    latency <= max_latency
   # rewritten as:
-  latency * inverse_of_max_latency <= 1 dimensionless
+  latency * provided inverse_of_max_latency <= 1 dimensionless
 
-  # compute power consumption using linear interpolation
+  # values taken from datasheet
   power_idle = 3.46 W
   power_peak = 91 W
-  power = power_idle + (power_peak-power_idle) * usage / 100 dimensionless
-  required power >= power
 
+  # compute power consumption using linear interpolation
+  P = (power_idle + (power_peak-power_idle) * usage 
+                                / 100 dimensionless)
+
+  required power >= P
+
+  # cost taken from Amazon
   required budget >= 350 USD
   required mass >= 20g
 }

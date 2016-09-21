@@ -1,11 +1,11 @@
 from contracts import contract
 from mcdp_dp.dp_flatten import MuxMap
 from mcdp_posets.poset_product import PosetProduct
+from mcdp_posets.space import Space
 from mcdp_posets.types_universe import (express_value_in_isomorphic_space,
     get_types_universe)
 from mcdp_posets.uppersets import UpperSet, UpperSets, upperset_project_map
 import itertools
-from mcdp_posets.space import Space
 _ = Space
 
 @contract(ua=UpperSet, ub=UpperSet)

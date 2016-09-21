@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 from _collections import defaultdict
 from contracts import contract
-from contracts.utils import raise_desc, check_isinstance
-from mcdp_dp.dp_identity import Identity
+from contracts.utils import check_isinstance, raise_desc
+from mcdp_dp import Identity
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import (Connection, get_name_for_fun_node,
     get_name_for_res_node, is_fun_node_name, is_res_node_name)
-from mocdp.comp.context_functions import is_dp_connected
-from mocdp.comp.wrap import SimpleWrap
-from mocdp.ndp.named_coproduct import NamedDPCoproduct
 from mocdp.comp.labelers import LabelerNDP
 from mocdp.comp.simplify_identities_imp import simplify_identities
+from mocdp.comp.wrap import SimpleWrap
+from mocdp.ndp.named_coproduct import NamedDPCoproduct
+# from mocdp.comp.context_functions import is_dp_connected
 
 __all__ = [
     'cndp_flatten',
@@ -140,14 +140,14 @@ def cndp_flatten(ndp):
             nn = n1
 
         if isinstance(nn, CompositeNamedDP):
-            nn_connections = nn.get_connections()
+#             nn_connections = nn.get_connections()
             for name2, ndp2 in nn.get_name2ndp().items():
                 assert not name2 in names2
                 isitf, is_fname = is_fun_node_name(name2)
                 isitr, is_rname = is_res_node_name(name2)
 
                 if (isitf or isitr):
-                    connected_to_something = is_dp_connected(name2, nn_connections)
+                    # connected_to_something = is_dp_connected(name2, nn_connections)
                     # do not add the identity nodes
                     # that represent functions or resources
                     # except if they are unconnected

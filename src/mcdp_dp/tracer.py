@@ -45,7 +45,7 @@ class Tracer():
     def log(self, s):
         """ Records a string """
         if self.logger is not None:
-            self.logger.info(self.prefix + s)
+            self.logger.info(self.prefix + ":" + s)
         self._log_event(TracerLog(s))
         
     @contextmanager
