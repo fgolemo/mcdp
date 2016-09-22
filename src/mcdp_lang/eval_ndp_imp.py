@@ -22,12 +22,12 @@ from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
 from mocdp.comp.composite_makecanonical import cndp_makecanonical
 from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
     get_name_for_fun_node, get_name_for_res_node)
+from mocdp.comp.ignore_some_imp import ignore_some
 from mocdp.comp.make_approximation_imp import make_approximation
 from mocdp.exceptions import (DPInternalError, DPSemanticError,
     DPSemanticErrorNotConnected)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 import sys
-from mocdp.comp.ignore_some_imp import ignore_some
 
 
 
@@ -773,8 +773,9 @@ def fix_resources_with_multiple_connections(context):
         cc = Connection(dp2=new_name, s2=fname, dp1=id_ndp, s1=rname)
         context.add_connection(cc)
 
+
 def eval_ndp_make_template(r, context):
     ndp = eval_ndp(r.dp_rvalue, context)
     from mocdp.comp.composite_templatize import ndp_templatize
-    return ndp_templatize(ndp)
+    return ndp_templatize(ndp, mark_as_template=True)
 

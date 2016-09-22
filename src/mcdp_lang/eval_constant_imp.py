@@ -13,6 +13,7 @@ from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
     get_types_universe, poset_minima)
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+from mcdp_posets.rcomp_units import RbicompUnits, RcompUnits
 
 
 CDP = CDPLanguage
@@ -88,11 +89,15 @@ def eval_constant(op, context):
             from mcdp_lang.eval_space_imp import eval_space  # @Reimport
             F = eval_space(op.space, context)
             assert isinstance(F, Space), op
+            assert isinstance(F, RcompUnits)
 
             v = op.value.value
 
             if isinstance(v, int) and isinstance(F, Rcomp):
                 v = float(v)
+
+            if v < 0:
+                F = RbicompUnits(F.units, F.string)
 
             try:
                 F.belongs(v)

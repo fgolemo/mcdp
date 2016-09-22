@@ -11,6 +11,7 @@ from pint import UnitRegistry  # @UnresolvedImport
 from pint.errors import UndefinedUnitError  # @UnresolvedImport
 import functools
 import math
+from mcdp_posets.rcomp import Rbicomp
 
 
 
@@ -107,6 +108,90 @@ class RcompUnits(Rcomp):
             return '%s %s' % (s, self.units_formatted)
         else:
             return s
+
+mcdp_dev_warning('need to check!!!')
+
+class RbicompUnits(Rbicomp):
+
+    def __init__(self, pint_unit, string):
+        if do_extra_checks():
+            ureg = get_ureg()
+            check_isinstance(pint_unit, ureg.Quantity)
+
+        Rbicomp.__init__(self)
+        self.units = pint_unit
+        self.string = string
+        u = parse_pint(string)
+        assert u == self.units, (self.units, u, string)
+
+        self.units_formatted = format_pint_unit_short(self.units)
+
+    @memoize_simple
+    def __repr__(self):
+        # need to call it to make sure dollars is defined
+        ureg = get_ureg()  # @UnusedVariable
+
+        # graphviz does not support three-byte unicode
+        # c = "ℝ̅"
+        # c = "ℝᶜ"
+        c = 'Rbi'
+
+        if self.units == R_dimensionless.units:
+            return '%s[]' % c
+
+        return "%s[%s]" % (c, self.units_formatted)
+
+    def __copy__(self):
+        other = RbicompUnits(self.units, self.string)
+        return other
+
+    def __getstate__(self):
+        # print('__getstate__  %s %s' % (id(self), self.__dict__))
+
+        # See: https://github.com/hgrecco/pint/issues/349
+        # This is a hack
+
+        state = {
+            'top': self.top,
+            'bottom': self.bottom,
+            'string': self.string,
+            'units_formatted': self.units_formatted,
+        }
+
+        if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
+            state[ATTRIBUTE_NDP_RECURSIVE_NAME] = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
+        return state
+
+    def __setstate__(self, x):
+        # print('__setstate__ %s %r' % (id(self), x))
+        self.top = x['top']
+        self.bottom = x['bottom']
+        self.string = x['string']
+        self.units = parse_pint(self.string)
+        self.units_formatted = x['units_formatted']
+
+        if ATTRIBUTE_NDP_RECURSIVE_NAME in x:
+            setattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME, x[ATTRIBUTE_NDP_RECURSIVE_NAME])
+
+    def __eq__(self, other):
+        if isinstance(other, RbicompUnits):
+            eq = (other.units == self.units)
+            return eq
+        return False
+
+    def format(self, x):
+        if x == self.top:
+            s = self.top.__repr__()
+        elif x == self.bottom:
+            s = self.bottom.__repr__()
+        else:
+            s = Rbicomp.format(self, x)
+
+        if self.units_formatted:
+            return '%s %s' % (s, self.units_formatted)
+        else:
+            return s
+
 
 @memoize_simple
 def parse_pint(s0):

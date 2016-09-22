@@ -9,8 +9,9 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import ProductN, SumN, SumNNat, WrapAMap, sum_dimensionality_works
 from mcdp_dp.dp_sum import MultValueMap, ProductNatN
-from mcdp_maps import MultNat, PlusNat, PlusValueMap, SumNInt
-from mcdp_posets import (Int, Nat, RcompUnits, Space,
+from mcdp_lang.helpers import create_operation
+from mcdp_maps import MinusValueMap, MultNat, PlusNat, PlusValueMap, SumNInt
+from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits, Space,
     express_value_in_isomorphic_space, get_types_universe, mult_table)
 from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError
@@ -118,7 +119,6 @@ def eval_rvalue_PlusN(x, context):
     else:
         return res
 
-
 def flatten_multN(ops):
     res = []
     for op in ops:
@@ -224,7 +224,6 @@ def get_mult_op(context, r, c):
         msg = 'Cannot create multiplication operation.'
         raise_desc(DPInternalError, msg, rtype=rtype, c=c)
 
-    from .helpers import create_operation
     r2 = create_operation(context, dp, resources=[r],
                           name_prefix='_mult', op_prefix='_x',
                           res_prefix='_y')
@@ -243,20 +242,29 @@ def flatten_plusN(ops):
 def eval_PlusN(x, context, wants_constant):
     """ Raises NotConstant if wants_constant is True. """
     from .eval_constant_imp import eval_constant
-    from .misc_math import plus_constantsN
+
 
     assert isinstance(x, CDP.PlusN)
     assert len(x.ops) > 1
 
     ops = flatten_plusN(get_odd_ops(unwrap_list(x.ops)))
-    constants = []
+    pos_constants = []
+    neg_constants = []
     resources = []
 
     for op in ops:
         try:
             x = eval_constant(op, context)
             assert isinstance(x, ValueWithUnits)
-            constants.append(x)
+
+            if isinstance(x.unit, (RcompUnits, Nat)):
+                pos_constants.append(x)
+            elif isinstance(x.unit, RbicompUnits):
+                neg_constants.append(x)
+            else:
+                msg = 'Invalid addition - needs error'
+                raise_desc(DPInternalError, msg, x=x)
+                
         except NotConstant as e:
             if wants_constant:
                 msg = 'Product not constant because one op is not constant.'
@@ -265,12 +273,48 @@ def eval_PlusN(x, context, wants_constant):
             assert isinstance(x, CResource)
             resources.append(x)
 
+    res = eval_PlusN_(pos_constants, resources, context)
+
+    if not neg_constants:
+        return res
+    else:
+        if len(neg_constants) > 1:
+            msg = 'Not implemented addition of more than one negative constant'
+            raise_desc(DPInternalError, msg, neg_constants=neg_constants)
+        else:
+            # only one negative constant
+            F = context.get_rtype(res)
+
+            constant = neg_constants[0]
+            assert constant.value < 0
+
+            c_space = RcompUnits(pint_unit=constant.unit.units,
+                                 string=constant.unit.string)
+            amap = MinusValueMap(F=F, c_value=-constant.value, c_space=c_space)
+
+            setattr(amap, '__name__', '- %s' % (constant.unit.format(-constant.value)))
+            dp = WrapAMap(amap)
+
+            r2 = create_operation(context, dp, resources=[res],
+                              name_prefix='_minus', op_prefix='_x',
+                              res_prefix='_y')
+            return r2
+
+
+
+def eval_PlusN_(constants, resources, context):
+    from .misc_math import plus_constantsN
     # it's a constant value
     if len(resources) == 0:
         return plus_constantsN(constants)
+
     elif len(resources) == 1:
-        c = plus_constantsN(constants)
-        return get_plus_op(context, r=resources[0], c=c)
+
+        if len(constants) > 0:
+            c = plus_constantsN(constants)
+            return get_plus_op(context, r=resources[0], c=c)
+        else:
+            return resources[0]
     else:
         # there are some resources
         resources_types = [context.get_rtype(_) for _ in resources]

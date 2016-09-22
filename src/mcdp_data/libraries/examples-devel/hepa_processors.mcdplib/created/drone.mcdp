@@ -1,0 +1,17 @@
+mcdp {
+   battery = instance `Battery
+   actuation = instance `Actuation
+
+   requires budget [USD]
+   required budget >= budget required by battery + budget required by actuation
+
+   # energy = power * endurance
+   provides endurance [s]
+   provides extra_payload [g]
+   capacity provided by battery >= provided endurance * (power required by actuation)
+   gravity = 9.81 m/s^2
+   weight = gravity * (mass required by battery + provided extra_payload)
+   lift provided by actuation >= weight
+   requires total_mass [g]
+   required total_mass >= mass required by battery + mass required by actuation
+}

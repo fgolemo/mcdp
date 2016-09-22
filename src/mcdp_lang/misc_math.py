@@ -3,7 +3,8 @@ from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
 from mcdp_dp import sum_units
 from mcdp_posets import Nat, RcompUnits, mult_table
-from mcdp_posets.rcomp_units import R_dimensionless, mult_table_seq
+from mcdp_posets.rcomp_units import R_dimensionless, mult_table_seq, \
+    RbicompUnits
 from mcdp_posets.types_universe import express_value_in_isomorphic_space
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPSemanticError
@@ -46,9 +47,17 @@ def vu_rcomp_mult_constants2(a, b):
 @contract(seq='seq($ValueWithUnits)')
 def generic_mult_constantsN(seq):
     """ Multiplies a sequence of constants that could be either Nat or RCompUnits """
+    for c in seq:
+        if isinstance(c.unit, RbicompUnits):
+            assert c.value < 0
+            msg = 'Cannot multiply by negative number %s.' % c
+            raise_desc(DPSemanticError, msg)
+
     posets = [_.unit for _ in seq]
     for p in posets:
+
         check_isinstance(p, (Nat, RcompUnits))
+
 
     promoted, R = generic_mult_table(posets)
     

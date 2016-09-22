@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
-from mcdp_dp.dp_dummy import Dummy
+from mcdp_dp import Dummy
 from mcdp_posets import PosetProduct, Rcomp
 from mocdp.comp.connection import Connection, connect2
 from mocdp.comp.wrap import SimpleWrap

@@ -85,6 +85,8 @@ class SolveDP(QuickAppBase):
         config_dirs = options.config_dirs.split(":")
         maindir = options.maindir
         if options.cache:
+            if out_dir is None:
+                out_dir = 'out-mcdp_solve'
             cache_dir = os.path.join(out_dir, '_cached', 'solve')
         else:
             cache_dir = None

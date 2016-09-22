@@ -8,6 +8,7 @@ from mcdp_lang.syntax import Syntax
 from mcdp_posets import PosetProduct, get_types_universe
 from mocdp.comp.context import Context
 
+
 @contract(query='dict(str:str)')
 def convert_string_query(ndp, query, context):
     """

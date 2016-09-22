@@ -91,9 +91,10 @@ def dp_repr_long_labeled(data):
 
 def ndp_visualization(data, style):
     ndp = get_ndp(data) 
-
     setattr(ndp, '_hack_force_enclose', True)
-    gg = gvgen_from_ndp(ndp, style)
+    library = data['library']
+    images_paths = library.get_images_paths()
+    gg = gvgen_from_ndp(ndp, style, images_paths=images_paths)
     return return_formats2(gg, 'ndp_%s' % style)
 
 def create_extra_css(params):  # @UnusedVariable
@@ -336,12 +337,11 @@ def do_plots(logger, model_name, plots, outdir, extra_params, maindir, extra_dir
 class PlotDP(QuickAppBase):
     """ Plot a DP:
     
-        mcdp-plot [--watch] [--plots '*'] [--out outdir] [-d dir] model_name
+        mcdp-plot  [--plots '*'] [--out outdir] [-d dir] model_name
         
     """
 
     def define_program_options(self, params):
-        params.add_flag('watch')
         params.accept_extra()
 
         possible = [p for p, _ in allplots]
@@ -388,16 +388,16 @@ class PlotDP(QuickAppBase):
                 maindir=maindir,
                 extra_dirs=extra_dirs,
                  use_cache=use_cache)
-
-        if options.watch:
-            def handler():
-                do_plots(filename, plots, out)
-
-            from .go import watch
-            d = os.path.dirname(filename)
-            if d == '':
-                d = '.'
-            watch(path=d, handler=handler)
+# 
+#         if options.watch:
+#             def handler():
+#                 do_plots(filename, plots, out)
+# 
+#             from .go import watch
+#             d = os.path.dirname(filename)
+#             if d == '':
+#                 d = '.'
+#             watch(path=d, handler=handler)
 
 
 mcdp_plot_main = PlotDP.get_sys_main()

@@ -7,6 +7,10 @@ from reprep.plot_utils import (ieee_spines, x_axis_extra_space,
     y_axis_extra_space)
 import itertools
 
+color_resources = '#700000'
+color_functions = '#007000'
+
+
 def generate_colors(n, colormap_name):
     """ Generates n color strings. """
 #     from itertools import cycle
@@ -33,8 +37,6 @@ def plot_all_directions(r, queries, results, what_to_plot_fun, what_to_plot_res)
     assert n == len(results)
     colors = generate_colors(n, colormap_name='Paired')
 
-    color_resources = '#700000'
-    color_functions = '#007000'
     marker_fun = marker_res = marker_joint = 'o'
 
     for xwhat, ywhat in itertools.combinations(what_to_plot_res, 2):

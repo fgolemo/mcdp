@@ -1,0 +1,12 @@
+mcdp {
+    provides p [flops]
+    requires x [flops]
+    requires y [flops]
+
+    threshold = 400000 flops 
+    
+    required x >= max(p, threshold)
+
+    required y >= max(0 flops, p) # - threshold)
+
+}

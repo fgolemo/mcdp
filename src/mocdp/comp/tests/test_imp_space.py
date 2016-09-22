@@ -1,10 +1,9 @@
-
 from comptests.registrar import comptest
 from contracts import contract
+from mcdp_dp import NotSolvableNeedsApprox
 from mcdp_dp.dp_transformations import get_dp_bounds
-from mcdp_dp.primitive import NotSolvableNeedsApprox
-from mcdp_lang.parse_interface import parse_ndp
-from mcdp_posets.space_product import SpaceProduct
+from mcdp_lang import parse_ndp
+from mcdp_posets import SpaceProduct
 from mcdp_report.gg_ndp import gvgen_from_ndp
 from mcdp_report_ndp_tests.test1 import GetValues
 from mcdp_tests.generation import for_all_nameddps
@@ -13,8 +12,7 @@ from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.composite_makecanonical import cndp_makecanonical
 from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.recursive_name_labeling import (MakeArguments,
-    get_imp_as_recursive_dict, get_names_used,
-    ndp_make, get_labelled_version)
+    get_imp_as_recursive_dict, get_labelled_version, get_names_used, ndp_make)
 import os
 
 @contract(a=MakeArguments)

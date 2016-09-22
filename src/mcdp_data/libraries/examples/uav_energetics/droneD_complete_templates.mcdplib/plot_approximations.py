@@ -4,7 +4,7 @@ from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_lang.parse_interface import parse_poset
 from mcdp_posets.poset_product import PosetProduct
 from mcdp_posets.uppersets import UpperSets
-from mcdp_report.generic_report_utils import generic_plot, get_best_plotter
+from mcdp_report.generic_report_utils import get_best_plotter
 from plot_utils import ieee_fonts_zoom3, ieee_spines_zoom3
 from reprep import Report
 import numpy as np
