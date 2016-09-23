@@ -3,7 +3,7 @@ from collections import namedtuple
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_lang.namedtuple_tricks import (
-    isnamedtupleinstance, isnamedtuplewhere, recursive_print)
+    isnamedtupleinstance, isnamedtuplewhere)
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
@@ -84,7 +84,8 @@ class FindDependencies():
 
     def __getstate__(self):
         d = dict(**self.__dict__)
-        del d['library']
+        if 'library' in d:
+            del d['library']
         return d
 
     @memoize_simple
