@@ -178,6 +178,7 @@ def mcdplib_test_setup_source_mcdp(context, libname):
 #             continue
 
         source = f['data']
+        filename = f['realpath']
 
         if gives_syntax_error(source):
             print('Skipping because syntax error')
@@ -190,7 +191,7 @@ def mcdplib_test_setup_source_mcdp(context, libname):
             c = context.child(basename)
     
             for ftest in registered:
-                c.comp(ftest, basename, source)
+                c.comp(ftest, filename, source)
 
 def get_keywords(source):
     line1 = source.split('\n')[0]
@@ -288,11 +289,14 @@ def mcdplib_test_setup_primitivedps(context, libname):
             c.comp(ftest, id_dp, ndp)
 
 @contextmanager
-def timeit(desc):
+def timeit(desc, minimum=None):
     t0 = time.clock()
     yield
     t1 = time.clock()
     delta = t1 - t0
+    if minimum is not None:
+        if delta < minimum:
+            return
     print('timeit %s: %.2f s' % (desc, delta))
 
 def _load_primitivedp(libname, model_name):

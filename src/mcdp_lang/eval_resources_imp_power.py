@@ -7,7 +7,9 @@ CDP = CDPLanguage
 
 
 def eval_rvalue_Power(rvalue, context):
-    from mcdp_lang.eval_resources_imp import eval_rvalue
+    assert isinstance(rvalue, (CDP.Power, CDP.PowerShort)), rvalue
+
+    from .eval_resources_imp import eval_rvalue
     base = eval_rvalue(rvalue.op1, context)
 
     exponent = rvalue.exponent

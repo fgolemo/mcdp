@@ -21,23 +21,21 @@ syn(Syntax.integer_fraction, '1/')
 exponent = L.exponent('^')
 
 ok(Syntax.rvalue_power_expr, 'pow(x,1/2)',
-    L.Power(op1=L.VariableRef('x'),
-            glyph=None,
+    L.Power(keyword=L.PowerKeyword('pow'), op1=L.VariableRef('x'),
             exponent=L.IntegerFraction(num=1, den=2)))
 
 ok(Syntax.rvalue_power_expr, 'x ^ 1/2',
-    L.Power(op1=L.VariableRef('x'),
+    L.PowerShort(op1=L.VariableRef('x'),
             glyph=exponent,
             exponent=L.IntegerFraction(num=1, den=2)))
 
 ok(Syntax.rvalue_power_expr, 'x ^ 2',
-    L.Power(op1=L.VariableRef('x'),
+    L.PowerShort(op1=L.VariableRef('x'),
             glyph=exponent,
             exponent=L.IntegerFraction(num=2, den=1)))
 
 ok(Syntax.rvalue_power_expr, 'pow(x, 2)',
-    L.Power(op1=L.VariableRef('x'),
-            glyph=None,
+    L.Power(keyword=L.PowerKeyword('pow'), op1=L.VariableRef('x'),
             exponent=L.IntegerFraction(num=2, den=1)))
 
 

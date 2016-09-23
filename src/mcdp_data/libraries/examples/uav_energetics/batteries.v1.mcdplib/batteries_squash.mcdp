@@ -1,4 +1,4 @@
-approx(cost,0%,1$,Top$) 
+approx(cost,0%,1$,Top $) 
 
 mcdp {
     battery = new Batteries

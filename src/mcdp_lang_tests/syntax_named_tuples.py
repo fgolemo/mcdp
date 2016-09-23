@@ -82,8 +82,25 @@ mcdp {
 
 @comptest
 def check_lang_namedtuple6():
-    pass
+    s = """namedproduct(
+    tag: s
+)"""
+    print('1')
+    parse_wrap(Syntax.space_product_with_labels, s)
 
+
+    print('2')
+    parse_wrap(Syntax.space_operand, s)
+
+    print('2b')
+    parse_poset(s)
+
+    s = """namedproduct(
+    tag: S(DuckiebotIntersectionSignal)
+)"""
+    print('3')
+    parse_poset(s)
+    print('4')
 
 @comptest
 def check_lang_namedtuple7():

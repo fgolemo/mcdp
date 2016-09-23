@@ -215,7 +215,9 @@ class CDPLanguage():
     
     IntegerFraction = namedtuplewhere('IntegerFraction', 'num den')
 
-    Power = namedtuplewhere('Power', 'op1 glyph exponent')
+    PowerKeyword = namedtuplewhere('PowerKeyword', 'keyword')
+    Power = namedtuplewhere('Power', 'keyword op1 exponent')
+    PowerShort = namedtuplewhere('PowerShort', 'op1 glyph exponent')
     BuildProblem = namedtuplewhere('BuildProblem', 'keyword statements')
 
     ModelStatements = namedtuplewhere('ModelStatements', 'statements')
