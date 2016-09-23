@@ -55,7 +55,14 @@ class Entry():
         self.name = name
         
     def __repr__(self):
-        return '%s(%s,%s)' % (type(self).__name__, self.libname, self.name)
+        return '%s(%s,%s)' % (type(self), self.libname, self.name)
+
+    def __hash__(self):
+        return hash(str(self))
+
+    def __eq__(self,other):
+        # XXX: not checking type?
+        return self.name == other.name and self.libname== other.libname
         
 class EntryNDP(Entry):
     pass
