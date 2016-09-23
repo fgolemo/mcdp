@@ -15,12 +15,15 @@ def draw_depgraph(res):
 
     @memoize_simple
     def get_gg_cluster(libname):
+        print('creating cluster %s ' % entry)
         return gg.newItem(libname)
 
     @memoize_simple
     def get_gg_node(entry):
+        print('creating node %s ' % entry)
         parent = get_gg_cluster(entry.libname)
-        return gg.newItem(entry.name, parent=parent)
+        label = '%s/%s' % (entry.libname, entry.name)
+        return gg.newItem(label, parent=parent)
 
     for entry in G.nodes():
         get_gg_node(entry)

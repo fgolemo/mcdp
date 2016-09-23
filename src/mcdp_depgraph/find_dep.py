@@ -49,9 +49,13 @@ def find_dependencies(config_dirs, maindir, seeds):
 
 # Entry = namedtuple('Entry', 'libname name')
 class Entry():
+    
     def __init__(self, libname, name):
         self.libname = libname
         self.name = name
+        
+    def __repr__(self):
+        return '%s(%s,%s)' % (type(self).__name__, self.libname, self.name)
         
 class EntryNDP(Entry):
     pass
