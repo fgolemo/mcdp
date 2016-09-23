@@ -1,0 +1,21 @@
+mcdp {
+    provides endurance     [s]
+    provides extra_payload [kg]
+    provides extra_power   [W] 
+
+    battery = new Battery
+    actuation = new Actuation
+
+    total_power = power required by actuation + extra_power
+    capacity provided by battery >= endurance * total_power
+
+    total_mass =  mass required by battery  + extra_payload
+
+    gravity = 9.81 m/s^2
+    weight = total_mass * gravity
+
+    lift provided by actuation >= weight 
+  
+
+    requires total_mass >= total_mass   
+}
