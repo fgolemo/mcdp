@@ -60,11 +60,11 @@ class MeetNDual(Mux):
 
         
 class Max(WrapAMap):
-    
+    """ This is the same as JoinNDP but it is its own class for visualization """    
     def __init__(self, F0):
         amap = JoinNMap(2, F0)
         WrapAMap.__init__(self, amap)
-#         JoinNDP.__init__(self, 2, F0)
+
         self.F0 = F0
 
     def diagram_label(self):

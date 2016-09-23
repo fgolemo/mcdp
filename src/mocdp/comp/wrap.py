@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-from .interfaces import NamedDP
 from contracts import contract, raise_wrapped
 from contracts.utils import indent, raise_desc
 from mcdp_dp import PrimitiveDP
 from mcdp_dp.dp_flatten import get_it
 from mcdp_posets import PosetProduct
 from mocdp.exceptions import DPInternalError
+
+from .interfaces import NamedDP
 
 
 __all__ = [

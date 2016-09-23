@@ -39,16 +39,11 @@ Technical debt:
 - 'ignore resources' should modify the diagram, not create a wrapper.
 - remove all the symlinks
 
+- remove normal form
+- remove caching from LoopDP; make separate class
+- remove caching from Library, make separate class
+
 --------------------
-
-
-    Not sure this actually works
-
-Bugs in visualization:
-  
-  - Min/max: see here: http://127.0.0.1:8080/libraries/pop/models/pop_example_3_7/views/syntax/
-    a) icon
-    b) meetmap
 
 
 

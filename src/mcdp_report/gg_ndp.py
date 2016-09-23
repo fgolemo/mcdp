@@ -281,7 +281,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
         (InvPlus2Nat, ''),
         (Conversion, ''),
         (MeetNDual, ''),
-        (JoinNDP, ''), # also Max is JoinNDP
+        (JoinNDP, ''),
         (TakeFun, ''),
         (TakeRes, ''),
     ]
