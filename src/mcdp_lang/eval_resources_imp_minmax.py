@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
+from mcdp_dp import Max, Max1, Min
+from mcdp_lang.helpers import get_resource_possibly_converted
+from mocdp.comp import Connection, dpwrap
+from mocdp.exceptions import DPSemanticError
+
 from .eval_constant_imp import eval_constant
 from .helpers import create_operation
 from .parts import CDPLanguage
-from mcdp_dp import Max, Max1, Min
-from mocdp.comp import Connection, dpwrap
-from mocdp.exceptions import DPSemanticError
-from mcdp_posets.types_universe import get_types_universe
-from mcdp_posets.poset import NotLeq
-from contracts.utils import raise_wrapped
-from mcdp_lang.helpers import get_resource_possibly_converted
+
+
 CDP = CDPLanguage
 
 
@@ -34,7 +34,7 @@ def eval_rvalue_OpMin(rvalue, context):
         raise DPSemanticError(msg, where=rvalue.where)
 
     dp = Min(F1)
-    nprefix, na, nb, nres = 'opmin', 'm0', 'm1', 'min'
+    nprefix, na, nb, nres = '_opmin', '_m0', '_m1', '_min'
 
     return add_binary2(context, a, b, dp, nprefix, na, nb, nres)
 

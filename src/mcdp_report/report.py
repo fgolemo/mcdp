@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-from .gg_ndp import gvgen_from_ndp
-from .gg_utils import gg_figure
+import warnings
+
 from contracts import contract
 from mcdp_posets import PosetProduct, R_dimensionless
 from mocdp.comp.interfaces import NamedDP
 from reprep import Report
-import warnings
-from .dp_graph_flow_imp import dp_graph_flow
 
+from .dp_graph_flow_imp import dp_graph_flow
+from .gg_ndp import gvgen_from_ndp
+from .gg_utils import gg_figure
 
 
 @contract(ndp=NamedDP)

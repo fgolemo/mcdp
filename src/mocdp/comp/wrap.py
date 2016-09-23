@@ -168,7 +168,10 @@ class SimpleWrap(NamedDP):
             s += '\n  provides %10s (%s) ' % (f, self.get_ftype(f))
         for r in self.get_rnames():
             s += '\n  requires %10s (%s) ' % (r, self.get_rtype(r))
-        s += '\n' + indent(self.get_dp().repr_long(), '  | ')
+            
+        dp = self.get_dp()
+        s += '\n %s' % type(dp)
+        s += '\n' + indent(dp.repr_long(), '  | ')
         return s
 
     def __repr__(self):

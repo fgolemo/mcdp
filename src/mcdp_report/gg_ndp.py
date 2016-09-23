@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 from collections import defaultdict
+from types import NoneType
+
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (Constant, ConstantMinimals, Conversion, GenericUnary,
@@ -15,7 +17,7 @@ from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning
 from mocdp.ndp import NamedDPCoproduct
-from types import NoneType
+
 
 STYLE_GREENRED = 'greenred'
 STYLE_GREENREDSYM = 'greenredsym'
@@ -279,7 +281,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
         (InvPlus2Nat, ''),
         (Conversion, ''),
         (MeetNDual, ''),
-        (JoinNDP, ''),
+        (JoinNDP, ''), # also Max is JoinNDP
         (TakeFun, ''),
         (TakeRes, ''),
     ]
