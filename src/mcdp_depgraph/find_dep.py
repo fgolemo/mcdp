@@ -82,6 +82,11 @@ class FindDependencies():
 
         return G
 
+    def __setstate__(self, x):
+        self.default_library_name = x['default_library_name']
+        self.visited = x['visited']
+        self.library = 'not-set-after-pickle'
+        
     def __getstate__(self):
         d = dict(**self.__dict__)
         if 'library' in d:
