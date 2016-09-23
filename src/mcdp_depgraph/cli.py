@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from mcdp_depgraph.draw_dep_graph import draw_depgraph
+from mcdp_depgraph.draw_dep_graph import draw_depgraph, draw_libdepgraph
 from mcdp_depgraph.find_dep import find_dependencies
 from mcdp_depgraph.other_reports import other_jobs
 from quickapp import QuickApp
