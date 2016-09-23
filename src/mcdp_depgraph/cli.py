@@ -47,6 +47,9 @@ class Depgraph(QuickApp):
         r = context.comp(draw_depgraph, res)
         context.add_report(r, 'draw')
 
+        r = context.comp(draw_libdepgraph, res)
+        context.add_report(r, 'libdepgraph')
+
             
             
 mcdp_depgraph_main = Depgraph.get_sys_main()

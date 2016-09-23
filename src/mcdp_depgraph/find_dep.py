@@ -87,6 +87,7 @@ class FindDependencies():
         self.visited = {}
 
     def create_graph(self):
+        """ Create a graph where each node is a an Entry """
         G = nx.DiGraph()
 
         for n in self.visited:
@@ -95,6 +96,19 @@ class FindDependencies():
             for d in deps:
                 G.add_edge(n, d)
 
+        return G
+    
+    def create_libgraph(self):
+        """ Create a graph where each node is a string, name for a library"""
+        G0 = self.create_graph()
+
+        G = nx.DiGraph()
+        for entry in G0:
+            G.add_node(entry.libname)
+            
+        for n1, n2 in G0.edges():
+            G.add_edge(n1.libname, n2.libname)
+            
         return G
 
     def __setstate__(self, x):
