@@ -31,7 +31,6 @@ On hold:
 (*) Demo for QR code
 Discarded:
 (*) Feature-parity with new Loop2, including normal transform - on hold 
-    Not sure this actually works
 
 
 Technical debt:
@@ -41,6 +40,18 @@ Technical debt:
 - remove all the symlinks
 
 --------------------
+
+
+    Not sure this actually works
+
+Bugs in visualization:
+  
+  - Min/max: see here: http://127.0.0.1:8080/libraries/pop/models/pop_example_3_7/views/syntax/
+    a) icon
+    b) meetmap
+
+
+
 
 
 Keys:
