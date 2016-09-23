@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+import logging
+
 from mcdp_depgraph.draw_dep_graph import draw_depgraph
 from mcdp_depgraph.find_dep import find_dependencies
-from quickapp import QuickApp
-import logging
 from mcdp_depgraph.other_reports import other_jobs
+from quickapp import QuickApp
 
 
 class Depgraph(QuickApp):
@@ -27,11 +28,13 @@ class Depgraph(QuickApp):
         params = options.get_extra()
 
         if len(params) < 1:
-            raise ValueError('Please specify model name.')
+            seeds = None
+            #raise ValueError('Please specify some model names to be used as seeds.')
+        else:
+            seeds = params
 
         config_dirs = options.config_dirs.split(":")
         maindir = options.maindir
-        seeds = params
         res = context.comp(find_dependencies, config_dirs=config_dirs,
                            maindir=maindir, seeds=seeds)
 

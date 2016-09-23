@@ -1,4 +1,5 @@
 from collections import namedtuple
+
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_lang.namedtuple_tricks import (
@@ -12,9 +13,11 @@ from mocdp.memoize_simple_imp import memoize_simple
 import networkx as nx
 
 
-@contract(config_dirs='list(str)', maindir='str')
+@contract(config_dirs='list(str)', maindir='str', seeds='None|seq(str)')
 def find_dependencies(config_dirs, maindir, seeds):
-
+    """
+        returns res, with res['fd'] ~ FindDependencies
+    """
     librarian = Librarian()
     for e in config_dirs:
         librarian.find_libraries(e)
@@ -22,6 +25,21 @@ def find_dependencies(config_dirs, maindir, seeds):
     default_library = librarian.get_library_by_dir(maindir)
 
     fd = FindDependencies(default_library)
+    
+    if seeds is None:
+        # add all models for all libraries
+        libnames = list(librarian.get_libraries())
+        
+        seeds = []
+        for libname in libnames:
+            library = librarian.load_library(libname)
+            ndps = library.list_ndps()
+            
+            for name in ndps:
+                seeds.append('%s.%s' % (libname, name))
+    else:
+        pass
+    
     fd.search(seeds)
 
     res = {}
@@ -74,6 +92,7 @@ class FindDependencies():
         print('getting library %r ' % libname)
         return self.library.load_library(libname)
 
+    @contract(seeds='seq(str)')
     def search(self, seeds):
         self.stack = []
         for s in seeds:
@@ -119,7 +138,7 @@ class FindDependencies():
     def collect_dependencies(self, s, x):
         assert isnamedtuplewhere(x), x
         default_library = s.libname
-        print recursive_print(x)
+        #print recursive_print(x)
         deps = set()
         CDP = CDPLanguage
         def visit(x):

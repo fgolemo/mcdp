@@ -1,6 +1,0 @@
-mcdp {
-   provides navigation [m/s]
-
-   requires planner [`planner]
-   requires localization [m/s]
-}

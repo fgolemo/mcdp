@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-from .utils import memo_disk_cache2
-from .utils.locate_files_imp import locate_files
 from contextlib import contextmanager
+from copy import deepcopy
+import os
+import shutil
+import sys
+
 from contracts import contract
 from contracts.utils import (check_isinstance, format_obs, raise_desc,
     raise_wrapped)
-from copy import deepcopy
 from mcdp_dp import PrimitiveDP
 from mcdp_lang import parse_ndp, parse_poset
 from mcdp_posets import Poset
@@ -15,9 +17,10 @@ from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.exceptions import DPSemanticError, extend_with_filename, \
     mcdp_dev_warning
-import os
-import shutil
-import sys
+
+from .utils import memo_disk_cache2
+from .utils.locate_files_imp import locate_files
+
 
 mcdp_dev_warning('move away')
 log_duplicates = False

@@ -1,23 +1,44 @@
+
+
+
+
+
 Goals:
 
-(*) Automatically generated iteration figures
+(*) Unified solving interface, for interactive and batch drawing.
+    - (interactive) I can drag over and I see the shape change
+    - I can see the animation 
 
-(*) Feature-parity with new Loop2, including normal transform
 
-(*) [branch: ???] Symmetrization for functionality/resources
+(*) Symmetrization for functionality/resources
 
-(*) Examples for WAFR paper
+    The challenge is creating dual of certain DPs, such as Mux DPs.
 
-(*) Compelling demo for uncertainty
+    This enables to compute stable(h1 h2*) or stable(h2 h1*)
 
+
+(*) Esthetics
+
+    - have one icon for each library (library_icon.png)
+
+    - display the dependency graph among libraries
+
+
+On hold:
 (*) Create a video?
 
 (*) Interface with cvxpy
-
 (*) Demo for QR code
+Discarded:
+(*) Feature-parity with new Loop2, including normal transform - on hold 
+    Not sure this actually works
 
-(*) Other features
 
+Technical debt:
+
+- revise the implementation of subtraction, done very quickly
+- 'ignore resources' should modify the diagram, not create a wrapper.
+- remove all the symlinks
 
 --------------------
 

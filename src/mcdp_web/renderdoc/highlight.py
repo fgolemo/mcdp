@@ -1,5 +1,12 @@
+import base64
+import hashlib
+import os
+from tempfile import mkdtemp
+import traceback
+
 from bs4 import BeautifulSoup
 from bs4.element import NavigableString
+
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_lang.syntax import Syntax
@@ -13,17 +20,14 @@ from mocdp import ATTR_LOAD_NAME, logger
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from reprep import Report
 from system_cmd import CmdException, system_cmd_result
-from tempfile import mkdtemp
-import base64
-import hashlib
-import os
-import traceback
+
 
 def bs(fragment):
     return BeautifulSoup(fragment, 'html.parser', from_encoding='utf-8')
 
 @contract(returns=str, html=str)
-def html_interpret(library, html, raise_errors=False, generate_pdf=False, realpath='unavailable'):
+def html_interpret(library, html, raise_errors=False, 
+                   generate_pdf=False, realpath='unavailable'):
     # clone linrary?
     library = library.clone()
     load_fragments(library, html,
