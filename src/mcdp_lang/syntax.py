@@ -847,14 +847,9 @@ class Syntax():
     ndpt_compact = sp(COMPACT - ndpt_dp_rvalue,
                        lambda t: CDP.Compact(t[0], t[1]))
 
-<<<<<<< HEAD
-    TEMPLATE = keyword('template', CDP.TemplateKeyword)
-    ndpt_template = sp(TEMPLATE - ndpt_dp_rvalue,
-=======
     TEMPLATE = spk(L('template'), CDP.TemplateKeyword)
     INTERFACE = spk(L('interface'), CDP.TemplateKeyword)
     ndpt_template = sp((TEMPLATE | INTERFACE) - ndpt_dp_rvalue,
->>>>>>> devel
                        lambda t: CDP.MakeTemplate(t[0], t[1]))
 
     FLATTEN = keyword('flatten', CDP.FlattenKeyword)
