@@ -3,6 +3,28 @@ from mcdp_report.gg_utils import gg_figure
 from reprep import Report
 from mcdp_depgraph.find_dep import FindDependencies
 from mcdp_report import my_gvgen
+from decorator import decorator
+
+def my_memoize_simple(obj):
+    cache = obj.cache = {}
+
+    def memoizer(f, *args):
+        key = (args)
+        if key not in cache:
+            print('computing for %s' % key.__repr__() )
+            cache[key] = f(*args)
+        assert key in cache
+
+        try:
+            cached = cache[key]
+            return cached
+        except ImportError:
+            del cache[key]
+            cache[key] = f(*args)
+            return cache[key]
+
+            # print('memoize: %s %d storage' % (obj, len(cache)))
+    return decorator(memoizer, obj)
 
 def draw_depgraph(res):
     r = Report()
@@ -13,12 +35,12 @@ def draw_depgraph(res):
 
     gg = my_gvgen.GvGen(options="rankdir=TB")
 
-    @memoize_simple
+    @my_memoize_simple
     def get_gg_cluster(libname):
         print('creating cluster %s ' % entry)
         return gg.newItem(libname)
 
-    @memoize_simple
+    @my_memoize_simple
     def get_gg_node(entry):
         print('creating node %s ' % entry)
         parent = get_gg_cluster(entry.libname)
