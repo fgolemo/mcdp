@@ -18,13 +18,15 @@ def other_jobs(context, maindir, config_dirs, outdir, res):
     G = fd.create_graph()
     
     texs = []
-    for entry in G.nodes():
+    nodes = list(G.nodes())
+    print nodes
+    for entry in nodes:
 
         tex = context.comp(other_reports,
                      maindir=maindir,
                      config_dirs=config_dirs,
                      outdir=outdir,
-                     entry=entry, job_id='other_reports-%s-%s' % (entry.libname, entry.name))
+                     entry=entry)#, job_id='other_reports-%s-%s' % (entry.libname, entry.name))
         texs.append(tex)
 
     context.comp(write_tex, outdir, texs)

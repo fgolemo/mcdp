@@ -1,4 +1,4 @@
-from collections import namedtuple
+# from collections import namedtuple
 
 from contracts import contract
 from contracts.utils import raise_desc
