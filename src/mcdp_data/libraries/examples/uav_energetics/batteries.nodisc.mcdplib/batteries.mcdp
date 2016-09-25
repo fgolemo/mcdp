@@ -1,12 +1,12 @@
 
 choose(
-        NiMH: (load Battery_NiMH),
-        NiH2: (load Battery_NiH2),
-         LCO: (load Battery_LCO),
-         LMO: (load Battery_LMO),
-       NiCad: (load Battery_NiCad),
-         SLA: (load Battery_SLA),
-        LiPo: (load Battery_LiPo),
-         LFP: (load Battery_LFP)
+        NiMH: `Battery_NiMH,
+        NiH2: `Battery_NiH2,
+         LCO: `Battery_LCO,
+         LMO: `Battery_LMO,
+       NiCad: `Battery_NiCad,
+         SLA: `Battery_SLA,
+        LiPo: `Battery_LiPo,
+         LFP: `Battery_LFP
 )
     

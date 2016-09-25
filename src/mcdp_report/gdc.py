@@ -148,9 +148,9 @@ class GraphDrawingContext():
         tmppath = self.get_temp_path()
         imagepaths = [self._get_default_imagepath()]
         imagepaths.extend(self.images_paths)
-        print('options: %s in %r' % (options, imagepaths))
+        #print('options: %s in %r' % (options, imagepaths))
         best = choose_best_icon(options, imagepaths)
-        print('best: %s' % best)
+        #print('best: %s' % best)
         resized = resize_icon(best, tmppath, 150)
         return resized
 

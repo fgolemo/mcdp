@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_dp import (ApproximableDP, CoProductDPLabels, Constant, DPLoop0,
-    DPLoop2, GenericUnary, LabelerDP, Limit, Mux, OpaqueDP, Parallel,
+    DPLoop2, LabelerDP, Limit, Mux, OpaqueDP, Parallel,
     PrimitiveDP, Series0)
 from mcdp_dp.dp_generic_unary import WrapAMap
+
 
 __all__ = [
     'dp_graph_tree',
@@ -20,8 +21,8 @@ def get_dp_label(dp):
     if isinstance(dp, Limit):
         x = '<= %s [%s]' % (dp.F.format(dp.limit), dp.F)
         label = 'Limit\n%s' % x
-    if isinstance(dp, GenericUnary):
-        label = dp.__repr__()
+#     if isinstance(dp, GenericUnary):
+#         label = dp.__repr__()
     if isinstance(dp, WrapAMap):
         label = 'WrapAMap\n%s' % dp.diagram_label()
     return label

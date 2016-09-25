@@ -5,5 +5,5 @@
        LMO  150 Wh/kg  2.84 Wh/$     500 []  Lithium manganese oxide 
      NiCad   30 Wh/kg  7.50 Wh/$     500 []  Nickel-cadmium
        SLA   30 Wh/kg  7.00 Wh/$     500 []  Lead-acid
-      LiPo  150 Wh/kg  2.50 Wh/$     600 []  Lithium polimer
+      LiPo  250 Wh/kg  2.50 Wh/$     600 []  Lithium polimer
        LFP   90 Wh/kg  1.50 Wh/$    1500 []  Lithium iron phosphate

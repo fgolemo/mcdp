@@ -46,7 +46,7 @@ Technical debt:
 --------------------
 
 
-
+- test ignore_resource  for wrong inputs
 
 
 Keys:

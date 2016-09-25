@@ -1,0 +1,10 @@
+mcdp {
+    battery = instance `available_batteries
+    
+    provides capacity using battery
+    provides missions using battery
+
+    ignore maintenance required by battery 
+    requires mass for battery
+    requires cost for battery
+}

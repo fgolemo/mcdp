@@ -128,7 +128,7 @@ def eval_constant(op, context):
         if isinstance(op, CDP.GenericNonlinearity):
             raise_desc(NotConstant, 'GenericNonlinearity is not constant', op=op)
 
-     
+
         if isinstance(op, CDP.MakeTuple):
             ops = get_odd_ops(unwrap_list(op.ops))
             constants = [eval_constant(_, context) for _ in ops]

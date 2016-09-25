@@ -31,21 +31,24 @@ def solve_combinations(ndp, combinations, result_like, lower=None, upper=None):
 def solve_queries(ndp, queries, result_like, lower=None, upper=None):
     results = []
     queries2 = []
+    implementations = []
+    dp0 = ndp.get_dp()
+    I = dp0.get_imp_space()
     for query in queries:
-        res = friendly_solve(ndp, query=query, result_like=result_like,
-                             upper=upper, lower=lower)
+        res, imps = friendly_solve(ndp, query=query, result_like=result_like,
+                                              upper=upper, lower=lower)
+        
         q2 = dict([(k, v) for k, (v, _) in query.items()])
         queries2.append(q2)
         results.append(res)
-    return dict(queries=queries2, results=results)
+        implementations.append(imps)
+    return dict(queries=queries2, results=results, implementations=implementations,
+                I = I)
 
 
 @contract(ndp=NamedDP, query='dict(str:tuple(float|int,str))')
 def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=None):
     """
-        Returns a set of dict(rname:)
-        
-        
         query = dict(power=(100,"W"))
         result_like = dict(power="W")
         
@@ -57,7 +60,7 @@ def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=No
     fnames = ndp.get_fnames()
     rnames = ndp.get_rnames()
 
-    if not len(rnames) > 1:
+    if not len(rnames) >= 1:
         raise NotImplementedError()
     
     value = []
@@ -94,7 +97,6 @@ def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=No
     else:
         dp = dp0
         
-
     F = dp.get_fun_space()
     F.belongs(value)
 
@@ -107,6 +109,7 @@ def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=No
     print('results: %s' % UR.format(res))
 
     ares = []
+    implementations = []
 
     for r in res.minimals:
         rnames = ndp.get_rnames()
@@ -118,11 +121,20 @@ def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=No
             i = rnames.index(rname)
             unit = interpret_string_as_space(sunit)
             Ri = ndp.get_rtype(rname)
-            ri = r[i]
+            if len(rnames) > 1:
+                ri = r[i]
+            else:
+                assert i == 0
+                ri = r
             v = express_value_in_isomorphic_space(S1=Ri, s1=ri, S2=unit)
             fr[rname] = v
+        
         ares.append(fr)
-    return ares
+        
+        ms = dp.get_implementations_f_r(value, r)
+        implementations.append(ms)
+        
+    return ares, implementations
 
 @contract(res='list(dict(str:*))')
 def to_numpy_array(result_like, res):

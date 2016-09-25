@@ -65,7 +65,8 @@ span.SolveModelKeyword,
 span.AnyOfKeyword,
 span.MaximalsKeyword,
 span.MinimalsKeyword,
-span.IgnoreResourcesKeyword
+span.IgnoreResourcesKeyword,
+span.ProcName
 { 
     font-weight: bold; 
     color: #00a;

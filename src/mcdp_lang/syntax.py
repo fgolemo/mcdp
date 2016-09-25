@@ -623,18 +623,17 @@ class Syntax():
                                lambda t: CDP.FunctionLabelIndex(keyword=t[1],
                                                                 fvalue=t[0], label=t[2]))
 
-    unary = {
-        'sqrt': lambda op1: CDP.GenericNonlinearity(math.sqrt, op1, lambda F: F),
-        'ceil': lambda op1: CDP.GenericNonlinearity(math.ceil, op1, lambda F: F),
-        'square': lambda op1: CDP.GenericNonlinearity(square, op1, lambda F: F),
-    }
 
-    unary_op = MatchFirst([sp(L(x), lambda t: CDP.ProcName(t[0]))  # XXX
-                   for x in unary])
-    rvalue_unary_expr = sp((C(unary_op, 'opname') - SLPAR
-                    + C(rvalue, 'op1')) - SRPAR,
-                    lambda t: Syntax.unary[t['opname'].name](t['op1']))
-
+    unary = ['sqrt', 'ceil', 'square']
+    
+    unary_op = MatchFirst([sp(L(x), lambda t: CDP.ProcName(t[0]))
+                           for x in unary])
+    
+    
+    rvalue_unary_expr = sp(unary_op - SLPAR - rvalue - SRPAR,
+                            lambda t: CDP.UnaryRvalue(t[0], t[1]))
+    
+    
     binary = {
         'max': CDP.OpMax,
         'min': CDP.OpMin,

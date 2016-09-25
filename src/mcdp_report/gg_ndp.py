@@ -4,7 +4,7 @@ from types import NoneType
 
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_dp import (Constant, ConstantMinimals, Conversion, GenericUnary,
+from mcdp_dp import (Constant, ConstantMinimals, Conversion,
     Identity, InvMult2, InvPlus2, InvPlus2Nat, JoinNDP, Limit, Max, MeetNDual,
     Min, Mux, MuxMap, Product, ProductN, Sum, SumN, SumNNat, TakeFun, TakeRes,
     WrapAMap)
@@ -253,7 +253,7 @@ def create(gdc, ndp, plotting_info):
 
 def is_simple(ndp):
     return isinstance(ndp, SimpleWrap) and isinstance(ndp.dp,
-     (Min, Max, Identity, GenericUnary, Sum, SumN, Product, ProductN, InvPlus2, InvMult2))
+     (Min, Max, Identity, Sum, SumN, Product, ProductN, InvPlus2, InvMult2))
 
 
 def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
@@ -305,7 +305,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
     
     is_special = is_special_dp(ndp.dp)
 
-    simple = (Min, Max, Identity, GenericUnary, WrapAMap, MeetNDual)
+    simple = (Min, Max, Identity, WrapAMap, MeetNDual)
     only_string = not is_special and isinstance(ndp.dp, simple)
 
     from mcdp_library.library import ATTR_LOAD_NAME
@@ -326,10 +326,10 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
 
         label = type(ndp.dp).__name__
 
-        if isinstance(ndp.dp, GenericUnary):
-            label = ndp.dp.function.__name__
+#         if isinstance(ndp.dp, GenericUnary):
+#             label = ndp.dp.function.__name__
 
-        elif isinstance(ndp.dp, WrapAMap):
+        if isinstance(ndp.dp, WrapAMap):
             label = ndp.dp.diagram_label()
 
             if isinstance(ndp.dp.amap, MuxMap):

@@ -11,6 +11,8 @@ class CDPLanguage():
 
     # min(), max(), etc.
     ProcName = namedtuplewhere('ProcName', 'name')
+    UnaryRvalue = namedtuplewhere('UnaryRvalue', 'proc rvalue')
+    
     GenericNonlinearity = namedtuplewhere('GenericNonlinearity',
                                           'function op1 R_from_F')
 
@@ -334,3 +336,4 @@ class CDPLanguage():
     # ignore_resources(a, b) mcdp { }
     IgnoreResourcesKeyword = namedtuplewhere('IgnoreResourcesKeyword', 'keyword')
     IgnoreResources = namedtuplewhere('IgnoreResources', 'keyword rnames dp_rvalue')
+
