@@ -1,10 +1,12 @@
+from contracts import contract
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
+from mocdp.exceptions import do_extra_checks
+
 from .poset import Poset
 from .poset_product import PosetProduct
 from .space import Space  # @UnusedImport
 from .space_product import SpaceProduct
-from contracts import contract
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
-from mocdp.exceptions import do_extra_checks
+
 
 __all__ = [
     'get_product_compact',

@@ -1,6 +1,7 @@
 from mcdp_posets import Map
-import numpy as np
 from mcdp_posets.rcomp import tiny
+import numpy as np
+
 
 class LinearMapComp(Map):
     """ Linear multiplication on R + top """

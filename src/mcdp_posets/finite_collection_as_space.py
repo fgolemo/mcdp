@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+import random
+
+from contracts.utils import raise_desc
+
 from .poset import NotLeq
 from .space import NotBelongs, NotEqual, Space
-from contracts.utils import raise_desc
-import random
 
 
 __all__ = ['FiniteCollectionAsSpace']

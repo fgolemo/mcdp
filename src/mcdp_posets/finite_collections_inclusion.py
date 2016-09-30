@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
+from contracts import contract
+from contracts.utils import raise_desc
+from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
+
 from .finite_collection import FiniteCollection
 from .finite_collection_as_space import FiniteCollectionAsSpace
 from .poset import NotBounded, NotLeq, Poset
 from .space import NotBelongs, NotEqual, Space
-from contracts import contract
-from contracts.utils import raise_desc
-from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
+
 
 __all__ = [
     'FiniteCollectionsInclusion',

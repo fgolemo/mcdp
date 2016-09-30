@@ -1,3 +1,7 @@
+from contracts import contract
+from contracts.utils import raise_desc, raise_wrapped
+from mocdp.exceptions import DPInternalError, mcdp_dev_warning
+
 from .nat import Int, Nat
 from .poset import NotLeq, Preorder
 from .poset_coproduct import PosetCoproduct
@@ -6,9 +10,7 @@ from .rcomp import Rcomp
 from .space import Map, MapNotDefinedHere, NotEqual
 from .space_product import SpaceProduct
 from .uppersets import UpperSets
-from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
-from mocdp.exceptions import DPInternalError, mcdp_dev_warning
+
 
 __all__ = [
     'get_types_universe',

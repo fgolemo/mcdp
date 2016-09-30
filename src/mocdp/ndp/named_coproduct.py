@@ -1,9 +1,11 @@
-from contracts.utils import raise_desc, raise_wrapped, indent
-from mocdp.comp.interfaces import NamedDP
-from mcdp_posets import NotEqual
 from contracts import contract
-from mocdp.comp.wrap import SimpleWrap
+from contracts.utils import raise_desc, raise_wrapped, indent
+from mcdp_dp import CoProductDPLabels
+from mcdp_posets import NotEqual
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME, ATTR_LOAD_NAME
+from mocdp.comp.interfaces import NamedDP
+from mocdp.comp.wrap import SimpleWrap
+
 
 __all__ = [
     'NamedDPCoproduct',
@@ -67,7 +69,7 @@ class NamedDPCoproduct(NamedDP):
         if self.labels is None:
             res = dp
         else:
-            from mcdp_dp.dp_coproduct import CoProductDPLabels
+            
             dp2 = CoProductDPLabels(dp, self.labels)
 
             assert dp2.get_fun_space() == dp.get_fun_space(), (dp, dp2)

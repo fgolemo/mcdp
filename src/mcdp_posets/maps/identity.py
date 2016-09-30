@@ -1,6 +1,7 @@
 from contracts import contract
 from mcdp_posets import Map, Space
 
+
 __all__ = [
     'IdentityMap',
 ]

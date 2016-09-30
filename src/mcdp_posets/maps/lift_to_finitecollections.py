@@ -1,7 +1,7 @@
-from mcdp_posets import Map
 from contracts import contract
+from mcdp_posets import Map
 
-
+__all__ = ['LiftToFiniteCollections']
 
 class LiftToFiniteCollections(Map):
 

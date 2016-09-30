@@ -1,8 +1,7 @@
-from mcdp_posets import Map
 from contracts import contract
+from mcdp_posets import Map, SpaceProduct, PosetProduct
 from mocdp.exceptions import mcdp_dev_warning
-from mcdp_posets import SpaceProduct
-from mcdp_posets.poset_product import PosetProduct
+
 
 __all__ = [
     'SpaceProductMap',

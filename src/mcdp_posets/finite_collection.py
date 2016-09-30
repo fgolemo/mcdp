@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
-from .space import NotBelongs, Space
 from contracts import contract
 from mocdp.exceptions import do_extra_checks
+
+from .space import NotBelongs, Space
 
 
 __all__ = [
