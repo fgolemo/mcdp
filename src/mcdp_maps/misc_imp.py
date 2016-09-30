@@ -4,6 +4,7 @@ from mcdp_posets import Map
 from mcdp_posets import Rcomp
 from mcdp_posets import RcompUnits
 import numpy as np
+from mcdp_posets.rcomp import finfo
 
 
 __all__ = ['CeilMap', 'FloorMap', 'SquareMap', 'SqrtMap']
@@ -72,7 +73,22 @@ class SquareMap(GenericFloatOperation):
         GenericFloatOperation.__init__(self, dom, 'square')
 
     def op(self, x):
-        return x * x
+        return square(x)
+    
+    
+
+def square(x):
+    try:
+        res = x * x
+    except FloatingPointError as e:
+        if 'underflow' in str(e):
+            return finfo.tiny
+        elif 'overflow' in str(e):
+            return finfo.max
+        else:
+            raise
+    return res
+
 
 class SqrtMap(GenericFloatOperation):
 

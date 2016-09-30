@@ -1,9 +1,11 @@
-from .utils_mkdir import mkdirs_thread_safe
+import os
+from tempfile import mkdtemp
+
 from contracts import contract
 from contracts.utils import raise_desc
-from decent_params.utils import UserError
+from decent_params import UserError
 from mcdp_cli.utils_wildcard import expand_string
-from mcdp_library.libraries import Librarian
+from mcdp_library import Librarian
 from mcdp_report.dp_graph_flow_imp import dp_graph_flow
 from mcdp_report.dp_graph_tree_imp import dp_graph_tree
 from mcdp_report.gg_ndp import STYLE_GREENRED, STYLE_GREENREDSYM, gvgen_from_ndp
@@ -13,8 +15,9 @@ from mocdp.comp.recursive_name_labeling import get_labelled_version
 from mocdp.exceptions import mcdp_dev_warning
 from quickapp import QuickAppBase
 from system_cmd import CmdException, system_cmd_result
-from tempfile import mkdtemp
-import os
+
+from .utils_mkdir import mkdirs_thread_safe
+
 
 def get_ndp(data):
     if not 'ndp' in data:
@@ -88,14 +91,6 @@ def dp_repr_long_labeled(data):
     dp = ndp.get_dp()
     res1 = ('txt', 'dp_repr_long_labeled', dp.repr_long())
     return [res1]
-
-def ndp_visualization(data, style):
-    ndp = get_ndp(data) 
-    setattr(ndp, '_hack_force_enclose', True)
-    library = data['library']
-    images_paths = library.get_images_paths()
-    gg = gvgen_from_ndp(ndp, style, images_paths=images_paths)
-    return return_formats2(gg, 'ndp_%s' % style)
 
 def create_extra_css(params):  # @UnusedVariable
     out = ''
@@ -227,13 +222,30 @@ allplots  = {
 }
 
 class Vis():
-    def __init__(self, s):
+    def __init__(self, s, direction, prefix):
         self.s = s
+        self.direction = direction
+        self.prefix = prefix
+        
     def __call__(self, data):
-        return ndp_visualization(data, style=self.s)
+        gg = self.ndp_visualization(data, style=self.s, direction=self.direction)
+        return return_formats2(gg,self.prefix)
 
-for s in [STYLE_GREENRED, 'default', 'clean', STYLE_GREENREDSYM]:
-    x = ('ndp_%s' % s, Vis(s))
+    def ndp_visualization(self, data, style, direction):
+        assert direction in ['TB', 'LR'], direction
+        ndp = get_ndp(data) 
+        setattr(ndp, '_hack_force_enclose', True)
+        library = data['library']
+        images_paths = library.get_images_paths()
+        gg = gvgen_from_ndp(ndp, style, images_paths=images_paths,  direction=direction)
+        return gg
+
+
+for s in [#STYLE_GREENRED, 'default', 'clean', 
+          STYLE_GREENREDSYM]:
+    x = ('ndp_%s' % s, Vis(s, 'LR', 'ndp_%s' %s))
+    allplots.add(x)
+    x = ('ndp_%s_tb' % s, Vis(s, 'TB', 'ndp_%s_TB'%s))
     allplots.add(x)
     
 def ndp_graph_enclosed_(data):
@@ -387,17 +399,7 @@ class PlotDP(QuickAppBase):
         do_plots(logger, filename, plots, out, options.extra_params,
                 maindir=maindir,
                 extra_dirs=extra_dirs,
-                 use_cache=use_cache)
-# 
-#         if options.watch:
-#             def handler():
-#                 do_plots(filename, plots, out)
-# 
-#             from .go import watch
-#             d = os.path.dirname(filename)
-#             if d == '':
-#                 d = '.'
-#             watch(path=d, handler=handler)
+                 use_cache=use_cache) 
 
 
 mcdp_plot_main = PlotDP.get_sys_main()

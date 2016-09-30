@@ -180,12 +180,23 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
                 images_paths = library.get_images_paths()
                 gv = GetValues(ndp=ndp, imp_dict=imp_dict, nu=upper, nl=1)
 
-                gg = gvgen_from_ndp(ndp=ndp, style=STYLE_GREENREDSYM,
-                                    images_paths=images_paths,
-                                    plotting_info=gv)
-
+                setattr(ndp, '_hack_force_enclose', True)
+                
                 with report_solutions.subsection('sol-%s-%s' % (i, j)) as rr:
+                    # Left right
+                    gg = gvgen_from_ndp(ndp=ndp, style=STYLE_GREENREDSYM,
+                                    images_paths=images_paths,
+                                    plotting_info=gv, direction='LR')
+
                     gg_figure(rr, 'figure', gg, do_png=True, do_pdf=True,
+                              do_svg=False, do_dot=False)
+
+                    # Top-bottom
+                    gg = gvgen_from_ndp(ndp=ndp, style=STYLE_GREENREDSYM,
+                                    images_paths=images_paths,
+                                    plotting_info=gv, direction='TB')
+
+                    gg_figure(rr, 'figure2', gg, do_png=True, do_pdf=True,
                               do_svg=False, do_dot=False)
 
         out_html = os.path.join(out, 'report_solutions.html')

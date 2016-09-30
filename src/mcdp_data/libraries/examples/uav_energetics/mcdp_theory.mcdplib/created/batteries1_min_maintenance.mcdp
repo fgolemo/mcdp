@@ -1,5 +1,5 @@
 mcdp {
-    battery = instance `available_batteries
+    battery = instance `Batteries
     
     provides capacity using battery
     provides missions using battery
@@ -7,4 +7,6 @@ mcdp {
     requires maintenance for battery
     ignore mass required by battery
     ignore cost required by battery
+
+    mass required by battery <= 3 kg
 }

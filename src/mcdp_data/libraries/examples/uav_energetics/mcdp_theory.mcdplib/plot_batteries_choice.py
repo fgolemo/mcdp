@@ -1,23 +1,16 @@
 #!/usr/bin/env python
     
-from matplotlib import pylab
-
-
 from common_stats import CommonStats
 from discrete_choices import compute_discrete_choices, figure_discrete_choices2
 from mcdp_ipython_utils.loading import solve_combinations
-from mcdp_ipython_utils.plotting import color_resources, color_functions, \
-    set_axis_colors
+from mcdp_ipython_utils.plotting import (color_resources, color_functions,
+    set_axis_colors)
 from mcdp_library_tests.tests import get_test_librarian
 import numpy as np
 from plot_commons import figure_num_implementations2
-from plot_utils import  ieee_spines_zoom3, plot_field
-from plot_utils import ieee_fonts_zoom3
+from plot_utils import ieee_spines_zoom3, plot_field, ieee_fonts_zoom3
 from quickapp.quick_app import QuickApp
 from reprep import Report
-
-
-ieee_fonts_zoom3(pylab)
 
 
 colormap = 'YlOrRd'
@@ -72,12 +65,13 @@ def go_drone1_cost():
 
     data = solve_combinations(ndp, combinations, result_like)
     return data
+
 def get_combinations():
     z = 2
     nt = 15 * z
     nr = 15 * z
     combinations = {
-        "capacity": (np.linspace(1, 100, nt), "kWh"),
+        "capacity": (np.linspace(1, 1000, nt), "Wh"),
         "missions": (np.linspace(1, 2000, nr), "[]"),
     }
     return combinations
@@ -183,6 +177,8 @@ def do_axes_drone(pylab):
     set_axis_colors(pylab, color_functions, color_functions)
 
 def create_report_min_maintenance(data):
+    matplotlib_settings()
+
     cs = CommonStats(data)
     r = Report() 
     figure_num_implementations2(r, data, cs, 'missions', 'capacity')
@@ -204,6 +200,8 @@ def create_report_min_maintenance(data):
     return r
     
 def create_report_min_cost(data):
+    matplotlib_settings()
+
     cs = CommonStats(data)
     r = Report() 
     figure_num_implementations2(r, data, cs, 'missions', 'capacity')
@@ -224,6 +222,8 @@ def create_report_min_cost(data):
     return r
  
 def create_report_min_joint(data):
+    matplotlib_settings()
+
     cs = CommonStats(data)
     r = Report() 
     figure_num_implementations2(r, data, cs, 'missions', 'capacity')
@@ -232,6 +232,8 @@ def create_report_min_joint(data):
 
 
 def create_report_min_cost_mass(data):
+    matplotlib_settings()
+
     cs = CommonStats(data)
     r = Report() 
     figure_num_implementations2(r, data, cs, 'missions', 'capacity')
@@ -242,6 +244,8 @@ def create_report_min_cost_mass(data):
 popt = dict(clip_on=False)
 
 def create_report_min_tco(data):
+    matplotlib_settings()
+
     cs = CommonStats(data)
     r = Report() 
     figure_num_implementations2(r, data, cs, 'missions', 'capacity')
@@ -265,6 +269,8 @@ def create_report_min_tco(data):
 
     
 def create_report_min_mass(data):
+    matplotlib_settings()
+
     cs = CommonStats(data)
     r = Report() 
     figure_num_implementations2(r, data, cs, 'missions', 'capacity')
@@ -285,6 +291,8 @@ def create_report_min_mass(data):
     return r
 
 def create_report_drone1_mass(data):
+    matplotlib_settings()
+
     cs = CommonStats(data)
     
     r = Report() 
@@ -294,6 +302,8 @@ def create_report_drone1_mass(data):
     return r
 
 def create_report_drone1_cost(data):
+    matplotlib_settings()
+
     cs = CommonStats(data)
     
     r = Report() 
@@ -302,8 +312,12 @@ def create_report_drone1_cost(data):
 
     return r
 
-
+def matplotlib_settings():
+    from matplotlib import pylab
+    ieee_fonts_zoom3(pylab)
+    
 def create_report_drone1_mass_cost(data):
+    matplotlib_settings()
     cs = CommonStats(data)
     
     r = Report() 

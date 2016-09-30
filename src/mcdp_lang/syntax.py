@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
-from .helpers import square
+from pyparsing import (
+    CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
+    NotAny, OneOrMore, Optional, ParserElement, Word, ZeroOrMore, alphanums,
+    alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
+    sglQuotedString)
+
+from mocdp.exceptions import mcdp_dev_warning
+
 from .parse_actions import (constant_minus_parse_action, divide_parse_action,
     funshortcut1m, mult_inv_parse_action, mult_parse_action, parse_pint_unit,
     plus_inv_parse_action, plus_parse_action, resshortcut1m,
@@ -8,13 +15,7 @@ from .parts import CDPLanguage
 from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
 from .utils_lists import make_list
-from mocdp.exceptions import mcdp_dev_warning
-from pyparsing import (
-    CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
-    NotAny, OneOrMore, Optional, ParserElement, Word, ZeroOrMore, alphanums,
-    alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
-    sglQuotedString)
-import math
+
 
 K = Keyword
 
@@ -163,7 +164,7 @@ class Syntax():
     C = lambda x, b: x.setResultsName(b)
 
     # optional whitespace
-#     ow = S(ZeroOrMore(L(' ')))
+    ow = S(ZeroOrMore(L(' ')))
  
     # do not load earlier
     from .syntax_codespec import get_code_spec_expr
@@ -749,7 +750,7 @@ class Syntax():
                  ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
                  ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3
                  ^ ignore_res
-                 ^ ignore_fun)
+                 ^ ignore_fun) + ow
 
     dp_model_statements = sp(OneOrMore(line_expr),
                              lambda t: CDP.ModelStatements(make_list(list(t))))

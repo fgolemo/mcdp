@@ -1,18 +1,19 @@
 """ Utils for graphgen """
 
-from bs4 import BeautifulSoup
-from contextlib import contextmanager
-from copy import deepcopy
-from mocdp.exceptions import mcdp_dev_warning
-from reprep.constants import MIME_PDF, MIME_PLAIN, MIME_PNG, MIME_SVG
-from system_cmd import CmdException, system_cmd_result
 import base64
 import codecs
-import networkx as nx  # @UnresolvedImport
+from contextlib import contextmanager
+from copy import deepcopy
 import os
 import traceback
-from contracts import contract
 
+from bs4 import BeautifulSoup
+
+from contracts import contract
+from mocdp.exceptions import mcdp_dev_warning
+import networkx as nx  # @UnresolvedImport
+from reprep.constants import MIME_PDF, MIME_PLAIN, MIME_PNG, MIME_SVG
+from system_cmd import CmdException, system_cmd_result
 
 
 def graphviz_run(filename_dot, output, prog='dot'):
@@ -111,11 +112,11 @@ def gg_figure(r, name, ggraph, do_png=True, do_pdf=True, do_svg=True,
                 graphviz_run(filename_dot, filename, prog=prog)
 
         if do_pdf:
-            with r.data_file('graph_pdf', MIME_PDF) as filename:
+            with f.data_file('graph_pdf', MIME_PDF) as filename:
                 graphviz_run(filename_dot, filename, prog=prog)
 
         if do_svg:
-            with r.data_file('graph_svg', MIME_SVG) as filename:
+            with f.data_file('graph_svg', MIME_SVG) as filename:
                 graphviz_run(filename_dot, filename, prog=prog)
 
                 soup = BeautifulSoup(open(filename).read(), 'lxml', from_encoding='utf-8')

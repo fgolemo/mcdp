@@ -107,7 +107,8 @@ class Rcomp(Poset):
         return "Rcomp()"
 
     def format(self, x):
-        self.belongs(x)
+        if do_extra_checks():
+            self.belongs(x)
 
         if x == self.top:
             return self.top.__repr__()
@@ -125,9 +126,10 @@ class Rcomp(Poset):
                 if x == maxf:
                     return 'max'
 
-                s = '%.5f' % x
-                s = '%.10f' % x
-                # s = '%f' % x
+                # s = '%.5f' % x
+                # s = '%.10f' % x
+                s = '%f' % x
+                
                 # remove trailing 0s
                 s = s.rstrip('0')
                 return s

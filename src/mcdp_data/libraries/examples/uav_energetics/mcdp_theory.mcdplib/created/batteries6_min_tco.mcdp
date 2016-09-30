@@ -1,5 +1,5 @@
 mcdp {
-    battery = instance `available_batteries
+    battery = instance `Batteries
     
     provides capacity using battery
     provides missions using battery
@@ -15,4 +15,5 @@ mcdp {
     parts_cost = cost required by battery 
     requires tco >= parts_cost + labor_cost + shipping_cost
 
+    mass required by battery <= 3 kg
 }

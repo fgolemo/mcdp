@@ -1,12 +1,7 @@
-
-
-from mcdp_ipython_utils.plotting import color_functions
-from mcdp_ipython_utils.plotting import color_resources
-from mcdp_posets import Coproduct1Labels, SpaceProduct
-from mcdp_posets import FiniteCollectionAsSpace
+from mcdp_ipython_utils.plotting import color_functions, color_resources
+from mcdp_posets import Coproduct1Labels, SpaceProduct, FiniteCollectionAsSpace
 import numpy as np
-from plot_utils import ieee_spines_zoom3
-from plot_utils import plot_field
+from plot_utils import ieee_spines_zoom3, plot_field
 
 
 fig = dict(figsize=(4.5, 4))
@@ -48,6 +43,7 @@ def compute_discrete_choices(data):
 
 def figure_discrete_choices2(r, data, cs, fname1, fname2):
     
+    num_solutions = cs.all_num_implementations
     all_discrete_choices = compute_discrete_choices(data)
     
     possible = ['', 'LCO', 
@@ -106,18 +102,44 @@ def figure_discrete_choices2(r, data, cs, fname1, fname2):
     for p in sorted(possible_indiv):
         if not p: continue
         
-        w = np.array([p in _ for _ in all_discrete_choices])
+        feasible = np.array([p in _ for _ in all_discrete_choices])
         with f.plot('where_%s' % p, **fig) as pylab:
             
             ieee_spines_zoom3(pylab)
   
             x = cs.get_functionality(fname1)
             y = cs.get_functionality(fname2)
-            pylab.plot(x, y, 'k.', markersize=0.1, clip_on=False)
             
-            x = x[w]
-            y = y[w]
-            pylab.plot(x, y, '.',  clip_on=False)
+            AND = np.logical_and
+            is_best = AND(feasible, num_solutions == 1)
+            is_one_of_two = AND(feasible, num_solutions == 2)
+            is_one_of_three = AND(feasible, num_solutions == 3)
+            is_one_of_four_or_more = AND(feasible, num_solutions >= 4)
+            
+            grey = '#bbbbbb'
+            color_infeasible = 'red'
+            pylab.plot(x[cs.is_feasible], 
+                       y[cs.is_feasible], '.', markersize=2, 
+                       markerfacecolor=grey,
+                       markeredgecolor='none', color='none', 
+                       clip_on=False)
+            pylab.plot(x[cs.is_not_feasible], 
+                       y[cs.is_not_feasible], '.', markersize=2, 
+                       markerfacecolor=color_infeasible,
+                       markeredgecolor='none', color='none', 
+                       clip_on=False)
+
+            def plot(where, marker, color):            
+                markersize = 3.5
+                pylab.plot(x[where], y[where], marker, markersize=markersize, 
+                           markeredgecolor='none',
+                           markerfacecolor=color, 
+                           color='none', clip_on=False)
+                
+            plot(is_best, 'o', 'black')
+            plot(is_one_of_two, 'd', '#000088')
+            plot(is_one_of_three, '>','#880000')
+            plot(is_one_of_four_or_more,'s', '#880088')
             
             pylab.title('%s' % p,  y=1.08)
             do_axes(pylab)

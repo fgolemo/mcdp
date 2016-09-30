@@ -109,7 +109,7 @@ class RcompUnits(Rcomp):
         else:
             return s
 
-mcdp_dev_warning('need to check!!!')
+mcdp_dev_warning('(!) Need to create plenty of checks for this Rbicomb.')
 
 class RbicompUnits(Rbicomp):
 

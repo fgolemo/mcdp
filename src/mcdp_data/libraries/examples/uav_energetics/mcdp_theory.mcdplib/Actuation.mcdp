@@ -1,0 +1,19 @@
+mcdp {
+  provides lift [N]
+  provides velocity [m/s]
+
+  requires power [W]
+  requires actuator_mass [g]
+  requires cost [$]
+
+  provided lift <= 100N
+  provided velocity <= 3 m/s
+
+  required actuator_mass >= 100 g
+  required cost >= 100 $
+
+  p0 = 2 W
+  p1 = 1.5 W/N^2
+
+  required power >= p0 + (lift^2) * p1
+}

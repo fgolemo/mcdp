@@ -1,13 +1,14 @@
+import os
+
 from comptests.registrar import comptest
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_cli.query_interpretation import convert_string_query
-from mcdp_dp.dp_flatten import Mux
-from mcdp_dp.dp_identity import IdentityDP
+from mcdp_dp import IdentityDP, Mux
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_library_tests.tests import get_test_library
-from mcdp_posets import NotBelongs
-from mcdp_posets.uppersets import lowerset_project, upperset_project
+from mcdp_posets import NotBelongs, lowerset_project, upperset_project, UpperSet, \
+    LowerSet
 from mcdp_report.gdc import STYLE_GREENREDSYM
 from mcdp_report.gg_ndp import PlottingInfo, gvgen_from_ndp
 from mcdp_report.gg_utils import gg_figure
@@ -20,7 +21,7 @@ from mocdp.exceptions import DPInternalError
 from mocdp.memoize_simple_imp import memoize_simple
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 from reprep import Report
-import os
+
 
 class ValueMissing(Exception):
     pass
@@ -151,6 +152,11 @@ class GetValues(PlottingInfo):
             i = fnames.index(fname)
             lf = lowerset_project(lf, i)
 
+        assert isinstance(lf, LowerSet)
+        if len(lf.maximals) == 1:
+            one = list(lf.maximals)[0]
+            return lf.P.format(one)
+        
         return lf.__str__()
 
 
@@ -192,6 +198,11 @@ class GetValues(PlottingInfo):
             i = rnames.index(rname)
             ur = upperset_project(ur, i)
 
+        assert isinstance(ur, UpperSet)
+        if len(ur.minimals) == 1:
+            one = list(ur.minimals)[0]
+            return ur.P.format(one)
+        
         return ur.__str__()
 
 

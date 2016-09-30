@@ -94,9 +94,10 @@ def go():
         f.write(summary)
     ss = """
 choose(
-    %s
+%s
 )
-    """ % ",\n    ".join("%8s: `Battery_%s" % (g,g) for g in good)
+    """ 
+    ss=  ss.strip() % ",\n".join("%7s: `Battery_%s" % (g,g) for g in good)
     with open('batteries.mcdp', 'w') as f:
         f.write(ss)
 

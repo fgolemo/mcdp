@@ -1,5 +1,5 @@
 specialize [
-  Battery: `available_batteries, 
+  Battery: `Batteries, 
   Actuation: `droneD_complete_v2.Actuation, 
   PowerApprox: mcdp {
     provides power [W]

@@ -4,11 +4,9 @@ from contracts.utils import raise_wrapped
 from mcdp_dp import (Constant, ConstantMinimals, Limit, LimitMaximals,
     get_conversion)
 from mcdp_posets import NotLeq, Poset, get_types_universe
-from mcdp_posets.rcomp import finfo
 from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.exceptions import DPSemanticError
-
 
 
 @contract(resources='seq')
@@ -141,6 +139,7 @@ def get_valuewithunits_as_function(v, context):
     context.add_ndp(n, ndp)
     return context.make_function(n, sn)
 
+
 @contract(returns=CResource, r=CResource, P=Poset)
 def get_resource_possibly_converted(r, P, context):
     """ Returns a resource possibly converted to the space P """
@@ -167,16 +166,4 @@ def get_resource_possibly_converted(r, P, context):
                                  res_prefix='_res')
             return r2
 
-
-def square(x):
-    try:
-        res = x * x
-    except FloatingPointError as e:
-        if 'underflow' in str(e):
-            return finfo.tiny
-        elif 'overflow' in str(e):
-            return finfo.max
-        else:
-            raise
-    return res
 

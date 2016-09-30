@@ -1,10 +1,10 @@
 from contracts.utils import raise_desc
-from mcdp_lang.parts import CDPLanguage
-from mcdp_maps.misc_imp import CeilMap, FloorMap, SquareMap, SqrtMap
-from mcdp_posets import Rcomp
-from mcdp_posets import RcompUnits
+from mcdp_dp import WrapAMap
+from mcdp_maps import CeilMap, FloorMap, SquareMap, SqrtMap
+from mcdp_posets import Rcomp, RcompUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError
-from mcdp_dp.dp_generic_unary import WrapAMap
+
+from .parts import CDPLanguage
 
 
 CDP = CDPLanguage

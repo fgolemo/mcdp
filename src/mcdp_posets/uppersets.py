@@ -18,6 +18,8 @@ __all__ = [
     'LowerSets',
     'lowerset_product',
     'upperset_product',
+    'lowerset_project',
+    'upperset_project',
 ]
 
 class UpperSet(Space):
