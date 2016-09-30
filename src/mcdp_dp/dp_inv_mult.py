@@ -85,7 +85,7 @@ class InvMult2U(PrimitiveDP):
         elif InvMult2.ALGO == InvMult2.ALGO_VAN_DER_CORPUT:
             x1, x2 = generate_exp_van_der_corput_sequence(n=self.n, C=f)
             ps = zip(x1, x2)
-        else:
+        else: # pragma: no cover
             assert False
             
         return UpperSet(minimals=ps, P=self.R)
@@ -194,7 +194,7 @@ class InvMult2L(PrimitiveDP):
                 points.append((pu[-1][0], 0.0))
 
                 points = set(points)
-        else:
+        else: # pragma: no cover
             assert False
 
         assert len(points) == self.n, (self.n, len(points), points)
@@ -210,7 +210,7 @@ def generate_exp_van_der_corput_sequence(n, C=1.0, mapping_function=None):
         
         so that x1*x2 = C.
     """
-    if C <= 0.0:
+    if C <= 0.0: # pragma: no cover
         raise_desc(ValueError, 'Need positive C, got %r.' % C)
 
 

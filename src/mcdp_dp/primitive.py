@@ -153,7 +153,6 @@ class PrimitiveDP(WithInternalLog):
             return True
 
     def check_unfeasible(self, f, i, r):
-
         if do_extra_checks():
             self.F.belongs(f)
             self.I.belongs(i)

@@ -8,3 +8,4 @@ from .approximation import *
 
 from .invmult2_tests import *
 from .products import *
+from .corner_case import *

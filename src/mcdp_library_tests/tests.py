@@ -126,17 +126,18 @@ def mcdplib_test_setup_nameddps(context, libname):
     l = get_test_library(libname)
     models = l.get_models()
 
-    from mcdp_tests.generation import for_all_nameddps
+    from mcdp_tests.generation import for_all_nameddps, for_all_nameddps_dyn
     load_tests_modules()
-    registered = for_all_nameddps.registered
 
     print('Found models: %r' % models)
-    print('Found registered: %r' % registered)
+    print('Found registered in for_all_nameddps_dyn: %r' % 
+          for_all_nameddps.registered)
+    print('Found registered in for_all_nameddps: %r' % 
+          for_all_nameddps_dyn.registered)
 
     for model_name in models:
         f = l._get_file_data(model_name + '.' + MCDPLibrary.ext_ndps)
-#         if not belongs_to_lib(f['realpath'], mcdplib):
-#             continue
+
         source = f['data']
 
         if gives_syntax_error(source):
@@ -151,8 +152,12 @@ def mcdplib_test_setup_nameddps(context, libname):
             else:
                 ndp = c.comp(_load_ndp, libname, model_name, job_id='load_ndp')
 
-                for ftest in registered:
+                for ftest in for_all_nameddps.registered:
                     c.comp(ftest, model_name, ndp)
+
+                for ftest in for_all_nameddps_dyn.registered:
+                    c.comp_dynamic(ftest, model_name, ndp)
+
 
 def mcdplib_test_setup_source_mcdp(context, libname):
     from mcdp_tests import load_tests_modules

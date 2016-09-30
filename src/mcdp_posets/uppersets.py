@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
-from .find_poset_minima.baseline_n2 import poset_maxima, poset_minima
-from .poset import NotLeq, Poset
-from .poset_product import PosetProduct
-from .space import NotBelongs, NotEqual, Space, Uninhabited
+import itertools
+import random
+
 from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
-import itertools
-import random
+
+from .find_poset_minima.baseline_n2 import poset_maxima, poset_minima
+from .poset import NotLeq, Poset
+from .poset_product import PosetProduct
+from .space import NotBelongs, NotEqual, Space, Uninhabited
 
 
 __all__ = [
@@ -66,14 +68,11 @@ class UpperSet(Space):
                 return
         raise_desc(NotBelongs, 'Point does not belong')
 
-        
     def __repr__(self):
         contents = ", ".join(self.P.format(m)
                         for m in sorted(self.minimals))
 
         return "↑{%s}" % contents
-
-
 
 
 class UpperSets(Poset):
@@ -309,11 +308,11 @@ class LowerSets(Poset):
         self.check_leq(r, b)
         return r
 
-    def format0(self, x):
-        contents = " v ".join("x ≥ %s" % self.P.format(m)
-                        for m in sorted(x.maximals))
-
-        return "{x ∣ %s }" % contents
+#     def format0(self, x):
+#         contents = " v ".join("x ≥ %s" % self.P.format(m)
+#                         for m in sorted(x.maximals))
+# 
+#         return "{x ∣ %s }" % contents
 
     def format(self, x):
         contents = ", ".join(self.P.format(m)
@@ -356,9 +355,9 @@ class LowerSet(Space):
             i = random.randint(0, n - 1)
             return list(self.maximals)[i]
 
-    @contract(returns=Poset)
-    def get_poset(self):
-        return self.P
+#     @contract(returns=Poset)
+#     def get_poset(self):
+#         return self.P
 
     def check_equal(self, x, y):
         self.P.check_equal(x, y)

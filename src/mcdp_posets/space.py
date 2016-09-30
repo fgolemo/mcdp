@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from abc import ABCMeta, abstractmethod
+
 from contracts import contract, raise_wrapped
 from mocdp.exceptions import do_extra_checks
+
 from .space_meta import SpaceMeta
 
 class NotBelongs(Exception):
@@ -43,10 +45,10 @@ class Space(object):
 
     @abstractmethod
     def check_equal(self, x, y):
-        # Raise NotEqual if not
+        """ Raises NotEqual if not equal. """
         pass
-
-
+    
+    @contract(returns=bool)
     def equal(self, a, b):
         try:
             self.check_equal(a, b)

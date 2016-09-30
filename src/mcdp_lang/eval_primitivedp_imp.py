@@ -20,11 +20,9 @@ def eval_primitivedp(r, context):  # @UnusedVariable
         if isinstance(r, (CDP.CodeSpecNoArgs, CDP.CodeSpec)):
             return eval_primitivedp_code_spec(r, context)
         
-        assert not isinstance(r, CDP.CodeSpec)
-
-    r = recursive_print(r)
-    msg = 'eval_primitivedp(): cannot evaluate r as a PrimitiveDP.'
-    raise_desc(DPInternalError, msg, r=r)
+        r = recursive_print(r)
+        msg = 'eval_primitivedp(): cannot evaluate r as a PrimitiveDP.'
+        raise_desc(DPInternalError, msg, r=r)
 
 def eval_primitivedp_code_spec(r, context):  # @UnusedVariable
     from .eval_codespec_imp import eval_codespec
