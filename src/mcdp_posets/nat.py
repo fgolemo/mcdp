@@ -189,7 +189,7 @@ class Int(Poset):
             x = f()
             if not x in s:
                 s.append(x)
-                
+        s = sorted(s)
         s.append(self.get_top())
         return s
 
