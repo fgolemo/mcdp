@@ -1,8 +1,9 @@
-from .dp_generic_unary import WrapAMap
 from contracts import contract
 from contracts.utils import check_isinstance
 from mcdp_maps import SumNatsN
 from mcdp_posets import Nat
+
+from .dp_generic_unary import WrapAMap
 
 
 __all__ = [

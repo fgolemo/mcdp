@@ -5,9 +5,10 @@ from mcdp_posets import Rcomp
 from mcdp_posets import RcompUnits
 import numpy as np
 from mcdp_posets.rcomp import finfo
+from mcdp_posets.nat import Nat
 
 
-__all__ = ['CeilMap', 'FloorMap', 'SquareMap', 'SqrtMap']
+__all__ = ['CeilMap', 'FloorMap', 'SquareMap', 'SqrtMap', 'SquareNatMap']
 
 
 class GenericFloatOperation(Map):
@@ -74,6 +75,17 @@ class SquareMap(GenericFloatOperation):
 
     def op(self, x):
         return square(x)
+    
+
+class SquareNatMap(Map):
+
+    def __init__(self):
+        dom = Nat()
+        cod = dom
+        Map.__init__(self, dom, cod)
+
+    def _call(self, x):
+        return x * x
     
     
 

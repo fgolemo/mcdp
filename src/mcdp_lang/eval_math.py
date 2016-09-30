@@ -2,9 +2,12 @@
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import MultValueMap, ProductNatN, ProductN, SumN, SumNNat, WrapAMap, sum_dimensionality_works
+from mcdp_dp.dp_sum import SumNRcompMap
 from mcdp_maps import MinusValueMap, MultNat, PlusNat, PlusValueMap, SumNInt
+from mcdp_maps.plus_value_map import PlusValueRcompMap
 from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits, Space,
     express_value_in_isomorphic_space, get_types_universe, mult_table)
+from mcdp_posets.rcomp import Rcomp
 from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError
 
@@ -14,6 +17,8 @@ from .helpers import create_operation, get_valuewithunits_as_resource
 from .misc_math import inv_constant
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mcdp_lang.helpers import get_resource_possibly_converted
+from mcdp_maps.sum_n_rcomp import SumNRcomp
 
 
 CDP = CDPLanguage
@@ -299,7 +304,6 @@ def eval_PlusN(x, context, wants_constant):
             return r2
 
 
-
 def eval_PlusN_(constants, resources, context):
     from .misc_math import plus_constantsN
     # it's a constant value
@@ -322,7 +326,17 @@ def eval_PlusN_(constants, resources, context):
         def castable_to_int(_):
             return tu.leq(_, target_int)
 
-        if all(isinstance(_, RcompUnits) for _ in resources_types):
+        def exactly_Rcomp_or_Nat(x):
+            return exactly_Rcomp(x) or isinstance(x, Nat)
+            
+        def exactly_Rcomp(x):
+            return isinstance(x, Rcomp) and not isinstance(x, RcompUnits)
+
+        if all(exactly_Rcomp(_) for _ in resources_types):
+            n = len(resources_types)
+            amap = SumNRcompMap(n)
+            dp = WrapAMap(amap)
+        elif all(isinstance(_, RcompUnits) for _ in resources_types):
             # addition between floats
             R = resources_types[0]
             Fs = tuple(resources_types)
@@ -341,9 +355,15 @@ def eval_PlusN_(constants, resources, context):
             dp = SumNNat(tuple(resources_types), R)
         elif all(castable_to_int(_) for _ in resources_types):
             R = Int()
-            dp = WrapAMap(SumNInt(tuple(resources_types), R))
+            amap = SumNInt(tuple(resources_types), R)
+            dp = WrapAMap(amap)
+        elif all(exactly_Rcomp_or_Nat(_) for _ in resources_types):
+            resources = [get_resource_possibly_converted(_, Rcomp(), context)
+                         for _ in resources]
+            amap = SumNRcomp(len(resources))
+            dp = WrapAMap(amap)
         else:
-            msg = 'Cannot find sum operator for mixed types.'
+            msg = 'Cannot find sum operator for combination of types.'
             raise_desc(DPInternalError, msg, resources_types=resources_types)
 
         r = create_operation(context, dp, resources,
@@ -359,19 +379,29 @@ def eval_PlusN_(constants, resources, context):
 @contract(r=CResource, c=ValueWithUnits)
 def get_plus_op(context, r, c):
     rtype = context.get_rtype(r)
+    
+    T1 = rtype
+    T2 = c.unit
 
-    if isinstance(rtype, RcompUnits) and  isinstance(c.unit, RcompUnits):
-        F = rtype
-        R = rtype
-        amap = PlusValueMap(F=F, c_value=c.value, c_space=c.unit, R=R)
-        setattr(amap, '__name__', '+ %s' % (c.unit.format(c.value))) 
+    if isinstance(T1, Rcomp) and isinstance(T2, Rcomp):
+        amap = PlusValueRcompMap(c.value)
+        setattr(amap, '__name__', '+ %s' % (T2.format(c.value))) 
         dp = WrapAMap(amap)
-    elif isinstance(rtype, Nat) and isinstance(c.unit, Nat):
+    if isinstance(T1, Rcomp) and isinstance(T2, Nat):
+        # cast Nat to Rcomp
+        amap = PlusValueRcompMap(float(c.value))
+        setattr(amap, '__name__', '+ %s' % (T2.format(c.value))) 
+        dp = WrapAMap(amap)
+    elif isinstance(T1, RcompUnits) and isinstance(T2, RcompUnits):
+        amap = PlusValueMap(F=T1, c_value=c.value, c_space=T2, R=T1)
+        setattr(amap, '__name__', '+ %s' % (T2.format(c.value))) 
+        dp = WrapAMap(amap)
+    elif isinstance(T1, Nat) and isinstance(T2, Nat):
         amap = PlusNat(c.value)
         dp = WrapAMap(amap)
     else:
         msg = 'Cannot create addition operation.'
-        raise_desc(DPInternalError, msg, rtype=rtype, c=c)
+        raise_desc(DPInternalError, msg, rtype=T1, c=c)
 
     r2 = create_operation(context, dp, resources=[r],
                           name_prefix='_plus', op_prefix='_x',

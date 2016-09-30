@@ -2,6 +2,7 @@ from contracts import contract
 from mcdp_posets import Int, Map, Poset, PosetProduct, Space  # @UnusedImport
 from mcdp_posets import get_types_universe
 
+
 __all__ = [
     'SumNInt',
 ]

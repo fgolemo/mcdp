@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
-    parse_wrap_check)
+from nose.tools import assert_equal
+from pyparsing import Literal
+
 from comptests.registrar import comptest
 from contracts.utils import raise_desc
 from mcdp_lang.parse_actions import parse_wrap
@@ -13,8 +14,10 @@ from mcdp_posets.uppersets import LowerSet, UpperSet, UpperSets
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.comp.recursive_name_labeling import get_names_used
 from mocdp.exceptions import DPNotImplementedError, DPSemanticError
-from nose.tools import assert_equal
-from pyparsing import Literal
+
+from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
+    parse_wrap_check)
+
 
 @comptest
 def check_lang():
@@ -490,22 +493,68 @@ def check_lang60b():
     print rnames
     assert rnames == ['mass']
 
+@comptest
+def check_lang70(): # TODO: rename
+    pass
+@comptest
+def check_lang71(): # TODO: rename
+    pass
+@comptest
+def check_lang72(): # TODO: rename
+    pass
+@comptest
+def check_lang73(): # TODO: rename
+    pass
+@comptest
+def check_lang74(): # TODO: rename
+    pass
+@comptest
+def check_lang75(): # TODO: rename
+    pass
+@comptest
+def check_lang76(): # TODO: rename
+    pass
+@comptest
+def check_lang77(): # TODO: rename
+    pass
+@comptest
+def check_lang78(): # TODO: rename
+    pass
+@comptest
+def check_lang79(): # TODO: rename
+    pass 
 
 
-
-
-#     s = """
-#     canonical mcdp {
-#
-#         provides f [m]
-#
-#         f + 10 m + 20 m <= 10 m
-#     }
-#
-#     """
-#     ndp = parse_ndp(s)
-#     dp = ndp.get_dp()
-#     pass
+@comptest
+def check_lang80(): # TODO: rename
+    pass
+@comptest
+def check_lang81(): # TODO: rename
+    pass
+@comptest
+def check_lang82(): # TODO: rename
+    pass
+@comptest
+def check_lang83(): # TODO: rename
+    pass
+@comptest
+def check_lang84(): # TODO: rename
+    pass
+@comptest
+def check_lang85(): # TODO: rename
+    pass
+@comptest
+def check_lang86(): # TODO: rename
+    pass
+@comptest
+def check_lang87(): # TODO: rename
+    pass
+@comptest
+def check_lang88(): # TODO: rename
+    pass
+@comptest
+def check_lang89(): # TODO: rename
+    pass 
 
 
 

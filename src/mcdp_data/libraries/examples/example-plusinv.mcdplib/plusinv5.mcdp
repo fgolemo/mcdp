@@ -10,7 +10,7 @@ mcdp {
 
 	provides z [Nat]
 
-	f.a >= sqrt(f.x) + sqrt(f.y) + z 
+	f.a >= ceil(sqrt(f.x)) + ceil(sqrt(f.y)) + z 
 
 	requires x, y for f
 }
