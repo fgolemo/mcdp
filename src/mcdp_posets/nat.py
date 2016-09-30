@@ -74,9 +74,14 @@ class Nat(Poset):
         assert False
 
     def get_test_chain(self, n):
-        s = [self.get_bottom()]
-        f = lambda: random.randint(1, 10)
-        s.extend(sorted(f() for _ in range(n - 2)))
+        s = []
+        f = lambda: random.randint(1, 100)
+        while len(s) < n - 2:
+            x = f()
+            if not x in s:
+                s.append(x)
+        s = sorted(s)
+        s.insert(0, 0)
         s.append(self.get_top())
         return s
 
@@ -183,13 +188,14 @@ class Int(Poset):
         assert False
 
     def get_test_chain(self, n):
-        s = [self.get_bottom()]
-        f = lambda: random.randint(1, 100)
-        for _ in range(n - 2):
+        s = []
+        f = lambda: random.randint(-100, 100)
+        while len(s) < n - 2:
             x = f()
             if not x in s:
                 s.append(x)
         s = sorted(s)
+        s.insert(0, self.get_bottom())
         s.append(self.get_top())
         return s
 
