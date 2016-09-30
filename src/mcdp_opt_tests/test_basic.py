@@ -34,7 +34,7 @@ def get_test_library2(libnames):
     l.load_library_hooks.append(librarian.load_library)
     return l
 
-@comptest
+# @comptest
 def opt_basic_1_long():
     libnames = ['actuation']
     library = get_test_library2(libnames)
