@@ -184,8 +184,12 @@ class Int(Poset):
 
     def get_test_chain(self, n):
         s = [self.get_bottom()]
-        f = lambda: random.randint(1, 10)
-        s.extend(sorted(f() for _ in range(n - 2)))
+        f = lambda: random.randint(1, 100)
+        for _ in range(n - 2):
+            x = f()
+            if not x in s:
+                s.append(x)
+                
         s.append(self.get_top())
         return s
 
