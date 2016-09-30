@@ -2,8 +2,7 @@
 from contracts import contract
 from mcdp_dp import (ApproximableDP, CoProductDPLabels, Constant, DPLoop0,
     DPLoop2, LabelerDP, Limit, Mux, OpaqueDP, Parallel,
-    PrimitiveDP, Series0)
-from mcdp_dp.dp_generic_unary import WrapAMap
+    PrimitiveDP, Series0, WrapAMap)
 
 
 __all__ = [

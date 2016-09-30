@@ -239,7 +239,7 @@ def extract_assets(html, basedir):
     for tag in soup.select('a'):
         href = tag['href']
         if href.startswith('data:'):
-            mime, data = link_data(href)
+            _mime, data = link_data(href)
 #             from mcdp_web.images.images import get_ext_for_mime
 #             ext = get_ext_for_mime(mime)
             if tag.has_attr('download'):
