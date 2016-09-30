@@ -1,20 +1,25 @@
 from contracts import contract
+from contracts.utils import check_isinstance
 from mcdp_posets import (Map, MapNotDefinedHere, RcompUnits,
     express_value_in_isomorphic_space)
+from mcdp_posets import Rcomp
+from mocdp.exceptions import mcdp_dev_warning
+
 
 __all__ = [
     'PlusValueMap',
+    'PlusValueRcompMap',
     'MinusValueMap',
 ]
 
 
 class PlusValueMap(Map):
     """ 
-        Implements _ -> _ + c 
+        Implements _ -> _ + c  for RcompUnits
     
     """
 
-    @contract(F=RcompUnits)
+    @contract(F=RcompUnits, R=RcompUnits)
     def __init__(self, F, c_value, c_space, R):
         Map.__init__(self, dom=F, cod=R)
         self.c_value = c_value
@@ -31,6 +36,26 @@ class PlusValueMap(Map):
         from mcdp_dp.dp_sum import sum_units
         return sum_units(Fs, values, self.R)
 
+class PlusValueRcompMap(Map):
+    """ 
+        Implements _ -> _ + c  for Rcomp.    
+    """
+
+    def __init__(self, c_value):
+        check_isinstance(c_value, float)
+        dom = Rcomp()
+        cod = dom
+        Map.__init__(self, dom=dom, cod=cod)
+        self.c_value = c_value
+
+    def __repr__(self):
+        return "+ %s" % self.dom.format(self.c_value)
+
+    def _call(self, x):
+        mcdp_dev_warning('overflow/underflow')
+        return x + self.c_value
+        
+    
 class MinusValueMap(Map):
     """ 
         Implements _ -> _ - c
@@ -40,7 +65,6 @@ class MinusValueMap(Map):
         It is not defined for x <= c. 
     """
 
-#     @contract(F=RcompUnits, c_value='>=0')
     def __init__(self, F, c_value, c_space):
         assert c_value >= 0
         Map.__init__(self, dom=F, cod=F)

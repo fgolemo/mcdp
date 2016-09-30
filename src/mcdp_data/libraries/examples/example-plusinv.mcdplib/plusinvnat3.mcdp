@@ -11,18 +11,18 @@
 #  will create a (practically) infinite loop as the program 
 #  tries to explore most of the antichains of N^2.
 flatten mcdp {
-        f = instance mcdp  {
-            provides a [Nat]
-            
-            requires x [Nat]
-            requires y [Nat]
-            
-            x + y >= a
-        }
+    f = instance mcdp  {
+        provides a [Nat]
+        
+        requires x [Nat]
+        requires y [Nat]
+        
+        x + y >= a
+    }
 
-        provides z [Nat]
+    provides z [Nat]
 
-        f.a >= f.x + f.y + z 
+    f.a >= f.x + f.y + z 
 
-        requires x, y for f
+    requires x, y for f
 }

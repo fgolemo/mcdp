@@ -604,7 +604,7 @@ mcdp {
     
     requires x, y for f
     
-    f.z >= sqrt(f.x) + sqrt(f.y) + Nat:4
+    f.z >= ceil(sqrt(f.x)) + ceil(sqrt(f.y)) + Nat:4
     
 }"""
     )

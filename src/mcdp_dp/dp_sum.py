@@ -57,7 +57,6 @@ class SumN(EmptyDP):
         F = PosetProduct(self.Fs)
         R = R
 
-
         EmptyDP.__init__(self, F=F, R=R)
         sum_dimensionality_works(Fs, R)
 
@@ -68,6 +67,25 @@ class SumN(EmptyDP):
 
     def __repr__(self):
         return 'SumN(%s -> %s)' % (self.F, self.R)
+
+class SumNRcompMap(Map):
+    """ Sum of Rcomp. """
+    
+    @contract(n='int,>=0')
+    def __init__(self, n):
+        P = Rcomp()
+        dom = PosetProduct((P,)*n)
+        cod = P
+        self.n = n
+        Map.__init__(self, dom, cod)
+        
+    def _call(self, x):
+        res = sum(x)
+        mcdp_dev_warning('overflow, underflow')
+        return res
+
+    def __repr__(self):
+        return 'SumNRcompMap(%s)' % self.n
 
 def sum_dimensionality_works(Fs, R):
     """ Raises ValueError if it is not possible to sum Fs to get R. """

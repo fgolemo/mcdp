@@ -294,6 +294,7 @@ def rcompunits_pow(a, num, den):
     """
         Gets the unit for a ^ (num/den)
     """
+    check_isinstance(a, RcompUnits)
     x = 1.0 * num / den
     u = a.units ** x
     s = '%s' % u
