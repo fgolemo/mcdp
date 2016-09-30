@@ -43,9 +43,19 @@ comptests-run-parallel-nocontracts-prof:
 	DISABLE_CONTRACTS=1 comptests -o $(out) --profile --nonose -c "make; rparmake" $(package)  
 
 
-coverage:
+docoverage-single:
+	# note you need "rmake" otherwise it will not be captured
+	rm -rf ouf_coverage .coverage
 	-DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "exit" $(package)
-	-DISABLE_CONTRACTS=1 coverage2 run `which compmake` $(out) -c "rparmake"
+	-DISABLE_CONTRACTS=1 coverage2 run `which compmake` $(out) -c "rmake"
+	coverage html -d out_coverage --include '*src/mcdp*'
+
+docoverage-parallel:
+	# note you need "rmake" otherwise it will not be captured
+	rm -rf ouf_coverage .coverage
+	-DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "exit" $(package)
+	-DISABLE_CONTRACTS=1 coverage run --concurrency=multiprocessing  `which compmake` $(out) -c "rparmake"
+	coverage combine
 	coverage html -d out_coverage --include '*src/mcdp*'
 
 
