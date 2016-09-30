@@ -44,6 +44,7 @@ comptests-run-parallel-nocontracts-prof:
 
 
 coverage:
+	rm -rf ouf_coverage .coverage
 	-DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "exit" $(package)
 	-DISABLE_CONTRACTS=1 coverage2 run `which compmake` $(out) -c "rparmake"
 	coverage html -d out_coverage --include '*src/mcdp*'
