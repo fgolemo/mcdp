@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-from .parts import CDPLanguage
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_posets import PosetProduct, PosetProductWithLabels
 from mocdp.exceptions import DPInternalError, DPSemanticError
+
+from .parts import CDPLanguage
+
 
 CDP = CDPLanguage
 

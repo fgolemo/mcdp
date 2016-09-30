@@ -1,7 +1,6 @@
-from mcdp_posets.nat import Nat
-from mcdp_posets.poset_product import PosetProduct
+from mcdp_posets import Map, Nat, PosetProduct
 import numpy as np
-from mcdp_posets.space import Map
+
 
 __all__ = ['SumNatsN']
 

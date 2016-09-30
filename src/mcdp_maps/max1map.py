@@ -1,7 +1,7 @@
 from contracts.utils import raise_wrapped
-from mcdp_posets import NotJoinable
-from mcdp_posets import Map, MapNotDefinedHere
+from mcdp_posets import Map, MapNotDefinedHere, NotJoinable
 from mocdp.exceptions import do_extra_checks
+
 
 __all__ = ['Max1Map']
 

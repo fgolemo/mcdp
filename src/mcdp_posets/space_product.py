@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-from .space import NotBelongs, NotEqual, Space
 from contracts import contract
 from contracts.utils import check_isinstance, indent, raise_desc
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME, ATTR_LOAD_NAME
+
+from .space import NotBelongs, NotEqual, Space
+
 
 __all__ = [
     'SpaceProduct',

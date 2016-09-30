@@ -1,29 +1,11 @@
-from mcdp_posets.space import Map, MapNotDefinedHere
 from contracts import contract
-from mcdp_posets.poset import Poset, NotJoinable
-from mcdp_posets.poset_product import PosetProduct
 from contracts.utils import raise_wrapped
+from mcdp_posets import Poset, NotJoinable, PosetProduct, Map, MapNotDefinedHere
+
 
 __all__ = [
     'MeetNMap',
 ]
-
-# class MeetMap2(Map):
-#
-#     @contract(F=Poset)
-#     def __init__(self, F):
-#         assert isinstance(F, Poset), F
-#         self.F = F
-#         dom = PosetProduct((F, F))
-#         cod = F
-#         Map.__init__(self, dom=dom, cod=cod)
-#
-#     def _call(self, x):
-#         assert isinstance(x, tuple) and len(x) == 2, x
-#         f1, f2 = x
-#         r = self.F0.meet(f1, f2)
-#         return r
-
 
 class MeetNMap(Map):
     """ 

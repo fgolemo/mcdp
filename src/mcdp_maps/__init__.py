@@ -1,4 +1,3 @@
-from .ceil_after import *
 from .join_map import *
 from .map_composition import *
 from .max1map import *

@@ -1,10 +1,7 @@
-from mcdp_posets import Map
 from contracts import contract
-from mcdp_posets import Poset
-from mcdp_posets import PosetProduct
-from mcdp_posets.poset import NotJoinable
-from mcdp_posets.space import MapNotDefinedHere
 from contracts.utils import raise_wrapped
+from mcdp_posets import Map, Poset, PosetProduct, NotJoinable, MapNotDefinedHere
+
 
 __all__ = [
     'JoinNMap',

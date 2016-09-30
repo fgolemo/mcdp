@@ -1,5 +1,5 @@
-import tempfile
 import os
+import tempfile
 
 
 def create_hierarchy(files):

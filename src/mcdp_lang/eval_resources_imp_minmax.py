@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 from mcdp_dp import Max, Max1, Min
-from mcdp_lang.helpers import get_resource_possibly_converted
 from mocdp.comp import Connection, dpwrap
 from mocdp.exceptions import DPSemanticError
 
 from .eval_constant_imp import eval_constant
-from .helpers import create_operation
+from .helpers import create_operation, get_resource_possibly_converted
 from .parts import CDPLanguage
 
 

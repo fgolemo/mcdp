@@ -5,6 +5,7 @@ from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import parse_wrap_check
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 
+
 @comptest
 def check_approx_res1():
     s = 'approx(provided f, 10 g)'

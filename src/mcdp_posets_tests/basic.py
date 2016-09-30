@@ -2,13 +2,14 @@ import itertools
 
 from comptests.registrar import comptest
 from contracts.utils import raise_desc
+from mcdp_posets import FinitePoset
 from mcdp_posets import Interval, NotBounded, PosetProduct, Uninhabited, NotBelongs, NotEqual, Rcomp
+from mcdp_posets import Nat
+from mcdp_posets import PosetCoproduct, PosetCoproductWithLabels
+from mcdp_posets.utils import poset_check_chain, check_minimal, check_maximal
 from mcdp_tests.generation import for_all_posets
 import numpy as np
-from mcdp_posets.poset_coproduct import PosetCoproduct, PosetCoproductWithLabels
-from mcdp_posets.finite_poset import FinitePoset
-from mcdp_posets.utils import poset_check_chain, check_minimal, check_maximal
-from mcdp_posets.nat import Nat
+from mcdp_posets.poset import NotLeq
 
 
 @for_all_posets
@@ -20,13 +21,22 @@ def check_poset1(_id_poset, poset):
         return
 
     poset.leq(bot, bot)
+    
+    poset.format(bot)
+    
+    x = poset.witness()
+    poset.leq(bot, x)
 
     try:
         top = poset.get_top()
     except NotBounded:
         pass
     else:
+        poset.leq(top, top)
         poset.leq(bot, top)
+    
+    poset.leq(x, top)
+    poset.format(top)
 
 @for_all_posets
 def check_poset1_chain(_id_poset, poset):
@@ -35,13 +45,16 @@ def check_poset1_chain(_id_poset, poset):
 
         chain = poset.get_test_chain(n=5)
         poset_check_chain(poset, chain)
-
     except Uninhabited:
         pass
 
     for a in chain:
         poset.check_equal(a, a)
-        
+        m = poset.meet(a, a)
+        poset.check_equal(m, a)
+        m = poset.join(a, a )
+        poset.check_equal(a, a)
+
     for a, b in itertools.combinations(chain, 2):
         try:
             poset.check_equal(a, b)
@@ -49,6 +62,27 @@ def check_poset1_chain(_id_poset, poset):
             pass
         else:
             raise_desc(Exception, 'failed', a=a, b=b, poset=poset)
+
+    for i, j in itertools.combinations(range(len(chain))):
+        if i > j:
+            i, j = j, i
+        
+        e1 = chain[i]
+        e2 = chain[j]
+        
+        poset.check_leq(e1, e2)
+        try: 
+            poset.check_leq(e2, e1)
+        except NotLeq:
+            pass
+        
+        meet = poset.meet(e1, e2)
+        join = poset.join(e1, e2)
+        
+        poset.check_equal(meet, e1)
+        poset.check_equal(join, e2)
+
+        
 
 
 @for_all_posets

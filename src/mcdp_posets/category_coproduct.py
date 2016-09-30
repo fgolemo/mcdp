@@ -1,8 +1,11 @@
-from .space import NotBelongs, NotEqual, Space
+import random
+
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, indent
-import random
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
+
+from .space import NotBelongs, NotEqual, Space
+
 
 __all__ = [
     'Coproduct1',

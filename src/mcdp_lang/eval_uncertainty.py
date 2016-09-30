@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+from mocdp.exceptions import mcdp_dev_warning
+
 from .helpers import create_operation
 from .parts import CDPLanguage
-from mocdp.exceptions import mcdp_dev_warning
+
 
 CDP = CDPLanguage
 

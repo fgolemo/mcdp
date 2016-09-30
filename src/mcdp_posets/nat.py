@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-from .poset import NotLeq, Poset
-from .space import NotBelongs, NotEqual
+import random
+
 from contracts.utils import raise_desc
 from mocdp.exceptions import do_extra_checks
-import random
+
+from .poset import NotLeq, Poset
+from .space import NotBelongs, NotEqual
+
 
 __all__ = [
    'Nat',

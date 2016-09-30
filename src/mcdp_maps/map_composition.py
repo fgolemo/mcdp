@@ -1,7 +1,9 @@
 from contracts import contract
-from mcdp_posets.space import Map
+from mcdp_posets import Map
 from mocdp.exceptions import mcdp_dev_warning
 
+
+__all__  = ['MapComposition']
 
 class MapComposition(Map):
 

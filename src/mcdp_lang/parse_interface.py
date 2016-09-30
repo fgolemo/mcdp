@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """ Contains the main parsing interface """
-from .parse_actions import parse_wrap
 from contracts import contract
 from mcdp_dp import PrimitiveDP
 from mcdp_posets import Poset
 from mocdp.exceptions import MCDPExceptionWithWhere
+
+from .parse_actions import parse_wrap
 
 
 __all__ = [

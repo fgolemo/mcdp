@@ -6,6 +6,7 @@ from mocdp.exceptions import do_extra_checks
 
 from .space_meta import SpaceMeta
 
+
 class NotBelongs(Exception):
     pass
 

@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-from .namedtuple_tricks import recursive_print
-from .parse_actions import add_where_information
-from .parts import CDPLanguage
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_dp import PrimitiveDP
 from mocdp.exceptions import DPInternalError
+
+from .namedtuple_tricks import recursive_print
+from .parse_actions import add_where_information
+from .parts import CDPLanguage
 
 
 CDP = CDPLanguage

@@ -1,6 +1,8 @@
+from contracts.utils import raise_wrapped
+
 from .poset import NotLeq, Poset
 from .space import NotEqual
-from contracts.utils import raise_wrapped
+
 
 __all__ = [
     'Any',

@@ -1,7 +1,10 @@
-from mcdp_posets.space import Map
-from mcdp_posets.nat import Nat
 from contracts import contract
+from mcdp_posets import Map, Nat
 
+
+__all__ = [
+    'PlusNat',
+]
 
 class PlusNat(Map):
 

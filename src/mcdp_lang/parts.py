@@ -2,6 +2,7 @@
 
 from .namedtuple_tricks import namedtuplewhere
 
+
 __all__ = [
     'CDPLanguage',
 ]

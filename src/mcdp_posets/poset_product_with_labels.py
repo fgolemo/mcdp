@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
-from .poset import Poset  # @UnusedImport
-from .poset_product import PosetProduct
-from .space import NotBelongs
 from contracts import contract
 from contracts.utils import raise_desc
 
+from .poset import Poset 
+from .poset_product import PosetProduct
+from .space import NotBelongs
+
+
+_ = Poset
 
 __all__ = [
     'PosetProductWithLabels',

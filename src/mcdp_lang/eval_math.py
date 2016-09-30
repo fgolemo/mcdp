@@ -134,7 +134,6 @@ def eval_MultN(x, context, wants_constant):
     """ Raises NotConstant if wants_constant is True. """
     from .misc_math import generic_mult_constantsN, generic_mult_table
     from .eval_constant_imp import eval_constant
-    from .helpers import get_resource_possibly_converted
 
     assert isinstance(x, CDP.MultN)
 

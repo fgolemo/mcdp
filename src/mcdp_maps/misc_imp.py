@@ -1,14 +1,17 @@
 from abc import abstractmethod
 
-from mcdp_posets import Map
-from mcdp_posets import Rcomp
-from mcdp_posets import RcompUnits
-import numpy as np
+from mcdp_posets import Map, Rcomp, RcompUnits, Nat
 from mcdp_posets.rcomp import finfo
-from mcdp_posets.nat import Nat
+import numpy as np
 
 
-__all__ = ['CeilMap', 'FloorMap', 'SquareMap', 'SqrtMap', 'SquareNatMap']
+__all__ = [
+    'CeilMap', 
+    'FloorMap', 
+    'SquareMap', 
+    'SqrtMap', 
+    'SquareNatMap',
+]
 
 
 class GenericFloatOperation(Map):

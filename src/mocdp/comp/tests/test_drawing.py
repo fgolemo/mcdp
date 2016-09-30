@@ -2,6 +2,7 @@
 import matplotlib
 from matplotlib.font_manager import FontProperties
 import os
+from mocdp.comp.interfaces import NotConnected
 
 matplotlib.rc('font', **{'sans-serif' : 'Arial',
                            'family' : 'sans-serif'})
@@ -21,6 +22,12 @@ def nameddp1_report(context, _id_dp, ndp):
 
 @for_all_nameddps_dyn
 def nameddp1_solve(context, _, ndp):
+    try:
+        ndp.check_fully_connected()
+    except NotConnected:
+        print('Skipping because not connected.')
+        return
+    
     dp = ndp.get_dp()
     funsp = dp.get_fun_space()
     ressp = dp.get_res_space()

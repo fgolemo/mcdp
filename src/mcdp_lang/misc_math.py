@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
+import functools
+import warnings
+
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
 from mcdp_dp import sum_units
 from mcdp_posets import Nat, RcompUnits, mult_table
+from mcdp_posets import express_value_in_isomorphic_space
 from mcdp_posets.rcomp_units import R_dimensionless, mult_table_seq, \
     RbicompUnits
-from mcdp_posets.types_universe import express_value_in_isomorphic_space
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPSemanticError
-import functools
-import warnings
 
 
 @contract(S=RcompUnits)

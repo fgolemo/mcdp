@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-from .parts import CDPLanguage
-from mcdp_posets import RCompUnitsPower
-from mcdp_dp import WrapAMap
-from mcdp_posets.rcomp_units import RcompUnits
-from mocdp.exceptions import DPSemanticError
 from contracts.utils import raise_desc
+from mcdp_dp import WrapAMap
+from mcdp_posets import RCompUnitsPower, RcompUnits
+from mocdp.exceptions import DPSemanticError
+
+from .parts import CDPLanguage
+
 
 CDP = CDPLanguage
 

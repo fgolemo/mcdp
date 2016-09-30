@@ -109,8 +109,8 @@ class UpperSets(Poset):
 
     def belongs(self, x):
         if not isinstance(x, UpperSet):
-            msg = 'Not an upperset: %s' % x.__repr__()
-            raise NotBelongs(msg)
+            msg = 'Not an upperset.'
+            raise_desc(NotBelongs, msg, x=x)
         if not x.P == self.P:
             msg = 'Different poset: %s ≠ %s' % (self.P, x.P)
             raise_desc(NotBelongs, msg, self=self, x=x)

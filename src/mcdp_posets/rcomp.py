@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-from .poset import NotLeq, Poset
 from contracts.utils import raise_desc
-from .space import NotBelongs, NotEqual
 from mocdp.exceptions import do_extra_checks
 import numpy as np
+
+from .poset import NotLeq, Poset
+from .space import NotBelongs, NotEqual
 
 
 __all__ = [

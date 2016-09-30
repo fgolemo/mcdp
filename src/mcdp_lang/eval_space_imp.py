@@ -1,8 +1,4 @@
 # -*- coding: utf-8 -*-
-from .namedtuple_tricks import recursive_print
-from .parse_actions import add_where_information
-from .parts import CDPLanguage
-from .utils_lists import get_odd_ops, unwrap_list
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_posets import (
@@ -11,6 +7,12 @@ from mcdp_posets import (
     UpperSets)
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPInternalError
+
+from .namedtuple_tricks import recursive_print
+from .parse_actions import add_where_information
+from .parts import CDPLanguage
+from .utils_lists import get_odd_ops, unwrap_list
+
 
 CDP = CDPLanguage
 

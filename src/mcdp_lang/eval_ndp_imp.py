@@ -1,15 +1,7 @@
 # -*- coding: utf-8 -*-
-from .eval_codespec_imp_utils_instantiate import ImportFailure, import_name
-from .eval_constant_imp import eval_constant
-from .eval_ndp_approx import eval_ndp_approx_lower, eval_ndp_approx_upper
-from .eval_space_imp import eval_space
-from .eval_template_imp import eval_template
-from .helpers import create_operation
-from .namedtuple_tricks import recursive_print
-from .parse_actions import add_where_information
-from .parts import CDPLanguage
-from .utils_lists import get_odd_ops, unwrap_list
 from contextlib import contextmanager
+import sys
+
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (
@@ -27,9 +19,17 @@ from mocdp.comp.make_approximation_imp import make_approximation
 from mocdp.exceptions import (DPInternalError, DPSemanticError,
     DPSemanticErrorNotConnected)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
-import sys
 
-
+from .eval_codespec_imp_utils_instantiate import ImportFailure, import_name
+from .eval_constant_imp import eval_constant
+from .eval_ndp_approx import eval_ndp_approx_lower, eval_ndp_approx_upper
+from .eval_space_imp import eval_space
+from .eval_template_imp import eval_template
+from .helpers import create_operation
+from .namedtuple_tricks import recursive_print
+from .parse_actions import add_where_information
+from .parts import CDPLanguage
+from .utils_lists import get_odd_ops, unwrap_list
 
 
 CDP = CDPLanguage

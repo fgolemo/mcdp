@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
-from .namedtuple_tricks import get_copy_with_where
-from .parts import CDPLanguage
-from .utils import isnamedtupleinstance, parse_action
-from .utils_lists import make_list
 from contextlib import contextmanager
+
+from pyparsing import ParseException, ParseFatalException
+
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
     MCDPExceptionWithWhere, do_extra_checks, mcdp_dev_warning)
-from pyparsing import ParseException, ParseFatalException
+
+from .namedtuple_tricks import get_copy_with_where
+from .parts import CDPLanguage
+from .utils import isnamedtupleinstance, parse_action
+from .utils_lists import make_list
+
 
 CDP = CDPLanguage
 

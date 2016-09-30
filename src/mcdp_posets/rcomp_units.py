@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-from .any import Any, BottomCompletion, TopCompletion
-from .rcomp import Rcomp
-from .space import Map
+import functools
+import math
+
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
@@ -9,10 +9,10 @@ from mocdp.exceptions import DPSyntaxError, do_extra_checks, mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
 from pint import UnitRegistry  # @UnresolvedImport
 from pint.errors import UndefinedUnitError  # @UnresolvedImport
-import functools
-import math
-from mcdp_posets.rcomp import Rbicomp
 
+from .any import Any, BottomCompletion, TopCompletion
+from .rcomp import Rcomp, Rbicomp
+from .space import Map
 
 
 class MyUnitRegistry(UnitRegistry):

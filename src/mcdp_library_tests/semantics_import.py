@@ -1,6 +1,7 @@
-from .create_mockups import create_hierarchy
 from comptests.registrar import comptest
 from mcdp_library import Librarian
+
+from .create_mockups import create_hierarchy
 
 
 @comptest
