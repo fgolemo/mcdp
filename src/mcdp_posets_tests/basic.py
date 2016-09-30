@@ -41,7 +41,7 @@ def check_poset1(_id_poset, poset):
 @for_all_posets
 def check_poset1_chain(_id_poset, poset):
     try:
-        from mcdp_posets import poset_check_chain
+        #from mcdp_posets import poset_check_chain
 
         chain = poset.get_test_chain(n=5)
         poset_check_chain(poset, chain)
@@ -61,9 +61,9 @@ def check_poset1_chain(_id_poset, poset):
         except NotEqual:
             pass
         else:
-            raise_desc(Exception, 'failed', a=a, b=b, poset=poset)
+            raise_desc(Exception, 'failed', a=a, b=b, poset=poset, chain=chain)
 
-    for i, j in itertools.combinations(range(len(chain))):
+    for i, j in itertools.combinations(range(len(chain)), 2):
         if i > j:
             i, j = j, i
         
@@ -177,7 +177,7 @@ def test_PosetCoproductWithLabels_1():
     f1 = FinitePoset(['a','b','c'], [])
     f2 = FinitePoset(['A','B','C'], [])
     subs = (f1, f2)
-    P = PosetCoproductWithLabels(subs)
+    P = PosetCoproductWithLabels(subs, labels=('one', 'two'))
     return P
 
 @comptest

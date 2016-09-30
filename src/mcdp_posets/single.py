@@ -39,7 +39,7 @@ class Single(Poset):
         return self.element
 
     def get_test_chain(self, n):  # @UnusedVariable
-        return [self.element, self.element]
+        return [self.element]
 
     def __eq__(self, other):
         return isinstance(other, Single) and other.element == self.element
