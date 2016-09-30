@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
-from .primitive import NormalForm, NotFeasible, PrimitiveDP
-from .tracer import Tracer
 from contracts import contract
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mcdp_posets import (LowerSet, Map, NotBelongs, PosetProduct, UpperSet,
     UpperSets, get_product_compact, poset_minima)
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import DPInternalError, do_extra_checks, mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
+
+from .primitive import NormalForm, NotFeasible, PrimitiveDP
+from .tracer import Tracer
 
 
 __all__ = [
@@ -109,37 +110,37 @@ class Series0(PrimitiveDP):
         assert res
         return res
 
-    def check_feasible(self, f1, m, r2):
-        # print('series:check_feasible(%s,%s,%s)' % (f1, m, r))
-        M, _, unpack = self._get_product()
-        if do_extra_checks():
-            M.belongs(m)
-        m1, m2 = unpack(m)
-
-        lf1, ur1 = self.dp1.evaluate(m1)
-        lf2, ur2 = self.dp2.evaluate(m2)
-
-        try:
-            lf1.belongs(f1)
-        except NotBelongs as e:
-            msg = 'First is not feasible'
-            raise_wrapped(NotFeasible, e, msg, lf1=lf1, f1=f1)
-        try:
-            ur2.belongs(r2)
-        except NotBelongs as e:
-            msg = 'Second is not feasible'
-            raise_wrapped(NotFeasible, e, msg, lf1=lf1, f1=f1)
-
-        feasible = non_zero_intersection(ur1=ur1, lf2=lf2)
-        if not feasible:
-            msg = 'Intersection is empty.'
-
-            s = ('%s [ m1 = %s ] %s <= %s [ m2 = %s ] %s' %
-                  (lf1, m1, ur1, lf2, m2, ur2))
-
-            raise_desc(NotFeasible, msg,
-                          dp1=self.dp1.repr_long(), dp2=self.dp2.repr_long(),
-                          s=s)
+#     def check_feasible(self, f1, m, r2):
+#         # print('series:check_feasible(%s,%s,%s)' % (f1, m, r))
+#         M, _, unpack = self._get_product()
+#         if do_extra_checks():
+#             M.belongs(m)
+#         m1, m2 = unpack(m)
+# 
+#         lf1, ur1 = self.dp1.evaluate(m1)
+#         lf2, ur2 = self.dp2.evaluate(m2)
+# 
+#         try:
+#             lf1.belongs(f1)
+#         except NotBelongs as e:
+#             msg = 'First is not feasible'
+#             raise_wrapped(NotFeasible, e, msg, lf1=lf1, f1=f1)
+#         try:
+#             ur2.belongs(r2)
+#         except NotBelongs as e:
+#             msg = 'Second is not feasible'
+#             raise_wrapped(NotFeasible, e, msg, lf1=lf1, f1=f1)
+# 
+#         feasible = non_zero_intersection(ur1=ur1, lf2=lf2)
+#         if not feasible:
+#             msg = 'Intersection is empty.'
+# 
+#             s = ('%s [ m1 = %s ] %s <= %s [ m2 = %s ] %s' %
+#                   (lf1, m1, ur1, lf2, m2, ur2))
+# 
+#             raise_desc(NotFeasible, msg,
+#                           dp1=self.dp1.repr_long(), dp2=self.dp2.repr_long(),
+#                           s=s)
 #
 #     def check_unfeasible(self, f1, m, r2):
 #         try:

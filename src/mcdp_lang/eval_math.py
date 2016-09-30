@@ -1,24 +1,19 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_dp import MultValueMap, ProductNatN, ProductN, SumN, SumNNat, WrapAMap, sum_dimensionality_works
-from mcdp_dp.dp_sum import SumNRcompMap
-from mcdp_maps import MinusValueMap, MultNat, PlusNat, PlusValueMap, SumNInt
-from mcdp_maps.plus_value_map import PlusValueRcompMap
+from mcdp_dp import MultValueMap, ProductNatN, ProductN, SumN, SumNNat, WrapAMap, sum_dimensionality_works, SumNRcompMap
+from mcdp_maps import MinusValueMap, MultNat, PlusNat, PlusValueMap, SumNInt, PlusValueRcompMap, SumNRcomp
 from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits, Space,
-    express_value_in_isomorphic_space, get_types_universe, mult_table)
-from mcdp_posets.rcomp import Rcomp
+    express_value_in_isomorphic_space, get_types_universe, mult_table, Rcomp)
 from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError
 
 from .eval_constant_imp import NotConstant
 from .eval_resources_imp import eval_rvalue
-from .helpers import create_operation, get_valuewithunits_as_resource
+from .helpers import create_operation, get_valuewithunits_as_resource, get_resource_possibly_converted
 from .misc_math import inv_constant
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from mcdp_lang.helpers import get_resource_possibly_converted
-from mcdp_maps.sum_n_rcomp import SumNRcomp
 
 
 CDP = CDPLanguage

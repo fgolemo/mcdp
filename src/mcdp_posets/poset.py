@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-from .space import Space
 from abc import abstractmethod
+
 from contracts import contract, describe_value
-from mocdp.exceptions import do_extra_checks
 from contracts.utils import raise_desc
+from mocdp.exceptions import do_extra_checks
+
+from .space import Space
+
 
 __all__ = [
     'Poset',

@@ -20,28 +20,28 @@ import numpy as np
 #     'check_sum_units_compatible',
 # ]
 
-class Sum(PrimitiveDP):
-
-    def __init__(self, F):
-        F0 = F
-        F = PosetProduct((F0, F0))
-        R = F0
-        self.F0 = F0
-
-        M = SpaceProduct(())
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
-
-    def solve(self, func):
-        self.F.belongs(func)
-
-        f1, f2 = func
-
-        r = self.F0.add(f1, f2)
-
-        return self.R.U(r)
-
-    def __repr__(self):
-        return 'Sum(%r)' % self.F0
+# class Sum(PrimitiveDP):
+# 
+#     def __init__(self, F):
+#         F0 = F
+#         F = PosetProduct((F0, F0))
+#         R = F0
+#         self.F0 = F0
+# 
+#         M = SpaceProduct(())
+#         PrimitiveDP.__init__(self, F=F, R=R, M=M)
+# 
+#     def solve(self, func):
+#         self.F.belongs(func)
+# 
+#         f1, f2 = func
+# 
+#         r = self.F0.add(f1, f2)
+# 
+#         return self.R.U(r)
+# 
+#     def __repr__(self):
+#         return 'Sum(%r)' % self.F0
 
 
 class SumN(EmptyDP):
@@ -97,7 +97,7 @@ def sum_dimensionality_works(Fs, R):
         ratio = R.units / Fi.units
         try:
             float(ratio)
-        except Exception as e:
+        except Exception as e: # pragma: no cover
             raise_wrapped(ValueError, e, 'Could not convert.', Fs=Fs, R=R)
 
 
@@ -113,7 +113,7 @@ def sum_units(Fs, values, R):
         # reasonably sure this is correct...
         try:
             factor = 1.0 / float(R.units / Fi.units)
-        except Exception as e:  # DimensionalityError
+        except Exception as e:  # pragma: no cover (DimensionalityError)
             raise_wrapped(Exception, e, 'some error', Fs=Fs, R=R)
 
         res += factor * x
@@ -123,53 +123,53 @@ def sum_units(Fs, values, R):
 
     return res
 
+# 
+# class SumUnitsNotCompatible(Exception):
+#     pass
+# 
+# @contract(Fs='tuple, seq[>=2]($RcompUnits)')
+# def check_sum_units_compatible(Fs):
+#     """
+#     
+#         raises SumUnitsNotCompatible
+#     """
+#     F0 = Fs[0]
+#     errors = []
+#     for F in Fs:
+#         
+#         try: 
+#             F.units + F0.units
+#         except ValueError as e:
+#             errors.append(e)
+#         except BaseException as e:
+#             raise
+#             
+#     if errors:
+#         msg = "Units not compatible: "
+#         msg += '\n' + "\n".join(str(e) for e in errors)
+#         raise SumUnitsNotCompatible(msg)
 
-class SumUnitsNotCompatible(Exception):
-    pass
-
-@contract(Fs='tuple, seq[>=2]($RcompUnits)')
-def check_sum_units_compatible(Fs):
-    """
-    
-        raises SumUnitsNotCompatible
-    """
-    F0 = Fs[0]
-    errors = []
-    for F in Fs:
-        
-        try: 
-            F.units + F0.units
-        except ValueError as e:
-            errors.append(e)
-        except BaseException as e:
-            raise
-            
-    if errors:
-        msg = "Units not compatible: "
-        msg += '\n' + "\n".join(str(e) for e in errors)
-        raise SumUnitsNotCompatible(msg)
-
-
-class Product(PrimitiveDP):
-
-    def __init__(self, F1, F2, R):
-        self.F1 = F1
-        self.F2 = F2
-
-        F = PosetProduct((F1, F2))
-
-        M = SpaceProduct(())
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
-
-    def solve(self, func):
-        f1, f2 = func
-
-        r = self.F1.multiply(f1, f2)
-
-        return self.R.U(r)
-
-    def __repr__(self):
-        return 'Product(%r×%r→%r)' % (self.F1, self.F2, self.R)
+# 
+# class Product(PrimitiveDP):
+# 
+#     def __init__(self, F1, F2, R):
+#         self.F1 = F1
+#         self.F2 = F2
+# 
+#         F = PosetProduct((F1, F2))
+# 
+#         M = SpaceProduct(())
+#         PrimitiveDP.__init__(self, F=F, R=R, M=M)
+# 
+#     def solve(self, func):
+#         f1, f2 = func
+# 
+#         r = self.F1.multiply(f1, f2)
+# 
+#         return self.R.U(r)
+# 
+#     def __repr__(self):
+#         return 'Product(%r×%r→%r)' % (self.F1, self.F2, self.R)
 
 class ProductN(EmptyDP):
 
@@ -234,49 +234,48 @@ class ProductNatN(Map):
         mult = lambda a, b : a * b
         r = functools.reduce(mult, x)
         mcdp_dev_warning('lacks overflow')
-        # # XXX: overflow
         return r
 
     def __repr__(self):
         return 'ProductNatN(%s)' % (self.n)
-
-
-class ProductMap(Map):
-    
-    def __init__(self, Fs, R):
-        for _ in Fs:
-            check_isinstance(_, (Nat, Rcomp))
-        check_isinstance(R, (Nat, Rcomp))
-        self.Fs = Fs
-        self.R = R
-
-        dom = PosetProduct(Fs)
-        cod = PosetProduct(R)
-        Map.__init__(self, dom=dom, cod=cod)
-
-    def _call(self, x):
-        def is_there_a_top():
-            for Fi, fi in zip(self.Fs, x):
-                if Fi.equal(Fi.get_top(), fi):
-                    return True
-            return False
-        if is_there_a_top():
-            return self.R.U(self.R.get_top())
-        # float
-        res = 1.0
-        for fi in x:  # Fi, fi in zip(self.Fs, x):
-            res = res * fi
-        finite = bool(np.isfinite(res))
-        if isinstance(self.R, Nat):
-            if finite:
-                return int(np.ceil(res))
-            else:
-                return self.R.top()
-        if isinstance(self.R, Rcomp):
-            if finite:
-                return res
-            else:
-                return self.R.top()
+# 
+# 
+# class ProductMap(Map):
+#     
+#     def __init__(self, Fs, R):
+#         for _ in Fs:
+#             check_isinstance(_, (Nat, Rcomp))
+#         check_isinstance(R, (Nat, Rcomp))
+#         self.Fs = Fs
+#         self.R = R
+# 
+#         dom = PosetProduct(Fs)
+#         cod = PosetProduct(R)
+#         Map.__init__(self, dom=dom, cod=cod)
+# 
+#     def _call(self, x):
+#         def is_there_a_top():
+#             for Fi, fi in zip(self.Fs, x):
+#                 if Fi.equal(Fi.get_top(), fi):
+#                     return True
+#             return False
+#         if is_there_a_top():
+#             return self.R.U(self.R.get_top())
+#         # float
+#         res = 1.0
+#         for fi in x:  # Fi, fi in zip(self.Fs, x):
+#             res = res * fi
+#         finite = bool(np.isfinite(res))
+#         if isinstance(self.R, Nat):
+#             if finite:
+#                 return int(np.ceil(res))
+#             else:
+#                 return self.R.top()
+#         if isinstance(self.R, Rcomp):
+#             if finite:
+#                 return res
+#             else:
+#                 return self.R.top()
 
 
 class MultValueMap(Map):
