@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
 from contextlib import contextmanager
-from contracts.utils import raise_desc, raise_wrapped
-from mcdp_cli.solve_meat import solve_main
-from mcdp_library import Librarian, MCDPLibrary
-from mcdp_library.utils import dir_from_package_name
-from mcdp_tests.generation import for_all_source_mcdp
-from mocdp import logger
-from mocdp.exceptions import DPSemanticError, mcdp_dev_warning
-from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
 import os
 import tempfile
 import time
-import yaml
+
+from contracts.utils import raise_desc, raise_wrapped
+from mcdp_library import Librarian, MCDPLibrary
+from mcdp_library.utils import dir_from_package_name
+from mcdp_tests.generation import for_all_source_mcdp
+from mocdp.exceptions import DPSemanticError
+from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
+
 
 __all__ = [
     'define_tests_for_mcdplibs',
@@ -81,13 +80,12 @@ def define_tests_for_mcdplibs(context):
     for libname in enumerate_test_libraries():
         c2 = context.child(libname)
 
-        c2.comp_dynamic(mcdplib_define_tst, libname)
-        
         c2.child('ndp').comp_dynamic(mcdplib_test_setup_nameddps, libname=libname)
         c2.child('poset').comp_dynamic(mcdplib_test_setup_posets, libname=libname)
         c2.child('primitivedp').comp_dynamic(mcdplib_test_setup_primitivedps, libname=libname)
         c2.child('source_mcdp').comp_dynamic(mcdplib_test_setup_source_mcdp, libname=libname)
         c2.child('value').comp_dynamic(mcdplib_test_setup_value, libname=libname)
+        c2.child('template').comp_dynamic(mcdplib_test_setup_template, libname=libname)
 
         path = librarian.libraries[libname]['path']
         makefile = os.path.join(path, 'Makefile')
@@ -288,6 +286,26 @@ def mcdplib_test_setup_primitivedps(context, libname):
         for ftest in registered:
             c.comp(ftest, id_dp, ndp)
 
+def mcdplib_test_setup_template(context, libname):
+    from mcdp_tests import load_tests_modules
+    l = get_test_library(libname)
+    templates = l.list_templates()
+
+    from mcdp_tests.generation import for_all_templates
+    load_tests_modules()
+    registered = for_all_templates.registered
+
+    print('Found: %r' % templates)
+    print('Registered: %r' % registered)
+
+    for id_template in templates:
+        c = context.child(id_template)
+
+        ndp = c.comp(_load_template, libname, id_template, job_id='load')
+
+        for ftest in registered:
+            c.comp(ftest, id_template, ndp)
+
 @contextmanager
 def timeit(desc, minimum=None):
     t0 = time.clock()
@@ -303,6 +321,11 @@ def _load_primitivedp(libname, model_name):
     l = get_test_library(libname)
     with timeit(model_name):
         return l.load_primitivedp(model_name)
+
+def _load_template(libname, model_name):
+    l = get_test_library(libname)
+    with timeit(model_name):
+        return l.load_template(model_name)
 
 def _load_value(libname, name):
     l = get_test_library(libname)
@@ -335,62 +358,62 @@ def _load_ndp(libname, model_name):
 
 
 
-def mcdplib_define_tst(context, libname):
-    """
-        mcdplib: folder
-        
-        loads the mcdp_lang_tests in mcdp_tests.yaml
-    """
-    librarian = get_test_librarian()
-    mcdplib = librarian.libraries[libname]['path']
-
-    assert os.path.exists(mcdplib)
-
-    fn = os.path.join(mcdplib, 'mcdp_tests.yaml')
-    if not os.path.exists(fn):
-        return
-
-    with open(fn) as f:
-        data = yaml.load(f)
-
-    if 'test_solve' in data:
-
-        tests = data['test_solve']
-        if tests is not None:
-            for name, test_data in tests.items():
-                c = context.child(name)
-                c.comp(mcdplib_define_tst_solve, mcdplib, name, test_data, job_id='solve')
-
-
-def mcdplib_define_tst_solve(mcdplib, id_test, test_data):  # @UnusedVariable
-    mcdp_dev_warning('this doesnt use the librarian')
-    # Reload the data (easier to debug)
-    fn = os.path.join(mcdplib, 'mcdp_tests.yaml')
-    with open(fn) as f:
-        data = yaml.load(f)
-    test_data = data['test_solve'][id_test]
-    
-    defaults = dict(lower=None, upper=None, max_steps=None, 
-                    intervals=None,
-                    expect_nres=None,
-                    expect_res=None,
-                    imp=None,
-                    _exp_advanced=False, expect_nimp=None,
-                    plot=False,
-                    do_movie=False)
-    required = ['query_strings', 'model_name']
-    params = defaults.copy()
-    for k, v in test_data.items():
-        if not k in defaults and not k in required:
-            raise_desc(ValueError, 'Invalid configuration.',
-                       k=k, test_data=test_data, defaults=defaults)
-        params[k] = v
-    
-    params['logger'] = logger
-    params['config_dirs'] = [mcdplib]
-    params['maindir'] = mcdplib
-    params['cache_dir'] = None
-    params['out_dir'] = os.path.join(mcdplib + '.out/%s' % id_test)
-    params['make'] = False
-
-    solve_main(**params)
+# def mcdplib_define_tst(context, libname):
+#     """
+#         mcdplib: folder
+#         
+#         loads the mcdp_lang_tests in mcdp_tests.yaml
+#     """
+#     librarian = get_test_librarian()
+#     mcdplib = librarian.libraries[libname]['path']
+# 
+#     assert os.path.exists(mcdplib)
+# 
+#     fn = os.path.join(mcdplib, 'mcdp_tests.yaml')
+#     if not os.path.exists(fn):
+#         return
+# 
+#     with open(fn) as f:
+#         data = yaml.load(f)
+# 
+#     if 'test_solve' in data:
+# 
+#         tests = data['test_solve']
+#         if tests is not None:
+#             for name, test_data in tests.items():
+#                 c = context.child(name)
+#                 c.comp(mcdplib_define_tst_solve, mcdplib, name, test_data, job_id='solve')
+# 
+# 
+# def mcdplib_define_tst_solve(mcdplib, id_test, test_data):  # @UnusedVariable
+#     mcdp_dev_warning('this doesnt use the librarian')
+#     # Reload the data (easier to debug)
+#     fn = os.path.join(mcdplib, 'mcdp_tests.yaml')
+#     with open(fn) as f:
+#         data = yaml.load(f)
+#     test_data = data['test_solve'][id_test]
+#     
+#     defaults = dict(lower=None, upper=None, max_steps=None, 
+#                     intervals=None,
+#                     expect_nres=None,
+#                     expect_res=None,
+#                     imp=None,
+#                     _exp_advanced=False, expect_nimp=None,
+#                     plot=False,
+#                     do_movie=False)
+#     required = ['query_strings', 'model_name']
+#     params = defaults.copy()
+#     for k, v in test_data.items():
+#         if not k in defaults and not k in required:
+#             raise_desc(ValueError, 'Invalid configuration.',
+#                        k=k, test_data=test_data, defaults=defaults)
+#         params[k] = v
+#     
+#     params['logger'] = logger
+#     params['config_dirs'] = [mcdplib]
+#     params['maindir'] = mcdplib
+#     params['cache_dir'] = None
+#     params['out_dir'] = os.path.join(mcdplib + '.out/%s' % id_test)
+#     params['make'] = False
+# 
+#     solve_main(**params)

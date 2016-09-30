@@ -1,9 +1,11 @@
-from .helpers import create_operation_lf
-from .parts import CDPLanguage
 from contracts import contract
 from mcdp_dp import TakeRes
-from mcdp_lang.utils_lists import get_odd_ops, unwrap_list
 from mcdp_posets import PosetProduct
+
+from .helpers import create_operation_lf
+from .parts import CDPLanguage
+from .utils_lists import get_odd_ops, unwrap_list
+
 
 CDP = CDPLanguage
 
@@ -24,3 +26,4 @@ def eval_MakeTuple_as_lfunction(mt, context):
     return create_operation_lf(context, dp=dp, functions=functions,
                             name_prefix='_demake_tuple', op_prefix='_factors',
                             res_prefix='_result')
+

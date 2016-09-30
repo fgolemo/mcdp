@@ -28,24 +28,24 @@ comptests-run-nocontracts-console:
 
 comptests-run-parallel:
 	mkdir -p $(out)
-	comptests -o $(out) --contracts --nonose -c "rparmake" $(package)  
+	comptests -o $(out) --contracts --nonose -c "rparmake not *long*" $(package)  
 
 comptests-run-parallel-nocontracts:
 	mkdir -p $(out)
-	DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "rparmake" $(package)  
+	DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "rparmake not *long*" $(package)  
 
 comptests-run-parallel-nocontracts-cov:
 	mkdir -p $(out)
-	DISABLE_CONTRACTS=1 comptests -o $(out) --coverage --nonose -c "rparmake" $(package)  
+	DISABLE_CONTRACTS=1 comptests -o $(out) --coverage --nonose -c "rparmake not *long*" $(package)  
 
 comptests-run-parallel-nocontracts-prof:
 	mkdir -p $(out)
-	DISABLE_CONTRACTS=1 comptests -o $(out) --profile --nonose -c "make; rparmake not *testlang13diagram*" $(package)  
+	DISABLE_CONTRACTS=1 comptests -o $(out) --profile --nonose -c "make; rparmake not *long*" $(package)  
 
 
 coverage:
 	-DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "exit" $(package)
-	-DISABLE_CONTRACTS=1 coverage2 run `which compmake` $(out) -c "rparmake"
+	-DISABLE_CONTRACTS=1 coverage2 run `which compmake` $(out) -c "rparmake not *long*"
 	coverage html -d out_coverage --include '*src/mcdp*'
 
 

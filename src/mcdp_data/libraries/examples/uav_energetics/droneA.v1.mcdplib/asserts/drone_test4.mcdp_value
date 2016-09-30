@@ -1,4 +1,4 @@
 assert_equal(
     solve(<1 hour, 0 kg, 1W>, `drone),
-    upperclosure { 0.011 kg}
+    upperclosure {0.011 kg}
 )

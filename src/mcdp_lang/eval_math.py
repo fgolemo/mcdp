@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
-from .eval_constant_imp import NotConstant
-from .eval_resources_imp import eval_rvalue
-from .helpers import get_valuewithunits_as_resource
-from .misc_math import inv_constant
-from .parts import CDPLanguage
-from .utils_lists import get_odd_ops, unwrap_list
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_dp import ProductN, SumN, SumNNat, WrapAMap, sum_dimensionality_works
-from mcdp_dp.dp_sum import MultValueMap, ProductNatN
-from mcdp_lang.helpers import create_operation
+from mcdp_dp import MultValueMap, ProductNatN, ProductN, SumN, SumNNat, WrapAMap, sum_dimensionality_works
 from mcdp_maps import MinusValueMap, MultNat, PlusNat, PlusValueMap, SumNInt
 from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits, Space,
     express_value_in_isomorphic_space, get_types_universe, mult_table)
 from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError
+
+from .eval_constant_imp import NotConstant
+from .eval_resources_imp import eval_rvalue
+from .helpers import create_operation, get_valuewithunits_as_resource
+from .misc_math import inv_constant
+from .parts import CDPLanguage
+from .utils_lists import get_odd_ops, unwrap_list
+
 
 CDP = CDPLanguage
 
@@ -132,12 +132,9 @@ def flatten_multN(ops):
 @contract(x=CDP.MultN, wants_constant=bool)
 def eval_MultN(x, context, wants_constant):
     """ Raises NotConstant if wants_constant is True. """
-    from .misc_math import generic_mult_constantsN
+    from .misc_math import generic_mult_constantsN, generic_mult_table
     from .eval_constant_imp import eval_constant
-    from mcdp_lang.misc_math import generic_mult_table
-    from mcdp_lang.helpers import get_resource_possibly_converted
-    from .helpers import create_operation
-
+    from .helpers import get_resource_possibly_converted
 
     assert isinstance(x, CDP.MultN)
 
@@ -212,7 +209,7 @@ def get_mult_op(context, r, c):
 
         mvmap = MultValueMap(F=F, R=R, value=c.value)
         label = '× %.5f %s' % (c.value, format_pint_unit_short(c.unit.units))
-#         label = '× %s' % (c.unit.format(c.value))
+        # label = '× %s' % (c.unit.format(c.value))
         setattr(mvmap, '__name__', label)
 
         dp = WrapAMap(mvmap)
@@ -243,7 +240,6 @@ def eval_PlusN(x, context, wants_constant):
     """ Raises NotConstant if wants_constant is True. """
     from .eval_constant_imp import eval_constant
 
-
     assert isinstance(x, CDP.PlusN)
     assert len(x.ops) > 1
 
@@ -272,6 +268,8 @@ def eval_PlusN(x, context, wants_constant):
             x = eval_rvalue(op, context)
             assert isinstance(x, CResource)
             resources.append(x)
+
+    # first, sum together all the constants
 
     res = eval_PlusN_(pos_constants, resources, context)
 
@@ -348,7 +346,6 @@ def eval_PlusN_(constants, resources, context):
             msg = 'Cannot find sum operator for mixed types.'
             raise_desc(DPInternalError, msg, resources_types=resources_types)
 
-        from .helpers import create_operation
         r = create_operation(context, dp, resources,
                              name_prefix='_sum', op_prefix='_term',
                              res_prefix='_result')
@@ -376,7 +373,6 @@ def get_plus_op(context, r, c):
         msg = 'Cannot create addition operation.'
         raise_desc(DPInternalError, msg, rtype=rtype, c=c)
 
-    from .helpers import create_operation
     r2 = create_operation(context, dp, resources=[r],
                           name_prefix='_plus', op_prefix='_x',
                           res_prefix='_y')

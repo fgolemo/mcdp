@@ -35,7 +35,7 @@ def get_test_library2(libnames):
     return l
 
 @comptest
-def opt_basic_1():
+def opt_basic_1_long():
     libnames = ['actuation']
     library = get_test_library2(libnames)
     

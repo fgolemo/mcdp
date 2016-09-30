@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-from .helpers import get_valuewithunits_as_function
-from .namedtuple_tricks import recursive_print
-from .parse_actions import add_where_information
-from .parts import CDPLanguage
-from .utils_lists import get_odd_ops, unwrap_list
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_dp import InvMult2, InvPlus2, InvPlus2Nat
@@ -13,6 +8,12 @@ from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import CFunction, get_name_for_res_node
 from mocdp.exceptions import (DPInternalError, DPNotImplementedError,
     DPSemanticError)
+
+from .helpers import get_valuewithunits_as_function
+from .namedtuple_tricks import recursive_print
+from .parse_actions import add_where_information
+from .parts import CDPLanguage
+from .utils_lists import get_odd_ops, unwrap_list
 
 
 CDP = CDPLanguage
