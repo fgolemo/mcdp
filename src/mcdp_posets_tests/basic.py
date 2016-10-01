@@ -39,14 +39,14 @@ def check_poset1(_id_poset, poset):
         poset.format(top)
 
 @for_all_posets
-def check_poset1_chain(_id_poset, poset):
+def check_poset1_chain(id_poset, poset):
     try:
         #from mcdp_posets import poset_check_chain
-
         chain = poset.get_test_chain(n=5)
         poset_check_chain(poset, chain)
     except Uninhabited:
-        pass
+        raise Exception('%s is Uninhabited' % id_poset)
+        
 
     for a in chain:
         poset.check_equal(a, a)
