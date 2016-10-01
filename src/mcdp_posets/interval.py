@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from contracts import check_isinstance
 import numpy as np
 
 from .poset import NotLeq, Poset

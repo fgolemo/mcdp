@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from .primitive import EmptyDP
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_posets import Map, MapNotDefinedHere, NotBelongs, Poset
 # from mocdp.exceptions import mcdp_dev_warning
 # import numpy as np
@@ -57,26 +57,27 @@ class WrapAMap(EmptyDP):
 
     @contract(amap=Map)
     def __init__(self, amap):
-        assert isinstance(amap, Map), amap
+        check_isinstance(amap, Map)
         F = amap.get_domain()
         R = amap.get_codomain()
-        if not isinstance(F, Poset):
-            msg = 'Expect that F is a Poset.'
-            raise_desc(ValueError, msg, F=F, amap=amap)
-        if not isinstance(R, Poset):
-            msg = 'Expect that R is a Poset.'
-            raise_desc(ValueError, msg, R=R, amap=amap)
+        check_isinstance(F, Poset)
+        check_isinstance(R, Poset)
+#             msg = 'Expect that F is a Poset.'
+#             raise_desc(ValueError, msg, F=F, amap=amap)
+#         if not isinstance(R, Poset):
+#             msg = 'Expect that R is a Poset.'
+#             raise_desc(ValueError, msg, R=R, amap=amap)
 
         EmptyDP.__init__(self, F=F, R=R)
         self.amap = amap
 
     def solve(self, func):
         try:
-            r = self.amap(func)
-        except NotBelongs as e:
-            msg = 'Wrapped map gives inconsistent results.'
-            raise_wrapped(ValueError, e, msg, f=func, amap=self.amap)
-        except MapNotDefinedHere as e:
+            r = self.amap(func)            
+#         except NotBelongs as e:
+#             msg = 'Wrapped map gives inconsistent results.'
+#             raise_wrapped(ValueError, e, msg, f=func, amap=self.amap)
+        except MapNotDefinedHere:
             return self.R.Us([])
 
         return self.R.U(r)
