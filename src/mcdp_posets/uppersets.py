@@ -3,14 +3,14 @@ import itertools
 import random
 
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, check_isinstance
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
 
 from .find_poset_minima.baseline_n2 import poset_maxima, poset_minima
 from .poset import NotLeq, Poset
 from .poset_product import PosetProduct
-from .space import NotBelongs, NotEqual, Space, Uninhabited
+from .space import Map, NotBelongs, NotEqual, Space, Uninhabited
 
 
 __all__ = [
@@ -276,6 +276,7 @@ class LowerSets(Poset):
             raise NotLeq('a = my ⊤')
 
         self.my_leq_(a, b)
+        
     def my_leq_(self, A, B):
         # there exists an a in A that a >= b
         def dominated(b):
@@ -309,12 +310,6 @@ class LowerSets(Poset):
         self.check_leq(r, a)
         self.check_leq(r, b)
         return r
-
-#     def format0(self, x):
-#         contents = " v ".join("x ≥ %s" % self.P.format(m)
-#                         for m in sorted(x.maximals))
-# 
-#         return "{x ∣ %s }" % contents
 
     def format(self, x):
         contents = ", ".join(self.P.format(m)
@@ -356,10 +351,6 @@ class LowerSet(Space):
             n = len(self.maximals)
             i = random.randint(0, n - 1)
             return list(self.maximals)[i]
-
-#     @contract(returns=Poset)
-#     def get_poset(self):
-#         return self.P
 
     def check_equal(self, x, y):
         self.P.check_equal(x, y)
@@ -420,8 +411,8 @@ def upperset_product_multi(ss):
 @contract(ur='$UpperSet', i='int,>=0')
 def upperset_project(ur, i):
     """ Projects an upperset on a posetproduct to the i-th component. """
-    assert isinstance(ur, UpperSet), ur
-    assert isinstance(ur.P, PosetProduct), ur
+    check_isinstance(ur, UpperSet)
+    check_isinstance(ur.P, PosetProduct)
     if not (0 <= i < len(ur.P)):
         msg = 'Index %d not valid.' % i
         raise_desc(ValueError, msg, P=ur.P)
@@ -447,13 +438,13 @@ def lowerset_project(lf, i):
     return LowerSet(poset_maxima(maximals, leq=Pi.leq), P=Pi)
 
 
+
 @contract(ur='$UpperSet', f='isinstance(Map)', returns='$UpperSet')
 def upperset_project_map(ur, f):
     """ Projects the upper set through the given map. """
-    assert isinstance(ur, UpperSet), ur
-    from mcdp_posets.space import Map
-    assert isinstance(f, Map)
-    from mcdp_posets.types_universe import get_types_universe
+    check_isinstance(ur, UpperSet)
+    check_isinstance(f, Map)
+    from .types_universe import get_types_universe
     tu = get_types_universe()
     if do_extra_checks():
         tu.check_equal(ur.P, f.get_domain())

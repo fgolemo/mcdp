@@ -70,6 +70,8 @@ def check_poset1_chain(_id_poset, poset):
         e1 = chain[i]
         e2 = chain[j]
         
+        print('Comparing e1 = {} and e2 = {}'.format(poset.format(e1), poset.format(e2)))
+        
         poset.check_leq(e1, e2)
         try: 
             poset.check_leq(e2, e1)
@@ -78,12 +80,13 @@ def check_poset1_chain(_id_poset, poset):
         
         meet1 = poset.meet(e1, e2)
         meet2 = poset.meet(e2, e1)
+
         join1 = poset.join(e1, e2)
         join2 = poset.join(e2, e1)
         
         poset.check_equal(meet1, e1)
-        poset.check_equal(join1, e2)
         poset.check_equal(meet2, e1)
+        poset.check_equal(join1, e2)
         poset.check_equal(join2, e2)
 
         

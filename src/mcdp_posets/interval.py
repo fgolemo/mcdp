@@ -78,7 +78,8 @@ class Interval(Poset):
             raise NotLeq('%s ≰ %s' % (a, b))
 
     def belongs(self, x):
-        check_isinstance(x, float)
+        if not isinstance(x, float):
+            raise NotBelongs('Not a float: {}'.format(x))
         if not self.L <= x <= self.U:
             msg = '%s ∉ [%s, %s]' % (x, self.format(self.L),
                                      self.format(self.U))
