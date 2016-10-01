@@ -103,9 +103,10 @@ def check_poset_top(_id_poset, poset):
         top = poset.get_top()
     except NotBounded:
         return
-    
+    print('top: {}'.format(poset.format(top)))
     poset.check_leq(top, top)
     a = poset.witness()
+    print('a: {}'.format(poset.format(a)))
     poset.check_leq(a, top)
     
 
