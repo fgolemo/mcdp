@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from contracts.utils import raise_wrapped
 import numpy as np
 
 from .poset import NotLeq, Poset
@@ -33,9 +34,13 @@ class GenericInterval(Poset):
         return self.b
 
     def belongs(self, x):
-        self.check_leq(self.a, x)
-        self.check_leq(x, self.b)
-
+        try:
+            self.check_leq(self.a, x)
+            self.check_leq(x, self.b)
+        except NotLeq as e:
+            msg = 'Does not belong to interval.'
+            raise_wrapped(NotBelongs, e, msg, compact=True)
+             
     def check_equal(self, a, b):
         self.P.check_equal(a, b)
 
@@ -83,7 +88,6 @@ class Interval(Poset):
             msg = '%s ∉ [%s, %s]' % (x, self.format(self.L),
                                      self.format(self.U))
             raise NotBelongs(msg)
-        return True
 
     def format(self, x):
         return '%.3f' % x

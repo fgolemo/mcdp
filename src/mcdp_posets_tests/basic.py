@@ -10,6 +10,7 @@ from mcdp_posets import NotLeq
 from mcdp_posets.utils import poset_check_chain, check_minimal, check_maximal
 from mcdp_tests.generation import for_all_posets
 import numpy as np
+from mcdp_posets.multiset import Multisets
 
 
 @for_all_posets
@@ -195,6 +196,16 @@ def test_PosetCoproductWithLabels_1():
     f2 = FinitePoset(['A','B','C'], [])
     subs = (f1, f2)
     P = PosetCoproductWithLabels(subs, labels=('one', 'two'))
+    return P
+
+def test_Multiset_1():
+    P0 = FinitePoset(['a','b','c'], [])
+    P = Multisets(P0)
+    return P
+
+def test_Multiset_2():
+    P0 = Rcomp()
+    P = Multisets(P0)
     return P
 
 @comptest
