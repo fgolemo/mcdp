@@ -2,7 +2,7 @@
 from abc import abstractmethod
 
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, raise_wrapped
 from mocdp.exceptions import do_extra_checks
 
 from .space import Space
@@ -68,9 +68,9 @@ class Poset(Preorder):
         try:
             top = self.get_top()
             return set([top])
-        except NotBounded: # pragma: no cover
+        except NotBounded as e: # pragma: no cover
             msg = 'Not bounded so get_maximal_elements() not implemented.'
-            raise_desc(NotImplementedError, msg, type=type(self).__name__)
+            raise_wrapped(NotImplementedError, e, msg, poset=self, type=type(self).__name__)
 
     def get_bottom(self): # pragma: no cover
         msg = 'Bottom not available.'

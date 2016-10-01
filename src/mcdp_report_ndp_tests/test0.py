@@ -1,9 +1,10 @@
+from mcdp_lang.syntax import Syntax
 from mcdp_report.gg_ndp import gvgen_from_ndp
-from mcdp_report.report import report_dp1, report_ndp1
 from mcdp_report.html import ast_to_html
+from mcdp_report.report import report_dp1, report_ndp1
 from mcdp_tests.generation import (for_all_dps_dyn, for_all_nameddps,
     for_all_nameddps_dyn, for_all_source_mcdp)
-from mcdp_lang.syntax import Syntax
+
 
 @for_all_source_mcdp
 def check_syntax(filename, source):  # @UnusedVariable
@@ -19,15 +20,15 @@ def check_syntax(filename, source):  # @UnusedVariable
         raise
 
 @for_all_dps_dyn
-def dp1_report(context, _id_dp, dp):
+def dp1_report(context, id_dp, dp):
     r = context.comp(report_dp1, dp)
-    context.add_report(r, 'dp1')
+    context.add_report(r, 'dp1', id_dp=id_dp)
 
 
 @for_all_nameddps_dyn
-def ndp1_report(context, _id_dp, ndp):
+def ndp1_report(context, id_dp, ndp):
     r = context.comp(report_ndp1, ndp)
-    context.add_report(r, 'ndp1')
+    context.add_report(r, 'ndp1', id_dp=id_dp)
 
 
 @for_all_nameddps

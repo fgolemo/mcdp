@@ -15,7 +15,12 @@ from mcdp_posets.multiset import Multisets
 
 @for_all_posets
 def check_poset1(_id_poset, poset):
-    """ Checks that bottom <= top """
+    
+    print poset.__str__()
+    print poset.__repr__()
+    
+    # Checks that bottom <= top 
+    
     try:
         bot = poset.get_bottom()
     except NotBounded:

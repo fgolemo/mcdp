@@ -92,7 +92,10 @@ class Rcomp(Poset):
 
     def get_test_chain(self, n):
         s = [self.get_bottom()]
-        s.extend(sorted(np.random.rand(n - 2) * 10))
+        
+        if n >= 3:
+            s.extend(sorted(np.random.rand(n - 2) * 10))
+            
         s.append(self.get_top())
         return s
 

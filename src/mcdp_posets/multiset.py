@@ -4,11 +4,12 @@ import itertools
 
 from contracts import contract
 from contracts.utils import raise_desc
-from mocdp.exceptions import mcdp_dev_warning
+from mocdp.exceptions import mcdp_dev_warning, do_extra_checks
 
 from .frozendict import frozendict2
 from .poset import NotLeq, Poset
 from .space import NotBelongs, NotEqual, Space
+from mcdp_posets.nat import Nat, Nat_add
 
 
 __all__ = [
@@ -17,8 +18,14 @@ __all__ = [
 ]
 
 class Multiset():
-    @contract(elements='dict(*:int,>=1)', S=Space)
+    @contract(elements='dict(*:*,>=1)', S=Poset)
     def __init__(self, elements, S):
+        N = Nat()
+        
+        if do_extra_checks():
+            for e, howmany in elements.items():
+                S.belongs(e)
+                N.belongs(howmany)
 
         self._elements = frozendict2(elements)
         self._S = S
@@ -27,22 +34,27 @@ class Multiset():
         return self._elements
 
     def __repr__(self):
-        return 'Multiset(%r, %r)' % (self._elements, self.S)
+        return 'Multiset(%r, %r)' % (self._elements, self._S)
 
 class Multisets(Poset):
     """ 
     
     """
 
-    @contract(S=Space)
+    @contract(S=Poset)
     def __init__(self, S):
         self.S = S
+# 
 
+    def get_top(self):
+        """This can only be implemented if we can enumerate the elements of S."""
+        elements = self.S.get_maximal_elements()
+        data = {}
+        alot = Nat().get_top()
+        for e in elements:
+            data[e] = alot
+        return Multiset(data, self.S)
 
-# This can only be implemented if we can enumerate the elements of Space
-#     def get_top(self):
-#         return
-#
     def witness(self):
         data = {self.S.witness(): 1}
         return Multiset(data, self.S)
@@ -67,7 +79,8 @@ class Multisets(Poset):
         m2 = b.get_elements()
         mcdp_dev_warning('#XXX should use S.equal()')
         if not (m1 == m2):  # XXX: should use S.equal()...
-            raise_desc(NotEqual, elements1=m1, elements2=m2)
+            msg = "Not equal"
+            raise_desc(NotEqual, msg, elements1=m1, elements2=m2)
 
     def check_leq(self, a, b):
         e1 = a.get_elements()
@@ -86,15 +99,16 @@ class Multisets(Poset):
         c = itertools.chain(a.get_elements().items(),
                             b.get_elements().items())
         for element, n in c:
-            r[element] += n
+            r[element] = Nat_add(r[element], n)
 
         r = dict(**r)
         return Multiset(r, self.S)
 
     def format(self, x):
+        N = Nat()
         elements = x.get_elements()
         ordered = sorted(elements)
-        strings = ['%d of %s' % (elements[k], k) for k in ordered]
+        strings = ['%s of %s' % (N.format(elements[k]), k) for k in ordered]
         contents = ", ".join(strings)
         return "{%s}" % contents
 

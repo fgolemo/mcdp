@@ -103,11 +103,15 @@ class UpperSets(Poset):
         return UpperSet([], self.P)
 
     def get_test_chain(self, n):
-        chain = self.P.get_test_chain(n-1)
-        f = lambda x: UpperSet(set([x]), self.P)
-        chain = list(map(f, chain))
-        chain.append(self.get_top())
-        return chain
+        if n >= 2:
+                
+            chain = self.P.get_test_chain(n-1)
+            f = lambda x: UpperSet(set([x]), self.P)
+            chain = list(map(f, chain))
+            chain.append(self.get_top())
+            return chain
+        else:
+            return [self.get_bottom()]
 
     def belongs(self, x):
         if not isinstance(x, UpperSet):

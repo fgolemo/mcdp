@@ -2,7 +2,7 @@
 import random
 
 from contracts.utils import raise_desc
-from mocdp.exceptions import do_extra_checks
+from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 
 from .poset import NotLeq, Poset
 from .space import NotBelongs, NotEqual
@@ -135,15 +135,19 @@ class Nat(Poset):
 #             return self.top
 #         return a * b
 # 
-#     def add(self, a, b):
-#         """ Addition, extended for top """
-#         if a == self.top or b == self.top:
-#             return self.top
-#         return a + b
-
     def check_equal(self, x, y):
         if not (x == y):
             raise NotEqual('%s != %s' % (x, y))
+
+def Nat_add(a, b):
+    """ Addition, extended for top """
+    top = Nat().get_top()
+    if a == top or b == top:
+        return top
+    mcdp_dev_warning('overflow')
+    return a + b
+
+
 
 
 IntBottom = "int:-inf"
