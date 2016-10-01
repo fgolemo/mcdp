@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from .poset import Poset
 from .space import NotBelongs
+from contracts.utils import raise_desc
 
 
 __all__ = [
@@ -20,8 +21,8 @@ class Single(Poset):
 
     def belongs(self, x):
         if not x == self.element:
-            msg = 'Not the single element: %s ' % x.__repr__()
-            raise NotBelongs(msg)
+            msg = 'Not the single element.'
+            raise_desc(NotBelongs, msg, x=x)
 
     def join(self, a, b):
         self.belongs(a)
