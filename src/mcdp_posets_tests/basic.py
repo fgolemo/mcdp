@@ -45,7 +45,7 @@ def check_poset1_chain(id_poset, poset):
         chain = poset.get_test_chain(n=5)
         poset_check_chain(poset, chain)
     except Uninhabited:
-        raise Exception('%s is Uninhabited' % id_poset)
+        raise Exception('%s %s is Uninhabited' % (id_poset, poset))
         
 
     for a in chain:
