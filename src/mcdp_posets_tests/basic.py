@@ -80,9 +80,15 @@ def check_poset1_chain(_id_poset, poset):
         
         meet1 = poset.meet(e1, e2)
         meet2 = poset.meet(e2, e1)
+        
+        print('meet1: {}'.format(meet1))
+        print('meet2: {}'.format(meet2))
 
         join1 = poset.join(e1, e2)
         join2 = poset.join(e2, e1)
+
+        print('join1: {}'.format(join1))
+        print('join2: {}'.format(join2))
         
         poset.check_equal(meet1, e1)
         poset.check_equal(meet2, e1)
