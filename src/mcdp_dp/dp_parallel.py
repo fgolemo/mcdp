@@ -97,16 +97,15 @@ class Parallel(PrimitiveDP):
 
         return fs, rs
 
-    def evaluate_f_m(self, f, m):
-        """ Returns the resources needed
-            by the particular implementation m """
-        f1, f2 = f
-        m1, m2 = self._split_m(m)
-        r1 = self.dp1.evaluate_f_m(f1, m1)
-        r2 = self.dp2.evaluate_f_m(f2, m2)
-        return (r1, r2)
+#     def evaluate_f_m(self, f, m):
+#         """ Returns the resources needed
+#             by the particular implementation m """
+#         f1, f2 = f
+#         m1, m2 = self._split_m(m)
+#         r1 = self.dp1.evaluate_f_m(f1, m1)
+#         r2 = self.dp2.evaluate_f_m(f2, m2)
+#         return (r1, r2)
 
-    # @memoize_simple
     def solve(self, f):
         if do_extra_checks():
             F = self.get_fun_space()

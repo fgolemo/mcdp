@@ -112,26 +112,26 @@ class DPLoop0(PrimitiveDP):
         LF = self.F.Ls(f1s)
         return LF, UR
         
-    def evaluate_f_m(self, f1, m):
-        """ Returns the resources needed
-            by the particular implementation.
-            raises NotFeasible 
-        """
-        F2 = self.F2
-        F1 = self.F
-        m0, f2 = self._unpack_m(m)
-        f = (f1, f2)
-        r = self.dp1.evaluate_f_m(f, m0)
-        try:
-            F2.check_leq(r, f2)
-        except NotLeq as e:
-            msg = 'Loop constraint not satisfied %s <= %s not satisfied.' % (F2.format(r), F2.format(f2))
-            msg += "\n f1 = %10s -->| ->[ %s ] --> %s " % (F1.format(f1), self.dp1, F2.format(r))
-            msg += "\n f2 = %10s -->|" % F2.format(f2)
-            raise_wrapped(NotFeasible, e, msg, compact=True)
-
-        self.R.belongs(r)
-        return r
+#     def evaluate_f_m(self, f1, m):
+#         """ Returns the resources needed
+#             by the particular implementation.
+#             raises NotFeasible 
+#         """
+#         F2 = self.F2
+#         F1 = self.F
+#         m0, f2 = self._unpack_m(m)
+#         f = (f1, f2)
+#         r = self.dp1.evaluate_f_m(f, m0)
+#         try:
+#             F2.check_leq(r, f2)
+#         except NotLeq as e:
+#             msg = 'Loop constraint not satisfied %s <= %s not satisfied.' % (F2.format(r), F2.format(f2))
+#             msg += "\n f1 = %10s -->| ->[ %s ] --> %s " % (F1.format(f1), self.dp1, F2.format(r))
+#             msg += "\n f2 = %10s -->|" % F2.format(f2)
+#             raise_wrapped(NotFeasible, e, msg, compact=True)
+# 
+#         self.R.belongs(r)
+#         return r
 
     def check_unfeasible(self, f1, m, r):
         from mcdp_dp.dp_series import get_product_compact

@@ -34,6 +34,7 @@ class GenericInterval(Poset):
         return self.b
 
     def belongs(self, x):
+        self.P.belongs(x)
         try:
             self.check_leq(self.a, x)
             self.check_leq(x, self.b)

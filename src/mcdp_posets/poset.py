@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from abc import abstractmethod
 
-from contracts import contract, describe_value
+from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.exceptions import do_extra_checks
 
@@ -56,7 +56,7 @@ class Poset(Preorder):
         try:
             bottom = self.get_bottom()
             return set([bottom])
-        except NotBounded:
+        except NotBounded: # pragma: no cover
             msg = 'Not bounded so get_minimal_elements() not implemented.'
             raise_desc(NotImplementedError, msg, type=type(self).__name__)
 
@@ -68,15 +68,15 @@ class Poset(Preorder):
         try:
             top = self.get_top()
             return set([top])
-        except NotBounded:
+        except NotBounded: # pragma: no cover
             msg = 'Not bounded so get_maximal_elements() not implemented.'
             raise_desc(NotImplementedError, msg, type=type(self).__name__)
 
-    def get_bottom(self):
+    def get_bottom(self): # pragma: no cover
         msg = 'Bottom not available.'
         raise_desc(NotBounded, msg, poset=self)
 
-    def get_top(self):
+    def get_top(self): # pragma: no cover
         msg = 'Top not available.'
         raise_desc(NotBounded, msg, poset=self)
 
@@ -101,8 +101,9 @@ class Poset(Preorder):
         if self.leq(b, a):
             return a
 
-        msg = 'The join %s ∨ %s does not exist in %s.' % (a, b, self)
-        raise NotJoinable(msg)
+        if True: # pragma: no cover
+            msg = 'The join %s ∨ %s does not exist in %s.' % (a, b, self)
+            raise NotJoinable(msg)
 
     def meet(self, a, b):  # "min" ∧
         if self.leq(a, b):
@@ -110,15 +111,16 @@ class Poset(Preorder):
         if self.leq(b, a):
             return b
 
-        msg = 'The meet %s ∧ %s does not exist in %s.' % (a, b, self)
-        raise NotJoinable(msg)
+        if True: # pragma: no cover
+            msg = 'The meet %s ∧ %s does not exist in %s.' % (a, b, self)
+            raise NotJoinable(msg)
 
     def U(self, a):
         """ Returns the principal upper set corresponding to the given a. """
         if do_extra_checks():
             self.belongs(a)
         from mcdp_posets import UpperSet
-        return UpperSet(set([a]), self)
+        return UpperSet([a], self)
 
     @contract(elements='seq|set')
     def Us(self, elements):
@@ -130,18 +132,18 @@ class Poset(Preorder):
             from mcdp_posets import check_minimal
             check_minimal(elements, poset=self)
         from mcdp_posets import UpperSet
-        return UpperSet(set(elements), self)
+        return UpperSet(elements, self)
     
     def L(self, a):
         """ Returns the principal lower set corresponding to the given a. """
         if do_extra_checks():
             self.belongs(a)
         from mcdp_posets import LowerSet
-        return LowerSet(set([a]), self)
+        return LowerSet([a], self)
 
     @contract(elements='seq|set')
     def Ls(self, elements):
         from mcdp_posets import LowerSet
-        return LowerSet(set(elements), self)
+        return LowerSet(elements, self)
    
     

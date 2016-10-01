@@ -42,8 +42,8 @@ class InvPlus2Nat(PrimitiveDP):
     def get_implementations_f_r(self, f, r):
         return set([(f, r)])
 
-    def evaluate_f_m(self, f, m):
-        return (m, f - m)
+#     def evaluate_f_m(self, f, m):
+#         return (m, f - m)
 
     def __repr__(self):
         return 'InvPlus2Nat(%s -> %s)' % (self.F, self.R)

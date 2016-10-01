@@ -47,11 +47,11 @@ class CoProductDP(PrimitiveDP):
         i, mi = self.M.unpack(m)
         return self.dps[i].evaluate(mi)
 
-    def evaluate_f_m(self, f, m):
-        """ Returns the resources needed
-            by the particular implementation m """
-        i, xi = self.M.unpack(m)
-        return self.dps[i].evaluate_f_m(f, xi)
+#     def evaluate_f_m(self, f, m):
+#         """ Returns the resources needed
+#             by the particular implementation m """
+#         i, xi = self.M.unpack(m)
+#         return self.dps[i].evaluate_f_m(f, xi)
 
     def get_implementations_f_r(self, f, r):
         """ Returns a nonempty set of thinks in self.M.

@@ -64,6 +64,10 @@ class PosetProduct(SpaceProduct, Poset):
             self.belongs(a)
             self.belongs(b)
         problems = []
+        if not( isinstance(a, tuple) and len(a) == len(self.subs)):
+            raise ValueError(a)
+        if not( isinstance(b, tuple) and len(b) == len(self.subs)):
+            raise ValueError(b)
         for i, (sub, x, y) in enumerate(zip(self.subs, a, b)):
             try:
                 sub.check_leq(x, y)

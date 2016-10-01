@@ -36,13 +36,13 @@ class CoProductDPLabels(PrimitiveDP):
         m0 = i, m[1]
         return self.dp.evaluate(m0)
         
-    def evaluate_f_m(self, f, m):
-        """ Returns the resources needed
-            by the particular implementation m """
-        label = m[0]
-        i = self.labels.index(label)
-        m0 = i, m[1]
-        return self.dp.evaluate_f_m(f, m0)
+#     def evaluate_f_m(self, f, m):
+#         """ Returns the resources needed
+#             by the particular implementation m """
+#         label = m[0]
+#         i = self.labels.index(label)
+#         m0 = i, m[1]
+#         return self.dp.evaluate_f_m(f, m0)
 
     def get_implementations_f_r(self, f, r):
         """ Returns a nonempty set of thinks in self.M.

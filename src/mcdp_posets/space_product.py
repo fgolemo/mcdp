@@ -63,8 +63,9 @@ class SpaceProduct(Space):
             raise_desc(NotBelongs, msg, args_first=False, self=self, x=x)
 
     def format(self, x):
-        if not isinstance(x, tuple):
-            raise_desc(NotBelongs, 'Not a tuple', x=x, self=self)
+        check_isinstance(x, tuple)
+        if len(x) != len(self.subs):
+            raise ValueError(x)
 
         ss = []
         for _, (sub, xe) in enumerate(zip(self.subs, x)):

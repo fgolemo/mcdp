@@ -38,10 +38,15 @@ class Multisets(Poset):
     def __init__(self, S):
         self.S = S
 
+
 # This can only be implemented if we can enumerate the elements of Space
 #     def get_top(self):
 #         return
 #
+    def witness(self):
+        data = {self.S.witness(): 1}
+        return Multiset(data, self.S)
+    
     def get_bottom(self):
         return Multiset({}, self.S)
 

@@ -228,8 +228,9 @@ class TypesUniverse(Preorder):
                 except NotLeq:
                     pass
 
-        msg = 'Spaces are ordered, but you forgot to code embedding.'
-        raise_desc(NotImplementedError, msg, A=A, B=B)
+        if True: # pragma: no cover
+            msg = 'Spaces are ordered, but you forgot to code embedding.'
+            raise_desc(NotImplementedError, msg, A=A, B=B)
 
 
 def get_coproduct_embedding(A, B, i):
@@ -283,6 +284,7 @@ def get_space_product_embedding(tu, A, B):
     pairs = [tu.get_embedding(a, b) for a, b in zip(A, B)]
     fs = [x for x, _ in pairs]
     finv = [y for _, y in pairs]
+
 
     from mcdp_posets.maps.product_map import SpaceProductMap
     res = SpaceProductMap(fs), SpaceProductMap(finv)

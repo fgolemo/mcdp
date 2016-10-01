@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
-from .dp_series import get_product_compact
-from .primitive import PrimitiveDP
+import itertools
+
 from contracts import contract
 from contracts.utils import indent
 from mcdp_posets import PosetProduct
-from mocdp.exceptions import do_extra_checks
-import itertools
 from mcdp_posets.uppersets import lowerset_product_multi, upperset_product_multi
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
+from mocdp.exceptions import do_extra_checks
+
+from .dp_series import get_product_compact
+from .primitive import PrimitiveDP
 
 
 __all__ = [
@@ -41,8 +43,8 @@ class ParallelN(PrimitiveDP):
             self.prod = _, _, _ = get_product_compact(*tuple(self.Ms))
         return self.prod
 
-    def evaluate_f_m(self, f, m):
-        raise NotImplementedError()
+#     def evaluate_f_m(self, f, m):
+#         raise NotImplementedError()
 #
 #         """ Returns the resources needed
 #             by the particular implementation m """

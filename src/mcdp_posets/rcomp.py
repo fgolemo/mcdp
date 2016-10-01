@@ -236,7 +236,10 @@ class Rbicomp(Poset):
 
         if x == self.top:
             return self.top.__repr__()
+        elif x == self.bottom:
+            return self.bottom.__repr__()
         else:
+            assert isinstance(x, float)
             # TODO: add parameter
             if x == int(x):
                 return '%d' % int(x)

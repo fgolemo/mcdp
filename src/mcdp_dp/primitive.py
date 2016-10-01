@@ -88,30 +88,30 @@ class PrimitiveDP(WithInternalLog):
 
         raise NotImplementedError(type(self).__name__)
 
-    def evaluate_f_m(self, func, m):
-        """ Returns the minimal resources needed
-            by the particular implementation m 
-        
-            raises NotFeasible
-        """
-        M = self.get_imp_space_mod_res()
-        if do_extra_checks():
-            self.F.belongs(func)
-            M.belongs(m)
-        if isinstance(M, SpaceProduct) and m == ():
-            rs = self.solve(func)
-            minimals = list(rs.minimals)
-            if len(minimals) == 1:
-                return minimals[0]
-            else:
-                msg = 'Cannot use default evaluate_f_m() because multiple miminals.'
-                raise_desc(NotImplementedError, msg,
-                           classname=type(self),
-                           func=func, M=M, m=m, minimals=rs.minimals)
-        else:
-            msg = 'Cannot use default evaluate_f_m()'
-            raise_desc(NotImplementedError, msg,
-                       classname=type(self), func=func, M=M, m=m,)
+#     def evaluate_f_m(self, func, m):
+#         """ Returns the minimal resources needed
+#             by the particular implementation m 
+#         
+#             raises NotFeasible
+#         """
+#         M = self.get_imp_space_mod_res()
+#         if do_extra_checks():
+#             self.F.belongs(func)
+#             M.belongs(m)
+#         if isinstance(M, SpaceProduct) and m == ():
+#             rs = self.solve(func)
+#             minimals = list(rs.minimals)
+#             if len(minimals) == 1:
+#                 return minimals[0]
+#             else:
+#                 msg = 'Cannot use default evaluate_f_m() because multiple miminals.'
+#                 raise_desc(NotImplementedError, msg,
+#                            classname=type(self),
+#                            func=func, M=M, m=m, minimals=rs.minimals)
+#         else:
+#             msg = 'Cannot use default evaluate_f_m()'
+#             raise_desc(NotImplementedError, msg,
+#                        classname=type(self), func=func, M=M, m=m,)
 
 
 
