@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-from .poset import NotLeq, Poset
-from .space import NotBelongs, NotEqual
 from contracts import check_isinstance
 import numpy as np
+
+from .poset import NotLeq, Poset
+from .space import NotBelongs, NotEqual
+
 
 __all__ = [
    'Interval',

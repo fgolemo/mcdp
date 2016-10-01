@@ -8,34 +8,34 @@ from .space_meta import SpaceMeta
 
 
 class NotBelongs(Exception):
-    pass
+    """ Raised by Space:belongs() """
 
 class Belongs(Exception):
     """ The point actually belongs to the set
         raised by check_not_belongs """
-    pass
+    
 
 class NotEqual(Exception):
-    pass
+    """ Raised by Space:check_equal() """
 
 class Uninhabited(Exception):
     ''' There is no element in this space. Raised by witness().'''
-    pass
+    
 
 class Space(object):
     __metaclass__ = SpaceMeta
 
     def format(self, x):
         """ Formats a point in the space. """
-        return x.__repr__()
+        return x.__repr__() 
 
     @abstractmethod
     def belongs(self, x):
         """ Raise NotBelongs """
     
-    def check_belongs(self, x):
-        return self.belongs(x)
-    
+#     def check_belongs(self, x):
+#         return self.belongs(x)
+#     
     def check_not_belongs(self, x):
         try:
             self.check_belongs(x)
@@ -47,7 +47,6 @@ class Space(object):
     @abstractmethod
     def check_equal(self, x, y):
         """ Raises NotEqual if not equal. """
-        pass
     
     @contract(returns=bool)
     def equal(self, a, b):
@@ -62,7 +61,6 @@ class Space(object):
     def witness(self):
         """ Returns an element of the space, or raise Uninhabited
             if the space is empty. """
-        pass
 
     def repr_long(self):
         return self.__repr__()
@@ -75,6 +73,7 @@ class Map():
 
     __metaclass__ = ABCMeta
 
+    @contract(dom=Space, cod=Space)
     def __init__(self, dom, cod):
         self.dom = dom
         self.cod = cod
@@ -111,8 +110,7 @@ class Map():
 
     @abstractmethod
     def _call(self, x):
-        """ Might raise MapNotDefinedHere (hack) """
-        pass
+        """ Might raise MapNotDefinedHere. """
 
     def __repr__(self):
         return "%s:%s→%s" % (type(self).__name__,

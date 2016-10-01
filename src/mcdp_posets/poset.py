@@ -73,15 +73,12 @@ class Poset(Preorder):
             raise_desc(NotImplementedError, msg, type=type(self).__name__)
 
     def get_bottom(self):
-        msg = 'Bottom not available for %s.' % describe_value(self)
-        raise NotBounded(msg)
-
-    def get_bot(self):
-        return self.get_bottom()
+        msg = 'Bottom not available.'
+        raise_desc(NotBounded, msg, poset=self)
 
     def get_top(self):
-        msg = 'Top not available for %s.' % describe_value(self)
-        raise NotBounded(msg)
+        msg = 'Top not available.'
+        raise_desc(NotBounded, msg, poset=self)
 
     def get_test_chain(self, n):  # @UnusedVariable
         """

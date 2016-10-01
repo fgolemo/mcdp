@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
-from .frozendict import frozendict2
-from .poset import NotLeq, Poset
-from .space import NotBelongs, NotEqual, Space
 from collections import defaultdict
+import itertools
+
 from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.exceptions import mcdp_dev_warning
-import itertools
+
+from .frozendict import frozendict2
+from .poset import NotLeq, Poset
+from .space import NotBelongs, NotEqual, Space
+
 
 __all__ = [
     'Multiset',

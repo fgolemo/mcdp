@@ -13,7 +13,7 @@ def time_poset_minima_func(f):
         n1 = len(elements)
         n2 = len(res)
         if n1 == n2:
-            if False:
+            if False: # pragma: no cover
                 if n1 > 10:
                     print('unnecessary leq!')
                     print('poset_minima %d -> %d t = %f s nleq = %d leq = %s' %

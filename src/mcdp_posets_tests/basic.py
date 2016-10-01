@@ -76,11 +76,15 @@ def check_poset1_chain(_id_poset, poset):
         except NotLeq:
             pass
         
-        meet = poset.meet(e1, e2)
-        join = poset.join(e1, e2)
+        meet1 = poset.meet(e1, e2)
+        meet2 = poset.meet(e2, e1)
+        join1 = poset.join(e1, e2)
+        join2 = poset.join(e2, e1)
         
-        poset.check_equal(meet, e1)
-        poset.check_equal(join, e2)
+        poset.check_equal(meet1, e1)
+        poset.check_equal(join1, e2)
+        poset.check_equal(meet2, e1)
+        poset.check_equal(join2, e2)
 
         
 
@@ -202,3 +206,19 @@ def check_posets_misc1():
         pass
     else:
         assert False
+        
+@for_all_posets
+def check_minimal_elements(_, poset):
+    try:
+        poset.get_minimal_elements()
+    except NotBounded:
+        pass
+
+@for_all_posets
+def check_maximal_elements(_, poset):
+    try:
+        poset.get_maximal_elements()
+    except NotBounded:
+        pass
+    
+    

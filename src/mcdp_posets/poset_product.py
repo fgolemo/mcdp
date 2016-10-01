@@ -1,12 +1,15 @@
 # -*- coding: utf-8 -*-
-from .poset import NotLeq, Poset
-from .space_product import SpaceProduct
+import collections
+import itertools
+
 from contracts import contract
 from contracts.utils import indent, raise_desc
 from mocdp.exceptions import do_extra_checks
 from mocdp.memoize_simple_imp import memoize_simple
-import collections
-import itertools
+
+from .poset import NotLeq, Poset
+from .space_product import SpaceProduct
+
 
 __all__ = [
     'PosetProduct',

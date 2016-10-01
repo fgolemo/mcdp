@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from .primitive import PrimitiveDP
 from mcdp_posets import LowerSet, PosetProduct, SpaceProduct, UpperSet
+
+from .primitive import PrimitiveDP
 
 
 __all__ = [

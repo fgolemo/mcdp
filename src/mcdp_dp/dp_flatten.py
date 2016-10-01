@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-from .dp_generic_unary import WrapAMap
 from contracts import contract
-from contracts.utils import check_isinstance, raise_wrapped
+from contracts.utils import raise_wrapped
 from mcdp_posets import Map, PosetProduct
 from mocdp.exceptions import DPInternalError
 from multi_index import get_it
+
+from .dp_generic_unary import WrapAMap
 
 
 __all__ = [
@@ -18,7 +19,7 @@ class MuxMap(Map):
     def __init__(self, F, coords):
         try:
             R = get_R_from_F_coords(F, coords)
-        except ValueError as e:
+        except ValueError as e: # pragma: no cover
             msg = 'Cannot create Mux'
             raise_wrapped(DPInternalError, e, msg, F=F, coords=coords)
 
@@ -66,13 +67,13 @@ class TakeRes(Mux):
 def get_R_from_F_coords(F, coords):
     return get_it(F, coords, reduce_list=PosetProduct)
 
-def get_flatten_muxmap(F0):
-    check_isinstance(F0, PosetProduct)
-    coords = []
-    for i, f in enumerate(F0.subs):
-        if isinstance(f, PosetProduct):
-            for j, _ in enumerate(f.subs):
-                coords.append((i, j))
-        else:
-            coords.append(i)
-    return coords
+# def get_flatten_muxmap(F0):
+#     check_isinstance(F0, PosetProduct)
+#     coords = []
+#     for i, f in enumerate(F0.subs):
+#         if isinstance(f, PosetProduct):
+#             for j, _ in enumerate(f.subs):
+#                 coords.append((i, j))
+#         else:
+#             coords.append(i)
+#     return coords
