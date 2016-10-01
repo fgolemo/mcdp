@@ -72,9 +72,10 @@ def eval_lfunction(lf, context):
             if isinstance(lf, klass):
                 return hook(lf, context)
 
-        r = recursive_print(lf)
-        msg = 'eval_lfunction(): cannot evaluate as a function.'
-        raise_desc(DPInternalError, msg, r=r)
+        if True: # pragma: no cover
+            r = recursive_print(lf)
+            msg = 'eval_lfunction(): cannot evaluate as a function.'
+            raise_desc(DPInternalError, msg, r=r)
 
 def eval_lfunction_anyoffun(lf, context):
     from mcdp_lang.eval_constant_imp import eval_constant
@@ -129,7 +130,7 @@ def eval_lfunction_variableref(lf, context):
 
 def eval_lfunction_invplus(lf, context):
     ops = get_odd_ops(unwrap_list(lf.ops))
-    if len(ops) != 2:
+    if len(ops) != 2: # pragma: no cover
         raise DPInternalError('Only 2 expected')
 
     fs = []
@@ -158,7 +159,7 @@ def eval_lfunction_invplus(lf, context):
         
     elif all(isinstance(_, Nat) for _ in Fs):
         dp = InvPlus2Nat(R, tuple(Fs))
-    else:
+    else: # pragma: no cover
         msg = 'Cannot find operator for mixed values'
         raise_desc(DPInternalError, msg, Fs=Fs)
     
@@ -178,7 +179,7 @@ def eval_lfunction_invplus(lf, context):
 
 def eval_lfunction_invmult(lf, context):
     ops = get_odd_ops(unwrap_list(lf.ops))
-    if len(ops) != 2:
+    if len(ops) != 2: # pragma: no cover
         raise DPInternalError('Only 2 expected')
 
     fs = []

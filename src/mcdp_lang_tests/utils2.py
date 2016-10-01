@@ -2,12 +2,10 @@
 from mcdp_lang.eval_resources_imp import eval_rvalue
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
-from mcdp_posets.types_universe import express_value_in_isomorphic_space
+from mcdp_posets import express_value_in_isomorphic_space
 from mocdp.comp.context import Context
 from mocdp.comp.context_eval_as_constant import (can_resource_be_constant,
     eval_constant_resource)
-from contextlib import contextmanager
-from contracts.utils import raise_wrapped
 
 
 def parse_as_rvalue(s):
@@ -68,15 +66,15 @@ def eval_rvalue_as_constant_same(s1, s2):
 
     p1.unit.check_equal(p1.value, v2)
     print('Found that %s == %s' % (p1, p2))
-
-
-@contextmanager
-def check_properties(s):
-    """ Prints s if there is an exception """
-    try:
-        yield
-    except Exception as e:
-        msg = ''
-        from mcdp_lang.namedtuple_tricks import recursive_print
-        s = recursive_print(s)
-        raise_wrapped(Exception, e, msg, object=s)
+# 
+# 
+# @contextmanager
+# def check_properties(s):
+#     """ Prints s if there is an exception """
+#     try:
+#         yield
+#     except Exception as e:
+#         msg = ''
+#         from mcdp_lang.namedtuple_tricks import recursive_print
+#         s = recursive_print(s)
+#         raise_wrapped(Exception, e, msg, object=s)

@@ -24,8 +24,9 @@ def eval_template(r, context):  # @UnusedVariable
             if isinstance(r, klass):
                 return hook(r, context)
 
-    r = recursive_print(r)
-    raise_desc(DPInternalError, 'Invalid template.', r=r)
+        if True: # pragma: no cover    
+            r = recursive_print(r)
+            raise_desc(DPInternalError, 'Invalid template.', r=r)
 
 def eval_template_load(r, context):
     assert isinstance(r, CDP.LoadTemplate)

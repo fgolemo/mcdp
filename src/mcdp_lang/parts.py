@@ -14,9 +14,6 @@ class CDPLanguage():
     ProcName = namedtuplewhere('ProcName', 'name')
     UnaryRvalue = namedtuplewhere('UnaryRvalue', 'proc rvalue')
     
-    GenericNonlinearity = namedtuplewhere('GenericNonlinearity',
-                                          'function op1 R_from_F')
-
     ValueExpr = namedtuplewhere('ValueExpr', 'value')
 
     # now only used for a hack

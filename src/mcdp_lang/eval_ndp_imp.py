@@ -37,8 +37,6 @@ CDP = CDPLanguage
 @contract(returns=NamedDP)
 def eval_ndp(r, context):  # @UnusedVariable
     with add_where_information(r.where):
-
-
         # TODO: remove
         if isinstance(r, CDP.VariableRef):
             try:
@@ -116,9 +114,10 @@ def eval_ndp(r, context):  # @UnusedVariable
             if isinstance(r, klass):
                 return hook(r, context)
 
-    r = recursive_print(r)
-    msg = 'eval_ndp(): cannot evaluate r as an NDP.'
-    raise_desc(DPInternalError, msg, r=r)
+        if True:
+            r = recursive_print(r)
+            msg = 'eval_ndp(): cannot evaluate r as an NDP.'
+            raise_desc(DPInternalError, msg, r=r)
 
 def eval_ndp_ignoreresources(r, context):
     assert isinstance(r, CDP.IgnoreResources)

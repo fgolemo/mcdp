@@ -28,7 +28,7 @@ class ParSimplificationRule():
         dp0 = Parallel(dp1, dp2)
         try:
             res = self._execute(dp1, dp2)
-        except BaseException as e:
+        except BaseException as e: # pragma: no cover
             msg = 'Error while executing Parallel simplification rule.'
             raise_wrapped(DPInternalError, e, msg, dp1=dp1.repr_long(),
                           dp2=dp2.repr_long(), rule=self)
@@ -36,7 +36,7 @@ class ParSimplificationRule():
         try:
             from mcdp_dp.dp_series_simplification import check_same_spaces
             check_same_spaces(dp0, res)
-        except AssertionError as e:
+        except AssertionError as e: # pragma: no cover
             msg = 'Invalid Parallel simplification for rule.'
             raise_wrapped(DPInternalError, e, msg, dp1=dp1.repr_long(),
                           dp2=dp2.repr_long(), rule=self)
@@ -44,7 +44,7 @@ class ParSimplificationRule():
 
     @abstractmethod
     def _execute(self, dp1, dp2):
-        pass
+        """ Execute the rule """
 
 
 class RuleMuxOutside(ParSimplificationRule):
@@ -153,24 +153,27 @@ def make_parallel(dp1, dp2):
         assert F == a.get_fun_space()
         return Identity(F)
 
-    # Parallel(X, Terminator) => Series(Mux([0]), X, Mux([0, ()]))
-    if is_equiv_to_terminator(dp2):
-        F = a.get_fun_space()  # PosetProduct((dp1.get_fun_space(),))
-        m1 = Mux(F, coords=0)
-        m2 = dp1
-        m3 = Mux(m2.get_res_space(), [(), []])
-        res = make_series(make_series(m1, m2), m3)
-
-        assert res.get_res_space() == a.get_res_space()
-        assert res.get_fun_space() == a.get_fun_space()
-        return res
-
-    if is_equiv_to_terminator(dp1):
-        F = a.get_fun_space()  # PosetProduct((dp1.get_fun_space(),))
-        m1 = Mux(F, coords=1)
-        m2 = dp2
-        m3 = Mux(m2.get_res_space(), [[], ()])
-        return make_series(make_series(m1, m2), m3)
+    if False:
+        # These never run...
+            
+        # Parallel(X, Terminator) => Series(Mux([0]), X, Mux([0, ()]))
+        if is_equiv_to_terminator(dp2):
+            F = a.get_fun_space()  # PosetProduct((dp1.get_fun_space(),))
+            m1 = Mux(F, coords=0)
+            m2 = dp1
+            m3 = Mux(m2.get_res_space(), [(), []])
+            res = make_series(make_series(m1, m2), m3)
+    
+            assert res.get_res_space() == a.get_res_space()
+            assert res.get_fun_space() == a.get_fun_space()
+            return res
+    
+        if is_equiv_to_terminator(dp1):
+            F = a.get_fun_space()  # PosetProduct((dp1.get_fun_space(),))
+            m1 = Mux(F, coords=1)
+            m2 = dp2
+            m3 = Mux(m2.get_res_space(), [[], ()])
+            return make_series(make_series(m1, m2), m3)
 
     for rule in rules:
         if rule.applies(dp1, dp2):

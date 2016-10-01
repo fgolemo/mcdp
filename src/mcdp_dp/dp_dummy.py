@@ -3,6 +3,7 @@ from mcdp_dp import PrimitiveDP
 from mcdp_posets import LowerSet, SpaceProduct, UpperSet
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 
+
 __all__ = [
     'Dummy',
     'Template',
@@ -18,7 +19,7 @@ class Template(PrimitiveDP):
         minimals = self.R.get_minimal_elements()
         # print('solving %s' % _func.__repr__())
         # print('solving minimals %s' % minimals.__repr__())
-        if not minimals:
+        if not minimals: # pragma: no cover
             msg = 'No minimal elements for poset %s' % self.R
             raise_desc(DPInternalError, msg, ndp=self)
 

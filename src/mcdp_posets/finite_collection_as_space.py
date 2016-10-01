@@ -6,7 +6,9 @@ from contracts.utils import raise_desc
 from .space import NotBelongs, NotEqual, Space
 
 
-__all__ = ['FiniteCollectionAsSpace']
+__all__ = [
+    'FiniteCollectionAsSpace',
+]
 
 
 class FiniteCollectionAsSpace(Space):

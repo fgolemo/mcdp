@@ -45,9 +45,10 @@ def eval_space(r, context):
         if isinstance(r, CDP.Unit):
             return r.value
 
-        msg = 'eval_space(): Cannot interpret as a space.'
-        r = recursive_print(r)
-        raise_desc(DPInternalError, msg, r=r)
+        if True: # pragma: no cover
+            msg = 'eval_space(): Cannot interpret as a space.'
+            r = recursive_print(r)
+            raise_desc(DPInternalError, msg, r=r)
 
 def eval_space_single_element_poset(r, context):  # @UnusedVariable
     assert isinstance(r, CDP.SingleElementPoset)

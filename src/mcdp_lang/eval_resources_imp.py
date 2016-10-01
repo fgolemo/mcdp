@@ -87,7 +87,6 @@ def eval_rvalue(rvalue, context):
         from .eval_math import eval_rvalue_PlusN
         from .eval_resources_imp_minmax import eval_rvalue_OpMax
         from .eval_resources_imp_minmax import eval_rvalue_OpMin
-#         from .eval_resources_imp_genericnonlin import eval_rvalue_GenericNonlinearity
         from .eval_resources_imp_tupleindex import eval_rvalue_TupleIndex
         from .eval_resources_imp_maketuple import eval_rvalue_MakeTuple
         from .eval_uncertainty import eval_rvalue_Uncertain
@@ -95,7 +94,6 @@ def eval_rvalue(rvalue, context):
         from .eval_resources_imp_unary import eval_rvalue_unary
         
         cases = {
-#             CDP.GenericNonlinearity : eval_rvalue_GenericNonlinearity,
             CDP.Power: eval_rvalue_Power,
             CDP.PowerShort: eval_rvalue_Power,
             CDP.Divide: eval_rvalue_divide,
@@ -117,9 +115,10 @@ def eval_rvalue(rvalue, context):
             if isinstance(rvalue, klass):
                 return hook(rvalue, context)
 
-        msg = 'eval_rvalue(): Cannot evaluate as resource.'
-        rvalue = recursive_print(rvalue)
-        raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
+        if True: # pragma: no cover    
+            msg = 'eval_rvalue(): Cannot evaluate as resource.'
+            rvalue = recursive_print(rvalue)
+            raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
 
 
 def eval_rvalue_approx_u(r, context):

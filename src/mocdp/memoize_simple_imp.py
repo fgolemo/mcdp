@@ -12,7 +12,7 @@ def memoize_simple(obj):
         try:
             cached = cache[key]
             return cached
-        except ImportError:
+        except ImportError: # pragma: no cover  # impossible to test
             del cache[key]
             cache[key] = f(*args)
             return cache[key]

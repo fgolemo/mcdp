@@ -125,10 +125,6 @@ def eval_constant(op, context):
             msg = 'Variable ref %r unknown.' % op.name
             raise DPSemanticError(msg, where=op.where)
 
-        if isinstance(op, CDP.GenericNonlinearity):
-            raise_desc(NotConstant, 'GenericNonlinearity is not constant', op=op)
-
-
         if isinstance(op, CDP.MakeTuple):
             ops = get_odd_ops(unwrap_list(op.ops))
             constants = [eval_constant(_, context) for _ in ops]
@@ -180,9 +176,10 @@ def eval_constant(op, context):
             if isinstance(op, klass):
                 return hook(op, context)
 
-        msg = 'eval_constant(): Cannot evaluate this as constant.'
-        op = recursive_print(op)
-        raise_desc(NotConstant, msg, op=op)
+        if True: # pragma: no cover    
+            msg = 'eval_constant(): Cannot evaluate this as constant.'
+            op = recursive_print(op)
+            raise_desc(NotConstant, msg, op=op)
 
 
 def eval_constant_space_custom_value(op, context):

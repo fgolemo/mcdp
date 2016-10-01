@@ -2,7 +2,9 @@ from contracts import contract
 from mcdp_posets import Map, Space
 
 
-__all__ = ['PromoteToFloat']
+__all__ = [
+    'PromoteToFloat',
+]
 
 class PromoteToFloat(Map):
 

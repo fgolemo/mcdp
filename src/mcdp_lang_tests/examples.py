@@ -13,7 +13,7 @@ def get_marked_tests(filename):
         contents = f.read()
 
     line1 = contents.split('\n')[0]
-    if not 'test' in line1:
+    if not 'test' in line1: # pragma: no cover
         msg = 'Please add a "test" comment at the beginning of the file.'
         raise_desc(Exception, msg, line1=line1, filename=filename)
 
@@ -48,7 +48,7 @@ def syntax_test(contents):
     import xml.etree.ElementTree as ETree
     try:
         _doc = ETree.parse(s)
-    except ETree.ParseError:
+    except ETree.ParseError: # pragma: no cover
         print('---')
         print(html)
         print('---')
@@ -91,8 +91,10 @@ def known_fail(f, *args):
         raise Exception(msg)
 
 
-def define_test_for(context, filename, basename, tests, known_failure=False):
+def define_test_for(context, filename, basename, tests):
 
+    known_failure = False
+    
     mocdp_base = os.path.join(dir_from_package_name('mocdp'), '..', '..')
     outdir = os.path.join(mocdp_base, 'out', 'mcdp_lang_tests')
     
