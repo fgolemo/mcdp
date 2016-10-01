@@ -35,8 +35,8 @@ def check_poset1(_id_poset, poset):
         poset.leq(top, top)
         poset.leq(bot, top)
     
-    poset.leq(x, top)
-    poset.format(top)
+        poset.leq(x, top)
+        poset.format(top)
 
 @for_all_posets
 def check_poset1_chain(_id_poset, poset):
