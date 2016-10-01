@@ -1,21 +1,28 @@
 # -*- coding: utf-8 -*-
-import matplotlib
-from matplotlib.font_manager import FontProperties
 import os
-from mocdp.comp.interfaces import NotConnected
 
-matplotlib.rc('font', **{'sans-serif' : 'Arial',
-                           'family' : 'sans-serif'})
+from matplotlib.font_manager import FontProperties
 
-from mcdp_report.report import report_dp1
 from mcdp_posets import Rcomp
+from mcdp_report.report import report_dp1
 from mcdp_tests.generation import for_all_nameddps_dyn
-from reprep import Report
+from mocdp.comp.interfaces import NotConnected
 import numpy as np
+from reprep import Report
 
 
+# 
+# 
+# matplotlib.rc('font', **{'sans-serif' : 'Arial',
+#                            'family' : 'sans-serif'})
 @for_all_nameddps_dyn
 def nameddp1_report(context, _id_dp, ndp):
+    try:
+        ndp.check_fully_connected()
+    except NotConnected:
+        print('Skipping because not connected.')
+        return
+    
     dp = ndp.get_dp()
     r = context.comp(report_dp1, dp)
     context.add_report(r, 'nameddp1')
