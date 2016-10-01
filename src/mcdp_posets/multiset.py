@@ -24,7 +24,7 @@ class Multiset():
         self._S = S
 
     def get_elements(self):
-        return self.elements
+        return self._elements
 
     def __repr__(self):
         return 'Multiset(%r, %r)' % (self._elements, self.S)
