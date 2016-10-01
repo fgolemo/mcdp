@@ -65,7 +65,7 @@ class Nat(Poset):
     def meet(self, a, b):
         # first the common case
         if isinstance(a, int) and isinstance(b, int):
-            return max(a, b)
+            return min(a, b)
         # generic case
         if self.leq(a, b):
             return a
