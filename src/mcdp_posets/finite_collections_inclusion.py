@@ -50,15 +50,13 @@ class FiniteCollectionsInclusion(Poset):
     def __eq__(self, other):
         return isinstance(other, FiniteCollectionsInclusion) and self.S == other.S
 
-
     def belongs(self, x):
         if not isinstance(x, FiniteCollection):
-            msg = 'Not a finite collection: %s' % x.__repr__()
+            msg = 'Not a finite collection.'
             raise_desc(NotBelongs, msg, x=x)
         if not x.S == self.S:
             msg = 'Different spaces: %s ≠ %s' % (self.S, x.S)
             raise_desc(NotBelongs, msg, x=x)
-        return True
 
     def check_equal(self, a, b):
         m1 = a.elements
