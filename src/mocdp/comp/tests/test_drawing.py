@@ -9,6 +9,8 @@ from mcdp_tests.generation import for_all_nameddps_dyn
 from mocdp.comp.interfaces import NotConnected
 import numpy as np
 from reprep import Report
+from mcdp_dp.primitive import NotSolvableNeedsApprox
+from mcdp_dp.dp_transformations import get_dp_bounds
 
 
 # 
@@ -121,10 +123,18 @@ def pylab_ylabel_unicode(pylab, yl):
 
 
 def solve_ndp(ndp, n=20):
+    
     dp = ndp.get_dp()
     funsp = dp.get_fun_space()
     chain = funsp.get_test_chain(n=n)
-    results = map(dp.solve, chain)
+    try:
+        results = map(dp.solve, chain)
+    except NotSolvableNeedsApprox:
+        nl = 10
+        nu = 10
+        dpL, dpU = get_dp_bounds(dp, nl, nu)
+        results = map(dpL.solve, chain)
+        
     return zip(chain, results)
 
         

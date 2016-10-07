@@ -1,24 +1,24 @@
 from comptests.registrar import comptest
 from mcdp_lang import parse_ndp
-from mcdp_dp.dp_approximation import CombinedCeil
-from mcdp_posets.uppersets import UpperSets
+from mcdp_posets import UpperSets
 
 
-@comptest
-def check_approximation2():
-    import numpy as np
-    f = CombinedCeil(n_per_decade=10, step=0.01)
-    x = np.linspace(0.1, 100, 1000)
-    y = np.array(map(f, x))
-    
-#     for xi, yi in zip(x, y):
-#         print('%10s -> %10s' % (xi, yi))
-#
-    print np.unique(y)
-    ny = len(np.unique(y))
-    print(ny)
-    assert 25 <= ny <= 30
-
+# from mcdp_dp.dp_approximation import CombinedCeil
+# 
+# @comptest
+# def check_approximation2():
+#     import numpy as np
+#     f = CombinedCeil(n_per_decade=10, step=0.01)
+#     x = np.linspace(0.1, 100, 1000)
+#     y = np.array(map(f, x))
+#     
+# #     for xi, yi in zip(x, y):
+# #         print('%10s -> %10s' % (xi, yi))
+# #
+#     print np.unique(y)
+#     ny = len(np.unique(y))
+#     print(ny)
+#     assert 25 <= ny <= 30
 @comptest
 def check_approximation3():
     # TODO: move in syntax

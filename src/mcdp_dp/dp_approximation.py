@@ -1,85 +1,85 @@
 # -*- coding: utf-8 -*-
+import math
+
 from contracts.utils import check_isinstance
 from mcdp_posets import Map, MapNotDefinedHere, RcompUnits
 from mcdp_posets.rcomp import finfo
 from mocdp.comp.wrap import dpwrap
 from mocdp.exceptions import mcdp_dev_warning
-import math
 
 
-class LinearCeil():
-    """
-    
-        y = ( alpha * ceil(x) / alpha) )
-        
-    """
-
-    def __init__(self, alpha):
-        self.alpha = alpha
-
-    def __call__(self, x):
-        assert isinstance(x, float) and x >= 0, x
-        if math.isinf(x):
-            return float('inf')
-        if x == 0.0:
-            return 0.0
-
-        try:
-            m = x / self.alpha
-        except FloatingPointError as e:
-            s = str(e)
-            if 'overflow' in s:
-                m = finfo.max
-            elif 'underflow' in s:
-                m = finfo.tiny
-            else:
-                raise
-
-        n = math.ceil(m)
-        y = n * self.alpha
-
-        res = float(y)
-
-        return res
-
-
-class LogarithmicCeil():
-    """
-    
-        y = exp( alpha * ceil(log(x) / alpha) )
-        
-    """
-
-    def __init__(self, alpha):
-        assert alpha > 0, alpha
-        self.alpha = alpha
-
-    def __call__(self, x):
-        assert isinstance(x, float) and x >= 0, x
-        if math.isinf(x):
-            return float('inf')
-        if x == 0:
-            return 0.0
-        l = math.log10(x)
-        m = l / self.alpha
-        n = math.ceil(m)
-        o = n * self.alpha
-        y = math.pow(10, o)
-        return float(y)
-
-class CombinedCeil():
-    def __init__(self, n_per_decade, step):
-
-        alpha = 1.0 / n_per_decade
-        self.f1 = LogarithmicCeil(alpha)
-        self.f2 = LinearCeil(step)
-
-    def __call__(self, x):
-        xx = self.f1(x)
-        y = self.f2(xx)
-        return y
-
-
+# 
+# 
+# class LinearCeil():
+#     """
+#     
+#         y = ( alpha * ceil(x) / alpha) )
+#         
+#     """
+# 
+#     def __init__(self, alpha):
+#         self.alpha = alpha
+# 
+#     def __call__(self, x):
+#         assert isinstance(x, float) and x >= 0, x
+#         if math.isinf(x):
+#             return float('inf')
+#         if x == 0.0:
+#             return 0.0
+# 
+#         try:
+#             m = x / self.alpha
+#         except FloatingPointError as e:
+#             s = str(e)
+#             if 'overflow' in s:
+#                 m = finfo.max
+#             elif 'underflow' in s:
+#                 m = finfo.tiny
+#             else:
+#                 raise
+# 
+#         n = math.ceil(m)
+#         y = n * self.alpha
+# 
+#         res = float(y)
+# 
+#         return res
+# 
+# class LogarithmicCeil():
+#     """
+#     
+#         y = exp( alpha * ceil(log(x) / alpha) )
+#         
+#     """
+# 
+#     def __init__(self, alpha):
+#         assert alpha > 0, alpha
+#         self.alpha = alpha
+# 
+#     def __call__(self, x):
+#         assert isinstance(x, float) and x >= 0, x
+#         if math.isinf(x):
+#             return float('inf')
+#         if x == 0:
+#             return 0.0
+#         l = math.log10(x)
+#         m = l / self.alpha
+#         n = math.ceil(m)
+#         o = n * self.alpha
+#         y = math.pow(10, o)
+#         return float(y)
+# 
+# class CombinedCeil():
+#     def __init__(self, n_per_decade, step):
+# 
+#         alpha = 1.0 / n_per_decade
+#         self.f1 = LogarithmicCeil(alpha)
+#         self.f2 = LinearCeil(step)
+# 
+#     def __call__(self, x):
+#         xx = self.f1(x)
+#         y = self.f2(xx)
+#         return y
 def identity(x):
     return x
 
