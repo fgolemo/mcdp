@@ -30,7 +30,7 @@ def nameddp1_report(context, id_dp, ndp):
     context.add_report(r, 'nameddp1', id_dp=id_dp)
 
 @for_all_nameddps_dyn
-def nameddp1_solve(context, _, ndp):
+def nameddp1_solve(context, id_ndp, ndp):
     try:
         ndp.check_fully_connected()
     except NotConnected:
@@ -46,7 +46,7 @@ def nameddp1_solve(context, _, ndp):
 
     solutions = context.comp(solve_ndp, ndp, n=30)
     r = context.comp(report_solutions, ndp, solutions)
-    context.add_report(r, 'report_solutions')
+    context.add_report(r, 'report_solutions', id_ndp=id_ndp)
 
 def unzip(iterable):
     return zip(*iterable)

@@ -4,6 +4,7 @@ import random
 from contracts.utils import raise_desc
 
 from .space import NotBelongs, NotEqual, Space
+from mcdp_posets.space import Uninhabited
 
 
 __all__ = [
@@ -30,6 +31,8 @@ class FiniteCollectionAsSpace(Space):
 
     def witness(self):
         n = len(self.elements)
+        if n == 0:
+            raise Uninhabited()
         i = random.randint(0, n-1)
         return list(self.elements)[i]
         

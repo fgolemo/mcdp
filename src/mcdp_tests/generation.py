@@ -18,6 +18,7 @@ def for_all_posets(f):
             return f0(id_poset, poset)
         except:
             logger.error('poset: %r' % poset)
+            logger.error('poset: %s' % type(poset))
             raise
     return f1
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, check_isinstance
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 
 from .finite_collection import FiniteCollection
@@ -30,6 +30,24 @@ class FiniteCollectionsInclusion(Poset):
         S = self.S
         return FiniteCollection(elements=elements, S=S)
 
+    def get_maximal_elements(self):
+        top = self.get_top()
+        return set([top])
+
+    def meet(self, a, b): 
+        """ Set intersection """
+        check_isinstance(a, FiniteCollection)
+        check_isinstance(b, FiniteCollection)
+        intersection = a.elements & b.elements
+        return FiniteCollection(elements=intersection, S=self.S)
+
+    def join(self, a, b): 
+        """ Set union """
+        check_isinstance(a, FiniteCollection)
+        check_isinstance(b, FiniteCollection)
+        intersection = a.elements | b.elements
+        return FiniteCollection(elements=intersection, S=self.S)
+        
     # This can only be implemented if we can enumerate the elements of Space
     def get_top(self):
         if isinstance(self.S, FiniteCollectionAsSpace):
@@ -40,7 +58,7 @@ class FiniteCollectionsInclusion(Poset):
 
             return res
 
-        mcdp_dev_warning('This should really be NotImplementedError')
+        mcdp_dev_warning('Maybe should use a TooMuchComputation error.')
         msg = 'Cannot enumerate the elements of this space.'
         raise_desc(NotBounded, msg, space=self.S)
 
@@ -71,15 +89,6 @@ class FiniteCollectionsInclusion(Poset):
         if not res:
             msg = 'Not included'
             raise_desc(NotLeq, msg, e1=e1, e2=e2)
-
-    def join(self, a, b):  # union
-        elements = set()
-        elements.update(a.elements)
-        elements.update(b.elements)
-        return FiniteCollection(elements, self.S)
-
-    def meet(self, a, b):  # union
-        raise NotImplementedError
 
     def format(self, x):
         contents = ", ".join(self.S.format(m)
