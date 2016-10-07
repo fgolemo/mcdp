@@ -59,7 +59,7 @@ class Rcomp(Poset):
         return self.top
 
     def witness(self):
-        return self.get_bottom()
+        return 2.0
 
     def belongs(self, x):
         if x == self.top:

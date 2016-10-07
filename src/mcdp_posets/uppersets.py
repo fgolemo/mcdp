@@ -235,11 +235,11 @@ class LowerSets(Poset):
     mcdp_dev_warning('need to think about this')
 
 
-    def get_top(self):
+    def get_bottom(self):
         maximals = self.P.get_maximal_elements()
         return LowerSet(set(maximals), self.P)
 
-    def get_bottom(self):
+    def get_top(self):
         return LowerSet(set(), self.P)
 
     def get_test_chain(self, n):

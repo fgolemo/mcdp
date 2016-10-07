@@ -1,7 +1,7 @@
 import itertools
 
 from comptests.registrar import comptest
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, raise_wrapped
 from mcdp_posets import FinitePoset
 from mcdp_posets import Interval, NotBounded, PosetProduct, Uninhabited, NotBelongs, NotEqual, Rcomp
 from mcdp_posets import Nat
@@ -138,7 +138,12 @@ def check_poset_bottom(_id_poset, poset):
     
     poset.check_leq(bottom, bottom)
     a = poset.witness()
-    poset.check_leq(bottom, a)
+    try:
+        poset.check_leq(bottom, a)
+    except NotLeq as e:
+        msg = 'Could not verify bottom <= witness'
+        raise_wrapped(Exception, e, msg, bottom=bottom, witness=a,
+                      compact=True)
     
 class Stranger():
     pass
