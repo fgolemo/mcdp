@@ -207,7 +207,8 @@ class Coproduct1Labels(Space):
     def pack(self, label, xi):
         if not label in self.labels:
             msg = 'The label is not allowed.'
-            raise_desc(ValueError, msg, label=label)
+            raise_desc(ValueError, msg, label=label, xi=xi,
+                       labels=self.labels)
         i = self.labels.index(label)
         def m(j):
             if j == i:

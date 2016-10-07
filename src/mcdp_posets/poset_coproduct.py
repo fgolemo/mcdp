@@ -91,7 +91,8 @@ class PosetCoproductWithLabels(Coproduct1Labels, Poset):
     def get_test_chain(self, n):
         i = random.randint(0, len(self.spaces) - 1)
         chain = self.spaces[i].get_test_chain(n)
-        return list(self._packs(i, chain))
+        label = self.labels[i]
+        return list(self._packs(label, chain))
  
     def get_bottom(self):
         mcdp_dev_warning('Except one of them is empty?')

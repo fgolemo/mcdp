@@ -5,6 +5,8 @@ from pyparsing import (
     alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
     sglQuotedString)
 
+ParserElement.enablePackrat()
+
 from mocdp.exceptions import mcdp_dev_warning
 
 from .parse_actions import (constant_minus_parse_action, divide_parse_action,
@@ -19,7 +21,6 @@ from .utils_lists import make_list
 
 K = Keyword
 
-ParserElement.enablePackrat()
 
 CDP = CDPLanguage
 
