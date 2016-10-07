@@ -12,15 +12,18 @@ for_all_source_mcdp = make_accumulator()
 for_all_posets0 = make_accumulator()
 
 def for_all_posets(f):
-    f0 = for_all_posets0(f)
+    @for_all_posets0
     def f1(id_poset, poset):
         try:
-            return f0(id_poset, poset)
+            return f(id_poset, poset)
         except:
             logger.error('poset: %r' % poset)
             logger.error('poset: %s' % type(poset))
             raise
+    
     return f1
+
+for_all_posets.registered = for_all_posets0.registered
 
 for_all_values = make_accumulator()
 for_all_dps = make_accumulator()
