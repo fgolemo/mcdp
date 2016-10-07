@@ -125,7 +125,14 @@ def check_poset_top(_id_poset, poset):
     poset.check_leq(top, top)
     a = poset.witness()
     print('a: {}'.format(poset.format(a)))
-    poset.check_leq(a, top)
+
+    try:
+        poset.check_leq(a, top)
+    except NotLeq as e:
+        msg = 'Could not verify witness <= top'
+        raise_wrapped(Exception, e, msg, top=top, witness=a,
+                      compact=True)
+
     
 
 

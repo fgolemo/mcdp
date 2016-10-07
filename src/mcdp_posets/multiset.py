@@ -44,7 +44,6 @@ class Multisets(Poset):
     @contract(S=Poset)
     def __init__(self, S):
         self.S = S
-# 
 
     def get_top(self):
         """This can only be implemented if we can enumerate the elements of S."""
@@ -83,14 +82,16 @@ class Multisets(Poset):
             raise_desc(NotEqual, msg, elements1=m1, elements2=m2)
 
     def check_leq(self, a, b):
+        N = Nat()
         e1 = a.get_elements()
         e2 = b.get_elements()
         for k, n in e1.items():
-            if not k in e2:
-                msg = 'Key is missing.'
-                raise_desc(NotLeq, msg, e1=e1, e2=e2, k=k)
-            if not(n <= e2[k]):
-                msg = 'Not enough.'
+            for k2, n2 in e2.items():
+                if self.S.leq(k, k2):
+                    if N.leq(n, n2):
+                        break # ok
+            else:
+                msg = 'Could not find resource in multiset.'
                 raise_desc(NotLeq, msg, e1=e1, e2=e2, k=k)
 
     def join(self, a, b):
