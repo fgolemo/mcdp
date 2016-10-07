@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from .context import Connection  # @UnusedImport
-from .interfaces import NamedDP, NotConnected
 from contracts import contract
 from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
@@ -10,6 +8,10 @@ from mocdp import ATTR_LOAD_NAME
 from mocdp.comp.context import Context, is_fun_node_name
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPSemanticError
+
+from .context import Connection  # @UnusedImport
+from .interfaces import NamedDP, NotConnected
+
 
 __all__ = [
     'CompositeNamedDP',
@@ -154,6 +156,8 @@ class CompositeNamedDP(NamedDP):
             s += '\n provides %s  [%s]' % (f, self.get_ftype(f))
         for r in self._rnames:
             s += '\n requires %s  [%s]' % (r, self.get_rtype(r))
+
+        s += '\n %d nodes, %d edges' % (len(self.context.names), len(self.context.connections))
 
         s += '\n connections: \n' + format_list_long(self.context.connections, informal=True)
         s += '\n names: \n' + format_dict_long(self.context.names, informal=True)

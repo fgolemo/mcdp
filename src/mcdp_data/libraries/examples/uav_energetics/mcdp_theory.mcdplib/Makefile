@@ -1,6 +1,7 @@
 
 all:
 	./plot_batteries_choice.py  -c rparmake
+	./plot_drone.py  -c rparmake
 
 clean:
 	rm -rf out-plot_batteries_choice.py

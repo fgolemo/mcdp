@@ -15,7 +15,8 @@ def plot_upset_minima(pylab, us):
 
 @contract(us=UpperSet)
 def plot_upset_R2(pylab, us, axis, color_shadow,
-                  extra_space_shadow=0.05, color_lines='none', markers='r.'):
+                  extra_space_shadow=0.05, color_lines='none', markers='r.',
+                  marker_params={}):
     from mcdp_report.generic_report_utils import enlarge_x
     from mcdp_report.generic_report_utils import enlarge_y
 
@@ -42,7 +43,7 @@ def plot_upset_R2(pylab, us, axis, color_shadow,
             # when using "finfo.tiny"
             eps = finfo.eps
             p = np.maximum(p, eps)
-            pylab.plot(p[0], p[1], markers, clip_on=False)
+            pylab.plot(p[0], p[1], markers, clip_on=False, **marker_params)
 
 
 def plot_cone(pylab, p, axis, color_shadow, color_lines):

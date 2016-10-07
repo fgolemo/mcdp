@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+import itertools
+
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, raise_wrapped
 from mcdp_cli.query_interpretation import interpret_params_1string
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.tracer import Tracer
@@ -11,8 +13,9 @@ from mcdp_posets import Space, UpperSets, express_value_in_isomorphic_space
 from mcdp_posets.rcomp import RcompTop
 from mocdp.comp.context import Context
 from mocdp.comp.interfaces import NamedDP
-import itertools
 import numpy as np
+from mcdp_posets.poset import NotLeq
+
 
 def solve_combinations(ndp, combinations, result_like, lower=None, upper=None):
     """
@@ -74,7 +77,11 @@ def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=No
         q, qs = query[fname]
         s = '%s %s' % (q, qs)
 
-        val = interpret_params_1string(s, F=F)
+        try:
+            val = interpret_params_1string(s, F=F)
+        except NotLeq as e:
+            raise_wrapped(ValueError, e, 'wrong type', fname=fname)
+            
         value.append(val)
 
     if len(fnames) == 1:

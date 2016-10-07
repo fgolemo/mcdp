@@ -5,12 +5,12 @@ from contracts.utils import raise_desc
 from mcdp_posets import FinitePoset
 from mcdp_posets import Interval, NotBounded, PosetProduct, Uninhabited, NotBelongs, NotEqual, Rcomp
 from mcdp_posets import Nat
-from mcdp_posets import PosetCoproduct, PosetCoproductWithLabels
 from mcdp_posets import NotLeq
+from mcdp_posets import PosetCoproduct, PosetCoproductWithLabels
+from mcdp_posets.multiset import Multisets
 from mcdp_posets.utils import poset_check_chain, check_minimal, check_maximal
 from mcdp_tests.generation import for_all_posets
 import numpy as np
-from mcdp_posets.multiset import Multisets
 
 
 @for_all_posets

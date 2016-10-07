@@ -1,3 +1,5 @@
+from contracts import contract
+from mcdp_posets import PosetProduct, Rcomp
 from mocdp.memoize_simple_imp import memoize_simple
 import numpy as np
 
@@ -50,6 +52,39 @@ class CommonStats():
             res.append(v)
         return np.array(res) 
                 
-                
-                
-                
+    @contract(rnames='seq(str)',
+              fnames='seq(str)')        
+    def iterate(self, fnames, rnames):
+        fs = []
+        rs = []      
+
+        data = self.data
+        def extract_fun(query):
+            return tuple([query[fname] for fname in fnames]) 
+        
+        def extract_res(query_result):
+            return tuple([query_result[rname] for rname in rnames]) 
+            
+        for query, query_results in zip(data['queries'], data['results']):
+            fs.append(extract_fun(query))
+            rs.append(map(extract_res, query_results))
+            
+        return fs, rs 
+    
+#     @contract(rnames='seq(str)',
+#               fnames='seq(str)')        
+#     def iterate_ordered(self, fnames, rnames):
+#         fs, rs = self.iterate(fnames, rnames)
+#         
+#         indices = range(len(fs))
+#         order = sorted(indices, key)
+#         assert len(fnames) == 2
+#         P = PosetProduct((Rcomp(),) * 2)
+#          
+#         order = np.argsort(fs, key=P.leq)
+#         
+#         fs = [fs[i] for i in order]
+#         rs = [rs[i] for i in order]
+#         return fs, rs
+#     
+#                 

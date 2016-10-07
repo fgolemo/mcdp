@@ -16,7 +16,7 @@ from reprep import Report
 # matplotlib.rc('font', **{'sans-serif' : 'Arial',
 #                            'family' : 'sans-serif'})
 @for_all_nameddps_dyn
-def nameddp1_report(context, _id_dp, ndp):
+def nameddp1_report(context, id_dp, ndp):
     try:
         ndp.check_fully_connected()
     except NotConnected:
@@ -25,7 +25,7 @@ def nameddp1_report(context, _id_dp, ndp):
     
     dp = ndp.get_dp()
     r = context.comp(report_dp1, dp)
-    context.add_report(r, 'nameddp1')
+    context.add_report(r, 'nameddp1', id_dp=id_dp)
 
 @for_all_nameddps_dyn
 def nameddp1_solve(context, _, ndp):

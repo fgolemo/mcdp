@@ -4,12 +4,12 @@ import itertools
 
 from contracts import contract
 from contracts.utils import raise_desc
+from mcdp_posets.nat import Nat, Nat_add
 from mocdp.exceptions import mcdp_dev_warning, do_extra_checks
 
 from .frozendict import frozendict2
 from .poset import NotLeq, Poset
-from .space import NotBelongs, NotEqual, Space
-from mcdp_posets.nat import Nat, Nat_add
+from .space import NotBelongs, NotEqual
 
 
 __all__ = [

@@ -6,7 +6,7 @@ scope: source.mcdp
 
 contexts:
   main:
-    - match: \b(mcdp|flatten|new|ceil|approx|instance|compacy|template|sub|for|by|instance|implemented-by|catalogue)\b
+    - match: \b(mcdp|flatten|new|ceil|approx|instance|compacy|template|sub|for|by|instance|implemented-by|catalogue|ignore)\b
       scope: keyword.control.mcdp
     - match: \b(choose|set-of|using|pow|approx|approxu|Top|Bottom|Minimals|Maximals)\b
       scope: keyword.control.mcdp

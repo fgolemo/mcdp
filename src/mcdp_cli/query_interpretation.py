@@ -112,7 +112,6 @@ def interpret_params_1string(p, F, context=None):
     fd = vu.value
 
     tu = get_types_universe()
-
     tu.check_leq(Fd, F)
     A_to_B, _ = tu.get_embedding(Fd, F)
     fg = A_to_B(fd)
