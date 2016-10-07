@@ -52,7 +52,7 @@ docoverage-single:
 
 docoverage-parallel:
 	# note you need "rmake" otherwise it will not be captured
-	rm -rf ouf_coverage .coverage
+	rm -rf ouf_coverage .coverage .coverage.*
 	-DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "exit" $(package)
 	-DISABLE_CONTRACTS=1 coverage run --concurrency=multiprocessing  `which compmake` $(out) -c "rparmake"
 	coverage combine
