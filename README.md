@@ -56,6 +56,10 @@ Then install the main module:
 Omit the sudo if you have already set up a virtual environment.
 
 
+## wkhtmltopdf
+
+If you get an error like "cannot connect to X server", try  [this solution](http://stackoverflow.com/a/34947479/334788).
+
 ## Getting started
 
 
