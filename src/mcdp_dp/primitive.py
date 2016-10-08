@@ -78,17 +78,16 @@ class PrimitiveDP(WithInternalLog):
     def evaluate(self, i):
         """ Evaluates an implementation. """
 
-    @abstractmethod
     def get_implementations_f_r(self, f, r):  # @UnusedVariable
         """ Returns the set of implementations that realize the pair (f, r).
             Might return an empty set. """
-#         M = self.get_imp_space_mod_res()
+        M = self.get_imp_space_mod_res()
 
-#         if isinstance(M, SpaceProduct) and len(M) == 0:
-#             m = ()
-#             return set([m])
+        if isinstance(M, SpaceProduct) and len(M) == 0:
+            m = ()
+            return set([m])
 
-#         raise NotImplementedError(type(self).__name__)
+        raise NotImplementedError(type(self).__name__)
 
 #     def evaluate_f_m(self, func, m):
 #         """ Returns the minimal resources needed
