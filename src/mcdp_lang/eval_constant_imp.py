@@ -1,4 +1,13 @@
 # -*- coding: utf-8 -*-
+from contracts import contract
+from contracts.utils import raise_desc, raise_wrapped
+from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
+    NotBelongs, NotLeq, PosetProduct, Rcomp, Space, UpperSet, UpperSets,
+    get_types_universe, poset_minima)
+from mcdp_posets.rcomp_units import RbicompUnits, RcompUnits
+from mocdp.comp.context import ValueWithUnits
+from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+
 from .eval_constant_asserts import (eval_assert_empty, eval_assert_equal,
     eval_assert_geq, eval_assert_gt, eval_assert_leq, eval_assert_lt,
     eval_assert_nonempty)
@@ -6,14 +15,6 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
-from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
-    NotBelongs, NotLeq, PosetProduct, Rcomp, Space, UpperSet, UpperSets,
-    get_types_universe, poset_minima)
-from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
-from mcdp_posets.rcomp_units import RbicompUnits, RcompUnits
 
 
 CDP = CDPLanguage

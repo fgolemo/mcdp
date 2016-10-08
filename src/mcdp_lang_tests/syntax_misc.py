@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from nose.tools import assert_equal
-from pyparsing import Literal
+from mcdp_lang.pyparsing_bundled import Literal
 
 from comptests.registrar import comptest
 from contracts.utils import raise_desc
@@ -28,7 +28,8 @@ def check_lang():
     idn = SyntaxIdentifiers.get_idn()
     parse_wrap(idn, 'battery')
     parse_wrap(idn, 'battery ')
-    parse_wrap(idn + Literal('='), 'battery=')
+    expr = idn + Literal('=')
+    parse_wrap(expr, 'battery=')
     parse_wrap(Syntax.ndpt_load, 'load battery')
 
 @comptest

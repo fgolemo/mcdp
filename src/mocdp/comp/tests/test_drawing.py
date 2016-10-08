@@ -10,6 +10,7 @@ from mcdp_report.report import report_dp1
 from mcdp_tests.generation import for_all_nameddps_dyn
 from mocdp.comp.interfaces import NotConnected
 from reprep import Report
+from mocdp.exceptions import mcdp_dev_warning
 
 
 # 
@@ -28,7 +29,8 @@ def nameddp1_report(context, _id_dp, ndp):
     r = context.comp(report_dp1, dp)
     context.add_report(r, 'nameddp1')
 
-@for_all_nameddps_dyn
+mcdp_dev_warning('disabled this for now')
+#@for_all_nameddps_dyn
 def nameddp1_solve(context, _id_ndp, ndp):
     try:
         ndp.check_fully_connected()
