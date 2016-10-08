@@ -81,7 +81,7 @@ class PrimitiveDP(WithInternalLog):
     def get_implementations_f_r(self, f, r):  # @UnusedVariable
         """ Returns the set of implementations that realize the pair (f, r).
             Might return an empty set. """
-        M = self.get_imp_space_mod_res()
+        M = self.get_imp_space()
 
         if isinstance(M, SpaceProduct) and len(M) == 0:
             m = ()
