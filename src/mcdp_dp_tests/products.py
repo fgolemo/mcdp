@@ -69,16 +69,23 @@ def check_products():
     print('depacked: %s' % str(u))
     assert_equal(u, element)
 
-
+    f2()
+    
+    # NOte now this is different
+     
+def f2():
+    print('------')
     F1 = PosetProduct(())
     M, pack, unpack = get_product_compact(F1)
 
     print('M: %s' % M)
-    element = ((),)
-    print('elements: %s' % F.format(*element))
-    s = pack(*element)
+    element = ()
+    F1.belongs(element)
+    print('elements: %s' % F1.format(element))
+    
+    s = pack(*(element,))
     print('packed: %s' % str(s))
-    u = unpack(s)
+    u,  = unpack(s)
     print('depacked: %s' % str(u))
     assert_equal(u, element)
 

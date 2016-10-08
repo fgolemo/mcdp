@@ -65,7 +65,8 @@ class SpaceProduct(Space):
     def format(self, x):
         check_isinstance(x, tuple)
         if len(x) != len(self.subs):
-            raise ValueError(x)
+            msg = 'Element does not belong here.'
+            raise_desc(ValueError, msg, x=x, subs=self.subs)
 
         ss = []
         for _, (sub, xe) in enumerate(zip(self.subs, x)):
@@ -86,6 +87,8 @@ class SpaceProduct(Space):
 
     def __repr__(self):
         name = type(self).__name__
+        if len(self.subs) == 0:
+            return 'PosetProduct([])'
         args = []
         for s in self.subs:
             res = s.__repr__()

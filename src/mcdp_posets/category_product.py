@@ -9,6 +9,7 @@ from .poset import Poset
 from .poset_product import PosetProduct
 from .space import Space  # @UnusedImport
 from .space_product import SpaceProduct
+from contracts.utils import raise_wrapped
 
 
 __all__ = [
@@ -23,7 +24,11 @@ def get_product_compact(*spaces):
     S = _prod_make(spaces) 
 
     def pack(*elements):
-        return _prod_make_state(elements, spaces)
+        try:
+            return _prod_make_state(elements, spaces)
+        except TypeError as e:
+            msg = 'Could not pack.'
+            raise_wrapped(TypeError, e, msg, elements=elements, spaces=spaces)
     def unpack(s):
         return _prod_get_state(s, spaces)
     return S, pack, unpack
