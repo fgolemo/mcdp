@@ -8,16 +8,16 @@ from mcdp_dp.solver import generic_solve
 from mcdp_dp.solver_iterative import solver_iterative
 from mcdp_dp.tracer import Tracer
 from mcdp_library import Librarian
-from mcdp_posets import (NotEqual, NotLeq, PosetProduct, UpperSets,
+from mcdp_posets import (NotLeq, UpperSets,
     express_value_in_isomorphic_space, get_types_universe)
 from mocdp.comp.recursive_name_labeling import (get_imp_as_recursive_dict,
     get_labelled_version, ndp_make)
 from reprep import Report
 
-from .query_interpretation import interpret_string
 from .utils_mkdir import mkdirs_thread_safe
 
 
+# from .query_interpretation import interpret_string
 class ExpectationsNotMet(Exception):
     pass
 
