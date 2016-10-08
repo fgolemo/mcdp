@@ -48,8 +48,8 @@ def report_dp1(dp, imp=None):
 
 
 
-    M = dp.get_imp_space_mod_res()
-    r.text('ImodR', str(M))
+    M = dp.get_imp_space()
+    r.text('I', str(M))
 
 
     if False:

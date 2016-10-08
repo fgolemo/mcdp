@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
-from .primitive import Feasible, NotFeasible, PrimitiveDP
-from .tracer import Tracer
 from collections import namedtuple
+import itertools
+
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mcdp_posets import (Map, NotLeq, PosetProduct, UpperSet, UpperSets,
     poset_maxima, poset_minima)
 from mocdp.exceptions import do_extra_checks
-import itertools
+
+from .primitive import Feasible, NotFeasible, PrimitiveDP
+from .tracer import Tracer
 
 
 __all__ = [
@@ -47,7 +49,7 @@ class DPLoop0(PrimitiveDP):
 
         F0 = self.dp1.get_fun_space()
         R0 = self.dp1.get_res_space()
-        M0 = self.dp1.get_imp_space_mod_res()
+        I0 = self.dp1.get_imp_space()
 
         if not isinstance(F0, PosetProduct):
             raise ValueError('Funsp is not a product: %r' % F0)
@@ -67,8 +69,8 @@ class DPLoop0(PrimitiveDP):
         # M = M0
         # from mcdp_dp.dp_series import prod_make
         from mcdp_dp.dp_series import get_product_compact
-        M, _, _ = get_product_compact(M0, F2)
-        self.M0 = M0
+        M, _, _ = get_product_compact(I0, F2)
+        self.M0 = I0
         self.F2 = F2
 
         self._solve_cache = {}

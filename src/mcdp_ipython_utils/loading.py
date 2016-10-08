@@ -9,12 +9,11 @@ from mcdp_dp.tracer import Tracer
 from mcdp_lang.eval_space_imp import eval_space
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
-from mcdp_posets import Space, UpperSets, express_value_in_isomorphic_space
+from mcdp_posets import NotLeq, Space, UpperSets, express_value_in_isomorphic_space
 from mcdp_posets.rcomp import RcompTop
 from mocdp.comp.context import Context
 from mocdp.comp.interfaces import NamedDP
 import numpy as np
-from mcdp_posets.poset import NotLeq
 
 
 def solve_combinations(ndp, combinations, result_like, lower=None, upper=None):

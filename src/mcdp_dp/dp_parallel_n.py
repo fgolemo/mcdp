@@ -23,10 +23,11 @@ class ParallelN(PrimitiveDP):
     @contract(dps='tuple,seq($PrimitiveDP)')
     def __init__(self, dps):
         Fs = [_.get_fun_space() for _ in dps]
-        F = PosetProduct(tuple(Fs))
         Rs = [_.get_res_space() for _ in dps]
+        Ms = [_.get_imp_space() for _ in dps]
+
+        F = PosetProduct(tuple(Fs))
         R = PosetProduct(tuple(Rs))
-        Ms = [_.get_imp_space_mod_res() for _ in dps]
 
         self.Ms = Ms
         self.dps = tuple(dps)
@@ -74,10 +75,6 @@ class ParallelN(PrimitiveDP):
 
         R = self.get_res_space()
         res = R.Us(set(s))
-
-        if do_extra_checks():
-            tres = self.get_tradeoff_space()
-            tres.belongs(res)
 
         return res
 

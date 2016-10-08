@@ -26,7 +26,7 @@ class DPLoop2(PrimitiveDP):
 
         F0 = self.dp1.get_fun_space()
         R0 = self.dp1.get_res_space()
-        M0 = self.dp1.get_imp_space_mod_res()
+        I0 = self.dp1.get_imp_space()
 
         if not isinstance(F0, PosetProduct) or len(F0.subs) != 2:
             msg = 'The function space must be a product of length 2.'
@@ -52,8 +52,8 @@ class DPLoop2(PrimitiveDP):
         R = R1
 
         from mcdp_dp.dp_series import get_product_compact
-        M, _, _ = get_product_compact(M0, F2, R2)
-        self.M0 = M0
+        M, _, _ = get_product_compact(I0, F2, R2)
+        self.I0 = I0
         self.F1 = F1
         self.F2 = F2
         self.R1 = R1

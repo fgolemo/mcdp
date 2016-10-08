@@ -113,39 +113,40 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
                            expect_nimp=expect_nimp,
                            nimplementations=nimplementations)
 
-    if expect_res is not None:
-        value = interpret_string(expect_res)
-        tracer.log('value: %s' % value)
-        res_expected = value.value
-        tu = get_types_universe()
-        # If it's a tuple of two elements, then we assume it's upper/lower bounds
-        if isinstance(value.unit, PosetProduct):
-            subs = value.unit.subs
-            assert len(subs) == 2, subs
+#     if expect_res is not None:
+#         value = interpret_string(expect_res)
+#         tracer.log('value: %s' % value)
+#         res_expected = value.value
+#         tu = get_types_universe()
+#         # If it's a tuple of two elements, then we assume it's upper/lower bounds
+#         if isinstance(value.unit, PosetProduct):
+#             subs = value.unit.subs
+#             assert len(subs) == 2, subs
+# 
+#             lower_UR_expected, upper_UR_expected = subs
+#             lower_res_expected, upper_res_expected = value.value
+#             
+#             lower_bound = tu.get_embedding(lower_UR_expected, UR)[0](lower_res_expected)
+#             upper_bound = tu.get_embedding(upper_UR_expected, UR)[0](upper_res_expected)
+# 
+#             tracer.log('lower: %s <= %s' % (UR.format(lower_bound), UR.format(res)))
+#             tracer.log('upper: %s <= %s' % (UR.format(upper_bound), UR.format(res)))
+# 
+#             UR.check_leq(lower_bound, res)
+#             UR.check_leq(res, upper_bound)
+#         else:
+#             # only one element: equality
+#             UR_expected = value.unit
+#             tu.check_leq(UR_expected, UR)
+#             A_to_B, _B_to_A = tu.get_embedding(UR_expected, UR)
+# 
+#             res_expected_f = A_to_B(res_expected)
+#             try:
+#                 UR.check_equal(res, res_expected_f)
+#             except NotEqual as e:
+#                 raise_wrapped(ExpectationsNotMet, e, 'res is different',
+#                               res=res, res_expected=res_expected, compact=True)
 
-            lower_UR_expected, upper_UR_expected = subs
-            lower_res_expected, upper_res_expected = value.value
-            
-            lower_bound = tu.get_embedding(lower_UR_expected, UR)[0](lower_res_expected)
-            upper_bound = tu.get_embedding(upper_UR_expected, UR)[0](upper_res_expected)
-
-            tracer.log('lower: %s <= %s' % (UR.format(lower_bound), UR.format(res)))
-            tracer.log('upper: %s <= %s' % (UR.format(upper_bound), UR.format(res)))
-
-            UR.check_leq(lower_bound, res)
-            UR.check_leq(res, upper_bound)
-        else:
-            # only one element: equality
-            UR_expected = value.unit
-            tu.check_leq(UR_expected, UR)
-            A_to_B, _B_to_A = tu.get_embedding(UR_expected, UR)
-
-            res_expected_f = A_to_B(res_expected)
-            try:
-                UR.check_equal(res, res_expected_f)
-            except NotEqual as e:
-                raise_wrapped(ExpectationsNotMet, e, 'res is different',
-                              res=res, res_expected=res_expected, compact=True)
 
     if plot:
         r = Report()

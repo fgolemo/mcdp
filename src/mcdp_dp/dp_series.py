@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-from contracts import contract
 from contracts.utils import indent, raise_desc, raise_wrapped
-from mcdp_posets import (LowerSet, Map, NotBelongs, PosetProduct, UpperSet,
+from mcdp_posets import (Map, NotBelongs, PosetProduct, UpperSet,
     UpperSets, get_product_compact, poset_minima)
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
-from mocdp.exceptions import DPInternalError, do_extra_checks, mcdp_dev_warning
+from mocdp.exceptions import DPInternalError, do_extra_checks
 from mocdp.memoize_simple_imp import memoize_simple
 
 from .primitive import NormalForm, NotFeasible, PrimitiveDP
@@ -17,7 +15,7 @@ __all__ = [
 ]
 
 
-class Series0(PrimitiveDP):
+class Series(PrimitiveDP):
 
     def __init__(self, dp1, dp2):
         self.dp1 = dp1
@@ -104,7 +102,7 @@ class Series0(PrimitiveDP):
             raise_desc(NotFeasible, msg, f=f, r=r, self=self)
 
         if do_extra_checks():
-            M = self.get_imp_space_mod_res()
+            M = self.get_imp_space()
             for _ in res:
                 M.belongs(_)
         assert res
@@ -196,15 +194,15 @@ class Series0(PrimitiveDP):
         s = s1 + ' % ' + s2 + self._add_extra_info()
         s += '\n' + indent(r1, '. ', first='\ ')
 
-        if hasattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME):
-            a = getattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME)
-            s += '\n (labeled as %s)' % a.__str__()
+#         if hasattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME):
+#             a = getattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME)
+#             s += '\n (labeled as %s)' % a.__str__()
 
         s += '\n' + indent(r2, '. ', first='\ ')
-
-        if hasattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME):
-            a = getattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME)
-            s += '\n (labeled as %s)' % a.__str__()
+# 
+#         if hasattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME):
+#             a = getattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME)
+#             s += '\n (labeled as %s)' % a.__str__()
 
         return s
 
@@ -270,7 +268,9 @@ class Series0(PrimitiveDP):
         return NormalForm(S, SeriesAlpha(self), SeriesBeta(self))
 
 
-Series = Series0
+
+
+Series0 = Series 
 # 
 # if False:
 #     # Huge product spaces
@@ -282,20 +282,20 @@ Series = Series0
 #         (s1, s2) = s
 #         return (s1, s2)
 
-
-@contract(ur1=UpperSet, lf2=LowerSet)
-def non_zero_intersection(ur1, lf2):
-    assert isinstance(ur1, UpperSet), ur1
-    assert isinstance(lf2, LowerSet), lf2
-    """ Returns true if the two sets have non zero intersection """
-    mcdp_dev_warning('Check better this one')
-    for m in ur1.minimals:
-        try:
-            lf2.belongs(m)
-            return True
-        except NotBelongs:
-            pass
-    return False
+# 
+# @contract(ur1=UpperSet, lf2=LowerSet)
+# def non_zero_intersection(ur1, lf2):
+#     assert isinstance(ur1, UpperSet), ur1
+#     assert isinstance(lf2, LowerSet), lf2
+#     """ Returns true if the two sets have non zero intersection """
+#     mcdp_dev_warning('Check better this one')
+#     for m in ur1.minimals:
+#         try:
+#             lf2.belongs(m)
+#             return True
+#         except NotBelongs:
+#             pass
+#     return False
 
 
 

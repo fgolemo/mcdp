@@ -99,11 +99,11 @@ def dp_graph_flow(dp0, imp=None):
         loop_label = str(dp.dp1.get_res_space())
 
         mcdp_dev_warning('add option')
-        if False:
-            M = dp.get_imp_space_mod_res()
-            M0 = dp.dp1.get_imp_space_mod_res()
-            loop_label += ' M0: %s' % M0
-            loop_label += ' M: %s' % M
+#         if False:
+#             M = dp.get_imp_space_mod_res()
+#             M0 = dp.dp1.get_imp_space_mod_res()
+#             loop_label += ' M0: %s' % M0
+#             loop_label += ' M: %s' % M
         l = gg.newLink(o, i, label=loop_label)
         gg.propertyAppend(l, "color", "red")
         gg.propertyAppend(l, "headport", "sw")
@@ -130,11 +130,11 @@ def dp_graph_flow(dp0, imp=None):
         loop_label = str(dp.F2)
 
         mcdp_dev_warning('add option')
-        if False:
-            M = dp.get_imp_space_mod_res()
-            M0 = dp.dp1.get_imp_space_mod_res()
-            loop_label += ' M0: %s' % M0
-            loop_label += ' M: %s' % M
+#         if False:
+#             M = dp.get_imp_space_mod_res()
+#             M0 = dp.dp1.get_imp_space_mod_res()
+#             loop_label += ' M0: %s' % M0
+#             loop_label += ' M: %s' % M
         l = gg.newLink(o, i, label=loop_label)
         gg.propertyAppend(l, "color", "red")
         gg.propertyAppend(l, "headport", "sw")

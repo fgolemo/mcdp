@@ -21,10 +21,10 @@ class CoProductDPLabels(PrimitiveDP):
         self.dp = dp
         self.labels = labels
 
-        M0 = dp.get_imp_space_mod_res()
+        I0 = dp.get_imp_space()
 
-        assert isinstance(M0, Coproduct1), M0
-        M = Coproduct1Labels(M0.spaces, labels)
+        check_isinstance(I0, Coproduct1)
+        M = Coproduct1Labels(I0.spaces, labels)
         
         F = dp.get_fun_space()
         R = dp.get_res_space()
@@ -35,18 +35,8 @@ class CoProductDPLabels(PrimitiveDP):
         i = self.labels.index(label)
         m0 = i, m[1]
         return self.dp.evaluate(m0)
-        
-#     def evaluate_f_m(self, f, m):
-#         """ Returns the resources needed
-#             by the particular implementation m """
-#         label = m[0]
-#         i = self.labels.index(label)
-#         m0 = i, m[1]
-#         return self.dp.evaluate_f_m(f, m0)
 
     def get_implementations_f_r(self, f, r):
-        """ Returns a nonempty set of thinks in self.M.
-            Might raise NotFeasible() """
         m0s = self.dp.get_implementations_f_r(f, r)
         res = []
         for m0 in m0s:

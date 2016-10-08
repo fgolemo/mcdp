@@ -8,7 +8,6 @@ from mocdp.comp.wrap import dpwrap
 from mocdp.exceptions import mcdp_dev_warning
 
 
-# 
 class LinearCeil():
     """
      
@@ -44,17 +43,18 @@ class LinearCeil():
  
         return res
  
+  
 class LogarithmicCeil():
     """
-     
+      
         y = exp( alpha * ceil(log(x) / alpha) )
-         
+          
     """
- 
+  
     def __init__(self, alpha):
         assert alpha > 0, alpha
         self.alpha = alpha
- 
+  
     def __call__(self, x):
         assert isinstance(x, float) and x >= 0, x
         if math.isinf(x):
@@ -67,18 +67,19 @@ class LogarithmicCeil():
         o = n * self.alpha
         y = math.pow(10, o)
         return float(y)
- 
-class CombinedCeil():
-    def __init__(self, n_per_decade, step):
- 
-        alpha = 1.0 / n_per_decade
-        self.f1 = LogarithmicCeil(alpha)
-        self.f2 = LinearCeil(step)
- 
-    def __call__(self, x):
-        xx = self.f1(x)
-        y = self.f2(xx)
-        return y
+
+# class CombinedCeil():
+#     def __init__(self, n_per_decade, step):
+#  
+#         alpha = 1.0 / n_per_decade
+#         self.f1 = LogarithmicCeil(alpha)
+#         self.f2 = LinearCeil(step)
+#  
+#     def __call__(self, x):
+#         xx = self.f1(x)
+#         y = self.f2(xx)
+#         return y
+     
 def identity(x):
     return x
 
@@ -90,6 +91,8 @@ class CombinedCeilMap(Map):
 
         if alpha > 0:
             self.f1 = LogarithmicCeil(alpha)
+#             msg = 'Logarithmic approx not implemented.'
+#             raise_desc(NotImplementedError, msg, alpha=alpha)
         else:
             self.f1 = identity
         

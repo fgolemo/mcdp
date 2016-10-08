@@ -88,7 +88,7 @@ class PrimitiveMeta(ABCMeta):
                         raise_wrapped(Exception, e,
                             'Solve failed', f=f, self=self)
                         
-                    M = self.get_imp_space_mod_res()
+                    M = self.get_imp_space()
                     try:
                         for m in res:
                             M.belongs(m)

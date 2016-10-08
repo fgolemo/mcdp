@@ -17,6 +17,10 @@ from mocdp.exceptions import DPNotImplementedError, DPSemanticError
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
+from mcdp_dp.dp_dummy import Template
+from mcdp_dp.dp_coproduct import CoProductDP
+from mcdp_dp.dp_catalogue import CatalogueDP
+from mcdp_dp.primitive import NotFeasible
 
 
 @comptest
@@ -494,11 +498,64 @@ def check_lang60b():
     assert rnames == ['mass']
 
 @comptest
-def check_lang70(): # TODO: rename
-    pass
+def check_lang70(): # TODO: rename check_coproductdp_error1
+    
+    # check error if types are different
+    F1 = parse_poset('g')
+    F2 = parse_poset('kg')
+    R1 = parse_poset('J')
+    R2 = parse_poset('V')
+    # Same R, different F
+    dp1 = Template(F1, R1)
+    dp2 = Template(F2, R1)
+    try:
+        CoProductDP((dp1, dp2))
+    except ValueError as e:
+        assert 'Cannot form' in str(e)
+    else: 
+        raise Exception()
+    
+    # Same F, different R
+    dp1 = Template(F1, R1)
+    dp2 = Template(F1, R2)
+    try:
+        CoProductDP((dp1, dp2))
+    except ValueError as e:
+        assert 'Cannot form' in str(e)
+    else: 
+        raise Exception()
+    
+
+
 @comptest
 def check_lang71(): # TODO: rename
-    pass
+    F = parse_poset('g')
+    R = parse_poset('J')
+    I = parse_poset('finite_poset{a b c}')
+    entries = [('a', 1, 2), ('b', 2, 4)]
+    dp1 = CatalogueDP(F=F,R=R,I=I,entries=entries)
+    
+    # This will not be feasible for dp1
+    f= 3
+    r = 1000
+    try:
+        ms = dp1.get_implementations_f_r(f,r)
+    except NotFeasible:
+        pass
+    else:
+        assert False, ms
+    
+    # and not for dp as well
+    dp = CoProductDP((dp1,))
+    try:
+        ms = dp.get_implementations_f_r(f,r)
+    except NotFeasible:
+        pass
+    else:
+        assert False, ms
+    
+
+
 @comptest
 def check_lang72(): # TODO: rename
     pass

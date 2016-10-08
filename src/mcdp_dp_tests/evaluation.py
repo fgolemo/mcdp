@@ -16,7 +16,7 @@ def check_evaluate(id_dp, dp):
     R = dp.get_res_space()
     UR = UpperSets(R)
     LF = LowerSets(F)
-    M = dp.get_imp_space_mod_res()
+    M = dp.get_imp_space()
     
     # We get a random m
     m0 = M.witness()
@@ -60,7 +60,7 @@ def check_evaluation():
     """)
     dp = ndp.get_dp()
     print(dp.repr_long())
-    M = dp.get_imp_space_mod_res()
+    M = dp.get_imp_space()
     assert_equal(M, SpaceProduct((R_dimensionless,) * 4))
     assert_equal(dp.get_res_space(), SpaceProduct(()))
     assert_equal(dp.get_fun_space(), SpaceProduct(()))
@@ -129,7 +129,7 @@ def check_evaluation2():
     """)
     dp = ndp.get_dp()
     print(dp.repr_long())
-    M = dp.get_imp_space_mod_res()
+    M = dp.get_imp_space()
 
     Is = dp.get_implementations_f_r((), ())
     print Is

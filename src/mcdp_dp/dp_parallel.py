@@ -28,8 +28,8 @@ class Parallel(PrimitiveDP):
 
         R = PosetProduct((R1, R2))
 
-        M1 = self.dp1.get_imp_space_mod_res()
-        M2 = self.dp2.get_imp_space_mod_res()
+        M1 = self.dp1.get_imp_space()
+        M2 = self.dp2.get_imp_space()
 
 
         self.M1 = M1
@@ -123,10 +123,6 @@ class Parallel(PrimitiveDP):
 
         res = R.Us(set(s))
 
-        if do_extra_checks():
-            tres = self.get_tradeoff_space()
-            tres.belongs(res)
-
         return res
 
     def __repr__(self):
@@ -139,15 +135,15 @@ class Parallel(PrimitiveDP):
         s += self._add_extra_info()
         s += '\n' + indent(r1, '. ', first='\ ')
 
-        if hasattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME):
-            a = getattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME)
-            s += '\n (labeled as %s)' % a.__str__()
+#         if hasattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME):
+#             a = getattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME)
+#             s += '\n (labeled as %s)' % a.__str__()
 
         s += '\n' + indent(r2, '. ', first='\ ')
 
-        if hasattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME):
-            a = getattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME)
-            s += '\n (labeled as %s)' % a.__str__()
+#         if hasattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME):
+#             a = getattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME)
+#             s += '\n (labeled as %s)' % a.__str__()
 
         return s
 

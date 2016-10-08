@@ -20,7 +20,7 @@ mcdp {
 
     I = dp.get_imp_space()
     R = dp.get_res_space()
-    M = dp.get_imp_space_mod_res()
+    M = dp.get_imp_space()
 
     print("I: %s" % I)
     print("M: %s" % M)
@@ -55,7 +55,7 @@ mcdp {
     I = dp.get_imp_space()
     F = dp.get_fun_space()
     R = dp.get_res_space()
-    M = dp.get_imp_space_mod_res()
+    M = dp.get_imp_space()
 
     print("F: %s" % F)
     print("R: %s" % R)
@@ -140,7 +140,7 @@ mcdp {
     I = dp.get_imp_space()
     F = dp.get_fun_space()
     R = dp.get_res_space()
-    M = dp.get_imp_space_mod_res()
+    M = dp.get_imp_space()
 
     print("F: %s" % F)
     print("R: %s" % R)
@@ -176,7 +176,7 @@ mcdp {
     I = dp.get_imp_space()
     F = dp.get_fun_space()
     R = dp.get_res_space()
-    M = dp.get_imp_space_mod_res()
+    M = dp.get_imp_space()
 
     print("F: %s" % F)
     print("R: %s" % R)

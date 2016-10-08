@@ -13,7 +13,7 @@ def check_solve_top_bottom(id_dp, dp):
     print('R: %s' % R)
 
     I = dp.get_imp_space()
-    M = dp.get_imp_space_mod_res()
+    M = dp.get_imp_space()
     print('I: %s' % I)
     print('M: %s' % M)
 
@@ -56,7 +56,8 @@ def check_solve_chain(_, dp):
     except NotSolvableNeedsApprox:
         return
 
-    trsp = dp.get_tradeoff_space()
-    poset_check_chain(trsp, trchain)
+    R = dp.get_res_space()
+    UR = UpperSets(R)
+    poset_check_chain(UR, trchain)
 
     print trchain

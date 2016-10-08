@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
-from .primitive_meta import PrimitiveMeta
 from abc import abstractmethod
 from collections import namedtuple
+
+from decent_logs import WithInternalLog
+
 from contracts import contract
 from contracts.utils import indent, raise_desc
-from decent_logs import WithInternalLog
 from mcdp_posets import (LowerSet, Map, NotBelongs, Poset, PosetProduct, Space,
     SpaceProduct, UpperSet, UpperSets, poset_minima)
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import do_extra_checks
+
+from .primitive_meta import PrimitiveMeta
 
 
 _ = LowerSet  # used by PyContracts
@@ -69,24 +72,23 @@ class PrimitiveDP(WithInternalLog):
         '''
             Given one f point, returns an UpperSet of resources.
         '''
-        pass
 
     @abstractmethod
     @contract(returns='tuple($LowerSet, $UpperSet)')
     def evaluate(self, i):
         """ Evaluates an implementation. """
 
+    @abstractmethod
     def get_implementations_f_r(self, f, r):  # @UnusedVariable
         """ Returns the set of implementations that realize the pair (f, r).
-            Returns a non-empty set or raises NotFeasible. """
-        M = self.get_imp_space_mod_res()
+            Might return an empty set. """
+#         M = self.get_imp_space_mod_res()
 
-        if isinstance(M, SpaceProduct) and len(M) == 0:
-            m = ()
-            # self.check_feasible(f, m , r)
-            return set([m])
+#         if isinstance(M, SpaceProduct) and len(M) == 0:
+#             m = ()
+#             return set([m])
 
-        raise NotImplementedError(type(self).__name__)
+#         raise NotImplementedError(type(self).__name__)
 
 #     def evaluate_f_m(self, func, m):
 #         """ Returns the minimal resources needed
@@ -113,8 +115,6 @@ class PrimitiveDP(WithInternalLog):
 #             raise_desc(NotImplementedError, msg,
 #                        classname=type(self), func=func, M=M, m=m,)
 
-
-
     def _assert_inited(self):
         if not '_inited' in self.__dict__:
             msg = 'Class %s not inited.' % (type(self))
@@ -131,14 +131,6 @@ class PrimitiveDP(WithInternalLog):
     @contract(returns=Space)
     def get_imp_space(self):
         return self.I
-
-    @contract(returns=Space)
-    def get_imp_space_mod_res(self):
-        return self.get_imp_space()
-
-    @contract(returns=Poset)
-    def get_tradeoff_space(self):
-        return UpperSets(self.R)
 
     def is_feasible(self, f, i, r):
         if do_extra_checks():

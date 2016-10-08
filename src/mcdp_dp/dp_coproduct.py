@@ -37,7 +37,7 @@ class CoProductDP(PrimitiveDP):
 
         F = F1
         R = R1
-        Ms = [dp.get_imp_space_mod_res() for dp in dps]
+        Ms = [dp.get_imp_space() for dp in dps]
 
         self.dps = dps
         self.M = Coproduct1(tuple(Ms))
@@ -65,7 +65,7 @@ class CoProductDP(PrimitiveDP):
                 # print('%s: dp.get_implementations_f_r(f, r) = %s ' % (j, ms))
                 for m in ms:
                     if do_extra_checks():
-                        Mj = dp.get_imp_space_mod_res()
+                        Mj = dp.get_imp_space()
                         try:
                             Mj.belongs(m)
                         except NotBelongs:
