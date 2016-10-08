@@ -74,8 +74,9 @@ def spa(x, b):
         # Rather, use a copy of x, x2, created once above
 
         #loc_end, _tokens = x2._parse(s[loc:], 0)
-        loc_end = x2.tryParse(s, loc)
-        character_end = loc + loc_end
+        #character_end = loc + loc_end
+        character_end = x2.tryParse(s, loc)
+        
 
         if isnamedtupleinstance(res) and (res.where is None or res.where.character_end is None):
             w2 = Where(s, character_end=character_end, character=loc)
