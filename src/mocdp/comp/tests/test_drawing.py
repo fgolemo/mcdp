@@ -53,47 +53,51 @@ def unzip(iterable):
 
 def report_solutions(ndp, solutions):
     r = Report()
-    
-    fnames = ndp.get_fnames()
-    rnames = ndp.get_rnames()
-    assert len(fnames) == 1
-    assert len(rnames) == 1
-    xl = '%s (%s)' % (fnames[0], ndp.get_ftype(fnames[0]))
-    yl = '%s (%s)' % (rnames[0], ndp.get_rtype(rnames[0]))
-
-
-    f, rmin = unzip(solutions)
-    
-    with r.plot() as pylab:
-        def gety(x):
-            return list(x.minimals)[0]
-        y = map(gety, rmin)
-        print f
-        print y
-
-        def is_finite(r):
-            return isinstance(r, float)
-
-        def get_finite_part(a, b):
-            return unzip([(f, r) for (f, r) in zip(a, b)
-                          if is_finite(r)
-                          and is_finite(f)])
-
-        def get_unfeasible_f(a, b):
-            return [f for (f, r) in zip(a, b) if not is_finite(r) and
-                    is_finite(f)  # no top
-                    ]
-
-        f0, y0 = get_finite_part(f, y)
-        print f0, y0
-        fu = get_unfeasible_f(f, y)
-
-        pylab.plot(f0, y0, 'k.')
-        pylab.plot(fu, 0 * np.array(fu), 'rs')
-        pylab_xlabel_unicode(pylab, xl)
-        pylab_ylabel_unicode(pylab, yl)
-
     return r
+
+#     
+#     
+#     fnames = ndp.get_fnames()
+#     rnames = ndp.get_rnames()
+#     assert len(fnames) == 1
+#     assert len(rnames) == 1
+#     xl = '%s (%s)' % (fnames[0], ndp.get_ftype(fnames[0]))
+#     yl = '%s (%s)' % (rnames[0], ndp.get_rtype(rnames[0]))
+# 
+# 
+#     f, rmin = unzip(solutions)
+#     
+#     with r.plot() as pylab:
+#         def gety(x):
+#             return list(x.minimals)[0]
+#         
+#         y = map(gety, rmin)
+#         print f
+#         print y
+# 
+#         def is_finite(r):
+#             return isinstance(r, float)
+# 
+#         def get_finite_part(a, b):
+#             return unzip([(f, r) for (f, r) in zip(a, b)
+#                           if is_finite(r)
+#                           and is_finite(f)])
+# 
+#         def get_unfeasible_f(a, b):
+#             return [f for (f, r) in zip(a, b) if not is_finite(r) and
+#                     is_finite(f)  # no top
+#                     ]
+# 
+#         f0, y0 = get_finite_part(f, y)
+#         print f0, y0
+#         fu = get_unfeasible_f(f, y)
+# 
+#         pylab.plot(f0, y0, 'k.')
+#         pylab.plot(fu, 0 * np.array(fu), 'rs')
+#         pylab_xlabel_unicode(pylab, xl)
+#         pylab_ylabel_unicode(pylab, yl)
+# 
+#     return r
 
 
 def pylab_label_generic(pf, s):
