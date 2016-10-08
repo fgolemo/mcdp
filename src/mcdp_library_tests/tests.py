@@ -78,7 +78,9 @@ def define_tests_for_mcdplibs(context):
     librarian = get_test_librarian()
 
     for libname in enumerate_test_libraries():
-        c2 = context.child(libname)
+        c2 = context.child(libname, extra_report_keys=dict(libname=libname))
+        
+        
 
         c2.child('ndp').comp_dynamic(mcdplib_test_setup_nameddps, libname=libname)
         c2.child('poset').comp_dynamic(mcdplib_test_setup_posets, libname=libname)
@@ -144,7 +146,7 @@ def mcdplib_test_setup_nameddps(context, libname):
             print('Skipping because syntax error')
             # TODO: actually check syntax error
         else:
-            c = context.child(model_name)
+            c = context.child(model_name,  extra_report_keys=dict(id_ndp=model_name))
 
             if gives_semantic_error(source):
                 c.comp(mcdplib_assert_semantic_error_fn, libname, model_name,

@@ -18,7 +18,7 @@ from mcdp_dp.dp_transformations import get_dp_bounds
 # matplotlib.rc('font', **{'sans-serif' : 'Arial',
 #                            'family' : 'sans-serif'})
 @for_all_nameddps_dyn
-def nameddp1_report(context, id_dp, ndp):
+def nameddp1_report(context, _id_dp, ndp):
     try:
         ndp.check_fully_connected()
     except NotConnected:
@@ -27,10 +27,10 @@ def nameddp1_report(context, id_dp, ndp):
     
     dp = ndp.get_dp()
     r = context.comp(report_dp1, dp)
-    context.add_report(r, 'nameddp1', id_dp=id_dp)
+    context.add_report(r, 'nameddp1')
 
 @for_all_nameddps_dyn
-def nameddp1_solve(context, id_ndp, ndp):
+def nameddp1_solve(context, _id_ndp, ndp):
     try:
         ndp.check_fully_connected()
     except NotConnected:
@@ -46,7 +46,7 @@ def nameddp1_solve(context, id_ndp, ndp):
 
     solutions = context.comp(solve_ndp, ndp, n=30)
     r = context.comp(report_solutions, ndp, solutions)
-    context.add_report(r, 'report_solutions', id_ndp=id_ndp)
+    context.add_report(r, 'report_solutions')
 
 def unzip(iterable):
     return zip(*iterable)
