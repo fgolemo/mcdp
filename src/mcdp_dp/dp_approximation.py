@@ -9,7 +9,6 @@ from mocdp.exceptions import mcdp_dev_warning
 
 
 # 
- 
 class LinearCeil():
     """
      

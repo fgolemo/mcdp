@@ -2,9 +2,9 @@
 import random
 
 from contracts.utils import raise_desc
+from mcdp_posets import Uninhabited
 
 from .space import NotBelongs, NotEqual, Space
-from mcdp_posets.space import Uninhabited
 
 
 __all__ = [

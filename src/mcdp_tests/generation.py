@@ -1,4 +1,5 @@
-from mocdp import logger
+
+
 
 def make_accumulator():
     def g(x):

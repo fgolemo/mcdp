@@ -3,14 +3,13 @@ import os
 
 from matplotlib.font_manager import FontProperties
 
+from mcdp_dp.dp_transformations import get_dp_bounds
+from mcdp_dp.primitive import NotSolvableNeedsApprox
 from mcdp_posets import Rcomp
 from mcdp_report.report import report_dp1
 from mcdp_tests.generation import for_all_nameddps_dyn
 from mocdp.comp.interfaces import NotConnected
-import numpy as np
 from reprep import Report
-from mcdp_dp.primitive import NotSolvableNeedsApprox
-from mcdp_dp.dp_transformations import get_dp_bounds
 
 
 # 

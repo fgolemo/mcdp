@@ -1,7 +1,6 @@
-
-
-
+# -*- coding: utf-8 -*-
 from contracts import contract
+from contracts.utils import raise_wrapped
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import do_extra_checks
 
@@ -9,7 +8,6 @@ from .poset import Poset
 from .poset_product import PosetProduct
 from .space import Space  # @UnusedImport
 from .space_product import SpaceProduct
-from contracts.utils import raise_wrapped
 
 
 __all__ = [
