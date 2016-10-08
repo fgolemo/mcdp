@@ -79,8 +79,11 @@ class PrimitiveDP(WithInternalLog):
         """ Evaluates an implementation. """
 
     def get_implementations_f_r(self, f, r):  # @UnusedVariable
-        """ Returns the set of implementations that realize the pair (f, r).
-            Might return an empty set. """
+        """ 
+            Returns the set of implementations that realize the pair (f, r).
+            Alwasy returns a set of implementations with some element in it.
+            Otherwise it raises NotFeasible. 
+        """
         M = self.get_imp_space()
 
         if isinstance(M, SpaceProduct) and len(M) == 0:

@@ -1,8 +1,10 @@
+import copy
+
 from contracts import contract
 from contracts.utils import indent
 from mcdp_dp.primitive import PrimitiveDP
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
-import copy
+
 
 __all__ = [
     'LabelerDP',
@@ -34,28 +36,3 @@ class LabelerDP(PrimitiveDP):
 
     def get_implementations_f_r(self, f, r):
         return self.dp.get_implementations_f_r(f, r)
-#
-#     @contract(returns=Space)
-#     def get_imp_space(self):
-#         I = self.I
-#         # This is a mess... on the up side, the rest of the code is great.
-#         #
-#         # Note: the first time the dp is created, there is no attribute.
-#         #   dp = Series(...)
-#         #      <internally calls get_imp_space()>
-#         #   setattr(dp, ..., name)
-#         # So we need to redo it
-#         # if not hasattr(self, 'Imarked'):
-#         if not hasattr(self, 'Imarked') or (hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME) and not hasattr(self.Imarked, ATTRIBUTE_NDP_RECURSIVE_NAME)):
-#             self.Imarked = copy.copy(I)
-#             if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
-#                 x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
-#
-#                 already = getattr(self.Imarked, ATTRIBUTE_NDP_RECURSIVE_NAME, None)
-#                 if already is not None and already != x:
-#                     msg = 'Overwriting value of ATTRIBUTE_NDP_RECURSIVE_NAME'
-#                     raise_desc(DPInternalError, msg, x=x, already=already, xself=self)
-#
-#                 setattr(self.Imarked, ATTRIBUTE_NDP_RECURSIVE_NAME, x)
-#
-#         return self.Imarked

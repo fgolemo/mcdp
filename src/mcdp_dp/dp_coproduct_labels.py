@@ -5,6 +5,7 @@ from mocdp.exceptions import do_extra_checks
 
 from .dp_coproduct import CoProductDP
 from .primitive import PrimitiveDP
+from mcdp_dp.primitive import NotFeasible
 
 
 __all__ = [
@@ -37,7 +38,10 @@ class CoProductDPLabels(PrimitiveDP):
         return self.dp.evaluate(m0)
 
     def get_implementations_f_r(self, f, r):
-        m0s = self.dp.get_implementations_f_r(f, r)
+        try:
+            m0s = self.dp.get_implementations_f_r(f, r)
+        except NotFeasible:
+            raise
         res = []
         for m0 in m0s:
             i = m0[0]

@@ -1,10 +1,12 @@
-from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_posets import Nat, Poset, PosetProduct, UpperSet
 from mcdp_posets.utils import check_minimal
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 import numpy as np
+
+from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
+
 
 _ = Nat, Poset
 
@@ -13,7 +15,6 @@ __all__ = [
     'InvMult2U',
     'InvMult2L',
 ]
-
 
 class InvMult2(ApproximableDP):
 
@@ -81,6 +82,7 @@ class InvMult2U(PrimitiveDP):
             s = set([(top1, top2)])
             return self.R.Us(s)
         if InvMult2.ALGO == InvMult2.ALGO_UNIFORM:
+            mcdp_dev_warning('TODO: add ALGO as parameter. ')
             ps = samplec(self.n, f)
         elif InvMult2.ALGO == InvMult2.ALGO_VAN_DER_CORPUT:
             x1, x2 = generate_exp_van_der_corput_sequence(n=self.n, C=f)
@@ -128,7 +130,7 @@ class InvMult2L(PrimitiveDP):
         self.n = n
 
     def get_implementations_f_r(self, f, r):  # @UnusedVariable
-        # TODO: check feasible
+        mcdp_dev_warning('TODO: check feasible')
         return set([(f, r)])
 
     def evaluate(self, m):

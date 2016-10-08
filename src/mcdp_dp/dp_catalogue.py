@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
-from .primitive import PrimitiveDP
 from contracts import contract
+from contracts.utils import raise_desc
+from mcdp_dp import NotFeasible
 from mcdp_posets import LowerSet, Poset, UpperSet, poset_maxima, poset_minima
 from mocdp.exceptions import do_extra_checks
+
+from .primitive import PrimitiveDP
+
 
 _ = Poset
 
@@ -61,7 +65,9 @@ class CatalogueDP(PrimitiveDP):
         for name, f_max, r_min in self.entries:
             if F.leq(f, f_max) and R.leq(r_min, r):
                 options_m.add(name)
-
+        if not options_m:
+            msg = 'Not feasible.'
+            raise_desc(NotFeasible, msg, f=F.format(f), r=R.format(r))
         return options_m
 
     def __repr__(self):
