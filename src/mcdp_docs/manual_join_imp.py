@@ -74,7 +74,7 @@ def manual_join(files_contents):
     d = BeautifulSoup(template, 'lxml')
     main_body = BeautifulSoup("", 'lxml')
 
-    for (libname, docname), data in files_contents:
+    for (_libname, docname), data in files_contents:
         doc = BeautifulSoup(data, 'lxml', from_encoding='utf-8')
 
         body = doc.body
@@ -111,11 +111,11 @@ def generate_doc(soup):
     header_id = 1
 
     class Item():
-        def __init__(self, tag, depth, name, id, items):
+        def __init__(self, tag, depth, name, _id, items):
             self.tag = tag
             self.name = name
             self.depth = depth
-            self.id = id
+            self.id = _id
             self.items = items
 #             for i in items:
 #                 assert isinstance(items)

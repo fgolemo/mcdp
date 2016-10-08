@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-from pyparsing import (
+from mcdp_lang.pyparsing_bundled import (
     CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
     NotAny, OneOrMore, Optional, ParserElement, Word, ZeroOrMore, alphanums,
     alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
     sglQuotedString)
-
-ParserElement.enablePackrat()
-
 from mocdp.exceptions import mcdp_dev_warning
 
 from .parse_actions import (constant_minus_parse_action, divide_parse_action,
@@ -19,10 +16,7 @@ from .syntax_utils import (
 from .utils_lists import make_list
 
 
-
-
-
-
+ParserElement.enablePackrat()
 
 K = Keyword
 

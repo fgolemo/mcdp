@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from pyparsing import Keyword, Literal, Optional, Suppress
+from mcdp_lang.pyparsing_bundled import Keyword, Literal, Optional, Suppress
 
 from contracts.utils import check_isinstance
 

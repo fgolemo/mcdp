@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
-from .dp_flatten import Mux, get_R_from_F_coords
-from .dp_identity import Identity
-from .dp_parallel import Parallel
-from .dp_parallel_simplification import make_parallel
-from .dp_series import Series
 from abc import ABCMeta, abstractmethod
+
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp.dp_terminator import Terminator
 from mcdp_posets import PosetProduct
 from mocdp.exceptions import DPInternalError, do_extra_checks, mcdp_dev_warning
 from multi_index.get_it_test import compose_indices, get_id_indices
+
+from .dp_flatten import Mux, get_R_from_F_coords
+from .dp_identity import Identity
+from .dp_parallel import Parallel
+from .dp_parallel_simplification import make_parallel
+from .dp_series import Series
+
 
 __all__ = [
     'make_series',

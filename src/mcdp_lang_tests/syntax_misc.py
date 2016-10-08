@@ -8,13 +8,13 @@ from mcdp_dp import CatalogueDP
 from mcdp_dp import CoProductDP
 from mcdp_dp import NotFeasible
 from mcdp_dp import Template
-from mcdp_posets import LowerSet, UpperSet, UpperSets
-from mcdp_posets import PosetProduct
-from mcdp_posets import get_product_compact
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_constant, parse_ndp, parse_poset
 from mcdp_lang.syntax import Syntax, SyntaxIdentifiers
 from mcdp_lang.syntax_codespec import SyntaxCodeSpec
+from mcdp_posets import LowerSet, UpperSet, UpperSets
+from mcdp_posets import PosetProduct
+from mcdp_posets import get_product_compact
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.comp.recursive_name_labeling import get_names_used
 from mocdp.exceptions import DPNotImplementedError, DPSemanticError

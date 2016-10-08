@@ -3,7 +3,7 @@ from .parts import CDPLanguage
 from .syntax import SyntaxBasics, SyntaxIdentifiers
 from .syntax_utils import L, O, S, SCOMMA, SLPAR, SRPAR, sp,keyword
 from .utils_lists import make_list
-from pyparsing import (Combine, Optional, Word, ZeroOrMore, alphanums, alphas,
+from mcdp_lang.pyparsing_bundled import (Combine, Optional, Word, ZeroOrMore, alphanums, alphas,
     oneOf, quotedString)
 
 CDP = CDPLanguage

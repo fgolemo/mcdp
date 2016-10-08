@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from contextlib import contextmanager
 
-from pyparsing import ParseException, ParseFatalException
+from mcdp_lang.pyparsing_bundled import ParseException, ParseFatalException
 
 from contracts import contract
 from contracts.interface import Where

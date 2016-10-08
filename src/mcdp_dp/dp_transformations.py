@@ -1,7 +1,9 @@
-from .primitive import ApproximableDP, PrimitiveDP
 from contracts import contract
 from mcdp_dp import (
     CoProductDP, CoProductDPLabels, DPLoop2, LabelerDP, OpaqueDP, ParallelN)
+
+from .primitive import ApproximableDP, PrimitiveDP
+
 
 @contract(dp=PrimitiveDP, returns=PrimitiveDP)
 def dp_transform(dp, f):

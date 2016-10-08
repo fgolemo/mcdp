@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
-from .dp_series import get_product_compact
-from .primitive import NormalForm, PrimitiveDP
+import itertools
+
 from contracts.utils import indent, raise_wrapped
 from mcdp_posets import (Map, NotBelongs, PosetProduct, UpperSet, UpperSets,
     lowerset_product, poset_minima, upperset_product)
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import do_extra_checks
-import itertools
+
+from .dp_series import get_product_compact
+from .primitive import NormalForm, PrimitiveDP
 
 
 __all__ = [

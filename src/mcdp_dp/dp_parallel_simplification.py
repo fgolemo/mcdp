@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
-from .dp_flatten import Mux
-from .dp_identity import Identity
-from .dp_parallel import Parallel
-from .dp_parallel_n import ParallelN
-from .primitive import PrimitiveDP  # @UnusedImport
 from abc import ABCMeta, abstractmethod
+
 from contracts import contract
 from contracts.utils import raise_wrapped
 from mcdp_posets import PosetProduct
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 from multi_index.get_it_test import compose_indices
+
+from .dp_flatten import Mux
+from .dp_identity import Identity
+from .dp_parallel import Parallel
+from .dp_parallel_n import ParallelN
+from .primitive import PrimitiveDP  # @UnusedImport
+
 
 __all__ = [
     'make_parallel',

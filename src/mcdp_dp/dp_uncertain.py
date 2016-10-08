@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
-from .dp_flatten import MuxMap
-from .dp_generic_unary import WrapAMap
-from .primitive import ApproximableDP
+import copy
+
 from contracts import contract
 from contracts.utils import raise_wrapped
 from mcdp_dp import NotSolvableNeedsApprox, PrimitiveDP, WrongUseOfUncertain
 from mcdp_maps import MapComposition
 from mcdp_posets import Map, NotLeq, PosetProduct, Space
-import copy
 
+from .dp_flatten import MuxMap
+from .dp_generic_unary import WrapAMap
+from .primitive import ApproximableDP
 
 
 __all__ = [
