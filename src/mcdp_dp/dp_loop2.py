@@ -53,7 +53,7 @@ class DPLoop2(PrimitiveDP):
 
         from mcdp_dp.dp_series import get_product_compact
         M, _, _ = get_product_compact(I0, F2, R2)
-        self.I0 = I0
+        self.M0 = I0
         self.F1 = F1
         self.F2 = F2
         self.R1 = R1
