@@ -476,8 +476,6 @@ def check_lang60():  # TODO: rename
 
     parse_wrap_check("((required in).dc).connector >= `USB_connectors: USB_Std_A",
                      Syntax.line_expr)
-    
-    
 
 @comptest
 def check_lang60b():
@@ -521,7 +519,6 @@ def check_lang70(): # TODO: rename check_coproductdp_error1
     else: 
         raise Exception()
     
-
 
 @comptest
 def check_lang71(): # TODO: rename
@@ -608,7 +605,7 @@ def check_lang88(): # TODO: rename
 @comptest
 def check_lang89(): # TODO: rename
     pass 
-
+    
 
 
      
