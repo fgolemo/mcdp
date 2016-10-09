@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 from contextlib import contextmanager
 
-from mcdp_lang.pyparsing_bundled import ParseException, ParseFatalException
-
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
+from mcdp_lang.pyparsing_bundled import ParseException, ParseFatalException
 from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
     MCDPExceptionWithWhere, do_extra_checks, mcdp_dev_warning)
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from contracts.utils import raise_desc
-from mcdp_lang.parse_interface import parse_constant
+from mcdp_lang import parse_constant
 from mocdp.exceptions import DPUserAssertion
 
 

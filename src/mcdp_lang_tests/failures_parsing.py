@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest, comptest_fails
-from mcdp_lang_tests.utils import assert_parsable_to_connected_ndp
-from mcdp_lang_tests.utils2 import eval_rvalue_as_constant
+
+from .utils import assert_parsable_to_connected_ndp
+from .utils2 import eval_rvalue_as_constant
 
 
 @comptest

@@ -1,9 +1,10 @@
 from comptests.registrar import comptest
+from contracts.utils import raise_desc
 from mcdp_dp.dp_transformations import get_dp_bounds
+from mcdp_dp.primitive import WrongUseOfUncertain
 from mcdp_lang import parse_ndp
 from mcdp_posets import UpperSet, UpperSets
-from mcdp_dp.primitive import WrongUseOfUncertain
-from contracts.utils import raise_desc
+
 
 @comptest
 def check_uncertainty1():

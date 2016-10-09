@@ -1,7 +1,8 @@
 from comptests.registrar import comptest
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
-from mcdp_lang_tests.utils import parse_wrap_check
+from .utils import parse_wrap_check
+
 
 CDP = CDPLanguage
 

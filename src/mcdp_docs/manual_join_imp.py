@@ -1,8 +1,11 @@
 #!/usr/bin/env python
-from bs4 import BeautifulSoup
-from contracts import contract
 import sys
+
+from bs4 import BeautifulSoup
+
+from contracts import contract
 from mcdp_report.html import get_language_css, get_markdown_css
+
 
 manual_css = """
 

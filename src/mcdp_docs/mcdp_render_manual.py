@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
-from .manual_join_imp import manual_join
+import logging
+import os
+import tempfile
+
 from mcdp_library import MCDPLibrary
 from mcdp_library_tests.tests import get_test_librarian
-from mcdp_report.gg_utils import embed_images_from_library
 from mcdp_web.renderdoc.highlight import get_minimal_document
 from mcdp_web.renderdoc.main import render_complete
 from mocdp import logger
 from quickapp import QuickApp
-import logging
-import os
-import tempfile
+
+from .manual_join_imp import manual_join
+
 
 manual_contents = [
     ('manual', 'tour'),

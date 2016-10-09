@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from nose.tools import assert_equal
+
 from comptests.registrar import register_indep
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
@@ -8,7 +10,6 @@ from mcdp_lang.parse_interface import parse_ndp, parse_ndp_filename
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
-from nose.tools import assert_equal
 
 
 def assert_syntax_error(s, expr, desc=None):

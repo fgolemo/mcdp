@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
-from mcdp_lang.syntax import Syntax
 from mcdp_lang import parse_ndp
+from mcdp_lang.syntax import Syntax
 
 from .utils import ok
+
 
 ok(Syntax.collection_of_constants, "{ 1.5 V, 5 V }")
 ok(Syntax.constant_value, "{ 1.5 V, 5 V }")

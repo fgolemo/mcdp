@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
+import logging
+import os
+
 from contracts.enabling import disable_all
 from contracts.utils import raise_desc
-from decent_params.utils.script_utils import UserError
+from decent_params import UserError
 from mcdp_library import Librarian, MCDPLibrary
 from mcdp_web.renderdoc.highlight import get_minimal_document
 from mcdp_web.renderdoc.main import render_complete
 from mocdp import logger
 from quickapp import QuickAppBase
-import logging
-import os
 
 
 class Render(QuickAppBase):

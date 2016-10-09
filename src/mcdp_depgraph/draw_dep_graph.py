@@ -1,8 +1,10 @@
-from mcdp_depgraph.find_dep import FindDependencies
 from mcdp_report import my_gvgen
 from mcdp_report.gg_utils import gg_figure
 from mocdp.memoize_simple_imp import memoize_simple
 from reprep import Report
+
+from .find_dep import FindDependencies
+
 
 def draw_libdepgraph(res):
     """ Just display the dependencies between libraries """

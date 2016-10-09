@@ -1,9 +1,10 @@
-from .utils import parse_wrap_check
-from .utils2 import eval_rvalue_as_constant
 from comptests.registrar import comptest
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
-from mcdp_lang_tests.utils import TestFailed
+
+from .utils import TestFailed, parse_wrap_check
+from .utils2 import eval_rvalue_as_constant
+
 
 CDP = CDPLanguage
 

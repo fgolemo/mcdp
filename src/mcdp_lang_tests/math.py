@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-from .utils2 import eval_rvalue_as_constant
 from comptests.registrar import comptest, comptest_fails
-from mcdp_lang.parse_interface import parse_constant, parse_ndp, parse_poset
-from mcdp_lang_tests.utils2 import eval_rvalue_as_constant_same_exactly
-from mcdp_posets.types_universe import get_types_universe
+from mcdp_lang import parse_constant, parse_ndp, parse_poset
+from mcdp_posets import get_types_universe
 from mocdp.exceptions import DPSemanticError
+
+from .utils2 import eval_rvalue_as_constant
+from .utils2 import eval_rvalue_as_constant_same_exactly
 
 
 @comptest
