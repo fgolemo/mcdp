@@ -19,7 +19,8 @@ def cndp_abstract(ndp):
     
     G = get_connection_multigraph(ndp.get_connections())
     cycles = list(simple_cycles(G))
-    logger.debug('cndp_abstract: %d cycles' % len(cycles))
+    if len(cycles) > 0:
+        logger.debug('cndp_abstract: %d cycles' % len(cycles))
     if not cycles:
         return dpgraph_making_sure_no_reps(ndp.context)
     else:
