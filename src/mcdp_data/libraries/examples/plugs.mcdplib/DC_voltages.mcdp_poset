@@ -1,0 +1,7 @@
+finite_poset {
+  v1_5 v5 v6_6 
+
+  none_voltages <= v1_5
+  none_voltages <= v5
+  none_voltages <= v6_6
+}

@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
+import random
+
+from contracts.utils import raise_desc
+from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
+
 from .poset import NotLeq, Poset
 from .space import NotBelongs, NotEqual
-from contracts.utils import raise_desc
-from mocdp.exceptions import do_extra_checks
-import random
+
 
 __all__ = [
    'Nat',
@@ -57,34 +60,40 @@ class Nat(Poset):
             return b
         if self.leq(b, a):
             return a
-        assert False
+        assert False # pragma: no cover
 
     def meet(self, a, b):
         # first the common case
         if isinstance(a, int) and isinstance(b, int):
-            return max(a, b)
+            return min(a, b)
         # generic case
         if self.leq(a, b):
             return a
         if self.leq(b, a):
             return b
-        assert False
+        assert False # pragma: no cover
 
     def get_test_chain(self, n):
-        s = [self.get_bottom()]
-        f = lambda: random.randint(1, 10)
-        s.extend(sorted(f() for _ in range(n - 2)))
+        s = []
+        f = lambda: random.randint(1, 100)
+        while len(s) < n - 2:
+            x = f()
+            if not x in s:
+                s.append(x)
+        s = sorted(s)
+        s.insert(0, 0)
         s.append(self.get_top())
         return s
 
     def __eq__(self, other):
         return isinstance(other, Nat)
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
+# 
+#     def __ne__(self, other):
+#         return not self.__eq__(other)
 
     def __repr__(self):
-        return "ℕ"
+        # return "ℕ"
+        return "N"
 
     def format(self, x):
         if isinstance(x, int):
@@ -92,8 +101,8 @@ class Nat(Poset):
         else:
             if x == self.top:
                 return self.top.__repr__()
-            else:
-                raise NotBelongs(x)
+            else: # pragma: no cover
+                raise ValueError(x) 
 
     def _leq(self, a, b):
         # common case
@@ -106,7 +115,8 @@ class Nat(Poset):
             return False
         if b == self.top:
             return True
-        return a <= b
+        
+        raise ValueError((a,b)) # pragma: no cover
 
     def leq(self, a, b):
         return self._leq(a, b)
@@ -119,21 +129,25 @@ class Nat(Poset):
             msg = '%s ≰ %s' % (a, b)
             raise NotLeq(msg)
 
-    def multiply(self, a, b):
-        """ Multiplication, extended for top """
-        if a == self.top or b == self.top:
-            return self.top
-        return a * b
-
-    def add(self, a, b):
-        """ Addition, extended for top """
-        if a == self.top or b == self.top:
-            return self.top
-        return a + b
-
+#     def multiply(self, a, b):
+#         """ Multiplication, extended for top """
+#         if a == self.top or b == self.top:
+#             return self.top
+#         return a * b
+# 
     def check_equal(self, x, y):
         if not (x == y):
             raise NotEqual('%s != %s' % (x, y))
+
+def Nat_add(a, b):
+    """ Addition, extended for top """
+    top = Nat().get_top()
+    if a == top or b == top:
+        return top
+    mcdp_dev_warning('overflow')
+    return a + b
+
+
 
 
 IntBottom = "int:-inf"
@@ -169,19 +183,24 @@ class Int(Poset):
             return b
         if self.leq(b, a):
             return a
-        assert False
+        assert False # pragma: no cover
 
     def meet(self, a, b):
         if self.leq(a, b):
             return a
         if self.leq(b, a):
             return b
-        assert False
+        assert False # pragma: no cover
 
     def get_test_chain(self, n):
-        s = [self.get_bottom()]
-        f = lambda: random.randint(1, 10)
-        s.extend(sorted(f() for _ in range(n - 2)))
+        s = []
+        f = lambda: random.randint(-100, 100)
+        while len(s) < n - 2:
+            x = f()
+            if not x in s:
+                s.append(x)
+        s = sorted(s)
+        s.insert(0, self.get_bottom())
         s.append(self.get_top())
         return s
 
@@ -222,79 +241,79 @@ class Int(Poset):
             msg = '%s ≰ %s' % (a, b)
             raise NotLeq(msg)
 
-    def multiply(self, a, b):
-        """ Multiplication, extended for top """
-        def undef():
-            raise ValueError('Cannot multiply %s, %s' % (a, b))
-        if a == self.top and b == self.top:
-            return self.top
-        if a == self.top and b == self.bottom:
-            return self.bottom
-        if a == self.bottom and b == self.bottom:
-            return self.top
-        if a == self.bottom and b == self.top:
-            return self.bottom
-        if a == self.bottom:  # and b int
-            if b > 0:
-                return self.bottom
-            elif b == 0:
-                undef()
-            elif b < 0:
-                return self.top
-        if a == self.top:  # and b int
-            if b > 0:
-                return self.top
-            elif b == 0:
-                undef()
-            elif b < 0:
-                return self.bottom
-        if a == self.bottom:  # and b int
-            if b > 0:
-                return self.bottom
-            elif b == 0:
-                undef()
-            elif b < 0:
-                return self.top
-        if b == self.top:  # and a int
-            if a > 0:
-                return self.top
-            elif a == 0:
-                undef()
-            elif a < 0:
-                return self.bottom
-        if b == self.bottom:  # and a int
-            if a > 0:
-                return self.bottom
-            elif a == 0:
-                undef()
-            elif a < 0:
-                return self.top
-        return a * b
-
-    def add(self, a, b):
-        def undef():
-            raise ValueError('Cannot add %s, %s' % (a, b))
-
-        if a == self.top:
-            if b == self.top:
-                return self.top
-            if b == self.bottom:
-                undef()
-            return self.top
-        if a == self.bottom:
-            if b == self.top:
-                undef()
-            if b == self.top:
-                return self.top
-            return self.bottom
-        if b == self.bottom:  # and a is int
-            return self.bottom
-        if b == self.top:  # and a is int
-            return self.top
-        # both int
-        res = a + b
-        # FIXME: overflow
-        return res
+#     def multiply(self, a, b):
+#         """ Multiplication, extended for top """
+#         def undef():
+#             raise ValueError('Cannot multiply %s, %s' % (a, b))
+#         if a == self.top and b == self.top:
+#             return self.top
+#         if a == self.top and b == self.bottom:
+#             return self.bottom
+#         if a == self.bottom and b == self.bottom:
+#             return self.top
+#         if a == self.bottom and b == self.top:
+#             return self.bottom
+#         if a == self.bottom:  # and b int
+#             if b > 0:
+#                 return self.bottom
+#             elif b == 0:
+#                 undef()
+#             elif b < 0:
+#                 return self.top
+#         if a == self.top:  # and b int
+#             if b > 0:
+#                 return self.top
+#             elif b == 0:
+#                 undef()
+#             elif b < 0:
+#                 return self.bottom
+#         if a == self.bottom:  # and b int
+#             if b > 0:
+#                 return self.bottom
+#             elif b == 0:
+#                 undef()
+#             elif b < 0:
+#                 return self.top
+#         if b == self.top:  # and a int
+#             if a > 0:
+#                 return self.top
+#             elif a == 0:
+#                 undef()
+#             elif a < 0:
+#                 return self.bottom
+#         if b == self.bottom:  # and a int
+#             if a > 0:
+#                 return self.bottom
+#             elif a == 0:
+#                 undef()
+#             elif a < 0:
+#                 return self.top
+#         return a * b
+# 
+#     def add(self, a, b):
+#         def undef():
+#             raise ValueError('Cannot add %s, %s' % (a, b))
+# 
+#         if a == self.top:
+#             if b == self.top:
+#                 return self.top
+#             if b == self.bottom:
+#                 undef()
+#             return self.top
+#         if a == self.bottom:
+#             if b == self.top:
+#                 undef()
+#             if b == self.top:
+#                 return self.top
+#             return self.bottom
+#         if b == self.bottom:  # and a is int
+#             return self.bottom
+#         if b == self.top:  # and a is int
+#             return self.top
+#         # both int
+#         res = a + b
+#         # FIXME: overflow
+#         return res
 
     def check_equal(self, x, y):
         if not (x == y):

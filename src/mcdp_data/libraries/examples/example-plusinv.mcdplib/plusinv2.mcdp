@@ -1,9 +1,9 @@
 mcdp {
-    provides a [s]
+    provides a [R]
     
-    requires x [s]
-    requires y [s]
-    requires z [s]
+    requires x [R]
+    requires y [R]
+    requires z [R]
     
     x + y * z >= a
 }

@@ -1,0 +1,4 @@
+product(
+    ac: `AC_power,
+    duration: s
+)

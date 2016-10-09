@@ -1,11 +1,14 @@
 # -*- coding: utf-8 -*-
-from .finite_collection_as_space import FiniteCollectionAsSpace
-from .poset import NotBounded, NotJoinable, NotLeq, NotMeetable, Poset
-from .space import Uninhabited
+from networkx.algorithms.dag import ancestors, descendants
+
 from contracts import contract
 from contracts.utils import raise_desc
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
-from networkx.algorithms.dag import ancestors, descendants
+
+from .finite_collection_as_space import FiniteCollectionAsSpace
+from .poset import NotBounded, NotJoinable, NotLeq, NotMeetable, Poset
+from .space import Uninhabited
+
 
 __all__ = ['FinitePoset']
 
@@ -40,7 +43,10 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
         return self.elements
 
     def __repr__(self):
-        return "FinitePoset(%d els)" % len(self.elements)
+        if len(self.elements) <= 2:
+            return 'FinitePoset(%d el = %s)' % (len(self.elements), list(self.elements).__repr__())
+        else:
+            return "FinitePoset(%d els)" % len(self.elements)
 
     def get_test_chain(self, n):  # @UnusedVariable
         if not self.elements:
@@ -153,7 +159,13 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
         else:
             self._bottom = None
 
-        
+    def leq(self, a, b):
+        if self.equal(a, b):
+            return True
+        if (a, b) in self.relations:
+            return True
+        return False
+
     def check_leq(self, a, b):
         if self.equal(a, b):
             return

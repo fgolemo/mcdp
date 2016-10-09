@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
+from contracts.utils import raise_wrapped
+import numpy as np
+
 from .poset import NotLeq, Poset
 from .space import NotBelongs, NotEqual
-from contracts import check_isinstance
-import numpy as np
+
 
 __all__ = [
    'Interval',
@@ -22,6 +24,9 @@ class GenericInterval(Poset):
     def __repr__(self):
         return 'GenericInterval(%r,%r,%r)' % (self.P, self.a, self.b)
 
+    def witness(self):
+        return self.a
+
     def get_bottom(self):
         return self.a
 
@@ -29,9 +34,14 @@ class GenericInterval(Poset):
         return self.b
 
     def belongs(self, x):
-        self.check_leq(self.a, x)
-        self.check_leq(x, self.b)
-
+        self.P.belongs(x)
+        try:
+            self.check_leq(self.a, x)
+            self.check_leq(x, self.b)
+        except NotLeq as e:
+            msg = 'Does not belong to interval.'
+            raise_wrapped(NotBelongs, e, msg, compact=True)
+             
     def check_equal(self, a, b):
         self.P.check_equal(a, b)
 
@@ -50,6 +60,9 @@ class Interval(Poset):
         self.belongs(self.L)
         self.belongs(self.U)
         assert self.leq(self.L, self.U)
+
+    def witness(self):
+        return self.L
 
     def get_test_chain(self, n):
         res = np.linspace(self.L, self.U, n)
@@ -70,12 +83,12 @@ class Interval(Poset):
             raise NotLeq('%s ≰ %s' % (a, b))
 
     def belongs(self, x):
-        check_isinstance(x, float)
+        if not isinstance(x, float):
+            raise NotBelongs('Not a float: {}'.format(x))
         if not self.L <= x <= self.U:
             msg = '%s ∉ [%s, %s]' % (x, self.format(self.L),
                                      self.format(self.U))
             raise NotBelongs(msg)
-        return True
 
     def format(self, x):
         return '%.3f' % x

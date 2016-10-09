@@ -1,12 +1,20 @@
 # -*- coding: utf-8 -*-
+import itertools
+
 from contracts.utils import indent, raise_desc, raise_wrapped
-from mcdp_dp.dp_loop import Iteration
-from mcdp_dp.primitive import Feasible, NotFeasible, PrimitiveDP
-from mcdp_dp.tracer import Tracer
-from mcdp_posets import (NotEqual, NotLeq, PosetProduct, UpperSets,
-    get_types_universe)
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
+from mcdp_posets import (LowerSet, NotEqual, NotLeq, PosetProduct, UpperSet,
+    UpperSets, get_types_universe, poset_maxima, poset_minima)
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import do_extra_checks
+
+from .dp_loop import Iteration
+from .primitive import Feasible, NotFeasible, PrimitiveDP
+from .tracer import Tracer
+
+
+__all__ = [
+    'DPLoop2',
+]
 
 
 class DPLoop2(PrimitiveDP):
@@ -21,7 +29,7 @@ class DPLoop2(PrimitiveDP):
 
         F0 = self.dp1.get_fun_space()
         R0 = self.dp1.get_res_space()
-        M0 = self.dp1.get_imp_space_mod_res()
+        I0 = self.dp1.get_imp_space()
 
         if not isinstance(F0, PosetProduct) or len(F0.subs) != 2:
             msg = 'The function space must be a product of length 2.'
@@ -47,15 +55,16 @@ class DPLoop2(PrimitiveDP):
         R = R1
 
         from mcdp_dp.dp_series import get_product_compact
-        M, _, _ = get_product_compact(M0, F2, R2)
-        self.M0 = M0
+        M, _, _ = get_product_compact(I0, F2, R2)
+        self.M0 = I0
         self.F1 = F1
         self.F2 = F2
         self.R1 = R1
         self.R2 = R2
 
         self._solve_cache = {}
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
+
 
     def _unpack_m(self, m):
         if do_extra_checks():
@@ -64,6 +73,31 @@ class DPLoop2(PrimitiveDP):
         _, _, unpack = get_product_compact(self.M0, self.F2, self.R2)
         m0, f2, r2 = unpack(m)
         return m0, f2, r2
+
+    def evaluate(self, m):
+        from mcdp_posets.category_product import get_product_compact
+        _, _, unpack = get_product_compact(self.M0, self.F2, self.R2)
+        m0, _f2, _r2 = unpack(m)
+
+        LF0, UR0 = self.dp1.evaluate(m0)
+        assert isinstance(LF0, LowerSet), (LF0, self.dp1)
+        assert isinstance(UR0, UpperSet), (UR0, self.dp1)
+
+        # now extract first components f1 and r1
+        f1s = set()
+        for fi in LF0.maximals:
+            fi1, _ = fi
+            f1s.add(fi1)
+        f1s = poset_maxima(f1s, self.F.leq)
+        LF = self.F.Ls(f1s)
+        r1s = set()
+        for ri in UR0.minimals:
+            ri1, _ = ri
+            r1s.add(ri1)
+        r1s = poset_minima(r1s, self.F.leq)
+        UR = self.R.Us(r1s)
+        return LF, UR
+
 
     def get_implementations_f_r(self, f1, r1):
         from mcdp_posets.category_product import get_product_compact
@@ -88,27 +122,27 @@ class DPLoop2(PrimitiveDP):
         return options
 
 
-    def evaluate_f_m(self, f1, m):
-        """ Returns the resources needed
-            by the particular implementation.
-            raises NotFeasible 
-        """
-        raise NotImplementedError
-        F2 = self.F2
-        F1 = self.F
-        m0, f2 = self._unpack_m(m)
-        f = (f1, f2)
-        r = self.dp1.evaluate_f_m(f, m0)
-        try:
-            F2.check_leq(r, f2)
-        except NotLeq as e:
-            msg = 'Loop constraint not satisfied %s <= %s not satisfied.' % (F2.format(r), F2.format(f2))
-            msg += "\n f1 = %10s -->| ->[ %s ] --> %s " % (F1.format(f1), self.dp1, F2.format(r))
-            msg += "\n f2 = %10s -->|" % F2.format(f2)
-            raise_wrapped(NotFeasible, e, msg, compact=True)
-
-        self.R.belongs(r)
-        return r
+#     def evaluate_f_m(self, f1, m):
+#         """ Returns the resources needed
+#             by the particular implementation.
+#             raises NotFeasible 
+#         """
+#         raise NotImplementedError
+#         F2 = self.F2
+#         F1 = self.F
+#         m0, f2 = self._unpack_m(m)
+#         f = (f1, f2)
+#         r = self.dp1.evaluate_f_m(f, m0)
+#         try:
+#             F2.check_leq(r, f2)
+#         except NotLeq as e:
+#             msg = 'Loop constraint not satisfied %s <= %s not satisfied.' % (F2.format(r), F2.format(f2))
+#             msg += "\n f1 = %10s -->| ->[ %s ] --> %s " % (F1.format(f1), self.dp1, F2.format(r))
+#             msg += "\n f2 = %10s -->|" % F2.format(f2)
+#             raise_wrapped(NotFeasible, e, msg, compact=True)
+# 
+#         self.R.belongs(r)
+#         return r
 
     def check_unfeasible(self, f1, m, r1):
         m0, f2, r2 = self._unpack_m(m)
@@ -146,8 +180,13 @@ class DPLoop2(PrimitiveDP):
 
     def repr_long(self):
         s = 'DPLoop2:   %s -> %s\n' % (self.get_fun_space(), self.get_res_space())
-        return s + indent(self.dp1.repr_long(), 'L ')
+        s += indent(self.dp1.repr_long(), 'L ')
 
+        if hasattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME):
+            a = getattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME)
+            s += '\n (labeled as %s)' % a.__str__()
+
+        return s
 
     def solve(self, f1):
         t = Tracer()
@@ -160,6 +199,7 @@ class DPLoop2(PrimitiveDP):
 
     def solve_all_cached(self, f1, trace):
         if not f1 in self._solve_cache:
+            #print('solving again %s' % f1.__str__())
             R = self.solve_all(f1, trace)
             self._solve_cache[f1] = R
             
@@ -177,18 +217,20 @@ class DPLoop2(PrimitiveDP):
         if do_extra_checks():
             F1.belongs(f1)
 
-
         UR = UpperSets(R)
 
         trace.values(type='loop2', UR=UR, R=R, dp=self)
 
         # we consider a set of iterates
         # we start from the bottom
-        zero = R2.get_bottom()
-        s0 = dp0.solve_trace((f1, zero), trace)
+        zeros = R2.get_minimal_elements()
+        minimals = set(itertools.product((f1,), zeros))
+        f0s = dp0.F.Us(minimals)
+        s0 = dp0.solveU(f0s)
         UR.belongs(s0)
-        trace.log('Iterating in UR = %s' % UR)
+        trace.log('Iterating in UR = %s' % UR.__str__())
         trace.log('Starting from %s' % UR.format(s0))
+        # trace.log('dp0: %s' % self.dp1.repr_long())
 
         S = [Iteration(s=s0, converged=set())]
         for i in range(1000000):  # XXX
@@ -198,8 +240,8 @@ class DPLoop2(PrimitiveDP):
                 sip, converged = dploop2_iterate(dp0, f1, R, si, t)
 
                 t.values(sip=sip, converged=converged)
-                t.log('it %d: sip = %s' % (i, UR.format(sip)))
-                t.log('it %d: converged = %s' % (i, UR.format(converged)))
+                t.log('R = %s' % UR.format(sip))
+#                 t.log('converged = %s' % UR.format(converged))
 
                 if do_extra_checks():
                     try:
@@ -215,8 +257,8 @@ class DPLoop2(PrimitiveDP):
                     t.log(' solution is %s' % (UR.format(sip)))
                     break
 
-
         res_all = S[-1].s
+        t.values(num_iterations=i)
 
         trace.log('res_all: %s' % UR.format(res_all))
         res_r1 = R1.Us(poset_minima([r1 for (r1, _) in res_all.minimals], leq=R1.leq))
@@ -237,11 +279,13 @@ def dploop2_iterate(dp0, f1, R, S, trace):
     converged = set()  # subset of solutions for which they converged
     nextit = set()
     # find the set of all r2s
-#     r2s = set([r2 for (r1, r2) in S.minimals])
 
     for (r1, r2) in S.minimals:
         # what are the results of solve(f1, f2)?
         hr = dp0.solve_trace((f1, r2), trace)
+
+        # print('(f1,r2)=(%s,%s)' % (f1, r2))
+        # print('| -> %s ' % hr)
 
         for (r1b, r2b) in hr.minimals:
             valid = R1.leq(r1, r1b)
@@ -255,6 +299,6 @@ def dploop2_iterate(dp0, f1, R, S, trace):
 
     nextit = R.Us(poset_minima(nextit, R.leq))
     converged = R.Us(poset_minima(converged, R.leq))
-    # print('iterations: %s' % UR.format(res))
+
     return nextit, converged
 

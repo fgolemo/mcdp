@@ -1,0 +1,5 @@
+product(
+    tag: S(DC_Charging),
+    dc: `DC_power,
+    duration: s
+)

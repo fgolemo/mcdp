@@ -1,0 +1,16 @@
+
+addmake(files: code batteries_imp.save_files)
+addmake(instructions: code batteries_imp.instructions)
+addmake(bom: code batteries_imp.collect_bom)
+mcdp {
+    b = instance
+
+        addmake(root: code batteries_imp.BatterySLA)
+        `Battery_SLA
+
+    b.capacity >= 1 MJ
+    b.missions >= 600 []
+
+    ignore maintenance required by b
+    requires mass, cost for b
+}

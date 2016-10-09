@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
+from .eval_codespec_imp_utils_instantiate import instantiate
 from contracts import contract
 from contracts.utils import indent
-from .eval_codespec_imp_utils_instantiate import instantiate
 import traceback
 
 __all__ = [

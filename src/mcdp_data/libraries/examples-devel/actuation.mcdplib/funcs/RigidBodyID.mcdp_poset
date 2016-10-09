@@ -1,0 +1,9 @@
+finite_poset {
+    none
+    rb1
+    # rb2
+    # rb3
+    # rb4
+
+    none <= rb1
+}

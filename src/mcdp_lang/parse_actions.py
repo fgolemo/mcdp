@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
-from .namedtuple_tricks import get_copy_with_where
-from .parts import CDPLanguage
-from .utils import isnamedtupleinstance, parse_action
-from .utils_lists import make_list
 from contextlib import contextmanager
+
+from mcdp_lang.pyparsing_bundled import ParseException, ParseFatalException
+
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
-    MCDPExceptionWithWhere, mcdp_dev_warning)
-from pyparsing import ParseException, ParseFatalException
+    MCDPExceptionWithWhere, do_extra_checks, mcdp_dev_warning)
+
+from .namedtuple_tricks import get_copy_with_where
+from .parts import CDPLanguage
+from .utils import isnamedtupleinstance, parse_action
+from .utils_lists import make_list
+
 
 CDP = CDPLanguage
 
@@ -48,40 +52,43 @@ def wheredecorator(b):
             raise_wrapped(DPInternalError, e, "Error while parsing.",
                           where=where.__str__(), tokens=tokens)
 
-        if isnamedtupleinstance(res) and res.where is None:  # or isinstance(res, ValueWithUnits):
+        if isnamedtupleinstance(res) and res.where is None:
             res = get_copy_with_where(res, where=where)
 
         return res
     return bb
 
 def spa(x, b):
+    x2 = x.copy()
+    x2.setParseAction()
+    bb = wheredecorator(b)
     @parse_action
     def p(tokens, loc, s):
-        bb = wheredecorator(b)
+        # print('parsing %r %r %r ' % (tokens, loc, s))
         res = bb(tokens, loc, s)
         # if we are here, then it means the parse was succesful
-        # we try again
+        # we try again to get loc_end
 
-        # not this, it would be recursive
-        # x.parseString(s[loc:])
+        # Do not this, it would be recursive
+        #   x.parseString(s[loc:])
+        # Rather, use a copy of x, x2, created once above
 
-        x2 = x.copy()
-        x2.setParseAction()
-        # a = x2.parseString(s[loc:])
-        loc_end, tokens = x2._parse(s[loc:], 0)
-        character_end = loc + loc_end
-
+        #loc_end, _tokens = x2._parse(s[loc:], 0)
+        #character_end = loc + loc_end
+        character_end = x2.tryParse(s, loc)
+        
         if isnamedtupleinstance(res) and (res.where is None or res.where.character_end is None):
             w2 = Where(s, character_end=character_end, character=loc)
             res = get_copy_with_where(res, where=w2)
 
-        if not isinstance(res, (float, int, str)):
-            if res.where is None:
-                msg = 'Found element with no where'
-                raise_desc(ValueError, msg, res=res)
+        if do_extra_checks():
+            if not isinstance(res, (float, int, str)):
+                if res.where is None:
+                    msg = 'Found element with no where'
+                    raise_desc(ValueError, msg, res=res)
 
-        if hasattr(res, 'where'):
-            assert res.where.character_end is not None, (res, isnamedtupleinstance(res))
+            if hasattr(res, 'where'):
+                assert res.where.character_end is not None, (res, isnamedtupleinstance(res))
 
         return res
     x.setParseAction(p)
@@ -102,6 +109,16 @@ def divide_parse_action(tokens):
     l = make_list(tokens)
     assert l.where.character_end is not None
     res = CDP.Divide(l, where=l.where)
+    return res
+
+
+@parse_action
+@wheredecorator
+def constant_minus_parse_action(tokens):
+    tokens = list(tokens[0])
+    l = make_list(tokens)
+    assert l.where.character_end is not None
+    res = CDP.ConstantMinus(l, where=l.where)
     return res
 
 
@@ -155,16 +172,26 @@ def parse_wrap(expr, string):
         msg = 'The string is unicode. It should be a str with utf-8 encoding.'
         msg += '\n' + string.encode('utf-8').__repr__()
         raise ValueError(msg)
+    assert isinstance(string, str), type(string)
 
     # Nice trick: the removE_comments doesn't change the number of lines
     # it only truncates them...
     string0 = remove_comments(string)
 
-#     print('parsing string0 %s %r %s' % (string0, string0, type(string0)))
-    # m = boxit
     m = lambda x: x
     try:
-        return expr.parseString(string0, parseAll=True)  # [0]
+        from mcdp_lang_tests.utils import find_parsing_element
+        from mcdp_library_tests.tests import timeit
+        try:
+            w = str(find_parsing_element(expr))
+        except ValueError:
+            w = '(unknown)'
+        with timeit(w, 0.5):
+            return expr.parseString(string0, parseAll=True)  # [0]
+    except RuntimeError as e:
+        msg = 'We have a recursive grammar.'
+        msg += "\n\n" + indent(m(string), '  ') + '\n'
+        raise_desc(DPInternalError, msg)
     except (ParseException, ParseFatalException) as e:
         # ... so we can use "string" here.
         # raise

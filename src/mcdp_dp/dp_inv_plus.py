@@ -1,19 +1,25 @@
-from .primitive import ApproximableDP, PrimitiveDP
+from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
 from contracts import contract
-from contracts.utils import check_isinstance
-from mcdp_posets import Nat, Poset  # @UnusedImport
-from mcdp_posets import PosetProduct, RcompUnits
+from contracts.utils import check_isinstance, raise_desc
+from mcdp_posets import Nat, Poset, PosetProduct, RcompUnits, get_types_universe
+from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 import numpy as np
-from mocdp.exceptions import mcdp_dev_warning
-from mcdp_dp.primitive import NotSolvableNeedsApprox
+
+_ = Nat, Poset
 
 __all__ = [
     'InvPlus2',
+    'InvPlus2U',
+    'InvPlus2L',
 ]
 
 mcdp_dev_warning('FIXME: bug - are we taking into account the units?')
 
 class InvPlus2(ApproximableDP):
+    ALGO_UNIFORM = 'uniform'
+    ALGO_VAN_DER_CORPUT = 'van_der_corput'
+    ALGO = ALGO_VAN_DER_CORPUT
+
     @contract(Rs='tuple[2],seq[2]($RcompUnits)', F=RcompUnits)
     def __init__(self, F, Rs):
         for _ in Rs:
@@ -21,43 +27,40 @@ class InvPlus2(ApproximableDP):
         check_isinstance(F, RcompUnits)
         self.Rs = Rs
         R = PosetProduct(Rs)
-        M = R[0]
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
 
+        tu = get_types_universe()
+        if not tu.equal(Rs[0], Rs[1]) or not tu.equal(F, Rs[0]):
+            msg = 'InvPlus only available for consistent units.'
+            raise_desc(DPInternalError, msg, F=F, Rs=Rs)
+
+        M = PosetProduct((F, R))
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
 
     def solve(self, f):
         raise NotSolvableNeedsApprox(type(self))
-#
-#     def solve(self, f):
-#         mcdp_dev_warning('Needs to raise Not?')
-#         n = 20
-#         options = np.linspace(0, f, n)
-#         mcdp_dev_warning('FIXME: bug - are we taking into account the units?')
-#         s = set()
-#         for o in options:
-#             s.add((o, f - o))
-#
-#         return self.R.Us(s)
 
+    def evaluate(self, m):
+        raise NotSolvableNeedsApprox(type(self))
 
     @contract(n='int,>=0')
     def get_lower_bound(self, n):
         F = self.F
         Rs = self.Rs
-        return InvPlus2L(F, Rs, n)
+        dp = InvPlus2L(F, Rs, n)
+        # preserve_dp_attributes(self, dp)
+        return dp
 
     @contract(n='int,>=0')
     def get_upper_bound(self, n):
         F = self.F
         Rs = self.Rs
-        return InvPlus2U(F, Rs, n)
+        dp = InvPlus2U(F, Rs, n)
+        # preserve_dp_attributes(self, dp)
+        return dp
 
     def get_implementations_f_r(self, f, r):  # @UnusedVariable
-        r1, r2 = r  # @UnusedVariable
-        return set([r1])
+        raise NotSolvableNeedsApprox(type(self))
 
-    def evaluate_f_m(self, f, m):
-        return (m, f - m)
 
 class InvPlus2L(PrimitiveDP):
 
@@ -67,17 +70,38 @@ class InvPlus2L(PrimitiveDP):
             check_isinstance(_, RcompUnits)
         check_isinstance(F, RcompUnits)
         R = PosetProduct(Rs)
-        M = R[0]
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        M = PosetProduct((F, R))
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
         self.nl = nl
 
+    def evaluate(self, m):
+        f, r = m
+        ur = self.R.U(r)
+        lf = self.F.L(f)
+        return lf, ur
+
+    def get_implementations_f_r(self, f, r):  # @UnusedVariable
+        return set([(f, r)])
+
     def solve(self, f):
+        if self.F.equal(f, self.F.get_top()):
+            # +infinity
+            top1 = self.R[0].get_top()
+            top2 = self.R[1].get_top()
+            s = set([(top1, 0.0), (0.0, top2)])
+            return self.R.Us(s)
         n = self.nl
-        o0 = np.linspace(0, f, n + 1)
-        # FIXME: bug - are we taking into account the units?
+
+        if InvPlus2.ALGO == InvPlus2.ALGO_VAN_DER_CORPUT:
+            options = van_der_corput_sequence(n + 1)
+        elif InvPlus2.ALGO == InvPlus2.ALGO_UNIFORM:
+            options = np.linspace(0.0, 1.0, n + 1)
+        else:
+            assert False, InvPlus2.ALGO
+
         s = []
-        for o in o0:
-            s.append((o, f - o))
+        for o in options:
+            s.append((f * o, f * (1.0 - o)))
 
         options = set()
         for i in range(n):
@@ -95,17 +119,52 @@ class InvPlus2U(PrimitiveDP):
         for _ in Rs:
             check_isinstance(_, RcompUnits)
         check_isinstance(F, RcompUnits)
+
         R = PosetProduct(Rs)
-        M = R[0]
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        M = PosetProduct((F, R))
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
         self.nu = nu
 
-    def solve(self, f):
-        n = self.nu
+    def get_implementations_f_r(self, f, r):  # @UnusedVariable
+        return set([(f, r)])
 
-        options = np.linspace(0, f, n)
-        # FIXME: bug - are we taking into account the units?
+    def evaluate(self, m):
+        f, r = m
+        ur = self.R.U(r)
+        lf = self.F.L(f)
+        return lf, ur
+
+    def solve(self, f):
+
+        if self.F.equal(f, self.F.get_top()):
+            # +infinity
+            top1 = self.R[0].get_top()
+            top2 = self.R[1].get_top()
+            s = set([(top1, 0.0), (0.0, top2)])
+            return self.R.Us(s)
+
+        n = self.nu
+        
+        if InvPlus2.ALGO == InvPlus2.ALGO_VAN_DER_CORPUT:
+            options = van_der_corput_sequence(n)
+        elif InvPlus2.ALGO == InvPlus2.ALGO_UNIFORM:
+            options = np.linspace(0.0, 1.0, n)
+        else:
+            assert False, InvPlus2.ALGO
+
         s = set()
         for o in options:
-            s.add((o, f - o))
+            s.add((f * o, f * (1 - o)))
         return self.R.Us(s)
+
+
+def van_der_corput_sequence(n):
+    return sorted([1.0] + [float(van_der_corput(_)) for _ in range(n - 1)])
+
+def van_der_corput(n, base=2):
+    vdc, denom = 0, 1
+    while n:
+        denom *= base
+        n, remainder = divmod(n, base)
+        vdc += remainder * 1.0 / denom
+    return vdc

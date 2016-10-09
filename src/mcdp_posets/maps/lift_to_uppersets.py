@@ -1,6 +1,7 @@
 from mcdp_posets import Map
 from contracts import contract
 
+__all__ = ['LiftToUpperSets']
 
 class LiftToUpperSets(Map):
     """ Lift the map f to uppersets """

@@ -1,26 +1,30 @@
 # -*- coding: utf-8 -*-
+from networkx.algorithms.cycles import simple_cycles
+
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_dp.dp_flatten import Mux
-from mcdp_dp.dp_loop2 import DPLoop2
+from mcdp_dp import DPLoop2, Mux
 from mcdp_dp.dp_series_simplification import make_series
-from mcdp_posets.poset_product import PosetProduct
+from mcdp_posets import PosetProduct, get_types_universe
+from mocdp import logger
 from mocdp.comp.composite import CompositeNamedDP
-from mocdp.comp.wrap import SimpleWrap
-from mcdp_posets.types_universe import get_types_universe
-from networkx.algorithms.cycles import simple_cycles
 from mocdp.comp.context_functions import dpgraph_making_sure_no_reps
+from mocdp.comp.wrap import SimpleWrap
+from mocdp.exceptions import mcdp_dev_warning
 
-@contract(ndp=CompositeNamedDP)
+
+@contract(ndp=CompositeNamedDP, returns=SimpleWrap)
 def cndp_abstract(ndp):
     from mocdp.comp.connection import get_connection_multigraph
     
     G = get_connection_multigraph(ndp.get_connections())
     cycles = list(simple_cycles(G))
+    logger.debug('cndp_abstract: %d cycles' % len(cycles))
     if not cycles:
         return dpgraph_making_sure_no_reps(ndp.context)
     else:
         return cndp_abstract_loop2(ndp)
+
 
 @contract(ndp=CompositeNamedDP, returns=SimpleWrap)
 def cndp_abstract_loop2(ndp):
@@ -38,6 +42,7 @@ def cndp_abstract_loop2(ndp):
     inner = res['inner']
 
     inner_dp = inner.get_dp()
+
     extraf = res['extraf']
     extrar = res['extrar']
 
@@ -53,7 +58,23 @@ def cndp_abstract_loop2(ndp):
     F1 = ndp.get_ftypes(extraf)
     R1 = ndp.get_rtypes(extrar)
     
-    assert len(cycles) == 1
+#     if len(cycles) > 1:
+#         msg = 'Expected there would be at most one cycle, found: %d.' % len(cycles)
+#         raise_desc(Exception, msg, ndp=ndp)
+
+    if len(cycles) == 0:
+        # raise NotImplementedError()
+        mcdp_dev_warning('this needs much more testing')
+        dp = inner_dp
+        fnames = extraf
+        rnames = extrar
+        if len(fnames) == 1:
+            fnames = fnames[0]
+        if len(rnames) == 1:
+            rnames = rnames[0]
+        from mocdp.comp.wrap import dpwrap
+        return dpwrap(dp, fnames, rnames)
+
     F2 = inner.get_rtype(cycles[0])
     R2 = F2
     

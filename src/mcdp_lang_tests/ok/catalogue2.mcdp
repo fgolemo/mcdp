@@ -41,7 +41,7 @@ mcdp {
         capacity <= cell.capacity
     }
 
-    sub battery = instance (simple_cell ^ cell_plus_converter)
+    sub battery = instance choose(s: simple_cell, c: cell_plus_converter)
     requires cost, mass for battery
     provides voltage, capacity using battery
 }

@@ -1,0 +1,22 @@
+flatten mcdp {
+
+  requires objective [R]
+  
+  var a [R]
+  var b [R]
+  var c [R]
+  var d [R]
+  var e [R]
+  var f [R]
+
+  a >= 0.50 [] * min(b, f)
+  a >= 0.50 [] * min(c, d)
+  b >= 0.20 []
+  c >= 0.45 []
+  c >= 0.30 []
+  d >= 1.00 []
+  e >= 0.50 []
+  f >= 0.90 [] * e 
+
+  required objective >= min(a, max(c, e))
+}

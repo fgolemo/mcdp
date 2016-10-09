@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
-from .space import NotBelongs, NotEqual, Space
 from contracts import contract
 from contracts.utils import check_isinstance, indent, raise_desc
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME, ATTR_LOAD_NAME
+
+from .space import NotBelongs, NotEqual, Space
+
 
 __all__ = [
     'SpaceProduct',
@@ -9,7 +12,8 @@ __all__ = [
 
 
 class SpaceProduct(Space):
-    """ A product of Posets with the product order. """
+    """ A product of Spaces. """
+
     @contract(subs='seq($Space)')
     def __init__(self, subs):
         assert isinstance(subs, tuple)
@@ -59,13 +63,18 @@ class SpaceProduct(Space):
             raise_desc(NotBelongs, msg, args_first=False, self=self, x=x)
 
     def format(self, x):
-        if not isinstance(x, tuple):
-            raise_desc(NotBelongs, 'Not a tuple', x=x, self=self)
+        check_isinstance(x, tuple)
+        if len(x) != len(self.subs):
+            msg = 'Element does not belong here.'
+            raise_desc(ValueError, msg, x=x, subs=self.subs)
 
         ss = []
         for _, (sub, xe) in enumerate(zip(self.subs, x)):
-            label = getattr(sub, 'label', '?')
-            s = '%s:%s' % (label, sub.format(xe))
+            label = getattr(sub, 'label', '_')
+            if not label or label[0] == '_':
+                s = sub.format(xe)
+            else:
+                s = '%s:%s' % (label, sub.format(xe))
             ss.append(s)
 
     # 'MATHEMATICAL LEFT ANGLE BRACKET' (U+27E8) ⟨
@@ -77,15 +86,50 @@ class SpaceProduct(Space):
         return tuple(x.witness() for x in self.subs)
 
     def __repr__(self):
-        def f(x):
-            if hasattr(x, '__mcdplibrary_load_name'):
-                return getattr(x, '__mcdplibrary_load_name')
+        name = type(self).__name__
+        if len(self.subs) == 0:
+            return 'PosetProduct([])'
+        args = []
+        for s in self.subs:
+            res = s.__repr__()
+            if hasattr(s, ATTRIBUTE_NDP_RECURSIVE_NAME):
+                a = getattr(s, ATTRIBUTE_NDP_RECURSIVE_NAME)
+                res += '{%s}' % "/".join(a)
+            args.append(res)
 
-            r = x.__repr__()
-            if  r[-1] != ')' and (isinstance(x, SpaceProduct) or ("×" in r)):
-                return "(%s)" % r
+        return '%s(%d: %s)' % (name, len(self.subs), ",".join(args))
+
+    def repr_long(self):
+        s = "%s[%s]" % (type(self).__name__, len(self.subs))
+        for i, S in enumerate(self.subs):
+            prefix0 = " %d. " % i
+            prefix1 = "    "
+            s += "\n" + indent(S.repr_long(), prefix1, first=prefix0)
+            if hasattr(S, ATTRIBUTE_NDP_RECURSIVE_NAME):
+                a = getattr(S, ATTRIBUTE_NDP_RECURSIVE_NAME)
+                s += '\n  labeled as %s' % a.__str__()
+
+        return s
+
+
+    def __str__(self):
+        if hasattr(self, ATTR_LOAD_NAME):
+            return "`" + getattr(self, ATTR_LOAD_NAME)
+
+        def f(x):
+            if hasattr(x, ATTR_LOAD_NAME):
+                res = '`' + getattr(x, ATTR_LOAD_NAME)
             else:
-                return r
+                r = x.__str__()
+                if  r[-1] != ')' and (isinstance(x, SpaceProduct) or ("×" in r)):
+                    res = "(%s)" % r
+                else:
+                    res = r
+
+            if hasattr(x, ATTRIBUTE_NDP_RECURSIVE_NAME):
+                a = getattr(x, ATTRIBUTE_NDP_RECURSIVE_NAME)
+                res += '{%s}' % "/".join(a)
+            return res
 
         if len(self.subs) == 0:
             return "𝟙"

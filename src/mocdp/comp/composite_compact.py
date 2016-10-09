@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+from mocdp import logger
 from mocdp.comp.context import Connection
+
 
 __all__ = [
     'compact_context',
@@ -21,7 +23,7 @@ def compact_context(context):
         return context
     else:
         name1, name2, their_connections = s[0]
-        print('Will compact %s, %s, %s' % s[0])
+        logger.debug('Will compact %s, %s, %s' % s[0])
 
         # establish order
         their_connections = list(their_connections)

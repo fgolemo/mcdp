@@ -8,7 +8,7 @@ mcdp {
 	    x + y >= a
 	}
 
-	f.a >= sqrt(f.x) + sqrt(f.y) + nat:10
+	f.a >= ceil(sqrt(f.x)) + ceil(sqrt(f.y)) + Nat:10
 
 	requires x, y for f
 }

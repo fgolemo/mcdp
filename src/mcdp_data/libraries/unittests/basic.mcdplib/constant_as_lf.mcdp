@@ -1,0 +1,17 @@
+# This converts from European to American
+mcdp {
+    provides out [V x A]
+    requires in  [V x A] 
+    requires cost [USD]
+
+    # This device costs $5 
+    cost >= 5 USD
+
+    # We require that the input is european or more
+    # and that it provides a good amount of power (take)
+    in >= < 0 V , take(out, 1) >
+    take(out, 0) <= Top V
+    
+    # We can only provide the american output
+    out <= < 100 V, Top A>
+}

@@ -1,9 +1,10 @@
-from mcdp_library.library import MCDPLibrary
+from mcdp_library import MCDPLibrary
 from mcdp_library.library_utils import list_library_files
-from mcdp_library_tests.tests import enumerate_test_libraries
+from mcdp_library_tests.tests import enumerate_test_libraries, get_test_library
 from mcdp_web.renderdoc.main import render_complete
 from mcdp_web_tests.test_server import test_mcdpweb_server
 from mocdp.exceptions import mcdp_dev_warning
+import os
 import shutil
 import tempfile
 
@@ -14,35 +15,42 @@ def define_tests_mcdp_web(context):
         
         It also looks for the files *.mcdp_tests.yaml inside.
     """
-    for short, dirname in enumerate_test_libraries():
-        c2 = context.child(short)
-        c2.comp_dynamic(define_tests_rendering, dirname)
+    for libname in enumerate_test_libraries():
+        c2 = context.child(libname)
+
+        c2.comp_dynamic(define_tests_rendering, libname)
+
         if False:
-            c2.comp(test_mcdpweb_server, dirname)
+            c2.comp(test_mcdpweb_server, libname)
         else:
             mcdp_dev_warning('test_mcdpweb_server() is not enabled')
 
 
-def define_tests_rendering(context, dirname):
-    library = MCDPLibrary()
-    library.add_search_dir(dirname)
+def define_tests_rendering(context, libname):
+    library = get_test_library(libname)
     
     ext = MCDPLibrary.ext_doc_md
     for docname, realpath in list_library_files(library, ext):
         job_id = 'render-%s' % docname
-        context.comp(check_rendering, dirname, docname, realpath, job_id=job_id)
+        context.comp(check_rendering, libname=libname, filename=realpath, job_id=job_id)
 
 
-def check_rendering(dirname, docname, filename):  # @UnusedVariable
+def check_rendering(libname, filename):
+    library = get_test_library(libname)
     import codecs
     data = codecs.open(filename, encoding='utf-8').read().encode('utf-8')
-
-    library = MCDPLibrary()
-    library.add_search_dir(dirname)
     
     tmpdir = tempfile.mkdtemp(prefix='mcdplibrary_cache')
     library.use_cache_dir(tmpdir)
 
-    render_complete(library, data, raise_errors=True, realpath=filename)
+    html = render_complete(library, data, raise_errors=True, realpath=filename)
+    basename = os.path.basename(filename)
+    fn = os.path.join('out', 'check_rendering', libname, basename + '.html')
+    d = os.path.dirname(fn)
+    if not os.path.exists(d):
+        os.makedirs(d)
+    with open(fn, 'w') as f:
+        f.write(html)
+    print('written to %r ' % fn)
 
     shutil.rmtree(tmpdir)

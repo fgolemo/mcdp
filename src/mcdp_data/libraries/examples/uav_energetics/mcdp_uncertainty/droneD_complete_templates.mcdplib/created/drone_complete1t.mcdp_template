@@ -1,0 +1,27 @@
+template [Battery: `BatteryInterface, Actuation: `ActuationInterface, Perception: `PerceptionInterface] 
+ 
+mcdp {
+    provides travel_distance [km]
+    provides num_missions [R]
+    provides carry_payload [g]
+
+    requires total_cost_ownership [$]
+
+    strategy = new Strategy
+
+    actuation_energetics = instance specialize [Battery: Battery, Actuation: Actuation] `ActuationEnergeticsTemplate 
+
+    endurance provided by actuation_energetics>= endurance required by strategy
+    velocity provided by actuation_energetics>= velocity required by strategy
+    num_missions provided by actuation_energetics >= provided num_missions
+    extra_payload provided by actuation_energetics>= provided carry_payload
+    distance provided by strategy >= provided travel_distance
+ 
+    perception = instance Perception
+    velocity required by strategy <= velocity provided by perception 
+    extra_power provided by actuation_energetics >= power required by perception
+
+    requires total_mass for actuation_energetics
+
+    total_cost_ownership >= total_cost required by actuation_energetics
+}

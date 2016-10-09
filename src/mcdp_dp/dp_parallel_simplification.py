@@ -1,15 +1,18 @@
 # -*- coding: utf-8 -*-
-from .dp_flatten import Mux
-from .dp_identity import Identity
-from .dp_parallel import Parallel
-from .dp_parallel_n import ParallelN
-from .primitive import PrimitiveDP  # @UnusedImport
 from abc import ABCMeta, abstractmethod
+
 from contracts import contract
 from contracts.utils import raise_wrapped
 from mcdp_posets import PosetProduct
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 from multi_index.get_it_test import compose_indices
+
+from .dp_flatten import Mux
+from .dp_identity import Identity
+from .dp_parallel import Parallel
+from .dp_parallel_n import ParallelN
+from .primitive import PrimitiveDP  # @UnusedImport
+
 
 __all__ = [
     'make_parallel',
@@ -28,7 +31,7 @@ class ParSimplificationRule():
         dp0 = Parallel(dp1, dp2)
         try:
             res = self._execute(dp1, dp2)
-        except BaseException as e:
+        except BaseException as e: # pragma: no cover
             msg = 'Error while executing Parallel simplification rule.'
             raise_wrapped(DPInternalError, e, msg, dp1=dp1.repr_long(),
                           dp2=dp2.repr_long(), rule=self)
@@ -36,7 +39,7 @@ class ParSimplificationRule():
         try:
             from mcdp_dp.dp_series_simplification import check_same_spaces
             check_same_spaces(dp0, res)
-        except AssertionError as e:
+        except AssertionError as e: # pragma: no cover
             msg = 'Invalid Parallel simplification for rule.'
             raise_wrapped(DPInternalError, e, msg, dp1=dp1.repr_long(),
                           dp2=dp2.repr_long(), rule=self)
@@ -44,7 +47,7 @@ class ParSimplificationRule():
 
     @abstractmethod
     def _execute(self, dp1, dp2):
-        pass
+        """ Execute the rule """
 
 
 class RuleMuxOutside(ParSimplificationRule):
@@ -140,21 +143,11 @@ def make_parallel_n(dps):
 #         return dp
     
 def make_parallel(dp1, dp2):
+    from mcdp_dp.dp_series_simplification import disable_optimization
+    if disable_optimization:
+        return Parallel(dp1, dp2)
+
     from mcdp_dp.dp_series_simplification import make_series, is_equiv_to_terminator, equiv_to_identity
-
-#     # if none is a mux, we cannot do anything
-#     if not isinstance(dp1, Mux) and not isinstance(dp2, Mux):
-#         return Parallel(dp1, dp2)
-#
-#     def identity_as_mux(x):
-#         if isinstance(x, Identity):
-#             F = x.get_fun_space()
-#             return Mux(F, ())
-#         return x
-#
-#     dp1 = identity_as_mux(dp1)
-#     dp2 = identity_as_mux(dp2)
-
 
     # change identity to Mux
     a = Parallel(dp1, dp2)
@@ -163,24 +156,27 @@ def make_parallel(dp1, dp2):
         assert F == a.get_fun_space()
         return Identity(F)
 
-    # Parallel(X, Terminator) => Series(Mux([0]), X, Mux([0, ()]))
-    if is_equiv_to_terminator(dp2):
-        F = a.get_fun_space()  # PosetProduct((dp1.get_fun_space(),))
-        m1 = Mux(F, coords=0)
-        m2 = dp1
-        m3 = Mux(m2.get_res_space(), [(), []])
-        res = make_series(make_series(m1, m2), m3)
-
-        assert res.get_res_space() == a.get_res_space()
-        assert res.get_fun_space() == a.get_fun_space()
-        return res
-
-    if is_equiv_to_terminator(dp1):
-        F = a.get_fun_space()  # PosetProduct((dp1.get_fun_space(),))
-        m1 = Mux(F, coords=1)
-        m2 = dp2
-        m3 = Mux(m2.get_res_space(), [[], ()])
-        return make_series(make_series(m1, m2), m3)
+    if False:
+        # These never run...
+            
+        # Parallel(X, Terminator) => Series(Mux([0]), X, Mux([0, ()]))
+        if is_equiv_to_terminator(dp2):
+            F = a.get_fun_space()  # PosetProduct((dp1.get_fun_space(),))
+            m1 = Mux(F, coords=0)
+            m2 = dp1
+            m3 = Mux(m2.get_res_space(), [(), []])
+            res = make_series(make_series(m1, m2), m3)
+    
+            assert res.get_res_space() == a.get_res_space()
+            assert res.get_fun_space() == a.get_fun_space()
+            return res
+    
+        if is_equiv_to_terminator(dp1):
+            F = a.get_fun_space()  # PosetProduct((dp1.get_fun_space(),))
+            m1 = Mux(F, coords=1)
+            m2 = dp2
+            m3 = Mux(m2.get_res_space(), [[], ()])
+            return make_series(make_series(m1, m2), m3)
 
     for rule in rules:
         if rule.applies(dp1, dp2):

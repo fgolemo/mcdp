@@ -1,0 +1,11 @@
+mcdp {
+    provides x86_flops [flops]
+    requires power [W]
+
+
+    provided x86_flops <= 1000000 flops
+
+    a = 0.0005 W / flops
+
+    required power >= 2 W +  a * x86_flops
+}

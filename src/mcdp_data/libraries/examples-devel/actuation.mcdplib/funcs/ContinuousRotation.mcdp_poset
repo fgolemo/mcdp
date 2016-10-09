@@ -1,0 +1,6 @@
+product( 
+  torque: N*m,
+  velocity: rad/s,
+  duration: s,
+  rigid_body: `RigidBodyID
+)

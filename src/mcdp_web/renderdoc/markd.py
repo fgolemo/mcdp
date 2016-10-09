@@ -6,7 +6,7 @@ def render_markdown(s):
     """ Returns an HTML string encoded in UTF-8"""
     if isinstance(s, unicode):
         msg = 'I expect a utf-8 string.'
-        raise_desc(TypeError, msg, s=s)
+        raise_desc(TypeError, msg, s=s.__repr__())
 
     import markdown  # @UnresolvedImport
 

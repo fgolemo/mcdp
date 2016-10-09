@@ -1,22 +1,27 @@
 # -*- coding: utf-8 -*-
-from .utils import safe_makedirs
 from abc import ABCMeta, abstractmethod
-from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped, indent
-from mcdp_posets import (NotLeq, PosetProduct, Rcomp, UpperSet, UpperSets,
-    get_types_universe)
-from mocdp.drawing import plot_upset_R2
-from reprep.config import RepRepDefaults
 import functools
 import os
 import traceback
+
+from contracts import contract
+from contracts.utils import indent, raise_desc, raise_wrapped
+from mcdp_posets import (NotLeq, PosetProduct, Rcomp, UpperSet, UpperSets,
+    get_types_universe)
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
+from mcdp_posets.rcomp import finfo
+import numpy as np
+from reprep.config import RepRepDefaults
+
+from .drawing import plot_upset_R2
+from .utils import safe_makedirs
 
 
 extra_space_finite = 0.025
 extra_space_top = 0.05
 
 
-def generic_report_trace(r, ndp, dp, trace, out, do_movie=False):
+def generic_report_trace(r, ndp, dp, trace, out, do_movie=False):  # @UnusedVariable
     r.text('dp', dp.repr_long())
     # r.text('trace', trace.format())
     
@@ -353,10 +358,14 @@ class Plotter_Tuple2_UR2(Plotter):
         P = space.subs[0]
         return self.p.axis_for_sequence(P, s)
     
-    def plot(self, pylab, axis, space, value, params={}):
+    def plot(self, pylab, axis, space, value, params={}):  # @UnusedVariable
         v1, v2 = value
-        params1 = dict(color_shadow=[1.0, 0.8, 0.8], markers='k.')
-        params2 = dict(color_shadow=[0.8, 0.8, 1.0], markers='g.')
+        default_params = dict(color_shadow_L='#FFC35C',  # [1.0, 0.8, 0.8],
+                              color_shadow_U='#C390D4', #[0.8, 0.8, 1.0])
+                              )
+        default_params.update(params)
+        params1 = dict(color_shadow=default_params['color_shadow_L'], markers='k.')
+        params2 = dict(color_shadow=default_params['color_shadow_U'], markers='k.')
         P = space.subs[0]
         self.p.plot(pylab, axis, P, v1, params1)
         self.p.plot(pylab, axis, P, v2, params2)
@@ -442,6 +451,7 @@ class PlotterUR2(Plotter):
 
         minimals = [self._get_screen_coords(_, axis) for _ in value.minimals]
 
+        minimals = poset_minima(minimals, space.P.leq)
         v = space.P.Us(minimals)
 
         plot_upset_R2(pylab, v, axis, extra_space_shadow=extra_space_finite,
@@ -491,7 +501,7 @@ class PlotterURRpR(Plotter):
         params0.update(params)
         color_shadow = params0['color_shadow']
         markers = params0['markers']
-        markers_params = params0['markers_params']
+        _markers_params = params0['markers_params']
         self.check_plot_space(space)
         tu = get_types_universe()
         P_TO_S, _ = tu.get_embedding(space.P, self.S)
@@ -541,13 +551,13 @@ class PlotterURRpR_23(PlotterURRpR):
 
 def enlarge_x(b, f):
     w = b[1] - b[0]
-    h = b[3] - b[2]
+    # h = b[3] - b[2]
     dw = f * w
     dh = 0
     return (b[0] - dw, b[1] + dw, b[2] - dh, b[3] + dh)
 
 def enlarge_y(b, f):
-    w = b[1] - b[0]
+    # w = b[1] - b[0]
     h = b[3] - b[2]
     dw = 0
     dh = h * f
@@ -557,9 +567,18 @@ def enlarge_y(b, f):
 def enlarge(b, f):
     w = b[1] - b[0]
     h = b[3] - b[2]
-    dw = f * w
-    dh = h * f
-    return (b[0] - dw, b[1] + dw, b[2] - dh, b[3] + dh)
+    # print b, f, w, h
+    dw = fix_underflow(f) * fix_underflow(w)
+    dh = fix_underflow(h) * fix_underflow(f)
+
+    a = (b[0] - dw, b[1] + dw, b[2] - dh, b[3] + dh)
+    return tuple(map(fix_underflow, a))
+
+
+def fix_underflow(x):
+    # using finfo.tiny gives problems to matplotlib
+    return np.maximum(x, finfo.eps)
+
 
 def enlarge_topright(b, f):
     w = b[1] - b[0]

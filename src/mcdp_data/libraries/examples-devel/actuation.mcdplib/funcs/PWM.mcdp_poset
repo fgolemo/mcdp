@@ -1,0 +1,7 @@
+product(
+ voltage_max: V,
+ amp_max: A,
+ freq_max: Hz,
+ duration: s,
+ rigid_body: `RigidBodyID
+)

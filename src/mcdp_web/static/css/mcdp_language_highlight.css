@@ -50,8 +50,23 @@ span.TakeKeyword,
 span.SpecializeKeyword,
 span.FinitePosetKeyword,
 span.ProductKeyword,
-span.UncertainKeyword
-
+span.UncertainKeyword,
+span.UpperSetsKeyword,
+span.MakeUpperSetsKyword,
+span.PowerSetKeyword,
+span.IntervalKeyword,
+span.UpperSetFromCollectionKeyword,
+span.TopKeyword,
+span.BottomKeyword,
+span.SingleElementPosetKeyword,
+span.SpaceCoproductKeyword,
+span.IgnoreKeyword,
+span.SolveModelKeyword,
+span.AnyOfKeyword,
+span.MaximalsKeyword,
+span.MinimalsKeyword,
+span.IgnoreResourcesKeyword,
+span.ProcName
 { 
     font-weight: bold; 
     color: #00a;
@@ -76,8 +91,10 @@ span.FuncName { color: #CC6600 ; }
 
 
 span.FName, span.RName { } 
-span.DPName, span.NDPName, span.PosetName, span.TemplateParamName,
-span.FinitePosetElement {  
+span.DPName, span.NDPName, span.PosetName, span.TemplateName,
+span.TemplateParamName,
+span.FinitePosetElement,
+span.SingleElementPosetTag {  
     color: #a0a;
 }
 

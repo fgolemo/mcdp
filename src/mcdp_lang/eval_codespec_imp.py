@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .eval_codespec_imp_utils import InstantiationException, instantiate_spec
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
@@ -5,8 +6,6 @@ from .utils_lists import unwrap_list
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
 from mocdp.exceptions import DPSemanticError
-# from conf_tools import instantiate_spec
-# from conf_tools.exceptions import ConfToolsException
 
 CDP = CDPLanguage
 

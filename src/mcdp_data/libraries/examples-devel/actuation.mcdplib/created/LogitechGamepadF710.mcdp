@@ -1,0 +1,6 @@
+# https://www.amazon.com/Logitech-940-000117-Gamepad-F710/dp/B0041RR0TW
+mcdp {
+    requires budget >= 25 USD # XXX
+
+    provides com [`LogitechWirelessCom]
+}

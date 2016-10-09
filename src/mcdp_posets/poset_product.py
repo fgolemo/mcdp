@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
-from .poset import NotLeq, Poset
-from .space_product import SpaceProduct
+import collections
+import itertools
+
 from contracts import contract
 from contracts.utils import indent, raise_desc
 from mocdp.exceptions import do_extra_checks
-import itertools
+from mocdp.memoize_simple_imp import memoize_simple
+
+from .poset import NotLeq, Poset
+from .space_product import SpaceProduct
+
 
 __all__ = [
     'PosetProduct',
@@ -16,10 +21,18 @@ class PosetProduct(SpaceProduct, Poset):
 
     @contract(subs='seq($Poset)')
     def __init__(self, subs):
+        if not isinstance(subs, collections.Iterable):
+            msg = 'PosetProduct expects a sequence of Posets.'
+            raise_desc(ValueError, msg, subs=subs)
         subs = tuple(subs)
         SpaceProduct.__init__(self, subs)
 
     def leq(self, a, b):
+        assert isinstance(a, tuple), (self, a)
+        assert isinstance(b, tuple), (self, b)
+        assert len(a) == len(self.subs), (self, a)
+        assert len(b) == len(self.subs), (self, b)
+
         if do_extra_checks():
             self.belongs(a)
             self.belongs(b)
@@ -30,6 +43,11 @@ class PosetProduct(SpaceProduct, Poset):
         return True
 
     def join(self, a, b):
+        assert isinstance(a, tuple), a
+        assert isinstance(b, tuple), b
+        assert len(a) == len(self.subs), (self, a)
+        assert len(b) == len(self.subs), (self, b)
+
         res = []
         for sub, x, y in zip(self.subs, a, b):
             res.append(sub.join(x, y))
@@ -46,6 +64,10 @@ class PosetProduct(SpaceProduct, Poset):
             self.belongs(a)
             self.belongs(b)
         problems = []
+        if not( isinstance(a, tuple) and len(a) == len(self.subs)):
+            raise ValueError(a)
+        if not( isinstance(b, tuple) and len(b) == len(self.subs)):
+            raise ValueError(b)
         for i, (sub, x, y) in enumerate(zip(self.subs, a, b)):
             try:
                 sub.check_leq(x, y)
@@ -58,14 +80,22 @@ class PosetProduct(SpaceProduct, Poset):
             msg = "\n".join(problems)
             raise_desc(NotLeq, msg, self=self, a=a, b=b)
 
+    @memoize_simple
     def get_top(self):
         return tuple([s.get_top() for s in self.subs])
 
+    @memoize_simple
     def get_bottom(self):
         return tuple([s.get_bottom() for s in self.subs])
 
+    @memoize_simple
     def get_minimal_elements(self):
         s = [_.get_minimal_elements() for _ in self.subs]
+        return set(itertools.product(*tuple(s)))
+
+    @memoize_simple
+    def get_maximal_elements(self):
+        s = [_.get_maximal_elements() for _ in self.subs]
         return set(itertools.product(*tuple(s)))
 
     def get_test_chain(self, n):
@@ -75,5 +105,3 @@ class PosetProduct(SpaceProduct, Poset):
         chains = [s.get_test_chain(n) for s in self.subs]
         res = zip(*tuple(chains))
         return res
-
-

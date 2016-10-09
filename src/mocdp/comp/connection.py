@@ -43,7 +43,7 @@ def check_connections(name2dp, connections):
  
 @contract(name2dp='dict(str:($NamedDP))',
           connections='set(str|$Connection)|list(str|$Connection)',
-          returns=NamedDP)
+          returns=SimpleWrap)
 def dpconnect(name2dp, connections, split=[]):
     """
         Raises TheresALoop
@@ -51,9 +51,12 @@ def dpconnect(name2dp, connections, split=[]):
     if len(name2dp) == 1:
         if connections:
             raise_desc(NotImplementedError, '')
-        return list(name2dp.values())[0]
+        res = list(name2dp.values())[0]
+
+        return res.abstract()
 
     connections = set(connections)
+#     if do_extra_checks():
     check_connections(name2dp, connections)
 
     # A, B, C
@@ -169,13 +172,12 @@ def its_dp_as_product(ndp):
         R0 = dp.get_res_space()
         lift = Mux(R0, [()])
         dp = make_series(dp, lift)
-
     return dp
 
 @contract(ndp1=NamedDP, ndp2=NamedDP,
           connections='set($Connection)',
           split='list(str)',
-          returns=NamedDP)
+          returns=SimpleWrap)
 def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
     """ 
         Note the argument split must be a list of strings so 
@@ -276,7 +278,6 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
         assert len(fntot) == len(Ftot), (fntot, Ftot)
         assert len(rntot) == len(Rtot), (rntot, Rtot)
 
-
         # I can create the first muxer m1
         # from ftot to Product(f1, D)
 
@@ -291,7 +292,6 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
 
         # Get Identity on D
         D_types = ndp2.get_ftypes(D)
-        # Id_D = Mux(D_types, ())  # or identity
         Id_D = Identity(D_types)
 
         ndp1_p = its_dp_as_product(ndp1)
@@ -309,7 +309,6 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
                 return c1
         
         A_B1_types = PosetProduct(tuple(ndp1.get_rtypes(A)) + tuple(ndp1.get_rtypes(B1)))
-        # Id_A_B1 = Mux(A_B1_types, ())  # or identity
         Id_A_B1 = Identity(A_B1_types)
         ndp2_p = its_dp_as_product(ndp2)
         Z = make_parallel(Id_A_B1, ndp2_p)
@@ -386,9 +385,6 @@ def connect2(ndp1, ndp2, connections, split, repeated_ok=False):
         Y_Z = make_series(Y, Z)
         Y_Z_m2 = make_series(Y_Z, m2)
 
-#         m1_X_Y = make_series(m1_X, Y)
-#         Z_m2 = make_series(Z, m2)
-#         _Y_Z_m2 = make_series(Y, Z_m2)
         res_dp = make_series(m1_X, Y_Z_m2)
 
         fnames = fntot
@@ -420,7 +416,7 @@ def simplify_if_only_one_name(res_dp, fnames, rnames):
 
 
 def make_name(already):
-    for i in range(1, 10):
+    for i in range(1, 1000):
         candidate = 'group%d' % i
         if not candidate in already:
             return candidate
@@ -598,7 +594,7 @@ def find_functions_with_multiple_connections(connections):
 
 @contract(name2dp='dict(str:$NamedDP)',
           connections='set(str|$Connection)|list(str|$Connection)',
-          returns=NamedDP)
+          returns=SimpleWrap)
 def dpgraph(name2dp, connections, split):
     """ 
     
@@ -606,7 +602,7 @@ def dpgraph(name2dp, connections, split):
         and that there are no repetitions of names of resources
         or functions.
         
-        It also assumes that there each function/resource 
+        It also assumes that each function/resource 
         is connected to exactly one function/resource.
         
     """
@@ -649,6 +645,7 @@ def dpgraph(name2dp, connections, split):
                    split=split)
     return res
 
+@contract(returns='set(tuple,seq(tuple(str, str)))')
 def simple_cycles_as_edges(G):
     cycles = list(simple_cycles(G))
     def c2e(c):
@@ -657,7 +654,7 @@ def simple_cycles_as_edges(G):
             n2 = c[(i + 1) % len(c)]
             yield n1, n2
 
-    return [list(c2e(c)) for c in cycles]
+    return set([tuple(c2e(c)) for c in cycles])
 
 @contract(returns=Connection)
 def choose_connection_to_cut1(connections, name2dp):
@@ -695,7 +692,7 @@ def choose_connection_to_cut1(connections, name2dp):
 
 @contract(name2dp='dict(str:($NamedDP))',
           connections='set(str|$Connection)|list(str|$Connection)',
-          returns=NamedDP)
+          returns=SimpleWrap)
 def dpgraph_(name2dp, connections, split):
 
     try:
@@ -705,8 +702,13 @@ def dpgraph_(name2dp, connections, split):
         G = get_connection_multigraph(connections)
         cycles = list(simple_cycles(G))
         if not cycles:
-            return dpconnect(name2dp, connections, split=split)
+            res = dpconnect(name2dp, connections, split=split)
+            assert isinstance(res, SimpleWrap), (type(res), name2dp)
+            return res
 
+        # At this point we never resort to the rest -
+        # this is always called without cycles
+        assert False
         c = choose_connection_to_cut1(connections, name2dp)
 
         other_connections = set()

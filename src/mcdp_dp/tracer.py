@@ -1,5 +1,6 @@
-from contracts import contract
 from contextlib import contextmanager
+
+from contracts import contract
 from contracts.utils import indent, raise_desc
 
 
@@ -28,6 +29,16 @@ class Tracer():
         self.prefix = prefix
         self.logger = logger
 
+    def __repr__(self):
+        return 'Tracer(%s)' % len(self.chronology)
+
+    def repr_long(self):
+        return self.__repr__()
+
+    def __getstate__(self):
+        # do not pickle logger
+        return dict(prefix=self.prefix, chronology=self.chronology)
+
     @contract(e=TracerEvent)
     def _log_event(self, e):
         self.chronology.append(e)
@@ -35,7 +46,7 @@ class Tracer():
     def log(self, s):
         """ Records a string """
         if self.logger is not None:
-            self.logger.info(self.prefix + s)
+            self.logger.info(self.prefix + ":" + s)
         self._log_event(TracerLog(s))
         
     @contextmanager
@@ -97,6 +108,15 @@ class Tracer():
                 for _ in x.trace.rec_find_has_value(name, value):
                     yield _
 
+    def rec_get_value(self, name):
+        values = list(self.get_value(name))
+        for v in values:
+            yield v
+
+        for x in self.chronology:
+            if isinstance(x, TracerRecursion):
+                for _ in x.trace.rec_get_value(name):
+                    yield _
 
     def get_iteration_values(self, name):
         iterations = self.get_iterations()
@@ -126,6 +146,9 @@ class TracerRecursion(TracerEvent):
         self.trace = trace
         self.result = result
 
+    def __repr__(self):
+        return 'TracerRecursion(%s,%s,%s)' % (self.name, self.trace, self.result)
+
     def format(self):
         name = self.name
         start = '%s: ' % name
@@ -136,6 +159,9 @@ class TracerValue(TracerEvent):
     def __init__(self, name, value):
         self.name = name
         self.value = value
+
+    def __repr__(self):
+        return 'TracerValue(%s,%s)' % (self.name, self.value)
 
     def format(self):
         return '%s = %s' % (self.name, self.value)

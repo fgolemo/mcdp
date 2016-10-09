@@ -1,19 +1,22 @@
+# -*- coding: utf-8 -*-
+import itertools
+
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, raise_wrapped
 from mcdp_cli.query_interpretation import interpret_params_1string
-from mocdp.comp.context import Context
-from mocdp.comp.interfaces import NamedDP
+from mcdp_dp.dp_transformations import get_dp_bounds
+from mcdp_dp.tracer import Tracer
 from mcdp_lang.eval_space_imp import eval_space
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
-from mcdp_posets import UpperSets
+from mcdp_posets import NotLeq, Space, UpperSets, express_value_in_isomorphic_space
 from mcdp_posets.rcomp import RcompTop
-from mcdp_posets.space import Space
-from mcdp_posets.types_universe import express_value_in_isomorphic_space
-import itertools
+from mocdp.comp.context import Context
+from mocdp.comp.interfaces import NamedDP
 import numpy as np
 
-def solve_combinations(ndp, combinations, result_like):
+
+def solve_combinations(ndp, combinations, result_like, lower=None, upper=None):
     """
     combinations = {
         "capacity": (np.linspace(50, 3000, 10), "Wh"),
@@ -25,40 +28,45 @@ def solve_combinations(ndp, combinations, result_like):
     
     """
     queries = list(get_combinations(combinations))
-    return solve_queries(ndp, queries, result_like)
+    return solve_queries(ndp, queries, result_like, lower=lower, upper=upper)
 
-def solve_queries(ndp, queries, result_like):
+def solve_queries(ndp, queries, result_like, lower=None, upper=None):
     results = []
     queries2 = []
+    implementations = []
+    dp0 = ndp.get_dp()
+    I = dp0.get_imp_space()
     for query in queries:
-        res = friendly_solve(ndp, query=query, result_like=result_like)
+        res, imps = friendly_solve(ndp, query=query, result_like=result_like,
+                                              upper=upper, lower=lower)
+        
         q2 = dict([(k, v) for k, (v, _) in query.items()])
         queries2.append(q2)
         results.append(res)
-    return dict(queries=queries2, results=results)
+        implementations.append(imps)
+    return dict(queries=queries2, results=results, implementations=implementations,
+                I = I)
 
 
 @contract(ndp=NamedDP, query='dict(str:tuple(float|int,str))')
-def friendly_solve(ndp, query, result_like='dict(str:str)'):
+def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=None):
     """
-        Returns a set of dict(rname:)
-        
-        
         query = dict(power=(100,"W"))
         result_like = dict(power="W")
         
         s = solve
     
     """
-
+    print('friendly_solve(upper=%s, lower=%s)' % (upper, lower))
+    # TODO: replace with convert_string_query(ndp, query, context):
     fnames = ndp.get_fnames()
     rnames = ndp.get_rnames()
-#     if not len(fnames) > 1:
-#         raise NotImplementedError()
-    if not len(rnames) > 1:
+
+    if not len(rnames) >= 1:
         raise NotImplementedError()
     
     value = []
+
     for fname in fnames:
         if not fname in query:
             msg = 'Missing function'
@@ -68,7 +76,11 @@ def friendly_solve(ndp, query, result_like='dict(str:str)'):
         q, qs = query[fname]
         s = '%s %s' % (q, qs)
 
-        val = interpret_params_1string(s, F=F)
+        try:
+            val = interpret_params_1string(s, F=F)
+        except NotLeq as e:
+            raise_wrapped(ValueError, e, 'wrong type', fname=fname)
+            
         value.append(val)
 
     if len(fnames) == 1:
@@ -76,29 +88,59 @@ def friendly_solve(ndp, query, result_like='dict(str:str)'):
     else:
         value = tuple(value)
 
-    dp = ndp.get_dp()
+    if hasattr(ndp, '_cache_dp0'):
+        dp0 = ndp._cache_dp0
+    else:
+        
+        dp0 = ndp.get_dp()
+        ndp._cache_dp0 = dp0
+        
+    if upper is not None:
+        _, dp = get_dp_bounds(dp0, nl=1, nu=upper)
+
+    elif lower is not None:
+        dp, _ = get_dp_bounds(dp0, nl=lower, nu=1)
+    else:
+        dp = dp0
+        
     F = dp.get_fun_space()
     F.belongs(value)
-#     print('query: %s' % F.format(value))
 
-    res = dp.solve(value)
+    from mocdp import logger
+    trace = Tracer(logger=logger)
+    res = dp.solve_trace(value, trace)
     R = dp.get_res_space()
     UR = UpperSets(R)
+    print('value: %s' % F.format(value))
     print('results: %s' % UR.format(res))
 
     ares = []
+    implementations = []
 
     for r in res.minimals:
+        rnames = ndp.get_rnames()
         fr = dict()
         for rname, sunit in result_like.items():
-            i = ndp.get_rnames().index(rname)
+            if not rname in rnames:
+                msg = 'Could not find resource %r.' % rname
+                raise_desc(ValueError, msg, rnames=rnames)
+            i = rnames.index(rname)
             unit = interpret_string_as_space(sunit)
             Ri = ndp.get_rtype(rname)
-            ri = r[i]
+            if len(rnames) > 1:
+                ri = r[i]
+            else:
+                assert i == 0
+                ri = r
             v = express_value_in_isomorphic_space(S1=Ri, s1=ri, S2=unit)
             fr[rname] = v
+        
         ares.append(fr)
-    return ares
+        
+        ms = dp.get_implementations_f_r(value, r)
+        implementations.append(ms)
+        
+    return ares, implementations
 
 @contract(res='list(dict(str:*))')
 def to_numpy_array(result_like, res):
@@ -111,15 +153,14 @@ def to_numpy_array(result_like, res):
         dtype.append((field, 'float'))
     n = len(res)
     a = np.zeros(n, dtype=dtype)
-    
-#     print('res: %s' % str(res))
-#     print('dtype: %s' % dtype)
-#     print('n: %s' % n)
+     
     for i, r in enumerate(res):
         for field in result_like:
             value = r[field]
             if isinstance(value, RcompTop):
                 value = np.inf
+
+
             a[field][i] = value
     return a
 

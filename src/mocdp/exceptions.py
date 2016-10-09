@@ -1,10 +1,12 @@
 from contextlib import contextmanager
 from contracts import all_disabled
+import getpass
 import sys
-import warnings
+
 
 class MCDPException(Exception):
     pass
+
 
 class MCDPExceptionWithWhere(MCDPException):
     def __init__(self, error, where=None):
@@ -32,20 +34,35 @@ class MCDPExceptionWithWhere(MCDPException):
         where = _get_where_with_filename(self, filename)
         return type(self)(self.error, where=where)
 
+
 class DPInternalError(MCDPExceptionWithWhere):
     """ Internal consistency errors (not user) """
+
 
 class DPUserError(MCDPExceptionWithWhere):
     """ User mistake """
     pass
 
+
 class DPSyntaxError(DPUserError):
     pass
+
 
 class DPSemanticError(DPUserError):
     pass
 
+class DPNotImplementedError(DPInternalError):
+    pass
+
+
 class DPSemanticErrorNotConnected(DPSemanticError):
+    pass
+
+
+class DPUserAssertion(MCDPExceptionWithWhere):
+    """ 
+        Assertion thrown by user using assert_leq, etc. 
+    """
     pass
 
 
@@ -55,10 +72,11 @@ def extend_with_filename(realpath):
         yield
     except MCDPExceptionWithWhere as e:
         _type, _value, traceback = sys.exc_info()
-        if realpath is not None:
-            e = e.with_filename(realpath)
-        else:
-            e = e
+        if e.where is None or e.where.filename is None:
+            if realpath is not None:
+                e = e.with_filename(realpath)
+            else:
+                e = e
         raise e, None, traceback
 
 def _get_where_with_filename(e, filename):
@@ -70,7 +88,6 @@ def _get_where_with_filename(e, filename):
         where = where.with_filename(filename)
     return where
 
-import getpass
 user = getpass.getuser()
 # class _storage:
 #     first = True

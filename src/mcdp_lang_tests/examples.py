@@ -13,7 +13,7 @@ def get_marked_tests(filename):
         contents = f.read()
 
     line1 = contents.split('\n')[0]
-    if not 'test' in line1:
+    if not 'test' in line1: # pragma: no cover
         msg = 'Please add a "test" comment at the beginning of the file.'
         raise_desc(Exception, msg, line1=line1, filename=filename)
 
@@ -41,15 +41,20 @@ def syntax_test_fn(filename):
 
 def syntax_test(contents):
     from mcdp_report.html import ast_to_html
-    html = ast_to_html(contents, complete_document=False)
 
+    html = ast_to_html(contents, complete_document=False, add_css=False)
+
+    s = StringIO(html)
     import xml.etree.ElementTree as ETree
     try:
-        s = StringIO(html)
         _doc = ETree.parse(s)
-    except ETree.ParseError :
-        print("ERROR in {0} : {1}".format(ETree.ParseError.filename,
-                                          ETree.ParseError.msg))
+    except ETree.ParseError: # pragma: no cover
+        print('---')
+        print(html)
+        print('---')
+        raise
+#         print("ERROR in {0} : {1}".format(ETree.ParseError.filename,
+#                                           ETree.ParseError.msg))
 
 
 def test_one(test, filename):
@@ -86,8 +91,10 @@ def known_fail(f, *args):
         raise Exception(msg)
 
 
-def define_test_for(context, filename, basename, tests, known_failure=False):
+def define_test_for(context, filename, basename, tests):
 
+    known_failure = False
+    
     mocdp_base = os.path.join(dir_from_package_name('mocdp'), '..', '..')
     outdir = os.path.join(mocdp_base, 'out', 'mcdp_lang_tests')
     

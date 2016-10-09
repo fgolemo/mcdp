@@ -1,6 +1,6 @@
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
-from pyramid.httpexceptions import HTTPFound
-from pyramid.renderers import render_to_response
+from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
+from pyramid.renderers import render_to_response  # @UnresolvedImport
 
 
 class AppEditor():

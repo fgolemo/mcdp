@@ -1,12 +1,9 @@
 # -*- coding: utf-8 -*-
-
 from .parts import CDPLanguage
 from contracts.utils import indent
 from mocdp.comp import NotConnected
 
-
 CDP = CDPLanguage
-#
 
 def get_missing_connections(context):
     connected_fun = set()  # contains (name, f)
@@ -28,11 +25,11 @@ def get_missing_connections(context):
             for rn in ndp.get_rnames():
                 available_res.add((n, rn))
 
-
     unconnected_fun = available_fun - connected_fun
     unconnected_res = available_res - connected_res
 
     return unconnected_fun, unconnected_res
+
 
 def check_missing_connections(context):
     """ Checks that all resources and functions are connected. """
@@ -44,48 +41,35 @@ def check_missing_connections(context):
         s += "There are some unconnected functions:"
         for n, fn in unconnected_fun:
             s += '\n- function %r of dp %r' % (fn, n)
-            msg = 'One way to fix this is to add an explicit function:\n'
-            fn2 = 'f'
-            fix = "provides %s [unit]" % fn2
-            if context.is_new_resource(n):
-                ref = n
-            else:
-                ref = '%s.%s' % (n, fn)
-            fix += '\n' + "%s >= %s" % (ref, fn2)
-            msg += indent(fix, '    ')
-            s += '\n' + indent(msg, 'help: ')
+            if False:
+                msg = 'One way to fix this is to add an explicit function:\n'
+                fn2 = 'f'
+                fix = "provides %s [unit]" % fn2
+                if context.is_new_resource(n):
+                    ref = n
+                else:
+                    ref = '%s.%s' % (n, fn)
+                fix += '\n' + "%s >= %s" % (ref, fn2)
+                msg += indent(fix, '    ')
+                s += '\n' + indent(msg, 'help: ')
 
     if unconnected_res:
         s += "\nThere are some unconnected resources:"
         for n, rn in unconnected_res:
             s += '\n- resource %s of dp %r' % (rn, n)
-            msg = 'One way to fix this is to add an explicit resource:\n'
-            rn2 = 'r'
-            fix = "requires %s [unit]" % rn2
-            if context.is_new_function(n):
-                ref = n
-            else:
-                ref = '%s.%s' % (n, rn)
-            # todo: omit '.' if n is
-            fix += '\n' + "%s >= %s" % (rn2, ref)
-            msg += indent(fix, '    ')
-            s += '\n' + indent(msg, 'help: ')
-
-
-    # This should count as unconnected:
-# cdp {
-#     a = template cdp {}
-#     b = template cdp {}
-# }
-    for name, ndp in context.names.items():
-        # anything that has both zero functions and zero resources is unconnected
-        rnames = ndp.get_rnames()
-        fnames = ndp.get_fnames()
-        if not rnames and not fnames:
-            s += "\nBlock %r has no functions or resources." % name
+            if False:
+                msg = 'One way to fix this is to add an explicit resource:\n'
+                rn2 = 'r'
+                fix = "requires %s [unit]" % rn2
+                if context.is_new_function(n):
+                    ref = n
+                else:
+                    ref = '%s.%s' % (n, rn)
+                # todo: omit '.' if n is
+                fix += '\n' + "%s >= %s" % (rn2, ref)
+                msg += indent(fix, '    ')
+                s += '\n' + indent(msg, 'help: ')
 
     if s:
         raise NotConnected(s)
     
-
-

@@ -1,43 +1,49 @@
+from mcdp_dp import NotSolvableNeedsApprox
+from mcdp_posets import NotBounded, UpperSets
 from mcdp_tests.generation import for_all_dps
-from mcdp_posets.poset_product import PosetProduct
-from mcdp_posets import Rcomp, R_Weight
-from comptests.registrar import comptest
-from mcdp_dp.dp_series import get_product_compact
-from nose.tools import assert_equal
-
 
 
 @for_all_dps
-def check_dp1(id_dp, dp):
+def check_solve_top_bottom(id_dp, dp):
     print('Testing %s: %s' % (id_dp, dp))
-    funsp = dp.get_fun_space()
-    ressp = dp.get_res_space()
-    trsp = dp.get_tradeoff_space()
-    print('F: %s' % funsp)
-    print('R: %s' % ressp)
+    F = dp.get_fun_space()
+    R = dp.get_res_space()
+    UR = UpperSets(R)
+    print('F: %s' % F)
+    print('R: %s' % R)
 
     I = dp.get_imp_space()
-    M = dp.get_imp_space_mod_res()
+    M = dp.get_imp_space()
     print('I: %s' % I)
     print('M: %s' % M)
 
-    f_top = funsp.get_top()
-    f_bot = funsp.get_bottom()
+    try:
+        f_top = F.get_top()
+        f_bot = F.get_bottom()
+    except NotBounded:
+        return
 
-#     if isinstance(dp, DPLoop0):
-#         return
+    try:
+        ur0 = dp.solve(f_bot)
+        ur1 = dp.solve(f_top)
+    except NotSolvableNeedsApprox:
+        return
 
-    u0 = dp.solve(f_bot)
-    u1 = dp.solve(f_top)
+    print('u0', ur0)
+    print('u1', ur1)
 
-    print('u0', u0)
-    print('u1', u1)
+    UR.check_leq(ur0, ur1)
 
-    trsp.check_leq(u0, u1)
+    # get implementations for ur0
+    for r in ur0.minimals:
+        ms = dp.get_implementations_f_r(f_bot, r)
+        for m in ms:
+            M.belongs(m)
+
 
 
 @for_all_dps
-def check_dp2(_id_dp, dp):
+def check_solve_chain(_, dp):
     from mcdp_posets.utils import poset_check_chain
 
     funsp = dp.get_fun_space()
@@ -45,46 +51,13 @@ def check_dp2(_id_dp, dp):
     chain = funsp.get_test_chain(n=5)
     poset_check_chain(funsp, chain)
 
-#     if isinstance(dp, DPLoop):
-#         return
+    try:
+        trchain = map(dp.solve, chain)
+    except NotSolvableNeedsApprox:
+        return
 
-    trchain = map(dp.solve, chain)
-
-    trsp = dp.get_tradeoff_space()
-    poset_check_chain(trsp, trchain)
+    R = dp.get_res_space()
+    UR = UpperSets(R)
+    poset_check_chain(UR, trchain)
 
     print trchain
-
-@comptest
-def check_products1():
-    def check_product(S1, S2, expected):
-        S, pack, unpack = get_product_compact(S1, S2)
-        print('product(%s, %s) = %s  expected %s' % (S1, S2, S, expected))
-        assert_equal(S, expected)
-
-        a = S1.witness()
-        b = S2.witness()
-        S1.belongs(a)
-        S2.belongs(b)
-        c = pack(a, b)
-        a2, b2 = unpack(c)
-        S1.check_equal(a, a2)
-        S2.check_equal(b, b2)
-
-        print('a = %s  b = %s' % (a, b))
-        print('c = %s ' % S.format(c))
-        print('a2 = %s  b2 = %s' % (a2, b2))
-
-
-    R = Rcomp()
-    E = R_Weight
-    check_product(PosetProduct((R, E)), R, PosetProduct((R, E, R)))
-    check_product(PosetProduct((R, R)), E, PosetProduct((R, R, E)))
-    check_product(PosetProduct((R, E)), PosetProduct((R, E)), PosetProduct((R, E, R, E)))
-
-    check_product(PosetProduct(()), R, R)
-    check_product(PosetProduct(()), PosetProduct((R,)), R)
-    check_product(R, PosetProduct(()), R)
-    check_product(PosetProduct((R,)), PosetProduct(()), R)
-
-

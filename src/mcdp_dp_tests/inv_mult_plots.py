@@ -3,22 +3,24 @@ from comptests.registrar import comptest, comptest_dynamic
 from mcdp_dp import InvPlus2Nat, Mux, SumNNat, WrapAMap, make_loop
 from mcdp_dp.dp_parallel_simplification import make_parallel
 from mcdp_dp.dp_series_simplification import wrap_series
+from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.solver import generic_solve
 from mcdp_dp.tracer import Tracer
 from mcdp_lang import parse_ndp
 from mcdp_lang.eval_math import PlusNat
+from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import assert_semantic_error
-from mcdp_posets import Map, Nat, NotEqual, PosetProduct, UpperSets
+from mcdp_posets import (Map, Nat, NotEqual, PosetProduct, UpperSets,
+    poset_minima)
+from mcdp_report.drawing import plot_upset_R2
 from mcdp_report.generic_report_utils import generic_report
-from mocdp.drawing import plot_upset_R2
+from mocdp.exceptions import mcdp_dev_warning
 from nose.tools import assert_equal
 from reprep import Report
 import itertools
 import numpy as np
 import warnings
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
-from mcdp_dp.dp_transformations import get_dp_bounds
-from mocdp.exceptions import mcdp_dev_warning
 
 
 # @comptest_dynamic
@@ -330,6 +332,22 @@ class CounterDP(WrapAMap):
 
 @comptest
 def check_loop_result3():
+    
+    
+    parse_wrap(Syntax.primitivedp_expr,
+                     'code mcdp_dp_tests.inv_mult_plots.CounterMap___(n=3)')[0]
+
+    parse_wrap(Syntax.ndpt_simple_dp_model,
+                     """
+                     dp {
+        requires x [Nat]
+        provides c [Nat]
+
+        implemented-by code mcdp_dp_tests.inv_mult_plots.CounterMap___(n=3)
+    }
+                     """)[0]
+
+
     assert_semantic_error("""
 mcdp {
     s = instance dp {
@@ -398,7 +416,7 @@ mcdp {
         implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=2)
     }
 
-    s = instance adp1 ^ adp2
+    s = instance choose(a: adp1, b: adp2)
     
     s.c >= s.x
    
@@ -454,7 +472,7 @@ mcdp {
         time  >= nat:0 * w.x 
     }
 
-    s = instance t1 ^ t2
+    s = instance choose (t1:t1, t2: t2)
     
     requires money, time for s
 }"""
@@ -470,7 +488,7 @@ mcdp {
 #     UNat.check_equal(res, N.U(2))
     print('***')
     print('Now using the generic solver')
-    trace = generic_solve(dp, f=(), max_steps=None)
+    _trace = generic_solve(dp, f=(), max_steps=None)
 
 
 @comptest
@@ -520,7 +538,7 @@ mcdp {
         time  >= nat:0 * w.x 
     }
 
-    s = instance t1 ^ t2
+    s = instance choose(t1:t1, t2: t2)
     
     s.c >= s.x
     
@@ -559,11 +577,9 @@ def check_loop_result5a():
 
     pf = [p for p in points if feasible(p[0], p[1])]
     pu = [p for p in points if not feasible(p[0], p[1])]
-    print 'pf', pf
-    print 'pu', pu
     N2 = PosetProduct((Nat(), Nat()))
     Min_pf = N2.Us(poset_minima(pf, leq=N2.leq))
-    print 'Min(pf)', Min_pf
+    print('Min(pf): %s' % Min_pf)
     assert(Min_pf.minimals == set([(6, 3), (4, 4), (7, 0), (3, 6), (0, 7)]))
     r = Report()
     f = r.figure()
@@ -588,14 +604,13 @@ mcdp {
     
     requires x, y for f
     
-    f.z >= sqrt(f.x) + sqrt(f.y) + nat:4
+    f.z >= ceil(sqrt(f.x)) + ceil(sqrt(f.y)) + Nat:4
     
 }"""
     )
     dp = ndp.get_dp()
     R = dp.get_res_space()
     UR = UpperSets(R)
-    print dp
     print dp.repr_long()
     f0 = ()
     from mocdp import logger
@@ -632,8 +647,6 @@ def get_simple_equiv():
     s2 = SumNNat((Nat(), Nat()), Nat())
     s3 = WrapAMap(PlusNat(4))
     s4 = InvPlus2Nat(Nat(), (Nat(), Nat()))
-    print s0
-    print s1
     dp0 = wrap_series(s1.get_fun_space(), [s0, s1, s2, s3, s4])
     dp = make_loop(dp0)
     return dp0, dp
@@ -646,7 +659,6 @@ def check_loop_result5c():
 
     res = dp.solve(())
     print res
-
 
     R = dp0.get_res_space()
     UR = UpperSets(R)
@@ -705,9 +717,6 @@ def check_loop_result5c():
     converged = list(trace.get_iteration_values('converged'))
 
     print converged
-#     for i, r in enumerate(result):
-#         print('%d: %s' % (i, UR.format(r.s)))
-#         print('converged: %s' % str(r.converged))
 
     expected = [
         [(0, 0)],
@@ -731,12 +740,12 @@ def check_loop_result5c():
 
 @comptest
 def check_loop_result5():
-    dp0, dp = get_simple_equiv()
+    _dp0, dp = get_simple_equiv()
     print dp.repr_long()
 
-    dp0, dp = get_simple_equiv()
+    _dp0, dp = get_simple_equiv()
 
-    R = dp0.get_res_space()
+    # R = dp0.get_res_space()
 
     S, alpha, beta = dp.get_normal_form()
     One = PosetProduct(())

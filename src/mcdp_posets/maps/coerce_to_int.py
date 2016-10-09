@@ -2,6 +2,8 @@ from contracts import contract
 from mcdp_posets import Map, Space
 
 
+__all__ = ['CoerceToInt']
+
 class CoerceToInt(Map):
 
     @contract(cod=Space, dom=Space)

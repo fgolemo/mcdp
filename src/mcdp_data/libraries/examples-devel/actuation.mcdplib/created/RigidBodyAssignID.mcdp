@@ -1,0 +1,3 @@
+mcdp {
+    provides id1 <= `RigidBodyID: rb1
+}

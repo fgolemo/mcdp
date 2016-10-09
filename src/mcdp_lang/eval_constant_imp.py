@@ -1,15 +1,21 @@
 # -*- coding: utf-8 -*-
-from .parts import CDPLanguage
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_lang.parse_actions import add_where_information
-from mcdp_lang.utils_lists import get_odd_ops, unwrap_list
 from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
     NotBelongs, NotLeq, PosetProduct, Rcomp, Space, UpperSet, UpperSets,
-    get_types_universe)
+    get_types_universe, poset_minima)
+from mcdp_posets.rcomp_units import RbicompUnits, RcompUnits
 from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPSemanticError, mcdp_dev_warning
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
+from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+
+from .eval_constant_asserts import (eval_assert_empty, eval_assert_equal,
+    eval_assert_geq, eval_assert_gt, eval_assert_leq, eval_assert_lt,
+    eval_assert_nonempty)
+from .namedtuple_tricks import recursive_print
+from .parse_actions import add_where_information
+from .parts import CDPLanguage
+from .utils_lists import get_odd_ops, unwrap_list
+
 
 CDP = CDPLanguage
 
@@ -57,6 +63,22 @@ def eval_constant(op, context):
             v = space.get_top()
             return ValueWithUnits(unit=space, value=v)
 
+        if isinstance(op, CDP.Maximals):
+            from mcdp_lang.eval_space_imp import eval_space  # @Reimport
+            space = eval_space(op.space, context)
+            elements = space.get_maximal_elements()
+            v = FiniteCollection(elements=elements, S=space)
+            S = FiniteCollectionsInclusion(space)
+            return ValueWithUnits(unit=S, value=v)
+
+        if isinstance(op, CDP.Minimals):
+            from mcdp_lang.eval_space_imp import eval_space  # @Reimport
+            space = eval_space(op.space, context)
+            elements = space.get_minimal_elements()
+            v = FiniteCollection(elements=elements, S=space)
+            S = FiniteCollectionsInclusion(space)
+            return ValueWithUnits(unit=S, value=v)
+
         if isinstance(op, CDP.Bottom):
             from mcdp_lang.eval_space_imp import eval_space  # @Reimport
             space = eval_space(op.space, context)
@@ -68,11 +90,15 @@ def eval_constant(op, context):
             from mcdp_lang.eval_space_imp import eval_space  # @Reimport
             F = eval_space(op.space, context)
             assert isinstance(F, Space), op
+            assert isinstance(F, RcompUnits)
 
             v = op.value.value
 
             if isinstance(v, int) and isinstance(F, Rcomp):
                 v = float(v)
+
+            if v < 0:
+                F = RbicompUnits(F.units, F.string)
 
             try:
                 F.belongs(v)
@@ -100,17 +126,6 @@ def eval_constant(op, context):
             msg = 'Variable ref %r unknown.' % op.name
             raise DPSemanticError(msg, where=op.where)
 
-        if isinstance(op, CDP.GenericNonlinearity):
-            raise_desc(NotConstant, 'GenericNonlinearity is not constant', op=op)
-
-        if isinstance(op, CDP.PlusN):
-            from mcdp_lang.eval_math import eval_PlusN_as_constant
-            return eval_PlusN_as_constant(op, context)
-
-        if isinstance(op, CDP.MultN):
-            from mcdp_lang.eval_math import eval_MultN_as_constant
-            return eval_MultN_as_constant(op, context)
-
         if isinstance(op, CDP.MakeTuple):
             ops = get_odd_ops(unwrap_list(op.ops))
             constants = [eval_constant(_, context) for _ in ops]
@@ -129,10 +144,10 @@ def eval_constant(op, context):
             dp = ndp.get_dp()
             f0 = eval_constant(op.f, context)
             F = dp.get_fun_space()
-            mcdp_dev_warning('I never understand this...')
+
             tu = get_types_universe()
             try:
-                tu.check_leq(F, f0.unit)
+                tu.check_leq(f0.unit, F)
             except NotLeq as e:
                 msg = 'Input not correct.'
                 raise_wrapped(DPSemanticError, e, msg, compact=True)
@@ -141,8 +156,31 @@ def eval_constant(op, context):
             UR = UpperSets(dp.get_res_space())
             return ValueWithUnits(res, UR)
 
-        msg = 'eval_constant() cannot evaluate this value as constant.'
-        raise_desc(NotConstant, msg, op=str(op))
+        from mcdp_lang.eval_math import eval_constant_minus
+        from mcdp_lang.eval_math import eval_PlusN_as_constant
+        from mcdp_lang.eval_math import eval_MultN_as_constant
+
+        cases = {
+            CDP.AssertEqual: eval_assert_equal,
+            CDP.AssertLEQ: eval_assert_leq,
+            CDP.AssertGEQ: eval_assert_geq,
+            CDP.AssertLT: eval_assert_lt,
+            CDP.AssertGT: eval_assert_gt,
+            CDP.AssertNonempty: eval_assert_nonempty,
+            CDP.AssertEmpty: eval_assert_empty,
+            CDP.ConstantMinus: eval_constant_minus,
+            CDP.PlusN: eval_PlusN_as_constant,
+            CDP.MultN: eval_MultN_as_constant,
+        }
+        
+        for klass, hook in cases.items():
+            if isinstance(op, klass):
+                return hook(op, context)
+
+        if True: # pragma: no cover    
+            msg = 'eval_constant(): Cannot evaluate this as constant.'
+            op = recursive_print(op)
+            raise_desc(NotConstant, msg, op=op)
 
 
 def eval_constant_space_custom_value(op, context):
@@ -154,6 +192,13 @@ def eval_constant_space_custom_value(op, context):
     custom_string = op.custom_string
 
     if isinstance(space, FiniteCollectionAsSpace):
+        if custom_string == '*':
+            if len(space.elements) == 1:
+                value = list(space.elements)[0]
+                return ValueWithUnits(unit=space, value=value)
+            else:
+                msg = 'You can use "*" only if the space has one element.'
+                raise_desc(DPSemanticError, msg, elements=space.elements)
         try:
             space.belongs(custom_string)
             mcdp_dev_warning('this does not seem to work...')
@@ -164,8 +209,18 @@ def eval_constant_space_custom_value(op, context):
 
         return ValueWithUnits(unit=space, value=op.custom_string)
     
+    if isinstance(space, Nat):
+        mcdp_dev_warning('Top?')
+        value = int(custom_string)
+        return ValueWithUnits(unit=Nat(), value=value)
+
+    if isinstance(space, Int):
+        mcdp_dev_warning('Top?')
+        value = int(custom_string)
+        return ValueWithUnits(unit=Int(), value=value)
+        
     msg = 'Custom parsing not implemented for space.'
-    raise_desc(NotImplementedError, msg, space=space, custom_string=custom_string)
+    raise_desc(DPInternalError, msg, space=space, custom_string=custom_string)
 
 def eval_constant_uppersetfromcollection(op, context):
     x = eval_constant(op.value, context)

@@ -1,8 +1,11 @@
-from contracts.utils import raise_desc, raise_wrapped
-from mocdp.comp.interfaces import NamedDP
-from mcdp_posets import NotEqual
 from contracts import contract
+from contracts.utils import raise_desc, raise_wrapped, indent
+from mcdp_dp import CoProductDPLabels
+from mcdp_posets import NotEqual
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME, ATTR_LOAD_NAME
+from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import SimpleWrap
+
 
 __all__ = [
     'NamedDPCoproduct',
@@ -64,14 +67,20 @@ class NamedDPCoproduct(NamedDP):
         dp = CoProductDP(tuple(options))
 
         if self.labels is None:
-            return dp
+            res = dp
         else:
-            from mcdp_dp.dp_coproduct import CoProductDPLabels
+            
             dp2 = CoProductDPLabels(dp, self.labels)
 
             assert dp2.get_fun_space() == dp.get_fun_space(), (dp, dp2)
             assert dp2.get_res_space() == dp.get_res_space(), (dp, dp2)
-            return dp2
+            res = dp2
+
+        if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
+            x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
+            setattr(res, ATTRIBUTE_NDP_RECURSIVE_NAME, x)
+
+        return res
 
     def check_fully_connected(self):
         for ndp in self.ndps:
@@ -89,4 +98,23 @@ class NamedDPCoproduct(NamedDP):
     def get_ftype(self, fname):
         return self.ndps[0].get_ftype(fname)
 
+    def __repr__(self):
+        s = 'NamedDPCoproduct'
+
+        if hasattr(self, ATTR_LOAD_NAME):
+            s += '\n (loaded as %r)' % getattr(self, ATTR_LOAD_NAME)
+
+        if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
+            s += '\n (labeled as %s)' % getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME).__str__()
+
+        for f in self.get_fnames():
+            s += '\n provides %s  [%s]' % (f, self.get_ftype(f))
+        for r in self.get_rnames():
+            s += '\n requires %s  [%s]' % (r, self.get_rtype(r))
+
+        for label, ndp in zip(self.labels, self.ndps):
+            prefix = '- %s: ' % label
+            prefix2 = ' ' * len(prefix)
+            s += '\n' + indent(ndp, prefix2, prefix)
+        return s
     

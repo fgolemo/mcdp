@@ -1,20 +1,30 @@
 # -*- coding: utf-8 -*-
+from nose.tools import assert_equal
+
 from comptests.registrar import comptest
+from contracts.utils import raise_desc
+from mcdp_dp import CatalogueDP, CoProductDP, NotFeasible, Template
 from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.parse_interface import parse_constant, parse_ndp, parse_poset
+from mcdp_lang.pyparsing_bundled import Literal
 from mcdp_lang.syntax import Syntax, SyntaxIdentifiers
 from mcdp_lang.syntax_codespec import SyntaxCodeSpec
-from  .utils import (assert_parsable_to_connected_ndp,
-    assert_semantic_error, parse_wrap_check)
-from nose.tools import assert_equal
-from pyparsing import Literal
-from mcdp_posets.uppersets import UpperSets, UpperSet
+from mcdp_posets import LowerSet, UpperSet, UpperSets, PosetProduct, get_product_compact
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
+from mocdp.comp.recursive_name_labeling import get_names_used
+from mocdp.exceptions import DPNotImplementedError, DPSemanticError
+
+from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
+    parse_wrap_check)
+
 
 @comptest
 def check_lang():
     idn = SyntaxIdentifiers.get_idn()
     parse_wrap(idn, 'battery')
-    parse_wrap(idn + Syntax.ow, 'battery ')
-    parse_wrap(idn + Syntax.ow + Literal('='), 'battery=')
+    parse_wrap(idn, 'battery ')
+    expr = idn + Literal('=')
+    parse_wrap(expr, 'battery=')
     parse_wrap(Syntax.ndpt_load, 'load battery')
 
 @comptest
@@ -97,6 +107,9 @@ def check_lang8_addition():
 def check_lang9_max():
     parse_wrap_check("""provides x [R]""",
                      Syntax.fun_statement)
+    parse_wrap_check("""requires x [R]""",
+                     Syntax.res_statement)
+
     parse_wrap_check("""
             provides x [R]
             requires r [R]
@@ -114,24 +127,7 @@ def check_lang9_max():
     parse_wrap(Syntax.rvalue_binary, 'max(f, g)')
     parse_wrap(Syntax.rvalue, 'max(f, g)')
     parse_wrap(Syntax.constraint_expr_geq, 'hnlin.x >= max(f, g)')
-
-#     p = assert_parsable_to_connected_ndp("""
-#     mcdp {
-#         provides f [R]
-#
-#         sub hnlin = instance dp {
-#             provides x [R]
-#             requires r [R]
-#
-#             implemented-by load SimpleNonlinearity1
-#         }
-#
-#         hnlin.x >= max(f, hnlin.r)
-#     }
-#     """)
-#
-#     assert_equal(p.get_rnames(), [])
-#     assert_equal(p.get_fnames(), ['f'])
+ 
 
 
 @comptest
@@ -206,32 +202,6 @@ mcdp {
 }""", "the name 'f' can't be used as a function")
 
 
-
-
-
-# TODO:
-#     assert_parsable_to_unconnected_ndp("""
-# cdp {
-#   motor = abstract cdp {
-#     provides torque [R]
-#     requires weight [R]
-#
-#     weight >= 1.0 [R]
-#     torque <= 1.0 [R]
-#   }
-# }
-# """)
-
-
-
-
-
-
-
-
-
-
-
 @comptest
 def check_lang49():
     """ Shortcuts "for" """
@@ -247,7 +217,7 @@ def check_lang51():
 
 
 
-    parse_wrap(Syntax.number_with_unit, '4.0 [R]')
+    parse_wrap(Syntax.valuewithunit, '4.0 [R]')
 
     parse_wrap(Syntax.space_pint_unit, "N")
     parse_wrap(Syntax.space_pint_unit, "m")
@@ -255,9 +225,9 @@ def check_lang51():
     parse_wrap(Syntax.space_pint_unit, "m / s^2")
     parse_wrap(Syntax.space_pint_unit, "m/s^2")
     
-    parse_wrap(Syntax.number_with_unit, '1 m')
-    parse_wrap(Syntax.number_with_unit, '1 m/s')
-    parse_wrap(Syntax.number_with_unit, '1 m/s^2')
+    parse_wrap(Syntax.valuewithunit, '1 m')
+    parse_wrap(Syntax.valuewithunit, '1 m/s')
+    parse_wrap(Syntax.valuewithunit, '1 m/s^2')
 
 
 
@@ -273,9 +243,44 @@ mcdp {
     x + y >= a
 }""")
 
+    s = """
+    mcdp {
+        provides a [s]
+        
+        requires x [s]
+        requires y [s]
+        requires z [s]
+        
+        x + y * z >= a
+    }"""
+    try:
+        parse_ndp(s)
+    except DPSemanticError as e:
+        if 'Inconsistent units' in str(e):
+            pass
+        else:
+            msg = 'Expected inconsistent unit error.'
+            raise_desc(Exception, msg)
+    else:
+        msg = 'Expected exception'
+        raise_desc(Exception, msg)
 
-
-
+    s = """
+    mcdp {
+        provides a [s]
+        
+        requires x [s]
+        requires y [hour]
+        
+        x + y >= a
+    }"""
+    try:
+        parse_ndp(s)
+    except DPNotImplementedError as e:
+        pass
+    else:
+        msg = 'Expected DPNotImplementedError'
+        raise_desc(Exception, msg)
 
 
 @comptest
@@ -307,6 +312,14 @@ def check_lang52():  # TODO: rename
     }
     """)
 
+
+#     parse_wrap(Syntax.LOAD, '`')
+#     parse_wrap(Syntax.posetname, 'P')
+#     print Syntax.load_poset
+#     parse_wrap(Syntax.load_poset, '`P')
+#     parse_wrap(Syntax.space_operand, '`P')
+#     parse_wrap(Syntax.fun_statement, "provides x [`P]")
+
     ndp = l.parse_ndp("""
         mcdp {
             provides x [`P]
@@ -332,21 +345,276 @@ def check_lang52():  # TODO: rename
 
 @comptest
 def check_lang54():  # TODO: rename
-    pass
+    ndp = parse_ndp("""
+        mcdp {
+            requires x [g x g]
+            
+            x >= any-of({<0g,1g>, <1g, 0g>})
+        }
+    """)
+    dp = ndp.get_dp()
+    R = dp.get_res_space()
+    UR = UpperSets(R)
+    res = dp.solve(())
+    UR.check_equal(res, UpperSet([(0.0,1.0),(1.0,0.0)], R))
+
 
 @comptest
 def check_lang55():  # TODO: rename
-    pass
+    ndp = parse_ndp("""
+        mcdp {
+            provides x [g x g]
+            
+            x <= any-of({<0g,1g>, <1g, 0g>})
+        }
+    """)
+    dp = ndp.get_dp()
+    R = dp.get_res_space()
+    F = dp.get_fun_space()
+    UR = UpperSets(R)
+    res = dp.solve((0.5, 0.5))
+
+    l = LowerSet(P=F, maximals=[(0.0, 1.0), (1.0, 0.0)])
+    l.belongs((0.0, 0.5))
+    l.belongs((0.5, 0.0))
+
+    UR.check_equal(res, UpperSet([], R))
+    res = dp.solve((0.0, 0.5))
+
+    UR.check_equal(res, UpperSet([()], R))
+    res = dp.solve((0.5, 0.0))
+
+    UR.check_equal(res, UpperSet([()], R))
 
 @comptest
 def check_lang56():  # TODO: rename
-    pass
+    p = parse_constant('Minimals V')
+    print p
+    p = parse_constant('Minimals finite_poset{ a b}')
+    print p
 
 @comptest
 def check_lang57():  # TODO: rename
-    pass
+    p = parse_constant('Maximals V')
+    print p
 
 @comptest
 def check_lang58():  # TODO: rename
+    assert_parsable_to_connected_ndp("""
+        mcdp {
+            a = instance mcdp {
+                provides f [s]
+                f <= 10 s
+            }
+            ignore f provided by a
+        }
+    """)
+
+
+    assert_parsable_to_connected_ndp("""
+        mcdp {
+            a = instance mcdp {
+                requires r [s]
+                r >= 10 s
+            }
+            ignore r required by a
+        }
+    """)
+
+def f():
     pass
+@comptest
+def check_lang59():  # TODO: rename
+    parse_wrap_check(""" addmake(root: code mcdp_lang_tests.syntax_misc.f) mcdp {} """,
+                     Syntax.ndpt_addmake)
+
+    ndp = parse_ndp(""" addmake(root: code mcdp_lang_tests.syntax_misc.f) mcdp {} """)
+
+    assert len(ndp.make) == 1
+    assert ndp.make[0][0] == 'root'
+    from mcdp_lang.eval_ndp_imp import ImportedFunction
+    assert isinstance(ndp.make[0][1], ImportedFunction)
+    # assert ndp.make == [('root', f)], ndp.make
+
+@comptest
+def check_lang61():  # TODO: rename
+
+    
+# . L . . . . . . . \ Parallel2  % R[kg]×(R[N]×R[N]) -> R[kg]×R[W] I = PosetProduct(R[kg],PosetProduct(R[N],R[N]){actuati
+# on/_prod1},R[N²]) names: [('actuation', '_prod1')]
+# . L . . . . . . . . \ Id(R[kg]) I = R[kg]
+# . L . . . . . . . . \ Series: %  R[N]×R[N] -> R[W] I = PosetProduct(PosetProduct(R[N],R[N]){actuation/_prod1},R[N²]) nam
+# es: [('actuation', '_prod1'), ('actuation', '_mult1')]
+# . L . . . . . . . . . \ ProductN(R[N]×R[N] -> R[N²]) named: ('actuation', '_prod1') I = PosetProduct(R[N],R[N])
+# . L . . . . . . . . . \ GenericUnary(<mcdp_lang.misc_math.MultValue instance at 0x10d8dcbd8>) named: ('actuation', '_mult1
+# ') I = R[N²]
+
+    S1 = parse_poset('N')
+    setattr(S1, ATTRIBUTE_NDP_RECURSIVE_NAME, ('S1',))
+    S2 = parse_poset('kg')
+    setattr(S2, ATTRIBUTE_NDP_RECURSIVE_NAME, ('S2',))
+    S12 = PosetProduct((S1, S2))
+    names = get_names_used(S12)
+    assert names == [('S1',), ('S2',)], names
+    P = parse_poset('J x W')
+    setattr(P, ATTRIBUTE_NDP_RECURSIVE_NAME, ('prod',))
+
+    S, _pack, _unpack = get_product_compact(P, S12)
+    print S.__repr__()
+    assert get_names_used(S) == [('prod',), ('S1',), ('S2',)]
+    
+    
+
+@comptest
+def check_lang60():  # TODO: rename
+    print('check_lang60()')
+    parse_wrap_check("required in", Syntax.fvalue_new_resource2)
+    parse_wrap_check("required in", Syntax.fvalue_operand)
+    parse_wrap_check("required in", Syntax.fvalue)
+    parse_wrap_check("(required in).dc", Syntax.fvalue_label_indexing3)
+    parse_wrap_check("((required in).dc).connector", Syntax.fvalue_label_indexing3)
+
+    parse_wrap_check("((required in).dc).connector >= `USB_connectors: USB_Std_A",
+                     Syntax.line_expr)
+    
+    
+
+@comptest
+def check_lang60b():
+    ndp = parse_ndp("""
+        ignore_resources(total_cost)
+        mcdp {
+            requires mass [g]
+            requires total_cost [USD]
+        }
+    
+    """)
+    rnames = ndp.get_rnames()
+    print rnames
+    assert rnames == ['mass']
+
+@comptest
+def check_lang70(): # TODO: rename check_coproductdp_error1
+    
+    # check error if types are different
+    F1 = parse_poset('g')
+    F2 = parse_poset('kg')
+    R1 = parse_poset('J')
+    R2 = parse_poset('V')
+    # Same R, different F
+    dp1 = Template(F1, R1)
+    dp2 = Template(F2, R1)
+    try:
+        CoProductDP((dp1, dp2))
+    except ValueError as e:
+        assert 'Cannot form' in str(e)
+    else: 
+        raise Exception()
+    
+    # Same F, different R
+    dp1 = Template(F1, R1)
+    dp2 = Template(F1, R2)
+    try:
+        CoProductDP((dp1, dp2))
+    except ValueError as e:
+        assert 'Cannot form' in str(e)
+    else: 
+        raise Exception()
+    
+
+
+@comptest
+def check_lang71(): # TODO: rename
+    F = parse_poset('g')
+    R = parse_poset('J')
+    I = parse_poset('finite_poset{a b c}')
+    entries = [('a', 1, 2), ('b', 2, 4)]
+    dp1 = CatalogueDP(F=F,R=R,I=I,entries=entries)
+    
+    # This will not be feasible for dp1
+    f= 3
+    r = 1000
+    try:
+        ms = dp1.get_implementations_f_r(f,r)
+    except NotFeasible:
+        pass
+    else:
+        assert False, ms
+    
+    # and not for dp as well
+    dp = CoProductDP((dp1,))
+    try:
+        ms = dp.get_implementations_f_r(f,r)
+    except NotFeasible:
+        pass
+    else:
+        assert False, ms
+    
+
+
+@comptest
+def check_lang72(): # TODO: rename
+    pass
+@comptest
+def check_lang73(): # TODO: rename
+    pass
+@comptest
+def check_lang74(): # TODO: rename
+    pass
+@comptest
+def check_lang75(): # TODO: rename
+    pass
+@comptest
+def check_lang76(): # TODO: rename
+    pass
+@comptest
+def check_lang77(): # TODO: rename
+    pass
+@comptest
+def check_lang78(): # TODO: rename
+    pass
+@comptest
+def check_lang79(): # TODO: rename
+    pass 
+
+
+@comptest
+def check_lang80(): # TODO: rename
+    pass
+@comptest
+def check_lang81(): # TODO: rename
+    pass
+@comptest
+def check_lang82(): # TODO: rename
+    pass
+@comptest
+def check_lang83(): # TODO: rename
+    pass
+@comptest
+def check_lang84(): # TODO: rename
+    pass
+@comptest
+def check_lang85(): # TODO: rename
+    pass
+@comptest
+def check_lang86(): # TODO: rename
+    pass
+@comptest
+def check_lang87(): # TODO: rename
+    pass
+@comptest
+def check_lang88(): # TODO: rename
+    pass
+@comptest
+def check_lang89(): # TODO: rename
+    pass 
+
+
+
+     
+
+
+
+
+
 

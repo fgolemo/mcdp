@@ -25,5 +25,5 @@ def dir_from_package_name(d):
             res = os.path.dirname(res)
 
         return res
-    except BaseException as e:
+    except BaseException as e: # pragma: no cover
         raise_wrapped(ValueError, e, 'Cannot resolve package name', d=d)

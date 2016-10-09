@@ -1,9 +1,14 @@
 # -*- coding: utf-8 -*-
+import os
+from wsgiref.simple_server import make_server
+
+from pyramid.config import Configurator  # @UnresolvedImport
+from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
+from pyramid.response import Response  # @UnresolvedImport
 
 from contracts import contract
 from contracts.utils import indent, raise_desc
-from mcdp_library import MCDPLibrary
-from mcdp_library.utils import locate_files
+from mcdp_library import Librarian, MCDPLibrary
 from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
 from mcdp_web.editor.app_editor import AppEditor
 from mcdp_web.editor_fancy.app_editor_fancy_generic import AppEditorFancyGeneric
@@ -16,14 +21,9 @@ from mcdp_web.solver.app_solver import AppSolver
 from mcdp_web.solver2.app_solver2 import AppSolver2
 from mcdp_web.visualization.app_visualization import AppVisualization
 from mocdp import logger
-from mocdp.exceptions import DPSemanticError, DPSyntaxError
-from pyramid.config import Configurator
-from pyramid.httpexceptions import HTTPFound
-from pyramid.response import Response
-from quickapp import QuickAppBase
-from wsgiref.simple_server import make_server
 import mocdp
-import os
+from mocdp.exceptions import DPSemanticError, DPSyntaxError
+from quickapp import QuickAppBase
 
 
 __all__ = [
@@ -36,7 +36,9 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
     def __init__(self, dirname):
         self.dirname = dirname
-        self.libraries = load_libraries(self.dirname)
+
+        self._load_libraries()
+
 
         logger.info('Found %d libraries underneath %r.' %
                         (len(self.libraries), self.dirname))
@@ -103,13 +105,28 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         libraries = self.list_libraries()
         return {'libraries': sorted(libraries)}
 
-
     def _refresh_library(self, _request):
         # nuclear option
-        self.libraries = load_libraries(self.dirname)
+        self._load_libraries()
 
         for l in [_['library'] for _ in self.libraries.values()]:
             l.delete_cache()
+
+        from mcdp_report.gdc import get_images
+        assert hasattr(get_images, 'cache')  # in case it changes later
+        get_images.cache = {}
+
+    def _load_libraries(self):
+        """ Loads libraries in the "self.dirname" dir. """
+        self.librarian = Librarian()
+        self.librarian.find_libraries(self.dirname)
+        self.libraries = self.librarian.get_libraries()
+        for _short, data in self.libraries.items():
+            l = data['library']
+            path = data['path']
+            cache_dir = os.path.join(path, '_cached/mcdpweb_cache')
+            l.use_cache_dir(cache_dir)
+
 
     def view_refresh_library(self, request):
         """ Refreshes the current library (if external files have changed) 
@@ -127,7 +144,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
     def view_exceptions_occurred(self, request):  # @UnusedVariable
         exceptions = []
         for e in self.exceptions:
-            exceptions.append(e)
+            u = unicode(e, 'utf-8')
+            exceptions.append(u)
         return {'exceptions': exceptions}
 
     def view_exception(self, exc, request):
@@ -136,19 +154,16 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         import traceback
         compact = (DPSemanticError, DPSyntaxError)
         if isinstance(exc, compact):
-            s = str(exc)
+            s = exc.__str__()
         else:
             s = traceback.format_exc(exc)
-        s = s.decode('utf-8')
-        # add to state so that it can be visualized in /exceptions
 
-        s = str(s)
         url = request.url
         referrer = request.referrer
         n = 'Error during serving this URL:'
         n += '\n url: %s' % url
         n += '\n referrer: %s' % referrer
-        ss = traceback.format_exc(exc).decode('utf-8')
+        ss = traceback.format_exc(exc)
         n += '\n' + indent(ss, '| ')
         self.exceptions.append(n)
 
@@ -158,8 +173,9 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         else:
             url_refresh = None
 
-        logger.error(s)
-        return {'exception': s, 'url_refresh': url_refresh}
+        u = unicode(s, 'utf-8')
+        logger.error(u)
+        return {'exception': u, 'url_refresh': url_refresh}
     
     def png_error_catch2(self, request, func):
         """ func is supposed to return an image response.
@@ -204,13 +220,22 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         f = os.path.join(docs, '%s.md' % docname)
         import codecs
         data = codecs.open(f, encoding='utf-8').read()  # XXX
-        html = render_markdown(data)
-
-        return {'contents': html}
+        data_str = data.encode('utf-8')
+        html = render_markdown(data_str)
+        html_u = unicode(html, 'utf-8')
+        return {'contents': html_u}
 
     # This is where we keep all the URLS
     def get_lmv_url(self, library, model, view):
         url = '/libraries/%s/models/%s/views/%s/' % (library, model, view)
+        return url
+
+    def get_ltv_url(self, library, template, view):
+        url = '/libraries/%s/templates/%s/views/%s/' % (library, template, view)
+        return url
+
+    def get_lpv_url(self, library, poset, view):
+        url = '/libraries/%s/posets/%s/views/%s/' % (library, poset, view)
         return url
 
     def get_lib_template_view_url(self, library, template, view):
@@ -230,26 +255,27 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
     def get_navigation_links(self, request):
         """ Pass this as "navigation" to the page. """
+        current_thing = None
 
         if 'model_name' in request.matchdict:
-            current_model = self.get_model_name(request)
+            current_thing = current_model = self.get_model_name(request)
             current_view = self.get_current_view(request)
         else:
             current_model = None
             current_view = None
 
         if 'template_name' in request.matchdict:
-            current_template = str(request.matchdict['template_name'])
+            current_thing = current_template = str(request.matchdict['template_name'])
         else:
             current_template = None
 
         if 'poset_name' in request.matchdict:
-            current_poset = str(request.matchdict['poset_name'])
+            current_thing = current_poset = str(request.matchdict['poset_name'])
         else:
             current_poset = None
 
         if 'value_name' in request.matchdict:
-            current_value = str(request.matchdict['value_name'])
+            current_thing = current_value = str(request.matchdict['value_name'])
         else:
             current_value = None
 
@@ -261,11 +287,13 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         
         models = self.list_of_models(request)
         
+        d['current_thing'] = current_thing
         d['current_library'] = current_library
         d['current_template'] = current_template
         d['current_poset'] = current_poset
-        d['current_view'] = current_view
         d['current_model'] = current_model
+
+        d['current_view'] = current_view
 
         documents = library._list_with_extension(MCDPLibrary.ext_doc_md)
 
@@ -295,7 +323,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
             url = self.get_lib_template_view_url(library=current_library,
                                                  template=t,
-                                                 view='edit_fancy')  # XXX
+                                                 view='syntax')  # XXX
 
             name = "Template: %s" % t
             desc = dict(name=name, url=url, current=is_current)
@@ -305,7 +333,11 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         d['posets'] = []
         for p in sorted(posets):
             is_current = (p == current_poset)
-            url = '/libraries/%s/posets/%s/views/edit_fancy/' % (current_library, p)
+            url = self.get_lpv_url(library=current_library,
+                                   poset=p,
+                                   view='syntax')
+
+#             url = '/libraries/%s/posets/%s/views/edit_fancy/' % (current_library, p)
             name = "Poset: %s" % p
             desc = dict(name=name, url=url, current=is_current)
             d['posets'].append(desc)
@@ -373,7 +405,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         data_unicode = codecs.open(realpath, encoding='utf-8').read()
         data_str = data_unicode.encode('utf-8')
         raise_errors = bool(strict)
-        html = render_complete(library=l, s=data_str, raise_errors=raise_errors)
+        html = render_complete(library=l, s=data_str, realpath=realpath, raise_errors=raise_errors)
         return html
 
     def view_library_doc(self, request):
@@ -427,7 +459,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         config.add_route('index', '/')
         config.add_view(self.view_index, route_name='index', renderer='index.jinja2')
 
-        config.add_route('list_libraries', '/list')
+#         config.add_route('list_libraries', '/list')
+        config.add_route('list_libraries', '/libraries/')
         config.add_view(self.view_list_libraries, route_name='list_libraries', renderer='list_libraries.jinja2')
 
         config.add_route('library_index', '/libraries/{library}/')
@@ -457,6 +490,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         config.add_route('exceptions', '/exceptions')
         config.add_view(self.view_exceptions_occurred, route_name='exceptions', renderer='json')
+        config.add_route('exceptions_formatted', '/exceptions_formatted')
+        config.add_view(self.view_exceptions_occurred, route_name='exceptions_formatted', renderer='exceptions_formatted.jinja2')
 
         # mainly used for wget
         config.add_route('robots', '/robots.txt')
@@ -466,43 +501,11 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         config.add_view(serve_robots, route_name='robots')
 
-
-
         config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
 
         app = config.make_wsgi_app()
         self.server = make_server('0.0.0.0', port, app)
         self.server.serve_forever()
-
-
-def load_libraries(dirname):
-    """ Returns a dictionary
-            
-            library_name -> {'path': ...}
-    """
-    if 'mcdplib' in dirname:
-        short = os.path.splitext(os.path.basename(dirname))[0]
-        l = MCDPLibrary()
-        cache_dir = os.path.join(dirname, '_cached/mcdpweb_cache')
-        l.use_cache_dir(cache_dir)
-        l.add_search_dir(dirname)
-        return {short: dict(path=dirname, library=l)}
-
-    libraries = locate_files(dirname, "*.mcdplib",
-                             followlinks=False,
-                             include_directories=True,
-                             include_files=False)
-    res = {}
-    for path in libraries:
-        library_name = os.path.splitext(os.path.basename(path))[0]
-
-        l = MCDPLibrary()
-        cache_dir = os.path.join(path, '_cached/mcdpweb_cache')
-        l.use_cache_dir(cache_dir)
-        l.add_search_dir(path)
-
-        res[library_name] = dict(path=path, library=l)
-    return res
 
 
 class MCDPWeb(QuickAppBase):

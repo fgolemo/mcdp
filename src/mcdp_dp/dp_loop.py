@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
+from collections import namedtuple
+import itertools
+
+from contracts.utils import indent, raise_desc, raise_wrapped
+from mcdp_posets import (Map, NotLeq, PosetProduct, UpperSet, UpperSets,
+    poset_maxima, poset_minima)
+from mocdp.exceptions import do_extra_checks
+
 from .primitive import Feasible, NotFeasible, PrimitiveDP
 from .tracer import Tracer
-from collections import namedtuple
-from contracts.utils import indent, raise_desc, raise_wrapped
-from mcdp_posets import Map, NotLeq, PosetProduct, UpperSet, UpperSets
-from mcdp_posets.utils import poset_minima
-from mocdp.exceptions import do_extra_checks
-import itertools
 
 
 __all__ = [
@@ -43,15 +45,11 @@ class DPLoop0(PrimitiveDP):
               `-----------/
     """
     def __init__(self, dp1):
-#         from mocdp import get_conftools_dps
-#
-#         library = get_conftools_dps()
-#         _, self.dp1 = library.instance_smarter(dp1)
         self.dp1 = dp1
 
         F0 = self.dp1.get_fun_space()
         R0 = self.dp1.get_res_space()
-        M0 = self.dp1.get_imp_space_mod_res()
+        I0 = self.dp1.get_imp_space()
 
         if not isinstance(F0, PosetProduct):
             raise ValueError('Funsp is not a product: %r' % F0)
@@ -71,12 +69,12 @@ class DPLoop0(PrimitiveDP):
         # M = M0
         # from mcdp_dp.dp_series import prod_make
         from mcdp_dp.dp_series import get_product_compact
-        M, _, _ = get_product_compact(M0, F2)
-        self.M0 = M0
+        M, _, _ = get_product_compact(I0, F2)
+        self.M0 = I0
         self.F2 = F2
 
         self._solve_cache = {}
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
 
     def get_implementations_f_r(self, f1, r):
         f2 = r
@@ -104,26 +102,38 @@ class DPLoop0(PrimitiveDP):
         m0, f2 = unpack(m)
         return m0, f2
 
-    def evaluate_f_m(self, f1, m):
-        """ Returns the resources needed
-            by the particular implementation.
-            raises NotFeasible 
-        """
-        F2 = self.F2
-        F1 = self.F
-        m0, f2 = self._unpack_m(m)
-        f = (f1, f2)
-        r = self.dp1.evaluate_f_m(f, m0)
-        try:
-            F2.check_leq(r, f2)
-        except NotLeq as e:
-            msg = 'Loop constraint not satisfied %s <= %s not satisfied.' % (F2.format(r), F2.format(f2))
-            msg += "\n f1 = %10s -->| ->[ %s ] --> %s " % (F1.format(f1), self.dp1, F2.format(r))
-            msg += "\n f2 = %10s -->|" % F2.format(f2)
-            raise_wrapped(NotFeasible, e, msg, compact=True)
-
-        self.R.belongs(r)
-        return r
+    def evaluate(self, m):
+        m0, _f2 = self._unpack_m(m)
+        LF0, UR = self.dp1.evaluate(m0)
+        # now extract first components f1 and r1
+        f1s = set()
+        for fi in LF0.maximals:
+            fi1, _ = fi
+            f1s.add(fi1)
+        f1s = poset_maxima(f1s, self.F.leq)
+        LF = self.F.Ls(f1s)
+        return LF, UR
+        
+#     def evaluate_f_m(self, f1, m):
+#         """ Returns the resources needed
+#             by the particular implementation.
+#             raises NotFeasible 
+#         """
+#         F2 = self.F2
+#         F1 = self.F
+#         m0, f2 = self._unpack_m(m)
+#         f = (f1, f2)
+#         r = self.dp1.evaluate_f_m(f, m0)
+#         try:
+#             F2.check_leq(r, f2)
+#         except NotLeq as e:
+#             msg = 'Loop constraint not satisfied %s <= %s not satisfied.' % (F2.format(r), F2.format(f2))
+#             msg += "\n f1 = %10s -->| ->[ %s ] --> %s " % (F1.format(f1), self.dp1, F2.format(r))
+#             msg += "\n f2 = %10s -->|" % F2.format(f2)
+#             raise_wrapped(NotFeasible, e, msg, compact=True)
+# 
+#         self.R.belongs(r)
+#         return r
 
     def check_unfeasible(self, f1, m, r):
         from mcdp_dp.dp_series import get_product_compact
@@ -174,27 +184,6 @@ class DPLoop0(PrimitiveDP):
                                                                 F2.format(used), F2.format(r))
             msg += "\n f2 = %10s -->|" % F2.format(f2)
             raise_desc(NotFeasible, msg)
-
-#
-#     def is_feasible(self, f1, m, r):
-#         from mcdp_dp.dp_series import get_product_compact
-#         _, _, unpack = get_product_compact(self.M0, self.F2)
-#         m0, f2 = unpack(m)
-#         f = (f1, f2)
-#         print('checking feasilbility for loop')
-#         print('f = %s' % str(f))
-#         print('m0 = %s, f2 = %s' % (m0, f2))
-#
-#         if not self.dp1.is_feasible(f, m0, r):
-#             print('The internal one is not feasibile with (%s, %s, %s)' % (f, m0, r))
-#             return False
-#         used = self.evaluate_f_m(f, m0)
-#         print('used = %s' % str(used))
-#         ok1 = self.R.leq(used, r)
-#         ok2 = self.R.leq(r, f2)
-#         print('ok1 = %s' % ok1)
-#         print('ok2 = %s' % ok2)
-#         return ok1 and ok2
 
     def get_normal_form(self):
         """

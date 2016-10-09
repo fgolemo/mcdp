@@ -1,16 +1,19 @@
 """ Utils for graphgen """
 
-from contextlib import contextmanager
-from copy import deepcopy
-from mocdp.exceptions import mcdp_dev_warning
-from reprep.constants import MIME_PDF, MIME_PNG, MIME_PLAIN, MIME_SVG
-from system_cmd import CmdException, system_cmd_result
-import networkx as nx  # @UnresolvedImport
-import os
-import traceback
-from bs4 import BeautifulSoup
 import base64
 import codecs
+from contextlib import contextmanager
+from copy import deepcopy
+import os
+import traceback
+
+from bs4 import BeautifulSoup
+
+from contracts import contract
+from mocdp.exceptions import mcdp_dev_warning
+import networkx as nx  # @UnresolvedImport
+from reprep.constants import MIME_PDF, MIME_PLAIN, MIME_PNG, MIME_SVG
+from system_cmd import CmdException, system_cmd_result
 
 
 def graphviz_run(filename_dot, output, prog='dot'):
@@ -109,11 +112,11 @@ def gg_figure(r, name, ggraph, do_png=True, do_pdf=True, do_svg=True,
                 graphviz_run(filename_dot, filename, prog=prog)
 
         if do_pdf:
-            with r.data_file('graph_pdf', MIME_PDF) as filename:
+            with f.data_file('graph_pdf', MIME_PDF) as filename:
                 graphviz_run(filename_dot, filename, prog=prog)
 
         if do_svg:
-            with r.data_file('graph_svg', MIME_SVG) as filename:
+            with f.data_file('graph_svg', MIME_SVG) as filename:
                 graphviz_run(filename_dot, filename, prog=prog)
 
                 soup = BeautifulSoup(open(filename).read(), 'lxml', from_encoding='utf-8')
@@ -143,6 +146,47 @@ def gg_figure(r, name, ggraph, do_png=True, do_pdf=True, do_svg=True,
         
     return f
 
+allowed_formats = ['png', 'pdf', 'svg', 'dot']
+
+def gg_get_formats(gg, data_formats):
+    res = []
+    mcdp_dev_warning('TODO: optimize')
+    for data_format in data_formats:
+        if not data_format in allowed_formats:
+            raise ValueError(data_format)
+
+        if data_format == 'dot':
+            d = get_dot_string(gg)
+        else:
+            d = gg_get_format(gg, data_format)
+
+        res.append(d)
+    return res
+
+def gg_get_format(gg, data_format):
+    from reprep import Report
+    r = Report()
+    do_dot = data_format == 'dot'
+    do_png = data_format == 'png'
+    do_pdf = data_format == 'pdf'
+    do_svg = data_format == 'svg'
+    gg_figure(r, 'graph', gg, do_dot=do_dot,
+              do_png=do_png, do_pdf=do_pdf, do_svg=do_svg)
+
+    if data_format == 'pdf':
+        pdf = r.resolve_url('graph_pdf').get_raw_data()
+        return pdf
+    elif data_format == 'png':
+        png = r.resolve_url('graph/graph').get_raw_data()
+        return png
+    elif data_format == 'dot':
+        dot = r.resolve_url('dot').get_raw_data()
+        return dot
+    elif data_format == 'svg':
+        svg = r.resolve_url('graph_svg').get_raw_data()
+        return svg
+    else:
+        raise ValueError('No known format %r.' % data_format)
 
 def embed_images(html, basedir):
     """ Embeds png and Jpg images using data """
@@ -161,6 +205,71 @@ def embed_images(html, basedir):
                 src = 'data:%s;base64,%s' % (mime, encoded)
                 tag['src'] = src
     return str(soup)
+
+def embed_images_from_library(html, library):
+    """ Resolves images from library """
+
+    def resolve(href):
+        print('resolving %r' % href)
+        f = library._get_file_data(href)
+        data = f['data']
+        # realpath = f['realpath']
+        return data
+
+    soup = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
+    for tag in soup.select('img'):
+        href = tag['src']
+        extensions = ['png', 'jpg']
+        for ext in extensions:
+            if ext in href and not 'data:' in href:
+                data = resolve(href)
+                encoded = base64.b64encode(data)
+                from mcdp_web.images.images import get_mime_for_format
+                mime = get_mime_for_format(ext)
+                src = 'data:%s;base64,%s' % (mime, encoded)
+                tag['src'] = src
+    return str(soup)
+    
+
+def extract_assets(html, basedir):
+    """ Extracts all embedded assets. """
+    if not os.path.exists(basedir):
+        os.makedirs(basedir)
+    soup = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
+    for tag in soup.select('a'):
+        href = tag['href']
+        if href.startswith('data:'):
+            _mime, data = link_data(href)
+#             from mcdp_web.images.images import get_ext_for_mime
+#             ext = get_ext_for_mime(mime)
+            if tag.has_attr('download'):
+                basename = tag['download']
+            else:
+                print('cannot find attr "download" in tag')
+                # print tag
+                continue
+            filename = os.path.join(basedir, basename)
+            with open(filename, 'w') as f:
+                f.write(data)
+            print('written to %s' % filename)
+
+@contract(returns='tuple(str,str)')
+def link_data(data_ref):
+    """ data_ref: data:<mime>;base64, 
+    
+        Returns mime, data.
+    """
+    assert data_ref.startswith('data:')
+    first, second = data_ref.split(';')
+    mime = first[len('data:'):]
+    assert second.startswith('base64,')
+    data = second[len('base64,'):]
+    # print('link %r' % data_ref[:100])
+    # print('decoding %r' % data[:100])
+    decoded = base64.b64decode(data)
+    return mime, decoded
+
+
 
 
 @contextmanager

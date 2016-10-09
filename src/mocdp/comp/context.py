@@ -1,51 +1,38 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
 from contracts import contract
-from contracts.utils import indent, raise_desc
-from mcdp_dp.dp_identity import Identity
-from mcdp_dp.primitive import PrimitiveDP
-from mcdp_posets import Poset, Space
+from contracts.utils import check_isinstance, raise_desc
+from mcdp_dp import FunctionNode, PrimitiveDP, ResourceNode
+from mcdp_posets import NotBounded, Poset, Space
+from mcdp_posets import FinitePoset
+from mcdp_posets import PosetProductWithLabels
+from mocdp import logger
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.comp.wrap import dpwrap
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+_ = logger
 
 __all__ = [
     'Connection',
     'Context',
 ]
 
+CFunction = namedtuple('CFunction', 'dp s')
+CResource = namedtuple('CResource', 'dp s')
 Connection0 = namedtuple('Connection', 'dp1 s1 dp2 s2')
+
+
 class Connection(Connection0):
     def __repr__(self):
         return ("Constraint(%s.%s <= %s.%s)" %
                 (self.dp1, self.s1, self.dp2, self.s2))
 
-#         return ("Constraint(dp1,s1 %s, %s <= dp2,s2 %s, %s)" %
-#                 (self.dp1, self.s1, self.dp2, self.s2))
-
+    @contract(nodes='set(str)|seq(str)')
     def involves_any_of_these_nodes(self, nodes):
         """ Returns true if any of the two nodes is in the iterable nodes."""
         return self.dp1 in nodes or self.dp2 in nodes
 
-
-class CFunction():
-    @contract(dp=str, s=str)
-    def __init__(self, dp, s):
-        self.dp = dp
-        self.s = s
-
-    def __repr__(self):
-        return 'CFunction(%s.%s)' % (self.dp, self.s)
-
-class CResource():
-    @contract(dp=str, s=str)
-    def __init__(self, dp, s):
-        self.dp = dp
-        self.s = s
-
-    def __repr__(self):
-        return 'CResource(%s.%s)' % (self.dp, self.s)
 
 
 class ValueWithUnits():
@@ -85,7 +72,6 @@ class NoSuchMCDPType(Exception):
     pass
 
 
-
 class Context():
 
     def __init__(self):
@@ -100,10 +86,14 @@ class Context():
         self.var2model = {}  # str -> NamedDP
         self.constants = {}  # str -> ValueWithUnits
 
+        self.ifun_init()
+        self.ires_init()
+        
         self.load_ndp_hooks = []
         self.load_posets_hooks = []
         self.load_primitivedp_hooks = []
         self.load_template_hooks = []
+        self.load_library_hooks = []
 
     def __repr__(self):
         s = 'Context:'
@@ -116,6 +106,10 @@ class Context():
 
         return s
 
+#     def get_default_library_name(self):
+#         """ hack used for Template """
+#         return getattr(self, 'default_library_name', None)
+
     def child(self):
         """ A child context preserves the value of the constants
             and the model types. """
@@ -124,6 +118,7 @@ class Context():
         c.load_posets_hooks = list(self.load_posets_hooks)
         c.load_primitivedp_hooks = list(self.load_primitivedp_hooks)
         c.load_template_hooks = list(self.load_template_hooks)
+        c.load_library_hooks = list(self.load_library_hooks)
         c.var2resource = {}  # XXX?
         c.var2function = {}  # XXX?
         c.var2model.update(self.var2model)
@@ -142,8 +137,16 @@ class Context():
     def load_template(self, load_arg):
         return self._load_hooks(load_arg, self.load_template_hooks, TemplateForNamedDP)
 
+    def load_library(self, load_arg):
+        check_isinstance(load_arg, str)
+        from mcdp_library.library import MCDPLibrary
+        return self._load_hooks(load_arg, self.load_library_hooks, MCDPLibrary)
+
     def _load_hooks(self, load_arg, hooks, expected):
         errors = []
+        if not hooks:
+            msg = 'Could not load %r because no loading hooks provided.' % load_arg
+            raise_desc(DPSemanticError, msg)
         for hook in hooks:
             try:
                 res = hook(load_arg)
@@ -152,8 +155,13 @@ class Context():
                     raise_desc(DPSemanticError, msg, res=res, expected=expected)
                 return res
             except DPSemanticError as e:
-                errors.append(str(e))
-        msg = 'Could not load: \n%s' % "\n\n".join(errors)
+                if len(hooks) == 1:
+                    raise
+                else:
+                    errors.append(e)
+
+        s = "\n\n".join(map(str, errors))
+        msg = 'Could not load %r: \n%s' % (load_arg, s)
         raise DPSemanticError(msg)
 
 
@@ -247,14 +255,15 @@ class Context():
         self.info('Adding name %r = %r' % (name, ndp))
         if name in self.names:
             # where?
-            raise DPSemanticError('Repeated identifier %r.' % name)
+            msg = 'Repeated identifier'
+            raise_desc(DPInternalError, msg, name=name)
         self.names[name] = ndp
 
     @contract(returns=str)
     def add_ndp_fun_node(self, fname, F):
-        ndp = dpwrap(Identity(F), fname, fname)
+        ndp = dpwrap(FunctionNode(F), fname, fname)
         name = get_name_for_fun_node(fname)
-        self.info('Adding new function %r as %r.' % (str(name), fname))
+        # print('Adding new function %r as %r.' % (str(name), fname))
         self.add_ndp(name, ndp)
         self.fnames.append(fname)
         return name
@@ -270,9 +279,9 @@ class Context():
     @contract(returns=str)
     def add_ndp_res_node(self, rname, R):
         """ returns the name of the node """
-        ndp = dpwrap(Identity(R), rname, rname)
+        ndp = dpwrap(ResourceNode(R), rname, rname)
         name = get_name_for_res_node(rname)
-        self.info('Adding new resource %r as %r ' % (str(name), rname))
+        # self.info('Adding new resource %r as %r ' % (str(name), rname))
         self.add_ndp(name, ndp)
         self.rnames.append(rname)
         return name
@@ -342,7 +351,7 @@ class Context():
         fnames = ndp2.get_fnames()
         if not c.s2 in fnames:
             msg = "Function %r does not exist (known: %s)" % (c.s2, ", ".join(fnames))
-            raise_desc(DPSemanticError, msg, known=rnames)
+            raise_desc(DPSemanticError, msg, known=fnames)
 
 
         R1 = ndp1.get_rtype(c.s1)
@@ -395,11 +404,11 @@ class Context():
         if not a.dp in self.names:
             msg = "Cannot find design problem %r." % str(a)
             raise DPSemanticError(msg)
-        dp = self.names[a.dp]
-        if not a.s in dp.get_rnames():
+        ndp = self.names[a.dp]
+        if not a.s in ndp.get_rnames():
             msg = "Design problem %r does not have resource %r." % (a.dp, a.s)
-            raise_desc(DPSemanticError, msg, ndp=dp.repr_long())
-        return dp.get_rtype(a.s)
+            raise_desc(DPSemanticError, msg, rnames=ndp.get_rnames())
+        return ndp.get_rtype(a.s)
 
     @contract(a=CFunction)
     def get_ftype(self, a):
@@ -410,8 +419,173 @@ class Context():
         dp = self.names[a.dp]
         if not a.s in dp.get_fnames():
             msg = "Design problem %r does not have function %r." % (a.dp, a.s)
-            raise_desc(DPSemanticError, msg, ndp=dp.repr_long())
+            raise_desc(DPSemanticError, msg, fnames=dp.get_fnames())
         return dp.get_ftype(a.s)
+
+    def ires_init(self):
+        self.indexed_res = {}
+
+    def ifun_init(self):
+        self.indexed_fun =  {}
+    
+    def ifun_finish(self):
+        """ Searches for all the automatically created DPs and closes them
+            by adding 0 constants. """
+        from mcdp_lang.helpers import get_valuewithunits_as_resource
+        from mcdp_lang.helpers import get_constant_minimals_as_resources
+
+        def connectedfun(ndp_name, s):
+            assert ndp_name in self.names
+            assert s in self.names[ndp_name].get_fnames()
+            for c in self.connections:
+                if c.dp2 == ndp_name and c.s2 == s:
+                    return True
+            return False
+            
+        for which, created in self.indexed_fun.items():
+            ndp = self.names[created]
+            for fname in ndp.get_fnames():
+                connected = connectedfun(created, fname)
+                if not connected:
+                    F = ndp.get_ftype(fname)
+                    if not self._can_ignore_unconnected(F):
+                        msg = 'Missing value %r for %r.' % (fname, which)
+                        raise_desc(DPSemanticError, msg)
+                    else:
+                        msg = 'Using default value for unconnected resource %s %s' % (created, fname)
+                        # logger.warn(msg)
+
+                    try:
+                        zero = F.get_bottom()
+                        vu = ValueWithUnits(value=zero, unit=F)
+                        res = get_valuewithunits_as_resource(vu, self)
+                    except NotBounded:
+                        minimals = F.get_minimal_elements()
+                        res = get_constant_minimals_as_resources(F, minimals, self)
+                    c = Connection(dp1=res.dp, s1=res.s, dp2=created, s2=fname)
+                    self.add_connection(c)
+
+    def ires_finish(self):
+        """ Searches for all the automatically created DPs and closes them
+            by adding 0 constants. """
+        from mcdp_lang.helpers import get_valuewithunits_as_function
+        from mcdp_lang.helpers import get_constant_maximals_as_function
+
+        def connectedres(ndp_name, s):
+            assert ndp_name in self.names
+            assert s in self.names[ndp_name].get_rnames()
+            for c in self.connections:
+                if c.dp1 == ndp_name and c.s1 == s:
+                    return True
+            return False
+
+        for which, created in self.indexed_res.items():
+
+            ndp = self.names[created]
+            for rname in ndp.get_rnames():
+                connected = connectedres(created, rname)
+                R = ndp.get_rtype(rname)
+                if not connected:
+                    if not self._can_ignore_unconnected(R):
+                        msg = 'Missing value %r for %r.' % (rname, which)
+                        raise_desc(DPSemanticError, msg)
+                    else:
+                        msg = 'Using default value for unconnected function %s %s' % (created, rname)
+                        # logger.warn(msg)
+                    try:
+                        top = R.get_top()
+                        vu = ValueWithUnits(value=top, unit=R)
+                        res = get_valuewithunits_as_function(vu, self)
+                    except NotBounded:
+                        maximals = R.get_maximal_elements()
+                        res = get_constant_maximals_as_function(R, maximals, self)
+                    c = Connection(dp2=res.dp, s2=res.s, dp1=created, s1=rname)
+                    self.add_connection(c)
+
+    def _can_ignore_unconnected(self, P):
+        if isinstance(P, FinitePoset) and len(P.elements) == 1:
+            return True
+        else:
+            return False
+
+    @contract(cr=CResource, index=int, returns=CResource)
+    def ires_get_index(self, cr, index):
+        from mcdp_dp.dp_flatten import TakeRes
+        from mocdp.comp.wrap import SimpleWrap
+
+        if not cr in self.indexed_res:
+            R = self.get_rtype(cr)
+            n = len(R.subs)
+
+            # todo: use labels
+            if isinstance(R, PosetProductWithLabels):
+                rnames = list(R.labels)
+            else:
+                rnames = ['_r%d' % i for i in range(n)]
+            coords = list(range(n))
+            dp = TakeRes(R, coords)
+            ndp_out = '_muxed'
+            ndp = SimpleWrap(dp, fnames=ndp_out, rnames=rnames)
+            ndp_name = self.new_name('_indexing')
+
+            self.add_ndp(ndp_name, ndp)
+            c = Connection(dp2=ndp_name, s2=ndp_out, dp1=cr.dp, s1=cr.s)
+            self.add_connection(c)
+
+            self.indexed_res[cr] = ndp_name
+
+        ndp_name = self.indexed_res[cr]
+
+        ndp = self.names[ndp_name]
+        rnames = ndp.get_rnames()
+        n = len(rnames)
+        s = rnames[index]
+        if not (0 <= index < n):
+            msg = 'Out of bounds.'
+            raise_desc(DPSemanticError, msg, index=index, R=R)
+
+        res = self.make_resource(ndp_name, s)
+        return res
+
+    @contract(cf=CFunction, index=int, returns=CFunction)
+    def ifun_get_index(self, cf, index):
+        from mcdp_dp.dp_flatten import TakeFun
+        from mocdp.comp.wrap import SimpleWrap
+
+        if not cf in self.indexed_fun:
+            F = self.get_ftype(cf)
+            n = len(F.subs)
+
+            # todo: use labels
+            if isinstance(F, PosetProductWithLabels):
+                fnames = list(F.labels)
+            else:
+                fnames = ['_f%d' % i for i in range(n)]
+            coords = list(range(n))
+            dp = TakeFun(F, coords)
+            ndp_out = '_muxed'
+            ndp = SimpleWrap(dp, fnames=fnames, rnames=ndp_out)
+            ndp_name = self.new_name('_indexing')
+
+            self.add_ndp(ndp_name, ndp)
+            c = Connection(dp1=ndp_name, s1=ndp_out, dp2=cf.dp, s2=cf.s)
+            self.add_connection(c)
+
+            self.indexed_fun[cf] = ndp_name
+
+        ndp_name = self.indexed_fun[cf]
+
+        ndp = self.names[ndp_name]
+        fnames = ndp.get_fnames()
+        n = len(fnames)
+        s = fnames[index]
+        if not (0 <= index < n):
+            msg = 'Out of bounds.'
+            raise_desc(DPSemanticError, msg, index=index, F=F)
+
+        res = self.make_function(ndp_name, s)
+        return res
+
 
 def format_list(l):
     """ Returns a nicely formatted list. """

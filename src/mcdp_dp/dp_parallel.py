@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-from .primitive import PrimitiveDP
-from contracts.utils import indent
-from .dp_series import get_product_compact
-from .primitive import NormalForm
-from mocdp.exceptions import do_extra_checks
-from mcdp_posets import Map, PosetProduct, UpperSet, UpperSets, poset_minima
 import itertools
+
+from contracts.utils import indent, raise_wrapped
+from mcdp_posets import (Map, NotBelongs, PosetProduct, UpperSet, UpperSets,
+    lowerset_product, poset_minima, upperset_product)
+from mocdp.exceptions import do_extra_checks
+
+from .dp_series import get_product_compact
+from .primitive import NormalForm, PrimitiveDP
 
 
 __all__ = [
@@ -16,10 +18,6 @@ __all__ = [
 class Parallel(PrimitiveDP):
 
     def __init__(self, dp1, dp2):
-#         from mocdp import get_conftools_dps
-#         library = get_conftools_dps()
-#         _, self.dp1 = library.instance_smarter(dp1)
-#         _, self.dp2 = library.instance_smarter(dp2)
         self.dp1 = dp1
         self.dp2 = dp2
 
@@ -31,23 +29,47 @@ class Parallel(PrimitiveDP):
 
         R = PosetProduct((R1, R2))
 
-        M1 = self.dp1.get_imp_space_mod_res()
-        M2 = self.dp2.get_imp_space_mod_res()
-        # M = SpaceProduct((M1, M2))
-        M, _, _ = get_product_compact(M1, M2)
+        M1 = self.dp1.get_imp_space()
+        M2 = self.dp2.get_imp_space()
+
+
         self.M1 = M1
         self.M2 = M2
 
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
-        
+        M, _, _ = self._get_product()
+
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
+
+    def __getstate__(self):
+        state = dict(**self.__dict__)
+        state.pop('prod', None)
+        return state
+
+    def _get_product(self):
+        if not hasattr(self, 'prod'):
+            self.prod = _, _, _ = get_product_compact(self.M1, self.M2)
+        return self.prod
+
     def get_implementations_f_r(self, f, r):
         f1, f2 = f
         r1, r2 = r
-        _, pack, _ = get_product_compact(self.M1, self.M2)
+        _, pack, _ = self._get_product()
 
         m1s = self.dp1.get_implementations_f_r(f1, r1)
         m2s = self.dp2.get_implementations_f_r(f2, r2)
         options = set()
+
+        if do_extra_checks():
+            for m1 in m1s:
+                self.M1.belongs(m1)
+
+            try:
+                for m2 in m2s:
+                    self.M2.belongs(m2)
+            except NotBelongs as e:
+                msg = ' Invalid result from dp2'
+                raise_wrapped(NotBelongs, e, msg, dp2=self.dp2.repr_long())
+
         for m1 in m1s:
             for m2 in m2s:
                 m = pack(m1, m2)
@@ -55,24 +77,35 @@ class Parallel(PrimitiveDP):
 
         if do_extra_checks():
             for _ in options:
-                self.M.belongs(_)
+                self.I.belongs(_)
 
         return options
         
     def _split_m(self, m):
-        _, _, unpack = get_product_compact(self.M1, self.M2)
+        _, _, unpack = self._get_product()
 
         m1, m2 = unpack(m)
         return m1, m2
 
-    def evaluate_f_m(self, f, m):
-        """ Returns the resources needed
-            by the particular implementation m """
-        f1, f2 = f
-        m1, m2 = self._split_m(m)
-        r1 = self.dp1.evaluate_f_m(f1, m1)
-        r2 = self.dp2.evaluate_f_m(f2, m2)
-        return (r1, r2)
+    def evaluate(self, i):
+        m1, m2 = self._split_m(i)
+
+        fs1, rs1 = self.dp1.evaluate(m1)
+        fs2, rs2 = self.dp2.evaluate(m2)
+
+        fs = lowerset_product(fs1, fs2)
+        rs = upperset_product(rs1, rs2)
+
+        return fs, rs
+
+#     def evaluate_f_m(self, f, m):
+#         """ Returns the resources needed
+#             by the particular implementation m """
+#         f1, f2 = f
+#         m1, m2 = self._split_m(m)
+#         r1 = self.dp1.evaluate_f_m(f1, m1)
+#         r2 = self.dp2.evaluate_f_m(f2, m2)
+#         return (r1, r2)
 
     def solve(self, f):
         if do_extra_checks():
@@ -91,10 +124,6 @@ class Parallel(PrimitiveDP):
 
         res = R.Us(set(s))
 
-        if do_extra_checks():
-            tres = self.get_tradeoff_space()
-            tres.belongs(res)
-
         return res
 
     def __repr__(self):
@@ -103,9 +132,20 @@ class Parallel(PrimitiveDP):
     def repr_long(self):
         r1 = self.dp1.repr_long()
         r2 = self.dp2.repr_long()
-        s = 'Parallel  %% %s -> %s' % (self.get_fun_space(), self.get_res_space())
+        s = 'Parallel2  %% %s -> %s' % (self.get_fun_space(), self.get_res_space())
+        s += self._add_extra_info()
         s += '\n' + indent(r1, '. ', first='\ ')
+
+#         if hasattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME):
+#             a = getattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME)
+#             s += '\n (labeled as %s)' % a.__str__()
+
         s += '\n' + indent(r2, '. ', first='\ ')
+
+#         if hasattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME):
+#             a = getattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME)
+#             s += '\n (labeled as %s)' % a.__str__()
+
         return s
 
     def get_normal_form(self):

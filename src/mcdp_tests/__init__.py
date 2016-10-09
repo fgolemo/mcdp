@@ -14,13 +14,12 @@ def load_tests_modules():
     import mcdp_lang_tests
     import mcdp_dp_tests
     import mcdp_web_tests
-
-    from mcdp_report import tests  # @Reimport
-
+    import mcdp_opt_tests
 
     from mocdp.comp.flattening import tests  # @Reimport
-
     from mocdp.comp import tests  # @Reimport
+
+    import mcdp_report_ndp_tests
 
 
 def jobs_comptests(context):

@@ -81,7 +81,7 @@ mcdp {
     f = ()
     try:
         dpl.solve(f)
-    except WrongUseOfUncertain as e:
+    except WrongUseOfUncertain:
         pass
     else:
         msg = 'Expected WrongUseOfUncertain.'
@@ -89,7 +89,7 @@ mcdp {
 
     try:
         dpu.solve(f)
-    except WrongUseOfUncertain as e:
+    except WrongUseOfUncertain:
         pass
     else:
         msg = 'Expected WrongUseOfUncertain.'

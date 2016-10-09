@@ -1,31 +1,52 @@
+
+
+
+
+
 Goals:
 
-(*) [branch: devel] Stabilize unit-tests in devel
+(*) Unified solving interface, for interactive and batch drawing.
+    - (interactive) I can drag over and I see the shape change
+    - I can see the animation 
 
-- B: mcdplib-example_plusinv-ndp-plusinvnat3b_inf-test_conversion 
 
-(*) Release new version
-- put manual.html on website
-- change website?
+(*) Symmetrization for functionality/resources
 
-(*) Automatically generated iteration figures
+    The challenge is creating dual of certain DPs, such as Mux DPs.
 
-(*) Feature-parity with new Loop2, including normal transform
+    This enables to compute stable(h1 h2*) or stable(h2 h1*)
 
-(*) [branch: ???] Symmetrization for functionality/resources
 
-(*) Examples for WAFR paper
+(*) Esthetics
 
-(*) Compelling demo for uncertainty
+    - have one icon for each library (library_icon.png)
 
+    - display the dependency graph among libraries
+
+
+On hold:
 (*) Create a video?
 
+(*) Interface with cvxpy
 (*) Demo for QR code
+Discarded:
+(*) Feature-parity with new Loop2, including normal transform - on hold 
 
-(*) Other features
 
+Technical debt:
+
+- revise the implementation of subtraction, done very quickly
+- 'ignore resources' should modify the diagram, not create a wrapper.
+- remove all the symlinks
+
+- remove normal form
+- remove caching from LoopDP; make separate class
+- remove caching from Library, make separate class
 
 --------------------
+
+
+- test ignore_resource  for wrong inputs
 
 
 Keys:
@@ -40,6 +61,29 @@ Keys:
 Bugs
 -----
 
+- throw semanticerror instead of internalerror when there are repeated identifiers
+mcdp {
+   requires shape [m x m x m]
+   requires shape >= <6.5in, 2in, 5.8in>
+
+
+
+- is a device that provides the <code class='mcdp_poset'>`AngularPlacement</code> functionality
+and to do so requires the <code class='mcdp_poset'>`PPM</code> functionality.
+
+
+ValueError: If <pre> is empty then it needs to have an id.
+tag: <code class="mcdp_poset"><code>AngularPlacement&lt;/code&gt; functionality
+     and to do so requires the &lt;code class='mcdp_poset'&gt;</code>PPM</code>
+
+==> use backtick escape  &#96;
+
+- F: parse custom string for PosetCoproduct
+- B: refresh library does not reset the icon caches
+- B: what happens with recursive definitions? (a.poset = "`a")
+
+- now the edges that are not connected are not purple
+
 - B: if the syntax is not correct, it is not displayed at all.
   http://127.0.0.1:8080/libraries/duckiebot_components/models/pimoroni_inc/views/syntax/
 
@@ -50,9 +94,9 @@ Bugs
 
 Meat
 ----
+- "op(Poset)" => constructs opposite poset
 
-
-- intervals - what happens 
+- intervals - what happens
 
 
 - L: Add something like:
@@ -65,15 +109,15 @@ Meat
 # This converts from TypeC to TypeL
 mcdp {
     provides out [`power]
-    requires in  [`power] 
+    requires in  [`power]
     requires cost [USD]
 
-    # This device costs $5 
+    # This device costs $5
     cost >= 5 USD
 
     take(in,  0) >= `socket_type : TypeL
-    take(out, 0) <= `socket_type : TypeC 
- 
+    take(out, 0) <= `socket_type : TypeC
+
     take(in, 1) >=  take(out, 1) # voltages
     take(in, 2) >=  take(out, 2) # amperes
 }
@@ -85,7 +129,7 @@ Misc
 - F: create operator approx(10g, -)
 
 - B: automatically load CSS from that file. (introduces dependency on mcdp_web)
- 
+
 
 MCDP-web
 ----------
@@ -159,7 +203,7 @@ There is already a connection to function 'r1' of '_res_r1'.
             ^
             |
             here or nearby
-``` 
+```
 
 - F: nice icon for  operations: take
 - F: nice icon for  operations: meet, Join
@@ -184,7 +228,7 @@ Language additions
 	}
 	```
 
-- L: Syntax for empty sets. ``{} g`` or  ``empty g`` 
+- L: Syntax for empty sets. ``{} g`` or  ``empty g``
 
 
 - L: Implement Python-style comments for more literate programming.
@@ -227,7 +271,7 @@ requires r1 >= f1
      implicit : 100g | `scientific_objectives : find_current_life
   }
 
-  catalouge { 
+  catalouge {
      provides resolution [pixels]
      requires latency [s]
 
@@ -240,11 +284,8 @@ requires r1 >= f1
 - g: visualize PlusNat as "+ x"
 
 
+- bug: This should have a better error message
+   <code class='mcdp_value'>`my_poset: <em>element</em></code>.
 
-
-
-
-
-
-
-
+    ValueError: If <pre> is empty then it needs to have an id.
+    tag: <code class="mcdp_value">`my_poset: <em>element</em></code>

@@ -1,6 +1,8 @@
+from contracts.utils import raise_wrapped
+
 from .poset import NotLeq, Poset
 from .space import NotEqual
-from contracts.utils import raise_wrapped
+
 
 __all__ = [
     'Any',
@@ -15,6 +17,8 @@ class Any(Poset):
         and trivial leq.  
     """
 
+    def witness(self):
+        return 0
     def belongs(self, x):
         pass  # true
 

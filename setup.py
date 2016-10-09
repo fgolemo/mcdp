@@ -1,5 +1,5 @@
+from setuptools import find_packages, setup
 import os
-from setuptools import setup, find_packages
 
 def get_version(filename):
     import ast
@@ -58,6 +58,7 @@ setup(name=name,
         'compmake',
           'psutil',
           'setproctitle',
+        'markdown',
       ],
       dependency_links  = [
           # 'https://github.com/AndreaCensi/contracts/archive/env_mcdp.zip#egg=PyContracts',
@@ -75,11 +76,13 @@ setup(name=name,
 
       entry_points={
          'console_scripts': [
-            # 'mcdp_plot = mcdp_cli:mcdp_plot_main',
-            # 'mcdp_solve = mcdp_cli:mcdp_solve_main',
             'mcdp-plot = mcdp_cli:mcdp_plot_main',
             'mcdp-solve = mcdp_cli:mcdp_solve_main',
             'mcdp-web = mcdp_web:mcdp_web_main',
+            'mcdp-eval = mcdp_cli:mcdp_eval_main',
+            'mcdp-render = mcdp_docs:mcdp_render_main',
+            'mcdp-render-manual = mcdp_docs:mcdp_render_manual_main',
+            'mcdp-depgraph = mcdp_depgraph:mcdp_depgraph_main',
         ]
       }
 )

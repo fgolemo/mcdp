@@ -1,0 +1,46 @@
+mcdp {
+    requires payload [`Payload]
+
+    (required payload).shape >= <5.47 in, 2.24 in, 0.87 in>
+    (required payload).mass >= 120 g
+
+    requires budget [USD]
+    required budget >= 12 USD
+
+    provides out1 [`PortableDCPower]
+    provides out2 [`PortableDCPower]
+
+    requires in [`DC_Charging]
+
+    ((provided out1).dc).connector <= `USB_connectors:USB_Std_A
+    ((provided out1).dc).voltage <= `DC_voltages: v5
+    amps1 = ((provided out1).dc).amps
+
+    ((provided out2).dc).connector <= `USB_connectors:USB_Std_A
+    ((provided out2).dc).voltage <= `DC_voltages: v5
+    amps2 = ((provided out2).dc).amps
+
+    ((required in).dc).connector >= `USB_connectors: USB_Micro_A_male
+    ((required in).dc).voltage >= `DC_voltages: v5
+
+    (required payload).rigid_body >= (provided out1).rigid_body
+    (required payload).rigid_body >= (provided out2).rigid_body
+
+    amps1 <= 2 A
+    amps2 <= 2 A
+    total_amps = amps1 + amps2
+    power = 5V * (total_amps)
+
+    duration = max((provided out1).duration, (provided out2).duration)
+    used_capacity = power * duration 
+    capacity = 5V * (10400 mA*hour )
+
+    used_capacity <= capacity
+
+    rate =  10400 mA*hour
+
+    amps_in = 2 A
+    power_in = 2 A * 5 V
+    ((required in).dc).amps >= amps_in
+    (required in).duration >= used_capacity/power_in
+}

@@ -1,0 +1,44 @@
+mcdp {
+   provides motion [`Motion]
+   provides payload_bottom [`Payload] 
+   provides payload_top    [`Payload] 
+
+   requires budget [USD]
+   required budget >= 15 USD
+
+   requires pwm1 [`PWM]
+   requires pwm2 [`PWM]
+   
+   mass = (provided payload_bottom).mass + (provided payload_top).mass 
+   
+   shape_top = (provided payload_top).shape
+   shape_bottom = (provided payload_bottom).shape
+ 
+
+   shape_top <= <14cm, 11cm, 30cm>
+   shape_bottom <= <14cm, 11cm, 3cm>
+
+   (provided motion).velocity <= 35 cm/ s
+
+   c = 0.1 A / kg
+   current = max(mass * c, 0.4 A)
+
+   endurance = (provided motion).endurance
+   rigid_body = max(max((provided motion).rigid_body, (provided payload_bottom).rigid_body),
+                    (provided payload_top).rigid_body)
+
+   (required pwm1).amp_max >= current
+   (required pwm1).voltage_max >= 5 V
+   (required pwm1).freq_max >= 60 Hz
+   (required pwm1).duration >= endurance
+   (required pwm1).rigid_body >= rigid_body
+
+   (required pwm2).amp_max >= current  
+   (required pwm2).voltage_max >= 5 V
+   (required pwm2).freq_max >= 60 Hz
+   (required pwm2).duration >= endurance
+   (required pwm2).rigid_body >= rigid_body
+
+   requires rb_id [`RigidBodyID] 
+   required rb_id >=  rigid_body
+}

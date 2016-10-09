@@ -1,14 +1,19 @@
+# -*- coding: utf-8 -*-
+from abc import ABCMeta, abstractmethod
+
+from contracts import contract
+from contracts.utils import raise_desc, raise_wrapped
+from mcdp_dp.dp_terminator import Terminator
+from mcdp_posets import PosetProduct
+from mocdp.exceptions import DPInternalError, do_extra_checks, mcdp_dev_warning
+from multi_index.get_it_test import compose_indices, get_id_indices
+
 from .dp_flatten import Mux, get_R_from_F_coords
 from .dp_identity import Identity
 from .dp_parallel import Parallel
 from .dp_parallel_simplification import make_parallel
 from .dp_series import Series
-from abc import ABCMeta, abstractmethod
-from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
-from mcdp_posets import PosetProduct
-from mocdp.exceptions import DPInternalError, mcdp_dev_warning
-from multi_index.get_it_test import compose_indices, get_id_indices
+
 
 __all__ = [
     'make_series',
@@ -24,21 +29,28 @@ class SeriesSimplificationRule():
 
     def execute(self, dp1, dp2):
         """ Returns the simplified version. """
-        # check that everything is correct
-        dp0 = Series(dp1, dp2)
         try:
             res = self._execute(dp1, dp2)
+        except DPInternalError:
+            raise
         except BaseException as e:
             msg = 'Error while executing Series simplification rule.'
-            raise_wrapped(DPInternalError, e, msg, dp1=dp1.repr_long(),
-                          dp2=dp2.repr_long(), rule=self)
+            raise_wrapped(DPInternalError, e, msg, rule=self)
 
-        try:
-            check_same_spaces(dp0, res)
-        except AssertionError as e:
-            msg = 'Invalid Series simplification rule.'
-            raise_wrapped(DPInternalError, e, msg, dp1=dp1.repr_long(),
-                          dp2=dp2.repr_long(), rule=self, res=res.repr_long())
+#         print('\n\nExecuting simplification %s' % (type(self).__name__))
+#         print('dp1----\n%s' % dp1.repr_long())
+#         print('dp2----\n%s' % dp2.repr_long())
+#         print('result-----\n%s' % res.repr_long())
+
+
+        if do_extra_checks():
+            dp0 = Series(dp1, dp2)
+            try:
+                check_same_spaces(dp0, res)
+            except AssertionError as e:
+                msg = 'Invalid Series simplification rule.'
+                raise_wrapped(DPInternalError, e, msg, rule=self)
+
         return res
 
     @abstractmethod
@@ -86,7 +98,8 @@ class RuleSimplifyLift(SeriesSimplificationRule):
 
         P = make_parallel(dp2.dp1, make_series(m2, dp2.dp2))
 
-        res = make_series(m1, P)
+#         res = make_series(m1, P)
+        res = Series(m1, P)
         return res
 
 
@@ -129,7 +142,8 @@ class RuleSimplifyLiftB(SeriesSimplificationRule):
 
         P = make_parallel(make_series(m2, dp2.dp1), dp2.dp2)
 
-        res = make_series(m1, P)
+        # res = make_series(m1, P)
+        res = Series(m1, P)
         return res
 
 
@@ -151,7 +165,6 @@ class RuleMuxComposition(SeriesSimplificationRule):
         assert isinstance(dp2, Mux)
         return mux_composition(dp1, dp2)
 
-
             
 class RuleSimplifyPermPar(SeriesSimplificationRule):
     """ 
@@ -169,7 +182,8 @@ class RuleSimplifyPermPar(SeriesSimplificationRule):
         if not isinstance(dp2, Parallel):
             return False
 
-        if not isinstance(dp1, Mux) or not is_two_permutation(dp1.get_fun_space(), dp1.coords):
+        if not isinstance(dp1, Mux) or \
+            not is_two_permutation(dp1.get_fun_space(), dp1.coords):
             return False
 
         return True
@@ -222,30 +236,11 @@ def equiv_to_identity(dp):
         if s == ():
             return True
     return False
-#
-# def is_permutation(dp):
-#     from mcdp_dp.dp_flatten import Mux
-#     if not isinstance(dp, Mux):
-#         return False
-#
-#     if dp.coords == [1, 0]:
-#         return True
-#     # TODO: more options
-#     return False
-# def is_permutation_invariant(dp):
-#     from mcdp_dp import Product, Sum, Min, Max
-#     if isinstance(dp, (Max, Min, Sum, Product)):
-#         return True
-#     # TODO: more options
-#     return False
+
 
 def is_equiv_to_terminator(dp):
-    from mcdp_dp.dp_terminator import Terminator
     if isinstance(dp, Terminator):
         return True
-#     from mcdp_dp.dp_flatten import Mux
-#     if isinstance(dp, Mux) and dp.coords == []:
-#         return True
     return False
 
 rules = [
@@ -256,17 +251,19 @@ rules = [
     RuleJoinPar(),
 ]
 
+disable_optimization = False
+
 def make_series(dp1, dp2):
     """ Creates a Series if needed.
         Simplifies the identity and muxes """
+    if disable_optimization:
+        return Series(dp1, dp2)
     # first, check that the series would be created correctly
 
     # Series(X(F,R), Terminator(R)) => Terminator(F)
     # but X not loop
-#     from mcdp_dp.dp_loop import DPLoop0
-    if is_equiv_to_terminator(dp2) and isinstance(dp1, Mux):
 
-        from mcdp_dp.dp_terminator import Terminator
+    if is_equiv_to_terminator(dp2) and isinstance(dp1, Mux):
         res = Terminator(dp1.get_fun_space())
         assert res.get_fun_space() == dp1.get_fun_space()
         return res
@@ -287,12 +284,6 @@ def make_series(dp1, dp2):
         return mux_composition(dp1, dp2)
 
     if isinstance(dp1, Mux):
-#         if isinstance(dp2, Series):
-#             dps = unwrap_series(dp2)
-#             if isinstance(dps[0], Mux):
-#                 first = mux_composition(dp1, dps[0])
-#                 rest = reduce(make_series, dps[1:])
-#                 return make_series(first, rest)
 
         def has_null_fun(dp):
             F = dp.get_fun_space()
@@ -358,7 +349,8 @@ def make_series(dp1, dp2):
 
         res = make_series(m2, make_parallel(rest, dp2.dp2))
 
-        check_same_spaces(Series(dp1, dp2), res)
+        if do_extra_checks():
+            check_same_spaces(Series(dp1, dp2), res)
         return res
 
     if isinstance(dp1, Mux) and isinstance(dp2, Parallel) \
@@ -379,7 +371,8 @@ def make_series(dp1, dp2):
 
         res = make_series(m2, make_parallel(dp2.dp1, rest))
 
-        check_same_spaces(Series(dp1, dp2), res)
+        if do_extra_checks():
+            check_same_spaces(Series(dp1, dp2), res)
         return res
 
 

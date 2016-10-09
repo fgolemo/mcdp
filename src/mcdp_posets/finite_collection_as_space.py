@@ -1,11 +1,15 @@
 # -*- coding: utf-8 -*-
-from .poset import NotLeq
-from .space import NotEqual, Space
+import random
+
 from contracts.utils import raise_desc
-from mcdp_posets.space import NotBelongs
+from mcdp_posets import Uninhabited
+
+from .space import NotBelongs, NotEqual, Space
 
 
-__all__ = ['FiniteCollectionAsSpace']
+__all__ = [
+    'FiniteCollectionAsSpace',
+]
 
 
 class FiniteCollectionAsSpace(Space):
@@ -18,21 +22,25 @@ class FiniteCollectionAsSpace(Space):
         self.elements = frozenset(universe)
 
     def belongs(self, x):
+#         if isinstance(x, dict):  # unhashable
+#             msg = 'Value is not hashable.'
+#             raise_desc(NotBelongs, msg, x=x, elements=self.elements)
         if not x in self.elements:
             msg = 'Element does not belong to poset.'
             raise_desc(NotBelongs, msg=msg, x=x, elements=self.elements)
 
+    def witness(self):
+        n = len(self.elements)
+        if n == 0:
+            raise Uninhabited()
+        i = random.randint(0, n-1)
+        return list(self.elements)[i]
+        
     def check_equal(self, a, b):
         if a == b:
             pass
         else:
             raise NotEqual('%s ≠ %s' % (a, b))
-
-    def check_leq(self, a, b):
-        if a == b:
-            pass
-        else:
-            raise_desc(NotLeq, 'Different', a=a, b=b)
 
     def format(self, x):
         return x.__repr__()

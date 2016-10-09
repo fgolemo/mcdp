@@ -1,0 +1,5 @@
+mcdp {
+
+    provides com [`USBCom]
+    requires com [`LogitechWirelessCom]
+}

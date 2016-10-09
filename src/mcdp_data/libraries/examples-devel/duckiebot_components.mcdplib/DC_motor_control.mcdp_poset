@@ -1,0 +1,5 @@
+product(
+    function: S(dc_motor_control),
+    max_voltage: V,
+    amps: A
+)

@@ -1,0 +1,10 @@
+# LiPo
+# voltage  7.4
+# crating 25
+# 135 mm x 42 mm x 45 mm
+# 17.6 oz
+# 100000 mA*hour
+mcdp {
+    requires budget >= 149.99 USD
+
+}

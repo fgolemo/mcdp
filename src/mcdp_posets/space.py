@@ -1,38 +1,41 @@
 # -*- coding: utf-8 -*-
 from abc import ABCMeta, abstractmethod
+
 from contracts import contract, raise_wrapped
 from mocdp.exceptions import do_extra_checks
+
 from .space_meta import SpaceMeta
 
+
 class NotBelongs(Exception):
-    pass
+    """ Raised by Space:belongs() """
 
 class Belongs(Exception):
     """ The point actually belongs to the set
         raised by check_not_belongs """
-    pass
+    
 
 class NotEqual(Exception):
-    pass
+    """ Raised by Space:check_equal() """
 
 class Uninhabited(Exception):
     ''' There is no element in this space. Raised by witness().'''
-    pass
+    
 
 class Space(object):
     __metaclass__ = SpaceMeta
 
     def format(self, x):
         """ Formats a point in the space. """
-        return x.__repr__()
+        return x.__repr__() 
 
     @abstractmethod
     def belongs(self, x):
         """ Raise NotBelongs """
     
-    def check_belongs(self, x):
-        return self.belongs(x)
-    
+#     def check_belongs(self, x):
+#         return self.belongs(x)
+#     
     def check_not_belongs(self, x):
         try:
             self.check_belongs(x)
@@ -43,10 +46,9 @@ class Space(object):
 
     @abstractmethod
     def check_equal(self, x, y):
-        # Raise NotEqual if not
-        pass
-
-
+        """ Raises NotEqual if not equal. """
+    
+    @contract(returns=bool)
     def equal(self, a, b):
         try:
             self.check_equal(a, b)
@@ -55,11 +57,13 @@ class Space(object):
         else:
             return True
         
+    @abstractmethod
     def witness(self):
         """ Returns an element of the space, or raise Uninhabited
             if the space is empty. """
-        raise NotImplementedError(type(self))
 
+    def repr_long(self):
+        return self.__repr__()
 
 
 class MapNotDefinedHere(Exception):
@@ -69,6 +73,7 @@ class Map():
 
     __metaclass__ = ABCMeta
 
+    @contract(dom=Space, cod=Space)
     def __init__(self, dom, cod):
         self.dom = dom
         self.cod = cod
@@ -105,8 +110,7 @@ class Map():
 
     @abstractmethod
     def _call(self, x):
-        """ Might raise MapNotDefinedHere (hack) """
-        pass
+        """ Might raise MapNotDefinedHere. """
 
     def __repr__(self):
         return "%s:%s→%s" % (type(self).__name__,

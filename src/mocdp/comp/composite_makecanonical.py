@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
+
+from networkx.algorithms.cycles import simple_cycles
+
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import Identity, Mux
 from mcdp_posets import PosetProduct, get_types_universe
+from mocdp import logger
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.connection import get_connection_multigraph
 from mocdp.comp.context import (CResource, Connection, get_name_for_fun_node,
@@ -11,19 +15,22 @@ from mocdp.comp.context import (CResource, Connection, get_name_for_fun_node,
 from mocdp.comp.flattening.flatten import cndp_flatten
 from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.wrap import SimpleWrap, dpwrap
-from mocdp.exceptions import DPSemanticError, DPSemanticErrorNotConnected
-from networkx.algorithms.cycles import simple_cycles
+from mocdp.exceptions import DPSemanticErrorNotConnected
+from mocdp.memoize_simple_imp import memoize_simple
 import numpy as np
+
 
 @contract(ndp=CompositeNamedDP)
 def cndp_makecanonical(ndp, name_inner_muxed='_inner_muxed', s_muxed='_muxed'):
     """ 
-        Returns a composite with only one ndp, called "named_inner_muxed".
+        Returns a composite with only one ndp, called <named_inner_muxed>.
         If there were cycles, then this will also have a signal caled s_muxed
         and there will be one connection to it.
         
         raises DPSemanticErrorNotConnected
     """
+
+    assert isinstance(ndp, CompositeNamedDP), type(ndp)
 
     try:
         ndp.check_fully_connected()
@@ -34,14 +41,19 @@ def cndp_makecanonical(ndp, name_inner_muxed='_inner_muxed', s_muxed='_muxed'):
     fnames = ndp.get_fnames()
     rnames = ndp.get_rnames()
 
+
     # First, we flatten it
     ndp = cndp_flatten(ndp)
+
     assert ndp.get_fnames() == fnames
     assert ndp.get_rnames() == rnames
+
+
     # then we compact it
     ndp = ndp.compact()
     assert ndp.get_fnames() == fnames
     assert ndp.get_rnames() == rnames
+
 
     # Check that we have some cycles
     G = get_connection_multigraph(ndp.get_connections())
@@ -66,18 +78,12 @@ def cndp_makecanonical(ndp, name_inner_muxed='_inner_muxed', s_muxed='_muxed'):
     assert ndp_inner.get_rnames() == rnames + cycles_names
 
     if cycles_names:
-#     if len(cycles_names) > 1:
         ndp_inner_muxed = add_muxes(ndp_inner, cs=cycles_names, s_muxed=s_muxed)
         mux_signal = s_muxed
         assert ndp_inner_muxed.get_fnames() == fnames + [mux_signal]
         assert ndp_inner_muxed.get_rnames() == rnames + [mux_signal]
-#     elif len(cycles_names) == 1:
-#         ndp_inner_muxed = ndp_inner
-#         mux_signal = cycles_names[0]
     else:
         ndp_inner_muxed = ndp_inner
-        pass
-
 
     name2ndp = {}
     name2ndp[name_inner_muxed] = ndp_inner_muxed
@@ -208,32 +214,28 @@ def cndp_create_one_without_some_connections(ndp, exclude_connections, names):
     from mocdp.comp.context import Context
     context = Context()
     
-    # print ndp
-    # print ndp.get_rnames()
-    # print ndp.get_fnames()
     # Create the fun/res node in the original order
     for fname in ndp.get_fnames():
-        F = ndp.get_ftype(fname)
-        context.add_ndp_fun_node(fname, F)  # this updates the internal fnames
+        # simply copy the functionnode - it might be a LabeledNDP
+        name = get_name_for_fun_node(fname)
+        fndp = ndp.get_name2ndp()[name]
+        context.fnames.append(fname)
+        context.add_ndp(name, fndp)
 
     for rname in ndp.get_rnames():
-        R = ndp.get_rtype(rname)
-        context.add_ndp_res_node(rname, R)  # this udpates the internal rnames
-
+        # simply copy the functionnode - it might be a LabeledNDP
+        name = get_name_for_res_node(rname)
+        rndp = ndp.get_name2ndp()[name]
+        context.rnames.append(rname)
+        context.add_ndp(name, rndp)
 
     for _name, _ndp in ndp.get_name2ndp().items():
         isf, fname = is_fun_node_name(_name)
         isr, rname = is_res_node_name(_name)
 
         if isf and fname in ndp.get_fnames():
-            # print('fname: %r' % fname)
-            # F = ndp.get_ftype(fname)
-            # context.add_ndp_fun_node(fname, F)
             pass
         elif isr and rname in ndp.get_rnames():
-            # print('rname: %r' % rname)
-            # R = ndp.get_rtype(rname)
-            # context.add_ndp_res_node(rname, R)
             pass
         else:
             # print('regular: %r' % _name)
@@ -255,8 +257,6 @@ def cndp_create_one_without_some_connections(ndp, exclude_connections, names):
         c2 = Connection(fn, name, e.dp2, e.s2)
         context.connections.append(c1)
         context.connections.append(c2)
-#         context.add_connection(c1)
-#         context.add_connection(c2)
 
     return CompositeNamedDP.from_context(context)
 
@@ -278,6 +278,7 @@ def choose_connections_to_cut(connections, name2dp):
         else:
             return 1
 
+    @memoize_simple
     def edge_weight(e):
         (dp1, dp2) = e
         c = find_one(connections, dp1, dp2)
@@ -295,6 +296,8 @@ def enumerate_minimal_solution(G, edge_weight):
         G: a graph
         edge_weight: a map from edge (i,j) of G to nonnegative weight
     """
+    # Next optimization: consider equivalence classes of edges:
+    # edges that belong to the same cycle. Then only keep the small ones.
     from mocdp.comp.connection import simple_cycles_as_edges
     
     State = namedtuple('State', 'cycles weight')
@@ -307,18 +310,85 @@ def enumerate_minimal_solution(G, edge_weight):
     
     # initial states
     all_edges = set(G.edges())
+
+    all_cycles = simple_cycles_as_edges(G)
+
+    def belongs_to_cycles(e):
+        for c in all_cycles:
+            assert isinstance(c, tuple)
+            if e in c:
+                return True
+        return False
+
+    def cycles_for_edge(e):
+        cycles = set()
+        for c in all_cycles:
+            assert isinstance(c, tuple)
+            if e in c:
+                cycles.add(c)
+        return freeze(cycles)
+
+    # these are the ones we care about
+    edges_belonging_to_cycles = set([e for e in all_edges if belongs_to_cycles(e)])
+
+    def get_edges_to_consider():
+        # For each set of cycles, find which edges are in the equivalence class
+        from collections import defaultdict
+        cycles2edges = defaultdict(lambda: set())
+        for e in edges_belonging_to_cycles:
+            cycles = freeze(cycles_for_edge(e))
+            cycles2edges[cycles].add(e)
+
+
+        cycles2champion = {}
+        cycles2weight = {}
+        for cycles, edges in cycles2edges.items():
+            logger.debug('Found %s edges that remove a set of %s cycles' % (len(edges), len(cycles)))
+
+            best = min(edges, key=edge_weight)
+
+            cycles2champion[cycles] = best
+            cycles2weight[cycles] = edge_weight(best)
+
+        def a_contains_b(ca, cb):
+            return cb.issubset(ca)
+
+        consider = set()
+        for cycles1 in cycles2weight:
+            logger.debug('cycles')
+            for cycles2 in cycles2weight:
+                w1 = cycles2weight[cycles1]
+                w2 = cycles2weight[cycles2]
+                if a_contains_b(cycles2, cycles1) and w2 < w1:
+                    #logger.debug('dominated')
+                    break
+            else:
+                # not dominated
+                consider.add(cycles2champion[cycles1])
+
+        logger.debug('From %d to %d edges to consider' % (len(edges_belonging_to_cycles), len(consider)))
+        return consider
+
+
+    edges_to_consider = get_edges_to_consider()
+
+    logger.debug('Deciding between %s hot of %d edges' % (len(edges_to_consider), len(all_edges)))
+
     best_weight = np.inf
     
-    current_partial_solutions[freeze([])] = State(cycles=simple_cycles_as_edges(G), weight=0.0)
+
+    current_partial_solutions[freeze([])] = \
+        State(cycles=all_cycles, weight=0.0)
     
     while current_partial_solutions:
         # choose the solution to expand with minimum weight
         removed, state = pop_solution_minimum_weight(current_partial_solutions)
         examined.add(removed)
-        print('%s best %s / %s / %s' % (len(current_solutions), best_weight, len(current_partial_solutions), removed))
+        logger.debug('nsolutions %s best w %s / current_partial_solutions %s / removed %s' %
+              (len(current_solutions), best_weight, len(current_partial_solutions), removed))
 
         # now look at edges that we could remove
-        to_remove = all_edges - removed
+        to_remove = edges_to_consider - removed
 
         for edge in to_remove:
             new_weight = state.weight + edge_weight(edge)
@@ -330,7 +400,7 @@ def enumerate_minimal_solution(G, edge_weight):
                 # print('do not consider')
                 continue
 
-            cycles = [c for c in state.cycles if not edge in c]
+            cycles = set([c for c in state.cycles if not edge in c])
 
             ss = State(cycles=cycles, weight=new_weight)
             if not cycles:
@@ -345,7 +415,7 @@ def enumerate_minimal_solution(G, edge_weight):
     best = solutions[np.argmin(weights)]
     state = current_solutions[best]
 
-    # print('best: %s %s' % (best, state))
+    logger.debug('best: %s %s' % (best, state))
     return best
 
 
@@ -359,20 +429,6 @@ def pop_solution_minimum_weight(sols):
     return k, res
 
 
-
-# Returns the list of cycles as a sequence of edges
-#     c_as_e = simple_cycles_as_edges(G)
-#
-#     counts = defaultdict(lambda: 0)
-#     for cycle in c_as_e:
-#         for edge in cycle:
-#             counts[edge] += 1
-#
-#     ncycles = len(c_as_e)
-#     best_edge, ncycles_broken = max(list(counts.items()), key=lambda x: x[1])
-    
-    
-        
 
 
 def get_canonical_elements(ndp0):

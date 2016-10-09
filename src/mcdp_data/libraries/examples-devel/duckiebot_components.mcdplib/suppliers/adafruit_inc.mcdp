@@ -1,7 +1,0 @@
-mcdp {
-	implements `supplier
-
-	_ |	{ 1 of `components: Explorer_HAT} | $22.95 | 1 week
-	_ |	{ 2 of `components: Explorer_HAT} | $29.95 | 1 week
-
-}

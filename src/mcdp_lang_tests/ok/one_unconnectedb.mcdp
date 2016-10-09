@@ -1,4 +1,4 @@
-# test unconnected
+# test connected
 mcdp {
     sub a = instance mcdp { 
     }

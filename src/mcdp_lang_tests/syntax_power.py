@@ -3,11 +3,11 @@
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error, ok,
     parse_wrap_check, sem, syn)
 from comptests.registrar import comptest
+from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_lang import parse_ndp
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
-from mcdp_posets.uppersets import UpperSets
-from mcdp_dp.dp_transformations import get_dp_bounds
+from mcdp_posets import UpperSets
 from nose.tools import assert_equal
 
 L = CDPLanguage
@@ -21,23 +21,21 @@ syn(Syntax.integer_fraction, '1/')
 exponent = L.exponent('^')
 
 ok(Syntax.rvalue_power_expr, 'pow(x,1/2)',
-    L.Power(op1=L.VariableRef('x'),
-            glyph=None,
+    L.Power(keyword=L.PowerKeyword('pow'), op1=L.VariableRef('x'),
             exponent=L.IntegerFraction(num=1, den=2)))
 
 ok(Syntax.rvalue_power_expr, 'x ^ 1/2',
-    L.Power(op1=L.VariableRef('x'),
+    L.PowerShort(op1=L.VariableRef('x'),
             glyph=exponent,
             exponent=L.IntegerFraction(num=1, den=2)))
 
 ok(Syntax.rvalue_power_expr, 'x ^ 2',
-    L.Power(op1=L.VariableRef('x'),
+    L.PowerShort(op1=L.VariableRef('x'),
             glyph=exponent,
             exponent=L.IntegerFraction(num=2, den=1)))
 
 ok(Syntax.rvalue_power_expr, 'pow(x, 2)',
-    L.Power(op1=L.VariableRef('x'),
-            glyph=None,
+    L.Power(keyword=L.PowerKeyword('pow'), op1=L.VariableRef('x'),
             exponent=L.IntegerFraction(num=2, den=1)))
 
 

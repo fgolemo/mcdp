@@ -1,9 +1,0 @@
-mcdp {
- requires r1 [g]
- r1 >= 10 g
- r1 >= 20 g
- provides f1 [A]
-f1 <= 10 A
-f1 <= 5 A
-
-}

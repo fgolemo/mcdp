@@ -1,7 +1,5 @@
-# from .wrap import SimpleWrap
 from mcdp_dp import PrimitiveDP
-# from mcdp_lang.syntax import Syntax, parse_wrap
-from mcdp_posets import SpaceProduct, UpperSet
+from mcdp_posets import FiniteCollectionAsSpace, LowerSet, UpperSet
 
 __all__ = [
     'Dummy',
@@ -10,9 +8,16 @@ __all__ = [
 
 class Template(PrimitiveDP):
     def __init__(self, F, R):
-        M = SpaceProduct(())
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
-    def solve(self, _func):
+        I = FiniteCollectionAsSpace(['*'])
+        PrimitiveDP.__init__(self, F=F, R=R, I=I)
+
+    def evaluate(self, i):
+        assert i == '*'
+        rs = UpperSet(set([self.R.get_bottom()]), self.R)
+        fs = LowerSet(set([self.F.get_top()]), self.F)
+        return fs, rs
+        
+    def solve(self, f):  # @UnusedVariable
         minimals = [self.R.get_bottom()]
         return UpperSet(set(minimals), self.R)
 

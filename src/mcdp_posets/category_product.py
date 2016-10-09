@@ -1,8 +1,14 @@
+# -*- coding: utf-8 -*-
+from contracts import contract
+from contracts.utils import raise_wrapped
+from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
+from mocdp.exceptions import do_extra_checks
+
 from .poset import Poset
 from .poset_product import PosetProduct
-from .space_product import SpaceProduct
-from contracts import contract
 from .space import Space  # @UnusedImport
+from .space_product import SpaceProduct
+
 
 __all__ = [
     'get_product_compact',
@@ -12,22 +18,29 @@ __all__ = [
 def get_product_compact(*spaces):
     """
         S, pack, unpack = get_product_compact(S1, S2)
-    """
-    S = _prod_make(spaces)
+    """ 
+    S = _prod_make(spaces) 
+
     def pack(*elements):
-        return _prod_make_state(elements, spaces)
+        try:
+            return _prod_make_state(elements, spaces)
+        except TypeError as e:
+            msg = 'Could not pack.'
+            raise_wrapped(TypeError, e, msg, elements=elements, spaces=spaces)
     def unpack(s):
         return _prod_get_state(s, spaces)
     return S, pack, unpack
 
 def get_subs(x):
+    if hasattr(x,  ATTRIBUTE_NDP_RECURSIVE_NAME):
+        # do not break the spaces that have a name
+        return (x,)
     if isinstance(x, SpaceProduct):
         return x.subs
     else:
         return (x,)
 
 def _prod_make(spaces):
-
     subs = ()
     for space in spaces:
         subs = subs + get_subs(space)
@@ -38,13 +51,18 @@ def _prod_make(spaces):
     if all(isinstance(x, Poset) for x in subs):
         S = PosetProduct(subs)
     else:
-        S = SpaceProduct(subs)
+        S = SpaceProduct(subs) 
 
     return S
 
 def _prod_make_state(elements, spaces):
+    assert isinstance(elements, tuple), elements
+    assert isinstance(spaces, tuple), spaces
 
     def get_state(X, x):
+        if hasattr(X, ATTRIBUTE_NDP_RECURSIVE_NAME):
+            # do not break the spaces that have a name
+            return (x,)
         if isinstance(X, SpaceProduct):
             return x
         else:
@@ -52,6 +70,8 @@ def _prod_make_state(elements, spaces):
 
     s = ()
     for space, e in zip(spaces, elements):
+        if do_extra_checks():
+            space.belongs(e)
         s = s + get_state(space, e)
 
     if len(s) == 1:

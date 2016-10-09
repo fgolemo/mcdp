@@ -1,0 +1,57 @@
+mcdp {
+   provides out [`PortableDCPower]
+   provides usbcom [`USBCom]
+   provides motion [`Motion]
+   provides payload [`Payload]
+
+   requires budget [USD]
+   
+   (provided motion).velocity <= 5 m/s
+   required budget >= 10000 USD
+
+   computer = instance `YoubotBaseComputer 
+
+   provided usbcom <= usbcom provided by computer 
+
+   battery = instance `YoubotBaseBattery
+
+   mass = (provided payload).mass
+   shape = (provided payload).shape
+ 
+
+   endurance1 = max( (provided usbcom).duration, (provided motion).endurance)
+   #endurance2 = (provided out).duration
+   
+   endurance = endurance1 
+
+   motors = instance mcdp {
+      provides endurance [s]
+      requires in [`PortableDCPower]
+   }
+
+   motors.endurance >= endurance
+
+   in required by motors  <= out3 provided by battery
+
+  # limit x and y
+   shape <= <30cm, 50cm, 50cm>
+   
+   mass <= 10 kg
+
+   out1 provided by battery >= dc required by computer
+   out2 provided by battery >= provided out
+ 
+   (provided out).dc <= (out2 provided by battery).dc
+   (provided out).duration <= (out2 provided by battery).duration
+   
+
+   rigid_body1 = max( (provided out).rigid_body, (provided usbcom).rigid_body )
+   rigid_body2 = max( (provided motion).rigid_body, (provided payload).rigid_body )
+   rigid_body = max(rigid_body1, rigid_body2)
+
+   rigid_body <= (out2 provided by battery).rigid_body
+
+   requires rigid_body [`RigidBodyID]
+   required rigid_body >= rigid_body
+   requires in for battery
+}

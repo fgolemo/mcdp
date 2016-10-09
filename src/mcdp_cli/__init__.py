@@ -1,3 +1,5 @@
+from .eval import *
 from .plot import *
-from .go import *
 from .solve import *
+
+

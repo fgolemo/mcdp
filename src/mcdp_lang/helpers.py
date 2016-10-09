@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
+from contracts.utils import raise_wrapped
+from mcdp_dp import (Constant, ConstantMinimals, Limit, LimitMaximals,
+    get_conversion)
+from mcdp_posets import NotLeq, Poset, get_types_universe
 from mocdp.comp import Connection, dpwrap
-from mocdp.comp.context import ValueWithUnits
-from mcdp_dp import Constant
-from mcdp_posets.types_universe import get_types_universe
-from mcdp_dp.conversion import get_conversion
-from mcdp_dp.dp_limit import Limit
-from mcdp_dp.dp_constant import ConstantMinimals
-
+from mocdp.comp.context import CResource, ValueWithUnits
+from mocdp.exceptions import DPSemanticError
 
 
 @contract(resources='seq')
@@ -39,7 +38,7 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
         fnames.append(ni)
 
 
-    fnames_ = fnames if len(fnames) > 1 else fnames[0]
+    fnames_ = fnames[0] if len(fnames) == 1 else fnames
     ndp = dpwrap(dp, fnames_, name_result)
     context.add_ndp(name, ndp)
 
@@ -70,7 +69,6 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
 
     if len(fnames) == 1:
         fnames = fnames[0]
-
 
     for c in connections:
         context.add_connection(c)
@@ -122,6 +120,16 @@ def get_constant_minimals_as_resources(R, values, context):
     context.add_ndp(nres, ndp)
     return context.make_resource(nres, nres)
 
+def get_constant_maximals_as_function(F, values, context):
+    for v in values:
+        F.belongs(v)
+
+    dp = LimitMaximals(F=F, values=values)
+    nres = context.new_name('_c')
+    ndp = dpwrap(dp, '_max', [])
+    context.add_ndp(nres, ndp)
+    return context.make_function(nres, '_max')
+
 @contract(v=ValueWithUnits)
 def get_valuewithunits_as_function(v, context):
     dp = Limit(v.unit, v.value)
@@ -132,7 +140,30 @@ def get_valuewithunits_as_function(v, context):
     return context.make_function(n, sn)
 
 
-def square(x):
-    res = x * x
-    return res
+@contract(returns=CResource, r=CResource, P=Poset)
+def get_resource_possibly_converted(r, P, context):
+    """ Returns a resource possibly converted to the space P """
+    assert isinstance(r, CResource)
+
+    R = context.get_rtype(r)
+    tu = get_types_universe()
+    
+    if tu.equal(R, P):
+        return r
+    else:
+        try:
+            tu.check_leq(R, P)
+        except NotLeq as e:
+            msg = 'Cannot convert %s to %s.'
+            raise_wrapped(DPSemanticError, e, msg)  # , where=rvalue.where)
+
+        conversion = get_conversion(R, P)
+        if conversion is None:
+            return r
+        else:
+            r2 = create_operation(context, conversion, [r],
+                                 name_prefix='_conv', op_prefix='_op',
+                                 res_prefix='_res')
+            return r2
+
 

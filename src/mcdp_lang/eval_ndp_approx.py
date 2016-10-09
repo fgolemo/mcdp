@@ -1,6 +1,6 @@
-from mocdp.exceptions import mcdp_dev_warning
+# -*- coding: utf-8 -*-
 from mocdp.comp.wrap import SimpleWrap
-
+from mocdp.exceptions import mcdp_dev_warning
 
 
 def eval_ndp_approx_lower(r, context):
@@ -19,6 +19,7 @@ def eval_ndp_approx_lower(r, context):
     fnames = fnames if len(fnames) > 1 else fnames[0]
     ndp2 = SimpleWrap(dpl, fnames, rnames)
     return ndp2
+
 
 def eval_ndp_approx_upper(r, context):
     from mcdp_lang.eval_ndp_imp import eval_ndp

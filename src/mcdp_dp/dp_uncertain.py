@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
+import copy
+
+from contracts import contract
+from contracts.utils import raise_wrapped
+from mcdp_dp import NotSolvableNeedsApprox, PrimitiveDP, WrongUseOfUncertain
+from mcdp_maps import MapComposition
+from mcdp_posets import Map, NotLeq, PosetProduct, Space
+
 from .dp_flatten import MuxMap
 from .dp_generic_unary import WrapAMap
 from .primitive import ApproximableDP
-from contracts import contract
-from contracts.utils import raise_wrapped
-from mcdp_dp import PrimitiveDP
-from mcdp_maps import MapComposition
-from mcdp_posets import PosetProduct, Space
-from mcdp_posets.poset import NotLeq
-from mcdp_posets.space import Map
-from mocdp.exceptions import DPSemanticError
-from mcdp_dp.primitive import NotSolvableNeedsApprox, WrongUseOfUncertain
 
 
 __all__ = [
@@ -30,10 +29,13 @@ class UncertainGate(ApproximableDP):
         self.F0 = F0
         F = PosetProduct((F0, F0))
         R = F0
-        M = PosetProduct(())
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        M = PosetProduct((F0, F0))  # must be same as approximations
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
 
     def solve(self, func):
+        raise NotSolvableNeedsApprox(type(self))
+
+    def evaluate(self, m):
         raise NotSolvableNeedsApprox(type(self))
 
     def __repr__(self):
@@ -42,12 +44,16 @@ class UncertainGate(ApproximableDP):
     def get_lower_bound(self, n):  # @UnusedVariable
         m1 = CheckOrder(self.F0)
         m2 = MuxMap(self.F, coords=0)
-        return WrapAMap(MapComposition((m1, m2)))
+        dp = WrapAMap(MapComposition((m1, m2)))
+        # preserve_dp_attributes(self, dp)
+        return dp
 
     def get_upper_bound(self, n):  # @UnusedVariable
         m1 = CheckOrder(self.F0)
         m2 = MuxMap(self.F, coords=1)
-        return WrapAMap(MapComposition((m1, m2)))
+        dp = WrapAMap(MapComposition((m1, m2)))
+        # preserve_dp_attributes(self, dp)
+        return dp
 
 class CheckOrder(Map):
     def __init__(self, F0):
@@ -81,8 +87,11 @@ class UncertainGateSym(ApproximableDP):
         self.F0 = F0
         F = F0
         R = PosetProduct((F0, F0))
-        M = PosetProduct(())
-        PrimitiveDP.__init__(self, F=F, R=R, M=M)
+        I = copy.copy(F0)
+        PrimitiveDP.__init__(self, F=F, R=R, I=I)
+
+    def evaluate(self, m):
+        raise NotSolvableNeedsApprox(type(self))
 
     def solve(self, func):
         raise NotSolvableNeedsApprox(type(self))
@@ -91,10 +100,12 @@ class UncertainGateSym(ApproximableDP):
         return 'UncertainGateSym(%r)' % self.F0
 
     def get_lower_bound(self, n):  # @UnusedVariable
-        return WrapAMap(LMap(self.F))
+        dp = WrapAMap(LMap(self.F))
+        return dp
 
     def get_upper_bound(self, n):  # @UnusedVariable
-        return WrapAMap(UMap(self.F))
+        dp = WrapAMap(UMap(self.F))
+        return dp
 
 
 class UMap(Map):

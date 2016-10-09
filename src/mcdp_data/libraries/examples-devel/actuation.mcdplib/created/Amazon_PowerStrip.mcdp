@@ -1,0 +1,11 @@
+# https://www.amazon.com/AmazonBasics-6-Outlet-Surge-Protector-Power/dp/B00TP1C51M
+mcdp {
+    provides out1 [`AC_Charging]
+    provides out2 [`AC_Charging]
+    provides out3 [`AC_Charging]
+    provides out4 [`AC_Charging]
+    provides out5 [`AC_Charging]
+    provides out6 [`AC_Charging]
+    requires in [`AC_Charging]
+    requires budget >= 9.08 USD
+}

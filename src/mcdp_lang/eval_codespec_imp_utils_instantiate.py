@@ -1,11 +1,13 @@
+# -*- coding: utf-8 -*-
+from contracts import contract
+from contracts.utils import indent, raise_desc
+import sys
 import traceback
 
-from contracts import contract
-from contracts.utils import raise_desc, indent
-import sys
-
-
-__all__ = ['import_name', 'instantiate']
+__all__ = [
+    'import_name',
+    'instantiate',
+]
 
 class SemanticMistake(Exception):
     pass
@@ -28,6 +30,8 @@ def instantiate(function_name, parameters):
         msg += '\n' + indent('%s\n%s' % (e, traceback.format_exc(e)), '> ')
         raise SemanticMistake(msg)
 
+class ImportFailure(ValueError):
+    pass
 
 @contract(name='str')
 def import_name(name):
@@ -52,12 +56,12 @@ def import_name(name):
                     msg = ('Cannot load %r (tried also with %r):\n' %
                            (name, module_name))
                     msg += '\n' + indent('%s\n%s' % (e, traceback.format_exc(e)), '> ')
-                    raise ValueError(msg)
+                    raise ImportFailure(msg)
 
                 if not field in module.__dict__:
                     msg = 'No field  %r\n' % (field)
                     msg += ' found in %r.' % (module)
-                    raise ValueError(msg)
+                    raise ImportFailure(msg)
 
                 return module.__dict__[field]
             else:
@@ -69,12 +73,12 @@ def import_name(name):
                     msg = ('Cannot load %r (tried also with %r):\n' %
                            (name, module_name))
                     msg += '\n' + indent('%s\n%s' % (e, traceback.format_exc(e)), '> ')
-                    raise ValueError(msg)
+                    raise ImportFailure(msg)
 
                 if not field in module.__dict__:
                     msg = 'No field  %r\n' % (field)
                     msg += ' found in %r.' % (module)
-                    raise ValueError(msg)
+                    raise ImportFailure(msg)
 
                 f = module.__dict__[field]
 
@@ -87,5 +91,5 @@ def import_name(name):
         else:
             msg = 'Cannot import name %r.' % (name)
             msg += '\n' + indent(traceback.format_exc(e), '> ')
-            raise_desc(ValueError, msg, sys_path=sys.path)
+            raise_desc(ImportFailure, msg, sys_path=sys.path)
 

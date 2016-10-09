@@ -52,6 +52,7 @@
 	</style>		    
 </head>
 <body class='markdown'>
+{% include 'refresh_shortcut.jinja2' %}
 
 {% if not print %}
 <a class='make_button' href="/libraries/{{navigation['current_library']}}/list">
@@ -66,8 +67,9 @@
 {{contents | safe }}
 {% else %}
 <div id='toc'>
-{% if has_library_doc('toc') %}
-{{ render_library_doc('toc') | safe }}
+{% set toc = navigation['current_library'] + '-toc' %}
+{% if has_library_doc(toc) %}
+{{ render_library_doc(toc) | safe }}
 {% endif %}
 </div>
 

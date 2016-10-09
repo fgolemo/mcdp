@@ -1,10 +1,11 @@
-from .parts import CDPLanguage
+# -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_posets.poset_product import PosetProduct
-from mcdp_dp.dp_flatten import Mux
+from mcdp_posets import PosetProduct, PosetProductWithLabels
 from mocdp.exceptions import DPInternalError, DPSemanticError
-from mcdp_posets.poset_product_with_labels import PosetProductWithLabels
+
+from .parts import CDPLanguage
+
 
 CDP = CDPLanguage
 
@@ -12,6 +13,7 @@ CDP = CDPLanguage
 def eval_rvalue_resource_label_index(r, context):
     from .eval_resources_imp import eval_rvalue
     assert isinstance(r, CDP.ResourceLabelIndex)
+    assert isinstance(r.label, CDP.IndexLabel), r.label
     label = r.label.label
     rvalue = eval_rvalue(r.rvalue, context)
 
@@ -26,15 +28,10 @@ def eval_rvalue_resource_label_index(r, context):
         raise_desc(DPSemanticError, msg, space=F)
 
     i = F.labels.index(label)
-    coords = i
-    dp = Mux(F, coords)
 
-    from .helpers import create_operation
-    return create_operation(context, dp=dp, resources=[rvalue],
-                            name_prefix='_label_index', op_prefix='_in',
-                            res_prefix='_out')
+    return context.ires_get_index(rvalue, i)
 
-@contract(ti=CDP.TupleIndex)
+@contract(ti=CDP.TupleIndexRes)
 def eval_rvalue_TupleIndex(ti, context):
     # TupleIndex = namedtuplewhere('TupleIndex', 'value index')
     # value evaluates as resources
@@ -42,6 +39,7 @@ def eval_rvalue_TupleIndex(ti, context):
 
     # Evaluate the resource
     from .eval_resources_imp import eval_rvalue
+    index = ti.index
     value = eval_rvalue(ti.value, context)
     F = context.get_rtype(value)
     
@@ -51,21 +49,14 @@ def eval_rvalue_TupleIndex(ti, context):
         raise_desc(DPSemanticError, msg, F=F)
 
     # let's check that the index is correct
-    if not isinstance(ti.index, int) or ti.index < 0:
+    if not isinstance(index, int) or index < 0:
         msg = "Invalid index."
-        raise_desc(DPInternalError, msg, index=ti.index)
+        raise_desc(DPInternalError, msg, index=index)
 
     # Now we check that the length is consistent
     l = len(F)
     if ti.index >= l:
-        msg = 'Invalid index %d for product of size %d.' % (ti.index, l)
+        msg = 'Invalid index %d for product of size %d.' % (index, l)
         raise_desc(DPSemanticError, msg)
 
-    # Now it's easy - this corresponds to a simple Mux operation
-    coords = ti.index
-    dp = Mux(F, coords)
-
-    from .helpers import create_operation
-    return create_operation(context, dp=dp, resources=[value],
-                            name_prefix='_take', op_prefix='_in_product',
-                            res_prefix='_result')
+    return context.ires_get_index(value, index)

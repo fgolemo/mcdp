@@ -1,6 +1,7 @@
 from contracts import contract
 from mcdp_posets import Map, Nat
 
+
 __all__ = ['MultNat']
 
 class MultNat(Map):

@@ -1,0 +1,6 @@
+mcdp {
+    requires budget >= 45 USD
+
+    provides com [`GPIOCom]
+    requires payload [`Payload]
+}

@@ -1,15 +1,19 @@
 # -*- coding: utf-8 -*-
+from contracts import contract
+from contracts.utils import raise_desc
+from mcdp_dp import InvMult2, InvPlus2, InvPlus2Nat
+from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table,
+    poset_maxima)
+from mocdp.comp import Connection, dpwrap
+from mocdp.comp.context import CFunction, get_name_for_res_node
+from mocdp.exceptions import (DPInternalError, DPNotImplementedError,
+    DPSemanticError)
+
 from .helpers import get_valuewithunits_as_function
+from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from contracts import contract
-from contracts.utils import raise_desc
-from mcdp_posets import Nat, RcompUnits, mult_table
-from mocdp.comp import Connection, dpwrap
-from mocdp.comp.context import CFunction, get_name_for_res_node
-from mcdp_dp import InvMult2, InvPlus2, InvPlus2Nat
-from mocdp.exceptions import DPInternalError, DPSemanticError
 
 
 CDP = CDPLanguage
@@ -44,7 +48,7 @@ def eval_lfunction(lf, context):
             return eval_lfunction_variableref(lf, context)
 
         constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
-                     CDP.Top, CDP.Bottom)
+                     CDP.Top, CDP.Bottom, CDP.Minimals, CDP.Maximals)
 
         if isinstance(lf, constants):
             from mcdp_lang.eval_constant_imp import eval_constant
@@ -61,14 +65,44 @@ def eval_lfunction(lf, context):
             CDP.DisambiguationFun: eval_lfunction_disambiguation,
             CDP.FunctionLabelIndex: eval_lfunction_label_index,
             CDP.TupleIndexFun: eval_lfunction_tupleindexfun,
+            CDP.AnyOfFun: eval_lfunction_anyoffun,
         }
 
         for klass, hook in cases.items():
             if isinstance(lf, klass):
                 return hook(lf, context)
 
-        msg = 'eval_lfunction() cannot evaluate as a function.'
-        raise_desc(DPInternalError, msg, lf=lf)
+        if True: # pragma: no cover
+            r = recursive_print(lf)
+            msg = 'eval_lfunction(): cannot evaluate as a function.'
+            raise_desc(DPInternalError, msg, r=r)
+
+def eval_lfunction_anyoffun(lf, context):
+    from mcdp_lang.eval_constant_imp import eval_constant
+    from mcdp_posets.finite_collections_inclusion import FiniteCollectionsInclusion
+    from mcdp_dp.dp_limit import LimitMaximals
+    from mcdp_posets.finite_collection import FiniteCollection
+    from mcdp_lang.helpers import create_operation_lf
+
+    assert isinstance(lf, CDP.AnyOfFun)
+    constant = eval_constant(lf.value, context)
+    if not isinstance(constant.unit, FiniteCollectionsInclusion):
+        msg = 'I expect that the argument to any-of evaluates to a finite collection.'
+        raise_desc(DPSemanticError, msg, constant=constant)
+    assert isinstance(constant.unit, FiniteCollectionsInclusion)
+    P = constant.unit.S
+
+    assert isinstance(constant.value, FiniteCollection)
+    elements = set(constant.value.elements)
+    maximals = poset_maxima(elements, P.leq)
+    if len(elements) != len(maximals):
+        msg = 'The elements are not maximals.'
+        raise_desc(DPSemanticError, msg, elements=elements, maximals=maximals)
+
+    dp = LimitMaximals(values=maximals, F=P)
+    return create_operation_lf(context, dp=dp, functions=[],
+                               name_prefix='_anyof', op_prefix='_',
+                                res_prefix='_result')
 
 def eval_lfunction_disambiguation(lf, context):
     return eval_lfunction(lf.fvalue, context)
@@ -86,9 +120,9 @@ def eval_lfunction_variableref(lf, context):
 
     try:
         dummy_ndp = context.get_ndp_res(lf.name)
-    except ValueError as e:
-        msg = 'New function name %r not declared.' % lf.name
-        msg += '\n%s' % str(e)
+    except ValueError:
+        msg = 'Function %r not declared.' % lf.name
+#         msg += '\n%s' % str(e)
         raise DPSemanticError(msg, where=lf.where)
 
     s = dummy_ndp.get_rnames()[0]
@@ -96,7 +130,7 @@ def eval_lfunction_variableref(lf, context):
 
 def eval_lfunction_invplus(lf, context):
     ops = get_odd_ops(unwrap_list(lf.ops))
-    if len(ops) != 2:
+    if len(ops) != 2: # pragma: no cover
         raise DPInternalError('Only 2 expected')
 
     fs = []
@@ -111,10 +145,21 @@ def eval_lfunction_invplus(lf, context):
     R = Fs[0]
 
     if all(isinstance(_, RcompUnits) for _ in Fs):
+        
+        tu = get_types_universe()
+        if not tu.leq(Fs[1], Fs[0]):
+            msg = 'Inconsistent units %s and %s.' % (Fs[1], Fs[0])
+            raise_desc(DPSemanticError, msg, Fs0=Fs[0], Fs1=Fs[1])
+
+        if not tu.equal(Fs[1], Fs[0]):
+            msg = 'This case was not implemented yet. Differing units %s and %s.' % (Fs[1], Fs[0])
+            raise_desc(DPNotImplementedError, msg, Fs0=Fs[0], Fs1=Fs[1])
+        
         dp = InvPlus2(R, tuple(Fs))
+        
     elif all(isinstance(_, Nat) for _ in Fs):
         dp = InvPlus2Nat(R, tuple(Fs))
-    else:
+    else: # pragma: no cover
         msg = 'Cannot find operator for mixed values'
         raise_desc(DPInternalError, msg, Fs=Fs)
     
@@ -134,7 +179,7 @@ def eval_lfunction_invplus(lf, context):
 
 def eval_lfunction_invmult(lf, context):
     ops = get_odd_ops(unwrap_list(lf.ops))
-    if len(ops) != 2:
+    if len(ops) != 2: # pragma: no cover
         raise DPInternalError('Only 2 expected')
 
     fs = []
@@ -167,9 +212,13 @@ def eval_lfunction_newresource(lf, context):
     rname = lf.name
     try:
         dummy_ndp = context.get_ndp_res(rname)
-    except ValueError as e:
+    except ValueError:
         msg = 'New resource name %r not declared.' % rname
-        msg += '\n%s' % str(e)
+        if context.rnames:
+            msg += ' Available: %s.' % ", ".join(context.rnames)
+        else:
+            msg += ' No resources declared so far.'
+        # msg += '\n%s' % str(e)
         raise DPSemanticError(msg, where=lf.where)
 
     return context.make_function(get_name_for_res_node(rname),

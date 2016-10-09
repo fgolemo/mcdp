@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
-
 from collections import defaultdict
 from contracts import contract
+from mcdp_dp import Identity, Mux
+from mcdp_dp.dp_parallel_simplification import make_parallel_n
+from mcdp_dp.dp_series_simplification import make_series
+from mcdp_posets import PosetProduct
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.composite_sub import (cndp_num_connected_components,
     cndp_split_in_components)
 from mocdp.comp.connection import cndp_dpgraph
 from mocdp.comp.context import Connection, Context
 from mocdp.comp.wrap import SimpleWrap
-from mcdp_dp.dp_flatten import Mux
-from mcdp_dp.dp_identity import Identity
-from mcdp_dp.dp_parallel_simplification import make_parallel_n
-from mcdp_dp.dp_series_simplification import make_series
-from mcdp_posets.poset_product import PosetProduct
 
 @contract(returns='list(tuple(str, str, set($Connection)))')
 def find_nodes_with_multiple_connections(context):
@@ -30,6 +28,7 @@ def find_nodes_with_multiple_connections(context):
                 seq.append((name1, name2, connections))
     return seq
 
+@contract(returns=SimpleWrap)
 def dpgraph_making_sure_no_reps(context):
     from mocdp.comp.connection import dpgraph
     # functionname -> list of names that use it
@@ -86,6 +85,7 @@ def dpgraph_making_sure_no_reps(context):
     if n == 1:
         # This is the base case
         res0 = dpgraph(name2npd, connections, split=[])
+
         res = make_sure_order_functions_and_resources(res0, fnames, rnames)
         return res
     else:
@@ -102,6 +102,8 @@ def dpgraph_making_sure_no_reps(context):
             
         final = ndps_parallel(simple_wraps)
         res = make_sure_order_functions_and_resources(final, fnames, rnames)
+
+        assert isinstance(res, SimpleWrap), type(res)
         return res
 
 
@@ -163,6 +165,7 @@ def ndps_parallel(ndps):
 
     return res
 
+@contract(res=SimpleWrap, returns=SimpleWrap)
 def make_sure_order_functions_and_resources(res, fnames, rnames):
     from mocdp.comp.connection import  connect2
     from mocdp.comp.wrap import dpwrap
@@ -186,6 +189,7 @@ def make_sure_order_functions_and_resources(res, fnames, rnames):
 
     assert res.get_fnames() == fnames
     assert res.get_rnames() == rnames
+    assert isinstance(res, SimpleWrap), type(res)
     return res
 
 
@@ -246,3 +250,10 @@ def wrap_change_name_function(ndp, fn, fn2):
     connections = set([Connection('-', tmpname, '-', fn)])
     return connect2(first, ndp, connections, split=[])
 
+@contract(name=str, connections='set($Connection)|list($Connection)')
+def is_dp_connected(name, connections):
+    """ Returns true if there is a connection to or from name. """
+    for c in connections:
+        if c.dp1 == name or c.dp2 == name:
+            return True
+    return False

@@ -1,9 +1,13 @@
-from .eval_constant_imp import eval_constant
-from .parts import CDPLanguage
+# -*- coding: utf-8 -*-
 from mcdp_dp import Max, Max1, Min
-from mcdp_lang.helpers import create_operation
 from mocdp.comp import Connection, dpwrap
 from mocdp.exceptions import DPSemanticError
+
+from .eval_constant_imp import eval_constant
+from .helpers import create_operation, get_resource_possibly_converted
+from .parts import CDPLanguage
+
+
 CDP = CDPLanguage
 
 
@@ -29,7 +33,7 @@ def eval_rvalue_OpMin(rvalue, context):
         raise DPSemanticError(msg, where=rvalue.where)
 
     dp = Min(F1)
-    nprefix, na, nb, nres = 'opmin', 'm0', 'm1', 'min'
+    nprefix, na, nb, nres = '_opmin', '_m0', '_m1', '_min'
 
     return add_binary2(context, a, b, dp, nprefix, na, nb, nres)
 
@@ -69,18 +73,13 @@ def eval_rvalue_OpMax(rvalue, context):
                                  op_prefix='_op',
                                  res_prefix='_result')
 
-
     b = eval_rvalue(rvalue.b, context)
 
     F1 = context.get_rtype(a)
-    F2 = context.get_rtype(b)
-
-    if not (F1 == F2):  # ## BUG1 here
-        msg = 'Incompatible units for Max(): %s and %s' % (F1, F2)
-        msg += '%s and %s' % (type(F1), type(F2))
-        raise DPSemanticError(msg, where=rvalue.where)
+    # possibly convert b to type of a
+    b = get_resource_possibly_converted(b, F1, context)
 
     dp = Max(F1)
-    nprefix, na, nb, nres = 'opmax', 'm0', 'm1', 'max'
+    nprefix, na, nb, nres = 'max', '_m0', '_m1', '_max'
 
     return add_binary2(context, a, b, dp, nprefix, na, nb, nres)

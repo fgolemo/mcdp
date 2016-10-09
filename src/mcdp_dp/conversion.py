@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
+from .dp_generic_unary import WrapAMap
+from .primitive import PrimitiveDP
 from contracts import contract
 from contracts.utils import raise_wrapped
-from mcdp_dp import PrimitiveDP  # @UnusedImport
-from mcdp_dp import WrapAMap
 from mcdp_posets import NotLeq, get_types_universe
 from mocdp.exceptions import DPSemanticError
+
+_ = PrimitiveDP
 
 __all__ = [
     'Conversion',
@@ -11,12 +14,13 @@ __all__ = [
 ]
 
 class Conversion(WrapAMap):
-    """ Simple wrap to get icon """
-    pass
+    """ Simple wrap to WrapAMap to get a custom icon. """
+
 
 @contract(returns='None|$PrimitiveDP')
 def get_conversion(A, B):
-    """ Returns None if there is no need or a Conversion Map """
+    """ Returns None if there is no need for a Conversion Map.
+        Otherwise returns a Conversion (< WrapAMap). """
     tu = get_types_universe()
     try:
         tu.check_leq(A, B)

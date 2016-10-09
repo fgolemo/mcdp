@@ -1,0 +1,46 @@
+template [
+  Battery: `BatteryInterface, 
+  Actuation: `ActuationInterface, 
+  PowerApprox: `PowerApprox
+] mcdp {  
+  provides endurance     [s] 
+  provides extra_payload [kg]
+  provides extra_power   [W]
+  provides num_missions [R]
+  provides velocity  [m/s]
+
+  requires total_cost [$]
+  
+  battery = instance  Battery
+  actuation = instance Actuation 
+
+  total_power0 = power required by actuation + extra_power
+
+  power_approx = instance PowerApprox
+  total_power0 <= power_approx.power
+  total_power = power required by power_approx
+
+  capacity provided by battery >= provided endurance * total_power
+ 
+  total_mass = (
+      mass required by battery + 
+      actuator_mass required by actuation 
+      + extra_payload)
+
+  gravity = 9.81 m/s^2
+  weight = total_mass * gravity
+
+  lift provided by actuation >= weight
+  velocity provided by actuation >= velocity
+  
+  labor_cost = (10 $) * (maintenance required by battery)
+
+  required total_cost >= (
+    cost required by actuation + 
+    cost required by battery + 
+    labor_cost)
+  
+  battery.missions >= num_missions
+ 
+  requires total_mass >= total_mass   
+}

@@ -1,7 +1,9 @@
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import check_isinstance, raise_desc, raise_wrapped
 from mcdp_posets import NotLeq, get_types_universe
-from mocdp.exceptions import DPSemanticError
+from mocdp import ATTR_LOAD_LIBNAME
+from mocdp.comp.interfaces import NamedDP
+from mocdp.exceptions import DPSemanticError, mcdp_dev_warning
 
 __all__ = [
     'TemplateForNamedDP'
@@ -13,14 +15,20 @@ class TemplateForNamedDP():
     def __init__(self, parameters, template_code):
         """
         
+            plus, the attribute ATTR_LOAD_LIBNAME is used
+            to describe the original library context
+        
         """
         self.parameters = parameters
         self.template_code = template_code
 
     @contract(parameter_assignment='dict(str:isinstance(NamedDP))')
     def specialize(self, parameter_assignment, context):
-        
+        for v in parameter_assignment.values():
+            check_isinstance(v, NamedDP)
+
         for k, v in self.parameters.items():
+
             if not k in parameter_assignment:
                 msg = 'Parameter not specified.'
                 raise_desc(DPSemanticError, msg, missing=k)
@@ -29,23 +37,35 @@ class TemplateForNamedDP():
             try:
                 check_same_interface(v,  proposed)
             except DifferentInterface as e:
-                msg = 'The interface is different.'
-                raise_wrapped(DPSemanticError, e, msg, proposed=proposed, v=v)
+                msg = 'Cannot specialize the template because the interface is different.'
+                raise_wrapped(DPSemanticError, e, msg,
+                              interface=describe_interface(v),
+                              proposed=describe_interface(proposed),
+                              compact=True)
         
-        c = context.child()
+        if hasattr(self, ATTR_LOAD_LIBNAME):
+            libname = getattr(self, ATTR_LOAD_LIBNAME)
+            print('The libname is %r ' % libname)
+            if libname is None:
+                mcdp_dev_warning('Tmp fix: can this ever be none?')
+                c = context.child()
+            else:
+                library = context.load_library(libname)
+                c = library._generate_context_with_hooks()
+        else:
+            c = context.child()
+
+
         for k, v in parameter_assignment.items():
             c.var2model[k] = v
 
         from mcdp_lang.eval_ndp_imp import eval_ndp
         return eval_ndp(self.template_code, c)
     
-    
-    def get_template_with_holes(self):
+    @contract(context='isinstance(Context)')
+    def get_template_with_holes(self, context):
         """ Returns a CompositeNamedDP with special "Hole" nodes. """
-        from mocdp.comp.context import Context
-        from mocdp.comp.composite_templatize import ndp_templatize
-
-        context = Context()
+        from .composite_templatize import ndp_templatize
 
         parameters = dict(**self.parameters)
         for k in parameters:
@@ -55,9 +75,7 @@ class TemplateForNamedDP():
             setattr(p, 'template_parameter', k)
             parameters[k] = p
 
-
         return self.specialize(parameters, context)
-
 
 class DifferentInterface(Exception):
     pass
@@ -81,8 +99,9 @@ def check_same_interface(interface, ndp):
                  or missing_resources)
     
     if problems:
-        msg = 'Different interface'
-        raise_desc(DifferentInterface, msg, interface=interface, ndp=ndp)
+        msg = 'Different number of functions and resources.'
+        raise_desc(DifferentInterface, msg)
+
 
     tu = get_types_universe()
 
@@ -105,7 +124,12 @@ def check_same_interface(interface, ndp):
             raise_desc(DPSemanticError, e, msg, r=r, R1=R1, R2=R2)
 
 
-
+def describe_interface(ndp):
+    fnames = ndp.get_fnames()
+    ftypes = ndp.get_ftypes(fnames)
+    rnames = ndp.get_rnames()
+    rtypes = ndp.get_rtypes(rnames)
+    return "fnames: %s\nftypes: %s\nrnames: %s\nrtypes: %s" % (fnames, ftypes, rnames, rtypes)
 
 
 

@@ -1,6 +1,8 @@
 from abc import ABCMeta
+
 from contracts import raise_wrapped
 from contracts.enabling import all_disabled
+
 
 __all__ = [
     'SpaceMeta',

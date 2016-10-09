@@ -1,44 +1,72 @@
+# -*- coding: utf-8 -*-
+from collections import namedtuple
 from contextlib import contextmanager
-from contracts.utils import raise_desc, raise_wrapped
-from mcdp_cli.solve_meat import solve_main
-from mcdp_library.library import MCDPLibrary
-from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
-from mcdp_library.utils.locate_files_imp import locate_files
-from mcdp_tests.generation import for_all_source_mcdp
-from mocdp import logger
-from mocdp.exceptions import DPSemanticError
 import os
-import shutil
 import tempfile
-import yaml
+import time
+
+from contracts.utils import raise_desc, raise_wrapped
+from mcdp_library import Librarian, MCDPLibrary
+from mcdp_library.utils import dir_from_package_name
+from mcdp_tests.generation import for_all_source_mcdp
+from mocdp.exceptions import DPSemanticError
+from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
+
 
 __all__ = [
     'define_tests_for_mcdplibs',
 ]
 
-def enumerate_test_libraries():
-    """ Returns list of (short_name, path) """
+TestLibrary = namedtuple('TestLibrary', 'bigpath librarian short path ')
+
+@memoize_simple
+def get_test_librarian():
     package = dir_from_package_name('mcdp_data')
     folder = os.path.join(package, 'libraries')
 
     if not os.path.exists(folder):
-        raise_desc(ValueError, 'No mcdp_lang_tests found.' , folder=folder)
+        raise_desc(ValueError, 'Test folders not found.' , folder=folder)
 
-    mcdplibs = locate_files(folder, '*.mcdplib', include_directories=True,
-                            include_files=False)
-    n = len(mcdplibs)
+    librarian = Librarian()
+    librarian.find_libraries(folder)
+    
+    libraries = librarian.get_libraries()
+
+    n = len(libraries)
     if n <= 1:
         msg = 'Expected more libraries.'
-        raise_desc(ValueError, msg, folder, mcdplibs=mcdplibs)
+        raise_desc(ValueError, msg, folder, libraries=libraries)
 
-    for m in mcdplibs:
-        f = os.path.join(m, '.mcdp_test_ignore')
+
+    return librarian
+
+def enumerate_test_libraries():
+    """ Returns list of (bigpath, short_name, path) """
+    librarian = get_test_librarian()
+
+    found = []
+
+    libraries = librarian.get_libraries()
+
+    for short, data in libraries.items():
+        path = data['path']
+        f = os.path.join(path, '.mcdp_test_ignore')
         if os.path.exists(f):
             continue
 
-        short = os.path.splitext(os.path.basename(m))[0]
-        short = short.replace('.', '_')
-        yield short, m
+        found.append(short)
+
+    return found
+
+@memoize_simple
+def get_test_library(libname):
+    assert isinstance(libname, str) and not 'mcdplib' in libname
+    librarian = get_test_librarian()
+    library = librarian.load_library(libname)
+    d = tempfile.mkdtemp(prefix='mcdplibrary_cache')
+    library.use_cache_dir(d)
+    # XXX: this does not erase the directory
+    return library
 
 
 def define_tests_for_mcdplibs(context):
@@ -47,21 +75,25 @@ def define_tests_for_mcdplibs(context):
         
         It also looks for the files *.mcdp_tests.yaml inside.
     """
-    for short, m in enumerate_test_libraries():
-        c2 = context.child(short)
-        c2.comp_dynamic(mcdplib_define_tst, mcdplib=m)
-        
-        c2.child('ndp').comp_dynamic(mcdplib_test_setup_nameddps, mcdplib=m)
-        c2.child('poset').comp_dynamic(mcdplib_test_setup_posets, mcdplib=m)
-        c2.child('primitivedps').comp_dynamic(mcdplib_test_setup_primitivedps, mcdplib=m)
-        c2.child('source_mcdp').comp_dynamic(mcdplib_test_setup_source_mcdp, mcdplib=m)
+    librarian = get_test_librarian()
 
-        makefile = os.path.join(m, 'Makefile')
+    for libname in enumerate_test_libraries():
+        c2 = context.child(libname, extra_report_keys=dict(libname=libname))
+        
+        
+
+        c2.child('ndp').comp_dynamic(mcdplib_test_setup_nameddps, libname=libname)
+        c2.child('poset').comp_dynamic(mcdplib_test_setup_posets, libname=libname)
+        c2.child('primitivedp').comp_dynamic(mcdplib_test_setup_primitivedps, libname=libname)
+        c2.child('source_mcdp').comp_dynamic(mcdplib_test_setup_source_mcdp, libname=libname)
+        c2.child('value').comp_dynamic(mcdplib_test_setup_value, libname=libname)
+        c2.child('template').comp_dynamic(mcdplib_test_setup_template, libname=libname)
+
+        path = librarian.libraries[libname]['path']
+        makefile = os.path.join(path, 'Makefile')
         if os.path.exists(makefile):
-            c2.comp(mcdplib_run_make, mcdplib=m)
-        else:
-            logger.warn('No makefile in %r.' % m)
-            
+            c2.comp(mcdplib_run_make, mcdplib=path)
+
 
 def mcdplib_run_make(mcdplib):
     makefile = os.path.join(mcdplib, 'Makefile')
@@ -73,82 +105,85 @@ def mcdplib_run_make(mcdplib):
                       display_stdout=True,
                       display_stderr=True,
                       raise_on_error=True)
+#
+# def belongs_to_lib(f, d):
+#     """ Returns true if the file is physically inside d
+#         and not, for example, symlinked """
+#     rf = os.path.realpath(f)
+#     rd = os.path.realpath(d)
+#     assert os.path.isdir(rd), rd
+#     assert not os.path.isdir(rf), rf
+#
+#     if rd in rf:
+#         return True
+#     else:
+#         return False
 
-def belongs_to_lib(f, d):
-    """ Returns true if the file is physically inside d
-        and not, for example, symlinked """
-    rf = os.path.realpath(f)
-    rd = os.path.realpath(d)
-    assert os.path.isdir(rd), rd
-    assert not os.path.isdir(rf), rf
-
-    if rd in rf:
-        return True
-    else:
-        return False
-
-def mcdplib_test_setup_nameddps(context, mcdplib):
+def mcdplib_test_setup_nameddps(context, libname):
     """ 
         Loads all mcdp_lang_tests that were specified by comptests
         using the for_all_nameddps decorator. 
     """
     from mcdp_tests import load_tests_modules
-
-    l = MCDPLibrary()
-    l.add_search_dir(mcdplib)
+    l = get_test_library(libname)
     models = l.get_models()
 
-    from mcdp_tests.generation import for_all_nameddps
+    from mcdp_tests.generation import for_all_nameddps, for_all_nameddps_dyn
     load_tests_modules()
-    registered = for_all_nameddps.registered
 
-    print('Mcdplib: %s' % mcdplib)
     print('Found models: %r' % models)
-    print('Found registered: %r' % registered)
+    print('Found registered in for_all_nameddps_dyn: %r' % 
+          for_all_nameddps.registered)
+    print('Found registered in for_all_nameddps: %r' % 
+          for_all_nameddps_dyn.registered)
 
     for model_name in models:
         f = l._get_file_data(model_name + '.' + MCDPLibrary.ext_ndps)
-        if not belongs_to_lib(f['realpath'], mcdplib):
-            continue
+
         source = f['data']
 
         if gives_syntax_error(source):
             print('Skipping because syntax error')
             # TODO: actually check syntax error
-        elif gives_semantic_error(source):
-            print('Skipping because semantic error')
-            context.comp(mcdplib_assert_semantic_error_fn, mcdplib, model_name)
         else:
-            c = context.child(model_name)
-            ndp = c.comp(_load_ndp, mcdplib, model_name, job_id='load_ndp')
+            c = context.child(model_name,  extra_report_keys=dict(id_ndp=model_name))
 
-            for ftest in registered:
-                c.comp(ftest, model_name, ndp)
+            if gives_semantic_error(source):
+                c.comp(mcdplib_assert_semantic_error_fn, libname, model_name,
+                       job_id='assert_semantic_error')
+            else:
+                ndp = c.comp(_load_ndp, libname, model_name, job_id='load_ndp')
 
-def mcdplib_test_setup_source_mcdp(context, mcdplib):
+                for ftest in for_all_nameddps.registered:
+                    c.comp(ftest, model_name, ndp)
+
+                for ftest in for_all_nameddps_dyn.registered:
+                    c.comp_dynamic(ftest, model_name, ndp)
+
+
+def mcdplib_test_setup_source_mcdp(context, libname):
     from mcdp_tests import load_tests_modules
 
-    l = MCDPLibrary()
-    l.add_search_dir(mcdplib)
+    l = get_test_library(libname)
 
     load_tests_modules()
 
     registered = for_all_source_mcdp.registered
 
-    print('Mcdplib: %s' % mcdplib)
     print('Found registered: %r' % registered)
 
     for basename in l.file_to_contents:
-        model_name, ext = os.path.splitext(basename)
+        _model_name, ext = os.path.splitext(basename)
         if ext != ".mcdp":
             # print basename, ext
             continue
 
         f = l._get_file_data(basename)
-        if not belongs_to_lib(f['realpath'], mcdplib):
-            continue
+#         if not belongs_to_lib(f['realpath'], mcdplib):
+#             continue
 
         source = f['data']
+        filename = f['realpath']
 
         if gives_syntax_error(source):
             print('Skipping because syntax error')
@@ -161,7 +196,7 @@ def mcdplib_test_setup_source_mcdp(context, mcdplib):
             c = context.child(basename)
     
             for ftest in registered:
-                c.comp(ftest, basename, source)
+                c.comp(ftest, filename, source)
 
 def get_keywords(source):
     line1 = source.split('\n')[0]
@@ -175,10 +210,10 @@ def gives_syntax_error(source):
     keywords = get_keywords(source)
     return 'syntax_error' in keywords
 
-def mcdplib_assert_semantic_error_fn(mcdplib, model_name):
+def mcdplib_assert_semantic_error_fn(libname, model_name):
+    l = get_test_library(libname)
     try:
-        with templib(mcdplib) as l:
-            res = l.load_ndp(model_name)
+        res = l.load_ndp(model_name)
         res.abstract()
     except DPSemanticError:
         pass
@@ -189,135 +224,203 @@ def mcdplib_assert_semantic_error_fn(mcdplib, model_name):
         msg = "Expected an exception, instead succesfull instantiation."
         raise_desc(Exception, msg, model_name=model_name, res=res.repr_long())
 
+def mcdplib_test_setup_value(context, libname):
+    from mcdp_tests import load_tests_modules
 
-def mcdplib_test_setup_posets(context, mcdplib):
+    l = get_test_library(libname)
+
+    values = l.list_values()
+
+    from mcdp_tests.generation import for_all_values
+    load_tests_modules()
+    registered = for_all_values.registered
+
+    print('Found values: %r' % values)
+    print('Found registered: %r' % registered)
+
+    for id_value in values:
+        c = context.child(id_value)
+
+        ndp = c.comp(_load_value, libname, id_value, job_id='load')
+
+        for ftest in registered:
+            c.comp(ftest, id_value, ndp)
+
+def mcdplib_test_setup_posets(context, libname):
     """ 
         Loads all mcdp_lang_tests that were specified by comptests
         using the for_all_nameddps decorator. 
     """
     from mcdp_tests import load_tests_modules
 
+    l = get_test_library(libname)
 
-    l = MCDPLibrary()
-    l.add_search_dir(mcdplib)
     posets = l.list_posets()
 
     from mcdp_tests.generation import for_all_posets
     load_tests_modules()
     registered = for_all_posets.registered
 
-    print('Mcdplib: %s' % mcdplib)
     print('Found posets: %r' % posets)
     print('Found registered: %r' % registered)
 
     for id_poset in posets:
         c = context.child(id_poset)
 
-        ndp = c.comp(_load_poset, mcdplib, id_poset, job_id='load_poset')
+        ndp = c.comp(_load_poset, libname, id_poset, job_id='load')
 
         for ftest in registered:
             c.comp(ftest, id_poset, ndp)
 
 
-def mcdplib_test_setup_primitivedps(context, mcdplib):
+def mcdplib_test_setup_primitivedps(context, libname):
     from mcdp_tests import load_tests_modules
-
-    l = MCDPLibrary()
-    l.add_search_dir(mcdplib)
+    l = get_test_library(libname)
     dps = l.list_primitivedps()
 
     from mcdp_tests.generation import for_all_dps
     load_tests_modules()
     registered = for_all_dps.registered
 
-    print('Mcdplib: %s' % mcdplib)
     print('Found: %r' % dps)
     print('Registered: %r' % registered)
 
     for id_dp in dps:
         c = context.child(id_dp)
 
-        ndp = c.comp(_load_primitivedp, mcdplib, id_dp, job_id='load_poset')
+        ndp = c.comp(_load_primitivedp, libname, id_dp, job_id='load')
 
         for ftest in registered:
             c.comp(ftest, id_dp, ndp)
 
-def _load_primitivedp(mcdplib, model_name):
-    with templib(mcdplib) as l:
-        return l.load_primitivedp(model_name)
+def mcdplib_test_setup_template(context, libname):
+    from mcdp_tests import load_tests_modules
+    l = get_test_library(libname)
+    templates = l.list_templates()
 
-def _load_poset(mcdplib, model_name):
-    with templib(mcdplib) as l:
-        return l.load_poset(model_name)
+    from mcdp_tests.generation import for_all_templates
+    load_tests_modules()
+    registered = for_all_templates.registered
 
-def _load_ndp(mcdplib, model_name):
-    with templib(mcdplib) as l:
-        return l.load_ndp(model_name)
+    print('Found: %r' % templates)
+    print('Registered: %r' % registered)
+
+    for id_template in templates:
+        c = context.child(id_template)
+
+        ndp = c.comp(_load_template, libname, id_template, job_id='load')
+
+        for ftest in registered:
+            c.comp(ftest, id_template, ndp)
 
 @contextmanager
-def templib(mcdplib):
-    tmpdir = tempfile.mkdtemp(prefix='mcdplibrary_tmdpir')
-    l = MCDPLibrary()
+def timeit(desc, minimum=None):
+    t0 = time.clock()
+    yield
+    t1 = time.clock()
+    delta = t1 - t0
+    if minimum is not None:
+        if delta < minimum:
+            return
+    print('timeit %s: %.2f s' % (desc, delta))
 
-    l.add_search_dir(mcdplib)
-    l.delete_cache()
-    try:
-        yield l
-    finally:
-        shutil.rmtree(tmpdir)
+def _load_primitivedp(libname, model_name):
+    l = get_test_library(libname)
+    with timeit(model_name):
+        return l.load_primitivedp(model_name)
+
+def _load_template(libname, model_name):
+    l = get_test_library(libname)
+    with timeit(model_name):
+        return l.load_template(model_name)
+
+def _load_value(libname, name):
+    l = get_test_library(libname)
+    vu = l.load_constant(name)
+    return vu
+
+def _load_poset(libname, model_name):
+    l = get_test_library(libname)
+    with timeit(model_name):
+        return l.load_poset(model_name)
+
+def _load_ndp(libname, model_name):
+    l = get_test_library(libname)
+    with timeit(model_name):
+        return l.load_ndp(model_name)
     
+#
+# @contextmanager
+# def templib(mcdplib):
+#     tmpdir = tempfile.mkdtemp(prefix='mcdplibrary_tmdpir')
+#     l = MCDPLibrary()
+#
+#     l.add_search_dir(mcdplib)
+#     l.delete_cache()
+#     try:
+#         yield l
+#     finally:
+#         shutil.rmtree(tmpdir)
+#
 
 
 
-def mcdplib_define_tst(context, mcdplib):
-    """
-        mcdplib: folder
-        
-        loads the mcdp_lang_tests in mcdp_tests.yaml
-    """
-    assert os.path.exists(mcdplib)
-
-    fn = os.path.join(mcdplib, 'mcdp_tests.yaml')
-    if not os.path.exists(fn):
-        return
-
-    with open(fn) as f:
-        data = yaml.load(f)
-
-    if 'test_solve' in data:
-
-        tests = data['test_solve']
-        if tests is not None:
-            for name, test_data in tests.items():
-                c = context.child(name)
-                c.comp(mcdplib_define_tst_solve, mcdplib, name, test_data, job_id='solve')
-
-
-def mcdplib_define_tst_solve(mcdplib, id_test, test_data):
-    # Reload the data (easier to debug)
-    fn = os.path.join(mcdplib, 'mcdp_tests.yaml')
-    with open(fn) as f:
-        data = yaml.load(f)
-    test_data = data['test_solve'][id_test]
-    
-    defaults = dict(lower=None, upper=None, max_steps=None, 
-                    intervals=None,
-                    expect_nres=None,
-                    expect_res=None,
-                    imp=None,
-                    _exp_advanced=False, expect_nimp=None,
-                    plot=False,
-                    do_movie=False)
-    required = ['query_strings', 'model_name']
-    params = defaults.copy()
-    for k, v in test_data.items():
-        if not k in defaults and not k in required:
-            raise_desc(ValueError, 'Invalid configuration.',
-                       k=k, test_data=test_data, defaults=defaults)
-        params[k] = v
-    
-    params['logger'] = logger
-    params['config_dirs'] = [mcdplib]
-    params['out_dir'] = os.path.join(mcdplib + '.out/%s' % id_test)
-
-    solve_main(**params)
+# def mcdplib_define_tst(context, libname):
+#     """
+#         mcdplib: folder
+#         
+#         loads the mcdp_lang_tests in mcdp_tests.yaml
+#     """
+#     librarian = get_test_librarian()
+#     mcdplib = librarian.libraries[libname]['path']
+# 
+#     assert os.path.exists(mcdplib)
+# 
+#     fn = os.path.join(mcdplib, 'mcdp_tests.yaml')
+#     if not os.path.exists(fn):
+#         return
+# 
+#     with open(fn) as f:
+#         data = yaml.load(f)
+# 
+#     if 'test_solve' in data:
+# 
+#         tests = data['test_solve']
+#         if tests is not None:
+#             for name, test_data in tests.items():
+#                 c = context.child(name)
+#                 c.comp(mcdplib_define_tst_solve, mcdplib, name, test_data, job_id='solve')
+# 
+# 
+# def mcdplib_define_tst_solve(mcdplib, id_test, test_data):  # @UnusedVariable
+#     mcdp_dev_warning('this doesnt use the librarian')
+#     # Reload the data (easier to debug)
+#     fn = os.path.join(mcdplib, 'mcdp_tests.yaml')
+#     with open(fn) as f:
+#         data = yaml.load(f)
+#     test_data = data['test_solve'][id_test]
+#     
+#     defaults = dict(lower=None, upper=None, max_steps=None, 
+#                     intervals=None,
+#                     expect_nres=None,
+#                     expect_res=None,
+#                     imp=None,
+#                     _exp_advanced=False, expect_nimp=None,
+#                     plot=False,
+#                     do_movie=False)
+#     required = ['query_strings', 'model_name']
+#     params = defaults.copy()
+#     for k, v in test_data.items():
+#         if not k in defaults and not k in required:
+#             raise_desc(ValueError, 'Invalid configuration.',
+#                        k=k, test_data=test_data, defaults=defaults)
+#         params[k] = v
+#     
+#     params['logger'] = logger
+#     params['config_dirs'] = [mcdplib]
+#     params['maindir'] = mcdplib
+#     params['cache_dir'] = None
+#     params['out_dir'] = os.path.join(mcdplib + '.out/%s' % id_test)
+#     params['make'] = False
+# 
+#     solve_main(**params)

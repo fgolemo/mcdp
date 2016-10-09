@@ -1,8 +1,9 @@
 from contracts import contract
-from mocdp.comp.wrap import SimpleWrap
-from mcdp_posets.poset_product import PosetProduct
+from mcdp_dp import Dummy
+from mcdp_posets import PosetProduct
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.interfaces import NamedDP
+from mocdp.comp.wrap import SimpleWrap
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 def cndp_templatize_children(cndp):
@@ -31,11 +32,14 @@ def ndpcoproduct_templatize(ndp):
     # attr_load_name?
     return res
 
-
 @contract(ndp=NamedDP, returns=SimpleWrap)
 def ndp_templatize(ndp, mark_as_template=False):
-    """ Creates a template based on the interface. 
+    """ 
+        Creates a template based on the interface. 
     
+        The dp is Dummy
+        
+        The ndp is either OnlyTemplate or SimpleWrap
         Copies attributes: ATTR_LOAD_NAME
     """
     fnames = ndp.get_fnames()
@@ -54,8 +58,6 @@ def ndp_templatize(ndp, mark_as_template=False):
         R = rtypes[0]
     else:
         R = PosetProduct(tuple(rtypes))
-
-    from mocdp.comp.template_imp import Dummy
 
     dp = Dummy(F, R)
     if mark_as_template:

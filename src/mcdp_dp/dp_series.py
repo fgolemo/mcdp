@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-from .dp_flatten import Mux
-from .dp_identity import Identity
-from .primitive import Feasible, NormalForm, NotFeasible, PrimitiveDP
-from .tracer import Tracer
 from contracts.utils import indent, raise_desc, raise_wrapped
-from mcdp_posets import (Map, PosetProduct, SpaceProduct, UpperSets,
-    get_product_compact)
+from mcdp_posets import (Map, NotBelongs, PosetProduct, UpperSet,
+    UpperSets, get_product_compact, poset_minima)
 from mocdp.exceptions import DPInternalError, do_extra_checks
+from mocdp.memoize_simple_imp import memoize_simple
+
+from .primitive import NormalForm, NotFeasible, PrimitiveDP
+from .tracer import Tracer
 
 
 __all__ = [
@@ -15,13 +15,11 @@ __all__ = [
 ]
 
 
-class Series0(PrimitiveDP):
+class Series(PrimitiveDP):
 
     def __init__(self, dp1, dp2):
         self.dp1 = dp1
         self.dp2 = dp2
-        # if equiv_to_identity(self.dp1) or equiv_to_identity(self.dp2):
-        #    raise ValueError('should not happen series\n- %s\n -%s' % (self.dp1, self.dp2))
 
         R1 = self.dp1.get_res_space()
         F2 = self.dp2.get_fun_space()
@@ -34,177 +32,124 @@ class Series0(PrimitiveDP):
         F1 = self.dp1.get_fun_space()
         R2 = self.dp2.get_res_space()
 
-        self.M1 = self.dp1.get_imp_space_mod_res()
-        self.M2 = self.dp2.get_imp_space_mod_res()
+        self.M1 = self.dp1.get_imp_space()
+        self.M2 = self.dp2.get_imp_space()
 
-
-        if isinstance(self.dp1, (Mux, Identity)):
-            self.extraM = SpaceProduct(())
-        elif self._is_equiv_to_terminator(self.dp2):
-            self.extraM = SpaceProduct(())
-        else:
-            self.extraM = R1
-
-        M, _, _ = get_product_compact(self.M1, self.extraM, self.M2)
-
+        M, _, _ = self._get_product()
         self._solve_cache = {}
-        PrimitiveDP.__init__(self, F=F1, R=R2, M=M)
+        PrimitiveDP.__init__(self, F=F1, R=R2, I=M)
+
+    def __getstate__(self):
+        state = dict(**self.__dict__)
+        state.pop('prod', None)
+        return state
+
+    def _get_product(self):
+        if not hasattr(self, 'prod'):
+            self.prod = _, _, _ = get_product_compact(self.M1, self.M2)
+            assert hasattr(self, 'prod')
+
+        return self.prod
 
     def _unpack_m(self, m):
-        _M, _, unpack = get_product_compact(self.M1, self.extraM, self.M2)
-        # M.belongs(m)
-        m1, m_extra, m2 = unpack(m)
-        return m1, m_extra, m2
+        M, _, unpack = self._get_product()
+        if do_extra_checks():
+            M.belongs(m)
+        m1, m2 = unpack(m)
+        return m1, m2
 
-    def evaluate_f_m(self, f1, m):
-        """ Returns the resources needed
-            by the particular implementation m """
-        m1, m_extra, m2 = self._unpack_m(m)
+    def evaluate(self, i):
+        m1, m2 = self._unpack_m(i)
+        fs, _ = self.dp1.evaluate(m1)
+        _, rs = self.dp2.evaluate(m2)
+        return fs, rs
 
-        if isinstance(self.dp1, (Mux, Identity)):
-            f2 = self.dp1.evaluate_f_m(f1, m1)
-        elif self._is_equiv_to_terminator(self.dp2):
-            F2 = self.dp2.get_fun_space()
-            f2 = F2.get_top()
-        else:
-            f2 = m_extra
-
-        r2 = self.dp2.evaluate_f_m(f2, m2)
-        return r2
-
+    @memoize_simple
     def get_implementations_f_r(self, f, r):
+        # print('%s get_implementaion(%s, %s)' % (id(self), f, r))
         f1 = f
-        _M, pack, _unpack = get_product_compact(self.M1, self.extraM, self.M2)
+        _, pack, _ = self._get_product()
         R2 = self.dp2.get_res_space()
         res = set()
         # First let's solve again for r1
         r1s = self.dp1.solve(f)
         for r1 in r1s.minimals:
             m1s = self.dp1.get_implementations_f_r(f1, r1)
+            if do_extra_checks():
+                try:
+                    for m1 in m1s:
+                        self.M1.belongs(m1)
+                except NotBelongs as e:
+                    msg = 'Invalid result from dp1 (%s)' % type(self.dp1)
+                    raise_wrapped(DPInternalError, e, msg, M1=self.M1, m1=m1,
+                                  dp1=self.dp1.repr_long())
+
             assert m1s, (self.dp1, f1, r1)
             
             f2 = r1
             r2s = self.dp2.solve(f2)
-            
-            if isinstance(self.dp1, (Mux, Identity)):
-                # print('equivalent to identity')
-                m_extra = ()  # XXX
-            elif self._is_equiv_to_terminator(self.dp2):
-                # print('equivalent to _is_equiv_to_terminator')
-                m_extra = ()  # XXX
-            else:
-                m_extra = f2
 
             for r2 in r2s.minimals:
                 if not R2.leq(r2, r):
                     continue
                 m2s = self.dp2.get_implementations_f_r(f2, r2)
-                # print('Found f1=%s r1=%s r2=%s' % (f1, r1, r2))
                 for m1 in m1s:
                     for m2 in m2s:
-                        m = pack(m1, m_extra, m2)
+                        m = pack(m1, m2)
                         res.add(m)
         if not res:
             msg = 'The (f,r) pair was not feasible.'
             raise_desc(NotFeasible, msg, f=f, r=r, self=self)
 
-
         if do_extra_checks():
-            M = self.get_imp_space_mod_res()
+            M = self.get_imp_space()
             for _ in res:
                 M.belongs(_)
         assert res
         return res
 
+#     def check_feasible(self, f1, m, r2):
+#         # print('series:check_feasible(%s,%s,%s)' % (f1, m, r))
+#         M, _, unpack = self._get_product()
+#         if do_extra_checks():
+#             M.belongs(m)
+#         m1, m2 = unpack(m)
+# 
+#         lf1, ur1 = self.dp1.evaluate(m1)
+#         lf2, ur2 = self.dp2.evaluate(m2)
+# 
+#         try:
+#             lf1.belongs(f1)
+#         except NotBelongs as e:
+#             msg = 'First is not feasible'
+#             raise_wrapped(NotFeasible, e, msg, lf1=lf1, f1=f1)
+#         try:
+#             ur2.belongs(r2)
+#         except NotBelongs as e:
+#             msg = 'Second is not feasible'
+#             raise_wrapped(NotFeasible, e, msg, lf1=lf1, f1=f1)
+# 
+#         feasible = non_zero_intersection(ur1=ur1, lf2=lf2)
+#         if not feasible:
+#             msg = 'Intersection is empty.'
+# 
+#             s = ('%s [ m1 = %s ] %s <= %s [ m2 = %s ] %s' %
+#                   (lf1, m1, ur1, lf2, m2, ur2))
+# 
+#             raise_desc(NotFeasible, msg,
+#                           dp1=self.dp1.repr_long(), dp2=self.dp2.repr_long(),
+#                           s=s)
+#
+#     def check_unfeasible(self, f1, m, r2):
+#         try:
+#             self.check_feasible(f1, m, r2)
+#         except NotFeasible:
+#             pass
+#         else:
+#             msg = 'It is feasible.'
+#             raise_desc(Feasible, msg, f1=f1, m=m, r2=r2)
 
-    def _is_equiv_to_terminator(self, dp):
-        from mcdp_dp.dp_terminator import Terminator
-        if isinstance(dp, Terminator):
-            return True
-        if isinstance(dp, Mux) and dp.coords == []:
-            return True
-        return False
-
-    def check_feasible(self, f1, m, r):
-        # print('series:check_feasible(%s,%s,%s)' % (f1, m, r))
-        M, _, unpack = get_product_compact(self.M1, self.extraM, self.M2)
-        M.belongs(m)
-        m1, m_extra, m2 = unpack(m)
-
-        comments = ''
-        try:
-            if isinstance(self.dp1, (Mux, Identity)):
-                f2 = self.dp1.evaluate_f_m(f1, m1)
-            elif self._is_equiv_to_terminator(self.dp2):
-                comments += 'dp2 is terminator'
-                # f2 = self.dp1.evaluate_f_m(f1, m1)
-                F2 = self.dp2.get_fun_space()
-                f2 = F2.get_top()
-            else:
-                comments += 'Using extra.'
-                f2 = m_extra
-        except NotFeasible as e:
-            msg = 'series: Asking for feasible(f1=%s, m=%s, r=%s)' % (f1, m, r)
-            msg += 'First evaluation not feasible.'
-            raise_wrapped(NotFeasible, e, msg, comments=comments,
-                          dp1=self.dp1.repr_long(), dp2=self.dp2.repr_long())
-            
-        try:
-            self.dp1.check_feasible(f1, m1, f2)
-        except NotFeasible as e:
-            msg = 'series: Asking for feasible(f1=%s, m=%s, r=%s)' % (f1, m, r)
-            msg += '\nFirst one not feasible:'
-            msg += '\n  f1 = %s -> [dp1(%s)] <~= f2 = %s ' % (f1, m1, f2)
-            raise_wrapped(NotFeasible, e, msg, compact=True, comments=comments,
-                          dp1=self.dp1.repr_long(), dp2=self.dp2.repr_long())
- 
-        if not self._is_equiv_to_terminator(self.dp2):
-            try:
-                self.dp2.check_feasible(f2, m2, r)
-            except NotFeasible as e:
-                msg = 'series: Asking for feasible(f1=%s, m=%s, r=%s)' % (f1, m, r)
-                msg += '\nFirst one is feasible:'
-                msg += '\n  f1 = %s -> [dp1(%s)] <= f2 = %s ' % (f1, m1, f2)
-                msg += '\nbut dp2 is *not* feasible:'
-                msg += '\n  f2 = %s -> [dp2(%s)] <~= r = %s ' % (f2, m2, r)
-                raise_wrapped(NotFeasible, e, msg, compact=True, dp2=self.dp2.repr_long(),
-                              dp1=self.dp1.repr_long(), comments=comments)
-
-    def check_unfeasible(self, f1, m, r):
-        M, _, unpack = get_product_compact(self.M1, self.extraM, self.M2)
-        M.belongs(m)
-        m1, m_extra, m2 = unpack(m)
-        try:
-            if isinstance(self.dp1, (Mux, Identity)):
-                r1 = self.dp1.evaluate_f_m(f1, m1)
-            elif self._is_equiv_to_terminator(self.dp2):
-                F2 = self.dp2.get_fun_space()
-                r1 = F2.get_top()
-            else:
-                r1 = m_extra
-        except NotFeasible:
-            return  # ok
-
-        try:
-            self.dp1.check_unfeasible(f1, m1, r1)
-        except Feasible as e1:
-            try:
-                f2 = r1
-                self.dp2.check_unfeasible(f2, m2, r)
-            except Feasible as e2:
-                msg = 'series: Asking to show unfeasible(f1=%s, m=%s, r=%s)' % (f1, m, r)
-
-                msg += '\nBut! one is feasible:'
-                msg += '\n  f1 = %s -> [ m1 = %s ] <= r1 = %s ' % (f1, m1, r1)
-                msg += '\n' + indent(self.dp1.repr_long(), '  dp1: ')
-                msg += '\n' + indent(str(e1).strip(), ' 1| ')
-#                 msg += '\n Then f2 evaluated to f2 = %s. ' % str(f2)
-                msg += '\nand two is feasible:'
-                msg += '\n  f2 = %s -> [ m2 = %s ] <= r = %s ' % (f2, m2, r)
-                msg += '\n' + indent(self.dp2.repr_long(), '  dp2: ')
-                msg += '\n' + indent(str(e2).strip(), ' 2| ')
-                raise_desc(Feasible, msg)
-
+    # @memoize_simple
     def solve(self, func):
         trace = Tracer()
         return self.solve_trace(func, trace)
@@ -215,11 +160,9 @@ class Series0(PrimitiveDP):
             return trace.result(self._solve_cache[func])
 
         trace.values(type='series')
-        from mcdp_posets import UpperSet, poset_minima
 
         with trace.child('dp1') as t:
             u1 = self.dp1.solve_trace(func, t)
-        # ressp1 = self.dp1.get_res_space()
 
         if do_extra_checks():
             R1 = self.dp1.get_res_space()
@@ -230,19 +173,13 @@ class Series0(PrimitiveDP):
         for u in u1.minimals:
             with trace.child('dp2') as t:
                 v = self.dp2.solve_trace(u, t)
-                assert isinstance(v, UpperSet), (type(self.dp2), v)
             mins.update(v.minimals)
 
         ressp = self.get_res_space()
         minimals = poset_minima(mins, ressp.leq)
-        # now mins is a set of UpperSets
-        # tres = self.get_tradeoff_space()
 
         us = UpperSet(minimals, ressp)
-        # tres.belongs(us)
 
-        # print('solving for %s' % str(func))
-        # return us
         self._solve_cache[func] = us
         return trace.result(us)
 
@@ -254,9 +191,19 @@ class Series0(PrimitiveDP):
         r2 = self.dp2.repr_long()
         s1 = 'Series:'
         s2 = ' %s -> %s' % (self.get_fun_space(), self.get_res_space())
-        s = s1 + ' % ' + s2
+        s = s1 + ' % ' + s2 + self._add_extra_info()
         s += '\n' + indent(r1, '. ', first='\ ')
+
+#         if hasattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME):
+#             a = getattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME)
+#             s += '\n (labeled as %s)' % a.__str__()
+
         s += '\n' + indent(r2, '. ', first='\ ')
+# 
+#         if hasattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME):
+#             a = getattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME)
+#             s += '\n (labeled as %s)' % a.__str__()
+
         return s
 
     def get_normal_form(self):
@@ -287,7 +234,6 @@ class Series0(PrimitiveDP):
 """     
         S, pack, unpack = get_product_compact(S1, S2)
 
-
         D = PosetProduct((UF1, S))
                          
         class SeriesAlpha(Map):
@@ -311,7 +257,6 @@ class Series0(PrimitiveDP):
                 Map.__init__(self, dom, cod)
 
             def _call(self, x):
-
                 (F, s) = x
                 (s1, s2) = unpack(s)
                 r_1 = beta1((F, s1))
@@ -323,15 +268,37 @@ class Series0(PrimitiveDP):
         return NormalForm(S, SeriesAlpha(self), SeriesBeta(self))
 
 
-Series = Series0
 
-if False:
-    # Huge product spaces
-    def prod_make(S1, S2):
-        S = PosetProduct((S1, S2))
-        return S
 
-    def prod_get_state(S1, S2, s):  # @UnusedVariable
-        (s1, s2) = s
-        return (s1, s2)
+Series0 = Series 
+# 
+# if False:
+#     # Huge product spaces
+#     def prod_make(S1, S2):
+#         S = PosetProduct((S1, S2))
+#         return S
+# 
+#     def prod_get_state(S1, S2, s):  # @UnusedVariable
+#         (s1, s2) = s
+#         return (s1, s2)
 
+# 
+# @contract(ur1=UpperSet, lf2=LowerSet)
+# def non_zero_intersection(ur1, lf2):
+#     assert isinstance(ur1, UpperSet), ur1
+#     assert isinstance(lf2, LowerSet), lf2
+#     """ Returns true if the two sets have non zero intersection """
+#     mcdp_dev_warning('Check better this one')
+#     for m in ur1.minimals:
+#         try:
+#             lf2.belongs(m)
+#             return True
+#         except NotBelongs:
+#             pass
+#     return False
+
+
+
+    
+    
+    

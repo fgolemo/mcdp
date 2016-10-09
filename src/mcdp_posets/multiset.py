@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
-from .frozendict import frozendict2
-from .poset import NotLeq, Poset
-from .space import NotBelongs, NotEqual, Space
 from collections import defaultdict
+import itertools
+
 from contracts import contract
 from contracts.utils import raise_desc
-from mocdp.exceptions import mcdp_dev_warning
-import itertools
+from mocdp.exceptions import mcdp_dev_warning, do_extra_checks
+
+from .frozendict import frozendict2
+from .nat import Nat_add, Nat
+from .poset import NotLeq, Poset
+from .space import NotBelongs, NotEqual
+
 
 __all__ = [
     'Multiset',
@@ -14,31 +18,46 @@ __all__ = [
 ]
 
 class Multiset():
-    @contract(elements='dict(*:int,>=1)', S=Space)
+    @contract(elements='dict(*:*,>=1)', S=Poset)
     def __init__(self, elements, S):
+        N = Nat()
+        
+        if do_extra_checks():
+            for e, howmany in elements.items():
+                S.belongs(e)
+                N.belongs(howmany)
 
         self._elements = frozendict2(elements)
         self._S = S
 
     def get_elements(self):
-        return self.elements
+        return self._elements
 
     def __repr__(self):
-        return 'Multiset(%r, %r)' % (self._elements, self.S)
+        return 'Multiset(%r, %r)' % (self._elements, self._S)
 
 class Multisets(Poset):
     """ 
     
     """
 
-    @contract(S=Space)
+    @contract(S=Poset)
     def __init__(self, S):
         self.S = S
 
-# This can only be implemented if we can enumerate the elements of Space
-#     def get_top(self):
-#         return
-#
+    def get_top(self):
+        """This can only be implemented if we can enumerate the elements of S."""
+        elements = self.S.get_maximal_elements()
+        data = {}
+        alot = Nat().get_top()
+        for e in elements:
+            data[e] = alot
+        return Multiset(data, self.S)
+
+    def witness(self):
+        data = {self.S.witness(): 1}
+        return Multiset(data, self.S)
+    
     def get_bottom(self):
         return Multiset({}, self.S)
 
@@ -59,17 +78,20 @@ class Multisets(Poset):
         m2 = b.get_elements()
         mcdp_dev_warning('#XXX should use S.equal()')
         if not (m1 == m2):  # XXX: should use S.equal()...
-            raise_desc(NotEqual, elements1=m1, elements2=m2)
+            msg = "Not equal"
+            raise_desc(NotEqual, msg, elements1=m1, elements2=m2)
 
     def check_leq(self, a, b):
+        N = Nat()
         e1 = a.get_elements()
         e2 = b.get_elements()
         for k, n in e1.items():
-            if not k in e2:
-                msg = 'Key is missing.'
-                raise_desc(NotLeq, msg, e1=e1, e2=e2, k=k)
-            if not(n <= e2[k]):
-                msg = 'Not enough.'
+            for k2, n2 in e2.items():
+                if self.S.leq(k, k2):
+                    if N.leq(n, n2):
+                        break # ok
+            else:
+                msg = 'Could not find resource in multiset.'
                 raise_desc(NotLeq, msg, e1=e1, e2=e2, k=k)
 
     def join(self, a, b):
@@ -78,15 +100,16 @@ class Multisets(Poset):
         c = itertools.chain(a.get_elements().items(),
                             b.get_elements().items())
         for element, n in c:
-            r[element] += n
+            r[element] = Nat_add(r[element], n)
 
         r = dict(**r)
         return Multiset(r, self.S)
 
     def format(self, x):
+        N = Nat()
         elements = x.get_elements()
         ordered = sorted(elements)
-        strings = ['%d of %s' % (elements[k], k) for k in ordered]
+        strings = ['%s of %s' % (N.format(elements[k]), k) for k in ordered]
         contents = ", ".join(strings)
         return "{%s}" % contents
 

@@ -1,7 +1,10 @@
-from mcdp_posets.space import Map
-from mcdp_posets.nat import Nat
 from contracts import contract
+from mcdp_posets import Map, Nat
 
+
+__all__ = [
+    'PlusNat',
+]
 
 class PlusNat(Map):
 
@@ -18,3 +21,6 @@ class PlusNat(Map):
         res = x + self.value
         assert isinstance(res, int), res
         return res
+
+    def __repr__(self):
+        return '+ %s' % self.value

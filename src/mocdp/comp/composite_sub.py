@@ -33,7 +33,7 @@ def cndp_split_in_components(cndp):
         res.append(r)
     return set(res)
 
-@contract(cndp=CompositeNamedDP, returns=CompositeNamedDP)
+@contract(cndp=CompositeNamedDP, nodes_i='set|seq(str)', returns=CompositeNamedDP)
 def cndp_sub(cndp, nodes_i):
     """ Returns a subset of the CompositeNamedDP with only certain nodes. """
     name2ndp = cndp.get_name2ndp()

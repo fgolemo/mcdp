@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
-from .context import Connection  # @UnusedImport
-from .interfaces import NamedDP, NotConnected
 from contracts import contract
 from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
+from mcdp_dp import Mux
+from mcdp_posets import NotEqual, PosetProduct
+from mocdp import ATTR_LOAD_NAME
+from mocdp.comp.context import Context, is_fun_node_name
+from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPSemanticError
-from mocdp.comp.context import is_fun_node_name
+
+from .context import Connection  # @UnusedImport
+from .interfaces import NamedDP, NotConnected
+
 
 __all__ = [
     'CompositeNamedDP',
@@ -25,8 +31,6 @@ class CompositeNamedDP(NamedDP):
     """
 
     def __init__(self, context):
-        from mocdp.comp.context import Context
-
         self.context = Context()
         self.context.names = context.names.copy()
         self.context.connections = list(context.connections)
@@ -40,13 +44,20 @@ class CompositeNamedDP(NamedDP):
         self._rnames = list(self.context.rnames)
         self._fnames = list(self.context.fnames)
 
+    def __copy__(self):
+        c = Context()
+        c.names = dict(**self.context.names)
+        c.connections = list(self.context.connections)
+        c.fnames = list(self.context.fnames)
+        c.rnames = list(self.context.rnames)
+        return CompositeNamedDP(c)
+
     @staticmethod
     def from_context(context):
         return CompositeNamedDP(context)
 
     @staticmethod
     def from_parts(name2ndp, connections, fnames, rnames):
-        from mocdp.comp.context import Context
         c = Context()
         c.names = name2ndp
         c.connections = connections
@@ -108,6 +119,12 @@ class CompositeNamedDP(NamedDP):
         return cndp_templatize_children(self)
 
     def abstract(self):
+        if not self.context.names:
+            # this means that there are nor children, nor functions nor resources
+            dp = Mux(PosetProduct(()), ())
+            ndp = SimpleWrap(dp, fnames=[], rnames=[])
+            return ndp
+
         try:
             self.check_fully_connected()
         except NotConnected as e:
@@ -116,27 +133,31 @@ class CompositeNamedDP(NamedDP):
 
         from mocdp.comp.composite_abstraction import cndp_abstract
         res = cndp_abstract(self)
+        assert isinstance(res, SimpleWrap), type(res)
 
-        # from mocdp.comp.context_functions import dpgraph_making_sure_no_reps
-        # res = dpgraph_making_sure_no_reps(self.context)
-        assert res.get_fnames() == self.context.fnames, (res.get_fnames(), self.context.fnames)
-        assert res.get_rnames() == self.context.rnames, (res.get_rnames(), self.context.rnames)
+        assert res.get_fnames() == self.context.fnames
+        assert res.get_rnames() == self.context.rnames
+        
         return res
 
     def get_dp(self):
         ndp = self.abstract()
-        return ndp.get_dp()
+        dp = ndp.get_dp()
+        return dp
 
     def __repr__(self):
         s = 'CompositeNDP'
-        from mcdp_library.library import ATTR_LOAD_NAME
-        if hasattr(self, ATTR_LOAD_NAME):
-            s += ' (loaded as %r)' % getattr(self, ATTR_LOAD_NAME)
 
+        if hasattr(self, ATTR_LOAD_NAME):
+            s += '\n (loaded as %r)' % getattr(self, ATTR_LOAD_NAME)
+#         if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
+#             s += '\n (labeled as %s)' % getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME).__str__()
         for f in self._fnames:
             s += '\n provides %s  [%s]' % (f, self.get_ftype(f))
         for r in self._rnames:
             s += '\n requires %s  [%s]' % (r, self.get_rtype(r))
+
+        s += '\n %d nodes, %d edges' % (len(self.context.names), len(self.context.connections))
 
         s += '\n connections: \n' + format_list_long(self.context.connections, informal=True)
         s += '\n names: \n' + format_dict_long(self.context.names, informal=True)
@@ -159,7 +180,8 @@ def check_consistent_data(names, fnames, rnames, connections):
         try:
             check_good_name(n)
         except ValueError as e:
-            raise_wrapped(ValueError, e, names=names)
+            msg = 'This name is not good.'
+            raise_wrapped(ValueError, e, msg, names=names)
 
         isit, x = is_fun_node_name(n)
         if isit and not x in fnames:
@@ -219,9 +241,56 @@ def check_consistent_data(names, fnames, rnames, connections):
 
             R = names[c.dp1].get_rtype(c.s1)
             F = names[c.dp2].get_ftype(c.s2)
-            tu.check_equal(R, F)
+
+            try:
+                tu.check_equal(R, F)
+            except NotEqual as e:
+                msg = 'Invalid connection %s' % c.__repr__()
+                raise_wrapped(ValueError, e, msg, R=R, F=F)
 
 
         except ValueError as e:
             msg = 'Invalid connection'
             raise_wrapped(ValueError, e, msg, c=c, names=list(names))
+
+@contract(cndp=CompositeNamedDP, returns='list(tuple(str, $NamedDP))')
+def cndp_iterate_res_nodes(cndp):
+    res = []
+    from mocdp.comp.context import is_res_node_name
+
+    for name2, ndp2 in cndp.get_name2ndp().items():
+        isitr, rname = is_res_node_name(name2)
+        if isitr:
+            res.append((rname, ndp2))
+    return res
+
+
+@contract(cndp=CompositeNamedDP, returns='list(tuple(str, $NamedDP))')
+def cndp_iterate_fun_nodes(cndp):
+    res = []
+    for name2, ndp2 in cndp.get_name2ndp().items():
+        isitr, fname = is_fun_node_name(name2)
+        if isitr:
+            res.append((fname, ndp2))
+    return res
+
+
+
+@contract(cndp=CompositeNamedDP, returns='list(tuple(str, $NamedDP))')
+def cndp_get_name_ndp_notfunres(cndp):
+    """ Yields a sequence of (name, ndp) excluding 
+        the fake ones that represent function or resource. """
+    assert isinstance(cndp, CompositeNamedDP)
+    from mocdp.comp.context import is_res_node_name
+
+    res = []
+    for name2, ndp2 in cndp.get_name2ndp().items():
+        isitf, _ = is_fun_node_name(name2)
+        isitr, _ = is_res_node_name(name2)
+        if isitf or isitr:
+            # do not add the identity nodes
+            # that represent functions or resources
+            continue
+        else:
+            res.append((name2, ndp2))
+    return res

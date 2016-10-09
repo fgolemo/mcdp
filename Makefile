@@ -40,12 +40,22 @@ comptests-run-parallel-nocontracts-cov:
 
 comptests-run-parallel-nocontracts-prof:
 	mkdir -p $(out)
-	DISABLE_CONTRACTS=1 comptests -o $(out) --profile --nonose -c "make; rparmake not *testlang13diagram*" $(package)  
+	DISABLE_CONTRACTS=1 comptests -o $(out) --profile --nonose -c "make; rparmake" $(package)  
 
 
-coverage:
+docoverage-single:
+	# note you need "rmake" otherwise it will not be captured
+	rm -rf ouf_coverage .coverage
 	-DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "exit" $(package)
-	-coverage2 run `which compmake` $(out) -c "rparmake"
+	-DISABLE_CONTRACTS=1 coverage2 run `which compmake` $(out) -c "rmake"
+	coverage html -d out_coverage --include '*src/mcdp*'
+
+docoverage-parallel:
+	# note you need "rmake" otherwise it will not be captured
+	rm -rf ouf_coverage .coverage .coverage.*
+	-DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "exit" $(package)
+	-DISABLE_CONTRACTS=1 coverage run --concurrency=multiprocessing  `which compmake` $(out) -c "rparmake"
+	coverage combine
 	coverage html -d out_coverage --include '*src/mcdp*'
 
 
@@ -65,3 +75,7 @@ bump-upload:
 	bumpversion patch
 	git push --tags
 	python setup.py sdist upload
+
+readme-commands:
+	mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 0.1 kg, 1 W>"
+	mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 1.0 kg, 1 W>"

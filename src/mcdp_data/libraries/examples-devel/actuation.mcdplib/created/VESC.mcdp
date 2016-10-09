@@ -1,0 +1,41 @@
+mcdp {
+    provides ppm [`PPM]
+    provides pwm [`PWM]
+
+    requires in [`PortableDCPower]
+    requires usb [`USBCom]
+
+    requires budget [USD]
+    requires payload [`Payload]
+
+    required budget >= 115 USD
+    
+    (required payload).shape >= <2cm, 2cm, 1cm>
+    (required payload).mass  >= 10 g
+
+    # XXX: these numbers were made up
+    (provided pwm).voltage_max <= 5 V
+    (provided pwm).amp_max  <= 2 A
+    (provided pwm).freq_max <= 120 Hz
+
+    # XXX: these numbers were made up
+    (provided ppm).voltage_max <= 5 V
+    (provided ppm).amp_max  <= 50 mA
+    (provided ppm).freq_max <= 120 Hz
+    (provided ppm).resolution <= 0.01 []
+
+    endurance = max( (provided ppm).duration, (provided pwm).duration )
+    (required in).duration >= endurance
+    (required usb).duration >= endurance
+
+    dc_in = (required in).dc
+    (dc_in).connector >= `barrel_connectors: barrel_5mm # incorrect
+    (dc_in).voltage >= `DC_voltages: v5
+    (dc_in).amps >= 2 A
+
+    (required payload).rigid_body >= (provided pwm).rigid_body
+    (required payload).rigid_body >= (provided ppm).rigid_body
+    (required in).rigid_body >= (provided ppm).rigid_body
+    (required usb).rigid_body >= (provided ppm).rigid_body
+
+}

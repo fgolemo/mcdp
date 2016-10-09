@@ -1,0 +1,46 @@
+flatten  mcdp {
+
+  requires objective [R]
+
+a = instance mcdp {
+  provides a [R]
+  requires a [R]
+  a >= a
+}
+ 
+b = instance mcdp {
+  provides b [R]
+  requires b [R]
+  b >= b
+}
+c = instance mcdp {
+  provides c [R]
+  requires c [R]
+  c >= c
+}
+d = instance mcdp {
+  provides d [R]
+  requires d [R]
+  d >= d
+}
+e = instance mcdp {
+  provides e [R]
+  requires e [R]
+  e >= e
+}
+f = instance mcdp {
+  provides f [R]
+  requires f [R]
+  f >= f
+}
+a.a >= 0.50 [] * min(b.b, f.f)
+a.a >= 0.50 [] * min(c.c, d.d)
+b.b >= 0.20 []
+c.c >= 0.45 []
+c.c >= 0.30 []
+d.d >= 1.00[]
+e.e >= 0.50 []
+f.f >= 0.90 [] * e.e
+
+required objective >= min(a.a, max(c.c, e.e))
+}

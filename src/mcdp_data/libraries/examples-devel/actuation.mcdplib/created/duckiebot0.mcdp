@@ -1,0 +1,76 @@
+ # mcdp-plot --cache --plots ndp_graph_enclosed -D ../.. -d . duckiebot0
+
+ mcdp {
+  dagu_chassis = instance `DaguChassis
+  battery_ravpower = instance `BatteryRavpower
+  
+  pi = instance `RaspberryPI2
+  dc_hat = instance `AdafruitDCHat 
+   
+  pi_camera = instance `PICamera
+
+  usb_to_wires = instance `USB_to_wires
+
+  pi.gpiocom <= pi_camera.com 
+ 
+  cable = instance `USB_A_to_Micro_B_cable
+
+  USBMicroCharger = instance `USBMicroCharging
+
+  requires ac >= USBMicroCharger.in
+
+  in required by battery_ravpower <= out provided by USBMicroCharger
+  
+  in required by pi <= out provided by cable
+  in required by cable <= out1 provided by battery_ravpower 
+  
+  # battery below
+  battery_ravpower.payload <= dagu_chassis.payload_bottom
+
+  in required by usb_to_wires <= out2 provided by battery_ravpower
+  in required by dc_hat <= out provided by usb_to_wires
+  
+  fit = instance template mcdp {
+      provides p1 [`Payload]
+      provides p2 [`Payload]
+      provides p3 [`Payload]
+      #provides p4 [`Payload]
+      #provides p5 [`Payload]
+      #provides p6 [`Payload]
+      #provides p7 [`Payload]
+      requires payload [`Payload]
+  }
+ 
+  
+  fit.p1 >= pi.payload
+  fit.p2 >= dc_hat.payload
+  fit.p3 >= pi_camera.payload
+  
+  fit.payload <= dagu_chassis.payload_top
+
+  provides motion using dagu_chassis 
+
+  dc_hat.pisocketcom1 <= pi.pisocketcom
+  ignore pisocketcom1 provided by dc_hat
+  ignore ethcom provided by pi
+  ignore usbcom1 required by pi 
+  ignore ethcom required by pi
+
+  dc_hat.out1 >= dagu_chassis.pwm1
+  dc_hat.out2 >= dagu_chassis.pwm2
+  ignore out3 provided by dc_hat
+  ignore out4 provided by dc_hat
+
+  requires budget [USD]
+
+  required budget >= (
+    budget required by dagu_chassis +
+     budget required by battery_ravpower + 
+     # budget required by buffalo + 
+     budget required by pi + 
+     budget required by dc_hat + 
+     budget required by pi_camera +
+     budget required by usb_to_wires +
+     budget required by USBMicroCharger
+  )
+}

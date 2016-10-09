@@ -1,0 +1,5 @@
+product(
+    tag: S(USBCom),
+    duration: s,
+    rigid_body: `RigidBodyID
+)

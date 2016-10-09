@@ -1,0 +1,6 @@
+template mcdp {
+
+   requires power [W]
+   provides flops [flops]
+
+}

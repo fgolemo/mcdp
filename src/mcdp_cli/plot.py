@@ -1,26 +1,30 @@
-from .solve_meat import solve_read_model
-from .utils_mkdir import mkdirs_thread_safe
+import os
+from tempfile import mkdtemp
+
 from contracts import contract
 from contracts.utils import raise_desc
-from decent_params.utils import UserError
+from decent_params import UserError
 from mcdp_cli.utils_wildcard import expand_string
-from mcdp_library import MCDPLibrary
-from mcdp_report.gg_ndp import STYLE_GREENRED, STYLE_GREENREDSYM, gvgen_from_ndp
-from mcdp_report.gg_utils import get_dot_string, gg_figure
-from mcdp_report.report import gvgen_from_dp
+from mcdp_library import Librarian
+from mcdp_report.dp_graph_flow_imp import dp_graph_flow
+from mcdp_report.dp_graph_tree_imp import dp_graph_tree
+from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
+from mcdp_report.gg_utils import gg_get_formats
+from mcdp_web.renderdoc.highlight import get_minimal_document
+from mocdp.comp.recursive_name_labeling import get_labelled_version
 from mocdp.exceptions import mcdp_dev_warning
 from quickapp import QuickAppBase
-from reprep import Report
 from system_cmd import CmdException, system_cmd_result
-from tempfile import mkdtemp
-import os
+
+from .utils_mkdir import mkdirs_thread_safe
+
 
 def get_ndp(data):
     if not 'ndp' in data:
-        dirs = data['dirs']
-        param = data['model_name']
-        _library, _basename, ndp = solve_read_model(dirs, param)
-        data['ndp'] = ndp
+        # dirs = data['dirs']
+        model_name = data['model_name']
+        library = data['library']
+        data['ndp'] = library.load_ndp(model_name)
     return data['ndp']
 
 def get_dp(data):
@@ -29,52 +33,67 @@ def get_dp(data):
         data['dp'] = ndp.get_dp()
     return data['dp']
 
-def png_pdf_from_gg(gg):
-    r = Report()
-    gg_figure(r, 'graph', gg, do_svg=False, do_dot=False)
-    png_node = r.resolve_url('graph/graph')
-    pdf_node = r.resolve_url('graph_pdf')
-    return png_node.get_raw_data(), pdf_node.get_raw_data()
+def return_formats2(gg, prefix):
+    formats = ['png', 'pdf', 'svg']
+    data = gg_get_formats(gg, formats)
+    res = [ (data_format, prefix, d)
+            for data_format, d in zip(formats, data)]
+    return res
 
-def dp_visualization(data):
+def dp_graph_flow_(data):
     dp = get_dp(data)
-    gg = gvgen_from_dp(dp)
-    png, pdf = png_pdf_from_gg(gg)
-    res1 = ('png', 'dp_tree', png)
-    res2 = ('pdf', 'dp_tree', pdf)
-    return [res1, res2]
+    gg = dp_graph_flow(dp)
+    return return_formats2(gg, 'dp_graph_flow')
 
+def dp_graph_tree_(data):
+    dp = get_dp(data)
+    gg = dp_graph_tree(dp, compact=False)
+    return return_formats2(gg, 'dp_graph_tree')
 
-def simple_print(data):
+def dp_graph_tree_labeled_(data):
     ndp = get_ndp(data)
-    res1 = ('txt', 'print', str(ndp))
+    ndp = get_labelled_version(ndp)
+    dp = ndp.get_dp()
+    gg = dp_graph_tree(dp, compact=False)
+    return return_formats2(gg, 'dp_graph_tree_labeled')
+
+def dp_graph_tree_compact_(data):
+    dp = get_dp(data)
+    gg = dp_graph_tree(dp, compact=True)
+    return return_formats2(gg, 'dp_graph_tree_compact')
+
+def dp_graph_tree_compact_labeled_(data):
+    ndp = get_ndp(data)
+    ndp = get_labelled_version(ndp)
+    dp = ndp.get_dp()
+    gg = dp_graph_tree(dp, compact=True)
+    return return_formats2(gg, 'dp_graph_tree_compact_labeled')
+
+def ndp_repr_long(data):
+    ndp = get_ndp(data)
+    res1 = ('txt', 'ndp_repr_long', ndp.repr_long())
     return [res1]
 
-def ndp_visualization(data, style):
-    ndp = get_ndp(data) 
-    gg = gvgen_from_ndp(ndp, style)
-    png, pdf = png_pdf_from_gg(gg)
+def ndp_repr_long_labeled(data):
+    ndp = get_ndp(data)
+    ndp = get_labelled_version(ndp)
+    res1 = ('txt', 'ndp_repr_long_labeled', ndp.repr_long())
+    return [res1]
 
-    # do it again
-    gg = gvgen_from_ndp(ndp, style)
-    dot = get_dot_string(gg)
+def dp_repr_long(data):
+    dp = get_dp(data)
+    res1 = ('txt', 'dp_repr_long', dp.repr_long())
+    return [res1]
 
-    res1 = ('png', style, png)
-    res2 = ('pdf', style, pdf)
-    res3 = ('dot', style, dot)
-
-    return [res1, res2, res3]
+def dp_repr_long_labeled(data):
+    ndp = get_ndp(data)
+    ndp = get_labelled_version(ndp)
+    dp = ndp.get_dp()
+    res1 = ('txt', 'dp_repr_long_labeled', dp.repr_long())
+    return [res1]
 
 def create_extra_css(params):  # @UnusedVariable
-#     hide = params.get('hide', '')
-#     lines = hide.split(':')
     out = ''
-#     if not lines:
-#         pass
-#     else:
-#         for l in lines:
-#             out += 'span#line%s, ' % l
-#         out += ' { display: none; }'
     return out
 
 def get_lines_to_hide(params):
@@ -85,6 +104,7 @@ def get_lines_to_hide(params):
     return [int(_) for _ in lines]
 
 def syntax_pdf(data):
+    """ Returns a PDF string """
     from mcdp_report.html import ast_to_html
     s = data['s']
     s = s.replace('\t', '    ')
@@ -92,8 +112,9 @@ def syntax_pdf(data):
     lines_to_hide = get_lines_to_hide(data['params'])
     def ignore_line(lineno):
         return lineno  in lines_to_hide
-    html = ast_to_html(s, complete_document=True, extra_css=extra_css,
+    contents = ast_to_html(s, complete_document=False, extra_css=extra_css,
                        ignore_line=ignore_line)
+    html = get_minimal_document(contents)
 
     d = mkdtemp()
     
@@ -188,20 +209,61 @@ allplots  = {
     ('syntax_doc', syntax_doc),
     ('syntax_frag', syntax_frag),
     ('syntax_pdf', syntax_pdf),
-    ('dp_tree', dp_visualization),
+    ('dp_graph_tree', dp_graph_tree_),
+    ('dp_graph_tree_compact', dp_graph_tree_compact_),
+    ('dp_graph_tree_labeled', dp_graph_tree_labeled_),
+    ('dp_graph_tree_compact_labeled', dp_graph_tree_compact_labeled_),
+    ('dp_graph_flow', dp_graph_flow_),
     ('tex_form', tex_form),
-    ('print', simple_print),
+    ('dp_repr_long', dp_repr_long),
+    ('ndp_repr_long', ndp_repr_long),
+    ('dp_repr_long_labeled', dp_repr_long_labeled),
+    ('ndp_repr_long_labeled', ndp_repr_long_labeled),
 }
 
 class Vis():
-    def __init__(self, s):
+    def __init__(self, s, direction, prefix):
         self.s = s
+        self.direction = direction
+        self.prefix = prefix
+        
     def __call__(self, data):
-        return ndp_visualization(data, style=self.s)
+        gg = self.ndp_visualization(data, style=self.s, direction=self.direction)
+        return return_formats2(gg,self.prefix)
 
-for s in [STYLE_GREENRED, 'default', 'clean', STYLE_GREENREDSYM]:
-    x = ('ndp_%s' % s, Vis(s))
+    def ndp_visualization(self, data, style, direction):
+        assert direction in ['TB', 'LR'], direction
+        ndp = get_ndp(data) 
+        setattr(ndp, '_hack_force_enclose', True)
+        library = data['library']
+        images_paths = library.get_images_paths()
+        gg = gvgen_from_ndp(ndp, style, images_paths=images_paths,  direction=direction)
+        return gg
+
+
+for s in [#STYLE_GREENRED, 'default', 'clean', 
+          STYLE_GREENREDSYM]:
+    x = ('ndp_%s' % s, Vis(s, 'LR', 'ndp_%s' %s))
     allplots.add(x)
+    x = ('ndp_%s_tb' % s, Vis(s, 'TB', 'ndp_%s_TB'%s))
+    allplots.add(x)
+    
+def ndp_graph_enclosed_(data):
+    library = data['library']
+    ndp = get_ndp(data)
+    style = STYLE_GREENREDSYM
+    yourname = None
+    from mcdp_web.images.images import ndp_graph_enclosed
+    png = ndp_graph_enclosed(library, ndp, style, yourname,
+                            data_format='png', direction='TB',
+                            enclosed=True)
+    pdf = ndp_graph_enclosed(library, ndp, style, yourname,
+                            data_format='pdf', direction='TB',
+                            enclosed=True)
+    return [('png', 'ndp_graph_enclosed', png),
+            ('pdf', 'ndp_graph_enclosed', pdf)]
+
+allplots.add(('ndp_graph_enclosed', ndp_graph_enclosed_))
 
 @contract(returns='tuple(str,*)')
 def parse_kv(x):
@@ -215,7 +277,7 @@ def parse_params(p):
 
     return dict(parse_kv(_) for _ in seq)
 
-def do_plots(logger, model_name, plots, outdir, extra_params, dirs):
+def do_plots(logger, model_name, plots, outdir, extra_params, maindir, extra_dirs, use_cache):
     data = {}
 
     if '.mcdp' in model_name:
@@ -225,20 +287,30 @@ def do_plots(logger, model_name, plots, outdir, extra_params, dirs):
         logger.warn(msg)
         model_name = model_name2
 
-    data['dirs'] = dirs
     data['model_name'] = model_name
 
-#     GlobalConfig.global_load_dir("mocdp")
+    if use_cache:
+        cache_dir = os.path.join(outdir, '_cached/mcdp_plot_cache')
+        print('using cache %s' % cache_dir)
+    else:
+        cache_dir = None
 
-    library = MCDPLibrary()
-    for d in dirs:
-        library.add_search_dir(d)
+    librarian = Librarian()
+    for e in extra_dirs:
+        librarian.find_libraries(e)
+
+    library = librarian.get_library_by_dir(maindir)
+    if cache_dir is not None:
+        library.use_cache_dir(cache_dir)
+
+    assert library.library_name is not None
 
     filename = model_name + '.mcdp'
     x = library._get_file_data(filename)
     data['s'] = x['data']
     data['filename'] = x['realpath']
     data['params'] = parse_params(extra_params)
+    data['library'] = library
 
     d = dict(allplots)
     results = []
@@ -277,25 +349,28 @@ def do_plots(logger, model_name, plots, outdir, extra_params, dirs):
 class PlotDP(QuickAppBase):
     """ Plot a DP:
     
-        mcdp-plot [--watch] [--plots *] [--out outdir] [-d dir] model_name
+        mcdp-plot  [--plots '*'] [--out outdir] [-d dir] model_name
         
     """
 
     def define_program_options(self, params):
-        params.add_flag('watch')
         params.accept_extra()
 
         possible = [p for p, _ in allplots]
 
         params.add_string('out', help='Output dir', default=None)
         params.add_string('extra_params', help='Add extra params', default="")
+        print possible
         params.add_string('plots', default='*', help='One of: %s' % possible)
 
-        params.add_string('dirs', default='.', short='-d',
-                           help='Library directories containing models.')
+        params.add_string('maindir', default='.', short='-d',
+                           help='Main library directory.')
+        params.add_string('extra_dirs', default='.', short='-D',
+                           help='Other directories (: separated).')
+
+        params.add_flag('cache')
 
     def go(self):
-#         GlobalConfig.global_load_dir("mocdp")
 
         options = self.get_options()
         filenames = options.get_extra()
@@ -311,25 +386,20 @@ class PlotDP(QuickAppBase):
         if options.out is None:
             out = os.path.dirname(filename)
             if not out:
-                out = '.'
+                out = 'out-mcdp_plot'
         else:
             out = options.out
         mkdirs_thread_safe(out)
         possible = [p for p, _ in allplots]
         plots = expand_string(options.plots, list(possible))
         logger = self.logger  # HasLogger
-        dirs = options.dirs.split(':')
-        do_plots(logger, filename, plots, out, options.extra_params, dirs=dirs)
-
-        if options.watch:
-            def handler():
-                do_plots(filename, plots, out)
-
-            from .go import watch
-            d = os.path.dirname(filename)
-            if d == '':
-                d = '.'
-            watch(path=d, handler=handler)
+        maindir = options.maindir
+        extra_dirs = options.extra_dirs.split(':')
+        use_cache = options.cache
+        do_plots(logger, filename, plots, out, options.extra_params,
+                maindir=maindir,
+                extra_dirs=extra_dirs,
+                 use_cache=use_cache) 
 
 
 mcdp_plot_main = PlotDP.get_sys_main()

@@ -1,4 +1,5 @@
 from collections import namedtuple
+from conf_tools.utils import dir_from_package_name
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
@@ -6,7 +7,9 @@ from mcdp_lang.namedtuple_tricks import isnamedtuplewhere
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
-
+from mocdp import logger
+import os
+import warnings
 
 def isolate_comments(s):
     lines = s.split("\n")
@@ -21,7 +24,6 @@ def isolate_comments(s):
 
     return unzip(map(isolate_comment, lines))
 
-
 def unzip(iterable):
     return zip(*iterable)
 
@@ -31,9 +33,23 @@ def ast_to_text(s):
     return print_ast(block)
     
 @contract(s=str)
-def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: False,
+def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
                 add_line_gutter=True, encapsulate_in_precode=True, add_css=True,
-                parse_expr=Syntax.ndpt_dp_rvalue, add_line_spans=False):
+                parse_expr=None, add_line_spans=False):
+    if parse_expr is None:
+        warnings.warn('Please add specific parse_expr (default=Syntax.ndpt_dp_rvalue)', stacklevel=2)
+        parse_expr = Syntax.ndpt_dp_rvalue
+    if add_css:
+        warnings.warn('check we really need add_css = True', stacklevel=2)
+
+    if complete_document:
+        warnings.warn('please do not use complete_document', stacklevel=2)
+    add_css = False
+
+    if ignore_line is None:
+        ignore_line = lambda _lineno: False
+    if extra_css is None:
+        extra_css = ''
 
     s_lines, s_comments = isolate_comments(s)
     assert len(s_lines) == len(s_comments) 
@@ -59,15 +75,16 @@ def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: 
     # print print_ast(block2)
 
     snippets = list(print_html_inner(block2))
-    assert len(snippets) == 1
+    # the len is > 1 for mcdp_statements
+    assert len(snippets) == 1, snippets
     snippet = snippets[0]
+    transformed_p = snippet.transformed
+    # transformed_p = "".join(snippet.transformed for snippet in snippets)
 
     def sanitize_comment(x):
         x = x.replace('>', '&gt;')
         x = x.replace('<', '&lt;')
         return x
-
-    transformed_p = (snippet.transformed)
 
     # add back the white space
     if empty_lines:
@@ -82,11 +99,11 @@ def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: 
 #             print('orig %d: %s' % (i, s_lines[i]))
 #             print('trans %d: %s' % (i, lines[i]))
         msg = 'Lost some lines while pretty printing: %s, %s' % (len(lines), len(s_comments))
-        print(msg)
+        logger.debug(msg)
         if len(s) > 10:
-            print('original string[:10] = %r' % s[:10])
-            print('original string[-10:] = %r' % s[-10:])
-    
+            logger.debug('original string[:10] = %r' % s[:10])
+            logger.debug('original string[-10:] = %r' % s[-10:])
+
     out = ""
     for i, (a, comment) in enumerate(zip(lines, s_comments)):
         line = a
@@ -118,7 +135,7 @@ def ast_to_html(s, complete_document, extra_css="", ignore_line=lambda _lineno: 
         frag += out
 
     if add_css:
-        frag += '\n\n<style type="text/css">\n' + css + '\n' + extra_css + '\n</style>\n\n'
+        frag += '\n\n<style type="text/css">\n' + get_language_css() + '\n' + extra_css + '\n</style>\n\n'
 
     if complete_document:
         s = """<html><head>
@@ -184,13 +201,18 @@ def print_html_inner(x):
     orig0 = x.where.string[x.where.character:x.where.character_end]
 
     klass = type(x).__name__
+    # special case: OpenBraceKeyword
+    if out == '<':
+        out = '&lt;'
+    if out == '>':
+        out = '&gt;'
     transformed0 = "<span class='%s'>%s</span>" % (klass, out)
     yield Snippet(op=x, orig=orig0, a=x.where.character, b=x.where.character_end,
                   transformed=transformed0)
 
 def sanitize(x):
-    if 'span' in x:
-        raise ValueError('getting confused %s' % x)
+    # if 'span' in x:
+    #    raise ValueError('getting confused %s' % x)
 
     x = x.replace('>=', '&gt;=')
     x = x.replace('<=', '&lt;=')
@@ -272,86 +294,17 @@ def iterate_notwhere(x):
             continue
         yield k, v
 
-# I will put a copy in static
-css = """ 
-     
-     span.NewResource { color: darkred;}
-     span.NewFunction { color: darkgreen; }
-     
-    span.Unit, span.Nat, span.Int  {  color: #aC5600 ;}
-    span.ValueExpr { color: #CC6600 ;}
-     
-     /*span.Function  { color: darkgreen;}*/
-      
-    span.MCDPKeyword,
-    span.SubKeyword,
-    span.CompactKeyword,
-    span.AbstractKeyword,
-    span.TemplateKeyword,
-    span.ForKeyword,
-    span.UsingKeyword,
-    span.LoadKeyword,
-    span.CodeKeyword,
-    span.FromLibraryKeyword,
-    span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
-    span.ImplementedbyKeyword , span.FromCatalogueKeyword, span.MCDPTypeKeywor,
-    span.InstanceKeyword,
-    span.CoproductWithNamesChooseKeyword,
-    span.MCDPTypeKeyword,
-    span.FromLibraryKeyword,
-    span.CoproductWithNamesChooseKeyword,
-    span.MCDPKeyword,
-    span.SubKeyword,
-    span.CompactKeyword,
-    span.AbstractKeyword,
-    span.TemplateKeyword,
-    span.ForKeyword,
-    span.UsingKeyword,
-    span.LoadKeyword, span.CodeKeyword,
-    span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
-    span.ImplementedbyKeyword,  
-    span.FromCatalogueKeyword, 
-    span.MCDPTypeKeyword,
-    span.InstanceKeyword,
-    span.FlattenKeyword,
-    span.ApproxKeyword
-    { 
-        font-weight: bold; 
-        color: #00a;
-    }
-    
-    span.ProvideKeyword, span.RequireKeyword  {
-        font-weight: bold; 
-        
-    } 
-    
-    span.ProvideKeyword,  span.ProvidedByKeyword, span.FName { color: darkgreen;}
-    span.RequireKeyword, span.RequiredByKeyword, span.RName  { color: darkred;}
-      
-    
+def get_language_css():
+    package = dir_from_package_name('mcdp_web')
+    fn = os.path.join(package, 'static', 'css', 'mcdp_language_highlight.css')
+    with open(fn) as f:
+        css = f.read()
+    return css
 
-       
-    /* There is a bug that prevents this from working correctly. */
-    /* span.ImpName { color: #CC6600; } */
-    span.FuncName { color: #CC6600 ; }
- 
-    
-    span.FName, span.RName { } 
-    span.DPName, span.NDPName {  
-        color: #a0a;
-    }
-    
-    span.DPTypeName, span.DPVariableRef { 
-        color:  #00F; 
-        font-weight: bold; 
-    }
-      
-    span.comment { 
-        color: grey;
-    }
+def get_markdown_css():
+    package = dir_from_package_name('mcdp_web')
+    fn = os.path.join(package, 'static', 'css', 'markdown.css')
+    with open(fn) as f:
+        css = f.read()
+    return css
 
-    span.line-gutter {    
-        margin-right: 1em; 
-        color: grey; 
-    }
-"""

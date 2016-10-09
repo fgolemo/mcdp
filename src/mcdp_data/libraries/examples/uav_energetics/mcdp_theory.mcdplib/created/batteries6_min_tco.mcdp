@@ -1,0 +1,19 @@
+mcdp {
+    battery = instance `Batteries
+    
+    provides capacity using battery
+    provides missions using battery
+
+    #ignore mass required by battery
+
+    each = 30 USD
+    labor_cost = maintenance required by battery * each
+
+    shipping = 1 USD / kg
+    shipping_cost = mass required by battery * shipping
+
+    parts_cost = cost required by battery 
+    requires tco >= parts_cost + labor_cost + shipping_cost
+
+    mass required by battery <= 3 kg
+}

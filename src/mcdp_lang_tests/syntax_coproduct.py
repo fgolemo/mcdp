@@ -3,11 +3,11 @@ from .utils import parse_wrap_check
 from mcdp_lang.syntax import Syntax
 from comptests.registrar import comptest
 from mcdp_lang import parse_ndp
-from mcdp_posets.uppersets import UpperSets
+from mcdp_posets import UpperSets
 
 @comptest
 def check_coproducts0():
-    parse_wrap_check('a ^ b', Syntax.ndpt_dp_rvalue)
+    parse_wrap_check('choose(a:a, b:b)', Syntax.ndpt_dp_rvalue)
 
 
 @comptest

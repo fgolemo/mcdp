@@ -1,1 +1,0 @@
-This is an example of a design problem with uncertainty.

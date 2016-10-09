@@ -1,0 +1,11 @@
+# https://www.amazon.com/Traxxas-3000mAh-NIMH-Flat-Battery/dp/B00P7X4KIS
+# NiMH
+mcdp {
+    requires budget >= 27.98 USD
+    requires payload [`Payload]
+
+    provides out [`PortableDCPower]
+    requires in [`DC_Charging]
+
+    
+}

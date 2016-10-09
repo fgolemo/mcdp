@@ -1,0 +1,49 @@
+mcdp {
+  requires power [W]
+  requires budget [USD]
+  requires mass [g]
+
+  provides resolution [pixels/deg]
+  provides min_throughput [Hz]
+  provides inverse_of_max_latency [1/s] 
+
+  # fit of latency as a function of resolution
+  l0 = -0.00045554 s
+  l1 = +0.00074915 s * deg / pixels
+  l2 = +0.00011316 s * deg^2 / pixels^2
+  r = provided resolution
+  latency = l0 + l1 * r + l2 * r^2
+
+  # fit of processor usage as a function of resolution
+  u0 = -0.35677861 dimensionless
+  u1 = +0.59336104 deg / pixels
+  u2 = +0.06660104 deg^2 / pixels^2
+  usage = u0 + u1 * r + u2 * r^2
+
+  # usage cannot go over 100%
+  usage <= 100 dimensionless
+
+  # Constraint for throughput:
+  #    latency <= 1 / min_throughput
+  # rewritten as:
+  provided min_throughput * latency <= 1 dimensionless 
+
+  # Constraint for latency:
+  #    latency <= max_latency
+  # rewritten as:
+  latency * provided inverse_of_max_latency <= 1 dimensionless
+
+  # values taken from datasheet
+  power_idle = 3.46 W
+  power_peak = 91 W
+
+  # compute power consumption using linear interpolation
+  P = (power_idle + (power_peak-power_idle) * usage 
+                                / 100 dimensionless)
+
+  required power >= P
+
+  # cost taken from Amazon
+  required budget >= 350 USD
+  required mass >= 20g
+}

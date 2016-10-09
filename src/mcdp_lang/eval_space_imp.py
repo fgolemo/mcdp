@@ -1,55 +1,40 @@
 # -*- coding: utf-8 -*-
+from contracts import contract
+from contracts.utils import raise_desc
+from mcdp_posets import (
+    FiniteCollectionsInclusion, FinitePoset, GenericInterval, Int, LowerSets,
+    Nat, Poset, PosetCoproduct, PosetProduct, PosetProductWithLabels, Space,
+    UpperSets)
+from mocdp.comp.context import ValueWithUnits
+from mocdp.exceptions import DPInternalError
+
+from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from contracts import contract
-from mcdp_posets import (
-    FiniteCollectionsInclusion, FinitePoset, Int, Nat, Poset, PosetProduct,
-    Space, UpperSets)
-from mocdp.exceptions import DPInternalError
-from mocdp.comp.context import ValueWithUnits
-from mcdp_posets.interval import GenericInterval
-from mcdp_posets.poset_product_with_labels import PosetProductWithLabels
+
 
 CDP = CDPLanguage
 
 @contract(returns=Space)
 def eval_space(r, context):
     with add_where_information(r.where):
-        if isinstance(r, CDP.RcompUnit):
-            from mcdp_posets.rcomp_units import make_rcompunit
-            return make_rcompunit(r.pint_string)
-
-        if isinstance(r, CDP.PowerSet):
-            P = eval_space(r.space, context)
-            return FiniteCollectionsInclusion(P)
-
-        if isinstance(r, CDP.Nat):
-            return Nat()
-
-        if isinstance(r, CDP.Int):
-            return Int()
-
-        if isinstance(r, CDP.SpaceProduct):
-            ops = get_odd_ops(unwrap_list(r.ops))
-            Ss = [eval_space(_, context) for _ in ops]
-            return PosetProduct(tuple(Ss))
-
-        if isinstance(r, CDP.LoadPoset):
-            return eval_poset_load(r, context)
-
-        if isinstance(r, CDP.FinitePoset):
-            return eval_space_finite_poset(r, context)
-
-        if isinstance(r, (CDP.CodeSpecNoArgs, CDP.CodeSpec)):
-            return eval_space_code_spec(r, context)
-
-        if isinstance(r, CDP.MakeUpperSets):
-            return eval_space_makeuppersets(r, context)
-
         cases = {
+            CDP.RcompUnit: eval_space_rcompunit,
+            CDP.SpaceProduct: eval_space_spaceproduct,
+            CDP.SpaceCoproduct: eval_space_spacecoproduct,
+            CDP.PowerSet: eval_space_powerset,
+            CDP.LoadPoset: eval_poset_load,
+            CDP.FinitePoset: eval_space_finite_poset,
+            CDP.CodeSpecNoArgs: eval_space_code_spec,
+            CDP.CodeSpec: eval_space_code_spec,
+            CDP.MakeUpperSets: eval_space_makeuppersets,
+            CDP.MakeLowerSets: eval_space_makelowersets,
             CDP.SpaceInterval: eval_space_interval,
-            CDP.ProductWithLabels : eval_space_productwithlabels,
+            CDP.ProductWithLabels: eval_space_productwithlabels,
+            CDP.SingleElementPoset: eval_space_single_element_poset,
+            CDP.Nat: lambda r, context: Nat(),  # @UnusedVariable
+            CDP.Int: lambda r, context: Int(),  # @UnusedVariable
         }
 
         for klass, hook in cases.items():
@@ -60,7 +45,38 @@ def eval_space(r, context):
         if isinstance(r, CDP.Unit):
             return r.value
 
-        raise DPInternalError('Invalid value to eval_space: %s' % str(r))
+        if True: # pragma: no cover
+            msg = 'eval_space(): Cannot interpret as a space.'
+            r = recursive_print(r)
+            raise_desc(DPInternalError, msg, r=r)
+
+def eval_space_single_element_poset(r, context):  # @UnusedVariable
+    assert isinstance(r, CDP.SingleElementPoset)
+    tag = r.tag.value
+    universe = set([tag])
+    return FinitePoset(universe=universe, relations=[])
+    
+def eval_space_rcompunit(r, context):  # @UnusedVariable
+    from mcdp_posets.rcomp_units import make_rcompunit
+    return make_rcompunit(r.pint_string)
+ 
+def eval_space_spaceproduct(r, context):
+    ops = get_odd_ops(unwrap_list(r.ops))
+    Ss = [eval_space(_, context) for _ in ops]
+    return PosetProduct(tuple(Ss))
+                        
+
+def eval_space_spacecoproduct(r, context):
+    assert isinstance(r, CDP.SpaceCoproduct)
+    ops = unwrap_list(r.entries)
+    Ss = [eval_space(_, context) for _ in ops]
+    return PosetCoproduct(tuple(Ss))
+
+
+def eval_space_powerset(r, context):
+    P = eval_space(r.space, context)
+    return FiniteCollectionsInclusion(P)
+
 
 def eval_space_productwithlabels(r, context):
     assert isinstance(r, CDP.ProductWithLabels)
@@ -85,14 +101,22 @@ def eval_space_interval(r, context):
     P = GenericInterval(va.unit, va.value, vb2.value)
     return P
 
+
 def eval_space_makeuppersets(r, context):
     P = eval_space(r.space, context)
     return UpperSets(P)
+
+
+def eval_space_makelowersets(r, context):
+    P = eval_space(r.space, context)
+    return LowerSets(P)
+
 
 def eval_space_code_spec(r, _context):
     from .eval_codespec_imp import eval_codespec
     res = eval_codespec(r, expect=Poset)
     return res
+
 
 def eval_space_finite_poset(r, context):  # @UnusedVariable
     chains = unwrap_list(r.chains) 
@@ -109,7 +133,24 @@ def eval_space_finite_poset(r, context):  # @UnusedVariable
 
     return FinitePoset(universe=universe, relations=relations)
 
-def eval_poset_load(r, context):
-    load_arg = r.name.value
-    return context.load_poset(load_arg)
 
+def eval_poset_load(r, context):
+    assert isinstance(r, CDP.LoadPoset)
+
+    arg = r.load_arg
+    assert isinstance(arg, (CDP.PosetName, CDP.PosetNameWithLibrary)), r
+
+    if isinstance(arg, CDP.PosetName):
+        load_arg = arg.value
+        return context.load_poset(load_arg)
+
+    if isinstance(arg, CDP.PosetNameWithLibrary):
+        assert isinstance(arg.library, CDP.LibraryName), r
+        assert isinstance(arg.name, CDP.PosetName), r
+
+        libname = arg.library.value
+        name = arg.name.value
+
+        library = context.load_library(libname)
+        return library.load_poset(name)
+    raise NotImplementedError(r.name)
