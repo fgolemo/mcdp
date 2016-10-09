@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
+import itertools
+
 from contracts.utils import indent, raise_desc, raise_wrapped
-from mcdp_dp.dp_loop import Iteration
-from mcdp_dp.primitive import Feasible, NotFeasible, PrimitiveDP
-from mcdp_dp.tracer import Tracer
 from mcdp_posets import (LowerSet, NotEqual, NotLeq, PosetProduct, UpperSet,
     UpperSets, get_types_universe, poset_maxima, poset_minima)
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import do_extra_checks
-import itertools
+
+from .dp_loop import Iteration
+from .primitive import Feasible, NotFeasible, PrimitiveDP
+from .tracer import Tracer
+
 
 __all__ = [
     'DPLoop2',
@@ -196,7 +199,7 @@ class DPLoop2(PrimitiveDP):
 
     def solve_all_cached(self, f1, trace):
         if not f1 in self._solve_cache:
-            print('solving again %s' % f1.__str__())
+            #print('solving again %s' % f1.__str__())
             R = self.solve_all(f1, trace)
             self._solve_cache[f1] = R
             
@@ -225,7 +228,7 @@ class DPLoop2(PrimitiveDP):
         f0s = dp0.F.Us(minimals)
         s0 = dp0.solveU(f0s)
         UR.belongs(s0)
-        trace.log('Iterating in UR = %s' % UR)
+        trace.log('Iterating in UR = %s' % UR.__str__())
         trace.log('Starting from %s' % UR.format(s0))
         # trace.log('dp0: %s' % self.dp1.repr_long())
 
@@ -237,8 +240,8 @@ class DPLoop2(PrimitiveDP):
                 sip, converged = dploop2_iterate(dp0, f1, R, si, t)
 
                 t.values(sip=sip, converged=converged)
-                t.log('it %d: sip = %s' % (i, UR.format(sip)))
-                t.log('it %d: converged = %s' % (i, UR.format(converged)))
+                t.log('R = %s' % UR.format(sip))
+#                 t.log('converged = %s' % UR.format(converged))
 
                 if do_extra_checks():
                     try:

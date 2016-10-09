@@ -75,3 +75,7 @@ bump-upload:
 	bumpversion patch
 	git push --tags
 	python setup.py sdist upload
+
+readme-commands:
+	mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 0.1 kg, 1 W>"
+	mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 1.0 kg, 1 W>"

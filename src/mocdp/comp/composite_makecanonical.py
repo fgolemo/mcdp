@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
+
+from networkx.algorithms.cycles import simple_cycles
+
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import Identity, Mux
 from mcdp_posets import PosetProduct, get_types_universe
+from mocdp import logger
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.connection import get_connection_multigraph
 from mocdp.comp.context import (CResource, Connection, get_name_for_fun_node,
@@ -13,8 +17,8 @@ from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.wrap import SimpleWrap, dpwrap
 from mocdp.exceptions import DPSemanticErrorNotConnected
 from mocdp.memoize_simple_imp import memoize_simple
-from networkx.algorithms.cycles import simple_cycles
 import numpy as np
+
 
 @contract(ndp=CompositeNamedDP)
 def cndp_makecanonical(ndp, name_inner_muxed='_inner_muxed', s_muxed='_muxed'):
@@ -210,8 +214,6 @@ def cndp_create_one_without_some_connections(ndp, exclude_connections, names):
     from mocdp.comp.context import Context
     context = Context()
     
-    # print ndp.get_rnames()
-    # print ndp.get_fnames()
     # Create the fun/res node in the original order
     for fname in ndp.get_fnames():
         # simply copy the functionnode - it might be a LabeledNDP
@@ -341,7 +343,7 @@ def enumerate_minimal_solution(G, edge_weight):
         cycles2champion = {}
         cycles2weight = {}
         for cycles, edges in cycles2edges.items():
-            print('Found %s edges that remove a set of %s cycles' % (len(edges), len(cycles)))
+            logger.debug('Found %s edges that remove a set of %s cycles' % (len(edges), len(cycles)))
 
             best = min(edges, key=edge_weight)
 
@@ -353,24 +355,24 @@ def enumerate_minimal_solution(G, edge_weight):
 
         consider = set()
         for cycles1 in cycles2weight:
-            print('cycles')
+            logger.debug('cycles')
             for cycles2 in cycles2weight:
                 w1 = cycles2weight[cycles1]
                 w2 = cycles2weight[cycles2]
                 if a_contains_b(cycles2, cycles1) and w2 < w1:
-                    print('dominated')
+                    #logger.debug('dominated')
                     break
             else:
                 # not dominated
                 consider.add(cycles2champion[cycles1])
 
-        print('From %d to %d edges to consider' % (len(edges_belonging_to_cycles), len(consider)))
+        logger.debug('From %d to %d edges to consider' % (len(edges_belonging_to_cycles), len(consider)))
         return consider
 
 
     edges_to_consider = get_edges_to_consider()
 
-    print('Deciding between %s hot of %d edges' % (len(edges_to_consider), len(all_edges)))
+    logger.debug('Deciding between %s hot of %d edges' % (len(edges_to_consider), len(all_edges)))
 
     best_weight = np.inf
     
@@ -382,7 +384,7 @@ def enumerate_minimal_solution(G, edge_weight):
         # choose the solution to expand with minimum weight
         removed, state = pop_solution_minimum_weight(current_partial_solutions)
         examined.add(removed)
-        print('nsolutions %s best w %s / current_partial_solutions %s / removed %s' %
+        logger.debug('nsolutions %s best w %s / current_partial_solutions %s / removed %s' %
               (len(current_solutions), best_weight, len(current_partial_solutions), removed))
 
         # now look at edges that we could remove
@@ -413,7 +415,7 @@ def enumerate_minimal_solution(G, edge_weight):
     best = solutions[np.argmin(weights)]
     state = current_solutions[best]
 
-    print('best: %s %s' % (best, state))
+    logger.debug('best: %s %s' % (best, state))
     return best
 
 

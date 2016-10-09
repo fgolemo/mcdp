@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
+from networkx.algorithms.cycles import simple_cycles
+
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_dp import DPLoop2, Mux
 from mcdp_dp.dp_series_simplification import make_series
 from mcdp_posets import PosetProduct, get_types_universe
+from mocdp import logger
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context_functions import dpgraph_making_sure_no_reps
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import mcdp_dev_warning
-from networkx.algorithms.cycles import simple_cycles
 
 
 @contract(ndp=CompositeNamedDP, returns=SimpleWrap)
@@ -17,7 +19,7 @@ def cndp_abstract(ndp):
     
     G = get_connection_multigraph(ndp.get_connections())
     cycles = list(simple_cycles(G))
-    print('cndp_abstract: %d cycles' % len(cycles))
+    logger.debug('cndp_abstract: %d cycles' % len(cycles))
     if not cycles:
         return dpgraph_making_sure_no_reps(ndp.context)
     else:

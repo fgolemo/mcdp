@@ -212,7 +212,10 @@ class UpperSets(Poset):
         return "↑{%s}" % contents
 
     def __repr__(self):
-        return "U(%r)" % self.P
+        return "UpperSets(%r)" % self.P
+    
+    def __str__(self):
+        return "U(%s)" % self.P
  
 
 class LowerSets(Poset):

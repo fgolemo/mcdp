@@ -17,7 +17,6 @@ from reprep import Report
 from .utils_mkdir import mkdirs_thread_safe
 
 
-# from .query_interpretation import interpret_string
 class ExpectationsNotMet(Exception):
     pass
 
@@ -26,7 +25,7 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
        intervals, _exp_advanced, expect_nres, imp, expect_nimp, plot, do_movie,
 
        # expect_res=None,
-       expect_res,
+       expect_res,  # @UnusedVariable
        make
        ):
 
@@ -38,8 +37,10 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
     logger.info('Using output dir %r' % out)
 
     librarian = Librarian()
+    logger.info('Looking for libraries in %s...' % config_dirs)
     for e in config_dirs:
         librarian.find_libraries(e)
+    logger.info('Found %d libraries.' % len(librarian.get_libraries()))
 
     library = librarian.get_library_by_dir(maindir)
     if cache_dir is not None:

@@ -8,7 +8,7 @@ from mcdp_cli.utils_wildcard import expand_string
 from mcdp_library import Librarian
 from mcdp_report.dp_graph_flow_imp import dp_graph_flow
 from mcdp_report.dp_graph_tree_imp import dp_graph_tree
-from mcdp_report.gg_ndp import STYLE_GREENRED, STYLE_GREENREDSYM, gvgen_from_ndp
+from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from mcdp_report.gg_utils import gg_get_formats
 from mcdp_web.renderdoc.highlight import get_minimal_document
 from mocdp.comp.recursive_name_labeling import get_labelled_version

@@ -79,26 +79,22 @@ The program ``mcdp-solve`` is a solver.
     $ mcdp-solve -d <library> <model_name>  <functionality>
     
 For example, to solve the MCDP specified in the file ``battery.mcdp`` in
-the library ``mcdp_data/libraries/examples/example-battery.mcdplib``, use:
+the library ``src/mcdp_data/libraries/examples/example-battery.mcdplib``, use:
 
-    $ mcdp-solve -d mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 0.1 kg, 1 W>"
+    $ mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 0.1 kg, 1 W>"
 
 The expected output is:
 
     ...
-    Iteration result: ConvergedToFinite
-    Fixed-point iteration converged to: {x ∣ x ≥ (0.03941 kg, 0.13941 kg) }
-    Minimal resources needed: mass = {x ∣ x ≥ 0.03941 kg }
+    Minimal resources needed: mass = ↑{0.039404 kg}
 
 This is the case of unreasonable demands (1 kg of extra payload):
 
-    $ mcdp-solve -d mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 1.0 kg, 1 W>"
+    $ mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 1.0 kg, 1 W>"
 
 This is the expected output:
 
-    Iteration result: ConvergedToTop
-    Fixed-point iteration converged to: {x ∣ x ≥ (⊤, ⊤) }
-    Minimal resources needed: mass = {x ∣ x ≥ ⊤ }
+    Minimal resources needed: mass = ↑{+∞ kg}
 
 #### Visualization of Co-Design Problems
 
@@ -108,7 +104,7 @@ The programs ``mcdp-plot`` will parse and plot the MCDP in a variety of represen
 
 For example, the command
 
-    $ mcdp-plot  -d mcdp_data/libraries/examples/example-battery.mcdplib battery
+    $ mcdp-plot  -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery
     
 will produce these graphs:
 

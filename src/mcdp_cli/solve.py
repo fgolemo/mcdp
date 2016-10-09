@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
-from .solve_meat import solve_main
-from decent_params import UserError
-from quickapp import QuickAppBase
 import logging
 import os
+
+from decent_params import UserError
+from mocdp import logger
+from quickapp import QuickAppBase
+
+from .solve_meat import solve_main
 
 
 class SolveDP(QuickAppBase):
@@ -23,15 +26,20 @@ class SolveDP(QuickAppBase):
                         default=None)
         params.accept_extra()
         params.add_flag('cache')
-        params.add_flag('plot', help='Show iterations graphically')
-        params.add_flag('movie', help='Create animation.')
-        params.add_flag('imp', help='Compute and show implementations.')
-        params.add_flag('make', help='Runs the make procedure on the implementations.')
+        params.add_flag('plot', 
+                        help='Show iterations graphically')
+        params.add_flag('movie', 
+                        help='Create animation.')
+        params.add_flag('imp', 
+                        help='Compute and show implementations.')
+        params.add_flag('make', 
+                        help='Runs the make procedure on the implementations.')
 
         params.add_string('config_dirs', default='.', short='-D',
                            help='Other libraries.')
         params.add_string('maindir', default='.', short='-d',
-                           help='Library directories containing models, separated by :.')
+                           help='Library directories containing models, '
+                           'separated by :.')
 
         params.add_flag('advanced',
                         help='Solve by advanced solver (in development)')
@@ -43,7 +51,7 @@ class SolveDP(QuickAppBase):
                        help='Use upper bound approx')
 
     def go(self):
-        from mocdp import logger
+        
         logger.setLevel(logging.DEBUG)
 
         options = self.get_options()
