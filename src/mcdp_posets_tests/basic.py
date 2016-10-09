@@ -209,14 +209,14 @@ def check_coproduct():
 
 def test_PosetCoproductWithLabels_1(): 
     # used in coprod1.mcdp_poset
-    f1 = FinitePoset(['a','b','c'], [])
-    f2 = FinitePoset(['A','B','C'], [])
+    f1 = FinitePoset(set(['a','b','c']), [])
+    f2 = FinitePoset(set(['A','B','C']), [])
     subs = (f1, f2)
     P = PosetCoproductWithLabels(subs, labels=('one', 'two'))
     return P
 
 def test_Multiset_1():
-    P0 = FinitePoset(['a','b','c'], [])
+    P0 = FinitePoset(set(['a','b','c']), [])
     P = Multisets(P0)
     return P
 

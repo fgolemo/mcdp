@@ -2,7 +2,7 @@
 from networkx.algorithms.dag import ancestors, descendants
 
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, check_isinstance
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 
 from .finite_collection_as_space import FiniteCollectionAsSpace
@@ -18,6 +18,7 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
 
     @contract(universe='set')  # , relations='collection(tuple(*,*))')
     def __init__(self, universe, relations):
+        check_isinstance(universe, set)
         FiniteCollectionAsSpace.__init__(self, universe)
         closure = transitive_closure(relations)
         # relations contains all closures, but not the cycles
