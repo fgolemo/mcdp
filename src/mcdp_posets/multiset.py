@@ -7,10 +7,12 @@ from contracts.utils import raise_desc
 from mocdp.exceptions import mcdp_dev_warning, do_extra_checks
 
 from .frozendict import frozendict2
-from .nat import Nat_add, Nat
+from .nat import NatTop, Nat_add, Nat
 from .poset import NotLeq, Poset
 from .space import NotBelongs, NotEqual
 
+
+_ = NatTop # used in contracts
 
 __all__ = [
     'Multiset',
@@ -18,7 +20,8 @@ __all__ = [
 ]
 
 class Multiset():
-    @contract(elements='dict(*:*,>=1)', S=Poset)
+    
+    @contract(elements='dict(*:($NatTop|(int,>=1)))', S=Poset)
     def __init__(self, elements, S):
         N = Nat()
         
