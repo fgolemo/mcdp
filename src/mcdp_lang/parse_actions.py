@@ -4,12 +4,12 @@ from contextlib import contextmanager
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
-from mcdp_lang.pyparsing_bundled import ParseException, ParseFatalException
 from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
     MCDPExceptionWithWhere, do_extra_checks, mcdp_dev_warning)
 
 from .namedtuple_tricks import get_copy_with_where
 from .parts import CDPLanguage
+from .pyparsing_bundled import ParseException, ParseFatalException
 from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list
 
@@ -58,8 +58,8 @@ def wheredecorator(b):
     return bb
 
 def spa(x, b):
-    x2 = x.copy()
-    x2.setParseAction()
+#     x2 = x.copy()
+#     x2.setParseAction()
     bb = wheredecorator(b)
     @parse_action
     def p(tokens, loc, s):
@@ -74,7 +74,7 @@ def spa(x, b):
 
         #loc_end, _tokens = x2._parse(s[loc:], 0)
         #character_end = loc + loc_end
-        character_end = x2.tryParse(s, loc)
+        character_end = x.tryParse(s, loc)
         
         if isnamedtupleinstance(res) and (res.where is None or res.where.character_end is None):
             w2 = Where(s, character_end=character_end, character=loc)
