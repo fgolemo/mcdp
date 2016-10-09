@@ -76,7 +76,8 @@ def spa(x, b):
         #character_end = loc + loc_end
         character_end = x.tryParse(s, loc)
         
-        if isnamedtupleinstance(res) and (res.where is None or res.where.character_end is None):
+        if isnamedtupleinstance(res) and \
+            (res.where is None or res.where.character_end is None):
             w2 = Where(s, character_end=character_end, character=loc)
             res = get_copy_with_where(res, where=w2)
 
@@ -87,7 +88,8 @@ def spa(x, b):
                     raise_desc(ValueError, msg, res=res)
 
             if hasattr(res, 'where'):
-                assert res.where.character_end is not None, (res, isnamedtupleinstance(res))
+                assert res.where.character_end is not None, \
+                    (res, isnamedtupleinstance(res))
 
         return res
     x.setParseAction(p)
@@ -226,7 +228,8 @@ def funshortcut1m(provides, fnames, prep_using, name):
                              name=name)
 @contract(name=CDP.DPName)
 def resshortcut1m(requires, rnames, prep_for, name):
-    return CDP.ResShortcut1m(requires=requires, rnames=rnames, prep_for=prep_for, name=name)
+    return CDP.ResShortcut1m(requires=requires, rnames=rnames, 
+                             prep_for=prep_for, name=name)
 
 def parse_pint_unit(tokens):
     tokens = list(tokens)
