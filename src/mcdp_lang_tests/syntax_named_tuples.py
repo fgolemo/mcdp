@@ -4,6 +4,7 @@ from mcdp_lang import parse_ndp, parse_poset
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 
+
 @comptest
 def check_lang_namedtuple1():
     parse_wrap(Syntax.PRODUCTWITHLABELS, 'product')

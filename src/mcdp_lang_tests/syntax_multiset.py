@@ -1,5 +1,6 @@
 from comptests.registrar import comptest, comptest_fails
-from mcdp_lang.parse_interface import parse_poset
+from mcdp_lang import parse_poset
+
 
 @comptest_fails
 def check_lang_multiset1():

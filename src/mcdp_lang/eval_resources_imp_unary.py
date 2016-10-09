@@ -1,7 +1,6 @@
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_dp import WrapAMap
-from mcdp_lang.helpers import get_resource_possibly_converted, create_operation
 from mcdp_maps import CeilMap, SquareMap, SqrtMap, SquareNatMap
 from mcdp_posets import Nat, Rcomp, RcompUnits
 from mcdp_posets.maps.identity import IdentityMap
@@ -9,6 +8,7 @@ from mocdp import logger
 from mocdp.comp.context import CResource
 from mocdp.exceptions import DPSemanticError
 
+from .helpers import get_resource_possibly_converted, create_operation
 from .parts import CDPLanguage
 
 

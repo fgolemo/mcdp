@@ -1,5 +1,6 @@
 from comptests.registrar import comptest, comptest_fails
-from mcdp_lang_tests.utils2 import eval_rvalue_as_constant_same_exactly
+from .utils2 import eval_rvalue_as_constant_same_exactly
+
 
 @comptest_fails
 def check_lang_conversion1():

@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from .parts import CDPLanguage
-from .syntax import SyntaxBasics, SyntaxIdentifiers
-from .syntax_utils import L, O, S, SCOMMA, SLPAR, SRPAR, sp,keyword
-from .utils_lists import make_list
-from mcdp_lang.pyparsing_bundled import (Combine, Optional, Word, ZeroOrMore, alphanums, alphas,
+from .pyparsing_bundled import (Combine, Optional, Word, ZeroOrMore, alphanums, alphas,
     oneOf, quotedString)
+from .syntax import SyntaxBasics, SyntaxIdentifiers
+from .syntax_utils import L, O, S, SCOMMA, SLPAR, SRPAR, sp, keyword
+from .utils_lists import make_list
+
 
 CDP = CDPLanguage
 

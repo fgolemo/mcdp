@@ -1,11 +1,11 @@
 from comptests.registrar import comptest
+from mcdp_lang import parse_constant, parse_ndp, parse_poset
 from mcdp_lang.namedtuple_tricks import recursive_print
-from mcdp_lang.parse_interface import parse_constant, parse_ndp, parse_poset
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import parse_wrap_check
-from mcdp_posets.finite_poset import FinitePoset
-from mcdp_posets.uppersets import UpperSets
+from mcdp_posets import FinitePoset, UpperSets
+
 
 CDP = CDPLanguage
 

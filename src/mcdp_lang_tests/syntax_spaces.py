@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
-from .utils import parse_wrap_check
+from mcdp_lang import parse_ndp
+from mcdp_lang.eval_space_imp import eval_space
 from mcdp_lang.syntax import Syntax
 from mocdp.comp.context import Context
 
-from mcdp_lang import parse_ndp
-from mcdp_lang.eval_space_imp import eval_space
+from .utils import parse_wrap_check
 
 
 @comptest

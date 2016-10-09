@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
-from .utils import parse_wrap_check
-from mcdp_lang.syntax import Syntax
 from comptests.registrar import comptest
 from mcdp_lang import parse_ndp
+from mcdp_lang.syntax import Syntax
 from mcdp_posets import UpperSets
+
+from .utils import parse_wrap_check
+
 
 @comptest
 def check_coproducts0():

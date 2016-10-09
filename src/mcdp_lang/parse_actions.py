@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 from contextlib import contextmanager
 
-from mcdp_lang.pyparsing_bundled import ParseException, ParseFatalException
-
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
@@ -11,6 +9,7 @@ from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
 
 from .namedtuple_tricks import get_copy_with_where
 from .parts import CDPLanguage
+from .pyparsing_bundled import ParseException, ParseFatalException
 from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list
 
@@ -59,8 +58,8 @@ def wheredecorator(b):
     return bb
 
 def spa(x, b):
-    x2 = x.copy()
-    x2.setParseAction()
+#     x2 = x.copy()
+#     x2.setParseAction()
     bb = wheredecorator(b)
     @parse_action
     def p(tokens, loc, s):
@@ -75,9 +74,10 @@ def spa(x, b):
 
         #loc_end, _tokens = x2._parse(s[loc:], 0)
         #character_end = loc + loc_end
-        character_end = x2.tryParse(s, loc)
+        character_end = x.tryParse(s, loc)
         
-        if isnamedtupleinstance(res) and (res.where is None or res.where.character_end is None):
+        if isnamedtupleinstance(res) and \
+            (res.where is None or res.where.character_end is None):
             w2 = Where(s, character_end=character_end, character=loc)
             res = get_copy_with_where(res, where=w2)
 
@@ -88,7 +88,8 @@ def spa(x, b):
                     raise_desc(ValueError, msg, res=res)
 
             if hasattr(res, 'where'):
-                assert res.where.character_end is not None, (res, isnamedtupleinstance(res))
+                assert res.where.character_end is not None, \
+                    (res, isnamedtupleinstance(res))
 
         return res
     x.setParseAction(p)
@@ -227,7 +228,8 @@ def funshortcut1m(provides, fnames, prep_using, name):
                              name=name)
 @contract(name=CDP.DPName)
 def resshortcut1m(requires, rnames, prep_for, name):
-    return CDP.ResShortcut1m(requires=requires, rnames=rnames, prep_for=prep_for, name=name)
+    return CDP.ResShortcut1m(requires=requires, rnames=rnames, 
+                             prep_for=prep_for, name=name)
 
 def parse_pint_unit(tokens):
     tokens = list(tokens)

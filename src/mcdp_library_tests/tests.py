@@ -9,6 +9,7 @@ from contracts.utils import raise_desc, raise_wrapped
 from mcdp_library import Librarian, MCDPLibrary
 from mcdp_library.utils import dir_from_package_name
 from mcdp_tests.generation import for_all_source_mcdp
+from mocdp import logger
 from mocdp.exceptions import DPSemanticError
 from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
 
@@ -322,8 +323,8 @@ def timeit(desc, minimum=None):
     if minimum is not None:
         if delta < minimum:
             return
-    print('timeit %s: %.2f s' % (desc, delta))
-
+    logger.debug('timeit %s: %.2f s' % (desc, delta))
+    
 def _load_primitivedp(libname, model_name):
     l = get_test_library(libname)
     with timeit(model_name):

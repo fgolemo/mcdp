@@ -1,9 +1,4 @@
 # -*- coding: utf-8 -*-
-from mcdp_lang.pyparsing_bundled import (
-    CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
-    NotAny, OneOrMore, Optional, ParserElement, Word, ZeroOrMore, alphanums,
-    alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
-    sglQuotedString)
 from mocdp.exceptions import mcdp_dev_warning
 
 from .parse_actions import (constant_minus_parse_action, divide_parse_action,
@@ -11,6 +6,11 @@ from .parse_actions import (constant_minus_parse_action, divide_parse_action,
     plus_inv_parse_action, plus_parse_action, resshortcut1m,
     space_product_parse_action)
 from .parts import CDPLanguage
+from .pyparsing_bundled import (
+    CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
+    NotAny, OneOrMore, Optional, ParserElement, Word, ZeroOrMore, alphanums,
+    alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
+    sglQuotedString)
 from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
 from .utils_lists import make_list

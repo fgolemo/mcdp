@@ -2,6 +2,7 @@ from comptests.registrar import comptest
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 
+
 @comptest
 def check_catalogue1():
     s = """

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest_fails
-from mcdp_lang_tests.utils import assert_parsable_to_connected_ndp
 from mcdp_dp import Max
+from .utils import assert_parsable_to_connected_ndp
+
 
 @comptest_fails
 def check_simplification():

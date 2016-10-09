@@ -1,6 +1,7 @@
+import os
+
 from contracts import contract
 from mcdp_cli.plot import allplots
-from mcdp_depgraph.find_dep import EntryNDP, EntryTemplate, FindDependencies
 from mcdp_lang.syntax import Syntax
 from mcdp_library import Librarian
 from mcdp_report.gdc import STYLE_GREENREDSYM
@@ -8,7 +9,9 @@ from mcdp_web.images.images import ndp_template_graph_enclosed
 from mcdp_web.renderdoc.highlight import get_ast_as_pdf
 from mocdp.exceptions import DPSemanticError
 from system_cmd import CmdException
-import os
+
+from .find_dep import EntryNDP, EntryTemplate, FindDependencies
+
 
 @contract(config_dirs='list(str)', outdir='str', maindir='str')
 def other_jobs(context, maindir, config_dirs, outdir, res):
