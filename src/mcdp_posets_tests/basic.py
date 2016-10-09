@@ -2,12 +2,8 @@ import itertools
 
 from comptests.registrar import comptest
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_posets import FinitePoset
-from mcdp_posets import Interval, NotBounded, PosetProduct, Uninhabited, NotBelongs, NotEqual, Rcomp
-from mcdp_posets import Nat
-from mcdp_posets import NotLeq
-from mcdp_posets import PosetCoproduct, PosetCoproductWithLabels
-from mcdp_posets.multiset import Multisets
+from mcdp_posets import FinitePoset, Interval, NotBounded, PosetProduct, Uninhabited, NotBelongs, NotEqual, Rcomp
+from mcdp_posets import Multisets, Nat, NotLeq, PosetCoproduct, PosetCoproductWithLabels
 from mcdp_posets.utils import poset_check_chain, check_minimal, check_maximal
 from mcdp_tests.generation import for_all_posets
 import numpy as np
@@ -248,12 +244,14 @@ def check_posets_misc1():
     else:
         assert False
         
+        
 @for_all_posets
 def check_minimal_elements(_, poset):
     try:
         poset.get_minimal_elements()
     except NotBounded:
         pass
+
 
 @for_all_posets
 def check_maximal_elements(_, poset):

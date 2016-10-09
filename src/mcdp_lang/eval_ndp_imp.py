@@ -2,6 +2,7 @@
 from contextlib import contextmanager
 import sys
 
+from mocdp import logger
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (
@@ -691,7 +692,7 @@ def eval_build_problem(r, context):
             try:
                 eval_statement(s, context)
             except DPInternalError:
-                print(recursive_print(s))
+                logger.error(recursive_print(s))
                 raise
 
     # take() optimization
