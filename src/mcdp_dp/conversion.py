@@ -19,7 +19,8 @@ class Conversion(WrapAMap):
 
 @contract(returns='None|$PrimitiveDP')
 def get_conversion(A, B):
-    """ Returns None if there is no need for a Conversion Map """
+    """ Returns None if there is no need for a Conversion Map.
+        Otherwise returns a Conversion (< WrapAMap). """
     tu = get_types_universe()
     try:
         tu.check_leq(A, B)

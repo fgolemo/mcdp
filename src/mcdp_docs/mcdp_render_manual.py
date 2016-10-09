@@ -63,10 +63,15 @@ class RenderManual(QuickApp):
         d = context.comp(manual_join, files_contents)
         context.comp(write, d, options.output_file)
 
+
 def write(s, out):
+    dn = os.path.dirname(out)
+    if not os.path.exists(dn):
+        os.makedirs(dn)
     with open(out, 'w') as f:
         f.write(s)
     print('Written %s ' % out)
+
 
 def render(libname, docname, generate_pdf):
     librarian = get_test_librarian()
@@ -84,7 +89,6 @@ def render(libname, docname, generate_pdf):
     html_contents = render_complete(library=l,
                                     s=data, raise_errors=True, realpath=realpath,
                                     generate_pdf=generate_pdf)
-    html_contents = embed_images_from_library(html=html_contents, library=l)
 
     doc = get_minimal_document(html_contents, add_markdown_css=True)
     return ((libname, docname), doc)

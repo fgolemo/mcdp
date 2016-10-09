@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
 from .utils2 import eval_rvalue_as_constant
 from comptests.registrar import comptest, comptest_fails
-from mcdp_lang.parse_interface import parse_constant, parse_ndp
+from mcdp_lang.parse_interface import parse_constant, parse_ndp, parse_poset
 from mocdp.exceptions import DPSemanticError
+from mcdp_lang_tests.utils2 import eval_rvalue_as_constant_same, \
+    eval_rvalue_as_constant_same_exactly
+from mcdp_posets.rcomp_units import R_dimensionless
+from mcdp_posets.types_universe import get_types_universe
 
 
 @comptest
@@ -61,4 +65,100 @@ def check_sums5():
 @comptest_fails
 def check_sums6():
     eval_rvalue_as_constant('int:2 + nat:3')
+
+
+@comptest
+def check_mult_mixed1():
+    eval_rvalue_as_constant_same_exactly('Nat:3 * Nat:2', 'Nat:6')
+    eval_rvalue_as_constant_same_exactly('Nat:3 * 2 []', '6 []')
+    eval_rvalue_as_constant_same_exactly('Nat:3 * 2 g', '6 g')
+    eval_rvalue_as_constant_same_exactly('3 [] * 2 g', '6 g')
+    eval_rvalue_as_constant_same_exactly('3 [] * 2 []', '6 []')
+    eval_rvalue_as_constant_same_exactly('Nat:3 * 10 []', '30 []')
+    eval_rvalue_as_constant_same_exactly('Nat:3 * 10 kg', '30 kg')
+
+
+@comptest
+def check_mult_mixed2():
+#     def check(s, value,):
+#         ndp = parse_ndp(s)
+#         dp = ndp.get_dp()
+#         return dp
+    tu = get_types_universe()
+
+    dimensionless = parse_poset('R')
+    Nat = parse_poset('Nat')
+    # m * s
+    ndp = parse_ndp(""" 
+    mcdp {
+        provides a [m]
+        provides b [s]
+        requires x >= a * b
+    }
+    """)
+    M = ndp.get_rtype('x')
+    tu.check_equal(M, parse_poset('m*s'))
+
+    # Nat * Nat
+    ndp = parse_ndp(""" 
+    mcdp {
+        provides a [Nat]
+        provides b [Nat]
+        requires x >= a * b
+    }
+    """)
+    M = ndp.get_rtype('x')
+    tu.check_equal(M, Nat)
+
+
+    # Nat * []
+    ndp = parse_ndp(""" 
+    mcdp {
+        provides a [Nat]
+        provides b [R]
+        requires x >= a * b
+    }
+    """)
+    M = ndp.get_rtype('x')
+    tu.check_equal(M, dimensionless)
+
+
+
+
+
+@comptest
+def check_mult_mixed3():
+    pass
+
+
+@comptest
+def check_mult_mixed4():
+    pass
+
+
+@comptest
+def check_mult_mixed5():
+    pass
+
+
+@comptest
+def check_mult_mixed6():
+    pass
+
+
+@comptest
+def check_mult_mixed7():
+    pass
+
+
+@comptest
+def check_mult_mixed8():
+    pass
+
+
+
+
+
+
+
 

@@ -374,7 +374,7 @@ class PlotDP(QuickAppBase):
         if options.out is None:
             out = os.path.dirname(filename)
             if not out:
-                out = '.'
+                out = 'out-mcdp_plot'
         else:
             out = options.out
         mkdirs_thread_safe(out)

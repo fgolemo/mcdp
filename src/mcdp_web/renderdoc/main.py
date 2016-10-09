@@ -22,4 +22,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     html = render_markdown(s)
     html2 = html_interpret(library, html, generate_pdf=generate_pdf,
                            raise_errors=raise_errors, realpath=realpath)
-    return html2
+
+    from mcdp_report.gg_utils import embed_images_from_library
+    html3 = embed_images_from_library(html=html2, library=library)
+    return html3
