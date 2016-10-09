@@ -319,7 +319,7 @@ def check_conversion2():
 
 @comptest
 def check_conversion3():
-    print "How does it work with negative numbers?"
+    print("How does it work with negative numbers?")
 
     string = """
     mcdp {
@@ -336,14 +336,14 @@ def check_conversion3():
 
 
     dp = ndp.get_dp()
-
+    print dp.repr_long()
     # no solutions for 0
     r = dp.solve(0.0)
     assert not r.minimals, r
     # one solution for 100 g
-    r = dp.solve(100)
+    r = dp.solve(100.0)
     assert r.minimals == set([0.0]), r
-    r = dp.solve(200)
+    r = dp.solve(200.0)
     assert r.minimals == set([100.0]), r
 
 

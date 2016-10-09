@@ -1,9 +1,11 @@
 from abc import ABCMeta, abstractmethod
+
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
 from mcdp_opt.context_utils import clone_context
 from mcdp_posets.uppersets import upperset_product_multi, upperset_project
 from mocdp.comp.context import CFunction, CResource, Connection
+
 
 class Action():
 
@@ -64,6 +66,7 @@ class ActionCreate(Action):
         pass
 
 class ActionConnect(ActionCreate):
+    
     @contract(f=CFunction, r=CResource)
     def __init__(self, f, r):
         self.cfunction = f
@@ -218,7 +221,7 @@ def get_new_lowerbounds(context, name, lower_bounds):
     return lower_bounds_new
 
     
-@contract(cresource=CResource, returns='tuple(*, $CFunction|None)')
+@contract(cfunction=CFunction, returns='tuple(*, $CFunction|None)')
 def get_connection_to_function(connections, cfunction):
     for c in connections:
         if c.dp2 == cfunction.dp and c.s2 == cfunction.s:

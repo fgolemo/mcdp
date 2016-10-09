@@ -75,8 +75,11 @@ class MinusValueMap(Map):
         self.F = F
         self.top = F.get_top()
 
-    def __repr__(self):
+    def __str__(self):
         return "- %s" % self.c_space.format(self.c_value)
+
+    def __repr__(self):
+        return "MinusValueMap(-%s)" % self.c_space.format(self.c_value)
 
     def _call(self, x):
         if self.F.equal(x, self.c):
@@ -89,6 +92,7 @@ class MinusValueMap(Map):
                 if self.F.equal(self.top, x):
                     return self.top
                 else:
+                    check_isinstance(x, float)
                     res = x - self.c
                     assert res >= 0
                     # todo: check underflow

@@ -4,8 +4,8 @@ from nose.tools import assert_equal
 from comptests.registrar import comptest
 from contracts.utils import raise_desc
 from mcdp_dp import CatalogueDP, CoProductDP, NotFeasible, Template
+from mcdp_lang import parse_constant, parse_ndp, parse_poset
 from mcdp_lang.parse_actions import parse_wrap
-from mcdp_lang.parse_interface import parse_constant, parse_ndp, parse_poset
 from mcdp_lang.pyparsing_bundled import Literal
 from mcdp_lang.syntax import Syntax, SyntaxIdentifiers
 from mcdp_lang.syntax_codespec import SyntaxCodeSpec
@@ -528,12 +528,12 @@ def check_lang71(): # TODO: rename
     F = parse_poset('g')
     R = parse_poset('J')
     I = parse_poset('finite_poset{a b c}')
-    entries = [('a', 1, 2), ('b', 2, 4)]
+    entries = [('a', 1.0, 2.0), ('b', 2.0, 4.0)]
     dp1 = CatalogueDP(F=F,R=R,I=I,entries=entries)
     
     # This will not be feasible for dp1
-    f= 3
-    r = 1000
+    f= 3.0
+    r = 1000.0
     try:
         ms = dp1.get_implementations_f_r(f,r)
     except NotFeasible:
@@ -581,40 +581,41 @@ def check_lang79(): # TODO: rename
 @comptest
 def check_lang80(): # TODO: rename
     pass
+
 @comptest
 def check_lang81(): # TODO: rename
     pass
+
 @comptest
 def check_lang82(): # TODO: rename
     pass
+
 @comptest
 def check_lang83(): # TODO: rename
     pass
+
 @comptest
 def check_lang84(): # TODO: rename
     pass
+
 @comptest
 def check_lang85(): # TODO: rename
     pass
+
 @comptest
 def check_lang86(): # TODO: rename
     pass
+
 @comptest
 def check_lang87(): # TODO: rename
     pass
+
 @comptest
 def check_lang88(): # TODO: rename
     pass
+
 @comptest
 def check_lang89(): # TODO: rename
     pass 
-
-
-
-     
-
-
-
-
 
 

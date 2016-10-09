@@ -291,7 +291,7 @@ def do_plots(logger, model_name, plots, outdir, extra_params, maindir, extra_dir
 
     if use_cache:
         cache_dir = os.path.join(outdir, '_cached/mcdp_plot_cache')
-        print('using cache %s' % cache_dir)
+        logger.info('using cache %s' % cache_dir)
     else:
         cache_dir = None
 
@@ -360,7 +360,7 @@ class PlotDP(QuickAppBase):
 
         params.add_string('out', help='Output dir', default=None)
         params.add_string('extra_params', help='Add extra params', default="")
-        print possible
+        #print possible
         params.add_string('plots', default='*', help='One of: %s' % possible)
 
         params.add_string('maindir', default='.', short='-d',
@@ -374,7 +374,7 @@ class PlotDP(QuickAppBase):
 
         options = self.get_options()
         filenames = options.get_extra()
-        print options
+        #print options
         if len(filenames) == 0:
             raise_desc(UserError, 'Need at least one filename.', filenames=filenames)
 

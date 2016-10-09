@@ -7,6 +7,7 @@ from mcdp_posets import Multisets, Nat, NotLeq, PosetCoproduct, PosetCoproductWi
 from mcdp_posets.utils import poset_check_chain, check_minimal, check_maximal
 from mcdp_tests.generation import for_all_posets
 import numpy as np
+from contracts.interface import ContractNotRespected
 
 
 @for_all_posets
@@ -198,7 +199,7 @@ def check_rcomp_corner_cases():
 def check_coproduct():
     try:
         PosetCoproduct(())
-    except ValueError:
+    except (ValueError, ContractNotRespected):
         pass
     else:
         assert False
