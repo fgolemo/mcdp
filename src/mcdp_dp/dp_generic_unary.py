@@ -28,8 +28,8 @@ class WrapAMap(EmptyDP):
         check_isinstance(F, Poset)
         check_isinstance(R, Poset)
 
-        EmptyDP.__init__(self, F=F, R=R)
         self.amap = amap
+        EmptyDP.__init__(self, F=F, R=R)
 
     def solve(self, func):
         try:
