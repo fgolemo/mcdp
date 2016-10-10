@@ -21,7 +21,6 @@ from .dp_generic_unary import WrapAMap
 #     'SumUnitsNotCompatible',
 #     'check_sum_units_compatible',
 # ]
-
 class SumNMap(Map):
     
     @contract(Fs='tuple, seq[>=2]($RcompUnits)', R=RcompUnits)
@@ -41,7 +40,7 @@ class SumNMap(Map):
         
     def _call(self, x):
         res = sum_units(self.Fs, x, self.R)
-        return self.R.U(res)
+        return res
     
     def __repr__(self):
         return 'SumNMap(%s -> %s)' % (self.dom, self.cod)
@@ -146,6 +145,7 @@ class ProductNMap(Map):
         Map.__init__(self, dom=dom, cod=cod)
 
     def _call(self, f):
+        print f
         # first, find out if there are any tops
         def is_there_a_top():
             for Fi, fi in zip(self.F, f):
@@ -234,7 +234,7 @@ class ProductNatN(Map):
             return False
 
         if is_there_a_top():
-            return self.R.U(self.R.get_top())
+            return self.R.get_top()
         
         mult = lambda a, b : a * b
         r = functools.reduce(mult, x)

@@ -170,6 +170,7 @@ class Series(PrimitiveDP):
             tr1.belongs(u1)
 
         mins = set([])
+        #print 'u1.minimals',  u1.minimals
         for u in u1.minimals:
             with trace.child('dp2') as t:
                 v = self.dp2.solve_trace(u, t)
