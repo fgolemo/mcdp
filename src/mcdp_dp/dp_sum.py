@@ -21,6 +21,7 @@ from .dp_generic_unary import WrapAMap
 #     'SumUnitsNotCompatible',
 #     'check_sum_units_compatible',
 # ]
+
 class SumNMap(Map):
     
     @contract(Fs='tuple, seq[>=2]($RcompUnits)', R=RcompUnits)
@@ -264,7 +265,4 @@ class MultValueMap(Map):
         if bool(np.isfinite(res)):
             return res
         else:
-            return self.cod.get_top()
-
-
-
+            return self.cod.get_top() 
