@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
-from .primitive import EmptyDP
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped, check_isinstance
-from mcdp_posets import Map, MapNotDefinedHere, NotBelongs, Poset
+from mcdp_posets import Map, MapNotDefinedHere, Poset
+
+from .primitive import EmptyDP
+
+
+from contracts.utils import check_isinstance
 # from mocdp.exceptions import mcdp_dev_warning
 # import numpy as np
 
