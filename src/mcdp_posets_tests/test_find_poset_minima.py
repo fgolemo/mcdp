@@ -65,7 +65,7 @@ def wrap_with_counts(P, maxleq=None):
     return P2(P)
 
 @contract(P=PosetProduct, xs='set')
-def stats_for_poset_minima(P, xs, f, _maxleq):
+def stats_for_poset_minima(P, xs, f, maxleq):  # @UnusedVariable
     """
         
         f(P, x)
