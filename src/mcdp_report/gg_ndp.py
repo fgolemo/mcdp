@@ -6,7 +6,7 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (Constant, ConstantMinimals, Conversion,
     Identity, InvMult2, InvPlus2, InvPlus2Nat, JoinNDP, Limit, Max, MeetNDual,
-    Min, Mux, MuxMap, ProductN, SumN, SumNNat, TakeFun, TakeRes,
+    Min, Mux, MuxMap, ProductN, SumNDP, SumNNat, TakeFun, TakeRes,
     WrapAMap)
 from mcdp_lang.blocks import get_missing_connections
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
@@ -253,7 +253,7 @@ def create(gdc, ndp, plotting_info):
 
 def is_simple(ndp):
     return isinstance(ndp, SimpleWrap) and isinstance(ndp.dp,
-     (Min, Max, Identity, SumN, ProductN, InvPlus2, InvMult2))
+     (Min, Max, Identity, SumNDP, ProductN, InvPlus2, InvMult2))
 
 
 def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
@@ -272,7 +272,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
     # This is a list of either PrimitiveDP or Maps
     special = [
 #         (Sum, ''),
-        (SumN, ''),
+        (SumNDP, ''),
         (SumNNat, ''),
 #         (Product, ''),
         (ProductN, ''),
@@ -416,7 +416,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
 
     node = gdc.newItem(label)
 
-    if isinstance(ndp.dp, (SumN,)):
+    if isinstance(ndp.dp, (SumNDP,)):
         gdc.styleApply("sum", node)
 
     if isinstance(ndp, OnlyTemplate):

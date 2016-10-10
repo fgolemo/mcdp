@@ -4,11 +4,10 @@ import functools
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
 from mcdp_posets import Map, Nat, PosetProduct, Rcomp, RcompUnits
-from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
+from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
 
 from .dp_generic_unary import WrapAMap
-from .primitive import EmptyDP
 
 
 #
@@ -132,27 +131,28 @@ def sum_units(Fs, values, R):
 
     return res
 
-class ProductN(EmptyDP):
+class ProductNMap(Map):
 
     @contract(Fs='tuple[>=2]')
     def __init__(self, Fs, R):
-        if do_extra_checks():
-            for _ in Fs:
-                check_isinstance(_, RcompUnits)
-            check_isinstance(R, RcompUnits)
+        for _ in Fs:
+            check_isinstance(_, RcompUnits)
+        check_isinstance(R, RcompUnits)
 
-        F = PosetProduct(Fs)
-        EmptyDP.__init__(self, F=F, R=R)
+        self.F = dom = PosetProduct(Fs)
+        self.R = cod = R
+        Map.__init__(self, dom=dom, cod=cod)
 
-    def solve(self, f):
+    def _call(self, f):
         # first, find out if there are any tops
         def is_there_a_top():
             for Fi, fi in zip(self.F, f):
                 if Fi.leq(Fi.get_top(), fi):
                     return True
             return False
+        
         if is_there_a_top():
-            return self.R.U(self.R.get_top())
+            return self.R.get_top()
 
         mult = lambda x, y: x * y
         try:
@@ -163,10 +163,52 @@ class ProductN(EmptyDP):
             r = np.inf
         if np.isinf(r):
             r = self.R.get_top()
-        return self.R.U(r)
+        return r
 
-    def __repr__(self):
-        return 'ProductN(%s -> %s)' % (self.F, self.R)
+class ProductN(WrapAMap):
+
+    @contract(Fs='tuple[>=2]')
+    def __init__(self, Fs, R):
+        amap = ProductNMap(Fs, R)
+        WrapAMap.__init__(self, amap)
+        
+#         
+# class ProductN_old(EmptyDP):
+# 
+#     @contract(Fs='tuple[>=2]')
+#     def __init__(self, Fs, R):
+#         if do_extra_checks():
+#             for _ in Fs:
+#                 check_isinstance(_, RcompUnits)
+#             check_isinstance(R, RcompUnits)
+# 
+#         F = PosetProduct(Fs)
+#         EmptyDP.__init__(self, F=F, R=R)
+# 
+#     def solve(self, f):
+#         # first, find out if there are any tops
+#         def is_there_a_top():
+#             for Fi, fi in zip(self.F, f):
+#                 if Fi.leq(Fi.get_top(), fi):
+#                     return True
+#             return False
+#         
+#         if is_there_a_top():
+#             return self.R.U(self.R.get_top())
+# 
+#         mult = lambda x, y: x * y
+#         try:
+#             r = functools.reduce(mult, f)
+#         except FloatingPointError as e:
+#             # assuming this is overflow
+#             assert 'overflow' in str(e)
+#             r = np.inf
+#         if np.isinf(r):
+#             r = self.R.get_top()
+#         return self.R.U(r)
+# 
+#     def __repr__(self):
+#         return 'ProductN(%s -> %s)' % (self.F, self.R)
 
 
 
