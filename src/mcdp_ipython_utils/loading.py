@@ -57,7 +57,7 @@ def friendly_solve(ndp, query, result_like='dict(str:str)', upper=None, lower=No
         s = solve
     
     """
-    print('friendly_solve(upper=%s, lower=%s)' % (upper, lower))
+    #print('friendly_solve(upper=%s, lower=%s)' % (upper, lower))
     # TODO: replace with convert_string_query(ndp, query, context):
     fnames = ndp.get_fnames()
     rnames = ndp.get_rnames()
