@@ -10,20 +10,21 @@ from contracts import contract
 from contracts.utils import indent, raise_desc
 from mcdp_library import Librarian, MCDPLibrary
 from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
-from mcdp_web.editor.app_editor import AppEditor
-from mcdp_web.editor_fancy.app_editor_fancy_generic import AppEditorFancyGeneric
-from mcdp_web.images.images import WebAppImages, get_mime_for_format
-from mcdp_web.interactive.app_interactive import AppInteractive
-from mcdp_web.qr.app_qr import AppQR
-from mcdp_web.renderdoc.main import render_complete
-from mcdp_web.renderdoc.markd import render_markdown
-from mcdp_web.solver.app_solver import AppSolver
-from mcdp_web.solver2.app_solver2 import AppSolver2
-from mcdp_web.visualization.app_visualization import AppVisualization
 from mocdp import logger
 import mocdp
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from quickapp import QuickAppBase
+
+from .editor.app_editor import AppEditor
+from .editor_fancy.app_editor_fancy_generic import AppEditorFancyGeneric
+from .images.images import WebAppImages, get_mime_for_format
+from .interactive.app_interactive import AppInteractive
+from .qr.app_qr import AppQR
+from .renderdoc.main import render_complete
+from .renderdoc.markd import render_markdown
+from .solver.app_solver import AppSolver
+from .solver2.app_solver2 import AppSolver2
+from .visualization.app_visualization import AppVisualization
 
 
 __all__ = [

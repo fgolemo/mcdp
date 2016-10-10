@@ -1,53 +1,15 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
+from contracts.utils import check_isinstance
 from mcdp_posets import Map, MapNotDefinedHere, Poset
 
 from .primitive import EmptyDP
 
 
-from contracts.utils import check_isinstance
-# from mocdp.exceptions import mcdp_dev_warning
-# import numpy as np
-
-
 __all__ = [
-#     'GenericUnary',
     'WrapAMap',
 ]
 
-# # XXX: this should be replaced by GenericUnaryMap
-# 
-# class GenericUnary(EmptyDP):
-#     """ Meant for scalar values. Top maps to Top"""
-#     @contract(F=Poset, R=Poset)
-#     def __init__(self, F, R, function):
-#         EmptyDP.__init__(self, F=F, R=R)
-#         self.function = function
-# 
-#         self.top = self.F.get_top()
-# 
-#     def solve(self, func):
-#         if isinstance(func, int):
-#             msg = 'Expecting a float, not an int.'
-#             mcdp_dev_warning('Which exception to throw?')
-#             raise_desc(ValueError, msg, func=func)
-# 
-#         if isinstance(func, float):
-#             r = self.function(func)
-# 
-#             # mcdp_dev_warning('give much more thoguth')
-#             if isinstance(r, float) and np.isinf(r):
-#                 r = self.R.get_top()
-#         else:
-#             if self.F.equal(func, self.top):
-#                 r = self.R.get_top()
-#             else:
-#                 raise ValueError(func)
-# 
-#         return self.R.U(r)
-# 
-#     def __repr__(self):
-#         return "GenericUnary(%s)" % self.function  # .__name__
 
 
 class WrapAMap(EmptyDP):
@@ -65,11 +27,6 @@ class WrapAMap(EmptyDP):
         R = amap.get_codomain()
         check_isinstance(F, Poset)
         check_isinstance(R, Poset)
-#             msg = 'Expect that F is a Poset.'
-#             raise_desc(ValueError, msg, F=F, amap=amap)
-#         if not isinstance(R, Poset):
-#             msg = 'Expect that R is a Poset.'
-#             raise_desc(ValueError, msg, R=R, amap=amap)
 
         EmptyDP.__init__(self, F=F, R=R)
         self.amap = amap

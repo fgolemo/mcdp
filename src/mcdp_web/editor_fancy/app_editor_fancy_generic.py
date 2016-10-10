@@ -1,4 +1,10 @@
+import cgi
 from collections import defaultdict, namedtuple
+import os
+
+from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
+from pyramid.renderers import render_to_response  # @UnresolvedImport
+
 from contracts.utils import raise_wrapped
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
@@ -9,10 +15,6 @@ from mcdp_web.utils import (ajax_error_catch, create_image_with_string,
 from mcdp_web.utils.response import response_data
 from mocdp import logger
 from mocdp.exceptions import DPInternalError, DPSemanticError
-from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
-from pyramid.renderers import render_to_response  # @UnresolvedImport
-import cgi
-import os
 
 
 Spec = namedtuple('Spec', 'url_part url_variable extension parse_expr parse'
@@ -268,7 +270,7 @@ def get_png_data_unavailable(library, name, x, data_format):  # @UnusedVariable
     return create_image_with_string(s, size=(512, 512), color=(0, 0, 255))
 
 
-def get_png_data_model(library, name, ndp, data_format):
+def get_png_data_model(library, name, ndp, data_format):  # @UnusedVariable
     from mcdp_web.images.images import ndp_graph_enclosed
     return ndp_graph_enclosed(library, ndp, style=STYLE_GREENREDSYM,
                               yourname=None, data_format=data_format)

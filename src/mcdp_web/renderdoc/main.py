@@ -1,8 +1,10 @@
-from .highlight import html_interpret
-from .markd import render_markdown
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_library import MCDPLibrary
+
+from .highlight import html_interpret
+from .markd import render_markdown
+
 
 __all__ = ['render_document']
 

@@ -1,6 +1,8 @@
-from mocdp.exceptions import DPSemanticError, DPSyntaxError
 import cgi
 import traceback
+
+from mocdp.exceptions import DPSemanticError, DPSyntaxError
+
 
 __all__ = [
     'ajax_error_catch',
