@@ -21,7 +21,8 @@ from .dp_generic_unary import WrapAMap
 #     'SumUnitsNotCompatible',
 #     'check_sum_units_compatible',
 # ]
-def SumNMap(Map):
+class SumNMap(Map):
+    
     @contract(Fs='tuple, seq[>=2]($RcompUnits)', R=RcompUnits)
     def __init__(self, Fs, R):
         for _ in Fs:
