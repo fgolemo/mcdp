@@ -214,16 +214,16 @@ from AC power to DC power.
 We can query the model as follows. Suppose we need 2 outputs, each of 0.5A.
 
 <pre class='mcdp_value'>solve(
-    ⟨ ⟨S(DC_power):*, `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩,
-      ⟨S(DC_power):*, `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩ ⟩, 
+    ⟨ ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩,
+      ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩ ⟩, 
     `Ravpower)</pre>
 </pre>
 
 This is the output:
 
 <pre class='print_value'>solve(
-    ⟨ ⟨S(DC_power):*, `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩,
-      ⟨S(DC_power):*, `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩ ⟩, 
+    ⟨ ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩,
+      ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩ ⟩, 
     `Ravpower)</pre>
 
 The model says we have two options: we need to find an outlet of ``TypeM``
@@ -246,13 +246,13 @@ functionality that we do not need.
 We can ask now for what resources we would need for a 0.5 A load:
 
 <pre class='mcdp_value'>solve(
-    ⟨S(DC_power):*, `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩,
+    ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩,
     `orei_plus_ravpower)</pre>
 
 and obtain
 
 <pre class='print_value'>solve(
-    ⟨S(DC_power):*, `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩,
+    ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩,
 
     `orei_plus_ravpower)</pre>
 
