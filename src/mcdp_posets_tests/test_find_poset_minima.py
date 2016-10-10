@@ -65,7 +65,7 @@ def wrap_with_counts(P, maxleq=None):
     return P2(P)
 
 @contract(P=PosetProduct, xs='set')
-def stats_for_poset_minima(P, xs, f, maxleq):
+def stats_for_poset_minima(P, xs, f, _maxleq):
     """
         
         f(P, x)
@@ -145,18 +145,18 @@ def pmin2():
 def run_all(poset, Ps):
     method = poset_minima_n2
     print('method: %s' % method)
-    r = stats_for_poset_minima(poset, Ps, method, maxleq=None)
+    _r = stats_for_poset_minima(poset, Ps, method, maxleq=None)
     def poset_minima_n2_sort_first(P, ps):
         f = sorted(ps)
         return poset_minima_n2(P, f)
 
     method = poset_minima_n2_sort_first
     print('method: %s' % method)
-    r = stats_for_poset_minima(poset, Ps, method, maxleq=None)
+    _r = stats_for_poset_minima(poset, Ps, method, maxleq=None)
 
     method = poset_minima_n2_optimizedPP
     print('method: %s' % method)
-    r = stats_for_poset_minima(poset, Ps, method, maxleq=None)
+    _r = stats_for_poset_minima(poset, Ps, method, maxleq=None)
 
 @comptest
 def pmin3():

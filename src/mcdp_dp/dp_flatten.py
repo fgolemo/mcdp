@@ -61,7 +61,7 @@ class TakeFun(WrapAMap):
         WrapAMap.__init__(self, amap)
 
 
-class TakeRes(Mux):
+class TakeRes(WrapAMap):
     """ Used by Context.ifun_get_index.
         Only used for having an appropriate icon (one green, many red). """
     def __init__(self, F, coords):

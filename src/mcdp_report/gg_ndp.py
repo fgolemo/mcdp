@@ -288,6 +288,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
 
     def is_special_dp(dp):
         if isinstance(dp, Mux):
+            
             coords = dp.coords
             if coords == [(), ()]:
                 return True
