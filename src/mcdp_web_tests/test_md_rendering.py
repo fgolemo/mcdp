@@ -7,6 +7,7 @@ from mocdp.exceptions import mcdp_dev_warning
 import os
 import shutil
 import tempfile
+from mcdp_web.renderdoc.highlight import get_minimal_document
 
 
 def define_tests_mcdp_web(context):
@@ -43,7 +44,9 @@ def check_rendering(libname, filename):
     tmpdir = tempfile.mkdtemp(prefix='mcdplibrary_cache')
     library.use_cache_dir(tmpdir)
 
-    html = render_complete(library, data, raise_errors=True, realpath=filename)
+    contents = render_complete(library, data, raise_errors=True, realpath=filename)
+    html = get_minimal_document(contents, add_markdown_css=True)
+    
     basename = os.path.basename(filename)
     fn = os.path.join('out', 'check_rendering', libname, basename + '.html')
     d = os.path.dirname(fn)
