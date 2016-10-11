@@ -3,9 +3,9 @@
 **PyMCDP** is a Python interpreter and solver for Monotone Co-Design Problems.
 It is currently in beta-testing. Please email censi@mit.edu if you wish to help.
 
-Please see <http://mcdp.mit.edu> for an introduction (or some [examples][examples]).
+Please see <http://mcdp.mit.edu> for an introduction (or see [the manual][manual]).
 
-[examples]: http://mcdp.mit.edu/examples.html
+[manual]: http://mcdp.mit.edu/media/pymcdp-manual.html
 
 *Below, an example of a graphical representation of an MCDP (left)
 along with the MCDPL snippet that describes it (right)*
