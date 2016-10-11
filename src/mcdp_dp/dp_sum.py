@@ -174,6 +174,7 @@ class ProductN(WrapAMap):
         amap = ProductNMap(Fs, R)
         WrapAMap.__init__(self, amap)
         
+        
 #         
 # class ProductN_old(EmptyDP):
 # 

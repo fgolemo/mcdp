@@ -15,7 +15,7 @@ from mocdp import logger
 from mocdp.comp import CompositeNamedDP, SimpleWrap
 from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 from mocdp.comp.interfaces import NamedDP
-from mocdp.exceptions import mcdp_dev_warning
+from mocdp.exceptions import mcdp_dev_warning, DPInternalError
 from mocdp.ndp import NamedDPCoproduct
 
 
@@ -320,9 +320,15 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
         'default',
     ]
     best_icon = gdc.get_icon(iconoptions)
-#     print('best_icon: %r' % best_icon)
-#     print('only_string: %r' % only_string)
-#     print('is special: %r' % is_special)
+    print('icon options: %s' % iconoptions)
+    print('best_icon: %r' % best_icon)
+    print('only_string: %r' % only_string)
+    print('is special: %r' % is_special)
+    if is_special and 'default.png' in best_icon:
+        raise_desc(DPInternalError, 'Could not find icon for special',
+                   iconoptions=iconoptions, is_special=is_special, best_icon=best_icon,
+                   only_string=only_string)
+        
     if only_string:
 
         label = type(ndp.dp).__name__
