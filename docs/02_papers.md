@@ -44,8 +44,7 @@ permalink: /papers/
 </div>
 
 <div class='talk'>
-    <strong>&ldquo;Monotone Co-Design Problems: or, everything is the same&rdquo;</strong>
-    </em>.
+    <strong>&ldquo;Monotone Co-Design Problems: or, everything is the same&rdquo;</strong>.
 
     <ul>
         <li>
