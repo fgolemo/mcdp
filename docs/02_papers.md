@@ -121,6 +121,9 @@ These two papers describe more examples for the simple case of a MCDP with only 
     </div><div style='clear:both'></div>
 </div> -->
 
+
+<!--
+
 This is an application to computation/resources graphs:
 
 <div class='pub-ref-desc'>
@@ -141,6 +144,7 @@ This is an application to computation/resources graphs:
         
     </div><div style='clear:both'></div>
 </div>
+-->
 
 <style type='text/css'>
 
