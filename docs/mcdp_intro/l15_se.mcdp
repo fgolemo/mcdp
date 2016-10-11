@@ -1,0 +1,7 @@
+# test semantic_error 
+cdp {
+    provides g [s]
+    provides f [s]
+
+    f >= g
+}

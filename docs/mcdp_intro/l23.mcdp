@@ -1,0 +1,4 @@
+# test semantic_error
+mcdp  {
+    provides a [R]
+}

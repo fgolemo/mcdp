@@ -1,0 +1,12 @@
+# test connected
+cdp {
+    provides c [J]
+    requires w1 [g]
+    requires w2 [g]
+    
+    sub battery = load battery
+    battery.capacity >= c
+    
+    w1 >= battery.battery_weight
+    w2 >= battery.battery_weight
+}

@@ -1,0 +1,26 @@
+<!-- <nav class="nav-primary" role="navigation" >
+    <ul>
+        {% for p in site.pages %}
+        <li>
+        	<a {% if p.url == page.url %}class="active"{% endif %} href="{{ site.baseurl }}{{ p.url }}">{{ p.title }} -- {{ p.url }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+</nav> -->
+
+
+ <div  class="nav-primary" role="navigation" >
+        {% for p in site.pages %}
+          {% if p.title %}
+
+          {% if p.url != page.url %}
+            <a class="page-link" href="{{ p.url | prepend: site.baseurl }}">
+            {{ p.title }}
+            </a>
+          {% else %}
+            <span class='current-page' style='font-weight: bold'>{{ p.title }}</span>
+          {% endif %}
+          <br/>
+          {% endif %}
+        {% endfor %}
+ </div>

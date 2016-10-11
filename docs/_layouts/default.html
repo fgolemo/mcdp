@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+
+  {% include head.html %}
+
+  <body>
+
+    <!-- % include header.html % -->
+    <!-- <p style='color:red'>Temporary pages - please check back in a few days.</p> -->
+
+    <table border=0 cellborder=0 style='width: 100%'>
+    <tr style='height: 7em'>
+    <td style='text-align: right;'>
+    <!-- <p>shorttitle = {{page.shorttitle}}</p> -->
+      <span style='color: grey; font-weight: bold'>Monotone<br/>Co-Design<br/>Problems</span>
+    
+    </td>
+    <td style='padding-left: 5em;'>
+    {% if page.title != 'Home' %} 
+      <h1>{{ page.title }}</h1>
+    {% else %}
+      
+    {% endif %}
+    </td>
+    </tr>
+    <tr>
+    <td style='width: 10em; valign: top;' valign='top'>
+    {% include nav.html %}
+    </td>
+    <td style='' valign='top'>
+    <div class="page-content"
+    {% if page.title == 'Home' %} 
+      style = 'margin-top: -5em'
+    {% endif %}
+    >
+      <div class="wrapper">
+        {{ content }}
+      </div>
+    </div>
+    </td>
+    </tr>
+    </table>
+    <!-- {% include footer.html %} -->
+
+  </body>
+
+</html>
