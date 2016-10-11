@@ -14,7 +14,7 @@ For more information, please see [the papers](/papers/) or [the PyMCDP manual](m
 
 
 *Below, an example of a graphical representation of an MCDP (left)
-along with the MCDPL snippet that describes it (right)*
+along with the MCDPL snippet that describes it (right).*
 
 <table>
  <tr>
