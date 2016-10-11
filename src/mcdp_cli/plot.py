@@ -248,22 +248,32 @@ for s in [#STYLE_GREENRED, 'default', 'clean',
     x = ('ndp_%s_tb' % s, Vis(s, 'TB', 'ndp_%s_TB'%s))
     allplots.add(x)
     
-def ndp_graph_enclosed_(data):
+def ndp_graph_enclosed0(data, direction):
     library = data['library']
     ndp = get_ndp(data)
     style = STYLE_GREENREDSYM
     yourname = None
     from mcdp_web.images.images import ndp_graph_enclosed
     png = ndp_graph_enclosed(library, ndp, style, yourname,
-                            data_format='png', direction='TB',
+                            data_format='png', direction=direction,
                             enclosed=True)
     pdf = ndp_graph_enclosed(library, ndp, style, yourname,
-                            data_format='pdf', direction='TB',
+                            data_format='pdf', direction=direction,
                             enclosed=True)
+    return png, pdf
+
+def ndp_graph_enclosed_LR(data):
+    png, pdf = ndp_graph_enclosed0(data, 'LR')
+    return [('png', 'ndp_graph_enclosed_LR', png),
+            ('pdf', 'ndp_graph_enclosed_LR', pdf)]
+
+def ndp_graph_enclosed_TB(data):
+    png, pdf = ndp_graph_enclosed0(data, 'LR')
     return [('png', 'ndp_graph_enclosed', png),
             ('pdf', 'ndp_graph_enclosed', pdf)]
 
-allplots.add(('ndp_graph_enclosed', ndp_graph_enclosed_))
+allplots.add(('ndp_graph_enclosed_LR', ndp_graph_enclosed_LR))
+allplots.add(('ndp_graph_enclosed', ndp_graph_enclosed_TB))
 
 @contract(returns='tuple(str,*)')
 def parse_kv(x):

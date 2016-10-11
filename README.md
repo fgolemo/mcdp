@@ -12,8 +12,8 @@ along with the MCDPL snippet that describes it (right)*
 
 <table>
  <tr>
- <td><img src="docs/media/battery-out_expected/battery_minimal-greenredsym.png" width="400px"/></td>
- <td><img src="docs/media/battery-out_expected/battery_minimal-syntax_pdf.png" width="300px"/>
+ <td><img src="docs/media/battery-out_expected3/battery_minimal-greenredsym.png" width="400px"/></td>
+ <td><img src="docs/media/battery-out_expected3/battery_minimal-syntax_pdf.png" width="300px"/>
  </td>
  </tr>
 </table>
@@ -112,15 +112,15 @@ will produce these graphs:
 <table>
     <tr>
         <td>Syntax highlighting</td>
-        <td><a href="docs/media/battery-out_expected/battery-syntax_pdf.png">
-            <img src="docs/media/battery-out_expected/battery-syntax_pdf.png" height="500px"/>
+        <td><a href="docs/media/battery-out_expected3/battery-syntax_pdf.png">
+            <img src="docs/media/battery-out_expected3/battery-syntax_pdf.png" height="500px"/>
             </a>
         </td>
     </tr>
-    <tr><td>Verbose graph</td><td><a href="docs/media/battery-out_expected/battery-default.png"><img src="docs/media/battery-out_expected/battery-default.png"/></a></td></tr>
-    <tr><td>Cleaned-up graph</td><td ><a href="docs/media/battery-out_expected/battery-clean.png">
-    <img src="docs/media/battery-out_expected/battery-clean.png" height="300px"/></a></td></tr>
-    <tr><td>Tree representation</td><td><img src="docs/media/battery-out_expected/battery-dp_tree.png"/></td></tr>
+    <tr><td>Verbose graph</td><td><a href="docs/media/battery-out_expected3/battery-ndp_graph_enclosed_LR.png"><img src="docs/media/battery-out_expected3/battery-ndp_graph_enclosed_LR.png"/></a></td></tr>
+<!--     <tr><td>Cleaned-up graph</td><td ><a href="docs/media/battery-out_expected3/battery-clean.png">
+    <img src="docs/media/battery-out_expected3/battery-clean.png" height="300px"/></a></td></tr> -->
+    <tr><td>Tree representation</td><td><img src="docs/media/battery-out_expected3/battery-dp_tree.png"/></td></tr>
     </tr>
 </table>
 
