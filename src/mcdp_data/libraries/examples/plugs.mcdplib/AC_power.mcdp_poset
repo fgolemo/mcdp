@@ -1,5 +1,4 @@
 product(
-         task: S(AC_power),
        socket: `socket_type,
       voltage: `AC_voltages,
     frequency: `AC_frequencies,

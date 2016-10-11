@@ -1,5 +1,6 @@
 import cgi
 
+
 class AppInteractive():
     """
         /libraries/{library}/interactive/mcdp_value/

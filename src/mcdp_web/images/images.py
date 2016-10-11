@@ -5,6 +5,7 @@ from mcdp_web.utils.response import response_data
 from mocdp.comp.composite_templatize import ndp_templatize
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 
+
 class WebAppImages():
 
     def __init__(self):

@@ -43,7 +43,17 @@ Technical debt:
 - remove caching from LoopDP; make separate class
 - remove caching from Library, make separate class
 
+
 --------------------
+
+
+- Create "add_bottom(<poset>)" operator.
+- Create type "{{poset}}", "{{mcdp}}", "{{template}}", "{{name}}", etc. to use in the documentation as stand-alone. 
+
+- bug doc: Ravpower assume 110: The model says we have two options: we need to find an outlet of TypeM at either 110 V or 220 V which will provide 5 W of power. Moreover, we need at least 10.99 USD to buy the component.
+
+- bug visualization: splits are not drawn well. See, e.g.,
+http://ares-super.lids.mit.edu/~andrea/env_mcdp/src/mcdp/out/check_rendering/plugs/sockets.md.html
 
 
 - test ignore_resource  for wrong inputs

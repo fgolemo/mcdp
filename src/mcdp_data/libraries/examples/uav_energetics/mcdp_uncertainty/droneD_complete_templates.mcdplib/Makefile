@@ -13,13 +13,13 @@ paper-approxs:
 	python plot_approximations.py
 
 paper-unc1:
-	python drone_unc1.py -c parmake
+	DISABE_CONTRACTS=1 python drone_unc1.py -c parmake
 
 paper-unc2:
-	python drone_unc2.py -c parmake
+	DISABE_CONTRACTS=1 python drone_unc2.py -c parmake
 
 paper-unc3:
-	python drone_unc3.py -c parmake
+	DISABE_CONTRACTS=1 python drone_unc3.py -c parmake
 
 used = \
 	drone_unc1_batteries_uncertain1 \

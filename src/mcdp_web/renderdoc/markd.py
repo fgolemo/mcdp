@@ -1,6 +1,7 @@
 from contracts import contract
 from contracts.utils import raise_desc
 
+
 @contract(s=str, returns=str)
 def render_markdown(s):
     """ Returns an HTML string encoded in UTF-8"""

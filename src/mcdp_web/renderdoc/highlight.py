@@ -538,7 +538,6 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
         source_code = tag.string.encode('utf-8')
         ndp = library.parse_ndp(source_code, realpath=realpath)
         yourname = None 
-        from mcdp_library.library import ATTR_LOAD_NAME
         if hasattr(ndp, ATTR_LOAD_NAME):
             yourname = getattr(ndp, ATTR_LOAD_NAME)
         direction = str(tag.get('direction', default_direction))
@@ -561,7 +560,6 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
 
     def ndp_graph_expand_(tag):
         source_code = tag.string.encode('utf-8')
-        ndp = library.parse_ndp(source_code)
         ndp = library.parse_ndp(source_code, realpath=realpath)
         yourname = ''
 

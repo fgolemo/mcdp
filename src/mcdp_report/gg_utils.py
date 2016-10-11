@@ -210,7 +210,7 @@ def embed_images_from_library(html, library):
     """ Resolves images from library """
 
     def resolve(href):
-        print('resolving %r' % href)
+        #print('resolving %r' % href)
         f = library._get_file_data(href)
         data = f['data']
         # realpath = f['realpath']
