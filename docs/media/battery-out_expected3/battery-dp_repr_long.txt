@@ -1,0 +1,34 @@
+Series: %  R[s]×R[kg]×R[W] -> R[kg]
+\ DPLoop2:   R[s]×R[kg]×R[W] -> (R[kg]×)
+. L Series: %  (R[s]×R[kg]×R[W])×R[kg] -> (R[kg]×)×R[kg]
+. L \ Series: %  (R[s]×R[kg]×R[W])×R[kg] -> R[kg]×R[kg]
+. L . \ Mux(PosetProduct(2: PosetProduct(3: R[s],R[kg],R[W]),R[kg]) -> PosetProduct(2: PosetProduct(2: PosetProduct(2: R[kg],R[W]),R[s]),R[kg]), [[[1, (0, 2)], (0, 0)], (0, 1)])    I = (R[s]×R[kg]×R[W])×R[kg]
+. L . \ Series: %  ((R[kg]×R[W])×R[s])×R[kg] -> R[kg]×R[kg]
+. L . . \ Parallel2  % ((R[kg]×R[W])×R[s])×R[kg] -> R[kg]×R[kg]
+. L . . . \ Series: %  (R[kg]×R[W])×R[s] -> R[kg]
+. L . . . . \ Parallel2  % (R[kg]×R[W])×R[s] -> R[W]×R[s]
+. L . . . . . \ Series: %  R[kg]×R[W] -> R[W]
+. L . . . . . . \ Parallel2  % R[kg]×R[W] -> R[W]×R[W]
+. L . . . . . . . \ Series: %  R[kg] -> R[W]
+. L . . . . . . . . \ WrapAMap(MultValueMap:R[kg]→R[N])
+. L . . . . . . . . \ Series: %  R[N] -> R[W]
+. L . . . . . . . . . \ Mux(R[N] -> PosetProduct(2: R[N],R[N]), [(), ()])    I = R[N]
+. L . . . . . . . . . \ Series: %  R[N]×R[N] -> R[W]
+. L . . . . . . . . . . \ WrapAMap(ProductNMap:R[N]×R[N]→R[N²])
+. L . . . . . . . . . . \ WrapAMap(MultValueMap:R[N²]→R[W])
+. L . . . . . . . \ Id(R[W])
+. L . . . . . . \ WrapAMap(SumNMap(R[W]×R[W] -> R[W]))
+. L . . . . . \ Id(R[s])
+. L . . . . \ Series: %  R[W]×R[s] -> R[kg]
+. L . . . . . \ WrapAMap(ProductNMap:R[W]×R[s]→R[J])
+. L . . . . . \ Series: %  R[J] -> R[kg]
+. L . . . . . . \ WrapAMap(MultValueMap:R[J]→R[J*kg/Wh])
+. L . . . . . . \ WrapAMap(LinearMapComp:R[J*kg/Wh]→R[kg])
+. L . . . \ Id(R[kg])
+. L . . \ Series: %  R[kg]×R[kg] -> R[kg]×R[kg]
+. L . . . \ Mux(PosetProduct(2: R[kg],R[kg]) -> PosetProduct(2: R[kg],PosetProduct(2: R[kg],R[kg])), [0, [0, 1]])    I = R[kg]×R[kg]
+. L . . . \ Parallel2  % R[kg]×(R[kg]×R[kg]) -> R[kg]×R[kg]
+. L . . . . \ Id(R[kg])
+. L . . . . \ WrapAMap(SumNMap(R[kg]×R[kg] -> R[kg]))
+. L \ Mux(PosetProduct(2: R[kg],R[kg]) -> PosetProduct(2: PosetProduct(1: R[kg]),R[kg]), [[0], 1])    I = R[kg]×R[kg]
+\ Mux(PosetProduct(1: R[kg]) -> R[kg], 0)    I = (R[kg]×)

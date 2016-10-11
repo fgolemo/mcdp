@@ -1,0 +1,223 @@
+BuildProblem  Where('mcdp {  \n    \n    provides endurance [s] \n    \n    provides extra_payload [kg]\n    \n    provides extra_power [W]\n\n    \n    battery = instance mcdp {\n        \n        provides capacity [J]        \n        \n        requires mass [kg] \n        \n\n        specific_energy_Li_Ion = 500 Wh / kg \n\n        mass >= capacity / specific_energy_Li_Ion\n    }\n\n    \n    actuation = instance mcdp {\n        \n        provides lift [N]\n        \n        requires power [W]\n        \n        c = 10.0 W/N^2\n        power >= lift * lift * c\n    }\n    \n    power = actuation.power + extra_power\n    energy = power * endurance\n    battery.capacity >= energy\n\n    \n    gravity = 9.81 m/s^2\n    weight = (battery.mass + extra_payload) * gravity\n    actuation.lift >= weight\n\n    \n    requires mass for battery\n}')
+ keyword: MCDPKeyword  Where('mcdp')
+           keyword: 'mcdp'
+ statements: List12  Where('provides endurance [s] \n    \n    provides extra_payload [kg]\n    \n    provides extra_power [W]\n\n    \n    battery = instance mcdp {\n        \n        provides capacity [J]        \n        \n        requires mass [kg] \n        \n\n        specific_energy_Li_Ion = 500 Wh / kg \n\n        mass >= capacity / specific_energy_Li_Ion\n    }\n\n    \n    actuation = instance mcdp {\n        \n        provides lift [N]\n        \n        requires power [W]\n        \n        c = 10.0 W/N^2\n        power >= lift * lift * c\n    }\n    \n    power = actuation.power + extra_power\n    energy = power * endurance\n    battery.capacity >= energy\n\n    \n    gravity = 9.81 m/s^2\n    weight = (battery.mass + extra_payload) * gravity\n    actuation.lift >= weight\n\n    \n    requires mass for battery')
+              e0: FunStatement  Where('provides endurance [s]')
+                   keyword: ProvideKeyword  Where('provides')
+                             keyword: 'provides'
+                   fname: FName  Where(' endurance')
+                           value: 'endurance'
+                   unit: RcompUnit  Where('s')
+                          pint_string: 's'
+              e1: FunStatement  Where('provides extra_payload [kg]')
+                   keyword: ProvideKeyword  Where('provides')
+                             keyword: 'provides'
+                   fname: FName  Where(' extra_payload')
+                           value: 'extra_payload'
+                   unit: RcompUnit  Where('kg')
+                          pint_string: 'kg'
+              e2: FunStatement  Where('provides extra_power [W]')
+                   keyword: ProvideKeyword  Where('provides')
+                             keyword: 'provides'
+                   fname: FName  Where(' extra_power')
+                           value: 'extra_power'
+                   unit: RcompUnit  Where('W')
+                          pint_string: 'W'
+              e3: SetNameNDPInstance  Where('battery = instance mcdp {\n        \n        provides capacity [J]        \n        \n        requires mass [kg] \n        \n\n        specific_energy_Li_Ion = 500 Wh / kg \n\n        mass >= capacity / specific_energy_Li_Ion\n    }')
+                   keyword: None
+                   name: DPName  Where('battery')
+                          value: 'battery'
+                   dp_rvalue: DPInstance  Where('instance mcdp {\n        \n        provides capacity [J]        \n        \n        requires mass [kg] \n        \n\n        specific_energy_Li_Ion = 500 Wh / kg \n\n        mass >= capacity / specific_energy_Li_Ion\n    }')
+                               keyword: InstanceKeyword  Where('instance')
+                                         keyword: 'instance'
+                               dp_rvalue: BuildProblem  Where('mcdp {\n        \n        provides capacity [J]        \n        \n        requires mass [kg] \n        \n\n        specific_energy_Li_Ion = 500 Wh / kg \n\n        mass >= capacity / specific_energy_Li_Ion\n    }')
+                                           keyword: MCDPKeyword  Where('mcdp')
+                                                     keyword: 'mcdp'
+                                           statements: List4  Where('provides capacity [J]        \n        \n        requires mass [kg] \n        \n\n        specific_energy_Li_Ion = 500 Wh / kg \n\n        mass >= capacity / specific_energy_Li_Ion')
+                                                        e0: FunStatement  Where('provides capacity [J]')
+                                                             keyword: ProvideKeyword  Where('provides')
+                                                                       keyword: 'provides'
+                                                             fname: FName  Where(' capacity')
+                                                                     value: 'capacity'
+                                                             unit: RcompUnit  Where('J')
+                                                                    pint_string: 'J'
+                                                        e1: ResStatement  Where('requires mass [kg]')
+                                                             keyword: RequireKeyword  Where('requires')
+                                                                       keyword: 'requires'
+                                                             rname: RName  Where(' mass')
+                                                                     value: 'mass'
+                                                             unit: RcompUnit  Where('kg')
+                                                                    pint_string: 'kg'
+                                                        e2: SetNameRValue  Where('specific_energy_Li_Ion = 500 Wh / kg \n\n        ')
+                                                             name: SetNameGenericVar  Where('specific_energy_Li_Ion')
+                                                                    value: 'specific_energy_Li_Ion'
+                                                             eq: eq  Where('=')
+                                                                  glyph: '='
+                                                             right_side: SimpleValue  Where('500 Wh / kg \n\n        ')
+                                                                          value: ValueExpr  Where('500')
+                                                                                  value: 500
+                                                                          space: RcompUnit  Where('Wh / kg \n\n        ')
+                                                                                  pint_string: 'Wh / kg'
+                                                        e3: Constraint  Where('mass >= capacity / specific_energy_Li_Ion')
+                                                             function: VariableRef  Where('mass')
+                                                                        name: 'mass'
+                                                             prep: geq  Where(' >=')
+                                                                    glyph: '>='
+                                                             rvalue: Divide  Where('capacity / specific_energy_Li_Ion')
+                                                                      ops: List3  Where('capacity / specific_energy_Li_Ion')
+                                                                            e0: VariableRef  Where('capacity')
+                                                                                 name: 'capacity'
+                                                                            e1: bar  Where('/')
+                                                                                 glyph: '/'
+                                                                            e2: VariableRef  Where('specific_energy_Li_Ion')
+                                                                                 name: 'specific_energy_Li_Ion'
+              e4: SetNameNDPInstance  Where('actuation = instance mcdp {\n        \n        provides lift [N]\n        \n        requires power [W]\n        \n        c = 10.0 W/N^2\n        power >= lift * lift * c\n    }')
+                   keyword: None
+                   name: DPName  Where('actuation')
+                          value: 'actuation'
+                   dp_rvalue: DPInstance  Where('instance mcdp {\n        \n        provides lift [N]\n        \n        requires power [W]\n        \n        c = 10.0 W/N^2\n        power >= lift * lift * c\n    }')
+                               keyword: InstanceKeyword  Where('instance')
+                                         keyword: 'instance'
+                               dp_rvalue: BuildProblem  Where('mcdp {\n        \n        provides lift [N]\n        \n        requires power [W]\n        \n        c = 10.0 W/N^2\n        power >= lift * lift * c\n    }')
+                                           keyword: MCDPKeyword  Where('mcdp')
+                                                     keyword: 'mcdp'
+                                           statements: List4  Where('provides lift [N]\n        \n        requires power [W]\n        \n        c = 10.0 W/N^2\n        power >= lift * lift * c')
+                                                        e0: FunStatement  Where('provides lift [N]')
+                                                             keyword: ProvideKeyword  Where('provides')
+                                                                       keyword: 'provides'
+                                                             fname: FName  Where(' lift')
+                                                                     value: 'lift'
+                                                             unit: RcompUnit  Where('N')
+                                                                    pint_string: 'N'
+                                                        e1: ResStatement  Where('requires power [W]')
+                                                             keyword: RequireKeyword  Where('requires')
+                                                                       keyword: 'requires'
+                                                             rname: RName  Where(' power')
+                                                                     value: 'power'
+                                                             unit: RcompUnit  Where('W')
+                                                                    pint_string: 'W'
+                                                        e2: SetNameRValue  Where('c = 10.0 W/N^2')
+                                                             name: SetNameGenericVar  Where('c')
+                                                                    value: 'c'
+                                                             eq: eq  Where('=')
+                                                                  glyph: '='
+                                                             right_side: SimpleValue  Where('10.0 W/N^2')
+                                                                          value: ValueExpr  Where('10.0')
+                                                                                  value: 10.0
+                                                                          space: RcompUnit  Where('W/N^2')
+                                                                                  pint_string: 'W / N ^ 2'
+                                                        e3: Constraint  Where('power >= lift * lift * c')
+                                                             function: VariableRef  Where('power')
+                                                                        name: 'power'
+                                                             prep: geq  Where(' >=')
+                                                                    glyph: '>='
+                                                             rvalue: MultN  Where('lift * lift * c')
+                                                                      ops: List5  Where('lift * lift * c')
+                                                                            e0: VariableRef  Where('lift')
+                                                                                 name: 'lift'
+                                                                            e1: times  Where('*')
+                                                                                 glyph: '*'
+                                                                            e2: VariableRef  Where(' lift')
+                                                                                 name: 'lift'
+                                                                            e3: times  Where('*')
+                                                                                 glyph: '*'
+                                                                            e4: VariableRef  Where(' c')
+                                                                                 name: 'c'
+              e5: SetNameRValue  Where('power = actuation.power + extra_power')
+                   name: SetNameGenericVar  Where('power')
+                          value: 'power'
+                   eq: eq  Where('=')
+                        glyph: '='
+                   right_side: PlusN  Where('actuation.power + extra_power')
+                                ops: List3  Where('actuation.power + extra_power')
+                                      e0: Resource  Where('actuation.power')
+                                           dp: DPName  Where('actuation')
+                                                value: 'actuation'
+                                           keyword: DotPrep  Where('.')
+                                                     glyph: '.'
+                                           s: RName  Where('power')
+                                               value: 'power'
+                                      e1: plus  Where('+')
+                                           glyph: '+'
+                                      e2: VariableRef  Where('extra_power')
+                                           name: 'extra_power'
+              e6: SetNameRValue  Where('energy = power * endurance')
+                   name: SetNameGenericVar  Where('energy')
+                          value: 'energy'
+                   eq: eq  Where('=')
+                        glyph: '='
+                   right_side: MultN  Where('power * endurance')
+                                ops: List3  Where('power * endurance')
+                                      e0: VariableRef  Where('power')
+                                           name: 'power'
+                                      e1: times  Where('*')
+                                           glyph: '*'
+                                      e2: VariableRef  Where(' endurance')
+                                           name: 'endurance'
+              e7: Constraint  Where('battery.capacity >= energy')
+                   function: Function  Where('battery.capacity')
+                              dp: DPName  Where('battery')
+                                   value: 'battery'
+                              keyword: DotPrep  Where('.')
+                                        glyph: '.'
+                              s: FName  Where('capacity')
+                                  value: 'capacity'
+                   prep: geq  Where(' >=')
+                          glyph: '>='
+                   rvalue: VariableRef  Where('energy')
+                            name: 'energy'
+              e8: SetNameRValue  Where('gravity = 9.81 m/s^2')
+                   name: SetNameGenericVar  Where('gravity')
+                          value: 'gravity'
+                   eq: eq  Where('=')
+                        glyph: '='
+                   right_side: SimpleValue  Where('9.81 m/s^2')
+                                value: ValueExpr  Where('9.81')
+                                        value: 9.81
+                                space: RcompUnit  Where('m/s^2')
+                                        pint_string: 'm / s ^ 2'
+              e9: SetNameRValue  Where('weight = (battery.mass + extra_payload) * gravity')
+                   name: SetNameGenericVar  Where('weight')
+                          value: 'weight'
+                   eq: eq  Where('=')
+                        glyph: '='
+                   right_side: MultN  Where('battery.mass + extra_payload) * gravity')
+                                ops: List3  Where('battery.mass + extra_payload) * gravity')
+                                      e0: PlusN  Where('battery.mass + extra_payload')
+                                           ops: List3  Where('battery.mass + extra_payload')
+                                                 e0: Resource  Where('battery.mass')
+                                                      dp: DPName  Where('battery')
+                                                           value: 'battery'
+                                                      keyword: DotPrep  Where('.')
+                                                                glyph: '.'
+                                                      s: RName  Where('mass')
+                                                          value: 'mass'
+                                                 e1: plus  Where('+')
+                                                      glyph: '+'
+                                                 e2: VariableRef  Where('extra_payload')
+                                                      name: 'extra_payload'
+                                      e1: times  Where('*')
+                                           glyph: '*'
+                                      e2: VariableRef  Where(' gravity')
+                                           name: 'gravity'
+              e10: Constraint  Where('actuation.lift >= weight')
+                    function: Function  Where('actuation.lift')
+                               dp: DPName  Where('actuation')
+                                    value: 'actuation'
+                               keyword: DotPrep  Where('.')
+                                         glyph: '.'
+                               s: FName  Where('lift')
+                                   value: 'lift'
+                    prep: geq  Where(' >=')
+                           glyph: '>='
+                    rvalue: VariableRef  Where('weight')
+                             name: 'weight'
+              e11: ResShortcut1  Where('requires mass for battery')
+                    requires: RequireKeyword  Where('requires')
+                               keyword: 'requires'
+                    rname: RName  Where(' mass')
+                            value: 'mass'
+                    prep_for: ForKeyword  Where('for')
+                               keyword: 'for'
+                    name: DPName  Where(' battery')
+                           value: 'battery'

@@ -1,0 +1,136 @@
+CompositeNDP
+ (loaded as 'battery')
+ provides endurance  [R[s]]
+ provides extra_payload  [R[kg]]
+ provides extra_power  [R[W]]
+ requires mass  [R[kg]]
+ 11 nodes, 11 edges
+ connections: 
+- Constraint(actuation.power <= _sum1._term01)
+- Constraint(_fun_extra_power.extra_power <= _sum1._term11)
+- Constraint(_sum1._result1 <= _prod1._factor01)
+- Constraint(_fun_endurance.endurance <= _prod1._factor11)
+- Constraint(_prod1._result2 <= battery.capacity)
+- Constraint(_fun_extra_payload.extra_payload <= _sum2._term12)
+- Constraint(_sum2._result3 <= _mult1._x01)
+- Constraint(_mult1._y1 <= actuation.lift)
+- Constraint(_join_fname1._mass_0 <= _sum2._term02)
+- Constraint(_join_fname1._mass_1 <= _res_mass.mass)
+- Constraint(battery.mass <= _join_fname1._a)
+ names: 
+    _fun_endurance: SimpleWrap
+                      provides  endurance (R[s])
+                      requires  endurance (R[s])
+                     <class 'mcdp_dp.dp_identity.FunctionNode'>
+                      | Id(R[s])
+_fun_extra_payload: SimpleWrap
+                      provides extra_payload (R[kg])
+                      requires extra_payload (R[kg])
+                     <class 'mcdp_dp.dp_identity.FunctionNode'>
+                      | Id(R[kg])
+  _fun_extra_power: SimpleWrap
+                      provides extra_power (R[W])
+                      requires extra_power (R[W])
+                     <class 'mcdp_dp.dp_identity.FunctionNode'>
+                      | Id(R[W])
+      _join_fname1: SimpleWrap
+                      provides         _a (R[kg])
+                      requires    _mass_0 (R[kg])
+                      requires    _mass_1 (R[kg])
+                     <class 'mcdp_dp.dp_max.MeetNDual'>
+                      | Mux(R[kg] -> PosetProduct(2: R[kg],R[kg]), [(), ()])    I = R[kg]
+            _mult1: SimpleWrap
+                      provides       _x01 (R[kg])
+                      requires        _y1 (R[N])
+                     <class 'mcdp_dp.dp_generic_unary.WrapAMap'>
+                      | WrapAMap(MultValueMap:R[kg]→R[N])
+            _prod1: SimpleWrap
+                      provides  _factor01 (R[W])
+                      provides  _factor11 (R[s])
+                      requires   _result2 (R[J])
+                     <class 'mcdp_dp.dp_sum.ProductN'>
+                      | WrapAMap(ProductNMap:R[W]×R[s]→R[J])
+         _res_mass: SimpleWrap
+                      provides       mass (R[kg])
+                      requires       mass (R[kg])
+                     <class 'mcdp_dp.dp_identity.ResourceNode'>
+                      | Id(R[kg])
+             _sum1: SimpleWrap
+                      provides    _term01 (R[W])
+                      provides    _term11 (R[W])
+                      requires   _result1 (R[W])
+                     <class 'mcdp_dp.dp_sum.SumNDP'>
+                      | WrapAMap(SumNMap(R[W]×R[W] -> R[W]))
+             _sum2: SimpleWrap
+                      provides    _term02 (R[kg])
+                      provides    _term12 (R[kg])
+                      requires   _result3 (R[kg])
+                     <class 'mcdp_dp.dp_sum.SumNDP'>
+                      | WrapAMap(SumNMap(R[kg]×R[kg] -> R[kg]))
+         actuation: CompositeNDP
+                     provides lift  [R[N]]
+                     requires power  [R[W]]
+                     5 nodes, 5 edges
+                     connections:
+                    - Constraint(_prod1._result1 <= _mult1._x01)
+                    - Constraint(_mult1._y1 <= _res_power.power)
+                    - Constraint(_join_fname1._lift_0 <= _prod1._factor01)
+                    - Constraint(_join_fname1._lift_1 <= _prod1._factor11)
+                    - Constraint(_fun_lift.lift <= _join_fname1._a)
+                     names:
+                       _fun_lift: SimpleWrap
+                                    provides       lift (R[N])
+                                    requires       lift (R[N])
+                                   <class 'mcdp_dp.dp_identity.FunctionNode'>
+                                    | Id(R[N])
+                    _join_fname1: SimpleWrap
+                                    provides         _a (R[N])
+                                    requires    _lift_0 (R[N])
+                                    requires    _lift_1 (R[N])
+                                   <class 'mcdp_dp.dp_max.MeetNDual'>
+                                    | Mux(R[N] -> PosetProduct(2: R[N],R[N]), [(), ()])    I = R[N]
+                          _mult1: SimpleWrap
+                                    provides       _x01 (R[N²])
+                                    requires        _y1 (R[W])
+                                   <class 'mcdp_dp.dp_generic_unary.WrapAMap'>
+                                    | WrapAMap(MultValueMap:R[N²]→R[W])
+                          _prod1: SimpleWrap
+                                    provides  _factor01 (R[N])
+                                    provides  _factor11 (R[N])
+                                    requires   _result1 (R[N²])
+                                   <class 'mcdp_dp.dp_sum.ProductN'>
+                                    | WrapAMap(ProductNMap:R[N]×R[N]→R[N²])
+                      _res_power: SimpleWrap
+                                    provides      power (R[W])
+                                    requires      power (R[W])
+                                   <class 'mcdp_dp.dp_identity.ResourceNode'>
+                                    | Id(R[W])
+           battery: CompositeNDP
+                     provides capacity  [R[J]]
+                     requires mass  [R[kg]]
+                     4 nodes, 3 edges
+                     connections:
+                    - Constraint(_fun_capacity.capacity <= _mult1._x01)
+                    - Constraint(_mult1._y1 <= _conversion1._in01)
+                    - Constraint(_conversion1._out1 <= _res_mass.mass)
+                     names:
+                     _conversion1: SimpleWrap
+                                     provides      _in01 (R[J*kg/Wh])
+                                     requires      _out1 (R[kg])
+                                    <class 'mcdp_dp.conversion.Conversion'>
+                                     | WrapAMap(LinearMapComp:R[J*kg/Wh]→R[kg])
+                    _fun_capacity: SimpleWrap
+                                     provides   capacity (R[J])
+                                     requires   capacity (R[J])
+                                    <class 'mcdp_dp.dp_identity.FunctionNode'>
+                                     | Id(R[J])
+                           _mult1: SimpleWrap
+                                     provides       _x01 (R[J])
+                                     requires        _y1 (R[J*kg/Wh])
+                                    <class 'mcdp_dp.dp_generic_unary.WrapAMap'>
+                                     | WrapAMap(MultValueMap:R[J]→R[J*kg/Wh])
+                        _res_mass: SimpleWrap
+                                     provides       mass (R[kg])
+                                     requires       mass (R[kg])
+                                    <class 'mcdp_dp.dp_identity.ResourceNode'>
+                                     | Id(R[kg])
