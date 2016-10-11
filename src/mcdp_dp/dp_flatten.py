@@ -51,17 +51,22 @@ class Mux(WrapAMap):
                                              self.amap.coords.__repr__(), self.get_imp_space())
         return s
 
-class TakeFun(Mux):
+class TakeFun(WrapAMap):
     """ used by Context.ires_get_index 
     
         Only used for having an appropriate icon (one red, many green)
     """
-    pass
+    def __init__(self, F, coords):
+        amap = MuxMap(F, coords)
+        WrapAMap.__init__(self, amap)
 
-class TakeRes(Mux):
+
+class TakeRes(WrapAMap):
     """ Used by Context.ifun_get_index.
         Only used for having an appropriate icon (one green, many red). """
-    pass
+    def __init__(self, F, coords):
+        amap = MuxMap(F, coords)
+        WrapAMap.__init__(self, amap)
 
 
 def get_R_from_F_coords(F, coords):

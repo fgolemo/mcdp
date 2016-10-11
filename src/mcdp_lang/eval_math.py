@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_dp import MultValueMap, ProductNatN, ProductN, SumN, SumNNat, WrapAMap, sum_dimensionality_works, SumNRcompMap
+from mcdp_dp import MultValueMap, ProductNatN, ProductN, SumNNat, WrapAMap, sum_dimensionality_works, SumNRcompMap
+from mcdp_dp.dp_sum import SumNDP
 from mcdp_maps import MinusValueMap, MultNat, PlusNat, PlusValueMap, SumNInt, PlusValueRcompMap, SumNRcomp
 from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits, Space,
     express_value_in_isomorphic_space, get_types_universe, mult_table, Rcomp)
@@ -342,7 +343,7 @@ def eval_PlusN_(constants, resources, context):
                     msg += '- %s has type %s\n' % (r, rt)
                 raise_desc(DPSemanticError, 'Incompatible units:\n%s' % msg)
 
-            dp = SumN(Fs, R)
+            dp = SumNDP(Fs, R)
         elif all(isinstance(_, Nat) for _ in resources_types):
             # natural number
             R = Nat()

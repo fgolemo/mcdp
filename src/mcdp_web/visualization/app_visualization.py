@@ -1,8 +1,9 @@
+from mcdp_lang.syntax import Syntax
+from mcdp_library import MCDPLibrary
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM
 from mcdp_report.html import ast_to_html
-from mcdp_library.library import MCDPLibrary
 from mocdp.exceptions import DPSyntaxError
-from mcdp_lang.syntax import Syntax
+
 
 class AppVisualization():
 

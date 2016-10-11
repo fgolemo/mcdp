@@ -1,0 +1,12 @@
+# test connected
+# todo: verify 1 block
+cdp {  
+    provides x [s] 
+    requires y [m/s]
+
+    h = 12 [R] + 14 [R] * (15 [R] + 1 [R])
+    g = 9.81 m/s^2
+ 	  
+    y >= g * h * x
+
+}

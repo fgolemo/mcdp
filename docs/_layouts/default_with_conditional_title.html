@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+  {% include head.html %}
+
+  <body>
+
+    <!-- % include header.html % -->
+    <!-- <p style='color:red'>Temporary pages - please check back in a few days.</p> -->
+    <table border=0 cellborder=0 style='width: 100%'>
+    <tr style='height: 7em'>
+    <td style='text-align: right;'>
+    {% if page.title != 'Home' %} 
+      <span style='color: grey; font-weight: bold'>Monotone<br/>Co-Design<br/>Problems</span>
+    {% endif %}
+    </td>
+    <td style='padding-left: 5em;'>
+    <h1> 
+    {% if page.title != 'Home' %} 
+      {{ page.title }} 
+    {% else %}
+      Monotone Co-Design Problems (MCDP)
+    {% endif %}
+    </h1>
+    </td>
+    </tr>
+    <tr>
+    <td style='width: 10em; valign: top;' valign='top'>
+    {% include nav.html %}
+    </td>
+    <td style='' valign='top'>
+    <div class="page-content">
+      <div class="wrapper">
+        {{ content }}
+      </div>
+    </div>
+    </td>
+    </tr>
+    </table>
+    <!-- {% include footer.html %} -->
+
+  </body>
+
+</html>

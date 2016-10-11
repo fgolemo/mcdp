@@ -1,0 +1,9 @@
+# test connected
+cdp {  
+    provides x [s] 
+    requires y [s]
+
+    z = 1 year + 12 days
+    y >= x + 1 week + (1 day + (x + 1 month + z))
+
+}

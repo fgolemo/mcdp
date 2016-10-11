@@ -1,0 +1,34 @@
+# test connected
+cdp {  
+    provides T [s] 
+    provides W0 [kg]
+    provides P0 [W]
+
+    sub battery = abstract cdp {
+    	provides capacity [J] 
+        provides one_over_alpha [kg/J]
+    	requires mass     [kg] 
+
+        mass >= capacity * one_over_alpha
+    }
+
+    provides one_over_alpha using battery
+
+    sub actuation = abstract cdp {
+    	provides lift  	[N]
+    	requires power [W]
+        gamma =  10 W/N
+        power >= square(lift) * gamma 
+    }
+
+    energy = (actuation.power + P0) * T
+    battery.capacity >= energy
+
+    g = 9.81 m/s^2
+ 	weight = (battery.mass + W0) * g
+    actuation.lift >= weight
+
+    requires mass for battery
+ 
+    battery.mass <= 0.086 kg
+}

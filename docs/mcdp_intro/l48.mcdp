@@ -1,0 +1,9 @@
+# test connected  
+cdp {
+    provides endurance [s]
+    provides power [W]
+    
+    energy = endurance * power
+    
+    requires e2 >= energy + 2.0 [J]
+}

@@ -214,7 +214,6 @@ def check_ndp_grap_imp1():
     out = 'out/check_ndp_grap_imp1'
     plot_different_solutions(libname, ndpname, query, out)
 
-
 @comptest
 def check_ndp_grap_imp2():
     libname = 'batteries_v1'
@@ -250,8 +249,7 @@ def plot_different_solutions(libname, ndpname, query, out, upper=None):
     if not os.path.exists(out):
         os.makedirs(out)
     library = get_test_library(libname)
-    library.use_cache_dir(os.path.join(out, 'cache'))
-
+    #library.use_cache_dir(os.path.join(out, 'cache'))
 
     ndp = library.load_ndp(ndpname)
 

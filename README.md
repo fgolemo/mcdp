@@ -3,20 +3,21 @@
 **PyMCDP** is a Python interpreter and solver for Monotone Co-Design Problems.
 It is currently in beta-testing. Please email censi@mit.edu if you wish to help.
 
-Please see <http://mcdp.mit.edu> for an introduction (or some [examples][examples]).
+Please see <http://mcdp.mit.edu> for an introduction (or see [the manual][manual]).
 
-[examples]: http://mcdp.mit.edu/examples.html
+[manual]: http://mcdp.mit.edu/media/pymcdp-manual.html
 
 *Below, an example of a graphical representation of an MCDP (left)
 along with the MCDPL snippet that describes it (right)*
 
 <table>
  <tr>
- <td><img src="out_expected/battery_minimal-clean.png" width="400px"/></td>
- <td><img src="out_expected/battery_minimal-syntax_pdf.png" width="300px"/>
+ <td><img src="docs/media/battery-out_expected3/battery_minimal-ndp_greenredsym.png" width="400px"/></td>
+ <td><img src="docs/media/battery-out_expected3/battery_minimal-syntax_pdf.png" width="300px"/>
  </td>
  </tr>
 </table>
+
 
 ## Installation
 
@@ -111,15 +112,15 @@ will produce these graphs:
 <table>
     <tr>
         <td>Syntax highlighting</td>
-        <td><a href="out_expected/battery-syntax_pdf.png">
-            <img src="out_expected/battery-syntax_pdf.png" height="500px"/>
+        <td><a href="docs/media/battery-out_expected3/battery-syntax_pdf.png">
+            <img src="docs/media/battery-out_expected3/battery-syntax_pdf.png" height="500px"/>
             </a>
         </td>
     </tr>
-    <tr><td>Verbose graph</td><td><a href="out_expected/battery-default.png"><img src="out_expected/battery-default.png"/></a></td></tr>
-    <tr><td>Cleaned-up graph</td><td ><a href="out_expected/battery-clean.png">
-    <img src="out_expected/battery-clean.png" height="300px"/></a></td></tr>
-    <tr><td>Tree representation</td><td><img src="out_expected/battery-dp_tree.png"/></td></tr>
+    <tr><td>Verbose graph</td><td><a href="docs/media/battery-out_expected3/battery-ndp_graph_enclosed_LR.png"><img src="docs/media/battery-out_expected3/battery-ndp_graph_enclosed_LR.png"/></a></td></tr>
+<!--     <tr><td>Cleaned-up graph</td><td ><a href="docs/media/battery-out_expected3/battery-clean.png">
+    <img src="docs/media/battery-out_expected3/battery-clean.png" height="300px"/></a></td></tr> -->
+    <tr><td>Tree representation</td><td><img src="docs/media/battery-out_expected3/battery-dp_graph_tree.png"/></td></tr>
     </tr>
 </table>
 
@@ -137,19 +138,19 @@ of monotone problems.)
 
 <table>
     <tr><td colspan="2">
-        <img src="animations/model.png" width="500px"/>
+        <img src="docs/media/animations/model.png" width="500px"/>
     </td></tr>
     <tr>
-     <td><img src="animations/plusinvnat2-nat4-problem.png" width="300px"/></td>
-     <td><img src="animations/plusinvnat2-nat10-problem.png" width="300px"/>
+     <td><img src="docs/media/animations/plusinvnat2-nat4-problem.png" width="300px"/></td>
+     <td><img src="docs/media/animations/plusinvnat2-nat10-problem.png" width="300px"/>
      </td>
      </tr>
      <tr>
-     <td><img src="animations/plusinvnat2-nat4.gif" width="300px"/></td>
-     <td><img src="animations/plusinvnat2-nat10.gif" width="300px"/></td>
+     <td><img src="docs/media/animations/plusinvnat2-nat4.gif" width="300px"/></td>
+     <td><img src="docs/media/animations/plusinvnat2-nat10.gif" width="300px"/></td>
      </tr>
      <tr>
-     <td colspan="2"><img src="animations/legend.png" width="500px"/></td>
+     <td colspan="2"><img src="docs/media/animations/legend.png" width="500px"/></td>
      </tr>
 </table>
 

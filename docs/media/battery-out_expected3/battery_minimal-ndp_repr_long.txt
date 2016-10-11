@@ -1,0 +1,51 @@
+CompositeNDP
+ (loaded as 'battery_minimal')
+ provides endurance  [R[s]]
+ provides payload  [R[kg]]
+ 7 nodes, 7 edges
+ connections: 
+- Constraint(_fun_endurance.endurance <= _prod1._factor01)
+- Constraint(actuation.power <= _prod1._factor11)
+- Constraint(_prod1._result1 <= battery.capacity)
+- Constraint(battery.mass <= _sum1._term01)
+- Constraint(_fun_payload.payload <= _sum1._term11)
+- Constraint(_sum1._result2 <= _mult1._x01)
+- Constraint(_mult1._y1 <= actuation.lift)
+ names: 
+_fun_endurance: SimpleWrap
+                  provides  endurance (R[s])
+                  requires  endurance (R[s])
+                 <class 'mcdp_dp.dp_identity.FunctionNode'>
+                  | Id(R[s])
+  _fun_payload: SimpleWrap
+                  provides    payload (R[kg])
+                  requires    payload (R[kg])
+                 <class 'mcdp_dp.dp_identity.FunctionNode'>
+                  | Id(R[kg])
+        _mult1: SimpleWrap
+                  provides       _x01 (R[kg])
+                  requires        _y1 (R[N])
+                 <class 'mcdp_dp.dp_generic_unary.WrapAMap'>
+                  | WrapAMap(MultValueMap:R[kg]→R[N])
+        _prod1: SimpleWrap
+                  provides  _factor01 (R[s])
+                  provides  _factor11 (R[W])
+                  requires   _result1 (R[J])
+                 <class 'mcdp_dp.dp_sum.ProductN'>
+                  | WrapAMap(ProductNMap:R[s]×R[W]→R[J])
+         _sum1: SimpleWrap
+                  provides    _term01 (R[kg])
+                  provides    _term11 (R[kg])
+                  requires   _result2 (R[kg])
+                 <class 'mcdp_dp.dp_sum.SumNDP'>
+                  | WrapAMap(SumNMap(R[kg]×R[kg] -> R[kg]))
+     actuation: SimpleWrap
+                  provides       lift (R[N])
+                  requires      power (R[W])
+                 <class 'mcdp_dp.dp_dummy.Template'>
+                  | Template(R[N]→R[W])
+       battery: SimpleWrap
+                  provides   capacity (R[J])
+                  requires       mass (R[kg])
+                 <class 'mcdp_dp.dp_dummy.Template'>
+                  | Template(R[J]→R[kg])

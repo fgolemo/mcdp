@@ -16,4 +16,21 @@ finite_poset {
   TypeC  <= TypeL
   TypeC  <= TypeN
   TypeC  <= TypeO
+
+  None <= TypeA 
+  None <= TypeB 
+  None <= TypeC 
+  None <= TypeD 
+  None <= TypeE 
+  None <= TypeF  
+  None <= TypeG  
+  None <= TypeH  
+  None <= TypeI2 
+  None <= TypeI3 
+  None <= TypeJ 
+  None <= TypeK 
+  None <= TypeL 
+  None <= TypeM 
+  None <= TypeN  
+  None <= TypeO
 }

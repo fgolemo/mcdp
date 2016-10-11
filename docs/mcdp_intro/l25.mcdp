@@ -1,0 +1,8 @@
+# test semantic_error
+# This should fail because -2 is not in Rcomp
+mcdp  {
+    provides f [g]
+    requires r [g]
+    
+    r >= f * -2 [R]
+}

@@ -1,0 +1,35 @@
+digraph G { 
+    rankdir=LR;
+   subgraph cluster1 {
+   color="white";
+   shape="plaintext";
+   label="";
+      node9 [shape="none",label="endurance [s]"];
+   
+      node10 [shape="none",label="payload [kg]"];
+   
+   }
+   node2 [shape="box",style="rounded",label="× 9.81000 m/s²"];
+   
+   node3 [shape="none",fixedsize="true",imagescale="true",image="/var/folders/kf/_zwsc1_j2wn8smr7xtrrpnxc0000gn/T/tmp9Ahoyedp-icons/resized/150/SumN.png",label="",height="1.0"];
+   
+   node4 [imagescale="true",shape="box",label=<<TABLE CELLBORDER='0' BORDER='0'><TR><TD>battery</TD></TR><TR><TD><IMG SRC='/var/folders/kf/_zwsc1_j2wn8smr7xtrrpnxc0000gn/T/tmp9Ahoyedp-icons/resized/150/battery.png' SCALE='TRUE'/></TD></TR></TABLE>>,style="rounded",height="1.0"];
+   
+   node5 [imagescale="true",shape="box",label=<<TABLE CELLBORDER='0' BORDER='0'><TR><TD>actuation</TD></TR><TR><TD><IMG SRC='/var/folders/kf/_zwsc1_j2wn8smr7xtrrpnxc0000gn/T/tmp9Ahoyedp-icons/resized/150/default.png' SCALE='TRUE'/></TD></TR></TABLE>>,style="rounded",height="1.0"];
+   
+   node6 [shape="none",fixedsize="true",imagescale="true",image="/var/folders/kf/_zwsc1_j2wn8smr7xtrrpnxc0000gn/T/tmp9Ahoyedp-icons/resized/150/ProductN.png",label="",height="1.0"];
+   
+   node7 [fixedsize="true",imagescale="true",shape="plaintext",image="/var/folders/kf/_zwsc1_j2wn8smr7xtrrpnxc0000gn/T/tmp9Ahoyedp-icons/resized/150/leq.png",label=""];
+   
+   node8 [fixedsize="true",imagescale="true",shape="plaintext",image="/var/folders/kf/_zwsc1_j2wn8smr7xtrrpnxc0000gn/T/tmp9Ahoyedp-icons/resized/150/leq.png",label=""];
+   
+   node10->node3 [fontcolor="darkgreen"];
+   node9->node6 [fontcolor="darkgreen"];
+   node2->node8 [fontcolor="red",weight="0.5",label="[N]"];
+   node3->node2 [label="[kg]"];
+   node4->node3 [label="mass [kg]"];
+   node5->node6 [label="power [W]"];
+   node6->node7 [fontcolor="red",weight="0.5",label="[J]"];
+   node7->node4 [fontcolor="darkgreen",weight="0.5",label="capacity [J]"];
+   node8->node5 [fontcolor="darkgreen",weight="0.5",label="lift [N]"];
+   }

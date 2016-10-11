@@ -6,7 +6,7 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (Constant, ConstantMinimals, Conversion,
     Identity, InvMult2, InvPlus2, InvPlus2Nat, JoinNDP, Limit, Max, MeetNDual,
-    Min, Mux, MuxMap, ProductN, SumN, SumNNat, TakeFun, TakeRes,
+    Min, Mux, MuxMap, ProductN, SumNDP, SumNNat, TakeFun, TakeRes,
     WrapAMap)
 from mcdp_lang.blocks import get_missing_connections
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
@@ -15,7 +15,7 @@ from mocdp import logger
 from mocdp.comp import CompositeNamedDP, SimpleWrap
 from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 from mocdp.comp.interfaces import NamedDP
-from mocdp.exceptions import mcdp_dev_warning
+from mocdp.exceptions import mcdp_dev_warning, DPInternalError
 from mocdp.ndp import NamedDPCoproduct
 
 
@@ -253,7 +253,7 @@ def create(gdc, ndp, plotting_info):
 
 def is_simple(ndp):
     return isinstance(ndp, SimpleWrap) and isinstance(ndp.dp,
-     (Min, Max, Identity, SumN, ProductN, InvPlus2, InvMult2))
+     (Min, Max, Identity, SumNDP, ProductN, InvPlus2, InvMult2))
 
 
 def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
@@ -272,7 +272,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
     # This is a list of either PrimitiveDP or Maps
     special = [
 #         (Sum, ''),
-        (SumN, ''),
+        (SumNDP, ''),
         (SumNNat, ''),
 #         (Product, ''),
         (ProductN, ''),
@@ -288,6 +288,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
 
     def is_special_dp(dp):
         if isinstance(dp, Mux):
+            
             coords = dp.coords
             if coords == [(), ()]:
                 return True
@@ -319,15 +320,19 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
         'default',
     ]
     best_icon = gdc.get_icon(iconoptions)
-#     print('best_icon: %r' % best_icon)
-#     print('only_string: %r' % only_string)
-#     print('is special: %r' % is_special)
+    #print('icon options: %s' % iconoptions)
+    #print('best_icon: %r' % best_icon)
+    #print('only_string: %r' % only_string)
+    #print('is special: %r' % is_special)
+    if is_special and 'default.png' in best_icon: # pragma: no cover
+        raise_desc(DPInternalError, 'Could not find icon for special',
+                   iconoptions=iconoptions, is_special=is_special, best_icon=best_icon,
+                   only_string=only_string)
+        
     if only_string:
 
         label = type(ndp.dp).__name__
 
-#         if isinstance(ndp.dp, GenericUnary):
-#             label = ndp.dp.function.__name__
 
         if isinstance(ndp.dp, WrapAMap):
             label = ndp.dp.diagram_label()
@@ -416,7 +421,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
 
     node = gdc.newItem(label)
 
-    if isinstance(ndp.dp, (SumN,)):
+    if isinstance(ndp.dp, (SumNDP,)):
         gdc.styleApply("sum", node)
 
     if isinstance(ndp, OnlyTemplate):

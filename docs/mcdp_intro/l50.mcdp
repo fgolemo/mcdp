@@ -1,0 +1,10 @@
+# test connected
+cdp {
+    sub motor = template cdp {
+        provides speed [R]
+        provides torque [R]
+        provides x [R]
+    }
+            
+    provides speed, torque, x using motor
+}

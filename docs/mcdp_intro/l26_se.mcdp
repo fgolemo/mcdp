@@ -1,0 +1,5 @@
+# test semantic_error
+  cdp  {
+        provides a [R]
+        a <= 5.0 [g] # invalid unit
+    }

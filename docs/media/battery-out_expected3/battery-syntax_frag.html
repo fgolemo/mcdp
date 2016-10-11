@@ -1,0 +1,44 @@
+<pre><code><span class='line-gutter'> 1</span><span class='line-content'><span class='BuildProblem'><span class='MCDPKeyword'>mcdp</span> {  </span>
+<span class='line-gutter'> 2</span><span class='line-content'>    <span class="comment"># We need to fly for this duration</span></span>
+<span class='line-gutter'> 3</span><span class='line-content'>    <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> endurance</span> [<span class='RcompUnit'>s</span>]</span> </span>
+<span class='line-gutter'> 4</span><span class='line-content'>    <span class="comment"># While carrying this extra payload</span></span>
+<span class='line-gutter'> 5</span><span class='line-content'>    <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> extra_payload</span> [<span class='RcompUnit'>kg</span>]</span></span>
+<span class='line-gutter'> 6</span><span class='line-content'>    <span class="comment"># And providing this extra power</span></span>
+<span class='line-gutter'> 7</span><span class='line-content'>    <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> extra_power</span> [<span class='RcompUnit'>W</span>]</span></span>
+<span class='line-gutter'> 8</span><span class='line-content'></span>
+<span class='line-gutter'> 9</span><span class='line-content'>    <span class="comment"># Sub-design problem: choose the battery</span></span>
+<span class='line-gutter'>10</span><span class='line-content'>    <span class='SetNameNDPInstance'><span class='DPName'>battery</span> = <span class='DPInstance'><span class='InstanceKeyword'>instance</span> <span class='BuildProblem'><span class='MCDPKeyword'>mcdp</span> {</span>
+<span class='line-gutter'>11</span><span class='line-content'>        <span class="comment"># A battery provides capacity</span></span>
+<span class='line-gutter'>12</span><span class='line-content'>        <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> capacity</span> [<span class='RcompUnit'>J</span>]</span>        </span>
+<span class='line-gutter'>13</span><span class='line-content'>        <span class="comment"># and requires some mass to be transported</span></span>
+<span class='line-gutter'>14</span><span class='line-content'>        <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> mass</span> [<span class='RcompUnit'>kg</span>]</span> </span>
+<span class='line-gutter'>15</span><span class='line-content'>        <span class="comment"># requires cost [$]</span></span>
+<span class='line-gutter'>16</span><span class='line-content'></span>
+<span class='line-gutter'>17</span><span class='line-content'>        <span class='SetNameRValue'><span class='SetNameGenericVar'>specific_energy_Li_Ion</span> <span class='eq'>=</span> <span class='SimpleValue'><span class='ValueExpr'>500</span> <span class='RcompUnit'>Wh / kg </span>
+<span class='line-gutter'>18</span><span class='line-content'></span>
+<span class='line-gutter'>19</span><span class='line-content'>        </span></span></span><span class='Constraint'><span class='VariableRef'>mass</span><span class='geq'> &gt;=</span> <span class='Divide'><span class='VariableRef'>capacity</span> <span class='bar'>/</span> <span class='VariableRef'>specific_energy_Li_Ion</span></span></span></span>
+<span class='line-gutter'>20</span><span class='line-content'>    }</span></span></span></span>
+<span class='line-gutter'>21</span><span class='line-content'></span>
+<span class='line-gutter'>22</span><span class='line-content'>    <span class="comment"># Sub-design problem: actuation</span></span>
+<span class='line-gutter'>23</span><span class='line-content'>    <span class='SetNameNDPInstance'><span class='DPName'>actuation</span> = <span class='DPInstance'><span class='InstanceKeyword'>instance</span> <span class='BuildProblem'><span class='MCDPKeyword'>mcdp</span> {</span>
+<span class='line-gutter'>24</span><span class='line-content'>        <span class="comment"># actuators need to provide this lift</span></span>
+<span class='line-gutter'>25</span><span class='line-content'>        <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> lift</span> [<span class='RcompUnit'>N</span>]</span></span>
+<span class='line-gutter'>26</span><span class='line-content'>        <span class="comment"># and will require power</span></span>
+<span class='line-gutter'>27</span><span class='line-content'>        <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> power</span> [<span class='RcompUnit'>W</span>]</span></span>
+<span class='line-gutter'>28</span><span class='line-content'>        <span class="comment"># simple model: quadratic</span></span>
+<span class='line-gutter'>29</span><span class='line-content'>        <span class='SetNameRValue'><span class='SetNameGenericVar'>c</span> <span class='eq'>=</span> <span class='SimpleValue'><span class='ValueExpr'>10.0</span> <span class='RcompUnit'>W/N^2</span></span></span></span>
+<span class='line-gutter'>30</span><span class='line-content'>        <span class='Constraint'><span class='VariableRef'>power</span><span class='geq'> &gt;=</span> <span class='MultN'><span class='VariableRef'>lift</span> <span class='times'>*</span><span class='VariableRef'> lift</span> <span class='times'>*</span><span class='VariableRef'> c</span></span></span></span>
+<span class='line-gutter'>31</span><span class='line-content'>    }</span></span></span></span>
+<span class='line-gutter'>32</span><span class='line-content'>    <span class="comment"># Co-design constraint: battery must be large enough</span></span>
+<span class='line-gutter'>33</span><span class='line-content'>    <span class='SetNameRValue'><span class='SetNameGenericVar'>power</span> <span class='eq'>=</span> <span class='PlusN'><span class='Resource'><span class='DPName'>actuation</span><span class='DotPrep'>.</span><span class='RName'>power</span></span> <span class='plus'>+</span> <span class='VariableRef'>extra_power</span></span></span></span>
+<span class='line-gutter'>34</span><span class='line-content'>    <span class='SetNameRValue'><span class='SetNameGenericVar'>energy</span> <span class='eq'>=</span> <span class='MultN'><span class='VariableRef'>power</span> <span class='times'>*</span><span class='VariableRef'> endurance</span></span></span></span>
+<span class='line-gutter'>35</span><span class='line-content'>    <span class='Constraint'><span class='Function'><span class='DPName'>battery</span><span class='DotPrep'>.</span><span class='FName'>capacity</span></span><span class='geq'> &gt;=</span> <span class='VariableRef'>energy</span></span></span>
+<span class='line-gutter'>36</span><span class='line-content'></span>
+<span class='line-gutter'>37</span><span class='line-content'>    <span class="comment"># Co-design constraint: actuators must be powerful enough</span></span>
+<span class='line-gutter'>38</span><span class='line-content'>    <span class='SetNameRValue'><span class='SetNameGenericVar'>gravity</span> <span class='eq'>=</span> <span class='SimpleValue'><span class='ValueExpr'>9.81</span> <span class='RcompUnit'>m/s^2</span></span></span></span>
+<span class='line-gutter'>39</span><span class='line-content'>    <span class='SetNameRValue'><span class='SetNameGenericVar'>weight</span> <span class='eq'>=</span> (<span class='MultN'><span class='PlusN'><span class='Resource'><span class='DPName'>battery</span><span class='DotPrep'>.</span><span class='RName'>mass</span></span> <span class='plus'>+</span> <span class='VariableRef'>extra_payload</span></span>) <span class='times'>*</span><span class='VariableRef'> gravity</span></span></span></span>
+<span class='line-gutter'>40</span><span class='line-content'>    <span class='Constraint'><span class='Function'><span class='DPName'>actuation</span><span class='DotPrep'>.</span><span class='FName'>lift</span></span><span class='geq'> &gt;=</span> <span class='VariableRef'>weight</span></span></span>
+<span class='line-gutter'>41</span><span class='line-content'></span>
+<span class='line-gutter'>42</span><span class='line-content'>    <span class="comment"># suppose we want to optimize for size of the battery</span></span>
+<span class='line-gutter'>43</span><span class='line-content'>    <span class='ResShortcut1'><span class='RequireKeyword'>requires</span><span class='RName'> mass</span> <span class='ForKeyword'>for</span><span class='DPName'> battery</span></span></span>
+<span class='line-gutter'>44</span><span class='line-content'>}</span></span></code></pre>

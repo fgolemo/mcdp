@@ -1,0 +1,136 @@
+BuildProblem  Where('mcdp {  \n provides endurance [s] \n provides payload   [kg]\n battery = instance template \n  mcdp {\n    provides capacity [J]\n    requires mass     [kg]\n  }\n actuation = instance template \n  mcdp {\n    provides lift  [N]\n    requires power [W]\n  }\n capacity provided by battery >= \n    endurance * (power required by actuation)\n g = 9.81 m/s^2\n lift provided by actuation >=\n    (mass required by battery + payload) * g\n}')
+ keyword: MCDPKeyword  Where('mcdp')
+           keyword: 'mcdp'
+ statements: List7  Where('provides endurance [s] \n provides payload   [kg]\n battery = instance template \n  mcdp {\n    provides capacity [J]\n    requires mass     [kg]\n  }\n actuation = instance template \n  mcdp {\n    provides lift  [N]\n    requires power [W]\n  }\n capacity provided by battery >= \n    endurance * (power required by actuation)\n g = 9.81 m/s^2\n lift provided by actuation >=\n    (mass required by battery + payload) * g')
+              e0: FunStatement  Where('provides endurance [s]')
+                   keyword: ProvideKeyword  Where('provides')
+                             keyword: 'provides'
+                   fname: FName  Where(' endurance')
+                           value: 'endurance'
+                   unit: RcompUnit  Where('s')
+                          pint_string: 's'
+              e1: FunStatement  Where('provides payload   [kg]')
+                   keyword: ProvideKeyword  Where('provides')
+                             keyword: 'provides'
+                   fname: FName  Where(' payload')
+                           value: 'payload'
+                   unit: RcompUnit  Where('kg')
+                          pint_string: 'kg'
+              e2: SetName  Where('battery = instance template \n  mcdp {\n    provides capacity [J]\n    requires mass     [kg]\n  }')
+                   keyword: None
+                   name: DPName  Where('battery')
+                          value: 'battery'
+                   dp_rvalue: DPInstance  Where(' instance template \n  mcdp {\n    provides capacity [J]\n    requires mass     [kg]\n  }')
+                               keyword: InstanceKeyword  Where('instance')
+                                         keyword: 'instance'
+                               dp_rvalue: MakeTemplate  Where('template \n  mcdp {\n    provides capacity [J]\n    requires mass     [kg]\n  }')
+                                           keyword: TemplateKeyword  Where('template')
+                                                     keyword: 'template'
+                                           dp_rvalue: BuildProblem  Where('mcdp {\n    provides capacity [J]\n    requires mass     [kg]\n  }')
+                                                       keyword: MCDPKeyword  Where('mcdp')
+                                                                 keyword: 'mcdp'
+                                                       statements: List2  Where('provides capacity [J]\n    requires mass     [kg]')
+                                                                    e0: FunStatement  Where('provides capacity [J]')
+                                                                         keyword: ProvideKeyword  Where('provides')
+                                                                                   keyword: 'provides'
+                                                                         fname: FName  Where(' capacity')
+                                                                                 value: 'capacity'
+                                                                         unit: RcompUnit  Where('J')
+                                                                                pint_string: 'J'
+                                                                    e1: ResStatement  Where('requires mass     [kg]')
+                                                                         keyword: RequireKeyword  Where('requires')
+                                                                                   keyword: 'requires'
+                                                                         rname: RName  Where(' mass')
+                                                                                 value: 'mass'
+                                                                         unit: RcompUnit  Where('kg')
+                                                                                pint_string: 'kg'
+              e3: SetName  Where('actuation = instance template \n  mcdp {\n    provides lift  [N]\n    requires power [W]\n  }')
+                   keyword: None
+                   name: DPName  Where('actuation')
+                          value: 'actuation'
+                   dp_rvalue: DPInstance  Where(' instance template \n  mcdp {\n    provides lift  [N]\n    requires power [W]\n  }')
+                               keyword: InstanceKeyword  Where('instance')
+                                         keyword: 'instance'
+                               dp_rvalue: MakeTemplate  Where('template \n  mcdp {\n    provides lift  [N]\n    requires power [W]\n  }')
+                                           keyword: TemplateKeyword  Where('template')
+                                                     keyword: 'template'
+                                           dp_rvalue: BuildProblem  Where('mcdp {\n    provides lift  [N]\n    requires power [W]\n  }')
+                                                       keyword: MCDPKeyword  Where('mcdp')
+                                                                 keyword: 'mcdp'
+                                                       statements: List2  Where('provides lift  [N]\n    requires power [W]')
+                                                                    e0: FunStatement  Where('provides lift  [N]')
+                                                                         keyword: ProvideKeyword  Where('provides')
+                                                                                   keyword: 'provides'
+                                                                         fname: FName  Where(' lift')
+                                                                                 value: 'lift'
+                                                                         unit: RcompUnit  Where('N')
+                                                                                pint_string: 'N'
+                                                                    e1: ResStatement  Where('requires power [W]')
+                                                                         keyword: RequireKeyword  Where('requires')
+                                                                                   keyword: 'requires'
+                                                                         rname: RName  Where(' power')
+                                                                                 value: 'power'
+                                                                         unit: RcompUnit  Where('W')
+                                                                                pint_string: 'W'
+              e4: Constraint  Where('capacity provided by battery >= \n    endurance * (power required by actuation)')
+                   function: Function  Where('capacity provided by battery')
+                              s: FName  Where('capacity')
+                                  value: 'capacity'
+                              keyword: ProvidedByKeyword  Where('provided by')
+                                        keyword: 'provided by'
+                              dp: DPName  Where(' battery')
+                                   value: 'battery'
+                   prep: geq  Where(' >=')
+                          glyph: '>='
+                   rvalue: MultN  Where('endurance * (power required by actuation')
+                            ops: List3  Where('endurance * (power required by actuation')
+                                  e0: VariableRef  Where('endurance')
+                                       name: 'endurance'
+                                  e1: times  Where('*')
+                                       glyph: '*'
+                                  e2: Resource  Where('power required by actuation')
+                                       s: RName  Where('power')
+                                           value: 'power'
+                                       keyword: RequiredByKeyword  Where('required by')
+                                                 keyword: 'required by'
+                                       dp: DPName  Where(' actuation')
+                                            value: 'actuation'
+              e5: SetNameGeneric  Where('g = 9.81 m/s^2')
+                   name: SetNameGenericVar  Where('g')
+                          value: 'g'
+                   eq: eq  Where('=')
+                        glyph: '='
+                   right_side: SimpleValue  Where('9.81 m/s^2')
+                                value: ValueExpr  Where('9.81')
+                                        value: 9.81
+                                space: RcompUnit  Where('m/s^2')
+                                        pint_string: 'm / s ^ 2'
+              e6: Constraint  Where('lift provided by actuation >=\n    (mass required by battery + payload) * g')
+                   function: Function  Where('lift provided by actuation')
+                              s: FName  Where('lift')
+                                  value: 'lift'
+                              keyword: ProvidedByKeyword  Where('provided by')
+                                        keyword: 'provided by'
+                              dp: DPName  Where(' actuation')
+                                   value: 'actuation'
+                   prep: geq  Where(' >=')
+                          glyph: '>='
+                   rvalue: MultN  Where('mass required by battery + payload) * g')
+                            ops: List3  Where('mass required by battery + payload) * g')
+                                  e0: PlusN  Where('mass required by battery + payload')
+                                       ops: List3  Where('mass required by battery + payload')
+                                             e0: Resource  Where('mass required by battery')
+                                                  s: RName  Where('mass')
+                                                      value: 'mass'
+                                                  keyword: RequiredByKeyword  Where('required by')
+                                                            keyword: 'required by'
+                                                  dp: DPName  Where(' battery')
+                                                       value: 'battery'
+                                             e1: plus  Where('+')
+                                                  glyph: '+'
+                                             e2: VariableRef  Where('payload')
+                                                  name: 'payload'
+                                  e1: times  Where('*')
+                                       glyph: '*'
+                                  e2: VariableRef  Where(' g')
+                                       name: 'g'

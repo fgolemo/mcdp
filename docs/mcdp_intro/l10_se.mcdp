@@ -1,0 +1,4 @@
+# test unconnected
+cdp {
+    sub battery = load battery
+}

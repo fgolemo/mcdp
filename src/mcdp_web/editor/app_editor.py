@@ -1,6 +1,7 @@
-from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
 from pyramid.renderers import render_to_response  # @UnresolvedImport
+
+from mocdp.exceptions import DPSemanticError, DPSyntaxError
 
 
 class AppEditor():
@@ -16,7 +17,8 @@ class AppEditor():
                         renderer='editor/edit_form.jinja2')
 
         config.add_route('edit_submit',
-                         self.get_lmv_url('{library}', '{model_name}', 'edit') + 'submit')
+                         self.get_lmv_url('{library}', '{model_name}', 'edit') 
+                         + 'submit')
 
         config.add_view(self.view_edit_submit, route_name='edit_submit')
 

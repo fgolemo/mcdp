@@ -1,0 +1,6 @@
+# test unconnected
+cdp {
+    requires g [R]
+    provides f [R] 
+}
+    

@@ -1,0 +1,13 @@
+# test connected
+mcdp {
+    sub times = dp {
+        provides a [R]
+        provides b [R]
+        requires c [R]
+ 
+        implemented-by load times_R
+    }
+
+    times.a >= times.c
+    times.b >= times.c 
+}
