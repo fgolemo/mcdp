@@ -120,7 +120,7 @@ will produce these graphs:
     <tr><td>Verbose graph</td><td><a href="docs/media/battery-out_expected3/battery-ndp_graph_enclosed_LR.png"><img src="docs/media/battery-out_expected3/battery-ndp_graph_enclosed_LR.png"/></a></td></tr>
 <!--     <tr><td>Cleaned-up graph</td><td ><a href="docs/media/battery-out_expected3/battery-clean.png">
     <img src="docs/media/battery-out_expected3/battery-clean.png" height="300px"/></a></td></tr> -->
-    <tr><td>Tree representation</td><td><img src="battery-dp_graph_tree.png"/></td></tr>
+    <tr><td>Tree representation</td><td><img src="docs/media/battery-out_expected3/battery-dp_graph_tree.png"/></td></tr>
     </tr>
 </table>
 
