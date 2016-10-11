@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
+import random
+
 from comptests.registrar import comptest
 from contracts import contract
 from mcdp_posets import Poset, PosetProduct, Rcomp
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima_n2
 import numpy as np
-import random
+
 
 @contract(n='>=1', ndim='>=1', m='>0')
 def get_random_points(n, ndim, m):
