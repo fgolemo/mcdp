@@ -10,6 +10,7 @@ import traceback
 from bs4 import BeautifulSoup
 
 from contracts import contract
+from mocdp import logger
 from mocdp.exceptions import mcdp_dev_warning
 import networkx as nx  # @UnresolvedImport
 from reprep.constants import MIME_PDF, MIME_PLAIN, MIME_PNG, MIME_SVG
@@ -33,11 +34,11 @@ def graphviz_run(filename_dot, output, prog='dot'):
         # print('done')
     except (CmdException, KeyboardInterrupt):
         emergency = 'emergency.dot'
-        print('saving to %r' % emergency)  # XXX
+        logger.error('saving to %r' % emergency)  # XXX
         contents = open(filename_dot).read()
         with open(emergency, 'w') as f:
             f.write(contents)
-        print(contents)
+#         print(contents)
         raise
 
 
@@ -107,36 +108,44 @@ def gg_figure(r, name, ggraph, do_png=True, do_pdf=True, do_svg=True,
 #                 f2.write(s)
 
         prog = 'dot'
-        if do_png:
-            with f.data_file('graph', MIME_PNG) as filename:
-                graphviz_run(filename_dot, filename, prog=prog)
-
-        if do_pdf:
-            with f.data_file('graph_pdf', MIME_PDF) as filename:
-                graphviz_run(filename_dot, filename, prog=prog)
-
-        if do_svg:
-            with f.data_file('graph_svg', MIME_SVG) as filename:
-                graphviz_run(filename_dot, filename, prog=prog)
-
-                soup = BeautifulSoup(open(filename).read(), 'lxml', from_encoding='utf-8')
-                for tag in soup.select('image'):
-                    href = tag['xlink:href']
-                    extensions = ['png', 'jpg']
-                    for ext in extensions:
-                        if ext in href:
-                            with open(href) as ff:
-                                png = ff.read()
-                            encoded = base64.b64encode(png)
-                            from mcdp_web.images.images import get_mime_for_format
-                            mime = get_mime_for_format(ext)
-                            src = 'data:%s;base64,%s' % (mime, encoded)
-                            tag['xlink:href'] = src
-
-                with codecs.open(filename, 'w', encoding='utf-8') as ff:
-                    s = str(soup)
-                    u = unicode(s, 'utf-8')
-                    ff.write(u)
+        try:
+                
+            if do_png:
+                with f.data_file('graph', MIME_PNG) as filename:
+                    graphviz_run(filename_dot, filename, prog=prog)
+    
+            if do_pdf:
+                with f.data_file('graph_pdf', MIME_PDF) as filename:
+                    graphviz_run(filename_dot, filename, prog=prog)
+    
+            if do_svg:
+                with f.data_file('graph_svg', MIME_SVG) as filename:
+                    graphviz_run(filename_dot, filename, prog=prog)
+    
+                    soup = BeautifulSoup(open(filename).read(), 'lxml', from_encoding='utf-8')
+                    for tag in soup.select('image'):
+                        href = tag['xlink:href']
+                        extensions = ['png', 'jpg']
+                        for ext in extensions:
+                            if ext in href:
+                                with open(href) as ff:
+                                    png = ff.read()
+                                encoded = base64.b64encode(png)
+                                from mcdp_web.images.images import get_mime_for_format
+                                mime = get_mime_for_format(ext)
+                                src = 'data:%s;base64,%s' % (mime, encoded)
+                                tag['xlink:href'] = src
+    
+                    with codecs.open(filename, 'w', encoding='utf-8') as ff:
+                        s = str(soup)
+                        u = unicode(s, 'utf-8')
+                        ff.write(u)
+        except CmdException as e:
+            if True:
+                mcdp_dev_warning('suppressing errors from graphviz')
+                logger.error('Graphivz failed')
+            else:
+                raise
 
         # MIME_GRAPHVIZ
         if do_dot:

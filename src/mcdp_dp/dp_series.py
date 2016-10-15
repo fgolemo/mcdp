@@ -178,10 +178,10 @@ class Series(PrimitiveDP):
                 v = self.dp2.solve_trace(u, t)
             mins.update(v.minimals)
 
-        ressp = self.get_res_space()
-        minimals = poset_minima(mins, ressp.leq)
+        R = self.get_res_space()
+        minimals = poset_minima(mins, R.leq)
 
-        us = UpperSet(minimals, ressp)
+        us = UpperSet(minimals, R)
 
         self._solve_cache[func] = us
         return trace.result(us)
@@ -203,8 +203,8 @@ class Series(PrimitiveDP):
         F = self.get_fun_space()
         maximals = poset_maxima(maxs, F.leq)
 
-        us = LowerSet(maximals)
-        return us
+        lf = LowerSet(maximals, F)
+        return lf
 
     def __repr__(self):
         return 'Series(%r, %r)' % (self.dp1, self.dp2)

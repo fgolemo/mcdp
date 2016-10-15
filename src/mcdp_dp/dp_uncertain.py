@@ -35,6 +35,9 @@ class UncertainGate(ApproximableDP):
     def solve(self, func):
         raise NotSolvableNeedsApprox(type(self))
 
+    def solve_r(self, func):
+        raise NotSolvableNeedsApprox(type(self))
+
     def evaluate(self, m):
         raise NotSolvableNeedsApprox(type(self))
 
@@ -42,18 +45,86 @@ class UncertainGate(ApproximableDP):
         return 'UncertainGate(%r)' % self.F0
 
     def get_lower_bound(self, n):  # @UnusedVariable
-        m1 = CheckOrder(self.F0)
-        m2 = MuxMap(self.F, coords=0)
-        dp = WrapAMap(MapComposition((m1, m2)))
-        # preserve_dp_attributes(self, dp)
-        return dp
+        return UncertainGateL(self.F0)
+#         m1 = CheckOrder(self.F0)
+#         m2 = MuxMap(self.F, coords=0)
+#         dp = WrapAMap(MapComposition((m1, m2)))
+#         return dp
 
     def get_upper_bound(self, n):  # @UnusedVariable
+        return UncertainGateU(self.F0)
+#         m1 = CheckOrder(self.F0)
+#         m2 = MuxMap(self.F, coords=1)
+#         dp = WrapAMap(MapComposition((m1, m2)))
+#         return dp
+    
+class UncertainGateU(WrapAMap):
+    """
+        h  :〈f1, f2〉⟼ {f2}
+        h* : f2 ⟼ {〈⊤, f2〉}
+    """
+    def __init__(self, F0):
+        F = PosetProduct((F0, F0))
+        m1 = CheckOrder(F0)
+        m2 = MuxMap(F, coords=1) # extract second coordinate
+        h = MapComposition((m1, m2))
+        hd = FirstTop(F0) 
+        WrapAMap.__init__(self, h, hd)
+
+
+class UncertainGateL(WrapAMap):
+    """
+        h  :〈f1, f2〉⟼ {f1}
+        h* : f1 ⟼ {〈f1, ⊤〉}     (SecondTop)
+    """
+    def __init__(self, F0):
+        F = PosetProduct((F0, F0))
         m1 = CheckOrder(self.F0)
-        m2 = MuxMap(self.F, coords=1)
-        dp = WrapAMap(MapComposition((m1, m2)))
-        # preserve_dp_attributes(self, dp)
-        return dp
+        m2 = MuxMap(F, coords=0) # extract second coordinate
+        h = MapComposition((m1, m2))
+        hd = SecondTop(F0) 
+        WrapAMap.__init__(self, h, hd)
+        
+
+class SecondTop(Map):
+    """
+        x ⟼〈x, ⊤〉
+    """
+    
+    def __init__(self, P):
+        cod = PosetProduct((P, P))
+        Map.__init__(self, dom=P, cod=cod)
+        self.top = P.get_top()
+    
+    def _call(self, x):
+        return (x, self.top)
+
+class FirstTop(Map):
+    """
+        x ⟼〈⊤, x〉
+    """
+    
+    def __init__(self, P):
+        cod = PosetProduct((P, P))
+        Map.__init__(self, dom=P, cod=cod)
+        self.top = P.get_top()
+    
+    def _call(self, x):
+        return (self.top, x)
+    
+class LMap(Map):
+    """
+        f ⟼〈⊥, f〉
+    """
+    def __init__(self, F):
+        F2 = PosetProduct((F, F))
+        Map.__init__(self, dom=F, cod=F2)
+        self.bottom = F.get_bottom()
+        
+    def _call(self, x):
+        return (self.bottom, x)
+
+    
 
 class CheckOrder(Map):
     def __init__(self, F0):
@@ -93,33 +164,56 @@ class UncertainGateSym(ApproximableDP):
     def evaluate(self, m):
         raise NotSolvableNeedsApprox(type(self))
 
-    def solve(self, func):
+    def solve(self, f):
+        raise NotSolvableNeedsApprox(type(self))
+
+    def solve_r(self, r):
         raise NotSolvableNeedsApprox(type(self))
 
     def __repr__(self):
         return 'UncertainGateSym(%r)' % self.F0
 
     def get_lower_bound(self, n):  # @UnusedVariable
-        dp = WrapAMap(LMap(self.F))
-        return dp
+        return LMapDP(self.F)
 
     def get_upper_bound(self, n):  # @UnusedVariable
-        dp = WrapAMap(UMap(self.F))
-        return dp
+        return UMapDP(self.F)
+
+
+class UMapDP(WrapAMap):
+    
+    def __init__(self, F):
+        amap = UMap(F)
+        WrapAMap.__init__(self, amap)
+
+class LMapDP(WrapAMap):
+    
+    def __init__(self, F):
+        amap = LMap(F)
+        WrapAMap.__init__(self, amap)
 
 
 class UMap(Map):
+    """
+        f ⟼〈f, ⊥〉
+    """
+    
     def __init__(self, F):
         F2 = PosetProduct((F, F))
         Map.__init__(self, dom=F, cod=F2)
         self.bottom = F.get_bottom()
+    
     def _call(self, x):
         return (x, self.bottom)
 
 class LMap(Map):
+    """
+        f ⟼〈⊥, f〉
+    """
     def __init__(self, F):
         F2 = PosetProduct((F, F))
         Map.__init__(self, dom=F, cod=F2)
         self.bottom = F.get_bottom()
+        
     def _call(self, x):
         return (self.bottom, x)

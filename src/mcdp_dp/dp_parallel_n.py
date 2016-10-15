@@ -61,22 +61,19 @@ class ParallelN(PrimitiveDP):
             F = self.get_fun_space()
             F.belongs(f)
 
-
         res = []
         for i, dp in enumerate(self.dps):
-            fi = f[i]
-            ri = dp.solve(fi)
+            ri = dp.solve(f[i])
             res.append(ri)
             
-        minimals = [_.minimals for _ in res]
-        s = []
-        for comb in itertools.product(*tuple(minimals)):
-            s.append(comb)
-
-        R = self.get_res_space()
-        res = R.Us(set(s))
-
-        return res
+        return upperset_product_multi(tuple(res))
+        
+    def solve_r(self, r):
+        res = []
+        for i, dp in enumerate(self.dps):
+            fi = dp.solve_r(r[i])
+            res.append(fi)
+        return lowerset_product_multi(tuple(res))    
 
     def evaluate(self, m):
         _, _, unpack = self._get_product()

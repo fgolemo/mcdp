@@ -3,9 +3,10 @@ from contracts import contract
 from contracts.utils import check_isinstance, indent, raise_desc
 from mcdp_posets import (
     Coproduct1, NotBelongs, NotEqual, get_types_universe, poset_minima)
-from mocdp.exceptions import do_extra_checks
+from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 
 from .primitive import NotFeasible, PrimitiveDP
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
 
 
 __all__ = [
@@ -54,7 +55,7 @@ class CoProductDP(PrimitiveDP):
 #         return self.dps[i].evaluate_f_m(f, xi)
 
     def get_implementations_f_r(self, f, r):
-        """ Returns a nonempty set of thinks in self.M.
+        """ Returns a nonempty set of elements of self.M.
             Might raise NotFeasible() """
         res = set()
         es = []
@@ -90,6 +91,7 @@ class CoProductDP(PrimitiveDP):
 
         s = []
 
+        mcdp_dev_warning('use specific operation on antichains')
         for dp in self.dps:
             rs = dp.solve(f)
             s.extend(rs.minimals)
@@ -97,6 +99,21 @@ class CoProductDP(PrimitiveDP):
         res = R.Us(poset_minima(s, R.leq))
 
         return res
+
+    def solve_r(self, r):
+        F = self.get_fun_space()
+
+        s = []
+
+        mcdp_dev_warning('use specific operation on antichains')
+        for dp in self.dps:
+            lf = dp.solve_r(r)
+            s.extend(lf.maximals)
+
+        res = F.Ls(poset_maxima(s, F.leq))
+
+        return res
+
 
     def __repr__(self):
         s = "^".join('%s' % x for x in self.dps)

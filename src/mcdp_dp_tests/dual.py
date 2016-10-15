@@ -1,9 +1,9 @@
-from mcdp_dp.primitive import NotSolvableNeedsApprox
-from mcdp_posets.uppersets import LowerSets
+from contracts.utils import raise_wrapped
+from mcdp_dp import NotSolvableNeedsApprox
+from mcdp_posets import LowerSets, UpperSets
+from mcdp_posets import NotBelongs
 from mcdp_posets.utils import poset_check_chain
 from mcdp_tests.generation import for_all_dps
-from mcdp_posets.space import NotBelongs
-from contracts.utils import raise_wrapped
 
 
 @for_all_dps
@@ -21,16 +21,23 @@ def dual01_chain(_, dp):
         return
 
     F = dp.get_fun_space()
+    R = dp.get_res_space()
     LF = LowerSets(F)
+    UR = UpperSets(R)
     
     poset_check_chain(LF, list(reversed(lfchain)))
 
-
     # now, for each functionality f, 
     # we know that the corresponding resource should be feasible
+    
     for lf, r in zip(lfchain, rchain):
+        print('r: %s' % R.format(r))
+        print('lf = h*(r) = %s' % LF.format(lf))
+        
         for f in lf.maximals:
+            print('  f = %s' % F.format(f))
             f_ur = dp.solve(f)
+            print('f_ur = h(f) =  %s' % UR.format(f_ur))
             try:
                 f_ur.belongs(r)
             except NotBelongs as e:

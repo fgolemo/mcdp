@@ -56,8 +56,12 @@ class CoProductDPLabels(PrimitiveDP):
 
         return set(res)
 
+    # For solve and solve_r, we don't care about implementations at all
     def solve(self, f):
         return self.dp.solve(f)
+
+    def solve_r(self, r):
+        return self.dp.solve_r(r)
 
     def __repr__(self):
         s = "^".join('%s:%s' % x for x in zip(self.labels, self.dp.dps))

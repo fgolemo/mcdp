@@ -323,31 +323,34 @@ def timeit(desc, minimum=None):
     if minimum is not None:
         if delta < minimum:
             return
-    logger.debug('timeit %s: %.2f s' % (desc, delta))
+    logger.debug('timeit %s: %.2f s (>= %s)' % (desc, delta, minimum))
     
+min_time_warn = 0.5
+
 def _load_primitivedp(libname, model_name):
     l = get_test_library(libname)
-    with timeit(model_name):
+    with timeit(model_name, minimum=min_time_warn):
         return l.load_primitivedp(model_name)
 
 def _load_template(libname, model_name):
     l = get_test_library(libname)
-    with timeit(model_name):
+    with timeit(model_name, minimum=min_time_warn):
         return l.load_template(model_name)
 
 def _load_value(libname, name):
     l = get_test_library(libname)
-    vu = l.load_constant(name)
+    with timeit(name, minimum=min_time_warn):
+        vu = l.load_constant(name)
     return vu
 
 def _load_poset(libname, model_name):
     l = get_test_library(libname)
-    with timeit(model_name):
+    with timeit(model_name, minimum=min_time_warn):
         return l.load_poset(model_name)
 
 def _load_ndp(libname, model_name):
     l = get_test_library(libname)
-    with timeit(model_name):
+    with timeit(model_name, minimum=min_time_warn):
         return l.load_ndp(model_name)
     
 #

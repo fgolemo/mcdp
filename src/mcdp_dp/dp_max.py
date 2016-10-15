@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from mcdp_maps import JoinNMap, Max1Map, MeetNMap
+from mcdp_maps.max1map import Max1dualMap
 from mcdp_posets import Poset
 
 from .dp_flatten import Mux
@@ -17,12 +18,15 @@ __all__ = [
 
 class Max1(WrapAMap):
     """
-        f -> max(value, f)
+        f ⟼ { max(value, f) }
+        r ⟼  {r} if r >= value
+               {} otherwise 
     """
     def __init__(self, F, value):
         assert isinstance(F, Poset)
         m = Max1Map(F, value)
-        WrapAMap.__init__(self, m)
+        md = Max1dualMap(R=F, value=value)
+        WrapAMap.__init__(self, m, md)
         self.value = value
     
     def __repr__(self):
@@ -30,7 +34,14 @@ class Max1(WrapAMap):
 
 
 class Min(WrapAMap):
-    """ Meet on a poset """
+    """ 
+        Meet on a poset  
+        
+        f1, f2 ⟼ { min(f1, f2) }
+        
+        r ⟼  {r} if r >= value
+               {} otherwise 
+    """
 
     def __init__(self, F):  #
         assert isinstance(F, Poset)
@@ -44,6 +55,8 @@ class Min(WrapAMap):
     
     def __repr__(self):
         return 'Min(%r)' % self.F0
+    
+    
 
 class JoinNDP(WrapAMap):
     def __init__(self, n, P):
@@ -54,9 +67,9 @@ class JoinNDP(WrapAMap):
 class MeetNDual(Mux):
     """ This is just a Mux 
     
-        f ↦ {(f, f, ..., f)} 
+        f ⟼ {(f, f, ..., f)} 
         
-        r, ..., r ↦ {min(r)}
+        r1, ..., rn ⟼ {min(r1, ..., rn)}
         
     """
     def __init__(self, n, P):

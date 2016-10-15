@@ -3,6 +3,7 @@ from contracts import contract
 from mcdp_posets import Poset, PosetProduct
 
 from .primitive import PrimitiveDP
+from mcdp_posets.space import NotBelongs
 
 
 __all__ = [
@@ -34,11 +35,16 @@ class Constant(PrimitiveDP):
         rs = self.R.U(self.c)
         return fs, rs
         
-    def solve(self, _):
+    def solve(self, f):
+        assert f == ()
         return self.R.U(self.c)
 
-    def solve_r(self, _):
-        return self.F.L(())
+    def solve_r(self, r):
+        F, R, c = self.F, self.R, self.c
+        if R.leq(c, r):
+            return F.L(()) # feasible
+        else:
+            return F.Ls([]) # infeasible
     
     def __repr__(self):
         return 'Constant(%s:%s)' % (self.R, self.c)
@@ -53,22 +59,31 @@ class ConstantMinimals(PrimitiveDP):
     """
     @contract(R=Poset)
     def __init__(self, R, values):
+        """ values: set of values """ 
         F = PosetProduct(())
         I = PosetProduct(())
         self.values = values
         PrimitiveDP.__init__(self, F=F, R=R, I=I)
+        self.ur = self.R.Us(self.values)
 
     def evaluate(self, i):
         assert i == ()
         lf = self.F.L(self.F.get_top())
-        ur = self.R.Us(self.values)
+        ur = self.ur
         return lf, ur
 
-    def solve(self, _):
-        return self.R.Us(self.values)
+    def solve(self, f):
+        assert f == ()
+        return self.ur
     
-    def solve_r(self, _):
-        return self.F.L(())
+    def solve_r(self, r):
+        F = self.F
+        try:
+            self.ur.belongs(r)
+            return F.L(()) # feasible
+        except NotBelongs:
+            return F.Ls([]) # infeasible
+        
 
     def __repr__(self):
         s = len(self.values)

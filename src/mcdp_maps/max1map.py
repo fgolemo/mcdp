@@ -1,4 +1,4 @@
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, raise_desc
 from mcdp_posets import Map, MapNotDefinedHere, NotJoinable
 from mocdp.exceptions import do_extra_checks
 
@@ -24,3 +24,23 @@ class Max1Map(Map):
             msg = 'Cannot compute join of elements.'
             raise_wrapped(MapNotDefinedHere, e, msg, value=self.value, x=x)
         return r
+
+
+class Max1dualMap(Map):
+    """
+        r -> { r   if r >= value
+               undefined  otherwise
+    """
+    def __init__(self, R, value):
+        if do_extra_checks():
+            R.belongs(value)
+
+        Map.__init__(self, R, R)
+        self.value = value
+        self.R = R
+
+    def _call(self, r):
+        if self.R.leq(self.value, r):
+            return r
+        else:
+            raise_desc(MapNotDefinedHere, 'unfeasible')
