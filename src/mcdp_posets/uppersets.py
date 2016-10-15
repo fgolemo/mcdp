@@ -375,29 +375,39 @@ class LowerSet(Space):
 
         return "↓{%s}" % contents
 
-
+# 
 @contract(s1=UpperSet, s2=UpperSet, returns=UpperSet)
 def upperset_product(s1, s2):
     assert isinstance(s1, UpperSet), s1
     assert isinstance(s2, UpperSet), s2
-    res = set(zip(s1.minimals, s2.minimals))
-    P = PosetProduct((s1.P, s2.P))
-    return UpperSet(res, P)
-
+    if len(s1.minimals) > 1 or len(s2.minimals) > 1:
+        msg = 'Broken code.'
+        raise_desc(AssertionError, msg)
+    return upperset_product_multi((s1, s2))
+ 
 @contract(s1=LowerSet, s2=LowerSet, returns=LowerSet)
 def lowerset_product(s1, s2):
     assert isinstance(s1, LowerSet), s1
     assert isinstance(s2, LowerSet), s2
-    res = set(zip(s1.maximals, s2.maximals))
-    P = PosetProduct((s1.P, s2.P))
-    return LowerSet(res, P)
+    if len(s1.maximals) > 1 or len(s2.maximals) > 1:
+        msg = 'Broken code.'
+        raise_desc(AssertionError, msg)
+
+    return lowerset_product_multi((s1, s2))
 
 @contract(ss='seq($LowerSet)', returns=LowerSet)
 def lowerset_product_multi(ss):
     Ps = tuple(_.P for _ in ss)
-    mins = tuple(_.maximals for _ in ss)
-    res = set(zip(*mins))
+    maxs = tuple(_.maximals for _ in ss)
+    res = set(itertools.product(*maxs))
     P = PosetProduct(Ps)
+    
+    from operator import mul
+    nout = len(res)
+    lengths = [len(_.maximals) for _ in ss]
+    ns = reduce(mul, lengths)
+    assert nout == ns, (nout, lengths, ns)
+    
     return LowerSet(res, P)
 
 @contract(ss='seq($UpperSet)', returns=UpperSet)
