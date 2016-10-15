@@ -39,6 +39,11 @@ class InvPlus2(ApproximableDP):
     def solve(self, f):
         raise NotSolvableNeedsApprox(type(self))
 
+    def solve_r(self, r):
+        r1, r2 = r
+        maxf = self.F.add(r1, r2)
+        return self.F.L(maxf)
+
     def evaluate(self, m):
         raise NotSolvableNeedsApprox(type(self))
 
@@ -111,6 +116,10 @@ class InvPlus2L(PrimitiveDP):
 
         return self.R.Us(options)
 
+    def solve_r(self, r):
+        r1, r2 = r
+        maxf = self.F.add(r1, r2)
+        return self.F.L(maxf)
 
 class InvPlus2U(PrimitiveDP):
 
@@ -156,6 +165,11 @@ class InvPlus2U(PrimitiveDP):
         for o in options:
             s.add((f * o, f * (1 - o)))
         return self.R.Us(s)
+
+    def solve_r(self, r):
+        r1, r2 = r
+        maxf = self.F.add(r1, r2)
+        return self.F.L(maxf)
 
 
 def van_der_corput_sequence(n):

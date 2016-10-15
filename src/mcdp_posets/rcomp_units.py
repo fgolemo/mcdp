@@ -289,6 +289,10 @@ def mult_table(a, b):
     s = '%s' % unit2
     return RcompUnits(unit2, s)
 
+def rcomp_add(x, y):
+    mcdp_dev_warning('underflow, overflow, Top')
+    return x + y
+
 @contract(a=RcompUnits, num='int', den='int')
 def rcompunits_pow(a, num, den):
     """

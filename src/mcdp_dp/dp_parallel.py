@@ -8,6 +8,7 @@ from mocdp.exceptions import do_extra_checks
 
 from .dp_series import get_product_compact
 from .primitive import NormalForm, PrimitiveDP
+from mcdp_posets.uppersets import lowerset_product_good
 
 
 __all__ = [
@@ -107,6 +108,7 @@ class Parallel(PrimitiveDP):
 #         r2 = self.dp2.evaluate_f_m(f2, m2)
 #         return (r1, r2)
 
+
     def solve(self, f):
         if do_extra_checks():
             F = self.get_fun_space()
@@ -125,6 +127,12 @@ class Parallel(PrimitiveDP):
         res = R.Us(set(s))
 
         return res
+
+    def solve_r(self, r):
+        r1, r2 = r
+        lf1 = self.dp1.solve_r(r1)
+        lf2 = self.dp2.solve_r(r2)
+        return lowerset_product_good(lf1, lf2)
 
     def __repr__(self):
         return 'Parallel(%r, %r)' % (self.dp1, self.dp2)

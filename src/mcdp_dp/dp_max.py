@@ -24,7 +24,6 @@ class Max1(WrapAMap):
         m = Max1Map(F, value)
         WrapAMap.__init__(self, m)
         self.value = value
-
     
     def __repr__(self):
         return 'Max1(%r, %s)' % (self.F, self.value)
@@ -53,17 +52,29 @@ class JoinNDP(WrapAMap):
 
 
 class MeetNDual(Mux):
-    """ This is just a Mux """
+    """ This is just a Mux 
+    
+        f ↦ {(f, f, ..., f)} 
+        
+        r, ..., r ↦ {min(r)}
+        
+    """
     def __init__(self, n, P):
         coords = [()] * n
         Mux.__init__(self, P, coords)
-
+    
+        self._set_map_dual(MeetNMap(n, P)) 
+        
+# SplitMap = MeetNDual
         
 class Max(WrapAMap):
     """ This is the same as JoinNDP but it is its own class for visualization """    
     def __init__(self, F0):
         amap = JoinNMap(2, F0)
-        WrapAMap.__init__(self, amap)
+        from mcdp_dp.dp_flatten import MuxMap
+        
+        amap_dual = MuxMap(F0, [(), ()])
+        WrapAMap.__init__(self, amap, amap_dual)
 
         self.F0 = F0
 

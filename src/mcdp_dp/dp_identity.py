@@ -19,11 +19,11 @@ class IdentityDP(WrapAMap):
     @contract(F=Poset)
     def __init__(self, F):
         amap = IdentityMap(F, F)
-        WrapAMap.__init__(self, amap)
+        amap_dual = IdentityMap(F, F)
+        WrapAMap.__init__(self, amap, amap_dual)
 
     def __repr__(self):
         return 'Id(%r)' % self.F
-
 
 
 class ResourceNode(IdentityDP):
@@ -31,12 +31,5 @@ class ResourceNode(IdentityDP):
 
 class FunctionNode(IdentityDP):
     pass
-
-#     class ResourceNode(OpaqueIdentity):
-#         pass
-#
-#     class FunctionNode(OpaqueIdentity):
-#         pass
-
 
 Identity = IdentityDP

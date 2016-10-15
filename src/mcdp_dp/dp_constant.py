@@ -12,7 +12,14 @@ __all__ = [
 
 
 class Constant(PrimitiveDP):
-
+    """ 
+        A constant resource. 
+        
+            F = 1
+            I = 1
+            
+    """
+    
     @contract(R=Poset)
     def __init__(self, R, value):
         self.c = value
@@ -30,12 +37,20 @@ class Constant(PrimitiveDP):
     def solve(self, _):
         return self.R.U(self.c)
 
+    def solve_r(self, _):
+        return self.F.L(())
+    
     def __repr__(self):
         return 'Constant(%s:%s)' % (self.R, self.c)
 
 
 class ConstantMinimals(PrimitiveDP):
-
+    """
+        Constant antichain of resources. 
+    
+            F = 1
+            I = 1
+    """
     @contract(R=Poset)
     def __init__(self, R, values):
         F = PosetProduct(())
@@ -51,6 +66,9 @@ class ConstantMinimals(PrimitiveDP):
 
     def solve(self, _):
         return self.R.Us(self.values)
+    
+    def solve_r(self, _):
+        return self.F.L(())
 
     def __repr__(self):
         s = len(self.values)

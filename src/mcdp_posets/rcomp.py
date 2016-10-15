@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import raise_desc
-from mocdp.exceptions import do_extra_checks
+from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 import numpy as np
 
 from .poset import NotLeq, Poset
@@ -168,6 +168,7 @@ class Rcomp(Poset):
         """ Addition, extended for top """
         if a == self.top or b == self.top:
             return self.top
+        mcdp_dev_warning('overflow check')
         return a + b
 
     def check_equal(self, x, y):

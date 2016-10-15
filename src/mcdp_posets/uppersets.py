@@ -386,14 +386,25 @@ def upperset_product(s1, s2):
 
 @contract(s1=LowerSet, s2=LowerSet, returns=LowerSet)
 def lowerset_product(s1, s2):
+    """ Not actually a product """
     assert isinstance(s1, LowerSet), s1
     assert isinstance(s2, LowerSet), s2
     res = set(zip(s1.maximals, s2.maximals))
     P = PosetProduct((s1.P, s2.P))
     return LowerSet(res, P)
 
+@contract(s1=LowerSet, s2=LowerSet, returns=LowerSet)
+def lowerset_product_good(s1, s2):
+    """ The real product. """
+    assert isinstance(s1, LowerSet), s1
+    assert isinstance(s2, LowerSet), s2
+    res = set(itertools.product(s1.maximals, s2.maximals))
+    P = PosetProduct((s1.P, s2.P))
+    return LowerSet(res, P)
+
 @contract(ss='seq($LowerSet)', returns=LowerSet)
 def lowerset_product_multi(ss):
+    """ Not actually a product """
     Ps = tuple(_.P for _ in ss)
     mins = tuple(_.maximals for _ in ss)
     res = set(zip(*mins))

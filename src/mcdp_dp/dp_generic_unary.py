@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import check_isinstance
+from contracts.utils import check_isinstance, raise_desc
 from mcdp_posets import Map, MapNotDefinedHere, Poset
 
 from .primitive import EmptyDP
@@ -21,22 +21,39 @@ class WrapAMap(EmptyDP):
     """
 
     @contract(amap=Map)
-    def __init__(self, amap):
+    def __init__(self, amap, amap_dual=None):
         check_isinstance(amap, Map)
         F = amap.get_domain()
         R = amap.get_codomain()
         check_isinstance(F, Poset)
         check_isinstance(R, Poset)
-
+        
+        self.amap_dual = amap_dual
         self.amap = amap
         EmptyDP.__init__(self, F=F, R=R)
 
+    def _set_map_dual(self, amap_dual):
+        """ Used for late initialization """
+        if self.amap_dual is not None:
+            msg = 'Dual map already initialized.'
+            raise_desc(ValueError, msg, amap_dual=self.amap_dual)
+        self.amap_dual = amap_dual
+        
+    def solve_r(self, r):  # @UnusedVariable
+        if self.amap_dual is None:
+            msg = 'Map amap_dual not provided so solve_r() not implemented.' 
+            raise_desc(NotImplementedError, msg, type=type(self), dp=self)
+        
+        try:
+            f = self.amap_dual(r)            
+        except MapNotDefinedHere:
+            return self.F.Ls([])
+
+        return self.F.L(f)
+        
     def solve(self, func):
         try:
             r = self.amap(func)            
-#         except NotBelongs as e:
-#             msg = 'Wrapped map gives inconsistent results.'
-#             raise_wrapped(ValueError, e, msg, f=func, amap=self.amap)
         except MapNotDefinedHere:
             return self.R.Us([])
 

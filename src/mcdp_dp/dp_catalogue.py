@@ -37,8 +37,19 @@ class CatalogueDP(PrimitiveDP):
                 options_r.append(r_min)
 
         rs = poset_minima(options_r, R.leq)
-        return self.R.Us(rs)
+        return R.Us(rs)
 
+    def solve_r(self, r):
+        R = self.R
+        F = self.F
+        options_f = []
+        for _name, f_max, r_min in self.entries:
+            if R.leq(r_min, r):
+                options_f.append(f_max)
+
+        rs = poset_maxima(options_f, F.leq)
+        return F.Ls(rs)
+    
     def evaluate(self, i):
         if do_extra_checks():
             self.I.belongs(i)

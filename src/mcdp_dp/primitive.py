@@ -73,6 +73,14 @@ class PrimitiveDP(WithInternalLog):
             Given one f point, returns an UpperSet of resources.
         '''
 
+#     @abstractmethod
+    @contract(returns=LowerSet)
+    def solve_r(self, r):  # @UnusedVariable
+        """ Dual of solve. Given a resource, returns a LowerSet
+            of functionality. """
+        msg = 'Function solve_r() not implemented.' 
+        raise_desc(NotImplementedError, msg, type=type(self), dp=self)
+
     @abstractmethod
     @contract(returns='tuple($LowerSet, $UpperSet)')
     def evaluate(self, i):

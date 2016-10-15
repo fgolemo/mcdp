@@ -36,6 +36,7 @@ def check_minimal(elements, poset):
 
 def poset_check_chain(poset, chain):
     """ Raises an exception if the chain is not a chain. """
+    chain = list(chain)
     for i in range(len(chain) - 1):
         try:
             poset.check_leq(chain[i], chain[i + 1])

@@ -2,11 +2,13 @@
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mcdp_posets import (Map, NotBelongs, PosetProduct, UpperSet,
     UpperSets, get_product_compact, poset_minima)
-from mocdp.exceptions import DPInternalError, do_extra_checks
+from mocdp.exceptions import DPInternalError, do_extra_checks, mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
 
 from .primitive import NormalForm, NotFeasible, PrimitiveDP
 from .tracer import Tracer
+from mcdp_posets.uppersets import LowerSets, LowerSet
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
 
 
 __all__ = [
@@ -169,8 +171,8 @@ class Series(PrimitiveDP):
             tr1 = UpperSets(R1)
             tr1.belongs(u1)
 
+        mcdp_dev_warning('rewrite this keeping structure')
         mins = set([])
-        #print 'u1.minimals',  u1.minimals
         for u in u1.minimals:
             with trace.child('dp2') as t:
                 v = self.dp2.solve_trace(u, t)
@@ -183,6 +185,26 @@ class Series(PrimitiveDP):
 
         self._solve_cache[func] = us
         return trace.result(us)
+
+    def solve_r(self, r):
+        l1 = self.dp1.solve_r(r)
+
+        if do_extra_checks():
+            F1 = self.dp1.get_fun_space()
+            LF1 = LowerSets(F1)
+            LF1.belongs(l1)
+
+        maxs = set([])
+        
+        for l in l1.maximals:    
+            v = self.dp2.solve_r(l)
+            maxs.update(v.maximals)
+
+        F = self.get_fun_space()
+        maximals = poset_maxima(maxs, F.leq)
+
+        us = LowerSet(maximals)
+        return us
 
     def __repr__(self):
         return 'Series(%r, %r)' % (self.dp1, self.dp2)
