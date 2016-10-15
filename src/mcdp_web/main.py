@@ -128,7 +128,6 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
             cache_dir = os.path.join(path, '_cached/mcdpweb_cache')
             l.use_cache_dir(cache_dir)
 
-
     def view_refresh_library(self, request):
         """ Refreshes the current library (if external files have changed) 
             then reloads the current url. """

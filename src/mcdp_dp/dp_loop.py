@@ -85,7 +85,6 @@ class DPLoop0(PrimitiveDP):
 
         M, M_pack, _ = get_product_compact(self.M0, self.F2)
 
-        
         for m0 in m0s:
             m = M_pack(m0, r)
             options.add(m)
