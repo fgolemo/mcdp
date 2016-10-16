@@ -112,17 +112,17 @@ class FirstTop(Map):
     def _call(self, x):
         return (self.top, x)
     
-class LMap(Map):
-    """
-        f ⟼〈⊥, f〉
-    """
-    def __init__(self, F):
-        F2 = PosetProduct((F, F))
-        Map.__init__(self, dom=F, cod=F2)
-        self.bottom = F.get_bottom()
-        
-    def _call(self, x):
-        return (self.bottom, x)
+# class LMap(Map):
+#     """
+#         f ⟼〈⊥, f〉
+#     """
+#     def __init__(self, F):
+#         F2 = PosetProduct((F, F))
+#         Map.__init__(self, dom=F, cod=F2)
+#         self.bottom = F.get_bottom()
+#         
+#     def _call(self, x):
+#         return (self.bottom, x)
 
     
 

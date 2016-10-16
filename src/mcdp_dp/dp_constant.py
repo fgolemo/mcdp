@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from mcdp_posets import Poset, PosetProduct
+from mcdp_posets import NotBelongs, Poset, PosetProduct
 
 from .primitive import PrimitiveDP
-from mcdp_posets.space import NotBelongs
 
 
 __all__ = [
@@ -30,13 +29,13 @@ class Constant(PrimitiveDP):
         PrimitiveDP.__init__(self, F=F, R=R, I=I)
 
     def evaluate(self, i):
-        assert i == ()
+        assert i == (), i
         fs = self.F.L(self.F.get_top())
         rs = self.R.U(self.c)
         return fs, rs
         
     def solve(self, f):
-        assert f == ()
+        assert f == (), f
         return self.R.U(self.c)
 
     def solve_r(self, r):
@@ -67,13 +66,13 @@ class ConstantMinimals(PrimitiveDP):
         self.ur = self.R.Us(self.values)
 
     def evaluate(self, i):
-        assert i == ()
+        assert i == (), i
         lf = self.F.L(self.F.get_top())
         ur = self.ur
         return lf, ur
 
     def solve(self, f):
-        assert f == ()
+        assert f == (), f
         return self.ur
     
     def solve_r(self, r):
@@ -84,7 +83,6 @@ class ConstantMinimals(PrimitiveDP):
         except NotBelongs:
             return F.Ls([]) # infeasible
         
-
     def __repr__(self):
         s = len(self.values)
         return 'ConstantMins(%s:%s)' % (self.R, s)
