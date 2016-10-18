@@ -114,6 +114,9 @@ class SyntaxIdentifiers():
         'ignore_resources',
         'dimensionless',
         'EmptySet',
+        'solve',
+        'solve_r',
+        'solve_f',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -460,9 +463,15 @@ class Syntax():
     
 
     # solve( <0 g>, `model )
-    SOLVE = keyword('solve', CDP.SolveModelKeyword)
-    solve_model = sp(SOLVE - SLPAR - constant_value - SCOMMA - ndpt_dp_rvalue - SRPAR,
+    # solve_F
+    SOLVE_F = (keyword('solve', CDP.SolveModelKeyword) 
+             | keyword('solve_f', CDP.SolveModelKeyword))
+    solve_model = sp(SOLVE_F - SLPAR - constant_value - SCOMMA - ndpt_dp_rvalue - SRPAR,
                lambda t: CDP.SolveModel(keyword=t[0], f=t[1], model=t[2]))
+
+    SOLVE_R = keyword('solve_r', CDP.SolveRModelKeyword)
+    solve_r_model = sp(SOLVE_R - SLPAR - constant_value - SCOMMA - ndpt_dp_rvalue - SRPAR,
+               lambda t: CDP.SolveRModel(keyword=t[0], r=t[1], model=t[2]))
 
 
     # <> or ⟨⟩
@@ -559,6 +568,7 @@ class Syntax():
                        | upper_set_from_collection
                        | lower_set_from_collection
                        | solve_model
+                       | solve_r_model
                        | space_custom_value1
                        | valuewithunit
                        | variable_ref

@@ -102,6 +102,7 @@ def mcdplib_run_make(mcdplib):
     cwd = mcdplib
     cmd = ['make', 'clean', 'all']
     from system_cmd.meat import system_cmd_result
+    print('$ cd %s' % cwd)
     system_cmd_result(cwd, cmd,
                       display_stdout=True,
                       display_stderr=True,

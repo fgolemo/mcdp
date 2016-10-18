@@ -105,7 +105,8 @@ class CompositeNamedDP(NamedDP):
         check_missing_connections(self.context)
 
     def compact(self):
-        # XXX: not sure what this does
+        """ Each set of edges that share both tail and head
+            are replaced by their product. """ 
         from mocdp.comp.composite_compact import compact_context
         context = compact_context(self.context)
         return CompositeNamedDP(context)

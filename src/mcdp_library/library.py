@@ -311,14 +311,16 @@ class MCDPLibrary():
                 match = fn
                 break
         else:
+            msg = 'Could not find file %r. ' % basename
             ext = os.path.splitext(basename)[1].replace('.', '')
+            
             available = sorted(self._list_with_extension(ext),
                                key=lambda x: x.lower())
 
-            available = ", ".join(available)
-
-            msg = ('Could not find file %r. Available files with %r extension: %s.' %
-                   (basename, ext, available))
+            if available:
+                available = ", ".join(available)
+                msg += (" Available files with %r extension: %s." %
+                        (ext, available))
 
             raise_desc(DPSemanticError, msg)
         found = self.file_to_contents[match]

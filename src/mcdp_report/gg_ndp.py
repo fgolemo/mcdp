@@ -8,7 +8,9 @@ from mcdp_dp import (Constant, ConstantMinimals, Conversion,
     Identity, InvMult2, InvPlus2, InvPlus2Nat, JoinNDP, Limit, MeetNDualDP,
     Mux, MuxMap, ProductN, SumNDP, SumNNat, TakeFun, TakeRes,
     WrapAMap)
+from mcdp_dp.dp_max import MeetNDP
 from mcdp_lang.blocks import get_missing_connections
+from mcdp_maps.sum_n_rcomp import SumNRcomp
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
 from mocdp import logger
@@ -17,7 +19,6 @@ from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning, DPInternalError
 from mocdp.ndp import NamedDPCoproduct
-from mcdp_dp.dp_max import MeetNDP
 
 
 STYLE_GREENRED = 'greenred'
@@ -246,6 +247,7 @@ def create(gdc, ndp, plotting_info):
 
     for fn in ndp.get_fnames():
         assert fn in functions
+        
     for rn in ndp.get_rnames():
         assert rn in resources
 
@@ -254,7 +256,9 @@ def create(gdc, ndp, plotting_info):
 
 def is_simple(ndp):
     return isinstance(ndp, SimpleWrap) and isinstance(ndp.dp,
-     (MeetNDP, JoinNDP, Identity, SumNDP, ProductN, InvPlus2, InvMult2))
+     (MeetNDP, JoinNDP, Identity, SumNDP,
+      SumNRcomp, 
+      ProductN, InvPlus2, InvMult2))
 
 
 def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable

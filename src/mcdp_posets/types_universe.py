@@ -10,8 +10,7 @@ from .poset_product import PosetProduct
 from .rcomp import Rcomp
 from .space import Map, MapNotDefinedHere, NotEqual
 from .space_product import SpaceProduct
-from .uppersets import UpperSets
-from mcdp_posets.uppersets import LowerSets
+from .uppersets import UpperSets, LowerSets
 
 
 __all__ = [

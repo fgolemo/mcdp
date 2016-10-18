@@ -172,8 +172,6 @@ MCDP-web / QR
 Bugs
 ----
 
-- B: FinitePoset does not have Join, Meet
-
 - B: Sometimes Pint does not simplify the units. For example,
       J * kg / Wh has the same dimensionality of kg
 
@@ -202,21 +200,8 @@ There is already a connection to function 'r1' of '_res_r1'.
 Language additions
 ------------------
 
-- L: New language feature: templates
 
 - L: types: Sets without the order. For example, given V, use set(V).
-- L: values: Indexing. For example:
-
-	```
-	mcdp {
-	   provides f [X x USD]
-	   requires cost [USD]
-
-	   cost >= f[1]
-	}
-	```
-
-- L: Syntax for empty sets. ``{} g`` or  ``EmptySet g``
 
 
 - L: Implement Python-style comments for more literate programming.
@@ -229,6 +214,7 @@ mcdp {
 }
 ```
  
+- Ability to rewrite in MCDPL.
 
 - Coproduct that automatically adds the spaces that are not there
 
@@ -279,7 +265,8 @@ requires r1 >= f1
     ValueError: If <pre> is empty then it needs to have an id.
     tag: <code class="mcdp_value">`my_poset: <em>element</em></code>
 
-- bug: the visualization is broken when displaying Unicode
+- bug: the visualization of errors is broken when displaying Unicode,
+because the alignment is not correct [Contracts]
 
  line  3 >    assert_equal(⊥ LowerSets(g), lowerclosure EmptySet g),
                                              ^

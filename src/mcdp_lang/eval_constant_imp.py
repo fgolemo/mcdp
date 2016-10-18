@@ -4,9 +4,9 @@ from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
     NotBelongs, NotLeq, PosetProduct, Rcomp, Space, UpperSet, UpperSets,
     get_types_universe, poset_minima)
-from mcdp_posets.rcomp_units import RbicompUnits, RcompUnits
+from mcdp_posets import LowerSets, LowerSet, RbicompUnits, RcompUnits
 from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning,\
+from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning, \
     do_extra_checks
 
 from .eval_constant_asserts import (eval_assert_empty, eval_assert_equal,
@@ -16,7 +16,6 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from mcdp_posets.uppersets import LowerSets, LowerSet
 
 
 CDP = CDPLanguage
@@ -137,28 +136,9 @@ def eval_constant(op, context):
             F.belongs(v)
             return ValueWithUnits(v, F)
 
-        if isinstance(op, CDP.SolveModel):
-            from mcdp_lang.eval_ndp_imp import eval_ndp
-            from mcdp_posets.types_universe import express_value_in_isomorphic_space
-            ndp = eval_ndp(op.model, context)
-            dp = ndp.get_dp()
-            f0 = eval_constant(op.f, context)
-            F = dp.get_fun_space()
-
-            tu = get_types_universe()
-            try:
-                tu.check_leq(f0.unit, F)
-            except NotLeq as e:
-                msg = 'Input not correct.'
-                raise_wrapped(DPSemanticError, e, msg, compact=True)
-            f = express_value_in_isomorphic_space(f0.unit, f0.value, F)
-            res = dp.solve(f)
-            UR = UpperSets(dp.get_res_space())
-            return ValueWithUnits(res, UR)
-
-        from mcdp_lang.eval_math import eval_constant_minus
-        from mcdp_lang.eval_math import eval_PlusN_as_constant
-        from mcdp_lang.eval_math import eval_MultN_as_constant
+        from .eval_math import eval_constant_minus
+        from .eval_math import eval_PlusN_as_constant
+        from .eval_math import eval_MultN_as_constant
 
         cases = {
             CDP.AssertEqual: eval_assert_equal,
@@ -174,6 +154,8 @@ def eval_constant(op, context):
             CDP.EmptySet: eval_EmptySet,
             CDP.UpperSetFromCollection: eval_constant_uppersetfromcollection,
             CDP.LowerSetFromCollection: eval_constant_lowersetfromcollection,
+            CDP.SolveModel: eval_solve_f,
+            CDP.SolveRModel: eval_solve_r,
         }
         
         for klass, hook in cases.items():
@@ -185,6 +167,49 @@ def eval_constant(op, context):
             op = recursive_print(op)
             raise_desc(NotConstant, msg, op=op)
 
+def eval_solve_f(op, context):
+    check_isinstance(op, CDP.SolveModel)
+    from mcdp_lang.eval_ndp_imp import eval_ndp
+    from mcdp_posets.types_universe import express_value_in_isomorphic_space
+    ndp = eval_ndp(op.model, context)
+    dp = ndp.get_dp()
+    f0 = eval_constant(op.f, context)
+    F = dp.get_fun_space()
+    R = dp.get_res_space()
+
+    tu = get_types_universe()
+    try:
+        tu.check_leq(f0.unit, F)
+    except NotLeq as e:
+        msg = 'Input not correct.'
+        raise_wrapped(DPSemanticError, e, msg, compact=True)
+    f = express_value_in_isomorphic_space(f0.unit, f0.value, F)
+    res = dp.solve(f)
+    UR = UpperSets(R)
+    return ValueWithUnits(res, UR)
+
+def eval_solve_r(op, context):
+    check_isinstance(op, CDP.SolveRModel)
+    from mcdp_lang.eval_ndp_imp import eval_ndp
+    from mcdp_posets.types_universe import express_value_in_isomorphic_space
+    ndp = eval_ndp(op.model, context)
+    dp = ndp.get_dp()
+    r0 = eval_constant(op.r, context)
+    F = dp.get_fun_space()
+    R = dp.get_res_space()
+
+    tu = get_types_universe()
+    try:
+        tu.check_leq(r0.unit, R)
+    except NotLeq as e:
+        msg = 'Input not correct.'
+        raise_wrapped(DPSemanticError, e, msg, compact=True)
+    r = express_value_in_isomorphic_space(r0.unit, r0.value, R)
+    
+    res = dp.solve_r(r)
+    LF = LowerSets(F)
+    return ValueWithUnits(res, LF)
+                                  
 def eval_EmptySet(op, context):
     check_isinstance(op, CDP.EmptySet)
     from mcdp_lang.eval_space_imp import eval_space

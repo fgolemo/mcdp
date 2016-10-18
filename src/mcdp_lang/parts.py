@@ -256,8 +256,13 @@ class CDPLanguage():
     SpaceCustomValue = namedtuplewhere('SpaceCustomValue', 'space keyword custom_string')
 
     # solve( <0 g>, `model )
+    # solve_f( )
     SolveModelKeyword = namedtuplewhere('SolveModelKeyword', 'keyword')
     SolveModel = namedtuplewhere('SolveModel', 'keyword f model')
+
+    # solve_r( <0 g>, `model )
+    SolveRModelKeyword = namedtuplewhere('SolveRModelKeyword', 'keyword')
+    SolveRModel = namedtuplewhere('SolveRModel', 'keyword r model')
 
     # UpperSets(<space>)
     UpperSetsKeyword = namedtuplewhere('UpperSetsKeyword', 'keyword')
