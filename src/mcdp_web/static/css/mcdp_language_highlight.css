@@ -66,7 +66,9 @@ span.AnyOfKeyword,
 span.MaximalsKeyword,
 span.MinimalsKeyword,
 span.IgnoreResourcesKeyword,
-span.ProcName
+span.ProcName,
+span.ApproxUpperKeyword,
+span.ApproxLowerKeyword
 { 
     font-weight: bold; 
     color: #00a;

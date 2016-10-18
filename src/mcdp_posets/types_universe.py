@@ -11,6 +11,7 @@ from .rcomp import Rcomp
 from .space import Map, MapNotDefinedHere, NotEqual
 from .space_product import SpaceProduct
 from .uppersets import UpperSets
+from mcdp_posets.uppersets import LowerSets
 
 
 __all__ = [
@@ -50,6 +51,15 @@ class TypesUniverse(Preorder):
                     raise_wrapped(NotEqual, e, msg, compact=True)
 
         if isinstance(A, UpperSets) and isinstance(B, UpperSets):
+            try:
+                self.check_equal(A.P, B.P)
+                return
+            except NotEqual as e:
+                msg = 'Spaces do not match'
+                raise_wrapped(NotEqual, e, msg, compact=True,
+                              A=A.P, B=B.P)
+
+        if isinstance(A, LowerSets) and isinstance(B, LowerSets):
             try:
                 self.check_equal(A.P, B.P)
                 return
@@ -109,6 +119,10 @@ class TypesUniverse(Preorder):
             self.check_leq(A.P, B.P)
             return
         
+        if isinstance(A, LowerSets) and isinstance(B, LowerSets):
+            self.check_leq(A.P, B.P)
+            return
+        
         if isinstance(A, SpaceProduct) and isinstance(B, SpaceProduct):
             return check_leq_products(self, A, B)
 
@@ -161,7 +175,6 @@ class TypesUniverse(Preorder):
         from mcdp_posets import RcompUnits
         from mcdp_posets import format_pint_unit_short
         from mcdp_posets.maps.identity import IdentityMap
-
 
         if isinstance(A, Nat) and isinstance(B, Rcomp):
             from .maps.coerce_to_int import CoerceToInt

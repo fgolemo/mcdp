@@ -102,6 +102,7 @@ class SyntaxIdentifiers():
         'import',
         'from',
         'upperclosure',
+        'lowerclosure',
         'code',
         'assert_equal',
         'assert_leq',
@@ -112,6 +113,7 @@ class SyntaxIdentifiers():
         'assert_nonempty',
         'ignore_resources',
         'dimensionless',
+        'EmptySet',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -146,6 +148,7 @@ class Syntax():
 
     placeholder = SL('[') + SL('[')+ (get_idn() | quoted) + SL(']') + SL(']')
     
+    
     dpname_placeholder = sp(placeholder, lambda t: CDP.Placeholder_dpname(t[0]))
     constant_placeholder = sp(placeholder, lambda t: CDP.Placeholder_constant(t[0]))
     rvalue_placeholder = sp(placeholder, lambda t: CDP.Placeholder_rvalue(t[0]))
@@ -158,7 +161,14 @@ class Syntax():
     primitivedp_placeholder = sp(placeholder, lambda t: CDP.Placeholder_primitivedp(t[0]))
     collection_placeholder = sp(placeholder, lambda t: CDP.Placeholder_collection(t[0]))
     integer_placeholder = sp(placeholder, lambda t: CDP.Placeholder_integer(t[0]))
+    nonneg_integer_placeholder = sp(placeholder, lambda t: CDP.Placeholder_nonneg_integer(t[0]))
     index_label_placeholder =  sp(placeholder, lambda t: CDP.Placeholder_index_label(t[0]))
+    integer_or_float_placeholder=   sp(placeholder, lambda t: CDP.Placeholder_integer_or_float(t[0]))
+               
+    integer =  SyntaxBasics.integer | integer_placeholder                        
+    integer_or_float = SyntaxBasics.integer_or_float | integer_or_float_placeholder
+    nonneg_integer = SyntaxBasics.nonneg_integer | nonneg_integer_placeholder
+    
 
     REQUIRED_BY = sp((K('required') | K('req.') | K('r.')) - K('by'),
                     lambda _: CDP.RequiredByKeyword('required by'))
@@ -305,10 +315,10 @@ class Syntax():
 
     unitst = S(L('[')) + C(space, 'unit') + S(L(']'))
 
-    nat_constant = sp(K('nat') - L(':') - SyntaxBasics.nonneg_integer,
+    nat_constant = sp(K('nat') - L(':') - nonneg_integer,
                       lambda t: CDP.NatConstant(t[0], t[1], t[2]))
 
-    int_constant = sp(K('int') - L(':') - SyntaxBasics.integer,
+    int_constant = sp(K('int') - L(':') - integer,
                       lambda t: CDP.IntConstant(t[0], t[1], t[2]))
 
     fname = sp(get_idn(), lambda t: CDP.FName(t[0])) | fname_placeholder
@@ -336,17 +346,17 @@ class Syntax():
 #                                               libname=t[1],
 #                                               symbols=make_list(t[3:], where=t[2].where)))
 
-    valuewithunit_numbers = sp(SyntaxBasics.integer_or_float + unitst,
+    valuewithunit_numbers = sp(integer_or_float + unitst,
                                lambda t: CDP.SimpleValue(t[0], t[1]))
 
     mcdp_dev_warning('dimensionless not tested')
     dimensionless = sp((L('[') + L(']')) ^ Keyword('dimensionless'),
                        lambda _: CDP.RcompUnit('m/m'))
 
-    valuewithunits_numbers_dimensionless = sp(SyntaxBasics.integer_or_float + dimensionless,
+    valuewithunits_numbers_dimensionless = sp(integer_or_float + dimensionless,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
     
-    valuewithunit_number_with_units = sp(SyntaxBasics.integer_or_float + space_pint_unit,
+    valuewithunit_number_with_units = sp(integer_or_float + space_pint_unit,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
 
     # Top <space>
@@ -466,13 +476,20 @@ class Syntax():
                     ZeroOrMore(COMMA - rvalue) - CLOSE_BRACE,
                     lambda t: CDP.MakeTuple(t[0], make_list(list(t)[1:-1]), t[-1]))
     
+    EMPTYSET = keyword('EmptySet', CDP.EmptySetKeyword)
+    constant_emptyset = sp(EMPTYSET + space,
+                           lambda t: CDP.EmptySet(t[0], t[1]))
+
     # TODO: how to express empty typed list? "{g}"
     collection_of_constants1 = sp(S(L('{')) + constant_value +
                                  ZeroOrMore(COMMA - constant_value) - S(L('}')),
                                  lambda t: CDP.Collection(make_list(list(t))))
     collection_of_constants2 = valuewithunit_minimals
     
-    collection_of_constants = collection_of_constants1 | collection_of_constants2 | collection_placeholder
+    collection_of_constants = (collection_of_constants1 
+                               | collection_of_constants2
+                               |  constant_emptyset
+                               | collection_placeholder)
 
     # upperclosure <set>
     # ↑ <set>
@@ -480,6 +497,14 @@ class Syntax():
                                            CDP.UpperSetFromCollectionKeyword)
     upper_set_from_collection = sp(upper_set_from_collection_keyword - collection_of_constants,
                                    lambda t: CDP.UpperSetFromCollection(t[0], t[1]))
+
+    # lowerclosure <set>
+
+    lower_set_from_collection_keyword = spk(K('lowerclosure'), # | L('↑'),
+                                           CDP.LowerSetFromCollectionKeyword)
+    lower_set_from_collection = sp(lower_set_from_collection_keyword - collection_of_constants,
+                                   lambda t: CDP.LowerSetFromCollection(t[0], t[1]))
+
 
     # <space> : identifier
     # `plugs : european
@@ -525,18 +550,21 @@ class Syntax():
     constant_minus_constant = sp(constant_value + L('-') + constant_value,
                                  lambda t: CDP.ConstantMinusConstant(t[0], t[1], t[2]))
 
+    
     constant_value_op = (
                          collection_of_constants
                        | tuple_of_constants
                        | nat_constant
                        | int_constant
                        | upper_set_from_collection
+                       | lower_set_from_collection
                        | solve_model
                        | space_custom_value1
                        | valuewithunit
                        | variable_ref
                        | asserts
                        | constant_placeholder
+                       | constant_emptyset
                        )
 
 
@@ -581,7 +609,7 @@ class Syntax():
 
     # take(<a, b>, 0)
     TAKE = keyword('take', CDP.TakeKeyword)
-    integer =  SyntaxBasics.integer | integer_placeholder
+    
     
     rvalue_tuple_indexing = sp(TAKE + SLPAR + rvalue + SCOMMA +
                                  integer + SRPAR,
@@ -898,12 +926,12 @@ class Syntax():
                             lambda t: CDP.MakeCanonical(t[0], t[1]))
 
     APPROX_LOWER = keyword('approx_lower', CDP.ApproxLowerKeyword)
-    ndpt_approx_lower = sp(APPROX_LOWER - SLPAR - SyntaxBasics.integer -
+    ndpt_approx_lower = sp(APPROX_LOWER - SLPAR - integer -
                             SCOMMA - ndpt_dp_rvalue - SRPAR,
                        lambda t: CDP.ApproxLower(t[0], t[1], t[2]))
 
     APPROX_UPPER = keyword('approx_upper', CDP.ApproxUpperKeyword)
-    ndpt_approx_upper = sp(APPROX_UPPER - SLPAR - SyntaxBasics.integer -
+    ndpt_approx_upper = sp(APPROX_UPPER - SLPAR - integer -
                             SCOMMA - ndpt_dp_rvalue - SRPAR,
                        lambda t: CDP.ApproxUpper(t[0], t[1], t[2]))
 

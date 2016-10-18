@@ -28,6 +28,10 @@ class CDPLanguage():
     # Bottom <space>
     Bottom = namedtuplewhere('Bottom', 'keyword space')
     BottomKeyword = namedtuplewhere('BottomKeyword', 'keyword')
+    
+    EmptySetKeyword= namedtuplewhere('EmptySetKeyword', 'keyword')
+    EmptySet = namedtuplewhere('EmptySet', 'keyword space')
+    
     # Maximals <space>
     Maximals = namedtuplewhere('Maximals', 'keyword space')
     MaximalsKeyword = namedtuplewhere('MaximalsKeyword', 'keyword')
@@ -188,6 +192,9 @@ class CDPLanguage():
     # upperset {0g,1g}
     UpperSetFromCollectionKeyword = namedtuplewhere('UpperSetFromCollectionKeyword', 'keyword')
     UpperSetFromCollection = namedtuplewhere('UpperSetFromCollection', 'keyword value')
+    # lowerset {0g}
+    LowerSetFromCollectionKeyword = namedtuplewhere('LowerSetFromCollectionKeyword', 'keyword')
+    LowerSetFromCollection = namedtuplewhere('LowerSetFromCollection', 'keyword value')
 
     FunStatement = namedtuplewhere('FunStatement', 'keyword fname unit')
     ResStatement = namedtuplewhere('ResStatement', 'keyword rname unit')
@@ -356,5 +363,9 @@ class CDPLanguage():
     Placeholder_fvalue = Placeholder # namedtuplewhere('Placeholder_fvalue', 'label')
     Placeholder_rvalue = Placeholder # namedtuplewhere('Placeholder_rvalue', 'label')
     Placeholder_integer = Placeholder
+    Placeholder_nonneg_integer = Placeholder
+    Placeholder_integer_or_float = Placeholder
     Placeholder_index_label = Placeholder
+    
+    
     

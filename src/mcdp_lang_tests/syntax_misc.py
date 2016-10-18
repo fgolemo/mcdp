@@ -5,7 +5,7 @@ from comptests.registrar import comptest
 from contracts.utils import raise_desc
 from mcdp_dp import CatalogueDP, CoProductDP, NotFeasible, Template
 from mcdp_lang.parse_actions import parse_wrap
-from mcdp_lang.parse_interface import parse_ndp, parse_poset
+from mcdp_lang.parse_interface import parse_ndp, parse_poset, parse_constant
 from mcdp_lang.pyparsing_bundled import Literal
 from mcdp_lang.syntax import Syntax, SyntaxIdentifiers
 from mcdp_lang.syntax_codespec import SyntaxCodeSpec
@@ -520,7 +520,10 @@ def check_lang76(): # TODO: rename
     
 @comptest
 def check_lang77(): # TODO: rename
-    pass
+    s = 'EmptySet Nat x Nat'
+    parse_wrap(Syntax.constant_emptyset, s)
+    parse_wrap(Syntax.constant_value, s)
+    
 @comptest
 def check_lang78(): # TODO: rename
     pass

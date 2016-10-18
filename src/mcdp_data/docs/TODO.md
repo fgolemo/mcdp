@@ -272,3 +272,10 @@ requires r1 >= f1
 
     ValueError: If <pre> is empty then it needs to have an id.
     tag: <code class="mcdp_value">`my_poset: <em>element</em></code>
+
+- bug: the visualization is broken when displaying Unicode
+
+ line  3 >    assert_equal(⊥ LowerSets(g), lowerclosure EmptySet g),
+                                             ^
+                                             |
+                                             here or nearby

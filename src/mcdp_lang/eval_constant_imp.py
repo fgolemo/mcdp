@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
     NotBelongs, NotLeq, PosetProduct, Rcomp, Space, UpperSet, UpperSets,
     get_types_universe, poset_minima)
 from mcdp_posets.rcomp_units import RbicompUnits, RcompUnits
 from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning,\
+    do_extra_checks
 
 from .eval_constant_asserts import (eval_assert_empty, eval_assert_equal,
     eval_assert_geq, eval_assert_gt, eval_assert_leq, eval_assert_lt,
@@ -15,6 +16,7 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mcdp_posets.uppersets import LowerSets, LowerSet
 
 
 CDP = CDPLanguage
@@ -44,8 +46,6 @@ def eval_constant(op, context):
         if isinstance(op, CDP.Collection):
             return eval_constant_collection(op, context)
 
-        if isinstance(op, CDP.UpperSetFromCollection):
-            return eval_constant_uppersetfromcollection(op, context)
 
         if isinstance(op, (CDP.Resource)):
             raise NotConstant(str(op))
@@ -171,6 +171,9 @@ def eval_constant(op, context):
             CDP.ConstantMinus: eval_constant_minus,
             CDP.PlusN: eval_PlusN_as_constant,
             CDP.MultN: eval_MultN_as_constant,
+            CDP.EmptySet: eval_EmptySet,
+            CDP.UpperSetFromCollection: eval_constant_uppersetfromcollection,
+            CDP.LowerSetFromCollection: eval_constant_lowersetfromcollection,
         }
         
         for klass, hook in cases.items():
@@ -182,6 +185,14 @@ def eval_constant(op, context):
             op = recursive_print(op)
             raise_desc(NotConstant, msg, op=op)
 
+def eval_EmptySet(op, context):
+    check_isinstance(op, CDP.EmptySet)
+    from mcdp_lang.eval_space_imp import eval_space
+    space = eval_space(op.space, context)
+    
+    P = FiniteCollectionsInclusion(space)
+    value = FiniteCollection(set([]), space)
+    return ValueWithUnits(unit=P, value=value)
 
 def eval_constant_space_custom_value(op, context):
     from .eval_space_imp import eval_space
@@ -230,7 +241,21 @@ def eval_constant_uppersetfromcollection(op, context):
     minimals = poset_minima(v.elements, S.leq)
     value = UpperSet(minimals, S)
     unit = UpperSets(S)
-    unit.belongs(value)
+    if do_extra_checks():
+        unit.belongs(value)
+    vu = ValueWithUnits(value, unit)
+    return vu
+
+def eval_constant_lowersetfromcollection(op, context):
+    x = eval_constant(op.value, context)
+    v = x.value
+    u = x.unit
+    S = u.S
+    maximals = poset_minima(v.elements, S.leq)
+    value = LowerSet(maximals, S)
+    unit = LowerSets(S)
+    if do_extra_checks():
+        unit.belongs(value)
     vu = ValueWithUnits(value, unit)
     return vu
 

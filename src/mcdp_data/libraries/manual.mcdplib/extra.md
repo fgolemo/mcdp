@@ -165,6 +165,8 @@ For example:
 <pre class='mcdp_value'>
     ⊥ V
 </pre>
+
+
 ### set making
 
 The syntax is:
@@ -178,6 +180,13 @@ For example:
 
 <pre class='mcdp_value'>
 {0 g, 1 g}
+</pre>
+
+
+To create an empty set:
+
+<pre class='mcdp_value'>
+    EmptySet [[space]]
 </pre>
 
 
@@ -259,42 +268,74 @@ is equivalent to
     abstract [["mcdp"]]
 </pre>
 
+
 ### compact
 
 <pre class='mcdp'>
     compact [["mcdp"]]
-</ndp>
+</pre>
+
 
 ### template
 
 <pre class='mcdp'>
     template [["mcdp"]]
-</ndp>
+</pre>
+
 
 ### flatten
 
 <pre class='mcdp'>
     flatten [["mcdp"]]
-</ndp>
+</pre>
+
 
 ### canonical
 
+This puts the MCDP in a canonical form:
 
 <pre class='mcdp'>
     canonical [["mcdp"]]
-</ndp>
+</pre>
+
+
 
 ### approx_lower, approx_upper
 
-    approx_lower(<n>, [["mcdp"]])
-    approx_upper(<n>, [["mcdp"]])
+This creates a lower and upper bound for the MCDP:
+
+<pre class='mcdp'>
+  approx_lower([[n]], [["mcdp"]])
+</n>
+
+<pre class='mcdp'>
+  approx_upper([[n]], [["mcdp"]])
+</pre>
 
 
 ### solve
 
 <pre class='mcdp_value'>
-    solve(value, [["mcdp"]])
+    solve([[functionality]], [["mcdp"]])
 </pre>
 
+<!-- <pre class='mcdp_value'>
+    solve_r( [[f]], [["mcdp"]])
+</pre>
+ -->
 
 ### Uncertain
+
+TODO
+
+### Asserts
+
+<pre>
+assert_equal
+assert_leq
+assert_geq
+assert_lt
+assert_gt
+assert_empty
+assert_nonempty
+</pre>
