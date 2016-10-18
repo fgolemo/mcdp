@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_dp.dp_limit import Limit
 from mcdp_library import MCDPLibrary

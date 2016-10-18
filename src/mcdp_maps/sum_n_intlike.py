@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_posets import Int, Map, Poset, PosetProduct, Space, get_types_universe
 

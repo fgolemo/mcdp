@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_posets.rcomp import finfo
 from mcdp_posets import UpperSet

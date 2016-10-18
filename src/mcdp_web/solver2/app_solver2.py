@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_cli.solve_meat import solve_meat_solve
 from mcdp_dp.dp_transformations import get_dp_bounds

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mcdp_dp import InvMult2
 from mcdp_dp.dp_inv_plus import InvPlus2

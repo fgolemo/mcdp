@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, check_isinstance
 from mcdp_dp import (Constant, ConstantMinimals, Limit, LimitMaximals,
     get_conversion)
 from mcdp_posets import NotLeq, Poset, get_types_universe
 from mocdp.comp import Connection, dpwrap
-from mocdp.comp.context import CResource, ValueWithUnits
+from mocdp.comp.context import CResource, ValueWithUnits, CFunction
 from mocdp.exceptions import DPSemanticError
 
 
@@ -154,8 +154,8 @@ def get_resource_possibly_converted(r, P, context):
         try:
             tu.check_leq(R, P)
         except NotLeq as e:
-            msg = 'Cannot convert %s to %s.'
-            raise_wrapped(DPSemanticError, e, msg)  # , where=rvalue.where)
+            msg = 'Cannot convert %s to %s.' % (R, P)
+            raise_wrapped(DPSemanticError, e, msg, R=R, P=P)
 
         conversion = get_conversion(R, P)
         if conversion is None:
@@ -166,4 +166,30 @@ def get_resource_possibly_converted(r, P, context):
                                  res_prefix='_res')
             return r2
 
+@contract(returns=CFunction, cf=CFunction, P=Poset)
+def get_function_possibly_converted(cf, P, context):
+    """ Returns a resource possibly converted to the space P """
+    check_isinstance(cf, CFunction)
+
+    F = context.get_ftype(cf)
+    tu = get_types_universe()
+    
+    if tu.equal(F, P):
+        return cf
+    else:
+        try:
+            tu.check_leq(P, F)
+        except NotLeq as e:
+            msg = 'Cannot convert %s to %s.' % (P, F)
+            raise_wrapped(DPSemanticError, e, msg,P=P, F=F)
+
+        conversion = get_conversion(P, F)
+        if conversion is None:
+            return cf
+        else:
+            cf2 = create_operation_lf(context, dp=conversion, 
+                                      functions=[cf], 
+                                      name_prefix='_conv', 
+                                      op_prefix='_op', res_prefix='_res')
+            return cf2
 

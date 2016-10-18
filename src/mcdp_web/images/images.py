@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from mcdp_report.dp_graph_flow_imp import dp_graph_flow
 from mcdp_report.gg_ndp import gvgen_from_ndp
 from mcdp_report.gg_utils import gg_get_format

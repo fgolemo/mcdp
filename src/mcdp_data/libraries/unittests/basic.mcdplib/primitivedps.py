@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 from mcdp_dp import (CatalogueDP, CoProductDP, CoProductDPLabels, Constant,
     ConstantMinimals, DPLoop0, DPLoop2, Identity, InvMult2, InvMult2L, InvMult2U,
     InvPlus2, InvPlus2L, InvPlus2Nat, InvPlus2U, JoinNDP, Limit, LimitMaximals,
-    Max, Max1, MeetNDual, Min, Mux, Parallel, ParallelN, Series0, Terminator,
-    UncertainGate, UncertainGateSym)
+    Max1, MeetNDualDP,  Mux, Parallel, ParallelN, Series0, Terminator,
+    UncertainGate, UncertainGateSym, MeetNDP, JoinNDualDP)
 from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct
 from mcdp_dp.dp_dummy import Template
@@ -119,34 +120,28 @@ def LimitMaximals_1():
     values = [(5, 1), (1, 5)]
     return LimitMaximals(F, values)
 
-def Max_1():
-    F = parse_poset('Nat')
-    return Max(F)
- 
 def Max1_1():
     F = parse_poset('Nat')
     f = 4
     return Max1(F, f)
- 
-def Min_1():
-    F = parse_poset('Nat')
-    return Min(F)
 
-def JoinNDP_1():
-    n = 3
-    F = parse_poset('Nat')
-    return JoinNDP(n, F)
-
-def MeetNDual_1():
-    n = 3
-    P = parse_poset('Nat')
-    return MeetNDual(n, P)
  
 def Template_1():
     P = parse_poset('m')
     F = P
     R = PosetProduct((P,P))
     return Template(F, R)
+
+# def Template_2_emptyset():
+#     F = FinitePoset(set([]), set([]))
+#     R = parse_poset('m')
+#     return Template(F, R)
+
+# def Template_3_emptyset():
+#     R = FinitePoset(set([]), set([]))
+#     F2 = parse_poset('m')
+#     return Template(F, R)
+
 
 def DPLoop0_1():
     F1 = parse_poset('N')
@@ -193,7 +188,24 @@ def UncertainGateSym_1():
     F0 = parse_poset('Nat')
     return UncertainGateSym(F0)
 
+def JoinNDualDP_1():
+    n = 3
+    F0 = parse_poset('Nat')
+    return JoinNDualDP(n, F0)
 
+def JoinNDP_1():
+    n = 3
+    F = parse_poset('Nat')
+    return JoinNDP(n, F)
 
-
+def MeetNDualDP_1():
+    n = 3
+    P = parse_poset('Nat')
+    return MeetNDualDP(n, P)
+ 
+def MeetNDP_1():
+    n = 3
+    P = parse_poset('Nat')
+    return MeetNDP(n, P)
+    
 

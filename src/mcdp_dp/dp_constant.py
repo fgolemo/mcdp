@@ -18,6 +18,8 @@ class Constant(PrimitiveDP):
             F = 1
             I = 1
             
+            
+        TODO: use ConstantMap instead
     """
     
     @contract(R=Poset)

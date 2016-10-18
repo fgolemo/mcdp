@@ -3,16 +3,16 @@ from networkx.algorithms.dag import ancestors, descendants
 
 from contracts import contract
 from contracts.utils import raise_desc
-from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
+from mocdp.exceptions import do_extra_checks
 
 from .finite_collection_as_space import FiniteCollectionAsSpace
 from .poset import NotBounded, NotJoinable, NotLeq, NotMeetable, Poset
 from .space import Uninhabited
 
 
-__all__ = ['FinitePoset']
-
-mcdp_dev_warning('Join and Meet are not implemented')
+__all__ = [
+    'FinitePoset',
+] 
 
 class FinitePoset(FiniteCollectionAsSpace, Poset):
 
@@ -26,7 +26,6 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
         self._find_top()
         self._find_bottom()
 
-        #
         if do_extra_checks():
             for a, b in self.relations:
                 assert a in universe

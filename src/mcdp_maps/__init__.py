@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+from .constant_map import *
 from .join_map import *
 from .map_composition import *
 from .max1map import *

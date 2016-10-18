@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest_fails
-from mcdp_dp import Max
+from contracts.utils import check_isinstance
+from mcdp_dp import JoinNDP
+
 from .utils import assert_parsable_to_connected_ndp
 
 
@@ -39,5 +41,5 @@ def check_simplification():
     }
 """)
     dp2 = m2.get_dp()
-    assert isinstance(dp1, Max)
-    assert isinstance(dp2, Max)
+    check_isinstance(dp1, JoinNDP)
+    check_isinstance(dp2, JoinNDP)

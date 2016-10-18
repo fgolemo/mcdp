@@ -40,6 +40,10 @@ mcdp {
 
 We can completely abstract an MCDP, using the <code><strong>abstract</strong></code> keyword.
 
+<pre class='mcdp'>abstract [[ "mcdp" ]]</pre>
+
+For example:
+
 <pre class='mcdp'>abstract `Composition1</pre>
 <pre class='ndp_graph_expand'>abstract `Composition1</pre>
 
@@ -82,7 +86,9 @@ set-of(V)
 
 The syntax is
 
-<pre><code><span class="keyword">UpperSets</span>(<span class='ph'>poset</span>)</code></pre>
+<pre class='mcdp_poset'>
+UpperSets([[poset]])
+</pre>
 
 For example:
 
@@ -94,8 +100,14 @@ UpperSets(V)
 
 The syntax is
 
-<pre><code><span class="keyword">Interval</span>(<span class='ph'>lower bound</span>,<span class='ph'>upper bound</span>)</code></pre>
 
+<pre class='mcdp_poset'>
+Interval([["lower bound"]], [["upper bound"]])
+</pre>
+
+<!-- 
+<pre><code><span class="keyword">Interval</span>(<span class='ph'>lower bound</span>,<span class='ph'>upper bound</span>)</code></pre>
+ -->
 For example:
 
 <pre class='mcdp_poset'>
@@ -115,10 +127,25 @@ Interval(1g, 10g)
 
 The syntax is:
 
-    ⊤ <space>
-    Top <space>
-    ⊥ <space>
-    Bottom <space>
+
+
+<pre class='mcdp_value'>
+    Top [[space]]
+</pre>
+
+<pre class='mcdp_value'>
+    ⊤ [[space]]
+</pre>
+
+<pre class='mcdp_value'>
+    Bottom [[space]]
+</pre>
+
+<pre class='mcdp_value'>
+    ⊥  [[space]]
+</pre>
+
+    
 
 For example:
 
@@ -142,7 +169,10 @@ For example:
 
 The syntax is:
 
-    {<element>, <element>, ..., <element> }
+
+<pre class='mcdp_value'>
+{[[element]], [[element]], [["..."]], [[element]]}
+</pre>
 
 For example:
 
@@ -155,7 +185,9 @@ For example:
 
 The syntax is:
 
-    upperclosure <set>
+<pre class='mcdp_value'>
+    upperclosure [[ set ]]
+</pre>
 
 For example:
 
@@ -172,21 +204,27 @@ upperclosure {0 g, 1 g}
 
 Suppose f has type F. Then:
 
-    ignore f provided by x
+<pre class='mcdp_statements'>
+    ignore [[functionality]] provided by [["dp"]]
+</pre>
 
 is equivalent to
 
-    f provided by x >= any-of(Minimals F)
-
+<pre class='mcdp_statements'>
+    [[functionality]] provided by [["dp"]] >= any-of(Minimals [[space]])
+</pre>
 
 Equivalently,
 
-    ignore r required by x
+<pre class='mcdp_statements'>
+    ignore [[resource]] required by [["dp"]]
+</pre>
 
 is equivalent to
 
-    r required by x <= any-of(Maximals R)
-
+<pre class='mcdp_statements'>
+    [[resource]] required by [["dp"]] <= any-of(Maximals [[space]])
+</pre>
 
 ### available math operators
 
@@ -200,10 +238,13 @@ is equivalent to
 ## Operations on NDPs
 
 
+<pre class='mcdp_statements'>
+    provides [[functionality]] using [["dp"]]
+</pre>
 
-
-    provides f using c
-    requires r for   c
+<pre class='mcdp_statements'>
+    requires [[resource]] for [["dp"]]
+</pre>
 
 ### implemented-by
 
@@ -214,33 +255,46 @@ is equivalent to
 
 ### abstract
 
-    abstract <ndp>
+<pre class='mcdp'>
+    abstract [["mcdp"]]
+</pre>
 
 ### compact
 
-    compact <ndp>
+<pre class='mcdp'>
+    compact [["mcdp"]]
+</ndp>
 
 ### template
 
-    template <ndp>
+<pre class='mcdp'>
+    template [["mcdp"]]
+</ndp>
 
 ### flatten
 
-    flatten <ndp>
+<pre class='mcdp'>
+    flatten [["mcdp"]]
+</ndp>
 
 ### canonical
 
-    canonical <ndp>
+
+<pre class='mcdp'>
+    canonical [["mcdp"]]
+</ndp>
 
 ### approx_lower, approx_upper
 
-    approx_lower(<n>, <ndp>)
-    approx_upper(<n>, <ndp>)
+    approx_lower(<n>, [["mcdp"]])
+    approx_upper(<n>, [["mcdp"]])
 
 
 ### solve
 
-    solve(value, <mcdp>)
+<pre class='mcdp_value'>
+    solve(value, [["mcdp"]])
+</pre>
 
 
 ### Uncertain

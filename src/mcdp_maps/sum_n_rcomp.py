@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_posets import Map, PosetProduct, Rcomp
 from mocdp.exceptions import mcdp_dev_warning

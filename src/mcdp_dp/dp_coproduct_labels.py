@@ -1,11 +1,12 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance
 from mcdp_posets import Coproduct1, Coproduct1Labels
 from mocdp.exceptions import do_extra_checks
 
 from .dp_coproduct import CoProductDP
+from .primitive import NotFeasible
 from .primitive import PrimitiveDP
-from mcdp_dp.primitive import NotFeasible
 
 
 __all__ = [
@@ -56,7 +57,6 @@ class CoProductDPLabels(PrimitiveDP):
 
         return set(res)
 
-    # For solve and solve_r, we don't care about implementations at all
     def solve(self, f):
         return self.dp.solve(f)
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_dp.dp_loop import DPLoop0
 from mcdp_posets.uppersets import UpperSet, UpperSets

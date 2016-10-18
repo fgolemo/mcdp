@@ -2,13 +2,13 @@
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mcdp_posets import (Map, NotBelongs, PosetProduct, UpperSet,
     UpperSets, get_product_compact, poset_minima)
+from mcdp_posets import LowerSets, LowerSet
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
 from mocdp.exceptions import DPInternalError, do_extra_checks, mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
 
 from .primitive import NormalForm, NotFeasible, PrimitiveDP
 from .tracer import Tracer
-from mcdp_posets.uppersets import LowerSets, LowerSet
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
 
 
 __all__ = [
@@ -77,7 +77,8 @@ class Series(PrimitiveDP):
         r1s = self.dp1.solve(f)
         for r1 in r1s.minimals:
             m1s = self.dp1.get_implementations_f_r(f1, r1)
-            if do_extra_checks():
+            
+            if do_extra_checks(): 
                 try:
                     for m1 in m1s:
                         self.M1.belongs(m1)
@@ -187,17 +188,18 @@ class Series(PrimitiveDP):
         return trace.result(us)
 
     def solve_r(self, r):
-        l1 = self.dp1.solve_r(r)
+        l2 = self.dp2.solve_r(r)
 
         if do_extra_checks():
-            F1 = self.dp1.get_fun_space()
-            LF1 = LowerSets(F1)
-            LF1.belongs(l1)
+            F2 = self.dp2.get_fun_space()
+            LF2 = LowerSets(F2)
+            LF2.belongs(l2)
 
         maxs = set([])
         
-        for l in l1.maximals:    
-            v = self.dp2.solve_r(l)
+        # todo: express as operation on antichains
+        for l in l2.maximals:    
+            v = self.dp1.solve_r(l)
             maxs.update(v.maximals)
 
         F = self.get_fun_space()

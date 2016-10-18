@@ -4,11 +4,11 @@ import itertools
 from contracts.utils import indent, raise_wrapped
 from mcdp_posets import (Map, NotBelongs, PosetProduct, UpperSet, UpperSets,
     lowerset_product, poset_minima, upperset_product)
+from mcdp_posets.uppersets import lowerset_product_good
 from mocdp.exceptions import do_extra_checks
 
 from .dp_series import get_product_compact
 from .primitive import NormalForm, PrimitiveDP
-from mcdp_posets.uppersets import lowerset_product_good
 
 
 __all__ = [

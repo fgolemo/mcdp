@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from matplotlib import pylab
 from mcdp_dp.dp_inv_mult import InvMult2
 from mcdp_dp.dp_transformations import get_dp_bounds

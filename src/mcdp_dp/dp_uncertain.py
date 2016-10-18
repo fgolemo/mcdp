@@ -79,7 +79,7 @@ class UncertainGateL(WrapAMap):
     """
     def __init__(self, F0):
         F = PosetProduct((F0, F0))
-        m1 = CheckOrder(self.F0)
+        m1 = CheckOrder(F0)
         m2 = MuxMap(F, coords=0) # extract second coordinate
         h = MapComposition((m1, m2))
         hd = SecondTop(F0) 

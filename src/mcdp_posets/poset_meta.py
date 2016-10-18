@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts.enabling import all_disabled
 
 from .space_meta import decorate_methods, SpaceMeta

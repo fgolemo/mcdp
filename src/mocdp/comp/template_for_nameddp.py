@@ -1,9 +1,11 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc, raise_wrapped
 from mcdp_posets import NotLeq, get_types_universe
 from mocdp import ATTR_LOAD_LIBNAME
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import DPSemanticError, mcdp_dev_warning
+
 
 __all__ = [
     'TemplateForNamedDP'
@@ -45,7 +47,6 @@ class TemplateForNamedDP():
         
         if hasattr(self, ATTR_LOAD_LIBNAME):
             libname = getattr(self, ATTR_LOAD_LIBNAME)
-            print('The libname is %r ' % libname)
             if libname is None:
                 mcdp_dev_warning('Tmp fix: can this ever be none?')
                 c = context.child()

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .actions import ActionAddNDP, ActionConnect
 from .context_utils import get_compatible_unconnected_functions
 from .optimization import Optimization

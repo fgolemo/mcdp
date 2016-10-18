@@ -111,3 +111,8 @@ span.line-gutter {
     margin-right: 1em; 
     color: grey; 
 }
+
+span.PlaceholderLabel {
+    color: grey;
+    /*font-style: italic;*/
+}

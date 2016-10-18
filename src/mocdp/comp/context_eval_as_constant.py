@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_dp import Constant, WrapAMap
 from mcdp_posets import PosetProduct

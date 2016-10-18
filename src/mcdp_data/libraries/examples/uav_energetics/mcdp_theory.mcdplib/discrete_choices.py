@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from mcdp_ipython_utils.plotting import color_functions, color_resources
 from mcdp_posets import Coproduct1Labels, SpaceProduct, FiniteCollectionAsSpace
 import numpy as np

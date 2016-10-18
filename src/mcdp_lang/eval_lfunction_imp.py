@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, check_isinstance
 from mcdp_dp import InvMult2, InvPlus2, InvPlus2Nat
+from mcdp_dp import JoinNDualDP, MeetNDualDP
 from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table,
     poset_maxima)
 from mocdp.comp import Connection, dpwrap
@@ -9,6 +10,8 @@ from mocdp.comp.context import CFunction, get_name_for_res_node
 from mocdp.exceptions import (DPInternalError, DPNotImplementedError,
     DPSemanticError)
 
+from .helpers import (get_function_possibly_converted,
+    create_operation_lf)
 from .helpers import get_valuewithunits_as_function
 from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
@@ -66,6 +69,8 @@ def eval_lfunction(lf, context):
             CDP.FunctionLabelIndex: eval_lfunction_label_index,
             CDP.TupleIndexFun: eval_lfunction_tupleindexfun,
             CDP.AnyOfFun: eval_lfunction_anyoffun,
+            CDP.OpMinF: eval_lfunction_opminf,
+            CDP.OpMaxF: eval_lfunction_opmaxf,
         }
 
         for klass, hook in cases.items():
@@ -77,13 +82,51 @@ def eval_lfunction(lf, context):
             msg = 'eval_lfunction(): cannot evaluate as a function.'
             raise_desc(DPInternalError, msg, r=r)
 
+def eval_lfunction_opminf(lf, context):
+    """
+        f <= min(required r1, required r2)
+    """
+    check_isinstance(lf, CDP.OpMinF)
+    
+    a = eval_lfunction(lf.a, context)
+    b = eval_lfunction(lf.b, context)
+ 
+    Fa = context.get_rtype(a)
+    b = get_function_possibly_converted(b, Fa, context)
+        
+    dp = MeetNDualDP(2, Fa)
+    
+    return create_operation_lf(context, dp=dp, functions=[a, b],
+                            name_prefix='max', op_prefix='_ops',
+                            res_prefix='_result')
+    
+def eval_lfunction_opmaxf(lf, context):
+    """
+        f <= max(required r1, required r2)
+    """
+    check_isinstance(lf, CDP.OpMaxF)
+    
+    a = eval_lfunction(lf.a, context)
+    b = eval_lfunction(lf.b, context)
+ 
+    Fa = context.get_rtype(a)
+    b = get_function_possibly_converted(b, Fa, context)
+        
+    dp = JoinNDualDP(2, Fa)
+    
+    return create_operation_lf(context, dp=dp, functions=[a, b],
+                            name_prefix='max', op_prefix='_ops',
+                            res_prefix='_result')
+ 
+
+    
+            
 def eval_lfunction_anyoffun(lf, context):
     from mcdp_lang.eval_constant_imp import eval_constant
     from mcdp_posets.finite_collections_inclusion import FiniteCollectionsInclusion
     from mcdp_dp.dp_limit import LimitMaximals
     from mcdp_posets.finite_collection import FiniteCollection
-    from mcdp_lang.helpers import create_operation_lf
-
+    
     assert isinstance(lf, CDP.AnyOfFun)
     constant = eval_constant(lf.value, context)
     if not isinstance(constant.unit, FiniteCollectionsInclusion):
@@ -163,7 +206,7 @@ def eval_lfunction_invplus(lf, context):
         msg = 'Cannot find operator for mixed values'
         raise_desc(DPInternalError, msg, Fs=Fs)
     
-
+    # TODO: use create_operation_lf
     ndp = dpwrap(dp, '_input', ['_f0', '_f1'])
 
     name = context.new_name('_invplus')
@@ -195,6 +238,7 @@ def eval_lfunction_invmult(lf, context):
 
 
     dp = InvMult2(R, tuple(Fs))
+    # TODO: use create_operation_lf
     ndp = dpwrap(dp, '_input', ['_f0', '_f1'])
 
     name = context.new_name('_invmult')

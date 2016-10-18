@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .safe_pickling import safe_pickle_dump, safe_pickle_load
 from contracts import contract
 import os

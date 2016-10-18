@@ -75,7 +75,7 @@ class Nat(Poset):
 
     def get_test_chain(self, n):
         s = []
-        f = lambda: random.randint(1, 100)
+        f = lambda: random.randint(1, n) # xxx
         while len(s) < n - 2:
             x = f()
             if not x in s:
@@ -139,12 +139,20 @@ class Nat(Poset):
         if not (x == y):
             raise NotEqual('%s != %s' % (x, y))
 
+
+# Optimization
+Nat_add_Nat = Nat()
+Nat_add_top = Nat_add_Nat.get_top()
+
 def Nat_add(a, b):
-    """ Addition, extended for top """
-    top = Nat().get_top()
-    if a == top or b == top:
-        return top
-    mcdp_dev_warning('overflow')
+    """ Addition on Nat, extended for top """
+    from mcdp_posets.poset import is_top
+    N = Nat_add_Nat
+    
+    if is_top(N, a) or is_top(N, b):
+        return Nat_add_top
+    
+    mcdp_dev_warning('catch overflow')
     return a + b
 
 

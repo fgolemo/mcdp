@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # module pyparsing.py
 #
 # Copyright (c) 2003-2015  Paul T. McGuire

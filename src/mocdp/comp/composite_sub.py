@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .connection import get_connection_graph
 from contracts import contract
 from mocdp.comp.composite import CompositeNamedDP

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance
 from mcdp_maps import SumNatsN

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contextlib import contextmanager
 from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
 from mcdp_library.utils.locate_files_imp import locate_files

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from mcdp_lang.syntax import Syntax
 from mcdp_report.gg_ndp import gvgen_from_ndp
 from mcdp_report.html import ast_to_html

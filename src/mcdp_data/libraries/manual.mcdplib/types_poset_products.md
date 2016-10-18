@@ -4,9 +4,10 @@ Use the Unicode symbol "``×``" or the simple letter ``x`` to create a poset pro
 
 The syntax is
 
-<pre>
-<em>space</em> × <em>space</em> × &hellip; × <em>space</em>
+<pre class='mcdp_poset'>
+[[space]] × [[space]] × [["..."]] × [[space]] 
 </pre>
+
 
 For example:
 
@@ -23,9 +24,9 @@ To create a tuple, use angular brackets.
 
 The syntax is:
 
-<pre>
-&lt; <em>element</em>, <em>element</em>, &hellip; &gt;
-⟨ <em>element</em>, <em>element</em>, &hellip; ⟩
+
+<pre class='mcdp_value'>
+&lt;[[element]], [[element]], [["..."]], [[element]]&gt;
 </pre>
 
 
@@ -46,8 +47,8 @@ An example using fancy unicode brackets:
 
 To access the elements of the tuple, use the syntax
 
-<pre>
-<strong>take</strong>(<em>value</em>, <em>index</em>)
+<pre class='mcdp_value'>
+take([[value]], [[index]])
 </pre>
 
 For example:
@@ -56,8 +57,8 @@ For example:
 mcdp {
     provides out [ J x A ]
 
-    take(out, 0) <= 10 J
-    take(out, 1) <= 2 A
+    take(provided out, 0) <= 10 J
+    take(provided out, 1) <= 2 A
 }
 </pre>
 
@@ -67,7 +68,7 @@ This is equivalent to
 mcdp {
     provides out [ J x A ]
 
-    out <= <10 J, 2 A>
+    provided out <= <10 J, 2 A>
 }
 </pre>
 
@@ -86,10 +87,23 @@ product(energy:J, current:A)
 
 Then it is possible to index those entries using one of these two syntaxes:
 
-<pre>
-<strong>take</strong>(<em>value</em>, <em>label</em>)
-(<em>value</em>).<em>label</em>
+<pre class='mcdp_rvalue'>
+take([[resource]], [[label]])
 </pre>
+
+<pre class='mcdp_fvalue'>
+take([[functionality]], [[label]])
+</pre>
+
+
+<pre class='mcdp_rvalue'>
+([[resource]]).[[label]]
+</pre>
+
+<pre class='mcdp_fvalue'>
+([[resource]]).[[label]]
+</pre>
+ 
 
 For example:
 
@@ -97,7 +111,7 @@ For example:
 mcdp {
     provides out [ product(energy:J, current:A) ]
 
-    (out).energy <= 10 J
-    (out).current <= 2 A
+    (provided out).energy <= 10 J
+    (provided out).current <= 2 A
 }
 </pre>

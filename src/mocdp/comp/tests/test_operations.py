@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from mcdp_tests.generation import for_all_nameddps
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.wrap import SimpleWrap

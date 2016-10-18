@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import numpy as np
 from reprep import Report
 from mcdp_library.library import MCDPLibrary

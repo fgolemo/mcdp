@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_dp.solver import SolverTrace
 from mocdp.exceptions import do_extra_checks

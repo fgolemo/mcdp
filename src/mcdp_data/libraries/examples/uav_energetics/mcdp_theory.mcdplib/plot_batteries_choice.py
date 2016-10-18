@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
     
 from common_stats import CommonStats
 from discrete_choices import compute_discrete_choices, figure_discrete_choices2

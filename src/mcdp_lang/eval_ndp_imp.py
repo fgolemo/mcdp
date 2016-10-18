@@ -5,7 +5,7 @@ import sys
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (
-    CatalogueDP, Conversion, JoinNDP, MeetNDual, get_conversion, make_series)
+    CatalogueDP, Conversion, JoinNDP, MeetNDualDP, get_conversion, make_series)
 from mcdp_posets import (
     FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe)
 from mocdp import ATTRIBUTE_NDP_MAKE_FUNCTION
@@ -752,7 +752,7 @@ def fix_resources_with_multiple_connections(context):
 
         P = context.get_rtype(CResource(id_ndp, rname))
         new_name = context.new_name('_join_fname')
-        dp = MeetNDual(n=len(its), P=P)
+        dp = MeetNDualDP(n=len(its), P=P)
 
         new_connections = []
         rnames = []
@@ -776,5 +776,5 @@ def fix_resources_with_multiple_connections(context):
 def eval_ndp_make_template(r, context):
     ndp = eval_ndp(r.dp_rvalue, context)
     from mocdp.comp.composite_templatize import ndp_templatize
-    return ndp_templatize(ndp, mark_as_template=True)
+    return ndp_templatize(ndp, mark_as_template=False)
 

@@ -1,56 +1,50 @@
-
-#basic-remake:
-#	compmake out/comptests -c "remake mcdplib-basic-*setup*; make mcdplib-basic-poset-*"
-
+ 
 out=out/comptests
 
 package=mcdp_tests
 
-comptests:
+
+prepare_tests:
 	mkdir -p $(out)
+
+	$(MAKE) -C libraries/unittests/basic.mcdplib/generated_dps/ clean all
+
+comptests: prepare_tests
 	comptests -o $(out) --contracts --nonose --console $(package)
 
-comptests-nocontracts:
-	mkdir -p $(out)
+comptests-nocontracts: prepare_tests
 	comptests -o $(out) --nonose --console $(package)
 
-comptests-run:
-	mkdir -p $(out)
+comptests-run: prepare_tests
 	comptests -o $(out) --contracts --nonose $(package) 
 
-comptests-run-nocontracts:
-	mkdir -p $(out)
+comptests-run-nocontracts: prepare_tests
 	comptests -o $(out) --nonose $(package) 
 
-comptests-run-nocontracts-console:
-	mkdir -p $(out)
+comptests-run-nocontracts-console: prepare_tests
 	comptests -o $(out) --nonose $(package) --console
 
-comptests-run-parallel:
-	mkdir -p $(out)
+comptests-run-parallel: prepare_tests
 	comptests -o $(out) --contracts --nonose -c "rparmake" $(package)  
 
-comptests-run-parallel-nocontracts:
-	mkdir -p $(out)
+comptests-run-parallel-nocontracts: prepare_tests
 	DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "rparmake" $(package)  
 
-comptests-run-parallel-nocontracts-cov:
-	mkdir -p $(out)
+comptests-run-parallel-nocontracts-cov: prepare_tests
 	DISABLE_CONTRACTS=1 comptests -o $(out) --coverage --nonose -c "rparmake" $(package)  
 
-comptests-run-parallel-nocontracts-prof:
-	mkdir -p $(out)
+comptests-run-parallel-nocontracts-prof: prepare_tests
 	DISABLE_CONTRACTS=1 comptests -o $(out) --profile --nonose -c "make; rparmake" $(package)  
 
 
-docoverage-single:
+docoverage-single: prepare_tests
 	# note you need "rmake" otherwise it will not be captured
 	rm -rf ouf_coverage .coverage
 	-DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "exit" $(package)
 	-DISABLE_CONTRACTS=1 coverage2 run `which compmake` $(out) -c "rmake"
 	coverage html -d out_coverage --include '*src/mcdp*'
 
-docoverage-parallel:
+docoverage-parallel: prepare_tests
 	# note you need "rmake" otherwise it will not be captured
 	rm -rf ouf_coverage .coverage .coverage.*
 	-DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "exit" $(package)
@@ -70,7 +64,6 @@ stats-locs-tests:
 	wc -l `find . -type f -name '*.py' | grep test`
 
 
-
 bump-upload:
 	bumpversion patch
 	git push --tags
@@ -79,3 +72,8 @@ bump-upload:
 readme-commands:
 	mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 0.1 kg, 1 W>"
 	mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 1.0 kg, 1 W>"
+
+
+check-unicode-encoding-line:
+	grep 'coding: utf-8' -r --include '*.py' -L  src/
+

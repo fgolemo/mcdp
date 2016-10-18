@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from mocdp.dp import make_series
 from mocdp.dp.dp_flatten import Mux

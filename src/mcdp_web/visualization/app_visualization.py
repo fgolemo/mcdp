@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM

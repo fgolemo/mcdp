@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import indent
 from mcdp_dp import LabelerDP, PrimitiveDP

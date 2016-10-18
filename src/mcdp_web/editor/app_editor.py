@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
 from pyramid.renderers import render_to_response  # @UnresolvedImport
 

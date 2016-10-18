@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax

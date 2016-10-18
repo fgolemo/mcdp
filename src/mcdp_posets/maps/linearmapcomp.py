@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts.utils import check_isinstance
 from mcdp_posets import Map, Rcomp, RcompUnits
 from mcdp_posets.rcomp import tiny 

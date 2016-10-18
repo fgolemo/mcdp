@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from textwrap import dedent
 
 def save_files(a):

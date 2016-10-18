@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
 from mcdp_dp import Constant, LimitMaximals

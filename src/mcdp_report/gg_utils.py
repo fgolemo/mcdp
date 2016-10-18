@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Utils for graphgen """
 
 import base64

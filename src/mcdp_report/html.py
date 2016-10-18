@@ -1,4 +1,8 @@
+# -*- coding: utf-8 -*-
 from collections import namedtuple
+import os
+import warnings
+
 from conf_tools.utils import dir_from_package_name
 from contracts import contract
 from contracts.interface import Where
@@ -8,8 +12,9 @@ from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
 from mocdp import logger
-import os
-import warnings
+from mocdp.exceptions import mcdp_dev_warning
+from mcdp_lang.parts import CDPLanguage
+
 
 def isolate_comments(s):
     lines = s.split("\n")
@@ -36,9 +41,11 @@ def ast_to_text(s):
 def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
                 add_line_gutter=True, encapsulate_in_precode=True, add_css=True,
                 parse_expr=None, add_line_spans=False):
+    
     if parse_expr is None:
         warnings.warn('Please add specific parse_expr (default=Syntax.ndpt_dp_rvalue)', stacklevel=2)
         parse_expr = Syntax.ndpt_dp_rvalue
+        
     if add_css:
         warnings.warn('check we really need add_css = True', stacklevel=2)
 
@@ -69,10 +76,8 @@ def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
     if not isnamedtuplewhere(block):
         raise ValueError(block)
 
-    # print print_ast(block)
     # XXX: this should not be necessary anymore
     block2 = make_tree(block, character_end=len(s))
-    # print print_ast(block2)
 
     snippets = list(print_html_inner(block2))
     # the len is > 1 for mcdp_statements
@@ -164,6 +169,18 @@ def order_contributions(it):
 
 def print_html_inner(x):
     assert isnamedtuplewhere(x), x
+    
+    CDP = CDPLanguage 
+    if isinstance(x, CDP.Placeholder):
+        orig0 = x.where.string[x.where.character:x.where.character_end]
+        if x.label == '...': # special case
+            transformed = '…' 
+        else:
+            transformed = '<span class="PlaceholderLabel">⟨%s⟩</span>' % x.label
+        
+        yield Snippet(op=x, orig=orig0, a=x.where.character, b=x.where.character_end,
+                  transformed=transformed)
+        return
 
     def iterate_check_order(it):
         last = 0
@@ -264,7 +281,7 @@ def make_tree(x, character_end):
 
     if w.character_end is None:
         if character_end < w.character:
-            print('**** warning: need to fix this')
+            mcdp_dev_warning('**** warning: need to fix this')
             character_end = w.character + 1
         w = Where(string=w.string, character=w.character,
                   character_end=character_end)
@@ -295,6 +312,7 @@ def iterate_notwhere(x):
         yield k, v
 
 def get_language_css():
+    mcdp_dev_warning('TODO: remove from mcdp_web')
     package = dir_from_package_name('mcdp_web')
     fn = os.path.join(package, 'static', 'css', 'mcdp_language_highlight.css')
     with open(fn) as f:

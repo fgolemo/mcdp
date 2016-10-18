@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # from mcdp_tests.generation import for_all_dps
 # from mcdp_posets.uppersets import UpperSets
 #

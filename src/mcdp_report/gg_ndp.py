@@ -5,8 +5,8 @@ from types import NoneType
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (Constant, ConstantMinimals, Conversion,
-    Identity, InvMult2, InvPlus2, InvPlus2Nat, JoinNDP, Limit, Max, MeetNDual,
-    Min, Mux, MuxMap, ProductN, SumNDP, SumNNat, TakeFun, TakeRes,
+    Identity, InvMult2, InvPlus2, InvPlus2Nat, JoinNDP, Limit, MeetNDualDP,
+    Mux, MuxMap, ProductN, SumNDP, SumNNat, TakeFun, TakeRes,
     WrapAMap)
 from mcdp_lang.blocks import get_missing_connections
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
@@ -17,6 +17,7 @@ from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning, DPInternalError
 from mocdp.ndp import NamedDPCoproduct
+from mcdp_dp.dp_max import MeetNDP
 
 
 STYLE_GREENRED = 'greenred'
@@ -253,7 +254,7 @@ def create(gdc, ndp, plotting_info):
 
 def is_simple(ndp):
     return isinstance(ndp, SimpleWrap) and isinstance(ndp.dp,
-     (Min, Max, Identity, SumNDP, ProductN, InvPlus2, InvMult2))
+     (MeetNDP, JoinNDP, Identity, SumNDP, ProductN, InvPlus2, InvMult2))
 
 
 def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
@@ -280,7 +281,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
         (InvMult2, ''),
         (InvPlus2Nat, ''),
         (Conversion, ''),
-        (MeetNDual, ''),
+        (MeetNDualDP, ''),
         (JoinNDP, ''),
         (TakeFun, ''),
         (TakeRes, ''),
@@ -306,7 +307,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
     
     is_special = is_special_dp(ndp.dp)
 
-    simple = (Min, Max, Identity, WrapAMap, MeetNDual)
+    simple = (MeetNDP, JoinNDP, Identity, WrapAMap, MeetNDualDP)
     only_string = not is_special and isinstance(ndp.dp, simple)
 
     from mcdp_library.library import ATTR_LOAD_NAME

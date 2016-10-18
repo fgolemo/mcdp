@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_cli.query_interpretation import convert_string_query
 from mcdp_dp import InvMult2

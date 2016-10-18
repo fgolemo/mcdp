@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import re
 from mcdp_library.library import MCDPLibrary
 

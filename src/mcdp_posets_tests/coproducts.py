@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest, comptest_fails
 from mcdp_posets import (Coproduct1, FinitePoset, PosetCoproduct, PosetProduct,
     R_Energy, R_Time, R_Weight, express_value_in_isomorphic_space,

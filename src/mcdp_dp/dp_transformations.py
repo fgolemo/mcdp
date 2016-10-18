@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_dp import (
     CoProductDP, CoProductDPLabels, DPLoop2, LabelerDP, OpaqueDP, ParallelN)

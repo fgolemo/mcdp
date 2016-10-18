@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts.utils import raise_wrapped, raise_desc
 from mcdp_posets import Map, MapNotDefinedHere, NotJoinable
 from mocdp.exceptions import do_extra_checks

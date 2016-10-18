@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts import contract
 from contracts.utils import check_isinstance, indent

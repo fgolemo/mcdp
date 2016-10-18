@@ -5,11 +5,11 @@ from comptests.registrar import comptest
 from contracts.utils import raise_desc
 from mcdp_dp import CatalogueDP, CoProductDP, NotFeasible, Template
 from mcdp_lang.parse_actions import parse_wrap
-from mcdp_lang.parse_interface import parse_constant, parse_ndp, parse_poset
+from mcdp_lang.parse_interface import parse_ndp, parse_poset
 from mcdp_lang.pyparsing_bundled import Literal
 from mcdp_lang.syntax import Syntax, SyntaxIdentifiers
 from mcdp_lang.syntax_codespec import SyntaxCodeSpec
-from mcdp_posets import LowerSet, UpperSet, UpperSets, PosetProduct, get_product_compact
+from mcdp_posets import UpperSet, UpperSets, PosetProduct, get_product_compact
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.comp.recursive_name_labeling import get_names_used
 from mocdp.exceptions import DPNotImplementedError, DPSemanticError
@@ -300,7 +300,7 @@ def add_def_poset(l, name, data):
     l.file_to_contents[fn] = dict(realpath='#', data=data)
 
 @comptest
-def check_lang52():  # TODO: rename
+def check_join_not_existence():
     """ A test for finite posets where the join might not exist. """
     from mcdp_library.library import MCDPLibrary
     l = MCDPLibrary()
@@ -343,63 +343,9 @@ def check_lang52():  # TODO: rename
     UR.check_equal(res2, UpperSet([], P))
 
 
-@comptest
-def check_lang54():  # TODO: rename
-    ndp = parse_ndp("""
-        mcdp {
-            requires x [g x g]
-            
-            x >= any-of({<0g,1g>, <1g, 0g>})
-        }
-    """)
-    dp = ndp.get_dp()
-    R = dp.get_res_space()
-    UR = UpperSets(R)
-    res = dp.solve(())
-    UR.check_equal(res, UpperSet([(0.0,1.0),(1.0,0.0)], R))
-
 
 @comptest
-def check_lang55():  # TODO: rename
-    ndp = parse_ndp("""
-        mcdp {
-            provides x [g x g]
-            
-            x <= any-of({<0g,1g>, <1g, 0g>})
-        }
-    """)
-    dp = ndp.get_dp()
-    R = dp.get_res_space()
-    F = dp.get_fun_space()
-    UR = UpperSets(R)
-    res = dp.solve((0.5, 0.5))
-
-    l = LowerSet(P=F, maximals=[(0.0, 1.0), (1.0, 0.0)])
-    l.belongs((0.0, 0.5))
-    l.belongs((0.5, 0.0))
-
-    UR.check_equal(res, UpperSet([], R))
-    res = dp.solve((0.0, 0.5))
-
-    UR.check_equal(res, UpperSet([()], R))
-    res = dp.solve((0.5, 0.0))
-
-    UR.check_equal(res, UpperSet([()], R))
-
-@comptest
-def check_lang56():  # TODO: rename
-    p = parse_constant('Minimals V')
-    print p
-    p = parse_constant('Minimals finite_poset{ a b}')
-    print p
-
-@comptest
-def check_lang57():  # TODO: rename
-    p = parse_constant('Maximals V')
-    print p
-
-@comptest
-def check_lang58():  # TODO: rename
+def check_ignore1():  # TODO: rename
     assert_parsable_to_connected_ndp("""
         mcdp {
             a = instance mcdp {
@@ -423,8 +369,9 @@ def check_lang58():  # TODO: rename
 
 def f():
     pass
+
 @comptest
-def check_lang59():  # TODO: rename
+def check_addmake1():
     parse_wrap_check(""" addmake(root: code mcdp_lang_tests.syntax_misc.f) mcdp {} """,
                      Syntax.ndpt_addmake)
 
@@ -437,8 +384,7 @@ def check_lang59():  # TODO: rename
     # assert ndp.make == [('root', f)], ndp.make
 
 @comptest
-def check_lang61():  # TODO: rename
-
+def check_get_names_used1():  
     
 # . L . . . . . . . \ Parallel2  % R[kg]×(R[N]×R[N]) -> R[kg]×R[W] I = PosetProduct(R[kg],PosetProduct(R[N],R[N]){actuati
 # on/_prod1},R[N²]) names: [('actuation', '_prod1')]
@@ -466,8 +412,7 @@ def check_lang61():  # TODO: rename
     
 
 @comptest
-def check_lang60():  # TODO: rename
-    print('check_lang60()')
+def check_namedproduct1():   
     parse_wrap_check("required in", Syntax.fvalue_new_resource2)
     parse_wrap_check("required in", Syntax.fvalue_operand)
     parse_wrap_check("required in", Syntax.fvalue)
@@ -478,7 +423,7 @@ def check_lang60():  # TODO: rename
                      Syntax.line_expr)
 
 @comptest
-def check_lang60b():
+def check_ignore_resources1():
     ndp = parse_ndp("""
         ignore_resources(total_cost)
         mcdp {
@@ -492,7 +437,7 @@ def check_lang60b():
     assert rnames == ['mass']
 
 @comptest
-def check_lang70(): # TODO: rename check_coproductdp_error1
+def check_coproductdp_error1():  
     
     # check error if types are different
     F1 = parse_poset('g')
@@ -521,7 +466,7 @@ def check_lang70(): # TODO: rename check_coproductdp_error1
     
 
 @comptest
-def check_lang71(): # TODO: rename
+def check_coproductdp2(): 
     F = parse_poset('g')
     R = parse_poset('J')
     I = parse_poset('finite_poset{a b c}')
@@ -547,23 +492,32 @@ def check_lang71(): # TODO: rename
     else:
         assert False, ms
     
+#### 
+# Check all 4
 
-
-@comptest
-def check_lang72(): # TODO: rename
-    pass
-@comptest
-def check_lang73(): # TODO: rename
-    pass
-@comptest
-def check_lang74(): # TODO: rename
-    pass
-@comptest
-def check_lang75(): # TODO: rename
-    pass
+    
 @comptest
 def check_lang76(): # TODO: rename
-    pass
+    s = '[[ identifier ]]'
+    parse_wrap(Syntax.constant_placeholder, s)
+    parse_wrap(Syntax.rvalue_placeholder, s)
+    parse_wrap(Syntax.fvalue_placeholder, s)
+    parse_wrap(Syntax.space_placeholder, s)
+    parse_wrap(Syntax.ndpt_placeholder, s)
+    parse_wrap(Syntax.template_placeholder, s)
+    parse_wrap(Syntax.primitivedp_placeholder, s)
+    parse_wrap(Syntax.collection_placeholder, s)
+
+    parse_wrap(Syntax.constant_value, s)
+    parse_wrap(Syntax.rvalue, s)
+    parse_wrap(Syntax.fvalue, s)
+    parse_wrap(Syntax.space, s)
+    parse_wrap(Syntax.ndpt_dp_rvalue, s)
+    parse_wrap(Syntax.template, s)
+    
+    parse_wrap(Syntax.upper_set_from_collection, 'upperclosure [[ set ]]')
+    parse_wrap(Syntax.ndpt_dp_rvalue, 'abstract [[ model ]]')
+    
 @comptest
 def check_lang77(): # TODO: rename
     pass

@@ -93,9 +93,29 @@ class Rcomp(Poset):
     def get_test_chain(self, n):
         s = [self.get_bottom()]
         
+        def f():
+            """ Random number between 0 and 10, up to 2 significant digits. """
+            x = np.random.rand() * 10
+            precision = 10
+            x = np.round(x * precision) / precision
+            return float(x)
+        
         if n >= 3:
-            s.extend(sorted(np.random.rand(n - 2) * 10))
+            other = []
+            some = [0.1, 1.0, 0.9, 1.1, 2.0, 2.1]
+            have = len(some)
+            other.extend(some[:n-2])
             
+            remaining = have - (n-2)
+            if remaining > 0:
+                while remaining:
+                    x = f()
+                    if x in other:
+                        continue
+                    other.append(x)
+                    remaining -= 1
+                
+            s.extend(sorted(other))
         s.append(self.get_top())
         return s
 

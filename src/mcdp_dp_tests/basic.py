@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from mcdp_dp import NotSolvableNeedsApprox
 from mcdp_posets import NotBounded, UpperSets
 from mcdp_tests.generation import for_all_dps

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 """
     
@@ -30,31 +31,32 @@
 from .examples import *
 from .failures_parsing import *
 from .failures_simplification import *
+from .math import *
+from .syntax_anyof import *
+from .syntax_approximation import *
+from .syntax_asserts import *
 from .syntax_canonical import *
+from .syntax_catalogue import *
 from .syntax_connections import *
+from .syntax_conversions import *
 from .syntax_coproduct import *
 from .syntax_from_library import *
+from .syntax_import import *
+from .syntax_intervals import *
 from .syntax_load import *
+from .syntax_minimals_maximals import *
+from .syntax_minmax import *
 from .syntax_misc import *
+from .syntax_multiset import *
+from .syntax_named_tuples import *
 from .syntax_numbers import *
 from .syntax_power import *
 from .syntax_sets import *
+from .syntax_single_space import *
 from .syntax_spaces  import *
 from .syntax_tuples  import *
+from .syntax_uncertainty import *
+from .take_optimization import *
 from .templates_test import *
 
-from .syntax_multiset import *
-from .syntax_intervals import *
-from .syntax_conversions import *
-from .syntax_uncertainty import *
-from .syntax_catalogue import *
-from .syntax_named_tuples import *
-from .syntax_single_space import *
-from .syntax_import import *
-from .take_optimization import *
-from .syntax_approximation import *
-
-from .syntax_asserts import *
-
-from .math import *
 

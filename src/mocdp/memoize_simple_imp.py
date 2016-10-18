@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from decorator import decorator
 
 def memoize_simple(obj):

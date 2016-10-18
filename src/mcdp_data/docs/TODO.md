@@ -47,7 +47,10 @@ Technical debt:
 --------------------
 
 
-- Create "add_bottom(<poset>)" operator.
+- Create "add_bottom(<poset>)" and "add_top" operator. 
+
+
+
 - Create type "{{poset}}", "{{mcdp}}", "{{template}}", "{{name}}", etc. to use in the documentation as stand-alone. 
 
 - bug doc: Ravpower assume 110: The model says we have two options: we need to find an outlet of TypeM at either 110 V or 220 V which will provide 5 W of power. Moreover, we need at least 10.99 USD to buy the component.
@@ -113,33 +116,11 @@ Meat
 
   my_npd.mcdp
   from-code('module.function', {param1=..., param2=...})
-
-
-- F: better compiler that re-uses previous uses of take()
-# This converts from TypeC to TypeL
-mcdp {
-    provides out [`power]
-    requires in  [`power]
-    requires cost [USD]
-
-    # This device costs $5
-    cost >= 5 USD
-
-    take(in,  0) >= `socket_type : TypeL
-    take(out, 0) <= `socket_type : TypeC
-
-    take(in, 1) >=  take(out, 1) # voltages
-    take(in, 2) >=  take(out, 2) # amperes
-}
-
-
+ 
 Misc
 -----
 
-- F: create operator approx(10g, -)
-
-- B: automatically load CSS from that file. (introduces dependency on mcdp_web)
-
+ 
 
 MCDP-web
 ----------
@@ -149,9 +130,6 @@ MCDP-web
 - F: add credits to free sw in the initial page
 
 - F: library list: templates
-
-
-- R: drop "/list"
 
 
 - F: list links to *.md documents in the initial library page
@@ -238,7 +216,7 @@ Language additions
 	}
 	```
 
-- L: Syntax for empty sets. ``{} g`` or  ``empty g``
+- L: Syntax for empty sets. ``{} g`` or  ``EmptySet g``
 
 
 - L: Implement Python-style comments for more literate programming.
@@ -250,11 +228,7 @@ mcdp {
   provides x [J] "This is a comment for the description"
 }
 ```
-
-- L: named tuples
-
-  T = namedtuple(T: Type, U: Type)
-
+ 
 
 
 - Bug in the dot drawing for this one:
@@ -284,7 +258,6 @@ requires r1 >= f1
   catalouge {
      provides resolution [pixels]
      requires latency [s]
-
 
      500 pixels => 10
   }

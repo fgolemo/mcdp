@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .basic import *
 from .normalform import *
 from .evaluation import *

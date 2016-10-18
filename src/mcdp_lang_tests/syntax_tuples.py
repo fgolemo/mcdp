@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mcdp_lang import parse_ndp
 from mcdp_lang.eval_resources_imp import eval_rvalue

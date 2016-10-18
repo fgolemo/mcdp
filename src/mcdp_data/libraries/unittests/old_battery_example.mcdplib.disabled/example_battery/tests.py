@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from reprep import Report
 from mocdp.drawing import plot_upset_minima, plot_upset_R2
 from mocdp.exceptions import mcdp_dev_warning

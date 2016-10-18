@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-
-from .find_poset_minima.baseline_n2 import poset_minima
 from contracts import raise_wrapped
 from mcdp_posets import NotLeq
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
+
+from .find_poset_minima.baseline_n2 import poset_minima
+
 
 __all__ = [
     'check_minimal',

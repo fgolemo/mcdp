@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest, comptest_fails
 from mcdp_dp.solver import (ConvergedToEmpty, ConvergedToFinite,
     ConvergedToInfinite, generic_solve)

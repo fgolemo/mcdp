@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import base64
 import hashlib
 import os
@@ -164,7 +165,7 @@ def make_plots(library, frag, raise_errors, realpath):
 
 def load_fragments(library, frag, realpath):
     """
-        loads all the codes 
+        loads all the codes specified as "mcdp" and "mcdp_poset"
         
             <pre class='mcdp' id='id_ndp>
             code
@@ -418,9 +419,12 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
 
     go('pre.mcdp', Syntax.ndpt_dp_rvalue, "mcdp", use_pre=True)
     go('pre.mcdp_poset', Syntax.space, "mcdp_poset", use_pre=True)
-    go('pre.mcdp_value', Syntax.rvalue, "mcdp_value", use_pre=True)
     go('pre.mcdp_template', Syntax.template, "mcdp_template", use_pre=True)
     go('pre.mcdp_statements', Syntax.dp_model_statements, "mcdp_statements", use_pre=True)
+    go('pre.mcdp_fvalue', Syntax.fvalue, "mcdp_fvalue", use_pre=True)
+    go('pre.mcdp_rvalue', Syntax.rvalue, "mcdp_rvalue", use_pre=True)
+    # todo: add deprecation
+    go('pre.mcdp_value', Syntax.rvalue, "mcdp_value", use_pre=True)
 
     go('code.mcdp', Syntax.ndpt_dp_rvalue, "mcdp", use_pre=False)
     go('code.mcdp_poset', Syntax.space, "mcdp_poset", use_pre=False)

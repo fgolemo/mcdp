@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from tempfile import mkdtemp
 
@@ -12,7 +13,7 @@ from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from mcdp_report.gg_utils import gg_get_formats
 from mcdp_web.renderdoc.highlight import get_minimal_document
 from mocdp.comp.recursive_name_labeling import get_labelled_version
-from mocdp.exceptions import mcdp_dev_warning
+from mocdp.exceptions import mcdp_dev_warning, DPSemanticError
 from quickapp import QuickAppBase
 from system_cmd import CmdException, system_cmd_result
 
@@ -40,32 +41,57 @@ def return_formats2(gg, prefix):
             for data_format, d in zip(formats, data)]
     return res
 
+from mocdp import logger
+
 def dp_graph_flow_(data):
-    dp = get_dp(data)
+    try:
+        dp = get_dp(data)
+    except DPSemanticError:
+        logger.warn('Could not draw dp_graph_flow_')
+        return []
     gg = dp_graph_flow(dp)
     return return_formats2(gg, 'dp_graph_flow')
 
 def dp_graph_tree_(data):
-    dp = get_dp(data)
+    try:
+        dp = get_dp(data)
+    except DPSemanticError:
+        logger.warn('Could not draw dp_graph_tree_')
+        return []
     gg = dp_graph_tree(dp, compact=False)
     return return_formats2(gg, 'dp_graph_tree')
 
 def dp_graph_tree_labeled_(data):
     ndp = get_ndp(data)
     ndp = get_labelled_version(ndp)
-    dp = ndp.get_dp()
+    
+    try:
+        dp = ndp.get_dp()
+    except DPSemanticError:
+        logger.warn('Could not draw dp_graph_tree_labeled_')
+        return []
+    
     gg = dp_graph_tree(dp, compact=False)
     return return_formats2(gg, 'dp_graph_tree_labeled')
 
 def dp_graph_tree_compact_(data):
-    dp = get_dp(data)
+    try:
+        dp = get_dp(data)
+    except DPSemanticError:
+        logger.warn('Could not draw dp_graph_tree_compact_')
+        return []
     gg = dp_graph_tree(dp, compact=True)
     return return_formats2(gg, 'dp_graph_tree_compact')
 
 def dp_graph_tree_compact_labeled_(data):
     ndp = get_ndp(data)
     ndp = get_labelled_version(ndp)
-    dp = ndp.get_dp()
+    try:
+        dp = ndp.get_dp()
+    except DPSemanticError:
+        logger.warn('Could not draw dp_graph_tree_compact_labeled_')
+        return []
+    
     gg = dp_graph_tree(dp, compact=True)
     return return_formats2(gg, 'dp_graph_tree_compact_labeled')
 
@@ -81,14 +107,23 @@ def ndp_repr_long_labeled(data):
     return [res1]
 
 def dp_repr_long(data):
-    dp = get_dp(data)
+    try:
+        dp = get_dp(data)
+    except DPSemanticError:
+        logger.warn('Could not draw dp_graph_tree_compact_labeled_')
+        return []
+
     res1 = ('txt', 'dp_repr_long', dp.repr_long())
     return [res1]
 
 def dp_repr_long_labeled(data):
     ndp = get_ndp(data)
     ndp = get_labelled_version(ndp)
-    dp = ndp.get_dp()
+    try:
+        dp = ndp.get_dp()
+    except DPSemanticError:
+        logger.warn('Could not draw dp_graph_tree_compact_labeled_')
+        return []
     res1 = ('txt', 'dp_repr_long_labeled', dp.repr_long())
     return [res1]
 

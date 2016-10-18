@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_lang.blocks import get_missing_connections
 from mcdp_lang.helpers import get_constant_minimals_as_resources

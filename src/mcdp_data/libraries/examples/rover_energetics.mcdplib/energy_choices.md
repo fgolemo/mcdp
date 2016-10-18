@@ -29,14 +29,11 @@ One way to get the heat is to procure a bit of Plutonium.
 We can connect the two, by specifying that the heat required by the 
 thermocouple is provided by the pellet:
 
-<p><pre class="ndp_graph_enclosed" enclosed="false">
-mcdp {
-    plutonium_pellet = new PlutoniumPellet
-
-    thermocouple = instance template `Thermocouple
-    heat required by thermocouple <= heat provided by plutonium_pellet
-}
-</pre></p>
+<p><pre class="ndp_graph_enclosed" id="plutonium_plus_thermocouple" enclosed="false">mcdp {
+  plutonium_pellet = new PlutoniumPellet
+  thermocouple = instance template `Thermocouple
+  heat required by thermocouple <= heat provided by plutonium_pellet
+}</pre></p>
 
 The masses are summed together:
 

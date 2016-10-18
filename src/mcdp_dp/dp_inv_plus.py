@@ -1,9 +1,12 @@
-from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
+# -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
 from mcdp_posets import Nat, Poset, PosetProduct, RcompUnits, get_types_universe
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 import numpy as np
+
+from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
+
 
 _ = Nat, Poset
 
@@ -68,6 +71,9 @@ class InvPlus2(ApproximableDP):
 
 
 class InvPlus2L(PrimitiveDP):
+    """ 
+        Lower approximation to f <= r1 + r2 on R.
+    """
 
     @contract(Rs='tuple[2],seq[2]($RcompUnits)', F=RcompUnits)
     def __init__(self, F, Rs, nl):
@@ -117,6 +123,9 @@ class InvPlus2L(PrimitiveDP):
         return self.R.Us(options)
 
     def solve_r(self, r):
+        """ 
+            Upper approximation to f <= r1 + r2 on R.
+        """
         r1, r2 = r
         maxf = self.F.add(r1, r2)
         return self.F.L(maxf)

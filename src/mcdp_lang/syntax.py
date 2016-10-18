@@ -19,6 +19,7 @@ from .utils_lists import make_list
 ParserElement.enablePackrat()
 
 K = Keyword
+SL = lambda x: S(L(x))
 
 
 CDP = CDPLanguage
@@ -138,7 +139,26 @@ class Syntax():
     # An expression that evaluates to a Template
     template = Forward()
 
+    get_idn = SyntaxIdentifiers.get_idn
+    # a quoted string
+    quoted = sp(dblQuotedString | sglQuotedString, lambda t:t[0][1:-1])
 
+
+    placeholder = SL('[') + SL('[')+ (get_idn() | quoted) + SL(']') + SL(']')
+    
+    dpname_placeholder = sp(placeholder, lambda t: CDP.Placeholder_dpname(t[0]))
+    constant_placeholder = sp(placeholder, lambda t: CDP.Placeholder_constant(t[0]))
+    rvalue_placeholder = sp(placeholder, lambda t: CDP.Placeholder_rvalue(t[0]))
+    fvalue_placeholder = sp(placeholder, lambda t: CDP.Placeholder_fvalue(t[0]))
+    fname_placeholder = sp(placeholder, lambda t: CDP.Placeholder_fname(t[0]))
+    rname_placeholder = sp(placeholder, lambda t: CDP.Placeholder_rname(t[0]))
+    space_placeholder = sp(placeholder, lambda t: CDP.Placeholder_poset(t[0]))
+    ndpt_placeholder = sp(placeholder, lambda t: CDP.Placeholder_constant(t[0]))
+    template_placeholder = sp(placeholder, lambda t: CDP.Placeholder_template(t[0]))
+    primitivedp_placeholder = sp(placeholder, lambda t: CDP.Placeholder_primitivedp(t[0]))
+    collection_placeholder = sp(placeholder, lambda t: CDP.Placeholder_collection(t[0]))
+    integer_placeholder = sp(placeholder, lambda t: CDP.Placeholder_integer(t[0]))
+    index_label_placeholder =  sp(placeholder, lambda t: CDP.Placeholder_index_label(t[0]))
 
     REQUIRED_BY = sp((K('required') | K('req.') | K('r.')) - K('by'),
                     lambda _: CDP.RequiredByKeyword('required by'))
@@ -181,7 +201,6 @@ class Syntax():
 
 
 
-    get_idn = SyntaxIdentifiers.get_idn
 
     library_name = sp(get_idn(), lambda t: CDP.LibraryName(t[0]))
 
@@ -274,6 +293,7 @@ class Syntax():
         | space_product_with_labels
         | space_single_element_poset
         | space_coproduct
+        | space_placeholder
     )
 
 
@@ -291,8 +311,8 @@ class Syntax():
     int_constant = sp(K('int') - L(':') - SyntaxBasics.integer,
                       lambda t: CDP.IntConstant(t[0], t[1], t[2]))
 
-    fname = sp(get_idn(), lambda t: CDP.FName(t[0]))
-    rname = sp(get_idn(), lambda t: CDP.RName(t[0]))
+    fname = sp(get_idn(), lambda t: CDP.FName(t[0])) | fname_placeholder
+    rname = sp(get_idn(), lambda t: CDP.RName(t[0])) | rname_placeholder
 
     PROVIDES = keyword('provides', CDP.ProvideKeyword)
     fun_statement = sp(PROVIDES + C(fname, 'fname') + unitst,
@@ -365,8 +385,6 @@ class Syntax():
 
     # TODO: change
 
-    # a quoted string
-    quoted = sp(dblQuotedString | sglQuotedString, lambda t:t[0][1:-1])
 
     ndpname = sp(get_idn() | quoted, lambda t: CDP.NDPName(t[0]))
 
@@ -377,7 +395,9 @@ class Syntax():
                         lambda t: CDP.LoadNDP(t[0], t[1]))
 
     # <dpname> = ...
-    dpname = sp(get_idn(), lambda t: CDP.DPName(t[0]))
+    dpname_real = sp(get_idn(), lambda t: CDP.DPName(t[0])) 
+    dpname = dpname_real | dpname_placeholder
+
     dptypename = sp(get_idn(), lambda t: CDP.DPTypeName(t[0]))
 
     # instance <type>
@@ -451,7 +471,8 @@ class Syntax():
                                  ZeroOrMore(COMMA - constant_value) - S(L('}')),
                                  lambda t: CDP.Collection(make_list(list(t))))
     collection_of_constants2 = valuewithunit_minimals
-    collection_of_constants = collection_of_constants1 | collection_of_constants2
+    
+    collection_of_constants = collection_of_constants1 | collection_of_constants2 | collection_placeholder
 
     # upperclosure <set>
     # ↑ <set>
@@ -515,6 +536,7 @@ class Syntax():
                        | valuewithunit
                        | variable_ref
                        | asserts
+                       | constant_placeholder
                        )
 
 
@@ -559,15 +581,17 @@ class Syntax():
 
     # take(<a, b>, 0)
     TAKE = keyword('take', CDP.TakeKeyword)
+    integer =  SyntaxBasics.integer | integer_placeholder
+    
     rvalue_tuple_indexing = sp(TAKE + SLPAR + rvalue + SCOMMA +
-                                  SyntaxBasics.integer + SRPAR,
+                                 integer + SRPAR,
                                lambda t: CDP.TupleIndexRes(keyword=t[0], value=t[1], index=t[2]))
 
     lf_tuple_indexing = sp(TAKE + SLPAR + fvalue + SCOMMA +
-                                  SyntaxBasics.integer + SRPAR,
+                                  integer + SRPAR,
                                lambda t: CDP.TupleIndexFun(keyword=t[0], value=t[1], index=t[2]))
 
-    index_label = sp(get_idn(), lambda t: CDP.IndexLabel(t[0]))
+    index_label = sp(get_idn(), lambda t: CDP.IndexLabel(t[0])) | index_label_placeholder
     # rvalue instead of rvalue_new_function
 
     # approximating a resource
@@ -589,7 +613,7 @@ class Syntax():
 
     # (provided a).label
     rvalue_label_indexing3 = sp(SLPAR + rvalue + SRPAR + DOT + index_label,
-                               lambda t: CDP.ResourceLabelIndex(keyword=t[1],
+                               lambda t: CDP.ResourceLabelIndex(keyword=t[1],   
                                                                 rvalue=t[0], label=t[2]))
 
     # TODO: remove
@@ -634,7 +658,7 @@ class Syntax():
     rvalue_unary_expr = sp(unary_op - SLPAR - rvalue - SRPAR,
                             lambda t: CDP.UnaryRvalue(t[0], t[1]))
     
-    
+    # binary functions on resources
     binary = {
         'max': CDP.OpMax,
         'min': CDP.OpMin,
@@ -646,6 +670,19 @@ class Syntax():
                         C(rvalue, 'op1') - SCOMMA
                         - C(rvalue, 'op2')) - SRPAR ,
                        lambda t: Syntax.binary[t[0].keyword](a=t['op1'], b=t['op2'], keyword=t[0]))
+
+    binary_f = {
+        'max': CDP.OpMaxF,
+        'min': CDP.OpMinF,
+    }
+
+    # binary functions on functionality
+    opname_f = sp(MatchFirst([L(x) for x in binary_f]), lambda t: CDP.OpKeyword(t[0]))
+
+    fvalue_binary = sp((opname_f - SLPAR +
+                        C(fvalue, 'op1') - SCOMMA
+                        - C(fvalue, 'op2')) - SRPAR ,
+                       lambda t: Syntax.binary_f[t[0].keyword](a=t['op1'], b=t['op2'], keyword=t[0]))
 
     fvalue_simple = sp(dpname + DOT - fname,
                        lambda t: CDP.Function(dp=t[0], s=t[2], keyword=t[1]))
@@ -890,7 +927,10 @@ class Syntax():
                                                   params=make_list(t[2], t[1].where),
                                                   ndpt=t[4]))
 
-    template << (code_spec | template_load | template_spec)  # mind the (...)
+    template << (code_spec 
+                 | template_load 
+                 | template_spec 
+                 | template_placeholder)  # mind the (...)
 
     SPECIALIZE = keyword('specialize', CDP.SpecializeKeyword)
 
@@ -917,7 +957,8 @@ class Syntax():
         ndpt_dp_variable_ref |
         ndpt_specialize |
         ndpt_addmake |
-        ndpt_ignore_resources
+        ndpt_ignore_resources |
+        ndpt_placeholder
     )
 
     # TODO: remove?
@@ -942,7 +983,8 @@ class Syntax():
         ^ rvalue_label_indexing3
         ^ rvalue_any_of
         ^ rvalue_approx_step
-        ^ rvalue_approx_u)
+        ^ rvalue_approx_u
+        ^ rvalue_placeholder)
 
     rvalue << operatorPrecedence(rvalue_operand, [
         (TIMES, 2, opAssoc.LEFT, mult_parse_action),
@@ -952,6 +994,7 @@ class Syntax():
 
     fvalue_operand = (
           constant_value
+        ^ fvalue_binary
         ^ fvalue_simple
         ^ fvalue_fancy
         ^ fvalue_new_resource
@@ -963,7 +1006,8 @@ class Syntax():
         ^ fvalue_label_indexing2
         ^ fvalue_label_indexing3
         ^ lf_tuple_indexing
-        ^ fvalue_any_of)
+        ^ fvalue_any_of
+        ^ fvalue_placeholder)
 
     # here we cannot use "|" because otherwise (cokode).id is not parsedcorrectly
 

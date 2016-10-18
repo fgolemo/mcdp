@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from reprep.plot_utils.spines import set_spines_look_A
 
 

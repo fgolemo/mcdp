@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import cgi
 from collections import defaultdict, namedtuple
 import os

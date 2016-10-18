@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from mcdp_dp import Max, Max1, Min
+from mcdp_dp import Max1
+from mcdp_dp.dp_max import JoinNDP, MeetNDP
 from mocdp.comp import Connection, dpwrap
 from mocdp.exceptions import DPSemanticError
 
@@ -32,7 +33,7 @@ def eval_rvalue_OpMin(rvalue, context):
         msg = 'Incompatible units: %s and %s' % (F1, F2)
         raise DPSemanticError(msg, where=rvalue.where)
 
-    dp = Min(F1)
+    dp = MeetNDP(2, F1)
     nprefix, na, nb, nres = '_opmin', '_m0', '_m1', '_min'
 
     return add_binary2(context, a, b, dp, nprefix, na, nb, nres)
@@ -79,7 +80,7 @@ def eval_rvalue_OpMax(rvalue, context):
     # possibly convert b to type of a
     b = get_resource_possibly_converted(b, F1, context)
 
-    dp = Max(F1)
+    dp = JoinNDP(2, F1)
     nprefix, na, nb, nres = 'max', '_m0', '_m1', '_max'
 
     return add_binary2(context, a, b, dp, nprefix, na, nb, nres)

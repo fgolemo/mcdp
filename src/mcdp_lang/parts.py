@@ -68,8 +68,11 @@ class CDPLanguage():
     CoproductWithNamesName = namedtuplewhere('CoproductWithNamesName', 'value')
     CoproductWithNames = namedtuplewhere('CoproductWithNames', 'keyword elements')
 
-    OpMax = namedtuplewhere('Max', 'keyword a b')
-    OpMin = namedtuplewhere('Min', 'keyword a b')
+    OpMax = namedtuplewhere('OpMax', 'keyword a b')
+    OpMin = namedtuplewhere('OpMin', 'keyword a b')
+
+    OpMaxF = namedtuplewhere('OpMaxF', 'keyword a b')
+    OpMinF = namedtuplewhere('OpMinF', 'keyword a b')
 
     DPName = namedtuplewhere('DPName', 'value')
     DPTypeName = namedtuplewhere('DPTypeName', 'value')
@@ -131,7 +134,7 @@ class CDPLanguage():
     OpenBraceKeyword = namedtuplewhere('OpenBraceKeyword', 'keyword')
     CloseBraceKeyword = namedtuplewhere('CloseBraceKeyword', 'keyword')
     FromLibraryKeyword = namedtuplewhere('FromLibraryKeyword', 'keyword')
-    OpKeyword = namedtuplewhere('OpKeyword', 'keyword')  # Max
+    OpKeyword = namedtuplewhere('OpKeyword', 'keyword')  
     DPWrapToken = namedtuplewhere('DPWrapToken', 'keyword')
     FuncName = namedtuplewhere('FuncName', 'value')  # python function name
     NDPName = namedtuplewhere('NDPName', 'value')  # name in "new <name>"
@@ -335,3 +338,23 @@ class CDPLanguage():
     IgnoreResourcesKeyword = namedtuplewhere('IgnoreResourcesKeyword', 'keyword')
     IgnoreResources = namedtuplewhere('IgnoreResources', 'keyword rnames dp_rvalue')
 
+    # placeholders to use in documentation
+    # [[label]]
+    
+    Placeholder = namedtuplewhere('Placeholder', 'label')
+    
+    Placeholder_ndp = Placeholder # namedtuplewhere('Placeholder_ndp', 'label')
+    Placeholder_poset = Placeholder # namedtuplewhere('Placeholder_poset', 'label')
+    Placeholder_primitivedp = Placeholder # namedtuplewhere('Placeholder_primitivedp', 'label')
+    Placeholder_constant = Placeholder # namedtuplewhere('Placeholder_constant', 'label')
+    Placeholder_dpname = Placeholder # namedtuplewhere('Placeholder_constant', 'label')
+    Placeholder_rname = Placeholder # namedtuplewhere('Placeholder_constant', 'label')
+    Placeholder_fname = Placeholder # namedtuplewhere('Placeholder_constant', 'label')
+    Placeholder_libname = Placeholder # namedtuplewhere('Placeholder_constant', 'label')
+    Placeholder_template = Placeholder # namedtuplewhere('Placeholder_template', 'label')
+    Placeholder_collection = Placeholder # namedtuplewhere('Placeholder_collection', 'label')
+    Placeholder_fvalue = Placeholder # namedtuplewhere('Placeholder_fvalue', 'label')
+    Placeholder_rvalue = Placeholder # namedtuplewhere('Placeholder_rvalue', 'label')
+    Placeholder_integer = Placeholder
+    Placeholder_index_label = Placeholder
+    
