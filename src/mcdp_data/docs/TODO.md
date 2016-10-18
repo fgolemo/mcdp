@@ -230,6 +230,12 @@ mcdp {
 ```
  
 
+- Coproduct that automatically adds the spaces that are not there
+
+
+  DP == DP x (0 -> F)
+
+  DP == DP x (0 -> R)
 
 - Bug in the dot drawing for this one:
 
