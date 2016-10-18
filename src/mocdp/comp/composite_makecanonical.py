@@ -49,7 +49,10 @@ def cndp_makecanonical(ndp, name_inner_muxed='_inner_muxed', s_muxed='_muxed'):
     assert ndp.get_rnames() == rnames
 
 
-    # then we compact it
+    # then we compact it (take the product of edges)
+    # Note also that this abstract() the children;
+    # however, because we flattened before, this is redundant,
+    # as every DP is a SimpleDP 
     ndp = ndp.compact()
     assert ndp.get_fnames() == fnames
     assert ndp.get_rnames() == rnames
