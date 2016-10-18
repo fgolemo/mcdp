@@ -10,8 +10,11 @@ from mcdp_posets import (NotLeq, PosetProduct, Rcomp, UpperSet, UpperSets,
     get_types_universe)
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
 from mcdp_posets.rcomp import finfo
+from mocdp import logger
+from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 import numpy as np
 from reprep.config import RepRepDefaults
+from reprep.plot_utils.styles import ieee_spines, ieee_fonts
 
 from .drawing import plot_upset_R2
 from .utils import safe_makedirs
@@ -24,13 +27,23 @@ extra_space_top = 0.05
 def generic_report_trace(r, ndp, dp, trace, out, do_movie=False):  # @UnusedVariable
     r.text('dp', dp.repr_long())
     # r.text('trace', trace.format())
-    
+    nloops = 0
     for l, trace_loop in enumerate(trace.find_loops()):
+        nloops += 1
         with r.subsection('loop%d' % l) as r2:
             _report_loop(r2, trace_loop, out, do_movie=do_movie)
-        
+    if nloops == 0:
+        raise_desc(DPInternalError, 'There is no iteration; no movie available.')
         
 def _report_loop(r, trace_loop, out, do_movie=True):
+    from matplotlib import pylab
+    ieee_fonts(pylab)
+    RepRepDefaults.savefig_params = dict(dpi=400, 
+                                         bbox_inches='tight', pad_inches=0.01,
+                                         transparent=True)
+
+
+    figsize = (2, 2)
     sips = list(trace_loop.get_iteration_values('sip'))
     converged = list(trace_loop.get_iteration_values('converged'))
     
@@ -54,34 +67,41 @@ def _report_loop(r, trace_loop, out, do_movie=True):
             outdir = os.path.join(out, 'video-%s' % name)
 
             visualized_axis = enlarge(axis, extra_space_top * 2)
-            print('Decided on axis %s' % str(axis))
+#             print('Decided on axis %s' % str(axis))
             for i, sip in enumerate(sips):
-                with f.plot('step%d' % i) as pylab:
-
+                with f.plot('step%03d' % i, figsize=figsize) as pylab:
+                    print('Step %d' % i)
+                    ieee_spines(pylab)
                     c_orange = '#FFA500'
                     c_red = [1, 0.5, 0.5]
-                    print('bottom')
+                    # plotting bottom (all in red
                     plotter.plot(pylab, axis, UR, R.U(R.get_bottom()),
                                  params=dict(color_shadow=c_red, markers=None))
-                    print('sip')
+                    #print('sip:\n  %s' % sip)
+                    marker_params = dict(markersize=5, markeredgecolor='none')
                     plotter.plot(pylab, axis, UR, sip,
-                                 params=dict(color_shadow=c_orange))
+                                 params=dict(color_shadow=c_orange,
+                                             markers_params=marker_params))
                     conv = converged[i]
                     c_blue = [0.6, 0.6, 1.0]
-                    print('converged')
-                    plotter.plot(pylab, axis, UR, R.Us(converged[i]),
+                    #print('converged:\n  %s' % conv)
+                    plotter.plot(pylab, axis, UR, conv,
                                  params=dict(color_shadow=c_blue))
-                    print('minimal')
-                    for c in conv:
+                    #print('minimal')
+                    
+                    for c in conv.minimals:
                         p = plotter.toR2(c)
                         pylab.plot(p[0], p[1], 'go',
-                                   markersize=10, markeredgecolor='g')
+                                   markersize=5, markeredgecolor='none', 
+                                   markerfacecolor='g', clip_on=False)
                     pylab.axis(visualized_axis)
+                    from mcdp_ipython_utils.plotting import color_resources, set_axis_colors
 
+                    set_axis_colors(pylab, color_resources, color_resources)
 
                 if do_movie:
 
-                    node = f.resolve_url('step%d/png' % i)
+                    node = f.resolve_url('step%03d/png' % i)
 
                     safe_makedirs(outdir)
                     fn = os.path.join(outdir, '%05d.png' % i)
@@ -92,12 +112,50 @@ def _report_loop(r, trace_loop, out, do_movie=True):
                 outmp4 = os.path.join(out, 'video-%s.mp4' % name)
 
                 try:
-                    from procgraph_mplayer.scripts.join_video import join_video_29
+                    import procgraph_mplayer  # @UnusedImport
+                
+#                     from procgraph_mplayer.scripts.join_video import join_video_29
                 except ImportError as e:
-                    print(e)
+                    logger.error('Cannot use Procgraph to create video.')
+                    logger.error(e)
+                    logger.info('The frames are in the directory %s' % outdir)
                 else:
-                    join_video_29(output=outmp4, dirname=outdir,
-                                  pattern='.*.png', fps=1.0)
+                    join_video_29_fixed(output=outmp4, dirname=outdir,
+                                        pattern='.*.png', fps=1.0)
+
+
+mcdp_dev_warning('add this to the procgraph repository')
+
+
+def join_video_29_fixed(output, dirname, pattern, fps):
+    """ 
+        Note that the pattern is a Python regex:
+        
+        pg-video-join -d anim-simple/ -p '*.png' -o anim-simple-collate.mp4 --fps 1 
+        
+    """
+    from procgraph.core.registrar_other import register_model_spec
+    from procgraph import pg
+
+    register_model_spec("""
+--- model join_video_helper_29
+config output
+config dirname
+config pattern
+config images_per_second
+
+|files_from_dir dir=$dirname regexp=$pattern fps=$images_per_second| \
+--> |imread_rgb| \
+--> |fix_frame_rate fps=29.97| \
+--> |mencoder quiet=1 file=$output timestamps=0|
+    
+    """)
+    params = dict(dirname=dirname, 
+                  pattern=pattern, 
+                  output=output,
+                  images_per_second=fps)
+    pg('join_video_helper_29', params)
+
 
 
 def generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0)):
@@ -318,9 +376,12 @@ class PlotterUR(Plotter):
                        markers_params={})
         params0.update(params)
 
-        color_shadow = params0['color_shadow']
-        markers = params0['markers']
-
+        color_shadow = params0.pop('color_shadow')
+        markers = params0.pop('markers')
+        marker_params = params0.pop('marker_params')
+        if params0: 
+            raise ValueError(params0)
+        
         self.axis = axis
         self.check_plot_space(space)
 
@@ -329,7 +390,8 @@ class PlotterUR(Plotter):
         v = space.P.Us(minimals)
 
         plot_upset_R2(pylab, v, axis, extra_space_shadow=extra_space_finite,
-                      color_shadow=color_shadow, markers=markers)
+                      color_shadow=color_shadow, markers=markers,
+                      marker_params=marker_params)
 
 class Plotter_Tuple2_UR2(Plotter):
     """ Plots a tuple of ur2 as min/max bounds """
@@ -440,11 +502,15 @@ class PlotterUR2(Plotter):
 
     def plot(self, pylab, axis, space, value, params={}):
         params0 = dict(color_shadow=[1.0, 0.8, 0.8], markers='k.',
-                       markers_params={})  # XXX markers_params?
+                       markers_params={}) 
         params0.update(params)
 
-        color_shadow = params0['color_shadow']
-        markers = params0['markers']
+        color_shadow = params0.pop('color_shadow')
+        markers = params0.pop('markers')
+        markers_params = params0.pop('markers_params')
+        if params0:
+            msg = 'Extra parameters given.'
+            raise_desc(ValueError, msg, params0=params0)
 
         self.axis = axis
         self.check_plot_space(space)
@@ -455,7 +521,8 @@ class PlotterUR2(Plotter):
         v = space.P.Us(minimals)
 
         plot_upset_R2(pylab, v, axis, extra_space_shadow=extra_space_finite,
-                      color_shadow=color_shadow, markers=markers)
+                      color_shadow=color_shadow, markers=markers,
+                      marker_params=markers_params)
 
 
 # Upsets((R[s]×R[s])×R[s])
@@ -501,16 +568,11 @@ class PlotterURRpR(Plotter):
         params0.update(params)
         color_shadow = params0['color_shadow']
         markers = params0['markers']
-        _markers_params = params0['markers_params']
+        markers_params = params0['markers_params']
+        
         self.check_plot_space(space)
         tu = get_types_universe()
         P_TO_S, _ = tu.get_embedding(space.P, self.S)
-
-#         y =-x+sqrt(x)+10,
-        # y>=-2x+ 2sqrt(x)+20.
-#         xs = np.linspace(0, 20, 100)
-#         ys = -2 * (xs - np.sqrt(xs) - 10)
-#         pylab.plot(xs, ys, '--')
 
         points2d = [self.toR2(P_TO_S(_)) for _ in value.minimals]
 
@@ -526,7 +588,8 @@ class PlotterURRpR(Plotter):
 
         v = MyUpperSet(points2d, P=R2)
         plot_upset_R2(pylab, v, axis,
-                      color_shadow=color_shadow, markers=markers)
+                      color_shadow=color_shadow, markers=markers,
+                      marker_params=markers_params)
         # for p in points2d:
         #    pylab.plot(p[0], p[1], 'rx')
 

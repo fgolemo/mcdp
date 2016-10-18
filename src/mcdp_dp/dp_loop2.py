@@ -232,16 +232,22 @@ class DPLoop2(PrimitiveDP):
         trace.log('Starting from %s' % UR.format(s0))
         # trace.log('dp0: %s' % self.dp1.repr_long())
 
-        S = [Iteration(s=s0, converged=set())]
+        with trace.iteration(0) as t:
+            t.values(sip=UR.get_bottom(), converged=R.Us(set()))
+            
+        with trace.iteration(1) as t:
+            t.values(sip=s0, converged=R.Us(set()))
+                
+        S = [Iteration(s=s0, converged=R.Us(set()))]
         for i in range(1000000):  # XXX
-            with trace.iteration(i) as t:
+            with trace.iteration(i+2) as t:
                 si = S[-1].s
 
                 sip, converged = dploop2_iterate(dp0, f1, R, si, t)
 
                 t.values(sip=sip, converged=converged)
                 t.log('R = %s' % UR.format(sip))
-#                 t.log('converged = %s' % UR.format(converged))
+                #   t.log('converged = %s' % UR.format(converged))
 
                 if do_extra_checks():
                     try:
@@ -274,8 +280,7 @@ def dploop2_iterate(dp0, f1, R, S, trace):
     UR = UpperSets(R)
     if do_extra_checks():
         UR.belongs(S)
-    R1 = R[0]
-    R2 = R[1]
+    R1, R2 = R
     converged = set()  # subset of solutions for which they converged
     nextit = set()
     # find the set of all r2s
@@ -289,11 +294,15 @@ def dploop2_iterate(dp0, f1, R, S, trace):
 
         for (r1b, r2b) in hr.minimals:
             valid = R1.leq(r1, r1b)
+            
+            valid2 =  R2.leq(r2, r2b)
+            if valid and (not valid2):
+                raise Exception()
 
             if valid:
                 nextit.add((r1b, r2b))
 
-                feasible = R2.leq(r2, r2b)
+                feasible = R2.leq(r2b, r2)
                 if feasible:
                     converged.add((r1b, r2b))
 

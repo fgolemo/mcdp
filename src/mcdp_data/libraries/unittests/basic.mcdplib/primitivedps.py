@@ -132,15 +132,6 @@ def Template_1():
     R = PosetProduct((P,P))
     return Template(F, R)
 
-# def Template_2_emptyset():
-#     F = FinitePoset(set([]), set([]))
-#     R = parse_poset('m')
-#     return Template(F, R)
-
-# def Template_3_emptyset():
-#     R = FinitePoset(set([]), set([]))
-#     F2 = parse_poset('m')
-#     return Template(F, R)
 
 
 def DPLoop0_1():

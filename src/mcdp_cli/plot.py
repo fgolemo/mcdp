@@ -12,6 +12,7 @@ from mcdp_report.dp_graph_tree_imp import dp_graph_tree
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from mcdp_report.gg_utils import gg_get_formats
 from mcdp_web.renderdoc.highlight import get_minimal_document
+from mocdp import logger
 from mocdp.comp.recursive_name_labeling import get_labelled_version
 from mocdp.exceptions import mcdp_dev_warning, DPSemanticError
 from quickapp import QuickAppBase
@@ -41,7 +42,6 @@ def return_formats2(gg, prefix):
             for data_format, d in zip(formats, data)]
     return res
 
-from mocdp import logger
 
 def dp_graph_flow_(data):
     try:

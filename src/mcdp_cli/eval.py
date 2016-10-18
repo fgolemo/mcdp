@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+import logging
+import os
+
 from contracts.enabling import disable_all
 from mcdp_library.libraries import Librarian
 from quickapp import QuickAppBase
-import logging
-import os
 
 
 class Eval(QuickAppBase):

@@ -4,22 +4,21 @@ from mcdp_posets.rcomp import finfo
 from mcdp_posets import UpperSet
 from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
-
-
-def plot_upset_minima(pylab, us):
-    points = us.minimals
-
-    # write once for axis
-    for p in points:
-        pylab.plot(p[0], p[1], 'k.', clip_on=False)
+# 
+# 
+# def plot_upset_minima(pylab, us):
+#     points = us.minimals
+# 
+#     # write once for axis
+#     for p in points:
+#         pylab.plot(p[0], p[1], 'k.', clip_on=False)
 
 
 @contract(us=UpperSet)
 def plot_upset_R2(pylab, us, axis, color_shadow,
                   extra_space_shadow=0.05, color_lines='none', markers='r.',
                   marker_params={}):
-    from mcdp_report.generic_report_utils import enlarge_x
-    from mcdp_report.generic_report_utils import enlarge_y
+    from .generic_report_utils import enlarge_x, enlarge_y
 
     points = us.minimals
 
@@ -44,6 +43,7 @@ def plot_upset_R2(pylab, us, axis, color_shadow,
             # when using "finfo.tiny"
             eps = finfo.eps
             p = np.maximum(p, eps)
+            #print('plot_upset_R2: marker params: %s ' % marker_params)
             pylab.plot(p[0], p[1], markers, clip_on=False, **marker_params)
 
 
