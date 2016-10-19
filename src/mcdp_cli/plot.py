@@ -19,6 +19,7 @@ from quickapp import QuickAppBase
 from system_cmd import CmdException, system_cmd_result
 
 from .utils_mkdir import mkdirs_thread_safe
+from mcdp_lang.syntax import Syntax
 
 
 def get_ndp(data):
@@ -213,7 +214,9 @@ def syntax_doc(data):
         return lineno  in lines_to_hide
 
     res = ast_to_html(s, complete_document=True, extra_css=extra_css,
-                      ignore_line=ignore_line)
+                      ignore_line=ignore_line, parse_expr = Syntax.ndpt_dp_rvalue)
+    
+    # TODO: add minimal document
     res1 = ('html', 'syntax_doc', res)
     return [res1]
 

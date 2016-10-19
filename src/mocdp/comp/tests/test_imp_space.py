@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import os
+
 from comptests.registrar import comptest
 from contracts import contract
 from mcdp_dp import NotSolvableNeedsApprox
@@ -14,7 +16,7 @@ from mocdp.comp.composite_makecanonical import cndp_makecanonical
 from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.recursive_name_labeling import (MakeArguments,
     get_imp_as_recursive_dict, get_labelled_version, get_names_used, ndp_make)
-import os
+
 
 @contract(a=MakeArguments)
 def make_root(a):

@@ -4,6 +4,7 @@ from mcdp_posets import UpperSets
 from mcdp_tests.generation import for_all_nameddps
 from mocdp.comp.interfaces import NotConnected
 
+
 @for_all_nameddps
 def test_conversion(id_ndp, ndp):
     if '_inf' in id_ndp:
