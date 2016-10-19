@@ -1,9 +1,5 @@
-<<<<<<< HEAD
 # -*- coding: utf-8 -*-
-=======
 import itertools
-
->>>>>>> master
 from contracts import contract
 from mcdp_dp.dp_flatten import MuxMap
 from mcdp_posets.poset_product import PosetProduct

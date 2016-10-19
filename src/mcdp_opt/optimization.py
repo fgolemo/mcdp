@@ -1,11 +1,8 @@
-<<<<<<< HEAD
 # -*- coding: utf-8 -*-
-=======
 import gc
 import os
 import shutil
 
->>>>>>> master
 from contracts import contract
 from mcdp_dp.dp_limit import Limit
 from mcdp_library import MCDPLibrary
