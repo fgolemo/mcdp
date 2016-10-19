@@ -1,0 +1,221 @@
+<html><head>
+        <meta charset="utf-8" />
+        </head><body>
+<pre><code><span class="comment"># test connected</span>
+<span class='BuildProblem'><span class='MCDPKeyword'>mcdp</span> {  <span class="comment"># mcdp = Monotone Co-Design Problem</span>
+
+        <span class="comment"># a MCDP is defined recursively as a composition</span>
+        <span class="comment"># of MCDPs. In this example, a "template" is a leaf</span>
+        <span class="comment"># and indicate the interface without the implementation</span>
+    <span class='SetName'><span class='SubKeyword'>sub</span><span class='DPName'> motor</span> = <span class='MakeTemplate'><span class='TemplateKeyword'>template</span> <span class='BuildProblem'><span class='MCDPKeyword'>mcdp</span> {
+      <span class="comment"># a motor provides a certain torque at a certain speed</span>
+      <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> speed</span> [<span class='Unit'>rad/s</span>]</span>
+      <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> torque</span> [<span class='Unit'>N*m</span>]</span>
+      <span class="comment"># and requires $ to buy it, g to carry it, </span>
+      <span class="comment"># and voltage, current to power it</span>
+      <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> cost</span> [<span class='Unit'>$</span>]</span>
+      <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> weight</span> [<span class='Unit'>g</span>]</span>
+      <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> voltage</span> [<span class='Unit'>V</span>]</span>
+      <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> current</span> [<span class='Unit'>A</span>]</span>
+    }</span></span></span>
+    
+    <span class="comment"># A "chassis" is the platform without the motors</span>
+    <span class="comment"># and energetics</span>
+    <span class='SetName'><span class='SubKeyword'>sub</span><span class='DPName'> chassis</span> = <span class='MakeTemplate'><span class='TemplateKeyword'>template</span> <span class='BuildProblem'><span class='MCDPKeyword'>mcdp</span> {
+      <span class="comment"># It provides a certain payload</span>
+      <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> payload</span> [<span class='Unit'>g</span>]</span>
+      <span class="comment"># and moves it at a given linear velocity</span>
+      <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> velocity</span> [<span class='Unit'>m/s</span>]</span>
+      <span class="comment"># It costs $ to buy</span>
+      <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> cost</span> [<span class='Unit'>$</span>]</span>
+      <span class="comment"># We might care about the total weight (for shipping)</span>
+      <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> total_weight</span> [<span class='Unit'>g</span>]</span>
+      <span class="comment"># It requires a motor with the given specs</span>
+      <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> motor_speed</span> [<span class='Unit'>rad/s</span>]</span>
+      <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> motor_torque</span> [<span class='Unit'>N*m</span>]</span>
+          <span class="comment"># It also requires a controller</span>
+          <span class="comment"># The unit "*" is a place-holder for this template</span>
+      <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> control_function</span> [<span class='Unit'>any</span>]</span>
+    }</span></span></span>
+
+        <span class="comment"># the entire CDP provides the function "velocity"</span>
+        <span class="comment"># by way of the chassis</span>
+    <span class='FunShortcut1'><span class='ProvideKeyword'>provides</span><span class='FName'> velocity</span> <span class='UsingKeyword'>using</span><span class='DPName'> chassis</span></span>
+ 
+        <span class="comment"># Constraints between motor and chassis</span>
+    <span class='Constraint'><span class='Function'><span class='FName'>torque</span> <span class='ProvidedByKeyword'>provided by</span><span class='DPName'> motor</span></span><span class='geq'> &gt;=</span> <span class='Resource'><span class='RName'>motor_torque</span> <span class='RequiredByKeyword'>required by</span><span class='DPName'> chassis</span></span></span>
+    <span class='Constraint'><span class='Function'><span class='FName'>speed</span> <span class='ProvidedByKeyword'>provided by</span><span class='DPName'> motor</span></span><span class='geq'> &gt;=</span> <span class='Resource'><span class='RName'>motor_speed</span> <span class='RequiredByKeyword'>required by</span><span class='DPName'> chassis</span></span></span>
+    
+    <span class="comment"># Motor control board in between battery and motor</span>
+        <span class='SetName'><span class='SubKeyword'>sub</span><span class='DPName'> MCB</span> = <span class='MakeTemplate'><span class='TemplateKeyword'>template</span> <span class='BuildProblem'><span class='MCDPKeyword'>mcdp</span> {
+        <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> voltage</span> [<span class='Unit'>V</span>]</span>
+        <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> current</span> [<span class='Unit'>A</span>]</span>
+        <span class="comment"># SWAP</span>
+        <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> cost</span> [<span class='Unit'>$</span>]</span>
+        <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> weight</span> [<span class='Unit'>g</span>]</span>
+        <span class="comment"># V, A from battery</span>
+        <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> input_voltage</span> [<span class='Unit'>V</span>]</span>
+        <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> input_current</span> [<span class='Unit'>A</span>]</span>
+        }</span></span></span>
+        
+        <span class="comment"># abbreviated form "&lt;problem&gt;.&lt;function/resource&gt;"  </span>
+        <span class='Constraint'><span class='Resource'><span class='DPName'>motor</span><span class='DotPrep'>.</span><span class='RName'>voltage</span></span><span class='leq'> &lt;=</span> <span class='Function'><span class='DPName'>MCB</span><span class='DotPrep'>.</span><span class='FName'>voltage</span></span></span>
+        <span class='Constraint'><span class='Resource'><span class='DPName'>motor</span><span class='DotPrep'>.</span><span class='RName'>current</span></span><span class='leq'> &lt;=</span> <span class='Function'><span class='DPName'>MCB</span><span class='DotPrep'>.</span><span class='FName'>current</span></span></span>
+
+        <span class="comment"># We need a battery</span>
+        <span class='SetName'><span class='SubKeyword'>sub</span><span class='DPName'> battery</span> = <span class='MakeTemplate'><span class='TemplateKeyword'>template</span> <span class='BuildProblem'><span class='MCDPKeyword'>mcdp</span> {
+                <span class="comment"># with the given capacity</span>
+        <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> capacity</span> [<span class='Unit'>J</span>]</span>
+        <span class="comment"># supplying a certain voltage/max current</span>
+        <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> voltage</span> [<span class='Unit'>V</span>]</span>
+        <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> current</span> [<span class='Unit'>A</span>]</span>
+        <span class="comment"># it will cost money </span>
+        <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> cost</span> [<span class='Unit'>$</span>]</span>
+        <span class="comment"># and need to be carried</span>
+        <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> weight</span> [<span class='Unit'>g</span>]</span> 
+        }</span></span></span>
+
+  <span class="comment"># "Autonomy" is a placeholder. It provides</span>
+  <span class="comment"># a control function and requires SWAP resources.</span>
+  <span class='SetName'><span class='SubKeyword'>sub</span><span class='DPName'> autonomy</span> = <span class='MakeTemplate'><span class='TemplateKeyword'>template</span> <span class='BuildProblem'><span class='MCDPKeyword'>mcdp</span> {
+    <span class="comment"># See paper "Resource-Aware Robotics-Application"</span>
+    <span class="comment"># for a discussion of how to define a partial order</span>
+    <span class="comment"># on the set of controller and computation graphs</span>
+    <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> control_function</span> [<span class='Unit'>any</span>]</span>
+    <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> computation_graph</span> [<span class='Unit'>any</span>]</span>
+    <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> cost</span> [<span class='Unit'>$</span>]</span>
+    <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> weight</span> [<span class='Unit'>g</span>]</span>
+  }</span></span></span>
+  <span class='Constraint'><span class='Function'><span class='DPName'>autonomy</span><span class='DotPrep'>.</span><span class='FName'>control_function</span></span><span class='geq'> &gt;=</span> <span class='Resource'><span class='DPName'>chassis</span><span class='DotPrep'>.</span><span class='RName'>control_function</span></span></span>
+
+  <span class='SetName'><span class='SubKeyword'>sub</span><span class='DPName'> computer</span> = <span class='MakeTemplate'><span class='TemplateKeyword'>template</span> <span class='BuildProblem'><span class='MCDPKeyword'>mcdp</span> {
+    <span class="comment"># a computer is something that runs a program</span>
+    <span class="comment"># defined by a computation graph</span>
+    <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> computation_graph</span> [<span class='Unit'>any</span>]</span>
+    <span class="comment"># and needs cost+SWAPto do so</span>
+    <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> voltage</span> [<span class='Unit'>V</span>]</span>
+    <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> current</span> [<span class='Unit'>A</span>]</span>
+    <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> cost</span> [<span class='Unit'>$</span>]</span>
+    <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> weight</span> [<span class='Unit'>g</span>]</span>
+  }</span></span></span>
+  <span class='Constraint'><span class='Resource'><span class='DPName'>autonomy</span><span class='DotPrep'>.</span><span class='RName'>computation_graph</span></span><span class='leq'> &lt;=</span> <span class='Function'><span class='DPName'>computer</span><span class='DotPrep'>.</span><span class='FName'>computation_graph</span></span></span>
+
+  <span class="comment"># Co-design constraint: we must carry everything</span>
+  <span class='Constraint'><span class='Function'><span class='DPName'>chassis</span><span class='DotPrep'>.</span><span class='FName'>payload</span></span><span class='geq'> &gt;=</span> (<span class='PlusN'><span class='Resource'><span class='DPName'>battery</span><span class='DotPrep'>.</span><span class='RName'>weight</span></span> <span class='plus'>+</span> <span class='Resource'><span class='DPName'>MCB</span><span class='DotPrep'>.</span><span class='RName'>weight</span></span> 
+    <span class='plus'>+</span> <span class='Resource'><span class='DPName'>autonomy</span><span class='DotPrep'>.</span><span class='RName'>weight</span></span> <span class='plus'>+</span> <span class='Resource'><span class='DPName'>computer</span><span class='DotPrep'>.</span><span class='RName'>weight</span></span> <span class='plus'>+</span> <span class='Resource'><span class='DPName'>motor</span><span class='DotPrep'>.</span><span class='RName'>weight</span></span></span>)</span>
+
+  <span class="comment"># Co-design constraint: we must have enough energy on board</span>
+  <span class="comment"># to last for the duration of the mission</span>
+  <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> endurance</span> [<span class='Unit'>s</span>]</span>
+  
+  <span class="comment"># sum current of components</span>
+  <span class='SetNameGeneric'><span class='SetNameGenericVar'>current</span> <span class='eq'>=</span> <span class='PlusN'><span class='Resource'><span class='DPName'>MCB</span><span class='DotPrep'>.</span><span class='RName'>input_current</span></span> <span class='plus'>+</span> <span class='Resource'><span class='DPName'>computer</span><span class='DotPrep'>.</span><span class='RName'>current</span></span></span></span>
+  <span class="comment"># take the maximum voltage (conservative)</span>
+  <span class='SetNameGeneric'><span class='SetNameGenericVar'>voltage</span> <span class='eq'>=</span> <span class='Max'><span class='OpKeyword'>max</span>(<span class='Resource'><span class='DPName'>MCB</span><span class='DotPrep'>.</span><span class='RName'>input_voltage</span></span>, <span class='Resource'><span class='DPName'>computer</span><span class='DotPrep'>.</span><span class='RName'>voltage</span></span>)</span></span>
+ 
+  <span class="comment"># Watts = Amperes * Volts</span>
+  <span class='SetNameGeneric'><span class='SetNameGenericVar'>power</span> <span class='eq'>=</span> <span class='MultN'><span class='VariableRef'>current</span> <span class='times'>*</span><span class='VariableRef'> voltage</span></span></span>
+  <span class="comment"># Joules = Watts * seconds</span>
+  <span class='SetNameGeneric'><span class='SetNameGenericVar'>energy</span> <span class='eq'>=</span> <span class='MultN'><span class='VariableRef'>endurance</span> <span class='times'>*</span><span class='VariableRef'> power</span></span></span>
+  
+  <span class="comment"># Requirements for the battery</span>
+  <span class='Constraint'><span class='Function'><span class='DPName'>battery</span><span class='DotPrep'>.</span><span class='FName'>capacity</span></span><span class='geq'> &gt;=</span> <span class='VariableRef'>energy</span></span>
+  <span class='Constraint'><span class='Function'><span class='DPName'>battery</span><span class='DotPrep'>.</span><span class='FName'>current</span></span><span class='geq'> &gt;=</span> <span class='VariableRef'>current</span></span>
+  <span class='Constraint'><span class='Function'><span class='DPName'>battery</span><span class='DotPrep'>.</span><span class='FName'>voltage</span></span><span class='geq'> &gt;=</span> <span class='VariableRef'>voltage</span></span>
+
+  <span class="comment"># We can take into account the shipping cost</span>
+  <span class='SetName'><span class='SubKeyword'>sub</span><span class='DPName'> shipping</span> = <span class='AbstractAway'><span class='AbstractKeyword'>abstract</span> <span class='BuildProblem'><span class='MCDPKeyword'>mcdp</span> {
+    <span class='FunStatement'><span class='ProvideKeyword'>provides</span><span class='FName'> ships</span> [<span class='Unit'>g</span>]</span>
+    <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> postage</span> [<span class='Unit'>$</span>]</span>
+
+        <span class="comment"># the shipping rate depends on the destination</span>
+    <span class='SetNameGeneric'><span class='SetNameGenericVar'>rate_continental_US</span>  <span class='eq'>=</span>     <span class='SimpleValue'><span class='ValueExpr'>0.5</span> <span class='Unit'>$ / lbs
+    </span></span></span><span class='SetNameGeneric'><span class='SetNameGenericVar'>rate_low_earth_orbit</span> <span class='eq'>=</span> <span class='SimpleValue'><span class='ValueExpr'>10000.0</span> <span class='Unit'>$ / lbs
+    </span></span></span><span class='SetNameGeneric'><span class='SetNameGenericVar'>rate</span> <span class='eq'>=</span> <span class='VariableRef'>rate_continental_US</span></span>
+    
+    <span class="comment"># postage proportional to weight</span>
+    <span class='Constraint'><span class='NewResource'>postage</span><span class='geq'> &gt;=</span> <span class='MultN'><span class='VariableRef'>rate</span> <span class='times'>*</span><span class='VariableRef'> ships</span></span></span>
+  }</span></span></span>
+  
+  <span class='Constraint'><span class='Function'><span class='DPName'>shipping</span><span class='DotPrep'>.</span><span class='FName'>ships</span></span><span class='geq'> &gt;=</span> <span class='Resource'><span class='DPName'>chassis</span><span class='DotPrep'>.</span><span class='RName'>total_weight</span></span></span>
+
+  <span class="comment"># What do we need to minimize overall?</span>
+  <span class="comment"># 1) Minimize the cost of everything</span>
+  <span class='ResStatement'><span class='RequireKeyword'>requires</span><span class='RName'> cost</span> [<span class='Unit'>$</span>]</span>
+  <span class="comment"># cost of building</span>
+  <span class='SetNameGeneric'><span class='SetNameGenericVar'>components_cost</span> <span class='eq'>=</span> (<span class='PlusN'><span class='Resource'><span class='DPName'>chassis</span><span class='DotPrep'>.</span><span class='RName'>cost</span></span> <span class='plus'>+</span> <span class='Resource'><span class='DPName'>motor</span><span class='DotPrep'>.</span><span class='RName'>cost</span></span> 
+                        <span class='plus'>+</span> <span class='Resource'><span class='DPName'>battery</span><span class='DotPrep'>.</span><span class='RName'>cost</span></span> <span class='plus'>+</span> <span class='Resource'><span class='DPName'>MCB</span><span class='DotPrep'>.</span><span class='RName'>cost</span></span> 
+           <span class='plus'>+</span> <span class='Resource'><span class='DPName'>autonomy</span><span class='DotPrep'>.</span><span class='RName'>cost</span></span> <span class='plus'>+</span> <span class='Resource'><span class='DPName'>computer</span><span class='DotPrep'>.</span><span class='RName'>cost</span></span></span> )</span>
+  <span class="comment"># plus cost of shipping</span>
+  <span class='Constraint'><span class='NewResource'>cost</span><span class='geq'> &gt;=</span> <span class='PlusN'><span class='VariableRef'>components_cost</span> <span class='plus'>+</span> <span class='Resource'><span class='DPName'>shipping</span><span class='DotPrep'>.</span><span class='RName'>postage</span></span></span></span> 
+  
+  <span class="comment"># 2) Also minimize the battery weight</span>
+  <span class='ResShortcut2'><span class='RequireKeyword'>requires</span><span class='RName'> w</span><span class='geq'> &gt;=</span> <span class='Resource'><span class='DPName'>battery</span><span class='DotPrep'>.</span><span class='RName'>weight</span></span></span> 
+
+}</span>
+</code></pre>
+
+<style type="text/css">
+ 
+     span.Unit { color: purple; }
+     span.ProvideKeyword, span.FName { color: darkgreen;}
+     span.RequireKeyword, span.RName  { color: darkred;}
+     
+     span.NewResource { color: darkred;}
+     span.ValueExpr { color: #CC6600 ;}
+     /*span.Function  { color: darkgreen;}*/
+span.ProvideKeyword,
+span.RequireKeyword,     
+       span.MCDPKeyword,
+       span.SubKeyword,
+    span.CompactKeyword,
+    span.AbstractKeyword,
+    span.TemplateKeyword,
+    span.ForKeyword,
+    span.UsingKeyword,
+    span.RequiredByKeyword,
+    span.ProvidedByKeyword,
+    span.LoadKeyword,
+    span.CodeKeyword,
+    span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
+    span.ImplementedbyKeyword , span.FromCatalogueKeyword, span.MCDPTypeKeywor,
+    span.InstanceKeyword,
+    span.MCDPTypeKeyword
+       { font-weight: bold; }
+       
+    
+       
+    span.ImpName { color: #CC6600; }
+    span.FuncName { color: #CC6600 ; }
+
+       span.MCDPKeyword,
+       span.SubKeyword,
+    span.CompactKeyword,
+    span.AbstractKeyword,
+    span.TemplateKeyword,
+    span.ForKeyword,
+    span.UsingKeyword,
+    span.RequiredByKeyword,
+    span.ProvidedByKeyword,
+    span.LoadKeyword, span.CodeKeyword,
+    span.leq, span.geq, span.OpKeyword, span.eq, span.plus, span.times, span.DPWrapToken,
+    span.ImplementedbyKeyword,  
+    span.FromCatalogueKeyword, 
+    span.MCDPTypeKeyword,
+    span.InstanceKeyword
+    {
+       color: #00a;
+    }
+    
+    span.FName, span.RName { } 
+    span.DPName { font-style: italic; }
+     
+    span.DPVariableRef { font-weight: bold; }
+    span.DPTypeName { color: black; font-weight: bold; }
+    span.comment { color: grey;}
+
+
+</style>
+
+
+</body></html>

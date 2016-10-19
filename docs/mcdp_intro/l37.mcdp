@@ -1,0 +1,10 @@
+# test connected
+template cdp {
+	provides voltage [V]
+	provides current [A]
+	#    
+	requires cost [$]
+	requires weight [g]
+	requires voltage [V] # repeated, but should be ok!
+	requires current [A]
+ }

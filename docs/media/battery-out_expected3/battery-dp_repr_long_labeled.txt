@@ -1,0 +1,68 @@
+Series: %  R[s]×R[kg]×R[W] -> R[kg]
+\ DPLoop2:   R[s]×R[kg]×R[W] -> (R[kg]×)
+. L Series: %  (R[s]×R[kg]×R[W])×((R[N]×R[N])×) -> (R[kg]×)×((R[N]×R[N])×)
+. L \ Series: %  (R[s]×R[kg]×R[W])×((R[N]×R[N])×) -> R[kg]×(R[N]×R[N])
+. L . \ Mux(PosetProduct(2: PosetProduct(3: R[s],R[kg],R[W]),PosetProduct(1: PosetProduct(2: R[N],R[N]))) -> PosetProduct(2: PosetProduct(2: PosetProduct(2: PosetProduct(2: R[N],R[N]),R[W]),R[s]),R[kg]), [[[[(1, 0, 1), (1, 0, 0)], (0, 2)], (0, 0)], (0, 1)])    I = (R[s]×R[kg]×R[W])×((R[N]×R[N])×)
+. L . \ Series: %  (((R[N]×R[N])×R[W])×R[s])×R[kg] -> R[kg]×(R[N]×R[N])
+. L . . \ Parallel2  % (((R[N]×R[N])×R[W])×R[s])×R[kg] -> (R[kg]×R[kg])×R[kg]
+. L . . . \ Series: %  ((R[N]×R[N])×R[W])×R[s] -> R[kg]×R[kg]
+. L . . . . \ Parallel2  % ((R[N]×R[N])×R[W])×R[s] -> R[W]×R[s]
+. L . . . . . \ Series: %  (R[N]×R[N])×R[W] -> R[W]
+. L . . . . . . \ Parallel2  % (R[N]×R[N])×R[W] -> R[W]×R[W]
+. L . . . . . . . \ Series: %  R[N]×R[N] -> R[W]
+. L . . . . . . . . \ LabelerDP(('actuation', '_prod1'))
+. L . . . . . . . . .  WrapAMap(ProductNMap:R[N]×R[N]→R[N²])
+. L . . . . . . . . \ Series: %  R[N²] -> R[W]
+. L . . . . . . . . . \ LabelerDP(('actuation', '_mult1'))
+. L . . . . . . . . . .  WrapAMap(MultValueMap:R[N²]→R[W])
+. L . . . . . . . . . \ LabelerDP(('actuation', '_res_power'))
+. L . . . . . . . . . .  Id(R[W])
+. L . . . . . . . \ LabelerDP(('_fun_extra_power',))
+. L . . . . . . . .  Id(R[W])
+. L . . . . . . \ LabelerDP(('_sum1',))
+. L . . . . . . .  WrapAMap(SumNMap(R[W]×R[W] -> R[W]))
+. L . . . . . \ LabelerDP(('_fun_endurance',))
+. L . . . . . .  Id(R[s])
+. L . . . . \ Series: %  R[W]×R[s] -> R[kg]×R[kg]
+. L . . . . . \ LabelerDP(('_prod1',))
+. L . . . . . .  WrapAMap(ProductNMap:R[W]×R[s]→R[J])
+. L . . . . . \ Series: %  R[J] -> R[kg]×R[kg]
+. L . . . . . . \ LabelerDP(('battery', '_fun_capacity'))
+. L . . . . . . .  Id(R[J])
+. L . . . . . . \ Series: %  R[J] -> R[kg]×R[kg]
+. L . . . . . . . \ LabelerDP(('battery', '_mult1'))
+. L . . . . . . . .  WrapAMap(MultValueMap:R[J]→R[J*kg/Wh])
+. L . . . . . . . \ Series: %  R[J*kg/Wh] -> R[kg]×R[kg]
+. L . . . . . . . . \ LabelerDP(('battery', '_conversion1'))
+. L . . . . . . . . .  WrapAMap(LinearMapComp:R[J*kg/Wh]→R[kg])
+. L . . . . . . . . \ Series: %  R[kg] -> R[kg]×R[kg]
+. L . . . . . . . . . \ LabelerDP(('battery', '_res_mass'))
+. L . . . . . . . . . .  Id(R[kg])
+. L . . . . . . . . . \ LabelerDP(('_join_fname1',))
+. L . . . . . . . . . .  Mux(R[kg] -> PosetProduct(2: R[kg],R[kg]), [(), ()])    I = R[kg]
+. L . . . \ Id(R[kg])
+. L . . \ Series: %  (R[kg]×R[kg])×R[kg] -> R[kg]×(R[N]×R[N])
+. L . . . \ Mux(PosetProduct(2: PosetProduct(2: R[kg],R[kg]),R[kg]) -> PosetProduct(2: R[kg],PosetProduct(2: R[kg],R[kg])), [(0, 1), [1, (0, 0)]])    I = (R[kg]×R[kg])×R[kg]
+. L . . . \ Parallel2  % R[kg]×(R[kg]×R[kg]) -> R[kg]×(R[N]×R[N])
+. L . . . . \ LabelerDP(('_res_mass',))
+. L . . . . .  Id(R[kg])
+. L . . . . \ Series: %  R[kg]×R[kg] -> R[N]×R[N]
+. L . . . . . \ Series: %  R[kg]×R[kg] -> R[N]
+. L . . . . . . \ Series: %  R[kg]×R[kg] -> R[N]
+. L . . . . . . . \ Series: %  R[kg]×R[kg] -> R[kg]
+. L . . . . . . . . \ Parallel2  % R[kg]×R[kg] -> R[kg]×R[kg]
+. L . . . . . . . . . \ LabelerDP(('_fun_extra_payload',))
+. L . . . . . . . . . .  Id(R[kg])
+. L . . . . . . . . . \ Id(R[kg])
+. L . . . . . . . . \ Series: %  R[kg]×R[kg] -> R[kg]
+. L . . . . . . . . . \ Mux(PosetProduct(2: R[kg],R[kg]) -> PosetProduct(2: R[kg],R[kg]), [1, 0])    I = R[kg]×R[kg]
+. L . . . . . . . . . \ LabelerDP(('_sum2',))
+. L . . . . . . . . . .  WrapAMap(SumNMap(R[kg]×R[kg] -> R[kg]))
+. L . . . . . . . \ LabelerDP(('_mult1',))
+. L . . . . . . . .  WrapAMap(MultValueMap:R[kg]→R[N])
+. L . . . . . . \ LabelerDP(('actuation', '_fun_lift'))
+. L . . . . . . .  Id(R[N])
+. L . . . . . \ LabelerDP(('actuation', '_join_fname1'))
+. L . . . . . .  Mux(R[N] -> PosetProduct(2: R[N],R[N]), [(), ()])    I = R[N]
+. L \ Mux(PosetProduct(2: R[kg],PosetProduct(2: R[N],R[N])) -> PosetProduct(2: PosetProduct(1: R[kg]),PosetProduct(1: PosetProduct(2: R[N],R[N]))), [[0], [[(1, 1), (1, 0)]]])    I = R[kg]×(R[N]×R[N])
+\ Mux(PosetProduct(1: R[kg]) -> R[kg], 0)    I = (R[kg]×)

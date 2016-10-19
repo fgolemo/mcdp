@@ -3,15 +3,12 @@ import itertools
 
 from comptests.registrar import comptest
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_posets import FinitePoset
-from mcdp_posets import Interval, NotBounded, PosetProduct, Uninhabited, NotBelongs, NotEqual, Rcomp
-from mcdp_posets import Nat
-from mcdp_posets import NotLeq
-from mcdp_posets import PosetCoproduct, PosetCoproductWithLabels
-from mcdp_posets.multiset import Multisets
+from mcdp_posets import FinitePoset, Interval, NotBounded, PosetProduct, Uninhabited, NotBelongs, NotEqual, Rcomp
+from mcdp_posets import Multisets, Nat, NotLeq, PosetCoproduct, PosetCoproductWithLabels
 from mcdp_posets.utils import poset_check_chain, check_minimal, check_maximal
 from mcdp_tests.generation import for_all_posets
 import numpy as np
+from contracts.interface import ContractNotRespected
 
 
 @for_all_posets
@@ -203,21 +200,21 @@ def check_rcomp_corner_cases():
 def check_coproduct():
     try:
         PosetCoproduct(())
-    except ValueError:
+    except (ValueError, ContractNotRespected):
         pass
     else:
         assert False
 
 def test_PosetCoproductWithLabels_1(): 
     # used in coprod1.mcdp_poset
-    f1 = FinitePoset(['a','b','c'], [])
-    f2 = FinitePoset(['A','B','C'], [])
+    f1 = FinitePoset(set(['a','b','c']), [])
+    f2 = FinitePoset(set(['A','B','C']), [])
     subs = (f1, f2)
     P = PosetCoproductWithLabels(subs, labels=('one', 'two'))
     return P
 
 def test_Multiset_1():
-    P0 = FinitePoset(['a','b','c'], [])
+    P0 = FinitePoset(set(['a','b','c']), [])
     P = Multisets(P0)
     return P
 
@@ -249,12 +246,14 @@ def check_posets_misc1():
     else:
         assert False
         
+        
 @for_all_posets
 def check_minimal_elements(_, poset):
     try:
         poset.get_minimal_elements()
     except NotBounded:
         pass
+
 
 @for_all_posets
 def check_maximal_elements(_, poset):

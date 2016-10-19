@@ -38,15 +38,15 @@ class FiniteCollectionsInclusion(Poset):
         """ Set intersection """
         check_isinstance(a, FiniteCollection)
         check_isinstance(b, FiniteCollection)
-        intersection = a.elements & b.elements
-        return FiniteCollection(elements=intersection, S=self.S)
+        intersection = a.elements & b.elements # frozenset
+        return FiniteCollection(elements=set(intersection), S=self.S)
 
     def join(self, a, b): 
         """ Set union """
         check_isinstance(a, FiniteCollection)
         check_isinstance(b, FiniteCollection)
-        intersection = a.elements | b.elements
-        return FiniteCollection(elements=intersection, S=self.S)
+        intersection = a.elements | b.elements  # frozenset
+        return FiniteCollection(elements=set(intersection), S=self.S)
         
     # This can only be implemented if we can enumerate the elements of Space
     def get_top(self):

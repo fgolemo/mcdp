@@ -20,8 +20,6 @@ def get_dp_label(dp):
     if isinstance(dp, Limit):
         x = '<= %s [%s]' % (dp.F.format(dp.limit), dp.F)
         label = 'Limit\n%s' % x
-#     if isinstance(dp, GenericUnary):
-#         label = dp.__repr__()
     if isinstance(dp, WrapAMap):
         label = 'WrapAMap\n%s' % dp.diagram_label()
     return label
@@ -79,7 +77,7 @@ def dp_graph_tree(dp0, imp=None, compact=False):
 
         return n
 
-    def go_coproductdplabels(dp, imp):
+    def go_coproductdplabels(dp, imp):  # @UnusedVariable
         assert isinstance(dp, CoProductDPLabels)
         labels = dp.labels
         dps = dp.dp.dps

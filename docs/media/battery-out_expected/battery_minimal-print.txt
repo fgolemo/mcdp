@@ -1,0 +1,42 @@
+CompositeNDP (loaded as 'battery_minimal')
+ provides endurance  [ℝᶜ[s]]
+ provides payload  [ℝᶜ[kg]]
+ connections: 
+- Constraint(_fun_endurance.endurance <= _prod1._factor01)
+- Constraint(actuation.power <= _prod1._factor11)
+- Constraint(_prod1._result1 <= battery.capacity)
+- Constraint(battery.mass <= _sum1._term01)
+- Constraint(_fun_payload.payload <= _sum1._term11)
+- Constraint(_sum1._result2 <= _mult1._x01)
+- Constraint(_mult1._y1 <= actuation.lift)
+ names: 
+        _mult1: SimpleWrap
+                  provides       _x01 (ℝᶜ[kg])
+                  requires        _y1 (ℝᶜ[N])
+                  | GenericUnary(<mcdp_lang.misc_math.MultValue instance at 0x1104964d0>)
+         _sum1: SimpleWrap
+                  provides    _term01 (ℝᶜ[kg])
+                  provides    _term11 (ℝᶜ[kg])
+                  requires   _result2 (ℝᶜ[kg])
+                  | SumN(ℝᶜ[kg]×ℝᶜ[kg] -> ℝᶜ[kg])
+  _fun_payload: SimpleWrap
+                  provides    payload (ℝᶜ[kg])
+                  requires    payload (ℝᶜ[kg])
+                  | Id(ℝᶜ[kg])
+_fun_endurance: SimpleWrap
+                  provides  endurance (ℝᶜ[s])
+                  requires  endurance (ℝᶜ[s])
+                  | Id(ℝᶜ[s])
+       battery: SimpleWrap
+                  provides   capacity (ℝᶜ[J])
+                  requires       mass (ℝᶜ[kg])
+                  | Template(ℝᶜ[J]→ℝᶜ[kg])
+     actuation: SimpleWrap
+                  provides       lift (ℝᶜ[N])
+                  requires      power (ℝᶜ[W])
+                  | Template(ℝᶜ[N]→ℝᶜ[W])
+        _prod1: SimpleWrap
+                  provides  _factor01 (ℝᶜ[s])
+                  provides  _factor11 (ℝᶜ[W])
+                  requires   _result1 (ℝᶜ[J])
+                  | ProductN(ℝᶜ[s]×ℝᶜ[W] -> ℝᶜ[J])

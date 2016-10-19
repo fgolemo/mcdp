@@ -1,0 +1,27 @@
+DPLoop2:   R[s]×R[kg] -> 𝟙
+L Series: %  (R[s]×R[kg])×R[J] -> (𝟙)×R[J]
+L \ Series: %  (R[s]×R[kg])×R[J] -> R[J]
+L . \ Mux(PosetProduct(2: PosetProduct(2: R[s],R[kg]),R[J]) -> PosetProduct(2: PosetProduct(2: R[J],R[kg]),R[s]), [[1, (0, 1)], (0, 0)])    I = (R[s]×R[kg])×R[J]
+L . \ Series: %  (R[J]×R[kg])×R[s] -> R[J]
+L . . \ Parallel2  % (R[J]×R[kg])×R[s] -> R[W]×R[s]
+L . . . \ Series: %  R[J]×R[kg] -> R[W]
+L . . . . \ Parallel2  % R[J]×R[kg] -> R[kg]×R[kg]
+L . . . . . \ LabelerDP(('battery',))
+L . . . . . .  Template(R[J]→R[kg])
+L . . . . . \ LabelerDP(('_fun_payload',))
+L . . . . . .  Id(R[kg])
+L . . . . \ Series: %  R[kg]×R[kg] -> R[W]
+L . . . . . \ LabelerDP(('_sum1',))
+L . . . . . .  WrapAMap(SumNMap(R[kg]×R[kg] -> R[kg]))
+L . . . . . \ Series: %  R[kg] -> R[W]
+L . . . . . . \ LabelerDP(('_mult1',))
+L . . . . . . .  WrapAMap(MultValueMap:R[kg]→R[N])
+L . . . . . . \ LabelerDP(('actuation',))
+L . . . . . . .  Template(R[N]→R[W])
+L . . . \ LabelerDP(('_fun_endurance',))
+L . . . .  Id(R[s])
+L . . \ Series: %  R[W]×R[s] -> R[J]
+L . . . \ Mux(PosetProduct(2: R[W],R[s]) -> PosetProduct(2: R[s],R[W]), [1, 0])    I = R[W]×R[s]
+L . . . \ LabelerDP(('_prod1',))
+L . . . .  WrapAMap(ProductNMap:R[s]×R[W]→R[J])
+L \ Mux(R[J] -> PosetProduct(2: PosetProduct([]),R[J]), [[], ()])    I = R[J]

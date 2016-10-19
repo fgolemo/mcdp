@@ -1,0 +1,10 @@
+# test connected
+ cdp {  
+    sub f =  cdp {
+        provides x [R]
+        requires y [R]
+        y >= x
+    }
+
+    f.x  >= f.y
+  }

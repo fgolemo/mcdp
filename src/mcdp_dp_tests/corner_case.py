@@ -9,7 +9,7 @@ from mcdp_posets_tests.utils import assert_belongs, assert_does_not_belong
 @comptest
 def check_product1():
     
-    amap = ProductNatN(2)
+    amap = ProductNatN(4)
 
     assert amap((1,3,4,5)) == 5*4*3
     

@@ -283,22 +283,32 @@ for s in [#STYLE_GREENRED, 'default', 'clean',
     x = ('ndp_%s_tb' % s, Vis(s, 'TB', 'ndp_%s_TB'%s))
     allplots.add(x)
     
-def ndp_graph_enclosed_(data):
+def ndp_graph_enclosed0(data, direction):
     library = data['library']
     ndp = get_ndp(data)
     style = STYLE_GREENREDSYM
     yourname = None
     from mcdp_web.images.images import ndp_graph_enclosed
     png = ndp_graph_enclosed(library, ndp, style, yourname,
-                            data_format='png', direction='TB',
+                            data_format='png', direction=direction,
                             enclosed=True)
     pdf = ndp_graph_enclosed(library, ndp, style, yourname,
-                            data_format='pdf', direction='TB',
+                            data_format='pdf', direction=direction,
                             enclosed=True)
+    return png, pdf
+
+def ndp_graph_enclosed_LR(data):
+    png, pdf = ndp_graph_enclosed0(data, 'LR')
+    return [('png', 'ndp_graph_enclosed_LR', png),
+            ('pdf', 'ndp_graph_enclosed_LR', pdf)]
+
+def ndp_graph_enclosed_TB(data):
+    png, pdf = ndp_graph_enclosed0(data, 'LR')
     return [('png', 'ndp_graph_enclosed', png),
             ('pdf', 'ndp_graph_enclosed', pdf)]
 
-allplots.add(('ndp_graph_enclosed', ndp_graph_enclosed_))
+allplots.add(('ndp_graph_enclosed_LR', ndp_graph_enclosed_LR))
+allplots.add(('ndp_graph_enclosed', ndp_graph_enclosed_TB))
 
 @contract(returns='tuple(str,*)')
 def parse_kv(x):
@@ -326,7 +336,7 @@ def do_plots(logger, model_name, plots, outdir, extra_params, maindir, extra_dir
 
     if use_cache:
         cache_dir = os.path.join(outdir, '_cached/mcdp_plot_cache')
-        print('using cache %s' % cache_dir)
+        logger.info('using cache %s' % cache_dir)
     else:
         cache_dir = None
 
@@ -395,7 +405,7 @@ class PlotDP(QuickAppBase):
 
         params.add_string('out', help='Output dir', default=None)
         params.add_string('extra_params', help='Add extra params', default="")
-        print possible
+        #print possible
         params.add_string('plots', default='*', help='One of: %s' % possible)
 
         params.add_string('maindir', default='.', short='-d',
@@ -409,7 +419,7 @@ class PlotDP(QuickAppBase):
 
         options = self.get_options()
         filenames = options.get_extra()
-        print options
+        #print options
         if len(filenames) == 0:
             raise_desc(UserError, 'Need at least one filename.', filenames=filenames)
 

@@ -1,4 +1,11 @@
+<<<<<<< HEAD
 # -*- coding: utf-8 -*-
+=======
+import gc
+import os
+import shutil
+
+>>>>>>> master
 from contracts import contract
 from mcdp_dp.dp_limit import Limit
 from mcdp_library import MCDPLibrary
@@ -6,6 +13,7 @@ from mcdp_library.library import ATTR_LOAD_NAME
 from mcdp_opt.cachedp import CacheDP
 from mcdp_opt.compare_different_resources import less_resources2
 from mcdp_opt.context_utils import create_context0
+from mcdp_opt.report_utils import get_optim_state_report
 from mcdp_posets import NotBounded, Poset, get_types_universe
 from mcdp_posets.types_universe import express_value_in_isomorphic_space
 from mcdp_posets.uppersets import UpperSet, upperset_project
@@ -17,12 +25,9 @@ from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.wrap import SimpleWrap, dpwrap
 from mocdp.exceptions import mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
-from reprep import Report
-import gc
 import networkx as nx
-import os
-import shutil
-from mcdp_opt.report_utils import get_optim_state_report
+from reprep import Report
+
 
 _ = UpperSet, CResource, Poset
 

@@ -1,0 +1,8 @@
+# test connected
+cdp {
+    requires g [s]
+    provides f [s]
+    
+    g >= f + f + f
+
+}

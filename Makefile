@@ -73,7 +73,11 @@ readme-commands:
 	mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 0.1 kg, 1 W>"
 	mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 1.0 kg, 1 W>"
 
-
 check-unicode-encoding-line:
 	grep 'coding: utf-8' -r --include '*.py' -L  src/
 
+clean-branches:
+	@echo First delete branches on Github.
+	@echo Then run this command.
+	@echo
+	git fetch -p && git branch -vv | awk '/: gone]/{print $$1}' | xargs git branch -d

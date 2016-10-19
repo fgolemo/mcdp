@@ -19,7 +19,6 @@ def eval_codespec(r, expect):
     function = r.function.value
 
     if isinstance(r, CDP.CodeSpec):
-        print r.arguments
         _args, kwargs = eval_arguments(r.arguments)
     else:
         kwargs = {}

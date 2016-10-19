@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from mcdp_posets.types_universe import get_types_universe
+from mcdp_posets import get_types_universe
 from mocdp.comp.context import CFunction, Context
 
 

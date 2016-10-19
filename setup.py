@@ -17,11 +17,12 @@ def get_version(filename):
 
 version = get_version(filename='src/mocdp/__init__.py')
 
+name = 'PyMCDP'
 
-setup(name='PyMCDP_devel',
+setup(name=name,
       url='http://github.com/AndreaCensi/mcdp',
       maintainer="Andrea Censi",
-      maintainer_email="andrea@censi.org",
+      maintainer_email="censi@mit.edu",
       description='PyMCDP is an interpreter and solver for Monotone Co-Design Problems',
       long_description='',
       package_data={'':['*.*', '*.mcdp*', '*.js', '*.png', '*.css']},
@@ -51,10 +52,12 @@ setup(name='PyMCDP_devel',
         'nose',
         'PyContracts>=1.7.6',
         # 'ConfTools>=1.7',
-        # 'RepRep>=2.9.3', 
+        'RepRep>=2.9.3', 
         'DecentLogs',
         'QuickApp>=1.2',
         'compmake',
+          'psutil',
+          'setproctitle',
         'markdown',
       ],
       dependency_links  = [
