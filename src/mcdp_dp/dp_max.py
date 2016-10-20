@@ -139,8 +139,9 @@ class JoinNDualDP(EmptyDP):
                 minimals.add(tuple(tops))
             return self.R.Us(minimals)
          
-mcdp_dev_warning('This screws up the optimization')
-# class MeetNDualDP(Mux):
+mcdp_dev_warning('Before we had MeetNDualDP(Mux); this screws up the optimization')
+
+# class:
 class MeetNDualDP(WrapAMap):
     """ 
     

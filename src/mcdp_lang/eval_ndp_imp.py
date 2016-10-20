@@ -457,41 +457,46 @@ def add_constraint(context, resource, function):
 
     tu = get_types_universe()
 
-    if tu.equal(R1, F2):
-        c = Connection(dp1=resource.dp, s1=resource.s,
-                       dp2=function.dp, s2=function.s)
-        context.add_connection(c)
-
-    elif tu.leq(R1, F2):
-        ##  F2    ---- (<=) ----   =>  ----(<=)--- [R1_to_F2] ----
-        ##   |     R1       F2          R1      R1             F2
-        ##  R1
-        R1_to_F2, _F2_to_R1 = tu.get_embedding(R1, F2)
-        conversion = Conversion(R1_to_F2)
-
-        resource2 = create_operation(context=context, dp=conversion,
-                                    resources=[resource], name_prefix='_conversion',
-                                     op_prefix='_in', res_prefix='_out')
-        c = Connection(dp1=resource2.dp, s1=resource2.s,
-                       dp2=function.dp, s2=function.s)
-        context.add_connection(c)
-    elif tu.leq(F2, R1):
-        ##  R1     ---- (<=) ----   =>  ----(<=)--- [F2_to_R1^L] ----
-        ##   |h     R1       F2          R1      R1               F2
-        ##  F2
+    try:
+        if tu.equal(R1, F2):
+            c = Connection(dp1=resource.dp, s1=resource.s,
+                           dp2=function.dp, s2=function.s)
+            context.add_connection(c)
+    
+        elif tu.leq(R1, F2):
+            ##  F2    ---- (<=) ----   =>  ----(<=)--- [R1_to_F2] ----
+            ##   |     R1       F2          R1      R1             F2
+            ##  R1
+            R1_to_F2, _F2_to_R1 = tu.get_embedding(R1, F2)
+            conversion = Conversion(R1_to_F2)
+    
+            resource2 = create_operation(context=context, dp=conversion,
+                                        resources=[resource], name_prefix='_conversion',
+                                         op_prefix='_in', res_prefix='_out')
+            c = Connection(dp1=resource2.dp, s1=resource2.s,
+                           dp2=function.dp, s2=function.s)
+            context.add_connection(c)
+        elif tu.leq(F2, R1):
+            ##  R1     ---- (<=) ----   =>  ----(<=)--- [F2_to_R1^L] ----
+            ##   |h     R1       F2          R1      R1               F2
+            ##  F2
+            
+            _F2_to_R1, R1_to_F2 = tu.get_embedding(F2, R1)
+            conversion = Conversion(R1_to_F2)
+            resource2 = create_operation(context=context, dp=conversion,
+                                        resources=[resource], name_prefix='_conversion',
+                                         op_prefix='_in', res_prefix='_out')
+            c = Connection(dp1=resource2.dp, s1=resource2.s,
+                           dp2=function.dp, s2=function.s)
+            context.add_connection(c)
+        else:
+            msg = 'Constraint between incompatible spaces.'
+            raise_desc(DPSemanticError, msg, R1=R1, F2=F2)
+    except NotImplementedError as e:
+        msg = 'Problem while creating embedding.'
+        raise_wrapped(DPInternalError, e, msg, resource=resource, function=function,
+                      R1=R1, F2=F2, F2b=F2.repr_long())
         
-        _F2_to_R1, R1_to_F2 = tu.get_embedding(F2, R1)
-        conversion = Conversion(R1_to_F2)
-        resource2 = create_operation(context=context, dp=conversion,
-                                    resources=[resource], name_prefix='_conversion',
-                                     op_prefix='_in', res_prefix='_out')
-        c = Connection(dp1=resource2.dp, s1=resource2.s,
-                       dp2=function.dp, s2=function.s)
-        context.add_connection(c)
-    else:
-        msg = 'Constraint between incompatible spaces.'
-        raise_desc(DPSemanticError, msg, R1=R1, F2=F2)
-
 
 def eval_statement(r, context):
     with add_where_information(r.where):

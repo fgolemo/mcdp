@@ -267,6 +267,7 @@ class DPLoop2(PrimitiveDP):
         t.values(num_iterations=i)
 
         trace.log('res_all: %s' % UR.format(res_all))
+        # todo: project_upperset
         res_r1 = R1.Us(poset_minima([r1 for (r1, _) in res_all.minimals], leq=R1.leq))
         return dict(res_all=res_all, res_r1=res_r1)
 
@@ -280,31 +281,34 @@ def dploop2_iterate(dp0, f1, R, S, trace):
     UR = UpperSets(R)
     if do_extra_checks():
         UR.belongs(S)
-    R1, R2 = R
+    R2 = R[1]
     converged = set()  # subset of solutions for which they converged
     nextit = set()
     # find the set of all r2s
 
-    for (r1, r2) in S.minimals:
+    for ra in S.minimals:
         # what are the results of solve(f1, f2)?
-        hr = dp0.solve_trace((f1, r2), trace)
+        hr = dp0.solve_trace((f1, ra[1]), trace)
 
         # print('(f1,r2)=(%s,%s)' % (f1, r2))
         # print('| -> %s ' % hr)
 
-        for (r1b, r2b) in hr.minimals:
-            valid = R1.leq(r1, r1b)
-            
-            valid2 =  R2.leq(r2, r2b)
-            if valid and (not valid2):
-                raise Exception()
+        for rb in hr.minimals:
+            valid = R.leq(ra, rb)
+#             valid = R1.leq(r1, r1b)
+#             
+#             valid2 = R2.leq(r2, r2b)
+#             if valid and (not valid2):
+#                 # indeed we can get here
+#                 # raise Exception()
+#                 pass
 
             if valid:
-                nextit.add((r1b, r2b))
+                nextit.add(rb)
 
-                feasible = R2.leq(r2b, r2)
+                feasible = R2.leq(rb[1], ra[1])
                 if feasible:
-                    converged.add((r1b, r2b))
+                    converged.add(rb)
 
     nextit = R.Us(poset_minima(nextit, R.leq))
     converged = R.Us(poset_minima(converged, R.leq))

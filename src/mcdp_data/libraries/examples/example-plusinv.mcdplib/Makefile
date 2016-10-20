@@ -7,7 +7,7 @@ dp3=plusinv3
 dp4=plusinv4
 dp5=plusinvnat5
 dp6=plusinvnat1
-dp7=plusinvnat2
+
 
 clean:
 	rm -rf out/
@@ -25,8 +25,8 @@ solve:
 	#mcdp-solve  --plot $(outp) $(dp3) 	"10 s"
 	#mcdp-solve  --plot $(outp) $(dp4)  "10 s"
 	mcdp-solve  --movie --plot $(outp) $(dp5)  "nat:5"
-	mcdp-solve  --movie --plot $(outp) $(dp6)  "nat:4"
-	mcdp-solve  --movie --plot $(outp) $(dp7)  "nat:4"
+	mcdp-solve  --movie --plot $(outp) $(dp5)  "nat:4"
+	mcdp-solve  --movie --plot $(outp) $(dp5)  "nat:4"
 	
 
 plots:
@@ -36,5 +36,5 @@ plots:
 	mcdp-plot $(outp) $(dp4) 
 	mcdp-plot $(outp) $(dp5) 
 	mcdp-plot $(outp) $(dp6) 
-	mcdp-plot $(outp) $(dp7) 
+	
 	

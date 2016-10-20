@@ -1,6 +1,13 @@
 # -*- coding: utf-8 -*-
+import itertools
+import warnings
+
+from nose.tools import assert_equal
+
 from comptests.registrar import comptest, comptest_dynamic
 from mcdp_dp import InvPlus2Nat, Mux, SumNNat, WrapAMap, make_loop
+from mcdp_dp.dp_loop2 import DPLoop2
+from mcdp_dp.dp_parallel import Parallel
 from mcdp_dp.dp_parallel_simplification import make_parallel
 from mcdp_dp.dp_series_simplification import wrap_series
 from mcdp_dp.dp_transformations import get_dp_bounds
@@ -13,15 +20,48 @@ from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import assert_semantic_error
 from mcdp_posets import (Map, Nat, NotEqual, PosetProduct, UpperSets,
     poset_minima)
+from mcdp_posets.maps.coerce_to_int import CoerceToInt
 from mcdp_report.drawing import plot_upset_R2
 from mcdp_report.generic_report_utils import generic_report
+from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import mcdp_dev_warning
-from nose.tools import assert_equal
-from reprep import Report
-import itertools
 import numpy as np
-import warnings
+from reprep import Report
 
+
+def example():
+    c0 = 4
+    from mcdp_posets.maps.promote_to_float import PromoteToFloat
+    from mcdp_dp.dp_series import Series
+    from mcdp_maps.misc_imp import CeilMap, SqrtMap
+    from mcdp_posets import Rcomp 
+    N = Nat()
+    R = Rcomp()
+    class PlusC(Map):
+        def __init__(self, c):
+            self.c= c
+            dom = cod = N
+            Map.__init__(self, dom, cod)
+        def _call(self, x):
+            return x + self.c
+    dp1 = Series(SumNNat((N, N), N), WrapAMap(PlusC(c0)))
+    prom = WrapAMap(PromoteToFloat(N, R))
+    sqrt = WrapAMap(SqrtMap(R))
+    ceil = WrapAMap(CeilMap(R))
+    coe = WrapAMap(CoerceToInt(R, N))
+    dp2 = Series(prom, Series(Series(sqrt, ceil), coe)) 
+    dp3 = InvPlus2Nat(N, (N, N)) 
+    One = PosetProduct(())
+    x = Mux(PosetProduct((One, N)), 1)
+    y = Mux(N, [(), ()])
+    xx = Series(Series(dp3, Parallel(dp2, dp2)), dp1)
+    print xx.repr_long()
+    s = [x, xx, y]
+    inner = Series(Series(s[0], s[1]), s[2])
+    print
+    dp = DPLoop2(inner)
+    ndp = SimpleWrap(dp, fnames=[], rnames=['x','y'])
+    return ndp
 
 # @comptest_dynamic
 def check_invmult(context):

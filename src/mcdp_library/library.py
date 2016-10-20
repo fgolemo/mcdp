@@ -104,6 +104,12 @@ class MCDPLibrary():
         res.library_name = getattr(self, 'library_name', None)
         return res
 
+    def use_tmp_cache(self):
+        """ Uses a temporary directory as cache. """
+        import tempfile
+        dirname  = tempfile.mkdtemp(suffix="mcdp_cache")
+        self.use_cache_dir(dirname)
+        
     def use_cache_dir(self, cache_dir):
 
         try:
