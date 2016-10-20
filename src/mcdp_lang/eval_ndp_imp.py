@@ -495,7 +495,7 @@ def add_constraint(context, resource, function):
     except NotImplementedError as e:
         msg = 'Problem while creating embedding.'
         raise_wrapped(DPInternalError, e, msg, resource=resource, function=function,
-                      R1=R1, F2=F2, F2b=F2.repr_long())
+                      R1=R1, F2=F2)
         
 
 def eval_statement(r, context):

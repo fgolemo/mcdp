@@ -1,4 +1,7 @@
 # -*- coding: utf-8 -*-
+import os
+import shutil
+
 from comptests.registrar import comptest, comptest_fails
 from contracts import contract
 from mcdp_lang import parse_constant, parse_poset
@@ -15,8 +18,6 @@ from mcdp_report.gg_utils import gg_figure
 from mocdp.comp.composite import cndp_get_name_ndp_notfunres
 from mocdp.comp.composite_templatize import cndp_templatize_children
 from reprep import Report
-import os
-import shutil
 
 
 def get_test_library2(libnames):

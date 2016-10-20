@@ -9,6 +9,7 @@ from mocdp.exceptions import mcdp_dev_warning
 from .dp_flatten import MuxMap
 from .dp_generic_unary import WrapAMap
 from .primitive import EmptyDP
+from mcdp_dp.dp_flatten import Mux
 
 
 __all__ = [
@@ -139,24 +140,38 @@ class JoinNDualDP(EmptyDP):
                 minimals.add(tuple(tops))
             return self.R.Us(minimals)
          
-mcdp_dev_warning('Before we had MeetNDualDP(Mux); this screws up the optimization')
+if True:
+    
+    class MeetNDualDP(Mux):
+        """ This is just a Mux """
+        def __init__(self, n, P):
+            coords = [()] * n
+            Mux.__init__(self, P, coords)
+            
+            hd = MeetNMap(n, P)
+            self._set_map_dual(hd)
 
-# class:
-class MeetNDualDP(WrapAMap):
-    """ 
-    
-        This is just a Mux 
-    
-        f ⟼ { ⟨f₁, f, ..., fₙ⟩ } 
+            
+else:
         
-        ⟨r₁, ..., rₙ⟩ ⟼ { min(r₁, ..., rₙ) }
-        
-    """
-    def __init__(self, n, P):
-        coords = [()] * n
-        h = MuxMap(P, coords)
-        hd = MeetNMap(n, P)
+    mcdp_dev_warning('Before we had MeetNDualDP(Mux); this screws up the optimization')
     
-        WrapAMap.__init__(self, h, hd) 
+    # class:
+    class MeetNDualDP(WrapAMap):
+        """ 
+        
+            This is just a Mux 
+        
+            f ⟼ { ⟨f₁, f, ..., fₙ⟩ } 
+            
+            ⟨r₁, ..., rₙ⟩ ⟼ { min(r₁, ..., rₙ) }
+            
+        """
+        def __init__(self, n, P):
+            coords = [()] * n
+            h = MuxMap(P, coords)
+            hd = MeetNMap(n, P)
+        
+            WrapAMap.__init__(self, h, hd) 
         
         

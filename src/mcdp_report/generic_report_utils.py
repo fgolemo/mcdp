@@ -178,8 +178,9 @@ def generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0)):
 def get_best_plotter(space):
     p = list(get_plotters(plotters, space))
     if not p:
-        msg = 'Could not find any plotter.'
+        msg = 'Could not find any plotter for space %s.' % space
         raise_desc(ValueError, msg, space=space)
+        
     return p[0][1]
 
 def get_plotters(plotters, space):
@@ -545,7 +546,7 @@ class PlotterURRpR(Plotter):
         try:
             tu.check_leq(P, self.S)
         except NotLeq as e:
-            msg = ('cannot convert to %s from %s' % (P, self.S))
+            msg = ('cannot convert from %s to %s' % (P, self.S))
             raise_wrapped(NotPlottable, e, msg)
 
         _f1, _f2 = tu.get_embedding(P, self.S)

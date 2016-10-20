@@ -10,10 +10,10 @@ from .space_meta import SpaceMeta
 class NotBelongs(Exception):
     """ Raised by Space:belongs() """
 
-class Belongs(Exception):
-    """ The point actually belongs to the set
-        raised by check_not_belongs """
-    
+# class Belongs(Exception):
+#     """ The point actually belongs to the set
+#         raised by check_not_belongs """
+#     
 
 class NotEqual(Exception):
     """ Raised by Space:check_equal() """
@@ -31,18 +31,15 @@ class Space(object):
 
     @abstractmethod
     def belongs(self, x):
-        """ Raise NotBelongs """
+        """ Raises NotBelongs """
     
-#     def check_belongs(self, x):
-#         return self.belongs(x)
-#     
-    def check_not_belongs(self, x):
-        try:
-            self.check_belongs(x)
-        except NotBelongs:
-            return
-        else:
-            raise Belongs()
+#     def check_not_belongs(self, x):
+#         try:
+#             self.check_belongs(x)
+#         except NotBelongs:
+#             return
+#         else:
+#             raise Belongs()
 
     @abstractmethod
     def check_equal(self, x, y):
@@ -98,7 +95,6 @@ class Map():
         y = self._call(x)
 
         if do_extra_checks():
-
             C = self.get_codomain()
             try:
                 C.belongs(y)
