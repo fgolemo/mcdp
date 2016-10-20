@@ -10,6 +10,8 @@ from mcdp_tests.generation import for_all_posets
 import numpy as np
 from contracts.interface import ContractNotRespected
 
+from mcdp_posets.types_universe import get_types_universe
+
 
 @for_all_posets
 def check_poset1(_id_poset, poset):
@@ -174,6 +176,15 @@ def check_square():
     assert not P.leq((0.0, 0.1), (0.0, 0.0))
 
 
+    # TODO: move away
+    
+    # def check_embedding21():
+    # P ~= (Px)
+    P = Rcomp()
+    S = PosetProduct((P, ))
+    tu = get_types_universe()
+    _, _ = tu.get_embedding(P, S)
+    
 @comptest
 def check_equality():
     assert Rcomp() == Rcomp()

@@ -50,6 +50,10 @@ docoverage-parallel: prepare_tests
 	-DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "exit" $(package)
 	-DISABLE_CONTRACTS=1 coverage run --concurrency=multiprocessing  `which compmake` $(out) -c "rparmake"
 	coverage combine
+	$(MAKE) coverage-report
+	#coverage html -d out_coverage --include '*src/mcdp*'
+
+coverage-report:
 	coverage html -d out_coverage --include '*src/mcdp*'
 
 
