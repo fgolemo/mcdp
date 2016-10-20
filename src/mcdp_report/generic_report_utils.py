@@ -456,7 +456,8 @@ class PlotterUR2(Plotter):
             tu.check_leq(P, R2)
         except NotLeq as e:
             msg = ('cannot convert to R^2 from %s' % space)
-            logger.debug('msg')
+            logger.debug(msg)
+            logger.debug(e)
             raise_wrapped(NotPlottable, e, msg)
 
         logger.debug('ok')
