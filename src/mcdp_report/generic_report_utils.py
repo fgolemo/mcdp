@@ -42,7 +42,6 @@ def _report_loop(r, trace_loop, out, do_movie=True):
                                          bbox_inches='tight', pad_inches=0.01,
                                          transparent=True)
 
-
     figsize = (2, 2)
     sips = list(trace_loop.get_iteration_values('sip'))
     converged = list(trace_loop.get_iteration_values('converged'))
@@ -50,8 +49,14 @@ def _report_loop(r, trace_loop, out, do_movie=True):
     UR = trace_loop.get_value1('UR')
     R = trace_loop.get_value1('R')
 
+    try:
+        available_plotters = list(get_plotters(plotters, UR))
+    except NotPlottable as e:
+        msg = 'Could not find plotter for space UR = %s.' % UR
+        raise_wrapped(DPInternalError, e, msg , UR=UR, compact=True)
+    
     with r.subsection('sip') as r2:
-        for name, plotter in get_plotters(plotters, UR):
+        for name, plotter in available_plotters:
             f = r2.figure(name, cols=5)
 
             axis = plotter.axis_for_sequence(UR, sips)
@@ -194,9 +199,12 @@ def get_plotters(plotters, space):
             errors.append((name, e))
     if available:
         return available
-    msg = 'Could not find any plotter.'
+    msg = 'Could not find any plotter for space %s.' % space
+#     for name, e in errors:
+#         msg + '\n %s \n %s' % (name, indent(e, '  '))
+    msg += '\nTraceback:'
     for name, e in errors:
-        msg += '%r:\n%s' % (name, indent(traceback.format_exc(e), '  '))
+        msg += '\n%r:\n%s' % (name, indent(traceback.format_exc(e), '  '))
     raise_desc(NotPlottable, msg)
 
 
@@ -309,7 +317,7 @@ class PlotterUR(Plotter):
     def check_plot_space(self, space):
         tu = get_types_universe()
         if not isinstance(space, UpperSets):
-            msg = 'I can only plot upper sets.'
+            msg = 'I can only plot upper sets of R.'
             raise_desc(NotPlottable, msg, space=space)
 
         R = Rcomp()
@@ -443,12 +451,15 @@ class PlotterUR2(Plotter):
 
         R2 = PosetProduct((Rcomp(), Rcomp()))
         P = space.P
+        logger.debug('space = %s ; P = %s; R2 = %s' % (space,space.P,R2))
         try:
             tu.check_leq(P, R2)
         except NotLeq as e:
             msg = ('cannot convert to R^2 from %s' % space)
+            logger.debug('msg')
             raise_wrapped(NotPlottable, e, msg)
 
+        logger.debug('ok')
         _f1, _f2 = tu.get_embedding(P, R2)
 
     def get_xylabels(self, space):
@@ -684,8 +695,8 @@ def min_comp(xs, d):
 
 plotters = {
        'UR2': PlotterUR2(),
-        'Tuple2_UR2': Plotter_Tuple2_UR2(),
-       'URRpR_12': PlotterURRpR_12(),
-       'URRpR_13': PlotterURRpR_13(),
-       'URRpR_23': PlotterURRpR_23(),
+#         'Tuple2_UR2': Plotter_Tuple2_UR2(),
+#        'URRpR_12': PlotterURRpR_12(),
+#        'URRpR_13': PlotterURRpR_13(),
+#        'URRpR_23': PlotterURRpR_23(),
 }
