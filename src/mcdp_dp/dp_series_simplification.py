@@ -108,6 +108,9 @@ class RuleSimplifyLift(SeriesSimplificationRule):
 
 class RuleLoop(SeriesSimplificationRule):
     """ 
+    
+        TODO: this is only implemented for a special case.
+        
         - | DP | - |m| 
         / |____| -
          `-------`       
@@ -138,6 +141,16 @@ class RuleLoop(SeriesSimplificationRule):
         dp1s = unwrap_series(dp1.dp1)
         if not isinstance(dp1s[-1], Mux):
             return False
+        
+        if dp2.coords == 0:
+            pass
+        else:
+            msg = 'Could not implement simplification' \
+                ' for dp2.coords = {}'.format(dp2.coords)
+            from mocdp import logger
+            logger.debug(msg)
+            return False
+        
         return True
 
     def _execute(self, dp1, dp2):
