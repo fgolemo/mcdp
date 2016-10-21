@@ -200,6 +200,7 @@ def get_plotters(plotters, space):
     if available:
         return available
     msg = 'Could not find any plotter for space %s.' % space
+    msg += '\n None of these worked: %s' % plotters.keys()
 #     for name, e in errors:
 #         msg + '\n %s \n %s' % (name, indent(e, '  '))
     msg += '\nTraceback:'
@@ -696,8 +697,8 @@ def min_comp(xs, d):
 
 plotters = {
        'UR2': PlotterUR2(),
-#         'Tuple2_UR2': Plotter_Tuple2_UR2(),
-#        'URRpR_12': PlotterURRpR_12(),
-#        'URRpR_13': PlotterURRpR_13(),
-#        'URRpR_23': PlotterURRpR_23(),
+         'Tuple2_UR2': Plotter_Tuple2_UR2(),
+        'URRpR_12': PlotterURRpR_12(),
+        'URRpR_13': PlotterURRpR_13(),
+        'URRpR_23': PlotterURRpR_23(),
 }

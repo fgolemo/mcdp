@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import itertools
 
-from comptests.registrar import comptest
+from comptests.registrar import comptest, comptest_fails
 from contracts.interface import ContractNotRespected
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_posets import FinitePoset, Interval, NotBounded, PosetProduct, Uninhabited, NotBelongs, NotEqual, Rcomp
@@ -174,11 +174,12 @@ def check_square():
     assert P.leq((0.0, 0.0), (0.0, 0.5))
     assert not P.leq((0.0, 0.1), (0.0, 0.0))
 
-
     # TODO: move away
     
-    # def check_embedding21():
-    # P ~= (Px)
+@comptest_fails    
+def check_embedding21():
+    # In general P ~= PosetProduct((P,)) 
+    # but we don't do it yet.
     P = Rcomp()
     S = PosetProduct((P, ))
     tu = get_types_universe()
