@@ -13,6 +13,8 @@ from .dp_identity import Identity
 from .dp_parallel import Parallel
 from .dp_parallel_simplification import make_parallel
 from .dp_series import Series
+from mcdp_posets.types_universe import get_types_universe
+
 
 
 __all__ = [
@@ -41,7 +43,6 @@ class SeriesSimplificationRule():
 #         print('dp1----\n%s' % dp1.repr_long())
 #         print('dp2----\n%s' % dp2.repr_long())
 #         print('result-----\n%s' % res.repr_long())
-
 
         if do_extra_checks():
             dp0 = Series(dp1, dp2)
@@ -103,6 +104,63 @@ class RuleSimplifyLift(SeriesSimplificationRule):
         return res
 
 
+
+
+class RuleLoop(SeriesSimplificationRule):
+    """ 
+        - | DP | - |m| 
+        / |____| -
+         `-------`       
+
+        where m and DP[-1] are a Mux
+        
+        - | DP | - |m| ----
+        / |____| -- Id ---
+         `-----------------`       
+
+        Series( Loop(dp), m ) =
+        
+        Series( Loop(Series(dp, Par(m, Id))) ) 
+    
+    """
+    def applies(self, dp1, dp2):
+        # second must be Mux
+        if not isinstance(dp2, Mux):
+            return False
+
+        # first must be Loop
+        from mcdp_dp.dp_loop2 import DPLoop2
+        if not isinstance(dp1, DPLoop2):
+            return False
+
+        # the last one inside Loop must be Mux, otherwise it 
+        # doesn't simplify
+        dp1s = unwrap_series(dp1.dp1)
+        if not isinstance(dp1s[-1], Mux):
+            return False
+        return True
+
+    def _execute(self, dp1, dp2):
+        from mcdp_dp.dp_loop2 import DPLoop2
+        assert isinstance(dp2, Mux)
+        assert isinstance(dp1, DPLoop2)
+        
+        # I want to create this:
+        #   -- |m| --- 
+        #   --  Id --- 
+        
+        if dp2.coords == 0:
+            coords = [ (0, 0), 1]
+        else:
+            raise_desc(NotImplementedError, dp1=dp1,dp2=dp2)
+        
+        m1 = Mux(dp1.dp1.get_res_space(), coords)
+        print m1
+        res = DPLoop2(make_series(dp1.dp1, m1))
+
+        print res
+        return res
+    
 class RuleSimplifyLiftB(SeriesSimplificationRule):
     """ 
                         |- A
@@ -249,6 +307,7 @@ rules = [
     RuleSimplifyPermPar(),
     RuleMuxComposition(),
     RuleJoinPar(),
+    RuleLoop(),
 ]
 
 disable_optimization = False
@@ -375,7 +434,6 @@ def make_series(dp1, dp2):
             check_same_spaces(Series(dp1, dp2), res)
         return res
 
-
 #     print('Cannot simplify:')
 #     print(' dp1: %s' % dp1)
 #     print(' dp2: %s' % dp2)
@@ -388,26 +446,55 @@ def make_series(dp1, dp2):
         # [dp1s[:-1] dp1s[-1]] --- [dp2s[0] dp2s[1:]]
         if rule.applies(dp1s[-1], dp2s[0]):
             r = rule.execute(dp1s[-1], dp2s[0])
+            
+            try:
+                check_same_fun(r, dp1s[-1])
+                check_same_res(r, dp2s[0])
+            except Exception as e:
+                msg = 'Invalid result of simplification rule.'
+                raise_wrapped(DPInternalError, e, msg, rule=rule,
+                              result=r.repr_long())
+                
             first = wrap_series(dp1.get_fun_space(), dp1s[:-1])
             rest = wrap_series(dp2s[0].get_fun_space(), dp2s[1:])
             return make_series(first, make_series(r, rest))
 
     return Series(dp1, dp2)
 
-
-def check_same_spaces(dp1, dp2):
-#     print('dp1: %s' % dp1)
-#     print('dp2: %s' % dp2)
+def check_same_fun(dp1, dp2):
+    """ Checks that the two dps have same F """
     F1 = dp1.get_fun_space()
-    R1 = dp1.get_res_space()
     F2 = dp2.get_fun_space()
-    R2 = dp2.get_res_space()
-    if not (R1 == R2):
-        msg = 'R not preserved'
-        raise_desc(AssertionError, msg, R1=R1, R2=R2)
+#     tu = get_types_universe()
     if not (F1 == F2):
         msg = 'F not preserved'
         raise_desc(AssertionError, msg, F1=F1, F2=F2)
+    
+    
+def check_same_res(dp1, dp2):
+    """ Checks that the two dps have same F """
+    R1 = dp1.get_res_space()
+    R2 = dp2.get_res_space()
+#     tu = get_types_universe()
+    if not (R1 == R2):
+        msg = 'R not preserved'
+        raise_desc(AssertionError, msg, R1=R1,R2=R2)
+    
+def check_same_spaces(dp1, dp2):
+    check_same_fun(dp1,dp2)
+    check_same_res(dp1, dp2)
+#     print('dp1: %s' % dp1)
+# #     print('dp2: %s' % dp2)
+#     F1 = dp1.get_fun_space()
+#     R1 = dp1.get_res_space()
+#     F2 = dp2.get_fun_space()
+#     R2 = dp2.get_res_space()
+#     if not (R1 == R2):
+#         msg = 'R not preserved'
+#         raise_desc(AssertionError, msg, R1=R1, R2=R2)
+#     if not (F1 == F2):
+#         msg = 'F not preserved'
+#         raise_desc(AssertionError, msg, F1=F1, F2=F2)
 
 
 def unwrap_series(dp):
