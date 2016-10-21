@@ -286,7 +286,7 @@ def opt_basic_6():
         'motion': '< `RigidBodyID: rb1, 0.1 m/s, 10 minutes >',
     }
     max_resources = {
-        'ac': '<`socket_type: TypeA, `AC_voltages: v110, `AC_frequencies: f50, 50W>, 3600 s>',
+        'ac': '<<`socket_type: TypeA, `AC_voltages: v110, `AC_frequencies: f50, 50W>, 3600 s>',
         'budget': '1000 USD',
     }
 
