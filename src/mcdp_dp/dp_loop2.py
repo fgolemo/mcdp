@@ -20,8 +20,8 @@ __all__ = [
 class DPLoop2(PrimitiveDP):
     """
                   ______
-           f1 -> |  dp  |--->r1
-           f2 -> |______|---. r2
+           f1 -- |  dp  |--- r1
+           f2 -- |______|---. r2
               `-----[>=]----/
     """
     def __init__(self, dp1):
@@ -271,8 +271,11 @@ class DPLoop2(PrimitiveDP):
         res_r1 = R1.Us(poset_minima([r1 for (r1, _) in res_all.minimals], leq=R1.leq))
         return dict(res_all=res_all, res_r1=res_r1)
 
+
 def dploop2_iterate(dp0, f1, R, S, trace):
-    """ Returns the next iteration  si \in UR 
+    """ 
+    
+        Returns the next iteration  si \in UR 
     
     
         Min ( h(f1, r20) \cup  !r20 ) 
