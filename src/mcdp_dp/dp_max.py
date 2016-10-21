@@ -140,7 +140,7 @@ class JoinNDualDP(EmptyDP):
                 minimals.add(tuple(tops))
             return self.R.Us(minimals)
          
-if True:
+if False:
     
     class MeetNDualDP(Mux):
         """ This is just a Mux """

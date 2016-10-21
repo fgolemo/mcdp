@@ -2,7 +2,6 @@
 from contextlib import contextmanager
 import sys
 
-from mocdp import logger
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (
@@ -10,6 +9,7 @@ from mcdp_dp import (
 from mcdp_posets import (
     FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe)
 from mocdp import ATTRIBUTE_NDP_MAKE_FUNCTION
+from mocdp import logger
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
 from mocdp.comp.composite_makecanonical import cndp_makecanonical

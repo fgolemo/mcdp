@@ -2,15 +2,14 @@
 import itertools
 
 from comptests.registrar import comptest
+from contracts.interface import ContractNotRespected
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_posets import FinitePoset, Interval, NotBounded, PosetProduct, Uninhabited, NotBelongs, NotEqual, Rcomp
 from mcdp_posets import Multisets, Nat, NotLeq, PosetCoproduct, PosetCoproductWithLabels
+from mcdp_posets.types_universe import get_types_universe
 from mcdp_posets.utils import poset_check_chain, check_minimal, check_maximal
 from mcdp_tests.generation import for_all_posets
 import numpy as np
-from contracts.interface import ContractNotRespected
-
-from mcdp_posets.types_universe import get_types_universe
 
 
 @for_all_posets
