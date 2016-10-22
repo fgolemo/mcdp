@@ -33,7 +33,7 @@ def future_comments_syntax():
 def future_empty_set():
     eval_rvalue_as_constant("{} g")
 
-@comptest_fails
+@comptest
 def bug_lift():
     assert_parsable_to_connected_ndp("""
 mcdp {

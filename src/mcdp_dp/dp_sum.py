@@ -51,7 +51,12 @@ class SumNDP(WrapAMap):
     
     def __init__(self, Fs, R):
         amap = SumNMap(Fs, R)
-        WrapAMap.__init__(self, amap)
+        if len(Fs) == 2:
+            from mcdp_dp.dp_inv_plus import InvPlus2
+            amap_dual = InvPlus2(R, Fs)
+        else:
+            amap_dual = None
+        WrapAMap.__init__(self, amap, amap_dual)
 #         
 #     
 # class SumN_old(EmptyDP):
@@ -146,11 +151,11 @@ class ProductNMap(Map):
         Map.__init__(self, dom=dom, cod=cod)
 
     def _call(self, f):
-        print f
+        
         # first, find out if there are any tops
         def is_there_a_top():
             for Fi, fi in zip(self.F, f):
-                if Fi.leq(Fi.get_top(), fi):
+                if is_top(Fi, fi):
                     return True
             return False
         
@@ -173,47 +178,14 @@ class ProductN(WrapAMap):
     @contract(Fs='tuple[>=2]')
     def __init__(self, Fs, R):
         amap = ProductNMap(Fs, R)
-        WrapAMap.__init__(self, amap)
+        if len(Fs) == 2:
+            from mcdp_dp.dp_inv_mult import InvMult2
+            amap_dual = InvMult2(R, Fs)
+        else:
+            amap_dual = None
+        WrapAMap.__init__(self, amap, amap_dual)
         
-        
-#         
-# class ProductN_old(EmptyDP):
-# 
-#     @contract(Fs='tuple[>=2]')
-#     def __init__(self, Fs, R):
-#         if do_extra_checks():
-#             for _ in Fs:
-#                 check_isinstance(_, RcompUnits)
-#             check_isinstance(R, RcompUnits)
-# 
-#         F = PosetProduct(Fs)
-#         EmptyDP.__init__(self, F=F, R=R)
-# 
-#     def solve(self, f):
-#         # first, find out if there are any tops
-#         def is_there_a_top():
-#             for Fi, fi in zip(self.F, f):
-#                 if Fi.leq(Fi.get_top(), fi):
-#                     return True
-#             return False
-#         
-#         if is_there_a_top():
-#             return self.R.U(self.R.get_top())
-# 
-#         mult = lambda x, y: x * y
-#         try:
-#             r = functools.reduce(mult, f)
-#         except FloatingPointError as e:
-#             # assuming this is overflow
-#             assert 'overflow' in str(e)
-#             r = np.inf
-#         if np.isinf(r):
-#             r = self.R.get_top()
-#         return self.R.U(r)
-# 
-#     def __repr__(self):
-#         return 'ProductN(%s -> %s)' % (self.F, self.R)
-
+    
 
 
 class ProductNatN(Map):

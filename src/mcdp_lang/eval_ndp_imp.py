@@ -468,7 +468,7 @@ def add_constraint(context, resource, function):
             ##   |     R1       F2          R1      R1             F2
             ##  R1
             R1_to_F2, _F2_to_R1 = tu.get_embedding(R1, F2)
-            conversion = Conversion(R1_to_F2)
+            conversion = Conversion(R1_to_F2, _F2_to_R1)
     
             resource2 = create_operation(context=context, dp=conversion,
                                         resources=[resource], name_prefix='_conversion',
@@ -482,7 +482,7 @@ def add_constraint(context, resource, function):
             ##  F2
             
             _F2_to_R1, R1_to_F2 = tu.get_embedding(F2, R1)
-            conversion = Conversion(R1_to_F2)
+            conversion = Conversion(R1_to_F2, _F2_to_R1)
             resource2 = create_operation(context=context, dp=conversion,
                                         resources=[resource], name_prefix='_conversion',
                                          op_prefix='_in', res_prefix='_out')

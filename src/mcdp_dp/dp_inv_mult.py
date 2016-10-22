@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, check_isinstance
 from mcdp_posets import Nat, Poset, PosetProduct, UpperSet
 from mcdp_posets.utils import check_minimal
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 import numpy as np
 
 from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
+from mcdp_posets.poset import is_top
 
 
 _ = Nat, Poset
@@ -72,16 +73,19 @@ class InvMult2U(PrimitiveDP):
         return set([(f, r)])
 
     def solve(self, f):
-        if f == 0.0:
-            return  UpperSet(minimals=set([(0.0, 0.0)]), P=self.R)
-
-        top = self.F.get_top()
-        if f == top:
+        
+        if is_top(self.F, f):
             mcdp_dev_warning('FIXME Need much more thought about this')
             top1 = self.Rs[0].get_top()
             top2 = self.Rs[1].get_top()
             s = set([(top1, top2)])
             return self.R.Us(s)
+
+        check_isinstance(f, float)
+                
+        if f == 0.0:
+            return UpperSet(minimals=set([(0.0, 0.0)]), P=self.R)
+
         if InvMult2.ALGO == InvMult2.ALGO_UNIFORM:
             mcdp_dev_warning('TODO: add ALGO as parameter. ')
             ps = samplec(self.n, f)
@@ -212,6 +216,8 @@ def generate_exp_van_der_corput_sequence(n, C=1.0, mapping_function=None):
         Returns a pair of numpy arrays
         
         so that x1*x2 = C.
+        
+        
     """
     if C <= 0.0: # pragma: no cover
         raise_desc(ValueError, 'Need positive C, got %r.' % C)

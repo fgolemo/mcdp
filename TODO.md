@@ -1,4 +1,6 @@
 
+- add solve_f to mcdp-solve
+
 - change color to  green/red for
 /Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_report/icons/MeetNDualDP.png
 

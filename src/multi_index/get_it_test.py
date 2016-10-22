@@ -71,20 +71,20 @@ def test_compositions():
     for X, i1, i2 in ccases:
         yield check_associativity, X, i1, i2, list
 
+def is_iterable(x):
+    if isinstance(x, str):
+        return False
+
+    try:
+        iter(x)
+    except TypeError:
+        return False
+    else:
+        return True
+        
 def get_id_indices(x, prefix=None):
     if prefix is None:
         prefix = ()
-
-    def is_iterable(x):
-        if isinstance(x, str):
-            return False
-
-        try:
-            iter(x)
-        except TypeError:
-            return False
-        else:
-            return True
 
     if is_iterable(x):
         return [ get_id_indices(m, prefix=prefix + (i,))

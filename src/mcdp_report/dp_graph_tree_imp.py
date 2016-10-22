@@ -3,6 +3,7 @@ from contracts import contract
 from mcdp_dp import (ApproximableDP, CoProductDPLabels, Constant, DPLoop0,
     DPLoop2, LabelerDP, Limit, Mux, OpaqueDP, Parallel,
     PrimitiveDP, Series0, WrapAMap)
+from multi_index.inversion import transform_pretty_print
 
 
 __all__ = [
@@ -12,7 +13,10 @@ __all__ = [
 def get_dp_label(dp):
     label = type(dp).__name__
     if isinstance(dp, Mux):
-        label = 'Mux\n%s' % str(dp.coords)
+        label = 'Mux\nh: %s' % transform_pretty_print(dp.amap.dom, dp.amap.coords)
+        if dp.amap_dual is not None:
+            label += '\nh*: %s' %  transform_pretty_print(dp.amap_dual.dom, dp.amap_dual.coords, 'A')
+        return label
     elif isinstance(dp, Constant):
         # x = '%s %s' % (dp.R.format(dp.c), dp.R)
         x = dp.R.format(dp.c)

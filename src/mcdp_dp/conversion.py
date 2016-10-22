@@ -4,7 +4,7 @@ from .primitive import PrimitiveDP
 from contracts import contract
 from contracts.utils import raise_wrapped
 from mcdp_posets import NotLeq, get_types_universe
-from mocdp.exceptions import DPSemanticError
+from mocdp.exceptions import DPSemanticError, mcdp_dev_warning
 
 _ = PrimitiveDP
 
@@ -31,7 +31,9 @@ def get_conversion(A, B):
     if tu.equal(A, B):
         conversion = None
     else:
-        A_to_B, _ = tu.get_embedding(A, B)
+        A_to_B, B_to_A_ = tu.get_embedding(A, B)
         conversion = Conversion(A_to_B)
+        mcdp_dev_warning('not sure')
+#         conversion = Conversion(A_to_B, B_to_A)
 
     return conversion

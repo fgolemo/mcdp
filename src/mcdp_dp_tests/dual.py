@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, raise_desc
 from mcdp_dp import NotSolvableNeedsApprox
 from mcdp_posets import LowerSets, UpperSets
 from mcdp_posets import NotBelongs
@@ -8,6 +8,14 @@ from mcdp_posets.utils import poset_check_chain
 from mcdp_tests.generation import for_all_dps, primitive_dp_test
 from mocdp import logger
 import numpy as np
+from mcdp_dp.dp_flatten import MuxMap
+from mcdp_lang.parse_interface import parse_poset
+from multi_index.get_it_test import compose_indices, get_id_indices
+from mcdp_dp.dp_series_simplification import simplify_indices_F
+from mcdp_posets.poset_product import PosetProduct
+from multi_index.imp import get_it
+from multi_index.inversion import transform_right_inverse
+from comptests.registrar import comptest
 
 
 @for_all_dps
@@ -110,9 +118,29 @@ def dual11(_, dp):
 @for_all_dps
 def dual12(_, dp):
     pass
+ 
+#     
+# def is_right_inverse(P, coords, coords2):
+#     
+#     comp = compose_indices(P, coords, coords2, list)
+# 
+#     simplified = simplify_indices_F(P, comp)
+#     
+#     return simplified == ()
+    
 
-@for_all_dps
-def dual13(_, dp):
-    pass
+@comptest
+def test_right_inverse():
+    P = parse_poset('((J x W) x s) x (m x Hz)')
+    coords = [(1, 1), [(0, 0, 1), (1, 0), (0, 0, 0), (0, 1)]]
+    print 'coords', coords    
+    i0 = get_id_indices(P)
+    print 'i0', i0
+    # compose
+    i0coords = compose_indices(P, i0, coords, list)
 
+    print 'i0coords', i0coords
+
+    Q, coords2 = transform_right_inverse(P, coords, PosetProduct)
+    
 

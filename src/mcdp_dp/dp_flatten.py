@@ -6,6 +6,8 @@ from mocdp.exceptions import DPInternalError
 from multi_index import get_it
 
 from .dp_generic_unary import WrapAMap
+from multi_index.inversion import transform_pretty_print,\
+    transform_right_inverse
 
 
 __all__ = [
@@ -35,10 +37,18 @@ class Mux(WrapAMap):
 
     @contract(coords='seq(int|tuple|list)|int')
     def __init__(self, F, coords):
-
+        self.amap_pretty = transform_pretty_print(F, coords)
         amap = MuxMap(F, coords)
+        try:
+            R, coords2 = transform_right_inverse(F, coords, PosetProduct)
+        except:
+            print('cannot invert {}'.format(self.amap_pretty))
+            raise
 
-        WrapAMap.__init__(self, amap)
+#         print 'R', R
+#         print 'coords2', coords2
+        amap_dual = MuxMap(R, coords2)
+        WrapAMap.__init__(self, amap, amap_dual)
 
         # This is used by many things (e.g. series simplification)
         self.coords = coords
