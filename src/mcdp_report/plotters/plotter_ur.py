@@ -8,6 +8,7 @@ from mcdp_report.drawing import plot_upset_R2
 from mcdp_report.plotters.interface import Plotter, NotPlottable
 from mocdp import logger
 from mocdp.exceptions import mcdp_dev_warning
+from mcdp_posets.poset_product import PosetProduct
 
 
 class PlotterUR(Plotter):
@@ -58,7 +59,7 @@ class PlotterUR(Plotter):
         return self._get_screen_coords(p, self.axis)
 
     def _get_screen_coords(self, p, axis=None):
-        x, y = 0, p
+        x, y = 0.0, p
 
         from mcdp_report.generic_report_utils import extra_space_top
 
@@ -97,8 +98,9 @@ class PlotterUR(Plotter):
         self.check_plot_space(space)
 
         minimals = [self._get_screen_coords(_, axis) for _ in value.minimals]
-
-        v = space.P.Us(minimals)
+        print 'minimals',minimals
+        R2 = PosetProduct((Rcomp(), Rcomp()))
+        v = R2.Us(minimals)
 
         from mcdp_report.generic_report_utils import extra_space_finite
 

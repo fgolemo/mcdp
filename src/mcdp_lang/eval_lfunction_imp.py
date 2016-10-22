@@ -91,7 +91,7 @@ def eval_lfunction_opminf(lf, context):
     a = eval_lfunction(lf.a, context)
     b = eval_lfunction(lf.b, context)
  
-    Fa = context.get_rtype(a)
+    Fa = context.get_ftype(a)
     b = get_function_possibly_converted(b, Fa, context)
         
     dp = MeetNDualDP(2, Fa)
@@ -109,7 +109,7 @@ def eval_lfunction_opmaxf(lf, context):
     a = eval_lfunction(lf.a, context)
     b = eval_lfunction(lf.b, context)
  
-    Fa = context.get_rtype(a)
+    Fa = context.get_ftype(a)
     b = get_function_possibly_converted(b, Fa, context)
         
     dp = JoinNDualDP(2, Fa)
