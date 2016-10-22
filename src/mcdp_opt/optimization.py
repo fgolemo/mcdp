@@ -94,7 +94,7 @@ class Optimization():
         (_R, ur), _tableres = self.get_lower_bounds(ndp, table)
 
         self.num_created = 0
-        s0 = OptimizationState(self, options, context, executed=[], forbidden=[],
+        s0 = OptimizationState(self, options, context, executed=[], forbidden=set(),
                                lower_bounds=lower_bounds, ur=ur,
                                creation_order=self.get_next_creation())
 

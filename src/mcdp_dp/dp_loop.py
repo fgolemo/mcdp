@@ -359,9 +359,8 @@ class DPLoop0(PrimitiveDP):
         trace.log('Iterating in UR = %s' % UR)
         trace.log('Starting from %s' % UR.format(s0))
 
-        S = [KleeneIteration(s=s0, s_converged=UR.Us(set()), 
-                             r=s0,
-                             r_converged=UR.Us(set()))]
+        S = [KleeneIteration(s=s0, s_converged=R.Us(set()), 
+                             r=s0, r_converged=R.Us(set()))]
         for i in range(1000):  # XXX
             with trace.iteration(i) as t:
                 si = S[-1].s
@@ -374,8 +373,8 @@ class DPLoop0(PrimitiveDP):
                     msg = 'Loop iteration invariant not satisfied.'
                     raise_wrapped(Exception, e, msg, si=si, sip=sip, dp=self.dp1)
 
-                S.append(KleeneIteration(s=sip, s_converged=UR.Us(converged),
-                                         r=sip, r_converged=UR.Us(converged)))
+                S.append(KleeneIteration(s=sip, s_converged=R.Us(converged),
+                                         r=sip, r_converged=R.Us(converged)))
 
                 if UR.leq(sip, si):
                     t.log('Breaking because converged (iteration %s) ' % i)
