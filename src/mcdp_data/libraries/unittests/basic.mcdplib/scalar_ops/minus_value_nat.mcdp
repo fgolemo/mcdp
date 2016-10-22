@@ -1,5 +1,5 @@
 mcdp {
     provides f [Nat]
     requires r [Nat]
-    required r >= provided f - Nat:1 
+    required r >= rvalue_minus_constant(provided f, Nat:1)
 }
