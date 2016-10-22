@@ -13,15 +13,17 @@ def get_dp_label(dp):
     label = type(dp).__name__
     if isinstance(dp, Mux):
         label = 'Mux\n%s' % str(dp.coords)
-    if isinstance(dp, Constant):
+    elif isinstance(dp, Constant):
         # x = '%s %s' % (dp.R.format(dp.c), dp.R)
         x = dp.R.format(dp.c)
         label = 'Constant\n%s' % x
-    if isinstance(dp, Limit):
+    elif isinstance(dp, Limit):
         x = '<= %s [%s]' % (dp.F.format(dp.limit), dp.F)
         label = 'Limit\n%s' % x
-    if isinstance(dp, WrapAMap):
+    elif isinstance(dp, WrapAMap):
         label = 'WrapAMap\n%s' % dp.diagram_label()
+        
+    label = type(dp).__name__ + '/' + label
     return label
 
 @contract(dp0=PrimitiveDP)
