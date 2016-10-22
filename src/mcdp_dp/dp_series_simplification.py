@@ -13,8 +13,6 @@ from .dp_identity import Identity
 from .dp_parallel import Parallel
 from .dp_parallel_simplification import make_parallel
 from .dp_series import Series
-from mcdp_posets.types_universe import get_types_universe
-
 
 
 __all__ = [

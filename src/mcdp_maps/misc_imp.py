@@ -80,7 +80,7 @@ class Floor0Map(GenericFloatOperation):
 
     def op(self, x):
         if x == 0.0:
-            return 0
+            return 0.0
         else:
             return np.ceil(x-1)
     

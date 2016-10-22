@@ -158,6 +158,8 @@ class Rcomp(Poset):
                 s = s.rstrip('0')
                 return s
 
+    tolerate_numerical_errors = False 
+    
     def _leq(self, a, b):
         if a == b:
             return True
@@ -165,6 +167,10 @@ class Rcomp(Poset):
             return False
         if b == self.top:
             return True
+        
+        if Rcomp.tolerate_numerical_errors:
+            if bool(np.isclose(a, b)):
+                return True
         return a <= b
 
     def leq(self, a, b):

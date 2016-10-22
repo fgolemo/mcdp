@@ -10,7 +10,7 @@ from .pyparsing_bundled import (
     CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
     NotAny, OneOrMore, Optional, ParserElement, Word, ZeroOrMore, alphanums,
     alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
-    sglQuotedString, FollowedBy, printables)
+    sglQuotedString)
 from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
 from .utils_lists import make_list
@@ -592,13 +592,14 @@ class Syntax():
     rvalue_resource = rvalue_resource_simple ^ rvalue_resource_fancy
 
     # Just <name>
-    rvalue_new_function = sp(get_idn(),
+    rvalue_new_function1 = sp(get_idn(),
                              lambda t: CDPLanguage.VariableRef(t[0]))
 
     # provided <name>
     rvalue_new_function2 = sp(PROVIDED - get_idn(),
                               lambda t: CDP.NewFunction(t[1]))
 
+    rvalue_new_function = rvalue_new_function2 | rvalue_new_function1
     # any-of(set)
     ANYOF = keyword('any-of', CDP.AnyOfKeyword)
     rvalue_any_of = sp(ANYOF - SLPAR - constant_value - SRPAR,
@@ -766,7 +767,8 @@ class Syntax():
     EXPONENT = spk(L('^'), CDP.exponent)
 
     # note: we cannot use "rvalue" because that makes the thing recursive
-    rvalue_power_expr_2 = sp((rvalue_resource ^ rvalue_new_function) + EXPONENT - rat_power_exponent,
+    rvalue_power_base = (rvalue_resource ^ rvalue_new_function) | (SLPAR + (rvalue_resource ^ rvalue_new_function) + SRPAR)
+    rvalue_power_expr_2 = sp( rvalue_power_base + EXPONENT - rat_power_exponent,
                              lambda t: CDP.PowerShort(op1=t[0], glyph=t[1], exponent=t[2]))
 
     rvalue_power_expr = rvalue_power_expr_1 | rvalue_power_expr_2

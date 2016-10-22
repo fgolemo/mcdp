@@ -288,7 +288,15 @@ def mult_table(a, b):
     unit2 = a.units * b.units
     s = '%s' % unit2
     return RcompUnits(unit2, s)
+# 
+# @contract(a=RcompUnits)
+# def inverse_of_unit(a):
+#     check_isinstance(a, RcompUnits)
+#     unit2 = 1 / a.units
+#     s = '%s' % unit2
+#     return RcompUnits(unit2, s)
 
+    
 def rcomp_add(x, y):
     mcdp_dev_warning('underflow, overflow, Top')
     return x + y
@@ -304,7 +312,13 @@ def rcompunits_pow(a, num, den):
     s = '%s' % u
     return RcompUnits(u, s)
 
-class RCompUnitsPower(Map):
+
+class RCompUnitsPowerMap(Map):
+    """ 
+        Computes:
+         
+            x |-> x ^ (num/den)
+    """
 
     def __init__(self, F, num, den):
         R = rcompunits_pow(F, num, den)

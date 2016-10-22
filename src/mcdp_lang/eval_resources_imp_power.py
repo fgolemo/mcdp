@@ -1,14 +1,18 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import raise_desc
 from mcdp_dp import WrapAMap
-from mcdp_posets import RCompUnitsPower, RcompUnits
+from mcdp_posets import RCompUnitsPowerMap, RcompUnits
 from mocdp.exceptions import DPSemanticError
 
 from .parts import CDPLanguage
 
-
 CDP = CDPLanguage
 
+class RcompUnitsPowerDP(WrapAMap):
+    def __init__(self, F, num, den):
+        amap = RCompUnitsPowerMap(F, num=num, den=den)
+        amap_dual = RCompUnitsPowerMap(F, num=den, den=num) # swap
+        WrapAMap.__init__(self, amap, amap_dual)
 
 def eval_rvalue_Power(rvalue, context):
     assert isinstance(rvalue, (CDP.Power, CDP.PowerShort)), rvalue
@@ -26,8 +30,7 @@ def eval_rvalue_Power(rvalue, context):
         msg = 'I can only compute pow() for floats with types; this is %r.' % (F)
         raise_desc(DPSemanticError, msg, F=F)
         
-    m = RCompUnitsPower(F, num=num, den=den)
-    dp = WrapAMap(m)
+    dp = RcompUnitsPowerDP(F, num=num, den=den)
     from .helpers import create_operation
     return create_operation(context, dp=dp, resources=[base],
                             name_prefix='_prod', op_prefix='_factor',

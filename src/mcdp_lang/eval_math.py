@@ -5,6 +5,7 @@ from mcdp_dp import MultValueMap, ProductNatN, ProductN, SumNNat, WrapAMap, sum_
 from mcdp_dp.dp_plus_value import PlusValueRcompDP, PlusValueDP, PlusValueNatDP
 from mcdp_dp.dp_sum import SumNDP
 from mcdp_maps import MinusValueMap, MultNat, SumNInt, SumNRcomp
+from mcdp_maps import PlusValueMap
 from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits, Space,
     express_value_in_isomorphic_space, get_types_universe, mult_table, Rcomp)
 from mocdp.comp.context import CResource, ValueWithUnits
@@ -16,7 +17,6 @@ from .helpers import create_operation, get_valuewithunits_as_resource, get_resou
 from .misc_math import inv_constant
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from mcdp_maps.plus_value_map import PlusValueMap
 
 
 CDP = CDPLanguage
@@ -197,10 +197,24 @@ def eval_MultN(x, context, wants_constant):
             c = generic_mult_constantsN(constants)
             return get_mult_op(context, r, c)
 
+class MultValueDP(WrapAMap):
+    @contract(F=RcompUnits, R=RcompUnits, unit=RcompUnits)
+    def __init__(self, F, R, unit, value):
+        amap = MultValueMap(F=F, R=R, value=value)
+        from mcdp_posets.rcomp_units import format_pint_unit_short
+
+        label = '× %.5f %s' % (value, format_pint_unit_short(unit.units))
+        # label = '× %s' % (c.unit.format(c.value))
+        setattr(amap, '__name__', label)
+        
+        # unit2 = inverse_of_unit(unit)
+        value2 = 1.0 / value
+        amap_dual = MultValueMap(F=R, R=F, value=value2)
+        WrapAMap.__init__(self, amap, amap_dual)
+
 
 @contract(r=CResource, c=ValueWithUnits)
 def get_mult_op(context, r, c):
-    from mcdp_posets.rcomp_units import format_pint_unit_short
 
     rtype = context.get_rtype(r)
 
@@ -209,12 +223,7 @@ def get_mult_op(context, r, c):
         F = rtype
         R = mult_table(rtype, c.unit)
 
-        mvmap = MultValueMap(F=F, R=R, value=c.value)
-        label = '× %.5f %s' % (c.value, format_pint_unit_short(c.unit.units))
-        # label = '× %s' % (c.unit.format(c.value))
-        setattr(mvmap, '__name__', label)
-
-        dp = WrapAMap(mvmap)
+        dp = MultValueDP(F=F,R=R,unit=c.unit,value=c.value) 
 
     elif isinstance(rtype, Nat) and isinstance(c.unit, Nat):
         amap = MultNat(c.value)

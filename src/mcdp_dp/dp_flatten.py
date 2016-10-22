@@ -36,9 +36,9 @@ class Mux(WrapAMap):
     @contract(coords='seq(int|tuple|list)|int')
     def __init__(self, F, coords):
 
-        self.amap = MuxMap(F, coords)
+        amap = MuxMap(F, coords)
 
-        WrapAMap.__init__(self, self.amap)
+        WrapAMap.__init__(self, amap)
 
         # This is used by many things (e.g. series simplification)
         self.coords = coords

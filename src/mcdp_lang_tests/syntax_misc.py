@@ -590,6 +590,11 @@ mcdp {
 
 @comptest
 def check_lang81(): # TODO: rename
+    
+    print parse_wrap(Syntax.rvalue_power_base, '(provided f)')
+    print parse_wrap(Syntax.rvalue_power_expr_2, '(provided f) ^ 5')
+    
+
     pass
 
 @comptest
