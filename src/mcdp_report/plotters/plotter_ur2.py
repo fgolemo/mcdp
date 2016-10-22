@@ -101,7 +101,10 @@ class PlotterUR2(Plotter):
         self.axis = axis
         self.check_plot_space(space)
 
-        minimals = [self._get_screen_coords(_, axis) for _ in value.minimals]
+        tu = get_types_universe()
+        P_TO_S, _ = tu.get_embedding(space.P, self.R2)
+
+        minimals = [self._get_screen_coords(P_TO_S(_), axis) for _ in value.minimals]
 
         minimals = poset_minima(minimals, self.R2.leq)
         v = self.R2.Us(minimals)
