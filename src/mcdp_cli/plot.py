@@ -149,7 +149,8 @@ def syntax_pdf(data):
     def ignore_line(lineno):
         return lineno  in lines_to_hide
     contents = ast_to_html(s, complete_document=False, extra_css=extra_css,
-                       ignore_line=ignore_line)
+                       ignore_line=ignore_line, parse_expr=Syntax.ndpt_dp_rvalue,
+                       add_css=False)
     html = get_minimal_document(contents)
 
     d = mkdtemp()

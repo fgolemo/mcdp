@@ -4,11 +4,8 @@ from nose.tools import assert_equal
 from comptests.registrar import comptest
 from contracts.utils import raise_desc
 from mcdp_dp import CatalogueDP, CoProductDP, NotFeasible, Template
-from mcdp_lang import parse_constant, parse_ndp, parse_poset
 from mcdp_lang.parse_actions import parse_wrap
-
 from mcdp_lang.parse_interface import parse_ndp, parse_poset
-
 from mcdp_lang.pyparsing_bundled import Literal
 from mcdp_lang.syntax import Syntax, SyntaxIdentifiers
 from mcdp_lang.syntax_codespec import SyntaxCodeSpec

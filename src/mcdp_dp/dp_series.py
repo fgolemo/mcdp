@@ -27,7 +27,7 @@ class Series(PrimitiveDP):
         F2 = self.dp2.get_fun_space()
 
         if not R1 == F2:
-            msg = 'Cannot connect different spaces.'
+            msg = 'Cannot connect different spaces R1 = {} and F2 = {}.'.format(R1,F2)
             raise_desc(DPInternalError, msg, dp1=self.dp1.repr_long(),
                        dp2=self.dp2.repr_long(), R1=R1, F2=F2)
 

@@ -5,7 +5,8 @@ import warnings
 from nose.tools import assert_equal
 
 from comptests.registrar import comptest, comptest_dynamic
-from mcdp_dp import InvPlus2Nat, Mux, SumNNat, WrapAMap, make_loop
+from mcdp_dp import InvPlus2Nat, Mux, SumNNat, WrapAMap
+from mcdp_dp.dp_loop import DPLoop0
 from mcdp_dp.dp_loop2 import DPLoop2
 from mcdp_dp.dp_parallel import Parallel
 from mcdp_dp.dp_parallel_simplification import make_parallel
@@ -27,7 +28,6 @@ from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
 from reprep import Report
-from mcdp_dp.dp_loop import DPLoop0
 
 
 def example():

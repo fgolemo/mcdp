@@ -4,7 +4,7 @@ from collections import namedtuple
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mcdp_posets import (LowerSet, NotEqual, NotLeq, PosetProduct, UpperSet,
     UpperSets, get_types_universe, poset_maxima, poset_minima)
-from mcdp_posets.uppersets import upperset_project
+from mcdp_posets.uppersets import upperset_project, LowerSets, lowerset_project
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import do_extra_checks
 
@@ -205,6 +205,15 @@ class DPLoop2(PrimitiveDP):
         res = self.solve_all_cached(f1, trace)
         return res['res_r1']
 
+    def solve_r(self, r):
+        t = Tracer()
+        res = self.solve_r_trace(r, t)
+        return res
+    
+    def solve_r_trace(self, r, trace):
+        res = self.solve_r_all(r, trace)
+        return res['res_f1']
+
     def solve_all_cached(self, f1, trace):
         if not f1 in self._solve_cache:
             #print('solving again %s' % f1.__str__())
@@ -233,7 +242,7 @@ class DPLoop2(PrimitiveDP):
         for i in range(1, 1000000):  # XXX
             with trace.iteration(i) as t:
                 si_prev = S[-1].s
-                si_next, converged = dploop2_iterate(dp0, f1, R, si_prev, t)
+                si_next, converged = solve_f_iterate(dp0, f1, R, si_prev, t)
                 iteration = KleeneIteration(s=si_next, 
                                             s_converged=converged,
                                             r=upperset_project(si_next, 0),
@@ -266,8 +275,59 @@ class DPLoop2(PrimitiveDP):
         
         return result
 
+    def solve_r_all(self, r1, trace):
+        """ Returns an upperset in UR. You want to project
+            it to R1 to use as the output. """
+        dp0 = self.dp1
+        F = dp0.get_fun_space()
+        F1 = F[0]
+        LF = LowerSets(F)
 
-def dploop2_iterate(dp0, f1, R, S, trace):
+        # we consider a set of iterates
+        # we start from the bottom
+        trace.log('Iterating in LF = %s' % LF.__str__())
+        
+        s0 = F.Ls(F.get_maximal_elements()) 
+        S = [KleeneIteration(s=s0, s_converged=F.Ls(set()),
+                                r=lowerset_project(s0, 0),
+                                r_converged=F1.Ls(set()))]
+            
+        for i in range(1, 1000000):  # XXX
+            with trace.iteration(i) as t:
+                si_prev = S[-1].s
+                si_next, converged = solve_r_iterate(dp0, r1, F, si_prev, t)
+                iteration = KleeneIteration(s=si_next, 
+                                            s_converged=converged,
+                                            r=lowerset_project(si_next, 0),
+                                            r_converged=lowerset_project(converged, 0))
+                S.append(iteration)
+                
+                t.log('si_next = %s' % LF.format(si_next))
+
+                if do_extra_checks():
+                    try:
+                        LF.check_leq(si_prev, si_next)
+                    except NotLeq as e:
+                        msg = 'Loop iteration invariant not satisfied.'
+                        raise_wrapped(Exception, e, msg, si_prev=si_prev, 
+                                      si_next=si_next, dp=self.dp1)
+                
+                t.values(state=S[-1])
+
+                if LF.leq(si_next, si_prev):
+                    t.log('Breaking because converged (iteration %s) ' % i)
+                    break
+
+        trace.values(type='loop2r', LF=LF, F=F, dp=self, iterations=S)
+        
+        res_all = S[-1].s
+        res_f1 = lowerset_project(res_all, 0)
+        result = dict(res_all=res_all, res_f1=res_f1)
+        
+        return result
+
+
+def solve_f_iterate(dp0, f1, R, S, trace):
     """ 
     
         Returns the next iteration  si \in UR 
@@ -298,6 +358,35 @@ def dploop2_iterate(dp0, f1, R, S, trace):
 
     nextit = R.Us(poset_minima(nextit, R.leq))
     converged = R.Us(poset_minima(converged, R.leq))
+
+    return nextit, converged
+
+def solve_r_iterate(dp0, r1, F, S, trace):
+    
+    LF = LowerSets(F)
+    if do_extra_checks():
+        LF.belongs(S)
+    F2 = F[1]
+    converged = set()  # subset of solutions for which they converged
+    nextit = set()
+    # find the set of all r2s
+
+    for fa in S.maximals:
+        hr = dp0.solve_r_trace((r1, fa[1]), trace)
+
+        for fb in hr.maximals:
+            # valid = R.leq(ra, rb) # ra <= rb
+            valid = F.leq(fb, fa) # fb <= fa 
+
+            if valid:
+                nextit.add(fb)
+
+                feasible = F2.leq(fa[1], fb[1])
+                if feasible:
+                    converged.add(fb)
+
+    nextit = F.Ls(poset_maxima(nextit, F.leq))
+    converged = F.Ls(poset_maxima(converged, F.leq))
 
     return nextit, converged
 

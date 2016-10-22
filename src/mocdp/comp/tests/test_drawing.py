@@ -13,10 +13,6 @@ from mocdp.exceptions import mcdp_dev_warning
 from reprep import Report
 
 
-# 
-# 
-# matplotlib.rc('font', **{'sans-serif' : 'Arial',
-#                            'family' : 'sans-serif'})
 @for_all_nameddps_dyn
 def nameddp1_report(context, _id_dp, ndp):
     try:

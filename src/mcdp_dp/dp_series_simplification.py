@@ -106,7 +106,7 @@ class RuleSimplifyLift(SeriesSimplificationRule):
 
 
 
-class RuleLoop(SeriesSimplificationRule):
+class RuleLoop1a(SeriesSimplificationRule):
     """ 
     
         TODO: this is only implemented for a special case.
@@ -168,11 +168,88 @@ class RuleLoop(SeriesSimplificationRule):
             raise_desc(NotImplementedError, dp1=dp1,dp2=dp2)
         
         m1 = Mux(dp1.dp1.get_res_space(), coords)
-        print m1
         res = DPLoop2(make_series(dp1.dp1, m1))
 
-        print res
         return res
+    
+
+class RuleLoop1b(SeriesSimplificationRule):
+    """ 
+    
+        TODO: this is only implemented for a special case,
+        with m.coords = [()]
+        
+        |m| - | DP | - 
+            / |____| -
+            `-------`       
+
+        where m and DP[0] are a Mux
+        
+        --- |m| -- | DP | ----
+        /-- Id  -- |____| -----
+         `-----------------`       
+
+        Series( m, Loop(dp)) =
+        
+        Series( Loop(Series(Par(m, Id), dp)) ) 
+    
+    """
+    def applies(self, dp1, dp2):
+        # first must be Mux
+        if not isinstance(dp1, Mux):
+            return False
+
+        # second must be Loop
+        from mcdp_dp.dp_loop2 import DPLoop2
+        if not isinstance(dp2, DPLoop2):
+            return False
+
+        # the first one inside Loop must be Mux, otherwise it 
+        # doesn't simplify
+        dp1s = unwrap_series(dp2.dp1)
+        if not isinstance(dp1s[0], Mux):
+            return False
+        
+        if dp1.coords == [()]:
+            pass
+        else:
+            msg = 'Could not implement simplification' \
+                ' for dp2.coords = {}'.format(dp2.coords)
+            from mocdp import logger
+            logger.debug(msg)
+            return False
+        
+        return True
+
+    def _execute(self, dp1, dp2):
+        from mcdp_dp.dp_loop2 import DPLoop2
+        assert isinstance(dp1, Mux)
+        assert isinstance(dp2, DPLoop2)
+        
+        # I want to create this:
+        #  P   -- |m| --- (Px) 
+        #  F2  --  Id --- F2 
+        
+        if dp1.coords == [()]:
+            coords = [ [0], 1]
+        else:
+            raise_desc(NotImplementedError, dp1=dp1,dp2=dp2)
+        
+        dp0 = dp2.dp1
+        
+        F = dp0.get_fun_space()
+        F2 = F[1]
+        F1= F[0]
+        P = F1[0]
+        m1F = PosetProduct((P, F2))
+        #print('m1F: %s' % m1F)
+        m1 = Mux(m1F, coords)
+        
+        #print 'm1', m1.tree_long()
+        res = DPLoop2(make_series(m1, dp0))
+
+        return res
+    
     
 class RuleSimplifyLiftB(SeriesSimplificationRule):
     """ 
@@ -320,7 +397,8 @@ rules = [
     RuleSimplifyPermPar(),
     RuleMuxComposition(),
     RuleJoinPar(),
-    RuleLoop(),
+    RuleLoop1a(),
+    RuleLoop1b(),
 ]
 
 disable_optimization = False

@@ -24,6 +24,13 @@ def get_dp_label(dp):
         label = 'WrapAMap\n%s' % dp.diagram_label()
         
     label = type(dp).__name__ + '/' + label
+    
+    if isinstance(dp, WrapAMap):
+        if dp.amap_dual is not None:
+            s = 'h*: %s' % dp.amap_dual
+        else:
+            s = 'h*: not set'
+        label += '\n' + s
     return label
 
 @contract(dp0=PrimitiveDP)

@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 from contextlib import contextmanager
+import os
+from tempfile import mkdtemp
+
 from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
 from mcdp_library.utils.locate_files_imp import locate_files
 from mcdp_report.utils import safe_makedirs
@@ -7,8 +10,7 @@ from mocdp.exceptions import mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
 from system_cmd.meat import system_cmd_result
 from system_cmd.structures import CmdException
-from tempfile import mkdtemp
-import os
+
 
 __all__ = [
     'GraphDrawingContext',

@@ -72,14 +72,17 @@ class PrimitiveDP(WithInternalLog):
         '''
             Given one f point, returns an UpperSet of resources.
         '''
-
-#     @abstractmethod
+        
     @contract(returns=LowerSet)
     def solve_r(self, r):  # @UnusedVariable
         """ Dual of solve. Given a resource, returns a LowerSet
             of functionality. """
         msg = 'Function solve_r() not implemented.' 
         raise_desc(NotImplementedError, msg, type=type(self), dp=self)
+
+    @contract(returns=LowerSet)
+    def solve_r_trace(self, func, tracer):  # @UnusedVariable
+        return self.solve_r(func)
 
     @abstractmethod
     @contract(returns='tuple($LowerSet, $UpperSet)')
@@ -301,12 +304,7 @@ class PrimitiveDP(WithInternalLog):
                 x = x[:n - 3] + '...'
                 s = x.encode('utf-8')
             return s
-
-        # S, _, _ = self.get_normal_form()
-#         s2 = '   [F = %s  R = %s  M = %s  S = %s]' % (clip(self.F, 13),
-#                        clip(self.R, 10), clip(self.M, 15),
-#                            clip(S, 28))
-
+ 
         s2 = ""
 
         head = s + ' ' * (n - ulen(s) - ulen(s2)) + s2
