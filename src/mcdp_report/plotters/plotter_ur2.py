@@ -21,17 +21,17 @@ class PlotterUR2(Plotter):
             msg = 'I can only plot upper sets of something isomorphic to R2.'
             raise_desc(NotPlottable, msg, space=space)
 
-        R2 = PosetProduct((Rcomp(), Rcomp()))
+        self.R2 = PosetProduct((Rcomp(), Rcomp()))
         P = space.P
         #logger.debug('space = %s ; P = %s; R2 = %s' % (space,space.P,R2))
         try:
-            tu.check_leq(P, R2)
+            tu.check_leq(P, self.R2)
         except NotLeq as e:
             msg = ('cannot convert to R^2 from %s' % space) 
             raise_wrapped(NotPlottable, e, msg, compact=True)
 
         logger.debug('ok')
-        _f1, _f2 = tu.get_embedding(P, R2)
+        _f1, _f2 = tu.get_embedding(P, self.R2)
 
     def get_xylabels(self, space):
         P = space.P
