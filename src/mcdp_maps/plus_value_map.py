@@ -61,6 +61,7 @@ class MinusValueRcompMap(Map):
     """ 
         Implements _ -> _ - c  for Rcomp.    
     """
+    
 
     def __init__(self, c_value):
         check_isinstance(c_value, float)
