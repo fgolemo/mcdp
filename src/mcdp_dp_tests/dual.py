@@ -25,8 +25,8 @@ def dual01_chain(id_dp, dp):
             
             # try to solve
             try: 
-                dp.solve(F.get_bottom())
-                dp.solve_r(R.get_top())
+                dp.solve(F.witness())
+                dp.solve_r(R.witness())
             except NotSolvableNeedsApprox:
                 print('NotSolvableNeedsApprox - will approximate ')
                 dp, _ = get_dp_bounds(dp, nl=10, nu=10)
