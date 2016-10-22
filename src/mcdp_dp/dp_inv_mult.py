@@ -2,12 +2,12 @@
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
 from mcdp_posets import Nat, Poset, PosetProduct, UpperSet
+from mcdp_posets.poset import is_top
 from mcdp_posets.utils import check_minimal
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 import numpy as np
 
 from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
-from mcdp_posets.poset import is_top
 
 
 _ = Nat, Poset
@@ -17,6 +17,14 @@ __all__ = [
     'InvMult2U',
     'InvMult2L',
 ]
+
+def InvMult2_solve_r(Rs, F, r):
+    r1, r2 = r
+    if is_top(Rs[0], r1) or is_top(Rs[1],r2):
+        f_max = F.get_top()
+    else:
+        f_max = r1 * r2
+    return F.L(f_max)
 
 class InvMult2(ApproximableDP):
 
@@ -37,6 +45,9 @@ class InvMult2(ApproximableDP):
 
     def solve(self, f):
         raise NotSolvableNeedsApprox(type(self))
+    
+    def solve_r(self, r):
+        return InvMult2_solve_r(self.Rs, self.F, r)
 
     def get_lower_bound(self, n):
         return InvMult2L(self.F, self.Rs, n)
@@ -96,6 +107,10 @@ class InvMult2U(PrimitiveDP):
             assert False
             
         return UpperSet(minimals=ps, P=self.R)
+    
+    def solve_r(self, r):
+        mcdp_dev_warning('This might not be correct')
+        return InvMult2_solve_r(self.Rs, self.F, r)
 
 def samplec(n, c):
     """ Samples n points on the curve xy=c """
@@ -144,6 +159,10 @@ class InvMult2L(PrimitiveDP):
         lf = self.F.L(f)
         return lf, ur
 
+    def solve_r(self, r):
+        mcdp_dev_warning('This might not be correct')
+        return InvMult2_solve_r(self.Rs, self.F, r)
+    
     def solve(self, f):
         if f == 0.0:
             return  UpperSet(minimals=set([(0.0, 0.0)]), P=self.R)

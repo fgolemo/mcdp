@@ -8,7 +8,8 @@ from .parts import CDPLanguage
 
 CDP = CDPLanguage
 
-class RcompUnitsPowerDP(WrapAMap):
+
+class RcompUnitsPowerDP(WrapAMap): # TODO: move
     def __init__(self, F, num, den):
         amap = RCompUnitsPowerMap(F, num=num, den=den)
         amap_dual = RCompUnitsPowerMap(amap.get_codomain(), num=den, den=num) # swap

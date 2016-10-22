@@ -1,21 +1,18 @@
 # -*- coding: utf-8 -*-
-from contracts.utils import raise_wrapped, raise_desc
+from comptests.registrar import comptest
+from contracts.utils import raise_wrapped
 from mcdp_dp import NotSolvableNeedsApprox
+from mcdp_lang.parse_interface import parse_poset
 from mcdp_posets import LowerSets, UpperSets
 from mcdp_posets import NotBelongs
-from mcdp_posets.rcomp import Rcomp
+from mcdp_posets import PosetProduct
+from mcdp_posets import Rcomp
 from mcdp_posets.utils import poset_check_chain
 from mcdp_tests.generation import for_all_dps, primitive_dp_test
 from mocdp import logger
-import numpy as np
-from mcdp_dp.dp_flatten import MuxMap
-from mcdp_lang.parse_interface import parse_poset
 from multi_index.get_it_test import compose_indices, get_id_indices
-from mcdp_dp.dp_series_simplification import simplify_indices_F
-from mcdp_posets.poset_product import PosetProduct
-from multi_index.imp import get_it
 from multi_index.inversion import transform_right_inverse
-from comptests.registrar import comptest
+from mcdp_dp.dp_transformations import get_dp_bounds
 
 
 @for_all_dps
@@ -25,6 +22,15 @@ def dual01_chain(id_dp, dp):
             # get a chain of resources
             F = dp.get_fun_space()
             R = dp.get_res_space()
+            
+            # try to solve
+            try: 
+                dp.solve(F.get_bottom())
+                dp.solve_r(R.get_top())
+            except NotSolvableNeedsApprox:
+                print('NotSolvableNeedsApprox - will approximate ')
+                dp, _ = get_dp_bounds(dp, nl=10, nu=10)
+            
             LF = LowerSets(F)
             UR = UpperSets(R)
         
@@ -39,7 +45,6 @@ def dual01_chain(id_dp, dp):
                 print('skipping because %s'  % e)
                 return
         
-            
             poset_check_chain(LF, list(reversed(lfchain)))
         
             # now, for each functionality f, 
@@ -117,16 +122,7 @@ def dual11(_, dp):
 
 @for_all_dps
 def dual12(_, dp):
-    pass
- 
-#     
-# def is_right_inverse(P, coords, coords2):
-#     
-#     comp = compose_indices(P, coords, coords2, list)
-# 
-#     simplified = simplify_indices_F(P, comp)
-#     
-#     return simplified == ()
+    pass 
     
 
 @comptest
