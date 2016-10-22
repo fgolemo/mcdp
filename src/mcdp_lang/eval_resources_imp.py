@@ -14,6 +14,9 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from mcdp_posets.rcomp import Rcomp
+from mcdp_posets.nat import Nat
+from mcdp_posets.rcomp_units import RcompUnits
+
 
 
 
@@ -128,12 +131,18 @@ def eval_rvalue_minus_constant(r, context):
     constant = eval_constant(r.c, context)
 
     R = context.get_rtype(rvalue)
-    if not isinstance(R, Rcomp):
+    
+    if isinstance(R, Nat) and isinstance(constant.unit, Nat):
+        from mcdp_lang.eval_math import MinusValueNatDP
+        dp = MinusValueNatDP(constant.value)
+    
+    elif isinstance(R, Rcomp) and not isinstance(R, RcompUnits):
+        from .eval_math import MinusValueDP
+        dp = MinusValueDP(F=R, c_value=constant.value, c_space=constant.unit)
+    else:
         msg = 'Could not create this operation with %s ' % R
         raise_desc(DPSemanticError, msg, R=R)
         
-    from .eval_math import MinusValueDP
-    dp = MinusValueDP(F=R, c_value=constant.value, c_space=constant.unit)
              
     return create_operation(context, dp=dp, resources=[rvalue],
                             name_prefix='_minusvalue', op_prefix='_op',
