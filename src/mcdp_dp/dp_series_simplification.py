@@ -214,7 +214,7 @@ class RuleLoop1b(SeriesSimplificationRule):
             pass
         else:
             msg = 'Could not implement simplification' \
-                ' for dp2.coords = {}'.format(dp2.coords)
+                ' for dp1.coords = {}'.format(dp1.coords)
             from mocdp import logger
             logger.debug(msg)
             return False
