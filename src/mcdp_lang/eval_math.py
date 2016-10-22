@@ -17,7 +17,6 @@ from .helpers import create_operation, get_valuewithunits_as_resource, get_resou
 from .misc_math import inv_constant
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from mcdp_maps.plus_nat import MinusValueNatMap, PlusValueNatMap
 
 
 CDP = CDPLanguage
@@ -313,16 +312,27 @@ def eval_PlusN(x, context, wants_constant):
 class MinusValueDP(WrapAMap):
     """ Give a positive constant here """
     def __init__(self, F, c_value, c_space):
-        check_isinstance(F, Rcomp)
+        check_isinstance(F, RcompUnits)
         assert c_value >= 0, c_value
         amap = MinusValueMap(P=F, c_value=c_value, c_space=c_space)
         amap_dual = PlusValueMap(F=F, c_value=c_value, c_space=c_space, R=F)
+        WrapAMap.__init__(self, amap, amap_dual)
+        
+class MinusValueRcompDP(WrapAMap):
+    """ Give a positive constant here """
+    def __init__(self, c_value):
+        assert c_value >= 0, c_value
+        from mcdp_maps.plus_value_map import MinusValueRcompMap, PlusValueRcompMap
+
+        amap = MinusValueRcompMap(c_value)
+        amap_dual = PlusValueRcompMap(c_value=c_value)
         WrapAMap.__init__(self, amap, amap_dual)
         
 class MinusValueNatDP(WrapAMap):
     """ Give a positive constant here """
     def __init__(self, c_value):
         assert c_value >= 0, c_value
+        from mcdp_maps.plus_nat import MinusValueNatMap, PlusValueNatMap
         amap = MinusValueNatMap(c_value)
         amap_dual = PlusValueNatMap(c_value)
         WrapAMap.__init__(self, amap, amap_dual)

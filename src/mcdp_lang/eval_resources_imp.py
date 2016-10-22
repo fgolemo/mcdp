@@ -5,6 +5,9 @@ from mcdp_dp import CombinedCeilMap, FloorStepMap, WrapAMap
 from mcdp_maps import PlusValueMap
 from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
     get_types_universe, poset_minima)
+from mcdp_posets import Nat
+from mcdp_posets import Rcomp
+from mcdp_posets import RcompUnits
 from mocdp.comp.context import CResource, ValueWithUnits, get_name_for_fun_node
 from mocdp.exceptions import DPSemanticError
 
@@ -13,11 +16,6 @@ from .helpers import create_operation, get_valuewithunits_as_resource
 from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
-from mcdp_posets.rcomp import Rcomp
-from mcdp_posets.nat import Nat
-from mcdp_posets.rcomp_units import RcompUnits
-
-
 
 
 CDP = CDPLanguage
@@ -127,17 +125,20 @@ def eval_rvalue(rvalue, context):
             raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
 
 def eval_rvalue_minus_constant(r, context):
+    from .eval_math import MinusValueNatDP
+    from .eval_math import MinusValueRcompDP
+    from .eval_math import MinusValueDP
+        
     rvalue = eval_rvalue(r.r, context)
     constant = eval_constant(r.c, context)
 
     R = context.get_rtype(rvalue)
     
     if isinstance(R, Nat) and isinstance(constant.unit, Nat):
-        from mcdp_lang.eval_math import MinusValueNatDP
         dp = MinusValueNatDP(constant.value)
-    
     elif isinstance(R, Rcomp) and not isinstance(R, RcompUnits):
-        from .eval_math import MinusValueDP
+        dp = MinusValueRcompDP(constant.value)
+    elif isinstance(R, RcompUnits):
         dp = MinusValueDP(F=R, c_value=constant.value, c_space=constant.unit)
     else:
         msg = 'Could not create this operation with %s ' % R

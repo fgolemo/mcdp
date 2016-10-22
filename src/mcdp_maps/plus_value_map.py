@@ -23,6 +23,9 @@ class PlusValueMap(Map):
 
     @contract(F=RcompUnits, R=RcompUnits)
     def __init__(self, F, c_value, c_space, R):
+        check_isinstance(F, RcompUnits)
+        check_isinstance(c_space, RcompUnits)
+        
         Map.__init__(self, dom=F, cod=R)
         self.c_value = c_value
         self.c_space = c_space
@@ -106,6 +109,8 @@ class MinusValueMap(Map):
     """
 
     def __init__(self, P, c_value, c_space):
+        check_isinstance(P, RcompUnits)
+        check_isinstance(c_space, RcompUnits)
         assert c_value >= 0
         Map.__init__(self, dom=P, cod=P)
         self.c_value = c_value
