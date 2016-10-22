@@ -5,6 +5,7 @@ from mcdp_posets import LowerSets, UpperSets
 from mcdp_posets import NotBelongs
 from mcdp_posets.utils import poset_check_chain
 from mcdp_tests.generation import for_all_dps, primitive_dp_test
+import numpy as np
 
 
 @for_all_dps
@@ -34,22 +35,37 @@ def dual01_chain(id_dp, dp):
         # we know that the corresponding resource should be feasible
         
         for lf, r in zip(lfchain, rchain):
+            print('')
             print('r: %s' % R.format(r))
-            print lf
             print('lf = h*(r) = %s' % LF.format(lf))
             
             for f in lf.maximals:
                 print('  f = %s' % F.format(f))
                 f_ur = dp.solve(f)
-                print('f_ur = h(f) =  %s' % UR.format(f_ur))
+                print('  f_ur = h(f) =  %s' % UR.format(f_ur))
+                
+#                 pr = R.U(r)
+#                 UR.check_leq(pr, f_ur)
                 try:
                     f_ur.belongs(r)
                 except NotBelongs as e:
-                    msg = 'Point does not belong.'
+                    msg = 'Point r = %s does not belong to f_ur= %s.' % (r, f_ur)
+                    if id_dp == 'minus_value':
+                        print 'f', f.__repr__()
+                        print 'r', r.__repr__()
+                        print (0.1.__repr__() + '+' + 1.0.__repr__() + '=' + (0.1+1.0).__repr__())
+                        x = 0.1+1.0
+                        print (x.__repr__() + '-' + 1.0.__repr__() + '=' + (x-1.0).__repr__())
+                        print 'r+', np.nextafter(r, 1000).__repr__()
+                        print 'r-', np.nextafter(r, 0).__repr__()
+                         
+                        print ('min', f_ur.minimals.__repr__())
+                     
                     raise_wrapped(AssertionError, e, msg,
-                                  lf=lf, r=r, f_ur=f_ur)
-            
-
+                                  lf=lf, r=r, f_ur=f_ur,
+                                  r_repr=r.__repr__(),
+                                  f_ur_minimals=f_ur.minimals.__repr__())
+             
 @for_all_dps
 def dual02(_, dp):
     

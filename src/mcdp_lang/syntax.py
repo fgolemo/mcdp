@@ -10,7 +10,7 @@ from .pyparsing_bundled import (
     CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
     NotAny, OneOrMore, Optional, ParserElement, Word, ZeroOrMore, alphanums,
     alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
-    sglQuotedString)
+    sglQuotedString, FollowedBy, printables)
 from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
 from .utils_lists import make_list
@@ -190,6 +190,7 @@ class Syntax():
     EQ = spk(L('='), CDP.eq)
     DOT = spk(L('.'), CDP.DotPrep)
     PLUS = spk(L('+'), CDP.plus)
+    MINUS = spk(L('-'), CDP.minus)
     TIMES = spk(L('*'), CDP.times)
     BAR = spk(L('/'), CDP.bar)
 
@@ -556,7 +557,7 @@ class Syntax():
     asserts = (assert_equal | assert_leq | assert_leq | assert_geq
                | assert_lt | assert_gt | assert_nonempty | assert_empty)
 
-    constant_minus_constant = sp(constant_value + L('-') + constant_value,
+    constant_minus_constant = sp(constant_value + MINUS + constant_value,
                                  lambda t: CDP.ConstantMinusConstant(t[0], t[1], t[2]))
 
     
@@ -687,7 +688,7 @@ class Syntax():
                                                                 fvalue=t[0], label=t[2]))
 
 
-    unary = ['sqrt', 'ceil', 'square']
+    unary = ['sqrt', 'ceil', 'square', 'floor']
     
     unary_op = MatchFirst([sp(L(x), lambda t: CDP.ProcName(t[0]))
                            for x in unary])
@@ -713,6 +714,19 @@ class Syntax():
         'max': CDP.OpMaxF,
         'min': CDP.OpMinF,
     }
+
+#     rvalue_minus_constant = sp( ((SLPAR+rvalue+SRPAR)|rvalue + ~FollowedBy(MINUS)) + MINUS - constant_value,
+#                                  lambda t: CDP.RvalueMinusConstant(t[0], t[1], t[2]))
+    
+#     not_minus = (NotAny(MINUS) + printables)
+#     has_minus = (OneOrMore(not_minus)+MINUS+OneOrMore(not_minus))
+#     rvalue_minus_constant = sp(  (NotAny(has_minus)+rvalue)  + MINUS - constant_value,
+#                                  lambda t: CDP.RvalueMinusConstant(t[0], t[1], t[2]))
+
+    rvalue_minus_constant = sp( SL('rvalue_minus_constant') + SLPAR + rvalue +
+                                SCOMMA +  constant_value + SRPAR,
+                             lambda t: CDP.RvalueMinusConstant(r=t[0], c=t[1]))
+    
 
     # binary functions on functionality
     opname_f = sp(MatchFirst([L(x) for x in binary_f]), lambda t: CDP.OpKeyword(t[0]))
@@ -1022,7 +1036,8 @@ class Syntax():
         ^ rvalue_any_of
         ^ rvalue_approx_step
         ^ rvalue_approx_u
-        ^ rvalue_placeholder)
+        ^ rvalue_placeholder 
+        ^ rvalue_minus_constant)
 
     rvalue << operatorPrecedence(rvalue_operand, [
         (TIMES, 2, opAssoc.LEFT, mult_parse_action),

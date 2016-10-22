@@ -13,6 +13,8 @@ from .helpers import create_operation, get_valuewithunits_as_resource
 from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
+from mcdp_posets.rcomp import Rcomp
+
 
 
 CDP = CDPLanguage
@@ -109,6 +111,7 @@ def eval_rvalue(rvalue, context):
             CDP.ApproxStepRes: eval_rvalue_approx_step,
             CDP.ApproxURes: eval_rvalue_approx_u,
             CDP.UnaryRvalue: eval_rvalue_unary,
+            CDP.RvalueMinusConstant: eval_rvalue_minus_constant,
         }
 
         for klass, hook in cases.items():
@@ -119,6 +122,22 @@ def eval_rvalue(rvalue, context):
             msg = 'eval_rvalue(): Cannot evaluate as resource.'
             rvalue = recursive_print(rvalue)
             raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
+
+def eval_rvalue_minus_constant(r, context):
+    rvalue = eval_rvalue(r.r, context)
+    constant = eval_constant(r.c, context)
+
+    R = context.get_rtype(rvalue)
+    if not isinstance(R, Rcomp):
+        msg = 'Could not create this operation with %s ' % R
+        raise_desc(DPSemanticError, msg, R=R)
+        
+    from .eval_math import MinusValueDP
+    dp = MinusValueDP(F=R, c_value=constant.value, c_space=constant.unit)
+             
+    return create_operation(context, dp=dp, resources=[rvalue],
+                            name_prefix='_minusvalue', op_prefix='_op',
+                            res_prefix='_result')
 
 
 def eval_rvalue_approx_u(r, context):

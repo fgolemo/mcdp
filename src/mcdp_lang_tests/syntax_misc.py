@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from nose.tools import assert_equal
 
-from comptests.registrar import comptest
-from contracts.utils import raise_desc
+from comptests.registrar import comptest, comptest_fails
+from contracts.utils import raise_desc, check_isinstance
 from mcdp_dp import CatalogueDP, CoProductDP, NotFeasible, Template
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp, parse_poset
@@ -16,6 +16,7 @@ from mocdp.exceptions import DPNotImplementedError, DPSemanticError
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
+from mcdp_lang.parts import CDPLanguage
 
 
 @comptest
@@ -527,14 +528,65 @@ def check_lang77(): # TODO: rename
 @comptest
 def check_lang78(): # TODO: rename
     pass
+
+@comptest_fails
+def check_lang79b(): # TODO: rename
+    
+    s = 'provided f - 1 dimensionless'
+    
+    print parse_wrap(Syntax.rvalue_minus_constant, s)
+    x = parse_wrap(Syntax.rvalue, s)[0]
+    check_isinstance(x, CDPLanguage.RvalueMinusConstant)
+    s = '(provided f) - 1 dimensionless'
+    print parse_wrap(Syntax.rvalue_minus_constant, s)
+    x = parse_wrap(Syntax.rvalue, s)[0]
+    
+    
 @comptest
 def check_lang79(): # TODO: rename
-    pass 
+    
+    s = 'rvalue_minus_constant(provided f, 1 dimensionless)'
+    
+    print parse_wrap(Syntax.rvalue_minus_constant, s)
+    x = parse_wrap(Syntax.rvalue, s)[0]
+    check_isinstance(x, CDPLanguage.RvalueMinusConstant)
+    
 
 
 @comptest
 def check_lang80(): # TODO: rename
-    pass
+    s = """
+mcdp {
+    provides f [R]
+    requires r [R]
+    x = provided f
+    required r >= x  + (0 dimensionless - 1 dimensionless)
+}
+    """
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    print dp.repr_long()
+    
+    s = """
+mcdp {
+    provides f [R]
+    requires r [R]
+    x = provided f
+    required r >= x - 1 dimensionless
+}
+    """
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    print dp.repr_long()
+    s = 'provided f'
+    print parse_wrap(Syntax.rvalue, s)
+    
+    s = 'x - Nat:1'
+    print parse_wrap(Syntax.rvalue, s)
+    
+    s = 'provided f - Nat:1'
+    print parse_wrap(Syntax.rvalue, s)
+    
 
 @comptest
 def check_lang81(): # TODO: rename

@@ -42,7 +42,8 @@ class WrapAMap(EmptyDP):
     def solve_r(self, r):  # @UnusedVariable
         if self.amap_dual is None:
             msg = 'Map amap_dual not provided so solve_r() not implemented.' 
-            raise_desc(NotImplementedError, msg, type=type(self), dp=self)
+            raise_desc(NotImplementedError, msg, type=type(self), dp=self,
+                       amap=self.amap)
         
         try:
             f = self.amap_dual(r)            
@@ -66,4 +67,6 @@ class WrapAMap(EmptyDP):
             return self.amap.__repr__()
 
     def __repr__(self):
+        if self.amap_dual is not None:
+            return 'WrapAMap(%r,%r)' % (self.amap, self.amap_dual)
         return 'WrapAMap(%r)' % self.amap

@@ -4,6 +4,7 @@ import functools
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
 from mcdp_posets import Map, Nat, PosetProduct, Rcomp, RcompUnits
+from mcdp_posets.poset import is_top
 from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
 
@@ -258,7 +259,7 @@ class MultValueMap(Map):
         Map.__init__(self, dom=dom, cod=cod)
 
     def _call(self, x):
-        if self.dom.equal(x, self.dom.get_top()):
+        if is_top(self.dom, x):
             return self.cod.get_top()
 
         res = x * self.value

@@ -2,6 +2,7 @@
 from abc import abstractmethod
 
 from mcdp_posets import Map, Rcomp, RcompUnits, Nat
+from mcdp_posets.poset import is_top
 from mcdp_posets.rcomp import finfo
 import numpy as np
 
@@ -29,6 +30,9 @@ class GenericFloatOperation(Map):
         self.name = name
 
     def _call(self, x):
+        if is_top(self.dom, x):
+            return self.cod.get_top()
+        
         if np.isinf(x):
             return self.cod.get_top()
 
@@ -62,8 +66,24 @@ class CeilMap(GenericFloatOperation):
 
     def op(self, x):
         return np.ceil(x)
-    
 
+class Floor0Map(GenericFloatOperation):
+    """
+        This is floor0:
+        
+        floor0(f) = { 0 for f = 0
+                      ceil(f-1) for f > 0    
+    """
+    
+    def __init__(self, dom):
+        GenericFloatOperation.__init__(self, dom, 'floor0')
+
+    def op(self, x):
+        if x == 0.0:
+            return 0
+        else:
+            return np.ceil(x-1)
+    
 class FloorMap(GenericFloatOperation):
 
     def __init__(self, dom):
@@ -89,7 +109,9 @@ class SquareNatMap(Map):
         Map.__init__(self, dom, cod)
 
     def _call(self, x):
-        return x * x
+        if is_top(self.dom, x):
+            return self.cod.get_top()
+        return x * x # XXX: overflow
     
     
 

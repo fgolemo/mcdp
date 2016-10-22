@@ -192,6 +192,7 @@ def parse_wrap(expr, string):
     except RuntimeError as e:
         msg = 'We have a recursive grammar.'
         msg += "\n\n" + indent(m(string), '  ') + '\n'
+
         raise_desc(DPInternalError, msg)
     except (ParseException, ParseFatalException) as e:
         # ... so we can use "string" here.

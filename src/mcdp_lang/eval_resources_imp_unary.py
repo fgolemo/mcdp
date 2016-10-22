@@ -11,6 +11,12 @@ from mocdp.exceptions import DPSemanticError
 
 from .helpers import get_resource_possibly_converted, create_operation
 from .parts import CDPLanguage
+from mcdp_posets.maps.promote_to_float import PromoteToFloat
+from mcdp_maps.misc_imp import FloorMap, Floor0Map
+from mcdp_posets.maps.coerce_to_int import CoerceToInt
+from mcdp_maps.map_composition import MapComposition
+from mcdp_dp.primitive import PrimitiveDP
+from mcdp_posets.space import Map
 
 
 CDP = CDPLanguage
@@ -42,16 +48,70 @@ class Rule():
             F = self.cast_type_to
             
         amap = self.use_map(F)
-        dp = WrapAMap(amap)
+        if isinstance(amap, Map):
+            dp = WrapAMap(amap)
+        else:
+            assert isinstance(amap, PrimitiveDP)
+            dp = amap
+            
         return create_operation(context, dp, [op_r],
                                          name_prefix='_%s'% self.opname, 
                                          op_prefix='_in',
                                          res_prefix='_out')
             
+class SquareNatDP(WrapAMap):
+    def __init__(self):
+        amap = SquareNatMap()
         
+        N = Nat()
+        R = Rcomp()
+        
+        maps = (
+            PromoteToFloat(N, R),
+            SqrtMap(R),
+            FloorMap(R),
+            CoerceToInt(R, N))
+        
+        amap_dual = MapComposition(maps)
+         
+        WrapAMap.__init__(self, amap, amap_dual)
+        
+class SquareDP(WrapAMap):
+    def __init__(self, F):
+        amap = SquareMap(F)
+        amap_dual = SqrtMap(F)
+        WrapAMap.__init__(self, amap, amap_dual)
+        
+class SqrtRDP(WrapAMap):
+    """ r >= sqrt(f) for rcomp or rcompunits """
+    def __init__(self, F):
+        amap = SqrtMap(F)
+        amap_dual = SquareMap(F)
+        WrapAMap.__init__(self, amap, amap_dual)
+        
+class Floor0DP(WrapAMap):
+    """
+        Note that floor() is not S-C.
+        
+        This is floor0:
+        
+        floor0(f) = { 0 for f = 0
+                      ceil(f-1) for f > 0
+    """
+    def __init__(self, F):
+        amap = Floor0Map(F)
+        amap_dual = CeilMap(F)
+        WrapAMap.__init__(self, amap, amap_dual)
+
+class CeilDP(WrapAMap):
+    def __init__(self, F):
+        amap = CeilMap(F)
+        amap_dual = FloorMap(F)
+        WrapAMap.__init__(self, amap, amap_dual)
+        
+    
 def get_unary_rules():
      
-    
     # note that RcompUnits derives from Rcomp so we must have this check
     def is_RcompUnits(T):
         return isinstance(T, RcompUnits)
@@ -64,24 +124,24 @@ def get_unary_rules():
         # sqrt(Nat): promote to Rcomp()
         # sqrt(Rcomp)
         # sqrt(Rcomp)
-        Rule('sqrt', is_Nat, Rcomp(), lambda _: SqrtMap(Rcomp())),
-        Rule('sqrt', is_Rcomp, None,  lambda _: SqrtMap(Rcomp())),
-        Rule('sqrt', is_RcompUnits, None,  lambda F: SqrtMap(F)),
+        Rule('sqrt', is_Nat, Rcomp(), lambda _: SqrtMap(Rcomp())), # XXX
+        Rule('sqrt', is_Rcomp, None,  lambda _: SqrtRDP(Rcomp())),
+        Rule('sqrt', is_RcompUnits, None,  lambda F: SqrtRDP(F)),
              
         # square: Nat -> Nat
         # square: Rcomp -> Rcomp
         # square: Rcompunits -> Rcompunits
-        Rule('square', is_Nat, None, lambda _: SquareNatMap()), 
-        Rule('square', is_Rcomp, None, lambda F: SquareMap(F)), 
-        Rule('square', is_RcompUnits, None, lambda F: SquareMap(F)), 
+        Rule('square', is_Nat, None, lambda _: SquareNatDP()), 
+        Rule('square', is_Rcomp, None, lambda F: SquareDP(F)), 
+        Rule('square', is_RcompUnits, None, lambda F: SquareDP(F)), 
 
         Rule('ceil', is_Nat, None, lambda _: IdentityMap(Nat(), Nat()), warn='ceil() used on Nats'), 
-        Rule('ceil', is_Rcomp, None, lambda _: CeilMap(Rcomp())), 
-        Rule('ceil', is_RcompUnits, None, lambda F: CeilMap(F)),
+        Rule('ceil', is_Rcomp, None, lambda _: CeilDP(Rcomp())), 
+        Rule('ceil', is_RcompUnits, None, lambda F: CeilDP(F)),
         
         Rule('floor', is_Nat, None, lambda _: IdentityMap(Nat(), Nat()), warn='floor() used on Nats'), 
-        Rule('floor', is_Rcomp, None, lambda _: CeilMap(Rcomp())), 
-        Rule('floor', is_RcompUnits, None, lambda F: CeilMap(F)),
+        Rule('floor', is_Rcomp, None, lambda _: Floor0DP(Rcomp())), 
+        Rule('floor', is_RcompUnits, None, lambda F: Floor0DP(F)),
     ]
     return rules
 

@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_dp import MultValueMap, ProductNatN, ProductN, SumNNat, WrapAMap, sum_dimensionality_works, SumNRcompMap
+from mcdp_dp.dp_plus_value import PlusValueRcompDP, PlusValueDP, PlusValueNatDP
 from mcdp_dp.dp_sum import SumNDP
-from mcdp_maps import MinusValueMap, MultNat, PlusNat, PlusValueMap, SumNInt, PlusValueRcompMap, SumNRcomp
+from mcdp_maps import MinusValueMap, MultNat, SumNInt, SumNRcomp
 from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits, Space,
     express_value_in_isomorphic_space, get_types_universe, mult_table, Rcomp)
 from mocdp.comp.context import CResource, ValueWithUnits
@@ -15,6 +16,7 @@ from .helpers import create_operation, get_valuewithunits_as_resource, get_resou
 from .misc_math import inv_constant
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mcdp_maps.plus_value_map import PlusValueMap
 
 
 CDP = CDPLanguage
@@ -288,7 +290,7 @@ def eval_PlusN(x, context, wants_constant):
 
             c_space = RcompUnits(pint_unit=constant.unit.units,
                                  string=constant.unit.string)
-            amap = MinusValueMap(F=F, c_value=-constant.value, c_space=c_space)
+            amap = MinusValueMap(P=F, c_value=-constant.value, c_space=c_space)
 
             setattr(amap, '__name__', '- %s' % (constant.unit.format(-constant.value)))
             dp = WrapAMap(amap)
@@ -298,6 +300,16 @@ def eval_PlusN(x, context, wants_constant):
                               res_prefix='_y')
             return r2
 
+class MinusValueDP(WrapAMap):
+    """ Give a positive constant here """
+    def __init__(self, F, c_value, c_space):
+        check_isinstance(F, Rcomp)
+        assert c_value > 0, c_value
+        amap = MinusValueMap(P=F, c_value=c_value, c_space=c_space)
+        amap_dual = PlusValueMap(F=F, c_value=c_value, c_space=c_space, R=F)
+        WrapAMap.__init__(self, amap, amap_dual)
+        
+        
 
 def eval_PlusN_(constants, resources, context):
     from .misc_math import plus_constantsN
@@ -371,29 +383,27 @@ def eval_PlusN_(constants, resources, context):
             c = plus_constantsN(constants)
             return get_plus_op(context, r=r, c=c)
 
+
+    
+        
 @contract(r=CResource, c=ValueWithUnits)
 def get_plus_op(context, r, c):
+    """ r + constant """
     rtype = context.get_rtype(r)
     
     T1 = rtype
     T2 = c.unit
 
     if isinstance(T1, Rcomp) and isinstance(T2, Rcomp):
-        amap = PlusValueRcompMap(c.value)
-        setattr(amap, '__name__', '+ %s' % (T2.format(c.value))) 
-        dp = WrapAMap(amap)
+        dp = PlusValueRcompDP(c.value)
     if isinstance(T1, Rcomp) and isinstance(T2, Nat):
         # cast Nat to Rcomp
-        amap = PlusValueRcompMap(float(c.value))
-        setattr(amap, '__name__', '+ %s' % (T2.format(c.value))) 
-        dp = WrapAMap(amap)
+        val = float(c.value)
+        dp = PlusValueRcompDP(val)
     elif isinstance(T1, RcompUnits) and isinstance(T2, RcompUnits):
-        amap = PlusValueMap(F=T1, c_value=c.value, c_space=T2, R=T1)
-        setattr(amap, '__name__', '+ %s' % (T2.format(c.value))) 
-        dp = WrapAMap(amap)
+        dp = PlusValueDP(F=T1, c_value=c.value, c_space=T2)
     elif isinstance(T1, Nat) and isinstance(T2, Nat):
-        amap = PlusNat(c.value)
-        dp = WrapAMap(amap)
+        dp = PlusValueNatDP(c.value)
     else:
         msg = 'Cannot create addition operation.'
         raise_desc(DPInternalError, msg, rtype=T1, c=c)
@@ -401,5 +411,4 @@ def get_plus_op(context, r, c):
     r2 = create_operation(context, dp, resources=[r],
                           name_prefix='_plus', op_prefix='_x',
                           res_prefix='_y')
-
     return r2

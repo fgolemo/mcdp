@@ -176,6 +176,7 @@ class CDPLanguage():
     geq = namedtuplewhere('geq', 'glyph')
     eq = namedtuplewhere('eq', 'glyph')
     plus = namedtuplewhere('plus', 'glyph')
+    minus = namedtuplewhere('minus', 'glyph')
     exponent = namedtuplewhere('exponent', 'glyph')
     times = namedtuplewhere('times', 'glyph')
     bar = namedtuplewhere('bar', 'glyph')
@@ -343,8 +344,8 @@ class CDPLanguage():
     AssertNonempty = namedtuplewhere('AssertNonempty', 'keyword value')
     AssertEmpty = namedtuplewhere('AssertEmpty', 'keyword value')
 
-
-    ConstantMinusConstant = namedtuplewhere('ConstantMinusConstant', 'c1 c2')
+    ConstantMinusConstant = namedtuplewhere('ConstantMinusConstant', 'c1 minus c2')
+    RvalueMinusConstant = namedtuplewhere('RvalueMinusConstant', 'r c')
 
     # ignore_resources(a, b) mcdp { }
     IgnoreResourcesKeyword = namedtuplewhere('IgnoreResourcesKeyword', 'keyword')

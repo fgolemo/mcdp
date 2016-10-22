@@ -8,6 +8,19 @@ from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct
 from mcdp_dp.dp_dummy import Template
 
+def PlusValueDP1():
+    from mcdp_dp import PlusValueDP
+    return PlusValueDP(2.1)
+
+def PlusValueRcompDP():
+    from mcdp_dp import PlusValueRcompDP
+    return PlusValueRcompDP(2.1)
+
+def PlusValueNatDP():
+    from mcdp_dp import PlusValueNatDP
+    return PlusValueNatDP(2)
+
+
 def CatalogueDP1():
     m1 = 'A'
     m2 = 'B'

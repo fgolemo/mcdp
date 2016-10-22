@@ -15,7 +15,6 @@ from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.solver import generic_solve
 from mcdp_dp.tracer import Tracer
 from mcdp_lang import parse_ndp
-from mcdp_lang.eval_math import PlusNat
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import assert_semantic_error
@@ -28,6 +27,7 @@ from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
 from reprep import Report
+from mcdp_maps.plus_nat import PlusValueNatMap
 
 
 def example():
@@ -686,7 +686,7 @@ def get_simple_equiv():
     s0 = Mux(F, 1)
     s1 = make_parallel(WrapAMap(RoundSqrt()), WrapAMap(RoundSqrt()))
     s2 = SumNNat((Nat(), Nat()), Nat())
-    s3 = WrapAMap(PlusNat(4))
+    s3 = WrapAMap(PlusValueNatMap(4))
     s4 = InvPlus2Nat(Nat(), (Nat(), Nat()))
     dp0 = wrap_series(s1.get_fun_space(), [s0, s1, s2, s3, s4])
     dp = DPLoop0(dp0)

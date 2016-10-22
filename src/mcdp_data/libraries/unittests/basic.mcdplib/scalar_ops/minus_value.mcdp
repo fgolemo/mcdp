@@ -1,6 +1,9 @@
 mcdp {
     provides f [R]
     requires r [R]
-    x = provided f
-    required r >= x - 1 dimensionless
+    required r >= rvalue_minus_constant(provided f, 1 dimensionless)
 }
+# r >= f - 1
+# f <= r + 1
+# r = 0 --> f <= 1
+# r = 0.1 --> f <= 1.1
