@@ -178,11 +178,12 @@ class ProductN(WrapAMap):
     @contract(Fs='tuple[>=2]')
     def __init__(self, Fs, R):
         amap = ProductNMap(Fs, R)
-        if len(Fs) == 2:
-            from mcdp_dp.dp_inv_mult import InvMult2
-            amap_dual = InvMult2(R, Fs)
-        else:
-            amap_dual = None
+#         if len(Fs) == 2:
+#             from mcdp_dp.dp_inv_mult import InvMult2
+#             amap_dual = InvMult2(R, Fs)
+#         else:
+        amap_dual = None
+
         WrapAMap.__init__(self, amap, amap_dual)
         
     
