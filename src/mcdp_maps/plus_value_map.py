@@ -72,7 +72,7 @@ class MinusValueRcompMap(Map):
         self.top = dom.get_top()
 
     def __repr__(self):
-        return "- %s" % self.dom.format(self.c_value)
+        return "- %s" % self.dom.format(self.c)
 
     def _call(self, x):
         P = self.dom
