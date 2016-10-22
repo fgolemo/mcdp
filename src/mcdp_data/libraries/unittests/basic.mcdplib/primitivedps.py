@@ -10,7 +10,10 @@ from mcdp_dp.dp_dummy import Template
 
 def PlusValueDP1():
     from mcdp_dp import PlusValueDP
-    return PlusValueDP(2.1)
+    F = parse_poset('J')
+    U = parse_poset('mJ')
+    v = 1000.0
+    return PlusValueDP(F, c_value=v, c_space=U)
 
 def PlusValueRcompDP():
     from mcdp_dp import PlusValueRcompDP

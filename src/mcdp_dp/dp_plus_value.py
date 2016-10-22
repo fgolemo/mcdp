@@ -18,6 +18,7 @@ class PlusValueDP(WrapAMap):
     """ RCompUnits """
     def __init__(self, F, c_value, c_space):
         check_isinstance(F, RcompUnits)
+        check_isinstance(c_space, RcompUnits)
         amap = PlusValueMap(F=F, c_value=c_value, c_space=c_space, R=F)
         #setattr(amap, '__name__', '+ %s' % (c_space.format(c_value)))
         amap_dual = MinusValueMap(P=F, c_value=c_value, c_space=c_space )
