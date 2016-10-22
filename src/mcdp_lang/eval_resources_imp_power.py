@@ -11,7 +11,7 @@ CDP = CDPLanguage
 class RcompUnitsPowerDP(WrapAMap):
     def __init__(self, F, num, den):
         amap = RCompUnitsPowerMap(F, num=num, den=den)
-        amap_dual = RCompUnitsPowerMap(F, num=den, den=num) # swap
+        amap_dual = RCompUnitsPowerMap(amap.get_codomain(), num=den, den=num) # swap
         WrapAMap.__init__(self, amap, amap_dual)
 
 def eval_rvalue_Power(rvalue, context):

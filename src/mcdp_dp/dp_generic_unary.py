@@ -35,6 +35,8 @@ class WrapAMap(EmptyDP):
             ( F == amap_dual.get_codomain())
             if not ok:
                 msg = 'Maps not compatible.'
+                msg += '\n h: %s -> %s' % (amap.get_domain(), amap.get_codomain())
+                msg += '\n h*: %s -> %s' % (amap_dual.get_domain(), amap_dual.get_codomain())
                 raise_desc(ValueError, msg, amap=amap, amap_dual=amap_dual)
             
         self.amap_dual = amap_dual
