@@ -23,7 +23,7 @@ __all__ = [
     r ∈ Uppersets(R₁): lower bound on the result.
     r_converged  ∈ Uppersets(R₁): which are minimal
 """
-KleeneIteration = namedtuple('Iteration', 's s_converged r r_converged')
+KleeneIteration = namedtuple('KleeneIteration', 's s_converged r r_converged')
 
 class DPLoop2(PrimitiveDP):
     """
