@@ -1,17 +1,18 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from mcdp_posets.rcomp import finfo
 from mcdp_posets import UpperSet
+from mcdp_posets.rcomp import finfo
+from mocdp import logger
 from mocdp.exceptions import mcdp_dev_warning
 import numpy as np 
 
-from mocdp import logger
+from .axis_algebra import enlarge_x, enlarge_y
+
 
 @contract(us=UpperSet)
 def plot_upset_R2(pylab, us, axis, color_shadow,
                   extra_space_shadow=0.05, color_lines='none', markers='r.',
                   marker_params={}):
-    from .generic_report_utils import enlarge_x, enlarge_y
 
     points = us.minimals
 
@@ -61,8 +62,6 @@ def plot_cone(pylab, p, axis, color_shadow, color_lines):
         facecolor=color_shadow,
         edgecolor='none',
     ))
-
-
 
     pylab.plot([p[0], p[0]], [p[1], ymax], '-', color=color_lines)
     pylab.plot([p[0], xmax], [p[1], p[1]], '-', color=color_lines)

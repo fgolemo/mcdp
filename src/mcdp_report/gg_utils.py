@@ -141,7 +141,7 @@ def gg_figure(r, name, ggraph, do_png=True, do_pdf=True, do_svg=True,
                         s = str(soup)
                         u = unicode(s, 'utf-8')
                         ff.write(u)
-        except CmdException as e:
+        except CmdException:
             if True:
                 mcdp_dev_warning('suppressing errors from graphviz')
                 logger.error('Graphivz failed')

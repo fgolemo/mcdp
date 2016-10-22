@@ -13,7 +13,7 @@ from contracts.utils import raise_desc, raise_wrapped
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.generic_report_utils import (
-    NotPlottable, enlarge, get_plotters, plotters)
+    NotPlottable, enlarge, get_plotters)
 from mcdp_report.html import ast_to_html, get_markdown_css
 from mcdp_web.images.images import (get_mime_for_format, ndp_graph_enclosed,
     ndp_graph_expand, ndp_graph_normal, ndp_graph_templatized)
@@ -21,6 +21,7 @@ from mocdp import ATTR_LOAD_NAME, logger
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from reprep import Report
 from system_cmd import CmdException, system_cmd_result
+from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters
 
 
 def bs(fragment):
@@ -129,7 +130,7 @@ def make_plots(library, frag, raise_errors, realpath):
         r = Report()
         f = r.figure()
         try:
-            available = dict(get_plotters(plotters, vu.unit))
+            available = dict(get_plotters(get_all_available_plotters(), vu.unit))
             assert available
         except NotPlottable as e:
             msg = 'No plotters available for %s' % vu.unit

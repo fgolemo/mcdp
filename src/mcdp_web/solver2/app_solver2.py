@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import cgi
+
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_cli.solve_meat import solve_meat_solve
 from mcdp_dp.dp_transformations import get_dp_bounds
@@ -7,13 +9,12 @@ from mcdp_lang.parse_interface import parse_constant
 from mcdp_posets import UpperSets
 from mcdp_posets.types_universe import (express_value_in_isomorphic_space,
     get_types_universe)
-from mcdp_report.generic_report_utils import get_best_plotter
 from mcdp_report.gg_ndp import format_unit
+from mcdp_report.plotters.get_plotters_imp import get_best_plotter
 from mcdp_web.utils import ajax_error_catch, memoize_simple, response_data
 from mocdp.exceptions import DPSyntaxError, mcdp_dev_warning
 from reprep import Report
 from reprep.plot_utils.axes import x_axis_extra_space, y_axis_extra_space
-import cgi
 
 
 class AppSolver2():

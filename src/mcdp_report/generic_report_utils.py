@@ -1,25 +1,19 @@
 # -*- coding: utf-8 -*-
-from abc import ABCMeta, abstractmethod
-import functools
 import os
-import traceback
 
-from contracts import contract
-from contracts.utils import indent, raise_desc, raise_wrapped
-from mcdp_posets import (NotLeq, PosetProduct, Rcomp, UpperSet, UpperSets,
-    get_types_universe)
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
-from mcdp_posets.rcomp import finfo
+from contracts.utils import raise_desc, raise_wrapped
+from mcdp_posets import  UpperSets
+from mcdp_report.axis_algebra import enlarge, join_axes
 from mcdp_report.movies import create_movie_from_png_sequence
+from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters, \
+    get_plotters
+from mcdp_report.plotters.interface import NotPlottable
 from mocdp import logger
 from mocdp.exceptions import DPInternalError
-import numpy as np
 from reprep.config import RepRepDefaults
 from reprep.plot_utils.styles import ieee_spines, ieee_fonts
 
-from .drawing import plot_upset_R2
-
-
+# XXX: floating constants
 extra_space_finite = 0.025
 extra_space_top = 0.05
 
@@ -77,7 +71,7 @@ def _report_loop_sequence(report, R, sips, converged, do_movie):
     figsize = (2, 2)
     
     try:
-        available_plotters = list(get_plotters(plotters, UR))
+        available_plotters = list(get_plotters(get_all_available_plotters(), UR))
     except NotPlottable as e:
         msg = 'Could not find plotter for space UR = %s.' % UR
         raise_wrapped(DPInternalError, e, msg , UR=UR, compact=True)
@@ -138,6 +132,8 @@ def generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0)):
     R = dp.get_res_space()
     UR = UpperSets(R)
 
+    plotters = get_all_available_plotters()
+    
     with r.subsection('S', caption='S') as rr:
         space = trace.S
         sequence = trace.get_s_sequence()
@@ -150,65 +146,12 @@ def generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0)):
         generic_try_plotters(rr, plotters, space, sequence, axis0=axis0,
                              annotation=annotation)
 
-def get_best_plotter(space):
-    p = list(get_plotters(plotters, space))
-    if not p:
-        msg = 'Could not find any plotter for space %s.' % space
-        raise_desc(ValueError, msg, space=space)
-        
-    return p[0][1]
 
-def get_plotters(plotters, space):
-    available = []
-    errors = []
-    for name, plotter in plotters.items():
-        try:
-            plotter.check_plot_space(space)
-            available.append((name, plotter))
-        except NotPlottable as e:
-            errors.append((name, e))
-    if available:
-        return available
-    msg = 'Could not find any plotter for space %s.' % space
-    msg += '\n None of these worked: %s' % plotters.keys()
-#     for name, e in errors:
-#         msg + '\n %s \n %s' % (name, indent(e, '  '))
-    msg += '\nTraceback:'
-    for name, e in errors:
-        msg += '\n%r:\n%s' % (name, indent(traceback.format_exc(e), '  '))
-    raise_desc(NotPlottable, msg)
-
-
-def generic_try_plotters(r, plotters, space, sequence,
-                         axis0=None, annotation=None):
-    nplots = 0
-    es = []
-    for name, plotter in plotters.items():
-        try:
-            plotter.check_plot_space(space)
-        except NotPlottable as e:
-            es.append(e)
-            # print('Plotter %r cannot plot %r:\n%s' % (name, space, e))
-            continue
-        nplots += 1
-
-        f = r.figure(name, cols=5)
-        generic_plot_sequence(f, plotter, space, sequence, axis0=axis0,
-                              annotation=annotation)
-
-    if not nplots:
-        r.text('error', 'No plotters for %s' % space +
-               '\n\n' + "\n".join(str(e) for e in es))
-
-
-def join_axes(a, b):
-    return (min(a[0], b[0]),
-            max(a[1], b[1]),
-            min(a[2], b[2]),
-            max(a[3], b[3]))
 
 
 def generic_plot(f, space, value):
+    plotters = get_all_available_plotters()
+
     es = []
     for name, plotter in plotters.items():
         try:
@@ -219,7 +162,6 @@ def generic_plot(f, space, value):
             continue
 
         axis = plotter.axis_for_sequence(space, [value])
-        print('axis for sequence: %s' % str(axis))
         axis = enlarge(axis, 0.15)
         print('enlarged:  %s' % str(axis))
         with f.plot(name) as pylab:
@@ -260,415 +202,25 @@ def generic_plot_sequence(r, plotter, space, sequence,
             if (axis[0] != axis[1]) or (axis[2] != axis[3]):
                 pylab.axis(axis)
 
-class NotPlottable(Exception):
-    pass
 
-class Plotter():
-    __metaclass__ = ABCMeta
-
-    @abstractmethod
-    def check_plot_space(self, space):
-        pass
-
-    @abstractmethod
-    @contract(returns='seq[4]')
-    def axis_for_sequence(self, space, seq):
-        pass
-
-    @abstractmethod
-    def plot(self, pylab, axis, space, value, params={}):
-        pass
-
-    def get_xylabels(self, _space):
-        return None, None
-
-class PlotterUR(Plotter):
-
-    @abstractmethod
-    def check_plot_space(self, space):
-        tu = get_types_universe()
-        if not isinstance(space, UpperSets):
-            msg = 'I can only plot upper sets of R.'
-            raise_desc(NotPlottable, msg, space=space)
-
-        R = Rcomp()
-        P = space.P
+def generic_try_plotters(r, plotters, space, sequence,
+                         axis0=None, annotation=None):
+    nplots = 0
+    es = []
+    for name, plotter in plotters.items():
         try:
-            tu.check_leq(P, R)
-        except NotLeq as e:
-            msg = ('cannot convert to R^2 from %s' % space)
-            raise_wrapped(NotPlottable, e, msg)
-
-        _f1, _f2 = tu.get_embedding(P, R)
-
-    def get_xylabels(self, space):
-        P = space.P
-        return '', '%s' % P
-
-    @contract(returns='seq[4]')
-    def axis_for_sequence(self, space, seq):
-        self.check_plot_space(space)
-
-        R = Rcomp()
-        tu = get_types_universe()
-        P_TO_S, _ = tu.get_embedding(space.P, R)
-
-        maxx, maxy = 1000.0, 1000.0
-        def limit(p):
-            x, y = p
-            x = min(x, maxx)
-            y = min(y, maxy)
-            return x, y
-
-        points2d = [[(limit(P_TO_S(_))) for _ in s.minimals] for s in seq]
-
-        axes = [get_bounds(_) for _ in points2d]
-        return enlarge(functools.reduce(reduce_bounds, axes), 0.1)
-
-    def toR2(self, p):
-        return self._get_screen_coords(p, self.axis)
-
-    def _get_screen_coords(self, p, axis=None):
-        x, y = p
-
-        if axis is not None:
-            dy = (axis[3] - axis[2]) * extra_space_top
-            dx = (axis[1] - axis[0]) * extra_space_top
-            top_x = axis[1] + dx
-            top_y = axis[3] + dy
-
-        if isinstance(x, (float, int)):
-            x = min(axis[1], x)
-        else:  # top
-            x = top_x
-        if isinstance(y, (float, int)):
-            y = min(axis[3], y)
-        else:  # top
-            y = top_y
-
-        p2 = x, y
-
-#         print('p: %s -> %s' % (p, p2))
-        return p2
-
-    def plot(self, pylab, axis, space, value, params={}):
-        params0 = dict(color_shadow=[1.0, 0.8, 0.8], markers='k.',
-                       markers_params={})
-        params0.update(params)
-
-        color_shadow = params0.pop('color_shadow')
-        markers = params0.pop('markers')
-        marker_params = params0.pop('marker_params')
-        if params0: 
-            raise ValueError(params0)
-        
-        self.axis = axis
-        self.check_plot_space(space)
-
-        minimals = [self._get_screen_coords(_, axis) for _ in value.minimals]
-
-        v = space.P.Us(minimals)
-
-        plot_upset_R2(pylab, v, axis, extra_space_shadow=extra_space_finite,
-                      color_shadow=color_shadow, markers=markers,
-                      marker_params=marker_params)
-
-class Plotter_Tuple2_UR2(Plotter):
-    """ Plots a tuple of ur2 as min/max bounds """
-    def __init__(self):
-        self.p = PlotterUR2()
-
-    def check_plot_space(self, space):
-        tu = get_types_universe()
-        if not (isinstance(space, PosetProduct) and len(space.subs) == 2):
-            msg = 'I can only plot 2-tuples of upper sets.'
-            raise_desc(NotPlottable, msg, space=space)
-
-        tu.check_equal(space[0], space[1])
-
-        try:
-            self.p.check_plot_space(space[0])
+            plotter.check_plot_space(space)
         except NotPlottable as e:
-            msg = 'It is a 2-tuple, but cannot plot inside. '
-            raise_wrapped(NotPlottable, e, msg, compact=True)
+            es.append(e)
+            # print('Plotter %r cannot plot %r:\n%s' % (name, space, e))
+            continue
+        nplots += 1
 
-    def axis_for_sequence(self, space, seq):
-        s = []
-        for a, b in seq:
-            s.append(a)
-            s.append(b)
-        P = space.subs[0]
-        return self.p.axis_for_sequence(P, s)
-    
-    def plot(self, pylab, axis, space, value, params={}):  # @UnusedVariable
-        v1, v2 = value
-        default_params = dict(color_shadow_L='#FFC35C',  # [1.0, 0.8, 0.8],
-                              color_shadow_U='#C390D4', #[0.8, 0.8, 1.0])
-                              )
-        default_params.update(params)
-        params1 = dict(color_shadow=default_params['color_shadow_L'], markers='k.')
-        params2 = dict(color_shadow=default_params['color_shadow_U'], markers='k.')
-        P = space.subs[0]
-        self.p.plot(pylab, axis, P, v1, params1)
-        self.p.plot(pylab, axis, P, v2, params2)
+        f = r.figure(name, cols=5)
+        generic_plot_sequence(f, plotter, space, sequence, axis0=axis0,
+                              annotation=annotation)
 
-class PlotterUR2(Plotter):
+    if not nplots:
+        r.text('error', 'No plotters for %s' % space +
+               '\n\n' + "\n".join(str(e) for e in es))
 
-    def check_plot_space(self, space):
-        tu = get_types_universe()
-        if not isinstance(space, UpperSets):
-            msg = 'I can only plot upper sets.'
-            raise_desc(NotPlottable, msg, space=space)
-
-        R2 = PosetProduct((Rcomp(), Rcomp()))
-        P = space.P
-        logger.debug('space = %s ; P = %s; R2 = %s' % (space,space.P,R2))
-        try:
-            tu.check_leq(P, R2)
-        except NotLeq as e:
-            msg = ('cannot convert to R^2 from %s' % space)
-            logger.debug(msg)
-            logger.debug(e)
-            raise_wrapped(NotPlottable, e, msg)
-
-        logger.debug('ok')
-        _f1, _f2 = tu.get_embedding(P, R2)
-
-    def get_xylabels(self, space):
-        P = space.P
-        return '%s' % P[0], '%s' % P[1]
-
-    @contract(returns='seq[4]')
-    def axis_for_sequence(self, space, seq):
-        self.check_plot_space(space)
-
-        R2 = PosetProduct((Rcomp(), Rcomp()))
-        tu = get_types_universe()
-        P_TO_S, _ = tu.get_embedding(space.P, R2)
-
-        maxx, maxy = 1000.0, 1000.0
-        def limit(p):
-            x, y = p
-            x = min(x, maxx)
-            y = min(y, maxy)
-            return x, y
-
-        points2d = [[(limit(P_TO_S(_))) for _ in s.minimals] for s in seq]
-
-        axes = [get_bounds(_) for _ in points2d]
-        return enlarge(functools.reduce(reduce_bounds, axes), 0.1)
-
-    def toR2(self, p):
-        return self._get_screen_coords(p, self.axis)
-
-    def _get_screen_coords(self, p, axis=None):
-        x, y = p
-
-        if axis is not None:
-            dy = (axis[3] - axis[2]) * extra_space_top
-            dx = (axis[1] - axis[0]) * extra_space_top
-            top_x = axis[1] + dx
-            top_y = axis[3] + dy
-
-        if isinstance(x, (float, int)):
-            x = min(axis[1], x)
-        else:  # top
-            x = top_x
-        if isinstance(y, (float, int)):
-            y = min(axis[3], y)
-        else:  # top
-            y = top_y
-
-        p2 = x, y
-
-#         print('p: %s -> %s' % (p, p2))
-        return p2
-
-    def plot(self, pylab, axis, space, value, params={}):
-        params0 = dict(color_shadow=[1.0, 0.8, 0.8], markers='k.',
-                       markers_params={}) 
-        params0.update(params)
-
-        color_shadow = params0.pop('color_shadow')
-        markers = params0.pop('markers')
-        markers_params = params0.pop('markers_params')
-        if params0:
-            msg = 'Extra parameters given.'
-            raise_desc(ValueError, msg, params0=params0)
-
-        self.axis = axis
-        self.check_plot_space(space)
-
-        minimals = [self._get_screen_coords(_, axis) for _ in value.minimals]
-
-        minimals = poset_minima(minimals, space.P.leq)
-        v = space.P.Us(minimals)
-
-        plot_upset_R2(pylab, v, axis, extra_space_shadow=extra_space_finite,
-                      color_shadow=color_shadow, markers=markers,
-                      marker_params=markers_params)
-
-
-# Upsets((R[s]×R[s])×R[s])
-class PlotterURRpR(Plotter):
-    def __init__(self):
-        R = Rcomp()
-        self.S = PosetProduct((PosetProduct((R, R)), R))
-
-    @abstractmethod
-    def toR2(self, z):
-        pass
-
-    def check_plot_space(self, space):
-        tu = get_types_universe()
-        if not isinstance(space, UpperSets):
-            msg = 'I can only plot upper sets.'
-            raise_desc(NotPlottable, msg, space=space)
-
-        P = space.P
-        try:
-            tu.check_leq(P, self.S)
-        except NotLeq as e:
-            msg = ('cannot convert from %s to %s' % (P, self.S))
-            raise_wrapped(NotPlottable, e, msg)
-
-        _f1, _f2 = tu.get_embedding(P, self.S)
-
-    @contract(returns='seq[4]')
-    def axis_for_sequence(self, space, seq):
-        self.check_plot_space(space)
-
-        tu = get_types_universe()
-        P_TO_S, _ = tu.get_embedding(space.P, self.S)
-
-        points2d = [[self.toR2(P_TO_S(_)) for _ in s.minimals] for s in seq]
-        axes = [get_bounds(_) for _ in points2d]
-        return enlarge(functools.reduce(reduce_bounds, axes), 0.1)
-
-
-    def plot(self, pylab, axis, space, value, params={}):
-        params0 = dict(color_shadow=[1.0, 0.8, 0.8], markers='k.',
-                       markers_params={})
-        params0.update(params)
-        color_shadow = params0['color_shadow']
-        markers = params0['markers']
-        markers_params = params0['markers_params']
-        
-        self.check_plot_space(space)
-        tu = get_types_universe()
-        P_TO_S, _ = tu.get_embedding(space.P, self.S)
-
-        points2d = [self.toR2(P_TO_S(_)) for _ in value.minimals]
-
-        R2 = PosetProduct((Rcomp(), Rcomp()))
-
-
-        class MyUpperSet(UpperSet):
-
-            def __init__(self, minimals, P):
-                self.minimals = frozenset(minimals)
-                self.P = P
-
-
-        v = MyUpperSet(points2d, P=R2)
-        plot_upset_R2(pylab, v, axis,
-                      color_shadow=color_shadow, markers=markers,
-                      marker_params=markers_params)
-        # for p in points2d:
-        #    pylab.plot(p[0], p[1], 'rx')
-
-class PlotterURRpR_12(PlotterURRpR):
-
-    def toR2(self, z):
-        (a, b), _ = z
-        return (a, b)
-
-class PlotterURRpR_13(PlotterURRpR):
-
-    def toR2(self, z):
-        (a, _), c = z
-        return (a, c)
-
-class PlotterURRpR_23(PlotterURRpR):
-
-    def toR2(self, z):
-        (_, b), c = z
-        return (b, c)
-
-
-def enlarge_x(b, f):
-    w = b[1] - b[0]
-    # h = b[3] - b[2]
-    dw = f * w
-    dh = 0
-    return (b[0] - dw, b[1] + dw, b[2] - dh, b[3] + dh)
-
-def enlarge_y(b, f):
-    # w = b[1] - b[0]
-    h = b[3] - b[2]
-    dw = 0
-    dh = h * f
-    return (b[0] - dw, b[1] + dw, b[2] - dh, b[3] + dh)
-
-@contract(b='seq[4](float|int)', f='float,>=0')
-def enlarge(b, f):
-    w = b[1] - b[0]
-    h = b[3] - b[2]
-    # print b, f, w, h
-    dw = fix_underflow(f) * fix_underflow(w)
-    dh = fix_underflow(h) * fix_underflow(f)
-
-    a = (b[0] - dw, b[1] + dw, b[2] - dh, b[3] + dh)
-    return tuple(map(fix_underflow, a))
-
-
-def fix_underflow(x):
-    # using finfo.tiny gives problems to matplotlib
-    return np.maximum(x, finfo.eps)
-
-
-def enlarge_topright(b, f):
-    w = b[1] - b[0]
-    h = b[3] - b[2]
-    dw = f * w
-    dh = h * f
-    return (b[0], b[1] + dw, b[2], b[3] + dh)
-
-def reduce_bounds(b1, b2):
-    return (min(b1[0], b2[0]),
-            max(b1[1], b2[1]),
-            min(b1[2], b2[2]),
-            max(b1[3], b2[3]))
-
-def get_bounds(points):
-    if not points:
-        return (0, 0, 0, 0)
-    xs = [p[0] for p in points]
-    ys = [p[1] for p in points]
-    return (min_comp(xs, 0.0),
-            max_comp(xs, 0.0),
-            min_comp(ys, 0.0),
-            max_comp(ys, 0.0))
-
-def _get_finite(xs):
-    return  [_ for _ in xs if isinstance(_, (int, float))]
-
-def max_comp(xs, d):
-    xs = _get_finite(xs)
-    if not xs:
-        return d
-    return max(xs)
-
-def min_comp(xs, d):
-    xs = _get_finite(xs)
-    if not xs:
-        return d
-    return min(xs)
-
-plotters = {
-       'UR2': PlotterUR2(),
-         'Tuple2_UR2': Plotter_Tuple2_UR2(),
-        'URRpR_12': PlotterURRpR_12(),
-        'URRpR_13': PlotterURRpR_13(),
-        'URRpR_23': PlotterURRpR_23(),
-}
