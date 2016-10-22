@@ -51,11 +51,12 @@ class SumNDP(WrapAMap):
     
     def __init__(self, Fs, R):
         amap = SumNMap(Fs, R)
-        if len(Fs) == 2:
-            from mcdp_dp.dp_inv_plus import InvPlus2
-            amap_dual = InvPlus2(R, Fs)
-        else:
-            amap_dual = None
+#         if len(Fs) == 2:
+#             from mcdp_dp.dp_inv_plus import InvPlus2
+#             amap_dual = InvPlus2(R, Fs)
+#         else:
+#         
+        amap_dual = None
         WrapAMap.__init__(self, amap, amap_dual)
 #         
 #     
