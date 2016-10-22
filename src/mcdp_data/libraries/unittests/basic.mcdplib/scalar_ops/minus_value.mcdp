@@ -1,0 +1,6 @@
+mcdp {
+    provides f [R]
+    requires r [R]
+    x = provided f
+    required r >= x - 1 dimensionless
+}

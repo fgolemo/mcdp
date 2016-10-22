@@ -61,7 +61,7 @@ class MinusValueMap(Map):
     """ 
         Implements _ -> _ - c
         
-        with c a negative constant.
+        (with c a positive constant.)
         
         It is not defined for x <= c. 
     """
@@ -88,7 +88,8 @@ class MinusValueMap(Map):
         else:
             if self.F.leq(x, self.c):
             # undefined
-                raise MapNotDefinedHere('%s < %s' % (self.F.format(x), self.F.format(self.c)))
+                msg = '%s < %s' % (self.F.format(x), self.F.format(self.c))
+                raise MapNotDefinedHere(msg)
             else:
                 if self.F.equal(self.top, x):
                     return self.top
