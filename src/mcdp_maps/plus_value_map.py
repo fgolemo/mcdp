@@ -54,6 +54,8 @@ class PlusValueRcompMap(Map):
         return "+ %s" % self.dom.format(self.c_value)
 
     def _call(self, x):
+        if is_top(self.dom, x):
+            return self.cod.get_top()
         mcdp_dev_warning('overflow/underflow')
         return x + self.c_value
 
