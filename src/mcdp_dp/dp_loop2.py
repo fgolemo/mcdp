@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
-import itertools
+from collections import namedtuple
 
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mcdp_posets import (LowerSet, NotEqual, NotLeq, PosetProduct, UpperSet,
     UpperSets, get_types_universe, poset_maxima, poset_minima)
+from mcdp_posets.uppersets import upperset_project
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import do_extra_checks
 
-from .dp_loop import Iteration
 from .primitive import Feasible, NotFeasible, PrimitiveDP
 from .tracer import Tracer
 
@@ -16,6 +16,14 @@ __all__ = [
     'DPLoop2',
 ]
 
+"""
+    s ∈ Uppersets(R): internal state of iteration
+    converged ∈ Uppersets(R): which ones have converged
+    
+    r ∈ Uppersets(R₁): lower bound on the result.
+    r_converged  ∈ Uppersets(R₁): which are minimal
+"""
+KleeneIteration = namedtuple('Iteration', 's s_converged r r_converged')
 
 class DPLoop2(PrimitiveDP):
     """
@@ -206,78 +214,64 @@ class DPLoop2(PrimitiveDP):
         return trace.result(self._solve_cache[f1])
     
     def solve_all(self, f1, trace):
-        """ Returns ur1, ur """
-        
-        F1 = self.F1
-        R1 = self.R1
-        R2 = self.R2
-        R = self.dp1.R
+        """ Returns an upperset in UR. You want to project
+            it to R1 to use as the output. """
         dp0 = self.dp1
-
-        if do_extra_checks():
-            F1.belongs(f1)
-
+        R = dp0.get_res_space()
+        R1 = R[0]
         UR = UpperSets(R)
-
-        trace.values(type='loop2', UR=UR, R=R, dp=self)
 
         # we consider a set of iterates
         # we start from the bottom
-        zeros = R2.get_minimal_elements()
-        minimals = set(itertools.product((f1,), zeros))
-        f0s = dp0.F.Us(minimals)
-        s0 = dp0.solveU(f0s)
-        UR.belongs(s0)
         trace.log('Iterating in UR = %s' % UR.__str__())
-        trace.log('Starting from %s' % UR.format(s0))
-        # trace.log('dp0: %s' % self.dp1.repr_long())
-
-        with trace.iteration(0) as t:
-            t.values(sip=UR.get_bottom(), converged=R.Us(set()))
+        
+        s0 = R.Us(R.get_minimal_elements()) 
+        S = [KleeneIteration(s=s0, s_converged=R.Us(set()),
+                                r=upperset_project(s0, 0),
+                                r_converged=R1.Us(set()))]
             
-        with trace.iteration(1) as t:
-            t.values(sip=s0, converged=R.Us(set()))
+        for i in range(1, 1000000):  # XXX
+            with trace.iteration(i) as t:
+                si_prev = S[-1].s
+                si_next, converged = dploop2_iterate(dp0, f1, R, si_prev, t)
+                iteration = KleeneIteration(s=si_next, 
+                                            s_converged=converged,
+                                            r=upperset_project(si_next, 0),
+                                            r_converged=upperset_project(converged, 0))
+                S.append(iteration)
                 
-        S = [Iteration(s=s0, converged=R.Us(set()))]
-        for i in range(1000000):  # XXX
-            with trace.iteration(i+2) as t:
-                si = S[-1].s
-
-                sip, converged = dploop2_iterate(dp0, f1, R, si, t)
-
-                t.values(sip=sip, converged=converged)
-                t.log('R = %s' % UR.format(sip))
-                #   t.log('converged = %s' % UR.format(converged))
+                t.log('R = %s' % UR.format(si_next))
 
                 if do_extra_checks():
                     try:
-                        UR.check_leq(si, sip)
+                        UR.check_leq(si_prev, si_next)
                     except NotLeq as e:
                         msg = 'Loop iteration invariant not satisfied.'
-                        raise_wrapped(Exception, e, msg, si=si, sip=sip, dp=self.dp1)
+                        raise_wrapped(Exception, e, msg, si_prev=si_prev, 
+                                      si_next=si_next, dp=self.dp1)
+                
+                t.values(state=S[-1])
 
-                S.append(Iteration(s=sip, converged=converged))
-
-                if UR.leq(sip, si):
+                if UR.leq(si_next, si_prev):
                     t.log('Breaking because converged (iteration %s) ' % i)
-                    t.log(' solution is %s' % (UR.format(sip)))
+                    #t.log(' solution is %s' % (UR.format(sip)))
+                    # todo: add reason why interrupted
                     break
 
+        trace.values(type='loop2', UR=UR, R=R, dp=self, iterations=S)
+        
         res_all = S[-1].s
-        t.values(num_iterations=i)
-
-        trace.log('res_all: %s' % UR.format(res_all))
-        # todo: project_upperset
-        res_r1 = R1.Us(poset_minima([r1 for (r1, _) in res_all.minimals], leq=R1.leq))
-        return dict(res_all=res_all, res_r1=res_r1)
+        res_r1 = upperset_project(res_all, 0)
+        result = dict(res_all=res_all, res_r1=res_r1)
+        
+        return result
 
 
 def dploop2_iterate(dp0, f1, R, S, trace):
     """ 
     
         Returns the next iteration  si \in UR 
-    
-    
+
         Min ( h(f1, r20) \cup  !r20 ) 
         
     """
@@ -290,21 +284,10 @@ def dploop2_iterate(dp0, f1, R, S, trace):
     # find the set of all r2s
 
     for ra in S.minimals:
-        # what are the results of solve(f1, f2)?
         hr = dp0.solve_trace((f1, ra[1]), trace)
 
-        # print('(f1,r2)=(%s,%s)' % (f1, r2))
-        # print('| -> %s ' % hr)
-
         for rb in hr.minimals:
-            valid = R.leq(ra, rb)
-#             valid = R1.leq(r1, r1b)
-#             
-#             valid2 = R2.leq(r2, r2b)
-#             if valid and (not valid2):
-#                 # indeed we can get here
-#                 # raise Exception()
-#                 pass
+            valid = R.leq(ra, rb) 
 
             if valid:
                 nextit.add(rb)

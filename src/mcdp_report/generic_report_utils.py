@@ -10,23 +10,22 @@ from mcdp_posets import (NotLeq, PosetProduct, Rcomp, UpperSet, UpperSets,
     get_types_universe)
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
 from mcdp_posets.rcomp import finfo
+from mcdp_report.movies import create_movie_from_png_sequence
 from mocdp import logger
-from mocdp.exceptions import DPInternalError, mcdp_dev_warning
+from mocdp.exceptions import DPInternalError
 import numpy as np
 from reprep.config import RepRepDefaults
 from reprep.plot_utils.styles import ieee_spines, ieee_fonts
 
 from .drawing import plot_upset_R2
-from .utils import safe_makedirs
 
 
 extra_space_finite = 0.025
 extra_space_top = 0.05
 
-
 def generic_report_trace(r, ndp, dp, trace, out, do_movie=False):  # @UnusedVariable
-    r.text('dp', dp.repr_long())
-    # r.text('trace', trace.format())
+#     r.text('dp', dp.repr_long())
+
     nloops = 0
     for l, trace_loop in enumerate(trace.find_loops()):
         nloops += 1
@@ -36,27 +35,56 @@ def generic_report_trace(r, ndp, dp, trace, out, do_movie=False):  # @UnusedVari
         raise_desc(DPInternalError, 'There is no iteration; no movie available.')
         
 def _report_loop(r, trace_loop, out, do_movie=True):
+    # list of KleeneIteration
+    iterations = trace_loop.get_value1('iterations')
+    R = trace_loop.get_value1('R')
+    R1 = R[0] 
+
+    sips = [_.s for _ in iterations]
+    converged = [_.s_converged for _ in iterations]
+    rs = [_.r for _ in iterations]
+    rs_converged = [_.r_converged for _ in iterations]
+
+    with r.subsection('rs') as r2:
+        sequences = _report_loop_sequence(r2, R1, rs, rs_converged, do_movie=do_movie)
+
+        if do_movie:
+            for name, sequence in sequences.items():                
+                outmp4 = os.path.join(out, 'video-r-%s.mp4' % name)
+                create_movie_from_png_sequence(sequence, outmp4)
+
+    with r.subsection('sip') as r2:
+        sequences = _report_loop_sequence(r2, R, sips, converged, do_movie=do_movie)
+
+        if do_movie:
+            for name, sequence in sequences.items():                
+                outmp4 = os.path.join(out, 'video-s-%s.mp4' % name)
+                create_movie_from_png_sequence(sequence, outmp4)
+    
+ 
+def _report_loop_sequence(report, R, sips, converged, do_movie):
+    """
+        Returns a dictionary dict(str: list of png data)
+    """
+    sequences = {}
+    
+    UR = UpperSets(R)
     from matplotlib import pylab
     ieee_fonts(pylab)
-    RepRepDefaults.savefig_params = dict(dpi=400, 
-                                         bbox_inches='tight', pad_inches=0.01,
-                                         transparent=True)
+    RepRepDefaults.savefig_params = dict(dpi=400, bbox_inches='tight', 
+                                         pad_inches=0.01, transparent=False)
 
     figsize = (2, 2)
-    sips = list(trace_loop.get_iteration_values('sip'))
-    converged = list(trace_loop.get_iteration_values('converged'))
     
-    UR = trace_loop.get_value1('UR')
-    R = trace_loop.get_value1('R')
-
     try:
         available_plotters = list(get_plotters(plotters, UR))
     except NotPlottable as e:
         msg = 'Could not find plotter for space UR = %s.' % UR
         raise_wrapped(DPInternalError, e, msg , UR=UR, compact=True)
     
-    with r.subsection('sip') as r2:
+    with report.subsection('sip') as r2:
         for name, plotter in available_plotters:
+            sequences[name] = [] # sequence of png
             f = r2.figure(name, cols=5)
 
             axis = plotter.axis_for_sequence(UR, sips)
@@ -67,32 +95,25 @@ def _report_loop(r, trace_loop, out, do_movie=True):
             axis[1] = min(axis[1], 1000.0)
             axis[3] = min(axis[3], 1000.0)
             axis = tuple(axis)
-            RepRepDefaults.savefig_params['transparent'] = False
-
-            outdir = os.path.join(out, 'video-%s' % name)
 
             visualized_axis = enlarge(axis, extra_space_top * 2)
-#             print('Decided on axis %s' % str(axis))
+
             for i, sip in enumerate(sips):
                 with f.plot('step%03d' % i, figsize=figsize) as pylab:
-                    print('Step %d' % i)
+                    logger.debug('Plotting iteration %d/%d' % (i, len(sips)))
                     ieee_spines(pylab)
                     c_orange = '#FFA500'
                     c_red = [1, 0.5, 0.5]
-                    # plotting bottom (all in red
                     plotter.plot(pylab, axis, UR, R.U(R.get_bottom()),
                                  params=dict(color_shadow=c_red, markers=None))
-                    #print('sip:\n  %s' % sip)
                     marker_params = dict(markersize=5, markeredgecolor='none')
                     plotter.plot(pylab, axis, UR, sip,
                                  params=dict(color_shadow=c_orange,
                                              markers_params=marker_params))
                     conv = converged[i]
                     c_blue = [0.6, 0.6, 1.0]
-                    #print('converged:\n  %s' % conv)
                     plotter.plot(pylab, axis, UR, conv,
                                  params=dict(color_shadow=c_blue))
-                    #print('minimal')
                     
                     for c in conv.minimals:
                         p = plotter.toR2(c)
@@ -105,62 +126,11 @@ def _report_loop(r, trace_loop, out, do_movie=True):
                     set_axis_colors(pylab, color_resources, color_resources)
 
                 if do_movie:
-
                     node = f.resolve_url('step%03d/png' % i)
+                    png = node.raw_data
+                    sequences[name].append(png)
 
-                    safe_makedirs(outdir)
-                    fn = os.path.join(outdir, '%05d.png' % i)
-                    with open(fn, 'w') as fi:
-                        fi.write(node.raw_data)
-
-            if do_movie:
-                outmp4 = os.path.join(out, 'video-%s.mp4' % name)
-
-                try:
-                    import procgraph_mplayer  # @UnusedImport
-                
-#                     from procgraph_mplayer.scripts.join_video import join_video_29
-                except ImportError as e:
-                    logger.error('Cannot use Procgraph to create video.')
-                    logger.error(e)
-                    logger.info('The frames are in the directory %s' % outdir)
-                else:
-                    join_video_29_fixed(output=outmp4, dirname=outdir,
-                                        pattern='.*.png', fps=1.0)
-
-
-mcdp_dev_warning('add this to the procgraph repository')
-
-
-def join_video_29_fixed(output, dirname, pattern, fps):
-    """ 
-        Note that the pattern is a Python regex:
-        
-        pg-video-join -d anim-simple/ -p '*.png' -o anim-simple-collate.mp4 --fps 1 
-        
-    """
-    from procgraph.core.registrar_other import register_model_spec
-    from procgraph import pg
-
-    register_model_spec("""
---- model join_video_helper_29
-config output
-config dirname
-config pattern
-config images_per_second
-
-|files_from_dir dir=$dirname regexp=$pattern fps=$images_per_second| \
---> |imread_rgb| \
---> |fix_frame_rate fps=29.97| \
---> |mencoder quiet=1 file=$output timestamps=0|
-    
-    """)
-    params = dict(dirname=dirname, 
-                  pattern=pattern, 
-                  output=output,
-                  images_per_second=fps)
-    pg('join_video_helper_29', params)
-
+    return sequences
 
 
 def generic_report(r, dp, trace, annotation=None, axis0=(0, 0, 0, 0)):
@@ -238,8 +208,6 @@ def join_axes(a, b):
             max(a[3], b[3]))
 
 
-
-
 def generic_plot(f, space, value):
     es = []
     for name, plotter in plotters.items():
@@ -251,7 +219,9 @@ def generic_plot(f, space, value):
             continue
 
         axis = plotter.axis_for_sequence(space, [value])
-        # axis = enlarge(axis, 0.15)
+        print('axis for sequence: %s' % str(axis))
+        axis = enlarge(axis, 0.15)
+        print('enlarged:  %s' % str(axis))
         with f.plot(name) as pylab:
             plotter.plot(pylab, axis, space, value, params={})
             pylab.axis(axis)

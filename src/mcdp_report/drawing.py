@@ -3,16 +3,9 @@ from contracts import contract
 from mcdp_posets.rcomp import finfo
 from mcdp_posets import UpperSet
 from mocdp.exceptions import mcdp_dev_warning
-import numpy as np
-# 
-# 
-# def plot_upset_minima(pylab, us):
-#     points = us.minimals
-# 
-#     # write once for axis
-#     for p in points:
-#         pylab.plot(p[0], p[1], 'k.', clip_on=False)
+import numpy as np 
 
+from mocdp import logger
 
 @contract(us=UpperSet)
 def plot_upset_R2(pylab, us, axis, color_shadow,
@@ -33,9 +26,11 @@ def plot_upset_R2(pylab, us, axis, color_shadow,
             if p[1] == ymax:
                 axis = enlarge_y(axis, extra_space_shadow)
 
-
             plot_cone(pylab, p, axis, color_shadow=color_shadow,
                       color_lines=color_lines)
+        else:
+            logger.debug('Warning: point %s not in axis %s' % (p, axis))
+            
     # cuteness
     if markers is not None:
         for p in points:
