@@ -23,20 +23,20 @@ class WrapAMap(EmptyDP):
     @contract(amap=Map)
     def __init__(self, amap, amap_dual=None):
         check_isinstance(amap, Map)
-        if amap_dual is not None:
-            check_isinstance(amap_dual, Map)
             
         F = amap.get_domain()
         R = amap.get_codomain()
         check_isinstance(F, Poset)
         check_isinstance(R, Poset)
         
-        ok = ( R == amap_dual.get_domain()) and \
-        ( F == amap_dual.get_codomain())
-        if not ok:
-            msg = 'Maps not compatible.'
-            raise_desc(ValueError, msg, amap=amap, amap_dual=amap_dual)
-        
+        if amap_dual is not None:
+            check_isinstance(amap_dual, Map)
+            ok = ( R == amap_dual.get_domain()) and \
+            ( F == amap_dual.get_codomain())
+            if not ok:
+                msg = 'Maps not compatible.'
+                raise_desc(ValueError, msg, amap=amap, amap_dual=amap_dual)
+            
         self.amap_dual = amap_dual
         self.amap = amap
         EmptyDP.__init__(self, F=F, R=R)
