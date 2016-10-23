@@ -274,10 +274,18 @@ def report(data):
     
     
 def get_num_iterations(trace):
-    v = list(trace.rec_get_value('num_iterations'))
-    if not isinstance(v, list) and len(v) == 1:
-        raise ValueError(v)
-    return v[0]
+    loops = list(trace.find_loops())
+    if len(loops) != 1: 
+        msg = 'I expected to find only one loop.'
+        raise_desc(ValueError, msg, loops=loops)
+
+
+    loop = loops[0]
+    
+    # list of KleeneIteration
+    iterations = loop.get_value1('iterations')
+    return len(iterations)
+        
 
 
 class DroneUnc2(QuickApp):

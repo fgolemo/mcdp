@@ -44,7 +44,7 @@ class SumNMap(Map):
         return res
     
     def __repr__(self):
-        return 'SumNMap(%s -> %s)' % (self.dom, self.cod)
+        return 'SumNMap(%s → %s)' % (self.dom, self.cod)
     
     
 class SumNDP(WrapAMap):
@@ -58,31 +58,9 @@ class SumNDP(WrapAMap):
 #         
         amap_dual = None
         WrapAMap.__init__(self, amap, amap_dual)
-#         
-#     
-# class SumN_old(EmptyDP):
-#     """ Sum of real values with units. """
-#     @contract(Fs='tuple, seq[>=2]($RcompUnits)', R=RcompUnits)
-#     def __init__(self, Fs, R):
-#         for _ in Fs:
-#             check_isinstance(_, RcompUnits)
-#         check_isinstance(R, RcompUnits)
-#         self.Fs = Fs
-# 
-#         # todo: check dimensionality
-#         F = PosetProduct(self.Fs)
-#         R = R
-# 
-#         EmptyDP.__init__(self, F=F, R=R)
-#         sum_dimensionality_works(Fs, R)
-# 
-#     def solve(self, func):
-#         # self.F.belongs(func)
-#         res = sum_units(self.Fs, func, self.R)
-#         return self.R.U(res)
-# 
-#     def __repr__(self):
-#         return 'SumN(%s -> %s)' % (self.F, self.R)
+        self.Fs = Fs
+    
+ 
 
 class SumNRcompMap(Map):
     """ Sum of Rcomp. """

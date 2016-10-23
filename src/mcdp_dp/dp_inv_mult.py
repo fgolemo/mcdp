@@ -56,7 +56,7 @@ class InvMult2(ApproximableDP):
         return InvMult2U(self.F, self.Rs, n)
 
     def __repr__(self):
-        return 'InvMult2(%s -> %s)' % (self.F, self.R)
+        return 'InvMult2(%s → %s)' % (self.F, self.R)
 
 
 class InvMult2U(PrimitiveDP):
@@ -240,7 +240,6 @@ def generate_exp_van_der_corput_sequence(n, C=1.0, mapping_function=None):
     """
     if C <= 0.0: # pragma: no cover
         raise_desc(ValueError, 'Need positive C, got %r.' % C)
-
 
     from .dp_inv_plus import van_der_corput_sequence
     v = np.array(van_der_corput_sequence(n))
