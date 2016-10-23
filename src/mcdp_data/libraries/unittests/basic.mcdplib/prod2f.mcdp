@@ -1,0 +1,7 @@
+mcdp  {
+    provides f1 [R]
+    provides f2 [R]
+    requires r  [R]
+
+    required r >= provided f1 * provided f2
+}
