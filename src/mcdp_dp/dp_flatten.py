@@ -67,16 +67,30 @@ class TakeFun(WrapAMap):
         Only used for having an appropriate icon (one red, many green)
     """
     def __init__(self, F, coords):
+        # Note that these always correspond to the identity!
+        # Let's check
+        n = len(coords)
+        assert list(range(n)) == coords, coords
+        
         amap = MuxMap(F, coords)
-        WrapAMap.__init__(self, amap)
+        amap_dual = MuxMap(F, coords)
+        
+        WrapAMap.__init__(self, amap, amap_dual)
 
 
 class TakeRes(WrapAMap):
     """ Used by Context.ifun_get_index.
         Only used for having an appropriate icon (one green, many red). """
     def __init__(self, F, coords):
+        # Note that these always correspond to the identity!
+        # Let's check
+        n = len(coords)
+        assert list(range(n)) == coords, coords
+        
         amap = MuxMap(F, coords)
-        WrapAMap.__init__(self, amap)
+        amap_dual = MuxMap(F, coords)
+        
+        WrapAMap.__init__(self, amap, amap_dual)
 
 
 def get_R_from_F_coords(F, coords):

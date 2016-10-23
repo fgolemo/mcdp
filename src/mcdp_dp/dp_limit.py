@@ -12,7 +12,15 @@ __all__ = [
 ]
 
 class Limit(PrimitiveDP):
-
+    """
+        Checks that f ≼ value
+        
+        f ⟼   {⟨⟩},  if f ≼ value
+                ø,    otherwise
+        
+        h* : ⟨⟩  ⟼ {value}
+                
+    """
     @contract(F='$Poset')
     def __init__(self, F, value):
         F.belongs(value)
@@ -30,15 +38,16 @@ class Limit(PrimitiveDP):
 
     def solve(self, f):
         if self.F.leq(f, self.limit):
-            res = UpperSet(set([()]), self.R)
-            # print('returning res %s' % res)
+            res = self.R.U(())
             return res
         else:
-            mcdp_dev_warning('Alternative is to use Top; think about it')
-            empty = UpperSet(set(), self.R)
-            # print('returning empty %s' % empty)
+            empty = self.R.Us(set())
             return empty
-
+        
+    def solve_r(self, r):
+        assert r == ()
+        return self.F.L(self.limit)
+        
     def __repr__(self):
         return 'Limit(%s, %s)' % (self.F, self.F.format(self.limit))
 
@@ -72,6 +81,10 @@ class LimitMaximals(PrimitiveDP):
         res = UpperSet(set([()]), self.R)
         return res
 
+    def solve_r(self, r):
+        assert r == ()
+        return self.limit
+    
     def __repr__(self):
         s = len(self.limit.maximals)
         return 'LimitMaximals(%s, %s els)' % (self.F, s)
