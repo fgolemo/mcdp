@@ -4,5 +4,5 @@ mcdp  {
     requires r3 [R]
     provides f  [R]
 
-    provided f <= required r1  + required r2 + required r3
+    provided f <= required r1 + required r2 + required r3
 }

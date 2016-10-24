@@ -51,7 +51,6 @@ def dp_graph_tree(dp0, imp=None, compact=False):
     add_leaf_text = not compact
     add_junction_text = not compact
 
-
     def go(dp, imp):
         """ Each of these must return a node """
         if isinstance(dp, Series0):

@@ -19,7 +19,6 @@ extra_space_top = 0.05
 
 def generic_report_trace(r, ndp, dp, trace, out, do_movie=False):  # @UnusedVariable
 #     r.text('dp', dp.repr_long())
-
     nloops = 0
     for l, trace_loop in enumerate(trace.find_loops()):
         nloops += 1

@@ -6,6 +6,7 @@ from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 import numpy as np
 
 from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
+from mcdp_posets.poset import is_top
 
 
 _ = Nat, Poset
@@ -54,16 +55,14 @@ class InvPlus2(ApproximableDP):
     def get_lower_bound(self, n):
         F = self.F
         Rs = self.Rs
-        dp = InvPlus2L(F, Rs, n)
-        # preserve_dp_attributes(self, dp)
+        dp = InvPlus2L(F, Rs, n) 
         return dp
 
     @contract(n='int,>=0')
     def get_upper_bound(self, n):
         F = self.F
         Rs = self.Rs
-        dp = InvPlus2U(F, Rs, n)
-        # preserve_dp_attributes(self, dp)
+        dp = InvPlus2U(F, Rs, n) 
         return dp
 
     def get_implementations_f_r(self, f, r):  # @UnusedVariable
@@ -154,7 +153,7 @@ class InvPlus2U(PrimitiveDP):
 
     def solve(self, f):
 
-        if self.F.equal(f, self.F.get_top()):
+        if is_top(self.F, f):
             # +infinity
             top1 = self.R[0].get_top()
             top2 = self.R[1].get_top()

@@ -5,10 +5,9 @@ from mcdp_dp import InvMult2, InvPlus2, InvPlus2Nat
 from mcdp_dp import JoinNDualDP, MeetNDualDP
 from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table,
     poset_maxima)
-from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import CFunction, get_name_for_res_node
 from mocdp.exceptions import (DPInternalError, DPNotImplementedError,
-    DPSemanticError)
+    DPSemanticError, mcdp_dev_warning)
 
 from .helpers import (get_function_possibly_converted,
     create_operation_lf)
@@ -32,23 +31,7 @@ def eval_lfunction(lf, context):
         if isinstance(lf, CDP.Function):
             return context.make_function(dp=lf.dp.value, s=lf.s.value)
 
-        if isinstance(lf, CDP.InvMult):
-            return eval_lfunction_invmult(lf, context)
-
-        if isinstance(lf, CDP.InvPlus):
-            return eval_lfunction_invplus(lf, context)
-
-        if isinstance(lf, CDP.NewResource):
-            return eval_lfunction_newresource(lf, context)
-
-        if isinstance(lf, CDP.MakeTuple):
-            from .eval_lfunction_imp_maketuple import eval_MakeTuple_as_lfunction
-            return eval_MakeTuple_as_lfunction(lf, context)
-
         from mocdp.comp.context import ValueWithUnits
-
-        if isinstance(lf, CDP.VariableRef):
-            return eval_lfunction_variableref(lf, context)
 
         constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
                      CDP.Top, CDP.Bottom, CDP.Minimals, CDP.Maximals)
@@ -59,11 +42,14 @@ def eval_lfunction(lf, context):
             assert isinstance(res, ValueWithUnits)
             return get_valuewithunits_as_function(res, context)
         
-        from mcdp_lang.eval_uncertainty import eval_lfunction_Uncertain
-        from mcdp_lang.eval_lfunction_imp_label_index import eval_lfunction_label_index
-
-        from mcdp_lang.eval_lfunction_imp_label_index import eval_lfunction_tupleindexfun
+        from .eval_lfunction_imp_maketuple import eval_MakeTuple_as_lfunction
+        from .eval_uncertainty import eval_lfunction_Uncertain
+        from .eval_lfunction_imp_label_index import eval_lfunction_label_index
+        from .eval_lfunction_imp_label_index import eval_lfunction_tupleindexfun
+        
         cases = {
+            CDP.NewResource: eval_lfunction_newresource,
+            CDP.MakeTuple: eval_MakeTuple_as_lfunction,
             CDP.UncertainFun: eval_lfunction_Uncertain,
             CDP.DisambiguationFun: eval_lfunction_disambiguation,
             CDP.FunctionLabelIndex: eval_lfunction_label_index,
@@ -71,6 +57,9 @@ def eval_lfunction(lf, context):
             CDP.AnyOfFun: eval_lfunction_anyoffun,
             CDP.OpMinF: eval_lfunction_opminf,
             CDP.OpMaxF: eval_lfunction_opmaxf,
+            CDP.InvMult: eval_lfunction_invmult,
+            CDP.InvPlus: eval_lfunction_invplus,
+            CDP.VariableRef: eval_lfunction_variableref,
         }
 
         for klass, hook in cases.items():
@@ -173,8 +162,6 @@ def eval_lfunction_variableref(lf, context):
 
 def eval_lfunction_invplus(lf, context):
     ops = get_odd_ops(unwrap_list(lf.ops))
-    if len(ops) != 2: # pragma: no cover
-        raise DPInternalError('Only 2 expected')
 
     fs = []
 
@@ -182,75 +169,71 @@ def eval_lfunction_invplus(lf, context):
         fi = eval_lfunction(op_i, context)
         fs.append(fi)
 
-    assert len(fs) == 2
+    return eval_lfunction_invplus_ops(fs, context)
 
-    Fs = map(context.get_ftype, fs)
-    R = Fs[0]
-
-    if all(isinstance(_, RcompUnits) for _ in Fs):
-        
-        tu = get_types_universe()
-        if not tu.leq(Fs[1], Fs[0]):
-            msg = 'Inconsistent units %s and %s.' % (Fs[1], Fs[0])
-            raise_desc(DPSemanticError, msg, Fs0=Fs[0], Fs1=Fs[1])
-
-        if not tu.equal(Fs[1], Fs[0]):
-            msg = 'This case was not implemented yet. Differing units %s and %s.' % (Fs[1], Fs[0])
-            raise_desc(DPNotImplementedError, msg, Fs0=Fs[0], Fs1=Fs[1])
-        
-        dp = InvPlus2(R, tuple(Fs))
-        
-    elif all(isinstance(_, Nat) for _ in Fs):
-        dp = InvPlus2Nat(R, tuple(Fs))
-    else: # pragma: no cover
-        msg = 'Cannot find operator for mixed values'
-        raise_desc(DPInternalError, msg, Fs=Fs)
+def eval_lfunction_invplus_ops(fs, context):
     
-    # TODO: use create_operation_lf
-    ndp = dpwrap(dp, '_input', ['_f0', '_f1'])
-
-    name = context.new_name('_invplus')
-    context.add_ndp(name, ndp)
-
-    c1 = Connection(dp2=fs[0].dp, s2=fs[0].s, dp1=name, s1='_f0')
-    c2 = Connection(dp2=fs[1].dp, s2=fs[1].s, dp1=name, s1='_f1')
-    context.add_connection(c1)
-    context.add_connection(c2)
-
-    res = context.make_function(name, '_input')
-    return res
+    if len(fs) == 1:
+        raise DPInternalError(fs)
+    elif len(fs) > 2: # pragma: no cover
+        mcdp_dev_warning('Maybe this should be smarter?')
+        
+        rest = eval_lfunction_invplus_ops(fs[1:], context)
+        return eval_lfunction_invplus_ops( [fs[0], rest], context) 
+    else:   
+            
+        Fs = map(context.get_ftype, fs)
+        R = Fs[0]
+    
+        if all(isinstance(_, RcompUnits) for _ in Fs):
+            
+            tu = get_types_universe()
+            if not tu.leq(Fs[1], Fs[0]):
+                msg = 'Inconsistent units %s and %s.' % (Fs[1], Fs[0])
+                raise_desc(DPSemanticError, msg, Fs0=Fs[0], Fs1=Fs[1])
+    
+            if not tu.equal(Fs[1], Fs[0]):
+                msg = 'This case was not implemented yet. Differing units %s and %s.' % (Fs[1], Fs[0])
+                raise_desc(DPNotImplementedError, msg, Fs0=Fs[0], Fs1=Fs[1])
+            
+            dp = InvPlus2(R, tuple(Fs))
+            
+        elif all(isinstance(_, Nat) for _ in Fs):
+            dp = InvPlus2Nat(R, tuple(Fs))
+        else: # pragma: no cover
+            msg = 'Cannot find operator for mixed values'
+            raise_desc(DPInternalError, msg, Fs=Fs)
+        
+        return create_operation_lf(context, dp=dp, functions=fs,
+                               name_prefix='_invplus', op_prefix='_',
+                                res_prefix='_result') 
 
 def eval_lfunction_invmult(lf, context):
     ops = get_odd_ops(unwrap_list(lf.ops))
-    if len(ops) != 2: # pragma: no cover
-        raise DPInternalError('Only 2 expected')
-
     fs = []
-
     for op_i in ops:
         fi = eval_lfunction(op_i, context)
         fs.append(fi)
 
-    assert len(fs) == 2
+    return eval_lfunction_invmult_ops(fs, context)
 
-    Fs = map(context.get_ftype, fs)
-    R = mult_table(Fs[0], Fs[1])
-
-
-    dp = InvMult2(R, tuple(Fs))
-    # TODO: use create_operation_lf
-    ndp = dpwrap(dp, '_input', ['_f0', '_f1'])
-
-    name = context.new_name('_invmult')
-    context.add_ndp(name, ndp)
-
-    c1 = Connection(dp2=fs[0].dp, s2=fs[0].s, dp1=name, s1='_f0')
-    c2 = Connection(dp2=fs[1].dp, s2=fs[1].s, dp1=name, s1='_f1')
-    context.add_connection(c1)
-    context.add_connection(c2)
-
-    res = context.make_function(name, '_input')
-    return res
+def eval_lfunction_invmult_ops(fs, context):
+    if len(fs) == 1:
+        raise DPInternalError(fs)
+    elif len(fs) > 2: # pragma: no cover
+        mcdp_dev_warning('Maybe this should be smarter?')
+        
+        rest = eval_lfunction_invmult_ops(fs[1:], context)
+        return eval_lfunction_invmult_ops( [fs[0], rest], context) 
+    else:   
+        Fs = map(context.get_ftype, fs)
+        R = mult_table(Fs[0], Fs[1])
+    
+        dp = InvMult2(R, tuple(Fs))
+        
+        return create_operation_lf(context, dp=dp, functions=fs,
+                        name_prefix='_invmult', op_prefix='_ops',
+                        res_prefix='_result') 
 
 def eval_lfunction_newresource(lf, context):
     rname = lf.name

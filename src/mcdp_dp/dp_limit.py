@@ -53,6 +53,15 @@ class Limit(PrimitiveDP):
 
 class LimitMaximals(PrimitiveDP):
 
+    """
+        
+        h: f ⟼ {⟨⟩},  if f \in \downarrow values
+                ø,    otherwise
+        
+        h* : ⟨⟩  ⟼ values
+                
+    """
+    
     @contract(F='$Poset', values='seq|set')
     def __init__(self, F, values):
         if do_extra_checks():

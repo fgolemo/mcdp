@@ -2,7 +2,9 @@
 import functools
 
 from contracts import contract
-from contracts.utils import check_isinstance, raise_wrapped
+from contracts.utils import check_isinstance, raise_wrapped, raise_desc
+from mcdp_dp.primitive import NotSolvableNeedsApprox, ApproximableDP,\
+    PrimitiveDP
 from mcdp_posets import Map, Nat, PosetProduct, Rcomp, RcompUnits
 from mcdp_posets.poset import is_top
 from mocdp.exceptions import mcdp_dev_warning
@@ -47,10 +49,13 @@ class SumNMap(Map):
         return 'SumNMap(%s → %s)' % (self.dom, self.cod)
     
     
-class SumNDP(WrapAMap):
-    
+class SumNDP(WrapAMap, ApproximableDP):
+    """
+        f1, f2, f3 -> f1 + f2 +f3
+    """
     def __init__(self, Fs, R):
         amap = SumNMap(Fs, R)
+        
 #         if len(Fs) == 2:
 #             from mcdp_dp.dp_inv_plus import InvPlus2
 #             amap_dual = InvPlus2(R, Fs)
@@ -59,8 +64,64 @@ class SumNDP(WrapAMap):
         amap_dual = None
         WrapAMap.__init__(self, amap, amap_dual)
         self.Fs = Fs
+        self.R = R
     
- 
+    def solve_r(self, r):  # @UnusedVariable
+        if len(self.Fs) > 2:
+            msg = 'Cannot invert more than two terms.'
+            raise_desc(NotImplementedError, msg) 
+        raise NotSolvableNeedsApprox()
+    
+    def get_lower_bound(self, n):
+        return Sum2LDP(self.Fs, self.R, n)
+
+    def get_upper_bound(self, n):
+        return Sum2UDP(self.Fs, self.R, n)
+
+
+class Sum2LDP():
+    """
+        f1, f2, f3 -> f1 + f2 +f3
+        r -> ((a,b) | a + b = r}
+    """
+    def __init__(self, Fs, R, n):
+        assert len(Fs) == 2
+        self.n = n
+        
+        F = PosetProduct(Fs)
+        M = PosetProduct((F, R))
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
+        
+    def solve(self, f):
+        from mcdp_dp.dp_inv_plus import InvPlus2
+        from mcdp_dp.dp_inv_plus import van_der_corput_sequence
+        
+        if is_top(self.F, f):
+            # +infinity
+            top1 = self.R[0].get_top()
+            top2 = self.R[1].get_top()
+            s = set([(top1, 0.0), (0.0, top2)])
+            return self.R.Us(s)
+
+        n = self.n
+        
+        if InvPlus2.ALGO == InvPlus2.ALGO_VAN_DER_CORPUT:
+            options = van_der_corput_sequence(n)
+        elif InvPlus2.ALGO == InvPlus2.ALGO_UNIFORM:
+            options = np.linspace(0.0, 1.0, n)
+        else:
+            assert False, InvPlus2.ALGO
+
+        s = set()
+        for o in options:
+            s.add((f * o, f * (1 - o)))
+        return self.R.Us(s)
+
+    def solve_f(self, f):
+        f1, f2 = f
+        minr = self.F.add(f1, f2)
+        return self.R.U(minr)
+
 
 class SumNRcompMap(Map):
     """ Sum of Rcomp. """
