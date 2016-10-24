@@ -3,8 +3,7 @@ import functools
 
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped, raise_desc
-from mcdp_dp.primitive import NotSolvableNeedsApprox, ApproximableDP,\
-    PrimitiveDP
+from mcdp_dp.primitive import NotSolvableNeedsApprox, ApproximableDP
 from mcdp_posets import Map, Nat, PosetProduct, Rcomp, RcompUnits
 from mcdp_posets.poset import is_top
 from mocdp.exceptions import mcdp_dev_warning
@@ -55,6 +54,8 @@ class SumNDP(WrapAMap, ApproximableDP):
     """
     def __init__(self, Fs, R):
         amap = SumNMap(Fs, R)
+#         for Fi in Fs:
+#             if not 
         
 #         if len(Fs) == 2:
 #             from mcdp_dp.dp_inv_plus import InvPlus2
@@ -67,32 +68,51 @@ class SumNDP(WrapAMap, ApproximableDP):
         self.R = R
     
     def solve_r(self, r):  # @UnusedVariable
-        if len(self.Fs) > 2:
-            msg = 'Cannot invert more than two terms.'
-            raise_desc(NotImplementedError, msg) 
         raise NotSolvableNeedsApprox()
     
     def get_lower_bound(self, n):
-        return Sum2LDP(self.Fs, self.R, n)
+        return SumNLDP(self.Fs, self.R, n)
 
-    def get_upper_bound(self, n):
-        return Sum2UDP(self.Fs, self.R, n)
+    def get_upper_bound(self, n): 
+        return SumNUDP(self.Fs, self.R, n)
 
-
-class Sum2LDP():
+class SumNUDP(WrapAMap):
     """
         f1, f2, f3 -> f1 + f2 +f3
         r -> ((a,b) | a + b = r}
     """
     def __init__(self, Fs, R, n):
-        assert len(Fs) == 2
         self.n = n
+        amap = SumNMap(Fs, R)
+        WrapAMap.__init__(self, amap)
         
-        F = PosetProduct(Fs)
-        M = PosetProduct((F, R))
-        PrimitiveDP.__init__(self, F=F, R=R, I=M)
+    def solve_r(self, f):
         
-    def solve(self, f):
+#         if len(self.Fs) > 2:
+#             msg = 'Cannot invert more than two terms.'
+#             raise_desc(NotImplementedError, msg)
+
+        raise NotImplementedError()
+    
+    
+class SumNLDP(WrapAMap):
+    """
+        f1, f2, f3 -> f1 + f2 +f3
+        r -> ((a,b) | a + b = r}
+    """
+    def __init__(self, Fs, R, n):
+        self.n = n
+        amap = SumNMap(Fs, R)
+        WrapAMap.__init__(self, amap)
+        
+    def solve_r(self, f):
+        
+#         if len(self.Fs) > 2:
+#             msg = 'Cannot invert more than two terms.'
+#             raise_desc(NotImplementedError, msg)
+
+        raise NotImplementedError()
+     
         from mcdp_dp.dp_inv_plus import InvPlus2
         from mcdp_dp.dp_inv_plus import van_der_corput_sequence
         
@@ -117,10 +137,6 @@ class Sum2LDP():
             s.add((f * o, f * (1 - o)))
         return self.R.Us(s)
 
-    def solve_f(self, f):
-        f1, f2 = f
-        minr = self.F.add(f1, f2)
-        return self.R.U(minr)
 
 
 class SumNRcompMap(Map):
@@ -225,8 +241,6 @@ class ProductN(WrapAMap):
         amap_dual = None
 
         WrapAMap.__init__(self, amap, amap_dual)
-        
-    
 
 
 class ProductNatN(Map):

@@ -2,11 +2,11 @@
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
 from mcdp_posets import Nat, Poset, PosetProduct, RcompUnits, get_types_universe
+from mcdp_posets.poset import is_top
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 import numpy as np
 
 from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
-from mcdp_posets.poset import is_top
 
 
 _ = Nat, Poset
