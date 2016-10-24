@@ -63,18 +63,22 @@ def CoProductDPLabels1():
     return CoProductDPLabels(dp, labels)
 
 def Mux1():
+    """ a -> a """
     F = parse_poset('Nat')
     coords = ()
     return Mux(F, coords)
 
 def Mux2():
-    F = parse_poset('Nat x Nat')
+    """ <a> -> a """
+    P0 = parse_poset('Nat')
+    F = PosetProduct((P0,))
     coords = 0
     return Mux(F, coords)
 
 def Mux3():
+    """ a -> <a> """
     F = parse_poset('Nat')
-    coords = [(),()]
+    coords = [()]
     return Mux(F, coords)
  
 def Identity1():
