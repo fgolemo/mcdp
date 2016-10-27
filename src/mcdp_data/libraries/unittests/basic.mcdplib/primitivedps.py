@@ -83,7 +83,7 @@ def Mux3():
 
 def Mux4():
     """ <a, <b, c> > -> < <a, b>, c> """
-    F = parse_poset('J x m x Hz')
+    F = parse_poset('J x (m x Hz)')
     coords = [ [0, (1, 0)], (1,1)]
     return Mux(F, coords)
 
@@ -92,8 +92,9 @@ def Mux5():
 
         <a, *> -> a
     """
+    N = parse_poset('Nat')
     One = PosetProduct(())
-    P = PosetProduct(Nat(), One)
+    P = PosetProduct(N, One)
     coords = 0
     return Mux(F, coords)
 
