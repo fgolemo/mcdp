@@ -2,7 +2,7 @@
 import functools
 
 from contracts import contract
-from contracts.utils import check_isinstance, raise_wrapped, raise_desc
+from contracts.utils import check_isinstance, raise_wrapped
 from mcdp_dp.primitive import NotSolvableNeedsApprox, ApproximableDP
 from mcdp_posets import Map, Nat, PosetProduct, Rcomp, RcompUnits
 from mcdp_posets.poset import is_top

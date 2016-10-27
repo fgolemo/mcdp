@@ -1,0 +1,8 @@
+mcdp  {
+    provides f1 [Nat]
+    provides f2 [Nat]
+    provides f3 [Nat]
+    requires r  [Nat]
+
+    required r >= provided f1  + provided f2 + provided f3
+}

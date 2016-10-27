@@ -20,6 +20,7 @@ from mcdp_posets import UpperSets
 #     ny = len(np.unique(y))
 #     print(ny)
 #     assert 25 <= ny <= 30
+
 @comptest
 def check_approximation3():
     # TODO: move in syntax

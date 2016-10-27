@@ -25,6 +25,9 @@ class OpaqueDP(PrimitiveDP):
     def solve(self, f):
         return self.dp.solve(f)
 
+    def solve_r(self, r):
+        return self.dp.solve_r(r)
+
     def evaluate(self, i):
         return self.dp.evaluate(i)
 

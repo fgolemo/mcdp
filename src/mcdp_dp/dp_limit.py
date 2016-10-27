@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-from .primitive import PrimitiveDP
 from contracts import contract
 from mcdp_posets import LowerSet, NotBelongs, Poset, PosetProduct, UpperSet
-from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
+from mocdp.exceptions import do_extra_checks
+
+from .primitive import PrimitiveDP
+
 
 _ = Poset
 

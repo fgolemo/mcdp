@@ -17,6 +17,7 @@ from mcdp_posets.maps.coerce_to_int import CoerceToInt
 from mcdp_maps.map_composition import MapComposition
 from mcdp_dp.primitive import PrimitiveDP
 from mcdp_posets.space import Map
+from mcdp_dp.dp_series_simplification import wrap_series
 
 
 CDP = CDPLanguage
@@ -76,6 +77,36 @@ class SquareNatDP(WrapAMap):
          
         WrapAMap.__init__(self, amap, amap_dual)
         
+
+class PromoteToFloatDP(WrapAMap):
+    def __init__(self, F, R):
+        amap = PromoteToFloat(F, R)
+        amap_dual = CoerceToInt(R, F)
+        WrapAMap.__init__(self, amap, amap_dual)
+    
+class CoerceToIntDP(WrapAMap):
+    def __init__(self, F, R):
+        amap = CoerceToInt(F, R)
+        amap_dual = PromoteToFloat(R, F)
+        WrapAMap.__init__(self, amap, amap_dual)
+        
+def CeilSqrtNat():
+    
+    # promote to float
+    # take sqrt
+    # make ceil
+    # coerce
+    R = Rcomp()
+    N = Nat()
+    dps = (
+        PromoteToFloatDP(N, R),
+        SqrtRDP(R),
+        CeilDP(R),
+        CoerceToIntDP(R, N),
+    )
+    return wrap_series(N, dps)
+        
+    
 class SquareDP(WrapAMap):
     def __init__(self, F):
         amap = SquareMap(F)
@@ -134,6 +165,8 @@ def get_unary_rules():
         Rule('square', is_Nat, None, lambda _: SquareNatDP()), 
         Rule('square', is_Rcomp, None, lambda F: SquareDP(F)), 
         Rule('square', is_RcompUnits, None, lambda F: SquareDP(F)), 
+
+        Rule('ceilsqrt', is_Nat, None, lambda _: CeilSqrtNat()), 
 
         Rule('ceil', is_Nat, None, lambda _: IdentityMap(Nat(), Nat()), warn='ceil() used on Nats'), 
         Rule('ceil', is_Rcomp, None, lambda _: CeilDP(Rcomp())), 

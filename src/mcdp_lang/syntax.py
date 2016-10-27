@@ -117,6 +117,7 @@ class SyntaxIdentifiers():
         'solve',
         'solve_r',
         'solve_f',
+        'ceilsqrt',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -689,7 +690,7 @@ class Syntax():
                                                                 fvalue=t[0], label=t[2]))
 
 
-    unary = ['sqrt', 'ceil', 'square', 'floor']
+    unary = ['sqrt',  'ceilsqrt', 'ceil', 'square', 'floor']
     
     unary_op = MatchFirst([sp(L(x), lambda t: CDP.ProcName(t[0]))
                            for x in unary])

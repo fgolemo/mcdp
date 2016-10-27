@@ -2,6 +2,8 @@
 from contracts import contract
 from mcdp_posets import Map, Space
 from mcdp_posets.poset import is_top
+from mocdp.exceptions import DPInternalError
+from contracts.utils import raise_wrapped
 
 
 __all__ = [
@@ -18,5 +20,10 @@ class PromoteToFloat(Map):
 
     def _call(self, x):
         if is_top(self.dom, x):
-            return self.cod.get_top() 
-        return float(x)
+            return self.cod.get_top()
+        try: 
+            return float(x)
+        except BaseException as e:
+            msg = 'Internal error in PromoteToFloat.'
+            raise_wrapped(DPInternalError, e, msg, x=x)
+            
