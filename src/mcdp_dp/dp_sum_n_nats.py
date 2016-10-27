@@ -24,9 +24,9 @@ class SumNNat(WrapAMap):
         amap = SumNatsN(self.n)
         WrapAMap.__init__(self, amap)
 
-    def solve_r(self, r):
-        
-        
+#     def solve_r(self, r):
+#         
+#         
         
     def __repr__(self):
         return 'SumNNat(%s)' % (self.n)
