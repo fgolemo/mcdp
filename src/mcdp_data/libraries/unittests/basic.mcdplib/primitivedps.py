@@ -96,7 +96,7 @@ def Mux5():
     One = PosetProduct(())
     P = PosetProduct((N, One))
     coords = 0
-    return Mux(F, coords)
+    return Mux(P, coords)
 
  
 def Identity1():
