@@ -94,7 +94,7 @@ def Mux5():
     """
     N = parse_poset('Nat')
     One = PosetProduct(())
-    P = PosetProduct(N, One)
+    P = PosetProduct((N, One))
     coords = 0
     return Mux(F, coords)
 
