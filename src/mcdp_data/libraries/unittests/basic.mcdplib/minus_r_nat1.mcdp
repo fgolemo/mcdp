@@ -1,0 +1,6 @@
+mcdp {
+    provides f [Nat]
+    requires r [Nat]
+
+    required r - Nat:2 >= provided f 
+}

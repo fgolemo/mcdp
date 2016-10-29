@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from mocdp import logger
 from mcdp_dp import MultValueMap, ProductNatN, ProductN, SumNNat, WrapAMap, sum_dimensionality_works, SumNRcompMap
 from mcdp_dp.dp_plus_value import PlusValueRcompDP, PlusValueDP, PlusValueNatDP
 from mcdp_dp.dp_sum import SumNDP
@@ -9,7 +10,7 @@ from mcdp_maps import PlusValueMap
 from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits, Space,
     express_value_in_isomorphic_space, get_types_universe, mult_table, Rcomp)
 from mocdp.comp.context import CResource, ValueWithUnits
-from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
 
 from .eval_constant_imp import NotConstant
 from .eval_resources_imp import eval_rvalue
@@ -51,14 +52,20 @@ def eval_constant_minus(op, context):
     for c in constants[1:]:
         vi = express_value_in_isomorphic_space(c.unit, c.value, R0)
 
-        if v0 < vi:
-            msg = 'Underflow: %s - %s gives a negative number' % (c.unit.format(v0), c.unit.format(vi))
-            raise_desc(DPSemanticError, msg)
+#         if v0 < vi:
+#             msg = 'Underflow: %s - %s gives a negative number' % (c.unit.format(v0), c.unit.format(vi))
+#             raise_desc(DPSemanticError, msg)
 
+        mcdp_dev_warning('Fix: how about Top?')
         v0 = v0 - vi
 
-    return ValueWithUnits(unit=R0, value=v0)
-
+    if v0 < 0:
+        R1 = RbicompUnits.from_rcompunits(R0)
+    else:
+        R1 = R0
+        
+    return ValueWithUnits(unit=R1, value=v0)
+    
 @contract(unit1=Space, unit2=Space)
 def convert_vu(value, unit1, unit2, context):  # @UnusedVariable
     tu = get_types_universe()
@@ -239,6 +246,7 @@ def get_mult_op(context, r, c):
 
 
 def flatten_plusN(ops):
+    """ Flattens recursively nested CDP.PlusN operators """
     res = []
     for op in ops:
         if isinstance(op, CDP.PlusN):
@@ -247,14 +255,12 @@ def flatten_plusN(ops):
             res.append(op)
     return res
 
-def eval_PlusN(x, context, wants_constant):
-    """ Raises NotConstant if wants_constant is True. """
+def eval_PlusN_sort_ops(ops, context, wants_constant):
+    """
+            pos_constants, neg_constants, resources = sort_ops(ops, context)
+    """
     from .eval_constant_imp import eval_constant
 
-    assert isinstance(x, CDP.PlusN)
-    assert len(x.ops) > 1
-
-    ops = flatten_plusN(get_odd_ops(unwrap_list(x.ops)))
     pos_constants = []
     neg_constants = []
     resources = []
@@ -279,12 +285,29 @@ def eval_PlusN(x, context, wants_constant):
             x = eval_rvalue(op, context)
             assert isinstance(x, CResource)
             resources.append(x)
+            
+    return pos_constants, neg_constants, resources
 
-    # first, sum together all the constants
+def eval_PlusN(x, context, wants_constant):
+    """ Raises NotConstant if wants_constant is True. """
+    assert isinstance(x, CDP.PlusN)
+    assert len(x.ops) > 1
 
+    # ops as a list
+    ops_list = get_odd_ops(unwrap_list(x.ops))
+    
+    # First, we flatten all operators
+    ops = flatten_plusN(ops_list)
+    
+    # Then we divide in positive constants, negative constants, and resources.
+    pos_constants, neg_constants, resources = \
+        eval_PlusN_sort_ops(ops, context, wants_constant)
+    
+    # first, sum the positive constants and the resources
     res = eval_PlusN_(pos_constants, resources, context)
 
     if not neg_constants:
+        # If there are no negative constants, we are done
         return res
     else:
         if len(neg_constants) > 1:
@@ -299,10 +322,10 @@ def eval_PlusN(x, context, wants_constant):
 
             c_space = RcompUnits(pint_unit=constant.unit.units,
                                  string=constant.unit.string)
-            amap = MinusValueMap(P=F, c_value=-constant.value, c_space=c_space)
-
-            setattr(amap, '__name__', '- %s' % (constant.unit.format(-constant.value)))
-            dp = WrapAMap(amap)
+#             amap = MinusValueMap(P=F, c_value=-constant.value, c_space=c_space)
+#             logger.debug('MinusValueMap created here')
+#             setattr(amap, '__name__', '- %s' % (constant.unit.format(-constant.value)))
+            dp = MinusValueDP(F=F, c_value=-constant.value, c_space=c_space)
 
             r2 = create_operation(context, dp, resources=[res],
                               name_prefix='_minus', op_prefix='_x',

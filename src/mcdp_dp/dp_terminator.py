@@ -9,15 +9,26 @@ __all__ = [
 ]
 
 class Terminator(PrimitiveDP):
-    """ Terminates a line """
+    """ AKA "True"
+    
+        f |-> True
+        
+        () |-> Top
+    """
 
     def __init__(self, F):
         R = PosetProduct(())
         I = SpaceProduct(())
         PrimitiveDP.__init__(self, F=F, R=R, I=I)
 
-    def solve(self, func):  # @UnusedVariable
+    def solve(self, f):  # @UnusedVariable
         return UpperSet([()], self.R)
+    
+    def solve_r(self, r):
+        assert r == ()
+        maximals = self.F.get_maximal_elements()
+        lf = LowerSet(maximals, self.F)
+        return lf
     
     def evaluate(self, m):
         assert m == ()

@@ -112,6 +112,7 @@ class RcompUnits(Rcomp):
 mcdp_dev_warning('(!) Need to create plenty of checks for this Rbicomb.')
 
 class RbicompUnits(Rbicomp):
+    """ [-inf, inf] """
 
     def __init__(self, pint_unit, string):
         if do_extra_checks():
@@ -125,6 +126,11 @@ class RbicompUnits(Rbicomp):
         assert u == self.units, (self.units, u, string)
 
         self.units_formatted = format_pint_unit_short(self.units)
+    
+    @staticmethod
+    def from_rcompunits(P):
+        check_isinstance(P, RcompUnits)
+        return RbicompUnits(pint_unit=P.units, string=P.string)
 
     @memoize_simple
     def __repr__(self):
