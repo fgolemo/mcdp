@@ -10,6 +10,7 @@ from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
 
 from .dp_generic_unary import WrapAMap
+from mcdp_posets.rcomp import Rcomp_multiply_upper_topology
 
 
 #
@@ -262,6 +263,7 @@ class ProductNatN(Map):
                     return True
             return False
 
+        # XXX: this is also wrong, possibly
         if is_there_a_top():
             return self.R.get_top()
         
@@ -275,23 +277,40 @@ class ProductNatN(Map):
 
 
 class MultValueMap(Map):
-    """ multiplies by <value> """
-    """ Implements _ -> _ * x on RCompUnits """
-    def __init__(self, F, R, value):
+    """ 
+        Multiplies by <value>.
+        Implements _ -> _ * x on RCompUnits with the upper topology
+        constraint (⊤ * 0 = 0 * ⊤ = 0)
+    """
+    def __init__(self, F, R, unit, value):
+        check_isinstance(unit, RcompUnits)
         check_isinstance(F, RcompUnits)
         check_isinstance(R, RcompUnits)
         dom = F
         cod = R
         self.value = value
+        self.unit = unit
         Map.__init__(self, dom=dom, cod=cod)
 
-    def _call(self, x):
-        if is_top(self.dom, x):
-            return self.cod.get_top()
-
-        res = x * self.value
-
-        if bool(np.isfinite(res)):
-            return res
+    def diagram_label(self):
+        from mcdp_posets.rcomp_units import format_pint_unit_short
+        if is_top(self.unit, self.value):
+            label = '× %s' % self.unit.format(self.value)
         else:
-            return self.cod.get_top() 
+            assert isinstance(self.value, float)
+            label = '× %.5f %s' % (self.value, format_pint_unit_short(self.unit.units))
+        return label
+
+    def _call(self, x):
+        return Rcomp_multiply_upper_topology(self.F, x, self.unit, 
+                                             self.value, self.cod)
+        
+#         if is_top(self.dom, x):
+#             return self.cod.get_top()
+# 
+#         res = x * self.value
+# 
+#         if bool(np.isfinite(res)):
+#             return res
+#         else:
+#             return self.cod.get_top() 

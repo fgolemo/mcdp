@@ -3,17 +3,38 @@ from mcdp_dp import (CatalogueDP, CoProductDP, CoProductDPLabels, Constant,
     ConstantMinimals, DPLoop0, DPLoop2, Identity, InvMult2, InvMult2L, InvMult2U,
     InvPlus2, InvPlus2L, InvPlus2Nat, InvPlus2U, JoinNDP, Limit, LimitMaximals,
     Max1, MeetNDualDP,  Mux, Parallel, ParallelN, Series0, Terminator,
-    UncertainGate, UncertainGateSym, MeetNDP, JoinNDualDP)
+    UncertainGate, UncertainGateSym,PlusValueDP, MeetNDP, JoinNDualDP, InvMult2Nat, MultValueDP)
+
 from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct
 from mcdp_dp.dp_dummy import Template
 
 def PlusValueDP1():
-    from mcdp_dp import PlusValueDP
     F = parse_poset('J')
     U = parse_poset('mJ')
     v = 1000.0
     return PlusValueDP(F, c_value=v, c_space=U)
+
+def MultValueDP1nonzero():
+    F = parse_poset('m')    
+    U = parse_poset('s')
+    v = 3.0
+    R = parse_poset('m*s')
+    return MultValueDP(F=F, R=R, unit=unit, value=value)
+
+def MultValueDP2zero():
+    F = parse_poset('m')    
+    U = parse_poset('s')
+    v = 0.0
+    R = parse_poset('m*s')
+    return MultValueDP(F=F, R=R, unit=unit, value=value)
+
+def MultValueDP3top():
+    F = parse_poset('m')    
+    U = parse_poset('s')
+    v = U.get_top()
+    R = parse_poset('m*s')
+    return MultValueDP(F=F, R=R, unit=unit, value=value)
 
 def PlusValueRcompDP():
     from mcdp_dp import PlusValueRcompDP

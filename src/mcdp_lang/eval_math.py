@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
-from mcdp_dp import MultValueMap, ProductNatN, ProductN, SumNNat, WrapAMap, sum_dimensionality_works, SumNRcompMap
+from mcdp_dp import ProductNatN, ProductN, SumNNat, WrapAMap, sum_dimensionality_works, SumNRcompMap
+from mcdp_dp.dp_multvalue import MultValueDP
 from mcdp_dp.dp_plus_value import PlusValueRcompDP, PlusValueDP, PlusValueNatDP
 from mcdp_dp.dp_sum import SumNDP
 from mcdp_maps import MinusValueMap, MultNat, SumNInt, SumNRcomp
@@ -203,20 +204,6 @@ def eval_MultN(x, context, wants_constant):
             c = generic_mult_constantsN(constants)
             return get_mult_op(context, r, c)
 
-class MultValueDP(WrapAMap):
-    @contract(F=RcompUnits, R=RcompUnits, unit=RcompUnits)
-    def __init__(self, F, R, unit, value):
-        amap = MultValueMap(F=F, R=R, value=value)
-        from mcdp_posets.rcomp_units import format_pint_unit_short
-
-        label = '× %.5f %s' % (value, format_pint_unit_short(unit.units))
-        # label = '× %s' % (c.unit.format(c.value))
-        setattr(amap, '__name__', label)
-        
-        # unit2 = inverse_of_unit(unit)
-        value2 = 1.0 / value
-        amap_dual = MultValueMap(F=R, R=F, value=value2)
-        WrapAMap.__init__(self, amap, amap_dual)
 
 
 @contract(r=CResource, c=ValueWithUnits)

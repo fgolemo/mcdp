@@ -14,6 +14,7 @@ __all__ = [
     'NotJoinable',
     'NotBounded',
     'Preorder',
+    'is_top',
 ]
 
 class NotLeq(Exception):

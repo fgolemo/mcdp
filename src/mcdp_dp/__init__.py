@@ -38,3 +38,5 @@ from .dp_labeler import *
 from .opaque_dp import *
 from .dp_approximation import *
 from .dp_plus_value import *
+from .dp_multvalue import *
+

@@ -87,42 +87,42 @@ def dual02(_, dp):
 @for_all_dps
 def dual03(_, dp):
     pass
-
-@for_all_dps
-def dual04(_, dp):
-    pass
-
-@for_all_dps
-def dual05(_, dp):
-    pass
-
-@for_all_dps
-def dual06(_, dp):
-    pass
-
-@for_all_dps
-def dual07(_, dp):
-    pass
-
-@for_all_dps
-def dual08(_, dp):
-    pass
-
-@for_all_dps
-def dual09(_, dp):
-    pass
-
-@for_all_dps
-def dual10(_, dp):
-    pass
-
-@for_all_dps
-def dual11(_, dp):
-    pass
-
-@for_all_dps
-def dual12(_, dp):
-    pass 
+# 
+# @for_all_dps
+# def dual04(_, dp):
+#     pass
+# 
+# @for_all_dps
+# def dual05(_, dp):
+#     pass
+# 
+# @for_all_dps
+# def dual06(_, dp):
+#     pass
+# 
+# @for_all_dps
+# def dual07(_, dp):
+#     pass
+# 
+# @for_all_dps
+# def dual08(_, dp):
+#     pass
+# 
+# @for_all_dps
+# def dual09(_, dp):
+#     pass
+# 
+# @for_all_dps
+# def dual10(_, dp):
+#     pass
+# 
+# @for_all_dps
+# def dual11(_, dp):
+#     pass
+# 
+# @for_all_dps
+# def dual12(_, dp):
+#     pass 
     
 
 @comptest

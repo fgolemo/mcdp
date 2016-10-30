@@ -5,6 +5,7 @@ import numpy as np
 
 from .poset import NotLeq, Poset
 from .space import NotBelongs, NotEqual
+from mcdp_posets.poset import is_top
 
 
 __all__ = [
@@ -173,11 +174,6 @@ class RcompBase(Poset):
             msg = '%s ≰ %s' % (a, b)
             raise NotLeq(msg)
 
-    def multiply(self, a, b):
-        """ Multiplication, extended for top """
-        if a == self.top or b == self.top:
-            return self.top
-        return a * b
 
     def add(self, a, b):
         """ Addition, extended for top """
@@ -330,3 +326,36 @@ class Rbicomp(Poset):
     def check_equal(self, x, y):
         if not x == y:
             raise NotEqual('%s != %s' % (x, y))
+
+
+def Rcomp_multiply_upper_topology(A, a, B, b, C):
+    """ 
+        Multiplication, extended for top, such that the upper topology
+        is respected. 
+        
+        So 0 * Top = 0.
+        and x * Top = Top.
+    
+    """
+    a_is_top = is_top(A, a)
+    b_is_top = is_top(B, b)
+    a_is_zero = not a_is_top and a == 0.0
+    b_is_zero = not b_is_top and b == 0.0
+    
+    # 0 * Top = 0
+    if b_is_top:
+        if a_is_zero:
+            return 0.0
+        else:
+            return C.get_top()
+    elif a_is_top:
+        if b_is_zero:
+            return 0.0
+        else:
+            return C.get_top()
+    else:
+        assert isinstance(a, float) 
+        assert isinstance(b, float)
+        
+        # XXX: overflow
+        return a * b

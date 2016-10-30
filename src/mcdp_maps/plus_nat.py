@@ -4,6 +4,7 @@ from mcdp_posets import Map, Nat
 from mcdp_posets.space import MapNotDefinedHere
 from mcdp_posets.poset import is_top
 from contracts.utils import check_isinstance
+from mcdp_posets.nat import Nat_add
 
 
 __all__ = [
@@ -13,22 +14,23 @@ __all__ = [
 
 class PlusValueNatMap(Map):
 
-    @contract(value=int)
     def __init__(self, value):
         self.value = value
         self.N = Nat()
+        self.N.belongs(value)
         Map.__init__(self, dom=self.N, cod=self.N)
 
     def _call(self, x):
-        if self.N.equal(self.N.get_top(), x):
-            return x
-        # TODO: check overflow
-        res = x + self.value
-        assert isinstance(res, int), res
-        return res
+        return Nat_add(x, self.value)
+#         if self.N.equal(self.N.get_top(), x):
+#             return x
+#         # TODO: check overflow
+#         res = x + self.value
+#         assert isinstance(res, int), res
+#         return res
 
     def __repr__(self):
-        return '+ %s' % self.value
+        return '+ %s' % self.N.format(self.value)
 
 
 class MinusValueNatMap(Map):

@@ -23,9 +23,10 @@ class PlusValueMap(Map):
 
     @contract(F=RcompUnits, R=RcompUnits)
     def __init__(self, F, c_value, c_space, R):
+        c_space.belongs(c_value)
+
         check_isinstance(F, RcompUnits)
         check_isinstance(c_space, RcompUnits)
-        
         Map.__init__(self, dom=F, cod=R)
         self.c_value = c_value
         self.c_space = c_space
@@ -101,17 +102,19 @@ class MinusValueRcompMap(Map):
                 
 class MinusValueMap(Map):
     """ 
-        Implements _ -> _ - c
+        Implements _ -> _ - c for Rcompunits
         
         (with c a positive constant.)
         
         It is not defined for x <= c. 
     """
 
+    @contract(P=RcompUnits, c_space=RcompUnits)
     def __init__(self, P, c_value, c_space):
+        c_space.belongs(c_value)
         check_isinstance(P, RcompUnits)
         check_isinstance(c_space, RcompUnits)
-        assert c_value >= 0
+    
         Map.__init__(self, dom=P, cod=P)
         self.c_value = c_value
         self.c_space = c_space
@@ -139,6 +142,7 @@ class MinusValueMap(Map):
                     return self.top
                 else:
                     check_isinstance(x, float)
+                    # XXX: What if self.c is Top?
                     res = x - self.c
                     assert res >= 0
                     # todo: check underflow

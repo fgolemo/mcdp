@@ -95,6 +95,9 @@ class TypesUniverse(Preorder):
         if isinstance(A, Nat) and isinstance(B, Rcomp):
             return
 
+        if isinstance(A, Nat) and isinstance(B, RcompUnits):
+            return
+
         if isinstance(A, FiniteCollectionsInclusion) and isinstance(B, FiniteCollectionsInclusion):
             self.check_leq(A.S, B.S)
             return
@@ -112,6 +115,7 @@ class TypesUniverse(Preorder):
             return
 
         if isinstance(B, Rcomp) and isinstance(A, RcompUnits):
+            # XXX : are we sure???
             return
 
         if isinstance(A, UpperSets) and isinstance(B, UpperSets):
@@ -175,7 +179,7 @@ class TypesUniverse(Preorder):
         from mcdp_posets import format_pint_unit_short
         from mcdp_posets.maps.identity import IdentityMap
 
-        if isinstance(A, Nat) and isinstance(B, Rcomp):
+        if isinstance(A, Nat) and isinstance(B, (Rcomp, RcompUnits)):
             from .maps.coerce_to_int import CoerceToInt
             from .maps.promote_to_float import PromoteToFloat
             return PromoteToFloat(A, B), CoerceToInt(B, A)
