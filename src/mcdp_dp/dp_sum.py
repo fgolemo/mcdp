@@ -302,8 +302,9 @@ class MultValueMap(Map):
         return label
 
     def _call(self, x):
-        return Rcomp_multiply_upper_topology(self.F, x, self.unit, 
-                                             self.value, self.cod)
+        return Rcomp_multiply_upper_topology(self.dom, x, 
+                                             self.unit, self.value, 
+                                             self.cod)
         
 #         if is_top(self.dom, x):
 #             return self.cod.get_top()
