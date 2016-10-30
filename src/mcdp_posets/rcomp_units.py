@@ -11,7 +11,7 @@ from pint import UnitRegistry  # @UnresolvedImport
 from pint.errors import UndefinedUnitError  # @UnresolvedImport
 
 from .any import Any, BottomCompletion, TopCompletion
-from .rcomp import Rcomp, Rbicomp
+from .rcomp import RcompBase, Rbicomp
 from .space import Map
 
 
@@ -32,14 +32,14 @@ def get_ureg():
     ureg = _ureg
     return ureg
 
-class RcompUnits(Rcomp):
+class RcompUnits(RcompBase):
 
     def __init__(self, pint_unit, string):
         if do_extra_checks():
             ureg = get_ureg()
             check_isinstance(pint_unit, ureg.Quantity)
             
-        Rcomp.__init__(self)
+        RcompBase.__init__(self)
         self.units = pint_unit
         self.string = string
         u = parse_pint(string)
@@ -102,7 +102,7 @@ class RcompUnits(Rcomp):
         if x == self.top:
             s = self.top.__repr__()
         else:
-            s = Rcomp.format(self, x)
+            s = RcompBase.format(self, x)
 
         if self.units_formatted:
             return '%s %s' % (s, self.units_formatted)
@@ -294,6 +294,7 @@ def mult_table(a, b):
     unit2 = a.units * b.units
     s = '%s' % unit2
     return RcompUnits(unit2, s)
+
 # 
 # @contract(a=RcompUnits)
 # def inverse_of_unit(a):

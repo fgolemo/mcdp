@@ -10,6 +10,7 @@ from mcdp_lang.parse_interface import parse_ndp, parse_ndp_filename
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
+from mcdp_lang.syntax import Syntax
 
 
 def assert_syntax_error(s, expr, desc=None):
@@ -134,18 +135,32 @@ def parse_wrap_check(string, expr, result=None):
                       string=string, expected=result)
 
 
-@contract(string=str)
-def parse_wrap_semantic_error(string, expr):
-    """ Assert semantic error """
+@contract(string=str, contains='str|None')
+def assert_parse_ndp_semantic_error(string, contains=None):
+    """ Asserts that parsing this string as an NDP will raise
+        a DPSemanticError. If contains is not None, it is 
+        a substring that must be contained in the error. """
+    return parse_wrap_semantic_error(string, Syntax.ndpt_dp_rvalue, contains=contains)
+
+@contract(string=str, contains='str|None')
+def parse_wrap_semantic_error(string, expr, contains=None):
+    """ Assert semantic error. If contains is not None, it is 
+        a substring that must be contained in the error. """
     if isinstance(expr, ParsingElement):
         expr = expr.get()
 
     try:
         _res = parse_wrap(expr, string)[0]  # note the 0, first element
-    except DPSemanticError:
-        pass
+    except DPSemanticError as e:
+        if contains is not None:
+            s = str(e)
+            if not contains in s:
+                msg = 'Expected a DPSemanticError with substring %r.' % contains
+                raise_wrapped(TestFailed, e, msg,
+                              expr=find_parsing_element(expr), string=string)
+            
     except BaseException as e:
-        msg = 'Expected DPSemanticError.'
+        msg = 'Expected DPSemanticError, but obtained %s.' % type(e)
         raise_wrapped(TestFailed, e, msg,
                       expr=find_parsing_element(expr), string=string)
 

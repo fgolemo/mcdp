@@ -45,7 +45,7 @@ tiny = finfo.tiny
 eps = finfo.eps
 maxf = finfo.max
 
-class Rcomp(Poset):
+class RcompBase(Poset):
     """
         [0, inf) U {T}
     """
@@ -119,17 +119,6 @@ class Rcomp(Poset):
         s.append(self.get_top())
         return s
 
-    def __eq__(self, other):
-        return isinstance(other, Rcomp)
-
-    def __ne__(self, other):
-        return not self.__eq__(other)
-
-    def __repr__(self):
-#         return "ℜ ⋃ {⊤}"
-#         return "ℜ"
-        return "Rcomp()"
-
     def format(self, x):
         if do_extra_checks():
             self.belongs(x)
@@ -200,6 +189,21 @@ class Rcomp(Poset):
     def check_equal(self, x, y):
         if not x == y:
             raise NotEqual('%s != %s' % (x, y))
+
+class Rcomp(RcompBase):
+    """ This is used as a separate class so Rcompunits does not
+    derive from Rcomp (which might confuse tests using isinstance) """
+    
+    def __eq__(self, other):
+        return isinstance(other, Rcomp)
+
+    def __ne__(self, other):
+        return not self.__eq__(other)
+    
+    def __repr__(self):
+#         return "ℜ ⋃ {⊤}"
+#         return "ℜ"
+        return "Rcomp()"
 
 
 

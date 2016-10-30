@@ -92,7 +92,7 @@ class Nat(Poset):
 #         return not self.__eq__(other)
 
     def __repr__(self):
-        # return "ℕ"
+        return "ℕ" # TODO: make this configurable
         return "N"
 
     def format(self, x):
@@ -140,7 +140,7 @@ class Nat(Poset):
             raise NotEqual('%s != %s' % (x, y))
 
 
-# Optimization
+# Optimization: we use these instances
 Nat_add_Nat = Nat()
 Nat_add_top = Nat_add_Nat.get_top()
 
@@ -156,6 +156,16 @@ def Nat_add(a, b):
     return a + b
 
 
+def Nat_mult(a, b):
+    """ Multiplication on Nat, extended for top """
+    from mcdp_posets.poset import is_top
+    N = Nat_add_Nat
+    
+    if is_top(N, a) or is_top(N, b):
+        return Nat_add_top
+    
+    mcdp_dev_warning('catch overflow')
+    return a * b
 
 
 IntBottom = "int:-inf"

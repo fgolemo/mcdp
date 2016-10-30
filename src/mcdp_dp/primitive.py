@@ -44,14 +44,14 @@ class PrimitiveDP(WithInternalLog):
     """ 
         There are F, R, I.
         
-        solve : F -> U(R)
-        get_implementations_f_r: F x R -> set(I)
+        solve : F ⟶ U(R)
+        get_implementations_f_r: F x R ⟶ set(I)
             (note that F is not optimal by each I, merely feasible...)
                 
-        evaluate: I -> L(F), U(R)
+        evaluate: I ⟶ L(F), U(R)
         
         future:
-            solve : F -> U(R)
+            solve : F ⟶ U(R)
         
         f' is feasible for I if f' \in eval(I).f
     
@@ -207,8 +207,8 @@ class PrimitiveDP(WithInternalLog):
     def get_normal_form(self):
         """
             S is a Poset
-            alpha: U(F) x S -> U(R)
-            beta:  U(F) x S -> S 
+            alpha: U(F) x S ⟶ U(R)
+            beta:  U(F) x S ⟶ S 
         """
         One = PosetProduct(())
         S = One

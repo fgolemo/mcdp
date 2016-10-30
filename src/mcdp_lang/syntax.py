@@ -215,8 +215,6 @@ class Syntax():
                    parse_pint_unit)
 
 
-
-
     library_name = sp(get_idn(), lambda t: CDP.LibraryName(t[0]))
 
     # load <name>
@@ -727,8 +725,7 @@ class Syntax():
 
     rvalue_minus_constant = sp( SL('rvalue_minus_constant') + SLPAR + rvalue +
                                 SCOMMA +  constant_value + SRPAR,
-                             lambda t: CDP.RvalueMinusConstant(r=t[0], c=t[1]))
-    
+                                lambda t: CDP.RvalueMinusConstant(r=t[0], c=t[1]))
 
     # binary functions on functionality
     opname_f = sp(MatchFirst([L(x) for x in binary_f]), lambda t: CDP.OpKeyword(t[0]))

@@ -140,30 +140,20 @@ class Parallel(PrimitiveDP):
     def repr_long(self):
         r1 = self.dp1.repr_long()
         r2 = self.dp2.repr_long()
-        s = 'Parallel2  %% %s -> %s' % (self.get_fun_space(), self.get_res_space())
+        s = 'Parallel2  %% %s ⟶  %s' % (self.get_fun_space(), self.get_res_space())
         s += self._add_extra_info()
         s += '\n' + indent(r1, '. ', first='\ ')
-
-#         if hasattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME):
-#             a = getattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME)
-#             s += '\n (labeled as %s)' % a.__str__()
-
-        s += '\n' + indent(r2, '. ', first='\ ')
-
-#         if hasattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME):
-#             a = getattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME)
-#             s += '\n (labeled as %s)' % a.__str__()
-
+        s += '\n' + indent(r2, '. ', first='\ ') 
         return s
 
     def get_normal_form(self):
         """
             
-            alpha1: U(F1) x S1 -> U(R1)
-            beta1:  U(F1) x S1 -> S1
+            alpha1: U(F1) x S1 ⟶ U(R1)
+            beta1:  U(F1) x S1 ⟶ S1
             
-            alpha2: U(F2) x S2 -> U(R2)
-            beta2:  U(R2) x S2 -> S2
+            alpha2: U(F2) x S2 ⟶ U(R2)
+            beta2:  U(R2) x S2 ⟶ S2
              
         """
 
@@ -183,8 +173,8 @@ class Parallel(PrimitiveDP):
 
         D = PosetProduct((UF, S))
         """
-            alpha: U(F1xF2) x (S1xS2) -> U(R1xR2)
-            beta : U(F1xF2) x (S1xS2) -> (S1xS2)
+            alpha: U(F1xF2) x (S1xS2) ⟶ U(R1xR2)
+            beta : U(F1xF2) x (S1xS2) ⟶ (S1xS2)
         """
         class SeriesAlpha(Map):
             def __init__(self, dp):
@@ -215,8 +205,8 @@ class Parallel(PrimitiveDP):
                 return r
 
         """
-            alpha: U(F1xF2) x (S1xS2) -> U(R1xR2)
-            beta : U(F1xF2) x (S1xS2) -> (S1xS2)
+            alpha: U(F1xF2) x (S1xS2) ⟶ U(R1xR2)
+            beta : U(F1xF2) x (S1xS2) ⟶ (S1xS2)
         """
         class SeriesBeta(Map):
             def __init__(self, dp):

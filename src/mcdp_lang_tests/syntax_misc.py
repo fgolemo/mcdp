@@ -18,6 +18,7 @@ import numpy as np
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
+from mcdp_lang_tests.utils import assert_parse_ndp_semantic_error
 
 
 @comptest
@@ -621,7 +622,16 @@ mcdp {
 
 @comptest
 def check_lang83(): # TODO: rename
-    pass
+    """ Loss of monotonicty. """ 
+    s = """
+mcdp {
+    provides f1 [R]
+    provides f2 [R]
+    requires r [R]
+    required r >= f1 - f2
+}
+    """
+    assert_parse_ndp_semantic_error(s)
 
 @comptest
 def check_lang84(): # TODO: rename

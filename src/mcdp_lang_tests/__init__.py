@@ -14,6 +14,7 @@
     
     assert_parsable_to_connected_ndp
     assert_parsable_to_unconnected_ndp
+    assert_parse_ndp_semantic_error(string, contains)
     
     Also useful:
         
@@ -23,8 +24,9 @@
         
         eval_rvalue_as_constant_same_exactly
         
-
-    parse_wrap_semantic_error
+        parse_wrap_semantic_error
+        
+        
 
 """
 

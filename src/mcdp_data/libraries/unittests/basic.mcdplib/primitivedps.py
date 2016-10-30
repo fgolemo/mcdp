@@ -103,6 +103,10 @@ def Identity1():
     F = parse_poset('V')
     return Identity(F)
 
+def InvMult2Nat1():
+    N = parse_poset('Nat')
+    return InvMult2Nat(N, (N, N))
+
 def InvMult21():
     F = parse_poset('m')
     R1 = parse_poset('s')

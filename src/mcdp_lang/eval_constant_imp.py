@@ -93,11 +93,16 @@ def eval_constant(op, context):
 
             v = op.value.value
 
-            if isinstance(v, int) and isinstance(F, Rcomp):
+            # promote integer to float
+            if isinstance(v, int) and isinstance(F, (Rcomp, RcompUnits)):
                 v = float(v)
 
             if v < 0:
-                F = RbicompUnits(F.units, F.string)
+                if isinstance(F, RcompUnits):
+                    F = RbicompUnits(F.units, F.string)
+                else:
+                    msg = 'Negative %s not implemented yet.' % F
+                    raise_desc(NotImplementedError, msg, F=F)
 
             try:
                 F.belongs(v)

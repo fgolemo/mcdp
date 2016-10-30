@@ -16,6 +16,8 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mcdp_dp.dp_inv_plus_nat import InvMult2Nat
+from mcdp_posets.rcomp import Rcomp
 
 
 CDP = CDPLanguage
@@ -220,17 +222,26 @@ def eval_lfunction_invmult(lf, context):
 def eval_lfunction_invmult_ops(fs, context):
     if len(fs) == 1:
         raise DPInternalError(fs)
-    elif len(fs) > 2: # pragma: no cover
+    elif len(fs) > 2: 
         mcdp_dev_warning('Maybe this should be smarter?')
-        
         rest = eval_lfunction_invmult_ops(fs[1:], context)
-        return eval_lfunction_invmult_ops( [fs[0], rest], context) 
+        return eval_lfunction_invmult_ops([fs[0], rest], context) 
     else:   
-        Fs = map(context.get_ftype, fs)
-        R = mult_table(Fs[0], Fs[1])
+        assert len(fs) == 2
+        Fs = tuple(map(context.get_ftype, fs))
     
-        dp = InvMult2(R, tuple(Fs))
-        
+        if isinstance(Fs[0], Nat) and isinstance(Fs[1], Nat):
+            dp = InvMult2Nat(Nat(), Fs)
+        else:
+            if isinstance(Fs[0], (Rcomp, RcompUnits)) and \
+               isinstance(Fs[1], (Rcomp, RcompUnits)):
+
+                R = mult_table(Fs[0], Fs[1])
+                dp = InvMult2(R, Fs)
+            else:
+                msg = 'Could not create invplus for types {}.' % format(Fs)
+                raise_desc(NotImplementedError, msg, Fs0=Fs[0], Fs1=Fs[1])
+                
         return create_operation_lf(context, dp=dp, functions=fs,
                         name_prefix='_invmult', op_prefix='_ops',
                         res_prefix='_result') 
