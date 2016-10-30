@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
-from mocdp import logger
 from mcdp_dp import MultValueMap, ProductNatN, ProductN, SumNNat, WrapAMap, sum_dimensionality_works, SumNRcompMap
 from mcdp_dp.dp_plus_value import PlusValueRcompDP, PlusValueDP, PlusValueNatDP
 from mcdp_dp.dp_sum import SumNDP
@@ -322,9 +321,7 @@ def eval_PlusN(x, context, wants_constant):
 
             c_space = RcompUnits(pint_unit=constant.unit.units,
                                  string=constant.unit.string)
-#             amap = MinusValueMap(P=F, c_value=-constant.value, c_space=c_space)
-#             logger.debug('MinusValueMap created here')
-#             setattr(amap, '__name__', '- %s' % (constant.unit.format(-constant.value)))
+
             dp = MinusValueDP(F=F, c_value=-constant.value, c_space=c_space)
 
             r2 = create_operation(context, dp, resources=[res],

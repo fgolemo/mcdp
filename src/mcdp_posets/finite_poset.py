@@ -41,7 +41,6 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
 
     def get_elements(self):
         return self.elements
-
     
     def __repr__(self):
         if len(self.elements) <= 5:
@@ -50,8 +49,8 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
             return "FinitePoset(%d els)" % len(self.elements)
 
     def repr_long(self):
-        return 'FinitePoset(%d el = %s)' % (len(self.elements), list(self.elements).__repr__())
-
+        return ('FinitePoset(%d el = %s)' % (len(self.elements), 
+                                             list(self.elements).__repr__()))
 
     def get_test_chain(self, n):  # @UnusedVariable
         if not self.elements:
@@ -182,6 +181,7 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
         raise_desc(NotLeq, 'The two elements are not ordered',
                    a=self.format(a), b=self.format(b))
 
+
 def transitive_closure(a):
     closure = set(a)
     while True:
@@ -193,6 +193,6 @@ def transitive_closure(a):
             break
 
         closure = closure_until_now
-
+ 
     return closure
 
