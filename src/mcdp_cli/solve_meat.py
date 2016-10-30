@@ -5,7 +5,7 @@ from contracts.utils import raise_desc, raise_wrapped
 from decent_params.utils import UserError
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.solver import generic_solve
-from mcdp_dp.solver_iterative import solver_iterative
+# from mcdp_dp.solver_iterative import solver_iterative
 from mcdp_dp.tracer import Tracer
 from mcdp_library import Librarian
 from mcdp_posets import (NotLeq, UpperSets,
