@@ -1,0 +1,9 @@
+#  r = 0 -> f empty
+#  r = 1 -> f empty
+#  r = Top -> f <= Top
+
+< 
+    assert_equal( solve_r(0 m, `minus_r_real2), ↓ EmptySet m),
+    assert_equal( solve_r(1 m, `minus_r_real2), ↓ EmptySet m),
+    assert_equal( solve_r(Top m, `minus_r_real2), ↓ { Top m })
+>

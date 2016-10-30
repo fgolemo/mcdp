@@ -1,9 +1,24 @@
+- change keyword "dp" into "mcdp"
+- optimizing this:
 
+    f * constant <= r
+
+    by creating specialized DP
+
+- keyword css Rcomp
+
+- NotImplementedError: Spaces are ordered, but you forgot to code embedding.
+A: Instance of <class 'mcdp_posets.uppersets.LowerSets'>.
+   L(ℕ)
+B: Instance of <class 'mcdp_posets.uppersets.LowerSets'>.
+   L(R[])
+   
 - add solve_f to mcdp-solve
 
 - change color to  green/red for
 /Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_report/icons/MeetNDualDP.png
 
+- unit tests for ↓ 
 - keyword: EmptySet
 
 - videos of "crunching"

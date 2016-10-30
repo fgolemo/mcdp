@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import raise_wrapped, raise_desc
-from mcdp_posets.space import NotBelongs
+from mcdp_posets import NotBelongs
 
 
 def assert_belongs(space, x):

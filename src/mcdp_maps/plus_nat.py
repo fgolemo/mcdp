@@ -34,7 +34,20 @@ class PlusValueNatMap(Map):
 
 
 class MinusValueNatMap(Map):
-
+    
+    """
+        if value is Top:
+        
+            r |->   MapNotDefinedHere   if r != Top
+                    Top  if r == Top  
+        
+        otherwise:
+        
+            r |->   MapNotDefinedHere   if r < value:
+                    r - value  if r >= value 
+        f - Top <= r 
+    
+    """
     @contract(value=int)
     def __init__(self, value):
         self.c = value
@@ -44,6 +57,15 @@ class MinusValueNatMap(Map):
         
     def _call(self, x):
         P = self.dom
+        
+        if is_top(self.dom, self.c):
+            #  r = 0 -> f empty
+            #  r = 1 -> f empty
+            #  r = Top -> f <= Top
+            if is_top(self.dom, x):
+                return self.top
+            else:
+                raise MapNotDefinedHere()
         
         if P.equal(x, self.c):
             return 0

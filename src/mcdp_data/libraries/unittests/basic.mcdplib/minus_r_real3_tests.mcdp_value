@@ -1,0 +1,9 @@
+#  r = 0 -> f empty
+#  r = 1 -> f empty
+#  r = Top -> f <= Top
+
+< 
+    assert_equal( solve_r(0 dimensionless, `minus_r_real3), ↓ EmptySet Rcomp),
+    assert_equal( solve_r(1 dimensionless, `minus_r_real3), ↓ EmptySet Rcomp),
+    assert_equal( solve_r(Top Rcomp, `minus_r_real3), ↓ { Top Rcomp })
+>

@@ -1,6 +1,6 @@
 mcdp {
-    provides f [R]
-    requires r [R]
+    provides f [m]
+    requires r [m]
 
-    required r >= provided f - 2 dimensionless
+    required r >= provided f - 2 m
 }

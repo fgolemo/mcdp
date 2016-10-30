@@ -113,30 +113,30 @@ class SumNLDP(WrapAMap):
 #             raise_desc(NotImplementedError, msg)
 
         raise NotImplementedError()
-     
-        from mcdp_dp.dp_inv_plus import InvPlus2
-        from mcdp_dp.dp_inv_plus import van_der_corput_sequence
-        
-        if is_top(self.F, f):
-            # +infinity
-            top1 = self.R[0].get_top()
-            top2 = self.R[1].get_top()
-            s = set([(top1, 0.0), (0.0, top2)])
-            return self.R.Us(s)
-
-        n = self.n
-        
-        if InvPlus2.ALGO == InvPlus2.ALGO_VAN_DER_CORPUT:
-            options = van_der_corput_sequence(n)
-        elif InvPlus2.ALGO == InvPlus2.ALGO_UNIFORM:
-            options = np.linspace(0.0, 1.0, n)
-        else:
-            assert False, InvPlus2.ALGO
-
-        s = set()
-        for o in options:
-            s.add((f * o, f * (1 - o)))
-        return self.R.Us(s)
+#      
+#         from mcdp_dp.dp_inv_plus import InvPlus2
+#         from mcdp_dp.dp_inv_plus import van_der_corput_sequence
+#         
+#         if is_top(self.F, f):
+#             # +infinity
+#             top1 = self.R[0].get_top()
+#             top2 = self.R[1].get_top()
+#             s = set([(top1, 0.0), (0.0, top2)])
+#             return self.R.Us(s)
+# 
+#         n = self.n
+#         
+#         if InvPlus2.ALGO == InvPlus2.ALGO_VAN_DER_CORPUT:
+#             options = van_der_corput_sequence(n)
+#         elif InvPlus2.ALGO == InvPlus2.ALGO_UNIFORM:
+#             options = np.linspace(0.0, 1.0, n)
+#         else:
+#             assert False, InvPlus2.ALGO
+# 
+#         s = set()
+#         for o in options:
+#             s.add((f * o, f * (1 - o)))
+#         return self.R.Us(s)
 
 
 

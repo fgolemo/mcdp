@@ -3,8 +3,11 @@ from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
 from mcdp_dp import InvMult2, InvPlus2, InvPlus2Nat
 from mcdp_dp import JoinNDualDP, MeetNDualDP
+from mcdp_dp.dp_inv_plus_nat import InvMult2Nat
+from mcdp_dp.dp_plus_value import PlusValueNatDP, PlusValueRcompDP, PlusValueDP
 from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table,
     poset_maxima)
+from mcdp_posets import Rcomp
 from mocdp.comp.context import CFunction, get_name_for_res_node
 from mocdp.exceptions import (DPInternalError, DPNotImplementedError,
     DPSemanticError, mcdp_dev_warning)
@@ -16,8 +19,6 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from mcdp_dp.dp_inv_plus_nat import InvMult2Nat
-from mcdp_posets.rcomp import Rcomp
 
 
 CDP = CDPLanguage
@@ -62,6 +63,7 @@ def eval_lfunction(lf, context):
             CDP.InvMult: eval_lfunction_invmult,
             CDP.InvPlus: eval_lfunction_invplus,
             CDP.VariableRef: eval_lfunction_variableref,
+            CDP.FValueMinusN: eval_lfunction_FValueMinusN,
         }
 
         for klass, hook in cases.items():
@@ -162,6 +164,47 @@ def eval_lfunction_variableref(lf, context):
     s = dummy_ndp.get_rnames()[0]
     return context.make_function(get_name_for_res_node(lf.name), s)
 
+def eval_lfunction_FValueMinusN(lf, context):
+    ops = get_odd_ops(unwrap_list(lf.ops))    
+    
+    # first one should be a functionality 
+    fvalue = eval_lfunction(ops[0], context)
+    
+    # ops after the first should be constant
+    must_be_constants = ops[1:]
+    from .eval_constant_imp import eval_constant
+
+    constants = []
+    for mc in must_be_constants:
+        try:
+            c  = eval_constant(mc, context)
+            constants.append(c)
+        except:
+            raise
+        
+    if len(constants) > 1:
+        raise NotImplementedError
+    
+    constant = constants[0] 
+
+    # f - constant <= (x)
+    # f <= (x) + Constant 
+
+    F = context.get_ftype(fvalue)
+    if isinstance(F, Nat) and isinstance(constant.unit, Nat):
+        dp = PlusValueNatDP(constant.value)
+    elif isinstance(F, Rcomp):
+        dp = PlusValueRcompDP(constant.value)
+    elif isinstance(F, RcompUnits):
+        dp = PlusValueDP(F=F, c_value=constant.value, c_space=constant.unit)
+    else:
+        msg = 'Could not create this operation with %s. ' % F
+        raise_desc(DPSemanticError, msg, F=F)
+             
+    return create_operation_lf(context, dp=dp, functions=[fvalue],
+                            name_prefix='_minusvalue', op_prefix='_op',
+                            res_prefix='_result')
+    
 def eval_lfunction_invplus(lf, context):
     ops = get_odd_ops(unwrap_list(lf.ops))
 
@@ -200,10 +243,14 @@ def eval_lfunction_invplus_ops(fs, context):
             
             dp = InvPlus2(R, tuple(Fs))
             
+        elif all(isinstance(_, Rcomp) for _ in Fs):
+            msg = 'InvPlus2 not implemented for Rcomp.'
+            raise_desc(NotImplementedError, msg)
         elif all(isinstance(_, Nat) for _ in Fs):
             dp = InvPlus2Nat(R, tuple(Fs))
+            
         else: # pragma: no cover
-            msg = 'Cannot find operator for mixed values'
+            msg = 'Cannot find operator for these types.'
             raise_desc(DPInternalError, msg, Fs=Fs)
         
         return create_operation_lf(context, dp=dp, functions=fs,

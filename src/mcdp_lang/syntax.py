@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
+from mcdp_lang.parse_actions import rvalue_minus_parse_action, \
+    fvalue_minus_parse_action
 from mocdp.exceptions import mcdp_dev_warning
 
-from .parse_actions import (constant_minus_parse_action, divide_parse_action,
+from .parse_actions import (divide_parse_action,
     funshortcut1m, mult_inv_parse_action, mult_parse_action, parse_pint_unit,
     plus_inv_parse_action, plus_parse_action, resshortcut1m,
     space_product_parse_action)
@@ -118,6 +120,7 @@ class SyntaxIdentifiers():
         'solve_r',
         'solve_f',
         'ceilsqrt',
+        'Rcomp',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -282,10 +285,8 @@ class Syntax():
     
     space_nat = sp(Keyword('Nat') | Keyword('ℕ'), lambda t: CDP.Nat(t[0]))
     space_int = sp(Keyword('Int') | Keyword('ℤ'), lambda t: CDP.Int(t[0]))
+    space_rcomp = sp(Keyword('Rcomp'), lambda t: CDP.Rcomp(t[0]))
 
-#     SingleElementPosetKeyword = namedtuplewhere('SingleElementPosetKeyword', 'keyword')
-#     SingleElementPosetTag = namedtuplewhere('SingleElementPosetTag', 'value')
-#     SingleElementPoset = namedtuplewhere('SingleElementPoset', 'keyword tag')
     space_single_element_poset_tag = sp(get_idn(), lambda t: CDP.SingleElementPosetTag(t[0]))
     space_single_element_poset_keyword = keyword('S', CDP.SingleElementPosetKeyword)
     space_single_element_poset = sp(space_single_element_poset_keyword +
@@ -297,6 +298,7 @@ class Syntax():
         | space_powerset
         | space_nat
         | space_int
+        | space_rcomp
         | load_poset
         | code_spec
         | space_finite_poset
@@ -509,7 +511,7 @@ class Syntax():
 
     # lowerclosure <set>
 
-    lower_set_from_collection_keyword = spk(K('lowerclosure'), # | L('↑'),
+    lower_set_from_collection_keyword = spk(K('lowerclosure')| L('↓'),
                                            CDP.LowerSetFromCollectionKeyword)
     lower_set_from_collection = sp(lower_set_from_collection_keyword - collection_of_constants,
                                    lambda t: CDP.LowerSetFromCollection(t[0], t[1]))
@@ -577,10 +579,11 @@ class Syntax():
                        | constant_emptyset
                        )
 
+    constant_value << constant_value_op
 
-    constant_value << operatorPrecedence(constant_value_op, [
-        ('-', 2, opAssoc.LEFT, constant_minus_parse_action),
-    ])
+#     constant_value << operatorPrecedence(constant_value_op, [
+#         ('-', 2, opAssoc.LEFT, constant_minus_parse_action),
+#     ])
 
     rvalue_resource_simple = sp(dpname + DOT - rname,
                                 lambda t: CDP.Resource(s=t[2], keyword=t[1], dp=t[0]))
@@ -723,9 +726,9 @@ class Syntax():
 #     rvalue_minus_constant = sp(  (NotAny(has_minus)+rvalue)  + MINUS - constant_value,
 #                                  lambda t: CDP.RvalueMinusConstant(t[0], t[1], t[2]))
 
-    rvalue_minus_constant = sp( SL('rvalue_minus_constant') + SLPAR + rvalue +
-                                SCOMMA +  constant_value + SRPAR,
-                                lambda t: CDP.RvalueMinusConstant(r=t[0], c=t[1]))
+#     rvalue_minus_constant = sp( SL('rvalue_minus_constant') + SLPAR + rvalue +
+#                                 SCOMMA +  constant_value + SRPAR,
+#                                 lambda t: CDP.RvalueMinusConstant(r=t[0], c=t[1]))
 
     # binary functions on functionality
     opname_f = sp(MatchFirst([L(x) for x in binary_f]), lambda t: CDP.OpKeyword(t[0]))
@@ -952,12 +955,12 @@ class Syntax():
     APPROX_LOWER = keyword('approx_lower', CDP.ApproxLowerKeyword)
     ndpt_approx_lower = sp(APPROX_LOWER - SLPAR - integer -
                             SCOMMA - ndpt_dp_rvalue - SRPAR,
-                       lambda t: CDP.ApproxLower(t[0], t[1], t[2]))
+                            lambda t: CDP.ApproxLower(t[0], t[1], t[2]))
 
     APPROX_UPPER = keyword('approx_upper', CDP.ApproxUpperKeyword)
     ndpt_approx_upper = sp(APPROX_UPPER - SLPAR - integer -
                             SCOMMA - ndpt_dp_rvalue - SRPAR,
-                       lambda t: CDP.ApproxUpper(t[0], t[1], t[2]))
+                            lambda t: CDP.ApproxUpper(t[0], t[1], t[2]))
 
 
     templatename = sp(get_idn() | quoted, lambda t: CDP.TemplateName(t[0]))
@@ -1013,11 +1016,7 @@ class Syntax():
         ndpt_placeholder
     )
 
-    # TODO: remove?
     ndpt_dp_rvalue << (ndpt_dp_operand | (SLPAR - ndpt_dp_operand - SRPAR))
-    # ndpt_dp_rvalue << operatorPrecedence(ndpt_dp_operand, [
-    #     (COPROD, 2, opAssoc.LEFT, coprod_parse_action),
-    # ])
 
     rvalue_operand = (
           rvalue_new_function
@@ -1037,12 +1036,13 @@ class Syntax():
         ^ rvalue_approx_step
         ^ rvalue_approx_u
         ^ rvalue_placeholder 
-        ^ rvalue_minus_constant)
+        )
 
     rvalue << operatorPrecedence(rvalue_operand, [
         (TIMES, 2, opAssoc.LEFT, mult_parse_action),
         (BAR, 2, opAssoc.LEFT, divide_parse_action),
         (PLUS, 2, opAssoc.LEFT, plus_parse_action),
+        (MINUS, 2, opAssoc.LEFT, rvalue_minus_parse_action),
     ])
 
     fvalue_operand = (
@@ -1067,6 +1067,7 @@ class Syntax():
     # fvalue_operand = (SLPAR - fvalue_operands - SRPAR) ^ fvalue_operands
 
     fvalue << operatorPrecedence(fvalue_operand, [
-        ('*', 2, opAssoc.LEFT, mult_inv_parse_action),
-        ('+', 2, opAssoc.LEFT, plus_inv_parse_action),
+        (TIMES, 2, opAssoc.LEFT, mult_inv_parse_action),
+        (PLUS, 2, opAssoc.LEFT, plus_inv_parse_action),
+        (MINUS, 2, opAssoc.LEFT, fvalue_minus_parse_action),
     ])

@@ -28,8 +28,11 @@ def dual01_chain(id_dp, dp):
                 dp.solve(F.witness())
                 dp.solve_r(R.witness())
             except NotSolvableNeedsApprox:
-                print('NotSolvableNeedsApprox - will approximate using lower bound ')
-                dp, _ = get_dp_bounds(dp, nl=10, nu=10)
+                print('NotSolvableNeedsApprox - doing  lower bound ')
+                dpL, dpU = get_dp_bounds(dp, nl=10, nu=10)
+                dual01_chain(id_dp+'_L10', dpL)
+                dual01_chain(id_dp+'_U10', dpU)
+                return
             
             LF = LowerSets(F)
             UR = UpperSets(R)

@@ -2,7 +2,7 @@
 from contracts import contract
 from contracts.utils import check_isinstance
 from mcdp_posets import Nat, PosetProduct
-from mcdp_posets.nat import Nat_add, Nat_mult
+from mcdp_posets.nat import Nat_add, Nat_mult_lowersets_continuous
 from mcdp_posets.poset import is_top
 import numpy as np
 
@@ -123,7 +123,7 @@ class InvMult2Nat(PrimitiveDP):
     
     def solve_r(self, r):
         r1, r2 = r
-        f = Nat_mult(r1, r2)
+        f = Nat_mult_lowersets_continuous(r1, r2)
         return self.F.L(f)
 
     def get_implementations_f_r(self, f, r):

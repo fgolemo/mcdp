@@ -62,6 +62,8 @@ class CDPLanguage():
 
     PlusN = namedtuplewhere('PlusN', 'ops')
     MultN = namedtuplewhere('MultN', 'ops')
+    RValueMinusN = namedtuplewhere('RValueMinusN', 'ops')
+    FValueMinusN = namedtuplewhere('FValueMinusN', 'ops')
     Divide = namedtuplewhere('Divide', 'ops')
     # all constants
     ConstantMinus = namedtuplewhere('ConstantMinus', 'ops')
@@ -115,6 +117,8 @@ class CDPLanguage():
     # natural numbers
     Nat = namedtuplewhere('Nat', 'symbol')
     Int = namedtuplewhere('Int', 'symbol')
+    Rcomp = namedtuplewhere('Rcomp', 'symbol')
+    
     # Just Keywords
     ProvideKeyword = namedtuplewhere('ProvideKeyword', 'keyword')
     RequireKeyword = namedtuplewhere('RequireKeyword', 'keyword')
@@ -345,7 +349,7 @@ class CDPLanguage():
     AssertEmpty = namedtuplewhere('AssertEmpty', 'keyword value')
 
     ConstantMinusConstant = namedtuplewhere('ConstantMinusConstant', 'c1 minus c2')
-    RvalueMinusConstant = namedtuplewhere('RvalueMinusConstant', 'r c')
+#     RvalueMinusConstant = namedtuplewhere('RvalueMinusConstant', 'r c')
 
     # ignore_resources(a, b) mcdp { }
     IgnoreResourcesKeyword = namedtuplewhere('IgnoreResourcesKeyword', 'keyword')

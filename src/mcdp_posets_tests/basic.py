@@ -46,7 +46,6 @@ def check_poset1(_id_poset, poset):
 @for_all_posets
 def check_poset1_chain(id_poset, poset):
     try:
-        #from mcdp_posets import poset_check_chain
         chain = poset.get_test_chain(n=5)
         poset_check_chain(poset, chain)
     except Uninhabited:
@@ -69,7 +68,8 @@ def check_poset1_chain(id_poset, poset):
         except NotEqual:
             pass
         else:
-            raise_desc(Exception, 'failed', a=a, b=b, poset=poset, chain=chain)
+            msg = 'I expected that a != b, but this is violated.'
+            raise_desc(Exception, msg, a=a, b=b, poset=poset, chain=chain)
 
     for i, j in itertools.combinations(range(len(chain)), 2):
         if i > j:

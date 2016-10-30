@@ -4,3 +4,8 @@ mcdp {
 
     required r - Top Nat >= provided f 
 }
+
+#  r >= f + Top
+#  r = 0 -> f empty
+#  r = 1 -> f empty
+#  r = Top -> f <= Top

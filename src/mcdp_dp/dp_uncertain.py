@@ -181,16 +181,36 @@ class UncertainGateSym(ApproximableDP):
 
 
 class UMapDP(WrapAMap):
-    
+    """
+        r = ⟨r₁, r₂⟩
+        
+        f ≤ r₁
+        
+        f ⟼〈f, ⊥〉
+        ⟨r₁, r₂⟩ ⟼ r₁ 
+        
+    """
     def __init__(self, F):
         amap = UMap(F)
-        WrapAMap.__init__(self, amap)
+        F2 = PosetProduct((F, F))
+        amap_dual = MuxMap(F2, 0)
+        WrapAMap.__init__(self, amap, amap_dual)
 
 class LMapDP(WrapAMap):
-    
+    """
+        r = ⟨r₁, r₂⟩
+        
+        f ≤ r2
+        
+        f ⟼〈⊥, f 〉
+        ⟨r₁, r₂⟩ ⟼ r₂ 
+        
+    """
     def __init__(self, F):
         amap = LMap(F)
-        WrapAMap.__init__(self, amap)
+        F2 = PosetProduct((F, F))
+        amap_dual = MuxMap(F2, 1)
+        WrapAMap.__init__(self, amap, amap_dual)
 
 
 class UMap(Map):

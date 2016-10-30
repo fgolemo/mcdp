@@ -11,6 +11,7 @@ from mcdp_posets.rcomp_units import R_dimensionless, mult_table_seq, \
     RbicompUnits
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPSemanticError
+from mcdp_posets.nat import Nat_mult_uppersets_continuous
 
 
 @contract(S=RcompUnits)
@@ -56,16 +57,15 @@ def generic_mult_constantsN(seq):
 
     posets = [_.unit for _ in seq]
     for p in posets:
-
         check_isinstance(p, (Nat, RcompUnits))
 
 
     promoted, R = generic_mult_table(posets)
     
     if isinstance(R, Nat):
-        res  = 1
-        for vu in seq:
-            res *= vu.value
+        values = [_.value for _ in seq]
+        from functools import reduce
+        res = reduce(Nat_mult_uppersets_continuous, values)
         return ValueWithUnits(res, R) 
     else:
         res = 1.0

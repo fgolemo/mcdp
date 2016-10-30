@@ -10,7 +10,7 @@ contexts:
       scope: keyword.control.mcdp
     - match: \b(solve_r|solve_f|compact|canonical|choose|set-of|using|pow|approx|approxu|Top|Bottom|Minimals|Maximals)\b
       scope: keyword.control.mcdp
-    - match: \b(Nat|Int|take|specialize|template|any-of|abstract)\b
+    - match: \b(Nat|Int|take|specialize|template|dimensionless|any-of|abstract)\b
       scope: keyword.control.mcdp
 # 'load',
 #         'compact',

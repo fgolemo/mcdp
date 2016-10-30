@@ -6,6 +6,7 @@ from contracts import contract
 from contracts.utils import raise_desc
 from decent_params import UserError
 from mcdp_cli.utils_wildcard import expand_string
+from mcdp_lang.syntax import Syntax
 from mcdp_library import Librarian
 from mcdp_report.dp_graph_flow_imp import dp_graph_flow
 from mcdp_report.dp_graph_tree_imp import dp_graph_tree
@@ -19,7 +20,6 @@ from quickapp import QuickAppBase
 from system_cmd import CmdException, system_cmd_result
 
 from .utils_mkdir import mkdirs_thread_safe
-from mcdp_lang.syntax import Syntax
 
 
 def get_ndp(data):
@@ -201,7 +201,8 @@ def syntax_frag(data):
     from mcdp_report.html import ast_to_html
     s = data['s']
     extra_css = create_extra_css(data['params'])
-    res = ast_to_html(s, complete_document=False, extra_css=extra_css)
+    res = ast_to_html(s, complete_document=False, extra_css=extra_css,
+                      parse_expr=Syntax.ndpt_dp_rvalue, add_css=True)
     res1 = ('html', 'syntax_frag', res)
     return [res1]
 
@@ -214,8 +215,9 @@ def syntax_doc(data):
     def ignore_line(lineno):
         return lineno  in lines_to_hide
 
-    res = ast_to_html(s, complete_document=True, extra_css=extra_css,
+    body_contents = ast_to_html(s, complete_document=False, extra_css=extra_css, add_css=False,
                       ignore_line=ignore_line, parse_expr = Syntax.ndpt_dp_rvalue)
+    res = get_minimal_document(body_contents, add_markdown_css=True)
     
     # TODO: add minimal document
     res1 = ('html', 'syntax_doc', res)

@@ -57,9 +57,7 @@ def wheredecorator(b):
         return res
     return bb
 
-def spa(x, b):
-#     x2 = x.copy()
-#     x2.setParseAction()
+def spa(x, b): 
     bb = wheredecorator(b)
     @parse_action
     def p(tokens, loc, s):
@@ -67,13 +65,6 @@ def spa(x, b):
         res = bb(tokens, loc, s)
         # if we are here, then it means the parse was succesful
         # we try again to get loc_end
-
-        # Do not this, it would be recursive
-        #   x.parseString(s[loc:])
-        # Rather, use a copy of x, x2, created once above
-
-        #loc_end, _tokens = x2._parse(s[loc:], 0)
-        #character_end = loc + loc_end
         character_end = x.tryParse(s, loc)
         
         if isnamedtupleinstance(res) and \
@@ -112,17 +103,6 @@ def divide_parse_action(tokens):
     res = CDP.Divide(l, where=l.where)
     return res
 
-
-@parse_action
-@wheredecorator
-def constant_minus_parse_action(tokens):
-    tokens = list(tokens[0])
-    l = make_list(tokens)
-    assert l.where.character_end is not None
-    res = CDP.ConstantMinus(l, where=l.where)
-    return res
-
-
 @parse_action
 @wheredecorator
 def coprod_parse_action(tokens):
@@ -141,7 +121,25 @@ def plus_parse_action(tokens):
     res = CDP.PlusN(l, where=l.where)
     return res
 
+@parse_action
+@wheredecorator
+def rvalue_minus_parse_action(tokens):
+    tokens = list(tokens[0])
+    l = make_list(tokens)
+    assert l.where.character_end is not None
+    res = CDP.RValueMinusN(l, where=l.where)
+    return res
 
+@parse_action
+@wheredecorator
+def fvalue_minus_parse_action(tokens):
+    tokens = list(tokens[0])
+    l = make_list(tokens)
+    assert l.where.character_end is not None
+    res = CDP.FValueMinusN(l, where=l.where)
+    return res
+
+    
 @parse_action
 def space_product_parse_action(tokens):
     tokens = list(tokens[0])

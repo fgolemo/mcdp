@@ -1,8 +1,8 @@
 mcdp  {
-    provides f1 [R]
-    provides f2 [R]
-    provides f3 [R]
-    requires r  [R]
+    provides f1 [m]
+    provides f2 [s]
+    provides f3 [J]
+    requires r  [m*s*J]
 
     required r >= provided f1 * provided f2 * provided f3
 }

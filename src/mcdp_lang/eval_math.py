@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from mcdp_dp import MultValueDP, MultValueNatDP
+from mcdp_dp import PlusValueRcompDP, PlusValueDP, PlusValueNatDP
 from mcdp_dp import ProductNatN, ProductN, SumNNat, WrapAMap, sum_dimensionality_works, SumNRcompMap
-from mcdp_dp.dp_multvalue import MultValueDP
-from mcdp_dp.dp_plus_value import PlusValueRcompDP, PlusValueDP, PlusValueNatDP
 from mcdp_dp.dp_sum import SumNDP
-from mcdp_maps import MinusValueMap, MultNat, SumNInt, SumNRcomp
-from mcdp_maps import PlusValueMap
+from mcdp_maps import MinusValueMap, SumNInt, SumNRcomp, PlusValueMap
 from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits, Space,
     express_value_in_isomorphic_space, get_types_universe, mult_table, Rcomp)
 from mocdp.comp.context import CResource, ValueWithUnits
@@ -120,8 +119,41 @@ def eval_rvalue_divide(op, context):
     res = get_mult_op(context, r=r, c=c2_inv)
     return res
 
+def eval_rvalue_RValueMinusN(x, context):
+    ops = get_odd_ops(unwrap_list(x.ops))    
+    rvalue = eval_rvalue(ops[0], context)
+    
+    # ops after the first should be constant
+    must_be_constants = ops[1:]
+    from mcdp_lang.eval_constant_imp import eval_constant
 
-
+    constants = []
+    for mc in must_be_constants:
+        try:
+            c  = eval_constant(mc, context)
+            constants.append(c)
+        except:
+            raise
+        
+    if len(constants) > 1:
+        raise NotImplementedError
+    
+    constant = constants[0] 
+    R = context.get_rtype(rvalue)
+    if isinstance(R, Nat) and isinstance(constant.unit, Nat):
+        dp = MinusValueNatDP(constant.value)
+    elif isinstance(R, Rcomp) and not isinstance(R, RcompUnits):
+        dp = MinusValueRcompDP(constant.value)
+    elif isinstance(R, RcompUnits):
+        dp = MinusValueDP(F=R, c_value=constant.value, c_space=constant.unit)
+    else:
+        msg = 'Could not create this operation with %s ' % R
+        raise_desc(DPSemanticError, msg, R=R)
+             
+    return create_operation(context, dp=dp, resources=[rvalue],
+                            name_prefix='_minusvalue', op_prefix='_op',
+                            res_prefix='_result')
+    
 def eval_rvalue_PlusN(x, context):
     res = eval_PlusN(x, context, wants_constant=False)
     if isinstance(res, ValueWithUnits):
@@ -215,12 +247,10 @@ def get_mult_op(context, r, c):
     if isinstance(rtype, RcompUnits) and isinstance(c.unit, RcompUnits):
         F = rtype
         R = mult_table(rtype, c.unit)
-
-        dp = MultValueDP(F=F,R=R,unit=c.unit,value=c.value) 
+        dp = MultValueDP(F=F, R=R, unit=c.unit, value=c.value) 
 
     elif isinstance(rtype, Nat) and isinstance(c.unit, Nat):
-        amap = MultNat(c.value)
-        dp = WrapAMap(amap)
+        dp = MultValueNatDP(c.value)
     else:
         msg = 'Cannot create multiplication operation.'
         raise_desc(DPInternalError, msg, rtype=rtype, c=c)
@@ -320,7 +350,9 @@ class MinusValueDP(WrapAMap):
     """ Give a positive constant here """
     def __init__(self, F, c_value, c_space):
         check_isinstance(F, RcompUnits)
-        assert c_value >= 0, c_value
+        check_isinstance(c_space, RcompUnits)
+        c_space.belongs(c_value)
+#         assert c_value >= 0, c_value
         amap = MinusValueMap(P=F, c_value=c_value, c_space=c_space)
         amap_dual = PlusValueMap(F=F, c_value=c_value, c_space=c_space, R=F)
         WrapAMap.__init__(self, amap, amap_dual)
@@ -370,7 +402,7 @@ def eval_PlusN_(constants, resources, context):
             return exactly_Rcomp(x) or isinstance(x, Nat)
             
         def exactly_Rcomp(x):
-            return isinstance(x, Rcomp) and not isinstance(x, RcompUnits)
+            return isinstance(x, Rcomp)
 
         if all(exactly_Rcomp(_) for _ in resources_types):
             n = len(resources_types)
@@ -417,8 +449,6 @@ def eval_PlusN_(constants, resources, context):
             return get_plus_op(context, r=r, c=c)
 
 
-    
-        
 @contract(r=CResource, c=ValueWithUnits)
 def get_plus_op(context, r, c):
     """ r + constant """

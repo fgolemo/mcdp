@@ -79,6 +79,9 @@ class TypesUniverse(Preorder):
         from mcdp_posets import FiniteCollectionsInclusion
         from mcdp_posets import RcompUnits
 
+        if A == B:
+            return
+        
         if isinstance(A, Nat) and isinstance(B, Nat):
             return
 
@@ -173,6 +176,7 @@ class TypesUniverse(Preorder):
             self.check_leq(A, B)
         except NotLeq as e:
             msg = 'Cannot get embedding if not preorder holds.'
+
             raise_wrapped(DPInternalError, e, msg, compact=True)
 
         from mcdp_posets import RcompUnits

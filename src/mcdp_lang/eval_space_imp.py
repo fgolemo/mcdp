@@ -5,6 +5,7 @@ from mcdp_posets import (
     FiniteCollectionsInclusion, FinitePoset, GenericInterval, Int, LowerSets,
     Nat, Poset, PosetCoproduct, PosetProduct, PosetProductWithLabels, Space,
     UpperSets)
+from mcdp_posets.rcomp import Rcomp
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPInternalError
 
@@ -35,6 +36,7 @@ def eval_space(r, context):
             CDP.SingleElementPoset: eval_space_single_element_poset,
             CDP.Nat: lambda r, context: Nat(),  # @UnusedVariable
             CDP.Int: lambda r, context: Int(),  # @UnusedVariable
+            CDP.Rcomp: lambda r, context: Rcomp(),  # @UnusedVariable
         }
 
         for klass, hook in cases.items():

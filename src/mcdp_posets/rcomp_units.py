@@ -303,9 +303,19 @@ def inverse_of_unit(a):
     s = '%s' % unit2
     return RcompUnits(unit2, s)
 
-    
+
+
+
 def rcomp_add(x, y):
-    mcdp_dev_warning('underflow, overflow, Top')
+    from .rcomp import Rcomp
+    P = Rcomp()
+    from .poset import is_top
+    x_is_top = is_top(P, x)
+    y_is_top = is_top(P, y)
+    
+    if x_is_top or y_is_top:
+        return P.get_top()
+    mcdp_dev_warning('underflow, overflow')    
     return x + y
 
 @contract(a=RcompUnits, num='int', den='int')

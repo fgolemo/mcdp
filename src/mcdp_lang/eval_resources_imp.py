@@ -5,9 +5,6 @@ from mcdp_dp import CombinedCeilMap, FloorStepMap, WrapAMap
 from mcdp_maps import PlusValueMap
 from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
     get_types_universe, poset_minima)
-from mcdp_posets import Nat
-from mcdp_posets import Rcomp
-from mcdp_posets import RcompUnits
 from mocdp.comp.context import CResource, ValueWithUnits, get_name_for_fun_node
 from mocdp.exceptions import DPSemanticError
 
@@ -95,13 +92,15 @@ def eval_rvalue(rvalue, context):
         from .eval_uncertainty import eval_rvalue_Uncertain
         from .eval_resources_imp_tupleindex import eval_rvalue_resource_label_index
         from .eval_resources_imp_unary import eval_rvalue_unary
-        
+        from .eval_math import eval_rvalue_RValueMinusN
+
         cases = {
             CDP.Power: eval_rvalue_Power,
             CDP.PowerShort: eval_rvalue_Power,
             CDP.Divide: eval_rvalue_divide,
             CDP.MultN: eval_rvalue_MultN,
             CDP.PlusN: eval_rvalue_PlusN,
+            CDP.RValueMinusN: eval_rvalue_RValueMinusN,
             CDP.OpMax: eval_rvalue_OpMax,
             CDP.OpMin: eval_rvalue_OpMin,
             CDP.TupleIndexRes: eval_rvalue_TupleIndex,
@@ -112,7 +111,6 @@ def eval_rvalue(rvalue, context):
             CDP.ApproxStepRes: eval_rvalue_approx_step,
             CDP.ApproxURes: eval_rvalue_approx_u,
             CDP.UnaryRvalue: eval_rvalue_unary,
-            CDP.RvalueMinusConstant: eval_rvalue_minus_constant,
         }
 
         for klass, hook in cases.items():
@@ -124,30 +122,30 @@ def eval_rvalue(rvalue, context):
             rvalue = recursive_print(rvalue)
             raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
 
-def eval_rvalue_minus_constant(r, context):
-    from .eval_math import MinusValueNatDP
-    from .eval_math import MinusValueRcompDP
-    from .eval_math import MinusValueDP
-        
-    rvalue = eval_rvalue(r.r, context)
-    constant = eval_constant(r.c, context)
-
-    R = context.get_rtype(rvalue)
-    
-    if isinstance(R, Nat) and isinstance(constant.unit, Nat):
-        dp = MinusValueNatDP(constant.value)
-    elif isinstance(R, Rcomp) and not isinstance(R, RcompUnits):
-        dp = MinusValueRcompDP(constant.value)
-    elif isinstance(R, RcompUnits):
-        dp = MinusValueDP(F=R, c_value=constant.value, c_space=constant.unit)
-    else:
-        msg = 'Could not create this operation with %s ' % R
-        raise_desc(DPSemanticError, msg, R=R)
-        
-             
-    return create_operation(context, dp=dp, resources=[rvalue],
-                            name_prefix='_minusvalue', op_prefix='_op',
-                            res_prefix='_result')
+# def eval_rvalue_minus_constant(r, context):
+#     from .eval_math import MinusValueNatDP
+#     from .eval_math import MinusValueRcompDP
+#     from .eval_math import MinusValueDP
+#         
+#     rvalue = eval_rvalue(r.r, context)
+#     constant = eval_constant(r.c, context)
+# 
+#     R = context.get_rtype(rvalue)
+#     
+#     if isinstance(R, Nat) and isinstance(constant.unit, Nat):
+#         dp = MinusValueNatDP(constant.value)
+#     elif isinstance(R, Rcomp) and not isinstance(R, RcompUnits):
+#         dp = MinusValueRcompDP(constant.value)
+#     elif isinstance(R, RcompUnits):
+#         dp = MinusValueDP(F=R, c_value=constant.value, c_space=constant.unit)
+#     else:
+#         msg = 'Could not create this operation with %s ' % R
+#         raise_desc(DPSemanticError, msg, R=R)
+#         
+#              
+#     return create_operation(context, dp=dp, resources=[rvalue],
+#                             name_prefix='_minusvalue', op_prefix='_op',
+#                             res_prefix='_result')
 
 
 def eval_rvalue_approx_u(r, context):

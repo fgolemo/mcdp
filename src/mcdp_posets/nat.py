@@ -156,10 +156,16 @@ def Nat_add(a, b):
     return a + b
 
 
-def Nat_mult(a, b):
-    """ Multiplication on Nat, extended for top """
+def Nat_mult_uppersets_continuous(a, b):
+    """ Multiplication on Nat, extended for top, so that top*0 = 0 """
     from mcdp_posets.poset import is_top
     N = Nat_add_Nat
+    
+    a_is_zero = a == 0
+    b_is_zero = b == 0
+    
+    if a_is_zero or b_is_zero:
+        return 0
     
     if is_top(N, a) or is_top(N, b):
         return Nat_add_top
@@ -167,6 +173,16 @@ def Nat_mult(a, b):
     mcdp_dev_warning('catch overflow')
     return a * b
 
+def Nat_mult_lowersets_continuous(a, b):
+    """ Multiplication on Nat, extended for top, so that top*0 = Top """
+    from mcdp_posets.poset import is_top
+    N = Nat_add_Nat
+     
+    if is_top(N, a) or is_top(N, b):
+        return Nat_add_top
+
+    mcdp_dev_warning('catch overflow')
+    return a * b
 
 IntBottom = "int:-inf"
 IntTop = "int:+inf"

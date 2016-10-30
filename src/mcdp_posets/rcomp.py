@@ -93,7 +93,6 @@ class RcompBase(Poset):
 
     def get_test_chain(self, n):
         s = [self.get_bottom()]
-        
         def f():
             """ Random number between 0 and 10, up to 2 significant digits. """
             x = np.random.rand() * 10
@@ -111,7 +110,7 @@ class RcompBase(Poset):
             if remaining > 0:
                 while remaining:
                     x = f()
-                    if x in other:
+                    if x in other or x in s:
                         continue
                     other.append(x)
                     remaining -= 1

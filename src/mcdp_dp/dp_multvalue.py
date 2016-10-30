@@ -7,10 +7,13 @@ from mcdp_posets.rcomp_units import inverse_of_unit
 from .dp_generic_unary import WrapAMap
 from .dp_sum import MultValueMap
 from mcdp_maps.constant_map import ConstantPosetMap
+from mcdp_posets.nat import Nat
+from mcdp_maps.mult_nat import MultNat
 
 
 __all__ = [
     'MultValueDP',
+    'MultValueNatDP',
 ]
 
 class MultValueDP(WrapAMap):
@@ -81,12 +84,15 @@ class MultValueDP(WrapAMap):
             
         WrapAMap.__init__(self, amap, amap_dual)
 
+
+
 class MultValueDPHelper1Map(Map):
     """
         The case c == 0.
         
         Implements:
-                r ->  Top
+                r ->  Top if r = 0
+                      undefined if r >= 0 
     """
     def __init__(self, dom, cod):
         Map.__init__(self, dom=dom, cod=cod)
@@ -116,4 +122,69 @@ class MultValueDPHelper2Map(Map):
         else:
             return 0.0
         
+
+class MultValueNatDPHelper2Map(Map):
+    """
+        Implements:
+         r |->   if r = 0, then f must be <= 0
+                 if r > 0, then f must be <= 0
+                 if r = Top, then f <= Top
+                 
+    """
+    def __init__(self):
+        dom = cod = Nat()
+        Map.__init__(self, dom=dom, cod=cod)
         
+    def _call(self, x):
+        if is_top(self.dom, x):
+            return self.cod.get_top()
+        else:
+            return 0
+        
+        
+class MultValueNatDP(WrapAMap):
+    """
+
+        f * c <= r 
+    """
+    
+    def __init__(self, value):
+        N = Nat()
+        N.belongs(value)
+        
+        amap = MultNat(value)
+        
+        # if value = Top:
+        #    f |-> f * Top 
+        #     
+        if is_top(N, value):
+            amap_dual = MultValueNatDPHelper2Map()
+        elif N.equal(0, value):
+            # r |-> Top
+            amap_dual = ConstantPosetMap(N, N, N.get_top())
+        else:    
+            # f * c <= r
+            # f <= r / c
+            # r |-> floor(r/c)
+            amap_dual = MultValueNatDPhelper(value)
+            
+        WrapAMap.__init__(self, amap, amap_dual)
+        
+class MultValueNatDPhelper(Map):
+    """  r |-> floor(r/c) """
+    
+    @contract(c='int')
+    def __init__(self, c):
+        check_isinstance(c, int)
+        cod = dom = Nat()
+        Map.__init__(self, dom, cod)
+        self.c = c
+        
+    def _call(self, r):
+        if is_top(self.dom, r):
+            return self.cod.get_top()
+        else:
+            fmax = int(np.floor( float(r) / self.c ))
+            return fmax
+        
+import numpy as np

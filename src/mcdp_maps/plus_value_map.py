@@ -4,8 +4,9 @@ from contracts.utils import check_isinstance
 from mcdp_posets import (Map, MapNotDefinedHere, RcompUnits,
     express_value_in_isomorphic_space)
 from mcdp_posets import Rcomp
-from mocdp.exceptions import mcdp_dev_warning
 from mcdp_posets.poset import is_top
+from mocdp.exceptions import mcdp_dev_warning
+from mcdp_posets.rcomp_units import rcomp_add
 
 
 __all__ = [
@@ -48,8 +49,8 @@ class PlusValueRcompMap(Map):
     """
 
     def __init__(self, c_value):
-        check_isinstance(c_value, float)
         dom = Rcomp()
+        dom.belongs(c_value)
         cod = dom
         Map.__init__(self, dom=dom, cod=cod)
         self.c_value = c_value
@@ -58,20 +59,16 @@ class PlusValueRcompMap(Map):
         return "+ %s" % self.dom.format(self.c_value)
 
     def _call(self, x):
-        if is_top(self.dom, x):
-            return self.cod.get_top()
-        mcdp_dev_warning('overflow/underflow')
-        return x + self.c_value
+        return rcomp_add(x, self.c_value)
 
 class MinusValueRcompMap(Map):
     """ 
         Implements _ -> _ - c  for Rcomp.    
     """
-    
 
     def __init__(self, c_value):
-        check_isinstance(c_value, float)
         dom = Rcomp()
+        dom.belongs(c_value)
         cod = dom
         Map.__init__(self, dom=dom, cod=cod)
         self.c = c_value
@@ -84,6 +81,15 @@ class MinusValueRcompMap(Map):
     def _call(self, x):
         P = self.dom
         
+        if is_top(self.dom, self.c):
+            #  r = 0 -> f empty
+            #  r = 1 -> f empty
+            #  r = Top -> f <= Top
+            if is_top(self.dom, x):
+                return self.top
+            else:
+                raise MapNotDefinedHere()
+            
         if P.equal(x, self.c):
             return 0.0
         else:
@@ -130,6 +136,30 @@ class MinusValueMap(Map):
         return "MinusValueMap(-%s)" % self.c_space.format(self.c_value)
 
     def _call(self, x):
+        
+        """
+        if value is Top:
+        
+            r |->   MapNotDefinedHere   if r != Top
+                    Top  if r == Top  
+        
+        otherwise:
+        
+            r |->   MapNotDefinedHere   if r < value:
+                    r - value  if r >= value 
+        f - Top <= r 
+    
+    """
+        if is_top(self.dom, self.c):
+            #  r = 0 -> f empty
+            #  r = 1 -> f empty
+            #  r = Top -> f <= Top
+            if is_top(self.dom, x):
+                return self.top
+            else:
+                raise MapNotDefinedHere()
+        
+        
         if self.P.equal(x, self.c):
             return 0.0
         else:
