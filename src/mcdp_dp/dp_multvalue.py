@@ -4,6 +4,7 @@ from contracts.utils import check_isinstance
 from mcdp_posets import Map, MapNotDefinedHere
 from mcdp_posets import RcompUnits
 from mcdp_posets import is_top
+from mcdp_posets.rcomp_units import inverse_of_unit
 
 from .dp_generic_unary import WrapAMap
 from .dp_sum import MultValueMap
@@ -66,7 +67,7 @@ class MultValueDP(WrapAMap):
         check_isinstance(unit, RcompUnits)
 
         amap = MultValueMap(F=F, R=R, unit=unit, value=value)
-        # unit2 = inverse_of_unit(unit)
+        
         # if value = Top:
         #    f |-> f * Top 
         #     
@@ -76,7 +77,8 @@ class MultValueDP(WrapAMap):
             amap_dual = MultValueDPHelper1Map(R, F)
         else:    
             value2 = 1.0 / value
-            amap_dual = MultValueMap(F=R, R=F, value=value2)
+            unit2 = inverse_of_unit(unit)
+            amap_dual = MultValueMap(F=R, R=F, unit=unit2, value=value2)
             
         WrapAMap.__init__(self, amap, amap_dual)
 

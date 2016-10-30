@@ -296,12 +296,12 @@ def mult_table(a, b):
     return RcompUnits(unit2, s)
 
 # 
-# @contract(a=RcompUnits)
-# def inverse_of_unit(a):
-#     check_isinstance(a, RcompUnits)
-#     unit2 = 1 / a.units
-#     s = '%s' % unit2
-#     return RcompUnits(unit2, s)
+@contract(a=RcompUnits)
+def inverse_of_unit(a):
+    check_isinstance(a, RcompUnits)
+    unit2 = 1 / a.units
+    s = '%s' % unit2
+    return RcompUnits(unit2, s)
 
     
 def rcomp_add(x, y):
