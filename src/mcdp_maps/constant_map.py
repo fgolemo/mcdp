@@ -5,6 +5,7 @@ from mocdp.exceptions import do_extra_checks
 
 __all__ = [
     'ConstantMap',
+    'ConstantPosetMap',
 ]
 
 
@@ -26,3 +27,17 @@ class ConstantMap(Map):
         assert x == (), x
         return self.value 
 
+
+class ConstantPosetMap(Map):
+    """ 
+        A map dom -> constant
+    """
+
+    def __init__(self, dom, cod, value):
+        cod.belongs(value)
+        Map.__init__(self, dom, cod)
+        self.value = value
+
+    def _call(self, x):  # @UnusedVariable
+        return self.value
+     

@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance
-from mcdp_posets import Map, MapNotDefinedHere
-from mcdp_posets import RcompUnits
-from mcdp_posets import is_top
+from mcdp_posets import Map, MapNotDefinedHere, RcompUnits, is_top
 from mcdp_posets.rcomp_units import inverse_of_unit
 
 from .dp_generic_unary import WrapAMap
 from .dp_sum import MultValueMap
+from mcdp_maps.constant_map import ConstantPosetMap
 
 
 __all__ = [
@@ -29,10 +28,10 @@ class MultValueDP(WrapAMap):
         
             if c == 0:
             
-                we have 
+                we have simply:
                 
-                r ->  if r = 0:   f <= Top
-                      if r > 0:   no solutions
+                r ⟼  Top
+                      
             
             if c != Top:
                 
@@ -45,8 +44,8 @@ class MultValueDP(WrapAMap):
             if c == Top:
             
                 r |->   if r = 0, then f must be <= 0
+                        if r > 0, then f <= 0 
                         if r = Top, then f <= Top
-                        Not Defined if r > 0 but not Top
             
         
     From: The Cuntz semigroup and domain theory
@@ -74,7 +73,7 @@ class MultValueDP(WrapAMap):
         if is_top(unit, value):
             amap_dual = MultValueDPHelper2Map(R, F)
         elif unit.equal(0.0, value):
-            amap_dual = MultValueDPHelper1Map(R, F)
+            amap_dual = ConstantPosetMap(R, F, F.get_top())
         else:    
             value2 = 1.0 / value
             unit2 = inverse_of_unit(unit)
@@ -82,14 +81,12 @@ class MultValueDP(WrapAMap):
             
         WrapAMap.__init__(self, amap, amap_dual)
 
-
-
-
 class MultValueDPHelper1Map(Map):
     """
+        The case c == 0.
+        
         Implements:
-                r ->  if r = 0:   f <= Top
-                      if r > 0:   no solutions
+                r ->  Top
     """
     def __init__(self, dom, cod):
         Map.__init__(self, dom=dom, cod=cod)
@@ -106,20 +103,17 @@ class MultValueDPHelper2Map(Map):
     """
         Implements:
          r |->   if r = 0, then f must be <= 0
+                 if r > 0, then f must be <= 0
                  if r = Top, then f <= Top
-                 Not Defined if r > 0 but not Top
+                 
     """
     def __init__(self, dom, cod):
         Map.__init__(self, dom=dom, cod=cod)
         
     def _call(self, x):
-        # 0 -> 0
-        if self.dom.equal(x, 0.0):
-            return 0.0
-        # Top -> Top
         if is_top(self.dom, x):
             return self.cod.get_top()
-        # otherwise undefined
-        raise MapNotDefinedHere(x)
+        else:
+            return 0.0
         
         

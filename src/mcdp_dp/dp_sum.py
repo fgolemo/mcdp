@@ -5,12 +5,12 @@ from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
 from mcdp_dp.primitive import NotSolvableNeedsApprox, ApproximableDP
 from mcdp_posets import Map, Nat, PosetProduct, Rcomp, RcompUnits
-from mcdp_posets.poset import is_top
+from mcdp_posets import is_top
+from mcdp_posets.rcomp import Rcomp_multiply_upper_topology
 from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
 
 from .dp_generic_unary import WrapAMap
-from mcdp_posets.rcomp import Rcomp_multiply_upper_topology
 
 
 #

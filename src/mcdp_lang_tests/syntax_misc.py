@@ -19,6 +19,7 @@ import numpy as np
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
 from mcdp_lang_tests.utils import assert_parse_ndp_semantic_error
+from mcdp_posets.uppersets import LowerSets
 
 
 @comptest
@@ -634,7 +635,28 @@ mcdp {
     assert_parse_ndp_semantic_error(s)
 
 @comptest
-def check_lang84(): # TODO: rename
+def check_lang84(): # TODO: rename to LF
+    
+    # In LF,
+    F = parse_poset('m')
+    LF = LowerSets(F)
+    
+    
+    lf0 = F.Ls(set([]))
+    lf1 = F.L(0.0)
+    lf2 = F.L(5.0)
+    lf3 = F.L(F.get_top())
+    
+    # the bottom is lf3
+    LF.check_leq(lf3, lf2)
+    LF.check_leq(lf3, lf1)
+    LF.check_leq(lf3, lf0)
+    
+    LF.check_leq(lf2, lf1)
+    LF.check_leq(lf2, lf0)
+    
+    LF.check_leq(lf1, lf0)
+    
     pass
 
 @comptest

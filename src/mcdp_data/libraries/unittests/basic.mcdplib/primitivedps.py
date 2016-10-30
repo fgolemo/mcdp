@@ -20,21 +20,21 @@ def MultValueDP1nonzero():
     U = parse_poset('s')
     v = 3.0
     R = parse_poset('m*s')
-    return MultValueDP(F=F, R=R, unit=unit, value=value)
+    return MultValueDP(F=F, R=R, unit=U, value=v)
 
 def MultValueDP2zero():
     F = parse_poset('m')    
     U = parse_poset('s')
     v = 0.0
     R = parse_poset('m*s')
-    return MultValueDP(F=F, R=R, unit=unit, value=value)
+    return MultValueDP(F=F, R=R, unit=U, value=v)
 
 def MultValueDP3top():
     F = parse_poset('m')    
     U = parse_poset('s')
     v = U.get_top()
     R = parse_poset('m*s')
-    return MultValueDP(F=F, R=R, unit=unit, value=value)
+    return MultValueDP(F=F, R=R, unit=U, value=v)
 
 def PlusValueRcompDP():
     from mcdp_dp import PlusValueRcompDP
