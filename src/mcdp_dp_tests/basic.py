@@ -2,7 +2,7 @@
 from contracts.utils import raise_wrapped
 from mcdp_dp import NotSolvableNeedsApprox
 from mcdp_posets import LowerSets, NotBounded, UpperSets, NotLeq
-from mcdp_tests.generation import for_all_dps
+from mcdp_tests.generation import for_all_dps, primitive_dp_test
 
 
 @for_all_dps
@@ -62,53 +62,57 @@ def try_with_approximations(id_dp, dp, test):
     
 @for_all_dps
 def check_solve_f_chain(id_dp, dp):
-    from mcdp_posets.utils import poset_check_chain
-
-    F = dp.get_fun_space()
-
-    f_chain = F.get_test_chain(n=5)
-    poset_check_chain(F, f_chain)
-
-    try:
-        trchain = map(dp.solve, f_chain)
-    except NotSolvableNeedsApprox:
-        return try_with_approximations(id_dp, dp, check_solve_r_chain)
-
-    R = dp.get_res_space()
-    UR = UpperSets(R)
-    try:
-        poset_check_chain(UR, trchain)
-    except ValueError as e:
-        msg = 'The map solve() for %r is not monotone.' % id_dp
-        raise_wrapped(Exception, e, msg, f_chain=f_chain, trchain=trchain, compact=True)
+    with primitive_dp_test(id_dp, dp):
+    
+        from mcdp_posets.utils import poset_check_chain
+    
+        F = dp.get_fun_space()
+    
+        f_chain = F.get_test_chain(n=5)
+        poset_check_chain(F, f_chain)
+    
+        try:
+            trchain = map(dp.solve, f_chain)
+        except NotSolvableNeedsApprox:
+            return try_with_approximations(id_dp, dp, check_solve_r_chain)
+    
+        R = dp.get_res_space()
+        UR = UpperSets(R)
+        try:
+            poset_check_chain(UR, trchain)
+        except ValueError as e:
+            msg = 'The map solve() for %r is not monotone.' % id_dp
+            raise_wrapped(Exception, e, msg, f_chain=f_chain, trchain=trchain, compact=True)
 
 
 
 @for_all_dps
 def check_solve_r_chain(id_dp, dp):
-    from mcdp_posets.utils import poset_check_chain
-
-    R = dp.get_res_space()
-    F = dp.get_fun_space()
-    LF = LowerSets(F)
+    with primitive_dp_test(id_dp, dp):
     
-    r_chain = R.get_test_chain(n=5)
-    poset_check_chain(R, r_chain)
-
-    try:
-        lfchain = map(dp.solve_r, r_chain)
-    except NotSolvableNeedsApprox:
-        return try_with_approximations(id_dp, dp, check_solve_r_chain)
+        from mcdp_posets.utils import poset_check_chain
     
-    try:
-        # now, notice that we need to reverse this
-        lfchain_reversed = list(reversed(lfchain))
-        poset_check_chain(LF, lfchain_reversed)
-    except ValueError as e:
-        msg = 'The map solve() for %r is not monotone.' % id_dp
-        raise_wrapped(Exception, e, msg, r_chain=r_chain, lfchain=lfchain,
-                      lfchain_reversed=lfchain_reversed, compact=True)
-
-
-
+        R = dp.get_res_space()
+        F = dp.get_fun_space()
+        LF = LowerSets(F)
+        
+        r_chain = R.get_test_chain(n=5)
+        poset_check_chain(R, r_chain)
+    
+        try:
+            lfchain = map(dp.solve_r, r_chain)
+        except NotSolvableNeedsApprox:
+            return try_with_approximations(id_dp, dp, check_solve_r_chain)
+        
+        try:
+            # now, notice that we need to reverse this
+            lfchain_reversed = list(reversed(lfchain))
+            poset_check_chain(LF, lfchain_reversed)
+        except ValueError as e:
+            msg = 'The map solve_r() for %r is not monotone.' % id_dp
+            raise_wrapped(Exception, e, msg, r_chain=r_chain, lfchain=lfchain,
+                          lfchain_reversed=lfchain_reversed, compact=True)
+    
+    
+    
 

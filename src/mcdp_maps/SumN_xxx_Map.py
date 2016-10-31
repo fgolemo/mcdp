@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
+import functools
+
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
 from mcdp_posets import (Int, Poset, Space, get_types_universe, Map, Nat, PosetProduct,
                          Rcomp, RcompUnits)
-from mocdp.exceptions import mcdp_dev_warning
+from mcdp_posets.poset import is_top
+from mcdp_posets.rcomp_units import rcomp_add
 import numpy as np
 
 
@@ -42,7 +45,6 @@ class SumNMap(Map):
     def __repr__(self):
         return 'SumNMap(%s → %s)' % (self.dom, self.cod)
     
-    
 class SumNRcompMap(Map):
     """ Sum of Rcomp. """
     
@@ -55,9 +57,7 @@ class SumNRcompMap(Map):
         Map.__init__(self, dom, cod)
         
     def _call(self, x):
-        res = sum(x)
-        mcdp_dev_warning('overflow, underflow')
-        return res
+        return functools.reduce(rcomp_add, x)
 
     def __repr__(self):
         return 'SumNRcompMap(%s)' % self.n
@@ -82,7 +82,7 @@ def sum_units(Fs, values, R):
         check_isinstance(Fi, RcompUnits)
     res = 0.0
     for Fi, x in zip(Fs, values):
-        if Fi.equal(x, Fi.get_top()):
+        if is_top(Fi, x):
             return R.get_top()
 
         # reasonably sure this is correct...
@@ -97,10 +97,6 @@ def sum_units(Fs, values, R):
         return R.get_top()
 
     return res
-
-
-
-
 
 
 class SumNIntMap(Map):
@@ -145,11 +141,11 @@ class SumNNatsMap(Map):
 
     def _call(self, x):
         assert isinstance(x, tuple) and len(x) == self.n
-        N = self.cod
         top = self.top
         res = 0
+        N = self.dom[0]
         for xi in x:
-            if N.equal(x, top):
+            if is_top(N, xi):
                 return top
             res += xi
         if np.isinf(res):

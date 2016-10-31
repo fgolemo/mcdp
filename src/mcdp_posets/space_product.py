@@ -27,6 +27,11 @@ class SpaceProduct(Space):
         return self.subs[index]
 
     def check_equal(self, a, b):
+        # first check that these belongs at all
+        for c in [a,b]:
+            if not isinstance(c, tuple) or len(c) != len(self.subs):
+                msg = 'Invalid argument is not a tuple.'
+                raise_desc(TypeError, msg, argument=c)
         problems = []
         for i, (sub, x, y) in enumerate(zip(self.subs, a, b)):
             try:

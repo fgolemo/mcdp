@@ -79,5 +79,5 @@ class WrapAMap(EmptyDP):
 
     def __repr__(self):
         if self.amap_dual is not None:
-            return 'WrapAMap(%r,%r)' % (self.amap, self.amap_dual)
-        return 'WrapAMap(%r)' % self.amap
+            return '%s(%r,%r)' % (type(self).__name__, self.amap, self.amap_dual)
+        return '%s(%r)' % (type(self).__name__, self.amap)

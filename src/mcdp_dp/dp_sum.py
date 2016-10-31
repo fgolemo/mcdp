@@ -13,6 +13,8 @@ __all__ = [
     'SumNNatDP',
     'SumNRcompDP',
     'SumNIntDP',
+    'SumNLDP',
+    'SumNUDP',
 ]
 
 class SumNDP(WrapAMap, ApproximableDP):

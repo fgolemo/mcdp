@@ -71,7 +71,7 @@ class InvMultValueNatMap(Map):
             return self.cod.get_top()
         else:
             if is_top(self.dom, x):
-                return self.cod.get_top()
+                return 0
             else:
                 if is_top(self.dom, self.value):
                     return 0
@@ -99,12 +99,16 @@ class InvMultValueMap(Map):
         # assert (dom * space = cod)
         Map.__init__(self, dom, cod)
 
+    def __repr__(self):
+        return 'InvMultValueMap(%s->%s, %s : %s)' % (self.dom, self.cod, self.space,
+                                                     self.space.format(self.value))
+        
     def _call(self, x):
         if self.dom.leq(self.value, 0.0): # value == 0
             return self.cod.get_top()
-        else:
+        else: # value != 0
             if is_top(self.dom, x):
-                return self.cod.get_top()
+                return 0.0
             else:
                 if is_top(self.dom, self.value):
                     return 0.0

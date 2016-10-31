@@ -87,7 +87,6 @@ def InvMultValueDP3top():
     R = parse_poset('m*s')
     return InvMultValueDP(F=F, R=R, unit=U, value=v)
 
-
 def MultValueDP1nonzero():
     F = parse_poset('m')    
     U = parse_poset('s')
@@ -342,4 +341,21 @@ def MeetNDP_1():
     P = parse_poset('Nat')
     return MeetNDP(n, P)
     
+
+from mcdp_dp import SumNLDP, SumNUDP
+
+def SumNLDP_1():
+    m = parse_poset('m')
+    Fs = (m, m)
+    R = m
+    nl = 5
+    return SumNLDP(Fs=Fs,R=R,n=nl)
+
+def SumNUDP_1():
+    m = parse_poset('m')
+    Fs = (m, m)
+    R = m
+    nu = 5
+    return SumNUDP(Fs=Fs,R=R,n=nu)
+ 
 
