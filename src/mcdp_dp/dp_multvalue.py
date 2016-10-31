@@ -198,6 +198,7 @@ class InvMultValueRcompDP(WrapAMap):
     def __init__(self, value):
         raise NotImplementedError
 
+
 class InvMultValueDP(WrapAMap):
     def __init__(self, F, R, unit, value):
         check_isinstance(F, RcompUnits)

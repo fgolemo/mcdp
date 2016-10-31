@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 from mcdp_dp.primitive import NotSolvableNeedsApprox
+from mcdp_dp_tests.dual import dual01_chain
 from mcdp_posets import UpperSets
 from mcdp_tests.generation import for_all_nameddps
 from mocdp.comp.interfaces import NotConnected
-from mcdp_dp_tests.dual import dual01_chain
+from mcdp_dp_tests.basic import check_solve_r_chain, check_solve_f_chain
+
 
 @for_all_nameddps
 def ndp_dual01_chain(id_ndp, ndp):
@@ -23,9 +25,10 @@ def ndp_dual01_chain(id_ndp, ndp):
     dp = ndp.get_dp()
     
     return dual01_chain(id_ndp, dp)
+
     
 @for_all_nameddps
-def check_solve_r_chain(id_ndp, ndp):
+def ndp_check_solve_r_chain(id_ndp, ndp):
     if '_inf' in id_ndp:
         # plusinvnat3b_inf
         print('Assuming that the suffix "_inf" in %r means that this will not converge'
@@ -45,7 +48,7 @@ def check_solve_r_chain(id_ndp, ndp):
 
 
 @for_all_nameddps
-def check_solve_f_chain(id_ndp, ndp):
+def ndp_check_solve_f_chain(id_ndp, ndp):
     if '_inf' in id_ndp:
         # plusinvnat3b_inf
         print('Assuming that the suffix "_inf" in %r means that this will not converge'
