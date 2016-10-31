@@ -1,20 +1,21 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc
+from mcdp_lang.parse_actions import decorate_add_where
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.exceptions import DPInternalError, DPSemanticError
 
 from .namedtuple_tricks import recursive_print
-from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import unwrap_list
 
 
 CDP = CDPLanguage
 
+@decorate_add_where
 @contract(returns=TemplateForNamedDP)
 def eval_template(r, context):  # @UnusedVariable
-    with add_where_information(r.where):
+#     with add_where_information(r.where):
         cases = {
             CDP.LoadTemplate: eval_template_load,
             CDP.TemplateSpec: eval_template_spec,

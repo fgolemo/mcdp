@@ -18,6 +18,7 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mcdp_lang.parse_actions import decorate_add_where
 
 
 CDP = CDPLanguage
@@ -25,7 +26,7 @@ CDP = CDPLanguage
 class NotConstant(DPSemanticError):
     pass 
          
-
+@decorate_add_where
 @contract(returns=ValueWithUnits)
 def eval_constant(op, context):
     """ 
@@ -35,9 +36,8 @@ def eval_constant(op, context):
     from .eval_math import (eval_constant_divide, eval_PlusN_as_constant,
                             eval_RValueMinusN_as_constant, eval_MultN_as_constant)
 
-
-    with add_where_information(op.where):
-
+#     with add_where_information(op.where):
+    if True:
         if isinstance(op, (CDP.Resource)):
             raise NotConstant(str(op))
 

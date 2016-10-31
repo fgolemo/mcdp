@@ -6,7 +6,6 @@ from .max1map import *
 from .meet_map import *
 from .misc_imp import *
 from .mult_value import *
-from .plus_nat import *
 from .plus_value_map import *
 from .SumN_xxx_Map import *
 from .ProductN_xxx_Map import *

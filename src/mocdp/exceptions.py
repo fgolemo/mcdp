@@ -3,6 +3,7 @@ from contextlib import contextmanager
 from contracts import all_disabled
 import getpass
 import sys
+from contracts.utils import indent
 
 
 class MCDPException(Exception):
@@ -25,7 +26,7 @@ class MCDPExceptionWithWhere(MCDPException):
         assert isinstance(error, str), error
         s = ""
         if stack:
-            s += '\n' + stack + '\n'
+            s += '\n' + indent(stack,'S ') + '\n'
         s += error
         if where is not None:
             from contracts.interface import add_prefix

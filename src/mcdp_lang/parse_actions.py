@@ -3,7 +3,7 @@ from contextlib import contextmanager
 
 from contracts import contract
 from contracts.interface import Where
-from contracts.utils import indent, raise_desc, raise_wrapped
+from contracts.utils import indent, raise_desc, raise_wrapped, check_isinstance
 from mocdp import logger
 from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
     MCDPExceptionWithWhere, do_extra_checks, mcdp_dev_warning)
@@ -14,14 +14,37 @@ from .pyparsing_bundled import ParseException, ParseFatalException
 from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list
 import traceback
-
+import sys
+from decorator import decorator
 
 CDP = CDPLanguage
+
+# 
+# def decorate_add_where(f):
+#     def f2(r, context):
+#         where = r.where
+#         try:
+#             return f(r, context)
+#         except MCDPExceptionWithWhere as e:
+#             _, _, tb = sys.exc_info()
+#             raise_with_info(e, where, nice_stack(tb))
+#     return f2
+
+@decorator
+def decorate_add_where(f, *args, **kwargs):
+    where = args[0].where
+    try:
+        return f(*args, **kwargs)
+    except MCDPExceptionWithWhere as e:
+        _, _, tb = sys.exc_info()
+        raise_with_info(e, where, nice_stack(tb))
+
+
 
 @contextmanager
 def add_where_information(where):
     """ Adds where field to DPSyntaxError or DPSemanticError thrown by code. """
-    active = True
+    active = False
     if not active:
         logger.debug('Note: Error tracing disabled in add_where_information().')
         
@@ -31,24 +54,32 @@ def add_where_information(where):
     else:
         try:
             yield
-#         except DPInternalError as e:
-#             raise
         except MCDPExceptionWithWhere as e:
             mcdp_dev_warning('add magic traceback handling here')
-            existing = getattr(e, 'where', None)
-            if existing: 
-                raise
-            use_where = existing if existing is not None else where
-            error = e.error
-            
-            stack = traceback.extract_stack()[:-2]
-            
-            stack_info = ''.join(traceback.format_list(stack))
-#             error += '\n' + 'added by add_where_information(%s):' % (id(where))
-#             error += '\n' + indent(stack_info, 'S: ')
-            
-            e = type(e)(error, where=use_where, stack=stack_info)
-            raise e
+            _, _, tb = sys.exc_info()
+            raise_with_info(e, where, nice_stack(tb))
+
+def nice_stack(tb):
+    lines = traceback.format_tb(tb)
+    # remove contracts stuff
+    lines = [_ for _ in lines if not '/src/contracts' in _]
+    s = "".join(lines)
+    import os
+    curpath = os.path.realpath(os.getcwd())
+    s = s.replace(curpath, '.')
+    return s
+    
+
+def raise_with_info(e, where, stack):
+    check_isinstance(e, MCDPExceptionWithWhere)
+    existing = getattr(e, 'where', None)
+    if existing: 
+        raise
+    use_where = existing if existing is not None else where
+    error = e.error
+
+    e = type(e)(error, where=use_where, stack=stack)
+    raise e
 
 def wheredecorator(b):
     def bb(tokens, loc, s):

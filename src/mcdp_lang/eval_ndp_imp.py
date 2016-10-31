@@ -6,10 +6,10 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (
     CatalogueDP, Conversion, JoinNDP, MeetNDualDP, get_conversion, make_series)
+from mcdp_lang.parse_actions import decorate_add_where
 from mcdp_posets import (
     FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe)
 from mocdp import ATTRIBUTE_NDP_MAKE_FUNCTION
-from mocdp import logger
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
 from mocdp.comp.composite_makecanonical import cndp_makecanonical
@@ -35,9 +35,11 @@ from .utils_lists import get_odd_ops, unwrap_list
 
 CDP = CDPLanguage
 
+@decorate_add_where
 @contract(returns=NamedDP)
 def eval_ndp(r, context):  # @UnusedVariable
-    with add_where_information(r.where):
+#     with add_where_information(r.where):
+    if True:
         # TODO: remove
         if isinstance(r, CDP.VariableRef):
             try:
@@ -497,9 +499,9 @@ def add_constraint(context, resource, function):
         raise_wrapped(DPInternalError, e, msg, resource=resource, function=function,
                       R1=R1, F2=F2)
         
-
+@decorate_add_where
 def eval_statement(r, context):
-    with add_where_information(r.where):
+#     with add_where_information(r.where):
         from mcdp_lang.eval_resources_imp import eval_rvalue
         from mcdp_lang.eval_lfunction_imp import eval_lfunction
 
@@ -693,12 +695,12 @@ def eval_build_problem(r, context):
     statements = unwrap_list(r.statements)
 
     for s in statements:
-        with add_where_information(s.where):
-            try:
-                eval_statement(s, context)
-            except DPInternalError:
-                logger.error(recursive_print(s))
-                raise
+#         with add_where_information(s.where):
+#             try:
+        eval_statement(s, context)
+#             except DPInternalError:
+#                 logger.error(recursive_print(s))
+#                 raise
 
     # take() optimization
     context.ifun_finish()

@@ -13,13 +13,15 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from .parse_actions import decorate_add_where
 
 
 CDP = CDPLanguage
 
+@decorate_add_where
 @contract(returns=Space)
 def eval_space(r, context):
-    with add_where_information(r.where):
+#     with add_where_information(r.where):
         cases = {
             CDP.RcompUnit: eval_space_rcompunit,
             CDP.SpaceProduct: eval_space_spaceproduct,

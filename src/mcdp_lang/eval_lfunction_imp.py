@@ -1,21 +1,23 @@
 # -*- coding: utf-8 -*-
+import traceback
+
 from contracts import contract
-from contracts.utils import raise_desc, check_isinstance, raise_wrapped
+from contracts.utils import raise_desc, check_isinstance, raise_wrapped, indent
 from mcdp_dp import (InvMult2, InvPlus2, InvPlus2Nat, InvMult2Nat,
                      InvMultValueNatDP, JoinNDualDP, MeetNDualDP, PlusValueNatDP,
                      PlusValueRcompDP, PlusValueDP)
+from mcdp_lang.parse_actions import raise_with_info, decorate_add_where
 from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table,
     poset_maxima)
 from mcdp_posets import Rcomp
 from mocdp.comp.context import CFunction, get_name_for_res_node, ValueWithUnits
 from mocdp.exceptions import (DPInternalError, DPNotImplementedError,
-    DPSemanticError, mcdp_dev_warning)
+    DPSemanticError, mcdp_dev_warning, MCDPExceptionWithWhere)
 
 from .helpers import (get_function_possibly_converted,
     create_operation_lf)
 from .helpers import get_valuewithunits_as_function
 from .namedtuple_tricks import recursive_print
-from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
 
@@ -30,49 +32,50 @@ __all__ = [
 def eval_lfunction_Function(lf, context):
     return context.make_function(dp=lf.dp.value, s=lf.s.value)
 
+@decorate_add_where
 @contract(returns=CFunction)
 def eval_lfunction(lf, context):
-    with add_where_information(lf.where):
+    constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
+                 CDP.Top, CDP.Bottom, CDP.Minimals, CDP.Maximals)
 
-        constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
-                     CDP.Top, CDP.Bottom, CDP.Minimals, CDP.Maximals)
+    if isinstance(lf, constants):
+        from mcdp_lang.eval_constant_imp import eval_constant
+        res = eval_constant(lf, context)
+        assert isinstance(res, ValueWithUnits)
+        return get_valuewithunits_as_function(res, context)
+    
+    from .eval_lfunction_imp_maketuple import eval_MakeTuple_as_lfunction
+    from .eval_uncertainty import eval_lfunction_Uncertain
+    from .eval_lfunction_imp_label_index import eval_lfunction_label_index
+    from .eval_lfunction_imp_label_index import eval_lfunction_tupleindexfun
+    
+    cases = {
+        CDP.Function: eval_lfunction_Function,
+        CDP.NewResource: eval_lfunction_newresource,
+        CDP.MakeTuple: eval_MakeTuple_as_lfunction,
+        CDP.UncertainFun: eval_lfunction_Uncertain,
+        CDP.DisambiguationFun: eval_lfunction_disambiguation,
+        CDP.FunctionLabelIndex: eval_lfunction_label_index,
+        CDP.TupleIndexFun: eval_lfunction_tupleindexfun,
+        CDP.AnyOfFun: eval_lfunction_anyoffun,
+        CDP.OpMinF: eval_lfunction_opminf,
+        CDP.OpMaxF: eval_lfunction_opmaxf,
+        CDP.InvMult: eval_lfunction_invmult,
+        CDP.InvPlus: eval_lfunction_invplus,
+        CDP.VariableRef: eval_lfunction_variableref,
+        CDP.FValueMinusN: eval_lfunction_FValueMinusN,
+    }
 
-        if isinstance(lf, constants):
-            from mcdp_lang.eval_constant_imp import eval_constant
-            res = eval_constant(lf, context)
-            assert isinstance(res, ValueWithUnits)
-            return get_valuewithunits_as_function(res, context)
-        
-        from .eval_lfunction_imp_maketuple import eval_MakeTuple_as_lfunction
-        from .eval_uncertainty import eval_lfunction_Uncertain
-        from .eval_lfunction_imp_label_index import eval_lfunction_label_index
-        from .eval_lfunction_imp_label_index import eval_lfunction_tupleindexfun
-        
-        cases = {
-            CDP.Function: eval_lfunction_Function,
-            CDP.NewResource: eval_lfunction_newresource,
-            CDP.MakeTuple: eval_MakeTuple_as_lfunction,
-            CDP.UncertainFun: eval_lfunction_Uncertain,
-            CDP.DisambiguationFun: eval_lfunction_disambiguation,
-            CDP.FunctionLabelIndex: eval_lfunction_label_index,
-            CDP.TupleIndexFun: eval_lfunction_tupleindexfun,
-            CDP.AnyOfFun: eval_lfunction_anyoffun,
-            CDP.OpMinF: eval_lfunction_opminf,
-            CDP.OpMaxF: eval_lfunction_opmaxf,
-            CDP.InvMult: eval_lfunction_invmult,
-            CDP.InvPlus: eval_lfunction_invplus,
-            CDP.VariableRef: eval_lfunction_variableref,
-            CDP.FValueMinusN: eval_lfunction_FValueMinusN,
-        }
+    for klass, hook in cases.items():
+        if isinstance(lf, klass):
+            return hook(lf, context)
 
-        for klass, hook in cases.items():
-            if isinstance(lf, klass):
-                return hook(lf, context)
+    if True: # pragma: no cover
+        r = recursive_print(lf)
+        msg = 'eval_lfunction(): cannot evaluate this as a function:'
+        msg += '\n' + indent(r, '  ')
+        raise_desc(DPInternalError, msg) 
 
-        if True: # pragma: no cover
-            r = recursive_print(lf)
-            msg = 'eval_lfunction(): cannot evaluate as a function.'
-            raise_desc(DPInternalError, msg, r=r)
 
 def eval_lfunction_opminf(lf, context):
     """

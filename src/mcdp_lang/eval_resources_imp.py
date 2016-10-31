@@ -14,6 +14,7 @@ from .helpers import create_operation, get_valuewithunits_as_resource
 from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
+from mcdp_lang.parse_actions import decorate_add_where
 
 
 CDP = CDPLanguage
@@ -21,6 +22,7 @@ CDP = CDPLanguage
 class DoesNotEvalToResource(DPSemanticError):
     """ also called "rvalue" """
 
+@decorate_add_where
 @contract(returns=CResource)
 def eval_rvalue(rvalue, context):
     """
@@ -28,100 +30,100 @@ def eval_rvalue(rvalue, context):
     """
     # assert not isinstance(rvalue, ValueWithUnits)
     # wants Resource or NewFunction
-    with add_where_information(rvalue.where):
+    #     with add_where_information(rvalue.where):
 
-        constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
-                     CDP.Top, CDP.Bottom, CDP.Maximals, CDP.Minimals)
+    constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
+                 CDP.Top, CDP.Bottom, CDP.Maximals, CDP.Minimals)
 
-        if isinstance(rvalue, constants):
-            res = eval_constant(rvalue, context)
-            assert isinstance(res, ValueWithUnits)
-            return get_valuewithunits_as_resource(res, context)
+    if isinstance(rvalue, constants):
+        res = eval_constant(rvalue, context)
+        assert isinstance(res, ValueWithUnits)
+        return get_valuewithunits_as_resource(res, context)
 
-        if isinstance(rvalue, CDP.Resource):
-            return context.make_resource(dp=rvalue.dp.value, s=rvalue.s.value)
+    if isinstance(rvalue, CDP.Resource):
+        return context.make_resource(dp=rvalue.dp.value, s=rvalue.s.value)
 
-        if isinstance(rvalue, CDP.NewFunction):
-            fname = rvalue.name
-            try:
-                dummy_ndp = context.get_ndp_fun(fname)
-            except ValueError:
-                msg = 'New resource name %r not declared.' % fname
-                if context.rnames:
-                    msg += ' Available: %s.' % ", ".join(context.rnames)
-                else:
-                    msg += ' No resources declared so far.'
-                raise DPSemanticError(msg, where=rvalue.where)
+    if isinstance(rvalue, CDP.NewFunction):
+        fname = rvalue.name
+        try:
+            dummy_ndp = context.get_ndp_fun(fname)
+        except ValueError:
+            msg = 'New resource name %r not declared.' % fname
+            if context.rnames:
+                msg += ' Available: %s.' % ", ".join(context.rnames)
+            else:
+                msg += ' No resources declared so far.'
+            raise DPSemanticError(msg, where=rvalue.where)
 
-            return context.make_resource(get_name_for_fun_node(fname),
-                                         dummy_ndp.get_rnames()[0])
+        return context.make_resource(get_name_for_fun_node(fname),
+                                     dummy_ndp.get_rnames()[0])
 
 
 
-        if isinstance(rvalue, CDP.VariableRef):
-            if rvalue.name in context.constants:
-                c = context.constants[rvalue.name]
-                assert isinstance(c, ValueWithUnits)
-                return get_valuewithunits_as_resource(c, context)
-                # return eval_rvalue(context.constants[rvalue.name], context)
+    if isinstance(rvalue, CDP.VariableRef):
+        if rvalue.name in context.constants:
+            c = context.constants[rvalue.name]
+            assert isinstance(c, ValueWithUnits)
+            return get_valuewithunits_as_resource(c, context)
+            # return eval_rvalue(context.constants[rvalue.name], context)
 
-            elif rvalue.name in context.var2resource:
-                return context.var2resource[rvalue.name]
+        elif rvalue.name in context.var2resource:
+            return context.var2resource[rvalue.name]
 
-            try:
-                dummy_ndp = context.get_ndp_fun(rvalue.name)
-            except ValueError:  # as e:
-                msg = 'Function %r not declared.' % rvalue.name
+        try:
+            dummy_ndp = context.get_ndp_fun(rvalue.name)
+        except ValueError:  # as e:
+            msg = 'Function %r not declared.' % rvalue.name
 
-                if context.fnames:
-                    msg += ' Available: %s.' % ", ".join(context.fnames)
-                else:
-                    msg += ' No function declared so far.'
-                raise DPSemanticError(msg, where=rvalue.where)
+            if context.fnames:
+                msg += ' Available: %s.' % ", ".join(context.fnames)
+            else:
+                msg += ' No function declared so far.'
+            raise DPSemanticError(msg, where=rvalue.where)
 
-            s = dummy_ndp.get_rnames()[0]
-            return context.make_resource(get_name_for_fun_node(rvalue.name), s)
+        s = dummy_ndp.get_rnames()[0]
+        return context.make_resource(get_name_for_fun_node(rvalue.name), s)
 
-        from .eval_resources_imp_power import eval_rvalue_Power
-        from .eval_math import eval_rvalue_divide
-        from .eval_math import eval_rvalue_MultN
-        from .eval_math import eval_rvalue_PlusN
-        from .eval_resources_imp_minmax import eval_rvalue_OpMax
-        from .eval_resources_imp_minmax import eval_rvalue_OpMin
-        from .eval_resources_imp_tupleindex import eval_rvalue_TupleIndex
-        from .eval_resources_imp_maketuple import eval_rvalue_MakeTuple
-        from .eval_uncertainty import eval_rvalue_Uncertain
-        from .eval_resources_imp_tupleindex import eval_rvalue_resource_label_index
-        from .eval_resources_imp_unary import eval_rvalue_unary
-        from .eval_math import eval_rvalue_RValueMinusN
+    from .eval_resources_imp_power import eval_rvalue_Power
+    from .eval_math import eval_rvalue_divide
+    from .eval_math import eval_rvalue_MultN
+    from .eval_math import eval_rvalue_PlusN
+    from .eval_resources_imp_minmax import eval_rvalue_OpMax
+    from .eval_resources_imp_minmax import eval_rvalue_OpMin
+    from .eval_resources_imp_tupleindex import eval_rvalue_TupleIndex
+    from .eval_resources_imp_maketuple import eval_rvalue_MakeTuple
+    from .eval_uncertainty import eval_rvalue_Uncertain
+    from .eval_resources_imp_tupleindex import eval_rvalue_resource_label_index
+    from .eval_resources_imp_unary import eval_rvalue_unary
+    from .eval_math import eval_rvalue_RValueMinusN
 
-        cases = {
-            CDP.Power: eval_rvalue_Power,
-            CDP.PowerShort: eval_rvalue_Power,
-            CDP.Divide: eval_rvalue_divide,
-            CDP.MultN: eval_rvalue_MultN,
-            CDP.PlusN: eval_rvalue_PlusN,
-            CDP.RValueMinusN: eval_rvalue_RValueMinusN,
-            CDP.OpMax: eval_rvalue_OpMax,
-            CDP.OpMin: eval_rvalue_OpMin,
-            CDP.TupleIndexRes: eval_rvalue_TupleIndex,
-            CDP.MakeTuple: eval_rvalue_MakeTuple,
-            CDP.UncertainRes: eval_rvalue_Uncertain,
-            CDP.ResourceLabelIndex: eval_rvalue_resource_label_index,
-            CDP.AnyOfRes: eval_rvalue_anyofres,
-            CDP.ApproxStepRes: eval_rvalue_approx_step,
-            CDP.ApproxURes: eval_rvalue_approx_u,
-            CDP.UnaryRvalue: eval_rvalue_unary,
-        }
+    cases = {
+        CDP.Power: eval_rvalue_Power,
+        CDP.PowerShort: eval_rvalue_Power,
+        CDP.Divide: eval_rvalue_divide,
+        CDP.MultN: eval_rvalue_MultN,
+        CDP.PlusN: eval_rvalue_PlusN,
+        CDP.RValueMinusN: eval_rvalue_RValueMinusN,
+        CDP.OpMax: eval_rvalue_OpMax,
+        CDP.OpMin: eval_rvalue_OpMin,
+        CDP.TupleIndexRes: eval_rvalue_TupleIndex,
+        CDP.MakeTuple: eval_rvalue_MakeTuple,
+        CDP.UncertainRes: eval_rvalue_Uncertain,
+        CDP.ResourceLabelIndex: eval_rvalue_resource_label_index,
+        CDP.AnyOfRes: eval_rvalue_anyofres,
+        CDP.ApproxStepRes: eval_rvalue_approx_step,
+        CDP.ApproxURes: eval_rvalue_approx_u,
+        CDP.UnaryRvalue: eval_rvalue_unary,
+    }
 
-        for klass, hook in cases.items():
-            if isinstance(rvalue, klass):
-                return hook(rvalue, context)
+    for klass, hook in cases.items():
+        if isinstance(rvalue, klass):
+            return hook(rvalue, context)
 
-        if True: # pragma: no cover    
-            msg = 'eval_rvalue(): Cannot evaluate as resource.'
-            rvalue = recursive_print(rvalue)
-            raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
+    if True: # pragma: no cover    
+        msg = 'eval_rvalue(): Cannot evaluate as resource.'
+        rvalue = recursive_print(rvalue)
+        raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
  
 def eval_rvalue_approx_u(r, context):
     assert isinstance(r, CDP.ApproxURes)
