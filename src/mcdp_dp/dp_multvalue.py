@@ -8,6 +8,7 @@ from mcdp_posets.rcomp_units import inverse_of_unit
 import numpy as np
 
 from .dp_generic_unary import WrapAMap
+from mcdp_maps.mult_value import InvMultValueNatMap
 
 
 __all__ = [
@@ -210,21 +211,9 @@ class InvMultValueNatDP(WrapAMap):
         N = Nat()
         N.belongs(value)
         
-        amap = None
+        amap = InvMultValueNatMap(value)
         amap_dual = InvMultDualValueNatMap(value)
-        
-        # if value = Top:
-        #    f |-> f * Top 
-        #     
-        if is_top(N, value):
-            amap_dual = MultValueNatDPHelper2Map()
-        elif N.equal(0, value):
-            # r |-> Top
-            amap_dual = ConstantPosetMap(N, N, N.get_top())
-        else:    
-            # f * c <= r
-            # f <= r / c
-            # r |-> floor(r/c)
-            amap_dual = MultValueNatDPhelper(value)
             
         WrapAMap.__init__(self, amap, amap_dual)
+        
+        

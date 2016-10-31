@@ -5,6 +5,7 @@ from mcdp_posets import Map, Nat, RcompUnits, is_top
 from mcdp_posets.nat import Nat_mult_uppersets_continuous, \
     Nat_mult_lowersets_continuous
 from mcdp_posets.rcomp import Rcomp_multiply_upper_topology
+import numpy as np
 
 
 __all__ = [
@@ -12,6 +13,7 @@ __all__ = [
     'MultValueMap',
     
     'InvMultDualValueNatMap',
+    'InvMultValueNatMap',
 ]
 
 class MultValueNatMap(Map):
@@ -30,11 +32,39 @@ class InvMultDualValueNatMap(Map):
     @contract(value=int)
     def __init__(self, value):
         self.value = value
-        self.N = Nat()
-        Map.__init__(self, dom=self.N, cod=self.N)
+        dom = cod = Nat()
+        Map.__init__(self, dom, cod)
 
     def _call(self, x):
         return Nat_mult_lowersets_continuous(self.value, x) 
+
+
+class InvMultValueNatMap(Map):
+    """ x |-> 
+             if f != top
+                ceil(f/c) if c < Top
+                {0} if c = Top
+            if f == top:
+                {0}
+    """
+    @contract(value=int)
+    def __init__(self, value):
+        self.value = value
+        dom = cod = Nat()
+        Map.__init__(self, dom, cod)
+
+    def _call(self, x):
+        if self.dom.leq(self.value, 0):
+            return self.cod.get_top()
+        else:
+            if is_top(self.dom, x):
+                return 0
+            else:
+                if is_top(self.dom, self.value):
+                    return 0
+                else:
+                    assert self.value > 0
+                    return int(np.ceil(float(x)/self.value))
 
 
 class MultValueMap(Map):
