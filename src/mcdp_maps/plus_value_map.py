@@ -2,10 +2,9 @@
 from contracts import contract
 from contracts.utils import check_isinstance
 from mcdp_posets import (Map, RcompUnits, Nat,
-    express_value_in_isomorphic_space, Rcomp, is_top)
+    express_value_in_isomorphic_space, Rcomp, is_top, MapNotDefinedHere)
 from mcdp_posets.nat import Nat_add
 from mcdp_posets.rcomp_units import rcomp_add, rcompunits_add
-from mcdp_posets.space import MapNotDefinedHere
 
 
 __all__ = [
@@ -33,17 +32,16 @@ class PlusValueMap(Map):
         c_space.belongs(c_value)
         check_isinstance(P, RcompUnits)
         check_isinstance(c_space, RcompUnits)
-        Map.__init__(self, dom=P, cod=P)
         self.c_value = c_value
         self.c_space = c_space
         self.c = express_value_in_isomorphic_space(c_space, c_value, P)
-
+        Map.__init__(self, dom=P, cod=P)
+        
     def __str__(self):
         return "+ %s" % self.c_space.format(self.c_value)
 
     def __repr__(self):
         return "PlusValueMap(%s)" % self.__str__()
-
 
     def _call(self, x):
         return rcompunits_add(self.dom, x, self.c) 

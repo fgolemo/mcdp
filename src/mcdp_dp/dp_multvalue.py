@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance
-from mcdp_maps import ConstantPosetMap
-from mcdp_maps import MultValueMap, MultValueNatMap
+from mcdp_maps import ConstantPosetMap, InvMultDualValueNatMap, MultValueMap, MultValueNatMap
 from mcdp_posets import Map, MapNotDefinedHere, RcompUnits, is_top
 from mcdp_posets import Nat
 from mcdp_posets.rcomp_units import inverse_of_unit
@@ -14,6 +13,10 @@ from .dp_generic_unary import WrapAMap
 __all__ = [
     'MultValueDP',
     'MultValueNatDP',
+    
+    'InvMultValueNatDP',
+    'InvMultValueRcompDP',
+    'InvMultValueDP',
 ]
 
 class MultValueDP(WrapAMap):
@@ -171,11 +174,13 @@ class MultValueNatDP(WrapAMap):
         WrapAMap.__init__(self, amap, amap_dual)
         
 class MultValueNatDPhelper(Map):
-    """  r |-> floor(r/c) """
+    """  r ⟼ floor(r/c) """
     
     @contract(c='int')
     def __init__(self, c):
         check_isinstance(c, int)
+        if c == 0:
+            raise ValueError(c)
         cod = dom = Nat()
         Map.__init__(self, dom, cod)
         self.c = c
@@ -187,3 +192,39 @@ class MultValueNatDPhelper(Map):
             fmax = int(np.floor( float(r) / self.c ))
             return fmax
         
+
+class InvMultValueDP(WrapAMap):
+    def __init__(self, value):
+        raise NotImplementedError
+
+class InvMultValueRcompDP(WrapAMap):
+    def __init__(self, F, R, unit, value):
+        raise NotImplementedError
+    
+class InvMultValueNatDP(WrapAMap):
+    """
+        f ≤ r * c
+    """
+    
+    def __init__(self, value):
+        N = Nat()
+        N.belongs(value)
+        
+        amap = None
+        amap_dual = InvMultDualValueNatMap(value)
+        
+        # if value = Top:
+        #    f |-> f * Top 
+        #     
+        if is_top(N, value):
+            amap_dual = MultValueNatDPHelper2Map()
+        elif N.equal(0, value):
+            # r |-> Top
+            amap_dual = ConstantPosetMap(N, N, N.get_top())
+        else:    
+            # f * c <= r
+            # f <= r / c
+            # r |-> floor(r/c)
+            amap_dual = MultValueNatDPhelper(value)
+            
+        WrapAMap.__init__(self, amap, amap_dual)

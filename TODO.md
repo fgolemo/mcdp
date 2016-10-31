@@ -1,29 +1,5 @@
-- test that lower/upper approximation works with solve_r
-- change keyword "dp" into "mcdp"
-- optimizing this:
 
-    f * constant <= r
 
-    by creating specialized DP
-
-- keyword css Rcomp
-
-- NotImplementedError: Spaces are ordered, but you forgot to code embedding.
-A: Instance of <class 'mcdp_posets.uppersets.LowerSets'>.
-   L(ℕ)
-B: Instance of <class 'mcdp_posets.uppersets.LowerSets'>.
-   L(R[])
-   
-- add solve_f to mcdp-solve
-
-- change color to  green/red for
-/Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_report/icons/MeetNDualDP.png
-
-- unit tests for ↓ 
-- keyword: EmptySet
-
-- videos of "crunching"
-  - do lower and upper bound together
 
 
 
@@ -196,6 +172,8 @@ MCDP-web / QR
 Bugs
 ----
 
+- B: FinitePoset does not have Join, Meet
+
 - B: Sometimes Pint does not simplify the units. For example,
       J * kg / Wh has the same dimensionality of kg
 
@@ -224,8 +202,21 @@ There is already a connection to function 'r1' of '_res_r1'.
 Language additions
 ------------------
 
+- L: New language feature: templates
 
 - L: types: Sets without the order. For example, given V, use set(V).
+- L: values: Indexing. For example:
+
+	```
+	mcdp {
+	   provides f [X x USD]
+	   requires cost [USD]
+
+	   cost >= f[1]
+	}
+	```
+
+- L: Syntax for empty sets. ``{} g`` or  ``EmptySet g``
 
 
 - L: Implement Python-style comments for more literate programming.
@@ -238,14 +229,7 @@ mcdp {
 }
 ```
  
-- Ability to rewrite in MCDPL.
 
-- Coproduct that automatically adds the spaces that are not there
-
-
-  DP == DP x (0 -> F)
-
-  DP == DP x (0 -> R)
 
 - Bug in the dot drawing for this one:
 
@@ -288,11 +272,3 @@ requires r1 >= f1
 
     ValueError: If <pre> is empty then it needs to have an id.
     tag: <code class="mcdp_value">`my_poset: <em>element</em></code>
-
-- bug: the visualization of errors is broken when displaying Unicode,
-because the alignment is not correct [Contracts]
-
- line  3 >    assert_equal(⊥ LowerSets(g), lowerclosure EmptySet g),
-                                             ^
-                                             |
-                                             here or nearby

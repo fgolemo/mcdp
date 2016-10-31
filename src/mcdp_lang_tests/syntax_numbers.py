@@ -30,16 +30,16 @@ def check_numbers1():
 
 @comptest
 def check_top1():
-    print eval_rvalue_as_constant('Top Nat')
+    eval_rvalue_as_constant('Top Nat')
 
 @comptest
 def check_top2():
-    print eval_rvalue_as_constant('⊤ ℕ')
+    eval_rvalue_as_constant('⊤ ℕ')
 
 @comptest
 def check_tuples():
-    print eval_rvalue_as_constant('<1 g, 2J>')
-    print eval_rvalue_as_constant('⟨1g, 2J⟩')
+    eval_rvalue_as_constant('<1 g, 2J>')
+    eval_rvalue_as_constant('⟨1g, 2J⟩')
 
 @comptest
 def check_numbers2():
@@ -64,43 +64,39 @@ def check_sum_nat_int():
 
 @comptest
 def check_division():
-    print parse_wrap_check('(5 g)', Syntax.rvalue)
-    print parse_wrap_check('1.0 [g] / 5 [l]', Syntax.rvalue)
-    print parse_wrap_check('(5 g) / 5 l', Syntax.rvalue)
+    parse_wrap_check('(5 g)', Syntax.rvalue)
+    parse_wrap_check('1.0 [g] / 5 [l]', Syntax.rvalue)
+    parse_wrap_check('(5 g) / 5 l', Syntax.rvalue)
 
-    print eval_rvalue_as_constant('1.0 [g] / 5 [l]')
+    eval_rvalue_as_constant('1.0 [g] / 5 [l]')
 
 @comptest
 def check_unit1():
 
-    print('parsing as unit_simple:')
-    print parse_wrap_syntax_error('N*m', Syntax.pint_unit_simple)
-    print('parsing as pint_unit:')
-    print parse_wrap_check('N*m', Syntax.space_pint_unit)
+    # parsing as unit_simple
+    parse_wrap_syntax_error('N*m', Syntax.pint_unit_simple)
+    # parsing as pint_unit:
+    parse_wrap_check('N*m', Syntax.space_pint_unit)
     parse_wrap_check('y', Syntax.pint_unit_simple)
     parse_wrap_syntax_error('x', Syntax.pint_unit_simple)
-#     parse_wrap_check('x', Syntax.disallowed)
-    print('unit_base:')
+    # unit_base
     parse_wrap_syntax_error('V x m', Syntax.pint_unit_simple)
 
     nu = Syntax.valuewithunit_number_with_units
-#     Syntax.space_expr.setWhiteSpaceChars(' \t')
-    print('skip: %r white: %r copydef: %r' % (nu.skipWhitespace, nu.whiteChars,
-            nu.copyDefaultWhiteChars))
+#     print('skip: %r white: %r copydef: %r' % (nu.skipWhitespace, nu.whiteChars,
+#             nu.copyDefaultWhiteChars))
     parse_wrap_check('12 W', nu)
     parse_wrap_check('12 Wh', nu)
     parse_wrap_syntax_error('12 W\n h', nu)
-
-
 
     parse_wrap_check('1 / s', Syntax.space_pint_unit)
 
     
     if True:
-        print('unit_simple:')
+        # print('unit_simple:')
         parse_wrap_syntax_error('V x m', Syntax.pint_unit_simple)
 
-        print('pint_unit:')
+        # print('pint_unit:')
         parse_wrap_syntax_error('V x m', Syntax.space_pint_unit)
 
         parse_wrap_syntax_error('*', Syntax.space_pint_unit)
@@ -123,8 +119,10 @@ def check_unit1():
         for g, ok, e, r in results:
             if ok:
                 print('%20s: OK   %s' % (g, r))
+                pass
             if not ok:
                 print('%20s: FAIL ' % g)
+                
                 exceptions.append(e)
 
         if exceptions:
@@ -319,7 +317,7 @@ def check_conversion2():
 
 @comptest
 def check_conversion3():
-    print("How does it work with negative numbers?")
+    #print("How does it work with negative numbers?")
 
     string = """
     mcdp {
@@ -336,7 +334,7 @@ def check_conversion3():
     #  r + 0.1 kg >= f 
 
     dp = ndp.get_dp()
-    print dp.repr_long()
+    #print dp.repr_long()
     r = dp.solve(0.0)
     assert r.minimals == set([0.0]), r
     # one solution for 100 g
@@ -360,9 +358,9 @@ def check_conversion3b():
     }""")
 
     dp = ndp.get_dp()
-    print(dp.repr_long())
+    #print(dp.repr_long())
     r = dp.solve(0.0)
-    print(r)
+    #print(r)
     assert_equal(r.minimals, set([0.005]))
 
 
@@ -379,9 +377,9 @@ def check_conversion4():
     }""")
 
     dp = ndp.get_dp()
-    print(dp.repr_long())
+    #print(dp.repr_long())
     r = dp.solve(0.0)
-    print(r)
+    #print(r)
     assert_equal(r.minimals, set([5.0]))
 
 @comptest

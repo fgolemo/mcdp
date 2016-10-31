@@ -4,11 +4,12 @@ from mcdp_dp import (CatalogueDP, CoProductDP, CoProductDPLabels, Constant,
     InvPlus2, InvPlus2L, InvPlus2Nat, InvPlus2U, JoinNDP, Limit, LimitMaximals,
     Max1, MeetNDualDP,  Mux, Parallel, ParallelN, Series0, Terminator,
     UncertainGate, UncertainGateSym, PlusValueDP, MeetNDP, JoinNDualDP, InvMult2Nat, MultValueDP,
-    MinusValueDP, MinusValueRcompDP, MinusValueNatDP)
+    MinusValueDP, MinusValueRcompDP, MinusValueNatDP, InvMultValueNatDP, InvMultValueRcompDP, InvMultValueDP)
 
 from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct, Nat, Rcomp
 from mcdp_dp.dp_dummy import Template
+
 
 def MinusValueDP1():
     F = parse_poset('J')
@@ -46,6 +47,47 @@ def PlusValueDP1():
     v = 1000.0
     return PlusValueDP(F, c_value=v, c_space=U)
 
+
+def InvMultValueNatDP1zero():
+    return InvMultValueNatDP(0)
+
+def InvMultValueNatDP2nonzero():
+    return InvMultValueNatDP(2)
+
+def InvMultValueNatDP3top():
+    return InvMultValueNatDP(Nat().get_top())
+
+def InvMultValueRcompDP1zero():
+    return InvMultValueRcompDP(0.0)
+
+def InvMultValueRcompDP2nonzero():
+    return InvMultValueRcompDP(10.0)
+
+def InvMultValueRcompDP3top():
+    return InvMultValueRcompDP(Rcomp().get_top())
+
+def InvMultValueDP1zero():
+    F = parse_poset('m')    
+    U = parse_poset('s')
+    v = 0.0
+    R = parse_poset('m*s')
+    return InvMultValueDP(F=F, R=R, unit=U, value=v)
+
+def InvMultValueDP2nonzero():
+    F = parse_poset('m')    
+    U = parse_poset('s')
+    v = 10.0
+    R = parse_poset('m*s')
+    return InvMultValueDP(F=F, R=R, unit=U, value=v)
+
+def InvMultValueDP3top():
+    F = parse_poset('m')    
+    U = parse_poset('s')
+    v = U.get_top()
+    R = parse_poset('m*s')
+    return InvMultValueDP(F=F, R=R, unit=U, value=v)
+
+
 def MultValueDP1nonzero():
     F = parse_poset('m')    
     U = parse_poset('s')
@@ -57,6 +99,13 @@ def MultValueDP2zero():
     F = parse_poset('m')    
     U = parse_poset('s')
     v = 0.0
+    R = parse_poset('m*s')
+    return MultValueDP(F=F, R=R, unit=U, value=v)
+
+def MultValueDP3top():
+    F = parse_poset('m')    
+    U = parse_poset('s')
+    v = U.get_top()
     R = parse_poset('m*s')
     return MultValueDP(F=F, R=R, unit=U, value=v)
 

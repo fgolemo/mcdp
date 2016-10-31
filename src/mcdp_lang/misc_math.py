@@ -46,7 +46,7 @@ def vu_rcomp_mult_constants2(a, b):
 
 @contract(seq='seq($ValueWithUnits)')
 def generic_mult_constantsN(seq):
-    """ Multiplies a sequence of constants that could be either Nat or RCompUnits """
+    """ Multiplies a sequence of constants that could be either Nat, Rcomp, or RCompUnits """
     for c in seq:
         if isinstance(c.unit, RbicompUnits):
             assert c.value < 0

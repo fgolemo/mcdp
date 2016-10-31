@@ -343,7 +343,6 @@ def eval_PlusN(x, context, wants_constant):
     # First, we flatten all operators
     ops = flatten_plusN(ops_list)
     
-    
     # Then we divide in positive constants, negative constants, and resources.
     pos_constants, neg_constants, resources = \
         eval_PlusN_sort_ops(ops, context, wants_constant)

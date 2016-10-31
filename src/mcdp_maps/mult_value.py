@@ -2,17 +2,20 @@
 from contracts import contract
 from contracts.utils import check_isinstance
 from mcdp_posets import Map, Nat, RcompUnits, is_top
-from mcdp_posets.nat import Nat_mult_uppersets_continuous
+from mcdp_posets.nat import Nat_mult_uppersets_continuous, \
+    Nat_mult_lowersets_continuous
 from mcdp_posets.rcomp import Rcomp_multiply_upper_topology
 
 
 __all__ = [
     'MultValueNatMap', 
     'MultValueMap',
+    
+    'InvMultDualValueNatMap',
 ]
 
 class MultValueNatMap(Map):
-
+    """ Multiplies using the upper set topology. """
     @contract(value=int)
     def __init__(self, value):
         self.value = value
@@ -22,6 +25,16 @@ class MultValueNatMap(Map):
     def _call(self, x):
         return Nat_mult_uppersets_continuous(self.value, x) 
 
+class InvMultDualValueNatMap(Map):
+    """ Multiplies using the lower set topology. """
+    @contract(value=int)
+    def __init__(self, value):
+        self.value = value
+        self.N = Nat()
+        Map.__init__(self, dom=self.N, cod=self.N)
+
+    def _call(self, x):
+        return Nat_mult_lowersets_continuous(self.value, x) 
 
 
 class MultValueMap(Map):
@@ -53,3 +66,5 @@ class MultValueMap(Map):
         return Rcomp_multiply_upper_topology(self.dom, x, 
                                              self.unit, self.value, 
                                              self.cod)
+        
+        

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc, check_isinstance
+from contracts.utils import raise_desc, check_isinstance, raise_wrapped
 from mcdp_dp import InvMult2, InvPlus2, InvPlus2Nat
 from mcdp_dp import JoinNDualDP, MeetNDualDP
 from mcdp_dp.dp_inv_mult import InvMult2Nat
@@ -20,6 +20,8 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mcdp_dp.dp_multvalue import InvMultValueNatDP
+
 
 
 CDP = CDPLanguage
@@ -257,18 +259,85 @@ def eval_lfunction_invplus_ops(fs, context):
                                name_prefix='_invplus', op_prefix='_',
                                 res_prefix='_result') 
 
-def eval_lfunction_invmult(lf, context):
-    ops = get_odd_ops(unwrap_list(lf.ops))
-    fs = []
-    for op_i in ops:
-        fi = eval_lfunction(op_i, context)
-        fs.append(fi)
+def eval_lfunction_invmult_sort_ops(ops, context, wants_constant):
+    """ Divides in resources and constants 
+    
+        Returns functions, constants
+    """ 
+    from mcdp_lang.eval_constant_imp import eval_constant
+    from mcdp_lang.eval_constant_imp import NotConstant
+    constants = []
+    functions = []
 
-    return eval_lfunction_invmult_ops(fs, context)
+    for op in ops:
+        try:
+            x = eval_constant(op, context)
+            check_isinstance(x, ValueWithUnits)
+            constants.append(x)
+                
+        except NotConstant as e:
+            if wants_constant:
+                msg = 'Product not constant because one op is not constant.'
+                raise_wrapped(NotConstant, e, msg, op=op)
+            x = eval_lfunction(op, context)
+            assert isinstance(x, CFunction)
+            functions.append(x)
+    return functions, constants
+
+def flatten_invmult(ops):
+    """ Flattens recursively nested CDP.InvMult operators """
+    res = []
+    for op in ops:
+        if isinstance(op, CDP.InvMult):
+            res.extend(flatten_invmult(get_odd_ops(unwrap_list(op.ops))))
+        else:
+            res.append(op)
+    return res
+
+def eval_lfunction_create_invmultvalue(lf, constant, context):
+    assert isinstance(lf, CFunction), lf
+    assert isinstance(constant, ValueWithUnits), constant
+    
+    F1 = context.get_ftype(lf)
+    F2 = constant.unit
+    
+    if isinstance(F1, Nat) and isinstance(F2, Nat):
+        dp = InvMultValueNatDP(constant.value)
+        return create_operation_lf(context, dp=dp, functions=[lf],
+                        name_prefix='_invmultvalue', op_prefix='_ops',
+                        res_prefix='_result')
+    else:
+        msg = 'Cannot get InvMultValue for spaces %s and %s' % (F1, F2)
+        raise_desc(NotImplementedError, msg, F1=F1, F2=F2)
+
+    
+def eval_lfunction_invmult(lf, context, wants_constant=False):
+    assert isinstance(lf, CDP.InvMult)
+    from mcdp_lang.misc_math import generic_mult_constantsN
+        
+    ops_list = get_odd_ops(unwrap_list(lf.ops))
+    ops = flatten_invmult(ops_list)
+    
+    functions, constants = eval_lfunction_invmult_sort_ops(ops, context, wants_constant=wants_constant)
+     
+    if functions: 
+        res = eval_lfunction_invmult_ops(functions, context)
+        
+        if constants:
+            constant = generic_mult_constantsN(constants)
+            return eval_lfunction_create_invmultvalue(res, constant, context)
+        else:
+            return res
+        
+    else:
+        # no functions, just constants
+        constant = generic_mult_constantsN(constants)
+        return get_valuewithunits_as_function(constant)
+
 
 def eval_lfunction_invmult_ops(fs, context):
     if len(fs) == 1:
-        raise DPInternalError(fs)
+        return fs[0]
     elif len(fs) > 2: 
         mcdp_dev_warning('Maybe this should be smarter?')
         rest = eval_lfunction_invmult_ops(fs[1:], context)
