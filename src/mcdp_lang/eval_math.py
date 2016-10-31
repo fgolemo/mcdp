@@ -361,7 +361,7 @@ def eval_PlusN(x, context, wants_constant):
         # we have only one negative constant
         assert len(neg_constants) == 1
         constant = neg_constants[0]
-        print 'constant.unit', constant.unit
+        
         check_isinstance(constant.unit, RbicompUnits)
         
         constant.unit.check_leq(constant.value, 0.0)

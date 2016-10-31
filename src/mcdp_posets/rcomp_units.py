@@ -369,6 +369,17 @@ def rcomp_add(x, y):
     mcdp_dev_warning('underflow, overflow')    
     return x + y
 
+def rcompunits_add(P, x, y):
+    check_isinstance(P, RcompUnits)
+    x_is_top = is_top(P, x)
+    y_is_top = is_top(P, y)
+    
+    if x_is_top or y_is_top:
+        return P.get_top()
+    mcdp_dev_warning('underflow, overflow')    
+    return x + y
+
+
 @contract(a=RcompUnits, num='int', den='int')
 def rcompunits_pow(a, num, den):
     """

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import check_isinstance
-from mcdp_dp.dp_generic_unary import WrapAMap
 from mcdp_maps import (MinusValueNatMap, PlusValueNatMap, MinusValueRcompMap,
                        PlusValueRcompMap, PlusValueMap, MinusValueMap)
-from mcdp_posets import Rcomp, RcompUnits
-from mcdp_posets.nat import Nat
+from mcdp_posets import Nat, Rcomp, RcompUnits
+
+from .dp_generic_unary import WrapAMap
 
 
 __all__ = [
@@ -27,7 +27,7 @@ class MinusValueDP(WrapAMap):
         check_isinstance(c_space, RcompUnits)
         c_space.belongs(c_value)
         amap = MinusValueMap(P=F, c_value=c_value, c_space=c_space)
-        amap_dual = PlusValueMap(F=F, c_value=c_value, c_space=c_space, R=F)
+        amap_dual = PlusValueMap(P=F, c_value=c_value, c_space=c_space)
         WrapAMap.__init__(self, amap, amap_dual)
         
 class MinusValueRcompDP(WrapAMap):

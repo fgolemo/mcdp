@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from nose.tools import assert_equal
 
-from comptests.registrar import comptest, comptest_fails
+from comptests.registrar import comptest
 from contracts.utils import raise_desc
 from mcdp_dp import CatalogueDP, CoProductDP, NotFeasible, Template
 from mcdp_lang.parse_actions import parse_wrap
@@ -530,7 +530,7 @@ def check_lang77(): # TODO: rename
 def check_lang78(): # TODO: rename
     pass
 
-@comptest_fails
+@comptest
 def check_lang79b(): # TODO: rename
     pass
 # 

@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_maps import ProductNMap, ProductNNatMap
-from mcdp_posets import Map
 
 from .dp_generic_unary import WrapAMap
 
