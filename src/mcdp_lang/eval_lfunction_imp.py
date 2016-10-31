@@ -274,14 +274,21 @@ def eval_lfunction_invmult_sort_ops(ops, context, wants_constant):
             x = eval_constant(op, context)
             check_isinstance(x, ValueWithUnits)
             constants.append(x)
-                
+            continue
+        except DPSemanticError as e:
+            if 'Variable ref' in str(e):
+                pass
+            else:
+                raise
         except NotConstant as e:
-            if wants_constant:
-                msg = 'Product not constant because one op is not constant.'
-                raise_wrapped(NotConstant, e, msg, op=op)
-            x = eval_lfunction(op, context)
-            assert isinstance(x, CFunction)
-            functions.append(x)
+            pass
+        
+        if wants_constant:
+            msg = 'Product not constant because one op is not constant.'
+            raise_wrapped(NotConstant, e, msg, op=op)
+        x = eval_lfunction(op, context)
+        assert isinstance(x, CFunction)
+        functions.append(x)
     return functions, constants
 
 def flatten_invmult(ops):
@@ -318,7 +325,8 @@ def eval_lfunction_invmult(lf, context, wants_constant=False):
     ops_list = get_odd_ops(unwrap_list(lf.ops))
     ops = flatten_invmult(ops_list)
     
-    functions, constants = eval_lfunction_invmult_sort_ops(ops, context, wants_constant=wants_constant)
+    functions, constants = eval_lfunction_invmult_sort_ops(ops, context, 
+                                                wants_constant=wants_constant)
      
     if functions: 
         res = eval_lfunction_invmult_ops(functions, context)
