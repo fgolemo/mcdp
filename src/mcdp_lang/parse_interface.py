@@ -36,6 +36,7 @@ def parse_ndp(string, context=None):
     assert isinstance(res, NamedDP), res
     return res
 
+import sys
 def parse_ndp_filename(filename, context=None):
     """ Reads the file and returns as NamedDP.
         The exception are annotated with filename. """
@@ -46,10 +47,9 @@ def parse_ndp_filename(filename, context=None):
     except MCDPExceptionWithWhere as e:
         active = True
         if active:
-#             e.where =  _get_where_with_filename(e, filename)
-#             raise
-#         
-            raise e.with_filename(filename)
+# http://stackoverflow.com/questions/1350671/inner-exception-with-traceback-in-python
+            e = e.with_filename(filename)
+            raise type(e), e.args, sys.exc_info()[2]
         else:
             logger.debug('Deactivated trace in parse_ndp_filename().')
             raise

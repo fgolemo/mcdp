@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from contextlib import contextmanager
-from contracts import all_disabled
 import getpass
 import sys
+
+from contracts import all_disabled
 from contracts.utils import indent
 
 
@@ -25,8 +26,9 @@ class MCDPExceptionWithWhere(MCDPException):
         error, where, stack = self.args
         assert isinstance(error, str), error
         s = ""
-        if stack:
-            s += '\n' + indent(stack,'S ') + '\n'
+        if False: # we have solved in a different way
+            if stack:
+                s += '\n' + indent(stack,'S ') + '\n'
         s += error
         if where is not None:
             from contracts.interface import add_prefix

@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 from contextlib import contextmanager
+import sys
+import traceback
+
+from decorator import decorator
 
 from contracts import contract
 from contracts.interface import Where
@@ -13,9 +17,7 @@ from .parts import CDPLanguage
 from .pyparsing_bundled import ParseException, ParseFatalException
 from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list
-import traceback
-import sys
-from decorator import decorator
+
 
 CDP = CDPLanguage
 
@@ -37,7 +39,7 @@ def decorate_add_where(f, *args, **kwargs):
         return f(*args, **kwargs)
     except MCDPExceptionWithWhere as e:
         _, _, tb = sys.exc_info()
-        raise_with_info(e, where, nice_stack(tb))
+        raise_with_info(e, where, tb)
 
 
 
@@ -57,7 +59,8 @@ def add_where_information(where):
         except MCDPExceptionWithWhere as e:
             mcdp_dev_warning('add magic traceback handling here')
             _, _, tb = sys.exc_info()
-            raise_with_info(e, where, nice_stack(tb))
+            raise_with_info(e, where, tb)
+
 
 def nice_stack(tb):
     lines = traceback.format_tb(tb)
@@ -70,16 +73,18 @@ def nice_stack(tb):
     return s
     
 
-def raise_with_info(e, where, stack):
+def raise_with_info(e, where, tb):
     check_isinstance(e, MCDPExceptionWithWhere)
     existing = getattr(e, 'where', None)
     if existing: 
         raise
     use_where = existing if existing is not None else where
     error = e.error
-
-    e = type(e)(error, where=use_where, stack=stack)
-    raise e
+    
+    stack = nice_stack(tb)
+    
+    args = (error, use_where, stack)
+    raise type(e), args, tb
 
 def wheredecorator(b):
     def bb(tokens, loc, s):

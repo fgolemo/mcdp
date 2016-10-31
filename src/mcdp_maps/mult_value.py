@@ -90,6 +90,8 @@ class InvMultValueMap(Map):
     """
     
     def __init__(self, dom, cod, space, value):
+        check_isinstance(dom, RcompUnits)
+        check_isinstance(cod, RcompUnits)
         space.belongs(value)
         self.value = value
         self.space = space
@@ -98,16 +100,16 @@ class InvMultValueMap(Map):
         Map.__init__(self, dom, cod)
 
     def _call(self, x):
-        if self.dom.leq(self.value, 0): # value == 0
+        if self.dom.leq(self.value, 0.0): # value == 0
             return self.cod.get_top()
         else:
             if is_top(self.dom, x):
                 return self.cod.get_top()
             else:
                 if is_top(self.dom, self.value):
-                    return 0
+                    return 0.0
                 else:
-                    assert self.value > 0
+                    assert self.value > 0.0
                     return float(x) / self.value
 
 

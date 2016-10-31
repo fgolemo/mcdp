@@ -226,7 +226,8 @@ def eval_ndp_load(r, context):
         ndp = context.load_ndp(name)
         return ndp
 
-    raise NotImplementedError(r)
+    msg = 'Unknown construct.'
+    raise_desc(DPInternalError, msg, r=r)
 
 def eval_ndp_instancefromlibrary(r, context):
     assert isinstance(r, CDP.DPInstanceFromLibrary)
@@ -247,7 +248,8 @@ def eval_ndp_instancefromlibrary(r, context):
         ndp = context.load_ndp(name)
         return ndp
 
-    raise NotImplementedError(r)
+    msg = 'Unknown construct.'
+    raise_desc(DPInternalError, msg, r=r)
 
 def eval_ndp_flatten(r, context):
     ndp = eval_ndp(r.dp_rvalue, context)

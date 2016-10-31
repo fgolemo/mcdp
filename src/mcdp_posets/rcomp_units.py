@@ -296,7 +296,7 @@ def mult_table(a, b):
     s = '%s' % unit2
     return RcompUnits(unit2, s)
 
-# 
+
 @contract(a=RcompUnits)
 def inverse_of_unit(a):
     check_isinstance(a, RcompUnits)

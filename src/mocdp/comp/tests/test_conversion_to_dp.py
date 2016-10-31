@@ -25,6 +25,45 @@ def ndp_dual01_chain(id_ndp, ndp):
     return dual01_chain(id_ndp, dp)
     
 @for_all_nameddps
+def check_solve_r_chain(id_ndp, ndp):
+    if '_inf' in id_ndp:
+        # plusinvnat3b_inf
+        print('Assuming that the suffix "_inf" in %r means that this will not converge'
+              % (id_ndp))
+        print('Skipping this test')
+        return
+
+    try:
+        ndp.check_fully_connected()
+    except NotConnected:
+        print('Skipping test_conversion because %r not connected.' % id_ndp)
+        return
+
+    dp = ndp.get_dp()
+    
+    return check_solve_r_chain(id_ndp, dp)
+
+
+@for_all_nameddps
+def check_solve_f_chain(id_ndp, ndp):
+    if '_inf' in id_ndp:
+        # plusinvnat3b_inf
+        print('Assuming that the suffix "_inf" in %r means that this will not converge'
+              % (id_ndp))
+        print('Skipping this test')
+        return
+
+    try:
+        ndp.check_fully_connected()
+    except NotConnected:
+        print('Skipping test_conversion because %r not connected.' % id_ndp)
+        return
+
+    dp = ndp.get_dp()
+    
+    return check_solve_f_chain(id_ndp, dp)
+
+@for_all_nameddps
 def test_conversion(id_ndp, ndp):
     if '_inf' in id_ndp:
         # plusinvnat3b_inf

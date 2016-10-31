@@ -1,18 +1,16 @@
 # -*- coding: utf-8 -*-
-import traceback
-
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance, raise_wrapped, indent
 from mcdp_dp import (InvMult2, InvPlus2, InvPlus2Nat, InvMult2Nat,
                      InvMultValueNatDP, JoinNDualDP, MeetNDualDP, PlusValueNatDP,
                      PlusValueRcompDP, PlusValueDP)
-from mcdp_lang.parse_actions import raise_with_info, decorate_add_where
+from mcdp_lang.parse_actions import decorate_add_where
 from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table,
     poset_maxima)
 from mcdp_posets import Rcomp
 from mocdp.comp.context import CFunction, get_name_for_res_node, ValueWithUnits
 from mocdp.exceptions import (DPInternalError, DPNotImplementedError,
-    DPSemanticError, mcdp_dev_warning, MCDPExceptionWithWhere)
+    DPSemanticError, mcdp_dev_warning)
 
 from .helpers import (get_function_possibly_converted,
     create_operation_lf)
@@ -20,6 +18,7 @@ from .helpers import get_valuewithunits_as_function
 from .namedtuple_tricks import recursive_print
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mcdp_dp.dp_multvalue import InvMultValueDP
 
 
 CDP = CDPLanguage
@@ -95,6 +94,7 @@ def eval_lfunction_opminf(lf, context):
                             name_prefix='max', op_prefix='_ops',
                             res_prefix='_result')
     
+    
 def eval_lfunction_opmaxf(lf, context):
     """
         f <= max(required r1, required r2)
@@ -112,15 +112,13 @@ def eval_lfunction_opmaxf(lf, context):
     return create_operation_lf(context, dp=dp, functions=[a, b],
                             name_prefix='max', op_prefix='_ops',
                             res_prefix='_result')
- 
-
     
             
 def eval_lfunction_anyoffun(lf, context):
-    from mcdp_lang.eval_constant_imp import eval_constant
-    from mcdp_posets.finite_collections_inclusion import FiniteCollectionsInclusion
-    from mcdp_dp.dp_limit import LimitMaximals
-    from mcdp_posets.finite_collection import FiniteCollection
+    from .eval_constant_imp import eval_constant
+    from mcdp_posets import FiniteCollectionsInclusion
+    from mcdp_dp import LimitMaximals
+    from mcdp_posets import FiniteCollection
     
     assert isinstance(lf, CDP.AnyOfFun)
     constant = eval_constant(lf.value, context)
@@ -309,14 +307,17 @@ def eval_lfunction_create_invmultvalue(lf, constant, context):
     F2 = constant.unit
     
     if isinstance(F1, Nat) and isinstance(F2, Nat):
-        dp = InvMultValueNatDP(constant.value)
-        return create_operation_lf(context, dp=dp, functions=[lf],
-                        name_prefix='_invmultvalue', op_prefix='_ops',
-                        res_prefix='_result')
+        dp = InvMultValueNatDP(constant.value)    
+    elif isinstance(F1, RcompUnits) and isinstance(F2, RcompUnits):
+        R = mult_table(F1, F2)
+        dp = InvMultValueDP(R, F1, constant.unit, constant.value)
     else:
         msg = 'Cannot get InvMultValue for spaces %s and %s' % (F1, F2)
         raise_desc(DPNotImplementedError, msg, F1=F1, F2=F2)
 
+    return create_operation_lf(context, dp=dp, functions=[lf],
+                        name_prefix='_invmultvalue', op_prefix='_ops',
+                        res_prefix='_result')
     
 def eval_lfunction_invmult(lf, context, wants_constant=False):
     assert isinstance(lf, CDP.InvMult)
