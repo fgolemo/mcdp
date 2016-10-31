@@ -38,8 +38,12 @@ class PlusValueMap(Map):
         self.c_space = c_space
         self.c = express_value_in_isomorphic_space(c_space, c_value, P)
 
-    def __repr__(self):
+    def __str__(self):
         return "+ %s" % self.c_space.format(self.c_value)
+
+    def __repr__(self):
+        return "PlusValueMap(%s)" % self.__str__()
+
 
     def _call(self, x):
         return rcompunits_add(self.dom, x, self.c) 
@@ -171,7 +175,7 @@ class PlusValueRcompMap(Map):
         Map.__init__(self, dom=dom, cod=cod)
         self.c_value = c_value
 
-    def __repr__(self):
+    def __str__(self):
         return "+ %s" % self.dom.format(self.c_value)
 
     def _call(self, x):
@@ -191,7 +195,7 @@ class MinusValueRcompMap(Map):
         
         self.top = dom.get_top()
 
-    def __repr__(self):
+    def __str__(self):
         return "- %s" % self.dom.format(self.c)
 
     def _call(self, x):

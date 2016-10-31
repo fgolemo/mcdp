@@ -5,6 +5,9 @@ mcdp {
     required r >= provided f + (1 m - Top m)
 }
 
+
+# 
+
 # If the number is negative:
 #
 #  r ≥ f - c,  with c ≥ 0

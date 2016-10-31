@@ -81,7 +81,6 @@ class Poset(Preorder):
         msg = 'Top not available.'
         raise_desc(NotBounded, msg, poset=self)
         
-
     def get_test_chain(self, n):  # @UnusedVariable
         """
             Returns a test chain of length up to n.
@@ -95,7 +94,6 @@ class Poset(Preorder):
         except NotBounded:
             pass
         return chain
-
 
     def join(self, a, b):  # "max" ∨
         if self.leq(a, b):

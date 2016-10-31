@@ -323,23 +323,22 @@ def check_conversion3():
 
     string = """
     mcdp {
-        provides x [g]
-        requires y [g]
+        provides f [g]
+        requires r [g]
     
         c = -0.1 kg
-        required y >= provided x + c
+        required r >= provided f + c
     }"""
 
-    # parse_wrap(Syntax.ndpt_dp_rvalue, string)[0]
-    # print recursive_print(p)
     ndp = parse_ndp(string)
 
+    # same as:
+    #  r + 0.1 kg >= f 
 
     dp = ndp.get_dp()
     print dp.repr_long()
-    # no solutions for 0
     r = dp.solve(0.0)
-    assert not r.minimals, r
+    assert r.minimals == set([0.0]), r
     # one solution for 100 g
     r = dp.solve(100.0)
     assert r.minimals == set([0.0]), r

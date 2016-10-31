@@ -4,6 +4,7 @@ import math
 
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped, raise_desc
+from mcdp_posets.poset import is_top, is_bottom
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import DPSyntaxError, do_extra_checks, mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
@@ -13,7 +14,6 @@ from pint.errors import UndefinedUnitError  # @UnresolvedImport
 from .any import Any, BottomCompletion, TopCompletion
 from .rcomp import RcompBase, Rbicomp
 from .space import Map
-from mcdp_posets.poset import is_top, is_bottom
 
 
 class MyUnitRegistry(UnitRegistry):
