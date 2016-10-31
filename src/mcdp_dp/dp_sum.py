@@ -2,7 +2,8 @@
 import functools
 
 from contracts import contract
-from contracts.utils import check_isinstance, raise_wrapped
+from contracts.utils import check_isinstance, raise_wrapped, raise_desc
+from mcdp_dp.dp_inv_plus import sample_sum_upperbound, sample_sum_lowersets
 from mcdp_dp.primitive import NotSolvableNeedsApprox, ApproximableDP
 from mcdp_posets import Map, Nat, PosetProduct, Rcomp, RcompUnits
 from mcdp_posets import is_top
@@ -24,6 +25,7 @@ from .dp_generic_unary import WrapAMap
 #     'SumUnitsNotCompatible',
 #     'check_sum_units_compatible',
 # ]
+
 class SumNMap(Map):
     
     @contract(Fs='tuple, seq[>=2]($RcompUnits)', R=RcompUnits)
@@ -81,63 +83,48 @@ class SumNUDP(WrapAMap):
     """
         f1, f2, f3 -> f1 + f2 +f3
         r -> ((a,b) | a + b = r}
+        
+        This is an upper approximation, which is always pessimistic.
+        So the points are exactly on the line, because that means 
+        that we are being pessimistic.
+        
     """
     def __init__(self, Fs, R, n):
         self.n = n
         amap = SumNMap(Fs, R)
         WrapAMap.__init__(self, amap)
         
-    def solve_r(self, f):
-        
-#         if len(self.Fs) > 2:
-#             msg = 'Cannot invert more than two terms.'
-#             raise_desc(NotImplementedError, msg)
+    def solve_r(self, r):
+         
+        if len(self.Fs) > 2:
+            msg = 'Cannot invert more than two terms.'
+            raise_desc(NotImplementedError, msg)
 
-        raise NotImplementedError()
+        options = sample_sum_upperbound(self.R, self.F, r, self.n)
+        return self.F.Ls(options)
     
     
 class SumNLDP(WrapAMap):
     """
         f1, f2, f3 -> f1 + f2 +f3
         r -> ((a,b) | a + b = r}
+        
+        This is a lower approximation, which is always optimistic.
+        
     """
     def __init__(self, Fs, R, n):
         self.n = n
+        self.Fs = Fs
         amap = SumNMap(Fs, R)
         WrapAMap.__init__(self, amap)
         
-    def solve_r(self, f):
-        
-#         if len(self.Fs) > 2:
-#             msg = 'Cannot invert more than two terms.'
-#             raise_desc(NotImplementedError, msg)
-
-        raise NotImplementedError()
-#      
-#         from mcdp_dp.dp_inv_plus import InvPlus2
-#         from mcdp_dp.dp_inv_plus import van_der_corput_sequence
-#         
-#         if is_top(self.F, f):
-#             # +infinity
-#             top1 = self.R[0].get_top()
-#             top2 = self.R[1].get_top()
-#             s = set([(top1, 0.0), (0.0, top2)])
-#             return self.R.Us(s)
-# 
-#         n = self.n
-#         
-#         if InvPlus2.ALGO == InvPlus2.ALGO_VAN_DER_CORPUT:
-#             options = van_der_corput_sequence(n)
-#         elif InvPlus2.ALGO == InvPlus2.ALGO_UNIFORM:
-#             options = np.linspace(0.0, 1.0, n)
-#         else:
-#             assert False, InvPlus2.ALGO
-# 
-#         s = set()
-#         for o in options:
-#             s.add((f * o, f * (1 - o)))
-#         return self.R.Us(s)
-
+    def solve_r(self, r):
+        if len(self.Fs) > 2:
+            msg = 'Cannot invert more than two terms.'
+            raise_desc(NotImplementedError, msg)
+            
+        options = sample_sum_lowersets(self.R, self.F, r, self.n)
+        return self.F.Ls(options)
 
 
 class SumNRcompMap(Map):
@@ -305,13 +292,3 @@ class MultValueMap(Map):
         return Rcomp_multiply_upper_topology(self.dom, x, 
                                              self.unit, self.value, 
                                              self.cod)
-        
-#         if is_top(self.dom, x):
-#             return self.cod.get_top()
-# 
-#         res = x * self.value
-# 
-#         if bool(np.isfinite(res)):
-#             return res
-#         else:
-#             return self.cod.get_top() 

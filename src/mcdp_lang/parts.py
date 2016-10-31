@@ -66,7 +66,7 @@ class CDPLanguage():
     FValueMinusN = namedtuplewhere('FValueMinusN', 'ops')
     Divide = namedtuplewhere('Divide', 'ops')
     # all constants
-    ConstantMinus = namedtuplewhere('ConstantMinus', 'ops')
+#     ConstantMinus = namedtuplewhere('ConstantMinus', 'ops')
     Coproduct = namedtuplewhere('Coproduct', 'ops')
 
     # elements: all strings, coproducts
@@ -348,7 +348,7 @@ class CDPLanguage():
     AssertNonempty = namedtuplewhere('AssertNonempty', 'keyword value')
     AssertEmpty = namedtuplewhere('AssertEmpty', 'keyword value')
 
-    ConstantMinusConstant = namedtuplewhere('ConstantMinusConstant', 'c1 minus c2')
+#     ConstantMinusConstant = namedtuplewhere('ConstantMinusConstant', 'c1 minus c2')
 #     RvalueMinusConstant = namedtuplewhere('RvalueMinusConstant', 'r c')
 
     # ignore_resources(a, b) mcdp { }

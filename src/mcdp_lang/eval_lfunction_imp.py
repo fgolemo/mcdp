@@ -280,10 +280,12 @@ def eval_lfunction_invmult_ops(fs, context):
         if isinstance(Fs[0], Nat) and isinstance(Fs[1], Nat):
             dp = InvMult2Nat(Nat(), Fs)
         else:
-            if isinstance(Fs[0], (Rcomp, RcompUnits)) and \
-               isinstance(Fs[1], (Rcomp, RcompUnits)):
-
+            if isinstance(Fs[0], ( RcompUnits)) and \
+               isinstance(Fs[1], ( RcompUnits)):
                 R = mult_table(Fs[0], Fs[1])
+                dp = InvMult2(R, Fs)
+            elif isinstance(Fs[0], Rcomp) and isinstance(Fs[1], Rcomp):
+                R = Rcomp()
                 dp = InvMult2(R, Fs)
             else:
                 msg = 'Could not create invplus for types {}.' % format(Fs)

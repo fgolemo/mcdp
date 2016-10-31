@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
-from mcdp_posets import Nat, Poset, PosetProduct, RcompUnits, get_types_universe
-from mcdp_posets.poset import is_top
+from mcdp_posets import Nat, Poset, PosetProduct, RcompUnits, get_types_universe, is_top
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 import numpy as np
 
@@ -94,33 +93,9 @@ class InvPlus2L(PrimitiveDP):
         return set([(f, r)])
 
     def solve(self, f):
-        if self.F.equal(f, self.F.get_top()):
-            # +infinity
-            top1 = self.R[0].get_top()
-            top2 = self.R[1].get_top()
-            s = set([(top1, 0.0), (0.0, top2)])
-            return self.R.Us(s)
-        n = self.nl
-
-        if InvPlus2.ALGO == InvPlus2.ALGO_VAN_DER_CORPUT:
-            options = van_der_corput_sequence(n + 1)
-        elif InvPlus2.ALGO == InvPlus2.ALGO_UNIFORM:
-            options = np.linspace(0.0, 1.0, n + 1)
-        else:
-            assert False, InvPlus2.ALGO
-
-        s = []
-        for o in options:
-            s.append((f * o, f * (1.0 - o)))
-
-        options = set()
-        for i in range(n):
-            x = s[i][0]
-            y = s[i + 1][1]
-            options.add((x, y))
-
+        options = sample_sum_lowerbound(self.F, self.R, f, self.nl)
         return self.R.Us(options)
-
+    
     def solve_r(self, r):
         """ 
             Upper approximation to f <= r1 + r2 on R.
@@ -128,6 +103,119 @@ class InvPlus2L(PrimitiveDP):
         r1, r2 = r
         maxf = self.F.add(r1, r2)
         return self.F.L(maxf)
+    
+def sample_sum_lowerbound(F, R, f, n):
+    """ 
+        Returns a set of points in R below the line {(a,b) | a + b = f } 
+        such that the line is contained in the upperclosure of the points.
+        
+        It uses the variable InvPlus2.ALGO to decide the type 
+        of sampling.
+    """
+    check_isinstance(R, PosetProduct) 
+    assert len(R) == 2
+    
+    if is_top(F, f):
+            # +infinity
+        top1 = R[0].get_top()
+        top2 = R[1].get_top()
+        return set([(top1, 0.0), (0.0, top2)])
+        
+    if F.leq(f, 0.0): # f == 0
+        return set([(0.0, 0.0)])
+         
+    if InvPlus2.ALGO == InvPlus2.ALGO_VAN_DER_CORPUT:
+        options = van_der_corput_sequence(n + 1)
+    elif InvPlus2.ALGO == InvPlus2.ALGO_UNIFORM:
+        options = np.linspace(0.0, 1.0, n + 1)
+    else:
+        assert False, InvPlus2.ALGO
+
+    s = []
+    for o in options:
+        s.append((f * o, f * (1.0 - o)))
+
+    options = set()
+    for i in range(n):
+        x = s[i][0]
+        y = s[i + 1][1]
+        
+        a = R.meet(s[i], s[i+1])
+        assert (x,y) == a, ((x,y), a)
+        
+        options.add((x, y))    
+
+    return options
+
+def sample_sum_lowersets(F, R, f, n):
+    """ 
+        Returns a set of points in R *above* the line {(a,b) | a + b = f } 
+        such that the line is contained in the downclosure of the points.
+        
+        It uses the variable InvPlus2.ALGO to decide the type of sampling.
+    """
+    check_isinstance(R, PosetProduct) 
+    assert len(R) == 2
+    
+    if is_top(F, f):
+            # +infinity
+        top1 = R[0].get_top()
+        top2 = R[1].get_top()
+        return set([(top1, 0.0), (0.0, top2)])
+        
+    if F.leq(f, 0.0): # f == 0
+        return set([(0.0, 0.0)])
+         
+    if InvPlus2.ALGO == InvPlus2.ALGO_VAN_DER_CORPUT:
+        options = van_der_corput_sequence(n + 1)
+    elif InvPlus2.ALGO == InvPlus2.ALGO_UNIFORM:
+        options = np.linspace(0.0, 1.0, n + 1)
+    else:
+        assert False, InvPlus2.ALGO
+
+    s = []
+    for o in options:
+        s.append((f * o, f * (1.0 - o)))
+
+    options = set()
+    for i in range(n):
+        x = s[i + 1][0]
+        y = s[i][1] # join
+        
+        a = R.join(s[i], s[i+1])
+        assert (x,y) == a, ((x,y), a)
+        options.add((x, y))    
+
+    return options
+
+def sample_sum_upperbound(F, R, f, nu):
+    """ 
+        Returns a set of points in R on the line {(a,b) | a + b = f }.
+    
+        It uses the variable InvPlus2.ALGO to decide the type 
+        of sampling.
+    """
+
+    if is_top(F, f):
+        # +infinity
+        top1 = R[0].get_top()
+        top2 = R[1].get_top()
+        return set([(top1, 0.0), (0.0, top2)])
+    
+    if F.leq(f, 0.0): # f == 0
+        return set([(0.0, 0.0)])
+            
+    if InvPlus2.ALGO == InvPlus2.ALGO_VAN_DER_CORPUT:
+        options = van_der_corput_sequence(nu)
+    elif InvPlus2.ALGO == InvPlus2.ALGO_UNIFORM:
+        options = np.linspace(0.0, 1.0, nu)
+    else:
+        assert False, InvPlus2.ALGO
+
+    s = set()
+    for o in options:
+        s.add((f * o, f * (1.0 - o)))
+    return s
 
 class InvPlus2U(PrimitiveDP):
 
@@ -152,27 +240,8 @@ class InvPlus2U(PrimitiveDP):
         return lf, ur
 
     def solve(self, f):
-
-        if is_top(self.F, f):
-            # +infinity
-            top1 = self.R[0].get_top()
-            top2 = self.R[1].get_top()
-            s = set([(top1, 0.0), (0.0, top2)])
-            return self.R.Us(s)
-
-        n = self.nu
-        
-        if InvPlus2.ALGO == InvPlus2.ALGO_VAN_DER_CORPUT:
-            options = van_der_corput_sequence(n)
-        elif InvPlus2.ALGO == InvPlus2.ALGO_UNIFORM:
-            options = np.linspace(0.0, 1.0, n)
-        else:
-            assert False, InvPlus2.ALGO
-
-        s = set()
-        for o in options:
-            s.add((f * o, f * (1 - o)))
-        return self.R.Us(s)
+        options = sample_sum_upperbound(self.F, self.R, f, self.nu)
+        return self.R.Us(options)
 
     def solve_r(self, r):
         r1, r2 = r

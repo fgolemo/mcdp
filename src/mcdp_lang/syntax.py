@@ -557,10 +557,6 @@ class Syntax():
 
     asserts = (assert_equal | assert_leq | assert_leq | assert_geq
                | assert_lt | assert_gt | assert_nonempty | assert_empty)
-
-    constant_minus_constant = sp(constant_value + MINUS + constant_value,
-                                 lambda t: CDP.ConstantMinusConstant(t[0], t[1], t[2]))
-
     
     constant_value_op = (
                          collection_of_constants
@@ -580,10 +576,6 @@ class Syntax():
                        )
 
     constant_value << constant_value_op
-
-#     constant_value << operatorPrecedence(constant_value_op, [
-#         ('-', 2, opAssoc.LEFT, constant_minus_parse_action),
-#     ])
 
     rvalue_resource_simple = sp(dpname + DOT - rname,
                                 lambda t: CDP.Resource(s=t[2], keyword=t[1], dp=t[0]))
@@ -717,18 +709,6 @@ class Syntax():
         'max': CDP.OpMaxF,
         'min': CDP.OpMinF,
     }
-
-#     rvalue_minus_constant = sp( ((SLPAR+rvalue+SRPAR)|rvalue + ~FollowedBy(MINUS)) + MINUS - constant_value,
-#                                  lambda t: CDP.RvalueMinusConstant(t[0], t[1], t[2]))
-    
-#     not_minus = (NotAny(MINUS) + printables)
-#     has_minus = (OneOrMore(not_minus)+MINUS+OneOrMore(not_minus))
-#     rvalue_minus_constant = sp(  (NotAny(has_minus)+rvalue)  + MINUS - constant_value,
-#                                  lambda t: CDP.RvalueMinusConstant(t[0], t[1], t[2]))
-
-#     rvalue_minus_constant = sp( SL('rvalue_minus_constant') + SLPAR + rvalue +
-#                                 SCOMMA +  constant_value + SRPAR,
-#                                 lambda t: CDP.RvalueMinusConstant(r=t[0], c=t[1]))
 
     # binary functions on functionality
     opname_f = sp(MatchFirst([L(x) for x in binary_f]), lambda t: CDP.OpKeyword(t[0]))
@@ -952,6 +932,7 @@ class Syntax():
     ndpt_canonical = sp(CANONICAL - ndpt_dp_rvalue,
                             lambda t: CDP.MakeCanonical(t[0], t[1]))
 
+    # approx_lower(n, <dp>) 
     APPROX_LOWER = keyword('approx_lower', CDP.ApproxLowerKeyword)
     ndpt_approx_lower = sp(APPROX_LOWER - SLPAR - integer -
                             SCOMMA - ndpt_dp_rvalue - SRPAR,

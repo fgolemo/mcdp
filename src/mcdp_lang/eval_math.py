@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from mcdp_dp import MinusValueNatDP, MinusValueRcompDP, MinusValueDP
 from mcdp_dp import MultValueDP, MultValueNatDP
 from mcdp_dp import PlusValueRcompDP, PlusValueDP, PlusValueNatDP
 from mcdp_dp import ProductNatN, ProductN, SumNNat, WrapAMap, sum_dimensionality_works, SumNRcompMap
-from mcdp_dp.dp_sum import SumNDP
-from mcdp_maps import MinusValueMap, SumNInt, SumNRcomp, PlusValueMap
+from mcdp_dp import SumNDP
+from mcdp_maps import SumNInt, SumNRcomp
 from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits, Space,
     express_value_in_isomorphic_space, get_types_universe, mult_table, Rcomp)
 from mocdp.comp.context import CResource, ValueWithUnits
@@ -35,20 +36,22 @@ def eval_constant_divide(op, context):
     return generic_mult_constantsN(factors)
 
 
-def eval_constant_minus(op, context):
-    from .eval_constant_imp import eval_constant
+# def eval_constant_minus(op, context):
+#     from .eval_constant_imp import eval_constant
+# 
+#     ops = get_odd_ops(unwrap_list(op.ops))
+#     constants = [eval_constant(_, context) for _ in ops]
 
-    ops = get_odd_ops(unwrap_list(op.ops))
-    constants = [eval_constant(_, context) for _ in ops]
-
-    R0 = constants[0].unit
+@contract(x=ValueWithUnits, constants='seq($ValueWithUnits)')
+def x_minus_constants(x, constants):
+    R0 = x.unit
     if not isinstance(R0, RcompUnits):
         msg = 'Cannot evaluate "-" on this space.'
         raise_desc(DPSemanticError, msg, R0=R0)
 
     # convert each factor to R0
-    v0 = constants[0].value
-    for c in constants[1:]:
+    v0 = x.value
+    for c in constants:
         vi = express_value_in_isomorphic_space(c.unit, c.value, R0)
 
 #         if v0 < vi:
@@ -65,6 +68,7 @@ def eval_constant_minus(op, context):
         
     return ValueWithUnits(unit=R1, value=v0)
     
+    
 @contract(unit1=Space, unit2=Space)
 def convert_vu(value, unit1, unit2, context):  # @UnusedVariable
     tu = get_types_universe()
@@ -74,6 +78,10 @@ def convert_vu(value, unit1, unit2, context):  # @UnusedVariable
 
 def eval_PlusN_as_constant(x, context):
     return eval_PlusN(x, context, wants_constant=True)
+
+
+def eval_RValueMinusN_as_constant(x, context):
+    return eval_rvalue_RValueMinusN(x, context, wants_constant=True)
 
 
 def eval_MultN_as_constant(x, context):
@@ -119,22 +127,45 @@ def eval_rvalue_divide(op, context):
     res = get_mult_op(context, r=r, c=c2_inv)
     return res
 
-def eval_rvalue_RValueMinusN(x, context):
-    ops = get_odd_ops(unwrap_list(x.ops))    
-    rvalue = eval_rvalue(ops[0], context)
+def eval_rvalue_RValueMinusN(x, context, wants_constant=False):
+    """ If wants_constant is True, returns a ValueWithUnit """
+    from .eval_constant_imp import eval_constant
+    ops = get_odd_ops(unwrap_list(x.ops))
     
-    # ops after the first should be constant
+    # ops after the first should be constant, otherwise
+    # we lose monotonicity
     must_be_constants = ops[1:]
-    from mcdp_lang.eval_constant_imp import eval_constant
-
     constants = []
     for mc in must_be_constants:
         try:
-            c  = eval_constant(mc, context)
+            c = eval_constant(mc, context)
+            assert isinstance(c, ValueWithUnits)
             constants.append(c)
-        except:
-            raise
+        except NotConstant as e:
+            msg = 'This expression is not monotone.'
+            raise_wrapped(DPSemanticError, e, msg, compact=True)
         
+    # Is the first value a constant?
+    try:
+        x = eval_constant(ops[0], context)
+        assert isinstance(x, ValueWithUnits)
+        # if so, this is just x - constants[0] - constants[1] - ...
+        vu = x_minus_constants(x, constants)
+        if wants_constant:
+            return vu
+        else:
+            return get_valuewithunits_as_resource(vu, context)
+        
+    except NotConstant:
+        # if we wanted this to be constant, it's a problem
+        if wants_constant:
+            raise 
+
+    # first value is not constant
+
+    rvalue = eval_rvalue(ops[0], context)
+ 
+    # we cannot do it with more than 1
     if len(constants) > 1:
         raise NotImplementedError
     
@@ -284,7 +315,7 @@ def eval_PlusN_sort_ops(ops, context, wants_constant):
     for op in ops:
         try:
             x = eval_constant(op, context)
-            assert isinstance(x, ValueWithUnits)
+            check_isinstance(x, ValueWithUnits)
 
             if isinstance(x.unit, (RcompUnits, Nat)):
                 pos_constants.append(x)
@@ -296,7 +327,7 @@ def eval_PlusN_sort_ops(ops, context, wants_constant):
                 
         except NotConstant as e:
             if wants_constant:
-                msg = 'Product not constant because one op is not constant.'
+                msg = 'Sum not constant because one op is not constant.'
                 raise_wrapped(NotConstant, e, msg, op=op)
             x = eval_rvalue(op, context)
             assert isinstance(x, CResource)
@@ -318,7 +349,7 @@ def eval_PlusN(x, context, wants_constant):
     # Then we divide in positive constants, negative constants, and resources.
     pos_constants, neg_constants, resources = \
         eval_PlusN_sort_ops(ops, context, wants_constant)
-    
+     
     # first, sum the positive constants and the resources
     res = eval_PlusN_(pos_constants, resources, context)
 
@@ -327,7 +358,7 @@ def eval_PlusN(x, context, wants_constant):
         return res
     else:
         if len(neg_constants) > 1:
-            msg = 'Not implemented addition of more than one negative constant'
+            msg = 'Not implemented addition of more than one negative constant.'
             raise_desc(DPInternalError, msg, neg_constants=neg_constants)
         else:
             # only one negative constant
@@ -346,36 +377,6 @@ def eval_PlusN(x, context, wants_constant):
                               res_prefix='_y')
             return r2
 
-class MinusValueDP(WrapAMap):
-    """ Give a positive constant here """
-    def __init__(self, F, c_value, c_space):
-        check_isinstance(F, RcompUnits)
-        check_isinstance(c_space, RcompUnits)
-        c_space.belongs(c_value)
-#         assert c_value >= 0, c_value
-        amap = MinusValueMap(P=F, c_value=c_value, c_space=c_space)
-        amap_dual = PlusValueMap(F=F, c_value=c_value, c_space=c_space, R=F)
-        WrapAMap.__init__(self, amap, amap_dual)
-        
-class MinusValueRcompDP(WrapAMap):
-    """ Give a positive constant here """
-    def __init__(self, c_value):
-        assert c_value >= 0, c_value
-        from mcdp_maps.plus_value_map import MinusValueRcompMap, PlusValueRcompMap
-
-        amap = MinusValueRcompMap(c_value)
-        amap_dual = PlusValueRcompMap(c_value=c_value)
-        WrapAMap.__init__(self, amap, amap_dual)
-        
-class MinusValueNatDP(WrapAMap):
-    """ Give a positive constant here """
-    def __init__(self, c_value):
-        assert c_value >= 0, c_value
-        from mcdp_maps.plus_nat import MinusValueNatMap, PlusValueNatMap
-        amap = MinusValueNatMap(c_value)
-        amap_dual = PlusValueNatMap(c_value)
-        WrapAMap.__init__(self, amap, amap_dual)
-
 def eval_PlusN_(constants, resources, context):
     from .misc_math import plus_constantsN
     # it's a constant value
@@ -383,7 +384,6 @@ def eval_PlusN_(constants, resources, context):
         return plus_constantsN(constants)
 
     elif len(resources) == 1:
-
         if len(constants) > 0:
             c = plus_constantsN(constants)
             return get_plus_op(context, r=resources[0], c=c)

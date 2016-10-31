@@ -1,3 +1,4 @@
+- test that lower/upper approximation works with solve_r
 - change keyword "dp" into "mcdp"
 - optimizing this:
 

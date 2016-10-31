@@ -6,8 +6,8 @@ from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
     get_types_universe, poset_minima)
 from mcdp_posets import LowerSets, LowerSet, RbicompUnits, RcompUnits
 from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning, \
-    do_extra_checks
+from mocdp.exceptions import (DPInternalError, DPSemanticError, mcdp_dev_warning,
+    do_extra_checks)
 
 from .eval_constant_asserts import (eval_assert_empty, eval_assert_equal,
     eval_assert_geq, eval_assert_gt, eval_assert_leq, eval_assert_lt,
@@ -32,19 +32,14 @@ def eval_constant(op, context):
     """
     with add_where_information(op.where):
 
-        if isinstance(op, CDP.Divide):
-            from mcdp_lang.eval_math import eval_constant_divide
-            return eval_constant_divide(op, context)
-
+        from mcdp_lang.eval_math import eval_constant_divide
+        
+        
         if isinstance(op, CDP.NatConstant):
             return ValueWithUnits(unit=Nat(), value=op.value)
 
         if isinstance(op, CDP.IntConstant):
             return ValueWithUnits(unit=Int(), value=op.value)
-
-        if isinstance(op, CDP.Collection):
-            return eval_constant_collection(op, context)
-
 
         if isinstance(op, (CDP.Resource)):
             raise NotConstant(str(op))
@@ -52,9 +47,7 @@ def eval_constant(op, context):
         if isinstance(op, (CDP.OpMax, CDP.OpMin, CDP.Power)):
             # TODO: can implement optimization
             raise NotConstant(str(op))
-
-        if isinstance(op, (CDP.SpaceCustomValue)):
-            return eval_constant_space_custom_value(op, context)
+ 
 
         if isinstance(op, CDP.Top):
             from mcdp_lang.eval_space_imp import eval_space
@@ -141,8 +134,8 @@ def eval_constant(op, context):
             F.belongs(v)
             return ValueWithUnits(v, F)
 
-        from .eval_math import eval_constant_minus
         from .eval_math import eval_PlusN_as_constant
+        from .eval_math import eval_RValueMinusN_as_constant
         from .eval_math import eval_MultN_as_constant
 
         cases = {
@@ -153,8 +146,11 @@ def eval_constant(op, context):
             CDP.AssertGT: eval_assert_gt,
             CDP.AssertNonempty: eval_assert_nonempty,
             CDP.AssertEmpty: eval_assert_empty,
-            CDP.ConstantMinus: eval_constant_minus,
+            CDP.Divide: eval_constant_divide,
+            CDP.Collection: eval_constant_collection,
+            CDP.SpaceCustomValue: eval_constant_space_custom_value,
             CDP.PlusN: eval_PlusN_as_constant,
+            CDP.RValueMinusN: eval_RValueMinusN_as_constant,
             CDP.MultN: eval_MultN_as_constant,
             CDP.EmptySet: eval_EmptySet,
             CDP.UpperSetFromCollection: eval_constant_uppersetfromcollection,
@@ -259,6 +255,11 @@ def eval_constant_space_custom_value(op, context):
         mcdp_dev_warning('Top?')
         value = int(custom_string)
         return ValueWithUnits(unit=Int(), value=value)
+
+    if isinstance(space, Rcomp):
+        mcdp_dev_warning('Top?')
+        value = float(custom_string)
+        return ValueWithUnits(unit=Rcomp(), value=value)
         
     msg = 'Custom parsing not implemented for space.'
     raise_desc(DPInternalError, msg, space=space, custom_string=custom_string)

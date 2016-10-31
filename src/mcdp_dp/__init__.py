@@ -14,7 +14,6 @@ from .dp_flatten import *
 from .dp_max import *
 from .dp_terminator import *
 
-
 from .dp_parallel_simplification import *
 from .dp_series_simplification import *
 from .dp_constant import *
@@ -39,4 +38,5 @@ from .opaque_dp import *
 from .dp_approximation import *
 from .dp_plus_value import *
 from .dp_multvalue import *
+from .dp_minus import *
 
