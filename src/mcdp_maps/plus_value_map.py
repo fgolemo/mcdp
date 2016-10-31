@@ -223,15 +223,15 @@ class MinusValueNatMap(Map):
         dom, cod = self.dom, self.cod 
         
         if is_top(dom, self.c):
-            return 0.0 
+            return 0 
         
         if dom.leq(x, self.c):
-            return 0.0
+            return 0
         else:
             if is_top(dom, x):
                 return cod.get_top()
             else:
-                check_isinstance(x, float)
+                check_isinstance(x, int)
                 res = x - self.c
                 assert res >= 0
                 return res

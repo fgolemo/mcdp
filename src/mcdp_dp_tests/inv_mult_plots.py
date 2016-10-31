@@ -46,7 +46,7 @@ def example():
             Map.__init__(self, dom, cod)
         def _call(self, x):
             return x + self.c
-    dp1 = Series(SumNNatDP((N, N), N), WrapAMap(PlusC(c0)))
+    dp1 = Series(SumNNatDP(2), WrapAMap(PlusC(c0)))
     prom = WrapAMap(PromoteToFloat(N, R))
     sqrt = WrapAMap(SqrtMap(R))
     ceil = WrapAMap(CeilMap(R))
@@ -686,7 +686,7 @@ def get_simple_equiv():
     F = PosetProduct((One, PosetProduct((Nat(), Nat()))))
     s0 = Mux(F, 1)
     s1 = make_parallel(WrapAMap(RoundSqrt()), WrapAMap(RoundSqrt()))
-    s2 = SumNNatDP((Nat(), Nat()), Nat())
+    s2 = SumNNatDP(2)
     s3 = WrapAMap(PlusValueNatMap(4))
     s4 = InvPlus2Nat(Nat(), (Nat(), Nat()))
     dp0 = wrap_series(s1.get_fun_space(), [s0, s1, s2, s3, s4])

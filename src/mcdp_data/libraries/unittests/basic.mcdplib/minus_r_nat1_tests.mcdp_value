@@ -1,3 +1,6 @@
+# required r - Nat:2 >= provided f 
+# r >= f + 2
+
 #  r = 0 -> f empty
 #  r = 1 -> f empty
 #  r = 2 -> f <= 0

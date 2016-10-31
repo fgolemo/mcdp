@@ -24,7 +24,7 @@ class ProductNDP(WrapAMap):
 
         WrapAMap.__init__(self, amap, amap_dual)
 
-class ProductNNatDP(Map):
+class ProductNNatDP(WrapAMap):
     def __init__(self, n):
         amap = ProductNNatMap(n)
         amap_dual = None

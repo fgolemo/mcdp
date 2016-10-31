@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import check_isinstance
 from mcdp_dp.dp_generic_unary import WrapAMap
-from mcdp_maps import (MinusValueNatMap, PlusValueNatMap, MinusValueRcompMap, 
+from mcdp_maps import (MinusValueNatMap, PlusValueNatMap, MinusValueRcompMap,
                        PlusValueRcompMap, PlusValueMap, MinusValueMap)
 from mcdp_posets import Rcomp, RcompUnits
 from mcdp_posets.nat import Nat
+
 
 __all__ = [
     'MinusValueDP',
