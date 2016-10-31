@@ -41,10 +41,10 @@ class InvMultDualValueNatMap(Map):
 
 class InvMultValueNatMap(Map):
     """ x |-> 
-             if f != top
+             if x != top
                 ceil(f/c) if c < Top
                 {0} if c = Top
-            if f == top:
+            if x == top:
                 {0}
     """
     @contract(value=int)
@@ -54,11 +54,11 @@ class InvMultValueNatMap(Map):
         Map.__init__(self, dom, cod)
 
     def _call(self, x):
-        if self.dom.leq(self.value, 0):
+        if self.dom.leq(self.value, 0): # value == 0
             return self.cod.get_top()
         else:
             if is_top(self.dom, x):
-                return 0
+                return self.cod.get_top()
             else:
                 if is_top(self.dom, self.value):
                     return 0

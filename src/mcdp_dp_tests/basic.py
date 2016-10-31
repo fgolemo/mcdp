@@ -3,6 +3,7 @@ from contracts.utils import raise_wrapped
 from mcdp_dp import NotSolvableNeedsApprox
 from mcdp_posets import NotBounded, UpperSets, NotLeq
 from mcdp_tests.generation import for_all_dps
+from mcdp_posets.uppersets import LowerSets
 
 
 @for_all_dps
@@ -51,23 +52,60 @@ def check_solve_top_bottom(id_dp, dp):
             M.belongs(m)
 
 
-
+def try_with_approximations(id_dp, dp, test):
+    from mcdp_dp.dp_transformations import get_dp_bounds
+    nl = nu = 5
+    dpL, dpU = get_dp_bounds(dp, nl, nu)
+    
+    test(id_dp + '_L%s' % nl, dpL)
+    test(id_dp + '_U%s' % nu, dpU)
+    
 @for_all_dps
-def check_solve_chain(_, dp):
+def check_solve_f_chain(id_dp, dp):
     from mcdp_posets.utils import poset_check_chain
 
-    funsp = dp.get_fun_space()
+    F = dp.get_fun_space()
 
-    chain = funsp.get_test_chain(n=5)
-    poset_check_chain(funsp, chain)
+    f_chain = F.get_test_chain(n=5)
+    poset_check_chain(F, f_chain)
 
     try:
-        trchain = map(dp.solve, chain)
+        trchain = map(dp.solve, f_chain)
     except NotSolvableNeedsApprox:
-        return
+        return try_with_approximations(id_dp, dp, check_solve_r_chain)
 
     R = dp.get_res_space()
     UR = UpperSets(R)
-    poset_check_chain(UR, trchain)
+    try:
+        poset_check_chain(UR, trchain)
+    except ValueError as e:
+        msg = 'The map solve() for %r is not monotone.' % id_dp
+        raise_wrapped(Exception, e, msg, f_chain=f_chain, trchain=trchain, compact=True)
 
-    print trchain
+
+
+@for_all_dps
+def check_solve_r_chain(id_dp, dp):
+    from mcdp_posets.utils import poset_check_chain
+
+    R = dp.get_res_space()
+    F = dp.get_fun_space()
+    LF = LowerSets(F)
+    
+    r_chain = R.get_test_chain(n=5)
+    poset_check_chain(R, r_chain)
+
+    try:
+        lfchain = map(dp.solve_r, r_chain)
+    except NotSolvableNeedsApprox:
+        return try_with_approximations(id_dp, dp, check_solve_r_chain)
+    
+    try:
+        poset_check_chain(LF, lfchain)
+    except ValueError as e:
+        msg = 'The map solve() for %r is not monotone.' % id_dp
+        raise_wrapped(Exception, e, msg, r_chain=r_chain, lfchain=lfchain, compact=True)
+
+
+
+
