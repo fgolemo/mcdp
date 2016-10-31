@@ -2,13 +2,12 @@
 from contracts import contract
 from contracts.utils import check_isinstance
 from mcdp_maps import ConstantPosetMap, InvMultDualValueNatMap, MultValueMap, MultValueNatMap
-from mcdp_posets import Map, MapNotDefinedHere, RcompUnits, is_top
-from mcdp_posets import Nat
+from mcdp_maps import InvMultValueNatMap
+from mcdp_posets import Map, MapNotDefinedHere, RcompUnits, is_top, Nat
 from mcdp_posets.rcomp_units import inverse_of_unit
 import numpy as np
 
 from .dp_generic_unary import WrapAMap
-from mcdp_maps.mult_value import InvMultValueNatMap
 
 
 __all__ = [

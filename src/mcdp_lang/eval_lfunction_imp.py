@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance, raise_wrapped
-from mcdp_dp import InvMult2, InvPlus2, InvPlus2Nat
-from mcdp_dp import JoinNDualDP, MeetNDualDP
-from mcdp_dp.dp_inv_mult import InvMult2Nat
-from mcdp_dp.dp_plus_value import PlusValueNatDP, PlusValueRcompDP, PlusValueDP
+from mcdp_dp import (InvMult2, InvPlus2, InvPlus2Nat, InvMult2Nat,
+                     InvMultValueNatDP, JoinNDualDP, MeetNDualDP, PlusValueNatDP,
+                     PlusValueRcompDP, PlusValueDP)
 from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table,
     poset_maxima)
 from mcdp_posets import Rcomp
-from mocdp.comp.context import CFunction, get_name_for_res_node
-from mocdp.comp.context import ValueWithUnits
+from mocdp.comp.context import CFunction, get_name_for_res_node, ValueWithUnits
 from mocdp.exceptions import (DPInternalError, DPNotImplementedError,
     DPSemanticError, mcdp_dev_warning)
 
@@ -20,8 +18,6 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from mcdp_dp.dp_multvalue import InvMultValueNatDP
-
 
 
 CDP = CDPLanguage

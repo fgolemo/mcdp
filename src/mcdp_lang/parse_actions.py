@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
+from mocdp import logger
 from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
     MCDPExceptionWithWhere, do_extra_checks, mcdp_dev_warning)
 
@@ -13,7 +14,6 @@ from .pyparsing_bundled import ParseException, ParseFatalException
 from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list
 
-from mocdp import logger
 
 CDP = CDPLanguage
 

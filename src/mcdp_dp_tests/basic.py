@@ -101,10 +101,13 @@ def check_solve_r_chain(id_dp, dp):
         return try_with_approximations(id_dp, dp, check_solve_r_chain)
     
     try:
-        poset_check_chain(LF, lfchain)
+        # now, notice that we need to reverse this
+        lfchain_reversed = list(reversed(lfchain))
+        poset_check_chain(LF, lfchain_reversed)
     except ValueError as e:
         msg = 'The map solve() for %r is not monotone.' % id_dp
-        raise_wrapped(Exception, e, msg, r_chain=r_chain, lfchain=lfchain, compact=True)
+        raise_wrapped(Exception, e, msg, r_chain=r_chain, lfchain=lfchain,
+                      lfchain_reversed=lfchain_reversed, compact=True)
 
 
 
