@@ -3,7 +3,7 @@ from contracts import contract
 from contracts.utils import check_isinstance
 from mcdp_posets import Map, Nat, RcompUnits, is_top
 from mcdp_posets.nat import Nat_mult_uppersets_continuous, \
-    Nat_mult_lowersets_continuous
+    Nat_mult_lowersets_continuous, RcompUnits_mult_lowersets_continuous
 from mcdp_posets.rcomp import Rcomp_multiply_upper_topology
 import numpy as np
 
@@ -38,6 +38,19 @@ class InvMultDualValueNatMap(Map):
     def _call(self, x):
         return Nat_mult_lowersets_continuous(self.value, x) 
 
+class InvMultDualValueMap(Map):
+    """ Multiplies using the lower set topology. """
+    def __init__(self, dom, cod, space, value):
+        space.belongs(value)
+        self.value = value
+        self.space = space
+        Map.__init__(self, dom, cod)
+
+    def _call(self, x):
+        A,a  = self.dom,x
+        B,b = self.space, self.value 
+        C = self.cod
+        return RcompUnits_mult_lowersets_continuous(A, a, B, b, C)
 
 class InvMultValueNatMap(Map):
     """ x |-> 
@@ -65,6 +78,37 @@ class InvMultValueNatMap(Map):
                 else:
                     assert self.value > 0
                     return int(np.ceil(float(x)/self.value))
+
+
+class InvMultValueMap(Map):
+    """ x |-> 
+             if x != top
+                ceil(f/c) if c < Top
+                {0} if c = Top
+            if x == top:
+                {0}
+    """
+    
+    def __init__(self, dom, cod, space, value):
+        space.belongs(value)
+        self.value = value
+        self.space = space
+        # XXX: not sure about the units
+        # assert (dom * space = cod)
+        Map.__init__(self, dom, cod)
+
+    def _call(self, x):
+        if self.dom.leq(self.value, 0): # value == 0
+            return self.cod.get_top()
+        else:
+            if is_top(self.dom, x):
+                return self.cod.get_top()
+            else:
+                if is_top(self.dom, self.value):
+                    return 0
+                else:
+                    assert self.value > 0
+                    return float(x) / self.value
 
 
 class MultValueMap(Map):

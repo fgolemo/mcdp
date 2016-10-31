@@ -13,6 +13,7 @@ from .parts import CDPLanguage
 from .pyparsing_bundled import ParseException, ParseFatalException
 from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list
+import traceback
 
 
 CDP = CDPLanguage
@@ -20,7 +21,7 @@ CDP = CDPLanguage
 @contextmanager
 def add_where_information(where):
     """ Adds where field to DPSyntaxError or DPSemanticError thrown by code. """
-    active = False
+    active = True
     if not active:
         logger.debug('Note: Error tracing disabled in add_where_information().')
         
@@ -30,13 +31,23 @@ def add_where_information(where):
     else:
         try:
             yield
-        except DPInternalError as e:
-            raise
+#         except DPInternalError as e:
+#             raise
         except MCDPExceptionWithWhere as e:
             mcdp_dev_warning('add magic traceback handling here')
             existing = getattr(e, 'where', None)
+            if existing: 
+                raise
             use_where = existing if existing is not None else where
-            e = type(e)(e.error, where=use_where)
+            error = e.error
+            
+            stack = traceback.extract_stack()[:-2]
+            
+            stack_info = ''.join(traceback.format_list(stack))
+#             error += '\n' + 'added by add_where_information(%s):' % (id(where))
+#             error += '\n' + indent(stack_info, 'S: ')
+            
+            e = type(e)(error, where=use_where, stack=stack_info)
             raise e
 
 def wheredecorator(b):

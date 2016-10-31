@@ -182,7 +182,8 @@ def eval_lfunction_FValueMinusN(lf, context):
             raise
         
     if len(constants) > 1:
-        raise NotImplementedError
+        msg = 'FValueMinusN not implemented for more than one constant.'
+        raise_desc(DPNotImplementedError, msg)
     
     constant = constants[0] 
 
@@ -243,7 +244,7 @@ def eval_lfunction_invplus_ops(fs, context):
             
         elif all(isinstance(_, Rcomp) for _ in Fs):
             msg = 'InvPlus2 not implemented for Rcomp.'
-            raise_desc(NotImplementedError, msg)
+            raise_desc(DPNotImplementedError, msg)
         elif all(isinstance(_, Nat) for _ in Fs):
             dp = InvPlus2Nat(R, tuple(Fs))
             
@@ -311,7 +312,7 @@ def eval_lfunction_create_invmultvalue(lf, constant, context):
                         res_prefix='_result')
     else:
         msg = 'Cannot get InvMultValue for spaces %s and %s' % (F1, F2)
-        raise_desc(NotImplementedError, msg, F1=F1, F2=F2)
+        raise_desc(DPNotImplementedError, msg, F1=F1, F2=F2)
 
     
 def eval_lfunction_invmult(lf, context, wants_constant=False):
@@ -362,7 +363,7 @@ def eval_lfunction_invmult_ops(fs, context):
                 dp = InvMult2(R, Fs)
             else:
                 msg = 'Could not create invplus for types {}.'.format(Fs)
-                raise_desc(NotImplementedError, msg, Fs0=Fs[0], Fs1=Fs[1])
+                raise_desc(DPNotImplementedError, msg, Fs0=Fs[0], Fs1=Fs[1])
                 
         return create_operation_lf(context, dp=dp, functions=fs,
                         name_prefix='_invmult', op_prefix='_ops',

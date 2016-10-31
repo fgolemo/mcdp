@@ -8,6 +8,7 @@ from mcdp_posets.rcomp_units import inverse_of_unit
 import numpy as np
 
 from .dp_generic_unary import WrapAMap
+from mcdp_maps.mult_value import InvMultValueMap, InvMultDualValueMap
 
 
 __all__ = [
@@ -199,7 +200,14 @@ class InvMultValueRcompDP(WrapAMap):
 
 class InvMultValueDP(WrapAMap):
     def __init__(self, F, R, unit, value):
-        raise NotImplementedError
+        check_isinstance(F, RcompUnits)
+        check_isinstance(R, RcompUnits)
+        check_isinstance(unit, RcompUnits)
+        unit.belongs(value)
+        amap = InvMultValueMap(F, R, unit, value)
+        amap_dual = InvMultDualValueMap(R, F, unit, value)    
+        WrapAMap.__init__(self, amap, amap_dual)
+        
     
 class InvMultValueNatDP(WrapAMap):
     """

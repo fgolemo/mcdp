@@ -10,18 +10,23 @@ class MCDPException(Exception):
 
 
 class MCDPExceptionWithWhere(MCDPException):
-    def __init__(self, error, where=None):
+    def __init__(self, error, where=None, stack=None):
         if not isinstance(error, str):
             raise ValueError('Expected string, got %r.' % type(error))
 
         self.error = error
         self.where = where
-        MCDPException.__init__(self, error, where)
+        self.stack = stack
+        
+        MCDPException.__init__(self, error, where, stack)
 
     def __str__(self):
-        error, where = self.args
+        error, where, stack = self.args
         assert isinstance(error, str), error
-        s = error
+        s = ""
+        if stack:
+            s += '\n' + stack + '\n'
+        s += error
         if where is not None:
             from contracts.interface import add_prefix
             ws = where.__str__()
@@ -33,7 +38,7 @@ class MCDPExceptionWithWhere(MCDPException):
         """ Returns the same exception with reference
             to the given filename. """
         where = _get_where_with_filename(self, filename)
-        return type(self)(self.error, where=where)
+        return type(self)(self.error, where=where, stack=self.stack)
 
 
 class DPInternalError(MCDPExceptionWithWhere):
@@ -82,11 +87,13 @@ def extend_with_filename(realpath):
 
 def _get_where_with_filename(e, filename):
     where = e.where
+    
     if where is None:
         mcdp_dev_warning('warning, where is None here: %s' % e)
         where = None
-    else:
+    else:    
         where = where.with_filename(filename)
+        
     return where
 
 user = getpass.getuser()

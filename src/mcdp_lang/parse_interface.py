@@ -3,6 +3,7 @@
 from contracts import contract
 from mcdp_dp import PrimitiveDP
 from mcdp_posets import Poset
+from mocdp import logger
 from mocdp.exceptions import MCDPExceptionWithWhere
 
 from .parse_actions import parse_wrap
@@ -43,7 +44,12 @@ def parse_ndp_filename(filename, context=None):
     try:
         return parse_ndp(contents, context)
     except MCDPExceptionWithWhere as e:
-        raise e.with_filename(filename)
+        active = True
+        if active:
+            raise e.with_filename(filename)
+        else:
+            logger.debug('Deactivate trace in parse_ndp_filename().')
+            raise
 
 @contract(returns=Poset)
 def parse_poset(string, context=None):

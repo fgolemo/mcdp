@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import raise_wrapped
 from mcdp_dp import NotSolvableNeedsApprox
-from mcdp_posets import NotBounded, UpperSets, NotLeq
+from mcdp_posets import LowerSets, NotBounded, UpperSets, NotLeq
 from mcdp_tests.generation import for_all_dps
-from mcdp_posets.uppersets import LowerSets
 
 
 @for_all_dps
@@ -59,6 +58,7 @@ def try_with_approximations(id_dp, dp, test):
     
     test(id_dp + '_L%s' % nl, dpL)
     test(id_dp + '_U%s' % nu, dpU)
+    
     
 @for_all_dps
 def check_solve_f_chain(id_dp, dp):

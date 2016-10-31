@@ -184,6 +184,18 @@ def Nat_mult_lowersets_continuous(a, b):
     mcdp_dev_warning('catch overflow')
     return a * b
 
+def RcompUnits_mult_lowersets_continuous(A, a, B, b, C):
+    """ Multiplication on Rcompunits, extended for top, so that top*0 = Top """
+    from mcdp_posets.poset import is_top
+     
+    if is_top(A, a) or is_top(B, b):
+        return C.get_top()
+
+    mcdp_dev_warning('catch overflow')
+    return a * b
+
+
+
 IntBottom = "int:-inf"
 IntTop = "int:+inf"
 
