@@ -1,23 +1,17 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_dp import WrapAMap
-from mcdp_maps import CeilMap, SquareMap, SqrtMap, SquareNatMap
-from mcdp_posets import Nat, Rcomp, RcompUnits
-from mcdp_posets.maps.identity import IdentityMap
+from mcdp_dp import (Floor0DP, CeilDP, CeilSqrtNatDP, SqrtRDP,
+    SquareNatDP, SquareDP)
+from mcdp_dp import PrimitiveDP
+from mcdp_dp.dp_identity import IdentityDP
+from mcdp_posets import Map, Nat, Rcomp, RcompUnits
 from mocdp import logger
 from mocdp.comp.context import CResource
 from mocdp.exceptions import DPSemanticError
 
 from .helpers import get_resource_possibly_converted, create_operation
 from .parts import CDPLanguage
-from mcdp_posets.maps.promote_to_float import PromoteToFloat
-from mcdp_maps.misc_imp import FloorMap, Floor0Map
-from mcdp_posets.maps.coerce_to_int import CoerceToInt
-from mcdp_maps.map_composition import MapComposition
-from mcdp_dp.primitive import PrimitiveDP
-from mcdp_posets.space import Map
-from mcdp_dp.dp_series_simplification import wrap_series
 
 
 CDP = CDPLanguage
@@ -50,7 +44,7 @@ class Rule():
             
         amap = self.use_map(F)
         if isinstance(amap, Map):
-            dp = WrapAMap(amap)
+            raise Exception(amap)
         else:
             assert isinstance(amap, PrimitiveDP)
             dp = amap
@@ -60,94 +54,16 @@ class Rule():
                                          op_prefix='_in',
                                          res_prefix='_out')
             
-class SquareNatDP(WrapAMap):
-    def __init__(self):
-        amap = SquareNatMap()
-        
-        N = Nat()
-        R = Rcomp()
-        
-        maps = (
-            PromoteToFloat(N, R),
-            SqrtMap(R),
-            FloorMap(R),
-            CoerceToInt(R, N))
-        
-        amap_dual = MapComposition(maps)
-         
-        WrapAMap.__init__(self, amap, amap_dual)
-        
 
-class PromoteToFloatDP(WrapAMap):
-    def __init__(self, F, R):
-        amap = PromoteToFloat(F, R)
-        amap_dual = CoerceToInt(R, F)
-        WrapAMap.__init__(self, amap, amap_dual)
-    
-class CoerceToIntDP(WrapAMap):
-    def __init__(self, F, R):
-        amap = CoerceToInt(F, R)
-        amap_dual = PromoteToFloat(R, F)
-        WrapAMap.__init__(self, amap, amap_dual)
-        
-def CeilSqrtNat():
-    
-    # promote to float
-    # take sqrt
-    # make ceil
-    # coerce
-    R = Rcomp()
-    N = Nat()
-    dps = (
-        PromoteToFloatDP(N, R),
-        SqrtRDP(R),
-        CeilDP(R),
-        CoerceToIntDP(R, N),
-    )
-    return wrap_series(N, dps)
-        
-    
-class SquareDP(WrapAMap):
-    def __init__(self, F):
-        amap = SquareMap(F)
-        amap_dual = SqrtMap(F)
-        WrapAMap.__init__(self, amap, amap_dual)
-        
-class SqrtRDP(WrapAMap):
-    """ r >= sqrt(f) for rcomp or rcompunits """
-    def __init__(self, F):
-        amap = SqrtMap(F)
-        amap_dual = SquareMap(F)
-        WrapAMap.__init__(self, amap, amap_dual)
-        
-class Floor0DP(WrapAMap):
-    """
-        Note that floor() is not S-C.
-        
-        This is floor0:
-        
-        floor0(f) = { 0 for f = 0
-                      ceil(f-1) for f > 0
-    """
-    def __init__(self, F):
-        amap = Floor0Map(F)
-        amap_dual = CeilMap(F)
-        WrapAMap.__init__(self, amap, amap_dual)
-
-class CeilDP(WrapAMap):
-    def __init__(self, F):
-        amap = CeilMap(F)
-        amap_dual = FloorMap(F)
-        WrapAMap.__init__(self, amap, amap_dual)
-        
-    
 def get_unary_rules():
      
     # note that RcompUnits derives from Rcomp so we must have this check
     def is_RcompUnits(T):
         return isinstance(T, RcompUnits)
+    
     def is_Rcomp(T):
-        return isinstance(T, Rcomp) and not isinstance(T, RcompUnits)
+        return isinstance(T, Rcomp)
+    
     def is_Nat(T):
         return isinstance(T, Nat)
         
@@ -155,7 +71,7 @@ def get_unary_rules():
         # sqrt(Nat): promote to Rcomp()
         # sqrt(Rcomp)
         # sqrt(Rcomp)
-        Rule('sqrt', is_Nat, Rcomp(), lambda _: SqrtMap(Rcomp())), # XXX
+        Rule('sqrt', is_Nat, Rcomp(), lambda _: SqrtRDP(Rcomp())), # XXX
         Rule('sqrt', is_Rcomp, None,  lambda _: SqrtRDP(Rcomp())),
         Rule('sqrt', is_RcompUnits, None,  lambda F: SqrtRDP(F)),
              
@@ -166,13 +82,13 @@ def get_unary_rules():
         Rule('square', is_Rcomp, None, lambda F: SquareDP(F)), 
         Rule('square', is_RcompUnits, None, lambda F: SquareDP(F)), 
 
-        Rule('ceilsqrt', is_Nat, None, lambda _: CeilSqrtNat()), 
+        Rule('ceilsqrt', is_Nat, None, lambda _: CeilSqrtNatDP()), 
 
-        Rule('ceil', is_Nat, None, lambda _: IdentityMap(Nat(), Nat()), warn='ceil() used on Nats'), 
+        Rule('ceil', is_Nat, None, lambda _: IdentityDP(Nat(), Nat()), warn='ceil() used on Nats'), 
         Rule('ceil', is_Rcomp, None, lambda _: CeilDP(Rcomp())), 
         Rule('ceil', is_RcompUnits, None, lambda F: CeilDP(F)),
         
-        Rule('floor', is_Nat, None, lambda _: IdentityMap(Nat(), Nat()), warn='floor() used on Nats'), 
+        Rule('floor', is_Nat, None, lambda _: IdentityDP(Nat(), Nat()), warn='floor() used on Nats'), 
         Rule('floor', is_Rcomp, None, lambda _: Floor0DP(Rcomp())), 
         Rule('floor', is_RcompUnits, None, lambda F: Floor0DP(F)),
     ]
@@ -200,37 +116,3 @@ def eval_rvalue_unary(r, context):
     msg = ('Cannot create unary operator %r for %s.'% (proc.name, F))
     raise_desc(DPSemanticError, msg, F=F)
     
-    
-#     
-#     if isinstance(F, Nat):
-#         if proc.name in ['sqrt']:
-#             # convert to Rcomp
-#             F = Rcomp()
-#             op_r = get_resource_possibly_converted(op_r, F, context) 
-#                 
-#         
-#     if not isinstance(F, (Rcomp, RcompUnits)):
-#         msg = ('Cannot create unary operator %r for %s (only Rcomp/RcompUnits supported).'%
-#                (proc.name, F))
-#         raise_desc(DPSemanticError, msg, F=F)
-# 
-#     if proc.name == 'square':
-#         amap = SquareMap(F)
-#     elif proc.name == 'sqrt':
-#         amap = SqrtMap(F)
-#     elif proc.name == 'ceil':
-#         amap = CeilMap(F)
-#     elif proc.name == 'floor':
-#         amap = FloorMap(F)
-#     else:
-#         msg = 'Unknown procedure %r.' % proc.name
-#         raise_desc(DPInternalError, msg) 
-#     
-#     dp = WrapAMap(amap)
-#     
-#     return create_operation(context, dp, [op_r],
-#                                  name_prefix='_%s'% proc.name, 
-#                                  op_prefix='_in',
-#                                  res_prefix='_out')
-#         
-        

@@ -5,10 +5,11 @@ import warnings
 from nose.tools import assert_equal
 
 from comptests.registrar import comptest, comptest_dynamic
-from mcdp_dp import InvPlus2Nat, Mux, SumNNat, WrapAMap
-from mcdp_dp.dp_loop import DPLoop0
-from mcdp_dp.dp_loop2 import DPLoop2
-from mcdp_dp.dp_parallel import Parallel
+from mcdp_dp import DPLoop0
+from mcdp_dp import DPLoop2
+from mcdp_dp import InvPlus2Nat, Mux, WrapAMap
+from mcdp_dp import Parallel
+from mcdp_dp import SumNNatDP
 from mcdp_dp.dp_parallel_simplification import make_parallel
 from mcdp_dp.dp_series_simplification import wrap_series
 from mcdp_dp.dp_transformations import get_dp_bounds
@@ -18,6 +19,7 @@ from mcdp_lang import parse_ndp
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import assert_semantic_error
+from mcdp_maps import PlusValueNatMap
 from mcdp_posets import (Map, Nat, NotEqual, PosetProduct, UpperSets,
     poset_minima)
 from mcdp_posets.maps.coerce_to_int import CoerceToInt
@@ -27,7 +29,6 @@ from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
 from reprep import Report
-from mcdp_maps.plus_nat import PlusValueNatMap
 
 
 def example():
@@ -45,7 +46,7 @@ def example():
             Map.__init__(self, dom, cod)
         def _call(self, x):
             return x + self.c
-    dp1 = Series(SumNNat((N, N), N), WrapAMap(PlusC(c0)))
+    dp1 = Series(SumNNatDP((N, N), N), WrapAMap(PlusC(c0)))
     prom = WrapAMap(PromoteToFloat(N, R))
     sqrt = WrapAMap(SqrtMap(R))
     ceil = WrapAMap(CeilMap(R))
@@ -685,7 +686,7 @@ def get_simple_equiv():
     F = PosetProduct((One, PosetProduct((Nat(), Nat()))))
     s0 = Mux(F, 1)
     s1 = make_parallel(WrapAMap(RoundSqrt()), WrapAMap(RoundSqrt()))
-    s2 = SumNNat((Nat(), Nat()), Nat())
+    s2 = SumNNatDP((Nat(), Nat()), Nat())
     s3 = WrapAMap(PlusValueNatMap(4))
     s4 = InvPlus2Nat(Nat(), (Nat(), Nat()))
     dp0 = wrap_series(s1.get_fun_space(), [s0, s1, s2, s3, s4])

@@ -30,8 +30,9 @@ def check_evaluate(id_dp, dp):
     LF.belongs(lf)
 
     if not lf.maximals or not ur.minimals:
-        msg = 'No points'
-        raise_desc(ValueError, msg, lf=lf, ur=ur, m0=m0, M=M, dp=dp.repr_long())
+        msg = 'The point m0 gave empty lf, ur.'
+        raise_desc(Exception, msg, lf=lf, ur=ur, m0=M.format(m0), 
+                   M=M, dp=dp.repr_long())
 
     # take one possible feasible pair
     _f = list(lf.maximals)[0]

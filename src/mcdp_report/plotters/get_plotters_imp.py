@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts.utils import raise_desc, indent
 from mcdp_report.plotters.interface import NotPlottable
 

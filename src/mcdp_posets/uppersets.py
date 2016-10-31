@@ -66,7 +66,8 @@ class UpperSet(Space):
         for p in self.minimals:
             if self.P.leq(p, x):
                 return
-        raise_desc(NotBelongs, 'Point does not belong')
+        msg = 'The point {} does not belong to this upperset.'.format(x)
+        raise_desc(NotBelongs, msg)
 
     def __repr__(self):
         contents = ", ".join(self.P.format(m)
@@ -325,8 +326,10 @@ class LowerSets(Poset):
         return "↓{%s}" % contents
 
     def __repr__(self):
-        return "L(%r)" % self.P
+        return "LowerSets(%r)" % self.P
 
+    def __str__(self):
+        return "L(%s)" % self.P
 
 
 class LowerSet(Space):

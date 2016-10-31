@@ -1,0 +1,8 @@
+
+< 
+    assert_equal( solve(0 m, `minus_real3), ↑ EmptySet m),
+
+    assert_equal( solve_r(0 m, `minus_real3), ↓ EmptySet m),
+    assert_equal( solve_r(1 m, `minus_real3), ↓ EmptySet m),
+    assert_equal( solve_r(Top m, `minus_real3), ↓ { Top m })
+>

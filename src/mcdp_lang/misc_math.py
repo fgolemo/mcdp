@@ -4,14 +4,13 @@ import warnings
 
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
-from mcdp_dp import sum_units
-from mcdp_posets import Nat, RcompUnits, mult_table
-from mcdp_posets import express_value_in_isomorphic_space
-from mcdp_posets.rcomp_units import R_dimensionless, mult_table_seq, \
-    RbicompUnits
+from mcdp_maps.SumN_xxx_Map import sum_units
+from mcdp_posets import Nat, RcompUnits, mult_table, Rcomp, express_value_in_isomorphic_space
+from mcdp_posets.nat import Nat_mult_uppersets_continuous
+from mcdp_posets.rcomp_units import (R_dimensionless, mult_table_seq,
+    RbicompUnits)
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPSemanticError
-from mcdp_posets.nat import Nat_mult_uppersets_continuous
 
 
 @contract(S=RcompUnits)
@@ -23,7 +22,6 @@ def inv_unit(S):
     return res
 
 def inv_constant(a):
-    from mcdp_posets.rcomp import Rcomp
     if a.unit == Nat():
         raise NotImplementedError('division by natural number')
         warnings.warn('Please think more about this. Now 1/N -> 1.0/N')
@@ -80,18 +78,19 @@ def generic_mult_constantsN(seq):
     return res
 
 def generic_mult_table(seq):
-    """ A generic mult table that knows how to take care of Nat as well. """
+    """ A generic mult table that knows how to take care of Nat and Rcomp as well. """
     seq = list(seq)
     for s in seq:
-        check_isinstance(s, (Nat, RcompUnits))
+        check_isinstance(s, (Nat, Rcomp, RcompUnits))
         
-    # If there are some Rcomps, then Nat will be promoted to Rcomp dimensionless
+    # If there are some RcompUnits, then Nat and Rcomp 
+    # will be promoted to Rcomp dimensionless
     any_reals = any(isinstance(_, RcompUnits) for _ in seq)
-    
+    any_rcomp = any(isinstance(_, Rcomp) for _ in seq)
     if any_reals:
         # compute the promoted ones
         def get_promoted(s):
-            if isinstance(s, Nat):
+            if isinstance(s, (Rcomp, Nat)):
                 return R_dimensionless
             else:
                 return s
@@ -101,7 +100,20 @@ def generic_mult_table(seq):
     
         # now we can use mult_table
         return promoted, mult_table_seq(promoted)
+    elif any_rcomp:
+        # promote Nat to Rcomp
+        def get_promoted(s):
+            if isinstance(s,  Nat):
+                return Rcomp
+            else:
+                assert isinstance(s, Rcomp)
+                return s
     
+        # this is all RcompUnits
+        promoted = map(get_promoted, seq)
+    
+        # now we can use mult_table
+        return promoted, Rcomp()
     else: # it's all Nats
         return seq, Nat()
 

@@ -1,19 +1,14 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import raise_desc
-from mcdp_dp import WrapAMap
-from mcdp_posets import RCompUnitsPowerMap, RcompUnits
+from mcdp_dp import RcompUnitsPowerDP
+from mcdp_posets import RcompUnits
 from mocdp.exceptions import DPSemanticError
 
 from .parts import CDPLanguage
 
+
 CDP = CDPLanguage
 
-
-class RcompUnitsPowerDP(WrapAMap): # TODO: move
-    def __init__(self, F, num, den):
-        amap = RCompUnitsPowerMap(F, num=num, den=den)
-        amap_dual = RCompUnitsPowerMap(amap.get_codomain(), num=den, den=num) # swap
-        WrapAMap.__init__(self, amap, amap_dual)
 
 def eval_rvalue_Power(rvalue, context):
     assert isinstance(rvalue, (CDP.Power, CDP.PowerShort)), rvalue

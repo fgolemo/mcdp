@@ -3,11 +3,42 @@ from mcdp_dp import (CatalogueDP, CoProductDP, CoProductDPLabels, Constant,
     ConstantMinimals, DPLoop0, DPLoop2, Identity, InvMult2, InvMult2L, InvMult2U,
     InvPlus2, InvPlus2L, InvPlus2Nat, InvPlus2U, JoinNDP, Limit, LimitMaximals,
     Max1, MeetNDualDP,  Mux, Parallel, ParallelN, Series0, Terminator,
-    UncertainGate, UncertainGateSym,PlusValueDP, MeetNDP, JoinNDualDP, InvMult2Nat, MultValueDP)
+    UncertainGate, UncertainGateSym, PlusValueDP, MeetNDP, JoinNDualDP, InvMult2Nat, MultValueDP,
+    MinusValueDP, MinusValueRcompDP, MinusValueNatDP)
 
 from mcdp_lang import parse_poset
-from mcdp_posets import FiniteCollectionAsSpace, PosetProduct
+from mcdp_posets import FiniteCollectionAsSpace, PosetProduct, Nat, Rcomp
 from mcdp_dp.dp_dummy import Template
+
+def MinusValueDP1():
+    F = parse_poset('J')
+    U = parse_poset('mJ')
+    v = 1000.0
+    return MinusValueDP(F=F, c_value=v, c_space=U)    
+
+def MinusValueDP2():
+    F = parse_poset('J')
+    U = parse_poset('mJ')
+    v = U.get_top()
+    return MinusValueDP(F=F, c_value=v, c_space=U)    
+
+def MinusValueRcompDP1():
+    v = 1000.0
+    return MinusValueRcompDP(v)
+
+def MinusValueRcompDP2():
+    U = Rcomp()
+    v = U.get_top()
+    return MinusValueRcompDP(v)
+
+def MinusValueNatDP1():
+    v = 4
+    return MinusValueNatDP(v)
+
+def MinusValueNatDP2():
+    N = Nat()
+    v = N.get_top()
+    return MinusValueNatDP(v)
 
 def PlusValueDP1():
     F = parse_poset('J')

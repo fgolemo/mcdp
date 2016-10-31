@@ -2,12 +2,14 @@
 import math
 
 from contracts.utils import check_isinstance
+from mcdp_dp.dp_generic_unary import WrapAMap
 from mcdp_posets import Map, MapNotDefinedHere, RcompUnits
 from mcdp_posets.rcomp import finfo
 from mocdp.comp.wrap import dpwrap
 from mocdp.exceptions import mcdp_dev_warning
 
 
+# CombinedCeilDP
 class LinearCeil():
     """
      
@@ -67,22 +69,15 @@ class LogarithmicCeil():
         o = n * self.alpha
         y = math.pow(10, o)
         return float(y)
-
-# class CombinedCeil():
-#     def __init__(self, n_per_decade, step):
-#  
-#         alpha = 1.0 / n_per_decade
-#         self.f1 = LogarithmicCeil(alpha)
-#         self.f2 = LinearCeil(step)
-#  
-#     def __call__(self, x):
-#         xx = self.f1(x)
-#         y = self.f2(xx)
-#         return y
      
 def identity(x):
     return x
 
+class CombinedCeilDP(WrapAMap):
+    def __init__(self, S, alpha, step, max_value=None):
+        amap = CombinedCeilMap(S, alpha, step, max_value)
+        WrapAMap.__init__(self, amap)
+        
 class CombinedCeilMap(Map):
 
     def __init__(self, S, alpha, step, max_value=None):
@@ -153,6 +148,10 @@ class FloorStepMap(Map):
         y = n * self.step
         return y
 
+class FloorStepDP(WrapAMap):
+    def __init__(self, S, step):
+        amap = FloorStepMap(S, step)
+        WrapAMap.__init__(self, amap)
 
 def get_approx_dp(S, name, approx_perc, approx_abs, approx_abs_S, max_value, max_value_S):
 

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 from contracts import contract
 from mocdp.exceptions import mcdp_dev_warning

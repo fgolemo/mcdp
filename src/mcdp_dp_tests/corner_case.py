@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
-from mcdp_dp.dp_max import JoinNDP, MeetNDP
-from mcdp_dp.dp_sum import ProductNatN
+from mcdp_dp import JoinNDP, MeetNDP
+from mcdp_dp import ProductNNatDP
 from mcdp_posets.nat import Nat
 from mcdp_posets_tests.utils import assert_belongs, assert_does_not_belong
 
@@ -9,7 +9,7 @@ from mcdp_posets_tests.utils import assert_belongs, assert_does_not_belong
 @comptest
 def check_product1():
     
-    amap = ProductNatN(4)
+    amap = ProductNNatDP(4)
 
     assert amap((1,3,4,5)) == 5*4*3
     

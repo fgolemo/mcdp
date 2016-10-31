@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_dp import CombinedCeilMap, FloorStepMap, WrapAMap
-from mcdp_maps import PlusValueMap
+from mcdp_dp.dp_approximation import FloorStepDP, CombinedCeilDP
+from mcdp_dp.dp_plus_value import PlusValueDP
+from mcdp_dp.dp_uncertain import UncertainGate
 from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
     get_types_universe, poset_minima)
 from mocdp.comp.context import CResource, ValueWithUnits, get_name_for_fun_node
@@ -121,33 +122,7 @@ def eval_rvalue(rvalue, context):
             msg = 'eval_rvalue(): Cannot evaluate as resource.'
             rvalue = recursive_print(rvalue)
             raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
-
-# def eval_rvalue_minus_constant(r, context):
-#     from .eval_math import MinusValueNatDP
-#     from .eval_math import MinusValueRcompDP
-#     from .eval_math import MinusValueDP
-#         
-#     rvalue = eval_rvalue(r.r, context)
-#     constant = eval_constant(r.c, context)
-# 
-#     R = context.get_rtype(rvalue)
-#     
-#     if isinstance(R, Nat) and isinstance(constant.unit, Nat):
-#         dp = MinusValueNatDP(constant.value)
-#     elif isinstance(R, Rcomp) and not isinstance(R, RcompUnits):
-#         dp = MinusValueRcompDP(constant.value)
-#     elif isinstance(R, RcompUnits):
-#         dp = MinusValueDP(F=R, c_value=constant.value, c_space=constant.unit)
-#     else:
-#         msg = 'Could not create this operation with %s ' % R
-#         raise_desc(DPSemanticError, msg, R=R)
-#         
-#              
-#     return create_operation(context, dp=dp, resources=[rvalue],
-#                             name_prefix='_minusvalue', op_prefix='_op',
-#                             res_prefix='_result')
-
-
+ 
 def eval_rvalue_approx_u(r, context):
     assert isinstance(r, CDP.ApproxURes)
 
@@ -171,21 +146,18 @@ def eval_rvalue_approx_u(r, context):
     if stepu == 0.0:
         return r1
 
-    ccm = FloorStepMap(R, step=stepu)
-    # ccm = CombinedCeilMap(R, alpha=0.0, step=stepu, max_value=None)
-    dp = WrapAMap(ccm)
+    dp = FloorStepDP(R, step=stepu)
 
     r2 = create_operation(context, dp=dp, resources=[r1],
                                name_prefix='_approx', op_prefix='_toapprox',
                                 res_prefix='_result')
 
-    dpsum = WrapAMap(PlusValueMap(R, step.value, step.unit, R))
+    dpsum = PlusValueDP(R, c_value=step.value, c_space=step.unit)
     r3 = create_operation(context, dp=dpsum, resources=[r2],
                                name_prefix='_sum', op_prefix='_op',
                                 res_prefix='_result')
 
 
-    from mcdp_dp.dp_uncertain import UncertainGate
     dpu = UncertainGate(R)
 
     return create_operation(context, dp=dpu, resources=[r2, r3],
@@ -213,9 +185,8 @@ def eval_rvalue_approx_step(r, context):
 
     stepu = express_value_in_isomorphic_space(S1=step.unit, s1=step.value, S2=R)
 
-    ccm = CombinedCeilMap(R, alpha=0.0, step=stepu, max_value=None)
-    dp = WrapAMap(ccm)
-
+    dp = CombinedCeilDP(S=R, alpha=0.0, step=stepu, max_value=None)
+#     def __init__(self, S, alpha, step, max_value=None):
     return create_operation(context, dp=dp, resources=[resource],
                                name_prefix='_approx', op_prefix='_toapprox',
                                 res_prefix='_result')

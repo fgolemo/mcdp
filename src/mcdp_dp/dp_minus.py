@@ -1,10 +1,10 @@
-from mcdp_dp.dp_generic_unary import WrapAMap
+# -*- coding: utf-8 -*-
 from contracts.utils import check_isinstance
-from mcdp_maps.plus_value_map import MinusValueRcompMap, PlusValueRcompMap
-from mcdp_posets.rcomp_units import RcompUnits
-from mcdp_maps.plus_value_map import PlusValueMap, MinusValueMap
-from mcdp_posets.rcomp import Rcomp
-from mcdp_maps.plus_nat import MinusValueNatMap, PlusValueNatMap
+from mcdp_dp.dp_generic_unary import WrapAMap
+from mcdp_maps import (MinusValueNatMap, PlusValueNatMap, MinusValueRcompMap, 
+                       PlusValueRcompMap, PlusValueMap, MinusValueMap)
+from mcdp_posets import Rcomp, RcompUnits
+from mcdp_posets.nat import Nat
 
 __all__ = [
     'MinusValueDP',
@@ -13,8 +13,15 @@ __all__ = [
 ]
 
 class MinusValueDP(WrapAMap):
-    """ Give a positive constant here """
+    """
+        r + c ≥ f
+        
+        h:  f ⟼  max(0, r-c) if  c ≠ ⊤
+                  0           if  c = ⊤
+        h*: r ⟼  r + c
+    """
     def __init__(self, F, c_value, c_space):
+        """ Give a positive constant here """
         check_isinstance(F, RcompUnits)
         check_isinstance(c_space, RcompUnits)
         c_space.belongs(c_value)
@@ -23,17 +30,32 @@ class MinusValueDP(WrapAMap):
         WrapAMap.__init__(self, amap, amap_dual)
         
 class MinusValueRcompDP(WrapAMap):
-    """ Give a positive constant here """
+    """
+        r + c ≥ f
+        
+        h:  f ⟼  max(0, r-c) if  c ≠ ⊤
+                  0           if  c = ⊤
+        h*: r ⟼  r + c
+    """
     def __init__(self, c_value):
+        """ Give a positive constant here """
         Rcomp().belongs(c_value)
         amap = MinusValueRcompMap(c_value)
         amap_dual = PlusValueRcompMap(c_value=c_value)
         WrapAMap.__init__(self, amap, amap_dual)
         
 class MinusValueNatDP(WrapAMap):
-    """ Give a positive constant here """
+    """
+        r + c ≥ f
+        
+        h:  f ⟼  max(0, r-c) if  c ≠ ⊤
+                  0           if  c = ⊤
+        h*: r ⟼  r + c
+    """
     def __init__(self, c_value):
-        assert c_value >= 0, c_value
+        """ Give a positive constant here """
+        N = Nat()
+        N.belongs(c_value)
         amap = MinusValueNatMap(c_value)
         amap_dual = PlusValueNatMap(c_value)
         WrapAMap.__init__(self, amap, amap_dual)

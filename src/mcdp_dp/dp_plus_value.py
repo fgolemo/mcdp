@@ -1,8 +1,8 @@
+# -*- coding: utf-8 -*-
 # TODO: move 
 from contracts.utils import check_isinstance
-from mcdp_maps.plus_nat import PlusValueNatMap, MinusValueNatMap
-from mcdp_maps.plus_value_map import PlusValueMap, MinusValueMap, \
-    PlusValueRcompMap, MinusValueRcompMap
+from mcdp_maps import (PlusValueMap, MinusValueMap,
+    PlusValueRcompMap, MinusValueRcompMap, PlusValueNatMap, MinusValueNatMap)
 from mcdp_posets import RcompUnits
 
 from .dp_generic_unary import WrapAMap

@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance
+from mcdp_maps import ConstantPosetMap
+from mcdp_maps import MultValueMap, MultValueNatMap
 from mcdp_posets import Map, MapNotDefinedHere, RcompUnits, is_top
+from mcdp_posets import Nat
 from mcdp_posets.rcomp_units import inverse_of_unit
+import numpy as np
 
 from .dp_generic_unary import WrapAMap
-from .dp_sum import MultValueMap
-from mcdp_maps.constant_map import ConstantPosetMap
-from mcdp_posets.nat import Nat
-from mcdp_maps.mult_nat import MultNat
 
 
 __all__ = [
@@ -152,7 +152,7 @@ class MultValueNatDP(WrapAMap):
         N = Nat()
         N.belongs(value)
         
-        amap = MultNat(value)
+        amap = MultValueNatMap(value)
         
         # if value = Top:
         #    f |-> f * Top 
@@ -187,4 +187,3 @@ class MultValueNatDPhelper(Map):
             fmax = int(np.floor( float(r) / self.c ))
             return fmax
         
-import numpy as np

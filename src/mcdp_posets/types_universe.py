@@ -11,6 +11,7 @@ from .rcomp import Rcomp
 from .space import Map, MapNotDefinedHere, NotEqual
 from .space_product import SpaceProduct
 from .uppersets import UpperSets, LowerSets
+from .rcomp_units import RbicompUnits
 
 
 __all__ = [
@@ -101,6 +102,15 @@ class TypesUniverse(Preorder):
         if isinstance(A, Nat) and isinstance(B, RcompUnits):
             return
 
+        if isinstance(A, RcompUnits) and isinstance(B, RbicompUnits):
+            if A.units.dimensionality == B.units.dimensionality:
+                return
+            else:
+                msg = "Dimensionality do not match."
+                raise_desc(NotLeq, msg,
+                           A_dimensionality=A.units.dimensionality,
+                           B_dimensionality=B.units.dimensionality)
+
         if isinstance(A, FiniteCollectionsInclusion) and isinstance(B, FiniteCollectionsInclusion):
             self.check_leq(A.S, B.S)
             return
@@ -182,6 +192,10 @@ class TypesUniverse(Preorder):
         from mcdp_posets import RcompUnits
         from mcdp_posets import format_pint_unit_short
         from mcdp_posets.maps.identity import IdentityMap
+        from mcdp_maps.map_composition import MapComposition
+        from .maps.linearmapcomp import LinearMapComp
+           
+
 
         if isinstance(A, Nat) and isinstance(B, (Rcomp, RcompUnits)):
             from .maps.coerce_to_int import CoerceToInt
@@ -191,11 +205,26 @@ class TypesUniverse(Preorder):
         if isinstance(A, Nat) and isinstance(B, Int):
             return IdentityMap(A, B), IdentityMap(B, A)
             
+        if isinstance(A, RcompUnits) and isinstance(B, RbicompUnits):
+            assert A.units.dimensionality == B.units.dimensionality
+            
+            factor = float(B.units / A.units)
+            A_to_B = MapComposition((LinearMapComp(A, A, 1.0 / factor),
+                                     IdentityMap(A, B)))
+            B_to_A = MapComposition((CheckNonnegativeMap(B, A), 
+                                     LinearMapComp(A, A, factor)))
+            
+            a = format_pint_unit_short(A.units)
+            b = format_pint_unit_short(B.units)
+            setattr(B_to_A, '__name__', '%s*-to-%s' % (b, a))
+            setattr(A_to_B, '__name__', '%s-to-%s*' % (a, b))
+            return A_to_B, B_to_A
+                
+
         if isinstance(A, RcompUnits) and isinstance(B, RcompUnits):
             assert A.units.dimensionality == B.units.dimensionality
 
             factor = float(B.units / A.units)
-            from .maps.linearmapcomp import LinearMapComp
             B_to_A = LinearMapComp(B, A, factor)
             A_to_B = LinearMapComp(A, B, 1.0 / factor)
 
@@ -253,7 +282,14 @@ class TypesUniverse(Preorder):
             msg = 'Spaces are ordered, but you forgot to code embedding.'
             raise_desc(NotImplementedError, msg, A=A, B=B)
 
-
+class CheckNonnegativeMap(Map):
+    def __init__(self, dom, cod):
+        Map.__init__(self, dom, cod)
+    def _call(self, x):
+        if not self.dom.leq(0.0, x):
+            raise MapNotDefinedHere()
+        return x
+    
 def get_coproduct_embedding(A, B, i):
     # assume that A <= B.spaces[i]
     A_to_B = Coprod_A_to_B_map(A=A, B=B, i=i)

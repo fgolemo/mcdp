@@ -3,7 +3,7 @@ from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
 from mcdp_dp import InvMult2, InvPlus2, InvPlus2Nat
 from mcdp_dp import JoinNDualDP, MeetNDualDP
-from mcdp_dp.dp_inv_plus_nat import InvMult2Nat
+from mcdp_dp.dp_inv_mult import InvMult2Nat
 from mcdp_dp.dp_plus_value import PlusValueNatDP, PlusValueRcompDP, PlusValueDP
 from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table,
     poset_maxima)
@@ -147,8 +147,6 @@ def eval_lfunction_disambiguation(lf, context):
 
 
 def eval_lfunction_variableref(lf, context):
-    from mocdp.comp.context import ValueWithUnits
-
     if lf.name in context.constants:
         c = context.constants[lf.name]
         assert isinstance(c, ValueWithUnits)

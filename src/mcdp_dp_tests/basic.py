@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
+from contracts.utils import raise_wrapped
 from mcdp_dp import NotSolvableNeedsApprox
-from mcdp_posets import NotBounded, UpperSets
+from mcdp_posets import NotBounded, UpperSets, NotLeq
 from mcdp_tests.generation import for_all_dps
 
 
@@ -23,6 +24,9 @@ def check_solve_top_bottom(id_dp, dp):
         f_bot = F.get_bottom()
     except NotBounded:
         return
+    
+    print('⊥ = %s' % F.format(f_bot))
+    print('⊤ = %s' % F.format(f_top))
 
     try:
         ur0 = dp.solve(f_bot)
@@ -30,11 +34,16 @@ def check_solve_top_bottom(id_dp, dp):
     except NotSolvableNeedsApprox:
         return
 
-    print('u0', ur0)
-    print('u1', ur1)
+    print('f(%s) = %s' % (f_bot,  ur0))
+    print('f(%s) = %s' % (f_top,  ur1))
+    print('Checking that the order is respected')
 
-    UR.check_leq(ur0, ur1)
-
+    try:
+        UR.check_leq(ur0, ur1)
+    except NotLeq as e:
+        msg = 'Not true that f(⊥) ≼ f(⊤).'
+        raise_wrapped(Exception, e, msg, ur0=ur0,ur1=ur1) 
+        
     # get implementations for ur0
     for r in ur0.minimals:
         ms = dp.get_implementations_f_r(f_bot, r)

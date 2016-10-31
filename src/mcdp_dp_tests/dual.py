@@ -4,10 +4,7 @@ from contracts.utils import raise_wrapped
 from mcdp_dp import NotSolvableNeedsApprox
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_lang.parse_interface import parse_poset
-from mcdp_posets import LowerSets, UpperSets
-from mcdp_posets import NotBelongs
-from mcdp_posets import PosetProduct
-from mcdp_posets import Rcomp
+from mcdp_posets import LowerSets, UpperSets, NotBelongs, PosetProduct, Rcomp
 from mcdp_posets.utils import poset_check_chain
 from mcdp_tests.generation import for_all_dps, primitive_dp_test
 from mocdp import logger
@@ -96,56 +93,19 @@ def dual02(_, dp):
 @for_all_dps
 def dual03(_, dp):
     pass
-# 
-# @for_all_dps
-# def dual04(_, dp):
-#     pass
-# 
-# @for_all_dps
-# def dual05(_, dp):
-#     pass
-# 
-# @for_all_dps
-# def dual06(_, dp):
-#     pass
-# 
-# @for_all_dps
-# def dual07(_, dp):
-#     pass
-# 
-# @for_all_dps
-# def dual08(_, dp):
-#     pass
-# 
-# @for_all_dps
-# def dual09(_, dp):
-#     pass
-# 
-# @for_all_dps
-# def dual10(_, dp):
-#     pass
-# 
-# @for_all_dps
-# def dual11(_, dp):
-#     pass
-# 
-# @for_all_dps
-# def dual12(_, dp):
-#     pass 
-    
 
 @comptest
 def test_right_inverse():
     P = parse_poset('((J x W) x s) x (m x Hz)')
     coords = [(1, 1), [(0, 0, 1), (1, 0), (0, 0, 0), (0, 1)]]
-    print 'coords', coords    
+    #print 'coords', coords    
     i0 = get_id_indices(P)
-    print 'i0', i0
+    #print 'i0', i0
     # compose
     i0coords = compose_indices(P, i0, coords, list)
 
-    print 'i0coords', i0coords
+    #print 'i0coords', i0coords
 
-    Q, coords2 = transform_right_inverse(P, coords, PosetProduct)
+    _Q, _coords2 = transform_right_inverse(P, coords, PosetProduct)
     
 
