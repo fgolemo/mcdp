@@ -194,11 +194,11 @@ class MultValueNatDPhelper(Map):
             return fmax
         
 
-class InvMultValueDP(WrapAMap):
+class InvMultValueRcompDP(WrapAMap):
     def __init__(self, value):
         raise NotImplementedError
 
-class InvMultValueRcompDP(WrapAMap):
+class InvMultValueDP(WrapAMap):
     def __init__(self, F, R, unit, value):
         raise NotImplementedError
     

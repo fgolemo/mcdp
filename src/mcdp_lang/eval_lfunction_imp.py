@@ -275,13 +275,13 @@ def eval_lfunction_invmult_sort_ops(ops, context, wants_constant):
             check_isinstance(x, ValueWithUnits)
             constants.append(x)
             continue
+        except NotConstant as e:
+            pass
         except DPSemanticError as e:
             if 'Variable ref' in str(e):
                 pass
             else:
                 raise
-        except NotConstant as e:
-            pass
         
         if wants_constant:
             msg = 'Product not constant because one op is not constant.'
