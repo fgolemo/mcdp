@@ -554,7 +554,7 @@ def check_lang79(): # TODO: rename
 #     x = parse_wrap(Syntax.rvalue, s)[0]
 #     check_isinstance(x, CDPLanguage.RvalueMinusConstant)
     
-@comptest_fails
+@comptest
 def check_lang80b(): # TODO: rename
     s = """
 mcdp {

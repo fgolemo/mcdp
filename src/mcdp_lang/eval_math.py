@@ -18,6 +18,7 @@ from .helpers import create_operation, get_valuewithunits_as_resource, get_resou
 from .misc_math import inv_constant
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mcdp_posets.rcomp_units import RbicompUnits_subtract
 
 
 CDP = CDPLanguage
@@ -35,36 +36,30 @@ def eval_constant_divide(op, context):
     from .misc_math import generic_mult_constantsN
     return generic_mult_constantsN(factors)
 
-
-# def eval_constant_minus(op, context):
-#     from .eval_constant_imp import eval_constant
-# 
-#     ops = get_odd_ops(unwrap_list(op.ops))
-#     constants = [eval_constant(_, context) for _ in ops]
-
 @contract(x=ValueWithUnits, constants='seq($ValueWithUnits)')
 def x_minus_constants(x, constants):
     R0 = x.unit
+    
     if not isinstance(R0, RcompUnits):
         msg = 'Cannot evaluate "-" on this space.'
         raise_desc(DPSemanticError, msg, R0=R0)
 
+    Rb = RbicompUnits.from_rcompunits(R0)
+    
     # convert each factor to R0
-    v0 = x.value
-    for c in constants:
-        vi = express_value_in_isomorphic_space(c.unit, c.value, R0)
-
-#         if v0 < vi:
-#             msg = 'Underflow: %s - %s gives a negative number' % (c.unit.format(v0), c.unit.format(vi))
-#             raise_desc(DPSemanticError, msg)
-
-        mcdp_dev_warning('Fix: how about Top?')
-        v0 = v0 - vi
-
-    if v0 < 0:
-        R1 = RbicompUnits.from_rcompunits(R0)
-    else:
+    try:
+        v0 = x.value
+        for c in constants:
+            vi = express_value_in_isomorphic_space(c.unit, c.value, Rb)
+            v0 = RbicompUnits_subtract(Rb, v0, vi)
+    except TypeError as e:
+        msg = 'Failure to compute subtraction.'
+        raise_wrapped(DPInternalError, e, msg, x=x, constants=constants)
+    
+    if Rb.leq(0.0, v0):
         R1 = R0
+    else:
+        R1 = Rb
         
     return ValueWithUnits(unit=R1, value=v0)
     

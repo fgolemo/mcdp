@@ -2,10 +2,8 @@
 from comptests.registrar import comptest, comptest_fails
 from mcdp_lang import parse_constant, parse_ndp, parse_poset
 from mcdp_posets import get_types_universe
-from mocdp.exceptions import DPSemanticError
 
-from .utils2 import eval_rvalue_as_constant
-from .utils2 import eval_rvalue_as_constant_same_exactly
+from .utils2 import eval_rvalue_as_constant, eval_rvalue_as_constant_same_exactly
 
 
 @comptest
@@ -25,25 +23,25 @@ def check_subtraction1():
     """)
 
 
-@comptest
-def check_subtraction2():
-    """ Underflow in constants """
-    try:
-        parse_constant("""
-        solve(<>, mcdp {
-            v1 = 10 g
-            v2 = 2 g
-            v3 = 9 g
-            v = v1 - v2 - v3 
-            
-            requires x >= v
-        })
-    
-    """)
-    except DPSemanticError as e:
-        print e
-    else:
-        raise Exception()
+# @comptest
+# def check_subtraction2():
+#     """ Underflow in constants """
+#     try:
+#         parse_constant("""
+#         solve(<>, mcdp {
+#             v1 = 10 g
+#             v2 = 2 g
+#             v3 = 9 g
+#             v = v1 - v2 - v3 
+#             
+#             requires x >= v
+#         })
+#     
+#     """)
+#     except DPSemanticError as e:
+#         print e
+#     else:
+#         raise Exception()
 
 
 @comptest_fails

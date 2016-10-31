@@ -4,7 +4,9 @@ from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
     NotBelongs, NotLeq, PosetProduct, Rcomp, Space, UpperSet, UpperSets,
     get_types_universe, poset_minima)
+from mcdp_posets import FiniteCollectionAsSpace
 from mcdp_posets import LowerSets, LowerSet, RbicompUnits, RcompUnits
+from mcdp_posets.types_universe import express_value_in_isomorphic_space
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import (DPInternalError, DPSemanticError, mcdp_dev_warning,
     do_extra_checks)
@@ -21,8 +23,8 @@ from .utils_lists import get_odd_ops, unwrap_list
 CDP = CDPLanguage
 
 class NotConstant(DPSemanticError):
-    pass
-
+    pass 
+         
 
 @contract(returns=ValueWithUnits)
 def eval_constant(op, context):
@@ -30,16 +32,11 @@ def eval_constant(op, context):
         Raises NotConstant if not constant. 
         Returns ValueWithUnits
     """
+    from .eval_math import (eval_constant_divide, eval_PlusN_as_constant,
+                            eval_RValueMinusN_as_constant, eval_MultN_as_constant)
+
+
     with add_where_information(op.where):
-
-        from mcdp_lang.eval_math import eval_constant_divide
-        
-        
-        if isinstance(op, CDP.NatConstant):
-            return ValueWithUnits(unit=Nat(), value=op.value)
-
-        if isinstance(op, CDP.IntConstant):
-            return ValueWithUnits(unit=Int(), value=op.value)
 
         if isinstance(op, (CDP.Resource)):
             raise NotConstant(str(op))
@@ -47,98 +44,13 @@ def eval_constant(op, context):
         if isinstance(op, (CDP.OpMax, CDP.OpMin, CDP.Power)):
             # TODO: can implement optimization
             raise NotConstant(str(op))
- 
-
-        if isinstance(op, CDP.Top):
-            from mcdp_lang.eval_space_imp import eval_space
-            space = eval_space(op.space, context)
-            v = space.get_top()
-            return ValueWithUnits(unit=space, value=v)
-
-        if isinstance(op, CDP.Maximals):
-            from mcdp_lang.eval_space_imp import eval_space  # @Reimport
-            space = eval_space(op.space, context)
-            elements = space.get_maximal_elements()
-            v = FiniteCollection(elements=elements, S=space)
-            S = FiniteCollectionsInclusion(space)
-            return ValueWithUnits(unit=S, value=v)
-
-        if isinstance(op, CDP.Minimals):
-            from mcdp_lang.eval_space_imp import eval_space  # @Reimport
-            space = eval_space(op.space, context)
-            elements = space.get_minimal_elements()
-            v = FiniteCollection(elements=elements, S=space)
-            S = FiniteCollectionsInclusion(space)
-            return ValueWithUnits(unit=S, value=v)
-
-        if isinstance(op, CDP.Bottom):
-            from mcdp_lang.eval_space_imp import eval_space  # @Reimport
-            space = eval_space(op.space, context)
-            v = space.get_bottom()
-            return ValueWithUnits(unit=space, value=v)
-
-        if isinstance(op, CDP.SimpleValue):
-            # assert isinstance(op.unit, CDP.Unit), op
-            from mcdp_lang.eval_space_imp import eval_space  # @Reimport
-            F = eval_space(op.space, context)
-            assert isinstance(F, Space), op
-            assert isinstance(F, RcompUnits)
-
-            v = op.value.value
-
-            # promote integer to float
-            if isinstance(v, int) and isinstance(F, (Rcomp, RcompUnits)):
-                v = float(v)
-
-            if v < 0:
-                if isinstance(F, RcompUnits):
-                    F = RbicompUnits(F.units, F.string)
-                else:
-                    msg = 'Negative %s not implemented yet.' % F
-                    raise_desc(NotImplementedError, msg, F=F)
-
-            try:
-                F.belongs(v)
-            except NotBelongs as e:
-                msg = 'Not in space'
-                raise_wrapped(DPSemanticError, e, msg, F=F, v=v, op=op)
-            return ValueWithUnits(unit=F, value=v)
-
-        if isinstance(op, CDP.VariableRef):
-            if op.name in context.constants:
-                return context.constants[op.name]
-
-            if op.name in context.var2resource:
-                res = context.var2resource[op.name]
-                msg = 'This is a resource.'
-                raise_desc(NotConstant, msg, res=res)
-
-            try:
-                x = context.get_ndp_fun(op.name)
-            except ValueError:
-                pass
-            else:
-                raise_desc(NotConstant, 'Corresponds to new function.', x=x)
-
-            msg = 'Variable ref %r unknown.' % op.name
-            raise DPSemanticError(msg, where=op.where)
-
-        if isinstance(op, CDP.MakeTuple):
-            ops = get_odd_ops(unwrap_list(op.ops))
-            constants = [eval_constant(_, context) for _ in ops]
-            # TODO: generic product
-            Fs = [_.unit for _ in constants]
-            vs = [_.value for _ in constants]
-            F = PosetProduct(tuple(Fs))
-            v = tuple(vs)
-            F.belongs(v)
-            return ValueWithUnits(v, F)
-
-        from .eval_math import eval_PlusN_as_constant
-        from .eval_math import eval_RValueMinusN_as_constant
-        from .eval_math import eval_MultN_as_constant
 
         cases = {
+            CDP.NatConstant: eval_constant_NatConstant,
+            CDP.IntConstant: eval_constant_IntConstant,
+            CDP.SimpleValue: eval_constant_SimpleValue,
+            CDP.VariableRef: eval_constant_VariableRef,
+            CDP.MakeTuple: eval_constant_MakeTuple,
             CDP.AssertEqual: eval_assert_equal,
             CDP.AssertLEQ: eval_assert_leq,
             CDP.AssertGEQ: eval_assert_geq,
@@ -157,6 +69,10 @@ def eval_constant(op, context):
             CDP.LowerSetFromCollection: eval_constant_lowersetfromcollection,
             CDP.SolveModel: eval_solve_f,
             CDP.SolveRModel: eval_solve_r,
+            CDP.Top: eval_constant_Top,
+            CDP.Maximals: eval_constant_Maximals,
+            CDP.Minimals: eval_constant_Minimals,
+            CDP.Bottom: eval_constant_Bottom,
         }
         
         for klass, hook in cases.items():
@@ -168,10 +84,107 @@ def eval_constant(op, context):
             op = recursive_print(op)
             raise_desc(NotConstant, msg, op=op)
 
+
+def eval_constant_NatConstant(op, context):  # @UnusedVariable
+    return ValueWithUnits(unit=Nat(), value=op.value)
+
+def eval_constant_IntConstant(op, context):  # @UnusedVariable
+    return ValueWithUnits(unit=Int(), value=op.value)
+
+def eval_constant_VariableRef(op, context):
+    if op.name in context.constants:
+        return context.constants[op.name]
+
+    if op.name in context.var2resource:
+        res = context.var2resource[op.name]
+        msg = 'This is a resource.'
+        raise_desc(NotConstant, msg, res=res)
+
+    try:
+        x = context.get_ndp_fun(op.name)
+    except ValueError:
+        pass
+    else:
+        raise_desc(NotConstant, 'Corresponds to new function.', x=x)
+
+    msg = 'Variable ref %r unknown.' % op.name
+    raise DPSemanticError(msg, where=op.where)
+
+
+def eval_constant_SimpleValue(op, context):
+    from .eval_space_imp import eval_space  # @Reimport
+    F = eval_space(op.space, context)
+    assert isinstance(F, Space), op
+    assert isinstance(F, RcompUnits)
+
+    v = op.value.value
+
+    # promote integer to float
+    if isinstance(v, int) and isinstance(F, (Rcomp, RcompUnits)):
+        v = float(v)
+
+    if v < 0:
+        if isinstance(F, RcompUnits):
+            F = RbicompUnits(F.units, F.string)
+        else:
+            msg = 'Negative %s not implemented yet.' % F
+            raise_desc(NotImplementedError, msg, F=F)
+
+    try:
+        F.belongs(v)
+    except NotBelongs as e:
+        msg = 'Not in space'
+        raise_wrapped(DPSemanticError, e, msg, F=F, v=v, op=op)
+    return ValueWithUnits(unit=F, value=v)
+
+
+def eval_constant_Top(op, context):
+    from .eval_space_imp import eval_space
+    space = eval_space(op.space, context)
+    v = space.get_top()
+    return ValueWithUnits(unit=space, value=v)
+
+
+def eval_constant_Maximals(op, context):
+    from .eval_space_imp import eval_space  # @Reimport
+    space = eval_space(op.space, context)
+    elements = space.get_maximal_elements()
+    v = FiniteCollection(elements=elements, S=space)
+    S = FiniteCollectionsInclusion(space)
+    return ValueWithUnits(unit=S, value=v)
+
+    
+def eval_constant_Minimals(op, context):
+    from .eval_space_imp import eval_space  # @Reimport
+    space = eval_space(op.space, context)
+    elements = space.get_minimal_elements()
+    v = FiniteCollection(elements=elements, S=space)
+    S = FiniteCollectionsInclusion(space)
+    return ValueWithUnits(unit=S, value=v)
+
+
+def eval_constant_Bottom(op, context):
+    from .eval_space_imp import eval_space  # @Reimport
+    space = eval_space(op.space, context)
+    v = space.get_bottom()
+    return ValueWithUnits(unit=space, value=v)
+
+
+def eval_constant_MakeTuple(op, context):
+    ops = get_odd_ops(unwrap_list(op.ops))
+    constants = [eval_constant(_, context) for _ in ops]
+    # TODO: generic product
+    Fs = [_.unit for _ in constants]
+    vs = [_.value for _ in constants]
+    F = PosetProduct(tuple(Fs))
+    v = tuple(vs)
+    F.belongs(v)
+    return ValueWithUnits(v, F)
+
+
 def eval_solve_f(op, context):
     check_isinstance(op, CDP.SolveModel)
-    from mcdp_lang.eval_ndp_imp import eval_ndp
-    from mcdp_posets.types_universe import express_value_in_isomorphic_space
+    from .eval_ndp_imp import eval_ndp
     ndp = eval_ndp(op.model, context)
     dp = ndp.get_dp()
     f0 = eval_constant(op.f, context)
@@ -191,8 +204,8 @@ def eval_solve_f(op, context):
 
 def eval_solve_r(op, context):
     check_isinstance(op, CDP.SolveRModel)
-    from mcdp_lang.eval_ndp_imp import eval_ndp
-    from mcdp_posets.types_universe import express_value_in_isomorphic_space
+    from .eval_ndp_imp import eval_ndp
+    
     ndp = eval_ndp(op.model, context)
     dp = ndp.get_dp()
     r0 = eval_constant(op.r, context)
@@ -213,17 +226,17 @@ def eval_solve_r(op, context):
                                   
 def eval_EmptySet(op, context):
     check_isinstance(op, CDP.EmptySet)
-    from mcdp_lang.eval_space_imp import eval_space
+    from .eval_space_imp import eval_space
     space = eval_space(op.space, context)
     
     P = FiniteCollectionsInclusion(space)
     value = FiniteCollection(set([]), space)
     return ValueWithUnits(unit=P, value=value)
 
+
+
 def eval_constant_space_custom_value(op, context):
     from .eval_space_imp import eval_space
-    from mcdp_posets import FiniteCollectionAsSpace
-
     assert isinstance(op, CDP.SpaceCustomValue)
     space = eval_space(op.space, context)
     custom_string = op.custom_string
@@ -300,7 +313,7 @@ def eval_constant_collection(op, context):
     e0 = elements[0]
 
     u0 = e0.unit
-    from mcdp_lang.eval_math import convert_vu
+    from .eval_math import convert_vu
     elements = [convert_vu(_.value, _.unit, u0, context) for _ in elements]
 
     value = FiniteCollection(set(elements), u0)

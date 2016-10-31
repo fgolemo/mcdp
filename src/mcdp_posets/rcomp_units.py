@@ -3,7 +3,7 @@ import functools
 import math
 
 from contracts import contract
-from contracts.utils import check_isinstance, raise_wrapped
+from contracts.utils import check_isinstance, raise_wrapped, raise_desc
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import DPSyntaxError, do_extra_checks, mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
@@ -13,6 +13,7 @@ from pint.errors import UndefinedUnitError  # @UnresolvedImport
 from .any import Any, BottomCompletion, TopCompletion
 from .rcomp import RcompBase, Rbicomp
 from .space import Map
+from mcdp_posets.poset import is_top, is_bottom
 
 
 class MyUnitRegistry(UnitRegistry):
@@ -303,13 +304,63 @@ def inverse_of_unit(a):
     s = '%s' % unit2
     return RcompUnits(unit2, s)
 
+def RbicompUnits_reflect(P, x):
+    check_isinstance(P, RbicompUnits)
+    if is_top(P, x):
+        return P.get_bottom()
+    if is_bottom(P, x):
+        return P.get_top()
+    return -x
+    
+class UndefinedRbicompUnitsResult(Exception):
+    pass
+
+def RbicompUnits_subtract(P, x, y):
+    """
+        Raises UndefinedRbicompUnitsResult
+    """
+    # computes x-y in P
+    check_isinstance(P, RbicompUnits)
+    y2 = RbicompUnits_reflect(P, y)
+    try:
+        return RbicompUnits_add(P, x, y2)
+    except UndefinedRbicompUnitsResult as e:
+        msg = 'Could not subtract.'
+        raise_desc(UndefinedRbicompUnitsResult, e, msg)
 
 
-
+def RbicompUnits_add(P, x, y):
+    """
+        Raises UndefinedRbicompUnitsResult
+    """
+    def undefined():
+        msg = 'Undefined addition.'
+        raise_desc(UndefinedRbicompUnitsResult, msg, x=P.format(x), y=P.format(y))
+        
+    if is_top(P, x):
+        if is_top(P, y):
+            return P.get_top()
+        elif is_bottom(P, y):
+            return undefined() 
+        return P.get_top()
+    elif is_bottom(P, x):
+        if is_top(P, y):
+            return undefined() 
+        elif is_bottom(P, y):
+            return P.get_bottom() 
+        return P.get_bottom()
+    else:
+        # x is normal: 
+        if is_top(P, y):
+            return undefined() 
+        elif is_bottom(P, y):
+            return P.get_bottom()
+        mcdp_dev_warning('underflow, overflow')
+        return x + y 
+    
 def rcomp_add(x, y):
     from .rcomp import Rcomp
     P = Rcomp()
-    from .poset import is_top
     x_is_top = is_top(P, x)
     y_is_top = is_top(P, y)
     
