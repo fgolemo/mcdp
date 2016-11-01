@@ -357,4 +357,13 @@ def Rcomp_multiply_upper_topology(A, a, B, b, C):
         assert isinstance(b, float)
         
         # XXX: overflow
-        return a * b
+        try:
+            return a * b
+        except FloatingPointError as e:
+            if 'underflow' in str(e):
+                mcdp_dev_warning('Not sure about this.')
+                return 0.0 
+            else:
+                raise
+                
+                
