@@ -42,9 +42,9 @@ class RcompBottom():
         return -np.inf
 
 finfo = np.finfo(float)
-tiny = finfo.tiny
-eps = finfo.eps
-maxf = finfo.max
+# tiny = finfo.tiny
+# eps = finfo.eps
+# maxf = finfo.max
 
 class RcompBase(Poset):
     """
@@ -102,7 +102,7 @@ class RcompBase(Poset):
         
         if n >= 3:
             other = []
-            some = [0.1, 1.0, 0.9, 1.1, 2.0, 2.1]
+            some = [finfo.tiny, finfo.eps, finfo.max, 0.1, 1.0, 0.9, 1.1, 2.0, 2.1]
             have = len(some)
             other.extend(some[:n-2])
             
@@ -130,13 +130,13 @@ class RcompBase(Poset):
             if x == int(x):
                 return '%d' % int(x)
             else:
-                if x == tiny:
+                if x == finfo.tiny:
                     return 'tiny'
 
-                if x == eps:
+                if x == finfo.eps:
                     return 'eps'
 
-                if x == maxf:
+                if x == finfo.maxf:
                     return 'max'
 
                 # s = '%.5f' % x
@@ -273,13 +273,13 @@ class Rbicomp(Poset):
             if x == int(x):
                 return '%d' % int(x)
             else:
-                if x == tiny:
+                if x == finfo.tiny:
                     return 'tiny'
 
-                if x == eps:
+                if x == finfo.eps:
                     return 'eps'
 
-                if x == maxf:
+                if x == finfo.maxf:
                     return 'max'
 
                 s = '%.5f' % x

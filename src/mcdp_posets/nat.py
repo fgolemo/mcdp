@@ -74,14 +74,14 @@ class Nat(Poset):
         assert False # pragma: no cover
 
     def get_test_chain(self, n):
-        s = []
+        import sys
+        s = [0, sys.maxint, self.get_top()]
         f = lambda: random.randint(1, n) # xxx
-        while len(s) < n - 2:
+        while len(s) < n - 1: # leave 1:  top 
             x = f()
             if not x in s:
                 s.append(x)
         s = sorted(s)
-        s.insert(0, 0)
         s.append(self.get_top())
         return s
 

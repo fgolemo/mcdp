@@ -73,7 +73,7 @@ class ProductNNatMap(Map):
 
         # XXX: this is also wrong, possibly
         if is_there_a_top():
-            return self.R.get_top()
+            return self.P.get_top()
         
         mult = lambda a, b : a * b
         r = functools.reduce(mult, x)
