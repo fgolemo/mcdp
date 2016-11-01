@@ -3,12 +3,10 @@ import functools
 
 from contracts import contract
 from contracts.utils import check_isinstance
-from mcdp_posets import Map, PosetProduct, RcompUnits, is_top
-from mcdp_posets import Nat
-from mcdp_posets import Rcomp
+from mcdp_posets import Map, PosetProduct, RcompUnits, is_top, Nat, Rcomp
+from mcdp_posets.rcomp import finfo
 from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
-from mcdp_posets.rcomp import finfo
 
 
 __all__ = [

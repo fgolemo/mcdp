@@ -3,9 +3,8 @@ from contracts.utils import raise_desc
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 import numpy as np
 
-from .poset import NotLeq, Poset
+from .poset import NotLeq, Poset, is_top
 from .space import NotBelongs, NotEqual
-from mcdp_posets.poset import is_top
 
 
 __all__ = [

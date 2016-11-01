@@ -3,12 +3,12 @@ from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
 from mcdp_posets import Nat, Poset, PosetProduct, UpperSet, is_top
 from mcdp_posets.nat import Nat_mult_lowersets_continuous
+from mcdp_posets.rcomp import finfo
 from mcdp_posets.utils import check_minimal
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 import numpy as np
 
 from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
-from mcdp_posets.rcomp import finfo
 
 
 _ = Nat, Poset
