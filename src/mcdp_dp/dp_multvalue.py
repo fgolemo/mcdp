@@ -207,8 +207,8 @@ class InvMultValueDP(WrapAMap):
         unit.belongs(value)
         amap = InvMultValueMap(F, R, unit, value)
         amap_dual = InvMultDualValueMap(R, F, unit, value)    
-        WrapAMap.__init__(self, amap, amap_dual)
-        
+        WrapAMap.__init__(self, amap, amap_dual)  
+    
     
 class InvMultValueNatDP(WrapAMap):
     """
