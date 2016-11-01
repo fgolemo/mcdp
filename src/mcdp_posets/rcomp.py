@@ -136,7 +136,7 @@ class RcompBase(Poset):
                 if x == finfo.eps:
                     return 'eps'
 
-                if x == finfo.maxf:
+                if x == finfo.max:
                     return 'max'
 
                 # s = '%.5f' % x
@@ -279,7 +279,7 @@ class Rbicomp(Poset):
                 if x == finfo.eps:
                     return 'eps'
 
-                if x == finfo.maxf:
+                if x == finfo.max:
                     return 'max'
 
                 s = '%.5f' % x
