@@ -11,7 +11,8 @@ from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits, Space,
 from mcdp_posets import is_top
 from mcdp_posets.rcomp_units import RbicompUnits_subtract, RbicompUnits_reflect
 from mocdp.comp.context import CResource, ValueWithUnits
-from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.exceptions import DPInternalError, DPSemanticError,\
+    DPNotImplementedError
 
 from .eval_constant_imp import NotConstant
 from .eval_resources_imp import eval_rvalue
@@ -162,7 +163,8 @@ def eval_rvalue_RValueMinusN(x, context, wants_constant=False):
  
     # we cannot do it with more than 1
     if len(constants) > 1:
-        raise NotImplementedError
+        msg = 'This code works only with 1 constant.'
+        raise_desc(DPNotImplementedError, msg)
     
     constant = constants[0] 
     R = context.get_rtype(rvalue)
@@ -248,8 +250,8 @@ def eval_MultN(x, context, wants_constant):
             n = len(resources2)
             dp = ProductNNatDP(n)
         elif isinstance(R, Rcomp):
-            msg = 'ProductRcompN not implemented yet'
-            raise NotImplementedError(msg) 
+            msg = 'ProductRcompN not implemented yet.'
+            raise_desc(DPNotImplementedError, msg) 
         else:
             resources_types2 = [context.get_rtype(_) for _ in resources2]
             dp = ProductNDP(tuple(resources_types2), R)

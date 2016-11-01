@@ -6,6 +6,7 @@ from mcdp_maps import SumNIntMap, SumNNatsMap, SumNMap, SumNRcompMap
 from mcdp_posets import Int
 
 from .dp_generic_unary import WrapAMap
+from mocdp.exceptions import DPNotImplementedError
 
 
 __all__ = [
@@ -48,7 +49,8 @@ class SumNNatDP(WrapAMap):
         return 'SumNNatDP(%s)' % self.n
     
     def solve_r(self, r):  # @UnusedVariable
-        raise NotImplementedError()
+        msg = 'SumNNatDP.solve_r not implemented yet'
+        raise_desc(DPNotImplementedError, msg)
 #     
 #     def get_lower_bound(self, n):
 #         return SumNLDP(self.Fs, self.R, n)

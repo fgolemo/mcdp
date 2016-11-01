@@ -74,7 +74,7 @@ def check_solve_f_chain(id_dp, dp):
         try:
             trchain = map(dp.solve, f_chain)
         except NotSolvableNeedsApprox:
-            return try_with_approximations(id_dp, dp, check_solve_r_chain)
+            return try_with_approximations(id_dp, dp, check_solve_f_chain)
     
         R = dp.get_res_space()
         UR = UpperSets(R)

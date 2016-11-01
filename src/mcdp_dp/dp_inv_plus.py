@@ -160,10 +160,11 @@ def sample_sum_lowersets(F, R, f, n):
     assert len(R) == 2
     
     if is_top(F, f):
+        # this is not correct, however it does not form a monotone sequence
             # +infinity
         top1 = R[0].get_top()
         top2 = R[1].get_top()
-        return set([(top1, 0.0), (0.0, top2)])
+        return set([(top1, top2)])
         
     if F.leq(f, 0.0): # f == 0
         return set([(0.0, 0.0)])
@@ -193,6 +194,8 @@ def sample_sum_lowersets(F, R, f, n):
 def sample_sum_upperbound(F, R, f, nu):
     """ 
         Returns a set of points in R on the line {(a,b) | a + b = f }.
+        
+        If f = Top, F = Top.
     
         It uses the variable InvPlus2.ALGO to decide the type 
         of sampling.
@@ -202,7 +205,7 @@ def sample_sum_upperbound(F, R, f, nu):
         # +infinity
         top1 = R[0].get_top()
         top2 = R[1].get_top()
-        return set([(top1, 0.0), (0.0, top2)])
+        return set([(top1, top2)])
     
     if F.leq(f, 0.0): # f == 0
         return set([(0.0, 0.0)])
