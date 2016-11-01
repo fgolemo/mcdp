@@ -4,8 +4,9 @@ from contracts.utils import check_isinstance
 from mcdp_posets import Map, Nat, RcompUnits, is_top
 from mcdp_posets.nat import Nat_mult_uppersets_continuous, \
     Nat_mult_lowersets_continuous, RcompUnits_mult_lowersets_continuous
-from mcdp_posets.rcomp import Rcomp_multiply_upper_topology
+from mcdp_posets.rcomp import Rcomp_multiply_upper_topology, Rcomp
 import numpy as np
+from mcdp_posets.rcomp_units import check_mult_units_consistency
 
 
 __all__ = [
@@ -82,7 +83,10 @@ class InvMultValueNatMap(Map):
 
 
 class InvMultValueMap(Map):
-    """ x |-> 
+    """
+        Valid for both Rcomp and RcompUnits.
+    
+         x |-> 
             if x != top
                 ceil(f/c) if c < Top
                 {0} if c = Top
@@ -91,8 +95,16 @@ class InvMultValueMap(Map):
     """
     
     def __init__(self, dom, cod, space, value):
-        check_isinstance(dom, RcompUnits)
-        check_isinstance(cod, RcompUnits)
+        if isinstance(dom, RcompUnits):
+            check_isinstance(cod, RcompUnits)
+            check_isinstance(space, RcompUnits)
+            # cod * space = dom
+            check_mult_units_consistency(cod, space, dom)
+        else:
+            check_isinstance(dom, Rcomp)
+            check_isinstance(cod, Rcomp)
+            check_isinstance(space, Rcomp)
+             
         space.belongs(value)
         self.value = value
         self.space = space
@@ -106,7 +118,7 @@ class InvMultValueMap(Map):
         
     def _call(self, x):
         y = self._call_(x)
-        print(' %s |-> %s    (c=%s)' % (x,y,self.space.format(self.value)))
+        #print(' %s |-> %s    (c=%s)' % (x,y,self.space.format(self.value)))
         return y
     
     def _call_(self, x):

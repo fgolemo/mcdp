@@ -5,10 +5,12 @@ from mcdp_maps import ConstantPosetMap, InvMultDualValueNatMap, MultValueMap, Mu
 from mcdp_maps import InvMultValueNatMap
 from mcdp_maps.mult_value import InvMultValueMap, InvMultDualValueMap
 from mcdp_posets import Map, MapNotDefinedHere, RcompUnits, is_top, Nat
-from mcdp_posets.rcomp_units import inverse_of_unit
+from mcdp_posets.rcomp_units import inverse_of_unit,\
+    check_mult_units_consistency
 import numpy as np
 
 from .dp_generic_unary import WrapAMap
+from mcdp_posets.rcomp import Rcomp
 
 
 __all__ = [
@@ -196,14 +198,24 @@ class MultValueNatDPhelper(Map):
 
 class InvMultValueRcompDP(WrapAMap):
     def __init__(self, value):
-        raise NotImplementedError
-
+        F = R = unit = Rcomp()
+        unit.belongs(value)
+        amap = InvMultValueMap(F, R, unit, value)
+        amap_dual = InvMultDualValueMap(R, F, unit, value)            
+        WrapAMap.__init__(self, amap, amap_dual)  
 
 class InvMultValueDP(WrapAMap):
     def __init__(self, F, R, unit, value):
-        check_isinstance(F, RcompUnits)
-        check_isinstance(R, RcompUnits)
-        check_isinstance(unit, RcompUnits)
+        """ r * c >= f """ 
+        if isinstance(F, RcompUnits):
+            check_isinstance(R, RcompUnits)
+            check_isinstance(unit, RcompUnits)
+            check_mult_units_consistency(R, unit, F)
+        else:
+            check_isinstance(F, Rcomp)
+            check_isinstance(R, Rcomp)
+            check_isinstance(unit, Rcomp)
+            
         unit.belongs(value)
         amap = InvMultValueMap(F, R, unit, value)
         amap_dual = InvMultDualValueMap(R, F, unit, value)    

@@ -4,7 +4,7 @@ from mcdp_dp import (CatalogueDP, CoProductDP, CoProductDPLabels, Constant,
     InvPlus2, InvPlus2L, InvPlus2Nat, InvPlus2U, JoinNDP, Limit, LimitMaximals,
     Max1, MeetNDualDP,  Mux, Parallel, ParallelN, Series0, Terminator,
     UncertainGate, UncertainGateSym, PlusValueDP, MeetNDP, JoinNDualDP, InvMult2Nat, MultValueDP,
-    MinusValueDP,ProductNDP, ProductNRcompDP, MinusValueRcompDP, MinusValueNatDP, InvMultValueNatDP, InvMultValueRcompDP, InvMultValueDP)
+    MinusValueDP,ProductNDP,ProductNNatDP, ProductNRcompDP, MinusValueRcompDP, MinusValueNatDP, InvMultValueNatDP, InvMultValueRcompDP, InvMultValueDP)
 
 from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct, Nat, Rcomp
