@@ -68,7 +68,7 @@ def check_solve_f_chain(id_dp, dp):
     
         F = dp.get_fun_space()
     
-        f_chain = F.get_test_chain(n=5)
+        f_chain = F.get_test_chain(n=8)
         poset_check_chain(F, f_chain)
     
         try:
@@ -96,7 +96,7 @@ def check_solve_r_chain(id_dp, dp):
         F = dp.get_fun_space()
         LF = LowerSets(F)
         
-        r_chain = R.get_test_chain(n=5)
+        r_chain = R.get_test_chain(n=8)
         poset_check_chain(R, r_chain)
     
         try:

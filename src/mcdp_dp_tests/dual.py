@@ -36,9 +36,8 @@ def dual01_chain(id_dp, dp):
             LF = LowerSets(F)
             UR = UpperSets(R)
         
-            rchain = R.get_test_chain(n=5)
+            rchain = R.get_test_chain(n=8)
             poset_check_chain(R, rchain)
-        
         
             try:
                 lfchain = list(map(dp.solve_r, rchain))
