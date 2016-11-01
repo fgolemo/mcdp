@@ -76,11 +76,11 @@ class InvPlus2L(PrimitiveDP):
         Lower approximation to f <= r1 + r2 on R.
     """
 
-    @contract(Rs='tuple[2],seq[2]($RcompUnits)', F=RcompUnits)
+    @contract(Rs='tuple[2],seq[2]($RcompUnits|$Rcomp)', F='$RcompUnits|$Rcomp')
     def __init__(self, F, Rs, nl):
         for _ in Rs:
-            check_isinstance(_, RcompUnits)
-        check_isinstance(F, RcompUnits)
+            check_isinstance(_, (Rcomp, RcompUnits))
+        check_isinstance(F, (Rcomp, RcompUnits))
         R = PosetProduct(Rs)
         M = PosetProduct((F, R))
         PrimitiveDP.__init__(self, F=F, R=R, I=M)
@@ -246,7 +246,7 @@ class InvPlus2U(PrimitiveDP):
         return lf, ur
 
     def solve(self, f):
-        print('InvPlus2.ALGO : ', InvPlus2.ALGO )
+        #print('InvPlus2.ALGO : ', InvPlus2.ALGO )
         options = sample_sum_upperbound(self.F, self.R, f, self.nu)
         return self.R.Us(options)
 

@@ -14,6 +14,7 @@ from mcdp_dp.dp_dummy import Template
 def ProductNDP_1():
     F1 = parse_poset('J')
     F2 = parse_poset('m')
+    Fs = (F1, F2)
     R = parse_poset('J*m')
     return ProductNDP(Fs, R)
 

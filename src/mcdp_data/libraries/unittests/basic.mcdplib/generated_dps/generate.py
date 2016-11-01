@@ -6,6 +6,11 @@ fn = '../primitivedps.py'
 
 contents = open(fn).read()
 
+lines = contents.split('\n')
+# throw away comments
+lines = [_ for _ in lines if not '#' in _]
+contents = '\n'.join(lines)
+
 r = re.compile('def\s+([\w]+)')
 
 for func in r.findall(contents):
