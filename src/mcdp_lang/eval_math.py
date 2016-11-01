@@ -20,6 +20,7 @@ from .helpers import create_operation, get_valuewithunits_as_resource, get_resou
 from .misc_math import inv_constant
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mcdp_dp.dp_products import ProductNRcompDP
 
 
 CDP = CDPLanguage
@@ -250,8 +251,7 @@ def eval_MultN(x, context, wants_constant):
             n = len(resources2)
             dp = ProductNNatDP(n)
         elif isinstance(R, Rcomp):
-            msg = 'ProductRcompN not implemented yet.'
-            raise_desc(DPNotImplementedError, msg) 
+            dp = ProductNRcompDP(len(resources2))
         else:
             resources_types2 = [context.get_rtype(_) for _ in resources2]
             dp = ProductNDP(tuple(resources_types2), R)

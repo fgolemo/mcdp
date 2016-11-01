@@ -241,11 +241,9 @@ def eval_lfunction_invplus_ops(fs, context):
                 msg = 'This case was not implemented yet. Differing units %s and %s.' % (Fs[1], Fs[0])
                 raise_desc(DPNotImplementedError, msg, Fs0=Fs[0], Fs1=Fs[1])
             
-            dp = InvPlus2(R, tuple(Fs))
-            
+            dp = InvPlus2(R, tuple(Fs))            
         elif all(isinstance(_, Rcomp) for _ in Fs):
-            msg = 'InvPlus2 not implemented for Rcomp.'
-            raise_desc(DPNotImplementedError, msg)
+            dp = InvPlus2(R, tuple(Fs))
         elif all(isinstance(_, Nat) for _ in Fs):
             dp = InvPlus2Nat(R, tuple(Fs))
             

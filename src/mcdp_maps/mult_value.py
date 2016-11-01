@@ -71,7 +71,8 @@ class InvMultValueNatMap(Map):
             return self.cod.get_top()
         else:
             if is_top(self.dom, x):
-                return 0
+                # changed from 0. This must be top because of monotonicity.
+                return self.cod.get_top() 
             else:
                 if is_top(self.dom, self.value):
                     return 0
@@ -82,7 +83,7 @@ class InvMultValueNatMap(Map):
 
 class InvMultValueMap(Map):
     """ x |-> 
-             if x != top
+            if x != top
                 ceil(f/c) if c < Top
                 {0} if c = Top
             if x == top:
@@ -104,11 +105,17 @@ class InvMultValueMap(Map):
                                                      self.space.format(self.value))
         
     def _call(self, x):
+        y = self._call_(x)
+        print(' %s |-> %s    (c=%s)' % (x,y,self.space.format(self.value)))
+        return y
+    
+    def _call_(self, x):
         if self.dom.leq(self.value, 0.0): # value == 0
             return self.cod.get_top()
         else: # value != 0
             if is_top(self.dom, x):
-                return 0.0
+                # changed from 0. This must be top because of monotonicity.
+                return self.cod.get_top() 
             else:
                 if is_top(self.dom, self.value):
                     return 0.0
