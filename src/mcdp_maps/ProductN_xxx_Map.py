@@ -5,6 +5,7 @@ from contracts import contract
 from contracts.utils import check_isinstance
 from mcdp_posets import Map, PosetProduct, RcompUnits, is_top
 from mcdp_posets import Nat
+from mcdp_posets import Rcomp
 from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
 
@@ -18,9 +19,10 @@ class ProductNMap(Map):
 
     @contract(Fs='tuple[>=2]')
     def __init__(self, Fs, R):
+        """ Should be all Rcomp or all RcompUnits """
         for _ in Fs:
-            check_isinstance(_, RcompUnits)
-        check_isinstance(R, RcompUnits)
+            check_isinstance(_, (Rcomp, RcompUnits))
+        check_isinstance(R, (Rcomp, RcompUnits))
 
         self.F = dom = PosetProduct(Fs)
         self.R = cod = R

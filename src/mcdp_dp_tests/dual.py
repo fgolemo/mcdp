@@ -16,6 +16,7 @@ from multi_index.inversion import transform_right_inverse
 def dual01_chain(id_dp, dp):
     try:
         with primitive_dp_test(id_dp, dp):
+            print('Starting testing with %r' % id_dp)
             # get a chain of resources
             F = dp.get_fun_space()
             R = dp.get_res_space()
