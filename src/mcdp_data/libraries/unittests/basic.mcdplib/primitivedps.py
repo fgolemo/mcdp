@@ -153,9 +153,18 @@ def CoProductDP1():
     dps = (CatalogueDP1(), CatalogueDP1())
     return CoProductDP(dps)
 
-def UncertainGate1():
-    F = parse_poset('Nat')
-    return UncertainGate(F)
+# unfortunately we cannot test it like the others
+# because it checks that the values are coherent
+# def UncertainGate1():
+#     F = parse_poset('Nat')
+#     return UncertainGate(F)
+# def UncertainGate_1():
+#     F0 = parse_poset('Nat')
+#     return UncertainGate(F0)
+
+# def UncertainGateSym_1():
+#     F0 = parse_poset('Nat')
+#     return UncertainGateSym(F0)
 
 def CoProductDPLabels1():
     dp = CoProductDP1()
@@ -275,7 +284,6 @@ def Template_1():
     return Template(F, R)
 
 
-
 def DPLoop0_1():
     F1 = parse_poset('N')
     F2 = parse_poset('m')
@@ -313,13 +321,6 @@ def Terminator_1():
     F = parse_poset('Nat')
     return Terminator(F)
 
-def UncertainGate_1():
-    F0 = parse_poset('Nat')
-    return UncertainGate(F0)
-
-def UncertainGateSym_1():
-    F0 = parse_poset('Nat')
-    return UncertainGateSym(F0)
 
 def JoinNDualDP_1():
     n = 3
