@@ -23,6 +23,8 @@ class NatTop():
 
 class Nat(Poset):
     """
+        This is represented as "int". 
+        
         [0, 1, 2, 3) U {T}
     """
     def __init__(self):
@@ -75,7 +77,7 @@ class Nat(Poset):
 
     def get_test_chain(self, n):
         import sys
-        s = [0, sys.maxint, self.get_top()]
+        s = [0, sys.maxint]
         f = lambda: random.randint(1, n) # xxx
         while len(s) < n - 1: # leave 1:  top 
             x = f()
@@ -102,7 +104,7 @@ class Nat(Poset):
             if x == self.top:
                 return self.top.__repr__()
             else: # pragma: no cover
-                raise ValueError(x) 
+                raise ValueError(x, type(x)) 
 
     def _leq(self, a, b):
         # common case
@@ -129,12 +131,6 @@ class Nat(Poset):
             msg = '%s ≰ %s' % (a, b)
             raise NotLeq(msg)
 
-#     def multiply(self, a, b):
-#         """ Multiplication, extended for top """
-#         if a == self.top or b == self.top:
-#             return self.top
-#         return a * b
-# 
     def check_equal(self, x, y):
         if not (x == y):
             raise NotEqual('%s != %s' % (x, y))
@@ -153,8 +149,17 @@ def Nat_add(a, b):
         return Nat_add_top
     
     mcdp_dev_warning('catch overflow')
-    return a + b
+    assert isinstance(a, int), (a, type(a))
+    assert isinstance(b, int), (b, type(b))
+    res = a + b
+    
+    if res > sys.maxint:
+        return N.get_top()
+    
+    assert isinstance(res, int), (res, type(res))
+    return res
 
+import sys
 
 def Nat_mult_uppersets_continuous(a, b):
     """ Multiplication on Nat, extended for top, so that top*0 = 0 """
@@ -171,7 +176,14 @@ def Nat_mult_uppersets_continuous(a, b):
         return Nat_add_top
     
     mcdp_dev_warning('catch overflow')
-    return a * b
+    assert isinstance(a, int), (a, type(a))
+    assert isinstance(b, int), (b, type(b))
+    res = a * b
+    if res > sys.maxint:
+        return N.get_top()
+    
+    assert isinstance(res, int), (res, type(res))
+    return res
 
 def Nat_mult_lowersets_continuous(a, b):
     """ Multiplication on Nat, extended for top, so that top*0 = Top """
@@ -182,7 +194,15 @@ def Nat_mult_lowersets_continuous(a, b):
         return Nat_add_top
 
     mcdp_dev_warning('catch overflow')
-    return a * b
+    assert isinstance(a, int), (a, type(a))
+    assert isinstance(b, int), (b, type(b))
+
+    res = a * b
+    if res > sys.maxint:
+        return N.get_top()
+    
+    assert isinstance(res, int), (res, type(res))
+    return res
 
 def RcompUnits_mult_lowersets_continuous(A, a, B, b, C):
     """ Multiplication on Rcompunits, extended for top, so that top*0 = Top """

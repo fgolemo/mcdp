@@ -158,7 +158,7 @@ class RcompBase(Poset):
             return True
         
         if Rcomp.tolerate_numerical_errors:
-            if bool(np.isclose(a, b)):
+            if bool(np.isclose(a, b, rtol=0)):
                 return True
         return a <= b
 

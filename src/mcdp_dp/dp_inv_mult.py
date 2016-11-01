@@ -8,6 +8,7 @@ from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 import numpy as np
 
 from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
+from mcdp_posets.rcomp import finfo
 
 
 _ = Nat, Poset
@@ -24,7 +25,15 @@ def InvMult2_solve_r(Rs, F, r):
     if is_top(Rs[0], r1) or is_top(Rs[1],r2):
         f_max = F.get_top()
     else:
-        f_max = r1 * r2
+        try:
+            f_max = r1 * r2
+        except FloatingPointError as e:
+            if 'underflow' in str(e):
+                f_max = finfo.tiny
+            elif 'overflow' in str(e):
+                f_max = F.get_top()
+            else:
+                raise
     return F.L(f_max)
 
 class InvMult2(ApproximableDP):

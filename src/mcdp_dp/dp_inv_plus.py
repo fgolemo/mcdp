@@ -302,6 +302,11 @@ class InvPlus2Nat(PrimitiveDP):
         assert isinstance(f, int)
 
         s = set()
+        
+        if f >= 100000:
+            msg = 'This would create an antichain of %s items.' % f
+            raise NotSolvableNeedsApprox(msg)
+        
         for o in range(f + 1):
             s.add((o, f - o))
 

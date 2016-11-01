@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import check_isinstance
+from contracts.utils import check_isinstance, raise_wrapped
 from mcdp_maps import ConstantPosetMap, InvMultDualValueNatMap, MultValueMap, MultValueNatMap
 from mcdp_maps import InvMultValueNatMap
 from mcdp_maps.mult_value import InvMultValueMap, InvMultDualValueMap
 from mcdp_posets import Map, MapNotDefinedHere, RcompUnits, is_top, Nat
-from mcdp_posets.rcomp_units import inverse_of_unit,\
+from mcdp_posets.rcomp import Rcomp
+from mcdp_posets.rcomp_units import inverse_of_unit, \
     check_mult_units_consistency
 import numpy as np
 
 from .dp_generic_unary import WrapAMap
-from mcdp_posets.rcomp import Rcomp
 
 
 __all__ = [
@@ -210,7 +210,12 @@ class InvMultValueDP(WrapAMap):
         if isinstance(F, RcompUnits):
             check_isinstance(R, RcompUnits)
             check_isinstance(unit, RcompUnits)
-            check_mult_units_consistency(R, unit, F)
+            try:
+                check_mult_units_consistency(R, unit, F)
+            except AssertionError as e:
+                msg = 'Invalid units.'
+                raise_wrapped(AssertionError, e, msg, F=F,R=R,unit=unit)
+                
         else:
             check_isinstance(F, Rcomp)
             check_isinstance(R, Rcomp)
