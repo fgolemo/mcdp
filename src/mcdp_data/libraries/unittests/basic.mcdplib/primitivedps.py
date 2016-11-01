@@ -95,24 +95,24 @@ def InvMultValueRcompDP3top():
     return InvMultValueRcompDP(Rcomp().get_top())
 
 def InvMultValueDP1zero():
-    F = parse_poset('m')    
+    F = parse_poset('m*s')    
     U = parse_poset('s')
+    R = parse_poset('m')
     v = 0.0
-    R = parse_poset('m*s')
     return InvMultValueDP(F=F, R=R, unit=U, value=v)
 
 def InvMultValueDP2nonzero():
-    F = parse_poset('m')    
+    F = parse_poset('m*s')    
     U = parse_poset('s')
+    R = parse_poset('m')
     v = 10.0
-    R = parse_poset('m*s')
     return InvMultValueDP(F=F, R=R, unit=U, value=v)
 
 def InvMultValueDP3top():
-    F = parse_poset('m')    
+    F = parse_poset('m*s')    
     U = parse_poset('s')
+    R = parse_poset('m')
     v = U.get_top()
-    R = parse_poset('m*s')
     return InvMultValueDP(F=F, R=R, unit=U, value=v)
 
 def MultValueDP1nonzero():

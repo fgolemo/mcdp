@@ -73,6 +73,12 @@ class MultValueDP(WrapAMap):
         check_isinstance(F, RcompUnits)
         check_isinstance(R, RcompUnits)
         check_isinstance(unit, RcompUnits)
+        
+        try:
+            check_mult_units_consistency(F, unit, R)
+        except AssertionError as e:
+            msg = 'Invalid units.'
+            raise_wrapped(ValueError, e, msg, F=F, R=R, unit=unit)
 
         amap = MultValueMap(F=F, R=R, unit=unit, value=value)
         

@@ -8,6 +8,7 @@ from mcdp_posets import Nat
 from mcdp_posets import Rcomp
 from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
+from mcdp_posets.rcomp import finfo
 
 
 __all__ = [
@@ -43,12 +44,16 @@ class ProductNMap(Map):
         mult = lambda x, y: x * y
         try:
             r = functools.reduce(mult, f)
+            if np.isinf(r):
+                r = self.R.get_top()
         except FloatingPointError as e:
             # assuming this is overflow
-            assert 'overflow' in str(e)
-            r = np.inf
-        if np.isinf(r):
-            r = self.R.get_top()
+            if 'overflow' in str(e):
+                r = self.R.get_top()
+            elif 'underflow' in str(e):
+                r = finfo.tiny
+            else:
+                raise
         return r
     
 
