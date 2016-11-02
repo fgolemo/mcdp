@@ -284,7 +284,7 @@ def Nat_mult_antichain_Min(m):
     
     if m == 0:
         # any (r1,r2) is such that r1*r2 >= 0
-        return set([0])
+        return set([(0, 0)])
     
     s = set()
     for o1 in range(1, m + 1):
@@ -317,7 +317,7 @@ def Nat_mult_antichain_Max(m):
     assert isinstance(m, int)
     
     if m < 1:
-        return set([0])
+        return set([(0, 0)])
     
     s = set()
     for o1 in range(1, m + 1):
@@ -363,7 +363,7 @@ class InvMult2Nat(ApproximableDP):
     def solve(self, f):
         if is_top(self.F, f):
             top = f
-            elements = [(top, 1), (1, top)] # XXX: to check
+            elements = set([(top, 1), (1, top)]) # XXX: to check
             return self.R.Us(elements) 
         
         if f > InvMult2Nat.memory_limit:
@@ -372,6 +372,7 @@ class InvMult2Nat(ApproximableDP):
             raise NotSolvableNeedsApprox(msg)
             
         options = Nat_mult_antichain_Min(f)
+        print options
         return self.R.Us(options)
     
     def get_lower_bound(self, n):  # @UnusedVariable
