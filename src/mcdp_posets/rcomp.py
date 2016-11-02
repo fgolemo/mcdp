@@ -307,24 +307,26 @@ class Rbicomp(Poset):
     def check_leq(self, a, b):
         if not self._leq(a, b):
             msg = '%s ≰ %s' % (a, b)
-            raise NotLeq(msg)
-# #
-# #     def multiply(self, a, b):
-# #         """ Multiplication, extended for top """
-# #         if a == self.top or b == self.top:
-# #             return self.top
-# #         return a * b
-#
-#     def add(self, a, b):
-#         """ Addition, extended for top """
-#         if a == self.top or b == self.top:
-#             return self.top
-#         return a + b
+            raise NotLeq(msg) 
 
     def check_equal(self, x, y):
         if not x == y:
             raise NotEqual('%s != %s' % (x, y))
 
+
+def Rcomp_multiply_upper_topology_seq(As, values, C):
+    """
+        As: tuple of Rcompunits
+        values: values (values[i] in A[i])
+        C: result
+    """
+    def mult2(x, y):
+        A, a = x
+        B, b = y
+        return Rcomp_multiply_upper_topology(A, a, B, b, C)
+    return functools.reduce(mult2, zip(As, values))
+
+import functools
 
 def Rcomp_multiply_upper_topology(A, a, B, b, C):
     """ 
@@ -361,8 +363,36 @@ def Rcomp_multiply_upper_topology(A, a, B, b, C):
         except FloatingPointError as e:
             if 'underflow' in str(e):
                 mcdp_dev_warning('Not sure about this.')
-                return 0.0 
+                return finfo.tiny 
+            elif 'overflow' in str(e):
+                return C.get_top()
             else:
                 raise
                 
+#         
+#         # first, find out if there are any tops
+#         def is_there_a_top():
+#             for Fi, fi in zip(self.F, f):
+#                 if is_top(Fi, fi):
+#                     return True
+#             return False
+#         
+#         if is_there_a_top():
+#             return self.R.get_top()
+# 
+#         mult = lambda x, y: x * y
+#         try:
+#             r = functools.reduce(mult, f)
+#             if np.isinf(r):
+#                 r = self.R.get_top()
+#         except FloatingPointError as e:
+#             # assuming this is overflow
+#             if 'overflow' in str(e):
+#                 r = self.R.get_top()
+#             elif 'underflow' in str(e):
+#                 r = finfo.tiny
+#             else:
+#                 raise
+#         return r
+    
                 

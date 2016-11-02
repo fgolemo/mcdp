@@ -4,7 +4,7 @@ from mcdp_dp import (CatalogueDP, CoProductDP, CoProductDPLabels, Constant,
     InvPlus2, InvPlus2L, InvPlus2Nat, InvPlus2U, JoinNDP, Limit, LimitMaximals,
     Max1, MeetNDualDP,  Mux, Parallel, ParallelN, Series0, Terminator,
     UncertainGate, UncertainGateSym, PlusValueDP, MeetNDP, JoinNDualDP, InvMult2Nat, MultValueDP,
-    MinusValueDP,ProductNDP,ProductNNatDP, ProductNRcompDP, MinusValueRcompDP, MinusValueNatDP, InvMultValueNatDP, InvMultValueRcompDP, InvMultValueDP)
+    MinusValueDP,ProductNDP, Product2DP_U, Product2DP_L, ProductNNatDP, ProductNRcompDP, MinusValueRcompDP, MinusValueNatDP, InvMultValueNatDP, InvMultValueRcompDP, InvMultValueDP)
 
 from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct, Nat, Rcomp
@@ -17,6 +17,20 @@ def ProductNDP_1():
     Fs = (F1, F2)
     R = parse_poset('J*m')
     return ProductNDP(Fs, R)
+
+def Product2DP_L_1():
+    F1 = parse_poset('J')
+    F2 = parse_poset('m')
+    Fs = (F1, F2)
+    R = parse_poset('J*m')
+    return Product2DP_L(Fs, R)
+
+def Product2DP_U_1():
+    F1 = parse_poset('J')
+    F2 = parse_poset('m')
+    Fs = (F1, F2)
+    R = parse_poset('J*m')
+    return Product2DP_U(Fs, R)
 
 def ProductNDP_2():
     F1 = parse_poset('J')

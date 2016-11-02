@@ -161,6 +161,10 @@ def Nat_add(a, b):
 
 import sys
 
+def Nat_mult_uppersets_continuous_seq(seq):
+    """ Multiplication on Nat, extended for top, so that top*0 = Top """
+    return functools.reduce(Nat_mult_uppersets_continuous, seq)
+
 def Nat_mult_uppersets_continuous(a, b):
     """ Multiplication on Nat, extended for top, so that top*0 = 0 """
     from mcdp_posets.poset import is_top
@@ -184,6 +188,8 @@ def Nat_mult_uppersets_continuous(a, b):
     
     assert isinstance(res, int), (res, type(res))
     return res
+
+import functools
 
 def Nat_mult_lowersets_continuous(a, b):
     """ Multiplication on Nat, extended for top, so that top*0 = Top """

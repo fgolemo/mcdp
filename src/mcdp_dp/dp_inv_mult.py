@@ -3,7 +3,7 @@ from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
 from mcdp_posets import Nat, Poset, PosetProduct, UpperSet, is_top
 from mcdp_posets.nat import Nat_mult_lowersets_continuous
-from mcdp_posets.rcomp import finfo
+from mcdp_posets.rcomp import Rcomp_multiply_upper_topology_seq
 from mcdp_posets.utils import check_minimal
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 import numpy as np
@@ -19,22 +19,7 @@ __all__ = [
     'InvMult2L',
     'InvMult2Nat',
 ]
-
-def InvMult2_solve_r(Rs, F, r):
-    r1, r2 = r
-    if is_top(Rs[0], r1) or is_top(Rs[1],r2):
-        f_max = F.get_top()
-    else:
-        try:
-            f_max = r1 * r2
-        except FloatingPointError as e:
-            if 'underflow' in str(e):
-                f_max = finfo.tiny
-            elif 'overflow' in str(e):
-                f_max = F.get_top()
-            else:
-                raise
-    return F.L(f_max)
+ 
 
 class InvMult2(ApproximableDP):
 
@@ -57,7 +42,7 @@ class InvMult2(ApproximableDP):
         raise NotSolvableNeedsApprox(type(self))
     
     def solve_r(self, r):
-        return InvMult2_solve_r(self.Rs, self.F, r)
+        return Rcomp_multiply_upper_topology_seq(self.Rs, r, self.F)
 
     def get_lower_bound(self, n):
         return InvMult2L(self.F, self.Rs, n)
@@ -94,7 +79,6 @@ class InvMult2U(PrimitiveDP):
         return set([(f, r)])
 
     def solve(self, f):
-        
         if is_top(self.F, f):
             mcdp_dev_warning('FIXME Need much more thought about this')
             top1 = self.Rs[0].get_top()
@@ -119,8 +103,7 @@ class InvMult2U(PrimitiveDP):
         return UpperSet(minimals=ps, P=self.R)
     
     def solve_r(self, r):
-        mcdp_dev_warning('This might not be correct')
-        return InvMult2_solve_r(self.Rs, self.F, r)
+        return Rcomp_multiply_upper_topology_seq(self.Rs, r, self.F)
 
 def samplec(n, c):
     """ Samples n points on the curve xy=c """
@@ -171,7 +154,7 @@ class InvMult2L(PrimitiveDP):
 
     def solve_r(self, r):
         mcdp_dev_warning('This might not be correct')
-        return InvMult2_solve_r(self.Rs, self.F, r)
+        return Rcomp_multiply_upper_topology_seq(self.Rs, r, self.F)
     
     def solve(self, f):
         if f == 0.0:
@@ -277,7 +260,71 @@ def generate_exp_van_der_corput_sequence(n, C=1.0, mapping_function=None):
     x2 = np.array(map(myexp, logx2))
     return x1, x2
 
+def Nat_mult_antichain_Min(m):
+    """ 
+        Returns the Minimal set of elements of Nat so that their product is at least m:
+    
+        Min { (a, b) | a * b >= m }
+    
+    """
+    # (top, 1) or (1, top)
+    P = Nat()
+    P.belongs(m)
+    top = P.get_top()
+    if is_top(P, m):
+        s = set([(top, 1), (1, top)]) # XXX:
+        return s
 
+    assert isinstance(m, int)
+    
+    if m == 0:
+        # any (r1,r2) is such that r1*r2 >= 0
+        return set([0])
+    
+    s = set()
+    for o1 in range(1, m + 1):
+        assert o1 >= 1
+        # We want the minimum x such that o1 * x >= f
+        # x >= f / o1
+        # x* = ceil(f / o1)
+        x =  int(np.ceil(m * 1.0 / o1))
+        assert x * o1 >= m
+        assert (x-1) * o1 < m
+        assert x >= 1
+        s.add((o1, x))
+    return s
+
+def Nat_mult_antichain_Max(m):
+    """ 
+        Returns the set of elements of Nat so that their product is at most m:
+    
+        Max { (a, b) | a * b <= m }
+    
+    """
+    # top -> [(top, top)]
+    P = Nat()
+    P.belongs(m)
+    top = P.get_top()
+    if is_top(P, m):
+        s = set([(top, top)])
+        return s
+
+    assert isinstance(m, int)
+    
+    if m < 1:
+        return set([0])
+    
+    s = set()
+    for o1 in range(1, m + 1):
+        assert o1 >= 1
+        # We want the minimum x such that o1 * x >= f
+        # x >= f / o1
+        # x* = ceil(f / o1)
+        x =  int(np.floor(m * 1.0 / o1))
+        assert x * o1 <= m
+        assert (x+1) * o1 < m
+        s.add((o1, x))
+    return s
 
 class InvMult2Nat(PrimitiveDP):
     """
@@ -306,38 +353,13 @@ class InvMult2Nat(PrimitiveDP):
         return lf, ur
 
     def solve(self, f):
-        # FIXME: what about the top?
-        
-        # (top, 1) or (1, top)
-        top = self.F.get_top()
-        if is_top(self.F, f):
-            s = set([(top, 1), (1, top)])
-            return self.R.Us(s)
-
-        assert isinstance(f, int)
-        
-        if f == 0:
-            # any (r1,r2) is such that r1*r2 >= 0
-            return self.R.U(self.R.get_bottom())
-        
-        s = set()
-        for o1 in range(1, f + 1):
-            assert o1 >= 1
-            # We want the minimum x such that o1 * x >= f
-            # x >= f / o1
-            # x* = ceil(f / o1)
-            x =  int(np.ceil(f * 1.0 / o1))
-            assert x * o1 >= f
-            assert (x-1) * o1 < f
-            assert x >= 1
-            s.add((o1, x))
-
-        return self.R.Us(s)
+        options = Nat_mult_antichain_Min(f)
+        return self.R.Us(options)
     
     def solve_r(self, r):
         r1, r2 = r
-        f = Nat_mult_lowersets_continuous(r1, r2)
-        return self.F.L(f)
+        f_max = Nat_mult_lowersets_continuous(r1, r2)
+        return self.F.L(f_max)
 
     def get_implementations_f_r(self, f, r):
         return set([(f, r)])

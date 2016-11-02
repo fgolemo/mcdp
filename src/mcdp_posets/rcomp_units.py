@@ -296,6 +296,16 @@ def mult_table(a, b):
     s = '%s' % unit2
     return RcompUnits(unit2, s)
 
+def check_mult_units_consistency_seq(factors, c):
+    for f in factors:
+        check_isinstance(f, RcompUnits)
+    check_isinstance(c, RcompUnits)
+    c_expected = mult_table_seq(factors)
+    if c.units != c_expected.units:
+        msg = 'For the multiplication of %s  I expected %s but got %s' % (factors, c_expected, c)
+        raise_desc(AssertionError, msg)
+
+
 def check_mult_units_consistency(a, b, c):
     """ Checks that a * b = c and raises AssertionError if not. """
     check_isinstance(a, RcompUnits)

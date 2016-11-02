@@ -1,41 +1,97 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
+from contracts.utils import raise_desc, check_isinstance
+from mcdp_dp.dp_inv_mult import Nat_mult_antichain_Max
+from mcdp_dp.primitive import NotSolvableNeedsApprox
 from mcdp_maps import ProductNMap, ProductNNatMap
+from mcdp_posets import Rcomp, RcompUnits
+from mcdp_posets.rcomp_units import check_mult_units_consistency_seq
 
 from .dp_generic_unary import WrapAMap
-from mcdp_posets.rcomp import Rcomp
 
 
 __all__ = [
     'ProductNDP',
     'ProductNNatDP',
     'ProductNRcompDP',
+    'Product2DP_U',
+    'Product2DP_L',
 ]
 
 class ProductNDP(WrapAMap):
+    
     @contract(Fs='tuple[>=2]')
     def __init__(self, Fs, R):
+        if isinstance(R, Rcomp):
+            for F in Fs:
+                check_isinstance(F, Rcomp)
+        elif isinstance(R, RcompUnits):
+            for F in Fs:
+                check_isinstance(F, RcompUnits)
+            check_mult_units_consistency_seq(Fs, R)
+        self.Fs = Fs
         amap = ProductNMap(Fs, R)
-#         if len(Fs) == 2:
-#             from mcdp_dp.dp_inv_mult import InvMult2
-#             amap_dual = InvMult2(R, Fs)
-#         else:
-        amap_dual = None
+        WrapAMap.__init__(self, amap, None)
 
-        WrapAMap.__init__(self, amap, amap_dual)
+    def solve_r(self, f):
+        raise NotSolvableNeedsApprox(type(self))
+    
+    def get_lower_bound(self, n):
+        if len(self.Rs) != 2:
+            msg = ('ProductNDP:get_lower_bound(): Not implemented yet '
+                  'for %d components.' % len(self.Fs))
+            raise_desc(NotImplementedError, msg)
+        return Product2DP_L(self.F, self.Rs, n) 
 
+    def get_upper_bound(self, n):
+        if len(self.Rs) != 2:
+            msg = ('ProductNDP:get_upper_bound(): Not implemented yet '
+                  'for %d components.' % len(self.Fs))
+            raise_desc(NotImplementedError, msg)
+        return Product2DP_U(self.F, self.Rs, n) 
+
+class Product2DP_L(WrapAMap):
+    
+    @contract(Fs='tuple[2]')
+    def __init__(self, Fs, R):
+        amap = ProductNMap(Fs, R)
+        WrapAMap.__init__(self, amap, None)
+        
+    def solve_r(self, r):
+        raise NotImplementedError
+
+class Product2DP_U(WrapAMap):
+    
+    @contract(Fs='tuple[2]')
+    def __init__(self, Fs, R):
+        amap = ProductNMap(Fs, R)
+        WrapAMap.__init__(self, amap, None)
+        
+    def solve_r(self, r):
+        raise NotImplementedError
+    
 class ProductNRcompDP(WrapAMap):
     
     def __init__(self, n):
         R = Rcomp()
-        Fs = (R,)*n
+        Fs = (R,) * n
         amap = ProductNMap(Fs, R)
-        amap_dual = None
-        WrapAMap.__init__(self, amap, amap_dual)
+        WrapAMap.__init__(self, amap, None)
 
 class ProductNNatDP(WrapAMap):
+    """
+        r >= f1 * f2 * ... * fn
+    """
     def __init__(self, n):
         amap = ProductNNatMap(n)
-        amap_dual = None
-        WrapAMap.__init__(self, amap, amap_dual)
+        WrapAMap.__init__(self, amap, None)
+        self.n = n
 
+    def solve_r(self, r):
+        if self.n > 2:
+            msg = 'ProductNNatDP not implemented for n = %s.' % self.n
+            raise_desc(NotImplementedError, msg, n=self.n)
+
+        assert self.n == 2
+        options = Nat_mult_antichain_Max(r)
+        return self.F.Ls(options)

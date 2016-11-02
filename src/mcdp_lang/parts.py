@@ -66,7 +66,6 @@ class CDPLanguage():
     FValueMinusN = namedtuplewhere('FValueMinusN', 'ops')
     Divide = namedtuplewhere('Divide', 'ops')
     # all constants
-#     ConstantMinus = namedtuplewhere('ConstantMinus', 'ops')
     Coproduct = namedtuplewhere('Coproduct', 'ops')
 
     # elements: all strings, coproducts
@@ -318,13 +317,6 @@ class CDPLanguage():
     ApproxUKeyword = namedtuplewhere('ApproxUKeyword', 'keyword')
     ApproxURes = namedtuplewhere('ApproxURes', 'keyword rvalue step')
 
-    # from a import symbol1, symbol2
-    # import symbol.a
-#     ImportSymbolsKeywordFrom = namedtuplewhere('ImportSymbolsKeywordFrom', 'keyword')
-#     ImportSymbolsKeywordImport = namedtuplewhere('ImportSymbolsKeywordImport', 'keyword')
-#     ImportSymbolsLibname = namedtuplewhere('ImportSymbolsLibname', 'value')
-#     ImportSymbolsSymbolname = namedtuplewhere('ImportSymbolsSymbolname', 'value')
-#     ImportSymbols = namedtuplewhere('ImportSymbols', 'keyword1 libname keyword2 symbols')
 
     # assert_equal(v1, v2)
     # assert_leq(v1, v2)
@@ -347,9 +339,6 @@ class CDPLanguage():
     AssertGT = namedtuplewhere('AssertGT', 'keyword v1 v2')
     AssertNonempty = namedtuplewhere('AssertNonempty', 'keyword value')
     AssertEmpty = namedtuplewhere('AssertEmpty', 'keyword value')
-
-#     ConstantMinusConstant = namedtuplewhere('ConstantMinusConstant', 'c1 minus c2')
-#     RvalueMinusConstant = namedtuplewhere('RvalueMinusConstant', 'r c')
 
     # ignore_resources(a, b) mcdp { }
     IgnoreResourcesKeyword = namedtuplewhere('IgnoreResourcesKeyword', 'keyword')
@@ -379,3 +368,11 @@ class CDPLanguage():
     
     
     
+
+# from a import symbol1, symbol2
+# import symbol.a
+#     ImportSymbolsKeywordFrom = namedtuplewhere('ImportSymbolsKeywordFrom', 'keyword')
+#     ImportSymbolsKeywordImport = namedtuplewhere('ImportSymbolsKeywordImport', 'keyword')
+#     ImportSymbolsLibname = namedtuplewhere('ImportSymbolsLibname', 'value')
+#     ImportSymbolsSymbolname = namedtuplewhere('ImportSymbolsSymbolname', 'value')
+#     ImportSymbols = namedtuplewhere('ImportSymbols', 'keyword1 libname keyword2 symbols')
