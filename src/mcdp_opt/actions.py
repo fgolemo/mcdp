@@ -134,7 +134,7 @@ class ActionAddNDP(ActionCreate):
 
         executed = c.executed + [self]
         # XXX
-        forbidden = c.forbidden + [self]
+        forbidden = c.forbidden + set([self])
 
         lower_bounds = dict(**c.lower_bounds)
 

@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
-from mcdp_dp.dp_inv_mult import Nat_mult_antichain_Max
+from mcdp_dp.dp_inv_mult import Nat_mult_antichain_Max, InvMult2,\
+    invmultL_solve_options
 from mcdp_dp.primitive import NotSolvableNeedsApprox, ApproximableDP
 from mcdp_maps import ProductNMap, ProductNNatMap
 from mcdp_posets import Rcomp, RcompUnits
@@ -9,7 +10,6 @@ from mcdp_posets.rcomp_units import check_mult_units_consistency_seq
 from mocdp.exceptions import mcdp_dev_warning
 
 from .dp_generic_unary import WrapAMap
-from mcdp_dp.dp_inv_plus import sample_sum_upperbound
 
 
 __all__ = [
@@ -89,8 +89,11 @@ class Product2DP_L(WrapAMap):
         self.nl = nl
         
     def solve_r(self, r):  # @UnusedVariable
-        msg = 'Product2DP_L:solve_r() not implemented'
-        raise_desc(NotImplementedError, msg)
+        algo = InvMult2.ALGO
+        mcdp_dev_warning('Not sure about this: is it L or U?')
+        options = invmultL_solve_options(F=self.R, R=self.F, f=r, n=self.nl, algo=algo)
+        return self.F.Ls(options)
+    
 
 class Product2DP_U(WrapAMap):
     
@@ -102,8 +105,10 @@ class Product2DP_U(WrapAMap):
         
     def solve_r(self, r):  
         # we want this to be pessimistic
-        options = sample_sum_upperbound(self.R, self.F, r, self.nu)
-        return self.L.Us(options)
+        mcdp_dev_warning('Not sure about this: is it L or U?')
+        algo = InvMult2.ALGO
+        options = invmultL_solve_options(F=self.R, R=self.F, f=r, n=self.nu, algo=algo)
+        return self.F.Ls(options)
 
 class ProductNRcompDP(WrapAMap, ApproximableDP):
     

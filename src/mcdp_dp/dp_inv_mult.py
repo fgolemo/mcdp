@@ -81,7 +81,7 @@ class InvMult2U(PrimitiveDP):
         return set([(f, r)])
 
     def solve(self, f):
-        algo=InvMult2.ALGO
+        algo = InvMult2.ALGO
         options = invmultU_solve_options(F=self.F, R=self.R, f=f, n=self.n, algo=algo)
         return self.R.Us(options)
     
