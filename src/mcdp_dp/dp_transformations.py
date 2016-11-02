@@ -4,6 +4,8 @@ from mcdp_dp import (
     CoProductDP, CoProductDPLabels, DPLoop2, LabelerDP, OpaqueDP, ParallelN)
 
 from .primitive import ApproximableDP, PrimitiveDP
+from mocdp.exceptions import DPInternalError
+from contracts.utils import raise_desc, raise_wrapped
 
 
 @contract(dp=PrimitiveDP, returns=PrimitiveDP)
@@ -13,6 +15,7 @@ def dp_transform(dp, f):
     from mcdp_dp.dp_series import Series0
     from mcdp_dp.dp_loop import DPLoop0
     from mcdp_dp.dp_parallel import Parallel
+    from mcdp_dp.dp_series_simplification import check_same_spaces
 
     if isinstance(dp, Series0):
         return Series0(dp_transform(dp.dp1, f),
@@ -37,9 +40,13 @@ def dp_transform(dp, f):
     elif isinstance(dp, LabelerDP):
         return LabelerDP(dp_transform(dp.dp, f), dp.recname)
     else:
-        r = f(dp)
-        # assert isinstance(r, PrimitiveDP)
-        return r
+        dp2 = f(dp)
+        try:
+            check_same_spaces(dp, dp2)
+        except AssertionError as e:
+            msg = 'Transformation %s does not preserve spaces.' % f
+            raise_wrapped(DPInternalError, e, msg, dp=dp, dp2=dp2, f=f, compact=True)
+        return dp2
 
 
 @contract(dp=PrimitiveDP, nl='int,>=1', nu='int,>=1')

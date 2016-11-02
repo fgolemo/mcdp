@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
-from mcdp_dp.dp_inv_mult import Nat_mult_antichain_Max, InvMult2,\
-    invmultL_solve_options
-from mcdp_dp.primitive import NotSolvableNeedsApprox, ApproximableDP
 from mcdp_maps import ProductNMap, ProductNNatMap
 from mcdp_posets import Rcomp, RcompUnits
 from mcdp_posets.rcomp_units import check_mult_units_consistency_seq
 from mocdp.exceptions import mcdp_dev_warning
 
 from .dp_generic_unary import WrapAMap
+from .dp_inv_mult import Nat_mult_antichain_Max, InvMult2, invmultL_solve_options
+from .primitive import NotSolvableNeedsApprox, ApproximableDP
+from mcdp_dp.dp_inv_mult import invmultU_solve_options
 
 
 __all__ = [
@@ -39,10 +39,6 @@ class ProductNDP(WrapAMap, ApproximableDP):
         raise NotSolvableNeedsApprox(type(self))
     
     def get_lower_bound(self, n):
-#         if len(self.Fs) != 2:
-#             msg = ('ProductNDP:get_lower_bound(): Not implemented yet '
-#                   'for %d components.' % len(self.Fs))
-#             raise_desc(NotImplementedError, msg)
         if len(self.Fs) == 2:
             return Product2DP_L(self.Fs, self.R, n)
         else:
@@ -52,10 +48,7 @@ class ProductNDP(WrapAMap, ApproximableDP):
         if len(self.Fs) == 2:
             return Product2DP_U(self.Fs, self.R, n)
         else:
-            return ProductNDP_U(self.Fs, self.R, n)
-#             msg = ('ProductNDP:get_upper_bound(): Not implemented yet '
-#                   'for %d components.' % len(self.Fs))
-#             raise_desc(NotImplementedError, msg)
+            return ProductNDP_U(self.Fs, self.R, n) 
          
 
 
@@ -66,8 +59,9 @@ class ProductNDP_L(WrapAMap):
         WrapAMap.__init__(self, amap, None)
         self.nl = nl
         
-    def solve_r(self, r):
-        raise NotImplementedError
+    def solve_r(self, r):  # @UnusedVariable
+        msg = 'ProductNDP_L(%s, %s):solve_r()' % (self.F, self.nl)
+        raise_desc(NotImplementedError, msg)
 
 class ProductNDP_U(WrapAMap):
     
@@ -76,8 +70,9 @@ class ProductNDP_U(WrapAMap):
         WrapAMap.__init__(self, amap, None)
         self.nl = nl
         
-    def solve_r(self, r):
-        raise NotImplementedError
+    def solve_r(self, r):  # @UnusedVariable
+        msg = 'ProductNDP_U(%s, %s):solve_r()' % (self.F, self.nl)
+        raise_desc(NotImplementedError, msg)
 
 
 class Product2DP_L(WrapAMap):
@@ -91,7 +86,7 @@ class Product2DP_L(WrapAMap):
     def solve_r(self, r):  # @UnusedVariable
         algo = InvMult2.ALGO
         mcdp_dev_warning('Not sure about this: is it L or U?')
-        options = invmultL_solve_options(F=self.R, R=self.F, f=r, n=self.nl, algo=algo)
+        options = invmultU_solve_options(F=self.R, R=self.F, f=r, n=self.nl, algo=algo)
         return self.F.Ls(options)
     
 
@@ -123,24 +118,50 @@ class ProductNRcompDP(WrapAMap, ApproximableDP):
         raise NotSolvableNeedsApprox(type(self))
     
     def get_lower_bound(self, n):
-        if len(self.Fs) != 2:
-            msg = ('ProductNRcompDP:get_lower_bound(): Not implemented yet '
-                  'for %d components.' % len(self.Fs))
-            raise_desc(NotImplementedError, msg)
-        return Product2RcompDP_L(n) 
+        if len(self.Fs) == 2:
+            return Product2RcompDP_L(n)
+        else:
+            return ProductNRcompDP_L(len(self.Fs), nl=n)
 
     def get_upper_bound(self, n):
-        if len(self.Fs) != 2:
-            msg = ('ProductNRcompDP:get_upper_bound(): Not implemented yet '
-                  'for %d components.' % len(self.Fs))
-            raise_desc(NotImplementedError, msg)
-        return Product2RcompDP_U(n) 
+        if len(self.Fs) == 2:
+            return Product2RcompDP_U(n)
+        else:
+            return ProductNRcompDP_U(len(self.Fs), nu=n) 
+    
+class ProductNRcompDP_L(WrapAMap):
+    
+    def __init__(self, n, nl):
+        R = Rcomp()
+        Fs = (R,) * n
+        amap = ProductNMap(Fs, R)
+        self.Fs = Fs
+        WrapAMap.__init__(self, amap, None)
+        self.nl = nl
+
+    def solve_r(self, f):  # @UnusedVariable
+        msg = 'ProductNRcompDP_L(%s, %s):solve_r()' % (self.Fs, self.nl)
+        raise_desc(NotImplementedError, msg)
+
+class ProductNRcompDP_U(WrapAMap):
+    
+    def __init__(self, n, nu):
+        R = Rcomp()
+        Fs = (R,) * n
+        amap = ProductNMap(Fs, R)
+        self.Fs = Fs
+        WrapAMap.__init__(self, amap, None)
+        self.nu = nu
+
+    def solve_r(self, f):  # @UnusedVariable
+        msg = 'ProductNRcompDP_U(%s, %s):solve_r()' % (self.Fs, self.nl)
+        raise_desc(NotImplementedError, msg)
     
 class Product2RcompDP_L(WrapAMap):
     
     def __init__(self, nl):
         R = Rcomp()
-        Fs = (R,) * nl
+        Fs = (R, R)
         self.nl = nl
         mcdp_dev_warning('This is not even true - it is the complicated function')
         amap = ProductNMap(Fs, R)
@@ -153,7 +174,7 @@ class Product2RcompDP_U(WrapAMap):
     
     def __init__(self, nu):
         R = Rcomp()
-        Fs = (R,) * nu
+        Fs = (R, R)
         self.nl = nu
         mcdp_dev_warning('This is not even true - it is the complicated function')
         amap = ProductNMap(Fs, R)

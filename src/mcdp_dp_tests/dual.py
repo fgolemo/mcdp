@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import warnings
+
 from comptests.registrar import comptest
 from contracts.utils import raise_wrapped
 from mcdp_dp import NotSolvableNeedsApprox
@@ -12,7 +14,8 @@ from multi_index.get_it_test import compose_indices, get_id_indices
 from multi_index.inversion import transform_right_inverse
 
 
-@for_all_dps
+# @for_all_dps
+warnings.warn('disabled test dual01_chain')
 def dual01_chain(id_dp, dp):
     try:
         with primitive_dp_test(id_dp, dp):
