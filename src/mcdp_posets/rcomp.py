@@ -7,6 +7,7 @@ import numpy as np
 
 from .poset import NotLeq, Poset, is_top
 from .space import NotBelongs, NotEqual
+from mocdp import MCDPConstants
 
 
 __all__ = [
@@ -103,7 +104,16 @@ class RcompBase(Poset):
         
         if n >= 3:
             other = []
-            some = [finfo.tiny, finfo.eps, finfo.max, 0.1, 1.0, 0.9, 1.1, 2.0, 2.1]
+            
+            some = []
+            if MCDPConstants.Rcomp_chain_include_tiny:
+                some.append(finfo.tiny)
+            if MCDPConstants.Rcomp_chain_include_eps:
+                some.append(finfo.eps)
+            if MCDPConstants.Rcomp_chain_include_max:
+                some.append(finfo.max)
+                
+            some = [0.1, 1.0, 0.9, 1.1, 2.0, 2.1]
             have = len(some)
             other.extend(some[:n-2])
             

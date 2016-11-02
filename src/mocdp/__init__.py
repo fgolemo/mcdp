@@ -52,18 +52,34 @@ except ImportError as e:
 
 # command dot -> graphviz
 
-import conf_tools
+# import conf_tools
 import decent_params
 import decent_logs
 import quickapp
 
 # some constants
 
-# Added to NamedDPs and spaces and dps
+# deprecated, used as attr for implementation spaces
 ATTRIBUTE_NDP_RECURSIVE_NAME = 'ndp_recursive_name'
+
 # added to NamedDPs
 ATTRIBUTE_NDP_MAKE_FUNCTION = 'make'
 
+# added 
 ATTR_LOAD_NAME = '__mcdplibrary_load_name'
 ATTR_LOAD_LIBNAME = '__mcdplibrary_load_libname'
+
+
+class MCDPConstants:
+    
+    Nat_chain_include_maxint = False
+    Rcomp_chain_include_tiny = False
+    Rcomp_chain_include_eps = False
+    Rcomp_chain_include_max = False
+    
+    # see also: InvMult2.ARGO
+    # see also: the other thing
+    
+
+
 

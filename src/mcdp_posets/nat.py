@@ -6,6 +6,7 @@ from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 
 from .poset import NotLeq, Poset
 from .space import NotBelongs, NotEqual
+from mocdp import MCDPConstants
 
 
 __all__ = [
@@ -77,7 +78,11 @@ class Nat(Poset):
 
     def get_test_chain(self, n):
         import sys
-        s = [0, sys.maxint]
+        s = [0]
+        
+        if MCDPConstants.Nat_chain_include_maxint:
+            s.append(sys.maxint)
+        
         f = lambda: random.randint(1, n) # xxx
         while len(s) < n - 1: # leave 1:  top 
             x = f()
@@ -98,7 +103,7 @@ class Nat(Poset):
         if isinstance(x, int):
             return '%d' % x
         elif isinstance(x, long):
-            return '%dL' % x
+            return '%dL!' % x
         else:
             if x == self.top:
                 return self.top.__repr__()
@@ -138,7 +143,7 @@ class Nat(Poset):
 # Optimization: we use these instances
 Nat_add_Nat = Nat()
 Nat_add_top = Nat_add_Nat.get_top()
-
+ 
 def Nat_add(a, b):
     """ Addition on Nat, extended for top """
     from mcdp_posets.poset import is_top
@@ -198,7 +203,6 @@ def Nat_mult_lowersets_continuous(a, b):
     if is_top(N, a) or is_top(N, b):
         return Nat_add_top
 
-    mcdp_dev_warning('catch overflow')
     assert isinstance(a, int), (a, type(a))
     assert isinstance(b, int), (b, type(b))
 
@@ -218,8 +222,6 @@ def RcompUnits_mult_lowersets_continuous(A, a, B, b, C):
 
     mcdp_dev_warning('catch overflow')
     return a * b
-
-
 
 IntBottom = "int:-inf"
 IntTop = "int:+inf"

@@ -3,7 +3,7 @@ from collections import namedtuple
 import os
 import warnings
 
-from conf_tools.utils import dir_from_package_name
+
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
@@ -312,6 +312,7 @@ def iterate_notwhere(x):
         yield k, v
 
 def get_language_css():
+    from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
     mcdp_dev_warning('TODO: remove from mcdp_web')
     package = dir_from_package_name('mcdp_web')
     fn = os.path.join(package, 'static', 'css', 'mcdp_language_highlight.css')
@@ -320,6 +321,8 @@ def get_language_css():
     return css
 
 def get_markdown_css():
+    from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
+
     package = dir_from_package_name('mcdp_web')
     fn = os.path.join(package, 'static', 'css', 'markdown.css')
     with open(fn) as f:
