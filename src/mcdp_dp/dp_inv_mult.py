@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
-from mcdp_posets import Nat, Poset, PosetProduct, UpperSet, is_top
+from mcdp_posets import Nat, Poset, PosetProduct, is_top
 from mcdp_posets.nat import Nat_mult_lowersets_continuous
 from mcdp_posets.rcomp import Rcomp_multiply_upper_topology_seq
 from mcdp_posets.utils import check_minimal
@@ -126,8 +126,8 @@ def invmultL_solve_options(F, R, f, n, algo):
     top = F.get_top()
     if f == top:
         mcdp_dev_warning('FIXME Need much more thought about this')
-        top1 = self.Rs[0].get_top()
-        top2 = self.Rs[1].get_top()
+        top1 = R[0].get_top()
+        top2 = R[1].get_top()
         s = set([(top1, 0.0), (0.0, top2)])
         return s
 
@@ -155,7 +155,6 @@ def invmultL_solve_options(F, R, f, n, algo):
         else:
             x1, x2 = generate_exp_van_der_corput_sequence(n=n - 1, C=f)
             pu = zip(x1, x2)
-            # ur = UpperSet(pu, self.R)
             assert len(pu) == n - 1, pu
 
             if do_extra_checks():

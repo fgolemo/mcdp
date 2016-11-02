@@ -282,10 +282,13 @@ def eval_MultN_ops_multi(resources,  context):
         dp = ProductNNatDP(n)
     elif isinstance(R, Rcomp):
         dp = ProductNRcompDP(len(resources))
-    else:
-        resources_types2 = [context.get_rtype(_) for _ in resources]
+    elif isinstance(R, RcompUnits):
+        resources_types2 = [context.get_rtype(_) for _ in resources2]
         dp = ProductNDP(tuple(resources_types2), R)
-    
+    else:
+        msg = 'Something wrong'
+        raise_desc(DPInternalError, msg, resources=resources, promoted=promoted, R=R)
+        
     r = create_operation(context, dp, resources,
                          name_prefix='_prod', op_prefix='_factor',
                          res_prefix='_result')
