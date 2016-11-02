@@ -331,7 +331,8 @@ def Nat_mult_antichain_Max(m):
         s.add((o1, x))
     return s
 
-class InvMult2Nat(PrimitiveDP):
+
+class InvMult2Nat(ApproximableDP):
     """
         Implements:
         
@@ -340,6 +341,8 @@ class InvMult2Nat(PrimitiveDP):
         with f,r₁,r₂ ∈ ℕ.
         
     """
+    memory_limit = 10000
+    
     @contract(Rs='tuple[2],seq[2]($Nat)', F=Nat)
     def __init__(self, F, Rs):
         if not len(Rs) == 2:
@@ -358,13 +361,33 @@ class InvMult2Nat(PrimitiveDP):
         return lf, ur
 
     def solve(self, f):
+        if is_top(self.F, f):
+            top = f
+            elements = [(top, 1), (1, top)] # XXX: to check
+            return self.R.Us(elements) 
+        
+        if f > InvMult2Nat.memory_limit:
+            msg = ('InvMult2Nat:solve(%s): This would produce' 
+                   ' an antichain of length %s.') % (f,f)
+            raise NotSolvableNeedsApprox(msg)
+            
         options = Nat_mult_antichain_Min(f)
         return self.R.Us(options)
     
+    def get_lower_bound(self, n):  # @UnusedVariable
+        msg = 'InvMult2Nat:get_lower_bound() not implemented yet'
+        raise_desc(NotImplementedError, msg)
+    
+    def get_upper_bound(self, n):  # @UnusedVariable
+        msg = 'InvMult2Nat:get_upper_bound() not implemented yet'
+        raise_desc(NotImplementedError, msg)
+        
     def solve_r(self, r):
         r1, r2 = r
         f_max = Nat_mult_lowersets_continuous(r1, r2)
         return self.F.L(f_max)
+    
+    
 
     def get_implementations_f_r(self, f, r):
         return set([(f, r)])

@@ -57,8 +57,11 @@ def try_with_approximations(id_dp, dp, test):
     dpL, dpU = get_dp_bounds(dp, nl, nu)
     
     if '_lower_' in id_dp or '_upper_' in id_dp:
-        raise Exception('Recursion detected for %r %r' %(id_dp, dp))
-        
+        msg = 'Recursion detected for %r %r' %(id_dp, dp)
+        print(msg)
+        return
+    
+    print('approx: %s -> %s, %s' % (dp, dpL, dpU))    
     test(id_dp + '_lower_%s' % nl, dpL)
     test(id_dp + '_upper_%s' % nu, dpU)
     

@@ -101,7 +101,6 @@ class ProductNRcompDP(WrapAMap, ApproximableDP):
     
 class Product2RcompDP_L(WrapAMap):
     
-    @contract(Fs='tuple[2]')
     def __init__(self, nl):
         R = Rcomp()
         Fs = (R,) * nl
@@ -115,7 +114,6 @@ class Product2RcompDP_L(WrapAMap):
 
 class Product2RcompDP_U(WrapAMap):
     
-    @contract(Fs='tuple[2]')
     def __init__(self, nu):
         R = Rcomp()
         Fs = (R,) * nu
