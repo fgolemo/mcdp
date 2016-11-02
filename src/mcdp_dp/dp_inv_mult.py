@@ -338,7 +338,7 @@ def Nat_mult_antichain_Max(m):
         # x* = ceil(f / o1)
         x =  int(np.floor(m * 1.0 / o1))
         assert x * o1 <= m
-        assert (x+1) * o1 < m
+        assert (x+1) * o1 < m, (x+1, o1, m)
         s.add((o1, x))
     return s
 
