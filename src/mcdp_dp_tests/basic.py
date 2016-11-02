@@ -56,8 +56,11 @@ def try_with_approximations(id_dp, dp, test):
     nl = nu = 5
     dpL, dpU = get_dp_bounds(dp, nl, nu)
     
-    test(id_dp + '_L%s' % nl, dpL)
-    test(id_dp + '_U%s' % nu, dpU)
+    if '_lower_' in id_dp or '_upper_' in id_dp:
+        raise Exception('Recursion detected for %r %r' %(id_dp, dp))
+        
+    test(id_dp + '_lower_%s' % nl, dpL)
+    test(id_dp + '_upper_%s' % nu, dpU)
     
     
 @for_all_dps

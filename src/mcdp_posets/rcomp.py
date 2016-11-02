@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import raise_desc
-from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
+from mocdp.exceptions import do_extra_checks, mcdp_dev_warning, DPInternalError
 import numpy as np
 
 from .poset import NotLeq, Poset, is_top
@@ -321,10 +321,26 @@ def Rcomp_multiply_upper_topology_seq(As, values, C):
         C: result
     """
     def mult2(x, y):
+        from mcdp_posets.rcomp_units import mult_table
         A, a = x
         B, b = y
-        return Rcomp_multiply_upper_topology(A, a, B, b, C)
-    return functools.reduce(mult2, zip(As, values))
+        if isinstance(A, Rcomp):
+            Y = A
+        else:
+            Y = mult_table(A, B)
+        y = Rcomp_multiply_upper_topology(A, a, B, b, Y)
+        return (Y, y) 
+    
+    ops = zip(As, values)
+    (Cobt, value) = functools.reduce(mult2, ops)
+    
+    from mcdp_posets.rcomp_units import RcompUnits
+    if isinstance(C, RcompUnits):
+        if Cobt.units != C.units:
+            msg = 'Expected %s, obtained %s.' % (C, Cobt)
+            raise_desc(DPInternalError, msg, As=As, values=values, C=C)
+            
+    return value
 
 import functools
 
