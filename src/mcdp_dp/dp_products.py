@@ -38,18 +38,46 @@ class ProductNDP(WrapAMap, ApproximableDP):
         raise NotSolvableNeedsApprox(type(self))
     
     def get_lower_bound(self, n):
-        if len(self.Fs) != 2:
-            msg = ('ProductNDP:get_lower_bound(): Not implemented yet '
-                  'for %d components.' % len(self.Fs))
-            raise_desc(NotImplementedError, msg)
-        return Product2DP_L(self.Fs, self.R, n) 
+#         if len(self.Fs) != 2:
+#             msg = ('ProductNDP:get_lower_bound(): Not implemented yet '
+#                   'for %d components.' % len(self.Fs))
+#             raise_desc(NotImplementedError, msg)
+        if len(self.Fs) == 2:
+            return Product2DP_L(self.Fs, self.R, n)
+        else:
+            return ProductNDP_L(self.Fs, self.R, n)
 
     def get_upper_bound(self, n):
-        if len(self.Fs) != 2:
-            msg = ('ProductNDP:get_upper_bound(): Not implemented yet '
-                  'for %d components.' % len(self.Fs))
-            raise_desc(NotImplementedError, msg)
-        return Product2DP_U(self.Fs, self.R, n) 
+        if len(self.Fs) == 2:
+            return Product2DP_U(self.Fs, self.R, n)
+        else:
+            return ProductNDP_U(self.Fs, self.R, n)
+#             msg = ('ProductNDP:get_upper_bound(): Not implemented yet '
+#                   'for %d components.' % len(self.Fs))
+#             raise_desc(NotImplementedError, msg)
+         
+
+
+class ProductNDP_L(WrapAMap):
+    
+    def __init__(self, Fs, R, nl):
+        amap = ProductNMap(Fs, R)
+        WrapAMap.__init__(self, amap, None)
+        self.nl = nl
+        
+    def solve_r(self, r):
+        raise NotImplementedError
+
+class ProductNDP_U(WrapAMap):
+    
+    def __init__(self, Fs, R, nl):
+        amap = ProductNMap(Fs, R)
+        WrapAMap.__init__(self, amap, None)
+        self.nl = nl
+        
+    def solve_r(self, r):
+        raise NotImplementedError
+
 
 class Product2DP_L(WrapAMap):
     
