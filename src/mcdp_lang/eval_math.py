@@ -21,6 +21,7 @@ from .helpers import create_operation, get_valuewithunits_as_resource, get_resou
 from .misc_math import inv_constant
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mocdp import MCDPConstants
 
 
 CDP = CDPLanguage
@@ -200,10 +201,11 @@ def flatten_multN(ops):
     return res
 
 
-@contract(x=CDP.MultN, wants_constant=bool)
+@contract(x=CDP.MultN, wants_constant=bool,
+          returns='$CResource|$ValueWithUnits')
 def eval_MultN(x, context, wants_constant):
     """ Raises NotConstant if wants_constant is True. """
-    from .misc_math import generic_mult_constantsN, generic_mult_table
+    from .misc_math import generic_mult_constantsN
     from .eval_constant_imp import eval_constant
 
     assert isinstance(x, CDP.MultN)
@@ -216,7 +218,6 @@ def eval_MultN(x, context, wants_constant):
     resources = []
 
     for op in ops:
-
         try:
             x = eval_constant(op, context)
             assert isinstance(x, ValueWithUnits)
@@ -236,41 +237,63 @@ def eval_MultN(x, context, wants_constant):
     # it's only resource * (c1*c2*c3*...)
     if len(resources) == 1:
         c = generic_mult_constantsN(constants)
-        return get_mult_op(context, r=resources[0], c=c)
-
+        res = get_mult_op(context, r=resources[0], c=c)
+        return res
     else:
-        # there are some resources
-        resources_types = [context.get_rtype(_) for _ in resources]
-        promoted, R = generic_mult_table(resources_types)
-
-        resources2 = []
-        for resource, P in zip(resources, promoted):
-            resources2.append(get_resource_possibly_converted(resource, P, context))
+        r = eval_MultN_ops(resources, context)
         
-        if isinstance(R, Nat):
-            n = len(resources2)
-            dp = ProductNNatDP(n)
-        elif isinstance(R, Rcomp):
-            dp = ProductNRcompDP(len(resources2))
-        else:
-            resources_types2 = [context.get_rtype(_) for _ in resources2]
-            dp = ProductNDP(tuple(resources_types2), R)
-
-        r = create_operation(context, dp, resources2,
-                             name_prefix='_prod', op_prefix='_factor',
-                             res_prefix='_result')
-
         if not constants:
             return r
         else:
             c = generic_mult_constantsN(constants)
             return get_mult_op(context, r, c)
 
+@contract(returns=CResource)
+def eval_MultN_ops(resources,  context):
+    """ Creates the Product?ops, using the strategy in MCDPConstants.force_mult_two_resources. """
+    assert len(resources) >= 2
+    
+    if MCDPConstants.force_mult_two_resources:
+        return eval_MultN_ops_onlytwo(resources,  context)
+    else:
+        return eval_MultN_ops_multi(resources, context)
+    
+@contract(returns=CResource)
+def eval_MultN_ops_onlytwo(resources,  context):
+    if len(resources) == 2:
+        return eval_MultN_ops_multi(resources, context)
+    else:
+        first = resources[0]
+        rest = eval_MultN_ops_onlytwo(resources[1:], context)
+        return eval_MultN_ops_onlytwo([first, rest],  context)
+    
+@contract(returns=CResource)
+def eval_MultN_ops_multi(resources,  context):
+    from .misc_math import  generic_mult_table
+    resources_types = [context.get_rtype(_) for _ in resources]
+    promoted, R = generic_mult_table(resources_types)
+
+    resources2 = []
+    for resource, P in zip(resources, promoted):
+        resources2.append(get_resource_possibly_converted(resource, P, context))
+
+    if isinstance(R, Nat):
+        n = len(resources)
+        dp = ProductNNatDP(n)
+    elif isinstance(R, Rcomp):
+        dp = ProductNRcompDP(len(resources))
+    else:
+        resources_types2 = [context.get_rtype(_) for _ in resources]
+        dp = ProductNDP(tuple(resources_types2), R)
+    
+    r = create_operation(context, dp, resources,
+                         name_prefix='_prod', op_prefix='_factor',
+                         res_prefix='_result')
+    return r
 
 
 @contract(r=CResource, c=ValueWithUnits)
 def get_mult_op(context, r, c):
-
     rtype = context.get_rtype(r)
 
     # Case 1: rcompunits, rcompunits
@@ -278,7 +301,6 @@ def get_mult_op(context, r, c):
         F = rtype
         R = mult_table(rtype, c.unit)
         dp = MultValueDP(F=F, R=R, unit=c.unit, value=c.value) 
-
     elif isinstance(rtype, Nat) and isinstance(c.unit, Nat):
         dp = MultValueNatDP(c.value)
     else:

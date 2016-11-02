@@ -81,33 +81,103 @@ class InvMult2U(PrimitiveDP):
         return set([(f, r)])
 
     def solve(self, f):
-        if is_top(self.F, f):
-            mcdp_dev_warning('FIXME Need much more thought about this')
-            top1 = self.Rs[0].get_top()
-            top2 = self.Rs[1].get_top()
-            s = set([(top1, top2)])
-            return self.R.Us(s)
-
-        check_isinstance(f, float)
-                
-        if f == 0.0:
-            return UpperSet(minimals=set([(0.0, 0.0)]), P=self.R)
-
-        if InvMult2.ALGO == InvMult2.ALGO_UNIFORM:
-            mcdp_dev_warning('TODO: add ALGO as parameter. ')
-            ps = samplec(self.n, f)
-        elif InvMult2.ALGO == InvMult2.ALGO_VAN_DER_CORPUT:
-            x1, x2 = generate_exp_van_der_corput_sequence(n=self.n, C=f)
-            ps = zip(x1, x2)
-        else: # pragma: no cover
-            assert False
-            
-        return UpperSet(minimals=ps, P=self.R)
+        algo=InvMult2.ALGO
+        options = invmultU_solve_options(F=self.F, R=self.R, f=f, n=self.n, algo=algo)
+        return self.R.Us(options)
     
     def solve_r(self, r):
         mcdp_dev_warning('this is not coherent with solve()')
         fmax =  Rcomp_multiply_upper_topology_seq(self.Rs, r, self.F)
         return self.F.L(fmax)
+
+
+def invmultU_solve_options(F, R, f, n, algo):
+    """ Returns a set of points in R that are on the line r1*r2=f. """
+    assert algo in [InvMult2.ALGO_UNIFORM, InvMult2.ALGO_VAN_DER_CORPUT]
+    if is_top(F, f):
+        mcdp_dev_warning('FIXME Need much more thought about this')
+        top1 = R[0].get_top()
+        top2 = R[1].get_top()
+        s = set([(top1, top2)])
+        return s
+
+    check_isinstance(f, float)
+            
+    if f == 0.0:
+        return set([(0.0, 0.0)])
+
+    if algo == InvMult2.ALGO_UNIFORM:
+        mcdp_dev_warning('TODO: add ALGO as parameter. ')
+        ps = samplec(n, f)
+    elif algo == InvMult2.ALGO_VAN_DER_CORPUT:
+        x1, x2 = generate_exp_van_der_corput_sequence(n=n, C=f)
+        ps = zip(x1, x2)
+    else: # pragma: no cover
+        assert False
+    return ps
+
+def invmultL_solve_options(F, R, f, n, algo):
+    """ Returns a set of points that are *below* r1*r2 = f """
+    assert algo in [InvMult2.ALGO_UNIFORM, InvMult2.ALGO_VAN_DER_CORPUT]
+    
+    if f == 0.0:
+        return set([(0.0, 0.0)])
+
+    top = F.get_top()
+    if f == top:
+        mcdp_dev_warning('FIXME Need much more thought about this')
+        top1 = self.Rs[0].get_top()
+        top2 = self.Rs[1].get_top()
+        s = set([(top1, 0.0), (0.0, top2)])
+        return s
+
+    if algo == InvMult2.ALGO_UNIFORM:
+        if n == 1:
+            points = [(0.0, 0.0)]
+        elif n == 2:
+            points = [(0.0, 0.0)]
+        else:
+            pu = sorted(samplec(n - 1, f), key=lambda _: _[0])
+            assert len(pu) == n - 1, (len(pu), n - 1)
+            nu = len(pu)
+
+            points = set()
+            points.add((0.0, pu[0][1]))
+            points.add((pu[-1][0], 0.0))
+            for i in range(nu - 1):
+                p = (pu[i][0], pu[i + 1][1])
+                points.add(p)
+
+    elif algo == InvMult2.ALGO_VAN_DER_CORPUT:
+
+        if n == 1:
+            points = set([(0.0, 0.0)])
+        else:
+            x1, x2 = generate_exp_van_der_corput_sequence(n=n - 1, C=f)
+            pu = zip(x1, x2)
+            # ur = UpperSet(pu, self.R)
+            assert len(pu) == n - 1, pu
+
+            if do_extra_checks():
+                check_minimal(pu, R)
+
+            nu = len(pu)
+            points = []
+            points.append((0.0, pu[0][1]))
+
+            for i in range(nu - 1):
+                p = (pu[i][0], pu[i + 1][1])
+                points.append(p)
+
+            points.append((pu[-1][0], 0.0))
+
+            points = set(points)
+    else: # pragma: no cover
+        assert False
+
+    assert len(points) == n, (n, len(points), points)
+
+    return points
 
 def samplec(n, c):
     """ Samples n points on the curve xy=c """
@@ -162,69 +232,11 @@ class InvMult2L(PrimitiveDP):
         return self.F.L(fmax)
     
     def solve(self, f):
-        if f == 0.0:
-            return  UpperSet(minimals=set([(0.0, 0.0)]), P=self.R)
-
-        top = self.F.get_top()
-        if f == top:
-            mcdp_dev_warning('FIXME Need much more thought about this')
-            top1 = self.Rs[0].get_top()
-            top2 = self.Rs[1].get_top()
-            s = set([(top1, 0.0), (0.0, top2)])
-            return self.R.Us(s)
-
-        n = self.n
-
-        if InvMult2.ALGO == InvMult2.ALGO_UNIFORM:
-            if n == 1:
-                points = [(0.0, 0.0)]
-            elif n == 2:
-                points = [(0.0, 0.0)]
-            else:
-
-                pu = sorted(samplec(n - 1, f), key=lambda _: _[0])
-                assert len(pu) == n - 1, (len(pu), n - 1)
-                nu = len(pu)
-
-                points = set()
-                points.add((0.0, pu[0][1]))
-                points.add((pu[-1][0], 0.0))
-                for i in range(nu - 1):
-                    p = (pu[i][0], pu[i + 1][1])
-                    points.add(p)
-
-
-        elif InvMult2.ALGO == InvMult2.ALGO_VAN_DER_CORPUT:
-
-            if n == 1:
-                points = set([(0.0, 0.0)])
-            else:
-                x1, x2 = generate_exp_van_der_corput_sequence(n=self.n - 1, C=f)
-                pu = zip(x1, x2)
-                # ur = UpperSet(pu, self.R)
-                assert len(pu) == self.n - 1, pu
-
-                if do_extra_checks():
-                    check_minimal(pu, self.get_res_space())
-
-                nu = len(pu)
-                points = []
-                points.append((0.0, pu[0][1]))
-
-                for i in range(nu - 1):
-                    p = (pu[i][0], pu[i + 1][1])
-                    points.append(p)
-
-                points.append((pu[-1][0], 0.0))
-
-                points = set(points)
-        else: # pragma: no cover
-            assert False
-
-        assert len(points) == self.n, (self.n, len(points), points)
-
-        return UpperSet(minimals=points, P=self.R)
-
+        algo = InvMult2.ALGO
+        options = invmultL_solve_options(F=self.F, R=self.R, f=f, n=self.n, algo=algo)
+        return self.R.Us(options)
+        
+        
 @contract(n='int,>=1', returns='tuple(*,*)')
 def generate_exp_van_der_corput_sequence(n, C=1.0, mapping_function=None):
     """

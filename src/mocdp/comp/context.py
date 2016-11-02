@@ -402,6 +402,7 @@ class Context():
     @contract(a=CResource)
     def get_rtype(self, a):
         """ Gets the type of a resource, raises DPSemanticError if not present. """
+        check_isinstance(a, CResource)
         if not a.dp in self.names:
             msg = "Cannot find design problem %r." % str(a)
             raise DPSemanticError(msg)
@@ -414,6 +415,7 @@ class Context():
     @contract(a=CFunction)
     def get_ftype(self, a):
         """ Gets the type of a function, raises DPSemanticError if not present. """
+        check_isinstance(a, CFunction)
         if not a.dp in self.names:
             msg = "Cannot find design problem %r." % str(a)
             raise DPSemanticError(msg)

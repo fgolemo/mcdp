@@ -194,6 +194,9 @@ def sample_sum_lowersets(F, R, f, n):
 
 def sample_sum_upperbound(F, R, f, nu):
     """ 
+        F = X
+        R = PosetProduct((X, X))
+        
         Returns a set of points in R on the line {(a,b) | a + b = f }.
         
         If f = Top, F = Top.

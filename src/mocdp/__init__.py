@@ -77,6 +77,13 @@ class MCDPConstants:
     Rcomp_chain_include_eps = False
     Rcomp_chain_include_max = False
     
+    
+    # only compile to graphs using two-factor multiplication for functions
+    force_mult_two_functions = True
+    # only compile to graphs using two-factor multiplication for resources
+    force_mult_two_resources = True
+    
+    
     # see also: InvMult2.ARGO
     # see also: the other thing
     

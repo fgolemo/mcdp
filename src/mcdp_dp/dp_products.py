@@ -9,6 +9,7 @@ from mcdp_posets.rcomp_units import check_mult_units_consistency_seq
 from mocdp.exceptions import mcdp_dev_warning
 
 from .dp_generic_unary import WrapAMap
+from mcdp_dp.dp_inv_plus import sample_sum_upperbound
 
 
 __all__ = [
@@ -87,8 +88,9 @@ class Product2DP_L(WrapAMap):
         WrapAMap.__init__(self, amap, None)
         self.nl = nl
         
-    def solve_r(self, r):
-        raise NotImplementedError
+    def solve_r(self, r):  # @UnusedVariable
+        msg = 'Product2DP_L:solve_r() not implemented'
+        raise_desc(NotImplementedError, msg)
 
 class Product2DP_U(WrapAMap):
     
@@ -98,9 +100,11 @@ class Product2DP_U(WrapAMap):
         WrapAMap.__init__(self, amap, None)
         self.nu = nu
         
-    def solve_r(self, r):
-        raise NotImplementedError
-    
+    def solve_r(self, r):  
+        # we want this to be pessimistic
+        options = sample_sum_upperbound(self.R, self.F, r, self.nu)
+        return self.L.Us(options)
+
 class ProductNRcompDP(WrapAMap, ApproximableDP):
     
     def __init__(self, n):

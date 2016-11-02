@@ -52,8 +52,9 @@ class WrapAMap(EmptyDP):
         
     def solve_r(self, r):  # @UnusedVariable
         if self.amap_dual is None:
-            msg = 'Map amap_dual not provided so solve_r() not implemented.' 
-            raise_desc(NotImplementedError, msg, type=type(self), dp=self,
+            msg = ('%s: Map amap_dual not provided so solve_r() '
+                   'not implemented.' % type(self).__name__)
+            raise_desc(NotImplementedError, msg, dp=self,
                        amap=self.amap)
         
         try:
