@@ -221,9 +221,13 @@ def eval_solve_r(op, context):
     r = express_value_in_isomorphic_space(r0.unit, r0.value, R)
     
     res = dp.solve_r(r)
-    LF = LowerSets(F)
-    return ValueWithUnits(res, LF)
-                                  
+    try:
+        LF = LowerSets(F)
+        return ValueWithUnits(res, LF)
+    except NotBelongs as e:
+        msg = 'Invalid result of solve_r().'
+        raise_desc(DPInternalError, msg, res=res, dp=dp.repr_long())
+                                      
 def eval_EmptySet(op, context):
     check_isinstance(op, CDP.EmptySet)
     from .eval_space_imp import eval_space

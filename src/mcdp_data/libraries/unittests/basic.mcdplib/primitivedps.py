@@ -23,14 +23,14 @@ def Product2DP_L_1():
     F2 = parse_poset('m')
     Fs = (F1, F2)
     R = parse_poset('J*m')
-    return Product2DP_L(Fs, R)
+    return Product2DP_L(Fs, R, 5)
 
 def Product2DP_U_1():
     F1 = parse_poset('J')
     F2 = parse_poset('m')
     Fs = (F1, F2)
     R = parse_poset('J*m')
-    return Product2DP_U(Fs, R)
+    return Product2DP_U(Fs, R, 5)
 
 def ProductNDP_2():
     F1 = parse_poset('J')

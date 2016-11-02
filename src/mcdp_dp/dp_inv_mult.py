@@ -42,7 +42,9 @@ class InvMult2(ApproximableDP):
         raise NotSolvableNeedsApprox(type(self))
     
     def solve_r(self, r):
-        return Rcomp_multiply_upper_topology_seq(self.Rs, r, self.F)
+        mcdp_dev_warning('this is not coherent with solve()')
+        fmax = Rcomp_multiply_upper_topology_seq(self.Rs, r, self.F)
+        return self.F.L(fmax)
 
     def get_lower_bound(self, n):
         return InvMult2L(self.F, self.Rs, n)
@@ -103,7 +105,9 @@ class InvMult2U(PrimitiveDP):
         return UpperSet(minimals=ps, P=self.R)
     
     def solve_r(self, r):
-        return Rcomp_multiply_upper_topology_seq(self.Rs, r, self.F)
+        mcdp_dev_warning('this is not coherent with solve()')
+        fmax =  Rcomp_multiply_upper_topology_seq(self.Rs, r, self.F)
+        return self.F.L(fmax)
 
 def samplec(n, c):
     """ Samples n points on the curve xy=c """
@@ -154,7 +158,8 @@ class InvMult2L(PrimitiveDP):
 
     def solve_r(self, r):
         mcdp_dev_warning('This might not be correct')
-        return Rcomp_multiply_upper_topology_seq(self.Rs, r, self.F)
+        fmax = Rcomp_multiply_upper_topology_seq(self.Rs, r, self.F)
+        return self.F.L(fmax)
     
     def solve(self, f):
         if f == 0.0:
