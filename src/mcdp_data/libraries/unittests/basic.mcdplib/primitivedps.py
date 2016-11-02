@@ -30,7 +30,7 @@ def Product2DP_U_1():
     F2 = parse_poset('m')
     Fs = (F1, F2)
     R = parse_poset('J*m')
-    return Product2DP_U(Fs, R, 5)
+    return Product2DP_U(Fs, R, 5) # 88187
 
 def ProductNDP_2():
     F1 = parse_poset('J')

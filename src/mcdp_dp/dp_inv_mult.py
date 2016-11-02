@@ -372,7 +372,6 @@ class InvMult2Nat(ApproximableDP):
             raise NotSolvableNeedsApprox(msg)
             
         options = Nat_mult_antichain_Min(f)
-        print options
         return self.R.Us(options)
     
     def get_lower_bound(self, n):  # @UnusedVariable
@@ -387,8 +386,6 @@ class InvMult2Nat(ApproximableDP):
         r1, r2 = r
         f_max = Nat_mult_lowersets_continuous(r1, r2)
         return self.F.L(f_max)
-    
-    
 
     def get_implementations_f_r(self, f, r):
         return set([(f, r)])

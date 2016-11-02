@@ -91,7 +91,14 @@ def sum_units(Fs, values, R):
         except Exception as e:  # pragma: no cover (DimensionalityError)
             raise_wrapped(Exception, e, 'some error', Fs=Fs, R=R)
 
-        res += factor * x
+        try:
+            res += factor * x
+        except FloatingPointError as e:
+            if 'overflow' in str(e):
+                res = np.inf
+                break
+            else:
+                raise
 
     if np.isinf(res):
         return R.get_top()

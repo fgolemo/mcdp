@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import functools
+
 from contracts.utils import raise_desc
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning, DPInternalError
 import numpy as np
@@ -342,7 +344,6 @@ def Rcomp_multiply_upper_topology_seq(As, values, C):
             
     return value
 
-import functools
 
 def Rcomp_multiply_upper_topology(A, a, B, b, C):
     """ 
