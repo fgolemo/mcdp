@@ -5,6 +5,7 @@ from mcdp_posets import Map, Rcomp, RcompUnits, Nat
 from mcdp_posets.poset import is_top
 from mcdp_posets.rcomp import finfo
 import numpy as np
+from mcdp_posets.nat import Nat_mult_lowersets_continuous
 
 
 __all__ = [
@@ -109,9 +110,7 @@ class SquareNatMap(Map):
         Map.__init__(self, dom, cod)
 
     def _call(self, x):
-        if is_top(self.dom, x):
-            return self.cod.get_top()
-        return x * x # XXX: overflow
+        return Nat_mult_lowersets_continuous(x, x)
     
     
 

@@ -89,17 +89,16 @@ class Nat(Poset):
 
     def __eq__(self, other):
         return isinstance(other, Nat)
-# 
-#     def __ne__(self, other):
-#         return not self.__eq__(other)
 
     def __repr__(self):
         return "ℕ" # TODO: make this configurable
-        return "N"
+        #return "N"
 
     def format(self, x):
         if isinstance(x, int):
             return '%d' % x
+        elif isinstance(x, long):
+            return '%dL' % x
         else:
             if x == self.top:
                 return self.top.__repr__()
