@@ -72,11 +72,6 @@ ATTR_LOAD_LIBNAME = '__mcdplibrary_load_libname'
 
 class MCDPConstants:
     
-    Nat_chain_include_maxint = False
-    Rcomp_chain_include_tiny = False
-    Rcomp_chain_include_eps = False
-    Rcomp_chain_include_max = False
-    
     
     # only compile to graphs using two-factor multiplication for functions
     force_mult_two_functions = True
@@ -88,5 +83,10 @@ class MCDPConstants:
     # see also: the other thing
     
 
-
+    # testing
+    Nat_chain_include_maxint = False
+    Rcomp_chain_include_tiny = False
+    Rcomp_chain_include_eps = False
+    Rcomp_chain_include_max = False
+    test_dual01_chain = True 
 

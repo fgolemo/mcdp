@@ -9,13 +9,18 @@ from mcdp_lang.parse_interface import parse_poset
 from mcdp_posets import LowerSets, UpperSets, NotBelongs, PosetProduct, Rcomp
 from mcdp_posets.utils import poset_check_chain
 from mcdp_tests.generation import for_all_dps, primitive_dp_test
-from mocdp import logger
+from mocdp import logger, MCDPConstants
 from multi_index.get_it_test import compose_indices, get_id_indices
 from multi_index.inversion import transform_right_inverse
 
 
-# @for_all_dps
-warnings.warn('disabled test dual01_chain')
+if MCDPConstants.test_dual01_chain:
+    warnings.warn('disabled test dual01_chain')
+    dec = lambda x: x
+else:
+    dec = for_all_dps
+
+@dec
 def dual01_chain(id_dp, dp):
     try:
         with primitive_dp_test(id_dp, dp):
