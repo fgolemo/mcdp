@@ -115,7 +115,6 @@ class InvMultValueMap(Map):
     def __repr__(self):
         return 'InvMultValueMap(%s->%s, %s : %s)' % (self.dom, self.cod, self.space,
                                                      self.space.format(self.value))
-        
     def _call(self, x):
         y = self._call_(x)
         #print(' %s |-> %s    (c=%s)' % (x,y,self.space.format(self.value)))
@@ -152,6 +151,9 @@ class MultValueMap(Map):
         self.unit = unit
         Map.__init__(self, dom=dom, cod=cod)
 
+    def __repr__(self):
+        return 'MultValueMap(%s)' % (self.unit.format(self.value))
+     
     def diagram_label(self):
         from mcdp_posets.rcomp_units import format_pint_unit_short
         if is_top(self.unit, self.value):

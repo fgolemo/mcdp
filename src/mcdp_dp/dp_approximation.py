@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import check_isinstance
-from mcdp_dp.dp_misc_unary import CeilDP, Floor0DP
-from mcdp_dp.dp_multvalue import MultValueDP
-from mcdp_dp.dp_series_simplification import wrap_series
 from mcdp_posets import RcompUnits, Rcomp
 from mcdp_posets.rcomp_units import R_dimensionless
+
+from .dp_misc_unary import CeilDP, Floor0DP
+from .dp_multvalue import MultValueDP
+from .dp_series_simplification import wrap_series
+
 
 __all__ = [
     'makeLinearCeilDP',
@@ -26,17 +28,17 @@ def makeLinearCeilDP(P, alpha):
     
     if isinstance(P, Rcomp):
         dps = [
-            MultValueDP(P, P, P, alpha),
-            CeilDP(P),
             MultValueDP(P, P, P, alpha_inv),
+            CeilDP(P),
+            MultValueDP(P, P, P, alpha),
         ]
         return wrap_series(P, dps)
     elif isinstance(P, RcompUnits):
         dimensionless = R_dimensionless
         dps = [
-            MultValueDP(P, P, dimensionless, alpha),
-            CeilDP(P),
             MultValueDP(P, P, dimensionless, alpha_inv),
+            CeilDP(P),
+            MultValueDP(P, P, dimensionless, alpha),
         ]
         return wrap_series(P, dps)
     else:
@@ -59,17 +61,17 @@ def makeLinearFloor0DP(P, alpha):
     
     if isinstance(P, Rcomp):
         dps = [
-            MultValueDP(P, P, P, alpha),
-            Floor0DP(P),
             MultValueDP(P, P, P, alpha_inv),
+            Floor0DP(P),
+            MultValueDP(P, P, P, alpha),
         ]
         return wrap_series(P, dps)
     elif isinstance(P, RcompUnits):
         dimensionless = R_dimensionless
         dps = [
-            MultValueDP(P, P, dimensionless, alpha),
-            Floor0DP(P),
             MultValueDP(P, P, dimensionless, alpha_inv),
+            Floor0DP(P),
+            MultValueDP(P, P, dimensionless, alpha),
         ]
         return wrap_series(P, dps)
     else:
