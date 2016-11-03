@@ -15,10 +15,10 @@ from multi_index.inversion import transform_right_inverse
 
 
 if MCDPConstants.test_dual01_chain:
+    dec = for_all_dps
+else:
     warnings.warn('disabled test dual01_chain')
     dec = lambda x: x
-else:
-    dec = for_all_dps
 
 @dec
 def dual01_chain(id_dp, dp):

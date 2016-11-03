@@ -11,10 +11,10 @@ from mocdp.comp.interfaces import NotConnected
 
 
 if MCDPConstants.test_dual01_chain:
+    dec = for_all_nameddps
+else:
     warnings.warn('disabled test ndp_dual01_chain')
     dec = lambda x: x
-else:
-    dec = for_all_nameddps
 
 @dec
 def ndp_dual01_chain(id_ndp, ndp):

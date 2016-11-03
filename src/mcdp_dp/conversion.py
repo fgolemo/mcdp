@@ -31,9 +31,8 @@ def get_conversion(A, B):
     if tu.equal(A, B):
         conversion = None
     else:
-        A_to_B, _ = tu.get_embedding(A, B)
-        conversion = Conversion(A_to_B)
-        mcdp_dev_warning('not sure')
-#         conversion = Conversion(A_to_B, B_to_A)
-
+        A_to_B, B_to_A = tu.get_embedding(A, B)
+        mcdp_dev_warning('not really sure of the semantics of this')
+        conversion = Conversion(A_to_B, B_to_A)
+        
     return conversion
