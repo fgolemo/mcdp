@@ -6,7 +6,7 @@ import os
 from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
 from pyramid.renderers import render_to_response  # @UnresolvedImport
 
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, check_isinstance
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM
@@ -140,7 +140,7 @@ class AppEditorFancyGeneric():
         nrows = min(nrows, 25)
 
         source_code = cgi.escape(source_code)
-        return {'source_code': source_code,
+        return {'source_code': unicode(source_code, 'utf-8'),
                 'realpath': realpath,
                 spec.url_variable: widget_name,
                 'rows': nrows,
@@ -151,18 +151,25 @@ class AppEditorFancyGeneric():
 
     def get_text_from_request2(self, request):
         """ Gets the 'text' field, taking care of weird
-            unicode characters from the browser. """
+            unicode characters from the browser. 
+        
+            Returns a string encoded in utf-8.
+        """
         string = request.json_body['text']
         # \xa0 is actually non-breaking space in Latin1 (ISO 8859-1), also chr(160).
         # You should replace it with a space.
         string = string.replace(u'\xa0', u' ')
 
-        try:
-            string = str(string.decode('utf-8'))
-        except UnicodeEncodeError as e:
-
-            string = string.encode('unicode_escape')
-            raise_wrapped(Exception, e, 'What', in_ascii=string)
+        # string is in unicode; we will  
+        check_isinstance(string, unicode)
+        
+        string = string.encode('utf-8')
+#         print type(string), string.__repr__()
+#         try:
+#             string = str(string.decode('utf-8'))
+#         except UnicodeEncodeError as e:
+#             string = string.encode('unicode_escape')
+#             raise_wrapped(Exception, e, 'What', in_ascii=string)
 
         return string
 

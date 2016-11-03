@@ -70,8 +70,12 @@ ATTR_LOAD_NAME = '__mcdplibrary_load_name'
 ATTR_LOAD_LIBNAME = '__mcdplibrary_load_libname'
 
 
-class MCDPConstants:
+class MCDPConstants():
+    """ Some system-wide constants """
     
+    #
+    # Compilation stage
+    #
     
     # only compile to graphs using two-factor multiplication for functions
     force_mult_two_functions = True
@@ -80,11 +84,15 @@ class MCDPConstants:
     
     force_plus_two_resources = True
     
+    force_plus_two_functions = True # currently unused (InvPlus2 -> InvPlusN)
     
-    # see also: InvMult2.ARGO
-    # see also: the other thing
+    # TODO: make algo configurable for invplus, etc. see also: InvMult2.ARGO 
     
-    # testing
+    
+    #
+    # Testing
+    #
+    
     Nat_chain_include_maxint = False
     Rcomp_chain_include_tiny = False
     Rcomp_chain_include_eps = False
@@ -92,4 +100,15 @@ class MCDPConstants:
     
     # test the correspondence between h and h*
     test_dual01_chain = False
+    
+    # TODO: add parameter to ignore Dot's failures
+    
+    #
+    # UI
+    #
+    
+    # Affects things like Nat
+    use_unicode_symbols = False
+    
+    
     

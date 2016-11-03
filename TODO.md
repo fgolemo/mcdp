@@ -43,9 +43,15 @@ Technical debt:
 - remove caching from LoopDP; make separate class
 - remove caching from Library, make separate class
 
+- T: 
+- B:crash: unicode chars in source: http://
+127.0.0.1:8080/libraries/example-catalogue/models/simple_cell/views/edit_fancy/
+
+- B: in the dp_flow pictures, the CoProduct is not expanded.
 
 --------------------
 
+- InvPlus2 -> InvPlusN
 
 - Create "add_bottom(<poset>)" and "add_top" operator. 
 

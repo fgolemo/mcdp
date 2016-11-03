@@ -82,7 +82,7 @@ class ActionConnect(ActionCreate):
         context.add_connection(con)
         executed = c.executed + [self]
         # XXX
-        forbidden = c.forbidden + set([self])
+        forbidden = c.forbidden | set([self])
 
         from mcdp_opt.partial_result import get_lower_bound_ndp
         ndp, table = get_lower_bound_ndp(context)
@@ -134,7 +134,7 @@ class ActionAddNDP(ActionCreate):
 
         executed = c.executed + [self]
         # XXX
-        forbidden = c.forbidden + set([self])
+        forbidden = c.forbidden | set([self])
 
         lower_bounds = dict(**c.lower_bounds)
 

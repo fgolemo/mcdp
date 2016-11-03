@@ -105,7 +105,6 @@ class UpperSets(Poset):
 
     def get_test_chain(self, n):
         if n >= 2:
-                
             chain = self.P.get_test_chain(n-1)
             f = lambda x: UpperSet(set([x]), self.P)
             chain = list(map(f, chain))
@@ -132,18 +131,23 @@ class UpperSets(Poset):
 
     def check_leq(self, a, b):
         if a == b:
-            return True
-        bot = self.get_bottom()
-        top = self.get_top()
-        if a == bot:
-            return True
-        if b == top:
-            return True
-        if b == bot:
-            raise NotLeq('b = my ⊥')
-
-        if a == top:
+            return # True
+        
+        a_is_top = len(a.minimals) == 0
+        b_is_top = len(b.minimals) == 0
+        
+        if b_is_top:
+            return #  True
+        if a_is_top:
             raise NotLeq('a = my ⊤')
+
+        # XXX: still might not be good, if this
+        # thing does not have a bottom
+#         bot = self.get_bottom()
+#         if a == bot:
+#             return True
+#         if b == bot:
+#             raise NotLeq('b = my ⊥')
 
         self.my_leq_(a, b)
 
@@ -224,20 +228,20 @@ class LowerSets(Poset):
     @contract(P='$Poset')
     def __init__(self, P):
         self.P = P
-        self.top = self.get_top()
-        self.bot = self.get_bottom()
-        if do_extra_checks():
-            self.belongs(self.top)
-            self.belongs(self.bot)
-            assert self.leq(self.bot, self.top)
-            assert not self.leq(self.top, self.bot)  # unless empty
+        
+#         self.top = self.get_top()
+#         self.bot = self.get_bottom()
+#         if do_extra_checks():
+#             self.belongs(self.top)
+#             self.belongs(self.bot)
+#             assert self.leq(self.bot, self.top)
+#             assert not self.leq(self.top, self.bot)  # unless empty
 
     def witness(self):
         w = self.P.witness()
         return LowerSet([w], self.P)
 
     mcdp_dev_warning('need to think about this')
-
 
     def get_bottom(self):
         maximals = self.P.get_maximal_elements()
@@ -274,14 +278,15 @@ class LowerSets(Poset):
             self.belongs(b)
         if a == b:
             return True
-        if a == self.bot:
-            return True
-        if b == self.top:
-            return True
-        if b == self.bot:
-            raise NotLeq('b = my ⊥')
-        if a == self.top:
-            raise NotLeq('a = my ⊤')
+        if False:
+            if a == self.bot:
+                return True
+            if b == self.top:
+                return True
+            if b == self.bot:
+                raise NotLeq('b = my ⊥')
+            if a == self.top:
+                raise NotLeq('a = my ⊤')
 
         self.my_leq_(a, b)
         

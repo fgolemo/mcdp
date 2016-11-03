@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_dp import FuncNotMoreThan
-from mcdp_dp import Identity
-from mcdp_dp import IdentityDP
-from mcdp_dp import makeLinearCeilDP
+from mcdp_dp import FuncNotMoreThan, Identity, IdentityDP, makeLinearCeilDP
 from mcdp_dp.dp_series_simplification import wrap_series
 from mcdp_posets import Space
 from mocdp.comp.composite import CompositeNamedDP
@@ -21,7 +18,8 @@ __all__ = ['make_approximation']
           approx_perc='float|int',
           approx_abs='float|int', approx_abs_S=Space, ndp=NamedDP,
           returns=NamedDP)
-def make_approximation(name, approx_perc, approx_abs, approx_abs_S, max_value, max_value_S, ndp):
+def make_approximation(name, approx_perc, approx_abs, approx_abs_S, 
+                       max_value, max_value_S, ndp):
     fnames = ndp.get_fnames()
     rnames = ndp.get_rnames()
 
@@ -43,7 +41,8 @@ NAME_APPROX = '_approx'
 def make_approximation_r(name, approx_perc, approx_abs, approx_abs_S,
                          max_value, max_value_S, ndp):
     R = ndp.get_rtype(name)
-    ndp_after = get_approx_dp(R, name, approx_perc, approx_abs, approx_abs_S, max_value, max_value_S)
+    ndp_after = get_approx_dp(R, name, approx_perc, approx_abs, approx_abs_S, 
+                              max_value, max_value_S)
 
     name2ndp = {NAME_ORIGINAL: ndp, NAME_APPROX: ndp_after}
     fnames = ndp.get_fnames()
@@ -118,7 +117,7 @@ def get_approx_dp(S, name, approx_perc, approx_abs, approx_abs_S, max_value,
     dps = []
     
     if max_value > 0:
-        dp_max  = FuncNotMoreThan(S, max_value_)
+        dp_max = FuncNotMoreThan(S, max_value_)
         dps.append(dp_max)
 
     if approx_abs_ > 0:
