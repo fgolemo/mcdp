@@ -154,7 +154,7 @@ def mcdplib_test_setup_nameddps(context, libname):
                 c.comp(mcdplib_assert_semantic_error_fn, libname, model_name,
                        job_id='assert_semantic_error')
             else:
-                ndp = c.comp(_load_ndp, libname, model_name, job_id='load_ndp')
+                ndp = c.comp(_load_ndp, libname, model_name, job_id='load')
 
                 for ftest in for_all_nameddps.registered:
                     c.comp(ftest, model_name, ndp)

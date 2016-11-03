@@ -261,7 +261,8 @@ def generate_exp_van_der_corput_sequence(n, C=1.0, mapping_function=None):
     logx2 = M - v2
     finfo = np.finfo(float)
 
-    eps = finfo.tiny
+    # eps = finfo.tiny # 1e-368
+    eps = finfo.eps # 1e-16
     maxi = finfo.max
     def myexp(x):
         try:

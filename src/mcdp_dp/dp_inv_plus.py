@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import check_isinstance, raise_desc
+from contracts.utils import check_isinstance, raise_desc, raise_wrapped
 from mcdp_posets import Nat, Poset, PosetProduct, RcompUnits, get_types_universe, is_top
 from mcdp_posets.nat import Nat_add
-from mcdp_posets.rcomp import Rcomp
+from mcdp_posets.rcomp import Rcomp, finfo
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 import numpy as np
 
@@ -179,15 +179,39 @@ def sample_sum_lowersets(F, R, f, n):
 
     s = []
     for o in options:
-        s.append((f * o, f * (1.0 - o)))
+        try:
+            s.append((f * o, f * (1.0 - o)))
+        except FloatingPointError as e:
+            if 'underflow' in str(e):
+                # assert f <= finfo.tiny, (f, finfo.tiny) 
+                mcdp_dev_warning('not sure about this')
+                s.append((finfo.eps, finfo.eps))
+            else:
+                raise_wrapped(FloatingPointError, e, 'error', f=f, o=o)
 
+    # the sequence s[] is ordered
+    for i in range(len(s)-1):
+        xs = [_[0] for _ in s]
+        ys = [_[1] for _ in s]
+        
+        if not xs[i] < xs[i+1]:
+            msg = 'Invalid sequence (s[%s].x = %s !< s[%s].x = %s.' % (i, xs[i],
+                                                                   i+1, xs[i+1])
+            xs2 = map(R[0].format, xs)
+            ys2 = map(R[1].format, ys)
+            raise_desc(AssertionError, msg, s=s, xs=xs, ys=ys, xs2=xs2, ys2=ys2)
+        
     options = set()
     for i in range(n):
         x = s[i + 1][0]
         y = s[i][1] # join
         
         a = R.join(s[i], s[i+1])
-        assert (x,y) == a, ((x,y), a)
+        
+        if (x,y) != a:
+            msg = 'Numerical error'
+            raise_desc(AssertionError, msg,
+                       x=x, y=y, a=a, s_i=s[i], s_i_plus=s[i+1])
         options.add((x, y))    
 
     return options
