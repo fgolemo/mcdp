@@ -12,6 +12,7 @@ from mcdp_tests.generation import for_all_source_mcdp
 from mocdp import logger
 from mocdp.exceptions import DPSemanticError
 from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
+from contracts.enabling import all_disabled
 
 
 __all__ = [
@@ -103,10 +104,15 @@ def mcdplib_run_make(mcdplib):
     cmd = ['make', 'clean', 'all']
     from system_cmd.meat import system_cmd_result
     print('$ cd %s' % cwd)
+    env = os.environ.copy()
+    if all_disabled():
+        print('Disabling contracts in environment.')
+        env['DISABLE_CONTRACTS'] = 1
     system_cmd_result(cwd, cmd,
                       display_stdout=True,
                       display_stderr=True,
-                      raise_on_error=True)
+                      raise_on_error=True,
+                      env=env)
 #
 # def belongs_to_lib(f, d):
 #     """ Returns true if the file is physically inside d

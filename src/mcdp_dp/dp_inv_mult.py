@@ -9,6 +9,7 @@ from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 import numpy as np
 
 from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
+from mocdp import MCDPConstants
 
 
 _ = Nat, Poset
@@ -259,11 +260,14 @@ def generate_exp_van_der_corput_sequence(n, C=1.0, mapping_function=None):
     M = np.log(C)
     logx1 = v2
     logx2 = M - v2
-    finfo = np.finfo(float)
+#     finfo = np.finfo(float)
 
     # eps = finfo.tiny # 1e-368
-    eps = finfo.eps # 1e-16
-    maxi = finfo.max
+#     eps = finfo.eps # 1e-16
+#     maxi = finfo.max
+    eps = MCDPConstants.inv_relations_eps 
+    maxi = 1 / eps
+     
     def myexp(x):
         try:
             return np.exp(x)
