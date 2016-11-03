@@ -9,6 +9,9 @@ from mocdp.comp.context import (Connection, get_name_for_fun_node,
     get_name_for_res_node)
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import dpwrap
+from mocdp.exceptions import DPNotImplementedError
+from mcdp_dp.dp_limit import FuncNotMoreThan
+from mcdp_dp.dp_series_simplification import wrap_series
 
 
 __all__ = ['make_approximation']
@@ -98,22 +101,26 @@ def make_approximation_f(name, approx_perc, approx_abs, approx_abs_S,
 
     return CompositeNamedDP.from_parts(name2ndp, connections, fnames, rnames)
 
-
-
 def get_approx_dp(S, name, approx_perc, approx_abs, approx_abs_S, max_value, max_value_S):
     from mcdp_posets.types_universe import express_value_in_isomorphic_space
 
     approx_abs_ = express_value_in_isomorphic_space(S1=approx_abs_S, s1=approx_abs, S2=S)
-#     max_value_ = express_value_in_isomorphic_space(S1=max_value_S, s1=max_value, S2=S)
+    max_value_ = express_value_in_isomorphic_space(S1=max_value_S, s1=max_value, S2=S)
 
     if approx_perc > 0:
-        raise NotImplementedError('Approx_perc not implemented')
-    if max_value > 0:
-        raise NotImplementedError('max_value not implemented')
+        raise_desc(DPNotImplementedError, 'Approx_perc not implemented')
+
 #     alpha = approx_perc / 100.0
     # print('alpha: %s approx_abs: %s' % (alpha, approx_abs_S.format(approx_abs_)))
 #     ccm = CombinedCeilMap(S, alpha=alpha, step=approx_abs_, max_value=max_value_)
-    dp = makeLinearCeilDP(S, approx_abs_)
+    
+    dps = [ makeLinearCeilDP(S, approx_abs_) ]
+    if max_value > 0:
+        dp_max  = FuncNotMoreThan(S, max_value_)
+        dps.insert(0, dp_max)
+    
+    dp = wrap_series(S, dps)
+    
     ndp = dpwrap(dp, name, name)
     return ndp
 

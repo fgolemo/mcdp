@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_posets import LowerSet, NotBelongs, Poset, PosetProduct, UpperSet
-from mocdp.exceptions import do_extra_checks
+from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 
 from .primitive import PrimitiveDP
 
@@ -11,7 +11,51 @@ _ = Poset
 __all__ = [
     'Limit',
     'LimitMaximals',
+    'FuncNotMoreThan',
 ]
+
+class FuncNotMoreThan(PrimitiveDP):
+    """
+        Checks that f ≼ limit
+        
+        f ⟼   {f},  if f ≼ limit
+                ø,    otherwise
+        
+        h* : r  ⟼ r
+                
+    """
+    @contract(F='$Poset')
+    def __init__(self, F, limit):
+        F.belongs(limit)
+        self.limit = limit
+        R = F
+        I = F
+        PrimitiveDP.__init__(self, F=F, R=R, I=I)
+
+    def evaluate(self, i):
+        mcdp_dev_warning('what should we do if it is not feasible?')
+        if self.F.leq(i, self.limit):
+            rs = self.R.U(i)
+            fs = self.F.L(i)
+        else:
+            rs = self.R.Us(set([]))
+            fs = self.F.Ls(set([]))
+        return fs, rs
+
+    def solve(self, f):
+        if self.F.leq(f, self.limit):
+            return self.R.U(f)
+        else:
+            empty = self.R.Us(set())
+            return empty
+        
+    def solve_r(self, r):  # @UnusedVariable
+        return self.F.L(self.limit)
+        
+    def __repr__(self):
+        return 'FuncNotMoreThan(%s)' % (self.F.format(self.limit))
+
+    
 
 class Limit(PrimitiveDP):
     """
