@@ -65,7 +65,7 @@ def make_approximation_r(name, approx_perc, approx_abs, approx_abs_S,
         rn_name = get_name_for_res_node(rn)
         name2ndp[rn_name] = rn_ndp
         if rn == name:
-            connections.appe3nd(Connection(NAME_APPROX, rn, rn_name, rn))
+            connections.append(Connection(NAME_APPROX, rn, rn_name, rn))
         else:
             connections.append(Connection(NAME_ORIGINAL, rn, rn_name, rn))
 
