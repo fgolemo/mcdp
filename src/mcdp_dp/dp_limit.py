@@ -4,6 +4,7 @@ from mcdp_posets import LowerSet, NotBelongs, Poset, PosetProduct, UpperSet
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 
 from .primitive import PrimitiveDP
+from mcdp_dp.primitive import NotFeasible
 
 
 _ = Poset
@@ -42,6 +43,12 @@ class FuncNotMoreThan(PrimitiveDP):
             fs = self.F.Ls(set([]))
         return fs, rs
 
+    def get_implementations_f_r(self, f, r):
+        if self.F.leq(f, r) and self.F.leq(f, self.limit):
+            return set([f])
+        else:
+            raise NotFeasible()
+        
     def solve(self, f):
         if self.F.leq(f, self.limit):
             return self.R.U(f)
