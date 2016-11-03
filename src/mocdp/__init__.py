@@ -78,15 +78,18 @@ class MCDPConstants:
     # only compile to graphs using two-factor multiplication for resources
     force_mult_two_resources = True
     
+    force_plus_two_resources = True
+    
     
     # see also: InvMult2.ARGO
     # see also: the other thing
     
-
     # testing
     Nat_chain_include_maxint = False
     Rcomp_chain_include_tiny = False
     Rcomp_chain_include_eps = False
     Rcomp_chain_include_max = False
-    test_dual01_chain = True 
-
+    
+    # test the correspondence between h and h*
+    test_dual01_chain = False
+    

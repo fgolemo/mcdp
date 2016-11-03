@@ -8,8 +8,8 @@ from mocdp.exceptions import mcdp_dev_warning
 
 from .dp_generic_unary import WrapAMap
 from .dp_inv_mult import Nat_mult_antichain_Max, InvMult2, invmultL_solve_options
+from .dp_inv_mult import invmultU_solve_options
 from .primitive import NotSolvableNeedsApprox, ApproximableDP
-from mcdp_dp.dp_inv_mult import invmultU_solve_options
 
 
 __all__ = [
@@ -167,8 +167,12 @@ class Product2RcompDP_L(WrapAMap):
         amap = ProductNMap(Fs, R)
         WrapAMap.__init__(self, amap, None)
         
-    def solve_r(self, r):
-        raise NotImplementedError
+    def solve_r(self, r):  # @UnusedVariable
+        mcdp_dev_warning('Not sure about this')
+        algo = InvMult2.ALGO
+        options = invmultU_solve_options(F=self.R, R=self.F, f=r, n=self.nl, algo=algo)
+        return self.F.Ls(options)
+    
 
 class Product2RcompDP_U(WrapAMap):
     
@@ -180,9 +184,12 @@ class Product2RcompDP_U(WrapAMap):
         amap = ProductNMap(Fs, R)
         WrapAMap.__init__(self, amap, None)
         
-    def solve_r(self, r):
-        raise NotImplementedError
-    
+    def solve_r(self, r):  # @UnusedVariable
+        mcdp_dev_warning('Not sure about this')
+        algo = InvMult2.ALGO
+        options = invmultL_solve_options(F=self.R, R=self.F, f=r, n=self.nl, algo=algo)
+        return self.F.Ls(options)
+
     
 class ProductNNatDP(WrapAMap):
     """
@@ -201,3 +208,5 @@ class ProductNNatDP(WrapAMap):
         assert self.n == 2
         options = Nat_mult_antichain_Max(r)
         return self.F.Ls(options)
+    
+

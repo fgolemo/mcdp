@@ -427,58 +427,76 @@ def eval_PlusN_(constants, resources, context):
             return resources[0]
     else:
         # there are some resources
-        resources_types = [context.get_rtype(_) for _ in resources]
 
-        target_int = Int()
-        tu = get_types_universe()
-        def castable_to_int(_):
-            return tu.leq(_, target_int)
-
-        def exactly_Rcomp_or_Nat(x):
-            return exactly_Rcomp(x) or isinstance(x, Nat)
-            
-        def exactly_Rcomp(x):
-            return isinstance(x, Rcomp)
-
-        if all(exactly_Rcomp(_) for _ in resources_types):
-            n = len(resources_types)
-            dp = SumNRcompDP(n)
-        elif all(isinstance(_, RcompUnits) for _ in resources_types):
-            # addition between floats
-            R = resources_types[0]
-            Fs = tuple(resources_types)
-            try:
-                sum_dimensionality_works(Fs, R)
-            except ValueError:
-                msg = ''
-                for r, rt in zip(resources, resources_types):
-                    msg += '- %s has type %s\n' % (r, rt)
-                raise_desc(DPSemanticError, 'Incompatible units:\n%s' % msg)
-
-            dp = SumNDP(Fs, R)
-        elif all(isinstance(_, Nat) for _ in resources_types):
-            # natural number
-            dp = SumNNatDP(len(resources))
-        elif all(castable_to_int(_) for _ in resources_types):
-            # XXX cast
-            dp = SumNIntDP(len(resources))
-        elif all(exactly_Rcomp_or_Nat(_) for _ in resources_types):
-            resources = [get_resource_possibly_converted(_, Rcomp(), context)
-                         for _ in resources]
-            dp = SumNRcompDP(len(resources))
-        else:
-            msg = 'Cannot find sum operator for combination of types.'
-            raise_desc(DPInternalError, msg, resources_types=resources_types)
-
-        r = create_operation(context, dp, resources,
-                             name_prefix='_sum', op_prefix='_term',
-                             res_prefix='_result')
-
+        r =  eval_PlusN_ops(resources, context) 
         if not constants:
             return r
         else:
             c = plus_constantsN(constants)
             return get_plus_op(context, r=r, c=c)
+
+
+def eval_PlusN_ops(resources, context):
+    if MCDPConstants.force_plus_two_resources:
+        return eval_PlusN_ops_two(resources, context)
+    else:
+        return eval_PlusN_ops_multi(resources, context)
+
+def eval_PlusN_ops_two(resources, context):
+    if len(resources) == 2:
+        return eval_PlusN_ops_multi(resources, context)
+    else:
+        first = resources[0]
+        rest = eval_PlusN_ops_multi(resources[1:], context)
+        return eval_PlusN_ops_multi([first, rest], context) 
+        
+def eval_PlusN_ops_multi(resources, context):
+    resources_types = [context.get_rtype(_) for _ in resources]
+    target_int = Int()
+    tu = get_types_universe()
+    def castable_to_int(_):
+        return tu.leq(_, target_int)
+
+    def exactly_Rcomp_or_Nat(x):
+        return exactly_Rcomp(x) or isinstance(x, Nat)
+        
+    def exactly_Rcomp(x):
+        return isinstance(x, Rcomp)
+
+    if all(exactly_Rcomp(_) for _ in resources_types):
+        n = len(resources_types)
+        dp = SumNRcompDP(n)
+    elif all(isinstance(_, RcompUnits) for _ in resources_types):
+        # addition between floats
+        R = resources_types[0]
+        Fs = tuple(resources_types)
+        try:
+            sum_dimensionality_works(Fs, R)
+        except ValueError:
+            msg = ''
+            for r, rt in zip(resources, resources_types):
+                msg += '- %s has type %s\n' % (r, rt)
+            raise_desc(DPSemanticError, 'Incompatible units:\n%s' % msg)
+
+        dp = SumNDP(Fs, R)
+    elif all(isinstance(_, Nat) for _ in resources_types):
+        # natural number
+        dp = SumNNatDP(len(resources))
+    elif all(castable_to_int(_) for _ in resources_types):
+        # XXX cast
+        dp = SumNIntDP(len(resources))
+    elif all(exactly_Rcomp_or_Nat(_) for _ in resources_types):
+        resources = [get_resource_possibly_converted(_, Rcomp(), context)
+                     for _ in resources]
+        dp = SumNRcompDP(len(resources))
+    else:
+        msg = 'Cannot find sum operator for combination of types.'
+        raise_desc(DPInternalError, msg, resources_types=resources_types)
+
+    r = create_operation(context, dp, resources,
+                         name_prefix='_sum', op_prefix='_term',
+                         res_prefix='_result')
+    return r
 
 
 @contract(r=CResource, c=ValueWithUnits)
