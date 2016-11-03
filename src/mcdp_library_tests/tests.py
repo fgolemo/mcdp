@@ -103,11 +103,14 @@ def mcdplib_run_make(mcdplib):
     cwd = mcdplib
     cmd = ['make', 'clean', 'all']
     from system_cmd.meat import system_cmd_result
-    print('$ cd %s' % cwd)
+    logger.debug('$ cd %s' % cwd)
     env = os.environ.copy()
     if all_disabled():
-        print('Disabling contracts in environment.')
-        env['DISABLE_CONTRACTS'] = 1
+        env['DISABLE_CONTRACTS'] = '1'
+        msg = ('Disabling contracts in environment by adding '
+               'DISABLE_CONTRACTS=%r.' % env['DISABLE_CONTRACTS'])
+        logger.debug(msg)
+        
     system_cmd_result(cwd, cmd,
                       display_stdout=True,
                       display_stderr=True,
