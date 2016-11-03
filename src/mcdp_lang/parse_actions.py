@@ -20,17 +20,7 @@ from .utils_lists import make_list
 
 
 CDP = CDPLanguage
-
-# 
-# def decorate_add_where(f):
-#     def f2(r, context):
-#         where = r.where
-#         try:
-#             return f(r, context)
-#         except MCDPExceptionWithWhere as e:
-#             _, _, tb = sys.exc_info()
-#             raise_with_info(e, where, nice_stack(tb))
-#     return f2
+ 
 
 @decorator
 def decorate_add_where(f, *args, **kwargs):
@@ -154,14 +144,14 @@ def divide_parse_action(tokens):
     res = CDP.Divide(l, where=l.where)
     return res
 
-@parse_action
-@wheredecorator
-def coprod_parse_action(tokens):
-    tokens = list(tokens[0])
-    l = make_list(tokens)
-    assert l.where.character_end is not None
-    res = CDP.Coproduct(l, where=l.where)
-    return res
+# @parse_action
+# @wheredecorator
+# def coprod_parse_action(tokens):
+#     tokens = list(tokens[0])
+#     l = make_list(tokens)
+#     assert l.where.character_end is not None
+#     res = CDP.Coproduct(l, where=l.where)
+#     return res
 
 @parse_action
 @wheredecorator

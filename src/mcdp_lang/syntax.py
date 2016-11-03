@@ -268,6 +268,7 @@ class Syntax():
                                    lambda t: 
                                    CDP.ProductWithLabels(keyword=t[0],
                                                          entries=make_list(t[1:])))
+    
     COPRODUCT = keyword('coproduct', CDP.SpaceCoproductKeyword)
     space_coproduct_label = sp(get_idn(), lambda t: CDP.ProductWithLabelsLabel(t[0]))
     space_coproduct_entry = space_product_label + SCOLON + space

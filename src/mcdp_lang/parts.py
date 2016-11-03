@@ -65,8 +65,8 @@ class CDPLanguage():
     RValueMinusN = namedtuplewhere('RValueMinusN', 'ops')
     FValueMinusN = namedtuplewhere('FValueMinusN', 'ops')
     Divide = namedtuplewhere('Divide', 'ops')
-    # all constants
-    Coproduct = namedtuplewhere('Coproduct', 'ops')
+    
+#     Coproduct = namedtuplewhere('Coproduct', 'ops')
 
     # elements: all strings, coproducts
     CoproductWithNamesChooseKeyword = namedtuplewhere('CoproductWithNamesChooseKeyword', 'keyword')
