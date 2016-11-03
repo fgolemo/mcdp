@@ -1,5 +1,5 @@
  # mcdp-plot --cache --plots ndp_graph_enclosed -d . duckiebot1
- mcdp {
+mcdp {
   dagu_chassis = instance `DaguChassis
   battery_ravpower = instance `BatteryRavpower
   buffalo = instance `BuffaloAccessPoint
@@ -78,14 +78,15 @@
 
   fit.payload <= dagu_chassis.payload_top
 
-  position = instance mcdp {
+  position = instance template mcdp {
     requires led1 [`LEDBlinking]
     requires led2 [`LEDBlinking]
     requires led3 [`LEDBlinking]
     requires led4 [`LEDBlinking]
     provides position_signal [`DuckiebotPositionSignal]
   }
-  communication = instance mcdp {
+  communication = instance template 
+mcdp {
     requires led [`LEDBlinking]
     provides intersection_signal [`DuckiebotIntersectionSignal]
   }
@@ -145,6 +146,7 @@
   ignore out3 provided by dc_hat
   ignore out4 provided by dc_hat
  
+  ignore rb_id required by dagu_chassis
   requires budget_platform >= (
      budget required by dagu_chassis +
      budget required by battery_ravpower + 

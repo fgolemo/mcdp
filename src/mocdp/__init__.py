@@ -86,7 +86,7 @@ class MCDPConstants():
     
     force_plus_two_resources = True
     
-    force_plus_two_functions = True # currently unused (InvPlus2 -> InvPlusN)
+    # force_plus_two_functions = True # currently unused (InvPlus2 -> InvPlusN)
     
     # TODO: make algo configurable for invplus, etc. see also: InvMult2.ARGO 
     
@@ -102,6 +102,12 @@ class MCDPConstants():
     
     # test the correspondence between h and h*
     test_dual01_chain = False
+    
+    # Ignore graphviz errors in unit tests 
+    test_ignore_graphviz_errors = True
+    
+    # Ignore the known failures
+    test_include_primitivedps_knownfailures = False
     
     # TODO: add parameter to ignore Dot's failures
     

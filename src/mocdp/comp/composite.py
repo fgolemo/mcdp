@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import sys
+
 from contracts import contract
 from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
@@ -130,7 +132,7 @@ class CompositeNamedDP(NamedDP):
             self.check_fully_connected()
         except NotConnected as e:
             msg = 'Cannot abstract because not all subproblems are connected.'
-            raise_wrapped(DPSemanticError, e, msg, compact=True)
+            raise_wrapped(DPSemanticError, e, msg, exc=sys.exc_info(), compact=True)
 
         from mocdp.comp.composite_abstraction import cndp_abstract
         res = cndp_abstract(self)

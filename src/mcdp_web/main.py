@@ -280,6 +280,9 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
             current_value = None
 
 
+        def natural_sorted(seq):
+            return sorted(seq, key=lambda s: s.lower())
+
         current_library = self.get_current_library_name(request)
         library = self.get_library(request)
 
@@ -304,7 +307,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
             d['documents'].append(desc)
 
         d['models'] = []
-        for m in sorted(models):
+        
+        for m in natural_sorted(models):
             is_current = m == current_model
 
             url = self.get_lmv_url(library=current_library,
@@ -318,7 +322,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         templates = library.list_templates()
         d['templates'] = []
-        for t in sorted(templates):
+        for t in natural_sorted(templates):
             is_current = (t == current_template)
 
             url = self.get_lib_template_view_url(library=current_library,
@@ -331,20 +335,18 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         posets = library.list_posets()
         d['posets'] = []
-        for p in sorted(posets):
+        for p in natural_sorted(posets):
             is_current = (p == current_poset)
             url = self.get_lpv_url(library=current_library,
                                    poset=p,
                                    view='syntax')
-
-#             url = '/libraries/%s/posets/%s/views/edit_fancy/' % (current_library, p)
             name = "Poset: %s" % p
             desc = dict(name=name, url=url, current=is_current)
             d['posets'].append(desc)
 
         values = library.list_values()
         d['values'] = []
-        for v in values:
+        for v in natural_sorted(values):
             is_current = (v == current_value)
             url = '/libraries/%s/values/%s/views/edit_fancy/' % (current_library, v)
             name = "Value: %s" % v
@@ -369,7 +371,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         libraries = self.list_libraries()
 
         d['libraries'] = []
-        for l in libraries:
+        for l in natural_sorted(libraries):
             is_current = l == current_library
             url = '/libraries/%s/' % l
             name = "Library: %s" % l

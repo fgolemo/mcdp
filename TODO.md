@@ -32,10 +32,17 @@ On hold:
 Discarded:
 (*) Feature-parity with new Loop2, including normal transform - on hold 
 
+- B: > NotImplementedError: SumNLDP:solve_r: Cannot invert more than two terms.
+Write "details mcdplib-actuation-ndp-duckiebot_sol00-ndp_check_solve_r_chain" to inspect the error.
+  
+
+- implement solve-r 
+
+- Introduce "Ignore" blocks, so that they can get their own icon (terminator)
+- performance: duckiebot_sol00 is veeery slow. Is it because we are doing "ignoring"
 
 Technical debt:
 
-- revise the implementation of subtraction, done very quickly
 - 'ignore resources' should modify the diagram, not create a wrapper.
 - remove all the symlinks
 
@@ -48,6 +55,10 @@ Technical debt:
 127.0.0.1:8080/libraries/example-catalogue/models/simple_cell/views/edit_fancy/
 
 - B: in the dp_flow pictures, the CoProduct is not expanded.
+
+
+- F: color the constants to reflect whether they are funcs or resources
+- F: automatically make the constant into a new function or resource
 
 --------------------
 

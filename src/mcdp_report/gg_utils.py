@@ -11,7 +11,7 @@ import traceback
 from bs4 import BeautifulSoup
 
 from contracts import contract
-from mocdp import logger
+from mocdp import logger, MCDPConstants
 from mocdp.exceptions import mcdp_dev_warning
 import networkx as nx  # @UnresolvedImport
 from reprep.constants import MIME_PDF, MIME_PLAIN, MIME_PNG, MIME_SVG
@@ -142,9 +142,10 @@ def gg_figure(r, name, ggraph, do_png=True, do_pdf=True, do_svg=True,
                         u = unicode(s, 'utf-8')
                         ff.write(u)
         except CmdException:
-            if True:
+            if MCDPConstants.test_ignore_graphviz_errors:
                 mcdp_dev_warning('suppressing errors from graphviz')
-                logger.error('Graphivz failed')
+                logger.error('Graphivz failed, but I will ignore it '
+                             'because of MCDPConstants.test_ignore_graphviz_errors.')
             else:
                 raise
 

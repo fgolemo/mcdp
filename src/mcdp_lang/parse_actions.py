@@ -46,7 +46,7 @@ def decorate_add_where(f, *args, **kwargs):
 @contextmanager
 def add_where_information(where):
     """ Adds where field to DPSyntaxError or DPSemanticError thrown by code. """
-    active = False
+    active = True
     if not active:
         logger.debug('Note: Error tracing disabled in add_where_information().')
         

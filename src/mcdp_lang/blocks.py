@@ -34,12 +34,18 @@ def get_missing_connections(context):
 def check_missing_connections(context):
     """ Checks that all resources and functions are connected. """
 
+    def xsorted(x):
+        return sorted(x)
+    
     unconnected_fun, unconnected_res = get_missing_connections(context)
 
     s = ""
     if unconnected_fun:
         s += "There are some unconnected functions:"
-        for n, fn in unconnected_fun:
+        
+        
+        
+        for n, fn in xsorted(unconnected_fun):
             s += '\n- function %r of dp %r' % (fn, n)
             if False:
                 msg = 'One way to fix this is to add an explicit function:\n'
@@ -55,7 +61,7 @@ def check_missing_connections(context):
 
     if unconnected_res:
         s += "\nThere are some unconnected resources:"
-        for n, rn in unconnected_res:
+        for n, rn in xsorted(unconnected_res):
             s += '\n- resource %s of dp %r' % (rn, n)
             if False:
                 msg = 'One way to fix this is to add an explicit resource:\n'
