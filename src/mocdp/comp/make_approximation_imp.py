@@ -113,10 +113,14 @@ def get_approx_dp(S, name, approx_perc, approx_abs, approx_abs_S, max_value, max
 #     alpha = approx_perc / 100.0
     # print('alpha: %s approx_abs: %s' % (alpha, approx_abs_S.format(approx_abs_)))
     
-    dps = [ makeLinearCeilDP(S, approx_abs_) ]
+    dps = [ ]
+    
     if max_value > 0:
         dp_max  = FuncNotMoreThan(S, max_value_)
-        dps.insert(0, dp_max)
+        dps.append(dp_max)
+
+    if approx_abs_ > 0:
+        dps.append(makeLinearCeilDP(S, approx_abs_))
     
     dp = wrap_series(S, dps)
     
