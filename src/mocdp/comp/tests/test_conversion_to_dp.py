@@ -1,13 +1,22 @@
 # -*- coding: utf-8 -*-
+import warnings
+
 from mcdp_dp.primitive import NotSolvableNeedsApprox
+from mcdp_dp_tests.basic import check_solve_r_chain, check_solve_f_chain
 from mcdp_dp_tests.dual import dual01_chain
 from mcdp_posets import UpperSets
 from mcdp_tests.generation import for_all_nameddps
+from mocdp import MCDPConstants
 from mocdp.comp.interfaces import NotConnected
-from mcdp_dp_tests.basic import check_solve_r_chain, check_solve_f_chain
 
 
-@for_all_nameddps
+if MCDPConstants.test_dual01_chain:
+    warnings.warn('disabled test ndp_dual01_chain')
+    dec = lambda x: x
+else:
+    dec = for_all_nameddps
+
+@dec
 def ndp_dual01_chain(id_ndp, ndp):
     if '_inf' in id_ndp:
         # plusinvnat3b_inf

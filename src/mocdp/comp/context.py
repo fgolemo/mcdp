@@ -10,6 +10,7 @@ from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.comp.wrap import dpwrap
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+from mcdp_posets.types_universe import express_value_in_isomorphic_space
 
 
 _ = logger
@@ -46,6 +47,10 @@ class ValueWithUnits():
 
     def __repr__(self):
         return 'ValueWithUnits(%r, %r)' % (self.value, self.unit)
+    
+    def cast_value(self, P):
+        """ Returns the value cast in the space P. """ 
+        return express_value_in_isomorphic_space(self.unit, self.value, P)
 
 def get_name_for_fun_node(name):
     return '_fun_%s' % name

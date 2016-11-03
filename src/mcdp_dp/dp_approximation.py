@@ -1,29 +1,16 @@
 # -*- coding: utf-8 -*-
-import math
-
 from contracts.utils import check_isinstance
-from mcdp_dp.dp_generic_unary import WrapAMap
-from mcdp_posets import Map, MapNotDefinedHere, RcompUnits
-from mcdp_posets.rcomp import finfo, Rcomp
-from mocdp.comp.wrap import dpwrap
-from mocdp.exceptions import mcdp_dev_warning
-from contracts import contract
+from mcdp_dp.dp_misc_unary import CeilDP, Floor0DP
 from mcdp_dp.dp_multvalue import MultValueDP
-from mcdp_dp.dp_misc_unary import CeilDP
 from mcdp_dp.dp_series_simplification import wrap_series
+from mcdp_posets import RcompUnits, Rcomp
 from mcdp_posets.rcomp_units import R_dimensionless
 
+__all__ = [
+    'makeLinearCeilDP',
+    'makeLinearFloor0DP',
+]
 
-    
-    
-@contract(returns=Map)
-def makeLinearCeilMap(P, alpha):
-    check_isinstance(P, (Rcomp, RcompUnits))
-    if alpha <=0:
-        raise ValueError(alpha)
-    
-    
-    
 def makeLinearCeilDP(P, alpha):
     """
         Implements the approximation:
@@ -33,13 +20,15 @@ def makeLinearCeilDP(P, alpha):
     if alpha <= 0:
         raise ValueError(alpha)
     
+    alpha_inv = 1.0/alpha
+    
     check_isinstance(P, (Rcomp, RcompUnits))
     
     if isinstance(P, Rcomp):
         dps = [
             MultValueDP(P, P, P, alpha),
             CeilDP(P),
-            MultValueDP(P, P, P, 1.0/alpha),
+            MultValueDP(P, P, P, alpha_inv),
         ]
         return wrap_series(P, dps)
     elif isinstance(P, RcompUnits):
@@ -47,11 +36,45 @@ def makeLinearCeilDP(P, alpha):
         dps = [
             MultValueDP(P, P, dimensionless, alpha),
             CeilDP(P),
-            MultValueDP(P, P, dimensionless, 1.0/alpha),
+            MultValueDP(P, P, dimensionless, alpha_inv),
         ]
         return wrap_series(P, dps)
     else:
         assert False, P
+
+def makeLinearFloor0DP(P, alpha):
+    """
+        Implements the approximation:
+        
+            y >= ( alpha * floor0(x) / alpha) )
+            
+        where floor0 disagrees with floor on integers.
+    """
+    if alpha <= 0:
+        raise ValueError(alpha)
+    
+    alpha_inv = 1.0/alpha
+    
+    check_isinstance(P, (Rcomp, RcompUnits))
+    
+    if isinstance(P, Rcomp):
+        dps = [
+            MultValueDP(P, P, P, alpha),
+            Floor0DP(P),
+            MultValueDP(P, P, P, alpha_inv),
+        ]
+        return wrap_series(P, dps)
+    elif isinstance(P, RcompUnits):
+        dimensionless = R_dimensionless
+        dps = [
+            MultValueDP(P, P, dimensionless, alpha),
+            Floor0DP(P),
+            MultValueDP(P, P, dimensionless, alpha_inv),
+        ]
+        return wrap_series(P, dps)
+    else:
+        assert False, P
+
 
 # CombinedCeilDP
 # class LinearCeil():
@@ -164,35 +187,35 @@ def makeLinearCeilDP(P, alpha):
 #         y = self.f2(xx)
 #         return y
 
-
-class FloorStepMap(Map):
-
-    def __init__(self, S, step):
-        check_isinstance(S, RcompUnits)
-        Map.__init__(self, dom=S, cod=S)
-        self.step = step
-
-    def __repr__(self):
-        return 'FloorStep(%s)' % self.dom.format(self.step)
-
-    def _call(self, x):
-        top = self.dom.get_top()
-        if self.dom.equal(top, x):
-            return top
-
-        assert isinstance(x, float)
-
-        try:
-            m = x / self.step
-        except FloatingPointError as e:
-            assert 'overflow' in str(e)
-            m = finfo.max
-
-        n = math.floor(m)
-        y = n * self.step
-        return y
-
-class FloorStepDP(WrapAMap):
-    def __init__(self, S, step):
-        amap = FloorStepMap(S, step)
-        WrapAMap.__init__(self, amap)
+# 
+# class FloorStepMap(Map):
+# 
+#     def __init__(self, S, step):
+#         check_isinstance(S, RcompUnits)
+#         Map.__init__(self, dom=S, cod=S)
+#         self.step = step
+# 
+#     def __repr__(self):
+#         return 'FloorStep(%s)' % self.dom.format(self.step)
+# 
+#     def _call(self, x):
+#         top = self.dom.get_top()
+#         if self.dom.equal(top, x):
+#             return top
+# 
+#         assert isinstance(x, float)
+# 
+#         try:
+#             m = x / self.step
+#         except FloatingPointError as e:
+#             assert 'overflow' in str(e)
+#             m = finfo.max
+# 
+#         n = math.floor(m)
+#         y = n * self.step
+#         return y
+# 
+# class FloorStepDP(WrapAMap):
+#     def __init__(self, S, step):
+#         amap = FloorStepMap(S, step)
+#         WrapAMap.__init__(self, amap)

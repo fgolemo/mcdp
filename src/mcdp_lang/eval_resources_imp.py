@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc
-from mcdp_dp.dp_approximation import FloorStepDP, makeLinearCeilDP
+from contracts.utils import raise_desc, raise_wrapped
+from mcdp_dp.dp_approximation import  makeLinearCeilDP, \
+    makeLinearFloor0DP
 from mcdp_dp.dp_plus_value import PlusValueDP
 from mcdp_dp.dp_uncertain import UncertainGate
 from mcdp_lang.parse_actions import decorate_add_where
@@ -140,16 +141,16 @@ def eval_rvalue_approx_u(r, context):
     tu = get_types_universe()
     try:
         tu.check_leq(step.unit, R)
-    except NotLeq:
+    except NotLeq as e:
         msg = ('The step is specified in a unit (%s), which is not compatible '
                'with the resource (%s).' % (step.unit, R))
-        raise_desc(DPSemanticError, msg)
+        raise_wrapped(DPSemanticError, e, msg, compact=True)
 
-    stepu = express_value_in_isomorphic_space(S1=step.unit, s1=step.value, S2=R)
+    stepu = step.cast_value(R)
     if stepu == 0.0:
         return r1
 
-    dp = FloorStepDP(R, step=stepu)
+    dp = makeLinearFloor0DP(R, stepu)
 
     r2 = create_operation(context, dp=dp, resources=[r1],
                                name_prefix='_approx', op_prefix='_toapprox',

@@ -112,7 +112,6 @@ def get_approx_dp(S, name, approx_perc, approx_abs, approx_abs_S, max_value, max
 
 #     alpha = approx_perc / 100.0
     # print('alpha: %s approx_abs: %s' % (alpha, approx_abs_S.format(approx_abs_)))
-#     ccm = CombinedCeilMap(S, alpha=alpha, step=approx_abs_, max_value=max_value_)
     
     dps = [ makeLinearCeilDP(S, approx_abs_) ]
     if max_value > 0:
