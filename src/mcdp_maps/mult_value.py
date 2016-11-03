@@ -5,8 +5,8 @@ from mcdp_posets import Map, Nat, RcompUnits, is_top
 from mcdp_posets.nat import Nat_mult_uppersets_continuous, \
     Nat_mult_lowersets_continuous, RcompUnits_mult_lowersets_continuous
 from mcdp_posets.rcomp import Rcomp_multiply_upper_topology, Rcomp
-import numpy as np
 from mcdp_posets.rcomp_units import check_mult_units_consistency
+import numpy as np
 
 
 __all__ = [

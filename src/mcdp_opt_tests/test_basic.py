@@ -17,6 +17,7 @@ from mcdp_report.gg_ndp import gvgen_from_ndp
 from mcdp_report.gg_utils import gg_figure
 from mocdp.comp.composite import cndp_get_name_ndp_notfunres
 from mocdp.comp.composite_templatize import cndp_templatize_children
+from mocdp.exceptions import mcdp_dev_warning
 from reprep import Report
 
 
@@ -326,7 +327,9 @@ def _parse_dict(d, library):
         values.append(c.value)
     return tuple(labels), tuple(posets), tuple(values)
 
-@comptest
+# @comptest
+mcdp_dev_warning('temporarily disabled opt_basic_7()')
+
 def opt_basic_7():
     libnames = ['actuation']
     library = get_test_library2(libnames)

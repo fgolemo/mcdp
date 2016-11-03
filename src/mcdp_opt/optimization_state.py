@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
-from .actions import ActionAddNDP, ActionConnect
-from .context_utils import get_compatible_unconnected_functions
-from .optimization import Optimization
-from .partial_result import get_lower_bound_ndp
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_lang import parse_poset
 from mcdp_lang.blocks import get_missing_connections
+from mcdp_posets import UpperSet, UpperSets
 from mcdp_posets import get_types_universe
-from mcdp_posets.uppersets import UpperSet, UpperSets
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import CResource, Connection
 from mocdp.exceptions import do_extra_checks
 from mocdp.memoize_simple_imp import memoize_simple
+
+from .actions import ActionAddNDP, ActionConnect
+from .context_utils import get_compatible_unconnected_functions
+from .optimization import Optimization
+from .partial_result import get_lower_bound_ndp
+
 
 _ = UpperSet
 

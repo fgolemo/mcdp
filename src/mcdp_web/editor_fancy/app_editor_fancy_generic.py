@@ -6,6 +6,7 @@ import os
 from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
 from pyramid.renderers import render_to_response  # @UnresolvedImport
 
+from contracts.utils import check_isinstance
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM
@@ -15,9 +16,6 @@ from mcdp_web.utils import (ajax_error_catch, create_image_with_string,
 from mcdp_web.utils.response import response_data
 from mocdp import logger
 from mocdp.exceptions import DPInternalError, DPSemanticError
-
-
-from contracts.utils import check_isinstance
 
 
 Spec = namedtuple('Spec', 'url_part url_variable extension parse_expr parse'
