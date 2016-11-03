@@ -205,7 +205,8 @@ def eval_rvalue_anyofres(r, context):
     assert isinstance(r, CDP.AnyOfRes)
     constant = eval_constant(r.value, context)
     if not isinstance(constant.unit, FiniteCollectionsInclusion):
-        msg = 'I expect that the argument to any-of evaluates to a finite collection.'
+        msg = ('I expect that the argument to any-of evaluates to '
+              'a finite collection.')
         raise_desc(DPSemanticError, msg, constant=constant)
     assert isinstance(constant.unit, FiniteCollectionsInclusion)
     P = constant.unit.S
