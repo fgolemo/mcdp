@@ -96,8 +96,10 @@ class Nat(Poset):
         return isinstance(other, Nat)
 
     def __repr__(self):
-        return "ℕ" # TODO: make this configurable
-        #return "N"
+        if MCDPConstants.use_unicode_symbols:
+            return "ℕ" # TODO: make this configurable
+        else:
+            return "N"
 
     def format(self, x):
         if isinstance(x, int):
@@ -281,7 +283,10 @@ class Int(Poset):
         return isinstance(other, Int)
 
     def __repr__(self):
-        return "Z"
+        if MCDPConstants.use_unicode_symbols:
+            return "Z" # XXX
+        else:
+            return "Z"
 
     def format(self, x):
         if x == self.top:
@@ -313,80 +318,6 @@ class Int(Poset):
         if not self._leq(a, b):
             msg = '%s ≰ %s' % (a, b)
             raise NotLeq(msg)
-
-#     def multiply(self, a, b):
-#         """ Multiplication, extended for top """
-#         def undef():
-#             raise ValueError('Cannot multiply %s, %s' % (a, b))
-#         if a == self.top and b == self.top:
-#             return self.top
-#         if a == self.top and b == self.bottom:
-#             return self.bottom
-#         if a == self.bottom and b == self.bottom:
-#             return self.top
-#         if a == self.bottom and b == self.top:
-#             return self.bottom
-#         if a == self.bottom:  # and b int
-#             if b > 0:
-#                 return self.bottom
-#             elif b == 0:
-#                 undef()
-#             elif b < 0:
-#                 return self.top
-#         if a == self.top:  # and b int
-#             if b > 0:
-#                 return self.top
-#             elif b == 0:
-#                 undef()
-#             elif b < 0:
-#                 return self.bottom
-#         if a == self.bottom:  # and b int
-#             if b > 0:
-#                 return self.bottom
-#             elif b == 0:
-#                 undef()
-#             elif b < 0:
-#                 return self.top
-#         if b == self.top:  # and a int
-#             if a > 0:
-#                 return self.top
-#             elif a == 0:
-#                 undef()
-#             elif a < 0:
-#                 return self.bottom
-#         if b == self.bottom:  # and a int
-#             if a > 0:
-#                 return self.bottom
-#             elif a == 0:
-#                 undef()
-#             elif a < 0:
-#                 return self.top
-#         return a * b
-# 
-#     def add(self, a, b):
-#         def undef():
-#             raise ValueError('Cannot add %s, %s' % (a, b))
-# 
-#         if a == self.top:
-#             if b == self.top:
-#                 return self.top
-#             if b == self.bottom:
-#                 undef()
-#             return self.top
-#         if a == self.bottom:
-#             if b == self.top:
-#                 undef()
-#             if b == self.top:
-#                 return self.top
-#             return self.bottom
-#         if b == self.bottom:  # and a is int
-#             return self.bottom
-#         if b == self.top:  # and a is int
-#             return self.top
-#         # both int
-#         res = a + b
-#         # FIXME: overflow
-#         return res
 
     def check_equal(self, x, y):
         if not (x == y):

@@ -24,18 +24,15 @@ Goals:
     - display the dependency graph among libraries
 
 
-On hold:
-(*) Create a video?
+On hold: 
 
 (*) Interface with cvxpy
 (*) Demo for QR code
-Discarded:
-(*) Feature-parity with new Loop2, including normal transform - on hold 
-
+ 
 - B: > NotImplementedError: SumNLDP:solve_r: Cannot invert more than two terms.
 Write "details mcdplib-actuation-ndp-duckiebot_sol00-ndp_check_solve_r_chain" to inspect the error.
-  
 
+- use greek letters in h*
 - implement solve-r 
 
 - Introduce "Ignore" blocks, so that they can get their own icon (terminator)
@@ -217,24 +214,9 @@ There is already a connection to function 'r1' of '_res_r1'.
 - B: there is now an ugly hack (Catch exception ) when plotting in gg_*
 
 Language additions
-------------------
-
-- L: New language feature: templates
+------------------ 
 
 - L: types: Sets without the order. For example, given V, use set(V).
-- L: values: Indexing. For example:
-
-	```
-	mcdp {
-	   provides f [X x USD]
-	   requires cost [USD]
-
-	   cost >= f[1]
-	}
-	```
-
-- L: Syntax for empty sets. ``{} g`` or  ``EmptySet g``
-
 
 - L: Implement Python-style comments for more literate programming.
 
@@ -246,8 +228,6 @@ mcdp {
 }
 ```
  
-
-
 - Bug in the dot drawing for this one:
 
 choose(
