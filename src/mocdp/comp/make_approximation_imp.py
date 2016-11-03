@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_dp import Identity, get_approx_dp
+from mcdp_dp import Identity
+from mcdp_dp.dp_approximation import makeLinearCeilDP
 from mcdp_posets import Space
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import (Connection, get_name_for_fun_node,
@@ -96,3 +97,24 @@ def make_approximation_f(name, approx_perc, approx_abs, approx_abs_S,
         connections.append(Connection(NAME_ORIGINAL, rn, rn_name, rn))
 
     return CompositeNamedDP.from_parts(name2ndp, connections, fnames, rnames)
+
+
+
+def get_approx_dp(S, name, approx_perc, approx_abs, approx_abs_S, max_value, max_value_S):
+    from mcdp_posets.types_universe import express_value_in_isomorphic_space
+
+    approx_abs_ = express_value_in_isomorphic_space(S1=approx_abs_S, s1=approx_abs, S2=S)
+#     max_value_ = express_value_in_isomorphic_space(S1=max_value_S, s1=max_value, S2=S)
+
+    if approx_perc > 0:
+        raise NotImplementedError('Approx_perc not implemented')
+    if max_value > 0:
+        raise NotImplementedError('max_value not implemented')
+#     alpha = approx_perc / 100.0
+    # print('alpha: %s approx_abs: %s' % (alpha, approx_abs_S.format(approx_abs_)))
+#     ccm = CombinedCeilMap(S, alpha=alpha, step=approx_abs_, max_value=max_value_)
+    dp = makeLinearCeilDP(S, approx_abs_)
+    ndp = dpwrap(dp, name, name)
+    return ndp
+
+

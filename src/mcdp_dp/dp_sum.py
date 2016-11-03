@@ -4,11 +4,10 @@ from mcdp_dp import NotSolvableNeedsApprox, ApproximableDP
 from mcdp_dp.dp_inv_plus import sample_sum_upperbound, sample_sum_lowersets
 from mcdp_maps import SumNIntMap, SumNNatsMap, SumNMap, SumNRcompMap
 from mcdp_posets import Int
+from mcdp_posets import is_top
+from mocdp.exceptions import DPNotImplementedError, mcdp_dev_warning
 
 from .dp_generic_unary import WrapAMap
-from mocdp.exceptions import DPNotImplementedError, mcdp_dev_warning
-from mcdp_posets.rcomp import Rcomp
-from mcdp_posets.poset import is_top
 
 
 __all__ = [
@@ -81,12 +80,7 @@ class SumNNatDP(WrapAMap, ApproximableDP):
     def get_upper_bound(self, nu):  # @UnusedVariable
         msg = 'SumNNatDP(%s).get_upper_bound() not implemented yet' % self.n
         raise_desc(DPNotImplementedError, msg)
-#     
-#     def get_lower_bound(self, n):
-#         return SumNLDP(self.Fs, self.R, n)
-# 
-#     def get_upper_bound(self, n): 
-#         return SumNUDP(self.Fs, self.R, n)
+
     
 class SumNUDP(WrapAMap):
     """

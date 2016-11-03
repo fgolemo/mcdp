@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from abc import abstractmethod
 
+from contracts.utils import check_isinstance
 from mcdp_posets import Map, Rcomp, RcompUnits, Nat
+from mcdp_posets.nat import Nat_mult_lowersets_continuous
 from mcdp_posets.poset import is_top
 from mcdp_posets.rcomp import finfo
 import numpy as np
-from mcdp_posets.nat import Nat_mult_lowersets_continuous
+import numpy as np
 
 
 __all__ = [
@@ -93,6 +95,7 @@ class FloorMap(GenericFloatOperation):
     def op(self, x):
         return np.floor(x)
     
+    
 class SquareMap(GenericFloatOperation):
 
     def __init__(self, dom):
@@ -101,6 +104,31 @@ class SquareMap(GenericFloatOperation):
     def op(self, x):
         return square(x)
     
+    
+class Linear1Map(GenericFloatOperation):
+    """
+        Computes y = a * x.
+    """
+    def __init__(self, dom, a):
+        check_isinstance(dom, (Rcomp, RcompUnits))
+        GenericFloatOperation.__init__(self, dom, 'linear1')
+        self.a = a
+ 
+    def op(self, x):
+        assert isinstance(x, float) and x >= 0, x
+        if np.isinf(x):
+            return float('inf')
+        try:
+            res = x * self.a
+            return res
+        except FloatingPointError as e:
+            s = str(e)
+            if 'overflow' in s:
+                return finfo.max
+            elif 'underflow' in s:
+                return finfo.tiny
+            else:
+                raise
 
 class SquareNatMap(Map):
 

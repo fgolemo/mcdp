@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_dp.dp_approximation import FloorStepDP, CombinedCeilDP
+from mcdp_dp.dp_approximation import FloorStepDP, makeLinearCeilDP
 from mcdp_dp.dp_plus_value import PlusValueDP
 from mcdp_dp.dp_uncertain import UncertainGate
+from mcdp_lang.parse_actions import decorate_add_where
 from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
     get_types_universe, poset_minima)
 from mocdp.comp.context import CResource, ValueWithUnits, get_name_for_fun_node
@@ -12,9 +13,7 @@ from mocdp.exceptions import DPSemanticError
 from .eval_constant_imp import eval_constant
 from .helpers import create_operation, get_valuewithunits_as_resource
 from .namedtuple_tricks import recursive_print
-from .parse_actions import add_where_information
 from .parts import CDPLanguage
-from mcdp_lang.parse_actions import decorate_add_where
 
 
 CDP = CDPLanguage
@@ -40,50 +39,6 @@ def eval_rvalue(rvalue, context):
         assert isinstance(res, ValueWithUnits)
         return get_valuewithunits_as_resource(res, context)
 
-    if isinstance(rvalue, CDP.Resource):
-        return context.make_resource(dp=rvalue.dp.value, s=rvalue.s.value)
-
-    if isinstance(rvalue, CDP.NewFunction):
-        fname = rvalue.name
-        try:
-            dummy_ndp = context.get_ndp_fun(fname)
-        except ValueError:
-            msg = 'New resource name %r not declared.' % fname
-            if context.rnames:
-                msg += ' Available: %s.' % ", ".join(context.rnames)
-            else:
-                msg += ' No resources declared so far.'
-            raise DPSemanticError(msg, where=rvalue.where)
-
-        return context.make_resource(get_name_for_fun_node(fname),
-                                     dummy_ndp.get_rnames()[0])
-
-
-
-    if isinstance(rvalue, CDP.VariableRef):
-        if rvalue.name in context.constants:
-            c = context.constants[rvalue.name]
-            assert isinstance(c, ValueWithUnits)
-            return get_valuewithunits_as_resource(c, context)
-            # return eval_rvalue(context.constants[rvalue.name], context)
-
-        elif rvalue.name in context.var2resource:
-            return context.var2resource[rvalue.name]
-
-        try:
-            dummy_ndp = context.get_ndp_fun(rvalue.name)
-        except ValueError:  # as e:
-            msg = 'Function %r not declared.' % rvalue.name
-
-            if context.fnames:
-                msg += ' Available: %s.' % ", ".join(context.fnames)
-            else:
-                msg += ' No function declared so far.'
-            raise DPSemanticError(msg, where=rvalue.where)
-
-        s = dummy_ndp.get_rnames()[0]
-        return context.make_resource(get_name_for_fun_node(rvalue.name), s)
-
     from .eval_resources_imp_power import eval_rvalue_Power
     from .eval_math import eval_rvalue_divide
     from .eval_math import eval_rvalue_MultN
@@ -98,7 +53,10 @@ def eval_rvalue(rvalue, context):
     from .eval_math import eval_rvalue_RValueMinusN
 
     cases = {
+        CDP.Resource: eval_rvalue_Resource,
         CDP.Power: eval_rvalue_Power,
+        CDP.VariableRef: eval_rvalue_VariableRef,
+        CDP.NewFunction : eval_rvalue_NewFunction,
         CDP.PowerShort: eval_rvalue_Power,
         CDP.Divide: eval_rvalue_divide,
         CDP.MultN: eval_rvalue_MultN,
@@ -125,6 +83,49 @@ def eval_rvalue(rvalue, context):
         rvalue = recursive_print(rvalue)
         raise_desc(DoesNotEvalToResource, msg, rvalue=rvalue)
  
+def eval_rvalue_Resource(rvalue, context):
+    if isinstance(rvalue, CDP.Resource):
+        return context.make_resource(dp=rvalue.dp.value, s=rvalue.s.value)
+    
+def eval_rvalue_VariableRef(rvalue, context):
+    if rvalue.name in context.constants:
+        c = context.constants[rvalue.name]
+        assert isinstance(c, ValueWithUnits)
+        return get_valuewithunits_as_resource(c, context)
+        # return eval_rvalue(context.constants[rvalue.name], context)
+
+    elif rvalue.name in context.var2resource:
+        return context.var2resource[rvalue.name]
+
+    try:
+        dummy_ndp = context.get_ndp_fun(rvalue.name)
+    except ValueError:  # as e:
+        msg = 'Function %r not declared.' % rvalue.name
+
+        if context.fnames:
+            msg += ' Available: %s.' % ", ".join(context.fnames)
+        else:
+            msg += ' No function declared so far.'
+        raise DPSemanticError(msg, where=rvalue.where)
+
+    s = dummy_ndp.get_rnames()[0]
+    return context.make_resource(get_name_for_fun_node(rvalue.name), s)
+
+def eval_rvalue_NewFunction(rvalue, context):
+    fname = rvalue.name
+    try:
+        dummy_ndp = context.get_ndp_fun(fname)
+    except ValueError:
+        msg = 'New resource name %r not declared.' % fname
+        if context.rnames:
+            msg += ' Available: %s.' % ", ".join(context.rnames)
+        else:
+            msg += ' No resources declared so far.'
+        raise DPSemanticError(msg, where=rvalue.where)
+
+    return context.make_resource(get_name_for_fun_node(fname),
+                                 dummy_ndp.get_rnames()[0])
+        
 def eval_rvalue_approx_u(r, context):
     assert isinstance(r, CDP.ApproxURes)
 
@@ -187,8 +188,8 @@ def eval_rvalue_approx_step(r, context):
 
     stepu = express_value_in_isomorphic_space(S1=step.unit, s1=step.value, S2=R)
 
-    dp = CombinedCeilDP(S=R, alpha=0.0, step=stepu, max_value=None)
-#     def __init__(self, S, alpha, step, max_value=None):
+    dp = makeLinearCeilDP(R, stepu)
+
     return create_operation(context, dp=dp, resources=[resource],
                                name_prefix='_approx', op_prefix='_toapprox',
                                 res_prefix='_result')
