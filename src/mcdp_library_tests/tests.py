@@ -5,6 +5,7 @@ import os
 import tempfile
 import time
 
+from contracts.enabling import all_disabled
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_library import Librarian, MCDPLibrary
 from mcdp_library.utils import dir_from_package_name
@@ -12,7 +13,6 @@ from mcdp_tests.generation import for_all_source_mcdp
 from mocdp import logger
 from mocdp.exceptions import DPSemanticError
 from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
-from contracts.enabling import all_disabled
 
 
 __all__ = [

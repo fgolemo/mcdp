@@ -5,11 +5,11 @@ from mcdp_posets import Nat, Poset, PosetProduct, is_top
 from mcdp_posets.nat import Nat_mult_lowersets_continuous
 from mcdp_posets.rcomp import Rcomp_multiply_upper_topology_seq
 from mcdp_posets.utils import check_minimal
+from mocdp import MCDPConstants
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 import numpy as np
 
 from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
-from mocdp import MCDPConstants
 
 
 _ = Nat, Poset
@@ -124,12 +124,12 @@ def invmultL_solve_options(F, R, f, n, algo):
     if f == 0.0:
         return set([(0.0, 0.0)])
 
-    top = F.get_top()
-    if f == top:
+    if is_top(F, f):
         mcdp_dev_warning('FIXME Need much more thought about this')
         top1 = R[0].get_top()
         top2 = R[1].get_top()
-        s = set([(top1, 0.0), (0.0, top2)])
+#         s = set([(top1, 0.0), (0.0, top2)])
+        s = set([(top1, top2)])
         return s
 
     if algo == InvMult2.ALGO_UNIFORM:
@@ -260,11 +260,7 @@ def generate_exp_van_der_corput_sequence(n, C=1.0, mapping_function=None):
     M = np.log(C)
     logx1 = v2
     logx2 = M - v2
-#     finfo = np.finfo(float)
 
-    # eps = finfo.tiny # 1e-368
-#     eps = finfo.eps # 1e-16
-#     maxi = finfo.max
     eps = MCDPConstants.inv_relations_eps 
     maxi = 1 / eps
      
