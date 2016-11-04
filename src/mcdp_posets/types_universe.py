@@ -233,15 +233,9 @@ class TypesUniverse(Preorder):
             assert B == h.get_codomain()
             assert A == hd.get_codomain()
             assert B == hd.get_domain()
-            return h, hd
-        
-# > | Super conversion not available.
-# > | A: Instance of <class 'mcdp_posets.poset_coproduct.PosetCoproduct'>.
-# > |    Coproduct1(FinitePoset(10 els)+FinitePoset(10 els))
-# > | B: Instance of <class 'mcdp_posets.finite_poset.FinitePoset'>.
-# > |    FinitePoset(10 els)        
+            return h, hd       
 
-        # case when A = ... + B + ... 
+        # case when A = Coproduct(... + B + ...) 
         if isinstance(A, PosetCoproduct):
             for i, Ai in enumerate(A.spaces):
                 if self.equal(B, Ai):
@@ -252,7 +246,7 @@ class TypesUniverse(Preorder):
                     assert B == hd.get_domain()
                     return h, hd
                 
-        # case when B = ... + A + ... 
+        # case when B = Coproduct(... + A + ...) 
         if isinstance(B, PosetCoproduct):
             for i, Bi in enumerate(B.spaces):
                 if self.equal(A, Bi):

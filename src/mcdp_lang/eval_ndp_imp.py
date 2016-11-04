@@ -18,7 +18,7 @@ from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
 from mocdp.comp.ignore_some_imp import ignore_some
 from mocdp.comp.make_approximation_imp import make_approximation
 from mocdp.exceptions import (DPInternalError, DPSemanticError,
-    DPSemanticErrorNotConnected, MCDPExceptionWithWhere)
+    DPSemanticErrorNotConnected, MCDPExceptionWithWhere, mcdp_dev_warning)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 from .eval_codespec_imp_utils_instantiate import ImportFailure, import_name
@@ -339,6 +339,7 @@ def eval_ndp_dpwrap(r, context):
     else:
         want_R = PosetProduct(want_Rs)
 
+    mcdp_dev_warning('Not sure about this')
     dp_prefix = get_conversion(want_F, dp_F)
     dp_postfix = get_conversion(dp_R, want_R)
 
