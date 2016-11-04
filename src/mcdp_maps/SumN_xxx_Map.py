@@ -48,7 +48,7 @@ class SumNMap(Map):
     def repr_map(self, letter):
         from mcdp_maps.meet_map import get_string_list_of_elements
         from mcdp_maps.meet_map import get_string_vector
-        n = self.n
+        n = len(self.Fs)
         start = get_string_vector(letter, n)
         elements = get_string_list_of_elements(letter, n)
         transformed =  " + ".join(elements)
