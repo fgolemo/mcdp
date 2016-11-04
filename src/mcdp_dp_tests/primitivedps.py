@@ -459,7 +459,7 @@ def SumNNatDP_2():
 
 @add_as_test
 def Conversion_a():
-    A = parse_poset('g')
+    A = parse_poset('kg')
     B = parse_poset('g')
     return get_conversion(A, B)
 
