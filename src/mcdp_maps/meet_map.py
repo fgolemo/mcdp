@@ -2,6 +2,7 @@
 from contracts import contract
 from contracts.utils import raise_wrapped
 from mcdp_posets import Poset, NotJoinable, PosetProduct, Map, MapNotDefinedHere
+from mcdp_maps.repr_map import repr_map_meetn
 
 
 __all__ = [
@@ -35,24 +36,5 @@ class MeetNMap(Map):
 
     def repr_map(self, letter):
         n = len(self.dom)
-        elements = get_string_list_of_elements(letter, n)
-        transformed = " ∨ ".join(elements)    
-        start = get_string_vector(letter, n)
-        return '%s ⟼ %s' % (start, transformed)
+        return repr_map_meetn(letter, n)
     
-def get_string_vector(letter, n):
-    """ Returns ⟨r₁, ..., rₙ⟩ """
-    elements = get_string_list_of_elements(letter, n)
-    start = "⟨" +", ".join(elements) + "⟩"
-    return start
-
-def get_string_list_of_elements(letter, n):
-    """ Returns ["r1", "r2", ...] """
-    def sub(i):
-        # indices = list("₁₂₃₄₅₆₇₈₉")  # ₀
-        indices = [str(_+1) for _ in range(n)]
-        
-        if i >= len(indices): return '%d' % i
-        return indices[i]
-    elements = [letter + sub(i) for i in range(n)]
-    return elements

@@ -2,6 +2,7 @@
 from contracts import contract
 from contracts.utils import raise_wrapped
 from mcdp_posets import Map, Poset, PosetProduct, NotJoinable, MapNotDefinedHere
+from mcdp_maps.repr_map import repr_map_joinn
 
 
 __all__ = [
@@ -40,12 +41,5 @@ class JoinNMap(Map):
 
 
     def repr_map(self, letter):
-        n = len(self.dom)
-        def sub(i):
-            indices = list("₀₁₂₃₄₅₆₇₈₉")
-            if i >= len(indices): return '%d' % i
-            return indices[i]
-        elements = [letter + sub(i) for i in range(n)]
-        start = "⟨" +" , ".join(elements) + "⟩"
-        transformed = " ∧ ".join(elements)
-        return '%s ⟼ { %s }' % (start, transformed)
+        return repr_map_joinn(letter, len(self.dom))
+    

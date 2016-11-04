@@ -125,6 +125,16 @@ class CoProductDP(PrimitiveDP):
             r1 = dp.repr_long()
             s += '\n' + indent(r1, '. ', first='^ ')
         return s
+    
+    
+    def repr_h_map(self):
+        con = " ∪ ".join('h%d(f)' % (i+1) for i in range(len(self.dps)))
+        return 'f ⟼ Min {%s}' % con
+    
+    def repr_hd_map(self):
+        con = " ∪ ".join('h*%d(r)' % (i+1) for i in range(len(self.dps)))
+        return 'r ⟼ Max {%s}' % con
+    
 #
 #     def get_normal_form(self):
 #         """

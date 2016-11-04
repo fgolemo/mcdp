@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import raise_desc
 from mcdp_dp import NotSolvableNeedsApprox, ApproximableDP
-from mcdp_dp.dp_inv_plus import sample_sum_upperbound, sample_sum_lowersets
 from mcdp_maps import SumNIntMap, SumNNatsMap, SumNMap, SumNRcompMap
 from mcdp_posets import Int
 from mcdp_posets import is_top
 from mocdp.exceptions import DPNotImplementedError, mcdp_dev_warning
 
 from .dp_generic_unary import WrapAMap
+from .sequences_invplus import sample_sum_upperbound, \
+    sample_sum_lowersets
 
 
 __all__ = [

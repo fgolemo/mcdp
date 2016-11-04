@@ -104,6 +104,7 @@ class Limit(PrimitiveDP):
     def __repr__(self):
         return 'Limit(%s, %s)' % (self.F, self.F.format(self.limit))
 
+
 class LimitMaximals(PrimitiveDP):
 
     """

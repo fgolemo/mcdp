@@ -116,12 +116,15 @@ class MultValueDPHelper1Map(Map):
             return self.cod.get_top()
         # otherwise undefined
         raise MapNotDefinedHere(x)
+    
+    def repr_map(self, letter):
+        return '%s ⟼ ⊤ if %s = 0, else ø' % (letter, letter)
         
 
 class MultValueDPHelper2Map(Map):
     """
         Implements:
-         r |->   if r = 0, then f must be <= 0
+         r ⟼   if r = 0, then f must be <= 0
                  if r > 0, then f must be <= 0
                  if r = Top, then f <= Top
                  
@@ -135,11 +138,14 @@ class MultValueDPHelper2Map(Map):
         else:
             return 0.0
         
+    def repr_map(self, letter):
+        return '%s ⟼ ⊤ if %s = ⊤, else 0' % (letter, letter)
+
 
 class MultValueNatDPHelper2Map(Map):
     """
         Implements:
-         r |->   if r = 0, then f must be <= 0
+         r ⟼  if r = 0, then f must be <= 0
                  if r > 0, then f must be <= 0
                  if r = Top, then f <= Top
                  
@@ -153,7 +159,10 @@ class MultValueNatDPHelper2Map(Map):
             return self.cod.get_top()
         else:
             return 0
-        
+
+    def repr_map(self, letter):
+        return '%s ⟼ ⊤ if %s = ⊤, else 0' % (letter, letter)
+
         
 class MultValueNatDP(WrapAMap):
     """

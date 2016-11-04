@@ -9,6 +9,7 @@ from mocdp.exceptions import do_extra_checks
 
 from .dp_series import get_product_compact
 from .primitive import NormalForm, PrimitiveDP
+from mcdp_dp.repr_strings import repr_h_map_parallel
 
 
 __all__ = [
@@ -144,7 +145,13 @@ class Parallel(PrimitiveDP):
         s += '\n' + indent(r1, '. ', first='\ ')
         s += '\n' + indent(r2, '. ', first='\ ') 
         return s
-
+    
+    def repr_h_map(self):
+        return repr_h_map_parallel('f', 2, 'h')
+    
+    def repr_hd_map(self):
+        return repr_h_map_parallel('r', 2, 'h*')
+    
     def get_normal_form(self):
         """
             
@@ -155,7 +162,6 @@ class Parallel(PrimitiveDP):
             beta2:  U(R2) x S2 ⟶ S2
              
         """
-
         S1, alpha1, beta1 = self.dp1.get_normal_form()
         S2, alpha2, beta2 = self.dp2.get_normal_form()
 

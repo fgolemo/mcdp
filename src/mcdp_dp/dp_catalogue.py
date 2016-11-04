@@ -84,5 +84,10 @@ class CatalogueDP(PrimitiveDP):
     def __repr__(self):
         return 'CatalogueDP(%r|%r)' % (self.F, self.R)
 
-
+    def repr_h_map(self):
+        return 'f ⟼ Min { r_i | f_i ≽ f}'
+    
+    def repr_hd_map(self):
+        return 'r ⟼ Max { f_i | r_i ≼ f}'
+    
 

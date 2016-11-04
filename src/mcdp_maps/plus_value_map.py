@@ -5,6 +5,8 @@ from mcdp_posets import (Map, RcompUnits, Nat,
     express_value_in_isomorphic_space, Rcomp, is_top, MapNotDefinedHere)
 from mcdp_posets.nat import Nat_add
 from mcdp_posets.rcomp_units import rcomp_add, rcompunits_add
+from mcdp_maps.repr_map import plusvaluedualmap_repr, plusvaluemap_repr,\
+    minusvaluemap_repr
 
 
 __all__ = [
@@ -48,6 +50,10 @@ class PlusValueMap(Map):
 
     def _call(self, x):
         return rcompunits_add(self.dom, x, self.c) 
+    
+    def repr_map(self, letter):
+        return plusvaluemap_repr(letter, self.c_space, self.c_value)
+
 
 class PlusValueDualMap(Map):
     """ 
@@ -104,6 +110,8 @@ class PlusValueDualMap(Map):
             else:
                 raise MapNotDefinedHere()
     
+    def repr_map(self, letter):
+        return plusvaluedualmap_repr(letter, self.c_space, self.c_value)
     
 class PlusValueDualRcompMap(Map):
 
@@ -133,6 +141,8 @@ class PlusValueDualRcompMap(Map):
             else:
                 raise MapNotDefinedHere()
 
+    def repr_map(self, letter):
+        return plusvaluedualmap_repr(letter, self.dom, self.c)
 
     
 class PlusValueDualNatMap(Map):
@@ -163,6 +173,8 @@ class PlusValueDualNatMap(Map):
             else:
                 raise MapNotDefinedHere()
             
+    def repr_map(self, letter):
+        return plusvaluedualmap_repr(letter, self.dom, self.c)
             
 class PlusValueRcompMap(Map):
     """ 
@@ -182,6 +194,9 @@ class PlusValueRcompMap(Map):
     def diagram_label(self):  
         return self.__str__()
     
+    def repr_map(self, letter):
+        return plusvaluemap_repr(letter, self.dom, self.c_value)
+
     def _call(self, x):
         return rcomp_add(x, self.c_value)
 
@@ -201,6 +216,9 @@ class MinusValueRcompMap(Map):
 
     def __str__(self):
         return "- %s" % self.dom.format(self.c)
+
+    def repr_map(self, letter):
+        return minusvaluemap_repr(letter, self.dom, self.c)
 
     def diagram_label(self):  
         return self.__str__()
@@ -252,6 +270,8 @@ class MinusValueMap(Map):
     def diagram_label(self):  
         return self.__str__()
 
+    def repr_map(self, letter):
+        return minusvaluemap_repr(letter, self.c_space, self.c_value)
 
     def __repr__(self):
         return "MinusValueMap(%s)" % self.__str__()
@@ -287,6 +307,9 @@ class PlusValueNatMap(Map):
 
     def diagram_label(self):  
         return self.__str__()
+
+    def repr_map(self, letter):
+        return plusvaluemap_repr(letter, self.N, self.value)
 
     def __str__(self):
         return '+ %s' % self.N.format(self.value)
@@ -333,7 +356,10 @@ class MinusValueNatMap(Map):
             
     def diagram_label(self):  
         return self.__str__()
-   
+
+    def repr_map(self, letter):
+        return minusvaluemap_repr(letter, self.dom, self.c)
+
     def __str__(self):
         return '- %s' % self.c
     

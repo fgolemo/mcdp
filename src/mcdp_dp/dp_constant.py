@@ -3,6 +3,7 @@ from contracts import contract
 from mcdp_posets import NotBelongs, Poset, PosetProduct
 
 from .primitive import PrimitiveDP
+from mcdp_posets.uppersets import UpperSets
 
 
 __all__ = [
@@ -25,7 +26,7 @@ class Constant(PrimitiveDP):
     @contract(R=Poset)
     def __init__(self, R, value):
         self.c = value
-
+        R.belongs(self.c)
         F = PosetProduct(())
         I = PosetProduct(())
         PrimitiveDP.__init__(self, F=F, R=R, I=I)
@@ -50,6 +51,12 @@ class Constant(PrimitiveDP):
     def __repr__(self):
         return 'Constant(%s:%s)' % (self.R, self.c)
 
+    def repr_h_map(self):
+        return '⟨⟩ ⟼ {%s}' % self.R.format(self.c)
+    
+    def repr_hd_map(self):
+        return 'r ⟼ {⟨⟩} if r ≼ %s, else ø' % self.R.format(self.c)
+    
 
 class ConstantMinimals(PrimitiveDP):
     """
@@ -85,6 +92,17 @@ class ConstantMinimals(PrimitiveDP):
         except NotBelongs:
             return F.Ls([]) # infeasible
         
+    def repr_h_map(self):
+        contents = ", ".join(self.R.format(m)
+                for m in sorted(self.ur.minimals))
+        return '⟨⟩ ⟼ {%s}' % contents
+    
+    def repr_hd_map(self):
+        UR = UpperSets(self.R)
+
+        return 'r ⟼ {⟨⟩} if r ∈ %s, else ø' % UR.format(self.ur)
+    
+    
     def __repr__(self):
         s = len(self.values)
         return 'ConstantMins(%s:%s)' % (self.R, s)

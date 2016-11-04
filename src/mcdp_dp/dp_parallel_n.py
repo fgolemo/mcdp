@@ -3,6 +3,7 @@ import itertools
 
 from contracts import contract
 from contracts.utils import indent
+from mcdp_dp.repr_strings import repr_h_map_parallel
 from mcdp_posets import PosetProduct
 from mcdp_posets.uppersets import lowerset_product_multi, upperset_product_multi
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
@@ -112,6 +113,13 @@ class ParallelN(PrimitiveDP):
 
     def __repr__(self):
         return 'ParallelN(%s)' % ",".join(_.__repr__() for _ in self.dps)
+
+    def repr_h_map(self):
+        return repr_h_map_parallel('f', len(self.dps), 'h')
+    
+    def repr_hd_map(self):
+        return repr_h_map_parallel('r', len(self.dps), 'h*')
+    
 
     def repr_long(self):
         s = 'ParallelN  %% %s -> %s' % (self.get_fun_space(), self.get_res_space())

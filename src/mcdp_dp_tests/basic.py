@@ -91,7 +91,6 @@ def check_solve_f_chain(id_dp, dp):
             raise_wrapped(Exception, e, msg, f_chain=f_chain, trchain=trchain, compact=True)
 
 
-
 @for_all_dps
 def check_solve_r_chain(id_dp, dp):
     with primitive_dp_test(id_dp, dp):
@@ -124,7 +123,9 @@ def check_solve_r_chain(id_dp, dp):
 def check_repr(id_dp, dp):  # @UnusedVariable
     s1 = dp.repr_h_map()
     s2 = dp.repr_hd_map()
+    print(s1)
+    print(s2)
     if not '⟼' in s1 or not '⟼' in s2:
-        msg = 'Malformed output' 
+        msg = '%s: Malformed output' % (type(dp).__name__) 
         raise_desc(ValueError, msg, repr_h_map=s1, repr_hd_map=s2)
 

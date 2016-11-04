@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
+from mcdp_dp.dp_inv_mult import invmultU_solve_options, invmultL_solve_options
+from mcdp_dp.repr_strings import repr_hd_map_productn
+from mcdp_dp.sequences_invplus import Nat_mult_antichain_Max
 from mcdp_maps import ProductNMap, ProductNNatMap
 from mcdp_posets import Rcomp, RcompUnits
 from mcdp_posets.rcomp_units import check_mult_units_consistency_seq
 from mocdp.exceptions import mcdp_dev_warning
 
 from .dp_generic_unary import WrapAMap
-from .dp_inv_mult import Nat_mult_antichain_Max, InvMult2, invmultL_solve_options
-from .dp_inv_mult import invmultU_solve_options
+from .dp_inv_mult import  InvMult2
 from .primitive import NotSolvableNeedsApprox, ApproximableDP
 
 
@@ -50,6 +52,8 @@ class ProductNDP(WrapAMap, ApproximableDP):
         else:
             return ProductNDP_U(self.Fs, self.R, n) 
          
+    def repr_hd_map(self):
+        return repr_hd_map_productn(2)
 
 class ProductNDP_L(WrapAMap):
     
@@ -61,18 +65,23 @@ class ProductNDP_L(WrapAMap):
     def solve_r(self, r):  # @UnusedVariable
         msg = 'ProductNDP_L(%s, %s):solve_r()' % (self.F, self.nl)
         raise_desc(NotImplementedError, msg)
+        
+    def repr_hd_map(self):
+        return repr_hd_map_productn(2, 'L', self.nl)
 
 class ProductNDP_U(WrapAMap):
     
     def __init__(self, Fs, R, nl):
         amap = ProductNMap(Fs, R)
         WrapAMap.__init__(self, amap, None)
-        self.nl = nl
+        self.nl = nl #XXX
         
     def solve_r(self, r):  # @UnusedVariable
         msg = 'ProductNDP_U(%s, %s):solve_r()' % (self.F, self.nl)
         raise_desc(NotImplementedError, msg)
 
+    def repr_hd_map(self):
+        return repr_hd_map_productn(2, 'U', self.nl)
 
 class Product2DP_L(WrapAMap):
     
@@ -88,6 +97,8 @@ class Product2DP_L(WrapAMap):
         options = invmultU_solve_options(F=self.R, R=self.F, f=r, n=self.nl, algo=algo)
         return self.F.Ls(options)
     
+    def repr_hd_map(self):
+        return repr_hd_map_productn(2, 'L')
 
 class Product2DP_U(WrapAMap):
     
@@ -103,6 +114,10 @@ class Product2DP_U(WrapAMap):
         algo = InvMult2.ALGO
         options = invmultL_solve_options(F=self.R, R=self.F, f=r, n=self.nu, algo=algo)
         return self.F.Ls(options)
+    
+    
+    def repr_hd_map(self):
+        return repr_hd_map_productn(2, 'U')
 
 class ProductNRcompDP(WrapAMap, ApproximableDP):
     
@@ -127,6 +142,10 @@ class ProductNRcompDP(WrapAMap, ApproximableDP):
             return Product2RcompDP_U(n)
         else:
             return ProductNRcompDP_U(len(self.Fs), nu=n) 
+        
+    
+    def repr_hd_map(self):
+        return repr_hd_map_productn(len(self.F))
     
 class ProductNRcompDP_L(WrapAMap):
     
@@ -141,6 +160,9 @@ class ProductNRcompDP_L(WrapAMap):
     def solve_r(self, f):  # @UnusedVariable
         msg = 'ProductNRcompDP_L(%s, %s):solve_r()' % (self.Fs, self.nl)
         raise_desc(NotImplementedError, msg)
+        
+    def repr_hd_map(self):
+        return repr_hd_map_productn(len(self.F), 'L', self.nl)
 
 class ProductNRcompDP_U(WrapAMap):
     
@@ -155,6 +177,9 @@ class ProductNRcompDP_U(WrapAMap):
     def solve_r(self, f):  # @UnusedVariable
         msg = 'ProductNRcompDP_U(%s, %s):solve_r()' % (self.Fs, self.nl)
         raise_desc(NotImplementedError, msg)
+        
+    def repr_hd_map(self):
+        return repr_hd_map_productn(len(self.F), 'U', self.nu)
     
 class Product2RcompDP_L(WrapAMap):
     
@@ -171,8 +196,10 @@ class Product2RcompDP_L(WrapAMap):
         algo = InvMult2.ALGO
         options = invmultU_solve_options(F=self.R, R=self.F, f=r, n=self.nl, algo=algo)
         return self.F.Ls(options)
-    
 
+    def repr_hd_map(self):
+        return repr_hd_map_productn(2, 'L', self.nl)
+    
 class Product2RcompDP_U(WrapAMap):
     
     def __init__(self, nu):
@@ -188,6 +215,9 @@ class Product2RcompDP_U(WrapAMap):
         algo = InvMult2.ALGO
         options = invmultL_solve_options(F=self.R, R=self.F, f=r, n=self.nl, algo=algo)
         return self.F.Ls(options)
+
+    def repr_hd_map(self):
+        return repr_hd_map_productn(2, 'U', self.nl)
 
     
 class ProductNNatDP(WrapAMap):
@@ -208,4 +238,6 @@ class ProductNNatDP(WrapAMap):
         options = Nat_mult_antichain_Max(r)
         return self.F.Ls(options)
     
+    def repr_hd_map(self):
+        return repr_hd_map_productn(self.n)
 

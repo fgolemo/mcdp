@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance
+from mcdp_maps.repr_map import repr_map_product
 from mcdp_posets import Map, PosetProduct, RcompUnits, Nat, Rcomp
 from mcdp_posets.nat import Nat_mult_uppersets_continuous_seq
 from mcdp_posets.rcomp import Rcomp_multiply_upper_topology_seq
@@ -28,15 +29,9 @@ class ProductNMap(Map):
         return Rcomp_multiply_upper_topology_seq(self.F.subs, f, self.R)
 
     def repr_map(self, letter):
-        return product_repr_map(letter, len(self.F))
+        return repr_map_product(letter, len(self.F))
 
-def product_repr_map(letter, n):
-    from mcdp_maps.meet_map import get_string_list_of_elements
-    from mcdp_maps.meet_map import get_string_vector
-    start = get_string_vector(letter, n)
-    elements = get_string_list_of_elements(letter, n)
-    transformed =  "⋅".join(elements)
-    return "%s ⟼ %s" % (start, transformed)
+
     
 
 class ProductNNatMap(Map):
@@ -61,4 +56,4 @@ class ProductNNatMap(Map):
         return 'ProductNNatMap(%s)' % (self.n)
 
     def repr_map(self, letter):
-        return product_repr_map(letter, len(self.Fs))
+        return repr_map_product(letter, self.n)

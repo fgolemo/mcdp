@@ -10,6 +10,7 @@ from .dp_flatten import MuxMap
 from .dp_generic_unary import WrapAMap
 from .primitive import EmptyDP
 from mcdp_dp.dp_flatten import Mux
+from mcdp_dp.repr_strings import repr_hd_map_meetndp
 
 
 __all__ = [
@@ -78,6 +79,9 @@ class MeetNDP(WrapAMap):
                 maximals.add(tuple(tops))
             return self.F.Ls(maximals)
 
+    def repr_hd_map(self):
+        return repr_hd_map_meetndp('r', self.n, '⊤')
+    
     def diagram_label(self):  # XXX
         return 'Min'
     
@@ -117,6 +121,9 @@ class JoinNDualDP(EmptyDP):
         
         self.joinmap = JoinNMap(n, F)
         
+    def repr_h_map(self):
+        return repr_hd_map_meetndp('f', self.n, '⊥')
+    
     def solve_r(self, r):
         try:
             m = self.joinmap(r)

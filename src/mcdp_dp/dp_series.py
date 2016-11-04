@@ -220,7 +220,13 @@ class Series(PrimitiveDP):
         s += '\n' + indent(r1, '. ', first='\ ')
         s += '\n' + indent(r2, '. ', first='\ ')
         return s
-
+    
+    def repr_h_map(self):
+        return 'f ⟼ [h2 ○ h1](f)' # XXX
+    
+    def repr_hd_map(self):
+        return 'r ⟼ [h1* ○ h2*](r)' # XXX
+    
     def get_normal_form(self):
         """
             
