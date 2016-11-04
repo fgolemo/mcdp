@@ -54,7 +54,7 @@ def check_solve_top_bottom(id_dp, dp):
 
 
 def try_with_approximations(id_dp, dp, test):
-    nl = nu = 2
+    nl = nu = 3
     
     dpL, dpU = get_dp_bounds(dp, nl, nu)
     
