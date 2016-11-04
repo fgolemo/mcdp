@@ -8,6 +8,11 @@ __all__ = ['CoerceToInt']
 
 class CoerceToInt(Map):
 
+    """ 
+        Coerces a float to integer. It is not defined in
+        the case that the float is not rounded. 
+    """  
+    
     @contract(cod=Space, dom=Space)
     def __init__(self, dom, cod):
         # todo: check dom is Nat or Int
@@ -20,6 +25,7 @@ class CoerceToInt(Map):
         if r != x:
             msg = 'We cannot just coerce %r into an int.' % x
             raise MapNotDefinedHere(msg)
+        return r
     
     def repr_map(self, letter):
         return "%s ⟼ (int) %s" % (letter, letter)
