@@ -88,7 +88,7 @@ class SumNNatDP(WrapAMap, ApproximableDP):
         raise_desc(DPNotImplementedError, msg)
         
     def repr_hd_map(self):
-        return repr_hd_map_sumn(len(self.Fs))
+        return repr_hd_map_sumn(self.n)
 
     
 class SumNUDP(WrapAMap):
