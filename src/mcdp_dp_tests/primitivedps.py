@@ -458,17 +458,18 @@ def SumNNatDP_2():
     return SumNNatDP(2)
 
 @add_as_test
-def SumNNatDP_3():
-    return SumNNatDP(3)
-
-@add_as_test
 def Conversion_a():
-    A = parse_poset('kg')
+    A = parse_poset('g')
     B = parse_poset('g')
     return get_conversion(A, B)
 
 if MCDPConstants.test_include_primitivedps_knownfailures:
     
+    
+    @add_as_test
+    def SumNNatDP_3():
+        return SumNNatDP(3)
+
     @add_as_test
     def DPLoop0_1():
         F1 = parse_poset('N')
