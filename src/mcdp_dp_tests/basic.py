@@ -3,6 +3,8 @@ from contracts.utils import raise_wrapped, raise_desc
 from mcdp_dp import NotSolvableNeedsApprox
 from mcdp_posets import LowerSets, NotBounded, UpperSets, NotLeq
 from mcdp_tests.generation import for_all_dps, primitive_dp_test
+from mcdp_dp.dp_transformations import get_dp_bounds
+from mcdp_dp.primitive import ApproximableDP
 
 
 @for_all_dps
@@ -129,3 +131,9 @@ def check_repr(id_dp, dp):  # @UnusedVariable
         msg = '%s: Malformed output' % (type(dp).__name__) 
         raise_desc(ValueError, msg, repr_h_map=s1, repr_hd_map=s2)
 
+    if not '_approx_' in id_dp and isinstance(dp, ApproximableDP):
+        dpL, dpU = get_dp_bounds(dp, 4, 4)
+        check_repr(id_dp + '_approx_Lower', dpL)
+        check_repr(id_dp + '_approx_Upper', dpU)
+        
+        

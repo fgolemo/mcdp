@@ -165,7 +165,7 @@ class SumNRcompDP(WrapAMap, ApproximableDP):
         return SumNRcompUDP(self.n, nu)
     
     def repr_hd_map(self):
-        return repr_hd_map_sumn(len(self.Fs))
+        return repr_hd_map_sumn(self.n)
 
     
 class SumNRcompUDP(WrapAMap):

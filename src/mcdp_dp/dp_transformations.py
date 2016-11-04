@@ -2,10 +2,12 @@
 from contracts import contract
 from mcdp_dp import (
     CoProductDP, CoProductDPLabels, DPLoop2, LabelerDP, OpaqueDP, ParallelN)
+from mocdp.exceptions import DPInternalError
 
 from .primitive import ApproximableDP, PrimitiveDP
-from mocdp.exceptions import DPInternalError
-from contracts.utils import raise_desc, raise_wrapped
+
+
+from contracts.utils import, raise_wrapped
 
 
 @contract(dp=PrimitiveDP, returns=PrimitiveDP)

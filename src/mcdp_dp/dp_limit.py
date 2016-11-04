@@ -63,7 +63,12 @@ class FuncNotMoreThan(PrimitiveDP):
     def __repr__(self):
         return 'FuncNotMoreThan(%s)' % (self.F.format(self.limit))
 
-    
+    def repr_h_map(self):
+        return 'f ⟼ f if f ≼ %s, else ø' % self.F.format(self.limit)
+
+    def repr_hd_map(self):
+        return '⟨⟩ ⟼ {%s}' % self.F.format(self.limit)
+
 
 class Limit(PrimitiveDP):
     """

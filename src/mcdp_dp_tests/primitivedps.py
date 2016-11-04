@@ -10,6 +10,7 @@ from mcdp_dp.dp_dummy import Template
 from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct, Nat, Rcomp
 from mocdp import MCDPConstants
+from mcdp_dp.dp_limit import FuncNotMoreThan
 
 
 all_primitivedps_tests = []
@@ -432,6 +433,12 @@ def SumNUDP_1():
     R = m
     nu = 5
     return SumNUDP(Fs=Fs,R=R,n=nu)
+
+@add_as_test
+def FuncNotMoreThan_1():
+    F = parse_poset('m')
+    limit = 2.0
+    return FuncNotMoreThan(F, limit)
  
 
 if MCDPConstants.test_include_primitivedps_knownfailures:
