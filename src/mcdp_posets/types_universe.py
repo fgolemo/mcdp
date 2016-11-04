@@ -8,10 +8,10 @@ from .poset import NotLeq, Preorder
 from .poset_coproduct import PosetCoproduct
 from .poset_product import PosetProduct
 from .rcomp import Rcomp
+from .rcomp_units import RbicompUnits
 from .space import Map, MapNotDefinedHere, NotEqual
 from .space_product import SpaceProduct
 from .uppersets import UpperSets, LowerSets
-from .rcomp_units import RbicompUnits
 
 
 __all__ = [
