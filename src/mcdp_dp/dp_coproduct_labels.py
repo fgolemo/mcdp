@@ -72,7 +72,6 @@ class CoProductDPLabels(PrimitiveDP):
         s += '\n' + self.dp.repr_long()
         return s
     
-    
     def repr_h_map(self):
         return self.dp.repr_h_map()
     

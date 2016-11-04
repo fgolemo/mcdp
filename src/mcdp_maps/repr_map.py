@@ -51,7 +51,6 @@ def plusvaluedualmap_repr(letter, space, value):
     c = space.format(value)
     return  '%s ⟼ max(%s - %s)' % (letter, letter, c)
             
-
 def plusvaluemap_repr(letter, space, value):
     label = '+ %s' % space.format(value)
     return  '%s ⟼ %s %s' % (letter, letter, label)
@@ -59,3 +58,9 @@ def plusvaluemap_repr(letter, space, value):
 def minusvaluemap_repr(letter, space, value):
     label = '- %s' % space.format(value)
     return  '%s ⟼ %s %s' % (letter, letter, label)
+
+def sumn_repr_map(letter, n):
+    start = get_string_vector(letter, n)
+    elements = get_string_list_of_elements(letter, n)
+    transformed =  " + ".join(elements)
+    return "%s ⟼ %s" % (start, transformed)

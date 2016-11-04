@@ -9,6 +9,7 @@ from mocdp.exceptions import DPNotImplementedError, mcdp_dev_warning
 from .dp_generic_unary import WrapAMap
 from .sequences_invplus import sample_sum_upperbound, \
     sample_sum_lowersets
+from mcdp_dp.repr_strings import invplus2_repr_h_map
 
 
 __all__ = [
@@ -39,6 +40,10 @@ class SumNDP(WrapAMap, ApproximableDP):
 
     def get_upper_bound(self, n): 
         return SumNUDP(self.Fs, self.R, n)
+    
+    def repr_hd_map(self):
+        return repr_hd_map_sumn(len(self.Fs))
+
  
 class SumNNatDP(WrapAMap, ApproximableDP):
     
@@ -52,11 +57,13 @@ class SumNNatDP(WrapAMap, ApproximableDP):
         return 'SumNNatDP(%s)' % self.n
     
     def solve_r(self, r):  # @UnusedVariable
+        
         # Max { (f1, f2): f1 + f2 <= r }
         if self.n > 2:
             msg = 'SumNNatDP(%s).solve_r not implemented yet' % self.n
             raise_desc(DPNotImplementedError, msg)
-            
+        
+        mcdp_dev_warning('move away')    
         if is_top(self.R, r):
             top = self.F[0].get_top()
             s = set([(top, top)])
@@ -81,6 +88,9 @@ class SumNNatDP(WrapAMap, ApproximableDP):
     def get_upper_bound(self, nu):  # @UnusedVariable
         msg = 'SumNNatDP(%s).get_upper_bound() not implemented yet' % self.n
         raise_desc(DPNotImplementedError, msg)
+        
+    def repr_hd_map(self):
+        return repr_hd_map_sumn(len(self.Fs))
 
     
 class SumNUDP(WrapAMap):
@@ -108,6 +118,9 @@ class SumNUDP(WrapAMap):
         options = sample_sum_upperbound(self.R, self.F, r, self.n)
         return self.F.Ls(options)
     
+    def repr_hd_map(self):
+        return repr_hd_map_sumn(len(self.Fs), 'U', self.n)
+
     
 class SumNLDP(WrapAMap):
     """
@@ -131,6 +144,9 @@ class SumNLDP(WrapAMap):
         options = sample_sum_lowersets(self.R, self.F, r, self.n)
         return self.F.Ls(options)
 
+    def repr_hd_map(self):
+        return repr_hd_map_sumn(len(self.Fs), 'L', self.n)
+
 class SumNRcompDP(WrapAMap, ApproximableDP):
     
     def __init__(self, n):
@@ -147,6 +163,10 @@ class SumNRcompDP(WrapAMap, ApproximableDP):
 
     def get_upper_bound(self, nu): 
         return SumNRcompUDP(self.n, nu)
+    
+    def repr_hd_map(self):
+        return repr_hd_map_sumn(len(self.Fs))
+
     
 class SumNRcompUDP(WrapAMap):
     """
@@ -174,6 +194,11 @@ class SumNRcompUDP(WrapAMap):
         return self.F.Ls(options)
     
     
+    def repr_hd_map(self):
+        return repr_hd_map_sumn(self.n, 'U', self.nu)
+
+    
+    
 class SumNRcompLDP(WrapAMap):
     """
         f1, f2, f3 -> f1 + f2 +f3
@@ -196,7 +221,10 @@ class SumNRcompLDP(WrapAMap):
         mcdp_dev_warning('not sure')
         options = sample_sum_lowersets(self.R, self.F, r, self.nl)
         return self.F.Ls(options)
-    
+
+    def repr_hd_map(self):
+        return repr_hd_map_sumn(self.n, 'L', self.nl)
+
 
 class SumNIntDP(WrapAMap):
 
@@ -212,4 +240,6 @@ class SumNIntDP(WrapAMap):
         return 'SumNIntDP(%s)' % (self.n)
     
 
+    def repr_hd_map(self):
+        return repr_hd_map_sumn(self.n)
 

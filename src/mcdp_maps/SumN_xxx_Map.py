@@ -8,6 +8,7 @@ from mcdp_posets import (Int, Poset, Space, get_types_universe, Map, Nat, PosetP
 from mcdp_posets.poset import is_top
 from mcdp_posets.rcomp_units import rcomp_add
 import numpy as np
+from mcdp_maps.repr_map import sumn_repr_map
 
 
 __all__ = [
@@ -48,13 +49,6 @@ class SumNMap(Map):
     def repr_map(self, letter):
         return sumn_repr_map(letter, len(self.Fs))
     
-
-def sumn_repr_map(letter, n):
-    from .meet_map import get_string_list_of_elements, get_string_vector
-    start = get_string_vector(letter, n)
-    elements = get_string_list_of_elements(letter, n)
-    transformed =  " + ".join(elements)
-    return "%s ⟼ %s" % (start, transformed)
 
 class SumNRcompMap(Map):
     """ Sum of Rcomp. """
@@ -143,7 +137,7 @@ class SumNIntMap(Map):
         target = Int()
         for xe, s in zip(x, self.subs):
             xe_int = s(xe)
-            res = target.add(res, xe_int)
+            res = target.add(res, xe_int) # XXX
         r = self.to_R(res)
         return r
 
