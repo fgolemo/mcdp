@@ -129,7 +129,7 @@ class JoinNDualDP(EmptyDP):
         return repr_hd_map_meetndp('f', self.n, '⊥')
     
     def repr_hd_map(self):
-        return repr_map_joinn('r', len(self.dom))
+        return repr_map_joinn('r', self.n)
     
     def solve_r(self, r):
         try:
