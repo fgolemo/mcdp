@@ -4,14 +4,15 @@ from mcdp_dp import (CatalogueDP, CoProductDP, CoProductDPLabels, Constant,
     InvPlus2, InvPlus2L, InvPlus2Nat, InvPlus2U, JoinNDP, Limit, LimitMaximals,
     Max1, MeetNDualDP, Mux, Parallel, ParallelN, Series0, Terminator,
     PlusValueDP, MeetNDP, JoinNDualDP, InvMult2Nat, MultValueDP,
-    MinusValueDP, ProductNDP, Product2DP_U, Product2DP_L, ProductNNatDP, ProductNRcompDP, MinusValueRcompDP, MinusValueNatDP, InvMultValueNatDP, InvMultValueRcompDP, InvMultValueDP)
-from mcdp_dp import SumNLDP, SumNUDP
-from mcdp_dp.dp_dummy import Template
+    MinusValueDP, ProductNDP, Product2DP_U, Product2DP_L, ProductNNatDP, ProductNRcompDP,
+    MinusValueRcompDP, MinusValueNatDP, InvMultValueNatDP, InvMultValueRcompDP,
+    InvMultValueDP,
+     SumNLDP, SumNUDP, Template, FuncNotMoreThan, RcompUnitsPowerDP, SquareNatDP)
 from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct, Nat, Rcomp
 from mocdp import MCDPConstants
-from mcdp_dp.dp_limit import FuncNotMoreThan
-from mcdp_dp.dp_misc_unary import RcompUnitsPowerDP, SquareNatDP
+from mcdp_dp.dp_sum import SumNNatDP
+from mcdp_dp.conversion import get_conversion
 
 
 all_primitivedps_tests = []
@@ -451,7 +452,20 @@ def RcompUnitsPowerDP_1():
 @add_as_test
 def SquareNatDP_0():
     return SquareNatDP()
-    
+
+@add_as_test    
+def SumNNatDP_2():
+    return SumNNatDP(2)
+
+@add_as_test
+def SumNNatDP_3():
+    return SumNNatDP(3)
+
+@add_as_test
+def Conversion_a():
+    A = parse_poset('Kg')
+    B = parse_poset('g')
+    return get_conversion(A, B)
 
 if MCDPConstants.test_include_primitivedps_knownfailures:
     

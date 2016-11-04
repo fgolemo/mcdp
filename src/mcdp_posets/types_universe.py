@@ -285,16 +285,22 @@ class TypesUniverse(Preorder):
 class CheckNonnegativeMap(Map):
     def __init__(self, dom, cod):
         Map.__init__(self, dom, cod)
+    
     def _call(self, x):
         if not self.dom.leq(0.0, x):
             raise MapNotDefinedHere()
         return x
+    
+    def repr_map(self, letter):
+        return '%s ⟼ %s' % (letter, letter)
+
     
 def get_coproduct_embedding(A, B, i):
     # assume that A <= B.spaces[i]
     A_to_B = Coprod_A_to_B_map(A=A, B=B, i=i)
     B_to_A = Coprod_B_to_A_map(A=A, B=B, i=i)
     return A_to_B, B_to_A
+
 
 class Coprod_A_to_B_map(Map):
     @contract(B=PosetCoproduct, i='int')
@@ -304,9 +310,14 @@ class Coprod_A_to_B_map(Map):
         self.B = B
         self.i = i 
         Map.__init__(self, dom=dom, cod=cod)
+    
     def _call(self, a):
         b = self.B.pack(self.i, a)
         return b
+    
+    def repr_map(self, letter):
+        return '%s ⟼ ⟨%s, %s⟩' % (letter, self.i, letter)
+
 
 class Coprod_B_to_A_map(Map):
     @contract(B=PosetCoproduct, i='int')
@@ -317,12 +328,16 @@ class Coprod_B_to_A_map(Map):
         self.A = A
         self.i = i
         Map.__init__(self, dom=dom, cod=cod)
+    
     def _call(self, b):
         j, a = self.B.unpack(b)
         if j != self.i:
             msg = 'Cannot convert element %s (in %s) to %s.' % (b, self.B, self.A)
             raise_desc(MapNotDefinedHere, msg, j=j, i=self.i, b=b, a=a)
         return a
+    
+    def repr_map(self, letter):
+        return '⟨%s, %s⟩ ⟼ %s' % (self.i, letter, letter)
 
 
 

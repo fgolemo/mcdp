@@ -4,11 +4,9 @@ from contracts.utils import raise_wrapped
 from mcdp_posets import Map, PosetProduct
 from mocdp.exceptions import DPInternalError
 from multi_index import get_it
+from multi_index.inversion import transform_pretty_print, transform_right_inverse
 
 from .dp_generic_unary import WrapAMap
-from multi_index.inversion import transform_pretty_print,\
-    transform_right_inverse, get_letter_proxy
-from multi_index.get_it_test import is_iterable
 
 
 __all__ = [
@@ -37,22 +35,8 @@ class MuxMap(Map):
         if letter == 'f':
             start = 'a'
         else:
-            start = 'A'
-#                     
-#         def transform_pretty_print2(P, coords, start_letter='a'):
-#             proxy, _ = get_letter_proxy(P, start_letter)
-#             transformed = get_it(proxy, coords, list)
-#             def pretty(x):
-#                 if is_iterable(x):
-#                     m = [pretty(_) for _ in x]
-#                     return '⟨' + ', '.join(m) + '⟩'
-#                 else:
-#                     return str(x)
-#             t1 = pretty(proxy)
-#             t2 = pretty(transformed)
-#             s = 'here %s ⟼ %s' % (t1, t2)
-#             return s
-
+            start = 'A' 
+            
         return transform_pretty_print(self.dom, self.coords, start)
     
             
@@ -67,9 +51,7 @@ class Mux(WrapAMap):
         except:
             print('cannot invert {}'.format(self.amap_pretty))
             raise
-
-#         print 'R', R
-#         print 'coords2', coords2
+ 
         amap_dual = MuxMap(R, coords2)
         WrapAMap.__init__(self, amap, amap_dual)
 
@@ -115,17 +97,6 @@ class TakeRes(WrapAMap):
         
         WrapAMap.__init__(self, amap, amap_dual)
 
-
 def get_R_from_F_coords(F, coords):
     return get_it(F, coords, reduce_list=PosetProduct)
-
-# def get_flatten_muxmap(F0):
-#     check_isinstance(F0, PosetProduct)
-#     coords = []
-#     for i, f in enumerate(F0.subs):
-#         if isinstance(f, PosetProduct):
-#             for j, _ in enumerate(f.subs):
-#                 coords.append((i, j))
-#         else:
-#             coords.append(i)
-#     return coords
+ 

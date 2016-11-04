@@ -158,6 +158,8 @@ class SquareNatMap(Map):
     def repr_map(self, letter):
         return '%s ⟼ %s^2' % (letter, letter)
 
+    def diagram_label(self):
+        return '^2'
 
 
 class SqrtMap(GenericFloatOperation):

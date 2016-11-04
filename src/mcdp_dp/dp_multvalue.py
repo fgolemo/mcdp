@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
-from mcdp_maps import ConstantPosetMap, InvMultDualValueNatMap, MultValueMap, MultValueNatMap
-from mcdp_maps import InvMultValueNatMap
-from mcdp_maps.mult_value import InvMultValueMap, InvMultDualValueMap
-from mcdp_posets import Map, MapNotDefinedHere, RcompUnits, is_top, Nat
-from mcdp_posets.rcomp import Rcomp
+from mcdp_maps import (ConstantPosetMap, InvMultDualValueNatMap, MultValueMap,
+                       MultValueNatMap, InvMultValueNatMap, InvMultValueMap, InvMultDualValueMap)
+from mcdp_posets import Map, MapNotDefinedHere, RcompUnits, is_top, Nat, Rcomp
 from mcdp_posets.rcomp_units import inverse_of_unit, check_mult_units_consistency
 import numpy as np
 

@@ -31,13 +31,18 @@ class PlusValueRcompDP(WrapAMap):
         amap = PlusValueRcompMap(c_value)
         amap_dual = PlusValueDualRcompMap(c_value)
         WrapAMap.__init__(self, amap, amap_dual)
-        
+    
+    def diagram_label(self):
+        return self.amap.diagram_label()
+    
         
 class PlusValueNatDP(WrapAMap):
     def __init__(self,  c_value):
         amap = PlusValueNatMap(c_value)
         amap_dual = PlusValueDualNatMap(c_value)
         WrapAMap.__init__(self, amap, amap_dual)
-        
+    
+    def diagram_label(self):
+        return self.amap.diagram_label() 
         
         

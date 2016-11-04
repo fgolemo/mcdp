@@ -48,6 +48,8 @@ class SquareNatDP(WrapAMap):
          
         WrapAMap.__init__(self, amap, amap_dual)
         
+    def diagram_label(self):
+        return self.amap.diagram_label()
 
 class PromoteToFloatDP(WrapAMap):
     def __init__(self, F, R):
@@ -62,7 +64,6 @@ class CoerceToIntDP(WrapAMap):
         WrapAMap.__init__(self, amap, amap_dual)
         
 def CeilSqrtNatDP():
-    
     # promote to float
     # take sqrt
     # make ceil
