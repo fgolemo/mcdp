@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, raise_desc
 from mcdp_dp import NotSolvableNeedsApprox
 from mcdp_posets import LowerSets, NotBounded, UpperSets, NotLeq
 from mcdp_tests.generation import for_all_dps, primitive_dp_test
@@ -120,5 +120,11 @@ def check_solve_r_chain(id_dp, dp):
                           lfchain_reversed=lfchain_reversed, compact=True)
     
     
-    
+@for_all_dps
+def check_repr(id_dp, dp):  # @UnusedVariable
+    s1 = dp.repr_h_map()
+    s2 = dp.repr_hd_map()
+    if not '⟼' in s1 or not '⟼' in s2:
+        msg = 'Malformed output' 
+        raise_desc(ValueError, msg, repr_h_map=s1, repr_hd_map=s2)
 
