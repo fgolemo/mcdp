@@ -51,7 +51,6 @@ class ProductNDP(WrapAMap, ApproximableDP):
             return ProductNDP_U(self.Fs, self.R, n) 
          
 
-
 class ProductNDP_L(WrapAMap):
     
     def __init__(self, Fs, R, nl):

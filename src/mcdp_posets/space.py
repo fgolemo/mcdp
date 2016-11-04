@@ -33,14 +33,6 @@ class Space(object):
     def belongs(self, x):
         """ Raises NotBelongs """
     
-#     def check_not_belongs(self, x):
-#         try:
-#             self.check_belongs(x)
-#         except NotBelongs:
-#             return
-#         else:
-#             raise Belongs()
-
     @abstractmethod
     def check_equal(self, x, y):
         """ Raises NotEqual if not equal. """
@@ -111,3 +103,7 @@ class Map():
     def __repr__(self):
         return "%s:%s→%s" % (type(self).__name__,
                              self.get_domain(), self.get_codomain())
+        
+    def repr_map(self, letter):  # @UnusedVariable
+        """ Returns a string of the type <letter> |-> f(<letter>) """
+        return '(undef for %s)' % type(self).__name__ 

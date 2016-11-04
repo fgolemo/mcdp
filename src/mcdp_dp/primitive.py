@@ -255,30 +255,39 @@ class PrimitiveDP(WithInternalLog):
     def __repr__(self):
         return '%s(%s→%s)' % (type(self).__name__, self.F, self.R)
 
-    def _add_extra_info(self):
-        if False:
-            s = ""
-
-            if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
-                x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
-                s += ' named: ' + x.__str__()
-
-            s3 = self.get_imp_space().__repr__()
-            s += ' I = %s' % s3
-
-            from mocdp.comp.recursive_name_labeling import get_names_used
-            if isinstance(self.I, SpaceProduct):
-                names = get_names_used(self.I)
-                # names = filter(None, names)
-                if names:
-                    s += ' names: %s' % names
-        else:
-            return ""
-
     def repr_long(self):
-        s = self.__repr__()
-        return s + self._add_extra_info()
+        """ A long, multiline representation """
+        return self.__repr__()
 
+    def repr_h_map(self):
+        """ Returns a string of the type "f |-> P(f)" """
+        return '(undefined for %s)' %  type(self).__name__
+    
+    def repr_hd_map(self):
+        """ Returns a string of the type "f |-> P(f)" """  
+        return '(undefined for %s)' %  type(self).__name__
+
+#     def _add_extra_info(self):
+#         if False:
+#             s = ""
+# 
+#             if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
+#                 x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
+#                 s += ' named: ' + x.__str__()
+# 
+#             s3 = self.get_imp_space().__repr__()
+#             s += ' I = %s' % s3
+# 
+#             from mocdp.comp.recursive_name_labeling import get_names_used
+#             if isinstance(self.I, SpaceProduct):
+#                 names = get_names_used(self.I)
+#                 # names = filter(None, names)
+#                 if names:
+#                     s += ' names: %s' % names
+#         else:
+#             return ""
+
+    
     def _children(self):  # XXX: is this still used?
         l = []
         if hasattr(self, 'dp1'):
@@ -293,17 +302,17 @@ class PrimitiveDP(WithInternalLog):
 
         u = lambda x: x.decode('utf-8')
         ulen = lambda x: len(u(x))
-
-        def clip(x, n):
-            s = str(x)
-            unicode_string = s.decode("utf-8")
-            l = len(unicode_string)
-            s = s + ' ' * (n - l)
-            if len(u(s)) > n:
-                x = u(s)
-                x = x[:n - 3] + '...'
-                s = x.encode('utf-8')
-            return s
+# 
+#         def clip(x, n):
+#             s = str(x)
+#             unicode_string = s.decode("utf-8")
+#             l = len(unicode_string)
+#             s = s + ' ' * (n - l)
+#             if len(u(s)) > n:
+#                 x = u(s)
+#                 x = x[:n - 3] + '...'
+#                 s = x.encode('utf-8')
+#             return s
  
         s2 = ""
 

@@ -38,3 +38,14 @@ class JoinNMap(Map):
             msg = 'Cannot join all elements.'
             raise_wrapped(MapNotDefinedHere, e, msg, res=res, x=x) 
 
+
+    def repr_map(self, letter):
+        n = len(self.dom)
+        def sub(i):
+            indices = list("₀₁₂₃₄₅₆₇₈₉")
+            if i >= len(indices): return '%d' % i
+            return indices[i]
+        elements = [letter + sub(i) for i in range(n)]
+        start = "⟨" +" , ".join(elements) + "⟩"
+        transformed = " ∧ ".join(elements)
+        return '%s ⟼ { %s }' % (start, transformed)

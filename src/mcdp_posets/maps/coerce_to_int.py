@@ -17,3 +17,6 @@ class CoerceToInt(Map):
         if is_top(self.dom, x):
             return self.cod.get_top()
         return int(x)
+    
+    def repr_map(self, letter):
+        return "%s ⟼ (int) %s" % (letter, letter)

@@ -154,6 +154,10 @@ class MultValueMap(Map):
     def __repr__(self):
         return 'MultValueMap(%s)' % (self.unit.format(self.value))
      
+    def repr_map(self, letter):
+        label = '× %s' % self.unit.format(self.value)
+        return  '%s ⟼ %s %s' % (letter, letter, label)
+    
     def diagram_label(self):
         from mcdp_posets.rcomp_units import format_pint_unit_short
         if is_top(self.unit, self.value):

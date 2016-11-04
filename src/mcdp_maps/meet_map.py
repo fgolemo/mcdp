@@ -32,3 +32,27 @@ class MeetNMap(Map):
         except NotJoinable as e:
             msg = 'Cannot meet all elements.'
             raise_wrapped(MapNotDefinedHere, e, msg, res=res, x=x)
+
+    def repr_map(self, letter):
+        n = len(self.dom)
+        elements = get_string_list_of_elements(letter, n)
+        transformed = " ∨ ".join(elements)    
+        start = get_string_vector(letter, n)
+        return '%s ⟼ %s' % (start, transformed)
+    
+def get_string_vector(letter, n):
+    """ Returns ⟨r₁, ..., rₙ⟩ """
+    elements = get_string_list_of_elements(letter, n)
+    start = "⟨" +", ".join(elements) + "⟩"
+    return start
+
+def get_string_list_of_elements(letter, n):
+    """ Returns ["r1", "r2", ...] """
+    def sub(i):
+        # indices = list("₁₂₃₄₅₆₇₈₉")  # ₀
+        indices = [str(_+1) for _ in range(n)]
+        
+        if i >= len(indices): return '%d' % i
+        return indices[i]
+    elements = [letter + sub(i) for i in range(n)]
+    return elements

@@ -281,7 +281,20 @@ class InvPlus2U(PrimitiveDP):
         r1, r2 = r
         maxf = self.F.add(r1, r2)
         return self.F.L(maxf)
+    
+    def repr_h_map(self):
+        return "f ⟼ {⟨r1, r2⟩ | r1 + r2 = f}"
 
+    def repr_hd_map(self):
+        return "⟨r1, r2⟩ ⟼ r1 + r2"
+
+def product_repr_map(letter, n):
+    from mcdp_maps.meet_map import get_string_list_of_elements
+    from mcdp_maps.meet_map import get_string_vector
+    start = get_string_vector(letter, n)
+    elements = get_string_list_of_elements(letter, n)
+    transformed =  "⋅".join(elements)
+    return "%s ⟼ %s" % (start, transformed)
 
 def van_der_corput_sequence(n):
     return sorted([1.0] + [float(van_der_corput(_)) for _ in range(n - 1)])
@@ -350,3 +363,8 @@ class InvPlus2Nat(PrimitiveDP):
     def __repr__(self):
         return 'InvPlus2Nat(%s -> %s)' % (self.F, self.R)
 
+    def repr_h_map(self):
+        return "f ⟼ {⟨r1, r2⟩ | r1 + r2 = f}"
+
+    def repr_hd_map(self):
+        return "⟨r1, r2⟩ ⟼ r1 + r2"

@@ -24,7 +24,9 @@ class PlusValueDP(WrapAMap):
         amap = PlusValueMap(P=F, c_value=c_value, c_space=c_space)
         amap_dual = PlusValueDualMap(P=F, c_value=c_value, c_space=c_space)
         WrapAMap.__init__(self, amap, amap_dual)
-        
+    
+    def diagram_label(self):  
+        return self.amap.diagram_label()
         
 class PlusValueRcompDP(WrapAMap):
     def __init__(self,  c_value):

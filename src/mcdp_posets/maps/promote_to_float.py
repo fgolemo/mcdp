@@ -27,3 +27,6 @@ class PromoteToFloat(Map):
             msg = 'Internal error in PromoteToFloat.'
             raise_wrapped(DPInternalError, e, msg, x=x)
             
+
+    def repr_map(self, letter):
+        return "%s ⟼ (float) %s" % (letter, letter)

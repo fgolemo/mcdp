@@ -171,7 +171,19 @@ else:
             coords = [()] * n
             h = MuxMap(P, coords)
             hd = MeetNMap(n, P)
-        
             WrapAMap.__init__(self, h, hd) 
+            
+#         def repr_hd_map(self):
+#             n = len(self.amap.coords)
+#             from mcdp_maps.meet_map import get_string_list_of_elements
+#             from mcdp_maps.meet_map import get_string_vector
+#             elements = get_string_list_of_elements("r", n)
+#             start = get_string_vector("r", n)
+#             end = " ∨ ".join(elements)
+#             return '%s ⟼ { %s }' % (start, end)
+            
+            
+            
+            
         
         

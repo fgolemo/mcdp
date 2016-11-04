@@ -95,6 +95,8 @@ class MultValueDP(WrapAMap):
             
         WrapAMap.__init__(self, amap, amap_dual)
 
+    def diagram_label(self):  
+        return self.amap.diagram_label()
 
 
 class MultValueDPHelper1Map(Map):

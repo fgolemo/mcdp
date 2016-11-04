@@ -26,6 +26,17 @@ class ProductNMap(Map):
 
     def _call(self, f):
         return Rcomp_multiply_upper_topology_seq(self.F.subs, f, self.R)
+
+    def repr_map(self, letter):
+        return product_repr_map(letter, len(self.F))
+
+def product_repr_map(letter, n):
+    from mcdp_maps.meet_map import get_string_list_of_elements
+    from mcdp_maps.meet_map import get_string_vector
+    start = get_string_vector(letter, n)
+    elements = get_string_list_of_elements(letter, n)
+    transformed =  "⋅".join(elements)
+    return "%s ⟼ %s" % (start, transformed)
     
 
 class ProductNNatMap(Map):
@@ -48,33 +59,6 @@ class ProductNNatMap(Map):
 
     def __repr__(self):
         return 'ProductNNatMap(%s)' % (self.n)
-    
-    
-#         
-#         # first, find out if there are any tops
-#         def is_there_a_top():
-#             for Fi, fi in zip(self.F, f):
-#                 if is_top(Fi, fi):
-#                     return True
-#             return False
-#         
-#         if is_there_a_top():
-#             return self.R.get_top()
-# 
-#         mult = lambda x, y: x * y
-#         try:
-#             r = functools.reduce(mult, f)
-#             if np.isinf(r):
-#                 r = self.R.get_top()
-#         except FloatingPointError as e:
-#             # assuming this is overflow
-#             if 'overflow' in str(e):
-#                 r = self.R.get_top()
-#             elif 'underflow' in str(e):
-#                 r = finfo.tiny
-#             else:
-#                 raise
-#         return r
-    
 
-    
+    def repr_map(self, letter):
+        return product_repr_map(letter, len(self.Fs))

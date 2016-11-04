@@ -45,6 +45,15 @@ class SumNMap(Map):
     def __repr__(self):
         return 'SumNMap(%s → %s)' % (self.dom, self.cod)
     
+    def repr_map(self, letter):
+        from mcdp_maps.meet_map import get_string_list_of_elements
+        from mcdp_maps.meet_map import get_string_vector
+        n = self.n
+        start = get_string_vector(letter, n)
+        elements = get_string_list_of_elements(letter, n)
+        transformed =  " + ".join(elements)
+        return "%s ⟼ %s" % (start, transformed)
+    
 class SumNRcompMap(Map):
     """ Sum of Rcomp. """
     
@@ -61,6 +70,15 @@ class SumNRcompMap(Map):
 
     def __repr__(self):
         return 'SumNRcompMap(%s)' % self.n
+    
+    def repr_map(self, letter):
+        from mcdp_maps.meet_map import get_string_list_of_elements
+        from mcdp_maps.meet_map import get_string_vector
+        n = self.n
+        start = get_string_vector(letter, n)
+        elements = get_string_list_of_elements(letter, n)
+        transformed =  " + ".join(elements)
+        return "%s ⟼ %s" % (start, transformed)
 
 def sum_dimensionality_works(Fs, R):
     """ Raises ValueError if it is not possible to sum Fs to get R. """

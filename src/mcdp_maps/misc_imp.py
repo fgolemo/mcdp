@@ -47,6 +47,9 @@ class GenericFloatOperation(Map):
     
     def diagram_label(self):
         return self.name
+    
+    def repr_map(self, letter):
+        return '%s ⟼ %s(%s)' % (letter, self.name, letter)
 
     @abstractmethod
     def op(self, x):

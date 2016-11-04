@@ -18,6 +18,8 @@ class WrapAMap(EmptyDP):
         
         If map is not defined at f (raises MapNotDefinedHere),
         then it returns an empty set. 
+        
+        # XXX: this cannot derive from EmptyDP
     """
 
     @contract(amap=Map)
@@ -77,6 +79,25 @@ class WrapAMap(EmptyDP):
             return getattr(self.amap, '__name__')
         else:
             return self.amap.__repr__()
+        
+    def repr_h_map(self):
+        """ Returns a string of the type "f |-> P(f)" """
+        m =  self.amap.repr_map('f')
+        s = m.split('⟼')
+        if len(s) != 2:
+            return ('%s:  no arrow in %s' % (type(self), m))
+        return  s[0].strip() + ' ⟼ {' + s[1].strip() + '}' 
+    
+    def repr_hd_map(self):
+        """ Returns a string of the type "f |-> P(f)" """
+        if self.amap_dual is not None:  
+            m =  self.amap_dual.repr_map('r')
+            s = m.split('⟼')
+            if len(s) != 2:
+                return ('%s:  no arrow in %s' % (type(self), m))
+            return  s[0].strip() + ' ⟼ {' + s[1].strip() + '}'
+        else:
+            return '(unset for %s)' % type(self).__name__
 
     def __repr__(self):
         if self.amap_dual is not None:

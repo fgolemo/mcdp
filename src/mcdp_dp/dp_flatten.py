@@ -7,7 +7,8 @@ from multi_index import get_it
 
 from .dp_generic_unary import WrapAMap
 from multi_index.inversion import transform_pretty_print,\
-    transform_right_inverse
+    transform_right_inverse, get_letter_proxy
+from multi_index.get_it_test import is_iterable
 
 
 __all__ = [
@@ -32,7 +33,29 @@ class MuxMap(Map):
         r = get_it(x, self.coords, reduce_list=tuple)
         return r
 
+    def repr_map(self, letter):
+        if letter == 'f':
+            start = 'a'
+        else:
+            start = 'A'
+#                     
+#         def transform_pretty_print2(P, coords, start_letter='a'):
+#             proxy, _ = get_letter_proxy(P, start_letter)
+#             transformed = get_it(proxy, coords, list)
+#             def pretty(x):
+#                 if is_iterable(x):
+#                     m = [pretty(_) for _ in x]
+#                     return '⟨' + ', '.join(m) + '⟩'
+#                 else:
+#                     return str(x)
+#             t1 = pretty(proxy)
+#             t2 = pretty(transformed)
+#             s = 'here %s ⟼ %s' % (t1, t2)
+#             return s
 
+        return transform_pretty_print(self.dom, self.coords, start)
+    
+            
 class Mux(WrapAMap):
 
     @contract(coords='seq(int|tuple|list)|int')

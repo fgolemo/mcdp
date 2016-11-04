@@ -105,10 +105,15 @@ class Floor0DP(WrapAMap):
         amap_dual = CeilMap(F)
         WrapAMap.__init__(self, amap, amap_dual)
 
+    def diagram_label(self):  
+        return 'floor0'
+
 class CeilDP(WrapAMap):
     def __init__(self, F):
         amap = CeilMap(F)
         amap_dual = FloorMap(F)
         WrapAMap.__init__(self, amap, amap_dual)
-        
+    def diagram_label(self):  
+        return 'ceil'
+
     
