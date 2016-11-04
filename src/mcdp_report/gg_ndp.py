@@ -19,6 +19,8 @@ from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning, DPInternalError
 from mocdp.ndp import NamedDPCoproduct
 from mcdp_dp.dp_sum import SumNRcompDP
+from mcdp_dp.dp_products import ProductNNatDP, ProductNRcompDP
+from mcdp_dp.dp_inv_mult import InvMult2Nat
 
 
 STYLE_GREENRED = 'greenred'
@@ -256,7 +258,8 @@ def create(gdc, ndp, plotting_info):
 
 def is_simple(ndp):
     return isinstance(ndp, SimpleWrap) and isinstance(ndp.dp,
-     (MeetNDP, JoinNDP, Identity, SumNDP,
+     (MeetNDP, JoinNDP, Identity, 
+      SumNDP,
       SumNRcompDP, 
       ProductNDP, InvPlus2, InvMult2))
 
@@ -276,17 +279,25 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
 
     # This is a list of either PrimitiveDP or Maps
     special = [
-#         (Sum, ''),
         (SumNDP, ''),
+        (SumNRcompDP, ''),
         (SumNNatDP, ''),
-#         (Product, ''),
-        (ProductNDP, ''),
+
         (InvPlus2, ''),
-        (InvMult2, ''),
         (InvPlus2Nat, ''),
+
+        (ProductNDP, ''),
+        (ProductNNatDP, ''),
+        (ProductNRcompDP, ''),
+
+        (InvMult2, ''),
+        (InvMult2Nat, ''),
+        
         (Conversion, ''),
+        
         (MeetNDualDP, ''),
         (JoinNDP, ''),
+        
         (TakeFun, ''),
         (TakeRes, ''),
     ]

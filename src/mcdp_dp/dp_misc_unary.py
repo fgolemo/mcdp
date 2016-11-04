@@ -83,6 +83,10 @@ class SquareDP(WrapAMap):
         amap = SquareMap(F)
         amap_dual = SqrtMap(F)
         WrapAMap.__init__(self, amap, amap_dual)
+    
+    def diagram_label(self):
+        return '^ 2'
+    
         
 class SqrtRDP(WrapAMap):
     """ r >= sqrt(f) for rcomp or rcompunits """
@@ -90,6 +94,9 @@ class SqrtRDP(WrapAMap):
         amap = SqrtMap(F)
         amap_dual = SquareMap(F)
         WrapAMap.__init__(self, amap, amap_dual)
+    
+    def diagram_label(self):
+        return 'sqrt'
         
 class Floor0DP(WrapAMap):
     """

@@ -143,7 +143,8 @@ class SquareNatMap(Map):
     def _call(self, x):
         return Nat_mult_lowersets_continuous(x, x)
     
-    
+    def repr_map(self, letter):
+        return '%s ⟼ %s^2' % (letter, letter)
 
 def square(x):
     try:
