@@ -54,7 +54,8 @@ def check_solve_top_bottom(id_dp, dp):
 
 
 def try_with_approximations(id_dp, dp, test):
-    nl = nu = 5
+    nl = nu = 2
+    
     dpL, dpU = get_dp_bounds(dp, nl, nu)
     
     if '_lower_' in id_dp or '_upper_' in id_dp:
