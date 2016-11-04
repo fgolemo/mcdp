@@ -245,7 +245,9 @@ class TypesUniverse(Preorder):
         if isinstance(A, PosetCoproduct):
             for i, Ai in enumerate(A.spaces):
                 if self.equal(B, Ai):
-                    h, hd = get_coproduct_embedding(B, A, i)
+                    hd, h = get_coproduct_embedding(B, A, i)
+#                     print('A: %s' % A)
+#                     print('A: %s' % A)
                     assert A == h.get_domain()
                     assert B == h.get_codomain()
                     assert A == hd.get_codomain()
@@ -262,15 +264,7 @@ class TypesUniverse(Preorder):
                     assert A == hd.get_codomain()
                     assert B == hd.get_domain()
                     return h, hd
-                
-#         if isinstance(B, PosetCoproduct):
-#             for i, x in enumerate(B.spaces):
-#                 try:
-#                     self.check_leq(A, x)
-#                     return get_coproduct_embedding(A, B, i)
-#                 except NotLeq:
-#                     pass
-
+                 
         msg = 'Super conversion not available.'
         raise_desc(NotLeq, msg, A=A, B=B)
              
@@ -391,6 +385,7 @@ def get_coproduct_embedding(A, B, i):
 
 
 class Coprod_A_to_B_map(Map):
+    
     @contract(B=PosetCoproduct, i='int')
     def __init__(self, A, B, i):
         check_isinstance(B, PosetCoproduct)
@@ -413,6 +408,7 @@ class Coprod_A_to_B_map(Map):
 
 
 class Coprod_B_to_A_map(Map):
+    
     @contract(B=PosetCoproduct, i='int')
     def __init__(self, A, B, i):
         check_isinstance(B, PosetCoproduct)
