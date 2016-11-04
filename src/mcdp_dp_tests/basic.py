@@ -3,8 +3,9 @@ from contracts.utils import raise_wrapped, raise_desc
 from mcdp_dp import NotSolvableNeedsApprox
 from mcdp_posets import LowerSets, NotBounded, UpperSets, NotLeq
 from mcdp_tests.generation import for_all_dps, primitive_dp_test
-from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.primitive import ApproximableDP
+from mcdp_dp.dp_transformations import get_dp_bounds
+
 
 
 @for_all_dps
@@ -54,7 +55,6 @@ def check_solve_top_bottom(id_dp, dp):
 
 
 def try_with_approximations(id_dp, dp, test):
-    from mcdp_dp.dp_transformations import get_dp_bounds
     nl = nu = 5
     dpL, dpU = get_dp_bounds(dp, nl, nu)
     
@@ -90,7 +90,8 @@ def check_solve_f_chain(id_dp, dp):
             poset_check_chain(UR, trchain)
         except ValueError as e:
             msg = 'The map solve() for %r is not monotone.' % id_dp
-            raise_wrapped(Exception, e, msg, f_chain=f_chain, trchain=trchain, compact=True)
+            raise_wrapped(Exception, e, msg, f_chain=f_chain, 
+                          trchain=trchain, compact=True)
 
 
 @for_all_dps
