@@ -97,7 +97,15 @@ class FloorMap(GenericFloatOperation):
         GenericFloatOperation.__init__(self, dom, 'floor')
 
     def op(self, x):
-                
+        return np.floor(x)
+          
+    
+class SquareMap(GenericFloatOperation):
+
+    def __init__(self, dom):
+        GenericFloatOperation.__init__(self, dom, 'square')
+
+    def op(self, x):
         def square(x):
             try:
                 res = x * x
@@ -109,16 +117,6 @@ class FloorMap(GenericFloatOperation):
                 else:
                     raise
             return res
-
-        return np.floor(x)
-    
-    
-class SquareMap(GenericFloatOperation):
-
-    def __init__(self, dom):
-        GenericFloatOperation.__init__(self, dom, 'square')
-
-    def op(self, x):
         return square(x)
     
     
