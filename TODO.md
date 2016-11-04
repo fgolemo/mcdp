@@ -197,4 +197,8 @@ http://ares-super.lids.mit.edu/~andrea/env_mcdp/src/mcdp/out/check_rendering/plu
 - B: we need to escape # in interactive. Maybe hexify?
 http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c  %0A    x <= c <= d # test%0A    e <= a1 # test%0A}
 
+- bug: we cannot visualize "ceilsqrt", see e.g. http://127.0.0.1:8080/libraries/solver/models/plusinvnat2/views/ndp_graph/
 
+- change TakeRes, TakeFun with the identity
+
+- check SumNDP repr_map: should be = instead of <=

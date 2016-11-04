@@ -7,8 +7,7 @@ from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (Constant, ConstantMinimals, Conversion,
     Identity, InvMult2, InvPlus2, InvPlus2Nat, JoinNDP, Limit, MeetNDualDP,
     Mux, MuxMap, ProductNDP, SumNDP, SumNNatDP, TakeFun, TakeRes,
-    WrapAMap) 
-from mcdp_dp.dp_max import MeetNDP
+    WrapAMap, InvMult2Nat, MeetNDP, ProductNNatDP, ProductNRcompDP, SumNRcompDP)
 from mcdp_lang.blocks import get_missing_connections
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
@@ -18,7 +17,6 @@ from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning, DPInternalError
 from mocdp.ndp import NamedDPCoproduct
-from mcdp_dp.dp_sum import SumNRcompDP
 
 
 STYLE_GREENRED = 'greenred'
@@ -64,6 +62,7 @@ class RecursiveEdgeLabeling(PlottingInfo):
     @contract(ndp_name='tuple')
     def get_rname_label(self, ndp_name, rname):
         return self.f.get_rname_label(self._name(ndp_name), rname)
+
 
 @contract(ndp=NamedDP, direction='str', yourname='str|None')
 def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourname=None,
@@ -256,7 +255,8 @@ def create(gdc, ndp, plotting_info):
 
 def is_simple(ndp):
     return isinstance(ndp, SimpleWrap) and isinstance(ndp.dp,
-     (MeetNDP, JoinNDP, Identity, SumNDP,
+     (MeetNDP, JoinNDP, Identity, 
+      SumNDP,
       SumNRcompDP, 
       ProductNDP, InvPlus2, InvMult2))
 
@@ -276,17 +276,25 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
 
     # This is a list of either PrimitiveDP or Maps
     special = [
-#         (Sum, ''),
         (SumNDP, ''),
+        (SumNRcompDP, ''),
         (SumNNatDP, ''),
-#         (Product, ''),
-        (ProductNDP, ''),
+
         (InvPlus2, ''),
-        (InvMult2, ''),
         (InvPlus2Nat, ''),
+
+        (ProductNDP, ''),
+        (ProductNNatDP, ''),
+        (ProductNRcompDP, ''),
+
+        (InvMult2, ''),
+        (InvMult2Nat, ''),
+        
         (Conversion, ''),
+        
         (MeetNDualDP, ''),
         (JoinNDP, ''),
+        
         (TakeFun, ''),
         (TakeRes, ''),
     ]

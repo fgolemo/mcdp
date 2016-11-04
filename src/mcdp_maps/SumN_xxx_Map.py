@@ -3,9 +3,9 @@ import functools
 
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
+from mcdp_maps.repr_map import sumn_repr_map
 from mcdp_posets import (Int, Poset, Space, get_types_universe, Map, Nat, PosetProduct,
-                         Rcomp, RcompUnits)
-from mcdp_posets.poset import is_top
+                         Rcomp, RcompUnits, is_top)
 from mcdp_posets.rcomp_units import rcomp_add
 import numpy as np
 
@@ -45,6 +45,10 @@ class SumNMap(Map):
     def __repr__(self):
         return 'SumNMap(%s → %s)' % (self.dom, self.cod)
     
+    def repr_map(self, letter):
+        return sumn_repr_map(letter, len(self.Fs))
+    
+
 class SumNRcompMap(Map):
     """ Sum of Rcomp. """
     
@@ -61,6 +65,9 @@ class SumNRcompMap(Map):
 
     def __repr__(self):
         return 'SumNRcompMap(%s)' % self.n
+    
+    def repr_map(self, letter):
+        return sumn_repr_map(letter, self.n)
 
 def sum_dimensionality_works(Fs, R):
     """ Raises ValueError if it is not possible to sum Fs to get R. """
@@ -129,9 +136,12 @@ class SumNIntMap(Map):
         target = Int()
         for xe, s in zip(x, self.subs):
             xe_int = s(xe)
-            res = target.add(res, xe_int)
+            res = target.add(res, xe_int) # XXX
         r = self.to_R(res)
         return r
+    
+    def repr_map(self, letter):
+        return sumn_repr_map(letter, self.n)
 
 
 class SumNNatsMap(Map):
@@ -159,4 +169,6 @@ class SumNNatsMap(Map):
             return top
 
         return res
-
+    
+    def repr_map(self, letter):
+        return sumn_repr_map(letter, self.n)

@@ -25,6 +25,10 @@ class Max1Map(Map):
             msg = 'Cannot compute join of elements.'
             raise_wrapped(MapNotDefinedHere, e, msg, value=self.value, x=x)
         return r
+    
+    def repr_map(self, letter):
+        return "%s ⟼ %s ∧ %s" % (letter, letter, self.F.format(self.value))
+
 
 
 class Max1dualMap(Map):

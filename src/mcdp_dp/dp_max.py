@@ -2,14 +2,16 @@
 from contracts.utils import raise_wrapped
 from mcdp_maps import JoinNMap, Max1Map, MeetNMap
 from mcdp_maps.max1map import Max1dualMap
+from mcdp_maps.repr_map import repr_map_joinn
 from mcdp_posets import MapNotDefinedHere, Poset, PosetProduct, NotBounded
 from mcdp_posets.poset import is_top, is_bottom
 from mocdp.exceptions import mcdp_dev_warning
 
+from .dp_flatten import Mux
 from .dp_flatten import MuxMap
 from .dp_generic_unary import WrapAMap
 from .primitive import EmptyDP
-from mcdp_dp.dp_flatten import Mux
+from .repr_strings import repr_hd_map_meetndp
 
 
 __all__ = [
@@ -39,6 +41,9 @@ class Max1(WrapAMap):
     
     def __repr__(self):
         return 'Max1(%r, %s)' % (self.F, self.value)
+
+    def repr_hd_map(self):
+        return "r ⟼ {r} if r ≽ %s, else ø" % (self.F.format(self.value))
 
         
 class MeetNDP(WrapAMap):
@@ -78,6 +83,9 @@ class MeetNDP(WrapAMap):
                 maximals.add(tuple(tops))
             return self.F.Ls(maximals)
 
+    def repr_hd_map(self):
+        return repr_hd_map_meetndp('r', self.n, '⊤')
+    
     def diagram_label(self):  # XXX
         return 'Min'
     
@@ -117,6 +125,12 @@ class JoinNDualDP(EmptyDP):
         
         self.joinmap = JoinNMap(n, F)
         
+    def repr_h_map(self):
+        return repr_hd_map_meetndp('f', self.n, '⊥')
+    
+    def repr_hd_map(self):
+        return repr_map_joinn('r', self.n)
+    
     def solve_r(self, r):
         try:
             m = self.joinmap(r)
@@ -171,7 +185,19 @@ else:
             coords = [()] * n
             h = MuxMap(P, coords)
             hd = MeetNMap(n, P)
-        
             WrapAMap.__init__(self, h, hd) 
+            
+#         def repr_hd_map(self):
+#             n = len(self.amap.coords)
+#             from mcdp_maps.meet_map import get_string_list_of_elements
+#             from mcdp_maps.meet_map import get_string_vector
+#             elements = get_string_list_of_elements("r", n)
+#             start = get_string_vector("r", n)
+#             end = " ∨ ".join(elements)
+#             return '%s ⟼ { %s }' % (start, end)
+            
+            
+            
+            
         
         

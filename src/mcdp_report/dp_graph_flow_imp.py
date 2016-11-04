@@ -3,6 +3,7 @@ from contracts import contract
 from mcdp_dp import DPLoop0, DPLoop2, Parallel, PrimitiveDP, Series0
 from mocdp.exceptions import mcdp_dev_warning
 
+
 __all__ = [
     'dp_graph_flow',
 ]
@@ -55,8 +56,10 @@ def dp_graph_flow(dp0, imp=None):
         label = str(R1)
         if m_extra is not None:
             label += ' m_extra: %s' % str(m_extra)
-        gg.newLink(n1o, n2i, label=label)
-
+        
+        l = gg.newLink(n1o, n2i, label=label)
+        gg.propertyAppend(l, 'arrowhead', 'none')
+        
         return (n1i, n2o)
 
     def go_parallel(dp, imp):
@@ -73,11 +76,14 @@ def dp_graph_flow(dp0, imp=None):
         gg.styleApply("connector", i)
         gg.styleApply("connector", o)
 
-        gg.newLink(i, n1i, label=str(dp.dp1.get_fun_space()))
-        gg.newLink(i, n2i, label=str(dp.dp2.get_fun_space()))
-        gg.newLink(n1o, o, label=str(dp.dp1.get_res_space()))
-        gg.newLink(n2o, o, label=str(dp.dp2.get_res_space()))
+        l1 = gg.newLink(i, n1i, label=str(dp.dp1.get_fun_space()))
+        l2 = gg.newLink(i, n2i, label=str(dp.dp2.get_fun_space()))
+        l3 = gg.newLink(n1o, o, label=str(dp.dp1.get_res_space()))
+        l4 = gg.newLink(n2o, o, label=str(dp.dp2.get_res_space()))
 
+        for _ in [l1, l2, l3, l4]:
+            gg.propertyAppend(_, 'arrowhead', 'none')
+            
         return (i, o)
 
     def go_loop(dp, imp):
@@ -93,9 +99,8 @@ def dp_graph_flow(dp0, imp=None):
         o = gg.newItem('')
         gg.propertyAppend(o, "shape", "point")
 
-        gg.newLink(i, n1i, label=str(dp.dp1.get_fun_space()))
-
-        gg.newLink(n1o, o, label=str(dp.dp1.get_res_space()))
+        l0 = gg.newLink(i, n1i, label=str(dp.dp1.get_fun_space()))
+        l1 = gg.newLink(n1o, o, label=str(dp.dp1.get_res_space()))
         loop_label = str(dp.dp1.get_res_space())
 
         mcdp_dev_warning('add option')
@@ -108,6 +113,9 @@ def dp_graph_flow(dp0, imp=None):
         gg.propertyAppend(l, "color", "red")
         gg.propertyAppend(l, "headport", "sw")
         gg.propertyAppend(l, "tailport", "s")
+
+        for _ in [l0, l1, l]:
+            gg.propertyAppend(_, 'arrowhead', 'none')
 
         return (i, o)
 
@@ -124,9 +132,11 @@ def dp_graph_flow(dp0, imp=None):
         o = gg.newItem('|')
         gg.propertyAppend(o, "shape", "plaintext")
 
-        gg.newLink(i, n1i, label=str(dp.dp1.get_fun_space()))
+        l0 = gg.newLink(i, n1i, label=str(dp.dp1.get_fun_space()))
+        l1 = gg.newLink(n1o, o, label=str(dp.dp1.get_res_space()))
+        gg.propertyAppend(l0, 'arrowhead', 'none')
+        gg.propertyAppend(l1, 'arrowhead', 'none')
 
-        gg.newLink(n1o, o, label=str(dp.dp1.get_res_space()))
         loop_label = str(dp.F2)
 
         mcdp_dev_warning('add option')
@@ -139,6 +149,8 @@ def dp_graph_flow(dp0, imp=None):
         gg.propertyAppend(l, "color", "red")
         gg.propertyAppend(l, "headport", "sw")
         gg.propertyAppend(l, "tailport", "s")
+        
+        gg.propertyAppend(l, 'arrowhead', 'none')
 
         return (i, o)
 
@@ -154,8 +166,10 @@ def dp_graph_flow(dp0, imp=None):
     f0 = gg.newItem("")
     (f, r) = go(dp0, imp)
     r0 = gg.newItem("")
-    gg.newLink(f0, f, label=str(dp0.get_fun_space()))
-    gg.newLink(r, r0, label=str(dp0.get_res_space()))
+    l0 = gg.newLink(f0, f, label=str(dp0.get_fun_space()))
+    l1 = gg.newLink(r, r0, label=str(dp0.get_res_space()))
+    gg.propertyAppend(l0, 'arrowhead', 'none')
+    gg.propertyAppend(l1, 'arrowhead', 'none')
 
     gg.styleApply("prim", f0)
     gg.styleApply("prim", r0)

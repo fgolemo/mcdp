@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import check_isinstance, raise_desc, raise_wrapped
-from mcdp_posets import Nat, Poset, PosetProduct, RcompUnits, get_types_universe, is_top
+from contracts.utils import check_isinstance, raise_desc
+from mcdp_posets import Nat, Poset, PosetProduct, RcompUnits
+from mcdp_posets import Rcomp, get_types_universe, is_top
 from mcdp_posets.nat import Nat_add
-from mcdp_posets.rcomp import Rcomp, finfo
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
-import numpy as np
 
 from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
+from .repr_strings import invplus2_repr_h_map, invplus2_repr_hd_map
+from .sequences_invplus import sample_sum_lowerbound, sample_sum_upperbound
 
 
 _ = Nat, Poset
@@ -70,6 +71,12 @@ class InvPlus2(ApproximableDP):
     def get_implementations_f_r(self, f, r):  # @UnusedVariable
         raise NotSolvableNeedsApprox(type(self))
 
+    def repr_h_map(self):
+        return invplus2_repr_h_map('f', 'r')
+
+    def repr_hd_map(self):
+        return invplus2_repr_hd_map('r')
+    
 
 class InvPlus2L(PrimitiveDP):
     """ 
@@ -107,148 +114,13 @@ class InvPlus2L(PrimitiveDP):
         maxf = self.F.add(r1, r2)
         return self.F.L(maxf)
     
-def sample_sum_lowerbound(F, R, f, n):
-    """ 
-        Returns a set of points in R below the line {(a,b) | a + b = f } 
-        such that the line is contained in the upperclosure of the points.
-        
-        It uses the variable InvPlus2.ALGO to decide the type 
-        of sampling.
-    """
-    check_isinstance(R, PosetProduct) 
-    assert len(R) == 2
+    def repr_h_map(self):
+        return invplus2_repr_h_map('f', 'r') + ' (approx)'
+
+    def repr_hd_map(self):
+        return invplus2_repr_hd_map('r')
+
     
-    if is_top(F, f):
-            # +infinity
-        top1 = R[0].get_top()
-        top2 = R[1].get_top()
-        return set([(top1, 0.0), (0.0, top2)])
-        
-    if F.leq(f, 0.0): # f == 0
-        return set([(0.0, 0.0)])
-         
-    if InvPlus2.ALGO == InvPlus2.ALGO_VAN_DER_CORPUT:
-        options = van_der_corput_sequence(n + 1)
-    elif InvPlus2.ALGO == InvPlus2.ALGO_UNIFORM:
-        options = np.linspace(0.0, 1.0, n + 1)
-    else:
-        assert False, InvPlus2.ALGO
-
-    s = []
-    for o in options:
-        s.append((f * o, f * (1.0 - o)))
-
-    options = set()
-    for i in range(n):
-        x = s[i][0]
-        y = s[i + 1][1]
-        
-        a = R.meet(s[i], s[i+1])
-        assert (x,y) == a, ((x,y), a)
-        
-        options.add((x, y))    
-
-    return options
-
-def sample_sum_lowersets(F, R, f, n):
-    """ 
-        Returns a set of points in R *above* the line {(a,b) | a + b = f } 
-        such that the line is contained in the downclosure of the points.
-        
-        It uses the variable InvPlus2.ALGO to decide the type of sampling.
-    """
-    check_isinstance(R, PosetProduct) 
-    assert len(R) == 2
-    
-    if is_top(F, f):
-        # this is not correct, however it does not form a monotone sequence
-            # +infinity
-        top1 = R[0].get_top()
-        top2 = R[1].get_top()
-        return set([(top1, top2)])
-        
-    if F.leq(f, 0.0): # f == 0
-        return set([(0.0, 0.0)])
-         
-    if InvPlus2.ALGO == InvPlus2.ALGO_VAN_DER_CORPUT:
-        options = van_der_corput_sequence(n + 1)
-    elif InvPlus2.ALGO == InvPlus2.ALGO_UNIFORM:
-        options = np.linspace(0.0, 1.0, n + 1)
-    else:
-        assert False, InvPlus2.ALGO
-
-    s = []
-    for o in options:
-        try:
-            s.append((f * o, f * (1.0 - o)))
-        except FloatingPointError as e:
-            if 'underflow' in str(e):
-                # assert f <= finfo.tiny, (f, finfo.tiny) 
-                mcdp_dev_warning('not sure about this')
-                s.append((finfo.eps, finfo.eps))
-            else:
-                raise_wrapped(FloatingPointError, e, 'error', f=f, o=o)
-
-    # the sequence s[] is ordered
-    for i in range(len(s)-1):
-        xs = [_[0] for _ in s]
-        ys = [_[1] for _ in s]
-        
-        if not xs[i] < xs[i+1]:
-            msg = 'Invalid sequence (s[%s].x = %s !< s[%s].x = %s.' % (i, xs[i],
-                                                                   i+1, xs[i+1])
-            xs2 = map(R[0].format, xs)
-            ys2 = map(R[1].format, ys)
-            raise_desc(AssertionError, msg, s=s, xs=xs, ys=ys, xs2=xs2, ys2=ys2)
-        
-    options = set()
-    for i in range(n):
-        x = s[i + 1][0]
-        y = s[i][1] # join
-        
-        a = R.join(s[i], s[i+1])
-        
-        if (x,y) != a:
-            msg = 'Numerical error'
-            raise_desc(AssertionError, msg,
-                       x=x, y=y, a=a, s_i=s[i], s_i_plus=s[i+1])
-        options.add((x, y))    
-
-    return options
-
-def sample_sum_upperbound(F, R, f, nu):
-    """ 
-        F = X
-        R = PosetProduct((X, X))
-        
-        Returns a set of points in R on the line {(a,b) | a + b = f }.
-        
-        If f = Top, F = Top.
-    
-        It uses the variable InvPlus2.ALGO to decide the type 
-        of sampling.
-    """
-
-    if is_top(F, f):
-        # +infinity
-        top1 = R[0].get_top()
-        top2 = R[1].get_top()
-        return set([(top1, top2)])
-    
-    if F.leq(f, 0.0): # f == 0
-        return set([(0.0, 0.0)])
-            
-    if InvPlus2.ALGO == InvPlus2.ALGO_VAN_DER_CORPUT:
-        options = van_der_corput_sequence(nu)
-    elif InvPlus2.ALGO == InvPlus2.ALGO_UNIFORM:
-        options = np.linspace(0.0, 1.0, nu)
-    else:
-        assert False, InvPlus2.ALGO
-
-    s = set()
-    for o in options:
-        s.add((f * o, f * (1.0 - o)))
-    return s
 
 class InvPlus2U(PrimitiveDP):
 
@@ -281,18 +153,12 @@ class InvPlus2U(PrimitiveDP):
         r1, r2 = r
         maxf = self.F.add(r1, r2)
         return self.F.L(maxf)
+    
+    def repr_h_map(self):
+        return invplus2_repr_h_map('f', 'r') + ' (approx)'
 
-
-def van_der_corput_sequence(n):
-    return sorted([1.0] + [float(van_der_corput(_)) for _ in range(n - 1)])
-
-def van_der_corput(n, base=2):
-    vdc, denom = 0, 1
-    while n:
-        denom *= base
-        n, remainder = divmod(n, base)
-        vdc += remainder * 1.0 / denom
-    return vdc
+    def repr_hd_map(self):
+        return invplus2_repr_hd_map('r')
 
 
 class InvPlus2Nat(PrimitiveDP):
@@ -349,4 +215,10 @@ class InvPlus2Nat(PrimitiveDP):
 
     def __repr__(self):
         return 'InvPlus2Nat(%s -> %s)' % (self.F, self.R)
+
+    def repr_h_map(self):
+        return invplus2_repr_h_map('f', 'r')
+
+    def repr_hd_map(self):
+        return invplus2_repr_hd_map('r')
 

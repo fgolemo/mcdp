@@ -129,6 +129,11 @@ class DPLoop2(PrimitiveDP):
 
         return options
 
+    def repr_h_map(self):
+        return 'f ⟼ lfp( h0(f, -) )'
+    
+    def repr_hd_map(self):
+        return 'r ⟼ lfp( h*0(r, -) )'
 
 #     def evaluate_f_m(self, f1, m):
 #         """ Returns the resources needed

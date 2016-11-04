@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, raise_desc
 from mcdp_dp import NotSolvableNeedsApprox
+from mcdp_dp.dp_transformations import get_dp_bounds
+from mcdp_dp.primitive import ApproximableDP
 from mcdp_posets import LowerSets, NotBounded, UpperSets, NotLeq
 from mcdp_tests.generation import for_all_dps, primitive_dp_test
+from mocdp.exceptions import DPNotImplementedError
 
 
 @for_all_dps
@@ -52,8 +55,8 @@ def check_solve_top_bottom(id_dp, dp):
 
 
 def try_with_approximations(id_dp, dp, test):
-    from mcdp_dp.dp_transformations import get_dp_bounds
-    nl = nu = 5
+    nl = nu = 3
+    
     dpL, dpU = get_dp_bounds(dp, nl, nu)
     
     if '_lower_' in id_dp or '_upper_' in id_dp:
@@ -61,7 +64,7 @@ def try_with_approximations(id_dp, dp, test):
         print(msg)
         return
     
-    print('approx: %s -> %s, %s' % (dp, dpL, dpU))    
+    #print('approx: %s -> %s, %s' % (dp, dpL, dpU))    
     test(id_dp + '_lower_%s' % nl, dpL)
     test(id_dp + '_upper_%s' % nu, dpU)
     
@@ -88,8 +91,8 @@ def check_solve_f_chain(id_dp, dp):
             poset_check_chain(UR, trchain)
         except ValueError as e:
             msg = 'The map solve() for %r is not monotone.' % id_dp
-            raise_wrapped(Exception, e, msg, f_chain=f_chain, trchain=trchain, compact=True)
-
+            raise_wrapped(Exception, e, msg, f_chain=f_chain, 
+                          trchain=trchain, compact=True)
 
 
 @for_all_dps
@@ -120,5 +123,21 @@ def check_solve_r_chain(id_dp, dp):
                           lfchain_reversed=lfchain_reversed, compact=True)
     
     
-    
+@for_all_dps
+def check_repr(id_dp, dp):  # @UnusedVariable
+    s1 = dp.repr_h_map()
+    s2 = dp.repr_hd_map()
+    print(s1)
+    print(s2)
+    if not '⟼' in s1 or not '⟼' in s2:
+        msg = '%s: Malformed output' % (type(dp).__name__) 
+        raise_desc(ValueError, msg, repr_h_map=s1, repr_hd_map=s2)
 
+    if not '_approx_' in id_dp and isinstance(dp, ApproximableDP):
+        try:
+            dpL, dpU = get_dp_bounds(dp, 4, 4)
+            check_repr(id_dp + '_approx_Lower', dpL)
+            check_repr(id_dp + '_approx_Upper', dpU)
+        except (DPNotImplementedError, NotImplementedError):
+            pass
+        

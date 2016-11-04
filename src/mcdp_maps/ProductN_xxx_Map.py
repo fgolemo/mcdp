@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance
+from mcdp_maps.repr_map import repr_map_product
 from mcdp_posets import Map, PosetProduct, RcompUnits, Nat, Rcomp
 from mcdp_posets.nat import Nat_mult_uppersets_continuous_seq
 from mcdp_posets.rcomp import Rcomp_multiply_upper_topology_seq
@@ -26,6 +27,11 @@ class ProductNMap(Map):
 
     def _call(self, f):
         return Rcomp_multiply_upper_topology_seq(self.F.subs, f, self.R)
+
+    def repr_map(self, letter):
+        return repr_map_product(letter, len(self.F))
+
+
     
 
 class ProductNNatMap(Map):
@@ -48,33 +54,6 @@ class ProductNNatMap(Map):
 
     def __repr__(self):
         return 'ProductNNatMap(%s)' % (self.n)
-    
-    
-#         
-#         # first, find out if there are any tops
-#         def is_there_a_top():
-#             for Fi, fi in zip(self.F, f):
-#                 if is_top(Fi, fi):
-#                     return True
-#             return False
-#         
-#         if is_there_a_top():
-#             return self.R.get_top()
-# 
-#         mult = lambda x, y: x * y
-#         try:
-#             r = functools.reduce(mult, f)
-#             if np.isinf(r):
-#                 r = self.R.get_top()
-#         except FloatingPointError as e:
-#             # assuming this is overflow
-#             if 'overflow' in str(e):
-#                 r = self.R.get_top()
-#             elif 'underflow' in str(e):
-#                 r = finfo.tiny
-#             else:
-#                 raise
-#         return r
-    
 
-    
+    def repr_map(self, letter):
+        return repr_map_product(letter, self.n)

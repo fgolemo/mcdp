@@ -2,6 +2,7 @@
 from mcdp_posets import LowerSet, PosetProduct, SpaceProduct, UpperSet
 
 from .primitive import PrimitiveDP
+from mcdp_posets.poset import NotBounded
 
 
 __all__ = [
@@ -37,5 +38,17 @@ class Terminator(PrimitiveDP):
         UR = UpperSet([()], self.R)
         return LF, UR
 
+    # visualization
     def __repr__(self):
         return 'Terminator(%r)' % self.F
+    
+    def repr_h_map(self):
+        return "f ⟼ {⟨⟩}"
+    
+    def repr_hd_map(self):
+        try: 
+            top = self.F.get_top()
+            s = self.F.format(top)
+        except NotBounded:
+            s = 'Max %s' % (self.F)
+        return "⟨⟩ ⟼ {%s}" % s

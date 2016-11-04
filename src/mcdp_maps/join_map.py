@@ -2,6 +2,7 @@
 from contracts import contract
 from contracts.utils import raise_wrapped
 from mcdp_posets import Map, Poset, PosetProduct, NotJoinable, MapNotDefinedHere
+from mcdp_maps.repr_map import repr_map_joinn
 
 
 __all__ = [
@@ -38,3 +39,7 @@ class JoinNMap(Map):
             msg = 'Cannot join all elements.'
             raise_wrapped(MapNotDefinedHere, e, msg, res=res, x=x) 
 
+
+    def repr_map(self, letter):
+        return repr_map_joinn(letter, len(self.dom))
+    
