@@ -141,7 +141,6 @@ class Parallel(PrimitiveDP):
         r1 = self.dp1.repr_long()
         r2 = self.dp2.repr_long()
         s = 'Parallel2  %% %s ⟶  %s' % (self.get_fun_space(), self.get_res_space())
-        s += self._add_extra_info()
         s += '\n' + indent(r1, '. ', first='\ ')
         s += '\n' + indent(r2, '. ', first='\ ') 
         return s

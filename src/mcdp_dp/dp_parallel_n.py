@@ -93,9 +93,7 @@ class ParallelN(PrimitiveDP):
 
     def get_implementations_f_r(self, f, r):
         _, pack, _ = self._get_product()
-
-
-
+        
         all_imps = []
         for i, dp in enumerate(self.dps):
             fi = f[i]
@@ -112,33 +110,11 @@ class ParallelN(PrimitiveDP):
 
         return options
 
-#         f1, f2 = f
-#         r1, r2 = r
-#         _, pack, _ = get_product_compact(self.M1, self.M2)
-#
-#         m1s = self.dp1.get_implementations_f_r(f1, r1)
-#         m2s = self.dp2.get_implementations_f_r(f2, r2)
-#
-#         options = set()
-#         for m1 in m1s:
-#             for m2 in m2s:
-#                 m = pack(m1, m2)
-#                 options.add(m)
-#
-#         if do_extra_checks():
-#             for _ in options:
-#                 self.M.belongs(_)
-#
-#         return options
-
-
-
     def __repr__(self):
         return 'ParallelN(%s)' % ",".join(_.__repr__() for _ in self.dps)
 
     def repr_long(self):
         s = 'ParallelN  %% %s -> %s' % (self.get_fun_space(), self.get_res_space())
-        s += self._add_extra_info()
         for dp in self.dps:
             r = dp.repr_long()
             s += '\n' + indent(r, '. ', first='\ ')
