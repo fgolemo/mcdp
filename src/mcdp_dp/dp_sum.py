@@ -9,7 +9,7 @@ from mocdp.exceptions import DPNotImplementedError, mcdp_dev_warning
 from .dp_generic_unary import WrapAMap
 from .sequences_invplus import sample_sum_upperbound, \
     sample_sum_lowersets
-from mcdp_dp.repr_strings import invplus2_repr_h_map
+from mcdp_dp.repr_strings import repr_hd_map_sumn
 
 
 __all__ = [

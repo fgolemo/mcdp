@@ -2,15 +2,16 @@
 from contracts.utils import raise_wrapped
 from mcdp_maps import JoinNMap, Max1Map, MeetNMap
 from mcdp_maps.max1map import Max1dualMap
+from mcdp_maps.repr_map import repr_map_joinn
 from mcdp_posets import MapNotDefinedHere, Poset, PosetProduct, NotBounded
 from mcdp_posets.poset import is_top, is_bottom
 from mocdp.exceptions import mcdp_dev_warning
 
+from .dp_flatten import Mux
 from .dp_flatten import MuxMap
 from .dp_generic_unary import WrapAMap
 from .primitive import EmptyDP
-from mcdp_dp.dp_flatten import Mux
-from mcdp_dp.repr_strings import repr_hd_map_meetndp
+from .repr_strings import repr_hd_map_meetndp
 
 
 __all__ = [
@@ -40,6 +41,9 @@ class Max1(WrapAMap):
     
     def __repr__(self):
         return 'Max1(%r, %s)' % (self.F, self.value)
+
+    def repr_hd_map(self):
+        return "r ⟼ {r} if r ≽ %s, else ø" % (self.F.format(self.value))
 
         
 class MeetNDP(WrapAMap):
@@ -123,6 +127,9 @@ class JoinNDualDP(EmptyDP):
         
     def repr_h_map(self):
         return repr_hd_map_meetndp('f', self.n, '⊥')
+    
+    def repr_hd_map(self):
+        return repr_map_joinn('r', len(self.dom))
     
     def solve_r(self, r):
         try:
