@@ -466,19 +466,19 @@ def add_constraint(context, resource, function):
                            dp2=function.dp, s2=function.s)
             context.add_connection(c)
     
-        elif tu.leq(R1, F2) and tu.leq(F2, R1):
+#         elif tu.leq(R1, F2) and tu.leq(F2, R1):
+#             R1_to_F2, F2_to_R1 = tu.get_embedding(R1, F2)
+#             conversion = Conversion(R1_to_F2, F2_to_R1)
+#             resource2 = create_operation(context=context, dp=conversion,
+#                                         resources=[resource], name_prefix='_conversion',
+#                                          op_prefix='_in', res_prefix='_out')
+#             c = Connection(dp1=resource2.dp, s1=resource2.s,
+#                            dp2=function.dp, s2=function.s)
+#             context.add_connection(c)
+        else:
             ##  F2    ---- (<=) ----   becomes  ----(<=)--- [R1_to_F2] ----
             ##   |     R1       F2                R1      R1             F2
             ##  R1
-            R1_to_F2, F2_to_R1 = tu.get_embedding(R1, F2)
-            conversion = Conversion(R1_to_F2, F2_to_R1)
-            resource2 = create_operation(context=context, dp=conversion,
-                                        resources=[resource], name_prefix='_conversion',
-                                         op_prefix='_in', res_prefix='_out')
-            c = Connection(dp1=resource2.dp, s1=resource2.s,
-                           dp2=function.dp, s2=function.s)
-            context.add_connection(c)
-        else:
             try:
                 R1_to_F2, F2_to_R1 = tu.get_super_conversion(R1, F2)
                 conversion = Conversion(R1_to_F2, F2_to_R1)
@@ -491,11 +491,6 @@ def add_constraint(context, resource, function):
                                dp2=function.dp, s2=function.s)
                 context.add_connection(c)
             except NotLeq as e:
-#         elif tu.leq(F2, R1):
-#             ##  R1     ---- (<=) ----  becomes  ----(<=)--- [F2_to_R1^L] ----
-#             ##   |h     R1       F2              R1      R1               F2
-#             ##  F2
-#             
                 msg = 'Constraint between incompatible spaces.'
                 msg += '\n  %s can be embedded in %s: %s ' % (R1, F2, tu.leq(R1, F2))
                 msg += '\n  %s can be embedded in %s: %s ' % (F2, R1, tu.leq(F2, R1))

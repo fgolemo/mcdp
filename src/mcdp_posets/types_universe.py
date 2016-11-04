@@ -20,7 +20,6 @@ __all__ = [
 ]
 
 
-
 class TypesUniverse(Preorder):
     """
         In this pre-order, a type A <= B if we can find 
@@ -203,6 +202,15 @@ class TypesUniverse(Preorder):
         from .rcomp_units import RcompUnits
         from .maps.coerce_to_int import FloorRNMap, CeilRNMap
         from .maps.promote_to_float import PromoteToFloat
+        
+        if self.leq(A, B) and self.leq(B, A):
+            h, hd = tu.get_embedding(A, B)
+            assert A == h.get_domain()
+            assert B == h.get_codomain()
+            assert A == hd.get_codomain()
+            assert B == hd.get_domain()
+            return h, hd
+    
         if isinstance(A, Nat) and isinstance(B, (Rcomp, RcompUnits)):
             # Nat ⟶ Reals
             # h  = PromoteToFloat
@@ -227,6 +235,34 @@ class TypesUniverse(Preorder):
             assert B == hd.get_domain()
             return h, hd
         
+# > | Super conversion not available.
+# > | A: Instance of <class 'mcdp_posets.poset_coproduct.PosetCoproduct'>.
+# > |    Coproduct1(FinitePoset(10 els)+FinitePoset(10 els))
+# > | B: Instance of <class 'mcdp_posets.finite_poset.FinitePoset'>.
+# > |    FinitePoset(10 els)        
+        if isinstance(A, PosetCoproduct):
+            print('iterating A: %s' % A)
+            print('iterating B: %s' % B)
+            for i, Ai in enumerate(A.spaces):
+                print('i = %d  A[i] = %s' % (i, Ai))
+                if self.equal(B, Ai):
+                    h, hd = get_coproduct_embedding(A, B, i)
+                    print 'h: %s' % h
+                    print 'hd: %s' % hd
+                    assert A == h.get_domain()
+                    assert B == h.get_codomain()
+                    assert A == hd.get_codomain()
+                    assert B == hd.get_domain()
+                    return h, hd
+                
+#         if isinstance(B, PosetCoproduct):
+#             for i, x in enumerate(B.spaces):
+#                 try:
+#                     self.check_leq(A, x)
+#                     return get_coproduct_embedding(A, B, i)
+#                 except NotLeq:
+#                     pass
+
         msg = 'Super conversion not available.'
         raise_desc(NotLeq, msg, A=A, B=B)
              
@@ -266,7 +302,6 @@ class TypesUniverse(Preorder):
             setattr(A_to_B, '__name__', '%s-to-%s*' % (a, b))
             return A_to_B, B_to_A
                 
-
         if isinstance(A, RcompUnits) and isinstance(B, RcompUnits):
             assert A.units.dimensionality == B.units.dimensionality
 
@@ -279,7 +314,6 @@ class TypesUniverse(Preorder):
             setattr(B_to_A, '__name__', '%s-to-%s' % (b, a))
             setattr(A_to_B, '__name__', '%s-to-%s' % (a, b))
             return A_to_B, B_to_A
-
 
         if self.equal(A, B):
             return IdentityMap(A, B), IdentityMap(B, A)
