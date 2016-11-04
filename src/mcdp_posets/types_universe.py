@@ -180,6 +180,56 @@ class TypesUniverse(Preorder):
         msg = "Do not know how to compare types."
         raise_desc(NotLeq, msg, A=A, B=B)
             
+    def get_super_conversion(self, A, B):
+        """ 
+            Returns a pair of maps (f,g), 
+        
+                f : A ⟶ B,
+                g : B ⟶ A,
+        
+            such that:
+            
+                f(a) = min { b ∈ B: a ≼ b }
+                g(b) = max { a ∈ A: a ≼ b }
+                
+            These two maps then can be used as a pair (h, h*)
+            to create a DP to be used as a "conversion" between
+            the two spaces.
+            
+            Raises NotLeq if it is not possible to create this 
+            pair of functions (either because the space are 
+            not comparable or because the implementation is not available). 
+        """
+        from .rcomp_units import RcompUnits
+        from .maps.coerce_to_int import FloorRNMap, CeilRNMap
+        from .maps.promote_to_float import PromoteToFloat
+        if isinstance(A, Nat) and isinstance(B, (Rcomp, RcompUnits)):
+            # Nat ⟶ Reals
+            # h  = PromoteToFloat
+            # h *= Floor
+            h = PromoteToFloat(A, B)
+            hd = FloorRNMap(B, A)
+            assert A == h.get_domain()
+            assert B == h.get_codomain()
+            assert A == hd.get_codomain()
+            assert B == hd.get_domain()
+            return h, hd
+        
+        if isinstance(A, (Rcomp, RcompUnits)) and isinstance(B, Nat):
+            # Reals -> Nat 
+            # h = Ceil
+            # h* = PromoteToFloat
+            h = CeilRNMap(A, B)
+            hd = PromoteToFloat(B, A)
+            assert A == h.get_domain()
+            assert B == h.get_codomain()
+            assert A == hd.get_codomain()
+            assert B == hd.get_domain()
+            return h, hd
+        
+        msg = 'Super conversion not available.'
+        raise_desc(NotLeq, msg, A=A, B=B)
+             
     def get_embedding(self, A, B):
         try:
             self.check_leq(A, B)

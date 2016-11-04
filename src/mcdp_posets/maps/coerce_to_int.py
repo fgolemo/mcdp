@@ -1,8 +1,15 @@
 # -*- coding: utf-8 -*-
+import math
+
 from contracts import contract
+from contracts.utils import check_isinstance
 from mcdp_posets import Map, Space
+from mcdp_posets.nat import Nat
 from mcdp_posets.poset import is_top
+from mcdp_posets.rcomp import Rcomp
+from mcdp_posets.rcomp_units import RcompUnits
 from mcdp_posets.space import MapNotDefinedHere
+
 
 __all__ = ['CoerceToInt']
 
@@ -15,7 +22,9 @@ class CoerceToInt(Map):
     
     @contract(cod=Space, dom=Space)
     def __init__(self, dom, cod):
-        # todo: check dom is Nat or Int
+        check_isinstance(dom, (Rcomp, RcompUnits))
+        check_isinstance(cod, Nat)
+
         Map.__init__(self, dom, cod)
 
     def _call(self, x):
@@ -29,3 +38,53 @@ class CoerceToInt(Map):
     
     def repr_map(self, letter):
         return "%s ⟼ (int) %s" % (letter, letter)
+    
+class FloorRNMap(Map):
+
+    """ 
+        From Rcomp to Nat. 
+
+         x -> int(floor(x))
+    """  
+    
+    @contract(cod=Space, dom=Space)
+    def __init__(self, dom, cod):
+        check_isinstance(dom, (Rcomp, RcompUnits))
+        check_isinstance(cod, Nat)
+        Map.__init__(self, dom, cod)
+
+    def _call(self, x):
+        if is_top(self.dom, x):
+            return self.cod.get_top()
+        assert isinstance(x, float)
+        # XXX: overflow?
+        r = int(math.floor(x))
+        return r
+    
+    def repr_map(self, letter):
+        return "%s ⟼ floor(%s)" % (letter, letter)
+
+class CeilRNMap(Map):
+
+    """ 
+        From Rcomp to Nat. 
+        
+         x -> int(floor(x))
+    """  
+    
+    @contract(cod=Space, dom=Space)
+    def __init__(self, dom, cod):
+        check_isinstance(dom, (Rcomp, RcompUnits))
+        check_isinstance(cod, Nat)
+        Map.__init__(self, dom, cod)
+
+    def _call(self, x):
+        if is_top(self.dom, x):
+            return self.cod.get_top()
+        assert isinstance(x, float)
+        # XXX: overflow?
+        r = int(math.ceil(x))
+        return r
+    
+    def repr_map(self, letter):
+        return "%s ⟼ floor(%s)" % (letter, letter)
