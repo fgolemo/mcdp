@@ -4,7 +4,6 @@ import math
 
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped, raise_desc
-from mcdp_posets.poset import is_top, is_bottom
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import DPSyntaxError, do_extra_checks, mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
@@ -12,6 +11,7 @@ from pint import UnitRegistry  # @UnresolvedImport
 from pint.errors import UndefinedUnitError  # @UnresolvedImport
 
 from .any import Any, BottomCompletion, TopCompletion
+from .poset import is_top, is_bottom
 from .rcomp import RcompBase, Rbicomp
 from .space import Map
 
@@ -44,7 +44,8 @@ class RcompUnits(RcompBase):
         self.units = pint_unit
         self.string = string
         u = parse_pint(string)
-        assert u == self.units, (self.units, u, string)
+        # assert u == self.units, (self.units, u, string)
+        assert str(u) == str(self.units), (self.units, u, string)
 
         self.units_formatted = format_pint_unit_short(self.units)
 
