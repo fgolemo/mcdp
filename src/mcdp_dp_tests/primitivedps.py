@@ -8,11 +8,11 @@ from mcdp_dp import (CatalogueDP, CoProductDP, CoProductDPLabels, Constant,
     MinusValueRcompDP, MinusValueNatDP, InvMultValueNatDP, InvMultValueRcompDP,
     InvMultValueDP,
      SumNLDP, SumNUDP, Template, FuncNotMoreThan, RcompUnitsPowerDP, SquareNatDP)
+from mcdp_dp.conversion import get_conversion
+from mcdp_dp.dp_sum import SumNNatDP
 from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct, Nat, Rcomp
 from mocdp import MCDPConstants
-from mcdp_dp.dp_sum import SumNNatDP
-from mcdp_dp.conversion import get_conversion
 
 
 all_primitivedps_tests = []

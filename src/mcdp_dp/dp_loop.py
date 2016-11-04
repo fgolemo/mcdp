@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+2# -*- coding: utf-8 -*-
 import itertools
 
 from contracts.utils import indent, raise_desc, raise_wrapped

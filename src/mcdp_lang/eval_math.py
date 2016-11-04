@@ -66,13 +66,6 @@ def x_minus_constants(x, constants):
     return ValueWithUnits(unit=R1, value=v0)
     
     
-@contract(unit1=Space, unit2=Space)
-def convert_vu(value, unit1, unit2, context):  # @UnusedVariable
-    tu = get_types_universe()
-    A_to_B, _ = tu.get_embedding(unit1, unit2)
-    return A_to_B(value)
-
-
 def eval_PlusN_as_constant(x, context):
     return eval_PlusN(x, context, wants_constant=True)
 

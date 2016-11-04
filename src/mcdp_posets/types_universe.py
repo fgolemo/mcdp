@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 
 from .nat import Int, Nat
@@ -18,7 +18,6 @@ __all__ = [
     'get_types_universe',
     'express_value_in_isomorphic_space',
 ]
-
 
 
 class TypesUniverse(Preorder):
@@ -180,13 +179,92 @@ class TypesUniverse(Preorder):
         msg = "Do not know how to compare types."
         raise_desc(NotLeq, msg, A=A, B=B)
             
+    def get_super_conversion(self, A, B):
+        """ 
+            Returns a pair of maps (f,g), 
+        
+                f : A ⟶ B,
+                g : B ⟶ A,
+        
+            such that:
+            
+                f(a) = min { b ∈ B: a ≼ b }
+                g(b) = max { a ∈ A: a ≼ b }
+                
+            These two maps then can be used as a pair (h, h*)
+            to create a DP to be used as a "conversion" between
+            the two spaces.
+            
+            Raises NotLeq if it is not possible to create this 
+            pair of functions (either because the space are 
+            not comparable or because the implementation is not available). 
+        """
+        from .rcomp_units import RcompUnits
+        from .maps.coerce_to_int import FloorRNMap, CeilRNMap
+        from .maps.promote_to_float import PromoteToFloat
+        
+        if self.leq(A, B) and self.leq(B, A):
+            h, hd = tu.get_embedding(A, B)
+            assert A == h.get_domain()
+            assert B == h.get_codomain()
+            assert A == hd.get_codomain()
+            assert B == hd.get_domain()
+            return h, hd
+    
+        if isinstance(A, Nat) and isinstance(B, (Rcomp, RcompUnits)):
+            # Nat ⟶ Reals
+            # h  = PromoteToFloat
+            # h *= Floor
+            h = PromoteToFloat(A, B)
+            hd = FloorRNMap(B, A)
+            assert A == h.get_domain()
+            assert B == h.get_codomain()
+            assert A == hd.get_codomain()
+            assert B == hd.get_domain()
+            return h, hd
+        
+        if isinstance(A, (Rcomp, RcompUnits)) and isinstance(B, Nat):
+            # Reals -> Nat 
+            # h = Ceil
+            # h* = PromoteToFloat
+            h = CeilRNMap(A, B)
+            hd = PromoteToFloat(B, A)
+            assert A == h.get_domain()
+            assert B == h.get_codomain()
+            assert A == hd.get_codomain()
+            assert B == hd.get_domain()
+            return h, hd       
 
+        # case when A = Coproduct(... + B + ...) 
+        if isinstance(A, PosetCoproduct):
+            for i, Ai in enumerate(A.spaces):
+                if self.equal(B, Ai):
+                    hd, h = get_coproduct_embedding(B, A, i)
+                    assert A == h.get_domain()
+                    assert B == h.get_codomain()
+                    assert A == hd.get_codomain()
+                    assert B == hd.get_domain()
+                    return h, hd
+                
+        # case when B = Coproduct(... + A + ...) 
+        if isinstance(B, PosetCoproduct):
+            for i, Bi in enumerate(B.spaces):
+                if self.equal(A, Bi):
+                    h, hd = get_coproduct_embedding(A, B, i)
+                    assert A == h.get_domain()
+                    assert B == h.get_codomain()
+                    assert A == hd.get_codomain()
+                    assert B == hd.get_domain()
+                    return h, hd
+                 
+        msg = 'Super conversion not available.'
+        raise_desc(NotLeq, msg, A=A, B=B)
+             
     def get_embedding(self, A, B):
         try:
             self.check_leq(A, B)
         except NotLeq as e:
-            msg = 'Cannot get embedding if not preorder holds.'
-
+            msg = 'Cannot get embedding if preorder does not holds.'
             raise_wrapped(DPInternalError, e, msg, compact=True)
 
         from mcdp_posets import RcompUnits
@@ -195,8 +273,6 @@ class TypesUniverse(Preorder):
         from mcdp_maps.map_composition import MapComposition
         from .maps.linearmapcomp import LinearMapComp
            
-
-
         if isinstance(A, Nat) and isinstance(B, (Rcomp, RcompUnits)):
             from .maps.coerce_to_int import CoerceToInt
             from .maps.promote_to_float import PromoteToFloat
@@ -220,7 +296,6 @@ class TypesUniverse(Preorder):
             setattr(A_to_B, '__name__', '%s-to-%s*' % (a, b))
             return A_to_B, B_to_A
                 
-
         if isinstance(A, RcompUnits) and isinstance(B, RcompUnits):
             assert A.units.dimensionality == B.units.dimensionality
 
@@ -233,7 +308,6 @@ class TypesUniverse(Preorder):
             setattr(B_to_A, '__name__', '%s-to-%s' % (b, a))
             setattr(A_to_B, '__name__', '%s-to-%s' % (a, b))
             return A_to_B, B_to_A
-
 
         if self.equal(A, B):
             return IdentityMap(A, B), IdentityMap(B, A)
@@ -294,7 +368,7 @@ class CheckNonnegativeMap(Map):
     def repr_map(self, letter):
         return '%s ⟼ %s' % (letter, letter)
 
-    
+@contract(B=PosetCoproduct)
 def get_coproduct_embedding(A, B, i):
     # assume that A <= B.spaces[i]
     A_to_B = Coprod_A_to_B_map(A=A, B=B, i=i)
@@ -303,8 +377,14 @@ def get_coproduct_embedding(A, B, i):
 
 
 class Coprod_A_to_B_map(Map):
+    
     @contract(B=PosetCoproduct, i='int')
     def __init__(self, A, B, i):
+        check_isinstance(B, PosetCoproduct)
+        if i >= len(B.spaces):
+            msg = 'Invalid index.'
+            raise_desc(ValueError, msg, A, B, i) 
+
         dom = A
         cod = B
         self.B = B
@@ -320,8 +400,13 @@ class Coprod_A_to_B_map(Map):
 
 
 class Coprod_B_to_A_map(Map):
+    
     @contract(B=PosetCoproduct, i='int')
     def __init__(self, A, B, i):
+        check_isinstance(B, PosetCoproduct)
+        if i >= len(B.spaces):
+            msg = 'Invalid index.'
+            raise_desc(ValueError, msg, A, B, i) 
         dom = B
         cod = A
         self.B = B

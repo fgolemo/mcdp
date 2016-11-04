@@ -117,6 +117,7 @@ class Floor0DP(WrapAMap):
         return 'floor0'
 
 class CeilDP(WrapAMap):
+    
     def __init__(self, F):
         amap = CeilMap(F)
         amap_dual = FloorMap(F)
