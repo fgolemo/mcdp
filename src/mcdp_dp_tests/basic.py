@@ -132,8 +132,10 @@ def check_repr(id_dp, dp):  # @UnusedVariable
         raise_desc(ValueError, msg, repr_h_map=s1, repr_hd_map=s2)
 
     if not '_approx_' in id_dp and isinstance(dp, ApproximableDP):
-        dpL, dpU = get_dp_bounds(dp, 4, 4)
-        check_repr(id_dp + '_approx_Lower', dpL)
-        check_repr(id_dp + '_approx_Upper', dpU)
-        
+        try:
+            dpL, dpU = get_dp_bounds(dp, 4, 4)
+            check_repr(id_dp + '_approx_Lower', dpL)
+            check_repr(id_dp + '_approx_Upper', dpU)
+        except NotImplementedError:
+            pass
         
