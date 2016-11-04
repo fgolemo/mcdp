@@ -11,6 +11,7 @@ from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct, Nat, Rcomp
 from mocdp import MCDPConstants
 from mcdp_dp.dp_limit import FuncNotMoreThan
+from mcdp_dp.dp_misc_unary import RcompUnitsPowerDP, SquareNatDP
 
 
 all_primitivedps_tests = []
@@ -440,6 +441,17 @@ def FuncNotMoreThan_1():
     limit = 2.0
     return FuncNotMoreThan(F, limit)
  
+@add_as_test
+def RcompUnitsPowerDP_1():
+    F = parse_poset('m')
+    num = 2
+    den = 3
+    return RcompUnitsPowerDP(F, num, den)
+
+@add_as_test
+def SquareNatDP_0():
+    return SquareNatDP()
+    
 
 if MCDPConstants.test_include_primitivedps_knownfailures:
     

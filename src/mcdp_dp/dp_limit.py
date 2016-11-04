@@ -23,7 +23,7 @@ class FuncNotMoreThan(PrimitiveDP):
         f ⟼   {f},  if f ≼ limit
                 ø,    otherwise
         
-        h* : r  ⟼ r
+        h* : r  ⟼ {r} 
                 
     """
     @contract(F='$Poset')
@@ -58,6 +58,7 @@ class FuncNotMoreThan(PrimitiveDP):
             return empty
         
     def solve_r(self, r):  # @UnusedVariable
+        mcdp_dev_warning('think more about this')
         return self.F.L(self.limit)
         
     def __repr__(self):
@@ -67,7 +68,7 @@ class FuncNotMoreThan(PrimitiveDP):
         return 'f ⟼ f if f ≼ %s, else ø' % self.F.format(self.limit)
 
     def repr_hd_map(self):
-        return '⟨⟩ ⟼ {%s}' % self.F.format(self.limit)
+        return '%s ⟼ {%s}' % self.F.format(self.limit)
 
 
 class Limit(PrimitiveDP):

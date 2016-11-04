@@ -439,11 +439,14 @@ class RCompUnitsPowerMap(Map):
         except OverflowError:
             return self.cod.get_top()
 
-    def __repr__(self):
+    def __repr__(self): # XXX
         s = '^ '
         s += '%d' % self.num
         if self.den != 1:
             s += '/%s' % self.den
         return s
+    
+    def repr_map(self, letter):
+        return '%s ⟼ %s ^ %s/%s ' % (letter, letter, self.num, self.den)
 
         

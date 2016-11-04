@@ -49,7 +49,7 @@ def repr_map_product(letter, n):
 
 def plusvaluedualmap_repr(letter, space, value):
     c = space.format(value)
-    return  '%s ⟼ max(%s - %s)' % (letter, letter, c)
+    return  '%s ⟼ %s - %s if %s ≽ %s, else ø' % (letter, letter, c, letter, c)
             
 def plusvaluemap_repr(letter, space, value):
     label = '+ %s' % space.format(value)
