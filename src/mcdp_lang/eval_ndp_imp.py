@@ -6,7 +6,7 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (
     CatalogueDP, Conversion, JoinNDP, MeetNDualDP, get_conversion, make_series)
-from mcdp_lang.parse_actions import decorate_add_where
+from mcdp_lang.parse_actions import decorate_add_where, raise_with_info
 from mcdp_posets import (
     FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe)
 from mocdp import ATTRIBUTE_NDP_MAKE_FUNCTION
@@ -18,7 +18,7 @@ from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
 from mocdp.comp.ignore_some_imp import ignore_some
 from mocdp.comp.make_approximation_imp import make_approximation
 from mocdp.exceptions import (DPInternalError, DPSemanticError,
-    DPSemanticErrorNotConnected)
+    DPSemanticErrorNotConnected, MCDPExceptionWithWhere)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 from .eval_codespec_imp_utils_instantiate import ImportFailure, import_name
@@ -417,9 +417,8 @@ def eval_ndp_catalogue(r, context):
                 ex = lambda msg: DPSemanticError(msg, where=cell.where)
                 raise_wrapped(ex, e, msg, compact=True)
 
-        from mcdp_lang.eval_math import convert_vu
-        fvalues_ = [convert_vu(_.value, _.unit, F, context) for (_, F) in zip(fvalues, Fs)]
-        rvalues_ = [convert_vu(_.value, _.unit, R, context) for (_, R) in zip(rvalues, Rs)]
+        fvalues_ = [_.cast_value(F) for (_, F) in zip(fvalues, Fs)]
+        rvalues_ = [_.cast_value(R)for (_, R) in zip(rvalues, Rs)]
 
         assert len(fvalues_) == len(fun)
         assert len(rvalues_) == len(res)
@@ -467,9 +466,9 @@ def add_constraint(context, resource, function):
                            dp2=function.dp, s2=function.s)
             context.add_connection(c)
     
-        elif tu.leq(R1, F2):
-            ##  F2    ---- (<=) ----   =>  ----(<=)--- [R1_to_F2] ----
-            ##   |     R1       F2          R1      R1             F2
+        elif tu.leq(R1, F2) and tu.leq(F2, R1):
+            ##  F2    ---- (<=) ----   becomes  ----(<=)--- [R1_to_F2] ----
+            ##   |     R1       F2                R1      R1             F2
             ##  R1
             R1_to_F2, _F2_to_R1 = tu.get_embedding(R1, F2)
             conversion = Conversion(R1_to_F2, _F2_to_R1)
@@ -480,21 +479,23 @@ def add_constraint(context, resource, function):
             c = Connection(dp1=resource2.dp, s1=resource2.s,
                            dp2=function.dp, s2=function.s)
             context.add_connection(c)
-        elif tu.leq(F2, R1):
-            ##  R1     ---- (<=) ----   =>  ----(<=)--- [F2_to_R1^L] ----
-            ##   |h     R1       F2          R1      R1               F2
-            ##  F2
-            
-            _F2_to_R1, R1_to_F2 = tu.get_embedding(F2, R1)
-            conversion = Conversion(R1_to_F2, _F2_to_R1)
-            resource2 = create_operation(context=context, dp=conversion,
-                                        resources=[resource], name_prefix='_conversion',
-                                         op_prefix='_in', res_prefix='_out')
-            c = Connection(dp1=resource2.dp, s1=resource2.s,
-                           dp2=function.dp, s2=function.s)
-            context.add_connection(c)
+#         elif tu.leq(F2, R1):
+#             ##  R1     ---- (<=) ----  becomes  ----(<=)--- [F2_to_R1^L] ----
+#             ##   |h     R1       F2              R1      R1               F2
+#             ##  F2
+#             
+#             _F2_to_R1, R1_to_F2 = tu.get_embedding(F2, R1)
+#             conversion = Conversion(R1_to_F2, _F2_to_R1)
+#             resource2 = create_operation(context=context, dp=conversion,
+#                                         resources=[resource], name_prefix='_conversion',
+#                                          op_prefix='_in', res_prefix='_out')
+#             c = Connection(dp1=resource2.dp, s1=resource2.s,
+#                            dp2=function.dp, s2=function.s)
+#             context.add_connection(c)
         else:
             msg = 'Constraint between incompatible spaces.'
+            msg += '\n  %s can be embedded in %s: %s ' % (R1, F2, tu.leq(R1, F2))
+            msg += '\n  %s can be embedded in %s: %s ' % (F2, R1, tu.leq(F2, R1))
             raise_desc(DPSemanticError, msg, R1=R1, F2=F2)
     except NotImplementedError as e:
         msg = 'Problem while creating embedding.'
@@ -503,7 +504,6 @@ def add_constraint(context, resource, function):
         
 @decorate_add_where
 def eval_statement(r, context):
-#     with add_where_information(r.where):
         from mcdp_lang.eval_resources_imp import eval_rvalue
         from mcdp_lang.eval_lfunction_imp import eval_lfunction
 
@@ -513,7 +513,12 @@ def eval_statement(r, context):
         elif isinstance(r, CDP.Constraint):
             resource = eval_rvalue(r.rvalue, context)
             function = eval_lfunction(r.function, context)
-            add_constraint(context, resource, function)
+            try:
+                add_constraint(context, resource, function)
+            except MCDPExceptionWithWhere as e:
+                _, _, tb = sys.exc_info()
+                where = r.prep.where # preposition
+                raise_with_info(e, where, tb)
 
         elif isinstance(r, CDP.SetNameNDPInstance):
             name = r.name.value

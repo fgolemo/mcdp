@@ -180,13 +180,11 @@ class TypesUniverse(Preorder):
         msg = "Do not know how to compare types."
         raise_desc(NotLeq, msg, A=A, B=B)
             
-
     def get_embedding(self, A, B):
         try:
             self.check_leq(A, B)
         except NotLeq as e:
-            msg = 'Cannot get embedding if not preorder holds.'
-
+            msg = 'Cannot get embedding if preorder does not holds.'
             raise_wrapped(DPInternalError, e, msg, compact=True)
 
         from mcdp_posets import RcompUnits
@@ -195,8 +193,6 @@ class TypesUniverse(Preorder):
         from mcdp_maps.map_composition import MapComposition
         from .maps.linearmapcomp import LinearMapComp
            
-
-
         if isinstance(A, Nat) and isinstance(B, (Rcomp, RcompUnits)):
             from .maps.coerce_to_int import CoerceToInt
             from .maps.promote_to_float import PromoteToFloat

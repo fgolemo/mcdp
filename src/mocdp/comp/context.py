@@ -49,7 +49,8 @@ class ValueWithUnits():
         return 'ValueWithUnits(%r, %r)' % (self.value, self.unit)
     
     def cast_value(self, P):
-        """ Returns the value cast in the space P. """ 
+        """ Returns the value cast in the space P (larger than
+            the current space). """ 
         return express_value_in_isomorphic_space(self.unit, self.value, P)
 
 def get_name_for_fun_node(name):
