@@ -7,7 +7,6 @@ from mcdp_posets.nat import Nat_mult_lowersets_continuous
 from mcdp_posets.poset import is_top
 from mcdp_posets.rcomp import finfo
 import numpy as np
-import numpy as np
 
 
 __all__ = [
@@ -73,6 +72,7 @@ class CeilMap(GenericFloatOperation):
     def op(self, x):
         return np.ceil(x)
 
+
 class Floor0Map(GenericFloatOperation):
     """
         This is floor0:
@@ -90,12 +90,26 @@ class Floor0Map(GenericFloatOperation):
         else:
             return np.ceil(x-1)
     
+    
 class FloorMap(GenericFloatOperation):
 
     def __init__(self, dom):
         GenericFloatOperation.__init__(self, dom, 'floor')
 
     def op(self, x):
+                
+        def square(x):
+            try:
+                res = x * x
+            except FloatingPointError as e:
+                if 'underflow' in str(e):
+                    return finfo.tiny
+                elif 'overflow' in str(e):
+                    return finfo.max
+                else:
+                    raise
+            return res
+
         return np.floor(x)
     
     
@@ -146,17 +160,6 @@ class SquareNatMap(Map):
     def repr_map(self, letter):
         return '%s ⟼ %s^2' % (letter, letter)
 
-def square(x):
-    try:
-        res = x * x
-    except FloatingPointError as e:
-        if 'underflow' in str(e):
-            return finfo.tiny
-        elif 'overflow' in str(e):
-            return finfo.max
-        else:
-            raise
-    return res
 
 
 class SqrtMap(GenericFloatOperation):
