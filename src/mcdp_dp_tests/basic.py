@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import raise_wrapped, raise_desc
 from mcdp_dp import NotSolvableNeedsApprox
+from mcdp_dp.dp_transformations import get_dp_bounds
+from mcdp_dp.primitive import ApproximableDP
 from mcdp_posets import LowerSets, NotBounded, UpperSets, NotLeq
 from mcdp_tests.generation import for_all_dps, primitive_dp_test
-from mcdp_dp.primitive import ApproximableDP
-from mcdp_dp.dp_transformations import get_dp_bounds
-
 
 
 @for_all_dps

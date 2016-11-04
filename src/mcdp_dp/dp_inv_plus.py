@@ -115,7 +115,7 @@ class InvPlus2L(PrimitiveDP):
         return self.F.L(maxf)
     
     def repr_h_map(self):
-        return invplus2_repr_h_map('f', 'r')
+        return invplus2_repr_h_map('f', 'r') + ' (approx)'
 
     def repr_hd_map(self):
         return invplus2_repr_hd_map('r')
@@ -155,7 +155,7 @@ class InvPlus2U(PrimitiveDP):
         return self.F.L(maxf)
     
     def repr_h_map(self):
-        return invplus2_repr_h_map('f', 'r')
+        return invplus2_repr_h_map('f', 'r') + ' (approx)'
 
     def repr_hd_map(self):
         return invplus2_repr_hd_map('r')
