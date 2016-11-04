@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance
+from mcdp_maps.repr_map import (plusvaluedualmap_repr, plusvaluemap_repr,
+                                minusvaluemap_repr)
 from mcdp_posets import (Map, RcompUnits, Nat,
     express_value_in_isomorphic_space, Rcomp, is_top, MapNotDefinedHere)
 from mcdp_posets.nat import Nat_add
 from mcdp_posets.rcomp_units import rcomp_add, rcompunits_add
-from mcdp_maps.repr_map import plusvaluedualmap_repr, plusvaluemap_repr,\
-    minusvaluemap_repr
 
 
 __all__ = [

@@ -62,7 +62,7 @@ def try_with_approximations(id_dp, dp, test):
         print(msg)
         return
     
-    print('approx: %s -> %s, %s' % (dp, dpL, dpU))    
+    #print('approx: %s -> %s, %s' % (dp, dpL, dpU))    
     test(id_dp + '_lower_%s' % nl, dpL)
     test(id_dp + '_upper_%s' % nu, dpU)
     

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_dp.primitive import NotFeasible
-from mcdp_posets import LowerSet, NotBelongs, Poset, PosetProduct, UpperSet
-from mcdp_posets import LowerSets
+from mcdp_posets import (LowerSet, NotBelongs, Poset, PosetProduct, UpperSet,
+                         LowerSets)
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 
 from .primitive import PrimitiveDP
