@@ -246,8 +246,6 @@ class TypesUniverse(Preorder):
             for i, Ai in enumerate(A.spaces):
                 if self.equal(B, Ai):
                     hd, h = get_coproduct_embedding(B, A, i)
-#                     print('A: %s' % A)
-#                     print('A: %s' % A)
                     assert A == h.get_domain()
                     assert B == h.get_codomain()
                     assert A == hd.get_codomain()
