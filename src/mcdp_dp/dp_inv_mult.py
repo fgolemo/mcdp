@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
+from mcdp_maps.repr_map import repr_map_product
 from mcdp_posets import Nat, Poset, PosetProduct, is_top
 from mcdp_posets.nat import Nat_mult_lowersets_continuous
 from mcdp_posets.rcomp import Rcomp_multiply_upper_topology_seq
 from mocdp.exceptions import mcdp_dev_warning
 
 from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
+from .repr_strings import repr_h_map_invmult
 from .sequences_invplus import Nat_mult_antichain_Min, invmultL_solve_options, invmultU_solve_options
-from mcdp_dp.repr_strings import repr_h_map_invmult
-from mcdp_maps.repr_map import repr_map_product
 
 
 _ = Nat, Poset
