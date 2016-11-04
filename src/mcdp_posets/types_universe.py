@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 
 from .nat import Int, Nat
@@ -240,15 +240,23 @@ class TypesUniverse(Preorder):
 # > |    Coproduct1(FinitePoset(10 els)+FinitePoset(10 els))
 # > | B: Instance of <class 'mcdp_posets.finite_poset.FinitePoset'>.
 # > |    FinitePoset(10 els)        
+
+        # case when A = ... + B + ... 
         if isinstance(A, PosetCoproduct):
-            print('iterating A: %s' % A)
-            print('iterating B: %s' % B)
             for i, Ai in enumerate(A.spaces):
-                print('i = %d  A[i] = %s' % (i, Ai))
                 if self.equal(B, Ai):
+                    h, hd = get_coproduct_embedding(B, A, i)
+                    assert A == h.get_domain()
+                    assert B == h.get_codomain()
+                    assert A == hd.get_codomain()
+                    assert B == hd.get_domain()
+                    return h, hd
+                
+        # case when B = ... + A + ... 
+        if isinstance(B, PosetCoproduct):
+            for i, Bi in enumerate(B.spaces):
+                if self.equal(A, Bi):
                     h, hd = get_coproduct_embedding(A, B, i)
-                    print 'h: %s' % h
-                    print 'hd: %s' % hd
                     assert A == h.get_domain()
                     assert B == h.get_codomain()
                     assert A == hd.get_codomain()
@@ -374,7 +382,7 @@ class CheckNonnegativeMap(Map):
     def repr_map(self, letter):
         return '%s ⟼ %s' % (letter, letter)
 
-    
+@contract(B=PosetCoproduct)
 def get_coproduct_embedding(A, B, i):
     # assume that A <= B.spaces[i]
     A_to_B = Coprod_A_to_B_map(A=A, B=B, i=i)
@@ -385,6 +393,11 @@ def get_coproduct_embedding(A, B, i):
 class Coprod_A_to_B_map(Map):
     @contract(B=PosetCoproduct, i='int')
     def __init__(self, A, B, i):
+        check_isinstance(B, PosetCoproduct)
+        if i >= len(B.spaces):
+            msg = 'Invalid index.'
+            raise_desc(ValueError, msg, A, B, i) 
+
         dom = A
         cod = B
         self.B = B
@@ -402,6 +415,10 @@ class Coprod_A_to_B_map(Map):
 class Coprod_B_to_A_map(Map):
     @contract(B=PosetCoproduct, i='int')
     def __init__(self, A, B, i):
+        check_isinstance(B, PosetCoproduct)
+        if i >= len(B.spaces):
+            msg = 'Invalid index.'
+            raise_desc(ValueError, msg, A, B, i) 
         dom = B
         cod = A
         self.B = B
