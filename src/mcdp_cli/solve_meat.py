@@ -5,7 +5,6 @@ from contracts.utils import raise_desc, raise_wrapped
 from decent_params.utils import UserError
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.solver import generic_solve
-# from mcdp_dp.solver_iterative import solver_iterative
 from mcdp_dp.tracer import Tracer
 from mcdp_library import Librarian
 from mcdp_posets import (NotLeq, UpperSets,
@@ -13,10 +12,11 @@ from mcdp_posets import (NotLeq, UpperSets,
 from mocdp.comp.recursive_name_labeling import (get_imp_as_recursive_dict,
     get_labelled_version, ndp_make)
 from reprep import Report
-
+DPLoop0
 from .utils_mkdir import mkdirs_thread_safe
 
 
+# from mcdp_dp.solver_iterative import solver_iterative
 class ExpectationsNotMet(Exception):
     pass
 
@@ -210,9 +210,10 @@ def solve_meat_solve(trace, ndp, dp, fg, intervals, max_steps, _exp_advanced):
     R = dp.get_res_space()
     UR = UpperSets(R)
 
-    if intervals:
-        res = solver_iterative(dp, fg, trace)
-    else:
+#     if intervals:
+#         res = solver_iterative(dp, fg, trace)
+#     else:
+    if True:
         if not _exp_advanced:
             res = dp.solve_trace(fg, trace)
             rnames = ndp.get_rnames()

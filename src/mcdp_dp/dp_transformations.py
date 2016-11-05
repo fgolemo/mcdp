@@ -13,7 +13,6 @@ def dp_transform(dp, f):
     """ Recursive application of a map f that is equivariant with
         series and parallel operations. """
     from mcdp_dp.dp_series import Series0
-    from mcdp_dp.dp_loop import DPLoop0
     from mcdp_dp.dp_parallel import Parallel
     from mcdp_dp.dp_series_simplification import check_same_spaces
 
@@ -31,8 +30,8 @@ def dp_transform(dp, f):
     elif isinstance(dp, CoProductDP):
         dps2 = tuple(dp_transform(_, f) for _ in dp.dps)
         return CoProductDP(dps2)
-    elif isinstance(dp, DPLoop0):
-        return DPLoop0(dp_transform(dp.dp1, f))
+#     elif isinstance(dp, DPLoop0):
+#         return DPLoop0(dp_transform(dp.dp1, f))
     elif isinstance(dp, DPLoop2):
         return DPLoop2(dp_transform(dp.dp1, f))
     elif isinstance(dp, OpaqueDP):

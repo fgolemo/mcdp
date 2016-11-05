@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import indent, raise_desc, raise_wrapped
-from mcdp_posets import (Map, NotBelongs, PosetProduct, UpperSet,
+from mcdp_posets import (NotBelongs, UpperSet,
     UpperSets, get_product_compact, poset_minima)
 from mcdp_posets import LowerSets, LowerSet
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
 from mocdp.exceptions import DPInternalError, do_extra_checks, mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
 
-from .primitive import NormalForm, NotFeasible, PrimitiveDP
+from .primitive import NotFeasible, PrimitiveDP
 from .tracer import Tracer
 
 
@@ -226,66 +226,66 @@ class Series(PrimitiveDP):
     
     def repr_hd_map(self):
         return 'r ⟼ [h1* ○ h2*](r)' # XXX
-    
-    def get_normal_form(self):
-        """
-            
-            alpha1: U(F1) x S1 -> U(R1)
-            beta1:  U(F1) x S1 -> S1
-            
-            alpha2: U(R1) x S2 -> U(R2)
-            beta2:  U(R1) x S2 -> S2
-             
-        """
-
-        S1, alpha1, beta1 = self.dp1.get_normal_form()
-        S2, alpha2, beta2 = self.dp2.get_normal_form()
-
-        F1 = self.dp1.get_fun_space()
-        R2 = self.dp2.get_res_space()
-
-        UR2 = UpperSets(R2)
-
-        UF1 = UpperSets(F1)
-        """
-        S = S1 x S2 is a Poset
-        alpha: UF1 x S -> UR1
-        beta: UF1 x S -> S
-"""     
-        S, pack, unpack = get_product_compact(S1, S2)
-
-        D = PosetProduct((UF1, S))
-                         
-        class SeriesAlpha(Map):
-            def __init__(self, dp):
-                self.dp = dp
-                dom = D
-                cod = UR2
-                Map.__init__(self, dom, cod)
-
-            def _call(self, x):
-                (F, s) = x
-                (s1, s2) = unpack(s)
-                a = alpha1((F, s1))
-                return alpha2((a, s2))
-
-        class SeriesBeta(Map):
-            def __init__(self, dp):
-                self.dp = dp
-                dom = D
-                cod = S
-                Map.__init__(self, dom, cod)
-
-            def _call(self, x):
-                (F, s) = x
-                (s1, s2) = unpack(s)
-                r_1 = beta1((F, s1))
-                a = alpha1((F, s1))
-                r_2 = beta2((a, s2))
-                
-                return pack(r_1, r_2)
-
-        return NormalForm(S, SeriesAlpha(self), SeriesBeta(self))
+#     
+#     def get_normal_form(self):
+#         """
+#             
+#             alpha1: U(F1) x S1 -> U(R1)
+#             beta1:  U(F1) x S1 -> S1
+#             
+#             alpha2: U(R1) x S2 -> U(R2)
+#             beta2:  U(R1) x S2 -> S2
+#              
+#         """
+# 
+#         S1, alpha1, beta1 = self.dp1.get_normal_form()
+#         S2, alpha2, beta2 = self.dp2.get_normal_form()
+# 
+#         F1 = self.dp1.get_fun_space()
+#         R2 = self.dp2.get_res_space()
+# 
+#         UR2 = UpperSets(R2)
+# 
+#         UF1 = UpperSets(F1)
+#         """
+#         S = S1 x S2 is a Poset
+#         alpha: UF1 x S -> UR1
+#         beta: UF1 x S -> S
+# """     
+#         S, pack, unpack = get_product_compact(S1, S2)
+# 
+#         D = PosetProduct((UF1, S))
+#                          
+#         class SeriesAlpha(Map):
+#             def __init__(self, dp):
+#                 self.dp = dp
+#                 dom = D
+#                 cod = UR2
+#                 Map.__init__(self, dom, cod)
+# 
+#             def _call(self, x):
+#                 (F, s) = x
+#                 (s1, s2) = unpack(s)
+#                 a = alpha1((F, s1))
+#                 return alpha2((a, s2))
+# 
+#         class SeriesBeta(Map):
+#             def __init__(self, dp):
+#                 self.dp = dp
+#                 dom = D
+#                 cod = S
+#                 Map.__init__(self, dom, cod)
+# 
+#             def _call(self, x):
+#                 (F, s) = x
+#                 (s1, s2) = unpack(s)
+#                 r_1 = beta1((F, s1))
+#                 a = alpha1((F, s1))
+#                 r_2 = beta2((a, s2))
+#                 
+#                 return pack(r_1, r_2)
+# 
+#         return NormalForm(S, SeriesAlpha(self), SeriesBeta(self))
 
 
 

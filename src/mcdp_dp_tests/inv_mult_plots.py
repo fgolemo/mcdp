@@ -5,13 +5,10 @@ import warnings
 from nose.tools import assert_equal
 
 from comptests.registrar import comptest, comptest_dynamic
-from mcdp_dp import DPLoop0
 from mcdp_dp import DPLoop2
 from mcdp_dp import InvPlus2Nat, Mux, WrapAMap
 from mcdp_dp import Parallel
 from mcdp_dp import SumNNatDP
-from mcdp_dp.dp_parallel_simplification import make_parallel
-from mcdp_dp.dp_series_simplification import wrap_series
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.solver import generic_solve
 from mcdp_dp.tracer import Tracer
@@ -19,14 +16,12 @@ from mcdp_lang import parse_ndp
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import assert_semantic_error
-from mcdp_maps import PlusValueNatMap
 from mcdp_posets import (Map, Nat, NotEqual, PosetProduct, UpperSets,
     poset_minima)
 from mcdp_posets.maps.coerce_to_int import CoerceToInt
 from mcdp_report.drawing import plot_upset_R2
 from mcdp_report.generic_report_utils import generic_report
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.exceptions import mcdp_dev_warning
 import numpy as np
 from reprep import Report
 
@@ -122,105 +117,105 @@ def check_invmult_report(dp):
     return r
 
 
-@comptest_dynamic
-def check_invmult2(context):
-    r = context.comp(check_invmult2_report)
-    context.add_report(r, 'check_invmult2_report')
-
-def check_invmult2_report():
-
-    ndp = parse_ndp("""
-    mcdp {
-    
-        sub multinv = instance abstract mcdp {
-            requires x [R]
-            requires y [R]
-            
-            provides c [R]
-    
-            c <= x * y
-        }
-    
-        multinv.c >= max( square(multinv.x), 1.0 [R])
-    
-        requires y for multinv
-    }
-"""
-    )
-     
-    dp0 = ndp.get_dp()
-    _, dp = get_dp_bounds(dp0, nl=1, nu=20)
-
-
-    r = Report()
-
-    F = dp.get_fun_space()
-    UR = UpperSets(dp.get_res_space())
-    f = F.U(())
-
-    print('solving straight:')
-    rmin = dp.solve(())
-    print('Rmin: %s' % UR.format(rmin))
-    S, alpha, beta = dp.get_normal_form()
-    # S: 𝟙                                                                                                                                  roc
-    if not isinstance(S, UpperSets):
-        mcdp_dev_warning('This test worked only with the loop0 definiton in which S was an upper set')
-        return r
-        
-    print('S: %s' % S)
-    s0 = S.get_bottom()
-
-    ss = [s0]
-    sr = [alpha((f, s0))]
-
-    nsteps = 5
-    for i in range(nsteps):
-        s_last = ss[-1]
-        S.belongs(s_last)
-        print('Computing step')
-        s_next = beta((f, s_last))
-        S.belongs(s_next)
-        print('snext: %s' % str(s_next))
-        if S.equal(ss[-1], s_next):
-            print('%d: breaking because converged' % i)
-            break
-
-        rn = alpha((f, s_next))
-        print('%d: rn  = %s' % (i, UR.format(rn)))
-        
-        ss.append(s_next)
-        sr.append(rn)
-
-
-    print('plotting')
-    mx = 3.0
-    my = 3.0
-    axis = (0, mx * 1.1, 0, my * 1.1)
-
-    fig = r.figure(cols=2)
-    for i, s in enumerate(ss):
-
-        with fig.plot('S%d' % i) as pylab:
-            plot_upset_R2(pylab, s, axis, color_shadow=[1.0, 0.8, 0.8])
-
-            xs = np.linspace(0.001, 1, 100)
-            ys = 1 / xs
-            pylab.plot(xs, ys, 'k-')
-
-            xs = np.linspace(1, mx, 100)
-            ys = xs
-            pylab.plot(xs, ys, 'k-')
-
-            pylab.axis(axis)
-
-        with fig.plot('R%d' % i) as pylab:
-            Rmin = sr[i]
-            y = np.array(list(Rmin.minimals))
-            x = y * 0
-            pylab.plot(x, y, 'k.')
-            pylab.axis((-mx / 10, mx / 10, 0, my))
-
-    return r
+# @comptest_dynamic
+# def check_invmult2(context):
+#     r = context.comp(check_invmult2_report)
+#     context.add_report(r, 'check_invmult2_report')
+# 
+# def check_invmult2_report():
+# 
+#     ndp = parse_ndp("""
+#     mcdp {
+#     
+#         sub multinv = instance abstract mcdp {
+#             requires x [R]
+#             requires y [R]
+#             
+#             provides c [R]
+#     
+#             c <= x * y
+#         }
+#     
+#         multinv.c >= max( square(multinv.x), 1.0 [R])
+#     
+#         requires y for multinv
+#     }
+# """
+#     )
+#      
+#     dp0 = ndp.get_dp()
+#     _, dp = get_dp_bounds(dp0, nl=1, nu=20)
+# 
+# 
+#     r = Report()
+# 
+#     F = dp.get_fun_space()
+#     UR = UpperSets(dp.get_res_space())
+#     f = F.U(())
+# 
+#     print('solving straight:')
+#     rmin = dp.solve(())
+#     print('Rmin: %s' % UR.format(rmin))
+#     S, alpha, beta = dp.get_normal_form()
+#     # S: 𝟙                                                                                                                                  roc
+#     if not isinstance(S, UpperSets):
+#         mcdp_dev_warning('This test worked only with the loop0 definiton in which S was an upper set')
+#         return r
+#         
+#     print('S: %s' % S)
+#     s0 = S.get_bottom()
+# 
+#     ss = [s0]
+#     sr = [alpha((f, s0))]
+# 
+#     nsteps = 5
+#     for i in range(nsteps):
+#         s_last = ss[-1]
+#         S.belongs(s_last)
+#         print('Computing step')
+#         s_next = beta((f, s_last))
+#         S.belongs(s_next)
+#         print('snext: %s' % str(s_next))
+#         if S.equal(ss[-1], s_next):
+#             print('%d: breaking because converged' % i)
+#             break
+# 
+#         rn = alpha((f, s_next))
+#         print('%d: rn  = %s' % (i, UR.format(rn)))
+#         
+#         ss.append(s_next)
+#         sr.append(rn)
+# 
+# 
+#     print('plotting')
+#     mx = 3.0
+#     my = 3.0
+#     axis = (0, mx * 1.1, 0, my * 1.1)
+# 
+#     fig = r.figure(cols=2)
+#     for i, s in enumerate(ss):
+# 
+#         with fig.plot('S%d' % i) as pylab:
+#             plot_upset_R2(pylab, s, axis, color_shadow=[1.0, 0.8, 0.8])
+# 
+#             xs = np.linspace(0.001, 1, 100)
+#             ys = 1 / xs
+#             pylab.plot(xs, ys, 'k-')
+# 
+#             xs = np.linspace(1, mx, 100)
+#             ys = xs
+#             pylab.plot(xs, ys, 'k-')
+# 
+#             pylab.axis(axis)
+# 
+#         with fig.plot('R%d' % i) as pylab:
+#             Rmin = sr[i]
+#             y = np.array(list(Rmin.minimals))
+#             x = y * 0
+#             pylab.plot(x, y, 'k.')
+#             pylab.axis((-mx / 10, mx / 10, 0, my))
+# 
+#     return r
 
 
 @comptest_dynamic
@@ -673,25 +668,39 @@ mcdp {
         UR.check_equal(res2, Min_pf)
     print(res2)
 
-
+#  
 def get_simple_equiv():
-    class RoundSqrt(Map):
-        def __init__(self):
-            Map.__init__(self, Nat(), Nat())
+    s = """
+    mcdp {
+    variable x [ℕ]
+    variable y [ℕ]
 
-        def _call(self, x):
-            return int(np.ceil(np.sqrt(1.0 * x)))
+    x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + Nat:10
 
-    One = PosetProduct(())
-    F = PosetProduct((One, PosetProduct((Nat(), Nat()))))
-    s0 = Mux(F, 1)
-    s1 = make_parallel(WrapAMap(RoundSqrt()), WrapAMap(RoundSqrt()))
-    s2 = SumNNatDP(2)
-    s3 = WrapAMap(PlusValueNatMap(4))
-    s4 = InvPlus2Nat(Nat(), (Nat(), Nat()))
-    dp0 = wrap_series(s1.get_fun_space(), [s0, s1, s2, s3, s4])
-    dp = DPLoop0(dp0)
-    return dp0, dp
+    requires x >= x
+    requires y >= y
+    }"""
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    return dp
+ 
+#     class RoundSqrt(Map):
+#         def __init__(self):
+#             Map.__init__(self, Nat(), Nat())
+#  
+#         def _call(self, x):
+#             return int(np.ceil(np.sqrt(1.0 * x)))
+#  
+#     One = PosetProduct(())
+#     F = PosetProduct((One, PosetProduct((Nat(), Nat()))))
+#     s0 = Mux(F, 1)
+#     s1 = make_parallel(WrapAMap(RoundSqrt()), WrapAMap(RoundSqrt()))
+#     s2 = SumNNatDP(2)
+#     s3 = WrapAMap(PlusValueNatMap(4))
+#     s4 = InvPlus2Nat(Nat(), (Nat(), Nat()))
+#     dp0 = wrap_series(s1.get_fun_space(), [s0, s1, s2, s3, s4])
+#     dp = DPLoop0(dp0)
+#     return dp0, dp
 
 @comptest
 def check_loop_result5c():
@@ -779,26 +788,26 @@ def check_loop_result5c():
             UR.check_equal(found, R.Us(expected[i]))
         except NotEqual as e:
             print e
-
-@comptest
-def check_loop_result5():
-    _dp0, dp = get_simple_equiv()
-    print dp.repr_long()
-
-    _dp0, dp = get_simple_equiv()
-
-    # R = dp0.get_res_space()
-
-    S, alpha, beta = dp.get_normal_form()
-    One = PosetProduct(())
-    uf = One.U(())
-    s0 = S.get_bottom()
-    ss = [s0]
-    for i in range(4):
-        snext = beta((uf, ss[-1]))
-        ss.append(snext)
-        print('S[%d]: %s' % (i + 1, S.format(snext)))
-    print('S: %s' % S)
-    print('α: %s' % alpha)
-    print('β: %s' % beta)
+# 
+# @comptest
+# def check_loop_result5():
+#     _dp0, dp = get_simple_equiv()
+#     print dp.repr_long()
+# 
+#     _dp0, dp = get_simple_equiv()
+# 
+#     # R = dp0.get_res_space()
+# 
+#     S, alpha, beta = dp.get_normal_form()
+#     One = PosetProduct(())
+#     uf = One.U(())
+#     s0 = S.get_bottom()
+#     ss = [s0]
+#     for i in range(4):
+#         snext = beta((uf, ss[-1]))
+#         ss.append(snext)
+#         print('S[%d]: %s' % (i + 1, S.format(snext)))
+#     print('S: %s' % S)
+#     print('α: %s' % alpha)
+#     print('β: %s' % beta)
 

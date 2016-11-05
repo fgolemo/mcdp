@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 from mcdp_dp import (CatalogueDP, CoProductDP, CoProductDPLabels, Constant,
-    ConstantMinimals, DPLoop0, DPLoop2, Identity, InvMult2, InvMult2L, InvMult2U,
+    ConstantMinimals, DPLoop2, Identity, InvMult2, InvMult2L, InvMult2U,
     InvPlus2, InvPlus2L, InvPlus2Nat, InvPlus2U, JoinNDP, Limit, LimitMaximals,
     Max1, MeetNDualDP, Mux, Parallel, ParallelN, Series0, Terminator,
     PlusValueDP, MeetNDP, JoinNDualDP, InvMult2Nat, MultValueDP,
     MinusValueDP, ProductNDP, Product2DP_U, Product2DP_L, ProductNNatDP, ProductNRcompDP,
     MinusValueRcompDP, MinusValueNatDP, InvMultValueNatDP, InvMultValueRcompDP,
-    InvMultValueDP,
+    InvMultValueDP, SumNNatDP,
      SumNLDP, SumNUDP, Template, FuncNotMoreThan, RcompUnitsPowerDP, SquareNatDP)
 from mcdp_dp.conversion import get_conversion
-from mcdp_dp.dp_sum import SumNNatDP
 from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct, Nat, Rcomp
 from mocdp import MCDPConstants
@@ -470,15 +469,15 @@ if MCDPConstants.test_include_primitivedps_knownfailures:
     def SumNNatDP_3():
         return SumNNatDP(3)
 
-    @add_as_test
-    def DPLoop0_1():
-        F1 = parse_poset('N')
-        F2 = parse_poset('m')
-        R = F2
-        F = PosetProduct((F1, F2))
-        dp = Template(F, R)
-        return DPLoop0(dp)
-    
+#     @add_as_test
+#     def DPLoop0_1():
+#         F1 = parse_poset('N')
+#         F2 = parse_poset('m')
+#         R = F2
+#         F = PosetProduct((F1, F2))
+#         dp = Template(F, R)
+#         return DPLoop0(dp)
+#     
     @add_as_test
     def ProductNDP_3():
         F1 = parse_poset('J')
