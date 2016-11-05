@@ -3,16 +3,11 @@ from nose.tools import assert_equal
 
 from comptests.registrar import comptest
 from mcdp_dp import WrapAMap
-from mcdp_dp.tracer import Tracer
 from mcdp_lang import parse_ndp
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import assert_semantic_error
-from mcdp_posets import (Map, Nat, NotEqual, PosetProduct, UpperSets,
-)
-from mcdp_report.drawing import plot_upset_R2
-import numpy as np
-from reprep import Report
+from mcdp_posets import (Map, Nat, PosetProduct, UpperSets,)
 
 
 # from mcdp_dp.solver import generic_solve
@@ -50,62 +45,59 @@ from reprep import Report
 #     ndp = SimpleWrap(dp, fnames=[], rnames=['x','y'])
 #     return ndp
 # @comptest_dynamic
-def check_invmult(context):
-    ndp = parse_ndp("""
-    mcdp {
-      requires a [R]
-      requires b [R]
-      
-      provides c [R]
-      
-      c <= a * b
-    }
-    """)
-    dp = ndp.get_dp()
-
-    r = context.comp(check_invmult_report, dp)
-    context.add_report(r, 'check_invmult_report')
-
-def check_invmult_report(dp):
-#     from mcdp_dp.dp_loop import SimpleLoop
-#     funsp = dp.get_fun_space()
-
-#     assert isinstance(dp, SimpleLoop)
-
-    f = 1.0
-    R0, R1 = dp.solve_approx(f=f, nl=15, nu=15)
-    UR = UpperSets(dp.get_res_space())
-
-    UR.belongs(R0)
-    UR.belongs(R1)
-    UR.check_leq(R0, R1)
-    # Payload2ET
-
-    r = Report()
-    caption = 'Two curves for each payload'
-    with r.plot('p1', caption=caption) as pylab:
-#        plot_upset_minima(pylab, R0)
-
-        mx = max(x for (x, _) in R1.minimals)
-        my = max(y for (_, y) in R1.minimals)
-        axis = (0, mx * 1.1, 0, my * 1.1)
-
-        plot_upset_R2(pylab, R0, axis, color_shadow=[1.0, 0.8, 0.8])
-        plot_upset_R2(pylab, R1, axis, color_shadow=[0.8, 1.0, 0.8])
-
-
-        xs = np.exp(np.linspace(-10, +10, 50))
-        ys = f / xs
-        pylab.plot(xs, ys, 'r-')
-
-        pylab.xlabel('time')
-        pylab.ylabel('energy')
-
-        pylab.axis(axis) 
-
-    return r
-
-
+# def check_invmult(context):
+#     ndp = parse_ndp("""
+#     mcdp {
+#       requires a [R]
+#       requires b [R]
+#       
+#       provides c [R]
+#       
+#       c <= a * b
+#     }
+#     """)
+#     dp = ndp.get_dp()
+# 
+#     r = context.comp(check_invmult_report, dp)
+#     context.add_report(r, 'check_invmult_report')
+# def check_invmult_report(dp):
+# #     from mcdp_dp.dp_loop import SimpleLoop
+# #     funsp = dp.get_fun_space()
+# 
+# #     assert isinstance(dp, SimpleLoop)
+# 
+#     f = 1.0
+#     R0, R1 = dp.solve_approx(f=f, nl=15, nu=15)
+#     UR = UpperSets(dp.get_res_space())
+# 
+#     UR.belongs(R0)
+#     UR.belongs(R1)
+#     UR.check_leq(R0, R1)
+#     # Payload2ET
+# 
+#     r = Report()
+#     caption = 'Two curves for each payload'
+#     with r.plot('p1', caption=caption) as pylab:
+# #        plot_upset_minima(pylab, R0)
+# 
+#         mx = max(x for (x, _) in R1.minimals)
+#         my = max(y for (_, y) in R1.minimals)
+#         axis = (0, mx * 1.1, 0, my * 1.1)
+# 
+#         plot_upset_R2(pylab, R0, axis, color_shadow=[1.0, 0.8, 0.8])
+#         plot_upset_R2(pylab, R1, axis, color_shadow=[0.8, 1.0, 0.8])
+# 
+# 
+#         xs = np.exp(np.linspace(-10, +10, 50))
+#         ys = f / xs
+#         pylab.plot(xs, ys, 'r-')
+# 
+#         pylab.xlabel('time')
+#         pylab.ylabel('energy')
+# 
+#         pylab.axis(axis) 
+# 
+#     return r
 # @comptest_dynamic
 # def check_invmult2(context):
 #     r = context.comp(check_invmult2_report)
@@ -205,8 +197,6 @@ def check_invmult_report(dp):
 #             pylab.axis((-mx / 10, mx / 10, 0, my))
 # 
 #     return r
-
-
 # @comptest_dynamic
 # def check_invmult3(context):
 #     r = context.comp(check_invmult3_report)
@@ -277,9 +267,6 @@ def check_invmult_report(dp):
 #     generic_report(r, dp, trace, annotation=annotation, axis0=axis0)
 # 
 #     return r
-
-
-
 @comptest
 def check_loop_result1():
 
@@ -358,7 +345,6 @@ class CounterDP(WrapAMap):
 
 @comptest
 def check_loop_result3():
-    
     
     parse_wrap(Syntax.primitivedp_expr,
                      'code mcdp_dp_tests.inv_mult_plots.CounterMap___(n=3)')[0]
@@ -657,21 +643,21 @@ mcdp {
 #         UR.check_equal(res2, Min_pf)
 #     print(res2)
 
-#  
-def get_simple_equiv():
-    s = """
-    mcdp {
-    variable x [ℕ]
-    variable y [ℕ]
-
-    x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + Nat:10
-
-    requires x >= x
-    requires y >= y
-    }"""
-    ndp = parse_ndp(s)
-    dp = ndp.get_dp()
-    return dp
+# #  
+# def get_simple_equiv():
+#     s = """
+#     mcdp {
+#     variable x [ℕ]
+#     variable y [ℕ]
+# 
+#     x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + Nat:10
+# 
+#     requires x >= x
+#     requires y >= y
+#     }"""
+#     ndp = parse_ndp(s)
+#     dp = ndp.get_dp()
+#     return dp
  
 #     class RoundSqrt(Map):
 #         def __init__(self):
@@ -691,92 +677,95 @@ def get_simple_equiv():
 #     dp = DPLoop0(dp0)
 #     return dp0, dp
 
-@comptest
-def check_loop_result5c():
-
-    dp0, dp = get_simple_equiv()
-    print dp.repr_long()
-
-    res = dp.solve(())
-    print res
-
-    R = dp0.get_res_space()
-    UR = UpperSets(R)
-    print('R: %s' % R)
-    print('UR: %s' % UR)
-
-    def check_dp0(f0, expected):
-        expected = list(expected)
-        res0 = dp0.solve(((), f0))
-        print res0
-        UR.check_equal(res0, R.Us(expected))
-
-    def check_minimal(f0):
-        """ The point is one of the minimal points
-        
-            f0 \in h(-, f0)
-        """
-        res0 = dp0.solve(((), f0))
-        minimals = list(res0.minimals)
-        print('check_minimal f0: %s  minimals: %s' % (f0, UR.format(res0)))
-        assert f0 in minimals
-
-    def check_feasible(f0):
-        """ The point is feasible
-        
-            ^f0 \subset ^h(-, f0)
-        """
-        res0 = dp0.solve(((), f0))
-        # minimals = list(res0.minimals)
-        print('check_feasible')
-        print(' f0: %s ' % str(f0))
-        print(' minimals: %s' %  UR.format(res0))
-
-        Uf0 = R.U(f0)
-        UR.check_leq(res0, Uf0)
-
-
-    def get_tradeoff(s):
-        for i in range(s + 1):
-            yield (i, s - i)
-
-    check_dp0(f0=(0, 0), expected=get_tradeoff(4))
-    check_dp0(f0=(0, 4), expected=get_tradeoff(6))
-    check_dp0(f0=(0, 6), expected=get_tradeoff(7))
-
-    solutions = [(0, 7), (3, 6), (4, 4), (6, 3), (7, 0)]
-    for s in solutions:
-        check_minimal(f0=s)
-
-    check_feasible((1, 7))
-    check_feasible((10, 10))
-
-    trace = Tracer()
-    res = dp.solve_trace((), trace)
-    print trace.format()
-    converged = list(trace.get_iteration_values('converged'))
-
-    print converged
-
-    expected = [
-        [(0, 0)],
-        list(get_tradeoff(4)),
-        list(get_tradeoff(6)),  # FIXME
-        list(get_tradeoff(7)),
-        [(0, 7), (2, 6), (3, 5), (4, 4), (5, 3), (6, 2), (7, 0)],
-        [(0, 7), (3, 6), (4, 4), (6, 3), (7, 0)],
-        [(0, 7), (3, 6), (4, 4), (6, 3), (7, 0)],
-    ]
-    sip = list(trace.get_iteration_values('sip'))
-    for i, found in enumerate(sip):
-        want = R.Us(expected[i])
-        print('step: %d' % i)
-        print('want:  %s' % UR.format(want))
-        print('found: %s' % UR.format(found))
-        try:
-            UR.check_equal(found, R.Us(expected[i]))
-        except NotEqual as e:
-            print e
+# @comptest
+# def check_loop_result5c():
+# 
+#     dp = get_simple_equiv()
+#     check_isinstance(dp, DPLoop2)
+#     dp0 = dp.dp1
+#     print dp.repr_long()
+# 
+#     res = dp.solve(())
+#     print res
+# 
+#     R = dp0.get_res_space()
+#     UR = UpperSets(R)
+#     print('R: %s' % R)
+#     print('UR: %s' % UR)
+# 
+#     def check_dp0(f0, expected):
+#         expected = list(expected)
+#         res0 = dp0.solve(((), f0))
+#         print res0
+#         UR.check_equal(res0, R.Us(expected))
+# 
+#     def check_minimal(f0):
+#         """ The point is one of the minimal points
+#         
+#             f0 \in h(-, f0)
+#         """
+#         res0 = dp0.solve(((), f0))
+#         minimals = list(res0.minimals)
+#         print('check_minimal f0: %s  minimals: %s' % (f0, UR.format(res0)))
+#         assert f0 in minimals
+# 
+#     def check_feasible(f0):
+#         """ The point is feasible
+#         
+#             ^f0 \subset ^h(-, f0)
+#         """
+#         res0 = dp0.solve(((), f0))
+#         # minimals = list(res0.minimals)
+#         print('check_feasible')
+#         print(' f0: %s ' % str(f0))
+#         print(' minimals: %s' %  UR.format(res0))
+# 
+#         Uf0 = R.U(f0)
+#         UR.check_leq(res0, Uf0)
+# 
+# 
+#     def get_tradeoff(s):
+#         for i in range(s + 1):
+#             yield (i, s - i)
+# 
+#     check_dp0(f0=(0, 0), expected=get_tradeoff(4))
+#     check_dp0(f0=(0, 4), expected=get_tradeoff(6))
+#     check_dp0(f0=(0, 6), expected=get_tradeoff(7))
+# 
+#     solutions = [(0, 7), (3, 6), (4, 4), (6, 3), (7, 0)]
+#     for s in solutions:
+#         check_minimal(f0=s)
+# 
+#     check_feasible((1, 7))
+#     check_feasible((10, 10))
+# 
+#     trace = Tracer()
+#     res = dp.solve_trace((), trace)
+#     print trace.format()
+#     converged = list(trace.get_iteration_values('converged'))
+# 
+#     print converged
+# 
+#     expected = [
+#         [(0, 0)],
+#         list(get_tradeoff(4)),
+#         list(get_tradeoff(6)),  # FIXME
+#         list(get_tradeoff(7)),
+#         [(0, 7), (2, 6), (3, 5), (4, 4), (5, 3), (6, 2), (7, 0)],
+#         [(0, 7), (3, 6), (4, 4), (6, 3), (7, 0)],
+#         [(0, 7), (3, 6), (4, 4), (6, 3), (7, 0)],
+#     ]
+#     sip = list(trace.get_iteration_values('sip'))
+#     for i, found in enumerate(sip):
+#         want = R.Us(expected[i])
+#         print('step: %d' % i)
+#         print('want:  %s' % UR.format(want))
+#         print('found: %s' % UR.format(found))
+#         try:
+#             UR.check_equal(found, R.Us(expected[i]))
+#         except NotEqual as e:
+#             print e
+#             
 # 
 # @comptest
 # def check_loop_result5():
