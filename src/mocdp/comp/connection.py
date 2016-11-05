@@ -788,17 +788,15 @@ def get_connection_multigraph_weighted(name2dp, connections):
         already.append(R)
         G.edge[dp1][dp2]['spaces'] = already
 
-    cycles = list(simple_cycles(G))
-    for cycle in cycles:
-        cycle = list(cycle)
-        cycle = cycle + [cycle[0]]
-        
-        for i in range(len(cycle) - 1):
-            # XXX
-            _val = G.edge[cycle[i]][cycle[i + 1]]['spaces']
-            # print('%s -> %s -> %s' % (cycle[i], val, cycle[i + 1]))
+#     cycles = list(simple_cycles(G))
+#     for cycle in cycles:
+#         cycle = list(cycle)
+#         cycle = cycle + [cycle[0]]
+#         
+#         for i in range(len(cycle) - 1):
+#             # XXX
+#             _val = G.edge[cycle[i]][cycle[i + 1]]['spaces']
+#             # print('%s -> %s -> %s' % (cycle[i], val, cycle[i + 1]))
 
     return G
     
-
-

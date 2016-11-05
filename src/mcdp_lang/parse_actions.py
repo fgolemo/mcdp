@@ -32,7 +32,6 @@ def decorate_add_where(f, *args, **kwargs):
         raise_with_info(e, where, tb)
 
 
-
 @contextmanager
 def add_where_information(where):
     """ Adds where field to DPSyntaxError or DPSemanticError thrown by code. """
@@ -143,15 +142,6 @@ def divide_parse_action(tokens):
     assert l.where.character_end is not None
     res = CDP.Divide(l, where=l.where)
     return res
-
-# @parse_action
-# @wheredecorator
-# def coprod_parse_action(tokens):
-#     tokens = list(tokens[0])
-#     l = make_list(tokens)
-#     assert l.where.character_end is not None
-#     res = CDP.Coproduct(l, where=l.where)
-#     return res
 
 @parse_action
 @wheredecorator
@@ -274,8 +264,5 @@ def resshortcut1m(requires, rnames, prep_for, name):
 def parse_pint_unit(tokens):
     tokens = list(tokens)
     pint_string = " ".join(tokens)
-    # print 'parse_pint_unit, tokens = %s, pint_string = %s' % (tokens, pint_string)
-
-    # return CDP.Unit(make_rcompunit(pint_string))
     return CDP.RcompUnit(pint_string)
 
