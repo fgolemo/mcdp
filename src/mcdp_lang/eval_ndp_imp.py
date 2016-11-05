@@ -692,8 +692,8 @@ def eval_statement(r, context):
             add_constraint(context, resource=rv, function=f)
         else:
             msg = 'eval_statement(): cannot interpret.'
-            r = recursive_print(r)
-            raise_desc(DPInternalError, msg, r=r)
+            r2 = recursive_print(r)
+            raise_desc(DPInternalError, msg, r=r2) # where=r.where.__repr__())
 
 def eval_build_problem(r, context):
     context = context.child()

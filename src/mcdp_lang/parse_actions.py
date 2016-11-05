@@ -120,6 +120,12 @@ def spa(x, b):
         
         if isnamedtupleinstance(res) and \
             (res.where is None or res.where.character_end is None):
+            
+            if character_end >= len(s):
+                trim = len(s)-1
+                logger.debug('Trimming character_end from %s to %s' % (character_end, trim))
+                character_end = trim
+                
             w2 = Where(s, character_end=character_end, character=loc)
             res = get_copy_with_where(res, where=w2)
 

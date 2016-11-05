@@ -137,15 +137,23 @@ def parse_wrap_check(string, expr, result=None):
 
 @contract(string=str, contains='str|None')
 def assert_parse_ndp_semantic_error(string, contains=None):
-    """ Asserts that parsing this string as an NDP will raise
+    """
+        Asserts that parsing this string as an NDP will raise
         a DPSemanticError. If contains is not None, it is 
-        a substring that must be contained in the error. """
+        a substring that must be contained in the error.
+        
+        Returns the exception. 
+    """
     return parse_wrap_semantic_error(string, Syntax.ndpt_dp_rvalue, contains=contains)
 
 @contract(string=str, contains='str|None')
 def parse_wrap_semantic_error(string, expr, contains=None):
-    """ Assert semantic error. If contains is not None, it is 
-        a substring that must be contained in the error. """
+    """ 
+        Assert semantic error. If contains is not None, it is 
+        a substring that must be contained in the error. 
+    
+        Returns the exception.
+    """
     if isinstance(expr, ParsingElement):
         expr = expr.get()
 
@@ -158,7 +166,9 @@ def parse_wrap_semantic_error(string, expr, contains=None):
                 msg = 'Expected a DPSemanticError with substring %r.' % contains
                 raise_wrapped(TestFailed, e, msg,
                               expr=find_parsing_element(expr), string=string)
-            
+            return e
+        else:
+            return e
     except BaseException as e:
         msg = 'Expected DPSemanticError, but obtained %s.' % type(e)
         raise_wrapped(TestFailed, e, msg,
