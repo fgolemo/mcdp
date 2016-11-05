@@ -1,21 +1,23 @@
 # -*- coding: utf-8 -*-
-from .context import Connection
-from .interfaces import NamedDP
-from .wrap import dpwrap
 from collections import Counter
+
+from networkx import DiGraph, MultiDiGraph, NetworkXUnfeasible
+from networkx.algorithms import is_connected, simple_cycles, topological_sort
+
 from contracts import contract
 from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
-from mcdp_dp import Identity, Mux, Terminator, make_parallel, make_series
-from mcdp_dp.dp_loop import make_loop
+from mcdp_dp import Identity, Mux, make_parallel, make_series
 from mcdp_posets import PosetProduct
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.connection_reps import (relabel, there_are_repetitions,
     there_are_reps)
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
-from networkx import DiGraph, MultiDiGraph, NetworkXUnfeasible
-from networkx.algorithms import is_connected, simple_cycles, topological_sort
+from mocdp.exceptions import DPInternalError, DPSemanticError
+
+from .context import Connection
+from .interfaces import NamedDP
+from .wrap import dpwrap
 
 
 class TheresALoop(Exception):
@@ -477,96 +479,96 @@ def order_dps(name2dp, connections):
     return l
 
 
-
-@contract(ndp=NamedDP, lf='str', lr='str', returns=NamedDP)
-def dploop0(ndp, lr, lf):
-    try:
-            
-        ndp.rindex(lr)
-        ndp.findex(lf)
-    
-        #
-        # This is the version in the papers
-        #           ______
-        #    f1 -> |  dp  |--->r
-        #    f2 -> |______|R|
-        #       `-----------/
-        #            _____
-        #  A------->|     |--B--|
-        #     |-o   | ndp |     |--->
-        #  -R-|-lf->|_____|--lr-| |
-        #  `--------(>=)----------/
-        #
-        # write as dploop0(series(X, dp))
-        #
-        # where X is a mux with function space A * R
-        # and coords
-        R = ndp.get_dp().get_res_space()
-    
-        F0 = ndp.get_fnames()
-        A = list(F0)  # preserve order
-        A.remove(lf)
-    
-        def coord_concat(a, b):
-            if b == (): return a
-            return a + (b,)
-    
-        if len(A) == 1:
-            F = PosetProduct((ndp.get_ftype(A[0]), R))
-        else:
-            F = PosetProduct((ndp.get_ftypes(A), R))
-
-        # print('A: %s' % A)
-        # print('F: %s' % F)
-
-        coords = []
-        for x in ndp.get_fnames():
-            if x in A:
-                i = A.index(x)
-                if len(A) != 1:
-                    coords.append(coord_concat((0,), i))
-                else:
-                    coords.append(0)  # just get the one A
-            if x == lf:
-                # print('x = lf = %s' % x)
-                xc = coord_concat((1,), ndp.rindex(lr))
-                coords.append(xc)
-
-
-        mcdp_dev_warning('This is a trick')
-        if len(coords) == 1:
-            coords = coords[0]
-    
-        X = Mux(F, coords)
-        # print('X = %s' % X.repr_long())
-        dp = ndp.get_dp()
-        # print('dp = %s' % dp.repr_long())
-        S = make_series(X, dp)
-        # print('S = %s' % S)
-        
-        res_dp = make_loop(S)
-        rnames = ndp.get_rnames()
-        fnames = A
-    
-        if len(fnames) == 1:
-    #         print('At this point, res_dp')
-    #         funsp = res_dp.get_fun_space()
-    #         res_dp = make_series(Mux(funsp[0], [()]), res_dp)
-            fnames = fnames[0]
-    
-        ressp = res_dp.get_res_space()
-        if len(rnames) == 1:
-            if isinstance(ressp, PosetProduct):
-                res_dp = make_series(res_dp, Mux(ressp, 0))
-                rnames = rnames[0]
-            else:
-                rnames = rnames[0]  # XXX
-    
-        res = dpwrap(res_dp, fnames, rnames)
-        return res
-    except DPInternalError as e:
-        msg = 'Error while calling dploop0( lr = %s -> lf = %s) ' % (lr, lf)
-        raise_wrapped(DPInternalError, e, msg, ndp=ndp.repr_long())
+# 
+# @contract(ndp=NamedDP, lf='str', lr='str', returns=NamedDP)
+# def dploop0(ndp, lr, lf):
+#     try:
+#             
+#         ndp.rindex(lr)
+#         ndp.findex(lf)
+#     
+#         #
+#         # This is the version in the papers
+#         #           ______
+#         #    f1 -> |  dp  |--->r
+#         #    f2 -> |______|R|
+#         #       `-----------/
+#         #            _____
+#         #  A------->|     |--B--|
+#         #     |-o   | ndp |     |--->
+#         #  -R-|-lf->|_____|--lr-| |
+#         #  `--------(>=)----------/
+#         #
+#         # write as dploop0(series(X, dp))
+#         #
+#         # where X is a mux with function space A * R
+#         # and coords
+#         R = ndp.get_dp().get_res_space()
+#     
+#         F0 = ndp.get_fnames()
+#         A = list(F0)  # preserve order
+#         A.remove(lf)
+#     
+#         def coord_concat(a, b):
+#             if b == (): return a
+#             return a + (b,)
+#     
+#         if len(A) == 1:
+#             F = PosetProduct((ndp.get_ftype(A[0]), R))
+#         else:
+#             F = PosetProduct((ndp.get_ftypes(A), R))
+# 
+#         # print('A: %s' % A)
+#         # print('F: %s' % F)
+# 
+#         coords = []
+#         for x in ndp.get_fnames():
+#             if x in A:
+#                 i = A.index(x)
+#                 if len(A) != 1:
+#                     coords.append(coord_concat((0,), i))
+#                 else:
+#                     coords.append(0)  # just get the one A
+#             if x == lf:
+#                 # print('x = lf = %s' % x)
+#                 xc = coord_concat((1,), ndp.rindex(lr))
+#                 coords.append(xc)
+# 
+# 
+#         mcdp_dev_warning('This is a trick')
+#         if len(coords) == 1:
+#             coords = coords[0]
+#     
+#         X = Mux(F, coords)
+#         # print('X = %s' % X.repr_long())
+#         dp = ndp.get_dp()
+#         # print('dp = %s' % dp.repr_long())
+#         S = make_series(X, dp)
+#         # print('S = %s' % S)
+#         
+#         res_dp = make_loop(S)
+#         rnames = ndp.get_rnames()
+#         fnames = A
+#     
+#         if len(fnames) == 1:
+#     #         print('At this point, res_dp')
+#     #         funsp = res_dp.get_fun_space()
+#     #         res_dp = make_series(Mux(funsp[0], [()]), res_dp)
+#             fnames = fnames[0]
+#     
+#         ressp = res_dp.get_res_space()
+#         if len(rnames) == 1:
+#             if isinstance(ressp, PosetProduct):
+#                 res_dp = make_series(res_dp, Mux(ressp, 0))
+#                 rnames = rnames[0]
+#             else:
+#                 rnames = rnames[0]  # XXX
+#     
+#         res = dpwrap(res_dp, fnames, rnames)
+#         return res
+#     except DPInternalError as e:
+#         msg = 'Error while calling dploop0( lr = %s -> lf = %s) ' % (lr, lf)
+#         raise_wrapped(DPInternalError, e, msg, ndp=ndp.repr_long())
 
 @contract(cndp=CompositeNamedDP, returns=SimpleWrap)
 def cndp_dpgraph(cndp):
@@ -709,47 +711,47 @@ def dpgraph_(name2dp, connections, split):
         # At this point we never resort to the rest -
         # this is always called without cycles
         assert False
-        c = choose_connection_to_cut1(connections, name2dp)
-
-        other_connections = set()
-        other_connections.update(connections)
-        other_connections.remove(c)
-
-        def connections_include_resource(conns, s):
-            for c in conns:
-                if c.s1 == s:
-                    return True
-            else:
-                return False
-
-        # we have to make sure that the signal that we need is not closed
-        if connections_include_resource(other_connections, c.s1):
-            split1 = [c.s1]
-        else:
-            split1 = []
-
-        split1.extend(split)
-
-        ndp = dpgraph(name2dp, other_connections, split=split1)
-
-        # now we make sure that the signals we have are preserved
-        ndp.rindex(c.s1)
-        ndp.findex(c.s2)
-        l = dploop0(ndp, c.s1, c.s2)
-
-        l.rindex(c.s1)
-
-        if c.s1 in split:
-            return l
-
-        else:
-            F = ndp.get_rtype(c.s1)
-            term = dpwrap(Terminator(F), c.s1, [])
-
-            res = connect2(l, term,
-                           set([Connection("-", c.s1, "-", c.s1)]), split=[])
-
-            return res
+#         c = choose_connection_to_cut1(connections, name2dp)
+# 
+#         other_connections = set()
+#         other_connections.update(connections)
+#         other_connections.remove(c)
+# 
+#         def connections_include_resource(conns, s):
+#             for c in conns:
+#                 if c.s1 == s:
+#                     return True
+#             else:
+#                 return False
+# 
+#         # we have to make sure that the signal that we need is not closed
+#         if connections_include_resource(other_connections, c.s1):
+#             split1 = [c.s1]
+#         else:
+#             split1 = []
+# 
+#         split1.extend(split)
+# 
+#         ndp = dpgraph(name2dp, other_connections, split=split1)
+# 
+#         # now we make sure that the signals we have are preserved
+#         ndp.rindex(c.s1)
+#         ndp.findex(c.s2)
+#         l = dploop0(ndp, c.s1, c.s2)
+# 
+#         l.rindex(c.s1)
+# 
+#         if c.s1 in split:
+#             return l
+# 
+#         else:
+#             F = ndp.get_rtype(c.s1)
+#             term = dpwrap(Terminator(F), c.s1, [])
+# 
+#             res = connect2(l, term,
+#                            set([Connection("-", c.s1, "-", c.s1)]), split=[])
+# 
+#             return res
     except DPSemanticError as e:
         raise_wrapped(DPSemanticError, e, 'Error while calling dpgraph().',
                       compact=True,
