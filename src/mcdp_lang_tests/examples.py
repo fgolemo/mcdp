@@ -8,6 +8,7 @@ from mcdp_lang_tests.utils import (assert_parsable_to_connected_ndp_fn,
     assert_parsable_to_unconnected_ndp_fn, assert_semantic_error_fn,
     assert_syntax_error_fn)
 from mcdp_library.utils import dir_from_package_name, locate_files
+from mcdp_lang.syntax import Syntax
 
 
 def get_marked_tests(filename):
@@ -44,7 +45,8 @@ def syntax_test_fn(filename):
 def syntax_test(contents):
     from mcdp_report.html import ast_to_html
 
-    html = ast_to_html(contents, complete_document=False, add_css=False)
+    html = ast_to_html(contents, parse_expr=Syntax.ndpt_dp_rvalue,
+                                complete_document=False, add_css=False)
 
     s = StringIO(html)
     import xml.etree.ElementTree as ETree

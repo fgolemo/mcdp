@@ -120,13 +120,7 @@ def spa(x, b):
         
         if isnamedtupleinstance(res) and \
             (res.where is None or res.where.character_end is None):
-            
-            if character_end >= len(s):
-                trim = len(s)-1
-                logger.debug('Trimming character_end from %s to %s' % (character_end, trim))
-                character_end = trim
-                
-            w2 = Where(s, character_end=character_end, character=loc)
+            w2 = Where(s, character=loc, character_end=character_end)
             res = get_copy_with_where(res, where=w2)
 
         if do_extra_checks():
@@ -252,10 +246,7 @@ def parse_wrap(expr, string):
     except (ParseException, ParseFatalException) as e:
         # ... so we can use "string" here.
         # raise
-        loc = e.loc
-        if loc >= len(string0):
-            loc -= 1
-        where = Where(string, character=loc)
+        where = Where(string, character=e.loc)
         raise DPSyntaxError(str(e), where=where)
     except DPSemanticError as e:
         msg = "User error while interpreting the model:"
