@@ -144,8 +144,25 @@ def assert_parse_ndp_semantic_error(string, contains=None):
         
         Returns the exception. 
     """
-    return parse_wrap_semantic_error(string, Syntax.ndpt_dp_rvalue, contains=contains)
+    try:
+        res = parse_ndp(string)
+    except DPSemanticError as e:
+        if contains is not None:
+            s = str(e)
+            if not contains in s:
+                msg = 'Expected a DPSemanticError with substring %r.' % contains
+                raise_wrapped(TestFailed, e, msg, string=string)
+            return e
+        else:
+            return e
+    except BaseException as e:
+        msg = 'Expected DPSemanticError, but obtained %s.' % type(e)
+        raise_wrapped(TestFailed, e, msg, string=string)
 
+    msg = 'Expected DPSemanticError, but no exception was thrown.'
+    raise_desc(TestFailed, msg, string=string, result=res) 
+    assert False
+    
 @contract(string=str, contains='str|None')
 def parse_wrap_semantic_error(string, expr, contains=None):
     """ 
@@ -158,7 +175,7 @@ def parse_wrap_semantic_error(string, expr, contains=None):
         expr = expr.get()
 
     try:
-        _res = parse_wrap(expr, string)[0]  # note the 0, first element
+        res = parse_wrap(expr, string)[0]  # note the 0, first element
     except DPSemanticError as e:
         if contains is not None:
             s = str(e)
@@ -174,6 +191,11 @@ def parse_wrap_semantic_error(string, expr, contains=None):
         raise_wrapped(TestFailed, e, msg,
                       expr=find_parsing_element(expr), string=string)
 
+    msg = 'Expected DPSemanticError, but no except was thrown.'
+    raise_desc(TestFailed, msg,
+                  expr=find_parsing_element(expr), string=string,
+                  result=res) 
+    assert False
 
 @contract(string=str)
 def parse_wrap_syntax_error(string, expr):

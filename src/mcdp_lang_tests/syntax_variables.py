@@ -14,7 +14,6 @@ def check_variables01():
     expr = Syntax.var_statement
     for s in some:
         parse_wrap(expr, s)
-    
 
 @comptest
 def check_variables02():
@@ -48,17 +47,50 @@ def check_variables03():
     assert_parse_ndp_semantic_error(s)
 
 
+
+
+
 @comptest
 def check_variables04():
-    pass
+    # This causes an error because it conflicts with f
+    s = """
+    mcdp {
+        provides f [Nat]
+        requires r [Nat]
+        
+        variable f [Nat]
+
+    }
+    """
+    assert_parse_ndp_semantic_error(s, 'Conflict')
 
 @comptest
 def check_variables05():
-    pass
+    # This causes an error because it conflicts with r
+    s = """
+    mcdp {
+        provides f [Nat]
+        requires r [Nat]
+        
+        variable r [Nat]
+    }
+    """
+    assert_parse_ndp_semantic_error(s, 'Conflict')
+ 
 
 @comptest
 def check_variables06():
-    pass
+    # This causes an error because it is repeated
+    s = """
+    mcdp {
+        provides f [Nat]
+        requires r [Nat]
+        
+        variable x [Nat]
+        variable x [Nat]
+    }
+    """
+    print assert_parse_ndp_semantic_error(s, 'Conflict')
 
 @comptest
 def check_variables07():

@@ -633,7 +633,7 @@ mcdp {
     required r >= f1 - f2
 }
     """
-    assert_parse_ndp_semantic_error(s)
+    print assert_parse_ndp_semantic_error(s)
 
 @comptest
 def check_lang84(): # TODO: rename to LF
