@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
-from mcdp_lang.parse_actions import rvalue_minus_parse_action, \
-    fvalue_minus_parse_action
 from mocdp.exceptions import mcdp_dev_warning
 
 from .parse_actions import (divide_parse_action,
     funshortcut1m, mult_inv_parse_action, mult_parse_action, parse_pint_unit,
     plus_inv_parse_action, plus_parse_action, resshortcut1m,
-    space_product_parse_action)
+    space_product_parse_action, rvalue_minus_parse_action, fvalue_minus_parse_action)
 from .parts import CDPLanguage
 from .pyparsing_bundled import (
     CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
@@ -341,9 +339,11 @@ class Syntax():
                        lambda t: CDP.ResStatement(t[0], t[1], t[2]))
     
     VARIABLE = keyword('variable', CDP.VarStatementKeyword)
-    var_statement = sp(VARIABLE + vname + unitst,
+    var_list = sp(vname + ZeroOrMore(SCOMMA + vname),
+                  lambda t: make_list(t))
+
+    var_statement = sp(VARIABLE + var_list + unitst,
                        lambda t: CDP.VarStatement(t[0], t[1], t[2]))
-    
 
     # import statements:
     #    from libname import a, b
@@ -780,6 +780,19 @@ class Syntax():
                                                   name=t[3]))
 
     FOR = keyword('for', CDP.ForKeyword)
+
+    rnames = sp(rname + ZeroOrMore(SCOMMA + rname),
+                lambda t: make_list(list(t)))
+    
+    res_shortcut4 = sp(REQUIRES + rnames, 
+                       lambda t: CDP.ResShortcut4(t[0], t[1]))
+
+    fnames = sp(fname + ZeroOrMore(SCOMMA + fname),
+                lambda t: make_list(list(t)))
+    
+    fun_shortcut4 = sp(PROVIDES + fnames, 
+                       lambda t: CDP.FunShortcut4(t[0], t[1]))
+    
     res_shortcut1 = sp(REQUIRES + rname + FOR - dpname,
                        lambda t: CDP.ResShortcut1(t[0], t[1], t[2], t[3]))
 
@@ -829,6 +842,8 @@ class Syntax():
                       setname_ndp_type2)
                  ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
                  ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3
+                 ^ res_shortcut4
+                 ^ fun_shortcut4
                  ^ var_statement
                  ^ ignore_res
                  ^ ignore_fun) + ow

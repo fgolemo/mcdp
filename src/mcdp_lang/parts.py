@@ -204,7 +204,7 @@ class CDPLanguage():
 
     FunStatement = namedtuplewhere('FunStatement', 'keyword fname unit')
     ResStatement = namedtuplewhere('ResStatement', 'keyword rname unit')
-    VarStatement = namedtuplewhere('VarStatement', 'keyword vname unit')
+    VarStatement = namedtuplewhere('VarStatement', 'keyword vnames unit')
     VarStatementKeyword = namedtuplewhere('VarStatementKeyword', 'keyword')
     
     PosetName = namedtuplewhere('PosetName', 'value')
@@ -225,7 +225,11 @@ class CDPLanguage():
     InvPlus = namedtuplewhere('InvPlus', 'ops')
     FunShortcut1 = namedtuplewhere('FunShortcut1', 'provides fname prep_using name')
     ResShortcut1 = namedtuplewhere('ResShortcut1', 'requires rname prep_for name')
-
+    
+    # requires x, y
+    ResShortcut4 = namedtuplewhere('ResShortcut4', 'requires rnames')
+    FunShortcut4 = namedtuplewhere('FunShortcut4', 'requires fnames')
+    
     FunShortcut1m = namedtuplewhere('FunShortcut1m', 'provides fnames prep_using name')
     ResShortcut1m = namedtuplewhere('ResShortcut1m', 'requires rnames prep_for name')
     FunShortcut2 = namedtuplewhere('FunShortcut2', 'keyword fname leq lf')
