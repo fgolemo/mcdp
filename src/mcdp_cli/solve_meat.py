@@ -12,7 +12,7 @@ from mcdp_posets import (NotLeq, UpperSets,
 from mocdp.comp.recursive_name_labeling import (get_imp_as_recursive_dict,
     get_labelled_version, ndp_make)
 from reprep import Report
-DPLoop0
+
 from .utils_mkdir import mkdirs_thread_safe
 
 

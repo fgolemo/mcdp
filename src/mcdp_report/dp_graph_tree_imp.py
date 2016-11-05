@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from mcdp_dp import (ApproximableDP, CoProductDPLabels, Constant, DPLoop0,
+from mcdp_dp import (ApproximableDP, CoProductDPLabels, Constant,
     DPLoop2, LabelerDP, Limit, Mux, OpaqueDP, Parallel,
     PrimitiveDP, Series0, WrapAMap)
 from multi_index.inversion import transform_pretty_print
@@ -64,8 +64,6 @@ def dp_graph_tree(dp0, imp=
             r = go_series(dp, imp)
         elif isinstance(dp, Parallel):
             r = go_parallel(dp, imp)
-        elif isinstance(dp, DPLoop0):
-            r = go_loop(dp, imp)
         elif isinstance(dp, DPLoop2):
             r = go_loop2(dp, imp)
         elif isinstance(dp, OpaqueDP):

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from mcdp_dp import DPLoop0, DPLoop2, Parallel, PrimitiveDP, Series0
+from mcdp_dp import DPLoop2, Parallel, PrimitiveDP, Series0
 from mocdp.exceptions import mcdp_dev_warning
 
 
@@ -23,8 +23,6 @@ def dp_graph_flow(dp0, imp=None):
             r = go_series(dp, imp)
         elif isinstance(dp, Parallel):
             r = go_parallel(dp, imp)
-        elif isinstance(dp, DPLoop0):
-            r = go_loop(dp, imp)
         elif isinstance(dp, DPLoop2):
             r = go_loop2(dp, imp)
         else:
