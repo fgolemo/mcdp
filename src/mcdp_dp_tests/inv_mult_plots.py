@@ -1,65 +1,54 @@
 # -*- coding: utf-8 -*-
-import itertools
-import warnings
-
 from nose.tools import assert_equal
 
-from comptests.registrar import comptest, comptest_dynamic
-from mcdp_dp import DPLoop2
-from mcdp_dp import InvPlus2Nat, Mux, WrapAMap
-from mcdp_dp import Parallel
-from mcdp_dp import SumNNatDP
-from mcdp_dp.dp_transformations import get_dp_bounds
-from mcdp_dp.solver import generic_solve
+from comptests.registrar import comptest
+from mcdp_dp import WrapAMap
 from mcdp_dp.tracer import Tracer
 from mcdp_lang import parse_ndp
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import assert_semantic_error
 from mcdp_posets import (Map, Nat, NotEqual, PosetProduct, UpperSets,
-    poset_minima)
-from mcdp_posets.maps.coerce_to_int import CoerceToInt
+)
 from mcdp_report.drawing import plot_upset_R2
-from mcdp_report.generic_report_utils import generic_report
-from mocdp.comp.wrap import SimpleWrap
 import numpy as np
 from reprep import Report
 
 
-def example():
-    c0 = 4
-    from mcdp_posets.maps.promote_to_float import PromoteToFloat
-    from mcdp_dp.dp_series import Series
-    from mcdp_maps.misc_imp import CeilMap, SqrtMap
-    from mcdp_posets import Rcomp 
-    N = Nat()
-    R = Rcomp()
-    class PlusC(Map):
-        def __init__(self, c):
-            self.c= c
-            dom = cod = N
-            Map.__init__(self, dom, cod)
-        def _call(self, x):
-            return x + self.c
-    dp1 = Series(SumNNatDP(2), WrapAMap(PlusC(c0)))
-    prom = WrapAMap(PromoteToFloat(N, R))
-    sqrt = WrapAMap(SqrtMap(R))
-    ceil = WrapAMap(CeilMap(R))
-    coe = WrapAMap(CoerceToInt(R, N))
-    dp2 = Series(prom, Series(Series(sqrt, ceil), coe)) 
-    dp3 = InvPlus2Nat(N, (N, N)) 
-    One = PosetProduct(())
-    x = Mux(PosetProduct((One, N)), 1)
-    y = Mux(N, [(), ()])
-    xx = Series(Series(dp3, Parallel(dp2, dp2)), dp1)
-    print xx.repr_long()
-    s = [x, xx, y]
-    inner = Series(Series(s[0], s[1]), s[2])
-    print
-    dp = DPLoop2(inner)
-    ndp = SimpleWrap(dp, fnames=[], rnames=['x','y'])
-    return ndp
-
+# from mcdp_dp.solver import generic_solve
+# def example():
+#     c0 = 4
+#     from mcdp_posets.maps.promote_to_float import PromoteToFloat
+#     from mcdp_dp.dp_series import Series
+#     from mcdp_maps.misc_imp import CeilMap, SqrtMap
+#     from mcdp_posets import Rcomp 
+#     N = Nat()
+#     R = Rcomp()
+#     class PlusC(Map):
+#         def __init__(self, c):
+#             self.c= c
+#             dom = cod = N
+#             Map.__init__(self, dom, cod)
+#         def _call(self, x):
+#             return x + self.c
+#     dp1 = Series(SumNNatDP(2), WrapAMap(PlusC(c0)))
+#     prom = WrapAMap(PromoteToFloat(N, R))
+#     sqrt = WrapAMap(SqrtMap(R))
+#     ceil = WrapAMap(CeilMap(R))
+#     coe = WrapAMap(CoerceToInt(R, N))
+#     dp2 = Series(prom, Series(Series(sqrt, ceil), coe)) 
+#     dp3 = InvPlus2Nat(N, (N, N)) 
+#     One = PosetProduct(())
+#     x = Mux(PosetProduct((One, N)), 1)
+#     y = Mux(N, [(), ()])
+#     xx = Series(Series(dp3, Parallel(dp2, dp2)), dp1)
+#     print xx.repr_long()
+#     s = [x, xx, y]
+#     inner = Series(Series(s[0], s[1]), s[2])
+#     print
+#     dp = DPLoop2(inner)
+#     ndp = SimpleWrap(dp, fnames=[], rnames=['x','y'])
+#     return ndp
 # @comptest_dynamic
 def check_invmult(context):
     ndp = parse_ndp("""
@@ -218,76 +207,76 @@ def check_invmult_report(dp):
 #     return r
 
 
-@comptest_dynamic
-def check_invmult3(context):
-    r = context.comp(check_invmult3_report)
-    context.add_report(r, 'check_invmult3_report')
-
-def check_invmult3_report():
-
-    ndp = parse_ndp("""
-mcdp {
-
-    sub multinv = instance abstract mcdp {
-  requires x [R]
-  requires y [R]
-
-  provides c [R]
-
-    c <= x * y
-  }
-
-   multinv.c >= max( square(multinv.x), 1.0 [R])
-
-  requires x for multinv
-  requires y for multinv
-
-}"""
-    )
-
-    dp0 = ndp.get_dp()
-    _, dp = get_dp_bounds(dp0, nl=1, nu=20)
-
-
-    r = Report()
-
-#     F = dp.get_fun_space()
-#     R = dp.get_res_space()
-#     UR = UpperSets(R)
-    f = ()  # F.U(())
-
-    r.text('dp', dp.tree_long())
-    print('solving straight:')
-#     rmin = dp.solve(())
-#     print('Rmin: %s' % UR.format(rmin))
-
-    trace = generic_solve(dp, f=f, max_steps=None)
-
-
-#
-#     fig0 = r.figure(cols=2)
-#     caption = 'Solution using solve()'
-#     with fig0.plot('S0', caption=caption) as pylab:
-#         plot_upset_R2(pylab, rmin, axis, color_shadow=[1.0, 0.8, 0.9])
-#         pylab.axis(axis)
-
-    def annotation(pylab, axis):
-        minx, maxx, _, _ = axis
-        xs = np.linspace(minx, 1, 100)
-        xs = np.array([x for x in xs if  x != 0])
-        ys = 1 / xs
-        pylab.plot(xs, ys, 'k-')
-
-        xs = np.linspace(1, maxx, 100)
-        ys = xs
-        pylab.plot(xs, ys, 'k--')
-
-    # make sure it includes (0,0) and (2, 0)
-    axis0 = (0, 2, 0, 0)
-
-    generic_report(r, dp, trace, annotation=annotation, axis0=axis0)
-
-    return r
+# @comptest_dynamic
+# def check_invmult3(context):
+#     r = context.comp(check_invmult3_report)
+#     context.add_report(r, 'check_invmult3_report')
+# 
+# def check_invmult3_report():
+# 
+#     ndp = parse_ndp("""
+# mcdp {
+# 
+#     sub multinv = instance abstract mcdp {
+#   requires x [R]
+#   requires y [R]
+# 
+#   provides c [R]
+# 
+#     c <= x * y
+#   }
+# 
+#    multinv.c >= max( square(multinv.x), 1.0 [R])
+# 
+#   requires x for multinv
+#   requires y for multinv
+# 
+# }"""
+#     )
+# 
+#     dp0 = ndp.get_dp()
+#     _, dp = get_dp_bounds(dp0, nl=1, nu=20)
+# 
+# 
+#     r = Report()
+# 
+# #     F = dp.get_fun_space()
+# #     R = dp.get_res_space()
+# #     UR = UpperSets(R)
+#     f = ()  # F.U(())
+# 
+#     r.text('dp', dp.tree_long())
+#     print('solving straight:')
+# #     rmin = dp.solve(())
+# #     print('Rmin: %s' % UR.format(rmin))
+# 
+#     trace = generic_solve(dp, f=f, max_steps=None)
+# 
+# 
+# #
+# #     fig0 = r.figure(cols=2)
+# #     caption = 'Solution using solve()'
+# #     with fig0.plot('S0', caption=caption) as pylab:
+# #         plot_upset_R2(pylab, rmin, axis, color_shadow=[1.0, 0.8, 0.9])
+# #         pylab.axis(axis)
+# 
+#     def annotation(pylab, axis):
+#         minx, maxx, _, _ = axis
+#         xs = np.linspace(minx, 1, 100)
+#         xs = np.array([x for x in xs if  x != 0])
+#         ys = 1 / xs
+#         pylab.plot(xs, ys, 'k-')
+# 
+#         xs = np.linspace(1, maxx, 100)
+#         ys = xs
+#         pylab.plot(xs, ys, 'k--')
+# 
+#     # make sure it includes (0,0) and (2, 0)
+#     axis0 = (0, 2, 0, 0)
+# 
+#     generic_report(r, dp, trace, annotation=annotation, axis0=axis0)
+# 
+#     return r
 
 
 
@@ -467,206 +456,206 @@ mcdp {
     res = dp.solve(())
     print res
     UNat.check_equal(res, N.U(2))
+# 
+# @comptest
+# def check_loop_result4():
+#     # Exploration of 2 technologies,
+#     # with two resources: money and time
+# 
+#     ndp = parse_ndp("""
+# mcdp {
+#     adp1 = dp {
+#         requires x [Nat]
+#         provides c [Nat]
+# 
+#         implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=3)
+#     }
+#     
+#     adp2 = dp {
+#         requires x [Nat]
+#         provides c [Nat]
+# 
+#         implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=2)
+#     }
+#     
+#     t1 = mcdp {
+#         # solution of this = (0,6)
+#         requires money [Nat]
+#         requires time  [Nat]
+#         w = instance adp1
+#         w.c >= w.x
+#         money >= nat:0 * w.x
+#         time  >= nat:2 * w.x 
+#     }
+# 
+#     t2 = mcdp {
+#         # solution of this = (2,0)
+#         requires money [Nat]
+#         requires time  [Nat]
+#         w = instance adp2
+#         w.c >= w.x
+#         money >= nat:1 * w.x
+#         time  >= nat:0 * w.x 
+#     }
+# 
+#     s = instance choose (t1:t1, t2: t2)
+#     
+#     requires money, time for s
+# }"""
+#     )
+#     dp = ndp.get_dp()
+#     print dp
+#     res = dp.solve(())
+#     print res
+# 
+#     R = dp.get_res_space()
+#     UR = UpperSets(R)
+#     UR.check_equal(res, R.Us([(2, 0), (0, 6)]))
+# #     UNat.check_equal(res, N.U(2))
+#     print('***')
+#     print('Now using the generic solver')
+#     _trace = generic_solve(dp, f=(), max_steps=None)
 
-@comptest
-def check_loop_result4():
-    # Exploration of 2 technologies,
-    # with two resources: money and time
-
-    ndp = parse_ndp("""
-mcdp {
-    adp1 = dp {
-        requires x [Nat]
-        provides c [Nat]
-
-        implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=3)
-    }
-    
-    adp2 = dp {
-        requires x [Nat]
-        provides c [Nat]
-
-        implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=2)
-    }
-    
-    t1 = mcdp {
-        # solution of this = (0,6)
-        requires money [Nat]
-        requires time  [Nat]
-        w = instance adp1
-        w.c >= w.x
-        money >= nat:0 * w.x
-        time  >= nat:2 * w.x 
-    }
-
-    t2 = mcdp {
-        # solution of this = (2,0)
-        requires money [Nat]
-        requires time  [Nat]
-        w = instance adp2
-        w.c >= w.x
-        money >= nat:1 * w.x
-        time  >= nat:0 * w.x 
-    }
-
-    s = instance choose (t1:t1, t2: t2)
-    
-    requires money, time for s
-}"""
-    )
-    dp = ndp.get_dp()
-    print dp
-    res = dp.solve(())
-    print res
-
-    R = dp.get_res_space()
-    UR = UpperSets(R)
-    UR.check_equal(res, R.Us([(2, 0), (0, 6)]))
-#     UNat.check_equal(res, N.U(2))
-    print('***')
-    print('Now using the generic solver')
-    _trace = generic_solve(dp, f=(), max_steps=None)
-
-
-@comptest
-def check_loop_result4b():
-    # Exploration of 2 technologies,
-    # with two resources: money and time
-
-    ndp = parse_ndp("""
-mcdp {
-    adp1 = dp {
-        requires x [Nat]
-        provides c [Nat]
-
-        implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=3)
-    }
-    
-    adp2 = dp {
-        requires x [Nat]
-        provides c [Nat]
-
-        implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=2)
-    }
-    
-    t1 = mcdp {
-        # solution of this = (0,6)
-        requires money [Nat]
-        requires time  [Nat]
-        w = instance adp1
-        
-        provides c using w
-        requires x for w
-        
-        money >= nat:0 * w.x
-        time  >= nat:2 * w.x 
-    }
-
-    t2 = mcdp {
-        # solution of this = (2,0)
-        requires money [Nat]
-        requires time  [Nat]
-        w = instance adp2
-        
-        provides c using w
-        requires x for w
-        
-        money >= nat:1 * w.x
-        time  >= nat:0 * w.x 
-    }
-
-    s = instance choose(t1:t1, t2: t2)
-    
-    s.c >= s.x
-    
-    requires money, time for s
-}"""
-    )
-    dp = ndp.get_dp()
-    print dp
-    res = dp.solve(())
-    print res
-
-    R = dp.get_res_space()
-    UR = UpperSets(R)
-    expected = R.Us([(2, 0), (0, 6)])
-    UR.check_equal(res, expected)
-#     UNat.check_equal(res, N.U(2))
-    print('***')
-    print('Now using the generic solver')
-    trace = generic_solve(dp, f=(), max_steps=None)
-    res2 = trace.get_r_sequence()[-1]
-    print res2
-    UR.check_equal(res2, expected)
-
-@comptest
-def check_loop_result5a():
-
-    mx = 10
-    my = 10
-    gridx = np.array(range(mx + 1))
-    gridy = np.array(range(my + 1))
-    points = set(itertools.product(gridx, gridy))
-
-    def feasible(x, y):
-        isqrt = lambda _: np.ceil(np.sqrt(_))
-        return x + y >= isqrt(x) + isqrt(y) + 4
-
-    pf = [p for p in points if feasible(p[0], p[1])]
-    pu = [p for p in points if not feasible(p[0], p[1])]
-    N2 = PosetProduct((Nat(), Nat()))
-    Min_pf = N2.Us(poset_minima(pf, leq=N2.leq))
-    print('Min(pf): %s' % Min_pf)
-    assert(Min_pf.minimals == set([(6, 3), (4, 4), (7, 0), (3, 6), (0, 7)]))
-    r = Report()
-    f = r.figure()
-    with f.plot('real') as pylab:
-        for x, y in pf:
-            pylab.plot(x, y, 'go')
-        for x, y in pu:
-            pylab.plot(x, y, 'rs')
-        pylab.axis((-0.5, mx + 0.5, -0.5, my + 0.5))
-    fn = 'out/inv_mult_plots.html'
-    r.to_html(fn)
-    print('written to %s' % fn)
-
-    ndp = parse_ndp("""
-mcdp {
-    f = instance mcdp {
-        requires x [Nat]
-        requires y [Nat]
-        provides z [Nat]
-        x + y >= z
-    }
-    
-    requires x, y for f
-    
-    f.z >= ceil(sqrt(f.x)) + ceil(sqrt(f.y)) + Nat:4
-    
-}"""
-    )
-    dp = ndp.get_dp()
-    R = dp.get_res_space()
-    UR = UpperSets(R)
-    print dp.repr_long()
-    f0 = ()
-    from mocdp import logger
-    trace1 = Tracer(logger=logger)
-    res1 = dp.solve_trace(f0, trace1)
-    UR.belongs(res1)
-    print('res1: %s' % UR.format(res1))
-
-    trace = generic_solve(dp, f=f0, max_steps=None)
-    res2 = trace.get_r_sequence()[-1]
-    UR.belongs(res2)
-    print('res2: %s' % UR.format(res2))
-
-    UR.check_equal(res1, Min_pf)
-
-    warnings.warn('Disabled check because it fails')
-    if False:
-        UR.check_equal(res2, Min_pf)
-    print(res2)
+# 
+# @comptest
+# def check_loop_result4b():
+#     # Exploration of 2 technologies,
+#     # with two resources: money and time
+# 
+#     ndp = parse_ndp("""
+# mcdp {
+#     adp1 = dp {
+#         requires x [Nat]
+#         provides c [Nat]
+# 
+#         implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=3)
+#     }
+#     
+#     adp2 = dp {
+#         requires x [Nat]
+#         provides c [Nat]
+# 
+#         implemented-by code mcdp_dp_tests.inv_mult_plots.CounterDP(n=2)
+#     }
+#     
+#     t1 = mcdp {
+#         # solution of this = (0,6)
+#         requires money [Nat]
+#         requires time  [Nat]
+#         w = instance adp1
+#         
+#         provides c using w
+#         requires x for w
+#         
+#         money >= nat:0 * w.x
+#         time  >= nat:2 * w.x 
+#     }
+# 
+#     t2 = mcdp {
+#         # solution of this = (2,0)
+#         requires money [Nat]
+#         requires time  [Nat]
+#         w = instance adp2
+#         
+#         provides c using w
+#         requires x for w
+#         
+#         money >= nat:1 * w.x
+#         time  >= nat:0 * w.x 
+#     }
+# 
+#     s = instance choose(t1:t1, t2: t2)
+#     
+#     s.c >= s.x
+#     
+#     requires money, time for s
+# }"""
+#     )
+#     dp = ndp.get_dp()
+#     print dp
+#     res = dp.solve(())
+#     print res
+# 
+#     R = dp.get_res_space()
+#     UR = UpperSets(R)
+#     expected = R.Us([(2, 0), (0, 6)])
+#     UR.check_equal(res, expected)
+# #     UNat.check_equal(res, N.U(2))
+#     print('***')
+#     print('Now using the generic solver')
+#     trace = generic_solve(dp, f=(), max_steps=None)
+#     res2 = trace.get_r_sequence()[-1]
+#     print res2
+#     UR.check_equal(res2, expected)
+# 
+# @comptest
+# def check_loop_result5a():
+# 
+#     mx = 10
+#     my = 10
+#     gridx = np.array(range(mx + 1))
+#     gridy = np.array(range(my + 1))
+#     points = set(itertools.product(gridx, gridy))
+# 
+#     def feasible(x, y):
+#         isqrt = lambda _: np.ceil(np.sqrt(_))
+#         return x + y >= isqrt(x) + isqrt(y) + 4
+# 
+#     pf = [p for p in points if feasible(p[0], p[1])]
+#     pu = [p for p in points if not feasible(p[0], p[1])]
+#     N2 = PosetProduct((Nat(), Nat()))
+#     Min_pf = N2.Us(poset_minima(pf, leq=N2.leq))
+#     print('Min(pf): %s' % Min_pf)
+#     assert(Min_pf.minimals == set([(6, 3), (4, 4), (7, 0), (3, 6), (0, 7)]))
+#     r = Report()
+#     f = r.figure()
+#     with f.plot('real') as pylab:
+#         for x, y in pf:
+#             pylab.plot(x, y, 'go')
+#         for x, y in pu:
+#             pylab.plot(x, y, 'rs')
+#         pylab.axis((-0.5, mx + 0.5, -0.5, my + 0.5))
+#     fn = 'out/inv_mult_plots.html'
+#     r.to_html(fn)
+#     print('written to %s' % fn)
+# 
+#     ndp = parse_ndp("""
+# mcdp {
+#     f = instance mcdp {
+#         requires x [Nat]
+#         requires y [Nat]
+#         provides z [Nat]
+#         x + y >= z
+#     }
+#     
+#     requires x, y for f
+#     
+#     f.z >= ceil(sqrt(f.x)) + ceil(sqrt(f.y)) + Nat:4
+#     
+# }"""
+#     )
+#     dp = ndp.get_dp()
+#     R = dp.get_res_space()
+#     UR = UpperSets(R)
+#     print dp.repr_long()
+#     f0 = ()
+#     from mocdp import logger
+#     trace1 = Tracer(logger=logger)
+#     res1 = dp.solve_trace(f0, trace1)
+#     UR.belongs(res1)
+#     print('res1: %s' % UR.format(res1))
+# 
+#     trace = generic_solve(dp, f=f0, max_steps=None)
+#     res2 = trace.get_r_sequence()[-1]
+#     UR.belongs(res2)
+#     print('res2: %s' % UR.format(res2))
+# 
+#     UR.check_equal(res1, Min_pf)
+# 
+#     warnings.warn('Disabled check because it fails')
+#     if False:
+#         UR.check_equal(res2, Min_pf)
+#     print(res2)
 
 #  
 def get_simple_equiv():
