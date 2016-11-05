@@ -61,8 +61,8 @@ def assert_semantic_error_fn(filename, desc=None):
             msg += '\n' + desc
         raise_desc(Exception, msg, filename=filename, res=res.repr_long())
         
-def assert_semantic_error(s , desc=None):
-    """ This asserts that s can be parsed, but cannot  be compiled to a *connected* ndp. """
+def assert_semantic_error(s , desc=None): # TODO: redundant with assert_parse_ndp_semantic_error(string, contains)
+    """ This asserts that s can be parsed, but"""
     try:
         res = parse_ndp(s)
         res.abstract()

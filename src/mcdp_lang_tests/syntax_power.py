@@ -11,6 +11,7 @@ from mcdp_posets import UpperSets
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error, ok,
     parse_wrap_check, sem, syn)
+from mcdp_lang_tests.utils import assert_parse_ndp_semantic_error
 
 
 L = CDPLanguage
@@ -18,7 +19,7 @@ L = CDPLanguage
 
 ok(Syntax.integer_fraction, '1/2', L.IntegerFraction(num=1, den=2))
 syn(Syntax.integer_fraction, '1/2.0')
-sem(Syntax.integer_fraction, '1/0')
+# sem(Syntax.integer_fraction, '1/0')
 syn(Syntax.integer_fraction, '1/')
 
 exponent = L.exponent('^')
@@ -104,11 +105,40 @@ def check_power5():
 
 @comptest
 def check_power6():
-    pass
+    assert_parse_ndp_semantic_error("""
+    mcdp {
+        provides lift [N]
+        requires power [W]
 
+        power >= pow(lift, 0/1)
+    }""", 'zero')
+
+    assert_parse_ndp_semantic_error("""
+    mcdp {
+        provides lift [N]
+        requires power [W]
+
+        power >= pow(lift, 1/0)
+    }""", 'zero')
+ 
 @comptest
 def check_power7():
-    pass
+    assert_parse_ndp_semantic_error("""
+    mcdp {
+        provides lift [N]
+        requires power [W]
+
+        required power >= (provided lift) ^ 0/1
+    }""", 'zero')
+
+    assert_parse_ndp_semantic_error("""
+    mcdp {
+        provides lift [N]
+        requires power [W]
+
+        required power >= (provided lift) ^ 1/0
+    }""", 'zero')
+ 
 
 @comptest
 def check_power8():  # TODO: move to ther files
