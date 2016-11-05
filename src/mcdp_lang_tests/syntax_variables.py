@@ -2,7 +2,8 @@ from comptests.registrar import comptest
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.parse_interface import parse_ndp
-from mcdp_lang_tests.utils import assert_parse_ndp_semantic_error
+from mcdp_lang_tests.utils import assert_parse_ndp_semantic_error,\
+    assert_parsable_to_unconnected_ndp
 
 @comptest
 def check_variables01():
@@ -34,6 +35,7 @@ def check_variables02():
 @comptest
 def check_variables03():
     # This causes an error because the variable x is not used.
+    # In the future there should be a warning or more explicit error.
     s = """
     mcdp {
         provides f [Nat]
@@ -44,10 +46,8 @@ def check_variables03():
         provided f <= required r
     }
     """
-    assert_parse_ndp_semantic_error(s)
-
-
-
+    assert_parsable_to_unconnected_ndp(s)
+    
 
 
 @comptest
@@ -76,7 +76,7 @@ def check_variables05():
     }
     """
     assert_parse_ndp_semantic_error(s, 'Conflict')
- 
+
 
 @comptest
 def check_variables06():
@@ -90,27 +90,92 @@ def check_variables06():
         variable x [Nat]
     }
     """
-    print assert_parse_ndp_semantic_error(s, 'Conflict')
+    expect = "Variable name 'x' already used once"
+    print assert_parse_ndp_semantic_error(s, expect)
 
 @comptest
 def check_variables07():
-    pass
+    # This causes an error because it conflicts with a 
+    # name used for resource
+    s = """
+    mcdp {
+        provides f [Nat]
+        requires r [Nat]
+        
+        x = provided f
+        variable x [Nat]
+    }
+    """
+    print assert_parse_ndp_semantic_error(s, 'already used as a resource')
+
 
 @comptest
 def check_variables08():
-    pass
+    # This causes an error because it conflicts with a 
+    # name used for functionality
+    s = """
+    mcdp {
+        provides f [Nat]
+        requires r [Nat]
+        
+        x = required r
+        variable x [Nat]
+    }
+    """
+    print assert_parse_ndp_semantic_error(s, 'already used as a functionality')
+
 
 @comptest
 def check_variables09():
-    pass
+    """ This is not connected. """
+    s = """
+    mcdp {
+        provides f [Nat]
+        requires r [Nat]
+        
+        variable x [Nat]
+        
+        x >= provided f 
+    }
+    """
+    assert_parsable_to_unconnected_ndp(s)
 
 @comptest
 def check_variables10():
-    pass
-
+    """ This is not connected. """
+    s = """
+    mcdp {
+        provides f [Nat]
+        requires r [Nat]
+        
+        variable x [Nat]
+        
+        x <= required r 
+    }
+    """
+    assert_parsable_to_unconnected_ndp(s)
+    
 @comptest
 def check_variables11():
-    pass
+    s = """
+mcdp {
+    provides z [Nat]
+
+    variable x [Nat]
+    variable y [Nat]
+
+    x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + provided z
+
+    requires x >= x
+    requires y >= y
+}
+    """
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    for i in range(6):
+        res = dp.solve(i)
+        print('%2d: %s' % (i, res))
+    
 
 @comptest
 def check_variables12():

@@ -136,11 +136,9 @@ def eval_rvalue_RValueMinusN(x, context, wants_constant=False):
             msg = 'The expression involving "-" is not monotone because one '
             msg += 'of the values after "-" is not a constant:\n\n'
             s = format_where(mc.where, context_before=0,
-                             arrow=False, 
-                             mark=None, use_unicode=True)
+                             arrow=False, mark=None, use_unicode=True)
             msg += indent(s, ' '*4)
             raise DPSemanticError(msg)
-#             raise_wrapped(DPSemanticError, e, msg, compact=True)
         
     # Is the first value a constant?
     try:

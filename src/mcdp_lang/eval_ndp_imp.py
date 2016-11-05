@@ -31,6 +31,7 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mcdp_dp.dp_identity import IdentityDP, VariableNode
 
 
 CDP = CDPLanguage
@@ -518,8 +519,13 @@ def eval_statement(r, context):
             _, _, tb = sys.exc_info()
             where = r.prep.where # indicate preposition "<="
             raise_with_info(e, where, tb)
+            
     elif isinstance(r, CDP.VarStatement):
         vname = r.vname.value
+        
+        if vname in context.variables:
+            msg = 'Variable name %r already used once.' % vname
+            raise DPSemanticError(msg, where=r.vname.where)
 
         if vname in context.rnames:
             msg = 'Conflict between variable and resource name %r.' % vname
@@ -529,10 +535,26 @@ def eval_statement(r, context):
             msg = 'Conflict between variable and functionality name %r.' % vname
             raise DPSemanticError(msg, where=r.vname.where)
         
-        R = eval_space(r.unit, context)
+        if vname in context.var2resource:
+            msg = 'The name %r is already used as a resource.' % vname
+            raise DPSemanticError(msg, where=r.where)
 
-        print name
-        raise NotImplementedError
+        if vname in context.var2function:
+            msg = 'The name %r is already used as a functionality.' % vname
+            raise DPSemanticError(msg, where=r.where)
+
+        P = eval_space(r.unit, context)
+        dp = VariableNode(P, vname)
+        fname = '_' + vname
+        rname = '_' + vname
+        ndp = dpwrap(dp, fname, rname)
+        context.add_ndp(vname, ndp)
+
+        context.set_var2resource(vname, CResource(vname, rname))
+        context.set_var2function(vname, CFunction(vname, fname))
+        
+        context.variables.add(vname)
+        
     elif isinstance(r, CDP.SetNameNDPInstance):
         name = r.name.value
         ndp = eval_ndp(r.dp_rvalue, context)
