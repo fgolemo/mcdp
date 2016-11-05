@@ -209,10 +209,15 @@ http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c 
     
     variable
 
-
 - Even fancier language:
 
   x + y >= ⌈√x⌉ + ⌈√y⌉ + ℕ:10
 
+- Cannot create addition between R and Nat:
 
-  
+  mcdp {  
+   variable a, c [R]
+   c >= square(a) + Nat:1 
+   a >= square(c)  
+  }
+
