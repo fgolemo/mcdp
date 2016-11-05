@@ -3,7 +3,7 @@ from contextlib import contextmanager
 import sys
 
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_dp import (
     CatalogueDP, Conversion, JoinNDP, MeetNDualDP, get_conversion, make_series)
 from mcdp_lang.parse_actions import decorate_add_where, raise_with_info
@@ -457,6 +457,9 @@ def eval_ndp_catalogue(r, context):
 
 @contract(resource=CResource, function=CFunction)
 def add_constraint(context, resource, function):
+    check_isinstance(resource, CResource)
+    check_isinstance(function, CFunction)
+    
     R1 = context.get_rtype(resource)
     F2 = context.get_ftype(function)
 
@@ -467,16 +470,6 @@ def add_constraint(context, resource, function):
             c = Connection(dp1=resource.dp, s1=resource.s,
                            dp2=function.dp, s2=function.s)
             context.add_connection(c)
-    
-#         elif tu.leq(R1, F2) and tu.leq(F2, R1):
-#             R1_to_F2, F2_to_R1 = tu.get_embedding(R1, F2)
-#             conversion = Conversion(R1_to_F2, F2_to_R1)
-#             resource2 = create_operation(context=context, dp=conversion,
-#                                         resources=[resource], name_prefix='_conversion',
-#                                          op_prefix='_in', res_prefix='_out')
-#             c = Connection(dp1=resource2.dp, s1=resource2.s,
-#                            dp2=function.dp, s2=function.s)
-#             context.add_connection(c)
         else:
             ##  F2    ---- (<=) ----   becomes  ----(<=)--- [R1_to_F2] ----
             ##   |     R1       F2                R1      R1             F2
@@ -502,6 +495,38 @@ def add_constraint(context, resource, function):
         raise_wrapped(DPInternalError, e, msg, resource=resource, function=function,
                       R1=R1, F2=F2)
         
+def add_variable(vname, P, where, context):
+    if vname in context.variables:
+        msg = 'Variable name %r already used once.' % vname
+        raise DPSemanticError(msg, where=where)
+
+    if vname in context.rnames:
+        msg = 'Conflict between variable and resource name %r.' % vname
+        raise DPSemanticError(msg, where=where)
+
+    if vname in context.fnames:
+        msg = 'Conflict between variable and functionality name %r.' % vname
+        raise DPSemanticError(msg, where=where)
+    
+    if vname in context.var2resource:
+        msg = 'The name %r is already used as a resource.' % vname
+        raise DPSemanticError(msg, where=where)
+
+    if vname in context.var2function:
+        msg = 'The name %r is already used as a functionality.' % vname
+        raise DPSemanticError(msg, where=where)
+
+    dp = VariableNode(P, vname)
+    fname = '_' + vname
+    rname = '_' + vname
+    ndp = dpwrap(dp, fname, rname)
+    context.add_ndp(vname, ndp)
+
+    context.set_var2resource(vname, CResource(vname, rname))
+    context.set_var2function(vname, CFunction(vname, fname))
+    
+    context.variables.add(vname)
+    
 @decorate_add_where
 def eval_statement(r, context):
     from mcdp_lang.eval_resources_imp import eval_rvalue
@@ -521,40 +546,13 @@ def eval_statement(r, context):
             raise_with_info(e, where, tb)
             
     elif isinstance(r, CDP.VarStatement):
-        vname = r.vname.value
-        
-        if vname in context.variables:
-            msg = 'Variable name %r already used once.' % vname
-            raise DPSemanticError(msg, where=r.vname.where)
-
-        if vname in context.rnames:
-            msg = 'Conflict between variable and resource name %r.' % vname
-            raise DPSemanticError(msg, where=r.vname.where)
-
-        if vname in context.fnames:
-            msg = 'Conflict between variable and functionality name %r.' % vname
-            raise DPSemanticError(msg, where=r.vname.where)
-        
-        if vname in context.var2resource:
-            msg = 'The name %r is already used as a resource.' % vname
-            raise DPSemanticError(msg, where=r.where)
-
-        if vname in context.var2function:
-            msg = 'The name %r is already used as a functionality.' % vname
-            raise DPSemanticError(msg, where=r.where)
-
         P = eval_space(r.unit, context)
-        dp = VariableNode(P, vname)
-        fname = '_' + vname
-        rname = '_' + vname
-        ndp = dpwrap(dp, fname, rname)
-        context.add_ndp(vname, ndp)
-
-        context.set_var2resource(vname, CResource(vname, rname))
-        context.set_var2function(vname, CFunction(vname, fname))
-        
-        context.variables.add(vname)
-        
+        vnames = unwrap_list(r.vnames)
+        for v in vnames:
+            vname = v.value
+            where = v.where
+            add_variable(vname, P, where, context)
+       
     elif isinstance(r, CDP.SetNameNDPInstance):
         name = r.name.value
         ndp = eval_ndp(r.dp_rvalue, context)
@@ -658,14 +656,45 @@ def eval_statement(r, context):
         A = eval_statement(CDP.FunStatement('-', r.fname, CDP.Unit(F)), context)
         add_constraint(context, resource=A, function=B)
 
-    elif isinstance(r, CDP.ResShortcut1):  # requires rname for name
-        # resource rname [r0]
-        # rname >= name.rname
+    elif isinstance(r, CDP.ResShortcut1):  
+        # requires rname for name
         with add_where_information(r.name.where):
             A = context.make_resource(r.name.value, r.rname.value)
         R = context.get_rtype(A)
         B = eval_statement(CDP.ResStatement('-', r.rname, CDP.Unit(R)), context)
         add_constraint(context, resource=A, function=B)  # B >= A
+
+    elif isinstance(r, CDP.ResShortcut4):  
+        # requires rname1, rname2
+        rnames = unwrap_list(r.rnames)
+        for _ in rnames:
+            rname = _.value
+            if rname in context.var2resource:
+                A = context.var2resource[rname]
+            elif rname in context.fnames: # it's a function 
+                A = context.make_resource(get_name_for_fun_node(rname), rname)
+            else:
+                msg = 'Could not find required resource expression %r.' % rname
+                raise DPSemanticError(msg, where=_.where)
+            R = context.get_rtype(A)
+            B = eval_statement(CDP.ResStatement('-', _, CDP.Unit(R)), context)
+            add_constraint(context, resource=A, function=B)  # B >= A
+    
+    elif isinstance(r, CDP.FunShortcut4):  
+        # requires rname1, rname2
+        fnames = unwrap_list(r.fnames)
+        for _ in fnames:
+            fname = _.value
+            if fname in context.var2function:
+                B = context.var2function[fname]
+            elif fname in context.rnames: # it's a function 
+                B = context.make_function(get_name_for_res_node(fname), fname)
+            else:
+                msg = 'Could not find required function expression %r.' % fname
+                raise DPSemanticError(msg, where=_.where)
+            F = context.get_ftype(B)
+            A = eval_statement(CDP.FunStatement('-', _, CDP.Unit(F)), context)
+            add_constraint(context, resource=A, function=B)  # B >= A
 
     elif isinstance(r, CDP.ResShortcut1m):  # requires rname1, rname2, ... for name
         for rname in unwrap_list(r.rnames):

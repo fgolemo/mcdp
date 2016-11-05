@@ -109,7 +109,7 @@ def assert_parsable_to_connected_ndp(s , desc=None):  # @UnusedVariable
     if isinstance(res, SimpleWrap):
         return res
     ndp = res.abstract()
-    print(ndp.repr_long())
+    #print(ndp.repr_long())
     return ndp
 
 

@@ -10,19 +10,12 @@
 #  Trying to solve this problem with the standard MCDP solver 
 #  will create a (practically) infinite loop as the program 
 #  tries to explore most of the antichains of N^2.
-flatten mcdp {
-    f = instance mcdp  {
-        provides a [Nat]
-        
-        requires x [Nat]
-        requires y [Nat]
-        
-        x + y >= a
-    }
-
+mcdp {
+    variable x, y [Nat]
+    
     provides z [Nat]
 
-    f.a >= f.x + f.y + z 
+    x + y >= x + y + z 
 
-    requires x, y for f
+    requires x, y
 }

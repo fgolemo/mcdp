@@ -1,13 +1,10 @@
 mcdp {
-	variable x [Nat]
-    variable y [Nat]
-
-	provides z [Nat]
+	variable x, y [Nat]
+    provides z [Nat]
 
 	x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + provided z 
 
-	requires x >= x 
-	requires y >= y 
+	requires x, y
 }
 
 # Note: this is a difficult one

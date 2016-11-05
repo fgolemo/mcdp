@@ -1,10 +1,11 @@
 mcdp {
-	variable x [ℕ]
-	variable y [ℕ]
+	variable x, y [ℕ]
+	
+	x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + ℕ:10
 
-	x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + Nat:10
 
-	requires x >= x
-	requires y >= y
+    # x + y >= ⌈√x⌉ + ⌈√y⌉ + ℕ:10
+
+	requires x, y
 }
  
