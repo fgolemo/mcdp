@@ -12,33 +12,40 @@ __all__ = [
 
 def get_dp_label(dp):
     label = type(dp).__name__
-    if isinstance(dp, Mux):
-        label = 'Mux\nh: %s' % transform_pretty_print(dp.amap.dom, dp.amap.coords)
-        if dp.amap_dual is not None:
-            label += '\nh*: %s' %  transform_pretty_print(dp.amap_dual.dom, dp.amap_dual.coords, 'A')
-        return label
-    elif isinstance(dp, Constant):
-        # x = '%s %s' % (dp.R.format(dp.c), dp.R)
-        x = dp.R.format(dp.c)
-        label = 'Constant\n%s' % x
-    elif isinstance(dp, Limit):
-        x = '<= %s [%s]' % (dp.F.format(dp.limit), dp.F)
-        label = 'Limit\n%s' % x
-    elif isinstance(dp, WrapAMap):
-        label = 'WrapAMap\n%s' % dp.diagram_label()
+    if False:
+        if isinstance(dp, Mux):
+            label = 'Mux\nh: %s' % transform_pretty_print(dp.amap.dom, dp.amap.coords)
+            if dp.amap_dual is not None:
+                label += '\nh*: %s' %  transform_pretty_print(dp.amap_dual.dom, dp.amap_dual.coords, 'A')
+            return label
+        elif isinstance(dp, Constant):
+            # x = '%s %s' % (dp.R.format(dp.c), dp.R)
+            x = dp.R.format(dp.c)
+            label = 'Constant\n%s' % x
+        elif isinstance(dp, Limit):
+            x = '<= %s [%s]' % (dp.F.format(dp.limit), dp.F)
+            label = 'Limit\n%s' % x
+        elif isinstance(dp, WrapAMap):
+            label = 'WrapAMap\n%s' % dp.diagram_label()
         
-    label = type(dp).__name__ + '/' + label
+#     label = type(dp).__name__ + '/' + label
     
-    if isinstance(dp, WrapAMap):
-        if dp.amap_dual is not None:
-            s = 'h*: %s' % dp.amap_dual
-        else:
-            s = 'h*: not set'
-        label += '\n' + s
+    label += '\n h: ' + dp.repr_h_map() 
+    label += '\n h*: ' + dp.repr_hd_map()
+    
+#     label += 'r<sub>1</sub>r<sup>2</sup>'
+    # "₁₂₃₄₅₆₇₈₉"
+    
+#     subs ={ "₁": "1", "₂": "2", "₃": "3", "₄":"4", "₅": "5", 
+#            "₆":"6", "₇": "7", "₈": "8", "₉": "9"}
+#     for s, ss in subs.items():
+#         label = label.replace(s, ss)
+#     
     return label
 
 @contract(dp0=PrimitiveDP)
-def dp_graph_tree(dp0, imp=None, compact=False):
+def dp_graph_tree(dp0, imp= 
+                  None, compact=False):
     """ 
         Visualizes the DP as a tree.
         

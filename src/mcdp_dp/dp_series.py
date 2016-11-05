@@ -216,21 +216,17 @@ class Series(PrimitiveDP):
         r2 = self.dp2.repr_long()
         s1 = 'Series:'
         s2 = ' %s ⟶  %s' % (self.get_fun_space(), self.get_res_space())
-        s = s1 + ' % ' + s2 + self._add_extra_info()
+        s = s1 + ' % ' + s2
         s += '\n' + indent(r1, '. ', first='\ ')
-
-#         if hasattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME):
-#             a = getattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME)
-#             s += '\n (labeled as %s)' % a.__str__()
-
         s += '\n' + indent(r2, '. ', first='\ ')
-# 
-#         if hasattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME):
-#             a = getattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME)
-#             s += '\n (labeled as %s)' % a.__str__()
-
         return s
-
+    
+    def repr_h_map(self):
+        return 'f ⟼ [h2 ○ h1](f)' # XXX
+    
+    def repr_hd_map(self):
+        return 'r ⟼ [h1* ○ h2*](r)' # XXX
+    
     def get_normal_form(self):
         """
             
@@ -246,7 +242,6 @@ class Series(PrimitiveDP):
         S2, alpha2, beta2 = self.dp2.get_normal_form()
 
         F1 = self.dp1.get_fun_space()
-        # R1 = self.dp1.get_res_space()
         R2 = self.dp2.get_res_space()
 
         UR2 = UpperSets(R2)

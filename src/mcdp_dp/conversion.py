@@ -23,18 +23,17 @@ class Conversion(WrapAMap):
 def get_conversion(A, B):
     """ Returns None if there is no need for a Conversion Map.
         Otherwise returns a Conversion (< WrapAMap). """
-    tu = get_types_universe()
-    try:
-        tu.check_leq(A, B)
-    except NotLeq as e:
-        msg = 'Wrapping with incompatible units.'
-        raise_wrapped(DPSemanticError, e, msg, A=A, B=B)
+    tu = get_types_universe() 
 
     if tu.equal(A, B):
         conversion = None
     else:
-        A_to_B, B_to_A = tu.get_embedding(A, B)
-        mcdp_dev_warning('not really sure of the semantics of this')
-        conversion = Conversion(A_to_B, B_to_A)
-        
+        try:
+            A_to_B, B_to_A = tu.get_super_conversion(A, B)
+            mcdp_dev_warning('not really sure of the semantics of this')
+            conversion = Conversion(A_to_B, B_to_A)
+        except NotLeq as e:
+            msg = 'Wrapping with incompatible units.'
+            raise_wrapped(DPSemanticError, e, msg, A=A, B=B)
+
     return conversion

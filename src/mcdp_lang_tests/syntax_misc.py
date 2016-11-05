@@ -633,7 +633,7 @@ mcdp {
     required r >= f1 - f2
 }
     """
-    assert_parse_ndp_semantic_error(s)
+    print assert_parse_ndp_semantic_error(s)
 
 @comptest
 def check_lang84(): # TODO: rename to LF
@@ -669,12 +669,90 @@ def check_lang85(): # TODO: rename
 
 @comptest
 def check_lang86(): # TODO: rename
-    pass
+    
+    s = """
+    mcdp {
+        provides f [R]
+        requires r [Nat]
+        provided f <= required r
+    }
+    """
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    
+    ur = dp.solve(0.4)
+    r = list(ur.minimals)[0]
+    assert_equal(r, 1) 
+    
+    
+    lf = dp.solve_r(12)
+    r = list(lf.maximals)[0]
+    assert_equal(r, 12.0) 
 
 @comptest
+def check_lang86_rcomp(): # TODO: rename
+    
+    s = """
+    mcdp {
+        provides f [Rcomp]
+        requires r [Nat]
+        provided f <= required r
+    }
+    """
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    
+    ur = dp.solve(0.4)
+    r = list(ur.minimals)[0]
+    assert_equal(r, 1) 
+    
+    lf = dp.solve_r(12)
+    r = list(lf.maximals)[0]
+    assert_equal(r, 12.0) 
+    
+@comptest
 def check_lang87(): # TODO: rename
-    pass
 
+    s = """
+    mcdp {
+        provides f [Nat]
+        requires r [R]
+        provided f <= required r
+    }
+    """
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    
+    ur = dp.solve(12)
+    r = list(ur.minimals)[0]
+    assert_equal(r, 12.0) 
+
+    lf = dp.solve_r(0.4)
+    r = list(lf.maximals)[0]
+    assert_equal(r, 0) 
+
+
+@comptest
+def check_lang87_rcomp(): # TODO: rename
+
+    s = """
+    mcdp {
+        provides f [Nat]
+        requires r [Rcomp]
+        provided f <= required r
+    }
+    """
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    
+    ur = dp.solve(12)
+    r = list(ur.minimals)[0]
+    assert_equal(r, 12.0) 
+
+    lf = dp.solve_r(0.4)
+    r = list(lf.maximals)[0]
+    assert_equal(r, 0) 
+    
 @comptest
 def check_lang88(): # TODO: rename
     pass

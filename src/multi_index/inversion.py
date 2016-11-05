@@ -36,7 +36,7 @@ def transform_pretty_print(P, coords, start_letter='a'):
             return str(x)
     t1 = pretty(proxy)
     t2 = pretty(transformed)
-    s = '{} ⟼  {}'.format(t1, t2)
+    s = '{} ⟼ {}'.format(t1, t2)
     return s
 
 def transform_right_inverse(P, coords, reduce_list):

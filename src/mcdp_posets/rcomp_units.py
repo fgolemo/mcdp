@@ -4,7 +4,6 @@ import math
 
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped, raise_desc
-from mcdp_posets.poset import is_top, is_bottom
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import DPSyntaxError, do_extra_checks, mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
@@ -12,6 +11,7 @@ from pint import UnitRegistry  # @UnresolvedImport
 from pint.errors import UndefinedUnitError  # @UnresolvedImport
 
 from .any import Any, BottomCompletion, TopCompletion
+from .poset import is_top, is_bottom
 from .rcomp import RcompBase, Rbicomp
 from .space import Map
 
@@ -44,7 +44,8 @@ class RcompUnits(RcompBase):
         self.units = pint_unit
         self.string = string
         u = parse_pint(string)
-        assert u == self.units, (self.units, u, string)
+        # assert u == self.units, (self.units, u, string)
+        assert str(u) == str(self.units), (self.units, u, string)
 
         self.units_formatted = format_pint_unit_short(self.units)
 
@@ -79,8 +80,9 @@ class RcompUnits(RcompBase):
             'units_formatted': self.units_formatted,
         }
 
-        if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
-            state[ATTRIBUTE_NDP_RECURSIVE_NAME] = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
+        att = ATTRIBUTE_NDP_RECURSIVE_NAME
+        if hasattr(self, att):
+            state[att] = getattr(self, att)
         return state
 
     def __setstate__(self, x):
@@ -90,8 +92,9 @@ class RcompUnits(RcompBase):
         self.units = parse_pint(self.string)
         self.units_formatted = x['units_formatted']
 
-        if ATTRIBUTE_NDP_RECURSIVE_NAME in x:
-            setattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME, x[ATTRIBUTE_NDP_RECURSIVE_NAME])
+        att = ATTRIBUTE_NDP_RECURSIVE_NAME
+        if att in x:
+            setattr(self, att, x[att])
 
     def __eq__(self, other):
         if isinstance(other, RcompUnits):
@@ -166,7 +169,8 @@ class RbicompUnits(Rbicomp):
         }
 
         if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
-            state[ATTRIBUTE_NDP_RECURSIVE_NAME] = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
+            state[ATTRIBUTE_NDP_RECURSIVE_NAME] = \
+                getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
         return state
 
     def __setstate__(self, x):
@@ -178,7 +182,8 @@ class RbicompUnits(Rbicomp):
         self.units_formatted = x['units_formatted']
 
         if ATTRIBUTE_NDP_RECURSIVE_NAME in x:
-            setattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME, x[ATTRIBUTE_NDP_RECURSIVE_NAME])
+            setattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME, 
+                    x[ATTRIBUTE_NDP_RECURSIVE_NAME])
 
     def __eq__(self, other):
         if isinstance(other, RbicompUnits):
@@ -435,11 +440,14 @@ class RCompUnitsPowerMap(Map):
         except OverflowError:
             return self.cod.get_top()
 
-    def __repr__(self):
+    def __repr__(self): # XXX
         s = '^ '
         s += '%d' % self.num
         if self.den != 1:
             s += '/%s' % self.den
         return s
+    
+    def repr_map(self, letter):
+        return '%s ⟼ %s ^ %s/%s ' % (letter, letter, self.num, self.den)
 
         

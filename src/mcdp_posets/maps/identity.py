@@ -17,3 +17,6 @@ class IdentityMap(Map):
 
     def _call(self, x):
         return x
+
+    def repr_map(self, letter):
+        return '%s ⟼ %s' % (letter, letter)

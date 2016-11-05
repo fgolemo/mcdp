@@ -160,17 +160,8 @@ class AppEditorFancyGeneric():
         # You should replace it with a space.
         string = string.replace(u'\xa0', u' ')
 
-        # string is in unicode; we will  
         check_isinstance(string, unicode)
-        
-        string = string.encode('utf-8')
-#         print type(string), string.__repr__()
-#         try:
-#             string = str(string.decode('utf-8'))
-#         except UnicodeEncodeError as e:
-#             string = string.encode('unicode_escape')
-#             raise_wrapped(Exception, e, 'What', in_ascii=string)
-
+        string = string.encode('utf-8') 
         return string
 
     def ajax_parse_generic(self, request, spec):
@@ -209,6 +200,7 @@ class AppEditorFancyGeneric():
 
             # print string.__repr__()
             # print highlight.__repr__()
+            
             return {'ok': True, 'highlight': highlight, 'request': req}
 
         return ajax_error_catch(go)

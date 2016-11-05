@@ -121,6 +121,7 @@ class SyntaxIdentifiers():
         'solve_f',
         'ceilsqrt',
         'Rcomp',
+        'variable'
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -329,14 +330,20 @@ class Syntax():
 
     fname = sp(get_idn(), lambda t: CDP.FName(t[0])) | fname_placeholder
     rname = sp(get_idn(), lambda t: CDP.RName(t[0])) | rname_placeholder
+    vname = sp(get_idn(), lambda t: CDP.VName(t[0])) | rname_placeholder
 
     PROVIDES = keyword('provides', CDP.ProvideKeyword)
-    fun_statement = sp(PROVIDES + C(fname, 'fname') + unitst,
+    fun_statement = sp(PROVIDES + fname + unitst,
                        lambda t: CDP.FunStatement(t[0], t[1], t[2]))
 
     REQUIRES = keyword('requires', CDP.RequireKeyword)
-    res_statement = sp(REQUIRES + C(rname, 'rname') + unitst,
+    res_statement = sp(REQUIRES + rname + unitst,
                        lambda t: CDP.ResStatement(t[0], t[1], t[2]))
+    
+    VARIABLE = keyword('variable', CDP.VarStatementKeyword)
+    var_statement = sp(VARIABLE + vname + unitst,
+                       lambda t: CDP.VarStatement(t[0], t[1], t[2]))
+    
 
     # import statements:
     #    from libname import a, b
@@ -822,6 +829,7 @@ class Syntax():
                       setname_ndp_type2)
                  ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
                  ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3
+                 ^ var_statement
                  ^ ignore_res
                  ^ ignore_fun) + ow
 

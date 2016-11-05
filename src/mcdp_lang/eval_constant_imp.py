@@ -317,8 +317,8 @@ def eval_constant_collection(op, context):
     e0 = elements[0]
 
     u0 = e0.unit
-    from .eval_math import convert_vu
-    elements = [convert_vu(_.value, _.unit, u0, context) for _ in elements]
+
+    elements = [_.cast_value(u0) for _ in elements]
 
     value = FiniteCollection(set(elements), u0)
     unit = FiniteCollectionsInclusion(u0)

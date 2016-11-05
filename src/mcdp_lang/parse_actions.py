@@ -110,7 +110,7 @@ def spa(x, b):
         
         if isnamedtupleinstance(res) and \
             (res.where is None or res.where.character_end is None):
-            w2 = Where(s, character_end=character_end, character=loc)
+            w2 = Where(s, character=loc, character_end=character_end)
             res = get_copy_with_where(res, where=w2)
 
         if do_extra_checks():
@@ -236,7 +236,7 @@ def parse_wrap(expr, string):
     except (ParseException, ParseFatalException) as e:
         # ... so we can use "string" here.
         # raise
-        where = Where(string, line=e.lineno, column=e.col)
+        where = Where(string, character=e.loc)
         raise DPSyntaxError(str(e), where=where)
     except DPSemanticError as e:
         msg = "User error while interpreting the model:"

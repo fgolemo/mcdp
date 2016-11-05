@@ -47,14 +47,7 @@ Goals:
 
 
 (*) Language additions
-
-- F: create "var"
-
-    var x [Nat]
-    var y [Nat]
-    x >= y
-    y >= x
-
+ 
 
 - F: "choose()" without labels
 - F: better catalouge syntax - implicit point
@@ -193,8 +186,13 @@ http://ares-super.lids.mit.edu/~andrea/env_mcdp/src/mcdp/out/check_rendering/plu
   http://127.0.0.1:8080/libraries/duckiebot_components/models/pimoroni_inc/views/syntax/
 
 - F: SVG for dpgraph http://127.0.0.1:8080/libraries/droneD_complete.v2/models/perception/views/dp_graph/
-
+ 
 - B: we need to escape # in interactive. Maybe hexify?
 http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c  %0A    x <= c <= d # test%0A    e <= a1 # test%0A}
 
+- bug: we cannot visualize "ceilsqrt", see e.g. http://127.0.0.1:8080/libraries/solver/models/plusinvnat2/views/ndp_graph/
+
+- change TakeRes, TakeFun with the identity
+
+- check SumNDP repr_map: should be = instead of <=
 

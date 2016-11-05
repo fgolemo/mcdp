@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance
+from mcdp_maps.repr_map import (plusvaluedualmap_repr, plusvaluemap_repr,
+                                minusvaluemap_repr)
 from mcdp_posets import (Map, RcompUnits, Nat,
     express_value_in_isomorphic_space, Rcomp, is_top, MapNotDefinedHere)
 from mcdp_posets.nat import Nat_add
@@ -40,11 +42,18 @@ class PlusValueMap(Map):
     def __str__(self):
         return "+ %s" % self.c_space.format(self.c_value)
 
+    def diagram_label(self):  
+        return self.__str__()
+    
     def __repr__(self):
         return "PlusValueMap(%s)" % self.__str__()
 
     def _call(self, x):
         return rcompunits_add(self.dom, x, self.c) 
+    
+    def repr_map(self, letter):
+        return plusvaluemap_repr(letter, self.c_space, self.c_value)
+
 
 class PlusValueDualMap(Map):
     """ 
@@ -101,6 +110,8 @@ class PlusValueDualMap(Map):
             else:
                 raise MapNotDefinedHere()
     
+    def repr_map(self, letter):
+        return plusvaluedualmap_repr(letter, self.c_space, self.c_value)
     
 class PlusValueDualRcompMap(Map):
 
@@ -130,6 +141,8 @@ class PlusValueDualRcompMap(Map):
             else:
                 raise MapNotDefinedHere()
 
+    def repr_map(self, letter):
+        return plusvaluedualmap_repr(letter, self.dom, self.c)
 
     
 class PlusValueDualNatMap(Map):
@@ -160,6 +173,8 @@ class PlusValueDualNatMap(Map):
             else:
                 raise MapNotDefinedHere()
             
+    def repr_map(self, letter):
+        return plusvaluedualmap_repr(letter, self.dom, self.c)
             
 class PlusValueRcompMap(Map):
     """ 
@@ -175,6 +190,12 @@ class PlusValueRcompMap(Map):
 
     def __str__(self):
         return "+ %s" % self.dom.format(self.c_value)
+
+    def diagram_label(self):  
+        return self.__str__()
+    
+    def repr_map(self, letter):
+        return plusvaluemap_repr(letter, self.dom, self.c_value)
 
     def _call(self, x):
         return rcomp_add(x, self.c_value)
@@ -195,6 +216,12 @@ class MinusValueRcompMap(Map):
 
     def __str__(self):
         return "- %s" % self.dom.format(self.c)
+
+    def repr_map(self, letter):
+        return minusvaluemap_repr(letter, self.dom, self.c)
+
+    def diagram_label(self):  
+        return self.__str__()
 
     def _call(self, x):
         dom, cod = self.dom, self.cod 
@@ -240,6 +267,12 @@ class MinusValueMap(Map):
     def __str__(self):
         return "- %s" % self.c_space.format(self.c_value)
 
+    def diagram_label(self):  
+        return self.__str__()
+
+    def repr_map(self, letter):
+        return minusvaluemap_repr(letter, self.c_space, self.c_value)
+
     def __repr__(self):
         return "MinusValueMap(%s)" % self.__str__()
 
@@ -272,7 +305,13 @@ class PlusValueNatMap(Map):
     def _call(self, x):
         return Nat_add(x, self.value) 
 
-    def __repr__(self):
+    def diagram_label(self):  
+        return self.__str__()
+
+    def repr_map(self, letter):
+        return plusvaluemap_repr(letter, self.N, self.value)
+
+    def __str__(self):
         return '+ %s' % self.N.format(self.value)
 
 
@@ -315,32 +354,12 @@ class MinusValueNatMap(Map):
                 assert res >= 0
                 return res
             
-#         P = self.dom
-#         
-#         if is_top(self.dom, self.c):
-#             #  r = 0 -> f empty
-#             #  r = 1 -> f empty
-#             #  r = Top -> f <= Top
-#             if is_top(self.dom, x):
-#                 return self.top
-#             else:
-#                 raise MapNotDefinedHere()
-#         
-#         if P.equal(x, self.c):
-#             return 0
-#         else:
-#             if P.leq(x, self.c):
-#                 msg = '%s < %s' % (P.format(x), P.format(self.c))
-#                 raise MapNotDefinedHere(msg)
-#             else:
-#                 if is_top(P, x):
-#                     return self.top
-#                 else:
-#                     check_isinstance(x, int)
-#                     res = x - self.c
-#                     assert res >= 0
-#                     # todo: check underflow
-#                     return res
-                
-    def __repr__(self):
+    def diagram_label(self):  
+        return self.__str__()
+
+    def repr_map(self, letter):
+        return minusvaluemap_repr(letter, self.dom, self.c)
+
+    def __str__(self):
         return '- %s' % self.c
+    

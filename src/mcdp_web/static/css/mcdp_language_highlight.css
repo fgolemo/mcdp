@@ -68,7 +68,8 @@ span.MinimalsKeyword,
 span.IgnoreResourcesKeyword,
 span.ProcName,
 span.ApproxUpperKeyword,
-span.ApproxLowerKeyword
+span.ApproxLowerKeyword,
+span.VarStatementKeyword
 { 
     font-weight: bold; 
     color: #00a;
@@ -96,7 +97,8 @@ span.FName, span.RName { }
 span.DPName, span.NDPName, span.PosetName, span.TemplateName,
 span.TemplateParamName,
 span.FinitePosetElement,
-span.SingleElementPosetTag {  
+span.SingleElementPosetTag
+{  
     color: #a0a;
 }
 

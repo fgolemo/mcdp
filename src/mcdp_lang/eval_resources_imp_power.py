@@ -18,9 +18,15 @@ def eval_rvalue_Power(rvalue, context):
 
     exponent = rvalue.exponent
     assert isinstance(exponent, CDP.IntegerFraction)
+
     num = exponent.num
     den = exponent.den
 
+    if num == 0 or den == 0:
+        msg = ('Invalid fraction %s/%s: both numerator and denominator'
+               ' should be greater than zero.' %(num, den))
+        raise_desc(DPSemanticError, msg)
+    
     F = context.get_rtype(base)
     if not isinstance(F, RcompUnits):
         msg = 'I can only compute pow() for floats with types; this is %r.' % (F)

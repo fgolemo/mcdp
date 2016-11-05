@@ -48,6 +48,8 @@ class SquareNatDP(WrapAMap):
          
         WrapAMap.__init__(self, amap, amap_dual)
         
+    def diagram_label(self):
+        return self.amap.diagram_label()
 
 class PromoteToFloatDP(WrapAMap):
     def __init__(self, F, R):
@@ -62,7 +64,6 @@ class CoerceToIntDP(WrapAMap):
         WrapAMap.__init__(self, amap, amap_dual)
         
 def CeilSqrtNatDP():
-    
     # promote to float
     # take sqrt
     # make ceil
@@ -83,6 +84,10 @@ class SquareDP(WrapAMap):
         amap = SquareMap(F)
         amap_dual = SqrtMap(F)
         WrapAMap.__init__(self, amap, amap_dual)
+    
+    def diagram_label(self):
+        return '^ 2'
+    
         
 class SqrtRDP(WrapAMap):
     """ r >= sqrt(f) for rcomp or rcompunits """
@@ -90,6 +95,9 @@ class SqrtRDP(WrapAMap):
         amap = SqrtMap(F)
         amap_dual = SquareMap(F)
         WrapAMap.__init__(self, amap, amap_dual)
+    
+    def diagram_label(self):
+        return 'sqrt'
         
 class Floor0DP(WrapAMap):
     """
@@ -105,10 +113,16 @@ class Floor0DP(WrapAMap):
         amap_dual = CeilMap(F)
         WrapAMap.__init__(self, amap, amap_dual)
 
+    def diagram_label(self):  
+        return 'floor0'
+
 class CeilDP(WrapAMap):
+    
     def __init__(self, F):
         amap = CeilMap(F)
         amap_dual = FloorMap(F)
         WrapAMap.__init__(self, amap, amap_dual)
-        
+    def diagram_label(self):  
+        return 'ceil'
+
     

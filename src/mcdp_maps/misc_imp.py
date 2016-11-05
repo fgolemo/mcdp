@@ -7,7 +7,6 @@ from mcdp_posets.nat import Nat_mult_lowersets_continuous
 from mcdp_posets.poset import is_top
 from mcdp_posets.rcomp import finfo
 import numpy as np
-import numpy as np
 
 
 __all__ = [
@@ -47,6 +46,9 @@ class GenericFloatOperation(Map):
     
     def diagram_label(self):
         return self.name
+    
+    def repr_map(self, letter):
+        return '%s ⟼ %s(%s)' % (letter, self.name, letter)
 
     @abstractmethod
     def op(self, x):
@@ -70,6 +72,7 @@ class CeilMap(GenericFloatOperation):
     def op(self, x):
         return np.ceil(x)
 
+
 class Floor0Map(GenericFloatOperation):
     """
         This is floor0:
@@ -87,6 +90,7 @@ class Floor0Map(GenericFloatOperation):
         else:
             return np.ceil(x-1)
     
+    
 class FloorMap(GenericFloatOperation):
 
     def __init__(self, dom):
@@ -94,7 +98,7 @@ class FloorMap(GenericFloatOperation):
 
     def op(self, x):
         return np.floor(x)
-    
+          
     
 class SquareMap(GenericFloatOperation):
 
@@ -102,6 +106,17 @@ class SquareMap(GenericFloatOperation):
         GenericFloatOperation.__init__(self, dom, 'square')
 
     def op(self, x):
+        def square(x):
+            try:
+                res = x * x
+            except FloatingPointError as e:
+                if 'underflow' in str(e):
+                    return finfo.tiny
+                elif 'overflow' in str(e):
+                    return finfo.max
+                else:
+                    raise
+            return res
         return square(x)
     
     
@@ -140,19 +155,11 @@ class SquareNatMap(Map):
     def _call(self, x):
         return Nat_mult_lowersets_continuous(x, x)
     
-    
+    def repr_map(self, letter):
+        return '%s ⟼ %s^2' % (letter, letter)
 
-def square(x):
-    try:
-        res = x * x
-    except FloatingPointError as e:
-        if 'underflow' in str(e):
-            return finfo.tiny
-        elif 'overflow' in str(e):
-            return finfo.max
-        else:
-            raise
-    return res
+    def diagram_label(self):
+        return '^2'
 
 
 class SqrtMap(GenericFloatOperation):

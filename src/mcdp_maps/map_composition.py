@@ -42,3 +42,6 @@ class MapComposition(Map):
             # may raise MapNotDefinedHere
             res = m.__call__(res)
         return res
+
+    def repr_map(self, letter):
+        return '%s ⟼ m2(m1(%s))' % (letter, letter)

@@ -4,9 +4,12 @@ from mcdp_dp import (CatalogueDP, CoProductDP, CoProductDPLabels, Constant,
     InvPlus2, InvPlus2L, InvPlus2Nat, InvPlus2U, JoinNDP, Limit, LimitMaximals,
     Max1, MeetNDualDP, Mux, Parallel, ParallelN, Series0, Terminator,
     PlusValueDP, MeetNDP, JoinNDualDP, InvMult2Nat, MultValueDP,
-    MinusValueDP, ProductNDP, Product2DP_U, Product2DP_L, ProductNNatDP, ProductNRcompDP, MinusValueRcompDP, MinusValueNatDP, InvMultValueNatDP, InvMultValueRcompDP, InvMultValueDP)
-from mcdp_dp import SumNLDP, SumNUDP
-from mcdp_dp.dp_dummy import Template
+    MinusValueDP, ProductNDP, Product2DP_U, Product2DP_L, ProductNNatDP, ProductNRcompDP,
+    MinusValueRcompDP, MinusValueNatDP, InvMultValueNatDP, InvMultValueRcompDP,
+    InvMultValueDP,
+     SumNLDP, SumNUDP, Template, FuncNotMoreThan, RcompUnitsPowerDP, SquareNatDP)
+from mcdp_dp.conversion import get_conversion
+from mcdp_dp.dp_sum import SumNNatDP
 from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct, Nat, Rcomp
 from mocdp import MCDPConstants
@@ -432,10 +435,41 @@ def SumNUDP_1():
     R = m
     nu = 5
     return SumNUDP(Fs=Fs,R=R,n=nu)
+
+@add_as_test
+def FuncNotMoreThan_1():
+    F = parse_poset('m')
+    limit = 2.0
+    return FuncNotMoreThan(F, limit)
  
+@add_as_test
+def RcompUnitsPowerDP_1():
+    F = parse_poset('m')
+    num = 2
+    den = 3
+    return RcompUnitsPowerDP(F, num, den)
+
+@add_as_test
+def SquareNatDP_0():
+    return SquareNatDP()
+
+@add_as_test    
+def SumNNatDP_2():
+    return SumNNatDP(2)
+
+@add_as_test
+def Conversion_a():
+    A = parse_poset('kg')
+    B = parse_poset('g')
+    return get_conversion(A, B)
 
 if MCDPConstants.test_include_primitivedps_knownfailures:
     
+    
+    @add_as_test
+    def SumNNatDP_3():
+        return SumNNatDP(3)
+
     @add_as_test
     def DPLoop0_1():
         F1 = parse_poset('N')

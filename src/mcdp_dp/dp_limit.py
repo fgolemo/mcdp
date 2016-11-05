@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_dp.primitive import NotFeasible
-from mcdp_posets import LowerSet, NotBelongs, Poset, PosetProduct, UpperSet
+from mcdp_posets import (LowerSet, NotBelongs, Poset, PosetProduct, UpperSet,
+                         LowerSets)
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 
 from .primitive import PrimitiveDP
@@ -22,7 +23,7 @@ class FuncNotMoreThan(PrimitiveDP):
         f ⟼   {f},  if f ≼ limit
                 ø,    otherwise
         
-        h* : r  ⟼ r
+        h* : r  ⟼ {r} 
                 
     """
     @contract(F='$Poset')
@@ -57,12 +58,18 @@ class FuncNotMoreThan(PrimitiveDP):
             return empty
         
     def solve_r(self, r):  # @UnusedVariable
+        mcdp_dev_warning('think more about this')
         return self.F.L(self.limit)
         
     def __repr__(self):
         return 'FuncNotMoreThan(%s)' % (self.F.format(self.limit))
 
-    
+    def repr_h_map(self):
+        return 'f ⟼ f if f ≼ %s, else ø' % self.F.format(self.limit)
+
+    def repr_hd_map(self):
+        return 'r ⟼ {%s}' % self.F.format(self.limit)
+
 
 class Limit(PrimitiveDP):
     """
@@ -104,6 +111,13 @@ class Limit(PrimitiveDP):
     def __repr__(self):
         return 'Limit(%s, %s)' % (self.F, self.F.format(self.limit))
 
+    def repr_h_map(self):
+        return 'f ⟼ {⟨⟩} if f ≼ %s, else ø' % self.F.format(self.limit)
+
+    def repr_hd_map(self):
+        return '⟨⟩ ⟼ {%s}' % self.F.format(self.limit)
+
+
 class LimitMaximals(PrimitiveDP):
 
     """
@@ -129,9 +143,9 @@ class LimitMaximals(PrimitiveDP):
 
     def evaluate(self, m):
         assert m == ()
-        LF = self.limit
-        UR = UpperSet(set([()]), self.R)
-        return LF, UR
+        lf = self.limit
+        ur = UpperSet(set([()]), self.R)
+        return lf, ur
         
     def solve(self, f):
         try:
@@ -150,4 +164,13 @@ class LimitMaximals(PrimitiveDP):
     def __repr__(self):
         s = len(self.limit.maximals)
         return 'LimitMaximals(%s, %s els)' % (self.F, s)
+    
+    def repr_h_map(self):
+        LF = LowerSets(self.F)
+        return 'f ⟼ {⟨⟩} if f ∈ %s, else ø' % LF.format(self.limit)
+
+    def repr_hd_map(self):
+        contents = ", ".join(self.F.format(m)
+                for m in sorted(self.limit.maximals))
+        return '⟨⟩ ⟼ {%s}' % contents
 

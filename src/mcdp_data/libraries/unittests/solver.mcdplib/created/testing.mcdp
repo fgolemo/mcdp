@@ -3,9 +3,6 @@ mcdp {
  requires r [g]
  required r >= 10 g
  provided f <= 14 g
-
-# this is ok
  provided f <= 10 g
-# this will cause an error:
-required r >= 20 g
+ required r >= 20 g
 }

@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
-from mcdp_maps import ConstantPosetMap, InvMultDualValueNatMap, MultValueMap, MultValueNatMap
-from mcdp_maps import InvMultValueNatMap
-from mcdp_maps.mult_value import InvMultValueMap, InvMultDualValueMap
-from mcdp_posets import Map, MapNotDefinedHere, RcompUnits, is_top, Nat
-from mcdp_posets.rcomp import Rcomp
+from mcdp_maps import (ConstantPosetMap, InvMultDualValueNatMap, MultValueMap,
+                       MultValueNatMap, InvMultValueNatMap, InvMultValueMap, InvMultDualValueMap)
+from mcdp_posets import Map, MapNotDefinedHere, RcompUnits, is_top, Nat, Rcomp
 from mcdp_posets.rcomp_units import inverse_of_unit, check_mult_units_consistency
 import numpy as np
 
@@ -95,6 +93,8 @@ class MultValueDP(WrapAMap):
             
         WrapAMap.__init__(self, amap, amap_dual)
 
+    def diagram_label(self):  
+        return self.amap.diagram_label()
 
 
 class MultValueDPHelper1Map(Map):
@@ -114,12 +114,15 @@ class MultValueDPHelper1Map(Map):
             return self.cod.get_top()
         # otherwise undefined
         raise MapNotDefinedHere(x)
+    
+    def repr_map(self, letter):
+        return '%s ⟼ ⊤ if %s = 0, else ø' % (letter, letter)
         
 
 class MultValueDPHelper2Map(Map):
     """
         Implements:
-         r |->   if r = 0, then f must be <= 0
+         r ⟼   if r = 0, then f must be <= 0
                  if r > 0, then f must be <= 0
                  if r = Top, then f <= Top
                  
@@ -133,11 +136,14 @@ class MultValueDPHelper2Map(Map):
         else:
             return 0.0
         
+    def repr_map(self, letter):
+        return '%s ⟼ ⊤ if %s = ⊤, else 0' % (letter, letter)
+
 
 class MultValueNatDPHelper2Map(Map):
     """
         Implements:
-         r |->   if r = 0, then f must be <= 0
+         r ⟼  if r = 0, then f must be <= 0
                  if r > 0, then f must be <= 0
                  if r = Top, then f <= Top
                  
@@ -151,7 +157,10 @@ class MultValueNatDPHelper2Map(Map):
             return self.cod.get_top()
         else:
             return 0
-        
+
+    def repr_map(self, letter):
+        return '%s ⟼ ⊤ if %s = ⊤, else 0' % (letter, letter)
+
         
 class MultValueNatDP(WrapAMap):
     """
