@@ -61,8 +61,8 @@ def assert_semantic_error_fn(filename, desc=None):
             msg += '\n' + desc
         raise_desc(Exception, msg, filename=filename, res=res.repr_long())
         
-def assert_semantic_error(s , desc=None):
-    """ This asserts that s can be parsed, but cannot  be compiled to a *connected* ndp. """
+def assert_semantic_error(s , desc=None): # TODO: redundant with assert_parse_ndp_semantic_error(string, contains)
+    """ This asserts that s can be parsed, but"""
     try:
         res = parse_ndp(s)
         res.abstract()
@@ -137,20 +137,45 @@ def parse_wrap_check(string, expr, result=None):
 
 @contract(string=str, contains='str|None')
 def assert_parse_ndp_semantic_error(string, contains=None):
-    """ Asserts that parsing this string as an NDP will raise
+    """
+        Asserts that parsing this string as an NDP will raise
         a DPSemanticError. If contains is not None, it is 
-        a substring that must be contained in the error. """
-    return parse_wrap_semantic_error(string, Syntax.ndpt_dp_rvalue, contains=contains)
+        a substring that must be contained in the error.
+        
+        Returns the exception. 
+    """
+    try:
+        res = parse_ndp(string)
+    except DPSemanticError as e:
+        if contains is not None:
+            s = str(e)
+            if not contains in s:
+                msg = 'Expected a DPSemanticError with substring %r.' % contains
+                raise_wrapped(TestFailed, e, msg, string=string)
+            return e
+        else:
+            return e
+    except BaseException as e:
+        msg = 'Expected DPSemanticError, but obtained %s.' % type(e)
+        raise_wrapped(TestFailed, e, msg, string=string)
 
+    msg = 'Expected DPSemanticError, but no exception was thrown.'
+    raise_desc(TestFailed, msg, string=string, result=res) 
+    assert False
+    
 @contract(string=str, contains='str|None')
 def parse_wrap_semantic_error(string, expr, contains=None):
-    """ Assert semantic error. If contains is not None, it is 
-        a substring that must be contained in the error. """
+    """ 
+        Assert semantic error. If contains is not None, it is 
+        a substring that must be contained in the error. 
+    
+        Returns the exception.
+    """
     if isinstance(expr, ParsingElement):
         expr = expr.get()
 
     try:
-        _res = parse_wrap(expr, string)[0]  # note the 0, first element
+        res = parse_wrap(expr, string)[0]  # note the 0, first element
     except DPSemanticError as e:
         if contains is not None:
             s = str(e)
@@ -158,12 +183,19 @@ def parse_wrap_semantic_error(string, expr, contains=None):
                 msg = 'Expected a DPSemanticError with substring %r.' % contains
                 raise_wrapped(TestFailed, e, msg,
                               expr=find_parsing_element(expr), string=string)
-            
+            return e
+        else:
+            return e
     except BaseException as e:
         msg = 'Expected DPSemanticError, but obtained %s.' % type(e)
         raise_wrapped(TestFailed, e, msg,
                       expr=find_parsing_element(expr), string=string)
 
+    msg = 'Expected DPSemanticError, but no except was thrown.'
+    raise_desc(TestFailed, msg,
+                  expr=find_parsing_element(expr), string=string,
+                  result=res) 
+    assert False
 
 @contract(string=str)
 def parse_wrap_syntax_error(string, expr):
@@ -190,10 +222,10 @@ def ok(expr, string, result=None):
     register_indep(parse_wrap_check, dynamic=False,
                    args=(string, expr, result), kwargs=dict())
 
-def sem(expr, string):
-    expr = find_parsing_element(expr)
-    register_indep(parse_wrap_semantic_error, dynamic=False,
-                   args=(string, expr), kwargs=dict())
+# def sem(expr, string):
+#     expr = find_parsing_element(expr)
+#     register_indep(parse_wrap_semantic_error, dynamic=False,
+#                    args=(string, expr), kwargs=dict())
 
 def syn(expr, string):
     expr = find_parsing_element(expr)

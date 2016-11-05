@@ -27,7 +27,6 @@
         parse_wrap_semantic_error
         
         
-
 """
 
 from .examples import *
@@ -60,5 +59,4 @@ from .syntax_tuples  import *
 from .syntax_uncertainty import *
 from .take_optimization import *
 from .templates_test import *
-
-
+from .syntax_variables import *

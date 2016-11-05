@@ -92,6 +92,9 @@ class Context():
         self.var2function = {}  # str -> Function
         self.var2model = {}  # str -> NamedDP
         self.constants = {}  # str -> ValueWithUnits
+        self.variables = set() # set of strings for variables
+        # already explicitly set. It is assumed each will have
+        # an NDP of the same name
 
         self.ifun_init()
         self.ires_init()

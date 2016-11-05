@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance, indent
 from mcdp_dp import (MinusValueNatDP, MinusValueRcompDP, MinusValueDP,
                      MultValueDP, MultValueNatDP, PlusValueRcompDP, PlusValueDP,
                      PlusValueNatDP , ProductNDP, SumNNatDP, ProductNNatDP,
@@ -21,6 +21,7 @@ from .helpers import create_operation, get_valuewithunits_as_resource, get_resou
 from .misc_math import inv_constant
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from contracts.interface import format_where
 
 
 CDP = CDPLanguage
@@ -131,9 +132,13 @@ def eval_rvalue_RValueMinusN(x, context, wants_constant=False):
             c = eval_constant(mc, context)
             assert isinstance(c, ValueWithUnits)
             constants.append(c)
-        except NotConstant as e:
-            msg = 'This expression is not monotone.'
-            raise_wrapped(DPSemanticError, e, msg, compact=True)
+        except NotConstant:
+            msg = 'The expression involving "-" is not monotone because one '
+            msg += 'of the values after "-" is not a constant:\n\n'
+            s = format_where(mc.where, context_before=0,
+                             arrow=False, mark=None, use_unicode=True)
+            msg += indent(s, ' '*4)
+            raise DPSemanticError(msg)
         
     # Is the first value a constant?
     try:

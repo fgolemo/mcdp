@@ -11,6 +11,7 @@ __all__ = [
     'IdentityDP',
     'FunctionNode',
     'ResourceNode',
+    'VariableNode',
 ]
 
 
@@ -25,6 +26,13 @@ class IdentityDP(WrapAMap):
     def __repr__(self):
         return 'Id(%r)' % self.F
 
+
+class VariableNode(IdentityDP):
+    def __init__(self, P, vname):
+        IdentityDP.__init__(self, P)
+        self.vname = vname
+    def diagram_label(self):
+        return self.vname
 
 class ResourceNode(IdentityDP):
     pass

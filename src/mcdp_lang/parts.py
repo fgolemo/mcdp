@@ -191,6 +191,8 @@ class CDPLanguage():
 
     FName = namedtuplewhere('FName', 'value')
     RName = namedtuplewhere('RName', 'value')
+    # Variable Name
+    VName = namedtuplewhere('VName', 'value')
     Collection = namedtuplewhere('Collection', 'elements')
 
     # upperset {0g,1g}
@@ -202,7 +204,9 @@ class CDPLanguage():
 
     FunStatement = namedtuplewhere('FunStatement', 'keyword fname unit')
     ResStatement = namedtuplewhere('ResStatement', 'keyword rname unit')
-
+    VarStatement = namedtuplewhere('VarStatement', 'keyword vname unit')
+    VarStatementKeyword = namedtuplewhere('VarStatementKeyword', 'keyword')
+    
     PosetName = namedtuplewhere('PosetName', 'value')
     PosetNameWithLibrary = namedtuplewhere('PosetNameWithLibrary', 'library glyph name')
 
