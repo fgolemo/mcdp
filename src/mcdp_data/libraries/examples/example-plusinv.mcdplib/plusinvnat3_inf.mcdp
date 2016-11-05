@@ -5,8 +5,8 @@
 #    s.t.  x + y >= x + y + z
 #  with z a parameter. 
 # The solution is: 
-#    z = 0   ⟼  {(0,0)}
-#    z > 0   ⟼  ø
+#    z = 0   ->  {(0,0)}
+#    z > 0   ->  ø
 #  Trying to solve this problem with the standard MCDP solver 
 #  will create a (practically) infinite loop as the program 
 #  tries to explore most of the antichains of N^2.
@@ -14,5 +14,5 @@ mcdp {
     provides z [Nat]
     variable x, y [Nat]
     x + y >= x + y + z 
-    requires x, y
+    rsequires x, y
 }

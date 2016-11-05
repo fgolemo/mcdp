@@ -198,3 +198,5 @@ http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c 
 
 - better implementation of get_canonical_form
 
+- implementing user warnings:
+    x ~ provided x

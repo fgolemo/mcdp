@@ -226,8 +226,9 @@ def parse_wrap(expr, string):
     except (ParseException, ParseFatalException) as e:
         # ... so we can use "string" here.
         # raise
-        where = Where(string, character=e.loc)
-        raise DPSyntaxError(str(e), where=where)
+        where = Where(string0, character=e.loc)
+        e2 = DPSyntaxError(str(e), where=where)
+        raise DPSyntaxError, e2, sys.exc_info()[2]
     except DPSemanticError as e:
         msg = "User error while interpreting the model:"
         msg += "\n\n" + indent(m(string), '  ') + '\n'
