@@ -222,10 +222,10 @@ def ok(expr, string, result=None):
     register_indep(parse_wrap_check, dynamic=False,
                    args=(string, expr, result), kwargs=dict())
 
-def sem(expr, string):
-    expr = find_parsing_element(expr)
-    register_indep(parse_wrap_semantic_error, dynamic=False,
-                   args=(string, expr), kwargs=dict())
+# def sem(expr, string):
+#     expr = find_parsing_element(expr)
+#     register_indep(parse_wrap_semantic_error, dynamic=False,
+#                    args=(string, expr), kwargs=dict())
 
 def syn(expr, string):
     expr = find_parsing_element(expr)

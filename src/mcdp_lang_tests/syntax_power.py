@@ -10,8 +10,8 @@ from mcdp_lang.syntax import Syntax
 from mcdp_posets import UpperSets
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error, ok,
-    parse_wrap_check, sem, syn)
-from mcdp_lang_tests.utils import assert_parse_ndp_semantic_error
+    parse_wrap_check, syn)
+from .utils import assert_parse_ndp_semantic_error
 
 
 L = CDPLanguage
@@ -19,7 +19,6 @@ L = CDPLanguage
 
 ok(Syntax.integer_fraction, '1/2', L.IntegerFraction(num=1, den=2))
 syn(Syntax.integer_fraction, '1/2.0')
-# sem(Syntax.integer_fraction, '1/0')
 syn(Syntax.integer_fraction, '1/')
 
 exponent = L.exponent('^')
