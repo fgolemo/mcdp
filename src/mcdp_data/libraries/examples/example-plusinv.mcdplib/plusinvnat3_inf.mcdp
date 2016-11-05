@@ -14,5 +14,5 @@ mcdp {
     provides z [Nat]
     variable x, y [Nat]
     x + y >= x + y + z 
-    rsequires x, y
+    requires x, y
 }

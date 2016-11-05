@@ -221,12 +221,9 @@ def parse_wrap(expr, string):
     except RuntimeError as e:
         msg = 'We have a recursive grammar.'
         msg += "\n\n" + indent(m(string), '  ') + '\n'
-
         raise_desc(DPInternalError, msg)
     except (ParseException, ParseFatalException) as e:
-        # ... so we can use "string" here.
-        # raise
-        where = Where(string0, character=e.loc)
+        where = Where(string0, character=e.loc) # note: string0
         e2 = DPSyntaxError(str(e), where=where)
         raise DPSyntaxError, e2, sys.exc_info()[2]
     except DPSemanticError as e:
