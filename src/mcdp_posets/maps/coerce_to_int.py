@@ -69,7 +69,7 @@ class CeilRNMap(Map):
     """ 
         From Rcomp to Nat. 
         
-         x -> int(floor(x))
+         x -> int(ceil(x))
     """  
     
     @contract(cod=Space, dom=Space)
@@ -87,4 +87,4 @@ class CeilRNMap(Map):
         return r
     
     def repr_map(self, letter):
-        return "%s ⟼ floor(%s)" % (letter, letter)
+        return "%s ⟼ ceil(%s)" % (letter, letter)
