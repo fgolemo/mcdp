@@ -35,7 +35,7 @@ class LinearMapComp(Map):
             return self.B.get_top()
         return res
 
-
     def repr_map(self, letter):
         label = '× %f' % self.factor
         return  '%s ⟼ %s %s' % (letter, letter, label)
+    
