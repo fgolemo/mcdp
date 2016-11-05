@@ -252,7 +252,10 @@ def parse_wrap(expr, string):
     except (ParseException, ParseFatalException) as e:
         # ... so we can use "string" here.
         # raise
-        where = Where(string, line=e.lineno, column=e.col)
+        loc = e.loc
+        if loc >= len(string0):
+            loc -= 1
+        where = Where(string, character=loc)
         raise DPSyntaxError(str(e), where=where)
     except DPSemanticError as e:
         msg = "User error while interpreting the model:"
