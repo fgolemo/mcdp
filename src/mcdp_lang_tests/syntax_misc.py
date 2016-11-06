@@ -19,6 +19,7 @@ import numpy as np
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
 from mcdp_posets.nat import Nat
+from mcdp_posets.rcomp_units import R_dimensionless
 
 
 @comptest
@@ -786,8 +787,43 @@ def check_lang88(): # TODO: rename
     
 @comptest
 def check_lang89(): # TODO: rename
-    pass 
+    """ Multiplication Nat and Rcompunits """
+    
+    # This is just a constant
+    s = """
+    mcdp {
+        unit_cost = 3 $
+        num_replacements = Nat: 2
+        requires cost >= unit_cost * num_replacements
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    R = dp.get_res_space()
+    assert R == parse_poset('USD'), R
 
+    # This is not a constant
+    s = """
+    mcdp {
+        provides num_replacements [Nat]
+        unit_cost = 3 $
+        requires cost >= unit_cost * provided num_replacements
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    R = dp.get_res_space()
+    assert R == parse_poset('USD'), R
+    
+    # This is with Rcomp
+    s = """
+    mcdp {
+        provides num_replacements [Nat]
+        unit_cost = 3 dimensionless
+        requires cost >= unit_cost * provided num_replacements
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    R = dp.get_res_space()
+    assert R == R_dimensionless, R
 
 @comptest
 def check_lang90(): # TODO: rename

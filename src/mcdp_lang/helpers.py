@@ -37,7 +37,6 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
         ni = context.new_fun_name('%s%s' % (op_prefix, i))
         fnames.append(ni)
 
-
     fnames_ = fnames[0] if len(fnames) == 1 else fnames
     ndp = dpwrap(dp, fnames_, name_result)
     context.add_ndp(name, ndp)
@@ -58,7 +57,8 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
                 pass
             else:
                 r = create_operation(context, conversion, [r],
-                                     name_prefix='_conv', op_prefix='_op',
+                                     name_prefix='_coversion_for_%s' % name_result, 
+                                     op_prefix='_op',
                                      res_prefix='_res')
 
         R = context.get_rtype(r)
@@ -67,8 +67,8 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
         c = Connection(dp1=r.dp, s1=r.s, dp2=name, s2=fnames[i])
         connections.append(c)
 
-    if len(fnames) == 1:
-        fnames = fnames[0]
+#     if len(fnames) == 1:
+#         fnames = fnames[0]
 
     for c in connections:
         context.add_connection(c)
@@ -162,7 +162,7 @@ def get_resource_possibly_converted(r, P, context):
             return r
         else:
             r2 = create_operation(context, conversion, [r],
-                                 name_prefix='_conv', op_prefix='_op',
+                                 name_prefix='_conv_grpc', op_prefix='_op',
                                  res_prefix='_res')
             return r2
 
@@ -189,7 +189,7 @@ def get_function_possibly_converted(cf, P, context):
         else:
             cf2 = create_operation_lf(context, dp=conversion, 
                                       functions=[cf], 
-                                      name_prefix='_conv', 
+                                      name_prefix='_conv_gfpc', 
                                       op_prefix='_op', res_prefix='_res')
             return cf2
 

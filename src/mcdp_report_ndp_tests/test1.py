@@ -215,6 +215,7 @@ def check_ndp_grap_imp1():
     out = 'out/check_ndp_grap_imp1'
     plot_different_solutions(libname, ndpname, query, out)
 
+
 @comptest
 def check_ndp_grap_imp2():
     libname = 'batteries_v1'
