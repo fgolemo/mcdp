@@ -221,3 +221,5 @@ http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c 
    a >= square(c)  
   }
 
+
+- make green and red plus icons
