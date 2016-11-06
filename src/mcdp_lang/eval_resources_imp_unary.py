@@ -19,7 +19,8 @@ from mcdp_posets.poset import Poset, NotLeq
 from mcdp_dp.conversion import get_conversion
 from mcdp_lang.eval_constant_imp import eval_constant, NotConstant
 from mcdp_lang.eval_resources_imp import eval_rvalue
-from mcdp_lang.helpers import get_valuewithunits_as_resource
+from mcdp_lang.helpers import get_valuewithunits_as_resource,\
+    get_valuewithunits_as_function
 from abc import abstractmethod, ABCMeta
 from mcdp_dp.dp_max import Max1, JoinNDP, Min1, MeetNDP
 
@@ -150,6 +151,10 @@ class OpSpec():
 class AssociativeOp(RuleInterface):
     
     @abstractmethod
+    def only_one(self, constant):
+        pass
+
+    @abstractmethod
     def reduce_constants(self, vus):
         """ constants: list of ValueWithUnits """
         
@@ -161,7 +166,7 @@ class AssociativeOp(RuleInterface):
     def return_op_variables(self, context, resources):
         pass
          
-    def apply(self, symbols, resources_or_constants, are_they_constant, context):
+    def apply(self, symbols, resources_or_constants, are_they_constant, context):  # @UnusedVariable
         """ Returns an Rvalue """
         
         # Find out how many are constants
@@ -176,8 +181,8 @@ class AssociativeOp(RuleInterface):
         # it's a constant value
         if len(resources) == 0:
             vu = self.reduce_constants(constants)
-            return get_valuewithunits_as_resource(vu, context)
-    
+            return self.only_one(vu, context)
+            
         # it's only resource * (c1*c2*c3*...)
         if len(resources) == 1:
             vu = self.reduce_constants(constants)
@@ -195,7 +200,15 @@ class AssociativeOp(RuleInterface):
                 
         assert False
 
-class OpJoin(AssociativeOp):
+class AssociativeOpRes(RuleInterface):
+    def only_one(self, vu, context):
+        return get_valuewithunits_as_resource(vu, context)
+
+class AssociativeOpFun(RuleInterface):
+    def only_one(self, vu, context):
+        return get_valuewithunits_as_function(vu, context)
+
+class OpJoin(AssociativeOpRes):
     
     def __init__(self, nargs):
         assert nargs >= 2    

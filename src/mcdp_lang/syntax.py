@@ -14,6 +14,7 @@ from .pyparsing_bundled import (
 from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
 from .utils_lists import make_list
+from mcdp_lang.pyparsing_bundled import FollowedBy
 
 
 ParserElement.enablePackrat()
@@ -695,7 +696,6 @@ class Syntax():
     unary_op = MatchFirst([sp(L(x), lambda t: CDP.ProcName(t[0]))
                            for x in unary])
     
-    
     rvalue_unary_expr = sp(unary_op - SLPAR - rvalue - SRPAR,
                             lambda t: CDP.UnaryRvalue(t[0], t[1]))
     
@@ -703,11 +703,19 @@ class Syntax():
     
     rvalue_generic_op_ops = sp(rvalue + ZeroOrMore(SCOMMA + rvalue),
                                lambda t: make_list(list(t)))
-    rvalue_generic_op  = sp(opname + SLPAR + rvalue_generic_op_ops + SRPAR,
+    
+    # The ~FollowedBy is due to situations like this:
+    #     >  line 26 >   power = power1 + power2 + power3
+    #     >  line 27 >   (required in).watts >= power
+    # which would be interpreted as power3(required in)
+    rvalue_generic_op  = sp(opname + SLPAR + rvalue_generic_op_ops + SRPAR
+                            +  ~FollowedBy(DOT),
                             lambda t: CDP.GenericOperationRes(t[0], t[1]) )
+    
     fvalue_generic_op_ops = sp(fvalue + ZeroOrMore(SCOMMA + fvalue),
                                lambda t: make_list(list(t)))
-    fvalue_generic_op  = sp(opname + SLPAR + fvalue_generic_op_ops + SRPAR,
+    fvalue_generic_op  = sp(opname + SLPAR + fvalue_generic_op_ops + SRPAR
+                            +  ~FollowedBy(DOT),
                             lambda t: CDP.GenericOperationFun(t[0], t[1]) )
     
     # binary functions on resources
