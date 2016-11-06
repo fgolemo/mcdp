@@ -15,19 +15,18 @@ CDP = CDPLanguage
 @decorate_add_where
 @contract(returns=TemplateForNamedDP)
 def eval_template(r, context):  # @UnusedVariable
-#     with add_where_information(r.where):
-        cases = {
-            CDP.LoadTemplate: eval_template_load,
-            CDP.TemplateSpec: eval_template_spec,
-        }
+    cases = {
+        CDP.LoadTemplate: eval_template_load,
+        CDP.TemplateSpec: eval_template_spec,
+    }
 
-        for klass, hook in cases.items():
-            if isinstance(r, klass):
-                return hook(r, context)
+    for klass, hook in cases.items():
+        if isinstance(r, klass):
+            return hook(r, context)
 
-        if True: # pragma: no cover    
-            r = recursive_print(r)
-            raise_desc(DPInternalError, 'Invalid template.', r=r)
+    if True: # pragma: no cover    
+        r = recursive_print(r)
+        raise_desc(DPInternalError, 'Invalid template.', r=r)
 
 def eval_template_load(r, context):
     assert isinstance(r, CDP.LoadTemplate)

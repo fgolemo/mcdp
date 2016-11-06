@@ -15,10 +15,9 @@ from .eval_constant_asserts import (eval_assert_empty, eval_assert_equal,
     eval_assert_geq, eval_assert_gt, eval_assert_leq, eval_assert_lt,
     eval_assert_nonempty)
 from .namedtuple_tricks import recursive_print
-from .parse_actions import add_where_information
+from .parse_actions import decorate_add_where
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from mcdp_lang.parse_actions import decorate_add_where
 
 
 CDP = CDPLanguage
@@ -35,54 +34,52 @@ def eval_constant(op, context):
     """
     from .eval_math import (eval_constant_divide, eval_PlusN_as_constant,
                             eval_RValueMinusN_as_constant, eval_MultN_as_constant)
-
-#     with add_where_information(op.where):
-    if True:
-        if isinstance(op, (CDP.Resource)):
-            raise NotConstant(str(op))
-
-        if isinstance(op, (CDP.OpMax, CDP.OpMin, CDP.Power)):
-            # TODO: can implement optimization
-            raise NotConstant(str(op))
-
-        cases = {
-            CDP.NatConstant: eval_constant_NatConstant,
-            CDP.IntConstant: eval_constant_IntConstant,
-            CDP.SimpleValue: eval_constant_SimpleValue,
-            CDP.VariableRef: eval_constant_VariableRef,
-            CDP.MakeTuple: eval_constant_MakeTuple,
-            CDP.AssertEqual: eval_assert_equal,
-            CDP.AssertLEQ: eval_assert_leq,
-            CDP.AssertGEQ: eval_assert_geq,
-            CDP.AssertLT: eval_assert_lt,
-            CDP.AssertGT: eval_assert_gt,
-            CDP.AssertNonempty: eval_assert_nonempty,
-            CDP.AssertEmpty: eval_assert_empty,
-            CDP.Divide: eval_constant_divide,
-            CDP.Collection: eval_constant_collection,
-            CDP.SpaceCustomValue: eval_constant_space_custom_value,
-            CDP.PlusN: eval_PlusN_as_constant,
-            CDP.RValueMinusN: eval_RValueMinusN_as_constant,
-            CDP.MultN: eval_MultN_as_constant,
-            CDP.EmptySet: eval_EmptySet,
-            CDP.UpperSetFromCollection: eval_constant_uppersetfromcollection,
-            CDP.LowerSetFromCollection: eval_constant_lowersetfromcollection,
-            CDP.SolveModel: eval_solve_f,
-            CDP.SolveRModel: eval_solve_r,
-            CDP.Top: eval_constant_Top,
-            CDP.Maximals: eval_constant_Maximals,
-            CDP.Minimals: eval_constant_Minimals,
-            CDP.Bottom: eval_constant_Bottom,
-        }
-        
-        for klass, hook in cases.items():
-            if isinstance(op, klass):
-                return hook(op, context)
-
-        if True: # pragma: no cover    
-            msg = 'eval_constant(): Cannot evaluate this as constant.'
-            op = recursive_print(op)
-            raise_desc(NotConstant, msg, op=op)
+    
+    if isinstance(op, (CDP.Resource)):
+        raise NotConstant(str(op))
+    
+    if isinstance(op, (CDP.OpMax, CDP.OpMin, CDP.Power)):
+        # TODO: can implement optimization
+        raise NotConstant(str(op))
+    
+    cases = {
+        CDP.NatConstant: eval_constant_NatConstant,
+        CDP.IntConstant: eval_constant_IntConstant,
+        CDP.SimpleValue: eval_constant_SimpleValue,
+        CDP.VariableRef: eval_constant_VariableRef,
+        CDP.MakeTuple: eval_constant_MakeTuple,
+        CDP.AssertEqual: eval_assert_equal,
+        CDP.AssertLEQ: eval_assert_leq,
+        CDP.AssertGEQ: eval_assert_geq,
+        CDP.AssertLT: eval_assert_lt,
+        CDP.AssertGT: eval_assert_gt,
+        CDP.AssertNonempty: eval_assert_nonempty,
+        CDP.AssertEmpty: eval_assert_empty,
+        CDP.Divide: eval_constant_divide,
+        CDP.Collection: eval_constant_collection,
+        CDP.SpaceCustomValue: eval_constant_space_custom_value,
+        CDP.PlusN: eval_PlusN_as_constant,
+        CDP.RValueMinusN: eval_RValueMinusN_as_constant,
+        CDP.MultN: eval_MultN_as_constant,
+        CDP.EmptySet: eval_EmptySet,
+        CDP.UpperSetFromCollection: eval_constant_uppersetfromcollection,
+        CDP.LowerSetFromCollection: eval_constant_lowersetfromcollection,
+        CDP.SolveModel: eval_solve_f,
+        CDP.SolveRModel: eval_solve_r,
+        CDP.Top: eval_constant_Top,
+        CDP.Maximals: eval_constant_Maximals,
+        CDP.Minimals: eval_constant_Minimals,
+        CDP.Bottom: eval_constant_Bottom,
+    }
+    
+    for klass, hook in cases.items():
+        if isinstance(op, klass):
+            return hook(op, context)
+    
+    if True: # pragma: no cover    
+        msg = 'eval_constant(): Cannot evaluate this as constant.'
+        op = recursive_print(op)
+        raise_desc(NotConstant, msg, op=op)
 
 
 def eval_constant_NatConstant(op, context):  # @UnusedVariable

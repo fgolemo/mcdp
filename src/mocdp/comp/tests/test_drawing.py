@@ -1,16 +1,8 @@
 # -*- coding: utf-8 -*-
-import os
-
-from matplotlib.font_manager import FontProperties
-
-from mcdp_dp import NotSolvableNeedsApprox
-from mcdp_dp.dp_transformations import get_dp_bounds
-from mcdp_posets import Rcomp
 from mcdp_report.report import report_dp1
 from mcdp_tests.generation import for_all_nameddps_dyn
 from mocdp.comp.interfaces import NotConnected
 from mocdp.exceptions import mcdp_dev_warning
-from reprep import Report
 
 
 @for_all_nameddps_dyn
@@ -26,31 +18,32 @@ def nameddp1_report(context, _id_dp, ndp):
     context.add_report(r, 'nameddp1')
 
 mcdp_dev_warning('disabled this for now')
-#@for_all_nameddps_dyn
-def nameddp1_solve(context, _id_ndp, ndp):
-    try:
-        ndp.check_fully_connected()
-    except NotConnected:
-        print('Skipping because not connected.')
-        return
-    
-    dp = ndp.get_dp()
-    funsp = dp.get_fun_space()
-    ressp = dp.get_res_space()
 
-    if not is_scalar(funsp) or not is_scalar(ressp):
-        return
+# #@for_all_nameddps_dyn
+# def nameddp1_solve(context, _id_ndp, ndp):
+#     try:
+#         ndp.check_fully_connected()
+#     except NotConnected:
+#         print('Skipping because not connected.')
+#         return
+#     
+#     dp = ndp.get_dp()
+#     funsp = dp.get_fun_space()
+#     ressp = dp.get_res_space()
+# 
+#     if not is_scalar(funsp) or not is_scalar(ressp):
+#         return
+# 
+#     solutions = context.comp(solve_ndp, ndp, n=30)
+#     r = context.comp(report_solutions, ndp, solutions)
+#     context.add_report(r, 'report_solutions')
+# 
+# def unzip(iterable):
+#     return zip(*iterable)
 
-    solutions = context.comp(solve_ndp, ndp, n=30)
-    r = context.comp(report_solutions, ndp, solutions)
-    context.add_report(r, 'report_solutions')
-
-def unzip(iterable):
-    return zip(*iterable)
-
-def report_solutions(ndp, solutions):
-    r = Report()
-    return r
+#     r = Report()
+#     return r
+# def report_solutions(ndp, solutions):
 
 #     
 #     
@@ -95,25 +88,25 @@ def report_solutions(ndp, solutions):
 #         pylab_ylabel_unicode(pylab, yl)
 # 
 #     return r
-
-
-def pylab_label_generic(pf, s):
-    prop = FontProperties()
-#     f = '/Volumes/1506-env_fault/sw/canopy/User/lib/python2.7/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneral.ttf'
-    fs = ['/Library/Fonts/Microsoft/Cambria Math.ttf']
-    for f in fs:
-        if os.path.exists(f):
-            prop.set_file(f)
-            break
-    sd = s.decode('utf-8')
-    pf(sd, fontproperties=prop)
-
-def pylab_xlabel_unicode(pylab, xl):
-    pylab_label_generic(pylab.xlabel, xl)
-
-
-def pylab_ylabel_unicode(pylab, yl):
-    pylab_label_generic(pylab.ylabel, yl)
+# 
+# 
+# def pylab_label_generic(pf, s):
+#     prop = FontProperties()
+# #     f = '/Volumes/1506-env_fault/sw/canopy/User/lib/python2.7/site-packages/matplotlib/mpl-data/fonts/ttf/STIXGeneral.ttf'
+#     fs = ['/Library/Fonts/Microsoft/Cambria Math.ttf']
+#     for f in fs:
+#         if os.path.exists(f):
+#             prop.set_file(f)
+#             break
+#     sd = s.decode('utf-8')
+#     pf(sd, fontproperties=prop)
+# 
+# def pylab_xlabel_unicode(pylab, xl):
+#     pylab_label_generic(pylab.xlabel, xl)
+# 
+# 
+# def pylab_ylabel_unicode(pylab, yl):
+#     pylab_label_generic(pylab.ylabel, yl)
 #
 #     try:
 #         pylab.ylabel(yl)
@@ -122,22 +115,22 @@ def pylab_ylabel_unicode(pylab, yl):
 #         pylab.ylabel(yl)
 #         # print('Cannot set label %s %r: %s' % (yl, yl, e))
 
-
-def solve_ndp(ndp, n=20):
-    
-    dp = ndp.get_dp()
-    funsp = dp.get_fun_space()
-    chain = funsp.get_test_chain(n=n)
-    try:
-        results = map(dp.solve, chain)
-    except NotSolvableNeedsApprox:
-        nl = 10
-        nu = 10
-        dpL, dpU = get_dp_bounds(dp, nl, nu)
-        results = map(dpL.solve, chain)
-        
-    return zip(chain, results)
-
-        
-def is_scalar(space):
-    return isinstance(space, Rcomp)
+# 
+# def solve_ndp(ndp, n=20):
+#     
+#     dp = ndp.get_dp()
+#     funsp = dp.get_fun_space()
+#     chain = funsp.get_test_chain(n=n)
+#     try:
+#         results = map(dp.solve, chain)
+#     except NotSolvableNeedsApprox:
+#         nl = 10
+#         nu = 10
+#         dpL, dpU = get_dp_bounds(dp, nl, nu)
+#         results = map(dpL.solve, chain)
+#         
+#     return zip(chain, results)
+# 
+#         
+# def is_scalar(space):
+#     return isinstance(space, Rcomp)

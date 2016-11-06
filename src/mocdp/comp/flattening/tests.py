@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mcdp_lang import parse_ndp
-from mocdp.comp.flattening.flatten import flatten_add_prefix
 from mcdp_tests.generation import for_all_nameddps
+from mocdp.comp.flattening.flatten import flatten_add_prefix
+
 
 @for_all_nameddps
 def check_flattening(_id_ndp, ndp):
@@ -110,24 +111,5 @@ def check_flatten5():
 
 @comptest
 def check_flatten6():
-    pass
+    pass 
 
-@comptest
-def check_flatten7():
-    pass
-
-@comptest
-def check_flatten8():
-    pass
-
-@comptest
-def check_flatten9():
-    pass
-
-@comptest
-def check_flatten10():
-    pass
-
-@comptest
-def check_flatten11():
-    pass

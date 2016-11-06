@@ -111,7 +111,7 @@ def test_right_inverse():
     i0 = get_id_indices(P)
     #print 'i0', i0
     # compose
-    i0coords = compose_indices(P, i0, coords, list)
+    _i0coords = compose_indices(P, i0, coords, list)
 
     #print 'i0coords', i0coords
 

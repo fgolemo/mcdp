@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from _collections import defaultdict
+
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
 from mcdp_dp import Identity
@@ -10,7 +11,7 @@ from mocdp.comp.labelers import LabelerNDP
 from mocdp.comp.simplify_identities_imp import simplify_identities
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
-# from mocdp.comp.context_functions import is_dp_connected
+
 
 __all__ = [
     'cndp_flatten',

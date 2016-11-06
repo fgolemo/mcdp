@@ -6,6 +6,7 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_dp import (
     CatalogueDP, Conversion, JoinNDP, MeetNDualDP, get_conversion, make_series)
+from mcdp_dp import VariableNode
 from mcdp_lang.parse_actions import decorate_add_where, raise_with_info
 from mcdp_posets import (
     FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe)
@@ -30,8 +31,7 @@ from .helpers import create_operation
 from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
-from .utils_lists import get_odd_ops, unwrap_list
-from mcdp_dp.dp_identity import IdentityDP, VariableNode
+from .utils_lists import unwrap_list
 
 
 CDP = CDPLanguage

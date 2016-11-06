@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
+from contracts.interface import format_where
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance, indent
 from mcdp_dp import (MinusValueNatDP, MinusValueRcompDP, MinusValueDP,
                      MultValueDP, MultValueNatDP, PlusValueRcompDP, PlusValueDP,
@@ -7,7 +8,7 @@ from mcdp_dp import (MinusValueNatDP, MinusValueRcompDP, MinusValueDP,
                      SumNRcompDP, SumNDP, SumNIntDP)
 from mcdp_dp.dp_products import ProductNRcompDP
 from mcdp_maps.SumN_xxx_Map import sum_dimensionality_works
-from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits, Space,
+from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits,
     express_value_in_isomorphic_space, get_types_universe, mult_table, Rcomp)
 from mcdp_posets import is_top
 from mcdp_posets.rcomp_units import RbicompUnits_subtract, RbicompUnits_reflect
@@ -21,7 +22,6 @@ from .helpers import create_operation, get_valuewithunits_as_resource, get_resou
 from .misc_math import inv_constant
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from contracts.interface import format_where
 
 
 CDP = CDPLanguage

@@ -10,7 +10,6 @@ from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPInternalError
 
 from .namedtuple_tricks import recursive_print
-from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
 from .parse_actions import decorate_add_where
@@ -21,38 +20,37 @@ CDP = CDPLanguage
 @decorate_add_where
 @contract(returns=Space)
 def eval_space(r, context):
-#     with add_where_information(r.where):
-        cases = {
-            CDP.RcompUnit: eval_space_rcompunit,
-            CDP.SpaceProduct: eval_space_spaceproduct,
-            CDP.SpaceCoproduct: eval_space_spacecoproduct,
-            CDP.PowerSet: eval_space_powerset,
-            CDP.LoadPoset: eval_poset_load,
-            CDP.FinitePoset: eval_space_finite_poset,
-            CDP.CodeSpecNoArgs: eval_space_code_spec,
-            CDP.CodeSpec: eval_space_code_spec,
-            CDP.MakeUpperSets: eval_space_makeuppersets,
-            CDP.MakeLowerSets: eval_space_makelowersets,
-            CDP.SpaceInterval: eval_space_interval,
-            CDP.ProductWithLabels: eval_space_productwithlabels,
-            CDP.SingleElementPoset: eval_space_single_element_poset,
-            CDP.Nat: lambda r, context: Nat(),  # @UnusedVariable
-            CDP.Int: lambda r, context: Int(),  # @UnusedVariable
-            CDP.Rcomp: lambda r, context: Rcomp(),  # @UnusedVariable
-        }
+    cases = {
+        CDP.RcompUnit: eval_space_rcompunit,
+        CDP.SpaceProduct: eval_space_spaceproduct,
+        CDP.SpaceCoproduct: eval_space_spacecoproduct,
+        CDP.PowerSet: eval_space_powerset,
+        CDP.LoadPoset: eval_poset_load,
+        CDP.FinitePoset: eval_space_finite_poset,
+        CDP.CodeSpecNoArgs: eval_space_code_spec,
+        CDP.CodeSpec: eval_space_code_spec,
+        CDP.MakeUpperSets: eval_space_makeuppersets,
+        CDP.MakeLowerSets: eval_space_makelowersets,
+        CDP.SpaceInterval: eval_space_interval,
+        CDP.ProductWithLabels: eval_space_productwithlabels,
+        CDP.SingleElementPoset: eval_space_single_element_poset,
+        CDP.Nat: lambda r, context: Nat(),  # @UnusedVariable
+        CDP.Int: lambda r, context: Int(),  # @UnusedVariable
+        CDP.Rcomp: lambda r, context: Rcomp(),  # @UnusedVariable
+    }
 
-        for klass, hook in cases.items():
-            if isinstance(r, klass):
-                return hook(r, context)
-                            
-        # This should be removed...
-        if isinstance(r, CDP.Unit):
-            return r.value
+    for klass, hook in cases.items():
+        if isinstance(r, klass):
+            return hook(r, context)
+                        
+    # This should be removed...
+    if isinstance(r, CDP.Unit):
+        return r.value
 
-        if True: # pragma: no cover
-            msg = 'eval_space(): Cannot interpret as a space.'
-            r = recursive_print(r)
-            raise_desc(DPInternalError, msg, r=r)
+    if True: # pragma: no cover
+        msg = 'eval_space(): Cannot interpret as a space.'
+        r = recursive_print(r)
+        raise_desc(DPInternalError, msg, r=r)
 
 def eval_space_single_element_poset(r, context):  # @UnusedVariable
     assert isinstance(r, CDP.SingleElementPoset)
