@@ -200,11 +200,11 @@ class AssociativeOp(RuleInterface):
                 
         assert False
 
-class AssociativeOpRes(RuleInterface):
+class AssociativeOpRes(AssociativeOp):
     def only_one(self, vu, context):
         return get_valuewithunits_as_resource(vu, context)
 
-class AssociativeOpFun(RuleInterface):
+class AssociativeOpFun(AssociativeOp):
     def only_one(self, vu, context):
         return get_valuewithunits_as_function(vu, context)
 
