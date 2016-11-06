@@ -18,6 +18,7 @@ import numpy as np
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
+from mcdp_posets.nat import Nat
 
 
 @comptest
@@ -755,10 +756,77 @@ def check_lang87_rcomp(): # TODO: rename
     
 @comptest
 def check_lang88(): # TODO: rename
-    pass
-
+    """ Check that the codomain of ceil is Nat. """
+    
+    s = """
+    mcdp {
+        provides f [R]
+        requires r >= ceil(f)
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    
+    print dp.repr_long()
+    R = dp.get_res_space()
+    assert R == Nat(), R
+    
+    
+    # now with Rcomp
+    s = """
+    mcdp {
+        provides f [Rcomp] 
+        requires r >= ceil(f)
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    
+    print dp.repr_long()
+    R = dp.get_res_space()
+    assert R == Nat(), R
+    
 @comptest
 def check_lang89(): # TODO: rename
     pass 
+
+
+@comptest
+def check_lang90(): # TODO: rename
+    pass 
+    
+
+
+
+@comptest
+def check_lang91(): # TODO: rename
+    pass 
+    
+
+
+
+@comptest
+def check_lang92(): # TODO: rename
+    pass 
+    
+
+
+
+@comptest
+def check_lang93(): # TODO: rename
+    pass 
+    
+
+
+
+@comptest
+def check_lang94(): # TODO: rename
+    pass 
+    
+
+
+@comptest
+def check_lang95(): # TODO: rename
+    pass 
+    
+
     
 
