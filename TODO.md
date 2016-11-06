@@ -216,10 +216,29 @@ http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c 
 - Cannot create addition between R and Nat:
 
   mcdp {  
-   variable a, c [R]
+   variable a, c [R] 
    c >= square(a) + Nat:1 
    a >= square(c)  
   }
 
 
 - make green and red plus icons
+
+- floor0 for resources
+- generic unary for functions
+- generic parsing for expressions operand(op, op, op)
+
+- allow covariant syntax like:
+    operand(op, op; opf, opf)
+    mcdp {
+      requires r
+      provides f
+
+      identity[r, x;f, x]
+
+      a + b >= c + d
+
+      leq[a+b; c+d]
+    }
+
+- reuse conversions 
