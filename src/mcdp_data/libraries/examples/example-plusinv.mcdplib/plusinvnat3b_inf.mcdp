@@ -2,11 +2,7 @@
 # It is equivalent to
 #   x + y >= x^2 + y^2 + 10
 mcdp {
-    variable x [Nat]
-    variable y [Nat]
-
+    variable x, y [Nat]
     x + y >= square(x) + square(y) + Nat:10
-
-    requires x >= x
-    requires y >= y
+    requires x, y
 }

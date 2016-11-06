@@ -3,7 +3,7 @@ from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.parse_interface import parse_ndp
 from mcdp_lang_tests.utils import assert_parse_ndp_semantic_error,\
-    assert_parsable_to_unconnected_ndp
+    assert_parsable_to_unconnected_ndp, assert_parsable_to_connected_ndp
 
 @comptest
 def check_variables01():
@@ -179,17 +179,119 @@ mcdp {
 
 @comptest
 def check_variables12():
-    pass
+    s = """
+mcdp {
+    provides z [Nat]
+
+    variable x, y [Nat]
+
+    x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + provided z
+
+    requires x >= x
+    requires y >= y
+}
+    """
+    parse_ndp(s)
+
 
 @comptest
-def check_variables13():
-    pass
+def check_variables13(): # TODO: rename  check_resources_shortcut4a()
+    s = """
+mcdp {
+    provides z [Nat]
 
+    variable x, y [Nat]
+
+    x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + provided z
+
+    requires x, y
+}
+    """
+    assert_parsable_to_connected_ndp(s)
+    
+    s = """
+mcdp {
+    provides z [Nat]
+
+    requires z
+}
+    """
+    assert_parsable_to_connected_ndp(s)
+    
+    
+    
 @comptest
 def check_variables14():
-    pass
+    s = """
+mcdp {
+    provides z [Nat]
+
+    variable x, y [Nat]
+
+    x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + provided z
+
+    requires x, notfound
+}
+    """
+    expect = "Could not find required resource expression 'notfound'"
+    print assert_parse_ndp_semantic_error(s, expect)
+    
+    s = """
+mcdp {
+    variable x [Nat]
+
+    x >= Nat: 0
+     
+    requires x [Nat] 
+    requires x  # error: name already used
+}
+    """
+    expect = "Repeated resource name 'x'"
+    print assert_parse_ndp_semantic_error(s, expect)
+
+    s = """
+mcdp {
+    variable x [Nat]
+
+    x <= Nat: 0
+     
+    provides x [Nat] 
+    provides x  # error: name already used
+}
+    """
+    expect = "Repeated function name 'x'"
+    print assert_parse_ndp_semantic_error(s, expect)
 
 @comptest
 def check_variables15():
-    pass
+    s = """
+mcdp {
+    variable x, y [Nat]
+    variable z [Nat]
+    
+    x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + z
 
+    requires x, y
+    provides z
+}
+    """
+    
+    assert_parsable_to_connected_ndp(s)
+    s = """
+mcdp {
+    requires z [Nat]
+
+    provides z
+}
+    """
+    assert_parsable_to_connected_ndp(s)
+
+    s = """
+mcdp {
+    requires z [Nat]
+    requires y [Nat]
+
+    provides z, y
+}
+    """
+    assert_parsable_to_connected_ndp(s)

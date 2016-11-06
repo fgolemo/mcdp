@@ -1,11 +1,9 @@
 mcdp {
 	provides z [s]
-	variable x [s]
-	variable y [s]
+	variable x, y [s]
 
 	x + y >= sqrt(x) + y * 0.5 [] + provided z 
 
-	requires x >= x
-	requires y >= y
+	requires x, y
 }
  
