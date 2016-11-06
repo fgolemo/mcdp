@@ -219,3 +219,5 @@ http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c 
 
 - readd some tests from invmult2
 
+
+- make green and red plus icons

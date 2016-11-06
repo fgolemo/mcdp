@@ -5,9 +5,11 @@ from mcdp_maps.map_composition import MapComposition
 from mcdp_maps.misc_imp import (SquareNatMap, SqrtMap, FloorMap, SquareMap,
     Floor0Map, CeilMap)
 from mcdp_posets import Nat, Rcomp
-from mcdp_posets.maps.coerce_to_int import CoerceToInt
+from mcdp_posets.maps.coerce_to_int import CoerceToInt, CeilRNMap
 from mcdp_posets.maps.promote_to_float import PromoteToFloat
 from mcdp_posets.rcomp_units import RCompUnitsPowerMap
+from contracts.utils import check_isinstance
+from mcdp_posets.rcomp import RcompBase
 
 
 __all__ = [
@@ -117,12 +119,25 @@ class Floor0DP(WrapAMap):
         return 'floor0'
 
 class CeilDP(WrapAMap):
-    
+    """ from float to float """
     def __init__(self, F):
         amap = CeilMap(F)
         amap_dual = FloorMap(F)
         WrapAMap.__init__(self, amap, amap_dual)
+        
     def diagram_label(self):  
         return 'ceil'
 
     
+class CeilToNatDP(WrapAMap):
+    """ 
+    """
+    def __init__(self, F, R):
+        check_isinstance(F, RcompBase)
+        check_isinstance(R, Nat)
+        h = CeilRNMap(F, R)
+        hd = PromoteToFloat(R, F)
+        WrapAMap.__init__(self, h, hd)
+        
+    def diagram_label(self):  
+        return 'ceil'

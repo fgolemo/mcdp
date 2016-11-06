@@ -12,6 +12,8 @@ from mocdp.exceptions import DPSemanticError
 
 from .helpers import get_resource_possibly_converted, create_operation
 from .parts import CDPLanguage
+from mcdp_dp.dp_misc_unary import CeilToNatDP
+from mcdp_posets.rcomp_units import R_dimensionless
 
 
 CDP = CDPLanguage
@@ -63,6 +65,9 @@ def get_unary_rules():
     
     def is_Rcomp(T):
         return isinstance(T, Rcomp)
+
+    def is_RcompUnits_dimensionless(T):
+        return isinstance(T, RcompUnits) and T.units == R_dimensionless.units
     
     def is_Nat(T):
         return isinstance(T, Nat)
@@ -85,7 +90,10 @@ def get_unary_rules():
         Rule('ceilsqrt', is_Nat, None, lambda _: CeilSqrtNatDP()), 
 
         Rule('ceil', is_Nat, None, lambda _: IdentityDP(Nat(), Nat()), warn='ceil() used on Nats'), 
-        Rule('ceil', is_Rcomp, None, lambda _: CeilDP(Rcomp())), 
+        Rule('ceil',lambda x: is_Rcomp(x) or is_RcompUnits_dimensionless(x), 
+                    None, 
+                    lambda _: CeilToNatDP(Rcomp(), Nat())), 
+        
         Rule('ceil', is_RcompUnits, None, lambda F: CeilDP(F)),
         
         Rule('floor', is_Nat, None, lambda _: IdentityDP(Nat(), Nat()), warn='floor() used on Nats'), 

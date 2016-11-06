@@ -11,7 +11,8 @@ from mcdp_maps.SumN_xxx_Map import sum_dimensionality_works
 from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits,
     express_value_in_isomorphic_space, get_types_universe, mult_table, Rcomp)
 from mcdp_posets import is_top
-from mcdp_posets.rcomp_units import RbicompUnits_subtract, RbicompUnits_reflect
+from mcdp_posets.rcomp_units import RbicompUnits_subtract, RbicompUnits_reflect,\
+    R_dimensionless
 from mocdp import MCDPConstants
 from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPNotImplementedError
@@ -284,9 +285,10 @@ def eval_MultN_ops_multi(resources,  context):
         dp = ProductNDP(tuple(resources_types2), R)
     else:
         msg = 'Something wrong'
-        raise_desc(DPInternalError, msg, resources=resources, promoted=promoted, R=R)
+        raise_desc(DPInternalError, msg, resources=resources, 
+                   resources2=resources2, promoted=promoted, R=R)
         
-    r = create_operation(context, dp, resources,
+    r = create_operation(context, dp, resources2,
                          name_prefix='_prod', op_prefix='_factor',
                          res_prefix='_result')
     return r
@@ -300,9 +302,21 @@ def get_mult_op(context, r, c):
     if isinstance(rtype, RcompUnits) and isinstance(c.unit, RcompUnits):
         F = rtype
         R = mult_table(rtype, c.unit)
-        dp = MultValueDP(F=F, R=R, unit=c.unit, value=c.value) 
+        unit, value = c.unit, c.value
+        dp = MultValueDP(F=F, R=R, unit=unit, value=value) 
     elif isinstance(rtype, Nat) and isinstance(c.unit, Nat):
         dp = MultValueNatDP(c.value)
+    elif isinstance(rtype, Nat) and isinstance(c.unit, RcompUnits):
+        # will cast Nat to R_dimensionless automatically
+        F = R_dimensionless
+        R = c.unit
+        unit, value = c.unit, c.value
+        dp = MultValueDP(F, R, unit=unit, value=value)
+    elif isinstance(rtype, RcompUnits) and isinstance(c.unit, Nat):
+        F = rtype
+        R = F
+        unit, value = R_dimensionless, c.cast_to(R_dimensionless)
+        dp = MultValueDP(F=F, R=F, unit=unit, value=value)
     else:
         msg = 'Cannot create multiplication operation.'
         raise_desc(DPInternalError, msg, rtype=rtype, c=c)
