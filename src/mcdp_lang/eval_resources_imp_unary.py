@@ -236,7 +236,7 @@ class OpJoin(AssociativeOpRes):
         dp = JoinNDP(len(resources), F)
         return create_operation(context, dp, resources, name_prefix='_maxn')
 
-class OpMeet(AssociativeOp):
+class OpMeet(AssociativeOpRes):
     
     def __init__(self, nargs):
         assert nargs >= 2    
