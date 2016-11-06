@@ -10,7 +10,7 @@ from mocdp.exceptions import DPSemanticError
 
 
 @contract(resources='seq')
-def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix):
+def create_operation(context, dp, resources, name_prefix, op_prefix='_op', res_prefix='_res'):
     """
     
         This is useful to create operations that take possibly many inputs

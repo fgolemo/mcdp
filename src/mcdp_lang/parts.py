@@ -13,6 +13,10 @@ class CDPLanguage():
     # min(), max(), etc.
     ProcName = namedtuplewhere('ProcName', 'name')
     UnaryRvalue = namedtuplewhere('UnaryRvalue', 'proc rvalue')
+    # any type of the kind  <name>(op1, ..., opn) 
+    GenericOperationName = namedtuplewhere('GenericOperationName', 'value')
+    GenericOperationRes = namedtuplewhere('GenericOperationRes', 'name ops')
+    GenericOperationFun = namedtuplewhere('GenericOperationFun', 'name ops')
     
     ValueExpr = namedtuplewhere('ValueExpr', 'value')
 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import raise_wrapped
 from mcdp_maps import JoinNMap, Max1Map, MeetNMap
-from mcdp_maps.max1map import Max1dualMap
+from mcdp_maps.max1map import Max1dualMap, Min1Map, Min1dualMap
 from mcdp_maps.repr_map import repr_map_joinn
 from mcdp_posets import MapNotDefinedHere, Poset, PosetProduct, NotBounded
 from mcdp_posets.poset import is_top, is_bottom
@@ -45,6 +45,25 @@ class Max1(WrapAMap):
     def repr_hd_map(self):
         return "r ⟼ {r} if r ≽ %s, else ø" % (self.F.format(self.value))
 
+
+class Min1(WrapAMap):
+    """
+        Meet on a poset.  
+
+        f ⟼ { min(value, f) }
+        r ⟼ { {r} if r <= value
+               Top otherwise }       # if r > value we can do any f!  
+    """
+    def __init__(self, F, value):
+        assert isinstance(F, Poset)
+        m = Min1Map(F, value)
+        md = Min1dualMap(R=F, value=value)
+        WrapAMap.__init__(self, m, md)
+        self.value = value
+    
+    def __repr__(self):
+        return 'Min1(%r, %s)' % (self.F, self.value) 
+    
         
 class MeetNDP(WrapAMap):
     """ 

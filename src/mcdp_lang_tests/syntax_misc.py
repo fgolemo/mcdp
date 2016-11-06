@@ -2,8 +2,9 @@
 from nose.tools import assert_equal
 
 from comptests.registrar import comptest
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, check_isinstance
 from mcdp_dp import CatalogueDP, CoProductDP, NotFeasible, Template
+from mcdp_dp.dp_max import Max1, Min1
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp, parse_poset
 from mcdp_lang.pyparsing_bundled import Literal
@@ -11,6 +12,8 @@ from mcdp_lang.syntax import Syntax, SyntaxIdentifiers
 from mcdp_lang.syntax_codespec import SyntaxCodeSpec
 from mcdp_lang_tests.utils import assert_parse_ndp_semantic_error
 from mcdp_posets import LowerSets, Rcomp, UpperSet, UpperSets, PosetProduct, get_product_compact
+from mcdp_posets.nat import Nat
+from mcdp_posets.rcomp_units import R_dimensionless
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.comp.recursive_name_labeling import get_names_used
 from mocdp.exceptions import DPNotImplementedError, DPSemanticError
@@ -18,8 +21,6 @@ import numpy as np
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
-from mcdp_posets.nat import Nat
-from mcdp_posets.rcomp_units import R_dimensionless
 
 
 @comptest
@@ -128,7 +129,7 @@ def check_lang9_max():
         }""",
         Syntax.ndpt_simple_dp_model)
     
-    parse_wrap(Syntax.rvalue_binary, 'max(f, g)')
+#     parse_wrap(Syntax.rvalue_binary, 'max(f, g)')
     parse_wrap(Syntax.rvalue, 'max(f, g)')
     parse_wrap(Syntax.constraint_expr_geq, 'hnlin.x >= max(f, g)')
  
@@ -786,7 +787,7 @@ def check_lang88(): # TODO: rename
     assert R == Nat(), R
     
 @comptest
-def check_lang89(): # TODO: rename
+def check_lang90(): # TODO: rename
     """ Multiplication Nat and Rcompunits """
     
     # This is just a constant
@@ -826,10 +827,80 @@ def check_lang89(): # TODO: rename
     assert R == R_dimensionless, R
 
 @comptest
-def check_lang90(): # TODO: rename
-    pass 
-    
+def check_lang89(): # TODO: rename
+    parse_wrap_check('provided f, provided f, provided f', 
+                     Syntax.rvalue_generic_op_ops)
+    parse_wrap_check('required f, required f, required f', 
+                     Syntax.fvalue_generic_op_ops)
+    parse_wrap_check('op1(required f, required f, required f)', 
+                     Syntax.fvalue_generic_op)
+    parse_wrap_check('op1(provided f, provided f, provided f)', 
+                     Syntax.rvalue_generic_op)
 
+    s = """
+    mcdp {
+        provides f [Nat] 
+        requires r [Nat] 
+        
+        r >= max(f, f, f) 
+    }
+    """
+
+    dp = parse_ndp(s).get_dp()
+#     print dp
+    
+    # All of these should be equivalent to Max1(Nat, 3)
+    max3s = [ """
+    mcdp {
+        provides f [Nat] 
+        requires r [Nat]         
+        r >= max(f, Nat:3) 
+    } ""","""
+    mcdp {
+        provides f [Nat] 
+        requires r [Nat]         
+        r >= max(f, Nat:2, Nat:3) 
+    } ""","""
+    mcdp {
+        provides f [Nat] 
+        requires r [Nat]         
+        r >= max(Nat:2, f, Nat:3) 
+    }"""]
+
+    for s in max3s:
+        print '-' * 10
+        print s
+        dp = parse_ndp(s).get_dp()
+        print dp.repr_long()
+        check_isinstance(dp, Max1)
+        assert dp.value == 3
+    
+    # All of these should be equivalent to Min1(Nat, 2)
+    min3s = [ """
+    mcdp {
+        provides f [Nat] 
+        requires r [Nat]         
+        r >= min(f, Nat:2) 
+    } ""","""
+    mcdp {
+        provides f [Nat] 
+        requires r [Nat]         
+        r >= min(f, Nat:2, Nat:3) 
+    } ""","""
+    mcdp {
+        provides f [Nat] 
+        requires r [Nat]         
+        r >= min(Nat:2, f, Nat:3) 
+    }"""]
+
+    for s in min3s:
+        print '-' * 10
+        print s
+        dp = parse_ndp(s).get_dp()
+        print dp.repr_long()
+        check_isinstance(dp, Min1)
+        assert dp.value == 2
+    
 
 
 @comptest

@@ -699,18 +699,29 @@ class Syntax():
     rvalue_unary_expr = sp(unary_op - SLPAR - rvalue - SRPAR,
                             lambda t: CDP.UnaryRvalue(t[0], t[1]))
     
+    opname = sp(get_idn(), lambda t: CDP.GenericOperationName(t[0]))
+    
+    rvalue_generic_op_ops = sp(rvalue + ZeroOrMore(SCOMMA + rvalue),
+                               lambda t: make_list(list(t)))
+    rvalue_generic_op  = sp(opname + SLPAR + rvalue_generic_op_ops + SRPAR,
+                            lambda t: CDP.GenericOperationRes(t[0], t[1]) )
+    fvalue_generic_op_ops = sp(fvalue + ZeroOrMore(SCOMMA + fvalue),
+                               lambda t: make_list(list(t)))
+    fvalue_generic_op  = sp(opname + SLPAR + fvalue_generic_op_ops + SRPAR,
+                            lambda t: CDP.GenericOperationFun(t[0], t[1]) )
+    
     # binary functions on resources
-    binary = {
-        'max': CDP.OpMax,
-        'min': CDP.OpMin,
-    }
+#     binary = {
+#         'max': CDP.OpMax,
+#         'min': CDP.OpMin,
+#     }
 
-    opname = sp(MatchFirst([L(x) for x in binary]), lambda t: CDP.OpKeyword(t[0]))
+#     opname = sp(MatchFirst([L(x) for x in binary]), lambda t: CDP.OpKeyword(t[0]))
 
-    rvalue_binary = sp((opname - SLPAR +
-                        C(rvalue, 'op1') - SCOMMA
-                        - C(rvalue, 'op2')) - SRPAR ,
-                       lambda t: Syntax.binary[t[0].keyword](a=t['op1'], b=t['op2'], keyword=t[0]))
+#     rvalue_binary = sp((opname - SLPAR +
+#                         C(rvalue, 'op1') - SCOMMA
+#                         - C(rvalue, 'op2')) - SRPAR ,
+#                        lambda t: Syntax.binary[t[0].keyword](a=t['op1'], b=t['op2'], keyword=t[0]))
 
     binary_f = {
         'max': CDP.OpMaxF,
@@ -1026,7 +1037,7 @@ class Syntax():
           rvalue_new_function
         ^ rvalue_new_function2
         ^ rvalue_resource
-        ^ rvalue_binary
+#         ^ rvalue_binary
         ^ rvalue_unary_expr
         ^ constant_value
         ^ rvalue_power_expr
@@ -1040,6 +1051,7 @@ class Syntax():
         ^ rvalue_approx_step
         ^ rvalue_approx_u
         ^ rvalue_placeholder 
+        ^ rvalue_generic_op
         )
 
     rvalue << operatorPrecedence(rvalue_operand, [
@@ -1064,7 +1076,8 @@ class Syntax():
         ^ fvalue_label_indexing3
         ^ lf_tuple_indexing
         ^ fvalue_any_of
-        ^ fvalue_placeholder)
+        ^ fvalue_placeholder
+        ^ fvalue_generic_op)
 
     # here we cannot use "|" because otherwise (cokode).id is not parsedcorrectly
 
