@@ -100,8 +100,7 @@ class RuleCeilRcompUnits(OneRGiveMeADP):
     """ ceil: Joules -> Joules """
     
     def get_arguments_type(self):
-        spec = OpSpecIsinstance(RcompUnits)
-        return (spec,)
+        return (OpSpecIsinstance(RcompUnits),)
 
     def generate_dp(self, R):  # @UnusedVariable
         return CeilDP(R, R)
@@ -113,21 +112,28 @@ class RuleSQRTRcompUnits(OneRGiveMeADP):
     """ ceil: Joules -> Joules """
     
     def get_arguments_type(self):
-        spec = OpSpecIsinstance(RcompUnits)
-        return (spec,)
+        return (OpSpecIsinstance(RcompUnits),)
 
     def generate_dp(self, R):
         return SqrtRDP(R)
 
 
 class RuleSQRTRcomp(OneRGiveMeADP):
-    """ ceil: Joules -> Joules """
+    """ ceil: R -> R"""
     
     def get_arguments_type(self):
-        spec = OpSpecExactly(Rcomp())
-        return (spec,)
+        return (OpSpecExactly(Rcomp()),)
 
-    def generate_dp(self, R):
+    def generate_dp(self, _):
+        return SqrtRDP(Rcomp())
+      
+class RuleSQRTRcompCastable(OneRGiveMeADP):
+    """ ceil: R -> R"""
+    
+    def get_arguments_type(self):
+        return (OpSpecCastable(Rcomp()),)
+
+    def generate_dp(self, _):
         return SqrtRDP(Rcomp())
       
 
@@ -418,11 +424,14 @@ for nargs in range(2, 8):
     generic_op_fun.append(('op_fun_max_%d' % nargs, 'max', OpJoinFun(nargs)))
     generic_op_fun.append(('op_fun_min_%d' % nargs, 'min', OpMeetFun(nargs)))
 
-generic_op_res.append(('op_res_ceil_rcomp',  'ceil', RuleCeilRcomp()))
 generic_op_res.append(('op_res_ceil_rcompunits', 'ceil', RuleCeilRcompUnits()))
+generic_op_res.append(('op_res_ceil_rcomp',  'ceil', RuleCeilRcomp()))
+
+RuleSQRTRcompCastable
 generic_op_res.append(('op_res_floor', 'floor', RuleFloorDisallowed()))
-generic_op_res.append(('op_res_sqrt_rcomp', 'sqrt', RuleSQRTRcomp()))
 generic_op_res.append(('op_res_sqrt_rcompunits', 'sqrt', RuleSQRTRcompUnits()))
+generic_op_res.append(('op_res_sqrt_rcomp', 'sqrt', RuleSQRTRcomp()))
+generic_op_res.append(('op_res_sqrt_rcomp_cast', 'sqrt', RuleSQRTRcompCastable()))
 
 generic_op_res.append(('op_res_square_nat', 'square', RuleSquareNat()))
 generic_op_res.append(('op_res_square_rcomp', 'square', RuleSquareRcomp())) 
