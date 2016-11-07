@@ -153,6 +153,7 @@ def generic_plot(f, space, value):
 
     es = []
     for name, plotter in plotters.items():
+        print('trying %s %s' % (name, plotter))
         try:
             plotter.check_plot_space(space)
         except NotPlottable as e:

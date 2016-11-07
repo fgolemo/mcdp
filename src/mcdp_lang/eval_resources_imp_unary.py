@@ -200,7 +200,7 @@ class OpSpecIsinstance(OpSpecInterface):
         try: 
             check_isinstance(P, self.X)
         except ValueError:
-            msg = 'Not of type.'
+            msg = 'Poset %s does not match %s.' % (P, self.X)
             raise_desc(OpSpecDoesntMatch, msg)
         
 class OpSpecCastable(OpSpecInterface):

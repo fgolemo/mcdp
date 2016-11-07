@@ -26,11 +26,8 @@ class PlotterUR2(Plotter):
 
         if isinstance(space.P, PosetProduct) and len(space.P) == 2 and \
             isinstance(space.P[0], RcompUnits) and isinstance(space.P[1], RcompUnits):
-
-            self.P_to_S = lambda x: x
-#             , _f2 = tu.get_embedding(P, self.R2)            
+            self.P_to_S = lambda x: x            
         else:   
-            
             #logger.debug('space = %s ; P = %s; R2 = %s' % (space,space.P,R2))
             try:
                 tu.check_leq(P, self.R2)
@@ -38,9 +35,8 @@ class PlotterUR2(Plotter):
                 msg = ('cannot convert to R^2 from %s' % space) 
                 raise_wrapped(NotPlottable, e, msg, compact=True)
     
-            logger.debug('ok')
             self.P_to_S, _f2 = tu.get_embedding(P, self.R2)
-
+            
     def get_xylabels(self, space):
         P = space.P
         return '%s' % P[0], '%s' % P[1]
@@ -48,7 +44,7 @@ class PlotterUR2(Plotter):
     @contract(returns='seq[4]')
     def axis_for_sequence(self, space, seq):
         self.check_plot_space(space)
-
+        
         R2 = PosetProduct((Rcomp(), Rcomp()))
         self.R2 = R2
 #         tu = get_types_universe()
@@ -61,7 +57,7 @@ class PlotterUR2(Plotter):
             y = min(y, maxy)
             return x, y
 
-        points2d = [[(limit(self.P_TO_S(_))) for _ in s.minimals] for s in seq]
+        points2d = [[(limit(self.P_to_S(_))) for _ in s.minimals] for s in seq]
 
         axes = [get_bounds(_) for _ in points2d]
         merged = functools.reduce(reduce_bounds, axes) 
