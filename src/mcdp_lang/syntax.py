@@ -690,16 +690,17 @@ class Syntax():
                                lambda t: CDP.FunctionLabelIndex(keyword=t[1],
                                                                 fvalue=t[0], label=t[2]))
 
+# 
+#     unary = [
+#              ]
+#     
+#     unary_op = MatchFirst([sp(L(x), lambda t: CDP.ProcName(t[0]))
+#                            for x in unary])
+    
+#     rvalue_unary_expr = sp(unary_op - SLPAR - rvalue - SRPAR,
+#                             lambda t: CDP.UnaryRvalue(t[0], t[1]))
+#     
 
-    unary = [
-             ]
-    
-    unary_op = MatchFirst([sp(L(x), lambda t: CDP.ProcName(t[0]))
-                           for x in unary])
-    
-    rvalue_unary_expr = sp(unary_op - SLPAR - rvalue - SRPAR,
-                            lambda t: CDP.UnaryRvalue(t[0], t[1]))
-    
     opname = sp(get_idn(), lambda t: CDP.GenericOperationName(t[0]))
     
     rvalue_generic_op_ops = sp(rvalue + ZeroOrMore(SCOMMA + rvalue),
@@ -732,18 +733,18 @@ class Syntax():
 #                         - C(rvalue, 'op2')) - SRPAR ,
 #                        lambda t: Syntax.binary[t[0].keyword](a=t['op1'], b=t['op2'], keyword=t[0]))
 
-    binary_f = {
-        'max': CDP.OpMaxF,
-        'min': CDP.OpMinF,
-    }
+#     binary_f = {
+# #         'max': CDP.OpMaxF,
+# #         'min': CDP.OpMinF,
+#     }
 
     # binary functions on functionality
-    opname_f = sp(MatchFirst([L(x) for x in binary_f]), lambda t: CDP.OpKeyword(t[0]))
+#     opname_f = sp(MatchFirst([L(x) for x in binary_f]), lambda t: CDP.OpKeyword(t[0]))
 
-    fvalue_binary = sp((opname_f - SLPAR +
-                        C(fvalue, 'op1') - SCOMMA
-                        - C(fvalue, 'op2')) - SRPAR ,
-                       lambda t: Syntax.binary_f[t[0].keyword](a=t['op1'], b=t['op2'], keyword=t[0]))
+#     fvalue_binary = sp((opname_f - SLPAR +
+#                         C(fvalue, 'op1') - SCOMMA
+#                         - C(fvalue, 'op2')) - SRPAR ,
+#                        lambda t: Syntax.binary_f[t[0].keyword](a=t['op1'], b=t['op2'], keyword=t[0]))
 
     fvalue_simple = sp(dpname + DOT - fname,
                        lambda t: CDP.Function(dp=t[0], s=t[2], keyword=t[1]))
@@ -1047,7 +1048,7 @@ class Syntax():
         ^ rvalue_new_function2
         ^ rvalue_resource
 #         ^ rvalue_binary
-        ^ rvalue_unary_expr
+#         ^ rvalue_unary_expr
         ^ constant_value
         ^ rvalue_power_expr
         ^ rvalue_tuple_indexing
@@ -1072,7 +1073,7 @@ class Syntax():
 
     fvalue_operand = (
           constant_value
-        ^ fvalue_binary
+#         ^ fvalue_binary
         ^ fvalue_simple
         ^ fvalue_fancy
         ^ fvalue_new_resource

@@ -19,6 +19,7 @@ from .namedtuple_tricks import recursive_print
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
 from mcdp_dp.dp_multvalue import InvMultValueDP
+from mcdp_lang.eval_resources_imp_unary import eval_lfunction_genericoperationfun
 
 
 CDP = CDPLanguage
@@ -57,12 +58,13 @@ def eval_lfunction(lf, context):
         CDP.FunctionLabelIndex: eval_lfunction_label_index,
         CDP.TupleIndexFun: eval_lfunction_tupleindexfun,
         CDP.AnyOfFun: eval_lfunction_anyoffun,
-        CDP.OpMinF: eval_lfunction_opminf,
-        CDP.OpMaxF: eval_lfunction_opmaxf,
+#         CDP.OpMinF: eval_lfunction_opminf,
+#         CDP.OpMaxF: eval_lfunction_opmaxf,
         CDP.InvMult: eval_lfunction_invmult,
         CDP.InvPlus: eval_lfunction_invplus,
         CDP.VariableRef: eval_lfunction_variableref,
         CDP.FValueMinusN: eval_lfunction_FValueMinusN,
+        CDP.GenericOperationFun: eval_lfunction_genericoperationfun,
     }
 
     for klass, hook in cases.items():
@@ -75,43 +77,43 @@ def eval_lfunction(lf, context):
         msg += '\n' + indent(r, '  ')
         raise_desc(DPInternalError, msg) 
 
-
-def eval_lfunction_opminf(lf, context):
-    """
-        f <= min(required r1, required r2)
-    """
-    check_isinstance(lf, CDP.OpMinF)
-    
-    a = eval_lfunction(lf.a, context)
-    b = eval_lfunction(lf.b, context)
- 
-    Fa = context.get_ftype(a)
-    b = get_function_possibly_converted(b, Fa, context)
-        
-    dp = MeetNDualDP(2, Fa)
-    
-    return create_operation_lf(context, dp=dp, functions=[a, b],
-                            name_prefix='max', op_prefix='_ops',
-                            res_prefix='_result')
-    
-    
-def eval_lfunction_opmaxf(lf, context):
-    """
-        f <= max(required r1, required r2)
-    """
-    check_isinstance(lf, CDP.OpMaxF)
-    
-    a = eval_lfunction(lf.a, context)
-    b = eval_lfunction(lf.b, context)
- 
-    Fa = context.get_ftype(a)
-    b = get_function_possibly_converted(b, Fa, context)
-        
-    dp = JoinNDualDP(2, Fa)
-    
-    return create_operation_lf(context, dp=dp, functions=[a, b],
-                            name_prefix='max', op_prefix='_ops',
-                            res_prefix='_result')
+# 
+# def eval_lfunction_opminf(lf, context):
+#     """
+#         f <= min(required r1, required r2)
+#     """
+#     check_isinstance(lf, CDP.OpMinF)
+#     
+#     a = eval_lfunction(lf.a, context)
+#     b = eval_lfunction(lf.b, context)
+#  
+#     Fa = context.get_ftype(a)
+#     b = get_function_possibly_converted(b, Fa, context)
+#         
+#     dp = MeetNDualDP(2, Fa)
+#     
+#     return create_operation_lf(context, dp=dp, functions=[a, b],
+#                             name_prefix='max', op_prefix='_ops',
+#                             res_prefix='_result')
+#     
+#     
+# def eval_lfunction_opmaxf(lf, context):
+#     """
+#         f <= max(required r1, required r2)
+#     """
+#     check_isinstance(lf, CDP.OpMaxF)
+#     
+#     a = eval_lfunction(lf.a, context)
+#     b = eval_lfunction(lf.b, context)
+#  
+#     Fa = context.get_ftype(a)
+#     b = get_function_possibly_converted(b, Fa, context)
+#         
+#     dp = JoinNDualDP(2, Fa)
+#     
+#     return create_operation_lf(context, dp=dp, functions=[a, b],
+#                             name_prefix='max', op_prefix='_ops',
+#                             res_prefix='_result')
     
             
 def eval_lfunction_anyoffun(lf, context):

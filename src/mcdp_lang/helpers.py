@@ -6,7 +6,7 @@ from mcdp_dp import (Constant, ConstantMinimals, Limit, LimitMaximals,
 from mcdp_posets import NotLeq, Poset, get_types_universe
 from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import CResource, ValueWithUnits, CFunction
-from mocdp.exceptions import DPSemanticError
+from mocdp.exceptions import DPSemanticError, DPInternalError
 
 
 @contract(resources='seq')
@@ -54,12 +54,11 @@ def create_operation(context, dp, resources, name_prefix, op_prefix='_op', res_p
         if not tu.equal(F, R):
             conversion = get_conversion(R, F)
             if conversion is None:
-                pass
+                msg = 'I need a conversion from %s to %s' % (R, F)
+                raise DPInternalError(msg)
             else:
                 r = create_operation(context, conversion, [r],
-                                     name_prefix='_coversion_for_%s' % name_result, 
-                                     op_prefix='_op',
-                                     res_prefix='_res')
+                                     name_prefix='_conversion_for_%s' % name_result)
 
         R = context.get_rtype(r)
         assert tu.equal(F, R)
@@ -74,22 +73,58 @@ def create_operation(context, dp, resources, name_prefix, op_prefix='_op', res_p
     return res
 
 
-def create_operation_lf(context, dp, functions, name_prefix, op_prefix, res_prefix):
+def create_operation_lf(context, dp, functions, name_prefix, 
+                        op_prefix='_op', res_prefix='_res', allow_conversion=True):
     name = context.new_name(name_prefix)
     name_result = context.new_res_name(res_prefix)
-
-    connections = []
+    
     rnames = []
     for i, f in enumerate(functions):
         ni = context.new_fun_name('%s%s' % (op_prefix, i))
-        c = Connection(dp2=f.dp, s2=f.s, dp1=name, s1=ni)
         rnames.append(ni)
+        
+    _rnames = rnames if len(rnames) > 1 else rnames[0]
+    ndp = dpwrap(dp, name_result, _rnames)
+
+    connections = []
+    tu = get_types_universe()
+    for i, f in enumerate(functions):
+        # source resource
+        Fi = context.get_ftype(f)
+        # function
+        Fhave = ndp.get_rtype(rnames[i])
+
+#         print('------- argu %d' % i)
+#         
+#         print('I need to connect function %s of type %s to resource %s of new NDP with type %s'%
+#               (f, Fi, rnames[i], Fhave))
+#         
+#         print('Fi: %s' % Fi)
+#         print('Fhave: %s' % Fhave)
+        
+        if not tu.equal(Fi, Fhave):
+            if not allow_conversion:
+                msg = ('The types are %s and %s are not equal, and '
+                       'allow_conversion is False' % (Fi, Fhave))
+                raise DPInternalError(msg)
+            
+#             print('creating conversion')
+            conversion = get_conversion(Fhave, Fi)
+            if conversion is None:
+                msg = 'I need a conversion from %s to %s' % (Fi, Fhave)
+                raise DPInternalError(msg)
+            else:
+#                 print('Conversion: %s' % conversion.repr_long())
+#                 print('Creating recursive...')
+                f = create_operation_lf(context, conversion, [f],
+                                        name_prefix='_conversion_for_%s' % name_result, 
+                                        allow_conversion=False)
+                 
+
+        c = Connection(dp2=f.dp, s2=f.s, dp1=name, s1=rnames[i])
+
         connections.append(c)
 
-    if len(rnames) == 1:
-        rnames = rnames[0]
-
-    ndp = dpwrap(dp, name_result, rnames)
     context.add_ndp(name, ndp)
 
     for c in connections:

@@ -4,6 +4,7 @@ from nose.tools import assert_equal
 from comptests.registrar import comptest
 from contracts.utils import raise_desc, check_isinstance
 from mcdp_dp import CatalogueDP, CoProductDP, NotFeasible, Template
+from mcdp_dp.dp_constant import Constant
 from mcdp_dp.dp_max import Max1, Min1
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp, parse_poset
@@ -17,11 +18,9 @@ from mcdp_posets.rcomp_units import R_dimensionless
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.comp.recursive_name_labeling import get_names_used
 from mocdp.exceptions import DPNotImplementedError, DPSemanticError
-import numpy as np
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
-from mcdp_dp.dp_constant import Constant
 
 
 @comptest
@@ -606,24 +605,25 @@ def check_lang81(): # TODO: rename
     pass
 
 @comptest
-def check_lang82(): # TODO: rename
-    print parse_wrap(Syntax.rvalue_unary_expr, " ceilsqrt(f.x) ")
-
-    s = """
-mcdp {
-    provides f [Nat]
-    requires r [Nat]
-    x = provided f
-    required r >= ceilsqrt(x)
-}
-    """
-    ndp = parse_ndp(s)
-    dp = ndp.get_dp()
-    for f in range(20):
-        ur = dp.solve(f)
-        r = list(ur.minimals)[0]
-        assert_equal(r, np.ceil(np.sqrt(f))) 
-    
+def check_lang82(): # TODO: rename⇪⇪⇪↶↶↶
+    pass
+#     print parse_wrap(Syntax.rvalue_unary_expr, " ceilsqrt(f.x) ")
+# 
+#     s = """
+# mcdp {
+#     provides f [Nat]
+#     requires r [Nat]
+#     x = provided f
+#     required r >= ceilsqrt(x)
+# }
+#     """
+#     ndp = parse_ndp(s)
+#     dp = ndp.get_dp()
+#     for f in range(20):
+#         ur = dp.solve(f)
+#         r = list(ur.minimals)[0]
+#         assert_equal(r, np.ceil(np.sqrt(f))) 
+#     
 
 
 @comptest
@@ -1021,6 +1021,64 @@ def check_lang89(): # TODO: rename
     """
     dp = parse_ndp(s).get_dp()
     print dp.repr_long()
+    
+    
+    """ Fvalue max """
+    s = """
+    mcdp {
+        provides f [m]
+        requires r1 [m] 
+        requires r2 [m]
+        
+        max(required r1, required r2) >= provided f
+    }
+    """
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    print dp.repr_long()
+    
+    """ Conversion """
+    s = """
+    mcdp {
+        provides f [m]
+        requires r1 [km] 
+        requires r2 [m]
+        
+        max(required r1, required r2) >= provided f
+    }
+    """
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    print dp.repr_long()
+
+    """ Conversion not possible """
+    s = """
+    mcdp {
+        provides f [m]
+        requires r1 [Nat] # cannot convert Nat to m 
+        requires r2 [m]
+        
+        max(required r1, required r2) >= provided f
+    }
+    """
+    expect = 'Could not convert R[m] to N'
+    assert_parse_ndp_semantic_error(s, expect)
+     
+     
+    """ Fvalue min """
+    s = """
+    mcdp {
+        provides f [m]
+        requires r1 [m] 
+        requires r2 [m]
+        
+        min(required r1, required r2) >= provided f
+    }
+    """
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    print dp.repr_long()
+    
 @comptest
 def check_lang91(): # TODO: rename
     pass 

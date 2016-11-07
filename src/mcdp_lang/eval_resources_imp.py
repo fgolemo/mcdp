@@ -47,7 +47,7 @@ def eval_rvalue(rvalue, context):
     from .eval_resources_imp_maketuple import eval_rvalue_MakeTuple
     from .eval_uncertainty import eval_rvalue_Uncertain
     from .eval_resources_imp_tupleindex import eval_rvalue_resource_label_index
-    from .eval_resources_imp_unary import eval_rvalue_unary, eval_rvalue_generic_operation
+    from .eval_resources_imp_unary import  eval_rvalue_generic_operation
     from .eval_math import eval_rvalue_RValueMinusN
 
     cases = {
@@ -67,7 +67,6 @@ def eval_rvalue(rvalue, context):
         CDP.AnyOfRes: eval_rvalue_anyofres,
         CDP.ApproxStepRes: eval_rvalue_approx_step,
         CDP.ApproxURes: eval_rvalue_approx_u,
-        CDP.UnaryRvalue: eval_rvalue_unary,
         CDP.GenericOperationRes: eval_rvalue_generic_operation,
     }
 
