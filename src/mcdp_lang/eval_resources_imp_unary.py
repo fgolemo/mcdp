@@ -6,7 +6,7 @@ from contracts.utils import raise_desc, check_isinstance, raise_wrapped, indent
 from mcdp_dp import (CeilDP, SqrtRDP,
     SquareNatDP, SquareDP)
 from mcdp_dp.conversion import get_conversion
-from mcdp_dp.dp_max import Max1, JoinNDP, Min1, MeetNDP, JoinNDualDP,\
+from mcdp_dp.dp_max import Max1, JoinNDP, Min1, MeetNDP, JoinNDualDP, \
     MeetNDualDP
 from mcdp_dp.dp_misc_unary import CeilToNatDP
 from mcdp_lang.eval_constant_imp import eval_constant, NotConstant
@@ -15,6 +15,7 @@ from mcdp_lang.helpers import get_valuewithunits_as_resource, \
 from mcdp_lang.utils_lists import unwrap_list
 from mcdp_posets import Nat, Rcomp, RcompUnits
 from mcdp_posets import NotLeq
+from mcdp_posets.types_universe import get_types_universe
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPSemanticError
 
@@ -123,7 +124,7 @@ class RuleSQRTRcomp(OneRGiveMeADP):
     """ ceil: Joules -> Joules """
     
     def get_arguments_type(self):
-        spec = OpSpecCastable(Rcomp())
+        spec = OpSpecExactly(Rcomp())
         return (spec,)
 
     def generate_dp(self, R):
@@ -135,7 +136,7 @@ class RuleSquareNat(OneRGiveMeADP):
     """ ceil: Joules -> Joules """
     
     def get_arguments_type(self):
-        spec = OpSpecCastable(Nat())
+        spec = OpSpecExactly(Nat())
         return (spec,)
 
     def generate_dp(self, R):  # @UnusedVariable
@@ -146,7 +147,7 @@ class RuleSquareRcomp(OneRGiveMeADP):
     """ ceil: Joules -> Joules """
     
     def get_arguments_type(self):
-        spec = OpSpecCastable(Rcomp())
+        spec = OpSpecExactly(Rcomp())
         return (spec,)
 
     def generate_dp(self, R):  # @UnusedVariable
@@ -174,6 +175,16 @@ class OpSpecInterface():
 class OpSpecTrue(OpSpecInterface):
     def applies(self, rtype, is_constant, symbols):
         pass
+
+
+class OpSpecExactly(OpSpecInterface):
+    def __init__(self, P):
+        self.P = P
+    def applies(self, rtype, is_constant, symbols):
+        tu = get_types_universe()
+        if not tu.equal(rtype, self.P):
+            msg = 'Poset %s does not match %s.' % (rtype, self.P)
+            raise OpSpecDoesntMatch(msg)
 
 class OpSpecIsinstance(OpSpecInterface):
     def __init__(self, X):
@@ -412,6 +423,7 @@ generic_op_res.append(('op_res_ceil_rcompunits', 'ceil', RuleCeilRcompUnits()))
 generic_op_res.append(('op_res_floor', 'floor', RuleFloorDisallowed()))
 generic_op_res.append(('op_res_sqrt_rcomp', 'sqrt', RuleSQRTRcomp()))
 generic_op_res.append(('op_res_sqrt_rcompunits', 'sqrt', RuleSQRTRcompUnits()))
+
 generic_op_res.append(('op_res_square_nat', 'square', RuleSquareNat()))
 generic_op_res.append(('op_res_square_rcomp', 'square', RuleSquareRcomp())) 
 generic_op_res.append(('op_res_square_rcompunits', 'square', RuleSquareRcompunits())) 
