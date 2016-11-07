@@ -1,5 +1,5 @@
 mcdp {
     provides f [R]
     requires r [R]
-    required r >= floor(provided f)
+    required r >= floor0(provided f)
 }

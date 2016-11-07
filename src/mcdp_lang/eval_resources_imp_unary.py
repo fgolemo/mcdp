@@ -8,7 +8,7 @@ from mcdp_dp import (CeilDP, SqrtRDP,
 from mcdp_dp.conversion import get_conversion
 from mcdp_dp.dp_max import Max1, JoinNDP, Min1, MeetNDP, JoinNDualDP, \
     MeetNDualDP
-from mcdp_dp.dp_misc_unary import CeilToNatDP
+from mcdp_dp.dp_misc_unary import CeilToNatDP, Floor0DP
 from mcdp_lang.eval_constant_imp import eval_constant, NotConstant
 from mcdp_lang.helpers import get_valuewithunits_as_resource, \
     get_valuewithunits_as_function, create_operation_lf
@@ -45,10 +45,12 @@ class RuleInterface():
 class RuleFloorDisallowed(RuleInterface):
     """ Floor is not Scott continuous """
     def get_arguments_type(self):
+        msg = ('In contrast to ceil(), floor() is not Scott-continuous, '
+               'so it cannot be used on resources (on this side of the equality). '
+               'There is a function availabled called floor0(), which is equal '
+               'to floor() everywhere, except at integers, where floor0(x) = x-1.')
         class Warn(OpSpecInterface):
             def applies(self, rtype, is_constant, symbols):  # @UnusedVariable
-                msg = ('floor() is not Scott-continuous, so it cannot be used'
-                       ' on this side of the equality.')
                 raise DPSemanticError(msg)
         spec = Warn()
         return (spec,)
@@ -127,6 +129,27 @@ class RuleSQRTRcomp(OneRGiveMeADP):
     def generate_dp(self, _):
         return SqrtRDP(Rcomp())
       
+
+
+    
+class RuleFloor0RcompUnits(OneRGiveMeADP):
+    """ ceil: Joules -> Joules """
+    
+    def get_arguments_type(self):
+        return (OpSpecIsinstance(RcompUnits),)
+
+    def generate_dp(self, R):
+        return Floor0DP(R)
+    
+class RuleFloor0Rcomp(OneRGiveMeADP):
+    """ ceil: R -> R"""
+    
+    def get_arguments_type(self):
+        return (OpSpecExactly(Rcomp()),)
+
+    def generate_dp(self, _):
+        return Floor0DP(Rcomp())
+      
 class RuleSQRTRcompCastable(OneRGiveMeADP):
     """ ceil: R -> R"""
     
@@ -196,7 +219,7 @@ class OpSpecIsinstance(OpSpecInterface):
     def __init__(self, X):
         self.X = X
         
-    def applies(self, P, is_constant, symbols):
+    def applies(self, P, is_constant, symbols):  # @UnusedVariable
         try: 
             check_isinstance(P, self.X)
         except ValueError:
@@ -210,7 +233,7 @@ class OpSpecCastable(OpSpecInterface):
     def applies(self, P, _is_constant, _symbols):
         try:
             get_conversion(self.castable_to, P) # XXX: will have to invert this
-        except NotLeq as e:
+        except NotLeq:
             msg = 'Could not find a conversion from %s to %s.' % (P, self.castable_to)
             raise_desc(OpSpecDoesntMatch, msg)
 #             raise_wrapped(OpSpecDoesntMatch, e, msg, exc=sys.exc_info())
@@ -427,8 +450,10 @@ for nargs in range(2, 8):
 generic_op_res.append(('op_res_ceil_rcompunits', 'ceil', RuleCeilRcompUnits()))
 generic_op_res.append(('op_res_ceil_rcomp',  'ceil', RuleCeilRcomp()))
 
-RuleSQRTRcompCastable
 generic_op_res.append(('op_res_floor', 'floor', RuleFloorDisallowed()))
+generic_op_res.append(('op_res_floor0_rcomp', 'floor0', RuleFloor0Rcomp()))
+generic_op_res.append(('op_res_floor0_rcomp', 'floor0', RuleFloor0RcompUnits()))
+
 generic_op_res.append(('op_res_sqrt_rcompunits', 'sqrt', RuleSQRTRcompUnits()))
 generic_op_res.append(('op_res_sqrt_rcomp', 'sqrt', RuleSQRTRcomp()))
 generic_op_res.append(('op_res_sqrt_rcomp_cast', 'sqrt', RuleSQRTRcompCastable()))
@@ -443,6 +468,13 @@ def get_best_match(opname, rtypes, are_they_constant, generic_ops):
     check_isinstance(opname, str)
     assert len(rtypes) == len(are_they_constant)
     
+    names_available = set(name for _,name,_ in generic_ops)
+    if not opname in names_available:
+        msg = 'Unknown operation %r.' % opname
+        msg += ' Available: ' + ", ".join(sorted(names_available)) + '.'
+        raise_desc(NotMatching, msg)
+        
+        
     problems = []
     for (id_op, name, op) in generic_ops:
         if name != opname:
@@ -457,9 +489,6 @@ def get_best_match(opname, rtypes, are_they_constant, generic_ops):
             raise
         return op, symbols
     
-    if not problems: # no name found at all
-        msg = 'Unknown operation %r.' % opname
-        raise_desc(NotMatching, msg)
         
     msg = ('Could not find a match with any of the %d version(s) of %r.' % 
            (len(problems), opname))
@@ -491,7 +520,7 @@ def match_op(op, rtypes, are_they_constant):
         try:
             spec.applies(R, is_constant, symbols)
         except OpSpecDoesntMatch as e:
-            raise_desc(NotMatching, str(e))
+            raise_desc(NotMatching, str(e).strip())
     return symbols
 
 def sort_resources_and_constants(ops, mode, context):
@@ -548,7 +577,7 @@ def eval_rvalue_generic_operation(r, context):
                                      generic_op_res)
     except NotMatching as e:
 #         msg = 'Could not find any operation that matches.'
-        raise_desc(DPSemanticError, str(e))
+        raise_desc(DPSemanticError, str(e).strip())
 #         , msg, opname=opname, rtypes=rtypes,
 #                       are_they_constant=are_they_constant)
 #     
