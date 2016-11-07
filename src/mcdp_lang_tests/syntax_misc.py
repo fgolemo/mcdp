@@ -957,6 +957,70 @@ def check_lang89(): # TODO: rename
     dp = parse_ndp(s).get_dp()
     print dp.repr_long()
     
+    s = """
+    mcdp {
+        provides f [m]
+        requires r [Nat] 
+        
+        required r >= floor(provided f)  / 5 m
+    }
+    """
+    assert_parse_ndp_semantic_error(s, "floor() is not Scott-continuous")
+    
+    s = """
+    mcdp {
+        provides f [m]
+        requires r [m] 
+        
+        required r >= sqrt(provided f)
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
+    
+    s = """
+    mcdp {
+        provides f [Rcomp]
+        requires r [Rcomp] 
+        
+        required r >= sqrt(provided f)
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
+    
+    s = """
+    mcdp {
+        provides f [Rcomp]
+        requires r [Rcomp] 
+        
+        required r >= square(provided f)
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
+    
+    s = """
+    mcdp {
+        provides f [Nat]
+        requires r [Nat] 
+        
+        required r >= square(provided f)
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
+    
+    s = """
+    mcdp {
+        provides f [m]
+        requires r [m] 
+        
+        required r >= square(provided f)
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
 @comptest
 def check_lang91(): # TODO: rename
     pass 

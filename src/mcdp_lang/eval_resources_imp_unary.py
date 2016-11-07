@@ -1,15 +1,13 @@
 # -*- coding: utf-8 -*-
 from abc import abstractmethod, ABCMeta
 import sys
-import sys
 
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance, raise_wrapped
-from mcdp_dp import (Floor0DP, CeilDP, CeilSqrtNatDP, SqrtRDP,
+from mcdp_dp import (CeilDP, CeilSqrtNatDP, SqrtRDP,
     SquareNatDP, SquareDP)
 from mcdp_dp import PrimitiveDP
 from mcdp_dp.conversion import get_conversion
-from mcdp_dp.dp_identity import IdentityDP
 from mcdp_dp.dp_max import Max1, JoinNDP, Min1, MeetNDP
 from mcdp_dp.dp_misc_unary import CeilToNatDP
 from mcdp_lang.eval_constant_imp import eval_constant, NotConstant
@@ -17,7 +15,7 @@ from mcdp_lang.helpers import get_valuewithunits_as_resource, \
     get_valuewithunits_as_function
 from mcdp_lang.utils_lists import unwrap_list
 from mcdp_posets import Map, Nat, Rcomp, RcompUnits
-from mcdp_posets.poset import Poset, NotLeq
+from mcdp_posets import NotLeq
 from mcdp_posets.rcomp_units import R_dimensionless
 from mocdp import logger
 from mocdp.comp.context import CResource, ValueWithUnits
@@ -90,18 +88,18 @@ def get_unary_rules():
         # sqrt(Nat): promote to Rcomp()
         # sqrt(Rcomp)
         # sqrt(Rcomp)
-        Rule('sqrt', is_Nat, Rcomp(), lambda _: SqrtRDP(Rcomp())), # XXX
-        Rule('sqrt', is_Rcomp, None,  lambda _: SqrtRDP(Rcomp())),
-        Rule('sqrt', is_RcompUnits, None,  lambda F: SqrtRDP(F)),
+#         Rule('sqrt', is_Nat, Rcomp(), lambda _: SqrtRDP(Rcomp())), # XXX
+#         Rule('sqrt', is_Rcomp, None,  lambda _: SqrtRDP(Rcomp())),
+#         Rule('sqrt', is_RcompUnits, None,  lambda F: SqrtRDP(F)),
              
         # square: Nat -> Nat
         # square: Rcomp -> Rcomp
         # square: Rcompunits -> Rcompunits
-        Rule('square', is_Nat, None, lambda _: SquareNatDP()), 
-        Rule('square', is_Rcomp, None, lambda F: SquareDP(F)), 
-        Rule('square', is_RcompUnits, None, lambda F: SquareDP(F)), 
+#         Rule('square', is_Nat, None, lambda _: SquareNatDP()), 
+#         Rule('square', is_Rcomp, None, lambda F: SquareDP(F)), 
+#         Rule('square', is_RcompUnits, None, lambda F: SquareDP(F)), 
 
-        Rule('ceilsqrt', is_Nat, None, lambda _: CeilSqrtNatDP()), 
+#         Rule('ceilsqrt', is_Nat, None, lambda _: CeilSqrtNatDP()), 
 
 #         Rule('ceil', is_Nat, None, lambda _: IdentityDP(Nat(), Nat()), warn='ceil() used on Nats'), 
 #         Rule('ceil',lambda x: is_Rcomp(x) or is_RcompUnits_dimensionless(x), 
@@ -109,10 +107,10 @@ def get_unary_rules():
 #                     lambda _: CeilToNatDP(Rcomp(), Nat())), 
 #         
 #         Rule('ceil', is_RcompUnits, None, lambda F: CeilDP(F)),
-        
-        Rule('floor', is_Nat, None, lambda _: IdentityDP(Nat(), Nat()), warn='floor() used on Nats'), 
-        Rule('floor', is_Rcomp, None, lambda _: Floor0DP(Rcomp())), 
-        Rule('floor', is_RcompUnits, None, lambda F: Floor0DP(F)),
+#         
+#         Rule('floor', is_Nat, None, lambda _: IdentityDP(Nat(), Nat()), warn='floor() used on Nats'), 
+#         Rule('floor', is_Rcomp, None, lambda _: Floor0DP(Rcomp())), 
+#         Rule('floor', is_RcompUnits, None, lambda F: Floor0DP(F)),
     ]
     return rules
 
@@ -135,55 +133,126 @@ class RuleInterface():
         """ Returns an Rvalue """
         pass
     
-class RuleCeilRcomp(RuleInterface):
+class RuleFloorDisallowed(RuleInterface):
+    """ Floor is not Scott continuous """
+    def get_arguments_type(self):
+        class Warn(OpSpecInterface):
+            def applies(self, rtype, is_constant, symbols):  # @UnusedVariable
+                msg = ('floor() is not Scott-continuous, so it cannot be used'
+                       ' on this side of the equality.')
+                raise DPSemanticError(msg)
+        spec = Warn()
+        return (spec,)
+    def apply(self, _symbols, resources_or_constants, are_they_constant, context):
+        pass
+    
+
+class OneRGiveMeADP(RuleInterface):
+    
+    @abstractmethod
+    def generate_dp(self, R):
+        pass
+    
+    def apply(self, symbols, resources_or_constants, are_they_constant, context):
+        assert len(resources_or_constants) == 1
+        is_constant = are_they_constant[0]
+    
+        if is_constant:
+            R = resources_or_constants[0].unit
+        else:
+            R = context.get_rtype(resources_or_constants[0])
+        
+        dp = self.generate_dp(R)
+            
+        if is_constant:
+            amap = dp.amap
+            value = resources_or_constants[0].cast_value(amap.get_domain())
+            result = amap(value)
+            vu = ValueWithUnits(result, amap.get_codomain())
+            return get_valuewithunits_as_resource(vu, context)
+        else:
+            r = resources_or_constants[0]
+            return create_operation(context, dp, [r], name_prefix='_sqrt')
+        
+        
+class RuleCeilRcomp(OneRGiveMeADP):
     """ ceil: Rcomp -> Nat"""
     
     def get_arguments_type(self):
         spec = OpSpecCastable(Rcomp())
         return (spec,)
 
-    def apply(self, _symbols, resources_or_constants, are_they_constant, context):
-        assert len(resources_or_constants) == 1
-        is_constant = are_they_constant[0]
-        
-        dp = CeilToNatDP(Rcomp(), Nat())
-        
-        if is_constant:
-            value = resources_or_constants[0].cast_value(Rcomp())
-            result = dp.amap(value)
-            vu = ValueWithUnits(result, Nat())
-            return get_valuewithunits_as_resource(vu, context)
-            
-        r = resources_or_constants[0]
-        
-        return create_operation(context, dp, [r], name_prefix='_ceil')
+    def generate_dp(self, R):  # @UnusedVariable
+        return CeilToNatDP(Rcomp(), Nat())
         
 
-    
-class RuleCeilRcompUnits(RuleInterface):
+class RuleCeilRcompUnits(OneRGiveMeADP):
     """ ceil: Joules -> Joules """
     
     def get_arguments_type(self):
         spec = OpSpecIsinstance(RcompUnits)
         return (spec,)
 
-    def apply(self, _symbols, resources_or_constants, are_they_constant, context):
-        assert len(resources_or_constants) == 1
-        is_constant = are_they_constant[0]
+    def generate_dp(self, R):  # @UnusedVariable
+        return CeilDP(R, R)
         
-        R = context.get_rtype(resources_or_constants[0]) 
-        dp = CeilDP(R, R)
-        
-        if is_constant:
-            value = resources_or_constants[0].cast_value(Rcomp())
-            result = dp.amap(value)
-            vu = ValueWithUnits(result, Nat())
-            return get_valuewithunits_as_resource(vu, context)
-            
-        r = resources_or_constants[0]
-        
-        return create_operation(context, dp, [r], name_prefix='_ceil')
-        
+    
+
+    
+class RuleSQRTRcompUnits(OneRGiveMeADP):
+    """ ceil: Joules -> Joules """
+    
+    def get_arguments_type(self):
+        spec = OpSpecIsinstance(RcompUnits)
+        return (spec,)
+
+    def generate_dp(self, R):
+        return SqrtRDP(R)
+
+
+class RuleSQRTRcomp(OneRGiveMeADP):
+    """ ceil: Joules -> Joules """
+    
+    def get_arguments_type(self):
+        spec = OpSpecCastable(Rcomp())
+        return (spec,)
+
+    def generate_dp(self, R):
+        return SqrtRDP(Rcomp())
+      
+
+    
+class RuleSquareNat(OneRGiveMeADP):
+    """ ceil: Joules -> Joules """
+    
+    def get_arguments_type(self):
+        spec = OpSpecCastable(Nat())
+        return (spec,)
+
+    def generate_dp(self, R):  # @UnusedVariable
+        return SquareNatDP()
+
+
+class RuleSquareRcomp(OneRGiveMeADP):
+    """ ceil: Joules -> Joules """
+    
+    def get_arguments_type(self):
+        spec = OpSpecCastable(Rcomp())
+        return (spec,)
+
+    def generate_dp(self, R):  # @UnusedVariable
+        return SquareDP(Rcomp())
+
+class RuleSquareRcompunits(OneRGiveMeADP):
+    """ ceil: Joules -> Joules """
+    def get_arguments_type(self):
+        spec = OpSpecIsinstance(RcompUnits)
+        return (spec,)
+
+    def generate_dp(self, R):
+        return SquareDP(R)
+
+    
 class OpSpecDoesntMatch(Exception):
     pass
 
@@ -366,6 +435,14 @@ for nargs in range(2, 8):
 
 generic_op_res.append(('ceil', RuleCeilRcomp()))
 generic_op_res.append(('ceil', RuleCeilRcompUnits()))
+generic_op_res.append(('floor', RuleFloorDisallowed()))
+generic_op_res.append(('sqrt', RuleSQRTRcomp()))
+generic_op_res.append(('sqrt', RuleSQRTRcompUnits()))
+generic_op_res.append(('square', RuleSquareNat()))
+generic_op_res.append(('square', RuleSquareRcomp())) 
+generic_op_res.append(('square', RuleSquareRcompunits())) 
+
+
 
 
 

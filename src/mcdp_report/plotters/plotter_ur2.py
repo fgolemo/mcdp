@@ -11,6 +11,7 @@ from mcdp_report.drawing import plot_upset_R2
 from mocdp import logger
 
 from .interface import Plotter, NotPlottable
+from mcdp_posets.rcomp_units import RcompUnits
 
 
 class PlotterUR2(Plotter):
@@ -20,18 +21,25 @@ class PlotterUR2(Plotter):
         if not isinstance(space, UpperSets):
             msg = 'I can only plot upper sets of something isomorphic to R2.'
             raise_desc(NotPlottable, msg, space=space)
-
-        self.R2 = PosetProduct((Rcomp(), Rcomp()))
         P = space.P
-        #logger.debug('space = %s ; P = %s; R2 = %s' % (space,space.P,R2))
-        try:
-            tu.check_leq(P, self.R2)
-        except NotLeq as e:
-            msg = ('cannot convert to R^2 from %s' % space) 
-            raise_wrapped(NotPlottable, e, msg, compact=True)
+        self.R2 = PosetProduct((Rcomp(), Rcomp()))
 
-        logger.debug('ok')
-        _f1, _f2 = tu.get_embedding(P, self.R2)
+        if isinstance(space.P, PosetProduct) and len(space.P) == 2 and \
+            isinstance(space.P[0], RcompUnits) and isinstance(space.P[1], RcompUnits):
+
+            self.P_to_S = lambda x: x
+#             , _f2 = tu.get_embedding(P, self.R2)            
+        else:   
+            
+            #logger.debug('space = %s ; P = %s; R2 = %s' % (space,space.P,R2))
+            try:
+                tu.check_leq(P, self.R2)
+            except NotLeq as e:
+                msg = ('cannot convert to R^2 from %s' % space) 
+                raise_wrapped(NotPlottable, e, msg, compact=True)
+    
+            logger.debug('ok')
+            self.P_to_S, _f2 = tu.get_embedding(P, self.R2)
 
     def get_xylabels(self, space):
         P = space.P
@@ -43,8 +51,8 @@ class PlotterUR2(Plotter):
 
         R2 = PosetProduct((Rcomp(), Rcomp()))
         self.R2 = R2
-        tu = get_types_universe()
-        P_TO_S, _ = tu.get_embedding(space.P, R2)
+#         tu = get_types_universe()
+#         P_TO_S, _ = tu.get_embedding(space.P, R2)
 
         maxx, maxy = 1000.0, 1000.0
         def limit(p):
@@ -53,7 +61,7 @@ class PlotterUR2(Plotter):
             y = min(y, maxy)
             return x, y
 
-        points2d = [[(limit(P_TO_S(_))) for _ in s.minimals] for s in seq]
+        points2d = [[(limit(self.P_TO_S(_))) for _ in s.minimals] for s in seq]
 
         axes = [get_bounds(_) for _ in points2d]
         merged = functools.reduce(reduce_bounds, axes) 
@@ -101,10 +109,10 @@ class PlotterUR2(Plotter):
         self.axis = axis
         self.check_plot_space(space)
 
-        tu = get_types_universe()
-        P_TO_S, _ = tu.get_embedding(space.P, self.R2)
+#         tu = get_types_universe()
+#         P_TO_S, _ = tu.get_embedding(space.P, self.R2)
 
-        minimals = [self._get_screen_coords(P_TO_S(_), axis) for _ in value.minimals]
+        minimals = [self._get_screen_coords(self.P_to_S(_), axis) for _ in value.minimals]
 
         minimals = poset_minima(minimals, self.R2.leq)
         v = self.R2.Us(minimals)
