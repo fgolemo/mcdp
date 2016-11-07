@@ -153,7 +153,6 @@ def generic_plot(f, space, value):
 
     es = []
     for name, plotter in plotters.items():
-        print('trying %s %s' % (name, plotter))
         try:
             plotter.check_plot_space(space)
         except NotPlottable as e:
@@ -163,7 +162,7 @@ def generic_plot(f, space, value):
 
         axis = plotter.axis_for_sequence(space, [value])
         axis = enlarge(axis, 0.15)
-        print('enlarged:  %s' % str(axis))
+        #print('enlarged:  %s' % str(axis))
         with f.plot(name) as pylab:
             plotter.plot(pylab, axis, space, value, params={})
             pylab.axis(axis)
