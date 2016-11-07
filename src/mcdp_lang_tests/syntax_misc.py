@@ -21,6 +21,7 @@ import numpy as np
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
+from mcdp_dp.dp_constant import Constant
 
 
 @comptest
@@ -846,8 +847,7 @@ def check_lang89(): # TODO: rename
     }
     """
 
-    dp = parse_ndp(s).get_dp()
-#     print dp
+    dp = parse_ndp(s).get_dp() 
     
     # All of these should be equivalent to Max1(Nat, 3)
     max3s = [ """
@@ -868,10 +868,10 @@ def check_lang89(): # TODO: rename
     }"""]
 
     for s in max3s:
-        print '-' * 10
-        print s
+#         print '-' * 10
+#         print s
         dp = parse_ndp(s).get_dp()
-        print dp.repr_long()
+#         print dp.repr_long()
         check_isinstance(dp, Max1)
         assert dp.value == 3
     
@@ -894,15 +894,69 @@ def check_lang89(): # TODO: rename
     }"""]
 
     for s in min3s:
-        print '-' * 10
-        print s
+#         print '-' * 10
+#         print s
         dp = parse_ndp(s).get_dp()
-        print dp.repr_long()
+#         print dp.repr_long()
         check_isinstance(dp, Min1)
         assert dp.value == 2
     
 
-
+    s = """
+    mcdp {
+        provides f [Nat] 
+        requires r [Nat] 
+        
+        r >= ceil(f) 
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
+    
+    s = """
+    mcdp {
+        provides f [Rcomp] 
+        requires r [Rcomp] 
+        
+        required r >= ceil(provided f) 
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
+    
+    s = """
+    mcdp {
+        provides f [Rcomp] 
+        requires r [Nat] 
+        
+        required  r >= ceil(provided f) 
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
+    
+    s = """
+    mcdp { 
+        requires r [Nat] 
+        
+        required  r >= ceil(1.2 dimensionless) 
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
+    check_isinstance(dp, Constant)
+    
+    s = """
+    mcdp {
+        provides f [m]
+        requires r [Nat] 
+        
+        required r >= ceil(provided f) 
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
+    
 @comptest
 def check_lang91(): # TODO: rename
     pass 

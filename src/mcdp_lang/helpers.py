@@ -67,9 +67,6 @@ def create_operation(context, dp, resources, name_prefix, op_prefix='_op', res_p
         c = Connection(dp1=r.dp, s1=r.s, dp2=name, s2=fnames[i])
         connections.append(c)
 
-#     if len(fnames) == 1:
-#         fnames = fnames[0]
-
     for c in connections:
         context.add_connection(c)
 

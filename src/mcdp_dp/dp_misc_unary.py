@@ -120,7 +120,7 @@ class Floor0DP(WrapAMap):
 
 class CeilDP(WrapAMap):
     """ from float to float """
-    def __init__(self, F):
+    def __init__(self, F, R):
         amap = CeilMap(F)
         amap_dual = FloorMap(F)
         WrapAMap.__init__(self, amap, amap_dual)

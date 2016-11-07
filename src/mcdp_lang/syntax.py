@@ -691,7 +691,9 @@ class Syntax():
                                                                 fvalue=t[0], label=t[2]))
 
 
-    unary = ['sqrt',  'ceilsqrt', 'ceil', 'square', 'floor']
+    unary = ['sqrt',  'ceilsqrt', 
+#              'ceil', 
+             'square', 'floor']
     
     unary_op = MatchFirst([sp(L(x), lambda t: CDP.ProcName(t[0]))
                            for x in unary])

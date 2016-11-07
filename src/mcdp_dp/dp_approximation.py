@@ -29,7 +29,7 @@ def makeLinearCeilDP(P, alpha):
     if isinstance(P, Rcomp):
         dps = [
             MultValueDP(P, P, P, alpha_inv),
-            CeilDP(P),
+            CeilDP(P, P),
             MultValueDP(P, P, P, alpha),
         ]
         return wrap_series(P, dps)
@@ -37,7 +37,7 @@ def makeLinearCeilDP(P, alpha):
         dimensionless = R_dimensionless
         dps = [
             MultValueDP(P, P, dimensionless, alpha_inv),
-            CeilDP(P),
+            CeilDP(P, P),
             MultValueDP(P, P, dimensionless, alpha),
         ]
         return wrap_series(P, dps)

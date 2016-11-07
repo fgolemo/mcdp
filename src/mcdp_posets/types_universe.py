@@ -78,6 +78,7 @@ class TypesUniverse(Preorder):
     def check_leq(self, A, B):
         from mcdp_posets import FiniteCollectionsInclusion
         from mcdp_posets import RcompUnits
+        from mcdp_posets.rcomp_units import R_dimensionless
 
         if A == B:
             return
@@ -99,7 +100,8 @@ class TypesUniverse(Preorder):
             return
 
         if isinstance(A, Nat) and isinstance(B, RcompUnits):
-            return
+            if R_dimensionless.units.dimensionality == B.units.dimensionality:  # @UndefinedVariable
+                return
 
         if isinstance(A, RcompUnits) and isinstance(B, RbicompUnits):
             if A.units.dimensionality == B.units.dimensionality:
@@ -123,12 +125,15 @@ class TypesUniverse(Preorder):
                            A_dimensionality=A.units.dimensionality,
                            B_dimensionality=B.units.dimensionality)
 
-        if isinstance(A, Rcomp) and isinstance(B, RcompUnits): 
-            return
+        if isinstance(A, Rcomp) and isinstance(B, RcompUnits):
+            from mcdp_posets.rcomp_units import R_dimensionless
+            if R_dimensionless.units.dimensionality == B.units.dimensionality:  # @UndefinedVariable
+                return
 
         if isinstance(B, Rcomp) and isinstance(A, RcompUnits):
-            # XXX : are we sure???
-            return
+            from mcdp_posets.rcomp_units import R_dimensionless  # @Reimport
+            if R_dimensionless.units.dimensionality == A.units.dimensionality:  # @UndefinedVariable
+                return
 
         if isinstance(A, UpperSets) and isinstance(B, UpperSets):
             self.check_leq(A.P, B.P)
@@ -202,16 +207,19 @@ class TypesUniverse(Preorder):
         from .rcomp_units import RcompUnits
         from .maps.coerce_to_int import FloorRNMap, CeilRNMap
         from .maps.promote_to_float import PromoteToFloat
+        from mcdp_posets.rcomp_units import R_dimensionless
+
         
         if self.leq(A, B) and self.leq(B, A):
             h, hd = tu.get_embedding(A, B)
+            print('The two types are isomorphic %s %s' % (A,B))
             assert A == h.get_domain()
             assert B == h.get_codomain()
             assert A == hd.get_codomain()
             assert B == hd.get_domain()
             return h, hd
     
-        if isinstance(A, Nat) and isinstance(B, (Rcomp, RcompUnits)):
+        if isinstance(A, Nat) and isinstance(B, Rcomp):
             # Nat ⟶ Reals
             # h  = PromoteToFloat
             # h *= Floor
@@ -223,17 +231,32 @@ class TypesUniverse(Preorder):
             assert B == hd.get_domain()
             return h, hd
         
-        if isinstance(A, (Rcomp, RcompUnits)) and isinstance(B, Nat):
+        if isinstance(A, Nat) and isinstance(B, RcompUnits):
+            if R_dimensionless.units.dimensionality == B.units.dimensionality:  # @UndefinedVariable
+                h = PromoteToFloat(A, B)
+                hd = FloorRNMap(B, A)
+                assert A == h.get_domain()
+                assert B == h.get_codomain()
+                assert A == hd.get_codomain()
+                assert B == hd.get_domain()
+                return h, hd
+        
+        if isinstance(A, Rcomp) and isinstance(B, Nat):
             # Reals -> Nat 
             # h = Ceil
             # h* = PromoteToFloat
             h = CeilRNMap(A, B)
-            hd = PromoteToFloat(B, A)
-            assert A == h.get_domain()
-            assert B == h.get_codomain()
-            assert A == hd.get_codomain()
-            assert B == hd.get_domain()
+            hd = PromoteToFloat(B, A) 
             return h, hd       
+
+        if isinstance(A, RcompUnits) and isinstance(B, Nat):
+            if R_dimensionless.units.dimensionality == A.units.dimensionality:  # @UndefinedVariable
+                # Reals -> Nat 
+                # h = Ceil
+                # h* = PromoteToFloat
+                h = CeilRNMap(A, B)
+                hd = PromoteToFloat(B, A) 
+                return h, hd       
 
         # case when A = Coproduct(... + B + ...) 
         if isinstance(A, PosetCoproduct):
