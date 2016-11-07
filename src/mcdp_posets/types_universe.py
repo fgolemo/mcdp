@@ -208,11 +208,9 @@ class TypesUniverse(Preorder):
         from .maps.coerce_to_int import FloorRNMap, CeilRNMap
         from .maps.promote_to_float import PromoteToFloat
         from mcdp_posets.rcomp_units import R_dimensionless
-
         
         if self.leq(A, B) and self.leq(B, A):
             h, hd = tu.get_embedding(A, B)
-            print('The two types are isomorphic %s %s' % (A,B))
             assert A == h.get_domain()
             assert B == h.get_codomain()
             assert A == hd.get_codomain()

@@ -951,7 +951,7 @@ def check_lang89(): # TODO: rename
         provides f [m]
         requires r [Nat] 
         
-        required r >= ceil(provided f) 
+        required r >= ceil(provided f)  / 5 m
     }
     """
     dp = parse_ndp(s).get_dp()

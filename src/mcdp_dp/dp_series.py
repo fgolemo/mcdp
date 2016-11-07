@@ -215,7 +215,7 @@ class Series(PrimitiveDP):
         r1 = self.dp1.repr_long()
         r2 = self.dp2.repr_long()
         s1 = 'Series:'
-        s2 = ' %s ⟶  %s' % (self.get_fun_space(), self.get_res_space())
+        s2 = ' %s ⇸ %s' % (self.get_fun_space(), self.get_res_space())
         s = s1 + ' % ' + s2
         s += '\n' + indent(r1, '. ', first='\ ')
         s += '\n' + indent(r2, '. ', first='\ ')

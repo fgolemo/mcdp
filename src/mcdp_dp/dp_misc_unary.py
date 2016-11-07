@@ -75,7 +75,7 @@ def CeilSqrtNatDP():
     dps = (
         PromoteToFloatDP(N, R),
         SqrtRDP(R),
-        CeilDP(R),
+        CeilDP(R, R),
         CoerceToIntDP(R, N),
     )
     return wrap_series(N, dps)

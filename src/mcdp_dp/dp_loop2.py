@@ -5,7 +5,6 @@ from contracts.utils import indent, raise_desc, raise_wrapped
 from mcdp_posets import (LowerSet, NotEqual, NotLeq, PosetProduct, UpperSet,
     UpperSets, get_types_universe, poset_maxima, poset_minima)
 from mcdp_posets.uppersets import upperset_project, LowerSets, lowerset_project
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import do_extra_checks
 
 from .primitive import Feasible, NotFeasible, PrimitiveDP
@@ -192,13 +191,8 @@ class DPLoop2(PrimitiveDP):
         return 'DPLoop2(%r)' % self.dp1
 
     def repr_long(self):
-        s = 'DPLoop2:   %s -> %s\n' % (self.get_fun_space(), self.get_res_space())
+        s = 'DPLoop2:   %s ⇸ %s\n' % (self.get_fun_space(), self.get_res_space())
         s += indent(self.dp1.repr_long(), 'L ')
-
-        if hasattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME):
-            a = getattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME)
-            s += '\n (labeled as %s)' % a.__str__()
-
         return s
 
     def solve(self, f1):
