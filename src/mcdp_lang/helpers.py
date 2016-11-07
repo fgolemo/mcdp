@@ -83,7 +83,7 @@ def create_operation_lf(context, dp, functions, name_prefix,
         ni = context.new_fun_name('%s%s' % (op_prefix, i))
         rnames.append(ni)
         
-    _rnames = rnames if len(rnames) > 1 else rnames[0]
+    _rnames = rnames[0] if len(rnames) == 1 else rnames
     ndp = dpwrap(dp, name_result, _rnames)
 
     connections = []
