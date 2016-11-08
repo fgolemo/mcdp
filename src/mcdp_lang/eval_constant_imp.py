@@ -263,13 +263,31 @@ def eval_constant_space_custom_value(op, context):
         return ValueWithUnits(unit=space, value=op.custom_string)
     
     if isinstance(space, Nat):
-        mcdp_dev_warning('Top?')
-        value = int(custom_string)
+        if isinstance(custom_string, CDP.ValueExpr):
+            value = int(custom_string.value) # XXX: warn
+            if value != custom_string.value:
+                msg = 'Invalid value %s' % value
+                raise_desc(DPSemanticError, msg, value=value, value0=custom_string.value)
+        elif isinstance(custom_string, str):
+            value = int(custom_string)
+        else:
+            msg = 'Cannot interpret value.'
+            raise_desc(DPInternalError, msg, value=value)
         return ValueWithUnits(unit=Nat(), value=value)
 
     if isinstance(space, Int):
         mcdp_dev_warning('Top?')
-        value = int(custom_string)
+        if isinstance(custom_string, CDP.ValueExpr):
+            value = int(custom_string.value) # XXX: warn
+            if value != custom_string.value:
+                msg = 'Invalid value %s' % value
+                raise_desc(DPSemanticError, msg, value=value, value0=custom_string.value)
+        elif isinstance(custom_string, str):
+            value = int(custom_string)
+        else:
+            msg = 'Cannot interpret value.'
+            raise_desc(DPInternalError, msg, value=value)
+        
         return ValueWithUnits(unit=Int(), value=value)
 
     if isinstance(space, Rcomp):
