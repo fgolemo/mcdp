@@ -35,53 +35,51 @@ def eval_constant(op, context):
     from .eval_math import (eval_constant_divide, eval_PlusN_as_constant,
                             eval_RValueMinusN_as_constant, eval_MultN_as_constant)
 
-#     with add_where_information(op.where):
-    if True:
-        if isinstance(op, (CDP.Resource)):
-            raise NotConstant(str(op))
+    if isinstance(op, (CDP.Resource)):
+        raise NotConstant(str(op))
 
-        if isinstance(op, (CDP.OpMax, CDP.OpMin, CDP.Power)):
-            # TODO: can implement optimization
-            raise NotConstant(str(op))
+    if isinstance(op, (CDP.OpMax, CDP.OpMin, CDP.Power)):
+        # TODO: can implement optimization
+        raise NotConstant(str(op))
 
-        cases = {
-            CDP.NatConstant: eval_constant_NatConstant,
-            CDP.IntConstant: eval_constant_IntConstant,
-            CDP.SimpleValue: eval_constant_SimpleValue,
-            CDP.VariableRef: eval_constant_VariableRef,
-            CDP.MakeTuple: eval_constant_MakeTuple,
-            CDP.AssertEqual: eval_assert_equal,
-            CDP.AssertLEQ: eval_assert_leq,
-            CDP.AssertGEQ: eval_assert_geq,
-            CDP.AssertLT: eval_assert_lt,
-            CDP.AssertGT: eval_assert_gt,
-            CDP.AssertNonempty: eval_assert_nonempty,
-            CDP.AssertEmpty: eval_assert_empty,
-            CDP.Divide: eval_constant_divide,
-            CDP.Collection: eval_constant_collection,
-            CDP.SpaceCustomValue: eval_constant_space_custom_value,
-            CDP.PlusN: eval_PlusN_as_constant,
-            CDP.RValueMinusN: eval_RValueMinusN_as_constant,
-            CDP.MultN: eval_MultN_as_constant,
-            CDP.EmptySet: eval_EmptySet,
-            CDP.UpperSetFromCollection: eval_constant_uppersetfromcollection,
-            CDP.LowerSetFromCollection: eval_constant_lowersetfromcollection,
-            CDP.SolveModel: eval_solve_f,
-            CDP.SolveRModel: eval_solve_r,
-            CDP.Top: eval_constant_Top,
-            CDP.Maximals: eval_constant_Maximals,
-            CDP.Minimals: eval_constant_Minimals,
-            CDP.Bottom: eval_constant_Bottom,
-        }
-        
-        for klass, hook in cases.items():
-            if isinstance(op, klass):
-                return hook(op, context)
+    cases = {
+        CDP.NatConstant: eval_constant_NatConstant,
+        CDP.IntConstant: eval_constant_IntConstant,
+        CDP.SimpleValue: eval_constant_SimpleValue,
+        CDP.VariableRef: eval_constant_VariableRef,
+        CDP.MakeTuple: eval_constant_MakeTuple,
+        CDP.AssertEqual: eval_assert_equal,
+        CDP.AssertLEQ: eval_assert_leq,
+        CDP.AssertGEQ: eval_assert_geq,
+        CDP.AssertLT: eval_assert_lt,
+        CDP.AssertGT: eval_assert_gt,
+        CDP.AssertNonempty: eval_assert_nonempty,
+        CDP.AssertEmpty: eval_assert_empty,
+        CDP.Divide: eval_constant_divide,
+        CDP.Collection: eval_constant_collection,
+        CDP.SpaceCustomValue: eval_constant_space_custom_value,
+        CDP.PlusN: eval_PlusN_as_constant,
+        CDP.RValueMinusN: eval_RValueMinusN_as_constant,
+        CDP.MultN: eval_MultN_as_constant,
+        CDP.EmptySet: eval_EmptySet,
+        CDP.UpperSetFromCollection: eval_constant_uppersetfromcollection,
+        CDP.LowerSetFromCollection: eval_constant_lowersetfromcollection,
+        CDP.SolveModel: eval_solve_f,
+        CDP.SolveRModel: eval_solve_r,
+        CDP.Top: eval_constant_Top,
+        CDP.Maximals: eval_constant_Maximals,
+        CDP.Minimals: eval_constant_Minimals,
+        CDP.Bottom: eval_constant_Bottom,
+    }
+    
+    for klass, hook in cases.items():
+        if isinstance(op, klass):
+            return hook(op, context)
 
-        if True: # pragma: no cover    
-            msg = 'eval_constant(): Cannot evaluate this as constant.'
-            op = recursive_print(op)
-            raise_desc(NotConstant, msg, op=op)
+    if True: # pragma: no cover    
+        msg = 'eval_constant(): Cannot evaluate this as constant.'
+        op = recursive_print(op)
+        raise_desc(NotConstant, msg, op=op)
 
 
 def eval_constant_NatConstant(op, context):  # @UnusedVariable
@@ -99,6 +97,11 @@ def eval_constant_VariableRef(op, context):
         msg = 'This is a resource.'
         raise_desc(NotConstant, msg, res=res)
 
+    if op.name in context.var2function:
+        res = context.var2function[op.name]
+        msg = 'This is a function.'
+        raise_desc(NotConstant, msg, res=res)
+
     try:
         x = context.get_ndp_fun(op.name)
     except ValueError:
@@ -106,6 +109,7 @@ def eval_constant_VariableRef(op, context):
     else:
         raise_desc(NotConstant, 'Corresponds to new function.', x=x)
 
+    print context.var2function, context.var2resource
     msg = 'Variable ref %r unknown.' % op.name
     raise DPSemanticError(msg, where=op.where)
 

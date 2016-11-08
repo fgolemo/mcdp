@@ -10,12 +10,10 @@ from mcdp_dp.dp_max import MinF1DP, MinR1DP, JoinNDP, MaxF1DP, MaxR1DP, MeetNDP,
     MeetNDualDP
 from mcdp_dp.dp_misc_unary import CeilToNatDP, Floor0DP
 from mcdp_lang.eval_constant_imp import eval_constant, NotConstant
-from mcdp_lang.helpers import get_valuewithunits_as_resource, \
-    get_valuewithunits_as_function, create_operation_lf
-from mcdp_lang.utils_lists import unwrap_list
+from .helpers import get_valuewithunits_as_resource, get_valuewithunits_as_function, create_operation_lf
+from .utils_lists import unwrap_list
 from mcdp_posets import Nat, Rcomp, RcompUnits
-from mcdp_posets import NotLeq
-from mcdp_posets.types_universe import get_types_universe
+from mcdp_posets import NotLeq, get_types_universe
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPSemanticError
 
@@ -77,14 +75,10 @@ class OneRGiveMeADP(RuleInterface):
         dp = self.generate_dp(R)
             
         if is_constant:
-            print('Constant value op(%s) ' % resources_or_constants[0])
             amap = dp.amap
             value = resources_or_constants[0].cast_value(amap.get_domain())
             result = amap(value)
-            print('amap: %s' % amap)
-            print('type: %s' % type(self))
             vu = ValueWithUnits(result, amap.get_codomain())
-            print('result vu = %s' % str(vu))
             return get_valuewithunits_as_resource(vu, context)
         else:
             r = resources_or_constants[0]
@@ -240,7 +234,6 @@ class OpSpecCastable(OpSpecInterface):
         except NotLeq:
             msg = 'Could not find a conversion from %s to %s.' % (P, self.castable_to)
             raise_desc(OpSpecDoesntMatch, msg)
-#             raise_wrapped(OpSpecDoesntMatch, e, msg, exc=sys.exc_info())
         
 
 class OpSpecMarkSymbol(OpSpecInterface):
@@ -298,7 +291,6 @@ class AssociativeOp(RuleInterface):
         # it's a constant value
         if len(resources) == 0:
             vu = self.reduce_constants(constants)
-#             print('Computing %s -> %s ' % (constants, vu))
             return self.only_one(vu, context)
             
         # it's only resource * (c1*c2*c3*...)

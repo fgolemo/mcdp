@@ -436,7 +436,6 @@ def eval_PlusN_(constants, resources, context):
             return resources[0]
     else:
         # there are some resources
-
         r =  eval_PlusN_ops(resources, context) 
         if not constants:
             return r

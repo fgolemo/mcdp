@@ -18,6 +18,10 @@ from .helpers import create_operation_lf, get_valuewithunits_as_function
 from .namedtuple_tricks import recursive_print
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mcdp_posets.rcomp_units import RbicompUnits
+from mcdp_lang.eval_constant_imp import NotConstant
+from mcdp_lang.misc_math import plus_constantsN
+from mcdp_dp.dp_minus import MinusValueDP
 
 
 CDP = CDPLanguage
@@ -164,25 +168,102 @@ def eval_lfunction_FValueMinusN(lf, context):
                             name_prefix='_minusvalue', op_prefix='_op',
                             res_prefix='_result')
     
+def eval_lfunction_invplus_sort_ops(ops, context, wants_constant):
+    """
+            pos_constants, neg_constants, functions = sort_ops(ops, context)
+    """
+    from .eval_constant_imp import eval_constant
+
+    pos_constants = []
+    neg_constants = []
+    functions = []
+
+    for op in ops:
+        try:
+            x = eval_constant(op, context)
+            check_isinstance(x, ValueWithUnits)
+            if isinstance(x.unit, (RcompUnits, Nat)):
+                pos_constants.append(x)
+            elif isinstance(x.unit, RbicompUnits):
+                neg_constants.append(x)
+            else:
+                msg = 'Invalid addition - needs error'
+                raise_desc(DPInternalError, msg, x=x)
+        except NotConstant as e:
+            if wants_constant:
+                msg = 'Sum not constant because one op is not constant.'
+                raise_wrapped(NotConstant, e, msg, op=op)
+            x = eval_lfunction(op, context)
+            assert isinstance(x, CFunction)
+            functions.append(x)
+            
+    return pos_constants, neg_constants, functions
+
     
 def eval_lfunction_invplus(lf, context):
     ops = get_odd_ops(unwrap_list(lf.ops))
+    pos_constants, neg_constants, functions = eval_lfunction_invplus_sort_ops(ops, context, wants_constant=False)
+        
+    if neg_constants:
+        msg = 'Inverse plus of negative constants not implemented yet.'
+        raise_desc(DPNotImplementedError, msg)
+    
+    constants = pos_constants
+    
+    if len(functions) == 0:
+        return plus_constantsN(constants)
 
-    fs = []
+    elif len(functions) == 1:
+        if len(constants) > 0:
+            c = plus_constantsN(constants)
+            return get_invplus_op(context, functions[0], c)
+        else:
+            return functions[0]
+    else:
+        # there are some functions
+        r =  eval_lfunction_invplus_ops(functions, context) 
+        if not constants:
+            return r
+        else:
+            c = plus_constantsN(constants)
+            return get_invplus_op(context, r, c)
 
-    for op_i in ops:
-        fi = eval_lfunction(op_i, context)
-        fs.append(fi)
 
-    return eval_lfunction_invplus_ops(fs, context)
+@contract(lf=CFunction, c=ValueWithUnits, returns=CFunction)
+def get_invplus_op(context, lf, c):
+    """ (fvalue) + constant >= f """
+    ftype = context.get_ftype(lf)
+    
+    T1 = ftype
+    T2 = c.unit
 
+    if isinstance(T1, Rcomp) and isinstance(T2, Rcomp):
+        
+        raise NotImplementedError
+        #dp = PlusValueRcompDP(c.value)
+    if isinstance(T1, Rcomp) and isinstance(T2, Nat):
+        # cast Nat to Rcomp
+#         val = float(c.value)
+        raise NotImplementedError
+        #dp = PlusValueRcompDP(val)
+    elif isinstance(T1, RcompUnits) and isinstance(T2, RcompUnits):
+        dp = MinusValueDP(T1, c.value, T2)
+        #dp = PlusValueDP(F=T1, c_value=c.value, c_space=T2)
+    elif isinstance(T1, Nat) and isinstance(T2, Nat):
+        #dp = PlusValueNatDP(c.value)
+        raise NotImplementedError
+    else:
+        msg = 'Cannot create inverse addition operation.'
+        raise_desc(DPInternalError, msg, rtype=T1, c=c)
+
+    r2 = create_operation_lf(context, dp, functions=[lf], name_prefix='_invplusop')
+    return r2
 
 def eval_lfunction_invplus_ops(fs, context):
     if len(fs) == 1:
         raise DPInternalError(fs)
     elif len(fs) > 2: # pragma: no cover
-        mcdp_dev_warning('Maybe this should be smarter?')
-        
+        mcdp_dev_warning('Maybe this should be smarter?')    
         rest = eval_lfunction_invplus_ops(fs[1:], context)
         return eval_lfunction_invplus_ops([fs[0], rest], context) 
     else:   

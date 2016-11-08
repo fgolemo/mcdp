@@ -21,6 +21,7 @@ from mocdp.exceptions import DPNotImplementedError, DPSemanticError
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
 from mcdp_dp.dp_max import MaxR1DP, MinR1DP, MaxF1DP, MinF1DP
+from mcdp_dp.dp_minus import MinusValueDP, MinusValueNatDP
 
 
 @comptest
@@ -1201,13 +1202,70 @@ def check_lang94(): # TODO: rename
 
 @comptest
 def check_lang95(): # TODO: rename
-    pass 
+    s = """
+    mcdp {
+      requires rb [J]
+      provides f2 [J]
+      f2 <= required rb + 2 J
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    check_isinstance(dp, MinusValueDP)
+
+    ur = dp.solve(12.0)
+    assert list(ur.minimals)[0] == 10.0
     
-
-
+    
+    # a bit of conversions
+    s = """
+    mcdp {
+      requires rb [m]
+      provides f2 [km]
+      f2 <= required rb + 2 cm
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    ur = dp.solve(12.0)
+    expect = 12 * 1000 - 0.02
+    assert list(ur.minimals)[0] == expect
+    
+    # rcomp
+    s = """
+    mcdp {
+      requires rb [Rcomp]
+      provides f2 [Rcomp]
+      f2 <= required rb + Rcomp:2
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    check_isinstance(dp, MinusValueNatDP)
+    ur = dp.solve(12.0)
+    assert list(ur.minimals)[0] == 10.0
+    
+    # Nat
+    s = """
+    mcdp {
+      requires rb [Nat]
+      provides f2 [Nat]
+      f2 <= required rb + Nat:2
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    ur = dp.solve(12.0)
+    assert list(ur.minimals)[0] == 10.0
+    
 @comptest
 def check_lang96(): # TODO: rename
-    pass 
+    s = """
+    mcdp {
+      requires rb [J]
+      provides f2 [J]
+      f2 <= rb + 2 J
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long() 
+    
     
     
 
