@@ -94,12 +94,12 @@ def eval_constant_VariableRef(op, context):
 
     if op.name in context.var2resource:
         res = context.var2resource[op.name]
-        msg = 'This is a resource.'
+        msg = 'This is a resource, not a constant.'
         raise_desc(NotConstant, msg, res=res)
 
     if op.name in context.var2function: # XXX: not sure this is needed
         res = context.var2function[op.name]
-        msg = 'This is a function.'
+        msg = 'This is a function, not a constant.'
         raise_desc(NotConstant, msg, res=res)
 
     try:
@@ -107,9 +107,16 @@ def eval_constant_VariableRef(op, context):
     except ValueError:
         pass
     else:
-        raise_desc(NotConstant, 'Corresponds to new function.', x=x)
+        raise_desc(NotConstant, 'Corresponds to new function, not a constant.', x=x)
 
-    print context.var2function, context.var2resource
+    try:
+        x = context.get_ndp_res(op.name)
+    except ValueError:
+        pass
+    else:
+        raise_desc(NotConstant, 'Corresponds to new resource, not a constant.', x=x)
+
+#     print context.var2function, context.var2resource
     msg = 'Variable ref %r unknown.' % op.name
     raise DPSemanticError(msg, where=op.where)
 
