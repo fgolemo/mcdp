@@ -22,6 +22,7 @@ from mcdp_posets.rcomp_units import RbicompUnits
 from mcdp_lang.eval_constant_imp import NotConstant
 from mcdp_lang.misc_math import plus_constantsN
 from mcdp_dp.dp_minus import MinusValueDP, MinusValueRcompDP, MinusValueNatDP
+from mcdp_lang.eval_warnings import MCDPWarnings, warn_language
 
 
 CDP = CDPLanguage
@@ -123,6 +124,11 @@ def eval_lfunction_variableref(lf, context):
         raise DPSemanticError(msg, where=lf.where)
 
     s = dummy_ndp.get_rnames()[0]
+    
+    msg = ('Please use the more precise form "required %s" rather than simply "%s".'
+           % (lf.name, lf.name))
+    warn_language(lf, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context)
+
     return context.make_function(get_name_for_res_node(lf.name), s)
 
 
