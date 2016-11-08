@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """ Contains the main parsing interface """
+import sys
+
 from contracts import contract
 from mcdp_dp import PrimitiveDP
 from mcdp_posets import Poset
 from mocdp import logger
-from mocdp.exceptions import MCDPExceptionWithWhere, _get_where_with_filename
+from mocdp.exceptions import MCDPExceptionWithWhere
 
 from .parse_actions import parse_wrap
 
@@ -36,7 +38,6 @@ def parse_ndp(string, context=None):
     assert isinstance(res, NamedDP), res
     return res
 
-import sys
 def parse_ndp_filename(filename, context=None):
     """ Reads the file and returns as NamedDP.
         The exception are annotated with filename. """
