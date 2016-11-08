@@ -21,7 +21,7 @@ from .utils_lists import get_odd_ops, unwrap_list
 from mcdp_posets.rcomp_units import RbicompUnits
 from mcdp_lang.eval_constant_imp import NotConstant
 from mcdp_lang.misc_math import plus_constantsN
-from mcdp_dp.dp_minus import MinusValueDP
+from mcdp_dp.dp_minus import MinusValueDP, MinusValueRcompDP, MinusValueNatDP
 
 
 CDP = CDPLanguage
@@ -182,7 +182,7 @@ def eval_lfunction_invplus_sort_ops(ops, context, wants_constant):
         try:
             x = eval_constant(op, context)
             check_isinstance(x, ValueWithUnits)
-            if isinstance(x.unit, (RcompUnits, Nat)):
+            if isinstance(x.unit, (RcompUnits, Rcomp, Nat)):
                 pos_constants.append(x)
             elif isinstance(x.unit, RbicompUnits):
                 neg_constants.append(x)
@@ -237,24 +237,21 @@ def get_invplus_op(context, lf, c):
     T1 = ftype
     T2 = c.unit
 
-    if isinstance(T1, Rcomp) and isinstance(T2, Rcomp):
-        
-        raise NotImplementedError
-        #dp = PlusValueRcompDP(c.value)
-    if isinstance(T1, Rcomp) and isinstance(T2, Nat):
+    if isinstance(T1, Rcomp) and isinstance(T2, Rcomp):        
+        val = c.value
+        dp = MinusValueRcompDP(val)
+    elif isinstance(T1, Rcomp) and isinstance(T2, Nat):
         # cast Nat to Rcomp
-#         val = float(c.value)
-        raise NotImplementedError
-        #dp = PlusValueRcompDP(val)
+        val = float(c.value)
+        dp = MinusValueRcompDP(val)
     elif isinstance(T1, RcompUnits) and isinstance(T2, RcompUnits):
         dp = MinusValueDP(T1, c.value, T2)
-        #dp = PlusValueDP(F=T1, c_value=c.value, c_space=T2)
     elif isinstance(T1, Nat) and isinstance(T2, Nat):
-        #dp = PlusValueNatDP(c.value)
-        raise NotImplementedError
+        dp = MinusValueNatDP(c.value)
     else:
-        msg = 'Cannot create inverse addition operation.'
-        raise_desc(DPInternalError, msg, rtype=T1, c=c)
+        msg = ('Cannot create inverse addition operation between variable of type %s '
+               'and constant of type %s.' % (T1, T2))  
+        raise_desc(DPInternalError, msg)
 
     r2 = create_operation_lf(context, dp, functions=[lf], name_prefix='_invplusop')
     return r2

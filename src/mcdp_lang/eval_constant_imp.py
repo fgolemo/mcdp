@@ -97,7 +97,7 @@ def eval_constant_VariableRef(op, context):
         msg = 'This is a resource.'
         raise_desc(NotConstant, msg, res=res)
 
-    if op.name in context.var2function:
+    if op.name in context.var2function: # XXX: not sure this is needed
         res = context.var2function[op.name]
         msg = 'This is a function.'
         raise_desc(NotConstant, msg, res=res)

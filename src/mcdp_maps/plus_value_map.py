@@ -343,6 +343,7 @@ class MinusValueNatMap(Map):
         if is_top(dom, self.c):
             return 0 
         
+        check_isinstance(x, int)
         if dom.leq(x, self.c):
             return 0
         else:

@@ -21,7 +21,8 @@ from mocdp.exceptions import DPNotImplementedError, DPSemanticError
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
 from mcdp_dp.dp_max import MaxR1DP, MinR1DP, MaxF1DP, MinF1DP
-from mcdp_dp.dp_minus import MinusValueDP, MinusValueNatDP
+from mcdp_dp.dp_minus import MinusValueDP, MinusValueNatDP, MinusValueRcompDP
+from mcdp_maps.plus_value_map import PlusValueRcompMap
 
 
 @comptest
@@ -1007,7 +1008,7 @@ def check_lang89k(): # TODO: rename
         provides f [m]
         requires r [m] 
         
-        required r >= sqrt(provided f)
+        sqrt(provided f) <= required r 
     }
     """
     dp = parse_ndp(s).get_dp()
@@ -1022,7 +1023,7 @@ def check_lang89l(): # TODO: rename
         provides f [Rcomp]
         requires r [Rcomp] 
         
-        required r >= sqrt(provided f)
+        sqrt(provided f) <= required r 
     }
     """
     dp = parse_ndp(s).get_dp()
@@ -1037,7 +1038,7 @@ def check_lang89m(): # TODO: rename
         provides f [Rcomp]
         requires r [Rcomp] 
         
-        required r >= square(provided f)
+        square(provided f) <= required r  
     }
     """
     dp = parse_ndp(s).get_dp()
@@ -1052,7 +1053,7 @@ def check_lang89n(): # TODO: rename
         provides f [Nat]
         requires r [Nat] 
         
-        required r >= square(provided f)
+        square(provided f) <= required r 
     }
     """
     dp = parse_ndp(s).get_dp()
@@ -1067,7 +1068,7 @@ def check_lang89o(): # TODO: rename
         provides f [m]
         requires r [m] 
         
-        required r >= square(provided f)
+        square(provided f) <= required r 
     }
     """
     dp = parse_ndp(s).get_dp()
@@ -1084,7 +1085,7 @@ def check_lang89p(): # TODO: rename
         requires r1 [m] 
         requires r2 [m]
         
-        max(required r1, required r2) >= provided f
+        provided f <= max(required r1, required r2)
     }
     """
     ndp = parse_ndp(s)
@@ -1102,7 +1103,7 @@ def check_lang89q(): # TODO: rename
         requires r1 [km] 
         requires r2 [m]
         
-        max(required r1, required r2) >= provided f
+        provided f <= max(required r1, required r2)  
     }
     """
     ndp = parse_ndp(s)
@@ -1120,7 +1121,7 @@ def check_lang89r(): # TODO: rename
         requires r1 [Nat] # cannot convert Nat to m 
         requires r2 [m]
         
-        max(required r1, required r2) >= provided f
+        provided f <= max(required r1, required r2) 
     }
     """
     expect = 'Could not convert R[m] to N'
@@ -1137,7 +1138,7 @@ def check_lang89s(): # TODO: rename
         requires r1 [m] 
         requires r2 [m]
         
-        min(required r1, required r2) >= provided f
+        provided f <= min(required r1, required r2) 
     }
     """
     ndp = parse_ndp(s)
@@ -1151,7 +1152,7 @@ def check_lang91(): # TODO: rename
         provides f [m]
         requires r [m] 
         
-        required r >= min(provided f, 5 m)
+        min(provided f, 5 m) <= required r
     }
     """
     dp = parse_ndp(s).get_dp()
@@ -1165,7 +1166,7 @@ def check_lang92(): # TODO: rename
         provides f [m]
         requires r [m] 
         
-        required r >= max(provided f, 5 m)
+        max(provided f, 5 m) <= required r 
     }
     """
     dp = parse_ndp(s).get_dp()
@@ -1180,7 +1181,7 @@ def check_lang93(): # TODO: rename
         provides f [m]
         requires r [m] 
         
-        max(required r, 5m) >= provided f
+        provided f <= max(required r, 5m) 
     }
     """
     dp = parse_ndp(s).get_dp()
@@ -1193,7 +1194,7 @@ def check_lang94(): # TODO: rename
         provides f [m]
         requires r [m] 
         
-        min(required r, 5m) >= provided f
+        provided f <= min(required r, 5m) 
     }
     """
     dp = parse_ndp(s).get_dp()
@@ -1232,13 +1233,24 @@ def check_lang95(): # TODO: rename
     # rcomp
     s = """
     mcdp {
+      requires r [Rcomp]
+      provides f [Rcomp]
+      provided f + Rcomp:2 <= required r
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
+    
+    # rcomp
+    s = """
+    mcdp {
       requires rb [Rcomp]
       provides f2 [Rcomp]
       f2 <= required rb + Rcomp:2
     }
     """
     dp = parse_ndp(s).get_dp()
-    check_isinstance(dp, MinusValueNatDP)
+    check_isinstance(dp, MinusValueRcompDP)
     ur = dp.solve(12.0)
     assert list(ur.minimals)[0] == 10.0
     
@@ -1251,8 +1263,36 @@ def check_lang95(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    ur = dp.solve(12.0)
-    assert list(ur.minimals)[0] == 10.0
+    ur = dp.solve(12)
+    check_isinstance(dp, MinusValueNatDP)
+    assert list(ur.minimals)[0] == 10
+   
+@comptest
+def check_lang95b(): # TODO: rename
+    # Nat and rcomp
+    
+    s = """
+    mcdp {
+      requires r [Nat]
+      provides f [Nat]
+      provided f + Rcomp:2 <= required r
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
+    
+    s = """
+    mcdp {
+      requires rb [Nat]
+      provides f2 [Nat]
+      f2 <= required rb + Rcomp:2
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
+    ur = dp.solve(12)
+    check_isinstance(dp, MinusValueNatDP)
+    assert list(ur.minimals)[0] == 10
     
 @comptest
 def check_lang96(): # TODO: rename
