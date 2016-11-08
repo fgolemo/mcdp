@@ -3,13 +3,13 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_posets import (NotLeq, Rcomp, UpperSets,
     get_types_universe)
+from mcdp_posets.poset_product import PosetProduct
+from mcdp_posets.rcomp import RcompBase
 from mcdp_report.axis_algebra import enlarge
 from mcdp_report.drawing import plot_upset_R2
 from mcdp_report.plotters.interface import Plotter, NotPlottable
 from mocdp import logger
 from mocdp.exceptions import mcdp_dev_warning
-from mcdp_posets.poset_product import PosetProduct
-from mcdp_posets.rcomp import RcompBase
 
 
 class PlotterUR(Plotter):

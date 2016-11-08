@@ -2,7 +2,7 @@
 from mcdp_dp import (CatalogueDP, CoProductDP, CoProductDPLabels, Constant,
     ConstantMinimals, DPLoop0, DPLoop2, Identity, InvMult2, InvMult2L, InvMult2U,
     InvPlus2, InvPlus2L, InvPlus2Nat, InvPlus2U, JoinNDP, Limit, LimitMaximals,
-    Max1, MeetNDualDP, Mux, Parallel, ParallelN, Series0, Terminator,
+    MeetNDualDP, Mux, Parallel, ParallelN, Series0, Terminator,
     PlusValueDP, MeetNDP, JoinNDualDP, InvMult2Nat, MultValueDP,
     MinusValueDP, ProductNDP, Product2DP_U, Product2DP_L, ProductNNatDP, ProductNRcompDP,
     MinusValueRcompDP, MinusValueNatDP, InvMultValueNatDP, InvMultValueRcompDP,
@@ -13,6 +13,7 @@ from mcdp_dp.dp_sum import SumNNatDP
 from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct, Nat, Rcomp
 from mocdp import MCDPConstants
+from mcdp_dp.dp_max import MaxF1DP, MinR1DP, MaxR1DP, MinF1DP
 
 
 all_primitivedps_tests = []
@@ -347,12 +348,33 @@ def LimitMaximals_1():
     return LimitMaximals(F, values)
 
 @add_as_test
-def Max1_1():
+def MaxR1DP_1():
     F = parse_poset('Nat')
     f = 4
-    return Max1(F, f)
+    return MaxR1DP(F, f)
 
  
+@add_as_test
+def MinR1DP_1():
+    F = parse_poset('Nat')
+    f = 4
+    return MinR1DP(F, f)
+
+@add_as_test
+def MaxF1DP_1():
+    F = parse_poset('Nat')
+    f = 4
+    return MaxF1DP(F, f)
+
+ 
+@add_as_test
+def MinF1DP_1():
+    F = parse_poset('Nat')
+    f = 4
+    return MinF1DP(F, f)
+
+
+                   
 @add_as_test
 def Template_1():
     P = parse_poset('m')
@@ -387,7 +409,7 @@ def ParallelN_1():
 def Series0_1():
     dp1 = Constant1() # R = V
     V = parse_poset('V')
-    dp2 = Max1(V, 2.0)
+    dp2 = MaxR1DP(V, 2.0)
     return Series0(dp1, dp2)
 
 @add_as_test

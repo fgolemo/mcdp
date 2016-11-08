@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import raise_wrapped
 from mcdp_maps import JoinNMap, Max1Map, MeetNMap
-from mcdp_maps.max1map import Max1dualMap, Min1Map, Min1dualMap
+from mcdp_maps.max1map import Max1dualMap, Min1Map, Min1dualMap, MaxR1DPMap,\
+    MinR1DPMap
 from mcdp_maps.repr_map import repr_map_joinn
 from mcdp_posets import MapNotDefinedHere, Poset, PosetProduct, NotBounded
 from mcdp_posets.poset import is_top, is_bottom
@@ -15,7 +16,10 @@ from .repr_strings import repr_hd_map_meetndp
 
 
 __all__ = [
-    'Max1', # odd one out
+    'MaxF1DP', 
+    'MinF1DP', 
+    'MinR1DP', 
+    'MaxR1DP', 
     
     'JoinNDP',
     'MeetNDualDP',
@@ -24,9 +28,11 @@ __all__ = [
 ]
 
 
-class Max1(WrapAMap):
+class MaxF1DP(WrapAMap):
     """
         Join on a poset.  
+        
+        r >= max(value, f)
 
         f ⟼ { max(value, f) }
         r ⟼  {r} if r >= value
@@ -46,7 +52,55 @@ class Max1(WrapAMap):
         return "r ⟼ {r} if r ≽ %s, else ø" % (self.F.format(self.value))
 
 
-class Min1(WrapAMap):
+class MaxR1DP(WrapAMap):
+    """        
+        max(r, c) >= f
+
+        f ⟼ { 
+            bottom  for  f <= c  
+            f for f > c
+        }
+        r ⟼ { max(r, c) } 
+    """
+    def __init__(self, F, value):
+        assert isinstance(F, Poset)
+        h = MaxR1DPMap(F, value)
+        hd = Max1Map(F, value)
+        WrapAMap.__init__(self, h, hd)
+        self.value = value
+    
+    def __repr__(self):
+        return 'MaxR1DP(%r, %s)' % (self.F, self.value)
+
+    def repr_h_map(self):
+        return "r ⟼ {r} if r ≼ %s, else ø" % (self.F.format(self.value))
+
+class MinR1DP(WrapAMap):
+    """        
+        min(r, c) >= f
+
+       f ⟼ { 
+            {f}  for  f <= c  
+            emptyset for f > c
+        }
+        r ⟼ { min(r, c) } 
+    """
+    def __init__(self, F, value):
+        assert isinstance(F, Poset)
+        h = MinR1DPMap(F, value)
+        hd = Min1Map(F, value)
+        WrapAMap.__init__(self, h, hd)
+        self.value = value
+    
+    def __repr__(self):
+        return 'MaxR1DP(%r, %s)' % (self.F, self.value)
+
+    def repr_h_map(self):
+        return "r ⟼ {r} if r ≼ %s, else ø" % (self.F.format(self.value))
+    
+    
+    
+class MinF1DP(WrapAMap):
     """
         Meet on a poset.  
 

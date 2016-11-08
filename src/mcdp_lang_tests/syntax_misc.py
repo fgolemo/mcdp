@@ -5,7 +5,6 @@ from comptests.registrar import comptest
 from contracts.utils import raise_desc, check_isinstance
 from mcdp_dp import CatalogueDP, CoProductDP, NotFeasible, Template
 from mcdp_dp.dp_constant import Constant
-from mcdp_dp.dp_max import Max1, Min1
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp, parse_poset
 from mcdp_lang.pyparsing_bundled import Literal
@@ -21,6 +20,7 @@ from mocdp.exceptions import DPNotImplementedError, DPSemanticError
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
+from mcdp_dp.dp_max import MaxR1DP, MinR1DP
 
 
 @comptest
@@ -757,6 +757,7 @@ def check_lang87_rcomp(): # TODO: rename
     r = list(lf.maximals)[0]
     assert_equal(r, 0) 
     
+
 @comptest
 def check_lang88(): # TODO: rename
     """ Check that the codomain of ceil is Nat. """
@@ -872,7 +873,7 @@ def check_lang89(): # TODO: rename
 #         print s
         dp = parse_ndp(s).get_dp()
 #         print dp.repr_long()
-        check_isinstance(dp, Max1)
+        check_isinstance(dp, MaxR1DP)
         assert dp.value == 3
     
     # All of these should be equivalent to Min1(Nat, 2)
@@ -898,7 +899,7 @@ def check_lang89(): # TODO: rename
 #         print s
         dp = parse_ndp(s).get_dp()
 #         print dp.repr_long()
-        check_isinstance(dp, Min1)
+        check_isinstance(dp, MinR1DP)
         assert dp.value == 2
     
 

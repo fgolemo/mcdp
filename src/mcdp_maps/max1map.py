@@ -79,7 +79,7 @@ class Min1dualMap(Map):
         
 class Max1dualMap(Map):
     """
-        r -> { r   if r >= value
+        x -> { x   if x >= value
                undefined  otherwise
     """
     def __init__(self, R, value):
@@ -95,3 +95,51 @@ class Max1dualMap(Map):
             return r
         else:
             raise_desc(MapNotDefinedHere, 'unfeasible')
+            
+
+class MaxR1DPMap(Map):
+    """
+        x ⟼ { 
+            bottom  for  x <= c  
+            x for x > c
+        }
+    """
+    def __init__(self, R, value):
+        if do_extra_checks():
+            R.belongs(value)
+
+        Map.__init__(self, R, R)
+        self.value = value
+        self.R = R
+
+    def _call(self, x):
+        if self.R.leq(x, self.value):
+            return self.R.get_bottom()
+        else:
+            return x
+            
+
+        
+        
+class MinR1DPMap(Map):
+    """
+        x -> { x   if x <= value
+                   undefined  otherwise
+    """
+    def __init__(self, R, value):
+        if do_extra_checks():
+            R.belongs(value)
+
+        Map.__init__(self, R, R)
+        self.value = value
+        self.R = R
+
+    def _call(self, r):
+        if self.R.leq(r, self.value):
+            return r
+        else:
+            raise_desc(MapNotDefinedHere, 'unfeasible')
+            
+            
+                 
+            
