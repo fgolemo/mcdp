@@ -20,7 +20,7 @@ from mocdp.exceptions import DPNotImplementedError, DPSemanticError
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
-from mcdp_dp.dp_max import MaxR1DP, MinR1DP
+from mcdp_dp.dp_max import MaxR1DP, MinR1DP, MaxF1DP, MinF1DP
 
 
 @comptest
@@ -839,6 +839,8 @@ def check_lang89(): # TODO: rename
     parse_wrap_check('op1(provided f, provided f, provided f)', 
                      Syntax.rvalue_generic_op)
 
+@comptest
+def check_lang89b(): # TODO: rename
     s = """
     mcdp {
         provides f [Nat] 
@@ -849,7 +851,10 @@ def check_lang89(): # TODO: rename
     """
 
     dp = parse_ndp(s).get_dp() 
-    
+   
+@comptest
+def check_lang89c(): # TODO: rename
+ 
     # All of these should be equivalent to Max1(Nat, 3)
     max3s = [ """
     mcdp {
@@ -873,9 +878,12 @@ def check_lang89(): # TODO: rename
 #         print s
         dp = parse_ndp(s).get_dp()
 #         print dp.repr_long()
-        check_isinstance(dp, MaxR1DP)
+        check_isinstance(dp, MaxF1DP)
         assert dp.value == 3
     
+@comptest
+def check_lang89d(): # TODO: rename
+
     # All of these should be equivalent to Min1(Nat, 2)
     min3s = [ """
     mcdp {
@@ -899,9 +907,11 @@ def check_lang89(): # TODO: rename
 #         print s
         dp = parse_ndp(s).get_dp()
 #         print dp.repr_long()
-        check_isinstance(dp, MinR1DP)
+        check_isinstance(dp, MinF1DP)
         assert dp.value == 2
     
+@comptest
+def check_lang89e(): # TODO: rename
 
     s = """
     mcdp {
@@ -914,6 +924,9 @@ def check_lang89(): # TODO: rename
     dp = parse_ndp(s).get_dp()
     print dp.repr_long()
     
+@comptest
+def check_lang89f(): # TODO: rename
+
     s = """
     mcdp {
         provides f [Rcomp] 
@@ -925,6 +938,9 @@ def check_lang89(): # TODO: rename
     dp = parse_ndp(s).get_dp()
     print dp.repr_long()
     
+@comptest
+def check_lang89g(): # TODO: rename
+
     s = """
     mcdp {
         provides f [Rcomp] 
@@ -936,6 +952,9 @@ def check_lang89(): # TODO: rename
     dp = parse_ndp(s).get_dp()
     print dp.repr_long()
     
+@comptest
+def check_lang89h(): # TODO: rename
+
     s = """
     mcdp { 
         requires r [Nat] 
@@ -947,6 +966,9 @@ def check_lang89(): # TODO: rename
     print dp.repr_long()
     check_isinstance(dp, Constant)
     
+@comptest
+def check_lang89i(): # TODO: rename
+
     s = """
     mcdp {
         provides f [m]
@@ -958,6 +980,9 @@ def check_lang89(): # TODO: rename
     dp = parse_ndp(s).get_dp()
     print dp.repr_long()
     
+@comptest
+def check_lang89j(): # TODO: rename
+
     s = """
     mcdp {
         provides f [m]
@@ -968,6 +993,10 @@ def check_lang89(): # TODO: rename
     """
     assert_parse_ndp_semantic_error(s, "floor() is not Scott-continuous")
     
+@comptest
+def check_lang89k(): # TODO: rename
+
+
     s = """
     mcdp {
         provides f [m]
@@ -979,6 +1008,10 @@ def check_lang89(): # TODO: rename
     dp = parse_ndp(s).get_dp()
     print dp.repr_long()
     
+@comptest
+def check_lang89l(): # TODO: rename
+
+
     s = """
     mcdp {
         provides f [Rcomp]
@@ -990,6 +1023,10 @@ def check_lang89(): # TODO: rename
     dp = parse_ndp(s).get_dp()
     print dp.repr_long()
     
+@comptest
+def check_lang89m(): # TODO: rename
+
+
     s = """
     mcdp {
         provides f [Rcomp]
@@ -1001,6 +1038,10 @@ def check_lang89(): # TODO: rename
     dp = parse_ndp(s).get_dp()
     print dp.repr_long()
     
+@comptest
+def check_lang89n(): # TODO: rename
+
+
     s = """
     mcdp {
         provides f [Nat]
@@ -1012,6 +1053,10 @@ def check_lang89(): # TODO: rename
     dp = parse_ndp(s).get_dp()
     print dp.repr_long()
     
+@comptest
+def check_lang89o(): # TODO: rename
+
+
     s = """
     mcdp {
         provides f [m]
@@ -1023,7 +1068,10 @@ def check_lang89(): # TODO: rename
     dp = parse_ndp(s).get_dp()
     print dp.repr_long()
     
-    
+@comptest
+def check_lang89p(): # TODO: rename
+
+
     """ Fvalue max """
     s = """
     mcdp {
@@ -1038,6 +1086,10 @@ def check_lang89(): # TODO: rename
     dp = ndp.get_dp()
     print dp.repr_long()
     
+@comptest
+def check_lang89q(): # TODO: rename
+
+
     """ Conversion """
     s = """
     mcdp {
@@ -1052,6 +1104,10 @@ def check_lang89(): # TODO: rename
     dp = ndp.get_dp()
     print dp.repr_long()
 
+@comptest
+def check_lang89r(): # TODO: rename
+
+
     """ Conversion not possible """
     s = """
     mcdp {
@@ -1065,7 +1121,10 @@ def check_lang89(): # TODO: rename
     expect = 'Could not convert R[m] to N'
     assert_parse_ndp_semantic_error(s, expect)
      
-     
+@comptest
+def check_lang89s(): # TODO: rename
+
+
     """ Fvalue min """
     s = """
     mcdp {
@@ -1138,6 +1197,31 @@ def check_lang94(): # TODO: rename
 
 @comptest
 def check_lang95(): # TODO: rename
+    pass 
+    
+
+
+@comptest
+def check_lang96(): # TODO: rename
+    pass 
+    
+    
+    
+
+@comptest
+def check_lang97(): # TODO: rename
+    pass 
+    
+    
+
+@comptest
+def check_lang98(): # TODO: rename
+    pass 
+    
+    
+
+@comptest
+def check_lang99(): # TODO: rename
     pass 
     
 

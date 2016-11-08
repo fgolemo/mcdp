@@ -368,11 +368,10 @@ class OpJoinFun(AssociativeOpRes):
             res = S.join(res, v)
         return ValueWithUnits(res, S)
             
-    def return_op_constant(self, context, resource, vu):
-        raise NotImplementedError
-#         check_isinstance(vu, ValueWithUnits)
-#         dp = Max1(vu.unit, vu.value) 
-#         return create_operation(context, dp, [resource], name_prefix='_max1a')
+    def return_op_constant(self, context, function, vu):
+        check_isinstance(vu, ValueWithUnits)
+        dp = MinF1DP(vu.unit, vu.value) 
+        return create_operation_lf(context, dp, [function], name_prefix='_max1a')
 
     def return_op_variables(self, context, functions):
         F = context.get_ftype(functions[0])
