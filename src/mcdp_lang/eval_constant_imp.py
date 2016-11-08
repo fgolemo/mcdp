@@ -243,7 +243,7 @@ def eval_constant_space_custom_value(op, context):
     assert isinstance(op, CDP.SpaceCustomValue)
     space = eval_space(op.space, context)
     custom_string = op.custom_string
-
+#     print('custom string %r' % (custom_string).__repr__())
     if isinstance(space, FiniteCollectionAsSpace):
         if custom_string == '*':
             if len(space.elements) == 1:
@@ -274,7 +274,13 @@ def eval_constant_space_custom_value(op, context):
 
     if isinstance(space, Rcomp):
         mcdp_dev_warning('Top?')
-        value = float(custom_string)
+        if isinstance(custom_string, CDP.ValueExpr):
+            value = custom_string.value
+        elif isinstance(custom_string, str):
+            value = float(custom_string)
+        else:
+            msg = 'Cannot interpret value.'
+            raise_desc(DPInternalError, msg, value=value)
         return ValueWithUnits(unit=Rcomp(), value=value)
         
     msg = 'Custom parsing not implemented for space.'

@@ -759,27 +759,29 @@ def check_lang87_rcomp(): # TODO: rename
     
 
 @comptest
-def check_lang88(): # TODO: rename
-    """ Check that the codomain of ceil is Nat. """
-    
+def check_lang88b(): # TODO: rename
     s = """
     mcdp {
         provides f [R]
-        requires r >= ceil(f)
+        requires r >= ceil(provided f)
     }
     """
     dp = parse_ndp(s).get_dp()
-    
-    print dp.repr_long()
+    print(s)
+    print(dp.repr_long())
     R = dp.get_res_space()
-    assert R == Nat(), R
+    assert R == R_dimensionless, R
     
+@comptest
+def check_lang88(): # TODO: rename
+    """ Check that the codomain of ceil is Nat. """
     
+
     # now with Rcomp
     s = """
     mcdp {
         provides f [Rcomp] 
-        requires r >= ceil(f)
+        requires r >= ceil(provided f)
     }
     """
     dp = parse_ndp(s).get_dp()
@@ -954,14 +956,16 @@ def check_lang89g(): # TODO: rename
     
 @comptest
 def check_lang89h(): # TODO: rename
-
+    parse_wrap_check('Rcomp:1', Syntax.space_custom_value1)
+    parse_wrap_check('Rcomp:1.2', Syntax.space_custom_value1)
     s = """
     mcdp { 
         requires r [Nat] 
         
-        required  r >= ceil(1.2 dimensionless) 
+        required r >= ceil(Rcomp:1.2) 
     }
     """
+    print s
     dp = parse_ndp(s).get_dp()
     print dp.repr_long()
     check_isinstance(dp, Constant)
@@ -1204,7 +1208,6 @@ def check_lang95(): # TODO: rename
 @comptest
 def check_lang96(): # TODO: rename
     pass 
-    
     
     
 

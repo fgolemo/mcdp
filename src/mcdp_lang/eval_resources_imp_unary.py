@@ -77,10 +77,14 @@ class OneRGiveMeADP(RuleInterface):
         dp = self.generate_dp(R)
             
         if is_constant:
+            print('Constant value op(%s) ' % resources_or_constants[0])
             amap = dp.amap
             value = resources_or_constants[0].cast_value(amap.get_domain())
             result = amap(value)
+            print('amap: %s' % amap)
+            print('type: %s' % type(self))
             vu = ValueWithUnits(result, amap.get_codomain())
+            print('result vu = %s' % str(vu))
             return get_valuewithunits_as_resource(vu, context)
         else:
             r = resources_or_constants[0]
@@ -294,6 +298,7 @@ class AssociativeOp(RuleInterface):
         # it's a constant value
         if len(resources) == 0:
             vu = self.reduce_constants(constants)
+#             print('Computing %s -> %s ' % (constants, vu))
             return self.only_one(vu, context)
             
         # it's only resource * (c1*c2*c3*...)
@@ -322,7 +327,9 @@ class AssociativeOpFun(AssociativeOp):
         return get_valuewithunits_as_function(vu, context)
 
 class OpJoin(AssociativeOpRes):
-    
+    """
+        r >= max(f1, f2)
+    """
     def __init__(self, nargs):
         assert nargs >= 2    
         self.nargs = nargs
@@ -352,6 +359,8 @@ class OpJoin(AssociativeOpRes):
 
 class OpJoinFun(AssociativeOpRes):
     
+    """ max(r, 2) >= f """
+    
     def __init__(self, nargs):
         assert nargs >= 2    
         self.nargs = nargs
@@ -370,7 +379,7 @@ class OpJoinFun(AssociativeOpRes):
             
     def return_op_constant(self, context, function, vu):
         check_isinstance(vu, ValueWithUnits)
-        dp = MinF1DP(vu.unit, vu.value) 
+        dp = MaxR1DP(vu.unit, vu.value) 
         return create_operation_lf(context, dp, [function], name_prefix='_max1a')
 
     def return_op_variables(self, context, functions):
@@ -381,6 +390,7 @@ class OpJoinFun(AssociativeOpRes):
 
 class OpMeetFun(AssociativeOpFun):
     
+    """ min(r, 2) >= f """
     def __init__(self, nargs):
         assert nargs >= 2    
         self.nargs = nargs
@@ -399,7 +409,7 @@ class OpMeetFun(AssociativeOpFun):
             
     def return_op_constant(self, context, function, vu):
         check_isinstance(vu, ValueWithUnits)
-        dp = MaxR1DP(vu.unit, vu.value) 
+        dp = MinR1DP(vu.unit, vu.value) 
         return create_operation_lf(context, dp, [function], name_prefix='_max1a')
 
     def return_op_variables(self, context, functions):
