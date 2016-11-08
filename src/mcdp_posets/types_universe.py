@@ -471,8 +471,8 @@ def get_space_product_embedding(tu, A, B):
 
 def get_poset_product_embedding(tu, A, B):
     pairs = [tu.get_embedding(a, b) for a, b in zip(A, B)]
-    fs = [x for x, _ in pairs]
-    finv = [y for _, y in pairs]
+    fs = tuple([x for x, _ in pairs])
+    finv = tuple([y for _, y in pairs])
 
     from mcdp_posets.maps.product_map import PosetProductMap
     res = PosetProductMap(fs), PosetProductMap(finv)

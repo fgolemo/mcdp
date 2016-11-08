@@ -72,45 +72,6 @@ def eval_lfunction(lf, context):
         msg = 'eval_lfunction(): cannot evaluate this as a function:'
         msg += '\n' + indent(r, '  ')
         raise_desc(DPInternalError, msg) 
-
-# 
-# def eval_lfunction_opminf(lf, context):
-#     """
-#         f <= min(required r1, required r2)
-#     """
-#     check_isinstance(lf, CDP.OpMinF)
-#     
-#     a = eval_lfunction(lf.a, context)
-#     b = eval_lfunction(lf.b, context)
-#  
-#     Fa = context.get_ftype(a)
-#     b = get_function_possibly_converted(b, Fa, context)
-#         
-#     dp = MeetNDualDP(2, Fa)
-#     
-#     return create_operation_lf(context, dp=dp, functions=[a, b],
-#                             name_prefix='max', op_prefix='_ops',
-#                             res_prefix='_result')
-#     
-#     
-# def eval_lfunction_opmaxf(lf, context):
-#     """
-#         f <= max(required r1, required r2)
-#     """
-#     check_isinstance(lf, CDP.OpMaxF)
-#     
-#     a = eval_lfunction(lf.a, context)
-#     b = eval_lfunction(lf.b, context)
-#  
-#     Fa = context.get_ftype(a)
-#     b = get_function_possibly_converted(b, Fa, context)
-#         
-#     dp = JoinNDualDP(2, Fa)
-#     
-#     return create_operation_lf(context, dp=dp, functions=[a, b],
-#                             name_prefix='max', op_prefix='_ops',
-#                             res_prefix='_result')
-    
             
 def eval_lfunction_anyoffun(lf, context):
     from .eval_constant_imp import eval_constant

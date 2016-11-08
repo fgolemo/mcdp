@@ -6,12 +6,11 @@ from contracts.utils import raise_desc, raise_wrapped
 from mcdp_posets import (NotLeq, PosetProduct, Rcomp, UpperSets,
     get_types_universe)
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
+from mcdp_posets.rcomp_units import RcompUnits
 from mcdp_report.axis_algebra import get_bounds, reduce_bounds
 from mcdp_report.drawing import plot_upset_R2
-from mocdp import logger
 
 from .interface import Plotter, NotPlottable
-from mcdp_posets.rcomp_units import RcompUnits
 
 
 class PlotterUR2(Plotter):

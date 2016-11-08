@@ -576,11 +576,7 @@ def eval_rvalue_generic_operation(r, context):
         op, symbols = get_best_match(opname, rtypes, are_they_constant,
                                      generic_op_res)
     except NotMatching as e:
-#         msg = 'Could not find any operation that matches.'
         raise_desc(DPSemanticError, str(e).strip())
-#         , msg, opname=opname, rtypes=rtypes,
-#                       are_they_constant=are_they_constant)
-#     
     r = op.apply(symbols, resources_or_constants, are_they_constant, context)
     return r
 

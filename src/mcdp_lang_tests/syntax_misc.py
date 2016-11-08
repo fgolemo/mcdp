@@ -1081,29 +1081,58 @@ def check_lang89(): # TODO: rename
     
 @comptest
 def check_lang91(): # TODO: rename
-    pass 
-    
-
-
+    s = """
+    mcdp {
+        provides f [m]
+        requires r [m] 
+        
+        required r >= min(provided f, 5 m)
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
+     
 
 @comptest
 def check_lang92(): # TODO: rename
-    pass 
-    
+    s = """
+    mcdp {
+        provides f [m]
+        requires r [m] 
+        
+        required r >= max(provided f, 5 m)
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
 
 
 
 @comptest
 def check_lang93(): # TODO: rename
-    pass 
-    
-
-
+    s = """
+    mcdp {
+        provides f [m]
+        requires r [m] 
+        
+        max(required r, 5m) >= provided f
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long() 
 
 @comptest
 def check_lang94(): # TODO: rename
-    pass 
-    
+    s = """
+    mcdp {
+        provides f [m]
+        requires r [m] 
+        
+        min(required r, 5m) >= provided f
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long() 
 
 
 @comptest
