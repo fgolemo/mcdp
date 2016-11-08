@@ -293,7 +293,7 @@ def eval_constant_space_custom_value(op, context):
     if isinstance(space, Rcomp):
         mcdp_dev_warning('Top?')
         if isinstance(custom_string, CDP.ValueExpr):
-            value = custom_string.value
+            value = float(custom_string.value)
         elif isinstance(custom_string, str):
             value = float(custom_string)
         else:
