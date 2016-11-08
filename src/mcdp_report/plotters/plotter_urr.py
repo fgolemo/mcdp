@@ -28,24 +28,26 @@ class PlotterURRpR(Plotter):
         if not isinstance(space, UpperSets):
             msg = 'I can only plot upper sets.'
             raise_desc(NotPlottable, msg, space=space)
-
+        
         P = space.P
-        try:
-            tu.check_leq(P, self.S)
-        except NotLeq as e:
-            msg = ('cannot convert from %s to %s' % (P, self.S))
-            raise_wrapped(NotPlottable, e, msg, compact=True)
-
-        _f1, _f2 = tu.get_embedding(P, self.S)
+        
+        if isinstance(P, PosetProduct) and len(P) == 2 and \
+            isinstance(P[0], PosetProduct) and len(P[0]) == 2:
+            self.P_to_S = lambda x: x
+        else:
+            try:
+                tu.check_leq(P, self.S)
+            except NotLeq as e:
+                msg = ('cannot convert from %s to %s' % (P, self.S))
+                raise_wrapped(NotPlottable, e, msg, compact=True)
+    
+            self.P_to_S, _f2 = tu.get_embedding(P, self.S)
 
     @contract(returns='seq[4]')
     def axis_for_sequence(self, space, seq):
         self.check_plot_space(space)
 
-        tu = get_types_universe()
-        P_TO_S, _ = tu.get_embedding(space.P, self.S)
-
-        points2d = [[self.toR2(P_TO_S(_)) for _ in s.minimals] for s in seq]
+        points2d = [[self.toR2(self.P_to_S(_)) for _ in s.minimals] for s in seq]
         axes = [get_bounds(_) for _ in points2d]
         return enlarge(functools.reduce(reduce_bounds, axes), 0.1)
 
@@ -59,10 +61,10 @@ class PlotterURRpR(Plotter):
         markers_params = params0['markers_params']
         
         self.check_plot_space(space)
-        tu = get_types_universe()
-        P_TO_S, _ = tu.get_embedding(space.P, self.S)
+#         tu = get_types_universe()
+#         P_TO_S, _ = tu.get_embedding(space.P, self.S)
 
-        points2d = [self.toR2(P_TO_S(_)) for _ in value.minimals]
+        points2d = [self.toR2(self.P_to_S(_)) for _ in value.minimals]
 
         R2 = PosetProduct((Rcomp(), Rcomp()))
 

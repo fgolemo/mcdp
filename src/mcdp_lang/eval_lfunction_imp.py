@@ -2,8 +2,10 @@
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance, raise_wrapped, indent
 from mcdp_dp import (InvMult2, InvPlus2, InvPlus2Nat, InvMult2Nat,
-                     InvMultValueNatDP, JoinNDualDP, MeetNDualDP, PlusValueNatDP,
+                     InvMultValueNatDP, PlusValueNatDP,
                      PlusValueRcompDP, PlusValueDP)
+from mcdp_dp.dp_multvalue import InvMultValueDP
+from mcdp_lang.eval_resources_imp_unary import eval_lfunction_genericoperationfun
 from mcdp_lang.parse_actions import decorate_add_where
 from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table,
     poset_maxima)
@@ -12,13 +14,10 @@ from mocdp.comp.context import CFunction, get_name_for_res_node, ValueWithUnits
 from mocdp.exceptions import (DPInternalError, DPNotImplementedError,
     DPSemanticError, mcdp_dev_warning)
 
-from .helpers import (get_function_possibly_converted,
-    create_operation_lf)
-from .helpers import get_valuewithunits_as_function
+from .helpers import create_operation_lf, get_valuewithunits_as_function
 from .namedtuple_tricks import recursive_print
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from mcdp_dp.dp_multvalue import InvMultValueDP
 
 
 CDP = CDPLanguage
@@ -56,13 +55,12 @@ def eval_lfunction(lf, context):
         CDP.DisambiguationFun: eval_lfunction_disambiguation,
         CDP.FunctionLabelIndex: eval_lfunction_label_index,
         CDP.TupleIndexFun: eval_lfunction_tupleindexfun,
-        CDP.AnyOfFun: eval_lfunction_anyoffun,
-        CDP.OpMinF: eval_lfunction_opminf,
-        CDP.OpMaxF: eval_lfunction_opmaxf,
+        CDP.AnyOfFun: eval_lfunction_anyoffun, 
         CDP.InvMult: eval_lfunction_invmult,
         CDP.InvPlus: eval_lfunction_invplus,
         CDP.VariableRef: eval_lfunction_variableref,
         CDP.FValueMinusN: eval_lfunction_FValueMinusN,
+        CDP.GenericOperationFun: eval_lfunction_genericoperationfun,
     }
 
     for klass, hook in cases.items():
@@ -74,45 +72,6 @@ def eval_lfunction(lf, context):
         msg = 'eval_lfunction(): cannot evaluate this as a function:'
         msg += '\n' + indent(r, '  ')
         raise_desc(DPInternalError, msg) 
-
-
-def eval_lfunction_opminf(lf, context):
-    """
-        f <= min(required r1, required r2)
-    """
-    check_isinstance(lf, CDP.OpMinF)
-    
-    a = eval_lfunction(lf.a, context)
-    b = eval_lfunction(lf.b, context)
- 
-    Fa = context.get_ftype(a)
-    b = get_function_possibly_converted(b, Fa, context)
-        
-    dp = MeetNDualDP(2, Fa)
-    
-    return create_operation_lf(context, dp=dp, functions=[a, b],
-                            name_prefix='max', op_prefix='_ops',
-                            res_prefix='_result')
-    
-    
-def eval_lfunction_opmaxf(lf, context):
-    """
-        f <= max(required r1, required r2)
-    """
-    check_isinstance(lf, CDP.OpMaxF)
-    
-    a = eval_lfunction(lf.a, context)
-    b = eval_lfunction(lf.b, context)
- 
-    Fa = context.get_ftype(a)
-    b = get_function_possibly_converted(b, Fa, context)
-        
-    dp = JoinNDualDP(2, Fa)
-    
-    return create_operation_lf(context, dp=dp, functions=[a, b],
-                            name_prefix='max', op_prefix='_ops',
-                            res_prefix='_result')
-    
             
 def eval_lfunction_anyoffun(lf, context):
     from .eval_constant_imp import eval_constant
@@ -137,8 +96,7 @@ def eval_lfunction_anyoffun(lf, context):
 
     dp = LimitMaximals(values=maximals, F=P)
     return create_operation_lf(context, dp=dp, functions=[],
-                               name_prefix='_anyof', op_prefix='_',
-                                res_prefix='_result')
+                               name_prefix='_anyof')
 
 
 def eval_lfunction_disambiguation(lf, context):

@@ -5,14 +5,13 @@ from contracts.utils import raise_desc, raise_wrapped, check_isinstance, indent
 from mcdp_dp import (MinusValueNatDP, MinusValueRcompDP, MinusValueDP,
                      MultValueDP, MultValueNatDP, PlusValueRcompDP, PlusValueDP,
                      PlusValueNatDP , ProductNDP, SumNNatDP, ProductNNatDP,
-                     SumNRcompDP, SumNDP, SumNIntDP)
-from mcdp_dp.dp_products import ProductNRcompDP
+                     SumNRcompDP, SumNDP, SumNIntDP, ProductNRcompDP)
 from mcdp_maps.SumN_xxx_Map import sum_dimensionality_works
 from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits,
     express_value_in_isomorphic_space, get_types_universe, mult_table, Rcomp)
 from mcdp_posets import is_top
-from mcdp_posets.rcomp_units import RbicompUnits_subtract, RbicompUnits_reflect,\
-    R_dimensionless
+from mcdp_posets.rcomp_units import (RbicompUnits_subtract, RbicompUnits_reflect,
+    R_dimensionless)
 from mocdp import MCDPConstants
 from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPNotImplementedError
@@ -288,9 +287,7 @@ def eval_MultN_ops_multi(resources,  context):
         raise_desc(DPInternalError, msg, resources=resources, 
                    resources2=resources2, promoted=promoted, R=R)
         
-    r = create_operation(context, dp, resources2,
-                         name_prefix='_prod', op_prefix='_factor',
-                         res_prefix='_result')
+    r = create_operation(context, dp, resources2, name_prefix='_prod')
     return r
 
 

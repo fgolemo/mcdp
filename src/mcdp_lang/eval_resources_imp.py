@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_dp.dp_approximation import  makeLinearCeilDP, \
-    makeLinearFloor0DP
+from mcdp_dp.dp_approximation import  makeLinearCeilDP, makeLinearFloor0DP
 from mcdp_dp.dp_plus_value import PlusValueDP
 from mcdp_dp.dp_uncertain import UncertainGate
 from mcdp_lang.parse_actions import decorate_add_where
@@ -44,13 +43,11 @@ def eval_rvalue(rvalue, context):
     from .eval_math import eval_rvalue_divide
     from .eval_math import eval_rvalue_MultN
     from .eval_math import eval_rvalue_PlusN
-    from .eval_resources_imp_minmax import eval_rvalue_OpMax
-    from .eval_resources_imp_minmax import eval_rvalue_OpMin
     from .eval_resources_imp_tupleindex import eval_rvalue_TupleIndex
     from .eval_resources_imp_maketuple import eval_rvalue_MakeTuple
     from .eval_uncertainty import eval_rvalue_Uncertain
     from .eval_resources_imp_tupleindex import eval_rvalue_resource_label_index
-    from .eval_resources_imp_unary import eval_rvalue_unary
+    from .eval_resources_imp_unary import  eval_rvalue_generic_operation
     from .eval_math import eval_rvalue_RValueMinusN
 
     cases = {
@@ -63,8 +60,6 @@ def eval_rvalue(rvalue, context):
         CDP.MultN: eval_rvalue_MultN,
         CDP.PlusN: eval_rvalue_PlusN,
         CDP.RValueMinusN: eval_rvalue_RValueMinusN,
-        CDP.OpMax: eval_rvalue_OpMax,
-        CDP.OpMin: eval_rvalue_OpMin,
         CDP.TupleIndexRes: eval_rvalue_TupleIndex,
         CDP.MakeTuple: eval_rvalue_MakeTuple,
         CDP.UncertainRes: eval_rvalue_Uncertain,
@@ -72,7 +67,7 @@ def eval_rvalue(rvalue, context):
         CDP.AnyOfRes: eval_rvalue_anyofres,
         CDP.ApproxStepRes: eval_rvalue_approx_step,
         CDP.ApproxURes: eval_rvalue_approx_u,
-        CDP.UnaryRvalue: eval_rvalue_unary,
+        CDP.GenericOperationRes: eval_rvalue_generic_operation,
     }
 
     for klass, hook in cases.items():

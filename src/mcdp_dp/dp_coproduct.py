@@ -120,7 +120,7 @@ class CoProductDP(PrimitiveDP):
         return 'CoProduct(%s)' % s
 
     def repr_long(self):
-        s = 'CoProduct  %% %s -> %s' % (self.get_fun_space(), self.get_res_space())
+        s = 'CoProduct  %% %s ⇸ %s' % (self.get_fun_space(), self.get_res_space())
         for dp in self.dps:
             r1 = dp.repr_long()
             s += '\n' + indent(r1, '. ', first='^ ')

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from mcdp_lang.pyparsing_bundled import FollowedBy
 from mocdp.exceptions import mcdp_dev_warning
 
 from .parse_actions import (divide_parse_action,
@@ -690,42 +691,27 @@ class Syntax():
                                lambda t: CDP.FunctionLabelIndex(keyword=t[1],
                                                                 fvalue=t[0], label=t[2]))
 
+#     
 
-    unary = ['sqrt',  'ceilsqrt', 'ceil', 'square', 'floor']
+    opname = sp(get_idn(), lambda t: CDP.GenericOperationName(t[0]))
     
-    unary_op = MatchFirst([sp(L(x), lambda t: CDP.ProcName(t[0]))
-                           for x in unary])
+    rvalue_generic_op_ops = sp(rvalue + ZeroOrMore(SCOMMA + rvalue),
+                               lambda t: make_list(list(t)))
     
+    # The ~FollowedBy is due to situations like this:
+    #     >  line 26 >   power = power1 + power2 + power3
+    #     >  line 27 >   (required in).watts >= power
+    # which would be interpreted as power3(required in)
+    rvalue_generic_op  = sp(opname + SLPAR + rvalue_generic_op_ops + SRPAR
+                            +  ~FollowedBy(DOT),
+                            lambda t: CDP.GenericOperationRes(t[0], t[1]) )
     
-    rvalue_unary_expr = sp(unary_op - SLPAR - rvalue - SRPAR,
-                            lambda t: CDP.UnaryRvalue(t[0], t[1]))
+    fvalue_generic_op_ops = sp(fvalue + ZeroOrMore(SCOMMA + fvalue),
+                               lambda t: make_list(list(t)))
+    fvalue_generic_op  = sp(opname + SLPAR + fvalue_generic_op_ops + SRPAR
+                            +  ~FollowedBy(DOT),
+                            lambda t: CDP.GenericOperationFun(t[0], t[1]) )
     
-    # binary functions on resources
-    binary = {
-        'max': CDP.OpMax,
-        'min': CDP.OpMin,
-    }
-
-    opname = sp(MatchFirst([L(x) for x in binary]), lambda t: CDP.OpKeyword(t[0]))
-
-    rvalue_binary = sp((opname - SLPAR +
-                        C(rvalue, 'op1') - SCOMMA
-                        - C(rvalue, 'op2')) - SRPAR ,
-                       lambda t: Syntax.binary[t[0].keyword](a=t['op1'], b=t['op2'], keyword=t[0]))
-
-    binary_f = {
-        'max': CDP.OpMaxF,
-        'min': CDP.OpMinF,
-    }
-
-    # binary functions on functionality
-    opname_f = sp(MatchFirst([L(x) for x in binary_f]), lambda t: CDP.OpKeyword(t[0]))
-
-    fvalue_binary = sp((opname_f - SLPAR +
-                        C(fvalue, 'op1') - SCOMMA
-                        - C(fvalue, 'op2')) - SRPAR ,
-                       lambda t: Syntax.binary_f[t[0].keyword](a=t['op1'], b=t['op2'], keyword=t[0]))
-
     fvalue_simple = sp(dpname + DOT - fname,
                        lambda t: CDP.Function(dp=t[0], s=t[2], keyword=t[1]))
 
@@ -1026,9 +1012,7 @@ class Syntax():
     rvalue_operand = (
           rvalue_new_function
         ^ rvalue_new_function2
-        ^ rvalue_resource
-        ^ rvalue_binary
-        ^ rvalue_unary_expr
+        ^ rvalue_resource 
         ^ constant_value
         ^ rvalue_power_expr
         ^ rvalue_tuple_indexing
@@ -1041,6 +1025,7 @@ class Syntax():
         ^ rvalue_approx_step
         ^ rvalue_approx_u
         ^ rvalue_placeholder 
+        ^ rvalue_generic_op
         )
 
     rvalue << operatorPrecedence(rvalue_operand, [
@@ -1052,7 +1037,6 @@ class Syntax():
 
     fvalue_operand = (
           constant_value
-        ^ fvalue_binary
         ^ fvalue_simple
         ^ fvalue_fancy
         ^ fvalue_new_resource
@@ -1065,7 +1049,8 @@ class Syntax():
         ^ fvalue_label_indexing3
         ^ lf_tuple_indexing
         ^ fvalue_any_of
-        ^ fvalue_placeholder)
+        ^ fvalue_placeholder
+        ^ fvalue_generic_op)
 
     # here we cannot use "|" because otherwise (cokode).id is not parsedcorrectly
 

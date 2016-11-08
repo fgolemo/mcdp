@@ -3,6 +3,8 @@ import itertools
 
 from contracts.utils import indent, raise_wrapped
 from mcdp_posets import (NotBelongs, PosetProduct, UpperSet,
+from mcdp_dp.repr_strings import repr_h_map_parallel
+from mcdp_posets import (Map, NotBelongs, PosetProduct, UpperSet, UpperSets,
     lowerset_product, poset_minima, upperset_product)
 from mcdp_posets.uppersets import lowerset_product_good
 from mocdp.exceptions import do_extra_checks
@@ -10,6 +12,7 @@ from mocdp.exceptions import do_extra_checks
 from .dp_series import get_product_compact
 from .primitive import PrimitiveDP
 from .repr_strings import repr_h_map_parallel
+from .primitive import NormalForm, PrimitiveDP
 
 
 __all__ = [
@@ -141,7 +144,7 @@ class Parallel(PrimitiveDP):
     def repr_long(self):
         r1 = self.dp1.repr_long()
         r2 = self.dp2.repr_long()
-        s = 'Parallel2  %% %s ⟶  %s' % (self.get_fun_space(), self.get_res_space())
+        s = 'Parallel2  %% %s ⇸ %s' % (self.get_fun_space(), self.get_res_space())
         s += '\n' + indent(r1, '. ', first='\ ')
         s += '\n' + indent(r2, '. ', first='\ ') 
         return s

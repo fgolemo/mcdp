@@ -1,8 +1,8 @@
-
+/**/
  span.NewResource { color: darkred;}
  span.NewFunction { color: darkgreen; }
  
-span.Unit, span.Nat, span.Int  {  color: #aC5600 ;}
+span.Unit, span.Nat, span.Int, span.Rcomp  {  color: #aC5600 ;}
 
 span.ValueExpr, span.IntegerFraction { color: #CC6600 ;}
 
@@ -69,11 +69,13 @@ span.IgnoreResourcesKeyword,
 span.ProcName,
 span.ApproxUpperKeyword,
 span.ApproxLowerKeyword,
-span.VarStatementKeyword
+span.VarStatementKeyword,
+span.GenericOperationName
 { 
     font-weight: bold; 
     color: #00a;
 }
+
 
 span.ProvideKeyword, span.RequireKeyword  {
     font-weight: bold; 

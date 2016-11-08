@@ -38,8 +38,8 @@ def check_minmax2(): # TODO: rename
 @comptest
 def check_minmax3(): # TODO: rename
     
-    parse_wrap(Syntax.opname_f, 'min')
-    parse_wrap(Syntax.fvalue_binary, 'min(required r1, required r2)')
+#     parse_wrap(Syntax.opname_f, 'min')
+#     parse_wrap(Syntax.fvalue_binary, 'min(required r1, required r2)')
     parse_wrap(Syntax.fvalue, 'min(required r1, required r2)')
 
     ndp = parse_ndp("""

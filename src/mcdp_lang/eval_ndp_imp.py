@@ -31,7 +31,7 @@ from .helpers import create_operation
 from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
-from .utils_lists import unwrap_list
+from .utils_lists import get_odd_ops, unwrap_list
 
 
 CDP = CDPLanguage
@@ -479,8 +479,7 @@ def add_constraint(context, resource, function):
                 assert tu.equal(R1, conversion.get_fun_space())
                 assert tu.equal(F2, conversion.get_res_space())
                 resource2 = create_operation(context=context, dp=conversion,
-                                            resources=[resource], name_prefix='_conversion',
-                                             op_prefix='_in', res_prefix='_out')
+                                            resources=[resource], name_prefix='_conversion')
                 c = Connection(dp1=resource2.dp, s1=resource2.s,
                                dp2=function.dp, s2=function.s)
                 context.add_connection(c)

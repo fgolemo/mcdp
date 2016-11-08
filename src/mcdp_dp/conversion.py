@@ -33,7 +33,8 @@ def get_conversion(A, B):
             mcdp_dev_warning('not really sure of the semantics of this')
             conversion = Conversion(A_to_B, B_to_A)
         except NotLeq as e:
-            msg = 'Wrapping with incompatible units.'
-            raise_wrapped(DPSemanticError, e, msg, A=A, B=B)
+            raise
+#             msg = 'Wrapping with incompatible units.'
+#             raise_wrapped(DPSemanticError, e, msg, A=A, B=B)
 
     return conversion

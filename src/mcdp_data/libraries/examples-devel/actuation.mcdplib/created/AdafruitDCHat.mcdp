@@ -35,16 +35,14 @@ mcdp {
     ((required in).dc).voltage >= `plugs.DC_voltages: v5
     ((required in).dc).connector >= `plugs.barrel_connectors: barrel_5mm
 
-    rigid_body1 = max( (provided out1).rigid_body, (provided out2).rigid_body)
-    rigid_body2 = max( (provided out3).rigid_body, (provided out4).rigid_body)
-    rigid_body = max(rigid_body1, rigid_body2)
+    
+    rigid_body = max( (provided out1).rigid_body, (provided out2).rigid_body,
+                      (provided out3).rigid_body, (provided out4).rigid_body)
     (required in).rigid_body >= rigid_body
     (required payload).rigid_body >= rigid_body
 
-    endurance1 = max( (provided out1).duration, (provided out2).duration )
-    endurance2 = max( (provided out3).duration, (provided out4).duration )
-    endurance = max(endurance1, endurance2)
-    (required in).duration >= endurance
+    (required in).duration >= max( (provided out1).duration, (provided out2).duration,
+                                   (provided out3).duration, (provided out4).duration )
 
     requires budget [USD]
     budget >= 22.50 USD

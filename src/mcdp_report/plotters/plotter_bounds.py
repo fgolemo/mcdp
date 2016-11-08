@@ -14,6 +14,7 @@ class Plotter_Tuple2_UR2(Plotter):
         self.p = PlotterUR2()
 
     def check_plot_space(self, space):
+        print('Plotter_Tuple2_UR2')
         tu = get_types_universe()
         if not (isinstance(space, PosetProduct) and len(space.subs) == 2):
             msg = 'I can only plot 2-tuples of upper sets.'
