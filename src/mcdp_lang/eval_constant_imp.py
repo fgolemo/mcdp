@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
-from mcdp_lang.parse_actions import decorate_add_where
 from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
     NotBelongs, NotLeq, PosetProduct, Rcomp, Space, UpperSet, UpperSets,
     get_types_universe, poset_minima)
 from mcdp_posets import FiniteCollectionAsSpace
 from mcdp_posets import LowerSets, LowerSet, RbicompUnits, RcompUnits
-from mcdp_posets.types_universe import express_value_in_isomorphic_space
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import (DPInternalError, DPSemanticError, mcdp_dev_warning,
     do_extra_checks)
@@ -106,16 +104,17 @@ def eval_constant_VariableRef(op, context):
     except ValueError:
         pass
     else:
-        raise_desc(NotConstant, 'Corresponds to new function, not a constant.', x=x)
+        msg = 'Corresponds to new function, not a constant.'
+        raise_desc(NotConstant, msg, x=x)
 
     try:
         x = context.get_ndp_res(op.name)
     except ValueError:
         pass
     else:
-        raise_desc(NotConstant, 'Corresponds to new resource, not a constant.', x=x)
+        msg = 'Corresponds to new resource, not a constant.'
+        raise_desc(NotConstant, msg, x=x)
 
-#     print context.var2function, context.var2resource
     msg = 'Variable ref %r unknown.' % op.name
     raise DPSemanticError(msg, where=op.where)
 
@@ -206,7 +205,7 @@ def eval_solve_f(op, context):
     except NotLeq as e:
         msg = 'Input not correct.'
         raise_wrapped(DPSemanticError, e, msg, compact=True)
-    f = express_value_in_isomorphic_space(f0.unit, f0.value, F)
+    f = f0.cast_value(F)
     res = dp.solve(f)
     UR = UpperSets(R)
     return ValueWithUnits(res, UR)
@@ -227,7 +226,7 @@ def eval_solve_r(op, context):
     except NotLeq as e:
         msg = 'Input not correct.'
         raise_wrapped(DPSemanticError, e, msg, compact=True)
-    r = express_value_in_isomorphic_space(r0.unit, r0.value, R)
+    r = r0.cast_value(R)
     
     res = dp.solve_r(r)
     try:
@@ -265,10 +264,10 @@ def eval_constant_space_custom_value(op, context):
         try:
             space.belongs(custom_string)
             mcdp_dev_warning('this does not seem to work...')
-        except NotBelongs as e:
-            msg = 'The value is not an element of this space.'
-            raise_wrapped(DPSemanticError, e, msg, compact=True,
-                          custom_string=op.custom_string, space=space)
+        except NotBelongs:
+            msg = 'The value "%s" is not an element of this poset.' % custom_string
+            msg += '\n\nThese are the valid values: ' + ", ".join(map(str, space.elements)) + '.'
+            raise_desc(DPSemanticError, msg)
 
         return ValueWithUnits(unit=space, value=op.custom_string)
     

@@ -251,3 +251,7 @@ http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c 
   (this means adding warnings to context)
 
 - add SKIP_INITIAL = False
+
+- dp graph for ParallelN
+- add wrapping for errors while editing
+
