@@ -114,7 +114,6 @@ class CoProductDP(PrimitiveDP):
 
         return res
 
-
     def __repr__(self):
         s = "^".join('%s' % x for x in self.dps)
         return 'CoProduct(%s)' % s
@@ -126,7 +125,6 @@ class CoProductDP(PrimitiveDP):
             s += '\n' + indent(r1, '. ', first='^ ')
         return s
     
-    
     def repr_h_map(self):
         con = " ∪ ".join('h%d(f)' % (i+1) for i in range(len(self.dps)))
         return 'f ⟼ Min {%s}' % con
@@ -134,84 +132,4 @@ class CoProductDP(PrimitiveDP):
     def repr_hd_map(self):
         con = " ∪ ".join('h*%d(r)' % (i+1) for i in range(len(self.dps)))
         return 'r ⟼ Max {%s}' % con
-    
-#
-#     def get_normal_form(self):
-#         """
-# 
-#             alpha1: U(F) x S1 -> U(R)
-#             beta1:  U(F) x S1 -> S1
-# 
-#             ...
-#             
-#             alphaN: U(F) x SN -> U(R)
-#             betaN:  U(R) x SN -> SN
-#             
-#             S = S1 ^ S2 ^ ... ^ SN
-#             
-#             alpha: U(F) x (S) -> U(R)
-#             beta : U(F) x (S) -> (S)
-# 
-#         """
-#         
-#         nf = [dp.get_normal_form() for dp in self.dps]
-#         
-#         Ss = [_.S for _ in nf]
-#         S = PosetProduct(tuple(Ss))
-#         print('S: %s' % S)
-# 
-#         F = self.get_fun_space()
-#         R = self.get_res_space()
-# 
-#         UF = UpperSets(F)
-#         UR = UpperSets(R)
-# 
-#         D = PosetProduct((UF, S))
-#         """
-#             D = U(F) x S
-#             alpha: U(F) x S -> U(R)
-#             beta : U(F) x S -> (S)
-#         """
-#         class CPAlpha(Map):
-#             def __init__(self, dp):
-#                 self.dp = dp
-#                 dom = D
-#                 cod = UR
-#                 Map.__init__(self, dom, cod)
-# 
-#             def _call(self, x):
-#                 (uf, s) = x
-#                 
-#                 uris = []
-#                 for i, si in enumerate(s):
-#                     uri = nf[i].alpha((uf, si))
-#                     uris.append(uri)
-# 
-#                 res = set()
-#                 for _ in uris:
-#                     res.update(_.minimals)
-#                 resm = poset_minima(res, R.leq)
-#                 r = UpperSet(resm, R)
-#                 return r
-# 
-#         class CPBeta(Map):
-#             def __init__(self, dp):
-#                 self.dp = dp
-#                 dom = D
-#                 cod = S
-#                 Map.__init__(self, dom, cod)
-# 
-#             def _call(self, x):
-#                 (uf, s) = x
-# 
-#                 res = []
-#                 for i, si in enumerate(s):
-# 
-#                     sn = nf[i].beta((uf, si))
-#                     res.append(sn)
-# 
-#                 return tuple(res)
-# 
-#         return NormalForm(S, CPAlpha(self), CPBeta(self))
-
-
+     

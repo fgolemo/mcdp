@@ -226,68 +226,6 @@ class Series(PrimitiveDP):
     
     def repr_hd_map(self):
         return 'r ⟼ [h1* ○ h2*](r)' # XXX
-#     
-#     def get_normal_form(self):
-#         """
-#             
-#             alpha1: U(F1) x S1 -> U(R1)
-#             beta1:  U(F1) x S1 -> S1
-#             
-#             alpha2: U(R1) x S2 -> U(R2)
-#             beta2:  U(R1) x S2 -> S2
-#              
-#         """
-# 
-#         S1, alpha1, beta1 = self.dp1.get_normal_form()
-#         S2, alpha2, beta2 = self.dp2.get_normal_form()
-# 
-#         F1 = self.dp1.get_fun_space()
-#         R2 = self.dp2.get_res_space()
-# 
-#         UR2 = UpperSets(R2)
-# 
-#         UF1 = UpperSets(F1)
-#         """
-#         S = S1 x S2 is a Poset
-#         alpha: UF1 x S -> UR1
-#         beta: UF1 x S -> S
-# """     
-#         S, pack, unpack = get_product_compact(S1, S2)
-# 
-#         D = PosetProduct((UF1, S))
-#                          
-#         class SeriesAlpha(Map):
-#             def __init__(self, dp):
-#                 self.dp = dp
-#                 dom = D
-#                 cod = UR2
-#                 Map.__init__(self, dom, cod)
-# 
-#             def _call(self, x):
-#                 (F, s) = x
-#                 (s1, s2) = unpack(s)
-#                 a = alpha1((F, s1))
-#                 return alpha2((a, s2))
-# 
-#         class SeriesBeta(Map):
-#             def __init__(self, dp):
-#                 self.dp = dp
-#                 dom = D
-#                 cod = S
-#                 Map.__init__(self, dom, cod)
-# 
-#             def _call(self, x):
-#                 (F, s) = x
-#                 (s1, s2) = unpack(s)
-#                 r_1 = beta1((F, s1))
-#                 a = alpha1((F, s1))
-#                 r_2 = beta2((a, s2))
-#                 
-#                 return pack(r_1, r_2)
-# 
-#         return NormalForm(S, SeriesAlpha(self), SeriesBeta(self))
-
-
 
 
 Series0 = Series 
@@ -301,22 +239,6 @@ Series0 = Series
 #     def prod_get_state(S1, S2, s):  # @UnusedVariable
 #         (s1, s2) = s
 #         return (s1, s2)
-
-# 
-# @contract(ur1=UpperSet, lf2=LowerSet)
-# def non_zero_intersection(ur1, lf2):
-#     assert isinstance(ur1, UpperSet), ur1
-#     assert isinstance(lf2, LowerSet), lf2
-#     """ Returns true if the two sets have non zero intersection """
-#     mcdp_dev_warning('Check better this one')
-#     for m in ur1.minimals:
-#         try:
-#             lf2.belongs(m)
-#             return True
-#         except NotBelongs:
-#             pass
-#     return False
-
 
 
     

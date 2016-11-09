@@ -2,12 +2,12 @@
 import functools
 
 from contracts.utils import raise_desc
+from mocdp import MCDPConstants
 from mocdp.exceptions import do_extra_checks, mcdp_dev_warning, DPInternalError
 import numpy as np
 
 from .poset import NotLeq, Poset, is_top
 from .space import NotBelongs, NotEqual
-from mocdp import MCDPConstants
 
 
 __all__ = [
@@ -19,7 +19,7 @@ class RcompTop():
         return self.__repr__()
     def __repr__(self):
         return "⊤"
-#         return "+∞"
+        # return "+∞"
     def __eq__(self, x):
         return isinstance(x, RcompTop)
     def __hash__(self):
@@ -44,9 +44,7 @@ class RcompBottom():
         return -np.inf
 
 finfo = np.finfo(float)
-# tiny = finfo.tiny
-# eps = finfo.eps
-# maxf = finfo.max
+
 
 class RcompBase(Poset):
     """
@@ -195,6 +193,7 @@ class RcompBase(Poset):
     def check_equal(self, x, y):
         if not x == y:
             raise NotEqual('%s != %s' % (x, y))
+
 
 class Rcomp(RcompBase):
     """ This is used as a separate class so Rcompunits does not
@@ -395,31 +394,4 @@ def Rcomp_multiply_upper_topology(A, a, B, b, C):
                 return C.get_top()
             else:
                 raise
-                
-#         
-#         # first, find out if there are any tops
-#         def is_there_a_top():
-#             for Fi, fi in zip(self.F, f):
-#                 if is_top(Fi, fi):
-#                     return True
-#             return False
-#         
-#         if is_there_a_top():
-#             return self.R.get_top()
-# 
-#         mult = lambda x, y: x * y
-#         try:
-#             r = functools.reduce(mult, f)
-#             if np.isinf(r):
-#                 r = self.R.get_top()
-#         except FloatingPointError as e:
-#             # assuming this is overflow
-#             if 'overflow' in str(e):
-#                 r = self.R.get_top()
-#             elif 'underflow' in str(e):
-#                 r = finfo.tiny
-#             else:
-#                 raise
-#         return r
-    
-                
+                 

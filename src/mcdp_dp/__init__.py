@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 from .primitive import *
-from .dp_loop import *
 from .dp_loop2 import *
 from .dp_series import *
 from .dp_parallel import *
