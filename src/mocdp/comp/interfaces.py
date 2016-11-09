@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 from abc import ABCMeta, abstractmethod
+
 from contracts import contract
 from mcdp_posets import PosetProduct
+
 
 __all__ = [
     'NotConnected',

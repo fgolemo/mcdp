@@ -10,6 +10,7 @@ from mocdp.exceptions import mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
 from system_cmd.meat import system_cmd_result
 from system_cmd.structures import CmdException
+from contracts.utils import check_isinstance
 
 
 __all__ = [
@@ -19,7 +20,7 @@ __all__ = [
 STYLE_GREENRED = 'greenred'
 STYLE_GREENREDSYM = 'greenredsym'
 COLOR_DARKGREEN = 'darkgreen'
-COLOR_DARKRED = 'red'
+COLOR_DARKRED = '#861109'
 
 class GraphDrawingContext():
     def __init__(self, gg, parent, yourname, level=0,
@@ -248,6 +249,8 @@ def choose_best_icon(iconoptions, imagepaths):
 
 
 def resize_icon(filename, tmppath, size):
+    check_isinstance(filename, str)
+    check_isinstance(tmppath, str)
     res = os.path.join(tmppath, 'resized', str(size))
 
     safe_makedirs(res)

@@ -70,7 +70,7 @@ ATTR_LOAD_NAME = '__mcdplibrary_load_name'
 ATTR_LOAD_LIBNAME = '__mcdplibrary_load_libname'
 
 
-import numpy as np
+
 
 class MCDPConstants():
     """ Some system-wide constants """
@@ -119,7 +119,7 @@ class MCDPConstants():
     
     # Any time we need to solve a relation like (r1*r2==f),
     # we will bound r1 and r2 in the interval [eps, 1/eps].
-    inv_relations_eps = np.finfo(float).eps # ~1e-16
+    inv_relations_eps = numpy.finfo(float).eps # ~1e-16
     # TODO: think whether this makes us optimistic or pessimistic, and where
     
 

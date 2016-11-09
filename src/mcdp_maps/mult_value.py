@@ -70,6 +70,9 @@ class MultValueNatMap(Map):
         self.N = Nat()
         Map.__init__(self, dom=self.N, cod=self.N)
 
+    def diagram_label(self):
+        return "× %s" % self.N.format(self.value)
+
     def _call(self, x):
         return Nat_mult_uppersets_continuous(self.value, x) 
     
@@ -131,6 +134,9 @@ class InvMultValueMap(Map):
         return 'InvMultValueMap(%s->%s, %s : %s)' % (self.dom, self.cod, self.space,
                                                      self.space.format(self.value))
  
+    def diagram_label(self):
+        return "/ %s" % self.space.format(self.value)
+
 
 class InvMultValueNatMap(Map):
     """ x |-> 
@@ -163,7 +169,8 @@ class InvMultValueNatMap(Map):
     def repr_map(self, letter):
         return repr_map_invmultvalue(letter, self.dom, self.value)
     
-    
+    def diagram_label(self):
+        return "/ %s" % self.dom.format(self.value)
 ### InvMultDualValue
 
 

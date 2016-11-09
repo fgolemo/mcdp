@@ -311,6 +311,21 @@ class RuleMuxComposition(SeriesSimplificationRule):
         assert isinstance(dp2, Mux)
         return mux_composition(dp1, dp2)
 
+# 
+# class RuleCommutativeF(SeriesSimplificationRule):
+#     """ 
+#         Commutative operators in functions. 
+#     
+#     
+#     """
+#     def applies(self, dp1, dp2):
+#         return isinstance(dp1, Mux) and isinstance(dp2, Mux)
+# 
+#     def _execute(self, dp1, dp2):
+#         assert isinstance(dp1, Mux)
+#         assert isinstance(dp2, Mux)
+#         return mux_composition(dp1, dp2)
+
             
 class RuleSimplifyPermPar(SeriesSimplificationRule):
     """ 

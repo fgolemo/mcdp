@@ -117,10 +117,16 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
     gg.styleAppend("simple", "style", "rounded")
 
     # constant resource (min r. needed)
-    gg.styleAppend("constant", "shape", "plaintext")
+    #     gg.styleAppend("constant", "shape", "plaintext")
+#     gg.styleAppend("constant", "fontcolor", COLOR_DARKGREEN)
+    gg.styleAppend("constant", "shape", "box")
+    gg.styleAppend("constant", "style", "rounded")
     # constant function (max f. to be implemented)
-    gg.styleAppend("limit", "shape", "plaintext")
-
+    #     gg.styleAppend("limit", "shape", "plaintext")
+#     gg.styleAppend("limit", "fontcolor", COLOR_DARKRED)
+    gg.styleAppend("limit", "shape", "box")
+    gg.styleAppend("limit", "style", "rounded")
+    
     gg.styleAppend("unconnected_node", "shape", "plaintext")
     unconnected_color = 'purple'
     gg.styleAppend("unconnected_node", "fontcolor", unconnected_color)

@@ -8,6 +8,7 @@ from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPInternalError
 
+
 __all__ = [
     'simplify_identities',
 ]

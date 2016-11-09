@@ -217,7 +217,11 @@ class InvMultValueRcompDP(WrapAMap):
         amap = InvMultValueMap(F, R, unit, value)
         amap_dual = InvMultDualValueMap(R, F, unit, value)            
         WrapAMap.__init__(self, amap, amap_dual)  
-
+        
+    def diagram_label(self):
+        return self.amap.diagram_label()
+    
+    
 class InvMultValueDP(WrapAMap):
     def __init__(self, F, R, unit, value):
         """ r * c >= f """ 
@@ -240,6 +244,9 @@ class InvMultValueDP(WrapAMap):
         amap_dual = InvMultDualValueMap(R, F, unit, value)    
         WrapAMap.__init__(self, amap, amap_dual)  
     
+    def diagram_label(self):
+        return self.amap.diagram_label()
+    
     
 class InvMultValueNatDP(WrapAMap):
     """
@@ -255,4 +262,6 @@ class InvMultValueNatDP(WrapAMap):
             
         WrapAMap.__init__(self, amap, amap_dual)
         
-        
+    def diagram_label(self):
+        return self.amap.diagram_label()
+    

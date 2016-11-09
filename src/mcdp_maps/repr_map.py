@@ -14,7 +14,7 @@ def repr_map_invmultdual(letter, value, space):
     
 def repr_map_joinn(letter, n):
     elements = get_string_list_of_elements(letter, n)
-    start = "⟨" +" , ".join(elements) + "⟩"
+    start = "⟨" +", ".join(elements) + "⟩"
     transformed = " ∧ ".join(elements)
     return '%s ⟼ %s' % (start, transformed)
 
