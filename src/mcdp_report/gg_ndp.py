@@ -17,7 +17,7 @@ from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning, DPInternalError
 from mocdp.ndp import NamedDPCoproduct
-from mcdp_dp.dp_identity import IdentityDP
+from mcdp_dp.dp_identity import IdentityDP, FunctionNode, ResourceNode
 
 
 STYLE_GREENRED = 'greenred'
@@ -688,8 +688,10 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 
             skip = gdc.should_I_skip_leq(ndp.context, c)
 
-            second_simple = is_simple(ndp.context.names[c.dp2])
-            first_simple = is_simple(ndp.context.names[c.dp1])
+            ndp_first = ndp.context.names[c.dp1]
+            ndp_second = ndp.context.names[c.dp2]
+            second_simple = is_simple(ndp_second)
+            first_simple = is_simple(ndp_first)
             any_simple = second_simple or first_simple
             both_simple = second_simple and first_simple
 
@@ -704,10 +706,15 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
                 gdc.styleApply("leq", box)
         
                 l1_label = get_signal_label(c.s2, ua)
-
+                
+       
                 dec = plotting_info.get_fname_label(ndp_name=(c.dp2,), fname=c.s2)
                 if dec is not None:
                     l1_label = get_signal_label_namepart(c.s2) + '\n' + dec
+
+                
+                if isinstance(ndp_second, SimpleWrap) and isinstance(ndp_second.dp, ResourceNode):
+                    l1_label = 'required ' + l1_label
 
 #                 print('Creating label with %r %s' % l1_label)
                 l1 = gdc.newLink(box, n_a , label=l1_label)
@@ -716,6 +723,10 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 #                     gdc.gg.propertyAppend(l1, "headport", "w")
 
                 l2_label = get_signal_label(c.s1, ub)
+
+                if isinstance(ndp_first, SimpleWrap) and isinstance(ndp_first.dp, FunctionNode):
+                    l2_label = 'provided ' + l2_label
+   
                 dec = plotting_info.get_rname_label(ndp_name=(c.dp1,), rname=c.s1)
                 if dec is not None:
                     l2_label = get_signal_label_namepart(c.s1) + '\n' + dec
@@ -752,7 +763,8 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 
             n = names2functions[dp][fn]
             F = ndp.context.names[dp].get_ftype(fn)
-            l = gdc.newLink(x, n, label=get_signal_label(fn, F))
+            label = 'required ' + get_signal_label(fn, F)
+            l = gdc.newLink(x, n, label=label)
 
             gdc.decorate_arrow_function(l)  # XXX?
             gdc.styleApply('unconnected_link', l)
@@ -763,7 +775,8 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 
             n = names2resources[dp][rn]
             R = ndp.context.names[dp].get_rtype(rn)
-            l = gdc.newLink(n, x, label=get_signal_label(rn, R))
+            label ='provided ' + get_signal_label(rn, R)
+            l = gdc.newLink(n, x, label=label)
             gdc.decorate_arrow_resource(l)  # XXX?
             gdc.styleApply('unconnected_link', l)
     

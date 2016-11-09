@@ -1,6 +1,5 @@
 product(
-    tag: S(PortableDCPower),
     dc: `DC_power,
     duration: s,
     rigid_body: `RigidBodyID
-)
+) 
