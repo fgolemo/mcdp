@@ -18,8 +18,8 @@ class RcompTop():
     def __str__(self):
         return self.__repr__()
     def __repr__(self):
-        # return "⊤"
-        return "+∞"
+        return "⊤"
+#         return "+∞"
     def __eq__(self, x):
         return isinstance(x, RcompTop)
     def __hash__(self):

@@ -343,10 +343,16 @@ This creates a lower and upper bound for the MCDP:
 </pre>
 
 
-### solve
+### solve and solve_r
+
+Evaluates the model:
 
 <pre class='mcdp_value'>
     solve([[functionality]], [["mcdp"]])
+</pre>
+
+<pre class='mcdp_value'>
+    solve_f([[functionality]], [["mcdp"]])
 </pre>
 
 <!-- <pre class='mcdp_value'>
@@ -359,6 +365,8 @@ This creates a lower and upper bound for the MCDP:
 TODO
 
 ### Asserts
+
+Some asserts:
 
 <pre>
 assert_equal
