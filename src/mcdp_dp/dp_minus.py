@@ -30,6 +30,9 @@ class MinusValueDP(WrapAMap):
         amap_dual = PlusValueMap(P=F, c_value=c_value, c_space=c_space)
         WrapAMap.__init__(self, amap, amap_dual)
         
+    def diagram_label(self):
+        return self.amap.diagram_label()
+
 class MinusValueRcompDP(WrapAMap):
     """
         r + c ≥ f
@@ -45,6 +48,10 @@ class MinusValueRcompDP(WrapAMap):
         amap_dual = PlusValueRcompMap(c_value=c_value)
         WrapAMap.__init__(self, amap, amap_dual)
         
+    
+    def diagram_label(self):
+        return self.amap.diagram_label()
+    
 class MinusValueNatDP(WrapAMap):
     """
         r + c ≥ f
@@ -60,3 +67,6 @@ class MinusValueNatDP(WrapAMap):
         amap = MinusValueNatMap(c_value)
         amap_dual = PlusValueNatMap(c_value)
         WrapAMap.__init__(self, amap, amap_dual)
+
+    def diagram_label(self):
+        return self.amap.diagram_label()

@@ -1273,7 +1273,7 @@ def check_lang95b(): # TODO: rename
     mcdp {
       requires r [Nat]
       provides f [Nat]
-      provided f + Rcomp:2 <= required r
+      provided f + Rcomp:2.3 <= required r
     }
     """
     dp = parse_ndp(s).get_dp()
@@ -1281,16 +1281,16 @@ def check_lang95b(): # TODO: rename
     
     s = """
     mcdp {
-      requires rb [Nat]
-      provides f2 [Nat]
-      f2 <= required rb + Rcomp:2
+      requires r [Nat]
+      provides f [Nat]
+      f <= required r + Rcomp:2.3
     }
     """
     dp = parse_ndp(s).get_dp()
     print dp.repr_long()
-    ur = dp.solve(12)
-    check_isinstance(dp, MinusValueNatDP)
-    assert list(ur.minimals)[0] == 10
+#     ur = dp.solve(12)
+#     check_isinstance(dp, MinusValueNatDP)
+#     assert list(ur.minimals)[0] == 10
     
 @comptest
 def check_lang96(): # TODO: rename

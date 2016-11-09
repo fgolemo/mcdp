@@ -254,6 +254,9 @@ def get_invplus_op(context, lf, c):
         dp = MinusValueDP(T1, c.value, T2)
     elif isinstance(T1, Nat) and isinstance(T2, Nat):
         dp = MinusValueNatDP(c.value)
+    elif isinstance(T1, Nat) and isinstance(T2, Rcomp):
+        # f2 <= required rb + Rcomp:2.3
+        dp = MinusValueRcompDP(c.value)
     else:
         msg = ('Cannot create inverse addition operation between variable of type %s '
                'and constant of type %s.' % (T1, T2))  
