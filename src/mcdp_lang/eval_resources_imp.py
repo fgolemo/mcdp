@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_dp import PlusValueDP, UncertainGate
 from mcdp_dp.dp_approximation import  makeLinearCeilDP, makeLinearFloor0DP
 from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
@@ -115,7 +115,9 @@ def eval_rvalue_VariableRef(rvalue, context):
 
 
 def eval_rvalue_NewFunction(rvalue, context):
-    fname = rvalue.name
+    check_isinstance(rvalue, CDP.NewFunction)
+    check_isinstance(rvalue.name, CDP.FName)
+    fname = rvalue.name.value
     try:
         dummy_ndp = context.get_ndp_fun(fname)
     except ValueError:

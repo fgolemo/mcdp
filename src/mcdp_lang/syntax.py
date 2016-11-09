@@ -602,8 +602,8 @@ class Syntax():
                              lambda t: CDPLanguage.VariableRef(t[0]))
 
     # provided <name>
-    rvalue_new_function2 = sp(PROVIDED - get_idn(),
-                              lambda t: CDP.NewFunction(t[1]))
+    rvalue_new_function2 = sp(PROVIDED - fname,
+                              lambda t: CDP.NewFunction(t[0], t[1]))
 
     rvalue_new_function = rvalue_new_function2 | rvalue_new_function1
     # any-of(set)
@@ -676,10 +676,10 @@ class Syntax():
                                lambda t: CDP.DisambiguationFun(tag=t[0], fvalue=t[1]))
 
     fvalue_new_resource = sp(get_idn(),
-                             lambda t: CDP.NewResource(t[0]))
+                             lambda t: CDP.NewResource(t[1], t[1])) # XXX
 
-    fvalue_new_resource2 = sp(REQUIRED - get_idn(),
-                              lambda t: CDP.NewResource(t[1]))
+    fvalue_new_resource2 = sp(REQUIRED - rname,
+                              lambda t: CDP.NewResource(t[0], t[1]))
 
     fvalue_label_indexing = sp(fvalue_new_resource + ICOMMA + index_label,
                                lambda t: CDP.FunctionLabelIndex(keyword=t[1],
@@ -785,10 +785,10 @@ class Syntax():
     res_shortcut1 = sp(REQUIRES + rname + FOR - dpname,
                        lambda t: CDP.ResShortcut1(t[0], t[1], t[2], t[3]))
 
-    fun_shortcut2 = sp(PROVIDES + fname + LEQ - fvalue,
+    fun_shortcut2 = sp(PROVIDES + fname + (LEQ ^ EQ) - fvalue,
                        lambda t: CDP.FunShortcut2(t[0], t[1], t[2], t[3]))
 
-    res_shortcut2 = sp(REQUIRES + rname + GEQ - rvalue,
+    res_shortcut2 = sp(REQUIRES + rname + (GEQ ^ EQ) - rvalue,
                        lambda t: CDP.ResShortcut2(t[0], t[1], t[2], t[3]))
 
     fun_shortcut3 = sp(PROVIDES +

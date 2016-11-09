@@ -1329,20 +1329,130 @@ def check_lang96(): # TODO: rename
 
 @comptest
 def check_lang97(): # TODO: rename
-    pass 
+    """ Requires shortcut with constant """
+    s = """
+    mcdp {
+      x = Nat: 2
+      requires x
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long() 
+    
+    s = """
+    mcdp {
+      x = Nat: 2
+      y = Nat: 3
+      requires x, y
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long() 
     
     
 
 @comptest
 def check_lang98(): # TODO: rename
-    pass 
+    """ Provides shortcut with constant """
+    s = """
+    mcdp {
+      x = Nat: 2
+      provides x
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long() 
+    
+    s = """
+    mcdp {
+      x = Nat: 2
+      y = Nat: 3
+      provides x, y
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long() 
+
     
     
 
 @comptest
 def check_lang99(): # TODO: rename
+    s = """
+    mcdp {
+      requires r [Nat]
+      f = Nat: 2 + required r
+      provides f
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long() 
+
+    s = """
+    mcdp {
+      requires r [Nat]
+      f = Nat: 2 + r
+      provides f
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long() 
+
+    s = """
+    mcdp {
+      provides f [Nat]
+      r = Nat: 2 + f
+      requires r
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
+     
+@comptest
+def check_lang100(): # TODO: rename
     pass 
-    
-
-    
-
+ 
+@comptest
+def check_lang101(): # TODO: rename
+    pass 
+ 
+@comptest
+def check_lang102(): # TODO: rename
+    pass 
+ 
+@comptest
+def check_lang103(): # TODO: rename
+    pass 
+ 
+@comptest
+def check_lang104(): # TODO: rename
+    pass 
+ 
+@comptest
+def check_lang105(): # TODO: rename
+    pass 
+ 
+@comptest
+def check_lang106(): # TODO: rename
+    pass 
+ 
+@comptest
+def check_lang107(): # TODO: rename
+    pass 
+ 
+@comptest
+def check_lang108(): # TODO: rename
+    pass 
+ 
+@comptest
+def check_lang109(): # TODO: rename
+    pass 
+ 
+@comptest
+def check_lang110(): # TODO: rename
+    pass 
+ 
+@comptest
+def check_lang111(): # TODO: rename
+    pass 
+ 

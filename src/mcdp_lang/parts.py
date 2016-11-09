@@ -92,8 +92,10 @@ class CDPLanguage():
     VariableRef = namedtuplewhere('VariableRef', 'name')
     VariableRefNDPType = namedtuplewhere('VariableRefNDPType', 'name')
 
-    NewResource = namedtuplewhere('NewResource', 'name')
-    NewFunction = namedtuplewhere('NewFunction', 'name')
+    # required rname 
+    NewResource = namedtuplewhere('NewResource', 'keyword name')
+    # provided fname
+    NewFunction = namedtuplewhere('NewFunction', 'keyword name')
     Constraint = namedtuplewhere('Constraint', 'function rvalue prep')
 
     NatConstant = namedtuplewhere('NatConstant', 's1 s2 value')  # value = int, >=0
@@ -236,8 +238,8 @@ class CDPLanguage():
     
     FunShortcut1m = namedtuplewhere('FunShortcut1m', 'provides fnames prep_using name')
     ResShortcut1m = namedtuplewhere('ResShortcut1m', 'requires rnames prep_for name')
-    FunShortcut2 = namedtuplewhere('FunShortcut2', 'keyword fname leq lf')
-    ResShortcut2 = namedtuplewhere('ResShortcut2', 'keyword rname geq rvalue')
+    FunShortcut2 = namedtuplewhere('FunShortcut2', 'keyword fname prep lf')
+    ResShortcut2 = namedtuplewhere('ResShortcut2', 'keyword rname prep rvalue')
     
     IntegerFraction = namedtuplewhere('IntegerFraction', 'num den')
 

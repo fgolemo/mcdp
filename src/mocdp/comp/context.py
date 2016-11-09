@@ -54,9 +54,11 @@ class ValueWithUnits():
         return express_value_in_isomorphic_space(self.unit, self.value, P)
 
 def get_name_for_fun_node(name):
+    check_isinstance(name, str) # also more conditions
     return '_fun_%s' % name
 
 def get_name_for_res_node(name):
+    check_isinstance(name, str) # also more conditions
     return '_res_%s' % name
 
 

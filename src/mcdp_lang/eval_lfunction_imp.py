@@ -417,7 +417,9 @@ def eval_lfunction_invmult_ops(fs, context):
                         res_prefix='_result') 
 
 def eval_lfunction_newresource(lf, context):
-    rname = lf.name
+    check_isinstance(lf, CDP.NewResource)
+    check_isinstance(lf.name, CDP.RName)
+    rname = lf.name.value
     try:
         dummy_ndp = context.get_ndp_res(rname)
     except ValueError:

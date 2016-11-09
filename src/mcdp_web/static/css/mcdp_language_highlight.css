@@ -1,13 +1,13 @@
 /**/
- span.NewResource { color: darkred;}
- span.NewFunction { color: darkgreen; }
- 
-span.Unit, span.Nat, span.Int, span.Rcomp  {  color: #aC5600 ;}
+span.Unit, span.Nat, span.Int, span.Rcomp  {  
+    color: #aC5600;
+}
 
-span.ValueExpr, span.IntegerFraction { color: #CC6600 ;}
+span.ValueExpr, span.IntegerFraction { 
+    color: #CC6600;
+}
 
 span.RcompUnit { color: #CC6600 ;}
- /*span.Function  { color: darkgreen;}*/
 
   
 span.MCDPKeyword,
@@ -86,16 +86,73 @@ span.ProductWithLabelsLabel, span.IndexLabel  {
 	color: #CC6600;
 }
 
-span.ProvideKeyword,  span.ProvidedByKeyword, span.FName { color: darkgreen;}
-span.RequireKeyword, span.RequiredByKeyword, span.RName  { color: darkred;}
-  
-   
+/* f provided by s */
+span.ProvidedByKeyword,
+span.Function > span.FName {
+    color: darkgreen;
+}
+
+/* f required by s */
+span.RequiredByKeyword,
+span.Resource > span.RName {
+    color: darkred;
+}
+
+/* required rname - this is a function inside */
+span.RequiredKeyword,
+span.NewResource > span.RName {
+    color: darkgreen;
+}
+
+/* provided fname - this is a resource inside */
+span.ProvidedKeyword,
+span.NewFunction > span.FName {
+    color: darkred;
+}
+
+/* provides f [m] */
+
+span.ProvideKeyword {
+    color: darkgreen;
+}
+
+span.FunStatement > span.FName,
+span.FunShortcut1 > span.FName,
+span.FunShortcut1m > span.FName,
+span.FunShortcut2 > span.FName,
+span.FunShortcut3 > span.FName,
+span.FunShortcut4 > span.FName {
+    color: darkgreen;
+}
+
+/* requires r [m] */
+/* requires r >= ... */
+/* requires r1, r2*/
+
+span.RequireKeyword {
+    color: darkred;
+}
+
+span.ResStatement > span.RName,
+span.ResShortcut1 > span.RName,
+span.ResShortcut1m > span.RName,
+span.ResShortcut2 > span.RName,
+span.ResShortcut3 > span.RName,
+span.ResShortcut4 > span.RName {
+    color: darkred;
+}
+
+span.SetNameRValue > span.SetNameGenericVar {
+    color: darkred;
+}
+span.SetNameFValue > span.SetNameGenericVar {
+    color: darkgreen;
+}
 /* There is a bug that prevents this from working correctly. */
 /* span.ImpName { color: #CC6600; } */
 span.FuncName { color: #CC6600 ; }
 
 
-span.FName, span.RName { } 
 span.DPName, span.NDPName, span.PosetName, span.TemplateName,
 span.TemplateParamName,
 span.FinitePosetElement,

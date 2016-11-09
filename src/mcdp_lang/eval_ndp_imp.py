@@ -32,6 +32,7 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mcdp_lang.eval_warnings import warn_language, MCDPWarnings
 
 
 CDP = CDPLanguage
@@ -710,6 +711,10 @@ def eval_statement(r, context):
             add_constraint(context, resource=A, function=B)
 
     elif isinstance(r, CDP.FunShortcut2):  # provides rname <= (lf)
+        if isinstance(r.prep, CDP.leq):
+            msg = 'This is deprecated, and should be "=".'
+            warn_language(r.prep, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context)
+            
         B = eval_lfunction(r.lf, context)
         assert isinstance(B, CFunction)
         F = context.get_ftype(B)
@@ -717,6 +722,10 @@ def eval_statement(r, context):
         add_constraint(context, resource=A, function=B)
 
     elif isinstance(r, CDP.ResShortcut2):  # requires rname >= (rvalue)
+        if isinstance(r.prep, CDP.geq):
+            msg = 'This is deprecated, and should be "=".'
+            warn_language(r.prep, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context)
+    
         A = eval_rvalue(r.rvalue, context)
         assert isinstance(A, CResource)
         R = context.get_rtype(A)
