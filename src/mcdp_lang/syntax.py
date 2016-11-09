@@ -675,13 +675,18 @@ class Syntax():
     fvalue_disambiguation = sp(fvalue_disambiguation_tag + fvalue,
                                lambda t: CDP.DisambiguationFun(tag=t[0], fvalue=t[1]))
 
-    fvalue_new_resource = sp(get_idn(),
-                             lambda t: CDP.NewResource(t[1], t[1])) # XXX
-
     fvalue_new_resource2 = sp(REQUIRED - rname,
                               lambda t: CDP.NewResource(t[0], t[1]))
 
-    fvalue_label_indexing = sp(fvalue_new_resource + ICOMMA + index_label,
+    fvalue_new_resource = sp(get_idn(), 
+                      lambda t: CDPLanguage.VariableRef(t[0]))
+# 
+# 
+#     fvalue_new_resource = sp(rname,
+#                              lambda t: CDP.NewResource(None, t[0])) # XXX
+
+    fvalue_label_indexing_ref = fvalue_new_resource2 | fvalue_new_resource 
+    fvalue_label_indexing = sp(fvalue_label_indexing_ref + ICOMMA + index_label,
                                lambda t: CDP.FunctionLabelIndex(keyword=t[1],
                                                                 fvalue=t[0], label=t[2]))
     # take(provided a, sub)
@@ -1042,7 +1047,7 @@ class Syntax():
           constant_value
         ^ fvalue_simple
         ^ fvalue_fancy
-        ^ fvalue_new_resource
+#         ^ fvalue_new_resource
         ^ fvalue_new_resource2
         ^ fvalue_maketuple
         ^ fvalue_uncertain
