@@ -35,14 +35,12 @@ def eval_constant(op, context):
     """
     from .eval_math import (eval_constant_divide, eval_PlusN_as_constant,
                             eval_RValueMinusN_as_constant, eval_MultN_as_constant)
-    
     if isinstance(op, (CDP.Resource)):
         raise NotConstant(str(op))
     
     if isinstance(op, (CDP.OpMax, CDP.OpMin, CDP.Power)):
         # TODO: can implement optimization
         raise NotConstant(str(op))
-    
     cases = {
         CDP.NatConstant: eval_constant_NatConstant,
         CDP.IntConstant: eval_constant_IntConstant,
@@ -76,7 +74,7 @@ def eval_constant(op, context):
     for klass, hook in cases.items():
         if isinstance(op, klass):
             return hook(op, context)
-    
+
     if True: # pragma: no cover    
         msg = 'eval_constant(): Cannot evaluate this as constant.'
         op = recursive_print(op)
@@ -95,7 +93,12 @@ def eval_constant_VariableRef(op, context):
 
     if op.name in context.var2resource:
         res = context.var2resource[op.name]
-        msg = 'This is a resource.'
+        msg = 'This is a resource, not a constant.'
+        raise_desc(NotConstant, msg, res=res)
+
+    if op.name in context.var2function: # XXX: not sure this is needed
+        res = context.var2function[op.name]
+        msg = 'This is a function, not a constant.'
         raise_desc(NotConstant, msg, res=res)
 
     try:
@@ -103,8 +106,16 @@ def eval_constant_VariableRef(op, context):
     except ValueError:
         pass
     else:
-        raise_desc(NotConstant, 'Corresponds to new function.', x=x)
+        raise_desc(NotConstant, 'Corresponds to new function, not a constant.', x=x)
 
+    try:
+        x = context.get_ndp_res(op.name)
+    except ValueError:
+        pass
+    else:
+        raise_desc(NotConstant, 'Corresponds to new resource, not a constant.', x=x)
+
+#     print context.var2function, context.var2resource
     msg = 'Variable ref %r unknown.' % op.name
     raise DPSemanticError(msg, where=op.where)
 
@@ -242,7 +253,7 @@ def eval_constant_space_custom_value(op, context):
     assert isinstance(op, CDP.SpaceCustomValue)
     space = eval_space(op.space, context)
     custom_string = op.custom_string
-
+#     print('custom string %r' % (custom_string).__repr__())
     if isinstance(space, FiniteCollectionAsSpace):
         if custom_string == '*':
             if len(space.elements) == 1:
@@ -262,18 +273,42 @@ def eval_constant_space_custom_value(op, context):
         return ValueWithUnits(unit=space, value=op.custom_string)
     
     if isinstance(space, Nat):
-        mcdp_dev_warning('Top?')
-        value = int(custom_string)
+        if isinstance(custom_string, CDP.ValueExpr):
+            value = int(custom_string.value) # XXX: warn
+            if value != custom_string.value:
+                msg = 'Invalid value %s' % value
+                raise_desc(DPSemanticError, msg, value=value, value0=custom_string.value)
+        elif isinstance(custom_string, str):
+            value = int(custom_string)
+        else:
+            msg = 'Cannot interpret value.'
+            raise_desc(DPInternalError, msg, value=value)
         return ValueWithUnits(unit=Nat(), value=value)
 
     if isinstance(space, Int):
         mcdp_dev_warning('Top?')
-        value = int(custom_string)
+        if isinstance(custom_string, CDP.ValueExpr):
+            value = int(custom_string.value) # XXX: warn
+            if value != custom_string.value:
+                msg = 'Invalid value %s' % value
+                raise_desc(DPSemanticError, msg, value=value, value0=custom_string.value)
+        elif isinstance(custom_string, str):
+            value = int(custom_string)
+        else:
+            msg = 'Cannot interpret value.'
+            raise_desc(DPInternalError, msg, value=value)
+        
         return ValueWithUnits(unit=Int(), value=value)
 
     if isinstance(space, Rcomp):
         mcdp_dev_warning('Top?')
-        value = float(custom_string)
+        if isinstance(custom_string, CDP.ValueExpr):
+            value = float(custom_string.value)
+        elif isinstance(custom_string, str):
+            value = float(custom_string)
+        else:
+            msg = 'Cannot interpret value.'
+            raise_desc(DPInternalError, msg, value=value)
         return ValueWithUnits(unit=Rcomp(), value=value)
         
     msg = 'Custom parsing not implemented for space.'

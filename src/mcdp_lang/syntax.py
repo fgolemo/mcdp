@@ -528,8 +528,11 @@ class Syntax():
 
     # <space> : identifier
     # `plugs : european
-    short_identifiers = Word(nums + alphas + '_')
-    space_custom_value1 = sp(space + L(":") + (L('*') | short_identifiers),
+#     short_identifiers = Word(nums + alphas + '_')
+    
+    short_identifiers = Combine(oneOf(list('_' + alphas)) + Optional(Word('_' + alphanums)))
+    
+    space_custom_value1 = sp(space + L(":") + (L('*') | short_identifiers |  SyntaxBasics.integer_or_float),
                           lambda t: CDP.SpaceCustomValue(t[0], t[1], t[2]))
 
 

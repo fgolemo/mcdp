@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
+from mcdp_dp import PlusValueDP, UncertainGate
 from mcdp_dp.dp_approximation import  makeLinearCeilDP, makeLinearFloor0DP
-from mcdp_dp.dp_plus_value import PlusValueDP
-from mcdp_dp.dp_uncertain import UncertainGate
-from mcdp_lang.parse_actions import decorate_add_where
 from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
     get_types_universe, poset_minima)
 from mocdp.comp.context import CResource, ValueWithUnits, get_name_for_fun_node
 from mocdp.exceptions import DPSemanticError
 
 from .eval_constant_imp import eval_constant
+from .eval_warnings import warn_language, MCDPWarnings
 from .helpers import create_operation, get_valuewithunits_as_resource
 from .namedtuple_tricks import recursive_print
+from .parse_actions import decorate_add_where
 from .parts import CDPLanguage
 
 
@@ -105,7 +105,14 @@ def eval_rvalue_VariableRef(rvalue, context):
         raise DPSemanticError(msg, where=rvalue.where)
 
     s = dummy_ndp.get_rnames()[0]
+    
+    msg = ('Please use the more precise form "provided %s" rather than simply "%s".'
+           % (rvalue.name, rvalue.name))
+    warn_language(rvalue, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context)
+
     return context.make_resource(get_name_for_fun_node(rvalue.name), s)
+
+
 
 def eval_rvalue_NewFunction(rvalue, context):
     fname = rvalue.name

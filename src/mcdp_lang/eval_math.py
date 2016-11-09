@@ -349,12 +349,12 @@ def eval_PlusN_sort_ops(ops, context, wants_constant):
             x = eval_constant(op, context)
             check_isinstance(x, ValueWithUnits)
 
-            if isinstance(x.unit, (RcompUnits, Nat)):
+            if isinstance(x.unit, (RcompUnits, Rcomp, Nat)):
                 pos_constants.append(x)
             elif isinstance(x.unit, RbicompUnits):
                 neg_constants.append(x)
             else:
-                msg = 'Invalid addition - needs error'
+                msg = 'Cannot use the type %s in a sum.' % x.unit
                 raise_desc(DPInternalError, msg, x=x)
                 
         except NotConstant as e:
@@ -436,7 +436,6 @@ def eval_PlusN_(constants, resources, context):
             return resources[0]
     else:
         # there are some resources
-
         r =  eval_PlusN_ops(resources, context) 
         if not constants:
             return r
@@ -518,17 +517,28 @@ def get_plus_op(context, r, c):
 
     if isinstance(T1, Rcomp) and isinstance(T2, Rcomp):
         dp = PlusValueRcompDP(c.value)
-    if isinstance(T1, Rcomp) and isinstance(T2, Nat):
+    elif isinstance(T1, Rcomp) and isinstance(T2, Nat):
         # cast Nat to Rcomp
-        val = float(c.value)
+        if is_top(Nat, c.value):
+            val = Rcomp().get_top()
+        else:
+            val = float(c.value)
         dp = PlusValueRcompDP(val)
+    elif isinstance(T1, Rcomp) and isinstance(T2, Rcomp):
+        dp = PlusValueRcompDP(c.value)
+    elif isinstance(T1, Nat) and isinstance(T2, Rcomp):
+        # This is the case:
+        # 
+        #   provided f + Rcomp:2.3 <= required r
+        dp = PlusValueRcompDP(c.value)
     elif isinstance(T1, RcompUnits) and isinstance(T2, RcompUnits):
         dp = PlusValueDP(F=T1, c_value=c.value, c_space=T2)
     elif isinstance(T1, Nat) and isinstance(T2, Nat):
         dp = PlusValueNatDP(c.value)
     else:
-        msg = 'Cannot create addition operation.'
-        raise_desc(DPInternalError, msg, rtype=T1, c=c)
+        msg = ('Cannot create addition operation between resource of type %s'
+               ' and constant of type %s.' % (T1, T2))
+        raise_desc(DPInternalError, msg)# , rtype=T1, c=c)
 
     r2 = create_operation(context, dp, resources=[r],
                           name_prefix='_plus', op_prefix='_x',

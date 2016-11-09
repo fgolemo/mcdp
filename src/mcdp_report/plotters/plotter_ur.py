@@ -3,12 +3,13 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_posets import (NotLeq, Rcomp, UpperSets,
     get_types_universe)
+from mcdp_posets.poset_product import PosetProduct
+from mcdp_posets.rcomp import RcompBase
 from mcdp_report.axis_algebra import enlarge
 from mcdp_report.drawing import plot_upset_R2
 from mcdp_report.plotters.interface import Plotter, NotPlottable
 from mocdp import logger
 from mocdp.exceptions import mcdp_dev_warning
-from mcdp_posets.poset_product import PosetProduct
 
 
 class PlotterUR(Plotter):
@@ -22,13 +23,16 @@ class PlotterUR(Plotter):
 
         R = Rcomp()
         P = space.P
-        try:
-            tu.check_leq(P, R)
-        except NotLeq as e:
-            msg = ('cannot convert to R^2 from %s' % space)
-            raise_wrapped(NotPlottable, e, msg, compact=True)
-
-        _f1, _f2 = tu.get_embedding(P, R)
+        if isinstance(P, RcompBase):
+            self.P_to_S = lambda x: x
+        else: 
+            try:
+                tu.check_leq(P, R)
+            except NotLeq as e:
+                msg = ('cannot convert to R^2 from %s' % space)
+                raise_wrapped(NotPlottable, e, msg, compact=True)
+    
+            self.P_to_S, _ = tu.get_embedding(P, R)
 
     def get_xylabels(self, space):
         P = space.P
@@ -39,8 +43,6 @@ class PlotterUR(Plotter):
         self.check_plot_space(space)
 
         R = Rcomp()
-        tu = get_types_universe()
-        P_TO_S, _ = tu.get_embedding(space.P, R)
 
         maxy = 1000.0
         def limit(p): # XXX trick for Top?
@@ -48,7 +50,7 @@ class PlotterUR(Plotter):
             y = min(y, maxy)
             return y
 
-        ys = [ max([limit(P_TO_S(_)) for _ in s.minimals]) 
+        ys = [ max([limit(self.P_to_S(_)) for _ in s.minimals]) 
               
               for s in seq]
         axes = (-1, 1, 0, max(ys))

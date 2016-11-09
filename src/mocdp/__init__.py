@@ -90,7 +90,6 @@ class MCDPConstants():
     
     # TODO: make algo configurable for invplus, etc. see also: InvMult2.ARGO 
     
-    
     #
     # Testing
     #
@@ -101,7 +100,7 @@ class MCDPConstants():
     Rcomp_chain_include_max = False
     
     # test the correspondence between h and h*
-    test_dual01_chain = False
+    test_dual01_chain = True
     
     # Ignore graphviz errors in unit tests 
     test_ignore_graphviz_errors = True

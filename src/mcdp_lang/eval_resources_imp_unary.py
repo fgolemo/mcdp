@@ -6,16 +6,14 @@ from contracts.utils import raise_desc, check_isinstance, raise_wrapped, indent
 from mcdp_dp import (CeilDP, SqrtRDP,
     SquareNatDP, SquareDP)
 from mcdp_dp.conversion import get_conversion
-from mcdp_dp.dp_max import Max1, JoinNDP, Min1, MeetNDP, JoinNDualDP, \
+from mcdp_dp.dp_max import MinF1DP, MinR1DP, JoinNDP, MaxF1DP, MaxR1DP, MeetNDP, JoinNDualDP, \
     MeetNDualDP
 from mcdp_dp.dp_misc_unary import CeilToNatDP, Floor0DP
 from mcdp_lang.eval_constant_imp import eval_constant, NotConstant
-from mcdp_lang.helpers import get_valuewithunits_as_resource, \
-    get_valuewithunits_as_function, create_operation_lf
-from mcdp_lang.utils_lists import unwrap_list
+from .helpers import get_valuewithunits_as_resource, get_valuewithunits_as_function, create_operation_lf
+from .utils_lists import unwrap_list
 from mcdp_posets import Nat, Rcomp, RcompUnits
-from mcdp_posets import NotLeq
-from mcdp_posets.types_universe import get_types_universe
+from mcdp_posets import NotLeq, get_types_universe
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPSemanticError
 
@@ -65,7 +63,7 @@ class OneRGiveMeADP(RuleInterface):
     def generate_dp(self, R):
         pass
     
-    def apply(self, symbols, resources_or_constants, are_they_constant, context):
+    def apply(self, symbols, resources_or_constants, are_they_constant, context):  # @UnusedVariable
         assert len(resources_or_constants) == 1
         is_constant = are_they_constant[0]
     
@@ -209,7 +207,7 @@ class OpSpecTrue(OpSpecInterface):
 class OpSpecExactly(OpSpecInterface):
     def __init__(self, P):
         self.P = P
-    def applies(self, rtype, is_constant, symbols):
+    def applies(self, rtype, is_constant, symbols):  # @UnusedVariable
         tu = get_types_universe()
         if not tu.equal(rtype, self.P):
             msg = 'Poset %s does not match %s.' % (rtype, self.P)
@@ -236,7 +234,6 @@ class OpSpecCastable(OpSpecInterface):
         except NotLeq:
             msg = 'Could not find a conversion from %s to %s.' % (P, self.castable_to)
             raise_desc(OpSpecDoesntMatch, msg)
-#             raise_wrapped(OpSpecDoesntMatch, e, msg, exc=sys.exc_info())
         
 
 class OpSpecMarkSymbol(OpSpecInterface):
@@ -254,11 +251,9 @@ class OpSpecMarkSymbol(OpSpecInterface):
             R0 = symbols[self.symbol] 
             try:
                 get_conversion(R0, rtype) # XXX: will have to invert this
-            except NotLeq as e:
+            except NotLeq:
                 msg = 'Could not convert %s to %s.' % (rtype, R0) 
                 raise_desc(OpSpecDoesntMatch, msg)
-#                  self.symbol,
-#                 raise_wrapped(OpSpecDoesntMatch, e, msg, exc=sys.exc_info())
         else:
             symbols[self.symbol] = rtype
              
@@ -324,7 +319,9 @@ class AssociativeOpFun(AssociativeOp):
         return get_valuewithunits_as_function(vu, context)
 
 class OpJoin(AssociativeOpRes):
-    
+    """
+        r >= max(f1, f2)
+    """
     def __init__(self, nargs):
         assert nargs >= 2    
         self.nargs = nargs
@@ -343,7 +340,7 @@ class OpJoin(AssociativeOpRes):
             
     def return_op_constant(self, context, resource, vu):
         check_isinstance(vu, ValueWithUnits)
-        dp = Max1(vu.unit, vu.value) 
+        dp = MaxF1DP(vu.unit, vu.value) 
         return create_operation(context, dp, [resource], name_prefix='_max1a')
 
     def return_op_variables(self, context, resources):
@@ -353,6 +350,8 @@ class OpJoin(AssociativeOpRes):
 
 
 class OpJoinFun(AssociativeOpRes):
+    
+    """ max(r, 2) >= f """
     
     def __init__(self, nargs):
         assert nargs >= 2    
@@ -370,11 +369,10 @@ class OpJoinFun(AssociativeOpRes):
             res = S.join(res, v)
         return ValueWithUnits(res, S)
             
-    def return_op_constant(self, context, resource, vu):
-        raise NotImplementedError
-#         check_isinstance(vu, ValueWithUnits)
-#         dp = Max1(vu.unit, vu.value) 
-#         return create_operation(context, dp, [resource], name_prefix='_max1a')
+    def return_op_constant(self, context, function, vu):
+        check_isinstance(vu, ValueWithUnits)
+        dp = MaxR1DP(vu.unit, vu.value) 
+        return create_operation_lf(context, dp, [function], name_prefix='_max1a')
 
     def return_op_variables(self, context, functions):
         F = context.get_ftype(functions[0])
@@ -384,6 +382,7 @@ class OpJoinFun(AssociativeOpRes):
 
 class OpMeetFun(AssociativeOpFun):
     
+    """ min(r, 2) >= f """
     def __init__(self, nargs):
         assert nargs >= 2    
         self.nargs = nargs
@@ -400,11 +399,10 @@ class OpMeetFun(AssociativeOpFun):
             res = S.meet(res, v)
         return ValueWithUnits(res, S)
             
-    def return_op_constant(self, context, resource, vu):
-        raise NotImplementedError
-#         check_isinstance(vu, ValueWithUnits)
-#         dp = Max1(vu.unit, vu.value) 
-#         return create_operation(context, dp, [resource], name_prefix='_max1a')
+    def return_op_constant(self, context, function, vu):
+        check_isinstance(vu, ValueWithUnits)
+        dp = MinR1DP(vu.unit, vu.value) 
+        return create_operation_lf(context, dp, [function], name_prefix='_max1a')
 
     def return_op_variables(self, context, functions):
         F = context.get_ftype(functions[0])
@@ -431,7 +429,7 @@ class OpMeet(AssociativeOpRes):
             
     def return_op_constant(self, context, resource, vu):
         check_isinstance(vu, ValueWithUnits)
-        dp = Min1(vu.unit, vu.value) 
+        dp = MinF1DP(vu.unit, vu.value) 
         return create_operation(context, dp, [resource], name_prefix='_min1a')
 
     def return_op_variables(self, context, resources):
