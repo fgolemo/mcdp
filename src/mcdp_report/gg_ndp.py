@@ -17,6 +17,7 @@ from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning, DPInternalError
 from mocdp.ndp import NamedDPCoproduct
+from mcdp_dp.dp_identity import IdentityDP
 
 
 STYLE_GREENRED = 'greenred'
@@ -325,7 +326,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
     
     is_special = is_special_dp(ndp.dp)
 
-    simple = (MeetNDP, JoinNDP, Identity, WrapAMap, MeetNDualDP)
+    simple = (MeetNDP, JoinNDP, IdentityDP, WrapAMap, MeetNDualDP)
     only_string = not is_special and isinstance(ndp.dp, simple)
 
     from mcdp_library.library import ATTR_LOAD_NAME
@@ -546,7 +547,8 @@ def create_coproduct(gdc0, ndp, plotting_info):
 
 def create_composite(gdc0, ndp, plotting_info):
     try:
-        return create_composite_(gdc0, ndp, plotting_info=plotting_info, SKIP_INITIAL=True)
+        SKIP_INITIAL = False
+        return create_composite_(gdc0, ndp, plotting_info=plotting_info, SKIP_INITIAL=SKIP_INITIAL)
     except Exception as e:
         logger.error(e)
         logger.error('I will try again without the SKIP_INITIAL parameter.')
@@ -558,7 +560,7 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
         assert isinstance(ndp, CompositeNamedDP)
 
         # names2functions[name][fn] = item
-
+        # names2resources[name][rn] = item
         names2resources = defaultdict(lambda: {})
         names2functions = defaultdict(lambda: {})
 

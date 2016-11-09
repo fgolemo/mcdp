@@ -35,9 +35,17 @@ class VariableNode(IdentityDP):
         return self.vname
 
 class ResourceNode(IdentityDP):
-    pass
+    def __init__(self, R, rname):
+        self.rname = rname
+        IdentityDP.__init__(self, R)
+    def diagram_label(self):
+        return 'Resource %s' % self.rname
 
 class FunctionNode(IdentityDP):
-    pass
+    def __init__(self, F, fname):
+        self.fname = fname
+        IdentityDP.__init__(self, F)
+    def diagram_label(self):
+        return 'Functionality %s' % self.fname 
 
 Identity = IdentityDP

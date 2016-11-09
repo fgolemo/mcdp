@@ -6,7 +6,6 @@ class MCDPWarnings:
     
     
 
-
 def warn_language(element, which, msg, context):
     """
         element: a namedtuplewhere

@@ -273,7 +273,7 @@ class Context():
 
     @contract(returns=str)
     def add_ndp_fun_node(self, fname, F):
-        ndp = dpwrap(FunctionNode(F), fname, fname)
+        ndp = dpwrap(FunctionNode(F, fname), fname, fname)
         name = get_name_for_fun_node(fname)
         # print('Adding new function %r as %r.' % (str(name), fname))
         self.add_ndp(name, ndp)
@@ -291,7 +291,7 @@ class Context():
     @contract(returns=str)
     def add_ndp_res_node(self, rname, R):
         """ returns the name of the node """
-        ndp = dpwrap(ResourceNode(R), rname, rname)
+        ndp = dpwrap(ResourceNode(R, rname), rname, rname)
         name = get_name_for_res_node(rname)
         # self.info('Adding new resource %r as %r ' % (str(name), rname))
         self.add_ndp(name, ndp)
