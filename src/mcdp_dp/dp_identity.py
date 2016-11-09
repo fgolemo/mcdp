@@ -39,13 +39,13 @@ class ResourceNode(IdentityDP):
         self.rname = rname
         IdentityDP.__init__(self, R)
     def diagram_label(self):
-        return 'Resource %s' % self.rname
+        return 'resource %s' % self.rname
 
 class FunctionNode(IdentityDP):
     def __init__(self, F, fname):
         self.fname = fname
         IdentityDP.__init__(self, F)
     def diagram_label(self):
-        return 'Functionality %s' % self.fname 
+        return 'functionality %s' % self.fname 
 
 Identity = IdentityDP
