@@ -1288,6 +1288,26 @@ def check_lang95b(): # TODO: rename
     """
     dp = parse_ndp(s).get_dp()
     print dp.repr_long()
+    
+    s = """
+    mcdp {
+      requires r [Nat]
+      provides f [Nat]
+      f <= required r + Top Rcomp
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
+    
+    s = """
+    mcdp {
+      requires r [Nat]
+      provides f [Nat]
+      provided f + Top Rcomp <= required r
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
 #     ur = dp.solve(12)
 #     check_isinstance(dp, MinusValueNatDP)
 #     assert list(ur.minimals)[0] == 10

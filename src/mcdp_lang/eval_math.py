@@ -519,18 +519,18 @@ def get_plus_op(context, r, c):
         dp = PlusValueRcompDP(c.value)
     elif isinstance(T1, Rcomp) and isinstance(T2, Nat):
         # cast Nat to Rcomp
-        val = float(c.value)
+        if is_top(Nat, c.value):
+            val = Rcomp().get_top()
+        else:
+            val = float(c.value)
         dp = PlusValueRcompDP(val)
     elif isinstance(T1, Rcomp) and isinstance(T2, Rcomp):
-        # cast Nat to Rcomp
-        val = float(c.value)
-        dp = PlusValueRcompDP(val)
+        dp = PlusValueRcompDP(c.value)
     elif isinstance(T1, Nat) and isinstance(T2, Rcomp):
         # This is the case:
         # 
         #   provided f + Rcomp:2.3 <= required r
-        val = float(c.value)
-        dp = PlusValueRcompDP(val)
+        dp = PlusValueRcompDP(c.value)
     elif isinstance(T1, RcompUnits) and isinstance(T2, RcompUnits):
         dp = PlusValueDP(F=T1, c_value=c.value, c_space=T2)
     elif isinstance(T1, Nat) and isinstance(T2, Nat):
