@@ -69,7 +69,7 @@ class RuleEvaluateMuxTimesLimit(SeriesSimplificationRule):
         and 
         
             a = Mux
-            b = Constant
+            b = Limit
             
         then we can just evaluate it pointwise.
               
@@ -85,9 +85,9 @@ class RuleEvaluateMuxTimesLimit(SeriesSimplificationRule):
         F = dp1.get_fun_space()
         
         res = Limit(F, f)
-        print('dp1: %s -> %s   dp2: %s -> %s ' % (dp1.get_fun_space(),dp1.get_res_space(),
-                                                  dp2.get_fun_space(), dp2.get_res_space()))
-        print('res: %s -> %s' % (res.get_fun_space(), res.get_res_space()))
+#         print('dp1: %s -> %s   dp2: %s -> %s ' % (dp1.get_fun_space(),dp1.get_res_space(),
+#                                                   dp2.get_fun_space(), dp2.get_res_space()))
+#         print('res: %s -> %s' % (res.get_fun_space(), res.get_res_space()))
         return res
     
         
