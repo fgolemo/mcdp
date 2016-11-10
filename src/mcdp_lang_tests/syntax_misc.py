@@ -1395,7 +1395,7 @@ def check_lang98(): # TODO: rename
 
     
 #     check_optimization_RuleEvaluateConstantTimesMux()
-    check_optimization_RuleEvaluateMuxTimesLimit()
+#     check_optimization_RuleEvaluateMuxTimesLimit()
     
 @comptest
 def check_lang99(): # TODO: rename
