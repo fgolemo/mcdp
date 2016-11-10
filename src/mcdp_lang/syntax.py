@@ -621,10 +621,6 @@ class Syntax():
     fvalue_uncertain = sp(UNCERTAIN + SLPAR + fvalue + SCOMMA + fvalue + SRPAR,
                           lambda t: CDP.UncertainFun(keyword=t[0], lower=t[1], upper=t[2]))
 
-    # oops, infinite recursion
-#     rvalue_tuple_indexing = sp(rvalue + S(L('[')) + SyntaxBasics.integer + S(L(']')),
-#                                lambda t: CDP.TupleIndex(value=t[0], index=t[1]))
-
     # take(<a, b>, 0)
     TAKE = keyword('take', CDP.TakeKeyword)
     
@@ -699,7 +695,6 @@ class Syntax():
                                lambda t: CDP.FunctionLabelIndex(keyword=t[1],
                                                                 fvalue=t[0], label=t[2]))
 
-#     
 
     opname = sp(get_idn(), lambda t: CDP.GenericOperationName(t[0]))
     
@@ -1047,7 +1042,6 @@ class Syntax():
           constant_value
         ^ fvalue_simple
         ^ fvalue_fancy
-#         ^ fvalue_new_resource
         ^ fvalue_new_resource2
         ^ fvalue_maketuple
         ^ fvalue_uncertain
