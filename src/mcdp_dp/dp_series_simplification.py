@@ -609,7 +609,7 @@ def make_series(dp1, dp2):
     for rule in rules:
         # [dp1s[:-1] dp1s[-1]] --- [dp2s[0] dp2s[1:]]
         if rule.applies(dp1s[-1], dp2s[0]):
-            logger.debug('Applying rule %s' % type(rule).__name__)
+            logger.debug('Applying series simplification rule %s' % type(rule).__name__)
             r = rule.execute(dp1s[-1], dp2s[0])
             try:
                 check_same_fun(r, dp1s[-1])

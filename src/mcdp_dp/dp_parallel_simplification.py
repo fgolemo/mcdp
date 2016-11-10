@@ -16,6 +16,7 @@ from mcdp_posets.uppersets import upperset_product, lowerset_product
 from mcdp_dp.dp_constant import Constant, ConstantMinimals
 from mcdp_dp.dp_limit import Limit, LimitMaximals
 from mcdp_dp.dp_series import Series
+from mcdp_dp.primitive import NotSolvableNeedsApprox
 
 
 __all__ = [
@@ -137,11 +138,17 @@ class RuleEvaluateParIfConstant(ParSimplificationRule):
         b = dp2
         
         One = PosetProduct(())
-        if a.get_fun_space() == One and b.get_fun_space() == One:
-            return True
-        else:
+        if not (a.get_fun_space() == One and b.get_fun_space() == One):
             return False
         
+        try:
+            solutions_a = a.solve(())
+            solutions_b = b.solve(())
+        except NotSolvableNeedsApprox:
+            return False
+        
+        return True
+    
     def _execute(self, dp1, dp2):
         One = PosetProduct(())
         OneOne = PosetProduct((One, One))
@@ -151,8 +158,12 @@ class RuleEvaluateParIfConstant(ParSimplificationRule):
         a = dp1
         b = dp2
         assert a.get_fun_space() == One and b.get_fun_space() == One
-        solutions_a = a.solve(())
-        solutions_b = b.solve(())
+        try:
+            solutions_a = a.solve(())
+            solutions_b = b.solve(())
+        except NotSolvableNeedsApprox:
+            raise
+        
         prod = upperset_product(solutions_a, solutions_b)
         R = PosetProduct((a.get_res_space(), b.get_res_space()))
         if len(prod.minimals) == 1:
@@ -186,11 +197,17 @@ class RuleEvaluateParIfLimit(ParSimplificationRule):
         b = dp2
         
         One = PosetProduct(())
-        if a.get_res_space() == One and b.get_res_space() == One:
-            return True
-        else:
+        if not (a.get_res_space() == One and b.get_res_space() == One):
+            return False
+
+        try:
+            solutions_a = a.solve_r(())  # @UnusedVariable
+            solutions_b = b.solve_r(())  # @UnusedVariable
+        except NotSolvableNeedsApprox:
             return False
         
+        return True
+
     def _execute(self, dp1, dp2): 
         a = dp1
         b = dp2
@@ -211,7 +228,6 @@ class RuleEvaluateParIfLimit(ParSimplificationRule):
         else:
             dpconstant = LimitMaximals(F, elements)
 
-        from .dp_series import Series
         res = Series( dpconstant, mux)
         return res
 
@@ -289,7 +305,7 @@ def make_parallel(dp1, dp2):
 
     for rule in rules:
         if rule.applies(dp1, dp2):
-            logger.debug('Applying rule %s' % type(rule).__name__)
+            logger.debug('Applying par. simplification rule %s' % type(rule).__name__)
             return rule.execute(dp1, dp2)
 
     return Parallel(dp1, dp2)
