@@ -4,9 +4,10 @@ from nose.tools import assert_equal
 from comptests.registrar import comptest
 from contracts.utils import raise_desc, check_isinstance
 from mcdp_dp import CatalogueDP, CoProductDP, NotFeasible, Template
+from mcdp_dp import Constant
+from mcdp_dp import Limit
 from mcdp_dp import MaxF1DP, MinF1DP
-from mcdp_dp.dp_constant import Constant
-from mcdp_dp.dp_minus import MinusValueDP, MinusValueNatDP, MinusValueRcompDP
+from mcdp_dp import MinusValueDP, MinusValueNatDP, MinusValueRcompDP
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp, parse_poset
 from mcdp_lang.pyparsing_bundled import Literal
@@ -22,7 +23,6 @@ from mocdp.exceptions import DPNotImplementedError, DPSemanticError
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
-from mcdp_dp.dp_limit import Limit
 
 
 @comptest

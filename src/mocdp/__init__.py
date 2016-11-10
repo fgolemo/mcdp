@@ -2,7 +2,14 @@
 __version__ = '2.1.3'
 
 import logging
+
+import decent_logs
+
 from contracts.utils import raise_wrapped
+import decent_params
+import quickapp
+
+
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -53,9 +60,6 @@ except ImportError as e:
 # command dot -> graphviz
 
 # import conf_tools
-import decent_params
-import decent_logs
-import quickapp
 
 # some constants
 
@@ -68,7 +72,6 @@ ATTRIBUTE_NDP_MAKE_FUNCTION = 'make'
 # added 
 ATTR_LOAD_NAME = '__mcdplibrary_load_name'
 ATTR_LOAD_LIBNAME = '__mcdplibrary_load_libname'
-
 
 
 
@@ -108,7 +111,6 @@ class MCDPConstants():
     # Ignore the known failures
     test_include_primitivedps_knownfailures = False
     
-    # TODO: add parameter to ignore Dot's failures
     
     #
     # UI

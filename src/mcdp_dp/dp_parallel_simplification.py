@@ -264,23 +264,8 @@ def make_parallel_n(dps):
     if len(dps) == 0:
         mcdp_dev_warning('This works but should be a special case.')
 
-    return ParallelN(tuple(dps))
-#
-#     from mcdp_dp.dp_series_simplification import make_series
-#
-#     if len(dps) == 2:
-#         return make_parallel(dps[0], dps[1])
-#     else:
-#         l = make_parallel(dps[-2], dps[-1])
-#         dp0 = make_parallel_n(dps[:-2] + [l])
-#         mm = get_flatten_muxmap(dp0.get_fun_space())
-#         print dp0
-#         R0 = dp0.get_res_space()
-#         flatten = Mux(R0, mm)
-#         print flatten
-#         dp = make_series(dp0, flatten)
-#         # XXX: what about the prefix?
-#         return dp
+    return ParallelN(tuple(dps)) 
+
     
 def make_parallel(dp1, dp2):
     from mcdp_dp.dp_series_simplification import disable_optimization

@@ -202,7 +202,8 @@ def parse_wrap(expr, string):
         msg = 'The string is unicode. It should be a str with utf-8 encoding.'
         msg += '\n' + string.encode('utf-8').__repr__()
         raise ValueError(msg)
-    assert isinstance(string, str), type(string)
+    
+    check_isinstance(string, str)
 
     # Nice trick: the removE_comments doesn't change the number of lines
     # it only truncates them...

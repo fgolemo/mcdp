@@ -7,7 +7,8 @@ from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_dp import (
     CatalogueDP, Conversion, JoinNDP, MeetNDualDP, get_conversion, make_series)
 from mcdp_dp import VariableNode
-from mcdp_lang.parse_actions import decorate_add_where, raise_with_info
+from mcdp_lang.parse_actions import decorate_add_where, raise_with_info,\
+    parse_wrap
 from mcdp_posets import (
     FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe)
 from mocdp import ATTRIBUTE_NDP_MAKE_FUNCTION
@@ -528,6 +529,92 @@ def add_variable(vname, P, where, context):
     
     context.variables.add(vname)
     
+def eval_statement_SetNameRValue(r, context):
+    """ 
+        This is a special case, because it is the place
+        where the syntax is ambiguous.
+        
+            x = Nat: 1 + r
+        
+        could be interpreted with r being a functionality
+        or a resource.
+        
+        By default it is parsed as SetNameRValue, and so we get here.
+        
+        We check whether it could be parsed as setname_fvalue,
+        and warn about that.
+         
+    """
+    from .eval_resources_imp import eval_rvalue
+    from .eval_constant_imp import NotConstant
+    from .eval_lfunction_imp import eval_lfunction
+    from .syntax import Syntax
+        
+    check_isinstance(r, CDP.SetNameRValue)
+
+    # Check to see if this could have been interpreted using
+    #    setname_fvalue    
+    # Try to have an alternative parsing of the string as 
+    #     Syntax.setname_fvalue
+    try:
+        w = r.where
+        s = w.string[w.character:w.character_end]
+        alt = parse_wrap(Syntax.setname_fvalue, s)[0]
+        # print('alternative: %s' % recursive_print(alt))
+        
+    except Exception as _:
+        #print "No, it does not parse: %s" % traceback.format_exc(e)
+        alt = None
+        
+        
+    name = r.name.value
+    right_side = r.right_side
+
+    if name in context.constants:
+        msg = 'Constant %r already set.' % name
+        raise DPSemanticError(msg, where=r.where)
+
+    if name in context.var2resource:
+        msg = 'Resource %r already set.' % name
+        raise DPSemanticError(msg, where=r.where)
+
+    if name in context.var2function:
+        msg = 'Name %r already used.' % name
+        raise DPSemanticError(msg, where=r.where)
+
+
+    try:
+        x = eval_constant(right_side, context)
+        context.set_constant(name, x)
+        used_constant = True
+    except NotConstant:
+        used_constant = False
+        try:
+            x = eval_rvalue(right_side, context)
+            context.set_var2resource(name, x)
+            used_rvalue = True
+        except DPSemanticError as e:
+            if 'not declared' in str(e) and alt is not None:
+                x = eval_lfunction(alt.right_side, context)
+                context.set_var2function(name, x)
+                used_rvalue = False
+            else:
+                raise
+            
+    if alt is not None:
+        msg = ('This expression could be parsed both as a functionality '
+               'and as a resource.')
+        if used_constant:
+            msg += ' I parsed it as a constant.'
+        else:
+            if used_rvalue:
+                msg += ' I parsed it as a resource.'
+            else:
+                msg += ' I parsed it as a function.'
+          
+        warn_language(r, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context)
+    
+    
 @decorate_add_where
 def eval_statement(r, context):
     from .eval_resources_imp import eval_rvalue
@@ -567,30 +654,9 @@ def eval_statement(r, context):
         context.set_var2model(name, x)
 
     elif isinstance(r, CDP.SetNameRValue):
-        name = r.name.value
-        right_side = r.right_side
-
-        if name in context.constants:
-            msg = 'Constant %r already set.' % name
-            raise DPSemanticError(msg, where=r.where)
-
-        if name in context.var2resource:
-            msg = 'Resource %r already set.' % name
-            raise DPSemanticError(msg, where=r.where)
-
-        if name in context.var2function:
-            msg = 'Name %r already used.' % name
-            raise DPSemanticError(msg, where=r.where)
-
-        from mcdp_lang.eval_constant_imp import NotConstant
-        try:
-            # from mcdp_lang.eval_constant_imp import eval_constant
-            x = eval_constant(right_side, context)
-            context.set_constant(name, x)
-        except NotConstant:
-            #  Cannot evaluate %r as constant
-#                 try:
-                x = eval_rvalue(right_side, context)
+        return eval_statement_SetNameRValue(r, context)
+    
+    
 #                     if False:
 #                         mcdp_dev_warning('This might be very risky, but cute.')
 #                         ndp = context.names[x.dp]
@@ -600,7 +666,6 @@ def eval_statement(r, context):
 #
 #                         x = context.make_resource(x.dp, name)
                 # adding as resource
-                context.set_var2resource(name, x)
 #                 except Exception as e:
 #                     mcdp_dev_warning('fix this')
 #                     print('Cannot evaluate %r as eval_rvalue: %s ' % (right_side, e))
