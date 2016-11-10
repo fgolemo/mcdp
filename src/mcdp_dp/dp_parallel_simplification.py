@@ -133,6 +133,8 @@ class RuleEvaluateParIfConstant(ParSimplificationRule):
                             ConstantMinimals(a.solve_f(()) x b.solve_f(())))   
            
     """
+    def __init__(self, only_for_constant=True):
+        self.only_for_constant = only_for_constant
     def applies(self, dp1, dp2):
         a = dp1
         b = dp2
@@ -141,10 +143,15 @@ class RuleEvaluateParIfConstant(ParSimplificationRule):
         if not (a.get_fun_space() == One and b.get_fun_space() == One):
             return False
         
+        if self.only_for_constant:
+            allowed = (Constant, ConstantMinimals)
+            if not (isinstance(a, allowed) and isinstance(b, allowed)):
+                return False
+        
         try:
-            solutions_a = a.solve(())
-            solutions_b = b.solve(())
-        except NotSolvableNeedsApprox:
+            solutions_a = a.solve(())  # @UnusedVariable
+            solutions_b = b.solve(())  # @UnusedVariable
+        except (NotSolvableNeedsApprox, NotImplementedError):
             return False
         
         return True
@@ -161,7 +168,7 @@ class RuleEvaluateParIfConstant(ParSimplificationRule):
         try:
             solutions_a = a.solve(())
             solutions_b = b.solve(())
-        except NotSolvableNeedsApprox:
+        except (NotSolvableNeedsApprox, NotImplementedError):
             raise
         
         prod = upperset_product(solutions_a, solutions_b)
@@ -192,6 +199,9 @@ class RuleEvaluateParIfLimit(ParSimplificationRule):
             Parallel(a, b) = Series(Limit(a.solve_r(()) x b.solve_r(()))), 1 <-> 1 x 1) 
            
     """
+    def __init__(self, only_for_limit=True):
+        self.only_for_limit = only_for_limit
+        
     def applies(self, dp1, dp2):        
         a = dp1
         b = dp2
@@ -200,10 +210,15 @@ class RuleEvaluateParIfLimit(ParSimplificationRule):
         if not (a.get_res_space() == One and b.get_res_space() == One):
             return False
 
+        if self.only_for_limit:
+            allowed = (Limit, LimitMaximals)
+            if not (isinstance(a, allowed) and isinstance(b, allowed)):
+                return False
+             
         try:
             solutions_a = a.solve_r(())  # @UnusedVariable
             solutions_b = b.solve_r(())  # @UnusedVariable
-        except NotSolvableNeedsApprox:
+        except (NotSolvableNeedsApprox, NotImplementedError):
             return False
         
         return True

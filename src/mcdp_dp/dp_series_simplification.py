@@ -75,15 +75,22 @@ class RuleEvaluateMuxTimesLimit(SeriesSimplificationRule):
               
     """
     def applies(self, dp1, dp2):
-        return isinstance(dp2, Constant) and isinstance(dp1, Mux)
+        return isinstance(dp1, Mux) and isinstance(dp2, Limit) 
         
     def _execute(self, dp1, dp2):
         check_isinstance(dp1, Mux)
-        check_isinstance(dp2, Constant)
+        check_isinstance(dp2, Limit)
         r = dp2.get_value()
         f = dp1.amap_dual(r)
         F = dp1.get_fun_space()
-        return Limit(F, f)
+        
+        res = Limit(F, f)
+        print('dp1: %s -> %s   dp2: %s -> %s ' % (dp1.get_fun_space(),dp1.get_res_space(),
+                                                  dp2.get_fun_space(), dp2.get_res_space()))
+        print('res: %s -> %s' % (res.get_fun_space(), res.get_res_space()))
+        return res
+    
+        
     
 class RuleEvaluateConstantTimesMux(SeriesSimplificationRule):
     """ 
