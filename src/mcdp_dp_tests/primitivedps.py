@@ -2,7 +2,7 @@
 from mcdp_dp import (CatalogueDP, CoProductDP, CoProductDPLabels, Constant,
     ConstantMinimals, DPLoop2, Identity, InvMult2, InvMult2L, InvMult2U,
     InvPlus2, InvPlus2L, InvPlus2Nat, InvPlus2U, JoinNDP, Limit, LimitMaximals,
-    MeetNDualDP, Mux, Parallel, ParallelN, Series0, Terminator,
+    MeetNDualDP, Mux, Parallel, ParallelN, Series0,
     PlusValueDP, MeetNDP, JoinNDualDP, InvMult2Nat, MultValueDP,
     MinusValueDP, ProductNDP, Product2DP_U, Product2DP_L, ProductNNatDP, ProductNRcompDP,
     MinusValueRcompDP, MinusValueNatDP, InvMultValueNatDP, InvMultValueRcompDP,
@@ -411,10 +411,10 @@ def Series0_1():
     dp2 = MaxR1DP(V, 2.0)
     return Series0(dp1, dp2)
 
-@add_as_test
-def Terminator_1():
-    F = parse_poset('Nat')
-    return Terminator(F)
+# @add_as_test
+# def Terminator_1():
+#     F = parse_poset('Nat')
+#     return Terminator(F)
 
 
 @add_as_test
