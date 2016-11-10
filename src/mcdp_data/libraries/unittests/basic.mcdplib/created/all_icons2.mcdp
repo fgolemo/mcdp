@@ -1,0 +1,16 @@
+mcdp {
+   provides f [Nat]
+   requires r [Nat]  
+   provides f2 [Nat]
+   provided f2 <= Nat: 2 
+   required r >= provided f
+
+   provides f3 [ Nat]
+   requires r3 [Nat]
+
+
+   provides f4 [ Nat]
+   requires r4 [Nat]
+
+   provided f4 <= required r4 * Nat: 4
+}

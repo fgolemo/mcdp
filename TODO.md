@@ -255,3 +255,6 @@ http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c 
 - dp graph for ParallelN
 - add wrapping for errors while editing
 
+- Evaluate empty tuple; see e.g http://127.0.0.1:8080/libraries/basic/models/resource_from_constants/views/dp_graph/
+
+  * If Series(a, b) and a.F = 1, then Change 

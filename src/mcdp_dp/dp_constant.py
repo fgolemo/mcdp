@@ -31,6 +31,9 @@ class Constant(PrimitiveDP):
         I = PosetProduct(())
         PrimitiveDP.__init__(self, F=F, R=R, I=I)
 
+    def get_value(self):
+        return self.c
+
     def evaluate(self, i):
         assert i == (), i
         fs = self.F.L(self.F.get_top())

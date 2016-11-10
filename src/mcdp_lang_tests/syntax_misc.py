@@ -22,6 +22,7 @@ from mocdp.exceptions import DPNotImplementedError, DPSemanticError
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
+from mcdp_dp.dp_limit import Limit
 
 
 @comptest
@@ -1353,7 +1354,7 @@ def check_lang97(): # TODO: rename
 
 @comptest
 def check_lang98(): # TODO: rename
-    """ Provides shortcut with constant """
+    """ Provides and require shortcut with constant """
     s = """
     mcdp {
       x = Nat: 2
@@ -1373,9 +1374,29 @@ def check_lang98(): # TODO: rename
     dp = parse_ndp(s).get_dp()
     print dp.repr_long() 
 
+    s = """
+    mcdp {
+      x = Nat: 2
+      requires x
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long() 
     
-    
+    s = """
+    mcdp {
+      x = Nat: 2
+      y = Nat: 3
+      requires x, y
+    }
+    """
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long() 
 
+    
+#     check_optimization_RuleEvaluateConstantTimesMux()
+    check_optimization_RuleEvaluateMuxTimesLimit()
+    
 @comptest
 def check_lang99(): # TODO: rename
     s = """
@@ -1408,10 +1429,38 @@ def check_lang99(): # TODO: rename
     dp = parse_ndp(s).get_dp()
     print dp.repr_long()
      
+
 @comptest
-def check_lang100(): # TODO: rename
-    pass 
- 
+def check_optimization_RuleEvaluateConstantTimesMux(): # TODO: rename
+    print('check_optimization_RuleEvaluateConstantTimesMux')
+    s = """
+    mcdp {
+      requires a [Nat]
+      requires b [Nat]
+    
+      required a >= Nat: 1
+      required b >= Nat: 2
+    }
+"""
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
+    check_isinstance(dp, Constant)
+
+def check_optimization_RuleEvaluateMuxTimesLimit(): # TODO: rename
+    print('check_optimization_RuleEvaluateMuxTimesLimit')
+    s = """
+    mcdp {
+      provides a [Nat]
+      provides b [Nat]
+    
+      provided a <= Nat: 1
+      provided b <= Nat: 2
+    }
+"""
+    dp = parse_ndp(s).get_dp()
+    print dp.repr_long()
+    check_isinstance(dp, Limit)
+    
 @comptest
 def check_lang101(): # TODO: rename
     pass 

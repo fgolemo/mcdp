@@ -10,9 +10,9 @@ from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPInternalError
 
 from .namedtuple_tricks import recursive_print
+from .parse_actions import decorate_add_where
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from .parse_actions import decorate_add_where
 
 
 CDP = CDPLanguage

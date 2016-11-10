@@ -89,7 +89,10 @@ class Limit(PrimitiveDP):
         R = PosetProduct(())
         I = PosetProduct(())
         PrimitiveDP.__init__(self, F=F, R=R, I=I)
-
+    
+    def get_value(self):
+        return self.limit
+    
     def evaluate(self, i):
         assert i == ()
         rs = self.R.U(self.R.get_bottom())

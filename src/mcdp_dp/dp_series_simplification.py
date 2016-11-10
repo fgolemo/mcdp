@@ -2,12 +2,14 @@
 from abc import ABCMeta, abstractmethod
 
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
-from mcdp_dp.dp_terminator import Terminator
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from mcdp_dp.dp_limit import Limit
 from mcdp_posets import PosetProduct
+from mocdp import logger
 from mocdp.exceptions import DPInternalError, do_extra_checks, mcdp_dev_warning
 from multi_index.get_it_test import compose_indices, get_id_indices
 
+from .dp_constant import Constant
 from .dp_flatten import Mux, get_R_from_F_coords
 from .dp_identity import Identity
 from .dp_parallel import Parallel
@@ -56,6 +58,62 @@ class SeriesSimplificationRule():
     def _execute(self, dp1, dp2):
         pass
 
+
+class RuleEvaluateMuxTimesLimit(SeriesSimplificationRule):
+    """ 
+    
+        if 
+        
+            Series(a, b)
+            
+        and 
+        
+            a = Mux
+            b = Constant
+            
+        then we can just evaluate it pointwise.
+              
+    """
+    def applies(self, dp1, dp2):
+        return isinstance(dp2, Constant) and isinstance(dp1, Mux)
+        
+    def _execute(self, dp1, dp2):
+        check_isinstance(dp1, Mux)
+        check_isinstance(dp2, Constant)
+        r = dp2.get_value()
+        f = dp1.amap_dual(r)
+        F = dp1.get_fun_space()
+        return Limit(F, f)
+    
+class RuleEvaluateConstantTimesMux(SeriesSimplificationRule):
+    """ 
+    
+        if 
+        
+            Series(a, b)
+            
+        and 
+        
+            a = Constant
+            b = Mux
+            
+        then we can just evaluate it pointwise.
+          
+           
+    """
+    def applies(self, dp1, dp2):
+        return isinstance(dp1, Constant) and isinstance(dp2, Mux)
+        
+    def _execute(self, dp1, dp2):
+        check_isinstance(dp1, Constant)
+        check_isinstance(dp2, Mux)
+        f = dp1.get_value()
+        r = dp2.amap(f)
+        R = dp2.get_res_space()
+        return Constant(R, r)
+    
+    
+# TODO: do the dual rule
 
 
 class RuleSimplifyLift(SeriesSimplificationRule):
@@ -145,7 +203,6 @@ class RuleLoop1a(SeriesSimplificationRule):
         else:
             msg = 'Could not implement simplification' \
                 ' for dp2.coords = {}'.format(dp2.coords)
-            from mocdp import logger
             logger.debug(msg)
             return False
         
@@ -213,7 +270,6 @@ class RuleLoop1b(SeriesSimplificationRule):
         else:
             msg = 'Could not implement simplification' \
                 ' for dp1.coords = {}'.format(dp1.coords)
-            from mocdp import logger
             logger.debug(msg)
             return False
         
@@ -399,10 +455,10 @@ def equiv_to_identity(dp):
     return False
 
 
-def is_equiv_to_terminator(dp):
-    if isinstance(dp, Terminator):
-        return True
-    return False
+# def is_equiv_to_terminator(dp):
+#     if isinstance(dp, Terminator):
+#         return True
+#     return False
 
 rules = [
     RuleSimplifyLift(),
@@ -412,6 +468,10 @@ rules = [
     RuleJoinPar(),
     RuleLoop1a(),
     RuleLoop1b(),
+#     RuleEvaluateParIfConstant(),
+#     RuleEvaluateParIfLimit(),
+    RuleEvaluateConstantTimesMux(),
+    RuleEvaluateMuxTimesLimit(),
 ]
 
 disable_optimization = False
@@ -426,10 +486,10 @@ def make_series(dp1, dp2):
     # Series(X(F,R), Terminator(R)) => Terminator(F)
     # but X not loop
 
-    if is_equiv_to_terminator(dp2) and isinstance(dp1, Mux):
-        res = Terminator(dp1.get_fun_space())
-        assert res.get_fun_space() == dp1.get_fun_space()
-        return res
+#     if is_equiv_to_terminator(dp2) and isinstance(dp1, Mux):
+#         res = Terminator(dp1.get_fun_space())
+#         assert res.get_fun_space() == dp1.get_fun_space()
+#         return res
 
     if equiv_to_identity(dp1):
         return dp2
@@ -549,8 +609,8 @@ def make_series(dp1, dp2):
     for rule in rules:
         # [dp1s[:-1] dp1s[-1]] --- [dp2s[0] dp2s[1:]]
         if rule.applies(dp1s[-1], dp2s[0]):
+            logger.debug('Applying rule %s' % type(rule).__name__)
             r = rule.execute(dp1s[-1], dp2s[0])
-            
             try:
                 check_same_fun(r, dp1s[-1])
                 check_same_res(r, dp2s[0])
@@ -564,6 +624,7 @@ def make_series(dp1, dp2):
             return make_series(first, make_series(r, rest))
 
     return Series(dp1, dp2)
+
 
 def check_same_fun(dp1, dp2):
     """ Checks that the two dps have same F """
@@ -586,20 +647,7 @@ def check_same_res(dp1, dp2):
     
 def check_same_spaces(dp1, dp2):
     check_same_fun(dp1,dp2)
-    check_same_res(dp1, dp2)
-#     print('dp1: %s' % dp1)
-# #     print('dp2: %s' % dp2)
-#     F1 = dp1.get_fun_space()
-#     R1 = dp1.get_res_space()
-#     F2 = dp2.get_fun_space()
-#     R2 = dp2.get_res_space()
-#     if not (R1 == R2):
-#         msg = 'R not preserved'
-#         raise_desc(AssertionError, msg, R1=R1, R2=R2)
-#     if not (F1 == F2):
-#         msg = 'F not preserved'
-#         raise_desc(AssertionError, msg, F1=F1, F2=F2)
-
+    check_same_res(dp1, dp2) 
 
 def unwrap_series(dp):
     if not isinstance(dp, Series):

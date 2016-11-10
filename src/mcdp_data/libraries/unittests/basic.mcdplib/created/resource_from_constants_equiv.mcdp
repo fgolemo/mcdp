@@ -1,0 +1,7 @@
+mcdp {
+  requires a [Nat]
+  requires b [Nat]
+
+  required a >= Nat: 1
+  required b >= Nat: 2
+}

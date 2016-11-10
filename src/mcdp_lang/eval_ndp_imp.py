@@ -33,6 +33,8 @@ from .parse_actions import add_where_information
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
 from mcdp_lang.eval_warnings import warn_language, MCDPWarnings
+from mcdp_lang.helpers import get_valuewithunits_as_function,\
+    get_valuewithunits_as_resource
 
 
 CDP = CDPLanguage
@@ -673,6 +675,9 @@ def eval_statement(r, context):
                 A = context.var2resource[rname]
             elif rname in context.fnames: # it's a function 
                 A = context.make_resource(get_name_for_fun_node(rname), rname)
+            elif rname in context.constants:
+                c = context.constants[rname]
+                A = get_valuewithunits_as_resource(c, context)
             else:
                 msg = 'Could not find required resource expression %r.' % rname
                 raise DPSemanticError(msg, where=_.where)
@@ -689,6 +694,9 @@ def eval_statement(r, context):
                 B = context.var2function[fname]
             elif fname in context.rnames: # it's a function 
                 B = context.make_function(get_name_for_res_node(fname), fname)
+            elif fname in context.constants:
+                c = context.constants[fname]
+                B = get_valuewithunits_as_function(c, context)
             else:
                 msg = 'Could not find required function expression %r.' % fname
                 raise DPSemanticError(msg, where=_.where)
