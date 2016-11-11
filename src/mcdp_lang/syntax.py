@@ -592,6 +592,7 @@ class Syntax():
                        | asserts
                        | constant_placeholder
                        | constant_emptyset
+#                        | constant_uncertain
                        )
     definitely_constant_value << (
          collection_of_constants
@@ -608,6 +609,7 @@ class Syntax():
        | asserts
        | constant_placeholder
        | constant_emptyset
+#        | constant_uncertain
     )
     constant_value << constant_value_op
 
@@ -637,6 +639,9 @@ class Syntax():
 
     # Uncertain(<lower>, <upper>)
     UNCERTAIN = keyword('Uncertain', CDP.UncertainKeyword)
+    constant_uncertain = sp(UNCERTAIN + SLPAR + rvalue + SCOMMA + rvalue + SRPAR,
+                          lambda t: CDP.UncertainConstant(keyword=t[0], lower=t[1], upper=t[2]))
+    
     rvalue_uncertain = sp(UNCERTAIN + SLPAR + rvalue + SCOMMA + rvalue + SRPAR,
                           lambda t: CDP.UncertainRes(keyword=t[0], lower=t[1], upper=t[2]))
 

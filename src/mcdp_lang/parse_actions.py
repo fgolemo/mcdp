@@ -8,19 +8,18 @@ from decorator import decorator
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped, check_isinstance
+from mcdp_lang.eval_warnings import MCDPWarnings, warn_language
 from mocdp import logger
 from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
     MCDPExceptionWithWhere, do_extra_checks, mcdp_dev_warning)
 
 from .namedtuple_tricks import get_copy_with_where
+from .namedtuple_tricks import isnamedtuplewhere
 from .parts import CDPLanguage
 from .pyparsing_bundled import ParseException, ParseFatalException
 from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list, unwrap_list
-from mcdp_lang.namedtuple_tricks import recursive_print, isnamedtuplewhere
-from mcdp_lang.pyparsing_bundled import Word, printables
-from mcdp_lang.eval_warnings import MCDPWarnings, warn_language
-
+from mcdp_lang.namedtuple_tricks import recursive_print
 
 
 CDP = CDPLanguage
@@ -153,6 +152,9 @@ def move_where(x0, string0, offset, offset_end):
     res = namedtuple_visitor(x0, move_where_rec)
     return res
 
+def infer_debug(s):
+    print(s)
+    
 def infer_types_of_variables(line_exprs):
     constants = set()
     # These are the resources and functions defined by the model
@@ -165,7 +167,7 @@ def infer_types_of_variables(line_exprs):
     
     def found_fname(fname):
         check_isinstance(fname, CDP.FName)
-#         print('found fname: %s' % fname.value)
+        infer_debug('found fname: %s' % fname.value)
         _ = fname.value
         if _ in functions:
             msg = 'Repeated function %r.' % _
@@ -200,7 +202,7 @@ def infer_types_of_variables(line_exprs):
 
     def found_cname(cname):
         check_isinstance(cname, CDP.CName)
-#         print('found constant: %s' % cname.value)
+        print('found constant: %s' % cname.value)
         if cname.value in constants:
             msg = 'Duplicated constants?'
             raise DPInternalError(msg, where=cname.where) 
@@ -228,7 +230,7 @@ def infer_types_of_variables(line_exprs):
 #             w = x.where
 #             s = w.string[w.character:w.character_end]
 #             print('   visit_to_check %r (%s)' % (s, type(x).__name__))
-            not_allowed = CDP.FName, CDP.RName
+            not_allowed = CDP.FName, CDP.RName, CDP.UncertainRes, CDP.UncertainFun
             if isinstance(x, not_allowed):
                 Tmp.verified = False
             if isinstance(x, CDP.VariableRef):
@@ -259,13 +261,7 @@ def infer_types_of_variables(line_exprs):
                 Flavors.rvalue.add(l)
             elif isinstance(x, CDP.Function):
                 l = x.dp.value + '.' + x.s.value
-                Flavors.fvalue.add(l)
-#             elif isinstance(x, CDP.FName):
-# #                 print('%r (FName) contributes to Flavors.rvalue' % x.name)
-#                 Flavors.rvalue.add(x.value)
-#             elif isinstance(x, CDP.RName):
-# #                 print('%r (RName) contributes to Flavors.fvalue' % x.name)
-#                 Flavors.fvalue.add(x.value)
+                Flavors.fvalue.add(l) 
             elif isinstance(x, CDP.VName):
                 Flavors.either.add(x.value)
             elif isinstance(x, CDP.VariableRef):
@@ -290,9 +286,9 @@ def infer_types_of_variables(line_exprs):
             
         namedtuple_visitor_only_visit(xx, visit_to_check2)
         
-#         print('Results of %r: rv %s fv %s undef %s either %s' % (
-#             nt_string(rvalue), Flavors.rvalue, Flavors.fvalue, Flavors.undefined,
-#             Flavors.either))
+        infer_debug('Results of %r: rv %s;  fv %s;  undef %s; either %s' % (
+            nt_string(rvalue), Flavors.rvalue, Flavors.fvalue, Flavors.undefined,
+            Flavors.either))
         if Flavors.rvalue and Flavors.fvalue:
             return CONFLICTING
         if Flavors.undefined:
@@ -307,17 +303,17 @@ def infer_types_of_variables(line_exprs):
             
     def can_be_treated_as_rvalue(x):
         res = get_flavour(x)
-#         print 'Results of %r -> %s' % (nt_string(x), res)
+        print 'Results of %r -> %s' % (nt_string(x), res)
         return res in [RVALUE, EITHER] 
     
     def can_be_treated_as_fvalue(x):
         res = get_flavour(x)
-#         print 'Results of %r -> %s' % (nt_string(x), res)
+        print 'Results of %r -> %s' % (nt_string(x), res)
         return res in [FVALUE, EITHER]
      
     for i, l in enumerate(line_exprs):
-#         print('\n\n--- line %r (%s)' % ( 
-#             l.where.string[l.where.character:l.where.character_end], type(l)))
+        infer_debug('\n\n--- line %r (%s)' % ( 
+            l.where.string[l.where.character:l.where.character_end], type(l)))
 #         print recursive_print(l)
         from mcdp_lang.syntax import Syntax
         # mark functions, resources, variables, and constants
@@ -354,9 +350,9 @@ def infer_types_of_variables(line_exprs):
             all_constant = check_all_constant(rvalue)
             if all_constant:
                 # This can become simply a constant
-#                 print('The value %r can be recognized as constant' % str(l.name.value))
+                infer_debug('The value %r can be recognized as constant' % str(l.name.value))
                 constants.add(l.name.value)
-            
+                print recursive_print(l)
             else:
                 """"
                 This is a special case, because it is the place
@@ -392,17 +388,24 @@ def infer_types_of_variables(line_exprs):
                         raise DPSemanticError(msg, where=l.right_side.where)
 
                     if one_ok and two_ok:
-                        msg = ('This expression is truly ambiguous, and I cannot '
-                              'judge whether it is a functionality or resource.')
-                        e = DPSemanticError(msg, where=l.right_side.where)
-                        raise e
+                        if isinstance(l.right_side, CDP.UncertainRes):
+                            msg = ('This expression is ambiguous. I will interpret it as a resource.')
+                            warn_language(l.right_side, 
+                                          MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, 
+                                          msg, context=None)
+                            deriv_resources.add(l.name.value)
+                        else:
+                            msg = ('This expression is truly ambiguous, and I cannot '
+                                  'judge whether it is a functionality or resource.')
+                            e = DPSemanticError(msg, where=l.right_side.where)
+                            raise e
                                 
-                    if one_ok and not two_ok:
+                    elif one_ok and not two_ok:
                         # we have concluded this can be a rvalue
                         #print('setting %r as deriv_resources' % l.name.value)
                         deriv_resources.add(l.name.value)
                         
-                    if two_ok and not one_ok:
+                    elif two_ok and not one_ok:
                         #print('setting %r as deriv_functions' % l.name.value)
                         deriv_functions.add(l.name.value)
                         # we replace the line

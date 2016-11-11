@@ -7,6 +7,7 @@ class MCDPWarnings:
     LANGUAGE_AMBIGUOS_EXPRESSION = 'Ambiguous expression'
     
 
+
 def warn_language(element, which, msg, context):
     """
         element: a namedtuplewhere
