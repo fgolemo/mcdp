@@ -173,11 +173,11 @@ def eval_lfunction_FValueMinusN(lf, context):
         except:
             raise
         
-    if len(constants) > 1:
-        msg = 'FValueMinusN not implemented for more than one constant.'
-        raise_desc(DPNotImplementedError, msg)
-    
-    constant = constants[0] 
+#     if len(constants) > 1:
+#         msg = 'FValueMinusN not implemented for more than one constant.'
+#         raise_desc(DPNotImplementedError, msg, constants = constants)
+#     
+    constant = plus_constantsN(constants) 
 
     # f - constant <= (x)
     # f <= (x) + Constant 

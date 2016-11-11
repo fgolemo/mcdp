@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from nose.tools import assert_equal
 
-from comptests.registrar import comptest
+from comptests.registrar import comptest, comptest_fails
 from contracts.utils import raise_desc, check_isinstance
 from mcdp_dp import (CatalogueDP, CoProductDP, NotFeasible, Template, Constant,
                      Limit, MaxF1DP, MinF1DP, MinusValueDP, MinusValueNatDP,
@@ -21,6 +21,7 @@ from mocdp.exceptions import DPNotImplementedError, DPSemanticError
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
+from mcdp_dp.dp_plus_value import PlusValueNatDP
 
 
 @comptest
@@ -1509,19 +1510,72 @@ def check_lang106(): # TODO: rename
  
 @comptest
 def check_lang107(): # TODO: rename
-    pass 
+    """ sum of nat constants """
+    s = """
+    mcdp {
+        requires x [Nat]
+        required x >=  Nat:2 + Nat:1
+    }
+    """
+    parse_ndp(s)
+    
  
 @comptest
 def check_lang108(): # TODO: rename
-    pass 
+    """ sum of nat constants (f) """
+    s = """
+    mcdp {
+        provides x [Nat]
+        provided x <=  Nat:2 + Nat:1
+    }
+    """
+    parse_ndp(s)
+
+    s = """
+    mcdp {
+        provides x [Nat]
+        provided x <=  Nat:2 + Rcomp:1
+    }
+    """
+    parse_ndp(s)
+
+    s = """
+    mcdp {
+        provides x [Nat]
+        provided x <=  Nat:2 + 1 dimensionless
+    }
+    """
+    parse_ndp(s)
+    # TODO: check type 
  
 @comptest
 def check_lang109(): # TODO: rename
-    pass 
+    # DPNotImplementedError
+    """ sum of negative nat """
+    s = """
+    mcdp {
+        provides f [Nat]
+        requires x [Nat]
+        required x >=  provided f - Nat:2 - Nat:1
+    }
+    """
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    check_isinstance(dp, MinusValueNatDP)
  
 @comptest
 def check_lang110(): # TODO: rename
-    pass 
+    # DPNotImplementedError
+    s = """
+    mcdp {
+        provides f [Nat]
+        requires r [Nat]
+        provided f <=  required r - Nat:2 - Nat:1
+    }
+    """
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    check_isinstance(dp, PlusValueNatDP)
  
 @comptest
 def check_lang111(): # TODO: rename

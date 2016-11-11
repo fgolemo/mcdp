@@ -281,6 +281,15 @@ file:///Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/unittes
 
 -  B: we might not keep track of filename when using the template
   Need to remember the filename when we have the template.
-  
+
 - L: remove "new"
 
+- Addition of more than one constant.
+> DPNotImplementedError: FValueMinusN not implemented for more than one constant.
+>
+>
+>  line  2 >    mcdp {
+>  line  3 >        provides f [Nat]
+>  line  4 >        requires r [Nat]
+>  line  5 >        provided f <=  required r - Nat:2 - Nat:1
+>                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~

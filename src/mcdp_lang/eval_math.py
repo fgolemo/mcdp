@@ -161,11 +161,12 @@ def eval_rvalue_RValueMinusN(x, context, wants_constant=False):
     rvalue = eval_rvalue(ops[0], context)
  
     # we cannot do it with more than 1
-    if len(constants) > 1:
-        msg = 'This code works only with 1 constant.'
-        raise_desc(DPNotImplementedError, msg)
-    
-    constant = constants[0] 
+#     if len(constants) > 1:
+#         msg = 'This code works only with 1 constant.'
+#         raise_desc(DPNotImplementedError, msg)
+#     
+    from .misc_math import plus_constantsN
+    constant = plus_constantsN(constants) 
     R = context.get_rtype(rvalue)
     if isinstance(R, Nat) and isinstance(constant.unit, Nat):
         dp = MinusValueNatDP(constant.value)
@@ -388,13 +389,13 @@ def eval_PlusN(x, context, wants_constant):
     if len(neg_constants) == 0:
         # If there are no negative constants, we are done
         return res
-    elif len(neg_constants) > 1:
-            msg = 'Not implemented addition of more than one negative constant.'
-            raise_desc(DPInternalError, msg, neg_constants=neg_constants)
+#     elif len(neg_constants) > 1:
+#             msg = 'Not implemented addition of more than one negative constant.'
+#             raise_desc(DPInternalError, msg, neg_constants=neg_constants)
     else:
         # we have only one negative constant
-        assert len(neg_constants) == 1
-        constant = neg_constants[0]
+        from mcdp_lang.misc_math import plus_constantsN
+        constant = plus_constantsN(neg_constants)
         
         check_isinstance(constant.unit, RbicompUnits)
         
@@ -412,9 +413,7 @@ def eval_PlusN(x, context, wants_constant):
             valuepos2 = c_space.get_top()
         else:
             valuepos2 = valuepos
-            
-        #valuepos2 = express_value_in_isomorphic_space(constant.unit, valuepos, c_space)
-        
+                    
         dp = MinusValueDP(F=F, c_value=valuepos2, c_space=c_space)
 
         r2 = create_operation(context, dp, resources=[res],

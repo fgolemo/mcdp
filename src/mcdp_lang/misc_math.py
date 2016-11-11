@@ -131,4 +131,5 @@ def plus_constants2(a, b):
     return ValueWithUnits(value=res, unit=R)
 
 def plus_constantsN(constants):
+    print('plus_constantsN: %s' % constants)
     return functools.reduce(plus_constants2, constants)
