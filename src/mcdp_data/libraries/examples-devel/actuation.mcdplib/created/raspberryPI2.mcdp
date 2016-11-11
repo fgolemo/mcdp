@@ -28,7 +28,7 @@ mcdp {
 
     c0 = 100 mA
     c = 0.001 mA/flops
-    amps = c0 + flops provided by processor  * c
+    amps = c0 + flops required by processor  * c
 
     socket_amps = (provided pisocketcom).amp_max
     ((required in).dc).amps >= amps + socket_amps

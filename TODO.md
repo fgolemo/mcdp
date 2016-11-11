@@ -287,3 +287,6 @@ file:///Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/unittes
 - switch colors in Sublime for required, provided
 
 - add sublime keywords: max
+
+- do not raise SemanticError in parsing
+
