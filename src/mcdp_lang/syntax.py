@@ -828,7 +828,7 @@ class Syntax():
 
     line_expr = (constraint_expr_geq ^ 
                  constraint_expr_leq ^
-                     (setname_constant | (
+                     (setname_constant ^ (
                       setname_rvalue ^ 
                       setname_fvalue ^
                       setname_ndp_instance1 ^ 
