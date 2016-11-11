@@ -779,7 +779,7 @@ class Syntax():
     rvalue_power_expr = rvalue_power_expr_1 | rvalue_power_expr_2
 
     constraint_expr_geq = sp(fvalue + GEQ - rvalue,
-                             lambda t: CDP.Constraint(function=t[0],
+                             lambda t: CDP.Constraint(fvalue=t[0],
                                                       rvalue=t[2],
                                                       prep=t[1]))
 

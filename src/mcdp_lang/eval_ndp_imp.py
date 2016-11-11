@@ -648,7 +648,7 @@ def eval_statement(r, context):
 
     elif isinstance(r, CDP.Constraint):
         resource = eval_rvalue(r.rvalue, context)
-        function = eval_lfunction(r.function, context)
+        function = eval_lfunction(r.fvalue, context)
         try:
             add_constraint(context, resource, function)
         except MCDPExceptionWithWhere as e:

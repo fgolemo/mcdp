@@ -19,7 +19,7 @@ from .parts import CDPLanguage
 from .pyparsing_bundled import ParseException, ParseFatalException
 from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list, unwrap_list
-from mcdp_lang.namedtuple_tricks import recursive_print
+
 
 
 CDP = CDPLanguage
@@ -141,7 +141,7 @@ def dp_model_statements_parse_action(tokens):
 
 def move_where(x0, string0, offset, offset_end):
     """ Moves all the references to an offset """
-    def move_where_rec(x):
+    def move_where_rec(x, parents):  # @UnusedVariable
         assert isnamedtuplewhere(x), type(x)
         w = x.where
         assert string0[offset:offset_end] == w.string
@@ -149,7 +149,7 @@ def move_where(x0, string0, offset, offset_end):
         character_end = w.character_end + offset
         w2 = Where(string0, character, character_end)
         return get_copy_with_where(x, w2)
-    res = namedtuple_visitor(x0, move_where_rec)
+    res = namedtuple_visitor_ext(x0, move_where_rec)
     return res
 
 def infer_debug(s):
@@ -226,11 +226,8 @@ def infer_types_of_variables(line_exprs):
         """ Checks that all VariableRefs are constant """
         class Tmp:
             verified = True
-        def visit_to_check(x):
+        def visit_to_check(x, parents):  # @UnusedVariable
             assert isnamedtuplewhere(x), type(x)
-#             w = x.where
-#             s = w.string[w.character:w.character_end]
-#             print('   visit_to_check %r (%s)' % (s, type(x).__name__))
             not_allowed = CDP.FName, CDP.RName, CDP.UncertainRes, CDP.UncertainFun
             if isinstance(x, not_allowed):
                 Tmp.verified = False
@@ -239,9 +236,8 @@ def infer_types_of_variables(line_exprs):
                     Tmp.verified = False
                 else:
                     pass
-#                     print('   variable ref %s is a constant' % str(x))
             return x
-        namedtuple_visitor(rvalue, visit_to_check)
+        namedtuple_visitor_ext(rvalue, visit_to_check)
         return Tmp.verified
     
     UNDEFINED, FVALUE, RVALUE, CONFLICTING, EITHER =\
@@ -339,7 +335,6 @@ def infer_types_of_variables(line_exprs):
                 found_vname(_)
             
         if isinstance(l, CDP.FunShortcut2):
-#             fvalue = l.lf
             pass
         elif isinstance(l, CDP.ResShortcut2):
             rvalue = l.rvalue
@@ -355,17 +350,16 @@ def infer_types_of_variables(line_exprs):
                 constants.add(l.name.value)
 #                 print recursive_print(l)
             else:
-                """"
-                This is a special case, because it is the place
-                where the syntax is ambiguous.
-                
-                    x = Nat: 1 + r
-                
-                could be interpreted with r being a functionality
-                or a resource.
-                
-                By default it is parsed as SetNameRValue, and so we get here.
-                """
+#                 This is a special case, because it is the place
+#                 where the syntax is ambiguous.
+#                 
+#                     x = Nat: 1 + r
+#                 
+#                 could be interpreted with r being a functionality
+#                 or a resource.
+#                 
+#                 By default it is parsed as SetNameRValue, and so we get here.
+#                 
                 try:
                     w = l.where
                     s = w.string[w.character:w.character_end]
@@ -426,75 +420,9 @@ def infer_types_of_variables(line_exprs):
 #             print('line %s' % type(l).__name__)
             pass
     
-    def refine(x):
-        if isinstance(x, CDP.VariableRef):
-            if x.name in constants:
-                cname = CDP.CName(x.name, where=x.where)
-                res = CDP.ConstantRef(cname=cname, where=x.where)
-                return res
-            elif x.name in resources and x.name in functions:
-                msg = 'I cannot say whether %r refers to the functionality or resource.' % x.name
-                msg += ' Need to implement >= - aware refinement.'
-                warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context=None) # XXX
-                return x
-            elif x.name in resources:
-                if x.name in variables:
-                    msg = 'I cannot say whether %r refers to the variable or resource.' % x.name
-                    warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context=None) # XXX
-                    return x 
-                
-                return CDP.NewResource(None, CDP.RName(x.name, where=x.where), 
-                                       where=x.where)
- 
-            elif x.name in functions:
-                if x.name in variables:
-                    msg = 'I cannot say whether %r refers to the variable or functionality.' % x.name
-                    warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context=None) # XXX
-                    return x
-                
-                return CDP.NewFunction(None, CDP.FName(x.name, where=x.where), 
-                                       where=x.where) 
-
-            elif x.name in deriv_resources:
-                where = x.where
-                drname = CDP.DerivResourceName(x.name, where=where)
-                res = CDP.DerivResourceRef(drname, where=where)
-                return res
-
-            elif x.name in deriv_functions:
-                # XXX: this is not correct
-                where = x.where
-                dfname = CDP.DerivFunctionName(x.name, where=where)
-                res = CDP.DerivFunctionRef(dfname, where=where)
-                return res
-            
-            elif x.name in variables:
-                where = x.where
-                dfname = CDP.VName(x.name, where=where)
-                res = CDP.ActualVarRef(dfname, where=where)
-                return res
-            else:
-                msg = 'I cannot judge this VariableRef: %r' % str(x)
-                logger.error(msg)
-                # raise DPInternalError(msg)
-       
-        if isinstance(x, CDP.SetNameGenericVar):
-            if x.value in constants:
-                return CDP.CName(x.value, where=x.where)
-
-            elif x.value in deriv_resources:
-                # XXX: this is not correct
-                return CDP.RName(x.value, where=x.where)
-
-            elif x.value in deriv_functions:
-                # XXX: this is not correct
-                return CDP.FName(x.value, where=x.where)
-            else:
-                
-                logger.error('I cannot judge this SetNameGenericVar: %r' % str(x))
-        return x
-        
-    line_exprs = [namedtuple_visitor(_, refine) for _ in line_exprs]
+    refine0 = lambda x, parents: refine(x, parents, constants, resources, functions, 
+                                        variables, deriv_resources, deriv_functions)
+    line_exprs = [namedtuple_visitor_ext(_, refine0) for _ in line_exprs]
     
 #     for l in line_exprs:
 #         print recursive_print(l)
@@ -507,19 +435,24 @@ def nt_string(x):
     return res
 
 def namedtuple_visitor_only_visit(x, visit):
-    def transform(x):
+    def transform(x, parents):  # @UnusedVariable
         visit(x)
         return x
-    namedtuple_visitor(x, transform)
+    namedtuple_visitor_ext(x, transform)
     
-def namedtuple_visitor(x, transform):
+def namedtuple_visitor_ext(x, transform, parents=None):
+    if parents is None:
+        parents = ()
+        
     if not isnamedtupleinstance(x):
         raise_desc(ValueError,'?', type=type(x).__name__, x=x)
     
     d = x._asdict()
     for k, v in d.items():
+#         print('k: %s' % k)
         if isnamedtupleinstance(v):
-            v2 = namedtuple_visitor(v, transform)
+            parents2 = parents + ( (x, k),  )
+            v2 = namedtuple_visitor_ext(v, transform, parents=parents2)
         else:
             v2 = v
          
@@ -529,13 +462,109 @@ def namedtuple_visitor(x, transform):
     x1 = T(**d)
 
     if isnamedtuplewhere(x1):
-        x1 = transform(x1)
+        x1 = transform(x1, parents=parents)
 
 #     if hasattr(x, 'warning'):
 #         setattr(x1, 'warning', getattr(x, 'warning'))
 #     
     return x1
 
+def refine(x, parents,
+           constants, resources, functions, variables, deriv_resources,
+           deriv_functions):
+    
+#     print tuple((type(x).__name__, y) for x, y in parents)
+    
+    is_rvalue_context = any(k == 'rvalue' for _, k in parents)
+    is_fvalue_context = any(k == 'fvalue' for _, k in parents)
+    
+    assert not (is_rvalue_context and is_fvalue_context)
+    
+    if isinstance(x, CDP.VariableRef):
+        if x.name in constants:
+            cname = CDP.CName(x.name, where=x.where)
+            res = CDP.ConstantRef(cname=cname, where=x.where)
+            return res
+        elif x.name in resources and x.name in functions:
+            if is_rvalue_context:
+                msg = 'Please use "provided %s" rather than just "%s".' % (x.name, x.name)
+                warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context=None) # XXX
+
+                # interpret as 
+                return CDP.NewResource(None, CDP.RName(x.name, where=x.where), 
+                                   where=x.where)
+            if is_fvalue_context:
+                msg = 'Please use "required %s" rather than just "%s".' % (x.name, x.name)
+                warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context=None) # XXX
+
+                return CDP.NewFunction(None, CDP.FName(x.name, where=x.where), 
+                                   where=x.where)
+            msg = 'I cannot say whether %r refers to the functionality or resource.' % x.name
+            msg += ' Need to implement >= - aware refinement.'
+            warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context=None) # XXX
+            return x
+        elif x.name in resources:
+            if x.name in variables:
+                msg = 'I cannot say whether %r refers to the variable or resource.' % x.name
+                warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context=None) # XXX
+                return x 
+            
+            msg = 'Please use "provided %s" rather than just "%s".' % (x.name, x.name)
+            warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context=None) # XXX
+
+            return CDP.NewResource(None, CDP.RName(x.name, where=x.where), 
+                                   where=x.where)
+
+        elif x.name in functions:
+            if x.name in variables:
+                msg = 'I cannot say whether %r refers to the variable or functionality.' % x.name
+                warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context=None) # XXX
+                return x
+            
+            msg = 'Please use "required %s" rather than just "%s".' % (x.name, x.name)
+            warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context=None) # XXX
+
+            return CDP.NewFunction(None, CDP.FName(x.name, where=x.where), 
+                                   where=x.where) 
+
+        elif x.name in deriv_resources:
+            where = x.where
+            drname = CDP.DerivResourceName(x.name, where=where)
+            res = CDP.DerivResourceRef(drname, where=where)
+            return res
+
+        elif x.name in deriv_functions:
+            # XXX: this is not correct
+            where = x.where
+            dfname = CDP.DerivFunctionName(x.name, where=where)
+            res = CDP.DerivFunctionRef(dfname, where=where)
+            return res
+        
+        elif x.name in variables:
+            where = x.where
+            dfname = CDP.VName(x.name, where=where)
+            res = CDP.ActualVarRef(dfname, where=where)
+            return res
+        else:
+            msg = 'I cannot judge this VariableRef: %r' % str(x)
+            logger.error(msg)
+            # raise DPInternalError(msg)
+   
+    if isinstance(x, CDP.SetNameGenericVar):
+        if x.value in constants:
+            return CDP.CName(x.value, where=x.where)
+
+        elif x.value in deriv_resources:
+            # XXX: this is not correct
+            return CDP.RName(x.value, where=x.where)
+
+        elif x.value in deriv_functions:
+            # XXX: this is not correct
+            return CDP.FName(x.value, where=x.where)
+        else:
+            
+            logger.error('I cannot judge this SetNameGenericVar: %r' % str(x))
+    return x
 
 def add_where_to_empty_list(result_of_function_above):
     r = result_of_function_above
