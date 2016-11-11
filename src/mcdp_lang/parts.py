@@ -96,6 +96,9 @@ class CDPLanguage():
     # provided fname
     NewFunction = namedtuplewhere('NewFunction', 'keyword name')
     Constraint = namedtuplewhere('Constraint', 'fvalue rvalue prep')
+    ConstraintInvalidRR = namedtuplewhere('ConstraintInvalidRR', 'rvalue1 rvalue2 prep')
+    ConstraintInvalidFF = namedtuplewhere('ConstraintInvalidFF', 'fvalue1 fvalue2 prep')
+    ConstraintInvalidSwapped = namedtuplewhere('ConstraintInvalidSwapped', 'fvalue rvalue prep')
 
     NatConstant = namedtuplewhere('NatConstant', 's1 s2 value')  # value = int, >=0
     IntConstant = namedtuplewhere('IntConstant', 's1 s2 value')  # value = int

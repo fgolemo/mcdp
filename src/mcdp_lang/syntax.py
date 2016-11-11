@@ -1,19 +1,17 @@
 # -*- coding: utf-8 -*-
-from mcdp_lang.parse_actions import dp_model_statements_parse_action, \
-    add_where_to_empty_list
-from mcdp_lang.pyparsing_bundled import FollowedBy
 from mocdp.exceptions import mcdp_dev_warning
 
 from .parse_actions import (divide_parse_action,
     funshortcut1m, mult_inv_parse_action, mult_parse_action, parse_pint_unit,
     plus_inv_parse_action, plus_parse_action, resshortcut1m,
-    space_product_parse_action, rvalue_minus_parse_action, fvalue_minus_parse_action)
+    space_product_parse_action, rvalue_minus_parse_action, fvalue_minus_parse_action,
+    dp_model_statements_parse_action, add_where_to_empty_list)
 from .parts import CDPLanguage
 from .pyparsing_bundled import (
     CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
     NotAny, OneOrMore, Optional, ParserElement, Word, ZeroOrMore, alphanums,
     alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
-    sglQuotedString)
+    sglQuotedString, FollowedBy)
 from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
 from .utils_lists import make_list
@@ -788,6 +786,43 @@ class Syntax():
                                                       rvalue=t[0],
                                                       prep=t[1]))
 
+
+    constraint_invalid1a = sp(fvalue + GEQ + fvalue,
+                             lambda t: CDP.ConstraintInvalidFF(fvalue1=t[0],
+                                                               fvalue2=t[2],
+                                                               prep=t[1]))
+    constraint_invalid2a = sp(rvalue + GEQ + rvalue,
+                             lambda t: CDP.ConstraintInvalidRR(rvalue1=t[0],
+                                                               rvalue2=t[2],
+                                                               prep=t[1]))
+    constraint_invalid1b = sp(fvalue + LEQ + fvalue,
+                             lambda t: CDP.ConstraintInvalidFF(fvalue1=t[0],
+                                                               fvalue2=t[2],
+                                                               prep=t[1]))
+    constraint_invalid2b = sp(rvalue + LEQ + rvalue,
+                             lambda t: CDP.ConstraintInvalidRR(rvalue1=t[0],
+                                                               rvalue2=t[2],
+                                                               prep=t[1]))
+    constraint_invalid3a = sp(rvalue + GEQ + fvalue,
+                             lambda t: CDP.ConstraintInvalidSwapped(rvalue=t[0],
+                                                                    fvalue=t[2],
+                                                                    prep=t[1]))
+
+
+
+    constraint_invalid3b = sp(fvalue + LEQ + rvalue,
+                             lambda t: CDP.ConstraintInvalidSwapped(rvalue=t[2],
+                                                                    fvalue=t[0],
+                                                                    prep=t[1]))
+    
+
+    constraint_invalid = (constraint_invalid1a ^ constraint_invalid2a
+                          ^ constraint_invalid3a
+                          ^ constraint_invalid1b
+                          ^ constraint_invalid2b 
+                          ^ constraint_invalid3b
+                          )
+    
     USING = keyword('using', CDP.UsingKeyword)
     fun_shortcut1 = sp(PROVIDES + fname + USING - dpname,
                        lambda t: CDP.FunShortcut1(provides=t[0],
@@ -848,8 +883,8 @@ class Syntax():
     ignore_res = sp(IGNORE + rvalue_resource,
                     lambda t: CDP.IgnoreRes(t[0], t[1]))
 
-    line_expr = (constraint_expr_geq ^ 
-                 constraint_expr_leq ^
+    line_expr = (  ( (constraint_expr_geq ^ constraint_expr_leq) | constraint_invalid)
+                   ^
                      (setname_constant ^ (
                       setname_rvalue ^ 
                       setname_fvalue ^

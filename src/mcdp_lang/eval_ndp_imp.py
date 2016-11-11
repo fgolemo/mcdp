@@ -643,6 +643,20 @@ def eval_statement(r, context):
     from .eval_resources_imp import eval_rvalue
     from .eval_lfunction_imp import eval_lfunction
 
+    invalid = (CDP.ConstraintInvalidRR, CDP.ConstraintInvalidFF, CDP.ConstraintInvalidSwapped)
+    
+    if isinstance(r, invalid):
+        msg = 'This constraint is invalid. '
+        
+        if isinstance(r, CDP.ConstraintInvalidRR):
+            msg += 'Both sides are resources.'
+        if isinstance(r, CDP.ConstraintInvalidFF):
+            msg += 'Both sides are functionalities.'
+        if isinstance(r, CDP.ConstraintInvalidSwapped):
+            msg += 'Functionality and resources are on the wrong side of the inequality.'
+
+        raise DPSemanticError(msg)
+
     if isinstance(r, Connection):
         context.add_connection(r)
 

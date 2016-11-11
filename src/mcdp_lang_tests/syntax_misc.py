@@ -1592,7 +1592,30 @@ def check_lang111(): # TODO: rename
  
 @comptest
 def check_lang112(): # TODO: rename
-    pass
+    
+    parse_wrap_check("required r >= required r", Syntax.constraint_invalid1a)
+    parse_wrap_check("provided f >= provided f", Syntax.constraint_invalid2a)
+    parse_wrap_check("required r <= required r", Syntax.constraint_invalid1b)
+    parse_wrap_check("provided f <= provided f", Syntax.constraint_invalid2b)
+    
+    parse_wrap_check("required r >= required r", Syntax.line_expr)
+    parse_wrap_check("provided f >= provided f", Syntax.line_expr)
+    parse_wrap_check("required r <= required r", Syntax.line_expr)
+    parse_wrap_check("provided f <= provided f", Syntax.line_expr)
+    
+    
+    print Syntax.constraint_invalid1a
+
+    parse_wrap_check("f required by ob1 >= r provided by ob2", Syntax.constraint_invalid3a)
+    parse_wrap_check("r provided by ob1 <= f required by ob1", Syntax.constraint_invalid3b)
+    parse_wrap_check("f required by ob1 >= r provided by ob2", Syntax.line_expr)
+    parse_wrap_check("r provided by ob1 <= f required by ob1", Syntax.line_expr)
+    
+    parse_wrap_check("provided f >= required r", Syntax.constraint_invalid3a)
+    parse_wrap_check("required r <= provided f", Syntax.constraint_invalid3b)
+    parse_wrap_check("provided f >= required r", Syntax.line_expr)
+    parse_wrap_check("required r <= provided f", Syntax.line_expr)
+    
 @comptest
 def check_lang113(): # TODO: rename
     pass
