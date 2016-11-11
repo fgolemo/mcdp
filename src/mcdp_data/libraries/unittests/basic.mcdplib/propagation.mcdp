@@ -1,0 +1,28 @@
+mcdp {
+    requires r1 [Nat]
+    provides f1 [Nat]
+    variable v1 [Nat]
+    c1 = Nat:1
+    c2 = c1
+    c3 = c2
+    c4 = c3 + c1
+
+    r2 = r1 
+    r2b = required r1
+
+    f2 = f1
+    f2b = provided f1
+
+    requires r5 = f2b
+
+    f3 = f1 + f2
+    # v1 can be used as either
+    r3 = r2 + v1
+    f3 = f2 + v1
+    f4 = f1 + c2
+    r4 = r1 + c2
+
+    # These are really truly ambiguous
+    # v2 = v1 + c1 
+    v2 = v1 + c1  + f2
+}

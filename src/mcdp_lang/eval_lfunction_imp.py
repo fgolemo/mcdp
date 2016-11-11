@@ -41,6 +41,10 @@ def eval_lfunction(lf, context):
     constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
                  CDP.Top, CDP.Bottom, CDP.Minimals, CDP.Maximals)
 
+    if isinstance(lf, (CDP.NewFunction)):
+        msg = 'The functionality %r cannot be used on this side of the constraint.'
+        raise_desc(DPSemanticError, msg % lf.name.value)
+        
     if isinstance(lf, constants):
         from mcdp_lang.eval_constant_imp import eval_constant
         res = eval_constant(lf, context)
@@ -64,6 +68,7 @@ def eval_lfunction(lf, context):
         CDP.InvMult: eval_lfunction_invmult,
         CDP.InvPlus: eval_lfunction_invplus,
         CDP.VariableRef: eval_lfunction_variableref,
+        CDP.DerivFunctionRef: eval_lfunction_DerivFunctionRef,
         CDP.FValueMinusN: eval_lfunction_FValueMinusN,
         CDP.GenericOperationFun: eval_lfunction_genericoperationfun,
     }
@@ -107,7 +112,15 @@ def eval_lfunction_anyoffun(lf, context):
 def eval_lfunction_disambiguation(lf, context):
     return eval_lfunction(lf.fvalue, context)
 
+def eval_lfunction_DerivFunctionRef(lf, context):
+    _ = lf.dfname.value
+    if _ in context.var2function:
+        return context.var2function[_]
+    else:        
+        msg = 'Derivative functionality %r not found.' % lf.name
+        raise DPSemanticError(msg, where=lf.where)
 
+    
 def eval_lfunction_variableref(lf, context):
     if lf.name in context.constants:
         c = context.constants[lf.name]

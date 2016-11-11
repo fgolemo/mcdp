@@ -33,6 +33,7 @@ def eval_constant(op, context):
     """
     from .eval_math import (eval_constant_divide, eval_PlusN_as_constant,
                             eval_RValueMinusN_as_constant, eval_MultN_as_constant)
+    from mcdp_lang.eval_resources_imp import eval_rvalue_ConstantRef
     if isinstance(op, (CDP.Resource)):
         raise NotConstant(str(op))
     
@@ -43,7 +44,7 @@ def eval_constant(op, context):
         CDP.NatConstant: eval_constant_NatConstant,
         CDP.IntConstant: eval_constant_IntConstant,
         CDP.SimpleValue: eval_constant_SimpleValue,
-        CDP.VariableRef: eval_constant_VariableRef,
+        
         CDP.MakeTuple: eval_constant_MakeTuple,
         CDP.AssertEqual: eval_assert_equal,
         CDP.AssertLEQ: eval_assert_leq,
@@ -67,6 +68,8 @@ def eval_constant(op, context):
         CDP.Maximals: eval_constant_Maximals,
         CDP.Minimals: eval_constant_Minimals,
         CDP.Bottom: eval_constant_Bottom,
+        
+        CDP.ConstantRef: eval_constant_ConstantRef,
     }
     
     for klass, hook in cases.items():
@@ -79,6 +82,17 @@ def eval_constant(op, context):
         raise_desc(NotConstant, msg, op=op)
 
 
+def eval_constant_ConstantRef(rvalue, context):
+    check_isinstance(rvalue, CDP.ConstantRef)
+    _ = rvalue.cname.value
+    if _ in context.constants:
+        c = context.constants[_]
+        assert isinstance(c, ValueWithUnits)
+        return c
+    else:
+        msg = 'Constant value %r not found.' % _
+        raise DPSemanticError(msg, where=rvalue.where) # or internal?
+    
 def eval_constant_NatConstant(op, context):  # @UnusedVariable
     return ValueWithUnits(unit=Nat(), value=op.value)
 

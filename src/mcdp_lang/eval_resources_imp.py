@@ -31,6 +31,10 @@ def eval_rvalue(rvalue, context):
     # wants Resource or NewFunction
     #     with add_where_information(rvalue.where):
 
+    if isinstance(rvalue, (CDP.NewResource)):
+        msg = 'The resource %r cannot be used on this side of the constraint.'
+        raise_desc(DPSemanticError, msg % rvalue.name.value)
+        
     constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
                  CDP.Top, CDP.Bottom, CDP.Maximals, CDP.Minimals)
 
@@ -53,7 +57,7 @@ def eval_rvalue(rvalue, context):
     cases = {
         CDP.Resource: eval_rvalue_Resource,
         CDP.Power: eval_rvalue_Power,
-        CDP.VariableRef: eval_rvalue_VariableRef,
+        
         CDP.NewFunction : eval_rvalue_NewFunction,
         CDP.PowerShort: eval_rvalue_Power,
         CDP.Divide: eval_rvalue_divide,
@@ -68,6 +72,11 @@ def eval_rvalue(rvalue, context):
         CDP.ApproxStepRes: eval_rvalue_approx_step,
         CDP.ApproxURes: eval_rvalue_approx_u,
         CDP.GenericOperationRes: eval_rvalue_generic_operation,
+        
+        CDP.VariableRef: eval_rvalue_VariableRef,
+        CDP.ConstantRef: eval_rvalue_ConstantRef,
+        CDP.DerivResourceRef: eval_rvalue_DerivResourceRef,
+        
     }
 
     for klass, hook in cases.items():
@@ -83,6 +92,26 @@ def eval_rvalue_Resource(rvalue, context):
     if isinstance(rvalue, CDP.Resource):
         return context.make_resource(dp=rvalue.dp.value, s=rvalue.s.value)
     
+def eval_rvalue_ConstantRef(rvalue, context):
+    check_isinstance(rvalue, CDP.ConstantRef)
+    _ = rvalue.cname.value
+    if _ in context.constants:
+        c = context.constants[_]
+        assert isinstance(c, ValueWithUnits)
+        return get_valuewithunits_as_resource(c, context)
+    else:
+        msg = 'Constant value %r not found.' % _
+        raise DPSemanticError(msg, where=rvalue.where) # or internal?
+
+def eval_rvalue_DerivResourceRef(rvalue, context):
+    check_isinstance(rvalue, CDP.DerivResourceRef)
+    _ = rvalue.drname.value
+    if _  in context.var2resource:
+        return context.var2resource[_]
+    else:
+        msg = 'Derivative resource %r not found.' % _
+        raise DPSemanticError(msg, where=rvalue.where) # or internal?
+
 def eval_rvalue_VariableRef(rvalue, context):
     if rvalue.name in context.constants:
         c = context.constants[rvalue.name]

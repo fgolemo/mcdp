@@ -79,6 +79,14 @@ span.RBRACE
     color: #00a;
 }
 
+span.VName { color: blue; }
+span.CName { color: grey; }
+span.SetNameRValue > span.RName { color: red; }
+span.SetNameFValue > span.FName { color: green; }
+
+span.DerivFunctionName { color: green; background-color: white;}
+span.DerivResourceName { color: red; background-color: white;}
+
 
 span.ProvideKeyword, span.RequireKeyword  {
     font-weight: bold; 

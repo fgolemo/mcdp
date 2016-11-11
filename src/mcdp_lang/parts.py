@@ -89,7 +89,6 @@ class CDPLanguage():
     Resource = namedtuplewhere('Resource', 'dp s keyword')
     Function = namedtuplewhere('Function', 'dp s keyword')
 
-    VariableRef = namedtuplewhere('VariableRef', 'name')
     VariableRefNDPType = namedtuplewhere('VariableRefNDPType', 'name')
 
     # required rname 
@@ -195,14 +194,31 @@ class CDPLanguage():
     DotPrep = namedtuplewhere('DotPrep', 'glyph')
     comma = namedtuplewhere('comma', 'glyph')
     LBRACE  = namedtuplewhere('LBRACE', 'glyph')
-    RBRACE  = namedtuplewhere('RBRACE', 'glyph')
-#     open_brace = namedtuplewhere('open_brace', 'glyph')
-#     close_brace = namedtuplewhere('close_brace', 'glyph')
+    RBRACE  = namedtuplewhere('RBRACE', 'glyph') 
 
+    # function name
     FName = namedtuplewhere('FName', 'value')
+    # resource name
     RName = namedtuplewhere('RName', 'value')
-    # Variable Name
+    # constant name
+    CName = namedtuplewhere('CName', 'value')
+    # variable Name (can be used as either f or r)
     VName = namedtuplewhere('VName', 'value')
+    
+    # This is used in parsing when we cannot decide what to do with it
+    # Later, it should be changed in one of the following
+    VariableRef = namedtuplewhere('VariableRef', 'name')
+    
+    DerivResourceName = namedtuplewhere('DerivResourceName', 'value')
+    DerivResourceRef = namedtuplewhere('DerivResourceRef', 'drname')
+    
+    DerivFunctionName = namedtuplewhere('DerivFunctionName', 'value')
+    DerivFunctionRef = namedtuplewhere('DerivFunctionRef', 'dfname')
+    ConstantRef = namedtuplewhere('ConstantRef', 'cname')
+    
+    # This  
+    ActualVarRef = namedtuplewhere('ActualVarRef', 'vname')
+    
     Collection = namedtuplewhere('Collection', 'elements')
 
     # upperset {0g,1g}
@@ -212,8 +228,8 @@ class CDPLanguage():
     LowerSetFromCollectionKeyword = namedtuplewhere('LowerSetFromCollectionKeyword', 'keyword')
     LowerSetFromCollection = namedtuplewhere('LowerSetFromCollection', 'keyword value')
 
-    FunStatement = namedtuplewhere('FunStatement', 'keyword fname unit')
-    ResStatement = namedtuplewhere('ResStatement', 'keyword rname unit')
+    
+    
     VarStatement = namedtuplewhere('VarStatement', 'keyword vnames unit')
     VarStatementKeyword = namedtuplewhere('VarStatementKeyword', 'keyword')
     
@@ -233,16 +249,26 @@ class CDPLanguage():
     SpaceProduct = namedtuplewhere('SpaceProduct', 'ops')
     InvMult = namedtuplewhere('InvMult', 'ops')
     InvPlus = namedtuplewhere('InvPlus', 'ops')
-    FunShortcut1 = namedtuplewhere('FunShortcut1', 'provides fname prep_using name')
-    ResShortcut1 = namedtuplewhere('ResShortcut1', 'requires rname prep_for name')
     
-    # requires x, y
+    # provides r [Nat]
+    FunStatement = namedtuplewhere('FunStatement', 'keyword fname unit')
+    # requires r [Nat]
+    ResStatement = namedtuplewhere('ResStatement', 'keyword rname unit')
+    # requires r1, r2
     ResShortcut4 = namedtuplewhere('ResShortcut4', 'requires rnames')
+    # provides f1, f2
     FunShortcut4 = namedtuplewhere('FunShortcut4', 'requires fnames')
-    
+    # provides r using <box>
+    FunShortcut1 = namedtuplewhere('FunShortcut1', 'provides fname prep_using name')
+    # requires f for <box>
+    ResShortcut1 = namedtuplewhere('ResShortcut1', 'requires rname prep_for name')
+    # provides f1,f2 using <box>
     FunShortcut1m = namedtuplewhere('FunShortcut1m', 'provides fnames prep_using name')
+    # requires r1,r2 for <box>
     ResShortcut1m = namedtuplewhere('ResShortcut1m', 'requires rnames prep_for name')
+    # provides f1 <= <expression>  (now '=')
     FunShortcut2 = namedtuplewhere('FunShortcut2', 'keyword fname prep lf')
+    # requires r1 >= <expression>  (now '=')
     ResShortcut2 = namedtuplewhere('ResShortcut2', 'keyword rname prep rvalue')
     
     IntegerFraction = namedtuplewhere('IntegerFraction', 'num den')

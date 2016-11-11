@@ -23,6 +23,8 @@ def is_a_special_list(x):
     return 'List' in type(x).__name__
 
 def make_list(x, where=None):
+    if x is None:
+        raise ValueError()
 #     if where is None:
 #         raise ValueError()
     try:

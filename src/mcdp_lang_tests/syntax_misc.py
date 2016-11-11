@@ -3,8 +3,8 @@ from nose.tools import assert_equal
 
 from comptests.registrar import comptest
 from contracts.utils import raise_desc, check_isinstance
-from mcdp_dp import (CatalogueDP, CoProductDP, NotFeasible, Template,  Constant, 
-                     Limit, MaxF1DP, MinF1DP, MinusValueDP, MinusValueNatDP, 
+from mcdp_dp import (CatalogueDP, CoProductDP, NotFeasible, Template, Constant,
+                     Limit, MaxF1DP, MinF1DP, MinusValueDP, MinusValueNatDP,
                      MinusValueRcompDP)
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp, parse_poset
@@ -1473,11 +1473,27 @@ def check_lang103(): # TODO: rename
  
 @comptest
 def check_lang104(): # TODO: rename
-    pass 
+    s = """mcdp {
+      variable v1 [Nat]
+      c1 = Nat: 2
+      undef = v1 + c1
+    }"""
+    
+    assert_parse_ndp_semantic_error(s, 'truly ambiguous')
+
+
  
 @comptest
 def check_lang105(): # TODO: rename
-    pass 
+    s = """mcdp {
+      provides f [Nat]
+      requires r [Nat]
+      x = f + r 
+    }"""
+
+    e = 'either as a functionality or as a resource'
+    assert_parse_ndp_semantic_error(s, e)
+
  
 @comptest
 def check_lang106(): # TODO: rename

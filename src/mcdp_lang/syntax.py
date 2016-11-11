@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from mcdp_lang.parse_actions import dp_model_statements_parse_action, \
+    add_where_to_empty_list
 from mcdp_lang.pyparsing_bundled import FollowedBy
 from mocdp.exceptions import mcdp_dev_warning
 
@@ -15,8 +17,6 @@ from .pyparsing_bundled import (
 from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
 from .utils_lists import make_list
-from mcdp_lang.parse_actions import dp_model_statements_parse_action,\
-    add_where_to_empty_list
 
 
 ParserElement.enablePackrat()
@@ -455,18 +455,16 @@ class Syntax():
     setname_ndp_type2 = sp(dptypename - EQ - ndpt_dp_rvalue,
                      lambda t: CDP.SetNameMCDPType(None, t[0], t[1], t[2]))
 
-
     # For pretty printing
     ELLIPSIS = keyword('...', CDP.Ellipsis)
-
 
     setname_generic_var = sp(get_idn(),
                               lambda t: CDP.SetNameGenericVar(t[0]))
     # a = ...
     # a = 10 g
     # TODO: use specific constant name
-    
-    setname_constant = sp(setname_generic_var + EQ + definitely_constant_value,
+    constant_name = sp(get_idn(), lambda t: CDP.CName(t[0]))
+    setname_constant = sp(constant_name + EQ + definitely_constant_value,
                          lambda t: CDP.SetNameConstant(t[0], t[1], t[2]))
     
     setname_rvalue = sp(setname_generic_var + EQ + (ELLIPSIS | rvalue),
