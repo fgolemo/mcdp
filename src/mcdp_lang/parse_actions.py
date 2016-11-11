@@ -21,7 +21,6 @@ from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list, unwrap_list
 
 
-
 CDP = CDPLanguage
  
 
@@ -484,15 +483,15 @@ def refine(x, parents,
             res = CDP.ConstantRef(cname=cname, where=x.where)
             return res
         elif x.name in resources and x.name in functions:
-            if is_rvalue_context:
-                msg = 'Please use "provided %s" rather than just "%s".' % (x.name, x.name)
+            if is_fvalue_context:
+                msg = 'Please use "required %s" rather than just "%s".' % (x.name, x.name)
                 warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context=None) # XXX
 
                 # interpret as 
                 return CDP.NewResource(None, CDP.RName(x.name, where=x.where), 
                                    where=x.where)
-            if is_fvalue_context:
-                msg = 'Please use "required %s" rather than just "%s".' % (x.name, x.name)
+            if is_rvalue_context:
+                msg = 'Please use "provided %s" rather than just "%s".' % (x.name, x.name)
                 warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context=None) # XXX
 
                 return CDP.NewFunction(None, CDP.FName(x.name, where=x.where), 
@@ -507,7 +506,7 @@ def refine(x, parents,
                 warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context=None) # XXX
                 return x 
             
-            msg = 'Please use "provided %s" rather than just "%s".' % (x.name, x.name)
+            msg = 'Please use "required %s" rather than just "%s".' % (x.name, x.name)
             warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context=None) # XXX
 
             return CDP.NewResource(None, CDP.RName(x.name, where=x.where), 
@@ -519,7 +518,7 @@ def refine(x, parents,
                 warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context=None) # XXX
                 return x
             
-            msg = 'Please use "required %s" rather than just "%s".' % (x.name, x.name)
+            msg = 'Please use "provided %s" rather than just "%s".' % (x.name, x.name)
             warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context=None) # XXX
 
             return CDP.NewFunction(None, CDP.FName(x.name, where=x.where), 
