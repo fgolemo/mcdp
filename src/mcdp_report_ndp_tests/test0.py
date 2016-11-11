@@ -11,6 +11,7 @@ from mocdp import logger
 @for_all_source_mcdp
 def check_syntax(filename, source):  # @UnusedVariable
     # print filename
+    source = open(filename).read()
     try:
         _html = ast_to_html(source,
                             parse_expr=Syntax.ndpt_dp_rvalue,

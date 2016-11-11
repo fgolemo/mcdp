@@ -57,7 +57,7 @@ mcdp {
         requires gpiocom [`GPIOCom]
     }
 
-    processor.com >= com provided by route_in
+    processor.com >= com required by route_in
     route_in.ethcom >= provided ethcom
     route_in.pisocketcom >= provided pisocketcom
     route_in.usbcom1 >= provided usbcom1

@@ -4,12 +4,17 @@ from contracts.utils import raise_desc, check_isinstance, raise_wrapped, indent
 from mcdp_dp import (InvMult2, InvPlus2, InvPlus2Nat, InvMult2Nat,
                      InvMultValueNatDP, PlusValueNatDP,
                      PlusValueRcompDP, PlusValueDP)
+from mcdp_dp.dp_minus import MinusValueDP, MinusValueRcompDP, MinusValueNatDP
 from mcdp_dp.dp_multvalue import InvMultValueDP
+from mcdp_lang.eval_constant_imp import NotConstant
 from mcdp_lang.eval_resources_imp_unary import eval_lfunction_genericoperationfun
+from mcdp_lang.eval_warnings import MCDPWarnings, warn_language
+from mcdp_lang.misc_math import plus_constantsN
 from mcdp_lang.parse_actions import decorate_add_where
 from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table,
     poset_maxima)
 from mcdp_posets import Rcomp
+from mcdp_posets.rcomp_units import RbicompUnits
 from mocdp.comp.context import CFunction, get_name_for_res_node, ValueWithUnits
 from mocdp.exceptions import (DPInternalError, DPNotImplementedError,
     DPSemanticError, mcdp_dev_warning)
@@ -18,11 +23,6 @@ from .helpers import create_operation_lf, get_valuewithunits_as_function
 from .namedtuple_tricks import recursive_print
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from mcdp_posets.rcomp_units import RbicompUnits
-from mcdp_lang.eval_constant_imp import NotConstant
-from mcdp_lang.misc_math import plus_constantsN
-from mcdp_dp.dp_minus import MinusValueDP, MinusValueRcompDP, MinusValueNatDP
-from mcdp_lang.eval_warnings import MCDPWarnings, warn_language
 
 
 CDP = CDPLanguage
@@ -184,11 +184,7 @@ def eval_lfunction_FValueMinusN(lf, context):
             constants.append(c)
         except:
             raise
-        
-#     if len(constants) > 1:
-#         msg = 'FValueMinusN not implemented for more than one constant.'
-#         raise_desc(DPNotImplementedError, msg, constants = constants)
-#     
+         
     constant = plus_constantsN(constants) 
 
     # f - constant <= (x)
@@ -340,8 +336,7 @@ def eval_lfunction_invmult_sort_ops(ops, context, wants_constant):
     
         Returns functions, constants
     """ 
-    from mcdp_lang.eval_constant_imp import eval_constant
-    from mcdp_lang.eval_constant_imp import NotConstant
+    from .eval_constant_imp import eval_constant
     constants = []
     functions = []
 

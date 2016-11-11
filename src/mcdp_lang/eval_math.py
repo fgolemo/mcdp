@@ -14,7 +14,7 @@ from mcdp_posets.rcomp_units import (RbicompUnits_subtract, RbicompUnits_reflect
     R_dimensionless)
 from mocdp import MCDPConstants
 from mocdp.comp.context import CResource, ValueWithUnits
-from mocdp.exceptions import DPInternalError, DPSemanticError, DPNotImplementedError
+from mocdp.exceptions import DPInternalError, DPSemanticError
 
 from .eval_constant_imp import NotConstant
 from .eval_resources_imp import eval_rvalue
