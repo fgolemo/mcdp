@@ -43,7 +43,8 @@ def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
                 parse_expr=None, add_line_spans=False):
     
     if parse_expr is None:
-        warnings.warn('Please add specific parse_expr (default=Syntax.ndpt_dp_rvalue)', stacklevel=2)
+        warnings.warn('Please add specific parse_expr (default=Syntax.ndpt_dp_rvalue)', 
+                      stacklevel=2)
         parse_expr = Syntax.ndpt_dp_rvalue
         
     if add_css:

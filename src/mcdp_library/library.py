@@ -15,8 +15,8 @@ from mocdp import ATTR_LOAD_LIBNAME, ATTR_LOAD_NAME, logger
 from mocdp.comp.context import Context, ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-from mocdp.exceptions import DPSemanticError, extend_with_filename, \
-    mcdp_dev_warning
+from mocdp.exceptions import DPSemanticError, \
+    mcdp_dev_warning, MCDPExceptionWithWhere
 
 from .utils import memo_disk_cache2
 from .utils.locate_files_imp import locate_files
@@ -228,10 +228,19 @@ class MCDPLibrary():
         with self._sys_path_adjust():
             context = self._generate_context_with_hooks()
 
-            with extend_with_filename(realpath):
+            try:
                 result = parse_ndp_like(string, context=context)
                 return result
-
+            except MCDPExceptionWithWhere as e:
+                logger.error('extend_with_filename(%r): seen %s' % (realpath, e))
+                _type, _value, traceback = sys.exc_info()
+                if e.where is None or e.where.filename is None:
+                    if realpath is not None:
+                        e = e.with_filename(realpath)
+                    else:
+                        e = e
+                raise e, None, traceback
+             
     def _generate_context_with_hooks(self):
         context = Context()
         context.load_ndp_hooks = [self.load_ndp]

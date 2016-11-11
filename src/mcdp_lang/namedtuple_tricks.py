@@ -12,7 +12,6 @@ def isnamedtupleinstance(x):
     if not isinstance(f, tuple): return False
     return all(type(n) == str for n in f)
 
-
 def isnamedtuplewhere(x):
     if not isnamedtupleinstance(x):
         return False
@@ -23,8 +22,9 @@ def namedtuplewhere(a, b):
     fields = b.split(" ")
     assert not 'where' in fields
     fields.append('where')
+#     fields.append('warning')
     base = namedtuple(a, fields)
-    base.__new__.__defaults__ = (None,)
+    base.__new__.__defaults__ = (None, )
     F = base
     # make the name available
     g = globals()
@@ -38,6 +38,15 @@ def get_copy_with_where(x, where):
     T = type(x)
     x1 = T(**d)
     return x1
+
+def get_copy_with_warning(x, warning):
+    d = x._asdict()
+    del d['warning']
+    d['warning'] = warning
+    T = type(x)
+    x1 = T(**d)
+    return x1
+
 
 def remove_where_info(x):
     if not isnamedtupleinstance(x):
@@ -71,6 +80,11 @@ def recursive_print(x):
         r = recursive_print(v).strip()
         s += indent(r, prefix, first=first)
         s += '\n'
+        
+    if hasattr(s, 'warning'):
+        msg = getattr(s, 'warning')
+        s += '\n' + indent(msg, '  W ')
+        
     return s
         
     

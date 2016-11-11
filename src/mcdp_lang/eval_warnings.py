@@ -16,3 +16,5 @@ def warn_language(element, which, msg, context):
     where = element.where
     msg = msg.strip() + '\n\n' + indent(str(where), ' '*4)
     logger.debug(msg)
+    
+#     setattr(element, 'warning', msg)

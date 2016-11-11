@@ -74,19 +74,8 @@ class DPUserAssertion(MCDPExceptionWithWhere):
     """
     pass
 
+from mocdp import logger
 
-@contextmanager
-def extend_with_filename(realpath):
-    try:
-        yield
-    except MCDPExceptionWithWhere as e:
-        _type, _value, traceback = sys.exc_info()
-        if e.where is None or e.where.filename is None:
-            if realpath is not None:
-                e = e.with_filename(realpath)
-            else:
-                e = e
-        raise e, None, traceback
 
 def _get_where_with_filename(e, filename):
     where = e.where

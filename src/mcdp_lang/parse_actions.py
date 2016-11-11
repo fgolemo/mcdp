@@ -154,7 +154,6 @@ def move_where(x0, string0, offset, offset_end):
     return res
 
 def infer_types_of_variables(line_exprs):
-    
     constants = set()
     # These are the resources and functions defined by the model
     resources = set()
@@ -235,16 +234,22 @@ def infer_types_of_variables(line_exprs):
             either = set()
             
         def visit_to_check2(x):
-#             print('  visit_to_check2(%s)  %s' % (nt_string(x), type(x).__name__))
-            if isinstance(x, CDP.FName):
-#                 print('%r (FName) contributes to Flavors.rvalue' % x.name)
-                Flavors.rvalue.add(x.value)
-            if isinstance(x, CDP.RName):
-#                 print('%r (RName) contributes to Flavors.fvalue' % x.name)
-                Flavors.fvalue.add(x.value)
-            if isinstance(x, CDP.VName):
+#             print('  visit_to_check2(%s)  %s %s' % (nt_string(x), type(x).__name__, x))
+            if isinstance(x, CDP.Resource):
+                l = x.dp.value + '.' + x.s.value
+                Flavors.rvalue.add(l)
+            elif isinstance(x, CDP.Function):
+                l = x.dp.value + '.' + x.s.value
+                Flavors.fvalue.add(l)
+#             elif isinstance(x, CDP.FName):
+# #                 print('%r (FName) contributes to Flavors.rvalue' % x.name)
+#                 Flavors.rvalue.add(x.value)
+#             elif isinstance(x, CDP.RName):
+# #                 print('%r (RName) contributes to Flavors.fvalue' % x.name)
+#                 Flavors.fvalue.add(x.value)
+            elif isinstance(x, CDP.VName):
                 Flavors.either.add(x.value)
-            if isinstance(x, CDP.VariableRef):
+            elif isinstance(x, CDP.VariableRef):
                 if x.name in functions and x.name in resources:
                     # ambiguous
                     Flavors.either.add(x.name) # not other flavor  
@@ -263,12 +268,12 @@ def infer_types_of_variables(line_exprs):
                 else:
                     msg = 'Could not resolve reference to %r.' % x.name
                     raise DPSemanticError(msg, where=x.where)
-                     
-        namedtuple_visitor(xx, visit_to_check2)
+            
+        namedtuple_visitor_only_visit(xx, visit_to_check2)
         
-#         print('Results of %r: rv %s fv %s undef %s either %s' % (
-#             nt_string(rvalue), Flavors.rvalue, Flavors.fvalue, Flavors.undefined,
-#             Flavors.either))
+        print('Results of %r: rv %s fv %s undef %s either %s' % (
+            nt_string(rvalue), Flavors.rvalue, Flavors.fvalue, Flavors.undefined,
+            Flavors.either))
         if Flavors.rvalue and Flavors.fvalue:
             return CONFLICTING
         if Flavors.undefined:
@@ -283,18 +288,18 @@ def infer_types_of_variables(line_exprs):
             
     def can_be_treated_as_rvalue(x):
         res = get_flavour(x)
-#         print 'Results of %r -> %s' % (nt_string(x), res)
+        print 'Results of %r -> %s' % (nt_string(x), res)
         return res in [RVALUE, EITHER] 
     
     def can_be_treated_as_fvalue(x):
         res = get_flavour(x)
-#         print 'Results of %r -> %s' % (nt_string(x), res)
+        print 'Results of %r -> %s' % (nt_string(x), res)
         return res in [FVALUE, EITHER]
      
     for i, l in enumerate(line_exprs):
-#         print('\n\n--- line %r (%s)' % ( 
-#             l.where.string[l.where.character:l.where.character_end], type(l)))
-
+        print('\n\n--- line %r (%s)' % ( 
+            l.where.string[l.where.character:l.where.character_end], type(l)))
+        print recursive_print(l)
         from mcdp_lang.syntax import Syntax
         # mark functions, resources, variables, and constants
         if isinstance(l, (CDP.FunStatement, CDP.FunShortcut1, CDP.FunShortcut2)):
@@ -468,8 +473,8 @@ def infer_types_of_variables(line_exprs):
         
     line_exprs = [namedtuple_visitor(_, refine) for _ in line_exprs]
     
-#     for l in line_exprs:
-#         print recursive_print(l)
+    for l in line_exprs:
+        print recursive_print(l)
     return line_exprs
 
 def nt_string(x):
@@ -478,6 +483,12 @@ def nt_string(x):
     res = w.string[w.character:w.character_end]
     return res
 
+def namedtuple_visitor_only_visit(x, visit):
+    def transform(x):
+        visit(x)
+        return x
+    namedtuple_visitor(x, transform)
+    
 def namedtuple_visitor(x, transform):
     if not isnamedtupleinstance(x):
         raise_desc(ValueError,'?', type=type(x).__name__, x=x)
@@ -490,12 +501,16 @@ def namedtuple_visitor(x, transform):
             v2 = v
          
         d[k] = v2
+    
     T = type(x)
     x1 = T(**d)
 
     if isnamedtuplewhere(x1):
         x1 = transform(x1)
 
+#     if hasattr(x, 'warning'):
+#         setattr(x1, 'warning', getattr(x, 'warning'))
+#     
     return x1
 
 
