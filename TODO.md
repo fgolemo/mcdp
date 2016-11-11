@@ -258,3 +258,14 @@ http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c 
 - Evaluate empty tuple; see e.g http://127.0.0.1:8080/libraries/basic/models/resource_from_constants/views/dp_graph/
 
   * If Series(a, b) and a.F = 1, then Change 
+
+
+- We should not warn for an expression "a = 1 J", like this:
+
+mocdp:This expression could be parsed both as a functionality and as a resource. I parsed it as a constant.
+
+    line  3 >        battery = instance mcdp {
+    line  4 >            requires mass [g]
+    line  5 >            provides energy [J]
+    line  6 >            specific_energy = 0.1 J / g
+                         ↑

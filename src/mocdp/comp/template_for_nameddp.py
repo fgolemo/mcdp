@@ -39,7 +39,8 @@ class TemplateForNamedDP():
             try:
                 check_same_interface(v,  proposed)
             except DifferentInterface as e:
-                msg = 'Cannot specialize the template because the interface is different.'
+                msg = ('Cannot specialize the template because '
+                       'the interface is different.')
                 raise_wrapped(DPSemanticError, e, msg,
                               interface=describe_interface(v),
                               proposed=describe_interface(proposed),
@@ -55,7 +56,6 @@ class TemplateForNamedDP():
                 c = library._generate_context_with_hooks()
         else:
             c = context.child()
-
 
         for k, v in parameter_assignment.items():
             c.var2model[k] = v
@@ -130,14 +130,8 @@ def describe_interface(ndp):
     ftypes = ndp.get_ftypes(fnames)
     rnames = ndp.get_rnames()
     rtypes = ndp.get_rtypes(rnames)
-    return "fnames: %s\nftypes: %s\nrnames: %s\nrtypes: %s" % (fnames, ftypes, rnames, rtypes)
-
-
-
-
-
-
-
+    return ("fnames: %s\nftypes: %s\nrnames: %s\nrtypes: %s" % 
+            (fnames, ftypes, rnames, rtypes))
 
 
 

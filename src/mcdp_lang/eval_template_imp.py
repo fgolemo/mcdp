@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, check_isinstance
 from mcdp_lang.parse_actions import decorate_add_where
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.exceptions import DPInternalError, DPSemanticError
@@ -18,6 +18,7 @@ def eval_template(r, context):  # @UnusedVariable
     cases = {
         CDP.LoadTemplate: eval_template_load,
         CDP.TemplateSpec: eval_template_spec,
+        CDP.Deriv: eval_template_deriv,
     }
 
     for klass, hook in cases.items():
@@ -26,8 +27,22 @@ def eval_template(r, context):  # @UnusedVariable
 
     if True: # pragma: no cover    
         r = recursive_print(r)
-        raise_desc(DPInternalError, 'Invalid template.', r=r)
+        msg = 'Cannot interpret this as a template.'
+        raise_desc(DPInternalError, msg, r=r)
 
+def eval_template_deriv(r, context):
+    from .eval_ndp_imp import eval_ndp
+
+    check_isinstance(r, CDP.Deriv)
+    
+#     name = r.dpname.value
+#     ndp = eval_ndp(r.ndp, context)
+    
+#     return ndp_deriv(r.ndp, name)
+
+    raise NotImplementedError
+    
+    
 def eval_template_load(r, context):
     assert isinstance(r, CDP.LoadTemplate)
     assert isinstance(r.load_arg, (CDP.TemplateName, CDP.TemplateNameWithLibrary))

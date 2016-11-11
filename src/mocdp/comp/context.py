@@ -5,12 +5,12 @@ from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
 from mcdp_dp import FunctionNode, PrimitiveDP, ResourceNode
 from mcdp_posets import FinitePoset , NotBounded, Poset, Space, PosetProductWithLabels
+from mcdp_posets.types_universe import express_value_in_isomorphic_space
 from mocdp import logger
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.comp.wrap import dpwrap
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
-from mcdp_posets.types_universe import express_value_in_isomorphic_space
 
 
 _ = logger
@@ -117,11 +117,7 @@ class Context():
         s += '\n' + '  constants: %s' % self.constants
 
         return s
-
-#     def get_default_library_name(self):
-#         """ hack used for Template """
-#         return getattr(self, 'default_library_name', None)
-
+ 
     def child(self):
         """ A child context preserves the value of the constants
             and the model types. """
@@ -273,6 +269,7 @@ class Context():
 
     @contract(returns=str)
     def add_ndp_fun_node(self, fname, F):
+        """ Returns the name of the node (something like _fun_****) """
         ndp = dpwrap(FunctionNode(F, fname), fname, fname)
         name = get_name_for_fun_node(fname)
         # print('Adding new function %r as %r.' % (str(name), fname))

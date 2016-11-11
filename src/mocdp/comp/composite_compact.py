@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from mocdp import logger
-from mocdp.comp.context import Connection
+
+from .context import Connection
 
 
 __all__ = [

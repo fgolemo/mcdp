@@ -16,6 +16,7 @@ from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
     get_name_for_fun_node, get_name_for_res_node)
 from mocdp.comp.ignore_some_imp import ignore_some
 from mocdp.comp.make_approximation_imp import make_approximation
+from mocdp.comp.template_deriv import cndp_eversion
 from mocdp.exceptions import (DPInternalError, DPSemanticError,
     DPSemanticErrorNotConnected, MCDPExceptionWithWhere, mcdp_dev_warning)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
@@ -64,6 +65,7 @@ def eval_ndp(r, context):  # @UnusedVariable
         CDP.ApproxUpper: eval_ndp_approx_upper,
         CDP.AddMake: eval_ndp_addmake,
         CDP.IgnoreResources: eval_ndp_ignoreresources,
+        CDP.Eversion: eval_eversion,
     }
     
     for klass, hook in cases.items():
@@ -75,6 +77,12 @@ def eval_ndp(r, context):  # @UnusedVariable
         msg = 'eval_ndp(): cannot evaluate r as an NDP.'
         raise_desc(DPInternalError, msg, r=r)
 
+def eval_eversion(r, context):
+    check_isinstance(r, CDP.Eversion)
+    ndp = eval_ndp(r.ndp, context)
+    name = r.dpname.value
+    res = cndp_eversion(ndp, name)
+    return res
     
 def eval_ndp_dpinstance(r, context):
     return eval_ndp(r.dp_rvalue, context)
@@ -520,7 +528,28 @@ def add_variable(vname, P, where, context):
     context.set_var2function(vname, CFunction(vname, fname))
     
     context.variables.add(vname)
+
+def eval_statement_SetNameConstant(r, context):
+    check_isinstance(r, CDP.SetNameConstant)
     
+    name = r.name.value
+    right_side = r.right_side
+
+    if name in context.constants:
+        msg = 'Constant %r already set.' % name
+        raise DPSemanticError(msg, where=r.where)
+
+    if name in context.var2resource:
+        msg = 'Resource %r already set.' % name
+        raise DPSemanticError(msg, where=r.where)
+
+    if name in context.var2function:
+        msg = 'Name %r already used.' % name
+        raise DPSemanticError(msg, where=r.where)
+
+    x = eval_constant(right_side, context)
+    context.set_constant(name, x)
+
 def eval_statement_SetNameRValue(r, context):
     """ 
         This is a special case, because it is the place
@@ -597,14 +626,16 @@ def eval_statement_SetNameRValue(r, context):
         msg = ('This expression could be parsed both as a functionality '
                'and as a resource.')
         if used_constant:
-            msg += ' I parsed it as a constant.'
+            pass
+        #             msg += ' I parsed it as a constant.'
         else:
             if used_rvalue:
                 msg += ' I parsed it as a resource.'
             else:
                 msg += ' I parsed it as a function.'
           
-        warn_language(r, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context)
+                warn_language(r, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, 
+                              msg, context)
     
     
 @decorate_add_where
@@ -647,7 +678,8 @@ def eval_statement(r, context):
 
     elif isinstance(r, CDP.SetNameRValue):
         return eval_statement_SetNameRValue(r, context)
-    
+    elif isinstance(r, CDP.SetNameConstant):
+        return eval_statement_SetNameConstant(r, context)
     elif isinstance(r, CDP.SetNameFValue):
         name = r.name.value
         right_side = r.right_side

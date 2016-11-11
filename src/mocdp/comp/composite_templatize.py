@@ -36,12 +36,14 @@ def ndpcoproduct_templatize(ndp):
 @contract(ndp=NamedDP, returns=SimpleWrap)
 def ndp_templatize(ndp, mark_as_template=False):
     """ 
-        Creates a template based on the interface. 
+        Creates a template based on the interface of the ndp.
     
         The dp is Dummy.
         
-        The ndp is either OnlyTemplate (placeholder, drawn with
-        dashed lines) or Templatized (drawn with solid black line)
+        The ndp is either 
+        - OnlyTemplate (placeholder, drawn with
+        dashed lines)  [using mark_as_template]
+        - Templatized (drawn with solid black line)
         
         Copies attributes: ATTR_LOAD_NAME
     """

@@ -120,7 +120,8 @@ class SyntaxIdentifiers():
         'solve_f',
         'ceilsqrt',
         'Rcomp',
-        'variable'
+        'variable',
+        'eversion'
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -460,6 +461,10 @@ class Syntax():
                               lambda t: CDP.SetNameGenericVar(t[0]))
     # a = ...
     # a = 10 g
+    # TODO: use specific constant name
+    setname_constant = sp(setname_generic_var + EQ + (ELLIPSIS | constant_value),
+                         lambda t: CDP.SetNameConstant(t[0], t[1], t[2]))
+    
     setname_rvalue = sp(setname_generic_var + EQ + (ELLIPSIS | rvalue),
                          lambda t: CDP.SetNameRValue(t[0], t[1], t[2]))
 
@@ -823,12 +828,13 @@ class Syntax():
 
     line_expr = (constraint_expr_geq ^ 
                  constraint_expr_leq ^
-                     (setname_rvalue ^ 
+                     (setname_constant | (
+                      setname_rvalue ^ 
                       setname_fvalue ^
                       setname_ndp_instance1 ^ 
                       setname_ndp_instance2 ^ 
                       setname_ndp_type1 ^ 
-                      setname_ndp_type2)
+                      setname_ndp_type2))
                  ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
                  ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3
                  ^ res_shortcut4
@@ -956,6 +962,9 @@ class Syntax():
                             SCOMMA - ndpt_dp_rvalue - SRPAR,
                             lambda t: CDP.ApproxUpper(t[0], t[1], t[2]))
 
+    EVERSION = keyword('eversion', CDP.EversionKeyword)
+    ndpt_eversion  = sp(EVERSION + SLPAR + ndpname + SCOMMA + ndpt_dp_rvalue + SRPAR,
+                        lambda t: CDP.Eversion(t[0], t[1], t[2]))
 
     templatename = sp(get_idn() | quoted, lambda t: CDP.TemplateName(t[0]))
     templatename_with_library = sp(library_name + L('.') - templatename,
@@ -975,10 +984,18 @@ class Syntax():
                        lambda t: CDP.TemplateSpec(keyword=t[0],
                                                   params=make_list(t[2], t[1].where),
                                                   ndpt=t[4]))
+    
+    # deriv(<name>, <ndp>)
+    DERIV = keyword('deriv', CDP.DerivKeyword)
+
+    # not sure about ndpname
+    template_deriv = sp(DERIV + SLPAR + ndpname + SCOMMA + ndpt_dp_rvalue + SRPAR,
+                        lambda t: CDP.Deriv(t[0], t[1], t[2]))
 
     template << (code_spec 
                  | template_load 
-                 | template_spec 
+                 | template_spec
+                 | template_deriv 
                  | template_placeholder)  # mind the (...)
 
     SPECIALIZE = keyword('specialize', CDP.SpecializeKeyword)
@@ -1007,7 +1024,8 @@ class Syntax():
         ndpt_specialize |
         ndpt_addmake |
         ndpt_ignore_resources |
-        ndpt_placeholder
+        ndpt_eversion |
+        ndpt_placeholder 
     )
 
     ndpt_dp_rvalue << (ndpt_dp_operand | (SLPAR - ndpt_dp_operand - SRPAR))

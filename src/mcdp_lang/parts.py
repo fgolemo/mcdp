@@ -112,6 +112,7 @@ class CDPLanguage():
     SetNameGenericVar = namedtuplewhere('SetNameGenericVar', 'value')
     SetNameNDPInstance = namedtuplewhere('SetNameNDPInstance', 'keyword name dp_rvalue')
     SetNameMCDPType = namedtuplewhere('SetNameMCDPType', 'keyword name eq right_side')
+    SetNameConstant = namedtuplewhere('SetNameConstant', 'name eq right_side')
     SetNameRValue = namedtuplewhere('SetNameRValue', 'name eq right_side')
     SetNameFValue = namedtuplewhere('SetNameFValue', 'name eq right_side')
 
@@ -158,6 +159,7 @@ class CDPLanguage():
     ApproxKeyword = namedtuplewhere('ApproxKeyword', 'keyword')
     FlattenKeyword = namedtuplewhere('FlattenKeyword', 'keyword')
     SpecializeKeyword = namedtuplewhere('SpecializeKeyword', 'keyword')
+    
     WithKeyword = namedtuplewhere('WithKeyword', 'keyword')
     TemplateSpec = namedtuplewhere('TemplateSpec', 'keyword params ndpt')
 
@@ -380,7 +382,13 @@ class CDPLanguage():
     Placeholder_integer_or_float = Placeholder
     Placeholder_index_label = Placeholder
     
+    # deriv(name, <mcdp>) 
+    DerivKeyword = namedtuplewhere('DerivKeyword', 'keyword')
+    Deriv = namedtuplewhere('Deriv', 'keyword dpname ndp')
     
+    # eversion(name, <mcdp>) 
+    EversionKeyword = namedtuplewhere('EversionKeyword', 'keyword')
+    Eversion = namedtuplewhere('Eversion', 'keyword dpname ndp')
     
 
 # from a import symbol1, symbol2
