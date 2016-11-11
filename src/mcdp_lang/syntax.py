@@ -861,6 +861,11 @@ class Syntax():
                  ^ ignore_res
                  ^ ignore_fun) + ow
 
+
+    # This is for syntax highlighting only (mcdp_web/renderdoc/highlight.py", line 424)
+    dp_model_statements = sp(OneOrMore(line_expr),
+                             lambda t: CDP.ModelStatements(make_list(list(t))))
+
     ndpt_dp_model_statements = sp(ZeroOrMore(line_expr),
                                   dp_model_statements_parse_action)
      
