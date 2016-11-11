@@ -11,10 +11,10 @@ template [
 
   requires total_cost [$]
   
-  battery = instance  Battery
+  battery = instance Battery
   actuation = instance Actuation 
 
-  total_power0 = power required by actuation + extra_power
+  total_power0 = power required by actuation + provided extra_power
 
   power_approx = instance PowerApprox
   total_power0 <= power_approx.power
@@ -22,13 +22,15 @@ template [
 
   capacity provided by battery >= provided endurance * total_power
  
-  total_mass = (
+  total_mass_comp = (
       mass required by battery + 
       actuator_mass required by actuation 
       + extra_payload)
 
   gravity = 9.81 m/s^2
-  weight = total_mass * gravity
+  weight = total_mass_comp * gravity
+
+  requires total_mass = total_mass_comp
 
   lift provided by actuation >= weight
   velocity provided by actuation >= velocity
@@ -40,7 +42,5 @@ template [
     cost required by battery + 
     labor_cost)
   
-  battery.missions >= num_missions
- 
-  requires total_mass >= total_mass   
+  missions provided by battery >= provided num_missions
 }

@@ -80,12 +80,14 @@ span.RBRACE
 }
 
 span.VName { color: blue; }
-span.CName { color: grey; }
-span.SetNameRValue > span.RName { color: red; }
-span.SetNameFValue > span.FName { color: green; }
+/* constant */
+span.CName { color: #333; 
+}
+span.SetNameRValue > span.RName { color: darkred; }
+span.SetNameFValue > span.FName { color: darkgreen; }
 
-span.DerivFunctionName { color: green; background-color: white;}
-span.DerivResourceName { color: red; background-color: white;}
+span.DerivFunctionName { color: darkgreen; } 
+span.DerivResourceName { color: darkred; }
 
 
 span.ProvideKeyword, span.RequireKeyword  {

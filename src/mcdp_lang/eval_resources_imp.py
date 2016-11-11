@@ -31,7 +31,7 @@ def eval_rvalue(rvalue, context):
     # wants Resource or NewFunction
     #     with add_where_information(rvalue.where):
 
-    if isinstance(rvalue, (CDP.NewResource)):
+    if isinstance(rvalue, (CDP.NewResource, CDP.DerivFunctionRef)):
         msg = 'The resource %r cannot be used on this side of the constraint.'
         raise_desc(DPSemanticError, msg % rvalue.name.value)
         

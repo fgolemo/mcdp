@@ -41,7 +41,7 @@ def eval_lfunction(lf, context):
     constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
                  CDP.Top, CDP.Bottom, CDP.Minimals, CDP.Maximals)
 
-    if isinstance(lf, (CDP.NewFunction)):
+    if isinstance(lf, (CDP.NewFunction, CDP.DerivResourceRef)):
         msg = 'The functionality %r cannot be used on this side of the constraint.'
         raise_desc(DPSemanticError, msg % lf.name.value)
         
