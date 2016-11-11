@@ -126,6 +126,15 @@ def spa(x, b):
     x.setParseAction(p)
 
 @parse_action
+# @wheredecorator
+def dp_model_statements_parse_action(tokens):
+    line_exprs = list(tokens)
+    for l in line_exprs:
+        print('line %s' % l.__str__())
+    return CDP.ModelStatements(make_list(line_exprs))
+
+
+@parse_action
 @wheredecorator
 def mult_parse_action(tokens):
     tokens = list(tokens[0])

@@ -190,12 +190,13 @@ class RuleLoop1a(SeriesSimplificationRule):
     
     """
     def applies(self, dp1, dp2):
+        from .dp_loop2 import DPLoop2
+
         # second must be Mux
         if not isinstance(dp2, Mux):
             return False
 
         # first must be Loop
-        from mcdp_dp.dp_loop2 import DPLoop2
         if not isinstance(dp1, DPLoop2):
             return False
 
@@ -216,7 +217,7 @@ class RuleLoop1a(SeriesSimplificationRule):
         return True
 
     def _execute(self, dp1, dp2):
-        from mcdp_dp.dp_loop2 import DPLoop2
+        from .dp_loop2 import DPLoop2
         assert isinstance(dp2, Mux)
         assert isinstance(dp1, DPLoop2)
         

@@ -272,3 +272,7 @@ mocdp:This expression could be parsed both as a functionality and as a resource.
 
 - We should not have "required " and "provided " attached to arcs like this:
 http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/views/edit_fancy/
+
+
+- Propagation of constant values:
+file:///Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/unittests/basic.mcdplib/out-mcdp_plot/propagation-syntax_doc.html

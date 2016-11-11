@@ -15,6 +15,7 @@ from .pyparsing_bundled import (
 from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
 from .utils_lists import make_list
+from mcdp_lang.parse_actions import dp_model_statements_parse_action
 
 
 ParserElement.enablePackrat()
@@ -860,16 +861,19 @@ class Syntax():
                  ^ ignore_res
                  ^ ignore_fun) + ow
 
-    dp_model_statements = sp(OneOrMore(line_expr),
-                             lambda t: CDP.ModelStatements(make_list(list(t))))
+    ndpt_dp_model_statements = sp(ZeroOrMore(line_expr),
+                                  dp_model_statements_parse_action)
+     
 
+    
     MCDPTOKEN = keyword('mcdp', CDP.MCDPKeyword)
     ndpt_dp_model = sp(MCDPTOKEN - S(L('{')) -
-                       ZeroOrMore(line_expr)
+                       ndpt_dp_model_statements
                         - S(L('}')),
                   lambda t: CDP.BuildProblem(keyword=t[0],
-                                             statements=make_list(list(t[1:]),
-                                                                  where=t[0].where)))
+                                             statements=t[1]))
+#     
+#                     dp_model_statements_parse_action(t[1:], where=t[0].where)))
 
 
     # load
