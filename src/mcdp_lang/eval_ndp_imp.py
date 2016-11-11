@@ -851,7 +851,8 @@ def eval_statement(r, context):
 def eval_build_problem(r, context):
     context = context.child()
 
-    statements = unwrap_list(r.statements)
+    check_isinstance(r.statements, CDP.ModelStatements)
+    statements = unwrap_list(r.statements.statements)
 
     for s in statements:
         eval_statement(s, context)
