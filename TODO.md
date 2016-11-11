@@ -269,3 +269,6 @@ mocdp:This expression could be parsed both as a functionality and as a resource.
     line  5 >            provides energy [J]
     line  6 >            specific_energy = 0.1 J / g
                          ↑
+
+- We should not have "required " and "provided " attached to arcs like this:
+http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/views/edit_fancy/

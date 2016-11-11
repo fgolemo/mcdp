@@ -70,7 +70,8 @@ span.ProcName,
 span.ApproxUpperKeyword,
 span.ApproxLowerKeyword,
 span.VarStatementKeyword,
-span.GenericOperationName
+span.GenericOperationName,
+span.EversionKeyword
 { 
     font-weight: bold; 
     color: #00a;

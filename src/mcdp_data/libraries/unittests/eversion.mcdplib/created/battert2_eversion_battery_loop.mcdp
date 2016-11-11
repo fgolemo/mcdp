@@ -1,0 +1,8 @@
+mcdp {
+   battery = instance `Battery 
+   battery_dual = instance eversion(battery, `Battery2)
+
+  # erase these to show visualization bug
+  mass required by battery <= mass provided by battery_dual
+  capacity provided by battery >= capacity required by battery_dual
+}
