@@ -6,6 +6,7 @@ class MCDPWarnings:
     LANGUAGE_CONSTRUCT_DEPRECATED = 'Deprecated construct'
     LANGUAGE_AMBIGUOS_EXPRESSION = 'Ambiguous expression'
     
+
 def warn_language(element, which, msg, context):
     """
         element: a namedtuplewhere

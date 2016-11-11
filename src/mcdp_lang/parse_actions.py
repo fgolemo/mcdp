@@ -19,6 +19,7 @@ from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list, unwrap_list
 from mcdp_lang.namedtuple_tricks import recursive_print, isnamedtuplewhere
 from mcdp_lang.pyparsing_bundled import Word, printables
+from mcdp_lang.eval_warnings import MCDPWarnings, warn_language
 
 
 
@@ -244,7 +245,10 @@ def infer_types_of_variables(line_exprs):
             if isinstance(x, CDP.VName):
                 Flavors.either.add(x.value)
             if isinstance(x, CDP.VariableRef):
-                if x.name in functions or x.name in deriv_resources:
+                if x.name in functions and x.name in resources:
+                    # ambiguous
+                    Flavors.either.add(x.name) # not other flavor  
+                elif x.name in functions or x.name in deriv_resources:
 #                     print('%r contributes to Flavors.rvalue' % x.name)
                     Flavors.rvalue.add(x.name) # not other flavor
                 elif x.name in resources or x.name in deriv_functions:
@@ -398,14 +402,18 @@ def infer_types_of_variables(line_exprs):
                 cname = CDP.CName(x.name, where=x.where)
                 res = CDP.ConstantRef(cname=cname, where=x.where)
                 return res
-            
+            elif x.name in resources and x.name in functions:
+                msg = 'I cannot say whether %r refers to the function or resource.' % x.name
+                msg += ' Need to implement >= - aware refinement.'
+                warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context=None) # XXX
+                return x
             elif x.name in resources:
                 return CDP.NewResource(None, CDP.RName(x.name, where=x.where), 
                                        where=x.where)
-
+ 
             elif x.name in functions:
                 return CDP.NewFunction(None, CDP.FName(x.name, where=x.where), 
-                                       where=x.where)
+                                       where=x.where) 
 
             elif x.name in deriv_resources:
                 where = x.where
@@ -428,7 +436,7 @@ def infer_types_of_variables(line_exprs):
                 
             else:
                 msg = 'I cannot judge this VariableRef: %r' % str(x)
-#                 logger.error(msg)
+                logger.error(msg)
                 # raise DPInternalError(msg)
        
         if isinstance(x, CDP.SetNameGenericVar):

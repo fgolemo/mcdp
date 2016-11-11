@@ -1493,11 +1493,19 @@ def check_lang105(): # TODO: rename
 
     e = 'either as a functionality or as a resource'
     assert_parse_ndp_semantic_error(s, e)
-
  
 @comptest
 def check_lang106(): # TODO: rename
-    pass 
+    """ Refininement when variables have the same name. """
+    s = """
+    mcdp {
+        requires power [Nat]
+        provides power [Nat]
+        power >= power + Nat:1
+    }
+    """
+    parse_ndp(s)
+    
  
 @comptest
 def check_lang107(): # TODO: rename
