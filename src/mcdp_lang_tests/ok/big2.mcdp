@@ -106,9 +106,9 @@ mcdp {  # mcdp = Monotone Co-Design Problem
   provides endurance [s]
   
   # sum current of components
-  current = MCB.input_current + computer.current
+  current = MCB.input_current + current required by computer
   # take the maximum voltage (conservative)
-  voltage = max(MCB.input_voltage, computer.voltage)
+  voltage = max(MCB.input_voltage, voltage required by computer)
  
   # Watts = Amperes * Volts
   power = current * voltage

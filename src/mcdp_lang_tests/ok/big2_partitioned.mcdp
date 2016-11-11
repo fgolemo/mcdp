@@ -92,8 +92,11 @@ mcdp {
   # to last for the duration of the mission
   provides endurance [s]
   
-  current = MCB.input_current + computation.current
-  voltage = MCB.input_voltage + computation.voltage
+  current = MCB.input_current + current required by computation
+
+  # XXX
+  voltage = MCB.input_voltage + voltage required by computation
+  
   power = current * voltage
   battery.capacity >= endurance * power
   battery.current >= current

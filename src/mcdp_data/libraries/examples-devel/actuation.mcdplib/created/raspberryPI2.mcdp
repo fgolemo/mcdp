@@ -28,7 +28,7 @@ mcdp {
 
     c0 = 100 mA
     c = 0.001 mA/flops
-    amps = c0 + processor.flops  * c
+    amps = c0 + flops provided by processor  * c
 
     socket_amps = (provided pisocketcom).amp_max
     ((required in).dc).amps >= amps + socket_amps
@@ -57,7 +57,7 @@ mcdp {
         requires gpiocom [`GPIOCom]
     }
 
-    processor.com >= route_in.com
+    processor.com >= com provided by route_in
     route_in.ethcom >= provided ethcom
     route_in.pisocketcom >= provided pisocketcom
     route_in.usbcom1 >= provided usbcom1
@@ -69,9 +69,8 @@ mcdp {
     route_out.ethcom <= required ethcom 
     route_out.gpiocom <= required gpiocom 
 
-    endurance1 =  max( (provided ethcom).duration, (provided pisocketcom).duration)
-    endurance2 =  max( (provided usbcom1).duration, (provided usbcom2).duration)
-    endurance = max(endurance1, endurance2)
+    endurance =  max( (provided ethcom).duration, (provided pisocketcom).duration, 
+                      (provided usbcom1).duration, (provided usbcom2).duration  )
 
     (required in).duration >= endurance
     rigid_body1 = max((provided ethcom).rigid_body, (provided pisocketcom).rigid_body)
