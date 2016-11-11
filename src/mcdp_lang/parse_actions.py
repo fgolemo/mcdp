@@ -492,8 +492,8 @@ def infer_types_of_variables(line_exprs):
         
     line_exprs = [namedtuple_visitor(_, refine) for _ in line_exprs]
     
-    for l in line_exprs:
-        print recursive_print(l)
+#     for l in line_exprs:
+#         print recursive_print(l)
     return line_exprs
 
 def nt_string(x):
