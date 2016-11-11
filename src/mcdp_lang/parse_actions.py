@@ -444,12 +444,10 @@ def namedtuple_visitor_ext(x, transform, parents=None):
     if parents is None:
         parents = ()
         
-    if not isnamedtupleinstance(x):
-        raise_desc(ValueError,'?', type=type(x).__name__, x=x)
+    assert isnamedtupleinstance(x), x
     
     d = x._asdict()
     for k, v in d.items():
-#         print('k: %s' % k)
         if isnamedtupleinstance(v):
             parents2 = parents + ( (x, k),  )
             v2 = namedtuple_visitor_ext(v, transform, parents=parents2)

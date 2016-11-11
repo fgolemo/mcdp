@@ -784,7 +784,7 @@ class Syntax():
                                                       prep=t[1]))
 
     constraint_expr_leq = sp(rvalue + LEQ - fvalue,
-                             lambda t: CDP.Constraint(function=t[2],
+                             lambda t: CDP.Constraint(fvalue=t[2],
                                                       rvalue=t[0],
                                                       prep=t[1]))
 
