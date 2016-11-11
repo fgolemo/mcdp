@@ -18,7 +18,7 @@ mcdp {
     f3 = f1 + f2
     # v1 can be used as either
     r3 = r2 + v1
-    f3 = f2 + v1
+    f3b = f2 + v1
     f4 = f1 + c2
     r4 = r1 + c2
 
