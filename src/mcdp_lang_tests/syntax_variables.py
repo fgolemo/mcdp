@@ -166,8 +166,7 @@ mcdp {
 
     x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + provided z
 
-    requires x >= x
-    requires y >= y
+    requires x, y
 }
     """
     ndp = parse_ndp(s)
@@ -187,8 +186,7 @@ mcdp {
 
     x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + provided z
 
-    requires x >= x
-    requires y >= y
+    requires x, y
 }
     """
     parse_ndp(s)
@@ -243,10 +241,9 @@ mcdp {
     x >= Nat: 0
      
     requires x [Nat] 
-    requires x  # error: name already used
 }
     """
-    expect = "Repeated resource name 'x'"
+    expect = "The name 'x' is already used by a variable"
     print assert_parse_ndp_semantic_error(s, expect)
 
     s = """
@@ -256,10 +253,9 @@ mcdp {
     x <= Nat: 0
      
     provides x [Nat] 
-    provides x  # error: name already used
 }
     """
-    expect = "Repeated function name 'x'"
+    expect = "The name 'x' is already used by a variable"
     print assert_parse_ndp_semantic_error(s, expect)
 
 @comptest

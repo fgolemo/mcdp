@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 from nose.tools import assert_equal
 
-from comptests.registrar import comptest, comptest_fails
+from comptests.registrar import comptest
 from contracts.utils import raise_desc, check_isinstance
 from mcdp_dp import (CatalogueDP, CoProductDP, NotFeasible, Template, Constant,
                      Limit, MaxF1DP, MinF1DP, MinusValueDP, MinusValueNatDP,
                      MinusValueRcompDP)
+from mcdp_dp import PlusValueNatDP
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp, parse_poset
 from mcdp_lang.pyparsing_bundled import Literal
@@ -13,7 +14,7 @@ from mcdp_lang.syntax import Syntax, SyntaxIdentifiers
 from mcdp_lang.syntax_codespec import SyntaxCodeSpec
 from mcdp_lang_tests.utils import assert_parse_ndp_semantic_error
 from mcdp_posets import LowerSets, Rcomp, UpperSet, UpperSets, PosetProduct, get_product_compact
-from mcdp_posets.nat import Nat
+from mcdp_posets import Nat
 from mcdp_posets.rcomp_units import R_dimensionless
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.comp.recursive_name_labeling import get_names_used
@@ -21,7 +22,6 @@ from mocdp.exceptions import DPNotImplementedError, DPSemanticError
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
-from mcdp_dp.dp_plus_value import PlusValueNatDP
 
 
 @comptest
