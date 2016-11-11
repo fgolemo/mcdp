@@ -72,6 +72,7 @@ def eval_lfunction(lf, context):
         CDP.DerivFunctionRef: eval_lfunction_DerivFunctionRef,
         CDP.FValueMinusN: eval_lfunction_FValueMinusN,
         CDP.GenericOperationFun: eval_lfunction_genericoperationfun,
+        CDP.ConstantRef: eval_lfunction_ConstantRef,
     }
 
     for klass, hook in cases.items():
@@ -131,6 +132,17 @@ def eval_lfunction_ActualVarRef(lf, context):
         msg = 'Cannot resolve variable %r.' % _
         raise DPSemanticError(msg, where=lf.where)
 
+def eval_lfunction_ConstantRef(lf, context):
+    check_isinstance(lf, CDP.ConstantRef)
+    _ = lf.cname.value
+    if  _ in context.constants:
+        c = context.constants[_]
+        assert isinstance(c, ValueWithUnits)
+        return get_valuewithunits_as_function(c, context)
+    else:
+        msg = 'Cannot resolve constant %r.' % _
+        raise DPSemanticError(msg, where=lf.where)
+    
 def eval_lfunction_variableref(lf, context):
     if lf.name in context.constants:
         c = context.constants[lf.name]

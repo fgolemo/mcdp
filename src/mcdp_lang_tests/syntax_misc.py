@@ -1579,5 +1579,14 @@ def check_lang110(): # TODO: rename
  
 @comptest
 def check_lang111(): # TODO: rename
-    pass 
+    """ constant ref for functions """
+    s = """
+    mcdp {
+        c = Nat: 2
+        provides f = c
+    }
+    """
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    print dp.repr_long()
  

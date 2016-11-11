@@ -16,6 +16,5 @@ mcdp {
 
     lift provided by actuation >= weight 
   
-
-    requires total_mass >= total_mass   
+    requires total_mass
 }
