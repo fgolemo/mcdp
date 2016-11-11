@@ -153,7 +153,8 @@ def move_where(x0, string0, offset, offset_end):
     return res
 
 def infer_debug(s):
-    print(s)
+    # print(s)
+    pass
     
 def infer_types_of_variables(line_exprs):
     constants = set()
@@ -202,7 +203,7 @@ def infer_types_of_variables(line_exprs):
 
     def found_cname(cname):
         check_isinstance(cname, CDP.CName)
-        print('found constant: %s' % cname.value)
+        infer_debug('found constant: %s' % cname.value)
         if cname.value in constants:
             msg = 'Duplicated constants?'
             raise DPInternalError(msg, where=cname.where) 
@@ -303,19 +304,19 @@ def infer_types_of_variables(line_exprs):
             
     def can_be_treated_as_rvalue(x):
         res = get_flavour(x)
-        print 'Results of %r -> %s' % (nt_string(x), res)
+        infer_debug('Results of %r -> %s' % (nt_string(x), res))
         return res in [RVALUE, EITHER] 
     
     def can_be_treated_as_fvalue(x):
         res = get_flavour(x)
-        print 'Results of %r -> %s' % (nt_string(x), res)
+        infer_debug('Results of %r -> %s' % (nt_string(x), res))
         return res in [FVALUE, EITHER]
      
     for i, l in enumerate(line_exprs):
         infer_debug('\n\n--- line %r (%s)' % ( 
             l.where.string[l.where.character:l.where.character_end], type(l)))
 #         print recursive_print(l)
-        from mcdp_lang.syntax import Syntax
+        from .syntax import Syntax
         # mark functions, resources, variables, and constants
         if isinstance(l, (CDP.FunStatement, CDP.FunShortcut1, CDP.FunShortcut2)):
             found_fname(l.fname)
@@ -352,7 +353,7 @@ def infer_types_of_variables(line_exprs):
                 # This can become simply a constant
                 infer_debug('The value %r can be recognized as constant' % str(l.name.value))
                 constants.add(l.name.value)
-                print recursive_print(l)
+#                 print recursive_print(l)
             else:
                 """"
                 This is a special case, because it is the place

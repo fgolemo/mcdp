@@ -11,7 +11,6 @@ from mcdp_posets.rcomp_units import (R_dimensionless, mult_table_seq,
     RbicompUnits, rcomp_add)
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPSemanticError, DPNotImplementedError
-from mcdp_posets.types_universe import get_types_universe
 
 
 @contract(S=RcompUnits)
@@ -173,5 +172,4 @@ def plus_constants2_rcompunits(a, b):
     return ValueWithUnits(value=res, unit=R)
 
 def plus_constantsN(constants):
-    print('plus_constantsN: %s' % constants)
     return functools.reduce(plus_constants2, constants)

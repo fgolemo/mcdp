@@ -7,6 +7,6 @@ mcdp {
    weight = total_mass * gravity
    
    energy_required = power required by actuation * endurance
-   lift provided by actuation >= weight  # XXX should be red
+   lift provided by actuation >= weight  
    capacity provided by battery >= energy_required
 }
