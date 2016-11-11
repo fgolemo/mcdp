@@ -15,8 +15,7 @@ from mocdp import ATTR_LOAD_LIBNAME, ATTR_LOAD_NAME, logger
 from mocdp.comp.context import Context, ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-from mocdp.exceptions import DPSemanticError, \
-    mcdp_dev_warning, MCDPExceptionWithWhere
+from mocdp.exceptions import DPSemanticError, mcdp_dev_warning, MCDPExceptionWithWhere
 
 from .utils import memo_disk_cache2
 from .utils.locate_files_imp import locate_files

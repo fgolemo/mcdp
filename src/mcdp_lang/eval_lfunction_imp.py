@@ -239,7 +239,8 @@ def eval_lfunction_invplus_sort_ops(ops, context, wants_constant):
     
 def eval_lfunction_invplus(lf, context):
     ops = get_odd_ops(unwrap_list(lf.ops))
-    pos_constants, neg_constants, functions = eval_lfunction_invplus_sort_ops(ops, context, wants_constant=False)
+    pos_constants, neg_constants, functions = \
+        eval_lfunction_invplus_sort_ops(ops, context, wants_constant=False)
         
     if neg_constants:
         msg = 'Inverse plus of negative constants not implemented yet.'
@@ -248,7 +249,8 @@ def eval_lfunction_invplus(lf, context):
     constants = pos_constants
     
     if len(functions) == 0:
-        return plus_constantsN(constants)
+        c = plus_constantsN(constants)
+        return get_valuewithunits_as_function(c, context)
 
     elif len(functions) == 1:
         if len(constants) > 0:

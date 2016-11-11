@@ -1534,7 +1534,7 @@ def check_lang108(): # TODO: rename
     s = """
     mcdp {
         provides x [Nat]
-        provided x <=  Nat:2 + Rcomp:1
+        provided x <=  Nat:3 + Rcomp:4
     }
     """
     parse_ndp(s)
@@ -1542,7 +1542,7 @@ def check_lang108(): # TODO: rename
     s = """
     mcdp {
         provides x [Nat]
-        provided x <=  Nat:2 + 1 dimensionless
+        provided x <=  Nat:5 + 7 dimensionless
     }
     """
     parse_ndp(s)

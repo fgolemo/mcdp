@@ -6,11 +6,12 @@ from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
 from mcdp_maps.SumN_xxx_Map import sum_units
 from mcdp_posets import Nat, RcompUnits, mult_table, Rcomp, express_value_in_isomorphic_space
-from mcdp_posets.nat import Nat_mult_uppersets_continuous
+from mcdp_posets.nat import Nat_mult_uppersets_continuous, Nat_add
 from mcdp_posets.rcomp_units import (R_dimensionless, mult_table_seq,
-    RbicompUnits)
+    RbicompUnits, rcomp_add)
 from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPSemanticError
+from mocdp.exceptions import DPSemanticError, DPNotImplementedError
+from mcdp_posets.types_universe import get_types_universe
 
 
 @contract(S=RcompUnits)
@@ -124,6 +125,47 @@ def add_table(F1, F2):
     return F1
 
 def plus_constants2(a, b):
+    
+    A = a.unit
+    B = b.unit
+    
+    if isinstance(A, RcompUnits) and isinstance(B, RcompUnits):
+        return plus_constants2_rcompunits(a, b)
+    
+    if isinstance(A, RcompUnits) and isinstance(B, (Rcomp, Nat)):
+        b2 = ValueWithUnits(b.cast_value(A), A)
+        return plus_constants2_rcompunits(a, b2)
+    
+    if isinstance(B, RcompUnits) and isinstance(A, (Rcomp, Nat)):
+        a2 = ValueWithUnits(a.cast_value(B), B)
+        return plus_constants2_rcompunits(a2, b)
+
+    if isinstance(B, Rcomp) and isinstance(A, Rcomp):
+        res = rcomp_add(a.value, b.value)
+        return ValueWithUnits(value=res, unit=Rcomp())
+
+    if isinstance(B, Rcomp) and isinstance(A, Nat):
+        a2v = a.cast_value(B)
+        res = rcomp_add(a2v, b.value)
+        return ValueWithUnits(value=res, unit=Rcomp())
+  
+    if isinstance(A, Rcomp) and isinstance(B, Nat):
+        b2v = b.cast_value(A)
+        res = rcomp_add(a.value, b2v)
+        return ValueWithUnits(value=res, unit=Rcomp())
+
+    if isinstance(B, Nat) and isinstance(A, Nat):
+        res = Nat_add(a.value, b.value)
+        return ValueWithUnits(value=res, unit=Nat())
+        
+    
+    msg = 'Cannot add %r and %r' % (a, b)
+    raise DPNotImplementedError(msg)
+
+@contract(a=ValueWithUnits, b=ValueWithUnits)
+def plus_constants2_rcompunits(a, b):
+    check_isinstance(a.unit, RcompUnits)
+    check_isinstance(b.unit, RcompUnits)
     R = a.unit
     Fs = [a.unit, b.unit]
     values = [a.value, b.value]
