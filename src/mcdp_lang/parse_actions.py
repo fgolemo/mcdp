@@ -301,10 +301,12 @@ def infer_types_of_variables(line_exprs):
             found_fname(l.fname)
         elif isinstance(l, (CDP.ResStatement, CDP.ResShortcut1, CDP.ResShortcut2)):
             found_rname(l.rname)
-        elif isinstance(l, (CDP.ResShortcut4, CDP.ResShortcut1m)):
+        elif isinstance(l, (#CDP.ResShortcut4, 
+                            CDP.ResShortcut1m)):
             for _ in unwrap_list(l.rnames):
                 found_rname(_)
-        elif isinstance(l, (CDP.FunShortcut4, CDP.FunShortcut1m)):
+        elif isinstance(l, (#CDP.FunShortcut4, 
+                            CDP.FunShortcut1m)):
             for _ in unwrap_list(l.fnames):
                 found_fname(_)
         
@@ -403,15 +405,25 @@ def infer_types_of_variables(line_exprs):
                 res = CDP.ConstantRef(cname=cname, where=x.where)
                 return res
             elif x.name in resources and x.name in functions:
-                msg = 'I cannot say whether %r refers to the function or resource.' % x.name
+                msg = 'I cannot say whether %r refers to the functionality or resource.' % x.name
                 msg += ' Need to implement >= - aware refinement.'
                 warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context=None) # XXX
                 return x
             elif x.name in resources:
+                if x.name in variables:
+                    msg = 'I cannot say whether %r refers to the variable or resource.' % x.name
+                    warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context=None) # XXX
+                    return x 
+                
                 return CDP.NewResource(None, CDP.RName(x.name, where=x.where), 
                                        where=x.where)
  
             elif x.name in functions:
+                if x.name in variables:
+                    msg = 'I cannot say whether %r refers to the variable or functionality.' % x.name
+                    warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context=None) # XXX
+                    return x
+                
                 return CDP.NewFunction(None, CDP.FName(x.name, where=x.where), 
                                        where=x.where) 
 
@@ -433,7 +445,6 @@ def infer_types_of_variables(line_exprs):
                 dfname = CDP.VName(x.name, where=where)
                 res = CDP.ActualVarRef(dfname, where=where)
                 return res
-                
             else:
                 msg = 'I cannot judge this VariableRef: %r' % str(x)
                 logger.error(msg)
@@ -457,6 +468,8 @@ def infer_types_of_variables(line_exprs):
         
     line_exprs = [namedtuple_visitor(_, refine) for _ in line_exprs]
     
+#     for l in line_exprs:
+#         print recursive_print(l)
     return line_exprs
 
 def nt_string(x):

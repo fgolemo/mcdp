@@ -74,6 +74,7 @@ def eval_rvalue(rvalue, context):
         CDP.GenericOperationRes: eval_rvalue_generic_operation,
         
         CDP.VariableRef: eval_rvalue_VariableRef,
+        CDP.ActualVarRef: eval_rvalue_ActualVarRef,
         CDP.ConstantRef: eval_rvalue_ConstantRef,
         CDP.DerivResourceRef: eval_rvalue_DerivResourceRef,
         
@@ -110,6 +111,16 @@ def eval_rvalue_DerivResourceRef(rvalue, context):
         return context.var2resource[_]
     else:
         msg = 'Derivative resource %r not found.' % _
+        raise DPSemanticError(msg, where=rvalue.where) # or internal?
+
+def eval_rvalue_ActualVarRef(rvalue, context):
+    check_isinstance(rvalue, CDP.ActualVarRef)
+
+    _ = rvalue.vname.value
+    if _  in context.var2resource:
+        return context.var2resource[_]
+    else:
+        msg = 'Cannot resolve variable %r not found.' % _
         raise DPSemanticError(msg, where=rvalue.where) # or internal?
 
 def eval_rvalue_VariableRef(rvalue, context):

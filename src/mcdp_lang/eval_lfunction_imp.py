@@ -68,6 +68,7 @@ def eval_lfunction(lf, context):
         CDP.InvMult: eval_lfunction_invmult,
         CDP.InvPlus: eval_lfunction_invplus,
         CDP.VariableRef: eval_lfunction_variableref,
+        CDP.ActualVarRef: eval_lfunction_ActualVarRef,
         CDP.DerivFunctionRef: eval_lfunction_DerivFunctionRef,
         CDP.FValueMinusN: eval_lfunction_FValueMinusN,
         CDP.GenericOperationFun: eval_lfunction_genericoperationfun,
@@ -113,14 +114,23 @@ def eval_lfunction_disambiguation(lf, context):
     return eval_lfunction(lf.fvalue, context)
 
 def eval_lfunction_DerivFunctionRef(lf, context):
+    check_isinstance(lf, CDP.DerivFunctionRef)
     _ = lf.dfname.value
     if _ in context.var2function:
         return context.var2function[_]
     else:        
-        msg = 'Derivative functionality %r not found.' % lf.name
+        msg = 'Derivative functionality %r not found.' % _
         raise DPSemanticError(msg, where=lf.where)
 
-    
+def eval_lfunction_ActualVarRef(lf, context):
+    check_isinstance(lf, CDP.ActualVarRef)
+    _ = lf.vname.value
+    if _ in context.var2function:
+        return context.var2function[_]
+    else:        
+        msg = 'Cannot resolve variable %r.' % _
+        raise DPSemanticError(msg, where=lf.where)
+
 def eval_lfunction_variableref(lf, context):
     if lf.name in context.constants:
         c = context.constants[lf.name]
