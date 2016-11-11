@@ -20,7 +20,7 @@ mcdp {
    
   lift provided by actuation >= weight
 
-  requires total_mass >= total_mass
+  requires total_mass
   
   labor_cost = (10 $) * (maintenance required by battery)
 

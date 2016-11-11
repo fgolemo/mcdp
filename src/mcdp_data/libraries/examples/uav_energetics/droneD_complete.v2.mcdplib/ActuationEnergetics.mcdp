@@ -33,5 +33,5 @@ mcdp {
 
     battery.missions >= num_missions
 
-    requires total_mass >= total_mass   
+    requires total_mass
 }
