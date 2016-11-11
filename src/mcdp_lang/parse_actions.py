@@ -17,6 +17,7 @@ from .parts import CDPLanguage
 from .pyparsing_bundled import ParseException, ParseFatalException
 from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list
+from mcdp_lang.utils_lists import unwrap_list
 
 
 CDP = CDPLanguage
@@ -126,13 +127,22 @@ def spa(x, b):
     x.setParseAction(p)
 
 @parse_action
-# @wheredecorator
 def dp_model_statements_parse_action(tokens):
     line_exprs = list(tokens)
     for l in line_exprs:
         print('line %s' % l.__str__())
     return CDP.ModelStatements(make_list(line_exprs))
 
+def add_where_to_empty_list(result_of_function_above):
+    r = result_of_function_above
+    check_isinstance(r, CDP.ModelStatements)
+    ops = unwrap_list(r.statements)
+    if len(ops) == 0:
+        l = make_list(ops, where=r.where)
+        res = CDP.ModelStatements(l, where=r.where)
+        return res
+    else:
+        return r
 
 @parse_action
 @wheredecorator

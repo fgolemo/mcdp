@@ -2,4 +2,7 @@
 mcdp {
     a = instance template mcdp  { 
     }
+    b = instance template mcdp {
+        provides a [Nat]
+    }
 }

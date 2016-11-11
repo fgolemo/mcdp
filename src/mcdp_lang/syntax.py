@@ -15,7 +15,8 @@ from .pyparsing_bundled import (
 from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
 from .utils_lists import make_list
-from mcdp_lang.parse_actions import dp_model_statements_parse_action
+from mcdp_lang.parse_actions import dp_model_statements_parse_action,\
+    add_where_to_empty_list
 
 
 ParserElement.enablePackrat()
@@ -866,20 +867,18 @@ class Syntax():
     dp_model_statements = sp(OneOrMore(line_expr),
                              lambda t: CDP.ModelStatements(make_list(list(t))))
 
+    MCDPTOKEN = keyword('mcdp', CDP.MCDPKeyword)
     ndpt_dp_model_statements = sp(ZeroOrMore(line_expr),
                                   dp_model_statements_parse_action)
      
+    lbrace  = sp(L('{'), lambda t: CDP.LBRACE(t[0]))
+    rbrace = sp(L('}'), lambda t: CDP.RBRACE(t[0]))
 
-    
-    MCDPTOKEN = keyword('mcdp', CDP.MCDPKeyword)
-    ndpt_dp_model = sp(MCDPTOKEN - S(L('{')) -
-                       ndpt_dp_model_statements
-                        - S(L('}')),
+    ndpt_dp_model = sp(MCDPTOKEN - lbrace - ndpt_dp_model_statements- rbrace,
                   lambda t: CDP.BuildProblem(keyword=t[0],
-                                             statements=t[1]))
-#     
-#                     dp_model_statements_parse_action(t[1:], where=t[0].where)))
-
+                                             lbrace=t[1],
+                                            statements=add_where_to_empty_list(t[2]),
+                                             rbrace=t[3]))
 
     # load
     primitivedp_name = sp(get_idn(), lambda t: CDP.FuncName(t[0]))  # XXX

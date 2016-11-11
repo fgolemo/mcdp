@@ -194,8 +194,10 @@ class CDPLanguage():
     coprod = namedtuplewhere('coprod', 'glyph')
     DotPrep = namedtuplewhere('DotPrep', 'glyph')
     comma = namedtuplewhere('comma', 'glyph')
-    open_brace = namedtuplewhere('open_brace', 'glyph')
-    close_brace = namedtuplewhere('close_brace', 'glyph')
+    LBRACE  = namedtuplewhere('LBRACE', 'glyph')
+    RBRACE  = namedtuplewhere('RBRACE', 'glyph')
+#     open_brace = namedtuplewhere('open_brace', 'glyph')
+#     close_brace = namedtuplewhere('close_brace', 'glyph')
 
     FName = namedtuplewhere('FName', 'value')
     RName = namedtuplewhere('RName', 'value')
@@ -248,7 +250,7 @@ class CDPLanguage():
     PowerKeyword = namedtuplewhere('PowerKeyword', 'keyword')
     Power = namedtuplewhere('Power', 'keyword op1 exponent')
     PowerShort = namedtuplewhere('PowerShort', 'op1 glyph exponent')
-    BuildProblem = namedtuplewhere('BuildProblem', 'keyword statements')
+    BuildProblem = namedtuplewhere('BuildProblem', 'keyword lbrace statements rbrace')
 
     ModelStatements = namedtuplewhere('ModelStatements', 'statements')
 
