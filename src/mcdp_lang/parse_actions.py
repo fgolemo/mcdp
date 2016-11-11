@@ -271,9 +271,9 @@ def infer_types_of_variables(line_exprs):
             
         namedtuple_visitor_only_visit(xx, visit_to_check2)
         
-        print('Results of %r: rv %s fv %s undef %s either %s' % (
-            nt_string(rvalue), Flavors.rvalue, Flavors.fvalue, Flavors.undefined,
-            Flavors.either))
+#         print('Results of %r: rv %s fv %s undef %s either %s' % (
+#             nt_string(rvalue), Flavors.rvalue, Flavors.fvalue, Flavors.undefined,
+#             Flavors.either))
         if Flavors.rvalue and Flavors.fvalue:
             return CONFLICTING
         if Flavors.undefined:
@@ -288,18 +288,18 @@ def infer_types_of_variables(line_exprs):
             
     def can_be_treated_as_rvalue(x):
         res = get_flavour(x)
-        print 'Results of %r -> %s' % (nt_string(x), res)
+#         print 'Results of %r -> %s' % (nt_string(x), res)
         return res in [RVALUE, EITHER] 
     
     def can_be_treated_as_fvalue(x):
         res = get_flavour(x)
-        print 'Results of %r -> %s' % (nt_string(x), res)
+#         print 'Results of %r -> %s' % (nt_string(x), res)
         return res in [FVALUE, EITHER]
      
     for i, l in enumerate(line_exprs):
-        print('\n\n--- line %r (%s)' % ( 
-            l.where.string[l.where.character:l.where.character_end], type(l)))
-        print recursive_print(l)
+#         print('\n\n--- line %r (%s)' % ( 
+#             l.where.string[l.where.character:l.where.character_end], type(l)))
+#         print recursive_print(l)
         from mcdp_lang.syntax import Syntax
         # mark functions, resources, variables, and constants
         if isinstance(l, (CDP.FunStatement, CDP.FunShortcut1, CDP.FunShortcut2)):
