@@ -7,8 +7,8 @@ mcdp {
 
   requires total_cost [$]
   
-  battery = new Battery_LiPo
-  actuation = new Actuation_a2_vel
+  battery = instance `Battery_LiPo
+  actuation = instance `Actuation_a2_vel
 
   total_power = power required by actuation + extra_power
   capacity provided by battery >= endurance * total_power
@@ -31,7 +31,7 @@ mcdp {
     cost required by battery + 
     labor_cost) 
    
-  missions provided by battery >= provided  num_missions
+  missions provided by battery >= provided num_missions
  
-  requires total_mass >= total_mass   
+  requires total_mass 
 }  

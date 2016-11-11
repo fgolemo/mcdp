@@ -166,17 +166,36 @@ def infer_types_of_variables(line_exprs):
     def found_fname(fname):
         check_isinstance(fname, CDP.FName)
 #         print('found fname: %s' % fname.value)
-        if fname.value in functions:
-            msg = 'Repeated function %r.' % fname.value
+        _ = fname.value
+        if _ in functions:
+            msg = 'Repeated function %r.' % _
             raise DPSemanticError(msg, where=fname.where)
+        
+        if _ in deriv_resources:
+            msg = 'The name %r is already used.' % _
+            raise DPSemanticError(msg, where=fname.where)
+
+        if _ in variables:
+            msg = 'The name %r is already used by a variable.' % _
+            raise DPSemanticError(msg, where=fname.where)
+
         functions.add(fname.value)
     
     def found_rname(rname):
         check_isinstance(rname, CDP.RName)
-#         print('found rname: %s' % rname.value)
-        if rname.value in resources:
-            msg = 'Repeated resource %r.' % rname.value
+        _ = rname.value
+        if _ in resources:
+            msg = 'Repeated resource %r.' % _
             raise DPSemanticError(msg, where=rname.where)
+        
+        if _ in deriv_resources:
+            msg = 'The name %r is already used.' % _
+            raise DPSemanticError(msg, where=rname.where)
+
+        if _ in variables:
+            msg = 'The name %r is already used by a variable.' % _
+            raise DPSemanticError(msg, where=rname.where)
+            
         resources.add(rname.value)
 
     def found_cname(cname):
