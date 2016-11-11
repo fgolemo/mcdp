@@ -140,7 +140,7 @@ mcdp {  # mcdp = Monotone Co-Design Problem
   # 1) Minimize the cost of everything
   requires cost [$]
   # cost of building
-  components_cost = (chassis.cost + motor.cost 
+  components_cost = (cost required by chassis + motor.cost 
   			+ battery.cost + MCB.cost 
            + autonomy.cost + computer.cost )
   # plus cost of shipping
