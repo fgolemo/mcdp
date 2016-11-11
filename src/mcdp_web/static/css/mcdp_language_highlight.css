@@ -71,7 +71,9 @@ span.ApproxUpperKeyword,
 span.ApproxLowerKeyword,
 span.VarStatementKeyword,
 span.GenericOperationName,
-span.EversionKeyword
+span.EversionKeyword,
+span.LBRACE,
+span.RBRACE
 { 
     font-weight: bold; 
     color: #00a;

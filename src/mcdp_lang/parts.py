@@ -110,7 +110,7 @@ class CDPLanguage():
     Ellipsis = namedtuplewhere('Ellipsis', 'token')
 
     SetNameGenericVar = namedtuplewhere('SetNameGenericVar', 'value')
-    SetNameNDPInstance = namedtuplewhere('SetNameNDPInstance', 'keyword name dp_rvalue')
+    SetNameNDPInstance = namedtuplewhere('SetNameNDPInstance', 'keyword name eq dp_rvalue')
     SetNameMCDPType = namedtuplewhere('SetNameMCDPType', 'keyword name eq right_side')
     SetNameConstant = namedtuplewhere('SetNameConstant', 'name eq right_side')
     SetNameRValue = namedtuplewhere('SetNameRValue', 'name eq right_side')

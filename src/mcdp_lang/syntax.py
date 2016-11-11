@@ -442,11 +442,11 @@ class Syntax():
     dpinstance_expr = dpinstance_from_type | dpinstance_from_library_shortcut
 
     SUB = keyword('sub', CDP.SubKeyword)
-    setname_ndp_instance1 = sp(SUB - dpname - S(EQ) - dpinstance_expr,
-                     lambda t: CDP.SetNameNDPInstance(t[0], t[1], t[2]))
+    setname_ndp_instance1 = sp(SUB - dpname - EQ - dpinstance_expr,
+                     lambda t: CDP.SetNameNDPInstance(t[0], t[1], t[2], t[3]))
 
-    setname_ndp_instance2 = sp(dpname - S(EQ) - dpinstance_expr,
-                     lambda t: CDP.SetNameNDPInstance(None, t[0], t[1]))
+    setname_ndp_instance2 = sp(dpname - EQ - dpinstance_expr,
+                     lambda t: CDP.SetNameNDPInstance(None, t[0], t[1], t[2]))
 
     MCDPTYPE = keyword('mcdp', CDP.MCDPTypeKeyword)
     setname_ndp_type1 = sp(MCDPTYPE - dptypename - EQ - ndpt_dp_rvalue,
