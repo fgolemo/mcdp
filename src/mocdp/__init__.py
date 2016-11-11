@@ -125,3 +125,4 @@ class MCDPConstants():
     # TODO: think whether this makes us optimistic or pessimistic, and where
     
 
+    log_cache_writes = False

@@ -1590,3 +1590,30 @@ def check_lang111(): # TODO: rename
     dp = ndp.get_dp()
     print dp.repr_long()
  
+@comptest
+def check_lang112(): # TODO: rename
+    pass
+@comptest
+def check_lang113(): # TODO: rename
+    pass
+@comptest
+def check_lang114(): # TODO: rename
+    pass
+@comptest
+def check_lang115(): # TODO: rename
+    pass
+@comptest
+def check_lang116(): # TODO: rename
+    pass
+@comptest
+def check_lang117(): # TODO: rename
+    pass
+@comptest
+def check_lang118(): # TODO: rename
+    pass
+@comptest
+def check_lang119(): # TODO: rename
+    pass
+@comptest
+def check_lang120(): # TODO: rename
+    pass
