@@ -138,6 +138,7 @@ class Syntax():
 
     # An expression that evaluates to a constant value
     constant_value = Forward()
+    definitely_constant_value = Forward() # no variable refs allowed
     # An expression that evaluates to a resource reference
     rvalue = Forward()
     # An expression that evaluates to a function reference
@@ -462,7 +463,8 @@ class Syntax():
     # a = ...
     # a = 10 g
     # TODO: use specific constant name
-    setname_constant = sp(setname_generic_var + EQ + (ELLIPSIS | constant_value),
+    
+    setname_constant = sp(setname_generic_var + EQ + definitely_constant_value,
                          lambda t: CDP.SetNameConstant(t[0], t[1], t[2]))
     
     setname_rvalue = sp(setname_generic_var + EQ + (ELLIPSIS | rvalue),
@@ -591,7 +593,22 @@ class Syntax():
                        | constant_placeholder
                        | constant_emptyset
                        )
-
+    definitely_constant_value << (
+         collection_of_constants
+       | tuple_of_constants
+       | nat_constant
+       | int_constant
+       | upper_set_from_collection
+       | lower_set_from_collection
+       | solve_model
+       | solve_r_model
+       | space_custom_value1
+       | valuewithunit
+       # | variable_ref # not allowed
+       | asserts
+       | constant_placeholder
+       | constant_emptyset
+    )
     constant_value << constant_value_op
 
     rvalue_resource_simple = sp(dpname + DOT - rname,

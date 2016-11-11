@@ -4,19 +4,19 @@ from abc import ABCMeta, abstractmethod
 from contracts import contract
 from contracts.utils import raise_wrapped
 from mcdp_posets import PosetProduct
+from mcdp_posets.uppersets import upperset_product, lowerset_product
 from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 from multi_index.get_it_test import compose_indices
 
+from .dp_constant import Constant, ConstantMinimals
 from .dp_flatten import Mux
-from .dp_identity import Identity
+from .dp_identity import IdentityDP
+from .dp_limit import Limit, LimitMaximals
 from .dp_parallel import Parallel
 from .dp_parallel_n import ParallelN
+from .dp_series import Series
+from .primitive import NotSolvableNeedsApprox
 from .primitive import PrimitiveDP  # @UnusedImport
-from mcdp_posets.uppersets import upperset_product, lowerset_product
-from mcdp_dp.dp_constant import Constant, ConstantMinimals
-from mcdp_dp.dp_limit import Limit, LimitMaximals
-from mcdp_dp.dp_series import Series
-from mcdp_dp.primitive import NotSolvableNeedsApprox
 
 
 __all__ = [
@@ -272,14 +272,14 @@ def make_parallel(dp1, dp2):
     if disable_optimization:
         return Parallel(dp1, dp2)
 
-    from mcdp_dp.dp_series_simplification import make_series, equiv_to_identity
+    from mcdp_dp.dp_series_simplification import equiv_to_identity
 
     # change identity to Mux
     a = Parallel(dp1, dp2)
     if equiv_to_identity(dp1) and equiv_to_identity(dp2):
         F = PosetProduct((dp1.get_fun_space(), dp2.get_fun_space()))
         assert F == a.get_fun_space()
-        return Identity(F)
+        return IdentityDP(F)
 
 #     if False:
 #         # These never run...
@@ -305,9 +305,8 @@ def make_parallel(dp1, dp2):
 
     for rule in rules:
         if rule.applies(dp1, dp2):
-            logger.debug('Applying par. simplification rule %s' % type(rule).__name__)
+            # logger.debug('Applying par. simplification rule %s' % type(rule).__name__)
             return rule.execute(dp1, dp2)
 
     return Parallel(dp1, dp2)
 
-from mocdp import logger
