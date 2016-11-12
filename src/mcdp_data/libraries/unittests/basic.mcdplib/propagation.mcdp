@@ -25,4 +25,7 @@ mcdp {
     # These are really truly ambiguous
     # v2 = v1 + c1 
     v2 = v1 + c1  + f2
+
+   requires r_unconnected [Nat]
+   provides f_unconnected [Nat]
 }

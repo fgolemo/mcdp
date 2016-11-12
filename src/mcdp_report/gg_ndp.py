@@ -13,7 +13,8 @@ from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
 from mocdp import logger
 from mocdp.comp import CompositeNamedDP, SimpleWrap
-from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
+from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node,\
+    is_fun_node_name, is_res_node_name
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning, DPInternalError
 from mocdp.ndp import NamedDPCoproduct
@@ -763,7 +764,13 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 
             n = names2functions[dp][fn]
             F = ndp.context.names[dp].get_ftype(fn)
-            label = 'required ' + get_signal_label(fn, F)
+            
+            label = get_signal_label(fn, F)
+            
+            it_is, _ = is_res_node_name(dp) 
+            if it_is:
+                label = 'required ' + label
+                
             l = gdc.newLink(x, n, label=label)
 
             gdc.decorate_arrow_function(l)  # XXX?
@@ -775,7 +782,12 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 
             n = names2resources[dp][rn]
             R = ndp.context.names[dp].get_rtype(rn)
-            label ='provided ' + get_signal_label(rn, R)
+            
+            label = get_signal_label(rn, R)
+            it_is, _ = is_fun_node_name(dp) 
+            if it_is: 
+                label = 'provided ' + label
+
             l = gdc.newLink(n, x, label=label)
             gdc.decorate_arrow_resource(l)  # XXX?
             gdc.styleApply('unconnected_link', l)
