@@ -9,7 +9,7 @@ from mocdp import logger
 from mocdp.exceptions import MCDPExceptionWithWhere
 
 from .parse_actions import parse_wrap
-from mcdp_lang.refinement import apply_refinement
+from .refinement import apply_refinement
 
 
 __all__ = [

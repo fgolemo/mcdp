@@ -232,7 +232,7 @@ def print_html_inner(x):
         out = '&lt;'
     if out == '>':
         out = '&gt;'
-    transformed0 = ("<span class='%s' where_character=%d where_character_end=%s>%s</span>" 
+    transformed0 = ("<span class='%s' where_character='%d' where_character_end='%s'>%s</span>" 
                     % (klass, x.where.character, x.where.character_end, out))
     yield Snippet(op=x, orig=orig0, a=x.where.character, b=x.where.character_end,
                   transformed=transformed0)
