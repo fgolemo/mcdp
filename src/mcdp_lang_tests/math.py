@@ -8,6 +8,32 @@ from .utils2 import eval_rvalue_as_constant, eval_rvalue_as_constant_same_exactl
 
 @comptest
 def check_subtraction1():
+    s = """
+    mcdp {
+            v1 = 10 g
+            v2 = 2 g
+            v3 = 1 g
+            v = v1 - v2 - v3 
+            
+            requires x >= v
+        }
+    """
+    print parse_ndp(s)
+    
+    s = """
+    mcdp {
+     t = instance mcdp {
+            v1 = 10 g
+            v2 = 2 g
+            v3 = 1 g
+            v = v1 - v2 - v3 
+            
+            requires x >= v
+        }
+    }
+    """
+    print parse_ndp(s)
+    
     parse_constant("""
     assert_equal(
         solve(<>, mcdp {
@@ -21,7 +47,36 @@ def check_subtraction1():
         upperclosure { 7 g }
     )
     """)
+    
+@comptest
+def check_subtraction2_contexts(): 
 
+    s = """
+    mcdp {
+      v2 = 2 g
+      t = instance mcdp {
+          v1 = 10 g
+            v = v1 - v2        
+            requires x >= v
+        }
+    }
+    """
+    print parse_ndp(s)
+    
+    s = """
+    mcdp {
+          v1 = 10 g
+        mcdp {
+      v2 = 2 g
+      t = instance mcdp {
+            v = v1 - v2        
+            requires x >= v
+        }
+        }
+    }
+    """
+    print parse_ndp(s)
+    
 
 # @comptest
 # def check_subtraction2():

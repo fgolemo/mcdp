@@ -35,9 +35,15 @@ def parse_ndp(string, context=None):
     assert isinstance(res, NamedDP), res
     return res
 
-def parse_ndp_refine(v, context):
+def standard_refine(v, context):
     v2 = apply_refinement(v, context)
     return v2
+
+parse_ndp_refine = standard_refine
+parse_poset_refine = standard_refine
+parse_constant_refine = standard_refine
+parse_dp_refine = standard_refine
+parse_template_refine = standard_refine
 
 def parse_ndp_eval(v, context):
     from .eval_ndp_imp import eval_ndp
@@ -79,8 +85,6 @@ def parse_poset(string, context=None):
     res = parse_poset_eval(v2, context)
     return res 
 
-def parse_poset_refine(x, context):  # @UnusedVariable
-    return x
 
 def parse_poset_eval(x, context):
     from .eval_space_imp import eval_space
@@ -119,9 +123,6 @@ def parse_constant(string, context=None):
 
     return res
 
-def parse_constant_refine(x, context):  # @UnusedVariable
-    return x
-
 def parse_constant_eval(x, context):
     from mocdp.comp.context import ValueWithUnits
     from mcdp_lang.eval_constant_imp import eval_constant
@@ -146,9 +147,6 @@ def parse_template(string, context=None):
     res = parse_template_eval(x, context)
     return res
 
-def parse_template_refine(x, context):  # @UnusedVariable
-    return x
-    
 def parse_template_eval(x, context):
     from mcdp_lang.eval_template_imp import eval_template
     from mocdp.comp.template_for_nameddp import TemplateForNamedDP

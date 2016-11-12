@@ -242,7 +242,7 @@ class AppEditorFancyGeneric():
                                             postprocess=None)
                         raise
                     
-                    thing = parse_eval(Tmp.parse_tree_interpreted)
+                    thing = parse_eval(Tmp.parse_tree_interpreted, context)
                 except (DPSemanticError, DPInternalError) as e:
                     highlight_marked = html_mark(highlight, e.where, "semantic_error")
                     self.last_processed2[key] = None  # XXX
