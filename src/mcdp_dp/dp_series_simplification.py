@@ -31,13 +31,13 @@ class SeriesSimplificationRule():
 
     def execute(self, dp1, dp2):
         """ Returns the simplified version. """
-        try:
-            res = self._execute(dp1, dp2)
-        except DPInternalError:
-            raise
-        except BaseException as e:
-            msg = 'Error while executing Series simplification rule.'
-            raise_wrapped(DPInternalError, e, msg, rule=self)
+#         try:
+        res = self._execute(dp1, dp2)
+#         except DPInternalError:
+#             raise
+#         except BaseException as e:
+#             msg = 'Error while executing Series simplification rule.'
+#             raise_wrapped(DPInternalError, e, msg, rule=self)
 
 #         print('\n\nExecuting simplification %s' % (type(self).__name__))
 #         print('dp1----\n%s' % dp1.repr_long())
@@ -56,7 +56,7 @@ class SeriesSimplificationRule():
 
     @abstractmethod
     def _execute(self, dp1, dp2):
-        pass
+        """ Returns an equivalent DP to Series(dp1, dp2) """
 
 
 class RuleEvaluateMuxTimesLimit(SeriesSimplificationRule):
@@ -487,7 +487,7 @@ disable_optimization = False
 def make_series(dp1, dp2):
     """ Creates a Series if needed.
         Simplifies the identity and muxes """
-    if disable_optimization:
+    if disable_optimization: # pragma: no cover
         return Series(dp1, dp2)
     # first, check that the series would be created correctly
 
@@ -638,8 +638,8 @@ def check_same_fun(dp1, dp2):
     """ Checks that the two dps have same F """
     F1 = dp1.get_fun_space()
     F2 = dp2.get_fun_space()
-#     tu = get_types_universe()
-    if not (F1 == F2):
+
+    if not (F1 == F2): # pragma: no cover
         msg = 'F not preserved'
         raise_desc(AssertionError, msg, F1=F1, F2=F2)
     
@@ -648,8 +648,8 @@ def check_same_res(dp1, dp2):
     """ Checks that the two dps have same F """
     R1 = dp1.get_res_space()
     R2 = dp2.get_res_space()
-#     tu = get_types_universe()
-    if not (R1 == R2):
+
+    if not (R1 == R2): # pragma: no cover
         msg = 'R not preserved'
         raise_desc(AssertionError, msg, R1=R1,R2=R2)
     
@@ -674,7 +674,6 @@ def wrap_series(F0, dps):
         return Identity(F0)
     else:
         return make_series(dps[0], wrap_series(dps[0].get_res_space(), dps[1:]))
-
 
 def simplify_indices_F(F, coords):
     # Safety check: Clearly if it's not the identity it cannot be equal to ()
@@ -724,7 +723,7 @@ def mux_composition(dp1, dp2):
         assert res.get_res_space() == dp0.get_res_space()
 
         return res
-    except DPInternalError as e:
+    except DPInternalError as e: # pragma: no cover
         msg = 'Cannot create shortcut.'
         raise_wrapped(DPInternalError, e, msg,
                       dp1=dp1.repr_long(), dp2=dp2.repr_long())

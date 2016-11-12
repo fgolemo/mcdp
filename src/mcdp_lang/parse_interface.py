@@ -130,6 +130,7 @@ def parse_constant_eval(x, context):
     value = result.value
     space = result.unit
     space.belongs(value)
+    return result
     
 @contract(returns='isinstance(TemplateForNamedDP)')
 def parse_template(string, context=None):
