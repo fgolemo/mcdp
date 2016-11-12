@@ -4,8 +4,7 @@ from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_posets import (FiniteCollection, FiniteCollectionsInclusion, Int, Nat,
     NotBelongs, NotLeq, PosetProduct, Rcomp, Space, UpperSet, UpperSets,
     get_types_universe, poset_minima)
-from mcdp_posets import FiniteCollectionAsSpace
-from mcdp_posets import LowerSets, LowerSet, RbicompUnits, RcompUnits
+from mcdp_posets import FiniteCollectionAsSpace, LowerSets, LowerSet, RbicompUnits, RcompUnits
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import (DPInternalError, DPSemanticError, mcdp_dev_warning,
     do_extra_checks)
@@ -33,7 +32,6 @@ def eval_constant(op, context):
     """
     from .eval_math import (eval_constant_divide, eval_PlusN_as_constant,
                             eval_RValueMinusN_as_constant, eval_MultN_as_constant)
-    from mcdp_lang.eval_resources_imp import eval_rvalue_ConstantRef
     if isinstance(op, (CDP.Resource)):
         raise NotConstant(str(op))
     
