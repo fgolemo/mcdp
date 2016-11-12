@@ -28,6 +28,16 @@
 		  	}
 	    	$("button").button().click(nodefault);
 		});
+		$(document).on('keydown', '#editor', function(e){
+		  //detect 'tab' key
+		  if(e.keyCode == 9){
+		    //add tab
+		    //document.execCommand('insertHTML', false, '&#009');
+		    document.execCommand('insertHTML', false, '   ');
+		    //prevent focusing on next element
+		    e.preventDefault();
+		  }
+		});
 	 </script>
 </td>
 </tr>
@@ -58,6 +68,7 @@
 	
   <span id='server_status'></span>
   <pre id='syntax_error'></pre>
+  <pre id='language_warnings'></pre>
   <pre id='comm_failure'></pre>
   </td></tr>
  
@@ -108,6 +119,7 @@
 		// $('button#save').disable();
 		$('#around_editor').css('background-color', '#ffe');
 		$('#syntax_error').html('');
+		$('#language_warnings').html('');
 		
 		current =$("a#graph img").attr("src");
 		desired = '/static/white.png';
@@ -208,6 +220,8 @@
 			//console.log('res: ' + (JSON.stringify(res)))
 			// console.log(res['error']);
 			$('#syntax_error').html(res['error']);
+			$('#language_warnings').html(); /* XXX */
+
 			//$('#syntax_error').show();
 			$('#around_editor').css('background-color', '#fee');
 			//$('button#save').text('Save (even though there are errors)');
@@ -238,6 +252,10 @@
 
 			$('#around_editor').css('background-color', 'white');
 			$('#syntax_error').html('');
+			if ('language_warnings' in res) {
+				$('#language_warnings').html(res['language_warnings']);
+			}
+			
 			//$('button#save').text('Save');
 			//$('button#save').enable();
 

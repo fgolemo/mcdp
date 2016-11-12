@@ -106,6 +106,10 @@ class Context():
         self.load_primitivedp_hooks = []
         self.load_template_hooks = []
         self.load_library_hooks = []
+        
+        # xxx this is probably not well thought out
+        # for example, are we propagating this to children? (no)
+        self.warnings = []
 
     def __repr__(self):
         s = 'Context:'

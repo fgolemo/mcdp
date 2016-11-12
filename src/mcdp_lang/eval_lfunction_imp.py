@@ -416,7 +416,7 @@ def eval_lfunction_invmult(lf, context, wants_constant=False):
     else:
         # no functions, just constants
         constant = generic_mult_constantsN(constants)
-        return get_valuewithunits_as_function(constant)
+        return get_valuewithunits_as_function(constant, context)
 
 
 def eval_lfunction_invmult_ops(fs, context):

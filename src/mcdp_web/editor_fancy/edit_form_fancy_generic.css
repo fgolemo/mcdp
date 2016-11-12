@@ -1,8 +1,22 @@
+#syntax_error, #language_warnings {
+    white-space: pre-wrap;
+    white-space: pre-wrap;
+}
 #syntax_error {
-	font-weight: bold;
+    
+    font-weight: bold;
 	font-size: 70%;
 	color: red;
 }
+
+#language_warnings {
+
+    font-weight: bold;
+    font-size: 70%;
+    color: darkorange;
+}
+
+
 #error_notice {
 	color: red;
 }

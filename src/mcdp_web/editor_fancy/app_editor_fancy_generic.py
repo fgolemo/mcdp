@@ -2,11 +2,17 @@
 import cgi
 from collections import defaultdict, namedtuple
 import os
+import sys
 
+from bs4 import BeautifulSoup
 from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
 from pyramid.renderers import render_to_response  # @UnresolvedImport
 
-from contracts.utils import check_isinstance
+from contracts.utils import check_isinstance, raise_wrapped, indent
+from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.parse_interface import parse_ndp_eval, parse_ndp_refine, \
+    parse_template_eval, parse_template_refine, parse_constant_eval, \
+    parse_constant_refine, parse_poset_eval, parse_poset_refine
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM
@@ -15,11 +21,18 @@ from mcdp_web.utils import (ajax_error_catch, create_image_with_string,
     format_exception_for_ajax_response, response_image)
 from mcdp_web.utils.response import response_data
 from mocdp import logger
-from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
+from contracts.interface import format_where
 
 
-Spec = namedtuple('Spec', 'url_part url_variable extension parse_expr parse'
+Spec = namedtuple('Spec', 'url_part url_variable extension '
+                  ' parse ' # function that returns the object
+                            # composition of the following:
+                  ' parse_expr ' #  expr = parse_wrap(string, expr)
+                  ' parse_refine ' # expr2 = parse_refine(expr, context)
+                  ' parse_eval '   # ndp = parse_eval(expr2, context
                   ' load get_png_data write minimal_source_code')
+
 
 class AppEditorFancyGeneric():
 
@@ -34,8 +47,10 @@ class AppEditorFancyGeneric():
 
         spec_models = Spec(url_part='models', url_variable='model_name',
                               extension=MCDPLibrary.ext_ndps,
-                              parse_expr=Syntax.ndpt_dp_rvalue,
                               parse=MCDPLibrary.parse_ndp,
+                              parse_expr=Syntax.ndpt_dp_rvalue,
+                              parse_refine=parse_ndp_refine,
+                              parse_eval=parse_ndp_eval,
                               load=MCDPLibrary.load_ndp,
                               get_png_data=get_png_data_model,
                               write=MCDPLibrary.write_to_model,
@@ -43,8 +58,10 @@ class AppEditorFancyGeneric():
 
         spec_templates = Spec(url_part='templates', url_variable='template_name',
                               extension=MCDPLibrary.ext_templates,
-                              parse_expr=Syntax.template,
                               parse=MCDPLibrary.parse_template,
+                              parse_expr=Syntax.template,
+                              parse_refine=parse_template_refine,
+                              parse_eval=parse_template_eval,
                               load=MCDPLibrary.load_template,
                               get_png_data=ndp_template_enclosed,
                               write=MCDPLibrary.write_to_template,
@@ -52,8 +69,10 @@ class AppEditorFancyGeneric():
 
         spec_values = Spec(url_part='values', url_variable='value_name',
                            extension=MCDPLibrary.ext_values,
-                           parse_expr=Syntax.rvalue,
                            parse=MCDPLibrary.parse_constant,
+                           parse_expr=Syntax.rvalue,
+                           parse_refine=parse_constant_refine,
+                           parse_eval=parse_constant_eval,
                            load=MCDPLibrary.load_constant,
                            get_png_data=get_png_data_unavailable,
                            write=MCDPLibrary.write_to_constant,
@@ -61,8 +80,10 @@ class AppEditorFancyGeneric():
 
         spec_posets = Spec(url_part='posets', url_variable='poset_name',
                            extension=MCDPLibrary.ext_posets,
-                           parse_expr=Syntax.space,
                            parse=MCDPLibrary.parse_poset,
+                           parse_expr=Syntax.space,
+                           parse_refine=parse_poset_refine,
+                           parse_eval=parse_poset_eval,
                            load=MCDPLibrary.load_poset,
                            get_png_data=get_png_data_unavailable,
                            write=MCDPLibrary.write_to_poset,
@@ -171,37 +192,86 @@ class AppEditorFancyGeneric():
         library_name = self.get_current_library_name(request)
         key = (library_name, spec, widget_name)
 
+        parse_expr = spec.parse_expr
+        parse_refine = spec.parse_refine
+        parse_eval = spec.parse_eval
+        
+        library = self.get_library(request)
+
+        context = library._generate_context_with_hooks()
+
         def go():
             try:
-                highlight = ast_to_html(string,
-                                        parse_expr=spec.parse_expr,
-                                        complete_document=False,
-                                        add_line_gutter=False,
-                                        encapsulate_in_precode=False,
-                                        add_css=False)
+                parse_tree = parse_wrap(parse_expr, string)[0]
+            except DPSemanticError as e:
+                msg = 'I only expected a DPSyntaxError'
+                raise_wrapped(DPSemanticError, e, msg, exc=sys.exc_info())
+            except DPSyntaxError as e:
+                # This is the case in which we could not even parse
+                res = format_exception_for_ajax_response(e, quiet=(DPSyntaxError,))
+                res['highlight'] = html_mark_syntax_error(string, e)
+                res['request'] = req
+                return res
+            
+            try:
+                class Tmp:
+                    parse_tree_interpreted = None
+                     
+                def postprocess(block):
+                    Tmp.parse_tree_interpreted = parse_refine(block, context) 
+                    return Tmp.parse_tree_interpreted
+                
+                
                 try:
-
-                    l = self.get_library(request)
-                    thing = spec.parse(l, string)
-
+                    try:
+                        highlight = ast_to_html(string,
+                                            parse_expr=parse_expr,
+                                            complete_document=False,
+                                            add_line_gutter=False,
+                                            encapsulate_in_precode=False,
+                                            add_css=False,
+                                            postprocess=postprocess)
+                    except DPSemanticError:
+                        # Do it again without postprocess
+                        highlight = ast_to_html(string,
+                                            parse_expr=parse_expr,
+                                            complete_document=False,
+                                            add_line_gutter=False,
+                                            encapsulate_in_precode=False,
+                                            add_css=False,
+                                            postprocess=None)
+                        raise
+                    
+                    thing = parse_eval(Tmp.parse_tree_interpreted)
                 except (DPSemanticError, DPInternalError) as e:
-
+                    highlight_marked = html_mark(highlight, e.where, "semantic_error")
                     self.last_processed2[key] = None  # XXX
-                    res = format_exception_for_ajax_response(e, quiet=(DPSemanticError,))
-                    res['highlight'] = highlight
+                    res = format_exception_for_ajax_response(e, quiet=(DPSemanticError, DPInternalError))
+                    res['highlight'] = highlight_marked
                     res['request'] = req
-
                     return res
-
+                
                 self.last_processed2[key] = thing
             except:
                 self.last_processed2[key] = None  # XXX
                 raise
 
+            warnings = []
+            for w in context.warnings:
+                # w.msg
+                highlight = html_mark(highlight, w.where, "language_warning")
+                wheres = format_where(w.where, context_before=0, mark=None, arrow=False, 
+                                      use_unicode=True, no_mark_arrow_if_longer_than=3)
+                warning = w.msg + '\n\n' + indent(wheres, '   ')
+                warnings.append(warning.strip())
+    
             # print string.__repr__()
             # print highlight.__repr__()
             
-            return {'ok': True, 'highlight': highlight, 'request': req}
+            return {'ok': True, 
+                    'highlight': highlight,
+                    'language_warnings': "\n\n".join(warnings), 
+                    'request': req}
 
         return ajax_error_catch(go)
 
@@ -247,7 +317,6 @@ class AppEditorFancyGeneric():
             return render_to_response(template, params, request=request)
 
         else:
-
             path = self.libraries[library]['path']
             source = spec.minimal_source_code
             filename = os.path.join(path, 'created', basename)
@@ -264,7 +333,34 @@ class AppEditorFancyGeneric():
 
             raise HTTPFound(url_edit)
 
+def html_mark(html, where, add_class):
+    """ Returns another html string """
+    html = '<pre>' + html + '</pre>'
+    soup = BeautifulSoup(html, 'lxml')
 
+    elements = soup.find_all("span")
+    for e in elements:
+        if e.has_attr('where_character'):
+            character = int(e['where_character'])
+            character_end = int(e['where_character_end'])
+            inside = where.character <= character <= character_end <= where.character_end
+            if inside:
+                e['class'] = e.get('class', []) + [add_class]
+        
+    pre = soup.body.pre
+    s = str(pre)
+    s = s.replace('<pre>', '')
+    s = s.replace('</pre>', '')
+    return s
+    
+def html_mark_syntax_error(string, e):
+    where = e.where
+    character = where.character
+    first = string[:character]
+    rest = string[character:]
+    s = "" + first + '<span style="color:red">'+rest + '</span>'
+    return s 
+    
 def get_png_data_unavailable(library, name, x, data_format):  # @UnusedVariable
     s = str(x)
     return create_image_with_string(s, size=(512, 512), color=(0, 0, 255))

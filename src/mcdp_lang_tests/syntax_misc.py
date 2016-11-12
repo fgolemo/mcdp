@@ -1603,9 +1603,7 @@ def check_lang112(): # TODO: rename
     parse_wrap_check("required r <= required r", Syntax.line_expr)
     parse_wrap_check("provided f <= provided f", Syntax.line_expr)
     
-    
-    print Syntax.constraint_invalid1a
-
+     
     parse_wrap_check("f required by ob1 >= r provided by ob2", Syntax.constraint_invalid3a)
     parse_wrap_check("r provided by ob1 <= f required by ob1", Syntax.constraint_invalid3b)
     parse_wrap_check("f required by ob1 >= r provided by ob2", Syntax.line_expr)
@@ -1618,7 +1616,17 @@ def check_lang112(): # TODO: rename
     
 @comptest
 def check_lang113(): # TODO: rename
-    pass
+    s="""
+     mcdp {
+         provides x = Nat:1 * 10 g
+     } 
+     """   
+    
+    ndp = parse_ndp(s)
+    dp = ndp.get_dp()
+    print dp.repr_long()
+    
+    
 @comptest
 def check_lang114(): # TODO: rename
     pass

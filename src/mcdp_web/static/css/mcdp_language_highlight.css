@@ -192,3 +192,10 @@ span.PlaceholderLabel {
     color: grey;
     /*font-style: italic;*/
 }
+
+span.semantic_error {
+    background-color: pink;
+}
+span.language_warning {
+    background-color: yellow;
+}

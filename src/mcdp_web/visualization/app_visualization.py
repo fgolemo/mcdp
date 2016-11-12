@@ -3,7 +3,10 @@ from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM
 from mcdp_report.html import ast_to_html
-from mocdp.exceptions import DPSyntaxError
+from mocdp.exceptions import DPSyntaxError, DPSemanticError
+from mocdp.comp.context import Context
+from mcdp_lang.parse_interface import parse_ndp_refine, parse_template_refine,\
+    parse_poset_refine
 
 
 class AppVisualization():
@@ -87,24 +90,27 @@ class AppVisualization():
         name = str(request.matchdict['model_name'])  # unicode
         ext = MCDPLibrary.ext_ndps
         expr = Syntax.ndpt_dp_rvalue
-        res = self._generate_view_syntax(request, name, ext, expr)
+        parse_refine = parse_ndp_refine
+        res = self._generate_view_syntax(request, name, ext, expr, parse_refine)
         return res
 
     def view_template_syntax(self, request):
         name = str(request.matchdict['template_name'])  # unicode
         ext = MCDPLibrary.ext_templates
         expr = Syntax.template
-        res = self._generate_view_syntax(request, name, ext, expr)
+        parse_refine = parse_template_refine
+        res = self._generate_view_syntax(request, name, ext, expr, parse_refine)
         return res
 
     def view_poset_syntax(self, request):
         name = str(request.matchdict['poset_name'])  # unicode
         ext = MCDPLibrary.ext_posets
         expr = Syntax.space
-        res = self._generate_view_syntax(request, name, ext, expr)
+        parse_refine = parse_poset_refine
+        res = self._generate_view_syntax(request, name, ext, expr, parse_refine)
         return res
 
-    def _generate_view_syntax(self, request, name, ext, expr):
+    def _generate_view_syntax(self, request, name, ext, expr, parse_refine=None):
         filename = '%s.%s' % (name, ext)
         l = self.get_library(request)
         f = l._get_file_data(filename)
@@ -124,12 +130,24 @@ class AppVisualization():
             html2 = self.render_markdown(fd['data'])
         else:
             html2 = None
+            
+        context = Context()
 
+        def postprocess(block):
+            if parse_refine is None:
+                return block
+            try:
+                x= parse_refine(block, context) 
+                return x
+            except DPSemanticError:
+                return block 
+              
         try:
             highlight = ast_to_html(source_code,
                                     complete_document=False,
                                     add_line_gutter=False,
-                                    parse_expr=expr)
+                                    parse_expr=expr,
+                                    postprocess=postprocess)
             
             highlight = self.add_html_links(request, highlight)
             error = ''

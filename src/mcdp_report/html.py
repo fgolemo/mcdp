@@ -3,17 +3,16 @@ from collections import namedtuple
 import os
 import warnings
 
-
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped
 from mcdp_lang.namedtuple_tricks import isnamedtuplewhere
 from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
 from mocdp import logger
 from mocdp.exceptions import mcdp_dev_warning
-from mcdp_lang.parts import CDPLanguage
 
 
 def isolate_comments(s):
@@ -40,7 +39,10 @@ def ast_to_text(s):
 @contract(s=str)
 def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
                 add_line_gutter=True, encapsulate_in_precode=True, add_css=True,
-                parse_expr=None, add_line_spans=False):
+                parse_expr=None, add_line_spans=False, postprocess=None):
+    """
+        postprocess = function applied to parse tree
+    """
     
     if parse_expr is None:
         warnings.warn('Please add specific parse_expr (default=Syntax.ndpt_dp_rvalue)', 
@@ -76,6 +78,12 @@ def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
 
     if not isnamedtuplewhere(block):
         raise ValueError(block)
+
+    if postprocess is not None:
+        block = postprocess(block)
+        if not isnamedtuplewhere(block):
+            raise ValueError(block)
+    
 
     # XXX: this should not be necessary anymore
     block2 = make_tree(block, character_end=len(s))
@@ -224,7 +232,8 @@ def print_html_inner(x):
         out = '&lt;'
     if out == '>':
         out = '&gt;'
-    transformed0 = "<span class='%s'>%s</span>" % (klass, out)
+    transformed0 = ("<span class='%s' where_character=%d where_character_end=%s>%s</span>" 
+                    % (klass, x.where.character, x.where.character_end, out))
     yield Snippet(op=x, orig=orig0, a=x.where.character, b=x.where.character_end,
                   transformed=transformed0)
 
@@ -258,6 +267,10 @@ def make_tree(x, character_end):
 
     if not isnamedtuplewhere(x):
         return x
+    
+    if x.where is None:
+        msg = 'I found an element without where attribute.'
+        raise_desc(ValueError, msg, x=x)
 
     if x.where.character_end is not None:
         character_end = min(x.where.character_end, character_end)

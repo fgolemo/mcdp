@@ -1,11 +1,14 @@
 from mocdp import logger
 from contracts.utils import indent
+from collections import namedtuple
 
 class MCDPWarnings:
     LANGUAGE_REFERENCE_OK_BUT_IMPRECISE = 'Language imprecise'
     LANGUAGE_CONSTRUCT_DEPRECATED = 'Deprecated construct'
     LANGUAGE_AMBIGUOS_EXPRESSION = 'Ambiguous expression'
     
+    
+MCDPWarning = namedtuple('MCDPWarning', 'which where msg')
 
 
 def warn_language(element, which, msg, context):
@@ -15,7 +18,10 @@ def warn_language(element, which, msg, context):
         msg: a string
     """
     where = element.where
-    msg = msg.strip() + '\n\n' + indent(str(where), ' '*4)
-    logger.debug(msg)
+    msg2 = msg.strip() + '\n\n' + indent(str(where), ' '*4)
+    logger.debug(msg2)
     
+    if context is not None:
+        w = MCDPWarning(which=which,where=where,msg=msg)
+        context.warnings.append(w)
 #     setattr(element, 'warning', msg)
