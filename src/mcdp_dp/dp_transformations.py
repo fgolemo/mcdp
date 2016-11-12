@@ -12,9 +12,9 @@ from .primitive import ApproximableDP, PrimitiveDP
 def dp_transform(dp, f):
     """ Recursive application of a map f that is equivariant with
         series and parallel operations. """
-    from mcdp_dp.dp_series import Series0
-    from mcdp_dp.dp_parallel import Parallel
-    from mcdp_dp.dp_series_simplification import check_same_spaces
+    from .dp_series import Series0
+    from .dp_parallel import Parallel
+    from .dp_series_simplification import check_same_spaces
 
     if isinstance(dp, Series0):
         return Series0(dp_transform(dp.dp1, f),
@@ -29,9 +29,7 @@ def dp_transform(dp, f):
         return CoProductDPLabels(dp_transform(dp.dp, f), dp.labels)
     elif isinstance(dp, CoProductDP):
         dps2 = tuple(dp_transform(_, f) for _ in dp.dps)
-        return CoProductDP(dps2)
-#     elif isinstance(dp, DPLoop0):
-#         return DPLoop0(dp_transform(dp.dp1, f))
+        return CoProductDP(dps2) 
     elif isinstance(dp, DPLoop2):
         return DPLoop2(dp_transform(dp.dp1, f))
     elif isinstance(dp, OpaqueDP):
@@ -42,7 +40,7 @@ def dp_transform(dp, f):
         dp2 = f(dp)
         try:
             check_same_spaces(dp, dp2)
-        except AssertionError as e:
+        except AssertionError as e: # pragma: no cover
             msg = 'Transformation %s does not preserve spaces.' % f
             raise_wrapped(DPInternalError, e, msg, dp=dp, dp2=dp2, f=f, compact=True)
         return dp2

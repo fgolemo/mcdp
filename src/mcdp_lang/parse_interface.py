@@ -23,7 +23,7 @@ __all__ = [
 
 def parse_ndp(string, context=None):
     from mocdp.comp.context import Context
-    from mcdp_lang.syntax import Syntax
+    from .syntax import Syntax
     from mocdp.comp.interfaces import NamedDP
 
     if context is None:
@@ -31,7 +31,7 @@ def parse_ndp(string, context=None):
     
     expr = parse_wrap(Syntax.ndpt_dp_rvalue, string)[0]
     expr2 = parse_ndp_refine(expr, context)
-    res = parse_ndp_eval(expr2)
+    res = parse_ndp_eval(expr2, context)
     assert isinstance(res, NamedDP), res
     return res
 
@@ -39,13 +39,10 @@ def parse_ndp_refine(v, context):
     v2 = apply_refinement(v, context)
     return v2
 
-def parse_ndp_eval(v, context=None):
-    from mcdp_lang.eval_ndp_imp import eval_ndp
-    from mocdp.comp.context import Context
+def parse_ndp_eval(v, context):
+    from .eval_ndp_imp import eval_ndp
     from mocdp.comp.interfaces import NamedDP
-
-    if context is None:
-        context = Context()
+    
     res = eval_ndp(v, context)
     assert isinstance(res, NamedDP), res
     return res
@@ -145,7 +142,7 @@ def parse_template(string, context=None):
     expr = Syntax.template
     x = parse_wrap(expr, string)[0]
     x = parse_template_refine(x, context)
-    res = parse_template_eval(x)
+    res = parse_template_eval(x, context)
     return res
 
 def parse_template_refine(x, context):  # @UnusedVariable
