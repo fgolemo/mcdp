@@ -13,12 +13,13 @@ from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
 from mocdp.comp.composite_makecanonical import cndp_makecanonical
 from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
-    get_name_for_fun_node, get_name_for_res_node)
+    get_name_for_fun_node, get_name_for_res_node, ModelBuildingContext)
 from mocdp.comp.ignore_some_imp import ignore_some
 from mocdp.comp.make_approximation_imp import make_approximation
 from mocdp.comp.template_deriv import cndp_eversion
 from mocdp.exceptions import (DPInternalError, DPSemanticError,
-    DPSemanticErrorNotConnected, MCDPExceptionWithWhere, mcdp_dev_warning)
+    DPSemanticErrorNotConnected, MCDPExceptionWithWhere, mcdp_dev_warning,
+    DPNotImplementedError)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 from .eval_codespec_imp_utils_instantiate import ImportFailure, import_name
@@ -33,6 +34,7 @@ from .parse_actions import (add_where_information, decorate_add_where, raise_wit
     parse_wrap)
 from .parts import CDPLanguage
 from .utils_lists import unwrap_list
+from mcdp_dp.dp_identity import FunctionNode, ResourceNode
 
 
 CDP = CDPLanguage
@@ -40,7 +42,7 @@ CDP = CDPLanguage
 @decorate_add_where
 @contract(returns=NamedDP)
 def eval_ndp(r, context):  # @UnusedVariable
-
+    check_isinstance(context, ModelBuildingContext)
     cases = {
         CDP.DPInstance: eval_ndp_dpinstance,
         CDP.Ellipsis: eval_ndp_ellipsis,
@@ -262,8 +264,9 @@ def eval_ndp_instancefromlibrary(r, context):
         ndp = context.load_ndp(name)
         return ndp
 
-    msg = 'Unknown construct.'
-    raise_desc(DPInternalError, msg, r=r)
+    if True: # pragma: no cover
+        msg = 'Unknown construct.'
+        raise_desc(DPInternalError, msg, r=r)
 
 def eval_ndp_flatten(r, context):
     ndp = eval_ndp(r.dp_rvalue, context)
@@ -582,8 +585,7 @@ def eval_statement_SetNameRValue(r, context):
         s = w.string[w.character:w.character_end]
         alt = parse_wrap(Syntax.setname_fvalue, s)[0]
         # print('alternative: %s' % recursive_print(alt))
-        
-    except Exception as _:
+    except Exception as _: # XXX: which one?
         #print "No, it does not parse: %s" % traceback.format_exc(e)
         alt = None
         
@@ -603,7 +605,6 @@ def eval_statement_SetNameRValue(r, context):
         msg = 'Name %r already used.' % name
         raise DPSemanticError(msg, where=r.where)
 
-
     try:
         x = eval_constant(right_side, context)
         context.set_constant(name, x)
@@ -612,10 +613,24 @@ def eval_statement_SetNameRValue(r, context):
         used_constant = False
         try:
             x = eval_rvalue(right_side, context)
+            ndp1 = context.names[x.dp]
+            current = x.s
+            updated = name
+            try: 
+                ndp2 = ndp_rename_resource(ndp1, current=current, updated=updated)
+                context.names[x.dp] = ndp2
+                x = CResource(x.dp, updated)
+            except CouldNotRename:
+                pass
+            
             context.set_var2resource(name, x)
             used_rvalue = True
+            
         except DPSemanticError as e:
             if 'not declared' in str(e) and alt is not None:
+                # XXX: this seems not to be used anymore
+                # after we implemented the interpretation at the syntax level
+                raise NotImplementedError
                 x = eval_lfunction(alt.right_side, context)
                 context.set_var2function(name, x)
                 used_rvalue = False
@@ -636,14 +651,95 @@ def eval_statement_SetNameRValue(r, context):
           
                 warn_language(r, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, 
                               msg, context)
+
+def eval_statement_SetNameFvalue(r, context):
+    check_isinstance(r, CDP.SetNameFValue)
+    name = r.name.value
+    right_side = r.right_side
+
+    if name in context.constants:
+        msg = 'Constant %r already set.' % name
+        raise DPSemanticError(msg, where=r.where)
+
+    if name in context.var2resource:
+        msg = 'Resource %r already set.' % name
+        raise DPSemanticError(msg, where=r.where)
+
+    if name in context.var2function:
+        msg = 'Name %r already used.' % name
+        raise DPSemanticError(msg, where=r.where)
+
+    from .eval_lfunction_imp import eval_lfunction
     
+    fv = eval_lfunction(right_side, context)
+    
+    ndp = context.names[fv.dp]
+    # TODO: check that is not used anywhere
+    
+    current = fv.s
+    updated = name
+    try: 
+        ndp2 = ndp_rename_function(ndp, current=current, updated=updated)
+        context.names[fv.dp] = ndp2
+        fv = CFunction(fv.dp, updated)
+    except CouldNotRename:
+        pass
+    
+    context.set_var2function(name, fv)
+
+class CouldNotRename(Exception):
+    """ Raised by ndp_rename_function() if they could not rename 
+        the function/resource.
+        
+        For example:
+            - if it's a SimpleWrap with FunctionNode or ResourceNode
+            - if it's a CompositedNamedDP
+    """
+            
+@contract(ndp=NamedDP, current=str, updated=str)
+def ndp_rename_function(ndp, current, updated):
+    """ Returns a NamedDP with a renamed function. Only works
+        with SimpleWrap + not FunctionNode or ResourceNode. In 
+        case, it raises CouldNotRename() """
+    fnames = ndp.get_fnames()
+    if not current in fnames: # pragma: no cover
+        msg = 'Cannot find function %r in ndp.' % current
+        raise_desc(DPInternalError, msg, current=current, updated=updated, ndp=ndp)
+        
+    if isinstance(ndp, SimpleWrap) and \
+        not isinstance(ndp.dp, (FunctionNode, ResourceNode)):
+        
+        return ndp.get_copy_with_renamed_function(current, updated)
+    else:
+        raise CouldNotRename()
+    
+#     raise_desc(DPNotImplementedError, 'not implemented', ndp=ndp)
+
+@contract(ndp=NamedDP, current=str, updated=str)
+def ndp_rename_resource(ndp, current, updated):
+    """ Returns a NamedDP with a renamed resource. """
+    rnames = ndp.get_rnames()
+    if not current in rnames: # pragma: no cover
+        msg = 'Cannot find %r in ndp.' % current
+        raise_desc(DPInternalError, msg, current=current, updated=updated, ndp=ndp)
+        
+    if isinstance(ndp, SimpleWrap) and \
+        not isinstance(ndp.dp, (FunctionNode, ResourceNode)):
+        return ndp.get_copy_with_renamed_resource(current, updated)
+    else:
+        raise CouldNotRename()
+    
+#     raise_desc(DPNotImplementedError, 'not implemented', ndp=ndp)
     
 @decorate_add_where
 def eval_statement(r, context):
+    check_isinstance(context, ModelBuildingContext)
     from .eval_resources_imp import eval_rvalue
     from .eval_lfunction_imp import eval_lfunction
 
-    invalid = (CDP.ConstraintInvalidRR, CDP.ConstraintInvalidFF, CDP.ConstraintInvalidSwapped)
+    invalid = (CDP.ConstraintInvalidRR, 
+               CDP.ConstraintInvalidFF, 
+               CDP.ConstraintInvalidSwapped)
     
     if isinstance(r, invalid):
         msg = 'This constraint is invalid. '
@@ -653,7 +749,8 @@ def eval_statement(r, context):
         if isinstance(r, CDP.ConstraintInvalidFF):
             msg += 'Both sides are functionalities.'
         if isinstance(r, CDP.ConstraintInvalidSwapped):
-            msg += 'Functionality and resources are on the wrong side of the inequality.'
+            msg += ('Functionality and resources are on the wrong side '
+                    'of the inequality.')
 
         raise DPSemanticError(msg)
 
@@ -695,24 +792,9 @@ def eval_statement(r, context):
     elif isinstance(r, CDP.SetNameConstant):
         return eval_statement_SetNameConstant(r, context)
     elif isinstance(r, CDP.SetNameFValue):
-        name = r.name.value
-        right_side = r.right_side
-
-        if name in context.constants:
-            msg = 'Constant %r already set.' % name
-            raise DPSemanticError(msg, where=r.where)
-
-        if name in context.var2resource:
-            msg = 'Resource %r already set.' % name
-            raise DPSemanticError(msg, where=r.where)
-
-        if name in context.var2function:
-            msg = 'Name %r already used.' % name
-            raise DPSemanticError(msg, where=r.where)
-
-        fv = eval_lfunction(right_side, context)
-        context.set_var2function(name, fv)
-
+        return eval_statement_SetNameFvalue(r,context)
+    
+   
     elif isinstance(r, CDP.ResStatement):
         # "requires r.rname [r.unit]"
         rname = r.rname.value

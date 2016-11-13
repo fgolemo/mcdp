@@ -238,9 +238,6 @@ def print_html_inner(x):
                   transformed=transformed0)
 
 def sanitize(x):
-    # if 'span' in x:
-    #    raise ValueError('getting confused %s' % x)
-
     x = x.replace('>=', '&gt;=')
     x = x.replace('<=', '&lt;=')
     return x

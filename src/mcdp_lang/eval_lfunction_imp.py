@@ -6,21 +6,22 @@ from mcdp_dp import (InvMult2, InvPlus2, InvPlus2Nat, InvMult2Nat,
                      PlusValueRcompDP, PlusValueDP)
 from mcdp_dp.dp_minus import MinusValueDP, MinusValueRcompDP, MinusValueNatDP
 from mcdp_dp.dp_multvalue import InvMultValueDP
-from mcdp_lang.eval_constant_imp import NotConstant
-from mcdp_lang.eval_resources_imp_unary import eval_lfunction_genericoperationfun
-from mcdp_lang.eval_warnings import MCDPWarnings, warn_language
-from mcdp_lang.misc_math import plus_constantsN
-from mcdp_lang.parse_actions import decorate_add_where
 from mcdp_posets import (Nat, RcompUnits, get_types_universe, mult_table,
     poset_maxima)
 from mcdp_posets import Rcomp
 from mcdp_posets.rcomp_units import RbicompUnits
-from mocdp.comp.context import CFunction, get_name_for_res_node, ValueWithUnits
+from mocdp.comp.context import CFunction, get_name_for_res_node, ValueWithUnits, \
+    ModelBuildingContext
 from mocdp.exceptions import (DPInternalError, DPNotImplementedError,
     DPSemanticError, mcdp_dev_warning)
 
+from .eval_constant_imp import NotConstant
+from .eval_resources_imp_unary import eval_lfunction_genericoperationfun
+from .eval_warnings import MCDPWarnings, warn_language
 from .helpers import create_operation_lf, get_valuewithunits_as_function
+from .misc_math import plus_constantsN
 from .namedtuple_tricks import recursive_print
+from .parse_actions import decorate_add_where
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
 
@@ -38,6 +39,8 @@ def eval_lfunction_Function(lf, context):
 @decorate_add_where
 @contract(returns=CFunction)
 def eval_lfunction(lf, context):
+    check_isinstance(context, ModelBuildingContext)
+    
     constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
                  CDP.Top, CDP.Bottom, CDP.Minimals, CDP.Maximals)
 

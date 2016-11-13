@@ -1,6 +1,7 @@
 from mocdp import logger
 from contracts.utils import indent
 from collections import namedtuple
+from mocdp.exceptions import DPInternalError
 
 class MCDPWarnings:
     LANGUAGE_REFERENCE_OK_BUT_IMPRECISE = 'Language imprecise'
@@ -24,4 +25,8 @@ def warn_language(element, which, msg, context):
     if context is not None:
         w = MCDPWarning(which=which,where=where,msg=msg)
         context.warnings.append(w)
+    else:
+        msg = 'Context is None so I cannot record this.'
+        raise DPInternalError(msg )
+        logger.debug(msg)
 #     setattr(element, 'warning', msg)

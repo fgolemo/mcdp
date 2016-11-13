@@ -255,45 +255,92 @@ http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c 
 - dp graph for ParallelN
 - add wrapping for errors while editing
 
-- Evaluate empty tuple; see e.g http://127.0.0.1:8080/libraries/basic/models/resource_from_constants/views/dp_graph/
-
-  * If Series(a, b) and a.F = 1, then Change 
-
-
-- We should not warn for an expression "a = 1 J", like this:
-
-mocdp:This expression could be parsed both as a functionality and as a resource. I parsed it as a constant.
-
-    line  3 >        battery = instance mcdp {
-    line  4 >            requires mass [g]
-    line  5 >            provides energy [J]
-    line  6 >            specific_energy = 0.1 J / g
-                         ↑
-
-- We should not have "required " and "provided " attached to arcs like this:
-http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/views/edit_fancy/
-
-
-- Propagation of constant values:
-file:///Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/unittests/basic.mcdplib/out-mcdp_plot/propagation-syntax_doc.html
-
-
 
 -  B: we might not keep track of filename when using the template
   Need to remember the filename when we have the template.
 
 - L: remove "new"
+- L: remove "load"
 
-- switch colors in Sublime for required, provided
+- Refactor: rename Constant, Limit
+- Refactor: Create DPContainer 
+    DPContainer(dps):
+    def get_dps():
+      return _dps()
+    def container_construct(dps): 
+      """creates a new one"""
 
-- add sublime keywords: max
+  so that we can test whether in the switchs we are taking care of every type.
 
-- do not raise SemanticError in parsing
+- T: test all images
 
-
-- parse semantically wrong stuff, but give an error later
-    provided f >= provided  f
-    
+- misc: switch colors in Sublime for required, provided - unknown    
 
 - web: editor align to 4-space boundaries instead of always adding 4 characters
 - web: undo
+- web: "pretty printing"?
+    e.g.  h = Nat:1
+         constant h = Nat:1
+
+- What is the default interpretation of the highly ambiguous
+   x = `name?
+
+  constant
+  variable
+  requires 
+  provides
+  
+  resource r1 = r required by X
+  function f1 = f provided by Y
+  r ≼ f
+  mcdptype T = 
+
+  sub dp =
+  instance dp = new 
+
+
+  template T = ???
+
+- lang: int -> natural numbers, float -> Rcomp
+
+-  T: unit tests for all images
+
+- implement preceq, succeq
+http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/views/edit_fancy/
+- choose a bettet font for mathematical symbols
+http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/views/edit_fancy/
+- Allow parsing of '<' and '>' but then warn 
+- allow multiple semantic errors instead of failing on first one
+- More specific error: only mark X
+ DPSemanticError: Unknown resource 'x' for design problem 'm'. Known functions: (empty).
+
+ line  1 >mcdp {
+ line  2 >   m = instance mcdp {}
+ line  3 >    a provided by b >= x required by m
+                                 ~~~~~~~~~~~~~~~
+
+
+- Add comments
+
+  mcdp {
+    ' One example of documentation for the entire MCDP.'
+
+    requires     mass [kg]   'The mass that must be transported.'
+    provides capacity [kWh]  'The capacity of the battery.'
+
+    constant a = 1 g  'Number of constants'
+  
+    constant gravity = (9.8 m/s^2) / 6 'Gravity on Earth'
+
+    variable x, y [Nat] 'constant '
+
+    x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + provided mass 
+    ' This constraints the vehicle '
+
+    required mass >= x
+  }
+
+- refactor: move eval_statement to its own .py
+
+
+- there might be a bug in warnings, for childrens

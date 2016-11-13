@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import warnings
-
 from contracts import contract
 from mcdp_posets import PosetProduct, R_dimensionless
 from mocdp.comp.interfaces import NamedDP

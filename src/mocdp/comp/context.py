@@ -81,6 +81,7 @@ class NoSuchMCDPType(Exception):
     pass
 
 
+
 class Context():
 
     def __init__(self):
@@ -110,6 +111,10 @@ class Context():
         # xxx this is probably not well thought out
         # for example, are we propagating this to children? (no)
         self.warnings = []
+        
+#         #
+#         self.suggested_rname = None
+#         self.suggested_fname = None
 
     def __repr__(self):
         s = 'Context:'
@@ -135,6 +140,11 @@ class Context():
         c.var2function = {}  # XXX?
         c.var2model.update(self.var2model)
         c.constants.update(self.constants)
+        # we give a reference to ours 
+        # c.warnings = self.warnings
+        # we do not preserve this
+        # use_rname = None
+
         return c
 
     def load_ndp(self, load_arg):
@@ -398,6 +408,8 @@ class Context():
         return False
 
     def new_fun_name(self, prefix):
+        if not self._fun_name_exists(prefix):
+            return prefix
         for i in range(1, 1000):
             cand = prefix + '%d' % i
             if not self._fun_name_exists(cand):
@@ -405,7 +417,9 @@ class Context():
         assert False, 'cannot find name? %r' % cand
 
     def new_res_name(self, prefix):
-        for i in range(1, 10000):
+        if not self._res_name_exists(prefix):
+            return prefix
+        for i in range(2, 10000):
             cand = prefix + '%d' % i
             if not self._res_name_exists(cand):
                 return cand
@@ -600,7 +614,32 @@ class Context():
 
         res = self.make_function(ndp_name, s)
         return res
+    
+#     def set_suggested_rname(self, rname):
+#         """ Returns a suggested fname, if any, and resets it to None. """
+#         if self.suggested_rname is not None:
+#             msg = 'It looks like the suggested rname was not used.'
+#             raise DPInternalError(msg, rname=rname, suggested_rname=self.suggested_rname)
+#         self.suggested_rname = rname
+#     
+#     def get_suggested_rname(self):
+#         r = self.suggested_rname
+#         self.suggested_rname = None
+#         return r
+#   
+#     def set_suggested_fname(self, fname):
+#         if self.suggested_fname is not None:
+#             msg = 'It looks like the suggested rname was not used.'
+#             raise DPInternalError(msg, fname=fname, suggested_fname=self.suggested_fname)
+#         self.suggested_fname = fname
+#     
+#     def get_suggested_fname(self):
+#         """ Returns a suggested fname, if any, and resets it to None. """
+#         r = self.suggested_fname
+#         self.suggested_fname = None
+#         return r
 
+ModelBuildingContext = Context
 
 def format_list(l):
     """ Returns a nicely formatted list. """

@@ -7,18 +7,18 @@ from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (Constant, ConstantMinimals, Conversion,
     Identity, InvMult2, InvPlus2, InvPlus2Nat, JoinNDP, Limit, MeetNDualDP,
     Mux, MuxMap, ProductNDP, SumNDP, SumNNatDP, TakeFun, TakeRes,
-    WrapAMap, InvMult2Nat, MeetNDP, ProductNNatDP, ProductNRcompDP, SumNRcompDP)
+    WrapAMap, InvMult2Nat, MeetNDP, ProductNNatDP, ProductNRcompDP, SumNRcompDP,
+    IdentityDP, FunctionNode, ResourceNode)
 from mcdp_lang.blocks import get_missing_connections
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
 from mocdp import logger
 from mocdp.comp import CompositeNamedDP, SimpleWrap
-from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node,\
-    is_fun_node_name, is_res_node_name
+from mocdp.comp.context import (get_name_for_fun_node, get_name_for_res_node,
+    is_fun_node_name, is_res_node_name)
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning, DPInternalError
 from mocdp.ndp import NamedDPCoproduct
-from mcdp_dp.dp_identity import IdentityDP, FunctionNode, ResourceNode
 
 
 STYLE_GREENRED = 'greenred'

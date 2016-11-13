@@ -256,6 +256,8 @@ class AppEditorFancyGeneric():
                 self.last_processed2[key] = None  # XXX
                 raise
 
+            print 'warnings', context.warnings
+            
             warnings = []
             for w in context.warnings:
                 # w.msg
@@ -264,6 +266,7 @@ class AppEditorFancyGeneric():
                                       use_unicode=True, no_mark_arrow_if_longer_than=3)
                 warning = w.msg + '\n\n' + indent(wheres, '   ')
                 warnings.append(warning.strip())
+            
     
             # print string.__repr__()
             # print highlight.__repr__()

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from mcdp_dp import (ApproximableDP, CoProductDPLabels, Constant,
-    DPLoop2, LabelerDP, Limit, Mux, OpaqueDP, Parallel,
-    PrimitiveDP, Series0, WrapAMap)
-from multi_index.inversion import transform_pretty_print
+from mcdp_dp import (ApproximableDP, CoProductDPLabels,
+    DPLoop2, LabelerDP, OpaqueDP, Parallel,
+    PrimitiveDP, Series0)
+from mcdp_dp.dp_parallel_n import ParallelN
 
 
 __all__ = [
@@ -12,21 +12,21 @@ __all__ = [
 
 def get_dp_label(dp):
     label = type(dp).__name__
-    if False:
-        if isinstance(dp, Mux):
-            label = 'Mux\nh: %s' % transform_pretty_print(dp.amap.dom, dp.amap.coords)
-            if dp.amap_dual is not None:
-                label += '\nh*: %s' %  transform_pretty_print(dp.amap_dual.dom, dp.amap_dual.coords, 'A')
-            return label
-        elif isinstance(dp, Constant):
-            # x = '%s %s' % (dp.R.format(dp.c), dp.R)
-            x = dp.R.format(dp.c)
-            label = 'Constant\n%s' % x
-        elif isinstance(dp, Limit):
-            x = '<= %s [%s]' % (dp.F.format(dp.limit), dp.F)
-            label = 'Limit\n%s' % x
-        elif isinstance(dp, WrapAMap):
-            label = 'WrapAMap\n%s' % dp.diagram_label()
+#     if False:
+#         if isinstance(dp, Mux):
+#             label = 'Mux\nh: %s' % transform_pretty_print(dp.amap.dom, dp.amap.coords)
+#             if dp.amap_dual is not None:
+#                 label += '\nh*: %s' %  transform_pretty_print(dp.amap_dual.dom, dp.amap_dual.coords, 'A')
+#             return label
+#         elif isinstance(dp, Constant):
+#             # x = '%s %s' % (dp.R.format(dp.c), dp.R)
+#             x = dp.R.format(dp.c)
+#             label = 'Constant\n%s' % x
+#         elif isinstance(dp, Limit):
+#             x = '<= %s [%s]' % (dp.F.format(dp.limit), dp.F)
+#             label = 'Limit\n%s' % x
+#         elif isinstance(dp, WrapAMap):
+#             label = 'WrapAMap\n%s' % dp.diagram_label()
         
 #     label = type(dp).__name__ + '/' + label
     
@@ -64,6 +64,8 @@ def dp_graph_tree(dp0, imp=
             r = go_series(dp, imp)
         elif isinstance(dp, Parallel):
             r = go_parallel(dp, imp)
+        elif isinstance(dp, ParallelN):
+            r = go_parallel_n(dp, imp)
         elif isinstance(dp, DPLoop2):
             r = go_loop2(dp, imp)
         elif isinstance(dp, OpaqueDP):
@@ -190,6 +192,30 @@ def dp_graph_tree(dp0, imp=
         create_edge(n, n2, dp.dp2)
         return n
 
+    def go_parallel_n(dp, imp):
+#         if imp is not None:
+#             m1, m2 = dp._split_m(imp)
+#         else:
+#             m1 = m2 = None
+        nodes = []
+        for dp_child in dp.dps:
+            mi = None
+            ni = go(dp_child, mi)
+            nodes.append(ni)
+
+        if add_junction_text:
+            label = 'par'
+        else:
+            label = ""
+        n = gg.newItem(label)
+        gg.styleApply("junction", n)
+        gg.styleApply('junction_par', n)
+
+        for ni in nodes:
+            create_edge(n, ni, dp.dp1)
+        
+        return n
+    
     def go_loop(dp, imp):
         if do_imp:
             m0, _f2 = dp._unpack_m(imp)

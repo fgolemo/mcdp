@@ -22,6 +22,8 @@ from mocdp.exceptions import DPNotImplementedError, DPSemanticError
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
+from mocdp.comp.context import ModelBuildingContext
+from mcdp_lang.eval_warnings import MCDPWarnings
 
 
 @comptest
@@ -1629,22 +1631,131 @@ def check_lang113(): # TODO: rename
     
 @comptest
 def check_lang114(): # TODO: rename
-    pass
+    s = """
+    mcdp {
+        provides f [Nat]
+        requires r [Nat]
+        
+        required r >= required r
+    }
+    """
+    expect = 'Both sides are functionalities.'
+    assert_parse_ndp_semantic_error(s, expect)
+    
+    s = """
+    mcdp {
+        provides f [Nat]
+        requires r [Nat]
+        
+        provided f >= provided f
+    }
+    """
+    expect = 'Both sides are resources.'
+    assert_parse_ndp_semantic_error(s, expect)
+
+    s = """
+    mcdp {
+        provides f [Nat]
+        requires r [Nat]
+        
+        provided f >= required r
+    }
+    """
+    expect =  'Functionality and resources are on the wrong side of the inequality.'
+    assert_parse_ndp_semantic_error(s, expect)
+    
 @comptest
 def check_lang115(): # TODO: rename
-    pass
+    """ Use given name when creating resources """ 
+    u = 'use_this_name'
+    s = """
+    mcdp {
+        provides f [Nat]
+        
+        %s = provided f + Nat:1
+    }
+    """ % u
+    ndp = parse_ndp(s)
+    names = list(ndp.get_name2ndp())
+    names.remove('_fun_f')
+    other = names[0]
+    rname = ndp.get_name2ndp()[other].get_rnames()[0]
+    assert_equal(rname, u)
+    
+    
 @comptest
 def check_lang116(): # TODO: rename
-    pass
+    """ Use given name when creating functions. """ 
+    u = 'use_this_name'
+    s = """
+    mcdp {
+        requires r [Nat]
+        
+        %s = required r + Nat:1
+    }
+    """ % u
+    ndp = parse_ndp(s)
+    names = list(ndp.get_name2ndp())
+    names.remove('_res_r')
+    other = names[0]
+    rname = ndp.get_name2ndp()[other].get_fnames()[0]
+    assert_equal(rname, u)
+    
+
 @comptest
 def check_lang117(): # TODO: rename
-    pass
+    """ Use given name when creating resources """ 
+    u = 'use_this_name'
+    s = """
+    mcdp {
+        provides f [Nat]
+        
+        %s = f + Nat:1
+    }
+    """ % u
+    ndp = parse_ndp(s)
+    # print ndp
+    names = list(ndp.get_name2ndp())
+    names.remove('_fun_f')
+    other = names[0]
+    rname = ndp.get_name2ndp()[other].get_rnames()[0]
+    assert_equal(rname, u)
+
 @comptest
 def check_lang118(): # TODO: rename
-    pass
+    """ Warnings """
+    s = """
+    mcdp {
+        provides f [Nat]
+        
+        f <= Nat: 2
+    }
+    """ 
+    context = ModelBuildingContext()
+    parse_ndp(s, context)
+    w = context.warnings
+    assert_equal(len(w), 1)
+    assert_equal(w[0].which, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE)
+
 @comptest
 def check_lang119(): # TODO: rename
-    pass
+    """ Warnings in nested structures. """
+    s = """
+    mcdp {
+        a = instance mcdp {
+            provides f [Nat]
+            f <= Nat: 2
+        }
+    }
+    """ 
+    context = ModelBuildingContext()
+    parse_ndp(s, context)
+    w = context.warnings
+    assert_equal(len(w), 1)
+    assert_equal(w[0].which, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE)
+
 @comptest
 def check_lang120(): # TODO: rename
     pass
+
+

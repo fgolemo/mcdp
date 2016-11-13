@@ -5,7 +5,8 @@ from mcdp_dp import PlusValueDP, UncertainGate
 from mcdp_dp.dp_approximation import  makeLinearCeilDP, makeLinearFloor0DP
 from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
     get_types_universe, poset_minima)
-from mocdp.comp.context import CResource, ValueWithUnits, get_name_for_fun_node
+from mocdp.comp.context import (CResource, ValueWithUnits, get_name_for_fun_node, 
+    ModelBuildingContext)
 from mocdp.exceptions import DPSemanticError
 
 from .eval_constant_imp import eval_constant
@@ -26,10 +27,10 @@ class DoesNotEvalToResource(DPSemanticError):
 def eval_rvalue(rvalue, context):
     """
         raises DoesNotEvalToResource
+        
+        suggest_name: use this name for resources to be created
     """
-    # assert not isinstance(rvalue, ValueWithUnits)
-    # wants Resource or NewFunction
-    #     with add_where_information(rvalue.where):
+    check_isinstance(context, ModelBuildingContext)
 
     if isinstance(rvalue, (CDP.NewResource, CDP.DerivFunctionRef)):
         msg = 'The resource %r cannot be used on this side of the constraint.'

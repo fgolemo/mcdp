@@ -2,8 +2,8 @@
 import itertools
 
 from contracts.utils import indent, raise_wrapped
-from mcdp_posets import (NotBelongs, PosetProduct, UpperSet,
-    lowerset_product, poset_minima, upperset_product)
+from mcdp_posets import (NotBelongs, PosetProduct,
+    lowerset_product, upperset_product)
 from mcdp_posets.uppersets import lowerset_product_good
 from mocdp.exceptions import do_extra_checks
 
@@ -152,24 +152,24 @@ class Parallel(PrimitiveDP):
     def repr_hd_map(self):
         return repr_h_map_parallel('r', 2, 'h*')
 
-
-def upperset_project_two(P, u):
-    """ u = upperset in P
-        P = Product(P1, P2) 
-        returns u1, u2
-    """
-    m1 = set()
-    m2 = set()
-    for a,b in u.minimals:
-        m1.add(a)
-        m2.add(b)
-    
-    P1 = P[0]
-    P2 = P[1]
-    m1m = poset_minima(m1, P1.leq)
-    m2m = poset_minima(m2, P2.leq)
-    
-    u1 = UpperSet(m1m, P1)
-    u2 = UpperSet(m2m, P2)
-    return u1, u2
-        
+# 
+# def upperset_project_two(P, u):
+#     """ u = upperset in P
+#         P = Product(P1, P2) 
+#         returns u1, u2
+#     """
+#     m1 = set()
+#     m2 = set()
+#     for a,b in u.minimals:
+#         m1.add(a)
+#         m2.add(b)
+#     
+#     P1 = P[0]
+#     P2 = P[1]
+#     m1m = poset_minima(m1, P1.leq)
+#     m2m = poset_minima(m2, P2.leq)
+#     
+#     u1 = UpperSet(m1m, P1)
+#     u2 = UpperSet(m2m, P2)
+#     return u1, u2
+#         

@@ -8,9 +8,10 @@ from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import CResource, ValueWithUnits, CFunction
 from mocdp.exceptions import DPSemanticError, DPInternalError
 
+from mocdp import logger
 
 @contract(resources='seq')
-def create_operation(context, dp, resources, name_prefix, op_prefix='_op', res_prefix='_res'):
+def create_operation(context, dp, resources, name_prefix, op_prefix=None, res_prefix=None):
     """
     
         This is useful to create operations that take possibly many inputs
@@ -29,6 +30,11 @@ def create_operation(context, dp, resources, name_prefix, op_prefix='_op', res_p
     """
     # new name for the ndp
     name = context.new_name(name_prefix)
+    if op_prefix is None:
+        op_prefix = '_op'
+    if res_prefix is None:
+        res_prefix = '_res'
+        
     name_result = context.new_res_name(res_prefix)
 
     connections = []

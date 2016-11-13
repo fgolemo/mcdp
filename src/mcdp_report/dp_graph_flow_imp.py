@@ -2,6 +2,7 @@
 from contracts import contract
 from mcdp_dp import DPLoop2, Parallel, PrimitiveDP, Series0
 from mocdp.exceptions import mcdp_dev_warning
+from mcdp_dp.dp_parallel_n import ParallelN
 
 
 __all__ = [
@@ -23,11 +24,20 @@ def dp_graph_flow(dp0, imp=None):
             r = go_series(dp, imp)
         elif isinstance(dp, Parallel):
             r = go_parallel(dp, imp)
+        elif isinstance(dp, ParallelN):
+            r = go_parallel_n(dp, imp)
         elif isinstance(dp, DPLoop2):
             r = go_loop2(dp, imp)
         else:
             r = go_simple(dp, imp)
         return r
+# 
+#         elif isinstance(dp, OpaqueDP):
+#         elif isinstance(dp, CoProductDPLabels):
+#         elif isinstance(dp, LabelerDP):
+#         elif isinstance(dp, ApproximableDP):
+
+
 
     def go_simple(dp, imp):
         from .dp_graph_tree_imp import get_dp_label
@@ -83,6 +93,28 @@ def dp_graph_flow(dp0, imp=None):
             gg.propertyAppend(_, 'arrowhead', 'none')
             
         return (i, o)
+
+    def go_parallel_n(dp, imp):
+        assert isinstance(dp, ParallelN)
+        i = gg.newItem("|")
+        o = gg.newItem("|")
+        gg.styleApply("connector", i)
+        gg.styleApply("connector", o)
+
+        for dp_i in dp.dps:
+            mi = None
+            (n1i, n1o) = go(dp_i, mi)
+
+            Fi = dp_i.get_fun_space()
+            Ri = dp_i.get_res_space()
+            l1 = gg.newLink(i, n1i, label=str(Fi))
+            l3 = gg.newLink(n1o, o, label=str(Ri))
+            
+            for _ in [l1,  l3]:
+                gg.propertyAppend(_, 'arrowhead', 'none')
+                
+        return (i, o)
+
 
     def go_loop(dp, imp):
         if do_imp:

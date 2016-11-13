@@ -79,7 +79,36 @@ def feat_import4():
 
 @comptest
 def feat_import5():
-    pass
+    """ Warnings in imports. """
+    data = {
+        'lib1.mcdplib/model0.mcdp': """
+        mcdp {
+            provides f [Nat]
+            f <= Nat: 2
+        }
+        """,
+        'lib1.mcdplib/model1.mcdp': 
+        """
+        mcdp {
+            a = instance `model0
+        }
+        """
+    }
+   
+    d = create_hierarchy(data)
+    librarian = Librarian()
+    librarian.find_libraries(d)
+    lib = librarian.load_library('lib1')
+
+#     context = lib._generate_context_with_hooks()
+    _model2 = lib.load_ndp('model1')
+# 
+#     context = ModelBuildingContext()
+#     parse_ndp(s, context)
+#     w = context.warnings
+#     assert_equal(len(w), 1)
+#     assert_equal(w[0].which, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE)
+#     pass
 
 @comptest
 def feat_import6():

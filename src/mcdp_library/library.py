@@ -186,18 +186,23 @@ class MCDPLibrary():
 
     def parse_ndp(self, string, realpath=None):
         """ This is the wrapper around parse_ndp that adds the hooks. """
-        return self._parse_with_hooks(parse_ndp, string, realpath)
-
+        result, context = self._parse_with_hooks(parse_ndp, string, realpath)
+        print('here', context.warnings)
+        return result
+    
     def parse_poset(self, string, realpath=None):
-        return self._parse_with_hooks(parse_poset, string, realpath)
-
+        result, context = self._parse_with_hooks(parse_poset, string, realpath)
+        return result
+    
     def parse_primitivedp(self, string, realpath=None):
         from mcdp_lang.parse_interface import parse_primitivedp
-        return self._parse_with_hooks(parse_primitivedp, string, realpath)
-
+        result, context = self._parse_with_hooks(parse_primitivedp, string, realpath)
+        return result
+    
     def parse_constant(self, string, realpath=None):
         from mcdp_lang.parse_interface import parse_constant
-        return self._parse_with_hooks(parse_constant, string, realpath)
+        result, context = self._parse_with_hooks(parse_constant, string, realpath)
+        return result
 
     def parse_template(self, string, realpath=None):
         from mcdp_lang.parse_interface import parse_template
@@ -224,12 +229,12 @@ class MCDPLibrary():
             sys.path = previous
 
     def _parse_with_hooks(self, parse_ndp_like, string, realpath):
-        with self._sys_path_adjust():
+        mcdp_dev_warning('remove context')
+        with self._sys_path_adjust(): 
             context = self._generate_context_with_hooks()
-
             try:
                 result = parse_ndp_like(string, context=context)
-                return result
+                return result, context
             except MCDPExceptionWithWhere as e:
                 logger.error('extend_with_filename(%r): seen %s' % (realpath, e))
                 _type, _value, traceback = sys.exc_info()

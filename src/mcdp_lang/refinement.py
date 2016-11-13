@@ -416,11 +416,11 @@ def refine(x, parents,
         elif x.name in functions:
             if x.name in variables:
                 msg = 'I cannot say whether %r refers to the variable or functionality.' % x.name
-                warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context=None) # XXX
+                warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context) # XXX
                 return x
             
             msg = 'Please use "provided %s" rather than just "%s".' % (x.name, x.name)
-            warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context=None) # XXX
+            warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context) # XXX
 
             return CDP.NewFunction(None, CDP.FName(x.name, where=x.where), 
                                    where=x.where) 

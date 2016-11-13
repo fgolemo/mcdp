@@ -14,7 +14,7 @@ mcdp {
     cycles_inv = Uncertain(1.0 []/787.5 [], 1.0[]/ 712.5 [])
 
     # Constraint between mass and capacity
-    massc = provided capacity * specific_energy_inv
+    massc = capacity * specific_energy_inv
 
     # How many times should it be replaced?
     num_replacements = ceil(provided missions * cycles_inv)
@@ -26,4 +26,3 @@ mcdp {
     required cost >= costc
     required mass >= massc
 }
-
