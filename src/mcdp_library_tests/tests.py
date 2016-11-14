@@ -11,9 +11,9 @@ from mcdp_library import Librarian, MCDPLibrary
 from mcdp_library.utils import dir_from_package_name
 from mcdp_tests.generation import for_all_source_mcdp
 from mocdp import logger
+from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError
 from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
-from mocdp.comp.context import Context
 
 
 __all__ = [
@@ -339,9 +339,10 @@ def timeit(desc, minimum=None):
 min_time_warn = 0.5
 
 def _load_primitivedp(libname, model_name):
+    context = Context()
     l = get_test_library(libname)
     with timeit(model_name, minimum=min_time_warn):
-        return l.load_primitivedp(model_name)
+        return l.load_primitivedp(model_name, context)
 
 def _load_template(libname, model_name):
     context = Context()
@@ -383,63 +384,3 @@ def _load_ndp(libname, model_name):
 #
 
 
-
-# def mcdplib_define_tst(context, libname):
-#     """
-#         mcdplib: folder
-#         
-#         loads the mcdp_lang_tests in mcdp_tests.yaml
-#     """
-#     librarian = get_test_librarian()
-#     mcdplib = librarian.libraries[libname]['path']
-# 
-#     assert os.path.exists(mcdplib)
-# 
-#     fn = os.path.join(mcdplib, 'mcdp_tests.yaml')
-#     if not os.path.exists(fn):
-#         return
-# 
-#     with open(fn) as f:
-#         data = yaml.load(f)
-# 
-#     if 'test_solve' in data:
-# 
-#         tests = data['test_solve']
-#         if tests is not None:
-#             for name, test_data in tests.items():
-#                 c = context.child(name)
-#                 c.comp(mcdplib_define_tst_solve, mcdplib, name, test_data, job_id='solve')
-# 
-# 
-# def mcdplib_define_tst_solve(mcdplib, id_test, test_data):  # @UnusedVariable
-#     mcdp_dev_warning('this doesnt use the librarian')
-#     # Reload the data (easier to debug)
-#     fn = os.path.join(mcdplib, 'mcdp_tests.yaml')
-#     with open(fn) as f:
-#         data = yaml.load(f)
-#     test_data = data['test_solve'][id_test]
-#     
-#     defaults = dict(lower=None, upper=None, max_steps=None, 
-#                     intervals=None,
-#                     expect_nres=None,
-#                     expect_res=None,
-#                     imp=None,
-#                     _exp_advanced=False, expect_nimp=None,
-#                     plot=False,
-#                     do_movie=False)
-#     required = ['query_strings', 'model_name']
-#     params = defaults.copy()
-#     for k, v in test_data.items():
-#         if not k in defaults and not k in required:
-#             raise_desc(ValueError, 'Invalid configuration.',
-#                        k=k, test_data=test_data, defaults=defaults)
-#         params[k] = v
-#     
-#     params['logger'] = logger
-#     params['config_dirs'] = [mcdplib]
-#     params['maindir'] = mcdplib
-#     params['cache_dir'] = None
-#     params['out_dir'] = os.path.join(mcdplib + '.out/%s' % id_test)
-#     params['make'] = False
-# 
-#     solve_main(**params)
