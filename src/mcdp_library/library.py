@@ -211,26 +211,26 @@ class MCDPLibrary():
         
         return res
 
-    def parse_ndp(self, string, realpath, context):
+    def parse_ndp(self, string, realpath=None, context=None):
         """ This is the wrapper around parse_ndp that adds the hooks. """
         result = self._parse_with_hooks(parse_ndp, string, realpath, context)
         return result
     
-    def parse_poset(self, string, realpath, context):
+    def parse_poset(self, string, realpath=None, context=None):
         result = self._parse_with_hooks(parse_poset, string, realpath, context)
         return result
     
-    def parse_primitivedp(self, string, realpath, context):
+    def parse_primitivedp(self, string, realpath=None, context=None):
         from mcdp_lang.parse_interface import parse_primitivedp
         result = self._parse_with_hooks(parse_primitivedp, string, realpath, context)
         return result
     
-    def parse_constant(self, string, realpath, context):
+    def parse_constant(self, string, realpath=None, context=None):
         from mcdp_lang.parse_interface import parse_constant
         result = self._parse_with_hooks(parse_constant, string, realpath, context)
         return result
 
-    def parse_template(self, string, realpath, context):
+    def parse_template(self, string, realpath=None, context=None):
         from mcdp_lang.parse_interface import parse_template
         template = self._parse_with_hooks(parse_template, string, realpath, context)
         if hasattr(template, ATTR_LOAD_LIBNAME):
@@ -255,17 +255,15 @@ class MCDPLibrary():
             sys.path = previous
 
     def _parse_with_hooks(self, parse_ndp_like, string, realpath, context):
-        mcdp_dev_warning('remove context')
+        
         with self._sys_path_adjust(): 
             context_mine = self._generate_context_with_hooks()
             try:
                 result = parse_ndp_like(string, context=context_mine)
-#                 msg = 'While parsing %r:' % realpath
                 from mcdp_lang.eval_warnings import warnings_copy_from_child_add_filename
-                
-                warnings_copy_from_child_add_filename(context, context_mine, realpath)
-#                 warnings_copy_from_child_make_nested(context, context_mine,
-#                                                      msg=msg, where=None)
+
+                if context is not None:                
+                    warnings_copy_from_child_add_filename(context, context_mine, realpath)
 
                 return result
             except MCDPExceptionWithWhere as e:
