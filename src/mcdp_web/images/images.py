@@ -41,7 +41,8 @@ class WebAppImages():
         def go():
             l = self.get_library(request)
             id_ndp = self.get_model_name(request)
-            ndp = l.load_ndp(id_ndp)
+            context = l._generate_context_with_hooks()
+            ndp = l.load_ndp(id_ndp, context)
 
             model_name = self.get_model_name(request)
             png = ndp_graph_templatized(library=l, ndp=ndp,
@@ -57,7 +58,8 @@ class WebAppImages():
             fileformat = request.matchdict['format']
             library = self.get_library(request)
 
-            ndp = library.load_ndp(id_ndp)
+            context = library._generate_context_with_hooks()
+            ndp = library.load_ndp(id_ndp, context)
             dp = ndp.get_dp()
             gg = dp_graph_flow(dp)
 
@@ -74,7 +76,8 @@ class WebAppImages():
             fileformat = request.matchdict['format']
 
             library = self.get_library(request)
-            ndp = library.load_ndp(id_ndp)
+            context = library._generate_context_with_hooks()
+            ndp = library.load_ndp(id_ndp, context)
 
             data = ndp_graph_normal(library=library, ndp=ndp, style=style,
                                     yourname=id_ndp,

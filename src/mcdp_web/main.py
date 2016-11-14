@@ -541,11 +541,11 @@ To access the interface, open your browser at the address
 Use Chrome, Firefox, or Opera - Internet Explorer is not supported.
 """ % options.port
 
-        logger.info(msg)
         if options.delete_cache:
+            logger.info('Deleting cache...')
             wa._refresh_library(None)
+        logger.info(msg)
         wa.serve(port=options.port)
-        logger.info('Server ready.')
 
 mcdp_web_main = MCDPWeb.get_sys_main()
 

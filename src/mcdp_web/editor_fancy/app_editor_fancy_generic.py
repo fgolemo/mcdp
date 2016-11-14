@@ -31,7 +31,8 @@ Spec = namedtuple('Spec', 'url_part url_variable extension '
                   ' parse_expr ' #  expr = parse_wrap(string, expr)
                   ' parse_refine ' # expr2 = parse_refine(expr, context)
                   ' parse_eval '   # ndp = parse_eval(expr2, context
-                  ' load get_png_data write minimal_source_code')
+                  ' load ' # load(name, context)
+                  'get_png_data write minimal_source_code')
 
 
 class AppEditorFancyGeneric():
@@ -205,7 +206,7 @@ class AppEditorFancyGeneric():
                 parse_tree = parse_wrap(parse_expr, string)[0]
             except DPSemanticError as e:
                 msg = 'I only expected a DPSyntaxError'
-                raise_wrapped(DPSemanticError, e, msg, exc=sys.exc_info())
+                raise_wrapped(DPInternalError, e, msg, exc=sys.exc_info())
             except DPSyntaxError as e:
                 # This is the case in which we could not even parse
                 res = format_exception_for_ajax_response(e, quiet=(DPSyntaxError,))
@@ -256,21 +257,20 @@ class AppEditorFancyGeneric():
                 self.last_processed2[key] = None  # XXX
                 raise
 
-            print 'warnings', context.warnings
+            print('app_editor_fancy_generic: warnings', context.warnings)
             
             warnings = []
             for w in context.warnings:
                 # w.msg
-                highlight = html_mark(highlight, w.where, "language_warning")
-                wheres = format_where(w.where, context_before=0, mark=None, arrow=False, 
-                                      use_unicode=True, no_mark_arrow_if_longer_than=3)
-                warning = w.msg + '\n\n' + indent(wheres, '   ')
+                warning = w.format_user()
+                if w.where is not None:
+                    highlight = html_mark(highlight, w.where, "language_warning")
+                    
+#                     wheres = format_where(w.where, context_before=0, mark=None, arrow=False, 
+#                                           use_unicode=True, no_mark_arrow_if_longer_than=3)
+#                     warning += '\n\n' + indent(wheres, '   ')
                 warnings.append(warning.strip())
-            
-    
-            # print string.__repr__()
-            # print highlight.__repr__()
-            
+                    
             return {'ok': True, 
                     'highlight': highlight,
                     'language_warnings': "\n\n".join(warnings), 
@@ -288,7 +288,8 @@ class AppEditorFancyGeneric():
 
             if not key in self.last_processed2:
                 l = self.get_library(request)
-                thing = spec.load(l, widget_name)
+                context = l._generate_context_with_hooks()
+                thing = spec.load(l, widget_name, context=context)
             else:
                 thing = self.last_processed2[key]
                 if thing is None:

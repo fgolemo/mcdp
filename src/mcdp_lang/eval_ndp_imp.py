@@ -35,6 +35,7 @@ from .parse_actions import (add_where_information, decorate_add_where, raise_wit
     parse_wrap)
 from .parts import CDPLanguage
 from .utils_lists import unwrap_list
+from mcdp_lang.eval_warnings import MCDPNestedWarning
 
 
 CDP = CDPLanguage
@@ -235,11 +236,19 @@ def eval_ndp_load(r, context):
         library = context.load_library(libname)
         # XXX: add warning location?
          
-        print 'eval_ndp_load()'
         context2 = context.child()
         res = library.load_ndp(name, context2)
-        from .eval_warnings import warnings_copy_from_child_make_nested
-        warnings_copy_from_child_make_nested(context, context2, msg='load_ndp', where=r.where)
+#         from .eval_warnings import warnings_copy_from_child_make_nested
+        
+        msg = 'While loading %r from library %r:' % (name, libname)
+        for w in context2.warnings:
+            if isinstance(w, MCDPNestedWarning) and w.where is None:
+                w2 = MCDPNestedWarning(msg=msg, where=r.where, warning=w.warning)
+                context.warnings.append(w2)
+            else:
+                context.warnings.append(w)
+#         warnings_copy_from_child_make_nested(context, context2, 
+#                                              msg='load_ndp', where=r.where)
         return res
 
     if isinstance(arg, CDP.NDPName):

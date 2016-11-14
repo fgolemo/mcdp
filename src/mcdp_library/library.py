@@ -176,24 +176,38 @@ class MCDPLibrary():
             logger.debug('Parsing %r' % (name))
             context_mine = Context()
             res = parsing_function(l, data, realpath, context=context_mine)
-#             if not context_mine.warnings:
-#                 print('actual_load(): no warnings from %s' % parsing_function)
 
-            msg = 'While loading %r.' % name
-            from mcdp_lang.eval_warnings import warnings_copy_from_child_make_nested
-            warnings_copy_from_child_make_nested(context, context_mine,
-                                                 msg=msg, where=None)
-            
+#             logger.debug('... actual_load(): parsed %r with %d warnings' % (name, len(context_mine.warnings)))
             setattr(res, ATTR_LOAD_NAME, name)
-            return res
+            return dict(res=res, context_warnings=context_mine.warnings)
 
         if not self.cache_dir:
-            return actual_load()
+            data = actual_load()
+            cached = False
         else:
             cache_file = os.path.join(self.cache_dir, parsing_function.__name__,
                                       '%s.cached' % name)
 
-            return memo_disk_cache2(cache_file, data, actual_load)
+            data = memo_disk_cache2(cache_file, data, actual_load)
+            cached = True
+        
+        res = data['res']
+        context_warnings = data['context_warnings']
+
+        cached = '[Cached]' if cached else ''        
+        logger.debug('... actual_load(): parsed %r with %d warnings %s' %
+                      (name, len(context_warnings), cached))
+            
+
+        class JustAHack:
+            warnings = context_warnings
+            
+        msg = 'While loading %r.' % name
+        from mcdp_lang.eval_warnings import warnings_copy_from_child_make_nested
+        
+        warnings_copy_from_child_make_nested(context, JustAHack, msg=msg, where=None)
+        
+        return res
 
     def parse_ndp(self, string, realpath, context):
         """ This is the wrapper around parse_ndp that adds the hooks. """
@@ -244,10 +258,12 @@ class MCDPLibrary():
             context_mine = self._generate_context_with_hooks()
             try:
                 result = parse_ndp_like(string, context=context_mine)
-                msg = 'While parsing %r:' % realpath
-                from mcdp_lang.eval_warnings import warnings_copy_from_child_make_nested
-                warnings_copy_from_child_make_nested(context, context_mine,
-                                                     msg=msg, where=None)
+#                 msg = 'While parsing %r:' % realpath
+                from mcdp_lang.eval_warnings import warnings_copy_from_child_add_filename
+                
+                warnings_copy_from_child_add_filename(context, context_mine, realpath)
+#                 warnings_copy_from_child_make_nested(context, context_mine,
+#                                                      msg=msg, where=None)
 
                 return result
             except MCDPExceptionWithWhere as e:
@@ -269,7 +285,7 @@ class MCDPLibrary():
         context.load_library_hooks = [self.load_library]
         return context
 
-    def load_library(self, id_library):
+    def load_library(self, id_library, context=None):
         errors = []
         for hook in self.load_library_hooks:
             try:
