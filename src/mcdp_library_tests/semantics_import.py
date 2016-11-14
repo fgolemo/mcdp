@@ -4,6 +4,7 @@ from mcdp_library import Librarian
 
 from .create_mockups import create_hierarchy
 from nose.tools import assert_equal
+from mocdp.comp.context import Context
 
 
 @comptest
@@ -46,8 +47,10 @@ def feat_import2():
     librarian = Librarian()
     librarian.find_libraries(d)
     lib1 = librarian.load_library('lib1')
-    _model1 = lib1.load_ndp('model1')
+    
+    _model1 = lib1.load_ndp('model1', context=Context())
     lib2 = librarian.load_library('lib2')
+    
     context = lib1._generate_context_with_hooks()
     _model2 = lib2.load_ndp('model2', context)
     _model3 = lib2.load_ndp('model3', context)

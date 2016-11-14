@@ -16,6 +16,7 @@ from mocdp.comp.composite_makecanonical import cndp_makecanonical
 from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.recursive_name_labeling import (MakeArguments,
     get_imp_as_recursive_dict, get_labelled_version, get_names_used, ndp_make)
+from nose.tools import assert_equal
 
 
 @contract(a=MakeArguments)
@@ -261,7 +262,7 @@ mcdp {
         
         a = instance catalogue {
             provides a [N]
-            one  |10N
+            one  | 10N
         }
         a.a >= 0N
     }
@@ -296,8 +297,11 @@ mcdp {
             imp_dict = get_imp_as_recursive_dict(I, imp)
             print('imp dict: %r' % imp_dict)
             assert set(imp_dict) == set(['_res_power', '_fun_lift', 'actuation']), imp_dict
-            assert set(imp_dict['actuation']) == \
-                set(['_mult1', 'a', '_res_power', '_c1', '_prod1', '_fun_lift', '_join_fname1']), imp_dict['actuation']
+            
+            found = set(imp_dict['actuation']) 
+            expected = set(['_mult1', 'a', '_res_power', '_c', '_prod1', '_fun_lift', '_join_fname1']) 
+            assert_equal(expected, found)
+                
 
             context = {}
             artifact = ndp_make(ndp0, imp_dict, context)

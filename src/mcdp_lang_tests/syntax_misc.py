@@ -337,7 +337,7 @@ def check_join_not_existence():
             z >= x
             z >= y
         }
-    """)
+    """, context=Context())
     dp = ndp.get_dp()
 
     res1 = dp.solve(('a', 'b'))
