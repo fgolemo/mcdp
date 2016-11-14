@@ -211,8 +211,8 @@ def dp_graph_tree(dp0, imp=
         gg.styleApply("junction", n)
         gg.styleApply('junction_par', n)
 
-        for ni in nodes:
-            create_edge(n, ni, dp.dp1)
+        for ni, dp_i in zip(nodes, dp.dps):
+            create_edge(n, ni, dp_i)
         
         return n
     

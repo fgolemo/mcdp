@@ -19,7 +19,6 @@ from mocdp.exceptions import DPSemanticError, mcdp_dev_warning, MCDPExceptionWit
 
 from .utils import memo_disk_cache2
 from .utils.locate_files_imp import locate_files
-from mcdp_lang.eval_warnings import MCDPNestedWarning
 
 
 mcdp_dev_warning('move away')
@@ -179,7 +178,6 @@ class MCDPLibrary():
             context_mine = Context()
             res = parsing_function(l, data, realpath, context=context_mine)
 
-#             logger.debug('... actual_load(): parsed %r with %d warnings' % (name, len(context_mine.warnings)))
             setattr(res, ATTR_LOAD_NAME, name)
             return dict(res=res, context_warnings=context_mine.warnings)
 
@@ -192,15 +190,18 @@ class MCDPLibrary():
 
             data = memo_disk_cache2(cache_file, data, actual_load)
             cached = True
+            
+            if not isinstance(data, dict): # outdated cache
+                data = actual_load()
+                cached = False
         
         res = data['res']
         context_warnings = data['context_warnings']
 
         cached = '[Cached]' if cached else ''        
-        logger.debug('... actual_load(): parsed %r with %d warnings %s' %
+        logger.debug('actual_load(): parsed %r with %d warnings %s' %
                       (name, len(context_warnings), cached))
             
-
         class JustAHack:
             warnings = context_warnings
             
@@ -289,7 +290,7 @@ class MCDPLibrary():
         errors = []
         for hook in self.load_library_hooks:
             try:
-                library = hook(id_library)
+                library = hook(id_library, context)
             except DPSemanticError as e:
                 if len(self.load_library_hooks) == 1:
                     raise

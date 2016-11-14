@@ -196,7 +196,6 @@ class Context():
         msg = 'Could not load %r: \n%s' % (load_arg, s)
         raise DPSemanticError(msg)
 
-
     @contract(s='str', dp='str', returns=CFunction)
     def make_function(self, dp, s):
         assert isinstance(dp, str)
