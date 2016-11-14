@@ -171,6 +171,8 @@ class MCDPLibrary():
         data = f['data']
         realpath = f['realpath']
 
+        current_generation = 2
+        
         def actual_load():
             # maybe we should clone
             l = self.clone()
@@ -179,24 +181,31 @@ class MCDPLibrary():
             res = parsing_function(l, data, realpath, context=context_mine)
 
             setattr(res, ATTR_LOAD_NAME, name)
-            return dict(res=res, context_warnings=context_mine.warnings)
+            return dict(res=res, 
+                        context_warnings=context_mine.warnings,
+                        generation=current_generation)
 
         if not self.cache_dir:
-            data = actual_load()
+            res_data = actual_load()
             cached = False
         else:
             cache_file = os.path.join(self.cache_dir, parsing_function.__name__,
                                       '%s.cached' % name)
 
-            data = memo_disk_cache2(cache_file, data, actual_load)
+            res_data = memo_disk_cache2(cache_file, data, actual_load)
             cached = True
             
-            if not isinstance(data, dict): # outdated cache
-                data = actual_load()
+            if not isinstance(res_data, dict) or not 'generation' in res_data \
+                or res_data['generation'] < current_generation: # outdated cache
+                res_data = actual_load()
+                try: 
+                    os.unlink(cache_file)
+                except Exception:
+                    pass
                 cached = False
         
-        res = data['res']
-        context_warnings = data['context_warnings']
+        res = res_data['res']
+        context_warnings = res_data['context_warnings']
 
         cached = '[Cached]' if cached else ''        
         logger.debug('actual_load(): parsed %r with %d warnings %s' %
