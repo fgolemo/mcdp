@@ -22,7 +22,7 @@ from mocdp.exceptions import DPNotImplementedError, DPSemanticError
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
-from mocdp.comp.context import ModelBuildingContext
+from mocdp.comp.context import ModelBuildingContext, Context
 from mcdp_lang.eval_warnings import MCDPWarnings
 
 

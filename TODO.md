@@ -348,3 +348,5 @@ http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/v
 - remove the old test; (with time limit, if x < Dec 1)
 
 - spell check: http://stackoverflow.com/questions/5601431/spellcheck-false-on-contenteditable-elements
+
+- contracts fails unittests

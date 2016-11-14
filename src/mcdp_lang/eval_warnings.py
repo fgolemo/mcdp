@@ -10,7 +10,7 @@ class MCDPWarnings:
     LANGUAGE_AMBIGUOS_EXPRESSION = 'Ambiguous expression'
     
 def warning_format_where(where):
-    wheres = format_where(where, context_before=0, mark=None, arrow=False, 
+    wheres = format_where(where, context_before=2, mark=None, arrow=False, 
                       use_unicode=True, no_mark_arrow_if_longer_than=3)
     return wheres
     

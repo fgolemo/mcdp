@@ -229,8 +229,6 @@ def eval_ndp_load(r, context):
     arg = r.load_arg
     check_isinstance(arg, (CDP.NDPName, CDP.NDPNameWithLibrary))
 
-    from mcdp_lang.eval_warnings import warnings_copy_from_child_make_nested2
-
     if isinstance(arg, CDP.NDPNameWithLibrary):
         check_isinstance(arg.library, CDP.LibraryName), arg
         check_isinstance(arg.name, CDP.NDPName), arg
@@ -263,6 +261,9 @@ def eval_ndp_load(r, context):
 
 
 def eval_ndp_instancefromlibrary(r, context):
+    msg = 'Construct "new X" is deprecated in favor of "instance `X".'
+    warn_language(r, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context)
+    
     check_isinstance(r, CDP.DPInstanceFromLibrary)
     check_isinstance(r.dpname, (CDP.NDPName, CDP.NDPNameWithLibrary))
     arg = r.dpname

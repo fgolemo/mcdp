@@ -132,27 +132,27 @@ class MCDPLibrary():
                 shutil.rmtree(self.cache_dir)
 
     @contract(returns=NamedDP)
-    def load_ndp(self, id_ndp, context):
+    def load_ndp(self, id_ndp, context=None):
         return self._load_generic(id_ndp, MCDPLibrary.ext_ndps,
                                   MCDPLibrary.parse_ndp, context)
 
     @contract(returns=Poset)
-    def load_poset(self, id_poset, context):
+    def load_poset(self, id_poset, context=None):
         return self._load_generic(id_poset, MCDPLibrary.ext_posets,
                                   MCDPLibrary.parse_poset, context)
 
     @contract(returns=ValueWithUnits)
-    def load_constant(self, id_poset, context):
+    def load_constant(self, id_poset, context=None):
         return self._load_generic(id_poset, MCDPLibrary.ext_values,
                                   MCDPLibrary.parse_constant, context)
 
     @contract(returns=PrimitiveDP)
-    def load_primitivedp(self, id_primitivedp, context):
+    def load_primitivedp(self, id_primitivedp, context=None):
         return self._load_generic(id_primitivedp, MCDPLibrary.ext_primitivedps,
                                   MCDPLibrary.parse_primitivedp, context)
 
     @contract(returns=TemplateForNamedDP)
-    def load_template(self, id_ndp, context):
+    def load_template(self, id_ndp, context=None):
         return self._load_generic(id_ndp, MCDPLibrary.ext_templates,
                                   MCDPLibrary.parse_template, context)
 
@@ -160,8 +160,10 @@ class MCDPLibrary():
     @contract(name=str, extension=str)
     def _load_generic(self, name, extension, parsing_function, context):
         """
-            parsing_function returns  x, context 
+            parsing_function takes string, context 
         """
+        if context is None:
+            context = Context()
         if not isinstance(name, str):
             msg = 'Expected a string for the name.'
             raise_desc(ValueError, msg, name=name)
