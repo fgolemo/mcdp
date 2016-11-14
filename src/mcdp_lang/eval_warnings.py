@@ -44,6 +44,16 @@ class MCDPNestedWarning(namedtuple('MCDPNestedWarning', 'where msg warning')):
         s += '\n' + indent(self.warning.format_user(), ' > ')
         return s
 
+
+def warnings_copy_from_child_make_nested2(context, context2, where, msg):
+    for w in context2.warnings:
+        if isinstance(w, MCDPNestedWarning) and w.where is None:
+            w2 = MCDPNestedWarning(msg=msg, where=where, warning=w.warning)
+            context.warnings.append(w2)
+        else:
+            context.warnings.append(w)
+
+
 def warnings_copy_from_child_make_nested(context0, context, msg, where):
     assert context0 is not context
     for w in context.warnings:

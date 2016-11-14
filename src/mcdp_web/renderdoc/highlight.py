@@ -22,6 +22,7 @@ from mocdp import ATTR_LOAD_NAME, logger
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from reprep import Report
 from system_cmd import CmdException, system_cmd_result
+from mocdp.comp.context import Context
 
 
 def bs(fragment):
@@ -98,7 +99,8 @@ def make_plots(library, frag, raise_errors, realpath):
                     vu = load(tag_id)
                 else:
                     source_code = tag.string.encode('utf-8')
-                    vu = parse(source_code, realpath=realpath)
+                    context = Context()
+                    vu = parse(source_code, realpath=realpath, context=context)
 
                 rendered = plotter(tag, vu)
 
@@ -517,7 +519,8 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
 
     def ndp_graph_normal_(tag):
         source_code = tag.string.encode('utf-8')
-        ndp = library.parse_ndp(source_code, realpath=realpath)
+        context = Context()
+        ndp = library.parse_ndp(source_code, realpath=realpath, context=context)
         yourname = ''
         direction = str(tag.get('direction', default_direction))
         
@@ -531,7 +534,8 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
         
     def ndp_graph_templatized_(tag):
         source_code = tag.string.encode('utf-8')
-        ndp = library.parse_ndp(source_code, realpath=realpath)
+        context = Context()
+        ndp = library.parse_ndp(source_code, realpath=realpath, context=context)
         yourname = ''
         direction = str(tag.get('direction', default_direction))
 
@@ -541,7 +545,8 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
 
     def ndp_graph_templatized_labeled_(tag):
         source_code = tag.string.encode('utf-8')
-        ndp = library.parse_ndp(source_code, realpath=realpath)
+        context = Context()
+        ndp = library.parse_ndp(source_code, realpath=realpath, context=context)
         yourname = None 
         if hasattr(ndp, ATTR_LOAD_NAME):
             yourname = getattr(ndp, ATTR_LOAD_NAME)
@@ -553,7 +558,8 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
 
     def ndp_graph_enclosed_(tag):  # ndp_graph_enclosed
         source_code = tag.string.encode('utf-8')
-        ndp = library.parse_ndp(source_code, realpath=realpath)
+        context = Context()
+        ndp = library.parse_ndp(source_code, realpath=realpath, context=context)
         yourname = ''
 
         direction = str(tag.get('direction', default_direction))
@@ -565,7 +571,8 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
 
     def ndp_graph_expand_(tag):
         source_code = tag.string.encode('utf-8')
-        ndp = library.parse_ndp(source_code, realpath=realpath)
+        context = Context()
+        ndp = library.parse_ndp(source_code, realpath=realpath, context=context)
         yourname = ''
 
         direction = str(tag.get('direction', default_direction))
@@ -578,7 +585,8 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
 
     def template_graph_enclosed_(tag):  # ndp_graph_enclosed
         source_code = tag.string.encode('utf-8')
-        template = library.parse_template(source_code, realpath=realpath)
+        context = Context()
+        template = library.parse_template(source_code, realpath=realpath, context=context)
         yourname = ''
         direction = str(tag.get('direction', default_direction))
         enclosed = bool_from_string(tag.get('enclosed', 'True'))

@@ -57,8 +57,15 @@ def eval_template_load(r, context):
         libname = arg.library.value
 
         library = context.load_library(libname)
-        return library.load_template(name, context)
-
+        
+        context2 = context.child()
+        template = library.load_template(name, context2)
+        
+        from mcdp_lang.eval_warnings import warnings_copy_from_child_make_nested2
+        msg = 'While loading template %r from library %r:' % (name, libname)
+        warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
+        return template
+        
     if isinstance(arg, CDP.TemplateName):
         name = r.load_arg.value
         return context.load_template(name)

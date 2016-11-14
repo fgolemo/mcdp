@@ -228,6 +228,8 @@ def eval_ndp_load(r, context):
     arg = r.load_arg
     check_isinstance(arg, (CDP.NDPName, CDP.NDPNameWithLibrary))
 
+    from mcdp_lang.eval_warnings import warnings_copy_from_child_make_nested2
+
     if isinstance(arg, CDP.NDPNameWithLibrary):
         check_isinstance(arg.library, CDP.LibraryName), arg
         check_isinstance(arg.name, CDP.NDPName), arg
@@ -238,23 +240,20 @@ def eval_ndp_load(r, context):
          
         context2 = context.child()
         res = library.load_ndp(name, context2)
-#         from .eval_warnings import warnings_copy_from_child_make_nested
-        
+
         msg = 'While loading %r from library %r:' % (name, libname)
-        for w in context2.warnings:
-            if isinstance(w, MCDPNestedWarning) and w.where is None:
-                w2 = MCDPNestedWarning(msg=msg, where=r.where, warning=w.warning)
-                context.warnings.append(w2)
-            else:
-                context.warnings.append(w)
-#         warnings_copy_from_child_make_nested(context, context2, 
-#                                              msg='load_ndp', where=r.where)
+        warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
+            
         return res
 
     if isinstance(arg, CDP.NDPName):
         name = arg.value
         # XXX: add warning location?
-        ndp = context.load_ndp(name)
+        context2 = context.child()
+        ndp = context2.load_ndp(name)
+
+        msg = 'While loading %r:' % (name)
+        warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
         return ndp
 
     if True: # pragma: no cover

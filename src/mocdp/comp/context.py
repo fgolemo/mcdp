@@ -624,31 +624,7 @@ class Context():
 
         res = self.make_function(ndp_name, s)
         return res
-    
-#     def set_suggested_rname(self, rname):
-#         """ Returns a suggested fname, if any, and resets it to None. """
-#         if self.suggested_rname is not None:
-#             msg = 'It looks like the suggested rname was not used.'
-#             raise DPInternalError(msg, rname=rname, suggested_rname=self.suggested_rname)
-#         self.suggested_rname = rname
-#     
-#     def get_suggested_rname(self):
-#         r = self.suggested_rname
-#         self.suggested_rname = None
-#         return r
-#   
-#     def set_suggested_fname(self, fname):
-#         if self.suggested_fname is not None:
-#             msg = 'It looks like the suggested rname was not used.'
-#             raise DPInternalError(msg, fname=fname, suggested_fname=self.suggested_fname)
-#         self.suggested_fname = fname
-#     
-#     def get_suggested_fname(self):
-#         """ Returns a suggested fname, if any, and resets it to None. """
-#         r = self.suggested_fname
-#         self.suggested_fname = None
-#         return r
-
+     
 ModelBuildingContext = Context
 
 def format_list(l):
