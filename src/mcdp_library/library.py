@@ -171,7 +171,7 @@ class MCDPLibrary():
         data = f['data']
         realpath = f['realpath']
 
-        current_generation = 2
+        current_generation = 3
         
         def actual_load():
             # maybe we should clone
@@ -197,6 +197,7 @@ class MCDPLibrary():
             
             if not isinstance(res_data, dict) or not 'generation' in res_data \
                 or res_data['generation'] < current_generation: # outdated cache
+                logger.debug('Removing stale cache %r.' % cache_file)
                 res_data = actual_load()
                 try: 
                     os.unlink(cache_file)
