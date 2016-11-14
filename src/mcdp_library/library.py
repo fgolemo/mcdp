@@ -19,6 +19,7 @@ from mocdp.exceptions import DPSemanticError, mcdp_dev_warning, MCDPExceptionWit
 
 from .utils import memo_disk_cache2
 from .utils.locate_files_imp import locate_files
+from mcdp_lang.eval_warnings import MCDPNestedWarning
 
 
 mcdp_dev_warning('move away')
@@ -110,7 +111,6 @@ class MCDPLibrary():
         self.use_cache_dir(dirname)
         
     def use_cache_dir(self, cache_dir):
-
         try:
             if not os.path.exists(cache_dir):
                 os.makedirs(cache_dir)
@@ -132,34 +132,36 @@ class MCDPLibrary():
                 shutil.rmtree(self.cache_dir)
 
     @contract(returns=NamedDP)
-    def load_ndp(self, id_ndp):
+    def load_ndp(self, id_ndp, context):
         return self._load_generic(id_ndp, MCDPLibrary.ext_ndps,
-                                  MCDPLibrary.parse_ndp)
+                                  MCDPLibrary.parse_ndp, context)
 
     @contract(returns=Poset)
-    def load_poset(self, id_poset):
+    def load_poset(self, id_poset, context):
         return self._load_generic(id_poset, MCDPLibrary.ext_posets,
-                                  MCDPLibrary.parse_poset)
+                                  MCDPLibrary.parse_poset, context)
 
     @contract(returns=ValueWithUnits)
-    def load_constant(self, id_poset):
+    def load_constant(self, id_poset, context):
         return self._load_generic(id_poset, MCDPLibrary.ext_values,
-                                  MCDPLibrary.parse_constant)
+                                  MCDPLibrary.parse_constant, context)
 
     @contract(returns=PrimitiveDP)
-    def load_primitivedp(self, id_primitivedp):
+    def load_primitivedp(self, id_primitivedp, context):
         return self._load_generic(id_primitivedp, MCDPLibrary.ext_primitivedps,
-                                  MCDPLibrary.parse_primitivedp)
+                                  MCDPLibrary.parse_primitivedp, context)
 
     @contract(returns=TemplateForNamedDP)
-    def load_template(self, id_ndp):
+    def load_template(self, id_ndp, context):
         return self._load_generic(id_ndp, MCDPLibrary.ext_templates,
-                                  MCDPLibrary.parse_template)
+                                  MCDPLibrary.parse_template, context)
 
 
     @contract(name=str, extension=str)
-    def _load_generic(self, name, extension, parsing):
-
+    def _load_generic(self, name, extension, parsing_function, context):
+        """
+            parsing_function returns  x, context 
+        """
         if not isinstance(name, str):
             msg = 'Expected a string for the name.'
             raise_desc(ValueError, msg, name=name)
@@ -172,41 +174,49 @@ class MCDPLibrary():
             # maybe we should clone
             l = self.clone()
             logger.debug('Parsing %r' % (name))
-            res = parsing(l, data, realpath)
+            context_mine = Context()
+            res = parsing_function(l, data, realpath, context=context_mine)
+#             if not context_mine.warnings:
+#                 print('actual_load(): no warnings from %s' % parsing_function)
+
+            msg = 'While loading %r.' % name
+            from mcdp_lang.eval_warnings import warnings_copy_from_child_make_nested
+            warnings_copy_from_child_make_nested(context, context_mine,
+                                                 msg=msg, where=None)
+            
             setattr(res, ATTR_LOAD_NAME, name)
             return res
 
         if not self.cache_dir:
             return actual_load()
         else:
-            cache_file = os.path.join(self.cache_dir, parsing.__name__,
+            cache_file = os.path.join(self.cache_dir, parsing_function.__name__,
                                       '%s.cached' % name)
 
             return memo_disk_cache2(cache_file, data, actual_load)
 
-    def parse_ndp(self, string, realpath=None):
+    def parse_ndp(self, string, realpath, context):
         """ This is the wrapper around parse_ndp that adds the hooks. """
-        result, context = self._parse_with_hooks(parse_ndp, string, realpath)
-        print('here', context.warnings)
+        result = self._parse_with_hooks(parse_ndp, string, realpath, context)
         return result
     
-    def parse_poset(self, string, realpath=None):
-        result, context = self._parse_with_hooks(parse_poset, string, realpath)
+    def parse_poset(self, string, realpath, context):
+        result = self._parse_with_hooks(parse_poset, string, realpath, context)
         return result
     
-    def parse_primitivedp(self, string, realpath=None):
+    def parse_primitivedp(self, string, realpath, context):
         from mcdp_lang.parse_interface import parse_primitivedp
-        result, context = self._parse_with_hooks(parse_primitivedp, string, realpath)
+        result = self._parse_with_hooks(parse_primitivedp, string, realpath, context)
         return result
     
-    def parse_constant(self, string, realpath=None):
+    def parse_constant(self, string, realpath, context):
         from mcdp_lang.parse_interface import parse_constant
-        result, context = self._parse_with_hooks(parse_constant, string, realpath)
+        result = self._parse_with_hooks(parse_constant, string, realpath, context)
         return result
 
-    def parse_template(self, string, realpath=None):
+    def parse_template(self, string, realpath, context):
         from mcdp_lang.parse_interface import parse_template
-        template = self._parse_with_hooks(parse_template, string, realpath)
+        template = self._parse_with_hooks(parse_template, string, realpath, context)
         if hasattr(template, ATTR_LOAD_LIBNAME):
             _prev = getattr(template, ATTR_LOAD_LIBNAME)
             # print('library %r gets something from %r' % (self.library_name, _prev))
@@ -228,13 +238,18 @@ class MCDPLibrary():
         finally:
             sys.path = previous
 
-    def _parse_with_hooks(self, parse_ndp_like, string, realpath):
+    def _parse_with_hooks(self, parse_ndp_like, string, realpath, context):
         mcdp_dev_warning('remove context')
         with self._sys_path_adjust(): 
-            context = self._generate_context_with_hooks()
+            context_mine = self._generate_context_with_hooks()
             try:
-                result = parse_ndp_like(string, context=context)
-                return result, context
+                result = parse_ndp_like(string, context=context_mine)
+                msg = 'While parsing %r:' % realpath
+                from mcdp_lang.eval_warnings import warnings_copy_from_child_make_nested
+                warnings_copy_from_child_make_nested(context, context_mine,
+                                                     msg=msg, where=None)
+
+                return result
             except MCDPExceptionWithWhere as e:
                 logger.error('extend_with_filename(%r): seen %s' % (realpath, e))
                 _type, _value, traceback = sys.exc_info()
@@ -422,7 +437,7 @@ class MCDPLibrary():
                                path2=res['realpath'])
 
         assert isinstance(basename, str), basename
-#         print('adding %r' % basename)
+
         self.file_to_contents[basename] = res
 
     def write_to_model(self, name, data):

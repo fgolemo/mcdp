@@ -3,6 +3,7 @@ from comptests.registrar import comptest
 from mcdp_library import Librarian
 
 from .create_mockups import create_hierarchy
+from nose.tools import assert_equal
 
 
 @comptest
@@ -22,9 +23,10 @@ def feat_import1():
     assert 'library' in libraries['lib1']
 
     lib1 = librarian.load_library('lib1')
-    _poset1 = lib1.load_poset('poset1')
+    context = lib1._generate_context_with_hooks()
+    _poset1 = lib1.load_poset('poset1', context)
     lib2 = librarian.load_library('lib2')
-    _poset2 = lib2.load_poset('poset2')
+    _poset2 = lib2.load_poset('poset2', context)
 
 
 @comptest
@@ -46,8 +48,9 @@ def feat_import2():
     lib1 = librarian.load_library('lib1')
     _model1 = lib1.load_ndp('model1')
     lib2 = librarian.load_library('lib2')
-    _model2 = lib2.load_ndp('model2')
-    _model3 = lib2.load_ndp('model3')
+    context = lib1._generate_context_with_hooks()
+    _model2 = lib2.load_ndp('model2', context)
+    _model3 = lib2.load_ndp('model3', context)
 
 @comptest
 def feat_import3():
@@ -61,7 +64,8 @@ def feat_import3():
     librarian = Librarian()
     librarian.find_libraries(d)
     lib2 = librarian.load_library('lib2')
-    _model2 = lib2.load_ndp('model2')
+    context = lib2._generate_context_with_hooks()
+    _model2 = lib2.load_ndp('model2', context)
 
 @comptest
 def feat_import4():
@@ -75,7 +79,8 @@ def feat_import4():
     librarian = Librarian()
     librarian.find_libraries(d)
     lib2 = librarian.load_library('lib2')
-    _model2 = lib2.load_ndp('model2')
+    context = lib2._generate_context_with_hooks()
+    _model2 = lib2.load_ndp('model2', context)
 
 @comptest
 def feat_import5():
@@ -100,15 +105,11 @@ def feat_import5():
     librarian.find_libraries(d)
     lib = librarian.load_library('lib1')
 
-#     context = lib._generate_context_with_hooks()
-    _model2 = lib.load_ndp('model1')
-# 
-#     context = ModelBuildingContext()
-#     parse_ndp(s, context)
-#     w = context.warnings
-#     assert_equal(len(w), 1)
-#     assert_equal(w[0].which, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE)
-#     pass
+    context = lib._generate_context_with_hooks()
+    _model2 = lib.load_ndp('model1', context)
+    for w in context.warnings:
+        print w.format_user()
+    assert_equal(len(context.warnings), 1)
 
 @comptest
 def feat_import6():

@@ -344,3 +344,5 @@ http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/v
 
 
 - there might be a bug in warnings, for childrens
+
+- remove the old test; (with time limit, if x < Dec 1)

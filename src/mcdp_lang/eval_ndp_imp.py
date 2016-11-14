@@ -6,6 +6,7 @@ from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_dp import (CatalogueDP, Conversion, JoinNDP, MeetNDualDP, get_conversion, make_series, VariableNode,
  ConstantMinimals, LimitMaximals, OpaqueDP)
+from mcdp_dp import FunctionNode, ResourceNode
 from mcdp_posets import (
     FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe)
 from mocdp import ATTRIBUTE_NDP_MAKE_FUNCTION
@@ -19,7 +20,7 @@ from mocdp.comp.make_approximation_imp import make_approximation
 from mocdp.comp.template_deriv import cndp_eversion
 from mocdp.exceptions import (DPInternalError, DPSemanticError,
     DPSemanticErrorNotConnected, MCDPExceptionWithWhere, mcdp_dev_warning,
-    DPNotImplementedError)
+)
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 from .eval_codespec_imp_utils_instantiate import ImportFailure, import_name
@@ -34,7 +35,6 @@ from .parse_actions import (add_where_information, decorate_add_where, raise_wit
     parse_wrap)
 from .parts import CDPLanguage
 from .utils_lists import unwrap_list
-from mcdp_dp.dp_identity import FunctionNode, ResourceNode
 
 
 CDP = CDPLanguage
@@ -233,10 +233,18 @@ def eval_ndp_load(r, context):
         libname = arg.library.value
         name = arg.name.value
         library = context.load_library(libname)
-        return library.load_ndp(name)
+        # XXX: add warning location?
+         
+        print 'eval_ndp_load()'
+        context2 = context.child()
+        res = library.load_ndp(name, context2)
+        from .eval_warnings import warnings_copy_from_child_make_nested
+        warnings_copy_from_child_make_nested(context, context2, msg='load_ndp', where=r.where)
+        return res
 
     if isinstance(arg, CDP.NDPName):
         name = arg.value
+        # XXX: add warning location?
         ndp = context.load_ndp(name)
         return ndp
 
@@ -729,7 +737,6 @@ def ndp_rename_resource(ndp, current, updated):
     else:
         raise CouldNotRename()
     
-#     raise_desc(DPNotImplementedError, 'not implemented', ndp=ndp)
     
 @decorate_add_where
 def eval_statement(r, context):
@@ -944,8 +951,8 @@ def eval_statement(r, context):
         raise_desc(DPInternalError, msg, r=r2) # where=r.where.__repr__())
 
 
-def eval_build_problem(r, context):
-    context = context.child()
+def eval_build_problem(r, context0):
+    context = context0.child()
 
     check_isinstance(r.statements, CDP.ModelStatements)
     statements = unwrap_list(r.statements.statements)
@@ -953,6 +960,9 @@ def eval_build_problem(r, context):
     for s in statements:
         eval_statement(s, context)
 
+    from .eval_warnings import warnings_copy_from_child
+    warnings_copy_from_child(context0, context)
+    
     # take() optimization
     context.ifun_finish()
     context.ires_finish()

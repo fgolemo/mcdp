@@ -154,5 +154,6 @@ def eval_poset_load(r, context):
         name = arg.name.value
 
         library = context.load_library(libname)
-        return library.load_poset(name)
+        return library.load_poset(name, context)
+    
     raise NotImplementedError(r.name)

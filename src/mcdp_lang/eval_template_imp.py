@@ -57,7 +57,7 @@ def eval_template_load(r, context):
         libname = arg.library.value
 
         library = context.load_library(libname)
-        return library.load_template(name)
+        return library.load_template(name, context)
 
     if isinstance(arg, CDP.TemplateName):
         name = r.load_arg.value

@@ -33,6 +33,7 @@ def parse_ndp(string, context=None):
     expr2 = parse_ndp_refine(expr, context)
     res = parse_ndp_eval(expr2, context)
     assert isinstance(res, NamedDP), res
+    
     return res
 
 def standard_refine(v, context):

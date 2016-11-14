@@ -147,21 +147,26 @@ class Context():
 
         return c
 
-    def load_ndp(self, load_arg):
+    def load_ndp(self, load_arg, context=None):
+        assert context is None or context is self
         return self._load_hooks(load_arg, self.load_ndp_hooks, NamedDP)
 
-    def load_primitivedp(self, load_arg):
+    def load_primitivedp(self, load_arg, context=None):
+        assert context is None or context is self
         return self._load_hooks(load_arg, self.load_primitivedp_hooks, PrimitiveDP)
 
-    def load_poset(self, load_arg):
+    def load_poset(self, load_arg, context=None):
+        assert context is None or context is self
         return self._load_hooks(load_arg, self.load_posets_hooks, Poset)
 
-    def load_template(self, load_arg):
+    def load_template(self, load_arg, context=None):
+        assert context is None or context is self
         return self._load_hooks(load_arg, self.load_template_hooks, TemplateForNamedDP)
 
-    def load_library(self, load_arg):
+    def load_library(self, load_arg, context=None):
+        assert context is None or context is self
         check_isinstance(load_arg, str)
-        from mcdp_library.library import MCDPLibrary
+        from mcdp_library import MCDPLibrary
         return self._load_hooks(load_arg, self.load_library_hooks, MCDPLibrary)
 
     def _load_hooks(self, load_arg, hooks, expected):
@@ -171,11 +176,16 @@ class Context():
             raise_desc(DPSemanticError, msg)
         for hook in hooks:
             try:
-                res = hook(load_arg)
-                if not isinstance(res, expected):
-                    msg = 'The hook did not return the expected type.'
-                    raise_desc(DPSemanticError, msg, res=res, expected=expected)
-                return res
+                try:
+                    res = hook(load_arg, context=self)
+                    if not isinstance(res, expected):
+                        msg = 'The hook did not return the expected type.'
+                        raise_desc(DPSemanticError, msg, res=res, expected=expected)
+                    return res
+                except TypeError:
+                    msg = 'Could not use hook %r' % hook
+                    logger.error(msg)
+                    raise
             except DPSemanticError as e:
                 if len(hooks) == 1:
                     raise

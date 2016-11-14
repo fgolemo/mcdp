@@ -60,7 +60,8 @@ class Eval(QuickAppBase):
         if cache_dir is not None:
             library.use_cache_dir(cache_dir)
 
-        c = library.load_constant(name)
+        context = library._generate_context_with_hooks()
+        c = library.load_constant(name, context)
         print(c)
 
 mcdp_eval_main = Eval.get_sys_main()

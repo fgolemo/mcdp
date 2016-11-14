@@ -9,7 +9,33 @@ class MCDPWarnings:
     LANGUAGE_AMBIGUOS_EXPRESSION = 'Ambiguous expression'
     
     
-MCDPWarning = namedtuple('MCDPWarning', 'which where msg')
+class MCDPWarning(namedtuple('MCDPWarning', 'which where msg')):
+    def format_user(self):
+        s = self.msg
+        if self.where:
+            s += '\n\n'
+            s += self.where.__str__()
+        return s
+    
+class MCDPNestedWarning(namedtuple('MCDPNestedWarning', 'where msg warning')):
+    def format_user(self):
+        s = self.msg
+        if self.where:
+            s += '\n\n'
+            s += self.where.__str__()
+        else:
+            s += '\n\n(no where)' 
+        s += '\n' + indent(self.warning.format_user(), ' > ')
+        return s
+
+def warnings_copy_from_child_make_nested(context0, context, msg, where):
+    for w in context.warnings:
+        w2 = MCDPNestedWarning(msg=msg, where=where, warning=w)
+        context0.warnings.append(w2)
+    
+def warnings_copy_from_child(context0, context):
+    for w in context.warnings:
+        context0.warnings.append(w)
 
 
 def warn_language(element, which, msg, context):

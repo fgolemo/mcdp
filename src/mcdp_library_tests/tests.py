@@ -13,6 +13,7 @@ from mcdp_tests.generation import for_all_source_mcdp
 from mocdp import logger
 from mocdp.exceptions import DPSemanticError
 from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
+from mocdp.comp.context import Context
 
 
 __all__ = [
@@ -343,25 +344,29 @@ def _load_primitivedp(libname, model_name):
         return l.load_primitivedp(model_name)
 
 def _load_template(libname, model_name):
+    context = Context()
     l = get_test_library(libname)
     with timeit(model_name, minimum=min_time_warn):
-        return l.load_template(model_name)
+        return l.load_template(model_name, context)
 
 def _load_value(libname, name):
     l = get_test_library(libname)
+    context = Context()
     with timeit(name, minimum=min_time_warn):
-        vu = l.load_constant(name)
+        vu = l.load_constant(name, context)
     return vu
 
 def _load_poset(libname, model_name):
     l = get_test_library(libname)
+    context = Context()
     with timeit(model_name, minimum=min_time_warn):
-        return l.load_poset(model_name)
+        return l.load_poset(model_name, context)
 
 def _load_ndp(libname, model_name):
     l = get_test_library(libname)
+    context = Context() 
     with timeit(model_name, minimum=min_time_warn):
-        return l.load_ndp(model_name)
+        return l.load_ndp(model_name, context)
     
 #
 # @contextmanager

@@ -59,7 +59,8 @@ def other_reports(outdir, maindir, config_dirs, entry):
     library = default_library.load_library(entry.libname)
 
     if isinstance(entry, EntryTemplate):
-        template = library.load_template(entry.name)
+        context = library._generate_context_with_hooks()
+        template = library.load_template(entry.name, context)
         pdf = ndp_template_graph_enclosed(library=library, template=template,
                                     style=STYLE_GREENREDSYM, yourname=None,
                                     data_format='pdf', direction='TB', enclosed=True)
