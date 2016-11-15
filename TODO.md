@@ -348,5 +348,11 @@ http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/v
 
 - spell check: http://stackoverflow.com/questions/5601431/spellcheck-false-on-contenteditable-elements
 
-- contracts fails unittests in branch mcdp
+- clarify "choose" for types and "choose" for dps (not implemented)
+
+- add choose without the labels
+
+  instance choose(A, B) = choose(instance A, instance B)
+
+- for choose(a, b), then a and be need to be disconnected
 

@@ -250,7 +250,6 @@ def eval_ndp_load(r, context):
         # XXX: add warning location?
         context2 = context.child()
         ndp = context2.load_ndp(name)
-
         msg = 'While loading %r:' % (name)
         warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
         return ndp
@@ -519,7 +518,7 @@ def add_constraint(context, resource, function):
                 msg += '\n  %s can be embedded in %s: %s ' % (R1, F2, tu.leq(R1, F2))
                 msg += '\n  %s can be embedded in %s: %s ' % (F2, R1, tu.leq(F2, R1))
                 raise_wrapped(DPSemanticError, e, msg, R1=R1, F2=F2, compact=True)
-    except NotImplementedError as e:
+    except NotImplementedError as e: # pragma: no cover
         msg = 'Problem while creating embedding.'
         raise_wrapped(DPInternalError, e, msg, resource=resource, function=function,
                       R1=R1, F2=F2)
@@ -951,7 +950,7 @@ def eval_statement(r, context):
         R = context.get_rtype(rv)
         try:
             values = R.get_maximal_elements()
-        except NotImplementedError as e:
+        except NotImplementedError as e: # pragma: no cover
             msg = 'Could not call get_maximal_elements().'
             raise_wrapped(DPInternalError, e, msg, R=R)
 

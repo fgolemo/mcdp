@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
 from pyramid.renderers import render_to_response  # @UnresolvedImport
 
-from contracts.utils import check_isinstance, raise_wrapped, indent
+from contracts.utils import check_isinstance, raise_wrapped
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp_eval, parse_ndp_refine, \
     parse_template_eval, parse_template_refine, parse_constant_eval, \
@@ -22,7 +22,6 @@ from mcdp_web.utils import (ajax_error_catch, create_image_with_string,
 from mcdp_web.utils.response import response_data
 from mocdp import logger
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
-from contracts.interface import format_where
 
 
 Spec = namedtuple('Spec', 'url_part url_variable extension '
@@ -203,6 +202,8 @@ class AppEditorFancyGeneric():
 
         def go():
             try:
+                # XXX: inefficient; we parse twice
+                
                 parse_tree = parse_wrap(parse_expr, string)[0]
             except DPSemanticError as e:
                 msg = 'I only expected a DPSyntaxError'
@@ -271,9 +272,11 @@ class AppEditorFancyGeneric():
 #                     warning += '\n\n' + indent(wheres, '   ')
                 warnings.append(warning.strip())
                     
+            sep = '-' * 80
+            language_warnings = ("\n\n"+ sep + "\n\n").join(warnings)
             return {'ok': True, 
                     'highlight': highlight,
-                    'language_warnings': "\n\n".join(warnings), 
+                    'language_warnings': language_warnings, 
                     'request': req}
 
         return ajax_error_catch(go)

@@ -25,7 +25,7 @@ class MCDPWarning(namedtuple('MCDPWarning', 'which where msg')):
         s = self.msg
         if self.where:
             s += '\n\n'
-            s += warning_format_where(self.where)
+            s += indent(warning_format_where(self.where), '  ')
         return s
     
 class MCDPNestedWarning(namedtuple('MCDPNestedWarning', 'where msg warning')):
@@ -38,10 +38,11 @@ class MCDPNestedWarning(namedtuple('MCDPNestedWarning', 'where msg warning')):
         s = self.msg
         if self.where:
             s += '\n\n'
-            s += warning_format_where(self.where)
+            s += indent(warning_format_where(self.where), '  ')
         else:
             s += '\n\n(no where)' 
-        s += '\n' + indent(self.warning.format_user(), ' > ')
+        s += '\n  I obtained this warning:\n'
+        s += '\n' + indent(self.warning.format_user(), '  | ')
         return s
 
 

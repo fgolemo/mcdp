@@ -44,6 +44,8 @@ def eval_template_deriv(r, context):
     
     
 def eval_template_load(r, context):
+    from .eval_warnings import warnings_copy_from_child_make_nested2
+
     assert isinstance(r, CDP.LoadTemplate)
     assert isinstance(r.load_arg, (CDP.TemplateName, CDP.TemplateNameWithLibrary))
 
@@ -61,14 +63,20 @@ def eval_template_load(r, context):
         context2 = context.child()
         template = library.load_template(name, context2)
         
-        from mcdp_lang.eval_warnings import warnings_copy_from_child_make_nested2
         msg = 'While loading template %r from library %r:' % (name, libname)
         warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
         return template
         
     if isinstance(arg, CDP.TemplateName):
+        
+        context2 = context.child()
         name = r.load_arg.value
-        return context.load_template(name)
+        template = context2.load_template(name)
+
+        msg = 'While loading %r:' % (name)
+        warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
+
+        return template
 
     raise NotImplementedError(r)
 

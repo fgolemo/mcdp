@@ -1,4 +1,3 @@
-
 choose(
         NiMH: (load Battery_NiMH),
         NiH2: (load Battery_NiH2),
@@ -9,4 +8,3 @@ choose(
         LiPo: (load Battery_LiPo),
          LFP: (load Battery_LFP)
 )
-    

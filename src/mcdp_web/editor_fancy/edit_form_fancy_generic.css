@@ -1,18 +1,18 @@
 #syntax_error, #language_warnings {
     white-space: pre-wrap;
-    white-space: pre-wrap;
+    word-wrap: break-word;
+
+    width: 100ex;
+    font-weight: bold;
+    font-size: 70%;
+
 }
 #syntax_error {
     
-    font-weight: bold;
-	font-size: 70%;
 	color: red;
 }
 
 #language_warnings {
-
-    font-weight: bold;
-    font-size: 70%;
     color: darkorange;
 }
 
