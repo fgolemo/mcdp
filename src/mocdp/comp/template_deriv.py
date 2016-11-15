@@ -7,7 +7,7 @@ from .composite import CompositeNamedDP
 from .template_for_nameddp import TemplateForNamedDP
 
 
-@contract(ndp=CompositeNamedDP, name=str, returns=TemplateForNamedDP)
+@contract(ndp=CompositeNamedDP, name=str, returns=CompositeNamedDP)
 def cndp_eversion(ndp, name):
     check_isinstance(ndp, CompositeNamedDP)    
     check_isinstance(name, str)
