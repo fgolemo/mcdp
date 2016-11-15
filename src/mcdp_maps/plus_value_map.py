@@ -330,11 +330,12 @@ class MinusValueNatMap(Map):
         f - Top <= r 
     
     """
-    @contract(value=int)
+    
     def __init__(self, value):
         self.c = value
-        N = Nat()
-        Map.__init__(self, dom=N, cod=N)
+        dom = cod = Nat()
+        dom.belongs(value)
+        Map.__init__(self, dom, cod)
         self.top  = self.dom.get_top()
         
     def _call(self, x):
