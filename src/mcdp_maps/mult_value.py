@@ -64,11 +64,12 @@ class MultValueMap(Map):
         
 class MultValueNatMap(Map):
     """ Multiplies using the upper set topology. """
-    @contract(value=int)
+    
     def __init__(self, value):
         self.value = value
-        self.N = Nat()
-        Map.__init__(self, dom=self.N, cod=self.N)
+        dom = cod = Nat()
+        dom.belongs(value)
+        Map.__init__(self, dom, cod)
 
     def diagram_label(self):
         return "× %s" % self.N.format(self.value)
@@ -146,10 +147,10 @@ class InvMultValueNatMap(Map):
             if x == top:
                 {0}
     """
-    @contract(value=int)
     def __init__(self, value):
         self.value = value
         dom = cod = Nat()
+        dom.belongs(value)
         Map.__init__(self, dom, cod)
 
     def _call(self, x):
@@ -193,10 +194,11 @@ class InvMultDualValueMap(Map):
         
 class InvMultDualValueNatMap(Map):
     """ Multiplies using the lower set topology. """
-    @contract(value=int)
+    
     def __init__(self, value):
         self.value = value
         dom = cod = Nat()
+        dom.belongs(value)
         Map.__init__(self, dom, cod)
 
     def _call(self, x):

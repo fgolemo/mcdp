@@ -855,7 +855,7 @@ def check_lang89b(): # TODO: rename
     }
     """
 
-    dp = parse_ndp(s).get_dp() 
+    parse_ndp(s).get_dp() 
    
 @comptest
 def check_lang89c(): # TODO: rename

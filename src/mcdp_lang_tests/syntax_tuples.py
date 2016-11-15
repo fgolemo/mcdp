@@ -8,6 +8,7 @@ from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError
 
 from .utils2 import eval_rvalue_as_constant_same
+from mcdp_lang_tests.utils import assert_parse_ndp_semantic_error
 
 
 same = eval_rvalue_as_constant_same
@@ -26,7 +27,7 @@ def check_tuples2():
     parsed = parse_wrap(Syntax.rvalue, s)[0]
     context = Context()
     ret = eval_rvalue(parsed, context)
-    print ret
+    print(ret)
 
     same("take(<1g, 5J>, 1)", "5 J")
 
@@ -39,7 +40,7 @@ def check_tuples3():
         r >= < 1J, 0g >
     }
     """)
-    print res
+    print(res)
 
 
 @comptest
@@ -110,13 +111,27 @@ def check_tuples8():
 @comptest
 def check_tuples9():
     """ unknown name """
-    try:
-        parse_ndp("""
-        mcdp {
-            requires r [ product(a:J, b:g) ]
-            
-            take(required r, x) >= 1 J
-        }
-        """)
-    except DPSemanticError as e:
-        print e
+    
+    s = ("""
+    mcdp {
+        requires r [ product(a:J, b:g) ]
+        
+        take(required r, x) >= 1 J
+    }
+    """)
+    
+    assert_parse_ndp_semantic_error(s)
+        
+        
+    """ out of bounds  """
+    s = """
+    mcdp {
+        requires r [ J x g]
+        
+        take(required r, 2) >= 1 J
+    }
+    """
+
+    assert_parse_ndp_semantic_error(s)
+        
+    
