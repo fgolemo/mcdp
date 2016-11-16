@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
-from contracts import contract
 from contracts.utils import check_isinstance
+from mcdp_maps.repr_map import repr_map_invmultdual
 from mcdp_posets import Map, Nat, RcompUnits, is_top
-from mcdp_posets.nat import Nat_mult_uppersets_continuous, \
-    Nat_mult_lowersets_continuous, RcompUnits_mult_lowersets_continuous
+from mcdp_posets.nat import (Nat_mult_uppersets_continuous,
+    Nat_mult_lowersets_continuous, RcompUnits_mult_lowersets_continuous)
 from mcdp_posets.rcomp import Rcomp_multiply_upper_topology, Rcomp
 from mcdp_posets.rcomp_units import check_mult_units_consistency
 import numpy as np
 
 from .repr_map import repr_map_invmultvalue, repr_map_multvalue
-from mcdp_maps.repr_map import repr_map_invmultdual
 
 
 __all__ = [

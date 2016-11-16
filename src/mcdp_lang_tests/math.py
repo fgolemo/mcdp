@@ -207,10 +207,3 @@ def check_mult_mixed7():
 def check_mult_mixed8():
     pass
 
-
-
-
-
-
-
-

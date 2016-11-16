@@ -4,7 +4,6 @@ from mocdp.comp.context import Connection
 from mocdp.exceptions import DPSemanticError
 
 from .composite import CompositeNamedDP
-from .template_for_nameddp import TemplateForNamedDP
 
 
 @contract(ndp=CompositeNamedDP, name=str, returns=CompositeNamedDP)

@@ -255,6 +255,7 @@ class MinusValueMap(Map):
         c_space.belongs(c_value)
         check_isinstance(P, RcompUnits)
         check_isinstance(c_space, RcompUnits)
+        c_space.belongs(c_value)
     
         Map.__init__(self, dom=P, cod=P)
         self.c_value = c_value

@@ -1,6 +1,3 @@
-
-
-
 mcdp {
     provides capacity [J]
     provides missions [R]
@@ -17,12 +14,12 @@ mcdp {
     cycles = 500 []
 
     # Constraint between mass and capacity
-    mass >= capacity / specific_energy
+    required mass >= provided capacity / specific_energy
 
     # How many times should it be replaced?
-    num_replacements = ceil(missions / cycles)
-    maintenance >= num_replacements
+    num_replacements = ceil(provided missions / cycles)
+    required maintenance >= num_replacements
 
     # Cost is proportional to number of replacements
-    cost >= (capacity / specific_cost) * num_replacements
+    cost >= ( capacity / specific_cost) * num_replacements
 }

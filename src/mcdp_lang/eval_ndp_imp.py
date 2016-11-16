@@ -28,6 +28,7 @@ from .eval_constant_imp import eval_constant
 from .eval_ndp_approx import eval_ndp_approx_lower, eval_ndp_approx_upper
 from .eval_space_imp import eval_space
 from .eval_template_imp import eval_template
+from .eval_warnings import  warnings_copy_from_child_make_nested2
 from .eval_warnings import warn_language, MCDPWarnings
 from .helpers import create_operation, get_valuewithunits_as_function, get_valuewithunits_as_resource
 from .namedtuple_tricks import recursive_print
@@ -35,8 +36,6 @@ from .parse_actions import (add_where_information, decorate_add_where, raise_wit
     parse_wrap)
 from .parts import CDPLanguage
 from .utils_lists import unwrap_list
-from mcdp_lang.eval_warnings import MCDPNestedWarning,\
-    warnings_copy_from_child_make_nested2
 
 
 CDP = CDPLanguage
