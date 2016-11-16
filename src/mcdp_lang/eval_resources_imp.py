@@ -203,15 +203,13 @@ def eval_rvalue_approx_u(r, context):
 
     dpsum = PlusValueDP(R, c_value=step.value, c_space=step.unit)
     r3 = create_operation(context, dp=dpsum, resources=[r2],
-                               name_prefix='_sum', op_prefix='_op',
-                                res_prefix='_result')
+                               name_prefix='_sum')
 
 
     dpu = UncertainGate(R)
 
     return create_operation(context, dp=dpu, resources=[r2, r3],
-                            name_prefix='_uncertain', op_prefix='_resources',
-                            res_prefix='_result')
+                            name_prefix='_uncertain')
 
 
 

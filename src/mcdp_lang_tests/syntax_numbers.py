@@ -83,8 +83,7 @@ def check_unit1():
     parse_wrap_syntax_error('V x m', Syntax.pint_unit_simple)
 
     nu = Syntax.valuewithunit_number_with_units
-#     print('skip: %r white: %r copydef: %r' % (nu.skipWhitespace, nu.whiteChars,
-#             nu.copyDefaultWhiteChars))
+
     parse_wrap_check('12 W', nu)
     parse_wrap_check('12 Wh', nu)
     parse_wrap_syntax_error('12 W\n h', nu)
@@ -92,42 +91,41 @@ def check_unit1():
     parse_wrap_check('1 / s', Syntax.space_pint_unit)
 
     
-    if True:
-        # print('unit_simple:')
-        parse_wrap_syntax_error('V x m', Syntax.pint_unit_simple)
+    # print('unit_simple:')
+    parse_wrap_syntax_error('V x m', Syntax.pint_unit_simple)
 
-        # print('pint_unit:')
-        parse_wrap_syntax_error('V x m', Syntax.space_pint_unit)
+    # print('pint_unit:')
+    parse_wrap_syntax_error('V x m', Syntax.space_pint_unit)
 
-        parse_wrap_syntax_error('*', Syntax.space_pint_unit)
-        parse_wrap_syntax_error('/', Syntax.space_pint_unit)
-        parse_wrap_syntax_error('^2', Syntax.space_pint_unit)
-        good = ['g', 'g^2', 'g^ 2', 'g ^ 2', 'm/g ^2',
-                'm^2/g^2', 'N*m', '$', 'V', 'A', 'm/s',
-                'any', '1/s',
-                ]
-        results = []
-        for g in good:
-            try:
-                r = parse_wrap_check(g, Syntax.space_pint_unit)
-            except TestFailed as e:
-                results.append((g, False, e, None))
-            else:
-                results.append((g, True, None, r))
+    parse_wrap_syntax_error('*', Syntax.space_pint_unit)
+    parse_wrap_syntax_error('/', Syntax.space_pint_unit)
+    parse_wrap_syntax_error('^2', Syntax.space_pint_unit)
+    good = ['g', 'g^2', 'g^ 2', 'g ^ 2', 'm/g ^2',
+            'm^2/g^2', 'N*m', '$', 'V', 'A', 'm/s',
+            'any', '1/s',
+            ]
+    results = []
+    for g in good:
+        try:
+            r = parse_wrap_check(g, Syntax.space_pint_unit)
+        except TestFailed as e: # pragma: no cover
+            results.append((g, False, e, None))
+        else:
+            results.append((g, True, None, r))
 
-        exceptions = []
-        for g, ok, e, r in results:
-            if ok:
-                print('%20s: OK   %s' % (g, r))
-                pass
-            if not ok:
-                print('%20s: FAIL ' % g)
-                
-                exceptions.append(e)
+    exceptions = []
+    for g, ok, e, r in results:
+        if ok:
+            print('%20s: OK   %s' % (g, r))
+            pass
+        if not ok:  # pragma: no cover
+            print('%20s: FAIL ' % g)
+            
+            exceptions.append(e)
 
-        if exceptions:
-            msg = "\n".join(str(e) for e in exceptions)
-            raise TestFailed(msg)
+    if exceptions:  # pragma: no cover
+        msg = "\n".join(str(e) for e in exceptions)
+        raise TestFailed(msg)
 
 @comptest
 def check_numbers3():

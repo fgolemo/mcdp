@@ -5,7 +5,7 @@ from mcdp_posets import (
     FiniteCollectionsInclusion, FinitePoset, GenericInterval, Int, LowerSets,
     Nat, Poset, PosetCoproduct, PosetProduct, PosetProductWithLabels, Space,
     UpperSets)
-from mcdp_posets.rcomp import Rcomp
+from mcdp_posets import Rcomp
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPInternalError
 

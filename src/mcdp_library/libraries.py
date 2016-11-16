@@ -20,11 +20,10 @@ class Librarian():
         Indexes several libraries. 
         
         A hook is created so that each one can find the others.
-       
-        l = Librarian()
-        l.find_libraries(dirname)
-        
-        lib = l.load_library('short') # returns MCDPLibrary
+           
+            l = Librarian()
+            l.find_libraries(dirname)
+            lib = l.load_library('short') # returns MCDPLibrary
     """
 
     def __init__(self):

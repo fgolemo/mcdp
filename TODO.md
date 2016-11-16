@@ -309,16 +309,8 @@ http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c 
 http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/views/edit_fancy/
 - choose a bettet font for mathematical symbols
 http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/views/edit_fancy/
-- Allow parsing of '<' and '>' but then warn 
+
 - allow multiple semantic errors instead of failing on first one
-- More specific error: only mark X
- DPSemanticError: Unknown resource 'x' for design problem 'm'. Known functions: (empty).
-
- line  1 >mcdp {
- line  2 >   m = instance mcdp {}
- line  3 >    a provided by b >= x required by m
-                                 ~~~~~~~~~~~~~~~
-
 
 - Add comments
 

@@ -8,8 +8,8 @@ from mocdp.comp import Connection, dpwrap
 from mocdp.comp.context import CResource, ValueWithUnits, CFunction
 from mocdp.exceptions import DPSemanticError, DPInternalError
 
-from mocdp import logger
 
+# from mocdp import logger
 @contract(resources='seq')
 def create_operation(context, dp, resources, name_prefix, op_prefix=None, res_prefix=None):
     """
