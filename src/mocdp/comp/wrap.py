@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import sys
+
 from contracts import contract, raise_wrapped
 from contracts.utils import indent, raise_desc, check_isinstance
 from mcdp_dp import PrimitiveDP
@@ -73,7 +75,7 @@ class SimpleWrap(NamedDP):
         except Exception as e:
             msg = 'Cannot wrap primitive DP.'
             raise_wrapped(ValueError, e, msg, dp=self.dp, F=F, R=R,
-                          fnames=fnames, rnames=rnames)
+                          fnames=fnames, rnames=rnames, exc=sys.exc_info())
 
     def abstract(self):
         return self

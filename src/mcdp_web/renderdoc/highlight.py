@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString
 
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, indent
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.generic_report_utils import (
@@ -19,7 +19,7 @@ from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters
 from mcdp_web.images.images import (get_mime_for_format, ndp_graph_enclosed,
     ndp_graph_expand, ndp_graph_normal, ndp_graph_templatized)
 from mocdp import ATTR_LOAD_NAME, logger
-from mocdp.exceptions import DPSemanticError, DPSyntaxError
+from mocdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
 from reprep import Report
 from system_cmd import CmdException, system_cmd_result
 from mocdp.comp.context import Context
@@ -319,7 +319,6 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
 
     def go(selector, parse_expr, extension, use_pre=True):
         for tag in soup.select(selector):
-            
             try:
                 if tag.string is None:
                     if not tag.has_attr('id'):
@@ -419,6 +418,12 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                 tag.insert_after(t)
                 if tag.string is None:
                     tag.string = "`%s" % tag['id']
+                    
+            except DPInternalError as e:
+                msg = 'Error while interpreting the code:\n\n'
+                msg += indent(source_code, '  | ')
+                raise_wrapped(DPInternalError, e,msg, exc=sys.exc_info())
+                
 
     go('pre.mcdp', Syntax.ndpt_dp_rvalue, "mcdp", use_pre=True)
     go('pre.mcdp_poset', Syntax.space, "mcdp_poset", use_pre=True)
@@ -435,6 +440,8 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
     go('code.mcdp_template', Syntax.template, "mcdp_template", use_pre=False)
 
     return str(soup)
+
+import sys
 
 @contract(frag=str, returns=str)
 def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, generate_pdf):

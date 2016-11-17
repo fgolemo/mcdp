@@ -110,6 +110,8 @@ class CDPLanguage():
     # an incomplete model
     Ellipsis = namedtuplewhere('Ellipsis', 'token')
 
+    ConstantKeyword = namedtuplewhere('ConstantKeyword', 'keyword')
+    
     SetNameGenericVar = namedtuplewhere('SetNameGenericVar', 'value')
     SetNameNDPInstance = namedtuplewhere('SetNameNDPInstance', 'keyword name eq dp_rvalue')
     SetNameMCDPType = namedtuplewhere('SetNameMCDPType', 'keyword name eq right_side')
@@ -422,7 +424,16 @@ class CDPLanguage():
     EversionKeyword = namedtuplewhere('EversionKeyword', 'keyword')
     Eversion = namedtuplewhere('Eversion', 'keyword dpname ndp')
     
+    CommentStringSimple = namedtuplewhere('CommentStringSimple', 'value')
+    CommentStringTriple = namedtuplewhere('CommentStringTriple', 'value')
+    CommentModel = namedtuplewhere('CommentModel', 'comment_string')
+    CommentFun = namedtuplewhere('CommentFun', 'comment_string')
+    CommentCon = namedtuplewhere('CommentCon', 'comment_string')
+    CommentRes = namedtuplewhere('CommentRes', 'comment_string')
+    CommentVar = namedtuplewhere('CommentVar', 'comment_string')
+    
 
+    
 # from a import symbol1, symbol2
 # import symbol.a
 #     ImportSymbolsKeywordFrom = namedtuplewhere('ImportSymbolsKeywordFrom', 'keyword')

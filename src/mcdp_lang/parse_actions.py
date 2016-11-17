@@ -17,10 +17,16 @@ from .parts import CDPLanguage
 from .pyparsing_bundled import ParseException, ParseFatalException
 from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list, unwrap_list
+from .namedtuple_tricks import recursive_print
 
 
 CDP = CDPLanguage
- 
+
+def copy_expr_remove_action(expr):
+    """ Use this instead of copy() """
+    e2 = expr.copy()
+    e2.parseAction = []
+    return e2
 
 @decorator
 def decorate_add_where(f, *args, **kwargs):
@@ -30,6 +36,13 @@ def decorate_add_where(f, *args, **kwargs):
     except MCDPExceptionWithWhere as e:
         _, _, tb = sys.exc_info()
         raise_with_info(e, where, tb)
+    except Exception as e:
+        msg = 'Unexpected exception while executing %s.' % f.__name__
+        if args and isnamedtupleinstance(args[0]):
+            r = recursive_print(args[0])
+        else:
+            r = 'unavailable'
+        raise_wrapped(DPInternalError, e, msg, exc=sys.exc_info(), r=r)
 
 
 @contextmanager
@@ -127,6 +140,12 @@ def spa(x, b):
                     (res, isnamedtupleinstance(res))
 
         return res
+    
+    a = x.parseAction
+    if a != []:
+        msg = 'This parsing expression already had a parsing element'
+        raise_desc(DPInternalError, msg, x=x, new_action=b)
+    
     x.setParseAction(p)
 
 @parse_action

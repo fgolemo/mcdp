@@ -8,13 +8,13 @@ from .pyparsing_bundled import Keyword, Literal, Optional, Suppress
 CDP = CDPLanguage
 
 def sp(a, b):
-    from mcdp_lang.parse_actions import spa
+    from .parse_actions import spa
     spa(a, b)
     return a
 
 def spk(a, part):
     """ Simple keyword literal """
-    from mcdp_lang.parse_actions import spa
+    from .parse_actions import spa
     spa(a, lambda t: part(t[0]))
     return a
 
@@ -27,7 +27,7 @@ def keyword(a, part):
     check_isinstance(a, str)
 
     a = Keyword(a)
-    from mcdp_lang.parse_actions import spa
+    from .parse_actions import spa
     spa(a, lambda t: part(t[0]))
     return a
 
@@ -41,3 +41,4 @@ SRPAR = S(L(')'))
 COMMA = sp(L(','), lambda t: CDP.comma(t[0]))
 SCOMMA = S(COMMA)
 SCOLON = S(L(':'))
+

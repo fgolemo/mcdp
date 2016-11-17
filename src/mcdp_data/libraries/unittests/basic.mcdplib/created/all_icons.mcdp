@@ -1,7 +1,8 @@
-mcdp  {
-    provides f1 [Nat]
-    provides f2 [Nat]
-    requires r1 [Nat]
+mcdp  { 
+    'Displaying all types of stuff '
+    provides f1 [Nat] 
+    provides f2 [Nat] 'function'
+    requires r1 [Nat] "resource"
     requires r2 [Nat]
     f1 + f2 <= r1 + r2
     provided f1 + provided f2 <= required r1 + required r2

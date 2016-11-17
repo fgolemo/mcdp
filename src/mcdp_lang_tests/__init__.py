@@ -61,3 +61,6 @@ from .take_optimization import *
 from .templates_test import *
 from .syntax_variables import *
 from .syntax_derivative import *
+
+from .syntax_comments import *
+

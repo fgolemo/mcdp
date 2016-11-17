@@ -77,7 +77,7 @@ class MultValueNatMap(Map):
         return Nat_mult_uppersets_continuous(self.value, x) 
     
     def repr_map(self, letter):
-        return repr_map_multvalue(letter, self.N, self.value)
+        return repr_map_multvalue(letter, self.dom, self.value)
     
     
 
