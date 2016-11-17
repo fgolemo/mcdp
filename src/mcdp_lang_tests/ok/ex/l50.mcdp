@@ -1,9 +1,9 @@
 # test connected
 mcdp {
     sub motor = instance template mcdp {
-        provides speed [R]
-        provides torque [R]
-        provides x [R]
+        provides speed [dimensionless]
+        provides torque [dimensionless]
+        provides x [dimensionless]
     }
             
     provides speed, torque, x using motor

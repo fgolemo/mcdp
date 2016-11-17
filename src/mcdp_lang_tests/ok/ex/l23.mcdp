@@ -1,4 +1,4 @@
 # test semantic_error
 mcdp  {
-    provides a [R]
+    provides a [dimensionless]
 }

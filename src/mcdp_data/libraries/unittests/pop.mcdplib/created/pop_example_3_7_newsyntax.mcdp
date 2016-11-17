@@ -1,5 +1,5 @@
 mcdp {
-  variable a, b, c, d, e, f [R]
+  variable a, b, c, d, e, f [dimensionless]
 
   a >= 0.50 [] * min(b, f)
   a >= 0.50 [] * min(c, d)

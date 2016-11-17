@@ -93,7 +93,7 @@ mcdp {
     ndp_labeled = get_labelled_version(ndp0)
     ndp_canonical = cndp_makecanonical(ndp_labeled)
     dp0 = ndp_canonical.get_dp()
-    print dp0.repr_long()
+#     print dp0.repr_long()
     dp, _ = get_dp_bounds(dp0, 5, 5)
     f = 0.0
     R = dp.get_res_space()
@@ -195,7 +195,7 @@ def test_imp_dict_2_makecanonical(id_ndp, ndp0):
         return
 
     ndp_labeled = get_labelled_version(ndp0)
-    ndp = cndp_makecanonical(ndp0)
+    _ndp = cndp_makecanonical(ndp0)
     dp0 = ndp_labeled.get_dp()
     F = dp0.get_fun_space()
     I = dp0.get_imp_space()
@@ -274,10 +274,10 @@ mcdp {
     """)
     assert isinstance(ndp0, CompositeNamedDP)
     ndp0_labeled = get_labelled_version(ndp0)
-    ndp = ndp0
+    _ndp = ndp0
     dp = ndp0_labeled.get_dp()
-    print ndp.repr_long()
-    print dp.repr_long()
+    # print ndp.repr_long()
+    # print dp.repr_long()
     f = 0.0
     R = dp.get_res_space()
     ur = dp.solve(f)

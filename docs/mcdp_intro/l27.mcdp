@@ -1,6 +1,6 @@
 # test unconnected
 cdp {
-    requires g [R]
-    provides f [R] 
+    requires g [dimensionless]
+    provides f [dimensionless] 
 }
     

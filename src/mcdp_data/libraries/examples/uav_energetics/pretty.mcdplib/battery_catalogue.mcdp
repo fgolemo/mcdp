@@ -1,6 +1,6 @@
 catalogue {
     provides capacity [J]
-    provides cycles   [R]
+    provides cycles   [dimensionless]
     requires mass     [kg]
     requires cost     [CHF]
 

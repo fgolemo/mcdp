@@ -1,5 +1,5 @@
 # test connected
 mcdp  {
-    provides a [R]
-    a <= 5.0 [R]
+    provides a [dimensionless]
+    a <= 5.0 [dimensionless]
 }

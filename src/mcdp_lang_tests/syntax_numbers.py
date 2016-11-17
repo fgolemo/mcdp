@@ -158,7 +158,7 @@ def check_numbers3_neg():
         provides f [g]
         requires r [g]
         
-        r >= f * -2 [R]
+        r >= f * -2 dimensionless
     }
     """)
 

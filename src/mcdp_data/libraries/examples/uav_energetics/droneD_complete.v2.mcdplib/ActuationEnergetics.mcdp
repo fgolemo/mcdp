@@ -2,7 +2,7 @@ mcdp {
     provides endurance     [s]
     provides extra_payload [kg]
     provides extra_power   [W]
-    provides num_missions [R]
+    provides num_missions [dimensionless]
     provides velocity [m/s]
 
     requires total_cost [$]

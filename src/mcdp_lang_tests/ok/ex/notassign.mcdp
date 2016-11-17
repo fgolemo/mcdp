@@ -1,6 +1,6 @@
 # test semantic_error
 mcdp {
-   requires a [R]
+   requires a [dimensionless]
 
 	# cannot assign the name a
 	a = 2 J

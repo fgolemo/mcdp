@@ -2,7 +2,7 @@
 mcdp {  
 	sub motor = instance template mcdp {
   		requires cost [$]
-  		provides velocity [R]
+  		provides velocity [dimensionless]
   		provides endurance [s]
  	}
 }

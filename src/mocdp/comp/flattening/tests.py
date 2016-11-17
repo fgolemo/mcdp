@@ -13,10 +13,10 @@ def check_flattening(_id_ndp, ndp):
 def check_flatten1():
     ndp = parse_ndp("""
     mcdp {
-      requires r1 [R]
-      requires r2 [R]
+      requires r1 [dimensionless]
+      requires r2 [dimensionless]
       
-      provides f1 [R]
+      provides f1 [dimensionless]
       
       f1 <= r1 * r2
     }
@@ -35,10 +35,10 @@ def check_flatten2():
     ndp = parse_ndp("""
     mcdp { 
     M = instance mcdp {
-      requires r1 [R]
-      requires r2 [R]
+      requires r1 [dimensionless]
+      requires r2 [dimensionless]
       
-      provides f1 [R]
+      provides f1 [dimensionless]
       
       f1 <= r1 * r2
     }
@@ -55,10 +55,10 @@ def check_flatten3():
     ndp = parse_ndp("""
     mcdp { 
     M = instance mcdp {
-      requires r1 [R]
-      requires r2 [R]
+      requires r1 [dimensionless]
+      requires r2 [dimensionless]
       
-      provides f1 [R]
+      provides f1 [dimensionless]
       
       f1 <= r1 * r2
     }
@@ -77,18 +77,18 @@ def check_flatten4():
     ndp = parse_ndp("""
     mcdp { 
     M = instance mcdp {
-      requires r1 [R]
-      requires r2 [R]
+      requires r1 [dimensionless]
+      requires r2 [dimensionless]
       
-      provides f1 [R]
+      provides f1 [dimensionless]
       
       f1 <= r1 * r2
     }
     N = instance mcdp {
-      requires r1 [R]
-      requires r2 [R]
+      requires r1 [dimensionless]
+      requires r2 [dimensionless]
       
-      provides f1 [R]
+      provides f1 [dimensionless]
       
       f1 <= r1 * r2
     }

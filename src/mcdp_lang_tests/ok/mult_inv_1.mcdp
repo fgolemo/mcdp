@@ -1,10 +1,10 @@
 # test connected
 mcdp {
 
-	requires a [R]
-	requires b [R]
+	requires a [dimensionless]
+	requires b [dimensionless]
 	
-	provides c [R]
+	provides c [dimensionless]
 	
 	c <= a * b
 

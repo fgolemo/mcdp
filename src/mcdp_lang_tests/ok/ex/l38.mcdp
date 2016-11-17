@@ -1,8 +1,8 @@
 # test connected
 mcdp {  
     sub f = instance mcdp {
-        provides a [R]
-        requires c [R]
+        provides a [dimensionless]
+        requires c [dimensionless]
             
         c >= a
     }

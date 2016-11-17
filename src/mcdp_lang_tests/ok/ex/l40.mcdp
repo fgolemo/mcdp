@@ -1,15 +1,15 @@
 # test connected
 mcdp {  
     sub f =  instance template mcdp {
-        provides x [R]
-        requires y [R]
+        provides x [dimensionless]
+        requires y [dimensionless]
 
     }
     sub g = instance template mcdp {
-        provides a [R]
-        requires x [R]
+        provides a [dimensionless]
+        requires x [dimensionless]
     }
     # conversion from int
-    f.x  >= f.y + g.x + 4 [R]
+    f.x  >= f.y + g.x + 4 [dimensionless]
     g.a >= f.y 
   }

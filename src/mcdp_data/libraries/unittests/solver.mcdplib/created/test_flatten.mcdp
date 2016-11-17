@@ -1,17 +1,17 @@
 mcdp { 
     M = instance mcdp {
-      requires r1 [R]
-      requires r2 [R]
+      requires r1 [dimensionless]
+      requires r2 [dimensionless]
       
-      provides f1 [R]
+      provides f1 [dimensionless]
       
       f1 <= r1 * r2
     }
     N = instance mcdp {
-      requires r1 [R]
-      requires r2 [R]
+      requires r1 [dimensionless]
+      requires r2 [dimensionless]
       
-      provides f1 [R]
+      provides f1 [dimensionless]
       
       f1 <= r1 * r2
     }

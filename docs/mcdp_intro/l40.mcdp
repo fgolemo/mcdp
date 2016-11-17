@@ -1,15 +1,15 @@
 # test connected
 cdp {  
     sub f =  template cdp {
-        provides x [R]
-        requires y [R]
+        provides x [dimensionless]
+        requires y [dimensionless]
 
     }
     sub g = template cdp {
-        provides a [R]
-        requires x [R]
+        provides a [dimensionless]
+        requires x [dimensionless]
     }
     # conversion from int
-    f.x  >= f.y + g.x + 4 [R]
+    f.x  >= f.y + g.x + 4 [dimensionless]
     g.a >= f.y 
   }

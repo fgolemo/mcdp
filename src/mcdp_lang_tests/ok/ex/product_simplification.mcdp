@@ -4,7 +4,7 @@ mcdp {
     provides x [s] 
     requires y [m/s]
 
-    h = 12 [R] + 14 [R] * (15 [R] + 1 [R])
+    h = 12 [dimensionless] + 14 [dimensionless] * (15 [dimensionless] + 1 [dimensionless])
     g = 9.81 m/s^2
  	  
     y >= g * h * x

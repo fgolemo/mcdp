@@ -1,5 +1,5 @@
 mcdp {  
-   variable a, c [R]
+   variable a, c [dimensionless]
    c >= square(a) + 1 dimensionless
    a >= square(c) + 1 dimensionless
 }
