@@ -157,6 +157,13 @@ class Syntax():
     # a quoted string
     quoted = sp(dblQuotedString | sglQuotedString, lambda t:t[0][1:-1])
     
+     
+    lbrace  = sp(L('{'), lambda t: CDP.LBRACE(t[0]))
+    rbrace = sp(L('}'), lambda t: CDP.RBRACE(t[0]))
+    lbracket  = sp(L('['), lambda t: CDP.LBRACKET(t[0]))
+    rbracket = sp(L(']'), lambda t: CDP.RBRACKET(t[0]))
+    
+    
     python_style_multiline1 = QuotedString(quoteChar='"""', escChar='\\', unquoteResults=True, multiline=True)
     python_style_multiline2 = QuotedString(quoteChar="'''", escChar='\\', unquoteResults=True, multiline=True)
     python_style_multiline = python_style_multiline1 | python_style_multiline2
@@ -235,7 +242,9 @@ class Syntax():
     space_pint_unit = sp(((Keyword('1') | pint_unit_simple) + ZeroOrMore(pint_unit_connector + pint_unit_simple)),
                    parse_pint_unit)
 
-
+    space_dimensionless = sp(Keyword('dimensionless'), 
+                             lambda _: CDP.RcompUnit('m/m'))
+    
     library_name = sp(get_idn(), lambda t: CDP.LibraryName(t[0]))
 
     # load <name>
@@ -328,6 +337,7 @@ class Syntax():
         | space_single_element_poset
         | space_coproduct
         | space_placeholder
+        | space_dimensionless
     )
 
 
@@ -336,8 +346,8 @@ class Syntax():
         (PRODUCT, 2, opAssoc.LEFT, space_product_parse_action),
     ])
 
-
-    unitst = S(L('[')) + space + S(L(']'))
+    
+#     unitst = S(L('[')) + space + S(L(']'))
 
     nat_constant = sp(K('nat') - L(':') - nonneg_integer,
                       lambda t: CDP.NatConstant(t[0], t[1], t[2]))
@@ -350,21 +360,33 @@ class Syntax():
     vname = sp(get_idn(), lambda t: CDP.VName(t[0])) | rname_placeholder
 
     PROVIDES = keyword('provides', CDP.ProvideKeyword)
-    fun_statement = sp(PROVIDES + fname + unitst + O(comment_fun),
-                       lambda t: CDP.FunStatement(t[0], t[1], t[2], 
-                                                  t[3] if len(t) == 4 else None))
+    fun_statement = sp(PROVIDES + fname + lbracket + space + rbracket + O(comment_fun),
+                       lambda t: CDP.FunStatement(keyword=t[0], 
+                                                  fname=t[1], 
+                                                  lbracket=t[2],
+                                                  unit=t[3],
+                                                  rbracket=t[4], 
+                                                  comment=t[5] if len(t) == 6 else None))
 
     REQUIRES = keyword('requires', CDP.RequireKeyword)
-    res_statement = sp(REQUIRES + rname + unitst + O(comment_res),
-                       lambda t: CDP.ResStatement(t[0], t[1], t[2],
-                                                  t[3] if len(t) == 4 else None))
+    res_statement = sp(REQUIRES + rname +  lbracket + space + rbracket + O(comment_res),
+                       lambda t: CDP.ResStatement(keyword=t[0], 
+                                                  rname=t[1], 
+                                                  lbracket=t[2],
+                                                  unit=t[3],
+                                                  rbracket=t[4], 
+                                                  comment=t[5] if len(t) == 6 else None))
     
     VARIABLE = keyword('variable', CDP.VarStatementKeyword)
     var_list = sp(vname + ZeroOrMore(SCOMMA + vname),
                   lambda t: make_list(t))
 
-    var_statement = sp(VARIABLE + var_list + unitst + S(O(comment_var)),
-                       lambda t: CDP.VarStatement(t[0], t[1], t[2]))
+# 'keyword vnames lbracket unit rbracket')
+    var_statement = sp(VARIABLE + var_list +  lbracket + space + rbracket + O(comment_var),
+                       lambda t: CDP.VarStatement(
+                           keyword=t[0], vnames=t[1], lbracket=t[2],
+                           unit=t[3], rbracket=t[4], 
+                           comment= t[5] if len(t) == 6 else None))
 
     # import statements:
     #    from libname import a, b
@@ -380,7 +402,7 @@ class Syntax():
 #                                               libname=t[1],
 #                                               symbols=make_list(t[3:], where=t[2].where)))
 
-    valuewithunit_numbers = sp(integer_or_float + unitst,
+    valuewithunit_numbers = sp(integer_or_float + S(lbracket) + space + S(rbracket),
                                lambda t: CDP.SimpleValue(t[0], t[1]))
 
     mcdp_dev_warning('dimensionless not tested')
@@ -947,9 +969,6 @@ class Syntax():
     MCDPTOKEN = keyword('mcdp', CDP.MCDPKeyword)
     ndpt_dp_model_statements = sp(ZeroOrMore(line_expr),
                                   dp_model_statements_parse_action)
-     
-    lbrace  = sp(L('{'), lambda t: CDP.LBRACE(t[0]))
-    rbrace = sp(L('}'), lambda t: CDP.RBRACE(t[0]))
     
     def ndpt_dp_model_parse(tokens):  # @NoSelf        
         if len(tokens) == 5:

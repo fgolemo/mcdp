@@ -205,26 +205,14 @@ http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c 
     
     variable
 
-- Even fancier language:
+- L: Even fancier language:
 
   x + y >= ⌈√x⌉ + ⌈√y⌉ + ℕ:10
 
-- Cannot create addition between R and Nat:
 
-  mcdp {  
-   variable a, c [R] 
-   c >= square(a) + Nat:1 
-   a >= square(c)  
-  } 
-
-- readd some tests from invmult2
-
-
-- make green and red plus icons
+- re-add some tests from invmult2
 
 - floor0 for resources
-- generic unary for functions
-- generic parsing for expressions operand(op, op, op)
 
 - allow covariant syntax like:
     operand(op, op; opf, opf)
@@ -307,30 +295,10 @@ http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c 
 
 - implement preceq, succeq
 http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/views/edit_fancy/
-- choose a bettet font for mathematical symbols
+- W: choose a better font for mathematical symbols
 http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/views/edit_fancy/
 
 - allow multiple semantic errors instead of failing on first one
-
-- Add comments
-
-  mcdp {
-    ' One example of documentation for the entire MCDP.'
-
-    requires     mass [kg]   'The mass that must be transported.'
-    provides capacity [kWh]  'The capacity of the battery.'
-
-    constant a = 1 g  'Number of constants'
-  
-    constant gravity = (9.8 m/s^2) / 6 'Gravity on Earth'
-
-    variable x, y [Nat] 'constant '
-
-    x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + provided mass 
-    ' This constraints the vehicle '
-
-    required mass >= x
-  }
 
 - refactor: move eval_statement to its own .py
 
@@ -350,6 +318,18 @@ http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/v
 
 
 
+
+- Try to see if this parses:
+
+    cost >= ( provided capacity / specific_cost) * num_replacements
+
+    cost >= ( capacity / specific_cost) * num_replacements
+
+- do not allow libraries with '.' in their name
+
+
+- make cute boxes
+
   0 1 2 3 4 5 6 7 8 9 A B C D E F
 U+250x  ─ ━ │ ┃ ┄ ┅ ┆ ┇ ┈ ┉ ┊ ┋ ┌ ┍ ┎ ┏
 U+251x  ┐ ┑ ┒ ┓ └ ┕ ┖ ┗ ┘ ┙ ┚ ┛ ├ ┝ ┞ ┟
@@ -361,10 +341,3 @@ U+256x  ╠ ╡ ╢ ╣ ╤ ╥ ╦ ╧ ╨ ╩ ╪ ╫ ╬ ╭ ╮ ╯
 U+257x  ╰ ╱ ╲ ╳ ╴ ╵ ╶ ╷ ╸ ╹ ╺ ╻ ╼ ╽ ╾ ╿
 U+258x  ▀ ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▉ ▊ ▋ ▌ ▍ ▎ ▏
 U+259x  ▐ ░ ▒ ▓ ▔ ▕ ▖ ▗ ▘ ▙ ▚ ▛ ▜ ▝ ▞ ▟
-
-
-- Try to see if this parses:
-
-    cost >= ( provided capacity / specific_cost) * num_replacements
-
-    cost >= ( capacity / specific_cost) * num_replacements

@@ -1,9 +1,10 @@
 from comptests.registrar import comptest, comptest_fails
 from mcdp_lang.parse_interface import parse_ndp
-from mcdp_lang_tests.utils import parse_wrap_check, assert_syntax_error
-from mcdp_lang.syntax import Syntax
 from mcdp_lang.parts import CDPLanguage
+from mcdp_lang.syntax import Syntax
 from mcdp_lang.syntax_utils import sp
+from mcdp_lang_tests.utils import parse_wrap_check, assert_syntax_error
+from mcdp_report.html import ast_to_html
 
 
 @comptest
@@ -72,18 +73,6 @@ def check_comments05():
     pass
 
 @comptest
-def check_comments06():
-    pass
-
-@comptest
-def check_comments07():
-    pass
-
-@comptest
-def check_comments08():
-    pass
-
-@comptest
 def check_comments09():
     pass
 
@@ -130,9 +119,7 @@ def check_comments16():
     parse_wrap_check("axx", Syntax.constant_name)
     expr=Syntax.constant_name + Syntax.EQ + Syntax.definitely_constant_value
     parse_wrap_check("axx = 1.2 g", expr)
-    def parse(tokens):
-        print 'here', tokens
-        t = tokens
+    def parse(t):
         return CDPLanguage.SetNameConstant(t[0], t[1], t[2])
     expr2 = sp(expr, parse)
     parse_wrap_check("axx = 1.2 g", expr2)
@@ -158,3 +145,47 @@ def check_comments16():
   }"""
     parse_ndp(s)
 
+
+
+@comptest
+def check_comments06():
+    s0 = 'mcdp {\n  }'
+    
+    for i in range(3):
+        for j in range(3):
+            s = '\n' * i + s0 + '\n' * j
+            expr = Syntax.ndpt_dp_rvalue
+            _html = ast_to_html(s, complete_document=False, 
+                                extra_css=None, ignore_line=None,
+                               add_line_gutter=False, 
+                               encapsulate_in_precode=True, add_css=False,
+                               parse_expr=expr, add_line_spans=False, 
+                               postprocess=None)
+             
+            
+@comptest
+def check_comments07(): # rename check_addition_nat_rcomp
+    
+    
+    s = """
+    mcdp {  
+       variable a, c [dimensionless] 
+       c >= square(a) + Nat:1 
+       a >= square(c)  
+    } """
+    
+    parse_ndp(s)
+    
+    
+    s = """
+    mcdp {  
+       variable a, c [Rcomp] 
+       c >= square(a) + Nat:1 
+       a >= square(c)  
+    } """
+    
+    parse_ndp(s)
+
+@comptest
+def check_comments08():
+    pass

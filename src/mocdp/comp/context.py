@@ -293,6 +293,8 @@ class Context():
     @contract(returns=str)
     def add_ndp_fun_node(self, fname, F):
         """ Returns the name of the node (something like _fun_****) """
+        if '-' in fname:
+            raise ValueError(fname)
         ndp = dpwrap(FunctionNode(F, fname), fname, fname)
         name = get_name_for_fun_node(fname)
         # print('Adding new function %r as %r.' % (str(name), fname))
@@ -311,6 +313,8 @@ class Context():
     @contract(returns=str)
     def add_ndp_res_node(self, rname, R):
         """ returns the name of the node """
+        if '-' in rname:
+            raise ValueError(rname)
         ndp = dpwrap(ResourceNode(R, rname), rname, rname)
         name = get_name_for_res_node(rname)
         # self.info('Adding new resource %r as %r ' % (str(name), rname))

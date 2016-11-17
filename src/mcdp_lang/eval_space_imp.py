@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, check_isinstance
 from mcdp_posets import (
     FiniteCollectionsInclusion, FinitePoset, GenericInterval, Int, LowerSets,
     Nat, Poset, PosetCoproduct, PosetProduct, PosetProductWithLabels, Space,
@@ -13,6 +13,7 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import decorate_add_where
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mcdp_lang.eval_warnings import MCDPWarnings, warn_language
 
 
 CDP = CDPLanguage
@@ -59,7 +60,13 @@ def eval_space_single_element_poset(r, context):  # @UnusedVariable
     return FinitePoset(universe=universe, relations=[])
     
 def eval_space_rcompunit(r, context):  # @UnusedVariable
+    check_isinstance(r, CDP.RcompUnit)
     from mcdp_posets.rcomp_units import make_rcompunit
+    
+    if r.pint_string == 'R':
+        msg ='Please use "dimensionless" rather than "R".'
+        warn_language(r, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context)
+        
     return make_rcompunit(r.pint_string)
  
 def eval_space_spaceproduct(r, context):

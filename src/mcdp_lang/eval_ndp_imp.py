@@ -752,7 +752,23 @@ def ndp_rename_resource(ndp, current, updated):
     else:
         raise CouldNotRename()
     
-    
+def add_function(fname, F, context, r):
+    check_isinstance(fname, str)
+    if fname in context.fnames:
+        msg = 'Repeated function name %r.' % fname
+        raise DPSemanticError(msg, where=r.where)
+
+    context.add_ndp_fun_node(fname, F)
+    return context.make_resource(get_name_for_fun_node(fname), fname)
+
+def add_resource(rname, R, context, r):
+    check_isinstance(rname, str)
+    if rname in context.rnames:
+        msg = 'Repeated resource name %r.' % rname
+        raise DPSemanticError(msg, where=r.where)
+    context.add_ndp_res_node(rname, R)
+    return context.make_function(get_name_for_res_node(rname), rname)
+
 @decorate_add_where
 def eval_statement(r, context):
     check_isinstance(context, ModelBuildingContext)
@@ -815,37 +831,19 @@ def eval_statement(r, context):
         return eval_statement_SetNameConstant(r, context)
     elif isinstance(r, CDP.SetNameFValue):
         return eval_statement_SetNameFvalue(r,context)
-    
-   
     elif isinstance(r, CDP.ResStatement):
-        # "requires r.rname [r.unit]"
-        rname = r.rname.value
-        if rname in context.rnames:
-            msg = 'Repeated resource name %r.' % rname
-            raise DPSemanticError(msg, where=r.rname.where)
-        
         R = eval_space(r.unit, context)
-        context.add_ndp_res_node(rname, R)
-
-        return context.make_function(get_name_for_res_node(rname), rname)
-
+        return add_resource(r.rname.value, R, context, r)        
     elif isinstance(r, CDP.FunStatement):
-        fname = r.fname.value
-        if fname in context.fnames:
-            msg = 'Repeated function name %r.' % fname
-            raise DPSemanticError(msg, where=r.fname.where)
-
-        F = eval_space(r.unit, context)
-        context.add_ndp_fun_node(fname, F)
-
-        return context.make_resource(get_name_for_fun_node(fname), fname)
-
+        F = eval_space(r.unit, context)    
+        return add_function(r.fname.value, F, context, r)
+        
     elif isinstance(r, CDP.FunShortcut1):  # provides fname using name
         fname = r.fname.value
         with add_where_information(r.name.where):
             B = context.make_function(r.name.value, fname)
         F = context.get_ftype(B)
-        A = eval_statement(CDP.FunStatement('-', r.fname, CDP.Unit(F), None), context)
+        A = add_function(r.fname.value, F, context, r)
         add_constraint(context, resource=A, function=B)
 
     elif isinstance(r, CDP.ResShortcut1):  
@@ -853,7 +851,7 @@ def eval_statement(r, context):
         with add_where_information(r.name.where):
             A = context.make_resource(r.name.value, r.rname.value)
         R = context.get_rtype(A)
-        B = eval_statement(CDP.ResStatement('-', r.rname, CDP.Unit(R), None), context)
+        B = add_resource(r.rname.value, R, context, r)
         add_constraint(context, resource=A, function=B)  # B >= A
 
     elif isinstance(r, CDP.ResShortcut4):  
@@ -872,7 +870,7 @@ def eval_statement(r, context):
                 msg = 'Could not find required resource expression %r.' % rname
                 raise DPSemanticError(msg, where=_.where)
             R = context.get_rtype(A)
-            B = eval_statement(CDP.ResStatement('-', _, CDP.Unit(R), None), context)
+            B = add_resource(rname, R, context, r)
             add_constraint(context, resource=A, function=B)  # B >= A
     
     elif isinstance(r, CDP.FunShortcut4):  
@@ -891,21 +889,21 @@ def eval_statement(r, context):
                 msg = 'Could not find required function expression %r.' % fname
                 raise DPSemanticError(msg, where=_.where)
             F = context.get_ftype(B)
-            A = eval_statement(CDP.FunStatement('-', _, CDP.Unit(F), None), context)
+            A = add_function(fname, F, context, r)
             add_constraint(context, resource=A, function=B)  # B >= A
 
     elif isinstance(r, CDP.ResShortcut1m):  # requires rname1, rname2, ... for name
         for rname in unwrap_list(r.rnames):
             A = context.make_resource(r.name.value, rname.value)
             R = context.get_rtype(A)
-            B = eval_statement(CDP.ResStatement('-', rname, CDP.Unit(R), None), context)
+            B = add_resource(rname.value, R, context, r)
             add_constraint(context, resource=A, function=B)
 
     elif isinstance(r, CDP.FunShortcut1m):  # provides fname1,fname2,... using name
         for fname in unwrap_list(r.fnames):
             B = context.make_function(r.name.value, fname.value)
             F = context.get_ftype(B)
-            A = eval_statement(CDP.FunStatement('-', fname, CDP.Unit(F), None), context)
+            A = add_function(fname.value, F, context, r)
             add_constraint(context, resource=A, function=B)
 
     elif isinstance(r, CDP.FunShortcut2):  # provides rname <= (lf)
@@ -916,7 +914,7 @@ def eval_statement(r, context):
         B = eval_lfunction(r.lf, context)
         check_isinstance(B, CFunction)
         F = context.get_ftype(B)
-        A = eval_statement(CDP.FunStatement('-', r.fname, CDP.Unit(F), None), context)
+        A = add_function(r.fname.value, F, context, r)
         add_constraint(context, resource=A, function=B)
 
     elif isinstance(r, CDP.ResShortcut2):  # requires rname >= (rvalue)
@@ -927,7 +925,7 @@ def eval_statement(r, context):
         A = eval_rvalue(r.rvalue, context)
         check_isinstance(A, CResource)
         R = context.get_rtype(A)
-        B = eval_statement(CDP.ResStatement('-', r.rname, CDP.Unit(R), None), context)
+        B = add_resource(r.rname.value, R, context, r)
         # B >= A
         add_constraint(context, resource=A, function=B)
 

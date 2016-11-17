@@ -514,14 +514,18 @@ def get_plus_op(context, r, c):
     T1 = rtype
     T2 = c.unit
 
+    def Rcomp_from_Nat(value):
+        if is_top(Nat(), value):
+            val = Rcomp().get_top()
+        else:
+            val = float(value)
+        return val
+
     if isinstance(T1, Rcomp) and isinstance(T2, Rcomp):
         dp = PlusValueRcompDP(c.value)
     elif isinstance(T1, Rcomp) and isinstance(T2, Nat):
         # cast Nat to Rcomp
-        if is_top(Nat, c.value):
-            val = Rcomp().get_top()
-        else:
-            val = float(c.value)
+        val = Rcomp_from_Nat(c.value)
         dp = PlusValueRcompDP(val)
     elif isinstance(T1, Rcomp) and isinstance(T2, Rcomp):
         dp = PlusValueRcompDP(c.value)
@@ -534,12 +538,13 @@ def get_plus_op(context, r, c):
         dp = PlusValueDP(F=T1, c_value=c.value, c_space=T2)
     elif isinstance(T1, Nat) and isinstance(T2, Nat):
         dp = PlusValueNatDP(c.value)
+    elif isinstance(T1, RcompUnits) and isinstance(T2, Nat):
+        val = Rcomp_from_Nat(c.value)
+        dp = PlusValueRcompDP(val)
     else:
         msg = ('Cannot create addition operation between resource of type %s'
                ' and constant of type %s.' % (T1, T2))
         raise_desc(DPInternalError, msg)# , rtype=T1, c=c)
 
-    r2 = create_operation(context, dp, resources=[r],
-                          name_prefix='_plus', op_prefix='_x',
-                          res_prefix='_y')
+    r2 = create_operation(context, dp, resources=[r], name_prefix='_plus')
     return r2

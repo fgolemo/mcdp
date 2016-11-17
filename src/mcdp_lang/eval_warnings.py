@@ -72,7 +72,7 @@ def warnings_copy_from_child(context0, context):
         context0.warnings.append(w)
 
 
-
+# warn_language(element, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context):
 def warn_language(element, which, msg, context):
     """
         element: a namedtuplewhere

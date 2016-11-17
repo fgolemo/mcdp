@@ -10,9 +10,9 @@ ok(Syntax.collection_of_constants, "{ 1.5 V, 5 V }")
 ok(Syntax.constant_value, "{ 1.5 V, 5 V }")
 
 
-ok(Syntax.unitst, "[set-of(V)]")
+ok(Syntax.space, "set-of(V)")
 
-ok(Syntax.unitst, "[℘(V)]")
+ok(Syntax.space, "℘(V)")
 
 
 @comptest

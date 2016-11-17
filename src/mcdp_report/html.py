@@ -63,16 +63,22 @@ def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
 
     s_lines, s_comments = isolate_comments(s)
     assert len(s_lines) == len(s_comments) 
-    # Problem: initial comment, '# test connected\nmcdp'
 
-    empty_lines = []
+    num_empty_lines_start = 0
     for line in s_lines:
         if line.strip() == '':
-            empty_lines.append(line)
+            num_empty_lines_start += 1
+        else:
+            break
+    
+    num_empty_lines_end = 0
+    for line in reversed(s_lines):
+        if line.strip() == '':
+            num_empty_lines_end += 1
         else:
             break
 
-    full_lines = s_lines[len(empty_lines):]
+    full_lines = s_lines[num_empty_lines_start: len(s_lines)- num_empty_lines_end]
     for_pyparsing = "\n".join(full_lines)
     block = parse_wrap(parse_expr, for_pyparsing)[0]
 
@@ -100,11 +106,14 @@ def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
         x = x.replace('<', '&lt;')
         return x
 
-    # add back the white space
-    if empty_lines:
-        transformed = "\n".join(empty_lines) + '\n' + transformed_p
-    else:
-        transformed = transformed_p
+#     # add back the white space
+#     if empty_lines_start:
+#         transformed = "\n".join(empty_lines_start) + '\n' + transformed_p
+#     else:
+#         transformed = transformed_p
+
+    transformed = '\n' * num_empty_lines_start + transformed_p
+    transformed = transformed +  '\n' * num_empty_lines_end
     
     lines = transformed.split('\n')
     if len(lines) != len(s_comments):

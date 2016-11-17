@@ -221,9 +221,7 @@ def check_lang49():
 def check_lang51():
     """ Shortcuts "using" """
     print parse_wrap(Syntax.space_pint_unit, 'R')
-    print parse_wrap(Syntax.unitst, '[R]')
-
-
+#     print parse_wrap(Syntax.unitst, '[R]')
 
     parse_wrap(Syntax.valuewithunit, '4.0 [R]')
 

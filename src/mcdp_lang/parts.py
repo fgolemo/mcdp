@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from .namedtuple_tricks import namedtuplewhere
 
 
@@ -199,6 +198,8 @@ class CDPLanguage():
     comma = namedtuplewhere('comma', 'glyph')
     LBRACE  = namedtuplewhere('LBRACE', 'glyph')
     RBRACE  = namedtuplewhere('RBRACE', 'glyph') 
+    LBRACKET  = namedtuplewhere('LBRACKET', 'glyph')
+    RBRACKET  = namedtuplewhere('RBRACKET', 'glyph') 
 
     # function name
     FName = namedtuplewhere('FName', 'value')
@@ -234,7 +235,7 @@ class CDPLanguage():
 
     
     
-    VarStatement = namedtuplewhere('VarStatement', 'keyword vnames unit')
+    VarStatement = namedtuplewhere('VarStatement', 'keyword vnames lbracket unit rbracket comment')
     VarStatementKeyword = namedtuplewhere('VarStatementKeyword', 'keyword')
     
     PosetName = namedtuplewhere('PosetName', 'value')
@@ -255,9 +256,9 @@ class CDPLanguage():
     InvPlus = namedtuplewhere('InvPlus', 'ops')
     
     # provides r [Nat] 'comment'
-    FunStatement = namedtuplewhere('FunStatement', 'keyword fname unit comment')
+    FunStatement = namedtuplewhere('FunStatement', 'keyword fname lbracket unit rbracket comment')
     # requires r [Nat] 'comment'
-    ResStatement = namedtuplewhere('ResStatement', 'keyword rname unit comment')
+    ResStatement = namedtuplewhere('ResStatement', 'keyword rname lbracket unit rbracket comment')
     # requires r1, r2 
     ResShortcut4 = namedtuplewhere('ResShortcut4', 'requires rnames')
     # provides f1, f2

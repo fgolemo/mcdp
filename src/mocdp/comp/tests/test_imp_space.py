@@ -136,8 +136,8 @@ def test_imp_dict_1(id_ndp, ndp):
     dp0 = ndp_labeled.get_dp()
     F = dp0.get_fun_space()
     I = dp0.get_imp_space()
-    print ndp_labeled.repr_long()
-    print dp0.repr_long()
+    # print ndp_labeled.repr_long()
+    # print dp0.repr_long()
     print('I: %s' % I.repr_long())
     
 
@@ -200,7 +200,7 @@ def test_imp_dict_2_makecanonical(id_ndp, ndp0):
     F = dp0.get_fun_space()
     I = dp0.get_imp_space()
     assert isinstance(I, SpaceProduct)
-    print ndp.repr_long()
+#     print ndp.repr_long()
     print('I: %s' % I)
     print('get_names_used: %s' % get_names_used(I))
 
