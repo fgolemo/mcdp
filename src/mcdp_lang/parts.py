@@ -254,11 +254,11 @@ class CDPLanguage():
     InvMult = namedtuplewhere('InvMult', 'ops')
     InvPlus = namedtuplewhere('InvPlus', 'ops')
     
-    # provides r [Nat]
-    FunStatement = namedtuplewhere('FunStatement', 'keyword fname unit')
-    # requires r [Nat]
-    ResStatement = namedtuplewhere('ResStatement', 'keyword rname unit')
-    # requires r1, r2
+    # provides r [Nat] 'comment'
+    FunStatement = namedtuplewhere('FunStatement', 'keyword fname unit comment')
+    # requires r [Nat] 'comment'
+    ResStatement = namedtuplewhere('ResStatement', 'keyword rname unit comment')
+    # requires r1, r2 
     ResShortcut4 = namedtuplewhere('ResShortcut4', 'requires rnames')
     # provides f1, f2
     FunShortcut4 = namedtuplewhere('FunShortcut4', 'requires fnames')
@@ -280,7 +280,7 @@ class CDPLanguage():
     PowerKeyword = namedtuplewhere('PowerKeyword', 'keyword')
     Power = namedtuplewhere('Power', 'keyword op1 exponent')
     PowerShort = namedtuplewhere('PowerShort', 'op1 glyph exponent')
-    BuildProblem = namedtuplewhere('BuildProblem', 'keyword lbrace statements rbrace')
+    BuildProblem = namedtuplewhere('BuildProblem', 'keyword lbrace comment statements rbrace')
 
     ModelStatements = namedtuplewhere('ModelStatements', 'statements')
 

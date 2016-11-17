@@ -280,8 +280,6 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
             current_value = None
 
 
-        def natural_sorted(seq):
-            return sorted(seq, key=lambda s: s.lower())
 
         current_library = self.get_current_library_name(request)
         library = self.get_library(request)
@@ -370,15 +368,47 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         libraries = self.list_libraries()
 
+        # just the list of names
         d['libraries'] = []
+        libname2desc = {}
         for l in natural_sorted(libraries):
             is_current = l == current_library
             url = '/libraries/%s/' % l
-            name = "Library: %s" % l
+            #name = "Library: %s" % l
+            name = l
             desc = dict(name=name, url=url, current=is_current)
+            libname2desc[l] =desc
             d['libraries'].append(desc)
 
+        indexed = self.get_libraries_indexed_by_dir()
+        indexed = [(sup, [libname2desc[_] for _ in l]) 
+                   for sup, l in indexed]
+        
+        # for sup, libraries in libraries_indexed
+        #   for l in libraries
+        #      l['name'], l['url']
+        d['libraries_indexed'] = indexed
+        
         return d
+    
+    
+    def get_libraries_indexed_by_dir(self):
+        """
+            returns a list of tuples (dirname, list(libname))
+        """
+        from collections import defaultdict
+        path2libraries = defaultdict(lambda: [])
+        for libname, data in self.libraries.items():
+            path = data['path']
+            sup = os.path.basename(os.path.dirname(path))
+            path2libraries[sup].append(libname)
+                     
+        res = []
+        for sup in natural_sorted(path2libraries):
+            r = (sup, natural_sorted(path2libraries[sup]))
+            res.append(r)
+        return res
+        
 
     def get_jinja_hooks(self, request):
         """ Returns a set of useful template functions. """
@@ -461,7 +491,6 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         config.add_route('index', '/')
         config.add_view(self.view_index, route_name='index', renderer='index.jinja2')
 
-#         config.add_route('list_libraries', '/list')
         config.add_route('list_libraries', '/libraries/')
         config.add_view(self.view_list_libraries, route_name='list_libraries', renderer='list_libraries.jinja2')
 
@@ -550,3 +579,6 @@ Use Chrome, Firefox, or Opera - Internet Explorer is not supported.
 mcdp_web_main = MCDPWeb.get_sys_main()
 
 
+
+def natural_sorted(seq):
+    return sorted(seq, key=lambda s: s.lower())

@@ -199,3 +199,19 @@ span.semantic_error {
 span.language_warning {
     background-color: yellow;
 }
+
+
+span.CommentModel {
+    color: darkblue ;
+    font-weight: bold;
+}
+
+span.CommentFun {
+    color: darkgreen;
+    font-weight: bold;
+}
+
+span.CommentRes {
+    color: darkred;
+    font-weight: bold;
+}

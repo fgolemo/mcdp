@@ -6,6 +6,7 @@ from .parse_actions import (divide_parse_action,
     plus_inv_parse_action, plus_parse_action, resshortcut1m,
     space_product_parse_action, rvalue_minus_parse_action, fvalue_minus_parse_action,
     dp_model_statements_parse_action, add_where_to_empty_list)
+from .parse_actions import copy_expr_remove_action
 from .parts import CDPLanguage
 from .pyparsing_bundled import (
     CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
@@ -15,7 +16,7 @@ from .pyparsing_bundled import (
 from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
 from .utils_lists import make_list
-from mcdp_lang.parse_actions import copy_expr_remove_action
+from mcdp_lang.pyparsing_bundled import QuotedString
 
 
 ParserElement.enablePackrat()
@@ -155,16 +156,19 @@ class Syntax():
     get_idn = SyntaxIdentifiers.get_idn
     # a quoted string
     quoted = sp(dblQuotedString | sglQuotedString, lambda t:t[0][1:-1])
-
-    comment_string_simple = sp(copy_expr_remove_action(quoted), CDP.CommentStringSimple)
-    comment_string_complex = sp(copy_expr_remove_action(quoted), CDP.CommentStringTriple)
+    
+    python_style_multiline1 = QuotedString(quoteChar='"""', escChar='\\', unquoteResults=True, multiline=True)
+    python_style_multiline2 = QuotedString(quoteChar="'''", escChar='\\', unquoteResults=True, multiline=True)
+    python_style_multiline = python_style_multiline1 | python_style_multiline2
+    comment_string_simple = sp(copy_expr_remove_action(quoted), lambda t: CDP.CommentStringSimple(t[0]))
+    comment_string_complex = sp(copy_expr_remove_action(python_style_multiline), lambda t: CDP.CommentStringTriple(t[0]))
     
     comment_model = sp(comment_string_simple | comment_string_complex,
-                       CDP.CommentModel)
-    comment_con = sp(copy_expr_remove_action(comment_string_simple), CDP.CommentCon)
-    comment_fun = sp(copy_expr_remove_action(comment_string_simple), CDP.CommentFun)
-    comment_res = sp(copy_expr_remove_action(comment_string_simple), CDP.CommentRes)
-    comment_var = sp(copy_expr_remove_action(comment_string_simple), CDP.CommentVar)
+                       lambda t: CDP.CommentModel(t[0]))
+    comment_con = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentCon(t[0]))
+    comment_fun = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentFun(t[0]))
+    comment_res = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentRes(t[0]))
+    comment_var = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentVar(t[0]))
 
     placeholder = SL('[') + SL('[') + (get_idn() | quoted) + SL(']') + SL(']')
     
@@ -333,7 +337,7 @@ class Syntax():
     ])
 
 
-    unitst = S(L('[')) + C(space, 'unit') + S(L(']'))
+    unitst = S(L('[')) + space + S(L(']'))
 
     nat_constant = sp(K('nat') - L(':') - nonneg_integer,
                       lambda t: CDP.NatConstant(t[0], t[1], t[2]))
@@ -346,15 +350,17 @@ class Syntax():
     vname = sp(get_idn(), lambda t: CDP.VName(t[0])) | rname_placeholder
 
     PROVIDES = keyword('provides', CDP.ProvideKeyword)
-    fun_statement = sp(PROVIDES + fname + unitst + S(O(comment_fun)),
-                       lambda t: CDP.FunStatement(t[0], t[1], t[2]))
+    fun_statement = sp(PROVIDES + fname + unitst + O(comment_fun),
+                       lambda t: CDP.FunStatement(t[0], t[1], t[2], 
+                                                  t[3] if len(t) == 4 else None))
 
     REQUIRES = keyword('requires', CDP.RequireKeyword)
-    res_statement = sp(REQUIRES + rname + unitst + S(O(comment_res)),
-                       lambda t: CDP.ResStatement(t[0], t[1], t[2]))
+    res_statement = sp(REQUIRES + rname + unitst + O(comment_res),
+                       lambda t: CDP.ResStatement(t[0], t[1], t[2],
+                                                  t[3] if len(t) == 4 else None))
     
     VARIABLE = keyword('variable', CDP.VarStatementKeyword)
-    var_list = sp(vname + ZeroOrMore(SCOMMA + vname) + S(O(comment_var)),
+    var_list = sp(vname + ZeroOrMore(SCOMMA + vname),
                   lambda t: make_list(t))
 
     var_statement = sp(VARIABLE + var_list + unitst + S(O(comment_var)),
@@ -942,18 +948,29 @@ class Syntax():
     ndpt_dp_model_statements = sp(ZeroOrMore(line_expr),
                                   dp_model_statements_parse_action)
      
-    lbrace  = sp(L('{'), CDP.LBRACE)
-    rbrace = sp(L('}'), CDP.RBRACE)
-
-    ndpt_dp_model = sp(MCDPTOKEN 
+    lbrace  = sp(L('{'), lambda t: CDP.LBRACE(t[0]))
+    rbrace = sp(L('}'), lambda t: CDP.RBRACE(t[0]))
+    
+    def ndpt_dp_model_parse(tokens):  # @NoSelf        
+        if len(tokens) == 5:
+            keyword, lbrace, comment, statements, rbrace = tokens
+        else:
+            keyword, lbrace, statements, rbrace = tokens
+            comment = None
+        
+        statements = add_where_to_empty_list(statements)
+        
+        return CDP.BuildProblem(keyword=keyword, lbrace=lbrace, comment=comment,
+                                statements=statements, rbrace=rbrace)
+ 
+    ndpt_dp_model = sp(  MCDPTOKEN 
                        - lbrace 
-                       - S(O(comment_model)) 
+                       + ow - O(comment_model) 
                        - ndpt_dp_model_statements 
                        - rbrace,
-                  lambda t: CDP.BuildProblem(keyword=t[0],
-                                             lbrace=t[1],
-                                             statements=add_where_to_empty_list(t[2]),
-                                             rbrace=t[3]))
+                       ndpt_dp_model_parse)
+
+                  
 
     # load
     primitivedp_name = sp(get_idn(), lambda t: CDP.FuncName(t[0]))  # XXX

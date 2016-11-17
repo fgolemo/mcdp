@@ -12,7 +12,7 @@ from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
 from mocdp import logger
-from mocdp.exceptions import mcdp_dev_warning, DPInternalError
+from mocdp.exceptions import mcdp_dev_warning
 
 
 def isolate_comments(s):
@@ -183,8 +183,6 @@ def print_html_inner(x):
     if isinstance(x, CDP.Placeholder):
         orig0 = x.where.string[x.where.character:x.where.character_end]
         check_isinstance(x.label, str)
-#         if not isinstance(x.label, str):
-#             raise_desc(DPInternalError, 'syntax assumptions violated', x=x)
         if x.label == '...': # special case
             transformed = '…' 
         else:

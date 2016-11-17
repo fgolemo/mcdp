@@ -39,6 +39,7 @@ def check_comments03():
 @comptest
 def check_comments03b():
     """ Double comments """
+
     s = """ mcdp { '''Doc''' } """
     parse_ndp(s)
     s = ''' mcdp { """Doc""" } '''
@@ -46,6 +47,12 @@ def check_comments03b():
 
 @comptest
 def check_comments04():
+    s = """ mcdp {  } """
+    parse_ndp(s)
+    s = """ mcdp { "com" } """
+    parse_ndp(s)
+
+
     s = """ mcdp { 
         provides f [m] "fun comment"
     } """

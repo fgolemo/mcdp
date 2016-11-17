@@ -5,8 +5,7 @@ import sys
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_dp import (CatalogueDP, Conversion, JoinNDP, MeetNDualDP, get_conversion, make_series, VariableNode,
- ConstantMinimals, LimitMaximals, OpaqueDP)
-from mcdp_dp import FunctionNode, ResourceNode
+ ConstantMinimals, LimitMaximals, OpaqueDP, FunctionNode, ResourceNode)
 from mcdp_posets import (
     FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe)
 from mocdp import ATTRIBUTE_NDP_MAKE_FUNCTION
@@ -42,7 +41,7 @@ CDP = CDPLanguage
 
 @decorate_add_where
 @contract(returns=NamedDP)
-def eval_ndp(r, context):  # @UnusedVariable
+def eval_ndp(r, context): 
     check_isinstance(context, ModelBuildingContext)
     cases = {
         CDP.DPInstance: eval_ndp_dpinstance,
@@ -139,8 +138,8 @@ def eval_ndp_ignoreresources(r, context):
     check_isinstance(r, CDP.IgnoreResources)
     rnames = [_.value for _ in unwrap_list(r.rnames)]
     ndp = eval_ndp(r.dp_rvalue, context)
-    # print('ignoring %r' % rnames)
     return ignore_some(ndp, ignore_rnames=rnames, ignore_fnames=[])
+    
     
 def eval_ndp_addmake(r, context):
     check_isinstance(r, CDP.AddMake)
@@ -156,6 +155,7 @@ def eval_ndp_addmake(r, context):
     res = getattr(ndp, ATTRIBUTE_NDP_MAKE_FUNCTION)
     res.append((what, function))
     return ndp
+
 
 class ImportedFunction():
     def __init__(self, function_name):
@@ -289,6 +289,7 @@ def eval_ndp_instancefromlibrary(r, context):
     if True: # pragma: no cover
         msg = 'Unknown construct.'
         raise_desc(DPInternalError, msg, r=r)
+
 
 def eval_ndp_flatten(r, context):
     ndp = eval_ndp(r.dp_rvalue, context)
@@ -844,7 +845,7 @@ def eval_statement(r, context):
         with add_where_information(r.name.where):
             B = context.make_function(r.name.value, fname)
         F = context.get_ftype(B)
-        A = eval_statement(CDP.FunStatement('-', r.fname, CDP.Unit(F)), context)
+        A = eval_statement(CDP.FunStatement('-', r.fname, CDP.Unit(F), None), context)
         add_constraint(context, resource=A, function=B)
 
     elif isinstance(r, CDP.ResShortcut1):  
@@ -852,7 +853,7 @@ def eval_statement(r, context):
         with add_where_information(r.name.where):
             A = context.make_resource(r.name.value, r.rname.value)
         R = context.get_rtype(A)
-        B = eval_statement(CDP.ResStatement('-', r.rname, CDP.Unit(R)), context)
+        B = eval_statement(CDP.ResStatement('-', r.rname, CDP.Unit(R), None), context)
         add_constraint(context, resource=A, function=B)  # B >= A
 
     elif isinstance(r, CDP.ResShortcut4):  
@@ -871,7 +872,7 @@ def eval_statement(r, context):
                 msg = 'Could not find required resource expression %r.' % rname
                 raise DPSemanticError(msg, where=_.where)
             R = context.get_rtype(A)
-            B = eval_statement(CDP.ResStatement('-', _, CDP.Unit(R)), context)
+            B = eval_statement(CDP.ResStatement('-', _, CDP.Unit(R), None), context)
             add_constraint(context, resource=A, function=B)  # B >= A
     
     elif isinstance(r, CDP.FunShortcut4):  
@@ -890,21 +891,21 @@ def eval_statement(r, context):
                 msg = 'Could not find required function expression %r.' % fname
                 raise DPSemanticError(msg, where=_.where)
             F = context.get_ftype(B)
-            A = eval_statement(CDP.FunStatement('-', _, CDP.Unit(F)), context)
+            A = eval_statement(CDP.FunStatement('-', _, CDP.Unit(F), None), context)
             add_constraint(context, resource=A, function=B)  # B >= A
 
     elif isinstance(r, CDP.ResShortcut1m):  # requires rname1, rname2, ... for name
         for rname in unwrap_list(r.rnames):
             A = context.make_resource(r.name.value, rname.value)
             R = context.get_rtype(A)
-            B = eval_statement(CDP.ResStatement('-', rname, CDP.Unit(R)), context)
+            B = eval_statement(CDP.ResStatement('-', rname, CDP.Unit(R), None), context)
             add_constraint(context, resource=A, function=B)
 
     elif isinstance(r, CDP.FunShortcut1m):  # provides fname1,fname2,... using name
         for fname in unwrap_list(r.fnames):
             B = context.make_function(r.name.value, fname.value)
             F = context.get_ftype(B)
-            A = eval_statement(CDP.FunStatement('-', fname, CDP.Unit(F)), context)
+            A = eval_statement(CDP.FunStatement('-', fname, CDP.Unit(F), None), context)
             add_constraint(context, resource=A, function=B)
 
     elif isinstance(r, CDP.FunShortcut2):  # provides rname <= (lf)
@@ -915,7 +916,7 @@ def eval_statement(r, context):
         B = eval_lfunction(r.lf, context)
         check_isinstance(B, CFunction)
         F = context.get_ftype(B)
-        A = eval_statement(CDP.FunStatement('-', r.fname, CDP.Unit(F)), context)
+        A = eval_statement(CDP.FunStatement('-', r.fname, CDP.Unit(F), None), context)
         add_constraint(context, resource=A, function=B)
 
     elif isinstance(r, CDP.ResShortcut2):  # requires rname >= (rvalue)
@@ -926,7 +927,7 @@ def eval_statement(r, context):
         A = eval_rvalue(r.rvalue, context)
         check_isinstance(A, CResource)
         R = context.get_rtype(A)
-        B = eval_statement(CDP.ResStatement('-', r.rname, CDP.Unit(R)), context)
+        B = eval_statement(CDP.ResStatement('-', r.rname, CDP.Unit(R), None), context)
         # B >= A
         add_constraint(context, resource=A, function=B)
 
