@@ -47,9 +47,9 @@ def check_evaluation():
     ndp = parse_ndp("""
     mcdp {  
     sub f = instance mcdp {
-        provides a [R]
+        provides a [dimensionless]
             
-        requires c [R]
+        requires c [dimensionless]
             
         c >= square(a)
     }
@@ -117,9 +117,9 @@ def check_evaluation2():
     ndp = parse_ndp("""
     mcdp {  
     sub f = instance mcdp {
-        provides a [R]
+        provides a [dimensionless]
             
-        requires c [R]
+        requires c [dimensionless]
             
         c >= sqrt(a)
     }

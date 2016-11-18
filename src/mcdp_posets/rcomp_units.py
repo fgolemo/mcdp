@@ -239,11 +239,14 @@ def make_rcompunit(units):
             return BottomCompletion(TopCompletion(Any()))
     
         if s == 'R':
+            raise DPSyntaxError('Form R is not recognized anymore. Use "dimensionless".')
+        
             s = 'm/m'
         unit = parse_pint(s)
     except DPSyntaxError as e:
         msg = 'Cannot parse %r.' % units
         raise_wrapped(DPSyntaxError, e, msg)
+        
     return RcompUnits(unit, s)
 
 R_Power_units = parse_pint('W')

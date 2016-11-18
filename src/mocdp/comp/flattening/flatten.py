@@ -191,8 +191,8 @@ def cndp_flatten(ndp):
                         # from function to resource:
                         #
                         # f = instance mcdp {
-                        #     provides a [R]
-                        #     requires c [R]
+                        #     provides a [dimensionless]
+                        #     requires c [dimensionless]
                         #
                         #     c >= a
                         # }

@@ -4,13 +4,13 @@
 template = """
 mcdp {
   provides capacity [J]
-  provides missions [R]
+  provides missions [dimensionless]
 
   requires mass [g]
   requires cost [$$]
 
   # Number of replacements
-  requires maintenance [R]
+  requires maintenance [dimensionless]
 
   # Battery properties
   specific_energy = $specific_energy

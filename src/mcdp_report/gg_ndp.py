@@ -475,7 +475,7 @@ def format_unit(R):
     elif isinstance(R, RcompUnits):
         return '[%s]' % format_pint_unit_short(R.units)
     elif isinstance(R, Rcomp):
-        return '[R]'
+        return '[]'
     elif hasattr(R, ATTR_LOAD_NAME):
         n = getattr(R, ATTR_LOAD_NAME)
         return '[`%s]' % n

@@ -9,9 +9,9 @@ from .utils2 import eval_rvalue_as_constant
 def ok_resource_mix():
     assert_parsable_to_connected_ndp("""
 mcdp {
-  provides f1 [R] 
-  requires r1 [R]
-  requires r2 [R]
+  provides f1 [dimensionless] 
+  requires r1 [dimensionless]
+  requires r2 [dimensionless]
 
   f1  <= 1 [] + (r1 * (r2 + r1)  )
 

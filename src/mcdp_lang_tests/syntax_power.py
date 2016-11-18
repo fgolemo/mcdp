@@ -144,10 +144,10 @@ def check_power8():  # TODO: move to ther files
 
     ndp = parse_ndp("""
     mcdp {
-      requires a [R]
-      requires b [R]
+      requires a [dimensionless]
+      requires b [dimensionless]
       
-      provides c [R]
+      provides c [dimensionless]
       
       a + b >= c
     }

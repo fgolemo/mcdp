@@ -113,20 +113,20 @@ def check_lang8_addition():
 
 @comptest
 def check_lang9_max():
-    parse_wrap_check("""provides x [R]""",
+    parse_wrap_check("""provides x [dimensionless]""",
                      Syntax.fun_statement)
-    parse_wrap_check("""requires x [R]""",
+    parse_wrap_check("""requires x [dimensionless]""",
                      Syntax.res_statement)
 
     parse_wrap_check("""
-            provides x [R]
-            requires r [R]
+            provides x [dimensionless]
+            requires r [dimensionless]
         """,
     Syntax.simple_dp_model_stats)
    
     parse_wrap_check("""dp {
-            provides x [R]
-            requires r [R]
+            provides x [dimensionless]
+            requires r [dimensionless]
             
             implemented-by load SimpleNonlinearity1
         }""",
@@ -142,11 +142,11 @@ def check_lang9_max():
 def check_lang10_comments():
     p = assert_parsable_to_connected_ndp("""
     mcdp {
-        provides f [R]
+        provides f [dimensionless]
         
         sub hnlin = instance mcdp {
-            provides x [R]
-            requires r [R]
+            provides x [dimensionless]
+            requires r [dimensionless]
             
             r >= pow(x, 2)
         }
@@ -164,12 +164,12 @@ def check_lang10_comments():
 def check_lang11_resources():
     p = assert_parsable_to_connected_ndp("""
     mcdp {
-        provides f [R]
-        requires z [R]
+        provides f [dimensionless]
+        requires z [dimensionless]
         
        sub hnlin = instance mcdp {
-            provides x [R]
-            requires r [R]
+            provides x [dimensionless]
+            requires r [dimensionless]
             
             r >= pow(x, 2)
         }
@@ -189,10 +189,10 @@ def check_lang11_resources():
 def check_lang12_addition_as_resources():
     assert_parsable_to_connected_ndp("""
     mcdp {
-        provides a [R]
-        provides b [R]
-        requires c [R]
-        requires d [R]
+        provides a [dimensionless]
+        provides b [dimensionless]
+        requires c [dimensionless]
+        requires d [dimensionless]
          
         c + d >= a + b
         }
@@ -221,9 +221,9 @@ def check_lang49():
 def check_lang51():
     """ Shortcuts "using" """
     print parse_wrap(Syntax.space_pint_unit, 'R')
-#     print parse_wrap(Syntax.unitst, '[R]')
+#     print parse_wrap(Syntax.unitst, '[dimensionless]')
 
-    parse_wrap(Syntax.valuewithunit, '4.0 [R]')
+    parse_wrap(Syntax.valuewithunit, '4.0 [dimensionless]')
 
     parse_wrap(Syntax.space_pint_unit, "N")
     parse_wrap(Syntax.space_pint_unit, "m")
@@ -562,8 +562,8 @@ def check_lang79(): # TODO: rename
 def check_lang80b(): # TODO: rename
     s = """
 mcdp {
-    provides f [R]
-    requires r [R]
+    provides f [dimensionless]
+    requires r [dimensionless]
     x = provided f
     required r >= x  + (0 dimensionless - 1 dimensionless)
 }
@@ -577,8 +577,8 @@ mcdp {
 def check_lang80(): # TODO: rename
     s = """
 mcdp {
-    provides f [R]
-    requires r [R]
+    provides f [dimensionless]
+    requires r [dimensionless]
     x = provided f
     required r >= x - 1 dimensionless
 }
@@ -632,9 +632,9 @@ def check_lang83(): # TODO: rename
     """ Loss of monotonicty. """ 
     s = """
 mcdp {
-    provides f1 [R]
-    provides f2 [R]
-    requires r [R]
+    provides f1 [dimensionless]
+    provides f2 [dimensionless]
+    requires r [dimensionless]
     required r >= f1 - f2
 }
     """
@@ -677,7 +677,7 @@ def check_lang86(): # TODO: rename
     
     s = """
     mcdp {
-        provides f [R]
+        provides f [dimensionless]
         requires r [Nat]
         provided f <= required r
     }
@@ -721,7 +721,7 @@ def check_lang87(): # TODO: rename
     s = """
     mcdp {
         provides f [Nat]
-        requires r [R]
+        requires r [dimensionless]
         provided f <= required r
     }
     """
@@ -763,7 +763,7 @@ def check_lang87_rcomp(): # TODO: rename
 def check_lang88b(): # TODO: rename
     s = """
     mcdp {
-        provides f [R]
+        provides f [dimensionless]
         requires r >= ceil(provided f)
     }
     """

@@ -48,7 +48,7 @@ def check_subtraction1():
     )
     """)
     
-@comptest_fails
+@comptest
 def check_subtraction2_contexts(): 
 
     s = """
@@ -167,7 +167,7 @@ def check_mult_mixed2():
     ndp = parse_ndp(""" 
     mcdp {
         provides a [Nat]
-        provides b [R]
+        provides b [dimensionless]
         requires x >= a * b
     }
     """)

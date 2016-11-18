@@ -10,7 +10,7 @@ def check_variables01():
     some = [
         'variable x [m]',
         'variable x [Nat]',
-        'variable x [R]',
+        'variable x [dimensionless]',
     ]
     expr = Syntax.var_statement
     for s in some:
