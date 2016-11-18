@@ -62,7 +62,7 @@ def go():
         print('Using algorithm %s ' % algo)
         with r.subsection(algo) as r2:
             # first
-            F = parse_poset('R')
+            F = parse_poset('dimensionless')
             R = F
             dp = InvMult2(F, (R, R))
             ns = [ 3, 4, 5, 6, 10, 15]

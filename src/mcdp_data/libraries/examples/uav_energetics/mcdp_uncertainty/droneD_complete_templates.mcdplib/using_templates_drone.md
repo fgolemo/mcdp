@@ -20,7 +20,7 @@ mcdp {
 
   requires cost     [$]
 
-  requires maintenance [R]
+  requires maintenance [dimensionless]
   requires mass [g]
 
   missions <= 1000 []
