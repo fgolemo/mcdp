@@ -11,7 +11,7 @@ mcdp {
         """ This is multiline comment """
      }
     
-    b = mcdp {
+    b = mcdp { 
         ''' This is multiline comment
              We can go multiline.     
         '''
@@ -19,8 +19,7 @@ mcdp {
 
 }
 
-
-# three
+# three 
 
 
 

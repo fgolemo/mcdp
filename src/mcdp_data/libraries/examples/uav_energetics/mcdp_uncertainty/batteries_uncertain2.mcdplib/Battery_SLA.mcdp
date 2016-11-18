@@ -1,12 +1,12 @@
 mcdp {
     provides capacity [J]
-    provides missions [R]
+    provides missions [dimensionless]
 
     requires mass     [g]
     requires cost     [USD]
 
     # Number of replacements
-    requires maintenance [R]
+    requires maintenance [dimensionless]
 
     # Battery properties
     specific_energy_inv = Uncertain(1.0 []/ 33 Wh/kg, 1.0 [] /  27 Wh/kg)
