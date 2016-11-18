@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
+import sys
+
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc, raise_wrapped
 from mcdp_posets import NotLeq, get_types_universe
-from mocdp import ATTR_LOAD_LIBNAME
+from mocdp import ATTR_LOAD_LIBNAME, ATTR_LOAD_REALPATH
 from mocdp.comp.interfaces import NamedDP
-from mocdp.exceptions import DPSemanticError, mcdp_dev_warning
+from mocdp.exceptions import DPSemanticError, mcdp_dev_warning, DPInternalError,\
+    MCDPExceptionWithWhere
 
 
 __all__ = [
@@ -19,6 +22,8 @@ class TemplateForNamedDP():
         
             plus, the attribute ATTR_LOAD_LIBNAME is used
             to describe the original library context
+            
+            also ATTR_LOAD_REALPATH 
         
         """
         self.parameters = parameters
@@ -26,6 +31,18 @@ class TemplateForNamedDP():
 
     @contract(parameter_assignment='dict(str:isinstance(NamedDP))')
     def specialize(self, parameter_assignment, context):
+        # ADD filename if ATTR_LOAD_REALPATH is set
+        try:
+            return self.specialize_(parameter_assignment, context)
+        except MCDPExceptionWithWhere as e:
+            realpath = getattr(self, ATTR_LOAD_REALPATH)
+            if realpath is not None and e.where.filename is None:
+                e = e.with_filename(realpath)
+                raise type(e), e.args, sys.exc_info()[2]
+            else:
+                raise
+        
+    def specialize_(self, parameter_assignment, context):
         for v in parameter_assignment.values():
             check_isinstance(v, NamedDP)
 

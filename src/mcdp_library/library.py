@@ -11,7 +11,7 @@ from contracts.utils import (check_isinstance, format_obs, raise_desc,
 from mcdp_dp import PrimitiveDP
 from mcdp_lang import parse_ndp, parse_poset
 from mcdp_posets import Poset
-from mocdp import ATTR_LOAD_LIBNAME, ATTR_LOAD_NAME, logger
+from mocdp import ATTR_LOAD_LIBNAME, ATTR_LOAD_NAME, logger, ATTR_LOAD_REALPATH
 from mocdp.comp.context import Context, ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
@@ -250,6 +250,7 @@ class MCDPLibrary():
         else:
             # print('parsed original template at %s' % self.library_name)
             setattr(template, ATTR_LOAD_LIBNAME, self.library_name)
+            setattr(template, ATTR_LOAD_REALPATH, realpath)
         return template
 
     @contextmanager

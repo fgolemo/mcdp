@@ -72,7 +72,7 @@ ATTRIBUTE_NDP_MAKE_FUNCTION = 'make'
 # added 
 ATTR_LOAD_NAME = '__mcdplibrary_load_name'
 ATTR_LOAD_LIBNAME = '__mcdplibrary_load_libname'
-
+ATTR_LOAD_REALPATH = '__mcdplibrary_load_realpath'
 
 
 class MCDPConstants():
