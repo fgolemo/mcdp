@@ -17,7 +17,7 @@ def check_comments01():
     parse_wrap_check("""'ciao'""", Syntax.comment_res)
     parse_wrap_check("""'ciao'""", Syntax.comment_var)
 
-@comptest_fails    
+@comptest    
 def check_comments02():
     """ Triple quotes """
     parse_wrap_check(""" '''ciao\n''' """, Syntax.comment_string_complex)

@@ -48,7 +48,7 @@ def check_subtraction1():
     )
     """)
     
-@comptest
+@comptest_fails
 def check_subtraction2_contexts(): 
 
     s = """
