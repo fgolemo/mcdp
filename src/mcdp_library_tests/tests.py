@@ -170,6 +170,7 @@ def mcdplib_test_setup_nameddps(context, libname):
                 for ftest in for_all_nameddps.registered:
                     
                     if accepts_arg(ftest, 'libname'):
+                        print('using libname for %s' % ftest)
                         c.comp(ftest, model_name, ndp, libname=libname,
                                job_id=ftest.__name__)
                     else:
@@ -178,6 +179,7 @@ def mcdplib_test_setup_nameddps(context, libname):
                 for ftest in for_all_nameddps_dyn.registered:
                     
                     if accepts_arg(ftest, 'libname'):
+                        print('using libname for %s' % ftest)
                         c.comp_dynamic(ftest, model_name, ndp, libname=libname,
                                        job_id=ftest.__name__)
                     else:
@@ -197,8 +199,8 @@ def accepts_arg(f, name):
     """ True if it supports the "library" argument """
     import inspect
     args = inspect.getargspec(f)
-    print args
-    return name in args
+#     print args
+    return name in args.args
 
 def mcdplib_test_setup_source_mcdp(context, libname):
     from mcdp_tests import load_tests_modules
