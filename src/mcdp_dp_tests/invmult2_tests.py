@@ -128,9 +128,9 @@ def invmult2_check2():
 @comptest
 def invmult2_check3():
 
-    F = parse_poset('R')
-    R1 = parse_poset('R')
-    R2 = parse_poset('R')
+    F = parse_poset('dimensionless')
+    R1 = parse_poset('dimensionless')
+    R2 = parse_poset('dimensionless')
 
     im = InvMult2(F, (R1, R2))
 
