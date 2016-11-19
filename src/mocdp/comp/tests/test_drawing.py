@@ -14,6 +14,7 @@ def nameddp1_report(context, _id_dp, ndp):
         return
     
     dp = ndp.get_dp()
+    
     r = context.comp(report_dp1, dp)
     context.add_report(r, 'nameddp1')
 

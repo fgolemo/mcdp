@@ -61,7 +61,8 @@ coverage-report:
 
 
 clean:
-	rm -rf $(out) _cached
+	rm -rf $(out) 
+	#_cached
 
 
 stats-locs:
