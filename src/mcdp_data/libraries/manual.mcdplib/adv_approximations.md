@@ -8,9 +8,9 @@
 
 <pre class='mcdp' id='invmult'>
 mcdp  {
-    provides a [R]
-    requires b [R]
-    requires c [R]
+    provides a [dimensionless]
+    requires b [dimensionless]
+    requires c [dimensionless]
     a <= b * c
 }
 </pre>
@@ -64,9 +64,9 @@ mcdp  {
 
 <pre class='mcdp' id='invplus'>
 mcdp {
-    provides a [R]
-    requires b [R]
-    requires c [R]
+    provides a [dimensionless]
+    requires b [dimensionless]
+    requires c [dimensionless]
     a <= b + c
 }
 </pre>

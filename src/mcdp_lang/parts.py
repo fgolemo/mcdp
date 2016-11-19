@@ -433,12 +433,3 @@ class CDPLanguage():
     CommentRes = namedtuplewhere('CommentRes', 'comment_string')
     CommentVar = namedtuplewhere('CommentVar', 'comment_string')
     
-
-    
-# from a import symbol1, symbol2
-# import symbol.a
-#     ImportSymbolsKeywordFrom = namedtuplewhere('ImportSymbolsKeywordFrom', 'keyword')
-#     ImportSymbolsKeywordImport = namedtuplewhere('ImportSymbolsKeywordImport', 'keyword')
-#     ImportSymbolsLibname = namedtuplewhere('ImportSymbolsLibname', 'value')
-#     ImportSymbolsSymbolname = namedtuplewhere('ImportSymbolsSymbolname', 'value')
-#     ImportSymbols = namedtuplewhere('ImportSymbols', 'keyword1 libname keyword2 symbols')
