@@ -233,10 +233,7 @@ http://127.0.0.1:8080/interactive/mcdp_value/#finite_poset { %0A    a <= b <= c 
   http://127.0.0.1:8080/libraries/basic/models/all_icons/views/dp_graph/
 
   parallel + swap = swap + parallel
-
-
-- add display of warning to web interface
-  (this means adding warnings to context)
+ 
 
 - add SKIP_INITIAL = False
 
