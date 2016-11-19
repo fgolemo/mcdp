@@ -5,6 +5,7 @@ from mcdp_report.gg_utils import gg_get_format
 from mcdp_web.utils.response import response_data
 from mocdp.comp.composite_templatize import ndp_templatize
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
+from mocdp.exceptions import mcdp_dev_warning
 
 
 class WebAppImages():
@@ -157,6 +158,7 @@ def ndp_template_enclosed(library, name, x, data_format):
 
 def ndp_template_graph_enclosed(library, template, style, yourname, data_format, direction, enclosed):
     assert isinstance(template, TemplateForNamedDP)
+    mcdp_dev_warning('Wrong - need assume ndp const')
 
     context = library._generate_context_with_hooks()
 
@@ -173,7 +175,8 @@ def ndp_template_graph_enclosed(library, template, style, yourname, data_format,
 
 def ndp_graph_expand(library, ndp, style, yourname, data_format, direction='TB'):
     """ This expands the children, forces the enclosure """
-    setattr(ndp, '_hack_force_enclose', True)
+    mcdp_dev_warning('Wrong - need assume ndp const')
+    setattr(ndp, '_hack_force_enclose', True) 
 
     images_paths = library.get_images_paths()
     # we actually don't want the name on top

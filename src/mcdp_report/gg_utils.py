@@ -159,9 +159,10 @@ def gg_figure(r, name, ggraph, do_png=True, do_pdf=True, do_svg=True,
 
 allowed_formats = ['png', 'pdf', 'svg', 'dot']
 
+@contract(returns='tuple')
 def gg_get_formats(gg, data_formats):
     res = []
-    mcdp_dev_warning('TODO: optimize')
+    mcdp_dev_warning('TODO: optimize gg_get_formats')
     for data_format in data_formats:
         if not data_format in allowed_formats:
             raise ValueError(data_format)
@@ -172,8 +173,10 @@ def gg_get_formats(gg, data_formats):
             d = gg_get_format(gg, data_format)
 
         res.append(d)
-    return res
-
+    return tuple(res)
+ 
+     
+    
 def gg_get_format(gg, data_format):
     from reprep import Report
     r = Report()

@@ -166,12 +166,39 @@ def mcdplib_test_setup_nameddps(context, libname):
             else:
                 ndp = c.comp(_load_ndp, libname, model_name, job_id='load')
 
+                    
                 for ftest in for_all_nameddps.registered:
-                    c.comp(ftest, model_name, ndp)
-
+                    
+                    if accepts_arg(ftest, 'libname'):
+                        c.comp(ftest, model_name, ndp, libname=libname,
+                               job_id=ftest.__name__)
+                    else:
+                        c.comp(ftest, model_name, ndp)
+                        
                 for ftest in for_all_nameddps_dyn.registered:
-                    c.comp_dynamic(ftest, model_name, ndp)
-
+                    
+                    if accepts_arg(ftest, 'libname'):
+                        c.comp_dynamic(ftest, model_name, ndp, libname=libname,
+                                       job_id=ftest.__name__)
+                    else:
+                        c.comp_dynamic(ftest, model_name, ndp)
+                        
+                    
+# 
+# def wrap_with_library(f, id_ndp, ndp, libname):
+#     library = get_test_library(libname)
+#     return f(id_ndp, ndp, library)
+# 
+# def wrap_with_library_dynamic(context, f, id_ndp, ndp, libname):
+#     library = get_test_library(libname)
+#     return f(context, id_ndp, ndp, library)
+    
+def accepts_arg(f, name):
+    """ True if it supports the "library" argument """
+    import inspect
+    args = inspect.getargspec(f)
+    print args
+    return name in args
 
 def mcdplib_test_setup_source_mcdp(context, libname):
     from mcdp_tests import load_tests_modules

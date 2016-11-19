@@ -30,6 +30,9 @@ comptests-run-parallel: prepare_tests
 comptests-run-parallel-nocontracts: prepare_tests
 	DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "rparmake" $(package)  
 
+comptests-run-parallel-nocontracts-onlysetup: prepare_tests
+	DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "parmake dynamic and ready; parmake dynamic and ready; parmake dynamic and ready" $(package)  
+
 comptests-run-parallel-nocontracts-cov: prepare_tests
 	DISABLE_CONTRACTS=1 comptests -o $(out) --coverage --nonose -c "rparmake" $(package)  
 

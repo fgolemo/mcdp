@@ -341,3 +341,4 @@ U+259x  ▐ ░ ▒ ▓ ▔ ▕ ▖ ▗ ▘ ▙ ▚ ▛ ▜ ▝ ▞ ▟
 
 - known failure: check_subtraction2_contexts
 
+- optimize gg_get_formats
