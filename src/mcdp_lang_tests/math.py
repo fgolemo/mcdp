@@ -48,9 +48,9 @@ def check_subtraction1():
     )
     """)
     
-@comptest
+@comptest_fails
 def check_subtraction2_contexts(): 
-
+    """ We cannot do propagation of constants inside contexts """
     s = """
     mcdp {
       v2 = 2 g
