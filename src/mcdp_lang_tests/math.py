@@ -138,7 +138,7 @@ def check_mult_mixed2():
 #         return dp
     tu = get_types_universe()
 
-    dimensionless = parse_poset('R')
+    dimensionless = parse_poset('dimensionless')
     Nat = parse_poset('Nat')
     # m * s
     ndp = parse_ndp(""" 

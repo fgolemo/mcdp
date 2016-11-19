@@ -15,6 +15,7 @@ from .utils import (TestFailed, assert_parsable_to_connected_ndp,
     parse_wrap_syntax_error)
 from .utils2 import (eval_rvalue_as_constant,
     eval_rvalue_as_constant_same_exactly)
+from mcdp_lang.parse_interface import parse_poset
 
 
 CDP = CDPLanguage
@@ -266,8 +267,8 @@ def check_type_universe1():
 
     tu = get_types_universe()
 
-    R1 = make_rcompunit('R')
-    R2 = make_rcompunit('R')
+    R1 = parse_poset('dimensionless')
+    R2 = parse_poset('dimensionless')
     assert R1 == R2
 
     tu.check_equal(R1, R2)
