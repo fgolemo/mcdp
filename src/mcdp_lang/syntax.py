@@ -382,7 +382,7 @@ class Syntax():
                   lambda t: make_list(t))
 
 # 'keyword vnames lbracket unit rbracket')
-    var_statement = sp(VARIABLE + var_list +  lbracket + space + rbracket + O(comment_var),
+    var_statement = sp(VARIABLE - var_list +  lbracket + space + rbracket + O(comment_var),
                        lambda t: CDP.VarStatement(
                            keyword=t[0], vnames=t[1], lbracket=t[2],
                            unit=t[3], rbracket=t[4], 

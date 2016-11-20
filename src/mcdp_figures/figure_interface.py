@@ -176,11 +176,14 @@ class MakeFiguresNDP(MakeFigures):
             'ndp_graph_templatized': 'ndp_graph_templatized_LR',
             'ndp_graph_templatized_labeled': 'ndp_graph_templatized_labeled_LR',
             'ndp_graph_normal': 'ndp_graph_normal_LR',
+            
         }
         
         from mcdp_report.gdc import STYLE_GREENREDSYM
         
         figure2function = {
+            'fancy_editor': (Enclosed, 
+                dict(direction='TB', enclosed=True, style=STYLE_GREENREDSYM, skip_initial=False)),
             'ndp_graph_enclosed_LR': (Enclosed, 
                 dict(direction='LR', enclosed=True, style=STYLE_GREENREDSYM)), 
             'ndp_graph_enclosed_TB': (Enclosed, 
@@ -312,7 +315,8 @@ class Expand(GGFormatter):
         yourname = None  # name
         from mcdp_report.gg_ndp import gvgen_from_ndp
         gg = gvgen_from_ndp(ndp, style=self.style, direction=self.direction,
-                            images_paths=images_paths, yourname=yourname)
+                            images_paths=images_paths, yourname=yourname,
+                            skip_initial=True)
         return gg
             
 class Templatized(GGFormatter):
@@ -321,7 +325,6 @@ class Templatized(GGFormatter):
         self.style = style
         self.labeled = labeled
          
-        
     def get_gg(self, mf):
         ndp = mf.get_ndp()
         library =mf.get_library()
@@ -339,7 +342,8 @@ class Templatized(GGFormatter):
     
         from mcdp_report.gg_ndp import gvgen_from_ndp
         gg = gvgen_from_ndp(ndp, self.style, yourname=yourname,
-                            images_paths=images_paths, direction=self.direction)
+                            images_paths=images_paths, direction=self.direction,
+                            skip_initial=True)
         return gg
 
 class Normal(GGFormatter):
@@ -357,14 +361,16 @@ class Normal(GGFormatter):
         from mcdp_report.gg_ndp import gvgen_from_ndp
 
         gg = gvgen_from_ndp(ndp, self. style, images_paths=images_paths,
-                            yourname=yourname, direction=self.direction)
+                            yourname=yourname, direction=self.direction,
+                            skip_initial=True)
         return gg
     
 class Enclosed(GGFormatter):
-    def __init__(self, direction, enclosed, style):
+    def __init__(self, direction, enclosed, style, skip_initial=True):
         self.direction = direction
         self.enclosed = enclosed
         self.style = style
+        self.skip_initial = skip_initial
          
     def get_gg(self, mf):
         from mocdp.comp.composite import CompositeNamedDP
@@ -391,7 +397,8 @@ class Enclosed(GGFormatter):
         # we actually don't want the name on top
         yourname = None  # name
         gg = gvgen_from_ndp(ndp2, style=self.style, direction=self.direction,
-                            images_paths=images_paths, yourname=yourname)
+                            images_paths=images_paths, yourname=yourname,
+                            skip_initial=self.skip_initial)
     
         return gg
     
@@ -422,7 +429,8 @@ class EnclosedTemplate(GGFormatter):
     
         images_paths = library.get_images_paths()
         gg = gvgen_from_ndp(ndp, style=self.style, direction=self.direction,
-                            images_paths=images_paths, yourname=yourname)
+                            images_paths=images_paths, yourname=yourname,
+                            skip_initial=True)
     
         return gg
     

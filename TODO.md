@@ -360,3 +360,18 @@ U+259x  ▐ ░ ▒ ▓ ▔ ▕ ▖ ▗ ▘ ▙ ▚ ▛ ▜ ▝ ▞ ▟
 - add 'fancy_editor' view
 
  - L: provides f1,f2,f3 [dimensionless]
+
+- graphics: green/red icons for mult and invmult
+
+- simplify PlusValue and MinusValue
+
+    mcdp {
+     provides f1 [dimensionless]
+     provides f2 [dimensionless]
+     provides f3 [dimensionless]
+     requires r1 [dimensionless]
+     requires r2 [dimensionless]
+     requires r3 [dimensionless]
+
+      r1 + r2 * r3 + 2 dimensionless >= f1 * f2 + f3 + 2 dimensionless
+    }

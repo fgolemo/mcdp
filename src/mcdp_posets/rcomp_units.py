@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import functools
 import math
+import sys
 
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped, raise_desc
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
-from mocdp.exceptions import DPSyntaxError, do_extra_checks, mcdp_dev_warning
+from mocdp.exceptions import DPSyntaxError, do_extra_checks, mcdp_dev_warning, \
+    DPSemanticError
 from mocdp.memoize_simple_imp import memoize_simple
 from pint import UnitRegistry  # @UnresolvedImport
 from pint.errors import UndefinedUnitError  # @UnresolvedImport
@@ -212,14 +214,17 @@ def parse_pint(s0):
     ureg = get_ureg()
     try:
         return ureg.parse_expression(s)
-
-    except (UndefinedUnitError, SyntaxError) as e:
+    except UndefinedUnitError as e:
+        msg = 'Cannot parse units %r: %s.' %(s0, str(e))
+        raise_desc(DPSemanticError, msg)
+    except SyntaxError as e:
         msg = 'Cannot parse units %r.' % s0
-        raise_wrapped(DPSyntaxError, e, msg, compact=True)
+        raise_wrapped(DPSemanticError, e, msg, compact=True, exc=sys.exc_info())
         # ? for some reason compact does not have effect here
     except Exception as e:
         msg = 'Cannot parse units %r (%s).' % (s0, type(e))
-        raise_wrapped(DPSyntaxError, e, msg)
+        raise_wrapped(DPSemanticError, e, msg, compact=True, exc=sys.exc_info())
+
 
 # @memoize_simple
 # cannot use memoize because we use setattr later
@@ -242,10 +247,12 @@ def make_rcompunit(units):
             raise DPSyntaxError('Form R is not recognized anymore. Use "dimensionless".')
         
             s = 'm/m'
+            
         unit = parse_pint(s)
     except DPSyntaxError as e:
-        msg = 'Cannot parse %r.' % units
-        raise_wrapped(DPSyntaxError, e, msg)
+        raise
+#         msg = 'Cannot parse the unit %r.' % units
+#         raise_wrapped(DPSemanticError, e, msg, compact=True, exc=sys.exc_info())
         
     return RcompUnits(unit, s)
 

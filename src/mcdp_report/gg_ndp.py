@@ -68,7 +68,7 @@ class RecursiveEdgeLabeling(PlottingInfo):
 
 @contract(ndp=NamedDP, direction='str', yourname='str|None')
 def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourname=None,
-                   plotting_info=None):
+                   plotting_info=None, skip_initial=True):
     if plotting_info is None:
         plotting_info = PlottingInfo()
 
@@ -103,7 +103,8 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
 
     from .gdc import GraphDrawingContext
     gdc = GraphDrawingContext(gg=gg, parent=None,
-                              yourname=yourname, images_paths=images_paths)
+                              yourname=yourname, images_paths=images_paths,
+                              skip_initial=skip_initial)
     gdc.set_style(style)
 
     gg.styleAppend("external", "shape", "none")
@@ -548,7 +549,8 @@ def create_coproduct(gdc0, ndp, plotting_info):
 
 def create_composite(gdc0, ndp, plotting_info):
     try:
-        SKIP_INITIAL = False
+        SKIP_INITIAL = gdc0.skip_initial
+        print('Skip initial: %s' % SKIP_INITIAL)
         return create_composite_(gdc0, ndp, plotting_info=plotting_info, SKIP_INITIAL=SKIP_INITIAL)
     except Exception as e:
         logger.error(e)

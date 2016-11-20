@@ -5,6 +5,8 @@ from mcdp_tests.generation import for_all_nameddps_dyn
 from reprep import Report
 from reprep.datanode import DataNode
 from mocdp.exceptions import DPSemanticError
+from mocdp import MCDPConstants
+import random
 
 @comptest
 def figint01():
@@ -20,14 +22,22 @@ def figint01():
         res = mf.get_figure(name, formats)
         print('%s -> %s %s ' % (name, formats, map(len, [res[f] for f in formats])))
 
+def toss_coin(h, prob_success):
+    random.seed(h)
+    u = random.uniform(0.0, 1.0)
+    success = u >= 1 - prob_success 
+    return success
 
 @for_all_nameddps_dyn
 def allformats(context, id_ndp, ndp, libname):
     mf = MakeFiguresNDP(ndp=ndp, library=None, yourname=None)
     for name in mf.available():
-        r = context.comp(allformats_report, id_ndp, ndp, libname, name,
-                         job_id=name)
-        context.add_report(r, 'allformats', id_ndp=id_ndp, which=name)
+        
+        if toss_coin(id_ndp, MCDPConstants.test_fraction_of_allreports):
+            
+            r = context.comp(allformats_report, id_ndp, ndp, libname, name,
+                             job_id=name)
+            context.add_report(r, 'allformats', id_ndp=id_ndp, which=name)
     
 def allformats_report(id_ndp, ndp, libname, which):
     from mcdp_web.images.images import get_mime_for_format

@@ -375,6 +375,6 @@ def get_png_data_unavailable(library, name, x, data_format):  # @UnusedVariable
 
 def get_png_data_model(library, name, ndp, data_format): 
     mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=name)
-    f = 'ndp_graph_enclosed_TB'
+    f = 'fancy_editor' 
     res = mf.get_figure(f, data_format)
     return res

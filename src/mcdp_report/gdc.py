@@ -25,7 +25,7 @@ COLOR_DARKRED = '#861109'
 class GraphDrawingContext():
     def __init__(self, gg, parent, yourname, level=0,
                  tmppath=None, style='default',
-                 images_paths=[]):
+                 images_paths=[], skip_initial=True):
         self.gg = gg
         self.parent = parent
         self.yourname = yourname
@@ -41,6 +41,19 @@ class GraphDrawingContext():
         self.all_nodes = []
 
         self.set_style(style)
+        self.skip_initial = skip_initial
+
+    def child_context(self, parent, yourname):
+        c = GraphDrawingContext(gg=self.gg,
+                                parent=parent,
+                                yourname=yourname,
+                                level=self.level + 1,
+                                tmppath=self.tmppath,
+                                style=self.style,
+                                images_paths=self.images_paths,
+                                skip_initial=self.skip_initial)
+        return c
+
 
     def get_all_nodes(self):
         return self.all_nodes
@@ -53,16 +66,7 @@ class GraphDrawingContext():
         self.all_nodes.append(n)
         return n
 
-    def child_context(self, parent, yourname):
-        c = GraphDrawingContext(gg=self.gg,
-                                parent=parent,
-                                yourname=yourname,
-                                level=self.level + 1,
-                                tmppath=self.tmppath,
-                                style=self.style,
-                                images_paths=self.images_paths)
-        return c
-
+  
     @contextmanager
     def child_context_yield(self, parent, yourname):
         c = self.child_context(parent=parent, yourname=yourname)
@@ -208,6 +212,8 @@ class GraphDrawingContext():
         if self.style in  [STYLE_GREENRED, STYLE_GREENREDSYM]:
             propertyAppend(n, 'fontcolor', COLOR_DARKGREEN)
 
+
+    
 # reset with: get_images.cache = {}
 @memoize_simple
 def get_images(dirname, exts=None):
