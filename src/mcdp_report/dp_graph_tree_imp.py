@@ -45,7 +45,7 @@ def get_dp_label(dp):
 
 @contract(dp0=PrimitiveDP)
 def dp_graph_tree(dp0, imp= 
-                  None, compact=False):
+                  None, compact=False, direction='TB'):
     """ 
         Visualizes the DP as a tree.
         
@@ -280,7 +280,9 @@ def dp_graph_tree(dp0, imp=
         return s
 
     import my_gvgen as gvgen
-    gg = gvgen.GvGen(options="rankdir=TB")
+    
+    assert direction in ['TB', 'LR']
+    gg = gvgen.GvGen(options="rankdir=%s" % direction)
 
     gg.styleAppend("root", "shape", "none")
 

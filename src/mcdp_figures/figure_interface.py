@@ -1,11 +1,10 @@
 from abc import ABCMeta, abstractmethod
+import inspect
 import sys  
 
 from contracts import contract
-from mcdp_report.gg_utils import gg_get_formats
-
-
 from contracts.utils import raise_desc, raise_wrapped
+from mcdp_report.gg_utils import gg_get_formats
 from mocdp import ATTR_LOAD_NAME
 
 
@@ -19,13 +18,21 @@ class MakeFigures():
         self.figure2function = figure2function
         
     def available(self):
+        return set(self.figure2function) | set(self.aliases)
+    def available_unique(self):
         return set(self.figure2function)
-    
     def available_formats(self, name):
         if not name in self.available():
             raise ValueError(name)
+        
+        if name in self.aliases:
+            name = self.aliases[name]
         k, p = self.figure2function[name]
-        formatter = k(**p)
+        try:
+            formatter = k(**p)
+        except TypeError as e:
+            msg = 'Could not instance formatter'
+            raise_wrapped(TypeError, e, msg, k=k, p=p, name=name)
         return formatter.available_formats()
     
     
@@ -109,6 +116,50 @@ class MakeFiguresTemplate(MakeFigures):
     def get_yourname(self):
         return self.yourname
 
+
+    
+class MakeFiguresDP(MakeFigures):
+    def __init__(self, dp):
+        self.dp = dp
+        
+        aliases = {
+            'dp_graph_flow': 'dp_graph_flow_TB',
+            'dp_graph_tree': 'dp_graph_tree_TB',
+            'dp_graph_tree_compact': 'dp_graph_tree_compact_TB',
+        }
+        
+        figure2function = {
+            'dp_graph_flow_LR': (DPGraphFlow, dict(direction='LR')), 
+            'dp_graph_flow_TB': (DPGraphFlow, dict(direction='TB')),
+            'dp_graph_tree_LR': (DPGraphTree, dict(direction='LR', compact=False)), 
+            'dp_graph_tree_TB': (DPGraphTree, dict(direction='TB', compact=False)),
+            'dp_graph_tree_compact_LR': (DPGraphTree, dict(direction='LR', compact=True)), 
+            'dp_graph_tree_compact_TB': (DPGraphTree, dict(direction='TB', compact=True)),
+            'dp_repr_long': (DP_repr_long, dict()),
+        }
+        
+        MakeFigures.__init__(self, aliases=aliases, figure2function=figure2function)
+    
+    def get_dp(self):
+        return self.dp
+    
+                   
+class MakeFigures_Formatter():
+    __metaclass__ = ABCMeta
+    
+    @abstractmethod
+    def available_formats(self):
+        """ Returns a set of formats that are available """
+    
+    @abstractmethod    
+    def get(self, mf, formats):
+        """
+            mf: MakeFiguresNDP
+            formats: tuple of strings
+            
+            must return a tuple of same length as formats
+        """
+        
 class MakeFiguresNDP(MakeFigures):
     def __init__(self, ndp, library=None, yourname=None):
         self.ndp = ndp
@@ -146,7 +197,24 @@ class MakeFiguresNDP(MakeFigures):
                 dict(direction='LR', style=STYLE_GREENREDSYM)), 
             'ndp_graph_normal_TB': (Normal, 
                 dict(direction='TB', style=STYLE_GREENREDSYM)),
+            
+            'ndp_repr_long': (NDP_repr_long, dict()),
         }
+        
+        # now add the ones from DP
+        mfdp = MakeFiguresDP(None)
+        for alias, x in  mfdp.aliases.items():
+            if alias in aliases:
+                raise ValueError(alias)
+            aliases[alias] = x
+        for which, (constructor, params) in mfdp.figure2function.items():
+            if which in figure2function:
+                raise ValueError(which)
+            
+            params2 = dict(params)
+            params2['constructor'] = constructor
+            figure2function[which] = (BridgeFormatter, params2)
+            BridgeFormatter(**params2)
         
         MakeFigures.__init__(self, aliases=aliases, figure2function=figure2function)
         
@@ -159,24 +227,48 @@ class MakeFiguresNDP(MakeFigures):
     
     def get_yourname(self):
         return self.yourname
+
+class BridgeFormatter(MakeFigures_Formatter):
+    def __init__(self, constructor, **kwargs):
+        try:    
+            self.dpf = constructor(**kwargs)
+        except TypeError as e:
+            msg = 'Could not instance %s with params %s' %\
+                (constructor, kwargs)
+            raise_wrapped(TypeError, e, msg)
+    def available_formats(self):
+        return self.dpf.available_formats()
+    def get(self, mf, formats):
+        ndp = mf.get_ndp()
+        dp = ndp.get_dp()
+        mf2 = MakeFiguresDP(dp=dp)
+        return self.dpf.get(mf2, formats)
     
-               
-class MakeFigures_Formatter():
-    __metaclass__ = ABCMeta
+class TextFormatter(MakeFigures_Formatter):
+    def available_formats(self):
+        return ['txt']
+    
+    def get(self, mf, formats):
+        assert len(formats) == 1, formats        
+        text = self.get_text(mf)
+        return (text,)
     
     @abstractmethod
-    def available_formats(self):
-        """ Returns a set of formats that are available """
+    def get_text(self, mf):
+        pass
+
+class NDP_repr_long(TextFormatter):
     
-    @abstractmethod    
-    def get(self, mf, formats):
-        """
-            mf: MakeFiguresNDP
-            formats: tuple of strings
-            
-            must return a tuple of same length as formats
-        """
-        
+    def get_text(self, mf):
+        ndp = mf.get_ndp()
+        return ndp.repr_long()
+    
+class DP_repr_long(TextFormatter):
+    
+    def get_text(self, mf):
+        dp = mf.get_dp()
+        return dp.repr_long()
+    
 class GGFormatter(MakeFigures_Formatter):
 
     def available_formats(self):
@@ -321,3 +413,23 @@ class EnclosedTemplate(GGFormatter):
     
         return gg
     
+class DPGraphFlow(GGFormatter):
+    def __init__(self, direction):
+        self.direction = direction
+        
+    def get_gg(self, mf):
+        dp = mf.get_dp()
+        from mcdp_report.dp_graph_flow_imp import dp_graph_flow
+        gg = dp_graph_flow(dp, direction=self.direction)
+        return gg
+    
+class DPGraphTree(GGFormatter):
+    def __init__(self, compact, direction):
+        self.compact = compact
+        self.direction = direction
+        
+    def get_gg(self, mf):
+        dp = mf.get_dp()
+        from mcdp_report.dp_graph_tree_imp import dp_graph_tree
+        gg = dp_graph_tree(dp, imp=None, compact=self.compact, direction=self.direction)
+        return gg

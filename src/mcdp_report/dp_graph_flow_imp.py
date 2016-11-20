@@ -10,7 +10,7 @@ __all__ = [
 ]
 
 @contract(dp0=PrimitiveDP)
-def dp_graph_flow(dp0, imp=None):
+def dp_graph_flow(dp0, imp=None, direction='LR'):
     """
     
         TODO: Coproduct
@@ -186,7 +186,8 @@ def dp_graph_flow(dp0, imp=None):
 
 
     import my_gvgen as gvgen
-    gg = gvgen.GvGen(options="rankdir=LR")
+    assert direction in ['LR', 'TB']
+    gg = gvgen.GvGen(options="rankdir=%s" % direction)
 
     gg.styleAppend("prim", "shape", "plaintext")
     gg.styleAppend("connector", "shape", "plaintext")
