@@ -4,6 +4,7 @@ from mcdp_figures.figure_interface import MakeFiguresNDP
 from mcdp_tests.generation import for_all_nameddps_dyn
 from reprep import Report
 from reprep.datanode import DataNode
+from mocdp.exceptions import DPSemanticError
 
 @comptest
 def figint01():
@@ -35,7 +36,12 @@ def allformats_report(id_ndp, ndp, libname, which):
     library = get_test_library(libname)
     mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=id_ndp)
     formats = mf.available_formats(which)
-    res = mf.get_figure(which, formats)
+    try:
+        res = mf.get_figure(which, formats)
+    except DPSemanticError as e:
+        if 'Cannot abstract' in str(e):
+            r.text('warning', 'Not connected. \n\n %s' % e)
+            return r
     print('%s -> %s %s ' % (which, formats, map(len, [res[f] for f in formats])))
     fig = r.figure()
     for f in formats:

@@ -100,7 +100,7 @@ class WebAppImages():
             context = library._generate_context_with_hooks()
             ndp = library.load_ndp(id_ndp, context)
             dp = ndp.get_dp()
-            gg = dp_graph_flow(dp)
+            gg = dp_graph_flow(dp, direction='TB')
 
             data = gg_get_format(gg, fileformat)
             mime = get_mime_for_format(fileformat)
@@ -123,15 +123,7 @@ class WebAppImages():
                                     data_format=fileformat)
             return response_data(request, data, get_mime_for_format(fileformat))
 
-        return self.png_error_catch2(request, go)
-#
-# def get_ext_for_mime(mime):
-#     table = get_mime_table()
-#     inverse = dict([v, k] for k, v in table.items())
-#     if not mime in inverse:
-#         msg = 'Could not find mime type in table.'
-#         raise_desc(ValueError, msg, available=list(inverse))
-#     return inverse[mime]
+        return self.png_error_catch2(request, go) 
 
 def get_mime_for_format(data_format):
     table = get_mime_table()
@@ -164,30 +156,30 @@ def ndp_graph_normal(library, ndp, style, yourname, data_format, direction='LR')
                         yourname=yourname, direction=direction)
     return gg_get_format(gg, data_format)
 
-def ndp_graph_enclosed(library, ndp, style, yourname, data_format, direction='TB',
-                       enclosed=True):
-    """ This templatizes the children. It forces the enclosure if enclosure is True. """
-    from mocdp.comp.composite import CompositeNamedDP
-    from mocdp.ndp.named_coproduct import NamedDPCoproduct
-    from mocdp.comp.composite_templatize import cndp_templatize_children
-    from mocdp.comp.composite_templatize import ndpcoproduct_templatize
-    if isinstance(ndp, CompositeNamedDP):
-        ndp2 = cndp_templatize_children(ndp)
-        # print('setting _hack_force_enclose %r' % enclosed)
-        if enclosed:
-            setattr(ndp2, '_hack_force_enclose', enclosed)
-    elif isinstance(ndp, NamedDPCoproduct):
-        ndp2 = ndpcoproduct_templatize(ndp)
-    else:
-        ndp2 = ndp
-
-    images_paths = library.get_images_paths()
-    # we actually don't want the name on top
-    yourname = None  # name
-    gg = gvgen_from_ndp(ndp2, style, direction=direction,
-                        images_paths=images_paths, yourname=yourname)
-
-    return gg_get_format(gg, data_format)
+# 
+# def ndp_graph_enclosed(library, ndp, style, yourname, data_format, direction='TB',
+#                        enclosed=True):
+#     """ This templatizes the children. It forces the enclosure if enclosure is True. """
+#     from mocdp.comp.composite import CompositeNamedDP
+#     from mocdp.ndp.named_coproduct import NamedDPCoproduct
+#     from mocdp.comp.composite_templatize import cndp_templatize_children
+#     from mocdp.comp.composite_templatize import ndpcoproduct_templatize
+#     if isinstance(ndp, CompositeNamedDP):
+#         ndp2 = cndp_templatize_children(ndp)
+#         # print('setting _hack_force_enclose %r' % enclosed)
+#         if enclosed:
+#             setattr(ndp2, '_hack_force_enclose', enclosed)
+#     elif isinstance(ndp, NamedDPCoproduct):
+#         ndp2 = ndpcoproduct_templatize(ndp)
+#     else:
+#         ndp2 = ndp
+# 
+#     images_paths = library.get_images_paths()
+#     # we actually don't want the name on top
+#     yourname = None  # name
+#     gg = gvgen_from_ndp(ndp2, style, direction=direction,
+#                         images_paths=images_paths, yourname=yourname)
+#     return gg_get_format(gg, data_format)
 
 def ndp_template_enclosed(library, name, x, data_format):
     from mcdp_report.gdc import STYLE_GREENREDSYM
@@ -211,17 +203,17 @@ def ndp_template_graph_enclosed(library, template, style, yourname, data_format,
                         images_paths=images_paths, yourname=yourname)
     return gg_get_format(gg, data_format)
 
-
-def ndp_graph_expand(library, ndp, style, yourname, data_format, direction='TB'):
-    """ This expands the children, forces the enclosure """
-    mcdp_dev_warning('Wrong - need assume ndp const')
-    setattr(ndp, '_hack_force_enclose', True) 
-
-    images_paths = library.get_images_paths()
-    # we actually don't want the name on top
-    yourname = None  # name
-    gg = gvgen_from_ndp(ndp, style, direction=direction,
-                        images_paths=images_paths, yourname=yourname)
-
-    return gg_get_format(gg, data_format)
+# 
+# def ndp_graph_expand(library, ndp, style, yourname, data_format, direction='TB'):
+#     """ This expands the children, forces the enclosure """
+#     mcdp_dev_warning('Wrong - need assume ndp const')
+#     setattr(ndp, '_hack_force_enclose', True) 
+# 
+#     images_paths = library.get_images_paths()
+#     # we actually don't want the name on top
+#     yourname = None  # name
+#     gg = gvgen_from_ndp(ndp, style, direction=direction,
+#                         images_paths=images_paths, yourname=yourname)
+# 
+#     return gg_get_format(gg, data_format)
 

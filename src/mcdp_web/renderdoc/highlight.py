@@ -2,6 +2,7 @@
 import base64
 import hashlib
 import os
+import sys
 from tempfile import mkdtemp
 import traceback
 
@@ -10,20 +11,19 @@ from bs4.element import NavigableString
 
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, indent
+from mcdp_figures.figure_interface import MakeFiguresNDP, MakeFiguresTemplate
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.generic_report_utils import (
     NotPlottable, enlarge, get_plotters)
 from mcdp_report.html import ast_to_html, get_markdown_css
 from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters
-from mcdp_web.images.images import (get_mime_for_format, ndp_graph_enclosed,
-    ndp_graph_expand, ndp_graph_normal, ndp_graph_templatized)
+from mcdp_web.images.images import (get_mime_for_format)
 from mocdp import ATTR_LOAD_NAME, logger
+from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
 from reprep import Report
 from system_cmd import CmdException, system_cmd_result
-from mocdp.comp.context import Context
-from mcdp_figures.figure_interface import MakeFiguresNDP, MakeFiguresTemplate
 
 
 def bs(fragment):
@@ -442,7 +442,6 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
 
     return str(soup)
 
-import sys
 
 @contract(frag=str, returns=str)
 def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, generate_pdf):

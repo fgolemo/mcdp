@@ -355,4 +355,8 @@ U+259x  ▐ ░ ▒ ▓ ▔ ▕ ▖ ▗ ▘ ▙ ▚ ▛ ▜ ▝ ▞ ▟
   - get_cwd()
      or context.get_file()
 
-     
+- add option not to draw extra node 
+- make editor view TB
+- add 'fancy_editor' view
+
+ - L: provides f1,f2,f3 [dimensionless]

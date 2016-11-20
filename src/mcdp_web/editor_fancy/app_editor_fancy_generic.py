@@ -373,12 +373,8 @@ def get_png_data_unavailable(library, name, x, data_format):  # @UnusedVariable
     return create_image_with_string(s, size=(512, 512), color=(0, 0, 255))
 
 
-def get_png_data_model(library, name, ndp, data_format):  # @UnusedVariable
-    mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=None)
-    f = 'ndp_graph_enclosed_LR'
+def get_png_data_model(library, name, ndp, data_format): 
+    mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=name)
+    f = 'ndp_graph_enclosed_TB'
     res = mf.get_figure(f, data_format)
     return res
-# 
-#     from mcdp_web.images.images import ndp_graph_enclosed
-#     return ndp_graph_enclosed(library, ndp, style=STYLE_GREENREDSYM,
-#                               yourname=None, data_format=data_format)

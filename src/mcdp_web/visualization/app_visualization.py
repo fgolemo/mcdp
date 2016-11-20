@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
+from mcdp_lang.parse_interface import parse_ndp_refine, parse_template_refine, \
+    parse_poset_refine
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.gg_ndp import STYLE_GREENREDSYM
 from mcdp_report.html import ast_to_html
-from mocdp.exceptions import DPSyntaxError, DPSemanticError
 from mocdp.comp.context import Context
-from mcdp_lang.parse_interface import parse_ndp_refine, parse_template_refine,\
-    parse_poset_refine
+from mocdp.exceptions import DPSyntaxError, DPSemanticError
 
 
 class AppVisualization():
