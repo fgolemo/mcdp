@@ -112,7 +112,7 @@ class MCDPConstants():
     test_include_primitivedps_knownfailures = False
     
     # only draw 1/20th of pictures
-    test_fraction_of_allreports = 0.05
+    test_fraction_of_allreports = 0.025
      
     #
     # UI
