@@ -16,6 +16,7 @@ from mocdp.exceptions import mcdp_dev_warning
 import networkx as nx  # @UnresolvedImport
 from reprep.constants import MIME_PDF, MIME_PLAIN, MIME_PNG, MIME_SVG
 from system_cmd import CmdException, system_cmd_result
+from contracts.utils import check_isinstance, raise_desc
 
 
 def graphviz_run(filename_dot, output, prog='dot'):
@@ -161,11 +162,13 @@ allowed_formats = ['png', 'pdf', 'svg', 'dot']
 
 @contract(returns='tuple')
 def gg_get_formats(gg, data_formats):
+    check_isinstance(data_formats, (list, tuple))
     res = []
     mcdp_dev_warning('TODO: optimize gg_get_formats')
     for data_format in data_formats:
         if not data_format in allowed_formats:
-            raise ValueError(data_format)
+            msg = 'Invalid data format.' 
+            raise_desc(ValueError, msg, data_formats=data_formats)
 
         if data_format == 'dot':
             d = get_dot_string(gg)

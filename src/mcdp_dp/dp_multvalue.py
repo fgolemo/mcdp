@@ -190,6 +190,7 @@ class MultValueNatDP(WrapAMap):
             
         WrapAMap.__init__(self, amap, amap_dual)
         
+        
 class MultValueNatDPhelper(Map):
     """  r ⟼ floor(r/c) """
     

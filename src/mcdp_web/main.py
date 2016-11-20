@@ -64,6 +64,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         self.add_model_view('ndp_repr', 'Text representation')
         self.add_model_view('dp_graph', 'Internal graph representation')
         self.add_model_view('solver', 'Simple solver')
+        self.add_model_view('images', 'Image representations')
 
     def add_model_view(self, name, desc):
         self.views[name] = dict(desc=desc, order=len(self.views))
@@ -251,6 +252,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         for x in self._get_views():
             if '/' + x + '/' in url:
                 return x
+            
         assert False, request.url
 
     def get_navigation_links(self, request):

@@ -347,4 +347,12 @@ U+259x  ▐ ░ ▒ ▓ ▔ ▕ ▖ ▗ ▘ ▙ ▚ ▛ ▜ ▝ ▞ ▟
 
 - optimize gg_get_formats
 
-- reprep creates svgz files?
+- web: better formatting of warnings. Give each own <p>
+  rather than using ---- as separator
+
+- new ExecutionContext:
+  - add_warning()
+  - get_cwd()
+     or context.get_file()
+
+     

@@ -3,7 +3,7 @@ import inspect
 import sys  
 
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_report.gg_utils import gg_get_formats
 from mocdp import ATTR_LOAD_NAME
 
@@ -41,6 +41,13 @@ class MakeFigures():
         """ If formats is a str, returns a str.
             If formats is a seq, returns a dictionary format_name -> bytes 
         """
+        
+        if isinstance(formats, unicode):
+            raise ValueError(formats)
+        check_isinstance(name, str)
+        if not isinstance(formats, str):
+            for f in formats:
+                check_isinstance(f, str)
         if name in self.aliases:
             name = self.aliases[name]
         
@@ -58,30 +65,27 @@ class MakeFigures():
         except Exception as e:
             msg = 'Cannot instantiate %r with params %r.' % (name, p)
             raise_wrapped(Exception, e, msg, params=p, exc=sys.exc_info() )
-             
-#         check_isinstance(formatter, MakeFiguresNDP_Formatter)
         
-        formats = (formats,) if isinstance(formats, str) else tuple(sorted(formats))
+        formats0 = (formats,) if isinstance(formats, str) else tuple(sorted(formats))
         
         available = formatter.available_formats()
-        
-        for _f in formats:
+        for _f in formats0:
+            assert len(_f) >= 3, (formats, formats0)
             if not _f in available:
                 msg = 'Format %s not provided.' % _f
                 raise_desc(ValueError, msg, available=available)
-
-         
+ 
         res = formatter.get(self, formats)
         
-        if not isinstance(res, tuple) and len(res) == len(formats):
-            msg = 'Invalid result of %s' % name
-            raise_desc(ValueError, msg, res=res)
-        
-        r = dict(zip(formats, res))
-
-        if len(formats) == 0:
-            return res[formats[0]]
-        
+#         if not isinstance(res, tuple) and len(res) == len(formats):
+#             msg = 'Invalid result of %s' % name
+#             raise_desc(ValueError, msg, res=res)
+#         
+        if isinstance(formats, str):
+            r = res
+            check_isinstance(res, str)
+        else:
+            r = dict(zip(formats, res)) 
         return r
     
 class MakeFiguresTemplate(MakeFigures):
@@ -249,9 +253,15 @@ class TextFormatter(MakeFigures_Formatter):
         return ['txt']
     
     def get(self, mf, formats):
-        assert len(formats) == 1, formats        
         text = self.get_text(mf)
-        return (text,)
+        
+        if isinstance(formats, str):
+            assert formats == 'txt'
+            return text
+        else:
+            assert formats[0] == 'txt'
+            return (text,)
+            
     
     @abstractmethod
     def get_text(self, mf):
@@ -276,7 +286,10 @@ class GGFormatter(MakeFigures_Formatter):
     
     def get(self, mf, formats):
         gg = self.get_gg(mf)
-        res = gg_get_formats(gg, formats)
+        if isinstance(formats, str):
+            res, = gg_get_formats(gg, (formats,))
+        else:
+            res = gg_get_formats(gg, formats)
         return res
     
     @abstractmethod
