@@ -375,3 +375,31 @@ U+259x  ▐ ░ ▒ ▓ ▔ ▕ ▖ ▗ ▘ ▙ ▚ ▛ ▜ ▝ ▞ ▟
 
       r1 + r2 * r3 + 2 dimensionless >= f1 * f2 + f3 + 2 dimensionless
     }
+
+- editor_fancy: turn text back to black when editing after a syntax error
+
+- better error message:
+DPSemanticError: Constraint between incompatible spaces.
+  R[kWh²/kg] can be embedded in R[g]: False 
+  R[g] can be embedded in R[kWh²/kg]: False 
+F2: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
+    R[g]
+R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
+    R[kWh²/kg]
+| Super conversion not available.
+| A: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
+|    R[kWh²/kg]
+| B: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
+|    R[g]
+
+- editor: parse text ignoring some lines 
+  create UnparsableText() 
+
+  edit the line to get
+
+    unparsable(' this is unparsable')
+
+    
+
+- editor: add warnings about unconnected functionality/resources
+

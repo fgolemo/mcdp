@@ -33,8 +33,10 @@ def allformats(context, id_ndp, ndp, libname):
     mf = MakeFiguresNDP(ndp=ndp, library=None, yourname=None)
     for name in mf.available():
         
-        if toss_coin(id_ndp, MCDPConstants.test_fraction_of_allreports):
-            
+        do_it = libname in ['basic', 'libtemplates', 'solver'] or \
+            toss_coin(id_ndp, MCDPConstants.test_fraction_of_allreports) 
+        
+        if do_it:
             r = context.comp(allformats_report, id_ndp, ndp, libname, name,
                              job_id=name)
             context.add_report(r, 'allformats', id_ndp=id_ndp, which=name)
