@@ -20,6 +20,7 @@ from quickapp import QuickAppBase
 from system_cmd import CmdException, system_cmd_result
 
 from .utils_mkdir import mkdirs_thread_safe
+from mcdp_figures.figure_interface import MakeFiguresNDP
 
 
 def get_ndp(data):
@@ -261,60 +262,80 @@ allplots  = {
     ('dp_repr_long_labeled', dp_repr_long_labeled),
     ('ndp_repr_long_labeled', ndp_repr_long_labeled),
 }
+# 
+# class Vis():
+#     def __init__(self, s, direction, prefix):
+#         self.s = s
+#         self.direction = direction
+#         self.prefix = prefix
+#         
+#     def __call__(self, data):
+#         gg = self.ndp_visualization(data, style=self.s, direction=self.direction)
+#         return return_formats2(gg,self.prefix)
+# 
+#     def ndp_visualization(self, data, style, direction):
+#         assert direction in ['TB', 'LR'], direction
+#         ndp = get_ndp(data) 
+#         setattr(ndp, '_hack_force_enclose', True)
+#         library = data['library']
+#         images_paths = library.get_images_paths()
+#         gg = gvgen_from_ndp(ndp, style, images_paths=images_paths,  direction=direction)
+#         return gg
 
-class Vis():
-    def __init__(self, s, direction, prefix):
-        self.s = s
-        self.direction = direction
-        self.prefix = prefix
+# 
+# for s in [#STYLE_GREENRED, 'default', 'clean', 
+#           STYLE_GREENREDSYM]:
+#     x = ('ndp_%s' % s, Vis(s, 'LR', 'ndp_%s' %s))
+#     allplots.add(x)
+#     x = ('ndp_%s_tb' % s, Vis(s, 'TB', 'ndp_%s_TB'%s))
+#     allplots.add(x)
+
+class MFCall():
+    def __init__(self, name):
+        self.name = name
         
     def __call__(self, data):
-        gg = self.ndp_visualization(data, style=self.s, direction=self.direction)
-        return return_formats2(gg,self.prefix)
-
-    def ndp_visualization(self, data, style, direction):
-        assert direction in ['TB', 'LR'], direction
-        ndp = get_ndp(data) 
-        setattr(ndp, '_hack_force_enclose', True)
+        ndp = get_ndp(data)
         library = data['library']
-        images_paths = library.get_images_paths()
-        gg = gvgen_from_ndp(ndp, style, images_paths=images_paths,  direction=direction)
-        return gg
+        mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=None)
+         
+        formats = mf.available_formats(self.name)
+        res = mf.get_figure(self.name, formats)
+        
+        results = [(_, self.name, res[_]) for _ in formats]
+        return results
+        
+mf = MakeFiguresNDP(ndp=None)    
+for name in mf.available():
+    allplots.add((name, MFCall(name)))
+          
+#     
+# def ndp_graph_enclosed0(data, direction):
+#     library = data['library']
+#     ndp = get_ndp(data)
+#     style = STYLE_GREENREDSYM
+#     yourname = None
+#     from mcdp_web.images.images import ndp_graph_enclosed
+#     png = ndp_graph_enclosed(library, ndp, style, yourname,
+#                             data_format='png', direction=direction,
+#                             enclosed=True)
+#     pdf = ndp_graph_enclosed(library, ndp, style, yourname,
+#                             data_format='pdf', direction=direction,
+#                             enclosed=True)
+#     return png, pdf
+# 
+# def ndp_graph_enclosed_LR(data):
+#     png, pdf = ndp_graph_enclosed0(data, 'LR')
+#     return [('png', 'ndp_graph_enclosed_LR', png),
+#             ('pdf', 'ndp_graph_enclosed_LR', pdf)]
+# 
+# def ndp_graph_enclosed_TB(data):
+#     png, pdf = ndp_graph_enclosed0(data, 'LR')
+#     return [('png', 'ndp_graph_enclosed', png),
+#             ('pdf', 'ndp_graph_enclosed', pdf)]
 
-
-for s in [#STYLE_GREENRED, 'default', 'clean', 
-          STYLE_GREENREDSYM]:
-    x = ('ndp_%s' % s, Vis(s, 'LR', 'ndp_%s' %s))
-    allplots.add(x)
-    x = ('ndp_%s_tb' % s, Vis(s, 'TB', 'ndp_%s_TB'%s))
-    allplots.add(x)
-    
-def ndp_graph_enclosed0(data, direction):
-    library = data['library']
-    ndp = get_ndp(data)
-    style = STYLE_GREENREDSYM
-    yourname = None
-    from mcdp_web.images.images import ndp_graph_enclosed
-    png = ndp_graph_enclosed(library, ndp, style, yourname,
-                            data_format='png', direction=direction,
-                            enclosed=True)
-    pdf = ndp_graph_enclosed(library, ndp, style, yourname,
-                            data_format='pdf', direction=direction,
-                            enclosed=True)
-    return png, pdf
-
-def ndp_graph_enclosed_LR(data):
-    png, pdf = ndp_graph_enclosed0(data, 'LR')
-    return [('png', 'ndp_graph_enclosed_LR', png),
-            ('pdf', 'ndp_graph_enclosed_LR', pdf)]
-
-def ndp_graph_enclosed_TB(data):
-    png, pdf = ndp_graph_enclosed0(data, 'LR')
-    return [('png', 'ndp_graph_enclosed', png),
-            ('pdf', 'ndp_graph_enclosed', pdf)]
-
-allplots.add(('ndp_graph_enclosed_LR', ndp_graph_enclosed_LR))
-allplots.add(('ndp_graph_enclosed', ndp_graph_enclosed_TB))
+# allplots.add(('ndp_graph_enclosed_LR', ndp_graph_enclosed_LR))
+# allplots.add(('ndp_graph_enclosed', ndp_graph_enclosed_TB))
 
 @contract(returns='tuple(str,*)')
 def parse_kv(x):
@@ -328,7 +349,8 @@ def parse_params(p):
 
     return dict(parse_kv(_) for _ in seq)
 
-def do_plots(logger, model_name, plots, outdir, extra_params, maindir, extra_dirs, use_cache):
+def do_plots(logger, model_name, plots, outdir, extra_params, 
+             maindir, extra_dirs, use_cache):
     data = {}
 
     if '.mcdp' in model_name:

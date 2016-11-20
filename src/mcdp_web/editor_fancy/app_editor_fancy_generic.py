@@ -9,13 +9,13 @@ from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
 from pyramid.renderers import render_to_response  # @UnresolvedImport
 
 from contracts.utils import check_isinstance, raise_wrapped
+from mcdp_figures.figure_interface import MakeFiguresNDP
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp_eval, parse_ndp_refine, \
     parse_template_eval, parse_template_refine, parse_constant_eval, \
     parse_constant_refine, parse_poset_eval, parse_poset_refine
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
-from mcdp_report.gg_ndp import STYLE_GREENREDSYM
 from mcdp_report.html import ast_to_html
 from mcdp_web.utils import (ajax_error_catch, create_image_with_string,
     format_exception_for_ajax_response, response_image)
@@ -374,6 +374,11 @@ def get_png_data_unavailable(library, name, x, data_format):  # @UnusedVariable
 
 
 def get_png_data_model(library, name, ndp, data_format):  # @UnusedVariable
-    from mcdp_web.images.images import ndp_graph_enclosed
-    return ndp_graph_enclosed(library, ndp, style=STYLE_GREENREDSYM,
-                              yourname=None, data_format=data_format)
+    mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=None)
+    f = 'ndp_graph_enclosed_LR'
+    res = mf.get_figure(f, data_format)
+    return res
+# 
+#     from mcdp_web.images.images import ndp_graph_enclosed
+#     return ndp_graph_enclosed(library, ndp, style=STYLE_GREENREDSYM,
+#                               yourname=None, data_format=data_format)
