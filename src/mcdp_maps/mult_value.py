@@ -70,9 +70,6 @@ class MultValueNatMap(Map):
         dom.belongs(value)
         Map.__init__(self, dom, cod)
 
-    def diagram_label(self):
-        return "× %s" % self.N.format(self.value)
-
     def _call(self, x):
         return Nat_mult_uppersets_continuous(self.value, x) 
     

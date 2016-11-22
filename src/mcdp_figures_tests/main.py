@@ -1,12 +1,14 @@
+import random
+
 from comptests.registrar import comptest
-from mcdp_lang.parse_interface import parse_ndp
 from mcdp_figures.figure_interface import MakeFiguresNDP
+from mcdp_lang.parse_interface import parse_ndp
 from mcdp_tests.generation import for_all_nameddps_dyn
+from mocdp import MCDPConstants
+from mocdp.exceptions import DPSemanticError
 from reprep import Report
 from reprep.datanode import DataNode
-from mocdp.exceptions import DPSemanticError
-from mocdp import MCDPConstants
-import random
+
 
 @comptest
 def figint01():

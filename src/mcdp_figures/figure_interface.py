@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-import inspect
 import sys  
 
 from contracts import contract
@@ -19,8 +18,10 @@ class MakeFigures():
         
     def available(self):
         return set(self.figure2function) | set(self.aliases)
+    
     def available_unique(self):
         return set(self.figure2function)
+    
     def available_formats(self, name):
         if not name in self.available():
             raise ValueError(name)
@@ -328,7 +329,6 @@ class Templatized(GGFormatter):
     def get_gg(self, mf):
         ndp = mf.get_ndp()
         library =mf.get_library()
-        # yourname = mf.get_yourname()
         
         yourname = None 
         if self.labeled:

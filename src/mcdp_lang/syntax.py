@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from mcdp_lang.pyparsing_bundled import QuotedString
 from mocdp.exceptions import mcdp_dev_warning
 
 from .parse_actions import (divide_parse_action,
@@ -16,7 +17,6 @@ from .pyparsing_bundled import (
 from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
 from .utils_lists import make_list
-from mcdp_lang.pyparsing_bundled import QuotedString
 
 
 ParserElement.enablePackrat()
