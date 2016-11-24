@@ -144,6 +144,10 @@ def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
             if i != len(lines) - 1:
                 out += '\n'
 
+    from xml.etree import ElementTree as ET
+    x = ET.fromstring(out)
+    
+    
     frag = ""
 
     if encapsulate_in_precode:
@@ -354,24 +358,38 @@ def comment_out(s, line):
     return "\n".join(lines)
     
 def mark_unparsable(s0, parse_expr):
+    """ Returns
+    
+            s, expr, commented
+            
+        where:
+        
+            s is the string with lines that do not parse marked as "#@"
+            expr is the parsed expression (can be None)
+            commented is the set of lines that had to be commented out
+            
+        Never raises DPSyntaxError
+    """
     commented = set()
-    s = s0
     nlines = len(s0.split('\n'))
+    s = s0
     while True:
+        print('nlines %s commented %s' % (nlines, commented))
         if len(commented) == nlines:
+            print('looks like we commented all of it')
             return s, None, commented 
-        print s
+#         print s
         try:     
             expr = parse_wrap(parse_expr, s)[0]
             #expr2 = parse_ndp_refine(expr, context)
             return s, expr, commented
         except DPSyntaxError as e:
 #             print e.where
-            print e
-            print ('string=%r' % s)
+#             print e
+#             print ('string=%r' % s)
             line = e.where.line
             assert line is not None
-            print('found error at char %s line %s of %r: %r' % (e.where.character, line, s0, s0[e.where.character]))
+            #print('found error at char %s line %s of %r: %r' % (e.where.character, line, s0, s0[e.where.character]))
             if line == nlines: # all commented
                 return s, None, commented
             if line in commented:

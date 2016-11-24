@@ -1,9 +1,9 @@
+from nose.tools import assert_equal
+
 from comptests.registrar import comptest
+from contracts.interface import line_and_col
 from mcdp_lang.syntax import Syntax
 from mcdp_report.html import mark_unparsable
-from contracts.interface import line_and_col
-from nose.tools import assert_equal
-from mcdp_lang.parse_interface import parse_ndp
 
 
 def ast_to_html_(s):
@@ -13,6 +13,7 @@ def ast_to_html_(s):
                 add_line_gutter=False, encapsulate_in_precode=True, add_css=False,
                 parse_expr=parse_expr, add_line_spans=False, postprocess=None)
     return html
+
 def mark_unparsable_(s):
     parse_expr = Syntax.ndpt_dp_rvalue
     return mark_unparsable(s, parse_expr)
@@ -26,7 +27,7 @@ def parsing_error_recov01():
         provides f [m]
     }
     """.strip()
-    s, expr, commented = mark_unparsable(s)
+    s, expr, commented = mark_unparsable_(s)
     parse_expr = Syntax.ndpt_dp_rvalue
     
     html = ast_to_html_(s)
@@ -52,10 +53,9 @@ def parsing_error_recov03():
     c = 4
     line, col = line_and_col(c, s)
     assert s[c] == 'a'
-    print line, col
     assert line == 1
     assert col == 0
-    pass
+
 
 
 @comptest
@@ -68,9 +68,9 @@ mcdp {
 
     parse_expr = Syntax.ndpt_dp_rvalue
 
-    if False:
-        s2, expr, commented = mark_unparsable(s, parse_expr)
-        assert_equal(commented, set([2]))
+
+    s2, expr, commented = mark_unparsable(s, parse_expr)
+    assert_equal(commented, set([2]))
 
     s="""   
 mcdp {
@@ -119,19 +119,26 @@ def parsing_error_recov06():
 @comptest
 def parsing_error_recov07():
     s="""#mcdp {unp}\n"""
-    parse_ndp(s)
-#     mark_unparsable_(s)
+    mark_unparsable_(s)
 
 
 @comptest
 def parsing_error_recov08():
-    print Syntax.ndpt_dp_rvalue
-
-    pass
-
+    # The problem with this is that the comment is inside the space for a
+    s="""mcdp {
+  a = 2 a
+# b = ckok
+}"""
+    print ast_to_html_(s)
+    assert False
+    
 
 @comptest
 def parsing_error_recov09():
+    """ Invalid HTML produced """
+    s="""# a!   
+a"""
+    ast_to_html_(s)
     pass
 
 

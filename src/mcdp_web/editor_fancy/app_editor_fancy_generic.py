@@ -210,21 +210,25 @@ class AppEditorFancyGeneric():
             except DPSyntaxError as e:
                 # This is the case in which we could not even parse
                 
-                print('string: %r' % string)
                 from mcdp_report.html import mark_unparsable
                 string2, expr, commented = mark_unparsable(string, parse_expr)
-                print('string2: %r' % string2)
-                print('Commented: %r' % (commented))
-
-                res = format_exception_for_ajax_response(e, quiet=(DPSyntaxError,))
                 
-                html = ast_to_html(string2, complete_document=False, extra_css=None, ignore_line=None,
-                            add_line_gutter=False, encapsulate_in_precode=True, add_css=False,
-                            parse_expr=parse_expr, add_line_spans=False, postprocess=None)
-                            
-#                 res['highlight'] = html_mark_syntax_error(string, e)
-                print('html with error:\n%s' % indent(html, '~'))
-                res['highlight'] = html
+                res = format_exception_for_ajax_response(e, quiet=(DPSyntaxError,))
+                if expr is not None:
+                    try:
+                        html = ast_to_html(string2, complete_document=False, extra_css=None, ignore_line=None,
+                                    add_line_gutter=False, encapsulate_in_precode=True, add_css=False,
+                                    parse_expr=parse_expr, add_line_spans=False, postprocess=None)
+                        print('html with error:\n%s' % indent(html, '~'))
+                
+                        res['highlight'] = html
+                    except DPSyntaxError:
+                        assert False, string2
+                else:
+                    res['highlight'] = html_mark_syntax_error(string, e)
+                
+                
+                
                 res['request'] = req
                 return res
             

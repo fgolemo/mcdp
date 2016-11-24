@@ -181,6 +181,7 @@
 
 
 	function update_text_with_highlight(req_text, highlight) {
+		console.log('highlight: ' + highlight)
 		// never change the user input!
 		pos = getCaretCharacterOffsetWithin($("#editor").get(0));
 		if (pos == null){
@@ -230,10 +231,11 @@
 			//$('button#save').enable();
 
 			if ('highlight' in res) {
-				relevant = still_relevant(res['request']['text']);
-				console.log('relevant ' +relevant)
+				res_text = res['request']['text']
+				relevant = still_relevant(res_text);
+				//console.log('relevant ' +relevant)
 				if (relevant)
-					update_text_with_highlight(res['request']['text'], res['highlight']);
+					update_text_with_highlight(res_text, res['highlight']);
 				else {
 					show_status('#server_status', 'Server is slow in responding...');
 				}
@@ -241,9 +243,10 @@
 		}	
 
 		function on_success(res) {
-			relevant = still_relevant(res['request']['text']);
+			res_text = res['request']['text']
+			relevant = still_relevant(res_text);
 
-			if (!relevant || (res['request']['text'] != last_text_sent_to_server)) {
+			if (!relevant || (res_text != last_text_sent_to_server)) {
 				//console.log('Slow server: ignoring stale.');
 				show_status('#server_status', 'Server is slow in responding...');
 				return;
@@ -261,7 +264,7 @@
 			//$('button#save').text('Save');
 			//$('button#save').enable();
 
-			update_text_with_highlight(res['request']['text'], res['highlight']);
+			update_text_with_highlight(res_text, res['highlight']);
 		}
 
 		last_text_sent_to_server = s;

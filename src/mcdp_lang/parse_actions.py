@@ -6,7 +6,7 @@ import traceback
 from decorator import decorator
 
 from contracts import contract
-from contracts.interface import Where
+from contracts.interface import Where, line_and_col, location
 from contracts.utils import indent, raise_desc, raise_wrapped, check_isinstance
 from mocdp import logger
 from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
@@ -245,9 +245,14 @@ def parse_wrap(expr, string):
     
     check_isinstance(string, str)
 
-    # Nice trick: the removE_comments doesn't change the number of lines
+    # Nice trick: the remove_comments doesn't change the number of lines
     # it only truncates them...
     string0 = remove_comments(string)
+    
+    if not string0.strip():
+        msg = 'Nothing to parse.'
+        where=Where(string, character=len(string))
+        raise DPSyntaxError(msg, where=where)
 
     m = lambda x: x
     try:
@@ -264,7 +269,11 @@ def parse_wrap(expr, string):
         msg += "\n\n" + indent(m(string), '  ') + '\n'
         raise_desc(DPInternalError, msg)
     except (ParseException, ParseFatalException) as e:
-        where = Where(string0, character=e.loc) # note: string0
+        # find the line and col in string0
+        line, col = line_and_col(e.loc, string0)
+        # find the equivalent location in string
+        loc2 = location(line, col, string)
+        where = Where(string, character=loc2)
         e2 = DPSyntaxError(str(e), where=where)
         raise DPSyntaxError, e2, sys.exc_info()[2]
     except DPSemanticError as e:
