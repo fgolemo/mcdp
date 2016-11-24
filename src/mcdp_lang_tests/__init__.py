@@ -63,4 +63,5 @@ from .syntax_variables import *
 from .syntax_derivative import *
 
 from .syntax_comments import *
+from .parsing_error_recovery import *
 

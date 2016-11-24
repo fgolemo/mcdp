@@ -22,7 +22,9 @@ def get_code_spec_expr():
         Evaluates to either CDP.CodeSpecNoArgs or CDP.CodeSpec.
     """
 
-    return SyntaxCodeSpec.code_spec
+    copy = SyntaxCodeSpec.code_spec
+    copy = copy.setName('code_spec')
+    return copy
 
 
 class SyntaxCodeSpec():
@@ -37,7 +39,8 @@ class SyntaxCodeSpec():
 
     code_spec_simple = sp(CODE + funcname,
                           lambda t: CDP.CodeSpecNoArgs(keyword=t[0], function=t[1]))
-
+    code_spec_simple = code_spec_simple.setName('code_spec_simple')
+    
     string_content = sp(quotedString,
                         lambda t: t[0][1:-1])
 

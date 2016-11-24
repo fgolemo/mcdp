@@ -7,8 +7,9 @@
     font-size: 70%;
 
 }
-#syntax_error {
-    
+/**[contenteditable="true"]{display: inline-block;}*/
+
+#syntax_error, .unparsable {
 	color: red;
 }
 

@@ -12,8 +12,9 @@ from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
 from mocdp import logger
-from mocdp.exceptions import mcdp_dev_warning
+from mocdp.exceptions import mcdp_dev_warning, DPSyntaxError
 
+unparsable_marker = '#@'
 
 def isolate_comments(s):
     lines = s.split("\n")
@@ -106,21 +107,11 @@ def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
         x = x.replace('<', '&lt;')
         return x
 
-#     # add back the white space
-#     if empty_lines_start:
-#         transformed = "\n".join(empty_lines_start) + '\n' + transformed_p
-#     else:
-#         transformed = transformed_p
-
     transformed = '\n' * num_empty_lines_start + transformed_p
     transformed = transformed +  '\n' * num_empty_lines_end
     
     lines = transformed.split('\n')
-    if len(lines) != len(s_comments):
-#         for i in range(min(len(lines), len(s_comments))):
-#
-#             print('orig %d: %s' % (i, s_lines[i]))
-#             print('trans %d: %s' % (i, lines[i]))
+    if len(lines) != len(s_comments): 
         msg = 'Lost some lines while pretty printing: %s, %s' % (len(lines), len(s_comments))
         logger.debug(msg)
         if len(s) > 10:
@@ -131,7 +122,12 @@ def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
     for i, (a, comment) in enumerate(zip(lines, s_comments)):
         line = a
         if comment:
-            line += '<span class="comment">%s</span>' % sanitize_comment(comment)
+            if comment.startswith(unparsable_marker):
+                unparsable = comment[len(unparsable_marker):]
+                line += '<span class="unparsable">%s</span>' % sanitize_comment(unparsable)
+            else:
+                line += '<span class="comment">%s</span>' % sanitize_comment(comment)
+            
         lineno = i + 1
         if ignore_line(lineno):
             pass
@@ -350,3 +346,39 @@ def get_markdown_css():
         css = f.read()
     return css
 
+
+
+def comment_out(s, line):
+    lines = s.split('\n')
+    lines[line+1] = unparsable_marker + lines[line+1]
+    return "\n".join(lines)
+    
+def mark_unparsable(s0, parse_expr):
+    commented = set()
+    s = s0
+    nlines = len(s0.split('\n'))
+    while True:
+        if len(commented) == nlines:
+            return s, None, commented 
+        print s
+        try:     
+            expr = parse_wrap(parse_expr, s)[0]
+            #expr2 = parse_ndp_refine(expr, context)
+            return s, expr, commented
+        except DPSyntaxError as e:
+#             print e.where
+            print e
+            print ('string=%r' % s)
+            line = e.where.line
+            assert line is not None
+            print('found error at char %s line %s of %r: %r' % (e.where.character, line, s0, s0[e.where.character]))
+            if line == nlines: # all commented
+                return s, None, commented
+            if line in commented:
+                return s, None, commented
+#                 msg = 'assertion: I already commented this line'
+#                 raise_desc(AssertionError, msg, commented=commented, s=s)
+            #print 'error in line %s (0 based)' % line
+            commented.add(line)
+            s = comment_out(s, line - 1) 
+            

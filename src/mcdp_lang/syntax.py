@@ -36,17 +36,17 @@ class SyntaxBasics():
     plus = Literal('+')
     plusorminus = plus | Literal('-')
     nonneg_integer = sp(Combine(O(plus) + number),
-                        lambda t: int(t[0]))
+                        lambda t: int(t[0])).setName('nonneg_integer')
     integer = sp(Combine(O(plusorminus) + number),
-                    lambda t: int(t[0]))
+                    lambda t: int(t[0])).setName('integer')
 
     # Note that '42' is not a valid float...
     floatnumber = sp((Combine(O(plusorminus) + number + point + O(number) + O(e + integer)) | 
                       Combine(O(plusorminus) + number + e + number)),
-                      lambda t: float(t[0]))
+                      lambda t: float(t[0])).setName('floatnumber')
 
     integer_or_float = sp(floatnumber | integer,
-                          lambda t: CDP.ValueExpr(t[0]))
+                          lambda t: CDP.ValueExpr(t[0])).setName('integer_or_float')
 
 class SyntaxIdentifiers():
     # unfortunately this needs to be maintained manually
@@ -128,28 +128,34 @@ class SyntaxIdentifiers():
     ]
 
     # remember to .copy() this otherwise things don't work
-    _idn = (NotAny(MatchFirst([Keyword(_) for _ in keywords])) + 
+    not_keyword = NotAny(MatchFirst([Keyword(_) for _ in keywords]))
+    not_keyword = not_keyword.setName('not_keyword')   
+    _idn = (not_keyword+ 
             Combine(oneOf(list('_' + alphas)) + 
                     Optional(Word('_' + alphanums)))).setResultsName('idn')
 
     @staticmethod
     def get_idn():
-        return SyntaxIdentifiers._idn.copy()
+        copy = SyntaxIdentifiers._idn.copy()
+#         copy = copy.setResultsName('idn')
+        copy = copy.setName('identifier')
+        return copy
 
 
 class Syntax():
 
     # An expression that evaluates to a constant value
-    constant_value = Forward()
-    definitely_constant_value = Forward()  # no variable refs allowed
+    constant_value = Forward().setName('constant_value')
+    definitely_constant_value = Forward().setName('definitely_constant_value')  # no variable refs allowed
     # An expression that evaluates to a resource reference
-    rvalue = Forward()
+    rvalue = Forward().setName('rvalue')
     # An expression that evaluates to a function reference
-    fvalue = Forward()
+    fvalue = Forward().setName('fvalue')
     # An expression that evaluates to a Poset
-    space = Forward()
+    space = Forward().setName('space')
     # An expression that evaluates to a NamedDP
-    ndpt_dp_rvalue = Forward()
+    ndpt_dp_rvalue = Forward().setName('ndpt_dp_rvalue')
+    
     # An expression that evaluates to a Template
     template = Forward()
 
@@ -171,31 +177,32 @@ class Syntax():
     comment_string_complex = sp(copy_expr_remove_action(python_style_multiline), lambda t: CDP.CommentStringTriple(t[0]))
     
     comment_model = sp(comment_string_simple | comment_string_complex,
-                       lambda t: CDP.CommentModel(t[0]))
-    comment_con = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentCon(t[0]))
-    comment_fun = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentFun(t[0]))
-    comment_res = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentRes(t[0]))
-    comment_var = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentVar(t[0]))
+                       lambda t: CDP.CommentModel(t[0])).setName('comment_model')
+    comment_con = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentCon(t[0])).setName('comment_con')
+    comment_fun = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentFun(t[0])).setName('comment_fun')
+    comment_res = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentRes(t[0])).setName('comment_res')
+    comment_var = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentVar(t[0])).setName('comment_val')
 
-    placeholder = SL('[') + SL('[') + (get_idn() | quoted) + SL(']') + SL(']')
+    placeholder = SL('[') + SL('[') + (get_idn() | quoted) + SL(']') + SL(']').setName('placeholder')
     
     
     
-    dpname_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_dpname(t[0]))
-    constant_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_constant(t[0]))
-    rvalue_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_rvalue(t[0]))
-    fvalue_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_fvalue(t[0]))
-    fname_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_fname(t[0]))
-    rname_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_rname(t[0]))
-    space_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_poset(t[0]))
-    ndpt_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_constant(t[0]))
-    template_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_template(t[0]))
-    primitivedp_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_primitivedp(t[0]))
-    collection_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_collection(t[0]))
-    integer_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_integer(t[0]))
-    nonneg_integer_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_nonneg_integer(t[0]))
-    index_label_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_index_label(t[0]))
-    integer_or_float_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_integer_or_float(t[0]))
+    
+    dpname_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_dpname(t[0])).setName('dpname_placeholder')
+    constant_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_constant(t[0])).setName('constant_placeholder')
+    rvalue_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_rvalue(t[0])).setName('rvalue_placeholder')
+    fvalue_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_fvalue(t[0])).setName('fvalue_placeholder')
+    fname_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_fname(t[0])).setName('fname_placeholder')
+    rname_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_rname(t[0])).setName('rname_placeholder')
+    space_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_poset(t[0])).setName('poset_placeholder')
+    ndpt_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_constant(t[0])).setName('constant_placeholder')
+    template_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_template(t[0])).setName('template_placeholder')
+    primitivedp_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_primitivedp(t[0])).setName('primitivedp_placeholder')
+    collection_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_collection(t[0])).setName('collection_placeholder')
+    integer_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_integer(t[0])).setName('integer_placeholder')
+    nonneg_integer_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_nonneg_integer(t[0])).setName('nonneg_integer_placeholder')
+    index_label_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_index_label(t[0])).setName('index_label_placeholder')
+    integer_or_float_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_integer_or_float(t[0])).setName('integer_or_float_placeholder')
                
     integer = SyntaxBasics.integer | integer_placeholder                        
     integer_or_float = SyntaxBasics.integer_or_float | integer_or_float_placeholder
@@ -250,12 +257,12 @@ class Syntax():
     # load <name>
     LOAD = spk(K('load') ^ L('`'), CDP.LoadKeyword)
 
-    posetname = sp(get_idn(), lambda t: CDP.PosetName(t[0]))
+    posetname = sp(get_idn(), lambda t: CDP.PosetName(t[0])).setName('posetname')
     posetname_with_library = sp(library_name + L('.') + posetname,
-        lambda t: CDP.PosetNameWithLibrary(library=t[0], glyph=t[1], name=t[2]))
+        lambda t: CDP.PosetNameWithLibrary(library=t[0], glyph=t[1], name=t[2])).setName('posetname_with_library')
 
     load_poset = sp(LOAD - (posetname_with_library | posetname),
-                    lambda t: CDP.LoadPoset(keyword=t[0], load_arg=t[1]))
+                    lambda t: CDP.LoadPoset(keyword=t[0], load_arg=t[1])).setName('load_poset')
 #
     # UpperSets(<poset>)
     UPPERSETS = keyword('UpperSets', CDP.UpperSetsKeyword)
@@ -340,6 +347,7 @@ class Syntax():
         | space_dimensionless
     )
 
+    
 
     PRODUCT = sp(L('x') | L('×'), lambda t: CDP.product(t[0]))
     space << operatorPrecedence(space_operand, [
@@ -458,7 +466,7 @@ class Syntax():
         lambda t: CDP.NDPNameWithLibrary(library=t[0], glyph=t[1], name=t[2]))
 
     ndpt_load = sp(LOAD - (ndpname_with_library | ndpname | SLPAR - ndpname - SRPAR),
-                        lambda t: CDP.LoadNDP(t[0], t[1]))
+                        lambda t: CDP.LoadNDP(t[0], t[1])).setName('ndpt_load')
 
     # <dpname> = ...
     dpname_real = sp(get_idn(), lambda t: CDP.DPName(t[0])) 
@@ -469,14 +477,14 @@ class Syntax():
     # instance <type>
     INSTANCE = keyword('instance', CDP.InstanceKeyword)
     dpinstance_from_type = sp(INSTANCE - (ndpt_dp_rvalue | (SLPAR - ndpt_dp_rvalue + SRPAR)),
-                              lambda t: CDP.DPInstance(t[0], t[1]))
+                              lambda t: CDP.DPInstance(t[0], t[1])).setName('dpinstance_from_type')
 
     # new Name ~= instance `Name
     NEW = keyword('new', CDP.FromLibraryKeyword)
     dpinstance_from_library_shortcut = \
         sp(NEW - (ndpname_with_library | ndpname | (SLPAR - ndpname + SRPAR)),
-                    lambda t:CDP.DPInstanceFromLibrary(t[0], t[1]))
-
+                    lambda t:CDP.DPInstanceFromLibrary(t[0], t[1])).setName('dpinstance_from_library_shortcut')
+                
     dpinstance_expr = dpinstance_from_type | dpinstance_from_library_shortcut
 
     SUB = keyword('sub', CDP.SubKeyword)
@@ -727,12 +735,12 @@ class Syntax():
     # approx(<rvalue>, 5g)
     APPROXRES = keyword('approx', CDP.ApproxKeyword)
     rvalue_approx_step = sp(APPROXRES - SLPAR + rvalue + SCOMMA + constant_value + SRPAR,
-                            lambda t: CDP.ApproxStepRes(t[0], t[1], t[2]))
+                            lambda t: CDP.ApproxStepRes(t[0], t[1], t[2])).setName('rvalue_approx_step')
 
     # approxu(<rvalue>, 5g)
     APPROXU = keyword('approxu', CDP.ApproxUKeyword)
     rvalue_approx_u = sp(APPROXU - SLPAR + rvalue + SCOMMA + constant_value + SRPAR,
-                            lambda t: CDP.ApproxURes(t[0], t[1], t[2]))
+                            lambda t: CDP.ApproxURes(t[0], t[1], t[2])).setName('rvalue_approx_u')
 
     # take(provided a, sub)
     rvalue_label_indexing2 = sp(TAKE + SLPAR + rvalue + SCOMMA + index_label + SRPAR,
@@ -928,7 +936,7 @@ class Syntax():
                           lambda t: CDP.IgnoreResources(keyword=t[0],
                                                         rnames=make_list(list(t[1:-1])),
                                                         dp_rvalue=t[-1]))
-
+    ndpt_ignore_resources = ndpt_ignore_resources.setName('ndpt_ignore_resources')
 
     res_shortcut3 = sp(REQUIRES + 
                        C(Group(rname + OneOrMore(S(L(',')) + rname)), 'rnames')
@@ -968,7 +976,7 @@ class Syntax():
 
     MCDPTOKEN = keyword('mcdp', CDP.MCDPKeyword)
     ndpt_dp_model_statements = sp(ZeroOrMore(line_expr),
-                                  dp_model_statements_parse_action)
+                                  dp_model_statements_parse_action).setName('ndpt_dp_model_statements')
     
     def ndpt_dp_model_parse(tokens):  # @NoSelf        
         if len(tokens) == 5:
@@ -987,13 +995,13 @@ class Syntax():
                        + ow - O(comment_model) 
                        - ndpt_dp_model_statements 
                        - rbrace,
-                       ndpt_dp_model_parse)
+                       ndpt_dp_model_parse).setName('ndpt_dp_model')
 
                   
 
     # load
     primitivedp_name = sp(get_idn(), lambda t: CDP.FuncName(t[0]))  # XXX
-    primitivedp_load = sp(LOAD - primitivedp_name, lambda t: CDP.LoadDP(t[0], t[1]))
+    primitivedp_load = sp(LOAD - primitivedp_name, lambda t: CDP.LoadDP(t[0], t[1])).setName('primitivedp_load')
 
     primitivedp_expr = (primitivedp_load | code_spec)
 
@@ -1009,7 +1017,7 @@ class Syntax():
                          primitivedp_expr - 
                          S(L('}')),
                          lambda t: CDP.DPWrap(token=t[0], statements=t[1],
-                                              prep=t[2], impl=t[3]))
+                                              prep=t[2], impl=t[3])).setName('ndpt_simple_dp_model')
 
     entry = rvalue
     imp_name = sp(get_idn(), lambda t: CDP.ImpName(t[0]))
@@ -1027,7 +1035,7 @@ class Syntax():
                       simple_dp_model_stats - 
                       catalogue_table - 
                       S(L('}')),
-                      lambda t: CDP.FromCatalogue(t[0], t[1], t[2]))
+                      lambda t: CDP.FromCatalogue(t[0], t[1], t[2])).setName('ndpt_catalogue_dp')
     # Example:
     #    choose(name: <dp>, name2: <dp>)
     CHOOSE = keyword('choose', CDP.CoproductWithNamesChooseKeyword)
@@ -1038,7 +1046,7 @@ class Syntax():
                                     - ZeroOrMore(SCOMMA + ndpt_coproduct_with_names_one)
                                     - SRPAR,
                                     lambda t: CDP.CoproductWithNames(keyword=t[0],
-                                                                     elements=make_list(t[1:])))
+                                                                     elements=make_list(t[1:]))).setName('ndpt_coproduct_with_names')
     
     # Example:
     #   approx(mass,0%,0g,%)
@@ -1053,7 +1061,7 @@ class Syntax():
                                                      perc=t[2],
                                                      abs=t[3],
                                                      max_value=t[4],
-                                                     dp=t[5]))
+                                                     dp=t[5])).setName('ndpt_approx')
 
     # Example:
     # addmake(code module.func) mcdp { ... }
@@ -1064,50 +1072,52 @@ class Syntax():
                       SyntaxCodeSpec.code_spec_simple - SRPAR
                       - ndpt_dp_rvalue,
                       lambda t: CDP.AddMake(keyword=t[0], what=t[1],
-                                            code=t[2], dp_rvalue=t[3]))
+                                            code=t[2], dp_rvalue=t[3])).setName('addmake')
+    
 
     ABSTRACT = keyword('abstract', CDP.AbstractKeyword)
     ndpt_abstract = sp(ABSTRACT - ndpt_dp_rvalue,
-                       lambda t: CDP.AbstractAway(t[0], t[1]))
+                       lambda t: CDP.AbstractAway(t[0], t[1])).setName('ndpt_abstract')
     
     COMPACT = keyword('compact', CDP.CompactKeyword)
     ndpt_compact = sp(COMPACT - ndpt_dp_rvalue,
-                       lambda t: CDP.Compact(t[0], t[1]))
+                       lambda t: CDP.Compact(t[0], t[1])).setName('ndpt_compact')
 
     TEMPLATE = spk(L('template'), CDP.TemplateKeyword)
     INTERFACE = spk(L('interface'), CDP.TemplateKeyword)
     ndpt_template = sp((TEMPLATE | INTERFACE) - ndpt_dp_rvalue,
-                       lambda t: CDP.MakeTemplate(t[0], t[1]))
+                       lambda t: CDP.MakeTemplate(t[0], t[1])).setName('ndpt_template')
 
     FLATTEN = keyword('flatten', CDP.FlattenKeyword)
     ndpt_flatten = sp(FLATTEN - ndpt_dp_rvalue,
-                      lambda t: CDP.Flatten(t[0], t[1]))
+                      lambda t: CDP.Flatten(t[0], t[1])).setName('ndpt_flatten')
 
     CANONICAL = keyword('canonical', CDP.FlattenKeyword)
     ndpt_canonical = sp(CANONICAL - ndpt_dp_rvalue,
-                            lambda t: CDP.MakeCanonical(t[0], t[1]))
+                            lambda t: CDP.MakeCanonical(t[0], t[1])).setName('ndpt_canonical')
 
     # approx_lower(n, <dp>) 
     APPROX_LOWER = keyword('approx_lower', CDP.ApproxLowerKeyword)
     ndpt_approx_lower = sp(APPROX_LOWER - SLPAR - integer - 
                             SCOMMA - ndpt_dp_rvalue - SRPAR,
-                            lambda t: CDP.ApproxLower(t[0], t[1], t[2]))
+                            lambda t: CDP.ApproxLower(t[0], t[1], t[2])).setName('ndpt_approx_lower')
 
     APPROX_UPPER = keyword('approx_upper', CDP.ApproxUpperKeyword)
     ndpt_approx_upper = sp(APPROX_UPPER - SLPAR - integer - 
                             SCOMMA - ndpt_dp_rvalue - SRPAR,
-                            lambda t: CDP.ApproxUpper(t[0], t[1], t[2]))
+                            lambda t: CDP.ApproxUpper(t[0], t[1], t[2])).setName('ndpt_approx_upper')
 
     EVERSION = keyword('eversion', CDP.EversionKeyword)
     ndpt_eversion = sp(EVERSION + SLPAR + ndpname + SCOMMA + ndpt_dp_rvalue + SRPAR,
                         lambda t: CDP.Eversion(t[0], t[1], t[2]))
+    ndpt_eversion = ndpt_eversion.setName('ndpt_eversion')
 
     templatename = sp(get_idn() | quoted, lambda t: CDP.TemplateName(t[0]))
     templatename_with_library = sp(library_name + L('.') - templatename,
         lambda t: CDP.TemplateNameWithLibrary(library=t[0], glyph=t[1], name=t[2]))
 
     template_load = sp(LOAD - (templatename_with_library | templatename),  # | (SLPAR - templatename - SRPAR)),
-                       lambda t: CDP.LoadTemplate(t[0], t[1]))
+                       lambda t: CDP.LoadTemplate(t[0], t[1])).setName('template_load')
     
     template_spec_param_name = sp(get_idn(), lambda t: CDP.TemplateParamName(t[0]))
     template_spec_param = template_spec_param_name + S(L(':')) + ndpt_dp_rvalue
@@ -1139,8 +1149,8 @@ class Syntax():
     ndpt_specialize = sp(SPECIALIZE - LSQ - Group(parameters) - RSQ - template,
                          lambda t: CDP.Specialize(keyword=t[0],
                                                   params=make_list(t[2], t[1].where),
-                                                  template=t[4]))
-
+                                                  template=t[4])).setName('ndpt_specialize')
+                                                  
     ndpt_dp_operand = (
         code_spec | 
         ndpt_load | 
@@ -1162,9 +1172,9 @@ class Syntax():
         ndpt_ignore_resources | 
         ndpt_eversion | 
         ndpt_placeholder 
-    )
+    ).setName('ndpt_dp_operand')
 
-    ndpt_dp_rvalue << (ndpt_dp_operand | (SLPAR - ndpt_dp_operand - SRPAR))
+    ndpt_dp_rvalue << (ndpt_dp_operand | (SLPAR - ndpt_dp_operand - SRPAR).setName('ndpt_dp_operand in parentheses'))
 
     rvalue_operand = (
           rvalue_new_function
@@ -1217,3 +1227,4 @@ class Syntax():
         (PLUS, 2, opAssoc.LEFT, plus_inv_parse_action),
         (MINUS, 2, opAssoc.LEFT, fvalue_minus_parse_action),
     ])
+

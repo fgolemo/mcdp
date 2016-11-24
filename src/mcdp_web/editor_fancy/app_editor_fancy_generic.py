@@ -8,7 +8,7 @@ from bs4 import BeautifulSoup
 from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
 from pyramid.renderers import render_to_response  # @UnresolvedImport
 
-from contracts.utils import check_isinstance, raise_wrapped
+from contracts.utils import check_isinstance, raise_wrapped, indent
 from mcdp_figures.figure_interface import MakeFiguresNDP
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp_eval, parse_ndp_refine, \
@@ -203,15 +203,28 @@ class AppEditorFancyGeneric():
         def go():
             try:
                 # XXX: inefficient; we parse twice
-                
                 parse_tree = parse_wrap(parse_expr, string)[0]
             except DPSemanticError as e:
                 msg = 'I only expected a DPSyntaxError'
                 raise_wrapped(DPInternalError, e, msg, exc=sys.exc_info())
             except DPSyntaxError as e:
                 # This is the case in which we could not even parse
+                
+                print('string: %r' % string)
+                from mcdp_report.html import mark_unparsable
+                string2, expr, commented = mark_unparsable(string, parse_expr)
+                print('string2: %r' % string2)
+                print('Commented: %r' % (commented))
+
                 res = format_exception_for_ajax_response(e, quiet=(DPSyntaxError,))
-                res['highlight'] = html_mark_syntax_error(string, e)
+                
+                html = ast_to_html(string2, complete_document=False, extra_css=None, ignore_line=None,
+                            add_line_gutter=False, encapsulate_in_precode=True, add_css=False,
+                            parse_expr=parse_expr, add_line_spans=False, postprocess=None)
+                            
+#                 res['highlight'] = html_mark_syntax_error(string, e)
+                print('html with error:\n%s' % indent(html, '~'))
+                res['highlight'] = html
                 res['request'] = req
                 return res
             

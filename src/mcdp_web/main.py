@@ -32,8 +32,9 @@ __all__ = [
 ]
 
 
-class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
-              AppSolver2, AppEditorFancyGeneric, WebAppImages):
+class WebApp(AppEditor, AppVisualization, 
+             AppQR, AppSolver, AppInteractive,
+             AppSolver2, AppEditorFancyGeneric, WebAppImages):
 
     def __init__(self, dirname):
         self.dirname = dirname
