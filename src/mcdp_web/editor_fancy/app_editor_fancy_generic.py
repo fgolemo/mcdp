@@ -262,6 +262,7 @@ class AppEditorFancyGeneric():
                     
                     thing = parse_eval(Tmp.parse_tree_interpreted, context)
                 except (DPSemanticError, DPInternalError) as e:
+                    print e
                     highlight_marked = html_mark(highlight, e.where, "semantic_error")
                     self.last_processed2[key] = None  # XXX
                     res = format_exception_for_ajax_response(e, quiet=(DPSemanticError, DPInternalError))

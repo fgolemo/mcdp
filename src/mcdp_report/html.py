@@ -374,29 +374,20 @@ def mark_unparsable(s0, parse_expr):
     nlines = len(s0.split('\n'))
     s = s0
     while True:
-        #print('nlines %s commented %s' % (nlines, commented))
         if len(commented) == nlines:
             #print('looks like we commented all of it')
             return s, None, commented 
-#         print s
         try:     
             expr = parse_wrap(parse_expr, s)[0]
             #expr2 = parse_ndp_refine(expr, context)
             return s, expr, commented
         except DPSyntaxError as e:
-#             print e.where
-#             print e
-#             print ('string=%r' % s)
             line = e.where.line
             assert line is not None
-            #print('found error at char %s line %s of %r: %r' % (e.where.character, line, s0, s0[e.where.character]))
             if line == nlines: # all commented
                 return s, None, commented
             if line in commented:
                 return s, None, commented
-#                 msg = 'assertion: I already commented this line'
-#                 raise_desc(AssertionError, msg, commented=commented, s=s)
-            #print 'error in line %s (0 based)' % line
             commented.add(line)
             s = comment_out(s, line - 1) 
             

@@ -237,7 +237,22 @@ def parse_wrap_filename(expr, filename):
     except MCDPExceptionWithWhere  as e:
         raise e.with_filename(filename)
 
+def translate_where(where0, string):
+    string0 = where0.string
+    line, col = line_and_col(where0.character, string0)
+    character2 = location(line, col, string)
+    
+    line, col = line_and_col(where0.character_end, string0)
+    character_end2 = location(line, col, string)
+    
+    where = Where(string=string, character=character2, character_end=character_end2)
+    return where
+
 def parse_wrap(expr, string):
+    from mcdp_lang_tests.utils import find_parsing_element
+    from mcdp_library_tests.tests import timeit
+    from mcdp_lang.refinement import namedtuple_visitor_ext
+    
     if isinstance(string, unicode):
         msg = 'The string is unicode. It should be a str with utf-8 encoding.'
         msg += '\n' + string.encode('utf-8').__repr__()
@@ -256,14 +271,18 @@ def parse_wrap(expr, string):
 
     m = lambda x: x
     try:
-        from mcdp_lang_tests.utils import find_parsing_element
-        from mcdp_library_tests.tests import timeit
+        
         try:
             w = str(find_parsing_element(expr))
         except ValueError:
             w = '(unknown)'
         with timeit(w, 0.5):
-            return expr.parseString(string0, parseAll=True)  # [0]
+            parsed = expr.parseString(string0, parseAll=True)  # [0]
+            def transform(x, parents):  # @UnusedVariable
+                where = translate_where(x.where, string)
+                return get_copy_with_where(x, where)
+            parsed_transformed = namedtuple_visitor_ext(parsed[0], transform) 
+            return [parsed_transformed]
     except RuntimeError as e:
         msg = 'We have a recursive grammar.'
         msg += "\n\n" + indent(m(string), '  ') + '\n'
@@ -275,9 +294,14 @@ def parse_wrap(expr, string):
         loc2 = location(line, col, string)
         where = Where(string, character=loc2)
         e2 = DPSyntaxError(str(e), where=where)
-        raise DPSyntaxError, e2, sys.exc_info()[2]
+        raise DPSyntaxError, e2.args, sys.exc_info()[2]
     except DPSemanticError as e:
-        raise
+        line, col = line_and_col(e.loc, string0)
+        # find the equivalent location in string
+        loc2 = location(line, col, string)
+        where = Where(string, character=loc2)
+        e2 = DPSemanticError(str(e), where=where)
+        raise DPSemanticError, e2.args, sys.exc_info()[2]
     except DPInternalError as e:
         raise
 #         msg = "Internal error while evaluating the spec:"

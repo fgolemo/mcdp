@@ -12,17 +12,18 @@ def isnamedtupleinstance(x):
     if not isinstance(f, tuple): return False
     return all(type(n) == str for n in f)
 
+
 def isnamedtuplewhere(x):
     if not isnamedtupleinstance(x):
         return False
     d = x._asdict()
     return 'where' in d
 
+
 def namedtuplewhere(a, b):
     fields = b.split(" ")
     assert not 'where' in fields
     fields.append('where')
-#     fields.append('warning')
     base = namedtuple(a, fields)
     base.__new__.__defaults__ = (None, )
     F = base
@@ -87,5 +88,3 @@ def recursive_print(x):
         
     return s
         
-    
-    

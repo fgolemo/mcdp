@@ -6,6 +6,7 @@ from mcdp_lang.syntax import Syntax
 from mcdp_report.html import mark_unparsable
 from mcdp_lang.parse_actions import parse_wrap
 from mocdp.exceptions import DPSyntaxError
+from mcdp_lang.parse_interface import parse_ndp
 
 
 def ast_to_html_(s):
@@ -154,13 +155,24 @@ a
 
 @comptest
 def parsing_error_recov10():
-    s="""mcdp { 
-a
-}kk"""
-    try:
-        parse_wrap(Syntax.ndpt_dp_rvalue, s)
-    except DPSyntaxError:
-        pass
     
-    mark_unparsable_(s)
+    s="""mcdp {
+#      a = mcdp {}
+ 
+     x = instance a 
+}
+#dkokokeo"""
+    parse_ndp(s)
+
+    
+@comptest
+def parsing_error_recov11():
+    pass
+#     
+#     try:
+#         parse_wrap(Syntax.ndpt_dp_rvalue, s)
+#     except DPSyntaxError:
+#         pass
+#     
+#     mark_unparsable_(s)
     
