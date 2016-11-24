@@ -14,6 +14,7 @@ from mcdp_lang.utils_lists import is_a_special_list
 from mocdp import logger, MCDPConstants
 from mocdp.exceptions import mcdp_dev_warning, DPSyntaxError
 
+
 unparsable_marker = '#@'
 
 def isolate_comments(s):

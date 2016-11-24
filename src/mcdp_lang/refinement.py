@@ -344,7 +344,8 @@ def namedtuple_visitor_ext(x, transform, parents=None):
     if parents is None:
         parents = ()
         
-    # special case: parsing 1.0 floatnumber
+    # special case: only useful when parsing 1.0 floatnumber
+    # otherwise we do not get here because of (x) below
     if isinstance(x, (int, float)):
         return x
     
@@ -355,7 +356,7 @@ def namedtuple_visitor_ext(x, transform, parents=None):
         if isnamedtupleinstance(v):
             parents2 = parents + ( (x, k),  )
             v2 = namedtuple_visitor_ext(v, transform, parents=parents2)
-        else:
+        else: # (x)
             v2 = v
          
         d[k] = v2

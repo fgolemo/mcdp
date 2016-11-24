@@ -244,6 +244,16 @@ def translate_where(where0, string):
     
     line, col = line_and_col(where0.character_end, string0)
     character_end2 = location(line, col, string)
+
+    if character_end2 > len(string):
+        print where0
+        print 'line, col', line, col
+        print 'character_end2', character_end2
+        print 'len(string)', len(string)
+        print indent(string,  ' string:')
+        print indent(string0, 'string0:')
+        print 'string: %r' % string
+        print 'string0: %r' % string0
     
     where = Where(string=string, character=character2, character_end=character_end2)
     return where
@@ -260,16 +270,19 @@ def parse_wrap(expr, string):
     
     check_isinstance(string, str)
 
+#     string = string.replace('\t', ' '*4)
+
     # Nice trick: the remove_comments doesn't change the number of lines
     # it only truncates them...
+    
     string0 = remove_comments(string)
+    
     
     if not string0.strip():
         msg = 'Nothing to parse.'
         where=Where(string, character=len(string))
         raise DPSyntaxError(msg, where=where)
 
-    m = lambda x: x
     try:
         
         try:
@@ -277,15 +290,20 @@ def parse_wrap(expr, string):
         except ValueError:
             w = '(unknown)'
         with timeit(w, 0.5):
+            expr.parseWithTabs()
             parsed = expr.parseString(string0, parseAll=True)  # [0]
             def transform(x, parents):  # @UnusedVariable
+                if x.where is None:
+                    msg = 'Where is None for this element'
+                    raise_desc(DPInternalError, msg, x=recursive_print(x),
+                               all=recursive_print(parsed[0]))
                 where = translate_where(x.where, string)
                 return get_copy_with_where(x, where)
             parsed_transformed = namedtuple_visitor_ext(parsed[0], transform) 
             return [parsed_transformed]
     except RuntimeError as e:
         msg = 'We have a recursive grammar.'
-        msg += "\n\n" + indent(m(string), '  ') + '\n'
+        msg += "\n\n" + indent(string, '  ') + '\n'
         raise_desc(DPInternalError, msg)
     except (ParseException, ParseFatalException) as e:
         # find the line and col in string0
