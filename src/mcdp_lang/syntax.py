@@ -286,8 +286,8 @@ class Syntax():
     finite_poset_chain = sp(finite_poset_el + ZeroOrMore(LEQ + finite_poset_el),
                                lambda t: make_list(t))
 
-    space_finite_poset = sp(FINITE_POSET - S(L('{')) + ZeroOrMore(finite_poset_chain) + S(L('}')),
-                      lambda t: CDP.FinitePoset(t[0], make_list(t[1:])))
+    space_finite_poset = sp(FINITE_POSET - L('{') + ZeroOrMore(finite_poset_chain) + S(L('}')),
+                      lambda t: CDP.FinitePoset(t[0], make_list(t[2:], where=t[0].where)))
 
     space_powerset_keyword = spk(L('℘') | L('set-of'), CDP.PowerSetKeyword)
     space_powerset = sp(space_powerset_keyword - L('(') + space + L(')'),

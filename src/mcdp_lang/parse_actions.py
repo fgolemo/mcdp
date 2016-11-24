@@ -322,8 +322,8 @@ def parse_wrap(expr, string):
         raise DPSemanticError, e2.args, sys.exc_info()[2]
     except DPInternalError as e:
         raise
-#         msg = "Internal error while evaluating the spec:"
 #         msg += "\n\n" + indent(m(string), '  ') + '\n'
+#         msg = "Internal error while evaluating the spec:"
 #         raise_wrapped(DPInternalError, e, msg, compact=False)
 
 def remove_comments(s):
