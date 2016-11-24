@@ -221,11 +221,7 @@ def ok(expr, string, result=None):
     expr = find_parsing_element(expr)
     register_indep(parse_wrap_check, dynamic=False,
                    args=(string, expr, result), kwargs=dict())
-
-# def sem(expr, string):
-#     expr = find_parsing_element(expr)
-#     register_indep(parse_wrap_semantic_error, dynamic=False,
-#                    args=(string, expr), kwargs=dict())
+ 
 
 def syn(expr, string):
     expr = find_parsing_element(expr)
@@ -241,15 +237,19 @@ class ParsingElement():
     def __repr__(self):
         return 'ParsingElement(%s)' % self.name
 
+
 @contract(returns=ParsingElement)
 def find_parsing_element(x):
     from mcdp_lang.syntax_codespec import SyntaxCodeSpec
+    from mcdp_lang.syntax import SyntaxBasics
     
     d = dict(**Syntax.__dict__)  # @UndefinedVariable
     d.update(**SyntaxCodeSpec.__dict__)  # @UndefinedVariable
+    d.update(**SyntaxBasics.__dict__) # @UndefinedVariable
 
     for name, value in d.items():  # @UndefinedVariable
         if value is x:
             return ParsingElement(name)
+        
     raise ValueError('Cannot find element for %s.' % str(x))
 

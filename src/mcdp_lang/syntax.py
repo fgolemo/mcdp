@@ -30,7 +30,7 @@ CDP = CDPLanguage
 
 class SyntaxBasics():
     # numbers
-    number = Word(nums)
+    number = Word(nums).setName('number')
     point = Literal('.')
     e = CaselessLiteral('E')
     plus = Literal('+')

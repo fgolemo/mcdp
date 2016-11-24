@@ -344,6 +344,10 @@ def namedtuple_visitor_ext(x, transform, parents=None):
     if parents is None:
         parents = ()
         
+    # special case: parsing 1.0 floatnumber
+    if isinstance(x, (int, float)):
+        return x
+    
     assert isnamedtupleinstance(x), x
     
     d = x._asdict()
@@ -362,9 +366,6 @@ def namedtuple_visitor_ext(x, transform, parents=None):
     if isnamedtuplewhere(x1):
         x1 = transform(x1, parents=parents)
 
-#     if hasattr(x, 'warning'):
-#         setattr(x1, 'warning', getattr(x, 'warning'))
-#     
     return x1
 
 def refine(x, parents,
