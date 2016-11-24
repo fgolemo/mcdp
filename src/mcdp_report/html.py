@@ -11,7 +11,7 @@ from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
-from mocdp import logger
+from mocdp import logger, MCDPConstants
 from mocdp.exceptions import mcdp_dev_warning, DPSyntaxError
 
 unparsable_marker = '#@'
@@ -144,9 +144,9 @@ def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
             if i != len(lines) - 1:
                 out += '\n'
 
-    from xml.etree import ElementTree as ET
-    x = ET.fromstring(out)
-    
+    if MCDPConstants.test_insist_correct_html_from_ast_to_html:
+        from xml.etree import ElementTree as ET
+        ET.fromstring(out)
     
     frag = ""
 
@@ -374,9 +374,9 @@ def mark_unparsable(s0, parse_expr):
     nlines = len(s0.split('\n'))
     s = s0
     while True:
-        print('nlines %s commented %s' % (nlines, commented))
+        #print('nlines %s commented %s' % (nlines, commented))
         if len(commented) == nlines:
-            print('looks like we commented all of it')
+            #print('looks like we commented all of it')
             return s, None, commented 
 #         print s
         try:     

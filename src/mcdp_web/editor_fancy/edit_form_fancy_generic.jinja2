@@ -100,12 +100,14 @@
 	function keyup() {
 		/* We do not ask for parsing every time a key is pressed */
 		text = current_text();
-		
+
 		// do not do it twice
 		if (text == last_rendered_text)
 			return; 
 		if (text == last_text_sent_to_server)
 			return;
+
+		$('.unparsable').css('color', 'black');
 
 		text_has_changed();
 		
@@ -181,7 +183,6 @@
 
 
 	function update_text_with_highlight(req_text, highlight) {
-		console.log('highlight: ' + highlight)
 		// never change the user input!
 		pos = getCaretCharacterOffsetWithin($("#editor").get(0));
 		if (pos == null){

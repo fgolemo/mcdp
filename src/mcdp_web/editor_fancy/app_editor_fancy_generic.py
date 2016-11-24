@@ -217,17 +217,16 @@ class AppEditorFancyGeneric():
                 if expr is not None:
                     try:
                         html = ast_to_html(string2, complete_document=False, extra_css=None, ignore_line=None,
-                                    add_line_gutter=False, encapsulate_in_precode=True, add_css=False,
+                                    add_line_gutter=False, encapsulate_in_precode=False, add_css=False,
                                     parse_expr=parse_expr, add_line_spans=False, postprocess=None)
-                        print('html with error:\n%s' % indent(html, '~'))
+                        #print('html with error:\n%s' % indent(html, '~'))
                 
                         res['highlight'] = html
                     except DPSyntaxError:
                         assert False, string2
                 else:
                     res['highlight'] = html_mark_syntax_error(string, e)
-                
-                
+                 
                 
                 res['request'] = req
                 return res

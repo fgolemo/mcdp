@@ -114,6 +114,7 @@ class MCDPConstants():
     # only draw 1/20th of pictures
     test_fraction_of_allreports = 0.025
      
+    test_insist_correct_html_from_ast_to_html = False
     #
     # UI
     #

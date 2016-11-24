@@ -1,9 +1,11 @@
 from nose.tools import assert_equal
 
 from comptests.registrar import comptest
-from contracts.interface import line_and_col
+from contracts.interface import line_and_col, location
 from mcdp_lang.syntax import Syntax
 from mcdp_report.html import mark_unparsable
+from mcdp_lang.parse_actions import parse_wrap
+from mocdp.exceptions import DPSyntaxError
 
 
 def ast_to_html_(s):
@@ -113,7 +115,7 @@ def parsing_error_recov06():
     s="""mcdp {
     unp}"""
     mark_unparsable_(s)
-    pass
+    
 
 
 @comptest
@@ -130,7 +132,7 @@ def parsing_error_recov08():
 # b = ckok
 }"""
     print ast_to_html_(s)
-    assert False
+    assert False, 'to fix'
     
 
 @comptest
@@ -139,9 +141,26 @@ def parsing_error_recov09():
     s="""# a!   
 a"""
     ast_to_html_(s)
-    pass
+    
+    s="""mcdp { 
+a
+}kk"""
+    for c in range(len(s)+1):
+        line, col = line_and_col(c, s)
+        c2 = location(line, col, s)
+        print('c = %2d line = %2d col = %s c2 = %s' % (c, line, col ,c2))
+        assert c == c2, (c, line, col, c2)
 
 
 @comptest
 def parsing_error_recov10():
-    pass
+    s="""mcdp { 
+a
+}kk"""
+    try:
+        parse_wrap(Syntax.ndpt_dp_rvalue, s)
+    except DPSyntaxError:
+        pass
+    
+    mark_unparsable_(s)
+    
