@@ -6,6 +6,7 @@
   	<style type='text/css'>
   	{% include 'editor_fancy/edit_form_fancy_generic.css' %}
   	</style>
+  	<title>{{navigation['current_thing']}}</title>
 
   </head>
   
@@ -92,8 +93,8 @@
 
 	function current_text() {
 		text = $("#editor").text();
-		console.log($("#editor").html());
-		console.log(text);
+		//console.log($("#editor").html());
+		//console.log(text);
 		return text;
 	}
 
@@ -338,8 +339,6 @@
 });
 </script>
 
-
-	</script>
   
   </body>
 </html>

@@ -183,7 +183,7 @@ class Syntax():
     comment_res = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentRes(t[0])).setName('comment_res')
     comment_var = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentVar(t[0])).setName('comment_val')
 
-    placeholder = SL('[') + SL('[') + (get_idn() | quoted) + SL(']') + SL(']').setName('placeholder')
+    placeholder = SL('[') + SL('[') - (get_idn() | quoted) + SL(']') + SL(']').setName('placeholder')
     
     
     
@@ -374,7 +374,7 @@ class Syntax():
                                                   lbracket=t[2],
                                                   unit=t[3],
                                                   rbracket=t[4], 
-                                                  comment=t[5] if len(t) == 6 else None))
+                                                  comment=t[5] if len(t) == 6 else None)).setName('fun_statement')
 
     REQUIRES = keyword('requires', CDP.RequireKeyword)
     res_statement = sp(REQUIRES + rname +  lbracket + space + rbracket + O(comment_res),
@@ -383,7 +383,7 @@ class Syntax():
                                                   lbracket=t[2],
                                                   unit=t[3],
                                                   rbracket=t[4], 
-                                                  comment=t[5] if len(t) == 6 else None))
+                                                  comment=t[5] if len(t) == 6 else None)).setName('res_statement')
     
     VARIABLE = keyword('variable', CDP.VarStatementKeyword)
     var_list = sp(vname + ZeroOrMore(SCOMMA + vname),
@@ -394,7 +394,7 @@ class Syntax():
                        lambda t: CDP.VarStatement(
                            keyword=t[0], vnames=t[1], lbracket=t[2],
                            unit=t[3], rbracket=t[4], 
-                           comment= t[5] if len(t) == 6 else None))
+                           comment= t[5] if len(t) == 6 else None)).setName('var_statement')
 
     # import statements:
     #    from libname import a, b
@@ -476,7 +476,7 @@ class Syntax():
 
     # instance <type>
     INSTANCE = keyword('instance', CDP.InstanceKeyword)
-    dpinstance_from_type = sp(INSTANCE - (ndpt_dp_rvalue | (SLPAR - ndpt_dp_rvalue + SRPAR)),
+    dpinstance_from_type = sp(INSTANCE - ((SLPAR - ndpt_dp_rvalue - SRPAR) | ndpt_dp_rvalue),
                               lambda t: CDP.DPInstance(t[0], t[1])).setName('dpinstance_from_type')
 
     # new Name ~= instance `Name
@@ -489,17 +489,17 @@ class Syntax():
 
     SUB = keyword('sub', CDP.SubKeyword)
     setname_ndp_instance1 = sp(SUB - dpname - EQ - dpinstance_expr,
-                     lambda t: CDP.SetNameNDPInstance(t[0], t[1], t[2], t[3]))
+                     lambda t: CDP.SetNameNDPInstance(t[0], t[1], t[2], t[3])).setName('setname_ndp_instance1')
 
     setname_ndp_instance2 = sp(dpname - EQ - dpinstance_expr,
-                     lambda t: CDP.SetNameNDPInstance(None, t[0], t[1], t[2]))
+                     lambda t: CDP.SetNameNDPInstance(None, t[0], t[1], t[2])).setName('setname_ndp_instance2')
 
     MCDPTYPE = keyword('mcdp', CDP.MCDPTypeKeyword)
     setname_ndp_type1 = sp(MCDPTYPE - dptypename - EQ - ndpt_dp_rvalue,
-                     lambda t: CDP.SetNameMCDPType(t[0], t[1], t[2], t[3]))
+                     lambda t: CDP.SetNameMCDPType(t[0], t[1], t[2], t[3])).setName('setname_ndp_type1')
 
     setname_ndp_type2 = sp(dptypename - EQ - ndpt_dp_rvalue,
-                     lambda t: CDP.SetNameMCDPType(None, t[0], t[1], t[2]))
+                     lambda t: CDP.SetNameMCDPType(None, t[0], t[1], t[2])).setName('setname_ndp_type2')
 
     # For pretty printing
     ELLIPSIS = keyword('...', CDP.Ellipsis)
@@ -524,17 +524,17 @@ class Syntax():
                           + S(O(comment_con)),
                          lambda t: CDP.SetNameConstant(t[0], t[1], t[2]))
     
-    setname_constant = setname_constant1 | setname_constant2
+    setname_constant = (setname_constant1 | setname_constant2).setName('setname_constant')
     setname_rvalue = sp(setname_generic_var + EQ + (ELLIPSIS | rvalue)
                         + S(O(comment_res)),
-                         lambda t: CDP.SetNameRValue(t[0], t[1], t[2]))
+                         lambda t: CDP.SetNameRValue(t[0], t[1], t[2])).setName('setname_rvalue')
 
     setname_fvalue = sp(setname_generic_var + EQ + fvalue
                         + S(O(comment_fun)),
-                        lambda t: CDP.SetNameFValue(t[0], t[1], t[2]))
+                        lambda t: CDP.SetNameFValue(t[0], t[1], t[2])).setName('setname_fvalue')
 
     variable_ref = sp(get_idn(),
-                      lambda t: CDPLanguage.VariableRef(t[0]))
+                      lambda t: CDPLanguage.VariableRef(t[0])).setName('variable_ref')
 
     ndpt_dp_variable_ref = sp(get_idn(),
                               lambda t: CDP.VariableRefNDPType(t[0]))
@@ -848,12 +848,12 @@ class Syntax():
     constraint_expr_geq = sp(fvalue + GEQ - rvalue,
                              lambda t: CDP.Constraint(fvalue=t[0],
                                                       rvalue=t[2],
-                                                      prep=t[1]))
+                                                      prep=t[1])).setName('constraint_expr_geq')
 
     constraint_expr_leq = sp(rvalue + LEQ - fvalue,
                              lambda t: CDP.Constraint(fvalue=t[2],
                                                       rvalue=t[0],
-                                                      prep=t[1]))
+                                                      prep=t[1])).setName('constraint_expr_leq')
 
 
     constraint_invalid1a = sp(fvalue + GEQ + fvalue,
@@ -890,14 +890,14 @@ class Syntax():
                           ^ constraint_invalid1b
                           ^ constraint_invalid2b 
                           ^ constraint_invalid3b
-                          )
+                          ).setName('constraint_invalid')
     
     USING = keyword('using', CDP.UsingKeyword)
     fun_shortcut1 = sp(PROVIDES + fname + USING - dpname,
                        lambda t: CDP.FunShortcut1(provides=t[0],
                                                   fname=t[1],
                                                   prep_using=t[2],
-                                                  name=t[3]))
+                                                  name=t[3])).setName('fun_shortcut1')
 
     FOR = keyword('for', CDP.ForKeyword)
 
@@ -905,22 +905,22 @@ class Syntax():
                 lambda t: make_list(list(t)))
     
     res_shortcut4 = sp(REQUIRES + rnames + S(O(comment_res)),
-                       lambda t: CDP.ResShortcut4(t[0], t[1]))
+                       lambda t: CDP.ResShortcut4(t[0], t[1])).setName('res_shortcut4')
 
     fnames = sp(fname + ZeroOrMore(SCOMMA + fname),
                 lambda t: make_list(list(t)))
     
     fun_shortcut4 = sp(PROVIDES + fnames + S(O(comment_fun)),
-                       lambda t: CDP.FunShortcut4(t[0], t[1]))
+                       lambda t: CDP.FunShortcut4(t[0], t[1])).setName('fun_shortcut4')
     
     res_shortcut1 = sp(REQUIRES + rname + FOR - dpname,
-                       lambda t: CDP.ResShortcut1(t[0], t[1], t[2], t[3]))
+                       lambda t: CDP.ResShortcut1(t[0], t[1], t[2], t[3])).setName('res_shortcut1')
 
     fun_shortcut2 = sp(PROVIDES + fname + (LEQ ^ EQ) - fvalue,
-                       lambda t: CDP.FunShortcut2(t[0], t[1], t[2], t[3]))
+                       lambda t: CDP.FunShortcut2(t[0], t[1], t[2], t[3])).setName('fun_shortcut2')
 
     res_shortcut2 = sp(REQUIRES + rname + (GEQ ^ EQ) - rvalue,
-                       lambda t: CDP.ResShortcut2(t[0], t[1], t[2], t[3]))
+                       lambda t: CDP.ResShortcut2(t[0], t[1], t[2], t[3])).setName('res_shortcut2')
 
     fun_shortcut3 = sp(PROVIDES + 
                        C(Group(fname + OneOrMore(SCOMMA + fname)), 'fnames')
@@ -928,15 +928,15 @@ class Syntax():
                        lambda t: funshortcut1m(provides=t[0],
                                                fnames=make_list(list(t['fnames'])),
                                                prep_using=t[2],
-                                               name=t[3]))
+                                               name=t[3])).setName('fun_shortcut3')
 
     IGNORE_RESOURCES = sp(K('ignore_resources'), CDP.IgnoreResourcesKeyword)
     ndpt_ignore_resources = sp(IGNORE_RESOURCES - SLPAR - rname
                           - ZeroOrMore(SCOMMA + rname) + SRPAR + ndpt_dp_rvalue,
                           lambda t: CDP.IgnoreResources(keyword=t[0],
                                                         rnames=make_list(list(t[1:-1])),
-                                                        dp_rvalue=t[-1]))
-    ndpt_ignore_resources = ndpt_ignore_resources.setName('ndpt_ignore_resources')
+                                                        dp_rvalue=t[-1])).setName('ndpt_ignore_resources')
+
 
     res_shortcut3 = sp(REQUIRES + 
                        C(Group(rname + OneOrMore(S(L(',')) + rname)), 'rnames')
@@ -944,13 +944,13 @@ class Syntax():
                        lambda t: resshortcut1m(requires=t[0],
                              rnames=make_list(list(t['rnames'])),
                              prep_for=t[2],
-                             name=t[3]))
+                             name=t[3])).setName('res_shortcut3')
 
     IGNORE = keyword('ignore', CDP.IgnoreKeyword)
     ignore_fun = sp(IGNORE + fvalue_function,
-                    lambda t: CDP.IgnoreFun(t[0], t[1]))
+                    lambda t: CDP.IgnoreFun(t[0], t[1])).setName('ignore_fun')
     ignore_res = sp(IGNORE + rvalue_resource,
-                    lambda t: CDP.IgnoreRes(t[0], t[1]))
+                    lambda t: CDP.IgnoreRes(t[0], t[1])).setName('ignore_res')
 
     line_expr = (((constraint_expr_geq ^ constraint_expr_leq) | constraint_invalid)
                    ^ 
@@ -968,7 +968,7 @@ class Syntax():
                  ^ var_statement
                  ^ ignore_res
                  ^ ignore_fun) + ow
-
+    line_expr = line_expr.setName('line_expr')
 
     # This is for syntax highlighting only (mcdp_web/renderdoc/highlight.py", line 424)
     dp_model_statements = sp(OneOrMore(line_expr),
@@ -1135,7 +1135,7 @@ class Syntax():
     DERIV = keyword('deriv', CDP.DerivKeyword)
 
     # not sure about ndpname
-    template_deriv = sp(DERIV + SLPAR + ndpname + SCOMMA + ndpt_dp_rvalue + SRPAR,
+    template_deriv = sp(DERIV - SLPAR - ndpname - SCOMMA - ndpt_dp_rvalue - SRPAR,
                         lambda t: CDP.Deriv(t[0], t[1], t[2]))
 
     template << (code_spec 

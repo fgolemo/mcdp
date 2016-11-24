@@ -403,3 +403,19 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 
 - editor: add warnings about unconnected functionality/resources
 
+
+- redlining doesn't work too good for this case:
+mcdp { 
+  battery = instance mcdp {
+    provides capacity [kWh]
+    requires mass [g]   
+  }
+
+  actuation = instance mcdp {
+    provides velocity [m/s]
+    provides payload [g]
+
+    requires 
+  }
+
+}

@@ -155,14 +155,31 @@ a
 
 @comptest
 def parsing_error_recov10():
-    
-    s="""mcdp {
-#      a = mcdp {}
- 
-     x = instance a 
-}
-#dkokokeo"""
-    parse_ndp(s)
+#     
+#     s="""mcdp {
+# #      a = mcdp {}
+#  
+#      x = instance a 
+# }
+# #dkokokeo"""
+#     parse_ndp(s)
+
+#     s="""a=instance mcdp {
+# a
+# }"""
+#     parse_wrap(Syntax.setname_ndp_instance2, s)
+
+    s="""a=instance mcdp {
+a
+}"""
+    parse_wrap(Syntax.line_expr, s)
+
+
+# 
+#     s="""instance mcdp {
+# a
+# }"""
+#     parse_wrap(Syntax.dpinstance_from_type, s)
 
     
 @comptest

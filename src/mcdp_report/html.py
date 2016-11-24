@@ -92,16 +92,18 @@ def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
         if not isnamedtuplewhere(block):
             raise ValueError(block)
     
-
     # XXX: this should not be necessary anymore
-    block2 = make_tree(block, character_end=len(s))
+#     block2 = make_tree(block, character_end=len(s))
+#     block2 = block
 
-    snippets = list(print_html_inner(block2))
+    snippets = list(print_html_inner(block))
     # the len is > 1 for mcdp_statements
     assert len(snippets) == 1, snippets
     snippet = snippets[0]
     transformed_p = snippet.transformed
-    # transformed_p = "".join(snippet.transformed for snippet in snippets)
+    
+    if block.where.character != 0:
+        transformed_p = for_pyparsing[:block.where.character] + transformed_p
 
     def sanitize_comment(x):
         x = x.replace('>', '&gt;')
@@ -144,7 +146,16 @@ def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
                 out += "</span>"
             if i != len(lines) - 1:
                 out += '\n'
-
+                
+    from mcdp_lang.namedtuple_tricks import recursive_print
+                
+    print 'for_pyparsing: %r' % for_pyparsing
+    print 'parsed: %s'  % recursive_print(block)
+    print block
+    print 'out: %r' % out
+#     if out.startswith(' '):
+#         out = '&nbsp;' + out
+    
     if MCDPConstants.test_insist_correct_html_from_ast_to_html:
         from xml.etree import ElementTree as ET
         ET.fromstring(out)
@@ -270,46 +281,46 @@ def print_ast(x):
     except ValueError as e:
         raise_wrapped(ValueError, e, 'wrong', x=x)
 
-@contract(character_end='int')
-def make_tree(x, character_end):
-
-    if not isnamedtuplewhere(x):
-        return x
-    
-    if x.where is None:
-        msg = 'I found an element without where attribute.'
-        raise_desc(ValueError, msg, x=x)
-
-    if x.where.character_end is not None:
-        character_end = min(x.where.character_end, character_end)
-
-    fields = {}
-    last = None
-
-    for k, v in reversed(list(iterate_sub(x))):
-        if last is None:
-            v_character_end = character_end
-        else:
-            if isnamedtuplewhere(last):
-                v_character_end = last.where.character - 1
-            else:
-                v_character_end = character_end
-
-        v2 = make_tree(v, character_end=v_character_end)
-        fields[k] = v2
-        last = v2
-
-    w = x.where
-
-    if w.character_end is None:
-        if character_end < w.character:
-            mcdp_dev_warning('**** warning: need to fix this')
-            character_end = w.character + 1
-        w = Where(string=w.string, character=w.character,
-                  character_end=character_end)
-
-    fields['where'] = w
-    return type(x)(**fields)
+# @contract(character_end='int')
+# def make_tree(x, character_end):
+# 
+#     if not isnamedtuplewhere(x):
+#         return x
+#     
+#     if x.where is None:
+#         msg = 'I found an element without where attribute.'
+#         raise_desc(ValueError, msg, x=x)
+# 
+#     if x.where.character_end is not None:
+#         character_end = min(x.where.character_end, character_end)
+# 
+#     fields = {}
+#     last = None
+# 
+#     for k, v in reversed(list(iterate_sub(x))):
+#         if last is None:
+#             v_character_end = character_end
+#         else:
+#             if isnamedtuplewhere(last):
+#                 v_character_end = last.where.character - 1
+#             else:
+#                 v_character_end = character_end
+# 
+#         v2 = make_tree(v, character_end=v_character_end)
+#         fields[k] = v2
+#         last = v2
+# 
+#     w = x.where
+# 
+#     if w.character_end is None:
+#         if character_end < w.character:
+#             mcdp_dev_warning('**** warning: need to fix this')
+#             character_end = w.character + 1
+#         w = Where(string=w.string, character=w.character,
+#                   character_end=character_end)
+# 
+#     fields['where'] = w
+#     return type(x)(**fields)
 
 
 def iterate_sub(x):

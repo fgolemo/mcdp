@@ -346,7 +346,7 @@ def namedtuple_visitor_ext(x, transform, parents=None):
         
     # special case: only useful when parsing 1.0 floatnumber
     # otherwise we do not get here because of (x) below
-    if isinstance(x, (int, float)):
+    if isinstance(x, (int, float, str)):
         return x
     
     assert isnamedtupleinstance(x), x
