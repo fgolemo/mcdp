@@ -392,13 +392,6 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 | B: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 |    R[g]
 
-- editor: parse text ignoring some lines 
-  create UnparsableText() 
-
-  edit the line to get
-
-    unparsable(' this is unparsable')
-
     
 
 - editor: add warnings about unconnected functionality/resources
@@ -421,3 +414,17 @@ mcdp {
 }
 
 - No arrow in PosetProductMap
+- Mux visualization with more than 21 signals (after z, use '{'), 
+
+- square for Nat: http://127.0.0.1:8080/libraries/basic/models/addition_1/views/syntax/
+
+- simplify a * a to mcdp {  
+   variable a, c [dimensionless] 
+   c >= a * a + Nat:1 
+   a >= square(c)  
+}
+
+- (integer) power for Natural numbers: a ^ 2
+http://127.0.0.1:8080/libraries/basic/models/addition_1/views/edit_fancy/
+
+- make Map::repr_map abstract

@@ -87,7 +87,7 @@ class WrapAMap(EmptyDP):
         if len(s) != 2:
             msg = ('%s:  no arrow in %s' % (type(self), m))
             raise ValueError(msg)
-        return  s[0].strip() + ' ⟼ {' + s[1].strip() + '}' 
+        return s[0].strip() + ' ⟼ {' + s[1].strip() + '}' 
     
     def repr_hd_map(self):
         """ Returns a string of the type "f |-> P(f)" """
