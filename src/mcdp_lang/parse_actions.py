@@ -270,8 +270,6 @@ def parse_wrap(expr, string):
     
     check_isinstance(string, str)
 
-#     string = string.replace('\t', ' '*4)
-
     # Nice trick: the remove_comments doesn't change the number of lines
     # it only truncates them...
     
@@ -289,39 +287,52 @@ def parse_wrap(expr, string):
             w = str(find_parsing_element(expr))
         except ValueError:
             w = '(unknown)'
+            
         with timeit(w, 0.5):
             expr.parseWithTabs()
             parsed = expr.parseString(string0, parseAll=True)  # [0]
+            
             def transform(x, parents):  # @UnusedVariable
-                if x.where is None:
+                if x.where is None: # pragma: no cover
                     msg = 'Where is None for this element'
                     raise_desc(DPInternalError, msg, x=recursive_print(x),
                                all=recursive_print(parsed[0]))
+                    
                 where = translate_where(x.where, string)
                 return get_copy_with_where(x, where)
+            
             parsed_transformed = namedtuple_visitor_ext(parsed[0], transform) 
             return [parsed_transformed]
-    except RuntimeError as e:
-        msg = 'We have a recursive grammar.'
-        msg += "\n\n" + indent(string, '  ') + '\n'
-        raise_desc(DPInternalError, msg)
+        
+#     except RuntimeError as e:
+#         msg = 'We have a recursive grammar.'
+#         msg += "\n\n" + indent(string, '  ') + '\n'
+#         raise_desc(DPInternalError, msg)
+#         
     except (ParseException, ParseFatalException) as e:
-        # find the line and col in string0
-        line, col = line_and_col(e.loc, string0)
-        # find the equivalent location in string
-        loc2 = location(line, col, string)
-        where = Where(string, character=loc2)
-        e2 = DPSyntaxError(str(e), where=where)
+        where1 = Where(string0, e.loc)
+        where2 = translate_where(where1, string)
+        e2 = DPSyntaxError(str(e), where=where2)
         raise DPSyntaxError, e2.args, sys.exc_info()[2]
+        
+#         # find the line and col in string0
+#         line, col = line_and_col(e.loc, string0)
+#         # find the equivalent location in string
+#         loc2 = location(line, col, string)
+#         where = Where(string, character=loc2)
+    
     except DPSemanticError as e:
-        line, col = line_and_col(e.loc, string0)
-        # find the equivalent location in string
-        loc2 = location(line, col, string)
-        where = Where(string, character=loc2)
-        e2 = DPSemanticError(str(e), where=where)
-        raise DPSemanticError, e2.args, sys.exc_info()[2]
-    except DPInternalError as e:
-        raise
+        msg = 'This should not throw a DPSemanticError'
+        raise_wrapped(DPInternalError, e,msg, exc=sys.exc_info())
+#         line, col = line_and_col(e.loc, string0)
+#         # find the equivalent location in string
+#         loc2 = location(line, col, string)
+#         where = Where(string, character=loc2)
+#         e2 = DPSemanticError(str(e), where=where)
+#         raise DPSemanticError, e2.args, sys.exc_info()[2]
+    
+#     except DPInternalError as e:
+#         raise
 #         msg += "\n\n" + indent(m(string), '  ') + '\n'
 #         msg = "Internal error while evaluating the spec:"
 #         raise_wrapped(DPInternalError, e, msg, compact=False)

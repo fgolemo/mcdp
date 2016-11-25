@@ -8,12 +8,9 @@ from bs4 import BeautifulSoup
 from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
 from pyramid.renderers import render_to_response  # @UnresolvedImport
 
-from contracts.utils import check_isinstance, raise_wrapped, indent
+from contracts.utils import check_isinstance, raise_wrapped
 from mcdp_figures.figure_interface import MakeFiguresNDP
 from mcdp_lang.parse_actions import parse_wrap
-from mcdp_lang.parse_interface import parse_ndp_eval, parse_ndp_refine, \
-    parse_template_eval, parse_template_refine, parse_constant_eval, \
-    parse_constant_refine, parse_poset_eval, parse_poset_refine
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.html import ast_to_html
@@ -22,6 +19,12 @@ from mcdp_web.utils import (ajax_error_catch, create_image_with_string,
 from mcdp_web.utils.response import response_data
 from mocdp import logger
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
+
+
+from mcdp_lang.parse_interface import( parse_ndp_eval, parse_ndp_refine, 
+    parse_template_eval, parse_template_refine, parse_constant_eval, 
+    parse_constant_refine, parse_poset_eval, parse_poset_refine)
+
 
 
 Spec = namedtuple('Spec', 'url_part url_variable extension '
@@ -209,17 +212,15 @@ class AppEditorFancyGeneric():
                 raise_wrapped(DPInternalError, e, msg, exc=sys.exc_info())
             except DPSyntaxError as e:
                 # This is the case in which we could not even parse
-                
                 from mcdp_report.html import mark_unparsable
-                string2, expr, commented = mark_unparsable(string, parse_expr)
+                string2, expr, _commented_lines = mark_unparsable(string, parse_expr)
                 
                 res = format_exception_for_ajax_response(e, quiet=(DPSyntaxError,))
                 if expr is not None:
                     try:
-                        html = ast_to_html(string2, complete_document=False, extra_css=None, ignore_line=None,
-                                    add_line_gutter=False, encapsulate_in_precode=False, add_css=False,
-                                    parse_expr=parse_expr, add_line_spans=False, postprocess=None)
-                        #print('html with error:\n%s' % indent(html, '~'))
+                        html = ast_to_html(string2,    ignore_line=None,
+                                    add_line_gutter=False, encapsulate_in_precode=False, 
+                                    parse_expr=parse_expr,   postprocess=None)
                 
                         res['highlight'] = html
                     except DPSyntaxError:
@@ -227,7 +228,6 @@ class AppEditorFancyGeneric():
                 else:
                     res['highlight'] = html_mark_syntax_error(string, e)
                  
-                
                 res['request'] = req
                 return res
             
@@ -236,9 +236,8 @@ class AppEditorFancyGeneric():
                     parse_tree_interpreted = None
                      
                 def postprocess(block):
-                    Tmp.parse_tree_interpreted = parse_refine(block, context) 
+                    Tmp.parse_tree_interpreted = parse_refine(block, context)
                     return Tmp.parse_tree_interpreted
-                
                 
                 try:
                     try:
@@ -253,16 +252,13 @@ class AppEditorFancyGeneric():
                         # Do it again without postprocess
                         highlight = ast_to_html(string,
                                             parse_expr=parse_expr,
-                                            complete_document=False,
                                             add_line_gutter=False,
                                             encapsulate_in_precode=False,
-                                            add_css=False,
                                             postprocess=None)
                         raise
                     
                     thing = parse_eval(Tmp.parse_tree_interpreted, context)
                 except (DPSemanticError, DPInternalError) as e:
-                    print e
                     highlight_marked = html_mark(highlight, e.where, "semantic_error")
                     self.last_processed2[key] = None  # XXX
                     res = format_exception_for_ajax_response(e, quiet=(DPSemanticError, DPInternalError))
@@ -274,8 +270,6 @@ class AppEditorFancyGeneric():
             except:
                 self.last_processed2[key] = None  # XXX
                 raise
-
-            print('app_editor_fancy_generic: warnings', context.warnings)
             
             warnings = []
             for w in context.warnings:
@@ -290,10 +284,14 @@ class AppEditorFancyGeneric():
                 warnings.append(warning.strip())
                     
             sep = '-' * 80
-            language_warnings = ("\n\n"+ sep + "\n\n").join(warnings)
+            language_warnings = ("\n\n" + sep + "\n\n").join(warnings)
+            language_warnings_html = "\n".join(['<div class="language_warning">%s</div>' % w
+                                      for w in warnings])
+            
             return {'ok': True, 
                     'highlight': highlight,
                     'language_warnings': language_warnings, 
+                    'language_warnings_html': language_warnings_html,
                     'request': req}
 
         return ajax_error_catch(go)

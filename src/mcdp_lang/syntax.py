@@ -491,7 +491,7 @@ class Syntax():
     setname_ndp_instance1 = sp(SUB - dpname - EQ - dpinstance_expr,
                      lambda t: CDP.SetNameNDPInstance(t[0], t[1], t[2], t[3])).setName('setname_ndp_instance1')
 
-    setname_ndp_instance2 = sp(dpname - EQ - dpinstance_expr,
+    setname_ndp_instance2 = sp(dpname + EQ + dpinstance_expr,
                      lambda t: CDP.SetNameNDPInstance(None, t[0], t[1], t[2])).setName('setname_ndp_instance2')
 
     MCDPTYPE = keyword('mcdp', CDP.MCDPTypeKeyword)
@@ -885,7 +885,8 @@ class Syntax():
                                                                     prep=t[1]))
     
 
-    constraint_invalid = (constraint_invalid1a ^ constraint_invalid2a
+    constraint_invalid = (constraint_invalid1a 
+                          ^ constraint_invalid2a
                           ^ constraint_invalid3a
                           ^ constraint_invalid1b
                           ^ constraint_invalid2b 
@@ -952,13 +953,15 @@ class Syntax():
     ignore_res = sp(IGNORE + rvalue_resource,
                     lambda t: CDP.IgnoreRes(t[0], t[1])).setName('ignore_res')
 
-    line_expr = (((constraint_expr_geq ^ constraint_expr_leq) | constraint_invalid)
+    line_expr = (
+        setname_ndp_instance1 |
+                      setname_ndp_instance2 |
+        ((constraint_expr_geq ^ constraint_expr_leq) | constraint_invalid)
                    ^ 
                      (setname_constant ^ (
                       setname_rvalue ^ 
                       setname_fvalue ^ 
-                      setname_ndp_instance1 ^ 
-                      setname_ndp_instance2 ^ 
+                       
                       setname_ndp_type1 ^ 
                       setname_ndp_type2))
                  ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2

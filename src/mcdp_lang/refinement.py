@@ -334,11 +334,13 @@ def nt_string(x):
     res = w.string[w.character:w.character_end]
     return res
 
+
 def namedtuple_visitor_only_visit(x, visit):
     def transform(x, parents):  # @UnusedVariable
         visit(x)
         return x
     namedtuple_visitor_ext(x, transform)
+    
     
 def namedtuple_visitor_ext(x, transform, parents=None):
     if parents is None:

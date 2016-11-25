@@ -4,15 +4,14 @@ import os
 import warnings
 
 from contracts import contract
-from contracts.interface import Where
 from contracts.utils import indent, raise_desc, raise_wrapped, check_isinstance
 from mcdp_lang.namedtuple_tricks import isnamedtuplewhere
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
-from mocdp import logger, MCDPConstants
-from mocdp.exceptions import mcdp_dev_warning, DPSyntaxError
+from mocdp import MCDPConstants
+from mocdp.exceptions import mcdp_dev_warning, DPSyntaxError, DPInternalError
 
 
 unparsable_marker = '#@'
@@ -39,29 +38,42 @@ def ast_to_text(s):
     return print_ast(block)
     
 @contract(s=str)
-def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
-                add_line_gutter=True, encapsulate_in_precode=True, add_css=True,
-                parse_expr=None, add_line_spans=False, postprocess=None):
+def ast_to_html(s, 
+                parse_expr=None,
+                
+                ignore_line=None,
+                add_line_gutter=True, 
+                encapsulate_in_precode=True, 
+                postprocess=None,
+                
+                # deprecated
+                complete_document=None,
+                extra_css=None, 
+                add_css=None,
+                add_line_spans=None,):
     """
         postprocess = function applied to parse tree
     """
     
+    if add_line_spans is not None and add_line_spans != False:
+        warnings.warn('deprecated param add_line_spans')
+    
     if parse_expr is None:
-        warnings.warn('Please add specific parse_expr (default=Syntax.ndpt_dp_rvalue)', 
-                      stacklevel=2)
-        parse_expr = Syntax.ndpt_dp_rvalue
+        raise Exception('Please add specific parse_expr (default=Syntax.ndpt_dp_rvalue)')
         
-    if add_css:
-        warnings.warn('check we really need add_css = True', stacklevel=2)
+    if add_css is not None:
+        warnings.warn('please do not use add_css', stacklevel=2)
 
-    if complete_document:
+    if complete_document is not None:
         warnings.warn('please do not use complete_document', stacklevel=2)
-    add_css = False
 
     if ignore_line is None:
         ignore_line = lambda _lineno: False
-    if extra_css is None:
-        extra_css = ''
+        
+    if extra_css is not None: 
+        warnings.warn('please do not use extra_css', stacklevel=2)
+        
+    extra_css = ''
 
     s_lines, s_comments = isolate_comments(s)
     assert len(s_lines) == len(s_comments) 
@@ -84,17 +96,13 @@ def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
     for_pyparsing = "\n".join(full_lines)
     block = parse_wrap(parse_expr, for_pyparsing)[0]
 
-    if not isnamedtuplewhere(block):
-        raise ValueError(block)
+    if not isnamedtuplewhere(block): # pragma: no cover
+        raise DPInternalError('unexpected', block=block)
 
     if postprocess is not None:
         block = postprocess(block)
         if not isnamedtuplewhere(block):
             raise ValueError(block)
-    
-    # XXX: this should not be necessary anymore
-#     block2 = make_tree(block, character_end=len(s))
-#     block2 = block
 
     snippets = list(print_html_inner(block))
     # the len is > 1 for mcdp_statements
@@ -116,10 +124,7 @@ def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
     lines = transformed.split('\n')
     if len(lines) != len(s_comments): 
         msg = 'Lost some lines while pretty printing: %s, %s' % (len(lines), len(s_comments))
-        logger.debug(msg)
-        if len(s) > 10:
-            logger.debug('original string[:10] = %r' % s[:10])
-            logger.debug('original string[-10:] = %r' % s[-10:])
+        raise DPInternalError(msg) 
 
     out = ""
     for i, (a, comment) in enumerate(zip(lines, s_comments)):
@@ -135,26 +140,15 @@ def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
         if ignore_line(lineno):
             pass
         else:
-            if add_line_spans:
-                out += "<span id='line%d'>" % lineno
+
             if add_line_gutter:
                 out += "<span class='line-gutter'>%2d</span>" % lineno
                 out += "<span class='line-content'>" + line + "</span>"
             else:
                 out += line
-            if add_line_spans:
-                out += "</span>"
+
             if i != len(lines) - 1:
                 out += '\n'
-                
-    from mcdp_lang.namedtuple_tricks import recursive_print
-                
-    print 'for_pyparsing: %r' % for_pyparsing
-    print 'parsed: %s'  % recursive_print(block)
-    print block
-    print 'out: %r' % out
-#     if out.startswith(' '):
-#         out = '&nbsp;' + out
     
     if MCDPConstants.test_insist_correct_html_from_ast_to_html:
         from xml.etree import ElementTree as ET
@@ -169,18 +163,8 @@ def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
     else:
         frag += out
 
-    if add_css:
-        frag += '\n\n<style type="text/css">\n' + get_language_css() + '\n' + extra_css + '\n</style>\n\n'
-
-    if complete_document:
-        s = """<html><head>
-        <meta charset="utf-8" />
-        </head><body>"""
-        s += frag
-        s += '\n</body></html>'
-        return s
-    else:
-        return frag
+    return frag 
+    
 
 Snippet = namedtuple('Snippet', 'op orig a b transformed')
 
@@ -221,9 +205,9 @@ def print_html_inner(x):
             cur.append('%s from %d -> %d: %s -> %r' % (type(x).__name__,
                                                        a, b, type(op).__name__, o))
 
-            if not a >= last:
+            if not a >= last: # pragma: no cover
                 raise_desc(ValueError, 'bad order', cur="\n".join(cur))
-            if not b >= a:
+            if not b >= a: # pragma: no cover
                 raise_desc(ValueError, 'bad ordering', cur="\n".join(cur))
             last = b
             yield i
@@ -281,46 +265,6 @@ def print_ast(x):
     except ValueError as e:
         raise_wrapped(ValueError, e, 'wrong', x=x)
 
-# @contract(character_end='int')
-# def make_tree(x, character_end):
-# 
-#     if not isnamedtuplewhere(x):
-#         return x
-#     
-#     if x.where is None:
-#         msg = 'I found an element without where attribute.'
-#         raise_desc(ValueError, msg, x=x)
-# 
-#     if x.where.character_end is not None:
-#         character_end = min(x.where.character_end, character_end)
-# 
-#     fields = {}
-#     last = None
-# 
-#     for k, v in reversed(list(iterate_sub(x))):
-#         if last is None:
-#             v_character_end = character_end
-#         else:
-#             if isnamedtuplewhere(last):
-#                 v_character_end = last.where.character - 1
-#             else:
-#                 v_character_end = character_end
-# 
-#         v2 = make_tree(v, character_end=v_character_end)
-#         fields[k] = v2
-#         last = v2
-# 
-#     w = x.where
-# 
-#     if w.character_end is None:
-#         if character_end < w.character:
-#             mcdp_dev_warning('**** warning: need to fix this')
-#             character_end = w.character + 1
-#         w = Where(string=w.string, character=w.character,
-#                   character_end=character_end)
-# 
-#     fields['where'] = w
-#     return type(x)(**fields)
 
 
 def iterate_sub(x):
@@ -363,14 +307,13 @@ def get_markdown_css():
     return css
 
 
-
 def comment_out(s, line):
     lines = s.split('\n')
     lines[line+1] = unparsable_marker + lines[line+1]
     return "\n".join(lines)
     
 def mark_unparsable(s0, parse_expr):
-    """ Returns
+    """ Returns a tuple:
     
             s, expr, commented
             
@@ -387,11 +330,9 @@ def mark_unparsable(s0, parse_expr):
     s = s0
     while True:
         if len(commented) == nlines:
-            #print('looks like we commented all of it')
             return s, None, commented 
         try:     
             expr = parse_wrap(parse_expr, s)[0]
-            #expr2 = parse_ndp_refine(expr, context)
             return s, expr, commented
         except DPSyntaxError as e:
             line = e.where.line

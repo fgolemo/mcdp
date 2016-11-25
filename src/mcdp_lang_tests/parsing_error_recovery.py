@@ -2,11 +2,9 @@ from nose.tools import assert_equal
 
 from comptests.registrar import comptest
 from contracts.interface import line_and_col, location
+from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_report.html import mark_unparsable
-from mcdp_lang.parse_actions import parse_wrap
-from mocdp.exceptions import DPSyntaxError
-from mcdp_lang.parse_interface import parse_ndp
 
 
 def ast_to_html_(s):
@@ -30,11 +28,10 @@ def parsing_error_recov01():
         provides f [m]
     }
     """.strip()
-    s, expr, commented = mark_unparsable_(s)
-    parse_expr = Syntax.ndpt_dp_rvalue
+    s, _expr, _commented = mark_unparsable_(s)
     
-    html = ast_to_html_(s)
-    print html
+    _html = ast_to_html_(s)
+    #print html
 
 
 @comptest
@@ -45,8 +42,8 @@ mcdp {
 unp
 }
 """.strip()
-    s2, expr, commented = mark_unparsable(s, parse_expr)
-    print commented
+    _s2, _expr, _commented = mark_unparsable(s, parse_expr)
+    
 
 
 
