@@ -85,7 +85,8 @@ class WrapAMap(EmptyDP):
         m =  self.amap.repr_map('f')
         s = m.split('⟼')
         if len(s) != 2:
-            return ('%s:  no arrow in %s' % (type(self), m))
+            msg = ('%s:  no arrow in %s' % (type(self), m))
+            raise ValueError(msg)
         return  s[0].strip() + ' ⟼ {' + s[1].strip() + '}' 
     
     def repr_hd_map(self):
@@ -94,7 +95,8 @@ class WrapAMap(EmptyDP):
             m =  self.amap_dual.repr_map('r')
             s = m.split('⟼')
             if len(s) != 2:
-                return ('%s:  no arrow in %s' % (type(self), m))
+                msg = ('%s:  no arrow in %s' % (type(self), m))
+                raise ValueError(msg)
             return  s[0].strip() + ' ⟼ {' + s[1].strip() + '}'
         else:
             return '(unset for %s)' % type(self).__name__

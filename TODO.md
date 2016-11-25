@@ -419,3 +419,5 @@ mcdp {
   }
 
 }
+
+- No arrow in PosetProductMap
