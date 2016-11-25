@@ -238,22 +238,31 @@ def parse_wrap_filename(expr, filename):
         raise e.with_filename(filename)
 
 def translate_where(where0, string):
+    """ 
+        Take the first where; compute line, col according to where0.string,
+        and find out the corresponding chars in the second string.
+        
+        This assumes that string and where0.string have the same lines.
+    """
     string0 = where0.string
     line, col = line_and_col(where0.character, string0)
     character2 = location(line, col, string)
     
-    line, col = line_and_col(where0.character_end, string0)
-    character_end2 = location(line, col, string)
+    if where0.character_end is None:
+        character_end2 = None
+    else:
+        line, col = line_and_col(where0.character_end, string0)
+        character_end2 = location(line, col, string)
 
-    if character_end2 > len(string):
-        print where0
-        print 'line, col', line, col
-        print 'character_end2', character_end2
-        print 'len(string)', len(string)
-        print indent(string,  ' string:')
-        print indent(string0, 'string0:')
-        print 'string: %r' % string
-        print 'string0: %r' % string0
+#     if character_end2 > len(string):
+#         print where0
+#         print 'line, col', line, col
+#         print 'character_end2', character_end2
+#         print 'len(string)', len(string)
+#         print indent(string,  ' string:')
+#         print indent(string0, 'string0:')
+#         print 'string: %r' % string
+#         print 'string0: %r' % string0
     
     where = Where(string=string, character=character2, character_end=character_end2)
     return where
