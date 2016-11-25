@@ -87,9 +87,6 @@ def dp_repr_long_labeled(data):
     res1 = ('txt', 'dp_repr_long_labeled', dp.repr_long())
     return [res1]
 
-def create_extra_css(params):  # @UnusedVariable
-    out = ''
-    return out
 
 def get_lines_to_hide(params):
     hide = params.get('hide', '')
@@ -103,13 +100,13 @@ def syntax_pdf(data):
     from mcdp_report.html import ast_to_html
     s = data['s']
     s = s.replace('\t', '    ')
-    extra_css = create_extra_css(data['params'])
+    
     lines_to_hide = get_lines_to_hide(data['params'])
     def ignore_line(lineno):
         return lineno  in lines_to_hide
-    contents = ast_to_html(s, complete_document=False, extra_css=extra_css,
+    contents = ast_to_html(s,  
                        ignore_line=ignore_line, parse_expr=Syntax.ndpt_dp_rvalue,
-                       add_css=False)
+                       )
     html = get_minimal_document(contents)
 
     d = mkdtemp()
@@ -159,9 +156,9 @@ def syntax_pdf(data):
 def syntax_frag(data):
     from mcdp_report.html import ast_to_html
     s = data['s']
-    extra_css = create_extra_css(data['params'])
-    res = ast_to_html(s, complete_document=False, extra_css=extra_css,
-                      parse_expr=Syntax.ndpt_dp_rvalue, add_css=True)
+    
+    res = ast_to_html(s,
+                      parse_expr=Syntax.ndpt_dp_rvalue)
     res1 = ('html', 'syntax_frag', res)
     return [res1]
 
@@ -169,13 +166,12 @@ def syntax_frag(data):
 def syntax_doc(data):
     from mcdp_report.html import ast_to_html
     s = data['s']
-    extra_css = create_extra_css(data['params'])
     lines_to_hide = get_lines_to_hide(data['params'])
     def ignore_line(lineno):
-        return lineno  in lines_to_hide
+        return lineno in lines_to_hide
 
-    body_contents = ast_to_html(s, complete_document=False, extra_css=extra_css, add_css=False,
-                      ignore_line=ignore_line, parse_expr = Syntax.ndpt_dp_rvalue)
+    body_contents = ast_to_html(s,
+                      ignore_line=ignore_line, parse_expr=Syntax.ndpt_dp_rvalue)
     res = get_minimal_document(body_contents, add_markdown_css=True)
     
     # TODO: add minimal document

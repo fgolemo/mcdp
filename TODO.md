@@ -22,10 +22,9 @@ Goals:
 (*) Improve correctness of symmetrization
 - T: dual chain for functionality/resources (dual chain).
     This enables to compute stable(h1 h2*) or stable(h2 h1*)
-
-(*) Derivative of a diagram
-
+ 
 (*) Cleanup:
+
 - cleanup: remove ATTRIBUTE_NDP_RECURSIVE_NAME
 - cleanup: remove normal form
 - refactor: 'ignore resources' should modify the diagram, not create a wrapper.
@@ -59,15 +58,25 @@ Goals:
   Putin = catalogue {
      provides plutonium [g]
      requires science [`scientific_objectives]
-     100g | `scientific_objectives : find_current_life
+     
+     100g ⟻ `scientific_objectives ⟼ find_current_life
+
      implicit : 100g | `scientific_objectives : find_current_life
   }
-
-  catalouge {
+ ↤↥↦↧ ⟻⟼
+  catalogue {
      provides resolution [pixels]
      requires latency [s]
 
-     500 pixels => 10
+    100 kWh ⟻ i1 ⟼ 100 g
+    
+    <100 kWh, 1 hour> <-| i1 |-> 100 g
+ 
+    ⟨100 kWh, 1 hour⟩ ⟻ i1 ⟼ 100 g
+    
+    ⟨100 kWh, 1 hour⟩ ↤ i1 ↦ 100 g
+    100 kWh, 1 hour ↤ i1 ↦ 100 g
+
   }
 
 
@@ -413,7 +422,6 @@ mcdp {
 
 }
 
-- No arrow in PosetProductMap
 - Mux visualization with more than 21 signals (after z, use '{'), 
 
 - square for Nat: http://127.0.0.1:8080/libraries/basic/models/addition_1/views/syntax/

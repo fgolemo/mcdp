@@ -1,4 +1,3 @@
-
 mcdp {
     provides out1 [`PWM]
     provides out2 [`PWM]
@@ -47,15 +46,12 @@ mcdp {
     (required in).duration >= endurance
 
     requires budget [USD]
-    budget >= 22.50 USD
+    required budget >= 22.50 USD
  
-    # (required pi_connection).amps >= 50 mA
-
-#    provides pisocketcom1 [`PISocketCom] 
     requires pisocketcom1 [`PISocketCom]
 
     core = instance `AdafruitDCHatCore
-    #provided pisocketcom1 <= Top `PiSocketCom
+
     Bottom `PiSocketCom <= core.pisocketcom1
     provided out1 <= core.out1
     provided out2 <= core.out2

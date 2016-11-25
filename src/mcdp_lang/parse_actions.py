@@ -7,17 +7,17 @@ from decorator import decorator
 
 from contracts import contract
 from contracts.interface import Where, line_and_col, location
-from contracts.utils import indent, raise_desc, raise_wrapped, check_isinstance
-from mocdp import logger
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from mocdp import logger, MCDPConstants
 from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
     MCDPExceptionWithWhere, do_extra_checks, mcdp_dev_warning)
 
 from .namedtuple_tricks import get_copy_with_where
+from .namedtuple_tricks import recursive_print
 from .parts import CDPLanguage
 from .pyparsing_bundled import ParseException, ParseFatalException
 from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list, unwrap_list
-from .namedtuple_tricks import recursive_print
 
 
 CDP = CDPLanguage
@@ -252,17 +252,7 @@ def translate_where(where0, string):
         character_end2 = None
     else:
         line, col = line_and_col(where0.character_end, string0)
-        character_end2 = location(line, col, string)
-
-#     if character_end2 > len(string):
-#         print where0
-#         print 'line, col', line, col
-#         print 'character_end2', character_end2
-#         print 'len(string)', len(string)
-#         print indent(string,  ' string:')
-#         print indent(string0, 'string0:')
-#         print 'string: %r' % string
-#         print 'string0: %r' % string0
+        character_end2 = location(line, col, string) 
     
     where = Where(string=string, character=character2, character_end=character_end2)
     return where
@@ -270,7 +260,7 @@ def translate_where(where0, string):
 def parse_wrap(expr, string):
     from mcdp_lang_tests.utils import find_parsing_element
     from mcdp_library_tests.tests import timeit
-    from mcdp_lang.refinement import namedtuple_visitor_ext
+    from .refinement import namedtuple_visitor_ext
     
     if isinstance(string, unicode):
         msg = 'The string is unicode. It should be a str with utf-8 encoding.'
@@ -297,7 +287,8 @@ def parse_wrap(expr, string):
         except ValueError:
             w = '(unknown)'
             
-        with timeit(w, 0.5):
+        
+        with timeit(w, MCDPConstants.parsing_too_slow_threshold):
             expr.parseWithTabs()
             parsed = expr.parseString(string0, parseAll=True)  # [0]
             
@@ -323,22 +314,10 @@ def parse_wrap(expr, string):
         where2 = translate_where(where1, string)
         e2 = DPSyntaxError(str(e), where=where2)
         raise DPSyntaxError, e2.args, sys.exc_info()[2]
-        
-#         # find the line and col in string0
-#         line, col = line_and_col(e.loc, string0)
-#         # find the equivalent location in string
-#         loc2 = location(line, col, string)
-#         where = Where(string, character=loc2)
-    
+         
     except DPSemanticError as e:
         msg = 'This should not throw a DPSemanticError'
-        raise_wrapped(DPInternalError, e,msg, exc=sys.exc_info())
-#         line, col = line_and_col(e.loc, string0)
-#         # find the equivalent location in string
-#         loc2 = location(line, col, string)
-#         where = Where(string, character=loc2)
-#         e2 = DPSemanticError(str(e), where=where)
-#         raise DPSemanticError, e2.args, sys.exc_info()[2]
+        raise_wrapped(DPInternalError, e,msg, exc=sys.exc_info()) 
     
 #     except DPInternalError as e:
 #         raise
@@ -356,7 +335,7 @@ def remove_comments(s):
     return "\n".join(map(remove_comment, lines))
 
 def parse_line(line):
-    from mcdp_lang.syntax import Syntax
+    from .syntax import Syntax
     return parse_wrap(Syntax.line_expr, line)[0]
 
 @contract(name= CDP.DPName)

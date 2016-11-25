@@ -127,5 +127,7 @@ class MCDPConstants():
     inv_relations_eps = numpy.finfo(float).eps # ~1e-16
     # TODO: think whether this makes us optimistic or pessimistic, and where
     
+    # threshold above which we output a warning
+    parsing_too_slow_threshold = 0.5
 
     log_cache_writes = False
