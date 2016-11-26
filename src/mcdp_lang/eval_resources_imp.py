@@ -7,7 +7,7 @@ from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
     get_types_universe, poset_minima)
 from mocdp.comp.context import (CResource, ValueWithUnits, get_name_for_fun_node, 
     ModelBuildingContext)
-from mocdp.exceptions import DPSemanticError
+from mocdp.exceptions import DPSemanticError, DPNotImplementedError
 
 from .eval_constant_imp import eval_constant
 from .eval_warnings import warn_language, MCDPWarnings
@@ -15,6 +15,8 @@ from .helpers import create_operation, get_valuewithunits_as_resource
 from .namedtuple_tricks import recursive_print
 from .parse_actions import decorate_add_where
 from .parts import CDPLanguage
+from mcdp_posets.rcomp import Rcomp
+from mcdp_posets.rcomp_units import RcompUnits
 
 
 CDP = CDPLanguage
@@ -172,6 +174,7 @@ def eval_rvalue_NewFunction(rvalue, context):
     return context.make_resource(get_name_for_fun_node(fname),
                                  dummy_ndp.get_rnames()[0])
         
+        
 def eval_rvalue_approx_u(r, context):
     assert isinstance(r, CDP.ApproxURes)
 
@@ -232,6 +235,10 @@ def eval_rvalue_approx_step(r, context):
 
     stepu = express_value_in_isomorphic_space(S1=step.unit, s1=step.value, S2=R)
 
+    if not isinstance(R, (Rcomp, RcompUnits)):
+        msg = 'approx() not implemented for %s.'%R
+        raise_desc(DPNotImplementedError, msg)
+        
     dp = makeLinearCeilDP(R, stepu)
 
     return create_operation(context, dp=dp, resources=[resource],
