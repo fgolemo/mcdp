@@ -51,9 +51,10 @@ def check_numbers2():
     parse_wrap_check('1 [g]', Syntax.valuewithunit,
                       CDP.SimpleValue(CDP.ValueExpr(1.0), CDP.RcompUnit('g')))
 
-@comptest_fails
+@comptest
 def check_sum_nat():
     eval_rvalue_as_constant_same_exactly('nat:1 + nat:1', 'nat:2')
+    eval_rvalue_as_constant_same_exactly('1 + 1', '2')
 
 @comptest_fails
 def check_sum_int():

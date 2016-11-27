@@ -279,6 +279,7 @@ def parse_wrap(expr, string):
         where=Where(string, character=len(string))
         raise DPSyntaxError(msg, where=where)
 
+
     try:
         
         try:
@@ -300,7 +301,8 @@ def parse_wrap(expr, string):
                 where = translate_where(x.where, string)
                 return get_copy_with_where(x, where)
             
-            parsed_transformed = namedtuple_visitor_ext(parsed[0], transform) 
+            parsed_transformed = namedtuple_visitor_ext(parsed[0], transform)
+            
             return [parsed_transformed]
         
 #     except RuntimeError as e:

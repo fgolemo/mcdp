@@ -1,5 +1,5 @@
 mcdp {
-    requires r1 [Nat]
+    requires r1 [Nat] 
     provides f1 [Nat]
     variable v1 [Nat]
     c1 = Nat:1

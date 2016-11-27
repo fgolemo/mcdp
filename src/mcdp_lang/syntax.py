@@ -124,7 +124,9 @@ class SyntaxIdentifiers():
         'ceilsqrt',
         'Rcomp',
         'variable',
-        'eversion'
+        'eversion',
+        'poset',
+        'add_bottom'
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -277,13 +279,21 @@ class Syntax():
     #   }
     #
     # evaluates to CDP.FinitePoset
+    
+    
     FINITE_POSET = keyword('finite_poset', CDP.FinitePosetKeyword)
+    POSET = keyword('poset', CDP.FinitePosetKeyword)
     finite_poset_el = sp(get_idn(), lambda t: CDP.FinitePosetElement(t[0]))
     finite_poset_chain = sp(finite_poset_el + ZeroOrMore(LEQ + finite_poset_el),
                                lambda t: make_list(t))
 
-    space_finite_poset = sp(FINITE_POSET - L('{') + ZeroOrMore(finite_poset_chain) + S(L('}')),
-                      lambda t: CDP.FinitePoset(t[0], make_list(t[2:], where=t[0].where)))
+    space_finite_poset = sp((FINITE_POSET | POSET) - L('{') + ZeroOrMore(finite_poset_chain) + S(L('}')),
+                            lambda t: CDP.FinitePoset(t[0], make_list(t[2:], where=t[0].where)))
+
+    ADD_BOTTOM = keyword('add_bottom', CDP.AddBottomKeyword)
+    
+    add_bottom = sp(ADD_BOTTOM + space,
+                    lambda t: CDP.AddBottom(t[0], t[1]))
 
     space_powerset_keyword = spk(L('℘') | L('set-of'), CDP.PowerSetKeyword)
     space_powerset = sp(space_powerset_keyword - L('(') + space + L(')'),
@@ -341,6 +351,7 @@ class Syntax():
         | space_coproduct
         | space_placeholder
         | space_dimensionless
+        | add_bottom
     )
 
     

@@ -7,7 +7,7 @@ from mcdp_posets import (
     UpperSets)
 from mcdp_posets import Rcomp
 from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPInternalError
+from mocdp.exceptions import DPInternalError, DPSemanticError
 
 from .namedtuple_tricks import recursive_print
 from .parse_actions import decorate_add_where
@@ -38,6 +38,7 @@ def eval_space(r, context):
         CDP.Nat: lambda r, context: Nat(),  # @UnusedVariable
         CDP.Int: lambda r, context: Int(),  # @UnusedVariable
         CDP.Rcomp: lambda r, context: Rcomp(),  # @UnusedVariable
+        CDP.AddBottom: eval_space_addbottom,
     }
 
     for klass, hook in cases.items():
@@ -53,6 +54,31 @@ def eval_space(r, context):
         r = recursive_print(r)
         raise_desc(DPInternalError, msg, r=r)
 
+def eval_space_addbottom(r, context):
+    check_isinstance(r, CDP.AddBottom)
+    poset = eval_space(r.poset, context)
+    if not isinstance(poset, FinitePoset):
+        msg = 'You can use add_bottom only on a FinitePoset.'
+        raise_desc(DPSemanticError, msg, where=r.keyword.where)
+    elements = poset.elements
+    relations = poset.relations
+     
+    bot = '⊥'
+    if bot in elements:
+        msg = 'Poset already has %r element.' % bot
+        raise_desc(DPSemanticError, msg, where=r.where)
+    elements2 = set()
+    elements2.update(elements)
+    elements2.add(bot)
+    relations2 = set()
+    relations2.update(relations)
+    for e in elements:
+        relations2.add((bot, e))
+        
+    fp = FinitePoset(elements2, relations2)
+    return fp 
+
+        
 def eval_space_single_element_poset(r, context):  # @UnusedVariable
     assert isinstance(r, CDP.SingleElementPoset)
     tag = r.tag.value

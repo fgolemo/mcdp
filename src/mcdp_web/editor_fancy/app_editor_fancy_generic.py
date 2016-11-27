@@ -242,19 +242,17 @@ class AppEditorFancyGeneric():
                 try:
                     try:
                         highlight = ast_to_html(string,
-                                            parse_expr=parse_expr,
-                                            complete_document=False,
-                                            add_line_gutter=False,
-                                            encapsulate_in_precode=False,
-                                            add_css=False,
-                                            postprocess=postprocess)
+                                                parse_expr=parse_expr,
+                                                add_line_gutter=False,
+                                                encapsulate_in_precode=False,
+                                                postprocess=postprocess)
                     except DPSemanticError:
                         # Do it again without postprocess
                         highlight = ast_to_html(string,
-                                            parse_expr=parse_expr,
-                                            add_line_gutter=False,
-                                            encapsulate_in_precode=False,
-                                            postprocess=None)
+                                                parse_expr=parse_expr,
+                                                add_line_gutter=False,
+                                                encapsulate_in_precode=False,
+                                                postprocess=None)
                         raise
                     
                     thing = parse_eval(Tmp.parse_tree_interpreted, context)

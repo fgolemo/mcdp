@@ -298,6 +298,9 @@ class CDPLanguage():
     FinitePosetElement = namedtuplewhere('FinitePosetElement', 'identifier')
     FinitePoset = namedtuplewhere('FinitePoset', 'keyword chains')
 
+    AddBottomKeyword = namedtuplewhere('AddBottomKeyword', 'keyword')
+    AddBottom = namedtuplewhere('AddBottom', 'keyword poset')
+    
     # Single-element poset
     # S(tag)
     SingleElementPosetKeyword = namedtuplewhere('SingleElementPosetKeyword', 'keyword')

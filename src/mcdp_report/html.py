@@ -92,8 +92,11 @@ def ast_to_html(s,
         else:
             break
 
-    full_lines = s_lines[num_empty_lines_start: len(s_lines)- num_empty_lines_end]
+    # use = s_lines
+    use = s.split('\n')
+    full_lines = use[num_empty_lines_start: len(s_lines)- num_empty_lines_end]
     for_pyparsing = "\n".join(full_lines)
+    
     block = parse_wrap(parse_expr, for_pyparsing)[0]
 
     if not isnamedtuplewhere(block): # pragma: no cover
@@ -121,32 +124,44 @@ def ast_to_html(s,
     transformed = '\n' * num_empty_lines_start + transformed_p
     transformed = transformed +  '\n' * num_empty_lines_end
     
+#     out = transformed
+    
     lines = transformed.split('\n')
     if len(lines) != len(s_comments): 
         msg = 'Lost some lines while pretty printing: %s, %s' % (len(lines), len(s_comments))
         raise DPInternalError(msg) 
-
+ 
     out = ""
-    for i, (a, comment) in enumerate(zip(lines, s_comments)):
-        line = a
-        if comment:
-            if comment.startswith(unparsable_marker):
-                unparsable = comment[len(unparsable_marker):]
-                line += '<span class="unparsable">%s</span>' % sanitize_comment(unparsable)
-            else:
-                line += '<span class="comment">%s</span>' % sanitize_comment(comment)
-            
+    for i, (line, comment) in enumerate(zip(lines, s_comments)):
         lineno = i + 1
         if ignore_line(lineno):
-            pass
+            continue
         else:
-
+            
+            if '#' in line:
+                w = line.index('#')
+                before = line[:w]
+                comment = line[w:]
+                
+                if comment.startswith(unparsable_marker):
+                    unparsable = comment[len(unparsable_marker):]
+                    linec = before + '<span class="unparsable">%s</span>' % sanitize_comment(unparsable)
+                else:
+                    linec = before + '<span class="comment">%s</span>' % sanitize_comment(comment)
+            else:
+                
+                linec = line   
+                
+            
             if add_line_gutter:
                 out += "<span class='line-gutter'>%2d</span>" % lineno
-                out += "<span class='line-content'>" + line + "</span>"
+                out += "<span class='line-content'>" + linec + "</span>"
             else:
-                out += line
+                out += linec
 
+        
+ 
+        
             if i != len(lines) - 1:
                 out += '\n'
     

@@ -1,4 +1,4 @@
-from comptests.registrar import comptest, comptest_fails
+from comptests.registrar import comptest
 from mcdp_lang.parse_interface import parse_ndp
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
