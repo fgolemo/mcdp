@@ -296,6 +296,8 @@ class CDPLanguage():
     # finite_poset { a <= b }
     FinitePosetKeyword = namedtuplewhere('FinitePosetKeyword', 'keyword')
     FinitePosetElement = namedtuplewhere('FinitePosetElement', 'identifier')
+    FinitePosetChainLEQ = namedtuplewhere('FinitePosetChainLEQ', 'ops')
+    FinitePosetChainGEQ = namedtuplewhere('FinitePosetChainGEQ', 'ops')
     FinitePoset = namedtuplewhere('FinitePoset', 'keyword chains')
 
     AddBottomKeyword = namedtuplewhere('AddBottomKeyword', 'keyword')

@@ -65,8 +65,8 @@ def eval_space_addbottom(r, context):
      
     bot = '⊥'
     if bot in elements:
-        msg = 'Poset already has %r element.' % bot
-        raise_desc(DPSemanticError, msg, where=r.where)
+        msg = 'Poset already has the "%s" element.' % bot
+        raise DPSemanticError(msg, where=r.where)
     elements2 = set()
     elements2.update(elements)
     elements2.add(bot)
@@ -159,12 +159,25 @@ def eval_space_finite_poset(r, context):  # @UnusedVariable
     universe = set()
     relations = set()
     for c in chains:
-        ops = get_odd_ops(c)
+        check_isinstance(c, (CDP.FinitePosetChainLEQ, CDP.FinitePosetChainGEQ))
+        
+        ops = get_odd_ops(unwrap_list(c.ops))
         elements = [_.identifier for _ in ops]
         universe.update(elements)
         
+        if isinstance(c, CDP.FinitePosetChainLEQ):
+            leq = True
+        elif isinstance(c, CDP.FinitePosetChainGEQ):
+            leq = False
+        else:
+            assert False
+        
         for a, b in zip(elements, elements[1:]):
-            relations.add((a, b))
+            
+            if leq:
+                relations.add((a, b))
+            else:
+                relations.add((b, a))
 
     return FinitePoset(universe=universe, relations=relations)
 

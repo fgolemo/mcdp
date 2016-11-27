@@ -284,10 +284,15 @@ class Syntax():
     FINITE_POSET = keyword('finite_poset', CDP.FinitePosetKeyword)
     POSET = keyword('poset', CDP.FinitePosetKeyword)
     finite_poset_el = sp(get_idn(), lambda t: CDP.FinitePosetElement(t[0]))
-    finite_poset_chain = sp(finite_poset_el + ZeroOrMore(LEQ + finite_poset_el),
-                               lambda t: make_list(t))
+    
+    finite_poset_chain_leq = sp(finite_poset_el + ZeroOrMore(LEQ + finite_poset_el),
+                               lambda t: CDP.FinitePosetChainLEQ(make_list(t)))
 
-    space_finite_poset = sp((FINITE_POSET | POSET) - L('{') + ZeroOrMore(finite_poset_chain) + S(L('}')),
+    finite_poset_chain_geq = sp(finite_poset_el + OneOrMore(GEQ + finite_poset_el),
+                               lambda t: CDP.FinitePosetChainGEQ(make_list(t)))
+
+    space_finite_poset = sp((FINITE_POSET | POSET) - L('{') + 
+                            ZeroOrMore(finite_poset_chain_leq ^ finite_poset_chain_geq) + S(L('}')),
                             lambda t: CDP.FinitePoset(t[0], make_list(t[2:], where=t[0].where)))
 
     ADD_BOTTOM = keyword('add_bottom', CDP.AddBottomKeyword)
@@ -354,15 +359,10 @@ class Syntax():
         | add_bottom
     )
 
-    
-
     PRODUCT = sp(L('x') | L('×'), lambda t: CDP.product(t[0]))
     space << operatorPrecedence(space_operand, [
         (PRODUCT, 2, opAssoc.LEFT, space_product_parse_action),
     ])
-
-    
-#     unitst = S(L('[')) + space + S(L(']'))
 
     nat_constant = sp(K('nat') - L(':') - nonneg_integer,
                       lambda t: CDP.NatConstant(t[0], t[1], t[2]))
@@ -372,8 +372,6 @@ class Syntax():
 
     rcomp_constant = sp(copy_expr_remove_action(SyntaxBasics.floatnumber),
                         lambda t: CDP.RcompConstant(float(t[0]))).setName('RCompConstant')
-
-    
 
     int_constant = sp(K('int') - L(':') - integer,
                       lambda t: CDP.IntConstant(t[0], t[1], t[2]))

@@ -24,6 +24,9 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mcdp_lang.parse_interface import( parse_ndp_eval, parse_ndp_refine, 
     parse_template_eval, parse_template_refine, parse_constant_eval, 
     parse_constant_refine, parse_poset_eval, parse_poset_refine)
+from mcdp_report.gg_utils import gg_get_formats
+from mcdp_posets.finite_poset import FinitePoset
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
 
 
 
@@ -88,7 +91,7 @@ class AppEditorFancyGeneric():
                            parse_refine=parse_poset_refine,
                            parse_eval=parse_poset_eval,
                            load=MCDPLibrary.load_poset,
-                           get_png_data=get_png_data_unavailable,
+                           get_png_data=get_png_data_poset,
                            write=MCDPLibrary.write_to_poset,
                            minimal_source_code="finite_poset {\na <= b <= c\n} ")
 
@@ -381,6 +384,41 @@ def html_mark_syntax_error(string, e):
     s = "" + first + '<span style="color:red">'+rest + '</span>'
     return s 
     
+def get_png_data_poset(library, name, x, data_format):
+    if isinstance(x, FinitePoset):
+        import mcdp_report.my_gvgen as gvgen
+        direction = 'TB'
+        assert direction in ['LR', 'TB']
+        gg = gvgen.GvGen(options="rankdir=%s" % direction)
+        
+        e2n = {}
+        for e in x.elements:
+            n = gg.newItem(e)
+            e2n[e] = n
+            gg.propertyAppend(n, "shape", "none")
+        
+        
+        for e1, e2 in x.relations:
+            # check if e2 is minimal
+            all_up = set(_ for _ in x.elements if x.leq(e1, _) and not x.leq(_, e1))
+            
+            minimals = poset_minima(all_up, x.leq)
+            
+            if not e2 in minimals:
+                continue
+            
+            low = e2n[e1]
+            high = e2n[e2]
+            l = gg.newLink(high, low )
+            gg.propertyAppend(l, "arrowhead", "none")
+            gg.propertyAppend(l, "arrowtail", "none")
+            
+        data, = gg_get_formats(gg, (data_format,))
+        return data
+    else:
+        s = str(x)
+        return create_image_with_string(s, size=(512, 512), color=(128, 128, 128))
+
 def get_png_data_unavailable(library, name, x, data_format):  # @UnusedVariable
     s = str(x)
     return create_image_with_string(s, size=(512, 512), color=(0, 0, 255))
