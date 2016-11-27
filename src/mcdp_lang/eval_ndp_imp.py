@@ -34,8 +34,7 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import (add_where_information, decorate_add_where, raise_with_info,
     parse_wrap)
 from .parts import CDPLanguage
-from .utils_lists import unwrap_list
-from mcdp_lang.utils_lists import get_odd_ops
+from .utils_lists import get_odd_ops, unwrap_list
 
 
 CDP = CDPLanguage
@@ -137,7 +136,7 @@ def eval_ndp_compact(r, context):
 
 def eval_ndp_ignoreresources(r, context):
     check_isinstance(r, CDP.IgnoreResources)
-    rnames = [_.value for _ in unwrap_list(r.rnames)]
+    rnames = [_.value for _ in get_odd_ops(unwrap_list(r.rnames))]
     ndp = eval_ndp(r.dp_rvalue, context)
     return ignore_some(ndp, ignore_rnames=rnames, ignore_fnames=[])
     
@@ -411,6 +410,7 @@ def eval_ndp_catalogue(r, context):
     statements = unwrap_list(r.funres)
     fun = [x for x in statements if isinstance(x, CDP.FunStatement)]
     res = [x for x in statements if isinstance(x, CDP.ResStatement)]
+    
     Fs = [eval_space(_.unit, context) for _ in fun]
     Rs = [eval_space(_.unit, context) for _ in res]
 
@@ -809,7 +809,7 @@ def eval_statement(r, context):
     elif isinstance(r, CDP.VarStatement):
         P = eval_space(r.unit, context)
  
-        vnames = unwrap_list(r.vnames)
+        vnames = get_odd_ops(unwrap_list(r.vnames))
         for v in vnames:
             vname = v.value
             where = v.where
@@ -832,62 +832,6 @@ def eval_statement(r, context):
         return eval_statement_SetNameConstant(r, context)
     elif isinstance(r, CDP.SetNameFValue):
         return eval_statement_SetNameFvalue(r,context)
-
-    elif isinstance(r, CDP.FunShortcut1):  # provides fname using name
-        fname = r.fname.value
-        with add_where_information(r.name.where):
-            B = context.make_function(r.name.value, fname)
-        F = context.get_ftype(B)
-        A = add_function(r.fname.value, F, context, r)
-        add_constraint(context, resource=A, function=B)
-
-    elif isinstance(r, CDP.ResShortcut1):  
-        # requires rname for name
-        with add_where_information(r.name.where):
-            A = context.make_resource(r.name.value, r.rname.value)
-        R = context.get_rtype(A)
-        B = add_resource(r.rname.value, R, context, r)
-        add_constraint(context, resource=A, function=B)  # B >= A
-
-
-  
-
-    elif isinstance(r, CDP.ResShortcut1m):  # requires rname1, rname2, ... for name
-        for rname in unwrap_list(r.rnames):
-            A = context.make_resource(r.name.value, rname.value)
-            R = context.get_rtype(A)
-            B = add_resource(rname.value, R, context, r)
-            add_constraint(context, resource=A, function=B)
-
-    elif isinstance(r, CDP.FunShortcut1m):  # provides fname1,fname2,... using name
-        for fname in unwrap_list(r.fnames):
-            B = context.make_function(r.name.value, fname.value)
-            F = context.get_ftype(B)
-            A = add_function(fname.value, F, context, r)
-            add_constraint(context, resource=A, function=B)
-
-    elif isinstance(r, CDP.FunShortcut2):  # provides rname <= (lf)
-        if isinstance(r.prep, CDP.leq):
-            msg = 'This is deprecated, and should be "=".'
-            warn_language(r.prep, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context)
-            
-        B = eval_lfunction(r.lf, context)
-        check_isinstance(B, CFunction)
-        F = context.get_ftype(B)
-        A = add_function(r.fname.value, F, context, r)
-        add_constraint(context, resource=A, function=B)
-
-    elif isinstance(r, CDP.ResShortcut2):  # requires rname >= (rvalue)
-        if isinstance(r.prep, CDP.geq):
-            msg = 'This is deprecated, and should be "=".'
-            warn_language(r.prep, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context)
-    
-        A = eval_rvalue(r.rvalue, context)
-        check_isinstance(A, CResource)
-        R = context.get_rtype(A)
-        B = add_resource(r.rname.value, R, context, r)
-        # B >= A
-        add_constraint(context, resource=A, function=B)
 
     elif isinstance(r, CDP.IgnoreFun):
         # equivalent to f >= any-of(Minimals S)
@@ -918,16 +862,26 @@ def eval_statement(r, context):
         context.add_ndp(name, ndp)
         f = context.make_function(name, '_limit')
         add_constraint(context, resource=rv, function=f)
-    else: # pragma: no cover
+    else: 
 
         cases = {
             CDP.ResStatement: eval_statement_ResStatement,
             CDP.FunStatement: eval_statement_FunStatement,
+            
             CDP.FunShortcut5: eval_statement_FunShortcut5,
             CDP.ResShortcut5: eval_statement_ResShortcut5,
             CDP.ResShortcut4: eval_statement_ResShortcut4,
             CDP.FunShortcut4: eval_statement_FunShortcut4,
-
+        
+            CDP.FunShortcut1m: eval_statement_FunShortcut1m,
+            CDP.ResShortcut1m: eval_statement_ResShortcut1m,
+            
+            CDP.FunShortcut2: eval_statement_FunShortcut2,
+            CDP.ResShortcut2: eval_statement_ResShortcut2,
+                        
+            CDP.FunShortcut1: eval_statement_FunShortcut1,
+            CDP.ResShortcut1: eval_statement_ResShortcut1,
+                  
         }
         
         for klass, hook in cases.items():
@@ -938,6 +892,71 @@ def eval_statement(r, context):
             msg = 'eval_statement(): cannot interpret.'
             r2 = recursive_print(r)
             raise_desc(DPInternalError, msg, r=r2) # where=r.where.__repr__())
+
+def eval_statement_FunShortcut1(r, context):
+    # provides fname using name
+    fname = r.fname.value
+    with add_where_information(r.name.where):
+        B = context.make_function(r.name.value, fname)
+    F = context.get_ftype(B)
+    A = add_function(r.fname.value, F, context, r=r.name)
+    add_constraint(context, resource=A, function=B)
+
+def eval_statement_ResShortcut1(r, context):  
+    # requires rname for name
+    with add_where_information(r.name.where):
+        A = context.make_resource(r.name.value, r.rname.value)
+    R = context.get_rtype(A)
+    B = add_resource(r.rname.value, R, context, r=r.name)
+    add_constraint(context, resource=A, function=B)  # B >= A
+
+
+def eval_statement_FunShortcut2(r, context):  
+    # provides rname <= (lf)
+    from mcdp_lang.eval_lfunction_imp import eval_lfunction
+    if isinstance(r.prep, CDP.leq):
+        msg = 'This is deprecated, and should be "=".'
+        warn_language(r.prep, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context)
+        
+    B = eval_lfunction(r.lf, context)
+    check_isinstance(B, CFunction)
+    F = context.get_ftype(B)
+    A = add_function(r.fname.value, F, context, r)
+    add_constraint(context, resource=A, function=B)
+
+def eval_statement_ResShortcut2(r, context):
+    # requires rname >= (rvalue)    
+    from mcdp_lang.eval_resources_imp import eval_rvalue
+
+    if isinstance(r.prep, CDP.geq):
+        msg = 'This is deprecated, and should be "=".'
+        warn_language(r.prep, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context)
+
+    A = eval_rvalue(r.rvalue, context)
+    check_isinstance(A, CResource)
+    R = context.get_rtype(A)
+    B = add_resource(r.rname.value, R, context, r)
+    # B >= A
+    add_constraint(context, resource=A, function=B)
+
+def eval_statement_ResShortcut1m(r, context):
+    # requires rname1, rname2, ... for name
+    rnames = get_odd_ops(unwrap_list(r.rnames))
+    for rname in rnames:
+        A = context.make_resource(r.name.value, rname.value)
+        R = context.get_rtype(A)
+        B = add_resource(rname.value, R, context, r=rname)
+        add_constraint(context, resource=A, function=B)
+
+        
+def eval_statement_FunShortcut1m(r, context): 
+     # provides fname1,fname2,... using name
+    fnames = get_odd_ops(unwrap_list(r.fnames))
+    for fname in fnames:
+        B = context.make_function(r.name.value, fname.value)
+        F = context.get_ftype(B)
+        A = add_function(fname.value, F, context, r=fname)
+        add_constraint(context, resource=A, function=B)
 
 
 def eval_statement_ResStatement(r, context):

@@ -372,6 +372,10 @@ class Syntax():
     vname = sp(get_idn(), lambda t: CDP.VName(t[0])) | rname_placeholder
 
     PROVIDES = keyword('provides', CDP.ProvideKeyword)
+    REQUIRES = keyword('requires', CDP.RequireKeyword)
+    VARIABLE = keyword('variable', CDP.VarStatementKeyword)
+
+    # These two are only used in catalogue - there is the generalization below
     fun_statement = sp(PROVIDES + fname + lbracket + space + rbracket + O(comment_fun),
                        lambda t: CDP.FunStatement(keyword=t[0], 
                                                   fname=t[1], 
@@ -380,7 +384,6 @@ class Syntax():
                                                   rbracket=t[4], 
                                                   comment=t[5] if len(t) == 6 else None)).setName('fun_statement')
 
-    REQUIRES = keyword('requires', CDP.RequireKeyword)
     res_statement = sp(REQUIRES + rname +  lbracket + space + rbracket + O(comment_res),
                        lambda t: CDP.ResStatement(keyword=t[0], 
                                                   rname=t[1], 
@@ -389,8 +392,7 @@ class Syntax():
                                                   rbracket=t[4], 
                                                   comment=t[5] if len(t) == 6 else None)).setName('res_statement')
     
-    VARIABLE = keyword('variable', CDP.VarStatementKeyword)
-    var_list = sp(vname + ZeroOrMore(SCOMMA + vname),
+    var_list = sp(vname + ZeroOrMore(COMMA + vname),
                   lambda t: make_list(t))
 
 # 'keyword vnames lbracket unit rbracket')
@@ -909,23 +911,24 @@ class Syntax():
 
     FOR = keyword('for', CDP.ForKeyword)
 
-    at_least_two_rnames = sp(rname + ZeroOrMore(COMMA + rname),
+    one_or_more_rnames = sp(rname + ZeroOrMore(COMMA + rname),
                 lambda t: make_list(list(t)))
-    at_least_two_fnames = sp(fname + ZeroOrMore(COMMA + fname),
+    
+    one_or_more_fnames = sp(fname + ZeroOrMore(COMMA + fname),
                 lambda t: make_list(list(t)))
 
-    res_shortcut4 = sp(REQUIRES + at_least_two_rnames + S(O(comment_res)),
+    res_shortcut4 = sp(REQUIRES + one_or_more_rnames + S(O(comment_res)),
                        lambda t: CDP.ResShortcut4(t[0], t[1])).setName('res_shortcut4')
 
-    fun_shortcut5 = sp(PROVIDES + at_least_two_fnames + lbracket + space + rbracket + O(comment_res),
+    fun_shortcut5 = sp(PROVIDES + one_or_more_fnames + lbracket + space + rbracket + O(comment_res),
                        lambda t: CDP.FunShortcut5(keyword=t[0], 
                                                   fnames=t[1], 
                                                   lbracket=t[2],
                                                   unit=t[3],
                                                   rbracket=t[4], 
-                                                  comment=t[5] if len(t) == 6 else None)).setName('res_shortcut5')
+                                                  comment=t[5] if len(t) == 6 else None)).setName('fun_shortcut5')
 
-    res_shortcut5 = sp(REQUIRES + at_least_two_rnames + lbracket + space + rbracket + O(comment_res),
+    res_shortcut5 = sp(REQUIRES + one_or_more_rnames + lbracket + space + rbracket + O(comment_res),
                        lambda t: CDP.ResShortcut5(keyword=t[0], 
                                                   rnames=t[1], 
                                                   lbracket=t[2],
@@ -934,41 +937,36 @@ class Syntax():
                                                   comment=t[5] if len(t) == 6 else None)).setName('res_shortcut5')
 
     
-    fun_shortcut4 = sp(PROVIDES + at_least_two_fnames + S(O(comment_fun)),
+    fun_shortcut4 = sp(PROVIDES + one_or_more_fnames + S(O(comment_fun)),
                        lambda t: CDP.FunShortcut4(t[0], t[1])).setName('fun_shortcut4')
     
     res_shortcut1 = sp(REQUIRES + rname + FOR - dpname,
                        lambda t: CDP.ResShortcut1(t[0], t[1], t[2], t[3])).setName('res_shortcut1')
 
-    fun_shortcut2 = sp(PROVIDES + fname + (LEQ ^ EQ) - fvalue,
+    fun_shortcut2 = sp(PROVIDES + fname + (LEQ | EQ) - fvalue,
                        lambda t: CDP.FunShortcut2(t[0], t[1], t[2], t[3])).setName('fun_shortcut2')
 
-    res_shortcut2 = sp(REQUIRES + rname + (GEQ ^ EQ) - rvalue,
+    res_shortcut2 = sp(REQUIRES + rname + (GEQ | EQ) - rvalue,
                        lambda t: CDP.ResShortcut2(t[0], t[1], t[2], t[3])).setName('res_shortcut2')
 
-    fun_shortcut3 = sp(PROVIDES + 
-                       C(Group(fname + OneOrMore(SCOMMA + fname)), 'fnames')
-                       + USING + dpname,
+    fun_shortcut3 = sp(PROVIDES + one_or_more_fnames + USING + dpname,
                        lambda t: funshortcut1m(provides=t[0],
-                                               fnames=make_list(list(t['fnames'])),
+                                               fnames=t[1],
                                                prep_using=t[2],
                                                name=t[3])).setName('fun_shortcut3')
 
     IGNORE_RESOURCES = sp(K('ignore_resources'), CDP.IgnoreResourcesKeyword)
-    ndpt_ignore_resources = sp(IGNORE_RESOURCES - SLPAR - rname
-                          - ZeroOrMore(SCOMMA + rname) + SRPAR + ndpt_dp_rvalue,
+    ndpt_ignore_resources = sp(IGNORE_RESOURCES - SLPAR - one_or_more_rnames
+                               + SRPAR + ndpt_dp_rvalue,
                           lambda t: CDP.IgnoreResources(keyword=t[0],
-                                                        rnames=make_list(list(t[1:-1])),
-                                                        dp_rvalue=t[-1])).setName('ndpt_ignore_resources')
+                                                        rnames=t[1],
+                                                        dp_rvalue=t[2])).setName('ndpt_ignore_resources')
 
-
-    res_shortcut3 = sp(REQUIRES + 
-                       C(Group(rname + OneOrMore(S(L(',')) + rname)), 'rnames')
-                       + FOR + dpname,
+    res_shortcut3 = sp(REQUIRES + one_or_more_rnames + FOR + dpname,
                        lambda t: resshortcut1m(requires=t[0],
-                             rnames=make_list(list(t['rnames'])),
-                             prep_for=t[2],
-                             name=t[3])).setName('res_shortcut3')
+                                               rnames=t[1],
+                                               prep_for=t[2],
+                                               name=t[3])).setName('res_shortcut3')
 
     IGNORE = keyword('ignore', CDP.IgnoreKeyword)
     ignore_fun = sp(IGNORE + fvalue_function,
@@ -987,7 +985,8 @@ class Syntax():
                        
                       setname_ndp_type1 ^ 
                       setname_ndp_type2))
-                 ^ fun_statement ^ res_statement ^ fun_shortcut1 ^ fun_shortcut2
+#                  ^ fun_statement ^ res_statement ^
+                 ^ fun_shortcut1 ^ fun_shortcut2
                  ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3
                  ^ res_shortcut4
                  ^ fun_shortcut4
