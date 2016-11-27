@@ -445,3 +445,5 @@ path2: /Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/unittes
 
 
 - delete caches in /tmp automatically
+
+- markdown rendering does not use refinement 
