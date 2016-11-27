@@ -3,7 +3,7 @@ from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
 from mcdp_maps import (ConstantPosetMap, InvMultDualValueNatMap, MultValueMap,
                        MultValueNatMap, InvMultValueNatMap, InvMultValueMap, InvMultDualValueMap)
-from mcdp_posets import Map, MapNotDefinedHere, RcompUnits, is_top, Nat, Rcomp
+from mcdp_posets import Map, RcompUnits, is_top, Nat, Rcomp
 from mcdp_posets.rcomp_units import inverse_of_unit, check_mult_units_consistency
 import numpy as np
 
@@ -96,27 +96,27 @@ class MultValueDP(WrapAMap):
     def diagram_label(self):  
         return self.amap.diagram_label()
 
-
-class MultValueDPHelper1Map(Map):
-    """
-        The case c == 0.
-        
-        Implements:
-                r ->  Top if r = 0
-                      undefined if r >= 0 
-    """
-    def __init__(self, dom, cod):
-        Map.__init__(self, dom=dom, cod=cod)
-        
-    def _call(self, x):
-        # 0 |-> Top
-        if self.dom.equal(x, 0.0):
-            return self.cod.get_top()
-        # otherwise undefined
-        raise MapNotDefinedHere(x)
-    
-    def repr_map(self, letter):
-        return '%s ⟼ ⊤ if %s = 0, else ø' % (letter, letter)
+# 
+# class MultValueDPHelper1Map(Map):
+#     """
+#         The case c == 0.
+#         
+#         Implements:
+#                 r ->  Top if r = 0
+#                       undefined if r >= 0 
+#     """
+#     def __init__(self, dom, cod):
+#         Map.__init__(self, dom=dom, cod=cod)
+#         
+#     def _call(self, x):
+#         # 0 |-> Top
+#         if self.dom.equal(x, 0.0):
+#             return self.cod.get_top()
+#         # otherwise undefined
+#         raise MapNotDefinedHere(x)
+#     
+#     def repr_map(self, letter):
+#         return '%s ⟼ ⊤ if %s = 0, else ø' % (letter, letter)
         
 
 class MultValueDPHelper2Map(Map):

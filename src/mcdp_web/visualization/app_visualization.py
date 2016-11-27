@@ -33,19 +33,36 @@ class AppVisualization():
         config.add_view(self.view_poset_syntax, route_name='poset_syntax',
                         renderer='visualization/poset_syntax.jinja2')
 
+        # these are images view for which the only change is the jinja2 template
+        image_views = [
+            'dp_graph', 
+            'dp_tree', 
+            'ndp_graph',
+        ]
 
+        for image_view in image_views:
+            route = 'model_%s' % image_view
+            url = self.get_lmv_url('{library}', '{model_name}', image_view)
+            renderer = 'visualization/model_%s.jinja2' % image_view
+            config.add_route(route, url)
+            config.add_view(self.view_model_info, route_name=route, renderer=renderer)
 
-        config.add_route('model_ndp_graph',
-                         self.get_lmv_url('{library}', '{model_name}', 'ndp_graph'))
-
-        config.add_view(self.view_model_ndp_graph, route_name='model_ndp_graph',
-                        renderer='visualization/model_ndp_graph.jinja2')
-
-
-        config.add_route('model_dp_graph',
-                         self.get_lmv_url('{library}', '{model_name}', 'dp_graph'))
-        config.add_view(self.view_model_dp_graph, route_name='model_dp_graph',
-                        renderer='visualization/model_dp_graph.jinja2')
+#         config.add_route('model_ndp_graph',
+#                          self.get_lmv_url('{library}', '{model_name}', 'ndp_graph'))
+# 
+#         config.add_view(self.view_model_ndp_graph, route_name='model_ndp_graph',
+#                         renderer='visualization/model_ndp_graph.jinja2')
+#         
+# 
+#         config.add_route('model_dp_graph',
+#                          self.get_lmv_url('{library}', '{model_name}', 'dp_graph'))
+#         config.add_view(self.view_model_dp_graph, route_name='model_dp_graph',
+#                         renderer='visualization/model_dp_graph.jinja2')
+# 
+#         config.add_route('model_dp_tree',
+#                          self.get_lmv_url('{library}', '{model_name}', 'dp_tree'))
+#         config.add_view(self.view_model_dp_tree, route_name='model_dp_tree',
+#                         renderer='visualization/model_dp_tree.jinja2')
 
         config.add_route('model_ndp_repr',
                          self.get_lmv_url('{library}', '{model_name}', 'ndp_repr'))
@@ -53,25 +70,26 @@ class AppVisualization():
                         renderer='visualization/model_generic_text_content.jinja2')
 
 
-    def view_model_ndp_graph(self, request):
-        model_name = str(request.matchdict['model_name'])  # unicode
+    def view_model_info(self, request):
+        return {
+            'model_name': self.get_model_name(request),
+            'views': self._get_views(),
+            'navigation': self.get_navigation_links(request),
+        }
 
-        return {'model_name': model_name,
-                'views': self._get_views(),
-                'current_view': 'ndp_graph',
-                'navigation': self.get_navigation_links(request),
-                'style': STYLE_GREENREDSYM}
-
-
-
-    def view_model_dp_graph(self, request):
-        model_name = str(request.matchdict['model_name'])  # unicode
-
-
-        return {'model_name': model_name,
-                'navigation': self.get_navigation_links(request),
-                'current_view': 'dp_graph',
-                }
+#     def view_model_dp_graph(self, request):
+#         return {
+#             'model_name': self.get_model_name(),
+#             'views': self._get_views(),
+#             'navigation': self.get_navigation_links(request)
+#         }
+#     
+#     def view_model_dp_tree(self, request):
+#         return {
+#             'model_name': self.get_model_name(),
+#             'views': self._get_views(),
+#             'navigation': self.get_navigation_links(request)
+#         }
 
     def view_model_ndp_repr(self, request):
         model_name = str(request.matchdict['model_name'])  # unicode
@@ -80,10 +98,11 @@ class AppVisualization():
         ndp_string = ndp.__repr__()
         ndp_string = ndp_string.decode("utf8")
 
-        return {'model_name': model_name,
-                'content': ndp_string,
-                'navigation': self.get_navigation_links(request),
-                'current_view': 'ndp_repr'}
+        return {
+            'model_name': model_name,
+            'content': ndp_string,
+            'navigation': self.get_navigation_links(request),
+        }
 
 
     def view_model_syntax(self, request):
@@ -289,7 +308,7 @@ class AppVisualization():
 
         # Add documentation links for each span
         # that has a class that finishes in "Keyword"
-        if False:
+        if False: 
             def select_tags():
                 for tag in soup.select('span'):
                     if 'class' in tag.attrs:
