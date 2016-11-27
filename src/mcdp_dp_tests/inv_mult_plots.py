@@ -304,13 +304,13 @@ mcdp {
       requires y [Nat]
       provides c [Nat]
 
-         x + y >= c
+        required x +  required y >= provided c
     }
     
     requires x for s
     provides c using s
     
-    requires y2 >= s.y * nat:2
+    requires y2 = y required by s * nat:2
     
 }"""
     )

@@ -12,6 +12,7 @@ from .parts import CDPLanguage
 from .utils import isnamedtupleinstance
 from .utils_lists import make_list
 from .utils_lists import unwrap_list
+from mcdp_lang.utils_lists import get_odd_ops
 
 
 CDP = CDPLanguage
@@ -139,8 +140,7 @@ def infer_types_of_variables(line_exprs, context):
         return Tmp.verified
     
     UNDEFINED, FVALUE, RVALUE, CONFLICTING, EITHER =\
-     'undefined', 'fvalue', 'rvalue', 'conflicting', 'either'
-#     flavors = [UNDEFINED, FVALUE, RVALUE, CONFLICTING, EITHER]
+     'undefined', 'fvalue', 'rvalue', 'conflicting', 'either' 
 
     def get_flavour(xx):
         class Flavors:
@@ -209,7 +209,6 @@ def infer_types_of_variables(line_exprs, context):
     for i, l in enumerate(line_exprs):
         infer_debug('\n\n--- line %r (%s)' % ( 
             l.where.string[l.where.character:l.where.character_end], type(l)))
-#         print recursive_print(l)
         from .syntax import Syntax
         # mark functions, resources, variables, and constants
         if isinstance(l, (CDP.FunStatement, CDP.FunShortcut1, CDP.FunShortcut2)):
@@ -217,26 +216,27 @@ def infer_types_of_variables(line_exprs, context):
         elif isinstance(l, (CDP.ResStatement, CDP.ResShortcut1, CDP.ResShortcut2)):
             found_rname(l.rname)
         elif isinstance(l, (#CDP.ResShortcut4, 
+                            CDP.ResShortcut5,
                             CDP.ResShortcut1m)):
-            for _ in unwrap_list(l.rnames):
+            for _ in get_odd_ops(unwrap_list(l.rnames)):
                 found_rname(_)
         elif isinstance(l, (#CDP.FunShortcut4, 
+                            CDP.FunShortcut5,
                             CDP.FunShortcut1m)):
-            for _ in unwrap_list(l.fnames):
+            for _ in get_odd_ops(unwrap_list(l.fnames)):
                 found_fname(_)
         
         if isinstance(l, CDP.SetNameConstant):
             found_cname(l.name)
             
         if isinstance(l, CDP.VarStatement):
-            for _ in unwrap_list(l.vnames):
+            for _ in get_odd_ops(unwrap_list(l.vnames)):
                 found_vname(_)
             
         if isinstance(l, CDP.FunShortcut2):
             pass
         elif isinstance(l, CDP.ResShortcut2):
             rvalue = l.rvalue
-#             print recursive_print(l)
         elif isinstance(l, CDP.SetNameRValue):
             # first of all, chech if all the references on the right 
             # are constant. 
@@ -246,7 +246,6 @@ def infer_types_of_variables(line_exprs, context):
                 # This can become simply a constant
                 infer_debug('The value %r can be recognized as constant' % str(l.name.value))
                 constants.add(l.name.value)
-#                 print recursive_print(l)
             else:
 #                 This is a special case, because it is the place
 #                 where the syntax is ambiguous.
@@ -309,14 +308,13 @@ def infer_types_of_variables(line_exprs, context):
                     deriv_resources.add(l.name.value)
 
         elif isinstance(l, CDP.SetNameFValue):
-#             fvalue = l.right_side
             deriv_functions.add(l.name.value)
         elif isinstance(l, CDP.SetNameConstant):
             pass
         elif isinstance(l, (CDP.FunStatement, CDP.ResStatement)):
             pass
         else:
-#             print('line %s' % type(l).__name__)
+        #             print('line %s' % type(l).__name__)
             pass
     
     refine0 = lambda x, parents: refine(x, parents, constants, resources, functions, 

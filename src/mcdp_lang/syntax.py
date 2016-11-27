@@ -128,8 +128,8 @@ class SyntaxIdentifiers():
     ]
 
     # remember to .copy() this otherwise things don't work
-    not_keyword = NotAny(MatchFirst([Keyword(_) for _ in keywords]))
-    not_keyword = not_keyword.setName('not_keyword')   
+    not_keyword = NotAny(MatchFirst([Keyword(_) for _ in keywords])).setName('not_keyword')
+
     _idn = (not_keyword+ 
             Combine(oneOf(list('_' + alphas)) + 
                     Optional(Word('_' + alphanums)))).setResultsName('idn')
@@ -243,7 +243,7 @@ class Syntax():
     pint_unit_connector = L('/') | L('*')
  
     space_pint_unit = sp(((Keyword('1') | pint_unit_simple) + ZeroOrMore(pint_unit_connector + pint_unit_simple)),
-                   parse_pint_unit)
+                         parse_pint_unit)
 
     space_dimensionless = sp(Keyword('dimensionless'), 
                              lambda _: CDP.RcompUnit('m/m'))
@@ -356,8 +356,8 @@ class Syntax():
     nat_constant = sp(K('nat') - L(':') - nonneg_integer,
                       lambda t: CDP.NatConstant(t[0], t[1], t[2]))
 
-    nat_constant2 = sp(nonneg_integer,
-                       lambda t: CDP.NatConstant(None, None, t[0]))
+    nat_constant2 = sp(nonneg_integer.copy().setName('nonneg_integer'),
+                       lambda t: CDP.NatConstant(None, None, t[0])).setName('nat_constant2')
 
     rcomp_constant = sp(copy_expr_remove_action(SyntaxBasics.floatnumber),
                         lambda t: CDP.RcompConstant(float(t[0]))).setName('RCompConstant')
