@@ -16,4 +16,5 @@ add_bottom poset {
   TypeC  <= TypeL
   TypeC  <= TypeN
   TypeC  <= TypeO
+
 }
