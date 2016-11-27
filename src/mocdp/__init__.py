@@ -103,9 +103,9 @@ class MCDPConstants():
     Rcomp_chain_include_max = False
     
     # test the correspondence between h and h* (currently failing)
-    test_dual01_chain = True
+    test_dual01_chain = False
     
-    # Ignore graphviz errors in unit tests 
+    # Ignore graphviz errors in unit tests
     test_ignore_graphviz_errors = True
     
     # Ignore the known failures

@@ -25,7 +25,7 @@ class FuncNotMoreThan(PrimitiveDP):
         
          
         r ⟼   {r},  if f ≼ limit
-                ø,    otherwise
+                limit,    otherwise
                 
     """
     @contract(F='$Poset')
