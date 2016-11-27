@@ -1,6 +1,6 @@
 from nose.tools import assert_equal
 
-from comptests.registrar import comptest
+from comptests.registrar import comptest, comptest_fails
 from contracts.interface import line_and_col, location
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
@@ -125,7 +125,7 @@ def parsing_error_recov07():
     mark_unparsable_(s)
 
 
-@comptest
+@comptest_fails
 def parsing_error_recov08():
     # The problem with this is that the comment is inside the space for a
     s="""mcdp {
@@ -153,7 +153,7 @@ a
         assert c == c2, (c, line, col, c2)
 
 
-@comptest
+@comptest_fails
 def parsing_error_recov10():
 #     
 #     s="""mcdp {

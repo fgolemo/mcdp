@@ -1,3 +1,4 @@
+# test semantic_error
 mcdp {
     provides f [Rcomp]
     requires r [Rcomp]

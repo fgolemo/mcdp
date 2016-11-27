@@ -1,3 +1,4 @@
+# test semantic_error
 mcdp {
     provides f [Nat]
     requires r [Nat]
