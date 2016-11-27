@@ -12,8 +12,7 @@ from mocdp import logger, MCDPConstants
 from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
     MCDPExceptionWithWhere, do_extra_checks, mcdp_dev_warning)
 
-from .namedtuple_tricks import get_copy_with_where
-from .namedtuple_tricks import recursive_print
+from .namedtuple_tricks import get_copy_with_where, recursive_print
 from .parts import CDPLanguage
 from .pyparsing_bundled import ParseException, ParseFatalException
 from .utils import isnamedtupleinstance, parse_action

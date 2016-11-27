@@ -2,10 +2,11 @@
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_dp import PlusValueDP, UncertainGate
-from mcdp_dp.dp_approximation import  makeLinearCeilDP, makeLinearFloor0DP
+from mcdp_dp.dp_approximation import makeLinearCeilDP, makeLinearFloor0DP
 from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
     get_types_universe, poset_minima)
-from mocdp.comp.context import (CResource, ValueWithUnits, get_name_for_fun_node, 
+from mcdp_posets import Rcomp, RcompUnits
+from mocdp.comp.context import (CResource, ValueWithUnits, get_name_for_fun_node,
     ModelBuildingContext)
 from mocdp.exceptions import DPSemanticError, DPNotImplementedError
 
@@ -15,14 +16,14 @@ from .helpers import create_operation, get_valuewithunits_as_resource
 from .namedtuple_tricks import recursive_print
 from .parse_actions import decorate_add_where
 from .parts import CDPLanguage
-from mcdp_posets.rcomp import Rcomp
-from mcdp_posets.rcomp_units import RcompUnits
 
 
 CDP = CDPLanguage
 
+
 class DoesNotEvalToResource(DPSemanticError):
     """ also called "rvalue" """
+    
 
 @decorate_add_where
 @contract(returns=CResource)
@@ -154,7 +155,6 @@ def eval_rvalue_VariableRef(rvalue, context):
     warn_language(rvalue, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context)
 
     return context.make_resource(get_name_for_fun_node(rvalue.name), s)
-
 
 
 def eval_rvalue_NewFunction(rvalue, context):

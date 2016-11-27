@@ -365,6 +365,7 @@ class Normal(GGFormatter):
                             skip_initial=True)
         return gg
     
+    
 class Enclosed(GGFormatter):
     def __init__(self, direction, enclosed, style, skip_initial=True):
         self.direction = direction

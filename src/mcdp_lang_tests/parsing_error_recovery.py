@@ -8,16 +8,19 @@ from mcdp_report.html import mark_unparsable
 
 
 def ast_to_html_(s):
-    parse_expr = Syntax.ndpt_dp_rvalue
     from mcdp_report.html import ast_to_html
+
+    parse_expr = Syntax.ndpt_dp_rvalue
     html = ast_to_html(s, complete_document=False, extra_css=None, ignore_line=None,
                 add_line_gutter=False, encapsulate_in_precode=True, add_css=False,
                 parse_expr=parse_expr, add_line_spans=False, postprocess=None)
     return html
 
+
 def mark_unparsable_(s):
     parse_expr = Syntax.ndpt_dp_rvalue
     return mark_unparsable(s, parse_expr)
+
 
 @comptest
 def parsing_error_recov01():
@@ -69,7 +72,7 @@ mcdp {
     parse_expr = Syntax.ndpt_dp_rvalue
 
 
-    s2, expr, commented = mark_unparsable(s, parse_expr)
+    _s2, _expr, commented = mark_unparsable(s, parse_expr)
     assert_equal(commented, set([2]))
 
     s="""   
@@ -79,7 +82,7 @@ mcdp {
     requires a [m]
 }""".strip()
 
-    s2, expr, commented = mark_unparsable(s, parse_expr)
+    _s2, _expr, commented = mark_unparsable(s, parse_expr)
 
     
     assert_equal(commented, set([2]))
@@ -87,15 +90,15 @@ mcdp {
 
 @comptest
 def parsing_error_recov05():
-    s="""   
-mcdp {
- provides x [m]
-    #@unp   
-    
-    requires a [m]
-    
-    
-}""".strip()
+#     s="""   
+# mcdp {
+#  provides x [m]
+#     #@unp   
+#     
+#     requires a [m]
+#     
+#     
+# }""".strip()
 
     s="""mcdp {
     #@unp

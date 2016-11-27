@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import check_isinstance
-from mcdp_posets import RcompUnits, Rcomp
-from mcdp_posets.rcomp_units import R_dimensionless
+from mcdp_posets import RcompUnits, Rcomp, R_dimensionless
 
 from .dp_misc_unary import CeilDP, Floor0DP
 from .dp_multvalue import MultValueDP
