@@ -73,7 +73,9 @@ span.VarStatementKeyword,
 span.GenericOperationName,
 span.EversionKeyword,
 span.LBRACE,
-span.RBRACE
+span.RBRACE,
+span.LBRACKET,
+span.RBRACKET
 { 
     font-weight: bold; 
     color: #00a;
@@ -134,7 +136,9 @@ span.FunShortcut1 > span.FName,
 span.FunShortcut1m > span.FName,
 span.FunShortcut2 > span.FName,
 span.FunShortcut3 > span.FName,
-span.FunShortcut4 > span.FName {
+span.FunShortcut4 > span.FName, 
+span.FunShortcut5 > span.FName
+{
     color: darkgreen;
 }
 
@@ -151,7 +155,8 @@ span.ResShortcut1 > span.RName,
 span.ResShortcut1m > span.RName,
 span.ResShortcut2 > span.RName,
 span.ResShortcut3 > span.RName,
-span.ResShortcut4 > span.RName {
+span.ResShortcut4 > span.RName,
+span.ResShortcut5 > span.RName {
     color: darkred;
 }
 

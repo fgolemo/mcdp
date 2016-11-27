@@ -99,6 +99,7 @@ class CDPLanguage():
     ConstraintInvalidSwapped = namedtuplewhere('ConstraintInvalidSwapped', 'fvalue rvalue prep')
 
     NatConstant = namedtuplewhere('NatConstant', 's1 s2 value')  # value = int, >=0
+    RcompConstant = namedtuplewhere('RcompConstant', 'value')  # value = int, >=0
     IntConstant = namedtuplewhere('IntConstant', 's1 s2 value')  # value = int
 
     LoadNDP = namedtuplewhere('LoadNDP', 'keyword load_arg')
@@ -259,6 +260,12 @@ class CDPLanguage():
     FunStatement = namedtuplewhere('FunStatement', 'keyword fname lbracket unit rbracket comment')
     # requires r [Nat] 'comment'
     ResStatement = namedtuplewhere('ResStatement', 'keyword rname lbracket unit rbracket comment')
+    
+    # provides x, y, z [Nat] 'comment'
+    FunShortcut5 = namedtuplewhere('FunShortcut5', 'keyword fnames lbracket unit rbracket comment')
+    # requires x, y, z [Nat] 'comment'
+    ResShortcut5 = namedtuplewhere('ResShortcut5', 'keyword rnames lbracket unit rbracket comment')
+    
     # requires r1, r2 
     ResShortcut4 = namedtuplewhere('ResShortcut4', 'requires rnames')
     # provides f1, f2

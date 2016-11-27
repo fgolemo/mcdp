@@ -68,6 +68,8 @@ def eval_constant(op, context):
         CDP.Bottom: eval_constant_Bottom,
         
         CDP.ConstantRef: eval_constant_ConstantRef,
+        
+        CDP.RcompConstant: eval_constant_RcompConstant,
     }
     
     for klass, hook in cases.items():
@@ -91,6 +93,9 @@ def eval_constant_ConstantRef(rvalue, context):
         msg = 'Constant value %r not found.' % _
         raise DPSemanticError(msg, where=rvalue.where) # or internal?
     
+def eval_constant_RcompConstant(op, context):  # @UnusedVariable
+    return ValueWithUnits(unit=Rcomp(), value=op.value)
+
 def eval_constant_NatConstant(op, context):  # @UnusedVariable
     return ValueWithUnits(unit=Nat(), value=op.value)
 

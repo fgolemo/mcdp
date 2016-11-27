@@ -35,6 +35,7 @@ from .parse_actions import (add_where_information, decorate_add_where, raise_wit
     parse_wrap)
 from .parts import CDPLanguage
 from .utils_lists import unwrap_list
+from mcdp_lang.utils_lists import get_odd_ops
 
 
 CDP = CDPLanguage
@@ -831,13 +832,7 @@ def eval_statement(r, context):
         return eval_statement_SetNameConstant(r, context)
     elif isinstance(r, CDP.SetNameFValue):
         return eval_statement_SetNameFvalue(r,context)
-    elif isinstance(r, CDP.ResStatement):
-        R = eval_space(r.unit, context)
-        return add_resource(r.rname.value, R, context, r)        
-    elif isinstance(r, CDP.FunStatement):
-        F = eval_space(r.unit, context)    
-        return add_function(r.fname.value, F, context, r)
-        
+
     elif isinstance(r, CDP.FunShortcut1):  # provides fname using name
         fname = r.fname.value
         with add_where_information(r.name.where):
@@ -854,43 +849,8 @@ def eval_statement(r, context):
         B = add_resource(r.rname.value, R, context, r)
         add_constraint(context, resource=A, function=B)  # B >= A
 
-    elif isinstance(r, CDP.ResShortcut4):  
-        # requires rname1, rname2
-        rnames = unwrap_list(r.rnames)
-        for _ in rnames:
-            rname = _.value
-            if rname in context.var2resource:
-                A = context.var2resource[rname]
-            elif rname in context.fnames: # it's a function 
-                A = context.make_resource(get_name_for_fun_node(rname), rname)
-            elif rname in context.constants:
-                c = context.constants[rname]
-                A = get_valuewithunits_as_resource(c, context)
-            else:
-                msg = 'Could not find required resource expression %r.' % rname
-                raise DPSemanticError(msg, where=_.where)
-            R = context.get_rtype(A)
-            B = add_resource(rname, R, context, r)
-            add_constraint(context, resource=A, function=B)  # B >= A
-    
-    elif isinstance(r, CDP.FunShortcut4):  
-        # requires rname1, rname2
-        fnames = unwrap_list(r.fnames)
-        for _ in fnames:
-            fname = _.value
-            if fname in context.var2function:
-                B = context.var2function[fname]
-            elif fname in context.rnames: # it's a function 
-                B = context.make_function(get_name_for_res_node(fname), fname)
-            elif fname in context.constants:
-                c = context.constants[fname]
-                B = get_valuewithunits_as_function(c, context)
-            else:
-                msg = 'Could not find required function expression %r.' % fname
-                raise DPSemanticError(msg, where=_.where)
-            F = context.get_ftype(B)
-            A = add_function(fname, F, context, r)
-            add_constraint(context, resource=A, function=B)  # B >= A
+
+  
 
     elif isinstance(r, CDP.ResShortcut1m):  # requires rname1, rname2, ... for name
         for rname in unwrap_list(r.rnames):
@@ -959,10 +919,56 @@ def eval_statement(r, context):
         f = context.make_function(name, '_limit')
         add_constraint(context, resource=rv, function=f)
     else: # pragma: no cover
-        msg = 'eval_statement(): cannot interpret.'
-        r2 = recursive_print(r)
-        raise_desc(DPInternalError, msg, r=r2) # where=r.where.__repr__())
 
+        cases = {
+            CDP.ResStatement: eval_statement_ResStatement,
+            CDP.FunStatement: eval_statement_FunStatement,
+            CDP.FunShortcut5: eval_statement_FunShortcut5,
+            CDP.ResShortcut5: eval_statement_ResShortcut5,
+            CDP.ResShortcut4: eval_statement_ResShortcut4,
+            CDP.FunShortcut4: eval_statement_FunShortcut4,
+
+        }
+        
+        for klass, hook in cases.items():
+            if isinstance(r, klass):
+                return hook(r, context)
+
+        if True: # pragma: no cover
+            msg = 'eval_statement(): cannot interpret.'
+            r2 = recursive_print(r)
+            raise_desc(DPInternalError, msg, r=r2) # where=r.where.__repr__())
+
+
+def eval_statement_ResStatement(r, context):
+    # provides r [Nat] 'comment'
+    R = eval_space(r.unit, context)
+    rname = r.rname
+    return add_resource(rname.value, R, context, r=rname)
+
+def eval_statement_FunStatement(r, context):
+    # provides r [Nat] 'comment'
+    F = eval_space(r.unit, context)  
+    fname = r.fname  
+    return add_function(fname.value, F, context, r=fname)
+
+def eval_statement_ResShortcut5(r, context):
+    # requires r1, r2 [Nat] 'comment'
+    check_isinstance(r, CDP.ResShortcut5)
+    R = eval_space(r.unit, context)
+    
+    rnames = get_odd_ops(unwrap_list(r.rnames))
+    for rname in rnames:
+        add_resource(rname.value, R, context, r=rname)
+
+def eval_statement_FunShortcut5(r, context):
+    check_isinstance(r, CDP.FunShortcut5)
+    # provides f1, f2 [Nat] 'comment'
+    F = eval_space(r.unit, context)
+    
+    fnames = get_odd_ops(unwrap_list(r.fnames))
+    for fname in fnames:
+        add_function(fname.value, F, context, r=fname)
 
 def eval_build_problem(r, context0):
     context = context0.child()
@@ -1060,3 +1066,47 @@ def eval_ndp_make_template(r, context):
     from mocdp.comp.composite_templatize import ndp_templatize
     return ndp_templatize(ndp, mark_as_template=False)
 
+
+def eval_statement_ResShortcut4(r, context):
+    check_isinstance(r, CDP.ResShortcut4)
+    # requires rname1, rname2
+    rnames = get_odd_ops(unwrap_list(r.rnames))
+    for _ in rnames:
+        rname = _.value
+        if rname in context.var2resource:
+            A = context.var2resource[rname]
+        elif rname in context.fnames: # it's a function 
+            A = context.make_resource(get_name_for_fun_node(rname), rname)
+        elif rname in context.constants:
+            c = context.constants[rname]
+            A = get_valuewithunits_as_resource(c, context)
+        else:
+            msg = 'Could not find required resource expression %r.' % rname
+            raise DPSemanticError(msg, where=_.where)
+        R = context.get_rtype(A)
+        B = add_resource(rname, R, context, r)
+        add_constraint(context, resource=A, function=B)  # B >= A
+  
+def eval_statement_FunShortcut4(r, context):
+    # provides rname1, rname2
+    check_isinstance(r, CDP.FunShortcut4)
+    
+    fnames = get_odd_ops(unwrap_list(r.fnames))
+    for _ in fnames:
+        fname = _.value
+        if fname in context.var2function:
+            B = context.var2function[fname]
+        elif fname in context.rnames: # it's a function 
+            B = context.make_function(get_name_for_res_node(fname), fname)
+        elif fname in context.constants:
+            c = context.constants[fname]
+            B = get_valuewithunits_as_function(c, context)
+        else:
+            msg = 'Could not find required function expression %r.' % fname
+            raise DPSemanticError(msg, where=_.where)
+        F = context.get_ftype(B)
+        A = add_function(fname, F, context, r)
+        add_constraint(context, resource=A, function=B)  # B >= A
+        
+        
+        

@@ -42,7 +42,8 @@ def eval_lfunction(lf, context):
     check_isinstance(context, ModelBuildingContext)
     
     constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
-                 CDP.Top, CDP.Bottom, CDP.Minimals, CDP.Maximals)
+                 CDP.Top, CDP.Bottom, CDP.Minimals, CDP.Maximals, 
+                 CDP.NatConstant, CDP.RcompConstant)
 
     if isinstance(lf, (CDP.NewFunction, CDP.DerivResourceRef)):
         msg = 'The functionality %r cannot be used on this side of the constraint.'

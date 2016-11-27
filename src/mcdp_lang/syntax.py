@@ -136,8 +136,7 @@ class SyntaxIdentifiers():
 
     @staticmethod
     def get_idn():
-        copy = SyntaxIdentifiers._idn.copy()
-#         copy = copy.setResultsName('idn')
+        copy = SyntaxIdentifiers._idn.copy() 
         copy = copy.setName('identifier')
         return copy
 
@@ -184,9 +183,6 @@ class Syntax():
     comment_var = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentVar(t[0])).setName('comment_val')
 
     placeholder = SL('[') + SL('[') - (get_idn() | quoted) + SL(']') + SL(']').setName('placeholder')
-    
-    
-    
     
     dpname_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_dpname(t[0])).setName('dpname_placeholder')
     constant_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_constant(t[0])).setName('constant_placeholder')
@@ -359,6 +355,14 @@ class Syntax():
 
     nat_constant = sp(K('nat') - L(':') - nonneg_integer,
                       lambda t: CDP.NatConstant(t[0], t[1], t[2]))
+
+    nat_constant2 = sp(nonneg_integer,
+                       lambda t: CDP.NatConstant(None, None, t[0]))
+
+    rcomp_constant = sp(copy_expr_remove_action(SyntaxBasics.floatnumber),
+                        lambda t: CDP.RcompConstant(float(t[0]))).setName('RCompConstant')
+
+    
 
     int_constant = sp(K('int') - L(':') - integer,
                       lambda t: CDP.IntConstant(t[0], t[1], t[2]))
@@ -652,7 +656,8 @@ class Syntax():
                        | asserts
                        | constant_placeholder
                        | constant_emptyset
-#                        | constant_uncertain
+                       | rcomp_constant# after valuewithunit 
+                       | nat_constant2 # after valuewithunit and rcomp_constant
                        )
     definitely_constant_value_operand =  (
          collection_of_constants
@@ -668,6 +673,8 @@ class Syntax():
        | asserts
        | constant_placeholder
        | constant_emptyset
+       | rcomp_constant# after valuewithunit 
+       | nat_constant2 # after valuewithunit and rcomp_constant
     )
     definitely_constant_value << definitely_constant_value_operand
 #     
@@ -902,16 +909,32 @@ class Syntax():
 
     FOR = keyword('for', CDP.ForKeyword)
 
-    rnames = sp(rname + ZeroOrMore(SCOMMA + rname),
+    at_least_two_rnames = sp(rname + ZeroOrMore(COMMA + rname),
                 lambda t: make_list(list(t)))
-    
-    res_shortcut4 = sp(REQUIRES + rnames + S(O(comment_res)),
+    at_least_two_fnames = sp(fname + ZeroOrMore(COMMA + fname),
+                lambda t: make_list(list(t)))
+
+    res_shortcut4 = sp(REQUIRES + at_least_two_rnames + S(O(comment_res)),
                        lambda t: CDP.ResShortcut4(t[0], t[1])).setName('res_shortcut4')
 
-    fnames = sp(fname + ZeroOrMore(SCOMMA + fname),
-                lambda t: make_list(list(t)))
+    fun_shortcut5 = sp(PROVIDES + at_least_two_fnames + lbracket + space + rbracket + O(comment_res),
+                       lambda t: CDP.FunShortcut5(keyword=t[0], 
+                                                  fnames=t[1], 
+                                                  lbracket=t[2],
+                                                  unit=t[3],
+                                                  rbracket=t[4], 
+                                                  comment=t[5] if len(t) == 6 else None)).setName('res_shortcut5')
+
+    res_shortcut5 = sp(REQUIRES + at_least_two_rnames + lbracket + space + rbracket + O(comment_res),
+                       lambda t: CDP.ResShortcut5(keyword=t[0], 
+                                                  rnames=t[1], 
+                                                  lbracket=t[2],
+                                                  unit=t[3],
+                                                  rbracket=t[4], 
+                                                  comment=t[5] if len(t) == 6 else None)).setName('res_shortcut5')
+
     
-    fun_shortcut4 = sp(PROVIDES + fnames + S(O(comment_fun)),
+    fun_shortcut4 = sp(PROVIDES + at_least_two_fnames + S(O(comment_fun)),
                        lambda t: CDP.FunShortcut4(t[0], t[1])).setName('fun_shortcut4')
     
     res_shortcut1 = sp(REQUIRES + rname + FOR - dpname,
@@ -968,6 +991,8 @@ class Syntax():
                  ^ res_shortcut1 ^ res_shortcut2 ^ res_shortcut3 ^ fun_shortcut3
                  ^ res_shortcut4
                  ^ fun_shortcut4
+                 ^ res_shortcut5
+                 ^ fun_shortcut5
                  ^ var_statement
                  ^ ignore_res
                  ^ ignore_fun) + ow

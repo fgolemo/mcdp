@@ -41,7 +41,6 @@ class RcompUnits(RcompBase):
         if do_extra_checks():
             ureg = get_ureg()
             check_isinstance(pint_unit, ureg.Quantity)
-            
         RcompBase.__init__(self)
         self.units = pint_unit
         self.string = string

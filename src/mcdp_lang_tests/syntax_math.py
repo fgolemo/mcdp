@@ -1,9 +1,15 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest, comptest_fails
-from mcdp_lang import parse_constant, parse_ndp, parse_poset
-from mcdp_posets import get_types_universe
+from nose.tools import assert_equal
 
-from .utils2 import eval_rvalue_as_constant, eval_rvalue_as_constant_same_exactly
+from comptests.registrar import comptest, comptest_fails, run_module_tests
+from mcdp_lang import parse_constant, parse_ndp, parse_poset
+from mcdp_lang.syntax import Syntax, SyntaxBasics
+from mcdp_lang_tests.utils import parse_wrap_check
+from mcdp_lang_tests.utils2 import eval_rvalue_as_constant, eval_rvalue_as_constant_same_exactly, \
+    eval_constant_same_exactly
+from mcdp_posets import get_types_universe
+from mcdp_posets.nat import Nat
+from mcdp_posets.rcomp import Rcomp
 
 
 @comptest
@@ -15,10 +21,10 @@ def check_subtraction1():
             v3 = 1 g
             v = v1 - v2 - v3 
             
-            requires x >= v
+            requires x = v
         }
     """
-    print parse_ndp(s)
+    parse_ndp(s)
     
     s = """
     mcdp {
@@ -28,11 +34,11 @@ def check_subtraction1():
             v3 = 1 g
             v = v1 - v2 - v3 
             
-            requires x >= v
+            requires x = v
         }
     }
     """
-    print parse_ndp(s)
+    parse_ndp(s)
     
     parse_constant("""
     assert_equal(
@@ -42,7 +48,7 @@ def check_subtraction1():
             v3 = 1 g
             v = v1 - v2 - v3 
             
-            requires x >= v
+            requires x = v
         }),
         upperclosure { 7 g }
     )
@@ -57,11 +63,11 @@ def check_subtraction2_contexts():
       t = instance mcdp {
           v1 = 10 g
             v = v1 - v2        
-            requires x >= v
+            requires x = v
         }
     }
     """
-    print parse_ndp(s)
+    parse_ndp(s)
     
     s = """
     mcdp {
@@ -70,34 +76,13 @@ def check_subtraction2_contexts():
       v2 = 2 g
       t = instance mcdp {
             v = v1 - v2        
-            requires x >= v
+            requires x = v
         }
         }
     }
     """
-    print parse_ndp(s)
+    parse_ndp(s)
     
-
-# @comptest
-# def check_subtraction2():
-#     """ Underflow in constants """
-#     try:
-#         parse_constant("""
-#         solve(<>, mcdp {
-#             v1 = 10 g
-#             v2 = 2 g
-#             v3 = 9 g
-#             v = v1 - v2 - v3 
-#             
-#             requires x >= v
-#         })
-#     
-#     """)
-#     except DPSemanticError as e:
-#         print e
-#     else:
-#         raise Exception()
-
 
 @comptest_fails
 def check_sums3():
@@ -131,11 +116,7 @@ def check_mult_mixed1():
 
 
 @comptest
-def check_mult_mixed2():
-#     def check(s, value,):
-#         ndp = parse_ndp(s)
-#         dp = ndp.get_dp()
-#         return dp
+def check_mult_mixed2(): 
     tu = get_types_universe()
 
     dimensionless = parse_poset('dimensionless')
@@ -145,7 +126,7 @@ def check_mult_mixed2():
     mcdp {
         provides a [m]
         provides b [s]
-        requires x >= a * b
+        requires x = provided a * provided b
     }
     """)
     M = ndp.get_rtype('x')
@@ -156,7 +137,7 @@ def check_mult_mixed2():
     mcdp {
         provides a [Nat]
         provides b [Nat]
-        requires x >= a * b
+        requires x = provided a * provided b
     }
     """)
     M = ndp.get_rtype('x')
@@ -168,7 +149,7 @@ def check_mult_mixed2():
     mcdp {
         provides a [Nat]
         provides b [dimensionless]
-        requires x >= a * b
+        requires x = provided a * provided b
     }
     """)
     M = ndp.get_rtype('x')
@@ -176,34 +157,85 @@ def check_mult_mixed2():
 
 
 
+@comptest
+def check_rcomp1():
+    parse_wrap_check('1.05', SyntaxBasics.floatnumber)
+    parse_wrap_check('2.05', Syntax.rcomp_constant)
+    parse_wrap_check('3.05', Syntax.definitely_constant_value)
+    parse_wrap_check('4.05', Syntax.constant_value)
+    
+    eval_constant_same_exactly('5.05', 'Rcomp:5.05')
 
 
 @comptest
-def check_mult_mixed3():
-    pass
+def check_nat1():
+    parse_wrap_check('1', Syntax.integer_or_float)
+    parse_wrap_check('2', Syntax.nat_constant2)
+    parse_wrap_check('3', Syntax.definitely_constant_value)
+    parse_wrap_check('4', Syntax.constant_value)
 
-
-@comptest
-def check_mult_mixed4():
-    pass
-
-
-@comptest
-def check_mult_mixed5():
-    pass
-
+    eval_constant_same_exactly('5', 'Nat:5')
 
 @comptest
-def check_mult_mixed6():
-    pass
-
+def check_nat2():
+    s = """
+    mcdp {
+        requires x = 1
+    }
+    """
+    ndp = parse_ndp(s)
+    assert_equal(Nat(), ndp.get_rtype('x'))
 
 @comptest
-def check_mult_mixed7():
-    pass
-
+def check_nat3():
+    s = """
+    mcdp {
+        provides x = 1
+    }
+    """
+    ndp = parse_ndp(s)
+    assert_equal(Nat(), ndp.get_ftype('x'))
+    
+@comptest
+def check_rcomp2():
+    s = """
+    mcdp {
+        requires x = 1.0
+    }
+    """
+    ndp = parse_ndp(s)
+    assert_equal(Rcomp(), ndp.get_rtype('x'))
 
 @comptest
-def check_mult_mixed8():
-    pass
+def check_rcomp3():
+    s = """
+    mcdp {
+        provides x = 1.0
+    }
+    """
+    ndp = parse_ndp(s)
+    assert_equal(Rcomp(), ndp.get_ftype('x'))
+    
 
+@comptest
+def check_add_mixed_new_syntax():
+    eval_rvalue_as_constant_same_exactly('3 + 2', 'Nat: 5')
+    eval_rvalue_as_constant_same_exactly('3 + 2.0', 'Rcomp: 5.0')
+    
+@comptest
+def check_mult_mixed_new_syntax():
+    eval_rvalue_as_constant_same_exactly('3 * 2', 'Nat: 6')
+    eval_rvalue_as_constant_same_exactly('3 * 2.0', 'Rcomp: 6.0')
+    eval_rvalue_as_constant_same_exactly('3 * 2 g', '6 g')
+    eval_rvalue_as_constant_same_exactly('3.0 * 2 g', '6 g')
+    eval_rvalue_as_constant_same_exactly('3.0 * 2.0', 'Rcomp: 6.0')
+    eval_rvalue_as_constant_same_exactly('3 * 10.0', 'Rcomp: 30.0')
+    eval_rvalue_as_constant_same_exactly('3 * 10.0 * 1 g', '30 g')
+    
+
+    
+if __name__ == '__main__': 
+    run_module_tests()
+    
+    
+    

@@ -32,7 +32,7 @@
 from .examples import *
 from .failures_parsing import *
 from .failures_simplification import *
-from .math import *
+from mcdp_lang_tests.syntax_math import *
 from .syntax_anyof import *
 from .syntax_approximation import *
 from .syntax_asserts import *
@@ -66,3 +66,6 @@ from .syntax_comments import *
 from .parsing_error_recovery import *
 
 from .misc_corner_cases import *
+
+from .todo import *
+

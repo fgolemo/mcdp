@@ -14,6 +14,7 @@ from .space_product import SpaceProduct
 from .uppersets import UpperSets, LowerSets
 
 
+
 __all__ = [
     'get_types_universe',
     'express_value_in_isomorphic_space',
@@ -74,12 +75,15 @@ class TypesUniverse(Preorder):
             msg = 'Different by direct comparison.'
             raise_desc(NotEqual, msg, A=A, B=B)
 
-
     def check_leq(self, A, B):
+        from mcdp_posets.space import Space
         from mcdp_posets import FiniteCollectionsInclusion
         from mcdp_posets import RcompUnits
-        from mcdp_posets.rcomp_units import R_dimensionless
+        from mcdp_posets import R_dimensionless
 
+        check_isinstance(A, Space)
+        check_isinstance(B, Space)
+        
         if A == B:
             return
         
@@ -96,8 +100,12 @@ class TypesUniverse(Preorder):
         # (well, not all natural numbers, not biglongs, but close enough)
 #         if isinstance(A, Nat) and isinstance(B, RcompUnits):
 #             return
+
         if isinstance(A, Nat) and isinstance(B, Rcomp):
             return
+        
+#         print 'isinstance(A, Nat)', isinstance(A, Nat)
+#         print 'isinstance(B, Rcomp)', isinstance(B, Rcomp), type(B), B.__repr__()
 
         if isinstance(A, Nat) and isinstance(B, RcompUnits):
             if R_dimensionless.units.dimensionality == B.units.dimensionality:  # @UndefinedVariable
@@ -126,12 +134,10 @@ class TypesUniverse(Preorder):
                            B_dimensionality=B.units.dimensionality)
 
         if isinstance(A, Rcomp) and isinstance(B, RcompUnits):
-            from mcdp_posets.rcomp_units import R_dimensionless
             if R_dimensionless.units.dimensionality == B.units.dimensionality:  # @UndefinedVariable
                 return
 
         if isinstance(B, Rcomp) and isinstance(A, RcompUnits):
-            from mcdp_posets.rcomp_units import R_dimensionless  # @Reimport
             if R_dimensionless.units.dimensionality == A.units.dimensionality:  # @UndefinedVariable
                 return
 
@@ -285,7 +291,7 @@ class TypesUniverse(Preorder):
         try:
             self.check_leq(A, B)
         except NotLeq as e:
-            msg = 'Cannot get embedding if preorder does not holds.'
+            msg = 'Cannot get embedding if preorder does not hold.'
             raise_wrapped(DPInternalError, e, msg, compact=True)
 
         from mcdp_posets import RcompUnits

@@ -55,8 +55,7 @@ def generic_mult_constantsN(seq):
 
     posets = [_.unit for _ in seq]
     for p in posets:
-        check_isinstance(p, (Nat, RcompUnits))
-
+        check_isinstance(p, (Nat, Rcomp, RcompUnits))
 
     promoted, R = generic_mult_table(posets)
     
@@ -104,7 +103,7 @@ def generic_mult_table(seq):
         # promote Nat to Rcomp
         def get_promoted(s):
             if isinstance(s,  Nat):
-                return Rcomp
+                return Rcomp()
             else:
                 assert isinstance(s, Rcomp)
                 return s

@@ -40,7 +40,8 @@ def eval_rvalue(rvalue, context):
         raise_desc(DPSemanticError, msg % rvalue.name.value)
         
     constants = (CDP.Collection, CDP.SimpleValue, CDP.SpaceCustomValue,
-                 CDP.Top, CDP.Bottom, CDP.Maximals, CDP.Minimals)
+                 CDP.Top, CDP.Bottom, CDP.Maximals, CDP.Minimals,
+                 CDP.NatConstant, CDP.RcompConstant)
 
     if isinstance(rvalue, constants):
         res = eval_constant(rvalue, context)

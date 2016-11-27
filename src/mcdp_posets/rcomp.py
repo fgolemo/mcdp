@@ -67,7 +67,7 @@ class RcompBase(Poset):
             return True
 
         if not isinstance(x, float):
-            raise_desc(NotBelongs, 'Not a float.', x=x)
+            raise_desc(NotBelongs, 'Not a float.', x=x, type_x=type(x))
         if not np.isfinite(x):
             msg = 'Not finite and not equal to top (%s).' % self.top
             raise_desc(NotBelongs, msg, x=x)
