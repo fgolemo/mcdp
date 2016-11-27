@@ -173,7 +173,6 @@ http://ares-super.lids.mit.edu/~andrea/env_mcdp/src/mcdp/out/check_rendering/plu
      requires shape >= <6.5in, 2in, 5.8in>
 
 
-
 (*) MCDP-web
 
 - R: add license information
@@ -385,7 +384,7 @@ U+259x  ▐ ░ ▒ ▓ ▔ ▕ ▖ ▗ ▘ ▙ ▚ ▛ ▜ ▝ ▞ ▟
       r1 + r2 * r3 + 2 dimensionless >= f1 * f2 + f3 + 2 dimensionless
     }
 
-- editor_fancy: turn text back to black when editing after a syntax error
+- editor_fancy: new text should be black
 
 - better error message:
 DPSemanticError: Constraint between incompatible spaces.
@@ -443,3 +442,6 @@ http://127.0.0.1:8080/libraries/basic/models/addition_1/views/edit_fancy/
 File 'tmp3.mcdp' reached twice.
 path1: /Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/unittests/basic.mcdplib/created/tmp3.mcdp
 path2: /Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/unittests/basic.mcdplib/created/tmp3.mcdp
+
+
+- delete caches in /tmp automatically

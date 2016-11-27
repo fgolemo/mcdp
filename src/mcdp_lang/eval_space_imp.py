@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
+from mcdp_lang.eval_warnings import MCDPWarnings, warn_language
 from mcdp_posets import (
     FiniteCollectionsInclusion, FinitePoset, GenericInterval, Int, LowerSets,
     Nat, Poset, PosetCoproduct, PosetProduct, PosetProductWithLabels, Space,
@@ -13,7 +14,6 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import decorate_add_where
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from mcdp_lang.eval_warnings import MCDPWarnings, warn_language
 
 
 CDP = CDPLanguage

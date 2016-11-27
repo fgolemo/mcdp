@@ -184,7 +184,7 @@ class Syntax():
     comment_res = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentRes(t[0])).setName('comment_res')
     comment_var = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentVar(t[0])).setName('comment_val')
 
-    placeholder = SL('[') + SL('[') - (get_idn() | quoted) + SL(']') + SL(']').setName('placeholder')
+    placeholder = SL('[') + SL('[') - (get_idn() | L('poset') | quoted) + SL(']') + SL(']').setName('placeholder')
     
     dpname_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_dpname(t[0])).setName('dpname_placeholder')
     constant_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_constant(t[0])).setName('constant_placeholder')
