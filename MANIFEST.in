@@ -43,6 +43,7 @@ recursive-exclude src _mcdpweb_cache
 
 global-exclude out out-* *.pyc out_expected _attic _mcdpweb_cache
 
+prune docs
 
 prune src/mcdp_data/libraries/examples/example-plusinv.mcdplib/out_expected
 
