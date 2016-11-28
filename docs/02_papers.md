@@ -77,8 +77,6 @@ permalink: /papers/
 
 This paper is currently the best reference:
 
-
-
 <div class='pub-ref-desc'>
     <img class='icon' src='http://purl.org/censi/web/media/paper-icons/censi16codesign.png'/>
     <p class='pub-ref-short'><span class="author">A.C..</span>
@@ -97,6 +95,26 @@ This paper is currently the best reference:
         
     </div><div style='clear:both'></div>
 </div>
+
+This is a rather technical paper with more examples and the description
+of the certainty handling mechanism currently implemented:
+
+<div class='pub-ref-compact'>
+    <img class='icon' src='http://purl.org/censi/web/media/paper-icons/censi16uncertainty.png'/>
+    <p class='pub-ref-short'><span class="author">A.C..</span>
+    <span class="title">Handling uncertainty in monotone co-design problems.</span>
+    Technical Report, Laboratory for Information and Decision Systems, MIT, October 2016.
+    <span class="links"><span class="pdf"><a href="https://arxiv.org/pdf/1609.03103v1"><img style='border:0; margin-bottom:-6px'  src='/media/pdf.gif'/> pdf</a></span><span class="url"><a href="https://arxiv.org/abs/1609.03103"><img style='border:0; margin-bottom:-6px; height: 17px'  src='/media/web.gif'/> supp. material</a></span></span><a class='pub-ref-bibtex-link' onclick='javascript:$("#censi16uncertainty").toggle();' href='javascript:void(0)'>bibtex</a><pre class='pub-ref-bibtex' id='censi16uncertainty' style='display: none;'>@techreport{censi16uncertainty,
+        author = "Censi, Andrea",
+        title = "Handling Uncertainty in Monotone Co-Design Problems",
+        url = "https://arxiv.org/abs/1609.03103",
+        month = "October",
+        year = "2016",
+        pdf = "https://arxiv.org/pdf/1609.03103v1",
+        institution = "Laboratory for Information and Decision Systems, MIT"
+    }</pre></p><div style='clear:both'></div>
+</div>
+
 <!-- 
 These two papers describe more examples for the simple case of a MCDP with only one cycle:
 
