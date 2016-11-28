@@ -2,7 +2,7 @@
 mcdp {  
 	sub motor = template cdp {
   		requires cost [$]
-  		provides velocity [R]
+  		provides velocity [dimensionless]
   		provides endurance [s]
  	}
 }

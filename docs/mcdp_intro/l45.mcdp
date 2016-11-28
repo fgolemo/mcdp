@@ -1,7 +1,7 @@
 # test connected
 cdp {
     sub motor = template cdp {
-        provides speed [R]
+        provides speed [dimensionless]
     }
             
     provides speed <= motor.speed

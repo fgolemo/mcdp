@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc
 from mcdp_library import MCDPLibrary

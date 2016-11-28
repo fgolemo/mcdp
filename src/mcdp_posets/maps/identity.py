@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_posets import Map, Space
 
@@ -16,3 +17,6 @@ class IdentityMap(Map):
 
     def _call(self, x):
         return x
+
+    def repr_map(self, letter):
+        return '%s ⟼ %s' % (letter, letter)

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts.enabling import all_disabled
 from contracts.utils import raise_desc
 from multiprocessing.process import Process

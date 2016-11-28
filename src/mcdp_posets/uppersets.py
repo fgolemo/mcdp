@@ -66,7 +66,8 @@ class UpperSet(Space):
         for p in self.minimals:
             if self.P.leq(p, x):
                 return
-        raise_desc(NotBelongs, 'Point does not belong')
+        msg = 'The point {} does not belong to this upperset.'.format(x)
+        raise_desc(NotBelongs, msg)
 
     def __repr__(self):
         contents = ", ".join(self.P.format(m)
@@ -104,7 +105,6 @@ class UpperSets(Poset):
 
     def get_test_chain(self, n):
         if n >= 2:
-                
             chain = self.P.get_test_chain(n-1)
             f = lambda x: UpperSet(set([x]), self.P)
             chain = list(map(f, chain))
@@ -131,18 +131,23 @@ class UpperSets(Poset):
 
     def check_leq(self, a, b):
         if a == b:
-            return True
-        bot = self.get_bottom()
-        top = self.get_top()
-        if a == bot:
-            return True
-        if b == top:
-            return True
-        if b == bot:
-            raise NotLeq('b = my ⊥')
-
-        if a == top:
+            return # True
+        
+        a_is_top = len(a.minimals) == 0
+        b_is_top = len(b.minimals) == 0
+        
+        if b_is_top:
+            return #  True
+        if a_is_top:
             raise NotLeq('a = my ⊤')
+
+        # XXX: still might not be good, if this
+        # thing does not have a bottom
+#         bot = self.get_bottom()
+#         if a == bot:
+#             return True
+#         if b == bot:
+#             raise NotLeq('b = my ⊥')
 
         self.my_leq_(a, b)
 
@@ -223,20 +228,20 @@ class LowerSets(Poset):
     @contract(P='$Poset')
     def __init__(self, P):
         self.P = P
-        self.top = self.get_top()
-        self.bot = self.get_bottom()
-        if do_extra_checks():
-            self.belongs(self.top)
-            self.belongs(self.bot)
-            assert self.leq(self.bot, self.top)
-            assert not self.leq(self.top, self.bot)  # unless empty
+        
+#         self.top = self.get_top()
+#         self.bot = self.get_bottom()
+#         if do_extra_checks():
+#             self.belongs(self.top)
+#             self.belongs(self.bot)
+#             assert self.leq(self.bot, self.top)
+#             assert not self.leq(self.top, self.bot)  # unless empty
 
     def witness(self):
         w = self.P.witness()
         return LowerSet([w], self.P)
 
     mcdp_dev_warning('need to think about this')
-
 
     def get_bottom(self):
         maximals = self.P.get_maximal_elements()
@@ -273,14 +278,15 @@ class LowerSets(Poset):
             self.belongs(b)
         if a == b:
             return True
-        if a == self.bot:
-            return True
-        if b == self.top:
-            return True
-        if b == self.bot:
-            raise NotLeq('b = my ⊥')
-        if a == self.top:
-            raise NotLeq('a = my ⊤')
+        if False:
+            if a == self.bot:
+                return True
+            if b == self.top:
+                return True
+            if b == self.bot:
+                raise NotLeq('b = my ⊥')
+            if a == self.top:
+                raise NotLeq('a = my ⊤')
 
         self.my_leq_(a, b)
         
@@ -325,8 +331,10 @@ class LowerSets(Poset):
         return "↓{%s}" % contents
 
     def __repr__(self):
-        return "L(%r)" % self.P
+        return "LowerSets(%r)" % self.P
 
+    def __str__(self):
+        return "L(%s)" % self.P
 
 
 class LowerSet(Space):
@@ -375,29 +383,43 @@ class LowerSet(Space):
 
         return "↓{%s}" % contents
 
-
+# 
 @contract(s1=UpperSet, s2=UpperSet, returns=UpperSet)
 def upperset_product(s1, s2):
     assert isinstance(s1, UpperSet), s1
     assert isinstance(s2, UpperSet), s2
-    res = set(zip(s1.minimals, s2.minimals))
-    P = PosetProduct((s1.P, s2.P))
-    return UpperSet(res, P)
+    return upperset_product_multi((s1, s2))
+    
 
 @contract(s1=LowerSet, s2=LowerSet, returns=LowerSet)
 def lowerset_product(s1, s2):
+    """ Not actually a product """
     assert isinstance(s1, LowerSet), s1
     assert isinstance(s2, LowerSet), s2
-    res = set(zip(s1.maximals, s2.maximals))
-    P = PosetProduct((s1.P, s2.P))
-    return LowerSet(res, P)
+    return lowerset_product_multi((s1, s2))
+    
+@contract(s1=LowerSet, s2=LowerSet, returns=LowerSet)
+def lowerset_product_good(s1, s2):
+    """ The real product. """
+    assert isinstance(s1, LowerSet), s1
+    assert isinstance(s2, LowerSet), s2
+    return lowerset_product_multi((s1, s2))
+
 
 @contract(ss='seq($LowerSet)', returns=LowerSet)
 def lowerset_product_multi(ss):
+    """ Not actually a product """
     Ps = tuple(_.P for _ in ss)
-    mins = tuple(_.maximals for _ in ss)
-    res = set(zip(*mins))
+    maxs = tuple(_.maximals for _ in ss)
+    res = set(itertools.product(*maxs))
     P = PosetProduct(Ps)
+    
+    from operator import mul
+    nout = len(res)
+    lengths = [len(_.maximals) for _ in ss]
+    ns = reduce(mul, lengths)
+    assert nout == ns, (nout, lengths, ns)
+    
     return LowerSet(res, P)
 
 @contract(ss='seq($UpperSet)', returns=UpperSet)

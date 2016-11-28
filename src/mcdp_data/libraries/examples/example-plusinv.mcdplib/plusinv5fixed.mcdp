@@ -1,15 +1,11 @@
 mcdp {
-	f = instance mcdp  {
-	    provides a [ℕ]
-	    
-	    requires x [ℕ]
-	    requires y [ℕ]
-	    
-	    x + y >= a
-	}
+	variable x, y [ℕ]
+	
+	x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + ℕ:10
 
-	f.a >= ceil(sqrt(f.x)) + ceil(sqrt(f.y)) + Nat:10
 
-	requires x, y for f
+    # x + y >= ⌈√x⌉ + ⌈√y⌉ + ℕ:10
+
+	requires x, y
 }
  

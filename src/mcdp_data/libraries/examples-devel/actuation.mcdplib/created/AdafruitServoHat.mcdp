@@ -10,7 +10,6 @@ mcdp {
     (required payload).shape >= <0mm, 0mm, 0mm> # XXX
     (required payload).rigid_body >= (provided out).rigid_body
 
-    
     ((required in).dc).voltage >= `DC_voltages: v5
     ((required in).dc).connector >= `barrel_connectors: barrel_5mm # double check
     ((required in).dc).amps >= 1 A # XXX
@@ -22,8 +21,6 @@ mcdp {
     ((provided out).dc).connector <= `barrel_connectors: barrel_5mm # double check # wrong
     ((provided out).dc).amps <=  1 A
     
-
-
     provides pwm1 [`PWM]
     provides pwm2 [`PWM]
     provides pwm3 [`PWM]

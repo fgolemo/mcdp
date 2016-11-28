@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 
 from common_stats import CommonStats
 from mcdp_ipython_utils.plotting import color_functions, set_axis_colors, \

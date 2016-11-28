@@ -8,9 +8,9 @@ contexts:
   main:
     - match: \b(mcdp|flatten|new|ceil|approx|instance|compacy|template|sub|for|by|instance|implemented-by|catalogue|ignore)\b
       scope: keyword.control.mcdp
-    - match: \b(choose|set-of|using|pow|approx|approxu|Top|Bottom|Minimals|Maximals)\b
+    - match: \b(solve_r|solve_f|compact|canonical|choose|set-of|using|pow|approx|approxu|Top|Bottom|Minimals|Maximals)\b
       scope: keyword.control.mcdp
-    - match: \b(take|specialize|template|any-of|abstract)\b
+    - match: \b(min|max|Nat|Int|take|sqrt|specialize|template|dimensionless|any-of|abstract|variable)\b
       scope: keyword.control.mcdp
 # 'load',
 #         'compact',

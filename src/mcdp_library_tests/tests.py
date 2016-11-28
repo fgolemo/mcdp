@@ -5,12 +5,14 @@ import os
 import tempfile
 import time
 
+from contracts.enabling import all_disabled
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_library import Librarian, MCDPLibrary
 from mcdp_library.utils import dir_from_package_name
 from mcdp_tests.generation import for_all_source_mcdp
 from mocdp import logger
-from mocdp.exceptions import DPSemanticError
+from mocdp.comp.context import Context
+from mocdp.exceptions import DPSemanticError, DPNotImplementedError
 from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
 
 
@@ -80,8 +82,6 @@ def define_tests_for_mcdplibs(context):
 
     for libname in enumerate_test_libraries():
         c2 = context.child(libname, extra_report_keys=dict(libname=libname))
-        
-        
 
         c2.child('ndp').comp_dynamic(mcdplib_test_setup_nameddps, libname=libname)
         c2.child('poset').comp_dynamic(mcdplib_test_setup_posets, libname=libname)
@@ -102,23 +102,20 @@ def mcdplib_run_make(mcdplib):
     cwd = mcdplib
     cmd = ['make', 'clean', 'all']
     from system_cmd.meat import system_cmd_result
+    logger.debug('$ cd %s' % cwd)
+    env = os.environ.copy()
+    if all_disabled():
+        env['DISABLE_CONTRACTS'] = '1'
+        msg = ('Disabling contracts in environment by adding '
+               'DISABLE_CONTRACTS=%r.' % env['DISABLE_CONTRACTS'])
+        logger.debug(msg)
+        
     system_cmd_result(cwd, cmd,
                       display_stdout=True,
                       display_stderr=True,
-                      raise_on_error=True)
-#
-# def belongs_to_lib(f, d):
-#     """ Returns true if the file is physically inside d
-#         and not, for example, symlinked """
-#     rf = os.path.realpath(f)
-#     rd = os.path.realpath(d)
-#     assert os.path.isdir(rd), rd
-#     assert not os.path.isdir(rf), rf
-#
-#     if rd in rf:
-#         return True
-#     else:
-#         return False
+                      raise_on_error=True,
+                      env=env)
+
 
 def mcdplib_test_setup_nameddps(context, libname):
     """ 
@@ -147,20 +144,52 @@ def mcdplib_test_setup_nameddps(context, libname):
             print('Skipping because syntax error')
             # TODO: actually check syntax error
         else:
-            c = context.child(model_name,  extra_report_keys=dict(id_ndp=model_name))
+            c = context.child(model_name, extra_report_keys=dict(id_ndp=model_name))
 
-            if gives_semantic_error(source):
+            if gives_not_implemented_error(source):
+                c.comp(mcdplib_assert_not_implemented_error_fn, libname, model_name,
+                       job_id='assert_not_implemented_error')
+            elif gives_semantic_error(source):
                 c.comp(mcdplib_assert_semantic_error_fn, libname, model_name,
                        job_id='assert_semantic_error')
             else:
-                ndp = c.comp(_load_ndp, libname, model_name, job_id='load_ndp')
+                ndp = c.comp(_load_ndp, libname, model_name, job_id='load')
 
+                    
                 for ftest in for_all_nameddps.registered:
-                    c.comp(ftest, model_name, ndp)
-
+                    
+                    if accepts_arg(ftest, 'libname'):
+                        print('using libname for %s' % ftest)
+                        c.comp(ftest, model_name, ndp, libname=libname,
+                               job_id=ftest.__name__)
+                    else:
+                        c.comp(ftest, model_name, ndp)
+                        
                 for ftest in for_all_nameddps_dyn.registered:
-                    c.comp_dynamic(ftest, model_name, ndp)
-
+                    
+                    if accepts_arg(ftest, 'libname'):
+                        print('using libname for %s' % ftest)
+                        c.comp_dynamic(ftest, model_name, ndp, libname=libname,
+                                       job_id=ftest.__name__)
+                    else:
+                        c.comp_dynamic(ftest, model_name, ndp)
+                        
+                    
+# 
+# def wrap_with_library(f, id_ndp, ndp, libname):
+#     library = get_test_library(libname)
+#     return f(id_ndp, ndp, library)
+# 
+# def wrap_with_library_dynamic(context, f, id_ndp, ndp, libname):
+#     library = get_test_library(libname)
+#     return f(context, id_ndp, ndp, library)
+    
+def accepts_arg(f, name):
+    """ True if it supports the "library" argument """
+    import inspect
+    args = inspect.getargspec(f)
+#     print args
+    return name in args.args
 
 def mcdplib_test_setup_source_mcdp(context, libname):
     from mcdp_tests import load_tests_modules
@@ -207,10 +236,28 @@ def gives_semantic_error(source):
     keywords = get_keywords(source)
     return 'semantic_error' in keywords
 
+def gives_not_implemented_error(source):
+    keywords = get_keywords(source)
+    return 'not_implemented_error' in keywords
+
 def gives_syntax_error(source):
     keywords = get_keywords(source)
     return 'syntax_error' in keywords
 
+def mcdplib_assert_not_implemented_error_fn(libname, model_name):
+    l = get_test_library(libname)
+    try:
+        res = l.load_ndp(model_name)
+        res.abstract()
+    except DPNotImplementedError:
+        pass
+    except BaseException as e:
+        msg = "Expected DPNotImplementedError, got %s." % type(e)
+        raise_wrapped(Exception, e, msg)
+    else:
+        msg = "Expected DPNotImplementedError, instead succesfull instantiation."
+        raise_desc(Exception, msg, model_name=model_name, res=res.repr_long())
+    
 def mcdplib_assert_semantic_error_fn(libname, model_name):
     l = get_test_library(libname)
     try:
@@ -219,10 +266,10 @@ def mcdplib_assert_semantic_error_fn(libname, model_name):
     except DPSemanticError:
         pass
     except BaseException as e:
-        msg = "Expected semantic error, got %s." % type(e)
+        msg = "Expected DPSemanticError, got %s." % type(e)
         raise_wrapped(Exception, e, msg)
     else:
-        msg = "Expected an exception, instead succesfull instantiation."
+        msg = "Expected DPSemanticError, instead succesfull instantiation."
         raise_desc(Exception, msg, model_name=model_name, res=res.repr_long())
 
 def mcdplib_test_setup_value(context, libname):
@@ -323,32 +370,40 @@ def timeit(desc, minimum=None):
     if minimum is not None:
         if delta < minimum:
             return
-    logger.debug('timeit %s: %.2f s' % (desc, delta))
+    logger.debug('timeit %s: %.2f s (>= %s)' % (desc, delta, minimum))
     
+min_time_warn = 0.5
+
 def _load_primitivedp(libname, model_name):
+    context = Context()
     l = get_test_library(libname)
-    with timeit(model_name):
-        return l.load_primitivedp(model_name)
+    with timeit(model_name, minimum=min_time_warn):
+        return l.load_primitivedp(model_name, context)
 
 def _load_template(libname, model_name):
+    context = Context()
     l = get_test_library(libname)
-    with timeit(model_name):
-        return l.load_template(model_name)
+    with timeit(model_name, minimum=min_time_warn):
+        return l.load_template(model_name, context)
 
 def _load_value(libname, name):
     l = get_test_library(libname)
-    vu = l.load_constant(name)
+    context = Context()
+    with timeit(name, minimum=min_time_warn):
+        vu = l.load_constant(name, context)
     return vu
 
 def _load_poset(libname, model_name):
     l = get_test_library(libname)
-    with timeit(model_name):
-        return l.load_poset(model_name)
+    context = Context()
+    with timeit(model_name, minimum=min_time_warn):
+        return l.load_poset(model_name, context)
 
 def _load_ndp(libname, model_name):
     l = get_test_library(libname)
-    with timeit(model_name):
-        return l.load_ndp(model_name)
+    context = Context() 
+    with timeit(model_name, minimum=min_time_warn):
+        return l.load_ndp(model_name, context)
     
 #
 # @contextmanager
@@ -365,63 +420,3 @@ def _load_ndp(libname, model_name):
 #
 
 
-
-# def mcdplib_define_tst(context, libname):
-#     """
-#         mcdplib: folder
-#         
-#         loads the mcdp_lang_tests in mcdp_tests.yaml
-#     """
-#     librarian = get_test_librarian()
-#     mcdplib = librarian.libraries[libname]['path']
-# 
-#     assert os.path.exists(mcdplib)
-# 
-#     fn = os.path.join(mcdplib, 'mcdp_tests.yaml')
-#     if not os.path.exists(fn):
-#         return
-# 
-#     with open(fn) as f:
-#         data = yaml.load(f)
-# 
-#     if 'test_solve' in data:
-# 
-#         tests = data['test_solve']
-#         if tests is not None:
-#             for name, test_data in tests.items():
-#                 c = context.child(name)
-#                 c.comp(mcdplib_define_tst_solve, mcdplib, name, test_data, job_id='solve')
-# 
-# 
-# def mcdplib_define_tst_solve(mcdplib, id_test, test_data):  # @UnusedVariable
-#     mcdp_dev_warning('this doesnt use the librarian')
-#     # Reload the data (easier to debug)
-#     fn = os.path.join(mcdplib, 'mcdp_tests.yaml')
-#     with open(fn) as f:
-#         data = yaml.load(f)
-#     test_data = data['test_solve'][id_test]
-#     
-#     defaults = dict(lower=None, upper=None, max_steps=None, 
-#                     intervals=None,
-#                     expect_nres=None,
-#                     expect_res=None,
-#                     imp=None,
-#                     _exp_advanced=False, expect_nimp=None,
-#                     plot=False,
-#                     do_movie=False)
-#     required = ['query_strings', 'model_name']
-#     params = defaults.copy()
-#     for k, v in test_data.items():
-#         if not k in defaults and not k in required:
-#             raise_desc(ValueError, 'Invalid configuration.',
-#                        k=k, test_data=test_data, defaults=defaults)
-#         params[k] = v
-#     
-#     params['logger'] = logger
-#     params['config_dirs'] = [mcdplib]
-#     params['maindir'] = mcdplib
-#     params['cache_dir'] = None
-#     params['out_dir'] = os.path.join(mcdplib + '.out/%s' % id_test)
-#     params['make'] = False
-# 
-#     solve_main(**params)

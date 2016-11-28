@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """ Utils for graphgen """
 
 import base64
@@ -10,6 +11,8 @@ import traceback
 from bs4 import BeautifulSoup
 
 from contracts import contract
+from contracts.utils import check_isinstance, raise_desc
+from mocdp import logger, MCDPConstants
 from mocdp.exceptions import mcdp_dev_warning
 import networkx as nx  # @UnresolvedImport
 from reprep.constants import MIME_PDF, MIME_PLAIN, MIME_PNG, MIME_SVG
@@ -33,11 +36,11 @@ def graphviz_run(filename_dot, output, prog='dot'):
         # print('done')
     except (CmdException, KeyboardInterrupt):
         emergency = 'emergency.dot'
-        print('saving to %r' % emergency)  # XXX
+        logger.error('saving to %r' % emergency)  # XXX
         contents = open(filename_dot).read()
         with open(emergency, 'w') as f:
             f.write(contents)
-        print(contents)
+#         print(contents)
         raise
 
 
@@ -107,36 +110,45 @@ def gg_figure(r, name, ggraph, do_png=True, do_pdf=True, do_svg=True,
 #                 f2.write(s)
 
         prog = 'dot'
-        if do_png:
-            with f.data_file('graph', MIME_PNG) as filename:
-                graphviz_run(filename_dot, filename, prog=prog)
-
-        if do_pdf:
-            with f.data_file('graph_pdf', MIME_PDF) as filename:
-                graphviz_run(filename_dot, filename, prog=prog)
-
-        if do_svg:
-            with f.data_file('graph_svg', MIME_SVG) as filename:
-                graphviz_run(filename_dot, filename, prog=prog)
-
-                soup = BeautifulSoup(open(filename).read(), 'lxml', from_encoding='utf-8')
-                for tag in soup.select('image'):
-                    href = tag['xlink:href']
-                    extensions = ['png', 'jpg']
-                    for ext in extensions:
-                        if ext in href:
-                            with open(href) as ff:
-                                png = ff.read()
-                            encoded = base64.b64encode(png)
-                            from mcdp_web.images.images import get_mime_for_format
-                            mime = get_mime_for_format(ext)
-                            src = 'data:%s;base64,%s' % (mime, encoded)
-                            tag['xlink:href'] = src
-
-                with codecs.open(filename, 'w', encoding='utf-8') as ff:
-                    s = str(soup)
-                    u = unicode(s, 'utf-8')
-                    ff.write(u)
+        try:
+                
+            if do_png:
+                with f.data_file('graph', MIME_PNG) as filename:
+                    graphviz_run(filename_dot, filename, prog=prog)
+    
+            if do_pdf:
+                with f.data_file('graph_pdf', MIME_PDF) as filename:
+                    graphviz_run(filename_dot, filename, prog=prog)
+    
+            if do_svg:
+                with f.data_file('graph_svg', MIME_SVG) as filename:
+                    graphviz_run(filename_dot, filename, prog=prog)
+    
+                    soup = BeautifulSoup(open(filename).read(), 'lxml', from_encoding='utf-8')
+                    for tag in soup.select('image'):
+                        href = tag['xlink:href']
+                        extensions = ['png', 'jpg']
+                        for ext in extensions:
+                            if ext in href:
+                                with open(href) as ff:
+                                    png = ff.read()
+                                encoded = base64.b64encode(png)
+                                from mcdp_web.images.images import get_mime_for_format
+                                mime = get_mime_for_format(ext)
+                                src = 'data:%s;base64,%s' % (mime, encoded)
+                                tag['xlink:href'] = src
+    
+                    with codecs.open(filename, 'w', encoding='utf-8') as ff:
+                        s = str(soup)
+                        u = unicode(s, 'utf-8')
+                        ff.write(u)
+        except CmdException:
+            if MCDPConstants.test_ignore_graphviz_errors:
+                mcdp_dev_warning('suppressing errors from graphviz')
+                logger.error('Graphivz failed, but I will ignore it '
+                             'because of MCDPConstants.test_ignore_graphviz_errors.')
+            else:
+                raise
 
         # MIME_GRAPHVIZ
         if do_dot:
@@ -148,12 +160,15 @@ def gg_figure(r, name, ggraph, do_png=True, do_pdf=True, do_svg=True,
 
 allowed_formats = ['png', 'pdf', 'svg', 'dot']
 
+@contract(returns='tuple')
 def gg_get_formats(gg, data_formats):
+    check_isinstance(data_formats, (list, tuple))
     res = []
-    mcdp_dev_warning('TODO: optimize')
+    mcdp_dev_warning('TODO: optimize gg_get_formats')
     for data_format in data_formats:
         if not data_format in allowed_formats:
-            raise ValueError(data_format)
+            msg = 'Invalid data format.' 
+            raise_desc(ValueError, msg, data_formats=data_formats)
 
         if data_format == 'dot':
             d = get_dot_string(gg)
@@ -161,8 +176,10 @@ def gg_get_formats(gg, data_formats):
             d = gg_get_format(gg, data_format)
 
         res.append(d)
-    return res
-
+    return tuple(res)
+ 
+     
+    
 def gg_get_format(gg, data_format):
     from reprep import Report
     r = Report()

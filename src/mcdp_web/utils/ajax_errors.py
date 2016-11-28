@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import cgi
 import traceback
 
@@ -19,7 +20,7 @@ def format_exception_for_ajax_response(e, quiet=()):
     res = {}
     res['ok'] = False
     if isinstance(e, quiet):
-        s = str(e)
+        s = type(e).__name__ + ': ' + str(e)
     else:
         s = traceback.format_exc(e)
     res['error'] = cgi.escape(s)

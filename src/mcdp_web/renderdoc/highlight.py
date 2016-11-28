@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 import base64
 import hashlib
 import os
+import sys
 from tempfile import mkdtemp
 import traceback
 
@@ -8,16 +10,18 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString
 
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, indent
+from mcdp_figures.figure_interface import MakeFiguresNDP, MakeFiguresTemplate
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.generic_report_utils import (
-    NotPlottable, enlarge, get_plotters, plotters)
+    NotPlottable, enlarge, get_plotters)
 from mcdp_report.html import ast_to_html, get_markdown_css
-from mcdp_web.images.images import (get_mime_for_format, ndp_graph_enclosed,
-    ndp_graph_expand, ndp_graph_normal, ndp_graph_templatized)
+from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters
+from mcdp_web.images.images import (get_mime_for_format)
 from mocdp import ATTR_LOAD_NAME, logger
-from mocdp.exceptions import DPSemanticError, DPSyntaxError
+from mocdp.comp.context import Context
+from mocdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
 from reprep import Report
 from system_cmd import CmdException, system_cmd_result
 
@@ -96,7 +100,8 @@ def make_plots(library, frag, raise_errors, realpath):
                     vu = load(tag_id)
                 else:
                     source_code = tag.string.encode('utf-8')
-                    vu = parse(source_code, realpath=realpath)
+                    context = Context()
+                    vu = parse(source_code, realpath=realpath, context=context)
 
                 rendered = plotter(tag, vu)
 
@@ -128,7 +133,7 @@ def make_plots(library, frag, raise_errors, realpath):
         r = Report()
         f = r.figure()
         try:
-            available = dict(get_plotters(plotters, vu.unit))
+            available = dict(get_plotters(get_all_available_plotters(), vu.unit))
             assert available
         except NotPlottable as e:
             msg = 'No plotters available for %s' % vu.unit
@@ -164,7 +169,7 @@ def make_plots(library, frag, raise_errors, realpath):
 
 def load_fragments(library, frag, realpath):
     """
-        loads all the codes 
+        loads all the codes specified as "mcdp" and "mcdp_poset"
         
             <pre class='mcdp' id='id_ndp>
             code
@@ -315,7 +320,6 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
 
     def go(selector, parse_expr, extension, use_pre=True):
         for tag in soup.select(selector):
-            
             try:
                 if tag.string is None:
                     if not tag.has_attr('id'):
@@ -415,12 +419,21 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                 tag.insert_after(t)
                 if tag.string is None:
                     tag.string = "`%s" % tag['id']
+                    
+            except DPInternalError as e:
+                msg = 'Error while interpreting the code:\n\n'
+                msg += indent(source_code, '  | ')
+                raise_wrapped(DPInternalError, e,msg, exc=sys.exc_info())
+                
 
     go('pre.mcdp', Syntax.ndpt_dp_rvalue, "mcdp", use_pre=True)
     go('pre.mcdp_poset', Syntax.space, "mcdp_poset", use_pre=True)
-    go('pre.mcdp_value', Syntax.rvalue, "mcdp_value", use_pre=True)
     go('pre.mcdp_template', Syntax.template, "mcdp_template", use_pre=True)
     go('pre.mcdp_statements', Syntax.dp_model_statements, "mcdp_statements", use_pre=True)
+    go('pre.mcdp_fvalue', Syntax.fvalue, "mcdp_fvalue", use_pre=True)
+    go('pre.mcdp_rvalue', Syntax.rvalue, "mcdp_rvalue", use_pre=True)
+    # todo: add deprecation
+    go('pre.mcdp_value', Syntax.rvalue, "mcdp_value", use_pre=True)
 
     go('code.mcdp', Syntax.ndpt_dp_rvalue, "mcdp", use_pre=False)
     go('code.mcdp_poset', Syntax.space, "mcdp_poset", use_pre=False)
@@ -428,6 +441,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
     go('code.mcdp_template', Syntax.template, "mcdp_template", use_pre=False)
 
     return str(soup)
+
 
 @contract(frag=str, returns=str)
 def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, generate_pdf):
@@ -462,18 +476,16 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
                 t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
                 t.string = traceback.format_exc(e)
                 tag.insert_after(t)
-    
-    from mcdp_report.gdc import STYLE_GREENREDSYM
+     
 
-    default_direction = 'LR'
-
-    def call(tag0, func, klass, **args):
+    def make_tag(tag0, klass, data, ndp=None, template=None):
+        
         if False:
-            png = func(data_format='png', **args)
+            png = data['png']
             r = create_img_png_base64(soup, png, **{'class': klass})
             return r
         else:
-            svg = func(data_format='svg', **args)
+            svg = data['svg']
 
             tag_svg = BeautifulSoup(svg, 'lxml', from_encoding='utf-8').svg
             tag_svg['class'] = klass
@@ -484,17 +496,17 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
                 tag_svg['id'] = tag0['id']
 
             if generate_pdf:
-                pdf0 = func(data_format='pdf', **args)
+                pdf0 = data['pdf']
                 pdf = crop_pdf(pdf0, margins=0)
 
                 div = soup.new_tag('div')
 
                 if tag0.has_attr('id'):
                     basename = tag0['id']
-                elif 'ndp' in args and hasattr(args['ndp'], ATTR_LOAD_NAME):
-                    basename = getattr(args['ndp'], ATTR_LOAD_NAME)
-                elif 'template' in args and hasattr(args['template'], ATTR_LOAD_NAME):
-                    basename = getattr(args['template'], ATTR_LOAD_NAME)
+                elif ndp is not None and hasattr(ndp, ATTR_LOAD_NAME):
+                    basename = getattr(ndp, ATTR_LOAD_NAME)
+                elif template is not None and hasattr(template, ATTR_LOAD_NAME):
+                    basename = getattr(template, ATTR_LOAD_NAME)
                 else:
                     hashcode = hashlib.sha224(tag0.string).hexdigest()[-8:]
                     basename = 'code-%s' % (hashcode)
@@ -510,85 +522,51 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
             else:
                 return tag_svg
 
-    def ndp_graph_normal_(tag):
-        source_code = tag.string.encode('utf-8')
-        ndp = library.parse_ndp(source_code, realpath=realpath)
-        yourname = ''
-        direction = str(tag.get('direction', default_direction))
+    
+    mf = MakeFiguresNDP(None,None,None)
+    available = set(mf.available()) | set(mf.aliases)
+    for which in available:
+        selector = 'pre.%s' % which
+        def callback(tag0):
+            source_code = tag0.string.encode('utf-8')
+            context = Context()
+            ndp = library.parse_ndp(source_code, realpath=realpath, context=context)
+            mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=None) # XXX
+            formats = ['svg']
+            if generate_pdf: 
+                formats.append('pdf')
+            data = mf.get_figure(which,formats)
+            tag = make_tag(tag0, which, data, ndp=ndp, template=None)
+            return tag
         
-        return call(tag, ndp_graph_normal,
-                    library=library,
-                    ndp=ndp,
-                    style=STYLE_GREENREDSYM,
-                    yourname=yourname,
-                    direction=direction,
-                    klass='ndp_graph_normal')
+        go(selector, callback)
+    
+    mf = MakeFiguresTemplate(None,None,None)
+    available = set(mf.available()) | set(mf.aliases)
+    for which in available:
+        selector = 'pre.%s' % which
+        def callback(tag0):
+            source_code = tag0.string.encode('utf-8')
+            context = Context()
+            template = library.parse_template(source_code, realpath=realpath, context=context)
+
+            mf = MakeFiguresTemplate(template=template, library=library, yourname=None) # XXX
+            formats = ['svg']
+            if generate_pdf: 
+                formats.append('pdf')
+            data = mf.get_figure(which,formats)
+            tag = make_tag(tag0, which, data, ndp=None, template=template)
+            return tag
         
-    def ndp_graph_templatized_(tag):
-        source_code = tag.string.encode('utf-8')
-        ndp = library.parse_ndp(source_code, realpath=realpath)
-        yourname = ''
-        direction = str(tag.get('direction', default_direction))
+        go(selector, callback)
+        
 
-        return call(tag, ndp_graph_templatized, library=library, ndp=ndp,
-                    yourname=yourname,
-                    direction=direction, klass='ndp_graph_templatized')
-
-    def ndp_graph_templatized_labeled_(tag):
-        source_code = tag.string.encode('utf-8')
-        ndp = library.parse_ndp(source_code, realpath=realpath)
-        yourname = None 
-        if hasattr(ndp, ATTR_LOAD_NAME):
-            yourname = getattr(ndp, ATTR_LOAD_NAME)
-        direction = str(tag.get('direction', default_direction))
-
-        return call(tag, ndp_graph_templatized, library=library, ndp=ndp,
-                    direction=direction,
-                    yourname=yourname, klass='ndp_graph_templatized_labeled')
-
-    def ndp_graph_enclosed_(tag):  # ndp_graph_enclosed
-        source_code = tag.string.encode('utf-8')
-        ndp = library.parse_ndp(source_code, realpath=realpath)
-        yourname = ''
-
-        direction = str(tag.get('direction', default_direction))
-        enclosed = bool_from_string(tag.get('enclosed', 'True'))
-        return call(tag, ndp_graph_enclosed, library=library, ndp=ndp,
-                    style=STYLE_GREENREDSYM,
-                     yourname=yourname, enclosed=enclosed,
-                     direction=direction, klass='ndp_graph_enclosed')
-
-    def ndp_graph_expand_(tag):
-        source_code = tag.string.encode('utf-8')
-        ndp = library.parse_ndp(source_code, realpath=realpath)
-        yourname = ''
-
-        direction = str(tag.get('direction', default_direction))
-
-        return call(tag, ndp_graph_expand, library=library, ndp=ndp,
-                    style=STYLE_GREENREDSYM,
-                     yourname=yourname,
-                     direction=direction,
-                     klass='ndp_graph_expand')
-
-    def template_graph_enclosed_(tag):  # ndp_graph_enclosed
-        source_code = tag.string.encode('utf-8')
-        template = library.parse_template(source_code, realpath=realpath)
-        yourname = ''
-        direction = str(tag.get('direction', default_direction))
-        enclosed = bool_from_string(tag.get('enclosed', 'True'))
-        from mcdp_web.images.images import ndp_template_graph_enclosed
-        return call(tag, ndp_template_graph_enclosed, library=library,
-                    template=template, style=STYLE_GREENREDSYM,
-                     yourname=yourname, enclosed=enclosed,
-                     direction=direction, klass='template_graph_enclosed')
-
-    go('pre.ndp_graph_normal', ndp_graph_normal_)
-    go('pre.ndp_graph_templatized', ndp_graph_templatized_)
-    go('pre.ndp_graph_templatized_labeled', ndp_graph_templatized_labeled_)
-    go('pre.ndp_graph_enclosed', ndp_graph_enclosed_)
-    go('pre.ndp_graph_expand', ndp_graph_expand_)
-    go('pre.template_graph_enclosed', template_graph_enclosed_)
+#     go('pre.ndp_graph_normal', ndp_graph_normal_)
+#     go('pre.ndp_graph_templatized', ndp_graph_templatized_)
+#     go('pre.ndp_graph_templatized_labeled', ndp_graph_templatized_labeled_)
+#     go('pre.ndp_graph_enclosed', ndp_graph_enclosed_)
+#     go('pre.ndp_graph_expand', ndp_graph_expand_)
+#     go('pre.template_graph_enclosed', template_graph_enclosed_)
 
     return str(soup)
 
@@ -618,3 +596,84 @@ def bool_from_string(b):
     msg = 'Cannot interpret string as boolean.'
     raise_desc(ValueError, msg, b=b)
     
+
+
+#     def ndp_graph_normal_(tag):
+#         source_code = tag.string.encode('utf-8')
+#         context = Context()
+#         ndp = library.parse_ndp(source_code, realpath=realpath, context=context)
+#         yourname = ''
+#         direction = str(tag.get('direction', default_direction))
+#         
+#         return call(tag, ndp_graph_normal,
+#                     library=library,
+#                     ndp=ndp,
+#                     style=STYLE_GREENREDSYM,
+#                     yourname=yourname,
+#                     direction=direction,
+#                     klass='ndp_graph_normal')
+#         
+#     def ndp_graph_templatized_(tag):
+#         source_code = tag.string.encode('utf-8')
+#         context = Context()
+#         ndp = library.parse_ndp(source_code, realpath=realpath, context=context)
+#         yourname = ''
+#         direction = str(tag.get('direction', default_direction))
+# 
+#         return call(tag, ndp_graph_templatized, library=library, ndp=ndp,
+#                     yourname=yourname,
+#                     direction=direction, klass='ndp_graph_templatized')
+# 
+#     def ndp_graph_templatized_labeled_(tag):
+#         source_code = tag.string.encode('utf-8')
+#         context = Context()
+#         ndp = library.parse_ndp(source_code, realpath=realpath, context=context)
+#         yourname = None 
+#         if hasattr(ndp, ATTR_LOAD_NAME):
+#             yourname = getattr(ndp, ATTR_LOAD_NAME)
+#         direction = str(tag.get('direction', default_direction))
+# 
+#         return call(tag, ndp_graph_templatized, library=library, ndp=ndp,
+#                     direction=direction,
+#                     yourname=yourname, klass='ndp_graph_templatized_labeled')
+# 
+#     def ndp_graph_enclosed_(tag):  # ndp_graph_enclosed
+#         source_code = tag.string.encode('utf-8')
+#         context = Context()
+#         ndp = library.parse_ndp(source_code, realpath=realpath, context=context)
+#         yourname = ''
+# #         raise Exception()
+#         direction = str(tag.get('direction', default_direction))
+#         enclosed = bool_from_string(tag.get('enclosed', 'True'))
+#         
+#         return call(tag, ndp_graph_enclosed, library=library, ndp=ndp,
+#                     style=STYLE_GREENREDSYM,
+#                      yourname=yourname, enclosed=enclosed,
+#                      direction=direction, klass='ndp_graph_enclosed')
+# 
+#     def ndp_graph_expand_(tag):
+#         source_code = tag.string.encode('utf-8')
+#         context = Context()
+#         ndp = library.parse_ndp(source_code, realpath=realpath, context=context)
+#         yourname = ''
+# 
+#         direction = str(tag.get('direction', default_direction))
+# 
+#         return call(tag, ndp_graph_expand, library=library, ndp=ndp,
+#                     style=STYLE_GREENREDSYM,
+#                      yourname=yourname,
+#                      direction=direction,
+#                      klass='ndp_graph_expand')
+# 
+#     def template_graph_enclosed_(tag):  # ndp_graph_enclosed
+#         source_code = tag.string.encode('utf-8')
+#         context = Context()
+#         template = library.parse_template(source_code, realpath=realpath, context=context)
+#         yourname = ''
+#         direction = str(tag.get('direction', default_direction))
+#         enclosed = bool_from_string(tag.get('enclosed', 'True'))
+#         from mcdp_web.images.images import ndp_template_graph_enclosed
+#         return call(tag, ndp_template_graph_enclosed, library=library,
+#                     template=template, style=STYLE_GREENREDSYM,
+#                      yourname=yourname, enclosed=enclosed,
+#                      direction=direction, klass='template_graph_enclosed')

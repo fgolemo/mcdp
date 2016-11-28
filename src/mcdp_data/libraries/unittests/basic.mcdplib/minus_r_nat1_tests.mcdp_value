@@ -1,0 +1,14 @@
+# required r - Nat:2 >= provided f 
+# r >= f + 2
+
+#  r = 0 -> f empty
+#  r = 1 -> f empty
+#  r = 2 -> f <= 0
+#  r = 3 -> f <= 1
+
+< 
+    assert_equal( solve_r(Nat:0, `minus_r_nat1), ↓ EmptySet Nat),
+    assert_equal( solve_r(Nat:1, `minus_r_nat1), ↓ EmptySet Nat),
+    assert_equal( solve_r(Nat:2, `minus_r_nat1), ↓ { Nat: 0 }),
+    assert_equal( solve_r(Nat:3, `minus_r_nat1), ↓ { Nat: 1 })
+>

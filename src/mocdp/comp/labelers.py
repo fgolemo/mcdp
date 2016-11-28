@@ -1,8 +1,10 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import indent
 from mcdp_dp import LabelerDP, PrimitiveDP
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import dpwrap
+
 
 __all__ = [
     'LabelerNDP',

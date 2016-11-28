@@ -4,13 +4,13 @@ import warnings
 
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
-from mcdp_dp import sum_units
-from mcdp_posets import Nat, RcompUnits, mult_table
-from mcdp_posets import express_value_in_isomorphic_space
-from mcdp_posets.rcomp_units import R_dimensionless, mult_table_seq, \
-    RbicompUnits
+from mcdp_maps.SumN_xxx_Map import sum_units
+from mcdp_posets import Nat, RcompUnits, mult_table, Rcomp, express_value_in_isomorphic_space
+from mcdp_posets.nat import Nat_mult_uppersets_continuous, Nat_add
+from mcdp_posets.rcomp_units import (R_dimensionless, mult_table_seq,
+    RbicompUnits, rcomp_add)
 from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPSemanticError
+from mocdp.exceptions import DPSemanticError, DPNotImplementedError
 
 
 @contract(S=RcompUnits)
@@ -22,7 +22,6 @@ def inv_unit(S):
     return res
 
 def inv_constant(a):
-    from mcdp_posets.rcomp import Rcomp
     if a.unit == Nat():
         raise NotImplementedError('division by natural number')
         warnings.warn('Please think more about this. Now 1/N -> 1.0/N')
@@ -47,7 +46,7 @@ def vu_rcomp_mult_constants2(a, b):
 
 @contract(seq='seq($ValueWithUnits)')
 def generic_mult_constantsN(seq):
-    """ Multiplies a sequence of constants that could be either Nat or RCompUnits """
+    """ Multiplies a sequence of constants that could be either Nat, Rcomp, or RCompUnits """
     for c in seq:
         if isinstance(c.unit, RbicompUnits):
             assert c.value < 0
@@ -56,16 +55,14 @@ def generic_mult_constantsN(seq):
 
     posets = [_.unit for _ in seq]
     for p in posets:
-
-        check_isinstance(p, (Nat, RcompUnits))
-
+        check_isinstance(p, (Nat, Rcomp, RcompUnits))
 
     promoted, R = generic_mult_table(posets)
     
     if isinstance(R, Nat):
-        res  = 1
-        for vu in seq:
-            res *= vu.value
+        values = [_.value for _ in seq]
+        from functools import reduce
+        res = reduce(Nat_mult_uppersets_continuous, values)
         return ValueWithUnits(res, R) 
     else:
         res = 1.0
@@ -80,18 +77,19 @@ def generic_mult_constantsN(seq):
     return res
 
 def generic_mult_table(seq):
-    """ A generic mult table that knows how to take care of Nat as well. """
+    """ A generic mult table that knows how to take care of Nat and Rcomp as well. """
     seq = list(seq)
     for s in seq:
-        check_isinstance(s, (Nat, RcompUnits))
+        check_isinstance(s, (Nat, Rcomp, RcompUnits))
         
-    # If there are some Rcomps, then Nat will be promoted to Rcomp dimensionless
+    # If there are some RcompUnits, then Nat and Rcomp 
+    # will be promoted to Rcomp dimensionless
     any_reals = any(isinstance(_, RcompUnits) for _ in seq)
-    
+    any_rcomp = any(isinstance(_, Rcomp) for _ in seq)
     if any_reals:
         # compute the promoted ones
         def get_promoted(s):
-            if isinstance(s, Nat):
+            if isinstance(s, (Rcomp, Nat)):
                 return R_dimensionless
             else:
                 return s
@@ -101,7 +99,20 @@ def generic_mult_table(seq):
     
         # now we can use mult_table
         return promoted, mult_table_seq(promoted)
+    elif any_rcomp:
+        # promote Nat to Rcomp
+        def get_promoted(s):
+            if isinstance(s,  Nat):
+                return Rcomp()
+            else:
+                assert isinstance(s, Rcomp)
+                return s
     
+        # this is all RcompUnits
+        promoted = map(get_promoted, seq)
+    
+        # now we can use mult_table
+        return promoted, Rcomp()
     else: # it's all Nats
         return seq, Nat()
 
@@ -112,6 +123,47 @@ def add_table(F1, F2):
     return F1
 
 def plus_constants2(a, b):
+    
+    A = a.unit
+    B = b.unit
+    
+    if isinstance(A, RcompUnits) and isinstance(B, RcompUnits):
+        return plus_constants2_rcompunits(a, b)
+    
+    if isinstance(A, RcompUnits) and isinstance(B, (Rcomp, Nat)):
+        b2 = ValueWithUnits(b.cast_value(A), A)
+        return plus_constants2_rcompunits(a, b2)
+    
+    if isinstance(B, RcompUnits) and isinstance(A, (Rcomp, Nat)):
+        a2 = ValueWithUnits(a.cast_value(B), B)
+        return plus_constants2_rcompunits(a2, b)
+
+    if isinstance(B, Rcomp) and isinstance(A, Rcomp):
+        res = rcomp_add(a.value, b.value)
+        return ValueWithUnits(value=res, unit=Rcomp())
+
+    if isinstance(B, Rcomp) and isinstance(A, Nat):
+        a2v = a.cast_value(B)
+        res = rcomp_add(a2v, b.value)
+        return ValueWithUnits(value=res, unit=Rcomp())
+  
+    if isinstance(A, Rcomp) and isinstance(B, Nat):
+        b2v = b.cast_value(A)
+        res = rcomp_add(a.value, b2v)
+        return ValueWithUnits(value=res, unit=Rcomp())
+
+    if isinstance(B, Nat) and isinstance(A, Nat):
+        res = Nat_add(a.value, b.value)
+        return ValueWithUnits(value=res, unit=Nat())
+        
+    
+    msg = 'Cannot add %r and %r' % (a, b)
+    raise DPNotImplementedError(msg)
+
+@contract(a=ValueWithUnits, b=ValueWithUnits)
+def plus_constants2_rcompunits(a, b):
+    check_isinstance(a.unit, RcompUnits)
+    check_isinstance(b.unit, RcompUnits)
     R = a.unit
     Fs = [a.unit, b.unit]
     values = [a.value, b.value]

@@ -1,0 +1,8 @@
+
+< 
+    assert_equal(⊥ LowerSets(g), lowerclosure {Top g}),
+    
+    # check that lowerclosure the empty set is the bottom of the lowersets
+    assert_equal(⊤ LowerSets(g), lowerclosure EmptySet g)
+>
+#   assert_leq(lowerclosure EmptySet g, lowerclosure {1g})   

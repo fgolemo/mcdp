@@ -4,8 +4,6 @@ import os
 from contracts.utils import raise_desc, raise_wrapped
 from decent_params.utils import UserError
 from mcdp_dp.dp_transformations import get_dp_bounds
-from mcdp_dp.solver import generic_solve
-from mcdp_dp.solver_iterative import solver_iterative
 from mcdp_dp.tracer import Tracer
 from mcdp_library import Librarian
 from mcdp_posets import (NotLeq, UpperSets,
@@ -17,6 +15,7 @@ from reprep import Report
 from .utils_mkdir import mkdirs_thread_safe
 
 
+# from mcdp_dp.solver_iterative import solver_iterative
 class ExpectationsNotMet(Exception):
     pass
 
@@ -206,36 +205,37 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
         report_solutions.to_html(out_html)
 
 
-def solve_meat_solve(trace, ndp, dp, fg, intervals, max_steps, _exp_advanced):
+def solve_meat_solve(trace, ndp, dp, fg, intervals, max_steps, exp_advanced):
     R = dp.get_res_space()
     UR = UpperSets(R)
 
-    if intervals:
-        res = solver_iterative(dp, fg, trace)
-    else:
-        if not _exp_advanced:
+#     if intervals:
+#         res = solver_iterative(dp, fg, trace)
+#     else:
+    if True:
+#         if not _exp_advanced:
             res = dp.solve_trace(fg, trace)
             rnames = ndp.get_rnames()
             x = ", ".join(rnames)
             # todo: add better formatting
             trace.log('Minimal resources needed: %s = %s' % (x, UR.format(res)))
-        else:
-            try:
-                trace = generic_solve(dp, f=fg, max_steps=max_steps)
-                trace.log('Iteration result: %s' % trace.result)
-                ss = trace.get_s_sequence()
-                S = trace.S
-                trace.log('Fixed-point iteration converged to: %s'
-                      % S.format(ss[-1]))
-                R = trace.dp.get_res_space()
-                UR = UpperSets(R)
-                sr = trace.get_r_sequence()
-                rnames = ndp.get_rnames()
-                x = ", ".join(rnames)
-                trace.log('Minimal resources needed: %s = %s'
-                      % (x, UR.format(sr[-1])))
-            except:
-                raise
+#         else:
+#             try:
+#                 trace = generic_solve(dp, f=fg, max_steps=max_steps)
+#                 trace.log('Iteration result: %s' % trace.result)
+#                 ss = trace.get_s_sequence()
+#                 S = trace.S
+#                 trace.log('Fixed-point iteration converged to: %s'
+#                       % S.format(ss[-1]))
+#                 R = trace.dp.get_res_space()
+#                 UR = UpperSets(R)
+#                 sr = trace.get_r_sequence()
+#                 rnames = ndp.get_rnames()
+#                 x = ", ".join(rnames)
+#                 trace.log('Minimal resources needed: %s = %s'
+#                       % (x, UR.format(sr[-1])))
+#             except:
+#                 raise
     return res, trace
 
 def solve_get_dp_from_ndp(basename, ndp, lower, upper, flatten=True):

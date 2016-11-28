@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
-
-from .find_poset_minima.baseline_n2 import poset_minima
 from contracts import raise_wrapped
 from mcdp_posets import NotLeq
 from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
+
+from .find_poset_minima.baseline_n2 import poset_minima
+
 
 __all__ = [
     'check_minimal',
@@ -22,8 +23,8 @@ def check_minimal(elements, poset):
     if not len(m2) == len(elements):
         msg = 'Set of elements is not minimal: %s' % elements
         extra = set(elements) - set(m2)
-        x = ", ".join([ '%s %r' % (poset.format(s), s) for s in extra])
-        msg += '\nThese points were dominated: %s' %x 
+        x = "\n ".join([ '%s %r' % (poset.format(s), s) for s in extra])
+        msg += '\nThese points were dominated:\n %s' %x 
         if len(extra) == 1:
             e = list(extra)[0]
             for e2 in elements:
@@ -36,6 +37,7 @@ def check_minimal(elements, poset):
 
 def poset_check_chain(poset, chain):
     """ Raises an exception if the chain is not a chain. """
+    chain = list(chain)
     for i in range(len(chain) - 1):
         try:
             poset.check_leq(chain[i], chain[i + 1])

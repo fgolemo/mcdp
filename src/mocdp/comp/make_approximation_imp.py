@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc
-from mcdp_dp import Identity, get_approx_dp
+from mcdp_dp import FuncNotMoreThan, Identity, IdentityDP, makeLinearCeilDP
+from mcdp_dp.dp_series_simplification import wrap_series
 from mcdp_posets import Space
 from mocdp.comp.composite import CompositeNamedDP
 from mocdp.comp.context import (Connection, get_name_for_fun_node,
     get_name_for_res_node)
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import dpwrap
+from mocdp.exceptions import DPNotImplementedError
 
 
 __all__ = ['make_approximation']
@@ -16,7 +18,8 @@ __all__ = ['make_approximation']
           approx_perc='float|int',
           approx_abs='float|int', approx_abs_S=Space, ndp=NamedDP,
           returns=NamedDP)
-def make_approximation(name, approx_perc, approx_abs, approx_abs_S, max_value, max_value_S, ndp):
+def make_approximation(name, approx_perc, approx_abs, approx_abs_S, 
+                       max_value, max_value_S, ndp):
     fnames = ndp.get_fnames()
     rnames = ndp.get_rnames()
 
@@ -38,7 +41,8 @@ NAME_APPROX = '_approx'
 def make_approximation_r(name, approx_perc, approx_abs, approx_abs_S,
                          max_value, max_value_S, ndp):
     R = ndp.get_rtype(name)
-    ndp_after = get_approx_dp(R, name, approx_perc, approx_abs, approx_abs_S, max_value, max_value_S)
+    ndp_after = get_approx_dp(R, name, approx_perc, approx_abs, approx_abs_S, 
+                              max_value, max_value_S)
 
     name2ndp = {NAME_ORIGINAL: ndp, NAME_APPROX: ndp_after}
     fnames = ndp.get_fnames()
@@ -49,14 +53,14 @@ def make_approximation_r(name, approx_perc, approx_abs, approx_abs_S,
 
     for fn in fnames:
         F = ndp.get_ftype(fn)
-        fn_ndp = dpwrap(Identity(F), fn, fn)
+        fn_ndp = dpwrap(IdentityDP(F), fn, fn)
         fn_name = get_name_for_fun_node(fn)
         name2ndp[fn_name] = fn_ndp
         connections.append(Connection(fn_name, fn, NAME_ORIGINAL, fn))
 
     for rn in rnames:
         R = ndp.get_rtype(rn)
-        rn_ndp = dpwrap(Identity(R), rn, rn)
+        rn_ndp = dpwrap(IdentityDP(R), rn, rn)
         rn_name = get_name_for_res_node(rn)
         name2ndp[rn_name] = rn_ndp
         if rn == name:
@@ -66,10 +70,12 @@ def make_approximation_r(name, approx_perc, approx_abs, approx_abs_S,
 
     return CompositeNamedDP.from_parts(name2ndp, connections, fnames, rnames)
 
+
 def make_approximation_f(name, approx_perc, approx_abs, approx_abs_S,
                          max_value, max_value_S, ndp):
     F = ndp.get_ftype(name)
-    ndp_before = get_approx_dp(F, name, approx_perc, approx_abs, approx_abs_S, max_value, max_value_S)
+    ndp_before = get_approx_dp(F, name, approx_perc, approx_abs, approx_abs_S, 
+                               max_value, max_value_S)
 
     name2ndp = {NAME_ORIGINAL: ndp, NAME_APPROX: ndp_before}
     fnames = ndp.get_fnames()
@@ -96,3 +102,30 @@ def make_approximation_f(name, approx_perc, approx_abs, approx_abs_S,
         connections.append(Connection(NAME_ORIGINAL, rn, rn_name, rn))
 
     return CompositeNamedDP.from_parts(name2ndp, connections, fnames, rnames)
+
+
+def get_approx_dp(S, name, approx_perc, approx_abs, approx_abs_S, max_value, 
+                  max_value_S):
+    from mcdp_posets.types_universe import express_value_in_isomorphic_space
+
+    approx_abs_ = express_value_in_isomorphic_space(S1=approx_abs_S, s1=approx_abs, S2=S)
+    max_value_ = express_value_in_isomorphic_space(S1=max_value_S, s1=max_value, S2=S)
+
+    if approx_perc > 0:
+        raise_desc(DPNotImplementedError, 'Approx_perc not implemented')
+
+    dps = []
+    
+    if max_value > 0:
+        dp_max = FuncNotMoreThan(S, max_value_)
+        dps.append(dp_max)
+
+    if approx_abs_ > 0:
+        dps.append(makeLinearCeilDP(S, approx_abs_))
+    
+    dp = wrap_series(S, dps)
+    
+    ndp = dpwrap(dp, name, name)
+    return ndp
+
+

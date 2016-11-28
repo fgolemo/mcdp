@@ -1,8 +1,8 @@
 # test connected
  cdp {  
     sub f =  cdp {
-        provides x [R]
-        requires y [R]
+        provides x [dimensionless]
+        requires y [dimensionless]
         y >= x
     }
 

@@ -1,4 +1,4 @@
-finite_poset {
+add_bottom poset {
   TypeA TypeB TypeC TypeD TypeE TypeF  TypeG  TypeH  
   TypeI2 TypeI3 TypeJ TypeK TypeL TypeM TypeN  TypeO
 
@@ -17,20 +17,4 @@ finite_poset {
   TypeC  <= TypeN
   TypeC  <= TypeO
 
-  None <= TypeA 
-  None <= TypeB 
-  None <= TypeC 
-  None <= TypeD 
-  None <= TypeE 
-  None <= TypeF  
-  None <= TypeG  
-  None <= TypeH  
-  None <= TypeI2 
-  None <= TypeI3 
-  None <= TypeJ 
-  None <= TypeK 
-  None <= TypeL 
-  None <= TypeM 
-  None <= TypeN  
-  None <= TypeO
 }

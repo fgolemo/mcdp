@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mcdp_lang import parse_constant, parse_ndp, parse_poset
 from mcdp_lang.namedtuple_tricks import recursive_print

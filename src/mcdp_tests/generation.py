@@ -1,5 +1,5 @@
-
-
+# -*- coding: utf-8 -*-
+from contextlib import contextmanager
 
 def make_accumulator():
     def g(x):
@@ -34,5 +34,31 @@ for_all_nameddps = make_accumulator()
 for_all_nameddps_dyn = make_accumulator()
 for_all_dps_dyn = make_accumulator()
 for_all_nameddps_dyn = make_accumulator()
+# 
+# @decorator
+# def primitive_dp_test(f):
+#     print('decorating %s' % f)
+#     from mocdp import logger
+#     def f0(id_dp, dp):
+#         try:
+#             return f(id_dp, dp)
+#         except:
+#             logger.error('Test failure for DP: %s' % dp.__repr__())
+#             logger.error(dp.repr_long())
+#             raise
+#     return f0
+    
 
+@contextmanager
+def primitive_dp_test(id_dp, dp):
+    from mocdp import logger
+    try:
+        yield
+    except:
+        logger.error('Test failure for DP %r' % id_dp)
+        logger.error('__repr__():\n%s' % dp.__repr__())
+        logger.error('repr_long():\n%s' % dp.repr_long())
+        raise
+    
+    
 

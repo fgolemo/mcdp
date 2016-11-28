@@ -1,0 +1,40 @@
+mcdp  { 
+    'Displaying all types of stuff '
+    provides f1 [Nat] 
+    provides f2 [Nat] 'function'
+    requires r1 [Nat] "resource"
+    requires r2 [Nat]
+    f1 + f2 <= r1 + r2
+    provided f1 + provided f2 <= required r1 + required r2
+    s = instance mcdp {
+      provides energy [Nat] 
+      requires mass [Nat]
+      mass >= energy 
+      provides energy2 <= Nat: 3
+      provides energy3 <= Nat: 4
+      requires mass2 >= Nat: 1
+      requires mass3 >= Nat:2
+    }
+
+    s.mass <= required r1
+    mass required by s <= required r1
+    provided f2 <= s.energy  
+    provided f2 <= energy provided by s
+
+    r4 = provided f1 + Nat:2
+    r5 = provided f1 + Nat:2
+    requires r4, r5
+    requires r6 = provided f1
+    f4 = required r1 + Nat:2
+    f5 = required r1 + Nat:2
+    provides f4, f5
+    provides f6 = required r1
+
+    f1 <= Nat: 5
+    r1 >= Nat: 3   
+
+    provides energy using s
+    requires mass for s
+    provides energy2, energy3 using s
+    requires mass2, mass3 for s
+}

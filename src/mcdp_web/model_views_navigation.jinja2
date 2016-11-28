@@ -14,11 +14,20 @@
 	
 	{% if not navigation['current_model'] %}
 	  <select id='select_library' class='hot_select'>
-	    {% for li in navigation['libraries'] %}
+	    <!-- {% for li in navigation['libraries'] %}
 	    <option value="{{li['url']}}" {% if li['current'] %} selected = 1 {% endif %}>
 	    	{{li['name']}}
 	    </option>
-	    {% endfor %}
+	    {% endfor %} -->
+		{% for sup, sup_libraries in navigation['libraries_indexed'] %}
+		    {% for li in sup_libraries %}
+		    <option value="{{li['url']}}" {% if li['current'] %} selected = 1 {% endif %}>
+		    	{{sup}} / {{li['name']}}
+		    </option>
+		    {% endfor %}
+
+		{% endfor %}
+
 	  </select>
 	 {% else %}
 	 	<a id='back_to_library' href="/libraries/{{navigation['current_library']}}/">

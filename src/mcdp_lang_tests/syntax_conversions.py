@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest, comptest_fails
+
 from .utils2 import eval_rvalue_as_constant_same_exactly
 
 

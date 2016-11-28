@@ -40,6 +40,10 @@ mcdp {
 
 We can completely abstract an MCDP, using the <code><strong>abstract</strong></code> keyword.
 
+<pre class='mcdp'>abstract [[ "mcdp" ]]</pre>
+
+For example:
+
 <pre class='mcdp'>abstract `Composition1</pre>
 <pre class='ndp_graph_expand'>abstract `Composition1</pre>
 
@@ -82,7 +86,9 @@ set-of(V)
 
 The syntax is
 
-<pre><code><span class="keyword">UpperSets</span>(<span class='ph'>poset</span>)</code></pre>
+<pre class='mcdp_poset'>
+UpperSets([[poset]])
+</pre>
 
 For example:
 
@@ -94,8 +100,14 @@ UpperSets(V)
 
 The syntax is
 
-<pre><code><span class="keyword">Interval</span>(<span class='ph'>lower bound</span>,<span class='ph'>upper bound</span>)</code></pre>
 
+<pre class='mcdp_poset'>
+Interval([["lower bound"]], [["upper bound"]])
+</pre>
+
+<!-- 
+<pre><code><span class="keyword">Interval</span>(<span class='ph'>lower bound</span>,<span class='ph'>upper bound</span>)</code></pre>
+ -->
 For example:
 
 <pre class='mcdp_poset'>
@@ -115,10 +127,25 @@ Interval(1g, 10g)
 
 The syntax is:
 
-    ⊤ <space>
-    Top <space>
-    ⊥ <space>
-    Bottom <space>
+
+
+<pre class='mcdp_value'>
+    Top [[space]]
+</pre>
+
+<pre class='mcdp_value'>
+    ⊤ [[space]]
+</pre>
+
+<pre class='mcdp_value'>
+    Bottom [[space]]
+</pre>
+
+<pre class='mcdp_value'>
+    ⊥  [[space]]
+</pre>
+
+    
 
 For example:
 
@@ -138,11 +165,16 @@ For example:
 <pre class='mcdp_value'>
     ⊥ V
 </pre>
+
+
 ### set making
 
 The syntax is:
 
-    {<element>, <element>, ..., <element> }
+
+<pre class='mcdp_value'>
+{[[element]], [[element]], [["..."]], [[element]]}
+</pre>
 
 For example:
 
@@ -151,11 +183,20 @@ For example:
 </pre>
 
 
+To create an empty set:
+
+<pre class='mcdp_value'>
+    EmptySet [[space]]
+</pre>
+
+
 ### upperclosure
 
 The syntax is:
 
-    upperclosure <set>
+<pre class='mcdp_value'>
+    upperclosure [[ set ]]
+</pre>
 
 For example:
 
@@ -172,21 +213,27 @@ upperclosure {0 g, 1 g}
 
 Suppose f has type F. Then:
 
-    ignore f provided by x
+<pre class='mcdp_statements'>
+    ignore [[functionality]] provided by [["dp"]]
+</pre>
 
 is equivalent to
 
-    f provided by x >= any-of(Minimals F)
-
+<pre class='mcdp_statements'>
+    [[functionality]] provided by [["dp"]] >= any-of(Minimals [[space]])
+</pre>
 
 Equivalently,
 
-    ignore r required by x
+<pre class='mcdp_statements'>
+    ignore [[resource]] required by [["dp"]]
+</pre>
 
 is equivalent to
 
-    r required by x <= any-of(Maximals R)
-
+<pre class='mcdp_statements'>
+    [[resource]] required by [["dp"]] <= any-of(Maximals [[space]])
+</pre>
 
 ### available math operators
 
@@ -200,10 +247,13 @@ is equivalent to
 ## Operations on NDPs
 
 
+<pre class='mcdp_statements'>
+    provides [[functionality]] using [["dp"]]
+</pre>
 
-
-    provides f using c
-    requires r for   c
+<pre class='mcdp_statements'>
+    requires [[resource]] for [["dp"]]
+</pre>
 
 ### implemented-by
 
@@ -214,33 +264,116 @@ is equivalent to
 
 ### abstract
 
-    abstract <ndp>
+<pre class='mcdp'>
+    abstract [["mcdp"]]
+</pre>
+
 
 ### compact
 
-    compact <ndp>
+The command ``compact`` takes an MCDP and produces another with "compacted" edges:
+
+<pre class='mcdp'>
+    compact [["mcdp"]]
+</pre>
+
+
+For every pair of DPS that have more than one edge between them,
+those edges are being replaced.
+
+<pre class='mcdp' id='compact_example'>
+    mcdp {
+      a = instance template mcdp {
+          provides f [Nat]
+          requires r1 [Nat]
+          requires r2 [Nat]
+      }
+      b = instance template mcdp {
+          provides f1 [Nat]
+          provides f2 [Nat]
+          requires r [Nat]
+      }
+      a.r1 <= b.f1
+      a.r2 <= b.f2
+    }
+</pre>
+
+Original:
+
+<pre class='ndp_graph_expand'>`compact_example</pre>
+
+Compacted:
+
+<pre class='ndp_graph_expand'>compact `compact_example</pre>
 
 ### template
 
-    template <ndp>
+<pre class='mcdp'>
+    template [["mcdp"]]
+</pre>
+
 
 ### flatten
 
-    flatten <ndp>
+<pre class='mcdp'>
+    flatten [["mcdp"]]
+</pre>
+
 
 ### canonical
 
-    canonical <ndp>
+This puts the MCDP in a canonical form:
+
+<pre class='mcdp'>
+    canonical [["mcdp"]]
+</pre>
+
+
 
 ### approx_lower, approx_upper
 
-    approx_lower(<n>, <ndp>)
-    approx_upper(<n>, <ndp>)
+This creates a lower and upper bound for the MCDP:
+
+<pre class='mcdp'>
+  approx_lower([[n]], [["mcdp"]])
+</n>
+
+<pre class='mcdp'>
+  approx_upper([[n]], [["mcdp"]])
+</pre>
 
 
-### solve
+### solve and solve_r
 
-    solve(value, <mcdp>)
+Evaluates the model:
 
+<pre class='mcdp_value'>
+    solve([[functionality]], [["mcdp"]])
+</pre>
+
+<pre class='mcdp_value'>
+    solve_f([[functionality]], [["mcdp"]])
+</pre>
+
+<!-- <pre class='mcdp_value'>
+    solve_r( [[f]], [["mcdp"]])
+</pre>
+ -->
 
 ### Uncertain
+
+TODO
+
+### Asserts
+
+Some asserts:
+
+<pre>
+assert_equal
+assert_leq
+assert_geq
+assert_lt
+assert_gt
+assert_empty
+assert_nonempty
+</pre>

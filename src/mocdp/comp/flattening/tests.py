@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mcdp_lang import parse_ndp
-from mocdp.comp.flattening.flatten import flatten_add_prefix
 from mcdp_tests.generation import for_all_nameddps
+from mocdp.comp.flattening.flatten import flatten_add_prefix
+
 
 @for_all_nameddps
 def check_flattening(_id_ndp, ndp):
@@ -11,10 +13,10 @@ def check_flattening(_id_ndp, ndp):
 def check_flatten1():
     ndp = parse_ndp("""
     mcdp {
-      requires r1 [R]
-      requires r2 [R]
+      requires r1 [dimensionless]
+      requires r2 [dimensionless]
       
-      provides f1 [R]
+      provides f1 [dimensionless]
       
       f1 <= r1 * r2
     }
@@ -33,10 +35,10 @@ def check_flatten2():
     ndp = parse_ndp("""
     mcdp { 
     M = instance mcdp {
-      requires r1 [R]
-      requires r2 [R]
+      requires r1 [dimensionless]
+      requires r2 [dimensionless]
       
-      provides f1 [R]
+      provides f1 [dimensionless]
       
       f1 <= r1 * r2
     }
@@ -53,10 +55,10 @@ def check_flatten3():
     ndp = parse_ndp("""
     mcdp { 
     M = instance mcdp {
-      requires r1 [R]
-      requires r2 [R]
+      requires r1 [dimensionless]
+      requires r2 [dimensionless]
       
-      provides f1 [R]
+      provides f1 [dimensionless]
       
       f1 <= r1 * r2
     }
@@ -75,18 +77,18 @@ def check_flatten4():
     ndp = parse_ndp("""
     mcdp { 
     M = instance mcdp {
-      requires r1 [R]
-      requires r2 [R]
+      requires r1 [dimensionless]
+      requires r2 [dimensionless]
       
-      provides f1 [R]
+      provides f1 [dimensionless]
       
       f1 <= r1 * r2
     }
     N = instance mcdp {
-      requires r1 [R]
-      requires r2 [R]
+      requires r1 [dimensionless]
+      requires r2 [dimensionless]
       
-      provides f1 [R]
+      provides f1 [dimensionless]
       
       f1 <= r1 * r2
     }
@@ -109,24 +111,5 @@ def check_flatten5():
 
 @comptest
 def check_flatten6():
-    pass
+    pass 
 
-@comptest
-def check_flatten7():
-    pass
-
-@comptest
-def check_flatten8():
-    pass
-
-@comptest
-def check_flatten9():
-    pass
-
-@comptest
-def check_flatten10():
-    pass
-
-@comptest
-def check_flatten11():
-    pass

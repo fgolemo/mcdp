@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mcdp_dp import InvMult2
 from mcdp_dp.dp_inv_plus import InvPlus2
@@ -127,9 +128,9 @@ def invmult2_check2():
 @comptest
 def invmult2_check3():
 
-    F = parse_poset('R')
-    R1 = parse_poset('R')
-    R2 = parse_poset('R')
+    F = parse_poset('dimensionless')
+    R1 = parse_poset('dimensionless')
+    R2 = parse_poset('dimensionless')
 
     im = InvMult2(F, (R1, R2))
 

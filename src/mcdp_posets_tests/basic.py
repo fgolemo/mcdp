@@ -1,13 +1,15 @@
+# -*- coding: utf-8 -*-
 import itertools
 
-from comptests.registrar import comptest
+from comptests.registrar import comptest, comptest_fails
+from contracts.interface import ContractNotRespected
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_posets import FinitePoset, Interval, NotBounded, PosetProduct, Uninhabited, NotBelongs, NotEqual, Rcomp
 from mcdp_posets import Multisets, Nat, NotLeq, PosetCoproduct, PosetCoproductWithLabels
+from mcdp_posets.types_universe import get_types_universe
 from mcdp_posets.utils import poset_check_chain, check_minimal, check_maximal
 from mcdp_tests.generation import for_all_posets
 import numpy as np
-from contracts.interface import ContractNotRespected
 
 
 @for_all_posets
@@ -44,7 +46,6 @@ def check_poset1(_id_poset, poset):
 @for_all_posets
 def check_poset1_chain(id_poset, poset):
     try:
-        #from mcdp_posets import poset_check_chain
         chain = poset.get_test_chain(n=5)
         poset_check_chain(poset, chain)
     except Uninhabited:
@@ -67,7 +68,8 @@ def check_poset1_chain(id_poset, poset):
         except NotEqual:
             pass
         else:
-            raise_desc(Exception, 'failed', a=a, b=b, poset=poset, chain=chain)
+            msg = 'I expected that a != b, but this is violated.'
+            raise_desc(Exception, msg, a=a, b=b, poset=poset, chain=chain)
 
     for i, j in itertools.combinations(range(len(chain)), 2):
         if i > j:
@@ -172,7 +174,17 @@ def check_square():
     assert P.leq((0.0, 0.0), (0.0, 0.5))
     assert not P.leq((0.0, 0.1), (0.0, 0.0))
 
-
+    # TODO: move away
+    
+@comptest_fails    
+def check_embedding21():
+    # In general P ~= PosetProduct((P,)) 
+    # but we don't do it yet.
+    P = Rcomp()
+    S = PosetProduct((P, ))
+    tu = get_types_universe()
+    _, _ = tu.get_embedding(P, S)
+    
 @comptest
 def check_equality():
     assert Rcomp() == Rcomp()

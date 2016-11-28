@@ -1,10 +1,10 @@
 # test connected
 cdp {
-    provides f [R]
+    provides f [dimensionless]
     
     sub hnlin = dp {
-        provides x [R]
-        requires r [R]
+        provides x [dimensionless]
+        requires r [dimensionless]
         
         implemented-by load SimpleNonlinearity1
     }

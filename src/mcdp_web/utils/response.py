@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pyramid.response import FileResponse  # @UnresolvedImport
 
 

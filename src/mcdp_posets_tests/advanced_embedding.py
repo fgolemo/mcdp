@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mcdp_lang import parse_poset
 from mcdp_posets import NotLeq, get_types_universe

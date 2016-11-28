@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mcdp_lang import parse_ndp
 from mocdp.comp.composite_abstraction import cndp_abstract_loop2
+
 
 @comptest
 def check_new_loop1():

@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+#@PydevCodeAnalysisIgnore 
 # module pyparsing.py
 #
 # Copyright (c) 2003-2015  Paul T. McGuire

@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 from matplotlib import pylab
 from mcdp_dp.dp_inv_mult import InvMult2
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_lang.parse_interface import parse_poset
 from mcdp_posets.poset_product import PosetProduct
 from mcdp_posets.uppersets import UpperSets
-from mcdp_report.generic_report_utils import get_best_plotter
+from mcdp_report.plotters.get_plotters_imp import get_best_plotter
 from plot_utils import ieee_fonts_zoom3, ieee_spines_zoom3
 from reprep import Report
 import numpy as np
@@ -61,7 +62,7 @@ def go():
         print('Using algorithm %s ' % algo)
         with r.subsection(algo) as r2:
             # first
-            F = parse_poset('R')
+            F = parse_poset('dimensionless')
             R = F
             dp = InvMult2(F, (R, R))
             ns = [ 3, 4, 5, 6, 10, 15]

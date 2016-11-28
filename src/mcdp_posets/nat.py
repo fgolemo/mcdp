@@ -6,6 +6,7 @@ from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
 
 from .poset import NotLeq, Poset
 from .space import NotBelongs, NotEqual
+from mocdp import MCDPConstants
 
 
 __all__ = [
@@ -23,6 +24,8 @@ class NatTop():
 
 class Nat(Poset):
     """
+        This is represented as "int". 
+        
         [0, 1, 2, 3) U {T}
     """
     def __init__(self):
@@ -74,35 +77,40 @@ class Nat(Poset):
         assert False # pragma: no cover
 
     def get_test_chain(self, n):
-        s = []
-        f = lambda: random.randint(1, 100)
-        while len(s) < n - 2:
+        import sys
+        s = [0]
+        
+        if MCDPConstants.Nat_chain_include_maxint:
+            s.append(sys.maxint)
+        
+        f = lambda: random.randint(1, n) # xxx
+        while len(s) < n - 1: # leave 1:  top 
             x = f()
             if not x in s:
                 s.append(x)
         s = sorted(s)
-        s.insert(0, 0)
         s.append(self.get_top())
         return s
 
     def __eq__(self, other):
         return isinstance(other, Nat)
-# 
-#     def __ne__(self, other):
-#         return not self.__eq__(other)
 
     def __repr__(self):
-        # return "ℕ"
-        return "N"
+        if MCDPConstants.use_unicode_symbols:
+            return "ℕ" # TODO: make this configurable
+        else:
+            return "N"
 
     def format(self, x):
         if isinstance(x, int):
             return '%d' % x
+        elif isinstance(x, long):
+            return '%dL!' % x
         else:
             if x == self.top:
                 return self.top.__repr__()
             else: # pragma: no cover
-                raise ValueError(x) 
+                raise ValueError(x, type(x)) 
 
     def _leq(self, a, b):
         # common case
@@ -129,26 +137,93 @@ class Nat(Poset):
             msg = '%s ≰ %s' % (a, b)
             raise NotLeq(msg)
 
-#     def multiply(self, a, b):
-#         """ Multiplication, extended for top """
-#         if a == self.top or b == self.top:
-#             return self.top
-#         return a * b
-# 
     def check_equal(self, x, y):
         if not (x == y):
             raise NotEqual('%s != %s' % (x, y))
 
+
+# Optimization: we use these instances
+Nat_add_Nat = Nat()
+Nat_add_top = Nat_add_Nat.get_top()
+ 
 def Nat_add(a, b):
-    """ Addition, extended for top """
-    top = Nat().get_top()
-    if a == top or b == top:
-        return top
-    mcdp_dev_warning('overflow')
-    return a + b
+    """ Addition on Nat, extended for top """
+    from mcdp_posets.poset import is_top
+    N = Nat_add_Nat
+    
+    if is_top(N, a) or is_top(N, b):
+        return Nat_add_top
+    
+    mcdp_dev_warning('catch overflow')
+    assert isinstance(a, int), (a, type(a))
+    assert isinstance(b, int), (b, type(b))
+    res = a + b
+    
+    if res > sys.maxint:
+        return N.get_top()
+    
+    assert isinstance(res, int), (res, type(res))
+    return res
 
+import sys
 
+def Nat_mult_uppersets_continuous_seq(seq):
+    """ Multiplication on Nat, extended for top, so that top*0 = Top """
+    return functools.reduce(Nat_mult_uppersets_continuous, seq)
 
+def Nat_mult_uppersets_continuous(a, b):
+    """ Multiplication on Nat, extended for top, so that top*0 = 0 """
+    from mcdp_posets.poset import is_top
+    N = Nat_add_Nat
+    
+    a_is_zero = a == 0
+    b_is_zero = b == 0
+    
+    if a_is_zero or b_is_zero:
+        return 0
+    
+    if is_top(N, a) or is_top(N, b):
+        return Nat_add_top
+    
+    mcdp_dev_warning('catch overflow')
+    assert isinstance(a, int), (a, type(a))
+    assert isinstance(b, int), (b, type(b))
+    res = a * b
+    if res > sys.maxint:
+        return N.get_top()
+    
+    assert isinstance(res, int), (res, type(res))
+    return res
+
+import functools
+
+def Nat_mult_lowersets_continuous(a, b):
+    """ Multiplication on Nat, extended for top, so that top*0 = Top """
+    from mcdp_posets.poset import is_top
+    N = Nat_add_Nat
+     
+    if is_top(N, a) or is_top(N, b):
+        return Nat_add_top
+
+    assert isinstance(a, int), (a, type(a))
+    assert isinstance(b, int), (b, type(b))
+
+    res = a * b
+    if res > sys.maxint:
+        return N.get_top()
+    
+    assert isinstance(res, int), (res, type(res))
+    return res
+
+def RcompUnits_mult_lowersets_continuous(A, a, B, b, C):
+    """ Multiplication on Rcompunits, extended for top, so that top*0 = Top """
+    from mcdp_posets.poset import is_top
+     
+    if is_top(A, a) or is_top(B, b):
+        return C.get_top()
+
+    mcdp_dev_warning('catch overflow')
+    return a * b
 
 IntBottom = "int:-inf"
 IntTop = "int:+inf"
@@ -208,7 +283,10 @@ class Int(Poset):
         return isinstance(other, Int)
 
     def __repr__(self):
-        return "Z"
+        if MCDPConstants.use_unicode_symbols:
+            return "Z" # XXX
+        else:
+            return "Z"
 
     def format(self, x):
         if x == self.top:
@@ -240,80 +318,6 @@ class Int(Poset):
         if not self._leq(a, b):
             msg = '%s ≰ %s' % (a, b)
             raise NotLeq(msg)
-
-#     def multiply(self, a, b):
-#         """ Multiplication, extended for top """
-#         def undef():
-#             raise ValueError('Cannot multiply %s, %s' % (a, b))
-#         if a == self.top and b == self.top:
-#             return self.top
-#         if a == self.top and b == self.bottom:
-#             return self.bottom
-#         if a == self.bottom and b == self.bottom:
-#             return self.top
-#         if a == self.bottom and b == self.top:
-#             return self.bottom
-#         if a == self.bottom:  # and b int
-#             if b > 0:
-#                 return self.bottom
-#             elif b == 0:
-#                 undef()
-#             elif b < 0:
-#                 return self.top
-#         if a == self.top:  # and b int
-#             if b > 0:
-#                 return self.top
-#             elif b == 0:
-#                 undef()
-#             elif b < 0:
-#                 return self.bottom
-#         if a == self.bottom:  # and b int
-#             if b > 0:
-#                 return self.bottom
-#             elif b == 0:
-#                 undef()
-#             elif b < 0:
-#                 return self.top
-#         if b == self.top:  # and a int
-#             if a > 0:
-#                 return self.top
-#             elif a == 0:
-#                 undef()
-#             elif a < 0:
-#                 return self.bottom
-#         if b == self.bottom:  # and a int
-#             if a > 0:
-#                 return self.bottom
-#             elif a == 0:
-#                 undef()
-#             elif a < 0:
-#                 return self.top
-#         return a * b
-# 
-#     def add(self, a, b):
-#         def undef():
-#             raise ValueError('Cannot add %s, %s' % (a, b))
-# 
-#         if a == self.top:
-#             if b == self.top:
-#                 return self.top
-#             if b == self.bottom:
-#                 undef()
-#             return self.top
-#         if a == self.bottom:
-#             if b == self.top:
-#                 undef()
-#             if b == self.top:
-#                 return self.top
-#             return self.bottom
-#         if b == self.bottom:  # and a is int
-#             return self.bottom
-#         if b == self.top:  # and a is int
-#             return self.top
-#         # both int
-#         res = a + b
-#         # FIXME: overflow
-#         return res
 
     def check_equal(self, x, y):
         if not (x == y):

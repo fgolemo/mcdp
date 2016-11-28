@@ -5,15 +5,17 @@ from types import NoneType
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (Constant, ConstantMinimals, Conversion,
-    Identity, InvMult2, InvPlus2, InvPlus2Nat, JoinNDP, Limit, Max, MeetNDual,
-    Min, Mux, MuxMap, ProductN, SumNDP, SumNNat, TakeFun, TakeRes,
-    WrapAMap)
+    Identity, InvMult2, InvPlus2, InvPlus2Nat, JoinNDP, Limit, MeetNDualDP,
+    Mux, MuxMap, ProductNDP, SumNDP, SumNNatDP, TakeFun, TakeRes,
+    WrapAMap, InvMult2Nat, MeetNDP, ProductNNatDP, ProductNRcompDP, SumNRcompDP,
+    IdentityDP, FunctionNode, ResourceNode)
 from mcdp_lang.blocks import get_missing_connections
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
 from mocdp import logger
 from mocdp.comp import CompositeNamedDP, SimpleWrap
-from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
+from mocdp.comp.context import (get_name_for_fun_node, get_name_for_res_node,
+    is_fun_node_name, is_res_node_name)
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning, DPInternalError
 from mocdp.ndp import NamedDPCoproduct
@@ -63,9 +65,10 @@ class RecursiveEdgeLabeling(PlottingInfo):
     def get_rname_label(self, ndp_name, rname):
         return self.f.get_rname_label(self._name(ndp_name), rname)
 
+
 @contract(ndp=NamedDP, direction='str', yourname='str|None')
 def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourname=None,
-                   plotting_info=None):
+                   plotting_info=None, skip_initial=True):
     if plotting_info is None:
         plotting_info = PlottingInfo()
 
@@ -100,7 +103,8 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
 
     from .gdc import GraphDrawingContext
     gdc = GraphDrawingContext(gg=gg, parent=None,
-                              yourname=yourname, images_paths=images_paths)
+                              yourname=yourname, images_paths=images_paths,
+                              skip_initial=skip_initial)
     gdc.set_style(style)
 
     gg.styleAppend("external", "shape", "none")
@@ -116,10 +120,16 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
     gg.styleAppend("simple", "style", "rounded")
 
     # constant resource (min r. needed)
-    gg.styleAppend("constant", "shape", "plaintext")
+    #     gg.styleAppend("constant", "shape", "plaintext")
+#     gg.styleAppend("constant", "fontcolor", COLOR_DARKGREEN)
+    gg.styleAppend("constant", "shape", "box")
+    gg.styleAppend("constant", "style", "rounded")
     # constant function (max f. to be implemented)
-    gg.styleAppend("limit", "shape", "plaintext")
-
+    #     gg.styleAppend("limit", "shape", "plaintext")
+#     gg.styleAppend("limit", "fontcolor", COLOR_DARKRED)
+    gg.styleAppend("limit", "shape", "box")
+    gg.styleAppend("limit", "style", "rounded")
+    
     gg.styleAppend("unconnected_node", "shape", "plaintext")
     unconnected_color = 'purple'
     gg.styleAppend("unconnected_node", "fontcolor", unconnected_color)
@@ -245,6 +255,7 @@ def create(gdc, ndp, plotting_info):
 
     for fn in ndp.get_fnames():
         assert fn in functions
+        
     for rn in ndp.get_rnames():
         assert rn in resources
 
@@ -253,7 +264,10 @@ def create(gdc, ndp, plotting_info):
 
 def is_simple(ndp):
     return isinstance(ndp, SimpleWrap) and isinstance(ndp.dp,
-     (Min, Max, Identity, SumNDP, ProductN, InvPlus2, InvMult2))
+     (MeetNDP, JoinNDP, Identity, 
+      SumNDP,
+      SumNRcompDP, 
+      ProductNDP, InvPlus2, InvMult2))
 
 
 def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
@@ -271,17 +285,25 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
 
     # This is a list of either PrimitiveDP or Maps
     special = [
-#         (Sum, ''),
         (SumNDP, ''),
-        (SumNNat, ''),
-#         (Product, ''),
-        (ProductN, ''),
+        (SumNRcompDP, ''),
+        (SumNNatDP, ''),
+
         (InvPlus2, ''),
-        (InvMult2, ''),
         (InvPlus2Nat, ''),
+
+        (ProductNDP, ''),
+        (ProductNNatDP, ''),
+        (ProductNRcompDP, ''),
+
+        (InvMult2, ''),
+        (InvMult2Nat, ''),
+        
         (Conversion, ''),
-        (MeetNDual, ''),
+        
+        (MeetNDualDP, ''),
         (JoinNDP, ''),
+        
         (TakeFun, ''),
         (TakeRes, ''),
     ]
@@ -306,7 +328,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
     
     is_special = is_special_dp(ndp.dp)
 
-    simple = (Min, Max, Identity, WrapAMap, MeetNDual)
+    simple = (MeetNDP, JoinNDP, IdentityDP, WrapAMap, MeetNDualDP)
     only_string = not is_special and isinstance(ndp.dp, simple)
 
     from mcdp_library.library import ATTR_LOAD_NAME
@@ -454,7 +476,7 @@ def format_unit(R):
     elif isinstance(R, RcompUnits):
         return '[%s]' % format_pint_unit_short(R.units)
     elif isinstance(R, Rcomp):
-        return '[R]'
+        return '[]'
     elif hasattr(R, ATTR_LOAD_NAME):
         n = getattr(R, ATTR_LOAD_NAME)
         return '[`%s]' % n
@@ -527,7 +549,9 @@ def create_coproduct(gdc0, ndp, plotting_info):
 
 def create_composite(gdc0, ndp, plotting_info):
     try:
-        return create_composite_(gdc0, ndp, plotting_info=plotting_info, SKIP_INITIAL=True)
+        SKIP_INITIAL = gdc0.skip_initial
+        print('Skip initial: %s' % SKIP_INITIAL)
+        return create_composite_(gdc0, ndp, plotting_info=plotting_info, SKIP_INITIAL=SKIP_INITIAL)
     except Exception as e:
         logger.error(e)
         logger.error('I will try again without the SKIP_INITIAL parameter.')
@@ -539,7 +563,7 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
         assert isinstance(ndp, CompositeNamedDP)
 
         # names2functions[name][fn] = item
-
+        # names2resources[name][rn] = item
         names2resources = defaultdict(lambda: {})
         names2functions = defaultdict(lambda: {})
 
@@ -667,8 +691,10 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 
             skip = gdc.should_I_skip_leq(ndp.context, c)
 
-            second_simple = is_simple(ndp.context.names[c.dp2])
-            first_simple = is_simple(ndp.context.names[c.dp1])
+            ndp_first = ndp.context.names[c.dp1]
+            ndp_second = ndp.context.names[c.dp2]
+            second_simple = is_simple(ndp_second)
+            first_simple = is_simple(ndp_first)
             any_simple = second_simple or first_simple
             both_simple = second_simple and first_simple
 
@@ -683,10 +709,15 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
                 gdc.styleApply("leq", box)
         
                 l1_label = get_signal_label(c.s2, ua)
-
+                
+       
                 dec = plotting_info.get_fname_label(ndp_name=(c.dp2,), fname=c.s2)
                 if dec is not None:
                     l1_label = get_signal_label_namepart(c.s2) + '\n' + dec
+
+                
+                if isinstance(ndp_second, SimpleWrap) and isinstance(ndp_second.dp, ResourceNode):
+                    l1_label = 'required ' + l1_label
 
 #                 print('Creating label with %r %s' % l1_label)
                 l1 = gdc.newLink(box, n_a , label=l1_label)
@@ -695,6 +726,10 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 #                     gdc.gg.propertyAppend(l1, "headport", "w")
 
                 l2_label = get_signal_label(c.s1, ub)
+
+                if isinstance(ndp_first, SimpleWrap) and isinstance(ndp_first.dp, FunctionNode):
+                    l2_label = 'provided ' + l2_label
+   
                 dec = plotting_info.get_rname_label(ndp_name=(c.dp1,), rname=c.s1)
                 if dec is not None:
                     l2_label = get_signal_label_namepart(c.s1) + '\n' + dec
@@ -731,7 +766,14 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 
             n = names2functions[dp][fn]
             F = ndp.context.names[dp].get_ftype(fn)
-            l = gdc.newLink(x, n, label=get_signal_label(fn, F))
+            
+            label = get_signal_label(fn, F)
+            
+            it_is, _ = is_res_node_name(dp) 
+            if it_is:
+                label = 'required ' + label
+                
+            l = gdc.newLink(x, n, label=label)
 
             gdc.decorate_arrow_function(l)  # XXX?
             gdc.styleApply('unconnected_link', l)
@@ -742,7 +784,13 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 
             n = names2resources[dp][rn]
             R = ndp.context.names[dp].get_rtype(rn)
-            l = gdc.newLink(n, x, label=get_signal_label(rn, R))
+            
+            label = get_signal_label(rn, R)
+            it_is, _ = is_fun_node_name(dp) 
+            if it_is: 
+                label = 'provided ' + label
+
+            l = gdc.newLink(n, x, label=label)
             gdc.decorate_arrow_resource(l)  # XXX?
             gdc.styleApply('unconnected_link', l)
     

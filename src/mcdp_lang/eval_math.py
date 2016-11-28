@@ -1,11 +1,18 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
-from mcdp_dp import MultValueMap, ProductNatN, ProductN, SumNNat, WrapAMap, sum_dimensionality_works, SumNRcompMap
-from mcdp_dp.dp_sum import SumNDP
-from mcdp_maps import MinusValueMap, MultNat, PlusNat, PlusValueMap, SumNInt, PlusValueRcompMap, SumNRcomp
-from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits, Space,
+from contracts.interface import format_where
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance, indent
+from mcdp_dp import (MinusValueNatDP, MinusValueRcompDP, MinusValueDP,
+                     MultValueDP, MultValueNatDP, PlusValueRcompDP, PlusValueDP,
+                     PlusValueNatDP , ProductNDP, SumNNatDP, ProductNNatDP,
+                     SumNRcompDP, SumNDP, SumNIntDP, ProductNRcompDP)
+from mcdp_maps.SumN_xxx_Map import sum_dimensionality_works
+from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits,
     express_value_in_isomorphic_space, get_types_universe, mult_table, Rcomp)
+from mcdp_posets import is_top
+from mcdp_posets.rcomp_units import (RbicompUnits_subtract, RbicompUnits_reflect,
+    R_dimensionless)
+from mocdp import MCDPConstants
 from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.exceptions import DPInternalError, DPSemanticError
 
@@ -32,40 +39,40 @@ def eval_constant_divide(op, context):
     from .misc_math import generic_mult_constantsN
     return generic_mult_constantsN(factors)
 
-
-def eval_constant_minus(op, context):
-    from .eval_constant_imp import eval_constant
-
-    ops = get_odd_ops(unwrap_list(op.ops))
-    constants = [eval_constant(_, context) for _ in ops]
-
-    R0 = constants[0].unit
+@contract(x=ValueWithUnits, constants='seq($ValueWithUnits)')
+def x_minus_constants(x, constants):
+    R0 = x.unit
+    
     if not isinstance(R0, RcompUnits):
         msg = 'Cannot evaluate "-" on this space.'
         raise_desc(DPSemanticError, msg, R0=R0)
 
+    Rb = RbicompUnits.from_rcompunits(R0)
+    
     # convert each factor to R0
-    v0 = constants[0].value
-    for c in constants[1:]:
-        vi = express_value_in_isomorphic_space(c.unit, c.value, R0)
-
-        if v0 < vi:
-            msg = 'Underflow: %s - %s gives a negative number' % (c.unit.format(v0), c.unit.format(vi))
-            raise_desc(DPSemanticError, msg)
-
-        v0 = v0 - vi
-
-    return ValueWithUnits(unit=R0, value=v0)
-
-@contract(unit1=Space, unit2=Space)
-def convert_vu(value, unit1, unit2, context):  # @UnusedVariable
-    tu = get_types_universe()
-    A_to_B, _ = tu.get_embedding(unit1, unit2)
-    return A_to_B(value)
-
-
+    try:
+        v0 = x.value
+        for c in constants:
+            vi = express_value_in_isomorphic_space(c.unit, c.value, Rb)
+            v0 = RbicompUnits_subtract(Rb, v0, vi)
+    except TypeError as e:
+        msg = 'Failure to compute subtraction.'
+        raise_wrapped(DPInternalError, e, msg, x=x, constants=constants)
+    
+    if Rb.leq(0.0, v0):
+        R1 = R0
+    else:
+        R1 = Rb
+        
+    return ValueWithUnits(unit=R1, value=v0)
+    
+    
 def eval_PlusN_as_constant(x, context):
     return eval_PlusN(x, context, wants_constant=True)
+
+
+def eval_RValueMinusN_as_constant(x, context):
+    return eval_rvalue_RValueMinusN(x, context, wants_constant=True)
 
 
 def eval_MultN_as_constant(x, context):
@@ -111,8 +118,70 @@ def eval_rvalue_divide(op, context):
     res = get_mult_op(context, r=r, c=c2_inv)
     return res
 
+def eval_rvalue_RValueMinusN(x, context, wants_constant=False):
+    """ If wants_constant is True, returns a ValueWithUnit """
+    from .eval_constant_imp import eval_constant
+    ops = get_odd_ops(unwrap_list(x.ops))
+    
+    # ops after the first should be constant, otherwise
+    # we lose monotonicity
+    must_be_constants = ops[1:]
+    constants = []
+    for mc in must_be_constants:
+        try:
+            c = eval_constant(mc, context)
+            assert isinstance(c, ValueWithUnits)
+            constants.append(c)
+        except NotConstant:
+            msg = 'The expression involving "-" is not monotone because one '
+            msg += 'of the values after "-" is not a constant:\n\n'
+            s = format_where(mc.where, context_before=0,
+                             arrow=False, mark=None, use_unicode=True)
+            msg += indent(s, ' '*4)
+            raise DPSemanticError(msg)
+        
+    # Is the first value a constant?
+    try:
+        x = eval_constant(ops[0], context)
+        assert isinstance(x, ValueWithUnits)
+        # if so, this is just x - constants[0] - constants[1] - ...
+        vu = x_minus_constants(x, constants)
+        if wants_constant:
+            return vu
+        else:
+            return get_valuewithunits_as_resource(vu, context)
+        
+    except NotConstant:
+        # if we wanted this to be constant, it's a problem
+        if wants_constant:
+            raise 
 
+    # first value is not constant
 
+    rvalue = eval_rvalue(ops[0], context)
+ 
+    # we cannot do it with more than 1
+#     if len(constants) > 1:
+#         msg = 'This code works only with 1 constant.'
+#         raise_desc(DPNotImplementedError, msg)
+#     
+    from .misc_math import plus_constantsN
+    constant = plus_constantsN(constants) 
+    R = context.get_rtype(rvalue)
+    if isinstance(R, Nat) and isinstance(constant.unit, Nat):
+        dp = MinusValueNatDP(constant.value)
+    elif isinstance(R, Rcomp) and not isinstance(R, RcompUnits):
+        dp = MinusValueRcompDP(constant.value)
+    elif isinstance(R, RcompUnits):
+        dp = MinusValueDP(F=R, c_value=constant.value, c_space=constant.unit)
+    else:
+        msg = 'Could not create this operation with %s ' % R
+        raise_desc(DPSemanticError, msg, R=R)
+             
+    return create_operation(context, dp=dp, resources=[rvalue],
+                            name_prefix='_minusvalue', op_prefix='_op',
+                            res_prefix='_result')
+    
 def eval_rvalue_PlusN(x, context):
     res = eval_PlusN(x, context, wants_constant=False)
     if isinstance(res, ValueWithUnits):
@@ -130,10 +199,11 @@ def flatten_multN(ops):
     return res
 
 
-@contract(x=CDP.MultN, wants_constant=bool)
+@contract(x=CDP.MultN, wants_constant=bool,
+          returns='$CResource|$ValueWithUnits')
 def eval_MultN(x, context, wants_constant):
     """ Raises NotConstant if wants_constant is True. """
-    from .misc_math import generic_mult_constantsN, generic_mult_table
+    from .misc_math import generic_mult_constantsN
     from .eval_constant_imp import eval_constant
 
     assert isinstance(x, CDP.MultN)
@@ -146,7 +216,6 @@ def eval_MultN(x, context, wants_constant):
     resources = []
 
     for op in ops:
-
         try:
             x = eval_constant(op, context)
             assert isinstance(x, ValueWithUnits)
@@ -166,57 +235,86 @@ def eval_MultN(x, context, wants_constant):
     # it's only resource * (c1*c2*c3*...)
     if len(resources) == 1:
         c = generic_mult_constantsN(constants)
-        return get_mult_op(context, r=resources[0], c=c)
-
+        res = get_mult_op(context, r=resources[0], c=c)
+        return res
     else:
-        # there are some resources
-        resources_types = [context.get_rtype(_) for _ in resources]
-        promoted, R = generic_mult_table(resources_types)
-
-        resources2 = []
-        for resource, P in zip(resources, promoted):
-            resources2.append(get_resource_possibly_converted(resource, P, context))
+        r = eval_MultN_ops(resources, context)
         
-        if isinstance(R, Nat):
-            n = len(resources2)
-            dp = WrapAMap(ProductNatN(n))
-
-        else:
-            resources_types2 = [context.get_rtype(_) for _ in resources2]
-            dp = ProductN(tuple(resources_types2), R)
-
-        r = create_operation(context, dp, resources2,
-                             name_prefix='_prod', op_prefix='_factor',
-                             res_prefix='_result')
-
         if not constants:
             return r
         else:
             c = generic_mult_constantsN(constants)
             return get_mult_op(context, r, c)
 
+@contract(returns=CResource)
+def eval_MultN_ops(resources,  context):
+    """ Creates the Product?ops, using the strategy in MCDPConstants.force_mult_two_resources. """
+    assert len(resources) >= 2
+    
+    if MCDPConstants.force_mult_two_resources:
+        return eval_MultN_ops_onlytwo(resources,  context)
+    else:
+        return eval_MultN_ops_multi(resources, context)
+    
+@contract(returns=CResource)
+def eval_MultN_ops_onlytwo(resources,  context):
+    if len(resources) == 2:
+        return eval_MultN_ops_multi(resources, context)
+    else:
+        first = resources[0]
+        rest = eval_MultN_ops_onlytwo(resources[1:], context)
+        return eval_MultN_ops_onlytwo([first, rest],  context)
+    
+@contract(returns=CResource)
+def eval_MultN_ops_multi(resources,  context):
+    from .misc_math import  generic_mult_table
+    resources_types = [context.get_rtype(_) for _ in resources]
+    promoted, R = generic_mult_table(resources_types)
+
+    resources2 = []
+    for resource, P in zip(resources, promoted):
+        resources2.append(get_resource_possibly_converted(resource, P, context))
+
+    if isinstance(R, Nat):
+        n = len(resources)
+        dp = ProductNNatDP(n)
+    elif isinstance(R, Rcomp):
+        dp = ProductNRcompDP(len(resources))
+    elif isinstance(R, RcompUnits):
+        resources_types2 = [context.get_rtype(_) for _ in resources2]
+        dp = ProductNDP(tuple(resources_types2), R)
+    else:
+        msg = 'Something wrong'
+        raise_desc(DPInternalError, msg, resources=resources, 
+                   resources2=resources2, promoted=promoted, R=R)
+        
+    r = create_operation(context, dp, resources2, name_prefix='_prod')
+    return r
+
 
 @contract(r=CResource, c=ValueWithUnits)
 def get_mult_op(context, r, c):
-    from mcdp_posets.rcomp_units import format_pint_unit_short
-
     rtype = context.get_rtype(r)
 
     # Case 1: rcompunits, rcompunits
     if isinstance(rtype, RcompUnits) and isinstance(c.unit, RcompUnits):
         F = rtype
         R = mult_table(rtype, c.unit)
-
-        mvmap = MultValueMap(F=F, R=R, value=c.value)
-        label = '× %.5f %s' % (c.value, format_pint_unit_short(c.unit.units))
-        # label = '× %s' % (c.unit.format(c.value))
-        setattr(mvmap, '__name__', label)
-
-        dp = WrapAMap(mvmap)
-
+        unit, value = c.unit, c.value
+        dp = MultValueDP(F=F, R=R, unit=unit, value=value) 
     elif isinstance(rtype, Nat) and isinstance(c.unit, Nat):
-        amap = MultNat(c.value)
-        dp = WrapAMap(amap)
+        dp = MultValueNatDP(c.value)
+    elif isinstance(rtype, Nat) and isinstance(c.unit, RcompUnits):
+        # will cast Nat to R_dimensionless automatically
+        F = R_dimensionless
+        R = c.unit
+        unit, value = c.unit, c.value
+        dp = MultValueDP(F, R, unit=unit, value=value)
+    elif isinstance(rtype, RcompUnits) and isinstance(c.unit, Nat):
+        F = rtype
+        R = F
+        unit, value = R_dimensionless, c.cast_to(R_dimensionless)
+        dp = MultValueDP(F=F, R=F, unit=unit, value=value)
     else:
         msg = 'Cannot create multiplication operation.'
         raise_desc(DPInternalError, msg, rtype=rtype, c=c)
@@ -228,6 +326,7 @@ def get_mult_op(context, r, c):
 
 
 def flatten_plusN(ops):
+    """ Flattens recursively nested CDP.PlusN operators """
     res = []
     for op in ops:
         if isinstance(op, CDP.PlusN):
@@ -236,14 +335,12 @@ def flatten_plusN(ops):
             res.append(op)
     return res
 
-def eval_PlusN(x, context, wants_constant):
-    """ Raises NotConstant if wants_constant is True. """
+def eval_PlusN_sort_ops(ops, context, wants_constant):
+    """
+            pos_constants, neg_constants, resources = sort_ops(ops, context)
+    """
     from .eval_constant_imp import eval_constant
 
-    assert isinstance(x, CDP.PlusN)
-    assert len(x.ops) > 1
-
-    ops = flatten_plusN(get_odd_ops(unwrap_list(x.ops)))
     pos_constants = []
     neg_constants = []
     resources = []
@@ -251,53 +348,78 @@ def eval_PlusN(x, context, wants_constant):
     for op in ops:
         try:
             x = eval_constant(op, context)
-            assert isinstance(x, ValueWithUnits)
+            check_isinstance(x, ValueWithUnits)
 
-            if isinstance(x.unit, (RcompUnits, Nat)):
+            if isinstance(x.unit, (RcompUnits, Rcomp, Nat)):
                 pos_constants.append(x)
             elif isinstance(x.unit, RbicompUnits):
                 neg_constants.append(x)
             else:
-                msg = 'Invalid addition - needs error'
+                msg = 'Cannot use the type %s in a sum.' % x.unit
                 raise_desc(DPInternalError, msg, x=x)
                 
         except NotConstant as e:
             if wants_constant:
-                msg = 'Product not constant because one op is not constant.'
+                msg = 'Sum not constant because one op is not constant.'
                 raise_wrapped(NotConstant, e, msg, op=op)
             x = eval_rvalue(op, context)
             assert isinstance(x, CResource)
             resources.append(x)
+            
+    return pos_constants, neg_constants, resources
 
-    # first, sum together all the constants
+def eval_PlusN(x, context, wants_constant):
+    """ Raises NotConstant if wants_constant is True. """
+    assert isinstance(x, CDP.PlusN)
+    assert len(x.ops) > 1
 
+    # ops as a list
+    ops_list = get_odd_ops(unwrap_list(x.ops))
+    
+    # First, we flatten all operators
+    ops = flatten_plusN(ops_list)
+    
+    # Then we divide in positive constants, negative constants, and resources.
+    pos_constants, neg_constants, resources = \
+        eval_PlusN_sort_ops(ops, context, wants_constant)
+     
+    # first, sum the positive constants and the resources
     res = eval_PlusN_(pos_constants, resources, context)
 
-    if not neg_constants:
+    if len(neg_constants) == 0:
+        # If there are no negative constants, we are done
         return res
+#     elif len(neg_constants) > 1:
+#             msg = 'Not implemented addition of more than one negative constant.'
+#             raise_desc(DPInternalError, msg, neg_constants=neg_constants)
     else:
-        if len(neg_constants) > 1:
-            msg = 'Not implemented addition of more than one negative constant'
-            raise_desc(DPInternalError, msg, neg_constants=neg_constants)
+        # we have only one negative constant
+        from mcdp_lang.misc_math import plus_constantsN
+        constant = plus_constantsN(neg_constants)
+        
+        check_isinstance(constant.unit, RbicompUnits)
+        
+        constant.unit.check_leq(constant.value, 0.0)
+        # now it's a positive value
+        valuepos = RbicompUnits_reflect(constant.unit, constant.value)
+        
+        F = context.get_rtype(res)
+        
+        c_space = RcompUnits(pint_unit=constant.unit.units,
+                             string=constant.unit.string)
+
+        # mainly to make sure we handle Top
+        if is_top(constant.unit, valuepos):
+            valuepos2 = c_space.get_top()
         else:
-            # only one negative constant
-            F = context.get_rtype(res)
+            valuepos2 = valuepos
+                    
+        dp = MinusValueDP(F=F, c_value=valuepos2, c_space=c_space)
 
-            constant = neg_constants[0]
-            assert constant.value < 0
-
-            c_space = RcompUnits(pint_unit=constant.unit.units,
-                                 string=constant.unit.string)
-            amap = MinusValueMap(F=F, c_value=-constant.value, c_space=c_space)
-
-            setattr(amap, '__name__', '- %s' % (constant.unit.format(-constant.value)))
-            dp = WrapAMap(amap)
-
-            r2 = create_operation(context, dp, resources=[res],
+        r2 = create_operation(context, dp, resources=[res],
                               name_prefix='_minus', op_prefix='_x',
                               res_prefix='_y')
-            return r2
-
+        return r2
 
 def eval_PlusN_(constants, resources, context):
     from .misc_math import plus_constantsN
@@ -306,7 +428,6 @@ def eval_PlusN_(constants, resources, context):
         return plus_constantsN(constants)
 
     elif len(resources) == 1:
-
         if len(constants) > 0:
             c = plus_constantsN(constants)
             return get_plus_op(context, r=resources[0], c=c)
@@ -314,92 +435,116 @@ def eval_PlusN_(constants, resources, context):
             return resources[0]
     else:
         # there are some resources
-        resources_types = [context.get_rtype(_) for _ in resources]
-
-        target_int = Int()
-        tu = get_types_universe()
-        def castable_to_int(_):
-            return tu.leq(_, target_int)
-
-        def exactly_Rcomp_or_Nat(x):
-            return exactly_Rcomp(x) or isinstance(x, Nat)
-            
-        def exactly_Rcomp(x):
-            return isinstance(x, Rcomp) and not isinstance(x, RcompUnits)
-
-        if all(exactly_Rcomp(_) for _ in resources_types):
-            n = len(resources_types)
-            amap = SumNRcompMap(n)
-            dp = WrapAMap(amap)
-        elif all(isinstance(_, RcompUnits) for _ in resources_types):
-            # addition between floats
-            R = resources_types[0]
-            Fs = tuple(resources_types)
-            try:
-                sum_dimensionality_works(Fs, R)
-            except ValueError:
-                msg = ''
-                for r, rt in zip(resources, resources_types):
-                    msg += '- %s has type %s\n' % (r, rt)
-                raise_desc(DPSemanticError, 'Incompatible units:\n%s' % msg)
-
-            dp = SumNDP(Fs, R)
-        elif all(isinstance(_, Nat) for _ in resources_types):
-            # natural number
-            R = Nat()
-            dp = SumNNat(tuple(resources_types), R)
-        elif all(castable_to_int(_) for _ in resources_types):
-            R = Int()
-            amap = SumNInt(tuple(resources_types), R)
-            dp = WrapAMap(amap)
-        elif all(exactly_Rcomp_or_Nat(_) for _ in resources_types):
-            resources = [get_resource_possibly_converted(_, Rcomp(), context)
-                         for _ in resources]
-            amap = SumNRcomp(len(resources))
-            dp = WrapAMap(amap)
-        else:
-            msg = 'Cannot find sum operator for combination of types.'
-            raise_desc(DPInternalError, msg, resources_types=resources_types)
-
-        r = create_operation(context, dp, resources,
-                             name_prefix='_sum', op_prefix='_term',
-                             res_prefix='_result')
-
+        r =  eval_PlusN_ops(resources, context) 
         if not constants:
             return r
         else:
             c = plus_constantsN(constants)
             return get_plus_op(context, r=r, c=c)
 
+
+def eval_PlusN_ops(resources, context):
+    if MCDPConstants.force_plus_two_resources:
+        return eval_PlusN_ops_two(resources, context)
+    else:
+        return eval_PlusN_ops_multi(resources, context)
+
+def eval_PlusN_ops_two(resources, context):
+    if len(resources) == 2:
+        return eval_PlusN_ops_multi(resources, context)
+    else:
+        first = resources[0]
+        rest = eval_PlusN_ops_multi(resources[1:], context)
+        return eval_PlusN_ops_multi([first, rest], context) 
+        
+def eval_PlusN_ops_multi(resources, context):
+    resources_types = [context.get_rtype(_) for _ in resources]
+    target_int = Int()
+    tu = get_types_universe()
+    def castable_to_int(_):
+        return tu.leq(_, target_int)
+
+    def exactly_Rcomp_or_Nat(x):
+        return exactly_Rcomp(x) or isinstance(x, Nat)
+        
+    def exactly_Rcomp(x):
+        return isinstance(x, Rcomp)
+
+    if all(exactly_Rcomp(_) for _ in resources_types):
+        n = len(resources_types)
+        dp = SumNRcompDP(n)
+    elif all(isinstance(_, RcompUnits) for _ in resources_types):
+        # addition between floats
+        R = resources_types[0]
+        Fs = tuple(resources_types)
+        try:
+            sum_dimensionality_works(Fs, R)
+        except ValueError:
+            msg = ''
+            for r, rt in zip(resources, resources_types):
+                msg += '- %s has type %s\n' % (r, rt)
+            raise_desc(DPSemanticError, 'Incompatible units:\n%s' % msg)
+
+        dp = SumNDP(Fs, R)
+    elif all(isinstance(_, Nat) for _ in resources_types):
+        # natural number
+        dp = SumNNatDP(len(resources))
+    elif all(castable_to_int(_) for _ in resources_types):
+        # XXX cast
+        dp = SumNIntDP(len(resources))
+    elif all(exactly_Rcomp_or_Nat(_) for _ in resources_types):
+        resources = [get_resource_possibly_converted(_, Rcomp(), context)
+                     for _ in resources]
+        dp = SumNRcompDP(len(resources))
+    else:
+        msg = 'Cannot find sum operator for combination of types.'
+        raise_desc(DPInternalError, msg, resources_types=resources_types)
+
+    r = create_operation(context, dp, resources,
+                         name_prefix='_sum', op_prefix='_term',
+                         res_prefix='_result')
+    return r
+
+
 @contract(r=CResource, c=ValueWithUnits)
 def get_plus_op(context, r, c):
+    """ r + constant """
     rtype = context.get_rtype(r)
     
     T1 = rtype
     T2 = c.unit
 
+    def Rcomp_from_Nat(value):
+        if is_top(Nat(), value):
+            val = Rcomp().get_top()
+        else:
+            val = float(value)
+        return val
+
     if isinstance(T1, Rcomp) and isinstance(T2, Rcomp):
-        amap = PlusValueRcompMap(c.value)
-        setattr(amap, '__name__', '+ %s' % (T2.format(c.value))) 
-        dp = WrapAMap(amap)
-    if isinstance(T1, Rcomp) and isinstance(T2, Nat):
+        dp = PlusValueRcompDP(c.value)
+    elif isinstance(T1, Rcomp) and isinstance(T2, Nat):
         # cast Nat to Rcomp
-        amap = PlusValueRcompMap(float(c.value))
-        setattr(amap, '__name__', '+ %s' % (T2.format(c.value))) 
-        dp = WrapAMap(amap)
+        val = Rcomp_from_Nat(c.value)
+        dp = PlusValueRcompDP(val)
+    elif isinstance(T1, Rcomp) and isinstance(T2, Rcomp):
+        dp = PlusValueRcompDP(c.value)
+    elif isinstance(T1, Nat) and isinstance(T2, Rcomp):
+        # This is the case:
+        # 
+        #   provided f + Rcomp:2.3 <= required r
+        dp = PlusValueRcompDP(c.value)
     elif isinstance(T1, RcompUnits) and isinstance(T2, RcompUnits):
-        amap = PlusValueMap(F=T1, c_value=c.value, c_space=T2, R=T1)
-        setattr(amap, '__name__', '+ %s' % (T2.format(c.value))) 
-        dp = WrapAMap(amap)
+        dp = PlusValueDP(F=T1, c_value=c.value, c_space=T2)
     elif isinstance(T1, Nat) and isinstance(T2, Nat):
-        amap = PlusNat(c.value)
-        dp = WrapAMap(amap)
+        dp = PlusValueNatDP(c.value)
+    elif isinstance(T1, RcompUnits) and isinstance(T2, Nat):
+        val = Rcomp_from_Nat(c.value)
+        dp = PlusValueRcompDP(val)
     else:
-        msg = 'Cannot create addition operation.'
-        raise_desc(DPInternalError, msg, rtype=T1, c=c)
+        msg = ('Cannot create addition operation between resource of type %s'
+               ' and constant of type %s.' % (T1, T2))
+        raise_desc(DPInternalError, msg)# , rtype=T1, c=c)
 
-    r2 = create_operation(context, dp, resources=[r],
-                          name_prefix='_plus', op_prefix='_x',
-                          res_prefix='_y')
-
+    r2 = create_operation(context, dp, resources=[r], name_prefix='_plus')
     return r2

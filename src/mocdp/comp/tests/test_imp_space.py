@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+import os
+
 from comptests.registrar import comptest
 from contracts import contract
 from mcdp_dp import NotSolvableNeedsApprox
@@ -13,7 +16,8 @@ from mocdp.comp.composite_makecanonical import cndp_makecanonical
 from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.recursive_name_labeling import (MakeArguments,
     get_imp_as_recursive_dict, get_labelled_version, get_names_used, ndp_make)
-import os
+from nose.tools import assert_equal
+
 
 @contract(a=MakeArguments)
 def make_root(a):
@@ -89,7 +93,7 @@ mcdp {
     ndp_labeled = get_labelled_version(ndp0)
     ndp_canonical = cndp_makecanonical(ndp_labeled)
     dp0 = ndp_canonical.get_dp()
-    print dp0.repr_long()
+#     print dp0.repr_long()
     dp, _ = get_dp_bounds(dp0, 5, 5)
     f = 0.0
     R = dp.get_res_space()
@@ -132,8 +136,8 @@ def test_imp_dict_1(id_ndp, ndp):
     dp0 = ndp_labeled.get_dp()
     F = dp0.get_fun_space()
     I = dp0.get_imp_space()
-    print ndp_labeled.repr_long()
-    print dp0.repr_long()
+    # print ndp_labeled.repr_long()
+    # print dp0.repr_long()
     print('I: %s' % I.repr_long())
     
 
@@ -191,12 +195,12 @@ def test_imp_dict_2_makecanonical(id_ndp, ndp0):
         return
 
     ndp_labeled = get_labelled_version(ndp0)
-    ndp = cndp_makecanonical(ndp0)
+    _ndp = cndp_makecanonical(ndp0)
     dp0 = ndp_labeled.get_dp()
     F = dp0.get_fun_space()
     I = dp0.get_imp_space()
     assert isinstance(I, SpaceProduct)
-    print ndp.repr_long()
+#     print ndp.repr_long()
     print('I: %s' % I)
     print('get_names_used: %s' % get_names_used(I))
 
@@ -258,7 +262,7 @@ mcdp {
         
         a = instance catalogue {
             provides a [N]
-            one  |10N
+            one  | 10N
         }
         a.a >= 0N
     }
@@ -270,10 +274,10 @@ mcdp {
     """)
     assert isinstance(ndp0, CompositeNamedDP)
     ndp0_labeled = get_labelled_version(ndp0)
-    ndp = ndp0
+    _ndp = ndp0
     dp = ndp0_labeled.get_dp()
-    print ndp.repr_long()
-    print dp.repr_long()
+    # print ndp.repr_long()
+    # print dp.repr_long()
     f = 0.0
     R = dp.get_res_space()
     ur = dp.solve(f)
@@ -293,8 +297,11 @@ mcdp {
             imp_dict = get_imp_as_recursive_dict(I, imp)
             print('imp dict: %r' % imp_dict)
             assert set(imp_dict) == set(['_res_power', '_fun_lift', 'actuation']), imp_dict
-            assert set(imp_dict['actuation']) == \
-                set(['_mult1', 'a', '_res_power', '_c1', '_prod1', '_fun_lift', '_join_fname1']), imp_dict['actuation']
+            
+            found = set(imp_dict['actuation']) 
+            expected = set(['_mult1', 'a', '_res_power', '_c', '_prod1', '_fun_lift', '_join_fname1']) 
+            assert_equal(expected, found)
+                
 
             context = {}
             artifact = ndp_make(ndp0, imp_dict, context)

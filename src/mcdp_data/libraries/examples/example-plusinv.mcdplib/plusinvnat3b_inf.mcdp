@@ -2,16 +2,7 @@
 # It is equivalent to
 #   x + y >= x^2 + y^2 + 10
 mcdp {
-    f = instance mcdp  {
-        provides a [Nat]
-        
-        requires x [Nat]
-        requires y [Nat]
-        
-        x + y >= a
-    }
-
-    f.a >= square(f.x) + square(f.y) + Nat:10
-
-    requires x, y for f
+    variable x, y [Nat]
+    x + y >= square(x) + square(y) + Nat:10
+    requires x, y
 }

@@ -1,9 +1,14 @@
+# -*- coding: utf-8 -*-
+import sys
+
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc, raise_wrapped
 from mcdp_posets import NotLeq, get_types_universe
-from mocdp import ATTR_LOAD_LIBNAME
+from mocdp import ATTR_LOAD_LIBNAME, ATTR_LOAD_REALPATH
 from mocdp.comp.interfaces import NamedDP
-from mocdp.exceptions import DPSemanticError, mcdp_dev_warning
+from mocdp.exceptions import DPSemanticError, mcdp_dev_warning, DPInternalError,\
+    MCDPExceptionWithWhere
+
 
 __all__ = [
     'TemplateForNamedDP'
@@ -17,6 +22,8 @@ class TemplateForNamedDP():
         
             plus, the attribute ATTR_LOAD_LIBNAME is used
             to describe the original library context
+            
+            also ATTR_LOAD_REALPATH 
         
         """
         self.parameters = parameters
@@ -24,6 +31,18 @@ class TemplateForNamedDP():
 
     @contract(parameter_assignment='dict(str:isinstance(NamedDP))')
     def specialize(self, parameter_assignment, context):
+        # ADD filename if ATTR_LOAD_REALPATH is set
+        try:
+            return self.specialize_(parameter_assignment, context)
+        except MCDPExceptionWithWhere as e:
+            realpath = getattr(self, ATTR_LOAD_REALPATH)
+            if realpath is not None and e.where.filename is None:
+                e = e.with_filename(realpath)
+                raise type(e), e.args, sys.exc_info()[2]
+            else:
+                raise
+        
+    def specialize_(self, parameter_assignment, context):
         for v in parameter_assignment.values():
             check_isinstance(v, NamedDP)
 
@@ -37,7 +56,8 @@ class TemplateForNamedDP():
             try:
                 check_same_interface(v,  proposed)
             except DifferentInterface as e:
-                msg = 'Cannot specialize the template because the interface is different.'
+                msg = ('Cannot specialize the template because '
+                       'the interface is different.')
                 raise_wrapped(DPSemanticError, e, msg,
                               interface=describe_interface(v),
                               proposed=describe_interface(proposed),
@@ -45,7 +65,6 @@ class TemplateForNamedDP():
         
         if hasattr(self, ATTR_LOAD_LIBNAME):
             libname = getattr(self, ATTR_LOAD_LIBNAME)
-            print('The libname is %r ' % libname)
             if libname is None:
                 mcdp_dev_warning('Tmp fix: can this ever be none?')
                 c = context.child()
@@ -54,7 +73,6 @@ class TemplateForNamedDP():
                 c = library._generate_context_with_hooks()
         else:
             c = context.child()
-
 
         for k, v in parameter_assignment.items():
             c.var2model[k] = v
@@ -129,14 +147,8 @@ def describe_interface(ndp):
     ftypes = ndp.get_ftypes(fnames)
     rnames = ndp.get_rnames()
     rtypes = ndp.get_rtypes(rnames)
-    return "fnames: %s\nftypes: %s\nrnames: %s\nrtypes: %s" % (fnames, ftypes, rnames, rtypes)
-
-
-
-
-
-
-
+    return ("fnames: %s\nftypes: %s\nrnames: %s\nrtypes: %s" % 
+            (fnames, ftypes, rnames, rtypes))
 
 
 

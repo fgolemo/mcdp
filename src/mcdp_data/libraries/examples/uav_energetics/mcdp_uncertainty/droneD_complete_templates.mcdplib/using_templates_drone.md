@@ -16,11 +16,11 @@ Now we can define an uncertain battery such as:
 <pre class="mcdp" id='BatteryUncertain' label='BatteryUncertain.mcdp'>
 mcdp {
   provides capacity [Wh]
-  provides missions [R]
+  provides missions [dimensionless]
 
   requires cost     [$]
 
-  requires maintenance [R]
+  requires maintenance [dimensionless]
   requires mass [g]
 
   missions <= 1000 []

@@ -2,7 +2,7 @@ mcdp {
   provides endurance     [s] 
   provides extra_payload [kg]
   provides extra_power   [W]
-  provides num_missions [R]
+  provides num_missions [dimensionless]
  
   battery = new Batteries
   actuation = new Actuation
@@ -20,7 +20,7 @@ mcdp {
    
   lift provided by actuation >= weight
 
-  requires total_mass >= total_mass
+  requires total_mass
   
   labor_cost = (10 $) * (maintenance required by battery)
 

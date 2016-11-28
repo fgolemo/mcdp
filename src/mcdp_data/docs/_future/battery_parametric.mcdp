@@ -12,7 +12,7 @@ mcdp {
         #: icon = icon-battery
     """
     provides capacity    [J]
-    provides missions    [R]
+    provides missions    [dimensionless]
 
     requires mass        [g]
     requires cost        [$]    

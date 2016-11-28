@@ -35,7 +35,7 @@ mcdp {
    rigid_body1 = (provided motion).rigid_body 
    rigid_body2 = (provided dc).rigid_body 
    rigid_body3 = (provided payload).rigid_body
-   rigid_body = max(max(rigid_body1, rigid_body2), rigid_body3)
+   rigid_body = max(rigid_body1, rigid_body2, rigid_body3)
    rigid_body <= any-of(Maximals(`RigidBodyID))
 
    out = (provided dc).dc 

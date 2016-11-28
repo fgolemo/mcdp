@@ -1,6 +1,9 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
+from contracts.utils import raise_wrapped
 from mcdp_dp import (
     CoProductDP, CoProductDPLabels, DPLoop2, LabelerDP, OpaqueDP, ParallelN)
+from mocdp.exceptions import DPInternalError
 
 from .primitive import ApproximableDP, PrimitiveDP
 
@@ -9,9 +12,9 @@ from .primitive import ApproximableDP, PrimitiveDP
 def dp_transform(dp, f):
     """ Recursive application of a map f that is equivariant with
         series and parallel operations. """
-    from mcdp_dp.dp_series import Series0
-    from mcdp_dp.dp_loop import DPLoop0
-    from mcdp_dp.dp_parallel import Parallel
+    from .dp_series import Series0
+    from .dp_parallel import Parallel
+    from .dp_series_simplification import check_same_spaces
 
     if isinstance(dp, Series0):
         return Series0(dp_transform(dp.dp1, f),
@@ -26,9 +29,7 @@ def dp_transform(dp, f):
         return CoProductDPLabels(dp_transform(dp.dp, f), dp.labels)
     elif isinstance(dp, CoProductDP):
         dps2 = tuple(dp_transform(_, f) for _ in dp.dps)
-        return CoProductDP(dps2)
-    elif isinstance(dp, DPLoop0):
-        return DPLoop0(dp_transform(dp.dp1, f))
+        return CoProductDP(dps2) 
     elif isinstance(dp, DPLoop2):
         return DPLoop2(dp_transform(dp.dp1, f))
     elif isinstance(dp, OpaqueDP):
@@ -36,9 +37,13 @@ def dp_transform(dp, f):
     elif isinstance(dp, LabelerDP):
         return LabelerDP(dp_transform(dp.dp, f), dp.recname)
     else:
-        r = f(dp)
-        # assert isinstance(r, PrimitiveDP)
-        return r
+        dp2 = f(dp)
+        try:
+            check_same_spaces(dp, dp2)
+        except AssertionError as e: # pragma: no cover
+            msg = 'Transformation %s does not preserve spaces.' % f
+            raise_wrapped(DPInternalError, e, msg, dp=dp, dp2=dp2, f=f, compact=True)
+        return dp2
 
 
 @contract(dp=PrimitiveDP, nl='int,>=1', nu='int,>=1')

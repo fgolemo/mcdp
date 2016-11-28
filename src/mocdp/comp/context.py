@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
+
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
 from mcdp_dp import FunctionNode, PrimitiveDP, ResourceNode
-from mcdp_posets import NotBounded, Poset, Space
-from mcdp_posets import FinitePoset
-from mcdp_posets import PosetProductWithLabels
+from mcdp_posets import FinitePoset , NotBounded, Poset, Space, PosetProductWithLabels
+from mcdp_posets.types_universe import express_value_in_isomorphic_space
 from mocdp import logger
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.comp.wrap import dpwrap
 from mocdp.exceptions import DPInternalError, DPSemanticError, mcdp_dev_warning
+
+
 _ = logger
 
 __all__ = [
@@ -45,11 +47,18 @@ class ValueWithUnits():
 
     def __repr__(self):
         return 'ValueWithUnits(%r, %r)' % (self.value, self.unit)
+    
+    def cast_value(self, P):
+        """ Returns the value cast in the space P (larger than
+            the current space). """ 
+        return express_value_in_isomorphic_space(self.unit, self.value, P)
 
 def get_name_for_fun_node(name):
+    check_isinstance(name, str) # also more conditions
     return '_fun_%s' % name
 
 def get_name_for_res_node(name):
+    check_isinstance(name, str) # also more conditions
     return '_res_%s' % name
 
 
@@ -72,6 +81,7 @@ class NoSuchMCDPType(Exception):
     pass
 
 
+
 class Context():
 
     def __init__(self):
@@ -85,6 +95,9 @@ class Context():
         self.var2function = {}  # str -> Function
         self.var2model = {}  # str -> NamedDP
         self.constants = {}  # str -> ValueWithUnits
+        self.variables = set() # set of strings for variables
+        # already explicitly set. It is assumed each will have
+        # an NDP of the same name
 
         self.ifun_init()
         self.ires_init()
@@ -94,6 +107,14 @@ class Context():
         self.load_primitivedp_hooks = []
         self.load_template_hooks = []
         self.load_library_hooks = []
+        
+        # xxx this is probably not well thought out
+        # for example, are we propagating this to children? (no)
+        self.warnings = []
+        
+#         #
+#         self.suggested_rname = None
+#         self.suggested_fname = None
 
     def __repr__(self):
         s = 'Context:'
@@ -105,11 +126,7 @@ class Context():
         s += '\n' + '  constants: %s' % self.constants
 
         return s
-
-#     def get_default_library_name(self):
-#         """ hack used for Template """
-#         return getattr(self, 'default_library_name', None)
-
+ 
     def child(self):
         """ A child context preserves the value of the constants
             and the model types. """
@@ -123,23 +140,33 @@ class Context():
         c.var2function = {}  # XXX?
         c.var2model.update(self.var2model)
         c.constants.update(self.constants)
+        # we give a reference to ours 
+        # c.warnings = self.warnings
+        # we do not preserve this
+        # use_rname = None
+
         return c
 
-    def load_ndp(self, load_arg):
+    def load_ndp(self, load_arg, context=None):
+        assert context is None or context is self
         return self._load_hooks(load_arg, self.load_ndp_hooks, NamedDP)
 
-    def load_primitivedp(self, load_arg):
+    def load_primitivedp(self, load_arg, context=None):
+        assert context is None or context is self
         return self._load_hooks(load_arg, self.load_primitivedp_hooks, PrimitiveDP)
 
-    def load_poset(self, load_arg):
+    def load_poset(self, load_arg, context=None):
+        assert context is None or context is self
         return self._load_hooks(load_arg, self.load_posets_hooks, Poset)
 
-    def load_template(self, load_arg):
+    def load_template(self, load_arg, context=None):
+        assert context is None or context is self
         return self._load_hooks(load_arg, self.load_template_hooks, TemplateForNamedDP)
 
-    def load_library(self, load_arg):
+    def load_library(self, load_arg, context=None):
+        assert context is None or context is self
         check_isinstance(load_arg, str)
-        from mcdp_library.library import MCDPLibrary
+        from mcdp_library import MCDPLibrary
         return self._load_hooks(load_arg, self.load_library_hooks, MCDPLibrary)
 
     def _load_hooks(self, load_arg, hooks, expected):
@@ -149,11 +176,16 @@ class Context():
             raise_desc(DPSemanticError, msg)
         for hook in hooks:
             try:
-                res = hook(load_arg)
-                if not isinstance(res, expected):
-                    msg = 'The hook did not return the expected type.'
-                    raise_desc(DPSemanticError, msg, res=res, expected=expected)
-                return res
+                try:
+                    res = hook(load_arg, context=self)
+                    if not isinstance(res, expected):
+                        msg = 'The hook did not return the expected type.'
+                        raise_desc(DPSemanticError, msg, res=res, expected=expected)
+                    return res
+                except TypeError:
+                    msg = 'Could not use hook %r' % hook
+                    logger.error(msg)
+                    raise
             except DPSemanticError as e:
                 if len(hooks) == 1:
                     raise
@@ -163,7 +195,6 @@ class Context():
         s = "\n\n".join(map(str, errors))
         msg = 'Could not load %r: \n%s' % (load_arg, s)
         raise DPSemanticError(msg)
-
 
     @contract(s='str', dp='str', returns=CFunction)
     def make_function(self, dp, s):
@@ -261,7 +292,10 @@ class Context():
 
     @contract(returns=str)
     def add_ndp_fun_node(self, fname, F):
-        ndp = dpwrap(FunctionNode(F), fname, fname)
+        """ Returns the name of the node (something like _fun_****) """
+        if '-' in fname:
+            raise ValueError(fname)
+        ndp = dpwrap(FunctionNode(F, fname), fname, fname)
         name = get_name_for_fun_node(fname)
         # print('Adding new function %r as %r.' % (str(name), fname))
         self.add_ndp(name, ndp)
@@ -279,7 +313,9 @@ class Context():
     @contract(returns=str)
     def add_ndp_res_node(self, rname, R):
         """ returns the name of the node """
-        ndp = dpwrap(ResourceNode(R), rname, rname)
+        if '-' in rname:
+            raise ValueError(rname)
+        ndp = dpwrap(ResourceNode(R, rname), rname, rname)
         name = get_name_for_res_node(rname)
         # self.info('Adding new resource %r as %r ' % (str(name), rname))
         self.add_ndp(name, ndp)
@@ -385,6 +421,8 @@ class Context():
         return False
 
     def new_fun_name(self, prefix):
+        if not self._fun_name_exists(prefix):
+            return prefix
         for i in range(1, 1000):
             cand = prefix + '%d' % i
             if not self._fun_name_exists(cand):
@@ -392,7 +430,9 @@ class Context():
         assert False, 'cannot find name? %r' % cand
 
     def new_res_name(self, prefix):
-        for i in range(1, 10000):
+        if not self._res_name_exists(prefix):
+            return prefix
+        for i in range(2, 10000):
             cand = prefix + '%d' % i
             if not self._res_name_exists(cand):
                 return cand
@@ -401,6 +441,7 @@ class Context():
     @contract(a=CResource)
     def get_rtype(self, a):
         """ Gets the type of a resource, raises DPSemanticError if not present. """
+        check_isinstance(a, CResource)
         if not a.dp in self.names:
             msg = "Cannot find design problem %r." % str(a)
             raise DPSemanticError(msg)
@@ -413,6 +454,7 @@ class Context():
     @contract(a=CFunction)
     def get_ftype(self, a):
         """ Gets the type of a function, raises DPSemanticError if not present. """
+        check_isinstance(a, CFunction)
         if not a.dp in self.names:
             msg = "Cannot find design problem %r." % str(a)
             raise DPSemanticError(msg)
@@ -585,7 +627,8 @@ class Context():
 
         res = self.make_function(ndp_name, s)
         return res
-
+     
+ModelBuildingContext = Context
 
 def format_list(l):
     """ Returns a nicely formatted list. """

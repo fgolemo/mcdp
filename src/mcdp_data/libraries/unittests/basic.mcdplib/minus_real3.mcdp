@@ -1,0 +1,50 @@
+mcdp {
+    provides f [m]
+    requires r [m]
+
+    required r >= provided f + (1 m - Top m)
+}
+
+
+# 
+
+# If the number is negative:
+#
+#  r ≥ f - c,  with c ≥ 0
+#
+# then it is treated as 
+#
+#  r + c ≥ f
+#
+# For example:
+# If c != ⊤
+# 
+# If r = 0, then f_max = c
+# If r > 0, then f_max = c + r
+# If r = ⊤, then f_max = ⊤
+#
+# If c = ⊤:
+#
+# If r = 0, then f_max = ⊤
+#
+# General rule is simply:
+#
+# f_max = r + c
+#
+# The other way around:
+#
+# r + c ≥ f
+# 
+# if c != ⊤:
+#
+#   if f == 0,  r_min = 0
+#   if f == c,  r_min = 0
+#   if f > c,   r_min = f - c
+#  that is:
+#   r_min = "max"(0, f-c)
+#
+# if c == ⊤:  r + ⊤ ≥ f
+#
+#   if 0<= f < ⊤:   r_min = 0
+#    if f == ⊤:   r_min = 0
+

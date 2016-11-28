@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
     
 from common_stats import CommonStats
 from discrete_choices import compute_discrete_choices, figure_discrete_choices2
@@ -85,7 +86,7 @@ def go_batteries_min_joint():
     
     combinations = get_combinations()
     
-    result_like = dict(cost="USD", maintenance="R", mass='g')
+    result_like = dict(cost="USD", maintenance="dimensionless", mass='g')
 
     data = solve_combinations(ndp, combinations, result_like)
     return data
@@ -114,7 +115,7 @@ def go_batteries_min_maintenance():
     
     combinations = get_combinations()
     
-    result_like = dict(maintenance="R")
+    result_like = dict(maintenance="dimensionless")
 
     data = solve_combinations(ndp, combinations, result_like)
     return data

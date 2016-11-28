@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-from .parts import CDPLanguage
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, raise_wrapped
 from mcdp_posets import (FiniteCollectionsInclusion, LowerSets, PosetProduct,
-    UpperSets, express_value_in_isomorphic_space)
+    UpperSets, express_value_in_isomorphic_space, NotLeq, get_types_universe)
 from mocdp import logger
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPSemanticError, DPUserAssertion
+
+from .parts import CDPLanguage
+
 
 def assert_generic(r, context, which):
     """ a : v1 < v2
@@ -14,13 +16,19 @@ def assert_generic(r, context, which):
     """
     from .eval_constant_imp import eval_constant
 
-    
     v1 = eval_constant(r.v1, context)
     v2 = eval_constant(r.v2, context)
     
     # put v2 in v1's space
     P = v1.unit
     value1 = v1.value
+    tu = get_types_universe()
+    
+    try:
+        tu.check_leq(v2.unit, v1.unit)
+    except NotLeq as e:
+        msg = 'Cannot cast %s to %s.' % (v2.unit, v1.unit)
+        raise_wrapped(DPSemanticError, e, msg, compact=True)
     value2 = express_value_in_isomorphic_space(v2.unit, v2.value, v1.unit)
     
     t = {}
@@ -39,7 +47,7 @@ def assert_generic(r, context, which):
     
     else: # assertion
         msg = 'Assertion %r failed.' % which
-        raise_desc(DPUserAssertion, msg, v1=v1, v2=v2)
+        raise_desc(DPUserAssertion, msg, expected=v1, obtained=v2)
     
          
 CDP = CDPLanguage

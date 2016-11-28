@@ -36,8 +36,8 @@ mcdp {
   # compute power consumption using linear interpolation
   power_idle = 1 W
   power_peak = 4 W
-  power = power_idle + (power_peak-power_idle) * usage / 100 dimensionless
-  required power >= power
+  P = power_idle + (power_peak-power_idle) * usage / 100 dimensionless
+  required power >= P
 
   required budget >= 30 USD
   required mass >= 20g

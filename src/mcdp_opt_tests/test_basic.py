@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+import os
+import shutil
+
 from comptests.registrar import comptest, comptest_fails
 from contracts import contract
 from mcdp_lang import parse_constant, parse_poset
@@ -13,9 +17,8 @@ from mcdp_report.gg_ndp import gvgen_from_ndp
 from mcdp_report.gg_utils import gg_figure
 from mocdp.comp.composite import cndp_get_name_ndp_notfunres
 from mocdp.comp.composite_templatize import cndp_templatize_children
+from mocdp.exceptions import mcdp_dev_warning
 from reprep import Report
-import os
-import shutil
 
 
 def get_test_library2(libnames):
@@ -229,8 +232,6 @@ def opt_basic_5():
     assert not less_resources2(l1b, l2b)
     assert less_resources2(l2b, l1b)
 
-
-
 @comptest
 def opt_basic_6():
     libnames = ['actuation']
@@ -238,8 +239,8 @@ def opt_basic_6():
 
     outdir = 'out/opt_basic_6'
 
-    library.use_cache_dir(os.path.join(outdir, 'cache'))
-
+    library.use_tmp_cache()
+    
     options = ['DaguChassis', 'AdaFruitDCHat0',
                'BatteryRavpower', 'USB_to_barrel',
                'USBMicroCharging']
@@ -286,7 +287,7 @@ def opt_basic_6():
         'motion': '< `RigidBodyID: rb1, 0.1 m/s, 10 minutes >',
     }
     max_resources = {
-        'ac': '< <S(AC_power):AC_power, `socket_type: TypeA, `AC_voltages: v110, `AC_frequencies: f50, 50W>, 3600 s>',
+        'ac': '<<`socket_type: TypeA, `AC_voltages: v110, `AC_frequencies: f50, 50W>, 3600 s>',
         'budget': '1000 USD',
     }
 
@@ -326,14 +327,16 @@ def _parse_dict(d, library):
         values.append(c.value)
     return tuple(labels), tuple(posets), tuple(values)
 
-@comptest
+# @comptest
+mcdp_dev_warning('temporarily disabled opt_basic_7()')
+
 def opt_basic_7():
     libnames = ['actuation']
     library = get_test_library2(libnames)
 
-    outdir = 'out/opt_basic_7'
-    cache_dir = os.path.join(outdir, 'cache')
-    library.use_cache_dir(cache_dir)
+#     outdir = 'out/opt_basic_7'
+#     cache_dir = os.path.join(outdir, 'cache')
+    library.use_tmp_cache()
     ndp = library.load_ndp('duckiebot_sol00')
 
 

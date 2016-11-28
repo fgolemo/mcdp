@@ -1,9 +1,9 @@
       mcdp {
-          provides f [R]
+          provides f [dimensionless]
           
           sub hnlin = instance dp {
-              provides x [R]
-              requires r [R]
+              provides x [dimensionless]
+              requires r [dimensionless]
               
               implemented-by load SimpleNonlinearity1
           }

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mcdp_dp.dp_series import get_product_compact
 from mcdp_posets import PosetProduct, R_Energy, R_Time, R_Weight, Rcomp

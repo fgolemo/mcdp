@@ -14,6 +14,7 @@ __all__ = [
     'NotJoinable',
     'NotBounded',
     'Preorder',
+    'is_top',
 ]
 
 class NotLeq(Exception):
@@ -79,7 +80,7 @@ class Poset(Preorder):
     def get_top(self): # pragma: no cover
         msg = 'Top not available.'
         raise_desc(NotBounded, msg, poset=self)
-
+        
     def get_test_chain(self, n):  # @UnusedVariable
         """
             Returns a test chain of length up to n.
@@ -93,7 +94,6 @@ class Poset(Preorder):
         except NotBounded:
             pass
         return chain
-
 
     def join(self, a, b):  # "max" ∨
         if self.leq(a, b):
@@ -146,4 +146,10 @@ class Poset(Preorder):
         from mcdp_posets import LowerSet
         return LowerSet(elements, self)
    
-    
+def is_top(poset, x):
+    """ Returns True if the element is the Top """
+    return poset.equal(x, poset.get_top())
+
+def is_bottom(poset, x):
+    """ Returns True if the element is the Top """
+    return poset.equal(x, poset.get_bottom())

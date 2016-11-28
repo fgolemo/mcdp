@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from mcdp_web.utils import response_data
 import binascii
 import os

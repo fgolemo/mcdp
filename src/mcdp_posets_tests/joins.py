@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from mcdp_tests.generation import for_all_posets
 from mcdp_posets.space import Uninhabited
 

@@ -1,269 +1,243 @@
 # -*- coding: utf-8 -*-
-import functools
-
-from contracts import contract
-from contracts.utils import check_isinstance, raise_wrapped
-from mcdp_posets import Map, Nat, PosetProduct, Rcomp, RcompUnits
-from mocdp.exceptions import mcdp_dev_warning
-import numpy as np
+from contracts.utils import raise_desc
+from mcdp_dp import NotSolvableNeedsApprox, ApproximableDP
+from mcdp_maps import SumNIntMap, SumNNatsMap, SumNMap, SumNRcompMap
+from mcdp_posets import Int, is_top
+from mocdp.exceptions import DPNotImplementedError, mcdp_dev_warning
 
 from .dp_generic_unary import WrapAMap
+from .repr_strings import repr_hd_map_sumn
+from .sequences_invplus import sample_sum_upperbound, sample_sum_lowersets
 
 
-#
-# __all__ = [
-#     'Sum',
-#     'SumN',
-#     'SumNNat',
-#     'SumNInt',
-#     'Product',
-#     'ProductN',
-#     'SumUnitsNotCompatible',
-#     'check_sum_units_compatible',
-# ]
-class SumNMap(Map):
-    
-    @contract(Fs='tuple, seq[>=2]($RcompUnits)', R=RcompUnits)
-    def __init__(self, Fs, R):
-        for _ in Fs:
-            check_isinstance(_, RcompUnits)
-        check_isinstance(R, RcompUnits)
-        self.Fs = Fs
-        self.R = R
-        
-        sum_dimensionality_works(Fs, R)
-        
-        dom = PosetProduct(self.Fs)
-        cod = R
+__all__ = [
+    'SumNDP',
+    'SumNNatDP',
+    'SumNRcompDP',
+    'SumNIntDP',
+    'SumNLDP',
+    'SumNUDP',
+]
 
-        Map.__init__(self, dom=dom, cod=cod)
-        
-    def _call(self, x):
-        res = sum_units(self.Fs, x, self.R)
-        return res
-    
-    def __repr__(self):
-        return 'SumNMap(%s -> %s)' % (self.dom, self.cod)
-    
-    
-class SumNDP(WrapAMap):
-    
+class SumNDP(WrapAMap, ApproximableDP):
+    """
+        f1, f2, f3 -> f1 + f2 +f3
+    """
     def __init__(self, Fs, R):
         amap = SumNMap(Fs, R)
-        WrapAMap.__init__(self, amap)
-#         
-#     
-# class SumN_old(EmptyDP):
-#     """ Sum of real values with units. """
-#     @contract(Fs='tuple, seq[>=2]($RcompUnits)', R=RcompUnits)
-#     def __init__(self, Fs, R):
-#         for _ in Fs:
-#             check_isinstance(_, RcompUnits)
-#         check_isinstance(R, RcompUnits)
-#         self.Fs = Fs
-# 
-#         # todo: check dimensionality
-#         F = PosetProduct(self.Fs)
-#         R = R
-# 
-#         EmptyDP.__init__(self, F=F, R=R)
-#         sum_dimensionality_works(Fs, R)
-# 
-#     def solve(self, func):
-#         # self.F.belongs(func)
-#         res = sum_units(self.Fs, func, self.R)
-#         return self.R.U(res)
-# 
-#     def __repr__(self):
-#         return 'SumN(%s -> %s)' % (self.F, self.R)
-
-class SumNRcompMap(Map):
-    """ Sum of Rcomp. """
+        amap_dual = None
+        WrapAMap.__init__(self, amap, amap_dual)
+        self.Fs = Fs
+        self.R = R
     
-    @contract(n='int,>=0')
+    def solve_r(self, r):  # @UnusedVariable
+        raise NotSolvableNeedsApprox()
+    
+    def get_lower_bound(self, n):
+        return SumNLDP(self.Fs, self.R, n)
+
+    def get_upper_bound(self, n): 
+        return SumNUDP(self.Fs, self.R, n)
+    
+    def repr_hd_map(self):
+        return repr_hd_map_sumn(len(self.Fs))
+
+ 
+class SumNNatDP(WrapAMap, ApproximableDP):
+    
     def __init__(self, n):
-        P = Rcomp()
-        dom = PosetProduct((P,)*n)
-        cod = P
         self.n = n
-        Map.__init__(self, dom, cod)
-        
-    def _call(self, x):
-        res = sum(x)
-        mcdp_dev_warning('overflow, underflow')
-        return res
-
+        amap = SumNNatsMap(n)
+        amap_dual = None
+        WrapAMap.__init__(self, amap, amap_dual)
+    
     def __repr__(self):
-        return 'SumNRcompMap(%s)' % self.n
-
-def sum_dimensionality_works(Fs, R):
-    """ Raises ValueError if it is not possible to sum Fs to get R. """
-    for Fi in Fs:
-        check_isinstance(Fi, RcompUnits)
-    check_isinstance(R, RcompUnits)
-
-    for Fi in Fs:
-        ratio = R.units / Fi.units
-        try:
-            float(ratio)
-        except Exception as e: # pragma: no cover
-            raise_wrapped(ValueError, e, 'Could not convert.', Fs=Fs, R=R)
-
-
-# Fs: sequence of Rcompunits
-def sum_units(Fs, values, R):
-    for Fi in Fs:
-        check_isinstance(Fi, RcompUnits)
-    res = 0.0
-    for Fi, x in zip(Fs, values):
-        if Fi.equal(x, Fi.get_top()):
-            return R.get_top()
-
-        # reasonably sure this is correct...
-        try:
-            factor = 1.0 / float(R.units / Fi.units)
-        except Exception as e:  # pragma: no cover (DimensionalityError)
-            raise_wrapped(Exception, e, 'some error', Fs=Fs, R=R)
-
-        res += factor * x
-
-    if np.isinf(res):
-        return R.get_top()
-
-    return res
-
-class ProductNMap(Map):
-
-    @contract(Fs='tuple[>=2]')
-    def __init__(self, Fs, R):
-        for _ in Fs:
-            check_isinstance(_, RcompUnits)
-        check_isinstance(R, RcompUnits)
-
-        self.F = dom = PosetProduct(Fs)
-        self.R = cod = R
-        Map.__init__(self, dom=dom, cod=cod)
-
-    def _call(self, f):
-        print f
-        # first, find out if there are any tops
-        def is_there_a_top():
-            for Fi, fi in zip(self.F, f):
-                if Fi.leq(Fi.get_top(), fi):
-                    return True
-            return False
+        return 'SumNNatDP(%s)' % self.n
+    
+    def solve_r(self, r):  # @UnusedVariable
         
-        if is_there_a_top():
-            return self.R.get_top()
+        # Max { (f1, f2): f1 + f2 <= r }
+        if self.n > 2:
+            msg = 'SumNNatDP(%s).solve_r not implemented yet' % self.n
+            raise_desc(DPNotImplementedError, msg)
+        
+        mcdp_dev_warning('move away')    
+        if is_top(self.R, r):
+            top = self.F[0].get_top()
+            s = set([(top, top)])
+            return self.F.Ls(s)
 
-        mult = lambda x, y: x * y
-        try:
-            r = functools.reduce(mult, f)
-        except FloatingPointError as e:
-            # assuming this is overflow
-            assert 'overflow' in str(e)
-            r = np.inf
-        if np.isinf(r):
-            r = self.R.get_top()
-        return r
+        assert isinstance(r, int)
 
-class ProductN(WrapAMap):
+        if r >= 100000:
+            msg = 'This would create an antichain of %s items.' % r
+            raise NotSolvableNeedsApprox(msg)
+        
+        s = set()        
+        for o in range(r + 1):
+            s.add((o, r - o))
 
-    @contract(Fs='tuple[>=2]')
-    def __init__(self, Fs, R):
-        amap = ProductNMap(Fs, R)
+        return self.F.Ls(s)
+    
+    def get_lower_bound(self, nl):  # @UnusedVariable
+        msg = 'SumNNatDP(%s).get_lower_bound() not implemented yet' % self.n
+        raise_desc(DPNotImplementedError, msg)
+
+    def get_upper_bound(self, nu):  # @UnusedVariable
+        msg = 'SumNNatDP(%s).get_upper_bound() not implemented yet' % self.n
+        raise_desc(DPNotImplementedError, msg)
+        
+    def repr_hd_map(self):
+        return repr_hd_map_sumn(self.n)
+
+    
+class SumNUDP(WrapAMap):
+    """
+        f1, f2, f3 -> f1 + f2 +f3
+        r -> ((a,b) | a + b = r}
+        
+        This is an upper approximation, which is always pessimistic.
+        So the points are exactly on the line, because that means 
+        that we are being pessimistic.
+        
+    """
+    def __init__(self, Fs, R, n):
+        self.n = n
+        amap = SumNMap(Fs, R)
+        self.Fs = Fs 
         WrapAMap.__init__(self, amap)
         
+    def solve_r(self, r):
+         
+        if len(self.Fs) > 2:
+            msg = 'Cannot invert more than two terms.'
+            raise_desc(NotImplementedError, msg)
+
+        options = sample_sum_upperbound(self.R, self.F, r, self.n)
+        return self.F.Ls(options)
+    
+    def repr_hd_map(self):
+        return repr_hd_map_sumn(len(self.Fs), 'U', self.n)
+
+    
+class SumNLDP(WrapAMap):
+    """
+        f1, f2, f3 -> f1 + f2 +f3
+        r -> ((a,b) | a + b = r}
         
-#         
-# class ProductN_old(EmptyDP):
-# 
-#     @contract(Fs='tuple[>=2]')
-#     def __init__(self, Fs, R):
-#         if do_extra_checks():
-#             for _ in Fs:
-#                 check_isinstance(_, RcompUnits)
-#             check_isinstance(R, RcompUnits)
-# 
-#         F = PosetProduct(Fs)
-#         EmptyDP.__init__(self, F=F, R=R)
-# 
-#     def solve(self, f):
-#         # first, find out if there are any tops
-#         def is_there_a_top():
-#             for Fi, fi in zip(self.F, f):
-#                 if Fi.leq(Fi.get_top(), fi):
-#                     return True
-#             return False
-#         
-#         if is_there_a_top():
-#             return self.R.U(self.R.get_top())
-# 
-#         mult = lambda x, y: x * y
-#         try:
-#             r = functools.reduce(mult, f)
-#         except FloatingPointError as e:
-#             # assuming this is overflow
-#             assert 'overflow' in str(e)
-#             r = np.inf
-#         if np.isinf(r):
-#             r = self.R.get_top()
-#         return self.R.U(r)
-# 
-#     def __repr__(self):
-#         return 'ProductN(%s -> %s)' % (self.F, self.R)
-
-
-
-class ProductNatN(Map):
-
-    """ Multiplies several Nats together """
-
-    @contract(n='int,>=2')
-    def __init__(self, n):
-        self.P = Nat()
-        dom = PosetProduct( (self.P,) * n)
-        cod = self.P
-        Map.__init__(self, dom=dom, cod=cod)
+        This is a lower approximation, which is always optimistic.
+        
+    """
+    def __init__(self, Fs, R, n):
         self.n = n
-                     
-    def _call(self, x):
-        def is_there_a_top():
-            for xi in x:
-                if self.P.equal(self.P.get_top(), xi):
-                    return True
-            return False
-
-        if is_there_a_top():
-            return self.R.get_top()
+        self.Fs = Fs
+        amap = SumNMap(Fs, R)
+        WrapAMap.__init__(self, amap)
         
-        mult = lambda a, b : a * b
-        r = functools.reduce(mult, x)
-        mcdp_dev_warning('lacks overflow')
-        return r
+    def solve_r(self, r):
+        if len(self.Fs) > 2:
+            msg = 'SumNLDP:solve_r: Cannot invert more than two terms.'
+            raise_desc(NotImplementedError, msg)
+            
+        options = sample_sum_lowersets(self.R, self.F, r, self.n)
+        return self.F.Ls(options)
 
+    def repr_hd_map(self):
+        return repr_hd_map_sumn(len(self.Fs), 'L', self.n)
+
+class SumNRcompDP(WrapAMap, ApproximableDP):
+    
+    def __init__(self, n):
+        amap = SumNRcompMap(n)
+        amap_dual = None
+        self.n = n
+        WrapAMap.__init__(self, amap, amap_dual)
+
+    def solve_r(self, r):  # @UnusedVariable
+        raise NotSolvableNeedsApprox()
+    
+    def get_lower_bound(self, nl):
+        return SumNRcompLDP(self.n, nl)
+
+    def get_upper_bound(self, nu): 
+        return SumNRcompUDP(self.n, nu)
+    
+    def repr_hd_map(self):
+        return repr_hd_map_sumn(self.n)
+
+    
+class SumNRcompUDP(WrapAMap):
+    """
+        f1, f2, f3 -> f1 + f2 +f3
+        r -> ((a,b) | a + b = r}
+        
+        This is an upper approximation, which is always pessimistic.
+        So the points are exactly on the line, because that means 
+        that we are being pessimistic.
+        
+    """
+    def __init__(self, n, nu):
+        self.n = n
+        self.nu = nu
+        amap = SumNRcompMap(n)
+        WrapAMap.__init__(self, amap)
+        
+    def solve_r(self, r):
+        if self.n > 2:
+            msg = 'SumNRcompUDP: Cannot invert more than two terms.'
+            raise_desc(NotImplementedError, msg)
+
+        mcdp_dev_warning('not sure')
+        options = sample_sum_upperbound(self.R, self.F, r, self.nu)
+        return self.F.Ls(options)
+    
+    
+    def repr_hd_map(self):
+        return repr_hd_map_sumn(self.n, 'U', self.nu)
+
+    
+    
+class SumNRcompLDP(WrapAMap):
+    """
+        f1, f2, f3 -> f1 + f2 +f3
+        r -> ((a,b) | a + b = r}
+        
+        This is a lower approximation, which is always optimistic.
+        
+    """
+    def __init__(self, n, nl):
+        self.n = n
+        self.nl = nl
+        amap = SumNRcompMap(n)
+        WrapAMap.__init__(self, amap)
+        
+    def solve_r(self, r):
+        if self.n > 2:
+            msg = 'SumNRcompLDP:solve_r: Cannot invert more than two terms.'
+            raise_desc(NotImplementedError, msg)
+            
+        mcdp_dev_warning('not sure')
+        options = sample_sum_lowersets(self.R, self.F, r, self.nl)
+        return self.F.Ls(options)
+
+    def repr_hd_map(self):
+        return repr_hd_map_sumn(self.n, 'L', self.nl)
+
+
+class SumNIntDP(WrapAMap):
+
+    def __init__(self, n):
+        Fs = (Int(),) * n
+        R = Int()
+        self.n = n
+
+        amap = SumNIntMap(Fs, R)
+        WrapAMap.__init__(self, amap)
+        
     def __repr__(self):
-        return 'ProductNatN(%s)' % (self.n)
+        return 'SumNIntDP(%s)' % (self.n)
+    
 
+    def repr_hd_map(self):
+        return repr_hd_map_sumn(self.n)
 
-class MultValueMap(Map):
-    """ multiplies by <value> """
-    """ Implements _ -> _ * x on RCompUnits """
-    def __init__(self, F, R, value):
-        check_isinstance(F, RcompUnits)
-        check_isinstance(R, RcompUnits)
-        dom = F
-        cod = R
-        self.value = value
-        Map.__init__(self, dom=dom, cod=cod)
-
-    def _call(self, x):
-        if self.dom.equal(x, self.dom.get_top()):
-            return self.cod.get_top()
-
-        res = x * self.value
-
-        if bool(np.isfinite(res)):
-            return res
-        else:
-            return self.cod.get_top() 

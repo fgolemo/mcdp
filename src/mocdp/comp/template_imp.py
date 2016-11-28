@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from mcdp_dp import PrimitiveDP
 from mcdp_posets import FiniteCollectionAsSpace, LowerSet, UpperSet
 

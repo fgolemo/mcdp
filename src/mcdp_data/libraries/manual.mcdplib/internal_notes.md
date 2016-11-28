@@ -72,16 +72,16 @@ mcdp {
 ### ndp_graph_expand
 
 ~~~
-<pre class='ndp_graph_expand' direction='LR'>`model</pre>
+<pre class='ndp_graph_expand_LR'>`model</pre>
 ~~~
 
-<pre class='ndp_graph_expand' direction='LR'>`model</pre>
+<pre class='ndp_graph_expand_LR'>`model</pre>
 
 ~~~
-<pre class='ndp_graph_expand' direction='TB'>`model</pre>
+<pre class='ndp_graph_expand_TB'>`model</pre>
 ~~~
 
-<pre class='ndp_graph_expand' direction='TB'>`model</pre>
+<pre class='ndp_graph_expand_TB'>`model</pre>
 
 ###  ndp_template_graph_enclosed
 

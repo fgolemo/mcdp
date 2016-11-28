@@ -11,6 +11,7 @@ __all__ = [
     'IdentityDP',
     'FunctionNode',
     'ResourceNode',
+    'VariableNode',
 ]
 
 
@@ -19,24 +20,34 @@ class IdentityDP(WrapAMap):
     @contract(F=Poset)
     def __init__(self, F):
         amap = IdentityMap(F, F)
-        WrapAMap.__init__(self, amap)
+        amap_dual = IdentityMap(F, F)
+        WrapAMap.__init__(self, amap, amap_dual)
 
     def __repr__(self):
         return 'Id(%r)' % self.F
 
 
+class VariableNode(IdentityDP):
+    def __init__(self, P, vname):
+        IdentityDP.__init__(self, P)
+        self.vname = vname
+    def diagram_label(self):
+        return self.vname
 
 class ResourceNode(IdentityDP):
-    pass
+    def __init__(self, R, rname):
+        self.rname = rname
+        IdentityDP.__init__(self, R)
+    def diagram_label(self):
+        return self.rname
+#         return 'resource %s' % self.rname
 
 class FunctionNode(IdentityDP):
-    pass
-
-#     class ResourceNode(OpaqueIdentity):
-#         pass
-#
-#     class FunctionNode(OpaqueIdentity):
-#         pass
-
+    def __init__(self, F, fname):
+        self.fname = fname
+        IdentityDP.__init__(self, F)
+    def diagram_label(self):
+        return self.fname
+#         return 'functionality %s' % self.fname 
 
 Identity = IdentityDP

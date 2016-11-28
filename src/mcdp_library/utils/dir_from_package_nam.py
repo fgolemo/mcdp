@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts.utils import raise_wrapped
 from contracts import contract
 import os

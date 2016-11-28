@@ -2,7 +2,7 @@ mcdp {
   provides endurance     [s] 
   provides extra_payload [kg]
   provides extra_power   [W]
-  provides num_missions  [R]
+  provides num_missions  [dimensionless]
   provides velocity      [m/s]
 
   requires total_cost [$]
@@ -19,15 +19,15 @@ mcdp {
   energy = provided endurance * total_power
   capacity provided by battery >= energy
   
-  total_mass = (
+  total_mass_components = (
       mass required by battery + 
       actuator_mass required by actuation +
       extra_payload)
-  
-  required total_mass >= total_mass
 
+  required total_mass >= total_mass_components
+  
   gravity = 9.81 m/s^2
-  weight = total_mass * gravity
+  weight = total_mass_components * gravity
 
   lift provided by actuation >= weight
   velocity provided by actuation >= velocity

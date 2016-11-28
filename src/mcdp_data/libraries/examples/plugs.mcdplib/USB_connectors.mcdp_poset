@@ -1,13 +1,13 @@
-finite_poset {
+add_bottom poset {
     # female (socket)
-    none_usb <= USB_Micro_A 
-    none_usb <=    USB_Micro_B
-    none_usb <=    USB_Mini_A
-    none_usb <=    USB_Mini_B
-    none_usb <=    USB_Std_A
-    none_usb <=    USB_Std_B
-    none_usb <=    USB_Type_C
+    USB_Micro_A 
+    USB_Micro_B
+    USB_Mini_A
+    USB_Mini_B
+    USB_Std_A
+    USB_Std_B
+    USB_Type_C
     # male
-    none_usb <=    USB_Micro_A_male
-    none_usb <=    USB_Micro_B_male
+    USB_Micro_A_male
+    USB_Micro_B_male
 }

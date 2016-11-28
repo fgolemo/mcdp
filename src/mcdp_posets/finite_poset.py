@@ -3,16 +3,16 @@ from networkx.algorithms.dag import ancestors, descendants
 
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
-from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
+from mocdp.exceptions import do_extra_checks
 
 from .finite_collection_as_space import FiniteCollectionAsSpace
 from .poset import NotBounded, NotJoinable, NotLeq, NotMeetable, Poset
 from .space import Uninhabited
 
 
-__all__ = ['FinitePoset']
-
-mcdp_dev_warning('Join and Meet are not implemented')
+__all__ = [
+    'FinitePoset',
+] 
 
 class FinitePoset(FiniteCollectionAsSpace, Poset):
 
@@ -27,7 +27,6 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
         self._find_top()
         self._find_bottom()
 
-        #
         if do_extra_checks():
             for a, b in self.relations:
                 assert a in universe
@@ -42,12 +41,16 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
 
     def get_elements(self):
         return self.elements
-
+    
     def __repr__(self):
-        if len(self.elements) <= 2:
-            return 'FinitePoset(%d el = %s)' % (len(self.elements), list(self.elements).__repr__())
+        if len(self.elements) <= 5:
+            return self.repr_long()
         else:
             return "FinitePoset(%d els)" % len(self.elements)
+
+    def repr_long(self):
+        return ('FinitePoset(%d el = %s)' % (len(self.elements), 
+                                             list(self.elements).__repr__()))
 
     def get_test_chain(self, n):  # @UnusedVariable
         if not self.elements:
@@ -178,6 +181,7 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
         raise_desc(NotLeq, 'The two elements are not ordered',
                    a=self.format(a), b=self.format(b))
 
+
 def transitive_closure(a):
     closure = set(a)
     while True:
@@ -189,6 +193,6 @@ def transitive_closure(a):
             break
 
         closure = closure_until_now
-
+ 
     return closure
 

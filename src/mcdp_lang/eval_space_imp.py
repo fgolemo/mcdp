@@ -1,55 +1,84 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, check_isinstance
+from mcdp_lang.eval_warnings import MCDPWarnings, warn_language
 from mcdp_posets import (
     FiniteCollectionsInclusion, FinitePoset, GenericInterval, Int, LowerSets,
     Nat, Poset, PosetCoproduct, PosetProduct, PosetProductWithLabels, Space,
     UpperSets)
+from mcdp_posets import Rcomp
 from mocdp.comp.context import ValueWithUnits
-from mocdp.exceptions import DPInternalError
+from mocdp.exceptions import DPInternalError, DPSemanticError
 
 from .namedtuple_tricks import recursive_print
-from .parse_actions import add_where_information
+from .parse_actions import decorate_add_where
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
 
 
 CDP = CDPLanguage
 
+@decorate_add_where
 @contract(returns=Space)
 def eval_space(r, context):
-    with add_where_information(r.where):
-        cases = {
-            CDP.RcompUnit: eval_space_rcompunit,
-            CDP.SpaceProduct: eval_space_spaceproduct,
-            CDP.SpaceCoproduct: eval_space_spacecoproduct,
-            CDP.PowerSet: eval_space_powerset,
-            CDP.LoadPoset: eval_poset_load,
-            CDP.FinitePoset: eval_space_finite_poset,
-            CDP.CodeSpecNoArgs: eval_space_code_spec,
-            CDP.CodeSpec: eval_space_code_spec,
-            CDP.MakeUpperSets: eval_space_makeuppersets,
-            CDP.MakeLowerSets: eval_space_makelowersets,
-            CDP.SpaceInterval: eval_space_interval,
-            CDP.ProductWithLabels: eval_space_productwithlabels,
-            CDP.SingleElementPoset: eval_space_single_element_poset,
-            CDP.Nat: lambda r, context: Nat(),  # @UnusedVariable
-            CDP.Int: lambda r, context: Int(),  # @UnusedVariable
-        }
+    cases = {
+        CDP.RcompUnit: eval_space_rcompunit,
+        CDP.SpaceProduct: eval_space_spaceproduct,
+        CDP.SpaceCoproduct: eval_space_spacecoproduct,
+        CDP.PowerSet: eval_space_powerset,
+        CDP.LoadPoset: eval_poset_load,
+        CDP.FinitePoset: eval_space_finite_poset,
+        CDP.CodeSpecNoArgs: eval_space_code_spec,
+        CDP.CodeSpec: eval_space_code_spec,
+        CDP.MakeUpperSets: eval_space_makeuppersets,
+        CDP.MakeLowerSets: eval_space_makelowersets,
+        CDP.SpaceInterval: eval_space_interval,
+        CDP.ProductWithLabels: eval_space_productwithlabels,
+        CDP.SingleElementPoset: eval_space_single_element_poset,
+        CDP.Nat: lambda r, context: Nat(),  # @UnusedVariable
+        CDP.Int: lambda r, context: Int(),  # @UnusedVariable
+        CDP.Rcomp: lambda r, context: Rcomp(),  # @UnusedVariable
+        CDP.AddBottom: eval_space_addbottom,
+    }
 
-        for klass, hook in cases.items():
-            if isinstance(r, klass):
-                return hook(r, context)
-                            
-        # This should be removed...
-        if isinstance(r, CDP.Unit):
-            return r.value
+    for klass, hook in cases.items():
+        if isinstance(r, klass):
+            return hook(r, context)
+                        
+    # This should be removed...
+    if isinstance(r, CDP.Unit):
+        return r.value
 
-        if True: # pragma: no cover
-            msg = 'eval_space(): Cannot interpret as a space.'
-            r = recursive_print(r)
-            raise_desc(DPInternalError, msg, r=r)
+    if True: # pragma: no cover
+        msg = 'eval_space(): Cannot interpret as a space.'
+        r = recursive_print(r)
+        raise_desc(DPInternalError, msg, r=r)
 
+def eval_space_addbottom(r, context):
+    check_isinstance(r, CDP.AddBottom)
+    poset = eval_space(r.poset, context)
+    if not isinstance(poset, FinitePoset):
+        msg = 'You can use add_bottom only on a FinitePoset.'
+        raise_desc(DPSemanticError, msg, where=r.keyword.where)
+    elements = poset.elements
+    relations = poset.relations
+     
+    bot = '⊥'
+    if bot in elements:
+        msg = 'Poset already has the "%s" element.' % bot
+        raise DPSemanticError(msg, where=r.where)
+    elements2 = set()
+    elements2.update(elements)
+    elements2.add(bot)
+    relations2 = set()
+    relations2.update(relations)
+    for e in elements:
+        relations2.add((bot, e))
+        
+    fp = FinitePoset(elements2, relations2)
+    return fp 
+
+        
 def eval_space_single_element_poset(r, context):  # @UnusedVariable
     assert isinstance(r, CDP.SingleElementPoset)
     tag = r.tag.value
@@ -57,7 +86,13 @@ def eval_space_single_element_poset(r, context):  # @UnusedVariable
     return FinitePoset(universe=universe, relations=[])
     
 def eval_space_rcompunit(r, context):  # @UnusedVariable
+    check_isinstance(r, CDP.RcompUnit)
     from mcdp_posets.rcomp_units import make_rcompunit
+    
+    if r.pint_string == 'R':
+        msg ='Please use "dimensionless" rather than "R".'
+        warn_language(r, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context)
+        
     return make_rcompunit(r.pint_string)
  
 def eval_space_spaceproduct(r, context):
@@ -124,12 +159,25 @@ def eval_space_finite_poset(r, context):  # @UnusedVariable
     universe = set()
     relations = set()
     for c in chains:
-        ops = get_odd_ops(c)
+        check_isinstance(c, (CDP.FinitePosetChainLEQ, CDP.FinitePosetChainGEQ))
+        
+        ops = get_odd_ops(unwrap_list(c.ops))
         elements = [_.identifier for _ in ops]
         universe.update(elements)
         
+        if isinstance(c, CDP.FinitePosetChainLEQ):
+            leq = True
+        elif isinstance(c, CDP.FinitePosetChainGEQ):
+            leq = False
+        else:
+            assert False
+        
         for a, b in zip(elements, elements[1:]):
-            relations.add((a, b))
+            
+            if leq:
+                relations.add((a, b))
+            else:
+                relations.add((b, a))
 
     return FinitePoset(universe=universe, relations=relations)
 
@@ -152,5 +200,6 @@ def eval_poset_load(r, context):
         name = arg.name.value
 
         library = context.load_library(libname)
-        return library.load_poset(name)
+        return library.load_poset(name, context)
+    
     raise NotImplementedError(r.name)

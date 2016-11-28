@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mcdp_lang.parse_interface import parse_poset
 from mcdp_lang.parse_actions import parse_wrap

@@ -32,8 +32,9 @@ __all__ = [
 ]
 
 
-class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
-              AppSolver2, AppEditorFancyGeneric, WebAppImages):
+class WebApp(AppEditor, AppVisualization, 
+             AppQR, AppSolver, AppInteractive,
+             AppSolver2, AppEditorFancyGeneric, WebAppImages):
 
     def __init__(self, dirname):
         self.dirname = dirname
@@ -60,9 +61,11 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         self.add_model_view('syntax', 'Simple display')
         self.add_model_view('edit_fancy', 'Fancy editor')
         self.add_model_view('edit', 'Simple editor for IE')
-        self.add_model_view('ndp_graph', 'Graph representation')
-        self.add_model_view('ndp_repr', 'Text representation')
-        self.add_model_view('dp_graph', 'Internal graph representation')
+        self.add_model_view('ndp_graph', 'NDP Graph representation')
+        self.add_model_view('ndp_repr', 'NDP Text representation')
+        self.add_model_view('dp_graph', 'DP graph representation')
+        self.add_model_view('dp_tree', 'DP tree representation')
+        self.add_model_view('images', 'other image representations')
         self.add_model_view('solver', 'Simple solver')
 
     def add_model_view(self, name, desc):
@@ -127,7 +130,6 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
             path = data['path']
             cache_dir = os.path.join(path, '_cached/mcdpweb_cache')
             l.use_cache_dir(cache_dir)
-
 
     def view_refresh_library(self, request):
         """ Refreshes the current library (if external files have changed) 
@@ -252,6 +254,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         for x in self._get_views():
             if '/' + x + '/' in url:
                 return x
+            
         assert False, request.url
 
     def get_navigation_links(self, request):
@@ -281,6 +284,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
             current_value = None
 
 
+
         current_library = self.get_current_library_name(request)
         library = self.get_library(request)
 
@@ -305,7 +309,8 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
             d['documents'].append(desc)
 
         d['models'] = []
-        for m in sorted(models):
+        
+        for m in natural_sorted(models):
             is_current = m == current_model
 
             url = self.get_lmv_url(library=current_library,
@@ -319,7 +324,7 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         templates = library.list_templates()
         d['templates'] = []
-        for t in sorted(templates):
+        for t in natural_sorted(templates):
             is_current = (t == current_template)
 
             url = self.get_lib_template_view_url(library=current_library,
@@ -332,20 +337,18 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         posets = library.list_posets()
         d['posets'] = []
-        for p in sorted(posets):
+        for p in natural_sorted(posets):
             is_current = (p == current_poset)
             url = self.get_lpv_url(library=current_library,
                                    poset=p,
                                    view='syntax')
-
-#             url = '/libraries/%s/posets/%s/views/edit_fancy/' % (current_library, p)
             name = "Poset: %s" % p
             desc = dict(name=name, url=url, current=is_current)
             d['posets'].append(desc)
 
         values = library.list_values()
         d['values'] = []
-        for v in values:
+        for v in natural_sorted(values):
             is_current = (v == current_value)
             url = '/libraries/%s/values/%s/views/edit_fancy/' % (current_library, v)
             name = "Value: %s" % v
@@ -369,15 +372,47 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
 
         libraries = self.list_libraries()
 
+        # just the list of names
         d['libraries'] = []
-        for l in libraries:
+        libname2desc = {}
+        for l in natural_sorted(libraries):
             is_current = l == current_library
             url = '/libraries/%s/' % l
-            name = "Library: %s" % l
+            #name = "Library: %s" % l
+            name = l
             desc = dict(name=name, url=url, current=is_current)
+            libname2desc[l] =desc
             d['libraries'].append(desc)
 
+        indexed = self.get_libraries_indexed_by_dir()
+        indexed = [(sup, [libname2desc[_] for _ in l]) 
+                   for sup, l in indexed]
+        
+        # for sup, libraries in libraries_indexed
+        #   for l in libraries
+        #      l['name'], l['url']
+        d['libraries_indexed'] = indexed
+        
         return d
+    
+    
+    def get_libraries_indexed_by_dir(self):
+        """
+            returns a list of tuples (dirname, list(libname))
+        """
+        from collections import defaultdict
+        path2libraries = defaultdict(lambda: [])
+        for libname, data in self.libraries.items():
+            path = data['path']
+            sup = os.path.basename(os.path.dirname(path))
+            path2libraries[sup].append(libname)
+                     
+        res = []
+        for sup in natural_sorted(path2libraries):
+            r = (sup, natural_sorted(path2libraries[sup]))
+            res.append(r)
+        return res
+        
 
     def get_jinja_hooks(self, request):
         """ Returns a set of useful template functions. """
@@ -460,7 +495,6 @@ class WebApp(AppEditor, AppVisualization, AppQR, AppSolver, AppInteractive,
         config.add_route('index', '/')
         config.add_view(self.view_index, route_name='index', renderer='index.jinja2')
 
-#         config.add_route('list_libraries', '/list')
         config.add_route('list_libraries', '/libraries/')
         config.add_view(self.view_list_libraries, route_name='list_libraries', renderer='list_libraries.jinja2')
 
@@ -540,11 +574,15 @@ To access the interface, open your browser at the address
 Use Chrome, Firefox, or Opera - Internet Explorer is not supported.
 """ % options.port
 
-        logger.info(msg)
         if options.delete_cache:
+            logger.info('Deleting cache...')
             wa._refresh_library(None)
+        logger.info(msg)
         wa.serve(port=options.port)
 
 mcdp_web_main = MCDPWeb.get_sys_main()
 
 
+
+def natural_sorted(seq):
+    return sorted(seq, key=lambda s: s.lower())

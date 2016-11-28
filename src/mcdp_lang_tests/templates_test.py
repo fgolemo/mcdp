@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mcdp_lang.syntax import Syntax
 from .utils import parse_wrap_check

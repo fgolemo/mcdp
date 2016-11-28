@@ -1,0 +1,6 @@
+
+< 
+    assert_equal( solve_r(0 m, `minus_r_real1), ↓ EmptySet m),
+    assert_equal( solve_r(1.9 m, `minus_r_real1), ↓ EmptySet m),
+    assert_equal( solve_r(Top m, `minus_r_real1), ↓ { Top m })
+>

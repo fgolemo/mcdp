@@ -1,15 +1,20 @@
+# -*- coding: utf-8 -*-
 from collections import namedtuple
-from conf_tools.utils import dir_from_package_name
-from contracts import contract
-from contracts.interface import Where
-from contracts.utils import indent, raise_desc, raise_wrapped
-from mcdp_lang.namedtuple_tricks import isnamedtuplewhere
-from mcdp_lang.parse_actions import parse_wrap
-from mcdp_lang.syntax import Syntax
-from mcdp_lang.utils_lists import is_a_special_list
-from mocdp import logger
 import os
 import warnings
+
+from contracts import contract
+from contracts.utils import indent, raise_desc, raise_wrapped, check_isinstance
+from mcdp_lang.namedtuple_tricks import isnamedtuplewhere
+from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.parts import CDPLanguage
+from mcdp_lang.syntax import Syntax
+from mcdp_lang.utils_lists import is_a_special_list
+from mocdp import MCDPConstants
+from mocdp.exceptions import mcdp_dev_warning, DPSyntaxError, DPInternalError
+
+
+unparsable_marker = '#@'
 
 def isolate_comments(s):
     lines = s.split("\n")
@@ -33,98 +38,137 @@ def ast_to_text(s):
     return print_ast(block)
     
 @contract(s=str)
-def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
-                add_line_gutter=True, encapsulate_in_precode=True, add_css=True,
-                parse_expr=None, add_line_spans=False):
+def ast_to_html(s, 
+                parse_expr=None,
+                
+                ignore_line=None,
+                add_line_gutter=True, 
+                encapsulate_in_precode=True, 
+                postprocess=None,
+                
+                # deprecated
+                complete_document=None,
+                extra_css=None, 
+                add_css=None,
+                add_line_spans=None,):
+    """
+        postprocess = function applied to parse tree
+    """
+    
+    if add_line_spans is not None and add_line_spans != False:
+        warnings.warn('deprecated param add_line_spans')
+    
     if parse_expr is None:
-        warnings.warn('Please add specific parse_expr (default=Syntax.ndpt_dp_rvalue)', stacklevel=2)
-        parse_expr = Syntax.ndpt_dp_rvalue
-    if add_css:
-        warnings.warn('check we really need add_css = True', stacklevel=2)
+        raise Exception('Please add specific parse_expr (default=Syntax.ndpt_dp_rvalue)')
+        
+    if add_css is not None:
+        warnings.warn('please do not use add_css', stacklevel=2)
 
-    if complete_document:
+    if complete_document is not None:
         warnings.warn('please do not use complete_document', stacklevel=2)
-    add_css = False
 
     if ignore_line is None:
         ignore_line = lambda _lineno: False
-    if extra_css is None:
-        extra_css = ''
+        
+    if extra_css is not None: 
+        warnings.warn('please do not use extra_css', stacklevel=2)
+        
+    extra_css = ''
 
     s_lines, s_comments = isolate_comments(s)
     assert len(s_lines) == len(s_comments) 
-    # Problem: initial comment, '# test connected\nmcdp'
 
-    empty_lines = []
+    num_empty_lines_start = 0
     for line in s_lines:
         if line.strip() == '':
-            empty_lines.append(line)
+            num_empty_lines_start += 1
+        else:
+            break
+    
+    num_empty_lines_end = 0
+    for line in reversed(s_lines):
+        if line.strip() == '':
+            num_empty_lines_end += 1
         else:
             break
 
-    full_lines = s_lines[len(empty_lines):]
+    # use = s_lines
+    use = s.split('\n')
+    full_lines = use[num_empty_lines_start: len(s_lines)- num_empty_lines_end]
     for_pyparsing = "\n".join(full_lines)
+    
     block = parse_wrap(parse_expr, for_pyparsing)[0]
 
-    if not isnamedtuplewhere(block):
-        raise ValueError(block)
+    if not isnamedtuplewhere(block): # pragma: no cover
+        raise DPInternalError('unexpected', block=block)
 
-    # print print_ast(block)
-    # XXX: this should not be necessary anymore
-    block2 = make_tree(block, character_end=len(s))
-    # print print_ast(block2)
+    if postprocess is not None:
+        block = postprocess(block)
+        if not isnamedtuplewhere(block):
+            raise ValueError(block)
 
-    snippets = list(print_html_inner(block2))
+    snippets = list(print_html_inner(block))
     # the len is > 1 for mcdp_statements
     assert len(snippets) == 1, snippets
     snippet = snippets[0]
     transformed_p = snippet.transformed
-    # transformed_p = "".join(snippet.transformed for snippet in snippets)
+    
+    if block.where.character != 0:
+        transformed_p = for_pyparsing[:block.where.character] + transformed_p
 
     def sanitize_comment(x):
         x = x.replace('>', '&gt;')
         x = x.replace('<', '&lt;')
         return x
 
-    # add back the white space
-    if empty_lines:
-        transformed = "\n".join(empty_lines) + '\n' + transformed_p
-    else:
-        transformed = transformed_p
+    transformed = '\n' * num_empty_lines_start + transformed_p
+    transformed = transformed +  '\n' * num_empty_lines_end
+    
+#     out = transformed
     
     lines = transformed.split('\n')
-    if len(lines) != len(s_comments):
-#         for i in range(min(len(lines), len(s_comments))):
-#
-#             print('orig %d: %s' % (i, s_lines[i]))
-#             print('trans %d: %s' % (i, lines[i]))
+    if len(lines) != len(s_comments): 
         msg = 'Lost some lines while pretty printing: %s, %s' % (len(lines), len(s_comments))
-        logger.debug(msg)
-        if len(s) > 10:
-            logger.debug('original string[:10] = %r' % s[:10])
-            logger.debug('original string[-10:] = %r' % s[-10:])
-
+        raise DPInternalError(msg) 
+ 
     out = ""
-    for i, (a, comment) in enumerate(zip(lines, s_comments)):
-        line = a
-        if comment:
-            line += '<span class="comment">%s</span>' % sanitize_comment(comment)
+    for i, (line, comment) in enumerate(zip(lines, s_comments)):
         lineno = i + 1
         if ignore_line(lineno):
-            pass
+            continue
         else:
-            if add_line_spans:
-                out += "<span id='line%d'>" % lineno
+            
+            if '#' in line:
+                w = line.index('#')
+                before = line[:w]
+                comment = line[w:]
+                
+                if comment.startswith(unparsable_marker):
+                    unparsable = comment[len(unparsable_marker):]
+                    linec = before + '<span class="unparsable">%s</span>' % sanitize_comment(unparsable)
+                else:
+                    linec = before + '<span class="comment">%s</span>' % sanitize_comment(comment)
+            else:
+                
+                linec = line   
+                
+            
             if add_line_gutter:
                 out += "<span class='line-gutter'>%2d</span>" % lineno
-                out += "<span class='line-content'>" + line + "</span>"
+                out += "<span class='line-content'>" + linec + "</span>"
             else:
-                out += line
-            if add_line_spans:
-                out += "</span>"
+                out += linec
+
+        
+ 
+        
             if i != len(lines) - 1:
                 out += '\n'
-
+    
+    if MCDPConstants.test_insist_correct_html_from_ast_to_html:
+        from xml.etree import ElementTree as ET
+        ET.fromstring(out)
+    
     frag = ""
 
     if encapsulate_in_precode:
@@ -134,18 +178,8 @@ def ast_to_html(s, complete_document, extra_css=None, ignore_line=None,
     else:
         frag += out
 
-    if add_css:
-        frag += '\n\n<style type="text/css">\n' + get_language_css() + '\n' + extra_css + '\n</style>\n\n'
-
-    if complete_document:
-        s = """<html><head>
-        <meta charset="utf-8" />
-        </head><body>"""
-        s += frag
-        s += '\n</body></html>'
-        return s
-    else:
-        return frag
+    return frag 
+    
 
 Snippet = namedtuple('Snippet', 'op orig a b transformed')
 
@@ -164,6 +198,19 @@ def order_contributions(it):
 
 def print_html_inner(x):
     assert isnamedtuplewhere(x), x
+    
+    CDP = CDPLanguage 
+    if isinstance(x, CDP.Placeholder):
+        orig0 = x.where.string[x.where.character:x.where.character_end]
+        check_isinstance(x.label, str)
+        if x.label == '...': # special case
+            transformed = '…' 
+        else:
+            transformed = '<span class="PlaceholderLabel">⟨%s⟩</span>' % x.label
+        
+        yield Snippet(op=x, orig=orig0, a=x.where.character, b=x.where.character_end,
+                  transformed=transformed)
+        return
 
     def iterate_check_order(it):
         last = 0
@@ -173,9 +220,9 @@ def print_html_inner(x):
             cur.append('%s from %d -> %d: %s -> %r' % (type(x).__name__,
                                                        a, b, type(op).__name__, o))
 
-            if not a >= last:
+            if not a >= last: # pragma: no cover
                 raise_desc(ValueError, 'bad order', cur="\n".join(cur))
-            if not b >= a:
+            if not b >= a: # pragma: no cover
                 raise_desc(ValueError, 'bad ordering', cur="\n".join(cur))
             last = b
             yield i
@@ -206,14 +253,12 @@ def print_html_inner(x):
         out = '&lt;'
     if out == '>':
         out = '&gt;'
-    transformed0 = "<span class='%s'>%s</span>" % (klass, out)
+    transformed0 = ("<span class='%s' where_character='%d' where_character_end='%s'>%s</span>" 
+                    % (klass, x.where.character, x.where.character_end, out))
     yield Snippet(op=x, orig=orig0, a=x.where.character, b=x.where.character_end,
                   transformed=transformed0)
 
 def sanitize(x):
-    # if 'span' in x:
-    #    raise ValueError('getting confused %s' % x)
-
     x = x.replace('>=', '&gt;=')
     x = x.replace('<=', '&lt;=')
     return x
@@ -235,42 +280,6 @@ def print_ast(x):
     except ValueError as e:
         raise_wrapped(ValueError, e, 'wrong', x=x)
 
-@contract(character_end='int')
-def make_tree(x, character_end):
-
-    if not isnamedtuplewhere(x):
-        return x
-
-    if x.where.character_end is not None:
-        character_end = min(x.where.character_end, character_end)
-
-    fields = {}
-    last = None
-
-    for k, v in reversed(list(iterate_sub(x))):
-        if last is None:
-            v_character_end = character_end
-        else:
-            if isnamedtuplewhere(last):
-                v_character_end = last.where.character - 1
-            else:
-                v_character_end = character_end
-
-        v2 = make_tree(v, character_end=v_character_end)
-        fields[k] = v2
-        last = v2
-
-    w = x.where
-
-    if w.character_end is None:
-        if character_end < w.character:
-            print('**** warning: need to fix this')
-            character_end = w.character + 1
-        w = Where(string=w.string, character=w.character,
-                  character_end=character_end)
-
-    fields['where'] = w
-    return type(x)(**fields)
 
 
 def iterate_sub(x):
@@ -295,6 +304,8 @@ def iterate_notwhere(x):
         yield k, v
 
 def get_language_css():
+    from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
+    mcdp_dev_warning('TODO: remove from mcdp_web')
     package = dir_from_package_name('mcdp_web')
     fn = os.path.join(package, 'static', 'css', 'mcdp_language_highlight.css')
     with open(fn) as f:
@@ -302,9 +313,49 @@ def get_language_css():
     return css
 
 def get_markdown_css():
+    from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
+
     package = dir_from_package_name('mcdp_web')
     fn = os.path.join(package, 'static', 'css', 'markdown.css')
     with open(fn) as f:
         css = f.read()
     return css
 
+
+def comment_out(s, line):
+    lines = s.split('\n')
+    lines[line+1] = unparsable_marker + lines[line+1]
+    return "\n".join(lines)
+    
+def mark_unparsable(s0, parse_expr):
+    """ Returns a tuple:
+    
+            s, expr, commented
+            
+        where:
+        
+            s is the string with lines that do not parse marked as "#@"
+            expr is the parsed expression (can be None)
+            commented is the set of lines that had to be commented out
+            
+        Never raises DPSyntaxError
+    """
+    commented = set()
+    nlines = len(s0.split('\n'))
+    s = s0
+    while True:
+        if len(commented) == nlines:
+            return s, None, commented 
+        try:     
+            expr = parse_wrap(parse_expr, s)[0]
+            return s, expr, commented
+        except DPSyntaxError as e:
+            line = e.where.line
+            assert line is not None
+            if line == nlines: # all commented
+                return s, None, commented
+            if line in commented:
+                return s, None, commented
+            commented.add(line)
+            s = comment_out(s, line - 1) 
+            

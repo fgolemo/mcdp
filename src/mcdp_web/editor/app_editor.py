@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
 from pyramid.renderers import render_to_response  # @UnresolvedImport
 
@@ -45,10 +46,7 @@ class AppEditor():
     def view_edit_submit(self, request):
         model_name = str(request.matchdict['model_name'])  # unicode
 
-        # filename = '%s.mcdp' % model_name
         l = self.get_library(request)
-        # f = l._get_file_data(filename)
-        # realpath = f['realpath']
 
         data = str(request.params['source_code'])
         data = data.replace('\r', '')

@@ -1,13 +1,5 @@
- 
 mcdp {  
-    f = instance mcdp {
-        provides a [R]
-            
-        requires c [R]
-            
-        c >= square(a)
-    }
-
-    f.a >= square(f.c)
-  
-  }
+   variable a, c [dimensionless]
+   c >= square(a) + 1 dimensionless
+   a >= square(c) + 1 dimensionless
+}

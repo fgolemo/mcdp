@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import sys
+
 from contracts import contract
 from contracts.utils import (format_dict_long, format_list_long, raise_desc,
     raise_wrapped)
@@ -105,7 +107,8 @@ class CompositeNamedDP(NamedDP):
         check_missing_connections(self.context)
 
     def compact(self):
-        # XXX: not sure what this does
+        """ Each set of edges that share both tail and head
+            are replaced by their product. """ 
         from mocdp.comp.composite_compact import compact_context
         context = compact_context(self.context)
         return CompositeNamedDP(context)
@@ -129,7 +132,7 @@ class CompositeNamedDP(NamedDP):
             self.check_fully_connected()
         except NotConnected as e:
             msg = 'Cannot abstract because not all subproblems are connected.'
-            raise_wrapped(DPSemanticError, e, msg, compact=True)
+            raise_wrapped(DPSemanticError, e, msg, exc=sys.exc_info(), compact=True)
 
         from mocdp.comp.composite_abstraction import cndp_abstract
         res = cndp_abstract(self)
@@ -224,19 +227,19 @@ def check_consistent_data(names, fnames, rnames, connections):
     for c in connections:
         try:
             if not c.dp1 in names:
-                raise_desc(ValueError, 'First DP not found.', name=c.dp1,
+                raise_desc(ValueError, 'First DP %r not found.' % c.dp1, name=c.dp1,
                            available=list(names))
 
             if not c.s1 in names[c.dp1].get_rnames():
-                raise_desc(ValueError, 'Resource not found',
+                raise_desc(ValueError, 'Resource %r of first DP %r not found' %( c.s1, c.dp1),
                            rname=c.s1, available=names[c.dp1].get_rnames())
 
             if not c.dp2 in names:
-                raise_desc(ValueError, 'Second DP not found.', name=c.dp2,
+                raise_desc(ValueError, 'Second DP %r not found.' % c.dp2, name=c.dp2,
                            available=list(names))
 
             if not c.s2 in names[c.dp2].get_fnames():
-                raise_desc(ValueError, 'Function not found.',
+                raise_desc(ValueError, 'Function %r of second DP %r not found.' % (c.s2, c.dp2),
                            s2=c.s2, available=names[c.dp2].get_fnames())
 
             R = names[c.dp1].get_rtype(c.s1)
@@ -248,10 +251,9 @@ def check_consistent_data(names, fnames, rnames, connections):
                 msg = 'Invalid connection %s' % c.__repr__()
                 raise_wrapped(ValueError, e, msg, R=R, F=F)
 
-
         except ValueError as e:
-            msg = 'Invalid connection'
-            raise_wrapped(ValueError, e, msg, c=c, names=list(names))
+            msg = 'Invalid connection %s.' % (c.__repr__())
+            raise_wrapped(ValueError, e, msg, compact=True)
 
 @contract(cndp=CompositeNamedDP, returns='list(tuple(str, $NamedDP))')
 def cndp_iterate_res_nodes(cndp):

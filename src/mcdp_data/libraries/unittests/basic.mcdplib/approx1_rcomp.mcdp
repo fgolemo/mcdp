@@ -1,0 +1,6 @@
+# test not_implemented_error
+mcdp {
+    provides f [Rcomp]
+    requires r [Rcomp]
+    required r >= approx(provided f, Rcomp: 2.1 )
+}

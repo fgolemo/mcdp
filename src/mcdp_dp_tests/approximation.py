@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from mcdp_lang import parse_ndp
 from mcdp_posets import UpperSets
@@ -19,6 +20,7 @@ from mcdp_posets import UpperSets
 #     ny = len(np.unique(y))
 #     print(ny)
 #     assert 25 <= ny <= 30
+
 @comptest
 def check_approximation3():
     # TODO: move in syntax

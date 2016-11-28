@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .debug_pickler import find_pickling_error
 from .safe_write import safe_read, safe_write
 from contracts import describe_type

@@ -1,5 +1,5 @@
 catalogue {
-  provides voltage  [℘(V)]
+  provides voltage  [℘(V)]  
   provides capacity [J]
 
   requires cost [$]

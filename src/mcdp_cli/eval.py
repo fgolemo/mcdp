@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
+import logging
+import os
+
 from contracts.enabling import disable_all
 from mcdp_library.libraries import Librarian
 from quickapp import QuickAppBase
-import logging
-import os
 
 
 class Eval(QuickAppBase):
@@ -59,6 +60,8 @@ class Eval(QuickAppBase):
         if cache_dir is not None:
             library.use_cache_dir(cache_dir)
 
-        library.load_constant(name)
+        context = library._generate_context_with_hooks()
+        c = library.load_constant(name, context)
+        print(c)
 
 mcdp_eval_main = Eval.get_sys_main()

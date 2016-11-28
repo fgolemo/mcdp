@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 
 from comptests.registrar import comptest
@@ -13,7 +14,8 @@ from mcdp_report.gdc import STYLE_GREENREDSYM
 from mcdp_report.gg_ndp import PlottingInfo, gvgen_from_ndp
 from mcdp_report.gg_utils import gg_figure
 from mocdp.comp.composite import CompositeNamedDP
-from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node
+from mocdp.comp.context import get_name_for_fun_node, get_name_for_res_node,\
+    Context
 from mocdp.comp.recursive_name_labeling import (get_imp_as_recursive_dict,
     get_labelled_version)
 from mocdp.comp.wrap import SimpleWrap
@@ -214,6 +216,7 @@ def check_ndp_grap_imp1():
     out = 'out/check_ndp_grap_imp1'
     plot_different_solutions(libname, ndpname, query, out)
 
+
 @comptest
 def check_ndp_grap_imp2():
     libname = 'batteries_v1'
@@ -250,8 +253,8 @@ def plot_different_solutions(libname, ndpname, query, out, upper=None):
         os.makedirs(out)
     library = get_test_library(libname)
     #library.use_cache_dir(os.path.join(out, 'cache'))
-
-    ndp = library.load_ndp(ndpname)
+    context = Context()
+    ndp = library.load_ndp(ndpname, context)
 
     context = library._generate_context_with_hooks()
     ndp_labelled = get_labelled_version(ndp)

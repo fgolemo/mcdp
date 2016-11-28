@@ -1,9 +1,10 @@
-#https://www.amazon.com/AmazonBasics-Micro-USB-USB-Cable-2-Pack/dp/B00NH13O7K/ref=sr_1_3?ie=UTF8&qid=1470855868&sr=8-3&keywords=usb+to+micro
+#https://www.amazon.com/AmazonBasics-Micro-USB-USB-Cable-2-Pack/dp
+# /B00NH13O7K/ref=sr_1_3?ie=UTF8&qid=1470855868&sr=8-3&keywords=usb+to+micro
 mcdp {
     provides out [`PortableDCPower]
     requires in [`PortableDCPower]
     requires budget [USD]
-    budget >= 2 USD
+    required budget >= 2 USD
 
     ((provided out).dc).connector <= `USB_connectors: USB_Micro_B_male
     ((required in).dc).connector >= `USB_connectors: USB_Std_A 

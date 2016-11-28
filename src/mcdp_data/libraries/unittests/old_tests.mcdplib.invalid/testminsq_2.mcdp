@@ -1,12 +1,12 @@
    mcdp {
-        provides f0 [R]
+        provides f0 [dimensionless]
         sub DP = instance mcdp {
-            provides f [R]
-            requires r2 [R]
+            provides f [dimensionless]
+            requires r2 [dimensionless]
             
             sub hnlin = instance dp {
-                provides x [R]
-                requires r [R]
+                provides x [dimensionless]
+                requires r [dimensionless]
                 
                 implemented-by load SimpleNonlinearity1
             }

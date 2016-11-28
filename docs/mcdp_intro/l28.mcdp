@@ -2,11 +2,11 @@
 cdp {
   
   sub child1 = cdp {
-      provides a [R]
-      provides b [R]
-      requires c [R]
+      provides a [dimensionless]
+      provides b [dimensionless]
+      requires c [dimensionless]
       c >= a + b
   }
   
-  child1.F1 >= 0.0 [R] # no F1
+  child1.F1 >= 0.0 [dimensionless] # no F1
 }

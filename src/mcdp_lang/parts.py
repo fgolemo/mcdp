@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 from .namedtuple_tricks import namedtuplewhere
 
 
@@ -10,9 +9,12 @@ __all__ = [
 
 class CDPLanguage():
 
+    # any type of the kind  <name>(op1, ..., opn) 
     # min(), max(), etc.
     ProcName = namedtuplewhere('ProcName', 'name')
-    UnaryRvalue = namedtuplewhere('UnaryRvalue', 'proc rvalue')
+    GenericOperationName = namedtuplewhere('GenericOperationName', 'value')
+    GenericOperationRes = namedtuplewhere('GenericOperationRes', 'name ops')
+    GenericOperationFun = namedtuplewhere('GenericOperationFun', 'name ops')
     
     ValueExpr = namedtuplewhere('ValueExpr', 'value')
 
@@ -28,6 +30,10 @@ class CDPLanguage():
     # Bottom <space>
     Bottom = namedtuplewhere('Bottom', 'keyword space')
     BottomKeyword = namedtuplewhere('BottomKeyword', 'keyword')
+    
+    EmptySetKeyword= namedtuplewhere('EmptySetKeyword', 'keyword')
+    EmptySet = namedtuplewhere('EmptySet', 'keyword space')
+    
     # Maximals <space>
     Maximals = namedtuplewhere('Maximals', 'keyword space')
     MaximalsKeyword = namedtuplewhere('MaximalsKeyword', 'keyword')
@@ -58,18 +64,22 @@ class CDPLanguage():
 
     PlusN = namedtuplewhere('PlusN', 'ops')
     MultN = namedtuplewhere('MultN', 'ops')
+    RValueMinusN = namedtuplewhere('RValueMinusN', 'ops')
+    FValueMinusN = namedtuplewhere('FValueMinusN', 'ops')
     Divide = namedtuplewhere('Divide', 'ops')
-    # all constants
-    ConstantMinus = namedtuplewhere('ConstantMinus', 'ops')
-    Coproduct = namedtuplewhere('Coproduct', 'ops')
+    
+#     Coproduct = namedtuplewhere('Coproduct', 'ops')
 
     # elements: all strings, coproducts
     CoproductWithNamesChooseKeyword = namedtuplewhere('CoproductWithNamesChooseKeyword', 'keyword')
     CoproductWithNamesName = namedtuplewhere('CoproductWithNamesName', 'value')
     CoproductWithNames = namedtuplewhere('CoproductWithNames', 'keyword elements')
 
-    OpMax = namedtuplewhere('Max', 'keyword a b')
-    OpMin = namedtuplewhere('Min', 'keyword a b')
+    OpMax = namedtuplewhere('OpMax', 'keyword a b')
+    OpMin = namedtuplewhere('OpMin', 'keyword a b')
+
+    OpMaxF = namedtuplewhere('OpMaxF', 'keyword a b')
+    OpMinF = namedtuplewhere('OpMinF', 'keyword a b')
 
     DPName = namedtuplewhere('DPName', 'value')
     DPTypeName = namedtuplewhere('DPTypeName', 'value')
@@ -77,14 +87,19 @@ class CDPLanguage():
     Resource = namedtuplewhere('Resource', 'dp s keyword')
     Function = namedtuplewhere('Function', 'dp s keyword')
 
-    VariableRef = namedtuplewhere('VariableRef', 'name')
     VariableRefNDPType = namedtuplewhere('VariableRefNDPType', 'name')
 
-    NewResource = namedtuplewhere('NewResource', 'name')
-    NewFunction = namedtuplewhere('NewFunction', 'name')
-    Constraint = namedtuplewhere('Constraint', 'function rvalue prep')
+    # required rname 
+    NewResource = namedtuplewhere('NewResource', 'keyword name')
+    # provided fname
+    NewFunction = namedtuplewhere('NewFunction', 'keyword name')
+    Constraint = namedtuplewhere('Constraint', 'fvalue rvalue prep')
+    ConstraintInvalidRR = namedtuplewhere('ConstraintInvalidRR', 'rvalue1 rvalue2 prep')
+    ConstraintInvalidFF = namedtuplewhere('ConstraintInvalidFF', 'fvalue1 fvalue2 prep')
+    ConstraintInvalidSwapped = namedtuplewhere('ConstraintInvalidSwapped', 'fvalue rvalue prep')
 
     NatConstant = namedtuplewhere('NatConstant', 's1 s2 value')  # value = int, >=0
+    RcompConstant = namedtuplewhere('RcompConstant', 'value')  # value = int, >=0
     IntConstant = namedtuplewhere('IntConstant', 's1 s2 value')  # value = int
 
     LoadNDP = namedtuplewhere('LoadNDP', 'keyword load_arg')
@@ -95,9 +110,12 @@ class CDPLanguage():
     # an incomplete model
     Ellipsis = namedtuplewhere('Ellipsis', 'token')
 
+    ConstantKeyword = namedtuplewhere('ConstantKeyword', 'keyword')
+    
     SetNameGenericVar = namedtuplewhere('SetNameGenericVar', 'value')
-    SetNameNDPInstance = namedtuplewhere('SetNameNDPInstance', 'keyword name dp_rvalue')
+    SetNameNDPInstance = namedtuplewhere('SetNameNDPInstance', 'keyword name eq dp_rvalue')
     SetNameMCDPType = namedtuplewhere('SetNameMCDPType', 'keyword name eq right_side')
+    SetNameConstant = namedtuplewhere('SetNameConstant', 'name eq right_side')
     SetNameRValue = namedtuplewhere('SetNameRValue', 'name eq right_side')
     SetNameFValue = namedtuplewhere('SetNameFValue', 'name eq right_side')
 
@@ -108,6 +126,8 @@ class CDPLanguage():
     # natural numbers
     Nat = namedtuplewhere('Nat', 'symbol')
     Int = namedtuplewhere('Int', 'symbol')
+    Rcomp = namedtuplewhere('Rcomp', 'symbol')
+    
     # Just Keywords
     ProvideKeyword = namedtuplewhere('ProvideKeyword', 'keyword')
     RequireKeyword = namedtuplewhere('RequireKeyword', 'keyword')
@@ -131,7 +151,7 @@ class CDPLanguage():
     OpenBraceKeyword = namedtuplewhere('OpenBraceKeyword', 'keyword')
     CloseBraceKeyword = namedtuplewhere('CloseBraceKeyword', 'keyword')
     FromLibraryKeyword = namedtuplewhere('FromLibraryKeyword', 'keyword')
-    OpKeyword = namedtuplewhere('OpKeyword', 'keyword')  # Max
+    OpKeyword = namedtuplewhere('OpKeyword', 'keyword')  
     DPWrapToken = namedtuplewhere('DPWrapToken', 'keyword')
     FuncName = namedtuplewhere('FuncName', 'value')  # python function name
     NDPName = namedtuplewhere('NDPName', 'value')  # name in "new <name>"
@@ -142,6 +162,7 @@ class CDPLanguage():
     ApproxKeyword = namedtuplewhere('ApproxKeyword', 'keyword')
     FlattenKeyword = namedtuplewhere('FlattenKeyword', 'keyword')
     SpecializeKeyword = namedtuplewhere('SpecializeKeyword', 'keyword')
+    
     WithKeyword = namedtuplewhere('WithKeyword', 'keyword')
     TemplateSpec = namedtuplewhere('TemplateSpec', 'keyword params ndpt')
 
@@ -169,26 +190,55 @@ class CDPLanguage():
     geq = namedtuplewhere('geq', 'glyph')
     eq = namedtuplewhere('eq', 'glyph')
     plus = namedtuplewhere('plus', 'glyph')
+    minus = namedtuplewhere('minus', 'glyph')
     exponent = namedtuplewhere('exponent', 'glyph')
     times = namedtuplewhere('times', 'glyph')
     bar = namedtuplewhere('bar', 'glyph')
     coprod = namedtuplewhere('coprod', 'glyph')
     DotPrep = namedtuplewhere('DotPrep', 'glyph')
     comma = namedtuplewhere('comma', 'glyph')
-    open_brace = namedtuplewhere('open_brace', 'glyph')
-    close_brace = namedtuplewhere('close_brace', 'glyph')
+    LBRACE  = namedtuplewhere('LBRACE', 'glyph')
+    RBRACE  = namedtuplewhere('RBRACE', 'glyph') 
+    LBRACKET  = namedtuplewhere('LBRACKET', 'glyph')
+    RBRACKET  = namedtuplewhere('RBRACKET', 'glyph') 
 
+    # function name
     FName = namedtuplewhere('FName', 'value')
+    # resource name
     RName = namedtuplewhere('RName', 'value')
+    # constant name
+    CName = namedtuplewhere('CName', 'value')
+    # variable Name (can be used as either f or r)
+    VName = namedtuplewhere('VName', 'value')
+    
+    # This is used in parsing when we cannot decide what to do with it
+    # Later, it should be changed in one of the following
+    VariableRef = namedtuplewhere('VariableRef', 'name')
+    
+    DerivResourceName = namedtuplewhere('DerivResourceName', 'value')
+    DerivResourceRef = namedtuplewhere('DerivResourceRef', 'drname')
+    
+    DerivFunctionName = namedtuplewhere('DerivFunctionName', 'value')
+    DerivFunctionRef = namedtuplewhere('DerivFunctionRef', 'dfname')
+    ConstantRef = namedtuplewhere('ConstantRef', 'cname')
+    
+    # This  
+    ActualVarRef = namedtuplewhere('ActualVarRef', 'vname')
+    
     Collection = namedtuplewhere('Collection', 'elements')
 
     # upperset {0g,1g}
     UpperSetFromCollectionKeyword = namedtuplewhere('UpperSetFromCollectionKeyword', 'keyword')
     UpperSetFromCollection = namedtuplewhere('UpperSetFromCollection', 'keyword value')
+    # lowerset {0g}
+    LowerSetFromCollectionKeyword = namedtuplewhere('LowerSetFromCollectionKeyword', 'keyword')
+    LowerSetFromCollection = namedtuplewhere('LowerSetFromCollection', 'keyword value')
 
-    FunStatement = namedtuplewhere('FunStatement', 'keyword fname unit')
-    ResStatement = namedtuplewhere('ResStatement', 'keyword rname unit')
-
+    
+    
+    VarStatement = namedtuplewhere('VarStatement', 'keyword vnames lbracket unit rbracket comment')
+    VarStatementKeyword = namedtuplewhere('VarStatementKeyword', 'keyword')
+    
     PosetName = namedtuplewhere('PosetName', 'value')
     PosetNameWithLibrary = namedtuplewhere('PosetNameWithLibrary', 'library glyph name')
 
@@ -205,20 +255,40 @@ class CDPLanguage():
     SpaceProduct = namedtuplewhere('SpaceProduct', 'ops')
     InvMult = namedtuplewhere('InvMult', 'ops')
     InvPlus = namedtuplewhere('InvPlus', 'ops')
+    
+    # provides r [Nat] 'comment'
+    FunStatement = namedtuplewhere('FunStatement', 'keyword fname lbracket unit rbracket comment')
+    # requires r [Nat] 'comment'
+    ResStatement = namedtuplewhere('ResStatement', 'keyword rname lbracket unit rbracket comment')
+    
+    # provides x, y, z [Nat] 'comment'
+    FunShortcut5 = namedtuplewhere('FunShortcut5', 'keyword fnames lbracket unit rbracket comment')
+    # requires x, y, z [Nat] 'comment'
+    ResShortcut5 = namedtuplewhere('ResShortcut5', 'keyword rnames lbracket unit rbracket comment')
+    
+    # requires r1, r2 
+    ResShortcut4 = namedtuplewhere('ResShortcut4', 'requires rnames')
+    # provides f1, f2
+    FunShortcut4 = namedtuplewhere('FunShortcut4', 'requires fnames')
+    # provides r using <box>
     FunShortcut1 = namedtuplewhere('FunShortcut1', 'provides fname prep_using name')
+    # requires f for <box>
     ResShortcut1 = namedtuplewhere('ResShortcut1', 'requires rname prep_for name')
-
+    # provides f1,f2 using <box>
     FunShortcut1m = namedtuplewhere('FunShortcut1m', 'provides fnames prep_using name')
+    # requires r1,r2 for <box>
     ResShortcut1m = namedtuplewhere('ResShortcut1m', 'requires rnames prep_for name')
-    FunShortcut2 = namedtuplewhere('FunShortcut2', 'keyword fname leq lf')
-    ResShortcut2 = namedtuplewhere('ResShortcut2', 'keyword rname geq rvalue')
+    # provides f1 <= <expression>  (now '=')
+    FunShortcut2 = namedtuplewhere('FunShortcut2', 'keyword fname prep lf')
+    # requires r1 >= <expression>  (now '=')
+    ResShortcut2 = namedtuplewhere('ResShortcut2', 'keyword rname prep rvalue')
     
     IntegerFraction = namedtuplewhere('IntegerFraction', 'num den')
 
     PowerKeyword = namedtuplewhere('PowerKeyword', 'keyword')
     Power = namedtuplewhere('Power', 'keyword op1 exponent')
     PowerShort = namedtuplewhere('PowerShort', 'op1 glyph exponent')
-    BuildProblem = namedtuplewhere('BuildProblem', 'keyword statements')
+    BuildProblem = namedtuplewhere('BuildProblem', 'keyword lbrace comment statements rbrace')
 
     ModelStatements = namedtuplewhere('ModelStatements', 'statements')
 
@@ -226,8 +296,13 @@ class CDPLanguage():
     # finite_poset { a <= b }
     FinitePosetKeyword = namedtuplewhere('FinitePosetKeyword', 'keyword')
     FinitePosetElement = namedtuplewhere('FinitePosetElement', 'identifier')
+    FinitePosetChainLEQ = namedtuplewhere('FinitePosetChainLEQ', 'ops')
+    FinitePosetChainGEQ = namedtuplewhere('FinitePosetChainGEQ', 'ops')
     FinitePoset = namedtuplewhere('FinitePoset', 'keyword chains')
 
+    AddBottomKeyword = namedtuplewhere('AddBottomKeyword', 'keyword')
+    AddBottom = namedtuplewhere('AddBottom', 'keyword poset')
+    
     # Single-element poset
     # S(tag)
     SingleElementPosetKeyword = namedtuplewhere('SingleElementPosetKeyword', 'keyword')
@@ -246,8 +321,13 @@ class CDPLanguage():
     SpaceCustomValue = namedtuplewhere('SpaceCustomValue', 'space keyword custom_string')
 
     # solve( <0 g>, `model )
+    # solve_f( )
     SolveModelKeyword = namedtuplewhere('SolveModelKeyword', 'keyword')
     SolveModel = namedtuplewhere('SolveModel', 'keyword f model')
+
+    # solve_r( <0 g>, `model )
+    SolveRModelKeyword = namedtuplewhere('SolveRModelKeyword', 'keyword')
+    SolveRModel = namedtuplewhere('SolveRModel', 'keyword r model')
 
     # UpperSets(<space>)
     UpperSetsKeyword = namedtuplewhere('UpperSetsKeyword', 'keyword')
@@ -260,6 +340,8 @@ class CDPLanguage():
     UncertainKeyword = namedtuplewhere('UncertainKeyword', 'keyword')
     UncertainRes = namedtuplewhere('UncertainRes', 'keyword lower upper')
     UncertainFun = namedtuplewhere('UncertainFun', 'keyword lower upper')
+    # unused 
+    UncertainConstant = namedtuplewhere('UncertainConstant', 'keyword lower upper')
 
     # Interval(a, b)
     IntervalKeyword = namedtuplewhere('IntervalKeyword', 'keyword')
@@ -298,13 +380,6 @@ class CDPLanguage():
     ApproxUKeyword = namedtuplewhere('ApproxUKeyword', 'keyword')
     ApproxURes = namedtuplewhere('ApproxURes', 'keyword rvalue step')
 
-    # from a import symbol1, symbol2
-    # import symbol.a
-#     ImportSymbolsKeywordFrom = namedtuplewhere('ImportSymbolsKeywordFrom', 'keyword')
-#     ImportSymbolsKeywordImport = namedtuplewhere('ImportSymbolsKeywordImport', 'keyword')
-#     ImportSymbolsLibname = namedtuplewhere('ImportSymbolsLibname', 'value')
-#     ImportSymbolsSymbolname = namedtuplewhere('ImportSymbolsSymbolname', 'value')
-#     ImportSymbols = namedtuplewhere('ImportSymbols', 'keyword1 libname keyword2 symbols')
 
     # assert_equal(v1, v2)
     # assert_leq(v1, v2)
@@ -328,10 +403,45 @@ class CDPLanguage():
     AssertNonempty = namedtuplewhere('AssertNonempty', 'keyword value')
     AssertEmpty = namedtuplewhere('AssertEmpty', 'keyword value')
 
-
-    ConstantMinusConstant = namedtuplewhere('ConstantMinusConstant', 'c1 c2')
-
     # ignore_resources(a, b) mcdp { }
     IgnoreResourcesKeyword = namedtuplewhere('IgnoreResourcesKeyword', 'keyword')
     IgnoreResources = namedtuplewhere('IgnoreResources', 'keyword rnames dp_rvalue')
 
+    # placeholders to use in documentation
+    # [[label]]
+    
+    Placeholder = namedtuplewhere('Placeholder', 'label')
+    
+    Placeholder_ndp = Placeholder # namedtuplewhere('Placeholder_ndp', 'label')
+    Placeholder_poset = Placeholder # namedtuplewhere('Placeholder_poset', 'label')
+    Placeholder_primitivedp = Placeholder # namedtuplewhere('Placeholder_primitivedp', 'label')
+    Placeholder_constant = Placeholder # namedtuplewhere('Placeholder_constant', 'label')
+    Placeholder_dpname = Placeholder # namedtuplewhere('Placeholder_constant', 'label')
+    Placeholder_rname = Placeholder # namedtuplewhere('Placeholder_constant', 'label')
+    Placeholder_fname = Placeholder # namedtuplewhere('Placeholder_constant', 'label')
+    Placeholder_libname = Placeholder # namedtuplewhere('Placeholder_constant', 'label')
+    Placeholder_template = Placeholder # namedtuplewhere('Placeholder_template', 'label')
+    Placeholder_collection = Placeholder # namedtuplewhere('Placeholder_collection', 'label')
+    Placeholder_fvalue = Placeholder # namedtuplewhere('Placeholder_fvalue', 'label')
+    Placeholder_rvalue = Placeholder # namedtuplewhere('Placeholder_rvalue', 'label')
+    Placeholder_integer = Placeholder
+    Placeholder_nonneg_integer = Placeholder
+    Placeholder_integer_or_float = Placeholder
+    Placeholder_index_label = Placeholder
+    
+    # deriv(name, <mcdp>) 
+    DerivKeyword = namedtuplewhere('DerivKeyword', 'keyword')
+    Deriv = namedtuplewhere('Deriv', 'keyword dpname ndp')
+    
+    # eversion(name, <mcdp>) 
+    EversionKeyword = namedtuplewhere('EversionKeyword', 'keyword')
+    Eversion = namedtuplewhere('Eversion', 'keyword dpname ndp')
+    
+    CommentStringSimple = namedtuplewhere('CommentStringSimple', 'value')
+    CommentStringTriple = namedtuplewhere('CommentStringTriple', 'value')
+    CommentModel = namedtuplewhere('CommentModel', 'comment_string')
+    CommentFun = namedtuplewhere('CommentFun', 'comment_string')
+    CommentCon = namedtuplewhere('CommentCon', 'comment_string')
+    CommentRes = namedtuplewhere('CommentRes', 'comment_string')
+    CommentVar = namedtuplewhere('CommentVar', 'comment_string')
+    

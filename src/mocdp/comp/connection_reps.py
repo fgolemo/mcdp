@@ -1,4 +1,6 @@
+# -*- coding: utf-8 -*-
 from collections import Counter
+
 from contracts.utils import raise_desc
 from mocdp.comp.context import Connection
 from mocdp.comp.interfaces import NamedDP

@@ -14,5 +14,5 @@ mcdp {
     p0 = 2 W
     p1 = 1.5 W/N^2
 
-    required power >= p0 + (lift^2) * p1
+    required power >= p0 + (provided lift^2) * p1
 }

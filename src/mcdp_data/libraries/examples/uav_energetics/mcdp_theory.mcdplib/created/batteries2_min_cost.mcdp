@@ -1,6 +1,6 @@
 mcdp {
   provides capacity [J]
-  provides missions [R]
+  provides missions [dimensionless]
 
   requires cost [$]
 

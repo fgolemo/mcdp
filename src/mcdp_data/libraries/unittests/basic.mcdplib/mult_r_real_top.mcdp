@@ -1,0 +1,6 @@
+mcdp  {
+    provides f  [dimensionless]
+    requires r  [dimensionless]
+
+    required r >= provided f * Top dimensionless
+}

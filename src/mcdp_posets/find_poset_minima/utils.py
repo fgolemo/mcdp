@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import time
 
 def time_poset_minima_func(f):

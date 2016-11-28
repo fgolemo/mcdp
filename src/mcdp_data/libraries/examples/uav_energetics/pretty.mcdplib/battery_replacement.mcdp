@@ -1,12 +1,12 @@
 mcdp {
     provides capacity [J]
     # Number of missions to be flown
-    provides missions [R]
+    provides missions [dimensionless]
 
     requires mass     [g]
     requires cost     [$]
     # Number of replacements needed
-    requires maintenance [R]
+    requires maintenance [dimensionless]
 
     specific_energy = 150 Wh/kg
     specific_cost =  2.50 Wh/$

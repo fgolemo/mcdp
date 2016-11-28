@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from reprep import Report
 
 def get_optim_state_report(s, opt):

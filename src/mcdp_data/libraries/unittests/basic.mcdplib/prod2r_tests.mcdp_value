@@ -1,0 +1,10 @@
+<
+    solve_r( <Top m, Top s>, `prod2r),
+    solve_r( <Top m, 0 s>, `prod2r),
+    solve_r( <Top m, 1 s>, `prod2r),
+
+    solve( 0 m*s, approx_lower(10, `prod2r)),
+    solve( Top m*s, approx_lower(10, `prod2r)),
+    solve( 0 m*s, approx_upper(10, `prod2r)),
+    solve( Top m*s, approx_upper(10, `prod2r))
+>

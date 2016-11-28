@@ -15,6 +15,7 @@ from .utils import (TestFailed, assert_parsable_to_connected_ndp,
     parse_wrap_syntax_error)
 from .utils2 import (eval_rvalue_as_constant,
     eval_rvalue_as_constant_same_exactly)
+from mcdp_lang.parse_interface import parse_poset
 
 
 CDP = CDPLanguage
@@ -30,16 +31,16 @@ def check_numbers1():
 
 @comptest
 def check_top1():
-    print eval_rvalue_as_constant('Top Nat')
+    eval_rvalue_as_constant('Top Nat')
 
 @comptest
 def check_top2():
-    print eval_rvalue_as_constant('⊤ ℕ')
+    eval_rvalue_as_constant('⊤ ℕ')
 
 @comptest
 def check_tuples():
-    print eval_rvalue_as_constant('<1 g, 2J>')
-    print eval_rvalue_as_constant('⟨1g, 2J⟩')
+    eval_rvalue_as_constant('<1 g, 2J>')
+    eval_rvalue_as_constant('⟨1g, 2J⟩')
 
 @comptest
 def check_numbers2():
@@ -50,9 +51,10 @@ def check_numbers2():
     parse_wrap_check('1 [g]', Syntax.valuewithunit,
                       CDP.SimpleValue(CDP.ValueExpr(1.0), CDP.RcompUnit('g')))
 
-@comptest_fails
+@comptest
 def check_sum_nat():
     eval_rvalue_as_constant_same_exactly('nat:1 + nat:1', 'nat:2')
+    eval_rvalue_as_constant_same_exactly('1 + 1', '2')
 
 @comptest_fails
 def check_sum_int():
@@ -64,72 +66,68 @@ def check_sum_nat_int():
 
 @comptest
 def check_division():
-    print parse_wrap_check('(5 g)', Syntax.rvalue)
-    print parse_wrap_check('1.0 [g] / 5 [l]', Syntax.rvalue)
-    print parse_wrap_check('(5 g) / 5 l', Syntax.rvalue)
+    parse_wrap_check('(5 g)', Syntax.rvalue)
+    parse_wrap_check('1.0 [g] / 5 [l]', Syntax.rvalue)
+    parse_wrap_check('(5 g) / 5 l', Syntax.rvalue)
 
-    print eval_rvalue_as_constant('1.0 [g] / 5 [l]')
+    eval_rvalue_as_constant('1.0 [g] / 5 [l]')
 
 @comptest
 def check_unit1():
 
-    print('parsing as unit_simple:')
-    print parse_wrap_syntax_error('N*m', Syntax.pint_unit_simple)
-    print('parsing as pint_unit:')
-    print parse_wrap_check('N*m', Syntax.space_pint_unit)
+    # parsing as unit_simple
+    parse_wrap_syntax_error('N*m', Syntax.pint_unit_simple)
+    # parsing as pint_unit:
+    parse_wrap_check('N*m', Syntax.space_pint_unit)
     parse_wrap_check('y', Syntax.pint_unit_simple)
     parse_wrap_syntax_error('x', Syntax.pint_unit_simple)
-#     parse_wrap_check('x', Syntax.disallowed)
-    print('unit_base:')
+    # unit_base
     parse_wrap_syntax_error('V x m', Syntax.pint_unit_simple)
 
     nu = Syntax.valuewithunit_number_with_units
-#     Syntax.space_expr.setWhiteSpaceChars(' \t')
-    print('skip: %r white: %r copydef: %r' % (nu.skipWhitespace, nu.whiteChars,
-            nu.copyDefaultWhiteChars))
+
     parse_wrap_check('12 W', nu)
     parse_wrap_check('12 Wh', nu)
     parse_wrap_syntax_error('12 W\n h', nu)
 
-
-
     parse_wrap_check('1 / s', Syntax.space_pint_unit)
 
     
-    if True:
-        print('unit_simple:')
-        parse_wrap_syntax_error('V x m', Syntax.pint_unit_simple)
+    # print('unit_simple:')
+    parse_wrap_syntax_error('V x m', Syntax.pint_unit_simple)
 
-        print('pint_unit:')
-        parse_wrap_syntax_error('V x m', Syntax.space_pint_unit)
+    # print('pint_unit:')
+    parse_wrap_syntax_error('V x m', Syntax.space_pint_unit)
 
-        parse_wrap_syntax_error('*', Syntax.space_pint_unit)
-        parse_wrap_syntax_error('/', Syntax.space_pint_unit)
-        parse_wrap_syntax_error('^2', Syntax.space_pint_unit)
-        good = ['g', 'g^2', 'g^ 2', 'g ^ 2', 'm/g ^2',
-                'm^2/g^2', 'N*m', '$', 'V', 'A', 'm/s',
-                'any', '1/s',
-                ]
-        results = []
-        for g in good:
-            try:
-                r = parse_wrap_check(g, Syntax.space_pint_unit)
-            except TestFailed as e:
-                results.append((g, False, e, None))
-            else:
-                results.append((g, True, None, r))
+    parse_wrap_syntax_error('*', Syntax.space_pint_unit)
+    parse_wrap_syntax_error('/', Syntax.space_pint_unit)
+    parse_wrap_syntax_error('^2', Syntax.space_pint_unit)
+    good = ['g', 'g^2', 'g^ 2', 'g ^ 2', 'm/g ^2',
+            'm^2/g^2', 'N*m', '$', 'V', 'A', 'm/s',
+            'any', '1/s',
+            ]
+    results = []
+    for g in good:
+        try:
+            r = parse_wrap_check(g, Syntax.space_pint_unit)
+        except TestFailed as e: # pragma: no cover
+            results.append((g, False, e, None))
+        else:
+            results.append((g, True, None, r))
 
-        exceptions = []
-        for g, ok, e, r in results:
-            if ok:
-                print('%20s: OK   %s' % (g, r))
-            if not ok:
-                print('%20s: FAIL ' % g)
-                exceptions.append(e)
+    exceptions = []
+    for g, ok, e, r in results:
+        if ok:
+            print('%20s: OK   %s' % (g, r))
+            pass
+        if not ok:  # pragma: no cover
+            print('%20s: FAIL ' % g)
+            
+            exceptions.append(e)
 
-        if exceptions:
-            msg = "\n".join(str(e) for e in exceptions)
-            raise TestFailed(msg)
+    if exceptions:  # pragma: no cover
+        msg = "\n".join(str(e) for e in exceptions)
+        raise TestFailed(msg)
 
 @comptest
 def check_numbers3():
@@ -162,7 +160,7 @@ def check_numbers3_neg():
         provides f [g]
         requires r [g]
         
-        r >= f * -2 [R]
+        r >= f * -2 dimensionless
     }
     """)
 
@@ -270,8 +268,8 @@ def check_type_universe1():
 
     tu = get_types_universe()
 
-    R1 = make_rcompunit('R')
-    R2 = make_rcompunit('R')
+    R1 = parse_poset('dimensionless')
+    R2 = parse_poset('dimensionless')
     assert R1 == R2
 
     tu.check_equal(R1, R2)
@@ -319,27 +317,26 @@ def check_conversion2():
 
 @comptest
 def check_conversion3():
-    print("How does it work with negative numbers?")
+    #print("How does it work with negative numbers?")
 
     string = """
     mcdp {
-        provides x [g]
-        requires y [g]
+        provides f [g]
+        requires r [g]
     
         c = -0.1 kg
-        required y >= provided x + c
+        required r >= provided f + c
     }"""
 
-    # parse_wrap(Syntax.ndpt_dp_rvalue, string)[0]
-    # print recursive_print(p)
     ndp = parse_ndp(string)
 
+    # same as:
+    #  r + 0.1 kg >= f 
 
     dp = ndp.get_dp()
-    print dp.repr_long()
-    # no solutions for 0
+    #print dp.repr_long()
     r = dp.solve(0.0)
-    assert not r.minimals, r
+    assert r.minimals == set([0.0]), r
     # one solution for 100 g
     r = dp.solve(100.0)
     assert r.minimals == set([0.0]), r
@@ -361,9 +358,9 @@ def check_conversion3b():
     }""")
 
     dp = ndp.get_dp()
-    print(dp.repr_long())
+    #print(dp.repr_long())
     r = dp.solve(0.0)
-    print(r)
+    #print(r)
     assert_equal(r.minimals, set([0.005]))
 
 
@@ -380,9 +377,9 @@ def check_conversion4():
     }""")
 
     dp = ndp.get_dp()
-    print(dp.repr_long())
+    #print(dp.repr_long())
     r = dp.solve(0.0)
-    print(r)
+    #print(r)
     assert_equal(r.minimals, set([5.0]))
 
 @comptest

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 def get_ndp():
 	from mcdp_lang import parse_ndp
 	return parse_ndp("mcdp {}")

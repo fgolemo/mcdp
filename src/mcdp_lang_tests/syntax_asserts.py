@@ -11,7 +11,7 @@ def expect(exc, f, *args):
         res = f(*args)
     except exc:
         pass
-    else:
+    else: # pragma: no cover
         msg = 'Expected {}'.format(exc)
         raise_desc(Exception, msg, f=f, res=res)
 

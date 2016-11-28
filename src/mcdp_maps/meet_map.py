@@ -1,6 +1,8 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_wrapped
 from mcdp_posets import Poset, NotJoinable, PosetProduct, Map, MapNotDefinedHere
+from mcdp_maps.repr_map import repr_map_meetn
 
 
 __all__ = [
@@ -31,3 +33,8 @@ class MeetNMap(Map):
         except NotJoinable as e:
             msg = 'Cannot meet all elements.'
             raise_wrapped(MapNotDefinedHere, e, msg, res=res, x=x)
+
+    def repr_map(self, letter):
+        n = len(self.dom)
+        return repr_map_meetn(letter, n)
+    

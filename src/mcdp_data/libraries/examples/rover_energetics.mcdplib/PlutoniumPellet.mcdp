@@ -1,13 +1,13 @@
 mcdp {
-    provides heat [W]
-    requires plutonium [g]
-    requires mass [g]
+  provides heat [W]
+  requires plutonium [g]
+  requires mass [g]
 
-    # Plutonium 238
-    decay_heat = 560 W/kg
+  # Plutonium 238
+  decay_heat = 560 W/kg
 
-    m = heat / decay_heat
+  m = heat / decay_heat
 
-    required mass >= m
-    required plutonium >= m
+  required mass >= m
+  required plutonium >= m
 }

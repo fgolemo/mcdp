@@ -1,9 +1,9 @@
 # test connected
 mcdp {
     sub times = cdp {
-        provides a [R]
-        provides b [R]
-        requires c [R]
+        provides a [dimensionless]
+        provides b [dimensionless]
+        requires c [dimensionless]
  
         c >= a * b
     }

@@ -4,6 +4,7 @@ from contracts.utils import raise_wrapped
 from mcdp_posets import Map, PosetProduct
 from mocdp.exceptions import DPInternalError
 from multi_index import get_it
+from multi_index.inversion import transform_pretty_print, transform_right_inverse
 
 from .dp_generic_unary import WrapAMap
 
@@ -30,15 +31,29 @@ class MuxMap(Map):
         r = get_it(x, self.coords, reduce_list=tuple)
         return r
 
-
+    def repr_map(self, letter):
+        if letter == 'f':
+            start = 'a'
+        else:
+            start = 'A' 
+            
+        return transform_pretty_print(self.dom, self.coords, start)
+    
+            
 class Mux(WrapAMap):
 
     @contract(coords='seq(int|tuple|list)|int')
     def __init__(self, F, coords):
-
-        self.amap = MuxMap(F, coords)
-
-        WrapAMap.__init__(self, self.amap)
+        self.amap_pretty = transform_pretty_print(F, coords)
+        amap = MuxMap(F, coords)
+        try:
+            R, coords2 = transform_right_inverse(F, coords, PosetProduct)
+        except:
+            print('cannot invert {}'.format(self.amap_pretty))
+            raise
+ 
+        amap_dual = MuxMap(R, coords2)
+        WrapAMap.__init__(self, amap, amap_dual)
 
         # This is used by many things (e.g. series simplification)
         self.coords = coords
@@ -57,28 +72,31 @@ class TakeFun(WrapAMap):
         Only used for having an appropriate icon (one red, many green)
     """
     def __init__(self, F, coords):
+        # Note that these always correspond to the identity!
+        # Let's check
+        n = len(coords)
+        assert list(range(n)) == coords, coords
+        
         amap = MuxMap(F, coords)
-        WrapAMap.__init__(self, amap)
+        amap_dual = MuxMap(F, coords)
+        
+        WrapAMap.__init__(self, amap, amap_dual)
 
 
 class TakeRes(WrapAMap):
     """ Used by Context.ifun_get_index.
         Only used for having an appropriate icon (one green, many red). """
     def __init__(self, F, coords):
+        # Note that these always correspond to the identity!
+        # Let's check
+        n = len(coords)
+        assert list(range(n)) == coords, coords
+        
         amap = MuxMap(F, coords)
-        WrapAMap.__init__(self, amap)
-
+        amap_dual = MuxMap(F, coords)
+        
+        WrapAMap.__init__(self, amap, amap_dual)
 
 def get_R_from_F_coords(F, coords):
     return get_it(F, coords, reduce_list=PosetProduct)
-
-# def get_flatten_muxmap(F0):
-#     check_isinstance(F0, PosetProduct)
-#     coords = []
-#     for i, f in enumerate(F0.subs):
-#         if isinstance(f, PosetProduct):
-#             for j, _ in enumerate(f.subs):
-#                 coords.append((i, j))
-#         else:
-#             coords.append(i)
-#     return coords
+ 

@@ -1,6 +1,6 @@
 mcdp {
     provides travel_distance [km]
-    provides num_missions [R]
+    provides num_missions [dimensionless]
     provides carry_payload [g]
 
     requires total_cost_ownership [$]

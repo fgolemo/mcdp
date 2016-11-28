@@ -1,4 +1,8 @@
 include *.md
+exclude *.pyc
+prune out-*
+prune out
+
 include Makefile
 include requirements.txt
 
@@ -32,9 +36,12 @@ recursive-include src/mcdp_data *.mcdp_poset
 recursive-include src/mcdp_data *.mcdp_template
 recursive-include src/mcdp_data *.mcdp_primitivedp
  
+recursive-exclude src *.pyc
+
 recursive-exclude src out
 recursive-exclude src _mcdpweb_cache
-global-exclude out out_expected _attic _mcdpweb_cache
+
+global-exclude out out-* *.pyc out_expected _attic _mcdpweb_cache
 
 
 prune src/mcdp_data/libraries/examples/example-plusinv.mcdplib/out_expected

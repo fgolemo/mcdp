@@ -1,0 +1,11 @@
+mcdp {
+    provides f [dimensionless]
+    requires r [dimensionless]
+    required r >= provided f + 1 dimensionless
+}
+
+# mcdp {
+#    provides f [dimensionless]
+#    requires r [dimensionless]
+#    required r >= provided f + 1 dimensionless
+#}

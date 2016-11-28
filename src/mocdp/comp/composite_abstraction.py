@@ -15,7 +15,7 @@ from mocdp.exceptions import mcdp_dev_warning
 
 @contract(ndp=CompositeNamedDP, returns=SimpleWrap)
 def cndp_abstract(ndp):
-    from mocdp.comp.connection import get_connection_multigraph
+    from .connection import get_connection_multigraph
     
     G = get_connection_multigraph(ndp.get_connections())
     cycles = list(simple_cycles(G))

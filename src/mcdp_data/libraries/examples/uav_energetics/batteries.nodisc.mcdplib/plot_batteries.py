@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import numpy as np
 from reprep import Report
 from mcdp_library.library import MCDPLibrary
@@ -10,7 +11,7 @@ def go():
         "capacity": (np.linspace(50, 3000, 10), "Wh"),
         "missions": ( 1000, "[]"),
     }
-    result_like = dict(maintenance="R", cost="USD", mass='kg')
+    result_like = dict(maintenance="dimensionless", cost="USD", mass='kg')
     what_to_plot_res = result_like
     what_to_plot_fun = dict(capacity="Wh", missions="[]")
 

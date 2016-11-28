@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 from contracts.utils import check_isinstance
 from mcdp_posets import Map, Rcomp, RcompUnits
-from mcdp_posets.rcomp import tiny 
+from mcdp_posets.rcomp import finfo 
 import numpy as np
 
 
@@ -28,8 +29,13 @@ class LinearMapComp(Map):
         except FloatingPointError as e:
             assert 'underflow' in str(e)
             # print x, self.factor
-            res = tiny
+            res = finfo.tiny
 
         if np.isinf(res):
             return self.B.get_top()
         return res
+
+    def repr_map(self, letter):
+        label = '× %f' % self.factor
+        return  '%s ⟼ %s %s' % (letter, letter, label)
+    

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from _collections import defaultdict
+
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
 from mcdp_dp import Identity
@@ -9,8 +10,9 @@ from mocdp.comp.context import (Connection, get_name_for_fun_node,
 from mocdp.comp.labelers import LabelerNDP
 from mocdp.comp.simplify_identities_imp import simplify_identities
 from mocdp.comp.wrap import SimpleWrap
+from mocdp.exceptions import DPInternalError
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
-# from mocdp.comp.context_functions import is_dp_connected
+
 
 __all__ = [
     'cndp_flatten',
@@ -155,7 +157,7 @@ def cndp_flatten(ndp):
                     # add_identities = not connected_to_something
                     add_identities = True
 
-                    if not add_identities:
+                    if not add_identities: # pragma: no cover
                         continue
                     else:
                         # think of the case where there are a f and r with
@@ -190,8 +192,8 @@ def cndp_flatten(ndp):
                         # from function to resource:
                         #
                         # f = instance mcdp {
-                        #     provides a [R]
-                        #     requires c [R]
+                        #     provides a [dimensionless]
+                        #     requires c [dimensionless]
                         #
                         #     c >= a
                         # }
@@ -283,29 +285,23 @@ def cndp_flatten(ndp):
 
         dp2_was_exploded = isinstance(name2ndp[dp2], CompositeNamedDP)
         if dp2_was_exploded:
-            if not dp2 in proxy_functions:
+            if not dp2 in proxy_functions: # pragma: no cover
                 msg = 'Bug: cannot find dp2.'
-                raise_desc(Exception, msg, dp2=dp2, keys=list(proxy_functions),
-                           c=c)
+                raise_desc(DPInternalError, msg, dp2=dp2, 
+                           keys=list(proxy_functions), c=c)
 
             (dp2_, s2_) = proxy_functions[dp2]["%s/%s" % (dp2, s2)]
-#
-#             dp2_ = "_fun_%s%s%s" % (dp2, sep, s2)
-            if not dp2_ in names2:
-                raise_desc(AssertionError, "?", dp2_=dp2_, c=c, names2=sorted(names2))
-#             s2_ = '%s%s%s' % (dp2, sep, s2)
+
+            if not dp2_ in names2: # pragma: no cover
+                raise_desc(DPInternalError, "?", dp2_=dp2_, c=c, 
+                           names2=sorted(names2))
         else:
             dp2_ = dp2
             s2_ = s2
 
         dp1_was_exploded = isinstance(name2ndp[dp1], CompositeNamedDP)
         if dp1_was_exploded:
-            (dp1_, s1_) = proxy_resources[dp1]["%s/%s" % (dp1, s1)]
-#
-#             dp1_ = "_res_%s%s%s" % (dp1, sep, s1)
-#             if not dp1_ in names2:
-#                 raise_desc(AssertionError, "?", dp1_=dp1_, c=c, names2=sorted(names2))
-#             s1_ = '%s%s%s' % (dp1, sep, s1)
+            (dp1_, s1_) = proxy_resources[dp1]["%s/%s" % (dp1, s1)] 
         else:
             dp1_ = dp1
             s1_ = s1

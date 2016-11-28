@@ -1,0 +1,8 @@
+mcdp {
+   actuation = instance `Actuation 
+   other = instance eversion(actuation, `Battery2)
+
+   mass required by actuation <= mass provided by other
+   power required by actuation <= power provided by other
+   lift provided by actuation >= lift required by other
+}

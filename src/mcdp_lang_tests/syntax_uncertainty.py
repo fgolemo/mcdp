@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest
 from contracts.utils import raise_desc
 from mcdp_dp.dp_transformations import get_dp_bounds

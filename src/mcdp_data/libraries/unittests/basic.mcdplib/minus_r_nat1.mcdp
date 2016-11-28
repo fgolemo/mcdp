@@ -1,0 +1,12 @@
+mcdp {
+    provides f [Nat]
+    requires r [Nat]
+
+    required r - Nat:2 >= provided f 
+}
+
+#  r = 0 -> f empty
+#  r = 1 -> f empty
+#  r = 2 -> f <= 0
+#  r = 3 -> f <= 1
+

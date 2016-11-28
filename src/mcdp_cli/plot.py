@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from tempfile import mkdtemp
 
@@ -5,14 +6,15 @@ from contracts import contract
 from contracts.utils import raise_desc
 from decent_params import UserError
 from mcdp_cli.utils_wildcard import expand_string
+from mcdp_figures.figure_interface import MakeFiguresNDP
+from mcdp_lang.syntax import Syntax
 from mcdp_library import Librarian
-from mcdp_report.dp_graph_flow_imp import dp_graph_flow
 from mcdp_report.dp_graph_tree_imp import dp_graph_tree
-from mcdp_report.gg_ndp import STYLE_GREENREDSYM, gvgen_from_ndp
 from mcdp_report.gg_utils import gg_get_formats
 from mcdp_web.renderdoc.highlight import get_minimal_document
+from mocdp import logger
 from mocdp.comp.recursive_name_labeling import get_labelled_version
-from mocdp.exceptions import mcdp_dev_warning
+from mocdp.exceptions import mcdp_dev_warning, DPSemanticError
 from quickapp import QuickAppBase
 from system_cmd import CmdException, system_cmd_result
 
@@ -40,39 +42,32 @@ def return_formats2(gg, prefix):
             for data_format, d in zip(formats, data)]
     return res
 
-def dp_graph_flow_(data):
-    dp = get_dp(data)
-    gg = dp_graph_flow(dp)
-    return return_formats2(gg, 'dp_graph_flow')
-
-def dp_graph_tree_(data):
-    dp = get_dp(data)
-    gg = dp_graph_tree(dp, compact=False)
-    return return_formats2(gg, 'dp_graph_tree')
 
 def dp_graph_tree_labeled_(data):
     ndp = get_ndp(data)
     ndp = get_labelled_version(ndp)
-    dp = ndp.get_dp()
+    
+    try:
+        dp = ndp.get_dp()
+    except DPSemanticError:
+        logger.warn('Could not draw dp_graph_tree_labeled_')
+        return []
+    
     gg = dp_graph_tree(dp, compact=False)
     return return_formats2(gg, 'dp_graph_tree_labeled')
-
-def dp_graph_tree_compact_(data):
-    dp = get_dp(data)
-    gg = dp_graph_tree(dp, compact=True)
-    return return_formats2(gg, 'dp_graph_tree_compact')
 
 def dp_graph_tree_compact_labeled_(data):
     ndp = get_ndp(data)
     ndp = get_labelled_version(ndp)
-    dp = ndp.get_dp()
+    try:
+        dp = ndp.get_dp()
+    except DPSemanticError:
+        logger.warn('Could not draw dp_graph_tree_compact_labeled_')
+        return []
+    
     gg = dp_graph_tree(dp, compact=True)
     return return_formats2(gg, 'dp_graph_tree_compact_labeled')
-
-def ndp_repr_long(data):
-    ndp = get_ndp(data)
-    res1 = ('txt', 'ndp_repr_long', ndp.repr_long())
-    return [res1]
+ 
 
 def ndp_repr_long_labeled(data):
     ndp = get_ndp(data)
@@ -80,21 +75,18 @@ def ndp_repr_long_labeled(data):
     res1 = ('txt', 'ndp_repr_long_labeled', ndp.repr_long())
     return [res1]
 
-def dp_repr_long(data):
-    dp = get_dp(data)
-    res1 = ('txt', 'dp_repr_long', dp.repr_long())
-    return [res1]
 
 def dp_repr_long_labeled(data):
     ndp = get_ndp(data)
     ndp = get_labelled_version(ndp)
-    dp = ndp.get_dp()
+    try:
+        dp = ndp.get_dp()
+    except DPSemanticError:
+        logger.warn('Could not draw dp_graph_tree_compact_labeled_')
+        return []
     res1 = ('txt', 'dp_repr_long_labeled', dp.repr_long())
     return [res1]
 
-def create_extra_css(params):  # @UnusedVariable
-    out = ''
-    return out
 
 def get_lines_to_hide(params):
     hide = params.get('hide', '')
@@ -108,12 +100,13 @@ def syntax_pdf(data):
     from mcdp_report.html import ast_to_html
     s = data['s']
     s = s.replace('\t', '    ')
-    extra_css = create_extra_css(data['params'])
+    
     lines_to_hide = get_lines_to_hide(data['params'])
     def ignore_line(lineno):
         return lineno  in lines_to_hide
-    contents = ast_to_html(s, complete_document=False, extra_css=extra_css,
-                       ignore_line=ignore_line)
+    contents = ast_to_html(s,  
+                       ignore_line=ignore_line, parse_expr=Syntax.ndpt_dp_rvalue,
+                       )
     html = get_minimal_document(contents)
 
     d = mkdtemp()
@@ -163,8 +156,9 @@ def syntax_pdf(data):
 def syntax_frag(data):
     from mcdp_report.html import ast_to_html
     s = data['s']
-    extra_css = create_extra_css(data['params'])
-    res = ast_to_html(s, complete_document=False, extra_css=extra_css)
+    
+    res = ast_to_html(s,
+                      parse_expr=Syntax.ndpt_dp_rvalue)
     res1 = ('html', 'syntax_frag', res)
     return [res1]
 
@@ -172,13 +166,15 @@ def syntax_frag(data):
 def syntax_doc(data):
     from mcdp_report.html import ast_to_html
     s = data['s']
-    extra_css = create_extra_css(data['params'])
     lines_to_hide = get_lines_to_hide(data['params'])
     def ignore_line(lineno):
-        return lineno  in lines_to_hide
+        return lineno in lines_to_hide
 
-    res = ast_to_html(s, complete_document=True, extra_css=extra_css,
-                      ignore_line=ignore_line)
+    body_contents = ast_to_html(s,
+                      ignore_line=ignore_line, parse_expr=Syntax.ndpt_dp_rvalue)
+    res = get_minimal_document(body_contents, add_markdown_css=True)
+    
+    # TODO: add minimal document
     res1 = ('html', 'syntax_doc', res)
     return [res1]
 
@@ -208,73 +204,51 @@ allplots  = {
     ('ast', ast),
     ('syntax_doc', syntax_doc),
     ('syntax_frag', syntax_frag),
-    ('syntax_pdf', syntax_pdf),
-    ('dp_graph_tree', dp_graph_tree_),
-    ('dp_graph_tree_compact', dp_graph_tree_compact_),
+    ('syntax_pdf', syntax_pdf), 
+    ('tex_form', tex_form), 
     ('dp_graph_tree_labeled', dp_graph_tree_labeled_),
     ('dp_graph_tree_compact_labeled', dp_graph_tree_compact_labeled_),
-    ('dp_graph_flow', dp_graph_flow_),
-    ('tex_form', tex_form),
-    ('dp_repr_long', dp_repr_long),
-    ('ndp_repr_long', ndp_repr_long),
     ('dp_repr_long_labeled', dp_repr_long_labeled),
     ('ndp_repr_long_labeled', ndp_repr_long_labeled),
 }
-
-class Vis():
-    def __init__(self, s, direction, prefix):
-        self.s = s
-        self.direction = direction
-        self.prefix = prefix
+ 
+class MFCall():
+    def __init__(self, name):
+        self.name = name
         
     def __call__(self, data):
-        gg = self.ndp_visualization(data, style=self.s, direction=self.direction)
-        return return_formats2(gg,self.prefix)
-
-    def ndp_visualization(self, data, style, direction):
-        assert direction in ['TB', 'LR'], direction
-        ndp = get_ndp(data) 
-        setattr(ndp, '_hack_force_enclose', True)
+        ndp = get_ndp(data)
         library = data['library']
-        images_paths = library.get_images_paths()
-        gg = gvgen_from_ndp(ndp, style, images_paths=images_paths,  direction=direction)
-        return gg
+        mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=None)
+         
+        formats = mf.available_formats(self.name)
+        res = mf.get_figure(self.name, formats)
+        
+        results = [(_, self.name, res[_]) for _ in formats]
+        return results
+        
+mf = MakeFiguresNDP(ndp=None)    
+for name in mf.available():
+    allplots.add((name, MFCall(name)))
 
-
-for s in [#STYLE_GREENRED, 'default', 'clean', 
-          STYLE_GREENREDSYM]:
-    x = ('ndp_%s' % s, Vis(s, 'LR', 'ndp_%s' %s))
-    allplots.add(x)
-    x = ('ndp_%s_tb' % s, Vis(s, 'TB', 'ndp_%s_TB'%s))
-    allplots.add(x)
-    
-def ndp_graph_enclosed0(data, direction):
-    library = data['library']
-    ndp = get_ndp(data)
-    style = STYLE_GREENREDSYM
-    yourname = None
-    from mcdp_web.images.images import ndp_graph_enclosed
-    png = ndp_graph_enclosed(library, ndp, style, yourname,
-                            data_format='png', direction=direction,
-                            enclosed=True)
-    pdf = ndp_graph_enclosed(library, ndp, style, yourname,
-                            data_format='pdf', direction=direction,
-                            enclosed=True)
-    return png, pdf
-
-def ndp_graph_enclosed_LR(data):
-    png, pdf = ndp_graph_enclosed0(data, 'LR')
-    return [('png', 'ndp_graph_enclosed_LR', png),
-            ('pdf', 'ndp_graph_enclosed_LR', pdf)]
-
-def ndp_graph_enclosed_TB(data):
-    png, pdf = ndp_graph_enclosed0(data, 'LR')
-    return [('png', 'ndp_graph_enclosed', png),
-            ('pdf', 'ndp_graph_enclosed', pdf)]
-
-allplots.add(('ndp_graph_enclosed_LR', ndp_graph_enclosed_LR))
-allplots.add(('ndp_graph_enclosed', ndp_graph_enclosed_TB))
-
+# 
+# class DP_MFCall():
+#     def __init__(self, name):
+#         self.name = name
+#         
+#     def __call__(self, data):
+#         dp = get_dp(data)
+# 
+#         mf = MakeFiguresDP(dp=dp)
+#         formats = mf.available_formats(self.name)
+#         res = mf.get_figure(self.name, formats)
+#         results = [(_, self.name, res[_]) for _ in formats]
+#         return results
+#         
+# mf = MakeFiguresDP(dp=None)    
+# for name in mf.available():
+#     allplots.add((name, DP_MFCall(name)))
+#            
 @contract(returns='tuple(str,*)')
 def parse_kv(x):
     return tuple(x.split('='))
@@ -287,7 +261,8 @@ def parse_params(p):
 
     return dict(parse_kv(_) for _ in seq)
 
-def do_plots(logger, model_name, plots, outdir, extra_params, maindir, extra_dirs, use_cache):
+def do_plots(logger, model_name, plots, outdir, extra_params, 
+             maindir, extra_dirs, use_cache):
     data = {}
 
     if '.mcdp' in model_name:
@@ -336,6 +311,9 @@ def do_plots(logger, model_name, plots, outdir, extra_params, maindir, extra_dir
             mcdp_dev_warning('Add better checks of error.')
             logger.error(e)
             continue
+        except Exception as e:
+            logger.error('While creating %r' % p)
+            raise
         assert isinstance(res, list), res
         for r in res:
             assert isinstance(r, tuple), r

@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_cli.query_interpretation import convert_string_query
 from mcdp_dp import InvMult2
@@ -217,10 +218,11 @@ def report(data):
 
 
 def get_num_iterations(trace):
-    v = list(trace.rec_get_value('num_iterations'))
+    v = list(trace.rec_get_value('iterations'))
     if not isinstance(v, list) and len(v) == 1:
         raise ValueError(v)
-    return v[0]
+    S =  v[0]
+    return len(S)
 
 class DroneUnc3(QuickApp):
 

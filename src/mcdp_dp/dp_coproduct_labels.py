@@ -1,11 +1,12 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import check_isinstance
 from mcdp_posets import Coproduct1, Coproduct1Labels
 from mocdp.exceptions import do_extra_checks
 
 from .dp_coproduct import CoProductDP
+from .primitive import NotFeasible
 from .primitive import PrimitiveDP
-from mcdp_dp.primitive import NotFeasible
 
 
 __all__ = [
@@ -59,6 +60,9 @@ class CoProductDPLabels(PrimitiveDP):
     def solve(self, f):
         return self.dp.solve(f)
 
+    def solve_r(self, r):
+        return self.dp.solve_r(r)
+
     def __repr__(self):
         s = "^".join('%s:%s' % x for x in zip(self.labels, self.dp.dps))
         return 'CoProductDPLabels(%s)' % s
@@ -67,3 +71,9 @@ class CoProductDPLabels(PrimitiveDP):
         s = "CoProductDPLabels %s " % self.labels.__repr__()
         s += '\n' + self.dp.repr_long()
         return s
+    
+    def repr_h_map(self):
+        return self.dp.repr_h_map()
+    
+    def repr_hd_map(self):
+        return self.dp.repr_hd_map()

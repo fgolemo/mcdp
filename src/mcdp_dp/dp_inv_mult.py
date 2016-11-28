@@ -1,11 +1,15 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc
-from mcdp_posets import Nat, Poset, PosetProduct, UpperSet
-from mcdp_posets.utils import check_minimal
-from mocdp.exceptions import do_extra_checks, mcdp_dev_warning
-import numpy as np
+from contracts.utils import raise_desc, check_isinstance
+from mcdp_maps.repr_map import repr_map_product
+from mcdp_posets import Nat, Poset, PosetProduct, is_top
+from mcdp_posets.nat import Nat_mult_lowersets_continuous
+from mcdp_posets.rcomp import Rcomp_multiply_upper_topology_seq
+from mocdp.exceptions import mcdp_dev_warning
 
 from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
+from .repr_strings import repr_h_map_invmult
+from .sequences_invplus import Nat_mult_antichain_Min, invmultL_solve_options, invmultU_solve_options
 
 
 _ = Nat, Poset
@@ -14,7 +18,9 @@ __all__ = [
     'InvMult2',
     'InvMult2U',
     'InvMult2L',
+    'InvMult2Nat',
 ]
+ 
 
 class InvMult2(ApproximableDP):
 
@@ -35,6 +41,17 @@ class InvMult2(ApproximableDP):
 
     def solve(self, f):
         raise NotSolvableNeedsApprox(type(self))
+    
+    def solve_r(self, r):
+        mcdp_dev_warning('this is not coherent with solve()')
+        fmax = Rcomp_multiply_upper_topology_seq(self.Rs, r, self.F)
+        return self.F.L(fmax)
+    
+    def repr_h_map(self):
+        return repr_h_map_invmult(len(self.Rs))
+    
+    def repr_hd_map(self):
+        return repr_map_product('r', len(self.Rs))    
 
     def get_lower_bound(self, n):
         return InvMult2L(self.F, self.Rs, n)
@@ -43,7 +60,7 @@ class InvMult2(ApproximableDP):
         return InvMult2U(self.F, self.Rs, n)
 
     def __repr__(self):
-        return 'InvMult2(%s -> %s)' % (self.F, self.R)
+        return 'InvMult2(%s → %s)' % (self.F, self.R)
 
 
 class InvMult2U(PrimitiveDP):
@@ -71,50 +88,21 @@ class InvMult2U(PrimitiveDP):
         return set([(f, r)])
 
     def solve(self, f):
-        if f == 0.0:
-            return  UpperSet(minimals=set([(0.0, 0.0)]), P=self.R)
+        algo = InvMult2.ALGO
+        options = invmultU_solve_options(F=self.F, R=self.R, f=f, n=self.n, algo=algo)
+        return self.R.Us(options)
+    
+    def solve_r(self, r):
+        mcdp_dev_warning('this is not coherent with solve()')
+        fmax =  Rcomp_multiply_upper_topology_seq(self.Rs, r, self.F)
+        return self.F.L(fmax)
 
-        top = self.F.get_top()
-        if f == top:
-            mcdp_dev_warning('FIXME Need much more thought about this')
-            top1 = self.Rs[0].get_top()
-            top2 = self.Rs[1].get_top()
-            s = set([(top1, top2)])
-            return self.R.Us(s)
-        if InvMult2.ALGO == InvMult2.ALGO_UNIFORM:
-            mcdp_dev_warning('TODO: add ALGO as parameter. ')
-            ps = samplec(self.n, f)
-        elif InvMult2.ALGO == InvMult2.ALGO_VAN_DER_CORPUT:
-            x1, x2 = generate_exp_van_der_corput_sequence(n=self.n, C=f)
-            ps = zip(x1, x2)
-        else: # pragma: no cover
-            assert False
-            
-        return UpperSet(minimals=ps, P=self.R)
+    def repr_h_map(self):
+        return repr_h_map_invmult(len(self.Rs))
+    
+    def repr_hd_map(self):
+        return repr_map_product('r', len(self.Rs)) + ' (approx)'
 
-def samplec(n, c):
-    """ Samples n points on the curve xy=c """
-    ps = sample(n)
-    assert len(ps) == n, (n, len(ps), ps)
-    s = np.sqrt(c)
-    ps = [(x * s, y * s) for x, y in ps]
-    return ps
-
-@contract(n='int,>=1', returns='list(tuple(float, float))')
-def sample(n):
-    """ Samples n points on the curve xy=1 """
-    assert n >= 1
-    points = set()
-
-    # divide the interval [0,1] equally in n/2 intervals
-    m = n / 2
-    xs = np.linspace(0.0, 1.0, m + 2)[1:-1]
-    ys = 1.0 / xs
-    if m * 2 < n:  # odd
-        points.add((1.0, 1.0))
-    points.update(zip(xs, ys))
-    points.update(zip(ys, xs))
-    return list(points)
 
 class InvMult2L(PrimitiveDP):
 
@@ -139,105 +127,87 @@ class InvMult2L(PrimitiveDP):
         lf = self.F.L(f)
         return lf, ur
 
+    def solve_r(self, r):
+        mcdp_dev_warning('This might not be correct')
+        fmax = Rcomp_multiply_upper_topology_seq(self.Rs, r, self.F)
+        return self.F.L(fmax)
+    
     def solve(self, f):
-        if f == 0.0:
-            return  UpperSet(minimals=set([(0.0, 0.0)]), P=self.R)
-
-        top = self.F.get_top()
-        if f == top:
-            mcdp_dev_warning('FIXME Need much more thought about this')
-            top1 = self.Rs[0].get_top()
-            top2 = self.Rs[1].get_top()
-            s = set([(top1, 0.0), (0.0, top2)])
-            return self.R.Us(s)
-
-        n = self.n
-
-        if InvMult2.ALGO == InvMult2.ALGO_UNIFORM:
-            if n == 1:
-                points = [(0.0, 0.0)]
-            elif n == 2:
-                points = [(0.0, 0.0)]
-            else:
-
-                pu = sorted(samplec(n - 1, f), key=lambda _: _[0])
-                assert len(pu) == n - 1, (len(pu), n - 1)
-                nu = len(pu)
-
-                points = set()
-                points.add((0.0, pu[0][1]))
-                points.add((pu[-1][0], 0.0))
-                for i in range(nu - 1):
-                    p = (pu[i][0], pu[i + 1][1])
-                    points.add(p)
-
-
-        elif InvMult2.ALGO == InvMult2.ALGO_VAN_DER_CORPUT:
-
-            if n == 1:
-                points = set([(0.0, 0.0)])
-            else:
-                x1, x2 = generate_exp_van_der_corput_sequence(n=self.n - 1, C=f)
-                pu = zip(x1, x2)
-                # ur = UpperSet(pu, self.R)
-                assert len(pu) == self.n - 1, pu
-
-                if do_extra_checks():
-                    check_minimal(pu, self.get_res_space())
-
-                nu = len(pu)
-                points = []
-                points.append((0.0, pu[0][1]))
-
-                for i in range(nu - 1):
-                    p = (pu[i][0], pu[i + 1][1])
-                    points.append(p)
-
-                points.append((pu[-1][0], 0.0))
-
-                points = set(points)
-        else: # pragma: no cover
-            assert False
-
-        assert len(points) == self.n, (self.n, len(points), points)
-
-        return UpperSet(minimals=points, P=self.R)
-
-@contract(n='int,>=1', returns='tuple(*,*)')
-def generate_exp_van_der_corput_sequence(n, C=1.0, mapping_function=None):
-    """
-        mapping_function: something that maps [0, 1] to [-inf, inf]
+        algo = InvMult2.ALGO
+        options = invmultL_solve_options(F=self.F, R=self.R, f=f, n=self.n, algo=algo)
+        return self.R.Us(options)
         
-        Returns a pair of numpy arrays
-        
-        so that x1*x2 = C.
+    def repr_h_map(self):
+        return repr_h_map_invmult(len(self.Rs))
+    
+    def repr_hd_map(self):
+        return repr_map_product('r', len(self.Rs)) + ' (approx)'    
+
+class InvMult2Nat(ApproximableDP):
     """
-    if C <= 0.0: # pragma: no cover
-        raise_desc(ValueError, 'Need positive C, got %r.' % C)
+        Implements:
+        
+             f ≤ r₁ * r₂
+        
+        with f,r₁,r₂ ∈ ℕ.
+        
+    """
+    memory_limit = 10000
+    
+    @contract(Rs='tuple[2],seq[2]($Nat)', F=Nat)
+    def __init__(self, F, Rs):
+        if not len(Rs) == 2:
+            raise ValueError(Rs)
+        for _ in Rs:
+            check_isinstance(_, Nat)
+        check_isinstance(F, Nat)
+        R = PosetProduct(Rs)
+        M = PosetProduct((F, R))
+        PrimitiveDP.__init__(self, F=F, R=R, I=M)
 
+    def evaluate(self, m):
+        f, r = m
+        ur = self.R.U(r)
+        lf = self.F.L(f)
+        return lf, ur
 
-    from .dp_inv_plus import van_der_corput_sequence
-    v = np.array(van_der_corput_sequence(n))
+    def solve(self, f):
+        if is_top(self.F, f):
+            top = f
+            elements = set([(top, 1), (1, top)]) # XXX: to check
+            return self.R.Us(elements) 
+        
+        if f > InvMult2Nat.memory_limit:
+            msg = ('InvMult2Nat:solve(%s): This would produce' 
+                   ' an antichain of length %s.') % (f,f)
+            raise NotSolvableNeedsApprox(msg)
+            
+        options = Nat_mult_antichain_Min(f)
+        return self.R.Us(options)
+    
+    def get_lower_bound(self, n):  # @UnusedVariable
+        msg = 'InvMult2Nat:get_lower_bound() not implemented yet'
+        raise_desc(NotImplementedError, msg)
+    
+    def get_upper_bound(self, n):  # @UnusedVariable
+        msg = 'InvMult2Nat:get_upper_bound() not implemented yet'
+        raise_desc(NotImplementedError, msg)
+        
+    def solve_r(self, r):
+        r1, r2 = r
+        f_max = Nat_mult_lowersets_continuous(r1, r2)
+        return self.F.L(f_max)
 
-    if mapping_function is None:
-        mapping_function = lambda x: np.tan(((x - 0.5) * 2) * (np.pi / 2))
-    v2 = np.array(map(mapping_function, v))
-    M = np.log(C)
-    logx1 = v2
-    logx2 = M - v2
-    finfo = np.finfo(float)
+    def get_implementations_f_r(self, f, r):
+        return set([(f, r)])
 
-    eps = finfo.tiny
-    maxi = finfo.max
-    def myexp(x):
-        try:
-            return np.exp(x)
-        except FloatingPointError:
-            if x < 0:
-                return eps
-            else:
-                return maxi
+    def __repr__(self):
+        return 'InvMult2Nat(%s -> %s)' % (self.F, self.R)
+    
+    def repr_h_map(self):
+        return repr_h_map_invmult(len(self.R))
+    
+    def repr_hd_map(self):
+        return repr_map_product('r', len(self.R))
 
-    x1 = np.array(map(myexp, logx1))
-    x2 = np.array(map(myexp, logx2))
-    return x1, x2
+    

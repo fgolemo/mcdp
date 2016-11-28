@@ -1,34 +1,51 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, check_isinstance
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.exceptions import DPInternalError, DPSemanticError
 
 from .namedtuple_tricks import recursive_print
-from .parse_actions import add_where_information
+from .parse_actions import decorate_add_where
 from .parts import CDPLanguage
 from .utils_lists import unwrap_list
 
 
 CDP = CDPLanguage
 
+@decorate_add_where
 @contract(returns=TemplateForNamedDP)
 def eval_template(r, context):  # @UnusedVariable
-    with add_where_information(r.where):
-        cases = {
-            CDP.LoadTemplate: eval_template_load,
-            CDP.TemplateSpec: eval_template_spec,
-        }
+    cases = {
+        CDP.LoadTemplate: eval_template_load,
+        CDP.TemplateSpec: eval_template_spec,
+        CDP.Deriv: eval_template_deriv,
+    }
 
-        for klass, hook in cases.items():
-            if isinstance(r, klass):
-                return hook(r, context)
+    for klass, hook in cases.items():
+        if isinstance(r, klass):
+            return hook(r, context)
 
-        if True: # pragma: no cover    
-            r = recursive_print(r)
-            raise_desc(DPInternalError, 'Invalid template.', r=r)
+    if True: # pragma: no cover    
+        r = recursive_print(r)
+        msg = 'Cannot interpret this as a template.'
+        raise_desc(DPInternalError, msg, r=r)
 
+def eval_template_deriv(r, context):  # @UnusedVariable
+#     from .eval_ndp_imp import eval_ndp
+#  
+    check_isinstance(r, CDP.Deriv)
+    
+#     name = r.dpname.value
+#     ndp = eval_ndp(r.ndp, context)
+    
+#     return ndp_deriv(r.ndp, name)
+
+    raise NotImplementedError
+    
+    
 def eval_template_load(r, context):
+    from .eval_warnings import warnings_copy_from_child_make_nested2
+
     assert isinstance(r, CDP.LoadTemplate)
     assert isinstance(r.load_arg, (CDP.TemplateName, CDP.TemplateNameWithLibrary))
 
@@ -42,11 +59,23 @@ def eval_template_load(r, context):
         libname = arg.library.value
 
         library = context.load_library(libname)
-        return library.load_template(name)
-
+        
+        context2 = context.child()
+        template = library.load_template(name, context2)
+        
+        msg = 'While loading template %r from library %r:' % (name, libname)
+        warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
+        return template
+        
     if isinstance(arg, CDP.TemplateName):
+        context2 = context.child()
         name = r.load_arg.value
-        return context.load_template(name)
+        template = context2.load_template(name)
+
+        msg = 'While loading %r:' % (name)
+        warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
+
+        return template
 
     raise NotImplementedError(r)
 

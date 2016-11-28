@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from mcdp_posets import PosetProduct, Rcomp
 from mocdp.memoize_simple_imp import memoize_simple

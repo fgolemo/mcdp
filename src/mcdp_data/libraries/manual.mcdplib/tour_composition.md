@@ -30,7 +30,7 @@ mcdp {
     provides lift [N]
     requires power [W]
 
-    l = lift
+    l = provided lift
     p0 = 5 W
     p1 = 6 W/N
     p2 = 7 W/N^2

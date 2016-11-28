@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-from .eval_codespec_imp_utils import InstantiationException, instantiate_spec
-from .parse_actions import add_where_information
-from .parts import CDPLanguage
-from .utils_lists import unwrap_list
 from contracts import contract
 from contracts.utils import check_isinstance, raise_wrapped
+from mcdp_lang.parse_actions import decorate_add_where
 from mocdp.exceptions import DPSemanticError
+
+from .eval_codespec_imp_utils import InstantiationException, instantiate_spec
+from .parts import CDPLanguage
+from .utils_lists import unwrap_list
+
 
 CDP = CDPLanguage
 
@@ -13,6 +15,7 @@ __all__ = [
     'eval_codespec',
 ]
 
+@decorate_add_where
 def eval_codespec(r, expect):
     assert isinstance(r, (CDP.CodeSpecNoArgs, CDP.CodeSpec))
 
@@ -24,21 +27,20 @@ def eval_codespec(r, expect):
         kwargs = {}
     check_isinstance(function, str)
 
-    with add_where_information(r.where):
-        try:
-            res = instantiate_spec([function, kwargs])
-        except InstantiationException as e:
-            msg = 'Could not instantiate code spec.'
-            raise_wrapped(DPSemanticError, e, msg, compact=True,
-                          function=function, kwargs=kwargs)
+    try:
+        res = instantiate_spec([function, kwargs])
+    except InstantiationException as e:
+        msg = 'Could not instantiate code spec.'
+        raise_wrapped(DPSemanticError, e, msg, compact=True,
+                      function=function, kwargs=kwargs)
 
-        try:
-            check_isinstance(res, expect)
-        except ValueError as e:
-            msg = 'The code did not return the correct type.'
-            raise_wrapped(DPSemanticError, e, msg, r=r, res=res, expect=expect)
+    try:
+        check_isinstance(res, expect)
+    except ValueError as e:
+        msg = 'The code did not return the correct type.'
+        raise_wrapped(DPSemanticError, e, msg, r=r, res=res, expect=expect)
 
-        return res
+    return res
 
 
 @contract(returns='tuple(tuple, dict)')

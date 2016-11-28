@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import indent, raise_desc, raise_wrapped
-from mcdp_posets import (Map, NotBelongs, PosetProduct, UpperSet,
+from mcdp_posets import (NotBelongs, UpperSet,
     UpperSets, get_product_compact, poset_minima)
-from mocdp.exceptions import DPInternalError, do_extra_checks
+from mcdp_posets import LowerSets, LowerSet
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_maxima
+from mocdp.exceptions import DPInternalError, do_extra_checks, mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
 
-from .primitive import NormalForm, NotFeasible, PrimitiveDP
+from .primitive import NotFeasible, PrimitiveDP
 from .tracer import Tracer
 
 
@@ -25,7 +27,7 @@ class Series(PrimitiveDP):
         F2 = self.dp2.get_fun_space()
 
         if not R1 == F2:
-            msg = 'Cannot connect different spaces.'
+            msg = 'Cannot connect different spaces R1 = {} and F2 = {}.'.format(R1,F2)
             raise_desc(DPInternalError, msg, dp1=self.dp1.repr_long(),
                        dp2=self.dp2.repr_long(), R1=R1, F2=F2)
 
@@ -75,7 +77,8 @@ class Series(PrimitiveDP):
         r1s = self.dp1.solve(f)
         for r1 in r1s.minimals:
             m1s = self.dp1.get_implementations_f_r(f1, r1)
-            if do_extra_checks():
+            
+            if do_extra_checks(): 
                 try:
                     for m1 in m1s:
                         self.M1.belongs(m1)
@@ -169,20 +172,41 @@ class Series(PrimitiveDP):
             tr1 = UpperSets(R1)
             tr1.belongs(u1)
 
+        mcdp_dev_warning('rewrite this keeping structure')
         mins = set([])
-        #print 'u1.minimals',  u1.minimals
         for u in u1.minimals:
             with trace.child('dp2') as t:
                 v = self.dp2.solve_trace(u, t)
             mins.update(v.minimals)
 
-        ressp = self.get_res_space()
-        minimals = poset_minima(mins, ressp.leq)
+        R = self.get_res_space()
+        minimals = poset_minima(mins, R.leq)
 
-        us = UpperSet(minimals, ressp)
+        us = UpperSet(minimals, R)
 
         self._solve_cache[func] = us
         return trace.result(us)
+
+    def solve_r(self, r):
+        l2 = self.dp2.solve_r(r)
+
+        if do_extra_checks():
+            F2 = self.dp2.get_fun_space()
+            LF2 = LowerSets(F2)
+            LF2.belongs(l2)
+
+        maxs = set([])
+        
+        # todo: express as operation on antichains
+        for l in l2.maximals:    
+            v = self.dp1.solve_r(l)
+            maxs.update(v.maximals)
+
+        F = self.get_fun_space()
+        maximals = poset_maxima(maxs, F.leq)
+
+        lf = LowerSet(maximals, F)
+        return lf
 
     def __repr__(self):
         return 'Series(%r, %r)' % (self.dp1, self.dp2)
@@ -191,84 +215,17 @@ class Series(PrimitiveDP):
         r1 = self.dp1.repr_long()
         r2 = self.dp2.repr_long()
         s1 = 'Series:'
-        s2 = ' %s -> %s' % (self.get_fun_space(), self.get_res_space())
-        s = s1 + ' % ' + s2 + self._add_extra_info()
+        s2 = ' %s ⇸ %s' % (self.get_fun_space(), self.get_res_space())
+        s = s1 + ' % ' + s2
         s += '\n' + indent(r1, '. ', first='\ ')
-
-#         if hasattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME):
-#             a = getattr(self.dp1, ATTRIBUTE_NDP_RECURSIVE_NAME)
-#             s += '\n (labeled as %s)' % a.__str__()
-
         s += '\n' + indent(r2, '. ', first='\ ')
-# 
-#         if hasattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME):
-#             a = getattr(self.dp2, ATTRIBUTE_NDP_RECURSIVE_NAME)
-#             s += '\n (labeled as %s)' % a.__str__()
-
         return s
-
-    def get_normal_form(self):
-        """
-            
-            alpha1: U(F1) x S1 -> U(R1)
-            beta1:  U(F1) x S1 -> S1
-            
-            alpha2: U(R1) x S2 -> U(R2)
-            beta2:  U(R1) x S2 -> S2
-             
-        """
-
-        S1, alpha1, beta1 = self.dp1.get_normal_form()
-        S2, alpha2, beta2 = self.dp2.get_normal_form()
-
-        F1 = self.dp1.get_fun_space()
-        # R1 = self.dp1.get_res_space()
-        R2 = self.dp2.get_res_space()
-
-        UR2 = UpperSets(R2)
-
-        UF1 = UpperSets(F1)
-        """
-        S = S1 x S2 is a Poset
-        alpha: UF1 x S -> UR1
-        beta: UF1 x S -> S
-"""     
-        S, pack, unpack = get_product_compact(S1, S2)
-
-        D = PosetProduct((UF1, S))
-                         
-        class SeriesAlpha(Map):
-            def __init__(self, dp):
-                self.dp = dp
-                dom = D
-                cod = UR2
-                Map.__init__(self, dom, cod)
-
-            def _call(self, x):
-                (F, s) = x
-                (s1, s2) = unpack(s)
-                a = alpha1((F, s1))
-                return alpha2((a, s2))
-
-        class SeriesBeta(Map):
-            def __init__(self, dp):
-                self.dp = dp
-                dom = D
-                cod = S
-                Map.__init__(self, dom, cod)
-
-            def _call(self, x):
-                (F, s) = x
-                (s1, s2) = unpack(s)
-                r_1 = beta1((F, s1))
-                a = alpha1((F, s1))
-                r_2 = beta2((a, s2))
-                
-                return pack(r_1, r_2)
-
-        return NormalForm(S, SeriesAlpha(self), SeriesBeta(self))
-
-
+    
+    def repr_h_map(self):
+        return 'f ⟼ [h2 ○ h1](f)' # XXX
+    
+    def repr_hd_map(self):
+        return 'r ⟼ [h1* ○ h2*](r)' # XXX
 
 
 Series0 = Series 
@@ -282,22 +239,6 @@ Series0 = Series
 #     def prod_get_state(S1, S2, s):  # @UnusedVariable
 #         (s1, s2) = s
 #         return (s1, s2)
-
-# 
-# @contract(ur1=UpperSet, lf2=LowerSet)
-# def non_zero_intersection(ur1, lf2):
-#     assert isinstance(ur1, UpperSet), ur1
-#     assert isinstance(lf2, LowerSet), lf2
-#     """ Returns true if the two sets have non zero intersection """
-#     mcdp_dev_warning('Check better this one')
-#     for m in ur1.minimals:
-#         try:
-#             lf2.belongs(m)
-#             return True
-#         except NotBelongs:
-#             pass
-#     return False
-
 
 
     

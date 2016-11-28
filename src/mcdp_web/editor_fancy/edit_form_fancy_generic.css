@@ -1,8 +1,23 @@
-#syntax_error {
-	font-weight: bold;
-	font-size: 70%;
+#syntax_error, #language_warnings {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+
+    width: 100ex;
+    font-weight: bold;
+    font-size: 70%;
+
+}
+/**[contenteditable="true"]{display: inline-block;}*/
+
+#syntax_error, .unparsable {
 	color: red;
 }
+
+#language_warnings {
+    color: darkorange;
+}
+
+
 #error_notice {
 	color: red;
 }

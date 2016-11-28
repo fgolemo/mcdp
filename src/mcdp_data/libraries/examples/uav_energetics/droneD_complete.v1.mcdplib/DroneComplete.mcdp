@@ -1,6 +1,6 @@
 mcdp {  
   provides travel_distance [km]
-  provides num_missions [R]
+  provides num_missions [dimensionless]
   provides carry_payload [g]
 
   requires total_cost_ownership [$]
@@ -13,7 +13,7 @@ mcdp {
     distance <= endurance * velocity
   }
 
-  ae = new ActuationEnergetics
+  ae = instance `ActuationEnergetics
 
   ae.endurance >= strategy.endurance
   ae.velocity >= strategy.velocity
@@ -21,7 +21,7 @@ mcdp {
   ae.extra_payload >= carry_payload
   strategy.distance >= travel_distance
 
-  computer = new Computer
+  computer = instance `Computer
 
   perception = instance template mcdp {
     provides velocity [m/s]
@@ -48,11 +48,11 @@ mcdp {
   ae.extra_power >= computer.power + sensor.power
 
   # We can take into account the shipping cost
-  shipping = new Shipping  
+  shipping = instance  `Shipping  
   
-  total_mass = ae.total_mass 
+  total_mass = total_mass required by ae
 
   shipping.ships >= total_mass
 
-  total_cost_ownership >= shipping.postage + ae.total_cost
+  total_cost_ownership >= postage required by shipping + total_cost required by ae
 }

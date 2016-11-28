@@ -464,7 +464,9 @@
 			<key>settings</key>
 			<dict> 
 				<key>foreground</key>
-				<string>#770000</string>
+
+				<string>#770000</string><!-- red -->
+				
 			</dict>
 		</dict>
 		<dict>
@@ -473,7 +475,7 @@
 			<key>settings</key>
 			<dict> 
 				<key>foreground</key>
-				<string>#007700</string>
+				<string>#007700</string> <!-- green -->
 			</dict>
 		</dict>
 

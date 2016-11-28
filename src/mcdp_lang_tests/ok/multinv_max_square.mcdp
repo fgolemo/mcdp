@@ -2,15 +2,15 @@
 mcdp {
 
   sub multinv = instance abstract mcdp {
-  	requires x [R]
-  	requires y [R]
+  	requires x [dimensionless]
+  	requires y [dimensionless]
   
-  	provides c [R]
+  	provides c [dimensionless]
   
     c <= x * y
   }
 
-  multinv.c >= max( square(multinv.x), 1.0 [R])
+  multinv.c >= max( square(multinv.x), 1.0 [dimensionless])
 
   requires y for multinv
 

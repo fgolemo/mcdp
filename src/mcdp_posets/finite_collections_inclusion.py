@@ -14,10 +14,15 @@ __all__ = [
 ]
 
 class FiniteCollectionsInclusion(Poset):
-    """ Lattice of finite collections 
+    """ 
+        Lattice of finite collections. 
     
         The bottom is the empty set.
         The top is the entire set.
+        
+        The elements are represented as instances of the
+        class FiniteCollection.
+        
     """
 
     @contract(S=Space)
@@ -30,10 +35,7 @@ class FiniteCollectionsInclusion(Poset):
         S = self.S
         return FiniteCollection(elements=elements, S=S)
 
-    def get_maximal_elements(self):
-        top = self.get_top()
-        return set([top])
-
+ 
     def meet(self, a, b): 
         """ Set intersection """
         check_isinstance(a, FiniteCollection)
@@ -47,7 +49,12 @@ class FiniteCollectionsInclusion(Poset):
         check_isinstance(b, FiniteCollection)
         intersection = a.elements | b.elements  # frozenset
         return FiniteCollection(elements=set(intersection), S=self.S)
-        
+    
+    
+    def get_maximal_elements(self):
+        top = self.get_top()
+        return set([top])
+    
     # This can only be implemented if we can enumerate the elements of Space
     def get_top(self):
         if isinstance(self.S, FiniteCollectionAsSpace):

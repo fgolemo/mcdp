@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import itertools
 
 from common_stats import CommonStats
@@ -139,7 +140,7 @@ def report_plane2(data):
     color_shadow = params0['color_shadow']
     markers = params0['markers']
 
-    P = parse_poset('R x R')
+    P = parse_poset('dimensionless x dimensionless')
     
     with f.plot('resources2', **fig2) as pylab:
         ieee_spines_zoom3(pylab)
@@ -231,7 +232,7 @@ def report_plane1(data):
     color_shadow = params0['color_shadow']
     markers = params0['markers']
 
-    P = parse_poset('R x R')
+    P = parse_poset('dimensionless x dimensionless')
     
     with f.plot('resources2', **fig2) as pylab:
         ieee_spines_zoom3(pylab)

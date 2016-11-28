@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, check_isinstance
 from mcdp_dp import (Constant, ConstantMinimals, Limit, LimitMaximals,
     get_conversion)
 from mcdp_posets import NotLeq, Poset, get_types_universe
 from mocdp.comp import Connection, dpwrap
-from mocdp.comp.context import CResource, ValueWithUnits
-from mocdp.exceptions import DPSemanticError
+from mocdp.comp.context import CResource, ValueWithUnits, CFunction
+from mocdp.exceptions import DPSemanticError, DPInternalError
 
 
+# from mocdp import logger
 @contract(resources='seq')
-def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix):
+def create_operation(context, dp, resources, name_prefix, op_prefix=None, res_prefix=None):
     """
     
         This is useful to create operations that take possibly many inputs
@@ -29,6 +30,11 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
     """
     # new name for the ndp
     name = context.new_name(name_prefix)
+    if op_prefix is None:
+        op_prefix = '_op'
+    if res_prefix is None:
+        res_prefix = '_res'
+        
     name_result = context.new_res_name(res_prefix)
 
     connections = []
@@ -36,7 +42,6 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
     for i, r in enumerate(resources):
         ni = context.new_fun_name('%s%s' % (op_prefix, i))
         fnames.append(ni)
-
 
     fnames_ = fnames[0] if len(fnames) == 1 else fnames
     ndp = dpwrap(dp, fnames_, name_result)
@@ -55,20 +60,17 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
         if not tu.equal(F, R):
             conversion = get_conversion(R, F)
             if conversion is None:
-                pass
+                msg = 'I need a conversion from %s to %s' % (R, F)
+                raise DPInternalError(msg)
             else:
                 r = create_operation(context, conversion, [r],
-                                     name_prefix='_conv', op_prefix='_op',
-                                     res_prefix='_res')
+                                     name_prefix='_conversion_for_%s' % name_result)
 
         R = context.get_rtype(r)
         assert tu.equal(F, R)
 
         c = Connection(dp1=r.dp, s1=r.s, dp2=name, s2=fnames[i])
         connections.append(c)
-
-    if len(fnames) == 1:
-        fnames = fnames[0]
 
     for c in connections:
         context.add_connection(c)
@@ -77,22 +79,58 @@ def create_operation(context, dp, resources, name_prefix, op_prefix, res_prefix)
     return res
 
 
-def create_operation_lf(context, dp, functions, name_prefix, op_prefix, res_prefix):
+def create_operation_lf(context, dp, functions, name_prefix, 
+                        op_prefix='_op', res_prefix='_res', allow_conversion=True):
     name = context.new_name(name_prefix)
     name_result = context.new_res_name(res_prefix)
-
-    connections = []
+    
     rnames = []
     for i, f in enumerate(functions):
         ni = context.new_fun_name('%s%s' % (op_prefix, i))
-        c = Connection(dp2=f.dp, s2=f.s, dp1=name, s1=ni)
         rnames.append(ni)
+        
+    _rnames = rnames[0] if len(rnames) == 1 else rnames
+    ndp = dpwrap(dp, name_result, _rnames)
+
+    connections = []
+    tu = get_types_universe()
+    for i, f in enumerate(functions):
+        # source resource
+        Fi = context.get_ftype(f)
+        # function
+        Fhave = ndp.get_rtype(rnames[i])
+
+#         print('------- argu %d' % i)
+#         
+#         print('I need to connect function %s of type %s to resource %s of new NDP with type %s'%
+#               (f, Fi, rnames[i], Fhave))
+#         
+#         print('Fi: %s' % Fi)
+#         print('Fhave: %s' % Fhave)
+        
+        if not tu.equal(Fi, Fhave):
+            if not allow_conversion:
+                msg = ('The types are %s and %s are not equal, and '
+                       'allow_conversion is False' % (Fi, Fhave))
+                raise DPInternalError(msg)
+            
+#             print('creating conversion')
+            conversion = get_conversion(Fhave, Fi)
+            if conversion is None:
+                msg = 'I need a conversion from %s to %s' % (Fi, Fhave)
+                raise DPInternalError(msg)
+            else:
+#                 print('Conversion: %s' % conversion.repr_long())
+#                 print('Creating recursive...')
+                f = create_operation_lf(context, conversion, [f],
+                                        name_prefix='_conversion_for_%s' % name_result, 
+                                        allow_conversion=False)
+                 
+
+        c = Connection(dp2=f.dp, s2=f.s, dp1=name, s1=rnames[i])
+
         connections.append(c)
 
-    if len(rnames) == 1:
-        rnames = rnames[0]
-
-    ndp = dpwrap(dp, name_result, rnames)
     context.add_ndp(name, ndp)
 
     for c in connections:
@@ -154,16 +192,42 @@ def get_resource_possibly_converted(r, P, context):
         try:
             tu.check_leq(R, P)
         except NotLeq as e:
-            msg = 'Cannot convert %s to %s.'
-            raise_wrapped(DPSemanticError, e, msg)  # , where=rvalue.where)
+            msg = 'Cannot convert %s to %s.' % (R, P)
+            raise_wrapped(DPSemanticError, e, msg, R=R, P=P)
 
         conversion = get_conversion(R, P)
         if conversion is None:
             return r
         else:
             r2 = create_operation(context, conversion, [r],
-                                 name_prefix='_conv', op_prefix='_op',
+                                 name_prefix='_conv_grpc', op_prefix='_op',
                                  res_prefix='_res')
             return r2
 
+@contract(returns=CFunction, cf=CFunction, P=Poset)
+def get_function_possibly_converted(cf, P, context):
+    """ Returns a resource possibly converted to the space P """
+    check_isinstance(cf, CFunction)
+
+    F = context.get_ftype(cf)
+    tu = get_types_universe()
+    
+    if tu.equal(F, P):
+        return cf
+    else:
+        try:
+            tu.check_leq(P, F)
+        except NotLeq as e:
+            msg = 'Cannot convert %s to %s.' % (P, F)
+            raise_wrapped(DPSemanticError, e, msg,P=P, F=F)
+
+        conversion = get_conversion(P, F)
+        if conversion is None:
+            return cf
+        else:
+            cf2 = create_operation_lf(context, dp=conversion, 
+                                      functions=[cf], 
+                                      name_prefix='_conv_gfpc', 
+                                      op_prefix='_op', res_prefix='_res')
+            return cf2
 

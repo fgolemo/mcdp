@@ -11,6 +11,7 @@ __all__ = [
 
 class FiniteCollection():
     """ This is used as a value, whose Space is FinitecollectionsInclusion """
+    
     @contract(elements='set|list', S=Space)
     def __init__(self, elements, S):
         self.elements = frozenset(elements)

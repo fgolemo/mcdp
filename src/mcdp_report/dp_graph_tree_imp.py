@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from mcdp_dp import (ApproximableDP, CoProductDPLabels, Constant, DPLoop0,
-    DPLoop2, LabelerDP, Limit, Mux, OpaqueDP, Parallel,
-    PrimitiveDP, Series0, WrapAMap)
+from mcdp_dp import (ApproximableDP, CoProductDPLabels,
+    DPLoop2, LabelerDP, OpaqueDP, Parallel,
+    PrimitiveDP, Series0)
+from mcdp_dp.dp_parallel_n import ParallelN
 
 
 __all__ = [
@@ -11,21 +12,40 @@ __all__ = [
 
 def get_dp_label(dp):
     label = type(dp).__name__
-    if isinstance(dp, Mux):
-        label = 'Mux\n%s' % str(dp.coords)
-    if isinstance(dp, Constant):
-        # x = '%s %s' % (dp.R.format(dp.c), dp.R)
-        x = dp.R.format(dp.c)
-        label = 'Constant\n%s' % x
-    if isinstance(dp, Limit):
-        x = '<= %s [%s]' % (dp.F.format(dp.limit), dp.F)
-        label = 'Limit\n%s' % x
-    if isinstance(dp, WrapAMap):
-        label = 'WrapAMap\n%s' % dp.diagram_label()
+#     if False:
+#         if isinstance(dp, Mux):
+#             label = 'Mux\nh: %s' % transform_pretty_print(dp.amap.dom, dp.amap.coords)
+#             if dp.amap_dual is not None:
+#                 label += '\nh*: %s' %  transform_pretty_print(dp.amap_dual.dom, dp.amap_dual.coords, 'A')
+#             return label
+#         elif isinstance(dp, Constant):
+#             # x = '%s %s' % (dp.R.format(dp.c), dp.R)
+#             x = dp.R.format(dp.c)
+#             label = 'Constant\n%s' % x
+#         elif isinstance(dp, Limit):
+#             x = '<= %s [%s]' % (dp.F.format(dp.limit), dp.F)
+#             label = 'Limit\n%s' % x
+#         elif isinstance(dp, WrapAMap):
+#             label = 'WrapAMap\n%s' % dp.diagram_label()
+        
+#     label = type(dp).__name__ + '/' + label
+    
+    label += '\n h: ' + dp.repr_h_map() 
+    label += '\n h*: ' + dp.repr_hd_map()
+    
+#     label += 'r<sub>1</sub>r<sup>2</sup>'
+    # "₁₂₃₄₅₆₇₈₉"
+    
+#     subs ={ "₁": "1", "₂": "2", "₃": "3", "₄":"4", "₅": "5", 
+#            "₆":"6", "₇": "7", "₈": "8", "₉": "9"}
+#     for s, ss in subs.items():
+#         label = label.replace(s, ss)
+#     
     return label
 
 @contract(dp0=PrimitiveDP)
-def dp_graph_tree(dp0, imp=None, compact=False):
+def dp_graph_tree(dp0, imp= 
+                  None, compact=False, direction='TB'):
     """ 
         Visualizes the DP as a tree.
         
@@ -38,15 +58,14 @@ def dp_graph_tree(dp0, imp=None, compact=False):
     add_leaf_text = not compact
     add_junction_text = not compact
 
-
     def go(dp, imp):
         """ Each of these must return a node """
         if isinstance(dp, Series0):
             r = go_series(dp, imp)
         elif isinstance(dp, Parallel):
             r = go_parallel(dp, imp)
-        elif isinstance(dp, DPLoop0):
-            r = go_loop(dp, imp)
+        elif isinstance(dp, ParallelN):
+            r = go_parallel_n(dp, imp)
         elif isinstance(dp, DPLoop2):
             r = go_loop2(dp, imp)
         elif isinstance(dp, OpaqueDP):
@@ -173,6 +192,30 @@ def dp_graph_tree(dp0, imp=None, compact=False):
         create_edge(n, n2, dp.dp2)
         return n
 
+    def go_parallel_n(dp, imp):
+#         if imp is not None:
+#             m1, m2 = dp._split_m(imp)
+#         else:
+#             m1 = m2 = None
+        nodes = []
+        for dp_child in dp.dps:
+            mi = None
+            ni = go(dp_child, mi)
+            nodes.append(ni)
+
+        if add_junction_text:
+            label = 'par'
+        else:
+            label = ""
+        n = gg.newItem(label)
+        gg.styleApply("junction", n)
+        gg.styleApply('junction_par', n)
+
+        for ni, dp_i in zip(nodes, dp.dps):
+            create_edge(n, ni, dp_i)
+        
+        return n
+    
     def go_loop(dp, imp):
         if do_imp:
             m0, _f2 = dp._unpack_m(imp)
@@ -237,7 +280,9 @@ def dp_graph_tree(dp0, imp=None, compact=False):
         return s
 
     import my_gvgen as gvgen
-    gg = gvgen.GvGen(options="rankdir=TB")
+    
+    assert direction in ['TB', 'LR']
+    gg = gvgen.GvGen(options="rankdir=%s" % direction)
 
     gg.styleAppend("root", "shape", "none")
 

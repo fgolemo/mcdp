@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 from abc import abstractmethod
-from collections import namedtuple
 
 from decent_logs import WithInternalLog
 
 from contracts import contract
 from contracts.utils import indent, raise_desc
-from mcdp_posets import (LowerSet, Map, NotBelongs, Poset, PosetProduct, Space,
+from mcdp_posets import (LowerSet, NotBelongs, Poset, Space,
     SpaceProduct, UpperSet, UpperSets, poset_minima)
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.exceptions import do_extra_checks
 
 from .primitive_meta import PrimitiveMeta
@@ -44,14 +42,14 @@ class PrimitiveDP(WithInternalLog):
     """ 
         There are F, R, I.
         
-        solve : F -> U(R)
-        get_implementations_f_r: F x R -> set(I)
+        solve : F ⟶ U(R)
+        get_implementations_f_r: F x R ⟶ set(I)
             (note that F is not optimal by each I, merely feasible...)
                 
-        evaluate: I -> L(F), U(R)
+        evaluate: I ⟶ L(F), U(R)
         
         future:
-            solve : F -> U(R)
+            solve : F ⟶ U(R)
         
         f' is feasible for I if f' \in eval(I).f
     
@@ -72,6 +70,17 @@ class PrimitiveDP(WithInternalLog):
         '''
             Given one f point, returns an UpperSet of resources.
         '''
+        
+    @contract(returns=LowerSet)
+    def solve_r(self, r):  # @UnusedVariable
+        """ Dual of solve. Given a resource, returns a LowerSet
+            of functionality. """
+        msg = 'Function solve_r() not implemented.' 
+        raise_desc(NotImplementedError, msg, type=type(self), dp=self)
+
+    @contract(returns=LowerSet)
+    def solve_r_trace(self, func, tracer):  # @UnusedVariable
+        return self.solve_r(func)
 
     @abstractmethod
     @contract(returns='tuple($LowerSet, $UpperSet)')
@@ -193,47 +202,47 @@ class PrimitiveDP(WithInternalLog):
         minima = poset_minima(res, ressp.leq)
         return ressp.Us(minima)
 
-    def get_normal_form(self):
-        """
-            S is a Poset
-            alpha: U(F) x S -> U(R)
-            beta:  U(F) x S -> S 
-        """
-        One = PosetProduct(())
-        S = One
-
-        class DefaultAlphaMap(Map):
-            def __init__(self, dp):
-                self.dp = dp
-                F = dp.get_fun_space()
-                R = dp.get_res_space()
-                UF = UpperSets(F)
-                dom = PosetProduct((UF, S))
-                cod = UpperSets(R)
-                Map.__init__(self, dom, cod)
-
-            def _call(self, x):
-                F, _s = x
-                Res = self.dp.solveU(F)
-                return Res
-
-        class DefaultBeta(Map):
-            def __init__(self, dp):
-                self.dp = dp
-                F = dp.get_fun_space()
-                UF = UpperSets(F)
-                dom = PosetProduct((UF, S))
-                cod = S
-                Map.__init__(self, dom, cod)
-
-            def _call(self, x):
-                _F, s = x
-                return s
-
-        alpha = DefaultAlphaMap(self)
-        beta = DefaultBeta(self)
-
-        return NormalForm(S=S, alpha=alpha, beta=beta)
+#     def get_normal_form(self):
+#         """
+#             S is a Poset
+#             alpha: U(F) x S ⟶ U(R)
+#             beta:  U(F) x S ⟶ S 
+#         """
+#         One = PosetProduct(())
+#         S = One
+# 
+#         class DefaultAlphaMap(Map):
+#             def __init__(self, dp):
+#                 self.dp = dp
+#                 F = dp.get_fun_space()
+#                 R = dp.get_res_space()
+#                 UF = UpperSets(F)
+#                 dom = PosetProduct((UF, S))
+#                 cod = UpperSets(R)
+#                 Map.__init__(self, dom, cod)
+# 
+#             def _call(self, x):
+#                 F, _s = x
+#                 Res = self.dp.solveU(F)
+#                 return Res
+# 
+#         class DefaultBeta(Map):
+#             def __init__(self, dp):
+#                 self.dp = dp
+#                 F = dp.get_fun_space()
+#                 UF = UpperSets(F)
+#                 dom = PosetProduct((UF, S))
+#                 cod = S
+#                 Map.__init__(self, dom, cod)
+# 
+#             def _call(self, x):
+#                 _F, s = x
+#                 return s
+# 
+#         alpha = DefaultAlphaMap(self)
+#         beta = DefaultBeta(self)
+# 
+#         return NormalForm(S=S, alpha=alpha, beta=beta)
 
 #     def get_normal_form_approx(self):
 #         gamma = DefaultGamma(self)
@@ -244,30 +253,39 @@ class PrimitiveDP(WithInternalLog):
     def __repr__(self):
         return '%s(%s→%s)' % (type(self).__name__, self.F, self.R)
 
-    def _add_extra_info(self):
-        if False:
-            s = ""
-
-            if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
-                x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
-                s += ' named: ' + x.__str__()
-
-            s3 = self.get_imp_space().__repr__()
-            s += ' I = %s' % s3
-
-            from mocdp.comp.recursive_name_labeling import get_names_used
-            if isinstance(self.I, SpaceProduct):
-                names = get_names_used(self.I)
-                # names = filter(None, names)
-                if names:
-                    s += ' names: %s' % names
-        else:
-            return ""
-
     def repr_long(self):
-        s = self.__repr__()
-        return s + self._add_extra_info()
+        """ A long, multiline representation """
+        return self.__repr__()
 
+    def repr_h_map(self):
+        """ Returns a string of the type "f |-> P(f)" """
+        return '(undefined for %s)' %  type(self).__name__
+    
+    def repr_hd_map(self):
+        """ Returns a string of the type "f |-> P(f)" """  
+        return '(undefined for %s)' %  type(self).__name__
+
+#     def _add_extra_info(self):
+#         if False:
+#             s = ""
+# 
+#             if hasattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME):
+#                 x = getattr(self, ATTRIBUTE_NDP_RECURSIVE_NAME)
+#                 s += ' named: ' + x.__str__()
+# 
+#             s3 = self.get_imp_space().__repr__()
+#             s += ' I = %s' % s3
+# 
+#             from mocdp.comp.recursive_name_labeling import get_names_used
+#             if isinstance(self.I, SpaceProduct):
+#                 names = get_names_used(self.I)
+#                 # names = filter(None, names)
+#                 if names:
+#                     s += ' names: %s' % names
+#         else:
+#             return ""
+
+    
     def _children(self):  # XXX: is this still used?
         l = []
         if hasattr(self, 'dp1'):
@@ -282,23 +300,18 @@ class PrimitiveDP(WithInternalLog):
 
         u = lambda x: x.decode('utf-8')
         ulen = lambda x: len(u(x))
-
-        def clip(x, n):
-            s = str(x)
-            unicode_string = s.decode("utf-8")
-            l = len(unicode_string)
-            s = s + ' ' * (n - l)
-            if len(u(s)) > n:
-                x = u(s)
-                x = x[:n - 3] + '...'
-                s = x.encode('utf-8')
-            return s
-
-        # S, _, _ = self.get_normal_form()
-#         s2 = '   [F = %s  R = %s  M = %s  S = %s]' % (clip(self.F, 13),
-#                        clip(self.R, 10), clip(self.M, 15),
-#                            clip(S, 28))
-
+# 
+#         def clip(x, n):
+#             s = str(x)
+#             unicode_string = s.decode("utf-8")
+#             l = len(unicode_string)
+#             s = s + ' ' * (n - l)
+#             if len(u(s)) > n:
+#                 x = u(s)
+#                 x = x[:n - 3] + '...'
+#                 s = x.encode('utf-8')
+#             return s
+ 
         s2 = ""
 
         head = s + ' ' * (n - ulen(s) - ulen(s2)) + s2
@@ -346,7 +359,7 @@ class ApproximableDP(PrimitiveDP):
         pass
 
 
-NormalForm = namedtuple('NormalForm', ['S', 'alpha', 'beta'])
+# NormalForm = namedtuple('NormalForm', ['S', 'alpha', 'beta'])
 
 # NormalFormApprox = namedtuple('NormalFormApprox', ['S', 'gamma', 'delta'])
 #

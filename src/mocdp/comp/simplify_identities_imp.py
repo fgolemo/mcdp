@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_wrapped
 from mcdp_dp import IdentityDP
@@ -6,6 +7,7 @@ from mocdp.comp.context import Connection
 from mocdp.comp.interfaces import NotConnected
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPInternalError
+
 
 __all__ = [
     'simplify_identities',

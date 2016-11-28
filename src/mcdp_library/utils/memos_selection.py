@@ -1,6 +1,11 @@
-from .safe_pickling import safe_pickle_dump, safe_pickle_load
-from contracts import contract
+# -*- coding: utf-8 -*-
 import os
+
+from contracts import contract
+from mocdp import MCDPConstants
+
+from .safe_pickling import safe_pickle_dump, safe_pickle_load
+
 
 __all__ = ['memo_disk_cache2']
 
@@ -36,7 +41,8 @@ def memo_disk_cache2(cache_file, data, f):
 
     result = f()
 
-    logger.info('Writing to cache %s.' % cache_file)
+    if MCDPConstants.log_cache_writes:
+        logger.info('Writing to cache %s.' % cache_file)
     res = dict(data=data, result=result)
     safe_pickle_dump(res, cache_file)
 

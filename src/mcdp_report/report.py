@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import warnings
-
 from contracts import contract
 from mcdp_posets import PosetProduct, R_dimensionless
 from mocdp.comp.interfaces import NamedDP
@@ -32,19 +30,19 @@ def report_dp1(dp, imp=None):
     gg_figure(r, 'graph', gg)
 
     r.text('long', dp.repr_long())
-
-    try:
-        S, alpha, beta = dp.get_normal_form()
-
-        s = ""
-        s += 'S: %s' % S
-        s += '\nα: %s' % alpha
-        s += '\nβ: %s' % beta
-
-        r.text('normalform', s)
-        r.text('tree_long', dp.tree_long())
-    except Exception as e:
-        warnings.warn('Normal form not implemented %s' % e)
+# 
+#     try:
+#         S, alpha, beta = dp.get_normal_form()
+# 
+#         s = ""
+#         s += 'S: %s' % S
+#         s += '\nα: %s' % alpha
+#         s += '\nβ: %s' % beta
+# 
+#         r.text('normalform', s)
+#         r.text('tree_long', dp.tree_long())
+#     except Exception as e:
+#         warnings.warn('Normal form not implemented %s' % e)
 
 
 

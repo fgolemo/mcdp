@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 
 from contracts import contract
@@ -19,11 +20,10 @@ class Librarian():
         Indexes several libraries. 
         
         A hook is created so that each one can find the others.
-       
-        l = Librarian()
-        l.find_libraries(dirname)
-        
-        lib = l.load_library('short') # returns MCDPLibrary
+           
+            l = Librarian()
+            l.find_libraries(dirname)
+            lib = l.load_library('short') # returns MCDPLibrary
     """
 
     def __init__(self):
@@ -87,7 +87,7 @@ class Librarian():
         return library_name, data
         
     @contract(libname=str, returns='isinstance(MCDPLibrary)')
-    def load_library(self, libname):
+    def load_library(self, libname, context=None):
         check_isinstance(libname, str)
         """ hook to pass to MCDPLibrary instances to find their sisters. """
         if not libname in self.libraries:

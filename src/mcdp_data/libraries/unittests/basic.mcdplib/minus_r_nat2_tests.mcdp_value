@@ -1,0 +1,9 @@
+#  r = 0 -> f empty
+#  r = 1 -> f empty
+#  r = Top -> f <= Top
+
+< 
+    assert_equal( solve_r(Nat:0, `minus_r_nat2), ↓ EmptySet Nat),
+    assert_equal( solve_r(Nat:1, `minus_r_nat2), ↓ EmptySet Nat),
+    assert_equal( solve_r(Top Nat, `minus_r_nat2), ↓ { Top Nat })
+>

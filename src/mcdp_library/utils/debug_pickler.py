@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from StringIO import StringIO
 from pickle import (Pickler, SETITEM, MARK, SETITEMS, EMPTY_TUPLE, TUPLE, POP,
     _tuplesize2code, POP_MARK)

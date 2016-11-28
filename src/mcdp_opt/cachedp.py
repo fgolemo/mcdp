@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from mcdp_dp.primitive import PrimitiveDP
 from mocdp.memoize_simple_imp import memoize_simple
 

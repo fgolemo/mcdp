@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .debug_pickler import *
 from .dir_from_package_nam import *
 from .locate_files_imp import *

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
+import sys
+
 from contracts import contract, raise_wrapped
-from contracts.utils import indent, raise_desc
+from contracts.utils import indent, raise_desc, check_isinstance
 from mcdp_dp import PrimitiveDP
 from mcdp_dp.dp_flatten import get_it
 from mcdp_posets import PosetProduct
@@ -73,7 +75,7 @@ class SimpleWrap(NamedDP):
         except Exception as e:
             msg = 'Cannot wrap primitive DP.'
             raise_wrapped(ValueError, e, msg, dp=self.dp, F=F, R=R,
-                          fnames=fnames, rnames=rnames)
+                          fnames=fnames, rnames=rnames, exc=sys.exc_info())
 
     def abstract(self):
         return self
@@ -87,6 +89,59 @@ class SimpleWrap(NamedDP):
     def check_fully_connected(self):
         pass  # it is
 
+
+    def get_copy_with_renamed_function(self, current, updated):
+        """ Returns an equivalent SimpleWrap with one function
+            name replaced. """
+        check_isinstance(current, str)
+        check_isinstance(updated, str)
+        
+        if self.F_single:
+            if not (self.Fname == current):
+                msg = 'Invalid current function name.'
+                raise_desc(ValueError, msg, ndp=self)
+            fnames2 = updated
+        else:
+            if not (current in self.Fnames):
+                msg = 'Invalid current function name.'
+                raise_desc(ValueError, msg, ndp=self)
+            fnames2 = list(self.Fnames)
+            fnames2[fnames2.index(current)] = updated
+            
+        if self.R_single:
+            rnames2 = self.Rname
+        else:
+            rnames2 = self.Rnames
+
+        return SimpleWrap(dp=self.dp, fnames=fnames2, rnames=rnames2, icon=self.icon)
+           
+    def get_copy_with_renamed_resource(self, current, updated):
+        """ Returns an equivalent SimpleWrap with one resource
+            name replaced. """
+        check_isinstance(current, str)
+        check_isinstance(updated, str)
+        
+        if self.R_single:
+            if not (self.Rname == current):
+                msg = 'Invalid current resource name.'
+                raise_desc(ValueError, msg, ndp=self)
+            rnames2 = updated
+        else:
+            if not (current in self.Rnames):
+                msg = 'Invalid current function name.'
+                raise_desc(ValueError, msg, ndp=self)
+            rnames2 = list(self.Rnames)
+            rnames2[rnames2.index(current)] = updated
+            
+        if self.F_single:
+            fnames2 = self.Fname
+        else:
+            fnames2 = self.Fnames
+
+        return SimpleWrap(dp=self.dp, fnames=fnames2, rnames=rnames2, icon=self.icon)
+            
+
+            
     def get_dp(self):
         dp = self.dp
 

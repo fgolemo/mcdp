@@ -1,9 +1,13 @@
+# -*- coding: utf-8 -*-
+from nose.tools import assert_equal
+
 from comptests.registrar import comptest
 from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_lang.parse_interface import parse_ndp
 from mcdp_lang.syntax import Syntax
-from .utils import parse_wrap_check
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
+
+from .utils import parse_wrap_check
 
 
 @comptest
@@ -25,10 +29,11 @@ def check_approx_res2():
     """
     ndp = parse_ndp(s)
     dp = ndp.get_dp()
+    print dp.repr_long()
     res = dp.solve(0.006)
-    assert res.minimals == set([0.01])
+    assert_equal(set([0.01]), res.minimals)
     res = dp.solve(0.016)
-    assert res.minimals == set([0.02])
+    assert_equal(set([0.02]), res.minimals)
 
 @comptest
 def check_approx_res3():

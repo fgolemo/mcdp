@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts import contract
 from contracts.utils import check_isinstance, indent
@@ -23,6 +24,9 @@ class OpaqueDP(PrimitiveDP):
 
     def solve(self, f):
         return self.dp.solve(f)
+
+    def solve_r(self, r):
+        return self.dp.solve_r(r)
 
     def evaluate(self, i):
         return self.dp.evaluate(i)

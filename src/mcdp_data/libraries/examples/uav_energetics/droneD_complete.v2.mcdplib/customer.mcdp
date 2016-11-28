@@ -2,6 +2,6 @@ template mcdp {
     provides budget [$]
 
     requires travel_distance [km]
-    requires num_missions [R]
+    requires num_missions [dimensionless]
     requires carry_payload [g]
 }

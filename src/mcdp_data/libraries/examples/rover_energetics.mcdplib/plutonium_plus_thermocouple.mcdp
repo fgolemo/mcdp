@@ -1,0 +1,6 @@
+mcdp {
+    plutonium_pellet = new PlutoniumPellet
+
+    thermocouple = instance template `Thermocouple
+    heat required by thermocouple <= heat provided by plutonium_pellet
+}

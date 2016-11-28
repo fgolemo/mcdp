@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from contextlib import contextmanager
 
 from contracts import contract
@@ -97,7 +98,7 @@ class Tracer():
                 yield x
 
     def find_loops(self):
-        for x in self.rec_find_has_value('type', 'loop'):
+        for x in self.rec_find_has_value('type', 'loop2'):
             yield x
 
     def rec_find_has_value(self, name, value):

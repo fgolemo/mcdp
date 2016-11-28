@@ -15,6 +15,7 @@ def load_tests_modules():
     import mcdp_dp_tests
     import mcdp_web_tests
     import mcdp_opt_tests
+    import mcdp_figures_tests
 
     from mocdp.comp.flattening import tests  # @Reimport
     from mocdp.comp import tests  # @Reimport
@@ -35,8 +36,6 @@ def jobs_comptests(context):
 
     from mcdp_lang_tests.examples import define_tests
     define_tests(context)
-
-
 
     # instantiation
     from comptests import jobs_registrar
