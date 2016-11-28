@@ -19,6 +19,7 @@ from quickapp import QuickAppBase
 from system_cmd import CmdException, system_cmd_result
 
 from .utils_mkdir import mkdirs_thread_safe
+from contracts.enabling import disable_all
 
 
 def get_ndp(data):
@@ -357,10 +358,14 @@ class PlotDP(QuickAppBase):
                            help='Other directories (: separated).')
 
         params.add_flag('cache')
+        params.add_flag('contracts')
 
     def go(self):
 
         options = self.get_options()
+        if not options.contracts:
+            disable_all()
+            
         filenames = options.get_extra()
         #print options
         if len(filenames) == 0:

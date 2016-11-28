@@ -90,6 +90,7 @@ user = getpass.getuser()
 #     first = True
 
 def do_extra_checks():
+    return False
     res = not all_disabled()
 #     if _storage.first:
 #         # logger.info('do_extra_checks: %s' % res)

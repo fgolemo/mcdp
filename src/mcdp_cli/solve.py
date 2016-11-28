@@ -7,6 +7,7 @@ from mocdp import logger
 from quickapp import QuickAppBase
 
 from .solve_meat import solve_main
+from contracts.enabling import disable_all
 
 
 class SolveDP(QuickAppBase):
@@ -49,12 +50,21 @@ class SolveDP(QuickAppBase):
                        help='Use lower bound approx')
         params.add_int('upper', default=None,
                        help='Use upper bound approx')
+        
+        params.add_flag('contracts', 
+                        help='Activate contracts.')
+
 
     def go(self):
         
         logger.setLevel(logging.DEBUG)
 
         options = self.get_options()
+        
+        if not options.contracts:
+            logger.debug('Disabling PyContrats. Use --contracts to enable.')
+            disable_all()
+            
         if options.expect_nimp is not None:
             options.imp = True
 
