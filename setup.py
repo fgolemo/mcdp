@@ -51,7 +51,7 @@ setup(name=name,
         'bs4',
         'nose',
         'PyContracts>=1.7.6',
-        # 'ConfTools>=1.7',
+        'ConfTools>=1.7', # even if implied
         'RepRep>=2.9.3', 
         'DecentLogs',
         'QuickApp>=1.2',
