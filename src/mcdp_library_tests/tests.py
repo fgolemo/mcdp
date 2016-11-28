@@ -12,7 +12,7 @@ from mcdp_library.utils import dir_from_package_name
 from mcdp_tests.generation import for_all_source_mcdp
 from mocdp import logger
 from mocdp.comp.context import Context
-from mocdp.exceptions import DPSemanticError
+from mocdp.exceptions import DPSemanticError, DPNotImplementedError
 from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
 
 
@@ -82,8 +82,6 @@ def define_tests_for_mcdplibs(context):
 
     for libname in enumerate_test_libraries():
         c2 = context.child(libname, extra_report_keys=dict(libname=libname))
-        
-        
 
         c2.child('ndp').comp_dynamic(mcdplib_test_setup_nameddps, libname=libname)
         c2.child('poset').comp_dynamic(mcdplib_test_setup_posets, libname=libname)
@@ -117,19 +115,7 @@ def mcdplib_run_make(mcdplib):
                       display_stderr=True,
                       raise_on_error=True,
                       env=env)
-#
-# def belongs_to_lib(f, d):
-#     """ Returns true if the file is physically inside d
-#         and not, for example, symlinked """
-#     rf = os.path.realpath(f)
-#     rd = os.path.realpath(d)
-#     assert os.path.isdir(rd), rd
-#     assert not os.path.isdir(rf), rf
-#
-#     if rd in rf:
-#         return True
-#     else:
-#         return False
+
 
 def mcdplib_test_setup_nameddps(context, libname):
     """ 
@@ -158,9 +144,12 @@ def mcdplib_test_setup_nameddps(context, libname):
             print('Skipping because syntax error')
             # TODO: actually check syntax error
         else:
-            c = context.child(model_name,  extra_report_keys=dict(id_ndp=model_name))
+            c = context.child(model_name, extra_report_keys=dict(id_ndp=model_name))
 
-            if gives_semantic_error(source):
+            if gives_not_implemented_error(source):
+                c.comp(mcdplib_assert_not_implemented_error_fn, libname, model_name,
+                       job_id='assert_not_implemented_error')
+            elif gives_semantic_error(source):
                 c.comp(mcdplib_assert_semantic_error_fn, libname, model_name,
                        job_id='assert_semantic_error')
             else:
@@ -247,10 +236,28 @@ def gives_semantic_error(source):
     keywords = get_keywords(source)
     return 'semantic_error' in keywords
 
+def gives_not_implemented_error(source):
+    keywords = get_keywords(source)
+    return 'not_implemented_error' in keywords
+
 def gives_syntax_error(source):
     keywords = get_keywords(source)
     return 'syntax_error' in keywords
 
+def mcdplib_assert_not_implemented_error_fn(libname, model_name):
+    l = get_test_library(libname)
+    try:
+        res = l.load_ndp(model_name)
+        res.abstract()
+    except DPNotImplementedError:
+        pass
+    except BaseException as e:
+        msg = "Expected DPNotImplementedError, got %s." % type(e)
+        raise_wrapped(Exception, e, msg)
+    else:
+        msg = "Expected DPNotImplementedError, instead succesfull instantiation."
+        raise_desc(Exception, msg, model_name=model_name, res=res.repr_long())
+    
 def mcdplib_assert_semantic_error_fn(libname, model_name):
     l = get_test_library(libname)
     try:
@@ -259,10 +266,10 @@ def mcdplib_assert_semantic_error_fn(libname, model_name):
     except DPSemanticError:
         pass
     except BaseException as e:
-        msg = "Expected semantic error, got %s." % type(e)
+        msg = "Expected DPSemanticError, got %s." % type(e)
         raise_wrapped(Exception, e, msg)
     else:
-        msg = "Expected an exception, instead succesfull instantiation."
+        msg = "Expected DPSemanticError, instead succesfull instantiation."
         raise_desc(Exception, msg, model_name=model_name, res=res.repr_long())
 
 def mcdplib_test_setup_value(context, libname):

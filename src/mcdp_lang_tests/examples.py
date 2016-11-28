@@ -4,11 +4,11 @@ import os
 
 from contracts.utils import raise_desc
 from mcdp_lang import parse_ndp_filename
+from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import (assert_parsable_to_connected_ndp_fn,
     assert_parsable_to_unconnected_ndp_fn, assert_semantic_error_fn,
     assert_syntax_error_fn, assert_not_implemented_error_fn)
 from mcdp_library.utils import dir_from_package_name, locate_files
-from mcdp_lang.syntax import Syntax
 
 
 def get_marked_tests(filename):
