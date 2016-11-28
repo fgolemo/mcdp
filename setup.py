@@ -52,6 +52,7 @@ setup(name=name,
         'nose',
         'PyContracts>=1.7.6',
         'ConfTools>=1.7', # even if implied
+        'comptests', # xxx: now it's always needed
         'RepRep>=2.9.3', 
         'DecentLogs',
         'QuickApp>=1.2',
