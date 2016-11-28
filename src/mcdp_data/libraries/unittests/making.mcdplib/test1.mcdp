@@ -6,7 +6,7 @@ mcdp {
     b = instance
 
         addmake(root: code batteries_imp.BatterySLA)
-        `Battery_SLA
+        `batteries_v1.Battery_SLA
 
     b.capacity >= 1 MJ
     b.missions >= 600 []
