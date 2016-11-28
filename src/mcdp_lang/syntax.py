@@ -132,16 +132,25 @@ class SyntaxIdentifiers():
     # remember to .copy() this otherwise things don't work
     not_keyword = NotAny(MatchFirst([Keyword(_) for _ in keywords])).setName('not_keyword')
 
-    _idn = (not_keyword+ 
-            Combine(oneOf(list('_' + alphas)) + 
-                    Optional(Word('_' + alphanums)))).setResultsName('idn')
+    _identifier = Combine(oneOf(list('_' + alphas)) + Optional(Word('_' + alphanums))).setName('identifier')
+
+    _idn = (not_keyword + _identifier).setResultsName('identifier except keywords')
 
     @staticmethod
     def get_idn():
-        copy = SyntaxIdentifiers._idn.copy() 
-        copy = copy.setName('identifier')
-        return copy
-
+        """ 
+            Returns an identifier expression ([_a-Z(_a-z1-9)*] 
+            plus the constraint that it cannot be a keyword.
+        """ 
+        return SyntaxIdentifiers._idn.copy() 
+        
+    @staticmethod
+    def get_identifier_unconstrained():
+        """ 
+            Returns an identifier expression ([_a-Z(_a-z1-9)*] 
+            This can be a keyword.
+        """ 
+        return SyntaxIdentifiers._identifier.copy()
 
 class Syntax():
 
@@ -184,7 +193,7 @@ class Syntax():
     comment_res = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentRes(t[0])).setName('comment_res')
     comment_var = sp(copy_expr_remove_action(comment_string_simple), lambda t: CDP.CommentVar(t[0])).setName('comment_val')
 
-    placeholder = SL('[') + SL('[') - (get_idn() | L('poset') | quoted) + SL(']') + SL(']').setName('placeholder')
+    placeholder = SL('[') + SL('[') - (SyntaxIdentifiers.get_identifier_unconstrained() | quoted) + SL(']') + SL(']').setName('placeholder')
     
     dpname_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_dpname(t[0])).setName('dpname_placeholder')
     constant_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_constant(t[0])).setName('constant_placeholder')
@@ -250,12 +259,15 @@ class Syntax():
     space_dimensionless = sp(Keyword('dimensionless'), 
                              lambda _: CDP.RcompUnit('m/m'))
     
-    library_name = sp(get_idn(), lambda t: CDP.LibraryName(t[0]))
+    library_name = sp(SyntaxIdentifiers.get_identifier_unconstrained(),
+                      lambda t: CDP.LibraryName(t[0]))
 
     # load <name>
     LOAD = spk(K('load') ^ L('`'), CDP.LoadKeyword)
 
-    posetname = sp(get_idn(), lambda t: CDP.PosetName(t[0])).setName('posetname')
+    posetname = sp( SyntaxIdentifiers.get_identifier_unconstrained(), 
+                    lambda t: CDP.PosetName(t[0])).setName('posetname')
+    
     posetname_with_library = sp(library_name + L('.') + posetname,
         lambda t: CDP.PosetNameWithLibrary(library=t[0], glyph=t[1], name=t[2])).setName('posetname_with_library')
 

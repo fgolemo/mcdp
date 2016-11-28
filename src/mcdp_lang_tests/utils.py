@@ -10,7 +10,8 @@ from mcdp_lang.parse_interface import parse_ndp, parse_ndp_filename
 from mcdp_lang.syntax import Syntax
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.exceptions import DPSemanticError, DPSyntaxError
+from mocdp.exceptions import DPSemanticError, DPSyntaxError,\
+    DPNotImplementedError
 
 
 def assert_syntax_error(s, expr, desc=None):
@@ -61,6 +62,21 @@ def assert_semantic_error_fn(filename, desc=None):
             msg += '\n' + desc
         raise_desc(Exception, msg, filename=filename, res=res.repr_long())
         
+def assert_not_implemented_error_fn(filename, desc=None):
+    try:
+        res = parse_ndp_filename(filename)
+        res.abstract()
+    except DPNotImplementedError:
+        pass
+    except BaseException as e:
+        msg = "Expected DPNotImplementedError, got %s." % type(e)
+        raise_wrapped(Exception, e, msg)
+    else:
+        msg = "Expected a DPNotImplementedError, instead succesfull instantiation."
+        if desc:
+            msg += '\n' + desc
+        raise_desc(Exception, msg, filename=filename, res=res.repr_long())
+        
 def assert_semantic_error(s , desc=None): # TODO: redundant with assert_parse_ndp_semantic_error(string, contains)
     """ This asserts that s can be parsed, but"""
     try:
@@ -76,6 +92,22 @@ def assert_semantic_error(s , desc=None): # TODO: redundant with assert_parse_nd
         if desc:
             msg += '\n' + desc
         raise_desc(Exception, msg, s=s, res=res.repr_long())
+
+# def assert_not_implemented_error(s , desc=None): # TODO: redundant with assert_parse_ndp_semantic_error(string, contains)
+#     """ This asserts that s can be parsed, but"""
+#     try:
+#         res = parse_ndp(s)
+#         res.abstract()
+#     except DPNotImplementedError:
+#         pass
+#     except BaseException as e:
+#         msg = "Expected DPNotImplementedError error, got %s." % type(e)
+#         raise_wrapped(Exception, e, msg, s=s)
+#     else:
+#         msg = "Expected an exception, instead succesfull instantiation."
+#         if desc:
+#             msg += '\n' + desc
+#         raise_desc(Exception, msg, s=s, res=res.repr_long())
 
 @contract(returns=NamedDP)
 def assert_parsable_to_unconnected_ndp(s, desc=None):  # @UnusedVariable
