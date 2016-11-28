@@ -7,8 +7,8 @@ mcdp {
 
     requires total_cost [$]
 
-    battery = new Battery_LCO
-    actuation = new Actuation
+    battery = instance `batteries_v1.Battery_LCO
+    actuation = instance `Actuation
 
     total_power = power required by actuation + extra_power
     capacity provided by battery >= endurance * total_power
