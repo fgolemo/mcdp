@@ -1,4 +1,4 @@
-# test semantic_error
+# test not_implemented_error
 mcdp {
     provides f [Rcomp]
     requires r [Rcomp]

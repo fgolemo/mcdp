@@ -236,7 +236,7 @@ def eval_rvalue_approx_step(r, context):
 
     stepu = express_value_in_isomorphic_space(S1=step.unit, s1=step.value, S2=R)
 
-    if not isinstance(R, (Rcomp, RcompUnits)):
+    if not isinstance(R, (RcompUnits)):
         msg = 'approx() not implemented for %s.'%R
         raise_desc(DPNotImplementedError, msg)
         
