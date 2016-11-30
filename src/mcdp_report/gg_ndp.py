@@ -550,7 +550,7 @@ def create_coproduct(gdc0, ndp, plotting_info):
 def create_composite(gdc0, ndp, plotting_info):
     try:
         SKIP_INITIAL = gdc0.skip_initial
-        print('Skip initial: %s' % SKIP_INITIAL)
+        #print('Skip initial: %s' % SKIP_INITIAL)
         return create_composite_(gdc0, ndp, plotting_info=plotting_info, SKIP_INITIAL=SKIP_INITIAL)
     except Exception as e:
         logger.error(e)

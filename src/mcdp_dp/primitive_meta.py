@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 from abc import ABCMeta
+import sys
 
 from contracts import all_disabled
 from contracts.utils import raise_wrapped
 from mcdp_posets import NotBelongs
-import sys
-from mocdp import logger
-from contracts.enabling import Switches
 
 
 __all__ = [

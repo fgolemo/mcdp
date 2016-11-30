@@ -358,7 +358,7 @@ def enumerate_minimal_solution(G, edge_weight):
 
         consider = set()
         for cycles1 in cycles2weight:
-            logger.debug('cycles')
+            #logger.debug('cycles')
             for cycles2 in cycles2weight:
                 w1 = cycles2weight[cycles1]
                 w2 = cycles2weight[cycles2]

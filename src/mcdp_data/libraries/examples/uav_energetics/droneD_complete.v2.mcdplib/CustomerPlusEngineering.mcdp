@@ -1,6 +1,6 @@
 mcdp {
-    customer = new Customer
-    robot = new DroneComplete
+    customer = instance `Customer
+    robot = instance `DroneComplete
 
     budget provided by customer >= total_cost_ownership required by robot
 

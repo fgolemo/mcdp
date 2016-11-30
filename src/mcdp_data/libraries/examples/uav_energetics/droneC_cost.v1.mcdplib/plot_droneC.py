@@ -3,6 +3,7 @@
 from mcdp_ipython_utils.loading import solve_queries
 from mcdp_ipython_utils.plotting import plot_all_directions
 from mcdp_library.library import MCDPLibrary
+from mcdp_library import Librarian
 from reprep import Report
 import numpy as np
 
@@ -30,8 +31,9 @@ def go():
     what_to_plot_res = result_like
     what_to_plot_fun = dict(extra_payload="g", endurance="minutes")
 
-    lib = MCDPLibrary()
-    lib.add_search_dir('.')
+    librarian = Librarian()
+    librarian.find_libraries('..')
+    lib = librarian.load_library('droneC_cost_v1')
     ndp = lib.load_ndp(model_name)
 
     data = solve_queries(ndp, queries, result_like)
