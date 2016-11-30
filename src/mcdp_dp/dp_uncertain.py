@@ -234,6 +234,9 @@ class UMap(Map):
     
     def _call(self, x):
         return (x, self.bottom)
+    
+    def repr_map(self, letter):
+        return "x ⟼〈x, ⊥〉".replace('x', letter)
 
 class LMap(Map):
     """
@@ -246,3 +249,6 @@ class LMap(Map):
         
     def _call(self, x):
         return (self.bottom, x)
+
+    def repr_map(self, letter):
+        return "x ⟼〈⊥, x〉".replace('x', letter)
