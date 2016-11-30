@@ -99,6 +99,9 @@ class SecondTop(Map):
     def _call(self, x):
         return (x, self.top)
 
+    def repr_map(self, letter):
+        return "r ⟼〈r, ⊤〉".replace('r', letter)
+
 class FirstTop(Map):
     """
         x ⟼〈⊤, x〉
@@ -111,6 +114,10 @@ class FirstTop(Map):
     
     def _call(self, x):
         return (self.top, x)
+    
+    def repr_map(self, letter):
+        return "r ⟼〈⊤, r〉".replace('r', letter)
+
     
 # class LMap(Map):
 #     """
