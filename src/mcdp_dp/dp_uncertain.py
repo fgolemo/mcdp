@@ -44,19 +44,18 @@ class UncertainGate(ApproximableDP):
     def __repr__(self):
         return 'UncertainGate(%r)' % self.F0
 
+    def repr_h_map(self):
+        return '⟨f1, f2⟩ ⟼ { either f1 or f2 }'
+    
+    def repr_hd_map(self):
+        return 'r ⟼ { either〈⊤, r〉 or 〈r, ⊤〉}'
+        
     def get_lower_bound(self, n):  # @UnusedVariable
-        return UncertainGateL(self.F0)
-#         m1 = CheckOrder(self.F0)
-#         m2 = MuxMap(self.F, coords=0)
-#         dp = WrapAMap(MapComposition((m1, m2)))
-#         return dp
+        return UncertainGateL(self.F0) 
 
     def get_upper_bound(self, n):  # @UnusedVariable
-        return UncertainGateU(self.F0)
-#         m1 = CheckOrder(self.F0)
-#         m2 = MuxMap(self.F, coords=1)
-#         dp = WrapAMap(MapComposition((m1, m2)))
-#         return dp
+        return UncertainGateU(self.F0) 
+    
     
 class UncertainGateU(WrapAMap):
     """
@@ -70,6 +69,12 @@ class UncertainGateU(WrapAMap):
         h = MapComposition((m1, m2))
         hd = FirstTop(F0) 
         WrapAMap.__init__(self, h, hd)
+    
+    def repr_h_map(self):
+        return '⟨f1, f2⟩ ⟼ {f2}'
+    
+    def repr_hd_map(self):
+        return 'r ⟼ {〈⊤, r〉}'
 
 
 class UncertainGateL(WrapAMap):
@@ -84,7 +89,13 @@ class UncertainGateL(WrapAMap):
         h = MapComposition((m1, m2))
         hd = SecondTop(F0) 
         WrapAMap.__init__(self, h, hd)
-        
+    
+    def repr_h_map(self):
+        return '⟨f1, f2⟩ ⟼ { f1 }'
+    
+    def repr_hd_map(self):
+        return 'r ⟼ {〈r, ⊤〉}'
+
 
 class SecondTop(Map):
     """
