@@ -173,6 +173,7 @@ http://ares-super.lids.mit.edu/~andrea/env_mcdp/src/mcdp/out/check_rendering/plu
      requires shape >= <6.5in, 2in, 5.8in>
 
 
+
 (*) MCDP-web
 
 - R: add license information
@@ -384,7 +385,7 @@ U+259x  ▐ ░ ▒ ▓ ▔ ▕ ▖ ▗ ▘ ▙ ▚ ▛ ▜ ▝ ▞ ▟
       r1 + r2 * r3 + 2 dimensionless >= f1 * f2 + f3 + 2 dimensionless
     }
 
-- editor_fancy: new text should be black
+- editor_fancy: turn text back to black when editing after a syntax error
 
 - better error message:
 DPSemanticError: Constraint between incompatible spaces.
@@ -399,11 +400,13 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 |    R[kWh²/kg]
 | B: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 |    R[g]
+
     
 
 - editor: add warnings about unconnected functionality/resources
 
-- redlining doesn't work too well for this case:
+
+- redlining doesn't work too good for this case:
 mcdp { 
   battery = instance mcdp {
     provides capacity [kWh]
@@ -421,6 +424,8 @@ mcdp {
 
 - Mux visualization with more than 21 signals (after z, use '{'), 
 
+- square for Nat: http://127.0.0.1:8080/libraries/basic/models/addition_1/views/syntax/
+
 - simplify a * a to mcdp {  
    variable a, c [dimensionless] 
    c >= a * a + Nat:1 
@@ -432,18 +437,18 @@ http://127.0.0.1:8080/libraries/basic/models/addition_1/views/edit_fancy/
 
 - make Map::repr_map abstract
 
+
+
 - constants like pi, e
 
 - remove nat_Constnat with lowercase nat
 
 - remove the awkward "1.0 []" syntax in favor of just "1.0"
 
-
-File 'tmp3.mcdp' reached twice.
-path1: /Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/unittests/basic.mcdplib/created/tmp3.mcdp
-path2: /Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/unittests/basic.mcdplib/created/tmp3.mcdp
-
+-File 'tmp3.mcdp' reached twice.
+-path1: /Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/unittests/basic.mcdplib/created/tmp3.mcdp
+-path2: /Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/unittests/basic.mcdplib/created/tmp3.mcdp
 
 - delete caches in /tmp automatically
+- markdown rendering does not use refinement
 
-- markdown rendering does not use refinement 
