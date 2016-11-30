@@ -129,21 +129,7 @@ class FirstTop(Map):
     def repr_map(self, letter):
         return "r ⟼〈⊤, r〉".replace('r', letter)
 
-    
-# class LMap(Map):
-#     """
-#         f ⟼〈⊥, f〉
-#     """
-#     def __init__(self, F):
-#         F2 = PosetProduct((F, F))
-#         Map.__init__(self, dom=F, cod=F2)
-#         self.bottom = F.get_bottom()
-#         
-#     def _call(self, x):
-#         return (self.bottom, x)
-
-    
-
+     
 class CheckOrder(Map):
     def __init__(self, F0):
         self.F0 = F0
@@ -181,6 +167,14 @@ class UncertainGateSym(ApproximableDP):
         I = copy.copy(F0)
         PrimitiveDP.__init__(self, F=F, R=R, I=I)
 
+
+    def repr_h_map(self):
+        return 'f ⟼ { either〈⊥, f〉 or 〈f, ⊥〉}'
+    
+    def repr_hd_map(self):
+        return '⟨r1, r2⟩ ⟼ { either r1 or r2 }'
+
+
     def evaluate(self, m):
         raise NotSolvableNeedsApprox(type(self))
 
@@ -216,6 +210,13 @@ class UMapDP(WrapAMap):
         amap_dual = MuxMap(F2, 0)
         WrapAMap.__init__(self, amap, amap_dual)
 
+    def repr_h_map(self):
+        return 'f ⟼ { 〈f, ⊥〉}'
+    
+    def repr_hd_map(self):
+        return '⟨r1, r2⟩ ⟼ { r1 }'
+
+
 class LMapDP(WrapAMap):
     """
         r = ⟨r₁, r₂⟩
@@ -231,6 +232,12 @@ class LMapDP(WrapAMap):
         F2 = PosetProduct((F, F))
         amap_dual = MuxMap(F2, 1)
         WrapAMap.__init__(self, amap, amap_dual)
+
+    def repr_h_map(self):
+        return 'f ⟼ { 〈⊥, f〉}'
+    
+    def repr_hd_map(self):
+        return '⟨r1, r2⟩ ⟼ { r2 }'
 
 
 class UMap(Map):
