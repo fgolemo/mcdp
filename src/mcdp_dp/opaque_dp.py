@@ -2,7 +2,6 @@
 from .primitive import PrimitiveDP
 from contracts import contract
 from contracts.utils import check_isinstance, indent
-from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 
 __all__ = [
     'OpaqueDP',
@@ -34,11 +33,14 @@ class OpaqueDP(PrimitiveDP):
     def get_implementations_f_r(self, f, r):
         return self.dp.get_implementations_f_r(f, r)
 
+    def repr_h_map(self):
+        return self.dp.repr_h_map() + ' (opaque)'
+    
+    def repr_hd_map(self):
+        return self.dp.repr_hd_map() + ' (opaque)'
+
     def repr_long(self):
         r1 = self.dp.repr_long()
         s = 'OpaqueDP'
         s+= '\n' + indent(r1, '. ', first='\ ')
-        if hasattr(self.dp, ATTRIBUTE_NDP_RECURSIVE_NAME):
-            a = getattr(self.dp, ATTRIBUTE_NDP_RECURSIVE_NAME)
-            s += '\n (labeled as %s)' % a.__str__()
         return s
