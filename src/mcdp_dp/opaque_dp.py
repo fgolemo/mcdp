@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from .primitive import PrimitiveDP
 from contracts import contract
-from contracts.utils import check_isinstance, indent
+from contracts.utils import check_isinstance, indent, raise_desc
+from mocdp.exceptions import DPInternalError
 
 __all__ = [
     'OpaqueDP',
@@ -14,7 +15,8 @@ class OpaqueDP(PrimitiveDP):
     def __init__(self, dp):
         check_isinstance(dp, PrimitiveDP)
         if isinstance(dp, OpaqueDP):
-            raise ValueError(dp)
+            msg = 'OpaqueDP inside OpaqueDP? this should not happen.'
+            raise_desc(DPInternalError, msg)
         self.dp = dp
         F = dp.F
         R = dp.R

@@ -209,6 +209,11 @@ class MultValueNatDPhelper(Map):
         else:
             fmax = int(np.floor( float(r) / self.c ))
             return fmax
+    
+    def repr_map(self, letter):
+        s = 'x ⟼ floor(x/%s)' % self.c
+        return s.replace('x', letter) 
+        
         
 
 class InvMultValueRcompDP(WrapAMap):
