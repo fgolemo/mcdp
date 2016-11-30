@@ -65,6 +65,7 @@ class Librarian():
                 for b in basenames:
                     basename = b + '.' + ext
                     allimages[basename] = l.file_to_contents[basename]
+                    
         for short, data in self.libraries.items():
             l = data['library']
             for basename, d in allimages.items():
