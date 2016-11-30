@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 from mcdp_dp import (CatalogueDP, CoProductDP, CoProductDPLabels, Constant,
     ConstantMinimals, DPLoop2, Identity, InvMult2, InvMult2L, InvMult2U,
@@ -10,12 +9,12 @@ from mcdp_dp import (CatalogueDP, CoProductDP, CoProductDPLabels, Constant,
     InvMultValueDP, SumNNatDP,
      SumNLDP, SumNUDP, Template, FuncNotMoreThan, RcompUnitsPowerDP, SquareNatDP)
 from mcdp_dp.conversion import get_conversion
+from mcdp_dp.dp_labeler import LabelerDP
+from mcdp_dp.dp_max import MaxF1DP, MinR1DP, MaxR1DP, MinF1DP
+from mcdp_dp.dp_uncertain import UncertainGate, UncertainGateSym
 from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct, Nat, Rcomp
 from mocdp import MCDPConstants
-from mcdp_dp.dp_max import MaxF1DP, MinR1DP, MaxR1DP, MinF1DP
-from mcdp_dp.dp_uncertain import UncertainGate, UncertainGateSym
-from mcdp_dp.dp_labeler import LabelerDP
 
 
 all_primitivedps_tests = []
@@ -213,19 +212,6 @@ def ConstantMinimals1():
 def CoProductDP1():
     dps = (CatalogueDP1(), CatalogueDP1())
     return CoProductDP(dps)
-
-# unfortunately we cannot test it like the others
-# because it checks that the values are coherent
-# def UncertainGate1():
-#     F = parse_poset('Nat')
-#     return UncertainGate(F)
-# def UncertainGate_1():
-#     F0 = parse_poset('Nat')
-#     return UncertainGate(F0)
-
-# def UncertainGateSym_1():
-#     F0 = parse_poset('Nat')
-#     return UncertainGateSym(F0)
 
 @add_as_test
 def CoProductDPLabels1():
@@ -487,15 +473,33 @@ def Conversion_a():
     B = parse_poset('g')
     return get_conversion(A, B)
 
-@add_as_test
-def UncertainGate1():
-    F0 = parse_poset('m')
-    return UncertainGate(F0)
+# 
+# @add_as_test
+# def UncertainGate1():
+#     F0 = parse_poset('m')
+#     return UncertainGate(F0)
+# 
+# 
+# @add_as_test
+# def UncertainGateSym1():
+#     F0 = parse_poset('m')
+#     return UncertainGateSym(F0)
 
-@add_as_test
-def UncertainGateSym1():
-    F0 = parse_poset('m')
-    return UncertainGateSym(F0)
+
+# unfortunately we cannot test it like the others
+# because it checks that the values are coherent
+# def UncertainGate1():
+#     F = parse_poset('Nat')
+#     return UncertainGate(F)
+# def UncertainGate_1():
+#     F0 = parse_poset('Nat')
+#     return UncertainGate(F0)
+
+# def UncertainGateSym_1():
+#     F0 = parse_poset('Nat')
+#     return UncertainGateSym(F0)
+
+
 
 @add_as_test
 def LabelerDP1():

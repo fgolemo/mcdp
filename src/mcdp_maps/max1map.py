@@ -95,7 +95,9 @@ class Max1dualMap(Map):
             return r
         else:
             raise_desc(MapNotDefinedHere, 'unfeasible')
-            
+
+    def repr_map(self, letter):  # @UnusedVariable
+        return "r ⟼ r if r ≽ %s, else ø".replace('r', letter)
 
 class MaxR1DPMap(Map):
     """
