@@ -55,7 +55,7 @@ def check_subtraction1():
     """)
     
 @comptest_fails
-def check_subtraction2_contexts(): 
+def check_subtraction2_contexts_a(): 
     """ We cannot do propagation of constants inside contexts """
     s = """
     mcdp {
@@ -69,6 +69,8 @@ def check_subtraction2_contexts():
     """
     parse_ndp(s)
     
+@comptest_fails
+def check_subtraction2_contexts_b(): 
     s = """
     mcdp {
           v1 = 10 g

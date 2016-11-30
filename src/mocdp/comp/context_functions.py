@@ -249,11 +249,11 @@ def wrap_change_name_function(ndp, fn, fn2):
     from mocdp.comp.connection import connect2
     connections = set([Connection('-', tmpname, '-', fn)])
     return connect2(first, ndp, connections, split=[])
-
-@contract(name=str, connections='set($Connection)|list($Connection)')
-def is_dp_connected(name, connections):
-    """ Returns true if there is a connection to or from name. """
-    for c in connections:
-        if c.dp1 == name or c.dp2 == name:
-            return True
-    return False
+# 
+# @contract(name=str, connections='set($Connection)|list($Connection)')
+# def is_dp_connected(name, connections):
+#     """ Returns true if there is a connection to or from name. """
+#     for c in connections:
+#         if c.dp1 == name or c.dp2 == name:
+#             return True
+#     return False

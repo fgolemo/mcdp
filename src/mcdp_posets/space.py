@@ -7,19 +7,23 @@ from mocdp.exceptions import do_extra_checks
 from .space_meta import SpaceMeta
 
 
+__all__ = [
+    'NotBelongs',
+    'NotEqual',
+    'Uninhabited',
+    'Space',
+    'MapNotDefinedHere',
+    'Map',
+]
+
 class NotBelongs(Exception):
     """ Raised by Space:belongs() """
-
-# class Belongs(Exception):
-#     """ The point actually belongs to the set
-#         raised by check_not_belongs """
-#     
 
 class NotEqual(Exception):
     """ Raised by Space:check_equal() """
 
 class Uninhabited(Exception):
-    ''' There is no element in this space. Raised by witness().'''
+    """ There is no element in this space. Raised by witness(). """
     
 
 class Space(object):
@@ -104,6 +108,7 @@ class Map():
         return "%s:%s→%s" % (type(self).__name__,
                              self.get_domain(), self.get_codomain())
         
+    @abstractmethod
     def repr_map(self, letter):  # @UnusedVariable
         """ Returns a string of the type <letter> |-> f(<letter>) """
-        return '(undef for %s)' % type(self).__name__ 
+        #return '(undef for %s)' % type(self).__name__ 

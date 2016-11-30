@@ -269,10 +269,10 @@ def cndp_flatten(ndp):
                     assert fname in proxy_functions[name], (fname, proxy_functions[name])
                 for rname in n0.get_rnames():
                     assert rname in proxy_resources[name]
-        except Exception as e:
+        except Exception as e:  # pragma: no cover
             s = '%s:\n %s %s \n\n%s' % (name, proxy_resources[name], proxy_functions[name], e)
             errors.append(s)
-    if errors:
+    if errors: # pragma: no cover
         s = "\n\n".join(errors)
         s += '%s %s' % (proxy_resources, proxy_functions)
         raise Exception(s)

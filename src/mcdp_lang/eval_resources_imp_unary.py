@@ -38,7 +38,6 @@ class RuleInterface():
     @abstractmethod
     def apply(self, symbols, resources_or_constants, are_they_constant, context):
         """ Returns an Rvalue """
-        pass
     
 class RuleFloorDisallowed(RuleInterface):
     """ Floor is not Scott continuous """
@@ -54,14 +53,16 @@ class RuleFloorDisallowed(RuleInterface):
         return (spec,)
     
     def apply(self, _symbols, resources_or_constants, are_they_constant, context):
-        pass
+        # this will never get executed
+        pass # pragma: no cover
+    
     
 
 class OneRGiveMeADP(RuleInterface):
     
     @abstractmethod
     def generate_dp(self, R):
-        pass
+        """ """
     
     def apply(self, symbols, resources_or_constants, are_they_constant, context):  # @UnusedVariable
         assert len(resources_or_constants) == 1
@@ -262,7 +263,7 @@ class AssociativeOp(RuleInterface):
     
     @abstractmethod
     def only_one(self, constant):
-        pass
+        """ """
 
     @abstractmethod
     def reduce_constants(self, vus):
@@ -270,11 +271,11 @@ class AssociativeOp(RuleInterface):
         
     @abstractmethod
     def return_op_constant(self, context, resource, vu):
-        pass
+        """ """
     
     @abstractmethod
     def return_op_variables(self, context, resources):
-        pass
+        """ """
          
     def apply(self, symbols, resources_or_constants, are_they_constant, context):  # @UnusedVariable
         """ Returns an Rvalue """

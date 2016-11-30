@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 from mcdp_dp import (CatalogueDP, CoProductDP, CoProductDPLabels, Constant,
     ConstantMinimals, DPLoop2, Identity, InvMult2, InvMult2L, InvMult2U,
@@ -13,6 +14,8 @@ from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct, Nat, Rcomp
 from mocdp import MCDPConstants
 from mcdp_dp.dp_max import MaxF1DP, MinR1DP, MaxR1DP, MinF1DP
+from mcdp_dp.dp_uncertain import UncertainGate, UncertainGateSym
+from mcdp_dp.dp_labeler import LabelerDP
 
 
 all_primitivedps_tests = []
@@ -483,6 +486,25 @@ def Conversion_a():
     A = parse_poset('kg')
     B = parse_poset('g')
     return get_conversion(A, B)
+
+@add_as_test
+def UncertainGate1():
+    F0 = parse_poset('m')
+    return UncertainGate(F0)
+
+@add_as_test
+def UncertainGateSym1():
+    F0 = parse_poset('m')
+    return UncertainGateSym(F0)
+
+@add_as_test
+def LabelerDP1():
+    F = parse_poset('m')
+    R = parse_poset('g')
+    dp0 = Template(F, R)
+    dp = LabelerDP(dp0, ('name', 'name2'))
+    return dp
+
 
 if MCDPConstants.test_include_primitivedps_knownfailures:
     

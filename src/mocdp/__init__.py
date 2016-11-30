@@ -131,3 +131,9 @@ class MCDPConstants():
     parsing_too_slow_threshold = 0.5
 
     log_cache_writes = False
+    
+    
+    InvPlus2Nat_max_antichain_size=  100000
+    InvMult2Nat_memory_limit   = 10000
+    
+    

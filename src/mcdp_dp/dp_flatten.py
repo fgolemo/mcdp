@@ -48,7 +48,7 @@ class Mux(WrapAMap):
         amap = MuxMap(F, coords)
         try:
             R, coords2 = transform_right_inverse(F, coords, PosetProduct)
-        except:
+        except: # pragma: no cover
             print('cannot invert {}'.format(self.amap_pretty))
             raise
  

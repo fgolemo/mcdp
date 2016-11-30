@@ -9,6 +9,7 @@ from mocdp.exceptions import DPInternalError, mcdp_dev_warning
 from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
 from .repr_strings import invplus2_repr_h_map, invplus2_repr_hd_map
 from .sequences_invplus import sample_sum_lowerbound, sample_sum_upperbound
+from mocdp import MCDPConstants
 
 
 _ = Nat, Poset
@@ -196,7 +197,7 @@ class InvPlus2Nat(PrimitiveDP):
 
         s = set()
         
-        if f >= 100000:
+        if f >= MCDPConstants.InvPlus2Nat_max_antichain_size:
             msg = 'This would create an antichain of %s items.' % f
             raise NotSolvableNeedsApprox(msg)
         

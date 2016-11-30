@@ -52,7 +52,7 @@ def check_rendering(libname, filename):
     basename = os.path.basename(filename)
     fn = os.path.join('out', 'check_rendering', libname, basename + '.html')
     d = os.path.dirname(fn)
-    if not os.path.exists(d):
+    if not os.path.exists(d): # pragma: no cover
         os.makedirs(d)
     with open(fn, 'w') as f:
         f.write(html)

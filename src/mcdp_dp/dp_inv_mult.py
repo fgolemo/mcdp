@@ -10,6 +10,7 @@ from mocdp.exceptions import mcdp_dev_warning
 from .primitive import ApproximableDP, NotSolvableNeedsApprox, PrimitiveDP
 from .repr_strings import repr_h_map_invmult
 from .sequences_invplus import Nat_mult_antichain_Min, invmultL_solve_options, invmultU_solve_options
+from mocdp import MCDPConstants
 
 
 _ = Nat, Poset
@@ -152,7 +153,7 @@ class InvMult2Nat(ApproximableDP):
         with f,r₁,r₂ ∈ ℕ.
         
     """
-    memory_limit = 10000
+    
     
     @contract(Rs='tuple[2],seq[2]($Nat)', F=Nat)
     def __init__(self, F, Rs):
@@ -177,7 +178,7 @@ class InvMult2Nat(ApproximableDP):
             elements = set([(top, 1), (1, top)]) # XXX: to check
             return self.R.Us(elements) 
         
-        if f > InvMult2Nat.memory_limit:
+        if f > MCDPConstants.InvMult2Nat_memory_limit:
             msg = ('InvMult2Nat:solve(%s): This would produce' 
                    ' an antichain of length %s.') % (f,f)
             raise NotSolvableNeedsApprox(msg)

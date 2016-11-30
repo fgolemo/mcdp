@@ -85,7 +85,7 @@ mcdp {
         dpl.solve(f)
     except WrongUseOfUncertain:
         pass
-    else:
+    else: # pragma: no cover
         msg = 'Expected WrongUseOfUncertain.'
         raise_desc(Exception, msg)
 
@@ -93,7 +93,7 @@ mcdp {
         dpu.solve(f)
     except WrongUseOfUncertain:
         pass
-    else:
+    else: # pragma: no cover
         msg = 'Expected WrongUseOfUncertain.'
         raise_desc(Exception, msg)
 

@@ -111,7 +111,7 @@ def get_approx_dp(S, name, approx_perc, approx_abs, approx_abs_S, max_value,
     approx_abs_ = express_value_in_isomorphic_space(S1=approx_abs_S, s1=approx_abs, S2=S)
     max_value_ = express_value_in_isomorphic_space(S1=max_value_S, s1=max_value, S2=S)
 
-    if approx_perc > 0:
+    if approx_perc > 0: # pragma: no cover
         raise_desc(DPNotImplementedError, 'Approx_perc not implemented')
 
     dps = []

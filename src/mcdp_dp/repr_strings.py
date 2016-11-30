@@ -39,10 +39,12 @@ def repr_hd_map_sumn(n, U_or_L=None, napprox=None):
     return s
     
     
-def repr_h_map_invmult(n, U_or_L=None, napprox=None):
+def repr_h_map_invmult(n, 
+#                        U_or_L=None, napprox=None
+                       ):
     s = inv_repr_h_map('r', 'f', n, 'Min', '≤', "⋅")
-    if U_or_L is not None:
-        s =  s.replace('⟼ ', '⟼ app%s(%s,') % (U_or_L, napprox) + ')'
+#     if U_or_L is not None:
+#         s =  s.replace('⟼ ', '⟼ app%s(%s,') % (U_or_L, napprox) + ')'
     return s
 
 
