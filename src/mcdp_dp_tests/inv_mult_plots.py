@@ -343,6 +343,7 @@ class CounterMap(Map):
         s =  'x ⟼ x + 1 if x <= %d else %d' % (self.n, self.n)
         return s.replace('x', letter)
 
+
 class CounterDP(WrapAMap):
     def __init__(self, n):
         WrapAMap.__init__(self, CounterMap(n))

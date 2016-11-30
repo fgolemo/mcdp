@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
-from mcdp_dp.primitive import PrimitiveDP
+from mcdp_dp import PrimitiveDP
 from mocdp.memoize_simple_imp import memoize_simple
+
 
 __all__ = [
     'CacheDP',
@@ -23,3 +24,10 @@ class CacheDP(PrimitiveDP):
     @memoize_simple
     def evaluate(self, i):
         return self.dp.evaluate(i)
+
+    def repr_h_map(self):
+        return self.dp.repr_h_map() + ' (cached)'
+    
+    def repr_hd_map(self):
+        return self.dp.repr_hd_map() + ' (cached)'
+    

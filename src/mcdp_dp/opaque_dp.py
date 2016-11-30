@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
-from .primitive import PrimitiveDP
 from contracts import contract
 from contracts.utils import check_isinstance, indent, raise_desc
 from mocdp.exceptions import DPInternalError
+
+from .primitive import PrimitiveDP
+
 
 __all__ = [
     'OpaqueDP',
