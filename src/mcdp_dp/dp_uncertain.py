@@ -140,6 +140,8 @@ class CheckOrder(Map):
             raise_wrapped(WrongUseOfUncertain, e, msg, l=l, u=u, compact=True)
         return x
 
+    def repr_map(self, letter):
+        return "⟨x1, x2⟩ ⟼ ⟨x1, x2⟩ (checks order)".replace('x', letter)
 
 class UncertainGateSym(ApproximableDP):
     """

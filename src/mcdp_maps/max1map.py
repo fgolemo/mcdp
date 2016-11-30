@@ -119,7 +119,10 @@ class MaxR1DPMap(Map):
             return self.R.get_bottom()
         else:
             return x
-            
+
+    def repr_map(self, letter):
+        return "r ⟼ ⊥ if r ≼ %s, else r".replace('r', letter)
+
 
         
         
@@ -141,7 +144,9 @@ class MinR1DPMap(Map):
             return r
         else:
             raise_desc(MapNotDefinedHere, 'unfeasible')
-            
+
+    def repr_map(self, letter):
+        return "r ⟼ r if r ≼ %s, else ø".replace('r', letter)
             
                  
             
