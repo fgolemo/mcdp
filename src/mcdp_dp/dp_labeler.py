@@ -32,6 +32,15 @@ class LabelerDP(PrimitiveDP):
     def solve(self, f):
         return self.dp.solve(f)
 
+    def solve_r(self, r):
+        return self.dp.solve_r(r)
+    
+    def repr_h_map(self):
+        return self.dp.repr_h_map() + ' (labeling)'
+    
+    def repr_hd_map(self):
+        return self.dp.repr_hd_map() + ' (labeling)'
+
     def evaluate(self, i):
         return self.dp.evaluate(i)
 

@@ -257,13 +257,15 @@ class PrimitiveDP(WithInternalLog):
         """ A long, multiline representation """
         return self.__repr__()
 
+    @abstractmethod
     def repr_h_map(self):
         """ Returns a string of the type "f |-> P(f)" """
-        return '(undefined for %s)' %  type(self).__name__
-    
+#         return '(undefined for %s)' %  type(self).__name__
+
+    @abstractmethod    
     def repr_hd_map(self):
         """ Returns a string of the type "f |-> P(f)" """  
-        return '(undefined for %s)' %  type(self).__name__
+#         return '(undefined for %s)' %  type(self).__name__
 
 #     def _add_extra_info(self):
 #         if False:
