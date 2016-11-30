@@ -246,7 +246,7 @@ def opt_basic_6():
                'USBMicroCharging']
 
     for o in options:
-        print('Trying %r' % o)
+        print('Trying if %r is connected...' % o)
         ndp = library.load_ndp(o)
         _dp = ndp.get_dp()
 

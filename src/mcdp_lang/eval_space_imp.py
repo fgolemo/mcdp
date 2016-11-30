@@ -44,10 +44,6 @@ def eval_space(r, context):
     for klass, hook in cases.items():
         if isinstance(r, klass):
             return hook(r, context)
-                        
-    # This should be removed...
-    if isinstance(r, CDP.Unit):
-        return r.value
 
     if True: # pragma: no cover
         msg = 'eval_space(): Cannot interpret as a space.'

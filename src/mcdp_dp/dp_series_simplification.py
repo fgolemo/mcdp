@@ -688,6 +688,7 @@ def simplify_indices_F(F, coords):
     if i0 == i0coords:
         return ()
 
+    mcdp_dev_warning('simplify_indices_F(): Note that none of this is ever taken(!).')
     if coords == [0] and len(F) == 1:
         return ()
     if coords == [0, 1] and len(F) == 2:

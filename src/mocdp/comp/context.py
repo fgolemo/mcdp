@@ -522,7 +522,6 @@ class Context():
             return False
 
         for which, created in self.indexed_res.items():
-
             ndp = self.names[created]
             for rname in ndp.get_rnames():
                 connected = connectedres(created, rname)

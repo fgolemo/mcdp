@@ -41,7 +41,9 @@ def allformats(context, id_ndp, ndp, libname):
         if do_it:
             r = context.comp(allformats_report, id_ndp, ndp, libname, name,
                              job_id=name)
-            context.add_report(r, 'allformats', id_ndp=id_ndp, which=name)
+            
+            if MCDPConstants.test_allformats_report_write:
+                context.add_report(r, 'allformats', id_ndp=id_ndp, which=name)
     
 def allformats_report(id_ndp, ndp, libname, which):
     from mcdp_web.images.images import get_mime_for_format

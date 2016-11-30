@@ -136,4 +136,5 @@ class MCDPConstants():
     InvPlus2Nat_max_antichain_size=  100000
     InvMult2Nat_memory_limit   = 10000
     
-    
+    # Actually write to disk the reports
+    test_allformats_report_write = False

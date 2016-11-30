@@ -122,8 +122,7 @@ class MaxR1DPMap(Map):
 
     def repr_map(self, letter):
         return "r ⟼ ⊥ if r ≼ %s, else r".replace('r', letter)
-
-
+ 
         
         
 class MinR1DPMap(Map):

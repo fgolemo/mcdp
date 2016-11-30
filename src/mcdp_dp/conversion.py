@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_wrapped
 from mcdp_posets import NotLeq, get_types_universe
-from mocdp.exceptions import DPSemanticError, mcdp_dev_warning
+from mocdp.exceptions import  mcdp_dev_warning
 
 from .dp_generic_unary import WrapAMap
 from .primitive import PrimitiveDP
@@ -32,9 +31,7 @@ def get_conversion(A, B):
             A_to_B, B_to_A = tu.get_super_conversion(A, B)
             mcdp_dev_warning('not really sure of the semantics of this')
             conversion = Conversion(A_to_B, B_to_A)
-        except NotLeq as e:
+        except NotLeq:
             raise
-#             msg = 'Wrapping with incompatible units.'
-#             raise_wrapped(DPSemanticError, e, msg, A=A, B=B)
-
+        
     return conversion

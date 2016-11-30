@@ -4,6 +4,7 @@ from contracts.utils import indent
 from mcdp_dp import LabelerDP, PrimitiveDP
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import dpwrap
+from mocdp.exceptions import mcdp_dev_warning
 
 
 __all__ = [
@@ -16,7 +17,7 @@ class LabelerNDP(NamedDP):
 
     @contract(ndp=NamedDP, recursive_name='tuple,seq(str)')
     def __init__(self, ndp, recursive_name):
-        if isinstance(ndp, LabelerNDP):
+        if isinstance(ndp, LabelerNDP): # pragma: no cover
             # never expect a labeler inside another
             raise TypeError(ndp)
         self.ndp = ndp
@@ -36,10 +37,12 @@ class LabelerNDP(NamedDP):
         n = self.ndp.flatten()
         return LabelerNDP(n, self.recursive_name)
 
+    mcdp_dev_warning('LabelerNDP:compact() not tested')
     def compact(self):
         n = self.ndp.compact()
         return LabelerNDP(n, self.recursive_name)
 
+    mcdp_dev_warning('LabelerNDP:abstract() not tested')
     def abstract(self):
         n0 = self.ndp.abstract()
         dp0 = n0.get_dp()
