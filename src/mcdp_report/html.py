@@ -180,7 +180,7 @@ def ast_to_html(s,
 Snippet = namedtuple('Snippet', 'op orig a b transformed')
 
 def iterate2(x):
-    iterate_(print_html_inner, x)
+    return iterate_(print_html_inner, x)
     
 def iterate_(transform, x):
     for  _, op in iterate_notwhere(x):
