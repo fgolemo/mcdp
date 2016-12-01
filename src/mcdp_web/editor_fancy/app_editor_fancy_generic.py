@@ -9,7 +9,7 @@ from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
 from pyramid.renderers import render_to_response  # @UnresolvedImport
 
 from contracts.utils import check_isinstance, raise_wrapped
-from mcdp_figures.figure_interface import MakeFiguresNDP
+from mcdp_figures.figure_interface import MakeFiguresNDP, MakeFiguresPoset
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
@@ -384,37 +384,12 @@ def html_mark_syntax_error(string, e):
     s = "" + first + '<span style="color:red">'+rest + '</span>'
     return s 
     
-def get_png_data_poset(library, name, x, data_format):
+def get_png_data_poset(library, name, x, data_format):  # @UnusedVariable
     if isinstance(x, FinitePoset):
-        import mcdp_report.my_gvgen as gvgen
-        direction = 'TB'
-        assert direction in ['LR', 'TB']
-        gg = gvgen.GvGen(options="rankdir=%s" % direction)
-        
-        e2n = {}
-        for e in x.elements:
-            n = gg.newItem(e)
-            e2n[e] = n
-            gg.propertyAppend(n, "shape", "none")
-        
-        
-        for e1, e2 in x.relations:
-            # check if e2 is minimal
-            all_up = set(_ for _ in x.elements if x.leq(e1, _) and not x.leq(_, e1))
-            
-            minimals = poset_minima(all_up, x.leq)
-            
-            if not e2 in minimals:
-                continue
-            
-            low = e2n[e1]
-            high = e2n[e2]
-            l = gg.newLink(high, low )
-            gg.propertyAppend(l, "arrowhead", "none")
-            gg.propertyAppend(l, "arrowtail", "none")
-            
-        data, = gg_get_formats(gg, (data_format,))
-        return data
+        mf = MakeFiguresPoset(x, library=library)
+        f = 'hasse_icons' 
+        res = mf.get_figure(f, data_format)
+        return res
     else:
         s = str(x)
         return create_image_with_string(s, size=(512, 512), color=(128, 128, 128))

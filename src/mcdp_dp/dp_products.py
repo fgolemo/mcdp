@@ -7,7 +7,7 @@ from mcdp_dp.sequences_invplus import Nat_mult_antichain_Max
 from mcdp_maps import ProductNMap, ProductNNatMap
 from mcdp_posets import Rcomp, RcompUnits
 from mcdp_posets.rcomp_units import check_mult_units_consistency_seq
-from mocdp.exceptions import mcdp_dev_warning
+from mocdp.exceptions import mcdp_dev_warning, DPNotImplementedError
 
 from .dp_generic_unary import WrapAMap
 from .dp_inv_mult import  InvMult2
@@ -36,6 +36,7 @@ class ProductNDP(WrapAMap, ApproximableDP):
         self.Fs = Fs
         amap = ProductNMap(Fs, R)
         WrapAMap.__init__(self, amap, None)
+        
 
     def solve_r(self, f):
         raise NotSolvableNeedsApprox(type(self))
@@ -43,17 +44,26 @@ class ProductNDP(WrapAMap, ApproximableDP):
     def get_lower_bound(self, n):
         if len(self.Fs) == 2:
             return Product2DP_L(self.Fs, self.R, n)
-        else:
+        else: 
+#             msg = 'Lower bound for n>=2 not implemented.'
+#             raise_desc(DPNotImplementedError, msg, Fs=self.Fs) 
+            # note 'N' not 2
             return ProductNDP_L(self.Fs, self.R, n)
 
     def get_upper_bound(self, n):
         if len(self.Fs) == 2:
             return Product2DP_U(self.Fs, self.R, n)
         else:
+#             msg = 'Upper bound for n>=2 not implemented.'
+#             raise_desc(DPNotImplementedError, msg, Fs=self.Fs)
+
+            # note 'N' not 2 
             return ProductNDP_U(self.Fs, self.R, n) 
          
     def repr_hd_map(self):
-        return repr_hd_map_productn(2)
+        n = len(self.Fs)
+        return repr_hd_map_productn(n)
+
 
 class ProductNDP_L(WrapAMap):
     

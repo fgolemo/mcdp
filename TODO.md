@@ -452,3 +452,5 @@ http://127.0.0.1:8080/libraries/basic/models/addition_1/views/edit_fancy/
 - delete caches in /tmp automatically
 - markdown rendering does not use refinement
 
+- syntax for primitivedp loop(series(par))
+

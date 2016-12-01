@@ -176,7 +176,7 @@ class MCDPLibrary():
         def actual_load():
             # maybe we should clone
             l = self.clone()
-            logger.debug('Parsing %r' % (name))
+            #logger.debug('Parsing %r' % (name))
             context_mine = Context()
             res = parsing_function(l, data, realpath, context=context_mine)
 
@@ -208,9 +208,10 @@ class MCDPLibrary():
         res = res_data['res']
         context_warnings = res_data['context_warnings']
 
-        cached = '[Cached]' if cached else ''        
-        logger.debug('actual_load(): parsed %r with %d warnings %s' %
-                      (name, len(context_warnings), cached))
+        if False:
+            cached = '[Cached]' if cached else ''        
+            logger.debug('actual_load(): parsed %r with %d warnings %s' %
+                          (name, len(context_warnings), cached))
             
         class JustAHack:
             warnings = context_warnings

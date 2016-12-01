@@ -6,7 +6,7 @@ from contracts import contract
 from contracts.utils import raise_desc
 from decent_params import UserError
 from mcdp_cli.utils_wildcard import expand_string
-from mcdp_figures.figure_interface import MakeFiguresNDP
+from mcdp_figures.figure_interface import MakeFiguresNDP, MakeFiguresPoset
 from mcdp_lang.syntax import Syntax
 from mcdp_library import Librarian
 from mcdp_report.dp_graph_tree_imp import dp_graph_tree
@@ -264,16 +264,13 @@ def parse_params(p):
 
 def do_plots(logger, model_name, plots, outdir, extra_params, 
              maindir, extra_dirs, use_cache):
-    data = {}
-
+    
     if '.mcdp' in model_name:
         model_name2 = model_name.replace('.mcdp', '')
         msg = 'Arguments should be model names, not file names.'
         msg += ' Interpreting %r as %r.' % (model_name, model_name2)
         logger.warn(msg)
         model_name = model_name2
-
-    data['model_name'] = model_name
 
     if use_cache:
         cache_dir = os.path.join(outdir, '_cached/mcdp_plot_cache')
@@ -291,8 +288,60 @@ def do_plots(logger, model_name, plots, outdir, extra_params,
 
     assert library.library_name is not None
 
+    is_ndp = library.file_exists(model_name + '.mcdp')
+    is_poset = library.file_exists(model_name + '.mcdp_poset')
+     
+    if is_ndp:
+        results = do_plots_ndp(model_name, library, plots, extra_params)
+    elif is_poset:
+        results = do_plots_poset(model_name, library, plots)
+    else:
+        msg = 'Cannot find anything corresponding to %r.' % model_name
+        raise_desc(ValueError, msg)
+            
+    write_results(results, model_name, outdir)
+    
+
+def write_results(res, model_name, outdir):
+    for r in res:
+        assert isinstance(r, tuple), r
+        mime, name, x = r
+        assert isinstance(x, str), x
+        ext = mime
+    
+        base = model_name + '-%s.%s' % (name, ext)
+    
+        out = os.path.join(outdir, base)
+        logger.info('Writing to %s' % out)
+        with open(out, 'w') as f:
+            f.write(x)
+
+def do_plots_poset(model_name, library, plots):
+    poset = library.load_poset(model_name)
+    mf = MakeFiguresPoset(poset, library=library)
+
+    possible = list(mf.available())
+    plots = expand_string(plots, list(possible))
+
+    allres = []
+    for plot in plots:
+        formats = mf.available_formats(plot)
+        res = mf.get_figure(plot, formats)
+        
+        results = [(_, plot, res[_]) for _ in formats]
+        allres.extend(results)
+    return allres
+        
+
+def do_plots_ndp(model_name, library, plots, extra_params):
+    possible = [p for p, _ in allplots]
+    plots = expand_string(plots, list(possible))
+
     filename = model_name + '.mcdp'
     x = library._get_file_data(filename)
+    data = {}
+    data['model_name'] = model_name
+
     data['s'] = x['data']
     data['filename'] = x['realpath']
     data['params'] = parse_params(extra_params)
@@ -301,7 +350,6 @@ def do_plots(logger, model_name, plots, outdir, extra_params,
     d = dict(allplots)
     results = []
     for p in plots:    
-        # print('plotting %r ' % p)
         try:
             if p in d:
                 res = d[p](data)
@@ -316,21 +364,8 @@ def do_plots(logger, model_name, plots, outdir, extra_params,
             logger.error('While creating %r' % p)
             raise
         assert isinstance(res, list), res
-        for r in res:
-            assert isinstance(r, tuple), r
-            mime, name, x = r
-            assert isinstance(x, str), x
-            ext = mime
-
-            base = model_name + '-%s.%s' % (name, ext)
-
-            out = os.path.join(outdir, base)
-            logger.info('Writing to %s' % out)
-            with open(out, 'w') as f:
-                f.write(x)
-
-            results.append(r)
-
+        results.extend(res)
+        
     return results
 
 
@@ -383,13 +418,11 @@ class PlotDP(QuickAppBase):
         else:
             out = options.out
         mkdirs_thread_safe(out)
-        possible = [p for p, _ in allplots]
-        plots = expand_string(options.plots, list(possible))
         logger = self.logger  # HasLogger
         maindir = options.maindir
         extra_dirs = options.extra_dirs.split(':')
         use_cache = options.cache
-        do_plots(logger, filename, plots, out, options.extra_params,
+        do_plots(logger, filename, options.plots, out, options.extra_params,
                 maindir=maindir,
                 extra_dirs=extra_dirs,
                  use_cache=use_cache) 

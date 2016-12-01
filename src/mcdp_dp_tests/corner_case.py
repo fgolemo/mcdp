@@ -4,19 +4,20 @@ from nose.tools import assert_raises
 from comptests.registrar import comptest, run_module_tests
 from mcdp_dp import JoinNDP, MeetNDP
 from mcdp_dp.dp_dummy import Template
+from mcdp_dp.dp_inv_mult import InvMult2Nat
+from mcdp_dp.dp_inv_plus import InvPlus2, InvPlus2Nat
 from mcdp_dp.dp_series import Series
+from mcdp_dp.dp_transformations import get_dp_bounds
+from mcdp_dp.primitive import NotSolvableNeedsApprox
 from mcdp_lang.parse_interface import parse_poset, parse_template, parse_ndp
 from mcdp_maps import ProductNNatMap
 from mcdp_posets import Nat
 from mcdp_posets_tests.utils import assert_belongs, assert_does_not_belong
-from mocdp.exceptions import DPInternalError, DPSemanticError
-from mocdp.comp.wrap import dpwrap
-from mocdp.comp.composite_makecanonical import connect_resources_to_outside,\
-    connect_functions_to_outside
-from mcdp_dp.dp_inv_plus import InvPlus2, InvPlus2Nat
 from mocdp import MCDPConstants
-from mcdp_dp.primitive import NotSolvableNeedsApprox
-from mcdp_dp.dp_inv_mult import InvMult2Nat
+from mocdp.comp.composite_makecanonical import connect_resources_to_outside, \
+    connect_functions_to_outside
+from mocdp.comp.wrap import dpwrap
+from mocdp.exceptions import DPInternalError, DPSemanticError
 
 
 @comptest
@@ -187,6 +188,32 @@ def unknown_operation_fun():
     """
     # DPSemanticError: Unknown operation 'not_existing'.
     assert_raises(DPSemanticError, parse_ndp, s)
+    
+@comptest
+def addbottom():
+    s = """
+    add_bottom g
+    """
+    assert_raises(DPSemanticError, parse_poset, s)
+    # DPSemanticError: You can use add_bottom only on a FinitePoset
+    
+    
+@comptest
+def product():
+    s = """
+    mcdp {
+        provides f1, f2 [g]
+        requires r = provided f1 * provided f2
+    }
+    """
+    ndp = parse_ndp(s)
+    
+    dp = ndp.get_dp()
+    dpL, dpU = get_dp_bounds(dp, nl=10, nu=10)
+    print dp.repr_long()
+    print dpL.repr_long()
+    print dpU.repr_long()
+    # DPSemanticError: You can use add_bottom only on a FinitePoset
     
 if __name__ == '__main__': 
     

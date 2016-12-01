@@ -85,9 +85,10 @@ def eval_space_rcompunit(r, context):  # @UnusedVariable
     check_isinstance(r, CDP.RcompUnit)
     from mcdp_posets.rcomp_units import make_rcompunit
     
-    if r.pint_string == 'R':
-        msg ='Please use "dimensionless" rather than "R".'
-        warn_language(r, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context)
+#     # TODO: remove
+#     if r.pint_string == 'R': # pragma: no cover
+#         msg ='Please use "dimensionless" rather than "R".'
+#         warn_language(r, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context)
         
     return make_rcompunit(r.pint_string)
  
