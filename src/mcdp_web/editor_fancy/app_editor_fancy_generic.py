@@ -13,6 +13,7 @@ from mcdp_figures.figure_interface import MakeFiguresNDP, MakeFiguresPoset
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
+from mcdp_posets.finite_poset import FinitePoset
 from mcdp_report.html import ast_to_html
 from mcdp_web.utils import (ajax_error_catch, create_image_with_string,
     format_exception_for_ajax_response, response_image)
@@ -24,9 +25,6 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mcdp_lang.parse_interface import( parse_ndp_eval, parse_ndp_refine, 
     parse_template_eval, parse_template_refine, parse_constant_eval, 
     parse_constant_refine, parse_poset_eval, parse_poset_refine)
-from mcdp_report.gg_utils import gg_get_formats
-from mcdp_posets.finite_poset import FinitePoset
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
 
 
 
@@ -350,6 +348,7 @@ class AppEditorFancyGeneric():
 
             raise HTTPFound(url_edit)
 
+
 def html_mark(html, where, add_class):
     """ Returns another html string """
     html = '<www><pre>' + html + '</pre></www>'
@@ -370,6 +369,7 @@ def html_mark(html, where, add_class):
     s = s.replace('</pre></www>', '')
     return s
     
+    
 def html_mark_syntax_error(string, e):
     where = e.where
     character = where.character
@@ -377,6 +377,7 @@ def html_mark_syntax_error(string, e):
     rest = string[character:]
     s = "" + first + '<span style="color:red">'+rest + '</span>'
     return s 
+    
     
 def get_png_data_poset(library, name, x, data_format):  # @UnusedVariable
     if isinstance(x, FinitePoset):

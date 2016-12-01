@@ -21,6 +21,7 @@ from .utils_lists import make_list
 
 ParserElement.enablePackrat()
 
+
 K = Keyword
 SL = lambda x: S(L(x))
 
@@ -1023,6 +1024,7 @@ class Syntax():
                              lambda t: CDP.ModelStatements(make_list(list(t))))
 
     MCDPTOKEN = keyword('mcdp', CDP.MCDPKeyword)
+#     MCDPTOKEN.leaveWhitespace()
     ndpt_dp_model_statements = sp(ZeroOrMore(line_expr),
                                   dp_model_statements_parse_action).setName('ndpt_dp_model_statements')
     
@@ -1038,13 +1040,13 @@ class Syntax():
         return CDP.BuildProblem(keyword=keyword, lbrace=lbrace, comment=comment,
                                 statements=statements, rbrace=rbrace)
  
-    ndpt_dp_model = sp(  MCDPTOKEN 
+    ndpt_dp_model = sp( MCDPTOKEN 
                        - lbrace 
                        + ow - O(comment_model) 
                        - ndpt_dp_model_statements 
                        - rbrace,
                        ndpt_dp_model_parse).setName('ndpt_dp_model')
-
+#     ndpt_dp_model.leaveWhitespace()
                   
 
     # load

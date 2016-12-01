@@ -32,6 +32,7 @@ def namedtuplewhere(a, b):
     g[a] = F
     return F
 
+
 def get_copy_with_where(x, where):
     d = x._asdict()
     del d['where']
@@ -39,6 +40,7 @@ def get_copy_with_where(x, where):
     T = type(x)
     x1 = T(**d)
     return x1
+
 
 def get_copy_with_warning(x, warning):
     d = x._asdict()
@@ -70,6 +72,7 @@ def clean_print(x):
 def recursive_print(x):
     if not isnamedtupleinstance(x):
         return x.__repr__()
+#         return x.__str__()
     s = type(x).__name__
     s += ':\n'
     for k, v in x._asdict().items():

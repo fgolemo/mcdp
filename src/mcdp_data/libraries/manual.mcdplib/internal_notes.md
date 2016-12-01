@@ -30,8 +30,8 @@ mcdp {
 	provides capacity [J]
 	requires mass [g]
 	s = instance `submodel
-	mass >= s.m2
-	capacity <= s.c2
+	mass >= r required by s
+	capacity <=  f provided by s
 }
 </pre>
  
@@ -104,6 +104,7 @@ mcdp {
 poset { 
 	a b 
 	c <= a 
+	c <= d
 	b <= d 
 }
 </pre>

@@ -69,3 +69,4 @@ from .misc_corner_cases import *
 
 from .todo import *
 
+from .test_suggestion import *

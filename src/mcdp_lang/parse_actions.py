@@ -117,7 +117,7 @@ def spa(x, b):
     bb = wheredecorator(b)
     @parse_action
     def p(tokens, loc, s):
-        # print('parsing %r %r %r ' % (tokens, loc, s))
+        #print('spa(): parsing %s %r %r %r ' % (x, tokens, loc, s))
         res = bb(tokens, loc, s)
         # if we are here, then it means the parse was succesful
         # we try again to get loc_end
@@ -145,6 +145,7 @@ def spa(x, b):
         msg = 'This parsing expression already had a parsing element'
         raise_desc(DPInternalError, msg, x=x, new_action=b)
     
+#     x.leaveWhitespace()
     x.setParseAction(p)
 
 @parse_action
@@ -290,6 +291,8 @@ def parse_wrap(expr, string):
         
         with timeit(w, MCDPConstants.parsing_too_slow_threshold):
             expr.parseWithTabs()
+            expr.leaveWhitespace()
+            
             parsed = expr.parseString(string0, parseAll=True)  # [0]
             
             def transform(x, parents):  # @UnusedVariable

@@ -21,7 +21,7 @@ mcdp {
     }
 
     # Sub-design problem: actuation
-    actuation = instance abstract mcdp {
+    actuation = instance mcdp {
         # actuators need to provide this lift
         provides lift [N]
         # and will require power
@@ -32,13 +32,13 @@ mcdp {
         required power >= l * l * c
     }
     # Co-design constraint: battery must be large enough
-    power = actuation.power + extra_power
-    energy = power * endurance
+    power = power required by actuation+ provided extra_power
+    energy = power * provided endurance
     battery.capacity >= energy
 
     # Co-design constraint: actuators must be powerful enough
     gravity = 9.81 m/s^2
-    weight = (battery.mass + extra_payload) * gravity
+    weight = (battery.mass + provided extra_payload) * gravity
     lift provided by actuation >= weight
 
     # we want to optimize for size of the battery

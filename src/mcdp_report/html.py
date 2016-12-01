@@ -123,8 +123,7 @@ def ast_to_html(s,
 
     transformed = '\n' * num_empty_lines_start + transformed_p
     transformed = transformed +  '\n' * num_empty_lines_end
-    
-#     out = transformed
+     
     
     lines = transformed.split('\n')
     if len(lines) != len(s_comments): 
@@ -158,10 +157,7 @@ def ast_to_html(s,
                 out += "<span class='line-content'>" + linec + "</span>"
             else:
                 out += linec
-
-        
  
-        
             if i != len(lines) - 1:
                 out += '\n'
     
@@ -184,9 +180,12 @@ def ast_to_html(s,
 Snippet = namedtuple('Snippet', 'op orig a b transformed')
 
 def iterate2(x):
+    iterate_(print_html_inner, x)
+    
+def iterate_(transform, x):
     for  _, op in iterate_notwhere(x):
         if isnamedtuplewhere(op):
-            for m in print_html_inner(op):
+            for m in transform(op):
                 yield m
 
 def order_contributions(it):
@@ -196,6 +195,21 @@ def order_contributions(it):
     o = list(it)
     return sorted(o, key=loc)
 
+def iterate_check_order(x, it):
+    last = 0
+    cur = []
+    for i in it:
+        op, o, a, b, _ = i
+        cur.append('%s from %d -> %d: %s -> %r' % (type(x).__name__,
+                                                   a, b, type(op).__name__, o))
+
+        if not a >= last: # pragma: no cover
+            raise_desc(ValueError, 'bad order', cur="\n".join(cur))
+        if not b >= a: # pragma: no cover
+            raise_desc(ValueError, 'bad ordering', cur="\n".join(cur))
+        last = b
+        yield i
+        
 def print_html_inner(x):
     assert isnamedtuplewhere(x), x
     
@@ -212,22 +226,7 @@ def print_html_inner(x):
                   transformed=transformed)
         return
 
-    def iterate_check_order(it):
-        last = 0
-        cur = []
-        for i in it:
-            op, o, a, b, _ = i
-            cur.append('%s from %d -> %d: %s -> %r' % (type(x).__name__,
-                                                       a, b, type(op).__name__, o))
-
-            if not a >= last: # pragma: no cover
-                raise_desc(ValueError, 'bad order', cur="\n".join(cur))
-            if not b >= a: # pragma: no cover
-                raise_desc(ValueError, 'bad ordering', cur="\n".join(cur))
-            last = b
-            yield i
-
-    subs = list(iterate_check_order(order_contributions(iterate2(x))))
+    subs = list(iterate_check_order(x, order_contributions(iterate2(x))))
 
     if is_a_special_list(x):
         for _ in subs:

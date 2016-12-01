@@ -373,8 +373,6 @@ def refine(x, parents,
            constants, resources, functions, variables, deriv_resources,
            deriv_functions, context):
     
-#     print tuple((type(x).__name__, y) for x, y in parents)
-    
     is_rvalue_context = any(k == 'rvalue' for _, k in parents)
     is_fvalue_context = any(k == 'fvalue' for _, k in parents)
     
@@ -391,41 +389,42 @@ def refine(x, parents,
                 warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context)
 
                 # interpret as 
-                return CDP.NewResource(None, CDP.RName(x.name, where=x.where), 
+                return CDP.NewResource(None, 
+                                       CDP.RName(x.name, where=x.where), 
                                    where=x.where)
             if is_rvalue_context:
                 msg = 'Please use "provided %s" rather than just "%s".' % (x.name, x.name)
                 warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context)
 
-                return CDP.NewFunction(None, CDP.FName(x.name, where=x.where), 
-                                   where=x.where)
+                return CDP.NewFunction(None, 
+                                       CDP.FName(x.name, where=x.where), 
+                                       where=x.where)
+                
             msg = 'I cannot say whether %r refers to the functionality or resource.' % x.name
             msg += ' Need to implement >= - aware refinement.'
             warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context)
             return x
         elif x.name in resources:
             if x.name in variables:
-                msg = 'I cannot say whether %r refers to the variable or resource.' % x.name
+                msg = 'I cannot say whether "%s" refers to the variable or resource.' % x.name
                 warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context)
                 return x 
             
             msg = 'Please use "required %s" rather than just "%s".' % (x.name, x.name)
             warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context)
 
-            return CDP.NewResource(None, CDP.RName(x.name, where=x.where), 
-                                   where=x.where)
+            return CDP.NewResource(None, CDP.RName(x.name, where=x.where), where=x.where)
 
         elif x.name in functions:
             if x.name in variables:
-                msg = 'I cannot say whether %r refers to the variable or functionality.' % x.name
+                msg = 'I cannot say whether "%s" refers to the variable or functionality.' % x.name
                 warn_language(x, MCDPWarnings.LANGUAGE_AMBIGUOS_EXPRESSION, msg, context) # XXX
                 return x
             
             msg = 'Please use "provided %s" rather than just "%s".' % (x.name, x.name)
             warn_language(x, MCDPWarnings.LANGUAGE_REFERENCE_OK_BUT_IMPRECISE, msg, context) # XXX
 
-            return CDP.NewFunction(None, CDP.FName(x.name, where=x.where), 
-                                   where=x.where) 
+            return CDP.NewFunction(None, CDP.FName(x.name, where=x.where), where=x.where) 
 
         elif x.name in deriv_resources:
             where = x.where
