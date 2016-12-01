@@ -11,7 +11,8 @@ from bs4.element import NavigableString
 
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, indent
-from mcdp_figures.figure_interface import MakeFiguresNDP, MakeFiguresTemplate
+from mcdp_lang.parse_interface import (parse_template_refine, parse_poset_refine,
+    parse_ndp_refine)
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.generic_report_utils import (
@@ -26,13 +27,17 @@ from reprep import Report
 from system_cmd import CmdException, system_cmd_result
 
 
+from mcdp_figures.figure_interface import( MakeFiguresNDP, MakeFiguresTemplate, 
+    MakeFiguresPoset)
+
+
 def bs(fragment):
     return BeautifulSoup(fragment, 'html.parser', from_encoding='utf-8')
 
 @contract(returns=str, html=str)
 def html_interpret(library, html, raise_errors=False, 
                    generate_pdf=False, realpath='unavailable'):
-    # clone linrary?
+    # clone library?
     library = library.clone()
     load_fragments(library, html,
                    realpath=realpath)
@@ -70,6 +75,32 @@ def make_pre(f):
         t.string = res
         return t
     return ff
+    
+def load_or_parse_from_tag(tag, load, parse):
+    """ 
+        If tag.string is not None, then it parses the contents
+        using the function parse.
+        
+        Otherwise it tries to load the id given.
+        
+        If empty and no ID, raises excxception.
+        
+        Either 
+            <tag  class=... id='poset'>
+        or 
+            <tag  class=...>my code </tag
+    """
+    if tag.string is None:
+        if not tag.has_attr('id'):
+            msg = "If <img> is empty then it needs to have an id."
+            raise_desc(ValueError, msg, tag=str(tag))
+        # load it
+        tag_id = tag['id'].encode('utf-8')
+        vu = load(tag_id)
+    else:
+        source_code = tag.string.encode('utf-8')
+        vu = parse(source_code)    
+    return vu
 
 @contract(frag=str, returns=str)
 def make_plots(library, frag, raise_errors, realpath):
@@ -91,18 +122,13 @@ def make_plots(library, frag, raise_errors, realpath):
 
             try:
                 # load value with units in vu
-                if tag.string is None:
-                    if not tag.has_attr('id'):
-                        msg = "If <img> is empty then it needs to have an id."
-                        raise_desc(ValueError, msg, tag=str(tag))
-                    # load it
-                    tag_id = tag['id'].encode('utf-8')
-                    vu = load(tag_id)
-                else:
-                    source_code = tag.string.encode('utf-8')
+                
+                def parsing(source_code):
                     context = Context()
-                    vu = parse(source_code, realpath=realpath, context=context)
-
+                    return parse(source_code, realpath=realpath, context=context)
+                    
+                vu = load_or_parse_from_tag(tag, load, parsing) 
+                
                 rendered = plotter(tag, vu)
 
                 if tag.has_attr('style'):
@@ -318,7 +344,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
 
     soup = bs(frag)
 
-    def go(selector, parse_expr, extension, use_pre=True):
+    def go(selector, parse_expr, extension, use_pre=True, refine=None):
         for tag in soup.select(selector):
             try:
                 if tag.string is None:
@@ -336,11 +362,24 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
 
                 # we are not using it
                 _realpath = realpath
+                context = Context()
+                def postprocess(x):
+                    if refine is not None:
+                        return refine(x, context=context)
+                    else:
+                        return x
                 html = ast_to_html(source_code, parse_expr=parse_expr,
                                                 complete_document=False,
                                                 add_line_gutter=False,
-                                                add_css=False)
-
+                                                add_css=False,
+                                                postprocess=postprocess)
+                
+                
+                for w in context.warnings:
+                    if w.where is not None:
+                        from mcdp_web.editor_fancy.app_editor_fancy_generic import html_mark
+                        html = html_mark(html, w.where, "language_warning")
+                        
                 frag2 = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
 
                 if use_pre:
@@ -426,9 +465,11 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                 raise_wrapped(DPInternalError, e,msg, exc=sys.exc_info())
                 
 
-    go('pre.mcdp', Syntax.ndpt_dp_rvalue, "mcdp", use_pre=True)
-    go('pre.mcdp_poset', Syntax.space, "mcdp_poset", use_pre=True)
-    go('pre.mcdp_template', Syntax.template, "mcdp_template", use_pre=True)
+    go('pre.mcdp', Syntax.ndpt_dp_rvalue,  "mcdp", use_pre=True, refine=parse_ndp_refine)
+    go('pre.mcdp_poset', Syntax.space, "mcdp_poset", use_pre=True, refine=parse_poset_refine)
+    go('pre.mcdp_template', Syntax.template, "mcdp_template", use_pre=True,
+        refine=parse_template_refine)
+       
     go('pre.mcdp_statements', Syntax.dp_model_statements, "mcdp_statements", use_pre=True)
     go('pre.mcdp_fvalue', Syntax.fvalue, "mcdp_fvalue", use_pre=True)
     go('pre.mcdp_rvalue', Syntax.rvalue, "mcdp_rvalue", use_pre=True)
@@ -466,7 +507,7 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
             except (DPSyntaxError, DPSemanticError) as e:
                 if raise_error_dp:
                     raise
-                print(e)
+                logger.error(e)
                 t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
                 t.string = str(e)
                 tag.insert_after(t)
@@ -478,59 +519,56 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
                 tag.insert_after(t)
      
 
-    def make_tag(tag0, klass, data, ndp=None, template=None):
-        
-        if False:
-            png = data['png']
-            r = create_img_png_base64(soup, png, **{'class': klass})
-            return r
-        else:
-            svg = data['svg']
+    def make_tag(tag0, klass, data, ndp=None, template=None, poset=None):
+        svg = data['svg']
 
-            tag_svg = BeautifulSoup(svg, 'lxml', from_encoding='utf-8').svg
-            tag_svg['class'] = klass
+        tag_svg = BeautifulSoup(svg, 'lxml', from_encoding='utf-8').svg
+        tag_svg['class'] = klass
 
-            if tag0.has_attr('style'):
-                tag_svg['style'] = tag0['style']
+        if tag0.has_attr('style'):
+            tag_svg['style'] = tag0['style']
+        if tag0.has_attr('id'):
+            tag_svg['id'] = tag0['id']
+
+        if generate_pdf:
+            pdf0 = data['pdf']
+            pdf = crop_pdf(pdf0, margins=0)
+
+            div = soup.new_tag('div')
+
             if tag0.has_attr('id'):
-                tag_svg['id'] = tag0['id']
-
-            if generate_pdf:
-                pdf0 = data['pdf']
-                pdf = crop_pdf(pdf0, margins=0)
-
-                div = soup.new_tag('div')
-
-                if tag0.has_attr('id'):
-                    basename = tag0['id']
-                elif ndp is not None and hasattr(ndp, ATTR_LOAD_NAME):
-                    basename = getattr(ndp, ATTR_LOAD_NAME)
-                elif template is not None and hasattr(template, ATTR_LOAD_NAME):
-                    basename = getattr(template, ATTR_LOAD_NAME)
-                else:
-                    hashcode = hashlib.sha224(tag0.string).hexdigest()[-8:]
-                    basename = 'code-%s' % (hashcode)
-
-                docname = os.path.splitext(os.path.basename(realpath))[0]
-                download = docname + "." + basename + "." + klass + '.pdf'
-                a = create_a_to_data(soup, download=download, data_format='pdf', data=pdf)
-                a['class'] = 'pdf_data'
-                a.append(NavigableString(download))
-                div.append(tag_svg)
-                div.append(a)
-                return div
+                basename = tag0['id']
+            elif ndp is not None and hasattr(ndp, ATTR_LOAD_NAME):
+                basename = getattr(ndp, ATTR_LOAD_NAME)
+            elif template is not None and hasattr(template, ATTR_LOAD_NAME):
+                basename = getattr(template, ATTR_LOAD_NAME)
+            elif poset is not None and hasattr(poset, ATTR_LOAD_NAME):
+                basename = getattr(poset, ATTR_LOAD_NAME)
             else:
-                return tag_svg
+                hashcode = hashlib.sha224(tag0.string).hexdigest()[-8:]
+                basename = 'code-%s' % (hashcode)
+
+            docname = os.path.splitext(os.path.basename(realpath))[0]
+            download = docname + "." + basename + "." + klass + '.pdf'
+            a = create_a_to_data(soup, download=download, data_format='pdf', data=pdf)
+            a['class'] = 'pdf_data'
+            a.append(NavigableString(download))
+            div.append(tag_svg)
+            div.append(a)
+            return div
+        else:
+            return tag_svg
 
     
-    mf = MakeFiguresNDP(None,None,None)
+    mf = MakeFiguresNDP(None, None, None)
     available = set(mf.available()) | set(mf.aliases)
     for which in available:
-        selector = 'pre.%s' % which
         def callback(tag0):
-            source_code = tag0.string.encode('utf-8')
             context = Context()
-            ndp = library.parse_ndp(source_code, realpath=realpath, context=context)
+            load = lambda x: library.load_ndp(x, context=context)
+            parse = lambda x: library.parse_ndp(x, realpath=realpath, context=context)  
+            ndp = load_or_parse_from_tag(tag0, load, parse)
+
             mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=None) # XXX
             formats = ['svg']
             if generate_pdf: 
@@ -539,16 +577,19 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
             tag = make_tag(tag0, which, data, ndp=ndp, template=None)
             return tag
         
+        selector = 'pre.%s' % which
+        go(selector, callback)
+        selector = 'img.%s' % which
         go(selector, callback)
     
     mf = MakeFiguresTemplate(None,None,None)
     available = set(mf.available()) | set(mf.aliases)
     for which in available:
-        selector = 'pre.%s' % which
         def callback(tag0):
-            source_code = tag0.string.encode('utf-8')
             context = Context()
-            template = library.parse_template(source_code, realpath=realpath, context=context)
+            load = lambda x: library.load_template(x, context=context)
+            parse = lambda x: library.parse_template(x, realpath=realpath, context=context)  
+            template = load_or_parse_from_tag(tag0, load, parse)
 
             mf = MakeFiguresTemplate(template=template, library=library, yourname=None) # XXX
             formats = ['svg']
@@ -558,15 +599,33 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
             tag = make_tag(tag0, which, data, ndp=None, template=template)
             return tag
         
+        selector = 'pre.%s' % which
+        go(selector, callback)
+        selector = 'img.%s' % which
         go(selector, callback)
         
-
-#     go('pre.ndp_graph_normal', ndp_graph_normal_)
-#     go('pre.ndp_graph_templatized', ndp_graph_templatized_)
-#     go('pre.ndp_graph_templatized_labeled', ndp_graph_templatized_labeled_)
-#     go('pre.ndp_graph_enclosed', ndp_graph_enclosed_)
-#     go('pre.ndp_graph_expand', ndp_graph_expand_)
-#     go('pre.template_graph_enclosed', template_graph_enclosed_)
+    mf = MakeFiguresPoset(None)
+    available = set(mf.available()) | set(mf.aliases)
+    for which in available:
+        def callback(tag0):
+            context = Context()
+            load = lambda x: library.load_poset(x, context=context)
+            parse = lambda x: library.parse_poset(x, realpath=realpath, context=context)  
+            poset = load_or_parse_from_tag(tag0, load, parse)
+            
+            mf = MakeFiguresPoset(poset=poset, library=library)
+            formats = ['svg']
+            if generate_pdf: 
+                formats.append('pdf')
+            data = mf.get_figure(which, formats)
+            tag = make_tag(tag0, which, data, ndp=None, template=None, poset=poset)
+            return tag
+        
+        selector = 'pre.%s' % which
+        go(selector, callback)
+        selector = 'img.%s' % which
+        go(selector, callback)
+         
 
     return str(soup)
 
@@ -597,83 +656,3 @@ def bool_from_string(b):
     raise_desc(ValueError, msg, b=b)
     
 
-
-#     def ndp_graph_normal_(tag):
-#         source_code = tag.string.encode('utf-8')
-#         context = Context()
-#         ndp = library.parse_ndp(source_code, realpath=realpath, context=context)
-#         yourname = ''
-#         direction = str(tag.get('direction', default_direction))
-#         
-#         return call(tag, ndp_graph_normal,
-#                     library=library,
-#                     ndp=ndp,
-#                     style=STYLE_GREENREDSYM,
-#                     yourname=yourname,
-#                     direction=direction,
-#                     klass='ndp_graph_normal')
-#         
-#     def ndp_graph_templatized_(tag):
-#         source_code = tag.string.encode('utf-8')
-#         context = Context()
-#         ndp = library.parse_ndp(source_code, realpath=realpath, context=context)
-#         yourname = ''
-#         direction = str(tag.get('direction', default_direction))
-# 
-#         return call(tag, ndp_graph_templatized, library=library, ndp=ndp,
-#                     yourname=yourname,
-#                     direction=direction, klass='ndp_graph_templatized')
-# 
-#     def ndp_graph_templatized_labeled_(tag):
-#         source_code = tag.string.encode('utf-8')
-#         context = Context()
-#         ndp = library.parse_ndp(source_code, realpath=realpath, context=context)
-#         yourname = None 
-#         if hasattr(ndp, ATTR_LOAD_NAME):
-#             yourname = getattr(ndp, ATTR_LOAD_NAME)
-#         direction = str(tag.get('direction', default_direction))
-# 
-#         return call(tag, ndp_graph_templatized, library=library, ndp=ndp,
-#                     direction=direction,
-#                     yourname=yourname, klass='ndp_graph_templatized_labeled')
-# 
-#     def ndp_graph_enclosed_(tag):  # ndp_graph_enclosed
-#         source_code = tag.string.encode('utf-8')
-#         context = Context()
-#         ndp = library.parse_ndp(source_code, realpath=realpath, context=context)
-#         yourname = ''
-# #         raise Exception()
-#         direction = str(tag.get('direction', default_direction))
-#         enclosed = bool_from_string(tag.get('enclosed', 'True'))
-#         
-#         return call(tag, ndp_graph_enclosed, library=library, ndp=ndp,
-#                     style=STYLE_GREENREDSYM,
-#                      yourname=yourname, enclosed=enclosed,
-#                      direction=direction, klass='ndp_graph_enclosed')
-# 
-#     def ndp_graph_expand_(tag):
-#         source_code = tag.string.encode('utf-8')
-#         context = Context()
-#         ndp = library.parse_ndp(source_code, realpath=realpath, context=context)
-#         yourname = ''
-# 
-#         direction = str(tag.get('direction', default_direction))
-# 
-#         return call(tag, ndp_graph_expand, library=library, ndp=ndp,
-#                     style=STYLE_GREENREDSYM,
-#                      yourname=yourname,
-#                      direction=direction,
-#                      klass='ndp_graph_expand')
-# 
-#     def template_graph_enclosed_(tag):  # ndp_graph_enclosed
-#         source_code = tag.string.encode('utf-8')
-#         context = Context()
-#         template = library.parse_template(source_code, realpath=realpath, context=context)
-#         yourname = ''
-#         direction = str(tag.get('direction', default_direction))
-#         enclosed = bool_from_string(tag.get('enclosed', 'True'))
-#         from mcdp_web.images.images import ndp_template_graph_enclosed
-#         return call(tag, ndp_template_graph_enclosed, library=library,
-#                     template=template, style=STYLE_GREENREDSYM,
-#                      yourname=yourname, enclosed=enclosed,
-#                      direction=direction, klass='template_graph_enclosed')

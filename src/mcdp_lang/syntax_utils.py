@@ -36,8 +36,10 @@ def keyword(a, part):
 S = Suppress
 L = Literal
 O = Optional
-SLPAR = S(L('('))
-SRPAR = S(L(')'))
+LPAR = L('(')
+RPAR = L(')')
+SLPAR = S(LPAR)
+SRPAR = S(RPAR)
 COMMA = sp(L(','), lambda t: CDP.comma(t[0]))
 SCOMMA = S(COMMA)
 SCOLON = S(L(':'))

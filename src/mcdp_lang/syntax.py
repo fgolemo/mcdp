@@ -303,9 +303,9 @@ class Syntax():
     finite_poset_chain_geq = sp(finite_poset_el + OneOrMore(GEQ + finite_poset_el),
                                lambda t: CDP.FinitePosetChainGEQ(make_list(t)))
 
-    space_finite_poset = sp((FINITE_POSET | POSET) - L('{') + 
-                            ZeroOrMore(finite_poset_chain_leq ^ finite_poset_chain_geq) + S(L('}')),
-                            lambda t: CDP.FinitePoset(t[0], make_list(t[2:], where=t[0].where)))
+    space_finite_poset = sp((FINITE_POSET | POSET) - lbrace  + 
+                            ZeroOrMore(finite_poset_chain_leq ^ finite_poset_chain_geq) + rbrace,
+                            lambda t: CDP.FinitePoset(t[0], t[1], make_list(t[2:-1], where=t[0].where), t[-1]))
 
     ADD_BOTTOM = keyword('add_bottom', CDP.AddBottomKeyword)
     

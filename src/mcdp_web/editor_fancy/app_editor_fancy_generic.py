@@ -93,7 +93,7 @@ class AppEditorFancyGeneric():
                            load=MCDPLibrary.load_poset,
                            get_png_data=get_png_data_poset,
                            write=MCDPLibrary.write_to_poset,
-                           minimal_source_code="finite_poset {\na <= b <= c\n} ")
+                           minimal_source_code="poset {\n    \n}")
 
         self.config_(config, spec_templates)
         self.config_(config, spec_values)
@@ -271,19 +271,13 @@ class AppEditorFancyGeneric():
             except:
                 self.last_processed2[key] = None  # XXX
                 raise
-            
+             
             warnings = []
             for w in context.warnings:
-                # w.msg
-                warning = w.format_user()
                 if w.where is not None:
                     highlight = html_mark(highlight, w.where, "language_warning")
-                    
-#                     wheres = format_where(w.where, context_before=0, mark=None, arrow=False, 
-#                                           use_unicode=True, no_mark_arrow_if_longer_than=3)
-#                     warning += '\n\n' + indent(wheres, '   ')
-                warnings.append(warning.strip())
-                    
+                warning = w.format_user()
+                warnings.append(warning.strip()) 
             sep = '-' * 80
             language_warnings = ("\n\n" + sep + "\n\n").join(warnings)
             language_warnings_html = "\n".join(['<div class="language_warning">%s</div>' % w
@@ -358,7 +352,7 @@ class AppEditorFancyGeneric():
 
 def html_mark(html, where, add_class):
     """ Returns another html string """
-    html = '<pre>' + html + '</pre>'
+    html = '<www><pre>' + html + '</pre></www>'
     soup = BeautifulSoup(html, 'lxml')
 
     elements = soup.find_all("span")
@@ -370,10 +364,10 @@ def html_mark(html, where, add_class):
             if inside:
                 e['class'] = e.get('class', []) + [add_class]
         
-    pre = soup.body.pre
+    pre = soup.body.www
     s = str(pre)
-    s = s.replace('<pre>', '')
-    s = s.replace('</pre>', '')
+    s = s.replace('<www><pre>', '')
+    s = s.replace('</pre></www>', '')
     return s
     
 def html_mark_syntax_error(string, e):

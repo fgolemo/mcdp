@@ -1,5 +1,5 @@
 from mocdp import logger
-from contracts.utils import indent
+from contracts.utils import indent, check_isinstance
 from collections import namedtuple
 from mocdp.exceptions import DPInternalError
 from contracts.interface import format_where
@@ -79,6 +79,7 @@ def warn_language(element, which, msg, context):
         which: one of the strings
         msg: a string
     """
+    check_isinstance(msg, str)
     where = element.where
     msg2 = msg.strip() + '\n\n' + indent(str(where), ' '*4)
     logger.debug(msg2)
@@ -88,6 +89,6 @@ def warn_language(element, which, msg, context):
         context.warnings.append(w)
     else:
         msg = 'Context is None so I cannot record this.'
-        raise DPInternalError(msg )
+        raise DPInternalError(msg)
         logger.debug(msg)
 #     setattr(element, 'warning', msg)

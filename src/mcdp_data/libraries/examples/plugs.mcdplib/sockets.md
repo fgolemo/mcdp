@@ -53,6 +53,8 @@ We can use a ``finite_poset`` to describe the poset [as follows](#socket_type):
 
 <pre class='mcdp_poset' id='socket_type' label='socket_type.mcdp_poset'></pre>
 
+<img class='hasse_icons' id='socket_type'></pre>
+
 
 ### Voltages 
 

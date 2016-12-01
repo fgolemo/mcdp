@@ -17,10 +17,10 @@ mcdp {
 
 <pre class="mcdp" id='submodel'>
 mcdp  {
-	provides c2 [J]
-	requires m2 [g]
-	m2 >= 10g
-	c2 <= 10J
+	provides f [J]
+	requires r [g]
+	required r >= 10g
+	provided f <= 10J
 }
 </pre>
 
@@ -34,6 +34,7 @@ mcdp {
 	capacity <= s.c2
 }
 </pre>
+ 
 
 ### mcdp_ndp_graph_templatized
 
@@ -72,30 +73,55 @@ mcdp {
 ### ndp_graph_expand
 
 ~~~
-<pre class='ndp_graph_expand_LR'>`model</pre>
+<img class='ndp_graph_expand_LR'>`model</img>
 ~~~
 
-<pre class='ndp_graph_expand_LR'>`model</pre>
+<img class='ndp_graph_expand_LR'>`model</img>
 
 ~~~
-<pre class='ndp_graph_expand_TB'>`model</pre>
+<img class='ndp_graph_expand_TB'>`model</img>
 ~~~
 
-<pre class='ndp_graph_expand_TB'>`model</pre>
+<img class='ndp_graph_expand_TB'>`model</img>
 
 ###  ndp_template_graph_enclosed
 
 ~~~
-<pre class='template_graph_enclosed'>`ActuationEnergeticsTemplate</pre>
+<img class='template_graph_enclosed'>`ActuationEnergeticsTemplate</img>
 ~~~
 
-
-<pre class='template_graph_enclosed'>
+<img class='template_graph_enclosed'>
 template [A:mcdp{}]
 mcdp {
 	a = instance A
 }
+</img>
+
+
+### Poset
+
+<pre class="mcdp_poset" id='myposet'>
+poset { 
+	a b 
+	c <= a 
+	b <= d 
+}
 </pre>
+
+
+~~~
+<img class='hasse'>`myposet</pre>
+~~~
+
+<img class='hasse'>`myposet</pre>
+
+
+~~~
+<img class='hasse' id='myposet'/>
+~~~
+
+<img class='hasse' id='myposet'/>
+
 
 ### plot_generic_value
 

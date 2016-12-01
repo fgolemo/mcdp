@@ -198,22 +198,41 @@ def addbottom():
     # DPSemanticError: You can use add_bottom only on a FinitePoset
     
     
-@comptest
-def product():
-    s = """
-    mcdp {
-        provides f1, f2 [g]
-        requires r = provided f1 * provided f2
-    }
-    """
-    ndp = parse_ndp(s)
-    
-    dp = ndp.get_dp()
-    dpL, dpU = get_dp_bounds(dp, nl=10, nu=10)
-    print dp.repr_long()
-    print dpL.repr_long()
-    print dpU.repr_long()
+# @comptest
+# def product():
+#     s = """
+#     mcdp {
+#         provides f1, f2 [g]
+#         requires r = provided f1 * provided f2
+#     }
+#     """
+#     ndp = parse_ndp(s)
+#     
+#     dp = ndp.get_dp()
+#     dpL, dpU = get_dp_bounds(dp, nl=10, nu=10)
+#     print dp.repr_long()
+#     print dpL.repr_long()
+#     print dpU.repr_long()
     # DPSemanticError: You can use add_bottom only on a FinitePoset
+    
+@comptest
+def check_repeated_poset():
+    s = """ poset {
+        a 
+        a <= b
+        }
+    """
+    parse_poset(s)
+    
+    s = """ poset{
+        a 
+        a 
+        }
+    """
+    
+    # mocdp.exceptions.DPSemanticError: Repeated element 'a'.
+    assert_raises(DPSemanticError, parse_poset, s)
+    
     
 if __name__ == '__main__': 
     

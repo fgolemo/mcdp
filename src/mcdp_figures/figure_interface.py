@@ -3,11 +3,11 @@ import sys
 
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
+from mcdp_posets.finite_poset import FinitePoset
+from mcdp_report.gdc import choose_best_icon
 from mcdp_report.gg_utils import gg_get_formats
 from mocdp import ATTR_LOAD_NAME
-from mcdp_posets.finite_poset import FinitePoset
-from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
-from mcdp_report.gdc import choose_best_icon
 
 
 __all__ = [

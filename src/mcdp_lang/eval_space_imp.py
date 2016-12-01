@@ -151,6 +151,11 @@ def eval_space_code_spec(r, _context):
 
 
 def eval_space_finite_poset(r, context):  # @UnusedVariable
+    
+    if r.keyword.keyword == 'finite_poset': # pragma: no cover
+        msg ='We now prefer "poset" to "finite_poset".'
+        warn_language(r.keyword, MCDPWarnings.LANGUAGE_CONSTRUCT_DEPRECATED, msg, context)
+
     chains = unwrap_list(r.chains) 
 
     universe = set()
@@ -158,8 +163,16 @@ def eval_space_finite_poset(r, context):  # @UnusedVariable
     for c in chains:
         check_isinstance(c, (CDP.FinitePosetChainLEQ, CDP.FinitePosetChainGEQ))
         
-        ops = get_odd_ops(unwrap_list(c.ops))
+        allops = unwrap_list(c.ops)
+        ops = get_odd_ops(allops)
         elements = [_.identifier for _ in ops]
+        
+        if len(elements) == 1:
+            e = elements[0]
+            if e in universe:
+                msg = 'Repeated element %r.' % e
+                raise DPSemanticError(msg, where=allops[0].where)
+        
         universe.update(elements)
         
         if isinstance(c, CDP.FinitePosetChainLEQ):
