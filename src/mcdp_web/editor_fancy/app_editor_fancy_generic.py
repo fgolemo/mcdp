@@ -25,6 +25,7 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mcdp_lang.parse_interface import( parse_ndp_eval, parse_ndp_refine, 
     parse_template_eval, parse_template_refine, parse_constant_eval, 
     parse_constant_refine, parse_poset_eval, parse_poset_refine)
+from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 
 
 
@@ -219,9 +220,12 @@ class AppEditorFancyGeneric():
                 res = format_exception_for_ajax_response(e, quiet=(DPSyntaxError,))
                 if expr is not None:
                     try:
-                        html = ast_to_html(string2,    ignore_line=None,
-                                    add_line_gutter=False, encapsulate_in_precode=False, 
-                                    parse_expr=parse_expr,   postprocess=None)
+                        html = ast_to_html(string2,    
+                                           ignore_line=None,
+                                           add_line_gutter=False, 
+                                           encapsulate_in_precode=False, 
+                                           parse_expr=parse_expr,   
+                                           postprocess=None)
                 
                         res['highlight'] = html
                     except DPSyntaxError:
@@ -269,6 +273,15 @@ class AppEditorFancyGeneric():
             except:
                 self.last_processed2[key] = None  # XXX
                 raise
+            
+            if Tmp.parse_tree_interpreted:
+                suggestions = get_suggestions(Tmp.parse_tree_interpreted)
+                string_with_suggestions = apply_suggestions(string, suggestions)
+                for where, replacement in suggestions:
+                    print('suggestion: %r' % replacement)
+                    highlight = html_mark(highlight, where, "suggestion")
+            else:
+                string_with_suggestions = None
              
             warnings = []
             for w in context.warnings:
@@ -285,6 +298,7 @@ class AppEditorFancyGeneric():
                     'highlight': highlight,
                     'language_warnings': language_warnings, 
                     'language_warnings_html': language_warnings_html,
+                    'string_with_suggestions': string_with_suggestions,
                     'request': req}
 
         return ajax_error_catch(go)

@@ -10,7 +10,7 @@
 
   </head>
   
-  <body>
+  <body spellcheck="false">
   	{% include 'model_views_navigation.jinja2' %}
   
   
@@ -20,6 +20,7 @@
     <div id='commands'>
 	  	<button id='save'>Save</button>
 	  	<button id='discard'>Discard</button>
+	  	<button id='apply_suggestions' style='display: none'>Beautify</button>
 	  	<span id='save_status'></span>
   	</div>
   	<script type='text/javascript'>
@@ -82,11 +83,14 @@
 	var timeoutID = null;
 	var parsing_wait_ms = 800;
 
+	var string_with_suggestions = null;
+
 	$(document).ready(function() {
 
 		$("#editor").keyup(keyup);
 		$( "button#save" ).click(click_button_save);
 		$( "button#discard" ).click(click_button_discard);
+		$( "button#apply_suggestions" ).click(click_apply_suggestions);
 
 	    try_to_parse(current_text());
 	});
@@ -111,6 +115,9 @@
 		$('.unparsable').css('color', 'black');
 
 		text_has_changed();
+
+		string_with_suggestions = null;
+		$('#apply_suggestions').hide();
 		
 		// and we wait that the user stops editing
 		if (timeoutID != null){
@@ -197,7 +204,7 @@
 
 	function still_relevant(req_text) {
 		text = current_text();
-		return req_text == text;
+		return req_text == text || req_text == string_with_suggestions;
 	}
 
  	function multiple_selection() {
@@ -256,6 +263,17 @@
 
 			if(multiple_selection())
 				return;
+
+			string_with_suggestions = res['string_with_suggestions']
+			if(null != string_with_suggestions) {
+				if(string_with_suggestions != res_text) {
+					$('#apply_suggestions').show();
+				} else {
+					$('#apply_suggestions').hide();	
+				}
+			} else {
+				$('#apply_suggestions').hide();
+			}
 
 			$('#around_editor').css('background-color', 'white');
 			$('#syntax_error').html('');
@@ -319,6 +337,19 @@
 		$("a#graph img").attr("src", url);		
 		//$('a#graph').imageZoom();
 	} 
+
+	function click_apply_suggestions() {
+    	if (string_with_suggestions != null) {
+   //      	pos = getCaretCharacterOffsetWithin($("#editor").get(0));
+			// if (pos == null){
+			// 	console.log('Cannot get element cursor.');
+			// 	pos = 0;
+			// }
+			try_to_parse(string_with_suggestions);
+			// s = '<pre><code>' + string_with_suggestions + '</code></pre>';
+			// update_text(s, pos);	
+    	}
+	}
 
 
 

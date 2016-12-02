@@ -199,13 +199,6 @@ span.PlaceholderLabel {
     /*font-style: italic;*/
 }
 
-span.semantic_error {
-    background-color: pink;
-}
-span.language_warning {
-    background-color: yellow;
-}
-
 
 span.CommentModel {
     color: purple ;
@@ -221,3 +214,51 @@ span.CommentRes {
     color: darkred;
     font-weight: bold;
 }
+
+
+
+
+
+span.semantic_error {
+    background-color: pink;
+ 
+}
+
+span.language_warning {
+    background-color: yellow !important;
+}
+
+
+span.suggestion {
+    background-color: white;
+}
+
+/*
+span.semantic_error {
+
+    text-decoration: underline;
+    text-decoration-style: wavy;
+    -webkit-text-decoration-style: wavy;
+    -moz-text-decoration-style: wavy;
+    text-decoration-color: red;
+}
+
+span.language_warning {
+
+    text-decoration: underline;
+    text-decoration-style: wavy;
+    -webkit-text-decoration-style: wavy;
+    -moz-text-decoration-style: wavy;
+    text-decoration-color: orange !important;
+}
+
+
+span.suggestion {
+
+    text-decoration: underline;
+    text-decoration-style: wavy;
+    -webkit-text-decoration-style: wavy;
+    -moz-text-decoration-style: wavy;
+    text-decoration-color: gray;
+}
+*/
