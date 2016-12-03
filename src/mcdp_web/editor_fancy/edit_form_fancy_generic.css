@@ -22,8 +22,9 @@
 }
 
 #editor {
-	font-size: 80%;
+	font-size: 65%;
 	width: 40em;
+    font-family: "Andale Mono", Courier, monospace;
 }
 
 #around_editor {margin: 0; padding: 0.5em;}

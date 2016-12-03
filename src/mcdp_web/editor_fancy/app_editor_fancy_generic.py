@@ -236,13 +236,16 @@ class AppEditorFancyGeneric():
                 res['request'] = req
                 return res
             
+            string_parse_tree_interpreted = parse_refine(parse_tree, context)
+            
             try:
                 class Tmp:
-                    parse_tree_interpreted = None
+                    string_nospaces_parse_tree_interpreted = None
                      
                 def postprocess(block):
-                    Tmp.parse_tree_interpreted = parse_refine(block, context)
-                    return Tmp.parse_tree_interpreted
+                    x = parse_refine(block, context)
+                    Tmp.string_nospaces_parse_tree_interpreted = x 
+                    return x
                 
                 try:
                     try:
@@ -260,7 +263,8 @@ class AppEditorFancyGeneric():
                                                 postprocess=None)
                         raise
                     
-                    thing = parse_eval(Tmp.parse_tree_interpreted, context)
+                    thing = parse_eval(Tmp.string_nospaces_parse_tree_interpreted, context)
+                    
                 except (DPSemanticError, DPInternalError) as e:
                     highlight_marked = html_mark(highlight, e.where, "semantic_error")
                     self.last_processed2[key] = None  # XXX
@@ -274,8 +278,8 @@ class AppEditorFancyGeneric():
                 self.last_processed2[key] = None  # XXX
                 raise
             
-            if Tmp.parse_tree_interpreted:
-                suggestions = get_suggestions(Tmp.parse_tree_interpreted)
+            if string_parse_tree_interpreted:
+                suggestions = get_suggestions(string_parse_tree_interpreted)
                 string_with_suggestions = apply_suggestions(string, suggestions)
                 for where, replacement in suggestions:
                     print('suggestion: %r' % replacement)

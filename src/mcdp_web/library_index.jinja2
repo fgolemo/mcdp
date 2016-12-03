@@ -43,18 +43,57 @@
 	div.compact img { max-width: 20em; max-height: 10em; } 
 </style>
 
+<button id='show_previews'>Show previews</button>
+
+<script type='text/javascript'>
+
+	function click_show_previews() {
+		// $('.preview').show();
+		console.log(all_images);
+		for (var i in all_images) {
+			x = all_images[i];
+			target = x[1];
+			src = x[0];
+			$(target).attr('src', src);
+		}
+	}
+
+	$(document).ready(function() {
+		$( "button#show_previews" ).click(click_show_previews);
+	});
+
+	var all_images = [];
+</script>
+
 {% for m in navigation['models'] %}
 
 <a class='modellink' href="{{m['url']}}">
-<div class="compact">
-	<span class="name">
-		
-			{{ m['id_ndp'] }}
+<div id='{{ m["id_ndp"] }}-div' class="compact">
+	<span class="name">	
+		{{ m['id_ndp'] }}
 	</span>
+	
+	<img id='{{ m["id_ndp"] }}-image' src='/static/white_small.png'/>
+
+	<script type='text/javascript'>
+		tmp_img="/libraries/{{navigation['current_library']}}/models/{{m['id_ndp']}}/views/solver2/compact_graph.png";
+		tmp_target = '#{{ m["id_ndp"] }}-image';
+		all_images.push([tmp_img, tmp_target]);
 		
-{#	/libraries/{library}/models/{models}/views/solver2/compact_graph.png #}
-        
-		<img src="/libraries/{{navigation['current_library']}}/models/{{m['id_ndp']}}/views/solver2/compact_graph.png"/>
+	function {{ m["id_ndp"] }}_callback() {
+		src="/libraries/{{navigation['current_library']}}/models/{{m['id_ndp']}}/views/solver2/compact_graph.png";
+
+		$( '#{{ m["id_ndp"] }}-image' ).attr('src', src);
+	}
+
+	$(document).ready(function() {
+		$( '#{{ m["id_ndp"] }}-div' ).hover({{ m["id_ndp"] }}_callback);
+	});
+
+	</script>
+		        
+		<!-- <img class='preview' style='display:none; border: solid 1px red' src="/libraries/{{navigation['current_library']}}/models/{{m['id_ndp']}}/views/solver2/compact_graph.png"/> -->
+	
 </div>
 </a>
 

@@ -26,13 +26,19 @@ def correct(x):
         m = re.search(r, x_string)
         return x_string[m.start():m.end()]
     
-    if isinstance(x, CDP.leq):
-        if x.glyph != '≤':
-            return x.glyph, '≤'
+    # each of this has one element .glyph
+    glyphs = {
+        CDP.leq: '≤',
+        CDP.geq: '≥',
+        CDP.OpenBraceKeyword: '⟨',
+        CDP.CloseBraceKeyword: '⟩',
+        CDP.times: '·',
+    }
     
-    if isinstance(x, CDP.geq):
-        if x.glyph != '≥': 
-            return x.glyph, '≥'
+    for klass, preferred in glyphs.items():
+        if isinstance(x, klass):
+            if x.glyph != preferred:
+                return x.glyph, preferred
     
     if isinstance(x, CDP.NewFunction) and x.keyword is None:
         name = x.name.value

@@ -235,7 +235,7 @@ class Syntax():
     DOT = spk(L('.'), CDP.DotPrep)
     PLUS = spk(L('+'), CDP.plus)
     MINUS = spk(L('-'), CDP.minus)
-    TIMES = spk(L('*'), CDP.times)
+    TIMES = spk(L('*') | L('·'), CDP.times)
     BAR = spk(L('/'), CDP.bar)
 
     # "call"

@@ -215,7 +215,11 @@ span.CommentRes {
     font-weight: bold;
 }
 
-
+/* Special case: ≤ does not look good in regular font Courier */
+span.leq, span.geq, span.OpenBraceKeyword, span.CloseBraceKeyword {
+    /*font-family: Courier, monospace;*/
+    font-weight: bold;
+}
 
 
 
