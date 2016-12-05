@@ -96,17 +96,16 @@ def ast_to_html(s,
         else:
             break
 
-    use = s_lines
-#     use = s.split('\n')
-    full_lines = use[num_empty_lines_start: len(s_lines)- num_empty_lines_end]
+    full_lines = s_lines[num_empty_lines_start: len(s_lines)- num_empty_lines_end]
     
     from mcdp_report.out_mcdpl import extract_ws
-    # remove also whitespace
     for_pyparsing0 = "\n".join(full_lines)
+    # remove also initial and final whitespace
     extra_before, for_pyparsing, extra_after = extract_ws(for_pyparsing0)
-    
+    # parse the string 'for_pyparsing'
     block0 = parse_wrap(parse_expr, for_pyparsing)[0]
-    
+    assert isnamedtuplewhere(block0)
+    # now transform everything so that it refers to s
     transform_original_s = s
     def transform(x, parents):  # @UnusedVariable
         w0 = x.where
@@ -137,9 +136,7 @@ def ast_to_html(s,
         return get_copy_with_where(x, where)
     
     block = namedtuple_visitor_ext(block0, transform)
-
-    if not isnamedtuplewhere(block): # pragma: no cover
-        raise DPInternalError('unexpected', block=block)
+    assert isnamedtuplewhere(block)
 
     if postprocess is not None:
         block = postprocess(block)
@@ -156,13 +153,14 @@ def ast_to_html(s,
 #         assert False
 #         transformed_p = for_pyparsing[:block.where.character] + transformed_p
 
-    # re-add here
+    # re-add the initial and final space here
     transformed_p = extra_before + transformed_p + extra_after
     def sanitize_comment(x):
         x = x.replace('>', '&gt;')
         x = x.replace('<', '&lt;')
         return x
 
+    # re-add the initial and final lines
     transformed = ''
     transformed += "\n".join(s_lines[:num_empty_lines_start])
     if num_empty_lines_start:
@@ -172,23 +170,14 @@ def ast_to_html(s,
         transformed += '\n'
     transformed += "\n".join(s_lines[len(original_lines)-num_empty_lines_end:])
 
-#     print 's', s.__repr__()
-#     print 'empty start', s_lines[:num_empty_lines_start]
-#     print 'empty end', s_lines[len(original_lines)-num_empty_lines_end:]
-     
      
     lines = transformed.split('\n')
     if len(lines) != len(s_comments):
-         
-#         print 'transformed', transformed.__repr__()
-#         print s_lines
-#         print 'num_empty_lines_start', num_empty_lines_start
-#         print 'num_empty_lines_end', num_empty_lines_end
         msg = 'Lost some lines while pretty printing: %s, %s' % (len(lines), len(s_comments))
         raise DPInternalError(msg) 
  
-#     print('transformed', transformed)
-#     print 'transfomed_lines', lines
+    print('transformed', transformed)
+    
     out = ""
     
     for i, (line, comment) in enumerate(zip(lines, s_comments)):
@@ -196,22 +185,36 @@ def ast_to_html(s,
         if ignore_line(lineno):
             continue
         else:
+            print('line %d' % i)
+            print(' oiginal line: %r' % original_lines[i])
+            print('         line: %r' % line)
+            print('      comment: %r' % comment)
             original_line = original_lines[i]
-            if '#' in original_line:
-                w = original_line.index('#')
-                before = line # (already transformed) #original_line[:w]
-                comment = original_line[w:]
-#                 print ('vefore: %r comment: %r' % (before, comment))
-                
+            if comment is not None:
+                assert '#' in original_line
+            
+            if '#' in original_line:               
+                if '#' in line:
+                    w = line.index('#')
+                    before = line[:w] # (already transformed) #original_line[:w]
+                    comment = line[w:]
+                else:
+                    before = line
+                    comment = comment
+                    
+                print('       before: %r' % comment)
+                print('      comment: %r' % comment)
+                    
                 if comment.startswith(unparsable_marker):
                     unparsable = comment[len(unparsable_marker):]
                     linec = before + '<span class="unparsable">%s</span>' % sanitize_comment(unparsable)
                 else:
                     linec = before + '<span class="comment">%s</span>' % sanitize_comment(comment)
                     
-#                 print('linec: %r' % linec)
             else:
                 linec = line 
+                
+            print('        linec: %r' % linec)
             
             if add_line_gutter:
                 out += "<span class='line-gutter'>%2d</span>" % lineno
