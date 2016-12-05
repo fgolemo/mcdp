@@ -58,16 +58,17 @@ class WebApp(AppEditor, AppVisualization,
         self.views = {}
         self.exceptions = []
         
-        self.add_model_view('syntax', 'Simple display')
-        self.add_model_view('edit_fancy', 'Fancy editor')
-        self.add_model_view('edit', 'Simple editor for IE')
+        self.add_model_view('syntax', 'Source code display')
+        self.add_model_view('edit_fancy', 'Editor')
+        # self.add_model_view('edit', 'Simple editor for IE')
+        self.add_model_view('solver2', desc='Solver interface')
         self.add_model_view('ndp_graph', 'NDP Graph representation')
         self.add_model_view('ndp_repr', 'NDP Text representation')
         self.add_model_view('dp_graph', 'DP graph representation')
         self.add_model_view('dp_tree', 'DP tree representation')
-        self.add_model_view('images', 'other image representations')
-        self.add_model_view('solver', 'Simple solver')
-
+        self.add_model_view('images', 'Other image representations')
+        self.add_model_view('solver', 'Graphical solver [experimental]')
+        
     def add_model_view(self, name, desc):
         self.views[name] = dict(desc=desc, order=len(self.views))
 

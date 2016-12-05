@@ -180,6 +180,17 @@ class CDPLanguage():
     CatalogueTable = namedtuplewhere('CatalogueTable', 'rows')
     FromCatalogue = namedtuplewhere('FromCatalogue', 'keyword funres table')
 
+    CatalogueFunc = namedtuplewhere('FromCatalogue', 'ops')
+    CatalogueRes = namedtuplewhere('CatalogueRes', 'ops')
+    CatalogueRowMapsfromto = namedtuplewhere('CatalogueRowMapsfromto', 
+                                             'functions mapsfrom impname mapsto resources')
+    
+    
+    Catalogue2 = namedtuplewhere('Catalogue2', 'keyword lbrace funres table rbrace')
+
+    CatalogueRow3 = namedtuplewhere('CatalogueRow3', 'functions leftright resources')
+    Catalogue3 = namedtuplewhere('Catalogue3', 'keyword lbrace funres table rbrace')
+
     ApproxDPModel = namedtuplewhere('ApproxDPModel', 'keyword name perc abs max_value dp')
 
     # just prepositions
@@ -201,7 +212,11 @@ class CDPLanguage():
     RBRACE  = namedtuplewhere('RBRACE', 'glyph') 
     LBRACKET  = namedtuplewhere('LBRACKET', 'glyph')
     RBRACKET  = namedtuplewhere('RBRACKET', 'glyph') 
-
+    
+    MAPSFROM  = namedtuplewhere('MAPSFROM', 'glyph')
+    MAPSTO  = namedtuplewhere('MAPSTO', 'glyph')
+    LEFTRIGHTARROW = namedtuplewhere('LEFTRIGHTARROW', 'glyph')
+    
     # function name
     FName = namedtuplewhere('FName', 'value')
     # resource name

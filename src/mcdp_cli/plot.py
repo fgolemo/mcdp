@@ -3,10 +3,11 @@ import os
 from tempfile import mkdtemp
 
 from contracts import contract
+from contracts.enabling import disable_all
 from contracts.utils import raise_desc
 from decent_params import UserError
 from mcdp_cli.utils_wildcard import expand_string
-from mcdp_figures.figure_interface import MakeFiguresNDP, MakeFiguresPoset
+from mcdp_figures import MakeFiguresNDP, MakeFiguresPoset
 from mcdp_lang.syntax import Syntax
 from mcdp_library import Librarian
 from mcdp_report.dp_graph_tree_imp import dp_graph_tree
@@ -19,7 +20,6 @@ from quickapp import QuickAppBase
 from system_cmd import CmdException, system_cmd_result
 
 from .utils_mkdir import mkdirs_thread_safe
-from contracts.enabling import disable_all
 
 
 def get_ndp(data):

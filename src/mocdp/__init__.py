@@ -138,3 +138,14 @@ class MCDPConstants():
     
     # Actually write to disk the reports
     test_allformats_report_write = False
+    
+
+def get_mcdp_tmp_dir():
+    from tempfile import gettempdir
+    import os
+    d0 = gettempdir()
+    d = os.path.join(d0, 'mcdp_tmp_dir')
+    from mcdp_report.utils import safe_makedirs
+    if not os.path.exists(d):
+        os.makedirs(d)
+    return d

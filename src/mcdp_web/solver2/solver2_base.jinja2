@@ -1,59 +1,167 @@
 <!DOCTYPE html>
 <html lang="en">
+
+<!--  2,3 http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiOiIiLCJhcmVhX1IiOiIiLCJmdG9yX2NoZWNrYm94Ijp0cnVlLCJydG9mX2NoZWNrYm94IjpmYWxzZSwiZG9fYXBwcm94aW1hdGlvbnMiOnRydWUsIm51IjoyLCJubCI6bnVsbH0= 
+http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiOiIiLCJhcmVhX1IiOiIiLCJmdG9yX2NoZWNrYm94Ijp0cnVlLCJydG9mX2NoZWNrYm94IjpmYWxzZSwiZG9fYXBwcm94aW1hdGlvbnMiOnRydWUsIm51IjoyLCJubCI6OX0=
+-->
 <head>
     <title>Interactive solver</title>
 
     {% include 'head.jinja2' %}
 	<style type='text/css'>
 	  .output_error {font-size: smaller; color: red; font-weight: bold; }
+
+    .output_error, .output_success {
+        /* at most 100 chars (approximately) */
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        width: 100ex;
+    }
+    img#compact_graph {
+      max-width: 50%; 
+      max-width: 35ex; 
+      float: right ;
+      margin-right: 10ex;
+    }
+
+    #slider-ln { width: 10em; }
+    #slider-un { width: 10em; }
+
+  #F_cell {color: darkgreen;}
+  #R_cell {color: darkred;}
+  #area_F { color: darkgreen;  font-family: Courier, monospace; font-size: 80%;}
+  #area_R { color: darkred;  font-family: Courier, monospace; font-size: 80%;}
+  .Ftext {color: darkgreen;}
+  .Rtext {color: darkred;}
+
+  table#params td:first-child, table#params label, #F_label, #R_label { 
+    text-align: right;
+    font-size: 80%;
+  }
+  fieldset { border: none; padding: 0; margin: 0; }
+
+  h2 { font-size: 100%; margin-bottom: -1.5em; margin-left: 0.5em;}
+  table#params {padding-top: 1em; /* for h2 trick above */}
+
+  div#query_box { border: solid 1px #ddd; padding: 1em;}
+
+  label { border: 0 !important; background-color: white !important; }
+
+  img#problem_icon {height: 7em;}
 	</style>
 </head>
 <body>
 	{% include 'model_views_navigation.jinja2' %}
 	
-  	<img src='compact_graph.png' style='max-width: 50%; float: right'/> 
-  
-  <style type='text/css'>
-  #slider-ln { width: 10em; }
-  #slider-un { width: 10em; }
-  table#params { font-size: 80%; }
-  </style>
+  <h2>Query</h2>
+  <div id='query_box'>
+  <img src='compact_graph.png' id='compact_graph'/>
 
   <table id='params'>
   <tr>
-  <td style='width: 10em'>
-  Query
-  
-  </td>
-  <td>
-  <textarea id="area" cols=40 rows=3/></textarea>
-  </td>
-	  <td style='text-align: left'>
-	  	{{space_description}}
-	  </td>
-  </tr>
-  <tr>
-  <td>
-  Lower bound n
-  </td>
-  <td>
-    <input type="text" id="slider-ln-value" value="1" readonly/>
-    </td>
+    <td></td>
     <td>
-    <div id='slider-ln'></div> </td>
-    </tr>
-  <tr>
-  <td>
-  Upper bound n:
-  </td>
-  <td>
-  <input type="text" id="slider-un-value" value="1" readonly "/>
-  </td>
-  <td>
-  <div id='slider-un'></div> </p>
-  </td>
+    <!-- <p  id='query-type-label' valign='top'>Query type</p> -->
+      <fieldset class='query_type'> 
+      <label for="ftor_checkbox">
+        <span class='Ftext'>Fixed the functionality</span>,
+        <span class='Rtext'>minimize the resources</span>.
+      </label>
+      <input type="radio" name="query-type" id="ftor_checkbox" checked="checked">
+      <br/>
+      <label for="rtof_checkbox">
+        <span class='Rtext'>Fixed the resources</span>, 
+        <span class='Ftext'>maximize the functionality</span>.
+      </label>
+      <input type="radio" name="query-type" id="rtof_checkbox">
+      <br/>
+      <label for="option3">
+        Given an implementation, evaluate functionality/resources.
+      </label>
+      <input type="radio" name="query-type" id="option3" disabled='1'>
+      <br/>
+      <label for="option4">
+        Given min functionality and max resources, find an implementation.
+      </label>
+      <input type="radio" name="query-type" id="option4" disabled='1'>
+      <br/>
+      <label for="option5">
+        Solve for component that makes problem feasible.
+      </label>
+      <input type="radio" name="query-type" id="option5" disabled='1'>
+    </fieldset>
+    <br/>
+    <img id='problem_icon' src='/static/white_small.png'/>
+    </td>
+  </tr>  
+  <tr id='row-fun'>
+    <td>
+    </td>
+    <td id='F_cell'>
+      <span id='F_label'>{{F_names}}<br/> {{F_description}}</span><br/>
+      <textarea id="area_F" cols=70 rows=5/></textarea>
+    </td>
   </tr>
+
+  <tr id='row-res'>
+    <td>
+    </td>
+   <td id='R_cell'>
+      <span id='R_label'>{{R_names}}<br/> {{R_description}}</span><br/>
+      <textarea id="area_R" cols=70 rows=5/></textarea>
+    </td>
+  </tr>
+
+  <tr>
+    <td></td><td>
+        <fieldset>
+            <input type="checkbox" name="do_approximations_x" id="do_approximations"/>
+            <label for="do_approximations_x">Use finite approximations 
+              to infinite antichains</label>
+
+        </fieldset>
+    </td>
+  </tr>
+  <tr>
+    <td valign='top' id='approx_cell'></td>
+      <!-- <fieldset> -->
+      
+
+    <td id='approx_params'>
+      <table>
+        <tr>
+          <td>
+          Upper bound complexity
+          </td>
+          
+          <td>
+            <input type="spinner" id="spinner-un" value='1'/>
+          </td>
+
+        </tr>
+        <tr>
+          <td>
+            Lower bound complexity
+          </td>
+          <td>
+            <input type="spinner" id="spinner-ln" value='1'/>
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+
+  <tr><td></td>
+    <td>
+        <fieldset>
+            <input type="checkbox" name="draw_implementations" id="draw_implementations"/>
+            <label for="draw_implementations">Draw diagram for implementations</label>
+        </fieldset>
+    </td>
+  </tr>
+   
 </table>
+</div> <!-- query box -->
     
   <pre class='output_error' id='output_error'></pre>
   <pre class='output_success' id='output_result'></pre>
@@ -66,6 +174,10 @@
   <pre class='output_success'  id='output_format'></pre>
   <pre class='output_success' id='output_space'></pre>
   <pre class='output_success' id='output_trace'></pre>
+ 
+  <pre class='output_success' id='output_raw'></pre>
+  <pre class='output_success' id='output_formatted'></pre>
+
   
   <pre class='output_error' id='ajax_error'></pre>
   </div>
@@ -82,42 +194,6 @@
       timeoutID = window.setTimeout(func, ms);
     }
 
-   function update_l(event, ui) {
-      v = $('#slider-un').slider('value');
-      console.log('value from 1: ' + v)
-      if (ui)
-        v = ui.value;
-        console.log('value from ui: ' + v)
-      //console.log(v);
-      $("#slider-ln-value").val(v);
-      call_after_pause(evaluate, wait_ms);
-   };
-
-   function update_u(event, ui) {
-      v = $('#slider-ln').slider('value');
-      console.log('value from 1: ' + v)
-      if (ui)
-        v = ui.value;
-        console.log('value from ui: ' + v)
-      //console.log(v);
-      $("#slider-un-value").val(v);
-      call_after_pause(evaluate, wait_ms);
-   };
-
-  $(document).ready(function() {
-		$('#slider-ln').slider({
-			    min: 1,
-      		max: 1000,
-      		slide: update_l
-    });
-		$('#slider-un').slider({
-          min: 1,
-          max: 1000,
-          slide: update_u
-    });
-    update_u(null, null);
-    update_l(null, null);
-	});
   </script>
 
  
@@ -126,56 +202,62 @@
 <script type="text/javascript">
  
 function ajax_begin() {
-	$('#operation_error').html('sending...');
+	S('#operation_error').html('sending...');
 }
 
 function ajax_success(data) {
     if (data['ok']) {
     	console.log('ok');
         console.log(data);
-        $('.output_error').html('');
+        S('.output_error').html('');
                 
-        $('#output_raw').html(data['output_raw']);
-        $('#output_formatted').html(data['output_formatted']);
-        $('#output_parsed').html(data['output_parsed'])
-        $('#output_space').html(data['output_space'])
-        $('#output_result').html(data['output_result'])
-        $('#output_trace').html(data['output_trace'])
+        S('#output_raw').html(data['output_raw']);
+        S('#output_formatted').html(data['output_formatted']);
+        S('#output_parsed').html(data['output_parsed'])
+        S('#output_space').html(data['output_space'])
+        S('#output_result').html(data['output_result'])
+        S('#output_trace').html(data['output_trace'])
 
-        $('#output_img').attr("src",data['output_image']);
+        S('#output_img').attr("src",data['output_image']);
 
     } else {
     	console.log(data);
-    	$('.output_success').html('');
+    	S('.output_success').html('');
     	
         error = data['error']
     	console.log(error);
     	
-    	$('#output_error').html(error);
-      $('#output_img').attr("src",'/static/error.png');
+    	S('#output_error').html(error);
+      // S('#output_img').attr("src",'/static/error.png');
+      S('#output_img').attr("src",'/static/white_small.png');
 	}
 }
     	
 function ajax_failure(error) {
 	console.log(error);
-	$('.output_success').html();
-	$('#ajax_error').html(error);
+	S('.output_success').html();
+	S('#ajax_error').html(error);
 }
 
 function evaluate() {
-    string = $('#area').val(); 
-    // console.log('string: "'+string+"'");
-    if (string.length == 0){
-        //console.log('String not present yet.');
-        return;
-    }
-    nl = $('#slider-ln').slider('value');
-    nu = $('#slider-un').slider('value');
-    //console.log("nl,nu: " + nl + "," + nu);
 
-    $('#output_img').attr("src",'/static/evaluating.gif');
+    ui_state = get_ui_state();
 
-    payload = {'string': string, 'nl': nl, 'nu': nu};
+    areaF = S('#area_F').val(); 
+    areaR = S('#area_R').val();
+    areaF = areaF.replace(/\s/g, ""); 
+    areaR = areaR.replace(/\s/g, ""); 
+
+    if(ui_state['ftor_checkbox'] && areaF.length == 0)
+      return;
+
+    if(ui_state['rtof_checkbox'] && areaR.length == 0)
+      return;
+
+    S('#output_img').attr("src",'/static/evaluating.gif');
+
+    
+    payload = {'ui_state': ui_state};
     jQuery.ajax({
         url     : 'submit',
         type    : 'POST',
@@ -186,20 +268,142 @@ function evaluate() {
     });
 }
 
+function get_ui_state() {
+  state = {};
+  state['area_F'] = S('#area_F').val(); 
+  state['area_R'] = S('#area_R').val(); 
+  state['ftor_checkbox'] = S("#ftor_checkbox").is(':checked');
+  state['rtof_checkbox'] = S("#rtof_checkbox").is(':checked');
+  state['do_approximations'] = S("#do_approximations").is(':checked');
+  state['nu'] = S('#spinner-un').spinner('value');
+  state['nl'] = S('#spinner-ln').spinner('value');
+  console.log('just read ln ' +state['nl']);
+  console.log('just read un ' +state['nu']);
+  return state;  
+}
 
-$(document ).ready(function() {
-    $('#area').on('inputchange', function() {
-        document.location.hash = string;
+function save_as_hash() {
+  console.log('save_as_hash()');
+  state = get_ui_state();
+  state_s = JSON.stringify(state);
+  console.log('setting to ' + state_s);
+  hash = btoa(state_s);
+
+  document.location.hash = hash; // XXX: encode
+}
+
+function set_state_from_hash() {
+    console.log('set_state_from_hash()');
+    hash = document.location.hash;
+    // console.log('hash ' + hash);
+    if (hash && hash.length>1) {
+      string = hash.substring(1);
+      try {
+        state_s = atob(string);
+        state = JSON.parse(state_s);
+      } catch (e) {
+        alert('Cannot decode hash.')
+        document.location.hash='';
+      }
+      console.log('set_state_from_hash(): using state ' + JSON.stringify(state));
+      S('#area_F').val(state['area_F']);
+      S('#area_R').val(state['area_R']);
+      S('#ftor_checkbox').prop("checked", state['ftor_checkbox']).checkboxradio("refresh");
+      S('#rtof_checkbox').prop("checked", state['rtof_checkbox']).checkboxradio("refresh");
+      S('#do_approximations').prop("checked", state['do_approximations']);
+      S('#spinner-un').spinner('value', state['nu']);
+      S('#spinner-ln').spinner('value', state['nl']);
+      console.log('set_state_from_hash(): setting ln to ' +state['nl']);
+      console.log('set_state_from_hash(): setting un to ' +state['nu']);
+    }
+    update_ui();
+}
+
+
+  /* Ensure $ returns at least 1 element */
+  function S(selector) {
+      x = $(selector);
+      if (x.length === 0) 
+          throw "Empty jQuery result for " + selector;
+      return x;
+  }
+
+  $( function() {
+    S( "input[type=radio]" ).checkboxradio();
+    // $( "input[type=checkbox]" ).checkboxradio();
+    
+    S('#ftor_checkbox').change(update_ui);
+    S('#rtof_checkbox').change(update_ui);
+    S('#do_approximations').change(update_ui);
+  
+    function save_hash_and_call() {
+      save_as_hash();
+      call_after_pause(evaluate, wait_ms); 
+    }
+    S('#ftor_checkbox').change(save_hash_and_call);
+    S('#rtof_checkbox').change(save_hash_and_call);
+
+
+    S( "#spinner-un" ).spinner({'min': 1, 'numberFormat': "n", 'spin': save_hash_and_call}); 
+    S( "#spinner-ln" ).spinner({'min': 1, 'numberFormat': "n", 'spin': save_hash_and_call}); 
+    update_ui();
+
+    S('#area_F').on('inputchange', function() {
+        save_as_hash();
         call_after_pause(evaluate, wait_ms);
     });
-    hash = document.location.hash;
-    if (hash) {
-       string = hash.substring(1);
-       $('#area').val(string);
-    }
-});
+    S('#area_R').on('inputchange', function() {
+        save_as_hash();
+        call_after_pause(evaluate, wait_ms);
+    });
+    S('#do_approximations').on('change', function() {
+      save_as_hash();
+      call_after_pause(evaluate, wait_ms);
+    });
 
-</script>
+    set_state_from_hash();
+
+  } );
+
+  function mark(which, enabled) {
+    if (enabled) {
+      S(which).prop('disabled', false);
+      S(which).css('background-color', 'white');
+    } else {
+      S(which).prop('disabled', true);
+      S(which).css('background-color', 'lightgrey');
+    }
+  }
+  
+  function update_ui() {
+    console.log('update_ui()');
+    if( S("#ftor_checkbox").is(':checked') ){ 
+      mark('#area_F', true);
+      mark('#area_R', false);
+      S('#row-res').hide();
+      S('#row-fun').show();
+      S('#problem_icon').attr("src", '/static/ftor.png');
+    }
+    if( S("#rtof_checkbox").is(':checked') ){ 
+      mark('#area_F', false);
+      mark('#area_R', true);
+      S('#row-res').show();
+      S('#row-fun').hide();
+      S('#problem_icon').attr("src", '/static/rtof.png');
+    }
+
+    if( S("#do_approximations").is(':checked') ){ 
+      S("#approx_params").show();
+      console.log('checked');
+    } else {
+      S("#approx_params").hide();
+      console.log('not checked');
+    }
+
+  }
+
+  
+  </script>
 
 </body>
 </html>

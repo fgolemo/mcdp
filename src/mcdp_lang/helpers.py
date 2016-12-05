@@ -2,12 +2,12 @@
 import sys
 
 from contracts import contract
-from contracts.utils import raise_wrapped, check_isinstance
+from contracts.utils import raise_wrapped
 from mcdp_dp import (Constant, ConstantMinimals, Limit, LimitMaximals,
     get_conversion)
 from mcdp_posets import NotLeq, Poset, get_types_universe
 from mocdp.comp import Connection, dpwrap
-from mocdp.comp.context import CResource, ValueWithUnits, CFunction
+from mocdp.comp.context import CResource, ValueWithUnits
 from mocdp.exceptions import DPSemanticError, DPInternalError, mcdp_dev_warning
 
 

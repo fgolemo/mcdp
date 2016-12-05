@@ -1,9 +1,9 @@
 from comptests.registrar import comptest, comptest_fails
 from mcdp_lang.parse_interface import parse_template, parse_ndp
-from mcdp_lang.parts import CDPLanguage
-from mcdp_lang_tests.utils import parse_wrap_check, parse_wrap_semantic_error,\
-    assert_parse_ndp_semantic_error
 from mcdp_lang.syntax import Syntax
+
+from .utils import parse_wrap_check, assert_parse_ndp_semantic_error
+
 
 @comptest_fails
 def check_deriv01():
@@ -20,7 +20,7 @@ def check_deriv01():
     })
     
     """
-    ndp = parse_template(s)
+    _t = parse_template(s)
     
 
 @comptest
@@ -43,7 +43,7 @@ def check_deriv03():
     })
     
     """
-    ndp = parse_ndp(s)
+    _ndp = parse_ndp(s)
     
 
 

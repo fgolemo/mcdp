@@ -3,8 +3,9 @@ span.Unit, span.Nat, span.Int, span.Rcomp  {
     color: #aC5600;
 }
 
-span.ValueExpr, span.IntegerFraction { 
+span.ValueExpr, span.IntegerFraction, span.NatConstant, span.RcompConstant { 
     color: #CC6600;
+
 }
 
 span.RcompUnit { color: #CC6600 ;}

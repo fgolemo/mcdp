@@ -11,7 +11,6 @@ from mcdp_dp import (CatalogueDP, CoProductDP, CoProductDPLabels, Constant,
 from mcdp_dp.conversion import get_conversion
 from mcdp_dp.dp_labeler import LabelerDP
 from mcdp_dp.dp_max import MaxF1DP, MinR1DP, MaxR1DP, MinF1DP
-from mcdp_dp.dp_uncertain import UncertainGate, UncertainGateSym
 from mcdp_lang import parse_poset
 from mcdp_posets import FiniteCollectionAsSpace, PosetProduct, Nat, Rcomp
 from mocdp import MCDPConstants

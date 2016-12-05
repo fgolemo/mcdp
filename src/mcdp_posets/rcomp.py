@@ -394,4 +394,3 @@ def Rcomp_multiply_upper_topology(A, a, B, b, C):
                 return C.get_top()
             else:
                 raise
-                 

@@ -5,5 +5,5 @@ mcdp {
     requires y [dimensionless]
     requires z [dimensionless]
     
-    x + y * z >= a
+    required x + required y · required z ≥ provided a
 }

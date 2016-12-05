@@ -514,8 +514,7 @@ def match_op(op, rtypes, are_they_constant):
         raise_desc(NotMatching, msg)
         
     symbols = {}
-    for i, (spec, R, is_constant) in \
-        enumerate(zip(requires, rtypes, are_they_constant)):
+    for spec, R, is_constant in zip(requires, rtypes, are_they_constant):
         try:
             spec.applies(R, is_constant, symbols)
         except OpSpecDoesntMatch as e:

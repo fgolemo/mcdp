@@ -5,7 +5,7 @@ from mcdp_dp import PlusValueDP, UncertainGate
 from mcdp_dp.dp_approximation import makeLinearCeilDP, makeLinearFloor0DP
 from mcdp_posets import (NotLeq, express_value_in_isomorphic_space,
     get_types_universe, poset_minima)
-from mcdp_posets import Rcomp, RcompUnits
+from mcdp_posets import RcompUnits
 from mocdp.comp.context import (CResource, ValueWithUnits, get_name_for_fun_node,
     ModelBuildingContext)
 from mocdp.exceptions import DPSemanticError, DPNotImplementedError

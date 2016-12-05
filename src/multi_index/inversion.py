@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-from multi_index.get_it_test import is_iterable
-from multi_index.imp import get_it
 from contracts.utils import raise_desc
 
+from .get_it_test import is_iterable
+from .imp import get_it
 
 
 def get_letter_proxy(P, start_letter='a'):
@@ -95,7 +95,7 @@ def transform_right_inverse(P, coords, reduce_list):
 #     print('I have map:\n %s \n %s' % (transform_pretty_print(P, coords), 
 #                                       transform_pretty_print(Q, coords2, 'A')))
     # this should be equal to P
-    P2 = get_it(Q, coords2, reduce_list)
+    _P2 = get_it(Q, coords2, reduce_list)
     return Q, coords2
 #     composition = compose_indices(P, coords, coords2, list)
 #     print('composition: {}'.format(composition))

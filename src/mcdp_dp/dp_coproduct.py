@@ -132,4 +132,3 @@ class CoProductDP(PrimitiveDP):
     def repr_hd_map(self):
         con = " ∪ ".join('h*%d(r)' % (i+1) for i in range(len(self.dps)))
         return 'r ⟼ Max {%s}' % con
-     

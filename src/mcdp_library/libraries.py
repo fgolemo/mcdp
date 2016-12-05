@@ -88,7 +88,7 @@ class Librarian():
         return library_name, data
         
     @contract(libname=str, returns='isinstance(MCDPLibrary)')
-    def load_library(self, libname, context=None):
+    def load_library(self, libname, context=None):  # @UnusedVariable
         check_isinstance(libname, str)
         """ hook to pass to MCDPLibrary instances to find their sisters. """
         if not libname in self.libraries:

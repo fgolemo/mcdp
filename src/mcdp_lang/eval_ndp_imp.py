@@ -57,6 +57,8 @@ def eval_ndp(r, context):
         CDP.CoproductWithNames: eval_ndp_CoproductWithNames,
         CDP.ApproxDPModel: eval_ndp_approxdpmodel,
         CDP.FromCatalogue: eval_ndp_catalogue,
+        CDP.Catalogue2: eval_ndp_catalogue2,
+        CDP.Catalogue3: eval_ndp_catalogue3,
         CDP.Flatten: eval_ndp_flatten,
         CDP.DPInstanceFromLibrary: eval_ndp_instancefromlibrary,
         CDP.CodeSpecNoArgs: eval_ndp_code_spec,
@@ -484,6 +486,226 @@ def eval_ndp_catalogue(r, context):
     ndp = dpwrap(dp, fnames=fnames, rnames=rnames)
     return ndp
 
+
+def eval_ndp_catalogue2(r, context):
+    check_isinstance(r, CDP.Catalogue2)
+    # FIXME:need to check for re-ordering
+    statements = unwrap_list(r.funres)
+    fun = [x for x in statements if isinstance(x, CDP.FunStatement)]
+    res = [x for x in statements if isinstance(x, CDP.ResStatement)]
+    Fs = [eval_space(_.unit, context) for _ in fun]
+    Rs = [eval_space(_.unit, context) for _ in res]
+
+    assert len(fun) + len(res) == len(statements), statements
+    
+    tu = get_types_universe()
+    
+    rows = unwrap_list(r.table)
+    
+    entries = [] # (name, f, r)
+    
+    for row in rows:
+        check_isinstance(row, CDP.CatalogueRowMapsfromto)
+        
+        check_isinstance(row.functions, CDP.CatalogueFunc) 
+        row.mapsfrom 
+        row.impname
+        row.impname.value 
+        row.mapsto 
+        check_isinstance(row.resources, CDP.CatalogueRes)
+        
+        fs = get_odd_ops(unwrap_list(row.functions.ops))
+        rs = get_odd_ops(unwrap_list(row.resources.ops))
+        
+        fs_evaluated = [eval_constant(_, context) for _ in fs]
+        rs_evaluated = [eval_constant(_, context) for _ in rs]
+
+        if len(Fs) == 0:
+            # expect <>
+            if len(fs) != 1 and fs_evaluated.value != ():
+                msg = 'Because there are no functionalities, I expected simply "<>".'
+                raise DPSemanticError(msg, where=row.functions.where)
+        else:
+            if len(fs_evaluated) != len(Fs):
+                msg = 'Mismatch with number of functionalities.'
+                raise DPSemanticError(msg, where=row.functions.where)
+        
+        if len(Rs) == 0:
+            if len(rs) != 1 and rs_evaluated.value != ():
+                msg = 'Because there are no resources, I expected simply "<>".'
+                raise DPSemanticError(msg, where=row.resources.where)
+        else:
+            if len(rs_evaluated) != len(Rs):
+                msg = 'Mismatch with number of resources.'
+                raise DPSemanticError(msg, where=row.resources.where)
+        
+        for cell, Fhave, F in zip(fs, fs_evaluated, Fs):
+            try:
+                tu.check_leq(Fhave.unit, F)
+            except NotLeq:
+                msg = 'Dimensionality problem: cannot convert %s to %s.' % (Fhave.unit, F)
+                raise DPSemanticError(msg, where=cell.where)
+#                 ex = lambda msg: DPSemanticError(msg, where=cell.where)
+#                 raise_wrapped(ex, e, msg, compact=True)
+
+        for cell, Rhave, R in zip(rs, rs_evaluated, Rs):
+            try:
+                tu.check_leq(Rhave.unit, R)
+            except NotLeq:
+                msg = 'Dimensionality problem: cannot convert %s to %s.' % (Rhave.unit, R)
+                raise DPSemanticError(msg, where=cell.where)
+#                 ex = lambda msg: DPSemanticError(msg, where=cell.where)
+#                 raise_wrapped(ex, e, msg, compact=True)
+
+        fvalues_ = [_.cast_value(F) for (_, F) in zip(fs_evaluated, Fs)]
+        rvalues_ = [_.cast_value(R) for (_, R) in zip(rs_evaluated, Rs)]
+
+        assert len(fvalues_) == len(fun)
+        assert len(rvalues_) == len(res)
+        
+        i = row.impname.value
+        f = tuple(fvalues_)
+        r = tuple(rvalues_)
+        
+        if len(Fs) == 0:
+            f = ()
+        if len(Rs) == 0:
+            r = ()
+            
+        entries.append((i, f, r))
+    
+    names = set([name for (name, _, _) in entries])
+    
+    M = FiniteCollectionAsSpace(names)
+    # use integers
+    # entries = [(float(i), b, c) for i, (_, b, c) in enumerate(entries)]
+
+    fnames = [_.fname.value for  _ in fun]
+    rnames = [_.rname.value for  _ in res]
+
+    if len(Fs) == 1:
+        F = Fs[0]
+        fnames = fnames[0]
+        entries = [(a, b[0], c) for (a, b, c) in entries]
+    else:
+        F = PosetProduct(tuple(Fs))
+
+    if len(Rs) == 1:
+        R = Rs[0]
+        rnames = rnames[0]
+        entries = [(a, b, c[0]) for (a, b, c) in entries]
+    else:
+        R = PosetProduct(tuple(Rs))
+
+    dp = CatalogueDP(F=F, R=R, I=M, entries=tuple(entries))
+    ndp = dpwrap(dp, fnames=fnames, rnames=rnames)
+    return ndp
+
+def eval_ndp_catalogue3(r, context):
+    check_isinstance(r, CDP.Catalogue3)
+    
+    statements = unwrap_list(r.funres)
+    fun = [x for x in statements if isinstance(x, CDP.FunStatement)]
+    res = [x for x in statements if isinstance(x, CDP.ResStatement)]
+    Fs = [eval_space(_.unit, context) for _ in fun]
+    Rs = [eval_space(_.unit, context) for _ in res]
+
+    assert len(fun) + len(res) == len(statements), statements
+    
+    tu = get_types_universe()
+    
+    rows = unwrap_list(r.table)
+    
+    entries = [] # (name, f, r)
+    
+    for i, row in enumerate(rows):
+        check_isinstance(row, CDP.CatalogueRow3)
+        
+        check_isinstance(row.functions, CDP.CatalogueFunc) 
+        row.leftright
+        check_isinstance(row.resources, CDP.CatalogueRes)
+        
+        fs = get_odd_ops(unwrap_list(row.functions.ops))
+        rs = get_odd_ops(unwrap_list(row.resources.ops))
+        
+        fs_evaluated = [eval_constant(_, context) for _ in fs]
+        rs_evaluated = [eval_constant(_, context) for _ in rs]
+
+        if len(Fs) == 0:
+            # expect <>
+            if len(fs) != 1 and fs_evaluated.value != ():
+                msg = 'Because there are no functionalities, I expected simply "<>".'
+                raise DPSemanticError(msg, where=row.functions.where)
+        else:
+            if len(fs_evaluated) != len(Fs):
+                msg = 'Mismatch with number of functionalities.'
+                raise DPSemanticError(msg, where=row.functions.where)
+        
+        if len(Rs) == 0:
+            if len(rs) != 1 and rs_evaluated.value != ():
+                msg = 'Because there are no resources, I expected simply "<>".'
+                raise DPSemanticError(msg, where=row.resources.where)
+        else:
+            if len(rs_evaluated) != len(Rs):
+                msg = 'Mismatch with number of resources.'
+                raise DPSemanticError(msg, where=row.resources.where)
+        
+        for cell, Fhave, F in zip(fs, fs_evaluated, Fs):
+            try:
+                tu.check_leq(Fhave.unit, F)
+            except NotLeq:
+                msg = 'Dimensionality problem: cannot convert %s to %s.' % (Fhave.unit, F)
+                raise DPSemanticError(msg, where=cell.where)
+
+        for cell, Rhave, R in zip(rs, rs_evaluated, Rs):
+            try:
+                tu.check_leq(Rhave.unit, R)
+            except NotLeq:
+                msg = 'Dimensionality problem: cannot convert %s to %s.' % (Rhave.unit, R)
+                raise DPSemanticError(msg, where=cell.where)
+
+        fvalues_ = [_.cast_value(F) for (_, F) in zip(fs_evaluated, Fs)]
+        rvalues_ = [_.cast_value(R) for (_, R) in zip(rs_evaluated, Rs)]
+
+        assert len(fvalues_) == len(fun)
+        assert len(rvalues_) == len(res)
+        
+        f = tuple(fvalues_)
+        r = tuple(rvalues_)
+        
+        if len(Fs) == 0:
+            f = ()
+        if len(Rs) == 0:
+            r = ()
+            
+        entries.append((i, f, r))
+    
+    names = set([name for (name, _, _) in entries])
+    
+    M = FiniteCollectionAsSpace(names)
+    # use integers
+    # entries = [(float(i), b, c) for i, (_, b, c) in enumerate(entries)]
+
+    fnames = [_.fname.value for  _ in fun]
+    rnames = [_.rname.value for  _ in res]
+
+    if len(Fs) == 1:
+        F = Fs[0]
+        fnames = fnames[0]
+        entries = [(a, b[0], c) for (a, b, c) in entries]
+    else:
+        F = PosetProduct(tuple(Fs))
+
+    if len(Rs) == 1:
+        R = Rs[0]
+        rnames = rnames[0]
+        entries = [(a, b, c[0]) for (a, b, c) in entries]
+    else:
+        R = PosetProduct(tuple(Rs))
+
+    dp = CatalogueDP(F=F, R=R, I=M, entries=tuple(entries))
+    ndp = dpwrap(dp, fnames=fnames, rnames=rnames)
+    return ndp
 
 @contract(resource=CResource, function=CFunction)
 def add_constraint(context, resource, function):
@@ -950,7 +1172,7 @@ def eval_statement_ResShortcut1m(r, context):
 
         
 def eval_statement_FunShortcut1m(r, context): 
-     # provides fname1,fname2,... using name
+    # provides fname1,fname2,... using name
     fnames = get_odd_ops(unwrap_list(r.fnames))
     for fname in fnames:
         B = context.make_function(r.name.value, fname.value)

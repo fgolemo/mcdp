@@ -20,7 +20,7 @@ class MCDPExceptionWithWhere(MCDPException):
         MCDPException.__init__(self, error, where, stack)
 
     def __str__(self):
-        error, where, stack = self.args
+        error, where, _stack = self.args  
         assert isinstance(error, str), error
         s = ""
 #         if False: # we have solved in a different way

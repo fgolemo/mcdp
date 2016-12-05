@@ -10,7 +10,7 @@ from contracts.utils import raise_desc, raise_wrapped
 from mcdp_library import Librarian, MCDPLibrary
 from mcdp_library.utils import dir_from_package_name
 from mcdp_tests.generation import for_all_source_mcdp
-from mocdp import logger
+from mocdp import logger, get_mcdp_tmp_dir
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPNotImplementedError
 from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
@@ -66,7 +66,11 @@ def get_test_library(libname):
     assert isinstance(libname, str) and not 'mcdplib' in libname
     librarian = get_test_librarian()
     library = librarian.load_library(libname)
-    d = tempfile.mkdtemp(prefix='mcdplibrary_cache')
+    
+    d = get_mcdp_tmp_dir()
+    prefix = 'mcdp_library_tests_get_test_library_'
+    d = tempfile.mkdtemp(dir=d, prefix=prefix)
+
     library.use_cache_dir(d)
     # XXX: this does not erase the directory
     return library

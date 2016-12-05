@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
-from mcdp_figures.figure_interface import MakeFiguresNDP
+from mcdp_figures import MakeFiguresNDP
 from mcdp_report.gg_ndp import gvgen_from_ndp
 from mcdp_report.gg_utils import gg_get_format
 from mcdp_web.utils.response import response_data
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mocdp.exceptions import mcdp_dev_warning
 
+
+__all__ = ['WebAppImages']
 
 class WebAppImages():
 
@@ -60,8 +62,8 @@ class WebAppImages():
             available.append((x, data_formats))
         return {
             'available': available,
-             'navigation': self.get_navigation_links(request),
-            }
+            'navigation': self.get_navigation_links(request),
+        }
         
     # TODO: catch errors when generating images
     def view_ndp_graph_templatized(self, request):
@@ -115,4 +117,3 @@ def ndp_template_graph_enclosed(library, template, style, yourname, data_format,
                         images_paths=images_paths, yourname=yourname)
     return gg_get_format(gg, data_format)
 
-#

@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 import os
 import tempfile
+from mocdp import get_mcdp_tmp_dir
 
+__all__ = ['create_hierarchy']
 
 def create_hierarchy(files):
     """ 
@@ -12,7 +14,11 @@ def create_hierarchy(files):
         }
     
     """
-    d = tempfile.mkdtemp(prefix='mcdplibrary_cache')
+    
+    mcdp_tmp_dir = get_mcdp_tmp_dir()
+    prefix = 'mcdp_library_tests_create_hierarchy()'
+    d = tempfile.mkdtemp(dir=mcdp_tmp_dir, prefix=prefix)
+    
     for filename, contents in files.items():
         fn = os.path.join(d, filename)
         dn = os.path.dirname(fn)

@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from contracts.utils import check_isinstance
 from mcdp_dp.dp_generic_unary import WrapAMap
 from mcdp_dp.dp_series_simplification import wrap_series
 from mcdp_maps.map_composition import MapComposition
@@ -7,9 +8,8 @@ from mcdp_maps.misc_imp import (SquareNatMap, SqrtMap, FloorMap, SquareMap,
 from mcdp_posets import Nat, Rcomp
 from mcdp_posets.maps.coerce_to_int import CoerceToInt, CeilRNMap
 from mcdp_posets.maps.promote_to_float import PromoteToFloat
-from mcdp_posets.rcomp_units import RCompUnitsPowerMap
-from contracts.utils import check_isinstance
 from mcdp_posets.rcomp import RcompBase
+from mcdp_posets.rcomp_units import RCompUnitsPowerMap
 
 
 __all__ = [
@@ -121,6 +121,7 @@ class Floor0DP(WrapAMap):
 class CeilDP(WrapAMap):
     """ from float to float """
     def __init__(self, F, R):
+        assert F == R
         amap = CeilMap(F)
         amap_dual = FloorMap(F)
         WrapAMap.__init__(self, amap, amap_dual)

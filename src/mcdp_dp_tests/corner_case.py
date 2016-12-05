@@ -7,7 +7,6 @@ from mcdp_dp.dp_dummy import Template
 from mcdp_dp.dp_inv_mult import InvMult2Nat
 from mcdp_dp.dp_inv_plus import InvPlus2, InvPlus2Nat
 from mcdp_dp.dp_series import Series
-from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.primitive import NotSolvableNeedsApprox
 from mcdp_lang.parse_interface import parse_poset, parse_template, parse_ndp
 from mcdp_maps import ProductNNatMap

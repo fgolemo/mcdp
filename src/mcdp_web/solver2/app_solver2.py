@@ -1,21 +1,37 @@
 # -*- coding: utf-8 -*-
+import base64
 import cgi
+from contextlib import contextmanager
+import json
 
 from contracts.utils import raise_desc, raise_wrapped
-from mcdp_cli.solve_meat import solve_meat_solve
+from mcdp_cli.solve_meat import solve_meat_solve_rtof, solve_meat_solve_ftor
 from mcdp_dp.dp_transformations import get_dp_bounds
+from mcdp_dp.primitive import NotSolvableNeedsApprox
 from mcdp_dp.tracer import Tracer
 from mcdp_lang.parse_interface import parse_constant
 from mcdp_posets import UpperSets
+from mcdp_posets.poset import NotLeq
 from mcdp_posets.types_universe import (express_value_in_isomorphic_space,
-    get_types_universe)
+)
+from mcdp_posets.uppersets import LowerSets
 from mcdp_report.gg_ndp import format_unit
 from mcdp_report.plotters.get_plotters_imp import get_best_plotter
 from mcdp_web.utils import ajax_error_catch, memoize_simple, response_data
-from mocdp.exceptions import DPSyntaxError, mcdp_dev_warning
+from mcdp_web.utils.image_error_catch_imp import response_image
+from mocdp import logger
+from mocdp.exceptions import DPSyntaxError, mcdp_dev_warning, DPSemanticError, \
+    DPInternalError
 from reprep import Report
+from reprep.constants import MIME_PNG
 from reprep.plot_utils.axes import x_axis_extra_space, y_axis_extra_space
 
+altchars = '-_' # instead of + /
+QUERY_TYPE_FTOR = 'ftor'
+QUERY_TYPE_RTOF = 'rtof'
+
+class NeedsApprox(Exception):
+    pass
 
 class AppSolver2():
     """
@@ -33,8 +49,7 @@ class AppSolver2():
         self.solutions = {}
 
     def config(self, config):
-        self.add_model_view('solver2', desc='Another solver interface')
-
+        
         base = '/libraries/{library}/models/{model_name}/views/solver2/'
 
         config.add_route('solver2_base', base)
@@ -66,25 +81,140 @@ class AppSolver2():
     def view_solver2_base(self, request):
         model_name = self.get_model_name(request)
         library = self.get_current_library_name(request)
-        _ndp, dp = self._get_ndp_dp(library, model_name)
+        ndp, dp = self._get_ndp_dp(library, model_name)
 
         F = dp.get_fun_space()
+        R = dp.get_res_space()
+        I = dp.get_imp_space()
 
-        space_description = unicode(str(F), 'utf-8')
-        return {'navigation': self.get_navigation_links(request),
-                'space_description': space_description}
+        F_description = str(F)
+        R_description = str(R)
+        I_description = str(I)
+        
+        u = lambda s: unicode(s, 'utf-8')
+        return {
+            'navigation': self.get_navigation_links(request),
+            'F_description': u(F_description),
+            'R_description': u(R_description),
+            'F_names': ", ".join(ndp.get_fnames()),
+            'R_names': ", ".join(ndp.get_rnames()),
+            'I_description': u(I_description),
+        }
 
     def view_solver2_submit(self, request):
         def go():
-            string = request.json_body['string'].encode('utf-8')
-            nl = int(request.json_body['nl'])
-            nu = int(request.json_body['nu'])
-            return self.process(request, string, nl, nu)
+            state = request.json_body['ui_state']
+            area_F = state['area_F'].encode('utf-8')
+            area_R = state['area_R'].encode('utf-8')
+            is_ftor = state['ftor_checkbox']
+            is_rtof = state['rtof_checkbox']
+            if is_ftor: 
+                pass
+            elif is_rtof:
+                pass
+            else:
+                msg = 'Cannot establish query type. '
+                raise_desc(DPInternalError, msg, state=state)
+                
+            do_approximations = state['do_approximations']
+            nl = state['nl'] 
+            nu = state['nu'] 
+            
+            if is_ftor:
+                key = dict(type=QUERY_TYPE_FTOR, 
+                            string=area_F, 
+                            do_approximations=do_approximations,
+                            nu=nu, nl=nl)
+        
+                data, res = self.process_ftor(request, area_F, do_approximations, nl, nu)
+            elif is_rtof:
+                key = dict(type=QUERY_TYPE_RTOF, 
+                            string=area_R, 
+                            do_approximations=do_approximations,
+                            nu=nu, nl=nl)
 
-        return ajax_error_catch(go)
+                data, res = self.process_rtof(request, area_R, do_approximations, nl, nu)
+            else:
+                raise_desc(DPInternalError, 'Inconsistent state', state=state)
+        
+            key_stable = sorted(tuple(key.items()))  
+            h = base64.b64encode(json.dumps(key_stable), altchars=altchars)
+    
+            data['state'] = state
+            data['key'] = key
+#             print('key_stable %r' % key_stable)
+#             print('adding hash %r' % h)
+            self.solutions[h] = data
 
+            res['output_image'] = 'display.png?hash=%s' % h
+            res['ok'] = True
+            return res
+   
+        quiet = (DPSyntaxError, DPSemanticError, NeedsApprox)
+        return ajax_error_catch(go, quiet=quiet)
+    
+    def process_rtof(self, request, string, do_approximations, nl, nu):
+        l = self.get_library(request)
+        parsed = l.parse_constant(string)
 
-    def process(self, request, string, nl, nu):
+        space = parsed.unit
+        value = parsed.value
+
+        model_name = self.get_model_name(request)
+        library = self.get_current_library_name(request)
+        ndp, dp = self._get_ndp_dp(library, model_name)
+
+        R = dp.get_res_space()
+        LF = LowerSets(dp.get_fun_space())
+
+        try:
+            r = parsed.cast_value(R)
+        except NotLeq: 
+            msg = 'Space %s cannot be converted to %s' % (parsed.unit, R)
+            raise DPSemanticError(msg)
+
+        logger.info('query rtof: %s ...' % R.format(r))
+        tracer = Tracer(logger=logger)
+        
+        max_steps = 10000
+        intervals = False
+        
+        res = {}
+        if do_approximations:
+    
+            dpl, dpu = get_dp_bounds(dp, nl, nu)
+    
+            result_l, _trace = solve_meat_solve_rtof(tracer, ndp, dpl, r,
+                                                intervals, max_steps, False)
+    
+            result_u, trace = solve_meat_solve_rtof(tracer, ndp, dpu, r,
+                                               intervals, max_steps, False)
+            
+            data = dict(result_l=result_l, result_u=result_u, dpl=dpl, dpu=dpu)
+            
+            res['output_result'] = 'Lower: %s\nUpper: %s' % (LF.format(result_l),
+                                                            LF.format(result_u))
+        else:
+            try:
+                result, trace = solve_meat_solve_rtof(tracer, ndp, dp, r,
+                                               intervals, max_steps, False)
+            except NotSolvableNeedsApprox:
+                msg = 'The design problem has infinite antichains. Please use approximations.'
+                raise NeedsApprox(msg)    
+
+            data = dict(result=result, dp=dp)
+            res['output_result'] = LF.format(result)
+                
+        e = cgi.escape
+
+        res['output_space'] = e(space.__repr__() + '\n' + str(type(space)))
+        res['output_raw'] = e(value.__repr__() + '\n' + str(type(value)))
+        res['output_formatted'] = e(space.format(value))
+        res['output_trace'] = str(trace) 
+         
+        return data, res
+
+    def process_ftor(self, request, string, do_approximations, nl, nu):
         l = self.get_library(request)
         parsed = l.parse_constant(string)
 
@@ -98,86 +228,111 @@ class AppSolver2():
         F = dp.get_fun_space()
         UR = UpperSets(dp.get_res_space())
 
-        tu = get_types_universe()
-        tu.check_leq(parsed.unit, F)
+        try:
+            f = parsed.cast_value(F)
+        except NotLeq: 
+            msg = 'Space %s cannot be converted to %s' % (parsed.unit, F)
+            raise DPSemanticError(msg)
 
-        f = express_value_in_isomorphic_space(parsed.unit, parsed.value, F)
-
-        print('query: %s ...' % F.format(f))
-
-        from mocdp import logger
+        logger.info('query rtof: %s ...' % F.format(f))
+ 
         tracer = Tracer(logger=logger)
-
-        dpl, dpu = get_dp_bounds(dp, nl, nu)
-
+        
         intervals = False
         max_steps = 10000
-        result_l, _trace = solve_meat_solve(tracer, ndp, dpl, f,
-                                         intervals, max_steps, False)
-
-        result_u, trace = solve_meat_solve(tracer, ndp, dpu, f,
-                                         intervals, max_steps, False)
-
-
-        key = (string, nl, nu)
-
-        res = dict(result_l=result_l, result_u=result_u, dpl=dpl, dpu=dpu)
-        self.solutions[key] = res
-
         res = {}
 
-        e = cgi.escape
+        if do_approximations:
+    
+            dpl, dpu = get_dp_bounds(dp, nl, nu)
+         
+            result_l, _trace = solve_meat_solve_ftor(tracer, ndp, dpl, f,
+                                             intervals, max_steps, False)
+    
+    
+            result_u, trace = solve_meat_solve_ftor(tracer, ndp, dpu, f,
+                                             intervals, max_steps, False)
+            
+            data = dict(result_l=result_l, result_u=result_u, dpl=dpl, dpu=dpu)
 
+            res['output_result'] = 'Lower: %s\nUpper: %s' % (UR.format(result_l),
+                                                         UR.format(result_u))
+
+        else:
+            try:
+                result, trace = solve_meat_solve_ftor(tracer, ndp, dp, f,
+                                                   intervals, max_steps, False)
+            except NotSolvableNeedsApprox:
+                msg = 'The design problem has infinite antichains. Please use approximations.'
+                raise NeedsApprox(msg)    
+            data = dict(result=result, dp=dp)
+            
+            res['output_result'] = UR.format(result)
+
+        e = cgi.escape
         res['output_space'] = e(space.__repr__() + '\n' + str(type(space)))
         res['output_raw'] = e(value.__repr__() + '\n' + str(type(value)))
         res['output_formatted'] = e(space.format(value))
-
-        res['output_result'] = 'Lower: %s\nUpper: %s' % (UR.format(result_l),
-                                                         UR.format(result_u))
-        res['output_trace'] = str(trace)
-
-        encoded = "nl=%s&nu=%s&string=%s" % (nl, nu, string)
-        res['output_image'] = 'display.png?' + encoded
-        res['ok'] = True
-
-        return res
+        res['output_trace'] = str(trace) 
+        return data, res
 
     def view_solver2_display(self, request):
         def go():
-            string = request.params['string'].encode('utf-8')
-            nl = int(request.params['nl'])
-            nu = int(request.params['nu'])
-            key = (string, nl, nu)
-            s = self.solutions[key]
+            h = request.params['hash'].encode('utf-8')
+            if not h in self.solutions:
+                try:
+                    h2 = base64.b64decode(h, altchars=altchars)
+                    decoded = json.loads(h2)
+                except Exception:
+                    decoded = '(unparsable)'
+                
+                msg = 'Cannot find solution from hash.'
+                others = list(self.solutions)
+                raise_desc(DPInternalError, msg, h=h, decoded=decoded, others=others)
+                #logger.error('do not have solution for %s' % orig)
+            data = self.solutions[h]
+            key = data['key']
+            
+            if key['type'] == QUERY_TYPE_FTOR:
+                
+                if key['do_approximations']:
+                    result_l, result_u = data['result_l'], data['result_u']
+        
+                    dpl, _dpu = data['dpl'], data['dpu']
 
-            result_l = s['result_l']
-            result_u = s['result_u']
-            # print result_l, result_u
-            dpl = s['dpl']
-            _dpu = s['dpu']
-
-            R = dpl.get_res_space()
-            UR = UpperSets(R)
-            r = Report()
-            f = r.figure()
-            plotter = get_best_plotter(space=UR)
-            # print plotter
-            # generic_plot(f, space=UR, value=result_l)
-
-            axis = plotter.axis_for_sequence(UR, [result_l, result_u])
-
-            with f.plot("plot") as pylab:
-                plotter.plot(pylab, axis, UR, result_l,
-                             params=dict(markers='g.', color_shadow='green'))
-                plotter.plot(pylab, axis, UR, result_u,
-                             params=dict(markers='b.', color_shadow='blue'))
-
-
-            png_node = r.resolve_url('png')
-            png_data = png_node.get_raw_data()
-
-            return response_data(request=request, data=png_data,
-                                 content_type='image/png')
+                    R = dpl.get_res_space()
+                    UR = UpperSets(R)
+                    
+                    output = {}
+                    with save_plot(output) as pylab:
+                        plotter = get_best_plotter(space=UR)
+                        axis = plotter.axis_for_sequence(UR, [result_l, result_u])
+                        plotter.plot(pylab, axis, UR, result_l,
+                                     params=dict(markers='g.', color_shadow='orange'))
+                        plotter.plot(pylab, axis, UR, result_u,
+                                     params=dict(markers='b.', color_shadow='blue'))
+        
+                    png = output['png']
+                    return response_data(request, png, MIME_PNG)
+                else:
+                    result = data['result'] 
+                    dp = data['dp']
+                    R = dp.get_res_space()
+                    UR = UpperSets(R)
+                    
+                    output = {}
+                    with save_plot(output) as pylab:
+                        plotter = get_best_plotter(space=UR)
+                        axis = plotter.axis_for_sequence(UR, [result])
+                        plotter.plot(pylab, axis, UR, result,
+                                     params=dict(markers='r.', color_shadow='darkred'))
+        
+                    png = output['png']
+                    return response_data(request, png, MIME_PNG)
+            else:
+                msg = 'Cannot display this.'
+                return response_image(request, msg, color=(125,125,125))
+        
         return self.png_error_catch2(request, go)
 
 
@@ -278,6 +433,22 @@ class AppSolver2():
                                  content_type='image/png')
 
         return self.png_error_catch2(request, go)
+
+@contextmanager
+def save_plot(output):
+    """
+        output = {}
+        with save_plot(output) as pylab:
+            pylab.plot(0,0)
+    """
+    r = Report()
+    f = r.figure()
+    with f.plot("plot") as pylab:
+        yield pylab
+    output['png'] = r.resolve_url('png').get_raw_data()
+    output['pdf'] = r.resolve_url('plot').get_raw_data()
+    # 
+     
 
 def get_samples(request, ndp):
     xaxis = str(request.params['xaxis'])

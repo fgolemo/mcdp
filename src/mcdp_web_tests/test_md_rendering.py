@@ -9,6 +9,7 @@ from mcdp_library_tests.tests import enumerate_test_libraries, get_test_library
 from mcdp_web.renderdoc.highlight import get_minimal_document
 from mcdp_web.renderdoc.main import render_complete
 from mcdp_web_tests.test_server import test_mcdpweb_server
+from mocdp import get_mcdp_tmp_dir
 from mocdp.exceptions import mcdp_dev_warning
 
 
@@ -43,19 +44,24 @@ def check_rendering(libname, filename):
     import codecs
     data = codecs.open(filename, encoding='utf-8').read().encode('utf-8')
     
-    tmpdir = tempfile.mkdtemp(prefix='mcdplibrary_cache')
-    library.use_cache_dir(tmpdir)
-
-    contents = render_complete(library, data, raise_errors=True, realpath=filename)
-    html = get_minimal_document(contents, add_markdown_css=True)
+    mcdp_tmp_dir = get_mcdp_tmp_dir()
+    prefix = 'check_rendering'
+    tmpdir = tempfile.mkdtemp(dir=mcdp_tmp_dir, prefix=prefix)
+  
+    try:
+        library.use_cache_dir(tmpdir)
     
-    basename = os.path.basename(filename)
-    fn = os.path.join('out', 'check_rendering', libname, basename + '.html')
-    d = os.path.dirname(fn)
-    if not os.path.exists(d): # pragma: no cover
-        os.makedirs(d)
-    with open(fn, 'w') as f:
-        f.write(html)
-    print('written to %r ' % fn)
-
-    shutil.rmtree(tmpdir)
+        contents = render_complete(library, data, raise_errors=True, realpath=filename)
+        html = get_minimal_document(contents, add_markdown_css=True)
+        
+        basename = os.path.basename(filename)
+        fn = os.path.join('out', 'check_rendering', libname, basename + '.html')
+        d = os.path.dirname(fn)
+        if not os.path.exists(d): # pragma: no cover
+            os.makedirs(d)
+        with open(fn, 'w') as f:
+            f.write(html)
+        print('written to %r ' % fn)
+        
+    finally:
+        shutil.rmtree(tmpdir)

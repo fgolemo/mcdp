@@ -248,7 +248,7 @@ def make_rcompunit(units):
             s = 'm/m'
             
         unit = parse_pint(s)
-    except DPSyntaxError as e:
+    except DPSyntaxError:
         raise
 #         msg = 'Cannot parse the unit %r.' % units
 #         raise_wrapped(DPSemanticError, e, msg, compact=True, exc=sys.exc_info())

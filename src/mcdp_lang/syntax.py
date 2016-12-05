@@ -230,6 +230,10 @@ class Syntax():
     # | L('⊆') | L('≼') | L('⊑')
     GEQ = spk(L('>=') | L('≥') , CDP.geq)
     LEQ = spk(L('<=') | L('≤') , CDP.leq)
+    MAPSTO = spk(L('⟼')|L('↦')|L('|->')|L('|-->')|L('|--->')|L('|---->'), CDP.MAPSTO).setName('⟼')
+    MAPSFROM = spk(L('↤')|L('⟻')|L('<-|')|L('<--|')|L('<---|')|L('<----|'), CDP.MAPSFROM).setName('⟻')
+    LEFTRIGHTARROW = spk(L('↔')|L('⟷')|L('<->')|L('<-->')|L('<--->')
+                         |L('<---->'), CDP.LEFTRIGHTARROW).setName('⟷')
 
     EQ = spk(L('='), CDP.eq)
     DOT = spk(L('.'), CDP.DotPrep)
@@ -344,7 +348,7 @@ class Syntax():
     
     space_nat = sp(Keyword('Nat') | Keyword('ℕ'), lambda t: CDP.Nat(t[0]))
     space_int = sp(Keyword('Int') | Keyword('ℤ'), lambda t: CDP.Int(t[0]))
-    space_rcomp = sp(Keyword('Rcomp'), lambda t: CDP.Rcomp(t[0]))
+    space_rcomp = sp(Keyword('Rcomp')| Keyword('ℝ'), lambda t: CDP.Rcomp(t[0]))
 
     space_single_element_poset_tag = sp(get_idn(), lambda t: CDP.SingleElementPosetTag(t[0]))
     space_single_element_poset_keyword = keyword('S', CDP.SingleElementPosetKeyword)
@@ -1075,16 +1079,46 @@ class Syntax():
     catalogue_row = sp(imp_name + 
                        ZeroOrMore(S(col_separator) + entry),
                        lambda t: make_list(list(t)))
+    
+    catalogue_func = sp(constant_value + ZeroOrMore(COMMA + constant_value), 
+                        lambda t: CDP.CatalogueFunc(make_list(list(t))))
+    catalogue_res = sp(constant_value + ZeroOrMore(COMMA + constant_value), 
+                        lambda t: CDP.CatalogueRes(make_list(list(t))))
+    catalogue_row2 = sp(catalogue_func + MAPSFROM - imp_name - MAPSTO - catalogue_res,
+                        lambda t: CDP.CatalogueRowMapsfromto(t[0], t[1], t[2], t[3], t[4]))
 
     catalogue_table = sp(OneOrMore(catalogue_row),
                          lambda t: CDP.CatalogueTable(make_list(list(t))))
 
-    FROMCATALOGUE = keyword('catalogue', CDP.FromCatalogueKeyword)
-    ndpt_catalogue_dp = sp(FROMCATALOGUE - 
-                      S(L('{')) - 
-                      simple_dp_model_stats - 
-                      catalogue_table - 
-                      S(L('}')),
+    CATALOGUE = keyword('catalogue', CDP.FromCatalogueKeyword)
+    
+#     'keyword lbrace funres table rbrace')
+    ndpt_catalogue2 = sp(CATALOGUE + 
+                      lbrace + 
+                      simple_dp_model_stats + 
+                      ZeroOrMore(catalogue_row2 + S(ow)) + 
+                      rbrace,
+                      lambda t: CDP.Catalogue2(t[0], t[1], t[2], make_list(list(t[3:-1]), where=t[-1].where), 
+                                                   t[-1])).setName('ndpt_catalogue2')
+
+    # f <-> r
+    catalogue_row3 = sp(catalogue_func + LEFTRIGHTARROW + catalogue_res,
+                        lambda t: CDP.CatalogueRow3(t[0], t[1], t[2]))
+    
+    ndpt_catalogue3 = sp(CATALOGUE + 
+                      lbrace + 
+                      simple_dp_model_stats + 
+                      ZeroOrMore(catalogue_row3) + 
+                      rbrace,
+                      lambda t: CDP.Catalogue3(t[0], t[1], t[2], make_list(list(t[3:-1]), where=t[-1].where), 
+                                                   t[-1])).setName('ndpt_catalogue3')
+
+
+    ndpt_catalogue_dp = sp(CATALOGUE + 
+                      S(lbrace) +
+                      simple_dp_model_stats + 
+                      catalogue_table +
+                      S(rbrace),
                       lambda t: CDP.FromCatalogue(t[0], t[1], t[2])).setName('ndpt_catalogue_dp')
     # Example:
     #    choose(name: <dp>, name2: <dp>)
@@ -1210,6 +1244,8 @@ class Syntax():
         ndpt_template | 
         ndpt_compact | 
         ndpt_catalogue_dp | 
+        ndpt_catalogue2 | 
+        ndpt_catalogue3 |
         ndpt_approx_lower | 
         ndpt_approx_upper | 
         ndpt_approx | 

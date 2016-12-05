@@ -42,7 +42,7 @@ class PlotterUR(Plotter):
     def axis_for_sequence(self, space, seq):
         self.check_plot_space(space)
 
-        R = Rcomp()
+#         R = Rcomp()
 
         maxy = 1000.0
         def limit(p): # XXX trick for Top?

@@ -6,7 +6,7 @@ from contracts.utils import check_isinstance, raise_desc, raise_wrapped
 from mcdp_posets import NotLeq, get_types_universe
 from mocdp import ATTR_LOAD_LIBNAME, ATTR_LOAD_REALPATH
 from mocdp.comp.interfaces import NamedDP
-from mocdp.exceptions import DPSemanticError, mcdp_dev_warning, DPInternalError,\
+from mocdp.exceptions import DPSemanticError, mcdp_dev_warning, \
     MCDPExceptionWithWhere
 
 

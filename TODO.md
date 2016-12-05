@@ -454,3 +454,9 @@ http://127.0.0.1:8080/libraries/basic/models/addition_1/views/edit_fancy/
 
 - syntax for primitivedp loop(series(par))
 
+- add test for    CDP.Rcomp: 'ℝ'
+
+- bug like this: (do not allow \n after 10)
+    provided f <= 10 
+    
+    b = mcdp { 

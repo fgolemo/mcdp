@@ -20,15 +20,16 @@ from mcdp_report.generic_report_utils import (
 from mcdp_report.html import ast_to_html, get_markdown_css
 from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters
 from mcdp_web.images.images import (get_mime_for_format)
-from mocdp import ATTR_LOAD_NAME, logger
+from mocdp import ATTR_LOAD_NAME, logger, get_mcdp_tmp_dir
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
 from reprep import Report
 from system_cmd import CmdException, system_cmd_result
 
 
-from mcdp_figures.figure_interface import( MakeFiguresNDP, MakeFiguresTemplate, 
+from mcdp_figures import( MakeFiguresNDP, MakeFiguresTemplate, 
     MakeFiguresPoset)
+import shutil
 
 
 def bs(fragment):
@@ -290,47 +291,60 @@ def get_ast_as_pdf(s, parse_expr):
                        ignore_line=None, parse_expr=parse_expr,
                        add_line_gutter=False, add_css=False)
     html = get_minimal_document(contents)
-    d = mkdtemp()
     
-    f_html = os.path.join(d, 'file.html')
-    with open(f_html, 'w') as f:
-        f.write(html)
-        
+    mcdp_tmp_dir = get_mcdp_tmp_dir()
+    prefix = 'get_ast_as_pdf()'
+    d = mkdtemp(dir=mcdp_tmp_dir, prefix=prefix)
+    
+    try:
+        f_html = os.path.join(d, 'file.html')
+        with open(f_html, 'w') as f:
+            f.write(html)
+            
+        try:
+            f_pdf = os.path.join(d, 'file.pdf')
+            cmd= ['wkhtmltopdf','-s','A1',f_html,f_pdf]
+            system_cmd_result(
+                    d, cmd, 
+                    display_stdout=False,
+                    display_stderr=False,
+                    raise_on_error=True)
+    
+            with open(f_pdf) as f:
+                data = f.read()
+            
+            data = crop_pdf(data, margins=0)
+    
+            return data
+        except CmdException as e:
+            raise e
+    finally:
+        shutil.rmtree(d)
+
+def crop_pdf(pdf, margins=0):
+    
+    mcdp_tmp_dir = get_mcdp_tmp_dir()
+    prefix = 'crop_pdf()'
+    d = mkdtemp(dir=mcdp_tmp_dir, prefix=prefix)
+    
     try:
         f_pdf = os.path.join(d, 'file.pdf')
-        cmd= ['wkhtmltopdf','-s','A1',f_html,f_pdf]
+        with open(f_pdf, 'w') as f:
+            f.write(pdf)
+        f_pdf_crop = os.path.join(d, 'file_crop.pdf')
+        cmd = ['pdfcrop', '--margins', str(margins), f_pdf, f_pdf_crop]
         system_cmd_result(
-                d, cmd, 
+                d, cmd,
                 display_stdout=False,
                 display_stderr=False,
                 raise_on_error=True)
-
-        with open(f_pdf) as f:
+    
+        with open(f_pdf_crop) as f:
             data = f.read()
-        
-        data = crop_pdf(data, margins=0)
-
         return data
-    except CmdException as e:
-        raise e
-
-def crop_pdf(pdf, margins=0):
-    d = mkdtemp()
-    f_pdf = os.path.join(d, 'file.pdf')
-    with open(f_pdf, 'w') as f:
-        f.write(pdf)
-    f_pdf_crop = os.path.join(d, 'file_crop.pdf')
-    cmd = ['pdfcrop', '--margins', str(margins), f_pdf, f_pdf_crop]
-    system_cmd_result(
-            d, cmd,
-            display_stdout=False,
-            display_stderr=False,
-            raise_on_error=True)
-
-    with open(f_pdf_crop) as f:
-        data = f.read()
-    return data
-
+    finally:
+        shutil.rmtree(d)
+        
 def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_errors=False):
     """ Looks for codes like:
     

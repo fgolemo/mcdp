@@ -3,14 +3,16 @@ from contextlib import contextmanager
 import os
 from tempfile import mkdtemp
 
+from contracts.utils import check_isinstance
 from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
 from mcdp_library.utils.locate_files_imp import locate_files
-from mcdp_report.utils import safe_makedirs
+from mocdp import get_mcdp_tmp_dir
 from mocdp.exceptions import mcdp_dev_warning
 from mocdp.memoize_simple_imp import memoize_simple
 from system_cmd.meat import system_cmd_result
 from system_cmd.structures import CmdException
-from contracts.utils import check_isinstance
+
+from .utils import safe_makedirs
 
 
 __all__ = [
@@ -22,7 +24,10 @@ STYLE_GREENREDSYM = 'greenredsym'
 COLOR_DARKGREEN = 'darkgreen'
 COLOR_DARKRED = '#861109'
 
+
+
 class GraphDrawingContext():
+    
     def __init__(self, gg, parent, yourname, level=0,
                  tmppath=None, style='default',
                  images_paths=[], skip_initial=True):
@@ -32,7 +37,9 @@ class GraphDrawingContext():
         self.level = level
 
         if tmppath is None:
-            tmppath = mkdtemp(suffix="dp-icons")
+            d = get_mcdp_tmp_dir()
+            prefix = 'GraphDrawingContext_tmppath'
+            tmppath = mkdtemp(dir=d, prefix=prefix)
             mcdp_dev_warning('need to share icons')
 
         self.tmppath = tmppath

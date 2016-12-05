@@ -9,8 +9,9 @@ from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
 from pyramid.renderers import render_to_response  # @UnresolvedImport
 
 from contracts.utils import check_isinstance, raise_wrapped
-from mcdp_figures.figure_interface import MakeFiguresNDP, MakeFiguresPoset
+from mcdp_figures import MakeFiguresNDP, MakeFiguresPoset
 from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_posets.finite_poset import FinitePoset
@@ -25,7 +26,6 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mcdp_lang.parse_interface import( parse_ndp_eval, parse_ndp_refine, 
     parse_template_eval, parse_template_refine, parse_constant_eval, 
     parse_constant_refine, parse_poset_eval, parse_poset_refine)
-from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 
 
 

@@ -4,43 +4,38 @@ from mcdp_lang import parse_ndp
 from mcdp_lang.eval_resources_imp import eval_rvalue
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
+from mcdp_lang_tests.utils import assert_parse_ndp_semantic_error
 from mocdp.comp.context import Context
-from mocdp.exceptions import DPSemanticError
 
 from .utils2 import eval_rvalue_as_constant_same
-from mcdp_lang_tests.utils import assert_parse_ndp_semantic_error
 
 
 same = eval_rvalue_as_constant_same
 
 @comptest
 def check_tuples1():
-
     same("1 g + 1 kg", "1001 g")
 
 @comptest
 def check_tuples2():
-    
-    #s =     "take(<1g, 5J>, 1)"
-
     s = "<1g, 5J>"
     parsed = parse_wrap(Syntax.rvalue, s)[0]
     context = Context()
-    ret = eval_rvalue(parsed, context)
-    print(ret)
+    _ret = eval_rvalue(parsed, context)
+    #print(ret)
 
     same("take(<1g, 5J>, 1)", "5 J")
 
 @comptest
 def check_tuples3():
-    res = parse_ndp("""
+    _res = parse_ndp("""
     mcdp {
         requires r [ J x g]
         
         r >= < 1J, 0g >
     }
     """)
-    print(res)
+#     print(res)
 
 
 @comptest
@@ -66,7 +61,7 @@ def check_tuples6():
 @comptest
 def check_tuples7():
 
-    res = parse_ndp("""
+    _res = parse_ndp("""
     mcdp {
         requires r [ product(a:J, b:g) ]
         
@@ -74,9 +69,9 @@ def check_tuples7():
         take(required r, b) >= 1 g
     }
     """)
-    print res
+    
 
-    res = parse_ndp("""
+    _res = parse_ndp("""
     mcdp {
         requires r [ product(a:J, b:g) ]
         
@@ -84,11 +79,11 @@ def check_tuples7():
         (required r).b >= 1 g
     }
     """)
-    print res
+
 
 @comptest
 def check_tuples8():
-    res = parse_ndp("""
+    _res = parse_ndp("""
     mcdp {
         provides f [ product(a:J, b:g) ]
         
@@ -96,9 +91,9 @@ def check_tuples8():
         take(provided f, b) <= 1 g
     }
     """)
-    print res
 
-    res = parse_ndp("""
+
+    _res = parse_ndp("""
     mcdp {
         provides f [ product(a:J, b:g) ]
         
@@ -106,7 +101,7 @@ def check_tuples8():
         (provided f).b <= 1 g
     }
     """)
-    print res
+    
     
 @comptest
 def check_tuples9():

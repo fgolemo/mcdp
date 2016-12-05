@@ -15,10 +15,6 @@ CDP = CDPLanguage
 
 @comptest
 def check_correction():
-    s = """ mcdp {
-    provides f [m]
-    f <= 10 m
-    } """
     s = """
     mcdp {  
  provides endurance [s] 
@@ -99,8 +95,8 @@ def try_corrections2(s):
         print 'Change %r in %r' % (orig_1, sub)
         
     s2 = apply_suggestions(s, suggestions)
-    print s2
-    x2 = parse_wrap(Syntax.ndpt_dp_rvalue, s2)[0]
+    #print s2
+    _x2 = parse_wrap(Syntax.ndpt_dp_rvalue, s2)[0]
     
 #     print recursive_print(t)
 #     ts = ast_to_mcdpl(t)

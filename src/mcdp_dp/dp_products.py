@@ -7,7 +7,7 @@ from mcdp_dp.sequences_invplus import Nat_mult_antichain_Max
 from mcdp_maps import ProductNMap, ProductNNatMap
 from mcdp_posets import Rcomp, RcompUnits
 from mcdp_posets.rcomp_units import check_mult_units_consistency_seq
-from mocdp.exceptions import mcdp_dev_warning, DPNotImplementedError
+from mocdp.exceptions import mcdp_dev_warning
 
 from .dp_generic_unary import WrapAMap
 from .dp_inv_mult import  InvMult2

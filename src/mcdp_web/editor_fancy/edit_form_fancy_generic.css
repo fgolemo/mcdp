@@ -1,11 +1,11 @@
 #syntax_error, #language_warnings {
+    /* at most 100 chars (approximately) */
     white-space: pre-wrap;
     word-wrap: break-word;
-
     width: 100ex;
+
     font-weight: bold;
     font-size: 70%;
-
 }
 /**[contenteditable="true"]{display: inline-block;}*/
 

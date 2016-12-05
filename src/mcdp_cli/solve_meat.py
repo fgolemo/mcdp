@@ -8,6 +8,7 @@ from mcdp_dp.tracer import Tracer
 from mcdp_library import Librarian
 from mcdp_posets import (NotLeq, UpperSets,
     express_value_in_isomorphic_space, get_types_universe)
+from mcdp_posets.uppersets import LowerSets
 from mocdp.comp.recursive_name_labeling import (get_imp_as_recursive_dict,
     get_labelled_version, ndp_make)
 from reprep import Report
@@ -74,7 +75,7 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
     logger.info('query: %s' % F.format(fg))
 
     tracer = Tracer(logger=logger)
-    res, trace = solve_meat_solve(tracer, ndp, dp, fg, intervals, max_steps, _exp_advanced)
+    res, trace = solve_meat_solve_ftor(tracer, ndp, dp, fg, intervals, max_steps, _exp_advanced)
 
     nres = len(res.minimals)
 
@@ -205,7 +206,19 @@ def solve_main(logger, config_dirs, maindir, cache_dir, model_name, lower, upper
         report_solutions.to_html(out_html)
 
 
-def solve_meat_solve(trace, ndp, dp, fg, intervals, max_steps, exp_advanced):
+def solve_meat_solve_rtof(trace, ndp, dp, r, intervals, max_steps, exp_advanced):
+    F = dp.get_fun_space()
+    LF = LowerSets(F)
+
+    res = dp.solve_r(r)
+    fnames = ndp.get_fnames()
+    x = ", ".join(fnames)
+    # todo: add better formatting
+    trace.log('Maximal functionality possible: %s = %s' % (x, LF.format(res)))
+
+    return res, trace
+
+def solve_meat_solve_ftor(trace, ndp, dp, fg, intervals, max_steps, exp_advanced):
     R = dp.get_res_space()
     UR = UpperSets(R)
 

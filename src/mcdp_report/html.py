@@ -14,6 +14,7 @@ from mocdp import MCDPConstants
 from mocdp.exceptions import mcdp_dev_warning, DPSyntaxError, DPInternalError
 
 
+
 unparsable_marker = '#@'
 
 def isolate_comments(s):
@@ -74,6 +75,7 @@ def ast_to_html(s,
         warnings.warn('please do not use extra_css', stacklevel=2)
         
     extra_css = ''
+    original_lines = s.split('\n')
 
     s_lines, s_comments = isolate_comments(s)
     assert len(s_lines) == len(s_comments) 
@@ -92,10 +94,15 @@ def ast_to_html(s,
         else:
             break
 
-    # use = s_lines
-    use = s.split('\n')
+    use = s_lines
+#     use = s.split('\n')
     full_lines = use[num_empty_lines_start: len(s_lines)- num_empty_lines_end]
-    for_pyparsing = "\n".join(full_lines)
+    
+    from mcdp_report.out_mcdpl import extract_ws
+    # remove also whitespace
+    for_pyparsing0 = "\n".join(full_lines)
+    extra_before, for_pyparsing, extra_after = extract_ws(for_pyparsing0)
+#     print 'for_pyparsing0', for_pyparsing0.__repr__()
     
     block = parse_wrap(parse_expr, for_pyparsing)[0]
 
@@ -114,43 +121,65 @@ def ast_to_html(s,
     transformed_p = snippet.transformed
     
     if block.where.character != 0:
+        assert False
         transformed_p = for_pyparsing[:block.where.character] + transformed_p
 
+    # re-add here
+    transformed_p = extra_before + transformed_p + extra_after
     def sanitize_comment(x):
         x = x.replace('>', '&gt;')
         x = x.replace('<', '&lt;')
         return x
 
-    transformed = '\n' * num_empty_lines_start + transformed_p
-    transformed = transformed +  '\n' * num_empty_lines_end
+    transformed = ''
+    transformed += "\n".join(s_lines[:num_empty_lines_start])
+    if num_empty_lines_start:
+        transformed += '\n'
+    transformed +=  transformed_p
+    if num_empty_lines_end:
+        transformed += '\n'
+    transformed += "\n".join(s_lines[len(original_lines)-num_empty_lines_end:])
+
+#     print 's', s.__repr__()
+#     print 'empty start', s_lines[:num_empty_lines_start]
+#     print 'empty end', s_lines[len(original_lines)-num_empty_lines_end:]
      
-    
+     
     lines = transformed.split('\n')
-    if len(lines) != len(s_comments): 
+    if len(lines) != len(s_comments):
+         
+#         print 'transformed', transformed.__repr__()
+#         print s_lines
+#         print 'num_empty_lines_start', num_empty_lines_start
+#         print 'num_empty_lines_end', num_empty_lines_end
         msg = 'Lost some lines while pretty printing: %s, %s' % (len(lines), len(s_comments))
         raise DPInternalError(msg) 
  
+#     print('transformed', transformed)
+#     print 'transfomed_lines', lines
     out = ""
+    
     for i, (line, comment) in enumerate(zip(lines, s_comments)):
         lineno = i + 1
         if ignore_line(lineno):
             continue
         else:
-            
-            if '#' in line:
-                w = line.index('#')
-                before = line[:w]
-                comment = line[w:]
+            original_line = original_lines[i]
+            if '#' in original_line:
+                w = original_line.index('#')
+                before = line # (already transformed) #original_line[:w]
+                comment = original_line[w:]
+#                 print ('vefore: %r comment: %r' % (before, comment))
                 
                 if comment.startswith(unparsable_marker):
                     unparsable = comment[len(unparsable_marker):]
                     linec = before + '<span class="unparsable">%s</span>' % sanitize_comment(unparsable)
                 else:
                     linec = before + '<span class="comment">%s</span>' % sanitize_comment(comment)
+                    
+#                 print('linec: %r' % linec)
             else:
-                
-                linec = line   
-                
+                linec = line 
             
             if add_line_gutter:
                 out += "<span class='line-gutter'>%2d</span>" % lineno
@@ -164,6 +193,8 @@ def ast_to_html(s,
     if MCDPConstants.test_insist_correct_html_from_ast_to_html:
         from xml.etree import ElementTree as ET
         ET.fromstring(out)
+        
+#     print 'ast_to_html, out', out
     
     frag = ""
 
@@ -247,19 +278,15 @@ def print_html_inner(x):
     orig0 = x.where.string[x.where.character:x.where.character_end]
 
     klass = type(x).__name__
-    # special case: OpenBraceKeyword
-    if out == '<':
-        out = '&lt;'
-    if out == '>':
-        out = '&gt;'
+
     transformed0 = ("<span class='%s' where_character='%d' where_character_end='%s'>%s</span>" 
                     % (klass, x.where.character, x.where.character_end, out))
     yield Snippet(op=x, orig=orig0, a=x.where.character, b=x.where.character_end,
                   transformed=transformed0)
 
 def sanitize(x):
-    x = x.replace('>=', '&gt;=')
-    x = x.replace('<=', '&lt;=')
+    x = x.replace('>', '&gt;')
+    x = x.replace('<', '&lt;')
     return x
 
 def print_ast(x):

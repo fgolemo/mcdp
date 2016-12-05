@@ -6,6 +6,7 @@ from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.refinement import namedtuple_visitor_ext
 from mocdp.exceptions import DPInternalError
 
+
 __all__ = ['get_suggestions', 'apply_suggestions']
 
 CDP = CDPLanguage
@@ -33,12 +34,27 @@ def correct(x):
         CDP.OpenBraceKeyword: '⟨',
         CDP.CloseBraceKeyword: '⟩',
         CDP.times: '·',
+        CDP.MAPSFROM: '⟻',
+        CDP.MAPSTO: '⟼',
+        CDP.LEFTRIGHTARROW: '⟷',
     }
     
     for klass, preferred in glyphs.items():
         if isinstance(x, klass):
             if x.glyph != preferred:
                 return x.glyph, preferred
+       
+    symbols = {
+        CDP.Nat: 'ℕ',
+        CDP.Int: 'ℤ',
+        CDP.Rcomp: 'ℝ',
+    }     
+    
+    for klass, preferred in symbols.items():
+        if isinstance(x, klass):
+            if x.symbol != preferred:
+                return x.symbol, preferred
+        
     
     if isinstance(x, CDP.NewFunction) and x.keyword is None:
         name = x.name.value

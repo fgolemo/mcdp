@@ -11,7 +11,8 @@ from contracts.utils import (check_isinstance, format_obs, raise_desc,
 from mcdp_dp import PrimitiveDP
 from mcdp_lang import parse_ndp, parse_poset
 from mcdp_posets import Poset
-from mocdp import ATTR_LOAD_LIBNAME, ATTR_LOAD_NAME, logger, ATTR_LOAD_REALPATH
+from mocdp import ATTR_LOAD_LIBNAME, ATTR_LOAD_NAME, logger, ATTR_LOAD_REALPATH, \
+    get_mcdp_tmp_dir
 from mocdp.comp.context import Context, ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
@@ -106,7 +107,9 @@ class MCDPLibrary():
     def use_tmp_cache(self):
         """ Uses a temporary directory as cache. """
         import tempfile
-        dirname  = tempfile.mkdtemp(suffix="mcdp_cache")
+        d = get_mcdp_tmp_dir()
+        prefix = 'MCDPLibrary_use_tmp_cache'
+        dirname = tempfile.mkdtemp(dir=d, prefix=prefix)
         self.use_cache_dir(dirname)
         
     def use_cache_dir(self, cache_dir):

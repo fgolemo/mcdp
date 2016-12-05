@@ -6,21 +6,50 @@ from mcdp_report.report import report_dp1, report_ndp1
 from mcdp_tests.generation import (for_all_dps_dyn, for_all_nameddps,
     for_all_nameddps_dyn, for_all_source_mcdp)
 from mocdp import logger
+from nose.tools import assert_equal
+from bs4.element import NavigableString
 
+def project_html(html):
+    from bs4 import BeautifulSoup
+    doc = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
+    res = gettext(doc, 0)
+    return res
+
+def gettext(element, n):
+    # print('%d %s element %r' % (n, '  ' * n, element.string))
+    
+    if isinstance(element, NavigableString):
+        string = element.string
+        if string is None:
+            return ''
+        else:
+            return string.encode('utf-8')
+    else:
+        out = ''
+        for child in element.children:
+            out += gettext(child, n + 1)
+     
+        return out
+    
 
 @for_all_source_mcdp
 def check_syntax(filename, source):  # @UnusedVariable
     # print filename
     source = open(filename).read()
     try:
-        _html = ast_to_html(source,
+        html = ast_to_html(source,
                             parse_expr=Syntax.ndpt_dp_rvalue,
-                           complete_document=False, extra_css="",
                            ignore_line=lambda _lineno: False,
-                           add_line_gutter=True, encapsulate_in_precode=True, 
-                           add_css=False)
+                           add_line_gutter=False, encapsulate_in_precode=True, 
+                           )
+#         print html.__repr__()
+        source2 = project_html(html)
+#         print source
+#         print source2
+        assert_equal(source, source2)
     except:
         logger.error('This happened to %r' %  filename)
+        
         raise
 
 @for_all_dps_dyn

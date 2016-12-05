@@ -92,7 +92,9 @@
 		$( "button#discard" ).click(click_button_discard);
 		$( "button#apply_suggestions" ).click(click_apply_suggestions);
 
-	    try_to_parse(current_text());
+		text0 = current_text()
+		console.log('asking server');
+	    try_to_parse(text0);
 	    update_image();
 	});
 
@@ -145,9 +147,9 @@
 
 
 	function try_to_parse_it() {
-		console.log('asking server');
-		text = current_text();
 		
+		text = current_text();
+		console.log('asking server to parse ' + text);
 		//element = $('#editor').get(0);
 		
 		try_to_parse(text);
@@ -285,6 +287,7 @@
 			//$('button#save').text('Save');
 			//$('button#save').enable();
 
+			// console.log('Received highlight  ' + res['highlight']);
 			update_text_with_highlight(res_text, res['highlight']);
 		}
 
