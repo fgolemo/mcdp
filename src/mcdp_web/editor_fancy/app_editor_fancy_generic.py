@@ -254,6 +254,7 @@ class AppEditorFancyGeneric():
                                                 add_line_gutter=False,
                                                 encapsulate_in_precode=False,
                                                 postprocess=postprocess)
+                        
                     except DPSemanticError:
                         # Do it again without postprocess
                         highlight = ast_to_html(string,
@@ -298,8 +299,9 @@ class AppEditorFancyGeneric():
             language_warnings_html = "\n".join(['<div class="language_warning">%s</div>' % w
                                       for w in warnings])
             
+            print highlight
             return {'ok': True, 
-                    'highlight': highlight,
+                    'highlight': unicode(highlight, 'utf8'),
                     'language_warnings': language_warnings, 
                     'language_warnings_html': language_warnings_html,
                     'string_with_suggestions': string_with_suggestions,
@@ -370,8 +372,9 @@ class AppEditorFancyGeneric():
 def html_mark(html, where, add_class):
     """ Returns another html string """
     html = '<www><pre>' + html + '</pre></www>'
-    soup = BeautifulSoup(html, 'lxml')
+    soup = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
 
+    nfound = 0
     elements = soup.find_all("span")
     for e in elements:
         if e.has_attr('where_character'):
@@ -380,11 +383,19 @@ def html_mark(html, where, add_class):
             inside = where.character <= character <= character_end <= where.character_end
             if inside:
                 e['class'] = e.get('class', []) + [add_class]
-        
+                nfound += 1
+                
+    if not nfound:
+        msg = 'Cannot find any html element for this location:\n\n%s' % where
+        msg += '\nwhere start: %s end: %s' % (where.character, where.character_end)
+        msg += '\nwhere.string = %r' % where.string
+        msg += '\n' + html.__repr__()
+        logger.error(msg)
     pre = soup.body.www
     s = str(pre)
     s = s.replace('<www><pre>', '')
     s = s.replace('</pre></www>', '')
+    assert isinstance(s, str)
     return s
     
     

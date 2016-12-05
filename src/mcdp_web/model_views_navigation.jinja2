@@ -2,6 +2,8 @@
 
 	#select_view { width: 18em; }
 	#select_model { width: 18em; }
+
+	#back_to_library, #select_view, #select_model { height: 1.5em !important;}
 </style>
 
 
@@ -21,8 +23,9 @@
 	    {% endfor %} -->
 		{% for sup, sup_libraries in navigation['libraries_indexed'] %}
 		    {% for li in sup_libraries %}
-		    <option value="{{li['url']}}" {% if li['current'] %} selected = 1 {% endif %}>
-		    	{{sup}} / {{li['name']}}
+		    <option name='{{li['name']}}' value="{{li['url']}}" {% if li['current'] %} selected = 1 {% endif %}>
+		    	<!-- note the span has no effect inside option -->
+		    	<span class='unicode-icons'>&#128214;</span> {{sup}} / {{li['name']}} <!-- 📖 -->
 		    </option>
 		    {% endfor %}
 
@@ -31,7 +34,7 @@
 	  </select>
 	 {% else %}
 	 	<a id='back_to_library' href="/libraries/{{navigation['current_library']}}/">
-	 		Library
+	 		<span class='unicode-icons'>⟲</span> Library
 	 		 <span class="library_name">
 	 		 	{{navigation['current_library']}}
 	 		 </span>
@@ -56,13 +59,17 @@
 	  	{% if not navigation['current_model'] and not navigation['current_template'] 
 	  		and not navigation['current_poset'] %}
 	  		
-	  		<option value="#"  selected = 1> Select one... </option>
+	  		<option value="#"  selected = 1>🔎 Select one... </option>
 	  		
 	  	{% endif %}
 	  
 	    {% for mi in navigation['models'] + navigation['templates'] + navigation['posets'] + navigation['values'] %}
 	    <option value="{{mi['url']}}" {% if mi['current'] %} selected = 1 {% endif %}>
-	    	{{mi['name']}}
+	    	{% if mi in navigation['models']    %}&#10213;{% endif %}
+	    	{% if mi in navigation['templates'] %}&#x2661;{% endif %} <!-- ⢶ -->
+	    	{% if mi in navigation['posets']    %}&#x28B6;{% endif %} <!-- ♡ -->
+	    	{% if mi in navigation['values']    %}&#x2723;{% endif %} <!-- ✣ -->
+	    	{{mi['name']}} 
 	    </option>
 	    {% endfor %}
 	  </select>
@@ -80,7 +87,7 @@
 		  <select id='select_view' class='hot_select'>
 		    {% for vi in navigation['views'] %}
 		    <option value="{{vi['url']}}" {% if vi['current'] %} selected = 1 {% endif %}>
-		    	{{vi['name']}}
+		    	<span class='unicode-icons'>&#128065;</span> {{vi['name']}}
 		    </option>
 		    {% endfor %}
 		  </select>

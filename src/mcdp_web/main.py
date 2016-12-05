@@ -318,7 +318,7 @@ class WebApp(AppEditor, AppVisualization,
                                    model=m,
                                    view='syntax')
 
-            name = "Model: %s" % m
+            name = "Model %s" % m
             desc = dict(id_ndp=m, name=name, url=url, current=is_current)
             d['models'].append(desc)
 

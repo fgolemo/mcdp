@@ -186,7 +186,7 @@ class AppVisualization():
         """ Puts links to the models. """
         library = self.get_current_library_name(request)
         from bs4 import BeautifulSoup
-        soup = BeautifulSoup(frag, 'html.parser')
+        soup = BeautifulSoup(frag, 'html.parser', from_encoding='utf-8')
         from bs4.element import NavigableString
 
         # look for links of the type:

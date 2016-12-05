@@ -1,15 +1,17 @@
 <style type='text/css'>
+  #outer li {padding: 5px; }
+  #outer a {text-decoration: none;}
 </style>
 <div id='outer'>
 <ul id="menu">
 <li id='root'>&#9776;
 <ul>
-  <li class="l1" id='menu_new'>New&hellip;
+  <li class="l1" id='menu_new'><span><span class='unicode-icons'>✎</span>New&hellip;</span>
     <ul>
-      <li><a id='new_model'>model&hellip;</a></li>
-      <li><a id='new_template'>template&hellip;</a></li>
-      <li><a id='new_poset'>poset&hellip;</a></li>
-      <li><a id='new_value'>value&hellip;</a></li>
+      <li><a id='new_model'><span class='unicode-icons'>&#10213;</span> model&hellip;</a></li>
+      <li><a id='new_template'><span class='unicode-icons'>&#x2661;</span>template&hellip;</a></li>
+      <li><a id='new_poset'><span class='unicode-icons'>&#x28B6;</span>poset&hellip;</a></li>
+      <li><a id='new_value'><span class='unicode-icons'>&#x2723;</span>value&hellip;</a></li>
     </ul>
   </li>
   <li class="l1">Other
@@ -45,7 +47,7 @@ $(document).ready(function() {
 <style type='text/css'>
 /* This makes the link fill all of the menu item
   otherwise it is hard to click */
-li a { display: block; width: 100%; }
+li a { display: block; width: 90%; } 
 
 
 .ui-widget {

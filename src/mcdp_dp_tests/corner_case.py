@@ -8,7 +8,8 @@ from mcdp_dp.dp_inv_mult import InvMult2Nat
 from mcdp_dp.dp_inv_plus import InvPlus2, InvPlus2Nat
 from mcdp_dp.dp_series import Series
 from mcdp_dp.primitive import NotSolvableNeedsApprox
-from mcdp_lang.parse_interface import parse_poset, parse_template, parse_ndp
+from mcdp_lang.parse_interface import parse_poset, parse_template, parse_ndp,\
+    parse_ndp_refine
 from mcdp_maps import ProductNNatMap
 from mcdp_posets import Nat
 from mcdp_posets_tests.utils import assert_belongs, assert_does_not_belong
@@ -17,6 +18,12 @@ from mocdp.comp.composite_makecanonical import connect_resources_to_outside, \
     connect_functions_to_outside
 from mocdp.comp.wrap import dpwrap
 from mocdp.exceptions import DPInternalError, DPSemanticError
+from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.syntax import Syntax
+from mocdp.comp.context import Context
+from mcdp_lang.suggestions import apply_suggestions, get_suggestions
+from mcdp_report.html import ast_to_html
+from mcdp_web.editor_fancy.app_editor_fancy_generic import html_mark
 
 
 @comptest
@@ -232,6 +239,36 @@ def check_repeated_poset():
     # mocdp.exceptions.DPSemanticError: Repeated element 'a'.
     assert_raises(DPSemanticError, parse_poset, s)
     
+@comptest
+def check_mark_suggestions():
+    s="""#comment
+mcdp {
+ provides a [Nat]
+}"""
+    parse_expr = Syntax.ndpt_dp_rvalue
+    x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
+    context = Context()
+    xr = parse_ndp_refine(x, context)
+    suggestions = get_suggestions(xr)
+    
+    # make sure we can apply them     
+    _s2 = apply_suggestions(s, suggestions)
+    
+    def postprocess(block):
+        x = parse_ndp_refine(block, context) 
+        return x
+
+    html  = ast_to_html(s,
+                        parse_expr=parse_expr,
+                        add_line_gutter=False,
+                        encapsulate_in_precode=False,
+                        postprocess=postprocess)
+    
+    for where, replacement in suggestions:
+        #print('suggestion: %r' % replacement)
+        html = html_mark(html, where, "suggestion")
+        
+    assert 'suggestion' in html
     
 if __name__ == '__main__': 
     

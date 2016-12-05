@@ -5,13 +5,15 @@ import warnings
 
 from contracts import contract
 from contracts.utils import indent, raise_desc, raise_wrapped, check_isinstance
-from mcdp_lang.namedtuple_tricks import isnamedtuplewhere
-from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.namedtuple_tricks import isnamedtuplewhere, get_copy_with_where
+from mcdp_lang.parse_actions import parse_wrap, translate_where
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
 from mocdp import MCDPConstants
 from mocdp.exceptions import mcdp_dev_warning, DPSyntaxError, DPInternalError
+from mcdp_lang.refinement import namedtuple_visitor_ext
+from contracts.interface import line_and_col, location, Where
 
 
 
@@ -102,9 +104,39 @@ def ast_to_html(s,
     # remove also whitespace
     for_pyparsing0 = "\n".join(full_lines)
     extra_before, for_pyparsing, extra_after = extract_ws(for_pyparsing0)
-#     print 'for_pyparsing0', for_pyparsing0.__repr__()
     
-    block = parse_wrap(parse_expr, for_pyparsing)[0]
+    block0 = parse_wrap(parse_expr, for_pyparsing)[0]
+    
+    transform_original_s = s
+    def transform(x, parents):  # @UnusedVariable
+        w0 = x.where
+        s0 = w0.string
+        
+        def translate(line, col):
+            # add initial white space on first line
+            if line == 0: 
+                col += len(extra_before)
+            # add the initial empty lines
+            line += num_empty_lines_start
+            return line, col
+        
+        # these are now in the original string transform_original_s
+        line, col = translate(*line_and_col(w0.character, s0))
+        character = location(line, col, transform_original_s)
+        
+        if w0.character_end is None:
+            character_end = None
+        else:
+            line, col = translate(*line_and_col(w0.character_end, s0))
+            character_end = location(line, col, transform_original_s) 
+        
+        where = Where(string=transform_original_s, 
+                      character=character, 
+                      character_end=character_end)
+        
+        return get_copy_with_where(x, where)
+    
+    block = namedtuple_visitor_ext(block0, transform)
 
     if not isnamedtuplewhere(block): # pragma: no cover
         raise DPInternalError('unexpected', block=block)
@@ -120,9 +152,9 @@ def ast_to_html(s,
     snippet = snippets[0]
     transformed_p = snippet.transformed
     
-    if block.where.character != 0:
-        assert False
-        transformed_p = for_pyparsing[:block.where.character] + transformed_p
+#     if block.where.character != 0:
+#         assert False
+#         transformed_p = for_pyparsing[:block.where.character] + transformed_p
 
     # re-add here
     transformed_p = extra_before + transformed_p + extra_after
@@ -204,7 +236,9 @@ def ast_to_html(s,
         frag += '</code></pre>'
     else:
         frag += out
-
+    
+    assert isinstance(frag, str)
+    
     return frag 
     
 

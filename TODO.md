@@ -460,3 +460,4 @@ http://127.0.0.1:8080/libraries/basic/models/addition_1/views/edit_fancy/
     provided f <= 10 
     
     b = mcdp { 
+- why double warning at http://127.0.0.1:8080/libraries/example-plusinv/models/plusinvnat5/views/edit_fancy/?

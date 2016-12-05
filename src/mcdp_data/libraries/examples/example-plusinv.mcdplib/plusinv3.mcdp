@@ -3,6 +3,6 @@
 mcdp {
     provides z [s]
     variable x, y [s]
-    x + y >= ceil(sqrt(x)) + ceil(sqrt(y)) + provided z 
+    x + y ≥ ceil(sqrt(x)) + ceil(sqrt(y)) + provided z 
     requires x, y 
 }

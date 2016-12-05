@@ -75,8 +75,8 @@ def manual_join(files_contents):
     markdown_css = get_markdown_css()
     mcdp_css = get_language_css()
     template = template.replace('CSS', mcdp_css + '\n' + manual_css + '\n' + markdown_css)
-    d = BeautifulSoup(template, 'lxml')
-    main_body = BeautifulSoup("", 'lxml')
+    d = BeautifulSoup(template, 'lxml', from_encoding='utf-8')
+    main_body = BeautifulSoup("", 'lxml', from_encoding='utf-8')
 
     for (_libname, docname), data in files_contents:
         doc = BeautifulSoup(data, 'lxml', from_encoding='utf-8')
@@ -96,7 +96,7 @@ def manual_join(files_contents):
             tag['href'] = new_ref
 
     toc = generate_doc(main_body)
-    toc = BeautifulSoup(toc, 'lxml')
+    toc = BeautifulSoup(toc, 'lxml', from_encoding='utf-8')
     toc['class'] = 'toc'
     toc['id'] = 'toc'
     toc_place = d.select('div#toc')[0]
@@ -191,7 +191,7 @@ def generate_doc(soup):
 
     for item in root.items:
         s = item.__str__(root=True)
-        stoc = BeautifulSoup(s, 'lxml')
+        stoc = BeautifulSoup(s, 'lxml', from_encoding='utf-8')
         stoc['class'] = 'toc'
         item.tag.insert_after(stoc)
 

@@ -22,7 +22,7 @@ def scrape(qrstring):
 
     f = urllib.urlopen(url)
     from bs4 import BeautifulSoup
-    soup = BeautifulSoup(f, 'html.parser')
+    soup = BeautifulSoup(f, 'html.parser', from_encoding='utf-8')
     resources = []
 
     # <link href="aaa_battery-web.png" name='aaa_battery' rel="mcdp/icon" type="image/png"/>

@@ -77,11 +77,23 @@ span.AddBottomKeyword,
 span.LBRACE,
 span.RBRACE,
 span.LBRACKET,
-span.RBRACKET
+span.RBRACKET,
+span.AssertEqualKeyword,
+span.AssertLEQKeyword,
+span.AssertGEQKeyword,
+span.AssertLTKeyword,
+span.AssertGTKeyword,
+span.AssertNonemptyKeyword,
+span.AssertEmptyKeyword
+
 { 
     font-weight: bold; 
     color: #00a;
 }
+
+span.MAPSTO { font-weight: bold; color: darkred;}
+span.MAPSFROM  { font-weight: bold; color: darkgreen;}
+
 
 span.VName { color: blue; }
 /* constant */

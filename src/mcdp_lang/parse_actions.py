@@ -273,12 +273,10 @@ def parse_wrap(expr, string):
     
     string0 = remove_comments(string)
     
-    
     if not string0.strip():
         msg = 'Nothing to parse.'
         where=Where(string, character=len(string))
         raise DPSyntaxError(msg, where=where)
-
 
     try:
         

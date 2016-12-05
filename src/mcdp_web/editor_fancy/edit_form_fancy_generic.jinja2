@@ -2,9 +2,10 @@
 
 <html lang="en">
   <head>
+  	<meta charset="UTF-8">
   	{% include 'head.jinja2' %}
   	<style type='text/css'>
-  	{% include 'editor_fancy/edit_form_fancy_generic.css' %}
+	  	{% include 'editor_fancy/edit_form_fancy_generic.css' %}
   	</style>
   	<title>{{navigation['current_thing']}}</title>
 
@@ -18,9 +19,10 @@
     <tr>
   <td colspan=2>
     <div id='commands'>
-	  	<button id='save'>Save</button>
-	  	<button id='discard'>Discard</button>
-	  	<button id='apply_suggestions' style='display: none'>Beautify</button>
+	  	<button id='save'><span class='unicode-icons'>&#128190;</span>save</button> <!-- 💾 -->
+	  	<button id='discard'><span class='unicode-icons'>&#128465;</span>discard</button> <!-- 🗑 -->
+	  	<button id='apply_suggestions' style='display: none; margin-left: 5em'>
+	  		<span class='unicode-icons'>&#128161;</span>beautify</button> <!--💡-->
 	  	<span id='save_status'></span>
   	</div>
   	<script type='text/javascript'>
