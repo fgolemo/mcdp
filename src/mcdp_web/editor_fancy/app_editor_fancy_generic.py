@@ -206,41 +206,63 @@ class AppEditorFancyGeneric():
         
         library = self.get_library(request)
 
-
+        def format_syntax_error(string, e):
+            string2, expr, _commented_lines = mark_unparsable(string, parse_expr)
+            
+            res = format_exception_for_ajax_response(e, quiet=(DPSyntaxError,))
+            if expr is not None:
+                try:
+                    html = ast_to_html(string2,    
+                                       ignore_line=None,
+                                       add_line_gutter=False, 
+                                       encapsulate_in_precode=False, 
+                                       parse_expr=parse_expr,   
+                                       postprocess=None)
+            
+                    res['highlight'] = html
+                except DPSyntaxError:
+                    assert False, string2
+            else:
+                res['highlight'] = html_mark_syntax_error(string, e)
+             
+            res['request'] = req
+            return res
+        
         def go():
-            try:
-                # XXX: inefficient; we parse twice
-                parse_tree = parse_wrap(parse_expr, string)[0]
-            except DPSemanticError as e:
-                msg = 'I only expected a DPSyntaxError'
-                raise_wrapped(DPInternalError, e, msg, exc=sys.exc_info())
-            except DPSyntaxError as e:
-                # This is the case in which we could not even parse
-                
-                string2, expr, _commented_lines = mark_unparsable(string, parse_expr)
-                
-                res = format_exception_for_ajax_response(e, quiet=(DPSyntaxError,))
-                if expr is not None:
-                    try:
-                        html = ast_to_html(string2,    
-                                           ignore_line=None,
-                                           add_line_gutter=False, 
-                                           encapsulate_in_precode=False, 
-                                           parse_expr=parse_expr,   
-                                           postprocess=None)
-                
-                        res['highlight'] = html
-                    except DPSyntaxError:
-                        assert False, string2
-                else:
-                    res['highlight'] = html_mark_syntax_error(string, e)
-                 
-                res['request'] = req
-                return res
+#             try:
+#                 # XXX: inefficient; we parse twice
+#                 parse_tree = parse_wrap(parse_expr, string)[0]
+#             except DPSemanticError as e:
+#                 msg = 'I only expected a DPSyntaxError'
+#                 raise_wrapped(DPInternalError, e, msg, exc=sys.exc_info())
+#             except DPSyntaxError as e:
+#                 # This is the case in which we could not even parse
+#                 
+#                 string2, expr, _commented_lines = mark_unparsable(string, parse_expr)
+#                 
+#                 res = format_exception_for_ajax_response(e, quiet=(DPSyntaxError,))
+#                 if expr is not None:
+#                     try:
+#                         html = ast_to_html(string2,    
+#                                            ignore_line=None,
+#                                            add_line_gutter=False, 
+#                                            encapsulate_in_precode=False, 
+#                                            parse_expr=parse_expr,   
+#                                            postprocess=None)
+#                 
+#                         res['highlight'] = html
+#                     except DPSyntaxError:
+#                         assert False, string2
+#                 else:
+#                     res['highlight'] = html_mark_syntax_error(string, e)
+#                  
+#                 res['request'] = req
+#                 return res
+#             
+#             context0 = library._generate_context_with_hooks()
+#             string_parse_tree_interpreted = parse_refine(parse_tree, context0)
             
             context0 = library._generate_context_with_hooks()
-            string_parse_tree_interpreted = parse_refine(parse_tree, context0)
-            
             try:
                 class Tmp:
                     string_nospaces_parse_tree_interpreted = None
@@ -269,7 +291,8 @@ class AppEditorFancyGeneric():
                         raise
                     
                     thing = parse_eval(Tmp.string_nospaces_parse_tree_interpreted, context0)
-                    
+                except DPSyntaxError as e:
+                    return format_syntax_error(string, e)
                 except (DPSemanticError, DPInternalError) as e:
                     highlight_marked = html_mark(highlight, e.where, "semantic_error")
                     self.last_processed2[key] = None  # XXX
@@ -284,11 +307,11 @@ class AppEditorFancyGeneric():
                 self.last_processed2[key] = None  # XXX
                 raise
             
-            if string_parse_tree_interpreted:
-                suggestions = get_suggestions(string_parse_tree_interpreted)
+            if Tmp.string_nospaces_parse_tree_interpreted:
+                suggestions = get_suggestions(Tmp.string_nospaces_parse_tree_interpreted)
                 string_with_suggestions = apply_suggestions(string, suggestions)
-                for where, replacement in suggestions:
-                    print('suggestion: %r' % replacement)
+                for where, _replacement in suggestions:
+                    #print('suggestion: %r' % replacement)
                     highlight = html_mark(highlight, where, "suggestion")
             else:
                 string_with_suggestions = None
@@ -300,18 +323,15 @@ class AppEditorFancyGeneric():
                 warning = w.format_user()
                 
                 warnings.append(sanitize(warning.strip())) 
-            sep = '-' * 80
-            language_warnings = ("\n\n" + sep + "\n\n").join(warnings)
-            x = ['<div class="language_warning_entry">%s</div>' % w for w in warnings]
+
+            x = ['<div class="language_warning_entry">%s</div>' % w 
+                 for w in warnings]
             language_warnings_html = "\n".join(x)
         
-            language_warnings_html_list = [unicode(w, 'utf8') for w in warnings]
                                                    
             return {'ok': True, 
                     'highlight': unicode(highlight, 'utf8'),
                     'language_warnings': language_warnings_html, 
-#                     'language_warnings_html': language_warnings_html,
-                    'language_warnings_html_list': language_warnings_html_list,
                     'string_with_suggestions': string_with_suggestions,
                     'request': req}
 
