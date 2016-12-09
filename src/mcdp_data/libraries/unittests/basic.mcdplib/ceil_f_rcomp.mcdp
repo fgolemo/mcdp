@@ -1,6 +1,6 @@
 mcdp {
-    provides f [Rcomp]
-    requires r [Rcomp]
+    provides f [ℝ]
+    requires r [ℝ]
 
-    required r >= ceil(provided f)
+    required r ≥ ceil(provided f)
 }

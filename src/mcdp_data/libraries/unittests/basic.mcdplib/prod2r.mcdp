@@ -3,5 +3,5 @@ mcdp  {
     requires r2 [s]
     provides f  [m*s]
 
-    provided f <= required r1 * required r2
+    provided f ≤ required r1 · required r2
 }

@@ -37,6 +37,7 @@ def correct(x):
         CDP.MAPSFROM: '⟻',
         CDP.MAPSTO: '⟼',
         CDP.LEFTRIGHTARROW: '⟷',
+        CDP.product: '×',
     }
     
     for klass, preferred in glyphs.items():
@@ -55,6 +56,17 @@ def correct(x):
             if x.symbol != preferred:
                 return x.symbol, preferred
         
+    keywords = {
+        CDP.TopKeyword: '⊤',
+        CDP.BottomKeyword: '⊥',
+        CDP.FinitePosetKeyword: 'poset',
+    }
+    
+    for klass, preferred in keywords.items():
+        if isinstance(x, klass):
+            if x.keyword != preferred:
+                return x.keyword, preferred
+
     
     if isinstance(x, CDP.NewFunction) and x.keyword is None:
         name = x.name.value

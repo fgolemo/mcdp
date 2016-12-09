@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from .response import response_data
 
+
 def break_lines(s, maxwidth):
     lines = s.split("\n")
     lines2 = []

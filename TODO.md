@@ -461,3 +461,17 @@ http://127.0.0.1:8080/libraries/basic/models/addition_1/views/edit_fancy/
     
     b = mcdp { 
 - why double warning at http://127.0.0.1:8080/libraries/example-plusinv/models/plusinvnat5/views/edit_fancy/?
+
+
+- DPSemanticError: I can only compute pow() for floats with types; this is Rcomp().
+- DPSemanticError: I can only compute pow() for floats with types; this is Nat().
+
+
+- use unicode string length to make this better
+
+ line  1 |#comment ℝ₊ m/s^2 m/s²
+ line  2 |mcdp {
+ line  3 | variable x [Rcomp]
+ line  4 | x ≥ x^2 + 1 
+                 ~~~
+                  ↑

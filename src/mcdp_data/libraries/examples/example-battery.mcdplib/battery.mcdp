@@ -16,7 +16,7 @@ mcdp {
 
         specific_energy_Li_Ion = 500 Wh / kg 
 
-        required mass >= provided capacity / specific_energy_Li_Ion
+        required mass ≥ provided capacity / specific_energy_Li_Ion
     }
 
     # Sub-design problem: actuation
@@ -27,17 +27,17 @@ mcdp {
         requires power [W]
         # simple model: quadratic
         c = 10.0 W/N^2
-        required power >= (provided lift)^2 * c
+        required power ≥ (provided lift)^2 · c
     }
     # Co-design constraint: battery must be large enough
-    power = power required by actuation+ provided extra_power
-    energy = power * provided endurance
-    battery.capacity >= energy
+    power = power required by actuation + provided extra_power
+    energy = power · provided endurance
+    capacity provided by battery ≥ energy
 
     # Co-design constraint: actuators must be powerful enough
     gravity = 9.81 m/s^2
-    weight = (battery.mass + provided extra_payload) * gravity
-    actuation.lift >= weight
+    weight = (mass required by battery + provided extra_payload) · gravity
+    lift provided by actuation ≥ weight
 
     # suppose we want to optimize for size of the battery
     requires mass for battery

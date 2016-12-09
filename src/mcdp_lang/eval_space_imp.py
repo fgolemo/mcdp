@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
 from contracts.utils import raise_desc, check_isinstance
-from mcdp_lang.eval_warnings import MCDPWarnings, warn_language
+from mcdp_lang.eval_warnings import MCDPWarnings, warn_language,\
+    warnings_copy_from_child_make_nested2
 from mcdp_posets import (
     FiniteCollectionsInclusion, FinitePoset, GenericInterval, Int, LowerSets,
     Nat, Poset, PosetCoproduct, PosetProduct, PosetProductWithLabels, Space,
@@ -200,7 +201,11 @@ def eval_poset_load(r, context):
 
     if isinstance(arg, CDP.PosetName):
         load_arg = arg.value
-        return context.load_poset(load_arg)
+        context2 = context.child()
+        res = context2.load_poset(load_arg)
+        msg = 'While loading poset %r:' % (load_arg)
+        warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
+        return res
 
     if isinstance(arg, CDP.PosetNameWithLibrary):
         assert isinstance(arg.library, CDP.LibraryName), r
@@ -208,8 +213,13 @@ def eval_poset_load(r, context):
 
         libname = arg.library.value
         name = arg.name.value
-
+        
         library = context.load_library(libname)
-        return library.load_poset(name, context)
+        context2 = context.child()
+        res = library.load_poset(name, context2)
+        
+        msg = 'While loading poset %r from library %r:' % (name, libname)
+        warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
+        return res
     
     raise NotImplementedError(r.name)

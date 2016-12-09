@@ -4,17 +4,16 @@ import os
 import warnings
 
 from contracts import contract
+from contracts.interface import line_and_col, location, Where
 from contracts.utils import indent, raise_desc, raise_wrapped, check_isinstance
 from mcdp_lang.namedtuple_tricks import isnamedtuplewhere, get_copy_with_where
-from mcdp_lang.parse_actions import parse_wrap, translate_where
+from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parts import CDPLanguage
+from mcdp_lang.refinement import namedtuple_visitor_ext
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
 from mocdp import MCDPConstants
 from mocdp.exceptions import mcdp_dev_warning, DPSyntaxError, DPInternalError
-from mcdp_lang.refinement import namedtuple_visitor_ext
-from contracts.interface import line_and_col, location, Where
-
 
 
 unparsable_marker = '#@'
@@ -176,7 +175,7 @@ def ast_to_html(s,
         msg = 'Lost some lines while pretty printing: %s, %s' % (len(lines), len(s_comments))
         raise DPInternalError(msg) 
  
-    print('transformed', transformed)
+#     print('transformed', transformed)
     
     out = ""
     
@@ -185,10 +184,10 @@ def ast_to_html(s,
         if ignore_line(lineno):
             continue
         else:
-            print('line %d' % i)
-            print(' oiginal line: %r' % original_lines[i])
-            print('         line: %r' % line)
-            print('      comment: %r' % comment)
+#             print('line %d' % i)
+#             print(' oiginal line: %r' % original_lines[i])
+#             print('         line: %r' % line)
+#             print('      comment: %r' % comment)
             original_line = original_lines[i]
             if comment is not None:
                 assert '#' in original_line
@@ -202,8 +201,8 @@ def ast_to_html(s,
                     before = line
                     comment = comment
                     
-                print('       before: %r' % comment)
-                print('      comment: %r' % comment)
+#                 print('       before: %r' % comment)
+#                 print('      comment: %r' % comment)
                     
                 if comment.startswith(unparsable_marker):
                     unparsable = comment[len(unparsable_marker):]
@@ -214,7 +213,7 @@ def ast_to_html(s,
             else:
                 linec = line 
                 
-            print('        linec: %r' % linec)
+#             print('        linec: %r' % linec)
             
             if add_line_gutter:
                 out += "<span class='line-gutter'>%2d</span>" % lineno

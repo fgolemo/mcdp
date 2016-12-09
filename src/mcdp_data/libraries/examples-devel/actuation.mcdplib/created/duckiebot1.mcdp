@@ -22,13 +22,13 @@ mcdp {
   joystick = instance `LogitechGamepadF710
   joystick_receiver = instance `LogitechReceiver
 
-  joystick_receiver.com <= joystick.com
+  com required by joystick_receiver ≤ com provided by joystick
   usb_to_barrel = instance `USB_to_barrel
-  pi.gpiocom <= pi_camera.com
-  pi.usbcom1 <= joystick_receiver.com
+  gpiocom required by pi ≤ com provided by pi_camera
+  usbcom1 required by pi ≤ com provided by joystick_receiver
 
-  pi.ethcom <= buffalo.eth
-  pi.ethcom >= buffalo.eth
+  ethcom required by pi ≤ eth provided by buffalo
+  ethcom provided by pi ≥ eth required by buffalo
 
   ignore usbcom1 provided by pi
   ignore usbcom2 provided by pi
@@ -37,24 +37,24 @@ mcdp {
 
   USBMicroCharger = instance `USBMicroCharging
 
-  requires ac >= USBMicroCharger.in
+  requires ac = in required by USBMicroCharger
 
   splitter = instance `USBSplitter
 
-  battery_ravpower.in <= USBMicroCharger.out 
-  splitter.in <= battery_ravpower.out1
+  in required by battery_ravpower ≤ out provided by USBMicroCharger 
+  in required by splitter ≤ out1 provided by battery_ravpower
   
-  in required by pi <= out provided by cable
-  in required by cable <= out1 provided by splitter 
+  in required by pi ≤ out provided by cable
+  in required by cable ≤ out1 provided by splitter 
 
   
-  buffalo.in <= splitter.out2
+  in required by buffalo ≤ out2 provided by splitter
   # battery below
-  battery_ravpower.payload <= dagu_chassis.payload_bottom
+  payload required by battery_ravpower ≤ payload_bottom provided by dagu_chassis
 
-  usb_to_barrel.in <= battery_ravpower.out2
-  usb_to_barrel.out >= servo_hat.in
-  servo_hat.out >= dc_hat.in
+  in required by usb_to_barrel ≤ out2 provided by battery_ravpower
+  out provided by usb_to_barrel ≥ in required by servo_hat
+  out provided by servo_hat ≥ in required by dc_hat
   fit = instance template mcdp {
       provides p1 [`Payload]
       provides p2 [`Payload]
@@ -67,16 +67,16 @@ mcdp {
   }
  
 
-  fit.p1 >= buffalo.payload
-  fit.p2 >= pi.payload
-  fit.p3 >= dc_hat.payload
-  fit.p4 >= servo_hat.payload
-  fit.p5 >= lsd_hat.payload
-  fit.p6 >= duckie.payload
-  fit.p7 >= pi_camera.payload
+  p1 provided by fit ≥ payload required by buffalo
+  p2 provided by fit ≥ payload required by pi
+  p3 provided by fit ≥ payload required by dc_hat
+  p4 provided by fit ≥ payload required by servo_hat
+  p5 provided by fit ≥ payload required by lsd_hat
+  p6 provided by fit ≥ payload required by duckie
+  p7 provided by fit ≥ payload required by pi_camera
 
 
-  fit.payload <= dagu_chassis.payload_top
+  payload required by fit ≤ payload_top provided by dagu_chassis
 
   position = instance template mcdp {
     requires led1 [`LEDBlinking]
@@ -96,58 +96,58 @@ mcdp {
   
   provides motion using dagu_chassis
 
-  communication.led <= rgb_led1.blinking
-  position.led1 <= rgb_led2.blinking
-  position.led2 <= rgb_led3.blinking
-  position.led3 <= rgb_led4.blinking
-  position.led4 <= rgb_led5.blinking
+  led required by communication ≤ blinking provided by rgb_led1
+  led1 required by position ≤ blinking provided by rgb_led2
+  led2 required by position ≤ blinking provided by rgb_led3
+  led3 required by position ≤ blinking provided by rgb_led4
+  led4 required by position ≤ blinking provided by rgb_led5
 
-  lsd_hat.rgb1 >= rgb_led1.driver
-  lsd_hat.rgb2 >= rgb_led2.driver
-  lsd_hat.rgb3 >= rgb_led3.driver
-  lsd_hat.rgb4 >= rgb_led4.driver
-  lsd_hat.rgb5 >= rgb_led5.driver
+  rgb1 provided by lsd_hat ≥ driver required by rgb_led1
+  rgb2 provided by lsd_hat ≥ driver required by rgb_led2
+  rgb3 provided by lsd_hat ≥ driver required by rgb_led3
+  rgb4 provided by lsd_hat ≥ driver required by rgb_led4
+  rgb5 provided by lsd_hat ≥ driver required by rgb_led5
 
-  servo_hat.pwm1 >= lsd_hat.pwm1
-  servo_hat.pwm2 >= lsd_hat.pwm2
-  servo_hat.pwm3 >= lsd_hat.pwm3
-  servo_hat.pwm4 >= lsd_hat.pwm4
-  servo_hat.pwm5 >= lsd_hat.pwm5
-  servo_hat.pwm6 >= lsd_hat.pwm6
-  servo_hat.pwm7 >= lsd_hat.pwm7
-  servo_hat.pwm8 >= lsd_hat.pwm8
-  servo_hat.pwm9 >= lsd_hat.pwm9
-  servo_hat.pwm10 >= lsd_hat.pwm10
-  servo_hat.pwm11 >= lsd_hat.pwm11
-  servo_hat.pwm12 >= lsd_hat.pwm12
-  servo_hat.pwm13 >= lsd_hat.pwm13
-  servo_hat.pwm14 >= lsd_hat.pwm14
-  servo_hat.pwm15 >= lsd_hat.pwm15
+  pwm1 provided by servo_hat ≥ pwm1 required by lsd_hat
+  pwm2 provided by servo_hat ≥ pwm2 required by lsd_hat
+  pwm3 provided by servo_hat ≥ pwm3 required by lsd_hat
+  pwm4 provided by servo_hat ≥ pwm4 required by lsd_hat
+  pwm5 provided by servo_hat ≥ pwm5 required by lsd_hat
+  pwm6 provided by servo_hat ≥ pwm6 required by lsd_hat
+  pwm7 provided by servo_hat ≥ pwm7 required by lsd_hat
+  pwm8 provided by servo_hat ≥ pwm8 required by lsd_hat
+  pwm9 provided by servo_hat ≥ pwm9 required by lsd_hat
+  pwm10 provided by servo_hat ≥ pwm10 required by lsd_hat
+  pwm11 provided by servo_hat ≥ pwm11 required by lsd_hat
+  pwm12 provided by servo_hat ≥ pwm12 required by lsd_hat
+  pwm13 provided by servo_hat ≥ pwm13 required by lsd_hat
+  pwm14 provided by servo_hat ≥ pwm14 required by lsd_hat
+  pwm15 provided by servo_hat ≥ pwm15 required by lsd_hat
 
 
   wifi = instance `Spectrum
-  buffalo.wlan >= wifi.wlan1
-  buffalo.wlan <= wifi.wlan1
-  router.wlan >= wifi.wlan2
-  router.wlan <= wifi.wlan2
+  wlan provided by buffalo ≥ wlan1 required by wifi
+  wlan required by buffalo ≤ wlan1 provided by wifi
+  wlan provided by router ≥ wlan2 required by wifi
+  wlan required by router ≤ wlan2 provided by wifi
   requires spectrum_occupation for wifi
 
   duckietop = instance `Duckietop
-  router.eth >= duckietop.eth
-  router.eth <= duckietop.eth
+  eth provided by router ≥ eth required by duckietop
+  eth required by router ≤ eth provided by duckietop
 
   provides visualization using duckietop
 
-  servo_hat.pisocketcom <= dc_hat.pisocketcom1
-  dc_hat.pisocketcom1 <= pi.pisocketcom
+  pisocketcom required by servo_hat ≤ pisocketcom1 provided by dc_hat
+  pisocketcom1 required by dc_hat ≤ pisocketcom provided by pi
 
-  dc_hat.out1 >= dagu_chassis.pwm1
-  dc_hat.out2 >= dagu_chassis.pwm2
+  out1 provided by dc_hat ≥ pwm1 required by dagu_chassis
+  out2 provided by dc_hat ≥ pwm2 required by dagu_chassis
   ignore out3 provided by dc_hat
   ignore out4 provided by dc_hat
  
   ignore rb_id required by dagu_chassis
-  requires budget_platform >= (
+  requires budget_platform = (
      budget required by dagu_chassis +
      budget required by battery_ravpower + 
      budget required by buffalo + 
@@ -167,7 +167,7 @@ mcdp {
      budget required by cable
   )
 
-  requires budget_station >= (
+  requires budget_station = (
      budget required by joystick +
      budget required by router + 
      budget required by duckietop

@@ -1,7 +1,7 @@
 catalogue {           
     provides voltage [set-of(V)]
     provides capacity [J]
-
+ 
     requires cost [$] "cost of the battery"
     requires mass [kg]
 

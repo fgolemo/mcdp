@@ -1,6 +1,6 @@
 mcdp {
-    provides f [Rcomp]
-    requires r [Rcomp]
+    provides f [ℝ]
+    requires r [ℝ]
 
-    required r - Top Rcomp >= provided f 
+    required r - ⊤ ℝ ≥ provided f 
 }

@@ -26,7 +26,9 @@ from reprep import Report
 from reprep.constants import MIME_PNG
 from reprep.plot_utils.axes import x_axis_extra_space, y_axis_extra_space
 
-altchars = '-_' # instead of + /
+
+# Alternate chars used for Base64 instead of + / which give problems with urls
+altchars = '-_' 
 QUERY_TYPE_FTOR = 'ftor'
 QUERY_TYPE_RTOF = 'rtof'
 
@@ -142,8 +144,7 @@ class AppSolver2():
     
             data['state'] = state
             data['key'] = key
-#             print('key_stable %r' % key_stable)
-#             print('adding hash %r' % h)
+
             self.solutions[h] = data
 
             res['output_image'] = 'display.png?hash=%s' % h
@@ -447,7 +448,7 @@ def save_plot(output):
         yield pylab
     output['png'] = r.resolve_url('png').get_raw_data()
     output['pdf'] = r.resolve_url('plot').get_raw_data()
-    # 
+    
      
 
 def get_samples(request, ndp):

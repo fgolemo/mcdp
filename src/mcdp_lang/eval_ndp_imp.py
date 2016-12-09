@@ -236,22 +236,20 @@ def eval_ndp_load(r, context):
         libname = arg.library.value
         name = arg.name.value
         library = context.load_library(libname)
-        # XXX: add warning location?
          
         context2 = context.child()
         res = library.load_ndp(name, context2)
 
-        msg = 'While loading %r from library %r:' % (name, libname)
+        msg = 'While loading MCDP %r from library %r:' % (name, libname)
         warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
-            
         return res
 
     if isinstance(arg, CDP.NDPName):
         name = arg.value
-        # XXX: add warning location?
+
         context2 = context.child()
         ndp = context2.load_ndp(name)
-        msg = 'While loading %r:' % (name)
+        msg = 'While loading MCDP %r:' % (name)
         warnings_copy_from_child_make_nested2(context, context2, r.where, msg)
         return ndp
 

@@ -191,6 +191,9 @@ class AppEditorFancyGeneric():
         return string
 
     def ajax_parse_generic(self, request, spec):
+        from mcdp_report.html import mark_unparsable
+        from mcdp_report.html import sanitize
+        
         widget_name = self.get_widget_name(request, spec)
         string = self.get_text_from_request2(request)
         req = {'text': request.json_body['text']}
@@ -203,7 +206,6 @@ class AppEditorFancyGeneric():
         
         library = self.get_library(request)
 
-        context = library._generate_context_with_hooks()
 
         def go():
             try:
@@ -214,7 +216,7 @@ class AppEditorFancyGeneric():
                 raise_wrapped(DPInternalError, e, msg, exc=sys.exc_info())
             except DPSyntaxError as e:
                 # This is the case in which we could not even parse
-                from mcdp_report.html import mark_unparsable
+                
                 string2, expr, _commented_lines = mark_unparsable(string, parse_expr)
                 
                 res = format_exception_for_ajax_response(e, quiet=(DPSyntaxError,))
@@ -236,14 +238,16 @@ class AppEditorFancyGeneric():
                 res['request'] = req
                 return res
             
-            string_parse_tree_interpreted = parse_refine(parse_tree, context)
+            context0 = library._generate_context_with_hooks()
+            string_parse_tree_interpreted = parse_refine(parse_tree, context0)
             
             try:
                 class Tmp:
                     string_nospaces_parse_tree_interpreted = None
                      
                 def postprocess(block):
-                    x = parse_refine(block, context)
+                    context1 = library._generate_context_with_hooks()
+                    x = parse_refine(block, context1)
                     Tmp.string_nospaces_parse_tree_interpreted = x 
                     return x
                 
@@ -264,12 +268,13 @@ class AppEditorFancyGeneric():
                                                 postprocess=None)
                         raise
                     
-                    thing = parse_eval(Tmp.string_nospaces_parse_tree_interpreted, context)
+                    thing = parse_eval(Tmp.string_nospaces_parse_tree_interpreted, context0)
                     
                 except (DPSemanticError, DPInternalError) as e:
                     highlight_marked = html_mark(highlight, e.where, "semantic_error")
                     self.last_processed2[key] = None  # XXX
-                    res = format_exception_for_ajax_response(e, quiet=(DPSemanticError, DPInternalError))
+                    res = format_exception_for_ajax_response(e, 
+                                        quiet=(DPSemanticError, DPInternalError))
                     res['highlight'] = highlight_marked
                     res['request'] = req
                     return res
@@ -289,21 +294,24 @@ class AppEditorFancyGeneric():
                 string_with_suggestions = None
              
             warnings = []
-            for w in context.warnings:
+            for w in context0.warnings:
                 if w.where is not None:
                     highlight = html_mark(highlight, w.where, "language_warning")
                 warning = w.format_user()
-                warnings.append(warning.strip()) 
+                
+                warnings.append(sanitize(warning.strip())) 
             sep = '-' * 80
             language_warnings = ("\n\n" + sep + "\n\n").join(warnings)
-            language_warnings_html = "\n".join(['<div class="language_warning">%s</div>' % w
-                                      for w in warnings])
-            
-            print highlight
+            x = ['<div class="language_warning">%s</div>' % w for w in warnings]
+            language_warnings_html = "\n".join(x)
+        
+            language_warnings_html_list = [unicode(w, 'utf8') for w in warnings]
+                                                   
             return {'ok': True, 
                     'highlight': unicode(highlight, 'utf8'),
                     'language_warnings': language_warnings, 
                     'language_warnings_html': language_warnings_html,
+                    'language_warnings_html_list': language_warnings_html_list,
                     'string_with_suggestions': string_with_suggestions,
                     'request': req}
 

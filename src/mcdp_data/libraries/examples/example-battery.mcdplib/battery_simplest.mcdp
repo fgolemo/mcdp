@@ -5,16 +5,16 @@ mcdp {
         provides capacity [J]        
         requires mass [kg]
         specific_energy = 500 Wh / kg
-        mass >= capacity / specific_energy
+        required mass ≥ provided capacity / specific_energy
     }
     actuation = instance mcdp {
         provides lift [N]
         requires power [W]
-        power >= lift * lift * 10.0 W/N^2
+        required power ≥ (provided lift) ^ 2 · 10.0 W/N^2
     }
-    energy = actuation.power * endurance
-    battery.capacity >= energy
+    energy = power required by actuation · provided endurance
+    capacity provided by battery ≥ energy
     g = 9.81 m/s^2
-    weight = (battery.mass + payload) * g
-    actuation.lift >= weight
+    weight = (mass required by battery + provided payload) · g
+    lift provided by actuation ≥ weight
 }

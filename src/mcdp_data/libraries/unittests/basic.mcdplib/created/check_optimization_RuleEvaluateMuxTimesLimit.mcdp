@@ -1,7 +1,7 @@
 mcdp {
-      provides a [Nat]
-      provides b [Nat]
+      provides a [ℕ] 
+      provides b [ℕ]
     
-      provided a <= Nat: 1
-      provided b <= Nat: 2
+      provided a ≤ ℕ: 1
+      provided b ≤ ℕ: 2
 }

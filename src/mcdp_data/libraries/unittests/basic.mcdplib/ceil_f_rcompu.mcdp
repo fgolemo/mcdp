@@ -2,5 +2,5 @@ mcdp {
     provides f [m]
     requires r [m]
 
-    required r >= ceil(provided f)
+    required r ≥ ceil(provided f)
 }
