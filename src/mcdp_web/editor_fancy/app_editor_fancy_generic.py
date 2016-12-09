@@ -302,15 +302,15 @@ class AppEditorFancyGeneric():
                 warnings.append(sanitize(warning.strip())) 
             sep = '-' * 80
             language_warnings = ("\n\n" + sep + "\n\n").join(warnings)
-            x = ['<div class="language_warning">%s</div>' % w for w in warnings]
+            x = ['<div class="language_warning_entry">%s</div>' % w for w in warnings]
             language_warnings_html = "\n".join(x)
         
             language_warnings_html_list = [unicode(w, 'utf8') for w in warnings]
                                                    
             return {'ok': True, 
                     'highlight': unicode(highlight, 'utf8'),
-                    'language_warnings': language_warnings, 
-                    'language_warnings_html': language_warnings_html,
+                    'language_warnings': language_warnings_html, 
+#                     'language_warnings_html': language_warnings_html,
                     'language_warnings_html_list': language_warnings_html_list,
                     'string_with_suggestions': string_with_suggestions,
                     'request': req}

@@ -1,6 +1,9 @@
 template mcdp {
-    requires budget >= 1 USD
+   #comment
+    requires budget ≥ 1 USD
 
     requires driver [`RGBLEDDriver]
     provides blinking [`LEDBlinking]
+
+   blinking ≤ ⊤ `LEDBlinking
 }

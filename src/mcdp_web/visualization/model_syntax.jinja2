@@ -45,9 +45,6 @@
 	
 	<table id='main'>
 	<tr><td>
-	{{highlight|safe}}
-	
-	
 	{% set url_edit = ("/libraries/" + navigation['current_library'] + 
 	              "/models/" + navigation['current_model'] + 
 	              "/views/edit_fancy/" )%}
@@ -55,6 +52,10 @@
 	<a class='make_button' href="{{url_edit}}">
 	 	<span class='unicode-icons'>✎</span>edit
  	</a> 
+
+	{{highlight|safe}}
+	
+	
 	 	
  	<script type='text/javascript'>
  	$(document).ready(function() {  		

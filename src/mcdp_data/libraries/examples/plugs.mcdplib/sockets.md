@@ -49,7 +49,7 @@ Some of them are compatible. For example we can fit
 a plug ot Type A into a socket of Type B. This
 creates a natural partial order structure.
 
-We can use a ``finite_poset`` to describe the poset [as follows](#socket_type):
+We can use a ``poset`` to describe the poset [as follows](#socket_type):
 
 <pre class='mcdp_poset' id='socket_type' label='socket_type.mcdp_poset'></pre>
 

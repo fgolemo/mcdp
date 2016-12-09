@@ -6,6 +6,7 @@
   	{% include 'head.jinja2' %}
   	<style type='text/css'>
 	  	{% include 'editor_fancy/edit_form_fancy_generic.css' %}
+
   	</style>
   	<title>{{navigation['current_thing']}}</title>
 
@@ -19,6 +20,7 @@
     <tr>
   <td colspan=2>
     <div id='commands'>
+    	<button id='close'><span class='unicode-icons'>×</span>close</button> 
 	  	<button id='save'><span class='unicode-icons'>&#128190;</span>save</button> <!-- 💾 -->
 	  	<button id='discard'><span class='unicode-icons'>&#128465;</span>discard</button> <!-- 🗑 -->
 	  	<button id='apply_suggestions' style='display: none; margin-left: 5em'>
@@ -71,7 +73,7 @@
 <td colspan=2>
 	
   <span id='server_status'></span>
-  <pre id='syntax_error'></pre>
+  <pre id='syntax_error' style='display: none'></pre>
   <pre id='language_warnings'></pre>
   <pre id='comm_failure'></pre>
   </td></tr>
@@ -90,6 +92,7 @@
 	$(document).ready(function() {
 
 		$("#editor").keyup(keyup);
+		$( "button#close" ).click(click_button_close);
 		$( "button#save" ).click(click_button_save);
 		$( "button#discard" ).click(click_button_discard);
 		$( "button#apply_suggestions" ).click(click_apply_suggestions);
@@ -135,6 +138,7 @@
 	function text_has_changed() {
 		// $('button#save').disable();
 		$('#around_editor').css('background-color', '#ffe');
+		$('#syntax_error').hide();
 		$('#syntax_error').html('');
 		$('#language_warnings').html('');
 		
@@ -237,6 +241,7 @@
 			//console.log('res: ' + (JSON.stringify(res)))
 			// console.log(res['error']);
 			$('#syntax_error').html(res['error']);
+			$('#syntax_error').show();
 			$('#language_warnings').html(); /* XXX */
 
 			//$('#syntax_error').show();
@@ -281,6 +286,7 @@
 			}
 
 			$('#around_editor').css('background-color', 'white');
+			$('#syntax_error').hide();
 			$('#syntax_error').html('');
 			if ('language_warnings' in res) {
 				$('#language_warnings').html(res['language_warnings']);
@@ -303,6 +309,15 @@
 		saved = true;
 		location.reload();
 	}
+
+
+	function click_button_close(res) {
+		click_button_save();
+		saved = true;
+		url = '../syntax/'
+		window.location = url;
+	}
+
 
 	function click_button_save() {
 		$('#save_status').html('saving...');

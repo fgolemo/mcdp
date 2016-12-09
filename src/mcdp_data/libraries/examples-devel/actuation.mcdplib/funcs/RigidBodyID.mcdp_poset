@@ -1,9 +1,6 @@
-finite_poset {
-    none
+add_bottom poset {
     rb1
     # rb2
     # rb3
     # rb4
-
-    none <= rb1
 }

@@ -1,4 +1,4 @@
-finite_poset {
+poset {
   find_ancient_life
   find_current_life
    

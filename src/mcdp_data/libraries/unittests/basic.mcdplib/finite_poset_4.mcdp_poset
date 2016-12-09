@@ -1,4 +1,4 @@
-finite_poset { 
+poset { 
 	a <= b
 	B <= C
 }

@@ -7,7 +7,7 @@ from mcdp_lang.parse_interface import parse_constant
 def check_minimals1():  # TODO: rename
     p = parse_constant('Minimals V')
     print p
-    p = parse_constant('Minimals finite_poset{ a b}')
+    p = parse_constant('Minimals poset{a b}')
     print p
 
 @comptest

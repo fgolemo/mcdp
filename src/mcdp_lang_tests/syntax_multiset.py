@@ -5,7 +5,7 @@ from mcdp_lang import parse_poset
 
 @comptest_fails
 def check_lang_multiset1():
-    parse_poset('multiset( finite_poset {a b c d e })')
+    parse_poset('multiset( poset {a b c d e })')
 
 
 @comptest
