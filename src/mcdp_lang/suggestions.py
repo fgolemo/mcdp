@@ -17,6 +17,9 @@ import re
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.refinement import namedtuple_visitor_ext
 from mocdp.exceptions import DPInternalError
+from mcdp_lang.dealing_with_special_letters import subscripts, greek_letters
+from contracts.utils import check_isinstance
+from contracts.interface import Where
 
 
 __all__ = [
@@ -136,25 +139,50 @@ def correct(x, parents):  # @UnusedVariable
                     w = ' ' * i + '^' + ' ' * j + n
                     if w in x_string:
                         return w, replacement
-                    
+    if isinstance(x, CDP.VName):
+        suggestion = get_suggestion_identifier(x.value)
+        if suggestion is not None:
+            return suggestion
     return None
 
+def get_suggestion_identifier(s):
+    """ Returns a pair of what, replacement, or None if no suggestions available""" 
+    for num, subscript in subscripts.items():
+        s0 = '_%d' % num
+        if s.endswith(s0):
+            return s0, subscript.encode('utf8')
+    for name, letter in greek_letters.items():
+        if name in s:
+            return name.encode('utf8'), letter.encode('utf8')
+    return None
+    
 def get_suggestions(xr):
     """ Returns a sequence of (where, replacement_string) """
     subs = [] # (where, sub)
-    def find_corrections(x, parents):  
+    def find_corrections(x, parents):
+        # expect two pairs of strings  
         has = correct(x, parents)
         if has is None:
             pass
         else:
             a, b = has
+            check_isinstance(a, str)
+            check_isinstance(b, str)
             s = x.where.string[x.where.character:x.where.character_end]
             if not a in s:
                 msg = 'Could not find piece %r in %r.' % (a, s)
                 raise DPInternalError(msg)
-            ws_before_a = s[:s.index(a)]
-            sub = ws_before_a + b
-            subs.append((x.where, sub))
+            
+            a_index = s.index(a)
+            a_len = len(a) # in bytes
+            a_char = x.where.character + a_index
+            a_char_end = a_char + a_len
+            a_where = Where(x.where.string, a_char, a_char_end)
+            sub = (a_where, b)
+            subs.append(sub)
+            #ws_before_a = s[:a_index]
+            #sub = ws_before_a + b
+            #subs.append((x.where, sub))
         return x
             
     _ = namedtuple_visitor_ext(xr, find_corrections)

@@ -322,12 +322,6 @@ def parse_wrap(expr, string):
     except DPSemanticError as e:
         msg = 'This should not throw a DPSemanticError'
         raise_wrapped(DPInternalError, e,msg, exc=sys.exc_info()) 
-    
-#     except DPInternalError as e:
-#         raise
-#         msg += "\n\n" + indent(m(string), '  ') + '\n'
-#         msg = "Internal error while evaluating the spec:"
-#         raise_wrapped(DPInternalError, e, msg, compact=False)
 
 def remove_comments(s):
     lines = s.split("\n")
