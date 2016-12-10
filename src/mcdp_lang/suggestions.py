@@ -139,7 +139,7 @@ def correct(x, parents):  # @UnusedVariable
                     w = ' ' * i + '^' + ' ' * j + n
                     if w in x_string:
                         return w, replacement
-    if isinstance(x, CDP.VName):
+    if isinstance(x, (CDP.VName, CDP.RName, CDP.FName, CDP.CName)):
         suggestion = get_suggestion_identifier(x.value)
         if suggestion is not None:
             return suggestion

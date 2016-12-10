@@ -11,7 +11,6 @@ from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import parse_wrap_check, TestFailed
 from mcdp_lang_tests.utils2 import eval_rvalue_as_constant
 from mocdp.comp.context import Context
-from mcdp_lang.namedtuple_tricks import recursive_print
 
 
 @comptest
@@ -19,9 +18,8 @@ def check_spaces1():
     def p(s):
         c = Context()
         r = parse_wrap_check(s, Syntax.space)
-#         print r
         _x = eval_space(r, c)
-#         print x
+        
     p('V')
     p("V x m")
     p("V × m")
@@ -181,13 +179,13 @@ def suggestions_exponent2():
     xr = parse_ndp_refine(x, Context())
     
     suggestions = get_suggestions(xr)
-#     print suggestions
+    # print suggestions
     assert_equal(1, len(suggestions))
     assert_equal('\xc2\xb2', suggestions[0][1])
     
     s2 = apply_suggestions(s, suggestions)
     parse_ndp(s2)
-#     print s2
+    # print s2
 
 @comptest
 def suggestions_subscript():

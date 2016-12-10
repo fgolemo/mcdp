@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest, run_module_tests
-from mcdp_lang.parse_interface import parse_ndp
-from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts
-from mcdp_lang.syntax import SyntaxIdentifiers
-from mcdp_lang_tests.utils import parse_wrap_check
 from nose.tools import assert_equal
+
+from comptests.registrar import comptest, run_module_tests
+from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts
+from mcdp_lang.parse_interface import parse_ndp
+from mcdp_lang.syntax import SyntaxIdentifiers
+from mcdp_lang_tests.utils import parse_wrap_check, assert_syntax_error
 
 
 @comptest
@@ -33,6 +34,10 @@ def special_letters1():
 def subscript_only_end():
     # these are not valid
     invalid = [u'₁x', u'a₁b', u'x₁₁']
+    expr = SyntaxIdentifiers.get_idn()
+    for s in invalid:
+        s = s.encode('utf8')
+        assert_syntax_error(s, expr)
     
 @comptest
 def special_letters_identifiers():

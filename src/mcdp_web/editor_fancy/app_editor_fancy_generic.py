@@ -2,21 +2,19 @@
 import cgi
 from collections import defaultdict, namedtuple
 import os
-import sys
 
 from bs4 import BeautifulSoup
 from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
 from pyramid.renderers import render_to_response  # @UnresolvedImport
 
-from contracts.utils import check_isinstance, raise_wrapped
-from mcdp_figures import MakeFiguresNDP, MakeFiguresPoset
-from mcdp_lang.parse_actions import parse_wrap
+from contracts.utils import check_isinstance, raise_desc
 from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
-from mcdp_posets.finite_poset import FinitePoset
 from mcdp_report.html import ast_to_html
-from mcdp_web.utils import (ajax_error_catch, create_image_with_string,
+from mcdp_web.editor_fancy.image import get_png_data_model, \
+    ndp_template_enclosed, get_png_data_unavailable, get_png_data_poset
+from mcdp_web.utils import (ajax_error_catch,
     format_exception_for_ajax_response, response_image)
 from mcdp_web.utils.response import response_data
 from mocdp import logger
@@ -39,6 +37,50 @@ Spec = namedtuple('Spec', 'url_part url_variable extension '
                   'get_png_data write minimal_source_code')
 
 
+spec_models = Spec(url_part='models', url_variable='model_name',
+                      extension=MCDPLibrary.ext_ndps,
+                      parse=MCDPLibrary.parse_ndp,
+                      parse_expr=Syntax.ndpt_dp_rvalue,
+                      parse_refine=parse_ndp_refine,
+                      parse_eval=parse_ndp_eval,
+                      load=MCDPLibrary.load_ndp,
+                      get_png_data=get_png_data_model,
+                      write=MCDPLibrary.write_to_model,
+                      minimal_source_code="mcdp {\n\n}")
+
+spec_templates = Spec(url_part='templates', url_variable='template_name',
+                      extension=MCDPLibrary.ext_templates,
+                      parse=MCDPLibrary.parse_template,
+                      parse_expr=Syntax.template,
+                      parse_refine=parse_template_refine,
+                      parse_eval=parse_template_eval,
+                      load=MCDPLibrary.load_template,
+                      get_png_data=ndp_template_enclosed,
+                      write=MCDPLibrary.write_to_template,
+                      minimal_source_code="template []\n\nmcdp {\n\n}")
+
+spec_values = Spec(url_part='values', url_variable='value_name',
+                   extension=MCDPLibrary.ext_values,
+                   parse=MCDPLibrary.parse_constant,
+                   parse_expr=Syntax.rvalue,
+                   parse_refine=parse_constant_refine,
+                   parse_eval=parse_constant_eval,
+                   load=MCDPLibrary.load_constant,
+                   get_png_data=get_png_data_unavailable,
+                   write=MCDPLibrary.write_to_constant,
+                   minimal_source_code="0 g")
+
+spec_posets = Spec(url_part='posets', url_variable='poset_name',
+                   extension=MCDPLibrary.ext_posets,
+                   parse=MCDPLibrary.parse_poset,
+                   parse_expr=Syntax.space,
+                   parse_refine=parse_poset_refine,
+                   parse_eval=parse_poset_eval,
+                   load=MCDPLibrary.load_poset,
+                   get_png_data=get_png_data_poset,
+                   write=MCDPLibrary.write_to_poset,
+                   minimal_source_code="poset {\n    \n}")
+
 class AppEditorFancyGeneric():
 
     def __init__(self):
@@ -48,52 +90,6 @@ class AppEditorFancyGeneric():
         self.last_processed2 = defaultdict(lambda: dict())
 
     def config(self, config):
-        from mcdp_web.images.images import ndp_template_enclosed
-
-        spec_models = Spec(url_part='models', url_variable='model_name',
-                              extension=MCDPLibrary.ext_ndps,
-                              parse=MCDPLibrary.parse_ndp,
-                              parse_expr=Syntax.ndpt_dp_rvalue,
-                              parse_refine=parse_ndp_refine,
-                              parse_eval=parse_ndp_eval,
-                              load=MCDPLibrary.load_ndp,
-                              get_png_data=get_png_data_model,
-                              write=MCDPLibrary.write_to_model,
-                              minimal_source_code="mcdp {\n\n}")
-
-        spec_templates = Spec(url_part='templates', url_variable='template_name',
-                              extension=MCDPLibrary.ext_templates,
-                              parse=MCDPLibrary.parse_template,
-                              parse_expr=Syntax.template,
-                              parse_refine=parse_template_refine,
-                              parse_eval=parse_template_eval,
-                              load=MCDPLibrary.load_template,
-                              get_png_data=ndp_template_enclosed,
-                              write=MCDPLibrary.write_to_template,
-                              minimal_source_code="template []\n\nmcdp {\n\n}")
-
-        spec_values = Spec(url_part='values', url_variable='value_name',
-                           extension=MCDPLibrary.ext_values,
-                           parse=MCDPLibrary.parse_constant,
-                           parse_expr=Syntax.rvalue,
-                           parse_refine=parse_constant_refine,
-                           parse_eval=parse_constant_eval,
-                           load=MCDPLibrary.load_constant,
-                           get_png_data=get_png_data_unavailable,
-                           write=MCDPLibrary.write_to_constant,
-                           minimal_source_code="0 g")
-
-        spec_posets = Spec(url_part='posets', url_variable='poset_name',
-                           extension=MCDPLibrary.ext_posets,
-                           parse=MCDPLibrary.parse_poset,
-                           parse_expr=Syntax.space,
-                           parse_refine=parse_poset_refine,
-                           parse_eval=parse_poset_eval,
-                           load=MCDPLibrary.load_poset,
-                           get_png_data=get_png_data_poset,
-                           write=MCDPLibrary.write_to_poset,
-                           minimal_source_code="poset {\n    \n}")
-
         self.config_(config, spec_templates)
         self.config_(config, spec_values)
         self.config_(config, spec_posets)
@@ -191,149 +187,20 @@ class AppEditorFancyGeneric():
         return string
 
     def ajax_parse_generic(self, request, spec):
-        from mcdp_report.html import mark_unparsable
-        from mcdp_report.html import sanitize
-        
         widget_name = self.get_widget_name(request, spec)
         string = self.get_text_from_request2(request)
         req = {'text': request.json_body['text']}
         library_name = self.get_current_library_name(request)
         key = (library_name, spec, widget_name)
 
-        parse_expr = spec.parse_expr
-        parse_refine = spec.parse_refine
-        parse_eval = spec.parse_eval
-        
         library = self.get_library(request)
+        cache = self.last_processed2
 
-        def format_syntax_error(string, e):
-            string2, expr, _commented_lines = mark_unparsable(string, parse_expr)
-            
-            res = format_exception_for_ajax_response(e, quiet=(DPSyntaxError,))
-            if expr is not None:
-                try:
-                    html = ast_to_html(string2,    
-                                       ignore_line=None,
-                                       add_line_gutter=False, 
-                                       encapsulate_in_precode=False, 
-                                       parse_expr=parse_expr,   
-                                       postprocess=None)
-            
-                    res['highlight'] = html
-                except DPSyntaxError:
-                    assert False, string2
-            else:
-                res['highlight'] = html_mark_syntax_error(string, e)
-             
+
+        def go():
+            res = process_parse_request(library, string, spec, key, cache)
             res['request'] = req
             return res
-        
-        def go():
-#             try:
-#                 # XXX: inefficient; we parse twice
-#                 parse_tree = parse_wrap(parse_expr, string)[0]
-#             except DPSemanticError as e:
-#                 msg = 'I only expected a DPSyntaxError'
-#                 raise_wrapped(DPInternalError, e, msg, exc=sys.exc_info())
-#             except DPSyntaxError as e:
-#                 # This is the case in which we could not even parse
-#                 
-#                 string2, expr, _commented_lines = mark_unparsable(string, parse_expr)
-#                 
-#                 res = format_exception_for_ajax_response(e, quiet=(DPSyntaxError,))
-#                 if expr is not None:
-#                     try:
-#                         html = ast_to_html(string2,    
-#                                            ignore_line=None,
-#                                            add_line_gutter=False, 
-#                                            encapsulate_in_precode=False, 
-#                                            parse_expr=parse_expr,   
-#                                            postprocess=None)
-#                 
-#                         res['highlight'] = html
-#                     except DPSyntaxError:
-#                         assert False, string2
-#                 else:
-#                     res['highlight'] = html_mark_syntax_error(string, e)
-#                  
-#                 res['request'] = req
-#                 return res
-#             
-#             context0 = library._generate_context_with_hooks()
-#             string_parse_tree_interpreted = parse_refine(parse_tree, context0)
-            
-            context0 = library._generate_context_with_hooks()
-            try:
-                class Tmp:
-                    string_nospaces_parse_tree_interpreted = None
-                     
-                def postprocess(block):
-                    context1 = library._generate_context_with_hooks()
-                    x = parse_refine(block, context1)
-                    Tmp.string_nospaces_parse_tree_interpreted = x 
-                    return x
-                
-                try:
-                    try:
-                        highlight = ast_to_html(string,
-                                                parse_expr=parse_expr,
-                                                add_line_gutter=False,
-                                                encapsulate_in_precode=False,
-                                                postprocess=postprocess)
-                        
-                    except DPSemanticError:
-                        # Do it again without postprocess
-                        highlight = ast_to_html(string,
-                                                parse_expr=parse_expr,
-                                                add_line_gutter=False,
-                                                encapsulate_in_precode=False,
-                                                postprocess=None)
-                        raise
-                    
-                    thing = parse_eval(Tmp.string_nospaces_parse_tree_interpreted, context0)
-                except DPSyntaxError as e:
-                    return format_syntax_error(string, e)
-                except (DPSemanticError, DPInternalError) as e:
-                    highlight_marked = html_mark(highlight, e.where, "semantic_error")
-                    self.last_processed2[key] = None  # XXX
-                    res = format_exception_for_ajax_response(e, 
-                                        quiet=(DPSemanticError, DPInternalError))
-                    res['highlight'] = highlight_marked
-                    res['request'] = req
-                    return res
-                
-                self.last_processed2[key] = thing
-            except:
-                self.last_processed2[key] = None  # XXX
-                raise
-            
-            if Tmp.string_nospaces_parse_tree_interpreted:
-                suggestions = get_suggestions(Tmp.string_nospaces_parse_tree_interpreted)
-                string_with_suggestions = apply_suggestions(string, suggestions)
-                for where, _replacement in suggestions:
-                    #print('suggestion: %r' % replacement)
-                    highlight = html_mark(highlight, where, "suggestion")
-            else:
-                string_with_suggestions = None
-             
-            warnings = []
-            for w in context0.warnings:
-                if w.where is not None:
-                    highlight = html_mark(highlight, w.where, "language_warning")
-                warning = w.format_user()
-                
-                warnings.append(sanitize(warning.strip())) 
-
-            x = ['<div class="language_warning_entry">%s</div>' % w 
-                 for w in warnings]
-            language_warnings_html = "\n".join(x)
-        
-                                                   
-            return {'ok': True, 
-                    'highlight': unicode(highlight, 'utf8'),
-                    'language_warnings': language_warnings_html, 
-                    'string_with_suggestions': string_with_suggestions,
-                    'request': req}
 
         return ajax_error_catch(go)
 
@@ -418,7 +285,7 @@ def html_mark(html, where, add_class):
         msg += '\nwhere start: %s end: %s' % (where.character, where.character_end)
         msg += '\nwhere.string = %r' % where.string
         msg += '\n' + html.__repr__()
-        logger.error(msg)
+        raise_desc(DPInternalError, msg)
     pre = soup.body.www
     s = str(pre)
     s = s.replace('<www><pre>', '')
@@ -435,24 +302,108 @@ def html_mark_syntax_error(string, e):
     s = "" + first + '<span style="color:red">'+rest + '</span>'
     return s 
     
+
+
+def process_parse_request(library, string, spec, key, cache):
+    """ returns a dict to be used as the request,
+        or raises an exception """
+    from mcdp_report.html import sanitize
     
-def get_png_data_poset(library, name, x, data_format):  # @UnusedVariable
-    if isinstance(x, FinitePoset):
-        mf = MakeFiguresPoset(x, library=library)
-        f = 'hasse_icons' 
-        res = mf.get_figure(f, data_format)
-        return res
+    parse_expr = spec.parse_expr
+    parse_refine = spec.parse_refine
+    parse_eval = spec.parse_eval
+        
+    context0 = library._generate_context_with_hooks()
+    try:
+        class Tmp:
+            string_nospaces_parse_tree_interpreted = None
+             
+        def postprocess(block):
+            context1 = library._generate_context_with_hooks()
+            x = parse_refine(block, context1)
+            Tmp.string_nospaces_parse_tree_interpreted = x 
+            return x
+        
+        try:
+            try:
+                highlight = ast_to_html(string,
+                                        parse_expr=parse_expr,
+                                        add_line_gutter=False,
+                                        encapsulate_in_precode=False,
+                                        postprocess=postprocess)
+                
+            except DPSemanticError:
+                # Do it again without postprocess
+                highlight = ast_to_html(string,
+                                        parse_expr=parse_expr,
+                                        add_line_gutter=False,
+                                        encapsulate_in_precode=False,
+                                        postprocess=None)
+                raise
+            
+            thing = parse_eval(Tmp.string_nospaces_parse_tree_interpreted, context0)
+        except DPSyntaxError as e:
+            return format_syntax_error2(parse_expr, string, e)
+        except (DPSemanticError, DPInternalError) as e:
+            highlight_marked = html_mark(highlight, e.where, "semantic_error")
+            cache[key] = None  # XXX
+            res = format_exception_for_ajax_response(e, 
+                                quiet=(DPSemanticError, DPInternalError))
+            res['highlight'] = highlight_marked
+            return res
+        
+        cache[key] = thing
+    except:
+        cache[key] = None  # XXX
+        raise
+    
+    if Tmp.string_nospaces_parse_tree_interpreted:
+        suggestions = get_suggestions(Tmp.string_nospaces_parse_tree_interpreted)
+        string_with_suggestions = apply_suggestions(string, suggestions)
+        for where, _replacement in suggestions:
+            #print('suggestion: %r' % replacement)
+            highlight = html_mark(highlight, where, "suggestion")
     else:
-        s = str(x)
-        return create_image_with_string(s, size=(512, 512), color=(128, 128, 128))
+        string_with_suggestions = None
+     
+    warnings = []
+    for w in context0.warnings:
+        if w.where is not None:
+            highlight = html_mark(highlight, w.where, "language_warning")
+        warning = w.format_user()
+        
+        warnings.append(sanitize(warning.strip())) 
 
-def get_png_data_unavailable(library, name, x, data_format):  # @UnusedVariable
-    s = str(x)
-    return create_image_with_string(s, size=(512, 512), color=(0, 0, 255))
-
-
-def get_png_data_model(library, name, ndp, data_format): 
-    mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=name)
-    f = 'fancy_editor' 
-    res = mf.get_figure(f, data_format)
+    x = ['<div class="language_warning_entry">%s</div>' % w 
+         for w in warnings]
+    language_warnings_html = "\n".join(x)
+                               
+    return {
+        'ok': True, 
+        'highlight': unicode(highlight, 'utf8'),
+        'language_warnings': language_warnings_html, 
+        'string_with_suggestions': string_with_suggestions,
+    }
+    
+def format_syntax_error2(parse_expr, string, e):
+    from mcdp_report.html import mark_unparsable
+    string2, expr, _commented_lines = mark_unparsable(string, parse_expr)
+    
+    res = format_exception_for_ajax_response(e, quiet=(DPSyntaxError,))
+    if expr is not None:
+        try:
+            html = ast_to_html(string2,    
+                               ignore_line=None,
+                               add_line_gutter=False, 
+                               encapsulate_in_precode=False, 
+                               parse_expr=parse_expr,   
+                               postprocess=None)
+    
+            res['highlight'] = html
+        except DPSyntaxError:
+            assert False, string2
+    else:
+        res['highlight'] = html_mark_syntax_error(string, e)
+     
     return res
+    

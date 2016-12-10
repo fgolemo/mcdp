@@ -95,25 +95,4 @@ def get_mime_table():
     }
     return d
 
-def ndp_template_enclosed(library, name, x, data_format):
-    from mcdp_report.gdc import STYLE_GREENREDSYM
-
-    return ndp_template_graph_enclosed(library, x, style=STYLE_GREENREDSYM, yourname=name,
-                                       data_format=data_format, direction='TB', enclosed=True)
-
-def ndp_template_graph_enclosed(library, template, style, yourname, data_format, direction, enclosed):
-    assert isinstance(template, TemplateForNamedDP)
-    mcdp_dev_warning('Wrong - need assume ndp const')
-
-    context = library._generate_context_with_hooks()
-
-    ndp = template.get_template_with_holes(context)
-
-    if enclosed:
-        setattr(ndp, '_hack_force_enclose', True)
-
-    images_paths = library.get_images_paths()
-    gg = gvgen_from_ndp(ndp, style=style, direction=direction,
-                        images_paths=images_paths, yourname=yourname)
-    return gg_get_format(gg, data_format)
 

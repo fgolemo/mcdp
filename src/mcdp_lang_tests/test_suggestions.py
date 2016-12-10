@@ -1,9 +1,10 @@
+from mcdp_lang.parse_actions import parse_wrap
+from mcdp_lang.parse_interface import parse_ndp_refine
+from mcdp_lang.suggestions import apply_suggestions, get_suggestions
+from mcdp_lang.syntax import Syntax
 from mcdp_tests.generation import for_all_source_mcdp
 from mocdp.comp.context import Context
-from mcdp_lang.parse_interface import parse_ndp_refine
-from mcdp_lang.parse_actions import parse_wrap
-from mcdp_lang.syntax import Syntax
-from mcdp_lang.suggestions import apply_suggestions, get_suggestions
+
 
 @for_all_source_mcdp
 def check_suggestions(filename, source):  # @UnusedVariable
@@ -20,3 +21,5 @@ def check_suggestions(filename, source):  # @UnusedVariable
     s2 = apply_suggestions(source, suggestions)
     if suggestions:
         print s2
+        
+        
