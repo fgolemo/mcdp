@@ -70,3 +70,4 @@ from .misc_corner_cases import *
 from .todo import *
 
 from .test_suggestions import *
+from .special_letters import *

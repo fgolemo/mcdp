@@ -266,7 +266,7 @@ def parse_wrap(expr, string):
         msg += '\n' + string.encode('utf-8').__repr__()
         raise ValueError(msg)
     
-    check_isinstance(string, str)
+    check_isinstance(string, bytes)
 
     # Nice trick: the remove_comments doesn't change the number of lines
     # it only truncates them...
@@ -285,7 +285,6 @@ def parse_wrap(expr, string):
         except ValueError:
             w = '(unknown)'
             
-        
         with timeit(w, MCDPConstants.parsing_too_slow_threshold):
             expr.parseWithTabs()
             
@@ -312,7 +311,8 @@ def parse_wrap(expr, string):
     except (ParseException, ParseFatalException) as e:
         where1 = Where(string0, e.loc)
         where2 = translate_where(where1, string)
-        e2 = DPSyntaxError(str(e), where=where2)
+        s = e.__str__().encode('utf8')
+        e2 = DPSyntaxError(s, where=where2)
         raise DPSyntaxError, e2.args, sys.exc_info()[2]
          
     except DPSemanticError as e:

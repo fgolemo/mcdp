@@ -1,28 +1,32 @@
 # -*- coding: utf-8 -*-
 
+
+"""
+    Example usage:
+
+        x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
+        xr = parse_ndp_refine(x, Context())
+        suggestions = get_suggestions(xr)     
+        s2 = apply_suggestions(s, suggestions)
+
+
+"""
+
 import re
 
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.refinement import namedtuple_visitor_ext
 from mocdp.exceptions import DPInternalError
-from mcdp_lang.namedtuple_tricks import recursive_print
 
 
-__all__ = ['get_suggestions', 'apply_suggestions']
+__all__ = [
+    'get_suggestions', 
+    'apply_suggestions',
+]
 
 CDP = CDPLanguage
 
-"""
-
-    x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
-    xr = parse_ndp_refine(x, Context())
-    suggestions = get_suggestions(xr)     
-    s2 = apply_suggestions(s, suggestions)
-
-
-"""
-
-def correct(x, parents):
+def correct(x, parents):  # @UnusedVariable
     x_string = x.where.string[x.where.character:x.where.character_end]
     def match_in_x_string(r):
         m = re.search(r, x_string)
@@ -93,7 +97,7 @@ def correct(x, parents):
     
     if isinstance(x, CDP.RcompUnit):
         replacements = {
-            '1': '¹',
+            '1':'¹',
             '2':'²' ,
             '3':'³',
             '4':'⁴',
@@ -115,9 +119,6 @@ def correct(x, parents):
                 return x_string, s2
 
     if isinstance(x, CDP.PowerShort):
-#         print isinstance(parents[-1][0], CDP.PowerShort)
-#         if isinstance(parents[-1][0], CDP.PowerShort):
-#             print ('sub ' + x_string)
         replacements = {
             '1':'¹',
             '2':'²' ,
@@ -132,7 +133,7 @@ def correct(x, parents):
         for n, replacement in replacements.items():
             for i in reversed(range(3)):
                 for j in reversed(range(3)):
-                    w = ' '*i + '^' + ' '*j + n
+                    w = ' ' * i + '^' + ' ' * j + n
                     if w in x_string:
                         return w, replacement
                     

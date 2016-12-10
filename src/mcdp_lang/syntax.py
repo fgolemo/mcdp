@@ -18,6 +18,8 @@ from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
 from .utils_lists import make_list
 from mcdp_lang.parse_actions import integer_fraction_from_superscript
+from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts
+from contracts.utils import check_isinstance
 
 
 ParserElement.enablePackrat()
@@ -134,25 +136,60 @@ class SyntaxIdentifiers():
     # remember to .copy() this otherwise things don't work
     not_keyword = NotAny(MatchFirst([Keyword(_) for _ in keywords])).setName('not_keyword')
 
-    _identifier = Combine(oneOf(list('_' + alphas)) + Optional(Word('_' + alphanums))).setName('identifier')
+    """ 
+        Valid identifiers:
+        
+            first letter:  _a-Z_a-z + the greek letters
+            middle letter: _a-Z_a-z1-9 + the greek letters
+            last letter:   _a-Z_a-z1-9 + the greek letters + subscripts
+            
+        plus the constraint that it cannot be a keyword.
+        
+        Greek letters are translated to their spelling.
+        Subscripts are translated; from '₁' to '_1'.
+    """ 
+
+    greek = list(_.encode('utf8') for _ in greek_letters.values())
+    subs = list(_.encode('utf8') for _ in subscripts.values())
+    first_letter = list('_' + alphas) + greek
+    mid_letter = list('_' + alphanums) + greek
+    last_letter = list('_' + alphanums) + greek + subs
+
+    combined = Combine(oneOf(first_letter) + O(Word(''.join(mid_letter))) + O(oneOf(last_letter)))
+    _identifier = sp(combined,
+                     lambda t: decode_identifier(t[0])).setName('identifier')
 
     _idn = (not_keyword + _identifier).setResultsName('identifier except keywords')
 
     @staticmethod
     def get_idn():
-        """ 
-            Returns an identifier expression ([_a-Z(_a-z1-9)*] 
-            plus the constraint that it cannot be a keyword.
-        """ 
         return SyntaxIdentifiers._idn.copy() 
         
+    normal_identifier_first =  '_' + alphas 
+    normal_identifier_middle =  '_' + alphanums
+    normal_identifier = Combine(oneOf(list(normal_identifier_first)) + 
+                                O(Word(normal_identifier_middle)))
     @staticmethod
     def get_identifier_unconstrained():
         """ 
             Returns an identifier expression ([_a-Z(_a-z1-9)*] 
             This can be a keyword.
         """ 
-        return SyntaxIdentifiers._identifier.copy()
+        return SyntaxIdentifiers.normal_identifier.copy()
+    
+def decode_identifier(s):
+    ''' Decodes '₁' to '_1', Ψ to Psi '''
+    check_isinstance(s, bytes)
+    for part, letter in greek_letters.items():
+        part = part.encode('utf8')
+        letter = letter.encode('utf8')
+        while letter in s:
+            s = s.replace(letter, part)
+    for num, glyph in subscripts.items():
+        glyph = glyph.encode('utf8')
+        if glyph in s:
+            s = s.replace(glyph, '_%d' % num)
+    return s
 
 class Syntax():
 
