@@ -153,10 +153,52 @@ poset {
 
 ### ``<code>``
 
+~~~
+This is P: <code class='mcdp_poset'>`my_poset</code>.
+
+This is P: <code class='mcdp_value'>Nat:0</code>.
+~~~
 
 This is P: <code class='mcdp_poset'>`my_poset</code>.
 
 This is P: <code class='mcdp_value'>Nat:0</code>.
+
+
+### Identifiers
+
+* suffix ``_min`` and ``_max``
+* suffix ``_0``, ``_1``, etc.
+* prefix greek letters 
+* ``alpha``, ``beta``, ``gamma``, ``DELTA``
+
+``x₀`` = ``x_0``
+
+``x₁`` = ``x_1``
+
+``x₂`` = ``x_2`` 
+
+``x₃`` = ``x_3`` 
+
+``x₄`` = ``x_4`` 
+
+``x₅`` = ``x_5`` 
+
+``x₆`` = ``x_6`` 
+
+``x₇`` = ``x_7`` 
+
+``x₈`` = ``x_8``
+
+``x₉`` = ``x_9``
+
+``α₁`` = ``alpha_1``
+
+``Δ`` = ``DELTA_max``
+
+xₘₐₓ
+ₐ				ₑ			ₕ	ᵢ	ⱼ	ₖ	ₗ	ₘ	ₙ	ₒ	ₚ		ᵣ	ₛ	ₜ	ᵤ	ᵥ		ₓ	
+
+βΓΔ
 
 <!-- This is not ok: <code class='mcdp_value'>`my_poset: <em>element</em></code>.
  -->

@@ -5,6 +5,7 @@ import re
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.refinement import namedtuple_visitor_ext
 from mocdp.exceptions import DPInternalError
+from mcdp_lang.namedtuple_tricks import recursive_print
 
 
 __all__ = ['get_suggestions', 'apply_suggestions']
@@ -21,7 +22,7 @@ CDP = CDPLanguage
 
 """
 
-def correct(x):
+def correct(x, parents):
     x_string = x.where.string[x.where.character:x.where.character_end]
     def match_in_x_string(r):
         m = re.search(r, x_string)
@@ -89,14 +90,59 @@ def correct(x):
         old = match_in_x_string(r)
         new = '%s provided by %s' % (s, dp)
         return old, new
+    
+    if isinstance(x, CDP.RcompUnit):
+        replacements = {
+            '1': '¹',
+            '2':'²' ,
+            '3':'³',
+            '4':'⁴',
+            '5':'⁵',
+            '6':'⁶',
+            '7':'⁷',
+            '8':'⁸',
+            '9':'⁹',
+        }
+        for n, replacement in replacements.items():
+            w = '^' + n
+            if w in x_string:
+                s2 = x_string.replace(w, replacement)
+                return x_string, s2
+            
+            w = '^ ' + n
+            if w in x_string:
+                s2 = x_string.replace(w, replacement)
+                return x_string, s2
 
+    if isinstance(x, CDP.PowerShort):
+#         print isinstance(parents[-1][0], CDP.PowerShort)
+#         if isinstance(parents[-1][0], CDP.PowerShort):
+#             print ('sub ' + x_string)
+        replacements = {
+            '1':'¹',
+            '2':'²' ,
+            '3':'³',
+            '4':'⁴',
+            '5':'⁵',
+            '6':'⁶',
+            '7':'⁷',
+            '8':'⁸',
+            '9':'⁹',
+        }
+        for n, replacement in replacements.items():
+            for i in reversed(range(3)):
+                for j in reversed(range(3)):
+                    w = ' '*i + '^' + ' '*j + n
+                    if w in x_string:
+                        return w, replacement
+                    
     return None
 
 def get_suggestions(xr):
     """ Returns a sequence of (where, replacement_string) """
     subs = [] # (where, sub)
-    def find_corrections(x, parents):  # @UnusedVariable
-        has = correct(x)
+    def find_corrections(x, parents):  
+        has = correct(x, parents)
         if has is None:
             pass
         else:
@@ -111,7 +157,24 @@ def get_suggestions(xr):
         return x
             
     _ = namedtuple_visitor_ext(xr, find_corrections)
+    subs = remove_redundant_suggestions(subs)
     return subs
+
+def remove_redundant_suggestions(subs):
+    """ Removes the suggestions that conflict with others. """
+    res = []
+    characters_affected = set()
+    for s in subs:
+        w, _ = s
+        chars = range(w.character, w.character_end)
+        
+        if any(_ in characters_affected for _ in chars):
+            #print('skipping %r - %s because of conflict' % (w, r))
+            pass
+        else:
+            res.append(s)
+        characters_affected.update(chars)
+    return res
 
 def apply_suggestions(s, subs):
     """ Returns a new string applying the suggestions above. """

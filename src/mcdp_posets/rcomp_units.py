@@ -209,12 +209,27 @@ class RbicompUnits(Rbicomp):
 @memoize_simple
 def parse_pint(s0):
     """ thin wrapper taking care of dollars not recognized """
-    s = s0.replace('$', ' dollars ')
+    replacements = {
+        '$': ' dollars ',
+        '¹': '^1',
+        '²': '^2',
+        '³': '^3',
+        '⁴': '^4',
+        '⁵': '^5',
+        '⁶': '^6',
+        '⁷': '^7',
+        '⁸': '^8',
+        '⁹': '^9',
+    }
+    s = s0
+    for p, replacement in replacements.items():
+        s = s.replace(p, replacement)
+        
     ureg = get_ureg()
     try:
         return ureg.parse_expression(s)
     except UndefinedUnitError as e:
-        msg = 'Cannot parse units %r: %s.' %(s0, str(e))
+        msg = 'Cannot parse units %r: %s.' % (s0, str(e))
         raise_desc(DPSemanticError, msg)
     except SyntaxError as e:
         msg = 'Cannot parse units %r.' % s0

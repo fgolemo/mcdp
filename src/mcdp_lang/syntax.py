@@ -17,6 +17,7 @@ from .pyparsing_bundled import (
 from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
 from .utils_lists import make_list
+from mcdp_lang.parse_actions import integer_fraction_from_superscript
 
 
 ParserElement.enablePackrat()
@@ -252,10 +253,14 @@ class Syntax():
     from .syntax_codespec import get_code_spec_expr
     code_spec = get_code_spec_expr()
 
-    pint_unit_base = NotAny(oneOf(SyntaxIdentifiers.keywords + ['x'])) + Word(alphas + '$')
-
-    pint_unit_power = L('^') + Word(nums)
+    pint_alphas = Word(alphas + '$')
+    pint_alphas.setWhitespaceChars(' ')
+    pint_unit_base = NotAny(oneOf(SyntaxIdentifiers.keywords + ['x'])) + pint_alphas 
+    pint_unit_base.setWhitespaceChars(' ')
+    pint_unit_power = (L('^') + Word(nums)) | L('¹') | L('²') |  L('³') |  L('⁴') | \
+         L('⁵') |  L('⁶') | L('⁷') | L('⁸') | L('⁹') 
     pint_unit_simple = pint_unit_base + O(pint_unit_power)
+    pint_unit_simple.setWhitespaceChars(' ')
     pint_unit_connector = L('/') | L('*')
  
     space_pint_unit = sp(((Keyword('1') | pint_unit_simple) + ZeroOrMore(pint_unit_connector + pint_unit_simple)),
@@ -451,10 +456,12 @@ class Syntax():
 
     valuewithunits_numbers_dimensionless = sp(integer_or_float + dimensionless,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
-    
+    pint_unit_simple.setWhitespaceChars(' ')
     valuewithunit_number_with_units = sp(integer_or_float + space_pint_unit,
                            lambda t: CDP.SimpleValue(t[0], t[1]))
-
+    integer_or_float.setWhitespaceChars(' ')
+    space_pint_unit.setWhitespaceChars(' ')
+    valuewithunit_number_with_units=valuewithunit_number_with_units.setWhitespaceChars(' ') # no newline
     # Top <space>
     TOP_LITERAL = 'Top'
     TOP = spk(K(TOP_LITERAL) | K('⊤'), CDP.TopKeyword)
@@ -878,7 +885,14 @@ class Syntax():
     rvalue_power_expr_2 = sp(rvalue_power_base + EXPONENT - rat_power_exponent,
                              lambda t: CDP.PowerShort(op1=t[0], glyph=t[1], exponent=t[2]))
 
-    rvalue_power_expr = rvalue_power_expr_1 | rvalue_power_expr_2
+    superscripts = sp(oneOf(['²','³','⁴', '⁵', '⁶', '⁷', '⁸', '⁹']),
+                      lambda t: integer_fraction_from_superscript(t[0]))
+
+    rvalue_power_expr_3 = sp(rvalue_power_base + superscripts,
+                             lambda t: CDP.PowerShort(op1=t[0], glyph=None,
+                                 exponent=t[1]))
+    
+    rvalue_power_expr = rvalue_power_expr_1 | rvalue_power_expr_2 | rvalue_power_expr_3
 
     constraint_expr_geq = sp(fvalue + GEQ - rvalue,
                              lambda t: CDP.Constraint(fvalue=t[0],

@@ -16,6 +16,23 @@
 	    font-size: 70%;
 	}
 
+
+	div#code {
+	font-size: 75%;
+	min-width: 20em;
+    /*font-family: "Andale Mono", Courier, monospace;*/
+    
+
+      margin-left: 10px;
+      margin-top: 10px;
+    box-shadow: 1px 1px 4px lightgrey;
+    padding: 0;
+    border-radius: 5px;
+    background-color: #eeeeff;  
+	}
+	code { font-family:  Courier, monospace; }
+	div#code pre {padding: 8px;}
+
 		a.link-to-keyword {
 			color: inherit;
 			text-decoration: inherit; 
@@ -53,7 +70,7 @@
 	 	<span class='unicode-icons'>✎</span>edit
  	</a> 
 
-	{{highlight|safe}}
+	<div id='code'>{{highlight|safe}}</div>
 	
 	
 	 	

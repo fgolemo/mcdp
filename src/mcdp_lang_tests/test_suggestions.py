@@ -12,7 +12,11 @@ def check_suggestions(filename, source):  # @UnusedVariable
     
     x = parse_wrap(Syntax.ndpt_dp_rvalue, source)[0]
     xr = parse_ndp_refine(x, Context())
-    suggestions = get_suggestions(xr)     
+    suggestions = get_suggestions(xr)
+    for w, r in suggestions:  # @UnusedVariable
+        #print('"%s" -> "%s"' % (w.string[w.character:w.character_end], r))
+        pass
+         
     s2 = apply_suggestions(source, suggestions)
     if suggestions:
         print s2

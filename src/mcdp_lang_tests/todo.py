@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from comptests.registrar import comptest, run_module_tests, comptest_fails
 from mcdp_lang_tests.utils2 import eval_rvalue_as_constant_same_exactly
 from mcdp_lang.parse_interface import parse_ndp, parse_poset
@@ -108,7 +109,19 @@ def check_poset_bottom_checks():
         return
     
     
-    
+   
+@comptest_fails
+def missing_power_resources():
+
+    parse_ndp("""
+    mcdp {
+        provides f [dimensionless]
+        requires r [dimensionless]
+        
+        provided f  <= (required r)²
+    }
+    """)
+ 
 
 
 if __name__ == '__main__': 

@@ -1,6 +1,6 @@
 mcdp {
     provides lift [N]
     requires power [W]
-    c = 10.0 W/N^2
-    power >= c * lift^2
+    c = 10.0 W/N²
+    required power ≥ c · provided lift^2
 }

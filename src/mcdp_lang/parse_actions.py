@@ -351,6 +351,21 @@ def resshortcut1m(requires, rnames, prep_for, name):
 
 def parse_pint_unit(tokens):
     tokens = list(tokens)
-    pint_string = " ".join(tokens)
+    pint_string = " ".join(tokens) #_.encode('utf-8') for _ in tokens)
     return CDP.RcompUnit(pint_string)
 
+
+def integer_fraction_from_superscript(x):
+    w = None
+    replacements = {
+    '¹': CDP.IntegerFraction(num=1, den=1, where=w),
+    '²': CDP.IntegerFraction(num=2, den=1, where=w),
+    '³': CDP.IntegerFraction(num=3, den=1, where=w),
+    '⁴': CDP.IntegerFraction(num=4, den=1, where=w),
+    '⁵': CDP.IntegerFraction(num=5, den=1, where=w),
+    '⁶': CDP.IntegerFraction(num=6, den=1, where=w),
+    '⁷': CDP.IntegerFraction(num=7, den=1, where=w),
+    '⁸': CDP.IntegerFraction(num=8, den=1, where=w),
+    '⁹': CDP.IntegerFraction(num=9, den=1, where=w),
+    }   
+    return replacements[x]

@@ -55,7 +55,7 @@ The code below is the complete model for the battery:
 
 This is a graphical representation of the network of constraints:
 
-<pre class='ndp_graph_expand'>`Battery_LiPo1</pre>
+<img class='ndp_graph_enclosed'>`Battery_LiPo1</img>
 
 ### Actuation
 
@@ -71,7 +71,7 @@ and the resources are:
 * <span class=R>actuator inertial mass</span>;
 * <span class=R>power</span>.
 
-<pre class='ndp_graph_templatized'>`Actuation</pre>
+<img class='ndp_graph_templatized'>`Actuation</img>
 
 The model first describes some hard constraints for the quantities:
 
@@ -148,7 +148,7 @@ The **cost constraint** is the following:
 <pre class=mcdp_statements>
 labor_cost = (10 $) * (maintenance required by battery)
 
- total_cost >= (
+total_cost >= (
    cost required by actuation +
    cost required by battery +
    labor_cost)
