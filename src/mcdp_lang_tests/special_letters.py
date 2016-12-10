@@ -56,18 +56,17 @@ def special_letters_identifiers():
         appears = appears.encode('utf-8')
         
         res = parse_wrap_check(appears, idn)
-        print('- %r %r -> %r' % (identifier, appears, res))
-        x = '  %s %s -> %s' % (identifier.decode('utf8'), 
-                               appears.decode('utf8'), 
-                               res.decode('utf8'))
-        print type(x)
-        print(x)
+        #print('- %r %r -> %r' % (identifier, appears, res))
+#         x = '  %s %s -> %s' % (identifier.decode('utf8'), 
+#                                appears.decode('utf8'), 
+#                                res.decode('utf8'))
+        #print(x)
         assert_equal(res, identifier)
 
 
 @comptest
 def check_subs():
-    for num, subscript in subscripts.items():
+    for _num, subscript in subscripts.items():
         subscript = subscript.encode('utf8')
         assert subscript in SyntaxIdentifiers.last_letter
         assert subscript not in SyntaxIdentifiers.mid_letter

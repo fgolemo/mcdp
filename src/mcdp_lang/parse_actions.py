@@ -311,7 +311,11 @@ def parse_wrap(expr, string):
     except (ParseException, ParseFatalException) as e:
         where1 = Where(string0, e.loc)
         where2 = translate_where(where1, string)
-        s = e.__str__().encode('utf8')
+        s0 = e.__str__()
+        check_isinstance(s0, bytes)
+#         print type(s0), s0.__repr__()
+#         s = s0.encode('utf8')
+        s = s0
         e2 = DPSyntaxError(s, where=where2)
         raise DPSyntaxError, e2.args, sys.exc_info()[2]
          
