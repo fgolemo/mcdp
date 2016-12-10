@@ -24,6 +24,7 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mcdp_lang.parse_interface import( parse_ndp_eval, parse_ndp_refine, 
     parse_template_eval, parse_template_refine, parse_constant_eval, 
     parse_constant_refine, parse_poset_eval, parse_poset_refine)
+from contracts import contract
 
 
 
@@ -263,36 +264,44 @@ class AppEditorFancyGeneric():
 
             raise HTTPFound(url_edit)
 
-
+@contract(html=bytes, returns=bytes)
 def html_mark(html, where, add_class):
-    """ Returns another html string """
+    """ Takes a utf-8 encoded string and returns another html string. """
+    check_isinstance(html, bytes)
+    
     html = '<www><pre>' + html + '</pre></www>'
     soup = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
 
-    nfound = 0
     elements = soup.find_all("span")
+    
+    found = [] 
+    
     for e in elements:
         if e.has_attr('where_character'):
             character = int(e['where_character'])
             character_end = int(e['where_character_end'])
+            print (where.character, character, character_end, where.character_end)
             inside = where.character <= character <= character_end <= where.character_end
             if inside:
-                e['class'] = e.get('class', []) + [add_class]
-                nfound += 1
+                found.append(e)
                 
-    if not nfound:
+    if not found:
         msg = 'Cannot find any html element for this location:\n\n%s' % where
         msg += '\nwhere start: %s end: %s' % (where.character, where.character_end)
         msg += '\nwhere.string = %r' % where.string
         msg += '\n' + html.__repr__()
         raise_desc(DPInternalError, msg)
+        
+    if len(found) == 1:
+        e2 = found[0]
+        e2['class'] = e2.get('class', []) + [add_class]
+        
     pre = soup.body.www
     s = str(pre)
     s = s.replace('<www><pre>', '')
     s = s.replace('</pre></www>', '')
     assert isinstance(s, str)
     return s
-    
     
 def html_mark_syntax_error(string, e):
     where = e.where
@@ -301,8 +310,6 @@ def html_mark_syntax_error(string, e):
     rest = string[character:]
     s = "" + first + '<span style="color:red">'+rest + '</span>'
     return s 
-    
-
 
 def process_parse_request(library, string, spec, key, cache):
     """ returns a dict to be used as the request,
@@ -361,7 +368,6 @@ def process_parse_request(library, string, spec, key, cache):
         suggestions = get_suggestions(Tmp.string_nospaces_parse_tree_interpreted)
         string_with_suggestions = apply_suggestions(string, suggestions)
         for where, _replacement in suggestions:
-            #print('suggestion: %r' % replacement)
             highlight = html_mark(highlight, where, "suggestion")
     else:
         string_with_suggestions = None
@@ -378,12 +384,13 @@ def process_parse_request(library, string, spec, key, cache):
          for w in warnings]
     language_warnings_html = "\n".join(x)
                                
-    return {
+    res = {
         'ok': True, 
         'highlight': unicode(highlight, 'utf8'),
         'language_warnings': language_warnings_html, 
         'string_with_suggestions': string_with_suggestions,
     }
+    return res
     
 def format_syntax_error2(parse_expr, string, e):
     from mcdp_report.html import mark_unparsable

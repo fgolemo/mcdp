@@ -153,7 +153,20 @@ def get_suggestion_identifier(s):
             return s0, subscript.encode('utf8')
     for name, letter in greek_letters.items():
         if name in s:
-            return name.encode('utf8'), letter.encode('utf8')
+            # yes: 'alpha_0'
+            # yes: 'alpha0'
+            # no: 'alphabet'
+            
+            i = s.index(name)
+            letter_before = None if i == 0 else s[i-1:i]
+            a = i + len(name)
+            letter_after = None if a == len(s) - 1 else s[a:a+1]
+            
+            dividers = ['_','0','1','2','3','4','5','6','7','8','9']
+            ok1 = letter_before is None or letter_before in dividers
+            ok2 = letter_after is None or letter_after in dividers
+            if ok1 and ok2:
+                return name.encode('utf8'), letter.encode('utf8')
     return None
     
 def get_suggestions(xr):

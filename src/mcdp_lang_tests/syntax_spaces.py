@@ -223,6 +223,21 @@ def suggestions_subscript_no_inside():
     suggestions = get_suggestions(xr)
     if suggestions: print suggestions
     assert_equal(0, len(suggestions)) 
+    
+@comptest
+def dont_suggest_weird_places():
+    s = """
+    mcdp {  
+        # this might look like "nu"
+       variable num_stuff [dimensionless]
+       
+       num_replacements = 0
+}"""
+    x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
+    xr = parse_ndp_refine(x, Context())
+    suggestions = get_suggestions(xr)
+    if suggestions: print suggestions
+    assert_equal(0, len(suggestions)) 
 
 @comptest
 def suggestions_greek():
@@ -236,7 +251,7 @@ def suggestions_greek():
     x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
     xr = parse_ndp_refine(x, Context())
     suggestions = get_suggestions(xr)
-    if suggestions: print suggestions
+    #if suggestions: print suggestions
     assert_equal(1, len(suggestions)) 
     s2 = apply_suggestions(s, suggestions)
     assert_equal(s2_exp, s2)
