@@ -17,6 +17,8 @@ from mocdp.exceptions import mcdp_dev_warning, DPSyntaxError, DPInternalError
 
 
 unparsable_marker = '#@'
+ATTR_WHERE_CHAR = 'c' #'where_character'
+ATTR_WHERE_CHAR_END = 'ce' # where_character_end'
 
 def isolate_comments(s):
     lines = s.split("\n")
@@ -315,10 +317,11 @@ def print_html_inner(x):
 
     klass = type(x).__name__
 
-    transformed0 = ("<span class='%s' where_character='%d' where_character_end='%s'>%s</span>" 
-                    % (klass, x.where.character, x.where.character_end, out))
+    transformed0 = ("<span class='%s' %s='%d' %s='%s'>%s</span>" 
+                    % (klass, ATTR_WHERE_CHAR, x.where.character, ATTR_WHERE_CHAR_END, x.where.character_end, out))
     yield Snippet(op=x, orig=orig0, a=x.where.character, b=x.where.character_end,
                   transformed=transformed0)
+
 
 def sanitize(x):
     x = x.replace('>', '&gt;')

@@ -11,7 +11,7 @@ from contracts.utils import check_isinstance, raise_desc
 from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
-from mcdp_report.html import ast_to_html
+from mcdp_report.html import ast_to_html, ATTR_WHERE_CHAR, ATTR_WHERE_CHAR_END
 from mcdp_web.editor_fancy.image import get_png_data_model, \
     ndp_template_enclosed, get_png_data_unavailable, get_png_data_poset
 from mcdp_web.utils import (ajax_error_catch,
@@ -277,11 +277,12 @@ def html_mark(html, where, add_class):
     found = [] 
     
     for e in elements:
-        if e.has_attr('where_character'):
-            character = int(e['where_character'])
-            character_end = int(e['where_character_end'])
-            print (where.character, character, character_end, where.character_end)
-            inside = where.character <= character <= character_end <= where.character_end
+        if e.has_attr(ATTR_WHERE_CHAR):
+            character = int(e[ATTR_WHERE_CHAR])
+            character_end = int(e[ATTR_WHERE_CHAR_END])
+            #print (where.character, character, character_end, where.character_end)
+            # inside = where.character <= character <= character_end <= where.character_end
+            inside = character <= where.character <= where.character_end <= character_end
             if inside:
                 found.append(e)
                 
@@ -292,9 +293,17 @@ def html_mark(html, where, add_class):
         msg += '\n' + html.__repr__()
         raise_desc(DPInternalError, msg)
         
-    if len(found) == 1:
-        e2 = found[0]
-        e2['class'] = e2.get('class', []) + [add_class]
+    # find the smallest one
+    def e_size(e):
+        character = int(e[ATTR_WHERE_CHAR])
+        character_end = int(e[ATTR_WHERE_CHAR_END])
+        l = character_end - character
+        return l
+    
+    ordered = sorted(found, key=e_size)
+        
+    e2 = ordered[0]    
+    e2['class'] = e2.get('class', []) + [add_class]
         
     pre = soup.body.www
     s = str(pre)
