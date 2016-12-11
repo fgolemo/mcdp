@@ -256,6 +256,21 @@ def suggestions_greek():
     s2 = apply_suggestions(s, suggestions)
     assert_equal(s2_exp, s2)
     
+
+@comptest
+def dont_suggest_if_already_done():
+    s = """
+    mcdp {  
+       # this is already done
+       variable a₁ [dimensionless]
+       variable alpha [dimensionless]
+}"""
+    x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
+    xr = parse_ndp_refine(x, Context())
+    suggestions = get_suggestions(xr)
+    if suggestions: print suggestions
+    assert_equal(0, len(suggestions))
+    
 if __name__ == '__main__': 
     
     run_module_tests()

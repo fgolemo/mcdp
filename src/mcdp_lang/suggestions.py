@@ -20,6 +20,7 @@ from mocdp.exceptions import DPInternalError
 from mcdp_lang.dealing_with_special_letters import subscripts, greek_letters
 from contracts.utils import check_isinstance
 from contracts.interface import Where
+from contracts import contract
 
 
 __all__ = [
@@ -139,24 +140,27 @@ def correct(x, parents):  # @UnusedVariable
                     w = ' ' * i + '^' + ' ' * j + n
                     if w in x_string:
                         return w, replacement
+                    
     if isinstance(x, (CDP.VName, CDP.RName, CDP.FName, CDP.CName)):
-        suggestion = get_suggestion_identifier(x.value)
+        suggestion = get_suggestion_identifier(x_string)
         if suggestion is not None:
             return suggestion
+        
     return None
 
+@contract(s=bytes, returns='tuple')
 def get_suggestion_identifier(s):
     """ Returns a pair of what, replacement, or None if no suggestions available""" 
+    check_isinstance(s, bytes)
     for num, subscript in subscripts.items():
         s0 = '_%d' % num
         if s.endswith(s0):
             return s0, subscript.encode('utf8')
     for name, letter in greek_letters.items():
-        if name in s:
+        if name.encode('utf8') in s:
             # yes: 'alpha_0'
             # yes: 'alpha0'
             # no: 'alphabet'
-            
             i = s.index(name)
             letter_before = None if i == 0 else s[i-1:i]
             a = i + len(name)
