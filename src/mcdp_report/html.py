@@ -48,36 +48,17 @@ def ast_to_html(s,
                 ignore_line=None,
                 add_line_gutter=True, 
                 encapsulate_in_precode=True, 
-                postprocess=None,
-                
-                # deprecated
-                complete_document=None,
-                extra_css=None, 
-                add_css=None,
-                add_line_spans=None,):
+                postprocess=None):
     """
         postprocess = function applied to parse tree
     """
     
-    if add_line_spans is not None and add_line_spans != False:
-        warnings.warn('deprecated param add_line_spans')
-    
     if parse_expr is None:
         raise Exception('Please add specific parse_expr (default=Syntax.ndpt_dp_rvalue)')
         
-    if add_css is not None:
-        warnings.warn('please do not use add_css', stacklevel=2)
-
-    if complete_document is not None:
-        warnings.warn('please do not use complete_document', stacklevel=2)
-
     if ignore_line is None:
         ignore_line = lambda _lineno: False
         
-    if extra_css is not None: 
-        warnings.warn('please do not use extra_css', stacklevel=2)
-        
-    extra_css = ''
     original_lines = s.split('\n')
 
     s_lines, s_comments = isolate_comments(s)

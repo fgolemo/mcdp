@@ -30,6 +30,39 @@ def special_letters1():
 """
     parse_ndp(s)
     
+    # should be able to use a_1 and a₁ as synonyms
+    s = """
+    mcdp {
+        a_1 = 42
+        b = a₁
+    }
+"""
+    parse_ndp(s)
+
+    s = """
+    mcdp {
+        a₁ = 42
+        b = a_1
+    }
+"""
+    parse_ndp(s)
+
+    s = """
+    mcdp {
+        η = 42
+        b = eta
+    }
+"""
+    parse_ndp(s)
+    
+    s = """
+    mcdp {
+        eta = 42
+        b = η 
+    }
+"""
+    parse_ndp(s)
+    
 @comptest
 def subscript_only_end():
     # these are not valid

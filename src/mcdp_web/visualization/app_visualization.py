@@ -162,7 +162,6 @@ class AppVisualization():
               
         try:
             highlight = ast_to_html(source_code,
-                                    complete_document=False,
                                     add_line_gutter=False,
                                     parse_expr=expr,
                                     postprocess=postprocess)

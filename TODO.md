@@ -1,7 +1,3 @@
-
-
-
-
 Keys:
 
 - R: refactoring / reorganization
@@ -13,11 +9,11 @@ Keys:
 
 Goals:
 
-(*) Implement solve-r 
+(*) Show visualization of solve-r 
 
 (*) Write paper that explains language
 
-(*) Make video
+(*) Make tutorial video
 
 (*) Improve correctness of symmetrization
 - T: dual chain for functionality/resources (dual chain).
@@ -34,7 +30,7 @@ Goals:
 
 (*) Test corner cases:
 - get to 100% code coverage
-- test ignore_resource  for wrong inputs
+- test ignore_resource for wrong inputs
 - T: what happens with recursive definitions? (a.poset = "`a")
 
 (*) Doing extra stuff:

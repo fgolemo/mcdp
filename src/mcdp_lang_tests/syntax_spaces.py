@@ -11,6 +11,7 @@ from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import parse_wrap_check, TestFailed
 from mcdp_lang_tests.utils2 import eval_rvalue_as_constant
 from mocdp.comp.context import Context
+from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts
 
 
 @comptest
@@ -271,6 +272,15 @@ def dont_suggest_if_already_done():
     if suggestions: print suggestions
     assert_equal(0, len(suggestions))
     
+@comptest
+def just_list():
+    s = sorted(greek_letters, key=lambda t: t.lower() + t[0])
+    print " ".join(greek_letters[_] for _ in s)
+    
+    print "\n".join('%s %s' % (greek_letters[k], k) for k in s)
+    print " ".join(subscripts.values())
+
+
 if __name__ == '__main__': 
     
     run_module_tests()

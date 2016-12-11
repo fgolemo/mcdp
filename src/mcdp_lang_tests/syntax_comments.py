@@ -155,11 +155,10 @@ def check_comments06():
         for j in range(3):
             s = '\n' * i + s0 + '\n' * j
             expr = Syntax.ndpt_dp_rvalue
-            _html = ast_to_html(s, complete_document=False, 
-                                extra_css=None, ignore_line=None,
+            _html = ast_to_html(s, ignore_line=None,
                                add_line_gutter=False, 
-                               encapsulate_in_precode=True, add_css=False,
-                               parse_expr=expr, add_line_spans=False, 
+                               encapsulate_in_precode=True,
+                               parse_expr=expr, 
                                postprocess=None)
              
             
