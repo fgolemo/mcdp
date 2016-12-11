@@ -39,6 +39,8 @@ pre {
 .template_graph_enclosed {
     max-width: 50em;
 }
+
+span.language_warning { background-color: inherit !important; }
 """
 
 @contract(files_contents='list( tuple( tuple(str,str), str) )', returns='str')
@@ -69,12 +71,9 @@ def manual_join(files_contents):
     </html>
     """
 
-    # css = urllib2.urlopen('http://127.0.0.1:8080/static/css/mcdp_language_highlight.css').read()
-    # other = urllib2.urlopen('http://127.0.0.1:8080/static/css/markdown.css').read()
-#     extra = open('manual.css').read()
     markdown_css = get_markdown_css()
     mcdp_css = get_language_css()
-    template = template.replace('CSS', mcdp_css + '\n' + manual_css + '\n' + markdown_css)
+    template = template.replace('CSS', mcdp_css + '\n' + markdown_css + '\n' + manual_css)
     d = BeautifulSoup(template, 'lxml', from_encoding='utf-8')
     main_body = BeautifulSoup("", 'lxml', from_encoding='utf-8')
 
@@ -97,10 +96,11 @@ def manual_join(files_contents):
 
     toc = generate_doc(main_body)
     toc = BeautifulSoup(toc, 'lxml', from_encoding='utf-8')
-    toc['class'] = 'toc'
-    toc['id'] = 'toc'
+    toc.html.body.ul['class'] = 'toc'
     toc_place = d.select('div#toc')[0]
     body_place = d.select('div#body')[0]
+    
+    #print('toc element: %s' % str(toc))
     toc_place.replaceWith(toc)
 
     body_place.replaceWith(main_body)
@@ -192,7 +192,7 @@ def generate_doc(soup):
     for item in root.items:
         s = item.__str__(root=True)
         stoc = BeautifulSoup(s, 'lxml', from_encoding='utf-8')
-        stoc['class'] = 'toc'
+        stoc.html.body.ul['class'] = 'toc'
         item.tag.insert_after(stoc)
 
 

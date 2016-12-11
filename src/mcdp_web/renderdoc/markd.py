@@ -3,14 +3,16 @@ from contracts import contract
 from contracts.utils import raise_desc
 
 
-@contract(s=str, returns=str)
+@contract(s=bytes, returns=bytes)
 def render_markdown(s):
     """ Returns an HTML string encoded in UTF-8"""
     if isinstance(s, unicode):
-        msg = 'I expect a utf-8 string.'
+        msg = 'I expect utf-8 encoded bytes.'
         raise_desc(TypeError, msg, s=s.__repr__())
 
     import markdown  # @UnresolvedImport
+    import logging
+    logging.getLogger("MARKDOWN").setLevel(logging.CRITICAL)
 
     extensions = [
         'markdown.extensions.smarty',
@@ -21,6 +23,7 @@ def render_markdown(s):
         'markdown.extensions.admonition',
         'markdown.extensions.tables',
     ]
+    
 
     # markdown takes and returns unicode
     u = unicode(s, 'utf-8')

@@ -98,7 +98,7 @@ This is the complete MCDP:
 
 This is the graphical representation:
 
-<pre class='ndp_graph_expand'>`Actuation</pre>
+<pre class='ndp_graph_enclosed'>`Actuation</pre>
 
 ### Actuation + energetics
 

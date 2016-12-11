@@ -24,7 +24,7 @@ mcdp {
 The resulting MCDP has an uncertainty gate, marked with "?",
 which joins two branches, the optimistic and the pessimistic branch.
 
-<pre class='ndp_graph_expand'>`uncertain1</pre>
+<pre class='ndp_graph_enclosed'>`uncertain1</pre>
 
 
 <!-- 

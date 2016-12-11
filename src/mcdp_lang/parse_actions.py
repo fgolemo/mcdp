@@ -119,7 +119,7 @@ def spa(x, b):
     def p(tokens, loc, s):
         #print('spa(): parsing %s %r %r %r ' % (x, tokens, loc, s))
         res = bb(tokens, loc, s)
-        # if we are here, then it means the parse was succesful
+        # if we are here, then it means the parse was successful
         # we try again to get loc_end
         character_end = x.tryParse(s, loc)
         
@@ -266,7 +266,7 @@ def parse_wrap(expr, string):
         msg += '\n' + string.encode('utf-8').__repr__()
         raise ValueError(msg)
     
-    check_isinstance(string, str)
+    check_isinstance(string, bytes)
 
     # Nice trick: the remove_comments doesn't change the number of lines
     # it only truncates them...
@@ -285,7 +285,6 @@ def parse_wrap(expr, string):
         except ValueError:
             w = '(unknown)'
             
-        
         with timeit(w, MCDPConstants.parsing_too_slow_threshold):
             expr.parseWithTabs()
             
@@ -312,18 +311,17 @@ def parse_wrap(expr, string):
     except (ParseException, ParseFatalException) as e:
         where1 = Where(string0, e.loc)
         where2 = translate_where(where1, string)
-        e2 = DPSyntaxError(str(e), where=where2)
+        s0 = e.__str__()
+        check_isinstance(s0, bytes)
+#         print type(s0), s0.__repr__()
+#         s = s0.encode('utf8')
+        s = s0
+        e2 = DPSyntaxError(s, where=where2)
         raise DPSyntaxError, e2.args, sys.exc_info()[2]
          
     except DPSemanticError as e:
         msg = 'This should not throw a DPSemanticError'
         raise_wrapped(DPInternalError, e,msg, exc=sys.exc_info()) 
-    
-#     except DPInternalError as e:
-#         raise
-#         msg += "\n\n" + indent(m(string), '  ') + '\n'
-#         msg = "Internal error while evaluating the spec:"
-#         raise_wrapped(DPInternalError, e, msg, compact=False)
 
 def remove_comments(s):
     lines = s.split("\n")

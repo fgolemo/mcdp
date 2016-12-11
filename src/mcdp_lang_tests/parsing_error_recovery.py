@@ -11,9 +11,9 @@ def ast_to_html_(s):
     from mcdp_report.html import ast_to_html
 
     parse_expr = Syntax.ndpt_dp_rvalue
-    html = ast_to_html(s, complete_document=False, extra_css=None, ignore_line=None,
-                add_line_gutter=False, encapsulate_in_precode=True, add_css=False,
-                parse_expr=parse_expr, add_line_spans=False, postprocess=None)
+    html = ast_to_html(s,  ignore_line=None,
+                add_line_gutter=False, encapsulate_in_precode=True,
+                parse_expr=parse_expr, postprocess=None)
     return html
 
 

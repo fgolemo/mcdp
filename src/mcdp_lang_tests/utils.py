@@ -148,12 +148,17 @@ def assert_parsable_to_connected_ndp(s , desc=None):  # @UnusedVariable
 class TestFailed(Exception):
     pass
 
-@contract(string=str)
+@contract(string=bytes)
 def parse_wrap_check(string, expr, result=None):
     check_isinstance(string, str)
     if isinstance(expr, ParsingElement):
         expr = expr.get()
 
+    try:
+        expr_name = find_parsing_element(expr)
+    except ValueError:
+        expr_name = '(unknown parse expr)'
+    
     try:
         res = parse_wrap(expr, string)[0]  # note the 0, first element
         res0 = remove_where_info(res)
@@ -163,7 +168,7 @@ def parse_wrap_check(string, expr, result=None):
     except BaseException as e:
         msg = 'Cannot parse %r' % string
         raise_wrapped(TestFailed, e, msg,
-                      expr=find_parsing_element(expr),
+                      expr_name=expr_name,
                       string=string, expected=result)
 
 
@@ -282,6 +287,6 @@ def find_parsing_element(x):
     for name, value in d.items():  # @UndefinedVariable
         if value is x:
             return ParsingElement(name)
-        
+
     raise ValueError('Cannot find element for %s.' % str(x))
 

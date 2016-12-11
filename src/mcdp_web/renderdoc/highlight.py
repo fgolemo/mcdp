@@ -2,6 +2,7 @@
 import base64
 import hashlib
 import os
+import shutil
 import sys
 from tempfile import mkdtemp
 import traceback
@@ -29,7 +30,6 @@ from system_cmd import CmdException, system_cmd_result
 
 from mcdp_figures import( MakeFiguresNDP, MakeFiguresTemplate, 
     MakeFiguresPoset)
-import shutil
 
 
 def bs(fragment):
@@ -287,9 +287,9 @@ def get_minimal_document(body_contents, add_markdown_css=False):
 
 def get_ast_as_pdf(s, parse_expr):
     s = s.replace('\t', '    ')
-    contents = ast_to_html(s, complete_document=False, extra_css=None,
+    contents = ast_to_html(s,
                        ignore_line=None, parse_expr=parse_expr,
-                       add_line_gutter=False, add_css=False)
+                       add_line_gutter=False)
     html = get_minimal_document(contents)
     
     mcdp_tmp_dir = get_mcdp_tmp_dir()
@@ -383,9 +383,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                     else:
                         return x
                 html = ast_to_html(source_code, parse_expr=parse_expr,
-                                                complete_document=False,
                                                 add_line_gutter=False,
-                                                add_css=False,
                                                 postprocess=postprocess)
                 
                 

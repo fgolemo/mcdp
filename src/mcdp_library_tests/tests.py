@@ -133,11 +133,12 @@ def mcdplib_test_setup_nameddps(context, libname):
     from mcdp_tests.generation import for_all_nameddps, for_all_nameddps_dyn
     load_tests_modules()
 
-    print('Found models: %r' % models)
-    print('Found registered in for_all_nameddps_dyn: %r' % 
-          for_all_nameddps.registered)
-    print('Found registered in for_all_nameddps: %r' % 
-          for_all_nameddps_dyn.registered)
+    if False:
+        print('Found models: %r' % models)
+        print('Found registered in for_all_nameddps_dyn: %r' % 
+              for_all_nameddps.registered)
+        print('Found registered in for_all_nameddps: %r' % 
+              for_all_nameddps_dyn.registered)
 
     for model_name in models:
         f = l._get_file_data(model_name + '.' + MCDPLibrary.ext_ndps)
@@ -145,8 +146,9 @@ def mcdplib_test_setup_nameddps(context, libname):
         source = f['data']
 
         if gives_syntax_error(source):
-            print('Skipping because syntax error')
+            #print('Skipping because syntax error')
             # TODO: actually check syntax error
+            pass
         else:
             c = context.child(model_name, extra_report_keys=dict(id_ndp=model_name))
 
@@ -163,7 +165,7 @@ def mcdplib_test_setup_nameddps(context, libname):
                 for ftest in for_all_nameddps.registered:
                     
                     if accepts_arg(ftest, 'libname'):
-                        print('using libname for %s' % ftest)
+                        #print('using libname for %s' % ftest)
                         c.comp(ftest, model_name, ndp, libname=libname,
                                job_id=ftest.__name__)
                     else:
@@ -172,27 +174,19 @@ def mcdplib_test_setup_nameddps(context, libname):
                 for ftest in for_all_nameddps_dyn.registered:
                     
                     if accepts_arg(ftest, 'libname'):
-                        print('using libname for %s' % ftest)
+                        #print('using libname for %s' % ftest)
                         c.comp_dynamic(ftest, model_name, ndp, libname=libname,
                                        job_id=ftest.__name__)
                     else:
                         c.comp_dynamic(ftest, model_name, ndp)
                         
-                    
-# 
-# def wrap_with_library(f, id_ndp, ndp, libname):
-#     library = get_test_library(libname)
-#     return f(id_ndp, ndp, library)
-# 
-# def wrap_with_library_dynamic(context, f, id_ndp, ndp, libname):
-#     library = get_test_library(libname)
-#     return f(context, id_ndp, ndp, library)
+                     
     
 def accepts_arg(f, name):
     """ True if it supports the "library" argument """
     import inspect
     args = inspect.getargspec(f)
-#     print args
+    # print args
     return name in args.args
 
 def mcdplib_test_setup_source_mcdp(context, libname):
@@ -204,7 +198,7 @@ def mcdplib_test_setup_source_mcdp(context, libname):
 
     registered = for_all_source_mcdp.registered
 
-    print('Found registered: %r' % registered)
+    #print('Found registered: %r' % registered)
 
     for basename in l.file_to_contents:
         _model_name, ext = os.path.splitext(basename)
@@ -220,17 +214,22 @@ def mcdplib_test_setup_source_mcdp(context, libname):
         filename = f['realpath']
 
         if gives_syntax_error(source):
-            print('Skipping because syntax error')
+            #print('Skipping because syntax error')
+            pass
             # TODO: actually check syntax error
         elif gives_semantic_error(source):
-            print('Skipping because semantic error')
+            # print('Skipping because semantic error')
+            pass
 
         else:            
 
             c = context.child(basename)
-    
+             
             for ftest in registered:
-                c.comp(ftest, filename, source)
+                kwargs = {}
+                if accepts_arg(ftest, 'libname'):
+                    kwargs['libname'] = libname
+                c.comp(ftest, filename, source, **kwargs)
 
 def get_keywords(source):
     line1 = source.split('\n')[0]
@@ -287,8 +286,8 @@ def mcdplib_test_setup_value(context, libname):
     load_tests_modules()
     registered = for_all_values.registered
 
-    print('Found values: %r' % values)
-    print('Found registered: %r' % registered)
+    #print('Found values: %r' % values)
+    #print('Found registered: %r' % registered)
 
     for id_value in values:
         c = context.child(id_value)
@@ -313,8 +312,8 @@ def mcdplib_test_setup_posets(context, libname):
     load_tests_modules()
     registered = for_all_posets.registered
 
-    print('Found posets: %r' % posets)
-    print('Found registered: %r' % registered)
+    #print('Found posets: %r' % posets)
+    #print('Found registered: %r' % registered)
 
     for id_poset in posets:
         c = context.child(id_poset)
@@ -334,8 +333,8 @@ def mcdplib_test_setup_primitivedps(context, libname):
     load_tests_modules()
     registered = for_all_dps.registered
 
-    print('Found: %r' % dps)
-    print('Registered: %r' % registered)
+    #print('Found: %r' % dps)
+    #print('Registered: %r' % registered)
 
     for id_dp in dps:
         c = context.child(id_dp)
@@ -354,8 +353,8 @@ def mcdplib_test_setup_template(context, libname):
     load_tests_modules()
     registered = for_all_templates.registered
 
-    print('Found: %r' % templates)
-    print('Registered: %r' % registered)
+    #print('Found: %r' % templates)
+    #print('Registered: %r' % registered)
 
     for id_template in templates:
         c = context.child(id_template)

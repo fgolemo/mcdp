@@ -17,6 +17,8 @@ from mocdp.exceptions import mcdp_dev_warning, DPSyntaxError, DPInternalError
 
 
 unparsable_marker = '#@'
+ATTR_WHERE_CHAR = 'c' #'where_character'
+ATTR_WHERE_CHAR_END = 'ce' # where_character_end'
 
 def isolate_comments(s):
     lines = s.split("\n")
@@ -46,36 +48,17 @@ def ast_to_html(s,
                 ignore_line=None,
                 add_line_gutter=True, 
                 encapsulate_in_precode=True, 
-                postprocess=None,
-                
-                # deprecated
-                complete_document=None,
-                extra_css=None, 
-                add_css=None,
-                add_line_spans=None,):
+                postprocess=None):
     """
         postprocess = function applied to parse tree
     """
     
-    if add_line_spans is not None and add_line_spans != False:
-        warnings.warn('deprecated param add_line_spans')
-    
     if parse_expr is None:
         raise Exception('Please add specific parse_expr (default=Syntax.ndpt_dp_rvalue)')
         
-    if add_css is not None:
-        warnings.warn('please do not use add_css', stacklevel=2)
-
-    if complete_document is not None:
-        warnings.warn('please do not use complete_document', stacklevel=2)
-
     if ignore_line is None:
         ignore_line = lambda _lineno: False
         
-    if extra_css is not None: 
-        warnings.warn('please do not use extra_css', stacklevel=2)
-        
-    extra_css = ''
     original_lines = s.split('\n')
 
     s_lines, s_comments = isolate_comments(s)
@@ -315,10 +298,11 @@ def print_html_inner(x):
 
     klass = type(x).__name__
 
-    transformed0 = ("<span class='%s' where_character='%d' where_character_end='%s'>%s</span>" 
-                    % (klass, x.where.character, x.where.character_end, out))
+    transformed0 = ("<span class='%s' %s='%d' %s='%s'>%s</span>" 
+                    % (klass, ATTR_WHERE_CHAR, x.where.character, ATTR_WHERE_CHAR_END, x.where.character_end, out))
     yield Snippet(op=x, orig=orig0, a=x.where.character, b=x.where.character_end,
                   transformed=transformed0)
+
 
 def sanitize(x):
     x = x.replace('>', '&gt;')

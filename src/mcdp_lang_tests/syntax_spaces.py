@@ -11,6 +11,7 @@ from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import parse_wrap_check, TestFailed
 from mcdp_lang_tests.utils2 import eval_rvalue_as_constant
 from mocdp.comp.context import Context
+from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts
 
 
 @comptest
@@ -18,9 +19,8 @@ def check_spaces1():
     def p(s):
         c = Context()
         r = parse_wrap_check(s, Syntax.space)
-#         print r
         _x = eval_space(r, c)
-#         print x
+        
     p('V')
     p("V x m")
     p("V × m")
@@ -160,7 +160,10 @@ def suggestions_exponent():
     
     suggestions = get_suggestions(xr)
     assert_equal(1, len(suggestions))
-    assert_equal('(provided f)\xc2\xb2', suggestions[0][1])
+    w, sub = suggestions[0]
+    ws = w.string[w.character:w.character_end]
+    assert_equal(ws, '^2')
+    assert_equal('\xc2\xb2', sub)
     
     s2 = apply_suggestions(source, suggestions)
     parse_ndp(s2)
@@ -173,18 +176,110 @@ def suggestions_exponent2():
    variable a, c [dimensionless] 
    c ≥ a^2 + 1
 }"""
-
     x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
     xr = parse_ndp_refine(x, Context())
     
     suggestions = get_suggestions(xr)
-#     print suggestions
+    # print suggestions
     assert_equal(1, len(suggestions))
-    assert_equal('a\xc2\xb2', suggestions[0][1])
+    assert_equal('\xc2\xb2', suggestions[0][1])
     
     s2 = apply_suggestions(s, suggestions)
     parse_ndp(s2)
-#     print s2
+    # print s2
+
+@comptest
+def suggestions_subscript():
+    s = """
+    mcdp {  
+       variable a_1 [dimensionless]
+    }"""
+    s2_exp = u"""
+    mcdp {  
+       variable a₁ [dimensionless]
+    }""".encode('utf8')
+
+    x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
+    xr = parse_ndp_refine(x, Context())
+    #print recursive_print(xr)
+    suggestions = get_suggestions(xr)
+    assert_equal(1, len(suggestions))
+    assert_equal('\xe2\x82\x81', suggestions[0][1])
+    
+    s2 = apply_suggestions(s, suggestions)
+    parse_ndp(s2)
+    #print s2
+    s2 = apply_suggestions(s, suggestions)
+    assert_equal(s2_exp, s2)
+
+
+@comptest
+def suggestions_subscript_no_inside():
+    s = """
+    mcdp {  
+       variable a_1_last [dimensionless]
+}"""
+    x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
+    xr = parse_ndp_refine(x, Context())
+    suggestions = get_suggestions(xr)
+    if suggestions: print suggestions
+    assert_equal(0, len(suggestions)) 
+    
+@comptest
+def dont_suggest_weird_places():
+    s = """
+    mcdp {  
+        # this might look like "nu"
+       variable num_stuff [dimensionless]
+       
+       num_replacements = 0
+}"""
+    x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
+    xr = parse_ndp_refine(x, Context())
+    suggestions = get_suggestions(xr)
+    if suggestions: print suggestions
+    assert_equal(0, len(suggestions)) 
+
+@comptest
+def suggestions_greek():
+    s = """ mcdp {  
+       variable a_alpha_last [dimensionless]
+    }"""
+    s2_exp = u""" mcdp {  
+       variable a_α_last [dimensionless]
+    }""".encode('utf8')
+
+    x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
+    xr = parse_ndp_refine(x, Context())
+    suggestions = get_suggestions(xr)
+    #if suggestions: print suggestions
+    assert_equal(1, len(suggestions)) 
+    s2 = apply_suggestions(s, suggestions)
+    assert_equal(s2_exp, s2)
+    
+
+@comptest
+def dont_suggest_if_already_done():
+    s = """
+    mcdp {  
+       # this is already done
+       variable a₁ [dimensionless]
+       variable alpha [dimensionless]
+}"""
+    x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
+    xr = parse_ndp_refine(x, Context())
+    suggestions = get_suggestions(xr)
+    if suggestions: print suggestions
+    assert_equal(0, len(suggestions))
+    
+@comptest
+def just_list():
+    s = sorted(greek_letters, key=lambda t: t.lower() + t[0])
+    print " ".join(greek_letters[_] for _ in s)
+    
+    print "\n".join('%s %s' % (greek_letters[k], k) for k in s)
+    print " ".join(subscripts.values())
+
 
 if __name__ == '__main__': 
     

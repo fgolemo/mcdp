@@ -55,7 +55,7 @@ mcdp {
 }
 </pre>
 </td><td>
-<pre class='ndp_graph_expand'>`model2</pre>
+<pre class='ndp_graph_enclosed'>`model2</pre>
 </td></tr></table>
 
 ### Describing relations between functionality and resources
@@ -71,13 +71,13 @@ mcdp {
 	provides capacity [J]
 	requires mass [g]
 
-	specific_energy = 4 J / g
-	required mass >= provided capacity / 
-	                 specific_energy
+	# specific energy
+	ρ = 4 J / g
+	required mass >= provided capacity / ρ                
 }
 </pre>
 
-<pre class='ndp_graph_expand'>`model4</pre>
+<pre class='ndp_graph_enclosed'>`model4</pre>
 
 ### Units
 
@@ -93,11 +93,11 @@ mcdp {
 	provides capacity [J]
 	requires mass [g]
 
-	specific_energy = 200 kWh / kg
-	required mass >= provided capacity / 
-	                 specific_energy
+	# specific energy
+	ρ = 200 kWh / kg
+	required mass >= provided capacity / ρ
 }
 </pre>
 
-<pre class='ndp_graph_expand'>`model5</pre>
+<pre class='ndp_graph_enclosed'>`model5</pre>
  

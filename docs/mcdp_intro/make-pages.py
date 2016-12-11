@@ -105,7 +105,7 @@ def format_example(e):
 	# code = code.replace('mcdp', '<strong>mcdp</strong>')
 	text += '\n\n'
 	try:
-		text += ast_to_html(code, complete_document=False)
+		text += ast_to_html(code)
 	except BaseException as err:
 		text += '<pre>%s</pre>' % err
 

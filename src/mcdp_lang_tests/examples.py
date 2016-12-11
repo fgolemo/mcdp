@@ -47,8 +47,7 @@ def syntax_test_fn(filename):
 def syntax_test(contents):
     from mcdp_report.html import ast_to_html
 
-    html = ast_to_html(contents, parse_expr=Syntax.ndpt_dp_rvalue,
-                                complete_document=False, add_css=False)
+    html = ast_to_html(contents, parse_expr=Syntax.ndpt_dp_rvalue)
 
     s = StringIO(html)
     import xml.etree.ElementTree as ETree

@@ -1,7 +1,3 @@
-
-
-
-
 Keys:
 
 - R: refactoring / reorganization
@@ -13,11 +9,11 @@ Keys:
 
 Goals:
 
-(*) Implement solve-r 
+(*) Show visualization of solve-r 
 
 (*) Write paper that explains language
 
-(*) Make video
+(*) Make tutorial video
 
 (*) Improve correctness of symmetrization
 - T: dual chain for functionality/resources (dual chain).
@@ -34,77 +30,38 @@ Goals:
 
 (*) Test corner cases:
 - get to 100% code coverage
-- test ignore_resource  for wrong inputs
+- test ignore_resource for wrong inputs
 - T: what happens with recursive definitions? (a.poset = "`a")
 
 (*) Doing extra stuff:
 - F: color the constants to reflect whether they are funcs or resources
 - F: automatically make the constant into a new function or resource
 - F: implement the n-version of everything 
-- F: Create "add_bottom(<poset>)" and "add_top" operator. 
+- F: Create "add_top" operator. 
 - F: parse custom string for PosetCoproduct
 
 (*) Unified solving interface, for interactive and batch drawing.
     - (interactive) I can drag over and I see the shape change
     - I can see the animation.
 
-
 (*) Language additions
  
 
 - F: "choose()" without labels
-- F: better catalouge syntax - implicit point
-
-  Putin = catalogue {
-     provides plutonium [g]
-     requires science [`scientific_objectives]
-     
-     100g ⟻ `scientific_objectives ⟼ find_current_life
-
-     implicit : 100g | `scientific_objectives : find_current_life
-  }
- ↤↥↦↧ ⟻⟼
-  catalogue {
-     provides resolution [pixels]
-     requires latency [s]
-
-    100 kWh ⟻ i1 ⟼ 100 g
-    
-    <100 kWh, 1 hour> <-| i1 |-> 100 g
- 
-    ⟨100 kWh, 1 hour⟩ ⟻ i1 ⟼ 100 g
-    
-    ⟨100 kWh, 1 hour⟩ ↤ i1 ↦ 100 g
-    100 kWh, 1 hour ↤ i1 ↦ 100 g
-
-  }
-
 
 - F: "op(Poset)" => constructs opposite poset
 
 - F: intervals - what happens
 
-- L: Implement Python-style comments for more literate programming.
-
-```
-mcdp {
-   """ this is the comment """
-
-  provides x [J] "This is a comment for the description"
-}
-```
- 
 
 (*) Esthetics
 
 - visualization: have one icon for each library (library_icon.png)
 - visualization: display the dependency graph among libraries
-- visualization: use greek letters in h*
+- visualization: use greek letters in repr_map for h*
 - visualization: in the dp_flow pictures, the CoProduct is not expanded.
 - visualization: Introduce "Ignore" blocks, so that they can get their own icon (terminator)
 - visualization: now the edges that are not connected are not purple
-- visualization: nice icon for  operations: take
-- visualization: nice icon for  operations: meet, Join (green and red)
 
 
 On hold: 
@@ -114,8 +71,6 @@ On hold:
 
 
 (*) Bugs / Issues
-
-- B: FinitePoset does not have Join, Meet
 
 - B: Sometimes Pint does not simplify the units. For example,
       J * kg / Wh has the same dimensionality of kg
@@ -432,33 +387,31 @@ mcdp {
    a >= square(c)  
 }
 
-- (integer) power for Natural numbers: a ^ 2
-http://127.0.0.1:8080/libraries/basic/models/addition_1/views/edit_fancy/
 
 - make Map::repr_map abstract
-
-
 
 - constants like pi, e
 
 - remove nat_Constnat with lowercase nat
 
 - remove the awkward "1.0 []" syntax in favor of just "1.0"
+- summary of warnings across libraries
 
 -File 'tmp3.mcdp' reached twice.
 -path1: /Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/unittests/basic.mcdplib/created/tmp3.mcdp
 -path2: /Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/unittests/basic.mcdplib/created/tmp3.mcdp
 
 - delete caches in /tmp automatically
-- markdown rendering does not use refinement
 
-- syntax for primitivedp loop(series(par))
+- syntax for primitivedp algebra: loop(series(par))
 
 - add test for    CDP.Rcomp: 'ℝ'
 
 
 - DPSemanticError: I can only compute pow() for floats with types; this is Rcomp().
 - DPSemanticError: I can only compute pow() for floats with types; this is Nat().
+- (integer) power for Natural numbers: a ^ 2
+http://127.0.0.1:8080/libraries/basic/models/addition_1/views/edit_fancy/
 
 
 - power resources
@@ -470,3 +423,13 @@ parse_ndp("""
         provided f  <= (required r)²
     }
     """)
+
+Detect:
+- unused constants
+- unused functions/resources
+- unconnected ndp's funcs or res
+
+
+
+required mass = between 120 Wh/kg and 100 Wh/kg 
+required mass = between 100 kg and 120 kg
