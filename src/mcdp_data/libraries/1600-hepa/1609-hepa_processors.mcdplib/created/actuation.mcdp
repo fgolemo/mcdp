@@ -5,11 +5,11 @@ mcdp {
    requires budget [USD]
    required budget ≥ 1000 USD
    requires mass = 1 kg
-   l = provided lift
+   l = provided lift  
    
-   p_0 = 1 W
-   p_1 = 1 W / N
-   p_2 = 1 W / N²
+   p₀ = 1 W
+   p₁ = 1 W / N
+   p₂ = 1 W / N²
    # xₘₐₓ
-   required power ≥ p_0 + p_1 · l + p_2 · l²
-}
+   required power >= p₀ + p₁·l + p₂·l²
+} 

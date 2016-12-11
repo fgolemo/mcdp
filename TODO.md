@@ -468,3 +468,8 @@ parse_ndp("""
         provided f  <= (required r)²
     }
     """)
+
+Detect:
+- unused constants
+- unused functions/resources
+- unconnected ndp's funcs or res

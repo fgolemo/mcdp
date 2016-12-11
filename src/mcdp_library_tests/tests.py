@@ -178,21 +178,13 @@ def mcdplib_test_setup_nameddps(context, libname):
                     else:
                         c.comp_dynamic(ftest, model_name, ndp)
                         
-                    
-# 
-# def wrap_with_library(f, id_ndp, ndp, libname):
-#     library = get_test_library(libname)
-#     return f(id_ndp, ndp, library)
-# 
-# def wrap_with_library_dynamic(context, f, id_ndp, ndp, libname):
-#     library = get_test_library(libname)
-#     return f(context, id_ndp, ndp, library)
+                     
     
 def accepts_arg(f, name):
     """ True if it supports the "library" argument """
     import inspect
     args = inspect.getargspec(f)
-#     print args
+    # print args
     return name in args.args
 
 def mcdplib_test_setup_source_mcdp(context, libname):
@@ -228,9 +220,12 @@ def mcdplib_test_setup_source_mcdp(context, libname):
         else:            
 
             c = context.child(basename)
-    
+             
             for ftest in registered:
-                c.comp(ftest, filename, source)
+                kwargs = {}
+                if accepts_arg(ftest, 'libname'):
+                    kwargs['libname'] = libname
+                c.comp(ftest, filename, source, **kwargs)
 
 def get_keywords(source):
     line1 = source.split('\n')[0]
