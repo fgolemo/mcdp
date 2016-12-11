@@ -37,70 +37,31 @@ Goals:
 - F: color the constants to reflect whether they are funcs or resources
 - F: automatically make the constant into a new function or resource
 - F: implement the n-version of everything 
-- F: Create "add_bottom(<poset>)" and "add_top" operator. 
+- F: Create "add_top" operator. 
 - F: parse custom string for PosetCoproduct
 
 (*) Unified solving interface, for interactive and batch drawing.
     - (interactive) I can drag over and I see the shape change
     - I can see the animation.
 
-
 (*) Language additions
  
 
 - F: "choose()" without labels
-- F: better catalouge syntax - implicit point
-
-  Putin = catalogue {
-     provides plutonium [g]
-     requires science [`scientific_objectives]
-     
-     100g ⟻ `scientific_objectives ⟼ find_current_life
-
-     implicit : 100g | `scientific_objectives : find_current_life
-  }
- ↤↥↦↧ ⟻⟼
-  catalogue {
-     provides resolution [pixels]
-     requires latency [s]
-
-    100 kWh ⟻ i1 ⟼ 100 g
-    
-    <100 kWh, 1 hour> <-| i1 |-> 100 g
- 
-    ⟨100 kWh, 1 hour⟩ ⟻ i1 ⟼ 100 g
-    
-    ⟨100 kWh, 1 hour⟩ ↤ i1 ↦ 100 g
-    100 kWh, 1 hour ↤ i1 ↦ 100 g
-
-  }
-
 
 - F: "op(Poset)" => constructs opposite poset
 
 - F: intervals - what happens
 
-- L: Implement Python-style comments for more literate programming.
-
-```
-mcdp {
-   """ this is the comment """
-
-  provides x [J] "This is a comment for the description"
-}
-```
- 
 
 (*) Esthetics
 
 - visualization: have one icon for each library (library_icon.png)
 - visualization: display the dependency graph among libraries
-- visualization: use greek letters in h*
+- visualization: use greek letters in repr_map for h*
 - visualization: in the dp_flow pictures, the CoProduct is not expanded.
 - visualization: Introduce "Ignore" blocks, so that they can get their own icon (terminator)
 - visualization: now the edges that are not connected are not purple
-- visualization: nice icon for  operations: take
-- visualization: nice icon for  operations: meet, Join (green and red)
 
 
 On hold: 
@@ -110,8 +71,6 @@ On hold:
 
 
 (*) Bugs / Issues
-
-- B: FinitePoset does not have Join, Meet
 
 - B: Sometimes Pint does not simplify the units. For example,
       J * kg / Wh has the same dimensionality of kg
