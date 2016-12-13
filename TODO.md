@@ -433,3 +433,16 @@ Detect:
 
 required mass = between 120 Wh/kg and 100 Wh/kg 
 required mass = between 100 kg and 120 kg
+
+-  make pre with max size even in case like approx() in
+file:///Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/manual.mcdplib/out-html/manual.html
+
+
+- constant keyword in setnameconstant, otherwise it doesn't get highlighted
+
+   constant gravity = 9.8 m/s² 
+   weight = mass required by battery · gravity 
+
+- unused resources, unused functions
+
+- disconnected warnings!

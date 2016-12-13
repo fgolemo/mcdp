@@ -164,6 +164,7 @@ def add_where_to_empty_list(result_of_function_above):
     else:
         return r
 
+
 @parse_action
 @wheredecorator
 def mult_parse_action(tokens):
@@ -173,6 +174,7 @@ def mult_parse_action(tokens):
     res = CDP.MultN(l, where=l.where)
     return res
 
+
 @parse_action
 @wheredecorator
 def divide_parse_action(tokens):
@@ -181,6 +183,7 @@ def divide_parse_action(tokens):
     assert l.where.character_end is not None
     res = CDP.Divide(l, where=l.where)
     return res
+
 
 @parse_action
 @wheredecorator
@@ -200,6 +203,7 @@ def rvalue_minus_parse_action(tokens):
     res = CDP.RValueMinusN(l, where=l.where)
     return res
 
+
 @parse_action
 @wheredecorator
 def fvalue_minus_parse_action(tokens):
@@ -216,17 +220,20 @@ def space_product_parse_action(tokens):
     ops = make_list(tokens)
     return CDP.SpaceProduct(ops, where=ops.where)
 
+
 @parse_action
 def mult_inv_parse_action(tokens):
     tokens = list(tokens[0])
     ops = make_list(tokens)
     return CDP.InvMult(ops, where=ops.where)
 
+
 @parse_action
 def plus_inv_parse_action(tokens):
     tokens = list(tokens[0])
     ops = make_list(tokens)
     return CDP.InvPlus(ops, where=ops.where)
+
 
 def parse_wrap_filename(expr, filename):
     with open(filename) as f:
@@ -235,6 +242,7 @@ def parse_wrap_filename(expr, filename):
         return parse_wrap(expr, contents)
     except MCDPExceptionWithWhere  as e:
         raise e.with_filename(filename)
+    
 
 def translate_where(where0, string):
     """ 
@@ -255,6 +263,7 @@ def translate_where(where0, string):
     
     where = Where(string=string, character=character2, character_end=character_end2)
     return where
+
 
 def parse_wrap(expr, string):
     from mcdp_lang_tests.utils import find_parsing_element
@@ -323,6 +332,7 @@ def parse_wrap(expr, string):
         msg = 'This should not throw a DPSemanticError'
         raise_wrapped(DPInternalError, e,msg, exc=sys.exc_info()) 
 
+
 def remove_comments(s):
     lines = s.split("\n")
     def remove_comment(line):
@@ -332,9 +342,11 @@ def remove_comments(s):
             return line
     return "\n".join(map(remove_comment, lines))
 
+
 def parse_line(line):
     from .syntax import Syntax
     return parse_wrap(Syntax.line_expr, line)[0]
+
 
 @contract(name= CDP.DPName)
 def funshortcut1m(provides, fnames, prep_using, name):
@@ -342,10 +354,13 @@ def funshortcut1m(provides, fnames, prep_using, name):
                              fnames=fnames,
                              prep_using=prep_using,
                              name=name)
+    
+    
 @contract(name=CDP.DPName)
 def resshortcut1m(requires, rnames, prep_for, name):
     return CDP.ResShortcut1m(requires=requires, rnames=rnames, 
                              prep_for=prep_for, name=name)
+
 
 def parse_pint_unit(tokens):
     tokens = list(tokens)

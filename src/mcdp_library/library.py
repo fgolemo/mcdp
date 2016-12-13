@@ -428,10 +428,15 @@ class MCDPLibrary():
                 if should_ignore(f):
                     continue
                 assert isinstance(f, str)
-                self._update_file(f)
+                self._update_file(f, from_search_dir=d)
 
     @contract(f=str)
-    def _update_file(self, f):
+    def _update_file_from_editor(self, f):
+        return self._update_file(f, from_search_dir='mcdp-web')
+    
+    @contract(f=str)
+    def _update_file(self, f, from_search_dir=None):
+        """ from_search_dir: from whence we arrived at this file. """
         basename = os.path.basename(f)
         check_isinstance(basename, str)
         # This will fail because then in pyparsing everything is unicode
@@ -439,34 +444,39 @@ class MCDPLibrary():
         # data = codecs.open(f, encoding='utf-8').read()
         data = open(f).read()
         realpath = os.path.realpath(f)
-        res = dict(data=data, realpath=realpath, path=f)
+        res = dict(data=data, realpath=realpath, path=f, from_search_dir=from_search_dir)
 
         strict = False
         if basename in self.file_to_contents:
             realpath1 = self.file_to_contents[basename]['realpath']
             path1 = self.file_to_contents[basename]['path']
-            if res['realpath'] == realpath1:
-                msg = 'File %r reached twice.' % basename
-                if not strict:
-                    logger.warning(msg + "\n" +
-                                   format_obs(dict(path1=path1,
-                                              path2=res['path'])))
-                else:
-                    raise_desc(DPSemanticError, msg,
-                               path1=path1,
-                               path2=res['path'])
-
-            else:
-                msg = 'Found duplicated file %r.' % basename
-                if not strict:
-                    if log_duplicates:
+            
+            expected = from_search_dir == 'mcdp-web'
+            if not expected:
+                if res['realpath'] == realpath1:
+                    msg = 'File %r reached twice.' % basename
+                    msg += '\n  now from %s' % from_search_dir
+                    msg += '\n prev from %s' % self.file_to_contents[basename]['from_search_dir']
+                    if not strict:
                         logger.warning(msg + "\n" +
-                                       format_obs(dict(path1=realpath1,
-                                                  path2=res['realpath'])))
+                                       format_obs(dict(path1=path1,
+                                                  path2=res['path'])))
+                    else:
+                        raise_desc(DPSemanticError, msg,
+                                   path1=path1,
+                                   path2=res['path'])
+    
                 else:
-                    raise_desc(DPSemanticError, msg,
-                               path1=realpath1,
-                               path2=res['realpath'])
+                    msg = 'Found duplicated file %r.' % basename
+                    if not strict:
+                        if log_duplicates:
+                            logger.warning(msg + "\n" +
+                                           format_obs(dict(path1=realpath1,
+                                                      path2=res['realpath'])))
+                    else:
+                        raise_desc(DPSemanticError, msg,
+                                   path1=realpath1,
+                                   path2=res['realpath'])
 
         assert isinstance(basename, str), basename
 
@@ -499,5 +509,5 @@ class MCDPLibrary():
         with open(realpath, 'w') as f:
             f.write(data)
         # reload
-        self._update_file(realpath)
+        self._update_file_from_editor(realpath)
 

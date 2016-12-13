@@ -71,3 +71,4 @@ from .todo import *
 
 from .test_suggestions import *
 from .special_letters import *
+from .detection_unused_constants import *

@@ -1,5 +1,6 @@
 from abc import abstractmethod, ABCMeta
-       
+
+
 class MakeFigures_Formatter():
     __metaclass__ = ABCMeta
     
@@ -29,8 +30,7 @@ class TextFormatter(MakeFigures_Formatter):
         else:
             assert formats[0] == 'txt'
             return (text,)
-            
-    
+        
     @abstractmethod
     def get_text(self, mf):
         pass

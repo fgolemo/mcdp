@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts.interface import Where
 from contracts.utils import check_isinstance
+from mcdp_lang.utils_lists import get_odd_ops
 from mocdp import logger
 from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
 )
@@ -12,15 +13,16 @@ from .parts import CDPLanguage
 from .utils import isnamedtupleinstance
 from .utils_lists import make_list
 from .utils_lists import unwrap_list
-from mcdp_lang.utils_lists import get_odd_ops
 
 
 CDP = CDPLanguage
 
 def apply_refinement(expr, context):
-    """ Returns a transformed expr with some changes. 
+    """ 
+        Returns a transformed expr with some changes. 
     
         Might raise DPSemanticError.
+        
         It also puts warnings in context.
     """ 
     
@@ -32,8 +34,19 @@ def apply_refinement(expr, context):
             if not line_exprs:
                 return x
             
-            line_exprs = infer_types_of_variables(line_exprs, context)
-            return CDP.ModelStatements(make_list(line_exprs), where=x.where)
+            si = SemanticInformation()
+            line_exprs = infer_types_of_variables(line_exprs, context, si)
+            transformed = CDP.ModelStatements(make_list(line_exprs), where=x.where)
+            
+            for cname, cinfo in si.constants.items():
+                if not cinfo.where_used:
+                    msg = 'Constant "%s" is unused.' % cname
+                    warn_language(cinfo.element_defined, 
+                                  MCDPWarnings.LANGUAGE_UNUSED_CONSTANT, 
+                                  msg, context=context)
+
+            
+            return transformed
 
     return namedtuple_visitor_ext(expr, transform)
      
@@ -55,8 +68,48 @@ def infer_debug(s):
     # print(s)
     pass
     
-def infer_types_of_variables(line_exprs, context):
-    constants = set()
+class SemanticInformationForEntity():
+    def __init__(self, element_defined, where_used=[]):
+        element_defined.where
+        #check_isinstance(where_defined, Where)
+        self.element_defined = element_defined
+        self.where_used = where_used
+        
+    def add_use(self, where):
+        check_isinstance(where, Where)
+        self.where_used.append(where)
+        
+class SemanticInformation():
+    def __init__(self):
+        # str to something
+        self.resources = {}  
+        self.functions = {} 
+        self.constants = {} 
+        self.variables = {}
+        self.deriv_resources = {}
+        self.deriv_functions = {}
+        
+    def found_constant(self, name, element):
+        check_isinstance(name, str)
+        where = element.where
+        infer_debug('found constant: %s' % name)
+        if name in self.constants:
+            msg = 'Duplicated constants?'
+            raise DPInternalError(msg, where=where) 
+        self.constants[name] = SemanticInformationForEntity(element) 
+    
+    def is_constant(self, name):
+        check_isinstance(name, str)
+        return name in self.constants
+    
+    def constant_mark_used(self, name, element):
+        where = element.where
+        self.constants[name].add_use(where)
+        
+        
+def infer_types_of_variables(line_exprs, context, si):
+    check_isinstance(si, SemanticInformation)
+#     constants = set()
     # These are the resources and functions defined by the model
     resources = set()
     functions = set()
@@ -100,14 +153,14 @@ def infer_types_of_variables(line_exprs, context):
             
         resources.add(rname.value)
 
-    def found_cname(cname):
-        check_isinstance(cname, CDP.CName)
-        infer_debug('found constant: %s' % cname.value)
-        if cname.value in constants:
-            msg = 'Duplicated constants?'
-            raise DPInternalError(msg, where=cname.where) 
-        constants.add(cname.value) 
-        
+#     def found_cname(cname):
+#         check_isinstance(cname, CDP.CName)
+#         infer_debug('found constant: %s' % cname.value)
+#         if cname.value in constants:
+#             msg = 'Duplicated constants?'
+#             raise DPInternalError(msg, where=cname.where) 
+#         constants.add(cname.value) 
+#         
     def found_vname(vname):
         check_isinstance(vname, CDP.VName)
 #         print('found variable: %s' % vname.value)
@@ -116,7 +169,7 @@ def infer_types_of_variables(line_exprs, context):
 
     def is_constant(vref):
         check_isinstance(vref, CDP.VariableRef)
-        it_is =  vref.name in constants
+        it_is = si.is_constant(vref.name)
 #         if it_is:
 #             print('     [yes, %r is constant]' % vref.name)
         return it_is
@@ -172,7 +225,7 @@ def infer_types_of_variables(line_exprs, context):
                 elif x.name in variables:
 #                     print('%r contributes to Flavors.either' % x.name)
                     Flavors.either.add(x.name)  
-                elif x.name in constants:
+                elif si.is_constant(x.name):
 #                     print('%r constant contributes to Flavors.either' % x.name)
                     Flavors.either.add(x.name)  
                 else:
@@ -227,7 +280,7 @@ def infer_types_of_variables(line_exprs, context):
                 found_fname(_)
         
         if isinstance(l, CDP.SetNameConstant):
-            found_cname(l.name)
+            si.found_constant(l.name.value, l)
             
         if isinstance(l, CDP.VarStatement):
             for _ in get_odd_ops(unwrap_list(l.vnames)):
@@ -245,18 +298,17 @@ def infer_types_of_variables(line_exprs, context):
             if all_constant:
                 # This can become simply a constant
                 infer_debug('The value %r can be recognized as constant' % str(l.name.value))
-                constants.add(l.name.value)
+                si.found_constant(l.name.value, l)
             else:
-#                 This is a special case, because it is the place
-#                 where the syntax is ambiguous.
-#                 
-#                     x = Nat: 1 + r
-#                 
-#                 could be interpreted with r being a functionality
-#                 or a resource.
-#                 
-#                 By default it is parsed as SetNameRValue, and so we get here.
-#                 
+            # This is a special case, because it is the place
+            # where the syntax is ambiguous.
+            #  
+            #     x = Nat: 1 + r
+            #  
+            # could be interpreted with r being a functionality
+            # or a resource.
+            #  
+            # By default it is parsed as SetNameRValue, and so we get here.
                 try:
                     w = l.where
                     s = w.string[w.character:w.character_end]
@@ -304,7 +356,7 @@ def infer_types_of_variables(line_exprs, context):
                         # we replace the line
                         line_exprs[i] = alt
                 else:
-#                     print('setting %r as deriv_resources' % l.name.value)
+                    #  print('setting %r as deriv_resources' % l.name.value)
                     deriv_resources.add(l.name.value)
 
         elif isinstance(l, CDP.SetNameFValue):
@@ -314,17 +366,19 @@ def infer_types_of_variables(line_exprs, context):
         elif isinstance(l, (CDP.FunStatement, CDP.ResStatement)):
             pass
         else:
-        #             print('line %s' % type(l).__name__)
+            #  print('line %s' % type(l).__name__)
             pass
     
-    refine0 = lambda x, parents: refine(x, parents, constants, resources, functions, 
+    refine0 = lambda x, parents: refine(x, parents, si, None, resources, functions, 
                                         variables, deriv_resources, deriv_functions,
                                         context=context)
     line_exprs = [namedtuple_visitor_ext(_, refine0) for _ in line_exprs]
     
-#     for l in line_exprs:
-#         print recursive_print(l)
+    # for l in line_exprs:
+    #     print recursive_print(l)
     return line_exprs
+
+
 
 def nt_string(x):
     assert isnamedtuplewhere(x)
@@ -369,8 +423,8 @@ def namedtuple_visitor_ext(x, transform, parents=None):
 
     return x1
 
-def refine(x, parents,
-           constants, resources, functions, variables, deriv_resources,
+def refine(x, parents, si,
+           _constants, resources, functions, variables, deriv_resources,
            deriv_functions, context):
     
     is_rvalue_context = any(k == 'rvalue' for _, k in parents)
@@ -379,9 +433,10 @@ def refine(x, parents,
     assert not (is_rvalue_context and is_fvalue_context)
     
     if isinstance(x, CDP.VariableRef):
-        if x.name in constants:
+        if si.is_constant(x.name):
             cname = CDP.CName(x.name, where=x.where)
             res = CDP.ConstantRef(cname=cname, where=x.where)
+            si.constant_mark_used(x.name, x)
             return res
         elif x.name in resources and x.name in functions:
             if is_fvalue_context:
@@ -450,7 +505,7 @@ def refine(x, parents,
             # raise DPInternalError(msg)
    
     if isinstance(x, CDP.SetNameGenericVar):
-        if x.value in constants:
+        if si.is_constant(x.value):
             return CDP.CName(x.value, where=x.where)
 
         elif x.value in deriv_resources:

@@ -21,7 +21,6 @@ class MakeFiguresNDP(MakeFigures):
             'ndp_graph_templatized': 'ndp_graph_templatized_LR',
             'ndp_graph_templatized_labeled': 'ndp_graph_templatized_labeled_LR',
             'ndp_graph_normal': 'ndp_graph_normal_LR',
-            
         }
         
         from mcdp_report.gdc import STYLE_GREENREDSYM

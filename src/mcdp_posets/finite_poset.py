@@ -92,7 +92,6 @@ class FinitePoset(FiniteCollectionAsSpace, Poset):
 
     def join(self, a, b):
         from mcdp_posets.find_poset_minima.baseline_n2 import poset_minima
-
         # find all descendants
         da = self._get_upper_closure(a)
         db = self._get_upper_closure(b)

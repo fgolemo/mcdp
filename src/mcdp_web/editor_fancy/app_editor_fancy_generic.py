@@ -199,7 +199,9 @@ class AppEditorFancyGeneric():
 
 
         def go():
-            res = process_parse_request(library, string, spec, key, cache)
+            from mcdp_library_tests.tests import timeit
+            with timeit('process_parse_request'):
+                res = process_parse_request(library, string, spec, key, cache)
             res['request'] = req
             return res
 
@@ -260,9 +262,10 @@ class AppEditorFancyGeneric():
             with open(filename, 'w') as f:
                 f.write(source)
 
-            l._update_file(filename)
+            l._update_file_from_editor(filename)
 
             raise HTTPFound(url_edit)
+
 
 @contract(html=bytes, returns=bytes)
 def html_mark(html, where, add_class):
@@ -335,8 +338,8 @@ def process_parse_request(library, string, spec, key, cache):
             string_nospaces_parse_tree_interpreted = None
              
         def postprocess(block):
-            context1 = library._generate_context_with_hooks()
-            x = parse_refine(block, context1)
+#             context1 = library._generate_context_with_hooks()
+            x = parse_refine(block, context0)
             Tmp.string_nospaces_parse_tree_interpreted = x 
             return x
         

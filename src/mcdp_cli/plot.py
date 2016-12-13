@@ -8,10 +8,12 @@ from contracts.utils import raise_desc
 from decent_params import UserError
 from mcdp_cli.utils_wildcard import expand_string
 from mcdp_figures import MakeFiguresNDP, MakeFiguresPoset
+from mcdp_lang.parse_interface import parse_ndp_refine
 from mcdp_lang.syntax import Syntax
 from mcdp_library import Librarian
 from mcdp_report.dp_graph_tree_imp import dp_graph_tree
 from mcdp_report.gg_utils import gg_get_formats
+from mcdp_web.editor_fancy.app_editor_fancy_generic import html_mark
 from mcdp_web.renderdoc.highlight import get_minimal_document
 from mocdp import logger
 from mocdp.comp.recursive_name_labeling import get_labelled_version
@@ -30,11 +32,13 @@ def get_ndp(data):
         data['ndp'] = library.load_ndp(model_name)
     return data['ndp']
 
+
 def get_dp(data):
     ndp = get_ndp(data)
     if not 'dp' in data:
         data['dp'] = ndp.get_dp()
     return data['dp']
+
 
 def return_formats2(gg, prefix):
     formats = ['png', 'pdf', 'svg']
@@ -56,6 +60,7 @@ def dp_graph_tree_labeled_(data):
     
     gg = dp_graph_tree(dp, compact=False)
     return return_formats2(gg, 'dp_graph_tree_labeled')
+
 
 def dp_graph_tree_compact_labeled_(data):
     ndp = get_ndp(data)
@@ -95,6 +100,7 @@ def get_lines_to_hide(params):
         return []
     lines = hide.split(':')
     return [int(_) for _ in lines]
+
 
 def syntax_pdf(data):
     """ Returns a PDF string """
@@ -153,6 +159,7 @@ def syntax_pdf(data):
     except CmdException as e:
         raise e
         
+        
 @contract(data=dict)
 def syntax_frag(data):
     from mcdp_report.html import ast_to_html
@@ -163,17 +170,38 @@ def syntax_frag(data):
     res1 = ('html', 'syntax_frag', res)
     return [res1]
 
+
 @contract(data=dict)
-def syntax_doc(data):
+def syntax_doc(data, mark_warnings=True):
     from mcdp_report.html import ast_to_html
     s = data['s']
     lines_to_hide = get_lines_to_hide(data['params'])
     def ignore_line(lineno):
         return lineno in lines_to_hide
 
-    body_contents = ast_to_html(s,
-                      ignore_line=ignore_line, parse_expr=Syntax.ndpt_dp_rvalue)
-    res = get_minimal_document(body_contents, add_markdown_css=True)
+    library = data['library']
+    context = library._generate_context_with_hooks()
+    
+    class Tmp:
+        string_nospaces_parse_tree_interpreted = None
+        
+    def postprocess(block):
+        x = parse_ndp_refine(block, context)
+        Tmp.string_nospaces_parse_tree_interpreted = x
+         
+        return x
+    
+    body = ast_to_html(s, 
+                    ignore_line=ignore_line, 
+                    parse_expr=Syntax.ndpt_dp_rvalue,
+                    postprocess=postprocess)
+
+    if mark_warnings:
+        for w in context.warnings:
+            if w.where is not None:
+                body = html_mark(body, w.where, "language_warning")
+        
+    res = get_minimal_document(body, add_markdown_css=True)
     
     # TODO: add minimal document
     res1 = ('html', 'syntax_doc', res)
@@ -207,6 +235,8 @@ allplots  = {
     ('syntax_frag', syntax_frag),
     ('syntax_pdf', syntax_pdf), 
     ('tex_form', tex_form), 
+    
+    # we need these because of "labeled"
     ('dp_graph_tree_labeled', dp_graph_tree_labeled_),
     ('dp_graph_tree_compact_labeled', dp_graph_tree_compact_labeled_),
     ('dp_repr_long_labeled', dp_repr_long_labeled),
@@ -230,26 +260,8 @@ class MFCall():
         
 mf = MakeFiguresNDP(ndp=None)    
 for name in mf.available():
-    allplots.add((name, MFCall(name)))
-
-# 
-# class DP_MFCall():
-#     def __init__(self, name):
-#         self.name = name
-#         
-#     def __call__(self, data):
-#         dp = get_dp(data)
-# 
-#         mf = MakeFiguresDP(dp=dp)
-#         formats = mf.available_formats(self.name)
-#         res = mf.get_figure(self.name, formats)
-#         results = [(_, self.name, res[_]) for _ in formats]
-#         return results
-#         
-# mf = MakeFiguresDP(dp=None)    
-# for name in mf.available():
-#     allplots.add((name, DP_MFCall(name)))
-#            
+    allplots.add((name, MFCall(name))) 
+    
 @contract(returns='tuple(str,*)')
 def parse_kv(x):
     return tuple(x.split('='))
@@ -380,7 +392,7 @@ class PlotDP(QuickAppBase):
     def define_program_options(self, params):
         params.accept_extra()
 
-        possible = [p for p, _ in allplots]
+        possible = ", ".join(sorted([p for p, _ in allplots]))
 
         params.add_string('out', help='Output dir', default=None)
         params.add_string('extra_params', help='Add extra params', default="")

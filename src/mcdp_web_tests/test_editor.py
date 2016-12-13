@@ -1,5 +1,3 @@
-from nose.tools import assert_equal
-
 from contracts.utils import check_isinstance, raise_desc
 from mcdp_library_tests.tests import get_test_library
 from mcdp_tests.generation import for_all_source_mcdp

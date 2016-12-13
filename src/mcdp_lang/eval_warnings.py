@@ -8,6 +8,7 @@ class MCDPWarnings:
     LANGUAGE_REFERENCE_OK_BUT_IMPRECISE = 'Language imprecise'
     LANGUAGE_CONSTRUCT_DEPRECATED = 'Deprecated construct'
     LANGUAGE_AMBIGUOS_EXPRESSION = 'Ambiguous expression'
+    LANGUAGE_UNUSED_CONSTANT = 'Unused constant'
     
 def warning_format_where(where):
     wheres = format_where(where, context_before=2, mark=None, arrow=False, 

@@ -7,6 +7,7 @@ from mcdp_dp import (CatalogueDP, CoProductDP, NotFeasible, Template, Constant,
                      Limit, MaxF1DP, MinF1DP, MinusValueDP, MinusValueNatDP,
                      MinusValueRcompDP)
 from mcdp_dp import PlusValueNatDP
+from mcdp_lang.eval_warnings import MCDPWarnings
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp, parse_poset
 from mcdp_lang.pyparsing_bundled import Literal
@@ -17,13 +18,12 @@ from mcdp_posets import LowerSets, Rcomp, UpperSet, UpperSets, PosetProduct, get
 from mcdp_posets import Nat
 from mcdp_posets.rcomp_units import R_dimensionless
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
+from mocdp.comp.context import ModelBuildingContext, Context
 from mocdp.comp.recursive_name_labeling import get_names_used
 from mocdp.exceptions import DPNotImplementedError, DPSemanticError
 
 from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
     parse_wrap_check)
-from mocdp.comp.context import ModelBuildingContext, Context
-from mcdp_lang.eval_warnings import MCDPWarnings
 
 
 @comptest
