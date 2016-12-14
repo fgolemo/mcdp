@@ -152,7 +152,7 @@ def opt_basic_1_long():
             s.text('info', msg)
 
     fn = os.path.join(outdir, 'opt_basic_1.html')
-    print fn
+    print(fn)
     r.to_html(fn)
 
 
@@ -372,11 +372,9 @@ def opt_basic_7():
 
     f1 = express_value_in_isomorphic_space(F, f0, F1)
 
-    res = dp.solve(f1)
-    print res
-
-
-
+    _res = dp.solve(f1)
+    #print res
+ 
 
 @comptest
 def opt_basic_8():

@@ -22,20 +22,25 @@ manual_contents = [
     ('manual', 'tour_templates'),
     ('manual', 'tour_uncertainty'),
     ('manual', 'scenarios'),
-    ('droneD_complete_v2', 'drone_complete'),
     ('plugs', 'sockets'),
     ('plugs', 'sockets2'),
     ('actuation', 'actuation_tour'),
     ('rover_energetics', 'energy_choices'),
     ('rover_energetics', 'energy_choices2'),
     ('rover_energetics', 'energy_choices3'),
-    ('manual', 'reference'),
-    ('manual', 'types'),
-    ('manual', 'types_scalar'),
-    ('manual', 'types_finite_posets'),
-    ('manual', 'types_poset_products'),
+    ('droneD_complete_v2', 'drone_complete'),
+    ('manual', 'lang_reference'),
+    ('manual', 'lang_types'),
+    ('manual', 'lang_types_scalar'),
+    ('manual', 'lang_types_finite_posets'),
+    ('manual', 'lang_types_poset_products'),
 #     ('manual', 'adv_approximations'),
-    ('manual', 'extra'),
+    ('manual', 'lang_unicode'),
+    ('manual', 'lang_extra'),
+    
+    ('manual', 'user'),
+    ('manual', 'developer'),
+
 ]
 
 class RenderManual(QuickApp):

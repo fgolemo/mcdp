@@ -30,7 +30,6 @@ from system_cmd import CmdException, system_cmd_result
 
 from mcdp_figures import( MakeFiguresNDP, MakeFiguresTemplate, 
     MakeFiguresPoset)
-import math
 
 
 

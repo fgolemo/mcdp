@@ -467,10 +467,6 @@ file:///Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/manual.
 - automatically beautify the code in the manual, unless there is 
   a class "dontbeautify"
 
+- use preceq instead of <=
+- mcdp_web: add documents in the dropdown 
 
-
-pre code { font-size: 0.8ex !important; padding:0 !important;}
-pre  { font-size: 0.9ex; padding: 0 !important;}
-/*code { border: 1px solid red; }
-pre { border: 1px solid blue; }
-*/  
