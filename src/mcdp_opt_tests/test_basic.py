@@ -384,8 +384,9 @@ def opt_basic_8():
     library = get_test_library2(libnames)
 
     outdir = 'out/opt_basic_8'
-
-    library.use_cache_dir(os.path.join(outdir, 'cache'))
+    cache = os.path.join(outdir, 'cache')
+    print('using cache %s' % cache)
+    library.use_cache_dir(cache)
 
     ndp = library.load_ndp('DaguChassis')
     R = ndp.get_rtype('pwm1')

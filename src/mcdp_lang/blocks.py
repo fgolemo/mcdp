@@ -1,13 +1,19 @@
 # -*- coding: utf-8 -*-
-from .parts import CDPLanguage
+from contracts import contract
 from contracts.utils import indent
 from mocdp.comp import NotConnected
 
+from .parts import CDPLanguage
+
+
 CDP = CDPLanguage
 
+#@contract(returns='tuple(set($CFunction), set($CResource))')
+@contract(returns='tuple(set, set)')
 def get_missing_connections(context):
-    connected_fun = set()  # contains (name, f)
-    connected_res = set()  # contains (name, f)
+    from mocdp.comp.context import CFunction, CResource
+    connected_fun = set()  # contains CFunction(name, f)
+    connected_res = set()  # contains CResource(name, f)
     for c in context.connections:
         connected_fun.add((c.dp2, c.s2))
         connected_res.add((c.dp1, c.s1))
@@ -19,12 +25,12 @@ def get_missing_connections(context):
 
         if not context.is_new_function(n):
             for fn in ndp.get_fnames():
-                available_fun.add((n, fn))
+                available_fun.add(CFunction(n, fn))
 
         if not context.is_new_resource(n):
             for rn in ndp.get_rnames():
-                available_res.add((n, rn))
-
+                available_res.add(CResource(n, rn))
+                
     unconnected_fun = available_fun - connected_fun
     unconnected_res = available_res - connected_res
 
@@ -42,9 +48,7 @@ def check_missing_connections(context):
     s = ""
     if unconnected_fun:
         s += "There are some unconnected functions:"
-        
-        
-        
+         
         for n, fn in xsorted(unconnected_fun):
             s += '\n- function %r of dp %r' % (fn, n)
             if False:
@@ -77,5 +81,9 @@ def check_missing_connections(context):
                 s += '\n' + indent(msg, 'help: ')
 
     if s:
-        raise NotConnected(s)
+        e = NotConnected(s)
+        e.unconnected_fun = unconnected_fun
+        e.unconnected_res = unconnected_res
+        raise e
+#         raise NotConnected(unconnected_fun, unconnected_res)
     

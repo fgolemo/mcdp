@@ -30,6 +30,8 @@ from system_cmd import CmdException, system_cmd_result
 
 from mcdp_figures import( MakeFiguresNDP, MakeFiguresTemplate, 
     MakeFiguresPoset)
+import math
+
 
 
 def bs(fragment):
@@ -373,7 +375,10 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                     source_code = source_code.replace('\t', ' ' * 4)
                 else:
                     source_code = get_source_code(tag)
-
+                    
+                # remove spurious indentation
+                source_code = source_code.strip()
+                
                 # we are not using it
                 _realpath = realpath
                 context = Context()
@@ -401,17 +406,17 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                         tag_label.append(tag['label'])
                         rendered.insert(0, tag_label)
 
-                    max_len = max(map(len, source_code.split('\n')))
-                    # account for the label
+                    max_len = max_len_of_pre_html(html)
+                    frag2.pre['string_len'] = max_len
                     if tag.has_attr('label'):
                         max_len = max(max_len, len(tag['label']) + 6)
-
-                    # need at least 1 to account for padding etc.
-                    bonus = 1
-                    style = 'width: %dch;' % (max_len + bonus)
+                        
+                    add_style_for_size(frag2.pre, max_len)
+                    style = ''
                 else:
                     # using <code>
                     rendered = frag2.pre.code
+                    
                     style = ''
 
                 if tag.has_attr('style'):
@@ -493,8 +498,37 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
     go('code.mcdp_value', Syntax.rvalue, "mcdp_value", use_pre=False)
     go('code.mcdp_template', Syntax.template, "mcdp_template", use_pre=False)
 
+    compute_size_for_pre_without_class(soup)
+
     return str(soup)
 
+def compute_size_for_pre_without_class(soup):
+    for pre in soup.select('pre'):
+        if not pre.has_attr('class'):
+            s = ''.join(pre.findAll(text=True))
+            max_len = max_len_of_pre_html(s)
+            add_style_for_size(pre, max_len)
+
+# think of :[[space]] × [[space]] × [["..."]] × [[space]]
+def max_len_of_pre_html(html):
+    from mcdp_report_ndp_tests.test0 import project_html
+    source2 = project_html(html)
+    line_len = lambda _: len(unicode(_, 'utf-8').rstrip())
+    max_len = max(map(line_len, source2.split('\n')))
+    return max_len 
+
+def add_style_for_size(element, max_len):         
+    fontsize = 14 # px
+    fontname = 'Courier'
+    ratio = 0.65 # ratio for Courier font
+    width = fontsize * (max_len) * ratio
+    style = 'font-family: %s; font-size: %spx; width: %dpx;' % (fontname, fontsize, width)
+    
+    if element.has_attr('style'):
+        style = element['style'] +';' + style
+            
+    element['style'] = style
+    
 
 @contract(frag=str, returns=str)
 def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, generate_pdf):

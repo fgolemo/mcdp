@@ -12,7 +12,8 @@ from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPSemanticError
 
 from .context import Connection  # @UnusedImport
-from .interfaces import NamedDP, NotConnected
+from .interfaces import NamedDP
+from mocdp.comp.interfaces import NotConnected
 
 
 __all__ = [

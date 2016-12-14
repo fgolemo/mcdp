@@ -11,8 +11,13 @@ __all__ = [
 ]
 
 class NotConnected(Exception):
-    pass
-
+    """
+        Use the following fields to annotate:
+        
+        self.unconnected_functions = set of CFunction
+        self.unconnected_resources = set of CResources
+    """
+     
 class NamedDP():
     """ A DP with names """
     __metaclass__ = ABCMeta

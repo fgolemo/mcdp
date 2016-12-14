@@ -9,8 +9,12 @@ from pyramid.renderers import render_to_response  # @UnresolvedImport
 
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
+from mcdp_lang.eval_warnings import warn_language, MCDPWarnings
+from mcdp_lang.parts import CDPLanguage
+from mcdp_lang.refinement import SemanticInformation, infer_types_of_variables
 from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_lang.syntax import Syntax
+from mcdp_lang.utils_lists import unwrap_list
 from mcdp_library import MCDPLibrary
 from mcdp_report.html import ast_to_html, ATTR_WHERE_CHAR, ATTR_WHERE_CHAR_END
 from mcdp_web.editor_fancy.image import get_png_data_model, \
@@ -19,6 +23,7 @@ from mcdp_web.utils import (ajax_error_catch,
     format_exception_for_ajax_response, response_image)
 from mcdp_web.utils.response import response_data
 from mocdp import logger
+from mocdp.comp.interfaces import NamedDP, NotConnected
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 
 
@@ -268,8 +273,11 @@ class AppEditorFancyGeneric():
 
 
 @contract(html=bytes, returns=bytes)
-def html_mark(html, where, add_class):
-    """ Takes a utf-8 encoded string and returns another html string. """
+def html_mark(html, where, add_class, tooltip=None):
+    """ Takes a utf-8 encoded string and returns another html string. 
+    
+        The tooltip functionality is disabled for now.
+    """
     check_isinstance(html, bytes)
     
     html = '<www><pre>' + html + '</pre></www>'
@@ -307,6 +315,12 @@ def html_mark(html, where, add_class):
         
     e2 = ordered[0]    
     e2['class'] = e2.get('class', []) + [add_class]
+    
+    if tooltip is not None:
+        script = 'show_tooltip(this, %r);' % tooltip
+        tooltip_u =  unicode(tooltip, 'utf-8') 
+        e2['onmouseover'] = script
+        e2['title'] = tooltip_u 
         
     pre = soup.body.www
     s = str(pre)
@@ -338,7 +352,6 @@ def process_parse_request(library, string, spec, key, cache):
             string_nospaces_parse_tree_interpreted = None
              
         def postprocess(block):
-#             context1 = library._generate_context_with_hooks()
             x = parse_refine(block, context0)
             Tmp.string_nospaces_parse_tree_interpreted = x 
             return x
@@ -361,11 +374,43 @@ def process_parse_request(library, string, spec, key, cache):
                 raise
             
             thing = parse_eval(Tmp.string_nospaces_parse_tree_interpreted, context0)
+            
+            if isinstance(thing, NamedDP):
+                ndp = thing
+                x = Tmp.string_nospaces_parse_tree_interpreted
+                CDP = CDPLanguage
+                
+                if isinstance(x, CDP.BuildProblem):
+                    si = SemanticInformation()
+                    line_exprs = unwrap_list(x.statements.statements)
+                    infer_types_of_variables(line_exprs, context0, si)
+                    try:
+                        ndp.check_fully_connected()
+                    except NotConnected as e:
+                        if hasattr(e, 'unconnected_fun'):
+                            ufs = e.unconnected_fun
+                            urs = e.unconnected_res
+                            
+                            for uf in ufs:
+                                if uf.dp in si.instances:    
+                                    msg = 'Unconnected function “%s”.' % uf.s
+                                    element = si.instances[uf.dp].element_defined
+                                    which = MCDPWarnings.UNCONNECTED_FUNCTION
+                                    warn_language(element, which, msg, context0)
+                
+                            for ur in urs:
+                                if ur.dp in si.instances:
+                                    msg = 'Unconnected resource “%s”.' % ur.s
+                                    element = si.instances[ur.dp].element_defined
+                                    which = MCDPWarnings.UNCONNECTED_RESOURCE 
+                                    warn_language(element, which, msg, context0)
+            
         except DPSyntaxError as e:
             return format_syntax_error2(parse_expr, string, e)
         except (DPSemanticError, DPInternalError) as e:
             highlight_marked = html_mark(highlight, e.where, "semantic_error")
-            cache[key] = None  # XXX
+            
+            cache[key] = None  # meaning we failed
             res = format_exception_for_ajax_response(e, 
                                 quiet=(DPSemanticError, DPInternalError))
             res['highlight'] = highlight_marked
@@ -379,15 +424,24 @@ def process_parse_request(library, string, spec, key, cache):
     if Tmp.string_nospaces_parse_tree_interpreted:
         suggestions = get_suggestions(Tmp.string_nospaces_parse_tree_interpreted)
         string_with_suggestions = apply_suggestions(string, suggestions)
-        for where, _replacement in suggestions:
-            highlight = html_mark(highlight, where, "suggestion")
+        for where, replacement in suggestions:
+            if where.character < where.character_end:
+                orig = where.string[where.character:where.character_end]
+                tooltip = 'Aesthetic suggestion: replace “%s” with “%s”.' % (orig, replacement)
+                bulb = '\xf0\x9f\x92\xa1'
+                tooltip += ' The “%sbeautify” button on the top right does it for you.' % bulb
+            else:
+                tooltip = 'Add “%s”.' % replacement
+            highlight = html_mark(highlight, where, "suggestion", tooltip=tooltip)
     else:
         string_with_suggestions = None
      
     warnings = []
     for w in context0.warnings:
         if w.where is not None:
-            highlight = html_mark(highlight, w.where, "language_warning")
+            tooltip = w.msg
+            highlight = html_mark(highlight, w.where, "language_warning",
+                                  tooltip=tooltip)
         warning = w.format_user()
         
         warnings.append(sanitize(warning.strip())) 

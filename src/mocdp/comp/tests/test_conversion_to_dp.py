@@ -7,7 +7,7 @@ from mcdp_dp_tests.dual import dual01_chain
 from mcdp_posets import UpperSets
 from mcdp_tests.generation import for_all_nameddps
 from mocdp import MCDPConstants
-from mocdp.comp.interfaces import NotConnected
+from mocdp.comp.interfaces import  NotConnected
 
 
 if MCDPConstants.test_dual01_chain:

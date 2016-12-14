@@ -268,8 +268,6 @@ span.language_warning {
     -moz-text-decoration-style: wavy;
     text-decoration-color: orange !important;
 }
-
-
 span.suggestion {
 
     text-decoration: underline;
@@ -279,3 +277,16 @@ span.suggestion {
     text-decoration-color: gray;
 }
 */
+span.has_tooltip {
+    /*border: solid 1px red;*/
+}
+div.tooltip {
+    position: absolute;
+    visibility: hidden;
+}
+span.has_tooltip:hover div.tooltip  {
+    visibility: visible;
+    background-color: yellow !important;
+    padding: 5px;
+}
+

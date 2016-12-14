@@ -931,41 +931,41 @@ class Syntax():
     
     rvalue_power_expr = rvalue_power_expr_1 | rvalue_power_expr_2 | rvalue_power_expr_3
 
-    constraint_expr_geq = sp(fvalue + GEQ - rvalue,
+    constraint_expr_geq = sp(fvalue + ow + GEQ - rvalue,
                              lambda t: CDP.Constraint(fvalue=t[0],
                                                       rvalue=t[2],
                                                       prep=t[1])).setName('constraint_expr_geq')
 
-    constraint_expr_leq = sp(rvalue + LEQ - fvalue,
+    constraint_expr_leq = sp(rvalue + ow +  LEQ - fvalue,
                              lambda t: CDP.Constraint(fvalue=t[2],
                                                       rvalue=t[0],
                                                       prep=t[1])).setName('constraint_expr_leq')
 
 
-    constraint_invalid1a = sp(fvalue + GEQ + fvalue,
+    constraint_invalid1a = sp(fvalue + ow +  GEQ + fvalue,
                              lambda t: CDP.ConstraintInvalidFF(fvalue1=t[0],
                                                                fvalue2=t[2],
                                                                prep=t[1]))
-    constraint_invalid2a = sp(rvalue + GEQ + rvalue,
+    constraint_invalid2a = sp(rvalue + ow +  GEQ + rvalue,
                              lambda t: CDP.ConstraintInvalidRR(rvalue1=t[0],
                                                                rvalue2=t[2],
                                                                prep=t[1]))
-    constraint_invalid1b = sp(fvalue + LEQ + fvalue,
+    constraint_invalid1b = sp(fvalue + ow +  LEQ + fvalue,
                              lambda t: CDP.ConstraintInvalidFF(fvalue1=t[0],
                                                                fvalue2=t[2],
                                                                prep=t[1]))
-    constraint_invalid2b = sp(rvalue + LEQ + rvalue,
+    constraint_invalid2b = sp(rvalue + ow + LEQ + rvalue,
                              lambda t: CDP.ConstraintInvalidRR(rvalue1=t[0],
                                                                rvalue2=t[2],
                                                                prep=t[1]))
-    constraint_invalid3a = sp(rvalue + GEQ + fvalue,
+    constraint_invalid3a = sp(rvalue + ow + GEQ + fvalue,
                              lambda t: CDP.ConstraintInvalidSwapped(rvalue=t[0],
                                                                     fvalue=t[2],
                                                                     prep=t[1]))
 
 
 
-    constraint_invalid3b = sp(fvalue + LEQ + rvalue,
+    constraint_invalid3b = sp(fvalue + ow + LEQ + rvalue,
                              lambda t: CDP.ConstraintInvalidSwapped(rvalue=t[2],
                                                                     fvalue=t[0],
                                                                     prep=t[1]))
@@ -1020,10 +1020,10 @@ class Syntax():
     res_shortcut1 = sp(REQUIRES + rname + FOR - dpname,
                        lambda t: CDP.ResShortcut1(t[0], t[1], t[2], t[3])).setName('res_shortcut1')
 
-    fun_shortcut2 = sp(PROVIDES + fname + (LEQ | EQ) - fvalue,
+    fun_shortcut2 = sp(PROVIDES + fname + ow + (LEQ | EQ) - fvalue,
                        lambda t: CDP.FunShortcut2(t[0], t[1], t[2], t[3])).setName('fun_shortcut2')
 
-    res_shortcut2 = sp(REQUIRES + rname + (GEQ | EQ) - rvalue,
+    res_shortcut2 = sp(REQUIRES + rname + ow + (GEQ | EQ) - rvalue,
                        lambda t: CDP.ResShortcut2(t[0], t[1], t[2], t[3])).setName('res_shortcut2')
 
     fun_shortcut3 = sp(PROVIDES + one_or_more_fnames + USING + dpname,

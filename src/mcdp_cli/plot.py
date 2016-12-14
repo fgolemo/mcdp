@@ -199,7 +199,7 @@ def syntax_doc(data, mark_warnings=True):
     if mark_warnings:
         for w in context.warnings:
             if w.where is not None:
-                body = html_mark(body, w.where, "language_warning")
+                body = html_mark(body, w.where, "language_warning", tooltip=w.format_user())
         
     res = get_minimal_document(body, add_markdown_css=True)
     

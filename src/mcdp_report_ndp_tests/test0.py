@@ -34,6 +34,11 @@ def gettext(element, n):
 
 @for_all_source_mcdp
 def check_syntax(filename, source):  # @UnusedVariable
+    
+    # skip generated files (hack)
+    if 'drone_unc2_' in filename:
+        return
+    
     # print filename
     source = open(filename).read()
     try:

@@ -150,20 +150,20 @@ The syntax is:
 For example:
 
 <pre class='mcdp_value'>
-    Top V
+Top V
 </pre>
 
 <pre class='mcdp_value'>
-    ⊤ V
+⊤ V
 </pre>
 
 
 <pre class='mcdp_value'>
-    Bottom V
+Bottom V
 </pre>
 
 <pre class='mcdp_value'>
-    ⊥ V
+⊥ V
 </pre>
 
 
@@ -186,7 +186,7 @@ For example:
 To create an empty set:
 
 <pre class='mcdp_value'>
-    EmptySet [[space]]
+EmptySet [[space]]
 </pre>
 
 
@@ -195,7 +195,7 @@ To create an empty set:
 The syntax is:
 
 <pre class='mcdp_value'>
-    upperclosure [[ set ]]
+upperclosure [[ set ]]
 </pre>
 
 For example:

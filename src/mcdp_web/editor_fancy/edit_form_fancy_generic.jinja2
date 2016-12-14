@@ -50,9 +50,9 @@
 </tr>
 
   <tr style=''><td style=' border: solid 0px gray; width: 50%'>
-	  <div id='around_editor'>
-	  	<!--<code><pre contenteditable="true" id='editor'></pre></code>-->
-	  	<pre><code contenteditable="true" id='editor'>{{source_code|safe}}</code></pre>
+  		<!-- do not add spaces between div and pre because we
+  			 are doing tricks with html()-->
+	  <div id='around_editor'><pre><code contenteditable="true" id='editor'>{{source_code|safe}}</code></pre>
 	  </div>
   </td>
 
@@ -92,6 +92,7 @@
 
 	$(document).ready(function() {
 
+		$(document).tooltip();
 		$("#editor").keyup(keyup);
 		$( "button#close" ).click(click_button_close);
 		$( "button#save" ).click(click_button_save);
@@ -104,10 +105,38 @@
 	    update_image();
 	});
 
+	function show_tooltip(obj, s) {
+		console.log('tooltip' + s);
+		// c = '<pre>'+ s + '</pre>'
+		// $( obj ).tooltip({'content': c});
+		$( obj ).tooltip(); //{'content': c});
+		//$( obj ).tooltip();
+	}
 	function current_text() {
 		text = $("#editor").text();
-		//console.log($("#editor").html());
-		//console.log(text);
+			
+			// h = $("#around_editor").html();
+			// console.log('h: ' + h);
+			// parsed = $.parseHTML(h); 
+			// // console.log('parsed');
+			// // console.log(parsed);
+			// var oParser = new DOMParser();
+			// var oDOM = oParser.parseFromString('<pre>'+ h + '</pre>', "text/xml");
+			// // console.log('oDOM');
+			// // console.log(oDOM);
+
+			// var tooltips = document.getElementsByClassName('tooltip');
+
+			// while(tooltips[0] ) {
+	  //   		tooltips[0].parentNode.removeChild(tooltips[0]);
+			// }
+
+			// text = $(oDOM).text();
+			// console.log('text odom');
+			// console.log(text);
+			
+			// var oSerializer = new XMLSerializer();
+			// var sXML = oSerializer.serializeToString(oDOM);
 		return text;
 	}
 
@@ -323,6 +352,8 @@
 	function click_button_save() {
 		$('#save_status').html('saving...');
 		data = {'text': current_text()};
+		// console.log('data');
+		// console.log(data);
 		ajax_send("save", data, on_comm_failure, 
 				  click_button_save_failure, click_button_save_success);
 	}

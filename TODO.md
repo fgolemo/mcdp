@@ -445,4 +445,32 @@ file:///Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/manual.
 
 - unused resources, unused functions
 
-- disconnected warnings!
+- refactor SemanticInformation - only done for Constants so far
+
+- in catalogue, model2 should be in yellow (or implementation color)
+- maybe the numbers and the units should not be orange
+
+- web interface: interface for ignore functions/resources
+
+  Mode 1:
+    function f1 : constrain/ignore (= constrain to >= Minimals P)
+    resource r1 : minimize/constrain/ignore (constrain <= Maximals R)
+
+  Mode 2:
+    function f1 : maximize/constrain/ignore (= constrain to >= Minimals P)
+    resource r1 : constrain/ignore (constrain <= Maximals R)
+
+
+- refactor: mv mcdp_web/render_doc in mcdp_docs
+
+- remove [] everywhere
+- automatically beautify the code in the manual, unless there is 
+  a class "dontbeautify"
+
+
+
+pre code { font-size: 0.8ex !important; padding:0 !important;}
+pre  { font-size: 0.9ex; padding: 0 !important;}
+/*code { border: 1px solid red; }
+pre { border: 1px solid blue; }
+*/  

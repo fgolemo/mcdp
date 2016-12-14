@@ -24,8 +24,10 @@ mcdp {
    current = max(mass * c, 0.4 A)
 
    endurance = (provided motion).endurance
-   rigid_body = max(max((provided motion).rigid_body, (provided payload_bottom).rigid_body),
-                    (provided payload_top).rigid_body)
+   rigid_body = max(
+      (provided motion).rigid_body, 
+      (provided payload_bottom).rigid_body,
+      (provided payload_top).rigid_body)
 
    (required pwm1).amp_max >= current
    (required pwm1).voltage_max >= 5 V

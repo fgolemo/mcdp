@@ -38,9 +38,15 @@ pre {
 .ndp_graph_templatized_labeled,
 .template_graph_enclosed {
     max-width: 50em;
+    
+    
 }
 
 span.language_warning { background-color: inherit !important; }
+
+p { max-width: 40em; }
+
+code { page-break-inside: avoid; }
 """
 
 @contract(files_contents='list( tuple( tuple(str,str), str) )', returns='str')

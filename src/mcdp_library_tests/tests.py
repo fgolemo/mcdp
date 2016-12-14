@@ -40,8 +40,8 @@ def get_test_librarian():
         msg = 'Expected more libraries.'
         raise_desc(ValueError, msg, folder, libraries=libraries)
 
-
     return librarian
+
 
 def enumerate_test_libraries():
     """ Returns list of (bigpath, short_name, path) """
@@ -60,6 +60,7 @@ def enumerate_test_libraries():
         found.append(short)
 
     return found
+
 
 @memoize_simple
 def get_test_library(libname):
@@ -104,7 +105,12 @@ def mcdplib_run_make(mcdplib):
     makefile = os.path.join(mcdplib, 'Makefile')
     assert os.path.exists(makefile)
     cwd = mcdplib
-    cmd = ['make', 'clean', 'all']
+    cmd = [
+        'make', 
+        '-j', 
+        'clean', 
+        'all',
+    ]
     from system_cmd.meat import system_cmd_result
     logger.debug('$ cd %s' % cwd)
     env = os.environ.copy()

@@ -81,13 +81,14 @@ class SemanticInformationForEntity():
         
 class SemanticInformation():
     def __init__(self):
-        # str to something
+        # maps str to SemanticInformationForEntity
         self.resources = {}  
         self.functions = {} 
         self.constants = {} 
         self.variables = {}
         self.deriv_resources = {}
         self.deriv_functions = {}
+        self.instances = {}
         
     def found_constant(self, name, element):
         check_isinstance(name, str)
@@ -106,10 +107,17 @@ class SemanticInformation():
         where = element.where
         self.constants[name].add_use(where)
         
+    def found_instance(self, name, element):
+        check_isinstance(name, str)
+        where = element.where
+        if name in self.instances:
+            msg = 'Duplicated instances?'
+            raise DPInternalError(msg, where=where) 
+        self.instances[name] = SemanticInformationForEntity(element) 
         
 def infer_types_of_variables(line_exprs, context, si):
     check_isinstance(si, SemanticInformation)
-#     constants = set()
+
     # These are the resources and functions defined by the model
     resources = set()
     functions = set()
@@ -151,27 +159,15 @@ def infer_types_of_variables(line_exprs, context, si):
             msg = 'The name %r is already used by a variable.' % _
             raise DPSemanticError(msg, where=rname.where)
             
-        resources.add(rname.value)
-
-#     def found_cname(cname):
-#         check_isinstance(cname, CDP.CName)
-#         infer_debug('found constant: %s' % cname.value)
-#         if cname.value in constants:
-#             msg = 'Duplicated constants?'
-#             raise DPInternalError(msg, where=cname.where) 
-#         constants.add(cname.value) 
-#         
+        resources.add(rname.value) 
+    
     def found_vname(vname):
-        check_isinstance(vname, CDP.VName)
-#         print('found variable: %s' % vname.value)
-        # TODO: check not already exists
+        check_isinstance(vname, CDP.VName) 
         variables.add(vname.value)
 
     def is_constant(vref):
         check_isinstance(vref, CDP.VariableRef)
-        it_is = si.is_constant(vref.name)
-#         if it_is:
-#             print('     [yes, %r is constant]' % vref.name)
+        it_is = si.is_constant(vref.name) 
         return it_is
     
     def check_all_constant(rvalue):
@@ -264,7 +260,9 @@ def infer_types_of_variables(line_exprs, context, si):
             l.where.string[l.where.character:l.where.character_end], type(l)))
         from .syntax import Syntax
         # mark functions, resources, variables, and constants
-        if isinstance(l, (CDP.FunStatement, CDP.FunShortcut1, CDP.FunShortcut2)):
+        if isinstance(l, CDP.SetNameNDPInstance):
+            si.found_instance(l.name.value, l.name)
+        elif isinstance(l, (CDP.FunStatement, CDP.FunShortcut1, CDP.FunShortcut2)):
             found_fname(l.fname)
         elif isinstance(l, (CDP.ResStatement, CDP.ResShortcut1, CDP.ResShortcut2)):
             found_rname(l.rname)
@@ -372,10 +370,9 @@ def infer_types_of_variables(line_exprs, context, si):
     refine0 = lambda x, parents: refine(x, parents, si, None, resources, functions, 
                                         variables, deriv_resources, deriv_functions,
                                         context=context)
+    
     line_exprs = [namedtuple_visitor_ext(_, refine0) for _ in line_exprs]
     
-    # for l in line_exprs:
-    #     print recursive_print(l)
     return line_exprs
 
 

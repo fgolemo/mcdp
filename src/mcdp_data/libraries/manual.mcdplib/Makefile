@@ -10,7 +10,7 @@ manual_html=$(htmltmpdir)/manual.html
 manual: $(manual_html)
 
 $(manual_html): 
-	DISABLE_CONTRACTS=1 mcdp-render-manual --output_file $@
+	DISABLE_CONTRACTS=1 mcdp-render-manual --output_file $@ -c rparmake
 
 manual.pdf: $(manual_html)  
 	wkhtmltopdf --print-media-type $(manual_html) $@ 
