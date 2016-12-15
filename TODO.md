@@ -1,7 +1,7 @@
 Keys:
 
 - R: refactoring / reorganization
-- F: features
+- F: new features
 - L: language features
 - B: bugs
 - T: testing
@@ -23,14 +23,15 @@ Goals:
 
 - cleanup: remove ATTRIBUTE_NDP_RECURSIVE_NAME
 - cleanup: remove normal form
-- refactor: 'ignore resources' should modify the diagram, not create a wrapper.
-- refactor: remove caching from LoopDP; make separate class
-- refactor: remove caching from Library, make separate class
-- refactor: generalize InvPlus2 -> InvPlusN with placeholders
+
+- core: 'ignore resources' should modify the diagram, not create a wrapper.
+- core: remove caching from LoopDP; make separate class
+- core: remove caching from Library, make separate class
+- core: generalize InvPlus2 -> InvPlusN with placeholders
 
 (*) Test corner cases:
 - get to 100% code coverage
-- test ignore_resource for wrong inputs
+- core: test ignore_resource for wrong inputs
 - T: what happens with recursive definitions? (a.poset = "`a")
 
 (*) Doing extra stuff:
@@ -47,10 +48,7 @@ Goals:
 (*) Language additions
  
 
-- F: "choose()" without labels
-
 - F: "op(Poset)" => constructs opposite poset
-
 - F: intervals - what happens
 
 
@@ -62,7 +60,6 @@ Goals:
 - visualization: in the dp_flow pictures, the CoProduct is not expanded.
 - visualization: Introduce "Ignore" blocks, so that they can get their own icon (terminator)
 - visualization: now the edges that are not connected are not purple
-
 
 On hold: 
 
@@ -263,71 +260,26 @@ http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/v
 - W: choose a better font for mathematical symbols
 http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/views/edit_fancy/
 
-- allow multiple semantic errors instead of failing on first one
-
-- refactor: move eval_statement to its own .py
-
-- there might be a bug in warnings, for children
-
-- remove the old test; (with time limit, if x < Dec 1)
-
-- spell check: http://stackoverflow.com/questions/5601431/spellcheck-false-on-contenteditable-elements
-
-- clarify "choose" for types and "choose" for dps (not implemented)
-
-- L: add choose without the labels
-
-  instance choose(A, B) = choose(instance A, instance B)
-
-  - for choose(a, b), then a and be need to be disconnected
 
 
+- core: do not allow libraries with '.' in their name
 
+- core: known failure: check_subtraction2_contexts
 
-- Try to see if this parses:
+- core: optimize gg_get_formats
 
-    cost >= ( provided capacity / specific_cost) * num_replacements
-
-    cost >= ( capacity / specific_cost) * num_replacements
-
-- do not allow libraries with '.' in their name
-
-
-- make cute boxes
-
-  0 1 2 3 4 5 6 7 8 9 A B C D E F
-U+250x  ─ ━ │ ┃ ┄ ┅ ┆ ┇ ┈ ┉ ┊ ┋ ┌ ┍ ┎ ┏
-U+251x  ┐ ┑ ┒ ┓ └ ┕ ┖ ┗ ┘ ┙ ┚ ┛ ├ ┝ ┞ ┟
-U+252x  ┠ ┡ ┢ ┣ ┤ ┥ ┦ ┧ ┨ ┩ ┪ ┫ ┬ ┭ ┮ ┯
-U+253x  ┰ ┱ ┲ ┳ ┴ ┵ ┶ ┷ ┸ ┹ ┺ ┻ ┼ ┽ ┾ ┿
-U+254x  ╀ ╁ ╂ ╃ ╄ ╅ ╆ ╇ ╈ ╉ ╊ ╋ ╌ ╍ ╎ ╏
-U+255x  ═ ║ ╒ ╓ ╔ ╕ ╖ ╗ ╘ ╙ ╚ ╛ ╜ ╝ ╞ ╟
-U+256x  ╠ ╡ ╢ ╣ ╤ ╥ ╦ ╧ ╨ ╩ ╪ ╫ ╬ ╭ ╮ ╯
-U+257x  ╰ ╱ ╲ ╳ ╴ ╵ ╶ ╷ ╸ ╹ ╺ ╻ ╼ ╽ ╾ ╿
-U+258x  ▀ ▁ ▂ ▃ ▄ ▅ ▆ ▇ █ ▉ ▊ ▋ ▌ ▍ ▎ ▏
-U+259x  ▐ ░ ▒ ▓ ▔ ▕ ▖ ▗ ▘ ▙ ▚ ▛ ▜ ▝ ▞ ▟
-
-- known failure: check_subtraction2_contexts
-
-- optimize gg_get_formats
-
-- web: better formatting of warnings. Give each own <p>
+- W: better formatting of warnings. Give each own <p>
   rather than using ---- as separator
 
-- new ExecutionContext:
+- core: new ExecutionContext:
   - add_warning()
   - get_cwd()
      or context.get_file()
 
-- add option not to draw extra node 
-- make editor view TB
-- add 'fancy_editor' view
+- display: add option not to draw extra node 
+- W: make editor view options for RL - TB (start at RL because more intuitive)
 
- - L: provides f1,f2,f3 [dimensionless]
-
-- graphics: green/red icons for mult and invmult
-
-- simplify PlusValue and MinusValue
+- core: simplify PlusValue and MinusValue
 
     mcdp {
      provides f1 [dimensionless]
@@ -340,9 +292,9 @@ U+259x  ▐ ░ ▒ ▓ ▔ ▕ ▖ ▗ ▘ ▙ ▚ ▛ ▜ ▝ ▞ ▟
       r1 + r2 * r3 + 2 dimensionless >= f1 * f2 + f3 + 2 dimensionless
     }
 
-- editor_fancy: turn text back to black when editing after a syntax error
+- W: turn text back to black when editing after a syntax error
 
-- better error message:
+- core: better error message:
 DPSemanticError: Constraint between incompatible spaces.
   R[kWh²/kg] can be embedded in R[g]: False 
   R[g] can be embedded in R[kWh²/kg]: False 
@@ -355,31 +307,9 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 |    R[kWh²/kg]
 | B: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 |    R[g]
+ 
 
-    
-
-- editor: add warnings about unconnected functionality/resources
-
-
-- redlining doesn't work too good for this case:
-mcdp { 
-  battery = instance mcdp {
-    provides capacity [kWh]
-    requires mass [g]   
-  }
-
-  actuation = instance mcdp {
-    provides velocity [m/s]
-    provides payload [g]
-
-    requires 
-  }
-
-}
-
-- Mux visualization with more than 21 signals (after z, use '{'), 
-
-- square for Nat: http://127.0.0.1:8080/libraries/basic/models/addition_1/views/syntax/
+- beauty: Mux visualization with more than 21 signals (after z, use '{'), 
 
 - simplify a * a to mcdp {  
    variable a, c [dimensionless] 
@@ -387,70 +317,44 @@ mcdp {
    a >= square(c)  
 }
 
+- refactor: move eval_statement to its own .py
 
-- make Map::repr_map abstract
+- refactor: make Map::repr_map abstract
+- misc: delete caches in /tmp automatically
 
-- constants like pi, e
+- L: constants like pi, e
+- L: remove nat_Constnat with lowercase nat
+- L: syntax for primitivedp algebra: loop(series(par))
+- L: add test for CDP.Rcomp: 'ℝ'
+- L: log exp etc.
+- L: invpower resources - provided f  <= (required r)²
+- L: (integer) power for Rcomp and Natural numbers: a ^ 2
 
-- remove nat_Constnat with lowercase nat
-
-- remove the awkward "1.0 []" syntax in favor of just "1.0"
-- summary of warnings across libraries
-
--File 'tmp3.mcdp' reached twice.
--path1: /Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/unittests/basic.mcdplib/created/tmp3.mcdp
--path2: /Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/unittests/basic.mcdplib/created/tmp3.mcdp
-
-- delete caches in /tmp automatically
-
-- syntax for primitivedp algebra: loop(series(par))
-
-- add test for    CDP.Rcomp: 'ℝ'
-
-
-- DPSemanticError: I can only compute pow() for floats with types; this is Rcomp().
-- DPSemanticError: I can only compute pow() for floats with types; this is Nat().
-- (integer) power for Natural numbers: a ^ 2
-http://127.0.0.1:8080/libraries/basic/models/addition_1/views/edit_fancy/
-
-
-- power resources
-parse_ndp("""
-    mcdp {
-        provides f [dimensionless]
-        requires r [dimensionless]
-        
-        provided f  <= (required r)²
-    }
-    """)
-
-Detect:
-- unused constants
-- unused functions/resources
-- unconnected ndp's funcs or res
-
-
-
-required mass = between 120 Wh/kg and 100 Wh/kg 
-required mass = between 100 kg and 120 kg
-
--  make pre with max size even in case like approx() in
-file:///Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/manual.mcdplib/out-html/manual.html
-
-
-- constant keyword in setnameconstant, otherwise it doesn't get highlighted
+- L: detect unused functions/resources
+- L: uncertainty syntax "between ... and ..."
+  required mass = between 120 Wh/kg and 100 Wh/kg 
+  required mass = between 100 kg and 120 kg
+- L: constant keyword in setnameconstant, otherwise it doesn't get highlighted
 
    constant gravity = 9.8 m/s² 
    weight = mass required by battery · gravity 
+- L: refactor SemanticInformation - only done for Constants so far
+- L: remove [] everywhere
+- L: use preceq instead of <= as suggetion
 
-- unused resources, unused functions
+- L: clarify "choose" for types and "choose" for dps (not implemented)
+- L: add choose without the labels
 
-- refactor SemanticInformation - only done for Constants so far
+  instance choose(A, B) = choose(instance A, instance B)
 
-- in catalogue, model2 should be in yellow (or implementation color)
-- maybe the numbers and the units should not be orange
+  - for choose(a, b), then a and be need to be disconnected
 
-- web interface: interface for ignore functions/resources
+- beauty: in catalogue, model2 should be in yellow (or implementation color)
+- beauty: maybe the numbers and the units should not be orange
+
+- W: add documents in library in the dropdowns
+
+- W: interface for ignore functions/resources
 
   Mode 1:
     function f1 : constrain/ignore (= constrain to >= Minimals P)
@@ -460,13 +364,43 @@ file:///Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/manual.
     function f1 : maximize/constrain/ignore (= constrain to >= Minimals P)
     resource r1 : constrain/ignore (constrain <= Maximals R)
 
-
 - refactor: mv mcdp_web/render_doc in mcdp_docs
 
-- remove [] everywhere
-- automatically beautify the code in the manual, unless there is 
+- manual/docs: automatically beautify the code in the manual, unless there is 
   a class "dontbeautify"
+- manual/docs: add "edit in editor" to documents
 
-- use preceq instead of <=
-- mcdp_web: add documents in the dropdown 
+- misc: make tool that looks for warning everywhere
 
+- W: for some error messages, only the string "msg" does not make sense.
+  See, e.g., http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/views/edit_fancy/
+
+- W: favicon
+- W: make splash screen
+- W: make first pages nicer
+- W: hide QR code, unless "andrea"
+- W: in library view, list all contents in columns, and add "create new" links
+  directly in there.
+
+  ndp   poset doc
+  ndp   poset doc
+  ndp         doc
+  +     +     + create
+
+- W: add credits page
+
+- docs: be able to reference to figures 
+
+  <p figid=1>a</p>
+
+  <p>Fig 1: a</p>
+
+  See <figref figid=figid></ref> 
+
+
+- docs: add brackets, succeq, etc. in the list of unicode characters
+- L: other subscripts
+
+  E_r
+
+- W: better performance in images (background loading?)

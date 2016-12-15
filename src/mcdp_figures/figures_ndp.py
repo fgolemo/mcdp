@@ -3,6 +3,7 @@ from mocdp import ATTR_LOAD_NAME
 
 from .figure_interface import MakeFigures
 from .formatters import MakeFigures_Formatter, TextFormatter, GGFormatter
+from mcdp_library_tests.tests import timeit_wall
 
 
 __all__ = [
@@ -156,10 +157,12 @@ class Enclosed(GGFormatter):
         
         # we actually don't want the name on top
         yourname = None  # name
+        
+#         with timeit_wall('get_gg - gvgen_from_ndp'):
         gg = gvgen_from_ndp(ndp2, style=self.style, direction=self.direction,
                             images_paths=images_paths, yourname=yourname,
                             skip_initial=self.skip_initial)
-    
+        
         return gg
     
         

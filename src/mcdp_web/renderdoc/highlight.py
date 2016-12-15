@@ -21,7 +21,7 @@ from mcdp_report.generic_report_utils import (
 from mcdp_report.html import ast_to_html, get_markdown_css
 from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters
 from mcdp_web.images.images import (get_mime_for_format)
-from mocdp import ATTR_LOAD_NAME, logger, get_mcdp_tmp_dir
+from mocdp import ATTR_LOAD_NAME, logger, get_mcdp_tmp_dir 
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
 from reprep import Report
@@ -69,6 +69,7 @@ def make_image_tag_from_png(f):
         return rendered
     return ff
 
+
 def make_pre(f):
     soup = bs("")
     def ff(*args, **kwargs):
@@ -77,6 +78,7 @@ def make_pre(f):
         t.string = res
         return t
     return ff
+
     
 def load_or_parse_from_tag(tag, load, parse):
     """ 
@@ -286,6 +288,7 @@ def get_minimal_document(body_contents, add_markdown_css=False):
     s = str(html)
     return s
 
+
 def get_ast_as_pdf(s, parse_expr):
     s = s.replace('\t', '    ')
     contents = ast_to_html(s,
@@ -322,6 +325,7 @@ def get_ast_as_pdf(s, parse_expr):
     finally:
         shutil.rmtree(d)
 
+
 def crop_pdf(pdf, margins=0):
     
     mcdp_tmp_dir = get_mcdp_tmp_dir()
@@ -333,7 +337,13 @@ def crop_pdf(pdf, margins=0):
         with open(f_pdf, 'w') as f:
             f.write(pdf)
         f_pdf_crop = os.path.join(d, 'file_crop.pdf')
-        cmd = ['pdfcrop', '--margins', str(margins), f_pdf, f_pdf_crop]
+        cmd = [
+            'pdfcrop', 
+            '--margins', 
+            str(margins), 
+            f_pdf, 
+            f_pdf_crop,
+        ]
         system_cmd_result(
                 d, cmd,
                 display_stdout=False,

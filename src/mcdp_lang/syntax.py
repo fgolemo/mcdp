@@ -263,13 +263,15 @@ class Syntax():
 
     PROVIDED = keyword('provided', CDP.ProvidedKeyword)
     REQUIRED = keyword('required', CDP.RequiredKeyword)
-
-    # | L('⊇') | L('≽') | L('⊒')
-    # | L('⊆') | L('≼') | L('⊑')
-    GEQ = spk(L('>=') | L('≥') , CDP.geq)
-    LEQ = spk(L('<=') | L('≤') , CDP.leq)
-    MAPSTO = spk(L('⟼')|L('↦')|L('|->')|L('|-->')|L('|--->')|L('|---->'), CDP.MAPSTO).setName('⟼')
-    MAPSFROM = spk(L('↤')|L('⟻')|L('<-|')|L('<--|')|L('<---|')|L('<----|'), CDP.MAPSFROM).setName('⟻')
+    GEQ = spk(L('>=') | L('≥') | L('≽'), CDP.geq)
+    LEQ = spk(L('<=') | L('≤') | L('≼'), CDP.leq)
+    MAPSTO = spk(L('⟼')|L('↦')|L('|->')|L('|-->')|L('|--->')|L('|---->')|
+                 L('->')|L('-->')|L('--->')|L('---->'), 
+                 CDP.MAPSTO).setName('⟼')
+    MAPSFROM = spk(L('↤')|L('⟻')|
+                   L('<-|')|L('<--|')|L('<---|')|L('<----|')|
+                   L('<-') |L('<--') |L('<---') |L('<----'), 
+                   CDP.MAPSFROM).setName('⟻')
     LEFTRIGHTARROW = spk(L('↔')|L('⟷')|L('<->')|L('<-->')|L('<--->')
                          |L('<---->'), CDP.LEFTRIGHTARROW).setName('⟷')
 

@@ -380,6 +380,18 @@ def timeit(desc, minimum=None):
         if delta < minimum:
             return
     logger.debug('timeit %s: %.2f s (>= %s)' % (desc, delta, minimum))
+
+@contextmanager
+def timeit_wall(desc, minimum=None):
+    t0 = time.time()
+    yield
+    t1 = time.time()
+    delta = t1 - t0
+    if minimum is not None:
+        if delta < minimum:
+            return
+    logger.debug('timeit(wall) %s: %.2f s (>= %s)' % (desc, delta, minimum))
+
     
 min_time_warn = 0.5
 

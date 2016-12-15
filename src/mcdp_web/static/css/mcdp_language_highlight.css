@@ -89,6 +89,7 @@ span.AssertEmptyKeyword
 { 
     font-weight: bold; 
     color: #00a;
+
 }
 
 span.MAPSTO { font-weight: bold; color: darkred;}
@@ -228,10 +229,16 @@ span.CommentRes {
     font-weight: bold;
 }
 
+
 /* Special case: ≤ does not look good in regular font Courier */
 span.leq, span.geq, span.OpenBraceKeyword, span.CloseBraceKeyword {
     /*font-family: Courier, monospace;*/
     font-weight: bold;
+}
+
+span.leq, span.geq {
+    font-family: "FreeSerif";
+    font-weight: normal !important;
 }
 
 
@@ -250,33 +257,6 @@ span.suggestion {
     background-color: white;
 }
 
-/*
-span.semantic_error {
-
-    text-decoration: underline;
-    text-decoration-style: wavy;
-    -webkit-text-decoration-style: wavy;
-    -moz-text-decoration-style: wavy;
-    text-decoration-color: red;
-}
-
-span.language_warning {
-
-    text-decoration: underline;
-    text-decoration-style: wavy;
-    -webkit-text-decoration-style: wavy;
-    -moz-text-decoration-style: wavy;
-    text-decoration-color: orange !important;
-}
-span.suggestion {
-
-    text-decoration: underline;
-    text-decoration-style: wavy;
-    -webkit-text-decoration-style: wavy;
-    -moz-text-decoration-style: wavy;
-    text-decoration-color: gray;
-}
-*/
 span.has_tooltip {
     /*border: solid 1px red;*/
 }
@@ -289,4 +269,5 @@ span.has_tooltip:hover div.tooltip  {
     background-color: yellow !important;
     padding: 5px;
 }
+
 

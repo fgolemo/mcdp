@@ -22,6 +22,7 @@ from .helpers import create_operation, get_valuewithunits_as_resource, get_resou
 from .misc_math import inv_constant
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mcdp_lang.misc_math import ConstantsNotCompatibleForAddition
 
 
 CDP = CDPLanguage
@@ -425,7 +426,10 @@ def eval_PlusN_(constants, resources, context):
     from .misc_math import plus_constantsN
     # it's a constant value
     if len(resources) == 0:
-        return plus_constantsN(constants)
+        try:
+            return plus_constantsN(constants)
+        except ConstantsNotCompatibleForAddition as e:
+            raise_desc(DPSemanticError, str(e))
 
     elif len(resources) == 1:
         if len(constants) > 0:
@@ -439,7 +443,11 @@ def eval_PlusN_(constants, resources, context):
         if not constants:
             return r
         else:
-            c = plus_constantsN(constants)
+            try:
+                c = plus_constantsN(constants)
+            except ConstantsNotCompatibleForAddition as e:
+                raise_desc(DPSemanticError, str(e))
+
             return get_plus_op(context, r=r, c=c)
 
 

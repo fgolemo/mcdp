@@ -11,9 +11,9 @@ mcdp {
     provides lift  [N]
     requires power [W]
   }
- capacity provided by battery ≥ 
+ capacity provided by battery ≽ 
     provided endurance · (power required by actuation)
- g = 9.81 m/s^2
- lift provided by actuation ≥
+ g = 9.81 m/s²
+ lift provided by actuation ≽
     (mass required by battery + provided payload) · g
 }

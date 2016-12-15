@@ -30,6 +30,7 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mcdp_lang.parse_interface import( parse_ndp_eval, parse_ndp_refine, 
     parse_template_eval, parse_template_refine, parse_constant_eval, 
     parse_constant_refine, parse_poset_eval, parse_poset_refine)
+from mcdp_library_tests.tests import timeit, timeit_wall
 
 
 
@@ -204,8 +205,7 @@ class AppEditorFancyGeneric():
 
 
         def go():
-            from mcdp_library_tests.tests import timeit
-            with timeit('process_parse_request'):
+            with timeit_wall('process_parse_request'):
                 res = process_parse_request(library, string, spec, key, cache)
             res['request'] = req
             return res
@@ -214,25 +214,28 @@ class AppEditorFancyGeneric():
 
     def graph_generic(self, request, spec):
         def go():
-            data_format = str(request.matchdict['data_format'])  # unicode
-            library = self.get_library(request)
-            widget_name = self.get_widget_name(request, spec)
-            library_name = self.get_current_library_name(request)
-            key = (library_name, spec, widget_name)
-
-            if not key in self.last_processed2:
-                l = self.get_library(request)
-                context = l._generate_context_with_hooks()
-                thing = spec.load(l, widget_name, context=context)
-            else:
-                thing = self.last_processed2[key]
-                if thing is None:
-                    return response_image(request, 'Could not parse.')
-
-            data = spec.get_png_data(library, widget_name, thing, data_format=data_format)
-            from mcdp_web.images.images import get_mime_for_format
-            mime = get_mime_for_format(data_format)
-            return response_data(request, data, mime)
+            with timeit_wall('graph_generic', 1.0):
+                data_format = str(request.matchdict['data_format'])  # unicode
+                library = self.get_library(request)
+                widget_name = self.get_widget_name(request, spec)
+                library_name = self.get_current_library_name(request)
+                key = (library_name, spec, widget_name)
+    
+                if not key in self.last_processed2:
+                    l = self.get_library(request)
+                    context = l._generate_context_with_hooks()
+                    thing = spec.load(l, widget_name, context=context)
+                else:
+                    thing = self.last_processed2[key]
+                    if thing is None:
+                        return response_image(request, 'Could not parse.')
+    
+                with timeit_wall('graph_generic - get_png_data', 1.0):
+                    data = spec.get_png_data(library, widget_name, thing, 
+                                             data_format=data_format)
+                from mcdp_web.images.images import get_mime_for_format
+                mime = get_mime_for_format(data_format)
+                return response_data(request, data, mime)
         return self.png_error_catch2(request, go)
 
 

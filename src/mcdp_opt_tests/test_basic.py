@@ -102,7 +102,8 @@ def opt_basic_1_long():
     ))
 
     rlabels, R0s, r0s = zip(*(
-        ('ac', poset('`AC_Charging'), (('AC_power', 'TypeA', 'v110', 'f50', 200.0), 3 * 3600.0)),
+        ('ac', poset('`AC_Charging'), 
+         (('AC_power', 'TypeA', 'v110', 'f50', 200.0), 3 * 3600.0)),
         ('budget', poset('USD'), 1000.0),
     ))
 
@@ -168,6 +169,8 @@ def plot_ndp(r, name, ndp, library):
     gg_figure(r, name, gg,
                do_pdf=False, do_svg=False,
               do_dot=False)
+    
+    
 @comptest
 def opt_basic_2():
     l1 = parse_poset('J').U(1.0)

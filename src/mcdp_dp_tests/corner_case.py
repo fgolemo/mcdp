@@ -306,6 +306,121 @@ mcdp {
     
     assert not '#@' in text
     
+
+@comptest
+def check_addition_incompatible():
+    s="""mcdp {
+      a = 10 g
+      b = 13
+      c = a + b # fails a + b
+    }"""
+    assert_raises(DPSemanticError, parse_ndp, s)
+
+@comptest
+def check_addition_incompatible2():
+    s="""mcdp {
+      requires r [g]
+      provides f [g]
+      a = 10 g # fails a + b
+      b = 13
+      r >= f + a + b
+    }"""
+    assert_raises(DPSemanticError, parse_ndp, s)
+    
+@comptest
+def check_addition_incompatible3():
+    s="""mcdp {
+      requires r [g]
+      provides f [g]
+      a = 10 # fails f + (a + b)
+      b = 13
+      r >= f + a + b
+    }"""
+    assert_raises(DPSemanticError, parse_ndp, s)
+ 
+@comptest
+def check_addition_incompatible2_dual():
+    s="""mcdp {
+      requires r [g]
+      provides f [g]
+      a = 10 g # fails a + b
+      b = 13
+      f <= r + a + b
+    }"""
+    assert_raises(DPSemanticError, parse_ndp, s)
+    
+@comptest
+def check_addition_incompatible3_dual():
+    s="""mcdp {
+      requires r [g]
+      provides f [g]
+      a = 10 # fails r + (a + b)
+      b = 13
+      f <= r + a + b
+    }"""
+    assert_raises(DPSemanticError, parse_ndp, s)
+    
+@comptest
+def repeated_identifier():
+    s = """
+    mcdp {
+       variable a[m] 
+       a = instance mcdp {}
+    }
+    """
+    assert_raises(DPSemanticError, parse_ndp, s)
+    
+@comptest
+def reserved_names1():
+    s = """
+    mcdp {
+       variable _fun_a [m] 
+    } """
+    assert_raises(DPSemanticError, parse_ndp, s)
+
+@comptest
+def reserved_names2():
+    s = """
+    mcdp {
+       variable _res_a [m] 
+    } """
+    assert_raises(DPSemanticError, parse_ndp, s)
+
+
+@comptest
+def reserved_names3():
+    s = """
+    mcdp {
+       provides _res_a [m] 
+    } """
+    assert_raises(DPSemanticError, parse_ndp, s)
+
+@comptest
+def reserved_names4():
+    s = """
+    mcdp {
+       provides _fun_a [m] 
+    } """
+    assert_raises(DPSemanticError, parse_ndp, s)
+    
+
+@comptest
+def reserved_names5():
+    s = """
+    mcdp {
+       requires _res_a [m] 
+    } """
+    assert_raises(DPSemanticError, parse_ndp, s)
+
+@comptest
+def reserved_names6():
+    s = """
+    mcdp {
+       requires _fun_a [m] 
+    } """
+    assert_raises(DPSemanticError, parse_ndp, s)
+    
+
 if __name__ == '__main__': 
     
     run_module_tests()

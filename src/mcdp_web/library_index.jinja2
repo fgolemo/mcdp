@@ -54,7 +54,11 @@
 			x = all_images[i];
 			target = x[1];
 			src = x[0];
-			$(target).attr('src', src);
+
+			tmpimg='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==';
+
+			$(target).prop('src',tmpimg);
+			$(target).prop('src', src);
 		}
 	}
 
@@ -83,7 +87,9 @@
 	function {{ m["id_ndp"] }}_callback() {
 		src="/libraries/{{navigation['current_library']}}/models/{{m['id_ndp']}}/views/solver2/compact_graph.png";
 
-		$( '#{{ m["id_ndp"] }}-image' ).attr('src', src);
+		which = '#{{ m["id_ndp"] }}-image';
+
+		$(which).prop('src', src);
 	}
 
 	$(document).ready(function() {

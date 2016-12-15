@@ -198,7 +198,8 @@ def generate_doc(soup):
     for item in root.items:
         s = item.__str__(root=True)
         stoc = BeautifulSoup(s, 'lxml', from_encoding='utf-8')
-        stoc.html.body.ul['class'] = 'toc'
+        if stoc.html is not None: # empty document case
+            stoc.html.body.ul['class'] = 'toc'
         item.tag.insert_after(stoc)
 
 

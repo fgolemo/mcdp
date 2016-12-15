@@ -1,4 +1,5 @@
 from abc import abstractmethod, ABCMeta
+from mcdp_library_tests.tests import timeit_wall
 
 
 class MakeFigures_Formatter():
@@ -42,13 +43,16 @@ class GGFormatter(MakeFigures_Formatter):
     
     def get(self, mf, formats):
         from mcdp_report.gg_utils import gg_get_formats
+        
+#         with timeit_wall('GGFormatter - get_gg'):
         gg = self.get_gg(mf)
+            
         if isinstance(formats, str):
             res, = gg_get_formats(gg, (formats,))
         else:
             res = gg_get_formats(gg, formats)
         return res
-    
+
     @abstractmethod
     def get_gg(self, mf):
         pass

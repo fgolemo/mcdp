@@ -1038,6 +1038,9 @@ def eval_statement(r, context):
     elif isinstance(r, CDP.SetNameNDPInstance):
         name = r.name.value
         ndp = eval_ndp(r.dp_rvalue, context)
+        if name in context.names:
+            msg = 'Repeated identifier "%s".' % name
+            raise DPSemanticError(msg, where=r.name.where)
         context.add_ndp(name, ndp)
 
     elif isinstance(r, CDP.SetNameMCDPType):

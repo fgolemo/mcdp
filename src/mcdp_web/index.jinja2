@@ -4,38 +4,82 @@
     <title>PyMCDP Interactive Environment</title>
     {% include 'head.jinja2' %}
     <style type='text/css'>
-    	h
+    	body { font-family: Georgia; }
+        #diagram { width: 10em; margin: 2em; }
+        body { padding-left: 6em; }
+
+        h3 { 
+            margin: 10px; }
+        #create_library { 
+            display: none; font-size: 80%;
+            padding: 10px;
+margin-left: 2em;
+margin-bottom: 4em; 
+            } /* button */
+
+            a#create_library.ui-button { padding: 3px !important; }
+
     </style>
 </head>
 <body>
 
-<h2>PyMCDP Interactive Environment (version {{version()}})</h2>
+<script type='text/javascript'>
+    $(document).ready(function() {          
+        $("#create_library").button();
+        $("#create_library").show();
+        $("#create_library").disable();
+    });
 
+</script>
 
+<table><tr>
+<td>
+<img id='diagram' src='/static/diagram_blank.png'/>
+</td>
+<td><br/>
+    <h2>PyMCDP <br/>
+        Interactive <br/>
+        <span style='color:darkred;'>Co</span>-<span style='color:darkgreen'>Design</span><br/>
+        Environment</h2>
+        <p style='font-family: monospace'>v{{version()}}</p>
+</td>
+</tr></table>
 
-<h3>Do</h3>
-
-<p>
-	<a href='/libraries/'>The list of libraries available.</a>
-</p>
-
-<p>
-	Some interesting starting points: 
-		<a href="/libraries/droneD_complete_v2/">the drone example</a>,
-	 	<a href="/libraries/plugs/">the plugs domain</a>
-</p>
-
-
+<div id='actions'>
 <h3>Learn</h3>
 
 <!--<p><a href="/docs/language_notes/">The MCDP language specification</a></p>-->
+<ul>
+<li>Papers and presentations</li>
+<li><a href="/static/manual.html">The PyMCDP Manual</a></li>
+</ul>
+ 
 
-<p><a href="/static/manual.html">The PyMCDP Manual</a></p>
+<h3>Do</h3>
+
+<ul>
+	<li>Look at <a href='/libraries/'>the list of available libraries.</a></li>
+</ul>
+
+<a id='create_library'>Create a new library</a>
+<!-- 
+<p>
+	Some interesting starting points: 
+		<a href="/libraries/droneD_complete_v2/">the drone example</a>,
+	 	<a href="/libraries/plugs/">the plugs domain</a>.
+</p>
+ -->
 
 <h3>Help</h3>
 
-<p>Please file bug reports at the <a href="https://github.com/AndreaCensi/mcdp/issues">Github 
-website</a></p> 
+<ul>
+<li>
+    Please file bug reports at the 
+        <a href="https://github.com/AndreaCensi/mcdp/issues">
+            Github website</a></li> 
+</ul>
+
+</div>
 
 <!--
 <p>Shortcuts:</p>

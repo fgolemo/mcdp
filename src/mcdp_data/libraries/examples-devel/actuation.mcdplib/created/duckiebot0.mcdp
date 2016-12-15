@@ -11,24 +11,24 @@
 
   usb_to_wires = instance `USB_to_wires
 
-  pi.gpiocom <= pi_camera.com 
+  gpiocom required by pi ≼ com provided by pi_camera 
  
   cable = instance `USB_A_to_Micro_B_cable
 
   USBMicroCharger = instance `USBMicroCharging
 
-  requires ac >= USBMicroCharger.in
+  requires ac = in required by USBMicroCharger
 
-  in required by battery_ravpower <= out provided by USBMicroCharger
+  in required by battery_ravpower ≼ out provided by USBMicroCharger
   
-  in required by pi <= out provided by cable
-  in required by cable <= out1 provided by battery_ravpower 
+  in required by pi ≼ out provided by cable
+  in required by cable ≼ out1 provided by battery_ravpower 
   
   # battery below
-  battery_ravpower.payload <= dagu_chassis.payload_bottom
+  payload required by battery_ravpower ≼ payload_bottom provided by dagu_chassis
 
-  in required by usb_to_wires <= out2 provided by battery_ravpower
-  in required by dc_hat <= out provided by usb_to_wires
+  in required by usb_to_wires ≼ out2 provided by battery_ravpower
+  in required by dc_hat ≼ out provided by usb_to_wires
   
   fit = instance template mcdp {
       provides p1 [`Payload]
@@ -42,28 +42,28 @@
   }
  
   
-  fit.p1 >= pi.payload
-  fit.p2 >= dc_hat.payload
-  fit.p3 >= pi_camera.payload
+  p1 provided by fit ≽ payload required by pi
+  p2 provided by fit ≽ payload required by dc_hat
+  p3 provided by fit ≽ payload required by pi_camera
   
-  fit.payload <= dagu_chassis.payload_top
+  payload required by fit ≼ payload_top provided by dagu_chassis
 
   provides motion using dagu_chassis 
 
-  dc_hat.pisocketcom1 <= pi.pisocketcom
+  pisocketcom1 required by dc_hat ≼ pisocketcom provided by pi
   ignore pisocketcom1 provided by dc_hat
   ignore ethcom provided by pi
   ignore usbcom1 required by pi 
   ignore ethcom required by pi
 
-  dc_hat.out1 >= dagu_chassis.pwm1
-  dc_hat.out2 >= dagu_chassis.pwm2
+  out1 provided by dc_hat ≽ pwm1 required by dagu_chassis
+  out2 provided by dc_hat ≽ pwm2 required by dagu_chassis
   ignore out3 provided by dc_hat
   ignore out4 provided by dc_hat
 
   requires budget [USD]
 
-  required budget >= (
+  required budget ≽ (
     budget required by dagu_chassis +
      budget required by battery_ravpower + 
      # budget required by buffalo + 

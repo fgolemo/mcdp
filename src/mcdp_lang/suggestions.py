@@ -38,8 +38,10 @@ def correct(x, parents):  # @UnusedVariable
     
     # each of this has one element .glyph
     glyphs = {
-        CDP.leq: '≤',
-        CDP.geq: '≥',
+        # CDP.leq: '≤',
+        # CDP.geq: '≥',
+        CDP.leq: '≼',
+        CDP.geq: '≽',
         CDP.OpenBraceKeyword: '⟨',
         CDP.CloseBraceKeyword: '⟩',
         CDP.times: '·',

@@ -11,6 +11,7 @@ from mcdp_posets.rcomp_units import (R_dimensionless, mult_table_seq,
     RbicompUnits, rcomp_add)
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPSemanticError, DPNotImplementedError
+from mcdp_posets.poset import NotLeq
 
 
 @contract(S=RcompUnits)
@@ -122,7 +123,11 @@ def add_table(F1, F2):
         raise_desc(DPSemanticError, msg, F1=F1, F2=F2)
     return F1
 
+class ConstantsNotCompatibleForAddition(Exception):
+    pass
+
 def plus_constants2(a, b):
+    """ raises ConstantsNotCompatibleForAddition """
     
     A = a.unit
     B = b.unit
@@ -131,11 +136,21 @@ def plus_constants2(a, b):
         return plus_constants2_rcompunits(a, b)
     
     if isinstance(A, RcompUnits) and isinstance(B, (Rcomp, Nat)):
-        b2 = ValueWithUnits(b.cast_value(A), A)
+        try:
+            b2A = b.cast_value(A)
+        except NotLeq:
+            msg = 'Cannot sum %s and %s.' % (A, B)
+            raise_desc(ConstantsNotCompatibleForAddition, msg)
+        b2 = ValueWithUnits(b2A, A)
         return plus_constants2_rcompunits(a, b2)
     
     if isinstance(B, RcompUnits) and isinstance(A, (Rcomp, Nat)):
-        a2 = ValueWithUnits(a.cast_value(B), B)
+        try:
+            a2B = a.cast_value(B)
+        except NotLeq:
+            msg = 'Cannot sum %s and %s.' % (A, B)
+            raise_desc(ConstantsNotCompatibleForAddition, msg)
+        a2 = ValueWithUnits(a2B, B)
         return plus_constants2_rcompunits(a2, b)
 
     if isinstance(B, Rcomp) and isinstance(A, Rcomp):
@@ -156,12 +171,12 @@ def plus_constants2(a, b):
         res = Nat_add(a.value, b.value)
         return ValueWithUnits(value=res, unit=Nat())
         
-    
     msg = 'Cannot add %r and %r' % (a, b)
     raise DPNotImplementedError(msg)
 
 @contract(a=ValueWithUnits, b=ValueWithUnits)
 def plus_constants2_rcompunits(a, b):
+    """ raises ConstantsNotCompatibleForAddition """
     check_isinstance(a.unit, RcompUnits)
     check_isinstance(b.unit, RcompUnits)
     R = a.unit
@@ -171,4 +186,5 @@ def plus_constants2_rcompunits(a, b):
     return ValueWithUnits(value=res, unit=R)
 
 def plus_constantsN(constants):
+    """ raises ConstantsNotCompatibleForAddition """
     return functools.reduce(plus_constants2, constants)

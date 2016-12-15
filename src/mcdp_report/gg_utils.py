@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
+from mcdp_library_tests.tests import timeit_wall
 from mocdp import logger, MCDPConstants
 from mocdp.exceptions import mcdp_dev_warning
 import networkx as nx  # @UnresolvedImport
@@ -27,22 +28,29 @@ def graphviz_run(filename_dot, output, prog='dot'):
     encoder = suff
 
     cmd = [prog, '-T%s' % encoder, '-o', output, filename_dot]
-    try:
-        # print('running graphviz')
-        system_cmd_result(cwd='.', cmd=cmd,
-                 display_stdout=False,
-                 display_stderr=False,
-                 raise_on_error=True)
-        # print('done')
-    except (CmdException, KeyboardInterrupt):
-        emergency = 'emergency.dot'
-        logger.error('saving to %r' % emergency)  # XXX
-        contents = open(filename_dot).read()
-        with open(emergency, 'w') as f:
-            f.write(contents)
-#         print(contents)
-        raise
-
+    
+    system_cmd_result(cwd='.', cmd=['cp', filename_dot, 'last_processed.dot'])
+#     print('just before running graphviz')
+    with timeit_wall('running graphviz on %s' % filename_dot, 1.0):
+        try:
+            # print('running graphviz')
+            system_cmd_result(cwd='.', cmd=cmd,
+                     #display_stdout=False,
+                     display_stdout=True,
+                     #display_stderr=False,
+                     display_stderr=True,
+                     raise_on_error=True,
+                     )
+            # print('done')
+        except (CmdException, KeyboardInterrupt):
+            emergency = 'emergency.dot'
+            logger.error('saving to %r' % emergency)  # XXX
+            contents = open(filename_dot).read()
+            with open(emergency, 'w') as f:
+                f.write(contents)
+            # print(contents)
+            raise
+    
 
 def gg_deepcopy(ggraph):
     try:
@@ -187,8 +195,10 @@ def gg_get_format(gg, data_format):
     do_png = data_format == 'png'
     do_pdf = data_format == 'pdf'
     do_svg = data_format == 'svg'
-    gg_figure(r, 'graph', gg, do_dot=do_dot,
-              do_png=do_png, do_pdf=do_pdf, do_svg=do_svg)
+    from mcdp_library_tests.tests import timeit_wall
+    with timeit_wall('gg_figure %s' % data_format): 
+        gg_figure(r, 'graph', gg, do_dot=do_dot,
+                    do_png=do_png, do_pdf=do_pdf, do_svg=do_svg)
 
     if data_format == 'pdf':
         pdf = r.resolve_url('graph_pdf').get_raw_data()
