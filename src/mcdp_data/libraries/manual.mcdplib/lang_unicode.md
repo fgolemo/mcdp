@@ -56,7 +56,7 @@ Every occurrence of a superscript of the digit *d* is interpreted as a power "``
 
 Putting all together, it is equivalent to write
 
-<pre class='mcdp_statements'>
+<pre class='mcdp_statements' noprettify="1">
 alpha_1 = beta^3 + 9.81 m/s^2
 </pre>
 

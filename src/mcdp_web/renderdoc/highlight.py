@@ -76,9 +76,11 @@ def make_pre(f):
     soup = bs("")
     def ff(*args, **kwargs):
         res = f(*args, **kwargs)
-        t = soup.new_tag('pre')  #  **{'class': 'print_value'})
-        t.string = res
-        return t
+        pre = soup.new_tag('pre')  #  **{'class': 'print_value'})
+        code = soup.new_tag('code')
+        code.string = res
+        pre.append(code)
+        return pre
     return ff
 
     
@@ -391,7 +393,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                 # remove spurious indentation
                 source_code = source_code.strip()
                 
-                do_apply_suggestions = True
+                do_apply_suggestions = not tag.has_attr('noprettify')
                 # then apply suggestions
                 if do_apply_suggestions:
                     x = parse_wrap(parse_expr, source_code)[0]

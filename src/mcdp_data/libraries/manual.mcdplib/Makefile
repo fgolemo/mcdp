@@ -23,3 +23,6 @@ publish: $(manual_html)
 	#cp $< ~/env_mcdp/src/mcdp-gh-pages/media/pymcdp-manual.html
 	cp $< ~/env_mcdp/src/mcdp/src/mcdp_web/static/manual.html
 	cp $< ~/env_mcdp/src/mcdp/docs/media/pymcdp-manual.html
+
+prince.pdf: $(manual_html) 
+	prince -s prince.css $(manual_html) -o $@

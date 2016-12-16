@@ -14,6 +14,8 @@ from mcdp_lang_tests.utils2 import eval_rvalue_as_constant
 from mcdp_report.out_mcdpl import extract_ws
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError
+from contracts.utils import indent
+from mocdp import MCDPConstants
 
 
 @comptest
@@ -84,6 +86,31 @@ def undefined_x():
     }
     """
     assert_raises(DPSemanticError, parse_ndp, source)
+####################
+
+def check_suggestions_result(s, s2_expected):
+    suggestions = get_suggestions_ndp(s)
+    s2 = apply_suggestions(s, suggestions)
+    if s2 != s2_expected:
+        msg = 'Expected:\n\n'
+        msg += '\n\n'+indent(make_chars_visible(s), '   original |')
+        msg += '\n\n'+indent(make_chars_visible(s2), 'transformed |')
+        msg += '\n\n'+indent(make_chars_visible(s2_expected), '   expected |')
+        raise ValueError(msg)
+  
+def make_chars_visible(x):
+    """ Replaces whitespaces ' ' and '\t' with '␣' and '⇥' """
+    x = x.replace(' ', '␣')
+    if MCDPConstants.tabsize == 4:
+        tab = '├──┤'
+    else:
+        tab = '⇥'
+        
+    x = x.replace('\t', tab)
+#     nl = '␤\n'
+    nl = '⏎\n'
+    x = x.replace('\n', nl)
+    return x
 
 @comptest
 def check_spaces7():
@@ -429,6 +456,7 @@ mcdp {
     suggestions = get_suggestions_ndp(s)
     s2 = apply_suggestions(s, suggestions)
     assert_equal(2, len(suggestions))
+    print s2
     assert_equal(s2, s2_expected)
     
     # this one there will be a further adjustment
@@ -444,6 +472,13 @@ def tabs1():
     print s.__repr__()
     s2 = apply_suggestions(s, suggestions)
 
+
+@comptest
+def tabs2():
+    s = 'template mcdp {\n\ta = 1\n}'
+    suggestions = get_suggestions_ndp(s)
+    print s.__repr__()
+    s2 = apply_suggestions(s, suggestions)
 
 @comptest
 def overlapping():
@@ -463,11 +498,36 @@ def suggestion_problem1():
     s2 = apply_suggestions(s, suggestions)
     s2_expected = """
  mcdp {
-     a = mcdp { 
+    a = mcdp { 
              b = mcdp {}
          } 
  }"""
     assert_equal(s2, s2_expected)
+    
+    
+@comptest 
+def nested():  
+    s="""
+mcdp {
+\ta = mcdp { 
+        
+    }
+m = 4
+}"""
+    s2_expected = """
+mcdp {
+\ta = mcdp { 
+        
+    }
+    m = 4
+}"""
+    check_suggestions_result(s, s2_expected)
+    
+@comptest 
+def first():
+    s = "mcdp {}"
+    s2_expected = "mcdp {\n}"
+    check_suggestions_result(s, s2_expected)
     
 if __name__ == '__main__': 
 #     overlapping()

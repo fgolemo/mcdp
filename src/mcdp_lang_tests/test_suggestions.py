@@ -1,10 +1,10 @@
+from contracts.utils import raise_desc
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp_refine
 from mcdp_lang.suggestions import apply_suggestions, get_suggestions
 from mcdp_lang.syntax import Syntax
 from mcdp_tests.generation import for_all_source_mcdp
 from mocdp.comp.context import Context
-from contracts.utils import raise_desc
 
 
 @for_all_source_mcdp
@@ -24,7 +24,9 @@ def check_suggestions(filename, source):  # @UnusedVariable
         #print('"%s" -> "%s"' % (w.string[w.character:w.character_end], r))
         pass
 #     print source.__repr__()
+    print(source)
     s2 = apply_suggestions(source, suggestions)
+    print(s2)
 #     if suggestions:
 #         print(s2)
         

@@ -411,3 +411,15 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 
 
 - change keyword 'template'
+
+- EmptySet
+
+prince: out-html/manual.html:[style]:1: warning: unknown property 'sheight'
+prince: out-html/manual.html: warning: unsupported properties: box-shadow
+prince: warning: no font for Miscellaneous Mathematical Symbols-A character U+27E8, fallback to '?'
+prince: page 7: warning: no font for Supplemental Arrows-A character U+27FB, fallback to '?'
+prince: page 7: warning: no font for Supplemental Arrows-A character U+27FC, fallback to '?'
+prince: page 18: warning: no font for Miscellaneous Mathematical Symbols-A character U+27E8, fallback to '?'
+prince: page 18: warning: no font for Miscellaneous Mathematical Symbols-A character U+27E9, fallback to '?'
+prince: page 18: warning: no font for Miscellaneous Mathematical Symbols-A character U+27E8, fallback to '?'
+prince: page 18: warning: no font for Miscellaneous Mathematical Symbols-A character U+27E9, fallback to '?'
