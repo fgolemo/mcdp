@@ -161,12 +161,12 @@ def correct(x, parents):  # @UnusedVariable
         TOKEN = 'mcdp'
         first_appearance_mcdp_in_sub = x_string.index(TOKEN)
         first_appearance_mcdp_in_orig = offset + first_appearance_mcdp_in_sub
-        that_line = x.where.string[:first_appearance_mcdp_in_orig+4].split('\n')[-1]
+        that_line = x.where.string[:first_appearance_mcdp_in_orig+len(TOKEN)].split('\n')[-1]
         
 #         print 'first line: %r' % that_line
         initial_spaces = that_line.index(TOKEN) 
         
-        if TOKEN in that_line[initial_spaces+4:]:
+        if TOKEN in that_line[initial_spaces+len(TOKEN):]:
             msg = 'I cannot deal with two "mcdp" in the same line.'
             raise_desc(NotImplemented, msg, that_line=that_line)
         # no! initial_spaces =  count_initial_spaces(that_line)
@@ -182,7 +182,7 @@ def correct(x, parents):  # @UnusedVariable
 
             that_line = after.split('\n')[0]
             
-#             print('its line: %r' % that_line)
+            print('%d its line: %r' % (i, that_line))
             # not the last with only a }
             if that_line.strip() == '}':
 #                 print('it is the last')
@@ -190,8 +190,8 @@ def correct(x, parents):  # @UnusedVariable
             else:
                 align_at = initial_spaces + 4
             
-            nspaces =  count_initial_spaces(that_line)
-#             print('has spaces %d' % nspaces)
+            nspaces = count_initial_spaces(that_line)
+            print('has spaces %d' % nspaces)
             if nspaces < align_at: 
                 # need to add some indentation
                 w = Where(x.where.string, offset + i + nspaces + 1, offset + i + nspaces +1)
@@ -208,11 +208,16 @@ def correct(x, parents):  # @UnusedVariable
             if TOKEN in that_line:
                 break
         
-def count_initial_spaces(x):
+def count_initial_spaces(x, tabsize=4):
     from mcdp_report.out_mcdpl import extract_ws
     first, _middle, _last = extract_ws(x)
-    #print x.__repr__(), [first, _middle, _last]
-    return len(first)
+    n = 0
+    for s in first:
+        if s == ' ':
+            n += 1
+        if s == '\t':
+            n += tabsize
+    return n
 
 def findall(p, s):
     '''Yields all the positions of
@@ -301,14 +306,22 @@ def apply_suggestions(s, subs):
     id2char = {}
     for i, c in enumerate(s):
         id2char[i] = c
-        
-    for where, replacement in subs:
+    
+    # do first the ones that are insertions
+    def order(s):
+        where, replacement = s
+        return where.character_end - where.character    
+    
+    for where, replacement in sorted(subs, key=order):
         assert where.string == s, (where.string, s)
-        #print ('replace %d to %d with %r' % (where.character, where.character_end, replacement))
+        print ('replace %d to %d with %r' % (where.character, where.character_end, replacement))
         # list of indices of characters to remove
         seq = list(range(where.character, where.character_end))
         
         # offset = chars.index(seq[0])
+        if where.character not in chars:
+            msg = 'Oops, char %d not in %s' % (where.character, chars)
+            raise NotImplemented(msg)
         offset = chars.index(where.character)
 
         for _ in seq:

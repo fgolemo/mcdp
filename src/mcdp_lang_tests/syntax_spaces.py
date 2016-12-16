@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from nose.tools import assert_equal, assert_raises
 
-from comptests.registrar import comptest, run_module_tests
+from comptests.registrar import comptest, run_module_tests, comptest_fails
 from mcdp_lang import parse_ndp
 from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts
 from mcdp_lang.eval_space_imp import eval_space
@@ -437,8 +437,39 @@ mcdp {
     s3 = apply_suggestions(s2, suggestions2)
     assert_equal(s3, s3_expected)
 
+@comptest
+def tabs1():
+    s = 'mcdp {\n\t# this is equivalent to a mux\n\tprovides fa [g]\n\tprovides fb [J]\n\n\trequires r [g x J]\n\n\tr >= <provided fa, fb>\n}'
+    suggestions = get_suggestions_ndp(s)
+    print s.__repr__()
+    s2 = apply_suggestions(s, suggestions)
+
+
+@comptest
+def overlapping():
+    s = 'mcdp {\n # this is equivalent to a mux\n provides fa [g]\n provides fb [J]\n\n requires r [g x J]\n\n r >= <provided fa, fb>\n}'
+    suggestions = get_suggestions_ndp(s)
+    s2 = apply_suggestions(s, suggestions)
+
+@comptest_fails
+def suggestion_problem1():
+    s=""" 
+ mcdp {
+     a = mcdp { 
+             b = mcdp {} 
+} 
+ }"""    
+    suggestions = get_suggestions_ndp(s)
+    s2 = apply_suggestions(s, suggestions)
+    s2_expected = """
+ mcdp {
+     a = mcdp { 
+             b = mcdp {}
+         } 
+ }"""
+    assert_equal(s2, s2_expected)
     
 if __name__ == '__main__': 
-    
+#     overlapping()
     run_module_tests()
     

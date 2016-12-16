@@ -23,7 +23,7 @@ def check_suggestions(filename, source):  # @UnusedVariable
     for w, r in suggestions:  # @UnusedVariable
         #print('"%s" -> "%s"' % (w.string[w.character:w.character_end], r))
         pass
-         
+    print source.__repr__()
     s2 = apply_suggestions(source, suggestions)
     if suggestions:
         print(s2)
