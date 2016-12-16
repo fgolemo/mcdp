@@ -430,12 +430,22 @@ def process_parse_request(library, string, spec, key, cache):
         for where, replacement in suggestions:
             if where.character < where.character_end:
                 orig = where.string[where.character:where.character_end]
-                tooltip = 'Aesthetic suggestion: replace “%s” with “%s”.' % (orig, replacement)
-                bulb = '\xf0\x9f\x92\xa1'
-                tooltip += ' The “%sbeautify” button on the top right does it for you.' % bulb
-            else:
-                tooltip = 'Add “%s”.' % replacement
-            highlight = html_mark(highlight, where, "suggestion", tooltip=tooltip)
+                if replacement.strip():
+                    tooltip = 'Aesthetic suggestion: replace “%s” with “%s”.' % (orig, replacement)
+                    bulb = '\xf0\x9f\x92\xa1'
+                    tooltip += ' The “%sbeautify” button on the top right does it for you.' % bulb
+                    klass = "suggestion"
+                else:
+                    tooltip = 'Fix indentation.'
+                    klass = 'indentation'
+            elif where.character == where.character_end:
+                if replacement.strip():
+                    tooltip = 'Add “%s”.' % replacement
+                    klass = 'suggestion'
+                else:
+                    tooltip = 'Fix indentation.'
+                    klass = 'indentation'
+            highlight = html_mark(highlight, where, klass, tooltip=tooltip)
     else:
         string_with_suggestions = None
      

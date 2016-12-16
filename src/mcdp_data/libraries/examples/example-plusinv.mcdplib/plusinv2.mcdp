@@ -5,5 +5,8 @@ mcdp {
     requires y [dimensionless]
     requires z [dimensionless]
     
-    required x + required y · required z ≥ provided a
+    required x + required y · required z ≽ provided a
+    
+    b = instance mcdp { 
+}
 }

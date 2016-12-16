@@ -18,7 +18,7 @@ from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.refinement import namedtuple_visitor_ext
 from mocdp.exceptions import DPInternalError
 from mcdp_lang.dealing_with_special_letters import subscripts, greek_letters
-from contracts.utils import check_isinstance
+from contracts.utils import check_isinstance, raise_desc
 from contracts.interface import Where
 from contracts import contract
 from mcdp_lang.utils_lists import unwrap_list
@@ -154,53 +154,62 @@ def correct(x, parents):  # @UnusedVariable
             yield suggestion
         
     if isinstance(x, CDP.BuildProblem):
-        #print 'build', x_string.__repr__()
+#         print 'build', x_string.__repr__()
         
         offset = x.where.character
         #print 'build complete %d  %r' %(offset, x.where.string)
+        TOKEN = 'mcdp'
+        first_appearance_mcdp_in_sub = x_string.index(TOKEN)
+        first_appearance_mcdp_in_orig = offset + first_appearance_mcdp_in_sub
+        that_line = x.where.string[:first_appearance_mcdp_in_orig+4].split('\n')[-1]
         
-        first_appearance_mcdp = offset + x_string.index('mcdp')
-        that_line = x.where.string[:first_appearance_mcdp].split('\n')[-1]
-        initial_spaces = count_initial_spaces(that_line)
-        #print('initial spaces = %d' % initial_spaces)
+#         print 'first line: %r' % that_line
+        initial_spaces = that_line.index(TOKEN) 
         
-        align_at = initial_spaces + 4
-        
+        if TOKEN in that_line[initial_spaces+4:]:
+            msg = 'I cannot deal with two "mcdp" in the same line.'
+            raise_desc(NotImplemented, msg, that_line=that_line)
+        # no! initial_spaces =  count_initial_spaces(that_line)
+#         print('initial spaces = %d' % initial_spaces)
+#         print
         # now look for all the new lines later
         newlines = findall('\n', x_string) 
         for i in newlines:
-            #print('newline at %d' % i)
-            # not the first
-            if i < first_appearance_mcdp:
-                #print('skip because first') 
+            if i < first_appearance_mcdp_in_sub:
+#                 print('skip because first') 
                 continue
             after = x_string[i+1:]
 
             that_line = after.split('\n')[0]
-            #print('its line: %r' % that_line)
+            if TOKEN in that_line:
+                break
+#             print('its line: %r' % that_line)
             # not the last with only a }
             if that_line.strip() == '}':
-                #print('skip because last')
-                continue
-            nspaces = count_initial_spaces(that_line)
-            #print('has spaces %d' % nspaces)
+#                 print('it is the last')
+                align_at = initial_spaces
+            else:
+                align_at = initial_spaces + 4
+            
+            nspaces =  count_initial_spaces(that_line)
+#             print('has spaces %d' % nspaces)
             if nspaces < align_at: 
                 # need to add some indentation
                 w = Where(x.where.string, offset + i + nspaces + 1, offset + i + nspaces +1)
                 to_add = align_at - nspaces
                 remaining = ' ' * to_add
-                #print('add %d spaces' % to_add)
+#                 print('add %d spaces' % to_add)
                 yield w, remaining 
             if nspaces > align_at:
                 remove = nspaces - align_at
                 w = Where(x.where.string, offset + i + 1, offset + i + 1 + remove)
-                #print('remove %d spaces' % remove)
+#                 print('remove %d spaces' % remove)
                 yield w, ''
         
 def count_initial_spaces(x):
     from mcdp_report.out_mcdpl import extract_ws
     first, _middle, _last = extract_ws(x)
-    print x.__repr__(), [first, _middle, _last]
+    #print x.__repr__(), [first, _middle, _last]
     return len(first)
 
 def findall(p, s):
@@ -261,10 +270,7 @@ def get_suggestions(xr):
             check_isinstance(b, str)
             
             sub = (a_where, b)
-            subs.append(sub)
-            #ws_before_a = s[:a_index]
-            #sub = ws_before_a + b
-            #subs.append((x.where, sub))
+            subs.append(sub) 
         return x
             
     _ = namedtuple_visitor_ext(xr, find_corrections)
@@ -296,7 +302,7 @@ def apply_suggestions(s, subs):
         
     for where, replacement in subs:
         assert where.string == s, (where.string, s)
-        print ('replace %d to %d with %r' % (where.character, where.character_end, replacement))
+        #print ('replace %d to %d with %r' % (where.character, where.character_end, replacement))
         # list of indices of characters to remove
         seq = list(range(where.character, where.character_end))
         
@@ -311,5 +317,5 @@ def apply_suggestions(s, subs):
             id2char[cid] = c 
             chars.insert(offset + j, cid)
     
-    result = ''.join( id2char[_] for _ in chars)
+    result = ''.join(id2char[_] for _ in chars)
     return result

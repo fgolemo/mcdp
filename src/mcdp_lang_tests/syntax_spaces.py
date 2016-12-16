@@ -175,7 +175,7 @@ mcdp {
 #     xr = parse_ndp_refine(x, Context())
     
     suggestions = get_suggestions_ndp(s)
-    print suggestions
+#     print suggestions
     assert_equal(1, len(suggestions))
     assert_equal('\xc2\xb2', suggestions[0][1])
     
@@ -268,9 +268,9 @@ def get_suggestions_ndp(s):
     x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
     assert_equal(x.where.string, s)
     
-    print ('get_suggestions_ndp s = %r' % s)
+#     print ('get_suggestions_ndp s = %r' % s)
 #     print ('get_suggestions_ndp x = %s' % recursive_print(x))
-    print ('get_suggestions_ndp x string = %r' % x.where.string)
+#     print ('get_suggestions_ndp x string = %r' % x.where.string)
     xr = parse_ndp_refine(x, Context())
     suggestions = get_suggestions(xr)
     return suggestions
@@ -287,10 +287,10 @@ def space_suggestions():
     s = """
  mcdp {
         a = 2
-} 
+ } 
 """
     suggestions = get_suggestions_ndp(s)
-    print suggestions
+#     print suggestions
     assert_equal(1, len(suggestions))
 
 @comptest
@@ -307,12 +307,33 @@ mcdp {
 } 
 """
     suggestions = get_suggestions_ndp(s)
-    print suggestions
+#     print suggestions
     assert_equal(1, len(suggestions))
     assert_equal(suggestions[0][0].character, suggestions[0][0].character_end) 
     s2 = apply_suggestions(s, suggestions)
     assert_equal(s2, s2expected)
 
+
+@comptest
+def space_suggestions_brace():
+    # 3 spaces
+    s = """
+ mcdp {
+     a = 2
+} 
+"""
+    s2expected = """
+ mcdp {
+     a = 2
+ } 
+"""
+    suggestions = get_suggestions_ndp(s)
+#     print suggestions
+    assert_equal(1, len(suggestions))
+    assert_equal(suggestions[0][0].character, suggestions[0][0].character_end) 
+    s2 = apply_suggestions(s, suggestions)
+    assert_equal(s2, s2expected)
+    
 @comptest
 def spaces():
     assert_equal(extract_ws(''), ('','',''))
@@ -346,6 +367,49 @@ mcdp {
     s2 = apply_suggestions(s, suggestions)
     suggestions2 = get_suggestions_ndp(s2)
     assert_equal(0, len(suggestions2))
+    
+    
+
+
+@comptest
+def recursive1():
+    s = """
+mcdp {
+    a = instance mcdp { }
+}"""
+    suggestions = get_suggestions_ndp(s)
+    assert_equal(0, len(suggestions))
+
+@comptest
+def nochanges():
+    s = """
+mcdp {
+    a = mcdp { 
+            b = mcdp {
+                } 
+        }
+}"""
+    suggestions = get_suggestions_ndp(s)
+    assert_equal(0, len(suggestions))
+
+@comptest
+def recursive2():
+    s = """
+mcdp {
+    a = instance mcdp { 
+}
+}"""
+    s2expected = """
+mcdp {
+    a = instance mcdp { 
+                 }
+}"""
+    suggestions = get_suggestions_ndp(s)
+    assert_equal(1, len(suggestions))
+    s2 = apply_suggestions(s, suggestions)
+    assert_equal(s2, s2expected)
+    
+                 
     
 if __name__ == '__main__': 
     

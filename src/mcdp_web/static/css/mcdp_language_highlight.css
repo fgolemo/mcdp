@@ -270,4 +270,7 @@ span.has_tooltip:hover div.tooltip  {
     padding: 5px;
 }
 
-
+span.indentation {
+    border-left: solid 10px white !important;
+    margin-left: -10px !important;
+}

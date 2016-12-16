@@ -41,6 +41,7 @@ def extract_ws(s, ws_chars = [' ', '\n', '\t']):
     """ Return initial, x, final such that initial + x + final = s """
     if not s:
         return '', '', ''
+    
     assert len(s) >= 1
     
     i = 0
@@ -63,7 +64,7 @@ def extract_ws(s, ws_chars = [' ', '\n', '\t']):
     final = s[len(s)-len_final:]
     middle = s[i:len(s)-len_final]
     recombine = initial + middle + final 
-    print('s: %r recombined: %r ' % (s, recombine))
+    
     assert recombine == s, (s, initial, middle, final)
     
     return initial, middle, final 
