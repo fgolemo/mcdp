@@ -314,8 +314,10 @@ def parse_wrap(expr, string):
                 return get_copy_with_where(x, where)
             
             parsed_transformed = namedtuple_visitor_ext(parsed[0], transform)
-            
-            assert_equal(parsed_transformed.where.string, string)
+
+            if hasattr(parsed_transformed, 'where'):            
+                # could be an int, str
+                assert_equal(parsed_transformed.where.string, string)
             
             return [parsed_transformed]
           

@@ -1,0 +1,12 @@
+catalogue {
+    provides capacity [kWh]
+    requires mass [kg]
+    requires budget [USD]
+
+     5 kWh ⟻ battery1 ⟼ 10 g, 2 USD
+     6 kWh ⟻ battery2 ⟼ 15 g, 3 USD
+     6 kWh ⟻ battery2b ⟼ 10 g, 5 USD
+     7 kWh ⟻ battery3 ⟼ 20 g, 5 USD
+    10 kWh ⟻ battery4 ⟼ 30 g, 6 USD
+ 
+}

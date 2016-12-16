@@ -1,0 +1,5 @@
+mcdp {  
+   variable a, c [dimensionless] 
+   c ≥ a² + 1
+   a ≥ c² 
+}

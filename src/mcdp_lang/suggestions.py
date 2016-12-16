@@ -181,8 +181,7 @@ def correct(x, parents):  # @UnusedVariable
             after = x_string[i+1:]
 
             that_line = after.split('\n')[0]
-            if TOKEN in that_line:
-                break
+            
 #             print('its line: %r' % that_line)
             # not the last with only a }
             if that_line.strip() == '}':
@@ -205,6 +204,9 @@ def correct(x, parents):  # @UnusedVariable
                 w = Where(x.where.string, offset + i + 1, offset + i + 1 + remove)
 #                 print('remove %d spaces' % remove)
                 yield w, ''
+            
+            if TOKEN in that_line:
+                break
         
 def count_initial_spaces(x):
     from mcdp_report.out_mcdpl import extract_ws

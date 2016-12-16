@@ -29,7 +29,7 @@ def graphviz_run(filename_dot, output, prog='dot'):
 
     cmd = [prog, '-T%s' % encoder, '-o', output, filename_dot]
     
-    system_cmd_result(cwd='.', cmd=['cp', filename_dot, 'last_processed.dot'])
+#     system_cmd_result(cwd='.', cmd=['cp', filename_dot, 'last_processed.dot'])
 #     print('just before running graphviz')
     with timeit_wall('running graphviz on %s' % filename_dot, 1.0):
         try:
@@ -195,7 +195,7 @@ def gg_get_format(gg, data_format):
     do_png = data_format == 'png'
     do_pdf = data_format == 'pdf'
     do_svg = data_format == 'svg'
-    from mcdp_library_tests.tests import timeit_wall
+#     from mcdp_library_tests.tests import timeit_wall
     with timeit_wall('gg_figure %s' % data_format): 
         gg_figure(r, 'graph', gg, do_dot=do_dot,
                     do_png=do_png, do_pdf=do_pdf, do_svg=do_svg)

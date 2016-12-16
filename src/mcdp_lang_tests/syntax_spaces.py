@@ -409,7 +409,34 @@ mcdp {
     s2 = apply_suggestions(s, suggestions)
     assert_equal(s2, s2expected)
     
-                 
+@comptest
+def recursive3():
+    s = """
+mcdp {
+     a = instance mcdp { 
+                 }
+}"""
+    s2_expected = """
+mcdp {
+    a = instance mcdp { 
+                  }
+}"""
+    s3_expected = """
+mcdp {
+    a = instance mcdp { 
+                 }
+}"""
+    suggestions = get_suggestions_ndp(s)
+    s2 = apply_suggestions(s, suggestions)
+    assert_equal(2, len(suggestions))
+    assert_equal(s2, s2_expected)
+    
+    # this one there will be a further adjustment
+    suggestions2 = get_suggestions_ndp(s2)
+    assert_equal(1, len(suggestions2))
+    s3 = apply_suggestions(s2, suggestions2)
+    assert_equal(s3, s3_expected)
+
     
 if __name__ == '__main__': 
     
