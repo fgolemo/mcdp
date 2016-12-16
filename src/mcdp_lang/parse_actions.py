@@ -17,6 +17,7 @@ from .parts import CDPLanguage
 from .pyparsing_bundled import ParseException, ParseFatalException
 from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list, unwrap_list
+from nose.tools import assert_equal
 
 
 CDP = CDPLanguage
@@ -234,7 +235,6 @@ def plus_inv_parse_action(tokens):
     ops = make_list(tokens)
     return CDP.InvPlus(ops, where=ops.where)
 
-
 def parse_wrap_filename(expr, filename):
     with open(filename) as f:
         contents = f.read()
@@ -242,15 +242,23 @@ def parse_wrap_filename(expr, filename):
         return parse_wrap(expr, contents)
     except MCDPExceptionWithWhere  as e:
         raise e.with_filename(filename)
-    
 
 def translate_where(where0, string):
     """ 
         Take the first where; compute line, col according to where0.string,
         and find out the corresponding chars in the second string.
         
-        This assumes that string and where0.string have the same lines.
+        This assumes that string and where0.string have the same number of lines.
     """
+    
+    nlines = len(string.split('\n'))
+    nlines0 = len(where0.string.split('\n'))
+    if nlines != nlines0:
+        msg = 'I expected they have the same lines.'
+        msg += '\n         string (%d lines): %r' % (nlines, string)
+        msg += '\n  where0.string (%d lines): %r' % (nlines0, where0.string)
+        raise_desc(DPInternalError, msg)
+    
     string0 = where0.string
     line, col = line_and_col(where0.character, string0)
     character2 = location(line, col, string)
@@ -263,7 +271,6 @@ def translate_where(where0, string):
     
     where = Where(string=string, character=character2, character_end=character_end2)
     return where
-
 
 def parse_wrap(expr, string):
     from mcdp_lang_tests.utils import find_parsing_element
@@ -284,11 +291,10 @@ def parse_wrap(expr, string):
     
     if not string0.strip():
         msg = 'Nothing to parse.'
-        where=Where(string, character=len(string))
+        where = Where(string, character=len(string))
         raise DPSyntaxError(msg, where=where)
 
     try:
-        
         try:
             w = str(find_parsing_element(expr))
         except ValueError:
@@ -298,7 +304,6 @@ def parse_wrap(expr, string):
             expr.parseWithTabs()
             
             parsed = expr.parseString(string0, parseAll=True)  # [0]
-            
             def transform(x, parents):  # @UnusedVariable
                 if x.where is None: # pragma: no cover
                     msg = 'Where is None for this element'
@@ -310,27 +315,22 @@ def parse_wrap(expr, string):
             
             parsed_transformed = namedtuple_visitor_ext(parsed[0], transform)
             
+            assert_equal(parsed_transformed.where.string, string)
+            
             return [parsed_transformed]
-        
-#     except RuntimeError as e:
-#         msg = 'We have a recursive grammar.'
-#         msg += "\n\n" + indent(string, '  ') + '\n'
-#         raise_desc(DPInternalError, msg)
-#         
+          
     except (ParseException, ParseFatalException) as e:
         where1 = Where(string0, e.loc)
         where2 = translate_where(where1, string)
         s0 = e.__str__()
         check_isinstance(s0, bytes)
-#         print type(s0), s0.__repr__()
-#         s = s0.encode('utf8')
         s = s0
         e2 = DPSyntaxError(s, where=where2)
         raise DPSyntaxError, e2.args, sys.exc_info()[2]
          
     except DPSemanticError as e:
         msg = 'This should not throw a DPSemanticError'
-        raise_wrapped(DPInternalError, e,msg, exc=sys.exc_info()) 
+        raise_wrapped(DPInternalError, e, msg, exc=sys.exc_info()) 
 
 
 def remove_comments(s):

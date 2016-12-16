@@ -21,6 +21,7 @@ from mcdp_lang.dealing_with_special_letters import subscripts, greek_letters
 from contracts.utils import check_isinstance
 from contracts.interface import Where
 from contracts import contract
+from mcdp_lang.utils_lists import unwrap_list
 
 
 __all__ = [
@@ -31,6 +32,10 @@ __all__ = [
 CDP = CDPLanguage
 
 def correct(x, parents):  # @UnusedVariable
+    """ Yields a sequence of corrections.
+        Each correction is either a pair (str, substitution)
+        or a (Where, sub)
+    """
     x_string = x.where.string[x.where.character:x.where.character_end]
     def match_in_x_string(r):
         m = re.search(r, x_string)
@@ -54,7 +59,7 @@ def correct(x, parents):  # @UnusedVariable
     for klass, preferred in glyphs.items():
         if isinstance(x, klass):
             if x.glyph != preferred:
-                return x.glyph, preferred
+                yield x.glyph, preferred
        
     symbols = {
         CDP.Nat: 'ℕ',
@@ -65,7 +70,7 @@ def correct(x, parents):  # @UnusedVariable
     for klass, preferred in symbols.items():
         if isinstance(x, klass):
             if x.symbol != preferred:
-                return x.symbol, preferred
+                yield x.symbol, preferred
         
     keywords = {
         CDP.TopKeyword: '⊤',
@@ -76,30 +81,30 @@ def correct(x, parents):  # @UnusedVariable
     for klass, preferred in keywords.items():
         if isinstance(x, klass):
             if x.keyword != preferred:
-                return x.keyword, preferred
+                yield x.keyword, preferred
 
     
     if isinstance(x, CDP.NewFunction) and x.keyword is None:
         name = x.name.value
-        return name, 'provided %s' % name
+        yield name, 'provided %s' % name
     
     if isinstance(x, CDP.NewResource) and x.keyword is None:
         name = x.name.value
-        return name, 'required %s' % name
+        yield name, 'required %s' % name
     
     if isinstance(x, CDP.Resource) and isinstance(x.keyword, CDP.DotPrep):
         dp, s = x.dp.value, x.s.value
         r = '%s.*\..*%s' % (dp, s)
         old = match_in_x_string(r)
         new = '%s required by %s' % (s, dp)
-        return old, new
+        yield old, new
     
     if isinstance(x, CDP.Function) and isinstance(x.keyword, CDP.DotPrep):
         dp, s = x.dp.value, x.s.value
         r = '%s.*\..*%s' % (dp, s)
         old = match_in_x_string(r)
         new = '%s provided by %s' % (s, dp)
-        return old, new
+        yield old, new
     
     if isinstance(x, CDP.RcompUnit):
         replacements = {
@@ -117,12 +122,12 @@ def correct(x, parents):  # @UnusedVariable
             w = '^' + n
             if w in x_string:
                 s2 = x_string.replace(w, replacement)
-                return x_string, s2
+                yield x_string, s2
             
             w = '^ ' + n
             if w in x_string:
                 s2 = x_string.replace(w, replacement)
-                return x_string, s2
+                yield x_string, s2
 
     if isinstance(x, CDP.PowerShort):
         replacements = {
@@ -141,14 +146,70 @@ def correct(x, parents):  # @UnusedVariable
                 for j in reversed(range(3)):
                     w = ' ' * i + '^' + ' ' * j + n
                     if w in x_string:
-                        return w, replacement
+                        yield w, replacement
                     
     if isinstance(x, (CDP.VName, CDP.RName, CDP.FName, CDP.CName)):
         suggestion = get_suggestion_identifier(x_string)
         if suggestion is not None:
-            return suggestion
+            yield suggestion
         
-    return None
+    if isinstance(x, CDP.BuildProblem):
+        #print 'build', x_string.__repr__()
+        
+        offset = x.where.character
+        #print 'build complete %d  %r' %(offset, x.where.string)
+        
+        first_appearance_mcdp = offset + x_string.index('mcdp')
+        that_line = x.where.string[:first_appearance_mcdp].split('\n')[-1]
+        initial_spaces = count_initial_spaces(that_line)
+        #print('initial spaces = %d' % initial_spaces)
+        
+        align_at = initial_spaces + 4
+        
+        # now look for all the new lines later
+        newlines = findall('\n', x_string) 
+        for i in newlines:
+            #print('newline at %d' % i)
+            # not the first
+            if i < first_appearance_mcdp:
+                #print('skip because first') 
+                continue
+            after = x_string[i+1:]
+
+            that_line = after.split('\n')[0]
+            #print('its line: %r' % that_line)
+            # not the last with only a }
+            if that_line.strip() == '}':
+                #print('skip because last')
+                continue
+            nspaces = count_initial_spaces(that_line)
+            #print('has spaces %d' % nspaces)
+            if nspaces < align_at: 
+                # need to add some indentation
+                w = Where(x.where.string, offset + i + nspaces + 1, offset + i + nspaces +1)
+                to_add = align_at - nspaces
+                remaining = ' ' * to_add
+                #print('add %d spaces' % to_add)
+                yield w, remaining 
+            if nspaces > align_at:
+                remove = nspaces - align_at
+                w = Where(x.where.string, offset + i + 1, offset + i + 1 + remove)
+                #print('remove %d spaces' % remove)
+                yield w, ''
+        
+def count_initial_spaces(x):
+    from mcdp_report.out_mcdpl import extract_ws
+    first, _middle, _last = extract_ws(x)
+    print x.__repr__(), [first, _middle, _last]
+    return len(first)
+
+def findall(p, s):
+    '''Yields all the positions of
+    the pattern p in the string s.'''
+    i = s.find(p)
+    while i != -1:
+        yield i
+        i = s.find(p, i+1)
 
 @contract(s=bytes, returns='tuple')
 def get_suggestion_identifier(s):
@@ -179,24 +240,26 @@ def get_suggestions(xr):
     """ Returns a sequence of (where, replacement_string) """
     subs = [] # (where, sub)
     def find_corrections(x, parents):
-        # expect two pairs of strings  
-        has = correct(x, parents)
-        if has is None:
-            pass
-        else:
-            a, b = has
-            check_isinstance(a, str)
-            check_isinstance(b, str)
-            s = x.where.string[x.where.character:x.where.character_end]
-            if not a in s:
-                msg = 'Could not find piece %r in %r.' % (a, s)
-                raise DPInternalError(msg)
+        # expect an iterator  
+        s = x.where.string[x.where.character:x.where.character_end]
+        
+        for suggestion in correct(x, parents):
+            a, b = suggestion
+            if isinstance(a, str):
+                if not a in s:
+                    msg = 'Could not find piece %r in %r.' % (a, s)
+                    raise DPInternalError(msg)
+                a_index = s.index(a)
+                a_len = len(a) # in bytes
+                a_char = x.where.character + a_index
+                a_char_end = a_char + a_len
+                a_where = Where(x.where.string, a_char, a_char_end)
+            else:
+                check_isinstance(a, Where)
+                a_where = a
             
-            a_index = s.index(a)
-            a_len = len(a) # in bytes
-            a_char = x.where.character + a_index
-            a_char_end = a_char + a_len
-            a_where = Where(x.where.string, a_char, a_char_end)
+            check_isinstance(b, str)
+            
             sub = (a_where, b)
             subs.append(sub)
             #ws_before_a = s[:a_index]
@@ -233,15 +296,20 @@ def apply_suggestions(s, subs):
         
     for where, replacement in subs:
         assert where.string == s, (where.string, s)
+        print ('replace %d to %d with %r' % (where.character, where.character_end, replacement))
+        # list of indices of characters to remove
         seq = list(range(where.character, where.character_end))
-        i = chars.index(seq[0])
+        
+        # offset = chars.index(seq[0])
+        offset = chars.index(where.character)
+
         for _ in seq:
             chars.remove(_)
             
         for j, c in enumerate(replacement):
             cid = len(id2char)
             id2char[cid] = c 
-            chars.insert(i + j, cid)
+            chars.insert(offset + j, cid)
     
     result = ''.join( id2char[_] for _ in chars)
     return result

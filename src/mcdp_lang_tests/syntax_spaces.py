@@ -3,6 +3,7 @@ from nose.tools import assert_equal, assert_raises
 
 from comptests.registrar import comptest, run_module_tests
 from mcdp_lang import parse_ndp
+from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts
 from mcdp_lang.eval_space_imp import eval_space
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp_refine
@@ -10,8 +11,9 @@ from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.utils import parse_wrap_check, TestFailed
 from mcdp_lang_tests.utils2 import eval_rvalue_as_constant
+from mcdp_report.out_mcdpl import extract_ws
 from mocdp.comp.context import Context
-from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts
+from mocdp.exceptions import DPSemanticError
 
 
 @comptest
@@ -73,27 +75,25 @@ catalogue {
 }
 """)
          
-
 @comptest
-def check_spaces5():
-    pass
-
-@comptest
-def check_spaces6():
-    pass
+def undefined_x():
+    source = """
+    mcdp {
+        provides x
+        provided x ≼ 9.8 m/s^2
+    }
+    """
+    assert_raises(DPSemanticError, parse_ndp, source)
 
 @comptest
 def check_spaces7():
     source = """
     mcdp {
         provides x
-        provided x ≤ 9.8 m/s^2
+        provided x ≼ 9.8 m/s^2
     }
     """
-    x = parse_wrap(Syntax.ndpt_dp_rvalue, source)[0]
-    xr = parse_ndp_refine(x, Context())
-    
-    suggestions = get_suggestions(xr)
+    suggestions = get_suggestions_ndp(source)
     
     assert_equal(1, len(suggestions))
     assert_equal('m/s\xc2\xb2', suggestions[0][1])
@@ -147,18 +147,13 @@ def power1():
 @comptest
 def suggestions_exponent():
     source = """
-    mcdp {
-        provides f [dimensionless]
-        requires r [dimensionless]
-        
-        (provided f)^2 ≤ required r
-    }
+mcdp {
+    provides f [dimensionless]
+    requires r [dimensionless]
+    (provided f)^2 ≼ required r
+}
     """
-    
-    x = parse_wrap(Syntax.ndpt_dp_rvalue, source)[0]
-    xr = parse_ndp_refine(x, Context())
-    
-    suggestions = get_suggestions(xr)
+    suggestions = get_suggestions_ndp(source) 
     assert_equal(1, len(suggestions))
     w, sub = suggestions[0]
     ws = w.string[w.character:w.character_end]
@@ -172,15 +167,15 @@ def suggestions_exponent():
 @comptest
 def suggestions_exponent2():
     s = """
-    mcdp {  
-   variable a, c [dimensionless] 
-   c ≥ a^2 + 1
+mcdp {
+    variable a, c [dimensionless] 
+    c ≽ a^2 + 1
 }"""
-    x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
-    xr = parse_ndp_refine(x, Context())
+#     x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
+#     xr = parse_ndp_refine(x, Context())
     
-    suggestions = get_suggestions(xr)
-    # print suggestions
+    suggestions = get_suggestions_ndp(s)
+    print suggestions
     assert_equal(1, len(suggestions))
     assert_equal('\xc2\xb2', suggestions[0][1])
     
@@ -191,18 +186,18 @@ def suggestions_exponent2():
 @comptest
 def suggestions_subscript():
     s = """
-    mcdp {  
-       variable a_1 [dimensionless]
-    }"""
+mcdp {  
+    variable a_1 [dimensionless]
+}"""
     s2_exp = u"""
-    mcdp {  
-       variable a₁ [dimensionless]
-    }""".encode('utf8')
-
-    x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
-    xr = parse_ndp_refine(x, Context())
-    #print recursive_print(xr)
-    suggestions = get_suggestions(xr)
+mcdp {  
+    variable a₁ [dimensionless]
+}""".encode('utf8')
+# 
+#     x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
+#     xr = parse_ndp_refine(x, Context())
+    
+    suggestions = get_suggestions_ndp(s)
     assert_equal(1, len(suggestions))
     assert_equal('\xe2\x82\x81', suggestions[0][1])
     
@@ -216,42 +211,41 @@ def suggestions_subscript():
 @comptest
 def suggestions_subscript_no_inside():
     s = """
-    mcdp {  
-       variable a_1_last [dimensionless]
+mcdp {  
+    variable a_1_last [dimensionless]
 }"""
-    x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
-    xr = parse_ndp_refine(x, Context())
-    suggestions = get_suggestions(xr)
+    suggestions = get_suggestions_ndp(s)
     if suggestions: print suggestions
     assert_equal(0, len(suggestions)) 
     
 @comptest
 def dont_suggest_weird_places():
     s = """
-    mcdp {  
-        # this might look like "nu"
-       variable num_stuff [dimensionless]
-       
-       num_replacements = 0
+mcdp {  
+    # this might look like "nu"
+    variable num_stuff [dimensionless]
+    num_replacements = 0
 }"""
-    x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
-    xr = parse_ndp_refine(x, Context())
-    suggestions = get_suggestions(xr)
+    suggestions = get_suggestions_ndp(s)
     if suggestions: print suggestions
     assert_equal(0, len(suggestions)) 
 
 @comptest
 def suggestions_greek():
-    s = """ mcdp {  
-       variable a_alpha_last [dimensionless]
-    }"""
-    s2_exp = u""" mcdp {  
-       variable a_α_last [dimensionless]
-    }""".encode('utf8')
+    s = """
+mcdp {  
+    variable a_alpha_last [dimensionless]
+}"""
+    s2_exp = u"""
+mcdp {  
+    variable a_α_last [dimensionless]
+}""".encode('utf8')
 
-    x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
-    xr = parse_ndp_refine(x, Context())
-    suggestions = get_suggestions(xr)
+#     x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
+#     assert_equal(x.where.string, s)
+#     xr = parse_ndp_refine(x, Context())
+#     suggestions = get_suggestions(xr)
+    suggestions = get_suggestions_ndp(s)
     #if suggestions: print suggestions
     assert_equal(1, len(suggestions)) 
     s2 = apply_suggestions(s, suggestions)
@@ -261,26 +255,98 @@ def suggestions_greek():
 @comptest
 def dont_suggest_if_already_done():
     s = """
-    mcdp {  
-       # this is already done
-       variable a₁ [dimensionless]
-       variable alpha [dimensionless]
+mcdp {  
+    # this is already done
+    variable a₁ [dimensionless]
+    variable alpha [dimensionless]
 }"""
-    x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
-    xr = parse_ndp_refine(x, Context())
-    suggestions = get_suggestions(xr)
+    suggestions = get_suggestions_ndp(s)
     if suggestions: print suggestions
     assert_equal(0, len(suggestions))
     
+def get_suggestions_ndp(s):
+    x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
+    assert_equal(x.where.string, s)
+    
+    print ('get_suggestions_ndp s = %r' % s)
+#     print ('get_suggestions_ndp x = %s' % recursive_print(x))
+    print ('get_suggestions_ndp x string = %r' % x.where.string)
+    xr = parse_ndp_refine(x, Context())
+    suggestions = get_suggestions(xr)
+    return suggestions
+
 @comptest
 def just_list():
     s = sorted(greek_letters, key=lambda t: t.lower() + t[0])
-    print " ".join(greek_letters[_] for _ in s)
+    print(" ".join(greek_letters[_] for _ in s))   
+    print("\n".join('%s %s' % (greek_letters[k], k) for k in s))
+    print(" ".join(subscripts.values()))
+
+@comptest
+def space_suggestions():
+    s = """
+ mcdp {
+        a = 2
+} 
+"""
+    suggestions = get_suggestions_ndp(s)
+    print suggestions
+    assert_equal(1, len(suggestions))
+
+@comptest
+def space_suggestions1():
+    # 3 spaces
+    s = """
+mcdp {
+   a = 2
+} 
+"""
+    s2expected = """
+mcdp {
+    a = 2
+} 
+"""
+    suggestions = get_suggestions_ndp(s)
+    print suggestions
+    assert_equal(1, len(suggestions))
+    assert_equal(suggestions[0][0].character, suggestions[0][0].character_end) 
+    s2 = apply_suggestions(s, suggestions)
+    assert_equal(s2, s2expected)
+
+@comptest
+def spaces():
+    assert_equal(extract_ws(''), ('','',''))
+    assert_equal(extract_ws('x'), ('','x',''))
+    assert_equal(extract_ws(' x'), (' ','x',''))
+    assert_equal(extract_ws(' x '), (' ','x',' '))
+    assert_equal(extract_ws(' '), (' ','',''))
+    assert_equal(extract_ws('  '), ('  ','',''))
     
-    print "\n".join('%s %s' % (greek_letters[k], k) for k in s)
-    print " ".join(subscripts.values())
+    
+@comptest
+def check_spaces_right_position():
+    s = """
+mcdp {
+a = 2
+}"""
+    suggestions = get_suggestions_ndp(s)
+    s2 = apply_suggestions(s, suggestions)
+    suggestions2 = get_suggestions_ndp(s2)
+    assert_equal(0, len(suggestions2))
 
 
+@comptest
+def check_spaces_right_position2():
+    s = """
+mcdp {
+    a = 2
+#
+}"""
+    suggestions = get_suggestions_ndp(s)
+    s2 = apply_suggestions(s, suggestions)
+    suggestions2 = get_suggestions_ndp(s2)
+    assert_equal(0, len(suggestions2))
+    
 if __name__ == '__main__': 
     
     run_module_tests()

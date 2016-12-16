@@ -61,7 +61,7 @@ coverage-report:
 
 
 clean:
-	rm -rf $(out) 
+	rm -rf $(out) out/opt_basic_*
 	#_cached
 
 

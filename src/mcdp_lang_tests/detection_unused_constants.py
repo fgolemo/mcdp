@@ -14,8 +14,9 @@ def warning_unused_variable1(): # TODO: rename
     }
     """ 
     context = ModelBuildingContext()
-    parse_ndp(s, context)
+    ndp = parse_ndp(s, context)
     w = context.warnings
+    print ndp.repr_long()
     assert_equal(len(w), 1)
     assert_equal(w[0].which, MCDPWarnings.LANGUAGE_UNUSED_CONSTANT)
 

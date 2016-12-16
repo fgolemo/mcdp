@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.utils_lists import is_a_special_list
+from mocdp.exceptions import mcdp_dev_warning
 
 
 __all__ = ['ast_to_mcdpl']
@@ -35,26 +36,37 @@ def iterate3(transform, x):
         yield Snippet(op=x, orig=orig0, a=x.where.character, b=x.where.character_end,
               transformed=out)
 
-def extract_ws(s):
-    """ Return initial, x, final such that initial+x+final = s """
+mcdp_dev_warning('TODO: extract_ws() used by mcdp_lnag, move in utils')
+def extract_ws(s, ws_chars = [' ', '\n', '\t']):
+    """ Return initial, x, final such that initial + x + final = s """
     if not s:
-        return '','',''
+        return '', '', ''
     assert len(s) >= 1
+    
     i = 0
-    is_ws = lambda x: x in [' ', '\n', '\t'] 
-    while is_ws(s[i]) and i < len(s): 
+    is_ws = lambda x: x in ws_chars 
+    
+    # i is the first character that is not a whitespace
+    while i < len(s) and is_ws(s[i]): 
         i += 1
+        
+    # now we know the initial string
     initial = s[:i]
-    j = len(s) - 1
-    while is_ws(s[j]) and j >= 0:
-        j -= 1
     
-    final = s[j+1:]
-    rest = s[i:j+1]
-    recombine = initial+rest+final 
-    assert recombine == s, (s, initial, rest, final)
+    # rest of the string (middle + final)
+    rest = s[i:]
     
-    return initial, rest, final 
+    len_final = 0
+    while len_final < len(rest) and is_ws(rest[len(rest)-len_final-1]):
+        len_final += 1
+    
+    final = s[len(s)-len_final:]
+    middle = s[i:len(s)-len_final]
+    recombine = initial + middle + final 
+    print('s: %r recombined: %r ' % (s, recombine))
+    assert recombine == s, (s, initial, middle, final)
+    
+    return initial, middle, final 
     
 def ast_to_mcdpl_inner(x):
     from mcdp_report.html import Snippet, iterate_check_order, order_contributions
