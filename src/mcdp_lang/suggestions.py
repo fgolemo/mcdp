@@ -14,14 +14,14 @@
 
 import re
 
+from contracts import contract
+from contracts.interface import Where
+from contracts.utils import check_isinstance, raise_desc
+from mcdp_lang.dealing_with_special_letters import subscripts, greek_letters
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.refinement import namedtuple_visitor_ext
+from mocdp import MCDPConstants
 from mocdp.exceptions import DPInternalError
-from mcdp_lang.dealing_with_special_letters import subscripts, greek_letters
-from contracts.utils import check_isinstance, raise_desc
-from contracts.interface import Where
-from contracts import contract
-from mcdp_lang.utils_lists import unwrap_list
 
 
 __all__ = [
@@ -173,6 +173,8 @@ def correct(x, parents):  # @UnusedVariable
 #         print('initial spaces = %d' % initial_spaces)
 #         print
         # now look for all the new lines later
+        INDENT = MCDPConstants.indent
+        TABSIZE = MCDPConstants.tabsize
         newlines = findall('\n', x_string) 
         for i in newlines:
             if i < first_appearance_mcdp_in_sub:
@@ -182,16 +184,16 @@ def correct(x, parents):  # @UnusedVariable
 
             that_line = after.split('\n')[0]
             
-            print('%d its line: %r' % (i, that_line))
+#             print('%d its line: %r' % (i, that_line))
             # not the last with only a }
             if that_line.strip() == '}':
 #                 print('it is the last')
                 align_at = initial_spaces
             else:
-                align_at = initial_spaces + 4
+                align_at = initial_spaces + INDENT
             
-            nspaces = count_initial_spaces(that_line)
-            print('has spaces %d' % nspaces)
+            nspaces = count_initial_spaces(that_line, TABSIZE)
+#             print('has spaces %d' % nspaces)
             if nspaces < align_at: 
                 # need to add some indentation
                 w = Where(x.where.string, offset + i + nspaces + 1, offset + i + nspaces +1)
@@ -208,7 +210,7 @@ def correct(x, parents):  # @UnusedVariable
             if TOKEN in that_line:
                 break
         
-def count_initial_spaces(x, tabsize=4):
+def count_initial_spaces(x, tabsize):
     from mcdp_report.out_mcdpl import extract_ws
     first, _middle, _last = extract_ws(x)
     n = 0
@@ -309,7 +311,7 @@ def apply_suggestions(s, subs):
     
     # do first the ones that are insertions
     def order(s):
-        where, replacement = s
+        where, _ = s
         return where.character_end - where.character    
     
     for where, replacement in sorted(subs, key=order):

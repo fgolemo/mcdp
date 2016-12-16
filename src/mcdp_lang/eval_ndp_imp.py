@@ -13,7 +13,9 @@ from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
     SimpleWrap, dpwrap)
 from mocdp.comp.composite_makecanonical import cndp_makecanonical
 from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
-    get_name_for_fun_node, get_name_for_res_node, ModelBuildingContext)
+    get_name_for_fun_node, get_name_for_res_node, ModelBuildingContext,
+    check_good_name_for_regular_node, check_good_name_for_function,
+    check_good_name_for_resource)
 from mocdp.comp.ignore_some_imp import ignore_some
 from mocdp.comp.make_approximation_imp import make_approximation
 from mocdp.comp.template_deriv import cndp_eversion
@@ -765,6 +767,12 @@ def add_variable(vname, P, where, context):
         msg = 'The name %r is already used as a functionality.' % vname
         raise DPSemanticError(msg, where=where)
 
+    try:
+        check_good_name_for_regular_node(vname)
+    except ValueError as e:
+        msg = 'Invalid name: %s' % e
+        raise DPSemanticError(msg, where=where)
+
     dp = VariableNode(P, vname)
     fname = '_' + vname
     rname = '_' + vname
@@ -975,6 +983,12 @@ def ndp_rename_resource(ndp, current, updated):
     
 def add_function(fname, F, context, r):
     check_isinstance(fname, str)
+    try:
+        check_good_name_for_function(fname)
+    except ValueError as e:
+        msg = 'Invalid name for functionality: %s' % e
+        raise DPSemanticError(msg, where=r.where)
+
     if fname in context.fnames:
         msg = 'Repeated function name %r.' % fname
         raise DPSemanticError(msg, where=r.where)
@@ -984,6 +998,12 @@ def add_function(fname, F, context, r):
 
 def add_resource(rname, R, context, r):
     check_isinstance(rname, str)
+    try:
+        check_good_name_for_resource(rname)
+    except ValueError as e:
+        msg = 'Invalid name for resource: %s' % e
+        raise DPSemanticError(msg, where=r.where)
+
     if rname in context.rnames:
         msg = 'Repeated resource name %r.' % rname
         raise DPSemanticError(msg, where=r.where)

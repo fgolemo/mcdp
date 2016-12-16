@@ -53,14 +53,13 @@ class ValueWithUnits():
             the current space). """ 
         return express_value_in_isomorphic_space(self.unit, self.value, P)
 
-def get_name_for_fun_node(name):
-    check_isinstance(name, str) # also more conditions
-    return '_fun_%s' % name
+def get_name_for_fun_node(fname):
+    check_isinstance(fname, str) # also more conditions
+    return '_fun_%s' % fname
 
-def get_name_for_res_node(name):
-    check_isinstance(name, str) # also more conditions
-    return '_res_%s' % name
-
+def get_name_for_res_node(rname):
+    check_isinstance(rname, str) # also more conditions
+    return '_res_%s' % rname
 
 @contract(returns='tuple(bool, str|None)')
 def is_fun_node_name(name):
@@ -76,6 +75,21 @@ def is_res_node_name(name):
         return True, fname
     return False, None
 
+def check_good_name_for_regular_node(name):
+    """ Raises an exception ValueError if this is not a good name for a node
+        e.g. starts with _res_ or _fun_ """
+    if is_fun_node_name(name)[0]:
+        msg = 'Looks like a reserved name for functions.'
+        raise ValueError(msg)
+    if is_res_node_name(name)[0]:
+        msg = 'Looks like a reserved name for resources.'
+        raise ValueError(msg)
+    
+def check_good_name_for_function(fname):
+    check_good_name_for_regular_node(fname)
+
+def check_good_name_for_resource(rname):
+    check_good_name_for_regular_node(rname)
 
 class NoSuchMCDPType(Exception):
     pass
@@ -282,12 +296,14 @@ class Context():
         # print(s)
         pass
 
+    
+        
     def add_ndp(self, name, ndp):
         self.info('Adding name %r = %r' % (name, ndp))
         if name in self.names:
             # where?
             msg = 'Repeated identifier'
-            raise_desc(DPInternalError, msg, name=name)
+            raise_desc(DPInternalError, msg, name=name)        
         self.names[name] = ndp
 
     @contract(returns=str)
@@ -635,4 +651,3 @@ def format_list(l):
         return '(empty)'
     else:
         return ", ".join(_.__repr__() for _ in l)
-

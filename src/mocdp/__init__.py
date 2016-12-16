@@ -78,6 +78,12 @@ ATTR_LOAD_REALPATH = '__mcdplibrary_load_realpath'
 class MCDPConstants():
     """ Some system-wide constants """
     
+    # source
+    
+    indent = 4
+    tabsize = 4
+        
+    
     #
     # Compilation stage
     #
