@@ -30,6 +30,8 @@ from system_cmd import CmdException, system_cmd_result
 
 from mcdp_figures import( MakeFiguresNDP, MakeFiguresTemplate, 
     MakeFiguresPoset)
+from mcdp_lang.suggestions import get_suggestions, apply_suggestions
+from mcdp_lang.parse_actions import parse_wrap
 
 
 
@@ -385,9 +387,18 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                 else:
                     source_code = get_source_code(tag)
                     
+                # prettify. 
                 # remove spurious indentation
                 source_code = source_code.strip()
                 
+                do_apply_suggestions = True
+                # then apply suggestions
+                if do_apply_suggestions:
+                    x = parse_wrap(parse_expr, source_code)[0]
+                    xr = parse_ndp_refine(x, Context())
+                    suggestions = get_suggestions(xr)
+                    source_code = apply_suggestions(source_code, suggestions)   
+    
                 # we are not using it
                 _realpath = realpath
                 context = Context()

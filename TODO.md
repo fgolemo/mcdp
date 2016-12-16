@@ -404,3 +404,10 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
   E_r
 
 - W: better performance in images (background loading?)
+
+- suggest cdot in  0.882 N * m
+- suggest indentation for poset {}, catalogue {}, product/namedproduct
+- various spacing issues
+
+
+- change keyword 'template'

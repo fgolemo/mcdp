@@ -23,10 +23,10 @@ def check_suggestions(filename, source):  # @UnusedVariable
     for w, r in suggestions:  # @UnusedVariable
         #print('"%s" -> "%s"' % (w.string[w.character:w.character_end], r))
         pass
-    print source.__repr__()
+#     print source.__repr__()
     s2 = apply_suggestions(source, suggestions)
-    if suggestions:
-        print(s2)
+#     if suggestions:
+#         print(s2)
         
     # do it a second time
     x = parse_wrap(Syntax.ndpt_dp_rvalue, s2)[0]

@@ -127,6 +127,8 @@ def infer_types_of_variables(line_exprs, context, si):
     deriv_functions = set()
     
     def found_fname(fname):
+        if isinstance(fname, CDP.Placeholder):
+            return
         check_isinstance(fname, CDP.FName)
         infer_debug('found fname: %s' % fname.value)
         _ = fname.value
@@ -145,6 +147,9 @@ def infer_types_of_variables(line_exprs, context, si):
         functions.add(fname.value)
     
     def found_rname(rname):
+        if isinstance(rname, CDP.Placeholder):
+            return
+
         check_isinstance(rname, CDP.RName)
         _ = rname.value
         if _ in resources:

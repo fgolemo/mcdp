@@ -80,7 +80,7 @@ class MCDPConstants():
     
     # source
     
-    indent = 4
+    indent = 2
     tabsize = 4
         
     

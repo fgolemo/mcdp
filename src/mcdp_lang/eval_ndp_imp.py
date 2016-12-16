@@ -5,23 +5,23 @@ import sys
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_dp import (CatalogueDP, Conversion, JoinNDP, MeetNDualDP, get_conversion, make_series, VariableNode,
- ConstantMinimals, LimitMaximals, OpaqueDP, FunctionNode, ResourceNode)
+                     ConstantMinimals, LimitMaximals, OpaqueDP, FunctionNode, ResourceNode)
 from mcdp_posets import (
     FiniteCollectionAsSpace, NotEqual, NotLeq, PosetProduct, get_types_universe)
 from mocdp import ATTRIBUTE_NDP_MAKE_FUNCTION
 from mocdp.comp import (CompositeNamedDP, Connection, NamedDP, NotConnected,
-    SimpleWrap, dpwrap)
+                        SimpleWrap, dpwrap)
 from mocdp.comp.composite_makecanonical import cndp_makecanonical
 from mocdp.comp.context import (CFunction, CResource, NoSuchMCDPType,
-    get_name_for_fun_node, get_name_for_res_node, ModelBuildingContext,
-    check_good_name_for_regular_node, check_good_name_for_function,
-    check_good_name_for_resource)
+                                get_name_for_fun_node, get_name_for_res_node, ModelBuildingContext,
+                                check_good_name_for_regular_node, check_good_name_for_function,
+                                check_good_name_for_resource)
 from mocdp.comp.ignore_some_imp import ignore_some
 from mocdp.comp.make_approximation_imp import make_approximation
 from mocdp.comp.template_deriv import cndp_eversion
 from mocdp.exceptions import (DPInternalError, DPSemanticError,
-    DPSemanticErrorNotConnected, MCDPExceptionWithWhere, mcdp_dev_warning,
-)
+                              DPSemanticErrorNotConnected, MCDPExceptionWithWhere, mcdp_dev_warning,
+                              )
 from mocdp.ndp.named_coproduct import NamedDPCoproduct
 
 from .eval_codespec_imp_utils_instantiate import ImportFailure, import_name
@@ -29,12 +29,12 @@ from .eval_constant_imp import eval_constant
 from .eval_ndp_approx import eval_ndp_approx_lower, eval_ndp_approx_upper
 from .eval_space_imp import eval_space
 from .eval_template_imp import eval_template
-from .eval_warnings import  warnings_copy_from_child_make_nested2
 from .eval_warnings import warn_language, MCDPWarnings
+from .eval_warnings import warnings_copy_from_child_make_nested2
 from .helpers import create_operation, get_valuewithunits_as_function, get_valuewithunits_as_resource
 from .namedtuple_tricks import recursive_print
 from .parse_actions import (add_where_information, decorate_add_where, raise_with_info,
-    parse_wrap)
+                            parse_wrap)
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
 
