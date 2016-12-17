@@ -92,10 +92,8 @@ a { color: #005; }
 /*ul, li {padding: 0; padding-left: 0em !important;}*/
 ul.toc { padding-left: 0; }
 li {margin: 0; margin-left: 0em;}
-.toc ul ul li { display: none; }
+/*.toc ul ul li { display: none; }*/
  
-
-
 
 """
 
@@ -122,8 +120,7 @@ def manual_join(files_contents):
         <style type='text/css'>CSS</style>
     </head>
     <body>
-    <h1 id='booktitle'>The PyMCDP user manual</h1>
-    <div id='toc'/>
+    FIRSTPAGE
     <div id='body'/>
     </body>
     </html>
@@ -132,12 +129,19 @@ def manual_join(files_contents):
     markdown_css = get_markdown_css()
     mcdp_css = get_language_css()
     template = template.replace('CSS', mcdp_css + '\n' + markdown_css + '\n' + manual_css)
+    
+    # title page
+    (_libname, docname), data = files_contents.pop(0)
+    assert docname == 'firstpage'
+    template = template.replace('FIRSTPAGE', data)
+    
     d = BeautifulSoup(template, 'lxml', from_encoding='utf-8')
+    
+    # empty document
     main_body = BeautifulSoup("", 'lxml', from_encoding='utf-8')
 
     for (_libname, docname), data in files_contents:
         doc = BeautifulSoup(data, 'lxml', from_encoding='utf-8')
-
         body = doc.html.body
         body.name = 'div'
         body['id'] = docname

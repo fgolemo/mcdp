@@ -415,5 +415,11 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
    b >= a
    a >= b
 
-- mathjax prerender
 
+- L set-of -> PowerSet
+- manual: Version PYMCDP_VERSION. Manual compiled from branch COMPILE_BRANCH on COMPILE_DATE.
+
+- add short headers <h1 short="describing MCDPs">Very looooon</h1>
+
+
+- mark the first part in 4.1.C - Finite Posets

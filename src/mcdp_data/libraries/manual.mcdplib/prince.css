@@ -7,3 +7,12 @@ pre code {
     /*font-size: 8pt; */
     /*line-height: 7pt !important; */
 }
+
+ul.toc, ul.toc ul { padding: 0; margin-left: 1em;} 
+
+ul.toc li { padding: 0; margin: 0;} 
+
+body > ul.toc > li > a { font-weight: bold; }
+ul.toc ul ul li a {color: gray !important;}
+
+ul.toc { column-count: 2; }

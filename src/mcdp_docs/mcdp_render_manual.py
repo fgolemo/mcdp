@@ -14,6 +14,10 @@ from .manual_join_imp import manual_join
 
 
 manual_contents = [
+    ('manual', 'firstpage'),
+    
+    ('manual', 'book_intro'),
+    
     ('manual', 'tour'),
     ('manual', 'tour_intro'),
     ('manual', 'tour_composition'),
@@ -21,14 +25,9 @@ manual_contents = [
     ('manual', 'tour_coproduct'),
     ('manual', 'tour_templates'),
     ('manual', 'tour_uncertainty'),
-    ('manual', 'scenarios'),
-    ('plugs', 'sockets'),
-    ('plugs', 'sockets2'),
-    ('actuation', 'actuation_tour'),
-    ('rover_energetics', 'energy_choices'),
-    ('rover_energetics', 'energy_choices2'),
-    ('rover_energetics', 'energy_choices3'),
-    ('droneD_complete_v2', 'drone_complete'),
+    
+    ('manual', 'ide_quicktour'),
+    
     ('manual', 'lang_reference'),
     ('manual', 'lang_types'),
     ('manual', 'lang_types_scalar'),
@@ -37,8 +36,18 @@ manual_contents = [
 #     ('manual', 'adv_approximations'),
     ('manual', 'lang_unicode'),
     ('manual', 'lang_extra'),
+
+    ('manual', 'ide_user'),
+
+    ('manual', 'scenarios'),
+    ('plugs', 'sockets'),
+    ('plugs', 'sockets2'),
+    ('actuation', 'actuation_tour'),
+    ('rover_energetics', 'energy_choices'),
+    ('rover_energetics', 'energy_choices2'),
+    ('rover_energetics', 'energy_choices3'),
+    ('droneD_complete_v2', 'drone_complete'),
     
-    ('manual', 'user'),
     ('manual', 'developer'),
 
 ]

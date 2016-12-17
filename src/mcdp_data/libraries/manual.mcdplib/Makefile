@@ -20,7 +20,8 @@ prince: $(manual_pdf_prince)
 .PHONY: $(manual_pdf_prince)
 
 $(manual_html): $(manual_tmp_html)
-	node prerender.js $^ $@
+	# node prerender.js $^ $@
+	cp $^ $@
 
 $(manual_tmp_html):
 	DISABLE_CONTRACTS=1 mcdp-render-manual --output_file $@ -c rparmake

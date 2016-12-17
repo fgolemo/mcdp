@@ -6,6 +6,7 @@ from mcdp_library import MCDPLibrary
 from .highlight import html_interpret
 from .markd import render_markdown
 from .prerender_math import prerender_mathjax, PrerenderError
+from mcdp_library_tests.tests import timeit_wall
 
 
 __all__ = ['render_document']
@@ -34,9 +35,12 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     html3 = embed_images_from_library(html=html2, library=library)
     
     html3 = html3.replace('MATHJAX_BARBAR', '\\\\')
-    try:
-        html4 = prerender_mathjax(html3)
-    except PrerenderError:
-        raise
-    
+    if '$$' in html3 or '$' in html3:
+        try:
+            with timeit_wall('prerender_mathjax'):
+                html4 = prerender_mathjax(html3)
+        except PrerenderError:
+            raise
+    else:
+        html4 = html3
     return html4

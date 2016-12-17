@@ -1,1 +1,0 @@
-# Interactive Co-Design Environment User Manual
