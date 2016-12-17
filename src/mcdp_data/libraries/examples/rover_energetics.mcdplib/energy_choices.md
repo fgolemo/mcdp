@@ -9,34 +9,42 @@
 A thermocouple is a device that converts heat into electrical power.
 
 <table><tr><td>
-    <pre class="mcdp" id="Thermocouple" label='Thermocouple.mcdp'/>
+    <pre class="mcdp" id="Thermocouple" label='Thermocouple.mcdp'></pre>
 </td><td>
     <pre class="ndp_graph_templatized_labeled"
         style='height: 10em'
         >`Thermocouple</pre>
-</pre></td></tr>
+</td></tr>
+</table>
+
 
 One way to get the heat is to procure a bit of Plutonium.
 
-<table><tr><td>
-    <pre class="mcdp" id="PlutoniumPellet" label='PlutoniumPellet.mcdp'/>
-</td><td>
-    <pre class="ndp_graph_templatized_labeled"
-        style='sheight: 10em'
-        >`PlutoniumPellet</pre>
-</pre></td></tr>
+<table>
+  <tr>
+    <td>
+      <pre class="mcdp" id="PlutoniumPellet" label='PlutoniumPellet.mcdp'></pre>
+    </td><td>
+      <pre class="ndp_graph_templatized_labeled"
+          style='sheight: 10em'>`PlutoniumPellet</pre>
+    </td>
+  </tr>
+</table>
 
 We can connect the two, by specifying that the heat required by the 
 thermocouple is provided by the pellet:
 
-<p><pre class="ndp_graph_enclosed" id="plutonium_plus_thermocouple" enclosed="false">mcdp {
-  plutonium_pellet = new PlutoniumPellet
-  thermocouple = instance template `Thermocouple
-  heat required by thermocouple <= heat provided by plutonium_pellet
-}</pre></p>
+<p>
+  <img class="ndp_graph_enclosed" id="plutonium_plus_thermocouple" enclosed="false">mcdp {
+    plutonium_pellet = new PlutoniumPellet
+    thermocouple = instance template `Thermocouple
+    heat required by thermocouple <= heat provided by plutonium_pellet
+  }</img>
+</p>
+ 
 
 The masses are summed together:
 
-<pre class="mcdp" id='rtig'/>
+<pre class="mcdp" id='rtig'></pre>
 
 <pre class="ndp_graph_enclosed">`rtig</pre>

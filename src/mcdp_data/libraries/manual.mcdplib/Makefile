@@ -3,6 +3,7 @@ htmltmpdir=out-html
 
 
 manual_html=$(htmltmpdir)/manual.html
+manual_tmp_html=$(htmltmpdir)/manual_tmp.html
 manual_pdf_wk=$(htmltmpdir)/manual-wk.pdf
 manual_pdf_prince=$(htmltmpdir)/manual-prince.pdf
 
@@ -15,8 +16,15 @@ prince: $(manual_pdf_prince)
 
 .PHONY: $(manual_pdf_prince)
 
-$(manual_html): 
+$(manual_html): $(manual_tmp_html)
+	npm install MathJax-node jsdom
+	node prerender.js $^ $@
+
+$(manual_tmp_html):
 	DISABLE_CONTRACTS=1 mcdp-render-manual --output_file $@ -c rparmake
+	
+# prerender:
+
 
 $(manual_pdf_wk): $(manual_html)  
 	wkhtmltopdf --print-media-type $< $@ 
@@ -24,6 +32,7 @@ $(manual_pdf_wk): $(manual_html)
 clean:
 	rm -rf out-mcdp-render-manual
 	rm -rf $(manual_html)
+	rm -rf $(manual_tmp_html)
 
 publish: $(manual_html)
 	#cp $< ~/env_mcdp/src/mcdp-gh-pages/media/pymcdp-manual.html
@@ -32,4 +41,4 @@ publish: $(manual_html)
 
 prince_css=prince.css
 $(manual_pdf_prince): $(manual_html) $(prince_css)
-	prince -s $(prince_css) $< -o $@
+	prince --javascript -s $(prince_css) $< -o $@

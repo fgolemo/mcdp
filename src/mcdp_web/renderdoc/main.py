@@ -5,6 +5,7 @@ from mcdp_library import MCDPLibrary
 
 from .highlight import html_interpret
 from .markd import render_markdown
+from .highlight import prerender_mathjax, PrerenderError
 
 
 __all__ = ['render_document']
@@ -22,10 +23,20 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
         msg = 'I expect a str encoded with utf-8, not unicode.'
         raise_desc(TypeError, msg, s=s)
 
+    # save the '\\' in mathjax before markdown
+    s = s.replace('\\\\', 'MATHJAX_BARBAR')
+
     html = render_markdown(s)
     html2 = html_interpret(library, html, generate_pdf=generate_pdf,
                            raise_errors=raise_errors, realpath=realpath)
 
     from mcdp_report.gg_utils import embed_images_from_library
     html3 = embed_images_from_library(html=html2, library=library)
-    return html3
+    
+    html3 = html3.replace('MATHJAX_BARBAR', '\\\\')
+    try:
+        html4 = prerender_mathjax(html3)
+    except PrerenderError:
+        raise
+    
+    return html4

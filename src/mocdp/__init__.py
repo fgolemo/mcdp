@@ -138,20 +138,20 @@ class MCDPConstants():
 
     log_cache_writes = False
     
-    
     InvPlus2Nat_max_antichain_size=  100000
     InvMult2Nat_memory_limit   = 10000
     
     # Actually write to disk the reports
     test_allformats_report_write = False
     
+    # this can be changed by customer. The other configuration switches
+    # are all relative.
+    diagrams_fontsize = 14
+
+    diagrams_smallimagesize_rel = 0.4
+    diagrams_leqimagesize_rel = 0.3
+    diagrams_bigimagesize_rel = 60  
     
-    diagrams_fontsize = 10
-    rel_to_8 = diagrams_fontsize/ 8
-    diagrams_smallimagesize = 0.4 * rel_to_8
-    #diagrams_leqimagesize = 0.2 * rel_to_8
-    diagrams_leqimagesize = 0.3 * rel_to_8
-    diagrams_bigimagesize = 60 * rel_to_8 # points 
     
 def get_mcdp_tmp_dir():
     from tempfile import gettempdir

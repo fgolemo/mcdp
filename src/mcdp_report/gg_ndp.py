@@ -161,6 +161,7 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
     gg.styleAppend('sum', 'imagescale', 'true')
     gg.styleAppend('sum', 'fixedsize', 'true')
 
+
     gg.styleAppend("leq", "shape", "plaintext")
     gg.styleAppend('leq', 'image', gdc.get_icon(['leq']))
     gg.styleAppend('leq', 'imagescale', 'true')
@@ -391,7 +392,13 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
             gdc.styleAppend(sname, 'image', best_icon)
             gdc.styleAppend(sname, 'imagescale', 'true')
             gdc.styleAppend(sname, 'fixedsize', 'true')
-            gdc.styleAppend(sname, 'height', MCDPConstants.diagrams_smallimagesize)
+            
+            rel_to_8 = MCDPConstants.diagrams_fontsize/ 8
+            diagrams_smallimagesize = MCDPConstants.diagrams_smallimagesize_rel * rel_to_8
+            #diagrams_leqimagesize = 0.2 * rel_to_8
+
+
+            gdc.styleAppend(sname, 'height', diagrams_smallimagesize)
             gdc.styleAppend(sname, "shape", "none")
             label = ''
         else:
@@ -415,9 +422,12 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
 #                 label = ("<TABLE CELLBORDER='0' BORDER='0'><TR><TD>%s</TD></TR>"
 #                 "<TR><TD'><IMG SRC='%s' SCALE='TRUE'/></TD></TR></TABLE>")
                 # these work as max size 
-                width = MCDPConstants.diagrams_bigimagesize
+                rel_to_8 = MCDPConstants.diagrams_fontsize/ 8
+                diagrams_bigimagesize = MCDPConstants.diagrams_bigimagesize_rel * rel_to_8 # points 
+
+                width = diagrams_bigimagesize
                 ratio = 0.8
-                height = MCDPConstants.diagrams_bigimagesize * ratio 
+                height = diagrams_bigimagesize * ratio 
                 label = ("<TABLE CELLBORDER='0' BORDER='0'><TR><TD>%s</TD></TR>"
                 "<TR><TD fixedsize='true' width='%d' height='%d'><IMG SRC='%s'/></TD></TR></TABLE>")
 
@@ -733,7 +743,10 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
 
             else:
                 box = gdc.newItem('')  # '≼') # LEQ
-                gdc.gg.propertyAppend(box, 'height', MCDPConstants.diagrams_leqimagesize)
+                rel_to_8 = MCDPConstants.diagrams_fontsize/ 8
+                diagrams_leqimagesize = MCDPConstants.diagrams_leqimagesize_rel * rel_to_8
+
+                gdc.gg.propertyAppend(box, 'height', diagrams_leqimagesize)
                 gdc.styleApply("leq", box)
         
                 l1_label = get_signal_label(c.s2, ua)

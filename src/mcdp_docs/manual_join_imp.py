@@ -14,17 +14,9 @@ manual_css = """
     margin: 0.5cm;
 }
 
-h1 { color: black; }
-h2 { color: blue; }
-h3 { color: magenta; }
-
 h1 { page-break-before: always; text-align: center;}
 h1#booktitle  { page-break-before: avoid; }
-h2 { }
-
-
 .toc a { text-decoration: none; }
-
 
 /* Good for safari */
 pre {
@@ -39,7 +31,6 @@ pre {
 .template_graph_enclosed {
     max-width: 50em;
     
-    
 }
 
 span.language_warning { background-color: inherit !important; }
@@ -47,10 +38,76 @@ span.language_warning { background-color: inherit !important; }
 p { max-width: 40em; }
 
 code { page-break-inside: avoid; }
+
+
+
+body {
+  font-family: "Times New Roman", Times, serif !important;
+  font-size: 10pt;
+}
+
+body {
+  text-align: justify;
+}
+
+@font-face {
+    font-family: monospace;
+    src: local("Courier")
+}
+ 
+h1 { font-size: 15pt; color: black !important;}
+h2 { font-size: 12pt; color: black !important;}
+h3 { font-size: 10pt; color: black !important; font-style: italic; font-weight: normal;}
+
+code { font-family: monospace, Cambria, "Cambria Math"; }
+p code { font-size: 8pt; }
+pre, pre code {
+    /*font-size: 8pt;*/
+    /*line-height: 7pt;*/
+}
+pre .label { font-size: 8px; font-style: normal; }
+pre { 
+    margin-left: 0.4em !important; 
+    border-radius: 4px !important; 
+    padding: 5px !important;
+}
+/* without labels */
+pre:not(.has_label) { 
+    margin-top: 0 !important; margin-bottom: 0; 
+}
+/* with labels */
+pre.has_label { 
+    /*margin-top: 0.7em !important; */
+}
+
+p { margin-top: 0.3em; margin-bottom: 0.3em; }
+h1,h2,h3 { margin-bottom: 0.3em; margin-top: 0.3em; }
+pre code { margin: 0; }
+pre { padding: 3pt; }
+a { color: #005; }
+/*ul, li {padding: 0; padding-left: 0em !important;}*/
+ul.toc { padding-left: 0; }
+li {margin: 0; margin-left: 0em;}
+.toc ul ul li { display: none; }
+ 
+
+
+
 """
 
 @contract(files_contents='list( tuple( tuple(str,str), str) )', returns='str')
 def manual_join(files_contents):
+
+
+#         <script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+# 
+#         <script type="text/x-mathjax-config">
+#             MathJax.Hub.Config({
+#               tex2jax: {inlineMath: [['$','$']]},
+#                 displayMath: [ ['$$','$$'], ["\\[","\\]"] ]
+#             });
+#         </script>
+
 
     template = """
     <!DOCTYPE html>
@@ -59,15 +116,6 @@ def manual_join(files_contents):
         <title>PyMCDP manual</title>
         <meta charset="utf-8">
         <style type='text/css'>CSS</style>
-
-        <script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
-
-        <script type="text/x-mathjax-config">
-            MathJax.Hub.Config({
-              tex2jax: {inlineMath: [['$','$']]}
-            });
-        </script>
-
     </head>
     <body>
     <h1 id='booktitle'>The PyMCDP user manual</h1>
@@ -86,7 +134,7 @@ def manual_join(files_contents):
     for (_libname, docname), data in files_contents:
         doc = BeautifulSoup(data, 'lxml', from_encoding='utf-8')
 
-        body = doc.body
+        body = doc.html.body
         body.name = 'div'
         body['id'] = docname
         main_body.append(body)

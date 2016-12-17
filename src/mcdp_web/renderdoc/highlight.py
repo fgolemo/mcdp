@@ -12,8 +12,10 @@ from bs4.element import NavigableString
 
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped, indent
+from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import (parse_template_refine, parse_poset_refine,
-    parse_ndp_refine)
+                                       parse_ndp_refine)
+from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.generic_report_utils import (
@@ -21,7 +23,7 @@ from mcdp_report.generic_report_utils import (
 from mcdp_report.html import ast_to_html, get_markdown_css
 from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters
 from mcdp_web.images.images import (get_mime_for_format)
-from mocdp import ATTR_LOAD_NAME, logger, get_mcdp_tmp_dir 
+from mocdp import ATTR_LOAD_NAME, logger, get_mcdp_tmp_dir
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
 from reprep import Report
@@ -30,8 +32,6 @@ from system_cmd import CmdException, system_cmd_result
 
 from mcdp_figures import( MakeFiguresNDP, MakeFiguresTemplate, 
     MakeFiguresPoset)
-from mcdp_lang.suggestions import get_suggestions, apply_suggestions
-from mcdp_lang.parse_actions import parse_wrap
 
 
 
@@ -43,8 +43,7 @@ def html_interpret(library, html, raise_errors=False,
                    generate_pdf=False, realpath='unavailable'):
     # clone library?
     library = library.clone()
-    load_fragments(library, html,
-                   realpath=realpath)
+    load_fragments(library, html, realpath=realpath)
 
     html = highlight_mcdp_code(library, html,
                                generate_pdf=generate_pdf,
@@ -62,6 +61,48 @@ def html_interpret(library, html, raise_errors=False,
                       realpath=realpath)
 
     return html
+
+class PrerenderError(Exception):
+    pass
+def prerender_mathjax(html):
+    html = html.replace('<p>$$', '\n$$')
+    html = html.replace('$$</p>', '$$\n')
+    print html
+    PRE = '/Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/manual.mcdplib/prerender.js'
+    
+    mcdp_tmp_dir = get_mcdp_tmp_dir()
+    prefix = 'prerender_mathjax_'
+    d = mkdtemp(dir=mcdp_tmp_dir, prefix=prefix)
+    
+    try:
+        f_html = os.path.join(d, 'file.html')
+        with open(f_html, 'w') as f:
+            f.write(html)
+            
+        try:
+            f_out = os.path.join(d, 'out.html')
+            cmd= ['node', PRE, f_html, f_out]
+            res = system_cmd_result(
+                    d, cmd, 
+                    display_stdout=True,
+                    display_stderr=True,
+                    raise_on_error=True)
+            
+            if 'parse error' in res.stderr:
+                lines = [_ for _ in res.stderr.split('\n')
+                         if 'parse error' in _ ]
+                assert lines
+                msg = 'LaTeX conversion errors:\n\n' + '\n'.join(lines)
+                raise PrerenderError(msg) 
+    
+            with open(f_out) as f:
+                data = f.read()
+            
+            return data
+        except CmdException as e:
+            raise e
+    finally:
+        shutil.rmtree(d)
 
 def make_image_tag_from_png(f):
     soup = bs("")
@@ -98,7 +139,7 @@ def load_or_parse_from_tag(tag, load, parse):
         or 
             <tag  class=...>my code </tag
     """
-    if tag.string is None:
+    if tag.string is None: # or not tag.string.strip():
         if not tag.has_attr('id'):
             msg = "If <img> is empty then it needs to have an id."
             raise_desc(ValueError, msg, tag=str(tag))
@@ -212,7 +253,7 @@ def load_fragments(library, frag, realpath):
     soup = bs(frag)
 
     for tag in soup.select('pre.mcdp'):
-        if tag.string is None:
+        if tag.string is None: # or not tag.string.strip():
             continue
 
         if tag.has_attr('id'):
@@ -230,7 +271,7 @@ def load_fragments(library, frag, realpath):
             library.file_to_contents[basename] = res
 
     for tag in soup.select('pre.mcdp_poset'):
-        if tag.string is None:
+        if tag.string is None:# or not tag.string.strip():
             continue
 
         if tag.has_attr('id'):
@@ -376,7 +417,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
     def go(selector, parse_expr, extension, use_pre=True, refine=None):
         for tag in soup.select(selector):
             try:
-                if tag.string is None:
+                if tag.string is None: # or not tag.string.strip():
                     if not tag.has_attr('id'):
                         msg = "If <pre> is empty then it needs to have an id."
                         raise_desc(ValueError, msg, tag=str(tag))
@@ -385,7 +426,6 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                     basename = '%s.%s' % (tag_id, extension)
                     data = library._get_file_data(basename)
                     source_code = data['data']
-                    source_code = source_code.replace('\t', ' ' * 4)
                 else:
                     source_code = get_source_code(tag)
                     
@@ -399,7 +439,9 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                     x = parse_wrap(parse_expr, source_code)[0]
                     xr = parse_ndp_refine(x, Context())
                     suggestions = get_suggestions(xr)
-                    source_code = apply_suggestions(source_code, suggestions)   
+                    source_code = apply_suggestions(source_code, suggestions)
+                # we don't want the browser to choose different tab size
+                source_code = source_code.replace('\t', ' ' * 4)   
     
                 # we are not using it
                 _realpath = realpath
@@ -555,10 +597,16 @@ def add_style_for_size(element, max_len):
     width = fontsize * (max_len) * ratio + padding
     style = 'font-family: %s; font-size: %spx; width: %dpx;' % (fontname, fontsize, width)
     
-    if element.has_attr('style'):
-        style = element['style'] +';' + style
-            
-    element['style'] = style
+    if not element.has_attr('style'):
+        element['style'] = ''
+#         
+#         style = element['style'] +';' + style
+#             
+
+    if True:
+        style = 'display: inline-block'
+        
+    element['style']+=  ';' + style
     
 
 @contract(frag=str, returns=str)

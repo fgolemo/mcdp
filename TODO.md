@@ -414,4 +414,6 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 - throw error if 
    b >= a
    a >= b
-   
+
+- mathjax prerender
+

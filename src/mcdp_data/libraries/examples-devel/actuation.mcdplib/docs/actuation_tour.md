@@ -130,5 +130,6 @@ Youbot base
 
 iRobot Create
 
-<pre class='ndp_graph_templatized_labeled'>`IRobotCreate</pre>
+<p><img class='ndp_graph_templatized_labeled'>`IRobotCreate</img></p>
+
 <pre class='mcdp' id='IRobotCreate'></pre>
