@@ -1,1 +1,1 @@
-# A quick tour 
+# Quickly - the modeling language

@@ -38,7 +38,7 @@ thermocouple is provided by the pellet:
   <img class="ndp_graph_enclosed" id="plutonium_plus_thermocouple" enclosed="false">mcdp {
     plutonium_pellet = new PlutoniumPellet
     thermocouple = instance template `Thermocouple
-    heat required by thermocouple <= heat provided by plutonium_pellet
+    heat required by thermocouple ≼ heat provided by plutonium_pellet
   }</img>
 </p>
  

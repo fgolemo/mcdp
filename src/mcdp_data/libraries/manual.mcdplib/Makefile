@@ -24,7 +24,7 @@ $(manual_html): $(manual_tmp_html)
 	cp $^ $@
 
 $(manual_tmp_html):
-	DISABLE_CONTRACTS=1 mcdp-render-manual --output_file $@ -c rparmake
+	DISABLE_CONTRACTS=1 mcdp-render-manual --output_file $@ -c "config echo 1; rparmake"
 	
 # prerender:
 

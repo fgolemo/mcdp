@@ -23,8 +23,8 @@ mcdp {
 	specific_energy = 150 Wh/kg
     specific_cost = 2.50 Wh/$
 
-	required mass >= provided capacity / specific_energy
-	required cost >= provided capacity / specific_cost
+	required mass ≽ provided capacity / specific_energy
+	required cost ≽ provided capacity / specific_cost
 }
 </pre>
 
@@ -59,8 +59,8 @@ mcdp {
 	specific_energy = 150 Wh/kg
     specific_cost = 2.50 Wh/$
 
-	required mass >= provided capacity / specific_energy
-	required cost >= provided capacity / specific_cost
+	required mass ≽ provided capacity / specific_energy
+	required cost ≽ provided capacity / specific_cost
 }
 </pre>
 </td>
@@ -74,8 +74,8 @@ mcdp {
 	specific_energy = 45 Wh/kg
     specific_cost = 10.50 Wh/$
 
-	required mass >= provided capacity / specific_energy
-	required cost >= provided capacity / specific_cost
+	required mass ≽ provided capacity / specific_energy
+	required cost ≽ provided capacity / specific_cost
 }
 </pre>
 </td>

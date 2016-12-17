@@ -7,9 +7,9 @@ catalogue {
 	provides capacity [J]
 	requires mass [g]
 
-	500 kWh <--| model1 |--> 100 g
-	600 kWh <--| model2 |--> 200 g
-	700 kWh <--| model3 |--> 400 g
+	500 kWh &lt;--| model1 |--&gt; 100 g
+	600 kWh &lt;--| model2 |--&gt; 200 g
+	700 kWh &lt;--| model3 |--&gt; 400 g
 }
 </pre>
 

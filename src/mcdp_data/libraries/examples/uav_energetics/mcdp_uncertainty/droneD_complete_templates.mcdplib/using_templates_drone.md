@@ -23,11 +23,11 @@ mcdp {
   requires maintenance [dimensionless]
   requires mass [g]
 
-  missions <= 1000 []
-  maintenance >= 1 []
-  cost >= 100 $
+  missions ≼ 1000 []
+  maintenance ≽ 1 []
+  cost ≽ 100 $
 
-  required mass >= 
+  required mass ≽ 
     Uncertain(provided capacity/120 Wh/kg ,
               provided capacity/100 Wh/kg )
   

@@ -131,9 +131,14 @@ def manual_join(files_contents):
     template = template.replace('CSS', mcdp_css + '\n' + markdown_css + '\n' + manual_css)
     
     # title page
-    (_libname, docname), data = files_contents.pop(0)
+    (_libname, docname), first_data = files_contents.pop(0)
     assert docname == 'firstpage'
-    template = template.replace('FIRSTPAGE', data)
+    
+    first_dom = BeautifulSoup(first_data, 'lxml', from_encoding='utf-8')
+    first_contents = first_dom.html.body
+    first_contents.name = 'div'
+    first_contents['id'] = docname
+    template = template.replace('FIRSTPAGE', str(first_contents))
     
     d = BeautifulSoup(template, 'lxml', from_encoding='utf-8')
     
@@ -157,13 +162,14 @@ def manual_join(files_contents):
             tag['href'] = new_ref
 
     toc = generate_doc(main_body)
-    toc = BeautifulSoup(toc, 'lxml', from_encoding='utf-8')
-    toc.html.body.ul['class'] = 'toc'
+    toc_ul = BeautifulSoup(toc, 'lxml', from_encoding='utf-8').html.body.ul
+    toc_ul['class'] = 'toc'
+    toc_ul['id'] = 'main_toc'
     toc_place = d.select('div#toc')[0]
     body_place = d.select('div#body')[0]
     
     #print('toc element: %s' % str(toc))
-    toc_place.replaceWith(toc)
+    toc_place.replaceWith(toc_ul)
 
     body_place.replaceWith(main_body)
 
@@ -191,8 +197,13 @@ def generate_doc(soup):
         def number_items(self, prefix, level):
             self.number = prefix
 
-            if self.tag:
-                self.tag.string = prefix + ' - ' + self.tag.string
+            if self.tag is not None:
+                # add a span inside the header
+                span = soup.new_tag('span')
+                span['class'] = 'toc_number'
+                span.string = prefix + ' - '
+                self.tag.insert(0, span)
+                #self.tag.string = prefix + ' - ' + self.tag.string
 
             def get_number(i, level):
                 if level == 0 or level == 1:
@@ -215,13 +226,12 @@ def generate_doc(soup):
                 item_prefix = prefix + get_number(i, level)
                 item.number_items(item_prefix, level + 1)
 
-
-
-
         def __str__(self, root=False):
             s = ''
             if not root:
-                s += '<a href="#%s">%s - %s</a>' % (self.id, self.number, self.name)
+                s += """<a class="toc_link" href="#%s">
+                            <span class="toc_number">%s -</span> 
+                            <span class="toc_name">%s</span></a>""" % (self.id, self.number, self.name)
             if self.items:
                 s += '<ul>'
                 for item in self.items:
@@ -238,7 +248,9 @@ def generate_doc(soup):
 
         # previous_depth = stack[-1].depth
 
-        item = Item(header, depth, header.string, header['id'], [])
+        using = header.decode_contents(formatter="html")
+#         print("%s or %s using %s" % (str(header), header.string, using))
+        item = Item(header, depth, using, header['id'], [])
 
         while(stack[-1].depth >= depth):
             stack.pop()
@@ -251,12 +263,15 @@ def generate_doc(soup):
 
     root.number_items(prefix='', level=0)
 
+    # iterate over chapters (below each h1)
     for item in root.items:
         s = item.__str__(root=True)
         stoc = BeautifulSoup(s, 'lxml', from_encoding='utf-8')
         if stoc.html is not None: # empty document case
-            stoc.html.body.ul['class'] = 'toc'
-        item.tag.insert_after(stoc)
+            ul = stoc.html.body.ul 
+            ul['class'] = 'toc chapter_toc'
+            # todo: add specific h1
+            item.tag.insert_after(ul)
 
 
     return root.__str__(root=True)

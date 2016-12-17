@@ -7,6 +7,6 @@ mcdp {
     provides power [dimensionless]
     requires power [dimensionless]
 
-    power >= power
+    power ≽ power
 }
 </pre>

@@ -35,8 +35,10 @@ from mcdp_figures import( MakeFiguresNDP, MakeFiguresTemplate,
 
 
 
+# def bs(fragment):
+#     return BeautifulSoup(fragment, 'html.parser', from_encoding='utf-8')
 def bs(fragment):
-    return BeautifulSoup(fragment, 'html.parser', from_encoding='utf-8')
+    return BeautifulSoup(fragment, 'lxml', from_encoding='utf-8')
 
 @contract(returns=str, html=str)
 def html_interpret(library, html, raise_errors=False, 
@@ -50,12 +52,16 @@ def html_interpret(library, html, raise_errors=False,
                                raise_errors=raise_errors,
                                realpath=realpath)
 
-    html = make_figures(library, html,
-                        generate_pdf=generate_pdf,
-                        raise_error_dp=raise_errors,
-                        raise_error_others=raise_errors,
-                        realpath=realpath)
-
+    try:
+#         print html
+        html = make_figures(library, html,
+                            generate_pdf=generate_pdf,
+                            raise_error_dp=raise_errors,
+                            raise_error_others=raise_errors,
+                            realpath=realpath)
+    except:
+        
+        raise
     html = make_plots(library, html,
                       raise_errors=raise_errors,
                       realpath=realpath)
@@ -196,6 +202,7 @@ def make_plots(library, frag, raise_errors, realpath):
     const = dict(load=library.load_constant, parse=library.parse_constant)
     mcdp = dict(load=library.load_ndp, parse=library.parse_ndp)
     go("img.plot_value_generic", plot_value_generic, **const)
+    go("render.plot_value_generic", plot_value_generic, **const)
     go("pre.print_value", print_value, **const)
     go("pre.print_mcdp", print_mcdp, **mcdp)
     return str(soup)
@@ -275,21 +282,44 @@ def get_minimal_document(body_contents, add_markdown_css=False):
     body = soup.new_tag('body')
     css = soup.new_tag('style', type='text/css')
     # <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    meta = soup.new_tag('meta')
-    meta['http-equiv'] = "Content-Type"
-    meta['content'] = "text/html; charset=utf-8"
-    head.append(meta)
+    
+    if False:
+        meta = soup.new_tag('meta')
+        meta['http-equiv'] = "Content-Type"
+        ctype = 'application/xhtml+xml'
+    #     ctype = 'text/html'
+        meta['content'] = "%s; charset=utf-8" % ctype
+        head.append(meta)
+    if True:
+        head.append(soup.new_tag('meta', charset='UTF-8'))
+    
+    title = soup.new_tag('title')
+    head.append(title)
+
     from mcdp_report.html import get_language_css
     mcdp_css = get_language_css()
     markdown_css = get_markdown_css() if add_markdown_css else ""
     allcss = mcdp_css + '\n' + markdown_css
     css.append(NavigableString(allcss))
     head.append(css)
-    body.append(bs(body_contents))
+    
+    parsed = bs(body_contents)
+    assert parsed.html is not None
+    assert parsed.html.body is not None
+    
+    for e in parsed.html.body:
+        body.append(e)
     html.append(head)
     html.append(body)
     s = str(html)
-    return s
+#     s = html.prettify() # not it removes empty text nodes
+#     print s
+#     ns="""<?xml version="1.0" encoding="utf-8" ?>"""
+    ns="""<!DOCTYPE html PUBLIC
+    "-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN"
+    "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg.dtd">"""
+    res = ns + '\n' +  s
+    return res
 
 
 def get_ast_as_pdf(s, parse_expr):
@@ -682,9 +712,13 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
             tag = make_tag(tag0, which, data, ndp=None, template=template)
             return tag
         
+        
+        
         selector = 'pre.%s' % which
         go(selector, callback)
         selector = 'img.%s' % which
+        go(selector, callback)
+        selector = 'render.%s' % which
         go(selector, callback)
         
     mf = MakeFiguresPoset(None)
@@ -708,7 +742,9 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
         go(selector, callback)
         selector = 'img.%s' % which
         go(selector, callback)
-         
+        selector = 'render.%s' % which
+        go(selector, callback)
+          
 
     return str(soup)
 

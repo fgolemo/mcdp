@@ -18,12 +18,20 @@ console.log('rendering...')
 
 mjAPI.start();
 mjAPI.typeset({
-  html: document.body.innerHTML,
+  'MathJax': {
+    'SVG': {
+      scale: 400
+    },    
+  }
+});
+mjAPI.typeset({
+  'html': document.body.innerHTML,
   renderer: "NativeMML",
-  renderer: "SVG",
+  // 'renderer': "SVG",
+  // 'renderer': "PNG", // no
   // "output/SVG",
-  inputs: ["TeX"],
-  xmlns: "mml"
+  'inputs': ["TeX"],
+  'xmlns': "mml",
 }, function(result) {
     console.log('rendering done.')
   "use strict";

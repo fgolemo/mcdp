@@ -1,5 +1,7 @@
 
-## Describing Monotone Co-Design Problems (MCDPs)
+## Describing MCDPs
+
+MCDP = Monotone Co-Design Problems...
 
 The simplest MCDP can be defined as:
 
@@ -50,8 +52,8 @@ mcdp {
 	provides capacity [J]
 	requires mass [g]
 
-	provided capacity <= 500 J
-	required mass >= 100g
+	provided capacity ≼ 500 J
+	required mass ≽ 100g
 }
 </pre>
 </td><td>
@@ -73,7 +75,7 @@ mcdp {
 
 	# specific energy
 	ρ = 4 J / g
-	required mass >= provided capacity / ρ                
+	required mass ≽ provided capacity / ρ                
 }
 </pre>
 
@@ -95,7 +97,7 @@ mcdp {
 
 	# specific energy
 	ρ = 200 kWh / kg
-	required mass >= provided capacity / ρ
+	required mass ≽ provided capacity / ρ
 }
 </pre>
 

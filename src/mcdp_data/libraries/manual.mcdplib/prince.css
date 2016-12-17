@@ -8,11 +8,102 @@ pre code {
     /*line-height: 7pt !important; */
 }
 
+/* keywords appearing in headers */
+ul.toc code { 
+    /*color: red !important;*/
+    font-size: 7pt !important; 
+}
 ul.toc, ul.toc ul { padding: 0; margin-left: 1em;} 
 
 ul.toc li { padding: 0; margin: 0;} 
 
-body > ul.toc > li > a { font-weight: bold; }
-ul.toc ul ul li a {color: gray !important;}
+ul#main_toc > li {
+    /*margin-bottom: 3em;*/
+    padding-bottom: 1em;
+}
+ul#main_toc > li > ul {
+    padding-top: 4pt;
+}
+ul#main_toc > li > a span.toc_name { 
+    font-weight: bold;  
+    
+/*    font-size: larger;*/
+}
 
-ul.toc { column-count: 2; }
+/** add page numbers for the first two */
+ul#main_toc > li > a::after { 
+    content: leader('_')  target-counter(attr(href), page) ;
+    font-weight: bold;
+}
+ul#main_toc > li > ul > li > a::after { content: leader('_')  target-counter(attr(href), page) }
+
+ul#main_toc > li > a > span.toc_number { 
+    font-weight: bold;
+}
+ul#main_toc > li > a > span.toc_number::before { 
+    content: 'Chapter '; 
+    font-weight: bold;
+}
+
+ul#main_toc ul,
+ul#main_toc ul ul {
+    margin-left: 0;
+}
+ul#main_toc ul ul li  a {
+    color: gray !important;
+}
+ul#main_toc ul ul li {
+    display: inline;
+}
+
+ul.toc ul ul li a span.toc_number { display: none; }
+
+ul.toc ul ul li a span.toc_name::before {
+    content: '•';
+    margin-right: 0.2em;
+}
+
+ul.toc { 
+    column-count: 2; 
+    column-gap: 20px;
+}
+
+
+div > ul:not(.toc)  {
+    margin-left: 2em;
+    margin-top: -0.3em;
+    margin-bottom: -0.3em;
+}
+
+
+/* first header down is highlighted */
+ul.chapter_toc > li > a {
+    font-weight: bold;
+}
+
+
+/* below numbers are erased */
+ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
+    color: red; 
+}
+
+ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
+    display: none;
+}
+
+ul.chapter_toc > li > ul > li > a.toc_link > span.toc_name::before {
+    content: '•';
+    margin-right: 0.5em;
+}
+
+#toc-heading { text-align: center; }
+
+h3 {font-style: normal !important;
+}
+
+h1:not(#booktitle), #toc-heading { font-variant: small-caps; }
+h1:not(#booktitle) ::before { content: 'Chapter '; }
+
+body { 
+hyphens: auto;
+ }

@@ -11,9 +11,9 @@ containing the following definition:
 
 <pre class='mcdp_poset' id='my_poset' label='my_poset.mcdp_poset' style=''>
 poset {
-    a <= b
-	c <= d
-	c <= e	
+    a ≼ b
+	c ≼ d
+	c ≼ e
 }
 </pre>
 
@@ -21,9 +21,9 @@ poset {
 This defines a poset with 5 elements ``a``, ``b``, ``c``, ``d``, ``e``
 and with the given order relations.
 
-<img class='hasse' id='my_poset'/>
+<render class='hasse' id='my_poset'/>
 
-Now that this poset has been defined, it can be used in the 
+Now that this poset has been defined, it can be used in the
 definition of an MCDP, by referring to it by name using
 the backtick notation, as in  &ldquo;<code class='mcdp_poset'>`my_poset</code>&rdquo;.
 
@@ -36,10 +36,9 @@ For example:
 mcdp {
 	provides f [`my_poset]
 
-	provided f <= `my_poset : c
+	provided f ≼ `my_poset : c
 }
 	</pre>
 </td><td>
-	<pre class='ndp_graph_enclosed'>`one</pre>
+	<render class='ndp_graph_enclosed'>`one</render>
 </td></tr></table>
-

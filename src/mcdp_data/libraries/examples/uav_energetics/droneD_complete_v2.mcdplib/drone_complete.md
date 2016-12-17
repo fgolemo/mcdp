@@ -19,7 +19,7 @@ and resources
 * <span class=R>inertial mass</span>;
 * <span class=R>maintenance</span> (number of times the battery needs to be replaced).
 
-<pre class='ndp_graph_templatized'>`Battery_LiPo1</pre>
+<render class='ndp_graph_templatized'>`Battery_LiPo1</render>
 
 The parameters for the model are the specific energy, the specific cost, and
 the number of cycles:
@@ -46,7 +46,7 @@ The total budget for the solution is given by the unit cost times
 the number of replacements:
 
 <pre class='mcdp_statements'>
-required cost >= unit_cost  * num_replacements
+required cost ≽ unit_cost  * num_replacements
 </pre>
 
 The code below is the complete model for the battery:
@@ -55,7 +55,7 @@ The code below is the complete model for the battery:
 
 This is a graphical representation of the network of constraints:
 
-<img class='ndp_graph_enclosed'>`Battery_LiPo1</img>
+<render class='ndp_graph_enclosed'>`Battery_LiPo1</render>
 
 ### Actuation
 
@@ -71,15 +71,15 @@ and the resources are:
 * <span class=R>actuator inertial mass</span>;
 * <span class=R>power</span>.
 
-<img class='ndp_graph_templatized'>`Actuation</img>
+<render class='ndp_graph_templatized'>`Actuation</render>
 
 The model first describes some hard constraints for the quantities:
 
 <pre class='mcdp_statements'>
-provided lift <= 100N
-required actuator_mass >= 100 g
-required cost >= 100 $
-provided velocity <= 3 m/s
+provided lift ≼ 100N
+required actuator_mass ≽ 100 g
+required cost ≽ 100 $
+provided velocity ≼ 3 m/s
 </pre>
 
 Then it describes a nonlinear polynomial (and monotone) relation
@@ -89,7 +89,7 @@ between <span class=F>lift</span> and <span class=R>power</span>:
 p0 = 2 W
 p1 = 1.5 W/N^2
 
-required power >= p0 + (lift^2) * p1
+required power ≽ p0 + (lift^2) * p1
 </pre>
 
 This is the complete MCDP:
@@ -126,7 +126,7 @@ The **power constraint** can be written as follows:
 
 <pre class='mcdp_statements'>
 total_power = power required by actuation + extra_power
-capacity provided by battery >= endurance * total_power
+capacity provided by battery ≽ endurance * total_power
 </pre>
 
 The **lift constraint** is the following:
@@ -140,7 +140,7 @@ total_mass = (
 gravity = 9.81 m/s^2
 weight = total_mass * gravity
 
-lift provided by actuation >= weight
+lift provided by actuation ≽ weight
 </pre>
 
 The **cost constraint** is the following:
@@ -148,7 +148,7 @@ The **cost constraint** is the following:
 <pre class=mcdp_statements>
 labor_cost = (10 $) * (maintenance required by battery)
 
-total_cost >= (
+total_cost ≽ (
    cost required by actuation +
    cost required by battery +
    labor_cost)

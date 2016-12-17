@@ -11,7 +11,7 @@ mcdp {
     c = instance mcdp {
       provides f [Nat]
       requires r [Nat]
-      provided f + Nat:1 <= required r
+      provided f + Nat:1 ≼ required r
     }
 
     provides f using c
@@ -22,14 +22,14 @@ mcdp {
     d = instance mcdp {
       provides f [Nat]
       requires r [Nat]
-      provided f + Nat:1 <= required r
+      provided f + Nat:1 ≼ required r
     }
 
     provides f using d
     requires r for   d
   }
 
-  r required by a <= f provided by b
+  r required by a ≼ f provided by b
   requires r for b
   provides f using a
 }
@@ -72,7 +72,7 @@ And we can also completely **flatten** it, by erasing the border between subprob
 
 ## Space expressions
 
-### set-of
+### ``set-of`` / ℘
 
 <pre class='mcdp_poset ex1'>
 ℘(V)
@@ -82,12 +82,16 @@ And we can also completely **flatten** it, by erasing the border between subprob
 set-of(V)
 </pre>
 
-### UpperSets
+### ``UpperSets``, ``LowerSets``
 
 The syntax is
 
 <pre class='mcdp_poset'>
 UpperSets([[poset]])
+</pre>
+
+<pre class='mcdp_poset'>
+LowerSets([[poset]])
 </pre>
 
 For example:
@@ -96,7 +100,7 @@ For example:
 UpperSets(V)
 </pre>
 
-### Interval
+### Interval [experimental]
 
 The syntax is
 
@@ -114,7 +118,7 @@ For example:
 Interval(1g, 10g)
 </pre>
 
-### Singletons
+### Singletons [experimental]
 
     S(tag)
 
@@ -123,7 +127,7 @@ Interval(1g, 10g)
 
 ## Constant expressions
 
-### Top, Bottom
+### ``Top``, ``Bottom`` / ⊤, ⊥
 
 The syntax is:
 
@@ -220,7 +224,7 @@ Suppose f has type F. Then:
 is equivalent to
 
 <pre class='mcdp_statements'>
-    [[functionality]] provided by [["dp"]] >= any-of(Minimals [[space]])
+    [[functionality]] provided by [["dp"]] ≽ any-of(Minimals [[space]])
 </pre>
 
 Equivalently,
@@ -232,7 +236,7 @@ Equivalently,
 is equivalent to
 
 <pre class='mcdp_statements'>
-    [[resource]] required by [["dp"]] <= any-of(Maximals [[space]])
+    [[resource]] required by [["dp"]] ≼ any-of(Maximals [[space]])
 </pre>
 
 ### available math operators
@@ -293,8 +297,8 @@ those edges are being replaced.
           provides f2 [Nat]
           requires r [Nat]
       }
-      a.r1 <= b.f1
-      a.r2 <= b.f2
+      a.r1 ≼ b.f1
+      a.r2 ≼ b.f2
     }
 </pre>
 

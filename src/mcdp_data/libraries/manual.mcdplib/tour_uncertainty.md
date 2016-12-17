@@ -14,7 +14,7 @@ mcdp {
   provides capacity [Wh]
   requires mass     [kg]
  
-  required mass >= 
+  required mass ≽ 
     Uncertain(provided capacity/120 Wh/kg ,
               provided capacity/100 Wh/kg )
   
@@ -40,7 +40,7 @@ mcdp {
   provides capacity [Wh]
   requires mass     [kg]
  
-  required mass * Uncertain(100 Wh/kg, 120 Wh/kg) >= provided capacity
+  required mass * Uncertain(100 Wh/kg, 120 Wh/kg) ≽ provided capacity
   
 }
 </pre>

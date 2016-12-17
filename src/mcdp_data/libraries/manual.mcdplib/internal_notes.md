@@ -5,22 +5,12 @@
 Use ``<pre>`` tags.
 
 ~~~
-<pre class="mcdp" id='model'>
-mcdp {
-	provides capacity [J]
-	requires mass [g]
-
-	# incomplete
-}
-</pre>
-~~~
-
 <pre class="mcdp" id='submodel'>
 mcdp  {
 	provides f [J]
 	requires r [g]
-	required r >= 10g
-	provided f <= 10J
+	required r ≽ 10g
+	provided f ≼ 10J
 }
 </pre>
 
@@ -30,8 +20,31 @@ mcdp {
 	provides capacity [J]
 	requires mass [g]
 	s = instance `submodel
-	mass >= r required by s
-	capacity <=  f provided by s
+	mass ≽ r required by s
+	capacity ≼  f provided by s
+}
+</pre>
+~~~
+
+will give you:
+
+<pre class="mcdp" id='submodel'>
+mcdp  {
+	provides f [J]
+	requires r [g]
+	required r ≽ 10g
+	provided f ≼ 10J
+}
+</pre>
+
+
+<pre class="mcdp" id='model'>
+mcdp {
+	provides capacity [J]
+	requires mass [g]
+	s = instance `submodel
+	mass ≽ r required by s
+	capacity ≼  f provided by s
 }
 </pre>
  
@@ -39,63 +52,63 @@ mcdp {
 ### mcdp_ndp_graph_templatized
 
 ~~~
-<pre class='ndp_graph_templatized'>`model</pre>
+<render class='ndp_graph_templatized'>`model</render>
 ~~~
 
-<pre class='ndp_graph_templatized'>`model</pre>
+<render class='ndp_graph_templatized'>`model</render>
 
 ### mcdp_ndp_graph_templatized_labeled
 
 ~~~
-<pre class='ndp_graph_templatized_labeled'>`model</pre>
+<render class='ndp_graph_templatized_labeled'>`model</render>
 ~~~
 
-<pre class='ndp_graph_templatized_labeled'>`model</pre>
+<render class='ndp_graph_templatized_labeled'>`model</render>
 
 
 ###  mcdp_ndp_graph_normal
 
 ~~~
-<pre class='ndp_graph_normal'>`model</pre>
+<render class='ndp_graph_normal'>`model</render>
 ~~~
 
-<pre class='ndp_graph_normal'>`model</pre>
+<render class='ndp_graph_normal'>`model</render>
 
 ### ndp_graph_enclosed
 
 ~~~
-<pre class='ndp_graph_enclosed'>`model</pre>
+<render class='ndp_graph_enclosed'>`model</render>
 ~~~
 
-<pre class='ndp_graph_enclosed'>`model</pre>
+<render class='ndp_graph_enclosed'>`model</render>
 
 
 ### ndp_graph_expand
 
 ~~~
-<img class='ndp_graph_expand_LR'>`model</img>
+<render class='ndp_graph_expand_LR'>`model</render>
 ~~~
 
-<img class='ndp_graph_expand_LR'>`model</img>
+<render class='ndp_graph_expand_LR'>`model</render>
 
 ~~~
-<img class='ndp_graph_expand_TB'>`model</img>
+<render class='ndp_graph_expand_TB'>`model</render>
 ~~~
 
-<img class='ndp_graph_expand_TB'>`model</img>
+<render class='ndp_graph_expand_TB'>`model</render>
 
 ###  ndp_template_graph_enclosed
 
 ~~~
-<img class='template_graph_enclosed'>`ActuationEnergeticsTemplate</img>
+<render class='template_graph_enclosed'>`ActuationEnergeticsTemplate</render>
 ~~~
 
-<img class='template_graph_enclosed'>
+<render class='template_graph_enclosed'>
 template [A:mcdp{}]
 mcdp {
 	a = instance A
 }
-</img>
+</render>
 
 
 ### Poset
@@ -103,55 +116,74 @@ mcdp {
 <pre class="mcdp_poset" id='myposet'>
 poset { 
 	a b 
-	c <= a 
-	c <= d
-	b <= d 
+	c ≼ a 
+	c ≼ d
+	b ≼ d 
 }
 </pre>
 
 
 ~~~
-<img class='hasse'>`myposet</pre>
+<render class='hasse'>`myposet</render>
 ~~~
 
-<img class='hasse'>`myposet</pre>
+<render class='hasse'>`myposet</render>
 
 
 ~~~
-<img class='hasse' id='myposet'/>
+<render class='hasse' id='myposet'></render>
 ~~~
 
-<img class='hasse' id='myposet'/>
+<render class='hasse' id='myposet'></render>
 
 
-### plot_generic_value
+Try to avoid this, because Markdown will get confused:
 
 ~~~
-<img class='plot_value_generic' style='width: 10em'>upperclosure{<1 g, 0m>, <2 g, 1m>} </img>
+<render class='hasse' id='myposet'/>
 ~~~
 
-<img class='plot_value_generic' style='width: 10em'>upperclosure{<1 g, 0m>, <2 g, 1m>} </img>
+
+<render class='hasse' id='myposet'/>
+
+### Using ``plot_value_generic``
+
+Can use ``plot_value_generic``
 
 
-<img class='plot_value_generic' style='width: 10em'>
-&lt;upperclosure {<0g, 1J>}, upperclosure {<1g, 0.5J>}&gt;
-</img>
+
+~~~
+<pre class='plot_value_generic' style='width: 10em'>
+	upperclosure{&lt;1 g, 0m&gt;, &lt;2 g, 1m&gt;}
+</pre>
+~~~
+
+<pre class='plot_value_generic' style='width: 10em'>upperclosure{&lt;1 g, 0m&gt;, &lt;2 g, 1m&gt;} </pre>
 
 
-### print_value
+<pre class='plot_value_generic' style='width: 10em'>
+&lt;upperclosure {&lt;0g, 1J&gt;}, upperclosure {&lt;1g, 0.5J&gt;}&gt;
+</pre>
+
+
+### ``print_value``
 
 ~~~
 <pre class='print_value'>
-&lt;upperclosure {<0g, 1J>}, upperclosure {<1g, 0.5J>}&gt;
+&lt;upperclosure {&lt;0g, 1J&gt;}, upperclosure {&lt;1g, 0.5J&gt;}&gt;
 </pre>
 ~~~
 
 <pre class='print_value'>
-&lt;upperclosure {<0g, 1J>}, upperclosure {<1g, 0.5J>}&gt;
+&lt;upperclosure {&lt;0g, 1J&gt;}, upperclosure {&lt;1g, 0.5J&gt;}&gt;
 </pre>
 
 
-### ``<code>``
+### Using ``code``
+
+Use ``<code>`` tags.
+
+
 
 ~~~
 This is P: <code class='mcdp_poset'>`my_poset</code>.
@@ -164,41 +196,6 @@ This is P: <code class='mcdp_poset'>`my_poset</code>.
 This is P: <code class='mcdp_value'>Nat:0</code>.
 
 
-### Identifiers
-
-* suffix ``_min`` and ``_max``
-* suffix ``_0``, ``_1``, etc.
-* prefix greek letters 
-* ``alpha``, ``beta``, ``gamma``, ``DELTA``
-
-``x₀`` = ``x_0``
-
-``x₁`` = ``x_1``
-
-``x₂`` = ``x_2`` 
-
-``x₃`` = ``x_3`` 
-
-``x₄`` = ``x_4`` 
-
-``x₅`` = ``x_5`` 
-
-``x₆`` = ``x_6`` 
-
-``x₇`` = ``x_7`` 
-
-``x₈`` = ``x_8``
-
-``x₉`` = ``x_9``
-
-``α₁`` = ``alpha_1``
-
-``Δ`` = ``DELTA_max``
-
-xₘₐₓ
-ₐ				ₑ			ₕ	ᵢ	ⱼ	ₖ	ₗ	ₘ	ₙ	ₒ	ₚ		ᵣ	ₛ	ₜ	ᵤ	ᵥ		ₓ	
-
-βΓΔ
 
 <!-- This is not ok: <code class='mcdp_value'>`my_poset: <em>element</em></code>.
  -->

@@ -57,8 +57,8 @@ For example:
 mcdp {
     provides out [ J x A ]
 
-    take(provided out, 0) <= 10 J
-    take(provided out, 1) <= 2 A
+    take(provided out, 0) ≼ 10 J
+    take(provided out, 1) ≼ 2 A
 }
 </pre>
 
@@ -68,7 +68,7 @@ This is equivalent to
 mcdp {
     provides out [ J x A ]
 
-    provided out <= <10 J, 2 A>
+    provided out ≼ &lt;10 J, 2 A&gt;
 }
 </pre>
 
@@ -111,7 +111,7 @@ For example:
 mcdp {
     provides out [ product(energy:J, current:A) ]
 
-    (provided out).energy <= 10 J
-    (provided out).current <= 2 A
+    (provided out).energy ≼ 10 J
+    (provided out).current ≼ 2 A
 }
 </pre>

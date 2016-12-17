@@ -11,10 +11,10 @@ mcdp  {
     provides a [dimensionless]
     requires b [dimensionless]
     requires c [dimensionless]
-    a <= b * c
+    a ≼ b * c
 }
 </pre>
-<!-- <pre class='ndp_graph_templatized'>`invmult</pre> -->
+
 
 <table class="approx">
     <tr>
@@ -26,34 +26,34 @@ mcdp  {
     </tr>
     <tr>
         <td>
-        <img class='plot_value_generic'>
+        <render class='plot_value_generic'>
             &lt; solve(1 [], approx_lower(1, `invmult)),
                  solve(1 [], approx_upper(1, `invmult))  &gt;
-        </img>
+        </render>
         </td>
         <td>
-        <img class='plot_value_generic'>
+        <render class='plot_value_generic'>
             &lt; solve(1 [], approx_lower(3, `invmult)),
                  solve(1 [], approx_upper(3, `invmult))  &gt;
-        </img>
+        </render>
         </td>
         <td>
-        <img class='plot_value_generic'>
+        <render class='plot_value_generic'>
             &lt; solve(1 [], approx_lower(5, `invmult)),
                  solve(1 [], approx_upper(5, `invmult))  &gt;
-        </img>
+        </render>
         </td>
         <td>
-        <img class='plot_value_generic'>
+        <render class='plot_value_generic'>
             &lt; solve(1 [], approx_lower(10, `invmult)),
                  solve(1 [], approx_upper(10, `invmult))  &gt;
-        </img>
+        </render>
         </td>
         <td>
-        <img class='plot_value_generic'>
+        <render class='plot_value_generic'>
             &lt; solve(1 [], approx_lower(25, `invmult)),
                  solve(1 [], approx_upper(25, `invmult))  &gt;
-        </img>
+        </render>
         </td>
     </tr>
 
@@ -67,9 +67,10 @@ mcdp {
     provides a [dimensionless]
     requires b [dimensionless]
     requires c [dimensionless]
-    a <= b + c
+    a ≼ b + c
 }
 </pre>
+
 <!-- <pre class='ndp_graph_templatized'>`invplus</pre> -->
 
 <table class="approx">
@@ -82,34 +83,34 @@ mcdp {
     </tr>
     <tr>
         <td>
-        <img class='plot_value_generic'>
+        <render class='plot_value_generic'>
             &lt; solve(1 [], approx_lower(1, `invplus)),
                  solve(1 [], approx_upper(1, `invplus))  &gt;
-        </img>
+        </render>
         </td>
         <td>
-        <img class='plot_value_generic'>
+        <render class='plot_value_generic'>
             &lt; solve(1 [], approx_lower(3, `invplus)),
                  solve(1 [], approx_upper(3, `invplus))  &gt;
-        </img>
+        </render>
         </td>
         <td>
-        <img class='plot_value_generic'>
+        <render class='plot_value_generic'>
             &lt; solve(1 [], approx_lower(5, `invplus)),
                  solve(1 [], approx_upper(5, `invplus))  &gt;
-        </img>
+        </render>
         </td>
         <td>
-        <img class='plot_value_generic'>
+        <render class='plot_value_generic'>
             &lt; solve(1 [], approx_lower(10, `invplus)),
                  solve(1 [], approx_upper(10, `invplus))  &gt;
-        </img>
+        </render>
         </td>
         <td>
-        <img class='plot_value_generic'>
+        <render class='plot_value_generic'>
             &lt; solve(1 [], approx_lower(25, `invplus)),
                  solve(1 [], approx_upper(25, `invplus))  &gt;
-        </img>
+        </render>
         </td>
     </tr>
 
