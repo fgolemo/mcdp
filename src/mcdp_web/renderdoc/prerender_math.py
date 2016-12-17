@@ -26,17 +26,28 @@ def prerender_mathjax(html):
     """
         Raises PrerenderError
     """
-    
+    tries = ['nodejs', 'node']
     try:
-        cmd= ['node', '--version']
+        cmd= [tries[0], '--version']
         res = system_cmd_result(
                 os.getcwd(), cmd, 
                 display_stdout=True,
                 display_stderr=True,
                 raise_on_error=True)
+        use = tries[0]
     except CmdException as e:
-        msg = 'Node.js executable "node" not found.'
-        raise_wrapped(PrerenderError, e, msg, compact=True)
+        try:
+            cmd= [tries[1], '--version']
+            res = system_cmd_result(
+                    os.getcwd(), cmd, 
+                    display_stdout=True,
+                    display_stderr=True,
+                    raise_on_error=True)
+            use = tries[1]
+        except CmdException as e:
+            msg = 'Node.js executable "node" or "nodejs" not found.'
+            msg += '\nIt can be installed using: sudo apt-get install -y nodejs'
+            raise_wrapped(PrerenderError, e, msg, compact=True)
         
     html = html.replace('<p>$$', '\n$$')
     html = html.replace('$$</p>', '$$\n')
@@ -52,7 +63,7 @@ def prerender_mathjax(html):
             
         try:
             f_out = os.path.join(d, 'out.html')
-            cmd= ['node', script, f_html, f_out]
+            cmd= [use, script, f_html, f_out]
             res = system_cmd_result(
                     d, cmd, 
                     display_stdout=True,
