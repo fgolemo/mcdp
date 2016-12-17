@@ -5,7 +5,7 @@ from mcdp_library import MCDPLibrary
 
 from .highlight import html_interpret
 from .markd import render_markdown
-from .highlight import prerender_mathjax, PrerenderError
+from .prerender_math import prerender_mathjax, PrerenderError
 
 
 __all__ = ['render_document']

@@ -62,48 +62,6 @@ def html_interpret(library, html, raise_errors=False,
 
     return html
 
-class PrerenderError(Exception):
-    pass
-def prerender_mathjax(html):
-    html = html.replace('<p>$$', '\n$$')
-    html = html.replace('$$</p>', '$$\n')
-    print html
-    PRE = '/Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/manual.mcdplib/prerender.js'
-    
-    mcdp_tmp_dir = get_mcdp_tmp_dir()
-    prefix = 'prerender_mathjax_'
-    d = mkdtemp(dir=mcdp_tmp_dir, prefix=prefix)
-    
-    try:
-        f_html = os.path.join(d, 'file.html')
-        with open(f_html, 'w') as f:
-            f.write(html)
-            
-        try:
-            f_out = os.path.join(d, 'out.html')
-            cmd= ['node', PRE, f_html, f_out]
-            res = system_cmd_result(
-                    d, cmd, 
-                    display_stdout=True,
-                    display_stderr=True,
-                    raise_on_error=True)
-            
-            if 'parse error' in res.stderr:
-                lines = [_ for _ in res.stderr.split('\n')
-                         if 'parse error' in _ ]
-                assert lines
-                msg = 'LaTeX conversion errors:\n\n' + '\n'.join(lines)
-                raise PrerenderError(msg) 
-    
-            with open(f_out) as f:
-                data = f.read()
-            
-            return data
-        except CmdException as e:
-            raise e
-    finally:
-        shutil.rmtree(d)
-
 def make_image_tag_from_png(f):
     soup = bs("")
     def ff(*args, **kwargs):
