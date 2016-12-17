@@ -7,7 +7,7 @@ from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
 from mocdp import get_mcdp_tmp_dir
 from system_cmd.meat import system_cmd_result
 from system_cmd.structures import CmdException
-from contracts.utils import raise_wrapped
+from contracts.utils import raise_wrapped, indent
 
 
 __all__ = ['prerender_mathjax']
@@ -46,7 +46,7 @@ def prerender_mathjax(html):
             use = tries[1]
         except CmdException as e:
             msg = 'Node.js executable "node" or "nodejs" not found.'
-            msg += '\nIt can be installed using: sudo apt-get install -y nodejs'
+            msg += '\nOn Ubuntu, it can be installed using:\n\n\tsudo apt-get install -y nodejs'
             raise_wrapped(PrerenderError, e, msg, compact=True)
         
     html = html.replace('<p>$$', '\n$$')
@@ -68,15 +68,26 @@ def prerender_mathjax(html):
                     d, cmd, 
                     display_stdout=True,
                     display_stderr=True,
-                    raise_on_error=True)
+                    raise_on_error=False)
             
-            if 'parse error' in res.stderr:
-                lines = [_ for _ in res.stderr.split('\n')
-                         if 'parse error' in _ ]
-                assert lines
-                msg = 'LaTeX conversion errors:\n\n' + '\n'.join(lines)
-                raise PrerenderError(msg) 
-    
+            if res.ret:
+                if 'Error: Cannot find module' in res.stderr:
+                    msg = 'You have to install the mathjax and/or jsdom libraries.'
+                    msg += '\nYou can install them using:\n\n\tnpm install MathJax-node jsdom'
+                    msg += '\n\n' + indent(res.stderr, '  |')
+                    raise PrerenderError(msg) 
+                
+                if 'parse error' in res.stderr:
+                    lines = [_ for _ in res.stderr.split('\n')
+                             if 'parse error' in _ ]
+                    assert lines
+                    msg = 'LaTeX conversion errors:\n\n' + '\n'.join(lines)
+                    raise PrerenderError(msg)
+            
+                msg = 'Unknown error (ret = %d).' % res.ret 
+                msg += '\n\n' + indent(res.stderr, '  |')
+                raise PrerenderError(msg)
+            
             with open(f_out) as f:
                 data = f.read()
             
