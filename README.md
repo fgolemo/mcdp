@@ -24,11 +24,19 @@ along with the MCDPL snippet that describes it (right)*
 The code has been tested on Ubuntu 14.04, Ubuntu 16.04, and OS X using Enthought Python distribution.
 
 
-### Prerequisites
+### Installing dependencies
 
 On Ubuntu:
 
     $ sudo apt-get install python-numpy python-matplotlib python-yaml python-pip python-dev python-setproctitle python-psutil graphviz wkhtmltopdf git 
+
+For math support:
+    
+    $ sudo apt-get install nodejs npm
+    $ sudo npm install MathJax-node jsdom
+
+For printing to PDF, install Prince from https://www.princexml.com/download/.
+
 
 ### Option 1: Install using pip
 

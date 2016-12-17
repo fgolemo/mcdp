@@ -2,8 +2,6 @@
 body {
 	/*padding-left: 3em;*/
 	/*width: 50em;*/
-
-	font-family: Georgia;
 }
 
 pre {
@@ -70,3 +68,4 @@ pre span.label { float: right;
 
 /*svg text {color: red !important;}
 svg { border: solid 1px red; }*/
+

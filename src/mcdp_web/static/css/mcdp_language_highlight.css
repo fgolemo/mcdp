@@ -274,3 +274,7 @@ span.indentation {
     border-left: solid 10px white !important;
     margin-left: -10px !important;
 }
+
+pre, code { tab-size: 4; }
+
+

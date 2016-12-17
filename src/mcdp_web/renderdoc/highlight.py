@@ -262,7 +262,7 @@ def get_source_code(tag):
     while source_code and source_code[0] == '\n':
         source_code = source_code[1:]
 
-    source_code = source_code.replace('\t', ' ' * 4)
+    #source_code = source_code.replace('\t', ' ' * 4)
     return source_code
 
 
@@ -399,7 +399,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                     suggestions = get_suggestions(xr)
                     source_code = apply_suggestions(source_code, suggestions)
                 # we don't want the browser to choose different tab size
-                source_code = source_code.replace('\t', ' ' * 4)   
+                #source_code = source_code.replace('\t', ' ' * 4)   
     
                 # we are not using it
                 _realpath = realpath

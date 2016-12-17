@@ -46,6 +46,9 @@ body {
   font-size: 10pt;
 }
 
+pre, code { font-size: 8pt; }
+
+
 body {
   text-align: justify;
 }
@@ -59,11 +62,12 @@ h1 { font-size: 15pt; color: black !important;}
 h2 { font-size: 12pt; color: black !important;}
 h3 { font-size: 10pt; color: black !important; font-style: italic; font-weight: normal;}
 
-code { font-family: monospace, Cambria, "Cambria Math"; }
+code { 
+    font-family: monospace, Cambria, "Cambria Math"; 
+}
+
 p code { font-size: 8pt; }
-pre, pre code {
-    /*font-size: 8pt;*/
-    /*line-height: 7pt;*/
+pre, pre code { 
 }
 pre .label { font-size: 8px; font-style: normal; }
 pre { 
