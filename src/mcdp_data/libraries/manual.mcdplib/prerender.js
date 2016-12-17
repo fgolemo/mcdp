@@ -1,5 +1,5 @@
 console.log('Loading libraries..');
-var mjAPI = require("mathjax-node/lib/mj-page.js");
+var mjAPI = require("MathJax-node/lib/mj-page.js");
 var jsdom = require("jsdom").jsdom;
 var fs = require('fs');
 
