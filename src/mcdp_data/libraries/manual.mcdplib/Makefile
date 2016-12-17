@@ -12,12 +12,14 @@ all: \
 	$(manual_pdf_wk) \
 	$(manual_pdf_prince)
 
+install:
+	npm install MathJax-node jsdom
+	
 prince: $(manual_pdf_prince)
 
 .PHONY: $(manual_pdf_prince)
 
 $(manual_html): $(manual_tmp_html)
-	npm install MathJax-node jsdom
 	node prerender.js $^ $@
 
 $(manual_tmp_html):

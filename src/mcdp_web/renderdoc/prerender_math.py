@@ -24,7 +24,9 @@ class PrerenderError(Exception):
 @contract(returns=str, html=str)
 def prerender_mathjax(html):
     """
-        Raises PrerenderError
+        Runs the prerender.js script to pre-render the MathJax into images.
+        
+        Raises PrerenderError.
     """
     tries = ['nodejs', 'node']
     try:
@@ -46,7 +48,8 @@ def prerender_mathjax(html):
             use = tries[1]
         except CmdException as e:
             msg = 'Node.js executable "node" or "nodejs" not found.'
-            msg += '\nOn Ubuntu, it can be installed using:\n\n\tsudo apt-get install -y nodejs'
+            msg += '\nOn Ubuntu, it can be installed using:'
+            msg += '\n\n\tsudo apt-get install -y nodejs'
             raise_wrapped(PrerenderError, e, msg, compact=True)
         
     html = html.replace('<p>$$', '\n$$')
@@ -72,8 +75,10 @@ def prerender_mathjax(html):
             
             if res.ret:
                 if 'Error: Cannot find module' in res.stderr:
-                    msg = 'You have to install the mathjax and/or jsdom libraries.'
-                    msg += '\nYou can install them using:\n\n\tnpm install MathJax-node jsdom'
+                    msg = 'You have to install the MathJax and/or jsdom libraries.'
+                    msg += '\nOn Ubuntu, you can install them using:'
+                    msg += '\n\n\tsudo apt-get install npm'
+                    msg += '\n\n\tnpm install MathJax-node jsdom'
                     msg += '\n\n' + indent(res.stderr, '  |')
                     raise PrerenderError(msg) 
                 
