@@ -129,7 +129,6 @@ def eval_ndp_abstractaway(r, context):
 
     return ndpa
 
-
 def eval_ndp_compact(r, context):
     ndp = eval_ndp(r.dp_rvalue, context)
     if isinstance(ndp, CompositeNamedDP):

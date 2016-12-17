@@ -22,6 +22,7 @@ from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.refinement import namedtuple_visitor_ext
 from mocdp import MCDPConstants
 from mocdp.exceptions import DPInternalError
+from collections import namedtuple
 
 
 __all__ = [
@@ -155,61 +156,147 @@ def correct(x, parents):  # @UnusedVariable
         
     if isinstance(x, CDP.BuildProblem):
 #         print 'build', x_string.__repr__()
-        
-        offset = x.where.character
-        #print 'build complete %d  %r' %(offset, x.where.string)
-        TOKEN = 'mcdp'
-        first_appearance_mcdp_in_sub = x_string.index(TOKEN)
-        first_appearance_mcdp_in_orig = offset + first_appearance_mcdp_in_sub
-        that_line = x.where.string[:first_appearance_mcdp_in_orig+len(TOKEN)].split('\n')[-1]
-        
+        for _ in suggestions_build_problem(x):
+            yield _
+            
+def suggestions_build_problem(x):
+    x_string = x.where.string[x.where.character:x.where.character_end]
+    offset = x.where.character
+    #print 'build complete %d  %r' %(offset, x.where.string)
+    TOKEN = 'mcdp'
+    first_appearance_mcdp_in_sub = x_string.index(TOKEN)
+    first_appearance_mcdp_in_orig = offset + first_appearance_mcdp_in_sub
+    first_line = x.where.string[:first_appearance_mcdp_in_orig+len(TOKEN)].split('\n')[-1]
+    
 #         print 'first line: %r' % that_line
-        initial_spaces = that_line.index(TOKEN) 
-        
-        if TOKEN in that_line[initial_spaces+len(TOKEN):]:
-            msg = 'I cannot deal with two "mcdp" in the same line.'
-            raise_desc(NotImplemented, msg, that_line=that_line)
-        # no! initial_spaces =  count_initial_spaces(that_line)
+    token_distance_from_newline = first_line.index(TOKEN) 
+    rest_of_first_line = first_line[token_distance_from_newline+len(TOKEN):]
+    if TOKEN in rest_of_first_line:
+        msg = 'I cannot deal with two "mcdp" in the same line.'
+        raise_desc(NotImplemented, msg, that_line=first_line)
+    # no! initial_spaces =  count_initial_spaces(that_line)
 #         print('initial spaces = %d' % initial_spaces)
 #         print
-        # now look for all the new lines later
-        INDENT = MCDPConstants.indent
-        TABSIZE = MCDPConstants.tabsize
-        newlines = findall('\n', x_string) 
-        for i in newlines:
-            if i < first_appearance_mcdp_in_sub:
-#                 print('skip because first') 
-                continue
-            after = x_string[i+1:]
+    # now look for all the new lines later
+    INDENT = MCDPConstants.indent
+    TABSIZE = MCDPConstants.tabsize
+    
+    # a string containing all complete lines including xstring
 
-            that_line = after.split('\n')[0]
-            
-#             print('%d its line: %r' % (i, that_line))
-            # not the last with only a }
-            if that_line.strip() == '}':
-#                 print('it is the last')
-                align_at = initial_spaces
-            else:
-                align_at = initial_spaces + INDENT
-            
-            nspaces = count_initial_spaces(that_line, TABSIZE)
-#             print('has spaces %d' % nspaces)
-            if nspaces < align_at: 
-                # need to add some indentation
-                w = Where(x.where.string, offset + i + nspaces + 1, offset + i + nspaces +1)
-                to_add = align_at - nspaces
-                remaining = ' ' * to_add
-#                 print('add %d spaces' % to_add)
-                yield w, remaining 
-            if nspaces > align_at:
-                remove = nspaces - align_at
-                w = Where(x.where.string, offset + i + 1, offset + i + 1 + remove)
-#                 print('remove %d spaces' % remove)
-                yield w, ''
-            
-            if TOKEN in that_line:
-                break
+    before = x.where.string[:first_appearance_mcdp_in_orig]
+    if '\n' in before:
+        last_newline_before = list(findall('\n', before))[-1] + 1
+    else:
+        last_newline_before = 0
         
+    rbrace = x.rbrace.where.character
+    # string after the rbrace
+    after = x.where.string[rbrace+1:]
+    if '\n' in after:
+        first_newline_after = list(findall('\n', after))[0] #- 1
+        first_newline_after += rbrace + 1 
+    else:
+        first_newline_after = len(x.where.string)
+    
+    lines_containing_xstring_offset = last_newline_before
+    lines_containing_xstring = x.where.string[lines_containing_xstring_offset:first_newline_after]
+#     print()
+#     print()
+#     print('original string: %r' % x.where.string)
+#     print('x_string: %r' % x_string)
+#     print('after : %r' % after)
+#     print('lines_containing_xstring: %r' % lines_containing_xstring)
+    # iterate over the lines 
+    line_infos = list(iterate_lines(lines_containing_xstring, lines_containing_xstring_offset))
+    
+    
+    initial_spaces = count_initial_spaces(line_infos[0].line_string, TABSIZE)
+    for line_info in line_infos:
+#         print(' --- line %s' % str(line_info))
+        i = line_info.character
+        that_line = line_info.line_string
+        
+        assert that_line == x.where.string[line_info.character:line_info.character_end]
+        
+#             print('%d its line: %r' % (i, that_line))
+        # not the last with only a }
+        
+        # index of current line start in global string
+        contains_rbrace = line_info.character <= rbrace < line_info.character_end
+#         print 'that_line = %r' % (that_line) 
+#         print ('rbrace pos %r' % rbrace)
+        if contains_rbrace:
+            assert '}' in that_line
+            align_at = initial_spaces
+            before_rbrace = x.where.string[line_info.character:rbrace]
+            before_rbrace_is_ws = is_all_whitespace(before_rbrace)
+            
+            if not before_rbrace_is_ws:
+                # need to add a newline
+#                 print('adding newline before rbrace')
+                w = Where(x.where.string, rbrace, rbrace)
+                replace = '\n' + ' ' * align_at
+                yield w, replace
+                continue
+    
+        is_line_with_initial_mcdp = (line_info.character <=  
+                first_appearance_mcdp_in_orig < line_info.character_end)
+        if is_line_with_initial_mcdp: 
+#                 print('skip because first') 
+            continue
+
+        if contains_rbrace:
+            align_at = initial_spaces
+        else:
+            align_at = initial_spaces + INDENT
+        
+        nspaces = count_initial_spaces(that_line, TABSIZE)
+#         print('has spaces %d' % nspaces)
+        if nspaces < align_at: 
+            # need to add some indentation at beginning of line
+            w = Where(x.where.string, i, i)
+            to_add = align_at - nspaces
+            remaining = ' ' * to_add
+#             print('add %d spaces' % to_add)
+            yield w, remaining 
+        if nspaces > align_at:
+            remove = nspaces - align_at
+            # XXX this should not include tabs... FIXME
+            w = Where(x.where.string, i, i + remove)
+#             print('remove %d spaces' % remove)
+            yield w, ''
+        
+        if TOKEN in that_line:
+            break
+            
+LineInfo = namedtuple('LineInfo', 'line_string character character_end')
+
+def iterate_lines(s, offset):
+    # iterate over the lines, yields LineInfo
+    lines = s.split('\n')
+    sofar = 0
+
+    for line_string in lines:
+        l = len(line_string)
+        character = offset + sofar
+        character_end = character  + l
+#         
+#         if line_string != s[character-offset:character_end-offset]:
+#             print 'error'
+#             print 'lines', lines
+#             print 'sofar', sofar
+#             print 'portion', s[character:character_end]
+#             print 'line_string', line_string
+            
+        assert line_string == s[character-offset:character_end-offset]
+        yield LineInfo(line_string, character, character_end)
+        sofar += l + 1 # newline
+
+def is_all_whitespace(s):
+    """ Returns true if the string is all whitespace (space or '\t') """
+    ws = [' ', '\t']
+    return all(c in ws for c in s)
+
 def count_initial_spaces(x, tabsize):
     from mcdp_report.out_mcdpl import extract_ws
     first, _middle, _last = extract_ws(x)

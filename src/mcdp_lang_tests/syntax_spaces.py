@@ -16,6 +16,7 @@ from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError
 from contracts.utils import indent
 from mocdp import MCDPConstants
+from mcdp_lang_tests.test_suggestions import check_suggestions
 
 
 @comptest
@@ -88,15 +89,40 @@ def undefined_x():
     assert_raises(DPSemanticError, parse_ndp, source)
 ####################
 
-def check_suggestions_result(s, s2_expected):
+def check_suggestions_result(s, s2_expected=None, nexpected=None):
     suggestions = get_suggestions_ndp(s)
     s2 = apply_suggestions(s, suggestions)
+    if nexpected is not None:
+        if nexpected != len(suggestions):
+            msg = 'Expected %d suggestions, got %d.' % (nexpected, len(suggestions))
+            msg += '\n\n'+indent(make_chars_visible(s), '   original |')
+            msg += '\n\n'+indent(make_chars_visible(s2), 'transformed |')
+            if s2_expected is not None:
+                msg += '\n\n'+indent(make_chars_visible(s2_expected), '   expected |')
+            raise ValueError(msg)
+            
+    if s2_expected is not None:
+        if s2 != s2_expected:
+            msg = 'Expected:\n\n'
+            msg += '\n\n'+indent(make_chars_visible(s), '   original |')
+            msg += '\n\n'+indent(make_chars_visible(s2), 'transformed |')
+            msg += '\n\n'+indent(make_chars_visible(s2_expected), '   expected |')
+            raise ValueError(msg)
+    return suggestions
+
+def assert_equal_string(s2, s2_expected, original=None):
     if s2 != s2_expected:
-        msg = 'Expected:\n\n'
-        msg += '\n\n'+indent(make_chars_visible(s), '   original |')
-        msg += '\n\n'+indent(make_chars_visible(s2), 'transformed |')
-        msg += '\n\n'+indent(make_chars_visible(s2_expected), '   expected |')
+        l0 = ' original |'
+        l1 = ' obtained |'
+        l2 = ' expected |'
+        msg = 'Violation:'
+        if original is not None:
+            msg += '\n\n'+indent(make_chars_visible(original), l0)
+        msg += '\n\n'+indent(make_chars_visible(s2), l1)
+        msg += '\n\n'+indent(make_chars_visible(s2_expected), l2) 
         raise ValueError(msg)
+    
+    
   
 def make_chars_visible(x):
     """ Replaces whitespaces ' ' and '\t' with '␣' and '⇥' """
@@ -232,7 +258,7 @@ mcdp {
     parse_ndp(s2)
     #print s2
     s2 = apply_suggestions(s, suggestions)
-    assert_equal(s2_exp, s2)
+    assert_equal_string(s2_exp, s2, original=s)
 
 
 @comptest
@@ -268,15 +294,7 @@ mcdp {
     variable a_α_last [dimensionless]
 }""".encode('utf8')
 
-#     x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
-#     assert_equal(x.where.string, s)
-#     xr = parse_ndp_refine(x, Context())
-#     suggestions = get_suggestions(xr)
-    suggestions = get_suggestions_ndp(s)
-    #if suggestions: print suggestions
-    assert_equal(1, len(suggestions)) 
-    s2 = apply_suggestions(s, suggestions)
-    assert_equal(s2_exp, s2)
+    check_suggestions_result(s, s2_exp, nexpected=1)
     
 
 @comptest
@@ -294,10 +312,6 @@ mcdp {
 def get_suggestions_ndp(s):
     x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
     assert_equal(x.where.string, s)
-    
-#     print ('get_suggestions_ndp s = %r' % s)
-#     print ('get_suggestions_ndp x = %s' % recursive_print(x))
-#     print ('get_suggestions_ndp x string = %r' % x.where.string)
     xr = parse_ndp_refine(x, Context())
     suggestions = get_suggestions(xr)
     return suggestions
@@ -338,7 +352,7 @@ mcdp {
     assert_equal(1, len(suggestions))
     assert_equal(suggestions[0][0].character, suggestions[0][0].character_end) 
     s2 = apply_suggestions(s, suggestions)
-    assert_equal(s2, s2expected)
+    assert_equal_string(s2, s2expected, original=s)
 
 
 @comptest
@@ -359,7 +373,8 @@ def space_suggestions_brace():
     assert_equal(1, len(suggestions))
     assert_equal(suggestions[0][0].character, suggestions[0][0].character_end) 
     s2 = apply_suggestions(s, suggestions)
-    assert_equal(s2, s2expected)
+    assert_equal_string(s2, s2expected, original=s)
+    
     
 @comptest
 def spaces():
@@ -395,7 +410,6 @@ mcdp {
     suggestions2 = get_suggestions_ndp(s2)
     assert_equal(0, len(suggestions2))
     
-    
 
 
 @comptest
@@ -405,19 +419,18 @@ mcdp {
     a = instance mcdp { }
 }"""
     suggestions = get_suggestions_ndp(s)
-    assert_equal(0, len(suggestions))
+    assert_equal(1, len(suggestions)) # add newline
 
 @comptest
 def nochanges():
     s = """
 mcdp {
     a = mcdp { 
-            b = mcdp {
-                } 
-        }
+        b = mcdp {
+        } 
+    }
 }"""
-    suggestions = get_suggestions_ndp(s)
-    assert_equal(0, len(suggestions))
+    check_suggestions_result(s, None, nexpected=0)
 
 @comptest
 def recursive2():
@@ -429,14 +442,12 @@ mcdp {
     s2expected = """
 mcdp {
     a = instance mcdp { 
-                 }
+    }
 }"""
-    suggestions = get_suggestions_ndp(s)
-    assert_equal(1, len(suggestions))
-    s2 = apply_suggestions(s, suggestions)
-    assert_equal(s2, s2expected)
+    check_suggestions_result(s, s2expected, nexpected=1)
     
-@comptest
+    
+@comptest_fails
 def recursive3():
     s = """
 mcdp {
@@ -446,45 +457,54 @@ mcdp {
     s2_expected = """
 mcdp {
     a = instance mcdp { 
-                  }
+                 }
 }"""
     s3_expected = """
 mcdp {
     a = instance mcdp { 
                  }
 }"""
-    suggestions = get_suggestions_ndp(s)
-    s2 = apply_suggestions(s, suggestions)
-    assert_equal(2, len(suggestions))
-    print s2
-    assert_equal(s2, s2_expected)
-    
-    # this one there will be a further adjustment
-    suggestions2 = get_suggestions_ndp(s2)
-    assert_equal(1, len(suggestions2))
-    s3 = apply_suggestions(s2, suggestions2)
-    assert_equal(s3, s3_expected)
 
+    check_suggestions_result(s, s2_expected, nexpected=2)
+    
+    check_suggestions_result(s2_expected, s3_expected, nexpected=1)
+ 
+
+@comptest
+def recursive4():
+    s = """
+mcdp {
+    a = instance mcdp { 
+                 }
+}"""
+    s2_expected = """
+mcdp {
+    a = instance mcdp { 
+    }
+}"""
+    
+    check_suggestions_result(s, s2_expected)
+     
 @comptest
 def tabs1():
     s = 'mcdp {\n\t# this is equivalent to a mux\n\tprovides fa [g]\n\tprovides fb [J]\n\n\trequires r [g x J]\n\n\tr >= <provided fa, fb>\n}'
     suggestions = get_suggestions_ndp(s)
-    print s.__repr__()
-    s2 = apply_suggestions(s, suggestions)
+#     print s.__repr__()
+    _s2 = apply_suggestions(s, suggestions)
 
 
 @comptest
 def tabs2():
     s = 'template mcdp {\n\ta = 1\n}'
     suggestions = get_suggestions_ndp(s)
-    print s.__repr__()
-    s2 = apply_suggestions(s, suggestions)
+#     print s.__repr__()
+    _s2 = apply_suggestions(s, suggestions)
 
 @comptest
 def overlapping():
     s = 'mcdp {\n # this is equivalent to a mux\n provides fa [g]\n provides fb [J]\n\n requires r [g x J]\n\n r >= <provided fa, fb>\n}'
     suggestions = get_suggestions_ndp(s)
-    s2 = apply_suggestions(s, suggestions)
+    _s2 = apply_suggestions(s, suggestions)
 
 @comptest_fails
 def suggestion_problem1():
@@ -494,18 +514,17 @@ def suggestion_problem1():
              b = mcdp {} 
 } 
  }"""    
-    suggestions = get_suggestions_ndp(s)
-    s2 = apply_suggestions(s, suggestions)
     s2_expected = """
  mcdp {
     a = mcdp { 
              b = mcdp {}
          } 
  }"""
-    assert_equal(s2, s2_expected)
+    _suggestions = check_suggestions_result(s, s2_expected)
+
     
     
-@comptest 
+@comptest_fails
 def nested():  
     s="""
 mcdp {

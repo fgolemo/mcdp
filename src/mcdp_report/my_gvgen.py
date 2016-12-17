@@ -22,7 +22,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 from sys import stdout
 from StringIO import StringIO
 
-gvgen_version = "0.9.1"
+gvgen_version = "1.0"
 
 debug = 0
 debug_tree_unroll = 0
@@ -58,6 +58,7 @@ class GvGen():
         self.padding_str="   "                   # Left padding to make children and parent look nice
         self.__styles = {}
         self.__default_style = []
+        self.__default_style_links = []
 #         self.smart_mode = 0                      # Disabled by default
 
         # The graph has a legend
@@ -263,6 +264,8 @@ class GvGen():
 
     def styleDefaultAppend(self, key, val):
         self.__default_style.append([key, val])
+    def styleDefaultLinksAppend(self, key, val):
+        self.__default_style_links.append([key, val])
 
     #
     # End: styles management
@@ -311,6 +314,10 @@ class GvGen():
 
     def propertiesLinkAsStringGet(self, link):
         props = {}
+
+        if self.__default_style_links:
+            props.update(self.__default_style_links)
+
 
         if link['style']:
             stylename = link['style']

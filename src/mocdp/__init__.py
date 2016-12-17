@@ -145,7 +145,14 @@ class MCDPConstants():
     # Actually write to disk the reports
     test_allformats_report_write = False
     
-
+    
+    diagrams_fontsize = 10
+    rel_to_8 = diagrams_fontsize/ 8
+    diagrams_smallimagesize = 0.4 * rel_to_8
+    #diagrams_leqimagesize = 0.2 * rel_to_8
+    diagrams_leqimagesize = 0.3 * rel_to_8
+    diagrams_bigimagesize = 60 * rel_to_8 # points 
+    
 def get_mcdp_tmp_dir():
     from tempfile import gettempdir
     import os

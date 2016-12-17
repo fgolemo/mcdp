@@ -4,6 +4,5 @@ mcdp {
     requires x [s]
     requires y [s]
     
-    required x + required y ≥ provided a
+    required x + required y ≽ provided a
 }
-

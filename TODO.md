@@ -389,37 +389,29 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 
 - W: add credits page
 
-- docs: be able to reference to figures 
-
-  <p figid=1>a</p>
-
-  <p>Fig 1: a</p>
-
-  See <figref figid=figid></ref> 
-
+- docs: be able to reference to figures using pubcss/prince but implemented by me
 
 - docs: add brackets, succeq, etc. in the list of unicode characters
 - L: other subscripts
 
   E_r
 
-- W: better performance in images (background loading?)
-
 - suggest cdot in  0.882 N * m
 - suggest indentation for poset {}, catalogue {}, product/namedproduct
-- various spacing issues
+- suggest different spaceing for mcdp {
+- suggest: fix recursive
 
 
-- change keyword 'template'
+- change keyword 'template' to something else ('dummy?')
 
-- EmptySet
+- css: EmptySet
+- css: using for should be green/red
 
-prince: out-html/manual.html:[style]:1: warning: unknown property 'sheight'
-prince: out-html/manual.html: warning: unsupported properties: box-shadow
-prince: warning: no font for Miscellaneous Mathematical Symbols-A character U+27E8, fallback to '?'
-prince: page 7: warning: no font for Supplemental Arrows-A character U+27FB, fallback to '?'
-prince: page 7: warning: no font for Supplemental Arrows-A character U+27FC, fallback to '?'
-prince: page 18: warning: no font for Miscellaneous Mathematical Symbols-A character U+27E8, fallback to '?'
-prince: page 18: warning: no font for Miscellaneous Mathematical Symbols-A character U+27E9, fallback to '?'
-prince: page 18: warning: no font for Miscellaneous Mathematical Symbols-A character U+27E8, fallback to '?'
-prince: page 18: warning: no font for Miscellaneous Mathematical Symbols-A character U+27E9, fallback to '?'
+- add initial icon to manual
+- add "home" button to web
+- web: create new library button
+
+- throw error if 
+   b >= a
+   a >= b
+   

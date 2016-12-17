@@ -12,7 +12,7 @@ from mcdp_dp import (Constant, ConstantMinimals, Conversion,
 from mcdp_lang.blocks import get_missing_connections
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
     RcompUnits, TopCompletion, format_pint_unit_short)
-from mocdp import logger
+from mocdp import logger, MCDPConstants
 from mocdp.comp import CompositeNamedDP, SimpleWrap
 from mocdp.comp.context import (get_name_for_fun_node, get_name_for_res_node,
     is_fun_node_name, is_res_node_name)
@@ -73,7 +73,6 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
         plotting_info = PlottingInfo()
 
     """
-    
         plotting_info(ndp_name=('name', 'sub'), fname=None, rname='r1')
         plotting_info(ndp_name=('name', 'sub'), fname='f1', rname=None)
            
@@ -84,8 +83,23 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
 
     import my_gvgen as gvgen
     assert direction in ['LR', 'TB']
-    gg = gvgen.GvGen(options="rankdir=%s" % direction)
-
+    gg = gvgen.GvGen(options="rankdir=%s;nodesep=0;esep=0" % direction)
+    
+    rel_to_8 = MCDPConstants.diagrams_fontsize / 8.0
+    gg.styleDefaultAppend('fontsize', MCDPConstants.diagrams_fontsize)
+    marginx = 0.07 * 1.2* rel_to_8
+    marginy = 0.03 * 1.2*  rel_to_8
+#     gg.styleDefaultAppend('margin', "%f,%f" % (marginx , marginy ))
+#     0.11,0.055.
+    gg.styleDefaultAppend("width", 0.2 * rel_to_8) # minimum width of node
+    gg.styleDefaultAppend("height", 0.2 * rel_to_8) # minimum width of node
+    gg.styleDefaultAppend("penwidth", 0.7 * rel_to_8)
+    gg.styleDefaultLinksAppend('fontsize', MCDPConstants.diagrams_fontsize)
+    gg.styleDefaultLinksAppend('penwidth', 1.0 * rel_to_8)
+    gg.styleDefaultLinksAppend('arrowsize', rel_to_8 * 0.3)
+#     gg.styleDefaultLinksAppend('constraint', "false")
+    
+    
 
     # if True, create clusters for functions and resources
     do_cluster_res_fun = False
@@ -118,6 +132,7 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
 
     gg.styleAppend("simple", "shape", "box")
     gg.styleAppend("simple", "style", "rounded")
+#     gg.styleAppend("simple", "margin", "0,0")
 
     # constant resource (min r. needed)
     #     gg.styleAppend("constant", "shape", "plaintext")
@@ -138,6 +153,7 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
 
     gg.styleAppend("container", "shape", "box")
     gg.styleAppend("container", "style", "rounded")
+#     gg.styleDefaultAppend('margin', "%f,%f" % (marginx * rel_to_8 * 3, marginy * rel_to_8 * 3))
 
     gg.styleAppend("sum", "shape", "box")
     gg.styleAppend("sum", "style", "rounded")
@@ -163,6 +179,11 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
 
     gg.styleAppend("coproduct_resource", "shape", "point")
     gg.styleAppend("coproduct_function", "shape", "point")
+    psize = 0.04
+    gg.styleAppend("coproduct_resource", "height", psize * rel_to_8)
+    gg.styleAppend("coproduct_resource", "width", psize * rel_to_8)
+    gg.styleAppend("coproduct_function", "height", psize * rel_to_8)
+    gg.styleAppend("coproduct_function", "width", psize * rel_to_8)
     gg.styleAppend("coproduct_link", "style", "dashed")
 
 
@@ -370,7 +391,7 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
             gdc.styleAppend(sname, 'image', best_icon)
             gdc.styleAppend(sname, 'imagescale', 'true')
             gdc.styleAppend(sname, 'fixedsize', 'true')
-            gdc.styleAppend(sname, 'height', '1.0')
+            gdc.styleAppend(sname, 'height', MCDPConstants.diagrams_smallimagesize)
             gdc.styleAppend(sname, "shape", "none")
             label = ''
         else:
@@ -388,15 +409,21 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
                 # shortlabel = '<I><B>%sa</B></I>' % shortlabel
                 sname = classname
                 gdc.styleAppend(sname, 'imagescale', 'true')
-                gdc.styleAppend(sname, 'height', '1.0')
+#                 gdc.styleAppend(sname, 'height', MCDPConstants.diagrams_bigimagesize)
                 gdc.styleAppend(sname, "shape", "box")
                 gdc.styleAppend(sname, "style", "rounded")
+#                 label = ("<TABLE CELLBORDER='0' BORDER='0'><TR><TD>%s</TD></TR>"
+#                 "<TR><TD'><IMG SRC='%s' SCALE='TRUE'/></TD></TR></TABLE>")
+                # these work as max size 
+                width = MCDPConstants.diagrams_bigimagesize
+                ratio = 0.8
+                height = MCDPConstants.diagrams_bigimagesize * ratio 
                 label = ("<TABLE CELLBORDER='0' BORDER='0'><TR><TD>%s</TD></TR>"
-                "<TR><TD><IMG SRC='%s' SCALE='TRUE'/></TD></TR></TABLE>")
+                "<TR><TD fixedsize='true' width='%d' height='%d'><IMG SRC='%s'/></TD></TR></TABLE>")
 
                 if shortlabel is None:
                     shortlabel = ''
-                label = label % (shortlabel, best_icon)
+                label = label % (shortlabel, width, height, best_icon)
             else:
                 # print('Image %r not found' % imagename)
                 sname = None
@@ -705,7 +732,8 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
                 l1 = gdc.newLink(n_b, n_a , label=get_signal_label(c.s1, ub))
 
             else:
-                box = gdc.newItem('')  # '≼')
+                box = gdc.newItem('')  # '≼') # LEQ
+                gdc.gg.propertyAppend(box, 'height', MCDPConstants.diagrams_leqimagesize)
                 gdc.styleApply("leq", box)
         
                 l1_label = get_signal_label(c.s2, ua)

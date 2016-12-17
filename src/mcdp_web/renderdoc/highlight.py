@@ -423,14 +423,19 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
 
                 if use_pre:
                     rendered = frag2.pre
+                    if not rendered.has_attr('class'):
+                        rendered['class'] = ""
                     if tag.has_attr('label'):
                         tag_label = soup.new_tag('span', **{'class': 'label'})
                         tag_label.append(tag['label'])
                         rendered.insert(0, tag_label)
+                        rendered.a
 
                     max_len = max_len_of_pre_html(html)
                     frag2.pre['string_len'] = max_len
+                    
                     if tag.has_attr('label'):
+                        rendered['class'] += ' has_label '
                         max_len = max(max_len, len(tag['label']) + 6)
                         
                     add_style_for_size(frag2.pre, max_len)
@@ -438,7 +443,9 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                 else:
                     # using <code>
                     rendered = frag2.pre.code
-                    
+                    if not rendered.has_attr('class'):
+                        rendered['class'] = ""
+
                     style = ''
 
                 if tag.has_attr('style'):
@@ -448,7 +455,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                     rendered['style'] = style
 
                 if tag.has_attr('class'):
-                    rendered['class'] = tag['class']
+                    rendered['class'] += " " +" ".join(tag['class'])
 
                 if tag.has_attr('id'):
                     rendered['id'] = tag['id']
@@ -541,9 +548,11 @@ def max_len_of_pre_html(html):
 
 def add_style_for_size(element, max_len):         
     fontsize = 14 # px
+    fontsize = 8
+    padding = 30
     fontname = 'Courier'
     ratio = 0.65 # ratio for Courier font
-    width = fontsize * (max_len) * ratio
+    width = fontsize * (max_len) * ratio + padding
     style = 'font-family: %s; font-size: %spx; width: %dpx;' % (fontname, fontsize, width)
     
     if element.has_attr('style'):
