@@ -7,6 +7,7 @@ from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
 from mocdp import get_mcdp_tmp_dir
 from system_cmd.meat import system_cmd_result
 from system_cmd.structures import CmdException
+from contracts.utils import raise_wrapped
 
 
 __all__ = ['prerender_mathjax']
@@ -25,6 +26,18 @@ def prerender_mathjax(html):
     """
         Raises PrerenderError
     """
+    
+    try:
+        cmd= ['node', '--version']
+        res = system_cmd_result(
+                os.getcwd(), cmd, 
+                display_stdout=True,
+                display_stderr=True,
+                raise_on_error=True)
+    except CmdException as e:
+        msg = 'Node.js executable "node" not found.'
+        raise_wrapped(PrerenderError, e, msg, compact=True)
+        
     html = html.replace('<p>$$', '\n$$')
     html = html.replace('$$</p>', '$$\n')
     script = get_prerender_js()
