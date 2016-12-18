@@ -12,6 +12,7 @@
 
 """
 
+from collections import namedtuple
 import re
 
 from contracts import contract
@@ -22,7 +23,6 @@ from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.refinement import namedtuple_visitor_ext
 from mocdp import MCDPConstants
 from mocdp.exceptions import DPInternalError
-from collections import namedtuple
 
 
 __all__ = [
@@ -279,7 +279,7 @@ def iterate_lines(s, offset):
     for line_string in lines:
         l = len(line_string)
         character = offset + sofar
-        character_end = character  + l
+        character_end = character + l
 #         
 #         if line_string != s[character-offset:character_end-offset]:
 #             print 'error'

@@ -115,6 +115,7 @@ can drive servos/motors using PPM/PWM.
 Dagu Chassis used for the Duckiebot.
 
 <render class='ndp_graph_templatized_labeled'>`DaguChassis</render>
+
 <pre class='mcdp' id='DaguChassis'></pre>
 
 ### The Youbot Base
@@ -122,6 +123,7 @@ Dagu Chassis used for the Duckiebot.
 Youbot base
 
 <render class='ndp_graph_templatized_labeled'>`YoubotBase</render>
+
 <pre class='mcdp' id='YoubotBase'></pre>
 
 
@@ -130,6 +132,6 @@ Youbot base
 
 iRobot Create
 
-<p><render class='ndp_graph_templatized_labeled'>`IRobotCreate</render></p>
+<render class='ndp_graph_templatized_labeled'>`IRobotCreate</render>
 
 <pre class='mcdp' id='IRobotCreate'></pre>

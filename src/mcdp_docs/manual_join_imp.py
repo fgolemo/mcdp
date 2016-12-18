@@ -52,11 +52,6 @@ pre, code { font-size: 8pt; }
 body {
   text-align: justify;
 }
-
-@font-face {
-    font-family: monospace;
-    src: local("Courier")
-}
  
 h1 { font-size: 15pt; color: black !important;}
 h2 { font-size: 12pt; color: black !important;}

@@ -9,8 +9,9 @@ manual_pdf_prince=$(htmltmpdir)/manual-prince.pdf
 
 all: \
 	$(manual_html) \
-	$(manual_pdf_wk) \
 	$(manual_pdf_prince)
+
+#$(manual_pdf_wk) 
 
 install:
 	npm install MathJax-node jsdom

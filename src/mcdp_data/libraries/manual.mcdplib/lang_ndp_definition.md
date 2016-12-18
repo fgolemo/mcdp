@@ -1,7 +1,7 @@
 
 ## Defining NDPs
 
-## ``mcdp{...}`` syntax
+### ``mcdp{...}`` syntax
 
 <pre class='mcdp_statements'>
     provides [[functionality]] using [["dp"]]

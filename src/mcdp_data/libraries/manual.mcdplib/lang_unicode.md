@@ -1,8 +1,8 @@
-## Use of Unicode letters and glyphs 
+## Use of Unicode letters and glyphs
 
 MCDPL allows to use some Unicode characters in identifiers and expressions.
 
-#### Greek letters
+### Greek letters
 
 The following are the Greek letters supported and their translitteration.
 Note that there is a difference between lower case and upper case.
@@ -20,39 +20,39 @@ Note that there is a difference between lower case and upper case.
     Γ Gamma     Φ Phi       Ξ Xi
     γ gamma     φ phi       ξ xi
     Ι Iota      Π Pi        Ζ Zeta
-    ι iota      π pi        ζ zeta  
-    Κ Kappa     Ψ Psi       
-    κ kappa     ψ psi      
+    ι iota      π pi        ζ zeta
+    Κ Kappa     Ψ Psi
+    κ kappa     ψ psi
 
 The way MCDPL considers these glyphs is that they are immediately
-converted to an extended form. 
+converted to an extended form.
 
-Every Greek letter is 
+Every Greek letter is
 converted to its name. It is syntactically equivalent to write
-"``alpha``" or "``α``". 
+"``alpha``" or "``α``".
 
-#### Subscripts
+### Subscripts
 
 These are the subscripts supported:
 
     x₀ x₁ x₂ x₃ x₄ x₅ x₆ x₇ x₈ x₉
 
-Subscripts can only occur at the end of an identifier: ``a₁`` is valid, 
+Subscripts can only occur at the end of an identifier: ``a₁`` is valid,
 while ``a₁b`` is not valid.
 
 For subscripts, every occurrence of a subscript of the digit *d* is converted to the fragment "``_d``".  It is syntactically equivalent to write
 "``_1``" or "``₁``".
 
-#### Superscripts
+### Superscripts
 
 These are the superscripts:
-   
+
     x¹ x² x³ x⁴ x⁵ x⁶ x⁷ x⁸ x⁹
 
 Every occurrence of a superscript of the digit *d* is interpreted as a power "``^d``".  It is syntactically equivalent to write "``x^2``" or "``x²``".
 
 
-#### Example of syntactic equivalence
+### Example of syntactic equivalence
 
 Putting all together, it is equivalent to write
 
@@ -60,7 +60,7 @@ Putting all together, it is equivalent to write
 alpha_1 = beta^3 + 9.81 m/s^2
 </pre>
 
-and 
+and
 
 <pre class='mcdp_statements'>
 α₁ = β³ + 9.81 m/s²

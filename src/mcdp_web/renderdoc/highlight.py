@@ -44,13 +44,13 @@ def html_interpret(library, html, raise_errors=False,
     library = library.clone()
     load_fragments(library, html, realpath=realpath)
 
-    print 'before highlight_mcdp_code: %s' % html
+#     print 'before highlight_mcdp_code: %s' % html
     html = highlight_mcdp_code(library, html,
                                generate_pdf=generate_pdf,
                                raise_errors=raise_errors,
                                realpath=realpath)
 
-    print 'after highlight_mcdp_code: %s' % html
+#     print 'after highlight_mcdp_code: %s' % html
     assert not '<html>' in html
     try:
 #         print html
@@ -321,9 +321,11 @@ def get_minimal_document(body_contents, add_markdown_css=False):
     
 #     assert parsed.html is not None
 #     assert parsed.html.body is not None
-    
-    for e in parsed.findChildren():
-        body.append(e)
+    assert parsed.name == 'fragment'
+    parsed.name = 'div'
+    body.append(parsed)
+#     for e in parsed.findChildren():
+#         body.append(e)
     html.append(head)
     html.append(body)
     soup.append(html)
@@ -622,23 +624,30 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
 
     compute_size_for_pre_without_class(soup)
 
+    # this is a bug with bs4...
+    soup = bs(to_html_stripping_fragment(soup))
+    
     pres = list(soup.select('pre'))
 #     print('pres: %d %s' %(len(pres), pres))
     for pre in pres:
+        
         p = pre.previousSibling
         if p is not None:
             if isinstance(p, NavigableString):
                 if '\n' in p:
+                    print('pre: %s' % str(pre))
 #                     print 'soup', soup
 #                     print 'soup dict', soup.__dict__
 #                     print 'soup.parser_class.new_tag', soup.parser_class.new_tag
-                    br = BeautifulSoup().new_tag('div')
+                    br = BeautifulSoup().new_tag('br')
                     br.string = ''
                     br['class'] = 'added_before_pre'
                     br['orig'] = unicode(p).__repr__()
+                    br['reference'] = "pre: %s p: %s" % (str(id(pre)), str(id(p)))
+                    print  br['reference']
 #                     print('adding tag br')
-                    pre.insert_before(br)
-#                     pre.parent.insert(pre.parent.index(pre), br)
+#                     pre.insert_before(br)
+                    pre.parent.insert(pre.parent.index(pre), br)
                     
     res = to_html_stripping_fragment(soup)
 #     print 'highlight_mcdp_code: %s' % res
@@ -781,6 +790,8 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
             tag = make_tag(tag0, which, data, ndp=ndp, template=None)
             return tag
         
+        selector = 'render.%s' % which
+        go(selector, callback)
         selector = 'pre.%s' % which
         go(selector, callback)
         selector = 'img.%s' % which

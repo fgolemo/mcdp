@@ -26,8 +26,8 @@ mjAPI.typeset({
 });
 mjAPI.typeset({
   'html': document.body.innerHTML,
-  renderer: "NativeMML",
-  // 'renderer': "SVG",
+  // renderer: "NativeMML",
+  'renderer': "SVG",
   // 'renderer': "PNG", // no
   // "output/SVG",
   'inputs': ["TeX"],

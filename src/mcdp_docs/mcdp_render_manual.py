@@ -53,6 +53,7 @@ manual_contents = [
     ('droneD_complete_v2', 'drone_complete'),
     
     ('manual', 'developer'),
+    ('manual', 'internal_notes'),
 
 ]
 

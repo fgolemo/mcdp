@@ -3,10 +3,21 @@
 @page { size: A5 }
 
 
-pre code { 
-    /*font-size: 8pt; */
-    /*line-height: 7pt !important; */
+
+
+@font-face {
+    font-family: monospace;
+    /*src: local("Consolas")*/
+    src: local("Anka/Coder Narrow")
 }
+pre  { 
+    font-size: 7pt !important; 
+    /*line-height: 7pt !important; */
+
+    display: inline-block;
+}
+
+
 
 /* keywords appearing in headers */
 ul.toc code { 
@@ -98,16 +109,31 @@ ul.chapter_toc > li > ul > li > a.toc_link > span.toc_name::before {
 
 #toc-heading { text-align: center; }
 
-h3 {font-style: normal !important;
+h2 { margin-top: 2em !important; }
+h3 {
+    font-style: normal !important;
+    padding-top: 1em;
+
+    width: 100%;
+    padding-bottom: 3pt;
+    border-bottom: solid 0.5pt grey;
 }
 
 h1:not(#booktitle), #toc-heading { font-variant: small-caps; }
 h1:not(#booktitle) ::before { content: 'Chapter '; }
 
 body { 
-hyphens: auto;
+    hyphens: auto;
  }
 
  p.todo {
     background-color: #fdd;
  }
+ p.todo::before { content: 'TODO: '; }
+
+ td pre { margin-top: 0 !important;  margin: 0 !important;}
+
+
+td br.added_before_pre {display: none;}
+
+td {padding: 0 !important;}
