@@ -18,6 +18,7 @@ from mocdp.exceptions import mcdp_dev_warning
 import networkx as nx  # @UnresolvedImport
 from reprep.constants import MIME_PDF, MIME_PLAIN, MIME_PNG, MIME_SVG
 from system_cmd import CmdException, system_cmd_result
+from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
 
 
 def graphviz_run(filename_dot, output, prog='dot'):
@@ -243,7 +244,8 @@ def embed_images_from_library(html, library):
         # realpath = f['realpath']
         return data
 
-    soup = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
+    soup = bs(html)
+    assert soup.name == 'fragment'
     for tag in soup.select('img'):
         href = tag['src']
         extensions = ['png', 'jpg']
@@ -255,7 +257,7 @@ def embed_images_from_library(html, library):
                 mime = get_mime_for_format(ext)
                 src = 'data:%s;base64,%s' % (mime, encoded)
                 tag['src'] = src
-    return str(soup)
+    return to_html_stripping_fragment(soup)
     
 
 def extract_assets(html, basedir):

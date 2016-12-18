@@ -2,11 +2,13 @@
 
 Consider this:
 
-<pre class='mcdp'>
-mcdp {
-    provides power [dimensionless]
-    requires power [dimensionless]
 
-    power ≽ power
-}
+<pre class='mcdp_poset'>
+    Int
 </pre>
+
+
+<pre class='mcdp_poset'>
+    Nat
+</pre>
+

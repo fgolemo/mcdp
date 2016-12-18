@@ -47,7 +47,9 @@ mcdp {
 	capacity ≼  f provided by s
 }
 </pre>
- 
+
+
+### ``noprettify``
 
 ### mcdp_ndp_graph_templatized
 
@@ -114,11 +116,11 @@ mcdp {
 ### Poset
 
 <pre class="mcdp_poset" id='myposet'>
-poset { 
-	a b 
-	c ≼ a 
+poset {
+	a b
+	c ≼ a
 	c ≼ d
-	b ≼ d 
+	b ≼ d
 }
 </pre>
 
@@ -194,6 +196,23 @@ This is P: <code class='mcdp_value'>Nat:0</code>.
 This is P: <code class='mcdp_poset'>`my_poset</code>.
 
 This is P: <code class='mcdp_value'>Nat:0</code>.
+
+
+### Abbreviations
+
+~~~
+<code class='keyword'>x</code>  and <k>x</k>
+
+<code class='mcdp_value'>Nat:0</code>
+
+<mcdp-value>Nat:0</mcdp-value>
+<mcdp-poset>Nat</mcdp-poset>.
+<mcdp-fvalue>1+1</mcdp-fvalue>.
+<mcdp-rvalue>1+2</mcdp-rvalue>.
+
+~~~
+
+
 
 
 

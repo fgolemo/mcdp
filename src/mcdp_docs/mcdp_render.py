@@ -83,6 +83,7 @@ def render(library, docname, data, realpath, out_dir, generate_pdf):
                                     s=data, raise_errors=True, realpath=realpath,
                                     generate_pdf=generate_pdf)
 
+    
     doc = get_minimal_document(html_contents, add_markdown_css=True)
 
     d = os.path.dirname(out)

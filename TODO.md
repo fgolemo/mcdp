@@ -423,3 +423,6 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 
 
 - mark the first part in 4.1.C - Finite Posets
+
+- ø
+- V: Top

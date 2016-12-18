@@ -53,10 +53,12 @@ span.FinitePosetKeyword,
 span.ProductKeyword,
 span.UncertainKeyword,
 span.UpperSetsKeyword,
-span.MakeUpperSetsKyword,
+span.LowerSetsKeyword,
+span.EmptySetKeyword,
 span.PowerSetKeyword,
 span.IntervalKeyword,
 span.UpperSetFromCollectionKeyword,
+span.LowerSetFromCollectionKeyword,
 span.TopKeyword,
 span.BottomKeyword,
 span.SingleElementPosetKeyword,
@@ -276,5 +278,10 @@ span.indentation {
 }
 
 pre, code { tab-size: 4; }
+
+code.keyword { 
+    color: #00a;
+    font-weight: bold; 
+}
 
 

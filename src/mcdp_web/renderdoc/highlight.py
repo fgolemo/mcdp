@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString
 
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped, indent
+from contracts.utils import raise_desc, raise_wrapped, indent, check_isinstance
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import (parse_template_refine, parse_poset_refine,
                                        parse_ndp_refine)
@@ -32,13 +32,10 @@ from system_cmd import CmdException, system_cmd_result
 
 from mcdp_figures import( MakeFiguresNDP, MakeFiguresTemplate, 
     MakeFiguresPoset)
+from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
 
 
 
-# def bs(fragment):
-#     return BeautifulSoup(fragment, 'html.parser', from_encoding='utf-8')
-def bs(fragment):
-    return BeautifulSoup(fragment, 'lxml', from_encoding='utf-8')
 
 @contract(returns=str, html=str)
 def html_interpret(library, html, raise_errors=False, 
@@ -47,11 +44,14 @@ def html_interpret(library, html, raise_errors=False,
     library = library.clone()
     load_fragments(library, html, realpath=realpath)
 
+    print 'before highlight_mcdp_code: %s' % html
     html = highlight_mcdp_code(library, html,
                                generate_pdf=generate_pdf,
                                raise_errors=raise_errors,
                                realpath=realpath)
 
+    print 'after highlight_mcdp_code: %s' % html
+    assert not '<html>' in html
     try:
 #         print html
         html = make_figures(library, html,
@@ -59,12 +59,18 @@ def html_interpret(library, html, raise_errors=False,
                             raise_error_dp=raise_errors,
                             raise_error_others=raise_errors,
                             realpath=realpath)
+        
+        
+#         print 'after make_figures: %s' % html
+        assert not '<html>' in html
     except:
         
         raise
     html = make_plots(library, html,
                       raise_errors=raise_errors,
                       realpath=realpath)
+
+#     print 'after make_plots: %s' % html
 
     return html
 
@@ -78,11 +84,11 @@ def make_image_tag_from_png(f):
 
 
 def make_pre(f):
-    soup = bs("")
+#     soup = bs("")
     def ff(*args, **kwargs):
         res = f(*args, **kwargs)
-        pre = soup.new_tag('pre')  #  **{'class': 'print_value'})
-        code = soup.new_tag('code')
+        pre = BeautifulSoup().new_tag('pre')  #  **{'class': 'print_value'})
+        code = BeautifulSoup().new_tag('code')
         code.string = res
         pre.append(code)
         return pre
@@ -205,7 +211,7 @@ def make_plots(library, frag, raise_errors, realpath):
     go("render.plot_value_generic", plot_value_generic, **const)
     go("pre.print_value", print_value, **const)
     go("pre.print_mcdp", print_mcdp, **mcdp)
-    return str(soup)
+    return to_html_stripping_fragment(soup)
 
 def load_fragments(library, frag, realpath):
     """
@@ -276,24 +282,32 @@ def get_source_code(tag):
 @contract(body_contents=str, returns=str)
 def get_minimal_document(body_contents, add_markdown_css=False):
     """ Creates the minimal html document with MCDPL css. """
-    soup = bs("<html></html>")
-    html = soup.html
-    head = soup.new_tag('head')
-    body = soup.new_tag('body')
-    css = soup.new_tag('style', type='text/css')
+    soup = bs("")
+    assert soup.name == 'fragment'
+    
+    
+    def new_tag(*args, **kwargs):
+        return BeautifulSoup().new_tag(*args, **kwargs)
+
+    
+    html = new_tag('html')
+    
+    head = new_tag('head')
+    body = new_tag('body')
+    css = new_tag('style', type='text/css')
     # <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
     if False:
-        meta = soup.new_tag('meta')
+        meta = new_tag('meta')
         meta['http-equiv'] = "Content-Type"
         ctype = 'application/xhtml+xml'
     #     ctype = 'text/html'
         meta['content'] = "%s; charset=utf-8" % ctype
         head.append(meta)
     if True:
-        head.append(soup.new_tag('meta', charset='UTF-8'))
+        head.append(new_tag('meta', charset='UTF-8'))
     
-    title = soup.new_tag('title')
+    title = new_tag('title')
     head.append(title)
 
     from mcdp_report.html import get_language_css
@@ -304,14 +318,16 @@ def get_minimal_document(body_contents, add_markdown_css=False):
     head.append(css)
     
     parsed = bs(body_contents)
-    assert parsed.html is not None
-    assert parsed.html.body is not None
     
-    for e in parsed.html.body:
+#     assert parsed.html is not None
+#     assert parsed.html.body is not None
+    
+    for e in parsed.findChildren():
         body.append(e)
     html.append(head)
     html.append(body)
-    s = str(html)
+    soup.append(html)
+    s = to_html_stripping_fragment(soup)
 #     s = html.prettify() # not it removes empty text nodes
 #     print s
 #     ns="""<?xml version="1.0" encoding="utf-8" ?>"""
@@ -401,6 +417,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
     """
 
     soup = bs(frag)
+    assert soup.name == 'fragment'
 
     def go(selector, parse_expr, extension, use_pre=True, refine=None):
         for tag in soup.select(selector):
@@ -421,7 +438,8 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                 # remove spurious indentation
                 source_code = source_code.strip()
                 
-                do_apply_suggestions = not tag.has_attr('noprettify')
+                do_apply_suggestions = (not tag.has_attr('noprettify') and
+                                        not tag.has_attr('np'))
                 # then apply suggestions
                 if do_apply_suggestions:
                     x = parse_wrap(parse_expr, source_code)[0]
@@ -456,7 +474,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                     if not rendered.has_attr('class'):
                         rendered['class'] = ""
                     if tag.has_attr('label'):
-                        tag_label = soup.new_tag('span', **{'class': 'label'})
+                        tag_label = BeautifulSoup().new_tag('span', **{'class': 'label'})
                         tag_label.append(tag['label'])
                         rendered.insert(0, tag_label)
                         rendered.a
@@ -464,8 +482,8 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                     max_len = max_len_of_pre_html(html)
                     frag2.pre['string_len'] = max_len
                     
-                    if tag.has_attr('label'):
-                        rendered['class'] += ' has_label '
+                    if tag.has_attr('label'): 
+                        add_class(rendered, 'has_label')
                         max_len = max(max_len, len(tag['label']) + 6)
                         
                     add_style_for_size(frag2.pre, max_len)
@@ -505,7 +523,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                                              data_format='pdf', data=pdf)
                         a['class'] = 'pdf_data'
                         a.append(NavigableString(download))
-                        div = soup.new_tag('div')
+                        div = BeautifulSoup().new_tag('div')
                         div.append(rendered)
                         div.append(a)
                         tag.replaceWith(div)
@@ -518,7 +536,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                 if raise_errors:
                     raise
                 logger.error(unicode(e.__str__(), 'utf-8'))
-                t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
+                t = BeautifulSoup().new_tag('pre', **{'class': 'error %s' % type(e).__name__})
                 t.string = str(e)
                 tag.insert_after(t)
 
@@ -529,7 +547,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                 if raise_errors:
                     raise
                 logger.error(unicode(e.__str__(), 'utf-8'))
-                t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
+                t = BeautifulSoup().new_tag('pre', **{'class': 'error %s' % type(e).__name__})
                 t.string = str(e)
                 tag.insert_after(t)
                 if tag.string is None:
@@ -540,7 +558,52 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                 msg += indent(source_code, '  | ')
                 raise_wrapped(DPInternalError, e,msg, exc=sys.exc_info())
                 
+    # <k>A</k> ==> <code class=keyword>A</code>
+    for e in soup.select('k'):
+        e2 = BeautifulSoup().new_tag('code')
+        
+        # copy string
+        e2.string = e.string
+        # copy attributes
+        for k, v in e.attrs.items():
+            e2[k] =v
+        # THEN add class
+        add_class(e2, 'keyword')
+        e.replace_with(e2)
+         
+#     'mcdp_template','mcdp', 'mcdp_statements',
+    # mcdp-poset
+#     print('initial mcdp_value: %s' % len(list(soup.select('code.mcdp_value'))))
+#     print('initial mcdp_poset: %s' % len(list(soup.select('code.mcdp_poset'))))
+    for x in [ 
+        'mcdp_poset', 
+        'mcdp_fvalue',
+        'mcdp_rvalue', 'mcdp_value']:
+        # mcdp_poset -> mcdp-poset
+        corresponding = x.replace('_', '-')
+             
+        for e in soup.select(corresponding):
+            e2 = BeautifulSoup().new_tag('code')
+            e2.string = e.string
+            # copy attributes
+            for k, v in e.attrs.items():
+                e2[k] = v
+            # THEN add class
+            add_class(e2, x)
 
+#             print('%s -> %s' % (e, e2))
+#             
+            e.replace_with(e2)
+    
+    # this is a bug with bs4. The replace_with above only adds an escaped
+    # text rather than the actual tag (!).
+    soup = bs(to_html_stripping_fragment(soup)) 
+    assert soup.name == 'fragment'       
+#     print('final code.mcdp_poset: %s' % len(list(soup.select('code.mcdp_poset'))))
+#     print('final code.mcdp_value: %s' % len(list(soup.select('code.mcdp_value'))))
+    
+    
+    
     go('pre.mcdp', Syntax.ndpt_dp_rvalue,  "mcdp", use_pre=True, refine=parse_ndp_refine)
     go('pre.mcdp_poset', Syntax.space, "mcdp_poset", use_pre=True, refine=parse_poset_refine)
     go('pre.mcdp_template', Syntax.template, "mcdp_template", use_pre=True,
@@ -559,7 +622,35 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
 
     compute_size_for_pre_without_class(soup)
 
-    return str(soup)
+    pres = list(soup.select('pre'))
+#     print('pres: %d %s' %(len(pres), pres))
+    for pre in pres:
+        p = pre.previousSibling
+        if p is not None:
+            if isinstance(p, NavigableString):
+                if '\n' in p:
+#                     print 'soup', soup
+#                     print 'soup dict', soup.__dict__
+#                     print 'soup.parser_class.new_tag', soup.parser_class.new_tag
+                    br = BeautifulSoup().new_tag('div')
+                    br.string = ''
+                    br['class'] = 'added_before_pre'
+                    br['orig'] = unicode(p).__repr__()
+#                     print('adding tag br')
+                    pre.insert_before(br)
+#                     pre.parent.insert(pre.parent.index(pre), br)
+                    
+    res = to_html_stripping_fragment(soup)
+#     print 'highlight_mcdp_code: %s' % res
+    return res
+
+def add_class(e, c):
+    check_isinstance(c, str)        
+    cur = e.get('class', '').split()
+    n = cur + [c]
+    
+    e['class'] = " ".join(n) 
+#     print 'old %s new %s attr %s ' %(cur, n, e['class'])
 
 def compute_size_for_pre_without_class(soup):
     for pre in soup.select('pre'):
@@ -621,13 +712,13 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
                 if raise_error_dp:
                     raise
                 logger.error(e)
-                t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
+                t = BeautifulSoup().new_tag('pre', **{'class': 'error %s' % type(e).__name__})
                 t.string = str(e)
                 tag.insert_after(t)
             except Exception as e:
                 if raise_error_others:
                     raise
-                t = soup.new_tag('pre', **{'class': 'error %s' % type(e).__name__})
+                t = BeautifulSoup().new_tag('pre', **{'class': 'error %s' % type(e).__name__})
                 t.string = traceback.format_exc(e)
                 tag.insert_after(t)
      
@@ -647,7 +738,7 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
             pdf0 = data['pdf']
             pdf = crop_pdf(pdf0, margins=0)
 
-            div = soup.new_tag('div')
+            div = BeautifulSoup().new_tag('div')
 
             if tag0.has_attr('id'):
                 basename = tag0['id']
@@ -746,7 +837,7 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
         go(selector, callback)
           
 
-    return str(soup)
+    return to_html_stripping_fragment(soup)
 
 @contract(data_format=str, data=str, download=str)
 def create_a_to_data(soup, download, data_format, data):

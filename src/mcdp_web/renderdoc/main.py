@@ -28,11 +28,14 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     s = s.replace('\\\\', 'MATHJAX_BARBAR')
 
     html = render_markdown(s)
+#     print '\nafter render_markdown: %s' % html
     html2 = html_interpret(library, html, generate_pdf=generate_pdf,
                            raise_errors=raise_errors, realpath=realpath)
 
     from mcdp_report.gg_utils import embed_images_from_library
     html3 = embed_images_from_library(html=html2, library=library)
+    
+#     print '\nafter embed_images_from_library: %s' % html3
     
     html3 = html3.replace('MATHJAX_BARBAR', '\\\\')
     if '$$' in html3 or '$' in html3:
@@ -43,4 +46,5 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
             raise
     else:
         html4 = html3
+#     print '\nafter prerender_mathjax: %s' % html4
     return html4

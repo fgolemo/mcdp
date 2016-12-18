@@ -156,8 +156,11 @@ is the group of all invariant  )
 There is some work that is "unrelated", which I cannot find
 a way to cite in my papers, though this was very inspirational.
 
+...
+
+<!--
 * Homotopy Type Theory
-* I found very useful the lessons Bartos Miliewsky
+* I found very useful the lessons Bartos Miliewsky -->
 
 ### Open source software
 

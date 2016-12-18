@@ -30,12 +30,16 @@ manual_contents = [
     
     ('manual', 'lang_reference'),
     ('manual', 'lang_types'),
-    ('manual', 'lang_types_scalar'),
-    ('manual', 'lang_types_finite_posets'),
-    ('manual', 'lang_types_poset_products'),
-#     ('manual', 'adv_approximations'),
-    ('manual', 'lang_unicode'),
+    ('manual', 'lang_values'),
+    ('manual', 'lang_ndp_definition'),
+    ('manual', 'lang_ndp_operations'),
+    ('manual', 'lang_ndp_signals'),
     ('manual', 'lang_extra'),
+    ('manual', 'lang_unicode'),
+
+#     ('manual', 'adv_approximations'),
+    
+    ('manual', 'libraries'),
 
     ('manual', 'ide_user'),
 

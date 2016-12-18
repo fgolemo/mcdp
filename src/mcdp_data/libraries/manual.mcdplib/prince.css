@@ -107,3 +107,7 @@ h1:not(#booktitle) ::before { content: 'Chapter '; }
 body { 
 hyphens: auto;
  }
+
+ p.todo {
+    background-color: #fdd;
+ }
