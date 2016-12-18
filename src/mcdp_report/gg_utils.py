@@ -18,7 +18,7 @@ from mocdp.exceptions import mcdp_dev_warning
 import networkx as nx  # @UnresolvedImport
 from reprep.constants import MIME_PDF, MIME_PLAIN, MIME_PNG, MIME_SVG
 from system_cmd import CmdException, system_cmd_result
-from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
+
 
 
 def graphviz_run(filename_dot, output, prog='dot'):
@@ -236,7 +236,7 @@ def embed_images(html, basedir):
 
 def embed_images_from_library(html, library):
     """ Resolves images from library """
-
+    from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
     def resolve(href):
         #print('resolving %r' % href)
         f = library._get_file_data(href)
