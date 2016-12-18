@@ -3,8 +3,8 @@
 
 Suppose we define a simple model called ``Battery`` as follows:
 
-<table style='border: solid 1px red; width: 100%'>
-    <tr><td style='width: 50%; border: solid 1px blue'>
+<table style=' width: 100%'>
+    <tr><td style='width: 50%; text-align: center'>
     <pre class="mcdp" id='Battery' label='Battery.mcdp'>
     mcdp {
         provides capacity [J]
@@ -25,8 +25,8 @@ Suppose we define a simple model called ``Battery`` as follows:
 
 Let's also define the MCDP ``Actuation1``:
 
-<table style='width: 100%; border: solid 1px red'>
-    <tr><td style='width: 50%;  border: solid 1px blue'>
+<table style='width: 100%;'>
+    <tr><td style='width: 50%; text-align: center'>
     <pre class="mcdp" id='Actuation1' label='Actuation1.mcdp'>
     mcdp {
         provides lift [N]
@@ -40,7 +40,7 @@ Let's also define the MCDP ``Actuation1``:
     }
     </pre>
     </td>
-    <td style='width: 50%'>
+    <td style='width: 50%; text-align: center'>
     <render class='ndp_graph_templatized_labeled' direction='LR'
         style='width: 80%' >`Actuation1</render>
     </td>

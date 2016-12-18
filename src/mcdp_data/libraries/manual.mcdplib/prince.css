@@ -134,6 +134,7 @@ body {
  td pre { margin-top: 0 !important;  margin: 0 !important;}
 
 
-td br.added_before_pre {display: none;}
-
 td {padding: 0 !important;}
+
+table { border: solid 1px blue; }
+td { border: solid 1px red; }

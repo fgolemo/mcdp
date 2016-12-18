@@ -69,3 +69,8 @@ pre span.label { float: right;
 /*svg text {color: red !important;}
 svg { border: solid 1px red; }*/
 
+
+td br.added_before_pre {display: none;}
+
+/* sometimes we want to text-align: left; the entire pre */
+pre { text-align: left; } 

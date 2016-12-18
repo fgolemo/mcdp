@@ -70,6 +70,7 @@ def html_interpret(library, html, raise_errors=False,
                       raise_errors=raise_errors,
                       realpath=realpath)
 
+    html = add_br_before_pres(html)
 #     print 'after make_plots: %s' % html
 
     return html
@@ -625,17 +626,23 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
     compute_size_for_pre_without_class(soup)
 
     # this is a bug with bs4...
-    soup = bs(to_html_stripping_fragment(soup))
+#     soup = bs(to_html_stripping_fragment(soup))
     
+  
+    res = to_html_stripping_fragment(soup)
+#     print 'highlight_mcdp_code: %s' % res
+    return res
+
+def add_br_before_pres(html):
+    soup = bs(html)
     pres = list(soup.select('pre'))
 #     print('pres: %d %s' %(len(pres), pres))
     for pre in pres:
-        
         p = pre.previousSibling
         if p is not None:
             if isinstance(p, NavigableString):
                 if '\n' in p:
-                    print('pre: %s' % str(pre))
+#                     print('pre: %s' % str(pre))
 #                     print 'soup', soup
 #                     print 'soup dict', soup.__dict__
 #                     print 'soup.parser_class.new_tag', soup.parser_class.new_tag
@@ -644,14 +651,11 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                     br['class'] = 'added_before_pre'
                     br['orig'] = unicode(p).__repr__()
                     br['reference'] = "pre: %s p: %s" % (str(id(pre)), str(id(p)))
-                    print  br['reference']
+#                     print  br['reference']
 #                     print('adding tag br')
 #                     pre.insert_before(br)
                     pre.parent.insert(pre.parent.index(pre), br)
-                    
-    res = to_html_stripping_fragment(soup)
-#     print 'highlight_mcdp_code: %s' % res
-    return res
+    return to_html_stripping_fragment(soup)
 
 def add_class(e, c):
     check_isinstance(c, str)        
