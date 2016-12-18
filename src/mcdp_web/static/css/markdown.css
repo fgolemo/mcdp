@@ -74,3 +74,24 @@ td br.added_before_pre {display: none;}
 
 /* sometimes we want to text-align: left; the entire pre */
 pre { text-align: left; } 
+
+
+pre.console { 
+	background-color: black;
+	color: #ccf;
+}
+
+pre.console .console_sign { 
+	color: #cfc;
+}
+
+pre.console .program { 
+	color: #ccf;
+	color: brown;
+}
+pre.console .program_option { 
+	color: red;
+}
+pre.console .program_command { 
+	color: green;
+}

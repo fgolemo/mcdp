@@ -70,8 +70,19 @@ ul#main_toc ul ul li {
 ul.toc ul ul li a span.toc_number { display: none; }
 
 ul.toc ul ul li a span.toc_name::before {
-    content: '•';
-    margin-right: 0.2em;
+    margin-right: 3pt;
+    
+    content: '⟡'; /*◇';*/
+    font-family: 'Cambria' !important;
+    font-size: 6pt;
+    /*padding-bottom: 5pt !important;*/
+    /*border: solid 1px red;*/
+    /*margin-top: -20pt !important;*/
+    /*display: inline;*/
+}
+ul.toc ul ul li:first-child a span.toc_name::before {
+    content: '';
+    margin: 0;
 }
 
 ul.toc { 
@@ -138,3 +149,7 @@ td {padding: 0 !important;}
 
 table { border: solid 1px blue; }
 td { border: solid 1px red; }
+/*
+svg { display: inline-block; transform: scale(0.5);
+ outline: 1px solid transparent;
+  }*/

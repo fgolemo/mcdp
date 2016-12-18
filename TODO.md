@@ -426,3 +426,5 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 
 - ø
 - V: Top
+
+- cite Keymera prover*

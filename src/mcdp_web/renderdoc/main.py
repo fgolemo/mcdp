@@ -7,6 +7,7 @@ from .highlight import html_interpret
 from .markd import render_markdown
 from .prerender_math import prerender_mathjax, PrerenderError
 from mcdp_library_tests.tests import timeit_wall
+from mcdp_web.renderdoc.highlight import mark_console_pres
 
 
 __all__ = ['render_document']
@@ -47,4 +48,6 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     else:
         html4 = html3
 #     print '\nafter prerender_mathjax: %s' % html4
-    return html4
+
+    html5 = mark_console_pres(html4)
+    return html5

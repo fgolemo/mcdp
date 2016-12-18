@@ -87,7 +87,7 @@ mcdp {
 
 ### Poset Products
 
-Use the Unicode symbol "``×``" or the simple letter ``x`` to create a poset product.
+Use the Unicode symbol "<k>×</k>" or the simple letter "<k>x</k>" to create a poset product.
 
 The syntax is
 

@@ -116,10 +116,28 @@ def manual_join(files_contents):
         <title>PyMCDP manual</title>
         <meta charset="utf-8">
         <style type='text/css'>CSS</style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+
+
     </head>
     <body>
     FIRSTPAGE
     <div id='body'/>
+    <script>
+console.log('loading script');
+
+    console.log('resizing');
+    $('svg').each(function() {
+        var width = $(this).width();    // Current image width
+        var height = $(this).height();  // Current image height
+        scale = 0.7;
+        console.log('resizing ' + width + ' ' + height);
+        $(this).css("width", width * scale); 
+        $(this).css("height", height * scale);
+    });
+
+</script>
     </body>
     </html>
     """
@@ -199,7 +217,7 @@ def generate_doc(soup):
                 # add a span inside the header
                 span = soup.new_tag('span')
                 span['class'] = 'toc_number'
-                span.string = prefix + ' - '
+                span.string = prefix + ' – '
                 self.tag.insert(0, span)
                 #self.tag.string = prefix + ' - ' + self.tag.string
 
@@ -225,10 +243,10 @@ def generate_doc(soup):
                 item.number_items(item_prefix, level + 1)
 
         def __str__(self, root=False):
-            s = ''
+            s = u''
             if not root:
-                s += """<a class="toc_link" href="#%s">
-                            <span class="toc_number">%s -</span> 
+                s += u"""<a class="toc_link" href="#%s">
+                            <span class="toc_number">%s –</span> 
                             <span class="toc_name">%s</span></a>""" % (self.id, self.number, self.name)
             if self.items:
                 s += '<ul>'

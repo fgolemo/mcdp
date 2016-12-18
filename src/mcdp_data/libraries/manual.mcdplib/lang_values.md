@@ -2,7 +2,7 @@
 ## Values
 
 
-### ``Top``, ``Bottom`` / ⊤, ⊥
+### <k>Top</k>, <k>Bottom</k>, <k>⊤</k>, <k>⊥</k>
 
 The syntax is:
 
@@ -44,6 +44,9 @@ Bottom V
 ⊥ V
 </pre>
 
+### <k>Minimals</k>, <k>Maximals</k>
+
+...
 
 ### Set-making syntax
 
@@ -74,7 +77,7 @@ EmptySet [[space]]
 </pre> -->
 
 
-### <k>upperclosure</k>, ``↑``, <k>lowerclosure</k>, ``↓``
+### <k>upperclosure</k>, <k>↑</k>, <k>lowerclosure</k>, <k>↓</k>
 
 Using <k>upperclosure</k>
 

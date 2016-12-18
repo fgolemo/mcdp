@@ -26,6 +26,7 @@ manual_contents = [
     ('manual', 'tour_templates'),
     ('manual', 'tour_uncertainty'),
     
+    ('manual', 'installation'),
     ('manual', 'ide_quicktour'),
     
     ('manual', 'lang_reference'),

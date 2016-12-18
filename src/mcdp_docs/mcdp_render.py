@@ -68,7 +68,10 @@ class Render(QuickAppBase):
             raise_desc(UserError, msg)
 
         for docname in docs:
-            basename = docname + '.' + MCDPLibrary.ext_doc_md
+            suffix =  '.' + MCDPLibrary.ext_doc_md
+            if docname.endswith(suffix):
+                docname = docname.replace(suffix,'')
+            basename = docname + suffix
             f = library._get_file_data(basename)
             data = f['data']
             realpath = f['realpath']

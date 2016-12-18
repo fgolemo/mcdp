@@ -33,6 +33,7 @@ from system_cmd import CmdException, system_cmd_result
 from mcdp_figures import( MakeFiguresNDP, MakeFiguresTemplate, 
     MakeFiguresPoset)
 from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
+from mcdp_report.out_mcdpl import extract_ws
 
 
 
@@ -70,7 +71,8 @@ def html_interpret(library, html, raise_errors=False,
                       raise_errors=raise_errors,
                       realpath=realpath)
 
-    html = add_br_before_pres(html)
+    if False:
+        html = add_br_before_pres(html)
 #     print 'after make_plots: %s' % html
 
     return html
@@ -83,9 +85,7 @@ def make_image_tag_from_png(f):
         return rendered
     return ff
 
-
 def make_pre(f):
-#     soup = bs("")
     def ff(*args, **kwargs):
         res = f(*args, **kwargs)
         pre = BeautifulSoup().new_tag('pre')  #  **{'class': 'print_value'})
@@ -218,6 +218,8 @@ def load_fragments(library, frag, realpath):
     """
         loads all the codes specified as "mcdp" and "mcdp_poset"
         
+        XXX: how about templates?
+        
             <pre class='mcdp' id='id_ndp>
             code
             </pre>
@@ -260,6 +262,75 @@ def load_fragments(library, frag, realpath):
 
             library.file_to_contents[basename] = res
 
+
+def mark_console_pres(html):
+    soup = bs(html)
+    new_tag = lambda _: BeautifulSoup().new_tag(_)
+    for code in soup.select('pre code'):
+        pre = code.parent
+        if code.string is None:
+            continue
+        s = code.string
+        if s.strip()[0] == '$':
+            pass
+#             print('it is console (%s)' % s)
+        else:
+            continue
+
+        add_class(pre, 'console')
+
+        code.string = ''
+        
+        lines = s.split('\n')
+        
+        programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
+                    'mcdp-web', 'mcdp-solve', 'mcdp-render',
+                    'mcdp-plot','mcdp-eval','mcdp-render-manual']
+        program_commands = ['install', 'develop', 'clone']
+        
+        def is_program(x, l):
+            if x == 'git' and 'apt-get' in l:
+                return False
+            return x in programs
+            
+        for j, line in enumerate(lines):
+            tokens = line.split(' ')
+            for i, token in enumerate(tokens):
+                if token == '$':
+                    # add <span class=console_sign>$</span>
+                    e = new_tag('span')
+                    e['class'] = 'console_sign'
+                    e.string = '$'
+                    code.append(e)
+                elif is_program(token, line):
+                    e = new_tag('span')
+                    e['class'] = '%s program' % token
+                    e.string = token
+                    code.append(e)
+                elif token in program_commands:
+                    e = new_tag('span')
+                    e['class'] = '%s program_command' % token
+                    e.string = token
+                    code.append(e)
+                elif token and token[0] == '-':
+                    e = new_tag('span')
+                    e['class'] = 'program_option'
+                    e.string = token
+                    code.append(e)
+                else:
+                    code.append(NavigableString(token))
+                    
+                is_last = i == len(tokens) - 1
+                if not is_last:
+                    code.append(NavigableString(' '))
+            
+            is_last_line = j == len(lines) - 1
+            if not is_last_line:
+                code.append(NavigableString('\n'))
+
+        
+    res = to_html_stripping_fragment(soup) 
+    return res
 
 def get_source_code(tag):
     """ Gets the string attribute. 
@@ -817,8 +888,6 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
             data = mf.get_figure(which,formats)
             tag = make_tag(tag0, which, data, ndp=None, template=template)
             return tag
-        
-        
         
         selector = 'pre.%s' % which
         go(selector, callback)
