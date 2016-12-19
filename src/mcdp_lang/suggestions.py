@@ -403,7 +403,7 @@ def apply_suggestions(s, subs):
     
     for where, replacement in sorted(subs, key=order):
         assert where.string == s, (where.string, s)
-        print ('replace %d to %d with %r' % (where.character, where.character_end, replacement))
+        # print ('replace %d to %d with %r' % (where.character, where.character_end, replacement))
         # list of indices of characters to remove
         seq = list(range(where.character, where.character_end))
         

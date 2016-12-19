@@ -20,11 +20,11 @@ mcdp {
 	requires mass [g]
 	requires cost [$]
 
-	specific_energy = 150 Wh/kg
-    specific_cost = 2.50 Wh/$
+	rho = 150 Wh/kg # specific energy
+    alpha = 2.50 Wh/$ # specific cost
 
-	required mass ≽ provided capacity / specific_energy
-	required cost ≽ provided capacity / specific_cost
+	required mass ≽ provided capacity / rho
+	required cost ≽ provided capacity / alpha
 }
 </pre>
 
@@ -47,7 +47,7 @@ in which we prefer either.
 First we model the two battery technologies separately
 as two MCDP using the same interface (same resources and same functionality).
 
-<table>
+<table class="col2">
 <tr>
 <td>
 <pre class='mcdp' id='Battery1_LiPo' label='Battery_LiPo.mcdp'>
@@ -56,11 +56,11 @@ mcdp {
 	requires mass [g]
 	requires cost [$]
 
-	specific_energy = 150 Wh/kg
-    specific_cost = 2.50 Wh/$
+	rho = 150 Wh/kg
+    alpha = 2.50 Wh/$
 
-	required mass ≽ provided capacity / specific_energy
-	required cost ≽ provided capacity / specific_cost
+	required mass ≽ provided capacity / rho
+	required cost ≽ provided capacity / alpha
 }
 </pre>
 </td>
@@ -71,11 +71,11 @@ mcdp {
 	requires mass [g]
 	requires cost [$]
 
-	specific_energy = 45 Wh/kg
-    specific_cost = 10.50 Wh/$
+	rho = 45 Wh/kg
+    alpha = 10.50 Wh/$
 
-	required mass ≽ provided capacity / specific_energy
-	required cost ≽ provided capacity / specific_cost
+	required mass ≽ provided capacity / rho
+	required cost ≽ provided capacity / alpha
 }
 </pre>
 </td>
@@ -94,7 +94,7 @@ Then we can define the **coproduct** of the two using
 the keyword <code><span class="CoproductWithNamesChooseKeyword">choose</span></code>.
 Graphically, the choice is indicated through dashed lines.
 
-<table>
+<table class="col2">
 <tr>
 <td valign="top">
 <pre class='mcdp' id='Batteries' label='Batteries.mcdp'>

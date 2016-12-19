@@ -54,7 +54,7 @@ class MCDPLibrary():
     ext_explanation2 = 'expl2.md'  # after the model
     ext_doc_md = 'md'  # library document
 
-    exts_images = ["png", 'jpg', 'PNG', 'JPG', 'JPEG', 'jpeg']
+    exts_images = ["png", 'jpg', 'PNG', 'JPG', 'JPEG', 'jpeg', 'svg', 'SVG']
     all_extensions = [ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps,
                       ext_explanation1, ext_explanation2, ext_doc_md] + exts_images
 

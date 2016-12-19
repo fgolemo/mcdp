@@ -14,9 +14,31 @@ var data = fs.readFileSync(manual, 'utf8');
 var document = jsdom(data); 
 
 
-console.log('rendering...')
+console.log('rendering...');
+
+// function SetRenderer(renderer) {
+//   if (renderer === "IMG" || renderer === "PNG") renderer = "SVG";
+//     MathJax.Hub.Config({
+//     SVG: {
+//       scale: 300
+//     }
+//   });
+
+//   return MathJax.Hub.setRenderer(renderer);
+// }
+
+// mjAPI.SetRenderer=SetRenderer;
 
 mjAPI.start();
+// window.MathJax.Hub.Config({
+//     SVG: {
+//       scale: 300
+//     }
+// });
+
+
+
+
 mjAPI.typeset({
   'MathJax': {
     'SVG': {
@@ -26,8 +48,8 @@ mjAPI.typeset({
 });
 mjAPI.typeset({
   'html': document.body.innerHTML,
-  renderer: "NativeMML",
-  // 'renderer': "SVG", // problem: too large
+  // renderer: "NativeMML", // problme: sometimes doesnt work in prince for single docs; problem: ugly
+  'renderer': "SVG", // problem: too large
   // 'renderer': "PNG", // no
   // "output/SVG",
   'inputs': ["TeX"],

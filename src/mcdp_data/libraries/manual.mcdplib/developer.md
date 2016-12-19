@@ -4,7 +4,9 @@
 
 ## Running unit tests
 
-## Documentation
+
+##
+## Writing documentation
 
 ### Using LaTeX
 
@@ -33,3 +35,12 @@ Refer to it as in \eqref{eq}.
 Also:
 
 $$ a+y^3 \stackrel{\eqref{eq}}= x^2 $$
+
+<!--
+## Types
+
+<render class='hasse' style='width: 10em'>
+    poset {
+        afloat ≼ aint ≼ aNat
+    }
+</render> -->

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from nose.tools import assert_raises, assert_equal
 
-from comptests.registrar import comptest, run_module_tests
+from comptests.registrar import comptest, run_module_tests, comptest_fails
 from mcdp_dp import JoinNDP, MeetNDP
 from mcdp_dp.dp_dummy import Template
 from mcdp_dp.dp_inv_mult import InvMult2Nat
@@ -316,7 +316,7 @@ def check_addition_incompatible():
     }"""
     assert_raises(DPSemanticError, parse_ndp, s)
 
-@comptest
+@comptest_fails
 def check_addition_incompatible2():
     s="""mcdp {
       requires r [g]
@@ -327,7 +327,7 @@ def check_addition_incompatible2():
     }"""
     assert_raises(DPSemanticError, parse_ndp, s)
     
-@comptest
+@comptest_fails
 def check_addition_incompatible3():
     s="""mcdp {
       requires r [g]
@@ -338,7 +338,7 @@ def check_addition_incompatible3():
     }"""
     assert_raises(DPSemanticError, parse_ndp, s)
  
-@comptest
+@comptest_fails
 def check_addition_incompatible2_dual():
     s="""mcdp {
       requires r [g]
@@ -349,7 +349,7 @@ def check_addition_incompatible2_dual():
     }"""
     assert_raises(DPSemanticError, parse_ndp, s)
     
-@comptest
+@comptest_fails
 def check_addition_incompatible3_dual():
     s="""mcdp {
       requires r [g]

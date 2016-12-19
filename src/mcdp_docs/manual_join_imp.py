@@ -72,7 +72,8 @@ pre {
 }
 /* without labels */
 pre:not(.has_label) { 
-    margin-top: 0 !important; margin-bottom: 0; 
+    /*margin-top: 0 !important;*/ 
+     
 }
 /* with labels */
 pre.has_label { 
@@ -90,8 +91,219 @@ li {margin: 0; margin-left: 0em;}
 /*.toc ul ul li { display: none; }*/
  
  
- 
+@media screen {
+     body { display: inline-block; }
+     html { text-align: center; } 
+    body {
+    
+        margin-left:auto;
+        margin-right:auto;
+    }
+    body { 
+        
 
+        width: 420pt;  /* A5 is  420pt × 595  */
+        background-color: white;
+        
+        /** essentially these are our "page margins" **/
+        border-right: solid 30pt white;
+        border-left: solid 30pt white;
+        margin-top: 0;
+    }
+    
+    html {
+        background-color: #eee;
+        border-right: solid 1px gray;
+    }
+
+    /* zoom the page - equal to browser zoom */
+    body {
+         transform: scale(1.5);
+         transform: scale( 100% / 1.5);
+         transform-origin: top center;
+    }
+    
+    /** add space for h1, in place of page breaks **/
+    h1 ~ h1 { margin-top: 4em; }
+    
+        
+    table.col2 { 
+        max-width: 100%; width: 100%;
+    }
+    table.col2 td {
+        width: 50%;
+        text-align: center;
+    }
+} 
+
+
+/************ TOC ***************/
+
+@media print {
+    /** two-column format */
+    ul.toc { 
+        column-count: 2; 
+        column-gap: 20px;
+    }
+    
+    /** add page numbers for the first two */
+    ul#main_toc > li > a::after { 
+        content: leader('_')  target-counter(attr(href), page) ;
+        font-weight: bold;
+    }
+
+    ul#main_toc > li > ul > li > a::after { content: leader('_')  target-counter(attr(href), page) }
+}
+
+ul#main_toc > li > a > span.toc_number { 
+    font-weight: bold;
+}
+ul#main_toc > li > a > span.toc_number::before { 
+    content: 'Chapter '; 
+    font-weight: bold;
+}
+
+ul#main_toc ul,
+ul#main_toc ul ul {
+    margin-left: 0;
+}
+ul#main_toc ul ul li  a {
+    color: gray !important;
+}
+ul#main_toc ul ul li {
+    display: inline;
+}
+
+ul.toc ul ul li a span.toc_number { display: none; }
+
+ul.toc ul ul li a span.toc_name::before {
+    margin-right: 3pt;
+    
+    content: '⟡'; /*◇';*/
+    font-family: 'Cambria' !important;
+    font-size: 6pt;
+    /*padding-bottom: 5pt !important;*/
+    /*border: solid 1px red;*/
+    /*margin-top: -20pt !important;*/
+    /*display: inline;*/
+}
+ul.toc ul ul li:first-child a span.toc_name::before {
+    content: '';
+    margin: 0;
+}
+
+div > ul:not(.toc)  {
+    margin-left: 2em;
+    margin-top: -0.3em;
+    margin-bottom: -0.3em;
+}
+
+
+/* first header down is highlighted */
+ul.chapter_toc > li > a {
+    font-weight: bold;
+}
+
+
+/* below numbers are erased */
+ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
+    color: red; 
+}
+
+ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
+    display: none;
+}
+
+ul.chapter_toc > li > ul > li > a.toc_link > span.toc_name::before {
+    content: '•';
+    margin-right: 0.5em;
+}
+
+
+
+/* keywords appearing in headers */
+ul.toc code { 
+    /*color: red !important;*/
+    font-size: 7pt !important; 
+}
+ul.toc, ul.toc ul { padding: 0; margin-left: 1em;} 
+
+ul.toc li { padding: 0; margin: 0;} 
+
+ul#main_toc > li {
+    /*margin-bottom: 3em;*/
+    padding-bottom: 1em;
+}
+ul#main_toc > li > ul {
+    padding-top: 4pt;
+}
+ul#main_toc > li > a span.toc_name { 
+    font-weight: bold;  
+    
+/*    font-size: larger;*/
+}
+
+/*********  end TOC ************/
+
+/********** headings *********/
+
+#toc-heading { text-align: center; }
+
+h2 { margin-top: 2em !important; }
+h3 {
+    font-style: normal !important;
+    padding-top: 1em;
+
+    width: 100%;
+    padding-bottom: 3pt;
+    border-bottom: solid 0.5pt grey;
+}
+
+h1:not(#booktitle), #toc-heading { font-variant: small-caps; }
+h1:not(#booktitle) ::before { content: 'Chapter '; }
+/***** end headings *****/
+
+
+/******  latex ****/ 
+
+div.definition::before { font-weight: bold; content: 'Definition';}
+div.example::before { font-weight: bold; content: 'Example';}
+div.remark::before { font-weight: bold; content: 'Remark';}
+div.lemma::before { font-weight: bold; content: 'Lemma';}
+
+
+.latex_env span.latex_env_label::before {content: ' (';}
+.latex_env span.latex_env_label::after {content: ') ';}
+
+
+/****** end latex ****/ 
+
+/**** misc ***/
+
+
+body { 
+    hyphens: auto;
+ }
+/* No decoration for links */
+a { text-decoration: none; color: darkblue;}
+
+ p.todo {
+    background-color: #fdd;
+ }
+ p.todo::before { content: 'TODO: '; }
+
+pre { 
+    margin-bottom: 0;
+}
+
+p + pre {
+    margin-top: 0.7em;
+} 
+pre + br + pre { 
+    margin-top: 0.3em;
+    /*border: solid 1px red;*/
+ /*float: left; clear: left;*/
+}
 
 """
 
@@ -116,7 +328,7 @@ def manual_join(files_contents):
         <title>PyMCDP manual</title>
         <meta charset="utf-8">
         <style type='text/css'>CSS</style>
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+        
 
 
 
@@ -124,20 +336,6 @@ def manual_join(files_contents):
     <body>
     FIRSTPAGE
     <div id='body'/>
-    <script>
-console.log('loading script');
-
-    console.log('resizing');
-    $('svg').each(function() {
-        var width = $(this).width();    // Current image width
-        var height = $(this).height();  // Current image height
-        scale = 0.7;
-        console.log('resizing ' + width + ' ' + height);
-        $(this).css("width", width * scale); 
-        $(this).css("height", height * scale);
-    });
-
-</script>
     </body>
     </html>
     """

@@ -428,3 +428,12 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 - V: Top
 
 - cite Keymera prover*
+
+
+
+- Simple substs from Tex:  
+  - definition?
+
+- print version information of key libraries (Pyparsing, Bs4, numpy, etc.)
+
+- Change "TODO: XX" in <div class="Todo">XXX</div>

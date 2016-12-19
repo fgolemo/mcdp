@@ -152,6 +152,11 @@ class MCDPConstants():
     diagrams_leqimagesize_rel = 0.3
     diagrams_bigimagesize_rel = 60  
     
+    # how much to scale the produced svg from dots
+    # if diagrams_fontsize = 14 and you want the font to be 10,
+    # use 10.0
+    svg_apparent_fontsize = 10.0 
+    scale_svg = svg_apparent_fontsize / float(diagrams_fontsize)
     
 def get_mcdp_tmp_dir():
     from tempfile import gettempdir

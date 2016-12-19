@@ -3,8 +3,8 @@
 
 Suppose we define a simple model called ``Battery`` as follows:
 
-<table style=' width: 100%'>
-    <tr><td style='width: 50%; text-align: center'>
+<table class="col2">
+    <tr><td>
     <pre class="mcdp" id='Battery' label='Battery.mcdp'>
     mcdp {
         provides capacity [J]
@@ -14,10 +14,8 @@ Suppose we define a simple model called ``Battery`` as follows:
     }
     </pre>
     </td>
-    <td style='width: 50%; text-align: center'>
-    <render class='ndp_graph_templatized_labeled' direction='LR'
-
-        style='width: 80%'
+    <td>
+    <render class='ndp_graph_templatized_labeled'
     >`Battery</render>
     </td>
     </tr>
@@ -25,8 +23,8 @@ Suppose we define a simple model called ``Battery`` as follows:
 
 Let's also define the MCDP ``Actuation1``:
 
-<table style='width: 100%;'>
-    <tr><td style='width: 50%; text-align: center'>
+<table class="col2">
+    <tr><td>
     <pre class="mcdp" id='Actuation1' label='Actuation1.mcdp'>
     mcdp {
         provides lift [N]
@@ -40,14 +38,15 @@ Let's also define the MCDP ``Actuation1``:
     }
     </pre>
     </td>
-    <td style='width: 50%; text-align: center'>
-    <render class='ndp_graph_templatized_labeled' direction='LR'
-        style='width: 80%' >`Actuation1</render>
+    <td>
+        <render class='ndp_graph_templatized_labeled'>
+            `Actuation1
+        </render>
     </td>
     </tr>
 </table>
 
-<render class='ndp_graph_enclosed' direction='LR'>`Actuation1</render>
+<render class='ndp_graph_enclosed' style='max-width: 100%'>`Actuation1</render>
 
 
 Then we can combine these two together.
@@ -57,7 +56,7 @@ syntax ``instance `Name``. The backtick means "load symbols from the library".
 
 The following creates two sub-design problems, for now unconnected.
 
-<table>
+<table class="col2">
     <tr>
     <td>
     <pre class="mcdp" id='combined1'>
@@ -68,7 +67,7 @@ The following creates two sub-design problems, for now unconnected.
     </pre>
     </td>
     <td>
-    <pre class='ndp_graph_enclosed' direction='LR'>`combined1</pre>
+        <render class='ndp_graph_enclosed'>`combined1</render>
     </td>
     </tr>
 </table>
@@ -91,7 +90,7 @@ mcdp {
 }
 </pre>
 
-<pre class='ndp_graph_enclosed' direction='LR' >`combined2</pre>
+<pre class='ndp_graph_enclosed' style='max-width: 100%'>`combined2</pre>
 
 We can create a model with a loop by introducing another constraint.
 
@@ -100,7 +99,7 @@ Take ``extra_payload`` to represent the user payload that we must carry.
 Then the lift provided by the actuator must be at least the mass
 of the battery plus the mass of the payload times gravity:
 
-<table id='mine'>
+<table id='mine' class="col2">
 <tr>
 <td>
 <pre class="mcdp" id='composition' label='Composition.mcdp'>
@@ -131,7 +130,7 @@ mcdp {
 </pre>
 </td>
     <td style='vertical-align: top'>
-        <pre class='ndp_graph_enclosed' style='max-height: 90ch' direction='TB'>
+        <pre class='ndp_graph_enclosed_TB' style='max-height: 70ex'>
             `Composition
         </pre>
     </td>

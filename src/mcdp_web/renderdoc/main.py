@@ -8,6 +8,8 @@ from .markd import render_markdown
 from .prerender_math import prerender_mathjax, PrerenderError
 from mcdp_library_tests.tests import timeit_wall
 from mcdp_web.renderdoc.highlight import mark_console_pres
+import re
+from mcdp_web.renderdoc.latex_preprocess import latex_preprocessing
 
 
 __all__ = ['render_document']
@@ -27,7 +29,9 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
 
     # save the '\\' in mathjax before markdown
     s = s.replace('\\\\', 'MATHJAX_BARBAR')
-
+    
+    # fixes for LaTeX
+    s = latex_preprocessing(s)
     html = render_markdown(s)
 #     print '\nafter render_markdown: %s' % html
     html2 = html_interpret(library, html, generate_pdf=generate_pdf,
@@ -50,4 +54,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
 #     print '\nafter prerender_mathjax: %s' % html4
 
     html5 = mark_console_pres(html4)
+    
+    html5 = html5.replace('~', '&nbsp;')
+    
     return html5

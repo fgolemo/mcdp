@@ -1,8 +1,9 @@
 /* These are the fixes for printing / prince */
 
-@page { size: A5 }
-
-
+@page { 
+    size: A5;
+    margin: 0.5cm; /* todo: remove from python */ ;
+}
 
 
 @font-face {
@@ -10,146 +11,84 @@
     /*src: local("Consolas")*/
     src: local("Anka/Coder Narrow")
 }
+/*
 pre  { 
     font-size: 7pt !important; 
-    /*line-height: 7pt !important; */
+    
 
     display: inline-block;
 }
 
+*/
+
+/*line-height: 7pt !important; */
 
 
-/* keywords appearing in headers */
-ul.toc code { 
-    /*color: red !important;*/
-    font-size: 7pt !important; 
-}
-ul.toc, ul.toc ul { padding: 0; margin-left: 1em;} 
-
-ul.toc li { padding: 0; margin: 0;} 
-
-ul#main_toc > li {
-    /*margin-bottom: 3em;*/
-    padding-bottom: 1em;
-}
-ul#main_toc > li > ul {
-    padding-top: 4pt;
-}
-ul#main_toc > li > a span.toc_name { 
-    font-weight: bold;  
-    
-/*    font-size: larger;*/
-}
-
-/** add page numbers for the first two */
-ul#main_toc > li > a::after { 
-    content: leader('_')  target-counter(attr(href), page) ;
-    font-weight: bold;
-}
-ul#main_toc > li > ul > li > a::after { content: leader('_')  target-counter(attr(href), page) }
-
-ul#main_toc > li > a > span.toc_number { 
-    font-weight: bold;
-}
-ul#main_toc > li > a > span.toc_number::before { 
-    content: 'Chapter '; 
-    font-weight: bold;
-}
-
-ul#main_toc ul,
-ul#main_toc ul ul {
-    margin-left: 0;
-}
-ul#main_toc ul ul li  a {
-    color: gray !important;
-}
-ul#main_toc ul ul li {
-    display: inline;
-}
-
-ul.toc ul ul li a span.toc_number { display: none; }
-
-ul.toc ul ul li a span.toc_name::before {
-    margin-right: 3pt;
-    
-    content: '⟡'; /*◇';*/
-    font-family: 'Cambria' !important;
-    font-size: 6pt;
-    /*padding-bottom: 5pt !important;*/
-    /*border: solid 1px red;*/
-    /*margin-top: -20pt !important;*/
-    /*display: inline;*/
-}
-ul.toc ul ul li:first-child a span.toc_name::before {
-    content: '';
-    margin: 0;
-}
-
-ul.toc { 
-    column-count: 2; 
-    column-gap: 20px;
-}
-
-
-div > ul:not(.toc)  {
-    margin-left: 2em;
-    margin-top: -0.3em;
-    margin-bottom: -0.3em;
-}
-
-
-/* first header down is highlighted */
-ul.chapter_toc > li > a {
-    font-weight: bold;
-}
-
-
-/* below numbers are erased */
-ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
-    color: red; 
-}
-
-ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
-    display: none;
-}
-
-ul.chapter_toc > li > ul > li > a.toc_link > span.toc_name::before {
-    content: '•';
-    margin-right: 0.5em;
-}
-
-#toc-heading { text-align: center; }
-
-h2 { margin-top: 2em !important; }
-h3 {
-    font-style: normal !important;
-    padding-top: 1em;
-
-    width: 100%;
-    padding-bottom: 3pt;
-    border-bottom: solid 0.5pt grey;
-}
-
-h1:not(#booktitle), #toc-heading { font-variant: small-caps; }
-h1:not(#booktitle) ::before { content: 'Chapter '; }
-
-body { 
-    hyphens: auto;
- }
-
- p.todo {
-    background-color: #fdd;
- }
- p.todo::before { content: 'TODO: '; }
 
  td pre { margin-top: 0 !important;  margin: 0 !important;}
 
 
 td {padding: 0 !important;}
-
-table { border: solid 1px blue; }
-td { border: solid 1px red; }
+/*
+table { 
+    border: solid 1px blue; 
+    max-width: 100%; width: 100%;}
+*/
+td { 
+    /*border: solid 1px red;*/
+ }
 /*
 svg { display: inline-block; transform: scale(0.5);
  outline: 1px solid transparent;
   }*/
+
+
+
+
+merror { color: red; }
+
+
+
+body { 
+    /*font-family: "Palatino" !important;*/
+    /*font-family: "Arial" !important;*/
+    /*font-kerning: normal;*/
+    /*font-variant: prince-opentype(liga);*/
+    
+     /*prince-text-replace: "ffi" "\fb03" "fi" "\fb01" "ffl" "\fb04" "fl" "\fb02" "ff" "\fb00";*/
+     
+       /*font-variant: prince-opentype(onum) prince-opentype(liga);*/
+
+  font-variant: prince-opentype(onum, dlig, liga);
+}
+
+
+
+svg.hasse text { font-family: monospace !important;}
+
+
+/*pre, pre code { font-family:"Consolas", "Anka/Coder Narrow" !important; }*/
+
+/* ⟨ */
+span.OpenBraceKeyword,  span.CloseBraceKeyword, span.PlaceholderLabel {
+    font-family:  "Cambria Math" !important;
+}
+
+
+p + table {  
+    margin-top: 0.9em !important;
+}
+/*pre + pre::outside { content: 'here\Athere'; display: block; clear: left; border: solid 1px red;}*/
+/*
+
+pre { 
+    margin-left: auto !important;
+    margin-right: auto !important; 
+}*/
+
+#mine { text-align: center; }
+
+table {
+    width: 100% !important;
+
+}

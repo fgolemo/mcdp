@@ -95,3 +95,5 @@ pre.console .program_option {
 pre.console .program_command { 
 	color: green;
 }
+
+merror { color: red; }

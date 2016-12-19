@@ -248,8 +248,8 @@ def embed_images_from_library(html, library):
     assert soup.name == 'fragment'
     for tag in soup.select('img'):
         href = tag['src']
-        extensions = ['png', 'jpg']
-        for ext in extensions:
+        img_extensions = ['png', 'jpg', 'PNG', 'JPG', 'svg', 'SVG']
+        for ext in img_extensions:
             if ext in href and not 'data:' in href:
                 data = resolve(href)
                 encoded = base64.b64encode(data)

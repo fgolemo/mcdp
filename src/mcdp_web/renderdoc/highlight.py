@@ -23,7 +23,8 @@ from mcdp_report.generic_report_utils import (
 from mcdp_report.html import ast_to_html, get_markdown_css
 from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters
 from mcdp_web.images.images import (get_mime_for_format)
-from mocdp import ATTR_LOAD_NAME, logger, get_mcdp_tmp_dir
+from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
+from mocdp import ATTR_LOAD_NAME, logger, get_mcdp_tmp_dir, MCDPConstants
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
 from reprep import Report
@@ -32,8 +33,7 @@ from system_cmd import CmdException, system_cmd_result
 
 from mcdp_figures import( MakeFiguresNDP, MakeFiguresTemplate, 
     MakeFiguresPoset)
-from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
-from mcdp_report.out_mcdpl import extract_ws
+import textwrap
 
 
 
@@ -344,9 +344,14 @@ def get_source_code(tag):
 
     source_code = tag.string.encode('utf-8')
 
+    # remove first newline
     while source_code and source_code[0] == '\n':
         source_code = source_code[1:]
 
+    print(indent(source_code, 'bef|'))
+    # remove common whitespace (so that we can indent html elements)
+    source_code = textwrap.dedent(source_code)
+    print(indent(source_code, 'aft|'))
     #source_code = source_code.replace('\t', ' ' * 4)
     return source_code
 
@@ -635,14 +640,25 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
     # <k>A</k> ==> <code class=keyword>A</code>
     for e in soup.select('k'):
         e2 = BeautifulSoup().new_tag('code')
-        
         # copy string
         e2.string = e.string
         # copy attributes
         for k, v in e.attrs.items():
-            e2[k] =v
+            e2[k] = v
         # THEN add class
         add_class(e2, 'keyword')
+        e.replace_with(e2)
+        
+    # <program>A</program> ==> <code class=program>A</code>
+    for e in soup.select('program'):
+        e2 = BeautifulSoup().new_tag('code')
+        # copy string
+        e2.string = e.string
+        # copy attributes
+        for k, v in e.attrs.items():
+            e2[k] = v
+        # THEN add class
+        add_class(e2, 'program')
         e.replace_with(e2)
          
 #     'mcdp_template','mcdp', 'mcdp_statements',
@@ -698,7 +714,11 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
 
     # this is a bug with bs4...
 #     soup = bs(to_html_stripping_fragment(soup))
-    
+    for pre in soup.select('pre + pre'):
+        print('adding br between PREs')
+        br = BeautifulSoup().new_tag('br')
+        br['class'] = 'pre_after_pre'
+        pre.parent.insert(pre.parent.index(pre), br)
   
     res = to_html_stripping_fragment(soup)
 #     print 'highlight_mcdp_code: %s' % res
@@ -811,6 +831,25 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
         svg = data['svg']
 
         tag_svg = BeautifulSoup(svg, 'lxml', from_encoding='utf-8').svg
+        
+        assert tag_svg.name == 'svg'
+        if tag_svg.has_attr('width'):
+            ws = tag_svg['width']
+            hs = tag_svg['height']
+            assert 'pt' in ws
+            w = float(ws.replace('pt',''))
+            h = float(hs.replace('pt',''))
+            scale = MCDPConstants.scale_svg 
+            
+            w2 = w * scale
+            h2 = h * scale
+            tag_svg['width'] = w2
+            tag_svg['height'] = h2
+            tag_svg['rescaled'] = 'Rescaled from %s %s' % (ws, hs)
+        else:
+            print('no width in SVG tag: %s' % tag_svg)
+            
+            
         tag_svg['class'] = klass
 
         if tag0.has_attr('style'):

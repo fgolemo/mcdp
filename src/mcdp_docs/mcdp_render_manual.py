@@ -44,17 +44,24 @@ manual_contents = [
 
     ('manual', 'ide_user'),
 
+    ('manual', 'cli_user'),
+
     ('manual', 'scenarios'),
-    ('plugs', 'sockets'),
-    ('plugs', 'sockets2'),
-    ('actuation', 'actuation_tour'),
+
     ('rover_energetics', 'energy_choices'),
     ('rover_energetics', 'energy_choices2'),
     ('rover_energetics', 'energy_choices3'),
+
+    ('plugs', 'sockets'),
+    ('plugs', 'sockets2'),
     ('droneD_complete_v2', 'drone_complete'),
-    
+    ('actuation', 'actuation_tour'),
+    # 3d printing
+    # processors: composition
     ('manual', 'developer'),
     ('manual', 'internal_notes'),
+    
+    ('manual', 'appendix_math'),
 
 ]
 
