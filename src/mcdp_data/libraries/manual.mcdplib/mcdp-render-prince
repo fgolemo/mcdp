@@ -1,0 +1,7 @@
+#!/bin/bash
+set -e
+set -x
+docname=$1
+mcdp-render ${docname}; prince -s prince.css -s prince-single.css -o ${docname}.pdf out/mcdp_render/${docname}.html
+
+echo Written on  ${docname}.pdf
