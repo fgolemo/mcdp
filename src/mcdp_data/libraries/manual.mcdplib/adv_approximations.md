@@ -7,30 +7,38 @@
 ### Multiplication dual
 
 <pre class='mcdp' id='invmult'>
-mcdp  {
-    provides a [dimensionless]
-    requires b [dimensionless]
-    requires c [dimensionless]
-    a ≼ b * c
+mcdp {
+    x = instance mcdp  {
+        provides f [dimensionless]
+        requires r_1 [dimensionless]
+        requires r_2 [dimensionless]
+        f ≼ r_1 * r_2
+    }
+
+    provides f using x
+    requires r_1, r_2 for x
+
+    r_1 required by x ≼ 5
+    r_2 required by x ≼ 5
 }
 </pre>
 
 
 <table class="approx">
     <tr>
-        <td>$$n=1$$</td>
+        <!-- <td>$$n=1$$</td> -->
         <td>$$n=3$$</td>
         <td>$$n=5$$</td>
         <td>$$n=10$$</td>
         <td>$$n=25$$</td>
     </tr>
     <tr>
-        <td>
+        <!-- <td>
         <render class='plot_value_generic'>
             &lt; solve(1 [], approx_lower(1, `invmult)),
                  solve(1 [], approx_upper(1, `invmult))  &gt;
         </render>
-        </td>
+        </td> -->
         <td>
         <render class='plot_value_generic'>
             &lt; solve(1 [], approx_lower(3, `invmult)),
@@ -64,10 +72,10 @@ mcdp  {
 
 <pre class='mcdp' id='invplus'>
 mcdp {
-    provides a [dimensionless]
-    requires b [dimensionless]
-    requires c [dimensionless]
-    a ≼ b + c
+    provides f [dimensionless]
+    requires r_1 [dimensionless]
+    requires r_2 [dimensionless]
+    f ≼ r_1 + r_2
 }
 </pre>
 
@@ -75,19 +83,19 @@ mcdp {
 
 <table class="approx">
     <tr>
-        <td>$$n=1$$</td>
+        <!-- <td>$$n=1$$</td> -->
         <td>$$n=3$$</td>
         <td>$$n=5$$</td>
         <td>$$n=10$$</td>
         <td>$$n=25$$</td>
     </tr>
     <tr>
-        <td>
+        <!-- <td>
         <render class='plot_value_generic'>
             &lt; solve(1 [], approx_lower(1, `invplus)),
                  solve(1 [], approx_upper(1, `invplus))  &gt;
         </render>
-        </td>
+        </td> -->
         <td>
         <render class='plot_value_generic'>
             &lt; solve(1 [], approx_lower(3, `invplus)),

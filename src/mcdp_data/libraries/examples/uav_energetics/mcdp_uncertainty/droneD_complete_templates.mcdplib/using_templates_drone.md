@@ -51,7 +51,7 @@ specialize [
  
 <!-- <pre class='print_mcdp'>approx_lower(5, `AE1)</pre> -->
 
-<pre class='print_value'>solve(<10 minutes, 0g, 0W, 500[], 0 m/s>,approx_lower(5, `AE1))</pre>
-<pre class='print_value'>solve(<10 minutes, 0g, 0W, 500[], 0 m/s>,approx_upper(5, `AE1))</pre>
+<pre class='print_value'>solve(⟨10 minutes, 0g, 0W, 500[], 0 m/s⟩,approx_lower(5, `AE1))</pre>
+<pre class='print_value'>solve(⟨10 minutes, 0g, 0W, 500[], 0 m/s⟩,approx_upper(5, `AE1))</pre>
 
 

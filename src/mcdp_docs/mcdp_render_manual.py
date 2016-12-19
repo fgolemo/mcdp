@@ -25,6 +25,7 @@ manual_contents = [
     ('manual', 'tour_coproduct'),
     ('manual', 'tour_templates'),
     ('manual', 'tour_uncertainty'),
+    ('manual', 'adv_approximations'),
     
     ('manual', 'installation'),
     ('manual', 'ide_quicktour'),

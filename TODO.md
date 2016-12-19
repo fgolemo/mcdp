@@ -437,3 +437,5 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 - print version information of key libraries (Pyparsing, Bs4, numpy, etc.)
 
 - Change "TODO: XX" in <div class="Todo">XXX</div>
+
+- warn if you see the string "<=" or ">=" in the text

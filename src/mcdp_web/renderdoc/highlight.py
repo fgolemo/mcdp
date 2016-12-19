@@ -348,10 +348,10 @@ def get_source_code(tag):
     while source_code and source_code[0] == '\n':
         source_code = source_code[1:]
 
-    print(indent(source_code, 'bef|'))
+#     print(indent(source_code, 'bef|'))
     # remove common whitespace (so that we can indent html elements)
     source_code = textwrap.dedent(source_code)
-    print(indent(source_code, 'aft|'))
+#     print(indent(source_code, 'aft|'))
     #source_code = source_code.replace('\t', ' ' * 4)
     return source_code
 
@@ -976,7 +976,7 @@ def create_a_to_data(soup, download, data_format, data):
 def create_img_png_base64(soup, png, **attrs):
     encoded = base64.b64encode(png)
     src = 'data:image/png;base64,%s' % encoded
-    return soup.new_tag('img', src=src, **attrs)
+    return BeautifulSoup().new_tag('img', src=src, **attrs)
 
 def bool_from_string(b):
     yes = ['True', 'true', '1', 'yes']
