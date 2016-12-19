@@ -34,7 +34,7 @@ from system_cmd import CmdException, system_cmd_result
 from mcdp_figures import( MakeFiguresNDP, MakeFiguresTemplate, 
     MakeFiguresPoset)
 import textwrap
-from mcdp_docs.manual_join_imp import get_manual_css_frag
+
 import bs4
 
 
@@ -475,6 +475,7 @@ def get_minimal_document(body_contents, title=None,
     
     if add_manual_css:
 #         print('adding fragment')
+        from mcdp_docs.manual_join_imp import get_manual_css_frag
         frags = indent(get_manual_css_frag(), ' '*10)
         frag = bs(frags)
 #         print 'frag: %s' % str(frag)
