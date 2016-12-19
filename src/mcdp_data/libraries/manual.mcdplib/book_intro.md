@@ -1,36 +1,85 @@
 # Introduction
 
-## The problem of co-design
+## The problem of system co-design
+
+What is a "system"?
+
+Here is a great quote:
 
 <blockquote id="firstquote">
-    <p>A system is composed of components;<br/> a component is something <strong>you understand</strong>.</p>
+    <p>A system is composed of components;<br/> a component is something you understand.</p>
 
     <p><a href="https://en.wikipedia.org/wiki/Howard_H._Aiken"
           title="Howard H. Aiken (1900-1973). Creator of the MARK I computer.">
-          Howard Aiken</a>,
+          &mdash; Howard Aiken</a>,
         quoted by <a href="https://en.wikipedia.org/wiki/Kenneth_E._Iverson"
             title='Kenneth E. Iverson (1920-2004). Creator of programming language APL.'>
-            K.E. Iverson</a>
-
-            <!-- http://dl.acm.org/citation.cfm?id=206985&dl=ACM&coll=DL&CFID=877903021&CFTOKEN=25689369
-        quoted by <a href="">Donald B. McIntyre</a> in <cite id='that_paper'>...</cite></p> -->
+            Kenneth Iverson</a>,
+            quoted by Donald McIntyre in <a href='http://dl.acm.org/citation.cfm?id=206985&dl=ACM&coll=DL&CFID=877903021&CFTOKEN=25689369'>this paper</a>,
+            but ultimately sourceless and probably apocryphical.</p>
 </blockquote>
 
-Here, we say:
+The first part of the quote, "A system is composed of components", is plain
+as day as much as it is tautological. We could equally say: "A system is partitioned in parts".
+
+The second part, "a component is something you understand", is revelatory:
+we call "system" what is too difficult to understand. Something is a "system"
+if we cannot keep it in mind in its entirety at the same time.
+
+This definition is, of course, an anthropocentric definition, as it is a
+limitation of the human mind, related to the amount of neurons in the brain.
+
+It also depends on what exactly is the task at hand with which we are confronted.
+
+Here, we consider the task of *designing* systems. The slogan is:
 
 <blockquote id='secondquote'>
     <p>A system is composed of components;<br/>
-     a component is something <strong>you can design</strong>.
+     a component is something <u>you can design</u>.
 </blockquote>
 
-After you know how to design all components separately,
-you still have the problem of designing the components in the system together.
-This problem of "designing things together" is what we call "**co-design**".
+After you know how to design all components separately, you still have the problem of designing the components in the system together. This problem of "designing things together" is what we call "**co-design**". This problem is one of the fundamental issues in engineering and computer sciences
+and appears by different names everywhere.
 
 Recently developed theory and tools allow to define these co-design problems
-formally in an intuitive way, while preserving the computability properties.
+in a formal yet intuitive way that is cross-disciplinary... and to develop solution methods.
 
-Furthermore, we will generalize beyond "components" (as in "physical" or "logical" components) and further abstract and generalize to *relations*.
+The idea is to formalize these components by their "functionality" and "resources".
+
+We call "**<f>functionality</f>**" is what the component provides: why is it in the system in
+the first place? For example, a battery provides capacity (kWh)
+  Other words for functionality are: <f>(functional) requirements</f>, <f>specifications</f>,
+  simply "<f>functions</f>".<span class='footnote'>Used extensively in embedded systems,
+  a field which is familiar with these issues. This name is not used because too confusing.</span>
+
+We call "**<r>resources</r>**" are what the component needs.
+  Synonyms for resources are: <r>costs</r>, <r>dependencies</r>, ...
+
+For the purpose of co-design, a component can be understood as
+a relation between functionality and resources.
+
+The **co-design constraints** are the ...
+
+
+If we generalize beyond
+"components", the physical components of engineering and the
+logical components of computer sciences, we can
+(as in "physical" or "logical" components) and further
+abstract and generalize to *relations*. So instead of "components"
+we are going to talk about **design problems**.
+
+All the concepts used have an intuitive graphical representation.
+
+In red and green... <span class=footnote>I apologize to colorblind people
+for the choice of colors; however, note that the diagrams are not ambiguous
+because of the node "leq" that joins them.</span>
+
+<!-- <figure>
+    <img width src='logo.png'/>
+    <figcaption>Representations of components</figcaption>
+</figure> -->
+
+
 
 
 ## This book
@@ -50,7 +99,7 @@ By reading this book, you will learn:
 * how to use the solution tools;
 * how to model design problems in several specific domains of engineering.
 
-### Bugs
+#### Bugs
 
 At this point:
 * the book is an early incomplete draft;
@@ -61,7 +110,33 @@ Please send any comments, suggestions, or bug reports to <a href="mailto:censi@m
 
 ## A brief summary of the theory
 
-* composition ...
+
+### Functionality and resources
+
+<style type='text/css'>
+img.art {
+    height: 6em;
+}
+
+</style>
+
+<img class='art'  latex-options='scale=0.33'  src="gmcdp_setup.pdf" />
+
+
+### Queries
+
+
+<img class='art' latex-options='scale=0.33' src="gmcdp_setup_query_r.pdf"/>
+
+<img class='art' latex-options='scale=0.33' src="gmcdp_setup_query_f.pdf"/>
+
+<img class='art' latex-options='scale=0.33' src="gmcdp_setup_h.pdf"/>
+
+### Composition
+
+
+### Templates
+* templates
 
 ### Categorical foundations
 
@@ -205,10 +280,12 @@ I would like to acknowledge:
 * Co-authors [David Spivak][spivak] and Joshua Tan, who developed the categorical
   foundations of this theory.
 
-<div class=draft>
+DRAFT
+
 * Jerry Marsden for geometry. (Here, I'm proud that the invariance group is quite large: it
 is the group of all invariants..)
-</div>
+
+/DRAFT
 
 [spivak]: http://math.mit.edu/~dspivak/
 
@@ -228,7 +305,7 @@ a way to cite in my papers, though this was very inspirational.
 * Homotopy Type Theory
 * I found very useful the lessons Bartos Miliewsky -->
 
-### Opensource software
+### Open source software
 
 Developing this software would not have been possible without
 the open source/free software ecosystem.
@@ -241,16 +318,21 @@ Particular enablers were:
 
 ## License information
 
+
+
+
 The code is available under the GPL license.
+
+
+<img id='license' src="by-nc-sa.svg"/>
 
 The book is available under the Creative Commons Attribution NonCommercial ShareAlike
 (CC BY-NC-SA) license.
 
-<img src="by-nc-sa.svg"/>
-
-
-
 <style type='text/css'>
+#license {
+    float: right;
+}
     blockquote#firstquote  p:first-child,
     blockquote#secondquote p:first-child {
         font-style: italic;

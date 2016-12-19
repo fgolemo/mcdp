@@ -1,3 +1,13 @@
+A servo motor like the [Traxxas 2075 Digital High-Torque Waterproof Servo][Traxxas_2075]
+is a device that provides the <mcdp-poset>load AngularPlacement</mcdp-poset> functionality,
+and to do so requires the <mcdp-poset>load PPM</mcdp-poset> resource.
+
+
+
+A brushless motor like the [Traxxas 3351][Traxxas_3351]
+provides the <mcdp-poset>`ContinuousRotation</mcdp-poset> functionality
+and requires the <mcdp-poset>`PWM</mcdp-poset> resource.
+
 ## The servo/motors domain
 
 This is a formalization of the domain of servos/DC motors and accessories.
@@ -27,6 +37,7 @@ This functionality is parameterized by:
 * ``transit_time_60deg``: the time it takes for the servo to travel 60 deg;
 * ``resolution [deg]``: how precisely it reaches the desired position.
 
+
 <pre class='mcdp_poset' id='AngularPlacement' label='AngularPlacement.mcdp_poset'></pre>
 
 
@@ -47,7 +58,8 @@ For PWM, the variables of interest are:
 * ``amp_max``: maximum current that can be provided;
 * ``freq_max``: the maximum switching frequency.
 
-<pre class='mcdp_poset' id='PWM' label='PWM.mcdp_poset'></pre>
+<pre class='mcdp_poset' id='PWM' label='PWM.mcdp_poset'>
+</pre>
 
 For PPM, the variables of interest are:
 
@@ -56,14 +68,17 @@ For PPM, the variables of interest are:
 * ``freq_max``: the maximum frequency;
 * ``resolution``: resolution of the generated PPM.
 
-<pre class='mcdp_poset' id='PPM' label='PPM.mcdp_poset'></pre>
+<pre class='mcdp_poset' id='PPM' label='PPM.mcdp_poset'>
+</pre>
 
 
 ### Example: servo motor driven by PPM
 
+Example: <mcdp-poset>`try1</mcdp-poset>
+
 A servo motor like the [Traxxas 2075 Digital High-Torque Waterproof Servo][Traxxas_2075]
-is a device that provides the <code class='mcdp_poset'>&#96;AngularPlacement</code> functionality,
-and to do so requires the <code class='mcdp_poset'> &#96;PPM</code> resource.
+is a device that provides the <mcdp-poset>load AngularPlacement</mcdp-poset> functionality,
+and to do so requires the <mcdp-poset>load PPM</mcdp-poset> resource.
 
 [Traxxas_2075]: https://www.amazon.com/Traxxas-Digital-High-Torque-Waterproof-Servo/dp/B002PGW31G
 
@@ -74,9 +89,10 @@ and to do so requires the <code class='mcdp_poset'> &#96;PPM</code> resource.
 
 ### Example: brushless motor driven by PWM
 
+
 A brushless motor like the [Traxxas 3351][Traxxas_3351]
-provides the <code class='mcdp_poset'> &#96;ContinuousRotation</code> functionality
-and requires the <code class='mcdp_poset'> &#96;PWM</code> resource.
+provides the <mcdp-poset>`ContinuousRotation</mcdp-poset> functionality
+and requires the <mcdp-poset>`PWM</mcdp-poset> resource.
 
 [Traxxas_3351]: https://www.amazon.com/Traxxas-3351-Velineon-Brushless-Motor/dp/B000SU3VCG
 

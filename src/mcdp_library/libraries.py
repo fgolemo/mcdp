@@ -57,14 +57,18 @@ class Librarian():
             self.libraries[short] = data
             
         # get all the images
-        allimages = {}
+        allimages = {} # base.ext -> same struct as l.file_to_contents
         for short, data in self.libraries.items():
             l = data['library']
             for ext in MCDPLibrary.exts_images:
                 basenames = l._list_with_extension(ext)
+#                 print('basenames: for %s are  %s' % (ext, basenames))
                 for b in basenames:
-                    basename = b + '.' + ext
-                    allimages[basename] = l.file_to_contents[basename]
+                    b_ext = b + '.' + ext
+#                     print('b_Ext: %s b_Ext in ftc: %s' % (b_ext, b_ext in l.file_to_contents))
+#                     if not b_ext in l.file_to_contents:
+#                         print 'avialable: %s' % sorted(l.file_to_contents)
+                    allimages[b_ext] = l.file_to_contents[b_ext]
                     
         for short, data in self.libraries.items():
             l = data['library']

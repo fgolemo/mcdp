@@ -18,6 +18,10 @@ from mocdp.exceptions import mcdp_dev_warning
 import networkx as nx  # @UnresolvedImport
 from reprep.constants import MIME_PDF, MIME_PLAIN, MIME_PNG, MIME_SVG
 from system_cmd import CmdException, system_cmd_result
+from tempfile import mkdtemp
+import shutil
+import cStringIO
+import re
 
 
 
@@ -244,22 +248,93 @@ def embed_images_from_library(html, library):
         # realpath = f['realpath']
         return data
 
+    from mcdp_web.images.images import get_mime_for_format
+        
+        
     soup = bs(html)
     assert soup.name == 'fragment'
+    # first, convert pdf to png
+    for tag in soup.select('img[src$=pdf], img[src$=PDF]'):
+        # load pdf data
+        data_pdf = resolve(tag['src'])
+        density = 300 # dots per inch
+        data_png = png_from_pdf(data_pdf, density=density)
+        
+        # get png image size
+        from PIL import Image
+        im=Image.open(cStringIO.StringIO(data_png))
+        width_px, height_px = im.size # (width,height) tuple
+        width_in = width_px / float(density)
+        height_in = height_px / float(density)
+        
+        scale = 1.0
+        if tag.has_attr('latex-options'):
+            o = tag['latex-options']
+#             print('latex options: %r' % o)
+            if 'scale' in o:
+#                 print('warning: no scale in latex options')
+                tokens = re.split(',|=', o)
+#                 print('tokens %s' % tokens)
+                scale_token = tokens[1+tokens.index('scale')]
+                scale = float(scale_token)
+            print('%s -> %s' % (o, scale))
+        use_width_in = width_in * scale
+        use_height_in = height_in * scale
+        # now, let's work out the original size
+        sizing = 'width: %sin; height: %sin;' % (use_width_in, use_height_in)
+        s = tag['style'] + ';' if tag.has_attr('style') else ''
+        tag['style'] = s + sizing
+        tag['size_in_pixels'] = '%s, %s' % (width_px, height_px)
+        # encode
+        encoded = base64.b64encode(data_png)
+        mime = get_mime_for_format('png')
+        src = 'data:%s;base64,%s' % (mime, encoded)
+        tag['src'] = src
+        
+        
     for tag in soup.select('img'):
         href = tag['src']
         img_extensions = ['png', 'jpg', 'PNG', 'JPG', 'svg', 'SVG']
         for ext in img_extensions:
             if ext in href and not 'data:' in href:
                 data = resolve(href)
-                encoded = base64.b64encode(data)
-                from mcdp_web.images.images import get_mime_for_format
+                encoded = base64.b64encode(data) 
                 mime = get_mime_for_format(ext)
                 src = 'data:%s;base64,%s' % (mime, encoded)
                 tag['src'] = src
+                
     return to_html_stripping_fragment(soup)
     
+    
+def png_from_pdf(pdf_data, density):
+    d = mkdtemp()
+    try:
+        tmpfile = os.path.join(d, 'file.pdf')
+        with open(tmpfile, 'wb') as f:
+            f.write(pdf_data)
+        
+        out = os.path.join(d, 'file.png')
+    
+        cmd = [
+            'convert',
+            '-density', str(density), 
+            tmpfile, 
+            out
+        ]
+        try:
+            system_cmd_result(cwd='.', cmd=cmd,
+                     display_stdout=False,
+                     display_stderr=False,
+                     raise_on_error=True)
 
+        except CmdException:
+            raise
+        
+        r = open(out,'rb').read()
+        return r
+    finally:
+        shutil.rmtree(d)
+        
 def extract_assets(html, basedir):
     """ Extracts all embedded assets. """
     if not os.path.exists(basedir):

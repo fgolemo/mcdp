@@ -43,6 +43,8 @@ publish: $(manual_html)
 	cp $< ~/env_mcdp/src/mcdp/src/mcdp_web/static/manual.html
 	cp $< ~/env_mcdp/src/mcdp/docs/media/pymcdp-manual.html
 
-prince_css=prince.css
-$(manual_pdf_prince): $(manual_html) $(prince_css)
-	prince --javascript -s $(prince_css) $< -o $@
+# prince_css=prince.css
+$(manual_pdf_prince): $(manual_html) #$(prince_css)
+	prince --javascript  $< -o $@
+
+	# -s $(prince_css)

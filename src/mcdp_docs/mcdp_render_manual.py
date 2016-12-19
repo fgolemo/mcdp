@@ -59,8 +59,12 @@ manual_contents = [
     ('actuation', 'actuation_tour'),
     # 3d printing
     # processors: composition
+    
+    ('manual', 'internals'),
+    
     ('manual', 'developer'),
     ('manual', 'internal_notes'),
+
     
     ('manual', 'appendix_math'),
 

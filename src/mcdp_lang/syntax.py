@@ -240,7 +240,7 @@ class Syntax():
     fvalue_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_fvalue(t[0])).setName('fvalue_placeholder')
     fname_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_fname(t[0])).setName('fname_placeholder')
     rname_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_rname(t[0])).setName('rname_placeholder')
-    space_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_poset(t[0])).setName('poset_placeholder')
+    space_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_poset(t[0])).setName('space_placeholder')
     ndpt_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_constant(t[0])).setName('constant_placeholder')
     template_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_template(t[0])).setName('template_placeholder')
     primitivedp_placeholder = sp(copy_expr_remove_action(placeholder), lambda t: CDP.Placeholder_primitivedp(t[0])).setName('primitivedp_placeholder')
@@ -326,11 +326,11 @@ class Syntax():
     # UpperSets(<poset>)
     UPPERSETS = keyword('UpperSets', CDP.UpperSetsKeyword)
     space_uppersets = sp(UPPERSETS + SLPAR + space + SRPAR,
-                         lambda t: CDP.MakeUpperSets(t[0], t[1]))
+                         lambda t: CDP.MakeUpperSets(t[0], t[1])).setName('space_uppersets')
 
     LOWERSETS = keyword('LowerSets', CDP.LowerSetsKeyword)
     space_lowersets = sp(LOWERSETS + SLPAR + space + SRPAR,
-                         lambda t: CDP.MakeLowerSets(t[0], t[1]))
+                         lambda t: CDP.MakeLowerSets(t[0], t[1])).setName('space_lowersets')
 
     # finite_poset {
     #     a
@@ -354,7 +354,7 @@ class Syntax():
 
     space_finite_poset = sp((FINITE_POSET | POSET) - lbrace  + 
                             ZeroOrMore(finite_poset_chain_leq ^ finite_poset_chain_geq) + rbrace,
-                            lambda t: CDP.FinitePoset(t[0], t[1], make_list(t[2:-1], where=t[0].where), t[-1]))
+                            lambda t: CDP.FinitePoset(t[0], t[1], make_list(t[2:-1], where=t[0].where), t[-1])).setName('space_finite_poset')
 
     ADD_BOTTOM = keyword('add_bottom', CDP.AddBottomKeyword)
     

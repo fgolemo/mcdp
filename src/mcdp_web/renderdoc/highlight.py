@@ -34,6 +34,8 @@ from system_cmd import CmdException, system_cmd_result
 from mcdp_figures import( MakeFiguresNDP, MakeFiguresTemplate, 
     MakeFiguresPoset)
 import textwrap
+from mcdp_docs.manual_join_imp import get_manual_css_frag
+import bs4
 
 
 
@@ -45,7 +47,6 @@ def html_interpret(library, html, raise_errors=False,
     library = library.clone()
     load_fragments(library, html, realpath=realpath)
 
-#     print 'before highlight_mcdp_code: %s' % html
     html = highlight_mcdp_code(library, html,
                                generate_pdf=generate_pdf,
                                raise_errors=raise_errors,
@@ -118,7 +119,7 @@ def load_or_parse_from_tag(tag, load, parse):
         tag_id = tag['id'].encode('utf-8')
         vu = load(tag_id)
     else:
-        source_code = tag.string.encode('utf-8')
+        source_code = get_source_code(tag)
         vu = parse(source_code)    
     return vu
 
@@ -232,7 +233,7 @@ def load_fragments(library, frag, realpath):
 
         if tag.has_attr('id'):
             id_ndp = tag['id'].encode('utf-8')
-            source_code = tag.string.encode('utf-8')
+            source_code = get_source_code(tag)
 
             basename = '%s.%s' % (id_ndp, MCDPLibrary.ext_ndps)
             res = dict(data=source_code, realpath=realpath)
@@ -250,7 +251,7 @@ def load_fragments(library, frag, realpath):
 
         if tag.has_attr('id'):
             id_ndp = tag['id'].encode('utf-8')
-            source_code = tag.string.encode('utf-8')
+            source_code = get_source_code(tag)
 
             basename = '%s.%s' % (id_ndp, MCDPLibrary.ext_posets)
             res = dict(data=source_code, realpath=realpath)
@@ -262,19 +263,77 @@ def load_fragments(library, frag, realpath):
 
             library.file_to_contents[basename] = res
 
+def escape_for_mathjax(html):
+    """ Escapes dollars in code 
+     
+    """
+    soup = bs(html)
+    for code in soup.select('code, mcdp-poset, mcdp-value, mcdp-fvalue, mcdp-rvalue, render'):
+        if not code.string:
+            continue
+        #unicode
+        s = code.string
+        if '$' in code.string:
+            s = s.replace('$', 'DOLLAR')
+            
+        code.string = s
+    
+    res = to_html_stripping_fragment(soup) 
+    return res
 
+    
+def escape_ticks_before_markdown(html):
+    """ Escapes backticks and quotes in code 
+    
+        Also removes comments <!--- -->
+    """
+    soup = bs(html)
+    for code in soup.select('code, pre, mcdp-poset, mcdp-value, mcdp-fvalue, mcdp-rvalue, render'):
+        if not code.string:
+            continue
+        #unicode
+        s = code.string
+        if '`' in code.string:
+            s = s.replace('`', '&#96;')
+#             print('replacing %r -> %r' %(code.string, s))
+            
+        if '"' in code.string:
+            s = s.replace('"', '&quot;')
+#             print('replacing %r -> %r' %(code.string, s))
+            
+        code.string = s
+    
+    comments=soup.find_all(string=lambda text:isinstance(text, bs4.Comment))
+    for c in comments:
+        print('stripping comment %s' % str(c))
+        c.extract()
+    
+    res = to_html_stripping_fragment(soup)
+     
+    return res
+    
 def mark_console_pres(html):
     soup = bs(html)
+#     print indent(html, 'mark_console_pres ')
     new_tag = lambda _: BeautifulSoup().new_tag(_)
     for code in soup.select('pre code'):
         pre = code.parent
         if code.string is None:
             continue
-        s = code.string
-        if s.strip()[0] == '$':
+        s0 = code.string
+        
+        from HTMLParser import HTMLParser
+        h = HTMLParser()
+        s = h.unescape(s0)
+        if s != s0:
+            print('decoded %r -> %r' % (s0, s))  
+        
+        beg = s.strip()
+        if beg.startswith('DOLLAR') or beg.startswith('$'):
             pass
-#             print('it is console (%s)' % s)
+            print('it is console (%r)' % s)
         else:
+            print('not console (%r)' % s)
             continue
 
         add_class(pre, 'console')
@@ -296,7 +355,7 @@ def mark_console_pres(html):
         for j, line in enumerate(lines):
             tokens = line.split(' ')
             for i, token in enumerate(tokens):
-                if token == '$':
+                if token in  ['$', 'DOLLAR']:
                     # add <span class=console_sign>$</span>
                     e = new_tag('span')
                     e['class'] = 'console_sign'
@@ -338,11 +397,22 @@ def get_source_code(tag):
         encodes as utf-8
         removes initial whitespace newlines
         converts tabs to spaces
+        
+        decodes entities
     """
     if tag.string is None:
         raise ValueError(str(tag))
 
-    source_code = tag.string.encode('utf-8')
+    s0 = tag.string
+
+    from HTMLParser import HTMLParser
+    h = HTMLParser()
+    s1 = h.unescape(s0)
+    if False:
+        if s1 != s0:
+            print('decoded %r -> %r' % (s0, s1))
+
+    source_code = s1.encode('utf-8')
 
     # remove first newline
     while source_code and source_code[0] == '\n':
@@ -353,19 +423,28 @@ def get_source_code(tag):
     source_code = textwrap.dedent(source_code)
 #     print(indent(source_code, 'aft|'))
     #source_code = source_code.replace('\t', ' ' * 4)
+    
+
     return source_code
 
 
 @contract(body_contents=str, returns=str)
-def get_minimal_document(body_contents, add_markdown_css=False):
-    """ Creates the minimal html document with MCDPL css. """
+def get_minimal_document(body_contents, title=None,
+                         add_markdown_css=False, add_manual_css=False):
+    """ Creates the minimal html document with MCDPL css.
+    
+        add_markdown_css: language + markdown
+        add_manual_css: language + markdown + (manual*)
+    
+     """
     soup = bs("")
     assert soup.name == 'fragment'
     
+    if title is None:
+        title = ''
     
     def new_tag(*args, **kwargs):
         return BeautifulSoup().new_tag(*args, **kwargs)
-
     
     html = new_tag('html')
     
@@ -373,26 +452,40 @@ def get_minimal_document(body_contents, add_markdown_css=False):
     body = new_tag('body')
     css = new_tag('style', type='text/css')
     # <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+#     if False:
+#         meta = new_tag('meta')
+#         meta['http-equiv'] = "Content-Type"
+#         ctype = 'application/xhtml+xml' 
+#         meta['content'] = "%s; charset=utf-8" % ctype
+#         head.append(meta)
+#     if True:
+    head.append(new_tag('meta', charset='UTF-8'))
     
-    if False:
-        meta = new_tag('meta')
-        meta['http-equiv'] = "Content-Type"
-        ctype = 'application/xhtml+xml'
-    #     ctype = 'text/html'
-        meta['content'] = "%s; charset=utf-8" % ctype
-        head.append(meta)
-    if True:
-        head.append(new_tag('meta', charset='UTF-8'))
-    
-    title = new_tag('title')
-    head.append(title)
+    tag_title = new_tag('title')
+    tag_title.append(NavigableString(title))
+    head.append(tag_title)
 
-    from mcdp_report.html import get_language_css
-    mcdp_css = get_language_css()
-    markdown_css = get_markdown_css() if add_markdown_css else ""
-    allcss = mcdp_css + '\n' + markdown_css
-    css.append(NavigableString(allcss))
-    head.append(css)
+    if add_markdown_css and not add_manual_css:
+        from mcdp_report.html import get_language_css
+        mcdp_css = get_language_css()
+        markdown_css = get_markdown_css()
+        allcss = mcdp_css + '\n' + markdown_css
+        css.append(NavigableString(allcss))
+        head.append(css)
+    
+    if add_manual_css:
+#         print('adding fragment')
+        frags = indent(get_manual_css_frag(), ' '*10)
+        frag = bs(frags)
+#         print 'frag: %s' % str(frag)
+#         
+#         print ('frag.contents: %s' % frag.contents)
+        children = list(frag.children)
+#         print ('frag.children: %s' % children)
+        for element in children:
+            # XXX: should we reset the parent relationship?
+#             print('element: %r' % str(element))
+            head.append(element)
     
     parsed = bs(body_contents)
     
@@ -401,19 +494,22 @@ def get_minimal_document(body_contents, add_markdown_css=False):
     assert parsed.name == 'fragment'
     parsed.name = 'div'
     body.append(parsed)
-#     for e in parsed.findChildren():
-#         body.append(e)
     html.append(head)
     html.append(body)
     soup.append(html)
     s = to_html_stripping_fragment(soup)
 #     s = html.prettify() # not it removes empty text nodes
-#     print s
+
 #     ns="""<?xml version="1.0" encoding="utf-8" ?>"""
     ns="""<!DOCTYPE html PUBLIC
     "-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN"
     "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg.dtd">"""
     res = ns + '\n' +  s
+    
+    if add_manual_css and MCDPConstants.manual_link_css_instead_of_including:
+        assert 'manual.css' in res, res
+    
+    res = res.replace('<div><!DOCTYPE html>', '<div>')    
     return res
 
 
@@ -485,6 +581,7 @@ def crop_pdf(pdf, margins=0):
         shutil.rmtree(d)
         
 def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_errors=False):
+#     print(indent(frag, 'highlight_mcdp_code '))
     """ Looks for codes like:
     
     <pre class="mcdp">mcdp {
@@ -640,11 +737,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
     # <k>A</k> ==> <code class=keyword>A</code>
     for e in soup.select('k'):
         e2 = BeautifulSoup().new_tag('code')
-        # copy string
-        e2.string = e.string
-        # copy attributes
-        for k, v in e.attrs.items():
-            e2[k] = v
+        copy_string_and_attrs(e, e2)
         # THEN add class
         add_class(e2, 'keyword')
         e.replace_with(e2)
@@ -653,10 +746,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
     for e in soup.select('program'):
         e2 = BeautifulSoup().new_tag('code')
         # copy string
-        e2.string = e.string
-        # copy attributes
-        for k, v in e.attrs.items():
-            e2[k] = v
+        copy_string_and_attrs(e, e2)
         # THEN add class
         add_class(e2, 'program')
         e.replace_with(e2)
@@ -674,10 +764,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
              
         for e in soup.select(corresponding):
             e2 = BeautifulSoup().new_tag('code')
-            e2.string = e.string
-            # copy attributes
-            for k, v in e.attrs.items():
-                e2[k] = v
+            copy_string_and_attrs(e, e2)
             # THEN add class
             add_class(e2, x)
 
@@ -724,6 +811,13 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
 #     print 'highlight_mcdp_code: %s' % res
     return res
 
+def copy_string_and_attrs(e, e2):
+    if e.string is not None:
+        e2.string = e.string
+    # copy attributes
+    for k, v in e.attrs.items():
+        e2[k] = v
+                
 def add_br_before_pres(html):
     soup = bs(html)
     pres = list(soup.select('pre'))

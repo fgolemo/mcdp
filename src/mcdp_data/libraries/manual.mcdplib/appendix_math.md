@@ -1,4 +1,4 @@
-
+<div style='display:none'>
 $\newcommand{\posA}{\mathcal{P}}$
 $\newcommand{\posB}{\mathcal{Q}}$
 
@@ -24,8 +24,7 @@ $\newcommand{\Rcomp}{\overline{\mathbb{R}}_{+}}$
 $\newcommand{\reals}{\mathbb{R}}$
 $\newcommand{\nonNegReals}{\mathbb{R}_{+}}$
 $\newcommand{\nonNegRealsComp}{\Rcomp}$
-
-
+</div>
 
 # Appendix: basic order theory
 

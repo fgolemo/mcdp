@@ -349,23 +349,37 @@ def iterate_notwhere(x):
             continue
         yield k, v
 
-def get_language_css():
+    
+def get_css_filename(basename):
     from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
-    mcdp_dev_warning('TODO: remove from mcdp_web')
     package = dir_from_package_name('mcdp_web')
-    fn = os.path.join(package, 'static', 'css', 'mcdp_language_highlight.css')
-    with open(fn) as f:
-        css = f.read()
-    return css
+    fn = os.path.join(package, 'static', 'css', basename + '.css')
+    if not os.path.exists(fn):
+        raise ValueError('File does not exist: %s' % fn)
+    return os.path.realpath(fn)
+
+def get_language_css_filename():
+    return get_css_filename('mcdp_language_highlight')
+    
+def get_language_css():
+    fn = get_language_css_filename()
+    return open(fn).read()
+
+def get_markdown_css_filename():
+    return get_css_filename('markdown')
 
 def get_markdown_css():
-    from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
+    fn = get_markdown_css_filename()
+    return open(fn).read()
 
-    package = dir_from_package_name('mcdp_web')
-    fn = os.path.join(package, 'static', 'css', 'markdown.css')
-    with open(fn) as f:
-        css = f.read()
-    return css
+def get_manual_generic_css_filename():
+    return get_css_filename('manual')
+
+def get_manual_screen_css_filename():
+    return get_css_filename('manual_screen')
+
+def get_manual_print_css_filename():
+    return get_css_filename('manual_prince')
 
 
 def comment_out(s, line):

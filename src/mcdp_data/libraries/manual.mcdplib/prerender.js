@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 console.log('Loading libraries..');
 var mjAPI = require("MathJax-node/lib/mj-page.js");
 var jsdom = require("jsdom").jsdom;
@@ -15,7 +16,7 @@ var document = jsdom(data);
 
 
 console.log('rendering...');
-
+// need to add:
 // function SetRenderer(renderer) {
 //   if (renderer === "IMG" || renderer === "PNG") renderer = "SVG";
 //     MathJax.Hub.Config({
@@ -34,18 +35,9 @@ mjAPI.start();
 //     SVG: {
 //       scale: 300
 //     }
-// });
+// }); 
+console.log('started');
 
-
-
-
-mjAPI.typeset({
-  'MathJax': {
-    'SVG': {
-      scale: 400
-    },    
-  }
-});
 mjAPI.typeset({
   'html': document.body.innerHTML,
   // renderer: "NativeMML", // problme: sometimes doesnt work in prince for single docs; problem: ugly
@@ -63,6 +55,8 @@ mjAPI.typeset({
   fs.writeFileSync(manual_out, HTML);
   console.log('written to ' + manual_out);
 });
+
+console.log('end');
 
 
 

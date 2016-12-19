@@ -31,14 +31,16 @@ and one resource, ``mass``, measured in grams. ([See how to describe types.](typ
 
 Graphically, this is how the interface is represented:
 
-<render class='ndp_graph_templatized'>`model1</render>
+<render class='ndp_graph_templatized'>
+	`model1
+</render>
 
 <!--
-The MCDP defined above is, however, unusable, because we have
-not specified how ``capacity`` and ``mass`` relate to one another.
-Graphically, this is represented using purple unconnected arrows:
+	The MCDP defined above is, however, unusable, because we have
+	not specified how ``capacity`` and ``mass`` relate to one another.
+	Graphically, this is represented using purple unconnected arrows:
 
-<pre class='ndp_graph_expand'>`model1</pre>
+	<pre class='ndp_graph_expand'>`model1</pre>
 -->
 
 ### Constant functionality and resources

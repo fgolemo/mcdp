@@ -2,6 +2,21 @@
 
 MCDPL allows to use some Unicode characters in identifiers and expressions.
 
+### Pure substitutions
+
+The following are equivalent
+
+    ⟻
+    ⟼
+    ≽
+    ≼
+    ·
+    ⟨⟩
+    ℘
+    ⊤
+    ⊥
+
+
 ### Greek letters
 
 The following are the Greek letters supported and their translitteration.

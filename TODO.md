@@ -129,21 +129,21 @@ http://ares-super.lids.mit.edu/~andrea/env_mcdp/src/mcdp/out/check_rendering/plu
 (*) MCDP-web
 
 - R: add license information
-- F: add credits to free sw in the initial page
+
 - F: library list: templates
 - F: list links to *.md documents in the initial library page
+- F: put the "new model" link everywhere (list of models, /index)
 - F: better initial list for each library
+
+- F: create library
+- F: rename library
+- F: delete library
 - F: rename model
 - F: delete model
-- T: mcdp-web: Testing of at least all links.
 - F: send to non-fancy for internet explorer
-- B: fancy_editor: the syntax highlighting skips the whitespace at the end of the model
+
 - B: mcdp-web: make sure that everything works when packaged
-
-- F: put the "new model" link everywhere (list of models, /index)
-- F: put the navigation bar everywhere
-- B: unicode characters such as ⟨ give server-side error
-
+- T: mcdp-web: Testing of at least all links.
 
 - bug: refresh library does not reset the icon caches
 
@@ -439,3 +439,14 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 - Change "TODO: XX" in <div class="Todo">XXX</div>
 
 - warn if you see the string "<=" or ">=" in the text
+
+
+- use Appendix A instead of "chapter 12 - Appendix"
+
+- spurious <!DOCTYPE html> for each page
+
+- DRAFT -- DRAFT/
+
+- unicode files
+
+- code for including css directly

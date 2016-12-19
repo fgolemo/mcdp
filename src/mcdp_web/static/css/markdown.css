@@ -97,3 +97,8 @@ pre.console .program_command {
 }
 
 merror { color: red; }
+
+
+
+h4 { display: inline; font-style: italic; font-size: 100%;
+color: red;}

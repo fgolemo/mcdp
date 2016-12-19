@@ -54,7 +54,7 @@ class MCDPLibrary():
     ext_explanation2 = 'expl2.md'  # after the model
     ext_doc_md = 'md'  # library document
 
-    exts_images = ["png", 'jpg', 'PNG', 'JPG', 'JPEG', 'jpeg', 'svg', 'SVG']
+    exts_images = ["png", 'jpg', 'PNG', 'JPG', 'JPEG', 'jpeg', 'svg', 'SVG', 'pdf', 'PDF']
     all_extensions = [ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps,
                       ext_explanation1, ext_explanation2, ext_doc_md] + exts_images
 
@@ -377,7 +377,7 @@ class MCDPLibrary():
                 match = fn
                 break
         else:
-            msg = 'Could not find file %r. ' % basename
+            msg = 'Could not find file %r.' % basename
             ext = os.path.splitext(basename)[1].replace('.', '')
             
             available = sorted(self._list_with_extension(ext),
@@ -387,7 +387,9 @@ class MCDPLibrary():
                 available = ", ".join(available)
                 msg += (" Available files with %r extension: %s." %
                         (ext, available))
-
+            else:
+                msg += " No files with extension %r found." % ext
+                
             raise_desc(DPSemanticError, msg)
         found = self.file_to_contents[match]
         return found
@@ -437,6 +439,7 @@ class MCDPLibrary():
     @contract(f=str)
     def _update_file(self, f, from_search_dir=None):
         """ from_search_dir: from whence we arrived at this file. """
+        assert os.path.exists(f)
         basename = os.path.basename(f)
         check_isinstance(basename, str)
         # This will fail because then in pyparsing everything is unicode

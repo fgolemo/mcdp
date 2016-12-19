@@ -1,14 +1,5 @@
 
 
-Consider this:
+Consider this <mcdp-poset>`ciao</mcdp-poset>
 
-
-<pre class='mcdp_poset'>
-    Int
-</pre>
-
-
-<pre class='mcdp_poset'>
-    Nat
-</pre>
-
+Ok?

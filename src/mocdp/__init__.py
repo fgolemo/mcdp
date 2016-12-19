@@ -158,6 +158,10 @@ class MCDPConstants():
     svg_apparent_fontsize = 10.0 
     scale_svg = svg_apparent_fontsize / float(diagrams_fontsize)
     
+    # useful for debugging css
+    # for (1) manual and (2) mcdp-render
+    manual_link_css_instead_of_including = True
+    
 def get_mcdp_tmp_dir():
     from tempfile import gettempdir
     import os

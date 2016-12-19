@@ -5,6 +5,13 @@
     margin: 0.5cm; /* todo: remove from python */ ;
 }
 
+/* only in the manual, not in mcdp-render, that is, after a #booktitle */
+h1#booktitle + h1 { 
+    page-break-before: always; 
+}
+h1#booktitle  { page-break-before: avoid; }
+
+
 
 @font-face {
     font-family: monospace;
@@ -78,7 +85,7 @@ span.OpenBraceKeyword,  span.CloseBraceKeyword, span.PlaceholderLabel {
 p + table {  
     margin-top: 0.9em !important;
 }
-/*pre + pre::outside { content: 'here\Athere'; display: block; clear: left; border: solid 1px red;}*/
+
 /*
 
 pre { 
