@@ -1,6 +1,10 @@
 
 ## Composing MCDPs
 
+
+MCDPL encourages composition and code reuse.
+
+
 Suppose we define a simple model called ``Battery`` as follows:
 
 <table class="col2">
@@ -51,8 +55,11 @@ Let's also define the MCDP ``Actuation1``:
 
 Then we can combine these two together.
 
-We can re-use previously defined MCDPs using the
-syntax ``instance `Name``. The backtick means "load symbols from the library".
+The syntax to re-use previously defined MCDPs is:
+
+    instance `Name
+
+The backtick means "load the symbols from the library, from the file ``name.mcdp``".
 
 The following creates two sub-design problems, for now unconnected.
 
@@ -72,9 +79,10 @@ The following creates two sub-design problems, for now unconnected.
     </tr>
 </table>
 
-To create a complete MCDP, take "endurance" as a high-level
-functionality. Then the energy required is equal to
-endurance &times; power.
+
+We can create a complete model with a loop by describing the co-design
+constraint.
+
 
 <pre class="mcdp" id='combined2'>
 mcdp {
@@ -94,7 +102,7 @@ mcdp {
 
 We can create a model with a loop by introducing another constraint.
 
-Take ``extra_payload`` to represent the user payload that we must carry.
+Take <f>extra_payload</f> to represent the user payload that we must carry.
 
 Then the lift provided by the actuator must be at least the mass
 of the battery plus the mass of the payload times gravity:

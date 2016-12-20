@@ -450,3 +450,21 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 - unicode files
 
 - code for including css directly
+
+
+  <a href=""
+  <cite id="nicole">Nicole. 2015. Title of paper. <em>Journal</em>, 4(3), 1-10.</cite>
+
+
+  Suppose the ID is puppy
+
+  ref number: "3"   <ref>puppy</ref> 
+  pretty ref: "Chapter 3" <ref p>puppy</ref>
+  
+  Bibliography:
+    <cite>key</cite>
+
+
+For each <element figure-id="" [figure-title=""]></element>
+Create
+

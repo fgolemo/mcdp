@@ -224,3 +224,6 @@ of the Kleene ascent chain
 \bot\posleq f(\bot)\posleq f(f(\bot))\posleq\cdots\posleq f^{(n)}(\bot)\leq\cdots.
 \]
 \end{lem}
+
+Citing lemma: <a href="#lem:kleene-1"></a>
+Citing def: <a href='#def:poset-width-height'></a>

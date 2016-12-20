@@ -31,18 +31,26 @@ limitation of the human mind, related to the amount of neurons in the brain.
 
 It also depends on what exactly is the task at hand with which we are confronted.
 
-Here, we consider the task of *designing* systems. The slogan is:
-
-<blockquote id='secondquote'>
-    <p>A system is composed of components;<br/>
-     a component is something <u>you can design</u>.
-</blockquote>
 
 After you know how to design all components separately, you still have the problem of designing the components in the system together. This problem of "designing things together" is what we call "**co-design**". This problem is one of the fundamental issues in engineering and computer sciences
 and appears by different names everywhere.
 
+
+Here, we consider the task of *designing* systems. The slogan is:
+
+<blockquote id='secondquote'>
+    <p>A system is composed of components;<br/>
+     a component is something <u>you can design</u>;<br/>
+     <u>co-design</u> is designing them all together.</p>
+</blockquote>
+
+## A new approach
+
 Recently developed theory and tools allow to define these co-design problems
 in a formal yet intuitive way that is cross-disciplinary... and to develop solution methods.
+
+
+Understand a component
 
 The idea is to formalize these components by their "functionality" and "resources".
 
@@ -52,13 +60,15 @@ the first place? For example, a battery provides capacity (kWh)
   simply "<f>functions</f>".<span class='footnote'>Used extensively in embedded systems,
   a field which is familiar with these issues. This name is not used because too confusing.</span>
 
-We call "**<r>resources</r>**" are what the component needs.
+We call "**<r>resources</r>**" what the component needs.
   Synonyms for resources are: <r>costs</r>, <r>dependencies</r>, ...
 
 For the purpose of co-design, a component can be understood as
 a relation between functionality and resources.
 
 The **co-design constraints** are the ...
+
+<img class='art' latex-options='scale=0.33' src="gmcdp_setup.pdf" />
 
 
 If we generalize beyond
@@ -70,9 +80,9 @@ we are going to talk about **design problems**.
 
 All the concepts used have an intuitive graphical representation.
 
-In red and green... <span class=footnote>I apologize to colorblind people
+In red and green... <footnote>I apologize to colorblind people
 for the choice of colors; however, note that the diagrams are not ambiguous
-because of the node "leq" that joins them.</span>
+because of the node "leq" that joins them.</footnote>
 
 <!-- <figure>
     <img width src='logo.png'/>

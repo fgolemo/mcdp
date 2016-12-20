@@ -23,7 +23,8 @@ from mcdp_report.generic_report_utils import (
 from mcdp_report.html import ast_to_html, get_markdown_css
 from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters
 from mcdp_web.images.images import (get_mime_for_format)
-from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
+from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment,\
+    check_html_fragment, to_html_stripping_fragment_document
 from mocdp import ATTR_LOAD_NAME, logger, get_mcdp_tmp_dir, MCDPConstants
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
@@ -437,8 +438,7 @@ def get_minimal_document(body_contents, title=None,
         add_manual_css: language + markdown + (manual*)
     
      """
-    assert not 'DOCTYPE' in body_contents, body_contents 
-    assert not '<html>' in body_contents, body_contents
+    check_html_fragment(body_contents)
     soup = bs("")
     assert soup.name == 'fragment'
     
@@ -500,7 +500,7 @@ def get_minimal_document(body_contents, title=None,
     html.append(head)
     html.append(body)
     soup.append(html)
-    s = to_html_stripping_fragment(soup)
+    s = to_html_stripping_fragment_document(soup)
     assert not 'DOCTYPE' in s
 #     s = html.prettify() # not it removes empty text nodes
 
@@ -513,7 +513,8 @@ def get_minimal_document(body_contents, title=None,
     if add_manual_css and MCDPConstants.manual_link_css_instead_of_including:
         assert 'manual.css' in res, res
     
-    res = res.replace('<div><!DOCTYPE html>', '<div>')    
+    res = res.replace('<div><!DOCTYPE html>', '<div>')
+        
     return res
 
 

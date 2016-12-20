@@ -98,7 +98,28 @@ pre.console .program_command {
 
 merror { color: red; }
 
+/*ol + h4, ul + h4 {color: red;}*/
+h4:after { content: ':'; }
+/*ul { margin-bottom: 1em; border: solid; clear: left; margin-left:0; } 
+li {border: solid 1px red;}
+*/
+h4 { 
+	font-size: 100%;
+	font-style: italic;
+	font-weight: normal;
+	float: left;
+	clear: left;
+	margin: 0; padding: 0;
+	margin-right: 0.34em;
+    /*
+    font-size: 1em; margin: 1em 0;
 
+	
+	display: run-in;
+	 float: left;
+    clear: both;*/
+    /*margin: 0 0.5em 0 0;*/
+    /*border : solid;*/
+}
 
-h4 { display: inline; font-style: italic; font-size: 100%;
-color: red;}
+/*h4 + p {display: inline-block;}*/

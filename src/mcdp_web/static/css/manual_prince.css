@@ -1,7 +1,9 @@
 /* These are the fixes for printing / prince */
 
 @page { 
-    size: A5;
+    /*size: A5;  148 x 210 mm   5.8 x 8.3 in */
+    /* 4:3 with short side being 5.8in; 5.8/3*4=7.73 */
+    size: 5.8in 7.73in;
     margin: 0.5cm; /* todo: remove from python */ ;
 }
 
@@ -98,3 +100,26 @@ table {
     width: 100% !important;
 
 }
+@media screen {
+    body div > ul:not(.toc) {
+        margin-left: 0em;
+        padding-left: 2em;
+        /*border : solid 1px blue;*/
+ margin-top: 0.2em;
+ margin-bottom: 0.2em;
+    }
+}
+@media print {
+/* this is some thing weird, not very robust. Need div.document */
+body div > ul:not(.toc) {
+  /*border : solid 1px blue;*/
+ margin-left: 2em; /*prince wants */
+ margin-top: 0.5em;
+ margin-bottom: 0.5em;
+}
+
+ul.toc ul:not(.toc) {
+  /*border : solid 1px red;*/
+}
+}
+
