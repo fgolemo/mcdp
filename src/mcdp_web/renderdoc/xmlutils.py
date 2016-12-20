@@ -13,6 +13,7 @@ def bs(fragment):
 def to_html_stripping_fragment(soup):
     assert soup.name == 'fragment'
     s = str(soup)
+    assert not '<html>' in s, s
     s = s.replace('<fragment>','')
     s = s.replace('</fragment>','')
     return s

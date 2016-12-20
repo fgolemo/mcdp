@@ -5,19 +5,18 @@
     margin: 0.5cm; /* todo: remove from python */ ;
 }
 
-/* only in the manual, not in mcdp-render, that is, after a #booktitle */
-h1#booktitle + h1 { 
-    page-break-before: always; 
+@media print {
+
+    /* only in the manual, not in mcdp-render, that is, after a #booktitle */
+    h1:not(#booktitle) { 
+        page-break-before: always; 
+    }
+
 }
-h1#booktitle  { page-break-before: avoid; }
+
+/*h1#booktitle  { page-break-before: avoid; }*/
 
 
-
-@font-face {
-    font-family: monospace;
-    /*src: local("Consolas")*/
-    src: local("Anka/Coder Narrow")
-}
 /*
 pre  { 
     font-size: 7pt !important; 

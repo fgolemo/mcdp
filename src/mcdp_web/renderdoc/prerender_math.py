@@ -29,7 +29,7 @@ def prerender_mathjax(html):
         
         Raises PrerenderError.
     """
-    assert not '<html>' in html
+    assert not '<html>' in html, html
     tries = ['nodejs', 'node']
     try:
         cmd= [tries[0], '--version']
