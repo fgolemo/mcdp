@@ -4,6 +4,7 @@ import os
 
 def latex_preprocessing(s):
     s = s.replace('~$', '&nbsp;$')
+#     s = s.replace('{}', '') # cannot do - mcdp { }
     # note: nongreedy matching ("?" after *);
     def fix(m):
         x=m.group(1)
@@ -13,6 +14,9 @@ def latex_preprocessing(s):
         return '\\eqref{%s}' %x
     s = re.sub(r'\\eqref{(.*?)}', fix, s)
     
+    s2 = re.sub(r'\\figref{(.*?)}', r'<a href="#fig:\1"></a>', s)
+    
+    s =s2
     s = re.sub(r'\\cite\[(.*)?\]{(.*?)}', r'<cite id="\2">[\1]</cite>', s)
     s = re.sub(r'\\cite{(.*?)}', r'<cite id="\1" replace="true">[\1]</cite>', s)
     
@@ -50,7 +54,7 @@ def replace_environment(s, envname, classname, labelprefix):
 #         print 'replace_def(%s, %s)' % (label, Scope.def_id)
         id_part = "id='%s' "% label if label is not None else ""
         l = "<span class='%s_label latex_env_label'>%s</span>" % (classname, thm_label) if thm_label else ""
-        s = '<div %sclass="%s latex_env">%s%s</div>' % (id_part, classname, l, contents)
+        s = '<div %sclass="%s latex_env" markdown="1">%s%s</div>' % (id_part, classname, l, contents)
         return s
     
     reg = '\\\\begin{%s}(\\[.*?\\])?(.*?)\\\\end{%s}' % (envname, envname)
@@ -75,9 +79,16 @@ def replace_captionsideleft(s):
     assert not 'includegraphics' in s
     def match(matchobj):
         first = matchobj.group(1)
+        first2, label = get_s_without_label(first, labelprefix="fig:")
         second = matchobj.group(2)
-        res = ('<figure class="captionsideleft">'
-               +'%s<figcaption>Standard figure caption</figcaption></figure>') % second
+        if label is not None:
+            idpart = ' id="%s"' % label
+        else:
+            idpart = ""
+        res = ('<figure class="captionsideleft"%s>' % idpart)
+        res += ('%s<figcaption></figcaption></figure>') % second
+        
+        print res
         return res
         
     s = re.sub(r'\\captionsideleft{(.*?)}{(.*?)}', 
@@ -114,7 +125,7 @@ def get_s_without_label(contents, labelprefix=None):
         if ok:
             Scope.def_id = found
             # extract
-            print('looking for labelprefix %r found label %r in %s' % ( labelprefix, found, contents))
+#             print('looking for labelprefix %r found label %r in %s' % ( labelprefix, found, contents))
             return ""
 #                 print('got it: %s' % Scope.def_id)
         else:

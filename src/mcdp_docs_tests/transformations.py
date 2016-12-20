@@ -120,8 +120,79 @@ and $c=d_e$ and ``code_b`` and <code>a_b</code>.
     s2 = tryit(s, write_to="f3.html")
     assert not '<em' in s2
     
+    
+@comptest
+def f4():
+
+    m = ' \\uparrow U = \\{ x : \\text{property}(x) \}'
+    s = """    
+Try: $%s $ 
+
+Try: 
+$$%s$$
+
+""" % (m, m)
+    s2 = tryit(s, write_to="f4.html")
+    assert not '<em' in s2
+    
+@comptest
+def f52():
+    s ="""
+
+\\begin{defn}[Width and height of a poset]
+\\label{def:poset-width-height} $\\mathsf{width}(\\posA)$ is the maximum
+cardinality of an antichain in~$\\posA$ and $\\mathsf{height}(\\posA)$
+is the maximum cardinality of a chain in~$\\posA$.
+\\end{defn}
+
+"""
+    s2 = tryit(s, write_to="f52.html")
+
+@comptest
+def f5():
+    s ="""
+
+This is code: `one`
+
+This is code: ``two``
+
+Don't get confused here: <strong>`bold</strong> and <strong>`brave</strong>.
+
+Should be fine <strong>&#96;bold</strong> and <strong>`brave</strong>.
+
+"""
+    s2 = tryit(s, write_to="f5.html")
+    assert not 'gt' in s2
+    
+
+@comptest
+def f6():
+    s ="""
+
+\begin{defn}[Upper closure]
+The operator~$\uparrow$ maps a subset to the smallest upper set that
+includes it:
+\begin{eqnarray*}
+\uparrow\colon\mathcal{P}(P) & \rightarrow & UP,\\
+S & \mapsto & \{y\in P:\exists\,x\in S:x\leq y\}.
+\end{eqnarray*}
+\end{defn}
+
+Try outside:
+\begin{eqnarray*}
+\uparrow\colon\mathcal{P}(P) & \rightarrow & UP,\\
+S & \mapsto & \{y\in P:\exists\,x\in S:x\leq y\}.
+\end{eqnarray*}
+
+"""
+    s2 = tryit(s, write_to="f6.html")
+    assert not 'em' in s2
+    assert not ' {y\in' in s2
+    
+    
+     
 
 if __name__ == '__main__': 
-    f3()
+    f5()
 #     run_module_tests()
     

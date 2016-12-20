@@ -18,7 +18,7 @@ def render_markdown(s):
         'markdown.extensions.smarty',
         'markdown.extensions.toc',
         'markdown.extensions.attr_list',
-        # 'markdown.extensions.extra',
+        'markdown.extensions.extra', # need for markdown=1
         'markdown.extensions.fenced_code',
         'markdown.extensions.admonition',
         'markdown.extensions.tables',

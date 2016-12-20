@@ -292,27 +292,39 @@ div.lemma {  counter-increment: lemma; }
 figure[id^='code:'] { counter-increment: listing; }
 figure[id^='code:'] figcaption::before {
     content: 'Listing ' counter(listing) '. ';
-    font-family: italic;
+    /*font-style: italic;*/
 }
 
 figure[id^='fig:'] { counter-increment: figure; }
 
-figure[id^='fig:'] figcaption::before {
+/* Not empty caption */
+figure[id^='fig:'] figcaption:not(:empty)::before {
     content: 'Figure ' counter(figure) '. ';
-    font-family: italic;
+    /*font-style: italic;*/
+    text-align: center;
+}
+/* Empty caption */
+figcaption { font-size: smaller; }
+figure { text-align: center; }
+figure[id^='fig:'] figcaption:empty { 
+    text-align: center; 
+}
+figure[id^='fig:'] figcaption:empty::before {
+    content: 'Figure ' counter(figure);
+    /*font-style: italic;*/
 }
 
 
-a[href^='#code:']::after {  content: 'Listing ' target-counter(attr(href), listing); }
-a[href^='#fig:']::after {  content: 'Fig. ' target-counter(attr(href), figure); }
-a[href^='#rem:']::after {  content: 'Remark ' target-counter(attr(href), remark); }
-a[href^='#lem:']::after {  content: 'Lemma ' target-counter(attr(href), lemma); }
-a[href^='#def:']::after {  content: 'Def.&nbsp;' target-counter(attr(href), definition); }
+a[href^='#code:']::after {  content: 'Listing\0000a0' target-counter(attr(href), listing); }
+a[href^='#fig:']::after {  content: 'Fig.\0000a0' target-counter(attr(href), figure); }
+a[href^='#rem:']::after {  content: 'Remark\0000a0' target-counter(attr(href), remark); }
+a[href^='#lem:']::after {  content: 'Lemma\0000a0' target-counter(attr(href), lemma); }
+a[href^='#def:']::after {  content: 'Def.\0000a0' target-counter(attr(href), definition); }
 
 @media screen {
-    a[href^='#code:']::after {  content: 'Listing ' '???'; }
-    a[href^='#fig:']::after {  content: 'Fig. ' '???'; }
-    a[href^='#rem:']::after {  content: 'Remark ' '???' }
-    a[href^='#lem:']::after {  content: 'Lemma ' '???' }
-    a[href^='#def:']::after {  content: 'Def. ' '???' }
+    a[href^='#code:']::after {  content: 'Listing\0000a0' '???'; }
+    a[href^='#fig:']::after {  content: 'Fig.\0000a0' '???'; }
+    a[href^='#rem:']::after {  content: 'Remark\0000a0' '???' }
+    a[href^='#lem:']::after {  content: 'Lemma\0000a0' '???' }
+    a[href^='#def:']::after {  content: 'Def.\0000a0' '???' }
 }

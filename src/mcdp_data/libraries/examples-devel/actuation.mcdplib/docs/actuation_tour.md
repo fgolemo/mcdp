@@ -6,7 +6,7 @@ and to do so requires the <mcdp-poset>load PPM</mcdp-poset> resource.
 
 A brushless motor like the [Traxxas 3351][Traxxas_3351]
 provides the <mcdp-poset>`ContinuousRotation</mcdp-poset> functionality
-and requires the <mcdp-poset>`PWM</mcdp-poset> resource.
+and requires the <mcdp-poset>&#96;PWM</mcdp-poset> resource.
 
 ## The servo/motors domain
 
@@ -14,13 +14,13 @@ This is a formalization of the domain of servos/DC motors and accessories.
 
 ### Continuous rotation
 
-The functionality <code>ContinuousRotation</code> describes
+The functionality <mcdp-poset>ContinuousRotation</mcdp-poset> describes
 a device that can provided continuous rotation along an axis.
 
 This functionality is parameterized by:
 
-* ``torque``: maximum torque provided;
-* ``velocity``: maximum velocity (rad/s).
+* <f>torque</f>: maximum torque provided;
+* <f>velocity</f>: maximum velocity (rad/s).
 
 <pre class='mcdp_poset' id='ContinuousRotation' label='ContinuousRotation.mcdp_poset'></pre>
 
@@ -77,8 +77,8 @@ For PPM, the variables of interest are:
 Example: <mcdp-poset>`try1</mcdp-poset>
 
 A servo motor like the [Traxxas 2075 Digital High-Torque Waterproof Servo][Traxxas_2075]
-is a device that provides the <mcdp-poset>load AngularPlacement</mcdp-poset> functionality,
-and to do so requires the <mcdp-poset>load PPM</mcdp-poset> resource.
+is a device that provides the <mcdp-poset>&#96;AngularPlacement</mcdp-poset> functionality,
+and to do so requires the <mcdp-poset>&#96;PPM</mcdp-poset> resource.
 
 [Traxxas_2075]: https://www.amazon.com/Traxxas-Digital-High-Torque-Waterproof-Servo/dp/B002PGW31G
 
@@ -92,7 +92,7 @@ and to do so requires the <mcdp-poset>load PPM</mcdp-poset> resource.
 
 A brushless motor like the [Traxxas 3351][Traxxas_3351]
 provides the <mcdp-poset>`ContinuousRotation</mcdp-poset> functionality
-and requires the <mcdp-poset>`PWM</mcdp-poset> resource.
+and requires the <mcdp-poset>&#96;PWM</mcdp-poset> resource.
 
 [Traxxas_3351]: https://www.amazon.com/Traxxas-3351-Velineon-Brushless-Motor/dp/B000SU3VCG
 

@@ -123,3 +123,7 @@ h4 {
 }
 
 /*h4 + p {display: inline-block;}*/
+
+/* fix markdonw extra */
+div.latex_env p { display: inline; }
+div.latex_env { margin-top: 0.5em; margin-bottom: 0.5em; }

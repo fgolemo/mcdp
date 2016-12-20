@@ -220,7 +220,13 @@ This is P: <code class='mcdp_value'>Nat:0</code>.
 
 ~~~
 
+### Bugs
 
+Avoid two backticks in the same paragraph, it will give an error:
+
+	Don't get confused here: <strong>`bold</strong> and <strong>`brave</strong>.
+
+because MD gets confused.
 
 
 

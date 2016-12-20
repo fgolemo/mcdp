@@ -47,15 +47,32 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
         l = replace_backticks_except_in_backticks_expression(l)
         l = replace_underscore_etc_in_formulas(l)
         return l
+    
+    DD = 'DOUBLEDOLLAR'
     s = replace_markdown_line_by_line(s, markdown_fixes)
     
+    def inside(sf):
+        sf = sf.replace('_', UNDERSCORE_IN_FORMULA)
+        sf = sf.replace('*', STAR_IN_FORMULA)
+        sf = sf.replace('\\', '\\\\')
+        return sf
+    def outside(sf):
+        return sf
+    s = s.replace('$$', DD)
+    s = replace_inside_delims(s, DD, inside=inside, outside=outside)
+    s = s.replace(DD, '$$')
+     
+    
+    s = s.replace('<mcdp-poset>', '<mcdp-poset markdown="0">')
     print(indent(s, 'before markdown | '))
+    
         
     s = render_markdown(s)
     
     print(indent(s, 'after  markdown | '))
     
     s = s.replace('\\*}', '*}')
+    
     s = s.replace('MATHJAX_BARBAR', '\\\\')
     s = replace_underscore_etc_in_formulas_undo(s)
     
@@ -160,10 +177,12 @@ def replace_underscore_etc_in_formulas(l):
     def inside(sf):
         sf = sf.replace('_', UNDERSCORE_IN_FORMULA)
         sf = sf.replace('*', STAR_IN_FORMULA)
+        sf = sf.replace('\\', '\\\\')
         return sf
     def outside(sf):
         return sf
-    return replace_inside_delims(l, '$', inside=inside, outside=outside)
+    l = replace_inside_delims(l, '$', inside=inside, outside=outside)
+    return l
     
 def replace_underscore_etc_in_formulas_undo(s):
     s = s.replace(UNDERSCORE_IN_FORMULA, '_')

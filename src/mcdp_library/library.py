@@ -413,7 +413,8 @@ class MCDPLibrary():
     def _add_search_dir(self, d):
         """ Adds the directory to the search directory list. """
 
-        ignore_patterns = ['/out/', '/out-html/', '/reprep-static/', 'html_resources']
+        ignore_patterns = ['/out/', '/out-html/', '/reprep-static/', 'html_resources',
+                           'node_modules']
 
         def should_ignore(f):
             for i in ignore_patterns:

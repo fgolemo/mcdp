@@ -1,4 +1,3 @@
-<div style='display:none'>
 $\newcommand{\posA}{\mathcal{P}}$
 $\newcommand{\posB}{\mathcal{Q}}$
 
@@ -24,7 +23,7 @@ $\newcommand{\Rcomp}{\overline{\mathbb{R}}_{+}}$
 $\newcommand{\reals}{\mathbb{R}}$
 $\newcommand{\nonNegReals}{\mathbb{R}_{+}}$
 $\newcommand{\nonNegRealsComp}{\Rcomp}$
-</div>
+
 
 # Appendix: basic order theory
 
@@ -49,10 +48,10 @@ a subset of a poset in which <em>no</em> elements are comparable. This
 is the mathematical concept that formalizes the idea of "Pareto
 front".
 
-<div class=definition title='Antichains'>
+\begin{defn}[Antichain] \label{def:antichain}
 A subset $S\subseteq\posA$ is an antichain iff no elements are comparable:
 for~$x,y\in S$, $x\posleq y$ implies~$x=y$.
-</div>
+\end{defn}
 
 Call~$\antichains\posA$ the set of all antichains in~$\posA$.
 By this definition, the empty set is an antichain: $\emptyset\in\antichains\posA$.
@@ -194,7 +193,6 @@ function $x\mapsto\left\lceil x\right\rceil $~ is \scottcontinuous
 \end{rem}
 \captionsideleft{\label{fig:ceil}}{\includegraphics[scale=0.33]{boot-art/1512-mcdp-tro/gmcdptro_ceil}}
 
-\emph{}
 
 A \emph{fixed} \emph{point} of $f:\posA\rightarrow\posA$ is a point~$x$
 such that $f(x)=x$.
