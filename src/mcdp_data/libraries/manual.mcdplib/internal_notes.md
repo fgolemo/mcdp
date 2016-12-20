@@ -6,7 +6,7 @@
 
 <h2 id="mcdp-render-manual"> <program>mcdp-render-manual</program> </h2>
 
-## Writing documentation 
+## Writing documentation
 
 ### syntax highlighting
 
@@ -168,10 +168,10 @@ Can use ``plot_value_generic``
 </pre>
 ~~~
 
-<pre class='plot_value_generic' style='width: 10em'>upperclosure{&lt;1 g, 0m&gt;, &lt;2 g, 1m&gt;} </pre>
+<pre class='plot_value_generic'>upperclosure{&lt;1 g, 0m&gt;, &lt;2 g, 1m&gt;} </pre>
 
 
-<pre class='plot_value_generic' style='width: 10em'>
+<pre class='plot_value_generic'>
 &lt;upperclosure {&lt;0g, 1J&gt;}, upperclosure {&lt;1g, 0.5J&gt;}&gt;
 </pre>
 

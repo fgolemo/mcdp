@@ -165,4 +165,13 @@ def replace_equations(s):
     Tmp.format = lambda self, x : '\\begin{align*}%s\\end{align*}' % x
     s = re.sub(reg, replace_eq, s, flags=re.M | re.DOTALL)
 
+    reg = r'\\begin{eqnarray\*}(.*?)\\end{eqnarray\*}'
+    Tmp.format = lambda self, x : '\\begin{eqnarray*}%s\\end{eqnarray*}' % x
+    s = re.sub(reg, replace_eq, s, flags=re.M | re.DOTALL)
+    
+    reg = r'\\begin{eqnarray}(.*?)\\end{eqnarray}'
+    Tmp.format = lambda self, x : '\\begin{eqnarray}%s\\end{eqnarray}' % x
+    s = re.sub(reg, replace_eq, s, flags=re.M | re.DOTALL)
+
     return s
+

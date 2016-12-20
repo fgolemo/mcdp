@@ -2,15 +2,13 @@
 from contracts import contract
 from contracts.utils import raise_desc, indent
 from mcdp_library import MCDPLibrary
+from mcdp_web.renderdoc.highlight import mark_console_pres,\
+    escape_for_mathjax
+from mcdp_web.renderdoc.latex_preprocess import latex_preprocessing
 
 from .highlight import html_interpret
 from .markd import render_markdown
-from .prerender_math import prerender_mathjax, PrerenderError
-from mcdp_library_tests.tests import timeit_wall
-from mcdp_web.renderdoc.highlight import mark_console_pres,\
-    escape_ticks_before_markdown, escape_for_mathjax
-import re
-from mcdp_web.renderdoc.latex_preprocess import latex_preprocessing
+from .prerender_math import prerender_mathjax
 
 
 __all__ = ['render_document']
@@ -29,7 +27,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
         raise_desc(TypeError, msg, s=s)
 
     # save the '\\' in mathjax before markdown
-#     s = s.replace('\\\\', 'MATHJAX_BARBAR')
+    
     
     # fixes for LaTeX
     s = latex_preprocessing(s)
@@ -40,11 +38,46 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     # invalid html, (in particular '$   ciao <ciao>' and make it work)
      
 #     s = escape_ticks_before_markdown(s)
-    s = s.replace('>`', '>&#96;')
-#     print(indent(s, 'before markdown | '))
+#     s = s.replace('>`', '>&#96;')
     
+    s = s.replace('\\\\', 'MATHJAX_BARBAR')
+    s = s.replace('*}', '\*}')
+    lines = s.split('\n')
+    
+    started = False
+    for i in range(len(lines)):
+        l = lines[i]
+        if l.startswith('~~~'):
+            if started:
+                started = False
+                continue
+            else:
+                started = True
+            
+        if started:
+            continue
+        is_literal = l.startswith(' '*4)
+        if is_literal: continue
+        l = l.replace('``', 'DOUBLETICKS')
+        if 'DOUBLETICKS' in l:
+            pass
+        else:
+            l = l.replace('`', '&#96;')
+        l = l.replace('DOUBLETICKS', '``')
+        lines[i] = l
+#     s = s.replace('<mcdp-poset>`', '<mcdp-poset>&#96;')
+    s = "\n".join(lines)
+    print(indent(s, 'before markdown | '))
+        
     s = render_markdown(s)
     
+    print(indent(s, 'after  markdown | '))
+    
+    s = s.replace('\\*}', '*}')
+    s = s.replace('MATHJAX_BARBAR', '\\\\')
+    
+    print(indent(s, 'after  replace | '))
+        
     # this escapes $ to DOLLAR
     s = escape_for_mathjax(s)
 #     print(indent(s, 'before prerender_mathjax | '))
@@ -74,7 +107,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
 #     print '\nafter embed_images_from_library: %s' % html3
     
     
-#     html3 = html3.replace('MATHJAX_BARBAR', '\\\\')
+
     
 #     
 #     if '$$' in html3 or '$' in html3:

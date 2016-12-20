@@ -8,11 +8,15 @@ The code has been tested on the following platforms:
 * OS X using the Enthought Python distribution.
 
 
-*Windows support:* In principle, there is nothing that prevents the software
+#### Windows support
+
+In principle, there is nothing that prevents the software
 to run on Windows, however, there are probably lots of subtle
 adjustments to be done. Porting contributions are welcome.
 
-*Python 3 support:* PyMCDP works on Python 2.7, not Python 3.
+#### Python 3 support
+
+PyMCDP works on Python 2.7, not Python 3.
 Porting is not difficult, but it is not done yet.
 
 

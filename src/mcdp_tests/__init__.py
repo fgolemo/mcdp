@@ -9,18 +9,18 @@ logger.setLevel(logging.DEBUG)
 
 def load_tests_modules():
     """ Loads all the mcdp_lang_tests that register using comptests facilities. """
-
     import mcdp_posets_tests
     import mcdp_lang_tests
     import mcdp_dp_tests
     import mcdp_web_tests
-    import mcdp_opt_tests
     import mcdp_figures_tests
+    import mcdp_docs_tests
+    import mcdp_report_ndp_tests
 
     from mocdp.comp.flattening import tests  # @Reimport
     from mocdp.comp import tests  # @Reimport
-
-    import mcdp_report_ndp_tests
+ 
+    import mcdp_opt_tests
 
 
 def jobs_comptests(context):
