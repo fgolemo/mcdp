@@ -49,9 +49,10 @@ mjAPI.typeset({
 }, function(result) {
     console.log('rendering done.')
   "use strict";
-  document.body.innerHTML = result.html;
-  var h = document.documentElement.outerHTML.replace(/^(\n|\s)*/,"");
-  var HTML = "<!DOCTYPE html>\n" + h;
+  // document.body.innerHTML = result.html;
+  // var h = document.documentElement.outerHTML.replace(/^(\n|\s)*/,"");
+  // var HTML = "<!DOCTYPE html>\n" + h;
+  HTML = result.html;
   fs.writeFileSync(manual_out, HTML);
   console.log('written to ' + manual_out);
 });

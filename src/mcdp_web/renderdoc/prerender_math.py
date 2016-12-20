@@ -8,6 +8,7 @@ from mocdp import get_mcdp_tmp_dir
 from system_cmd.meat import system_cmd_result
 from system_cmd.structures import CmdException
 from contracts.utils import raise_wrapped, indent
+from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
 
 
 __all__ = ['prerender_mathjax']
@@ -28,6 +29,7 @@ def prerender_mathjax(html):
         
         Raises PrerenderError.
     """
+    assert not '<html>' in html
     tries = ['nodejs', 'node']
     try:
         cmd= [tries[0], '--version']
@@ -95,6 +97,9 @@ def prerender_mathjax(html):
             
             with open(f_out) as f:
                 data = f.read()
+            # remove DOCTYPE and spurious
+#             print indent(data, 'from node |')
+            data = to_html_stripping_fragment(bs(data))
             
             return data
         except CmdException as e:

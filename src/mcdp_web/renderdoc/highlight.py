@@ -437,6 +437,8 @@ def get_minimal_document(body_contents, title=None,
         add_manual_css: language + markdown + (manual*)
     
      """
+    assert not 'DOCTYPE' in body_contents, body_contents 
+    assert not '<html>' in body_contents, body_contents
     soup = bs("")
     assert soup.name == 'fragment'
     
@@ -499,6 +501,7 @@ def get_minimal_document(body_contents, title=None,
     html.append(body)
     soup.append(html)
     s = to_html_stripping_fragment(soup)
+    assert not 'DOCTYPE' in s
 #     s = html.prettify() # not it removes empty text nodes
 
 #     ns="""<?xml version="1.0" encoding="utf-8" ?>"""

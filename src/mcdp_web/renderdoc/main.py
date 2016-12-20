@@ -43,7 +43,6 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     s = s.replace('\\\\', 'MATHJAX_BARBAR')
     s = s.replace('*}', '\*}')
     lines = s.split('\n')
-    
     started = False
     for i in range(len(lines)):
         l = lines[i]
@@ -58,46 +57,50 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
             continue
         is_literal = l.startswith(' '*4)
         if is_literal: continue
-        l = l.replace('``', 'DOUBLETICKS')
-        if 'DOUBLETICKS' in l:
-            pass
-        else:
-            l = l.replace('`', '&#96;')
-        l = l.replace('DOUBLETICKS', '``')
-        lines[i] = l
-#     s = s.replace('<mcdp-poset>`', '<mcdp-poset>&#96;')
+        D = 'DOUBLETICKS'
+        l = l.replace('``', D)
+        tokens = l.split(D)
+        tokens2 = []
+        for j, f in enumerate(tokens):
+            if j % 2 == 0: # outside the quotes
+                f = f.replace('`', '&#96;')
+            tokens2.append(f)
+        l2 = D.join(tokens2)
+        # now re-replace the doubleticks
+        l2 = l2.replace(D, '``')
+        lines[i] = l2
     s = "\n".join(lines)
-    print(indent(s, 'before markdown | '))
+#     print(indent(s, 'before markdown | '))
         
     s = render_markdown(s)
     
-    print(indent(s, 'after  markdown | '))
+#     print(indent(s, 'after  markdown | '))
     
     s = s.replace('\\*}', '*}')
     s = s.replace('MATHJAX_BARBAR', '\\\\')
     
-    print(indent(s, 'after  replace | '))
+#     print(indent(s, 'after  replace | '))
         
     # this escapes $ to DOLLAR
     s = escape_for_mathjax(s)
 #     print(indent(s, 'before prerender_mathjax | '))
     # mathjax must be after markdown because of code blocks using "$"
+#     assert not 'DOCTYPE' in s, s
     s = prerender_mathjax(s)
-    
+#     assert not 'DOCTYPE' in s, s
     
 #     print(indent(s, 'after prerender_mathjax | '))
     
     
 #     print(indent(html, 'after render_markdown'))
 
-    html  = s
+    html = s
     html = html.replace('<p>DRAFT</p>', '<div class="draft">')
     
     html = html.replace('<p>/DRAFT</p>', '</div>')
     
     html = mark_console_pres(html)
 
-#     print '\nafter render_markdown: %s' % html
     html2 = html_interpret(library, html, generate_pdf=generate_pdf,
                            raise_errors=raise_errors, realpath=realpath)
 
