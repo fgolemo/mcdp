@@ -1,5 +1,5 @@
 
-<h1 id='booktitle'>
+<h1 id='booktitle' nonumber>
     <!-- PyMCDP user manual -->
     <!-- The MCDPL co-design modeling language <br/>
     and its interactive co-design environment -->
@@ -36,7 +36,7 @@
     with ETH Zurich; with nuTonomy, inc.; and with Duckietown Engineering.
 </div>
 
-<h2 id='toc-heading'>Table of contents</h2>
+<h2 nonumber id='toc-heading'>Table of contents</h2>
 
 <div id='toc'></div>
 

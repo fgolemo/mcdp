@@ -14,6 +14,7 @@ Suppose we define a simple model called ``Battery`` as follows:
         provides capacity [J]
         requires mass [g]
         rho = 100 kWh / kg # specific_energy
+        rho_1 = 2
         required mass ≽ provided capacity / rho
     }
     </pre>

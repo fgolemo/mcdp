@@ -269,7 +269,15 @@ def resize_icon(filename, tmppath, size):
     safe_makedirs(res)
     resized = os.path.join(res, os.path.basename(filename))
     if not os.path.exists(resized):
-        cmd = ['convert', filename, '-resize', '%s' % size, resized]
+        cmd = ['convert', 
+               filename, 
+               '-resize', '%s' % size, 
+               # remove alpha - otherwise lulu complains
+               '-background', 'white',
+            '-alpha','remove',
+            '-alpha','off', 
+               
+               resized]
         try:
 
             system_cmd_result(cwd='.', cmd=cmd,

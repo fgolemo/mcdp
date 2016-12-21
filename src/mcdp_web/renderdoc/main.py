@@ -3,7 +3,7 @@ from contracts import contract
 from contracts.utils import raise_desc, indent
 from mcdp_library import MCDPLibrary
 from mcdp_web.renderdoc.highlight import mark_console_pres,\
-    escape_for_mathjax
+    escape_for_mathjax, make_figure_from_figureid_attr
 from mcdp_web.renderdoc.latex_preprocess import latex_preprocessing
 
 from .highlight import html_interpret
@@ -80,11 +80,12 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
         
     # this escapes $ to DOLLAR
     s = escape_for_mathjax(s)
+   
     check_html_fragment(s)
 #     print(indent(s, 'before prerender_mathjax | '))
     # mathjax must be after markdown because of code blocks using "$"
-
     s = prerender_mathjax(s)
+    
     check_html_fragment(s)
     
 #     print(indent(s, 'after prerender_mathjax | '))
@@ -97,6 +98,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     html = html.replace('<p>/DRAFT</p>', '</div>')
     
     html = mark_console_pres(html)
+    html = make_figure_from_figureid_attr(html)
     check_html_fragment(html)
     html2 = html_interpret(library, html, generate_pdf=generate_pdf,
                            raise_errors=raise_errors, realpath=realpath)
@@ -107,10 +109,25 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     
     check_html_fragment(html3) 
     
+    
+    
     return html3
+
+def get_mathjax_preamble():
+    
+    symbols = '/Users/andrea/env_mcdp/src/mcdp/libraries/manual.mcdplib/symbols.tex'
+    tex = open(symbols).read()
+    
+    lines = tex.split('\n')
+    lines = ['$%s$' % l for l in filter(lambda x: len(x.strip())>0, lines)]
+    tex = "\n".join(lines)
+    frag = '<div class="mathjax-symbols">%s</div>\n' % tex
+    frag = tex
+    return frag
 
 
 def replace_markdown_line_by_line(s, line_transform):
+    
     lines = s.split('\n')
     block_started = False
     for i in range(len(lines)):
@@ -129,6 +146,7 @@ def replace_markdown_line_by_line(s, line_transform):
         l2 = line_transform(l)
         lines[i] = l2
     s2 = "\n".join(lines)
+
     return s2
 # 
 # def replace_backticks_except_in_backticks_expression(l):

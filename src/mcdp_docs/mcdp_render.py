@@ -90,6 +90,9 @@ def render(library, docname, data, realpath, out_dir, generate_pdf):
     doc = get_minimal_document(html_contents, title=title,
                                add_markdown_css=True, add_manual_css=True)
 
+    from mcdp_docs.check_missing_links import check_if_any_href_is_invalid
+    check_if_any_href_is_invalid(doc)
+    
     d = os.path.dirname(out)
     if not os.path.exists(d):
         os.makedirs(d)

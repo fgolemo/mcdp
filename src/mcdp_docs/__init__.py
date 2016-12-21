@@ -7,3 +7,6 @@ from .mcdp_render_manual import mcdp_render_manual_main
 import bs4
 import logging
 logging.getLogger("chardet.universaldetector").setLevel(logging.CRITICAL)
+
+
+logging.getLogger("PIL.PngImagePlugin").setLevel(logging.CRITICAL)

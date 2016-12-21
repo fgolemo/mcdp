@@ -240,7 +240,7 @@ def load_fragments(library, frag, realpath):
             res = dict(data=source_code, realpath=realpath)
 
             if basename in library.file_to_contents:
-                msg = 'Duplicated entry.'
+                msg = 'The id %r has already been used previously.'
                 raise_desc(ValueError, msg, tag=str(tag),
                            known=library.file_to_contents[basename])
 
@@ -312,7 +312,42 @@ def escape_ticks_before_markdown(html):
     res = to_html_stripping_fragment(soup)
      
     return res
-    
+
+def make_figure_from_figureid_attr(html):
+    """
+        Makes a figure if 
+            <e figure-id='fig:ure' figure-caption='ciao'/> 
+            
+        becomes
+        
+        <figure id="fig:ure">
+            <e figure-id='fig:ure' figure-caption='ciao'/>
+            <figcaption>ciao</figcaption>
+        </figure>
+        
+    """
+    soup = bs(html) 
+    new_tag = lambda _: BeautifulSoup().new_tag(_)
+    for towrap in soup.select('[figure-id]'):
+        parent = towrap.parent
+        fig = new_tag('figure')
+        fig['id'] = towrap['figure-id']
+        if towrap.has_attr('figure-caption'):
+            caption = towrap['figure-caption']
+        else:
+            caption = ''
+        figcaption = new_tag('figcaption')
+        figcaption.append(NavigableString(caption))
+        i = parent.index(towrap)
+        towrap.extract()
+        fig.append(towrap)
+        fig.append(figcaption)
+        
+        parent.insert(i, fig)
+        
+    res = to_html_stripping_fragment(soup)
+    return res
+
 def mark_console_pres(html):
     soup = bs(html)
 #     print indent(html, 'mark_console_pres ')
@@ -944,7 +979,7 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
             h2 = h * scale
             tag_svg['width'] = w2
             tag_svg['height'] = h2
-            tag_svg['rescaled'] = 'Rescaled from %s %s' % (ws, hs)
+            tag_svg['rescaled'] = 'Rescaled from %s %s, scale = %s' % (ws, hs, scale)
         else:
             print('no width in SVG tag: %s' % tag_svg)
             

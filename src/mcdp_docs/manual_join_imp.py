@@ -5,6 +5,8 @@ import sys
 from bs4 import BeautifulSoup
 
 from contracts import contract
+from contracts.utils import raise_desc
+from mocdp import logger
 
 
 def get_manual_css_frag():
@@ -74,7 +76,8 @@ def manual_join(files_contents):
     first_dom = BeautifulSoup(first_data, 'lxml', from_encoding='utf-8')
     first_contents = first_dom.html.body
     first_contents.name = 'div'
-    first_contents['id'] = docname
+    first_contents['class'] = 'doc'
+    first_contents['docname'] = docname
     template = template.replace('FIRSTPAGE', str(first_contents))
     
     d = BeautifulSoup(template, 'lxml', from_encoding='utf-8')
@@ -110,7 +113,11 @@ def manual_join(files_contents):
 
     body_place.replaceWith(main_body)
 
-    return str(d)
+    res = str(d)
+    
+    from mcdp_docs.check_missing_links import check_if_any_href_is_invalid
+    check_if_any_href_is_invalid(res)
+    return res
 
 def debug(s):
     sys.stderr.write(str(s) + ' \n')
@@ -181,8 +188,19 @@ def generate_doc(soup):
     stack = [ Item(None, 0, 'root', 'root', []) ]
 
     for header in soup.findAll(['h1', 'h2', 'h3']):
-        header['id'] = header_id
-
+        
+        prefix = {'h1':'sec','h2':'sub','h3':'subsub'}[header.name]
+        
+        if not header.has_attr('id'):    
+            header['id'] = '%s:%s' % (prefix, header_id)
+        else:
+            cur = header['id']
+            if not cur.startswith(prefix+':'):
+                #msg = 'Invalid ID %r for tag %r, muststart with %r.' % (cur, header.name, prefix)
+                #raise_desc(ValueError, msg, tag=str(header))
+                msg = 'Adding prefix %r to current id %r for %s.' % (prefix, cur, header.name)
+                header['id'] = prefix + ':' + cur
+                logger.debug(msg)
         depth = int(header.name[1])
 
         # previous_depth = stack[-1].depth

@@ -162,6 +162,11 @@ class MCDPConstants():
     # for (1) manual and (2) mcdp-render
     manual_link_css_instead_of_including = True
     
+    
+#     pdf_to_png_dpi = 300 # dots per inch
+    pdf_to_png_dpi = 100 # dots per inch
+    
+    
 def get_mcdp_tmp_dir():
     from tempfile import gettempdir
     import os

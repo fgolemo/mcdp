@@ -49,11 +49,13 @@ Some of them are compatible. For example we can fit
 a plug ot Type A into a socket of Type B. This
 creates a natural partial order structure.
 
-We can use a ``poset`` to describe the poset [as follows](#socket_type):
+We can use a ``poset`` to describe the poset [](#fig:socket_type):
 
 <pre class='mcdp_poset' id='socket_type' label='socket_type.mcdp_poset'></pre>
 
-<img class='hasse_icons' id='socket_type'></pre>
+<render class='hasse_icons' figure-id='fig:socket_type' 
+    figure-caption='The poset of plugs.'
+style='width: 10em'>`socket_type</render>
 
 
 ### Voltages 

@@ -257,7 +257,8 @@ def embed_images_from_library(html, library):
     for tag in soup.select('img[src$=pdf], img[src$=PDF]'):
         # load pdf data
         data_pdf = resolve(tag['src'])
-        density = 300 # dots per inch
+
+        density = MCDPConstants.pdf_to_png_dpi # dots per inch
         data_png = png_from_pdf(data_pdf, density=density)
         
         # get png image size
@@ -318,6 +319,9 @@ def png_from_pdf(pdf_data, density):
         cmd = [
             'convert',
             '-density', str(density), 
+            '-background', 'white',
+            '-alpha','remove',
+            '-alpha','off', 
             tmpfile, 
             out
         ]

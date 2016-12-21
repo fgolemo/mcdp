@@ -1,29 +1,3 @@
-$\newcommand{\posA}{\mathcal{P}}$
-$\newcommand{\posB}{\mathcal{Q}}$
-
-$\newcommand{\posAleq}{\posleq_{\posA}}$
-$\newcommand{\posBleq}{\posleq_{\posB}}$
-$\newcommand{\posleq}{\preceq}$
-
-$\newcommand{\antichains}{\mathrm{A}}$
-$\newcommand{\upsets}{\mathrm{U}}$
-
-$\newcommand{\CPO}{CPO}$
-
-$\newcommand{\Min}{\mathsf{Min}}$
-$\newcommand{\Max}{\mathsf{Max}}$
-
-$\newcommand{\pset}{\mathscr{P}}$
-
-$\newcommand{\upit}{\uparrow}$
-
-$\newcommand{\lfp}{\mathsf{lfp}}$
-$\newcommand{\Rcomp}{\overline{\mathbb{R}}_{+}}$
-
-$\newcommand{\reals}{\mathbb{R}}$
-$\newcommand{\nonNegReals}{\mathbb{R}_{+}}$
-$\newcommand{\nonNegRealsComp}{\Rcomp}$
-
 
 # Appendix: basic order theory
 
@@ -135,7 +109,7 @@ a bottom for $\posA$ exists, then the bottom for~$\antichains\posA$
 is the singleton containing only the bottom for~$\posA$: $\bot_{\antichains\posA}=\{\bot_{\posA}\}.$
 
 
-## Monotonicity and fixed points \label{sec:Monotonicity-and-fixed}
+\subsection{Monotonicity and fixed points \label{sec:Monotonicity-and-fixed}}
 
 We will use Kleene's theorem, a celebrated result that is used in
 disparate fields. It is used in computer science for defining denotational
@@ -222,6 +196,4 @@ of the Kleene ascent chain
 \bot\posleq f(\bot)\posleq f(f(\bot))\posleq\cdots\posleq f^{(n)}(\bot)\leq\cdots.
 \]
 \end{lem}
-
-Citing lemma: <a href="#lem:kleene-1"></a>
-Citing def: <a href='#def:poset-width-height'></a>
+ 

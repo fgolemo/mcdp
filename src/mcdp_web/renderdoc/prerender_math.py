@@ -22,8 +22,37 @@ def get_prerender_js():
 class PrerenderError(Exception):
     pass
 
+def prerender_mathjax(s):
+    STARTTAG = 'STARTHERE'
+    ENDTAG = 'ENDHERE'
+    s = STARTTAG +  get_mathjax_preamble() + ENDTAG + s
+    s = prerender_mathjax_(s)
+    c0 = s.index(STARTTAG)
+    c1 = s.index(ENDTAG) + len(ENDTAG)
+    s = s[:c0] + s[c1:]
+    return s
+
+def get_mathjax_preamble():
+    fn = '/Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/manual.mcdplib/symbols.tex'
+    tex = open(fn).read()
+#     lines = filter(lambda x: len(x.strip())> 0, tex.split('\n'))
+#     lines = ['$'+l+'$' for l in lines]
+#     f = "\n".join(lines)
+    f = '$$'+tex+'$$'
+    f += """
+<script type="text/x-mathjax-config">
+    console.log('here!');
+    
+   MathJax.Hub.Config({ 
+       TeX: { extensions: ["color.js"] },
+       SVG: {font:'STIX-Web'}
+   }); 
+</script>"""
+
+    return f
+
 @contract(returns=str, html=str)
-def prerender_mathjax(html):
+def prerender_mathjax_(html):
     """
         Runs the prerender.js script to pre-render the MathJax into images.
         

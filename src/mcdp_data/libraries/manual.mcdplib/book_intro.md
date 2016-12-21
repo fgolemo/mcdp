@@ -57,8 +57,9 @@ The idea is to formalize these components by their "functionality" and "resource
 We call "**<f>functionality</f>**" is what the component provides: why is it in the system in
 the first place? For example, a battery provides capacity (kWh)
   Other words for functionality are: <f>(functional) requirements</f>, <f>specifications</f>,
-  simply "<f>functions</f>".<span class='footnote'>Used extensively in embedded systems,
-  a field which is familiar with these issues. This name is not used because too confusing.</span>
+  simply <f>&ldquo;functions&rdquo;</f>.
+  <footnote>Used extensively in embedded systems,
+  a field which is familiar with these issues. This name is not used because too confusing.</footnote>
 
 We call "**<r>resources</r>**" what the component needs.
   Synonyms for resources are: <r>costs</r>, <r>dependencies</r>, ...
@@ -297,7 +298,7 @@ is the group of all invariants..)
 
 /DRAFT
 
-[spivak]: http://math.mit.edu/~dspivak/
+[spivak]: http://math.mit.edu/%7edspivak/
 
 ### Funding sources
 

@@ -96,7 +96,7 @@ li {margin: 0; margin-left: 0em;}
     }
     ul#main_toc > li > ul > li{
         padding-top: 2pt;
-        color: red;
+        /*color: red;*/
     }
     ul#main_toc > li > ul > li > ul   {
         margin-top: 1pt;
@@ -174,7 +174,7 @@ ul.chapter_toc > li > a {
 
 /* below numbers are erased */
 ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
-    color: red; 
+    /*color: red; */
 }
 
 ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
@@ -241,6 +241,8 @@ div.definition::before { font-weight: bold; content: 'Definition ' counter(defin
 div.example::before { font-weight: bold; content: 'Example ' counter(example) '.';}
 div.remark::before { font-weight: bold; content: 'Remark ' counter(remark)'.';}
 div.lemma::before { font-weight: bold; content: 'Lemma ' counter(lemma)'.';}
+div.proposition::before { font-weight: bold; content: 'Proposition ' counter(proposition)'.';}
+div.theorem::before { font-weight: bold; content: 'Theorem ' counter(theorem)'.';}
 
 
 .latex_env span.latex_env_label::before {content: ' (';}
@@ -288,11 +290,31 @@ div.example {  counter-increment: example; }
 div.remark {  counter-increment: remark; }
 div.definition {  counter-increment: definition; }
 div.lemma {  counter-increment: lemma; }
+div.proposition {  counter-increment: proposition; }
+div.theorem {  counter-increment: theorem; }
+
 
 figure[id^='code:'] { counter-increment: listing; }
-figure[id^='code:'] figcaption::before {
+figure[id^='code:'] figcaption:not(:empty)::before {
     content: 'Listing ' counter(listing) '. ';
-    /*font-style: italic;*/
+}
+
+figure[id^='code:'] {
+    display: inline-block;
+    text-align: center;
+}
+figure[id^='fig:']
+{
+    /*border: solid blue;*/
+    text-align: center;
+}
+figure[id^='code:'] figcaption {
+    text-align: center;
+    /*border: solid;*/
+    width: 100%;
+}
+figure[id^='code:'] figcaption:empty::before {
+    content: 'Listing ' counter(listing);
 }
 
 figure[id^='fig:'] { counter-increment: figure; }
@@ -305,26 +327,174 @@ figure[id^='fig:'] figcaption:not(:empty)::before {
 }
 /* Empty caption */
 figcaption { font-size: smaller; }
-figure { text-align: center; }
-figure[id^='fig:'] figcaption:empty { 
-    text-align: center; 
-}
+figure[id^='fig:'] { text-align: center; }
+figure[id^='fig:'] figcaption:empty { text-align: center; }
 figure[id^='fig:'] figcaption:empty::before {
     content: 'Figure ' counter(figure);
     /*font-style: italic;*/
 }
 
-
-a[href^='#code:']::after {  content: 'Listing\0000a0' target-counter(attr(href), listing); }
-a[href^='#fig:']::after {  content: 'Fig.\0000a0' target-counter(attr(href), figure); }
-a[href^='#rem:']::after {  content: 'Remark\0000a0' target-counter(attr(href), remark); }
-a[href^='#lem:']::after {  content: 'Lemma\0000a0' target-counter(attr(href), lemma); }
-a[href^='#def:']::after {  content: 'Def.\0000a0' target-counter(attr(href), definition); }
+a[href^='#eq:']::before {  content: '(' target-counter(attr(href), listing) ')'; }
+a[href^='#code:']::before {  content: 'Listing\0000a0' target-counter(attr(href), listing); }
+a[href^='#fig:']::before {  content: 'Fig.\0000a0' target-counter(attr(href), figure); }
+a[href^='#rem:']::before {  content: 'Remark\0000a0' target-counter(attr(href), remark); }
+a[href^='#lem:']::before {  content: 'Lemma\0000a0' target-counter(attr(href), lemma); }
+a[href^='#def:']::before {  content: 'Def.\0000a0' target-counter(attr(href), definition); }
+a[href^='#prop:']::before {  content: 'Prop.\0000a0' target-counter(attr(href), proposition); }
+a[href^='#exa:']::before {  content: 'Example\0000a0' target-counter(attr(href), example); }
+a[href^='#thm:']:not([class*='only-number'])::before {  content: 'Theorem\0000a0' target-counter(attr(href), theorem); }
+a[href^='#thm:'][class*='only-number']::before {  content: target-counter(attr(href), theorem); }
 
 @media screen {
-    a[href^='#code:']::after {  content: 'Listing\0000a0' '???'; }
-    a[href^='#fig:']::after {  content: 'Fig.\0000a0' '???'; }
-    a[href^='#rem:']::after {  content: 'Remark\0000a0' '???' }
-    a[href^='#lem:']::after {  content: 'Lemma\0000a0' '???' }
-    a[href^='#def:']::after {  content: 'Def.\0000a0' '???' }
+    a[href^='#eq:']::before {  content: '(' '???' ')'; }
+
+    a[href^='#code:']::before {  content: 'Listing\0000a0' '???'; }
+    a[href^='#fig:']::before {  content: 'Fig.\0000a0' '???'; }
+    a[href^='#rem:']::before {  content: 'Remark\0000a0' '???' }
+    a[href^='#lem:']::before {  content: 'Lemma\0000a0' '???' }
+    a[href^='#def:']::before {  content: 'Def.\0000a0' '???' }
+    a[href^='#prop:']::before {  content: 'Prop.\0000a0' '???'; }
+    a[href^='#thm:']::before {  content: 'Theorem\0000a0''???'; }
+    a[href^='#exa:']::before {  content: 'Example\0000a0' '???'; }
 }
+
+/** maybe chapter **/
+
+/** Very important - otherwise counters are local to divs,
+    and not robust to errors with divs */
+
+body {
+ counter-reset: section subsection subsubsection;
+}
+h1:not([nonumber]) {  
+    counter-increment: section; 
+    margin-bottom: 2em;
+}
+h1 {
+    counter-reset: subsection subsubsection;
+}
+
+/*h2 :not([nonumber]) */
+/*h2:not([nonumber]) { }*/
+    /*border: solid;*/
+
+h2:not([nonumber]) { 
+    counter-increment: subsection; 
+}
+h2 {
+    counter-reset: subsubsection; 
+}
+
+h3:not([nonumber]) {  
+    counter-increment: subsubsection; 
+}
+
+@media print {
+    a[href^='#sec:']::before { 
+        content: 'Chapter\0000a0' target-counter(attr(href), section); 
+    }
+}
+@media screen {
+    a[href^='#sec:']::before {  
+        content: 'Chapter\0000a0' '???'; 
+    }
+}
+@media print {
+    ul.toc a[href^='#sec:']::before { /* mdash: — ndahs:  –; */
+        content: 'Chapter\0000a0' target-counter(attr(href), section) ' –'; 
+        font-weight: bold;
+    }
+}
+@media screen {
+    ul.toc a[href^='#sec:']::before {
+        content: 'Chapter\0000a0' '???' ' –'; 
+        font-weight: bold;
+    }
+}
+h1:not([nonumber])::before {
+    content: 'Chapter\0000a0' counter(section);
+    display:block;
+    font-variant: small-caps;
+    font-size: smaller;
+    margin-bottom: 0.5em;
+}
+.toc_number { display :none; }
+h1[nonumber]::before {
+    /*content: '(u)';*/
+}
+
+@media print {
+    a[href^='#sub:']::before { 
+        content: 'Subsection\0000a0' target-counter(attr(href), section) '.' target-counter(attr(href), subsection) ; 
+    }
+      
+}
+@media screen {
+    a[href^='#sub:']::before {  
+        content: 'Subsection\0000a0' '???'; 
+    }
+}
+@media print {
+    ul.toc a[href^='#sub:']::before {
+        content: target-counter(attr(href), section) '.' target-counter(attr(href), subsection) ' –'; 
+        
+    }
+}
+@media screen {
+    ul.toc a[href^='#sub:']::before {
+        content: '???' ' –';
+        
+    }
+}
+
+h2:not([nonumber])::before {
+    content: /*'Subsection\0000a0'*/ counter(section)'.'counter(subsection) '. ';
+}
+
+
+@media print {
+    a[href^='#subsub:']::before { 
+        content: 'Subsubsection\0000a0' target-counter(attr(href), section) '.' target-counter(attr(href), subsection) '-' target-counter(attr(href), subsubsection, upper-alpha); 
+    }
+}
+@media screen {
+    a[href^='#subsub:']::before {  
+        content: 'Subsubsection\0000a0' '???'; 
+    }
+}
+
+ul.toc a[href^='#subsub:']::before {  
+    display: none; content: none;
+}
+
+h3:not([nonumber])::before {
+    /*content: counter(section) '.' counter(subsection) '-' counter(subsubsection, upper-alpha) '. ';*/
+    content: counter(subsubsection, lower-alpha) ') ';
+}
+/*
+
+h1:not([nonumber])::after {
+    content: '{css_computed:"' counter(section)'"}';
+    color: green;
+}
+h2:not([nonumber])::after {
+    content: '{css_computed:"' counter(section)'.'counter(subsection) '"}';
+    color: green;
+}
+h3:not([nonumber])::after {
+    color: green;
+    content: '{css_computed:"' counter(section)'.'counter(subsection)'-'counter(subsubsection, upper-alpha) '"}';
+}
+
+*/
+
+
+/*TODO: make preprocessing into code*/
+/*f,r { font-family: monospace; font-size: 80%;}*/
+f { color: darkgreen; }
+r { color: darkred;}
+
+
+div.figure { border: solid; }
+
+

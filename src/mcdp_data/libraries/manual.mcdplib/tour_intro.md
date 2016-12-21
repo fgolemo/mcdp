@@ -9,16 +9,16 @@ For example, multiplying by a negative number is a syntax error.<footnote>Simila
 
 This section introduces MCDPL by way of a tutorial.
 
-The minimal MCDP can be defined as in <a href="code:empty"/>.
+<a href='#this-does-not-exist'/>
 
-<figure id='code:empty'>
-	<pre class='mcdp' id='empty'>
-	mcdp {
+The minimal MCDP can be defined as in <a href="#code:empty"/>.
 
-	}
-	</pre>
-	<figcaption></figcaption>
-</figure>
+
+<pre class='mcdp' id='empty' figure-id='code:empty'>
+mcdp {
+
+}
+</pre>
 
 The code describes an MCDP with no functionality or resources,
 $\funsp=\One$, $\ressp=\One$.
@@ -39,15 +39,15 @@ mcdp {
 The code above defines an MCDP with one functionality, <f>capacity</f>, measured in joules,
 and one resource, <r>mass</r>, measured in grams.
 
-That is, $\funsp=\mathbb{R}_{+}^{[\text{J}]}$ and $\ressp=\mathbb{R}_{+}^{[\text{g}]}$. Here, let $\mathbb{R}$ refer to double precision floating point numbers.<footnote>(See how to describe types and type systems in <ref>types</ref>.</footnote>
+That is, $\funsp=\mathbb{R}_{+}^{[\text{J}]}$ and $\ressp=\mathbb{R}_{+}^{[\text{g}]}$. Here, let $\mathbb{R}$ refer to double precision floating point numbers.<footnote>(See how to describe types and type systems in <a href='#sec:types'/>.</footnote>
 
 Graphically, the
-MCDP is represented as a box with two edges (\prettyref{fig:some}).
+MCDP is represented as a box with two edges (<a href="#fig:some"/>).
 
-<render class='ndp_graph_templatized' figure-id='fig:some'>
+
+<render class='ndp_graph_templatized' figure-id="fig:some">
 	`model1
 </render>
-
 <!--
 	The MCDP defined above is, however, unusable, because we have
 	not specified how ``capacity`` and ``mass`` relate to one another.
@@ -58,17 +58,16 @@ MCDP is represented as a box with two edges (\prettyref{fig:some}).
 
 ### Constant functionality and resources
 
-The MCDP in <ref>code:some</ref> is not complete, as we have not
+The MCDP in <a href="#code:model1"/> is not complete, as we have not
 defined what constraints <f>capacity</f> and <r>mass</r> must satisfy.
 
-
-<ref>fig:code</ref> is a minimal example of a complete MCDP.
+<a href='#code:model2'/> is a minimal example of a complete MCDP.
 We have given hard bounds to both <f>capacity</f> and <r>mass</r>.
 
 <table class="col2" >
 	<tr>
 	<td>
-	<pre class='mcdp' id='model2' figure-id="fig:code">
+	<pre class='mcdp' id='model2' figure-id="code:model2">
 	mcdp {
 		provides capacity [J]
 		requires mass [g]
@@ -78,9 +77,10 @@ We have given hard bounds to both <f>capacity</f> and <r>mass</r>.
 	}
 	</pre>
 	</td><td>
-		<render class='ndp_graph_enclosed'>`model2</render>
+		<render class='ndp_graph_enclosed' figure-id="fig:model2">`model2</render>
 	</td></tr>
 </table>
+
 
 ### Querying the model
 
@@ -117,7 +117,7 @@ mass and capacity, given by the specific energy, using the following line:
 	required mass ≽ provided capacity / ρ
 </pre>
 
-In the graphical representation (<ref>code:model4</ref>), there is now
+In the graphical representation (<a href="#fig:model4"/>), there is now
 a connection between <f>capacity</f> and <r>mass</r>, with a DP that
 multiplies by the inverse of the specific energy.
 
@@ -146,15 +146,15 @@ multiplies by the inverse of the specific energy.
 PyMCDP is picky about units. It will complain if any operation does
 not have the required dimensionality. However, as long as the dimensionality
 is correct, it will automatically convert to and from equivalent units.
-For example, in <ref>code:conversion</ref> the specific energy given
-in kWh/kg. The two MCPDs are equivalent. PyMCDP will take care of
+For example, in <a href="#code:conversion"/> the specific energy given
+in <mcdp-poset>kWh/kg</mcdp-poset>. The two MCPDs are equivalent. PyMCDP will take care of
 the conversions that are needed, and will introduce a conversion from
-<mcdp-poset>J*kg/kWh</mcdp-poset> to <mcdp-poset>g</mcdp-poset> (<ref>fig:conversion</ref>).
+<mcdp-poset>J*kg/kWh</mcdp-poset> to <mcdp-poset>g</mcdp-poset> (<a href="#fig:conversion"/>).
 
 TODO: add pointers to problems with conversions: Glimli Glider, Ariane?
 
 For example, this is the same example with the specific
-energy given in kWh/kg.
+energy given in <mcdp-poset>kWh/kg</mcdp-poset>.
 
 
 <table class="col2">
@@ -170,6 +170,6 @@ energy given in kWh/kg.
 		}
 		</pre>
 	</td><td>
-		<render class='ndp_graph_enclosed_TB'>`model5</render>
+		<render class='ndp_graph_enclosed_TB' figure-id="fig:conversion">`model5</render>
 	</td></tr>
 </table>

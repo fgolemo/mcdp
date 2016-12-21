@@ -46,3 +46,10 @@ publish: $(manual_html)
 
 $(manual_pdf_prince): $(manual_html) 
 	prince --javascript  $< -o $@
+
+
+lulu-6by9.pdf: $(manual_pdf_prince)
+	pdfjam --outfile  $@  --fitpaper true --papersize '{6.125in,9.250in}' $^
+	echo written $<
+
+lulu: lulu-6by9.pdf
