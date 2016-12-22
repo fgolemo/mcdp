@@ -497,4 +497,8 @@ r { color: darkred;}
 
 div.figure { border: solid; }
 
+.Fcolor { color: darkgreen; }
+.Rcolor { color: darkred; }
 
+
+.uline { text-decoration: underline; }

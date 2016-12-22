@@ -1,0 +1,293 @@
+
+\newcommand{\triv}{\text{Triv}}
+
+\newcommand{\idFunc}{\mathrm{Id}}
+\newcommand{\reals}{\mathbb{R}}
+
+% fonts missing
+\renewcommand{\mathbbm}[1]{\mathbb{#1}}
+\renewcommand{\mathscr}[1]{\mathcal{#1}}
+
+\newcommand{\nonNegRealsComp}{\Rcomp}
+\newcommand{\nonNegReals}{\mathbb{R}_+}
+% symbols missing
+% http://www-sop.inria.fr/marelle/tralics/quadrat/testmath.xml
+\newcommand{\varocircle}{⦾}
+\newcommand{\varotimes}{⊗}
+\newcommand{\varovee}{(\vee)}
+
+\newcommand{\vmath}[1]{\mathsf{#1}} % How words should appear in math mode.
+
+\newcommand{\colR}{\color{darkred}}
+\newcommand{\colF}{\color{darkgreen}}
+\newcommand{\colH}{\color{blue}}
+
+\newcommand{\rtof}{{\colH \varphi}} 
+\newcommand{\ftor}{{\colH h}} 
+\newcommand{\ftoR}{{\colH H}} 
+% \newcommand{\ftoR}{{\color{black}H}} 
+\newcommand{\Rcomp}{\overline{\mathbb{R}}_+}
+
+
+% \newcommand{\colR}{\color[rgb]{0.555789,0.000000,0.000000}}
+% \newcommand{\colF}{\color[rgb]{0.094869,0.500000,0.000000}}
+% \newcommand{\colH}{\color[rgb]{0.000000,0.400000,1.000000}}
+\newcommand{\colI}{\color[RGB]{214,120,5}}
+
+
+
+% \newcommand{\posA}{\mathcal{P}}
+% \newcommand{\posB}{\mathcal{Q}}
+
+% \newcommand{\posAleq}{\posleq_{\posA}}
+% \newcommand{\posBleq}{\posleq_{\posB}}
+% \newcommand{\posleq}{\preceq}
+
+% \newcommand{\antichains}{\mathrm{A}}
+% \newcommand{\upsets}{\mathrm{U}}
+
+% \newcommand{\CPO}{CPO}
+
+% \newcommand{\Min}{\mathsf{Min}}
+% \newcommand{\Max}{\mathsf{Max}}
+
+% \newcommand{\pset}{\mathscr{P}}
+
+% \newcommand{\upit}{\uparrow}
+
+% \newcommand{\lfp}{\mathsf{lfp}}
+% \newcommand{\Rcomp}{\overline{\mathbb{R}}_{+}}
+
+% \newcommand{\reals}{\mathbb{R}}
+% \newcommand{\nonNegReals}{\mathbb{R}_{+}}
+% \newcommand{\nonNegRealsComp}{\Rcomp}
+
+
+\newcommand{\funsp}{{\colF\mathscr{F}}} % Function space
+\newcommand{\funleq}{\posleq_{\funsp}} % Function space
+\newcommand{\fun}{\vmath{f}} % Function
+
+\newcommand{\funtop}{\top_\funsp}
+\newcommand{\funbot}{\bot_\funsp}
+
+\newcommand{\imp}{\vmath{i}} % Implementation
+\newcommand{\impsp}{\mathscr{I}} % Implementation space
+
+\newcommand{\exc}{\vmath{exec}} % Executation $\exc: \impsp \rightarrow \funsp$
+\newcommand{\eval}{\vmath{eval}} % Evaluation $\eval: \impsp \rightarrow \ressp$
+
+% \newcommand{\param}{\vmath{p}} % Parameter
+\newcommand{\paramsp}{\mathscr{P}} % Parameter space
+% \newcommand{\paramleq}{\leq_{\paramsp}}
+
+\newcommand{\res}{\vmath{r}} % Resources
+\newcommand{\resleq}{\posleq_{\ressp}}
+\newcommand{\restop}{\top_\ressp}
+\newcommand{\resbot}{\bot_\ressp}
+
+\newcommand{\ressp}{{\colR\mathscr{R}}} % Resources space
+\newcommand{\resspleq}{\resleq}
+
+\newcommand{\tressp}{\trof(\ressp)} % Trade-off space
+\newcommand{\trof}{\mathscr{T}} % Trade-off space
+\newcommand{\tres}{T} 
+\newcommand{\tresleq}{\leq_{\trof}} % Trade-off space
+\newcommand{\trleq}{\leq_{\trof}} % Trade-off space
+
+%:section:articles/1509-gcmdp:
+
+
+
+\newcommand{\dpisp}{\ensuremath{\vmath{DPI}}}
+\newcommand{\cdpisp}{\ensuremath{\vmath{CDPI}}}
+
+\newcommand{\dprobsp}{\ensuremath{\vmath{DP}}}
+\newcommand{\dprob}{\vmath{dp}} % Design problem
+
+
+\newcommand{\dpseries}{\vmath{series}}
+\newcommand{\dppar}{\vmath{par}}
+\newcommand{\dploop}{\vmath{loop}}
+
+\newcommand{\dploopb}{\vmath{loopb}} % second form of dploop
+
+\newcommand{\cdprobsp}{\ensuremath{\vmath{CDP}}}
+\newcommand{\cdprob}{\vmath{cdp}} % Design problem
+\newcommand{\dpatoms}{\vmath{atoms}} % Atoms of a cdp
+
+
+\newcommand{\resMin}{{\Min_{\resleq}}}
+
+
+
+\newcommand{\unconnectedfun}{\mathsf{UF}}
+\newcommand{\unconnectedres}{\mathsf{UR}}
+
+
+
+\newcommand{\Aressp}{{\colR\mathsf{\colR A}\ressp}} % Antichains of resources
+\newcommand{\Afunsp}{{\colF\mathsf{\colF A}\funsp}} % Antichains of functions
+
+
+%:section:articles/UDP:
+
+\newcommand{\udpa}{\boldsymbol{u}_a}
+\newcommand{\udpb}{\boldsymbol{u}_b}
+\newcommand{\udpL}{\boldsymbol{\mathsf{L}}} 
+\newcommand{\udpU}{\boldsymbol{\mathsf{U}}} 
+\newcommand{\udpsp}{\vmath{UDP}}
+\newcommand{\udpleq}{\posleq_\udpsp}
+
+\newcommand{\dpsp}{\vmath{DP}}
+\newcommand{\dpleq}{\posleq_\dpsp}
+
+\newcommand{\terms}{\vmath{Terms}}
+
+\newcommand{\udpsem}{\Phi}
+
+\newcommand{\dpsem}{\varphi}
+
+\newcommand{\atoms}{\mathcal{A}}
+\newcommand{\atree}{\boldsymbol{\vmath{T}}}
+\newcommand{\val}{\boldsymbol{v}} % Valuation
+
+\newcommand{\ops}{\vmath{ops}} % Set of operations
+
+\newcommand{\ftorL}{\ftor_L}
+\newcommand{\ftorU}{\ftor_U}
+
+\newcommand{\acprod}{\mathbin{\boldsymbol{\times}}} % Product of antichains
+
+\newcommand{\oploop}{\dagger}
+\newcommand{\opseries}{\mathbin{\varocircle}}
+\newcommand{\oppar}{\mathbin{\varotimes}}
+\newcommand{\opcoprod}{\mathbin{\varovee}}
+
+\newcommand{\UId}{\vmath{UId}} % Uncertain identity
+\newcommand{\vdc}{\vmath{vdc}} % Van Der Corput
+
+
+\newcommand{\makedp}{\Gamma}
+
+\newcommand{\colU}{\color{purple}}
+\newcommand{\colL}{\color{orange}}
+
+
+
+
+\newcommand{\R}[1]{{\colR #1}}
+\newcommand{\F}[1]{{\colF #1}}
+\newcommand{\I}[1]{{\colI #1}}
+
+\newcommand{\One}{\mathbbm{1}} % \usepackage{bbm}
+\newcommand{\cdpiN}{\mathcal{V}} % Nodes in a CDPI
+\newcommand{\cdpin}{v} % one node in a CDPI
+\newcommand{\cdpinA}{v_1}
+\newcommand{\cdpinB}{v_2}
+\newcommand{\cdpiresind}{i}
+\newcommand{\cdpifunind}{j}
+\newcommand{\cdpiresindA}{i_1}
+\newcommand{\cdpifunindB}{j_2}
+\newcommand{\dpinumf}{\vmath{nf}}
+\newcommand{\dpinumr}{\vmath{nr}}
+\newcommand{\cdpinnumf}{\dpinumf_\cdpin} % Number of functionalities
+\newcommand{\cdpinnumr}{\dpinumr_\cdpin} % Number of resources
+\newcommand{\cdpiE}{\mathcal{E}} % Edges in a CDPI
+
+
+
+
+
+% \let\oldfun\fun     \renewcommand{\fun}{{\colF\oldfun}}
+% \let\oldres\res     \renewcommand{\res}{{\colR\oldres}}
+% \let\oldimp\imp     \renewcommand{\imp}{{\colI\oldimp}}
+
+% \let\oldexc\exc     \renewcommand{\exc}{{\colF\oldexc}}
+% \let\oldeval\eval     \renewcommand{\eval}{{\colR\oldeval}}
+
+% \let\oldfunsp\funsp \renewcommand{\funsp}{{\colF\oldfunsp}}
+% \let\oldressp\ressp \renewcommand{\ressp}{{\colR\oldressp}}
+% \let\oldimpsp\impsp \renewcommand{\impsp}{{\colI\oldimpsp}}
+
+% \let\oldftor\ftor \renewcommand{\ftor}{{\colH\oldftor}}
+% \let\oldrtof\rtof \renewcommand{\rtof}{{\colH\oldrtof}}
+
+% % TODO: move away
+
+% \renewcommand{\Aressp}{{\colR\antichains\ressp}} % Antichains of resources
+% \renewcommand{\Afunsp}{{\colF\antichains\funsp}} % Antichains of resources
+
+
+
+
+
+
+%
+%:section:basic/optimization: Optimization staff
+
+
+\newcommand{\subto}{\text{s.t.}} % Subject to in math
+\newcommand{\with}{\text{using}} % "With"
+
+%
+%:section:basic/posets: Partial orders
+%
+
+\newcommand{\pset}{\mathscr{P}} % Power set (latenative to powerset
+\DeclareMathOperator*{\Min}{Min}
+\DeclareMathOperator*{\Inf}{Inf}
+\DeclareMathOperator*{\Sup}{Sup}
+\DeclareMathOperator*{\Max}{Max}
+
+\newcommand{\lowerbounds}{\vmath{lowerbounds}}
+\newcommand{\upperbounds}{\vmath{upperbounds}}
+\newcommand{\posMin}{\Min}
+\newcommand{\posleq}{\preceq}
+% \newcommand{\poslneq}{\precneq} % usepackage{mathabx}
+\newcommand{\poslt}{\prec} 
+\newcommand{\posgeq}{\succeq}
+
+\newcommand{\posA}{\mathcal{P}} %
+
+\newcommand{\posAleq}{\mathrel{{\posleq_\posA}}} %
+
+\newcommand{\posAMin}{\mathop{{\posMin_{\posAleq}}}} %  Minimal elements
+
+\newcommand{\posAmin}{\mathop{{\min_{\posAleq}}}} %  The least element
+\newcommand{\posAmax}{\mathop{{\max_{\posAleq}}}} %  The least element
+
+\newcommand{\posB}{\mathcal{Q}} % 
+\newcommand{\posBleq}{\mathrel{{\posleq_\posB}}} %
+\newcommand{\posC}{\mathcal{R}} % 
+
+
+\newcommand{\lfp}{\vmath{lfp}} % Least fixed point 
+\newcommand{\prefixed}{\vmath{prefixed}} % prefixed points 
+\newcommand{\CPOs}{\textsc{CPO}s\xspace}
+\newcommand{\CPO}{\textsc{CPO}\xspace}
+\newcommand{\DCPOs}{\textsc{DCPO}s\xspace}
+\newcommand{\DCPO}{\textsc{DCPO}\xspace}
+
+%:example: The upper sets of P are $\upsets(P)$
+% \newcommand{\antichains}{\vmath{antichains}} % 
+\newcommand{\antichains}{\vmath{A}} % 
+%:example: The antichains sets of P are $\antichains(P)$
+
+\newcommand{\upsets}{\vmath{U}} %
+%:example: The upper sets of $\posA$ are $\upsets\posA$
+\newcommand{\downsets}{\vmath{D}} %
+%:example: The down sets of $\posA$ are $\downsets\posA$
+
+
+\newcommand{\upresleq}{\posleq_{\upressp}}
+\newcommand{\upressp}{\upsets\ressp}
+\newcommand{\allupsets}{\vmath{Up}} % 
+%:deprecated:
+
+
+\newcommand{\upit}{{\uparrow\,}} % Converts to smallest upset containing the ste
+
+\newcommand{\stupit}{\dot{\upit}} % Strict upper closure
+
+\newcommand{\posetwidth}{\vmath{width}}
+\newcommand{\posetheight}{\vmath{height}}

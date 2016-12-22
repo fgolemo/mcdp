@@ -238,6 +238,20 @@ def embed_images(html, basedir):
                 tag['src'] = src
     return str(soup)
 
+def get_length_in_inches(s):
+    """ "1cm" = 0.393 """
+    inpoints = {'cm': 0.393, 'in': 1.0,
+                '\\textwidth': 6.0}
+    for unit, ininches in inpoints.items():
+        if unit in s:
+            digits = s[:s.index(unit)]
+            num = float(digits)
+            res = num * ininches
+            print ('%r = %s inches (digits: %s)' % (s, res, digits))
+            return res
+    msg = 'Cannot interpreted length %r.' % s
+    raise ValueError(msg)
+        
 def embed_images_from_library(html, library):
     """ Resolves images from library """
     from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
@@ -268,19 +282,34 @@ def embed_images_from_library(html, library):
         width_in = width_px / float(density)
         height_in = height_px / float(density)
         
-        scale = 1.0
+        
         if tag.has_attr('latex-options'):
-            o = tag['latex-options']
-#             print('latex options: %r' % o)
-            if 'scale' in o:
-#                 print('warning: no scale in latex options')
-                tokens = re.split(',|=', o)
-#                 print('tokens %s' % tokens)
-                scale_token = tokens[1+tokens.index('scale')]
-                scale = float(scale_token)
-            print('%s -> %s' % (o, scale))
-        use_width_in = width_in * scale
-        use_height_in = height_in * scale
+            latex_options = tag['latex-options']
+            props = {}
+            for assignment in re.split(',', latex_options):
+                tokens = list(re.split('=', assignment))
+                if len(tokens) ==2:
+                    props[tokens[0]] = tokens[1]
+                elif len(tokens) == 1:
+                    props[tokens[0]] = True
+                else:
+                    raise ValueError((latex_options, tokens))
+                
+                
+            if 'scale' in props:
+                scale = float(props['scale'])
+                use_width_in = width_in * scale
+                use_height_in = height_in * scale
+            elif 'width' in props:
+                use_width_in = get_length_in_inches(props['width'])
+                ratio = height_in/width_in
+                use_height_in = use_width_in * ratio
+            else:
+                use_width_in = width_in 
+                use_height_in = height_in 
+        else:
+            use_width_in = width_in 
+            use_height_in = height_in 
         # now, let's work out the original size
         sizing = 'width: %sin; height: %sin;' % (use_width_in, use_height_in)
         s = tag['style'] + ';' if tag.has_attr('style') else ''

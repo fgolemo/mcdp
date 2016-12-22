@@ -10,6 +10,7 @@ from .highlight import html_interpret
 from .markd import render_markdown
 from .prerender_math import prerender_mathjax
 from mcdp_web.renderdoc.xmlutils import check_html_fragment
+from mocdp.exceptions import DPInternalError
 
 
 __all__ = ['render_document']
@@ -27,8 +28,14 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
         msg = 'I expect a str encoded with utf-8, not unicode.'
         raise_desc(TypeError, msg, s=s)
 
-    # save the '\\' in mathjax before markdown
+
     
+    # copy all math content,
+    #  between $$ and $$
+    #  between various limiters etc.
+    # returns a dict(string, substitution)
+    s, maths = extract_maths(s) 
+    print('maths = %s' % maths)
     
     # fixes for LaTeX
     s = latex_preprocessing(s)
@@ -37,9 +44,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
 
     # cannot parse html before markdown, because md will take
     # invalid html, (in particular '$   ciao <ciao>' and make it work)
-     
-#     s = escape_ticks_before_markdown(s)
-#     s = s.replace('>`', '>&#96;')
+    
     
     s = s.replace('\\\\', 'MATHJAX_BARBAR')
     s = s.replace('*}', '\*}')
@@ -47,22 +52,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
         l = replace_backticks_except_in_backticks_expression(l)
         l = replace_underscore_etc_in_formulas(l)
         return l
-    
-    DD = 'DOUBLEDOLLAR'
-    s = replace_markdown_line_by_line(s, markdown_fixes)
-    
-    def inside(sf):
-        sf = sf.replace('_', UNDERSCORE_IN_FORMULA)
-        sf = sf.replace('*', STAR_IN_FORMULA)
-        sf = sf.replace('\\', '\\\\')
-        return sf
-    def outside(sf):
-        return sf
-    s = s.replace('$$', DD)
-    s = replace_inside_delims(s, DD, inside=inside, outside=outside)
-    s = s.replace(DD, '$$')
-     
-    
+
     s = s.replace('<mcdp-poset>', '<mcdp-poset markdown="0">')
     print(indent(s, 'before markdown | '))
     
@@ -70,17 +60,34 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     s = render_markdown(s)
     
     print(indent(s, 'after  markdown | '))
-    
+
+    for k,v in maths.items():
+        if not k in s:
+            msg = 'Cannot find %r (= %r)' % (k, v)
+            raise_desc(DPInternalError, msg, s=s)
+        def preprocess_equations(x):
+            # this gets mathjax confused
+            x = x.replace('>', '\\gt')
+            x = x.replace('<', '\\lt')
+            return x
+            
+        v = preprocess_equations(v)
+        s = s.replace(k, v)
+
+    from mcdp_web.renderdoc.latex_preprocess import replace_equations
+    s = replace_equations(s)        
     s = s.replace('\\*}', '*}')
     
-    s = s.replace('MATHJAX_BARBAR', '\\\\')
+#     s = s.replace('MATHJAX_BARBAR', '\\\\')
+
     s = replace_underscore_etc_in_formulas_undo(s)
     
 #     print(indent(s, 'after  replace | '))
         
     # this escapes $ to DOLLAR
+    print(indent(s, 'before  mathjax | '))
     s = escape_for_mathjax(s)
-   
+
     check_html_fragment(s)
 #     print(indent(s, 'before prerender_mathjax | '))
     # mathjax must be after markdown because of code blocks using "$"
@@ -125,9 +132,22 @@ def get_mathjax_preamble():
     frag = tex
     return frag
 
-
-def replace_markdown_line_by_line(s, line_transform):
+def extract_maths(s):
+    """ returns s2, subs(str->str) """
+    delimiters = [('$$','$$'),
+                    ('$','$'),
+                   ('\\[', '\\]')]
+    envs = ['equation','align','align*','eqnarray','eqnarray*']
+    for e in envs:
+        delimiters.append(('\\begin{%s}' % e, '\\end{%s}'% e))
     
+    subs = {}
+    for d1, d2 in delimiters:
+        from mcdp_web.renderdoc.latex_preprocess import extract_delimited
+        s = extract_delimited(s, d1, d2, subs)  
+    return s, subs
+
+def replace_markdown_line_by_line(s, line_transform):    
     lines = s.split('\n')
     block_started = False
     for i in range(len(lines)):
