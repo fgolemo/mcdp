@@ -33,11 +33,11 @@ def prerender_mathjax(s):
     return s
 
 def get_mathjax_preamble():
-    fn = '/Volumes/1604-mcdp/data/env_mcdp/src/mcdp/src/mcdp_data/libraries/manual.mcdplib/symbols.tex'
+    package = dir_from_package_name('mcdp_data')
+    fn = os.path.join(package, 'libraries/manual.mcdplib/symbols.tex')
+    if not os.path.exists(fn):
+        raise ValueError(fn)
     tex = open(fn).read()
-#     lines = filter(lambda x: len(x.strip())> 0, tex.split('\n'))
-#     lines = ['$'+l+'$' for l in lines]
-#     f = "\n".join(lines)
     f = '$$'+tex+'$$'
     f += """
 <script type="text/x-mathjax-config">
