@@ -10,3 +10,5 @@ M\doteq\begin{cases}
  & \res\in\ftor(\fun),\\
  & \res\posleq\fun.
 \end{cases}
+\]
+\end{example}

@@ -14,7 +14,7 @@ Citing them in order:
   
   <ul>
   <li>no</li>
-  <li> <a href="#sub:sC_child"/></li
+  <li> <a href="#sub:sC_child"/></li>
   </ul>
 
 * <a href="#sub:sssF"/> (should be: sssF)

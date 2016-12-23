@@ -56,7 +56,7 @@ def replace_markdown_line_by_line(s, line_transform=None, code_transform=None, i
         assert l.startswith('<')
         tagname = ''
         l = l[1:]
-        v = lambda _: _.isdigit() or _.isalpha() or _ == '_' 
+        v = lambda _: _.isdigit() or _.isalpha() or _ in ['_', '-'] 
         while l and v(l[0]):
             tagname += l[0]
             l = l[1:]
@@ -64,7 +64,6 @@ def replace_markdown_line_by_line(s, line_transform=None, code_transform=None, i
             msg = 'Cannot get tagname from line %r' % line_in[0]
             msg += '\n in:%s out= %s' % (line_in, line_out)
             raise ValueError(msg)
-#         print('xml tag: %r' % tagname)
         # <tagname> okokokok </tagname>
         # <tagname /> okokokok
         can_close_by_short = True

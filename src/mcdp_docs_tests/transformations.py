@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from comptests.registrar import comptest, run_module_tests, comptest_fails
-from mcdp_library.library import MCDPLibrary
-from mcdp_web.renderdoc.main import render_complete
-from mcdp_web.renderdoc.highlight import get_minimal_document
+from comptests.registrar import comptest
 from contracts.utils import raise_desc
+from mcdp_library.library import MCDPLibrary
+from mcdp_web.renderdoc.highlight import get_minimal_document
+from mcdp_web.renderdoc.main import render_complete
 
 
 def tryit(s, write_to=None, forbid=[]):
