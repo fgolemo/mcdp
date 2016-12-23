@@ -7,6 +7,7 @@ from bs4 import BeautifulSoup
 from contracts import contract
 from contracts.utils import raise_desc
 from mocdp import logger
+from bs4.element import Comment
 
 
 def get_manual_css_frag():
@@ -202,7 +203,7 @@ def generate_doc(soup):
 
     stack = [ Item(None, 0, 'root', 'root', []) ]
 
-    for header in soup.findAll(['h1', 'h2', 'h3']):
+    for header in list(soup.findAll(['h1', 'h2', 'h3'])):
         
         prefix = {'h1':'sec','h2':'sub','h3':'subsub'}[header.name]
         
@@ -216,6 +217,8 @@ def generate_doc(soup):
                 msg = 'Adding prefix %r to current id %r for %s.' % (prefix, cur, header.name)
                 header['id'] = prefix + ':' + cur
                 logger.debug(msg)
+                header.parent.insert(header.parent.index(header), 
+                                     Comment('Warning: ' + msg))
         depth = int(header.name[1])
 
         # previous_depth = stack[-1].depth

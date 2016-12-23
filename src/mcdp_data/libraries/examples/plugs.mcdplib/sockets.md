@@ -54,8 +54,7 @@ We can use a ``poset`` to describe the poset [](#fig:socket_type):
 <pre class='mcdp_poset' id='socket_type' label='socket_type.mcdp_poset'></pre>
 
 <render class='hasse_icons' figure-id='fig:socket_type' 
-    figure-caption='The poset of plugs.'
-style='width: 10em'>`socket_type</render>
+   figure-caption='The poset of plugs.' style='width: 10em'>`socket_type</render>
 
 
 ### Voltages 
@@ -220,7 +219,7 @@ We can query the model as follows. Suppose we need 2 outputs, each of 0.5A.
 <pre class='mcdp_value'>solve(
     ⟨ ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩,
       ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩ ⟩, 
-    `Ravpower)</pre>
+    `Ravpower)
 </pre>
 
 This is the output:

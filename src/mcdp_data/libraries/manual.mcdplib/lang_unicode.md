@@ -1,6 +1,4 @@
-## Use of Unicode letters and glyphs
-
-\label{sec:unicode}
+## Use of Unicode letters and glyphs ## {#sec:unicode}
 
 MCDPL allows to use some Unicode characters in identifiers and expressions.
 

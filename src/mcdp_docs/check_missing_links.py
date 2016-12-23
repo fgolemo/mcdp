@@ -1,4 +1,5 @@
 from mocdp import logger
+from bs4.element import Comment
 
 
 def check_if_any_href_is_invalid(html):
@@ -9,9 +10,10 @@ def check_if_any_href_is_invalid(html):
     for a in soup.select('a[href^="#"]'):
         href = a['href']
         if a.has_attr('class') and  "mjx-svg-href" in a['class']:
-            msg = 'Invalid math reference: %s' % str(a)
+#             msg = 'Invalid math reference: %s' % str(a)
             msg = 'Invalid math reference (sorry, no details).'
             logger.error(msg)
+            a.insert_before(Comment('Error: %s' % msg))
             math_errors.append(msg)
             continue 
 #         if href == "#": continue
@@ -21,11 +23,13 @@ def check_if_any_href_is_invalid(html):
         if not selection:
             msg = 'No element found matching %s' % str(a)
             logger.error(msg)
+            a.insert_before(Comment('Error: %s' % msg))
             errors.append(msg)
             continue
         if len(selection) > 1:
             msg = 'More than one element matching %r.' % href
             logger.error(msg)
+            a.insert_before(Comment('Error: %s' % msg))
             errors.append(msg)
             continue
     return errors, math_errors

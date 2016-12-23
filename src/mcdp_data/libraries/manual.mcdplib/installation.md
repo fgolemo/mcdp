@@ -86,7 +86,7 @@ Run the command:
 
     $ mcdp-web
 
-Then point your browser to the address <http://127.0.0.1:8080/>.
+Then point your browser to the address [http://127.0.0.1:8080/](http://127.0.0.1:8080/).
 
 ### Running command-line programs
 

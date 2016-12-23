@@ -10,14 +10,14 @@
 
 A battery is specified as a DP with the functionalities:
 
-* <span class=F>capacity</span> used for each mission;
-* <span class=F>number of missions</span>;
+* <f>capacity</f> used for each mission;
+* <f>number of missions</f>;
 
 and resources
 
-* <span class=R>cost</span>;
-* <span class=R>inertial mass</span>;
-* <span class=R>maintenance</span> (number of times the battery needs to be replaced).
+* <r>cost</r>;
+* <r>inertial mass</r>;
+* <r>maintenance</r> (number of times the battery needs to be replaced).
 
 <render class='ndp_graph_templatized'>`Battery_LiPo1</render>
 
@@ -62,14 +62,14 @@ This is a graphical representation of the network of constraints:
 
 The actuation is defined as a DP where the functionalities are:
 
-* <span class=F>the maximum platform velocity</span>;
-* <span class=F>the maximum lift</span>;
+* <f>the maximum platform velocity</f>;
+* <f>the maximum lift</f>;
 
 and the resources are:
 
-* <span class=R>cost</span>;
-* <span class=R>actuator inertial mass</span>;
-* <span class=R>power</span>.
+* <r>cost</r>;
+* <r>actuator inertial mass</r>;
+* <r>power</r>.
 
 <render class='ndp_graph_templatized'>`Actuation</render>
 
@@ -83,7 +83,7 @@ provided velocity ≼ 3 m/s
 </pre>
 
 Then it describes a nonlinear polynomial (and monotone) relation
-between <span class=F>lift</span> and <span class=R>power</span>:
+between <f>lift</f> and <r>power</r>:
 
 <pre class='mcdp_statements'>
 p0 = 2 W
@@ -107,9 +107,9 @@ actuation and energetics as sub-MCDPs.
 
 We will take as high-level functionality:
 
-* <span class=F>endurance</span> (length of mission)
-* <span class=F>extra payload</span>: things that must be carried on board
-* <span class=F>extra power</span>: power to be provided for other subsystems
+* <f>endurance</f> (length of mission)
+* <f>extra payload</f>: things that must be carried on board
+* <f>extra power</f>: power to be provided for other subsystems
 
 <pre class='ndp_graph_templatized'>`ActuationEnergetics</pre>
 
@@ -145,7 +145,7 @@ lift provided by actuation ≽ weight
 
 The **cost constraint** is the following:
 
-<pre class=mcdp_statements>
+<pre class='mcdp_statements'>
 labor_cost = (10 &#36;) * (maintenance required by battery)
 
 total_cost ≽ (
@@ -212,9 +212,9 @@ These are other parts that we need.
 
 Based on the previous models, we can assemble the model
 for the entire drone, with high-level functionality:
-* <span class=F>travel_distance</span>
-* <span class=F>carry payload</span>
-* <span class=F>num_missions</span>
+* <f>travel_distance</f>
+* <f>carry payload</f>
+* <f>num_missions</f>
 
 <pre class='ndp_graph_templatized'>`DroneComplete</pre>
 <pre class='ndp_graph_enclosed'>`DroneComplete</pre>

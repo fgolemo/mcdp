@@ -9,6 +9,14 @@
 ## Writing documentation
 
 
+### Markdown Extra
+
+This is to set the ID:
+
+~~~
+## header ## {#sec:the_id}
+~~~
+
 
 ### Using LaTeX
 
@@ -18,13 +26,11 @@ The basic relation is $\res \geq \ftor(\fun)$.
 
 Simple test to show MathJax is working: $x = y^2 + \sin(\int_a^b D x)$.
 
-$$
 \begin{eqnarray}
 y &=& x^4 + 4      \nonumber \\
   &=& (x^2+2)^2 -4x^2 \nonumber \\
   &\le&(x^2+2)^2    \nonumber
 \end{eqnarray}
-$$
 
 
 Define this:
@@ -52,20 +58,20 @@ Use <code>&lt;pre&gt;</code> tags.
 ~~~
 <pre class="mcdp" id='submodel'>
 mcdp  {
-	provides f [J]
-	requires r [g]
-	required r ≽ 10g
-	provided f ≼ 10J
+    provides f [J]
+    requires r [g]
+    required r ≽ 10g
+    provided f ≼ 10J
 }
 </pre>
 
 <pre class="mcdp" id='model'>
 mcdp {
-	provides capacity [J]
-	requires mass [g]
-	s = instance `submodel
-	mass ≽ r required by s
-	capacity ≼  f provided by s
+    provides capacity [J]
+    requires mass [g]
+    s = instance `submodel
+    mass ≽ r required by s
+    capacity ≼  f provided by s
 }
 </pre>
 ~~~
@@ -74,26 +80,71 @@ will give you:
 
 <pre class="mcdp" id='submodel'>
 mcdp  {
-	provides f [J]
-	requires r [g]
-	required r ≽ 10g
-	provided f ≼ 10J
+    provides f [J]
+    requires r [g]
+    required r ≽ 10g
+    provided f ≼ 10J
 }
 </pre>
 
 
 <pre class="mcdp" id='model'>
 mcdp {
-	provides capacity [J]
-	requires mass [g]
-	s = instance &#96;submodel
-	mass ≽ r required by s
-	capacity ≼  f provided by s
+    provides capacity [J]
+    requires mass [g]
+    s = instance &#96;submodel
+    mass ≽ r required by s
+    capacity ≼  f provided by s
 }
 </pre>
 
 
 ### `noprettify`
+
+### Other substitutions
+
+col2, col3, col4, col5
+
+~~~
+<col2>
+    <p></p>
+    <p></p>
+    <p></p>
+    <p></p>
+</col2>
+~~~
+
+Other abbreviations
+
+<col2>
+    <code>&lt;val&gt;</code>
+    <code>&lt;code class="mcdp_value"&gt;</code>
+    <code>&lt;mcdp-value&gt;</code>
+    <code>&lt;code class="mcdp_value"&gt;</code>
+    <code>&lt;pos&gt;</code>
+    <code>&lt;code class="mcdp_poset"&gt;</code>
+    <code>&lt;mcdp-poset&gt;</code>
+    <code>&lt;code class="mcdp_poset"&gt;</code>
+</col2>
+
+~~~
+<pre mcdp-value>
+~~~
+instead of
+~~~
+<pre class='mcdp_value'>
+</pre>
+~~~
+
+
+~~~
+<pre mcdp-poset>
+~~~
+instead of
+~~~
+<pre class='mcdp_poset'>
+</pre>
+~~~
 
 ### mcdp_ndp_graph_templatized
 
@@ -152,7 +203,7 @@ mcdp {
 <render class='template_graph_enclosed'>
 template [A:mcdp{}]
 mcdp {
-	a = instance A
+    a = instance A
 }
 </render>
 
@@ -161,10 +212,10 @@ mcdp {
 
 <pre class="mcdp_poset" id='myposet'>
 poset {
-	a b
-	c ≼ a
-	c ≼ d
-	b ≼ d
+    a b
+    c ≼ a
+    c ≼ d
+    b ≼ d
 }
 </pre>
 
@@ -197,17 +248,17 @@ Can use `plot_value_generic`
 
 ~~~
 <pre class='plot_value_generic' style='width: 10em'>
-	upperclosure{&lt;1 g, 0m&gt;, &lt;2 g, 1m&gt;}
+    upperclosure{&lt;1 g, 0m&gt;, &lt;2 g, 1m&gt;}
 </pre>
 ~~~
 
 <pre class='plot_value_generic'>
-	upperclosure{&lt;1 g, 0m&gt;, &lt;2 g, 1m&gt;}
+    upperclosure{&lt;1 g, 0m&gt;, &lt;2 g, 1m&gt;}
 </pre>
 
 
 <pre class='plot_value_generic'>
-	&lt;upperclosure {&lt;0g, 1J&gt;}, upperclosure {&lt;1g, 0.5J&gt;}&gt;
+    &lt;upperclosure {&lt;0g, 1J&gt;}, upperclosure {&lt;1g, 0.5J&gt;}&gt;
 </pre>
 
 
@@ -260,16 +311,16 @@ This is P: <code class='mcdp_value'>Nat:0</code>.
 
 Always close the render and pre elements:
 
-	<render ...></render>
+    <render ...></render>
 
 Never:
 
-	<render .../>
+    <render .../>
 
 
 Avoid two backticks in the same paragraph, it will give an error:
 
-	Don't get confused here: <strong>`bold</strong> and <strong>`brave</strong>.
+    Don't get confused here: <strong>`bold</strong> and <strong>`brave</strong>.
 
 because MD gets confused.
 

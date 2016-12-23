@@ -5,6 +5,7 @@ from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from contracts.interface import Where
 from mocdp.exceptions import DPSyntaxError
 from mocdp import logger
+from mcdp_web.renderdoc.markdown_transform import is_inside_markdown_quoted_block
 
 
 def latex_preprocessing(s):
@@ -708,11 +709,46 @@ def extract_delimited(s, d1, d2, subs, domain):
         raise ValueError(msg)
     subs[key] = complete
     
-    print ('%r = %s' % (key, complete))
+#     print ('%r = %s' % (key, complete))
     s2 = s[:a] + key + s[b:]
     return extract_delimited(s2, d1, d2, subs, domain)
     
+
+
+def extract_maths(s):
+    """ returns s2, subs(str->str) """
+    # these first, because they might contain $ $
+    envs = [
+        'equation','align','align*',
+            
+            # no - should be inside of $$
+            'eqnarray','eqnarray*',
+            
+#             'tabular' # have pesky &
+            ]
+ 
+    delimiters = []
+    for e in envs:
+        delimiters.append(('\\begin{%s}' % e, '\\end{%s}'% e))
+   
+    # AFTER the environments
+    delimiters.extend([('$$','$$'),
+                    ('$','$'),
+                   ('\\[', '\\]')])
     
+    subs = {}
+    for d1, d2 in delimiters:
+        s = extract_delimited(s, d1, d2, subs, domain='MATHS')
+        
+    for k, v in list(subs.items()):
+        # replace back if k is in a line that is a comment
+        # or there is an odd numbers of \n~~~
+        if is_inside_markdown_quoted_block(s, s.index(k)):
+            s = s.replace(k, v)
+            del subs[k]
+  
+    return s, subs
+
 if __name__ == '__main__':
     s = """
 For example, the expression <mcpd-value>&lt;2 J, 1 A&gt;</mcdp-value>

@@ -569,28 +569,16 @@ h4 code:last-of-type::after{
 
 div.colN-wrap {
     text-align: center;
-    border: solid 1px blue;
+    /*border: solid 1px blue;*/
 }
 div.colN-wrap table {
     display: inline-block;
-    border: solid 1px red;
+    /*border: solid 1px red;*/
 }
 
 div.colN-wrap table td {
     padding-left: 0.7em;
     padding-right: 0.7em;
-    border: solid 1px blue;
+    /*border: solid 1px blue;*/
 }
-
-
-/*
-table.col2 { 
-    max-width: 100%; width: 100%;
-}
-table.col2 td {
-    width: 50%;
-    text-align: center;
-}
-*/
-
-
+ 

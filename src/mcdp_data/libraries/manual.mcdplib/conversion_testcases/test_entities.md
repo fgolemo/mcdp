@@ -1,0 +1,1 @@
+Other words for functionality are: simply <f>&ldquo;functions&rdquo;</f>.

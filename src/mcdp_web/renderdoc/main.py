@@ -2,7 +2,12 @@
 from contracts import contract
 from contracts.utils import raise_desc, indent
 from mcdp_library import MCDPLibrary
-from mocdp.exceptions import DPInternalError, DPSyntaxError
+from mcdp_web.renderdoc.abbrevs import other_abbrevs
+from mcdp_web.renderdoc.highlight import fix_subfig_references
+from mcdp_web.renderdoc.macro_col2 import col_macros,\
+    col_macros_prepare_before_markdown
+from mcdp_web.renderdoc.preliminary_checks import do_preliminary_checks_and_fixes
+from mocdp.exceptions import DPInternalError
 
 from .highlight import html_interpret,  mark_console_pres,\
     escape_for_mathjax, make_figure_from_figureid_attr
@@ -10,11 +15,9 @@ from .latex_preprocess import latex_preprocessing
 from .markd import render_markdown
 from .prerender_math import prerender_mathjax
 from .xmlutils import check_html_fragment
-from mcdp_web.renderdoc.highlight import fix_subfig_references
-from contracts.interface import Where
-from mcdp_web.renderdoc.macro_col2 import col_macros,\
-    col_macros_prepare_before_markdown
-from mcdp_web.renderdoc.abbrevs import other_abbrevs
+from mcdp_web.renderdoc.latex_preprocess import extract_maths
+from mcdp_web.renderdoc.markdown_transform import is_inside_markdown_quoted_block
+
 
 
 __all__ = ['render_document']
@@ -32,14 +35,9 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
         msg = 'I expect a str encoded with utf-8, not unicode.'
         raise_desc(TypeError, msg, s=s)
 
-    misspellings = ['mcpd', 'MCPD']
-    for m in misspellings:
-        if m in s:
-            c = s.index(m)
-            msg = 'Typo, you wrote MCPD rather than MCDP'
-            where = Where(s, c, c + len(m))
-            raise DPSyntaxError(msg, where=where)
-        
+   
+    s = do_preliminary_checks_and_fixes(s)
+    
     # copy all math content,
     #  between $$ and $$
     #  between various limiters etc.
@@ -162,7 +160,7 @@ def get_mathjax_preamble():
 
 def protect_my_envs(s):
     # we don't want MathJax to look inside these
-    elements = ['mcdp-value', 'mcdp-poset', 'pre', 'render']
+    elements = ['mcdp-value', 'mcdp-poset', 'pre', 'render', 'pos', 'val']
     delimiters = []
     for e in elements:
         delimiters.append(('<%s'%e,'</%s>'%e))
@@ -182,64 +180,8 @@ def protect_my_envs(s):
 
     return s, subs
 
-def is_inside_markdown_quoted_block(s, i):
-    before = s[:i]
-    nbefore = before.count('\n~~~')
-    
-    if nbefore % 2 == 1:
-        return True
-        # we are in a quoted block -- replace back
-        
-    last_line = before.split('\n')[-1]
-    if last_line.startswith(' '*4):
-        return True
 
-    return False
 
-def extract_maths(s):
-    """ returns s2, subs(str->str) """
-    delimiters = [('$$','$$'),
-                    ('$','$'),
-                   ('\\[', '\\]')]
-    envs = ['equation','align','align*','eqnarray','eqnarray*']
-    for e in envs:
-        delimiters.append(('\\begin{%s}' % e, '\\end{%s}'% e))
-    
-    subs = {}
-    for d1, d2 in delimiters:
-        from mcdp_web.renderdoc.latex_preprocess import extract_delimited
-        s = extract_delimited(s, d1, d2, subs, domain='MATHS')
-        
-    for k, v in list(subs.items()):
-        # replace back if k is in a line that is a comment
-        # or there is an odd numbers of \n~~~
-        if is_inside_markdown_quoted_block(s, s.index(k)):
-            s = s.replace(k, v)
-            del subs[k]
-  
-    return s, subs
-
-def replace_markdown_line_by_line(s, line_transform):    
-    lines = s.split('\n')
-    block_started = False
-    for i in range(len(lines)):
-        l = lines[i]
-        if l.startswith('~~~'):
-            if block_started:
-                block_started = False
-                continue
-            else:
-                block_started = True
-            
-        if block_started:
-            continue
-        is_literal = l.startswith(' '*4)
-        if is_literal: continue
-        l2 = line_transform(l)
-        lines[i] = l2
-    s2 = "\n".join(lines)
-
-    return s2
 # 
 # def replace_backticks_except_in_backticks_expression(l):
 #     D = 'DOUBLETICKS'

@@ -15,7 +15,7 @@ Here is a great quote:
         quoted by <a href="https://en.wikipedia.org/wiki/Kenneth_E._Iverson"
             title='Kenneth E. Iverson (1920-2004). Creator of programming language APL.'>
             Kenneth Iverson</a>,
-            quoted by Donald McIntyre in <a href='http://dl.acm.org/citation.cfm?id=206985&dl=ACM&coll=DL&CFID=877903021&CFTOKEN=25689369'>this paper</a>,
+            quoted by Donald McIntyre in <a href='http://dl.acm.org/citation.cfm?id=206985&amp;dl=ACM&amp;coll=DL&amp;CFID=877903021&amp;CFTOKEN=25689369'>this paper</a>,
             but ultimately sourceless and probably apocryphical.</p>
 </blockquote>
 

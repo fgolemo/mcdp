@@ -68,36 +68,77 @@ for Mathematical Programming. Duxbury Press. ISBN 978-0-534-38809-6.</cite>
 MCDPL has 5 "types universes". Every expression in the language
 belongs to one of these types as described in \tabref{table1}.
 
-\begin{table}\caption{Types universe \label{tab:table1}}
-\begin{tabular}{cll}
-Type universe & example \\
-Posets &  <mcdp-poset>Nat</mcdp-poset>, <mcdp-poset>m/s^2</mcdp-poset> &
-        Posets are the equivalent of what are "types" in other languages.
-\\
-Values & <mcdp-value>42</mcdp-value>, <mcdp-value>9.81 m/s^2</mcdp-value>
-& Values are the elements of the posets. \\
-NDPs & <k>mcdp{...}</k>
-    & These correspond to the mathematical idea of MCDPs, enriched by extra
-        information, such as names of "ports". \\
-templates & <k>template[...]{...}</k> & These are templates for NDPs; could be considered morphisms in an operad \\
-DPs & \xxx & These correspond to primitive DPs \\
-\end{tabular}
-\end{table}
+<table figure-id="tab:table1" figure-caption="Types universe">
+    <tr>
+        <td>Type universe </td>
+        <td> example</td>
+        <td></td>
+    </tr>
+    <tr>
+        <td>Posets</td>
+        <td><mcdp-poset>Nat</mcdp-poset>, <mcdp-poset>m/s^2</mcdp-poset> </td>
+        <td>Posets are the equivalent of what are "types" in other languages.</td>
+    </tr>
+    <tr>
+        <td>Values</td>
+        <td><mcdp-value>42</mcdp-value>, <mcdp-value>9.81 m/s^2</mcdp-value></td>
+        <td>Values are the elements of the posets.</td>
+    </tr>
+    <tr>
+        <td>NDPs</td>
+        <td><k>mcdp{...}</k></td>
+        <td>These correspond to the mathematical idea of MCDPs, enriched by extra
+            information, such as names of "ports".</td>
+    </tr>
+    <tr>
+        <td>templates</td>
+        <td><k>template[...]{...}</k> </td>
+        <td>These are templates for NDPs; could be considered morphisms in an operad</td>
+    </tr>
+    <tr>
+        <td>DPs</td>
+        <td>\xxx</td>
+        <td>These correspond to primitive DPs</td>
+    </tr>
+</table>
 
 \tabref{table2} describes for each type the default file extension
 and the base Python class.
 
-
-\begin{table}\caption{Types universe, file extensions and Python superclass \label{tab:table2}}
-\begin{tabular}{cll}
-Type universe & file extension & Python superclass  \\
-Posets & <code>.mcdp_poset</code> & <code>Poset</code> \\
-Values & <code>.mcdp_value</code> & <code>object</code> <footnote>Any Python object will do. \xxx</footnote> \\
-NDPs & <code>.mcdp</code> & <code>NamedDP</code> \\
-templates & <code>.mcdp_template</code> & \xxx \\
-DPs & <code>.mcdp_primitivedp</code> & <code>PrimitiveDP</code>
-\end{tabular}
-\end{table}
+<table
+    figure-id="tab:table2"
+    figure-caption="Types universe, file extensions and Python superclass">
+    <tr>
+        <td>Type universe </td>
+        <td> file extensions</td>
+        <td>superclass</td>
+    </tr>
+    <tr>
+        <td>Posets</td>
+        <td>.mcdp_poset</td>
+        <td>Poset</td>
+    </tr>
+    <tr>
+        <td>Values</td>
+        <td><code>.mcdp_value</code></td>
+        <td><code>object</code> <footnote>Any Python object will do. \xxx</footnote></td>
+    </tr>
+    <tr>
+        <td>NDPs</td>
+        <td> <code>.mcdp</code></td>
+        <td><code>NamedDP</code></td>
+    </tr>
+    <tr>
+        <td>templates</td>
+        <td><code>.mcdp_template</code> </td>
+        <td>\xxx</td>
+    </tr>
+    <tr>
+        <td>DPs</td>
+        <td><code>.mcdp_primitivedp</code></td>
+        <td><code>PrimitiveDP</code></td>
+    </tr>
+</table>
 
 It is possile to implement one's own extensions by subclassing
 one of these classes. In particular, what is easy to do
