@@ -9,10 +9,7 @@ For example, multiplying by a negative number is a syntax error.<footnote>Simila
 
 This section introduces MCDPL by way of a tutorial.
 
-<a href='#this-does-not-exist'/>
-
 The minimal MCDP can be defined as in <a href="#code:empty"/>.
-
 
 <pre class='mcdp' id='empty' figure-id='code:empty'>
 mcdp {
@@ -29,10 +26,10 @@ the keywords <code>provides</code> and <code>requires</code>:
 
 <pre class='mcdp' id='model1' figure-id='code:model1'>
 mcdp {
-	provides capacity [J]
-	requires mass [g]
+    provides capacity [J]
+    requires mass [g]
 
-	# ...
+    # ...
 }
 </pre>
 
@@ -46,14 +43,14 @@ MCDP is represented as a box with two edges (<a href="#fig:some"/>).
 
 
 <render class='ndp_graph_templatized' figure-id="fig:some">
-	`model1
+    `model1
 </render>
 <!--
-	The MCDP defined above is, however, unusable, because we have
-	not specified how ``capacity`` and ``mass`` relate to one another.
-	Graphically, this is represented using purple unconnected arrows:
+    The MCDP defined above is, however, unusable, because we have
+    not specified how ``capacity`` and ``mass`` relate to one another.
+    Graphically, this is represented using purple unconnected arrows:
 
-	<pre class='ndp_graph_expand'>`model1</pre>
+    <pre class='ndp_graph_expand'>`model1</pre>
 -->
 
 ### Constant functionality and resources
@@ -65,16 +62,16 @@ defined what constraints <f>capacity</f> and <r>mass</r> must satisfy.
 We have given hard bounds to both <f>capacity</f> and <r>mass</r>.
 
 <col2>
-	<pre class='mcdp' id='model2' figure-id="code:model2">
-	mcdp {
-		provides capacity [J]
-		requires mass [g]
+    <pre class='mcdp' id='model2' figure-id="code:model2">
+    mcdp {
+    provides capacity [J]
+    requires mass [g]
 
-		provided capacity ≼ 500 J
-		required mass ≽ 100g
-	}
-	</pre>
-	<render class='ndp_graph_enclosed' figure-id="fig:model2">`model2</render>
+    provided capacity ≼ 500 J
+    required mass ≽ 100g
+    }
+    </pre>
+    <render class='ndp_graph_enclosed' figure-id="fig:model2">`model2</render>
 </col2>
 
 ### Querying the model
@@ -82,20 +79,20 @@ We have given hard bounds to both <f>capacity</f> and <r>mass</r>.
 
 It is possible to query this minimal example. For example:
 
-	$ mcdp-solve minimal 400J
+    $ mcdp-solve minimal 400J
 
 The answer is:
 
-	Minimal resources needed: mass = ↑ 100 g
+    Minimal resources needed: mass = ↑ 100 g
 
 
 If we ask for more than the MCDP can provide:
 
-	$ mcdp-solve minimal 600J
+    $ mcdp-solve minimal 600J
 
 we obtain no solutions (the empty set):
 
-	Minimal resources needed: mass = ↑ {}
+    Minimal resources needed: mass = ↑ {}
 
 
 ### Describing relations between functionality and resources
@@ -108,8 +105,8 @@ multiplication, and division. For example, we can describe a linear relation bet
 mass and capacity, given by the specific energy, using the following line:
 
 <pre class='mcdp_statements'>
-	ρ = 4 J / g
-	required mass ≽ provided capacity / ρ
+    ρ = 4 J / g
+    required mass ≽ provided capacity / ρ
 </pre>
 
 In the graphical representation (<a href="#fig:model4"/>), there is now
@@ -118,18 +115,18 @@ multiplies by the inverse of the specific energy.
 
 
 <col2>
-		<pre class='mcdp' id='model4'>
-		mcdp {
-			provides capacity [J]
-			requires mass [g]
+    <pre class='mcdp' id='model4'>
+    mcdp {
+    provides capacity [J]
+    requires mass [g]
 
-			# specific energy
-			ρ = 4 J / g
-			required mass ≽ provided capacity / ρ
-		}
-		</pre>
-		<render class='ndp_graph_enclosed'
-			figure-id='fig:model4'>`model4</render>
+    # specific energy
+    ρ = 4 J / g
+    required mass ≽ provided capacity / ρ
+    }
+    </pre>
+    <render class='ndp_graph_enclosed'
+    figure-id='fig:model4'>`model4</render>
 </col2>
 
 
@@ -151,16 +148,16 @@ energy given in <mcdp-poset>kWh/kg</mcdp-poset>.
 
 
 <col2>
-		<pre class='mcdp' id='model5' figure-id='code:conversion'
-		figure-caption='Automatic conversion among g, kg, J, kWh'>
-		mcdp {
-			provides capacity [J]
-			requires mass [g]
+    <pre class='mcdp' id='model5' figure-id='code:conversion'
+    figure-caption='Automatic conversion among g, kg, J, kWh'>
+    mcdp {
+    provides capacity [J]
+    requires mass [g]
 
-			# specific energy
-			ρ = 200 kWh / kg
-			required mass ≽ provided capacity / ρ
-		}
-		</pre>
-		<render class='ndp_graph_enclosed_TB' figure-id="fig:conversion">`model5</render>
+    # specific energy
+    ρ = 200 kWh / kg
+    required mass ≽ provided capacity / ρ
+    }
+    </pre>
+    <render class='ndp_graph_enclosed_TB' figure-id="fig:conversion">`model5</render>
 </col2>

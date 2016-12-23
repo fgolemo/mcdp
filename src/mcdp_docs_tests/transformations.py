@@ -57,7 +57,7 @@ def conv_f():
 @comptest
 def conv_f2():
     s = """
-    Use the syntax ``instance &#96;Name``.
+    Use the syntax ``instance `Name``.
 """
     tryit(s)
 
@@ -195,41 +195,36 @@ Should be fine <strong>&#96;bold</strong> and <strong>`brave</strong>.
 def conv_f6():
     s ="""
 
-\begin{defn}[Upper closure]
-The operator~$\uparrow$ maps a subset to the smallest upper set that
+\\begin{defn}[Upper closure]
+The operator~$\\uparrow$ maps a subset to the smallest upper set that
 includes it:
-\begin{eqnarray*}
-\uparrow\colon\mathcal{P}(P) & \rightarrow & UP,\\
-S & \mapsto & \{y\in P:\exists\,x\in S:x\leq y\}.
-\end{eqnarray*}
-\end{defn}
+\\begin{eqnarray*}
+\\uparrow\\colon\\mathcal{P}(P) & \\rightarrow & UP,\\
+S & \\mapsto & \\{y\\in P:\\exists\\,x\\in S:x\\leq y\\}.
+\\end{eqnarray*}
+\\end{defn}
 
 Try outside:
-\begin{eqnarray*}
-\uparrow\colon\mathcal{P}(P) & \rightarrow & UP,\\
-S & \mapsto & \{y\in P:\exists\,x\in S:x\leq y\}.
-\end{eqnarray*}
+\\begin{eqnarray*}
+\\uparrow\\colon\\mathcal{P}(P) & \\rightarrow & UP,\\\\
+S & \\mapsto & \\{y\\in P:\\exists\\,x\\in S:x\\leq y\\}.
+\\end{eqnarray*}
 
 """
-    s2 = tryit(s, write_to="f6.html",
+    tryit(s, write_to="f6.html",
                forbid=['<em', ' {y'])
 
 others = [
     """
-    \begin{defn}[Upper closure]
-The operator~$\uparrow$ maps a subset to the smallest upper set that
+\\begin{defn}[Upper closure]
+The operator~$\\uparrow$ maps a subset to the smallest upper set that
 includes it:
-\begin{eqnarray*}
-\uparrow\colon\mathcal{P}(P) & \rightarrow & UP,\\
-S & \mapsto & \{y\in P:\exists\,x\in S:x\leq y\}.
-\end{eqnarray*}
-\end{defn}
+\\begin{eqnarray*}
+\\uparrow\\colon\\mathcal{P}(P) & \\rightarrow & UP,\\\\
+S & \\mapsto & \\{y\\in P:\\exists\\,x\\in S:x\\leq y\\}.
+\\end{eqnarray*}
+\\end{defn}
 
-Try outside:
-\begin{eqnarray*}
-\uparrow\colon\mathcal{P}(P) & \rightarrow & UP,\\
-S & \mapsto & \{y\in P:\exists\,x\in S:x\leq y\}.
-\end{eqnarray*}
     """,
     """
     
@@ -264,9 +259,9 @@ Requires <mcdp-poset>`bold</mcdp-poset> and <mcdp-poset>`bold</mcdp-poset>
 Requires <strong>`bold</strong> and <strong>`brave</strong>.
 """,
 """
-This is fbox: \fbox{ ciao !!! }
+This is fbox: \\fbox{ ciao !!! }
 
-This is fbox2: \fbox{ ciao !!! }
+This is fbox2: \\fbox{ ciao !!! }
 """,
 """
 A:
@@ -276,12 +271,12 @@ A:
 ~~~
 """,
 """
-\begin{figure}[H]
-\hfill{}\subfloat[\label{fig:Simple-DP}]{\centering{}\includegraphics[scale=0.33]{gmcdptro_nonconvex1b}}\hfill{}\subfloat[\label{fig:nonconvex3}]{\centering{}\includegraphics[scale=0.33]{gmcdptro_nonconvex3}}\hfill{}
-
-\caption{\label{fig:ceil-1}One feedback connection and a topologically continuous~$\ftor$
+\\begin{figure}[H]
+\\hfill{}\\subfloat[\\label{fig:Simple-DP}]{\\centering{}
+\\includegraphics[scale=0.33]{gmcdptro_nonconvex1b}}
+\\caption{\\label{fig:ceil-1}One feedback connection and a topologically continuous~$\\ftor$
 are sufficient to induce a disconnected feasible set.}
-\end{figure}
+\\end{figure}
 """,
 """
 The minimal MCDP can be defined as in <a href="#code:empty"/>.
@@ -309,30 +304,30 @@ Citing them in order:
   
   <ul>
   <li>no</li>
-  <li> <a href="#sub:sC_child"/></li
+  <li> <a href="#sub:sC_child"/></li>
   </ul>
 
 * <a href="#sub:sssF"/> (should be: sssF)
 
 
 
-\section{sA \label{sec:sA} (should be 1)} 
-\section{second bu without label (should be 2)}
-\subsection{child of second (should be 2.1)} 
-\subsection{child of second \label{sub:child_second} (should be 2.2)}
-\subsubsection{child of child of sA}
+\\section{sA \\label{sec:sA} (should be 1)} 
+\\section{second bu without label (should be 2)}
+\\subsection{child of second (should be 2.1)} 
+\\subsection{child of second \\label{sub:child_second} (should be 2.2)}
+\\subsubsection{child of child of sA}
 
-\section{sB \label{sec:sB}}
+\\section{sB \\label{sec:sB}}
 
-\section*{sB-not numbered}
-\subsection{child of sB - this will be 3.0 however it's a bug - no numbered inside nn}
-\section{sC (should be Section 4)}
-\subsection{ssC \label{sub:sC_child} (should be Subsection 4.1)}
-\subsection{ssD (should be Subsection 4.2)}
-\subsubsection{sssF \label{sub:sssF} should be 4.2-A}
-\subsubsection*{sssG unnumbered}
-\subsubsection{sssF2 \label{sub:sssF2} should be 4.2-B}
-\subsection*{ssE unnumbered}
+\\section*{sB-not numbered}
+\\subsection{child of sB - this will be 3.0 however it's a bug - no numbered inside nn}
+\\section{sC (should be Section 4)}
+\\subsection{ssC \\label{sub:sC_child} (should be Subsection 4.1)}
+\\subsection{ssD (should be Subsection 4.2)}
+\\subsubsection{sssF \\label{sub:sssF} should be 4.2-A}
+\\subsubsection*{sssG unnumbered}
+\\subsubsection{sssF2 \\label{sub:sssF2} should be 4.2-B}
+\\subsection*{ssE unnumbered}
 
 <style>
 h1 {page-break-before: avoid !important;}
@@ -363,17 +358,7 @@ is the group of all invariants..)
 [spivak]: http://math.mit.edu/%7edspivak/
 """,
 """
-\begin{example}
-\label{exa:one}Consider the CDPI in \figref{Simple-DP}. The \uline{m}inimal
-resources~$M\subseteq\Aressp$ are the objectives of this optimization
-problem:
-\[
-M\doteq\begin{cases}
-\with & \fun,\res\in\funsp=\ressp,\\
-\Min_{\posleq} & \res,\\
- & \res\in\ftor(\fun),\\
- & \res\posleq\fun.
-\end{cases}
+
 """
 ]
     
