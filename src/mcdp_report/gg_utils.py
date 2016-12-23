@@ -281,6 +281,8 @@ def embed_images_from_library(html, library, raise_errors=True):
         # load pdf data
         data_pdf = resolve(tag['src'])
         if data_pdf is None:
+            from mcdp_web.renderdoc.highlight import add_class
+            add_class(tag, 'missing-image')
             continue
 
         density = MCDPConstants.pdf_to_png_dpi # dots per inch
