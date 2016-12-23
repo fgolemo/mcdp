@@ -29,15 +29,15 @@ And this is the interface that must be implemented:
 
 ## Running unit tests
 
+Use:
 
-##
-## Writing documentation
+    $ make clean comptests-run-parallel-nocontracts
+
+It takes about 40 minutes to run all the tests.
+
 
 ### Using LaTeX
 
-$\newcommand{\fun}{{\color{green}f}}$
-$\newcommand{\res}{{\color{red}r}}$
-$\newcommand{\ftor}{{\color{blue}h}}$
 
 The basic relation is $\res \geq \ftor(\fun)$.
 
@@ -60,12 +60,3 @@ Refer to it as in \eqref{eq}.
 Also:
 
 $$ a+y^3 \stackrel{\eqref{eq}}= x^2 $$
-
-<!--
-## Types
-
-<render class='hasse' style='width: 10em'>
-    poset {
-        afloat ≼ aint ≼ aNat
-    }
-</render> -->

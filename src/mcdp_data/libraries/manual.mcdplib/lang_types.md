@@ -138,7 +138,7 @@ poset {
 This declaration defines a poset with 5 elements ``a``, ``b``, ``c``, ``d``, ``e``and with the given order relations ([](#fig:my_poset_hasse)).
 The name of the poset, `my_poset`, comes from the filename `my_poset.mcdp_poset`.
 
-<render class='hasse' id='my_poset' figure-id:"fig:my_poset_hasse"/>
+<render class='hasse' id='my_poset' figure-id="fig:my_poset_hasse"></render>
 
 After the poset has been defined, it can be used in the
 definition of an MCDP, by referring to it by name using

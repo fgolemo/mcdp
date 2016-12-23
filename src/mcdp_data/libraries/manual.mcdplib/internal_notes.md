@@ -8,6 +8,36 @@
 
 ## Writing documentation
 
+
+
+### Using LaTeX
+
+
+The basic relation is $\res \geq \ftor(\fun)$.
+
+
+Simple test to show MathJax is working: $x = y^2 + \sin(\int_a^b D x)$.
+
+$$
+\begin{eqnarray}
+y &=& x^4 + 4      \nonumber \\
+  &=& (x^2+2)^2 -4x^2 \nonumber \\
+  &\le&(x^2+2)^2    \nonumber
+\end{eqnarray}
+$$
+
+
+Define this:
+
+$$a := x^2-y^3 \tag{eq}\label{eq} $$
+
+Refer to it as in \eqref{eq}.
+
+Also:
+
+$$ a+y^3 \stackrel{\eqref{eq}}= x^2 $$
+
+
 ### syntax highlighting
 
 Remember to escape:
@@ -153,14 +183,11 @@ poset {
 <render class='hasse' id='myposet'></render>
 
 
-Try to avoid this, because Markdown will get confused:
+Avoid this, because Markdown will get confused:
 
-~~~
-<render class='hasse' id='myposet'/>
-~~~
-
-
-<render class='hasse' id='myposet'/>
+<pre>
+&lt;render class='hasse' id='myposet'/&gt;
+</pre>
 
 ### Using `plot_value_generic`
 
@@ -175,7 +202,7 @@ Can use `plot_value_generic`
 ~~~
 
 <pre class='plot_value_generic'>
-	upperclosure{&lt;1 g, 0m&gt;, &lt;2 g, 1m&gt;} 
+	upperclosure{&lt;1 g, 0m&gt;, &lt;2 g, 1m&gt;}
 </pre>
 
 
@@ -229,6 +256,16 @@ This is P: <code class='mcdp_value'>Nat:0</code>.
 ~~~
 
 ### Bugs and limitations
+
+
+Always close the render and pre elements:
+
+	<render ...></render>
+
+Never:
+
+	<render .../>
+
 
 Avoid two backticks in the same paragraph, it will give an error:
 

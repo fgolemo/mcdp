@@ -18,14 +18,14 @@ mcdp {
   provides capacity [Wh]
   provides missions [dimensionless]
 
-  requires cost     [$]
+  requires cost     [&36;]
 
   requires maintenance [dimensionless]
   requires mass [g]
 
   missions ≼ 1000 []
   maintenance ≽ 1 []
-  cost ≽ 100 $
+  cost ≽ 100 &36;
 
   required mass ≽ 
     Uncertain(provided capacity/120 Wh/kg ,

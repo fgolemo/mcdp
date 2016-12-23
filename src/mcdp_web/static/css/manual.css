@@ -379,7 +379,7 @@ figure[id^='fig:'] > figcaption:empty::before {
 }
 
 a[href^='#eq:'    ]:empty:not(.only-number)::before {  content:'(♦)';content: '(' target-counter(attr(href), listing) ')'; }
-a[href^='#eq:'    ]:empty.only-number::before       {  content:'♦';  target-counter(attr(href), listing); }
+a[href^='#eq:'    ]:empty.only-number::before       {  content:'♦';  content: target-counter(attr(href), listing); }
 a[href^='#code:'  ]:empty::before {  content: 'Listing♦'; content: 'Listing\0000a0' target-counter(attr(href), listing); }
 a[href^='#fig:'   ]:empty:not(.only-number)::before {  content: 'Fig.♦'; content: 'Fig.\0000a0' target-counter(attr(href), figure);  }
 a[href^='#fig:'   ]:empty.only-number::before { content: '♦'; content:   target-counter(attr(href), figure) ; }

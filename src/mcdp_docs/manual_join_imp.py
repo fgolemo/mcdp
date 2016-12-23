@@ -113,10 +113,25 @@ def manual_join(files_contents):
 
     body_place.replaceWith(main_body)
 
+    bibhere = d.find('div', id='put-bibliography-here')
+    if bibhere is None:
+        logger.error('Could not find #put-bibliography-here in document.')
+    else:
+        cites = list(d.find_all('cite'))
+        # TODO: sort
+        for c in cites:
+            # remove it from parent
+            c.extract()
+            # add to bibliography
+            bibhere.append(c)
+
     res = str(d)
     
     from mcdp_docs.check_missing_links import check_if_any_href_is_invalid
     check_if_any_href_is_invalid(res)
+    
+    
+    
     return res
 
 def debug(s):

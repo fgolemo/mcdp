@@ -67,6 +67,7 @@ manual_contents = [
 
     
     ('manual', 'appendix_math'),
+    ('manual', 'backmatter'),
 
 ]
 
