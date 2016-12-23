@@ -9,7 +9,7 @@ that have units associated to them.
 
 <table figure-id="tab:summary_posets" figure-caption="Build-in posets">
     <tr>
-        <td>MCDPL poset</td><td>ideal poset</td><td>Python object \\
+        <td>MCDPL poset</td><td>ideal poset</td><td>Python object</td>
     </tr>
 
     <tr>
