@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
-import re
 import os
-from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+import re
+
 from contracts.interface import Where
-from mocdp.exceptions import DPSyntaxError
-from mocdp import logger
+from contracts.utils import raise_desc, raise_wrapped
 from mcdp_web.renderdoc.markdown_transform import is_inside_markdown_quoted_block
+from mocdp import logger
+from mocdp.exceptions import DPSyntaxError
 
 
 def latex_preprocessing(s):
@@ -189,7 +190,7 @@ def maketable(inside, opt, asterisk):
 
     if Tmp.caption is not None:
         inside = '<figcaption>' + Tmp.caption + "</figcaption>" + inside
-    print('tmp.caption: %s' % Tmp.caption)
+#     print('tmp.caption: %s' % Tmp.caption)
     res  = '<figure class="table"%s>%s</figure>' % (idpart, inside)
     
     if Tmp.label is not None:
@@ -249,12 +250,12 @@ def makefigure(inside, opt, asterisk):
         assert not opts and len(args) == 1
         x, Tmp.label = get_s_without_label(args[0], labelprefix="fig:")
         res = '<figcaption>' + x + "</figcaption>" 
-        print('caption args: %r, %r' % (args, opts))
+#         print('caption args: %r, %r' % (args, opts))
         return res
     
     inside = substitute_command_ext(inside, 'caption', sub_caption, nargs=1, nopt=0)
     
-    print('makefigure inside without caption = %r'  % inside)
+#     print('makefigure inside without caption = %r'  % inside)
     assert not '\\caption' in inside
 
     if Tmp.label is not None:
@@ -291,8 +292,6 @@ def substitute_simple(s, name, replace):
         \ciao material-> submaterial
         \ciao{} material -> submaterial
     """
-    print(len(s))
-    
     start = '\\' + name
     if not start in s:
         return s
@@ -350,9 +349,9 @@ def substitute_command_ext(s, name, f, nargs, nopt):
     
     before = s[:start]
     rest = s[start:]
-    print('before: %r' % before)
+#     print('before: %r' % before)
     assert s[start:].startswith('\\'+name)
-    print('s[start:]: %r' % s[start:])
+#     print('s[start:]: %r' % s[start:])
     assert rest.startswith('\\'+name)
     assert not ('\\' + name ) in before, before
     
@@ -365,15 +364,15 @@ def substitute_command_ext(s, name, f, nargs, nopt):
     for _ in range(nopt):
         consume = consume_whitespace(consume)
         if not consume or consume[0] != '[':
-            print('skipping option')
+#             print('skipping option')
             opt = None
         else:
             opt_string, consume = get_balanced_brace(consume)
-            print('opt string %r consume %r' % (opt_string, consume))
+#             print('opt string %r consume %r' % (opt_string, consume))
             opt = opt_string[1:-1] # remove brace
         opts.append(opt)
         
-    print('after opts= %r'% consume)
+#     print('after opts= %r'% consume)
     for _ in range(nargs):
         consume = consume_whitespace(consume)
         if not consume or consume[0] != '{':
@@ -387,15 +386,15 @@ def substitute_command_ext(s, name, f, nargs, nopt):
         consume = consume2
         arg = arg_string[1:-1] # remove brace
         args.append(arg)
-    print('substitute_command_ext for %r : args = %s opts = %s consume0 = %r' % (name, args, opts, consume0))
+#     print('substitute_command_ext for %r : args = %s opts = %s consume0 = %r' % (name, args, opts, consume0))
     args = tuple(args)
     opts = tuple(opts)
     replace = f(args=args, opts=opts)
     after_tran = substitute_command_ext(consume, name, f, nargs, nopt)
     res = before + replace + after_tran
-    print('before: %r' % before) 
-    print('replace: %r' % replace)
-    print('after_tran: %r' % after_tran)
+#     print('before: %r' % before) 
+#     print('replace: %r' % replace)
+#     print('after_tran: %r' % after_tran)
     assert not ('\\' + name ) in res, res
     return res
 
@@ -543,7 +542,6 @@ def replace_captionsideleft(s):
         res = ('<figure class="captionsideleft"%s>' % idpart)
         res += ('%s<figcaption></figcaption></figure>') % second
         
-        print res
         return res
         
     s = re.sub(r'\\captionsideleft{(.*?)}{(.*?)}', 
@@ -610,9 +608,9 @@ def replace_equations(s):
     def replace_eq(matchobj):
         contents = matchobj.group(1)        
         contents2, label = get_s_without_label(contents, labelprefix = None)
-        print('contents %r - %r label %r' % (contents, contents2, label))
+#         print('contents %r - %r label %r' % (contents, contents2, label))
         if label is not None:
-            print('found label %r' % label)
+#             print('found label %r' % label)
             contents2 +='\\label{%s}' % label
             contents2 +='\\tag{%s}' % (Tmp.count + 1)
             Tmp.count += 1
@@ -678,7 +676,7 @@ def extract_delimited(s, d1, d2, subs, domain):
         return s 
     try:
         search_d1_from = a + len(d1)
-        print('search_d1_from = %s' % search_d1_from)
+#         print('search_d1_from = %s' % search_d1_from)
         b0 = get_next_unescaped_appearance(s, d2, search_d1_from)
         assert b0 >= search_d1_from
         assert s[b0:].startswith(d2)
@@ -686,7 +684,7 @@ def extract_delimited(s, d1, d2, subs, domain):
         complete = s[a:b]
     except NotFound:
         assert s[a:].startswith(d1)
-        print('could not find delimiter d2 %r in %r' % (d2, s[search_d1_from:]))
+#         print('could not find delimiter d2 %r in %r' % (d2, s[search_d1_from:]))
         return s 
     assert complete.startswith(d1)
     assert complete.endswith(d2)

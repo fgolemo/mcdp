@@ -79,7 +79,7 @@ def check_parsable(s):
 #     parser = ET.XMLParser()
 #     parser.entity["nbsp"] = unichr(160)
     s = '<add-wrap-for-xml-parser>'+s+'</add-wrap-for-xml-parser>'
-    print indent(s, ' for xml')
+    # print indent(s, ' for xml')
     try:
         _ = ET.fromstring(s)
     except Exception as e:

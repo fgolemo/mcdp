@@ -75,7 +75,8 @@ class Optimization():
                 ndp.check_fully_connected()
             except NotConnected as e:
                 if o.lower() == "raspberrypi2":
-                    print e
+                    # 
+                    pass
                 unconnected.append(o)
 
 

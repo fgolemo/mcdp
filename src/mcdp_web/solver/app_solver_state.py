@@ -138,7 +138,7 @@ class SolverState():
 
         datasets = [{'data': [make_point(p)],
                  'backgroundColor': self.get_color(i)} for i, p in enumerate(self.fun)]
-        print datasets
+        # print datasets
         return datasets
 
     def get_datasets_res(self, wx, wy):
@@ -173,7 +173,7 @@ class SolverState():
 
         datasets = [{'data': get_points(ui),
                  'backgroundColor': self.get_color(i)} for i, ui in enumerate(self.ures)]
-        print datasets
+        # print datasets
         return datasets
 
 def make_value(x):

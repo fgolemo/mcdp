@@ -55,7 +55,7 @@ def check_syntax(filename, source, parse_expr=Syntax.ndpt_dp_rvalue):  # @Unused
         source2 = project_html(html)
 #         print source
 #         print source2
-        print indent(html, 'html |')
+        # print indent(html, 'html |')
         assert_equal_string(s2_expected=source, s2=source2)
     except:
         logger.error('This happened to %r' %  filename)
@@ -105,7 +105,7 @@ def parcheck_space():
     ]
     filename = None
     parse_expr = Syntax.space_prec
-    print parse_expr
+    # print parse_expr
     for source in sources:
         print('source = %r' % source)
         check_syntax(filename, source, parse_expr=parse_expr)

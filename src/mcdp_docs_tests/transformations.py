@@ -12,11 +12,12 @@ def tryit(s, write_to=None, forbid=[]):
     realpath = 'trasnformations.py'
     s2 = render_complete(library, s, raise_errors, realpath, generate_pdf=False)
     
-    if write_to is not None:
-        doc = get_minimal_document(s2, add_manual_css=True)
-        with open(write_to, 'wb') as f:
-            f.write(doc)
-        print('written to %s' % write_to)
+    if False:
+        if write_to is not None:
+            doc = get_minimal_document(s2, add_manual_css=True)
+            with open(write_to, 'wb') as f:
+                f.write(doc)
+            print('written to %s' % write_to)
         
     tests = {
      'doctype': not 'DOCTYPE' in s2,

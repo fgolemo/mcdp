@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 
+from mocdp import logger
 from contracts import contract
 from mcdp_cli.plot import allplots
 from mcdp_lang.syntax import Syntax
@@ -22,7 +23,7 @@ def other_jobs(context, maindir, config_dirs, outdir, res):
     
     texs = []
     nodes = list(G.nodes())
-    print nodes
+    
     for entry in nodes:
 
         tex = context.comp(other_reports,
@@ -102,10 +103,10 @@ def other_reports(outdir, maindir, config_dirs, entry):
             try:
                 res = d[p](data)
             except DPSemanticError as e:
-                print e
+                logger.error(str(e))
                 continue
             except CmdException as e:
-                print e
+                logger.error(str(e))
                 continue
             assert isinstance(res, list), res
             for r in res:

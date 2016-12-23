@@ -61,7 +61,7 @@ def gg_deepcopy(ggraph):
     try:
         return deepcopy(ggraph)
     except Exception as e:
-        print traceback.format_exc(e)
+        logger.error(traceback.format_exc(e))
         mcdp_dev_warning('Deep copy of gvgen graph failed: happens when in IPython.')
         return ggraph
 
