@@ -177,7 +177,7 @@ def generate_doc(soup):
 
                 if i >= len(headings):
                     msg = 'i = %d level %s headings = %s' % (i, level, headings)
-                    print msg
+                    logger.error(msg)
                     return 'extraheading%s' % i
                     raise ValueError(msg)
                 return headings[i]
