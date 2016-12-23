@@ -914,10 +914,7 @@ def add_br_before_pres(html):
 
 def add_class(e, c):
     check_isinstance(c, str)        
-    cur = e.get('class', '').split()
-    n = cur + [c]
-    
-    e['class'] = " ".join(n) 
+    e['class'] = e.get('class', []) + [c]
 #     print 'old %s new %s attr %s ' %(cur, n, e['class'])
 
 def compute_size_for_pre_without_class(soup):
