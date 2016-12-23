@@ -13,11 +13,11 @@ and 120 Wh/kg. This is one way to describe such uncertainty:
 mcdp {
   provides capacity [Wh]
   requires mass     [kg]
- 
-  required mass ≽ 
+
+  required mass ≽
     Uncertain(provided capacity/120 Wh/kg ,
               provided capacity/100 Wh/kg )
-  
+
 }
 </pre>
 
@@ -27,8 +27,8 @@ which joins two branches, the optimistic and the pessimistic branch.
 <pre class='ndp_graph_enclosed'>`uncertain1</pre>
 
 
-<!-- 
-    <img style='max-width: 30em' src="/libraries/uncertainty/models/uncertain_battery4/views/solver2/display1u.png?xaxis=capacity&amp;yaxis=mass&amp;xmin=0J&amp;xmax=1MJ&amp;nsamples=50"/> 
+<!--
+    <img style='max-width: 30em' src="/libraries/uncertainty/models/uncertain_battery4/views/solver2/display1u.png?xaxis=capacity&amp;yaxis=mass&amp;xmin=0J&amp;xmax=1MJ&amp;nsamples=50"/>
 -->
 
 <!--
@@ -39,9 +39,9 @@ This is an equivalent way to describe the same uncertainty:
 mcdp {
   provides capacity [Wh]
   requires mass     [kg]
- 
+
   required mass * Uncertain(100 Wh/kg, 120 Wh/kg) ≽ provided capacity
-  
+
 }
 </pre>
 

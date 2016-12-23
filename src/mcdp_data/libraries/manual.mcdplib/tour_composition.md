@@ -7,8 +7,7 @@ MCDPL encourages composition and code reuse.
 
 Suppose we define a simple model called ``Battery`` as follows:
 
-<table class="col2">
-    <tr><td>
+<col2>
     <pre class="mcdp" id='Battery' label='Battery.mcdp'>
     mcdp {
         provides capacity [J]
@@ -18,18 +17,12 @@ Suppose we define a simple model called ``Battery`` as follows:
         required mass ≽ provided capacity / rho
     }
     </pre>
-    </td>
-    <td>
-    <render class='ndp_graph_templatized_labeled'
-    >`Battery</render>
-    </td>
-    </tr>
-</table>
+    <render class='ndp_graph_templatized_labeled'>`Battery</render>
+</col2>
 
 Let's also define the MCDP ``Actuation1``:
 
-<table class="col2">
-    <tr><td>
+<col2>
     <pre class="mcdp" id='Actuation1' label='Actuation1.mcdp'>
     mcdp {
         provides lift [N]
@@ -42,14 +35,10 @@ Let's also define the MCDP ``Actuation1``:
         required power ≽ p0 + p1 * l + p2 * l^2
     }
     </pre>
-    </td>
-    <td>
         <render class='ndp_graph_templatized_labeled'>
             `Actuation1
         </render>
-    </td>
-    </tr>
-</table>
+</col2>
 
 <render class='ndp_graph_enclosed' style='max-width: 100%'>`Actuation1</render>
 
@@ -64,22 +53,15 @@ The backtick means "load the symbols from the library, from the file ``name.mcdp
 
 The following creates two sub-design problems, for now unconnected.
 
-<table class="col2">
-    <tr>
-    <td>
+<col2>
     <pre class="mcdp" id='combined1'>
     mcdp {
         actuation = instance `Actuation1
         battery = instance `Battery
     }
     </pre>
-    </td>
-    <td>
-        <render class='ndp_graph_enclosed'>`combined1</render>
-    </td>
-    </tr>
-</table>
-
+    <render class='ndp_graph_enclosed'>`combined1</render>
+</col2>
 
 We can create a complete model with a loop by describing the co-design
 constraint.
@@ -108,9 +90,7 @@ Take <f>extra_payload</f> to represent the user payload that we must carry.
 Then the lift provided by the actuator must be at least the mass
 of the battery plus the mass of the payload times gravity:
 
-<table id='mine' class="col2">
-<tr>
-<td>
+<col2 id='mine'>
 <pre class="mcdp" id='composition' label='Composition.mcdp'>
 mcdp {
     actuation = instance `Actuation1
@@ -137,15 +117,10 @@ mcdp {
     required mass ≽ total_mass
 }
 </pre>
-</td>
-    <td style='vertical-align: top'>
         <pre class='ndp_graph_enclosed_TB' style='max-height: 70ex'>
             `Composition
         </pre>
-    </td>
-</tr>
-</table>
-
+</col2>
 
 
 <style type='text/css'>

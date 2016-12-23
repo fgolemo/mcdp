@@ -12,7 +12,7 @@ This is a summary of the processing steps:
 
     MCDPL string
     |
-    Syntax Tree 
+    Syntax Tree
     |
     Syntax tree with semantic annotations  -->  pretty-printed strings
     |
@@ -48,7 +48,3 @@ this is good for generality.
 
 
 Where is the bottleneck?...
-
-
-
-

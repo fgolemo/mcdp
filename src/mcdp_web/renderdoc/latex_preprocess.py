@@ -62,6 +62,7 @@ def latex_preprocessing(s):
     s = re.sub(r'\\defref{(.*?)}', r'<a href="#def:\1"></a>', s)
     s = re.sub(r'\\exaref{(.*?)}', r'<a href="#exa:\1"></a>', s)
     s = re.sub(r'\\secref{(.*?)}', r'<a href="#sec:\1"></a>', s)
+    s = re.sub(r'\\coderef{(.*?)}', r'<a href="#code:\1"></a>', s)
     
     s = sub_headers(s)               
     s = re.sub(r'\\cite\[(.*)?\]{(.*?)}', r'<a href="#bib:\2">[\1]</a>', s)
@@ -189,6 +190,13 @@ def maketable(inside, opt, asterisk):
         inside = '<figcaption>' + Tmp.caption + "</figcaption>" + inside
     print('tmp.caption: %s' % Tmp.caption)
     res  = '<figure class="table"%s>%s</figure>' % (idpart, inside)
+    
+    if Tmp.label is not None:
+        idpart = ' id="%s-wrap"' % Tmp.label
+    else:
+        idpart = ""
+
+    res = '<div class="table-wrap"%s>%s</div>' % (idpart, res)
     return res
 
 def makeminipage(inside, opt):

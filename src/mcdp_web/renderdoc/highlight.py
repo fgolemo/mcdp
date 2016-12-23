@@ -369,7 +369,7 @@ def make_figure_from_figureid_attr(html):
 
 def mark_console_pres(html):
     soup = bs(html)
-#     print indent(html, 'mark_console_pres ')
+    #     print indent(html, 'mark_console_pres ')
     new_tag = lambda _: BeautifulSoup().new_tag(_)
     for code in soup.select('pre code'):
         pre = code.parent
@@ -872,7 +872,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
     # this is a bug with bs4...
 #     soup = bs(to_html_stripping_fragment(soup))
     for pre in soup.select('pre + pre'):
-        print('adding br between PREs')
+#         print('adding br between PREs')
         br = BeautifulSoup().new_tag('br')
         br['class'] = 'pre_after_pre'
         pre.parent.insert(pre.parent.index(pre), br)

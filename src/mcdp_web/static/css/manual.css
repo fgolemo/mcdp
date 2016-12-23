@@ -535,3 +535,62 @@ cite[id^='bib:']::before {
     font-style: normal;
 }
 
+figure.table figcaption { padding-bottom: 0.3em; }
+figure.table td:not(:first-child) { 
+    padding-left: 1em; 
+} 
+div.table-wrap { text-align: center; }
+
+h2 code:first-of-type::before,
+h3 code:first-of-type::before,
+h4 code:first-of-type::before{ 
+    content: '('; 
+    font-weight: normal;
+    font-family: serif;
+}
+h2 code:not(:last-of-type)::after,
+h3 code:not(:last-of-type)::after,
+h4 code:not(:last-of-type)::after{ 
+    content: ', '; 
+    font-weight: normal;
+    font-family: serif;
+}
+
+h2 code:last-of-type::after,
+h3 code:last-of-type::after,
+h4 code:last-of-type::after{ 
+    content: ')'; 
+    font-weight: normal;
+    font-family: serif;
+}
+
+/**** col2, etc . ***/
+
+
+div.colN-wrap {
+    text-align: center;
+    border: solid 1px blue;
+}
+div.colN-wrap table {
+    display: inline-block;
+    border: solid 1px red;
+}
+
+div.colN-wrap table td {
+    padding-left: 0.7em;
+    padding-right: 0.7em;
+    border: solid 1px blue;
+}
+
+
+/*
+table.col2 { 
+    max-width: 100%; width: 100%;
+}
+table.col2 td {
+    width: 50%;
+    text-align: center;
+}
+*/
+
+

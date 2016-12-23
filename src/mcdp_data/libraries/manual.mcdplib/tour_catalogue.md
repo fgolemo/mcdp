@@ -4,8 +4,7 @@ We can also enumerate an arbitrary relation, as follows:
 
 
 
-<table class="col2">
-    <tr><td>
+<col2>
     <pre class='mcdp' id='model3'>
     catalogue {
         provides capacity [J]
@@ -16,7 +15,7 @@ We can also enumerate an arbitrary relation, as follows:
         700 kWh &lt;--| model3 |--&gt; 400 g
     }
     </pre>
-    </td><td>
+
     <render class='ndp_graph_expand'>`model3</render>
-    </td></tr>
-</table>
+
+</col2>

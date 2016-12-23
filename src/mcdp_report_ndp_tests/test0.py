@@ -8,7 +8,9 @@ from mcdp_tests.generation import (for_all_dps_dyn, for_all_nameddps,
 from mocdp import logger
 from nose.tools import assert_equal
 from bs4.element import NavigableString
-from comptests.registrar import comptest
+from comptests.registrar import comptest, comptest_fails
+from mcdp_lang_tests.syntax_spaces import assert_equal_string
+from contracts.utils import indent
 
 def project_html(html):
     from bs4 import BeautifulSoup
@@ -53,55 +55,75 @@ def check_syntax(filename, source, parse_expr=Syntax.ndpt_dp_rvalue):  # @Unused
         source2 = project_html(html)
 #         print source
 #         print source2
-        assert_equal(source, source2)
+        print indent(html, 'html |')
+        assert_equal_string(s2_expected=source, s2=source2)
     except:
         logger.error('This happened to %r' %  filename)
         
         raise
+    
+if False:
+    # these are all antiquate
+    @for_all_dps_dyn
+    def dp1_report(context, id_dp, dp):
+        r = context.comp(report_dp1, dp)
+        context.add_report(r, 'dp1', id_dp=id_dp)
+    
+    
+    @for_all_nameddps_dyn
+    def ndp1_report(context, id_dp, ndp):
+        r = context.comp(report_ndp1, ndp)
+        context.add_report(r, 'ndp1', id_dp=id_dp)
+    
+    
+    @for_all_nameddps
+    def graph_default(_, ndp):
+        _gg = gvgen_from_ndp(ndp, style='default')
+    
+    
+    @for_all_nameddps
+    def graph_greenred(_, ndp):
+        _gg = gvgen_from_ndp(ndp, style='greenred')
+    
+    
+    @for_all_nameddps
+    def graph_clean(_, ndp):
+        _gg = gvgen_from_ndp(ndp, style='clean')
+    
+    
+    @for_all_nameddps
+    def graph_greenredsym(_, ndp):
+        _gg = gvgen_from_ndp(ndp, style='greenredsym')
 
-@for_all_dps_dyn
-def dp1_report(context, id_dp, dp):
-    r = context.comp(report_dp1, dp)
-    context.add_report(r, 'dp1', id_dp=id_dp)
 
-
-@for_all_nameddps_dyn
-def ndp1_report(context, id_dp, ndp):
-    r = context.comp(report_ndp1, ndp)
-    context.add_report(r, 'ndp1', id_dp=id_dp)
-
-
-@for_all_nameddps
-def graph_default(_, ndp):
-    _gg = gvgen_from_ndp(ndp, style='default')
-
-
-@for_all_nameddps
-def graph_greenred(_, ndp):
-    _gg = gvgen_from_ndp(ndp, style='greenred')
-
-
-@for_all_nameddps
-def graph_clean(_, ndp):
-    _gg = gvgen_from_ndp(ndp, style='clean')
-
-
-@for_all_nameddps
-def graph_greenredsym(_, ndp):
-    _gg = gvgen_from_ndp(ndp, style='greenredsym')
-
-
-@comptest
-def quickcheck():
+@comptest_fails
+def parcheck_space():
     sources = [
         "(J × A) × (m × s × Nat)",
-        "(J × A)"
+        "J x A",
+        "(J x A)",
     ]
+    filename = None
+    parse_expr = Syntax.space_prec
+    print parse_expr
     for source in sources:
-        filename = None
-        parse_expr = Syntax.space
+        print('source = %r' % source)
+        check_syntax(filename, source, parse_expr=parse_expr)
+
+@comptest_fails 
+def parcheck_fvalue():
+    sources = [
+        "(1 + 1)",
+        "(1 + 1) ",
+        " (1 + 1)",
+        " (1 + 1) ",
+    ]
+    filename = None
+    parse_expr = Syntax.fvalue
+    for source in sources:
         check_syntax(filename, source, parse_expr=parse_expr)
     
+quickcheck = parcheck_fvalue
     
 if __name__=='__main__':
     quickcheck()

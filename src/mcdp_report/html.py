@@ -5,7 +5,8 @@ import os
 from contracts import contract
 from contracts.interface import line_and_col, location, Where
 from contracts.utils import indent, raise_desc, raise_wrapped, check_isinstance
-from mcdp_lang.namedtuple_tricks import isnamedtuplewhere, get_copy_with_where
+from mcdp_lang.namedtuple_tricks import isnamedtuplewhere, get_copy_with_where,\
+    recursive_print
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.refinement import namedtuple_visitor_ext
@@ -85,6 +86,8 @@ def ast_to_html(s,
     extra_before, for_pyparsing, extra_after = extract_ws(for_pyparsing0)
     # parse the string 'for_pyparsing'
     block0 = parse_wrap(parse_expr, for_pyparsing)[0]
+    
+#     print indent(recursive_print(block0), ' block0 |')
     assert isnamedtuplewhere(block0)
     # now transform everything so that it refers to s
     transform_original_s = s

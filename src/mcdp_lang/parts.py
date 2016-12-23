@@ -212,6 +212,8 @@ class CDPLanguage():
     RBRACE  = namedtuplewhere('RBRACE', 'glyph') 
     LBRACKET  = namedtuplewhere('LBRACKET', 'glyph')
     RBRACKET  = namedtuplewhere('RBRACKET', 'glyph') 
+    LPAR  = namedtuplewhere('LPAR', 'glyph') 
+    RPAR  = namedtuplewhere('RPAR', 'glyph')
     
     MAPSFROM  = namedtuplewhere('MAPSFROM', 'glyph')
     MAPSTO  = namedtuplewhere('MAPSTO', 'glyph')
@@ -267,7 +269,7 @@ class CDPLanguage():
     CodeSpec = namedtuplewhere('CodeSpec', 'keyword function arguments')
     CodeSpecNoArgs = namedtuplewhere('CodeSpecNoArgs', 'keyword function')
 
-    SpaceProduct = namedtuplewhere('SpaceProduct', 'ops')
+    SpaceProduct = namedtuplewhere('SpaceProduct', 'lpar ops rpar')
     InvMult = namedtuplewhere('InvMult', 'ops')
     InvPlus = namedtuplewhere('InvPlus', 'ops')
     

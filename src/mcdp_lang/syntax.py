@@ -212,13 +212,13 @@ class Syntax():
     # a quoted string
     quoted = sp(dblQuotedString | sglQuotedString, lambda t:t[0][1:-1])
     
-     
     lbrace  = sp(L('{'), lambda t: CDP.LBRACE(t[0]))
     rbrace = sp(L('}'), lambda t: CDP.RBRACE(t[0]))
     lbracket  = sp(L('['), lambda t: CDP.LBRACKET(t[0]))
     rbracket = sp(L(']'), lambda t: CDP.RBRACKET(t[0]))
-    
-    
+#     lpar = sp(L('('), lambda t: CDP.LPAR(t[0]))
+#     rpar = sp(L(')'), lambda t: CDP.RPAR(t[0]))
+#     
     python_style_multiline1 = QuotedString(quoteChar='"""', escChar='\\', unquoteResults=True, multiline=True)
     python_style_multiline2 = QuotedString(quoteChar="'''", escChar='\\', unquoteResults=True, multiline=True)
     python_style_multiline = python_style_multiline1 | python_style_multiline2
@@ -421,10 +421,10 @@ class Syntax():
     )
 
     PRODUCT = sp(L('x') | L('×'), lambda t: CDP.product(t[0]))
-    space << operatorPrecedence(space_operand, [
+    space <<  operatorPrecedence(space_operand, [
         (PRODUCT, 2, opAssoc.LEFT, space_product_parse_action),
-    ])
-
+    ])#, lpar='(', rpar=')')
+#     space_prec
     nat_constant = sp(K('nat') - L(':') - nonneg_integer,
                       lambda t: CDP.NatConstant(t[0], t[1], t[2]))
 

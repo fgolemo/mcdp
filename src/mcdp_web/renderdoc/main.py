@@ -12,6 +12,9 @@ from .prerender_math import prerender_mathjax
 from .xmlutils import check_html_fragment
 from mcdp_web.renderdoc.highlight import fix_subfig_references
 from contracts.interface import Where
+from mcdp_web.renderdoc.macro_col2 import col_macros,\
+    col_macros_prepare_before_markdown
+from mcdp_web.renderdoc.abbrevs import other_abbrevs
 
 
 __all__ = ['render_document']
@@ -42,7 +45,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     #  between various limiters etc.
     # returns a dict(string, substitution)
     s, maths = extract_maths(s) 
-    print('maths = %s' % maths)
+#     print('maths = %s' % maths)
     
     # fixes for LaTeX
     s = latex_preprocessing(s)
@@ -61,8 +64,10 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
 #     s = s.replace('<mcdp-poset>', '<mcdp-poset markdown="0">')
     
     s, mcdpenvs = protect_my_envs(s) 
-    print('mcdpenvs = %s' % maths)
+#     print('mcdpenvs = %s' % maths)
 
+    s = col_macros_prepare_before_markdown(s)
+    
     print(indent(s, 'before markdown | '))
     s = render_markdown(s)
     print(indent(s, 'after  markdown | '))
@@ -111,35 +116,37 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
 
     check_html_fragment(s)
     
-    print(indent(s, 'after prerender_mathjax | '))
+#     print(indent(s, 'after prerender_mathjax | '))
     
 
-    html = s
-    html = html.replace('<p>DRAFT</p>', '<div class="draft">')
+    s = s.replace('<p>DRAFT</p>', '<div class="draft">')
     
-    html = html.replace('<p>/DRAFT</p>', '</div>')
+    s = s.replace('<p>/DRAFT</p>', '</div>')
     
-    html = mark_console_pres(html)
-    html = make_figure_from_figureid_attr(html)
-    print(indent(s, 'after  make_figure_from_figureid_attr | '))
-    html = fix_subfig_references(html)
-    check_html_fragment(html)
+    s = mark_console_pres(s)
+    s = make_figure_from_figureid_attr(s)
+    
+    s = col_macros(s)
+    s = other_abbrevs(s)
+    print(indent(s, 'after  col_macros | '))
+    s = fix_subfig_references(s)
+    check_html_fragment(s)
     
     print(indent(s, 'before  html_interpret | '))
-    html2 = html_interpret(library, html, generate_pdf=generate_pdf,
+    s = html_interpret(library, s, generate_pdf=generate_pdf,
                            raise_errors=raise_errors, realpath=realpath)
 
-    check_html_fragment(html2)
+    check_html_fragment(s)
     from mcdp_report.gg_utils import embed_images_from_library
     
     raise_missing_image_errors = False
-    html3 = embed_images_from_library(html=html2, library=library, 
+    s = embed_images_from_library(html=s, library=library, 
                                       raise_errors=raise_missing_image_errors)
     
-    check_html_fragment(html3) 
+    check_html_fragment(s) 
     
     
-    return html3
+    return s
 
 def get_mathjax_preamble():
     

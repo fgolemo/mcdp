@@ -82,10 +82,10 @@ mcdp {
 </tr>
 	<tr>
 		<td>
-			<pre class='ndp_graph_templatized_labeled'>`Battery1_LiPo</pre>
+			<render class='ndp_graph_templatized_labeled'>`Battery1_LiPo</render>
 		</td>
 		<td>
-			<pre class='ndp_graph_templatized_labeled'>`Battery1_NiH2</pre>
+			<render class='ndp_graph_templatized_labeled'>`Battery1_NiH2</render>
 		</td>
 	</tr>
 </table>
@@ -94,18 +94,12 @@ Then we can define the **coproduct** of the two using
 the keyword <code><span class="CoproductWithNamesChooseKeyword">choose</span></code>.
 Graphically, the choice is indicated through dashed lines.
 
-<table class="col2">
-<tr>
-<td valign="top">
-<pre class='mcdp' id='Batteries' label='Batteries.mcdp'>
-choose(
-	NiH2: `Battery1_LiPo,
-	LiPo: `Battery1_NiH2
-)
-</pre>
-</td>
-<td valign="top">
-<pre class='ndp_graph_enclosed'>`Batteries</pre>
-</td>
-</tr>
-</table>
+<col2 class="td-valign-top">
+	<pre class='mcdp' id='Batteries' label='Batteries.mcdp'>
+	choose(
+		NiH2: `Battery1_LiPo,
+		LiPo: `Battery1_NiH2
+	)
+	</pre>
+	<render class='ndp_graph_enclosed'>`Batteries</render>
+</col2>

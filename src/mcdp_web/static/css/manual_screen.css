@@ -38,12 +38,5 @@
     }
 
         
-    table.col2 { 
-        max-width: 100%; width: 100%;
-    }
-    table.col2 td {
-        width: 50%;
-        text-align: center;
-    }
 } 
 

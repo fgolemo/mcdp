@@ -64,9 +64,7 @@ defined what constraints <f>capacity</f> and <r>mass</r> must satisfy.
 <a href='#code:model2'/> is a minimal example of a complete MCDP.
 We have given hard bounds to both <f>capacity</f> and <r>mass</r>.
 
-<table class="col2" >
-	<tr>
-	<td>
+<col2>
 	<pre class='mcdp' id='model2' figure-id="code:model2">
 	mcdp {
 		provides capacity [J]
@@ -76,11 +74,8 @@ We have given hard bounds to both <f>capacity</f> and <r>mass</r>.
 		required mass ≽ 100g
 	}
 	</pre>
-	</td><td>
-		<render class='ndp_graph_enclosed' figure-id="fig:model2">`model2</render>
-	</td></tr>
-</table>
-
+	<render class='ndp_graph_enclosed' figure-id="fig:model2">`model2</render>
+</col2>
 
 ### Querying the model
 
@@ -122,8 +117,7 @@ a connection between <f>capacity</f> and <r>mass</r>, with a DP that
 multiplies by the inverse of the specific energy.
 
 
-<table class="col2">
-	<tr><td>
+<col2>
 		<pre class='mcdp' id='model4'>
 		mcdp {
 			provides capacity [J]
@@ -134,10 +128,9 @@ multiplies by the inverse of the specific energy.
 			required mass ≽ provided capacity / ρ
 		}
 		</pre>
-	</td><td>
-		<render class='ndp_graph_enclosed' figure-id='fig:model4'>`model4</render>
-	</td></tr>
-</table>
+		<render class='ndp_graph_enclosed'
+			figure-id='fig:model4'>`model4</render>
+</col2>
 
 
 
@@ -157,8 +150,7 @@ For example, this is the same example with the specific
 energy given in <mcdp-poset>kWh/kg</mcdp-poset>.
 
 
-<table class="col2">
-	<tr><td>
+<col2>
 		<pre class='mcdp' id='model5' figure-id='code:conversion'
 		figure-caption='Automatic conversion among g, kg, J, kWh'>
 		mcdp {
@@ -170,7 +162,5 @@ energy given in <mcdp-poset>kWh/kg</mcdp-poset>.
 			required mass ≽ provided capacity / ρ
 		}
 		</pre>
-	</td><td>
 		<render class='ndp_graph_enclosed_TB' figure-id="fig:conversion">`model5</render>
-	</td></tr>
-</table>
+</col2>

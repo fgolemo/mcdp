@@ -91,7 +91,7 @@ pre  {
  td pre { margin-top: 0 !important;  margin: 0 !important;}
 
 
-td {padding: 0 !important;}
+/*td {padding: 0 !important;}*/
 /*
 table { 
     border: solid 1px blue; 
@@ -151,10 +151,10 @@ pre {
 
 #mine { text-align: center; }
 
-table {
+/*table {
     width: 100% !important;
-
 }
+*/
 @media screen {
     body div > ul:not(.toc) {
         margin-left: 0em;

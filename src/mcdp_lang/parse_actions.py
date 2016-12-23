@@ -213,13 +213,27 @@ def fvalue_minus_parse_action(tokens):
     assert l.where.character_end is not None
     res = CDP.FValueMinusN(l, where=l.where)
     return res
+# 
+# 
+# def get_token_of_class(tokens, klass):
+#     """ Returns the lpar instance if it exists, or None.
+#         It also removes it from the list. """
+#     for i, _ in enumerate(tokens):
+#         if isinstance(_, klass):
+#             return tokens.pop(i)
+#     return None
 
-    
 @parse_action
 def space_product_parse_action(tokens):
     tokens = list(tokens[0])
+#     if '(' in tokens: tokens.remove('(')
+#     if ')' in tokens: tokens.remove(')')
+#     lpar = get_token_of_class(tokens, CDP.LPAR)
+#     rpar = get_token_of_class(tokens, CDP.RPAR)
+    lpar = None
+    rpar = None
     ops = make_list(tokens)
-    return CDP.SpaceProduct(ops, where=ops.where)
+    return CDP.SpaceProduct(lpar=lpar, ops=ops, rpar=rpar, where=ops.where)
 
 
 @parse_action
