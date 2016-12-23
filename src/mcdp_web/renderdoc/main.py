@@ -133,7 +133,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     
     raise_missing_image_errors = False
     html3 = embed_images_from_library(html=html2, library=library, 
-                                      raise_erros=raise_missing_image_errors)
+                                      raise_errors=raise_missing_image_errors)
     
     check_html_fragment(html3) 
     
