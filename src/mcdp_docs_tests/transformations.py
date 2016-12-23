@@ -182,7 +182,7 @@ This is code: `one`
 
 This is code: ``two``
 
-Don't get confused here: <strong>`bold</strong> and <strong>`brave</strong>.
+<!-- known bug:  <strong>`bold</strong> and <strong>`brave</strong>. -->
 
 Should be fine <strong>&#96;bold</strong> and <strong>`brave</strong>.
 

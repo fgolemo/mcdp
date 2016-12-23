@@ -196,9 +196,29 @@ footnote {
 }
 
 
-
 /* saves 75% of time */
 /*ul.toc { display: none; }*/
 
 
 /*span.MathJax_SVG { border: solid 1px red;  position: relative; left: -4em;}*/
+
+/* fix this in Prince */
+svg { max-width: 100%;}
+
+
+figcaption {page-break-before: avoid;}
+/*
+@media print {
+h1::after {
+    margin-top: -3em;
+    content: ' ';
+    background-color: red;
+    position: absolute;
+    left: 3cm;
+    width: 8cm;
+    height: 3cm;
+    display: block;
+    top: 0;
+} 
+*/
+}

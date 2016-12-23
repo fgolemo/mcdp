@@ -229,7 +229,7 @@ def load_fragments(library, frag, realpath):
     soup = bs(frag)
 
     for tag in soup.select('pre.mcdp'):
-        if tag.string is None: # or not tag.string.strip():
+        if tag.string is None or not tag.string.strip():
             continue
 
         if tag.has_attr('id'):
@@ -240,7 +240,7 @@ def load_fragments(library, frag, realpath):
             res = dict(data=source_code, realpath=realpath)
 
             if basename in library.file_to_contents:
-                msg = 'The id %r has already been used previously.'
+                msg = 'The id %r has already been used previously.' % basename
                 raise_desc(ValueError, msg, tag=str(tag),
                            known=library.file_to_contents[basename])
 
@@ -311,6 +311,25 @@ def escape_ticks_before_markdown(html):
     
     res = to_html_stripping_fragment(soup)
      
+    return res
+
+def fix_subfig_references(html):
+    """
+        Changes references like #fig:x to #subfig:x if it exists.
+    """
+    soup = bs(html) 
+
+    for a in soup.select('a[href^="#fig:"]'):
+        name = a['href'][1:]
+        
+        alternative = 'sub' + name
+#         print('considering if it exists %r' % alternative)
+        if list(soup.select('#' +alternative)):
+            newref = '#sub' + name
+            logger.debug('changing ref %r to %r' % (a['href'],newref))
+            a['href'] = newref
+        
+    res = to_html_stripping_fragment(soup)
     return res
 
 def make_figure_from_figureid_attr(html):
@@ -641,7 +660,9 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                 if tag.string is None: # or not tag.string.strip():
                     if not tag.has_attr('id'):
                         msg = "If <pre> is empty then it needs to have an id."
-                        raise_desc(ValueError, msg, tag=str(tag))
+                        raise_desc(ValueError, msg, tag=str(tag), 
+                                   before=str(tag.previousSibling),
+                                   after=str(tag.nextSibling))
                     # load it
                     tag_id = tag['id'].encode('utf-8')
                     basename = '%s.%s' % (tag_id, extension)
@@ -657,11 +678,20 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                 do_apply_suggestions = (not tag.has_attr('noprettify') and
                                         not tag.has_attr('np'))
                 # then apply suggestions
-                if do_apply_suggestions:
-                    x = parse_wrap(parse_expr, source_code)[0]
-                    xr = parse_ndp_refine(x, Context())
-                    suggestions = get_suggestions(xr)
-                    source_code = apply_suggestions(source_code, suggestions)
+                try:
+                    if do_apply_suggestions:
+                        x = parse_wrap(parse_expr, source_code)[0]
+                        xr = parse_ndp_refine(x, Context())
+                        suggestions = get_suggestions(xr)
+                        source_code = apply_suggestions(source_code, suggestions)
+                except DPSyntaxError:
+                    msg = 'Error while parsing this tag:\n\n'
+                    msg += indent(str(tag), '   ')
+                    
+                    msg += '\n\n' + 'source code:' + '\n\n'
+                    msg += indent(source_code, '   ')
+                    logger.error(msg)
+                    raise
                 # we don't want the browser to choose different tab size
                 #source_code = source_code.replace('\t', ' ' * 4)   
     

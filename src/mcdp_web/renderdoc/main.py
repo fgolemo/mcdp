@@ -2,15 +2,16 @@
 from contracts import contract
 from contracts.utils import raise_desc, indent
 from mcdp_library import MCDPLibrary
-from mcdp_web.renderdoc.highlight import mark_console_pres,\
-    escape_for_mathjax, make_figure_from_figureid_attr
-from mcdp_web.renderdoc.latex_preprocess import latex_preprocessing
+from mocdp.exceptions import DPInternalError, DPSyntaxError
 
-from .highlight import html_interpret
+from .highlight import html_interpret,  mark_console_pres,\
+    escape_for_mathjax, make_figure_from_figureid_attr
+from .latex_preprocess import latex_preprocessing
 from .markd import render_markdown
 from .prerender_math import prerender_mathjax
-from mcdp_web.renderdoc.xmlutils import check_html_fragment
-from mocdp.exceptions import DPInternalError
+from .xmlutils import check_html_fragment
+from mcdp_web.renderdoc.highlight import fix_subfig_references
+from contracts.interface import Where
 
 
 __all__ = ['render_document']
@@ -28,8 +29,14 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
         msg = 'I expect a str encoded with utf-8, not unicode.'
         raise_desc(TypeError, msg, s=s)
 
-
-    
+    misspellings = ['mcpd', 'MCPD']
+    for m in misspellings:
+        if m in s:
+            c = s.index(m)
+            msg = 'Typo, you wrote MCPD rather than MCDP'
+            where = Where(s, c, c + len(m))
+            raise DPSyntaxError(msg, where=where)
+        
     # copy all math content,
     #  between $$ and $$
     #  between various limiters etc.
@@ -45,20 +52,19 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     # cannot parse html before markdown, because md will take
     # invalid html, (in particular '$   ciao <ciao>' and make it work)
     
-    
-    s = s.replace('\\\\', 'MATHJAX_BARBAR')
     s = s.replace('*}', '\*}')
     def markdown_fixes(l):
         l = replace_backticks_except_in_backticks_expression(l)
         l = replace_underscore_etc_in_formulas(l)
         return l
 
-    s = s.replace('<mcdp-poset>', '<mcdp-poset markdown="0">')
+#     s = s.replace('<mcdp-poset>', '<mcdp-poset markdown="0">')
+    
+    s, mcdpenvs = protect_my_envs(s) 
+    print('mcdpenvs = %s' % maths)
+
     print(indent(s, 'before markdown | '))
-    
-        
     s = render_markdown(s)
-    
     print(indent(s, 'after  markdown | '))
 
     for k,v in maths.items():
@@ -67,8 +73,10 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
             raise_desc(DPInternalError, msg, s=s)
         def preprocess_equations(x):
             # this gets mathjax confused
+            x0 =x
             x = x.replace('>', '\\gt')
             x = x.replace('<', '\\lt')
+            print('replaced equation %r by %r ' % (x0, x))
             return x
             
         v = preprocess_equations(v)
@@ -78,26 +86,33 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     s = replace_equations(s)        
     s = s.replace('\\*}', '*}')
     
-#     s = s.replace('MATHJAX_BARBAR', '\\\\')
-
     s = replace_underscore_etc_in_formulas_undo(s)
     
 #     print(indent(s, 'after  replace | '))
         
-    # this escapes $ to DOLLAR
+
     print(indent(s, 'before  mathjax | '))
+    
+
+
     s = escape_for_mathjax(s)
 
     check_html_fragment(s)
 #     print(indent(s, 'before prerender_mathjax | '))
     # mathjax must be after markdown because of code blocks using "$"
     s = prerender_mathjax(s)
-    
+
+    for k,v in mcdpenvs.items():
+        # there is this case:
+        # ~~~
+        # <pre> </pre>
+        # ~~~
+        s = s.replace(k, v)
+
     check_html_fragment(s)
     
-#     print(indent(s, 'after prerender_mathjax | '))
+    print(indent(s, 'after prerender_mathjax | '))
     
-#     print(indent(html, 'after render_markdown'))
 
     html = s
     html = html.replace('<p>DRAFT</p>', '<div class="draft">')
@@ -106,7 +121,10 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     
     html = mark_console_pres(html)
     html = make_figure_from_figureid_attr(html)
+    html = fix_subfig_references(html)
     check_html_fragment(html)
+    
+    print(indent(s, 'before  html_interpret | '))
     html2 = html_interpret(library, html, generate_pdf=generate_pdf,
                            raise_errors=raise_errors, realpath=realpath)
 
@@ -115,7 +133,6 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     html3 = embed_images_from_library(html=html2, library=library)
     
     check_html_fragment(html3) 
-    
     
     
     return html3
@@ -132,6 +149,42 @@ def get_mathjax_preamble():
     frag = tex
     return frag
 
+def protect_my_envs(s):
+    # we don't want MathJax to look inside these
+    elements = ['mcdp-value', 'mcdp-poset', 'pre', 'render']
+    delimiters = []
+    for e in elements:
+        delimiters.append(('<%s'%e,'</%s>'%e))
+        
+    print delimiters
+    subs = {}
+    for d1, d2 in delimiters:
+        from mcdp_web.renderdoc.latex_preprocess import extract_delimited
+        s = extract_delimited(s, d1, d2, subs, 'MYENVS')
+        
+    for k, v in list(subs.items()):
+        # replace back if k is in a line that is a comment
+        # or there is an odd numbers of \n~~~
+        if is_inside_markdown_quoted_block(s, s.index(k)):
+            s = s.replace(k, v)
+            del subs[k]
+
+    return s, subs
+
+def is_inside_markdown_quoted_block(s, i):
+    before = s[:i]
+    nbefore = before.count('\n~~~')
+    
+    if nbefore % 2 == 1:
+        return True
+        # we are in a quoted block -- replace back
+        
+    last_line = before.split('\n')[-1]
+    if last_line.startswith(' '*4):
+        return True
+
+    return False
+
 def extract_maths(s):
     """ returns s2, subs(str->str) """
     delimiters = [('$$','$$'),
@@ -144,7 +197,15 @@ def extract_maths(s):
     subs = {}
     for d1, d2 in delimiters:
         from mcdp_web.renderdoc.latex_preprocess import extract_delimited
-        s = extract_delimited(s, d1, d2, subs)  
+        s = extract_delimited(s, d1, d2, subs, domain='MATHS')
+        
+    for k, v in list(subs.items()):
+        # replace back if k is in a line that is a comment
+        # or there is an odd numbers of \n~~~
+        if is_inside_markdown_quoted_block(s, s.index(k)):
+            s = s.replace(k, v)
+            del subs[k]
+  
     return s, subs
 
 def replace_markdown_line_by_line(s, line_transform):    

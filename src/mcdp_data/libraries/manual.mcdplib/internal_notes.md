@@ -1,16 +1,23 @@
 
 
-<h2 id="mcdp-depgraph"> <program>mcdp-depgraph</program> </h2>
+<h2 id="sub:mcdp-depgraph"> <program>mcdp-depgraph</program> </h2>
 
-<h2 id="mcdp-render"> <program>mcdp-render</program> </h2>
+<h2 id="sub:mcdp-render"> <program>mcdp-render</program> </h2>
 
-<h2 id="mcdp-render-manual"> <program>mcdp-render-manual</program> </h2>
+<h2 id="sub:mcdp-render-manual"> <program>mcdp-render-manual</program> </h2>
 
 ## Writing documentation
 
 ### syntax highlighting
 
-Use ``<pre>`` tags.
+Remember to escape:
+
+* use `&#96;` instead of &#96;
+* use `&#36;` instead of &#36;
+* use `&lt;` instead of &lt;
+* use `&gt;` instead of &gt;
+
+Use <code>&lt;pre&gt;</code> tags.
 
 ~~~
 <pre class="mcdp" id='submodel'>
@@ -21,7 +28,6 @@ mcdp  {
 	provided f ≼ 10J
 }
 </pre>
-
 
 <pre class="mcdp" id='model'>
 mcdp {
@@ -50,22 +56,22 @@ mcdp  {
 mcdp {
 	provides capacity [J]
 	requires mass [g]
-	s = instance `submodel
+	s = instance &#96;submodel
 	mass ≽ r required by s
 	capacity ≼  f provided by s
 }
 </pre>
 
 
-### ``noprettify``
+### `noprettify`
 
 ### mcdp_ndp_graph_templatized
 
 ~~~
-<render class='ndp_graph_templatized'>`model</render>
+<render class='ndp_graph_templatized'>&#96;model</render>
 ~~~
 
-<render class='ndp_graph_templatized'>`model</render>
+<render class='ndp_graph_templatized'>&#96;model</render>
 
 ### mcdp_ndp_graph_templatized_labeled
 
@@ -156,9 +162,9 @@ Try to avoid this, because Markdown will get confused:
 
 <render class='hasse' id='myposet'/>
 
-### Using ``plot_value_generic``
+### Using `plot_value_generic`
 
-Can use ``plot_value_generic``
+Can use `plot_value_generic`
 
 
 
@@ -168,15 +174,17 @@ Can use ``plot_value_generic``
 </pre>
 ~~~
 
-<pre class='plot_value_generic'>upperclosure{&lt;1 g, 0m&gt;, &lt;2 g, 1m&gt;} </pre>
+<pre class='plot_value_generic'>
+	upperclosure{&lt;1 g, 0m&gt;, &lt;2 g, 1m&gt;} 
+</pre>
 
 
 <pre class='plot_value_generic'>
-&lt;upperclosure {&lt;0g, 1J&gt;}, upperclosure {&lt;1g, 0.5J&gt;}&gt;
+	&lt;upperclosure {&lt;0g, 1J&gt;}, upperclosure {&lt;1g, 0.5J&gt;}&gt;
 </pre>
 
 
-### ``print_value``
+### `print_value`
 
 ~~~
 <pre class='print_value'>
@@ -189,9 +197,9 @@ Can use ``plot_value_generic``
 </pre>
 
 
-### Using ``code``
+### Using `code`
 
-Use ``<code>`` tags.
+Use &lt;code&gt; tags.
 
 
 
@@ -220,7 +228,7 @@ This is P: <code class='mcdp_value'>Nat:0</code>.
 
 ~~~
 
-### Bugs
+### Bugs and limitations
 
 Avoid two backticks in the same paragraph, it will give an error:
 

@@ -3,15 +3,17 @@ import shutil
 from tempfile import mkdtemp
 
 from contracts import contract
+from contracts.utils import raise_wrapped, indent
 from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
+from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
 from mocdp import get_mcdp_tmp_dir
 from system_cmd.meat import system_cmd_result
 from system_cmd.structures import CmdException
-from contracts.utils import raise_wrapped, indent
-from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
 
 
-__all__ = ['prerender_mathjax']
+__all__ = [
+    'prerender_mathjax',
+]
 
 def get_prerender_js():
     package = dir_from_package_name('mcdp_data')

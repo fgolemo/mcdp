@@ -8,6 +8,7 @@ from mcdp_tests.generation import (for_all_dps_dyn, for_all_nameddps,
 from mocdp import logger
 from nose.tools import assert_equal
 from bs4.element import NavigableString
+from comptests.registrar import comptest
 
 def project_html(html):
     from bs4 import BeautifulSoup
@@ -33,17 +34,18 @@ def gettext(element, n):
     
 
 @for_all_source_mcdp
-def check_syntax(filename, source):  # @UnusedVariable
+def check_syntax(filename, source, parse_expr=Syntax.ndpt_dp_rvalue):  # @UnusedVariable
     
     # skip generated files (hack)
-    if 'drone_unc2_' in filename:
+    if filename and 'drone_unc2_' in filename:
         return
     
     # print filename
-    source = open(filename).read()
+    if filename is not None:
+        source = open(filename).read()
     try:
         html = ast_to_html(source,
-                            parse_expr=Syntax.ndpt_dp_rvalue,
+                            parse_expr,
                            ignore_line=lambda _lineno: False,
                            add_line_gutter=False, encapsulate_in_precode=True, 
                            )
@@ -87,3 +89,19 @@ def graph_clean(_, ndp):
 @for_all_nameddps
 def graph_greenredsym(_, ndp):
     _gg = gvgen_from_ndp(ndp, style='greenredsym')
+
+
+@comptest
+def quickcheck():
+    sources = [
+        "(J × A) × (m × s × Nat)",
+        "(J × A)"
+    ]
+    for source in sources:
+        filename = None
+        parse_expr = Syntax.space
+        check_syntax(filename, source, parse_expr=parse_expr)
+    
+    
+if __name__=='__main__':
+    quickcheck()

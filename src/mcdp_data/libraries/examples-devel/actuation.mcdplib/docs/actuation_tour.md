@@ -58,8 +58,7 @@ For PWM, the variables of interest are:
 * ``amp_max``: maximum current that can be provided;
 * ``freq_max``: the maximum switching frequency.
 
-<pre class='mcdp_poset' id='PWM' label='PWM.mcdp_poset'>
-</pre>
+<pre class='mcdp_poset' id='PWM' label='PWM.mcdp_poset'></pre>
 
 For PPM, the variables of interest are:
 
@@ -68,8 +67,7 @@ For PPM, the variables of interest are:
 * ``freq_max``: the maximum frequency;
 * ``resolution``: resolution of the generated PPM.
 
-<pre class='mcdp_poset' id='PPM' label='PPM.mcdp_poset'>
-</pre>
+<pre class='mcdp_poset' id='PPM' label='PPM.mcdp_poset'></pre>
 
 
 ### Example: servo motor driven by PPM

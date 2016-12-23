@@ -11,17 +11,17 @@ between different battery technologies.
 
 Let us consider the model of a battery in which we take
 the functionality to be the capacity
-and the resources to be the mass [g] and the cost [$].
+and the resources to be the mass [g] and the cost [&#36;].
 
 
 <pre class='mcdp' id='Battery1' style='display:none'>
 mcdp {
 	provides capacity [J]
 	requires mass [g]
-	requires cost [$]
+	requires cost [&#36;]
 
 	rho = 150 Wh/kg # specific energy
-    alpha = 2.50 Wh/$ # specific cost
+    alpha = 2.50 Wh/&#36; # specific cost
 
 	required mass ≽ provided capacity / rho
 	required cost ≽ provided capacity / alpha
@@ -54,10 +54,10 @@ as two MCDP using the same interface (same resources and same functionality).
 mcdp {
 	provides capacity [J]
 	requires mass [g]
-	requires cost [$]
+	requires cost [&#36;]
 
 	rho = 150 Wh/kg
-    alpha = 2.50 Wh/$
+    alpha = 2.50 Wh/&#36;
 
 	required mass ≽ provided capacity / rho
 	required cost ≽ provided capacity / alpha
@@ -69,10 +69,10 @@ mcdp {
 mcdp {
 	provides capacity [J]
 	requires mass [g]
-	requires cost [$]
+	requires cost [&#36;]
 
 	rho = 45 Wh/kg
-    alpha = 10.50 Wh/$
+    alpha = 10.50 Wh/&#36;
 
 	required mass ≽ provided capacity / rho
 	required cost ≽ provided capacity / alpha

@@ -26,7 +26,7 @@ the number of cycles:
 
 <pre class='mcdp_statements'>
 specific_energy = 150 Wh/kg
-specific_cost = 2.50 Wh/$
+specific_cost = 2.50 Wh/&#36;
 cycles = 600 []
 </pre>
 
@@ -78,7 +78,7 @@ The model first describes some hard constraints for the quantities:
 <pre class='mcdp_statements'>
 provided lift ≼ 100N
 required actuator_mass ≽ 100 g
-required cost ≽ 100 $
+required cost ≽ 100 &#36;
 provided velocity ≼ 3 m/s
 </pre>
 
@@ -146,7 +146,7 @@ lift provided by actuation ≽ weight
 The **cost constraint** is the following:
 
 <pre class=mcdp_statements>
-labor_cost = (10 $) * (maintenance required by battery)
+labor_cost = (10 &#36;) * (maintenance required by battery)
 
 total_cost ≽ (
    cost required by actuation +

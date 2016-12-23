@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
 import os
-import warnings
 
 from contracts import contract
 from contracts.interface import line_and_col, location, Where
@@ -13,7 +12,7 @@ from mcdp_lang.refinement import namedtuple_visitor_ext
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import is_a_special_list
 from mocdp import MCDPConstants
-from mocdp.exceptions import mcdp_dev_warning, DPSyntaxError, DPInternalError
+from mocdp.exceptions import DPSyntaxError, DPInternalError
 
 
 unparsable_marker = '#@'

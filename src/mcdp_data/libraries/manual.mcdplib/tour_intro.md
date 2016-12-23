@@ -147,7 +147,7 @@ PyMCDP is picky about units. It will complain if any operation does
 not have the required dimensionality. However, as long as the dimensionality
 is correct, it will automatically convert to and from equivalent units.
 For example, in <a href="#code:conversion"/> the specific energy given
-in <mcdp-poset>kWh/kg</mcdp-poset>. The two MCPDs are equivalent. PyMCDP will take care of
+in <mcdp-poset>kWh/kg</mcdp-poset>. The two MCDPs are equivalent. PyMCDP will take care of
 the conversions that are needed, and will introduce a conversion from
 <mcdp-poset>J*kg/kWh</mcdp-poset> to <mcdp-poset>g</mcdp-poset> (<a href="#fig:conversion"/>).
 
@@ -159,7 +159,8 @@ energy given in <mcdp-poset>kWh/kg</mcdp-poset>.
 
 <table class="col2">
 	<tr><td>
-		<pre class='mcdp' id='model5'>
+		<pre class='mcdp' id='model5' figure-id='code:conversion'
+		figure-caption='Automatic conversion among g, kg, J, kWh'>
 		mcdp {
 			provides capacity [J]
 			requires mass [g]

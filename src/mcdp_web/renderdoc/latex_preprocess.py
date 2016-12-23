@@ -4,6 +4,7 @@ import os
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from contracts.interface import Where
 from mocdp.exceptions import DPSyntaxError
+from mocdp import logger
 
 
 def latex_preprocessing(s):
@@ -40,7 +41,7 @@ def latex_preprocessing(s):
         if x.startswith('eq:'):
             return '\\ref{%s}' % x
         else:
-            return '<a href="#\1"></a>'
+            return '<a href="#%s" class="only-number"></a>' % x
     s = re.sub(r'\\ref{(.*?)}', subit, s)
     
     s = re.sub(r'\\eqref{(.*?)}', r'\\eqref{eq:\1}', s)
@@ -63,8 +64,8 @@ def latex_preprocessing(s):
     s = re.sub(r'\\secref{(.*?)}', r'<a href="#sec:\1"></a>', s)
     
     s = sub_headers(s)               
-    s = re.sub(r'\\cite\[(.*)?\]{(.*?)}', r'<cite id="\2">[\1]</cite>', s)
-    s = re.sub(r'\\cite{(.*?)}', r'<cite id="\1" replace="true">[\1]</cite>', s)
+    s = re.sub(r'\\cite\[(.*)?\]{(.*?)}', r'<a href="#bib:\2">[\1]</a>', s)
+    s = re.sub(r'\\cite{(.*?)}', r'<a href="#bib:\1" replace="true"></a>', s)
     
     # note: nongreedy matching ("?" after *); and multiline (re.M) DOTALL = '\n' part of .
     s = re.sub(r'\\emph{(.*?)}', r'<em>\1</em>', s, flags=re.M | re.DOTALL)
@@ -83,65 +84,170 @@ def latex_preprocessing(s):
     
     s = substitute_simple(s, 'hfill', '')
     s = substitute_simple(s, 'centering', '')
-    s = substitute_simple(s, 'medskip', '')
+    s = substitute_simple(s, 'bigskip', '<span class="bigskip"/>')
+    s = substitute_simple(s, 'medskip', '<span class="medskip"/>')
+    s = substitute_simple(s, 'smallskip', '<span class="medskip"/>')
     s = substitute_simple(s, 'par', '<br class="from_latex_par"/>')
+    
     s = replace_captionsideleft(s)
     
     s = substitute_command(s, 'F', lambda name, inside: '<span class="Fcolor">%s</span>' % inside)
     s = substitute_command(s, 'R', lambda name, inside: '<span class="Rcolor">%s</span>' % inside)
     s = substitute_command(s, 'uline', lambda name, inside: '<span class="uline">%s</span>' % inside)
 
-    for x in ['footnotesize', 'small']:
+    for x in ['footnotesize', 'small', 'normalsize']:
         s = substitute_command(s, x, 
                                lambda name, inside: '<span class="apply-parent %s">%s</span>' % (x, inside))
 
     s = replace_environment(s, "defn", "definition", "def:")
     s = replace_environment(s, "lem", "lemma", "lem:")
     s = replace_environment(s, "rem", "remark", "rem:")
-    s = replace_environment(s, "thm", "thorem", "thm:")
+    s = replace_environment(s, "thm", "theorem", "thm:")
     s = replace_environment(s, "prop", "proposition", ("pro:", "prop:"))
     s = replace_environment(s, "example", "example", "exa:")
     s = replace_environment(s, "proof", "proof", "proof:")
     s = replace_environment(s, "problem", "problem", "prob:")
-    s = replace_environment(s, "abstract", "abstract", None)
-    s = replace_environment(s, "centering", "centering", None)
+    s = replace_environment(s, "abstract", "abstract", 'don-t-steal-label')
+    s = replace_environment(s, "centering", "centering", 'don-t-steal-label')
+    s = replace_environment(s, "center", "center", 'don-t-steal-label')
     
-    
+    s = replace_environment_ext(s, "tabular", maketabular)
+    s = replace_environment_ext(s, "enumerate", make_enumerate)
+    s = replace_environment_ext(s, "itemize", make_itemize)
+    s = replace_environment_ext(s, "minipage", makeminipage)
     s = replace_environment_ext(s, "figure", lambda inside, opt: makefigure(inside, opt, False))
-    s = replace_environment_ext(s, "figure*",lambda inside, opt: makefigure(inside, opt, True))
+    s = replace_environment_ext(s, "figure*", lambda inside, opt: makefigure(inside, opt, True))
+    s = replace_environment_ext(s, "table", lambda inside, opt: maketable(inside, opt, False))
+    s = replace_environment_ext(s, "table*",lambda inside, opt: maketable(inside, opt, True))
     
     s = s.replace('pro:', 'prop:')
-    
+
+#     s = replace_environment_ext(s, "enumerate", makenumerate)
+#     s = replace_environment_ext(s, "itemize", makeitemize)
+#     
     s = replace_quotes(s)
 #     if 'defn' in s:
 #         raise ValueError(s)
     return s
 
+# def makenumerate(inside, opt):
+def maketabular(inside, opt):
+    # get alignment like {ccc}
+    arg, inside = get_balanced_brace(inside)
+    align = arg[1:-1]
+    
+    SEP = '\\\\'
+    inside = inside.replace('\\tabularnewline', SEP)
+    rows = inside.split(SEP)
+    r_htmls = []
+    for r in rows:
+        columns = r.split('&')
+        r_html = "".join('<td>%s</td>' % _ for _ in columns)
+        r_htmls.append(r_html)
+    html = "".join("<tr>%s</tr>" % _ for _ in r_htmls)
+    r = ""
+    r += '<table>'
+    r += html
+    r += '</table>'
+    return r
+
+def make_enumerate(inside, opt):
+    return make_list(inside, opt, 'ul')
+def make_itemize(inside, opt):
+    return make_list(inside, opt, 'ul')
+    
+def make_list(inside, opt, name):
+    # get alignment like {ccc}
+    assert name in ['ul', 'ol']
+    items = inside.split('\\item')
+    items = items[1:]
+    html = "".join("<li>%s</li>" % _ for _ in items)
+    r = "<%s>%s</%s>" % (name, html, name)
+    return r
+
+def maketable(inside, opt, asterisk):
+    placement = opt  # @UnusedVariable
+    
+    class Tmp:
+        label = None
+        caption = None
+    
+    def sub_caption(args, opts):
+        assert not opts and len(args) == 1
+        Tmp.caption, Tmp.label = get_s_without_label(args[0], labelprefix="tab:")
+        return ''
+    
+    inside = substitute_command_ext(inside, 'caption', sub_caption, nargs=1, nopt=0)
+    assert not '\\caption' in inside
+
+    if Tmp.label is not None:
+        idpart = ' id="%s"' % Tmp.label
+    else:
+        idpart = ""
+
+    if Tmp.caption is not None:
+        inside = '<figcaption>' + Tmp.caption + "</figcaption>" + inside
+    print('tmp.caption: %s' % Tmp.caption)
+    res  = '<figure class="table"%s>%s</figure>' % (idpart, inside)
+    return res
+
+def makeminipage(inside, opt):
+    align = opt  # @UnusedVariable
+    if inside[0] == '{':
+        opt_string, inside = get_balanced_brace(inside)
+        latex_width = opt_string[1:-1] # remove brace
+    else:
+        latex_width = None
+    
+    if latex_width is not None:
+        attrs = ' latex-width="%s"' % latex_width
+    else:
+        attrs = ''
+    
+    res  = '<div class="minipage"%s>%s</div>' % (attrs, inside)
+    return res
+
 def makefigure(inside, opt, asterisk):
     align = opt  # @UnusedVariable
-    print('makefigure inside = %r'  % inside)
+    
     def subfloat_replace(args, opts):
         contents = args[0]
         caption = opts[0]
+        
+        caption, label = get_s_without_label(caption, labelprefix="fig:")
+        if label is None:
+            caption, label = get_s_without_label(caption, labelprefix="subfig:")
+        if label is not None and not label.startswith('subfig:'):
+            msg = 'Subfigure labels should start with "subfig:"; found %r.' % (label)
+            label = 'sub' + label
+            msg += 'I will change to %r.' % label
+            logger.debug(msg)
+            
+        if label is not None:
+            idpart = ' id="%s"' % label
+        else:
+            idpart = ""
+
         if caption is None: caption = 'no subfloat caption'
-        res = '<figure>%s<figcaption>%s</figcaption></figure>' % (contents, caption)
+        res = '<figure class="subfloat"%s>%s<figcaption>%s</figcaption></figure>' % (idpart, contents, caption)
         return res
     
     inside = substitute_command_ext(inside, 'subfloat', subfloat_replace, nargs=1, nopt=1)
-#     print('makefigure inside now = %r'  % inside)
     class Tmp:
         label = None
     
     def sub_caption(args, opts):
         assert not opts and len(args) == 1
-#         print('caption xargs = %s' % args.__repr__())
         x, Tmp.label = get_s_without_label(args[0], labelprefix="fig:")
-#         print('caption x = %s' % x.__repr__())
         res = '<figcaption>' + x + "</figcaption>" 
+        print('caption args: %r, %r' % (args, opts))
         return res
     
     inside = substitute_command_ext(inside, 'caption', sub_caption, nargs=1, nopt=0)
     
+    print('makefigure inside without caption = %r'  % inside)
+    assert not '\\caption' in inside
+
     if Tmp.label is not None:
         idpart = ' id="%s"' % Tmp.label
     else:
@@ -186,10 +292,15 @@ def substitute_simple(s, name, replace):
     istart = s.index(start)
     i = istart + len(start)
     
-    next_char = s[i+1] 
-    
-    # don't match '\ciao' when looking for '\c'
-    is_match = not next_char.isalpha()
+    if i >= len(s) - 1:
+        is_match = True
+    else:
+        assert i < len(s) -1 
+        next_char = s[i+1] 
+        
+        # don't match '\ciao' when looking for '\c'
+        is_match = not next_char.isalpha()
+        
     if not is_match:
         return s[:i] + substitute_simple(s[i:], name, replace) 
 
@@ -219,16 +330,24 @@ def substitute_command_ext(s, name, f, nargs, nopt):
         if nargs=1 and nopt = 0:
             f : x -> s
     """
-    lookfor = '\\' + name + '[' if nopt > 0 else '{'
+    lookfor = ('\\' + name) +( '[' if nopt > 0 else '{')
     
     try:
         start = get_next_unescaped_appearance(s, lookfor, 0)
         assert s[start:].startswith(lookfor)
+#         print('s[start:] starts with %r %r' % s[start:])
     except NotFound:
         return s
     
     before = s[:start]
-    consume = consume0= s[start + len(lookfor) - 1:]
+    rest = s[start:]
+    print('before: %r' % before)
+    assert s[start:].startswith('\\'+name)
+    print('s[start:]: %r' % s[start:])
+    assert rest.startswith('\\'+name)
+    assert not ('\\' + name ) in before, before
+    
+    consume = consume0 = s[start + len(lookfor) - 1:]
     
     opts = []
     args = []
@@ -265,6 +384,10 @@ def substitute_command_ext(s, name, f, nargs, nopt):
     replace = f(args=args, opts=opts)
     after_tran = substitute_command_ext(consume, name, f, nargs, nopt)
     res = before + replace + after_tran
+    print('before: %r' % before) 
+    print('replace: %r' % replace)
+    print('after_tran: %r' % after_tran)
+    assert not ('\\' + name ) in res, res
     return res
 
 def consume_whitespace(s):
@@ -368,6 +491,9 @@ def replace_quotes(s):
     return replace_quotes(s2)
     
 def replace_environment_ext(s, envname, f):
+    # need to escape *
+    if '*' in envname:
+        envname = envname.replace('*', '\\*')
     reg = '\\\\begin{%s}(\\[.*?\\])?(.*?)\\\\end{%s}' % (envname, envname)
     # note multiline and matching '\n'
     reg = re.compile(reg, flags=re.M | re.DOTALL)
@@ -385,10 +511,14 @@ def replace_environment(s, envname, classname, labelprefix):
     def replace_m(inside, opt):
         thm_label = opt
         contents, label = get_s_without_label(inside, labelprefix=labelprefix)
+        if label is not None and isinstance(labelprefix, str):
+            assert label.startswith(labelprefix), (s, labelprefix, label)
         id_part = "id='%s' "% label if label is not None else ""
+        
+        print('using label %r for env %r (labelprefix %r)' % (label, envname, labelprefix))
         l = "<span class='%s_label latex_env_label'>%s</span>" % (classname, thm_label) if thm_label else ""
-        s = '<div %sclass="%s latex_env" markdown="1">%s%s</div>' % (id_part, classname, l, contents)
-        return s
+        rr = '<div %sclass="%s latex_env" markdown="1">%s%s</div>' % (id_part, classname, l, contents)
+        return rr
     return replace_environment_ext(s, envname, replace_m)
     
 def replace_captionsideleft(s):
@@ -436,27 +566,32 @@ def get_s_without_label(contents, labelprefix=None):
         def_id = None
     def got_it(m):
         found = m.group(1)
-#         print('found : %r' % found)
-        if not isinstance(labelprefix, tuple):
-            options = (labelprefix,)
+        if labelprefix is None:
+            ok = True
         else:
-            options = labelprefix
-        ok = labelprefix is None or any(_.startswith(labelprefix) for _ in options)
+            if  isinstance(labelprefix, tuple):
+                options = labelprefix
+            elif isinstance(labelprefix, str):
+                options = (labelprefix,)
+            else: 
+                raise ValueError(labelprefix)
+            ok = any(found.startswith(_) for _ in options)
         
         if ok:
             Scope.def_id = found
             # extract
 #             print('looking for labelprefix %r found label %r in %s' % ( labelprefix, found, contents))
             return ""
-#                 print('got it: %s' % Scope.def_id)
         else:
 #             print('not using %r' % ( found))
             # keep 
             return "\\label{%s}" % found
-#                 print('rejecting id %r for definition' % m.group(1))
         
     contents2 = re.sub(r'\\label{(.*?)}', got_it, contents)
-    return contents2, Scope.def_id
+    label =  Scope.def_id
+    if isinstance(labelprefix, str) and label is not None:
+        assert label.startswith(labelprefix), (label, labelprefix)
+    return contents2, label
     
 def replace_equations(s):
     class Tmp:
@@ -511,29 +646,43 @@ def replace_equations(s):
 def get_next_unescaped_appearance(s, d1, search_from):
     while True:
         if not d1 in s[search_from:]:
+#             print('nope, no %r in s[%s:] = %r' % (d1,search_from, s[search_from:]))
             raise NotFound()
         maybe = s.index(d1, search_from)
         if s[maybe-1] == '\\':
+#             print('found escaped match of %r (prev chars = %r)' % (d1, s[:maybe]))
             search_from = maybe + 1
         else:
+            assert s[maybe:].startswith(d1)
             return maybe
         
 class NotFound(Exception):
     pass
 
         
-def extract_delimited(s, d1, d2, subs):
+def extract_delimited(s, d1, d2, subs, domain):
     try:
         a = get_next_unescaped_appearance(s, d1, 0)
-        b0 = get_next_unescaped_appearance(s, d2, a + len(d1))
+#         print('found delimiter start %r in %r at a = %s' %( d1,s,a))
+        assert s[a:].startswith(d1)
+    except NotFound:
+        return s 
+    try:
+        search_d1_from = a + len(d1)
+        print('search_d1_from = %s' % search_d1_from)
+        b0 = get_next_unescaped_appearance(s, d2, search_d1_from)
+        assert b0 >= search_d1_from
+        assert s[b0:].startswith(d2)
         b = b0 + len(d2)
         complete = s[a:b]
     except NotFound:
+        assert s[a:].startswith(d1)
+        print('could not find delimiter d2 %r in %r' % (d2, s[search_d1_from:]))
         return s 
     assert complete.startswith(d1)
     assert complete.endswith(d2)
     #inside = s[a+len(d1):b-len(d2)]
-    key = 'KEY%0003dD'% len(subs)
+    key = 'KEY%s%0003dD'% (domain,len(subs))
     if 'KEY' in complete:
         msg = 'recursive - %s = %r' % (key, complete)
         msg += '\n\n'
@@ -553,5 +702,15 @@ def extract_delimited(s, d1, d2, subs):
     
     print ('%r = %s' % (key, complete))
     s2 = s[:a] + key + s[b:]
-    return extract_delimited(s2, d1, d2, subs)
+    return extract_delimited(s2, d1, d2, subs, domain)
     
+    
+if __name__ == '__main__':
+    s = """
+For example, the expression <mcpd-value>&lt;2 J, 1 A&gt;</mcdp-value>
+denotes a tuple with two elements, equal to <mcdp-value>2 J</mcpd-value>
+and <code class='mcdp-value'>2 A</code>.
+"""
+    d1 = '<mcdp-value'
+    a = get_next_unescaped_appearance(s, d1, 0)
+
