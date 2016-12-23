@@ -20,6 +20,7 @@ comptests-run: prepare_tests
 
 comptests-run-nocontracts: prepare_tests
 	comptests -o $(out) --nonose $(package) 
+	compmake $(out) -c "ls failed"
 
 comptests-run-nocontracts-console: prepare_tests
 	comptests -o $(out) --nonose $(package) --console
