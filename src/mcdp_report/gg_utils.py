@@ -14,7 +14,7 @@ from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
 from mcdp_library_tests.tests import timeit_wall
 from mocdp import logger, MCDPConstants
-from mocdp.exceptions import mcdp_dev_warning
+from mocdp.exceptions import mcdp_dev_warning, DPSemanticError
 import networkx as nx  # @UnresolvedImport
 from reprep.constants import MIME_PDF, MIME_PLAIN, MIME_PNG, MIME_SVG
 from system_cmd import CmdException, system_cmd_result
@@ -252,12 +252,21 @@ def get_length_in_inches(s):
     msg = 'Cannot interpreted length %r.' % s
     raise ValueError(msg)
         
-def embed_images_from_library(html, library):
+def embed_images_from_library(html, library, raise_errors=True):
     """ Resolves images from library """
     from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
+    
     def resolve(href):
         #print('resolving %r' % href)
-        f = library._get_file_data(href)
+        try:
+            f = library._get_file_data(href)
+        except DPSemanticError:
+            if raise_errors:
+                raise
+            else:
+                msg = 'Could not find file %r.' % href
+                logger.error(msg)
+                return None
         data = f['data']
         # realpath = f['realpath']
         return data
@@ -271,6 +280,8 @@ def embed_images_from_library(html, library):
     for tag in soup.select('img[src$=pdf], img[src$=PDF]'):
         # load pdf data
         data_pdf = resolve(tag['src'])
+        if data_pdf is None:
+            continue
 
         density = MCDPConstants.pdf_to_png_dpi # dots per inch
         data_png = png_from_pdf(data_pdf, density=density)
