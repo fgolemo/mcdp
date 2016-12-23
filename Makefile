@@ -90,3 +90,7 @@ clean-branches:
 	@echo Then run this command.
 	@echo
 	git fetch -p && git branch -vv | awk '/: gone]/{print $$1}' | xargs git branch -d
+
+
+naked-prints:
+	zsh -c "grep '^[[:space:]]*print ' src/**/*py 2>/dev/null  | grep -v gvgen | grep -v pyparsing_bundled | grep -v /libraries | grep -v XCP | grep -v node_modules | grep -v tests"

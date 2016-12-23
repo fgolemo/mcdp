@@ -300,7 +300,7 @@ class AppVisualization():
             sub_poset_name_with_library()
             sub_libraryname()  # keep last
         except:
-            print soup
+            # print soup
             raise
         # keep above last!
 

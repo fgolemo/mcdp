@@ -71,7 +71,7 @@ def plot_all_directions(r, queries, results, what_to_plot_fun, what_to_plot_res)
                             xs = [x[0]] * len(y)
                             pylab.plot(xs, y, marker_joint, color=color)
                         else:
-                            print x, y
+                            # print x, y
                             pylab.plot(x, y, marker_joint, color=color)
                 set_axis_colors(pylab, color_functions, color_resources)
 
