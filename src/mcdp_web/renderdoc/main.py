@@ -121,6 +121,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     
     html = mark_console_pres(html)
     html = make_figure_from_figureid_attr(html)
+    print(indent(s, 'after  make_figure_from_figureid_attr | '))
     html = fix_subfig_references(html)
     check_html_fragment(html)
     

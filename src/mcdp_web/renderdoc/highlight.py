@@ -913,8 +913,12 @@ def add_br_before_pres(html):
     return to_html_stripping_fragment(soup)
 
 def add_class(e, c):
-    check_isinstance(c, str)        
-    e['class'] = e.get('class', []) + [c]
+    check_isinstance(c, str)
+    cur = e.get('class', [])
+    if isinstance(cur, str):
+        cur = cur.split()
+    cur = cur + [c]
+    e['class'] = cur
 #     print 'old %s new %s attr %s ' %(cur, n, e['class'])
 
 def compute_size_for_pre_without_class(soup):

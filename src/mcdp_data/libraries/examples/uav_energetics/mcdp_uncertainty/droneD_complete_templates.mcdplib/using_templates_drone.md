@@ -3,7 +3,7 @@
 
 Define the ActuationEnergeticsTemplate as follows
 
-<pre class='mcdp_template' id='ActuationEnergeticsTemplate'/>
+<pre class='mcdp_template' id='ActuationEnergeticsTemplate'></pre>
 
 This can now be described as:
 
@@ -18,14 +18,14 @@ mcdp {
   provides capacity [Wh]
   provides missions [dimensionless]
 
-  requires cost     [&36;]
+  requires cost     [&#36;]
 
   requires maintenance [dimensionless]
   requires mass [g]
 
   missions ≼ 1000 []
   maintenance ≽ 1 []
-  cost ≽ 100 &36;
+  cost ≽ 100 &#36;
 
   required mass ≽ 
     Uncertain(provided capacity/120 Wh/kg ,
