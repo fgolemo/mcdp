@@ -29,6 +29,8 @@ class MakeFiguresNDP(MakeFigures):
         figure2function = {
             'fancy_editor': (Enclosed, 
                 dict(direction='TB', enclosed=True, style=STYLE_GREENREDSYM, skip_initial=False)),
+            'fancy_editor_LR': (Enclosed, 
+                dict(direction='LR', enclosed=True, style=STYLE_GREENREDSYM, skip_initial=False)),
             'ndp_graph_enclosed_LR': (Enclosed, 
                 dict(direction='LR', enclosed=True, style=STYLE_GREENREDSYM)), 
             'ndp_graph_enclosed_TB': (Enclosed, 

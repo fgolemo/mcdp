@@ -7,7 +7,8 @@ What is a "system"?
 Here is a great quote:
 
 <blockquote id="firstquote">
-    <p>A system is composed of components;<br/> a component is something you understand.</p>
+    <p>A system is composed of components;<br/>
+      a component is something you understand.</p>
 
     <p><a href="https://en.wikipedia.org/wiki/Howard_H._Aiken"
           title="Howard H. Aiken (1900-1973). Creator of the MARK I computer.">
@@ -53,7 +54,7 @@ in a formal yet intuitive way that is cross-disciplinary... and to develop solut
 Understand a component
 
 The idea is to formalize these components by their "functionality" and "resources".
-
+\ade 
 We call "**<f>functionality</f>**" is what the component provides: why is it in the system in
 the first place? For example, a battery provides capacity (kWh)
   Other words for functionality are: <f>(functional) requirements</f>, <f>specifications</f>,
@@ -83,7 +84,7 @@ All the concepts used have an intuitive graphical representation.
 
 In red and green... <footnote>I apologize to colorblind people
 for the choice of colors; however, note that the diagrams are not ambiguous
-because of the node "leq" that joins them.</footnote>
+because of the node $\posleq$ that joins them.</footnote>
 
 <!-- <figure>
     <img width src='logo.png'/>

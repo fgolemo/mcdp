@@ -20,10 +20,12 @@ Suppose we define a simple model called ``Battery`` as follows:
     <render class='ndp_graph_templatized_labeled'>`Battery</render>
 </col2>
 
-Let's also define the MCDP ``Actuation1``:
+Let's also define the MCDP ``Actuation1``, as a
+relation from <f>lift</f> to <r>power</r>, as in [](#code:Actuation1).
 
 <col2>
-    <pre class="mcdp" id='Actuation1' label='Actuation1.mcdp'>
+    <pre class="mcdp" id='Actuation1' label='Actuation1.mcdp'
+        figure-id="code:Actuation1">
     mcdp {
         provides lift [N]
         requires power [W]
@@ -40,20 +42,49 @@ Let's also define the MCDP ``Actuation1``:
         </render>
 </col2>
 
-<render class='ndp_graph_enclosed' style='max-width: 100%'>`Actuation1</render>
+The relation between <f>lift</f> and <r>power</r>
+is described by the polynomial relation
+
+<pre class="mcdp_statements">
+    required power ≽ p0 + p1 * l + p2 * l^2
+</pre>
+
+This is really the composition of five DPs,
+correponding to sum, multiplaction, and exponentiation ([](#fig:Actuation1)).
+
+<render class='ndp_graph_enclosed' style='max-width: 100%'
+figure-id="fig:Actuation1"> `Actuation1</render>
+
+The primitive DPs are shown in [](#fig:primitive).
+
+<col3>
+
+$\fun_1 + \fun_2 \posleq \res$
+
+$\fun \posleq \res_1 + \res_2$
+
+$\max(\fun_1, \fun_2) \posleq \res$
+
+<span>\xxx</span>
+
+<span>\xxx</span>
+
+<span>\xxx</span>
+
+</col3>
 
 
-Then we can combine these two together.
+Let us combine these two together.
 
 The syntax to re-use previously defined MCDPs is:
 
     instance `Name
 
-The backtick means "load the symbols from the library, from the file ``name.mcdp``".
+The backtick means "load the symbols from the library, from the file `name.mcdp`".
 
 The following creates two sub-design problems, for now unconnected.
 
-<col2>
+<col2 id='combined1-around'>
     <pre class="mcdp" id='combined1'>
     mcdp {
         actuation = instance `Actuation1
@@ -62,6 +93,12 @@ The following creates two sub-design problems, for now unconnected.
     </pre>
     <render class='ndp_graph_enclosed'>`combined1</render>
 </col2>
+
+<style type='text/css'>
+#combined1-around td {
+    vertical-align: c;
+}
+</style>
 
 We can create a complete model with a loop by describing the co-design
 constraint.
@@ -91,7 +128,8 @@ Then the lift provided by the actuator must be at least the mass
 of the battery plus the mass of the payload times gravity:
 
 <col2 id='mine'>
-<pre class="mcdp" id='composition' label='Composition.mcdp'>
+<pre class="mcdp" id='composition' label='Composition.mcdp'
+    figure-id="code:composition">
 mcdp {
     actuation = instance `Actuation1
     battery = instance `Battery

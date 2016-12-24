@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, indent
 from mcdp_library import MCDPLibrary
 from mcdp_web.renderdoc.abbrevs import other_abbrevs
 from mcdp_web.renderdoc.highlight import fix_subfig_references
@@ -17,6 +17,7 @@ from .latex_preprocess import latex_preprocessing
 from .markd import render_markdown
 from .prerender_math import prerender_mathjax
 from .xmlutils import check_html_fragment
+from mocdp import logger
 
 
 __all__ = ['render_document']
@@ -42,7 +43,14 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     #  between various limiters etc.
     # returns a dict(string, substitution)
     s, maths = extract_maths(s) 
-#     print('maths = %s' % maths)
+    print('maths = %s' % maths)
+    for k, v in maths.items():
+        if v[0] == '$' and v[1] != '$$':
+            if '\n\n' in v:
+                msg = 'Suspicious math fragment %r = %r' % (k, v)
+                logger.error(maths)
+                logger.error(msg)
+                raise ValueError(msg)
     
     # fixes for LaTeX
     s = latex_preprocessing(s)
@@ -64,9 +72,9 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
 
     s = col_macros_prepare_before_markdown(s)
     
-#     print(indent(s, 'before markdown | '))
+    print(indent(s, 'before markdown | '))
     s = render_markdown(s)
-#     print(indent(s, 'after  markdown | '))
+    print(indent(s, 'after  markdown | '))
 
     for k,v in maths.items():
         if not k in s:

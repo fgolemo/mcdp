@@ -667,16 +667,27 @@ class NotFound(Exception):
     pass
 
         
-def extract_delimited(s, d1, d2, subs, domain):
+def extract_delimited(s, d1, d2, subs, domain, acceptance=None):
+    """
+        acceptance: s, i -> Bool
+    """
+    if acceptance is None:
+        acceptance = lambda _s, _i : True
     try:
-        a = get_next_unescaped_appearance(s, d1, 0)
-#         print('found delimiter start %r in %r at a = %s' %( d1,s,a))
+        a_search_from = 0
+        while True:
+            a = get_next_unescaped_appearance(s, d1, a_search_from)
+            if acceptance(s, a):
+                break
+            a_search_from = a + 1 
+            
+        print('found delimiter start %r in %r at a = %s' %( d1,s,a))
         assert s[a:].startswith(d1)
     except NotFound:
         return s 
     try:
         search_d1_from = a + len(d1)
-#         print('search_d1_from = %s' % search_d1_from)
+        print('search_d1_from = %s' % search_d1_from)
         b0 = get_next_unescaped_appearance(s, d2, search_d1_from)
         assert b0 >= search_d1_from
         assert s[b0:].startswith(d2)
@@ -684,7 +695,7 @@ def extract_delimited(s, d1, d2, subs, domain):
         complete = s[a:b]
     except NotFound:
         assert s[a:].startswith(d1)
-#         print('could not find delimiter d2 %r in %r' % (d2, s[search_d1_from:]))
+        print('could not find delimiter d2 %r in %r' % (d2, s[search_d1_from:]))
         return s 
     assert complete.startswith(d1)
     assert complete.endswith(d2)
@@ -709,7 +720,7 @@ def extract_delimited(s, d1, d2, subs, domain):
     
 #     print ('%r = %s' % (key, complete))
     s2 = s[:a] + key + s[b:]
-    return extract_delimited(s2, d1, d2, subs, domain)
+    return extract_delimited(s2, d1, d2, subs, domain, acceptance=acceptance)
     
 
 
@@ -734,16 +745,21 @@ def extract_maths(s):
                     ('$','$'),
                    ('\\[', '\\]')])
     
+    def acceptance(s0, i):
+        inside = is_inside_markdown_quoted_block(s0, i)
+        return not inside
+    
     subs = {}
     for d1, d2 in delimiters:
-        s = extract_delimited(s, d1, d2, subs, domain='MATHS')
+        s = extract_delimited(s, d1, d2, subs, domain='MATHS', acceptance=acceptance)
         
-    for k, v in list(subs.items()):
-        # replace back if k is in a line that is a comment
-        # or there is an odd numbers of \n~~~
-        if is_inside_markdown_quoted_block(s, s.index(k)):
-            s = s.replace(k, v)
-            del subs[k]
+#     # This should not be used anymore
+#     for k, v in list(subs.items()):
+#         # replace back if k is in a line that is a comment
+#         # or there is an odd numbers of \n~~~
+#         if is_inside_markdown_quoted_block(s, s.index(k)):
+#             s = s.replace(k, v)
+#             del subs[k]
   
     return s, subs
 

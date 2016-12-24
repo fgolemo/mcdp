@@ -66,6 +66,9 @@ manual_contents = [
     ('manual', 'internal_notes'),
 
     
+    ('manual', 'a_back_symbols'),
+    ('manual', 'a_back_syntax'),
+    
     ('manual', 'appendix_math'),
     ('manual', 'backmatter'),
 
