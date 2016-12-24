@@ -85,6 +85,8 @@ def latex_preprocessing(s):
     s = substitute_simple(s, 'scottcontinuity', 'Scott continuity')
     s = substitute_simple(s, 'scottcontinuous', 'Scott continuous')
     
+    s = substitute_simple(s, 'xxx', '<div class="xxx">XXX</div>')
+    
     s = substitute_simple(s, 'hfill', '')
     s = substitute_simple(s, 'centering', '')
     s = substitute_simple(s, 'bigskip', '<span class="bigskip"/>')
@@ -523,7 +525,7 @@ def replace_environment(s, envname, classname, labelprefix):
             assert label.startswith(labelprefix), (s, labelprefix, label)
         id_part = "id='%s' "% label if label is not None else ""
         
-        print('using label %r for env %r (labelprefix %r)' % (label, envname, labelprefix))
+#         print('using label %r for env %r (labelprefix %r)' % (label, envname, labelprefix))
         l = "<span class='%s_label latex_env_label'>%s</span>" % (classname, thm_label) if thm_label else ""
         rr = '<div %sclass="%s latex_env" markdown="1">%s%s</div>' % (id_part, classname, l, contents)
         return rr
@@ -661,6 +663,7 @@ def get_next_unescaped_appearance(s, d1, search_from):
             search_from = maybe + 1
         else:
             assert s[maybe:].startswith(d1)
+#             print('found %r at %r ' % (d1, s[maybe:]))
             return maybe
         
 class NotFound(Exception):
@@ -681,13 +684,13 @@ def extract_delimited(s, d1, d2, subs, domain, acceptance=None):
                 break
             a_search_from = a + 1 
             
-        print('found delimiter start %r in %r at a = %s' %( d1,s,a))
+#         print('found delimiter start %r in %r at a = %s' %( d1,s,a))
         assert s[a:].startswith(d1)
     except NotFound:
         return s 
     try:
         search_d1_from = a + len(d1)
-        print('search_d1_from = %s' % search_d1_from)
+#         print('search_d1_from = %s' % search_d1_from)
         b0 = get_next_unescaped_appearance(s, d2, search_d1_from)
         assert b0 >= search_d1_from
         assert s[b0:].startswith(d2)
@@ -695,7 +698,7 @@ def extract_delimited(s, d1, d2, subs, domain, acceptance=None):
         complete = s[a:b]
     except NotFound:
         assert s[a:].startswith(d1)
-        print('could not find delimiter d2 %r in %r' % (d2, s[search_d1_from:]))
+#         print('could not find delimiter d2 %r in %r' % (d2, s[search_d1_from:]))
         return s 
     assert complete.startswith(d1)
     assert complete.endswith(d2)

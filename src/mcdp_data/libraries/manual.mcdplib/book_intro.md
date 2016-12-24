@@ -2,6 +2,12 @@
 
 ## The problem of system co-design
 
+<div figure-id='fig:Intro' figure-caption="This is an initial image">
+    <span style='display: block; float: right; height: 8em; width: 10em; background-color: lightgrey; margin-left: 2em;'>
+    content
+    </span>
+</div>
+
 What is a "system"?
 
 Here is a great quote:
@@ -26,24 +32,33 @@ as day as much as it is tautological. We could equally say: "A system is partiti
 The second part, "a component is something you understand", is revelatory:
 we call "system" what is too difficult to understand. Something is a "system"
 if we cannot keep it in mind in its entirety at the same time.
-
+%
 This definition is, of course, an anthropocentric definition, as it is a
 limitation of the human mind, related to the amount of neurons in the brain.
 
-It also depends on what exactly is the task at hand with which we are confronted.
+It also depends on what exactly is the task at hand with which we are confronted. Here, we consider the task of *designing* systems. The slogan is:
+
+<blockquote id='secondquote'>
+    <!-- <p>A system is composed of components;<br/>
+     a component is something <u>you can design</u>;<br/>
+     <u>co-design</u> is designing them all together.</p> -->
+
+     <p>A system is composed of components;<br/>
+       a component is something you understand
+       <span id="newpart">how to design</span>.</p>
+</blockquote>
+
+<style>
+#newpart {
+    color: purple;
+}
+</style>
 
 
-After you know how to design all components separately, you still have the problem of designing the components in the system together. This problem of "designing things together" is what we call "**co-design**". This problem is one of the fundamental issues in engineering and computer sciences
+After you know how to design all components separately, you still have the problem of designing the components in the system together. This problem of "designing things together" is what we shall call "**co-design**". This problem is one of the fundamental issues in engineering and computer sciences
 and appears by different names everywhere.
 
 
-Here, we consider the task of *designing* systems. The slogan is:
-
-<blockquote id='secondquote'>
-    <p>A system is composed of components;<br/>
-     a component is something <u>you can design</u>;<br/>
-     <u>co-design</u> is designing them all together.</p>
-</blockquote>
 
 ## A new approach
 
@@ -54,7 +69,7 @@ in a formal yet intuitive way that is cross-disciplinary... and to develop solut
 Understand a component
 
 The idea is to formalize these components by their "functionality" and "resources".
-\ade 
+\ade
 We call "**<f>functionality</f>**" is what the component provides: why is it in the system in
 the first place? For example, a battery provides capacity (kWh)
   Other words for functionality are: <f>(functional) requirements</f>, <f>specifications</f>,

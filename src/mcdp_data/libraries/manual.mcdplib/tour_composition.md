@@ -33,26 +33,30 @@ is described by the polynomial relation
 This is really the composition of five DPs,
 correponding to sum, multiplaction, and exponentiation ([](#fig:Actuation1)).
 
-<render class='ndp_graph_enclosed' style='max-width: 100%'
-figure-id="fig:Actuation1"> `Actuation1</render>
+<render class='ndp_graph_enclosed' style='max-width: 100%' figure-id="fig:Actuation1">
+    `Actuation1
+</render>
 
 The primitive DPs are shown in [](#fig:primitive).
 
-<col3>
+<col4>
 
-$\fun_1 + \fun_2 \posleq \res$
+    $\fun_1 + \fun_2 \posleq \res$
 
-$\fun \posleq \res_1 + \res_2$
+    $\fun \posleq \res_1 + \res_2$
 
-$\max(\fun_1, \fun_2) \posleq \res$
+    $\max(\fun_1, \fun_2) \posleq \res$
 
-<span>\xxx</span>
+    $\max(\fun_1, \fun_2) \posleq \res$
 
-<span>\xxx</span>
+    <span>\xxx</span>
+    <span>\xxx</span>
 
-<span>\xxx</span>
+    <span>\xxx</span>
 
-</col3>
+    <span>\xxx</span>
+
+</col4>
 
 
 Let us combine these two together.

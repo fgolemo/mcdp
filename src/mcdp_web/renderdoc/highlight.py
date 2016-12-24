@@ -24,7 +24,7 @@ from mcdp_report.html import ast_to_html, get_markdown_css
 from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters
 from mcdp_web.images.images import (get_mime_for_format)
 from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment,\
-    check_html_fragment, to_html_stripping_fragment_document
+    check_html_fragment, to_html_stripping_fragment_document, describe_tag
 from mocdp import ATTR_LOAD_NAME, logger, get_mcdp_tmp_dir, MCDPConstants
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
@@ -54,21 +54,20 @@ def html_interpret(library, html, raise_errors=False,
                                raise_errors=raise_errors,
                                realpath=realpath)
 
-    try:
-        html = make_figures(library, html,
-                            generate_pdf=generate_pdf,
-                            raise_error_dp=raise_errors,
-                            raise_error_others=raise_errors,
-                            realpath=realpath)
-    except:
-        
-        raise
     html = make_plots(library, html,
                       raise_errors=raise_errors,
                       realpath=realpath)
+    # let's do make_plots first; then make_figures will 
+    # check for remaining <render> elements.
+    html = make_figures(library, html,
+                        generate_pdf=generate_pdf,
+                        raise_error_dp=raise_errors,
+                        raise_error_others=raise_errors,
+                        realpath=realpath)
 
-    if False:
-        html = add_br_before_pres(html)
+
+#     if False:
+#         html = add_br_before_pres(html)
 #     print 'after make_plots: %s' % html
 
     return html
@@ -345,23 +344,45 @@ def fix_subfig_references(html):
 
 def make_figure_from_figureid_attr(html):
     """
-        Makes a figure if 
+        Makes a figure:
             <e figure-id='fig:ure' figure-caption='ciao'/> 
-            
-        becomes
-        
+                    
         <figure id="fig:ure">
             <e figure-id='fig:ure' figure-caption='ciao'/>
             <figcaption>ciao</figcaption>
         </figure>
+
+        Makes a table:
+            <e figure-id='tab:ure' figure-caption='ciao'/>
+            
+        becomes
+        
+        
+        
         
     """
     soup = bs(html) 
     
     for towrap in soup.select('[figure-id]'):
+        ID = towrap['figure-id']
         parent = towrap.parent
         fig = Tag(name='figure')
-        fig['id'] = towrap['figure-id']
+        fig['id'] = ID
+        caption_below = True
+        if ID.startswith('fig:'):
+            add_class(fig, 'figure')
+        elif ID.startswith('subfig:'):
+            add_class(fig, 'subfloat')
+        elif ID.startswith('tab:'):
+            add_class(fig, 'table')
+            caption_below = False
+        elif ID.startswith('code:'):
+            add_class(fig, 'code')
+            pass
+        else:
+            msg = 'The ID %r should start with fig: or tab: or code:' % ID
+            raise_desc(ValueError, msg, tag=describe_tag(towrap))
+            
         if towrap.has_attr('figure-caption'):
             caption = towrap['figure-caption']
         else:
@@ -371,7 +392,11 @@ def make_figure_from_figureid_attr(html):
         i = parent.index(towrap)
         towrap.extract()
         fig.append(towrap)
-        fig.append(figcaption)
+        
+        if caption_below:
+            fig.append(figcaption)
+        else:
+            fig.insert(0, figcaption)
         
         parent.insert(i, fig)
         
@@ -664,9 +689,8 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                 if tag.string is None: # or not tag.string.strip():
                     if not tag.has_attr('id'):
                         msg = "If <pre> is empty then it needs to have an id."
-                        raise_desc(ValueError, msg, tag=str(tag), 
-                                   before=str(tag.previousSibling),
-                                   after=str(tag.nextSibling))
+                        raise_desc(ValueError, msg, tag=describe_tag(tag))
+                        
                     # load it
                     tag_id = tag['id'].encode('utf-8')
                     basename = '%s.%s' % (tag_id, extension)
@@ -707,10 +731,10 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                         return refine(x, context=context)
                     else:
                         return x
+#                 print('rendering source code %r' % source_code)
                 html = ast_to_html(source_code, parse_expr=parse_expr,
                                                 add_line_gutter=False,
                                                 postprocess=postprocess)
-                
                 
                 for w in context.warnings:
                     if w.where is not None:
@@ -719,6 +743,17 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                         
                 frag2 = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
                 
+#                 texts = [i for i in frag2.recursiveChildGenerator() 
+#                         if type(i) == NavigableString]
+#                 for t in texts:
+#                     s = t.string
+#                     if ' ' in s:
+# 
+#                         s = s.replace(' ', ' ')
+#                         r = Tag(name='span', attrs={'class': 'space_in_code'})
+#                         r.append(NavigableString(s))
+#                         t.replace_with(r)
+                    
                 if use_pre:
                     rendered = frag2.pre
                     if not rendered.has_attr('class'):
@@ -902,30 +937,30 @@ def copy_string_and_attrs(e, e2):
     # copy attributes
     for k, v in e.attrs.items():
         e2[k] = v
-                
-def add_br_before_pres(html):
-    soup = bs(html)
-    pres = list(soup.select('pre'))
-#     print('pres: %d %s' %(len(pres), pres))
-    for pre in pres:
-        p = pre.previousSibling
-        if p is not None:
-            if isinstance(p, NavigableString):
-                if '\n' in p:
-#                     print('pre: %s' % str(pre))
-#                     print 'soup', soup
-#                     print 'soup dict', soup.__dict__
-#                     print 'soup.parser_class.new_tag', soup.parser_class.new_tag
-                    br =Tag(name='br')
-                    br.string = ''
-                    br['class'] = 'added_before_pre'
-                    br['orig'] = unicode(p).__repr__()
-                    br['reference'] = "pre: %s p: %s" % (str(id(pre)), str(id(p)))
-#                     print  br['reference']
-#                     print('adding tag br')
-#                     pre.insert_before(br)
-                    pre.parent.insert(pre.parent.index(pre), br)
-    return to_html_stripping_fragment(soup)
+#                 
+# def add_br_before_pres(html):
+#     soup = bs(html)
+#     pres = list(soup.select('pre'))
+# #     print('pres: %d %s' %(len(pres), pres))
+#     for pre in pres:
+#         p = pre.previousSibling
+#         if p is not None:
+#             if isinstance(p, NavigableString):
+#                 if '\n' in p:
+# #                     print('pre: %s' % str(pre))
+# #                     print 'soup', soup
+# #                     print 'soup dict', soup.__dict__
+# #                     print 'soup.parser_class.new_tag', soup.parser_class.new_tag
+#                     br =Tag(name='br')
+#                     br.string = ''
+#                     br['class'] = 'added_before_pre'
+#                     br['orig'] = unicode(p).__repr__()
+#                     br['reference'] = "pre: %s p: %s" % (str(id(pre)), str(id(p)))
+# #                     print  br['reference']
+# #                     print('adding tag br')
+# #                     pre.insert_before(br)
+#                     pre.parent.insert(pre.parent.index(pre), br)
+#     return to_html_stripping_fragment(soup)
 
 def add_class(e, c):
     if isinstance(c, str):    
@@ -1164,13 +1199,14 @@ def create_a_to_data(download, data_format, data):
     encoded = base64.b64encode(data)
     href = 'data:%s;base64,%s' % (mime, encoded)
     attrs = dict(href=href, download=download)
-#     print('download: %s' % download)
-    return Tag(name='a', **attrs)
+    return Tag(name='a', attrs=attrs)
 
 def create_img_png_base64(png, **attrs):
     encoded = base64.b64encode(png)
     src = 'data:image/png;base64,%s' % encoded
-    return Tag(name='img', src=src, **attrs)
+    attrs = dict(**attrs)
+    attrs['src'] =src
+    return Tag(name='img', attrs=attrs)
 
 def bool_from_string(b):
     yes = ['True', 'true', '1', 'yes']

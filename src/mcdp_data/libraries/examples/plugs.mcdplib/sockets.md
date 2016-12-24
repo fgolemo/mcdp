@@ -21,29 +21,26 @@ There are many [AC power plugs and sockets][wiki].
     }
 </style>
 
-<table class='sockets'>
-<tr>
-    <td>Type A<br/><img src='typeA.jpg'/></td>
-    <td>Type B<br/><img src='typeB.jpg'/></td>
-    <td>Type C<br/><img src='typeC.jpg'/></td>
-    <td>Type D<br/><img src='typeD.jpg'/></td>
-    <td>Type E<br/><img src='typeE.jpg'/></td>
-</tr>
-<tr>
-    <td>Type F<br/><img src='typeF.jpg'/></td>
-    <td>Type G<br/><img src='typeG.jpg'/></td>
-    <td>Type H<br/><img src='typeH.jpg'/></td>
-    <td>Type I<br/><img src='typeI.jpg'/></td>
-    <td>Type J<br/><img src='typeJ.jpg'/></td>
-</tr>
-<tr>
-    <td>Type K<br/><img src='typeK.jpg'/></td>
-    <td>Type L<br/><img src='typeL.jpg'/></td>
-    <td>Type M<br/><img src='typeM.jpg'/></td>
-    <td>Type N<br/><img src='typeN.jpg'/></td>
-    <td>Type O<br/><img src='typeO.jpg'/></td>
-</tr>
-</table>
+<col5>
+    <!--  -->
+    <s>Type A<br/><img src='typeA.jpg'/></s>
+    <s>Type B<br/><img src='typeB.jpg'/></s>
+    <s>Type C<br/><img src='typeC.jpg'/></s>
+    <s>Type D<br/><img src='typeD.jpg'/></s>
+    <s>Type E<br/><img src='typeE.jpg'/></s>
+    <!--  -->
+    <s>Type F<br/><img src='typeF.jpg'/></s>
+    <s>Type G<br/><img src='typeG.jpg'/></s>
+    <s>Type H<br/><img src='typeH.jpg'/></s>
+    <s>Type I<br/><img src='typeI.jpg'/></s>
+    <s>Type J<br/><img src='typeJ.jpg'/></s>
+    <!--  -->
+    <s>Type K<br/><img src='typeK.jpg'/></s>
+    <s>Type L<br/><img src='typeL.jpg'/></s>
+    <s>Type M<br/><img src='typeM.jpg'/></s>
+    <s>Type N<br/><img src='typeN.jpg'/></s>
+    <s>Type O<br/><img src='typeO.jpg'/></s>
+</col5>
 
 Some of them are compatible. For example we can fit
 a plug ot Type A into a socket of Type B. This
@@ -54,7 +51,9 @@ We can use a ``poset`` to describe the poset [](#fig:socket_type):
 <pre class='mcdp_poset' id='socket_type' label='socket_type.mcdp_poset'></pre>
 
 <render class='hasse_icons' figure-id='fig:socket_type' 
-   figure-caption='The poset of plugs.' style='width: 10em'>`socket_type</render>
+    figure-caption='The poset of plugs.' style='width: 10em'>
+   `socket_type
+</render>
 
 
 ### Voltages 
@@ -109,13 +108,11 @@ Consider [one of these OREI adapters][orei], which you can buy for $7.31:
 
 This is an adapter from Type L to either Type C or Type A:
 
-<table class='sockets'>
-<tr>
-    <td>Type L<br/><img src='typeL.jpg'/></td>
-    <td>Type A<br/><img src='typeA.jpg'/></td>
-    <td>Type C<br/><img src='typeC.jpg'/></td>
-</tr>
-</table>
+<col3>
+    <s>Type L<br/><img src='typeL.jpg'/></s>
+    <s>Type A<br/><img src='typeA.jpg'/></s>
+    <s>Type C<br/><img src='typeC.jpg'/></s>
+</col3>
 
 A plug adapter can be modeled as follows:
 
@@ -163,19 +160,17 @@ We can repeat the same story with DC connectors.
 <style type='text/css'>
     table#usb img {width: 5em;}
 </style>
-<table id='usb'>
-    <tr>
-        <td><img src='USB_Micro_A.png'/></td>
-        <td><img src='USB_Micro_B.png'/></td>
-        <td><img src='USB_Mini_A.png'/></td>
-        <td><img src='USB_Mini_B.png'/></td>
-    </tr>
-    <tr>
-        <td><img src='USB_Std_A.png'/></td>
-        <td><img src='USB_Std_B.png'/></td>
-        <td><img src='USB_Type_C.png'/></td>
-    </tr>
-</table>
+
+<col4 figure-id="tab:usb" figure-caption="USB Shapes">
+        <s><img src='USB_Micro_A.png'/></s>
+        <s><img src='USB_Micro_B.png'/></s>
+        <s><img src='USB_Mini_A.png'/></s>
+        <s><img src='USB_Mini_B.png'/></s>
+
+        <s><img src='USB_Std_A.png'/></s>
+        <s><img src='USB_Std_B.png'/></s>
+        <s><img src='USB_Type_C.png'/></s>
+</col4>
 
 <pre class='mcdp_poset' id='USB_connectors' label='USB_connectors.mcdp_poset'></pre>
 
@@ -224,10 +219,12 @@ We can query the model as follows. Suppose we need 2 outputs, each of 0.5A.
 
 This is the output:
 
-<pre class='print_value'>solve(
+<pre class='print_value'>
+    solve(
     ⟨ ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩,
       ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩ ⟩, 
-    `Ravpower)</pre>
+    `Ravpower)
+</pre>
 
 The model says we have two options: we need to find an outlet of ``TypeM``
 at either 110 V or 220 V which will provide 5 W of power. Moreover, we need 
@@ -248,15 +245,19 @@ functionality that we do not need.
 
 We can ask now for what resources we would need for a 0.5 A load:
 
-<pre class='mcdp_value'>solve(
+<pre class='mcdp_value'>
+    solve(
     ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩,
-    `orei_plus_ravpower)</pre>
+    `orei_plus_ravpower)
+</pre>
 
 and obtain
 
-<pre class='print_value'>solve(
+<pre class='print_value'>
+    solve(
     ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩,
 
-    `orei_plus_ravpower)</pre>
+    `orei_plus_ravpower)
+</pre>
 
 

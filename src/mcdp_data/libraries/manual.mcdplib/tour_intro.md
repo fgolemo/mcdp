@@ -5,7 +5,7 @@ The minimal MCDP can be defined as in [](#code:empty).
 
 <col2>
     <pre class='mcdp' id='empty' figure-id='code:empty' label='empty.mcdp'
-    style='min-width: 12em'>
+    style='min-width: 8em'>
     mcdp {
 
     }
@@ -178,17 +178,20 @@ For example, [](#code:conversion) is the same example with the specific
 energy given in <mcdp-poset>kWh/kg</mcdp-poset>.
 The output of the two models are completely equivalent (up to numerical errors).
 
+<col2>
+    <pre class='mcdp' id='model5' figure-id='code:conversion'
+    figure-caption='Automatic conversion among g, kg, J, kWh'>
+    mcdp {
+    provides capacity [J]
+    requires mass [g]
 
-<pre class='mcdp' id='model5' figure-id='code:conversion'
-figure-caption='Automatic conversion among g, kg, J, kWh'>
-mcdp {
-provides capacity [J]
-requires mass [g]
-
-# specific energy
-ρ = 200 kWh / kg
-required mass ≽ provided capacity / ρ
-}
-</pre>
-<render class='ndp_graph_enclosed_LR'
-        figure-id="fig:conversion">`model5</render>
+    # specific energy
+    ρ = 200 kWh / kg
+    required mass ≽ provided capacity / ρ
+    }
+    </pre>
+    <render class='ndp_graph_enclosed_LR'
+            figure-id="fig:conversion">
+            `model5
+    </render>
+</col2>

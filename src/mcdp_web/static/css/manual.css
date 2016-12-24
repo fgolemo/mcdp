@@ -60,6 +60,9 @@ code {
 }
 
 p code { font-size: 8pt; }
+pre {
+    display: inline-block;
+}
 pre, pre code { 
 }
 pre .label { font-size: 8px; font-style: normal; }
@@ -281,11 +284,14 @@ pre + br + pre {
  /*float: left; clear: left;*/
 }
 
-
+div.todo-wrap {
+    text-align: center;
+}
 p.todo {
+    display:inline-block;
     background-color: #fdd;
 }
-p.todo::before { content: 'TODO: '; }
+p.todo::before { content: 'TODO: '; font-weight: bold; }
 
 
 figure:not(.subfloat) {
@@ -363,10 +369,10 @@ figure[id^='fig:'] > figcaption:not(:empty)::before {
 }
 
 figure[id^='subfig:'] figcaption:not(:empty)::before {
-    content: '(' counter(subfloat, lower-alpha) ') ';
+    content: '(' counter(subfloat, lower-alpha) ')\0000a0';
 }
 figure[id^='subfig:'] figcaption:empty::before {
-    content: '(' counter(subfloat, lower-alpha) ') ';
+    content: '(' counter(subfloat, lower-alpha) ')';
 }
 
 /* Empty caption */
@@ -581,9 +587,16 @@ div.colN-wrap table td {
     padding-right: 0.7em;
     /*border: solid 1px blue;*/
 }
-
+table.col2 tr td {
+}
+table.col2 tr {
+}
+table.col2 td {
+    width: fill-available;
+}
 table.col2 {
     max-width: 100%;
+    /*text-align: center;*/
 } 
 figcaption {
     margin-top: 0.7em;
@@ -591,4 +604,39 @@ figcaption {
 table.col2 td {
     padding-bottom: 0;
     vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+p svg {
+    margin-top: -100px;
+}
+
+h2,h3,h4 { clear: both; }
+
+
+table.labels-col1 td:first-child {
+    font-weight: bold;
+}
+
+table.labels-row1 tr:first-child {
+    font-weight: bold;
+}
+
+.xxx { font-weight: bold; font-family: monospace; color: red; }
+
+center { 
+    display: block;
+    width: 100%;
+    text-align: center;
+}
+
+center > * {
+    display: inline-block;
+}
+
+.space_in_code {
+    /*display: inline-block;*/
+    background-color: white;
+    /*border: solid 1px red;*/
 }

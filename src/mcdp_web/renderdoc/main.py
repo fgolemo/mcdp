@@ -18,6 +18,7 @@ from .markd import render_markdown
 from .prerender_math import prerender_mathjax
 from .xmlutils import check_html_fragment
 from mocdp import logger
+import itertools
 
 
 __all__ = ['render_document']
@@ -37,13 +38,13 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
 
    
     s = do_preliminary_checks_and_fixes(s)
-    
+    s = s.replace('%\n', '&nbsp;')
     # copy all math content,
     #  between $$ and $$
     #  between various limiters etc.
     # returns a dict(string, substitution)
     s, maths = extract_maths(s) 
-    print('maths = %s' % maths)
+#     print('maths = %s' % maths)
     for k, v in maths.items():
         if v[0] == '$' and v[1] != '$$':
             if '\n\n' in v:
@@ -164,7 +165,17 @@ def get_mathjax_preamble():
 
 def protect_my_envs(s):
     # we don't want MathJax to look inside these
-    elements = ['mcdp-value', 'mcdp-poset', 'pre', 'render', 'pos', 'val']
+    elements = ['mcdp-value', 'mcdp-poset', 'pre', 'render', 
+                'poset', 'pos',
+                'value', 'val']
+    # "poset" must be before "pos"
+    # "value" must be before "val"
+    
+    for e1, e2 in itertools.product(elements, elements):
+        if e1 == e2: continue
+        if e1.startswith(e2):
+            assert elements.index(e1) < elements.index(e2)
+            
     delimiters = []
     for e in elements:
         delimiters.append(('<%s'%e,'</%s>'%e))

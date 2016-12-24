@@ -20,24 +20,29 @@ becomes
 
 '''
 import math
-from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment,\
-    describe_tag
-from bs4 import BeautifulSoup
+from mcdp_web.renderdoc.highlight import add_class
+
 from bs4.element import NavigableString, Tag, Comment
+
 from contracts.utils import raise_desc
+from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment, describe_tag
 from mocdp import logger
+import re
+
 
 __all__ = [
     'col_macros_prepare_before_markdown',
     'col_macros',
 ]
 
-ns = [1,2,3,4,5]
+ns = [1,2,3,4,5,6,7,8,9,10  ]
 def col_macros_prepare_before_markdown(s):
     """ MD doesn't like <col2> as top-level element """
-    for n in ns:
-        s = s.replace('<col%d'%n ,'<div class="make-col%d" '%n)
-        s = s.replace('</col%d>'%n ,'</div>')
+#     for n in ns:
+#         s = s.replace('</col%d>'%n ,'</div>')
+    s = re.sub(r'<(col\d)(.*?)>', r'<div make-\1=""\2>', s, flags = re.M | re.DOTALL)
+    s = re.sub(r'<\/(col\d)>', '</div>', s, flags = re.M | re.DOTALL)
+
     return s
 
 def col_macros(html):
@@ -48,7 +53,7 @@ def col_macros(html):
 def col_macro(html, n):
     assert n in ns
     soup = bs(html)
-    selector = 'div.make-col%d' % n
+    selector = 'div[make-col%d]' % n
     num = 0
     for e in soup.select(selector):
         col_macro_(e, n)
@@ -67,8 +72,9 @@ def col_macro_(e, ncols):
     
     """
     assert e.name == 'div' 
-    assert 'make-col%d' % ncols in e['class']
+    assert e.has_attr('make-col%d' % ncols)
     
+#     print describe_tag(e)
     children = list(e.children) 
     # remove strings from this
     is_string = lambda x: isinstance(x, NavigableString)
@@ -76,7 +82,8 @@ def col_macro_(e, ncols):
     children = [_ for _ in children if not is_string(_)]
     
     if len(children) < ncols:
-        msg = 'Cannot create table with %r cols with only %d children' % (ncols, len(children))
+        msg = ('Cannot create table with %r cols with only %d children' % 
+               (ncols, len(children)))
         raise_desc(ValueError, msg, tag=describe_tag(e))
     
     for c in children:
@@ -87,25 +94,30 @@ def col_macro_(e, ncols):
         empty = not ss.strip()
         if not empty:
             msg = 'Found nonempty string %r between children.' % ss 
-            raise_desc(ValueError, msg, tag=describe_tag())
+            raise_desc(ValueError, msg, tag=describe_tag(e))
         # remove it
         s.extract()
         
     nchildren = len(children)
     nrows = int(math.ceil(nchildren / float(ncols)))
     
-    e.name = 'div'
-    from mcdp_web.renderdoc.highlight import add_class
-    add_class(e, 'col%d-wrap'%ncols)
-    add_class(e, 'colN-wrap')
-    table = Tag(name='table')
-    add_class(table, 'col%d'%ncols)
-    add_class(table, 'colN')
-    add_class(table, 'col%d-created'%ncols)
+    parent = e.parent
+    original_position = parent.index(e)
+    e.extract()
+    table = e
+    e.name = 'table'
+    add_class(table, 'col%d' % ncols)
+    add_class(table, 'colN') 
+    
+    wrapper = Tag(name='div')
+    add_class(wrapper, 'col%d-wrap' % ncols)
+    add_class(wrapper, 'colN-wrap')
+    
     NL = '\n'
     # S = '-' * 4
     # XXX: change to above to see the problem with indentation
     S = ' ' * 4
+    tbody = Tag(name='tbody')
     for row in range(nrows):
         tr = Tag(name='tr')
         tr.append(NavigableString(NL))
@@ -121,15 +133,16 @@ def col_macro_(e, ncols):
             tr.append(td)
             tr.append(NavigableString(NL))
         tr.append(S+S)
-        table.append(NavigableString(NL))
-        table.append(NavigableString(S+S))
-        table.append(tr)   
-        table.append(NavigableString(NL+S))
-    e.append(NavigableString(NL + S))  
-    e.append(table)
-    e.append(NavigableString(NL))
-    # XXX
-    i = e.parent.index(e)
-    e.parent.insert(i, e) 
+        tbody.append(NavigableString(NL))
+        tbody.append(NavigableString(S+S))
+        tbody.append(tr)   
+        tbody.append(NavigableString(NL+S))
+    table.append(tbody)
+    
+    wrapper.append(NavigableString(NL + S))  
+    wrapper.append(table)
+    wrapper.append(NavigableString(NL))
+    
+    parent.insert(original_position, wrapper) 
     
     

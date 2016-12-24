@@ -54,8 +54,10 @@ MCDPL uses these ideas from Fortress:
    See <a href="#sec:unicode"/> for details.
 * the use of *units* in the basic type system.
 
-<cite id="bib:fourer02ampl">Fourer, Robert; Brian W. Kernighan (2002). AMPL: A Modeling Language
-for Mathematical Programming. Duxbury Press. ISBN 978-0-534-38809-6.</cite>
+<cite id="bib:fourer02ampl">
+    Fourer, Robert; Brian W. Kernighan (2002). AMPL: A Modeling Language
+    for Mathematical Programming. Duxbury Press. ISBN 978-0-534-38809-6.
+</cite>
 
 <cite id="bib:fortress">Fortress paper \xxx</cite>
 
@@ -68,77 +70,66 @@ for Mathematical Programming. Duxbury Press. ISBN 978-0-534-38809-6.</cite>
 MCDPL has 5 "types universes". Every expression in the language
 belongs to one of these types as described in \tabref{table1}.
 
-<table figure-id="tab:table1" figure-caption="Types universe">
-    <tr>
-        <td>Type universe </td>
-        <td> example</td>
-        <td></td>
-    </tr>
-    <tr>
-        <td>Posets</td>
-        <td><mcdp-poset>Nat</mcdp-poset>, <mcdp-poset>m/s^2</mcdp-poset> </td>
-        <td>Posets are the equivalent of what are "types" in other languages.</td>
-    </tr>
-    <tr>
-        <td>Values</td>
-        <td><mcdp-value>42</mcdp-value>, <mcdp-value>9.81 m/s^2</mcdp-value></td>
-        <td>Values are the elements of the posets.</td>
-    </tr>
-    <tr>
-        <td>NDPs</td>
-        <td><k>mcdp{...}</k></td>
-        <td>These correspond to the mathematical idea of MCDPs, enriched by extra
-            information, such as names of "ports".</td>
-    </tr>
-    <tr>
-        <td>templates</td>
-        <td><k>template[...]{...}</k> </td>
-        <td>These are templates for NDPs; could be considered morphisms in an operad</td>
-    </tr>
-    <tr>
-        <td>DPs</td>
-        <td>\xxx</td>
-        <td>These correspond to primitive DPs</td>
-    </tr>
-</table>
+<col3 figure-id="tab:table1"
+      figure-caption="Types universe"
+      class='labels-row1'>
+    <s>Type universe </s>
+    <s>example</s>
+    <s></s>
+    <!-- -->
+    <s>Posets</s>
+    <s><mcdp-poset>Nat</mcdp-poset>, <mcdp-poset>m/s^2</mcdp-poset> </s>
+    <s>Posets are the equivalent of what are "types" in other languages.</s>
+    <!-- -->
+    <s>Values</s>
+    <s><mcdp-value>42</mcdp-value>, <mcdp-value>9.81 m/s^2</mcdp-value></s>
+    <s>Values are the elements of the posets.</s>
+    <!-- -->
+    <s>NDPs</s>
+    <s><k>mcdp{...}</k></s>
+    <s>These correspond to the mathematical idea of MCDPs, enriched by extra
+        information, such as names of "ports".</s>
+    <!-- -->
+    <s>templates</s>
+    <s><k>template[...]{...}</k> </s>
+    <s>These are templates for NDPs; could be considered morphisms in an operad</s>
+    <!-- -->
+    <s>DPs</s>
+    <s>\xxx</s>
+    <s>These correspond to primitive DPs</s>
+</col3>
 
 \tabref{table2} describes for each type the default file extension
 and the base Python class.
 
-<table
+<col3 class='labels-row1'
     figure-id="tab:table2"
     figure-caption="Types universe, file extensions and Python superclass">
-    <tr>
-        <td>Type universe </td>
-        <td> file extensions</td>
-        <td>superclass</td>
-    </tr>
-    <tr>
-        <td>Posets</td>
-        <td>.mcdp_poset</td>
-        <td>Poset</td>
-    </tr>
-    <tr>
-        <td>Values</td>
-        <td><code>.mcdp_value</code></td>
-        <td><code>object</code> <footnote>Any Python object will do. \xxx</footnote></td>
-    </tr>
-    <tr>
-        <td>NDPs</td>
-        <td> <code>.mcdp</code></td>
-        <td><code>NamedDP</code></td>
-    </tr>
-    <tr>
-        <td>templates</td>
-        <td><code>.mcdp_template</code> </td>
-        <td>\xxx</td>
-    </tr>
-    <tr>
-        <td>DPs</td>
-        <td><code>.mcdp_primitivedp</code></td>
-        <td><code>PrimitiveDP</code></td>
-    </tr>
-</table>
+    <!---->
+        <s>Type universe </s>
+        <s> file extensions</s>
+        <s>superclass</s>
+        <!---->
+        <s>Posets</s>
+        <s>.mcdp_poset</s>
+        <s>Poset</s>
+        <!---->
+        <s>Values</s>
+        <s><code>.mcdp_value</code></s>
+        <s><code>object</code><footnote>Any Python object will do. \xxx</footnote></s>
+        <!---->
+        <s>NDPs</s>
+        <s> <code>.mcdp</code></s>
+        <s><code>NamedDP</code></s>
+     <!---->
+        <s>templates</s>
+        <s><code>.mcdp_template</code> </s>
+        <s>\xxx</s>
+    <!---->
+        <s>DPs</s>
+        <s><code>.mcdp_primitivedp</code></s>
+        <s><code>PrimitiveDP</code></s>
+</col3>
 
 It is possile to implement one's own extensions by subclassing
 one of these classes. In particular, what is easy to do
@@ -149,11 +140,11 @@ if these cannot be expressed using the operators available.
 
 #tab\:table1 td,
 #tab\:table2 td { padding: 0.5em;} /* fix for fix for prince */
-
+/*
 #tab\:table1 tr:first-child,
 #tab\:table2 tr:first-child  {
     font-weight: bold;
-}
+}*/
 
 #tab\:table1 td:first-child,
 #tab\:table2 td:first-child  {

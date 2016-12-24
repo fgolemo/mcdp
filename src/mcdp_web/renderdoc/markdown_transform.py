@@ -1,3 +1,4 @@
+from contracts.utils import raise_desc
 
 
 def is_inside_markdown_quoted_block(s, i):
@@ -22,8 +23,6 @@ def censor_markdown_code_blocks(s):
     def code_transform(_): 
         return 'censored-code'
     return replace_markdown_line_by_line(s, line_transform, code_transform, inside_tag)
-    
-
     
 
 def replace_markdown_line_by_line(s, line_transform=None, code_transform=None, inside_tag=None):
@@ -52,7 +51,8 @@ def replace_markdown_line_by_line(s, line_transform=None, code_transform=None, i
                 line_out.append(l2)
                 
     def eat_tag(line_in, line_out):
-        l = line_in[0]
+        first_line = l = line_in[0]
+        approximate_line = len(line_out)
         assert l.startswith('<')
         tagname = ''
         l = l[1:]
@@ -84,16 +84,21 @@ def replace_markdown_line_by_line(s, line_transform=None, code_transform=None, i
 #                 print('xml cannot close by short anymore')
                 can_close_by_short = False 
             
+            # if first line then </tag> can be anywhere
+            # if not first line, it should be at the beginning
             end_tag ='</%s>' % tagname 
-            if end_tag in l:
+            cond1 = (i == 0) and (end_tag in l)
+            cond2 = (i > 0) and l.startswith(end_tag) 
+            if cond1 or cond2:
 #                 print('Found end tag %r' % end_tag)
                 return
             else:
                 pass
 #                 print ('No %r in %r; continue' % (end_tag, l))
             i += 1
-        msg = 'Cannot find matching tag to %r.' % tagname
-        raise ValueError(msg)
+        msg = 'Cannot find matching tag to %r. Around line %d.' % (tagname, approximate_line)
+        msg + '\n Remember I want it either on the first line (anywhere) or at the start of a line.'
+        raise_desc(ValueError, msg, first_line=first_line)
     
     MARK = ' ' *4
     def eat_code(line_in, line_out):

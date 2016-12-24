@@ -90,12 +90,12 @@ and <poset>`BatteryInterface</poset>.
     label='CompositionTemplate.mcdp'
     figure-id="code:CompositionTemplate">
 template [
-    actuation: `ActuationInterface,
-    battery: `BatteryInterface
+    generic_actuation: `ActuationInterface,
+    generic_battery: `BatteryInterface
   ]
 mcdp {
-    actuation = instance `Actuation1
-    battery = instance battery
+    actuation = instance generic_actuation
+    battery = instance generic_battery
 
     # battery must provide power for actuation
     provides endurance [s]
@@ -121,7 +121,8 @@ mcdp {
 </pre>
 
 
-<render class="template_children_summarized_TB" style='max-height: 30em'>
+<!-- style='max-height: 30em'> -->
+<render class="template_children_summarized_TB">
     `CompositionTemplate
 </render>
 </col2>

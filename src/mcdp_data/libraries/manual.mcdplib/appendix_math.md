@@ -196,4 +196,15 @@ of the Kleene ascent chain
 \bot\posleq f(\bot)\posleq f(f(\bot))\posleq\cdots\posleq f^{(n)}(\bot)\leq\cdots.
 \]
 \end{lem}
- 
+
+
+### Other definitions to be written
+
+\begin{defn}\label{def:upperset} \xxx
+\end{defn}
+
+\begin{defn}\label{def:lowerset} \xxx
+\end{defn}
+
+\begin{defn}\label{def:monotone-map} \xxx
+\end{defn}

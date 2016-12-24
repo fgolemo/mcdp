@@ -23,21 +23,22 @@ There are several notions of "compositions"
 between two design problems (DPs) for which
 MCDPL provides syntactic constructs:
 
-* *series*: two DPs can be connected in series
+* *series* ([](#subfig:series)): two DPs can be connected in series
   if the second provides
   the resources required by the first.
-* *parallel*: \xxx
-* *co-product*: Two DPs can describe two alternatives
-* *recursive*: A larger DPs can be defined as the
+* *parallel* ([](#subfig:parallel)): \xxx
+* *coproduct* ([](#subfig:coproduct)): Two DPs can describe two alternatives
+* *recursive* ([](#subfig:hierarchical)): A larger DPs can be defined as the
   interconnection of smaller, primitive DPs.
-* *templating*: \xxx
+* *templating* ([](#subfig:templating)): \xxx
 
-<col3>
-    <span figure-id="Series">series</span>
-    <span figure-id="Parallel">parallel</span>
-    <span figure-id='Co-product'>co-product \xxx</span>
-    <span figure-id='Recursive'>recursive \xxx</span>
-    <span figure-id='Templating'>templating \xxx</span>
+<col3 figure-id="fig:main"
+      figure-caption="DPs can be composed in a variety of ways">
+    <span figure-id="subfig:series" figure-caption="Series">\xxx</span>
+    <span figure-id="subfig:parallel"  figure-caption="Parallel">\xxx</span>
+    <span figure-id='subfig:coproduct'  figure-caption="Coproduct">\xxx</span>
+    <span figure-id='subfig:hierarchical'  figure-caption="Hierarchical"> \xxx</span>
+    <span figure-id='subfig:templating' figure-caption="Templating">\xxx</span>
 </col3>
 
 <!--

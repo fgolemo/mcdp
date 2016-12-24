@@ -3,11 +3,10 @@
 import sys
 
 from bs4 import BeautifulSoup
+from bs4.element import Comment
 
 from contracts import contract
-from contracts.utils import raise_desc
 from mocdp import logger
-from bs4.element import Comment
 
 
 def get_manual_css_frag():
@@ -129,10 +128,7 @@ def manual_join(files_contents):
     res = str(d)
     
     from mcdp_docs.check_missing_links import check_if_any_href_is_invalid
-    check_if_any_href_is_invalid(res)
-    
-    
-    
+    check_if_any_href_is_invalid(res) 
     return res
 
 def debug(s):
@@ -191,9 +187,10 @@ def generate_doc(soup):
         def __str__(self, root=False):
             s = u''
             if not root:
-                s += u"""<a class="toc_link" href="#%s">
+                s += (u"""<a class="toc_link" href="#%s">
                             <span class="toc_number">%s –</span> 
-                            <span class="toc_name">%s</span></a>""" % (self.id, self.number, self.name)
+                            <span class="toc_name">%s</span></a>""" % 
+                            (self.id, self.number, self.name))
             if self.items:
                 s += '<ul>'
                 for item in self.items:
@@ -221,8 +218,7 @@ def generate_doc(soup):
                                      Comment('Warning: ' + msg))
         depth = int(header.name[1])
 
-        # previous_depth = stack[-1].depth
-
+        # previous_depth = stack[-1].depth 
         using = header.decode_contents(formatter="html")
 #         print("%s or %s using %s" % (str(header), header.string, using))
         item = Item(header, depth, using, header['id'], [])
@@ -232,8 +228,7 @@ def generate_doc(soup):
         stack[-1].items.append(item)
         stack.append(item)
         header_id += 1
-
-
+ 
     root = stack[0]
 
     root.number_items(prefix='', level=0)
@@ -247,7 +242,6 @@ def generate_doc(soup):
             ul['class'] = 'toc chapter_toc'
             # todo: add specific h1
             item.tag.insert_after(ul)
-
-
+ 
     return root.__str__(root=True)
 

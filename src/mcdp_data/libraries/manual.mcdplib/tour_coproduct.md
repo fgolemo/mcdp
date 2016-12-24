@@ -31,8 +31,9 @@ mcdp {
 </pre>
 
 <pre class='ndp_graph_templatized_labeled'
-    figure-id="fig:Battery1"
->`Battery1</pre>
+    figure-id="fig:Battery1">
+    `Battery1
+</pre>
 
 
 Consider two different battery technologies,

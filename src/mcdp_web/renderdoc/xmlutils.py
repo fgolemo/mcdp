@@ -1,5 +1,7 @@
 from bs4 import BeautifulSoup
-from contracts.utils import raise_desc, indent
+from contracts.utils import raise_desc, indent, check_isinstance
+from bs4.element import Tag
+from contracts import contract
 
 # def bs(fragment):
 #     return BeautifulSoup(fragment, 'html.parser', from_encoding='utf-8')
@@ -37,21 +39,26 @@ def check_html_fragment(m, msg=None):
         msg2 += 'This appears to be a complete document instead of a fragment.'
         raise_desc(ValueError, msg2, m=m)
         
-        
+@contract(tag=Tag, returns=str)
 def describe_tag(tag):
+    check_isinstance(tag, Tag)
+    def c(tag):
+        x = unicode(tag).encode('utf-8')
+        return x 
+    
     s = "This is the tag:"
     s += '\n\n'
-    s += indent(str(tag), 'tag |')
+    s += indent(c(tag), 'tag |')
     s +='\n\n' + 'This is the tag in context:' + '\n\n'
     
     sc = ""
     if tag.previousSibling is not None:
-        sc += str(tag.previousSibling)
+        sc += c(tag.previousSibling)
     else:
         sc += '<!-- no prev sibling -->'
-    sc += str(tag)
+    sc += c(tag)
     if tag.nextSibling is not None:
-        sc += str(tag.next)
+        sc += c(tag.next)
     else:
         sc += '<!-- no next sibling -->' 
         

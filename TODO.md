@@ -471,3 +471,7 @@ Create
 
 
 tex: ``below''
+
+* ast_to_html: subsituttie "&nbsp;" for the final chars so that it is clear and 
+they get visualize. Need to make sure transformation back is ok though (and the editor???)
+
