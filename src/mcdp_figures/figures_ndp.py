@@ -1,9 +1,9 @@
 from contracts.utils import raise_wrapped
+from mcdp_report.gg_ndp import gvgen_from_ndp
 from mocdp import ATTR_LOAD_NAME
 
 from .figure_interface import MakeFigures
 from .formatters import MakeFigures_Formatter, TextFormatter, GGFormatter
-from mcdp_library_tests.tests import timeit_wall
 
 
 __all__ = [
@@ -116,11 +116,10 @@ class Normal(GGFormatter):
         
     def get_gg(self, mf):
         ndp = mf.get_ndp()
-        library =mf.get_library()
+        library = mf.get_library()
         yourname = mf.get_yourname()
         
-        images_paths =  library.get_images_paths() if library else []
-        from mcdp_report.gg_ndp import gvgen_from_ndp
+        images_paths = library.get_images_paths() if library else []
 
         gg = gvgen_from_ndp(ndp, self. style, images_paths=images_paths,
                             yourname=yourname, direction=self.direction,
@@ -128,6 +127,24 @@ class Normal(GGFormatter):
         return gg
     
     
+def templatize_children_for_figures(ndp, enclosed):
+    from mocdp.comp.composite import CompositeNamedDP
+    from mocdp.ndp.named_coproduct import NamedDPCoproduct
+    from mocdp.comp.composite_templatize import cndp_templatize_children
+    from mocdp.comp.composite_templatize import ndpcoproduct_templatize
+    
+
+    if isinstance(ndp, CompositeNamedDP):
+        ndp2 = cndp_templatize_children(ndp)
+        # print('setting _hack_force_enclose %r' % enclosed)
+        if enclosed:
+            setattr(ndp2, '_hack_force_enclose', True)
+    elif isinstance(ndp, NamedDPCoproduct):
+        ndp2 = ndpcoproduct_templatize(ndp)
+    else:
+        ndp2 = ndp
+    return ndp2
+
 class Enclosed(GGFormatter):
     def __init__(self, direction, enclosed, style, skip_initial=True):
         self.direction = direction
@@ -136,37 +153,23 @@ class Enclosed(GGFormatter):
         self.skip_initial = skip_initial
          
     def get_gg(self, mf):
-        from mocdp.comp.composite import CompositeNamedDP
-        from mocdp.ndp.named_coproduct import NamedDPCoproduct
-        from mocdp.comp.composite_templatize import cndp_templatize_children
-        from mocdp.comp.composite_templatize import ndpcoproduct_templatize
-        from mcdp_report.gg_ndp import gvgen_from_ndp
 
         ndp = mf.get_ndp()
         
-        if isinstance(ndp, CompositeNamedDP):
-            ndp2 = cndp_templatize_children(ndp)
-            # print('setting _hack_force_enclose %r' % enclosed)
-            if self.enclosed:
-                setattr(ndp2, '_hack_force_enclose', True)
-        elif isinstance(ndp, NamedDPCoproduct):
-            ndp2 = ndpcoproduct_templatize(ndp)
-        else:
-            ndp2 = ndp
-    
+        ndp2 = templatize_children_for_figures(ndp, enclosed=self.enclosed)
+        
         library = mf.get_library()
         images_paths = library.get_images_paths() if library is not None else []
         
         # we actually don't want the name on top
         yourname = None  # name
         
-#         with timeit_wall('get_gg - gvgen_from_ndp'):
         gg = gvgen_from_ndp(ndp2, style=self.style, direction=self.direction,
                             images_paths=images_paths, yourname=yourname,
                             skip_initial=self.skip_initial)
         
         return gg
-    
+
         
 class Templatized(GGFormatter):
     def __init__(self, direction, style, labeled):
@@ -188,13 +191,10 @@ class Templatized(GGFormatter):
         
         images_paths = library.get_images_paths() if library else []
     
-        from mcdp_report.gg_ndp import gvgen_from_ndp
         gg = gvgen_from_ndp(ndp, self.style, yourname=yourname,
                             images_paths=images_paths, direction=self.direction,
                             skip_initial=True)
         return gg
-
-
 
 class Expand(GGFormatter):
     def __init__(self, direction, style):
@@ -208,7 +208,6 @@ class Expand(GGFormatter):
         images_paths = library.get_images_paths() if library is not None else []
         ndp = mf.get_ndp()
         yourname = None  # name
-        from mcdp_report.gg_ndp import gvgen_from_ndp
         gg = gvgen_from_ndp(ndp, style=self.style, direction=self.direction,
                             images_paths=images_paths, yourname=yourname,
                             skip_initial=True)

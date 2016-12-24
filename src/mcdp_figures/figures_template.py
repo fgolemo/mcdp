@@ -20,10 +20,13 @@ class MakeFiguresTemplate(MakeFigures):
         
         figure2function = {
             'template_graph_enclosed_LR': (EnclosedTemplate, 
-                dict(direction='LR', enclosed=True, style=STYLE_GREENREDSYM)), 
+                dict(direction='LR', enclosed=True, style=STYLE_GREENREDSYM, templatize_children=False)), 
             'template_graph_enclosed_TB': (EnclosedTemplate, 
-                dict(direction='TB', enclosed=True, style=STYLE_GREENREDSYM)),
-
+                dict(direction='TB', enclosed=True, style=STYLE_GREENREDSYM, templatize_children=False)),
+            'template_children_summarized_LR': (EnclosedTemplate, 
+                dict(direction='LR', enclosed=True, style=STYLE_GREENREDSYM, templatize_children=True)), 
+            'template_children_summarized_TB': (EnclosedTemplate, 
+                dict(direction='TB', enclosed=True, style=STYLE_GREENREDSYM, templatize_children=True)),
         }
 
         MakeFigures.__init__(self, aliases=aliases, figure2function=figure2function)
@@ -40,10 +43,11 @@ class MakeFiguresTemplate(MakeFigures):
 
 
 class EnclosedTemplate(GGFormatter):
-    def __init__(self, direction, enclosed, style):
+    def __init__(self, direction, enclosed, style, templatize_children):
         self.direction = direction
         self.enclosed = enclosed
         self.style = style
+        self.templatize_children = templatize_children
          
     def get_gg(self, mf):
         from mcdp_report.gg_ndp import gvgen_from_ndp
@@ -59,7 +63,12 @@ class EnclosedTemplate(GGFormatter):
             context = Context()
     
         ndp = template.get_template_with_holes(context)
-    
+
+        if self.templatize_children:
+            from mcdp_figures.figures_ndp import templatize_children_for_figures
+            ndp = templatize_children_for_figures(ndp, enclosed=self.enclosed)
+
+
         if self.enclosed:
             setattr(ndp, '_hack_force_enclose', True)
     

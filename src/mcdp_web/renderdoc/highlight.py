@@ -11,7 +11,7 @@ from bs4 import BeautifulSoup
 from bs4.element import NavigableString, Tag
 
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped, indent, check_isinstance
+from contracts.utils import raise_desc, raise_wrapped, indent
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import (parse_template_refine, parse_poset_refine,
                                        parse_ndp_refine)
@@ -74,7 +74,6 @@ def html_interpret(library, html, raise_errors=False,
     return html
 
 def make_image_tag_from_png(f):
-    soup = bs("")
     def ff(*args, **kwargs):
         png = f(*args, **kwargs)
         rendered = create_img_png_base64( png)
@@ -212,13 +211,12 @@ def make_plots(library, frag, raise_errors, realpath):
 
 def load_fragments(library, frag, realpath):
     """
-        loads all the codes specified as "mcdp" and "mcdp_poset"
+        loads all the codes specified as
+         
+            <pre class="mcdp" id='...'>...</pre> 
+            <pre class="mcdp_poset" id='...'>...</pre>
+            <pre class="mcdp_template" id='...'>...</pre>
         
-        XXX: how about templates?
-        
-            <pre class='mcdp' id='id_ndp>
-            code
-            </pre>
     """
     soup = bs(frag)
 
@@ -258,6 +256,25 @@ def load_fragments(library, frag, realpath):
 
             library.file_to_contents[basename] = res
 
+    for tag in soup.select('pre.mcdp_template'):
+        if tag.string is None:# or not tag.string.strip():
+            continue
+
+        if tag.has_attr('id'):
+            id_ndp = tag['id'].encode('utf-8')
+            source_code = get_source_code(tag)
+
+            basename = '%s.%s' % (id_ndp, MCDPLibrary.ext_templates)
+            res = dict(data=source_code, realpath=realpath)
+
+            if basename in library.file_to_contents:
+                msg = 'Duplicated entry.'
+                raise_desc(ValueError, msg, tag=str(tag),
+                           known=library.file_to_contents[basename])
+
+            library.file_to_contents[basename] = res
+            
+            
 def escape_for_mathjax(html):
     """ Escapes dollars in code 
      
@@ -728,7 +745,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                         add_class(rendered, 'has_label')
                         max_len = max(max_len, len(tag['label']) + 6)
                         
-                    add_style_for_size(frag2.pre, max_len)
+#                     add_style_for_size(frag2.pre, max_len)
                     style = ''
                 else:
                     # using <code>
@@ -745,7 +762,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                     rendered['style'] = style
 
                 if tag.has_attr('class'):
-                    rendered['class'] += " " +" ".join(tag['class'])
+                    add_class(rendered, tag['class'])
 
                 if tag.has_attr('id'):
                     rendered['id'] = tag['id']
@@ -761,7 +778,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
 
                         docname = os.path.splitext(os.path.basename(realpath))[0]
                         download = docname + '.' + basename + '.source_code.pdf'
-                        a = create_a_to_data(soup, download=download,
+                        a = create_a_to_data(download=download,
                                              data_format='pdf', data=pdf)
                         a['class'] = 'pdf_data'
                         a.append(NavigableString(download))
@@ -863,15 +880,17 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
     go('code.mcdp_value', Syntax.rvalue, "mcdp_value", use_pre=False)
     go('code.mcdp_template', Syntax.template, "mcdp_template", use_pre=False)
 
-    compute_size_for_pre_without_class(soup)
+
+#     compute_size_for_pre_without_class(soup)
 
     # this is a bug with bs4...
-#     soup = bs(to_html_stripping_fragment(soup))
     for pre in soup.select('pre + pre'):
 #         print('adding br between PREs')
         br = Tag(name='br')
         br['class'] = 'pre_after_pre'
         pre.parent.insert(pre.parent.index(pre), br)
+  
+  
   
     res = to_html_stripping_fragment(soup)
 #     print 'highlight_mcdp_code: %s' % res
@@ -909,20 +928,25 @@ def add_br_before_pres(html):
     return to_html_stripping_fragment(soup)
 
 def add_class(e, c):
-    check_isinstance(c, str)
+    if isinstance(c, str):    
+        cc = c.split(' ')
+    elif isinstance(c, list):
+        cc = c
+    else:
+        raise ValueError(c)
     cur = e.get('class', [])
     if isinstance(cur, str):
         cur = cur.split()
-    cur = cur + [c]
+    cur = cur + cc
     e['class'] = cur
 #     print 'old %s new %s attr %s ' %(cur, n, e['class'])
 
-def compute_size_for_pre_without_class(soup):
-    for pre in soup.select('pre'):
-        if not pre.has_attr('class'):
-            s = ''.join(pre.findAll(text=True))
-            max_len = max_len_of_pre_html(s)
-            add_style_for_size(pre, max_len)
+# def compute_size_for_pre_without_class(soup):
+#     for pre in soup.select('pre'):
+#         if not pre.has_attr('class'):
+#             s = ''.join(pre.findAll(text=True))
+#             max_len = max_len_of_pre_html(s)
+#             add_style_for_size(pre, max_len)
 
 # think of :[[space]] × [[space]] × [["..."]] × [[space]]
 def max_len_of_pre_html(html):
@@ -931,27 +955,27 @@ def max_len_of_pre_html(html):
     line_len = lambda _: len(unicode(_, 'utf-8').rstrip())
     max_len = max(map(line_len, source2.split('\n')))
     return max_len 
-
-def add_style_for_size(element, max_len):         
-    fontsize = 14 # px
-    fontsize = 8
-    padding = 30
-    fontname = 'Courier'
-    ratio = 0.65 # ratio for Courier font
-    width = fontsize * (max_len) * ratio + padding
-    style = 'font-family: %s; font-size: %spx; width: %dpx;' % (fontname, fontsize, width)
-    
-    if not element.has_attr('style'):
-        element['style'] = ''
+# 
+# def add_style_for_size(element, max_len):         
+#     fontsize = 14 # px
+#     fontsize = 8
+#     padding = 30
+#     fontname = 'Courier'
+#     ratio = 0.65 # ratio for Courier font
+#     width = fontsize * (max_len) * ratio + padding
+#     style = 'font-family: %s; font-size: %spx; width: %dpx;' % (fontname, fontsize, width)
+#     
+#     if not element.has_attr('style'):
+#         element['style'] = ''
+# #         
+# #         style = element['style'] +';' + style
+# #             
+# 
+#     if True:
+#         style = 'display: inline-block'
 #         
-#         style = element['style'] +';' + style
-#             
-
-    if True:
-        style = 'display: inline-block'
-        
-    element['style']+=  ';' + style
-    
+#     element['style']+=  ';' + style
+#     
 
 @contract(frag=str, returns=str)
 def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, generate_pdf):
@@ -1038,7 +1062,7 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
 
             docname = os.path.splitext(os.path.basename(realpath))[0]
             download = docname + "." + basename + "." + klass + '.pdf'
-            a = create_a_to_data(soup, download=download, data_format='pdf', data=pdf)
+            a = create_a_to_data(download=download, data_format='pdf', data=pdf)
             a['class'] = 'pdf_data'
             a.append(NavigableString(download))
             div.append(tag_svg)
@@ -1049,8 +1073,8 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
 
     
     mf = MakeFiguresNDP(None, None, None)
-    available = set(mf.available()) | set(mf.aliases)
-    for which in available:
+    available_ndp = set(mf.available()) | set(mf.aliases)
+    for which in available_ndp:
         def callback(tag0):
             context = Context()
             load = lambda x: library.load_ndp(x, context=context)
@@ -1073,8 +1097,8 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
         go(selector, callback)
     
     mf = MakeFiguresTemplate(None,None,None)
-    available = set(mf.available()) | set(mf.aliases)
-    for which in available:
+    available_template = set(mf.available()) | set(mf.aliases)
+    for which in available_template:
         def callback(tag0):
             context = Context()
             load = lambda x: library.load_template(x, context=context)
@@ -1097,8 +1121,8 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
         go(selector, callback)
         
     mf = MakeFiguresPoset(None)
-    available = set(mf.available()) | set(mf.aliases)
-    for which in available:
+    available_poset = set(mf.available()) | set(mf.aliases)
+    for which in available_poset:
         def callback(tag0):
             context = Context()
             load = lambda x: library.load_poset(x, context=context)
@@ -1120,10 +1144,20 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
         selector = 'render.%s' % which
         go(selector, callback)
 
+
+    unsure = list(soup.select('render'))
+    if unsure:
+        msg = 'Invalid "render" elements.'
+        msg += '\n\n' + '\n\n'.join(str(_) for _ in unsure)
+        
+        msg += '\n\n' + " Available for NDPs: %s." % ", ".join(sorted(available_ndp))
+        msg += '\n\n' + " Available for templates: %s." % ", ".join(sorted(available_template))
+        msg += '\n\n' + " Available for posets: %s." % ", ".join(sorted(available_poset))
+        raise ValueError(msg)
     return to_html_stripping_fragment(soup)
 
 @contract(data_format=str, data=str, download=str)
-def create_a_to_data(soup, download, data_format, data):
+def create_a_to_data(download, data_format, data):
     """ Returns a tag with base64 encoded data """
     assert data_format in ['pdf', 'png']
     mime = get_mime_for_format(data_format)

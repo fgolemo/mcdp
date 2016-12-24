@@ -8,15 +8,7 @@ MCDPL encourages composition and code reuse.
 Suppose we define a simple model called ``Battery`` as follows:
 
 <col2>
-    <pre class="mcdp" id='Battery' label='Battery.mcdp'>
-    mcdp {
-        provides capacity [J]
-        requires mass [g]
-        rho = 100 kWh / kg # specific_energy
-        rho_1 = 2
-        required mass ≽ provided capacity / rho
-    }
-    </pre>
+    <pre class="mcdp" id='Battery' label='Battery.mcdp'></pre>
     <render class='ndp_graph_templatized_labeled'>`Battery</render>
 </col2>
 
@@ -25,18 +17,7 @@ relation from <f>lift</f> to <r>power</r>, as in [](#code:Actuation1).
 
 <col2>
     <pre class="mcdp" id='Actuation1' label='Actuation1.mcdp'
-        figure-id="code:Actuation1">
-    mcdp {
-        provides lift [N]
-        requires power [W]
-
-        l = provided lift
-        p0 = 5 W
-        p1 = 6 W/N
-        p2 = 7 W/N^2
-        required power ≽ p0 + p1 * l + p2 * l^2
-    }
-    </pre>
+        figure-id="code:Actuation1"></pre>
         <render class='ndp_graph_templatized_labeled'>
             `Actuation1
         </render>

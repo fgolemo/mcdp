@@ -189,16 +189,16 @@ the backtick notation, as in &ldquo;<pos>`my_poset</pos>&rdquo;.
 To refer to its elements, use the notation <val>`my_poset: element</val> ([](#code:one)).
 
 <col2>
-	<pre class='mcdp' id='one' figure-id='code:one'
+    <pre class='mcdp' id='one' figure-id='code:one'
     figure-caption='Referring to an element of a custom poset'>
 mcdp {
-	provides f [&#96;my_poset]
+    provides f [&#96;my_poset]
 
-	provided f ≼ &#96;my_poset : c
+    provided f ≼ &#96;my_poset : c
 }
-	</pre>
+    </pre>
 
-	<render class='ndp_graph_enclosed'>&#96;one</render>
+    <render class='ndp_graph_enclosed'>&#96;one</render>
 </col2>
 
 

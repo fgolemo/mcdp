@@ -75,7 +75,7 @@ pre:not(.has_label) {
 }
 /* with labels */
 pre.has_label { 
-    /*margin-top: 0.7em !important; */
+    margin-top: 0;
 }
 
 p { margin-top: 0.3em; margin-bottom: 0.3em; }
@@ -581,4 +581,14 @@ div.colN-wrap table td {
     padding-right: 0.7em;
     /*border: solid 1px blue;*/
 }
- 
+
+table.col2 {
+    max-width: 100%;
+} 
+figcaption {
+    margin-top: 0.7em;
+}
+table.col2 td {
+    padding-bottom: 0;
+    vertical-align: middle;
+}

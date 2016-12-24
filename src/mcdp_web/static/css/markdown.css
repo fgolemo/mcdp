@@ -8,7 +8,7 @@ pre {
 	background-color: #eee;
 	white-space: pre-wrap;
 	margin-left: 2em;
-	margin-top: 2em;
+	/*margin-top: 2em;*/
 	padding: 10px;
 	border-radius: 10px ;
 	/*display: inline-block;*/
@@ -53,8 +53,24 @@ pre.error, pre.DPSemanticError, pre.DPSyntaxError {
 
 }
 
+span.label_outside {
+	display: block;
+	font-size: 6pt;
+	letter-spacing: 0.4pt;
+	font-family:  "Andale Mono", monospace;
+	text-align: left;
+	padding-left: 1em;
+	padding-bottom: 2pt;
+	font-weight: bold;
+	color: gray;
+}
+span.label_outside + * {
+	page-break-before: avoid;
+}
+pre span.label_inside { 
+	display: none;
 
-pre span.label { float: right; 
+	float: right; 
 	font-style:italic;
 	border-radius: 10px ;
 	/*border: solid 1px black; */
@@ -79,6 +95,7 @@ pre { text-align: left; }
 pre.console { 
 	background-color: black;
 	color: #ccf;
+	display: inline-block;
 }
 
 pre.console .console_sign { 
