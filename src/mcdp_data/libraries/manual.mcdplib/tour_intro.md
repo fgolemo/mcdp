@@ -1,57 +1,73 @@
 
-## Describing MCDPs
+## The minimal MCDP
 
-MCDP = Monotone Co-Design Problems...
+The minimal MCDP can be defined as in [](#code:empty).
 
-The goal of the language is to represent all and only MCDPs.
+<col2>
+    <pre class='mcdp' id='empty' figure-id='code:empty' label='empty.mcdp'
+    style='min-width: 12em'>
+    mcdp {
 
-For example, multiplying by a negative number is a syntax error.<footnote>Similarly, CVX's~\cite{cvx} goal is to describe all only convex problems.</footnote>
+    }
+    </pre>
+    <render class='fancy_editor' figure-id="fig:empty">`empty</render>
+</col2>
 
-This section introduces MCDPL by way of a tutorial.
+The code describes an MCDP with zero functionality or resources.
+The functionality and resources spaces are $\funsp=\One$, $\ressp=\One$.
+The space $\One = \{ \langle\rangle \}$ is the empty product, which contains only one element, the empty tuple $\langle\rangle$.
+You might think about $\One$ as providing one bit of information:
+whether something is feasible or not.
 
-The minimal MCDP can be defined as in <a href="#code:empty"/>.
+The model above can already be queried using the program <program>mcdp-plot</program>. The command
 
-<pre class='mcdp' id='empty' figure-id='code:empty'>
-mcdp {
+    $ mcdp-solve empty "<>"
 
-}
-</pre>
+produces the output:
 
-The code describes an MCDP with no functionality or resources,
-$\funsp=\One$, $\ressp=\One$.
+    Minimal resources needed = ↑{⟨⟩}
+
+The output means that it is feasible to do nothing, and to do nothing
+we need nothing. Formally, the question is "What are the minimal
+resources necessary to perform $\fun=\langle\rangle$?"
+and the answer is "To perform $\fun=\langle\rangle$,
+you need at least $\res=\langle\rangle$".
 
 
-The functionality and resources of an MCDP is defined using
-the keywords <code>provides</code> and <code>requires</code>:
+## Defining functionality and resources
 
-<pre class='mcdp' id='model1' figure-id='code:model1'>
-mcdp {
-    provides capacity [J]
-    requires mass [g]
 
-    # ...
-}
-</pre>
+The functionality and resources of an MCDP are defined using
+the keywords <code><f>provides</f></code> and <code><r>requires</r></code>:
 
-The code above defines an MCDP with one functionality, <f>capacity</f>, measured in joules,
+<col2>
+    <pre class='mcdp' id='model1' figure-id='code:model1'>
+    mcdp {
+        provides capacity [J]
+        requires mass [g]
+    }
+    </pre>
+    <render class='fancy_editor_LR' figure-id="fig:model1">
+    `model1
+    </render>
+</col2>
+
+The code above defines an MCDP with one functionality,
+<f>capacity</f>, measured in joules,
 and one resource, <r>mass</r>, measured in grams.
 
-That is, $\funsp=\mathbb{R}_{+}^{[\text{J}]}$ and $\ressp=\mathbb{R}_{+}^{[\text{g}]}$. Here, let $\mathbb{R}$ refer to double precision floating point numbers.<footnote>(See how to describe types and type systems in <a href='#sec:types'/>.</footnote>
+That is, the functionality space is $\funsp=\overline{\reals}_{+}^{[\text{J}]}$ and
+the resource space is $\ressp=\overline{\reals}_{+}^{[\text{g}]}$. Here, let $\overline{\reals}_{+}^{[g]}$ refers to the nonnegative real numbers with units of grams.<footnote>Of course, internally this is
+represented using floating points. See [](#sub:Rcomp) for more details.</footnote>
 
-Graphically, the
-MCDP is represented as a box with two edges (<a href="#fig:some"/>).
-
-
-<render class='ndp_graph_templatized' figure-id="fig:some">
-    `model1
-</render>
+The MCDP defined above is, however, unusable, because we have
+not specified how ``capacity`` and ``mass`` relate to one another.
+Graphically, this is represented using  unconnected arrows
+([](#fig:model1)).
 <!--
-    The MCDP defined above is, however, unusable, because we have
-    not specified how ``capacity`` and ``mass`` relate to one another.
-    Graphically, this is represented using purple unconnected arrows:
-
-    <pre class='ndp_graph_expand'>`model1</pre>
--->
+<render class='fancy_editor_LR' figure-id="fig:model1">
+    `model1
+</render> -->
 
 ### Constant functionality and resources
 
@@ -71,34 +87,36 @@ We have given hard bounds to both <f>capacity</f> and <r>mass</r>.
     required mass ≽ 100g
     }
     </pre>
-    <render class='ndp_graph_enclosed' figure-id="fig:model2">`model2</render>
+    <render class='ndp_graph_enclosed' figure-id="fig:model2">
+        `model2
+    </render>
 </col2>
-
-### Querying the model
 
 
 It is possible to query this minimal example. For example:
 
-    $ mcdp-solve minimal 400J
+    $ mcdp-solve minimal "400 J"
 
 The answer is:
 
-    Minimal resources needed: mass = ↑ 100 g
+    Minimal resources needed: mass = ↑ {100 g}
 
 
 If we ask for more than the MCDP can provide:
 
-    $ mcdp-solve minimal 600J
+    $ mcdp-solve minimal "600 J"
 
 we obtain no solutions (the empty set):
 
-    Minimal resources needed: mass = ↑ {}
+    Minimal resources needed: mass = ↑{}
+
+The notation `↑{}` means "the upper closure of the empty set $\emptyset$" ([](#def:upperclosure)), which is equal to $\emptyset$.
 
 
 ### Describing relations between functionality and resources
 
 In MCDPs, functionality and resources can depend on each other using
-any monotone relations.
+any monotone relations ([](#def:monotone-relation)).
 
 The language MCDPL contains as primitives addition,
 multiplication, and division. For example, we can describe a linear relation between
@@ -115,20 +133,33 @@ multiplies by the inverse of the specific energy.
 
 
 <col2>
-    <pre class='mcdp' id='model4'>
+    <pre class='mcdp' id='model4' label='linear.mcdp'>
     mcdp {
-    provides capacity [J]
-    requires mass [g]
+        provides capacity [J]
+        requires mass [g]
 
-    # specific energy
-    ρ = 4 J / g
-    required mass ≽ provided capacity / ρ
+        # specific energy
+        ρ = 4 J / g
+        required mass ≽ provided capacity / ρ
     }
     </pre>
     <render class='ndp_graph_enclosed'
     figure-id='fig:model4'>`model4</render>
 </col2>
 
+
+If we ask for more than the MCDP can provide:
+
+    $ mcdp-solve linear "600 J"
+
+we obtain no solutions (the empty set):
+
+    Minimal resources needed: mass = ↑{150 g}
+
+<!--
+<pre class='print_value'>
+solve(600J,`model4)
+</pre> -->
 
 
 ### Units
@@ -141,23 +172,23 @@ in <mcdp-poset>kWh/kg</mcdp-poset>. The two MCDPs are equivalent. PyMCDP will ta
 the conversions that are needed, and will introduce a conversion from
 <mcdp-poset>J*kg/kWh</mcdp-poset> to <mcdp-poset>g</mcdp-poset> (<a href="#fig:conversion"/>).
 
-TODO: add pointers to problems with conversions: Glimli Glider, Ariane?
+<!-- TODO: add pointers to problems with conversions: Glimli Glider, Ariane? -->
 
-For example, this is the same example with the specific
+For example, [](#code:conversion) is the same example with the specific
 energy given in <mcdp-poset>kWh/kg</mcdp-poset>.
+The output of the two models are completely equivalent (up to numerical errors).
 
 
-<col2>
-    <pre class='mcdp' id='model5' figure-id='code:conversion'
-    figure-caption='Automatic conversion among g, kg, J, kWh'>
-    mcdp {
-    provides capacity [J]
-    requires mass [g]
+<pre class='mcdp' id='model5' figure-id='code:conversion'
+figure-caption='Automatic conversion among g, kg, J, kWh'>
+mcdp {
+provides capacity [J]
+requires mass [g]
 
-    # specific energy
-    ρ = 200 kWh / kg
-    required mass ≽ provided capacity / ρ
-    }
-    </pre>
-    <render class='ndp_graph_enclosed_TB' figure-id="fig:conversion">`model5</render>
-</col2>
+# specific energy
+ρ = 200 kWh / kg
+required mass ≽ provided capacity / ρ
+}
+</pre>
+<render class='ndp_graph_enclosed_LR'
+        figure-id="fig:conversion">`model5</render>
