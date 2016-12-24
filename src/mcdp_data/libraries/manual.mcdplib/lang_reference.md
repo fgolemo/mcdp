@@ -43,7 +43,7 @@ MPL (Kristjansson)
 
 #### Fortress
 
-Some aspects of MCDPL were inspired by a language called [Fortress][fortress]\cite{bib:fortress} that was developed by Guy Steele and team at Sun during the period 2005--2012.<footnote>It was funded by the DARPA
+Some aspects of MCDPL were inspired by a language called [Fortress][fortress]\cite{fortress} that was developed by Guy Steele and team at Sun during the period 2005--2012.<footnote>It was funded by the DARPA
 [High Productivity Computing Systems (HPCS)][HPCS], but it didn't make the latter phase  of the program, so it was eventually abandoned.</footnote>.
 
 MCDPL uses these ideas from Fortress:

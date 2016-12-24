@@ -11,18 +11,27 @@ from mocdp import MCDPConstants
 __all__ = ['do_preliminary_checks_and_fixes']
 
 def do_preliminary_checks_and_fixes(s):
-    check_no_tabs(s)
+    check_no_forbidden(s)
+    
     s = remove_comments(s)
     s = check_misspellings(s)
     s = check_most_of_it_xml(s) 
     return s
 
-def check_no_tabs(s):
+def check_no_forbidden(s):
     if '\t' in s:
         i = s.index('\t')
         msg = "Tabs bring despair (e.g. Markdown does not recognize them.)"
         where = Where(s, i)
         raise DPSyntaxError(msg, where=where)
+    
+    forbidden = ['>=', '<=']
+    for f in forbidden:
+        if f in s:
+            msg = 'Found forbidden sequence %r. This will not end well.' % f
+            c = s.index(f)
+            where = Where(s, c, c + len(f))
+            raise DPSyntaxError(msg, where=where)
     
 def remove_comments(s):
     s = re.sub('<!--(.*?)-->', '', s, flags=re.M | re.DOTALL)

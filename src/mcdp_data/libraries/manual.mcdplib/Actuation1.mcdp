@@ -3,8 +3,8 @@ mcdp {
     requires power [W]
 
     l = provided lift
-    p0 = 5 W
-    p1 = 6 W/N
-    p2 = 7 W/N^2
-    required power ≽ p0 + p1 * l + p2 * l^2
+    p_0 = 5 W
+    p_1 = 6 W/N
+    p_2 = 7 W/N^2
+    required power ≽ p_0 + p_1 * l + p_2 * l^2
 }

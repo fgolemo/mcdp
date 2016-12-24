@@ -443,35 +443,6 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 
 - use Appendix A instead of "chapter 12 - Appendix"
 
-- spurious <!DOCTYPE html> for each page
-
-- DRAFT -- DRAFT/
-
-- unicode files
-
-- code for including css directly
 
 
-  <a href=""
-  <cite id="nicole">Nicole. 2015. Title of paper. <em>Journal</em>, 4(3), 1-10.</cite>
-
-
-  Suppose the ID is puppy
-
-  ref number: "3"   <ref>puppy</ref> 
-  pretty ref: "Chapter 3" <ref p>puppy</ref>
-  
-  Bibliography:
-    <cite>key</cite>
-
-
-For each <element figure-id="" [figure-title=""]></element>
-Create
-
-
-
-tex: ``below''
-
-* ast_to_html: subsituttie "&nbsp;" for the final chars so that it is clear and 
-they get visualize. Need to make sure transformation back is ok though (and the editor???)
-
+- use cdot in diagrms for units like J*kg/kWh]

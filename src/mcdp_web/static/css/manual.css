@@ -348,6 +348,8 @@ figure.table figcaption {
     width: 100%;
     text-align: center;
     font-variant: small-caps;
+    letter-spacing: 0.24pt;
+    font-size: 10pt;
 }
 
 figure[id^='tab:'] > figcaption:not(:empty) {
@@ -625,14 +627,18 @@ table.labels-row1 tr:first-child {
 
 .xxx { font-weight: bold; font-family: monospace; color: red; }
 
-center { 
+div[center] { 
     display: block;
     width: 100%;
     text-align: center;
+    /*border: solid;*/
 }
 
-center > * {
+div[center] > * {
     display: inline-block;
+    margin-top: 0;
+    margin-bottom: 0;
+    
 }
 
 .space_in_code {

@@ -20,13 +20,13 @@ These are not ``functions``; rather, they are __relations__.
 For example, a statement of the kind:
 
 <pre class='mcdp_statements'>
-    a >= sqrt(b)
+    a &gt;= sqrt(b)
 </pre>
 
 In fact, it is different than:
 
 <pre class='mcdp_statements'>
-    sqrt(a) >= b
+    sqrt(a) &gt;= b
 </pre>
 
 #### <k>pow</k>, <k>sqrt</k>

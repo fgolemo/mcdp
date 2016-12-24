@@ -136,6 +136,11 @@ instead of
 </pre>
 ~~~
 
+~~~
+<center>
+</center>
+~~~
+
 
 ~~~
 <pre mcdp-poset>

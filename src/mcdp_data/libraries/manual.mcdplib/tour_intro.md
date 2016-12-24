@@ -178,7 +178,7 @@ For example, [](#code:conversion) is the same example with the specific
 energy given in <mcdp-poset>kWh/kg</mcdp-poset>.
 The output of the two models are completely equivalent (up to numerical errors).
 
-<col2>
+<center>
     <pre class='mcdp' id='model5' figure-id='code:conversion'
     figure-caption='Automatic conversion among g, kg, J, kWh'>
     mcdp {
@@ -190,8 +190,14 @@ The output of the two models are completely equivalent (up to numerical errors).
     required mass ≽ provided capacity / ρ
     }
     </pre>
+    <!-- do not put in col2 - this is large -->
     <render class='ndp_graph_enclosed_LR'
-            figure-id="fig:conversion">
+            figure-id="fig:conversion" style='max-width: 100%'>
             `model5
     </render>
-</col2>
+</center>
+
+<figcaption id='fig:conversion:caption'>
+    A conversion from <poset>J*kg/kWh</poset> to <poset>g</poset>
+    is automatically introduced.
+</figcaption>

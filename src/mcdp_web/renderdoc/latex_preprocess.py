@@ -272,7 +272,7 @@ def sub_headers(s):
     def sub_header(ss, cmd, hname, number=True):
         def replace(name, inside):  # @UnusedVariable
             options = ""
-            options += ' nonumber' if number is False else ''
+            options += ' nonumber=""' if number is False else ''
             inside, label = get_s_without_label(inside, labelprefix=None)
             options += ' id="%s"' % label if label is not None else ''
             template = '<{hname}{options}>{inside}</{hname}>' 

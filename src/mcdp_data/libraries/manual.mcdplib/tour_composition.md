@@ -27,7 +27,7 @@ The relation between <f>lift</f> and <r>power</r>
 is described by the polynomial relation
 
 <pre class="mcdp_statements">
-    required power ≽ p0 + p1 * l + p2 * l^2
+    required power ≽ p_0 + p_1 * l + p_2 * l^2
 </pre>
 
 This is really the composition of five DPs,

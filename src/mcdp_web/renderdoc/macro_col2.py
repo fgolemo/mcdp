@@ -43,6 +43,10 @@ def col_macros_prepare_before_markdown(s):
     s = re.sub(r'<(col\d)(.*?)>', r'<div make-\1=""\2>', s, flags = re.M | re.DOTALL)
     s = re.sub(r'<\/(col\d)>', '</div>', s, flags = re.M | re.DOTALL)
 
+
+    s = re.sub(r'<center(.*?)>', r'<div center=""\1>', s, flags = re.M | re.DOTALL)
+    s = re.sub(r'<\/center>', '</div>', s, flags = re.M | re.DOTALL)
+
     return s
 
 def col_macros(html):

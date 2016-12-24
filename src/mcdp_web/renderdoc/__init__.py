@@ -13,6 +13,13 @@
         s = " ".join(element.strings) # note: strings
         
     Because if <p>ciao<span>come</span></p>
-    then p.string is None. 
+    then p.string is None.
+    
+    
+    Search by ID:
+    
+        element = soup.find("tagName", id='lookfor'})
+        if element is not None:
+            
 
 """

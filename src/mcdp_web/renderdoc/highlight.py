@@ -383,12 +383,28 @@ def make_figure_from_figureid_attr(html):
             msg = 'The ID %r should start with fig: or tab: or code:' % ID
             raise_desc(ValueError, msg, tag=describe_tag(towrap))
             
-        if towrap.has_attr('figure-caption'):
-            caption = towrap['figure-caption']
+        external_caption_id = '%s:caption' % ID
+        external_caption = soup.find(id=external_caption_id)
+        if external_caption is not None:
+#             print('using external caption %s' % str(external_caption))
+            external_caption.extract()
+            if external_caption.name != 'figcaption':
+                logger.error('Element %s#%r should have name figcaption.' %
+                             (external_caption.name, external_caption_id))
+                external_caption.name = 'figcaption'
+            figcaption = external_caption
+            
+            if towrap.has_attr('figure-caption'):
+                msg = 'Already using external caption for %s' % ID
+                raise_desc(ValueError, msg, describe_tag(towrap))
         else:
-            caption = ''
-        figcaption = Tag(name='figcaption')
-        figcaption.append(NavigableString(caption))
+#             print('could not find external caption %s' % external_caption_id)
+            if towrap.has_attr('figure-caption'):
+                caption = towrap['figure-caption']
+            else:
+                caption = ''
+            figcaption = Tag(name='figcaption')
+            figcaption.append(NavigableString(caption))
         i = parent.index(towrap)
         towrap.extract()
         fig.append(towrap)

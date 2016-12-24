@@ -233,7 +233,6 @@ $$
     \quad \equiv \quad
     (p_1 \posleq_P p_2) \wedge (q_1 \posleq_Q q_2).
 $$
-%
 \end{defn}
 
 In MCDPL, use the Unicode symbol "<k>×</k>" or the simple letter "<k>x</k>" to create a poset product, using the syntax:
@@ -282,11 +281,11 @@ a product of the two spaces <pos>J</pos>
 and <pos>A</pos> with the two entries
 named ``energy`` and ``current``.
 
-<center>
+<div center>
     <pre class='mcdp_poset'>
     product(energy:J, current:A)
     </pre>
-</center>
+</div>
 
 The names for the fields must be valid identifiers (starts with a letter,
 contains letters, underscore, and numbers).
@@ -380,11 +379,11 @@ denotes the principal upper set of the element <value>{2 g, 1 m}</value> in the 
 
 The syntax is
 
-<center>
-<pre class='mcdp_poset'>
-Interval([["lower bound"]], [["upper bound"]])
-</pre>
-</center>
+<div center>
+    <pre class='mcdp_poset'>
+    Interval([["lower bound"]], [["upper bound"]])
+    </pre>
+</div>
 
 <!--
 <pre><code><span class="keyword">Interval</span>(<span class='ph'>lower bound</span>,<span class='ph'>upper bound</span>)</code></pre>

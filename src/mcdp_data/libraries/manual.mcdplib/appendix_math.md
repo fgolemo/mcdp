@@ -208,3 +208,9 @@ of the Kleene ascent chain
 
 \begin{defn}\label{def:monotone-map} \xxx
 \end{defn}
+
+\begin{defn}\label{def:upperclosure} \xxx
+\end{defn}
+
+\begin{defn}\label{def:lowerclosure} \xxx
+\end{defn}

@@ -103,11 +103,11 @@ pre.console .console_sign {
 }
 
 pre.console .program { 
-	color: #ccf;
-	color: brown;
+	color: #cff;
+	/*color: brown;*/
 }
 pre.console .program_option { 
-	color: red;
+	/*color: red;*/
 }
 pre.console .program_command { 
 	color: green;
