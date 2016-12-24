@@ -18,6 +18,8 @@ manual_contents = [
     
     ('manual', 'book_intro'),
     
+    ('manual', 'bit_of_theory'),
+    
     ('manual', 'tour'),
     ('manual', 'tour_intro'),
     ('manual', 'tour_composition'),

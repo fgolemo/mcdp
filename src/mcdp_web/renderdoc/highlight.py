@@ -869,21 +869,42 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                 raise_wrapped(DPInternalError, e,msg, exc=sys.exc_info())
                 
     # <k>A</k> ==> <code class=keyword>A</code>
-    for e in soup.select('k'):
-        e2 = Tag(name='code')
-        copy_string_and_attrs(e, e2)
-        # THEN add class
-        add_class(e2, 'keyword')
-        e.replace_with(e2)
+#     for e in soup.select('k'):
+#         e.name = 'code'
+#         add_class(e, 'keyword')
         
     # <program>A</program> ==> <code class=program>A</code>
-    for e in soup.select('program'):
-        e2 = Tag(name='code')
-        # copy string
-        copy_string_and_attrs(e, e2)
-        # THEN add class
-        add_class(e2, 'program')
-        e.replace_with(e2)
+#     for e in soup.select('program'):
+#         e.name = 'code'
+#         add_class(e, 'program')
+
+    abbrevs = {
+        # tag name:  (new name, classes to add)
+        'fname': ('code', ['FName']),
+        'rname': ('code', ['RName']),
+        'k': ('code', ['keyword']),
+        'program': ('code', ['program']),
+        'f': ('span', ['f']),
+        'r': ('span', ['r']),
+        'kf': ('code', ['f', 'keyword']),
+        'kr': ('code', ['r', 'keyword']),
+        'cf': ('code', ['f']),
+        'cr': ('code', ['r']),
+    }
+    for original_tag_name, (new_tag_name, classes_to_add) in abbrevs.items():
+        for e in soup.select(original_tag_name):
+            e.name = new_tag_name
+            for c in classes_to_add:
+                add_class(e, c)
+
+
+#         
+#         e2 = Tag(name='code')
+#         # copy string
+#         copy_string_and_attrs(e, e2)
+#         # THEN add class
+#         add_class(e2, 'program')
+#         e.replace_with(e2)
          
 #     'mcdp_template','mcdp', 'mcdp_statements',
     # mcdp-poset
@@ -897,14 +918,15 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
         corresponding = x.replace('_', '-')
              
         for e in soup.select(corresponding):
-            e2 = Tag(name='code')
-            copy_string_and_attrs(e, e2)
+#             e2 = Tag(name='code')
+#             copy_string_and_attrs(e, e2)
+            e.name = 'code'
             # THEN add class
-            add_class(e2, x)
+            add_class(e, x)
 
 #             print('%s -> %s' % (e, e2))
 #             
-            e.replace_with(e2)
+#             e.replace_with(e2)
     
     # this is a bug with bs4. The replace_with above only adds an escaped
     # text rather than the actual tag (!).
@@ -941,19 +963,17 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
         br['class'] = 'pre_after_pre'
         pre.parent.insert(pre.parent.index(pre), br)
   
-  
-  
     res = to_html_stripping_fragment(soup)
 #     print 'highlight_mcdp_code: %s' % res
     return res
-
-def copy_string_and_attrs(e, e2):
-    if e.string is not None:
-        e2.string = e.string
-    # copy attributes
-    for k, v in e.attrs.items():
-        e2[k] = v
-#                 
+# 
+# def copy_string_and_attrs(e, e2):
+#     if e.string is not None:
+#         e2.string = e.string
+#     # copy attributes
+#     for k, v in e.attrs.items():
+#         e2[k] = v
+# #                 
 # def add_br_before_pres(html):
 #     soup = bs(html)
 #     pres = list(soup.select('pre'))

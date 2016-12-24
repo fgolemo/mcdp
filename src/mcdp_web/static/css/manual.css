@@ -514,9 +514,13 @@ h3:not([nonumber])::after {
 
 /*TODO: make preprocessing into code*/
 /*f,r { font-family: monospace; font-size: 80%;}*/
-f { color: darkgreen; }
-r { color: darkred;}
+.f { color: darkgreen; }
+.r { color: darkred;}
+.keyword.f { color: darkgreen; }
+.keyword.r { color: darkred;}
 
+f, r { border: solid 1px red;}
+f::before, r::before { content: 'xxx';}
 
 div.figure { border: solid; }
 
@@ -638,7 +642,7 @@ div[center] > * {
     display: inline-block;
     margin-top: 0;
     margin-bottom: 0;
-    
+
 }
 
 .space_in_code {
@@ -646,3 +650,4 @@ div[center] > * {
     background-color: white;
     /*border: solid 1px red;*/
 }
+

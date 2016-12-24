@@ -284,4 +284,6 @@ code.keyword {
     font-weight: bold; 
 }
 
-
+/* allow for manual */
+code.FName { color: darkgreen; }
+code.RName { color: darkred; }

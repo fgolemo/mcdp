@@ -107,8 +107,6 @@ because of the node $\posleq$ that joins them.</footnote>
 </figure> -->
 
 
-
-
 ## This book
 
 This book presents a new approach to formalizing and solving co-design problems
@@ -135,60 +133,18 @@ At this point:
 Please send any comments, suggestions, or bug reports to <a href="mailto:censi@mit.edu">censi@mit.edu</a>.
 
 
-## A brief summary of the theory
-
-
-### Functionality and resources
-
-<style type='text/css'>
-img.art {
-    height: 6em;
-}
-
-</style>
-
-<img class='art'  latex-options='scale=0.33'  src="gmcdp_setup.pdf" />
-
-
-### Queries
-
-
-<img class='art' latex-options='scale=0.33' src="gmcdp_setup_query_r.pdf"/>
-
-<img class='art' latex-options='scale=0.33' src="gmcdp_setup_query_f.pdf"/>
-
-<img class='art' latex-options='scale=0.33' src="gmcdp_setup_h.pdf"/>
-
-### Composition
-
-
-### Templates
-* templates
-
-### Categorical foundations
-
-...
-
-### Pointers to papers
-
-These are the papers available for the theory:
-
-* A mathematical approach to Co-Design...
-
-These are useful background papers and books:
-
-* ...
-
 ## A new approach to co-design
 
 Workflow...
+
+
 
 The tools for this do not exist yet completely.
 So far, the language exists (though new constructs will be found)
 and the environment is an approximation of what we need.
 
 
-### Where to use it?
+## Where to use it?
 
 It can be applied in different fields...
 

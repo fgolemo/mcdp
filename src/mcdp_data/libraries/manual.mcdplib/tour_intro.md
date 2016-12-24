@@ -1,5 +1,5 @@
 
-## The minimal MCDP
+## Hello, world!
 
 The minimal MCDP can be defined as in [](#code:empty).
 
@@ -38,7 +38,10 @@ you need at least $\res=\langle\rangle$".
 
 
 The functionality and resources of an MCDP are defined using
-the keywords <code><f>provides</f></code> and <code><r>requires</r></code>:
+the keywords <kf>provides</kf> and <kr>requires</kr>.
+The code in [](#code:model1) defines an MCDP with one functionality,
+<fname>capacity</fname>, measured in joules,
+and one resource, <rname>mass</rname>, measured in grams.
 
 <col2>
     <pre class='mcdp' id='model1' figure-id='code:model1'>
@@ -52,17 +55,14 @@ the keywords <code><f>provides</f></code> and <code><r>requires</r></code>:
     </render>
 </col2>
 
-The code above defines an MCDP with one functionality,
-<f>capacity</f>, measured in joules,
-and one resource, <r>mass</r>, measured in grams.
 
 That is, the functionality space is $\funsp=\overline{\reals}_{+}^{[\text{J}]}$ and
-the resource space is $\ressp=\overline{\reals}_{+}^{[\text{g}]}$. Here, let $\overline{\reals}_{+}^{[g]}$ refers to the nonnegative real numbers with units of grams.<footnote>Of course, internally this is
-represented using floating points. See [](#sub:Rcomp) for more details.</footnote>
+the resource space is $\ressp=\overline{\reals}_{+}^{[\text{g}]}$. Here, let $\overline{\reals}_{+}^{[g]}$ refers to the nonnegative real numbers with units of grams. (Of course, internally this is
+represented using floating point numbers. See [](#sub:Rcomp) for more details.)
 
-The MCDP defined above is, however, unusable, because we have
-not specified how ``capacity`` and ``mass`` relate to one another.
-Graphically, this is represented using  unconnected arrows
+The MCDP defined above is, however, incomplete, because we have
+not specified how <fname>capacity</fname> and <rname>mass</rname> relate to one another.
+In the graphical notation, the co-design diagram has unconnected arrows
 ([](#fig:model1)).
 <!--
 <render class='fancy_editor_LR' figure-id="fig:model1">
@@ -71,11 +71,11 @@ Graphically, this is represented using  unconnected arrows
 
 ### Constant functionality and resources
 
-The MCDP in <a href="#code:model1"/> is not complete, as we have not
-defined what constraints <f>capacity</f> and <r>mass</r> must satisfy.
+<!-- The MCDP in <a href="#code:model1"/> is not complete, as we have not
+defined what constraints <fname>capacity</fname> and <rname>mass</rname> must satisfy. -->
 
-<a href='#code:model2'/> is a minimal example of a complete MCDP.
-We have given hard bounds to both <f>capacity</f> and <r>mass</r>.
+[](#code:model2) is a complete MCDP.
+We have given hard bounds to both <fname>capacity</fname> and <rname>mass</rname>.
 
 <col2>
     <pre class='mcdp' id='model2' figure-id="code:model2">
@@ -91,6 +91,42 @@ We have given hard bounds to both <f>capacity</f> and <r>mass</r>.
         `model2
     </render>
 </col2>
+
+In the body of the <k>mcdp{}</k> declaration one
+can refer to the values of the functionality and resources
+using the expressions <cf>provided <em>(functionality name)</em></cf>
+and <cr>required <em>(resource name)</em></cr>.
+%
+If it is possible to disambiguate from the context, the MCDPL
+interpreter also allows to drop the keywords <cf>provided</cf>
+and <cr>required</cr>, although it will give a warning.
+%
+For example, if one forgets the keyword <cf>provided</cf>,
+the interpreter will give the following warning:
+
+<pre>
+Please use "provided capacity" rather than just "capacity".
+
+    line  2 |    provides capacity [J]
+    line  3 |    requires mass [g]
+    line  4 |
+    line  5 |    capacity ≼ 500 J
+                 ^^^^^^^^
+</pre>
+
+To describe the inequality constraints, MCDPL allows to use <k>&lt;=</k>, <k>&gt;=</k>, as well as their fancy Unicode version <k>≼</k>, <k>≽</k>.
+These two expressions are completely equivalent:
+<col2>
+<pre class='mcdp_statements'>
+provided capacity ≼ 500 J
+required mass ≽ 100g
+</pre>
+<pre class='mcdp_statements' np>
+provided capacity &lt;= 500 J
+required mass &gt;= 100g
+</pre>
+</col2>
+
 
 
 It is possible to query this minimal example. For example:
