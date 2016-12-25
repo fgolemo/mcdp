@@ -2,8 +2,20 @@
 
 ## The problem of system co-design
 
+<style>
+    #fig\:Intro {
+        display: block; float: right;
+        background-color: grey;
+        margin-left: 2em;
+    }
+    #fig\:Intro span {
+        display: block;
+        height: 8em; width: 10em; background-color: lightgrey;
+    }
+</style>
+
 <div figure-id='fig:Intro' figure-caption="This is an initial image">
-    <span style='display: block; float: right; height: 8em; width: 10em; background-color: lightgrey; margin-left: 2em;'>
+    <span style=''>
     content
     </span>
 </div>
@@ -22,16 +34,21 @@ Here is a great quote:
         quoted by <a href="https://en.wikipedia.org/wiki/Kenneth_E._Iverson"
             title='Kenneth E. Iverson (1920-2004). Creator of programming language APL.'>
             Kenneth Iverson</a>,
-            quoted by Donald McIntyre in <a href='http://dl.acm.org/citation.cfm?id=206985&amp;dl=ACM&amp;coll=DL&amp;CFID=877903021&amp;CFTOKEN=25689369'>this paper</a>,
-            but ultimately sourceless and probably apocryphical.</p>
+            quoted<!--  by Donald McIntyre  -->
+            in <a href='http://dl.acm.org/citation.cfm?id=206985&amp;dl=ACM&amp;coll=DL&amp;CFID=877903021&amp;CFTOKEN=25689369'>this paper</a>,
+            but ultimately sourceless and probably apocryphical.
+    </p>
+    <style>
+     #firstquote p:nth-child(2) {
+        max-width: 20em; color: red;
+    }
+    </style>
+
 </blockquote>
 
-The first part of the quote, "A system is composed of components", is plain
-as day as much as it is tautological. We could equally say: "A system is partitioned in parts".
 
-The second part, "a component is something you understand", is revelatory:
-we call "system" what is too difficult to understand. Something is a "system"
-if we cannot keep it in mind in its entirety at the same time.
+The first part of the quote, "A system is composed of components", is plain
+as day as much as it is tautological. We could equally say: "A system is partitioned in parts". The second part, "a component is something you understand", is insightful: we call "system" what is too difficult to understand. Something is a "system" if we cannot keep it in mind in its entirety at the same time.
 %
 This definition is, of course, an anthropocentric definition, as it is a
 limitation of the human mind, related to the amount of neurons in the brain.
@@ -101,10 +118,31 @@ In red and green... <footnote>I apologize to colorblind people
 for the choice of colors; however, note that the diagrams are not ambiguous
 because of the node $\posleq$ that joins them.</footnote>
 
-<!-- <figure>
-    <img width src='logo.png'/>
-    <figcaption>Representations of components</figcaption>
-</figure> -->
+
+## A new approach to co-design
+
+Workflow...
+
+
+After an MCDP has been defined, then it can be "queried". For
+example, the user can ask what is the optimal configuration of the
+system that has the least amount of resources.
+
+
+MCDPL comes with a web-based GUI described in <ref>Chapter ???</ref>. The user can input a model and immediately see the graphical representation of such model.
+
+
+The tools for this do not exist yet completely.
+So far, the language exists (though new constructs will be found)
+and the environment is an approximation of what we need.
+
+
+## Where to use it?
+
+It can be applied in different fields...
+
+Chapter ... shows the case when
+
 
 
 ## This book
@@ -124,203 +162,10 @@ By reading this book, you will learn:
 * how to use the solution tools;
 * how to model design problems in several specific domains of engineering.
 
-#### Bugs
+
 
 At this point:
 * the book is an early incomplete draft;
 * the software is experimental and only partially documented.
 
 Please send any comments, suggestions, or bug reports to <a href="mailto:censi@mit.edu">censi@mit.edu</a>.
-
-
-## A new approach to co-design
-
-Workflow...
-
-
-
-The tools for this do not exist yet completely.
-So far, the language exists (though new constructs will be found)
-and the environment is an approximation of what we need.
-
-
-## Where to use it?
-
-It can be applied in different fields...
-
-Chapter ... shows the case when
-
-### Advantages and limitations
-
-Advantages of the method:
-
-* intuitive...
-* scalable...
-* zooming in and out...
-* multi-domain...
-* ...
-
-Limitations:
-
-* You still need to model...
-
-Next steps:
-
-* ...
-
-## Advantages and limitations
-
-As this is work in progress; it will take some time before it
-can be reliably deployed. However, it already has some advantages.
-
-Here we list advantages and current limitations of the work.
-
-### Theory
-
-Advantages of the theory:
-
-* ...
-
-Limitations of the theory:
-
-* ...
-
-Next steps for the theory:
-
-* ...
-
-### Language
-
-Advantages of the language:
-
-* ...
-
-Limitations of the language:
-
-* It is not supposed to model anything more than MCDPs.
-* ...
-
-Next steps for the language:
-
-* Allow mini-languages to define each MCDP. For example, a convex optimization
-  mini language.
-
-* ...
-
-
-### Core implementation
-
-Advantages of the implementation:
-
-* The code is relatively elegant.
-* It is *exhaustively* tested.
-* ...
-
-Limitations of the implementation:
-
-* This is experimental software.
-* Some of the operations are implemented using $O(n^2)$ operations
-while $O(n \log(n))$ would be possible. In particular, meet and join
-of antichains are not efficiently implemented.
-* It is slow because of Python, generally, and the fact that there are not
-* ...
-
-Next steps for the implementation:
-
-* ...
-* Compile down to native code using LLVM.
-
-### Environment
-
-Advantages of the environment:
-
-* Browsing libraries. Creating models, posets, etc.
-* Semantic highlighting of code.
-* Visual feedback for most objects; e.g. diagrams are shown visually.
-* ...
-* beutification (formatting)
-
-Limitations of the environment:
-
-* Not all functions are implemented from the UI. For example,
-  it is not possible to create a new library from the UI.
-
-Next steps for the environment:
-
-* ...
-
-
-### Pointers to software
-
-
-
-## Acknowledgements
-
-### People
-
-I would like to acknowledge:
-
-* Co-authors [David Spivak][spivak] and Joshua Tan, who developed the categorical
-  foundations of this theory.
-
-DRAFT
-
-* Jerry Marsden for geometry. (Here, I'm proud that the invariance group is quite large: it
-is the group of all invariants..)
-
-/DRAFT
-
-[spivak]: http://math.mit.edu/%7edspivak/
-
-### Funding sources
-
-* NSF
-* AFRL
-
-### Un-related work
-
-There is some work that is "unrelated", which I cannot find
-a way to cite in my papers, though this was very inspirational.
-
-...
-
-<!--
-* Homotopy Type Theory
-* I found very useful the lessons Bartos Miliewsky -->
-
-### Open source software
-
-Developing this software would not have been possible without
-the open source/free software ecosystem.
-
-Particular enablers were:
-
-* Python, Numpy, Scipy, PyParsing, ...
-* NodeJS, MathJax, ...
-
-
-## License information
-
-
-
-
-The code is available under the GPL license.
-
-
-<img id='license' src="by-nc-sa.svg"/>
-
-The book is available under the Creative Commons Attribution NonCommercial ShareAlike
-(CC BY-NC-SA) license.
-
-<style type='text/css'>
-#license {
-    float: right;
-}
-    blockquote#firstquote  p:first-child,
-    blockquote#secondquote p:first-child {
-        font-style: italic;
-    }
-    blockquote#firstquote p:not(:first-child) {
-        font-size: smaller;
-    }
-</style>

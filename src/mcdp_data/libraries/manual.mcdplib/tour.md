@@ -1,57 +1,15 @@
-# Tutorial
+# Language and tools tutorial   {#sec:tutorial}
 
-This chapter describes the MCDPL modeling language,
-which allows the formal definition of co-design problems,
-by way of a tutorial.
+MCDPL is a modeling language that allows the formal definition of co-design problems.
+MCDPL is designed to describe all and only MCDPs. There is a core of functionality
+(posets, primitive relations, etc.) that are built in, and there are extension
+mechanisms.
 
-## Basics
+MCDPL is a *modeling* language, not a *programming* language. This means
+that MCDPL allows to describe variables and systems of relations between
+variables. Once the model is described, then it can be *queried*; and the
+"interpreter" [<program>mcdp-solve</program>](#sec:mcdp-solve) runs the
+computation necessary to obtain the answers.
 
-The goal of the language is to represent all and only [MCDPs
-(Monotone Co-Design Problems)](#def:MCDP). For example, multiplying by a negative number is a syntax error.
-<!-- <footnote>Similarly, CVX's~\cite{cvx} goal
-is to describe all only convex problems.</footnote> -->
-
-The interface of each subsystem is specified
-by its <f>functionality</f> and its <r>resources</r>.
-
-#### Composition
-
-The language encourages a compositional approach to
-co-design.
-
-There are several notions of "compositions"
-between two design problems (DPs) for which
-MCDPL provides syntactic constructs:
-
-* *series* ([](#subfig:series)): two DPs can be connected in series
-  if the second provides
-  the resources required by the first.
-* *parallel* ([](#subfig:parallel)): \xxx
-* *coproduct* ([](#subfig:coproduct)): Two DPs can describe two alternatives
-* *recursive* ([](#subfig:hierarchical)): A larger DPs can be defined as the
-  interconnection of smaller, primitive DPs.
-* *templating* ([](#subfig:templating)): \xxx
-
-<col3 figure-id="fig:main"
-      figure-caption="DPs can be composed in a variety of ways">
-    <span figure-id="subfig:series" figure-caption="Series">\xxx</span>
-    <span figure-id="subfig:parallel"  figure-caption="Parallel">\xxx</span>
-    <span figure-id='subfig:coproduct'  figure-caption="Coproduct">\xxx</span>
-    <span figure-id='subfig:hierarchical'  figure-caption="Hierarchical"> \xxx</span>
-    <span figure-id='subfig:templating' figure-caption="Templating">\xxx</span>
-</col3>
-
-<!--
-MCDPL supports a modules system that allows to re-use
-commonly used models. -->
-<p></p>
-
-#### Querying
-
-After an MCDP has been defined, then it can be "queried". For
-example, the user can ask what is the optimal configuration of the
-system that has the least amount of resources.
-
-#### Queries
-
-MCDPL comes with a web-based GUI described in <ref>Chapter ???</ref>. The user can input a model and immediately see the graphical representation of such model.
+This chapter describes the MCDPL modeling language, by way of a tutorial.
+A more formal description is given in [](#sec:MCDPL-language-reference).

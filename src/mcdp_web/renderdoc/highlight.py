@@ -341,7 +341,7 @@ def fix_subfig_references(html):
 #         print('considering if it exists %r' % alternative)
         if list(soup.select('#' +alternative)):
             newref = '#sub' + name
-            logger.debug('changing ref %r to %r' % (a['href'],newref))
+#             logger.debug('changing ref %r to %r' % (a['href'],newref))
             a['href'] = newref
         
     res = to_html_stripping_fragment(soup)
@@ -388,6 +388,8 @@ def make_figure_from_figureid_attr(html):
             msg = 'The ID %r should start with fig: or tab: or code:' % ID
             raise_desc(ValueError, msg, tag=describe_tag(towrap))
             
+        if 'caption-left' in towrap.attrs.get('figure-class', ''): 
+            caption_below = False
         external_caption_id = '%s:caption' % ID
         external_caption = soup.find(id=external_caption_id)
         if external_caption is not None:
@@ -410,16 +412,29 @@ def make_figure_from_figureid_attr(html):
                 caption = ''
             figcaption = Tag(name='figcaption')
             figcaption.append(NavigableString(caption))
+        
+        outside = Tag(name='div')
+        outside['id'] = ID + '-wrap'
+        if towrap.has_attr('figure-class'):
+            for k in towrap['figure-class'].split(' '):
+                add_class(towrap, k)
+                add_class(outside, k )
+        
         i = parent.index(towrap)
         towrap.extract()
-        fig.append(towrap)
+        figcontent = Tag(name='div', attrs={'class':'figcontent'})
+        figcontent.append(towrap)
+        fig.append(figcontent)
         
         if caption_below:
             fig.append(figcaption)
         else:
             fig.insert(0, figcaption)
         
-        parent.insert(i, fig)
+        add_class(outside, 'generated-figure-wrap')
+        add_class(fig, 'generated-figure')
+        outside.append(fig)
+        parent.insert(i, outside)
         
     res = to_html_stripping_fragment(soup)
     return res
@@ -762,6 +777,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                         
                 frag2 = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
                 
+                
 #                 texts = [i for i in frag2.recursiveChildGenerator() 
 #                         if type(i) == NavigableString]
 #                 for t in texts:
@@ -774,7 +790,10 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
 #                         t.replace_with(r)
                     
                 if use_pre:
-                    rendered = frag2.pre
+                    rendered = Tag(name='div', attrs={'class':'rendered'})
+                    pre = frag2.pre
+                    pre.extract()
+                    rendered.append(pre)
                     if not rendered.has_attr('class'):
                         rendered['class'] = ""
                     if tag.has_attr('label'):
@@ -784,16 +803,16 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                         add_class(tag_label, 'label_inside')
                         tag_label.append(NavigableString(text))
                         
-                        rendered.insert(0, tag_label)
+                        pre.insert(0, tag_label)
                         
                         tag_label_outside = Tag(name='span')
                         add_class(tag_label_outside, 'label')
                         add_class(tag_label_outside, 'label_outside')
                         tag_label_outside.append(NavigableString(text))
-                        tag.insert_before(tag_label_outside)
+                        rendered.insert(0, tag_label_outside)
                         
                     max_len = max_len_of_pre_html(html)
-                    frag2.pre['string_len'] = max_len
+#                     frag2.pre['string_len'] = max_len
                     
                     if tag.has_attr('label'): 
                         add_class(rendered, 'has_label')
@@ -803,7 +822,8 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                     style = ''
                 else:
                     # using <code>
-                    rendered = frag2.pre.code
+                    rendered =  frag2.pre.code
+                    rendered.extract()
                     if not rendered.has_attr('class'):
                         rendered['class'] = ""
 
@@ -881,11 +901,15 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
     abbrevs = {
         # tag name:  (new name, classes to add)
         'fname': ('code', ['FName']),
+        'fvalue': ('code', ['mcdp-value', 'fvalue']),
+        'rvalue': ('code', ['mcdp-value', 'rvalue']),
         'rname': ('code', ['RName']),
+        'impname': ('code', ['impname']),
         'k': ('code', ['keyword']),
         'program': ('code', ['program']),
         'f': ('span', ['f']),
         'r': ('span', ['r']),
+        'imp': ('span', ['imp']),
         'kf': ('code', ['f', 'keyword']),
         'kr': ('code', ['r', 'keyword']),
         'cf': ('code', ['f']),

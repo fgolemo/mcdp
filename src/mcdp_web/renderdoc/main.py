@@ -4,7 +4,7 @@ from contracts.utils import raise_desc, indent
 from mcdp_library import MCDPLibrary
 from mcdp_web.renderdoc.abbrevs import other_abbrevs
 from mcdp_web.renderdoc.highlight import fix_subfig_references
-from mcdp_web.renderdoc.latex_preprocess import extract_maths
+from mcdp_web.renderdoc.latex_preprocess import extract_maths, extract_tabular
 from mcdp_web.renderdoc.macro_col2 import col_macros,\
     col_macros_prepare_before_markdown
 from mcdp_web.renderdoc.markdown_transform import is_inside_markdown_quoted_block
@@ -37,8 +37,16 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
         msg = 'I expect a str encoded with utf-8, not unicode.'
         raise_desc(TypeError, msg, s=s)
 
+    # need to do this before do_preliminary_checks_and_fixes 
+    # because of & char
+    s, tabulars = extract_tabular(s)
    
     s = do_preliminary_checks_and_fixes(s)
+    # put back tabular, because extract_maths needs to grab them
+    for k,v in tabulars.items():
+        assert k in s
+        s = s.replace(k, v)
+        
     s = s.replace('%\n', '&nbsp;')
     # copy all math content,
     #  between $$ and $$
@@ -56,6 +64,9 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     
     # fixes for LaTeX
     s = latex_preprocessing(s)
+    assert not '\\par' in s
+    assert not '\\vspace' in s
+    assert not 'begin{tabular}' in s
     
     s = '<div style="display:none">Because of mathjax bug</div>\n\n\n' + s
 
@@ -68,16 +79,17 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
 #         l = replace_underscore_etc_in_formulas(l)
 #         return l
 
-
+    s = other_abbrevs(s)
     s, mcdpenvs = protect_my_envs(s) 
 #     print('mcdpenvs = %s' % maths)
 
+    
     s = col_macros_prepare_before_markdown(s)
     
     print(indent(s, 'before markdown | '))
     s = render_markdown(s)
     print(indent(s, 'after  markdown | '))
-
+    
     for k,v in maths.items():
         if not k in s:
             msg = 'Cannot find %r (= %r)' % (k, v)
@@ -96,13 +108,10 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     s = replace_equations(s)        
     s = s.replace('\\*}', '*}')
     
-#     s = replace_underscore_etc_in_formulas_undo(s)
     
-#     print(indent(s, 'after  replace | '))
-        
+    # need to process tabular before mathjax
+    
 
-#     print(indent(s, 'before  mathjax | '))
-    
 
 
     s = escape_for_mathjax(s)
@@ -132,7 +141,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     s = make_figure_from_figureid_attr(s)
     
     s = col_macros(s)
-    s = other_abbrevs(s)
+    
 #     print(indent(s, 'after  col_macros | '))
     s = fix_subfig_references(s)
     check_html_fragment(s)

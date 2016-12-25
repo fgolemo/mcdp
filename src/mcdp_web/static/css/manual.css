@@ -333,6 +333,10 @@ figure[id^='code:'] figcaption {
     /*border: solid;*/
     width: 100%;
 }
+figure[id^='code:'] figcaption:not(:empty) {
+    text-align: left;
+    max-width: 30em;
+}
 figure[id^='code:'] figcaption:empty::before {
     content: 'Listing ' counter(listing);
 }
@@ -355,10 +359,10 @@ figure.table figcaption {
 figure[id^='tab:'] > figcaption:not(:empty) {
 }
 figure[id^='tab:'] > figcaption:not(:empty)::before {
-    content: 'Table ' counter(table) '. ';
+    content: 'Table\0000a0' counter(table) '. ';
 }
 figure[id^='tab:'] > figcaption:empty::before {
-    content: 'Table ' counter(table);
+    content: 'Table\0000a0' counter(table);
 }
 
 
@@ -366,7 +370,7 @@ figure[id^='fig:'] > figcaption:not(:empty) {
     text-align: justify;
 }
 figure[id^='fig:'] > figcaption:not(:empty)::before {
-    content: 'Figure ' counter(figure) '. ';
+    content: 'Figure\0000a0' counter(figure) '. ';
     /*font-style: italic;*/
 }
 
@@ -382,7 +386,7 @@ figcaption { font-size: smaller; }
 figure[id^='fig:'] { text-align: center; }
 figure[id^='fig:'] > figcaption:empty { text-align: center; }
 figure[id^='fig:'] > figcaption:empty::before {
-    content: 'Figure ' counter(figure);
+    content: 'Figure\0000a0' counter(figure);
     /*font-style: italic;*/
 }
 
@@ -404,7 +408,7 @@ a[href^='#exa:'   ]:empty::before  {  content: 'Example.♦';content: 'Example\0
 a[href^='#thm:'   ]:empty:not(.only-number)::before {  content: 'Theorem♦'; content: 'Theorem\0000a0' target-counter(attr(href), theorem); }
 a[href^='#thm:'   ]:empty.only-number::before {  content: '♦'; content: target-counter(attr(href), theorem); }
 a[href^='#sub:'   ]:empty:not(.only-number)::before { content: 'Subsection♦.♦'; content: 'Subsection\0000a0' target-counter(attr(href), section) '.' target-counter(attr(href), subsection) ; }
-a[href^='#sub:'   ]:empty.only-number)::before { content: '♦.♦'; content:target-counter(attr(href), section) '.' target-counter(attr(href), subsection) ; }
+a[href^='#sub:'   ]:empty.only-number::before { content: '♦.♦'; content:target-counter(attr(href), section) '.' target-counter(attr(href), subsection) ; }
       
 
 /** maybe chapter **/
@@ -513,6 +517,8 @@ h3:not([nonumber])::after {
 /*f,r { font-family: monospace; font-size: 80%;}*/
 .f { color: darkgreen; }
 .r { color: darkred;}
+.imp { color: darkorange; }
+.impname {color: darkorange; }
 .keyword.f { color: darkgreen; }
 .keyword.r { color: darkred;}
 
@@ -527,7 +533,7 @@ div.figure { border: solid; }
 
 .uline { text-decoration: underline; }
 
-div.fbox { border: solid 1pt black; }
+div.fbox { border: solid 1pt black; padding: 3pt;}
 
 div.center, div.centering { text-align: center; }
 
@@ -619,10 +625,12 @@ h2,h3,h4 { clear: both; }
 
 
 table.labels-col1 td:first-child {
+    font-size: 90%;
     font-weight: bold;
 }
 
 table.labels-row1 tr:first-child {
+    font-size: 90%;
     font-weight: bold;
 }
 
@@ -648,18 +656,52 @@ div[center] > * {
     /*border: solid 1px red;*/
 }
 
-.errored {
-    border: solid 2px red !important;
-    padding: 3px !important;
-    /*background-color: red;*/
+@page rotated {
+    size: 3.8in 4.73in !important;
+    
 }
-.duplicated-id {
-    color: red;
+
+div.float_bottom {
+    float: bottom;
 }
-.href-invalid {
-    color: red;
+pre code.output {
+    background-color: turquoise;
 }
-.href-replaced {
-    background-color: yellow;
+/*#code\:complicated  {
+    page: mia;
+    border: dotted 2px blue;
+    position: fixed;
+    bottom: 0;
+    left:0; right: 0;
+    width: 100%;
+    margin-top: 3em;
+}
+*/
+
+ .figcontent  { margin: 0; padding: 0; }
+
+@media screen {
+    div.caption-left figure  {
+        display: table;
+    }
+    div.caption-left figure > figcaption  {
+        display: inline-block;
+        margin-right: 3em;
+    }
+    div.caption-left figure > .figcontent {
+        display: table-cell;
+    } 
+
+    div.caption-right figure  {
+        display: table-row;
+    }
+    div.caption-right figure > figcaption  {
+        display: inline-block;
+        margin-left: 3em;
+    }
+    div.caption-right figure > .figcontent {
+        display: table-cell;
+    }
+
 }
 

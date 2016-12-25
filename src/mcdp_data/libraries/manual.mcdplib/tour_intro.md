@@ -1,35 +1,75 @@
 
+
+## Graphical representations of design problems
+
+MCDPL allows to define design problems, which are represented as in [](#fig:complicated): a box with green arrows for functionalities
+and red arrows for resources.
+
+<center>
+    <col3 figure-id='fig:complicated'>
+        <span><f>Functionalities</f><br/><br/>$\langle\funsp,\funleq\rangle$</span>
+        <render class='ndp_graph_templatized' id='complicated' label='empty.mcdp'>
+        template mcdp {
+            provides f1 [g]
+            provides f2 [J]
+            provides f3 [m]
+            requires r1 [lux]
+            requires r2 [USD]
+            requires r3 [liters]
+        }
+        </render>
+        <span><r>Resources</r><br/><br/>$\langle\ressp,\posleq_{\ressp}\rangle$</span>
+    </col3>
+    <figcaption id='fig:complicated:caption'>
+        Representation of a design problem with three functionalities
+        (<fname>f1</fname>, <fname>f2</fname>, <fname>f3</fname>)
+        and three resources (<rname>r1</rname>, <rname>r2</rname>, <rname>r3</rname>).
+    </figcaption>
+</center>
+
 ## Hello, world!
 
-The "hello world" example of an MCDP is a degenerate MCDP that
-can tell us that, to do nothing, nothing is needed.
 
-The minimal MCDP can be defined as in [](#code:empty).
+The "hello world" example of an MCDP is an MCDP that
+has zero functionalities and zero resources ([](#fig:empty)).
+%
+This MCDP will be able to tell us that to do nothing, nothing is needed.
+While you might have an intuitive understanding of this fact, you
+might appreciate having a formal proof.
+
+An MCDP is described in MCDPL using the construct <k>mcdp {&hellip;}</k>,
+as in [](#code:empty).
 The code describes an MCDP with zero functionality and zero resources.
+Comments in MCDPL work like in Python: everything after &ldquo;`#`&rdquo; is ignored
+by the interpreter.
 
-<col2>
-    <pre class='mcdp' id='empty' figure-id='code:empty' label='empty.mcdp'>
-    mcdp {&#32;&#32;&#32;&#32;
-        # an empty model
+<col2><!-- &#32;&#32;&#32;&#32; -->
+    <pre class='mcdp' id='empty' figure-id='code:empty' label='empty.mcdp'  figure-class='caption-left'>
+    mcdp {
+        # an empty MCDP
     }
     </pre>
-    <render class='fancy_editor' figure-id="fig:empty">`empty</render>
+    <render class='fancy_editor' id='empty' figure-id="fig:empty" style='width: 6em' figure-class='caption-right'>
+        `empty
+    </render>
 </col2>
 
 Formally, the functionality and resources spaces are $\funsp=\One$, $\ressp=\One$.
 %
 The space $\One = \{ \langle\rangle \}$ is the empty product ([](#def:One)). $\One$ contains only one element, the empty tuple $\langle\rangle$.
 
-The MCDP above can already be queried using the program <program>mcdp-solve</program>. The command
+The MCDP above can already be queried using the program <program>mcdp-solve</program>:
 
-    $ mcdp-solve empty "<>"
+<pre><code>&#36; mcdp-solve empty "&lt;&gt;"</code></pre>
 
-means "for the MCDP <code>empty</code>, find the minimal resources
+The command above means "for the MCDP <code>empty</code>, find the minimal resources
 needed to perform the functionality $f=\langle\rangle$".
 %
 The command produces the output:
 
-    Minimal resources needed = ↑{⟨⟩}
+~~~ .output
+Minimal resources needed = ↑{⟨⟩}
+~~~
 
 The output means "it is possible to perform the functionality specified,
 and the minimal resources needed are $\res^\star=\langle\rangle$".
@@ -75,21 +115,15 @@ In the graphical notation, the co-design diagram has unconnected arrows
 In the body of the <k>mcdp{}</k> declaration one
 can refer to the values of the functionality and resources
 using the expressions <cf>provided <em>(functionality name)</em></cf>
-and <cr>required <em>(resource name)</em></cr>
-and declaring an inequality of the type
-$$
-    {\colF \text{functionality}} \posgeq {\colR\text{resources}}.
-$$
-
+and <cr>required <em>(resource name)</em></cr>.
 For example, [](#code:model2) shows the completion of the
 previous MCDP, with hard bounds given to both <fname>capacity</fname> and <rname>mass</rname>.
 
 <center>
-    <pre class='mcdp' id='model2' figure-id="code:model2" np>
+    <pre np class='mcdp' id='model2' figure-id="code:model2" figure-class='caption-left'>
     mcdp {
         provides capacity [J]
         requires mass [g]
-
         provided capacity &lt;= 500 J
         required mass &gt;= 100g
     }
@@ -97,10 +131,10 @@ previous MCDP, with hard bounds given to both <fname>capacity</fname> and <rname
 </center>
 
 To describe the inequality constraints, MCDPL allows to use <k>&lt;=</k>, <k>&gt;=</k>, as well as their fancy Unicode version <k>≼</k>, <k>≽</k>.
-These two expressions are completely equivalent:
+These two expressions are equivalent:
 %
 <col2>
-    <pre class='mcdp_statements'>
+    <pre class='mcdp_statements' np>
     provided capacity &lt;= 500 J
     required mass &gt;= 100g
     </pre>
@@ -108,32 +142,56 @@ These two expressions are completely equivalent:
     provided capacity ≼ 500 J
     required mass ≽ 100g
     </pre>
-    <!-- -->
-    <pre class='mcdp_statements'>
-    provided capacity &lt;= 500 J
-    required mass &gt;= 100g
-    </pre>
 </col2>
 
-The verbose visualization is as in [](#fig:model2-verbose).
+The visualization of these constraints is as in [](#fig:model2-verbose).
+Note that there is always a &ldquo;$\posleq$&rdquo; node between
+a green and a red edge.
+This visualization is quite verbose.
+It shows one node for each functionality
+and resources; here, a node can be thought of a variable on which
+we are optimizing. This is the view shown in the editor.
 
 <render class='fancy_editor_LR' figure-id="fig:model2-verbose"
     figure-caption="Verbose visualization">
     `model2
 </render>
 
-The visualization in [](#fig:model2-verbose) is quite verbose.  It shows one node for each functionality
-and resources; here, a node can be thought of a variable on which
-we are optimizing. This is the view shown in the editor.
 
 The less verbose visualization, as in [](#fig:model2-verbose),
 skips the visualization of the initial node.
 
-<render class='ndp_graph_enclosed' figure-id="fig:model2"
-    figure-caption="Synthetic visualization">
+<render class='ndp_graph_enclosed' figure-id="fig:model2" figure-class='caption-left'>
     `model2
 </render>
 
+
+
+It is possible to query this minimal example. For example:
+
+    $ mcdp-solve minimal "400 J"
+
+The answer is:
+
+    Minimal resources needed: mass = ↑ {100 g}
+
+If we ask for more than the MCDP can provide:
+
+    $ mcdp-solve minimal "600 J"
+
+we obtain no solutions (the empty set):
+
+    Minimal resources needed: mass = ↑{ }
+
+The notation &ldquo;`↑{ }`&rdquo; means "the upper closure of the empty set $\emptyset$" ([](#def:upperclosure)), which is equal to $\emptyset$.
+
+
+
+### Aside: an helpful interpreter
+
+The MCDPL interpreter tries to be very helpful.
+
+#### Fixing omissions
 
 If it is possible to disambiguate from the context, the MCDPL
 interpreter also allows to drop the keywords <cf>provided</cf>
@@ -152,25 +210,31 @@ Please use "provided capacity" rather than just "capacity".
                  ^^^^^^^^
 </pre>
 
+The IDE will actually automatically insert the keyword.
 
-It is possible to query this minimal example. For example:
+#### Catching other problems
 
-    $ mcdp-solve minimal "400 J"
+All inequalities will always be of the kind:
+$$
+    {\colF \text{functionality}} \posgeq {\colR\text{resources}}.
+$$
 
-The answer is:
+If you mistakenly put functionality and resources on the wrong
+side of the inequality, as in:
 
-    Minimal resources needed: mass = ↑ {100 g}
+<pre class='mcdp_statements' np>
+provided capacity &gt;= 500 J  # incorrect expression
+</pre>
 
+then the interpreter will display an error like:
 
-If we ask for more than the MCDP can provide:
+~~~ .output
+DPSemanticError: This constraint is invalid. Both sides are resources.
 
-    $ mcdp-solve minimal "600 J"
+line  5 |    provided capacity ≽ 500 J
+                               ↑
+~~~
 
-we obtain no solutions (the empty set):
-
-    Minimal resources needed: mass = ↑{}
-
-The notation &ldquo;`↑{}`&rdquo; means "the upper closure of the empty set $\emptyset$" ([](#def:upperclosure)), which is equal to $\emptyset$.
 
 
 ### Describing relations between functionality and resources

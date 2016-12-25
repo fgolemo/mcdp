@@ -22,12 +22,10 @@ manual_contents = [
     
     ('manual', 'tour'),
     ('manual', 'tour_intro'),
-    ('manual', 'tour_composition'),
     ('manual', 'tour_catalogue'),
     ('manual', 'tour_coproduct'),
+    ('manual', 'tour_composition'),
     ('manual', 'tour_templates'),
-    ('manual', 'tour_uncertainty'),
-    ('manual', 'adv_approximations'),
     
     ('manual', 'installation'),
     ('manual', 'ide_quicktour'),
@@ -40,6 +38,7 @@ manual_contents = [
     ('manual', 'lang_ndp_signals'),
     ('manual', 'lang_extra'),
     ('manual', 'lang_unicode'),
+    ('manual', 'lang_relations'),
 
 #     ('manual', 'adv_approximations'),
     
@@ -66,6 +65,8 @@ manual_contents = [
     
     ('manual', 'developer'),
     ('manual', 'internal_notes'),
+    ('manual', 'adv_uncertainty'),
+    ('manual', 'adv_approximations'),
 
     
     ('manual', 'a_back_symbols'),
@@ -73,6 +74,7 @@ manual_contents = [
     
     ('manual', 'appendix_math'),
     ('manual', 'backmatter'),
+    ('manual', 'merged'),
 
 ]
 

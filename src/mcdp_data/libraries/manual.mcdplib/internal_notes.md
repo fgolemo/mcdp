@@ -151,6 +151,62 @@ instead of
 </pre>
 ~~~
 
+
+###
+
+For any element, this will create a figure that wraps the element:
+~~~ .html
+    <element figure-id="fig:code">
+        content
+    </element>
+~~~
+It will create HMTL of the form:
+~~~ .html
+<div id='fig:code-wrap' class='generated-figure-wrap'>
+    <figure id='fig:code' class='generated-figure'>>
+        <element figure-id="fig:code">
+            content
+        </element>
+    </figure>
+</div>
+~~~
+
+To add a class to the figure, use `figure-class`:
+
+~~~ .html
+<element figure-id="fig:code" figure-class="myclass">
+    content
+</element>
+~~~
+
+This will give it to the `<figure>` and the containing `<figure>`
+
+Useful classes:
+
+* `float_bottom`
+
+To add a caption, use `figure-caption`:
+
+~~~ .html
+<element figure-id="fig:code" figure-caption="This is my caption">
+    content
+</element>
+~~~
+
+Alternatively, you can put anywhere an element `figucaption` with ID `...:caption`:
+
+~~~ .html
+<element figure-id="fig:code">
+    content
+</element>
+
+<figcaption id='fig:code:caption'>
+    This is my caption. Can contain <code>code</code>.
+</figcaption>
+~~~
+
+
+
 ### mcdp_ndp_graph_templatized
 
 ~~~

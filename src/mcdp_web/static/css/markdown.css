@@ -144,3 +144,22 @@ h4 {
 /* fix markdonw extra */
 div.latex_env p { display: inline; }
 div.latex_env { margin-top: 0.5em; margin-bottom: 0.5em; }
+
+
+
+
+.errored {
+    border: solid 2px red !important;
+    padding: 3px !important;
+    /*background-color: red;*/
+}
+.duplicated-id {
+    color: red;
+}
+.href-invalid {
+    color: red;
+}
+.href-replaced {
+    background-color: yellow;
+}
+
