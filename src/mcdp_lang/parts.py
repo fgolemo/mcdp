@@ -180,7 +180,7 @@ class CDPLanguage():
     CatalogueTable = namedtuplewhere('CatalogueTable', 'rows')
     FromCatalogue = namedtuplewhere('FromCatalogue', 'keyword funres table')
 
-    CatalogueFunc = namedtuplewhere('FromCatalogue', 'ops')
+    CatalogueFunc = namedtuplewhere('CatalogueFun', 'ops')
     CatalogueRes = namedtuplewhere('CatalogueRes', 'ops')
     CatalogueRowMapsfromto = namedtuplewhere('CatalogueRowMapsfromto', 
                                              'functions mapsfrom impname mapsto resources')

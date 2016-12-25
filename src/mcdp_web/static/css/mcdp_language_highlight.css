@@ -287,3 +287,14 @@ code.keyword {
 /* allow for manual */
 code.FName { color: darkgreen; }
 code.RName { color: darkred; }
+
+span.ImpName { color: #cc7a00; }
+
+/* for catalogue */
+.CatalogueFun span.ValueExpr,
+.CatalogueFun span.RcompUnit
+ { color: darkgreen !important; }
+.CatalogueRes span.ValueExpr,
+.CatalogueRes span.RcompUnit
+{ color: darkred !important; }
+

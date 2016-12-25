@@ -1,4 +1,4 @@
-## Use of Unicode letters and glyphs ## {#sec:unicode}
+## Use of Unicode letters and glyphs ## {#sub:unicode}
 
 MCDPL allows to use some Unicode characters in identifiers and expressions.
 

@@ -22,7 +22,7 @@ img.art {
 
 <img class='art' latex-options='scale=0.33' src="gmcdp_setup_h.pdf"/>
 
-### Composition
+### Composition {#subsub:theory-composition}
 
 
 ### Templates

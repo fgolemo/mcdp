@@ -24,7 +24,8 @@ import itertools
 __all__ = ['render_document']
 
 @contract(returns='str', s=str, library=MCDPLibrary, raise_errors=bool)
-def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
+def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
+                    check_refs=False):
     """
         Transforms markdown into html and then renders the mcdp snippets inside.
         
@@ -146,7 +147,13 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False):
     raise_missing_image_errors = False
     s = embed_images_from_library(html=s, library=library, 
                                       raise_errors=raise_missing_image_errors)
-    
+    from mcdp_docs.check_missing_links import check_if_any_href_is_invalid
+    from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
+    if check_refs:
+        d = bs(s)
+        check_if_any_href_is_invalid(d)
+        s = to_html_stripping_fragment(d)
+
     check_html_fragment(s) 
     
     return s

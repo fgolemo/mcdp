@@ -1,41 +1,42 @@
 
 ## Hello, world!
 
+The "hello world" example of an MCDP is a degenerate MCDP that
+can tell us that, to do nothing, nothing is needed.
+
 The minimal MCDP can be defined as in [](#code:empty).
+The code describes an MCDP with zero functionality and zero resources.
 
 <col2>
-    <pre class='mcdp' id='empty' figure-id='code:empty' label='empty.mcdp'
-    style='min-width: 8em'>
-    mcdp {
-
+    <pre class='mcdp' id='empty' figure-id='code:empty' label='empty.mcdp'>
+    mcdp {&#32;&#32;&#32;&#32;
+        # an empty model
     }
     </pre>
     <render class='fancy_editor' figure-id="fig:empty">`empty</render>
 </col2>
 
-The code describes an MCDP with zero functionality or resources.
-The functionality and resources spaces are $\funsp=\One$, $\ressp=\One$.
-The space $\One = \{ \langle\rangle \}$ is the empty product, which contains only one element, the empty tuple $\langle\rangle$.
-You might think about $\One$ as providing one bit of information:
-whether something is feasible or not.
+Formally, the functionality and resources spaces are $\funsp=\One$, $\ressp=\One$.
+%
+The space $\One = \{ \langle\rangle \}$ is the empty product ([](#def:One)). $\One$ contains only one element, the empty tuple $\langle\rangle$.
 
-The model above can already be queried using the program <program>mcdp-plot</program>. The command
+The MCDP above can already be queried using the program <program>mcdp-solve</program>. The command
 
     $ mcdp-solve empty "<>"
 
-produces the output:
+means "for the MCDP <code>empty</code>, find the minimal resources
+needed to perform the functionality $f=\langle\rangle$".
+%
+The command produces the output:
 
     Minimal resources needed = ↑{⟨⟩}
 
-The output means that it is feasible to do nothing, and to do nothing
-we need nothing. Formally, the question is "What are the minimal
-resources necessary to perform $\fun=\langle\rangle$?"
-and the answer is "To perform $\fun=\langle\rangle$,
-you need at least $\res=\langle\rangle$".
+The output means "it is possible to perform the functionality specified,
+and the minimal resources needed are $\res^\star=\langle\rangle$".
+So, we learned that we need nothing to do nothing.
 
 
 ## Defining functionality and resources
-
 
 The functionality and resources of an MCDP are defined using
 the keywords <kf>provides</kf> and <kr>requires</kr>.
@@ -56,9 +57,9 @@ and one resource, <rname>mass</rname>, measured in grams.
 </col2>
 
 
-That is, the functionality space is $\funsp=\overline{\reals}_{+}^{[\text{J}]}$ and
-the resource space is $\ressp=\overline{\reals}_{+}^{[\text{g}]}$. Here, let $\overline{\reals}_{+}^{[g]}$ refers to the nonnegative real numbers with units of grams. (Of course, internally this is
-represented using floating point numbers. See [](#sub:Rcomp) for more details.)
+That is, the functionality space is~$\funsp=\overline{\reals}_{+}^{[\text{J}]}$ and
+the resource space is $\ressp=\overline{\reals}_{+}^{[\text{g}]}$. Here, let~$\overline{\reals}_{+}^{[g]}$ refers to the nonnegative real numbers with units of grams. (Of course, internally this is
+represented using floating point numbers. See~[](#sub:Rcomp) for more details.)
 
 The MCDP defined above is, however, incomplete, because we have
 not specified how <fname>capacity</fname> and <rname>mass</rname> relate to one another.
@@ -69,34 +70,71 @@ In the graphical notation, the co-design diagram has unconnected arrows
     `model1
 </render> -->
 
-### Constant functionality and resources
-
-<!-- The MCDP in <a href="#code:model1"/> is not complete, as we have not
-defined what constraints <fname>capacity</fname> and <rname>mass</rname> must satisfy. -->
-
-[](#code:model2) is a complete MCDP.
-We have given hard bounds to both <fname>capacity</fname> and <rname>mass</rname>.
-
-<col2>
-    <pre class='mcdp' id='model2' figure-id="code:model2">
-    mcdp {
-    provides capacity [J]
-    requires mass [g]
-
-    provided capacity ≼ 500 J
-    required mass ≽ 100g
-    }
-    </pre>
-    <render class='ndp_graph_enclosed' figure-id="fig:model2">
-        `model2
-    </render>
-</col2>
+### Constraining functionality and resources
 
 In the body of the <k>mcdp{}</k> declaration one
 can refer to the values of the functionality and resources
 using the expressions <cf>provided <em>(functionality name)</em></cf>
-and <cr>required <em>(resource name)</em></cr>.
+and <cr>required <em>(resource name)</em></cr>
+and declaring an inequality of the type
+$$
+    {\colF \text{functionality}} \posgeq {\colR\text{resources}}.
+$$
+
+For example, [](#code:model2) shows the completion of the
+previous MCDP, with hard bounds given to both <fname>capacity</fname> and <rname>mass</rname>.
+
+<center>
+    <pre class='mcdp' id='model2' figure-id="code:model2" np>
+    mcdp {
+        provides capacity [J]
+        requires mass [g]
+
+        provided capacity &lt;= 500 J
+        required mass &gt;= 100g
+    }
+    </pre>
+</center>
+
+To describe the inequality constraints, MCDPL allows to use <k>&lt;=</k>, <k>&gt;=</k>, as well as their fancy Unicode version <k>≼</k>, <k>≽</k>.
+These two expressions are completely equivalent:
 %
+<col2>
+    <pre class='mcdp_statements'>
+    provided capacity &lt;= 500 J
+    required mass &gt;= 100g
+    </pre>
+    <pre class='mcdp_statements'>
+    provided capacity ≼ 500 J
+    required mass ≽ 100g
+    </pre>
+    <!-- -->
+    <pre class='mcdp_statements'>
+    provided capacity &lt;= 500 J
+    required mass &gt;= 100g
+    </pre>
+</col2>
+
+The verbose visualization is as in [](#fig:model2-verbose).
+
+<render class='fancy_editor_LR' figure-id="fig:model2-verbose"
+    figure-caption="Verbose visualization">
+    `model2
+</render>
+
+The visualization in [](#fig:model2-verbose) is quite verbose.  It shows one node for each functionality
+and resources; here, a node can be thought of a variable on which
+we are optimizing. This is the view shown in the editor.
+
+The less verbose visualization, as in [](#fig:model2-verbose),
+skips the visualization of the initial node.
+
+<render class='ndp_graph_enclosed' figure-id="fig:model2"
+    figure-caption="Synthetic visualization">
+    `model2
+</render>
+
+
 If it is possible to disambiguate from the context, the MCDPL
 interpreter also allows to drop the keywords <cf>provided</cf>
 and <cr>required</cr>, although it will give a warning.
@@ -113,20 +151,6 @@ Please use "provided capacity" rather than just "capacity".
     line  5 |    capacity ≼ 500 J
                  ^^^^^^^^
 </pre>
-
-To describe the inequality constraints, MCDPL allows to use <k>&lt;=</k>, <k>&gt;=</k>, as well as their fancy Unicode version <k>≼</k>, <k>≽</k>.
-These two expressions are completely equivalent:
-<col2>
-<pre class='mcdp_statements'>
-provided capacity ≼ 500 J
-required mass ≽ 100g
-</pre>
-<pre class='mcdp_statements' np>
-provided capacity &lt;= 500 J
-required mass &gt;= 100g
-</pre>
-</col2>
-
 
 
 It is possible to query this minimal example. For example:
@@ -146,7 +170,7 @@ we obtain no solutions (the empty set):
 
     Minimal resources needed: mass = ↑{}
 
-The notation `↑{}` means "the upper closure of the empty set $\emptyset$" ([](#def:upperclosure)), which is equal to $\emptyset$.
+The notation &ldquo;`↑{}`&rdquo; means "the upper closure of the empty set $\emptyset$" ([](#def:upperclosure)), which is equal to $\emptyset$.
 
 
 ### Describing relations between functionality and resources
@@ -156,12 +180,19 @@ any monotone relations ([](#def:monotone-relation)).
 
 The language MCDPL contains as primitives addition,
 multiplication, and division. For example, we can describe a linear relation between
-mass and capacity, given by the specific energy, using the following line:
+mass and capacity, given by the specific energy $\rho$:
+$$
+    \text{capacity} = \rho \times \text{mass}.
+$$
 
-<pre class='mcdp_statements'>
-    ρ = 4 J / g
-    required mass ≽ provided capacity / ρ
-</pre>
+This relation can be described in MCDPL as
+
+<center>
+    <pre class='mcdp_statements'>
+        ρ = 4 J / g
+        required mass ≽ provided capacity / ρ
+    </pre>
+</center>
 
 In the graphical representation (<a href="#fig:model4"/>), there is now
 a connection between <f>capacity</f> and <r>mass</r>, with a DP that
@@ -173,8 +204,6 @@ multiplies by the inverse of the specific energy.
     mcdp {
         provides capacity [J]
         requires mass [g]
-
-        # specific energy
         ρ = 4 J / g
         required mass ≽ provided capacity / ρ
     }
@@ -214,17 +243,25 @@ For example, [](#code:conversion) is the same example with the specific
 energy given in <mcdp-poset>kWh/kg</mcdp-poset>.
 The output of the two models are completely equivalent (up to numerical errors).
 
-<center>
-    <pre class='mcdp' id='model5' figure-id='code:conversion'
-    figure-caption='Automatic conversion among g, kg, J, kWh'>
-    mcdp {
-    provides capacity [J]
-    requires mass [g]
+[](#code:conversion) also shows the syntax for comments.
+MCDPL allows to add a Python-style documentation strings at the beginning
+of the model, delimited by three quotes.
+It also allows to give a short description for each
+functionality, resource, or constant declaration, by writing a
+string at the end of the line.
 
-    # specific energy
-    ρ = 200 kWh / kg
+<center>
+    <pre class='mcdp' id='model5' figure-id='code:conversion'>
+mcdp {
+    '''
+        Simple model of a battery as a linear relation
+        between capacity and mass.
+    '''
+    provides capacity [J] 'Capacity provided by the battery'
+    requires mass [g] 'Battery mass'
+    ρ = 200 kWh / kg  'Specific energy'
     required mass ≽ provided capacity / ρ
-    }
+}
     </pre>
     <!-- do not put in col2 - this is large -->
     <render class='ndp_graph_enclosed_LR'
@@ -232,6 +269,11 @@ The output of the two models are completely equivalent (up to numerical errors).
             `model5
     </render>
 </center>
+
+<figcaption id='code:conversion:caption'>
+    Automatic conversion among <poset>g</poset>, <poset>kg</poset>,
+    <poset>J</poset>, <poset>kWh</poset>.
+</figcaption>
 
 <figcaption id='fig:conversion:caption'>
     A conversion from <poset>J*kg/kWh</poset> to <poset>g</poset>

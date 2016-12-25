@@ -25,7 +25,9 @@ def check_no_forbidden(s):
         where = Where(s, i)
         raise DPSyntaxError(msg, where=where)
     
-    forbidden = ['>=', '<=']
+    forbidden = ['>=', '<=', 
+                 '>>'# added by mistake by Atom autocompletion
+                 ]
     for f in forbidden:
         if f in s:
             msg = 'Found forbidden sequence %r. This will not end well.' % f

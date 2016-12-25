@@ -3,7 +3,7 @@
 All values of <f>functionality</f> and <r>resources</r> belong to posets.
 PyMCDP knows a few built-in posets, and gives you the possibility of creating your own.
 %
-[](#tag:summary_posets) shows the basic posets that are built in:
+[](#tab:summary_posets) shows the basic posets that are built in:
 natural numbers, nonnegative real numbers, and nonnegative real numbers
 that have units associated to them.
 

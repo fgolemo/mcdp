@@ -403,7 +403,9 @@ a[href^='#prob:'  ]:empty::before {  content: 'Problem.♦';content: 'Problem\00
 a[href^='#exa:'   ]:empty::before  {  content: 'Example.♦';content: 'Example\0000a0' target-counter(attr(href), example); }
 a[href^='#thm:'   ]:empty:not(.only-number)::before {  content: 'Theorem♦'; content: 'Theorem\0000a0' target-counter(attr(href), theorem); }
 a[href^='#thm:'   ]:empty.only-number::before {  content: '♦'; content: target-counter(attr(href), theorem); }
-
+a[href^='#sub:'   ]:empty:not(.only-number)::before { content: 'Subsection♦.♦'; content: 'Subsection\0000a0' target-counter(attr(href), section) '.' target-counter(attr(href), subsection) ; }
+a[href^='#sub:'   ]:empty.only-number)::before { content: '♦.♦'; content:target-counter(attr(href), section) '.' target-counter(attr(href), subsection) ; }
+      
 
 /** maybe chapter **/
 
@@ -461,11 +463,6 @@ h1[nonumber]::before {
     /*content: '(u)';*/
 }
 
-a[href^='#sub:']::before { 
-    content: 'Subsection♦.♦';
-    content: 'Subsection\0000a0' target-counter(attr(href), section) '.' target-counter(attr(href), subsection) ; 
-}
-      
 
 
 ul.toc a[href^='#sub:']::before {
@@ -649,5 +646,20 @@ div[center] > * {
     /*display: inline-block;*/
     background-color: white;
     /*border: solid 1px red;*/
+}
+
+.errored {
+    border: solid 2px red !important;
+    padding: 3px !important;
+    /*background-color: red;*/
+}
+.duplicated-id {
+    color: red;
+}
+.href-invalid {
+    color: red;
+}
+.href-replaced {
+    background-color: yellow;
 }
 

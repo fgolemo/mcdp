@@ -1,10 +1,10 @@
 
 
-<h2 id="sub:mcdp-depgraph"> <program>mcdp-depgraph</program> </h2>
+## <program>mcdp-depgraph</program> {#sub:mcdp-depgraph}
 
-<h2 id="sub:mcdp-render"> <program>mcdp-render</program> </h2>
+## <program>mcdp-render</program> {#sub:mcdp-render}
 
-<h2 id="sub:mcdp-render-manual"> <program>mcdp-render-manual</program> </h2>
+## <program>mcdp-render-manual</program> {#sub:mcdp-render-manual}
 
 ## Writing documentation
 

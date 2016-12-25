@@ -1,7 +1,8 @@
-you can use
+
 ## Signals
 
 ### Available math operators
+
 
 These are the available operators:
 

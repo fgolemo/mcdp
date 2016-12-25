@@ -47,7 +47,7 @@ Compacted:
 
 <pre class='ndp_graph_expand'>compact `compact_example</pre>
 
-### <k>template</k>
+### <k>template</k>   {#keyword-template}
 
 <pre class='mcdp'>
     template [["mcdp"]]

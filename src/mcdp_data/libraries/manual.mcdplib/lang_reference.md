@@ -51,7 +51,7 @@ MCDPL uses these ideas from Fortress:
 * the liberal use of *Unicode characters*, that make the models similar to the
   mathematical expressions. This is used both for operators
   as well as identifiers (e.g. ``ρ_1`` is a synonim of ``rho₂``).
-   See <a href="#sec:unicode"/> for details.
+   See <a href="#sub:unicode"/> for details.
 * the use of *units* in the basic type system.
 
 <cite id="bib:fourer02ampl">
@@ -70,6 +70,11 @@ MCDPL uses these ideas from Fortress:
 MCDPL has 5 "types universes". Every expression in the language
 belongs to one of these types as described in \tabref{table1}.
 
+<style>
+#tab:table1 td:nth-child(3) {
+    text-align: center;
+}
+</style>
 <col3 figure-id="tab:table1"
       figure-caption="Types universe"
       class='labels-row1'>
@@ -99,7 +104,7 @@ belongs to one of these types as described in \tabref{table1}.
     <s>These correspond to primitive DPs</s>
 </col3>
 
-\tabref{table2} describes for each type the default file extension
+[](#tab:table2) describes for each type the default file extension
 and the base Python class.
 
 <col3 class='labels-row1'

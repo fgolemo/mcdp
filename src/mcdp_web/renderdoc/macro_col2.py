@@ -63,9 +63,11 @@ def col_macro(html, n):
         col_macro_(e, n)
         num += 1
     if num == 0:
-        logger.debug('No elements matching %r found.' % selector)
+        pass
+        #logger.debug('No elements matching %r found.' % selector)
     else:
-        logger.debug('Found %d elements matching %r.' % (num, selector))
+        pass
+        #logger.debug('Found %d elements matching %r.' % (num, selector))
     res = to_html_stripping_fragment(soup) 
     return res
 

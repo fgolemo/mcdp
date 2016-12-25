@@ -37,6 +37,7 @@ from mcdp_figures import( MakeFiguresNDP, MakeFiguresTemplate,
 import textwrap
 
 import bs4
+import warnings
 
 
 
@@ -46,6 +47,13 @@ def html_interpret(library, html, raise_errors=False,
                    generate_pdf=False, realpath='unavailable'):
     # clone library, so that we don't pollute it 
     # with our private definitions
+    
+    warnings.warn('For debugging, raise_errors = False')
+    raise_errors = False # XXX
+    
+    if not raise_errors:
+        logger.error('raise_errors is False: we add errors in the document')
+        
     library = library.clone()
     load_fragments(library, html, realpath=realpath)
 
@@ -157,16 +165,13 @@ def make_plots(library, frag, raise_errors, realpath):
             except (DPSyntaxError, DPSemanticError) as e:
                 if raise_errors:
                     raise
-                logger.error(str(e))  # XXX
-                t = Tag(name='pre', **{'class': 'error %s' % type(e).__name__})
-                t.string = str(e)
-                tag.insert_after(t)
+                else:
+                    note_error(tag, e)
             except Exception as e:
                 if raise_errors:
                     raise
-                t = Tag(name='pre', **{'class': 'error %s' % type(e).__name__})
-                t.string = traceback.format_exc(e)
-                tag.insert_after(t)
+                else:
+                    note_error(tag, e)
     
     @make_image_tag_from_png
     def plot_value_generic(tag, vu):  # @UnusedVariable
@@ -728,14 +733,12 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                         xr = parse_ndp_refine(x, Context())
                         suggestions = get_suggestions(xr)
                         source_code = apply_suggestions(source_code, suggestions)
-                except DPSyntaxError:
-                    msg = 'Error while parsing this tag:\n\n'
-                    msg += indent(str(tag), '   ')
-                    
-                    msg += '\n\n' + 'source code:' + '\n\n'
-                    msg += indent(source_code, '   ')
-                    logger.error(msg)
-                    raise
+                except DPSyntaxError as e:
+                    if raise_errors:
+                        raise
+                    else:
+                        note_error(tag, e)
+                        continue
                 # we don't want the browser to choose different tab size
                 #source_code = source_code.replace('\t', ' ' * 4)   
     
@@ -845,24 +848,21 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
             except DPSyntaxError as e:
                 if raise_errors:
                     raise
-                logger.error(unicode(e.__str__(), 'utf-8'))
-                t = Tag(name='pre', **{'class': 'error %s' % type(e).__name__})
-                t.string = str(e)
-                tag.insert_after(t)
-
-                if tag.string is None:
-                    tag.string = "`%s" % tag['id']
+                else:
+                    note_error(tag, e)
+                    if tag.string is None:
+                        tag.string = "`%s" % tag['id']
+                    continue
 
             except DPSemanticError as e:
                 if raise_errors:
                     raise
-                logger.error(unicode(e.__str__(), 'utf-8'))
-                t = Tag(name='pre', **{'class': 'error %s' % type(e).__name__})
-                t.string = str(e)
-                tag.insert_after(t)
-                if tag.string is None:
-                    tag.string = "`%s" % tag['id']
-                    
+                else:
+                    note_error(tag, e)
+                    if tag.string is None:
+                        tag.string = "`%s" % tag['id']
+                    continue
+                        
             except DPInternalError as e:
                 msg = 'Error while interpreting the code:\n\n'
                 msg += indent(source_code, '  | ')
@@ -1062,26 +1062,25 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
 
     soup = bs(frag)
 
-    def go(selector, func):
-
-        for tag in soup.select(selector):
-            try:
-                r = func(tag) 
-                tag.replaceWith(r)
-            except (DPSyntaxError, DPSemanticError) as e:
-                if raise_error_dp:
-                    raise
-                logger.error(e)
-                t = Tag(name='pre', **{'class': 'error %s' % type(e).__name__})
-                t.string = str(e)
-                tag.insert_after(t)
-            except Exception as e:
-                if raise_error_others:
-                    raise
-                t = Tag(name='pre', **{'class': 'error %s' % type(e).__name__})
-                t.string = traceback.format_exc(e)
-                tag.insert_after(t)
-     
+    def go(s0, func):
+        selectors = s0.split(',')
+        for selector in selectors:
+            for tag in soup.select(selector):
+                try:
+                    r = func(tag) 
+                    tag.replaceWith(r)
+                except (DPSyntaxError, DPSemanticError) as e:
+                    if raise_error_dp:
+                        raise
+                    else:
+                        note_error(tag, e)
+                        continue
+                except Exception as e:
+                    if raise_error_others:
+                        raise
+                    else:
+                        note_error(tag, e)
+                        continue
 
     def make_tag(tag0, klass, data, ndp=None, template=None, poset=None):
         svg = data['svg']
@@ -1104,7 +1103,6 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
             tag_svg['rescaled'] = 'Rescaled from %s %s, scale = %s' % (ws, hs, scale)
         else:
             print('no width in SVG tag: %s' % tag_svg)
-            
             
         tag_svg['class'] = klass
 
@@ -1147,9 +1145,10 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
     available_ndp = set(mf.available()) | set(mf.aliases)
     for which in available_ndp:
         def callback(tag0):
+            assert tag0.parent is not None
             context = Context()
             load = lambda x: library.load_ndp(x, context=context)
-            parse = lambda x: library.parse_ndp(x, realpath=realpath, context=context)  
+            parse = lambda x: library.parse_ndp(x, realpath=realpath, context=context)
             ndp = load_or_parse_from_tag(tag0, load, parse)
 
             mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=None) # XXX
@@ -1159,13 +1158,9 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
             data = mf.get_figure(which,formats)
             tag = make_tag(tag0, which, data, ndp=ndp, template=None)
             return tag
-        
-        selector = 'render.%s' % which
+        selector = 'render.%s,pre.%s,img.%s' % (which, which, which)
         go(selector, callback)
-        selector = 'pre.%s' % which
-        go(selector, callback)
-        selector = 'img.%s' % which
-        go(selector, callback)
+
     
     mf = MakeFiguresTemplate(None,None,None)
     available_template = set(mf.available()) | set(mf.aliases)
@@ -1184,12 +1179,9 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
             tag = make_tag(tag0, which, data, ndp=None, template=template)
             return tag
         
-        selector = 'pre.%s' % which
+        selector = 'render.%s,pre.%s,img.%s' % (which, which, which)
         go(selector, callback)
-        selector = 'img.%s' % which
-        go(selector, callback)
-        selector = 'render.%s' % which
-        go(selector, callback)
+
         
     mf = MakeFiguresPoset(None)
     available_poset = set(mf.available()) | set(mf.aliases)
@@ -1207,16 +1199,11 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
             data = mf.get_figure(which, formats)
             tag = make_tag(tag0, which, data, ndp=None, template=None, poset=poset)
             return tag
-        
-        selector = 'pre.%s' % which
+        selector = 'render.%s,pre.%s,img.%s' % (which, which, which)
         go(selector, callback)
-        selector = 'img.%s' % which
-        go(selector, callback)
-        selector = 'render.%s' % which
-        go(selector, callback)
-
 
     unsure = list(soup.select('render'))
+    unsure = [_ for _ in unsure if not 'errored' in _.attrs.get('class','')]
     if unsure:
         msg = 'Invalid "render" elements.'
         msg += '\n\n' + '\n\n'.join(str(_) for _ in unsure)
@@ -1227,6 +1214,24 @@ def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, ge
         raise ValueError(msg)
     return to_html_stripping_fragment(soup)
 
+
+def note_error(tag0, e):
+    add_class(tag0, 'errored')
+    logger.error(str(e))  # XXX
+    t = Tag(name='pre', attrs={'class': 'error %s' % type(e).__name__})
+    # t.string = str(e)
+    # logger.error(unicode(e.__str__(), 'utf-8'))
+    t.string = traceback.format_exc(e)
+    tag0.insert_after(t)
+#     msg = 'Error while parsing this tag:\n\n'
+#     msg += indent(str(tag), '   ')
+#      
+#     msg += '\n\n' + 'source code:' + '\n\n'
+#     msg += indent(source_code, '   ')
+#     logger.error(msg)
+#     raise
+
+    
 @contract(data_format=str, data=str, download=str)
 def create_a_to_data(download, data_format, data):
     """ Returns a tag with base64 encoded data """

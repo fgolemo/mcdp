@@ -209,8 +209,23 @@ of the Kleene ascent chain
 \begin{defn}\label{def:monotone-map} \xxx
 \end{defn}
 
+\begin{defn}\label{def:monotone-relation} \xxx
+\end{defn}
+
 \begin{defn}\label{def:upperclosure} \xxx
 \end{defn}
 
 \begin{defn}\label{def:lowerclosure} \xxx
+\end{defn}
+
+\begin{defn}\label{def:One} \xxx
+The space $\One = \{ \langle\rangle \}$ is the empty product, which contains only one element, the empty tuple $\langle\rangle$.
+\end{defn}
+
+Antichains of One.
+
+You might think about $\One$ as providing one bit of information:
+whether something is feasible or not.
+
+\begin{defn}\label{def:MCDP} \xxx
 \end{defn}

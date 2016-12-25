@@ -1,6 +1,8 @@
 
 ## Other language features
 
+### Documentation strings 
+
 ### solve and solve_r
 
 Evaluates the model:

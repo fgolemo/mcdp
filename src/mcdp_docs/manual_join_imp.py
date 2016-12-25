@@ -7,6 +7,7 @@ from bs4.element import Comment
 
 from contracts import contract
 from mocdp import logger
+from mocdp.exceptions import DPSyntaxError, DPSemanticError
 
 
 def get_manual_css_frag():
@@ -125,12 +126,24 @@ def manual_join(files_contents):
             # add to bibliography
             bibhere.append(c)
 
-    res = str(d)
+    check_various_errors(d)
     
     from mcdp_docs.check_missing_links import check_if_any_href_is_invalid
-    check_if_any_href_is_invalid(res) 
+    check_if_any_href_is_invalid(d) 
+
+    res = str(d)
     return res
 
+def check_various_errors(d):
+    error_names = ['DPSemanticError', 'DPSyntaxError']
+    selector = ", ".join('.'+_ for _ in error_names)
+    errors = list(d.find_all(selector))
+    if errors:
+        msg = 'I found %d errors in processing.' % len(errors)
+        logger.error(msg)
+        for e in errors:
+            logger.error(e.contents)
+            
 def debug(s):
     sys.stderr.write(str(s) + ' \n')
 
@@ -200,9 +213,9 @@ def generate_doc(soup):
 
     stack = [ Item(None, 0, 'root', 'root', []) ]
 
-    for header in list(soup.findAll(['h1', 'h2', 'h3'])):
+    for header in list(soup.findAll(['h1', 'h2', 'h3', 'h4'])):
         
-        prefix = {'h1':'sec','h2':'sub','h3':'subsub'}[header.name]
+        prefix = {'h1':'sec','h2':'sub','h3':'subsub','h4':'par'}[header.name]
         
         if not header.has_attr('id'):    
             header['id'] = '%s:%s' % (prefix, header_id)
@@ -213,7 +226,7 @@ def generate_doc(soup):
                 #raise_desc(ValueError, msg, tag=str(header))
                 msg = 'Adding prefix %r to current id %r for %s.' % (prefix, cur, header.name)
                 header['id'] = prefix + ':' + cur
-                logger.debug(msg)
+                #logger.debug(msg)
                 header.parent.insert(header.parent.index(header), 
                                      Comment('Warning: ' + msg))
         depth = int(header.name[1])

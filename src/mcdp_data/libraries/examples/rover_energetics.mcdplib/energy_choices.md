@@ -11,9 +11,7 @@ A thermocouple is a device that converts heat into electrical power.
 <table><tr><td>
     <pre class="mcdp" id="Thermocouple" label='Thermocouple.mcdp'></pre>
 </td><td>
-    <pre class="ndp_graph_templatized_labeled"
-        style='height: 10em'
-        >`Thermocouple</pre>
+    <pre class="ndp_graph_templatized_labeled">`Thermocouple</pre>
 </td></tr>
 </table>
 
@@ -25,8 +23,7 @@ One way to get the heat is to procure a bit of Plutonium.
     <td>
       <pre class="mcdp" id="PlutoniumPellet" label='PlutoniumPellet.mcdp'></pre>
     </td><td>
-      <pre class="ndp_graph_templatized_labeled"
-          style='sheight: 10em'>`PlutoniumPellet</pre>
+      <pre class="ndp_graph_templatized_labeled">`PlutoniumPellet</pre>
     </td>
   </tr>
 </table>
