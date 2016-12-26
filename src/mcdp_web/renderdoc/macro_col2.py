@@ -125,6 +125,8 @@ def col_macro_(e, ncols):
     S = ' ' * 4
     tbody = Tag(name='tbody')
     for row in range(nrows):
+        tbody.append(NavigableString(NL))
+        tbody.append(NavigableString(S+S))
         tr = Tag(name='tr')
         tr.append(NavigableString(NL))
         for col in range(ncols):
@@ -139,9 +141,12 @@ def col_macro_(e, ncols):
             tr.append(td)
             tr.append(NavigableString(NL))
         tr.append(S+S)
-        tbody.append(NavigableString(NL))
-        tbody.append(NavigableString(S+S))
-        tbody.append(tr)   
+        if row == 0 and ('labels-row1' in e.attrs.get('class', '')):
+            thead = Tag(name='thead')
+            thead.append(tr)
+            table.append(thead) # add in table, not tbody
+        else:
+            tbody.append(tr)   # add in tbody
         tbody.append(NavigableString(NL+S))
     table.append(tbody)
     

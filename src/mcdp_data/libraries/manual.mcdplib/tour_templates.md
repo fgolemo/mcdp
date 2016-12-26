@@ -137,3 +137,6 @@ We can then obtain the previous model by specializing it ([](#code:specialize)).
         generic_actuation: `Actuation1
     ] `CompositionTemplate
 </pre>
+
+
+\XXX Add example of battery composition

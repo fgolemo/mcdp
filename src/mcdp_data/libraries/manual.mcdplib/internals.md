@@ -1,7 +1,7 @@
 # Behind the scenes
 
-This chapter provides a description of the computation that is happening behind the scenes,
-including the intermediate representation formats.
+This chapter provides a description of the computation that is happening behind
+the scenes, including the intermediate representation formats.
 
 Before looking at this, you should read some of the papers; see \ref{papers}.
 
@@ -40,8 +40,8 @@ This is a summary of the processing steps:
 
 Use discrete antichain...
 
-This is quite ingrained everywhere... one could use e.g. "convex representation"  but
-this is good for generality.
+This is quite ingrained everywhere... one could use e.g. "convex representation"
+but this is good for generality.
 
 
 ## Details of the algorithms

@@ -152,34 +152,32 @@ instead of
 ~~~
 
 
-###
+### Creating figures
 
 For any element, this will create a figure that wraps the element:
-~~~ .html
+
     <element figure-id="fig:code">
         content
     </element>
-~~~
+
 It will create HMTL of the form:
-~~~ .html
-<div id='fig:code-wrap' class='generated-figure-wrap'>
-    <figure id='fig:code' class='generated-figure'>>
-        <element figure-id="fig:code">
-            content
-        </element>
-    </figure>
-</div>
-~~~
+
+    <div id='fig:code-wrap' class='generated-figure-wrap'>
+        <figure id='fig:code' class='generated-figure'>
+            <element figure-id="fig:code">
+                content
+            </element>
+        </figure>
+    </div>
 
 To add a class to the figure, use `figure-class`:
 
-~~~ .html
-<element figure-id="fig:code" figure-class="myclass">
-    content
-</element>
-~~~
+    <element figure-id="fig:code" figure-class="myclass">
+        content
+    </element>
 
-This will give it to the `<figure>` and the containing `<figure>`
+This will give it to the <code>&lt;figure&gt;</code> and the containing <code>&lt;figure&gt;</code>
+
 
 Useful classes:
 
@@ -187,25 +185,21 @@ Useful classes:
 
 To add a caption, use `figure-caption`:
 
-~~~ .html
-<element figure-id="fig:code" figure-caption="This is my caption">
-    content
-</element>
-~~~
+    <element figure-id="fig:code" figure-caption="This is my caption">
+        content
+    </element>
 
 Alternatively, you can put anywhere an element `figucaption` with ID `...:caption`:
 
-~~~ .html
-<element figure-id="fig:code">
-    content
-</element>
+    <element figure-id="fig:code">
+        content
+    </element>
 
-<figcaption id='fig:code:caption'>
-    This is my caption. Can contain <code>code</code>.
-</figcaption>
-~~~
+    <figcaption id='fig:code:caption'>
+        This is my caption. Can contain <code>code</code>.
+    </figcaption>
 
-
+Other... -->
 
 ### mcdp_ndp_graph_templatized
 
@@ -262,7 +256,10 @@ Alternatively, you can put anywhere an element `figucaption` with ID `...:captio
 ~~~
 
 <render class='template_graph_enclosed'>
-template [A:mcdp{}]
+template [
+    A:mcdp{
+    }
+]
 mcdp {
     a = instance A
 }

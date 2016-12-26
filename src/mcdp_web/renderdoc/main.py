@@ -19,6 +19,7 @@ from .prerender_math import prerender_mathjax
 from .xmlutils import check_html_fragment
 from mocdp import logger
 import itertools
+from mcdp_web.renderdoc.lessc import preprocess_lessc
 
 
 __all__ = ['render_document']
@@ -165,6 +166,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
 
     check_html_fragment(s) 
     
+    s = preprocess_lessc(s)
     return s
 
 def get_mathjax_preamble():

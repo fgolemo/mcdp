@@ -7,6 +7,7 @@ from contracts.utils import raise_wrapped, indent
 from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
 from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
 from mocdp import get_mcdp_tmp_dir
+from mocdp.memoize_simple_imp import memoize_simple
 from system_cmd.meat import system_cmd_result
 from system_cmd.structures import CmdException
 
@@ -53,6 +54,35 @@ def get_mathjax_preamble():
 
     return f
 
+
+@memoize_simple
+def get_nodejs_bin():
+    """ Raises NodeNotFound (XXX) """
+    tries = ['nodejs', 'node']
+    try:
+        cmd= [tries[0], '--version']
+        _res = system_cmd_result(
+                os.getcwd(), cmd, 
+                display_stdout=True,
+                display_stderr=True,
+                raise_on_error=True)
+        return tries[0]
+    except CmdException as e:
+        try:
+            cmd= [tries[1], '--version']
+            _res = system_cmd_result(
+                    os.getcwd(), cmd, 
+                    display_stdout=True,
+                    display_stderr=True,
+                    raise_on_error=True)
+            return tries[1]
+        except CmdException as e:
+            msg = 'Node.js executable "node" or "nodejs" not found.'
+            msg += '\nOn Ubuntu, it can be installed using:'
+            msg += '\n\n\tsudo apt-get install -y nodejs'
+            raise_wrapped(PrerenderError, e, msg, compact=True)
+            
+            
 @contract(returns=str, html=str)
 def prerender_mathjax_(html):
     """
@@ -61,29 +91,7 @@ def prerender_mathjax_(html):
         Raises PrerenderError.
     """
     assert not '<html>' in html, html
-    tries = ['nodejs', 'node']
-    try:
-        cmd= [tries[0], '--version']
-        res = system_cmd_result(
-                os.getcwd(), cmd, 
-                display_stdout=True,
-                display_stderr=True,
-                raise_on_error=True)
-        use = tries[0]
-    except CmdException as e:
-        try:
-            cmd= [tries[1], '--version']
-            res = system_cmd_result(
-                    os.getcwd(), cmd, 
-                    display_stdout=True,
-                    display_stderr=True,
-                    raise_on_error=True)
-            use = tries[1]
-        except CmdException as e:
-            msg = 'Node.js executable "node" or "nodejs" not found.'
-            msg += '\nOn Ubuntu, it can be installed using:'
-            msg += '\n\n\tsudo apt-get install -y nodejs'
-            raise_wrapped(PrerenderError, e, msg, compact=True)
+    use = get_nodejs_bin()
         
     html = html.replace('<p>$$', '\n$$')
     html = html.replace('$$</p>', '$$\n')

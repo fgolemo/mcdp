@@ -1,0 +1,30 @@
+
+.figcontent  { margin: 0; padding: 0; }
+
+
+@media screen {
+    div.caption-left figure {
+        display: table;
+
+        > figcaption  {
+            display: inline-block;
+            margin-right: 3em;
+        }
+
+        > .figcontent {
+            display: table-cell;
+        } 
+    }
+    div.caption-right figure  {
+        display: table-row;
+    
+        > figcaption  {
+            display: inline-block;
+            margin-left: 3em;
+        }
+        > .figcontent {
+            display: table-cell;
+        }
+    }
+}
+

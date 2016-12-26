@@ -1,21 +1,67 @@
-## Use of Unicode letters and glyphs ## {#sub:unicode}
 
-MCDPL allows to use some Unicode characters in identifiers and expressions.
+### Use of Unicode glyphs to represent operators
 
-### Pure substitutions
+MCDPL allows a number of Unicode glyphs as an abbreviations of a few operators.
 
-The following are equivalent
 
-    ⟻
-    ⟼
-    ≽
-    ≼
-    ·
-    ⟨⟩
-    ℘
-    ⊤
-    ⊥
+<col3 id='glyphs' class='labels-row1'>
+    <s>Unicode</s> <s>ASCII</s>  <s>Context</s>
+    <k>≽</k>    <k>&gt;=</k>      <s></s>
+    <k>≼</k>    <k>&lt;=</k>      <s></s>
+    <k>·</k>    <k>*</k>          <s>Multiplication</s>
+    <k>⟨…⟩</k>  <k>&lt;…&gt;</k>  <s>Tuple-building </s>
+    <k>⊤</k>    <k>Top</k>        <s></s>
+    <k>⊥</k>    <k>Bottom</k>     <s></s>
+    <k>℘</k>    <k>powerset</k>   <s><a href="#syntax-powerset">Power set</a></s>
+    <s><kf>⟻</kf><br/><kr>⟼</kr></s> <s><kf>&lt;--|</kf><br/><kr>|--&gt;</kr></s>
+    <s><a href="#syntax-catalogue">Catalogue</a></s>
+</col3>
+<style>
+    #glyphs {
+        column-count: 2;
+        td:nth-child(3) {
+            text-align: left;
+            vertical-align: top;
+        }
+    }
+</style>
 
+#### Superscripts to indicate powers
+
+Every occurrence of a superscript of the digit *d* is interpreted as a power
+"``^d``".  It is syntactically equivalent to write "``x^2``" or "``x²``".
+<!-- x¹ x² x³ x⁴ x⁵ x⁶ x⁷ x⁸ x⁹ -->
+
+<col2 id='subscripts'>
+    <code>x¹</code> <code>x^1</code>
+    <code>x²</code> <code>x^2</code>
+    <code>x³</code> <code>x^3</code>
+    <code>x⁴</code> <code>x^4</code>
+    <code>x⁵</code> <code>x^5</code>
+    <code>x⁶</code> <code>x^6</code>
+    <code>x⁷</code> <code>x^7</code>
+    <code>x⁸</code> <code>x^8</code>
+    <code>x⁹</code> <code>x^9</code>
+</col2>
+
+<style>
+    #subscripts {
+        column-count: 5;
+    }
+</style>
+
+
+
+## Use of Unicode letters as part of identifiers ## {#sub:unicode}
+
+MCDPL allows to use some Unicode characters, Greek letters and subscripts, also
+in identifiers and expressions. For exmple, it is equivalent to write
+''`alpha_1`'' and ''`α₁`''.
+
+The rules are that:
+
+1. Greek letters can only appear at the beginning of an identifier.
+2. Subscripts can only appear at the end of an identifier.
 
 ### Greek letters
 
@@ -39,12 +85,12 @@ Note that there is a difference between lower case and upper case.
     Κ Kappa     Ψ Psi
     κ kappa     ψ psi
 
-The way MCDPL considers these glyphs is that they are immediately
-converted to an extended form.
+Every Greek letter is converted to its name. It is syntactically equivalent to
+write "`alpha_material`" or "`α_material`".
 
-Every Greek letter is
-converted to its name. It is syntactically equivalent to write
-"``alpha``" or "``α``".
+Greek letter names are only considered at the beginning of the identifier
+and if they are followed by a non-word character.
+For example, the identifer `alphabet` is not converted to `αbet`.
 
 ### Subscripts
 
@@ -52,31 +98,8 @@ These are the subscripts supported:
 
     x₀ x₁ x₂ x₃ x₄ x₅ x₆ x₇ x₈ x₉
 
-Subscripts can only occur at the end of an identifier: ``a₁`` is valid,
-while ``a₁b`` is not valid.
+For subscripts, every occurrence of a subscript of the digit *d* is converted to
+the fragment "``_d``".  It is syntactically equivalent to write "``_1``" or "``₁``".
 
-For subscripts, every occurrence of a subscript of the digit *d* is converted to the fragment "``_d``".  It is syntactically equivalent to write
-"``_1``" or "``₁``".
-
-### Superscripts
-
-These are the superscripts:
-
-    x¹ x² x³ x⁴ x⁵ x⁶ x⁷ x⁸ x⁹
-
-Every occurrence of a superscript of the digit *d* is interpreted as a power "``^d``".  It is syntactically equivalent to write "``x^2``" or "``x²``".
-
-
-### Example of syntactic equivalence
-
-Putting all together, it is equivalent to write
-
-<pre class='mcdp_statements' noprettify="1">
-alpha_1 = beta^3 + 9.81 m/s^2
-</pre>
-
-and
-
-<pre class='mcdp_statements'>
-α₁ = β³ + 9.81 m/s²
-</pre>
+Subscripts can only occur at the end of an identifier: ``a₁`` is valid, while
+``a₁b`` is not valid.

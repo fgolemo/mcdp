@@ -103,3 +103,5 @@ Graphically, the choice is indicated through dashed lines.
     </pre>
     <render class='ndp_graph_enclosed'>`Batteries</render>
 </col2>
+
+\XXX Add example 

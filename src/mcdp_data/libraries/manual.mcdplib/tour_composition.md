@@ -156,3 +156,5 @@ mcdp {
         /*width: 25em; */
     }
 </style>
+
+\XXX Add example  output

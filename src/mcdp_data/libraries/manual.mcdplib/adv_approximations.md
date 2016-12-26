@@ -125,8 +125,7 @@ mcdp {
 </table>
 
 <style type='text/css'>
-table.approx img {
-    width: 10em;
-}
-
+    table.approx img {
+        width: 10em;
+    }
 </style>

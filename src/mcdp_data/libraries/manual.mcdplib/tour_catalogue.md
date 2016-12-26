@@ -110,7 +110,7 @@ Cases for model in [](#code:catalogue2)
 </center>
 
 <style>
-#tab\:catalogue2-solutions table {
+/*#tab\:catalogue2-solutions table {
     border-collapse: collapse;
     border: 0;
 }
@@ -122,7 +122,7 @@ Cases for model in [](#code:catalogue2)
 }
 #tab\:catalogue2-solutions tr:nth-child(odd):not(:first-child) {
     background-color: #eee;
-}
+}*/
 </style>
 
 We can verify these with <program>mcdp-solve</program>. We also

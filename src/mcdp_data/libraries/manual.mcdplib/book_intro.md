@@ -2,6 +2,7 @@
 
 ## The problem of system co-design
 
+<!--
 <style>
     #fig\:Intro {
         display: block; float: right;
@@ -18,7 +19,7 @@
     <span style=''>
     content
     </span>
-</div>
+</div> -->
 
 What is a "system"?
 
@@ -40,7 +41,7 @@ Here is a great quote:
     </p>
     <style>
      #firstquote p:nth-child(2) {
-        max-width: 20em; color: red;
+        max-width: 20em;
     }
     </style>
 
@@ -52,8 +53,8 @@ as day as much as it is tautological. We could equally say: "A system is partiti
 %
 This definition is, of course, an anthropocentric definition, as it is a
 limitation of the human mind, related to the amount of neurons in the brain.
-
-It also depends on what exactly is the task at hand with which we are confronted. Here, we consider the task of *designing* systems. The slogan is:
+%
+It also depends on what exactly is the task at hand with which we are confronted. Here, we consider the task of *designing* systems. So the slogan is:
 
 <blockquote id='secondquote'>
     <!-- <p>A system is composed of components;<br/>

@@ -11,11 +11,11 @@ all: \
 	$(manual_html) \
 	$(manual_pdf_prince)
 
-#$(manual_pdf_wk) 
+#$(manual_pdf_wk)
 
 install:
-	npm install MathJax-node jsdom
-	
+	npm install MathJax-node jsdom less
+
 prince: $(manual_pdf_prince)
 
 .PHONY: $(manual_pdf_prince)
@@ -26,12 +26,12 @@ $(manual_html): $(manual_tmp_html)
 
 $(manual_tmp_html):
 	DISABLE_CONTRACTS=1 mcdp-render-manual --output_file $@ -c "config echo 1; rparmake"
-	
+
 # prerender:
 
 
-$(manual_pdf_wk): $(manual_html)  
-	wkhtmltopdf --print-media-type $< $@ 
+$(manual_pdf_wk): $(manual_html)
+	wkhtmltopdf --print-media-type $< $@
 
 clean:
 	rm -rf out-mcdp-render-manual
@@ -44,7 +44,7 @@ publish: $(manual_html)
 	cp $< ~/env_mcdp/src/mcdp/docs/media/pymcdp-manual.html
 
 
-$(manual_pdf_prince): $(manual_html) 
+$(manual_pdf_prince): $(manual_html)
 	prince --javascript  $< -o $@
 
 

@@ -69,16 +69,19 @@ by defining the following:
     \forall a:& \quad a \times \top &= \top
 \end{eqnarray}
 
-Floating point with completion are indicated by <pos np>Rcomp</pos>
-or <pos>Rcomp</pos>, and their values as <val np>Rcomp:42.0</val>, <val>Rcomp:42.0</val>, or simply <val>42.0</val>.
+This poset is indicated in MCDPL by <pos np>Rcomp</pos>
+or <pos>Rcomp</pos>. Values belonging to this poset are indicates with the syntax
+their values as <val np>Rcomp:42.0</val>, <val>Rcomp:42.0</val>, or simply <val>42.0</val>.
 
-Internally, $\Rcomp$ is approximated using double precision
-point numbers ([IEEE 754]), corresponding to the <code>float</code> type used by Python and the `double` type in C (in most implementations of C).
+Internally, $\Rcomp$ is approximated using double precision point numbers ([IEEE
+754]), corresponding to the <code>float</code> type used by Python and the
+`double` type in C (in most implementations of C).
 %
-Of course, the floating point implementations of $+$ and $\times$
-are also not associative or commutative due to rounding errors.
-PyMCDP does not assume  commutativity or associativity; the assumption
-is just that they are [monotone](#def:monotone-map) ([](#def:monotone-map)) in each argument (which they are).
+Of course, the floating point implementations of $+$ and $\times$ are also not
+associative or commutative due to rounding errors. PyMCDP does not assume
+commutativity or associativity; the assumption is just that they are
+[monotone](#def:monotone-map) ([](#def:monotone-map)) in each argument (which
+they are).
 
 [IEEE 754]: https://en.wikipedia.org/wiki/IEEE_floating_point
 

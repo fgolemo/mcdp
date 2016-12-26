@@ -1,499 +1,619 @@
+/*
 
 
 
+    -----------------
+
+
+    -----------------
+
+
+
+
+
+
+        Automatically created ---  do not modify 
+
+
+    -----------------
+
+
+    -----------------
+
+
+    -----------------
+
+
+    -----------------
+
+
+
+*/.figcontent {
+  margin: 0;
+  padding: 0;
+}
+@media screen {
+  div.caption-left figure {
+    display: table;
+  }
+  div.caption-left figure > figcaption {
+    display: inline-block;
+    margin-right: 3em;
+  }
+  div.caption-left figure > .figcontent {
+    display: table-cell;
+  }
+  div.caption-right figure {
+    display: table-row;
+  }
+  div.caption-right figure > figcaption {
+    display: inline-block;
+    margin-left: 3em;
+  }
+  div.caption-right figure > .figcontent {
+    display: table-cell;
+  }
+}
 body {
   font-family: "Times New Roman", Times, serif !important;
   font-size: 10pt;
 }
-
-
 @font-face {
-    font-family: monospace;
-    /*src: local("Consolas")*/
-    src: local("Anka/Coder Narrow")
+  font-family: monospace;
+  /*src: local("Consolas")*/
+  src: local("Anka/Coder Narrow");
 }
-
-
 h1 {
-    text-align: center;
+  text-align: center;
 }
-
-.toc a { text-decoration: none; }
-
+.toc a {
+  text-decoration: none;
+}
 /* Good for safari */
 pre {
-     box-shadow: none;
+  box-shadow: none;
 }
-
 .ndp_graph_expand,
 .ndp_graph_enclosed,
 .ndp_graph_normal,
 .ndp_graph_templatized,
 .ndp_graph_templatized_labeled,
 .template_graph_enclosed {
-    max-width: 50em;
-    
+  max-width: 50em;
 }
-
-span.language_warning { background-color: inherit !important; }
-
-p { max-width: 40em; }
-
-code { page-break-inside: avoid; }
-
-
-
-pre, code { font-size: 8pt; }
-
-
+span.language_warning {
+  background-color: inherit !important;
+}
+p {
+  max-width: 40em;
+}
+code {
+  page-break-inside: avoid;
+}
+pre,
+code {
+  font-size: 8pt;
+}
 body {
   text-align: justify;
 }
- 
-h1 { font-size: 15pt; color: black !important;}
-h2 { font-size: 12pt; color: black !important;}
-h3 { 
-    font-size: 10pt; }
-
-code { 
-    font-family: monospace, Cambria, "Cambria Math"; 
+h1 {
+  font-size: 15pt;
+  color: black !important;
 }
-
-p code { font-size: 8pt; }
+h2 {
+  font-size: 12pt;
+  color: black !important;
+}
+h3 {
+  font-size: 10pt;
+}
+code {
+  font-family: monospace, Cambria, "Cambria Math";
+}
+p code {
+  font-size: 8pt;
+}
 pre {
-    display: inline-block;
+  display: inline-block;
 }
-pre, pre code { 
+pre .label {
+  font-size: 8px;
+  font-style: normal;
 }
-pre .label { font-size: 8px; font-style: normal; }
-pre { 
-    margin-left: 0.4em !important; 
-    border-radius: 4px !important; 
-    padding: 5px !important;
+pre {
+  margin-left: 0.4em !important;
+  border-radius: 4px !important;
+  padding: 5px !important;
 }
 /* without labels */
-pre:not(.has_label) { 
-    /*margin-top: 0 !important;*/ 
-     
+pre:not(.has_label) {
+  /*margin-top: 0 !important;*/
 }
 /* with labels */
-pre.has_label { 
-    margin-top: 0;
+pre.has_label {
+  margin-top: 0;
 }
-
-p { margin-top: 0.3em; margin-bottom: 0.3em; }
-h1,h2,h3 { margin-bottom: 0.3em; margin-top: 0.3em; }
-pre code { margin: 0; }
-pre { padding: 3pt; }
-a { color: #005; }
+p {
+  margin-top: 0.3em;
+  margin-bottom: 0.3em;
+}
+h1,
+h2,
+h3 {
+  margin-bottom: 0.3em;
+  margin-top: 0.3em;
+}
+pre code {
+  margin: 0;
+}
+pre {
+  padding: 3pt;
+}
+a {
+  color: #005;
+}
 /*ul, li {padding: 0; padding-left: 0em !important;}*/
-ul.toc { padding-left: 0; }
-li {margin: 0; margin-left: 0em;}
+ul.toc {
+  padding-left: 0;
+}
+li {
+  margin: 0;
+  margin-left: 0;
+}
 /*.toc ul ul li { display: none; }*/
- 
- 
 /************ TOC ***************/
-
 @media screen {
-    ul.toc { 
-        column-count: 2; 
-        column-gap: 20px;
-        /*max-height: 30em;*/
-    }
-    ul#main_toc > li > ul > li{
-        padding-top: 2pt;
-        /*color: red;*/
-    }
-    ul#main_toc > li > ul > li > ul   {
-        margin-top: 1pt;
-        margin-bottom: 1pt;
-    }
-
+  ul.toc {
+    column-count: 2;
+    column-gap: 20px;
+    /*max-height: 30em;*/
+  }
+  ul#main_toc > li > ul > li {
+    padding-top: 2pt;
+    /*color: red;*/
+  }
+  ul#main_toc > li > ul > li > ul {
+    margin-top: 1pt;
+    margin-bottom: 1pt;
+  }
 }
 @media print {
-    /** two-column format */
-    ul.toc { 
-        column-count: 2; 
-        column-gap: 20px;
-    }
-    
-    /** add page numbers for the first two */
-    ul#main_toc > li > a::after { 
-        content: leader('_')  target-counter(attr(href), page) ;
-        font-weight: bold;
-    }
-
-    ul#main_toc > li > ul > li > a::after {
-         content: leader('_') target-counter(attr(href), page); 
-     }
-}
-
-ul#main_toc > li > a > span.toc_number { 
+  /** two-column format */
+  ul.toc {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  /** add page numbers for the first two */
+  ul#main_toc > li > a::after {
+    content: leader('_') target-counter(attr(href), page);
     font-weight: bold;
+  }
+  ul#main_toc > li > ul > li > a::after {
+    content: leader('_') target-counter(attr(href), page);
+  }
 }
-ul#main_toc > li > a > span.toc_number::before { 
-    content: 'Chapter '; 
-    font-weight: bold;
+ul#main_toc > li > a > span.toc_number {
+  font-weight: bold;
 }
-
+ul#main_toc > li > a > span.toc_number::before {
+  content: 'Chapter ';
+  font-weight: bold;
+}
 ul#main_toc ul,
 ul#main_toc ul ul {
-    margin-left: 0;
+  margin-left: 0;
 }
-ul#main_toc ul ul li  a {
-    color: gray !important;
+ul#main_toc ul ul li a {
+  color: gray !important;
 }
 ul#main_toc ul ul li {
-    display: inline;
+  display: inline;
 }
-
-ul.toc ul ul li a span.toc_number { display: none; }
-
+ul.toc ul ul li a span.toc_number {
+  display: none;
+}
 ul.toc ul ul li a span.toc_name::before {
-    margin-right: 3pt;
-    
-    content: '⟡'; /*◇';*/
-    font-family: 'Cambria' !important;
-    font-size: 6pt;
-    /*padding-bottom: 5pt !important;*/
-    /*border: solid 1px red;*/
-    /*margin-top: -20pt !important;*/
-    /*display: inline;*/
+  margin-right: 3pt;
+  content: '⟡';
+  /*◇';*/
+  font-family: 'Cambria' !important;
+  font-size: 6pt;
+  /*padding-bottom: 5pt !important;*/
+  /*border: solid 1px red;*/
+  /*margin-top: -20pt !important;*/
+  /*display: inline;*/
 }
 ul.toc ul ul li:first-child a span.toc_name::before {
-    content: '';
-    margin: 0;
+  content: '';
+  margin: 0;
 }
-
 /*div > ul:not(.toc)  {
     margin-left: 2em;
     margin-top: -0.3em;
     margin-bottom: -0.3em;
 }
 */
-
 /* first header down is highlighted */
 ul.chapter_toc > li > a {
-    font-weight: bold;
+  font-weight: bold;
 }
-
-
 /* below numbers are erased */
 ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
-    /*color: red; */
+  /*color: red; */
 }
-
 ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
-    display: none;
+  display: none;
 }
-
 ul.chapter_toc > li > ul > li > a.toc_link > span.toc_name::before {
-    content: '•';
-    margin-right: 0.5em;
+  content: '•';
+  margin-right: 0.5em;
 }
-
-
-
 /* keywords appearing in headers */
-ul.toc code { 
-    /*color: red !important;*/
-    font-size: 7pt !important; 
-    color: #a2a2a2 !important;
+ul.toc code {
+  /*color: red !important;*/
+  font-size: 7pt !important;
+  color: #a2a2a2 !important;
 }
-ul.toc, ul.toc ul { padding: 0; margin-left: 1em;} 
-
-ul.toc li { padding: 0; margin: 0;} 
-
+ul.toc,
+ul.toc ul {
+  padding: 0;
+  margin-left: 1em;
+}
+ul.toc li {
+  padding: 0;
+  margin: 0;
+}
 ul#main_toc > li {
-    /*margin-bottom: 3em;*/
-    padding-bottom: 1em;
+  /*margin-bottom: 3em;*/
+  padding-bottom: 1em;
 }
 ul#main_toc > li > ul {
-    padding-top: 4pt;
+  padding-top: 4pt;
 }
-ul#main_toc > li > a span.toc_name { 
-    font-weight: bold;  
-    
-/*    font-size: larger;*/
+ul#main_toc > li > a span.toc_name {
+  font-weight: bold;
+  /*    font-size: larger;*/
 }
-
 /*********  end TOC ************/
-
 /********** headings *********/
-
-#toc-heading { text-align: center; }
-
-h2 { margin-top: 2em !important; }
-h3 {
-    color: #615d5d;
-
-    font-style: normal !important;
-    font-weight: bold;
-    padding-top: 1em;
-
-    width: 100%;
-    padding-bottom: 3pt;
-    border-bottom: solid 0.5pt grey;
-}
-
-h1:not(#booktitle), #toc-heading { font-variant: small-caps; }
-h1:not(#booktitle) ::before { content: 'Chapter '; }
-/***** end headings *****/
-
-
-/******  latex ****/ 
-
-div.definition::before { font-weight: bold; content: 'Definition ' counter(definition)'.';}
-div.example::before { font-weight: bold; content: 'Example ' counter(example) '.';}
-div.remark::before { font-weight: bold; content: 'Remark ' counter(remark)'.';}
-div.problem::before { font-weight: bold; content: 'Problem ' counter(problem)'.';}
-div.lemma::before { font-weight: bold; content: 'Lemma ' counter(lemma)'.';}
-div.proposition::before { font-weight: bold; content: 'Proposition ' counter(proposition)'.';}
-div.theorem::before { font-weight: bold; content: 'Theorem ' counter(theorem)'.';}
-
-
-.latex_env span.latex_env_label::before {content: ' (';}
-.latex_env span.latex_env_label::after {content: ') ';}
-
-
-/****** end latex ****/ 
-
-/**** misc ***/
-
-
-body { 
-    hyphens: auto;
-}
-/* No decoration for links */
-a { 
-    text-decoration: none;
-     color: darkblue;
-}
-
-
-pre { 
-    margin-bottom: 0;
-}
-
-p + pre {
-    margin-top: 0.7em;
-} 
-pre + br + pre { 
-    margin-top: 0.3em;
-    /*border: solid 1px red;*/
- /*float: left; clear: left;*/
-}
-
-div.todo-wrap {
-    text-align: center;
-}
-p.todo {
-    display:inline-block;
-    background-color: #fdd;
-}
-p.todo::before { content: 'TODO: '; font-weight: bold; }
-
-
-figure:not(.subfloat) {
-    /*counter-increment: figure;*/
-    counter-reset: subfloat;
-}
-figure.subfloat {
-    counter-increment: subfloat;
-}
-
-figure[id^='fig:'] { counter-increment: figure; }
-figure.table {  counter-increment: table; }
-div.example {  counter-increment: example; }
-div.remark {  counter-increment: remark; }
-div.definition {  counter-increment: definition; }
-div.lemma {  counter-increment: lemma; }
-div.proposition {  counter-increment: proposition; }
-div.theorem {  counter-increment: theorem; }
-div.problem {  counter-increment: problem; }
-
-
-
-figure[id^='code:'] { counter-increment: listing; }
-figure[id^='code:'] figcaption:not(:empty)::before {
-    content: 'Listing ' counter(listing) '. ';
-}
-
-figure[id^='code:'] {
-    display: inline-block;
-    text-align: center;
-}
-figure[id^='fig:']
-{
-    /*border: solid blue;*/
-    text-align: center;
-}
-figure[id^='code:'] figcaption {
-    text-align: center;
-    /*border: solid;*/
-    width: 100%;
-}
-figure[id^='code:'] figcaption:not(:empty) {
-    text-align: left;
-    max-width: 30em;
-}
-figure[id^='code:'] figcaption:empty::before {
-    content: 'Listing ' counter(listing);
-}
-
-
-/* Not empty caption */
-figure.table {
-    display: inline-block;
-}
-figure.table figcaption {
-    padding-left: 2em;
-    padding-right: 2em;
-    width: 100%;
-    text-align: center;
-    font-variant: small-caps;
-    letter-spacing: 0.24pt;
-    font-size: 10pt;
-}
-
-figure[id^='tab:'] > figcaption:not(:empty) {
-}
-figure[id^='tab:'] > figcaption:not(:empty)::before {
-    content: 'Table\0000a0' counter(table) '. ';
-}
-figure[id^='tab:'] > figcaption:empty::before {
-    content: 'Table\0000a0' counter(table);
-}
-
-
-figure[id^='fig:'] > figcaption:not(:empty) {
-    text-align: justify;
-}
-figure[id^='fig:'] > figcaption:not(:empty)::before {
-    content: 'Figure\0000a0' counter(figure) '. ';
-    /*font-style: italic;*/
-}
-
-figure[id^='subfig:'] figcaption:not(:empty)::before {
-    content: '(' counter(subfloat, lower-alpha) ')\0000a0';
-}
-figure[id^='subfig:'] figcaption:empty::before {
-    content: '(' counter(subfloat, lower-alpha) ')';
-}
-
-/* Empty caption */
-figcaption { font-size: smaller; }
-figure[id^='fig:'] { text-align: center; }
-figure[id^='fig:'] > figcaption:empty { text-align: center; }
-figure[id^='fig:'] > figcaption:empty::before {
-    content: 'Figure\0000a0' counter(figure);
-    /*font-style: italic;*/
-}
-
-a[href^='#eq:'    ]:empty:not(.only-number)::before {  content:'(♦)';content: '(' target-counter(attr(href), listing) ')'; }
-a[href^='#eq:'    ]:empty.only-number::before       {  content:'♦';  content: target-counter(attr(href), listing); }
-a[href^='#code:'  ]:empty::before {  content: 'Listing♦'; content: 'Listing\0000a0' target-counter(attr(href), listing); }
-a[href^='#fig:'   ]:empty:not(.only-number)::before {  content: 'Fig.♦'; content: 'Fig.\0000a0' target-counter(attr(href), figure);  }
-a[href^='#fig:'   ]:empty.only-number::before { content: '♦'; content:   target-counter(attr(href), figure) ; }
-a[href^='#subfig:']:empty:not(.only-number)::before {  content: 'Fig.♦?'; content: 'Fig.\0000a0' target-counter(attr(href), figure)  target-counter(attr(href), subfloat,  lower-alpha); }
-a[href^='#subfig:']:empty.only-number::before {  content: '♦?';  content:  target-counter(attr(href), figure) target-counter(attr(href), subfloat, lower-alpha); }
-a[href^='#tab:'   ]:empty:not(.only-number)::before { content: 'Table♦'; content: 'Table\0000a0' target-counter(attr(href), table);}
-a[href^='#tab:'   ]:empty.only-number::before {  content: '♦'; content:  target-counter(attr(href), table);}
-a[href^='#rem:'   ]:empty::before {  content: 'Remark.♦';content: 'Remark\0000a0' target-counter(attr(href), remark); }
-a[href^='#lem:'   ]:empty::before {  content: 'Lemma.♦';content: 'Lemma\0000a0' target-counter(attr(href), lemma); }
-a[href^='#def:'   ]:empty::before {  content: 'Def.♦'; content: 'Def.\0000a0' target-counter(attr(href), definition); }
-a[href^='#prop:'  ]:empty::before {  content: 'Prop.♦';content: 'Prop.\0000a0' target-counter(attr(href), proposition); }
-a[href^='#prob:'  ]:empty::before {  content: 'Problem.♦';content: 'Problem\0000a0' target-counter(attr(href), problem); }
-a[href^='#exa:'   ]:empty::before  {  content: 'Example.♦';content: 'Example\0000a0' target-counter(attr(href), example); }
-a[href^='#thm:'   ]:empty:not(.only-number)::before {  content: 'Theorem♦'; content: 'Theorem\0000a0' target-counter(attr(href), theorem); }
-a[href^='#thm:'   ]:empty.only-number::before {  content: '♦'; content: target-counter(attr(href), theorem); }
-a[href^='#sub:'   ]:empty:not(.only-number)::before { content: 'Subsection♦.♦'; content: 'Subsection\0000a0' target-counter(attr(href), section) '.' target-counter(attr(href), subsection) ; }
-a[href^='#sub:'   ]:empty.only-number::before { content: '♦.♦'; content:target-counter(attr(href), section) '.' target-counter(attr(href), subsection) ; }
-      
-
-/** maybe chapter **/
-
-/** Very important - otherwise counters are local to divs,
-    and not robust to errors with divs */
-
-body {
- counter-reset: table bib section subsection subsubsection figure example remark definition proposition lemma theorem problem;
-
-}
-h1:not([nonumber]) {  
-    counter-increment: section; 
-    margin-bottom: 2em;
-}
-h1 {
-    counter-reset: subsection subsubsection;
-}
-
-/*h2 :not([nonumber]) */
-/*h2:not([nonumber]) { }*/
-    /*border: solid;*/
-
-h2:not([nonumber]) { 
-    counter-increment: subsection; 
+#toc-heading {
+  text-align: center;
 }
 h2 {
-    counter-reset: subsubsection; 
+  margin-top: 2em !important;
 }
-
-h3:not([nonumber]) {  
-    counter-increment: subsubsection; 
+h3 {
+  color: #615d5d;
+  font-style: normal !important;
+  font-weight: bold;
+  padding-top: 1em;
+  width: 100%;
+  padding-bottom: 3pt;
+  border-bottom: solid 0.5pt grey;
 }
-
-
-a[href^='#sec:']::before { 
-    content: 'Chapter♦';
-    content: 'Chapter\0000a0' target-counter(attr(href), section); 
+h1:not(#booktitle),
+#toc-heading {
+  font-variant: small-caps;
 }
-
-ul.toc a[href^='#sec:']::before { /* mdash: — ndahs:  –; */
-    content: 'Chapter\0000a0' '♦' ' –'; 
-    content: 'Chapter\0000a0' target-counter(attr(href), section) ' –'; 
-    font-weight: bold;
+h1:not(#booktitle) ::before {
+  content: 'Chapter ';
 }
-
+/***** end headings *****/
+/******  latex ****/
+div.definition::before {
+  font-weight: bold;
+  content: 'Definition ' counter(definition) '.';
+}
+div.example::before {
+  font-weight: bold;
+  content: 'Example ' counter(example) '.';
+}
+div.remark::before {
+  font-weight: bold;
+  content: 'Remark ' counter(remark) '.';
+}
+div.problem::before {
+  font-weight: bold;
+  content: 'Problem ' counter(problem) '.';
+}
+div.lemma::before {
+  font-weight: bold;
+  content: 'Lemma ' counter(lemma) '.';
+}
+div.proposition::before {
+  font-weight: bold;
+  content: 'Proposition ' counter(proposition) '.';
+}
+div.theorem::before {
+  font-weight: bold;
+  content: 'Theorem ' counter(theorem) '.';
+}
+.latex_env span.latex_env_label::before {
+  content: ' (';
+}
+.latex_env span.latex_env_label::after {
+  content: ') ';
+}
+/****** end latex ****/
+/**** misc ***/
+body {
+  hyphens: auto;
+}
+/* No decoration for links */
+a {
+  text-decoration: none;
+  color: darkblue;
+}
+pre {
+  margin-bottom: 0;
+}
+p + pre {
+  margin-top: 0.7em;
+}
+pre + br + pre {
+  margin-top: 0.3em;
+  /*border: solid 1px red;*/
+  /*float: left; clear: left;*/
+}
+div.todo-wrap {
+  text-align: center;
+}
+p.todo {
+  display: inline-block;
+  background-color: #fdd;
+}
+p.todo::before {
+  content: 'TODO: ';
+  font-weight: bold;
+}
+figure:not(.subfloat) {
+  /*counter-increment: figure;*/
+  counter-reset: subfloat;
+}
+figure.subfloat {
+  counter-increment: subfloat;
+}
+figure[id^='fig:'] {
+  counter-increment: figure;
+}
+figure.table {
+  counter-increment: table;
+}
+div.example {
+  counter-increment: example;
+}
+div.remark {
+  counter-increment: remark;
+}
+div.definition {
+  counter-increment: definition;
+}
+div.lemma {
+  counter-increment: lemma;
+}
+div.proposition {
+  counter-increment: proposition;
+}
+div.theorem {
+  counter-increment: theorem;
+}
+div.problem {
+  counter-increment: problem;
+}
+figure[id^='code:'] {
+  counter-increment: listing;
+}
+figure[id^='code:'] figcaption:not(:empty)::before {
+  content: 'Listing ' counter(listing) '. ';
+}
+figure[id^='code:'] {
+  display: inline-block;
+  text-align: center;
+}
+figure[id^='fig:'] {
+  /*border: solid blue;*/
+  text-align: center;
+}
+figure[id^='code:'] figcaption {
+  text-align: center;
+  /*border: solid;*/
+  width: 100%;
+}
+figure[id^='code:'] figcaption:not(:empty) {
+  text-align: left;
+  max-width: 30em;
+}
+figure[id^='code:'] figcaption:empty::before {
+  content: 'Listing ' counter(listing);
+}
+/* Not empty caption */
+figure.table {
+  display: inline-block;
+}
+figure.table figcaption {
+  padding-left: 2em;
+  padding-right: 2em;
+  width: 100%;
+  text-align: center;
+  font-variant: small-caps;
+  letter-spacing: 0.24pt;
+  font-size: 10pt;
+}
+/*@num-eq: target-counter(attr(href), listing);
+@ref-eq: '(' @num-eq ')';
+*/
+figure[id^='tab:'] > figcaption:not(:empty)::before {
+  content: 'Table' '\0000a0' counter(table) '. ';
+}
+figure[id^='tab:'] > figcaption:empty::before {
+  content: 'Table' '\0000a0' counter(table);
+}
+figure[id^='fig:'] > figcaption {
+  text-align: justify;
+}
+figure[id^='fig:'] > figcaption:not(:empty)::before {
+  content: 'Figure' '\0000a0' counter(figure) '. ';
+}
+figure[id^='fig:'] > figcaption:empty::before {
+  content: 'Figure' '\0000a0' counter(figure);
+}
+figure[id^='subfig:'] > figcaption:not(:empty)::before {
+  content: '(' counter(subfloat, lower-alpha) ')' '\0000a0';
+}
+figure[id^='subfig:'] > figcaption:empty::before {
+  content: '(' counter(subfloat, lower-alpha) ')';
+}
+/* Empty caption */
+figcaption {
+  font-size: smaller;
+}
+/*
+a[href^='#eq:'    ]:empty {
+    :not(.only-number)::before {  content:'('@NS')';content: '(' target-counter(attr(href), listing) ')'; }
+          .only-number::before {  content:'♦';  content: target-counter(attr(href), listing); }
+}*/
+a[href^='#code:']:empty .only-number::before {
+  content: '♦';
+  content: target-counter(attr(href), listing);
+}
+a[href^='#code:']:empty :not(.only-number)::before {
+  content: '♦';
+  content: 'Listing' '\0000a0' target-counter(attr(href), listing);
+}
+a[href^='#fig:']:empty .only-number::before {
+  content: '♦';
+  content: target-counter(attr(href), figure);
+}
+a[href^='#fig:']:empty :not(.only-number)::before {
+  content: '♦';
+  content: 'Figure' '\0000a0' target-counter(attr(href), figure);
+}
+/*
+a[href^='#fig:'   ]:empty:not(.only-number)::before {  content: 'Fig.♦'; content: 'Fig.\0000a0' target-counter(attr(href), figure);  }
+a[href^='#fig:'   ]:empty.only-number::before { content: '♦'; content:   target-counter(attr(href), figure) ; } */
+a[href^='#subfig:']:empty:not(.only-number)::before {
+  content: 'Fig.♦?';
+  content: 'Fig.\0000a0' target-counter(attr(href), figure) target-counter(attr(href), subfloat, lower-alpha);
+}
+a[href^='#subfig:']:empty.only-number::before {
+  content: '♦?';
+  content: target-counter(attr(href), figure) target-counter(attr(href), subfloat, lower-alpha);
+}
+a[href^='#tab:']:empty:not(.only-number)::before {
+  content: 'Table♦';
+  content: 'Table\0000a0' target-counter(attr(href), table);
+}
+a[href^='#tab:']:empty.only-number::before {
+  content: '♦';
+  content: target-counter(attr(href), table);
+}
+a[href^='#rem:']:empty::before {
+  content: 'Remark.♦';
+  content: 'Remark\0000a0' target-counter(attr(href), remark);
+}
+a[href^='#lem:']:empty::before {
+  content: 'Lemma.♦';
+  content: 'Lemma\0000a0' target-counter(attr(href), lemma);
+}
+a[href^='#def:']:empty::before {
+  content: 'Def.♦';
+  content: 'Def.\0000a0' target-counter(attr(href), definition);
+}
+a[href^='#prop:']:empty::before {
+  content: 'Prop.♦';
+  content: 'Prop.\0000a0' target-counter(attr(href), proposition);
+}
+a[href^='#prob:']:empty::before {
+  content: 'Problem.♦';
+  content: 'Problem\0000a0' target-counter(attr(href), problem);
+}
+a[href^='#exa:']:empty::before {
+  content: 'Example.♦';
+  content: 'Example\0000a0' target-counter(attr(href), example);
+}
+a[href^='#thm:']:empty:not(.only-number)::before {
+  content: 'Theorem♦';
+  content: 'Theorem\0000a0' target-counter(attr(href), theorem);
+}
+a[href^='#thm:']:empty.only-number::before {
+  content: '♦';
+  content: target-counter(attr(href), theorem);
+}
+a[href^='#sub:']:empty:not(.only-number)::before {
+  content: 'Subsection♦.♦';
+  content: 'Subsection\0000a0' target-counter(attr(href), section) '.' target-counter(attr(href), subsection);
+}
+a[href^='#sub:']:empty.only-number::before {
+  content: '♦.♦';
+  content: target-counter(attr(href), section) '.' target-counter(attr(href), subsection);
+}
+/** maybe chapter **/
+/** Very important - otherwise counters are local to divs,
+    and not robust to errors with divs */
+body {
+  counter-reset: table listing bib section subsection subsubsection figure example remark definition proposition lemma theorem problem;
+}
+h1:not([nonumber]) {
+  counter-increment: section;
+  margin-bottom: 2em;
+}
+h1 {
+  counter-reset: subsection subsubsection;
+}
+/*h2 :not([nonumber]) */
+/*h2:not([nonumber]) { }*/
+/*border: solid;*/
+h2:not([nonumber]) {
+  counter-increment: subsection;
+}
+h2 {
+  counter-reset: subsubsection;
+}
+h3:not([nonumber]) {
+  counter-increment: subsubsection;
+}
+a[href^='#sec:']::before {
+  content: 'Chapter♦';
+  content: 'Chapter\0000a0' target-counter(attr(href), section);
+}
+ul.toc a[href^='#sec:']::before {
+  /* mdash: — ndahs:  –; */
+  content: 'Chapter\0000a0' '♦' ' –';
+  content: 'Chapter\0000a0' target-counter(attr(href), section) ' –';
+  font-weight: bold;
+}
 h1:not([nonumber])::before {
-    content: 'Chapter\0000a0' counter(section);
-    display:block;
-    font-variant: small-caps;
-    font-size: smaller;
-    margin-bottom: 0.5em;
+  content: 'Chapter\0000a0' counter(section);
+  display: block;
+  font-variant: small-caps;
+  font-size: smaller;
+  margin-bottom: 0.5em;
 }
-.toc_number { display :none; }
+.toc_number {
+  display: none;
+}
 h1[nonumber]::before {
-    /*content: '(u)';*/
+  /*content: '(u)';*/
 }
-
-
-
 ul.toc a[href^='#sub:']::before {
-    content: '♦.♦' ' –';
-    content: target-counter(attr(href), section) '.' target-counter(attr(href), subsection) ' –'; 
-    
+  content: '♦.♦' ' –';
+  content: target-counter(attr(href), section) '.' target-counter(attr(href), subsection) ' –';
 }
-
-
 h2:not([nonumber])::before {
-    content: /*'Subsection\0000a0'*/ counter(section)'.'counter(subsection) '. ';
+  content: counter(section) '.' counter(subsection) '. ';
 }
-
-
-a[href^='#subsub:']::before { 
-    content: 'Subsubsection♦';
-    content: 'Subsubsection\0000a0' target-counter(attr(href), section) '.' target-counter(attr(href), subsection) '-' target-counter(attr(href), subsubsection, upper-alpha); 
+a[href^='#subsub:']::before {
+  content: 'Subsubsection♦';
+  content: 'Subsubsection\0000a0' target-counter(attr(href), section) '.' target-counter(attr(href), subsection) '-' target-counter(attr(href), subsubsection, upper-alpha);
 }
-
-
-ul.toc a[href^='#subsub:']::before {  
-    display: none; content: none;
+ul.toc a[href^='#subsub:']::before {
+  display: none;
+  content: none;
 }
-
 h3:not([nonumber])::before {
-    /*content: counter(section) '.' counter(subsection) '-' counter(subsubsection, upper-alpha) '. ';*/
-    content: counter(subsubsection, lower-alpha) ') ';
+  /*content: counter(section) '.' counter(subsection) '-' counter(subsubsection, upper-alpha) '. ';*/
+  content: counter(subsubsection, lower-alpha) ') ';
 }
 /*
 
@@ -511,197 +631,204 @@ h3:not([nonumber])::after {
 }
 
 */
-
-
 /*TODO: make preprocessing into code*/
 /*f,r { font-family: monospace; font-size: 80%;}*/
-.f { color: darkgreen; }
-.r { color: darkred;}
-.imp { color: darkorange; }
-.impname {color: darkorange; }
-.keyword.f { color: darkgreen; }
-.keyword.r { color: darkred;}
-
-f, r { border: solid 1px red;}
-f::before, r::before { content: 'xxx';}
-
-div.figure { border: solid; }
-
-.Fcolor { color: darkgreen; }
-.Rcolor { color: darkred; }
-
-
-.uline { text-decoration: underline; }
-
-div.fbox { border: solid 1pt black; padding: 3pt;}
-
-div.center, div.centering { text-align: center; }
-
-
+.f {
+  color: darkgreen;
+}
+.r {
+  color: darkred;
+}
+.imp {
+  color: darkorange;
+}
+.impname {
+  color: darkorange;
+}
+.keyword.f {
+  color: darkgreen;
+}
+.keyword.r {
+  color: darkred;
+}
+div.figure {
+  border: solid;
+}
+.Fcolor {
+  color: darkgreen;
+}
+.Rcolor {
+  color: darkred;
+}
+.uline {
+  text-decoration: underline;
+}
+div.fbox {
+  border: solid 1pt black;
+  padding: 3pt;
+}
+div.center,
+div.centering {
+  text-align: center;
+}
 cite {
-    display: block;
-    font-style: normal;
+  display: block;
+  font-style: normal;
 }
 cite[id^='bib:'] {
-    counter-increment: bib;
+  counter-increment: bib;
 }
-cite[id^='bib:']::before { 
-    content: '[' counter(bib) '] ';
-    font-style: normal;
+cite[id^='bib:']::before {
+  content: '[' counter(bib) '] ';
+  font-style: normal;
 }
-
-figure.table figcaption { padding-bottom: 0.3em; }
-figure.table td:not(:first-child) { 
-    padding-left: 1em; 
-} 
-div.table-wrap { text-align: center; }
-
+figure.table figcaption {
+  padding-bottom: 0.3em;
+}
+figure.table td:not(:first-child) {
+  padding-left: 1em;
+}
+div.table-wrap {
+  text-align: center;
+}
 h2 code:first-of-type::before,
 h3 code:first-of-type::before,
-h4 code:first-of-type::before{ 
-    content: '('; 
-    font-weight: normal;
-    font-family: serif;
+h4 code:first-of-type::before {
+  content: '(';
+  font-weight: normal;
+  font-family: serif;
 }
 h2 code:not(:last-of-type)::after,
 h3 code:not(:last-of-type)::after,
-h4 code:not(:last-of-type)::after{ 
-    content: ', '; 
-    font-weight: normal;
-    font-family: serif;
+h4 code:not(:last-of-type)::after {
+  content: ', ';
+  font-weight: normal;
+  font-family: serif;
 }
-
 h2 code:last-of-type::after,
 h3 code:last-of-type::after,
-h4 code:last-of-type::after{ 
-    content: ')'; 
-    font-weight: normal;
-    font-family: serif;
+h4 code:last-of-type::after {
+  content: ')';
+  font-weight: normal;
+  font-family: serif;
 }
-
 /**** col2, etc . ***/
-
-
 div.colN-wrap {
-    text-align: center;
-    /*border: solid 1px blue;*/
+  text-align: center;
+  /*border: solid 1px blue;*/
 }
 div.colN-wrap table {
-    display: inline-block;
-    /*border: solid 1px red;*/
+  display: inline-block;
+  /*border: solid 1px red;*/
 }
-
 div.colN-wrap table td {
-    padding-left: 0.7em;
-    padding-right: 0.7em;
-    /*border: solid 1px blue;*/
-}
-table.col2 tr td {
-}
-table.col2 tr {
+  padding-left: 0.7em;
+  padding-right: 0.7em;
+  /*border: solid 1px blue;*/
 }
 table.col2 td {
-    width: fill-available;
+  width: fill-available;
 }
 table.col2 {
-    max-width: 100%;
-    /*text-align: center;*/
-} 
+  max-width: 100%;
+  /*text-align: center;*/
+}
 figcaption {
-    margin-top: 0.7em;
+  margin-top: 0.7em;
 }
 table.col2 td {
-    padding-bottom: 0;
-    vertical-align: middle;
-    margin-left: auto;
-    margin-right: auto;
+  padding-bottom: 0;
+  vertical-align: middle;
+  margin-left: auto;
+  margin-right: auto;
 }
-
 p svg {
-    margin-top: -100px;
+  margin-top: -100px;
 }
-
-h2,h3,h4 { clear: both; }
-
-
+h2,
+h3,
+h4 {
+  clear: both;
+}
 table.labels-col1 td:first-child {
-    font-size: 90%;
-    font-weight: bold;
+  font-size: 90%;
+  font-weight: bold;
 }
-
-table.labels-row1 tr:first-child {
-    font-size: 90%;
-    font-weight: bold;
+table.labels-row1 {
+  border-collapse: collapse;
+  border: 0;
 }
-
-.xxx { font-weight: bold; font-family: monospace; color: red; }
-
-div[center] { 
-    display: block;
-    width: 100%;
-    text-align: center;
-    /*border: solid;*/
+table.labels-row1 thead {
+  display: table-header-group;
+  font-size: 90%;
+  font-weight: bold;
+  padding-bottom: 3pt;
+  border-bottom: solid 1pt grey;
 }
-
+table.labels-row1 tbody tr:nth-child(even) {
+  background-color: #ffffff;
+}
+table.labels-row1 tbody tr:nth-child(odd) {
+  background-color: #f2f2f2;
+}
+.xxx {
+  font-weight: bold;
+  font-family: monospace;
+  color: red;
+}
+div[center] {
+  display: block;
+  width: 100%;
+  text-align: center;
+  /*border: solid;*/
+}
 div[center] > * {
-    display: inline-block;
-    margin-top: 0;
-    margin-bottom: 0;
-
+  display: inline-block;
+  margin-top: 0;
+  margin-bottom: 0;
 }
-
 .space_in_code {
-    /*display: inline-block;*/
-    background-color: white;
-    /*border: solid 1px red;*/
+  /*display: inline-block;*/
+  background-color: white;
+  /*border: solid 1px red;*/
 }
-
 @page rotated {
-    size: 3.8in 4.73in !important;
-    
+  size: 3.8in 4.73in !important;
 }
-
 div.float_bottom {
-    float: bottom;
+  float: bottom;
 }
 pre code.output {
-    background-color: turquoise;
+  /*background-color: turquoise;*/
 }
-/*#code\:complicated  {
-    page: mia;
-    border: dotted 2px blue;
-    position: fixed;
-    bottom: 0;
-    left:0; right: 0;
-    width: 100%;
-    margin-top: 3em;
-}
+/*
+
+
+
+    -----------------
+
+
+    -----------------
+
+
+
+
+
+
+        Automatically created ---  do not modify 
+
+
+    -----------------
+
+
+    -----------------
+
+
+    -----------------
+
+
+    -----------------
+
+
+
 */
-
- .figcontent  { margin: 0; padding: 0; }
-
-@media screen {
-    div.caption-left figure  {
-        display: table;
-    }
-    div.caption-left figure > figcaption  {
-        display: inline-block;
-        margin-right: 3em;
-    }
-    div.caption-left figure > .figcontent {
-        display: table-cell;
-    } 
-
-    div.caption-right figure  {
-        display: table-row;
-    }
-    div.caption-right figure > figcaption  {
-        display: inline-block;
-        margin-left: 3em;
-    }
-    div.caption-right figure > .figcontent {
-        display: table-cell;
-    }
-
-}
-
