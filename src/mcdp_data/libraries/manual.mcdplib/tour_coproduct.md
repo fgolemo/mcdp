@@ -11,9 +11,9 @@ of coproduct][cat-coproduct].
 As an example, let us consider how to model the choice
 between different battery technologies.
 
-Consider the model of a battery, in which we take
-the functionality to be the <f>capacity</f>
-and the resources to be the <r>mass&nbsp;[g]</r> and the <r>cost&nbsp;[&#36;]</r>.
+Consider the model of a battery, in which we take the functionality to be the
+<f>capacity</f> and the resources to be the <r>mass&nbsp;[g]</r> and the
+<r>cost&nbsp;[&#36;]</r>.
 
 
 <pre class='mcdp' id='Battery1' style='display:none'>
@@ -36,15 +36,13 @@ mcdp {
 </pre>
 
 
-Consider two different battery technologies,
-characterized by their specific energy (Joules per gram)
-and specific cost (USD per gram).
+Consider two different battery technologies, characterized by their specific
+energy (Joules per gram) and specific cost (USD per gram).
 
-Specifically, consider [Nickel-Hidrogen batteries][NiH2]
-and [Lithium-Polymer][LiPo] batteries.
-On technology is cheaper but leads to heavier batteries
-and viceversa. Because of this fact, there might be designs
-in which we prefer either.
+Specifically, consider [Nickel-Hidrogen batteries][NiH2] and
+[Lithium-Polymer][LiPo] batteries. On technology is cheaper but leads to heavier
+batteries and viceversa. Because of this fact, there might be designs in which
+we prefer either.
 
 [NiH2]: https://en.wikipedia.org/wiki/Nickel%E2%80%93hydrogen_battery
 [Lipo]: https://en.wikipedia.org/wiki/Lithium_polymer_battery
@@ -90,9 +88,9 @@ as two MCDP using the same interface (same resources and same functionality).
        </render>
 </col2>
 
-Then we can define the **coproduct** of the two using
-the keyword <code><span class="CoproductWithNamesChooseKeyword">choose</span></code>.
-Graphically, the choice is indicated through dashed lines.
+Then we can define the **coproduct** of the two using the keyword <code><span
+class="CoproductWithNamesChooseKeyword">choose</span></code>. Graphically, the
+choice is indicated through dashed lines.
 
 <col2 class="td-valign-top">
     <pre class='mcdp' id='Batteries' label='Batteries.mcdp'>
@@ -104,4 +102,4 @@ Graphically, the choice is indicated through dashed lines.
     <render class='ndp_graph_enclosed'>`Batteries</render>
 </col2>
 
-\XXX Add example 
+\XXX Add example

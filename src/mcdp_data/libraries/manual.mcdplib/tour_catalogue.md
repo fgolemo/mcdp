@@ -1,14 +1,16 @@
 ## Catalogues (enumeration)
 
-The previous example used a linear relation between functionality
-and resource. However, in general, MCDPs do not make any assumption
-about continuity and differentiability of the functionality-resource
-relation. The MCDPL language has a construct called "catalogue"
-that allows defining an arbitrary discrete relation.
+The previous example used a linear relation between functionality and resource.
+However, in general, MCDPs do not make any assumption about continuity and
+differentiability of the functionality-resource relation. The MCDPL language has
+a construct called "catalogue" that allows defining an arbitrary discrete
+relation.
 
-Recall from the theory that a design problem is generally defined
-from a triplet of <f>functionality space</f>, <imp>implementation space</imp>, and <r>resource space</r> ([](#def:DP)). According
-to the diagram in [](#fig:gmcdp_setup), one should define the two maps $\eval$ and $\exc$, which map an implementation to the functionality it provides and the resources it requires.
+Recall from the theory that a design problem is generally defined from a triplet
+of <f>functionality space</f>, <imp>implementation space</imp>, and <r>resource
+space</r> ([](#def:DP)). According to the diagram in [](#fig:gmcdp_setup), one
+should define the two maps $\eval$ and $\exc$, which map an implementation to
+the functionality it provides and the resources it requires.
 
 <center>
     <img class='art'  latex-options='scale=0.33'  src="gmcdp_setup.pdf"
@@ -16,16 +18,17 @@ to the diagram in [](#fig:gmcdp_setup), one should define the two maps $\eval$ a
 </center>
 
 <figcaption id='fig:setup:caption'>
-A design problem is defined from an mplementation space $\impsp$, functionality space $\funsp$, resource space $\ressp$, and the
-maps $\eval$ and $\exc$ that relate the three spaces.
+    A design problem is defined from an mplementation space $\impsp$, functionality
+    space $\funsp$, resource space $\ressp$, and the maps $\eval$ and $\exc$ that
+    relate the three spaces.
 </figcaption>
 
-MCDPL allows to define arbitrary maps $\eval$ and $\exc$,
-and therefore arbitrary relations from functionality to resources, using the <k>catalogue {&hellip;}</k> construction. An example is shown
-in [](#code:model3). In this case, the implementation space contains the
-three elements <impname>model1</impname>, <impname>model2</impname>,
-<impname>model3</impname>. Each model is explicitly associated
-to a value in the functionality and in the resource space.
+MCDPL allows to define arbitrary maps $\eval$ and $\exc$, and therefore
+arbitrary relations from functionality to resources, using the <k>catalogue
+{…}</k> construction. An example is shown in [](#code:model3). In this case, the
+implementation space contains the three elements <impname>model1</impname>,
+<impname>model2</impname>, <impname>model3</impname>. Each model is explicitly
+associated to a value in the functionality and in the resource space.
 
 <center>
     <pre class='mcdp' id='model3' figure-id="code:model3">
@@ -44,7 +47,8 @@ to a value in the functionality and in the resource space.
     </figcaption>
 </center>
 
-The icon for this construction is meant to remind of a spreadsheet ([](#fig:model3)).
+The icon for this construction is meant to remind of a spreadsheet
+([](#fig:model3)).
 
 <center>
     <render class='ndp_graph_expand' figure-id="fig:model3">`model3</render>
@@ -52,10 +56,10 @@ The icon for this construction is meant to remind of a spreadsheet ([](#fig:mode
 
 ## Multiple minimal solutions
 
-The <k>catalogue</k> construct is the first that allows to define
-MCDPs that have multiple minimal solutions. To see this, let's
-expand the model in [](#code:model3) to include a few more models
-and one more resource, <rname>cost</rname>.
+The <k>catalogue</k> construct is the first that allows to define MCDPs that
+have multiple minimal solutions. To see this, let's expand the model in
+[](#code:model3) to include a few more models and one more resource,
+<rname>cost</rname>.
 
 <center>
     <pre class='mcdp' id='catalogue2' figure-id="code:catalogue2">
@@ -72,11 +76,12 @@ and one more resource, <rname>cost</rname>.
     </pre>
 </center>
 
-The numbers (not realistic) were chosen so that <impname>model2</impname>
-and <impname>model3</impname> do not dominate each other:
-they provide the same functionality (<fvalue>600 kWh</fvalue>)
-but one is cheaper but heavier, and the other is more expensive
-but lighter. This means that for the functionality value of <fvalue>600 kWh</fvalue> there are two minimal solutions: either <rvalue>⟨200 g, 200 USD⟩</rvalue> or <rvalue>⟨250 g, 150 USD⟩</rvalue>.
+The numbers (not realistic) were chosen so that <impname>model2</impname> and
+<impname>model3</impname> do not dominate each other: they provide the same
+functionality (<fvalue>600 kWh</fvalue>) but one is cheaper but heavier, and the
+other is more expensive but lighter. This means that for the functionality value
+of <fvalue>600 kWh</fvalue> there are two minimal solutions: either <rvalue>⟨200
+g, 200 USD⟩</rvalue> or <rvalue>⟨250 g, 150 USD⟩</rvalue>.
 
 The number of minimal solutions is not constant: for this example,
 we have:
@@ -125,10 +130,9 @@ Cases for model in [](#code:catalogue2)
 }*/
 </style>
 
-We can verify these with <program>mcdp-solve</program>. We also
-use the switch `--imp` to ask it to give also the name of the
-implementations; without the switch, it only prints the value
-of the minimal resources.
+We can verify these with <program>mcdp-solve</program>. We also use the switch
+`--imp` to ask it to give also the name of the implementations; without the
+switch, it only prints the value of the minimal resources.
 
 For example, for $\fun =$ <fvalue>50 kWH</fvalue>:
 
@@ -152,10 +156,10 @@ we obtain two solutions:
     r = ⟨mass:200 g, cost:200 USD⟩
       implementation 1 of 1: m = 'model2'
 
-<program>mcdp-solve</program> displays first the set of minimal
-resources required; then, for each value of the resource,
-it displays the name of the implementations; in general, there could be
-multiple implementations that have exactly the same resource consumption.
+<program>mcdp-solve</program> displays first the set of minimal resources
+required; then, for each value of the resource, it displays the name of the
+implementations; in general, there could be multiple implementations that have
+exactly the same resource consumption.
 
 <!--
 <render class='hasse'>

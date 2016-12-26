@@ -11,6 +11,6 @@
     requires [[resource]] for [["dp"]]
 </pre>
 
-### Primitive DPs (<k>implemented-by</k>)
+### Primitive DPs <k>implemented-by</k>
 
 ...

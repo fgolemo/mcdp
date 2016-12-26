@@ -4,8 +4,9 @@
 
 ## Basics
 
-The goal of the language is to represent all and only [MCDPs
-(Monotone Co-Design Problems)](#def:MCDP). For example, multiplying by a negative number is a syntax error.
+The goal of the language is to represent all and only [MCDPs (Monotone Co-Design
+Problems)](#def:MCDP). For example, multiplying by a negative number is a syntax
+error.
 <!-- <footnote>Similarly, CVX's~\cite{cvx} goal
 is to describe all only convex problems.</footnote> -->
 
@@ -14,12 +15,10 @@ by its <f>functionality</f> and its <r>resources</r>.
 
 #### Composition
 
-The language encourages a compositional approach to
-co-design.
+The language encourages a compositional approach to co-design.
 
-There are several notions of "compositions"
-between two design problems (DPs) for which
-MCDPL provides syntactic constructs:
+There are several notions of "compositions" between two design problems (DPs)
+for which MCDPL provides syntactic constructs:
 
 * *series* ([](#subfig:series)): two DPs can be connected in series
   if the second provides

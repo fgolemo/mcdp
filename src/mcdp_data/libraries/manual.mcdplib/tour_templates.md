@@ -2,26 +2,24 @@
 
 "Templates" are a way to describe reusable design patterns.
 
-For example, the code in [](#code:composition) composes
-a particular battery model, called <mcdp>Battery</mcdp>,
-and a particular actuator model, called <mcdp>`Actuation1</mcdp>.
-However, it is clear that the pattern of "interconnect battery
-and actuators" is independent of the particular battery and
-actuator. MCDPL allows to describe this situation by using the
-idea of "template".
+For example, the code in [](#code:composition) composes a particular battery
+model, called <mcdp>Battery</mcdp>, and a particular actuator model, called
+<mcdp>`Actuation1</mcdp>. However, it is clear that the pattern of "interconnect
+battery and actuators" is independent of the particular battery and actuator.
+MCDPL allows to describe this situation by using the idea of "template".
 
 Templates are described using the keyword <k>template</k>.
 The syntax is:
 
-<pre><code>    <k>template</k> [<span>name1</span><k>:</k> <span> interface1</span>, <span>name2</span><k>:</k> <span> interface2 </span>, &hellip; ]
+<pre><code>    <k>template</k> [<span>name1</span><k>:</k> <span> interface1</span>, <span>name2</span><k>:</k> <span> interface2 </span>, … ]
     <k>mcdp</k> <k>{</k>
-    &hellip;
+        …
     <k>}</k>
 </code></pre>
 
-In the brackets put pairs of name and NDPs that will be used
-to specify the interface.
-For example, suppose that there is an interface defined in <code>Interface.mcdp</code> as in [](#code:Interface).
+In the brackets put pairs of name and NDPs that will be used to specify the
+interface. For example, suppose that there is an interface defined in
+<code>Interface.mcdp</code> as in [](#code:Interface).
 
 <pre class="mcdp" id='Interface' label='Interface.mcdp'
     figure-id="code:Interface">
@@ -31,8 +29,8 @@ mcdp {
 }
 </pre>
 
-Then we can declare a template as in [](#code:ExampleTemplate).
-The template is visualized as a diagram with a hole ([](#fig:ExampleTemplate)).
+Then we can declare a template as in [](#code:ExampleTemplate). The template is
+visualized as a diagram with a hole ([](#fig:ExampleTemplate)).
 
 <col2>
     <pre class="mcdp_template" id='ExampleTemplate' label='ExampleTemplate.mcdp_template'
@@ -75,15 +73,11 @@ mcdp {
 </pre>
 </col2>
 
-Then we can define a template that uses them.
-For example the code in [](#code:CompositionTemplate)
-specifies that the templates requires two parameters,
-called
-<code>generic_actuation</code>
-and <code>generic_battery</code>,
-and they must have the interfaces
-defined by <poset>`ActuationInterface</poset>
-and <poset>`BatteryInterface</poset>.
+Then we can define a template that uses them. For example the code in
+[](#code:CompositionTemplate) specifies that the templates requires two
+parameters, called <code>generic_actuation</code> and
+<code>generic_battery</code>, and they must have the interfaces defined by
+<poset>`ActuationInterface</poset> and <poset>`BatteryInterface</poset>.
 
 <col2>
 <pre class="mcdp_template" id='CompositionTemplate'

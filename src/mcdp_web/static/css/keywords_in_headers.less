@@ -1,0 +1,18 @@
+
+h2, h3, h4, ul.toc {
+    code:first-of-type::before {
+      content: '(';
+      font-weight: normal;
+      font-family: serif;
+    }
+    :not(:last-of-type)::after {
+      content: ', ';
+      font-weight: normal;
+      font-family: serif;
+  }
+  code:last-of-type::after {
+      content: ')';
+      font-weight: normal;
+      font-family: serif;
+  }
+}

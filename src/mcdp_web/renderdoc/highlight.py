@@ -553,6 +553,10 @@ def get_source_code(tag):
 #     print(indent(source_code, 'aft|'))
     #source_code = source_code.replace('\t', ' ' * 4)
     
+    if tag.name == 'code':
+        if '\n' in source_code:
+            logger.debug('Treating newline in %r as space' % source_code)
+            source_code = source_code.replace('\n', ' ')
 
     return source_code
 

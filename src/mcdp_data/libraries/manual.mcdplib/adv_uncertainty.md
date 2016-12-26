@@ -5,9 +5,9 @@
 
 The keyword ``Uncertain`` is used to define uncertain relations.
 
-For example, suppose there is some uncertain in the value
-of the specific energy, varying between 100 Wh/kg
-and 120 Wh/kg. This is one way to describe such uncertainty:
+For example, suppose there is some uncertain in the value of the specific
+energy, varying between 100 Wh/kg and 120 Wh/kg. This is one way to describe
+such uncertainty:
 
 <pre class="mcdp" id='uncertain1'>
 mcdp {
@@ -21,8 +21,8 @@ mcdp {
 }
 </pre>
 
-The resulting MCDP has an uncertainty gate, marked with "?",
-which joins two branches, the optimistic and the pessimistic branch.
+The resulting MCDP has an uncertainty gate, marked with "?", which joins two
+branches, the optimistic and the pessimistic branch.
 
 <pre class='ndp_graph_enclosed'>`uncertain1</pre>
 

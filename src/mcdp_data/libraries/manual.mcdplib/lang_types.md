@@ -1,11 +1,11 @@
 ## Posets and their values
 
-All values of <f>functionality</f> and <r>resources</r> belong to posets.
-PyMCDP knows a few built-in posets, and gives you the possibility of creating your own.
+All values of <f>functionality</f> and <r>resources</r> belong to posets. PyMCDP
+knows a few built-in posets, and gives you the possibility of creating your own.
 %
-[](#tab:summary_posets) shows the basic posets that are built in:
-natural numbers, nonnegative real numbers, and nonnegative real numbers
-that have units associated to them.
+[](#tab:summary_posets) shows the basic posets that are built in: natural
+numbers, nonnegative real numbers, and nonnegative real numbers that have units
+associated to them.
 
 <col1>
 <col3 figure-id="tab:summary_posets" figure-caption="Built-in posets"
@@ -41,7 +41,8 @@ that have units associated to them.
 
 ### Natural numbers <pos np>Nat</pos> <pos>Nat</pos>
 
-By $\overline{\mathbb{N}}$ we mean the completion of  $\mathbb{N}$ to include a top element $\top$. This makes the poset a [complete partial order](#def:cpo)
+By $\overline{\mathbb{N}}$ we mean the completion of  $\mathbb{N}$ to include a
+top element $\top$. This makes the poset a [complete partial order](#def:cpo)
 ([](#def:cpo)).
 
 
@@ -59,19 +60,19 @@ a chain of $2^{31} + 1$ elements.
 
 ### Nonnegative floating point numbers <pos np>Rcomp</pos> <pos>Rcomp</pos>  {#sub:Rcomp}
 
-Let $\reals_{+}=\{x \mid x \geq 0\}$ be the nonnegative real numbers  and let $\overline{\reals}_{+} = \reals_{+} \cup \top$ be its completion.
-%
-The $+$ and $\times$ operations are extended from $\reals$ to $\Rcomp$
-by defining the following:
-%
+Let $\reals_{+}=\{x \mid x \geq 0\}$ be the nonnegative real numbers  and let
+$\overline{\reals}_{+} = \reals_{+} \cup \top$ be its completion. The $+$ and
+$\times$ operations are extended from $\reals$ to $\Rcomp$ by defining the
+following:
+
 \begin{eqnarray}
     \forall a:& \quad a + \top &= \top \\
     \forall a:& \quad a \times \top &= \top
 \end{eqnarray}
 
-This poset is indicated in MCDPL by <pos np>Rcomp</pos>
-or <pos>Rcomp</pos>. Values belonging to this poset are indicates with the syntax
-their values as <val np>Rcomp:42.0</val>, <val>Rcomp:42.0</val>, or simply <val>42.0</val>.
+This poset is indicated in MCDPL by <pos np>Rcomp</pos> or <pos>Rcomp</pos>.
+Values belonging to this poset are indicates with the syntax their values as
+<val np>Rcomp:42.0</val>, <val>Rcomp:42.0</val>, or simply <val>42.0</val>.
 
 Internally, $\Rcomp$ is approximated using double precision point numbers ([IEEE
 754]), corresponding to the <code>float</code> type used by Python and the
@@ -107,7 +108,7 @@ syntax in [](#tab:number-units).
     <span>$\langle\Rcomp^{[\text{m}]}, \leq\rangle$</span>
     <span>$\langle\Rcomp^{[\text{s}]}, \leq\rangle$</span>
     <span>$\langle\Rcomp^{[\text{m/s}]}, \leq\rangle$</span>
-    <span>&hellip;</span>
+    <span>…</span>
 
     <span>syntax<br/> for posets</span>
     <pos>g</pos>
@@ -115,7 +116,7 @@ syntax in [](#tab:number-units).
     <pos>m</pos>
     <pos>s</pos>
     <pos>m/s</pos>
-    <span>&hellip;</span>
+    <span>…</span>
 
      <span>syntax<br/> for values</span>
      <val>1.2 g</val>
@@ -123,7 +124,7 @@ syntax in [](#tab:number-units).
      <val>10 m</val>
      <val>10 s</val>
      <val>23 m/s</val>
-     <span>&hellip;</span>
+     <span>…</span>
 
 </col7>
 </col1>
@@ -154,21 +155,23 @@ enriched with an annotation of units $u\in U$.
 [group]: https://en.wikipedia.org/wiki/Group_(mathematics)#Definition
 
 
-Multiplication is defined for all pairs of units.
-Let $|x|$ denote the absolute numerical value of $x$ (stripping the unit away).
-Then, if $x \in \mathbb{F}^{[u]}$  and $y \in \mathbb{F}^{[v]}$, their product is $x\cdot y \in \mathbb{F}^{[uv]} $ and $|x\cdot y| = |x|\cdot|y|$.
+Multiplication is defined for all pairs of units. Let $|x|$ denote the absolute
+numerical value of $x$ (stripping the unit away). Then, if $x \in
+\mathbb{F}^{[u]}$  and $y \in \mathbb{F}^{[v]}$, their product is $x\cdot y \in
+\mathbb{F}^{[uv]} $ and $|x\cdot y| = |x|\cdot|y|$.
 
-Addition is defined only for compatible pairs of units (e.g., <pos>m</pos> and <pos>km</pos>),
-     but it is not possible to sum, say, <pos>m</pos>
-     and <pos>s</pos>.
-If $x \in \mathbb{F}^{[u]}$  and $y \in \mathbb{F}^{[v]}$,
-    then $x + y \in \mathbb{F}^{[u]} $, and
-    $ x + y = |x| + \alpha^u_v |y| $, where
-     $\alpha^u_v$ is a table of conversion factors, and $|x|$ is
-     the absolute numerical value of $x$.
+Addition is defined only for compatible pairs of units (e.g., <pos>m</pos> and
+<pos>km</pos>), but it is not possible to sum, say, <pos>m</pos> and
+<pos>s</pos>. If $x \in \mathbb{F}^{[u]}$  and $y \in \mathbb{F}^{[v]}$, then $x +
+y \in \mathbb{F}^{[u]} $, and $ x + y = |x| + \alpha^u_v |y| $, where
+$\alpha^u_v$ is a table of conversion factors, and $|x|$ is the absolute
+numerical value of $x$.
 
 
-In practice, this means that MCDPL thinks that <val>1 kg + 1 g</val> is equal to <val>1.001 kg</val>. Addition is not strictly commutative, because <val>1 g + 1 kg</val> is equal to <val>1001 g</val>, which is equivalent, but not equal, to <val>1.001 kg</val>.
+In practice, this means that MCDPL thinks that <val>1 kg + 1 g</val> is equal to
+<val>1.001 kg</val>. Addition is not strictly commutative, because <val>1 g + 1
+kg</val> is equal to <val>1001 g</val>, which is equivalent, but not equal, to
+<val>1.001 kg</val>.
 
 
 
@@ -178,8 +181,9 @@ It is possible to define custom finite posets
 using the keyword <k>poset</k>.
 
 For example, supposes that we create a file named `MyPoset.mcdp_poset`
-containing the definition in [](#code:MyPoset).
-This declaration defines a poset with 5 elements `a`, `b`, `c`, `d`, `e` and with the given order relations, as displayed in [](#fig:MyPosetHasse).
+containing the definition in [](#code:MyPoset). This declaration defines a poset
+with 5 elements `a`, `b`, `c`, `d`, `e` and with the given order relations, as
+displayed in [](#fig:MyPosetHasse).
 
 
 <col2>
@@ -200,11 +204,12 @@ This declaration defines a poset with 5 elements `a`, `b`, `c`, `d`, `e` and wit
 </col2>
 
 The name of the poset, `MyPoset`, comes from the filename `MyPoset.mcdp_poset`.
-After the poset has been defined, it can be used in the
-definition of an MCDP, by referring to it by name using
-the backtick notation, as in &ldquo;<pos>`MyPoset</pos>&rdquo;.
+After the poset has been defined, it can be used in the definition of an MCDP,
+by referring to it by name using the backtick notation, as in
+<q><pos>`MyPoset</pos></q>.
 
-To refer to its elements, use the notation <val>`MyPoset: element</val> ([](#code:one)).
+To refer to its elements, use the notation <val>`MyPoset: element</val>
+([](#code:one)).
 
 <col2>
     <pre class='mcdp' id='one' figure-id='code:one'
@@ -238,7 +243,8 @@ $$
 $$
 \end{defn}
 
-In MCDPL, use the Unicode symbol "<k>×</k>" or the simple letter "<k>x</k>" to create a poset product, using the syntax:
+In MCDPL, use the Unicode symbol "<k>×</k>" or the simple letter "<k>x</k>" to
+create a poset product, using the syntax:
 
 
 <col2>
@@ -251,11 +257,12 @@ In MCDPL, use the Unicode symbol "<k>×</k>" or the simple letter "<k>x</k>" to 
     </pre>
 </col2>
 
-For example, the expression <pos>J × A</pos> represents a product of Joules and Amperes.
+For example, the expression <pos>J × A</pos> represents a product of Joules and
+Amperes.
 
-The elements of a poset product are called "tuples". These correspond
-exactly to [Python's tuples][tuples].
-To define a tuple, use angular brackets &ldquo;<code>&lt;</code>&rdquo; and &ldquo;<code>&gt;</code>&rdquo;. The syntax is:
+The elements of a poset product are called "tuples". These correspond exactly to
+[Python's tuples][tuples]. To define a tuple, use angular brackets
+<q><code>&lt;</code></q> and <q><code>&gt;</code></q>. The syntax is:
 
 <div>
     <pre class='mcdp_value' np>
@@ -263,26 +270,26 @@ To define a tuple, use angular brackets &ldquo;<code>&lt;</code>&rdquo; and &ldq
     </pre>
 </div>
 
-For example, the expression <val>&lt;2 J, 1 A&gt;</val>
-denotes a tuple with two elements, equal to <val>2 J</val>
-and <code class='mcdp_value'>2 A</code>.
-An alternative syntax uses the fancy Unicode brackets &ldquo;&#x3008;&rdquo; and &ldquo;&#x3009;&rdquo;, as in <val>⟨0 J, 1 A⟩</val>.
+For example, the expression <val>&lt;2 J, 1 A&gt;</val> denotes a tuple with two
+elements, equal to <val>2 J</val> and <code class='mcdp_value'>2 A</code>. An
+alternative syntax uses the fancy Unicode brackets <q>&#x3008;</q> and
+<q>&#x3009;</q>, as in <val>⟨0 J, 1 A⟩</val>.
 
 [tuples]: https://docs.python.org/3/tutorial/datastructures.html#tuples-and-sequences
 
 
-Tuples can be nested. For example, you can describe a tuple like
- <val np>⟨ ⟨0 J, 1 A⟩, ⟨1 m, 1 s, 42⟩ ⟩</val>,
-and its poset is denoted as <code>(</code><pos np>(J × A) × (m × s × Nat)</pos><code>)</code>.
+Tuples can be nested. For example, you can describe a tuple like <val np>⟨ ⟨0 J,
+1 A⟩, ⟨1 m, 1 s, 42⟩ ⟩</val>, and its poset is denoted as <code>(</code><pos
+np>(J × A) × (m × s × Nat)</pos><code>)</code>.
 
 
 ### Named Poset Products <k>product</k>
 
-MCDPL also supports "named products". These are semantically equivalent
-to products, however, there is also a name associated to each entry. This allows to easily refer to the elements.For example, the following declares
-a product of the two spaces <pos>J</pos>
-and <pos>A</pos> with the two entries
-named ``energy`` and ``current``.
+MCDPL also supports "named products". These are semantically equivalent to
+products, however, there is also a name associated to each entry. This allows to
+easily refer to the elements.For example, the following declares a product of
+the two spaces <pos>J</pos> and <pos>A</pos> with the two entries named
+``energy`` and ``current``.
 
 <div center>
     <pre class='mcdp_poset'>
@@ -295,11 +302,10 @@ contains letters, underscore, and numbers).
 
 ### Power sets <k>set-of</k> <k>℘</k>
 
-MCDPL allows to describe the set of subsets of a poset, i.e.
-its [power set][powerset].
-The power set $\pset(Q)$ of a poset $Q$ is a poset with
-the order given by inclusion:
-%
+MCDPL allows to describe the set of subsets of a poset, i.e. its [power
+set][powerset]. The power set $\pset(Q)$ of a poset $Q$ is a poset with the
+order given by inclusion:
+
 $$
     a \posleq_{\pset(Q)} b
     \quad \equiv \quad
@@ -339,7 +345,16 @@ set-building notation:
 For example, the value <val>{1,2,3}</val>
 is an element of the poset <pos>℘(Nat)</pos>.
 
-### Upper and lower sets and closures <k>UpperSets</k> <k>LowerSets</k> <k>upperclosure</k> <k>↑</k> <k>lowerclosure</k> <k>↓</k>
+<h3>
+    Upper and lower sets and closures
+
+   <k>UpperSets</k>
+   <k>LowerSets</k>
+   <k>upperclosure</k>
+   <k>↑</k>
+   <k>lowerclosure</k>
+   <k>↓</k>
+</h3>
 
 Upper sets ([](#def:upperset)) and lower sets ([](#def:lowerset))
 can be described by the syntax
@@ -354,12 +369,11 @@ can be described by the syntax
     </pre>
 </col2>
 
-For example, <mcdp-poset>UpperSets(Nat)</mcdp-poset>
-represents the space of uppersets for the natural numbers.
+For example, <poset>UpperSets(Nat)</poset> represents the space of
+uppersets for the natural numbers.
 
-To describe an upper set (i.e. an element of the space
-of upper sets), use the keyword <k>upperclosure</k>
-or its abbreviation <k>↑</k>. The syntax is:
+To describe an upper set (i.e. an element of the space of upper sets), use the
+keyword <k>upperclosure</k> or its abbreviation <k>↑</k>. The syntax is:
 
 <col2>
     <pre class='mcdp_value'>
@@ -371,11 +385,8 @@ or its abbreviation <k>↑</k>. The syntax is:
     </pre>
 </col2>
 
-For example:
-<value>
-    ↑ {2 g, 1 m}
-</value>
-denotes the principal upper set of the element <value>{2 g, 1 m}</value> in the poset <mcdp-poset>g x m</mcdp-poset>.
+For example: <value>↑ {2 g, 1 m}</value> denotes the principal upper set of
+the element <value>{2 g, 1 m}</value> in the poset <poset>g x m</poset>.
 
 
 ### Interval (experimental)
@@ -448,11 +459,9 @@ denote the set of minimal and maximal elements of a poset.
 }
 </style>
 
-For example, assume that the poset <code>MyPoset</code> is defined as
-in [](#fig:hasse2).
-%
-Then
-  <val>Maximals &#96;MyPoset</val> is equivalent to `b`and `d` and <val>Minimals &#96;MyPoset</val> is equivalent to `a`, `e`, `c`.
+For example, assume that the poset <code>MyPoset</code> is defined as in
+[](#fig:hasse2). % Then <val>Maximals &#96;MyPoset</val> is equivalent to `b`and
+`d` and <val>Minimals &#96;MyPoset</val> is equivalent to `a`, `e`, `c`.
 
 <!--
 <pre class='mcdp_value' id='value1'>

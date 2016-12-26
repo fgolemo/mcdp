@@ -6,47 +6,44 @@
 We will use basic facts about order theory. Davey and Priestley~\cite{davey02}
 and Roman~\cite{roman08} are possible reference texts.
 
-Let $\left\langle \posA,\posAleq\right\rangle $ be a partially ordered
-set (poset), which is a set~$\posA$ together with a partial order~$\posAleq$
-(a reflexive, antisymmetric, and transitive relation). The partial
-order~"$\posAleq$" is written as "$\posleq$" if the context
-is clear. If a poset has a least element, it is called "bottom"
-and it is denoted by~$\bot_{\posA}$. If the poset has a maximum
-element, it is called "top" and denoted as~$\top_{\posA}$.
+Let $\left\langle \posA,\posAleq\right\rangle $ be a partially ordered set
+(poset), which is a set~$\posA$ together with a partial order~$\posAleq$ (a
+reflexive, antisymmetric, and transitive relation). The partial
+order~"$\posAleq$" is written as "$\posleq$" if the context is clear. If a poset
+has a least element, it is called "bottom" and it is denoted by~$\bot_{\posA}$.
+If the poset has a maximum element, it is called "top" and denoted
+as~$\top_{\posA}$.
 
 ### Chains and antichains
 
-A <em>chain</em> $x\posleq y\posleq z\posleq\dots$ is a subset of a
-poset in which all elements are comparable. An <em>antichain</em> is
-a subset of a poset in which <em>no</em> elements are comparable. This
-is the mathematical concept that formalizes the idea of "Pareto
-front".
+A <em>chain</em> $x\posleq y\posleq z\posleq\dots$ is a subset of a poset in
+which all elements are comparable. An <em>antichain</em> is a subset of a poset
+in which <em>no</em> elements are comparable. This is the mathematical concept
+that formalizes the idea of "Pareto front".
 
 \begin{defn}[Antichain] \label{def:antichain}
 A subset $S\subseteq\posA$ is an antichain iff no elements are comparable:
 for~$x,y\in S$, $x\posleq y$ implies~$x=y$.
 \end{defn}
 
-Call~$\antichains\posA$ the set of all antichains in~$\posA$.
-By this definition, the empty set is an antichain: $\emptyset\in\antichains\posA$.
+Call~$\antichains\posA$ the set of all antichains in~$\posA$. By this
+definition, the empty set is an antichain: $\emptyset\in\antichains\posA$.
 
-\begin{defn}[Width and height of a poset]
-\label{def:poset-width-height} $\mathsf{width}(\posA)$ is the maximum
-cardinality of an antichain in~$\posA$ and $\mathsf{height}(\posA)$
-is the maximum cardinality of a chain in~$\posA$.
+\begin{defn}[Width and height of a poset] \label{def:poset-width-height}
+$\mathsf{width}(\posA)$ is the maximum cardinality of an antichain in~$\posA$
+and $\mathsf{height}(\posA)$ is the maximum cardinality of a chain in~$\posA$.
 \end{defn}
 
 
 ### Minimal elements
 
-Uppercase "$\Min$" will denote the \emph{minimal} elements of
-a set. The minimal elements are the elements that are not dominated
-by any other in the set. Lowercase "$\min$" denotes \emph{ the
-least} element, an element that dominates all others, if it exists.
-(If~$\min S$ exists, then~$\Min S=\{\min S\}$.)
+Uppercase "$\Min$" will denote the \emph{minimal} elements of a set. The minimal
+elements are the elements that are not dominated by any other in the set.
+Lowercase "$\min$" denotes \emph{ the least} element, an element that dominates
+all others, if it exists. (If~$\min S$ exists, then~$\Min S=\{\min S\}$.)
 
-The set of minimal elements of a set are an antichain, so~$\Min$
-is a map from the power set $\pset(\posA)$ to the antichains~$\antichains\posA$:
+The set of minimal elements of a set are an antichain, so~$\Min$ is a map from
+the power set $\pset(\posA)$ to the antichains~$\antichains\posA$:
 
 \begin{align*}
 \Min\colon\pset(\posA) & \rightarrow\antichains\posA,\\

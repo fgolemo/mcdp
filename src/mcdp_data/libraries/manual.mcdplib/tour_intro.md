@@ -10,7 +10,7 @@ for resources.
     <col3 figure-id='fig:complicated'>
         <s><f>Functionalities</f> <br/><br/>
                 $\langle\funsp,\funleq\rangle$</s>
-        <render class='ndp_graph_templatized' id='complicated' label='empty.mcdp'>
+        <render class='ndp_graph_templatized' id='complicated'>
         template mcdp {
             provides f1 [g]
             provides f2 [J]
@@ -39,10 +39,10 @@ and zero resources ([](#fig:empty)). This MCDP will be able to tell us that to
 do nothing, nothing is needed. While you might have an intuitive understanding
 of this fact, you might appreciate having a formal proof.
 
-An MCDP is described in MCDPL using the construct <k>mcdp {&hellip;}</k>, as in
+An MCDP is described in MCDPL using the construct <k>mcdp {…}</k>, as in
 [](#code:empty). The code describes an MCDP with zero functionality and zero
 resources. Comments in MCDPL work like in Python: everything after
-&ldquo;`#`&rdquo; is ignored by the interpreter.
+<q>`#`</q> is ignored by the interpreter.
 
 <col2><!-- &#32;&#32;&#32;&#32; -->
     <pre class='mcdp' id='empty' label='empty.mcdp'
@@ -143,7 +143,7 @@ previous MCDP, with hard bounds given to both <fname>capacity</fname> and
 
 
 The visualization of these constraints is as in [](#fig:model2-verbose). Note
-that there is always a &ldquo;$\posleq$&rdquo; node between a green and a red
+that there is always a <q>$\posleq$</q> node between a green and a red
 edge. This visualization is quite verbose. It shows one node for each
 functionality and resources; here, a node can be thought of a variable on which
 we are optimizing. This is the view shown in the editor.
@@ -180,15 +180,15 @@ we obtain no solutions (the empty set):
 
     Minimal resources needed: mass = ↑{ }
 
-The notation &ldquo;`↑{ }`&rdquo; means "the upper closure of the empty set
+The notation <q>`↑{ }`</q> means "the upper closure of the empty set
 $\emptyset$" ([](#def:upperclosure)), which is equal to $\emptyset$.
 
 
-### Beyond ASCII - Use of Unicode glyphs in the language
+### Beyond `ASCII` - Use of Unicode glyphs in the language
 
-To describe the inequality constraints, MCDPL allows to use <k>&lt;=</k>,
-<k>&gt;=</k>, as well as their fancy Unicode version <k>≼</k>, <k>≽</k>. These
-two expressions are equivalent:
+To describe the inequality constraints, MCDPL allows to use <q><k>&lt;=</k></q>,
+<q><k>&gt;=</k></q>, as well as their fancy Unicode version <q><k>≼</k></q>,
+<q><k>≽</k></q>. These two expressions are equivalent:
 
 <col2>
     <pre class='mcdp_statements' np>

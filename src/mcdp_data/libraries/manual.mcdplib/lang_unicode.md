@@ -1,5 +1,5 @@
 
-### Use of Unicode glyphs to represent operators
+## Use of Unicode glyphs to represent operators {#sub:unicode-operators}
 
 MCDPL allows a number of Unicode glyphs as an abbreviations of a few operators.
 
@@ -9,7 +9,7 @@ MCDPL allows a number of Unicode glyphs as an abbreviations of a few operators.
     <k>≽</k>    <k>&gt;=</k>      <s></s>
     <k>≼</k>    <k>&lt;=</k>      <s></s>
     <k>·</k>    <k>*</k>          <s>Multiplication</s>
-    <k>⟨…⟩</k>  <k>&lt;…&gt;</k>  <s>Tuple-building </s>
+    <k>⟨⋯⟩</k>  <k>&lt;⋯&gt;</k>  <s>Tuple-building </s>
     <k>⊤</k>    <k>Top</k>        <s></s>
     <k>⊥</k>    <k>Bottom</k>     <s></s>
     <k>℘</k>    <k>powerset</k>   <s><a href="#syntax-powerset">Power set</a></s>
@@ -29,7 +29,7 @@ MCDPL allows a number of Unicode glyphs as an abbreviations of a few operators.
 #### Superscripts to indicate powers
 
 Every occurrence of a superscript of the digit *d* is interpreted as a power
-"``^d``".  It is syntactically equivalent to write "``x^2``" or "``x²``".
+<q>`^d`</q>.  It is syntactically equivalent to write <q>`x^2`</q> or <q>`x²`</q>.
 <!-- x¹ x² x³ x⁴ x⁵ x⁶ x⁷ x⁸ x⁹ -->
 
 <col2 id='subscripts'>
@@ -52,11 +52,11 @@ Every occurrence of a superscript of the digit *d* is interpreted as a power
 
 
 
-## Use of Unicode letters as part of identifiers ## {#sub:unicode}
+## Use of Unicode letters as part of identifiers ## {#sub:unicode-in-identifiers}
 
 MCDPL allows to use some Unicode characters, Greek letters and subscripts, also
 in identifiers and expressions. For exmple, it is equivalent to write
-''`alpha_1`'' and ''`α₁`''.
+<q>`alpha_1`</q> and <q>`α₁`</q>.
 
 The rules are that:
 
@@ -86,11 +86,11 @@ Note that there is a difference between lower case and upper case.
     κ kappa     ψ psi
 
 Every Greek letter is converted to its name. It is syntactically equivalent to
-write "`alpha_material`" or "`α_material`".
+write <q>`alpha_material`</q> or <q>`α_material`</q>.
 
 Greek letter names are only considered at the beginning of the identifier
 and if they are followed by a non-word character.
-For example, the identifer `alphabet` is not converted to `αbet`.
+For example, the identifer <q>`alphabet`</q> is not converted to <q>`αbet`</q>.
 
 ### Subscripts
 
@@ -99,7 +99,7 @@ These are the subscripts supported:
     x₀ x₁ x₂ x₃ x₄ x₅ x₆ x₇ x₈ x₉
 
 For subscripts, every occurrence of a subscript of the digit *d* is converted to
-the fragment "``_d``".  It is syntactically equivalent to write "``_1``" or "``₁``".
+the fragment <q>`_d`</q>.  It is syntactically equivalent to write <q>`_1`</q> or <q>`₁`</q>.
 
 Subscripts can only occur at the end of an identifier: ``a₁`` is valid, while
-``a₁b`` is not valid.
+<q>`a₁b`</q> is not valid.

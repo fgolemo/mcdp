@@ -110,8 +110,8 @@ We can create a model with a loop by introducing another constraint.
 
 Take <f>extra_payload</f> to represent the user payload that we must carry.
 
-Then the lift provided by the actuator must be at least the mass
-of the battery plus the mass of the payload times gravity:
+Then the lift provided by the actuator must be at least the mass of the battery
+plus the mass of the payload times gravity:
 
 <col2 id='mine'>
 <pre class="mcdp" id='composition' label='Composition.mcdp'

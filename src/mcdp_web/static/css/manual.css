@@ -54,6 +54,30 @@
     display: table-cell;
   }
 }
+h2 code:first-of-type::before,
+h3 code:first-of-type::before,
+h4 code:first-of-type::before,
+ul.toc code:first-of-type::before {
+  content: '(';
+  font-weight: normal;
+  font-family: serif;
+}
+h2 :not(:last-of-type)::after,
+h3 :not(:last-of-type)::after,
+h4 :not(:last-of-type)::after,
+ul.toc :not(:last-of-type)::after {
+  content: ', ';
+  font-weight: normal;
+  font-family: serif;
+}
+h2 code:last-of-type::after,
+h3 code:last-of-type::after,
+h4 code:last-of-type::after,
+ul.toc code:last-of-type::after {
+  content: ')';
+  font-weight: normal;
+  font-family: serif;
+}
 body {
   font-family: "Times New Roman", Times, serif !important;
   font-size: 10pt;
@@ -70,8 +94,10 @@ h1 {
   text-decoration: none;
 }
 /* Good for safari */
-pre {
-  box-shadow: none;
+@media screen {
+  pre {
+    box-shadow: none;
+  }
 }
 .ndp_graph_expand,
 .ndp_graph_enclosed,
@@ -473,19 +499,19 @@ a[href^='#eq:'    ]:empty {
     :not(.only-number)::before {  content:'('@NS')';content: '(' target-counter(attr(href), listing) ')'; }
           .only-number::before {  content:'♦';  content: target-counter(attr(href), listing); }
 }*/
-a[href^='#code:']:empty .only-number::before {
+a[href^='#code:']:empty.only-number::before {
   content: '♦';
   content: target-counter(attr(href), listing);
 }
-a[href^='#code:']:empty :not(.only-number)::before {
+a[href^='#code:']:empty:not(.only-number)::before {
   content: '♦';
   content: 'Listing' '\0000a0' target-counter(attr(href), listing);
 }
-a[href^='#fig:']:empty .only-number::before {
+a[href^='#fig:']:empty.only-number::before {
   content: '♦';
   content: target-counter(attr(href), figure);
 }
-a[href^='#fig:']:empty :not(.only-number)::before {
+a[href^='#fig:']:empty:not(.only-number)::before {
   content: '♦';
   content: 'Figure' '\0000a0' target-counter(attr(href), figure);
 }

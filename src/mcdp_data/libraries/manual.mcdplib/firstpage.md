@@ -46,11 +46,10 @@
 
 
 
-<style type='text/css'>
-#booktitle, #author {
-    font-family: Cambria;
-
-}
+<style>
+    #booktitle, #author {
+        font-family: Cambria;
+    }
     #booktitle {
         text-align: center; font-size: 45pt !important;
         margin-top: 1em !important;
@@ -58,13 +57,14 @@
     #author {
         text-align: center;
         margin-top: 5em;
-    }
-    #author a {
+
+         a {
         text-decoration: none;
         color: darkblue;
         font-size: 14pt;
+        }
     }
-
+    
     #author, #affiliation { display: none; }
     @media print {
         #affiliation {
