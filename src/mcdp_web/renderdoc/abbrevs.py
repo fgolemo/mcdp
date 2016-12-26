@@ -30,6 +30,7 @@ def other_abbrevs(s):
         for e in soup.select(k):
             e.name = v
 
+    # fix todo
     for p in list(soup.select('p')):
         s = " ".join(p.strings) # note: strings
         

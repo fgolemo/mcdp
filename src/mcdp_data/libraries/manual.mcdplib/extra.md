@@ -37,3 +37,27 @@ for which MCDPL provides syntactic constructs:
     <span figure-id='subfig:hierarchical'  figure-caption="Hierarchical"> \xxx</span>
     <span figure-id='subfig:templating' figure-caption="Templating">\xxx</span>
 </col3>
+
+
+
+
+The primitive DPs are shown in [](#fig:primitive).
+
+<col4>
+
+    $\fun_1 + \fun_2 \posleq \res$
+
+    $\fun \posleq \res_1 + \res_2$
+
+    $\max(\fun_1, \fun_2) \posleq \res$
+
+    $\max(\fun_1, \fun_2) \posleq \res$
+
+    <span>\xxx</span>
+    <span>\xxx</span>
+
+    <span>\xxx</span>
+
+    <span>\xxx</span>
+
+</col4>

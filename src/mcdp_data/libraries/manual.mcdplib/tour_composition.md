@@ -26,9 +26,11 @@ relation from <f>lift</f> to <r>power</r>, as in [](#code:Actuation1).
 The relation between <f>lift</f> and <r>power</r>
 is described by the polynomial relation
 
+<center>
 <pre class="mcdp_statements">
     required power ≽ p₀ + p₁ * l + p₂ * l^2
 </pre>
+</center>
 <!-- Cannot substitute _0, _1, _2, by itself because no context -->
 
 This is really the composition of five DPs,
@@ -38,46 +40,32 @@ correponding to sum, multiplaction, and exponentiation ([](#fig:Actuation1)).
     `Actuation1
 </render>
 
-The primitive DPs are shown in [](#fig:primitive).
-
-<col4>
-
-    $\fun_1 + \fun_2 \posleq \res$
-
-    $\fun \posleq \res_1 + \res_2$
-
-    $\max(\fun_1, \fun_2) \posleq \res$
-
-    $\max(\fun_1, \fun_2) \posleq \res$
-
-    <span>\xxx</span>
-    <span>\xxx</span>
-
-    <span>\xxx</span>
-
-    <span>\xxx</span>
-
-</col4>
-
-
 Let us combine these two together.
 
 The syntax to re-use previously defined MCDPs is:
 
-    instance `Name
+<center>
+<pre>
+<k>instance</k> &#96;Name
+</pre>
+</center>
 
-The backtick means "load the symbols from the library, from the file `name.mcdp`".
+The backtick means <q>load the symbols from the library, from the file called `Name.mcdp`</q>.
 
 The following creates two sub-design problems, for now unconnected.
 
 <col2 id='combined1-around'>
-    <pre class="mcdp" id='combined1'>
+    <pre class="mcdp" id='combined1'
+        figure-id="code:combined1">
     mcdp {
-        actuation = instance `Actuation1
-        battery = instance `Battery
+        actuation = instance &#96;Actuation1
+        battery = instance &#96;Battery
     }
     </pre>
-    <render class='ndp_graph_enclosed'>`combined1</render>
+    <render class='ndp_graph_enclosed'
+        figure-id="fig:combined1">
+        &#96;combined1
+    </render>
 </col2>
 
 <style type='text/css'>
@@ -86,25 +74,42 @@ The following creates two sub-design problems, for now unconnected.
 }
 </style>
 
-We can create a complete model with a loop by describing the co-design
-constraint.
+The model in [](#code:combined1) is not usable yet because some of the edges are
+unconnected. We can create a complete model by adding a co-design constraint.
 
+For example, suppose that we know the desired <fname>endurance</fname> for the
+design. Then we know that the <f>capacity provided by the battery</f> must
+exceed the <r>energy</r> required by actuation, which is the product of power
+and endurance. All of this can be expressed directly in MCDPL using the syntax:
 
-<pre class="mcdp" id='combined2'>
-mcdp {
-    actuation = instance `Actuation1
-    battery = instance `Battery
-
-    # battery must provide power for actuation
-    provides endurance [s]
-    energy = provided endurance *
-        (power required by actuation)
-
-    capacity provided by battery ≽ energy
-}
+<pre class="mcdp_statements">
+energy = provided endurance * (power required by actuation)
+capacity provided by battery ≽ energy
 </pre>
 
-<pre class='ndp_graph_enclosed' style='max-width: 100%'>`combined2</pre>
+The visualization of the resulting model has a connection between the two design
+problems representing the co-design constraint ([](#fig:combined2)).
+
+<center>
+    <pre class="mcdp" id='combined2'
+         figure-id="code:combined2" figure-class="caption-left">
+    mcdp {
+        provides endurance [s]
+        &#32;
+        actuation = instance `Actuation1
+        battery = instance `Battery
+        &#32;
+        # battery must provide power for actuation
+        energy = provided endurance * (power required by actuation)
+        capacity provided by battery ≽ energy
+        # still incomplete...
+    }
+    </pre>
+    <render class='ndp_graph_enclosed' style='max-width: 100%'
+        figure-id="fig:combined2">
+        &#96;combined2
+    </render>
+</center>
 
 We can create a model with a loop by introducing another constraint.
 
@@ -157,4 +162,4 @@ mcdp {
     }
 </style>
 
-\XXX Add example  output
+TODO: Add example output

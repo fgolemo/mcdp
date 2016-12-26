@@ -475,7 +475,7 @@ figure[id^='tab:'] > figcaption:not(:empty)::before {
 figure[id^='tab:'] > figcaption:empty::before {
   content: 'Table' '\0000a0' counter(table);
 }
-figure[id^='fig:'] > figcaption {
+figure[id^='fig:'] > figcaption:not(:empty) {
   text-align: justify;
 }
 figure[id^='fig:'] > figcaption:not(:empty)::before {
@@ -494,11 +494,6 @@ figure[id^='subfig:'] > figcaption:empty::before {
 figcaption {
   font-size: smaller;
 }
-/*
-a[href^='#eq:'    ]:empty {
-    :not(.only-number)::before {  content:'('@NS')';content: '(' target-counter(attr(href), listing) ')'; }
-          .only-number::before {  content:'♦';  content: target-counter(attr(href), listing); }
-}*/
 a[href^='#code:']:empty.only-number::before {
   content: '♦';
   content: target-counter(attr(href), listing);
@@ -513,18 +508,15 @@ a[href^='#fig:']:empty.only-number::before {
 }
 a[href^='#fig:']:empty:not(.only-number)::before {
   content: '♦';
-  content: 'Figure' '\0000a0' target-counter(attr(href), figure);
-}
-/*
-a[href^='#fig:'   ]:empty:not(.only-number)::before {  content: 'Fig.♦'; content: 'Fig.\0000a0' target-counter(attr(href), figure);  }
-a[href^='#fig:'   ]:empty.only-number::before { content: '♦'; content:   target-counter(attr(href), figure) ; } */
-a[href^='#subfig:']:empty:not(.only-number)::before {
-  content: 'Fig.♦?';
-  content: 'Fig.\0000a0' target-counter(attr(href), figure) target-counter(attr(href), subfloat, lower-alpha);
+  content: 'Fig.' '\0000a0' target-counter(attr(href), figure);
 }
 a[href^='#subfig:']:empty.only-number::before {
-  content: '♦?';
+  content: '♦';
   content: target-counter(attr(href), figure) target-counter(attr(href), subfloat, lower-alpha);
+}
+a[href^='#subfig:']:empty:not(.only-number)::before {
+  content: '♦';
+  content: 'Fig.' '\0000a0' target-counter(attr(href), figure) target-counter(attr(href), subfloat, lower-alpha);
 }
 a[href^='#tab:']:empty:not(.only-number)::before {
   content: 'Table♦';

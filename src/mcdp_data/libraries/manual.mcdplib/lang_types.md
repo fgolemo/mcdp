@@ -58,7 +58,7 @@ a chain of $2^{31} + 1$ elements.
 
 [int]: https://docs.python.org/2/library/stdtypes.html#numeric-types-int-float-long-complex
 
-### Nonnegative floating point numbers <pos np>Rcomp</pos> <pos>Rcomp</pos>  {#sub:Rcomp}
+### Nonnegative floating point numbers <pos np>Rcomp</pos> <pos>Rcomp</pos>  {#subsub:Rcomp}
 
 Let $\reals_{+}=\{x \mid x \geq 0\}$ be the nonnegative real numbers  and let
 $\overline{\reals}_{+} = \reals_{+} \cup \top$ be its completion. The $+$ and

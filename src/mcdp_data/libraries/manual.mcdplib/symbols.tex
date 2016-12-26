@@ -1,3 +1,5 @@
+\newcommand{\exc}{\vmath{\colF exec}} % Executation $\exc: \impsp \rightarrow \funsp$
+\newcommand{\eval}{\vmath{\colR eval}} % Evaluation $\eval: \impsp \rightarrow \ressp$
 
 \newcommand{\triv}{\text{Triv}}
 
@@ -24,11 +26,12 @@
 \newcommand{\colF}{\color{darkgreen}}
 \newcommand{\colH}{\color{blue}}
 
-\newcommand{\rtof}{{\colH \varphi}} 
-\newcommand{\ftor}{{\colH h}} 
-\newcommand{\ftoR}{{\colH H}} 
-% \newcommand{\ftoR}{{\color{black}H}} 
-\newcommand{\Rcomp}{\overline{\mathbb{R}}_+}
+\newcommand{\rtof}{{\colH \varphi}}
+\newcommand{\ftor}{{\colH h}}
+\newcommand{\ftoR}{{\colH H}}
+% \newcommand{\ftoR}{{\color{black}H}}
+\newcommand{\Rcomp}{\overline{\mathbb{R}}_{+}}
+\newcommand{\Rcpu}[1]{\Rcomp^{[\textrm{#1}]}}
 
 
 % \newcommand{\colR}{\color[rgb]{0.555789,0.000000,0.000000}}
@@ -73,10 +76,8 @@
 \newcommand{\funbot}{\bot_\funsp}
 
 \newcommand{\imp}{\vmath{i}} % Implementation
-\newcommand{\impsp}{\mathscr{I}} % Implementation space
+\newcommand{\impsp}{{\colI\mathscr{I}}} % Implementation space
 
-\newcommand{\exc}{\vmath{exec}} % Executation $\exc: \impsp \rightarrow \funsp$
-\newcommand{\eval}{\vmath{eval}} % Evaluation $\eval: \impsp \rightarrow \ressp$
 
 % \newcommand{\param}{\vmath{p}} % Parameter
 \newcommand{\paramsp}{\mathscr{P}} % Parameter space
@@ -92,7 +93,7 @@
 
 \newcommand{\tressp}{\trof(\ressp)} % Trade-off space
 \newcommand{\trof}{\mathscr{T}} % Trade-off space
-\newcommand{\tres}{T} 
+\newcommand{\tres}{T}
 \newcommand{\tresleq}{\leq_{\trof}} % Trade-off space
 \newcommand{\trleq}{\leq_{\trof}} % Trade-off space
 
@@ -135,8 +136,8 @@
 
 \newcommand{\udpa}{\boldsymbol{u}_a}
 \newcommand{\udpb}{\boldsymbol{u}_b}
-\newcommand{\udpL}{\boldsymbol{\mathsf{L}}} 
-\newcommand{\udpU}{\boldsymbol{\mathsf{U}}} 
+\newcommand{\udpL}{\boldsymbol{\mathsf{L}}}
+\newcommand{\udpU}{\boldsymbol{\mathsf{U}}}
 \newcommand{\udpsp}{\vmath{UDP}}
 \newcommand{\udpleq}{\posleq_\udpsp}
 
@@ -246,7 +247,7 @@
 \newcommand{\posMin}{\Min}
 \newcommand{\posleq}{\preceq}
 % \newcommand{\poslneq}{\precneq} % usepackage{mathabx}
-\newcommand{\poslt}{\prec} 
+\newcommand{\poslt}{\prec}
 \newcommand{\posgeq}{\succeq}
 
 \newcommand{\posA}{\mathcal{P}} %
@@ -258,21 +259,21 @@
 \newcommand{\posAmin}{\mathop{{\min_{\posAleq}}}} %  The least element
 \newcommand{\posAmax}{\mathop{{\max_{\posAleq}}}} %  The least element
 
-\newcommand{\posB}{\mathcal{Q}} % 
+\newcommand{\posB}{\mathcal{Q}} %
 \newcommand{\posBleq}{\mathrel{{\posleq_\posB}}} %
-\newcommand{\posC}{\mathcal{R}} % 
+\newcommand{\posC}{\mathcal{R}} %
 
 
-\newcommand{\lfp}{\vmath{lfp}} % Least fixed point 
-\newcommand{\prefixed}{\vmath{prefixed}} % prefixed points 
+\newcommand{\lfp}{\vmath{lfp}} % Least fixed point
+\newcommand{\prefixed}{\vmath{prefixed}} % prefixed points
 \newcommand{\CPOs}{\textsc{CPO}s\xspace}
 \newcommand{\CPO}{\textsc{CPO}\xspace}
 \newcommand{\DCPOs}{\textsc{DCPO}s\xspace}
 \newcommand{\DCPO}{\textsc{DCPO}\xspace}
 
 %:example: The upper sets of P are $\upsets(P)$
-% \newcommand{\antichains}{\vmath{antichains}} % 
-\newcommand{\antichains}{\vmath{A}} % 
+% \newcommand{\antichains}{\vmath{antichains}} %
+\newcommand{\antichains}{\vmath{A}} %
 %:example: The antichains sets of P are $\antichains(P)$
 
 \newcommand{\upsets}{\vmath{U}} %
@@ -283,7 +284,7 @@
 
 \newcommand{\upresleq}{\posleq_{\upressp}}
 \newcommand{\upressp}{\upsets\ressp}
-\newcommand{\allupsets}{\vmath{Up}} % 
+\newcommand{\allupsets}{\vmath{Up}} %
 %:deprecated:
 
 

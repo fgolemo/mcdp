@@ -17,8 +17,8 @@ the functionality it provides and the resources it requires.
         figure-id='fig:gmcdp_setup'/>
 </center>
 
-<figcaption id='fig:setup:caption'>
-    A design problem is defined from an mplementation space $\impsp$, functionality
+<figcaption id='fig:gmcdp_setup:caption'>
+    A design problem is defined from an implementation space $\impsp$, functionality
     space $\funsp$, resource space $\ressp$, and the maps $\eval$ and $\exc$ that
     relate the three spaces.
 </figcaption>
@@ -62,7 +62,8 @@ have multiple minimal solutions. To see this, let's expand the model in
 <rname>cost</rname>.
 
 <center>
-    <pre class='mcdp' id='catalogue2' figure-id="code:catalogue2">
+    <pre class='mcdp' id='catalogue2'
+    figure-id="code:catalogue2" figure-class='label-left'>
     catalogue {
         provides capacity [J]
         requires mass [g]
@@ -84,7 +85,8 @@ of <fvalue>600 kWh</fvalue> there are two minimal solutions: either <rvalue>⟨2
 g, 200 USD⟩</rvalue> or <rvalue>⟨250 g, 150 USD⟩</rvalue>.
 
 The number of minimal solutions is not constant: for this example,
-we have:
+we have four cases as a function of $\fun$ ([](#tab:catalogue2-solutions)).
+As $\fun$ increases, there are 1, 2, 1, and 0 minimal solutions.
 
 <figcaption id='tab:catalogue2-solutions:caption' markdown="1">
 Cases for model in [](#code:catalogue2)
@@ -95,44 +97,29 @@ Cases for model in [](#code:catalogue2)
     <s>Functionality requested</s>
     <s>Optimal implementation(s)</s>
     <s>Minimal resources needed</s>
-    <!--  -->
-    <s>$\fun \leq$ <fvalue>500 kWh</fvalue></s>
+    &#32;
+    <s><fvalue>0 kWh</fvalue> $\leq \fun \leq$ <fvalue>500 kWh</fvalue></s>
     <s><impname>model1</impname></s>
     <s><rvalue>⟨100 g, 10 USD⟩</rvalue></s>
-    <!--  -->
+    &#32;
     <s><fvalue>500 kWh</fvalue> $\lt \fun \leq$ <fvalue>600 kWH</fvalue></s>
     <s><impname>model2</impname><br/>or<br/><impname>model3</impname></s>
     <s><rvalue>⟨200 g, 200 USD⟩</rvalue><br/>or<br/><rvalue>⟨250 g, 150 USD⟩</rvalue></s>
-    <!--  -->
+    &#32;
     <s><fvalue>600 kWh</fvalue> $\lt \fun \leq$ <fvalue>700 kWH</fvalue></s>
     <s><impname>model4</impname></s>
     <s><rvalue>⟨400 g, 400 USD⟩</rvalue></s>
-    <!--  -->
-    <s><fvalue>700 kWh</fvalue> $\lt \fun$</s>
+    &#32;
+    <s><fvalue>700 kWh</fvalue> $\lt \fun \leq$ <fvalue>Top kWh</fvalue></s>
     <s><impname>$\emptyset$</impname></s>
-    <s><rvalue>$\emptyset$</rvalue></s>
+    <s><r>$\emptyset$</r></s>
 </col3>
 </center>
 
-<style>
-/*#tab\:catalogue2-solutions table {
-    border-collapse: collapse;
-    border: 0;
-}
-#tab\:catalogue2-solutions tr:first-child td {
-    padding-bottom: 3pt;
-}
-#tab\:catalogue2-solutions tr:nth-child(even) {
-    background-color: #fafafa;
-}
-#tab\:catalogue2-solutions tr:nth-child(odd):not(:first-child) {
-    background-color: #eee;
-}*/
-</style>
 
 We can verify these with <program>mcdp-solve</program>. We also use the switch
-`--imp` to ask it to give also the name of the implementations; without the
-switch, it only prints the value of the minimal resources.
+<q>`--imp`</q> to ask the program to give also the name of the implementations;
+without the switch, it only prints the value of the minimal resources.
 
 For example, for $\fun =$ <fvalue>50 kWH</fvalue>:
 

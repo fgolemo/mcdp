@@ -905,9 +905,9 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
     abbrevs = {
         # tag name:  (new name, classes to add)
         'fname': ('code', ['FName']),
-        'fvalue': ('code', ['mcdp-value', 'fvalue']),
-        'rvalue': ('code', ['mcdp-value', 'rvalue']),
         'rname': ('code', ['RName']),
+        'fvalue': ('code', ['mcdp_value', 'fvalue']),
+        'rvalue': ('code', ['mcdp_value', 'rvalue']),
         'impname': ('code', ['impname']),
         'k': ('code', ['keyword']),
         'program': ('code', ['program']),
@@ -925,23 +925,18 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
             for c in classes_to_add:
                 add_class(e, c)
 
+    # warn not to get confused ith '_' and '-'
+    special_classes = ['mcdp_poset', 'mcdp_fvalue', 'mcdp_rvalue', 'mcdp_value']
+    for x in special_classes:
+        # we do not expect to see an element that has class with '-' instead of '_'
+        erroring = x.replace('_', '-')
+        mistakes = list(soup.select('.%s' % erroring))
+        if mistakes:
+            msg = 'You cannot use %r as a class; use lowercase.' % erroring
+            tags = "\n\n".join(indent(describe_tag(_),' | ') for _ in mistakes)
+            raise_desc(ValueError, msg, tags=tags)
 
-#         
-#         e2 = Tag(name='code')
-#         # copy string
-#         copy_string_and_attrs(e, e2)
-#         # THEN add class
-#         add_class(e2, 'program')
-#         e.replace_with(e2)
-         
-#     'mcdp_template','mcdp', 'mcdp_statements',
-    # mcdp-poset
-#     print('initial mcdp_value: %s' % len(list(soup.select('code.mcdp_value'))))
-#     print('initial mcdp_poset: %s' % len(list(soup.select('code.mcdp_poset'))))
-    for x in [ 
-        'mcdp_poset', 
-        'mcdp_fvalue',
-        'mcdp_rvalue', 'mcdp_value']:
+    for x in special_classes:
         # mcdp_poset -> mcdp-poset
         corresponding = x.replace('_', '-')
              
@@ -952,9 +947,6 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
             # THEN add class
             add_class(e, x)
 
-#             print('%s -> %s' % (e, e2))
-#             
-#             e.replace_with(e2)
     
     # this is a bug with bs4. The replace_with above only adds an escaped
     # text rather than the actual tag (!).

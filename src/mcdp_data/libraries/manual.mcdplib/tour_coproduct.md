@@ -37,10 +37,10 @@ mcdp {
 
 
 Consider two different battery technologies, characterized by their specific
-energy (Joules per gram) and specific cost (USD per gram).
+energy &#91;<poset>Wh/kg</poset>&#93; and specific cost &#91;<poset>Wh/&#36;</poset>&#93;.
 
 Specifically, consider [Nickel-Hidrogen batteries][NiH2] and
-[Lithium-Polymer][LiPo] batteries. On technology is cheaper but leads to heavier
+[Lithium-Polymer][LiPo] batteries. One technology is cheaper but leads to heavier
 batteries and viceversa. Because of this fact, there might be designs in which
 we prefer either.
 
@@ -88,15 +88,14 @@ as two MCDP using the same interface (same resources and same functionality).
        </render>
 </col2>
 
-Then we can define the **coproduct** of the two using the keyword <code><span
-class="CoproductWithNamesChooseKeyword">choose</span></code>. Graphically, the
-choice is indicated through dashed lines.
+Then we can define the **coproduct** of the two using the keyword
+<k>choose</k>>. Graphically, the choice is indicated through dashed lines.
 
 <col2 class="td-valign-top">
     <pre class='mcdp' id='Batteries' label='Batteries.mcdp'>
     choose(
-    NiH2: `Battery1_LiPo,
-    LiPo: `Battery1_NiH2
+        NiH2: `Battery1_LiPo,
+        LiPo: `Battery1_NiH2
     )
     </pre>
     <render class='ndp_graph_enclosed'>`Batteries</render>
