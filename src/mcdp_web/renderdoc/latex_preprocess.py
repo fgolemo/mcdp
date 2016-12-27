@@ -921,8 +921,9 @@ def replace_inside_equations(s):
     s = s.replace('×', '\\times')
     s = s.replace('∞', '\\infty')
     s = s.replace('∈', '\\in')
-    s = s.replace('⟦', '\llbracket')
-    s = s.replace('⟧', '\rrbracket')
+    s = s.replace('⟦', '\\llbracket')
+    s = s.replace('⟧', '\\rrbracket')
+    s = s.replace('≐', '\\doteq')
     for letter_name, symbol in greek_letters.items():
         symbol = symbol.encode('utf-8')
         letter_name = str(letter_name)

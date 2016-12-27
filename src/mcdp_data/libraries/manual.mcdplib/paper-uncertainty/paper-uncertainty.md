@@ -221,7 +221,7 @@ Self-loops are allowed as well.
 \captionsideleft{\label{fig:connection}}{\includegraphics[scale=0.33]{unc_connection}}
 \begin{example}
 The MCDP in~\prettyref{fig:example} is the interconnection of 3
-DPs $\ftor_{a},\ftor_{b},\ftor_{c}.$ The semantics of the MCDP as
+DPs $\ftorₐ,\ftor_{b},\ftor_{c}.$ The semantics of the MCDP as
 an optimization problem is shown in~\prettyref{fig:example-semantics}.\\
 \captionsideleft{\label{fig:example}}{\hspace{-7mm}\includegraphics[scale=0.33]{unc_atoms_g_v_graph}}\\
 \captionsideleft{\label{fig:example-semantics}}{\hspace{-2mm}\includegraphics[scale=0.33]{unc_semantics}}
@@ -277,7 +277,7 @@ that assigns a DP to each atom.
 \begin{example}
 The MCDP in~\prettyref{fig:example} can be described by the atoms
 $\atoms=\{a,b,c\}$, the term $\atree=\dploop(\dpseries(a,\dppar(b,c)),$
-plus the valuation $\val:\{a⟼\ftor_{a},b⟼\ftor_{b},c⟼\ftor_{c}\}.$
+plus the valuation $\val:\{a⟼\ftorₐ,b⟼\ftor_{b},c⟼\ftor_{c}\}.$
 The tuple~$\left⟨ \atoms,\atree,\val\right⟩ $ for this
 example is shown in \prettyref{fig:example-b}.
 \end{example}
@@ -311,10 +311,10 @@ is defined as follows:
 \begin{minipage}[t]{1.05\columnwidth}
 {\small{}
 \begin{align}
-\dpsem⟦\left⟨ \atoms,a,\val\right⟩ ⟧ & \doteq\val(a),\qquad\text{for all}\ a∈\atoms,\label{eq:base}\\
-\dpsem⟦\left⟨ \atoms,\dpseries(\atree₁,\atree₂),\val\right⟩ ⟧ & \doteq\dpsem⟦\left⟨ \atoms,\atree₁,\val\right⟩ ⟧\,\opseries\,\dpsem⟦\left⟨ \atoms,\atree₂,\val\right⟩ ⟧,\label{eq:series}\\
-\dpsem⟦\left⟨ \atoms,\dppar(\atree₁,\atree₂),\val\right⟩ ⟧ & \doteq\dpsem⟦\left⟨ \atoms,\atree₁,\val\right⟩ ⟧\,\oppar\,\dpsem⟦\left⟨ \atoms,\atree₂,\val\right⟩ ⟧,\label{eq:par}\\
-\dpsem⟦\left⟨ \atoms,\dploop(\atree),\val\right⟩ ⟧ & \doteq\dpsem⟦\left⟨ \atoms,\atree,\val\right⟩ ⟧^{\oploop}.\label{eq:loop}
+\dpsem⟦\left⟨ \atoms,a,\val\right⟩ ⟧ & ≐\val(a),\qquad\text{for all}\ a∈\atoms,\label{eq:base}\\
+\dpsem⟦\left⟨ \atoms,\dpseries(\atree₁,\atree₂),\val\right⟩ ⟧ & ≐\dpsem⟦\left⟨ \atoms,\atree₁,\val\right⟩ ⟧\,\opseries\,\dpsem⟦\left⟨ \atoms,\atree₂,\val\right⟩ ⟧,\label{eq:series}\\
+\dpsem⟦\left⟨ \atoms,\dppar(\atree₁,\atree₂),\val\right⟩ ⟧ & ≐\dpsem⟦\left⟨ \atoms,\atree₁,\val\right⟩ ⟧\,\oppar\,\dpsem⟦\left⟨ \atoms,\atree₂,\val\right⟩ ⟧,\label{eq:par}\\
+\dpsem⟦\left⟨ \atoms,\dploop(\atree),\val\right⟩ ⟧ & ≐\dpsem⟦\left⟨ \atoms,\atree,\val\right⟩ ⟧^{\oploop}.\label{eq:loop}
 \end{align}
 }
 \end{minipage}{\small{}}}{\small \par}
@@ -371,7 +371,7 @@ is defined as
 \subsection{Solution of MCDPs}
 
 \prettyref{def:dpsem} gives a way to evaluate the map~$\ftor$ for
-the graph, given the maps~$\{\ftor{}_{a}\mid a∈\atoms\}$ for the
+the graph, given the maps~$\{\ftor{}ₐ\mid a∈\atoms\}$ for the
 leaves. Following those instructions, we can compute~$\ftor(\fun)$,
 and thus find the minimal resources needed for the entire MCDP.
 \begin{example}
@@ -380,14 +380,14 @@ explicitly. From~\prettyref{def:dpsem}, we can compute the semantics
 as follows:
 \begin{align*}
 \ftor & =\dpsem⟦ ⟨\atoms,\dploop(\dpseries(a,\dppar(b,c)),\val⟩⟧ \\
- & =\left(\ftor_{a}\,\opseries\,(\ftor_{b}\,\oppar\,\ftor_{c})\right)^{\oploop}.
+ & =\left(\ftorₐ\,\opseries\,(\ftor_{b}\,\oppar\,\ftor_{c})\right)^{\oploop}.
 \end{align*}
 Substituting the definitions~\ref{def:opmaps}\textendash \ref{def:oploop}
 above, one finds that $\ftor(\fun)=\lfp\left(\Psi_{\fun}\right),$
 with
 \begin{align*}
 \Psi_{\fun}:\Aressp & ⟶\Aressp,\\
-{\colR R} & ⟼\bigcup_{\res∈{\colR R}}\Big[\Min_{\posleq}\uparrow\bigcup_{s∈\ftor_{a}(\fun₁,\res)}\ftor_{b}(s)\acprod\ftor_{c}(s)\Big]\ \cap\uparrow\res.
+{\colR R} & ⟼\bigcup_{\res∈{\colR R}}\Big[\Min_{\posleq}\uparrow\bigcup_{s∈\ftorₐ(\fun₁,\res)}\ftor_{b}(s)\acprod\ftor_{c}(s)\Big]\ \cap\uparrow\res.
 \end{align*}
 The least fixed point equation can be solved using Kleene's algorithm~\cite[CPO Fixpoint theorem I, 8.15]{davey02}.
 A dynamical system that computes the set of solutions is given by
@@ -563,21 +563,21 @@ below.
 \subsubsection*{Informal statement}
 
 Suppose that we have an MCDP composed of many DPs, and one of those
-is~$\ftor_{a}$~(\prettyref{fig:consider1}).
+is~$\ftorₐ$~(\prettyref{fig:consider1}).
 
 \captionsideleft{\label{fig:consider1}}{\includegraphics[scale=0.33]{unc_f1}}
 
 \noindent Suppose that we can find two DPs $\boldsymbol{\mathsf{L}}$,
-$\boldsymbol{\mathsf{U}}$ that bound the DP~$\ftor_{a}$~(\prettyref{fig:consider2}).
+$\boldsymbol{\mathsf{U}}$ that bound the DP~$\ftorₐ$~(\prettyref{fig:consider2}).
 
 \captionsideleft{\label{fig:consider2}}{\includegraphics[scale=0.33]{unc_f2}}
 
 \noindent This can model either (a)~uncertainty in our knowledge
-of~$\ftor_{a}$, or (b)~a relaxation that we willingly introduce.
+of~$\ftorₐ$, or (b)~a relaxation that we willingly introduce.
 
 \noindent Then we can consider the pair~$\boldsymbol{\mathsf{L}}$,
 $\boldsymbol{\mathsf{U}}$ as a UDP~$\left⟨ \boldsymbol{\mathsf{L}},\boldsymbol{\mathsf{U}}\right⟩ $
-and we can plug it in the original MCDP in place of~$\ftor_{a}$~(\prettyref{fig:luinside}).
+and we can plug it in the original MCDP in place of~$\ftorₐ$~(\prettyref{fig:luinside}).
 \begin{center}
 \captionsideleft{\label{fig:luinside}}{\includegraphics[scale=0.33]{unc_f3}}
 \par\end{center}
@@ -723,7 +723,7 @@ By construction, $\ufloor_{α}\dpleq\mathsf{Id}\dpleq\uceil_{α}.$
 and $\uceil_{α}$.}
 \end{figure}
 
-Let $\UId_{α}\doteq\left⟨ \ufloor_{α},\uceil_{α}\right⟩ $
+Let $\UId_{α}≐\left⟨ \ufloor_{α},\uceil_{α}\right⟩ $
 be the ``uncertain identity''. For~$0<α<β$, it holds
 that
 \[
@@ -748,12 +748,12 @@ where the new valuation~$\val_{α}$ agrees with~$\val$ except
 on a particular atom~$a∈\atoms$, which is replaced by the series
 of the original~$\val(a)$ and the approximation~$\text{UId}_{α}$:
 \begin{align*}
-\val_{α}(a) & \doteq\dpseries(\UId_{α},\val(a))
+\val_{α}(a) & ≐\dpseries(\UId_{α},\val(a))
 \end{align*}
 Call the original and approximated DPs~$\dprob$ and~$\dprob_{α}$:
 \[
 \begin{array}{ccc}
-\dprob\doteq\udpsem ⟦ \left⟨ \atoms,\atree,\val\right⟩ ⟧ , &  & \dprob{}_{α}\doteq\udpsem⟦ \left⟨ \atoms,\atree,\val_{α}\right⟩ ⟧ .\end{array}
+\dprob≐\udpsem ⟦ \left⟨ \atoms,\atree,\val\right⟩ ⟧ , &  & \dprob{}_{α}≐\udpsem⟦ \left⟨ \atoms,\atree,\val_{α}\right⟩ ⟧ .\end{array}
 \]
 Because $\val\posleq_{V}\val_{α}$ (in the sense of~\prettyref{def:For-two-valuations,}),
 \prettyref{thm:udpsem-monotone} implies that
@@ -1121,23 +1121,23 @@ The definition of $\oppar$ (\prettyref{def:opmaps}) is:
 Because of symmetry, it suffices to prove that $\oppar$ is monotone
 in the first argument, leaving the second fixed.
 
-We need to prove that for any two DPs $\ftor_{a},\ftor_{b}$ such
+We need to prove that for any two DPs $\ftorₐ,\ftor_{b}$ such
 that
 \begin{equation}
-\ftor_{a}\dpleq\ftor_{b},\label{eq:Ikno}
+\ftorₐ\dpleq\ftor_{b},\label{eq:Ikno}
 \end{equation}
 and for any fixed $\overline{\ftor}$, then
 \[
-\ftor_{a}\oppar\overline{\ftor}\dpleq\ftor_{b}\oppar\overline{\ftor}.
+\ftorₐ\oppar\overline{\ftor}\dpleq\ftor_{b}\oppar\overline{\ftor}.
 \]
 Let $R=\overline{\ftor}(\fun₂)$. Then we have that
 \begin{align*}
-[\ftor_{a}\oppar\overline{\ftor}](\fun₁,\fun₂) & =\ftor_{a}(\fun₁)\acprod R,\\{}
+[\ftorₐ\oppar\overline{\ftor}](\fun₁,\fun₂) & =\ftorₐ(\fun₁)\acprod R,\\{}
 [\ftor_{b}\oppar\overline{\ftor}](\fun₁,\fun₂) & =\ftor_{b}(\fun₁)\acprod R.
 \end{align*}
 Because of \prettyref{eq:Ikno}, we know that
 \[
-\ftor_{a}(\fun₁)\posleq_{\antichains\ressp₁}\ftor_{b}(\fun₁).
+\ftorₐ(\fun₁)\posleq_{\antichains\ressp₁}\ftor_{b}(\fun₁).
 \]
 So the thesis follows from proving that the product of antichains
 is monotone~(\prettyref{lem:product-monotone}).
@@ -1191,7 +1191,7 @@ to prove this just for the base case and for the recursive cases.
 
 The base case, given in \eqref{eq:base}, is
 \[
-\dpsem⟦\left⟨ \atoms,a,\val\right⟩ ⟧\doteq\val(a),\qquad\text{for all}\ a∈\atoms.
+\dpsem⟦\left⟨ \atoms,a,\val\right⟩ ⟧≐\val(a),\qquad\text{for all}\ a∈\atoms.
 \]
 We have
 \begin{align*}
