@@ -7,6 +7,7 @@ from contracts.utils import raise_desc, raise_wrapped
 from mcdp_web.renderdoc.markdown_transform import is_inside_markdown_quoted_block
 from mocdp import logger
 from mocdp.exceptions import DPSyntaxError
+from mcdp_lang.dealing_with_special_letters import greek_letters
 
 def assert_not_inside(substring, s):
     if substring in s:
@@ -910,6 +911,22 @@ def replace_inside_equations(s):
     s = s.replace('⟼', '\\mapsto')
     s = s.replace('⟨', '\\langle')
     s = s.replace('⟩', '\\rangle')
+    s = s.replace('≤', '\\leq')
+    s = s.replace('≥', '\\geq')
+    s = s.replace('₁', '_{1}')
+    s = s.replace('₂', '_{2}')
+    s = s.replace('ₙ', '_{n}')
+    s = s.replace('₊', '_{+}')
+    s = s.replace('ℝ', '\\mathbb{R}')
+    s = s.replace('×', '\\times')
+    s = s.replace('∞', '\\infty')
+    s = s.replace('∈', '\\in')
+    s = s.replace('⟦', '\llbracket')
+    s = s.replace('⟧', '\rrbracket')
+    for letter_name, symbol in greek_letters.items():
+        symbol = symbol.encode('utf-8')
+        letter_name = str(letter_name)
+        s = s.replace(symbol, '\\' + letter_name)
     return s
 
 def extract_maths(s):
@@ -940,6 +957,9 @@ def extract_maths(s):
     subs = {}
     for d1, d2 in delimiters:
         s = extract_delimited(s, d1, d2, subs, domain='MATHS', acceptance=acceptance)
+        
+    for k, v in subs.items():
+        subs[k] = replace_inside_equations(v)
     return s, subs
 
 

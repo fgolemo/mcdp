@@ -24,7 +24,7 @@ some uncertainty in the answer.
 
 The design of a robotic platform involves the choice and configuration
 of many hardware and software subsystems (actuation, energetics, perception,
-control, \ldots{}) in an harmonious entity in which all \emph{co-design
+control, …) in an harmonious entity in which all \emph{co-design
 constraints} are respected. Because robotics is a relatively young
 discipline, there is still little work towards obtaining systematic
 procedures to derive optimal designs. Therefore, robot design is a
@@ -103,8 +103,8 @@ solutions.
 
 This paper describes how to add a notion of \emph{uncertainty} in
 the MCDP framework. The model of uncertainty considered is interval
-uncertainty on arbitrary partial orders. For a poset~$\left\langle \posA,\posleq\right\rangle $,
-these are sets of the type~$\{x\in\posA\colon a\posleq x\posleq b\}$.
+uncertainty on arbitrary partial orders. For a poset~$\left⟨ \posA,\posleq\right⟩ $,
+these are sets of the type~$\{x∈\posA\colon a\posleq x\posleq b\}$.
 I will show how one can introduce this type of uncertainty in the
 MCDP framework by considering ordered pairs of design problems. Each
 pair describes lower and upper bounds for resources usage. These \emph{uncertain
@@ -148,8 +148,8 @@ for reproducing the experiments.
 
 \emph{A design problem} (DP) is a monotone relation between \emph{\F{provided functionality}}
 and \emph{\R{required resources}}. \F{Functionality} and \R{resources}
-are complete partial orders (CPO)~\cite{davey02}, indicated by~$\langle\funsp,\posleq_{\funsp}\rangle$
-and~$\langle\ressp,\posleq_{\ressp}\rangle$. The graphical representations
+are complete partial orders (CPO)~\cite{davey02}, indicated by~$⟨\funsp,\posleq_{\funsp}⟩$
+and~$⟨\ressp,\posleq_{\ressp}⟩$. The graphical representations
 uses nodes for DPs and green (red) edges for \F{functionality} and
 \R{resources}~(\prettyref{fig:dp}).
 
@@ -162,7 +162,7 @@ are \R{resources} (what the battery requires)~(\prettyref{fig:battery1}).
 \end{example}
 \captionsideleft{\label{fig:battery1}}{\includegraphics[scale=0.33]{unc_battery_masscost}}
 
-\noindent In general, fixed a functionality~$\fun\in\funsp$, there
+\noindent In general, fixed a functionality~$\fun∈\funsp$, there
 will be multiple resources in~$\ressp$ sufficient to perform the
 functionality that are incomparable with respect to~$\posleq_{\ressp}$.
 For example, in the case of a battery one might consider different
@@ -177,29 +177,29 @@ informally called a ``Pareto front''.
 
 
 \begin{defn}
-An \emph{antichain}~$S$ in a poset~$\left\langle \posA,\posleq\right\rangle $
+An \emph{antichain}~$S$ in a poset~$\left⟨ \posA,\posleq\right⟩ $
 is a subset of~$\posA$ such that no element of~$S$ dominates another
-element: if~$x,y\in S$ and~$x\posleq y$, then~$x=y$.
+element: if~$x,y∈ S$ and~$x\posleq y$, then~$x=y$.
 \end{defn}
 \begin{lem}
 Let~$\antichains\posA$ be the set of antichains of~$\posA$. $\antichains\posA$
 is a poset itself, with the partial order~$\posleq_{\antichains\posA}$
 defined as
 \begin{equation}
-S_{1}\posleq_{\antichains\posA}S_{2}\ \equiv\ \uparrow S_{1}\supseteq\,\uparrow S_{2}.\label{eq:orderantichains}
+S₁\posleq_{\antichains\posA}S₂\ \equiv\ \uparrow S₁\supseteq\,\uparrow S₂.\label{eq:orderantichains}
 \end{equation}
 \end{lem}
 \begin{defn}
 \label{def:A-monotone-design}A\emph{ monotone design problem~}(DP)
-is a tuple~$\left\langle \funsp,\ressp,\ftor\right\rangle $ such
-that~$\funsp$ and~$\ressp$ are CPOs, and~${\colH\ftor}:{\colF\fun}\rightarrow{\colR\antichains\ressp}$
+is a tuple~$\left⟨ \funsp,\ressp,\ftor\right⟩ $ such
+that~$\funsp$ and~$\ressp$ are CPOs, and~${\colH\ftor}:{\colF\fun}⟶{\colR\antichains\ressp}$
 is a monotone and Scott-continuous function~(\cite{gierz03continuous}
 or \cite[Definition 11]{censi16codesign_sep16}).
 \end{defn}
 \captionsideleft{}{\includegraphics[scale=0.33]{unc_ftor}}
 
 \noindent Each functionality~$\fun$ corresponds to an antichain
-of resources~$\ftor(\fun)\in\Aressp$~(\prettyref{fig:antichain}).
+of resources~$\ftor(\fun)∈\Aressp$~(\prettyref{fig:antichain}).
 
 \captionsideleft{\label{fig:antichain}}{\includegraphics[scale=0.33]{unc_ftorgraph}}
 
@@ -215,7 +215,7 @@ A Monotone Co-Design Problem is a multigraph of DPs. Two DPs can be
 connected by adding an edge~(\prettyref{fig:connection}). The semantics
 of the interconnection is that the resources required by the first
 DP must be provided by the second DP. Mathematically, this is a partial
-order inequality constraint of the type~$\res_{1}\posleq\fun_{2}$.
+order inequality constraint of the type~$\res₁\posleq\fun₂$.
 Self-loops are allowed as well.
 
 \captionsideleft{\label{fig:connection}}{\includegraphics[scale=0.33]{unc_connection}}
@@ -261,24 +261,24 @@ and there is only one atom~$a$, then the terms are $\terms(\{f\},\{a\})=\{a,f(a)
 
 
 \begin{defn}[Algebraic definition Monotone Co-Design Problems]
-\label{def:MCDP-algebraic}An MCDP is a tuple~$\left\langle \atoms,\atree,\val\right\rangle $,
+\label{def:MCDP-algebraic}An MCDP is a tuple~$\left⟨ \atoms,\atree,\val\right⟩ $,
 where:
 \begin{enumerate}
 \item $\atoms$ is any set of atoms, to be used as labels.
 \item The term~$\atree$ in the $\{\dpseries,\dppar,\dploop\}$ algebra
 describes the structure of the graph:
 \[
-\atree\in\terms(\{\dpseries,\dppar,\dploop\},\atoms).
+\atree∈\terms(\{\dpseries,\dppar,\dploop\},\atoms).
 \]
-\item The \emph{valuation} $\val$ is a map $\val:\atoms\rightarrow\dpsp$
+\item The \emph{valuation} $\val$ is a map $\val:\atoms⟶\dpsp$
 that assigns a DP to each atom.
 \end{enumerate}
 \end{defn}
 \begin{example}
 The MCDP in~\prettyref{fig:example} can be described by the atoms
 $\atoms=\{a,b,c\}$, the term $\atree=\dploop(\dpseries(a,\dppar(b,c)),$
-plus the valuation $\val:\{a\mapsto\ftor_{a},b\mapsto\ftor_{b},c\mapsto\ftor_{c}\}.$
-The tuple~$\left\langle \atoms,\atree,\val\right\rangle $ for this
+plus the valuation $\val:\{a⟼\ftor_{a},b⟼\ftor_{b},c⟼\ftor_{c}\}.$
+The tuple~$\left⟨ \atoms,\atree,\val\right⟩ $ for this
 example is shown in \prettyref{fig:example-b}.
 \end{example}
 \captionsideleft{\label{fig:example-b}}{\includegraphics[scale=0.33]{unc_atoms_g_v}}
@@ -300,10 +300,10 @@ define~$\dpsem$, we need to only define what happens in the base
 case (equation~\ref{eq:base}), and what happens for each operator
 $\dpseries,\dppar,\dploop$ (equations~\ref{eq:series}\textendash \ref{eq:loop}).
 \begin{defn}[Semantics of MCDP]
-\label{def:dpsem}Given an MCDP in algebraic form~$\left\langle \atoms,\atree,\val\right\rangle $,
+\label{def:dpsem}Given an MCDP in algebraic form~$\left⟨ \atoms,\atree,\val\right⟩ $,
 the semantics
 \[
-\dpsem\llbracket\left\langle \atoms,\atree,\val\right\rangle \rrbracket\in\dpsp
+\dpsem⟦\left⟨ \atoms,\atree,\val\right⟩ ⟧∈\dpsp
 \]
 is defined as follows:
 
@@ -311,10 +311,10 @@ is defined as follows:
 \begin{minipage}[t]{1.05\columnwidth}
 {\small{}
 \begin{align}
-\dpsem\llbracket\left\langle \atoms,a,\val\right\rangle \rrbracket & \doteq\val(a),\qquad\text{for all}\ a\in\atoms,\label{eq:base}\\
-\dpsem\llbracket\left\langle \atoms,\dpseries(\atree_{1},\atree_{2}),\val\right\rangle \rrbracket & \doteq\dpsem\llbracket\left\langle \atoms,\atree_{1},\val\right\rangle \rrbracket\,\opseries\,\dpsem\llbracket\left\langle \atoms,\atree_{2},\val\right\rangle \rrbracket,\label{eq:series}\\
-\dpsem\llbracket\left\langle \atoms,\dppar(\atree_{1},\atree_{2}),\val\right\rangle \rrbracket & \doteq\dpsem\llbracket\left\langle \atoms,\atree_{1},\val\right\rangle \rrbracket\,\oppar\,\dpsem\llbracket\left\langle \atoms,\atree_{2},\val\right\rangle \rrbracket,\label{eq:par}\\
-\dpsem\llbracket\left\langle \atoms,\dploop(\atree),\val\right\rangle \rrbracket & \doteq\dpsem\llbracket\left\langle \atoms,\atree,\val\right\rangle \rrbracket^{\oploop}.\label{eq:loop}
+\dpsem⟦\left⟨ \atoms,a,\val\right⟩ ⟧ & \doteq\val(a),\qquad\text{for all}\ a∈\atoms,\label{eq:base}\\
+\dpsem⟦\left⟨ \atoms,\dpseries(\atree₁,\atree₂),\val\right⟩ ⟧ & \doteq\dpsem⟦\left⟨ \atoms,\atree₁,\val\right⟩ ⟧\,\opseries\,\dpsem⟦\left⟨ \atoms,\atree₂,\val\right⟩ ⟧,\label{eq:series}\\
+\dpsem⟦\left⟨ \atoms,\dppar(\atree₁,\atree₂),\val\right⟩ ⟧ & \doteq\dpsem⟦\left⟨ \atoms,\atree₁,\val\right⟩ ⟧\,\oppar\,\dpsem⟦\left⟨ \atoms,\atree₂,\val\right⟩ ⟧,\label{eq:par}\\
+\dpsem⟦\left⟨ \atoms,\dploop(\atree),\val\right⟩ ⟧ & \doteq\dpsem⟦\left⟨ \atoms,\atree,\val\right⟩ ⟧^{\oploop}.\label{eq:loop}
 \end{align}
 }
 \end{minipage}{\small{}}}{\small \par}
@@ -324,28 +324,28 @@ Please see~\cite[Section VI]{censi16codesign_sep16} for details
 about the interpretation of these operators and how they are derived.
 
 The $\oppar$ operator is a regular product in category theory: we
-are considering all possible combinations of resources required by~$\ftor_{1}$
-and~$\ftor_{2}$.
+are considering all possible combinations of resources required by~$\ftor₁$
+and~$\ftor₂$.
 \begin{defn}[Product operator $\oppar$]
-\label{def:opmaps}For two maps $\ftor_{1}\colon\funsp_{1}\rightarrow\Aressp_{1}$
-and $\ftor_{2}\colon\funsp_{2}\rightarrow\Aressp_{2}$, define
+\label{def:opmaps}For two maps $\ftor₁\colon\funsp₁⟶\Aressp₁$
+and $\ftor₂\colon\funsp₂⟶\Aressp₂$, define
 \begin{align*}
-\ftor_{1}\oppar\ftor_{2}:(\funsp_{1}\times\funsp_{2}) & \rightarrow\antichains(\ressp_{1}\times\ressp_{2}),\\
-\left\langle \fun_{1},\fun_{2}\right\rangle  & \mapsto\ftor_{1}(\fun_{1})\acprod\ftor_{2}(\fun_{2}),
+\ftor₁\oppar\ftor₂:(\funsp₁×\funsp₂) & ⟶\antichains(\ressp₁×\ressp₂),\\
+\left⟨ \fun₁,\fun₂\right⟩  & ⟼\ftor₁(\fun₁)\acprod\ftor₂(\fun₂),
 \end{align*}
 where $\acprod$ is the product of two antichains.
 \end{defn}
-The $\opseries$ operator is similar to a convolution: fixed $\fun_{1}$,
-one evaluates the resources $\res_{1}\in\ftor_{1}(\fun)$, and for
-each~$\res_{1}$, $\ftor_{2}(\res_{1})$ is evaluated. The $\Min$
+The $\opseries$ operator is similar to a convolution: fixed $\fun₁$,
+one evaluates the resources $\res₁∈\ftor₁(\fun)$, and for
+each~$\res₁$, $\ftor₂(\res₁)$ is evaluated. The $\Min$
 operator then chooses the minimal elements.
 \begin{defn}[Series operator~$\opseries$]
-\label{def:opseries}For two maps~$\ftor_{1}\colon\funsp_{1}\rightarrow\Aressp_{1}$
-and~$\ftor_{2}\colon\funsp_{2}\rightarrow\Aressp_{2}$, if~$\ressp_{1}=\funsp_{2}$
+\label{def:opseries}For two maps~$\ftor₁\colon\funsp₁⟶\Aressp₁$
+and~$\ftor₂\colon\funsp₂⟶\Aressp₂$, if~$\ressp₁=\funsp₂$
 , define
 \begin{align*}
-{\displaystyle \ftor_{1}\opseries\ftor_{2}\colon\funsp_{1}} & \rightarrow\Aressp_{2},\\
-\ftor_{1} & \mapsto\Min_{\posleq_{\ressp_{2}}}\bigcup_{\res_{1}\in\ftor_{1}(\fun)}\ftor_{2}(\res_{1}).
+{\displaystyle \ftor₁\opseries\ftor₂\colon\funsp₁} & ⟶\Aressp₂,\\
+\ftor₁ & ⟼\Min_{\posleq_{\ressp₂}}\bigcup_{\res₁∈\ftor₁(\fun)}\ftor₂(\res₁).
 \end{align*}
 
 \end{defn}
@@ -354,24 +354,24 @@ and~$\ftor_{2}\colon\funsp_{2}\rightarrow\Aressp_{2}$, if~$\ressp_{1}=\funsp_{2}
 The dagger operator $\oploop$ is actually a standard operator used
 in domain theory (see, e.g., \cite[II-2.29]{gierz03continuous}).
 \begin{defn}[Loop operator $\oploop$]
-\label{def:oploop}For a map $\ftor:\funsp_{1}\times\funsp_{2}\rightarrow\Aressp$,
+\label{def:oploop}For a map $\ftor:\funsp₁×\funsp₂⟶\Aressp$,
 define
 \begin{align}
-\ftor^{\oploop}:\funsp_{1} & \rightarrow\Aressp,\nonumber \\
-\fun_{1} & \mapsto\lfp\left(\Psi_{\fun_{1}}^{\ftor}\right),\label{eq:lfp}
+\ftor^{\oploop}:\funsp₁ & ⟶\Aressp,\nonumber \\
+\fun₁ & ⟼\lfp\left(\Psi_{\fun₁}^{\ftor}\right),\label{eq:lfp}
 \end{align}
-where $\lfp$ is the least-fixed point operator, and~$\Psi_{\fun_{1}}^{\ftor}$
+where $\lfp$ is the least-fixed point operator, and~$\Psi_{\fun₁}^{\ftor}$
 is defined as
 \begin{align*}
-\Psi_{\fun_{1}}^{\ftor}:\Aressp & \rightarrow\Aressp,\\
-{\colR R} & \mapsto\Min_{\posleq_{\ressp}}\bigcup_{\res\in{\colR R}}\ftor(\fun_{1},\res)\ \cap\uparrow\res.
+\Psi_{\fun₁}^{\ftor}:\Aressp & ⟶\Aressp,\\
+{\colR R} & ⟼\Min_{\posleq_{\ressp}}\bigcup_{\res∈{\colR R}}\ftor(\fun₁,\res)\ \cap\uparrow\res.
 \end{align*}
 \end{defn}
 
 \subsection{Solution of MCDPs}
 
 \prettyref{def:dpsem} gives a way to evaluate the map~$\ftor$ for
-the graph, given the maps~$\{\ftor{}_{a}\mid a\in\atoms\}$ for the
+the graph, given the maps~$\{\ftor{}_{a}\mid a∈\atoms\}$ for the
 leaves. Following those instructions, we can compute~$\ftor(\fun)$,
 and thus find the minimal resources needed for the entire MCDP.
 \begin{example}
@@ -379,15 +379,15 @@ The MCDP in~\prettyref{fig:example} is so small that we can do this
 explicitly. From~\prettyref{def:dpsem}, we can compute the semantics
 as follows:
 \begin{align*}
-\ftor & =\dpsem\llbracket \langle\atoms,\dploop(\dpseries(a,\dppar(b,c)),\val\rangle\rrbracket \\
+\ftor & =\dpsem⟦ ⟨\atoms,\dploop(\dpseries(a,\dppar(b,c)),\val⟩⟧ \\
  & =\left(\ftor_{a}\,\opseries\,(\ftor_{b}\,\oppar\,\ftor_{c})\right)^{\oploop}.
 \end{align*}
 Substituting the definitions~\ref{def:opmaps}\textendash \ref{def:oploop}
 above, one finds that $\ftor(\fun)=\lfp\left(\Psi_{\fun}\right),$
 with
 \begin{align*}
-\Psi_{\fun}:\Aressp & \rightarrow\Aressp,\\
-{\colR R} & \mapsto\bigcup_{\res\in{\colR R}}\Big[\Min_{\posleq}\uparrow\bigcup_{s\in\ftor_{a}(\fun_{1},\res)}\ftor_{b}(s)\acprod\ftor_{c}(s)\Big]\ \cap\uparrow\res.
+\Psi_{\fun}:\Aressp & ⟶\Aressp,\\
+{\colR R} & ⟼\bigcup_{\res∈{\colR R}}\Big[\Min_{\posleq}\uparrow\bigcup_{s∈\ftor_{a}(\fun₁,\res)}\ftor_{b}(s)\acprod\ftor_{c}(s)\Big]\ \cap\uparrow\res.
 \end{align*}
 The least fixed point equation can be solved using Kleene's algorithm~\cite[CPO Fixpoint theorem I, 8.15]{davey02}.
 A dynamical system that computes the set of solutions is given by
@@ -404,8 +404,8 @@ This dynamical system is a proper algorithm only if each step can
 be performed with bounded computation. An example in which this is
 not the case are relations that give an infinite number of solutions
 for each functionality. For example, the very first DP appearing in~\prettyref{fig:Example1}
-corresponds to the relation~${\colF\text{travel distance}}\leq{\colR\text{velocity}}\times{\colR\text{endurance}},$
-for which there are infinite numbers of pairs~$\langle{\colR\text{velocity}},{\colR\text{endurance}}\rangle$
+corresponds to the relation~${\colF\text{travel distance}}≤{\colR\text{velocity}}×{\colR\text{endurance}},$
+for which there are infinite numbers of pairs~$⟨{\colR\text{velocity}},{\colR\text{endurance}}⟩$
 for each value of~${\colF\text{travel distance}}$. The machinery
 developed in this paper will make it possible to deal with these infinite-cardinality
 relations by relaxation.
@@ -434,11 +434,11 @@ to posets of DPs, and finally, to the poset of uncertain DPs.
 
 The first step is defining a partial order~$\dpleq$ on~$\dpsp$.
 \begin{defn}[Partial order $\dpleq$]
-Consider two DPs $\ftor_{1},\ftor_{2}:\funsp\rightarrow\Aressp$.
-The DP~$\ftor_{1}$ precedes~$\ftor_{2}$ if it requires fewer resources
+Consider two DPs $\ftor₁,\ftor₂:\funsp⟶\Aressp$.
+The DP~$\ftor₁$ precedes~$\ftor₂$ if it requires fewer resources
 for all functionality~$\fun$:
 \[
-\ftor_{1}\dpleq\ftor_{2}\quad\equiv\quad\ftor_{1}(\fun)\posleq_{\Aressp}\ftor_{2}(\fun),\ \text{for all }\fun\in\funsp.
+\ftor₁\dpleq\ftor₂\quad\equiv\quad\ftor₁(\fun)\posleq_{\Aressp}\ftor₂(\fun),\ \text{for all }\fun∈\funsp.
 \]
 \end{defn}
 \captionsideleft{}{\includegraphics[scale=0.33]{unc_dporder}\includegraphics[scale=0.33]{unc_dpleq2}}
@@ -450,15 +450,15 @@ bottom~$\bot_{\dpsp}$, defined as follows:
 
 \begin{minipage}[t]{0.4\columnwidth}
 \begin{align*}
-\bot_{\dpsp}:\funsp & \rightarrow\Aressp,\\
-\fun & \mapsto\{\bot_{\ressp}\}.
+\bot_{\dpsp}:\funsp & ⟶\Aressp,\\
+\fun & ⟼\{\bot_{\ressp}\}.
 \end{align*}
 
 \end{minipage}
 \begin{minipage}[t]{0.4\columnwidth}
 \begin{align}
-\top_{\dpsp}:\funsp & \rightarrow\Aressp,\nonumber \\
-\fun & \mapsto\emptyset.\label{eq:top}
+\top_{\dpsp}:\funsp & ⟶\Aressp,\nonumber \\
+\fun & ⟼\emptyset.\label{eq:top}
 \end{align}
 
 \end{minipage}
@@ -471,7 +471,7 @@ resources, and~$\top_{\dpsp}$ means that the problem is always infeasible
 
 \subsection{Uncertain DPs (UDPs)}
 \begin{defn}[Uncertain DPs]
-An Uncertain DP (UDP)~$\boldsymbol{u}$ is a pair of DPs~$\langle\udpL\boldsymbol{u},\udpU\boldsymbol{u}\rangle$
+An Uncertain DP (UDP)~$\boldsymbol{u}$ is a pair of DPs~$⟨\udpL\boldsymbol{u},\udpU\boldsymbol{u}⟩$
 such that~$\udpL\boldsymbol{u}\dpleq\udpU\boldsymbol{u}$.
 \end{defn}
 \captionsideleft{}{\includegraphics[scale=0.33]{unc_udpdef}}
@@ -487,21 +487,21 @@ is contained in the interval~$[\udpL\udpa,\udpU\udpa]$ (\prettyref{fig:udpspace}
 \end{defn}
 \captionsideleft{\label{fig:udpspace}}{\includegraphics[scale=0.33]{unc_udpab2}\includegraphics[scale=0.33]{unc_udpab}}
 
-The partial order~$\udpleq$ has a top~$\top_{\udpsp}=\left\langle \bot_{\dpsp},\top_{\dpsp}\right\rangle .$
+The partial order~$\udpleq$ has a top~$\top_{\udpsp}=\left⟨ \bot_{\dpsp},\top_{\dpsp}\right⟩ .$
 This pair describes maximum uncertainty about the DP: we do not know
 if the DP is feasible with 0 resources~($\bot_{\dpsp}$), or if it
 is completely infeasible~($\top_{\dpsp}$).
 
 \subsection{DPs as degenerate UDPs}
 
-A DP~$\ftor$ is equivalent to a degenerate UDP~$\langle\ftor,\ftor\rangle$.
+A DP~$\ftor$ is equivalent to a degenerate UDP~$⟨\ftor,\ftor⟩$.
 
-A UDP~$\boldsymbol{u}$ is a bound for a DP~$\ftor$ if~$\boldsymbol{u}\udpleq\langle\ftor,\ftor\rangle$,
+A UDP~$\boldsymbol{u}$ is a bound for a DP~$\ftor$ if~$\boldsymbol{u}\udpleq⟨\ftor,\ftor⟩$,
 or, equivalently, if $\udpL\boldsymbol{u}\udpleq\ftor\udpleq\udpU\boldsymbol{u}$.
 
 \captionsideleft{\label{fig:pyr1}}{\hspace{-9mm}\includegraphics[scale=0.33]{unc_dpcones2}\includegraphics[scale=0.33]{unc_dpcones}}
 
-A pair $\langle\ftor,\ftor\rangle$ is a minimal element of~$\udpsp$,
+A pair $⟨\ftor,\ftor⟩$ is a minimal element of~$\udpsp$,
 because it cannot be dominated by any other. Thus, we can imagine
 the space $\udpsp$ as a pyramid~(\prettyref{fig:pyr1}), with the
 space~$\dpsp$ forming the base. The base represents non-uncertain
@@ -515,9 +515,9 @@ the definition of MCDPs. The only difference between \prettyref{def:MCDP-algebra
 and~\prettyref{def:umcdp} below is that the valuation assigns to
 each atom an UDP, rather than a~DP.
 \begin{defn}[Algebraic definition of UMCDPs]
-\label{def:umcdp}An Uncertain MCDP (UMCDP) is a tuple~$\left\langle \atoms,\atree,\val\right\rangle $,
-where~$\atoms$ is a set of atoms,~$\atree\in\terms(\{\dpseries,\dppar,\dploop\},\atoms)$
-is the algebraic representation of the graph, and~$\val:\atoms\rightarrow\udpsp$
+\label{def:umcdp}An Uncertain MCDP (UMCDP) is a tuple~$\left⟨ \atoms,\atree,\val\right⟩ $,
+where~$\atoms$ is a set of atoms,~$\atree∈\terms(\{\dpseries,\dppar,\dploop\},\atoms)$
+is the algebraic representation of the graph, and~$\val:\atoms⟶\udpsp$
 is a valuation that assigns to each atom a UDP.
 \end{defn}
 
@@ -526,29 +526,29 @@ Next, the semantics of a UMCDP is defined as a map~$\udpsem$ that
 computes the UDP. \prettyref{def:semantics-udp}~below is analogous
 to~\prettyref{def:dpsem}.
 \begin{defn}[Semantics of UMCDPs]
-\label{def:semantics-udp}Given an UMCDP~$\left\langle \atoms,\atree,\val\right\rangle $,
+\label{def:semantics-udp}Given an UMCDP~$\left⟨ \atoms,\atree,\val\right⟩ $,
 the semantics function~$\udpsem$ computes a UDP
 \[
-\udpsem\llbracket\left\langle \atoms,\atree,\val\right\rangle \rrbracket\in\udpsp,
+\udpsem⟦\left⟨ \atoms,\atree,\val\right⟩ ⟧∈\udpsp,
 \]
 and it is recursively defined as follows:
 
 \adjustbox{max width=8.6cm}{
 \noindent\begin{minipage}[t]{1\columnwidth}
 \[
-\udpsem\llbracket\left\langle \atoms,a,\val\right\rangle \rrbracket=\val(a),\qquad\text{for all}\ a\in\atoms.
+\udpsem⟦\left⟨ \atoms,a,\val\right⟩ ⟧=\val(a),\qquad\text{for all}\ a∈\atoms.
 \]
 \begin{align*}
-\udpL\udpsem\llbracket\left\langle \atoms,\dpseries(\atree_{1},\atree_{2}),\val\right\rangle \rrbracket & =(\udpL\udpsem\llbracket\left\langle \atoms,\atree_{1},\val\right\rangle \rrbracket)\,\opseries\,(\udpL\udpsem\llbracket\left\langle \atoms,\atree_{2},\val\right\rangle \rrbracket),\\
-\udpU\udpsem\llbracket\left\langle \atoms,\dpseries(\atree_{1},\atree_{2}),\val\right\rangle \rrbracket & =(\udpU\udpsem\llbracket\left\langle \atoms,\atree_{1},\val\right\rangle \rrbracket)\,\opseries\,(\udpU\udpsem\llbracket\left\langle \atoms,\atree_{2},\val\right\rangle \rrbracket),
+\udpL\udpsem⟦\left⟨ \atoms,\dpseries(\atree₁,\atree₂),\val\right⟩ ⟧ & =(\udpL\udpsem⟦\left⟨ \atoms,\atree₁,\val\right⟩ ⟧)\,\opseries\,(\udpL\udpsem⟦\left⟨ \atoms,\atree₂,\val\right⟩ ⟧),\\
+\udpU\udpsem⟦\left⟨ \atoms,\dpseries(\atree₁,\atree₂),\val\right⟩ ⟧ & =(\udpU\udpsem⟦\left⟨ \atoms,\atree₁,\val\right⟩ ⟧)\,\opseries\,(\udpU\udpsem⟦\left⟨ \atoms,\atree₂,\val\right⟩ ⟧),
 \end{align*}
 \begin{align*}
-\udpL\udpsem\llbracket\left\langle \atoms,\dppar(\atree_{1},\atree_{2}),\val\right\rangle ] & =(\udpL\udpsem\llbracket\left\langle \atoms,\atree_{1},\val\right\rangle \rrbracket)\ \oppar\ (\udpL\udpsem\llbracket\left\langle \atoms,\atree_{2},\val\right\rangle \rrbracket),\\
-\udpU\udpsem\llbracket\left\langle \atoms,\dppar(\atree_{1},\atree_{2}),\val\right\rangle ] & =(\udpU\udpsem\llbracket\left\langle \atoms,\atree_{1},\val\right\rangle \rrbracket)\ \oppar\ (\udpU\udpsem\llbracket\left\langle \atoms,\atree_{2},\val\right\rangle \rrbracket),
+\udpL\udpsem⟦\left⟨ \atoms,\dppar(\atree₁,\atree₂),\val\right⟩ ] & =(\udpL\udpsem⟦\left⟨ \atoms,\atree₁,\val\right⟩ ⟧)\ \oppar\ (\udpL\udpsem⟦\left⟨ \atoms,\atree₂,\val\right⟩ ⟧),\\
+\udpU\udpsem⟦\left⟨ \atoms,\dppar(\atree₁,\atree₂),\val\right⟩ ] & =(\udpU\udpsem⟦\left⟨ \atoms,\atree₁,\val\right⟩ ⟧)\ \oppar\ (\udpU\udpsem⟦\left⟨ \atoms,\atree₂,\val\right⟩ ⟧),
 \end{align*}
 \begin{align*}
-\udpL\udpsem\llbracket\left\langle \atoms,\dploop(\atree),\val\right\rangle \rrbracket & =(\udpL\udpsem\llbracket\left\langle \atoms,\atree,\val\right\rangle \rrbracket)^{\oploop},\\
-\udpU\udpsem\llbracket\left\langle \atoms,\dploop(\atree),\val\right\rangle \rrbracket & =(\udpU\udpsem\llbracket\left\langle \atoms,\atree,\val\right\rangle \rrbracket)^{\oploop}.
+\udpL\udpsem⟦\left⟨ \atoms,\dploop(\atree),\val\right⟩ ⟧ & =(\udpL\udpsem⟦\left⟨ \atoms,\atree,\val\right⟩ ⟧)^{\oploop},\\
+\udpU\udpsem⟦\left⟨ \atoms,\dploop(\atree),\val\right⟩ ⟧ & =(\udpU\udpsem⟦\left⟨ \atoms,\atree,\val\right⟩ ⟧)^{\oploop}.
 \end{align*}
 
 \end{minipage}}
@@ -576,7 +576,7 @@ $\boldsymbol{\mathsf{U}}$ that bound the DP~$\ftor_{a}$~(\prettyref{fig:consider
 of~$\ftor_{a}$, or (b)~a relaxation that we willingly introduce.
 
 \noindent Then we can consider the pair~$\boldsymbol{\mathsf{L}}$,
-$\boldsymbol{\mathsf{U}}$ as a UDP~$\left\langle \boldsymbol{\mathsf{L}},\boldsymbol{\mathsf{U}}\right\rangle $
+$\boldsymbol{\mathsf{U}}$ as a UDP~$\left⟨ \boldsymbol{\mathsf{L}},\boldsymbol{\mathsf{U}}\right⟩ $
 and we can plug it in the original MCDP in place of~$\ftor_{a}$~(\prettyref{fig:luinside}).
 \begin{center}
 \captionsideleft{\label{fig:luinside}}{\includegraphics[scale=0.33]{unc_f3}}
@@ -602,16 +602,16 @@ This result generalizes for any number of substitutions.
 First, we define a partial order on the valuations. A valuation precedes
 another if it gives more information on each DP.
 \begin{defn}[Partial order $\posleq_{V}$ on valuations]
-\label{def:For-two-valuations,}For two valuations~$\val_{1},\val_{2}:\atoms\rightarrow\udpsp$,
-say that~$\val_{1}\posleq_{V}\val_{2}$ if~$\val_{1}(a)\udpleq\val_{2}(a)$
-for all~$a\in\atoms$.
+\label{def:For-two-valuations,}For two valuations~$\val₁,\val₂:\atoms⟶\udpsp$,
+say that~$\val₁\posleq_{V}\val₂$ if~$\val₁(a)\udpleq\val₂(a)$
+for all~$a∈\atoms$.
 \end{defn}
 At this point, we have enough machinery in place that we can simply
 state the result as ``the semantics is monotone in the valuation''.
 \begin{thm}[$\udpsem$ is monotone in the valuation]
-\label{thm:udpsem-monotone}If $\val_{1}\posleq_{V}\val_{2}$, then
+\label{thm:udpsem-monotone}If $\val₁\posleq_{V}\val₂$, then
 \[
-\udpsem\llbracket\left\langle \atoms,\atree,\val_{1}\right\rangle \rrbracket\udpleq\udpsem\llbracket\left\langle \atoms,\atree,\val_{2}\right\rangle \rrbracket.
+\udpsem⟦\left⟨ \atoms,\atree,\val₁\right⟩ ⟧\udpleq\udpsem⟦\left⟨ \atoms,\atree,\val₂\right⟩ ⟧.
 \]
 \end{thm}
 The proof is given in Appendix~\prettyref{subsec:proof-main-result}
@@ -681,7 +681,7 @@ above. Each panel shows two curves: the lower bound (best case analysis)
 and the upper bound (worst case analysis). In some cases, the lower
 bound is feasible, but the upper bound is not. For example, in panel~\emph{b},
 for 10\% uncertainty, we can conclude that, notwithstanding the uncertainty,
-there exists a solution for endurance~$\leq1.3\,\text{hours}$, while
+there exists a solution for endurance~$≤1.3\,\text{hours}$, while
 for higher endurance, because the upper bound is infeasible, we cannot
 conclude that there is a solution \textemdash{} though, because the
 lower bound is feasible, we cannot conclude that a solution does not
@@ -711,26 +711,26 @@ identity''.
 
 \subsubsection{The uncertain identity}
 
-Let~$\alpha>0$ be a step size. Define~$\ufloor_{\alpha}$ and~$\uceil_{\alpha}$
-to be the floor and ceil with step size~$\alpha$~(\prettyref{fig:identity_approximation}).
-By construction, $\ufloor_{\alpha}\dpleq\mathsf{Id}\dpleq\uceil_{\alpha}.$
+Let~$α>0$ be a step size. Define~$\ufloor_{α}$ and~$\uceil_{α}$
+to be the floor and ceil with step size~$α$~(\prettyref{fig:identity_approximation}).
+By construction, $\ufloor_{α}\dpleq\mathsf{Id}\dpleq\uceil_{α}.$
 
 \begin{figure}[H]
 \subfloat{\includegraphics[scale=0.33]{unc_approx1a}}
 \subfloat{\includegraphics[scale=0.33]{unc_approx1b}}
 \subfloat{\includegraphics[scale=0.33]{unc_approx1c}}
-\caption{\label{fig:identity_approximation}The identity and its two relaxations~$\ufloor_{\alpha}$
-and $\uceil_{\alpha}$.}
+\caption{\label{fig:identity_approximation}The identity and its two relaxations~$\ufloor_{α}$
+and $\uceil_{α}$.}
 \end{figure}
 
-Let $\UId_{\alpha}\doteq\left\langle \ufloor_{\alpha},\uceil_{\alpha}\right\rangle $
-be the ``uncertain identity''. For~$0<\alpha<\beta$, it holds
+Let $\UId_{α}\doteq\left⟨ \ufloor_{α},\uceil_{α}\right⟩ $
+be the ``uncertain identity''. For~$0<α<β$, it holds
 that
 \[
-\mathsf{Id}\poslt_{\udpsp}\UId_{\alpha}\poslt_{\udpsp}\UId_{\beta}.
+\mathsf{Id}\poslt_{\udpsp}\UId_{α}\poslt_{\udpsp}\UId_{β}.
 \]
-Therefore, the sequence $\UId_{\alpha}$ is a descending chain that
-converges to~$\mathsf{Id}$ as~$\alpha\rightarrow0$~(\prettyref{fig:other}).
+Therefore, the sequence $\UId_{α}$ is a descending chain that
+converges to~$\mathsf{Id}$ as~$α⟶0$~(\prettyref{fig:other}).
 
 \captionsideleft{\label{fig:other}}{\includegraphics[scale=0.33]{unc_uid1}\includegraphics[scale=0.33]{unc_uid2}}
 
@@ -738,31 +738,31 @@ converges to~$\mathsf{Id}$ as~$\alpha\rightarrow0$~(\prettyref{fig:other}).
 \subsubsection{Approximations in MCDP}
 
 We can take any edge in an MCDP and apply this relaxation. Formally,
-we first introduce an identity~$\mathsf{Id}$ and then relax it using~$\UId_{\alpha}$~(\prettyref{fig:introduce}).
+we first introduce an identity~$\mathsf{Id}$ and then relax it using~$\UId_{α}$~(\prettyref{fig:introduce}).
 
 \captionsideleft{\label{fig:introduce}}{\includegraphics[scale=0.33]{unc_introduce}}
 
-Mathematically, given an MCDP~$\left\langle \atoms,\atree,\val\right\rangle $,
-we generate a UMCDP~$\left\langle \atoms,\atree,\val_{\alpha}\right\rangle $,
-where the new valuation~$\val_{\alpha}$ agrees with~$\val$ except
-on a particular atom~$a\in\atoms$, which is replaced by the series
-of the original~$\val(a)$ and the approximation~$\text{UId}_{\alpha}$:
+Mathematically, given an MCDP~$\left⟨ \atoms,\atree,\val\right⟩ $,
+we generate a UMCDP~$\left⟨ \atoms,\atree,\val_{α}\right⟩ $,
+where the new valuation~$\val_{α}$ agrees with~$\val$ except
+on a particular atom~$a∈\atoms$, which is replaced by the series
+of the original~$\val(a)$ and the approximation~$\text{UId}_{α}$:
 \begin{align*}
-\val_{\alpha}(a) & \doteq\dpseries(\UId_{\alpha},\val(a))
+\val_{α}(a) & \doteq\dpseries(\UId_{α},\val(a))
 \end{align*}
-Call the original and approximated DPs~$\dprob$ and~$\dprob_{\alpha}$:
+Call the original and approximated DPs~$\dprob$ and~$\dprob_{α}$:
 \[
 \begin{array}{ccc}
-\dprob\doteq\udpsem \llbracket \left\langle \atoms,\atree,\val\right\rangle \rrbracket , &  & \dprob{}_{\alpha}\doteq\udpsem\llbracket \left\langle \atoms,\atree,\val_{\alpha}\right\rangle \rrbracket .\end{array}
+\dprob\doteq\udpsem ⟦ \left⟨ \atoms,\atree,\val\right⟩ ⟧ , &  & \dprob{}_{α}\doteq\udpsem⟦ \left⟨ \atoms,\atree,\val_{α}\right⟩ ⟧ .\end{array}
 \]
-Because $\val\posleq_{V}\val_{\alpha}$ (in the sense of~\prettyref{def:For-two-valuations,}),
+Because $\val\posleq_{V}\val_{α}$ (in the sense of~\prettyref{def:For-two-valuations,}),
 \prettyref{thm:udpsem-monotone} implies that
 \[
-\dprob\udpleq\dprob_{\alpha}.
+\dprob\udpleq\dprob_{α}.
 \]
-This means that we can solve~$\udpL\dprob_{\alpha}$ and~$\udpU\dprob_{\alpha}$
+This means that we can solve~$\udpL\dprob_{α}$ and~$\udpU\dprob_{α}$
 and obtain upper and lower bounds for~$\dprob$. Furthermore, by
-varying~$\alpha$, we can construct an approximating sequence of
+varying~$α$, we can construct an approximating sequence of
 DPs whose solution will converge to the solution of the original MCDP.
 
 
@@ -770,23 +770,19 @@ DPs whose solution will converge to the solution of the original MCDP.
 
 This procedure was applied to the example model in~\prettyref{fig:Example1}
 by introducing a tolerance to the ``power'' variable for the actuation.
-The tolerance~$\alpha$ is chosen at logarithmic intervals between~$0.01\,\text{mW}$
+The tolerance~$α$ is chosen at logarithmic intervals between~$0.01\,\text{mW}$
 and~$1\,\text{W}$. \prettyref{fig:mass}~shows the solutions of
-the minimal mass required for~$\udpL\dprob_{\alpha}$ and~$\udpU\dprob_{\alpha}$,
-as a function of~$\alpha$. \prettyref{fig:mass} confirms the consistency
-results predicted by the theory. First, if the solutions for both~$\udpL\dprob_{\alpha}$
-and~$\udpU\dprob_{\alpha}$ exist, then they are ordered ($\udpL\dprob_{\alpha}(\fun)\posleq\udpU\dprob_{\alpha}(\fun)$).
-Second, as~$\alpha$ decreases, the interval shrinks. Third, the
+the minimal mass required for~$\udpL\dprob_{α}$ and~$\udpU\dprob_{α}$,
+as a function of~$α$. \prettyref{fig:mass} confirms the consistency
+results predicted by the theory. First, if the solutions for both~$\udpL\dprob_{α}$
+and~$\udpU\dprob_{α}$ exist, then they are ordered ($\udpL\dprob_{α}(\fun)\posleq\udpU\dprob_{α}(\fun)$).
+Second, as~$α$ decreases, the interval shrinks. Third, the
 bounds are consistent (the solution for the original DP is always
 contained in the bound).
 
 \begin{figure}[H]
-\subfloat[\label{fig:mass}]{\includegraphics[scale=0.4]{unc_approx2a}
-
-}\subfloat[\label{fig:num_iterations}]{\includegraphics[scale=0.4]{unc_approx2c}
-
-}
-
+\subfloat[\label{fig:mass}]{\includegraphics[scale=0.4]{unc_approx2a}}
+\subfloat[\label{fig:num_iterations}]{\includegraphics[scale=0.4]{unc_approx2c}}
 \caption{Results of model in \prettyref{fig:Example1} when tolerance is applied
 to the actuation \R{power} resource. Please see the supplementary
 materials for more details.}
@@ -794,7 +790,7 @@ materials for more details.}
 
 Next, it is interesting to consider the computational complexity.
 \prettyref{fig:num_iterations}~shows the number of iterations as
-a function of the resolution~$\alpha$, and the trade-off of the
+a function of the resolution~$α$, and the trade-off of the
 uncertainty of the solution and the computational resources spent.
 This shows that this approximation scheme is an effective way to reduce
 the computation load while maintaining a consistent estimate.
@@ -806,12 +802,12 @@ Another way in which uncertain DPs can be used is to construct approximations
 of DPs that would be too expensive to solve exactly. For example,
 consider a relation like
 \begin{equation}
-{\colF\text{travel\_distance}}\leq{\colR\text{velocity}}\times{\colR\text{endurance}},\label{eq:qun}
+{\colF\text{travel\_distance}}≤{\colR\text{velocity}}×{\colR\text{endurance}},\label{eq:qun}
 \end{equation}
 which appears in the model in \prettyref{fig:Example1}. If we take
-these three quantities in \prettyref{eq:qun} as belonging to~$\reals$,
+these three quantities in \prettyref{eq:qun} as belonging to~$ℝ$,
 then, for each value of the \F{travel distance}, there are infinite
-pairs of~$\left\langle {\colR\text{velocity}},{\colR\text{endurance}}\right\rangle $
+pairs of~$\left⟨ {\colR\text{velocity}},{\colR\text{endurance}}\right⟩ $
 that are feasible. (On a computer, where the quantities could be represented
 as floating point numbers, the combinations are properly not ``infinite'',
 but, still, extremely large.)
@@ -821,70 +817,70 @@ uncertain DPs that use finite and prescribed computation.
 
 \subsubsection{Relaxations for addition}
 
-Consider a monotone relation between some functionality~$\fun_{1}\in\mathbb{R}_{+}$
-and resources~$\res_{1},\res_{2}\in\mathbb{R}_{+}$ described by
-the constraint that~$\fun_{1}\leq\res_{1}+\res_{2}$ (\prettyref{fig:example-invplus}).
+Consider a monotone relation between some functionality~$\fun₁∈ℝ₊$
+and resources~$\res₁,\res₂∈ℝ₊$ described by
+the constraint that~$\fun₁≤\res₁+\res₂$ (\prettyref{fig:example-invplus}).
 For example, this could represent the case where there are two batteries
-providing the power~$\fun_{1}$, and we need to decide how much to
-allocate to the first~($\res_{1}$) or the second~($\res_{2}$).
+providing the power~$\fun₁$, and we need to decide how much to
+allocate to the first~($\res₁$) or the second~($\res₂$).
 
 \captionsideleft{\label{fig:example-invplus}}{\includegraphics[scale=0.33]{unc_plusinv}}
 
 The formal definition of this constraint as an DP is
 \begin{align*}
-\overline{+}:{\colF\reals_{+}} & \rightarrow{\colR\antichains(\reals_{+}\times\reals_{+})},\\
-\fun_{1} & \mapsto\{\left\langle x,\fun_{1}-x\right\rangle \mid x\in\reals_{+}\}.
+\overline{+}:{\colFℝ₊} & ⟶{\colR\antichains(ℝ₊×ℝ₊)},\\
+\fun₁ & ⟼\{\left⟨ x,\fun₁-x\right⟩ \mid x∈ℝ₊\}.
 \end{align*}
-Note that, for each value~$\fun_{1}$, $\overline{+}(\fun_{1})$
+Note that, for each value~$\fun₁$, $\overline{+}(\fun₁)$
 is a set of infinite cardinality.
 
 We will now define two sequences of relaxations for~$\overline{+}$
-with a fixed number of solutions~$n\geq1$.
+with a fixed number of solutions~$n≥1$.
 
 \subsubsection*{Using uniform sampling}
 
-We will first define a sequence of UDPs~$S_{n}$ based on uniform
-sampling. Let~$\udpU S_{n}$ consist of~$n$ points sampled on the
-segment with extrema~$\left\langle 0,\fun_{1}\right\rangle $ and~$\left\langle \fun_{1},0\right\rangle $.
-For~$\udpL S_{n}$, sample~$n+1$ points on the segment and take
+We will first define a sequence of UDPs~$Sₙ$ based on uniform
+sampling. Let~$\udpU Sₙ$ consist of~$n$ points sampled on the
+segment with extrema~$\left⟨ 0,\fun₁\right⟩ $ and~$\left⟨ \fun₁,0\right⟩ $.
+For~$\udpL Sₙ$, sample~$n+1$ points on the segment and take
 the \emph{meet} of successive points~(\prettyref{fig:make_lower}).
 \begin{center}
 \captionsideleft{\label{fig:make_lower}}{\includegraphics[scale=0.33]{unc_make_lower}}
 \par\end{center}
 
 The first elements of the sequences are shown in~\prettyref{fig:approx_invplus}.
-One can easily prove that $\udpL S_{n}\dpleq\overline{+}\dpleq\udpU S_{n}$,
-and thus~$S_{n}$ is a relaxation of~$\overline{+}$, in the sense
-that~$\overline{+}\udpleq S_{n}$. Moreover, $S_{n}$ converges to
-$\overline{+}$ as $n\rightarrow\infty$.
+One can easily prove that $\udpL Sₙ\dpleq\overline{+}\dpleq\udpU Sₙ$,
+and thus~$Sₙ$ is a relaxation of~$\overline{+}$, in the sense
+that~$\overline{+}\udpleq Sₙ$. Moreover, $Sₙ$ converges to
+$\overline{+}$ as $n⟶∞$.
 \begin{center}
 \begin{figure}[H]
 \centering{}\includegraphics[scale=0.33]{unc_sampling}\caption{\label{fig:approx_invplus}Approximations to $\overline{+}$ using
-the uniform sampling sequence~$S_{n}$. }
+the uniform sampling sequence~$Sₙ$. }
 \end{figure}
 \par\end{center}
 
-However, note that the convergence is not monotonic: $S_{n+1}{\not\posleq}_{\udpsp}S_{n}.$
+However, note that the convergence is not monotonic: $S_{n+1}{\not\posleq}_{\udpsp}Sₙ.$
 The situation can be represented graphically as in~\prettyref{fig:notchain}.
-The sequence~$S_{n}$ eventually converges to $\overline{+}$, but
+The sequence~$Sₙ$ eventually converges to $\overline{+}$, but
 it is not a descending chain. This means that it is not true, in general,
 that the solution to the MCDP obtained by plugging in~$S_{n+1}$
-gives smaller bounds than~$S_{n}$.
+gives smaller bounds than~$Sₙ$.
 
 \subsubsection*{Relaxation based on Van Der Corput sequence}
 
-We can easily create an approximation sequence~$V:\mathbb{N}\rightarrow\udpsp$
+We can easily create an approximation sequence~$V:\mathbb{N}⟶\udpsp$
 that converges monotonically using Var Der Corput (VDC) sampling~\cite[Section 5.2]{LaValle2006Planning}.
 Let~$\vdc(n)$ be the VDC sequence of~$n$ elements in the interval~$[0,1]$.
 The first elements of the VDC are $0,0.5,0.25,0.75,0.125,\dots$.
 The sequence is guaranteed to satisfy~$\vdc(n)\subseteq\vdc(n+1)$
-and to minimize the discrepancy. The upper bound~$\udpU V_{n}$
-is defined as sampling the segment with extrema~$\left\langle 0,\fun_{1}\right\rangle $
-and~$\left\langle \fun_{1},0\right\rangle $ using the VDC sequence:
+and to minimize the discrepancy. The upper bound~$\udpU Vₙ$
+is defined as sampling the segment with extrema~$\left⟨ 0,\fun₁\right⟩ $
+and~$\left⟨ \fun₁,0\right⟩ $ using the VDC sequence:
 \[
-\udpU V_{n}\colon\fun_{1}\mapsto\{\left\langle \fun_{1}x,\fun_{1}(1-x)\right\rangle \mid x\in\vdc(n)\}.
+\udpU Vₙ\colon\fun₁⟼\{\left⟨ \fun₁x,\fun₁(1-x)\right⟩ \mid x∈\vdc(n)\}.
 \]
- The lower bound~$\udpL V_{n}$ is defined by taking meets of successive
+ The lower bound~$\udpL Vₙ$ is defined by taking meets of successive
 points, according to the procedure in~\prettyref{fig:make_lower}.
 \begin{center}
 \begin{figure}[H]
@@ -892,20 +888,20 @@ points, according to the procedure in~\prettyref{fig:make_lower}.
 \adjustbox{max width=8.6cm}{\includegraphics[scale=0.33]{unc_samplingb}}
 \par
 \caption{\label{fig:Vn}Approximations to $\overline{+}$ using the Van Der
-Corput sequence~$V_{n}$.}
+Corput sequence~$Vₙ$.}
 \end{figure}
 \par\end{center}
 
-For this sequence, one can prove that not only~$\overline{+}\udpleq V_{n}$,
-but also that the convergence is uniform, in the sense that~$\overline{+}\udpleq V_{n+1}\udpleq V_{n}.$
+For this sequence, one can prove that not only~$\overline{+}\udpleq Vₙ$,
+but also that the convergence is uniform, in the sense that~$\overline{+}\udpleq V_{n+1}\udpleq Vₙ.$
 The situation is represented graphically in~\prettyref{fig:convergence_pyramid}:
 the sequence is a descending chain that converges to~$\overline{+}$.
 
 \subsubsection{Inverse of multiplication}
 
 The case of multiplication can be treated analogously to the case
-of addition. By taking the logarithm, the inequality~$\fun_{1}\leq\res_{1}\res_{2}$
-can be rewritten as~$\log(\fun_{1})\leq\log(\res_{1})+\log(\res_{2}).$
+of addition. By taking the logarithm, the inequality~$\fun₁≤\res₁\res₂$
+can be rewritten as~$\log(\fun₁)≤\log(\res₁)+\log(\res₂).$
 So we can repeat the constructions done for addition. The VDC sequence
 are shown in~\prettyref{fig:approx_invmult}.
 
@@ -914,13 +910,13 @@ are shown in~\prettyref{fig:approx_invmult}.
 \adjustbox{max width=8.6cm}{\includegraphics[scale=0.33]{unc_sampling2b}}
 \par
 \caption{\label{fig:approx_invmult}Van Der Corput relaxations for the relation
-$\fun_{1}\leq\res_{1}\res_{2}$.}
+$\fun₁≤\res₁\res₂$.}
 \end{figure}
 
 
 \subsubsection{Numerical example}
 
-We have applied this relaxation to the relation ${\colF\text{travel distance}}\leq{\colR\text{velocity}}\times{\colR\text{endurance}}$
+We have applied this relaxation to the relation ${\colF\text{travel distance}}≤{\colR\text{velocity}}×{\colR\text{endurance}}$
 in the MCDP in~\prettyref{fig:Example1}. Thanks to this theory,
 we can obtain estimates of the solutions using bounded computation,
 even though that relation has infinite cardinality.
@@ -932,26 +928,26 @@ convergence, while VDC sampling does.
 \begin{center}
 \begin{figure}[t]
 
-\subfloat[\label{fig:notchain}Qualitative behavior for $S_{n}$]{\centering{}\includegraphics[scale=0.33]{unc_convergence_pyramid}}\subfloat[\label{fig:convergence_pyramid}Qualitative behavior for $V_{n}$]{
+\subfloat[\label{fig:notchain}Qualitative behavior for $Sₙ$]{\centering{}\includegraphics[scale=0.33]{unc_convergence_pyramid}}\subfloat[\label{fig:convergence_pyramid}Qualitative behavior for $Vₙ$]{
 \includegraphics[scale=0.33]{unc_convergence_pyramid2}
 \par
 }
 \par
 
-\subfloat[\label{fig:invplus1}Numerical results for $S_{n}$]{
+\subfloat[\label{fig:invplus1}Numerical results for $Sₙ$]{
 \adjustbox{max width=4.0cm}{\includegraphics[scale=0.33]{unc_convergence}}
 \par
-}\subfloat[\label{fig:invplus2}Numerical results for $V_{n}$]{
+}\subfloat[\label{fig:invplus2}Numerical results for $Vₙ$]{
 \adjustbox{max width=4.0cm}{\includegraphics[scale=0.33]{unc_convergence2}}
 \par
 }
 \par
 \caption{Solutions to the example in~\prettyref{fig:Example1}, applying relaxations
-for the relation ${\colF\text{travel\_distance}}\leq{\colR\text{velocity}}\times{\colR\text{endurance}}$
+for the relation ${\colF\text{travel\_distance}}≤{\colR\text{velocity}}×{\colR\text{endurance}}$
 using the uniform sampling sequence and the VDC sampling sequence.
-The uniform sampling sequence~$S_{n}$ does not converge monotonically
+The uniform sampling sequence~$Sₙ$ does not converge monotonically
 (panel~\emph{a}); therefore the progress is not monotonic~(panel\emph{~c}).
-Conversely, the Van Der Corput sequence~$V_{n}$ is a descending
+Conversely, the Van Der Corput sequence~$Vₙ$ is a descending
 chain (panel~\emph{b}), which results in monotonic progress (panel~\emph{d}).}
 \end{figure}
 \par\end{center}
@@ -1009,31 +1005,31 @@ is well formed, in the sense that the way the semantics function~$\udpsem$
 is defined, it returns a UDP for each argument. This is not obvious
 from~\prettyref{def:semantics-udp}.
 
-For example, for $\udpsem\llbracket\atoms,\dpseries(\atree_{1},\atree_{2}),\val\rrbracket$,
-the definition gives values for~$\udpL\udpsem\llbracket\atoms,\dpseries(\atree_{1},\atree_{2}),\val\rrbracket$
-and~$\udpU\udpsem\llbracket\atoms,\dpseries(\atree_{1},\atree_{2}),\val\rrbracket$
+For example, for $\udpsem⟦\atoms,\dpseries(\atree₁,\atree₂),\val⟧$,
+the definition gives values for~$\udpL\udpsem⟦\atoms,\dpseries(\atree₁,\atree₂),\val⟧$
+and~$\udpU\udpsem⟦\atoms,\dpseries(\atree₁,\atree₂),\val⟧$
 separately, without checking that
 \[
-\udpL\udpsem\llbracket\atoms,\dpseries(\atree_{1},\atree_{2}),\val\rrbracket\dpleq\udpU\udpsem\llbracket\atoms,\dpseries(\atree_{1},\atree_{2}),\val\rrbracket.
+\udpL\udpsem⟦\atoms,\dpseries(\atree₁,\atree₂),\val⟧\dpleq\udpU\udpsem⟦\atoms,\dpseries(\atree₁,\atree₂),\val⟧.
 \]
  The following lemma provides the proof for that.
 \begin{lem}
 \label{lem:udpsem-well-formed}\prettyref{def:semantics-udp} is well
 formed, in the sense that {\small{}
 \begin{equation}
-\udpL\udpsem\llbracket\langle\atoms,\dpseries(\atree_{1},\atree_{2}),\val\rangle\rrbracket\dpleq\udpU\udpsem\llbracket\langle\atoms,\dpseries(\atree_{1},\atree_{2}),\val\rangle\rrbracket,\label{eq:wf1}
+\udpL\udpsem⟦⟨\atoms,\dpseries(\atree₁,\atree₂),\val⟩⟧\dpleq\udpU\udpsem⟦⟨\atoms,\dpseries(\atree₁,\atree₂),\val⟩⟧,\label{eq:wf1}
 \end{equation}
 \begin{equation}
-\udpL\udpsem\llbracket\left\langle \atoms,\dppar(\atree_{1},\atree_{2}),\val\right\rangle \rrbracket\dpleq\udpU\udpsem\llbracket\left\langle \atoms,\dppar(\atree_{1},\atree_{2}),\val\right\rangle \rrbracket,\label{eq:wf2}
+\udpL\udpsem⟦\left⟨ \atoms,\dppar(\atree₁,\atree₂),\val\right⟩ ⟧\dpleq\udpU\udpsem⟦\left⟨ \atoms,\dppar(\atree₁,\atree₂),\val\right⟩ ⟧,\label{eq:wf2}
 \end{equation}
 \begin{equation}
-\udpL\udpsem\llbracket\left\langle \atoms,\dploop(\atree),\val\right\rangle \rrbracket\dpleq\udpU\udpsem\llbracket\left\langle \atoms,\dploop(\atree),\val\right\rangle \rrbracket.\label{eq:wf3}
+\udpL\udpsem⟦\left⟨ \atoms,\dploop(\atree),\val\right⟩ ⟧\dpleq\udpU\udpsem⟦\left⟨ \atoms,\dploop(\atree),\val\right⟩ ⟧.\label{eq:wf3}
 \end{equation}
 }{\small \par}
 \end{lem}
 \begin{IEEEproof}
 Proving \prettyref{eq:wf1}\textemdash \prettyref{eq:wf3} can be
-reduced to proving the following three results, for any $x,y\in\udpsp$:
+reduced to proving the following three results, for any $x,y∈\udpsp$:
 \begin{align*}
 \left(\udpL x\opseries\udpL y\right) & \dpleq\left(\udpU x\opseries\udpU y\right),\\
 \left(\udpL x\oppar\udpL y\right) & \dpleq\left(\udpU x\oppar\udpU y\right),\\
@@ -1076,51 +1072,51 @@ This follows from the fact that~$\oploop$ is monotone (\prettyref{lem:loop-monot
 
 These lemmas are used in the proofs above.
 \begin{lem}
-\label{lem:series-monotone}$\opseries:\dpsp\times\dpsp\rightarrow\dpsp$
-is monotone on~$\langle\dpsp,\dpleq\rangle$.
+\label{lem:series-monotone}$\opseries:\dpsp×\dpsp⟶\dpsp$
+is monotone on~$⟨\dpsp,\dpleq⟩$.
 \end{lem}
 \begin{IEEEproof}
 In~\prettyref{def:opseries}, $\opseries$ is defined as follows
-for two maps~$\ftor_{1}\colon\funsp_{1}\rightarrow\Aressp_{1}$ and~$\ftor_{2}\colon\funsp_{2}\rightarrow\Aressp_{2}$:
+for two maps~$\ftor₁\colon\funsp₁⟶\Aressp₁$ and~$\ftor₂\colon\funsp₂⟶\Aressp₂$:
 \[
-{\displaystyle \ftor_{1}\opseries\ftor_{2}=\Min_{\posleq_{\ressp_{2}}}\uparrow\bigcup_{s\in\ftor_{1}(\fun)}\ftor_{2}(s)}.
+{\displaystyle \ftor₁\opseries\ftor₂=\Min_{\posleq_{\ressp₂}}\uparrow\bigcup_{s∈\ftor₁(\fun)}\ftor₂(s)}.
 \]
 It is useful to decompose this expression as the composition of three
 maps:
 \[
-\ftor_{1}\opseries\ftor_{2}=m\circ g[\ftor_{2}]\circ\ftor_{1},
+\ftor₁\opseries\ftor₂=m\circ g[\ftor₂]\circ\ftor₁,
 \]
 where~``$\circ$'' is the usual map composition, and~$g$ and~$m$
 are defined as follows:
 \begin{align*}
-g[\ftor_{2}]:\antichains\ressp_{1} & \rightarrow\upsets\ressp_{2},\\
-R & \mapsto\uparrow\bigcup_{s\in R}\ftor_{2}(s),
+g[\ftor₂]:\antichains\ressp₁ & ⟶\upsets\ressp₂,\\
+R & ⟼\uparrow\bigcup_{s∈ R}\ftor₂(s),
 \end{align*}
 and
 \begin{align*}
-m:\upsets\ressp_{2} & \rightarrow\antichains\ressp_{2},\\
-R & \mapsto\Min_{\posleq_{\ressp_{2}}}R.
+m:\upsets\ressp₂ & ⟶\antichains\ressp₂,\\
+R & ⟼\Min_{\posleq_{\ressp₂}}R.
 \end{align*}
 
 From the following facts:
 \begin{itemize}
 \item $m$ is monotone.
-\item $g[\ftor_{2}]$ is monotone in $\ftor_{2}$.
-\item $f_{1}\circ f_{2}$ is monotone in each argument if the other argument
+\item $g[\ftor₂]$ is monotone in $\ftor₂$.
+\item $f₁\circ f₂$ is monotone in each argument if the other argument
 is monotone.
 \end{itemize}
 Then the thesis follows.
 \end{IEEEproof}
 
 \begin{lem}
-\label{lem:par-monotone}$\oppar:\dpsp\times\dpsp\rightarrow\dpsp$
-is monotone on~$\langle\dpsp,\dpleq\rangle$.
+\label{lem:par-monotone}$\oppar:\dpsp×\dpsp⟶\dpsp$
+is monotone on~$⟨\dpsp,\dpleq⟩$.
 \end{lem}
 \begin{IEEEproof}
 The definition of $\oppar$ (\prettyref{def:opmaps}) is:
 \begin{align*}
-\ftor_{1}\oppar\ftor_{2}:(\funsp_{1}\times\funsp_{2}) & \rightarrow\antichains(\ressp_{1}\times\ressp_{2}),\\
-\left\langle \fun_{1},\fun_{2}\right\rangle  & \mapsto\ftor_{1}(\fun_{1})\times\ftor_{2}(\fun_{2}).
+\ftor₁\oppar\ftor₂:(\funsp₁×\funsp₂) & ⟶\antichains(\ressp₁×\ressp₂),\\
+\left⟨ \fun₁,\fun₂\right⟩  & ⟼\ftor₁(\fun₁)×\ftor₂(\fun₂).
 \end{align*}
 Because of symmetry, it suffices to prove that $\oppar$ is monotone
 in the first argument, leaving the second fixed.
@@ -1134,49 +1130,49 @@ and for any fixed $\overline{\ftor}$, then
 \[
 \ftor_{a}\oppar\overline{\ftor}\dpleq\ftor_{b}\oppar\overline{\ftor}.
 \]
-Let $R=\overline{\ftor}(\fun_{2})$. Then we have that
+Let $R=\overline{\ftor}(\fun₂)$. Then we have that
 \begin{align*}
-[\ftor_{a}\oppar\overline{\ftor}](\fun_{1},\fun_{2}) & =\ftor_{a}(\fun_{1})\acprod R,\\{}
-[\ftor_{b}\oppar\overline{\ftor}](\fun_{1},\fun_{2}) & =\ftor_{b}(\fun_{1})\acprod R.
+[\ftor_{a}\oppar\overline{\ftor}](\fun₁,\fun₂) & =\ftor_{a}(\fun₁)\acprod R,\\{}
+[\ftor_{b}\oppar\overline{\ftor}](\fun₁,\fun₂) & =\ftor_{b}(\fun₁)\acprod R.
 \end{align*}
 Because of \prettyref{eq:Ikno}, we know that
 \[
-\ftor_{a}(\fun_{1})\posleq_{\antichains\ressp_{1}}\ftor_{b}(\fun_{1}).
+\ftor_{a}(\fun₁)\posleq_{\antichains\ressp₁}\ftor_{b}(\fun₁).
 \]
 So the thesis follows from proving that the product of antichains
 is monotone~(\prettyref{lem:product-monotone}).
 \end{IEEEproof}
 \begin{lem}
-\label{lem:product-monotone}The product of antichains~$\acprod:\antichains\ressp_{1}\times\antichains\ressp_{2}\rightarrow\antichains(\ressp_{1}\times\ressp_{2})$
+\label{lem:product-monotone}The product of antichains~$\acprod:\antichains\ressp₁×\antichains\ressp₂⟶\antichains(\ressp₁×\ressp₂)$
 is monotone.
 \end{lem}
 
 \begin{lem}
-\label{lem:loop-monotone}$\oploop:\dpsp\rightarrow\dpsp$ is monotone
-on~$\langle\dpsp,\dpleq\rangle$.
+\label{lem:loop-monotone}$\oploop:\dpsp⟶\dpsp$ is monotone
+on~$⟨\dpsp,\dpleq⟩$.
 \end{lem}
 \begin{IEEEproof}
-Let $\ftor_{1}\dpleq\ftor_{2}$. Then we can prove that $\ftor_{1}^{\oploop}\dpleq\ftor_{2}^{\oploop}$.
+Let $\ftor₁\dpleq\ftor₂$. Then we can prove that $\ftor₁^{\oploop}\dpleq\ftor₂^{\oploop}$.
 From the definition of~$\oploop$~(\prettyref{def:oploop}), we
 have that
 \begin{align*}
-\ftor_{1}^{\oploop}(\fun_{1}) & =\lfp(\Psi_{\fun}^{\ftor_{1}}),\\
-\ftor_{2}^{\oploop}(\fun_{2}) & =\lfp(\Psi_{\fun}^{\ftor_{2}}),
+\ftor₁^{\oploop}(\fun₁) & =\lfp(\Psi_{\fun}^{\ftor₁}),\\
+\ftor₂^{\oploop}(\fun₂) & =\lfp(\Psi_{\fun}^{\ftor₂}),
 \end{align*}
-with~$\Psi_{\fun_{1}}^{\ftor}$ defined as
+with~$\Psi_{\fun₁}^{\ftor}$ defined as
 \begin{align*}
-\Psi_{\fun_{1}}^{\ftor}:\Aressp & \rightarrow\Aressp,\\
-{\colR R} & \mapsto\Min_{\posleq_{\ressp}}\bigcup_{\res\in{\colR R}}\ftor(\fun_{1},\res)\ \cap\uparrow\res.
+\Psi_{\fun₁}^{\ftor}:\Aressp & ⟶\Aressp,\\
+{\colR R} & ⟼\Min_{\posleq_{\ressp}}\bigcup_{\res∈{\colR R}}\ftor(\fun₁,\res)\ \cap\uparrow\res.
 \end{align*}
 The least fixed point operator $\lfp$ is monotone, so we are left
 to check that the map
 \[
-\ftor\mapsto\Psi_{\fun_{1}}^{\ftor}
+\ftor⟼\Psi_{\fun₁}^{\ftor}
 \]
-is monotone. That is the case, because if $\ftor_{1}\dpleq\ftor_{2}$
+is monotone. That is the case, because if $\ftor₁\dpleq\ftor₂$
 then
 \[
-\left[\bigcup_{\res\in{\colR R}}\ftor_{1}(\fun_{1},\res)\ \cap\uparrow\res\right]\posleq_{\Aressp}\left[\bigcup_{\res\in{\colR R}}\ftor_{2}(\fun_{1},\res)\ \cap\uparrow\res\right].
+\left[\bigcup_{\res∈{\colR R}}\ftor₁(\fun₁,\res)\ \cap\uparrow\res\right]\posleq_{\Aressp}\left[\bigcup_{\res∈{\colR R}}\ftor₂(\fun₁,\res)\ \cap\uparrow\res\right].
 \]
 \end{IEEEproof}
 
@@ -1185,9 +1181,9 @@ then
 
 
 \begin{lem}[$\dpsem$ is monotone in the valuation]
-\label{lem:dpsem-monotone}Suppose that~$\val_{1},\val_{2}:\atoms\rightarrow\dpsp$
-are two valuations for which it holds that~$\val_{1}(a)\dpleq\val_{2}(a)$.
-Then~$\dpsem\llbracket\left\langle \atoms,\atree,\val_{1}\right\rangle \rrbracket\dpleq\dpsem\llbracket\left\langle \atoms,\atree,\val_{2}\right\rangle \rrbracket$.
+\label{lem:dpsem-monotone}Suppose that~$\val₁,\val₂:\atoms⟶\dpsp$
+are two valuations for which it holds that~$\val₁(a)\dpleq\val₂(a)$.
+Then~$\dpsem⟦\left⟨ \atoms,\atree,\val₁\right⟩ ⟧\dpleq\dpsem⟦\left⟨ \atoms,\atree,\val₂\right⟩ ⟧$.
 \end{lem}
 \begin{IEEEproof}
 Given the recursive definition of \prettyref{def:dpsem}, we need
@@ -1195,14 +1191,14 @@ to prove this just for the base case and for the recursive cases.
 
 The base case, given in \eqref{eq:base}, is
 \[
-\dpsem\llbracket\left\langle \atoms,a,\val\right\rangle \rrbracket\doteq\val(a),\qquad\text{for all}\ a\in\atoms.
+\dpsem⟦\left⟨ \atoms,a,\val\right⟩ ⟧\doteq\val(a),\qquad\text{for all}\ a∈\atoms.
 \]
 We have
 \begin{align*}
-\dpsem\llbracket\left\langle \atoms,\atree,\val_{1}\right\rangle \rrbracket & =\val_{1}(a)\\
-\dpsem\llbracket\left\langle \atoms,\atree,\val_{2}\right\rangle \rrbracket & =\val_{2}(a)
+\dpsem⟦\left⟨ \atoms,\atree,\val₁\right⟩ ⟧ & =\val₁(a)\\
+\dpsem⟦\left⟨ \atoms,\atree,\val₂\right⟩ ⟧ & =\val₂(a)
 \end{align*}
-and $\val_{1}(a)\dpleq\val_{2}(a)$ by assumption.
+and $\val₁(a)\dpleq\val₂(a)$ by assumption.
 
 For the recursive cases, \eqref{eq:series}\textendash \eqref{eq:loop},
 the thesis follows from the monotonicity of $\opseries$, $\oppar$,
@@ -1218,41 +1214,41 @@ We restate the theorem.
 
 \textbf{Theorem~\ref{thm:udpsem-monotone}}. \emph{If
 \[
-\val_{1}\posleq_{V}\val_{2}
+\val₁\posleq_{V}\val₂
 \]
 then
 \[
-\udpsem\llbracket\left\langle \atoms,\atree,\val_{1}\right\rangle \rrbracket\udpleq\udpsem\llbracket\left\langle \atoms,\atree,\val_{2}\right\rangle \rrbracket.
+\udpsem⟦\left⟨ \atoms,\atree,\val₁\right⟩ ⟧\udpleq\udpsem⟦\left⟨ \atoms,\atree,\val₂\right⟩ ⟧.
 \]
 }
 \begin{IEEEproof}
 From the definition of $\udpsem$ and $\dpsem$, we can derive that
 \begin{align}
-\udpL\udpsem\llbracket\langle\atoms,\atree,\val\rangle\rrbracket & =\dpsem\llbracket\langle\atoms,\atree,\udpL\circ\val\rangle\rrbracket.\label{eq:equiv1}
+\udpL\udpsem⟦⟨\atoms,\atree,\val⟩⟧ & =\dpsem⟦⟨\atoms,\atree,\udpL\circ\val⟩⟧.\label{eq:equiv1}
 \end{align}
-In particular, for $\val=\val_{1}$,
+In particular, for $\val=\val₁$,
 \begin{equation}
-\udpL\udpsem\llbracket\langle\atoms,\atree,\val_{1}\rangle\rrbracket=\dpsem\llbracket\langle\atoms,\atree,\udpL\circ\val_{1}\rangle\rrbracket.\label{eq:w1}
+\udpL\udpsem⟦⟨\atoms,\atree,\val₁⟩⟧=\dpsem⟦⟨\atoms,\atree,\udpL\circ\val₁⟩⟧.\label{eq:w1}
 \end{equation}
-Because $\val_{1}(a)\udpleq\val_{2}(a),$ from \prettyref{lem:dpsem-monotone},
+Because $\val₁(a)\udpleq\val₂(a),$ from \prettyref{lem:dpsem-monotone},
 \begin{equation}
-\dpsem\llbracket\langle\atoms,\atree,\udpL\circ\val_{1}\rangle\rrbracket\dpleq\dpsem\llbracket\langle\atoms,\atree,\udpL\circ\val_{2}\rangle\rrbracket.\label{eq:w2}
+\dpsem⟦⟨\atoms,\atree,\udpL\circ\val₁⟩⟧\dpleq\dpsem⟦⟨\atoms,\atree,\udpL\circ\val₂⟩⟧.\label{eq:w2}
 \end{equation}
 From~\prettyref{eq:equiv1} again,
 \begin{equation}
-\dpsem\llbracket\langle\atoms,\atree,\udpL\circ\val_{2}\rangle\rrbracket=\udpL\udpsem\llbracket\langle\atoms,\atree,\val_{2}\rangle\rrbracket.\label{eq:w3}
+\dpsem⟦⟨\atoms,\atree,\udpL\circ\val₂⟩⟧=\udpL\udpsem⟦⟨\atoms,\atree,\val₂⟩⟧.\label{eq:w3}
 \end{equation}
 From \eqref{eq:w1},~\eqref{eq:w2}, \eqref{eq:w3} together,
 \[
-\udpL\udpsem\llbracket\langle\atoms,\atree,\val_{1}\rangle\rrbracket\dpleq\udpL\udpsem\llbracket\langle\atoms,\atree,\val_{2}\rangle\rrbracket.
+\udpL\udpsem⟦⟨\atoms,\atree,\val₁⟩⟧\dpleq\udpL\udpsem⟦⟨\atoms,\atree,\val₂⟩⟧.
 \]
  Repeating the same reasoning for~$\udpU$, we have
 \[
-\udpU\udpsem\llbracket\langle\atoms,\atree,\val_{2}\rangle\rrbracket\dpleq\udpU\udpsem\llbracket\langle\atoms,\atree,\val_{1}\rangle\rrbracket.
+\udpU\udpsem⟦⟨\atoms,\atree,\val₂⟩⟧\dpleq\udpU\udpsem⟦⟨\atoms,\atree,\val₁⟩⟧.
 \]
  Therefore
 \[
-\udpsem\llbracket\langle\atoms,\atree,\val_{1}\rangle\rrbracket\udpleq\udpsem\llbracket\langle\atoms,\atree,\val_{2}\rangle\rrbracket.
+\udpsem⟦⟨\atoms,\atree,\val₁⟩⟧\udpleq\udpsem⟦⟨\atoms,\atree,\val₂⟩⟧.
 \]
 \end{IEEEproof}
 
