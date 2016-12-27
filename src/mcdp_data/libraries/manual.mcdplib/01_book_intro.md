@@ -136,7 +136,33 @@ It can be applied in different fields...
 
 Chapter ... shows the case when
 
+<col2>
+    <render class='ndp_graph_templatized' id='3D_Printer'>
+    template mcdp {
+        provides accuracy [1/s]
+        provides shape [*]
+        requires time [s]
+        requires cost [USD]
+        requires materials [*]
+    }
+    </render>
+    <s>
+    A 3D printer...
+    </s>
 
+    <render class='ndp_graph_templatized' id='Computer vision'>
+    template mcdp {
+        provides false_positives [1/s]
+        requires latency [s]
+        requires computation [USD]
+        requires false_negatives [*]
+    }
+    </render>
+    <s>
+    \xxx
+    </s>
+
+</col2>
 
 ## This book
 

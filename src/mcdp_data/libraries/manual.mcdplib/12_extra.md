@@ -61,3 +61,28 @@ The primitive DPs are shown in [](#fig:primitive).
     <span>\xxx</span>
 
 </col4>
+
+### Interval (experimental)
+
+The syntax is
+
+<div center>
+    <pre class='mcdp_poset'>
+    Interval([["lower bound"]], [["upper bound"]])
+    </pre>
+</div>
+
+<!--
+<pre><code><span class="keyword">Interval</span>(<span class='ph'>lower bound</span>,<span class='ph'>upper bound</span>)</code></pre>
+ -->
+For example:
+
+<pre class='mcdp_poset'>
+Interval(1g, 10g)
+</pre>
+
+### Singletons (experimental)
+
+    S(tag)
+
+    S(tag):*

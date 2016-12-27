@@ -64,7 +64,8 @@ def check_if_any_href_is_invalid(soup):
                 core = href[i+1:]
             else:
                 core = ID
-            possible = ['sec', 'sub', 'subsub', 'fig', 'tab', 'code',
+            possible = ['sec', 'sub', 'subsub', 'fig', 'tab', 'code', 'app', 'appsub',
+                        'appsubsub',
                         'def', 'eq', 'rem', 'lem', 'prob', 'prop', 'exa', 'thm' ]
             matches = [] 
             others = []

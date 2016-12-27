@@ -4,7 +4,8 @@ from contracts.utils import raise_desc, indent
 from mcdp_library import MCDPLibrary
 from mcdp_web.renderdoc.abbrevs import other_abbrevs
 from mcdp_web.renderdoc.highlight import fix_subfig_references
-from mcdp_web.renderdoc.latex_preprocess import extract_maths, extract_tabular
+from mcdp_web.renderdoc.latex_preprocess import extract_maths, extract_tabular,\
+    assert_not_inside
 from mcdp_web.renderdoc.macro_col2 import col_macros,\
     col_macros_prepare_before_markdown
 from mcdp_web.renderdoc.markdown_transform import is_inside_markdown_quoted_block
@@ -20,6 +21,9 @@ from .xmlutils import check_html_fragment
 from mocdp import logger
 import itertools
 from mcdp_web.renderdoc.lessc import preprocess_lessc
+from mcdp_web.renderdoc.xmlutils import to_html_stripping_fragment, bs
+import mocdp
+import datetime
 
 
 __all__ = ['render_document']
@@ -38,6 +42,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
         msg = 'I expect a str encoded with utf-8, not unicode.'
         raise_desc(TypeError, msg, s=s)
 
+    s = replace_macros(s)
     # need to do this before do_preliminary_checks_and_fixes 
     # because of & char
     s, tabulars = extract_tabular(s)
@@ -110,16 +115,13 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     s = s.replace('\\*}', '*}')
     
     
-    # need to process tabular before mathjax
-    
-
-
-
+    # need to process tabular before mathjax 
     s = escape_for_mathjax(s)
 
     check_html_fragment(s)
 #     print(indent(s, 'before prerender_mathjax | '))
     # mathjax must be after markdown because of code blocks using "$"
+    
     s = prerender_mathjax(s)
 
     for k,v in mcdpenvs.items():
@@ -158,7 +160,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     s = embed_images_from_library(html=s, library=library, 
                                       raise_errors=raise_missing_image_errors)
     from mcdp_docs.check_missing_links import check_if_any_href_is_invalid
-    from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
+    
     if check_refs:
         d = bs(s)
         check_if_any_href_is_invalid(d)
@@ -167,7 +169,62 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     check_html_fragment(s) 
     
     s = preprocess_lessc(s)
+    
+    s = fix_validation_problems(s)
     return s
+
+def replace_macros(s):
+    macros = {}
+    macros['PYMCDP_VERSION'] = mocdp.__version__
+    # 'July 23, 2010'
+    macros['PYMCDP_COMPILE_DATE'] = datetime.date.today().strftime("%B %d, %Y") 
+    macros['PYMCDP_COMPILE_TIME'] = datetime.datetime.now().strftime("%I:%M%p")
+    
+    for k, v in macros.items():
+        s = s.replace(k, v)
+        
+    assert_not_inside(s, 'PYMCDP_')
+    return s
+
+def fix_validation_problems(s):
+    """ Fixes things that make the document not validate. """
+    soup = bs(s)
+    
+    # remove the attributes span.c and span.ce used in ast_to_html
+    for e in soup.select('span[c]'):
+        del e.attrs['c']
+    for e in soup.select('span[ce]'):
+        del e.attrs['ce']
+
+    also_remove = ['figure-id', 'figure-class', 'figure-caption']
+    also_remove.extend('make-col%d' % _ for _ in range(1, 12))
+    
+    for a in also_remove:
+        for e in soup.select('[%s]' % a):
+            del e.attrs[a]
+        
+    # add missing type for <style>
+#     for e in soup.select('style:not([type])'):
+    for e in soup.select('style'):
+        if not 'type' in e.attrs:
+            e.attrs['type'] = 'text/css'
+
+    for e in soup.select('span.MathJax_SVG'):
+        style = e.attrs['style']
+        style = style.replace('display: inline-block;' ,'/* decided-to-ignore-inline-block: 0;*/')
+        e.attrs['style'] = style
+        
+    # remove useless <defs id="MathJax_SVG_glyphs"></defs>
+#     for e in list(soup.select('defs')):
+#         if e.attrs.get('id',None) == "MathJax_SVG_glyphs" and not e.string:
+#             e.extract()
+        
+#     for e in soup.select('svg'):
+#         xmlns = "http://www.w3.org/2000/svg"
+#         if not 'xmlns' in e.attrs:
+#             e.attrs['xmlns'] = xmlns
+            
+    return to_html_stripping_fragment(soup)
 
 def get_mathjax_preamble():
     

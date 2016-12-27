@@ -88,17 +88,15 @@ def latex_preprocessing(s):
     s = replace_includegraphics(s)
     s = substitute_command(s, 'fbox', lambda name, inside:  # @UnusedVariable
                            '<div class="fbox">' + inside + "</div>" )
-    s = substitute_simple(s, 'scottcontinuity', 'Scott continuity')
-    s = substitute_simple(s, 'CPO', 'CPO')
-    s = substitute_simple(s, 'DCPO', 'DCPO')
-    s = substitute_simple(s, 'eg', 'e.g.')
+    s = substitute_simple(s, 'scottcontinuity', 'Scott continuity', xspace=True)
+    s = substitute_simple(s, 'scottcontinuous', 'Scott continuous', xspace=True)
+    s = substitute_simple(s, 'CPO', 'CPO', xspace=True)
+    s = substitute_simple(s, 'DCPO', 'DCPO', xspace=True)
+    s = substitute_simple(s, 'eg', 'e.g.', xspace=True)
     s = substitute_simple(s, '$', '&#36;')
-    s2 = substitute_simple(s, '#', '&#35;')
-    if s != s2:
-        print 'got the pound'
-    s = substitute_simple(s, 'scottcontinuous', 'Scott continuous')
+    s = substitute_simple(s, '#', '&#35;')
     
-    s = substitute_simple(s, 'xxx', '<div class="xxx">XXX</div>')
+    s = substitute_simple(s, 'xxx', '<span class="xxx">XXX</span>')
     
     s = substitute_simple(s, 'hfill', '')
     s = substitute_simple(s, 'quad', '')
@@ -332,7 +330,7 @@ def sub_headers(s):
     s = sub_header(s, cmd='subsubsection', hname='h3', number=True)
     return s
   
-def substitute_simple(s, name, replace):
+def substitute_simple(s, name, replace, xspace=False):
     """
         \ciao material-> submaterial
         \ciao{} material -> submaterial
@@ -360,21 +358,31 @@ def substitute_simple(s, name, replace):
 #         print('skip %s match at %r next char %r ' % (start, s[i-10:i+10], next_char)) 
         return s[:i] + substitute_simple(s[i:], name, replace) 
 
-
-    after0 = s[i:]
-    eat_space = True
-    if len(after0)> 2 and after0[:2] == '{}':
-        eat_space = False
-            
-    if eat_space:
-        while i < len(s) and (s[i] in [' ']):
-            i += 1
-    after = s[i:]
-    
     before = s[:istart] 
+    after = s[i:]
+
+    if xspace:
+        braces, after = possibly_eat_braces(after)
+    else:
+        braces, after = possibly_eat_braces(after)
+        if braces:
+            _spaces, after = eat_spaces(after)
+    
     return before + replace + substitute_simple(after, name, replace)
     
-    
+def eat_spaces(x):
+    """ x -> spaces, x' """
+    j = 0
+    while j < len(s) and (x[j] in [' ']):
+        j += 1
+    return x[:j], x[j:]
+
+def possibly_eat_braces(remaining):
+    """ x -> braces, x' """
+    if remaining.startswith('{}'):
+        return '{}', remaining[3:]
+    else:
+        return '', remaining
     
 class Malformed(Exception):
     pass

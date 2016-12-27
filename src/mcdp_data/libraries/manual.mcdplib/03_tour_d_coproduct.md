@@ -89,7 +89,7 @@ as two MCDP using the same interface (same resources and same functionality).
 </col2>
 
 Then we can define the **coproduct** of the two using the keyword
-<k>choose</k>>. Graphically, the choice is indicated through dashed lines.
+<k>choose</k>. Graphically, the choice is indicated through dashed lines.
 
 <col2 class="td-valign-top">
     <pre class='mcdp' id='Batteries' label='Batteries.mcdp'>
@@ -101,4 +101,4 @@ Then we can define the **coproduct** of the two using the keyword
     <render class='ndp_graph_enclosed'>`Batteries</render>
 </col2>
 
-\XXX Add example
+TODO: Add numerical example

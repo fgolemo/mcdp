@@ -14,7 +14,7 @@
 There are other programs that are used primarely to develop:
 
 * <program>mcdp-render</program>: renders a Markdown-enhanced
-  file. Documented <a href="#mcdp-render">here</a>.
-* <program>mcdp-render-manual</program>: renders this manual. Documented <a href="#mcdp-render-manual">here</a>.
+  file. Documented <a href="#sub:mcdp-render">here</a>.
+* <program>mcdp-render-manual</program>: renders this manual. Documented <a href="#sub:mcdp-render-manual">here</a>.
 * <program>mcdp-depgraph</program>: renders a graph of the dependencies
-  of the modules. Documented <a href="#mcdp-depgraph">here</a>.
+  of the modules. Documented <a href="#sub:mcdp-depgraph">here</a>.

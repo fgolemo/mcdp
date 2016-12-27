@@ -2,12 +2,10 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from bs4 import BeautifulSoup
-from bs4.element import Comment
+from bs4.element import Comment, Tag, NavigableString
 
 from contracts import contract
 from mocdp import logger
-from mocdp.exceptions import DPSyntaxError, DPSemanticError
 
 
 def get_manual_css_frag():
@@ -55,7 +53,8 @@ def manual_join(files_contents):
     <!DOCTYPE html>
     <html lang="en">
     <head>
-        <title>TITLE</title>
+        <!--- PYMCDP_VERSION - PYMCDP_COMPILE_DATE - PYMCDP_COMPILE_TIME -->
+        <title>PYMCDP_COMPILE_TIME - TITLE</title>
         <meta charset="utf-8">
         CSS
         </head>
@@ -66,33 +65,51 @@ def manual_join(files_contents):
     </html>
     """ 
     
+    from mcdp_web.renderdoc.main import replace_macros
+    template = replace_macros(template)
+    
     frag = get_manual_css_frag()
     template = template.replace('CSS', frag)
     template = template.replace('TITLE', 'Practical Tools for Co-Design')
     
     # title page
     (_libname, docname), first_data = files_contents.pop(0)
-    assert docname == 'firstpage'
+    assert 'first' in docname
     
-    first_dom = BeautifulSoup(first_data, 'lxml', from_encoding='utf-8')
-    first_contents = first_dom.html.body
+    from mcdp_web.renderdoc.xmlutils import bs
+    first_contents = bs(first_data)
     first_contents.name = 'div'
+    
     first_contents['class'] = 'doc'
     first_contents['docname'] = docname
     template = template.replace('FIRSTPAGE', str(first_contents))
     
-    d = BeautifulSoup(template, 'lxml', from_encoding='utf-8')
+    d = bs(template)
     
     # empty document
-    main_body = BeautifulSoup("", 'lxml', from_encoding='utf-8')
+    main_body = Tag(name='div', attrs={'id':'main_body'})
 
     for (_libname, docname), data in files_contents:
-        doc = BeautifulSoup(data, 'lxml', from_encoding='utf-8')
-        body = doc.html.body
-        body.name = 'div'
-        body['id'] = docname
-        main_body.append(body)
+        print('docname %r -> %s bytes' % (docname, len(data)))
+        from mcdp_web.renderdoc.latex_preprocess import assert_not_inside
+        assert_not_inside(data, 'DOCTYPE')
+        frag = bs(data)
+#         frag.name = 'div' # from fragment
+#         frag.attrs['title'] = "This was the contents of %r, now a DIV." % docname
+#         frag['id'] = docname
+        main_body.append('\n')
+        main_body.append(Comment('Beginning of body of %r' % docname))
+        main_body.append('\n')
+        if True:
+            for x in frag.contents:
+                x2 = x.__copy__() # not clone, not extract
+                main_body.append(x2)
+        else: 
+            main_body.append(frag)
+        main_body.append('\n')
+        main_body.append(Comment('End of body of %r' % docname))
 
+    
     for tag in main_body.select("a"):
         href = tag['href']
         # debug(href)
@@ -102,8 +119,11 @@ def manual_join(files_contents):
             new_ref = '#%s' % page
             tag['href'] = new_ref
 
+    print('adding toc')
     toc = generate_doc(main_body)
-    toc_ul = BeautifulSoup(toc, 'lxml', from_encoding='utf-8').html.body.ul
+    toc_ul = bs(toc).ul
+    toc_ul.extract()
+    assert toc_ul.name == 'ul'
     toc_ul['class'] = 'toc'
     toc_ul['id'] = 'main_toc'
     toc_place = d.select('div#toc')[0]
@@ -112,8 +132,11 @@ def manual_join(files_contents):
     #print('toc element: %s' % str(toc))
     toc_place.replaceWith(toc_ul)
 
+    print('replacing body_place with main_body')
     body_place.replaceWith(main_body)
+    main_body.insert_after(Comment('end of main_body'))
 
+    print('putting bibliography')
     bibhere = d.find('div', id='put-bibliography-here')
     if bibhere is None:
         logger.error('Could not find #put-bibliography-here in document.')
@@ -126,12 +149,15 @@ def manual_join(files_contents):
             # add to bibliography
             bibhere.append(c)
 
+    print('checking errors')
     check_various_errors(d)
     
     from mcdp_docs.check_missing_links import check_if_any_href_is_invalid
+    print('checking hrefs')
     check_if_any_href_is_invalid(d) 
-
-    res = str(d)
+    print('converting to string')
+    res = str(d) # do not use to_html_stripping_fragment - this is a complete doc
+    print('done - %d bytes' % len(res))
     return res
 
 def check_various_errors(d):
@@ -168,7 +194,7 @@ def generate_doc(soup):
 
             if self.tag is not None:
                 # add a span inside the header
-                span = soup.new_tag('span')
+                span = Tag(name='span')
                 span['class'] = 'toc_number'
                 span.string = prefix + ' – '
                 self.tag.insert(0, span)
@@ -213,29 +239,47 @@ def generate_doc(soup):
 
     stack = [ Item(None, 0, 'root', 'root', []) ]
 
-    for header in list(soup.findAll(['h1', 'h2', 'h3', 'h4'])):
+    print('Finding headers')
+    headers = list(soup.findAll(['h1', 'h2', 'h3', 'h4']))
+    print('iterating headers')
+    formatter="html"
+    formatter = headers[0]._formatter_for_name(formatter)
+    for header in headers:
+        ID = header.get('id', None)
+        prefix = None if (ID is None or not ':' in ID) else ID[:ID.index(':')] 
         
-        prefix = {'h1':'sec','h2':'sub','h3':'subsub','h4':'par'}[header.name]
+        allowed_prefixes = {
+            'h1': ['sec', 'app'],
+            'h2': ['sub', 'appsub'],
+            'h3': ['subsub', 'appsubsub'],
+            'h4': ['par'],
+        }[header.name]
+        default_prefix = allowed_prefixes[0]
         
-        if not header.has_attr('id'):    
-            header['id'] = '%s:%s' % (prefix, header_id)
+        if ID is None: 
+            header['id'] = '%s:%s' % (default_prefix, header_id)
         else:
-            cur = header['id']
-            if not cur.startswith(prefix+':'):
+            if prefix is None: 
                 #msg = 'Invalid ID %r for tag %r, muststart with %r.' % (cur, header.name, prefix)
                 #raise_desc(ValueError, msg, tag=str(header))
-                msg = 'Adding prefix %r to current id %r for %s.' % (prefix, cur, header.name)
-                header['id'] = prefix + ':' + cur
+                msg = ('Adding prefix %r to current id %r for %s.' % 
+                       (default_prefix, ID, header.name))
                 #logger.debug(msg)
-                header.parent.insert(header.parent.index(header), 
-                                     Comment('Warning: ' + msg))
+                header.insert_before(Comment('Warning: ' + msg))
+                header['id'] = default_prefix + ':' + ID
+            else:
+                if prefix not in allowed_prefixes:
+                    msg = ('The prefix %r is not allowed for %s (ID=%r)' % 
+                           (prefix, header.name, ID))
+                    logger.error(msg)
+                    header.insert_after(Comment('Error: ' + msg))
+                    
         depth = int(header.name[1])
 
-        # previous_depth = stack[-1].depth 
-        using = header.decode_contents(formatter="html")
-#         print("%s or %s using %s" % (str(header), header.string, using))
+        using = header.decode_contents(formatter=formatter)
+        print('header %s %s %s ' % (' '*2*depth, header.name, using))
         item = Item(header, depth, using, header['id'], [])
-
+        
         while(stack[-1].depth >= depth):
             stack.pop()
         stack[-1].items.append(item)
@@ -244,17 +288,22 @@ def generate_doc(soup):
  
     root = stack[0]
 
+    print('numbering items')
     root.number_items(prefix='', level=0)
 
+    from mcdp_web.renderdoc.xmlutils import bs
+
+    print('toc iterating')
     # iterate over chapters (below each h1)
     for item in root.items:
         s = item.__str__(root=True)
-        stoc = BeautifulSoup(s, 'lxml', from_encoding='utf-8')
+        stoc = bs(s)
         if stoc.html is not None: # empty document case
-            ul = stoc.html.body.ul 
+            ul = stoc.ul
+            ul.extract() 
             ul['class'] = 'toc chapter_toc'
             # todo: add specific h1
             item.tag.insert_after(ul)
- 
+    print('toc done iterating')
     return root.__str__(root=True)
 

@@ -5,9 +5,12 @@ import os
 import shutil
 import sys
 from tempfile import mkdtemp
+import textwrap
 import traceback
+import warnings
 
 from bs4 import BeautifulSoup
+import bs4
 from bs4.element import NavigableString, Tag
 
 from contracts import contract
@@ -34,10 +37,7 @@ from system_cmd import CmdException, system_cmd_result
 
 from mcdp_figures import( MakeFiguresNDP, MakeFiguresTemplate, 
     MakeFiguresPoset)
-import textwrap
 
-import bs4
-import warnings
 
 
 
@@ -590,8 +590,13 @@ def get_minimal_document(body_contents, title=None,
 #         meta['content'] = "%s; charset=utf-8" % ctype
 #         head.append(meta)
 #     if True:
-    head.append(Tag(name='meta', attrs=dict(charset='UTF-8')))
+#     head.append(Tag(name='meta', attrs=dict(charset='UTF-8')))
+#     head.append(Tag(name='meta', attrs={'http-equiv':"Content-Type",
+#                                         'content': "text/html; charset=utf-8"}))
+    head.append(Tag(name='meta', attrs={'http-equiv':"Content-Type",
+                                        'content': "application/xhtml+xml; charset=utf-8"}))
     
+
     tag_title = Tag(name='title')
     tag_title.append(NavigableString(title))
     head.append(tag_title)

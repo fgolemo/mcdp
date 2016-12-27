@@ -1,9 +1,9 @@
 
 ## Other language features
 
-### Documentation strings 
+### Documentation strings
 
-### solve and solve_r
+### Solving   <k>solve</k> <k>solve_r</k>  {#syntax-solve}
 
 Evaluates the model:
 
@@ -22,19 +22,19 @@ Evaluates the model:
 
 
 
-### template
+### <k>template</k>  {#syntax-template}
 
 ...
 
-### specialize
+### <k>specialize</k>  {#syntax-specialize}
 
 ...
 
-### Uncertain
+### <k>Uncertain</k>  {#syntax-Uncertain}
 
 TODO
 
-### Asserts
+### Asserts <k>assert_leq</k> <k>assert_equal</k> <k>&hellip;</k>
 
 Some asserts:
 

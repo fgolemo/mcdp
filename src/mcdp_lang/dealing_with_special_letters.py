@@ -26,6 +26,7 @@ greek_letters = {
     u'psi':u'ψ',
     u'omega':u'ω',   
     u'Gamma':u'Γ',
+    u'Chi':u'Χ',
     u'Delta':u'Δ',
     u'Epsilon':u'Ε',
     u'Zeta':u'Ζ',

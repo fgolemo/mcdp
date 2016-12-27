@@ -1,3 +1,66 @@
+
+## Types universe
+
+MCDPL has 5 "types universes", which we are going to call "Posets", "Values",
+"Named DPs (NDPs)", "Primitive DPs (PDPs)" and "Templates". Every expression in
+the language belongs to one of these universes ([](#tab:types-universes)).
+
+<col3 figure-id="tab:types-universes"
+      figure-caption="Types universe"
+      figure-class="float_top"
+      class='labels-row1'>
+    <s>Type universe </s>
+    <s>example</s>
+    <s>Semantics</s>
+    <!-- -->
+    <s>Posets</s>
+    <s><mcdp-poset>Nat</mcdp-poset>, <mcdp-poset>m/s^2</mcdp-poset> </s>
+    <s>A "poset" describes a set of objects and
+        an order relation.</s>
+    <!-- -->
+    <s>Values</s>
+    <s><mcdp-value>42</mcdp-value>, <mcdp-value>9.81 m/s^2</mcdp-value></s>
+    <s>Values are elements of a posets.</s>
+    <!-- -->
+    <s>Primitive DPs</s>
+    <s>\xxx</s>
+    <s>These correspond to the idea of the DP category. They have
+        a functionality space and a resource space.</s>
+    <!-- -->
+    <s>Named DPs</s>
+    <s><k>mcdp{...}</k></s>
+    <s>These are Primitive DPs + information about the names
+        of ports.</s>
+    <!-- -->
+    <s>Composite Named DPs</s>
+    <s><k>mcdp{...}</k></s>
+    <s>These are Named DPs that are described as the composition
+        of other DPs.</s>
+    <!-- -->
+    <s>templates</s>
+    <s><k>template[...]{...}</k> </s>
+    <s>These are templates for Composite Named DPs (they could be considered
+    morphisms in an operad).</s>
+</col3>
+
+<style type='stylesheet/less'>
+    #tab\:types-universes {
+        td {
+            font-size: smaller;
+            vertical-align: top;
+            padding: 0.5em;
+            &amp;:nth-child(3) {
+                text-align: left;
+            }
+            &amp;:first-child  {
+                width: 10em;
+                text-align: center;
+            }
+        }
+    }
+</style>
+
+
 ## Posets and their values
 
 All values of <f>functionality</f> and <r>resources</r> belong to posets. PyMCDP
@@ -18,21 +81,21 @@ associated to them.
 
         <pos np>Nat</pos>
 
-        $\langle\mathbb{N} \cup \top, \leq\rangle$
+        <s>$\langle\mathbb{N} \cup \top, \leq\rangle$</s>
 
         <s><code>int</code> plus a special <code>Top</code> object</s>
 
 
         <pos np>Rcomp</pos>
 
-        $\langle{\mathbb{R}}_+ \cup \top, \leq\rangle$
+        <s>$\langle{\mathbb{R}}_+ \cup \top, \leq\rangle$</s>
 
         <s><code>float</code> plus a special <code>Top</code> object</s>
 
 
         <pos np>g</pos>
 
-        $\langle\mathbb{R}^{[\text{g}]}_+\cup \top, \leq\rangle$
+        <s>$\langle\mathbb{R}^{[\text{g}]}_+\cup \top, \leq\rangle$</s>
 
         <s><code>float</code> plus a special <code>Top</code> object</s>
 </col3>
@@ -97,41 +160,35 @@ and even $\reals^{[\text{m}]}$  from $\reals^{[\text{km}]}$.
 These posets and their values are indicated using the
 syntax in [](#tab:number-units).
 
-<col1>
-<col7 figure-id="tab:number-units"
-    figure-caption="Numbers with units"
-    class='labels-col1'>
+<center>
+    <col4  class='labels-col1'
+        figure-id="tab:number-units" figure-caption="Numbers with units" >
+        <span>ideal&nbsp;poset</span>
+        <span>$\langle\Rcomp^{[\text{g}]}, \leq\rangle$</span>
+        <span>$\langle\Rcomp^{[\text{J}]}, \leq\rangle$</span>
+        <span>$\langle\Rcomp^{[\text{m/s}]}, \leq\rangle$</span>
+        <!-- <span>…</span> -->
 
-    <span>ideal poset</span>
-    <span>$\langle\Rcomp^{[\text{g}]}, \leq\rangle$</span>
-    <span>$\langle\Rcomp^{[\text{J}]}, \leq\rangle$</span>
-    <span>$\langle\Rcomp^{[\text{m}]}, \leq\rangle$</span>
-    <span>$\langle\Rcomp^{[\text{s}]}, \leq\rangle$</span>
-    <span>$\langle\Rcomp^{[\text{m/s}]}, \leq\rangle$</span>
-    <span>…</span>
+        <span>syntax&nbsp;for&nbsp;poset</span>
+        <pos>g</pos>
+        <pos>J</pos>
+        <pos>m/s</pos>
+        <!-- <span>…</span> -->
 
-    <span>syntax<br/> for posets</span>
-    <pos>g</pos>
-    <pos>J</pos>
-    <pos>m</pos>
-    <pos>s</pos>
-    <pos>m/s</pos>
-    <span>…</span>
-
-     <span>syntax<br/> for values</span>
-     <val>1.2 g</val>
-     <val>20 J</val>
-     <val>10 m</val>
-     <val>10 s</val>
-     <val>23 m/s</val>
-     <span>…</span>
-
-</col7>
-</col1>
+         <span>syntax&nbsp;for&nbsp;values</span>
+         <val>1.2 g</val>
+         <val>20 J</val>
+         <val>23 m/s</val>
+         <!-- <span>…</span> -->
+    </col4>
+</center>
 
 <style>
-    #tab\:number-units tr:not(:first-child) td {
-        text-align: right;
+    #tab\:number-units {
+        /*tr:not(:first-child) */
+        td {
+            text-align: right;
+        }
     }
 </style>
 
@@ -147,11 +204,12 @@ involving units.
 [pint]: http://pint.readthedocs.org/
 
 
-Units in Pint form a [group] with an equivalence relation.
+Units in Pint form a [group][group].
 Call this group of units $U$ and its elements $u, v, \dots \in U$.
 By $\mathbb{F}^{[u]}$, we mean a field $\mathbb{F}$
 enriched with an annotation of units $u\in U$.
 
+ with an equivalence relation.
 [group]: https://en.wikipedia.org/wiki/Group_(mathematics)#Definition
 
 
@@ -177,10 +235,10 @@ kg</val> is equal to <val>1001 g</val>, which is equivalent, but not equal, to
 
 ### Defining custom posets <k>poset</k>
 
-It is possible to define custom finite posets
-using the keyword <k>poset</k>.
+It is possible to define custom finite posets using the keyword
+<q><k>poset</k></q>.
 
-For example, supposes that we create a file named `MyPoset.mcdp_poset`
+For example, suppose that we create a file named <q>`MyPoset.mcdp_poset`</q>
 containing the definition in [](#code:MyPoset). This declaration defines a poset
 with 5 elements `a`, `b`, `c`, `d`, `e` and with the given order relations, as
 displayed in [](#fig:MyPosetHasse).
@@ -190,16 +248,16 @@ displayed in [](#fig:MyPosetHasse).
     <pre class='mcdp_poset' id='MyPoset' label='MyPoset.mcdp_poset'
          figure-id='code:MyPoset'
          figure-caption='Definition of a custom poset'
-         >
-    poset {
-        a b c d e&#32;&#32;&#32;&#32;&#32;&#32;&#32; <!-- code for space -->
+         ></pre>
+    <!-- poset {
+        a b c d e&#32;&#32;&#32;&#32;&#32;&#32;&#32;
 
         a ≼ b
         c ≼ d
         e ≼ d
         e ≼ b
     }
-    </pre>
+    </pre> -->
     <render class='hasse' figure-id="fig:MyPosetHasse">`MyPoset</render>
 </col2>
 
@@ -227,23 +285,9 @@ mcdp {
 
 ### Poset products <k>×</k>
 
-MCDPL allows the definition of finite cartesian products.
+MCDPL allows the definition of finite Cartesian products ([](#def:posets-cartesian-product)).
 
-\begin{defn}[Product of posets]
-  \label{def:product-posets}
-%
-For two posets $P,Q$, the Cartesian product $P\times Q$
-is the set of pairs $\langle p, q \rangle$ for $p\in P$ and $q \in Q$.
-The order is the following:
-%
-$$
-    \langle p_1, q_1 \rangle \posleq \langle p_2, q_2 \rangle
-    \quad \equiv \quad
-    (p_1 \posleq_P p_2) \wedge (q_1 \posleq_Q q_2).
-$$
-\end{defn}
-
-In MCDPL, use the Unicode symbol "<k>×</k>" or the simple letter "<k>x</k>" to
+Use the Unicode symbol "<k>×</k>" or the simple letter "<k>x</k>" to
 create a poset product, using the syntax:
 
 
@@ -264,16 +308,16 @@ The elements of a poset product are called "tuples". These correspond exactly to
 [Python's tuples][tuples]. To define a tuple, use angular brackets
 <q><code>&lt;</code></q> and <q><code>&gt;</code></q>. The syntax is:
 
-<div>
+<center>
     <pre class='mcdp_value' np>
-    &lt;[[valueXXX]], [[value]], [["..."]], [[value]]&gt;
+    &lt;[[value]], [[value]], [["..."]], [[value]]&gt;
     </pre>
-</div>
+</center>
 
-For example, the expression <val>&lt;2 J, 1 A&gt;</val> denotes a tuple with two
-elements, equal to <val>2 J</val> and <code class='mcdp_value'>2 A</code>. An
-alternative syntax uses the fancy Unicode brackets <q>&#x3008;</q> and
-<q>&#x3009;</q>, as in <val>⟨0 J, 1 A⟩</val>.
+For example, the expression <q><val>&lt;2 J, 1 A&gt;</val></q> denotes a tuple
+with two elements, equal to <val>2 J</val> and <val>2 A</val>. An alternative
+syntax uses the fancy Unicode brackets <q>&#x3008;</q> and <q>&#x3009;</q>, as
+in <q><val>⟨0 J, 1 A⟩</val></q>.
 
 [tuples]: https://docs.python.org/3/tutorial/datastructures.html#tuples-and-sequences
 
@@ -287,7 +331,7 @@ np>(J × A) × (m × s × Nat)</pos><code>)</code>.
 
 MCDPL also supports "named products". These are semantically equivalent to
 products, however, there is also a name associated to each entry. This allows to
-easily refer to the elements.For example, the following declares a product of
+easily refer to the elements. For example, the following declares a product of
 the two spaces <pos>J</pos> and <pos>A</pos> with the two entries named
 ``energy`` and ``current``.
 
@@ -300,7 +344,7 @@ the two spaces <pos>J</pos> and <pos>A</pos> with the two entries named
 The names for the fields must be valid identifiers (starts with a letter,
 contains letters, underscore, and numbers).
 
-### Power sets <k>set-of</k> <k>℘</k>
+### Power sets <k>set-of</k> <k>℘</k>   {#syntax-powerset}
 
 MCDPL allows to describe the set of subsets of a poset, i.e. its [power
 set][powerset]. The power set $\pset(Q)$ of a poset $Q$ is a poset with the
@@ -311,8 +355,10 @@ $$
     \quad \equiv \quad
     a \subseteq b.
 $$
-%
-In this order, $\emptyset$ is the top. Meet and join are
+<!-- %
+In this order, $\emptyset$ is the top.  -->
+
+In this poset, [meet](#def:meet) and [join](#def:join) are
 union and intersection, respectively.
 
 [powerset]: https://en.wikipedia.org/wiki/Power_set
@@ -338,9 +384,11 @@ The syntax is either of these:
 To describe values in a powerset, i.e. subsets, use this
 set-building notation:
 
+<center>
 <pre class='mcdp_value'>
 { [[value]], [[value]], [["..."]], [[value]]}
 </pre>
+</center>
 
 For example, the value <val>{1,2,3}</val>
 is an element of the poset <pos>℘(Nat)</pos>.
@@ -370,7 +418,7 @@ can be described by the syntax
 </col2>
 
 For example, <poset>UpperSets(Nat)</poset> represents the space of
-uppersets for the natural numbers.
+upper sets for the natural numbers.
 
 To describe an upper set (i.e. an element of the space of upper sets), use the
 keyword <k>upperclosure</k> or its abbreviation <k>↑</k>. The syntax is:
@@ -385,109 +433,5 @@ keyword <k>upperclosure</k> or its abbreviation <k>↑</k>. The syntax is:
     </pre>
 </col2>
 
-For example: <value>↑ {2 g, 1 m}</value> denotes the principal upper set of
+For example: <value>↑ {&lt;2 g, 1 m&gt;}</value> denotes the principal upper set of
 the element <value>{2 g, 1 m}</value> in the poset <poset>g x m</poset>.
-
-
-### Interval (experimental)
-
-The syntax is
-
-<div center>
-    <pre class='mcdp_poset'>
-    Interval([["lower bound"]], [["upper bound"]])
-    </pre>
-</div>
-
-<!--
-<pre><code><span class="keyword">Interval</span>(<span class='ph'>lower bound</span>,<span class='ph'>upper bound</span>)</code></pre>
- -->
-For example:
-
-<pre class='mcdp_poset'>
-Interval(1g, 10g)
-</pre>
-
-### Singletons (experimental)
-
-    S(tag)
-
-    S(tag):*
-
-
-
-## Other ways to specify values
-
-
-### Top and bottom <k>Top</k> <k>Bottom</k>
-
-These expressions allow to indicate minimal and maximals elements.
-
-To indicate top and bottom of a poset, use the syntax:
-
-<col2>
-        <val np>Top [["poset"]]</val>
-        <val>⊤ [["poset"]]</val>
-        <val np>Bottom [["poset"]]</val>
-        <val>⊥ [["poset"]]</val>
-</col2>
-
-For example, <val>Top V</val> indicates
-the top of the <pos>V</pos>.
-
-TODO: syntax <code>poset: Top</code>.
-
-
-### Minimals and maximals  <k>Minimals</k> <k>Maximals</k>
-
-The expressions <val>Minimals [["poset"]]</val>
-and <val>Maximals [["poset"]]</val>
-denote the set of minimal and maximal elements of a poset.
-
-
-<!-- <pre class='mcdp_poset' id='MyPoset' label='MyPoset.mcdp_poset'
-    figure-id='code:MyPoset'></pre> -->
-<div id='outside'>
-    <render class='hasse' figure-id="fig:hasse2" >&#96;MyPoset</render>
-</div>
-
-<style>
-#outside figure { margin: 0; }
-#outside {
-    width: 12em;
-    float: right;
-}
-</style>
-
-For example, assume that the poset <code>MyPoset</code> is defined as in
-[](#fig:hasse2). % Then <val>Maximals &#96;MyPoset</val> is equivalent to `b`and
-`d` and <val>Minimals &#96;MyPoset</val> is equivalent to `a`, `e`, `c`.
-
-<!--
-<pre class='mcdp_value' id='value1'>
-    assert_equal(Maximals &#96;MyPoset, {&#96;MyPoset:b, &#96;MyPoset:d})
-</pre>
-<pre class='mcdp_value'>
-    assert_equal(Minimals &#96;MyPoset, {&#96;MyPoset:a, &#96;MyPoset:e, &#96;MyPoset:c, })
-</pre>
-
-<pre class='print_value'>&#96;value1</pre> -->
-
-### The empty set <k>EmptySet</k>
-
-To denote the empty set, use the keyword <k>EmptySet</k>:
-
-<pre class='mcdp_value'>
-EmptySet [[poset]]
-</pre>
-
-Note that empty sets are typed---this is different from set theory.
-<val>EmptySet J</val> is an empty set of energies,
-and <val>EmptySet V</val> is an empty set of voltages,
-and the two are not equivalent.
-
-<!-- or
-
-<pre class='mcdp_value'>
-ø [[space]]
-</pre> -->

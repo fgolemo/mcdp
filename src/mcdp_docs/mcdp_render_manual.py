@@ -11,73 +11,31 @@ from mocdp import logger
 from quickapp import QuickApp
 
 from .manual_join_imp import manual_join
+from mcdp_library.utils.locate_files_imp import locate_files
+from reprep.utils.natsorting import natsorted
 
-
-manual_contents = [
-    ('manual', 'firstpage'),
-    
-    ('manual', 'book_intro'),
-    
-    ('manual', 'bit_of_theory'),
-    
-    ('manual', 'tour'),
-    ('manual', 'tour_intro'),
-    ('manual', 'tour_catalogue'),
-    ('manual', 'tour_coproduct'),
-    ('manual', 'tour_composition'),
-    ('manual', 'tour_templates'),
-    
-    ('manual', 'installation'),
-    ('manual', 'ide_quicktour'),
-    
-    ('manual', 'lang_reference'),
-    ('manual', 'lang_types'),
-    ('manual', 'lang_values'),
-    ('manual', 'lang_ndp_definition'),
-    ('manual', 'lang_ndp_operations'),
-    ('manual', 'lang_ndp_signals'),
-    ('manual', 'lang_extra'),
-    ('manual', 'lang_unicode'),
-    ('manual', 'lang_relations'),
-
-#     ('manual', 'adv_approximations'),
-    
-    ('manual', 'libraries'),
-
-    ('manual', 'ide_user'),
-
-    ('manual', 'cli_user'),
-
-    ('manual', 'scenarios'),
-
-    ('rover_energetics', 'energy_choices'),
-    ('rover_energetics', 'energy_choices2'),
-    ('rover_energetics', 'energy_choices3'),
-
-    ('plugs', 'sockets'),
-    ('plugs', 'sockets2'),
-    ('droneD_complete_v2', 'drone_complete'),
-    ('actuation', 'actuation_tour'),
-    # 3d printing
-    # processors: composition
-    
-    ('manual', 'internals'),
-    
-    ('manual', 'developer'),
-    ('manual', 'internal_notes'),
-    ('manual', 'adv_uncertainty'),
-    ('manual', 'adv_approximations'),
-
-    
-    ('manual', 'a_back_symbols'),
-    ('manual', 'a_back_syntax'),
-    
-    ('manual', 'appendix_math'),
-    ('manual', 'backmatter'),
-    ('manual', 'merged'),
-
-]
-
+def get_manual_contents():
+    root = os.getcwd()
+    directory = root
+    pattern = '*.md'
+    filenames = locate_files(directory, pattern, followlinks=True,
+                 include_directories=False,
+                 include_files=True,
+                 normalize=False)
+    ok = []
+    for fn in filenames:
+        fn = os.path.relpath(fn, root)
+        # only root files
+        is_root = os.path.dirname(fn) == ''
+        if not is_root: 
+            continue
+        b, _extension = os.path.splitext(os.path.basename(fn))
+        ok.append(b)
+        
+    filenames = natsorted(ok)
+    for f in filenames:
+        yield 'manual', f
+                 
 class RenderManual(QuickApp):
     """ Renders the PyMCDP manual """
 
@@ -97,9 +55,39 @@ class RenderManual(QuickApp):
 
         generate_pdf = options.pdf
         files_contents = []
+        
+        manual_contents = list(get_manual_contents())
+        
+        insert_after = ('manual', '10_scenarios')
+        
+        extra = [
+            ('rover_energetics', 'energy_choices'),
+            ('rover_energetics', 'energy_choices2'),
+            ('rover_energetics', 'energy_choices3'),
+        
+            ('plugs', 'sockets'),
+            ('plugs', 'sockets2'),
+            ('droneD_complete_v2', 'drone_complete'),
+            ('actuation', 'actuation_tour'),
+        # 3d printing
+        # processors: composition
+        ]
+        
+        at = manual_contents.index(insert_after) + 1
+        manual_contents = manual_contents[:at] + extra + manual_contents[at:] 
+        
+        # check that all the docnames are unique
+        pnames = [_[1] for _ in manual_contents]
+        if len(pnames) != len(set(pnames)):
+            msg = 'Repeated names detected: %s' % pnames
+            raise ValueError(msg)
+        
+        print('manual contents: %s' % manual_contents)
         for libname, docname in manual_contents:
+            print('%s - %s' % (libname, docname))
             res = context.comp(render, libname, docname, generate_pdf,
-                               job_id='render-%s-%s' % (libname, docname))
+                               job_id=docname)
+#                                job_id='render-%s-%s' % (libname, docname))
             files_contents.append(res)
 
         d = context.comp(manual_join, files_contents)
@@ -133,7 +121,15 @@ def render(libname, docname, generate_pdf):
                                     generate_pdf=generate_pdf)
 
     doc = get_minimal_document(html_contents, add_markdown_css=True)
-    return ((libname, docname), doc)
+    dirname = 'out-html'
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    fn = os.path.join(dirname, 'part-%s.html' % docname)
+    with open(fn, 'w') as f:
+        f.write(doc)
+        
+    return ((libname, docname), html_contents)
+
     
 
 mcdp_render_manual_main = RenderManual.get_sys_main()

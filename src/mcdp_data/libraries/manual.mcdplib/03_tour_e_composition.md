@@ -118,26 +118,36 @@ Take <f>extra_payload</f> to represent the user payload that we must carry.
 Then the lift provided by the actuator must be at least the mass of the battery
 plus the mass of the payload times gravity:
 
-<col2 id='mine'>
+<pre class='mcdp_statements'>
+gravity = 9.81 m/s^2
+total_mass = (mass required by battery
+                     + provided payload)
+weight = total_mass * gravity
+lift provided by actuation ≽ weight
+</pre>
+
+Now there is a loop in the co-design diagram [](#fig:Composition).
+
+<col2 id='mine' style='float: bottom'>
 <pre class="mcdp" id='composition' label='Composition.mcdp'
-    figure-id="code:composition">
+    figure-id="code:Composition">
 mcdp {
+    provides endurance [s]
+    provides payload [g]
+
     actuation = instance `Actuation1
     battery = instance `Battery
 
     # battery must provide power for actuation
-    provides endurance [s]
     energy = provided endurance *
         (power required by actuation)
 
     capacity provided by battery ≽ energy
 
     # actuation must carry payload + battery
-    provides payload [g]
     gravity = 9.81 m/s^2
     total_mass = (mass required by battery
                          + provided payload)
-
     weight = total_mass * gravity
     lift provided by actuation ≽ weight
 
@@ -146,7 +156,8 @@ mcdp {
     required mass ≽ total_mass
 }
 </pre>
-        <pre class='ndp_graph_enclosed_TB' style='max-height: 70ex'>
+        <pre class='ndp_graph_enclosed_TB' style='max-height: 70ex'
+            figure-id='fig:Composition'>
             `Composition
         </pre>
 </col2>

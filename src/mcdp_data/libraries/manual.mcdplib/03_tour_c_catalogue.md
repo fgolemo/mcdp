@@ -8,7 +8,7 @@ relation.
 
 Recall from the theory that a design problem is generally defined from a triplet
 of <f>functionality space</f>, <imp>implementation space</imp>, and <r>resource
-space</r> ([](#def:DP)). According to the diagram in [](#fig:gmcdp_setup), one
+space</r>. According to the diagram in [](#fig:gmcdp_setup), one
 should define the two maps $\eval$ and $\exc$, which map an implementation to
 the functionality it provides and the resources it requires.
 
@@ -56,10 +56,10 @@ The icon for this construction is meant to remind of a spreadsheet
 
 ## Multiple minimal solutions
 
-The <k>catalogue</k> construct is the first that allows to define MCDPs that
-have multiple minimal solutions. To see this, let's expand the model in
-[](#code:model3) to include a few more models and one more resource,
-<rname>cost</rname>.
+The <k>catalogue</k> construct is the first construct we encountered that allows
+to define MCDPs that have *multiple minimal solutions*. To see this, let's
+expand the model in [](#code:model3) to include a few more models and one more
+resource, <rname>cost</rname>.
 
 <center>
     <pre class='mcdp' id='catalogue2'

@@ -1,5 +1,5 @@
 
-# Appendix: basic order theory
+# Basic order theory  {#app:basic-order-theory}
 
 <!-- Ligature: efficient affe cafilo. Digits: 1 2 3 4 5 000123679 -->
 
@@ -106,7 +106,7 @@ a bottom for $\posA$ exists, then the bottom for~$\antichains\posA$
 is the singleton containing only the bottom for~$\posA$: $\bot_{\antichains\posA}=\{\bot_{\posA}\}.$
 
 
-\subsection{Monotonicity and fixed points \label{sec:Monotonicity-and-fixed}}
+### Monotonicity and fixed points     {#sub:Monotonicity-and-fixed}
 
 We will use Kleene's theorem, a celebrated result that is used in
 disparate fields. It is used in computer science for defining denotational
@@ -197,25 +197,49 @@ of the Kleene ascent chain
 
 ### Other definitions to be written
 
-\begin{defn}\label{def:upperset} \xxx
+\begin{defn}[Meet]\label{def:meet} \xxx
 \end{defn}
 
-\begin{defn}\label{def:lowerset} \xxx
+\begin{defn}[Join]\label{def:join} \xxx
 \end{defn}
 
-\begin{defn}\label{def:monotone-map} \xxx
+
+\begin{defn}[Power set]\label{def:powerset} \xxx
 \end{defn}
 
-\begin{defn}\label{def:monotone-relation} \xxx
+\begin{defn}[Cartesian product of posets]
+  \label{def:posets-cartesian-product}
+%
+For two posets $P,Q$, the Cartesian product $P\times Q$
+is the set of pairs $\langle p, q \rangle$ for $p\in P$ and $q \in Q$.
+The order is the following:
+%
+$$
+    \langle p_1, q_1 \rangle \posleq \langle p_2, q_2 \rangle
+    \quad \equiv \quad
+    (p_1 \posleq_P p_2) \wedge (q_1 \posleq_Q q_2).
+$$
 \end{defn}
 
-\begin{defn}\label{def:upperclosure} \xxx
+\begin{defn}[Upper set]\label{def:upperset} \xxx
 \end{defn}
 
-\begin{defn}\label{def:lowerclosure} \xxx
+\begin{defn}[Lower set]\label{def:lowerset} \xxx
 \end{defn}
 
-\begin{defn}\label{def:One} \xxx
+\begin{defn}[Monotone map]\label{def:monotone-map} \xxx
+\end{defn}
+
+\begin{defn}[Monotone relation]\label{def:monotone-relation} \xxx
+\end{defn}
+
+\begin{defn}[Upper closure]\label{def:upperclosure} \xxx
+\end{defn}
+
+\begin{defn}[Lower closure]\label{def:lowerclosure} \xxx
+\end{defn}
+
+\begin{defn}[Empty product]\label{def:One}
 The space $\One = \{ \langle\rangle \}$ is the empty product, which contains only one element, the empty tuple $\langle\rangle$.
 \end{defn}
 

@@ -1,7 +1,7 @@
 
 ## Defining NDPs
 
-### ``mcdp{...}`` syntax
+### ``mcdp{...}`` syntax   {#syntax-mcdp}
 
 <pre class='mcdp_statements'>
     provides [[functionality]] using [["dp"]]
@@ -11,6 +11,8 @@
     requires [[resource]] for [["dp"]]
 </pre>
 
-### Primitive DPs <k>implemented-by</k>
+### ``catalogue{...}`` syntax   {#syntax-catalogue}
+
+## Primitive DPs <k>implemented-by</k>
 
 ...

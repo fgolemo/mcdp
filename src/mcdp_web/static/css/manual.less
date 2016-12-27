@@ -200,7 +200,7 @@ ul.chapter_toc > li > ul > li > a.toc_link > span.toc_name::before {
 
 
 /* keywords appearing in headers */
-ul.toc code {
+#maintoc code {
     /*color: red !important;*/
     font-size: 7pt !important;
     color: #a2a2a2 !important;
@@ -443,32 +443,41 @@ a[href^='#thm:'   ]:empty.only-number::before {  content: '♦'; content: target
 a[href^='#sub:'   ]:empty:not(.only-number)::before { content: 'Subsection♦.♦'; content: 'Subsection\0000a0' target-counter(attr(href), section) '.' target-counter(attr(href), subsection) ; }
 a[href^='#sub:'   ]:empty.only-number::before { content: '♦.♦'; content:target-counter(attr(href), section) '.' target-counter(attr(href), subsection) ; }
 
+a[href^='#subsub:']:empty::before {
+    content: 'Section♦';
+    content: 'Section\0000a0' target-counter(attr(href), section) '.' target-counter(attr(href), subsection) '-' target-counter(attr(href), subsubsection, upper-alpha);
+}
+
 
 /** maybe chapter **/
 
 /** Very important - otherwise counters are local to divs,
     and not robust to errors with divs */
 
-body {
-    counter-reset: table listing bib section subsection subsubsection figure example remark definition proposition lemma theorem problem;
+html {
+    counter-reset: table  listing  bib  section appendix subsection  subsubsection figure example remark definition proposition lemma theorem problem ;
 
 }
-h1:not([nonumber]) {
-    counter-increment: section;
-    margin-bottom: 2em;
-}
+
 h1 {
     counter-reset: subsection subsubsection;
+
+    &:not([nonumber])[id^='sec:'] { counter-increment: section; }
+    &:not([nonumber])[id^='app:'] { counter-increment: appendix; }
 }
 
+h1 {
+    margin-bottom: 2em;
+}
 /*h2 :not([nonumber]) */
 /*h2:not([nonumber]) { }*/
     /*border: solid;*/
 
-h2:not([nonumber]) {
-    counter-increment: subsection;
-}
 h2 {
+    &:not([nonumber]) {
+        counter-increment: subsection;
+    }
+
     counter-reset: subsubsection;
 }
 
@@ -482,13 +491,26 @@ a[href^='#sec:']::before {
     content: 'Chapter\0000a0' target-counter(attr(href), section);
 }
 
+ul.toc a[href^='#app:']::before { /* mdash: — ndahs:  –; */
+    content: 'Appendix\0000a0' '♦' ' –';
+    content: 'Appendix\0000a0' target-counter(attr(href), appendix, upper-alpha) ' –';
+    font-weight: bold;
+}
+
 ul.toc a[href^='#sec:']::before { /* mdash: — ndahs:  –; */
     content: 'Chapter\0000a0' '♦' ' –';
     content: 'Chapter\0000a0' target-counter(attr(href), section) ' –';
     font-weight: bold;
 }
 
-h1:not([nonumber])::before {
+h1:not([nonumber])[id^="app:"]::before {
+    content: 'Appendix\0000a0' counter(appendix, upper-alpha);
+    display:block;
+    font-variant: small-caps;
+    font-size: smaller;
+    margin-bottom: 0.5em;
+}
+h1:not([nonumber])[id^="sec:"]::before {
     content: 'Chapter\0000a0' counter(section);
     display:block;
     font-variant: small-caps;
@@ -509,14 +531,12 @@ ul.toc a[href^='#sub:']::before {
 }
 
 
-h2:not([nonumber])::before {
+h2:not([nonumber])[id^='sub:']::before {
     content: /*'Subsection\0000a0'*/ counter(section)'.'counter(subsection) '. ';
 }
 
-
-a[href^='#subsub:']::before {
-    content: 'Subsubsection♦';
-    content: 'Subsubsection\0000a0' target-counter(attr(href), section) '.' target-counter(attr(href), subsection) '-' target-counter(attr(href), subsubsection, upper-alpha);
+h2:not([nonumber])[id^='appsub:']::before {
+    content: /*'Subsection\0000a0'*/ counter(appendix, upper-alpha)'.'counter(subsection) '. ';
 }
 
 
@@ -587,29 +607,6 @@ figure.table td:not(:first-child) {
 }
 div.table-wrap { text-align: center; }
 
-h2 code:first-of-type::before,
-h3 code:first-of-type::before,
-h4 code:first-of-type::before{
-    content: '(';
-    font-weight: normal;
-    font-family: serif;
-}
-h2 code:not(:last-of-type)::after,
-h3 code:not(:last-of-type)::after,
-h4 code:not(:last-of-type)::after{
-    content: ', ';
-    font-weight: normal;
-    font-family: serif;
-}
-
-h2 code:last-of-type::after,
-h3 code:last-of-type::after,
-h4 code:last-of-type::after{
-    content: ')';
-    font-weight: normal;
-    font-family: serif;
-}
-
 /**** col2, etc . ***/
 
 
@@ -655,9 +652,25 @@ p svg {
 h2,h3,h4 { clear: both; }
 
 
-table.labels-col1 td:first-child {
-    font-size: 90%;
-    font-weight: bold;
+table.labels-col1 {
+    td:first-child {
+        font-size: 90%;
+        font-weight: bold;
+    }
+
+    border-collapse: collapse;
+    border: 0;
+
+    td:first-child {
+        padding-right: 3pt;
+        border-right: solid 1pt grey;
+    }
+    td:nth-child(odd):not(:first-child) {
+        background-color: shade(#fff,   0%);
+    }
+    td:nth-child(even) {
+        background-color: shade(#fff,  5%);
+    }
 }
 
 table.labels-row1 {
@@ -711,6 +724,10 @@ div[center] > * {
 
 }
 
+div.float_top {
+    float: bottom;
+}
+
 div.float_bottom {
     float: bottom;
 }
@@ -726,4 +743,9 @@ q {
     ::after {
         // content: '\0201D';
     }
+}
+
+
+span.impname, code {
+    word-wrap: normal;
 }

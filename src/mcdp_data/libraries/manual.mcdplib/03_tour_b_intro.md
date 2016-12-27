@@ -186,8 +186,8 @@ The visualization of these constraints is as in [](#fig:model2-verbose). Note
 that there is always a <q>$\posleq$</q> node between a green and a red
 edge.
 
-<render class='fancy_editor_LR' figure-id="fig:model2-verbose"
-    figure-caption="Verbose visualization">
+<render class='fancy_editor_LR'
+        figure-id="fig:model2-verbose">
     `model2
 </render>
 
@@ -231,8 +231,9 @@ $\emptyset$" ([](#def:upperclosure)), which is equal to $\emptyset$.
 ## Beyond ASCII - Use of Unicode glyphs in the language
 
 To describe the inequality constraints, MCDPL allows to use <q><k>&lt;=</k></q>,
-<q><k>&gt;=</k></q>, as well as their fancy Unicode version <q><k>≼</k></q>,
-<q><k>≽</k></q>. These two expressions are equivalent:
+<q><k>&gt;=</k></q>, as well as their fancy Unicode version <q><k><span
+class="leq">≼</span></k></q>, <q><k><span class="geq">≽</span></k></q>. These
+two expressions are equivalent:
 
 <col2>
     <pre class='mcdp_statements' np>

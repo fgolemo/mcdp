@@ -3,7 +3,7 @@
 "Templates" are a way to describe reusable design patterns.
 
 <!-- XXX: we should not use <poset> below, but it works to get the color -->
-For example, the code in [](#code:composition) composes a particular battery
+For example, the code in [](#code:Composition) composes a particular battery
 model, called <poset>&#96;Battery</poset>, and a particular actuator model, called
 <poset>&#96;Actuation1</poset>. However, it is clear that the pattern of
 "interconnect battery and actuators" is independent of the particular battery
@@ -53,16 +53,6 @@ visualized as a diagram with a hole ([](#fig:ExampleTemplate)).
 Here is the application to the previous example of battery
 and actuation. Suppose that we define their "interfaces"
 as in [](#code:BatteryInterface) and [](#code:ActuationInterface).
-<!--
-Later, we can instance it as follows.
-<!--
-provided f &lt;= 10
-required r &gt;= 15 -->
-
-Suppose  there are two specific batteries, -->
-
-
-
 
 <col2>
 <pre class='mcdp' id='BatteryInterface' label='BatteryInterface.mcdp'
@@ -87,7 +77,7 @@ parameters, called <code>generic_actuation</code> and
 <code>generic_battery</code>, and they must have the interfaces defined by
 <poset>`ActuationInterface</poset> and <poset>`BatteryInterface</poset>.
 
-<col2>
+<col2 style='float: bottom'>
 <pre class="mcdp_template" id='CompositionTemplate'
     label='CompositionTemplate.mcdp'
     figure-id="code:CompositionTemplate">
