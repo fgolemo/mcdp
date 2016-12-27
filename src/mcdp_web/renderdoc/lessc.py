@@ -1,14 +1,14 @@
 import os
+import shutil
 from tempfile import mkdtemp
 
-from pip._vendor.distlib._backport import shutil
-
 from contracts import contract
+from contracts.utils import indent
 from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
 from mocdp import get_mcdp_tmp_dir
 from system_cmd.meat import system_cmd_result
 from system_cmd.structures import CmdException
-from contracts.utils import indent
+
 
 def preprocess_lessc(s):
     soup = bs(s)
