@@ -12,7 +12,7 @@
 
 
 
-        Automatically created ---  do not modify
+        Automatically created ---  do not modify 
 
 
     -----------------
@@ -721,6 +721,18 @@ cite[id^='bib:']::before {
   content: '[' counter(bib) '] ';
   font-style: normal;
 }
+a[href^='#bib:']:empty::before {
+  content: '♦';
+  content: '[' target-counter(attr(href), bib) ']';
+}
+a[href^='#bib:']:not(:empty)::before {
+  content: '♦';
+  content: '[' target-counter(attr(href), bib) ', ';
+}
+a[href^='#bib:']:not(:empty)::after {
+  content: '♦';
+  content: ']';
+}
 figure.table figcaption {
   padding-bottom: 0.3em;
 }
@@ -824,9 +836,9 @@ div[center] > * {
   background-color: white;
   /*border: solid 1px red;*/
 }
-/*@page rotated {
+@page rotated {
   size: 3.8in 4.73in !important;
-}*/
+}
 div.float_top {
   float: bottom;
 }
@@ -839,6 +851,29 @@ pre code.output {
 span.impname,
 code {
   word-wrap: normal;
+}
+svg.hasse text {
+  font-family: monospace !important;
+}
+div.proof {
+  font-style: italic;
+}
+div.proof::before {
+  content: 'Proof: ';
+}
+div.proof::after {
+  content: 'QED';
+}
+div.abstract {
+  font-weight: bold;
+  font-size: smaller;
+}
+figure figure.subfloat {
+  display: inline-block;
+  margin: 0;
+}
+figure figure.subfloat:not(:first-of-type) {
+  margin-left: 2em;
 }
 /*
 
@@ -854,7 +889,7 @@ code {
 
 
 
-        Automatically created ---  do not modify
+        Automatically created ---  do not modify 
 
 
     -----------------

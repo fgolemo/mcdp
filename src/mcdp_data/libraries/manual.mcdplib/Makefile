@@ -50,7 +50,15 @@ publish: $(manual_html)
 
 pdf_metadata=pdf_metadata.txt
 
-$(manual_pdf_prince): $(manual_html) $(pdf_metadata)
+cssdir=../../../mcdp_web/static/css
+
+.PHONY: css
+
+css:
+	$(MAKE) -C $(cssdir)
+
+$(manual_pdf_prince): $(manual_html) $(pdf_metadata) $(cssdir)/*less $(cssdir)/*css
+	$(MAKE) css
 	prince --javascript $< -o $@.tmp
 	pdftk $@.tmp update_info $(pdf_metadata) output $@
 	pdftk $@ dump_data output $@.metadata.txt
@@ -66,3 +74,9 @@ lulu-6by9.pdf: $(manual_pdf_prince)
 	# echo written $@
 
 lulu: lulu-6by9.pdf
+
+bibfile=all_only_one.bib
+bibout=bibliography
+bib: $(bibout)
+$(bibout):
+	bibtex2html --dl -o $(bibout) $(bibfile)

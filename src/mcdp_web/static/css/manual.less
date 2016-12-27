@@ -600,6 +600,23 @@ cite[id^='bib:']::before {
     content: '[' counter(bib) '] ';
     font-style: normal;
 }
+a[href^='#bib:'] {
+
+    &:empty::before {
+        content: @NS;
+        content: '[' target-counter(attr(href), bib) ']';
+    }
+    &:not(:empty){
+        &::before{
+            content: @NS;
+            content: '[' target-counter(attr(href), bib) ', ';
+        }
+        &::after{
+            content: @NS;
+            content: ']';
+        }
+    }
+}
 
 figure.table figcaption { padding-bottom: 0.3em; }
 figure.table td:not(:first-child) {
@@ -751,3 +768,26 @@ span.impname, code {
 }
 
 svg.hasse text { font-family: monospace !important;}
+
+div.proof {
+    &::before {
+        content: 'Proof: '
+    }
+    font-style: italic;
+    &::after {
+        content: 'QED'
+    }
+}
+
+div.abstract {
+    font-weight: bold;
+    font-size: smaller;
+}
+
+figure figure.subfloat {
+    display: inline-block;
+    margin: 0;
+    &:not(:first-of-type)  {
+        margin-left: 2em;
+    }
+}

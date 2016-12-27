@@ -134,7 +134,7 @@ def erase_job_if_files_updated(compmake_context, promise, filenames):
             logger.info('  files last updated: %s' % friendly_age(last_update))
             logger.info('       job last done: %s' % friendly_age(done_at))
                     
-#             mark_to_remake(job_id, db)
+            mark_to_remake(job_id, db)
     
 def generate_metadata():
     template = MCDPManualConstants.pdf_metadata_template

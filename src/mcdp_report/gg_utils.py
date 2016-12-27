@@ -240,6 +240,7 @@ def embed_images(html, basedir):
 
 def get_length_in_inches(s):
     """ "1cm" = 0.393 """
+#     s = s.replace('\\columnwidth', '8.')
     inpoints = {'cm': 0.393, 'in': 1.0,
                 '\\textwidth': 6.0}
     for unit, ininches in inpoints.items():
@@ -290,7 +291,7 @@ def embed_images_from_library(html, library, raise_errors=True):
         
         # get png image size
         from PIL import Image
-        im=Image.open(cStringIO.StringIO(data_png))
+        im = Image.open(cStringIO.StringIO(data_png))
         width_px, height_px = im.size # (width,height) tuple
         width_in = width_px / float(density)
         height_in = height_px / float(density)
@@ -314,7 +315,11 @@ def embed_images_from_library(html, library, raise_errors=True):
                 use_width_in = width_in * scale
                 use_height_in = height_in * scale
             elif 'width' in props:
-                use_width_in = get_length_in_inches(props['width'])
+                try:
+                    use_width_in = get_length_in_inches(props['width'])
+                except ValueError as e:
+                    logger.error('Cannot interpret %s: %s' % (latex_options, e))
+                    use_width_in = 5.0
                 ratio = height_in/width_in
                 use_height_in = use_width_in * ratio
             else:

@@ -6,6 +6,9 @@
 We will use basic facts about order theory. Davey and Priestley~\cite{davey02}
 and Roman~\cite{roman08} are possible reference texts.
 
+I can also cite <a href='#bib:davey02'>that paragraph x.y</a>.
+
+
 Let $\left\langle \posA,\posAleq\right\rangle $ be a partially ordered set
 (poset), which is a set~$\posA$ together with a partial order~$\posAleq$ (a
 reflexive, antisymmetric, and transitive relation). The partial
@@ -14,12 +17,17 @@ has a least element, it is called "bottom" and it is denoted by~$\bot_{\posA}$.
 If the poset has a maximum element, it is called "top" and denoted
 as~$\top_{\posA}$.
 
+
 ### Chains and antichains
 
+\begin{defn}[Chain]
 A <em>chain</em> $x\posleq y\posleq z\posleq\dots$ is a subset of a poset in
-which all elements are comparable. An <em>antichain</em> is a subset of a poset
-in which <em>no</em> elements are comparable. This is the mathematical concept
-that formalizes the idea of "Pareto front".
+which all elements are comparable.
+\end{defn}
+
+An <em>antichain</em> is a subset of a poset in which <em>no</em> elements are
+comparable. This is the mathematical concept that formalizes the idea of "Pareto
+front".
 
 \begin{defn}[Antichain] \label{def:antichain}
 A subset $S\subseteq\posA$ is an antichain iff no elements are comparable:

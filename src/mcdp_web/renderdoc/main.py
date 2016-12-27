@@ -71,9 +71,9 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     
     # fixes for LaTeX
     s = latex_preprocessing(s)
-    assert not '\\par' in s
-    assert not '\\vspace' in s
-    assert not 'begin{tabular}' in s
+#     assert not '\\par' in s
+#     assert not '\\vspace' in s
+#     assert not 'begin{tabular}' in s
     
     s = '<div style="display:none">Because of mathjax bug</div>\n\n\n' + s
 
@@ -93,9 +93,9 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     
     s = col_macros_prepare_before_markdown(s)
     
-    print(indent(s, 'before markdown | '))
+#     print(indent(s, 'before markdown | '))
     s = render_markdown(s)
-    print(indent(s, 'after  markdown | '))
+#     print(indent(s, 'after  markdown | '))
     
     for k,v in maths.items():
         if not k in s:

@@ -15,7 +15,7 @@ def assert_not_inside(substring, s):
         msg = 'I found the forbidden substring %r in string.' % substring
         raise DPSyntaxError(msg, where=w)
 def latex_preprocessing(s):
-    assert_not_inside('\\\\hspace', s)
+#     assert_not_inside('\\\\hspace', s)
     s = s.replace('~$', '&nbsp;$')
 #     s = s.replace('{}', '') # cannot do - mcdp { }
     # note: nongreedy matching ("?" after *);
@@ -35,7 +35,34 @@ def latex_preprocessing(s):
     s = re.sub(r'\\textendash\s*', '&ndash;', s) # XXX
     s = re.sub(r'\\textemdash\s*', '&mdash;', s) # XXX
      
+    justignore = ['vfill', 'pagebreak']
+    for j in justignore:
+        s = substitute_command_ext(s, j, lambda args, opts: '<!--skipped %s-->' % j,  # @UnusedVariable
+                                   nargs=1, nopt=0)
+
+    class Tmp:
+        title = None
+        author = None
     
+    def find_title(args, opts):  # @UnusedVariable
+        Tmp.title = args[0]
+        return ''
+    s = substitute_command_ext(s, "title", find_title, nargs=1, nopt=0)
+    def find_author(args, opts):  # @UnusedVariable
+        Tmp.author = args[0]
+        return ''
+    s = substitute_command_ext(s, "author", find_author, nargs=1, nopt=0)
+
+
+    title = ""
+    title += "<h1>%s</h1>" % Tmp.title
+    title += "<div class='author'>%s</div>" % Tmp.author
+    
+    print title
+    print s.index('maketitle')
+#     s = substitute_command_ext(s, "maketitle", make_title, nargs=0, nopt=0)
+    s = substitute_simple(s, "maketitle", title)
+    assert_not_inside(s, 'maketitle')
     s = re.sub(r'\\noindent\s*', '', s) # XXX
 # {[}m{]}}, and we need to choose the \R{endurance~$T$~{[}s{]}}
     s = re.sub(r'{(\[|\])}', r'\1', s)
@@ -52,6 +79,9 @@ def latex_preprocessing(s):
             return '<a href="#%s" class="only-number"></a>' % x
     s = re.sub(r'\\ref{(.*?)}', subit, s)
     
+    s = substitute_command(s, 'prettyref', lambda name, inside:  # @UnusedVariable
+                           '<a href="#%s"/>' % inside)
+
     s = re.sub(r'\\eqref{(.*?)}', r'\\eqref{eq:\1}', s)
     s = s.replace('eq:eq:', 'eq:')
     
@@ -95,6 +125,7 @@ def latex_preprocessing(s):
     s = substitute_simple(s, 'eg', 'e.g.', xspace=True)
     s = substitute_simple(s, '$', '&#36;')
     s = substitute_simple(s, '#', '&#35;')
+    s = substitute_simple(s, 'ldots', '&hellip;')
     
     s = substitute_simple(s, 'xxx', '<span class="xxx">XXX</span>')
     
@@ -105,7 +136,7 @@ def latex_preprocessing(s):
     s = substitute_simple(s, 'medskip', '<span class="medskip"/>')
     s = substitute_simple(s, 'smallskip', '<span class="medskip"/>')
     s = substitute_simple(s, 'par', '<br class="from_latex_par"/>')
-    assert_not_inside('\\par', s)
+#     assert_not_inside('\\par', s)
     s = substitute_command_ext(s, 'vspace', lambda args, opts: '<!--skipped v-space-->',  # @UnusedVariable
                            nargs=1, nopt=0)
     s = substitute_command_ext(s, 'vspace*', lambda args, opts: '<!--skipped v-space*-->',  # @UnusedVariable
@@ -120,15 +151,18 @@ def latex_preprocessing(s):
 #     \IEEEPARstart{O}{ne}
     s = substitute_command_ext(s, 'IEEEPARstart', lambda args, opts: args[0]+args[1],  # @UnusedVariable
                            nargs=2, nopt=0)
-    
-    assert_not_inside('\\vspace', s)
-    assert_not_inside('\\hspace', s)
-    
+#     
+#     assert_not_inside('\\vspace', s)
+#     assert_not_inside('\\hspace', s)
+#     
     s = substitute_simple(s, 'setlength', '')
     s = substitute_command_ext(s, 'extrarowheight', lambda args, opts: '', nargs=1, nopt=0)  # @UnusedVariable
     
     s = substitute_command_ext(s, 'url', lambda args, opts: '<a href="%s">%s</a>' % (args[0], args[0]), nargs=1, nopt=0)  # @UnusedVariable
 
+    # \adjustbox{max width=4.0cm}{ 
+    # TODO:
+    s = substitute_command_ext(s, 'adjustbox', lambda args, opts: args[1], nargs=2, nopt=0)  # @UnusedVariable
     
     s = replace_captionsideleft(s)
     
@@ -140,7 +174,7 @@ def latex_preprocessing(s):
     for x in ['footnotesize', 'small', 'normalsize']:
         s = substitute_simple(s, x, 
                                '<span class="apply-parent %s"></span>' %x)  # @UnusedVariable
-        assert_not_inside('\\' + x, s)
+#         assert_not_inside('\\' + x, s)
 
     s = replace_environment(s, "defn", "definition", "def:")
     s = replace_environment(s, "lem", "lemma", "lem:")
@@ -149,6 +183,7 @@ def latex_preprocessing(s):
     s = replace_environment(s, "prop", "proposition", ("pro:", "prop:"))
     s = replace_environment(s, "example", "example", "exa:")
     s = replace_environment(s, "proof", "proof", "proof:")
+    s = replace_environment(s, "IEEEproof", "proof", "proof:")
     s = replace_environment(s, "problem", "problem", "prob:")
     s = replace_environment(s, "abstract", "abstract", 'don-t-steal-label')
     s = replace_environment(s, "centering", "centering", 'don-t-steal-label')
@@ -328,6 +363,8 @@ def sub_headers(s):
     s = sub_header(s, cmd='subsection', hname='h2', number=True)
     s = sub_header(s, cmd='subsubsection*', hname='h3', number=False)
     s = sub_header(s, cmd='subsubsection', hname='h3', number=True)
+    s = sub_header(s, cmd='paragraph*', hname='h4', number=False)
+    s = sub_header(s, cmd='paragraph', hname='h4', number=True)
     return s
   
 def substitute_simple(s, name, replace, xspace=False):
@@ -373,7 +410,7 @@ def substitute_simple(s, name, replace, xspace=False):
 def eat_spaces(x):
     """ x -> spaces, x' """
     j = 0
-    while j < len(s) and (x[j] in [' ']):
+    while j < len(x) and (x[j] in [' ']):
         j += 1
     return x[:j], x[j:]
 
@@ -394,7 +431,7 @@ def substitute_command_ext(s, name, f, nargs, nopt):
         if nargs=1 and nopt = 0:
             f : x -> s
     """
-    noccur = s.count('\\'+name)
+#     noccur = s.count('\\'+name)
 #     print('substitute_command_ext name = %s  len(s)=%s occur = %d' % (name, len(s), noccur))
 #     if nargs == 0 and nopt == 0:
 #         lookfor = '\\' + name
@@ -422,17 +459,17 @@ def substitute_command_ext(s, name, f, nargs, nopt):
     
     opts = []
     args = []
-    
+    print('---- %r' % name)
 #     print('consume= %r'% consume)
     for _ in range(nopt):
         consume = consume_whitespace(consume)
         if not consume or consume[0] != '[':
-#             print('skipping option')
+            print('skipping option')
             opt = None
         else:
             opt_string, consume = get_balanced_brace(consume)
-#             print('opt string %r consume %r' % (opt_string, consume))
             opt = opt_string[1:-1] # remove brace
+            print('opt string %r consume %r opt = %r' % (opt_string, consume, opt))
         opts.append(opt)
         
 #     print('after opts= %r'% consume)
@@ -456,6 +493,9 @@ def substitute_command_ext(s, name, f, nargs, nopt):
     
     
     replace = f(args=args, opts=opts)
+    if replace is None:
+        msg = 'function %s returned none' % f
+        raise Exception(msg)
 #     nchars = len(consume0) - len(consume)
     assert consume0.endswith(consume)
 #     print('consume0: %r' % consume0[:nchars])
@@ -521,7 +561,7 @@ def get_balanced_brace(s):
     assert s[0] in ['{', '[']
     stack = []
     i = 0
-    while i <= len(s):
+    while i < len(s):
         # take care of escaping
         if s[i] == '\\' and i < len(s)-1 and s[i+1] in ['{','[','}',']']:
             i += 2
@@ -532,11 +572,15 @@ def get_balanced_brace(s):
             stack.append(s[i])
         if s[i] == '}':
             if not stack or stack[-1] != '{':
-                raise Malformed(stack)
+                msg = 'One extra closing brace }'
+                msg += '\n\n' + Where(s, i).__str__()
+                raise_desc(Malformed, msg, stack=stack, s=s)
             stack.pop()
         if s[i] == ']':
             if not stack or stack[-1] != '[':
-                raise Malformed(stack)
+                msg = 'One extra closing brace ]'
+                msg += '\n\n' + Where(s, i).__str__()
+                raise_desc(Malformed, msg, stack=stack, s=s)
             stack.pop()
 
         if not stack:
@@ -545,8 +589,8 @@ def get_balanced_brace(s):
             break
         i += 1
     if stack:
-        msg = 'Unmatched braces (stack = %s)' % stack
-        raise_desc(Malformed, s, msg)
+        msg = 'Unmatched braces at the end of s (stack = %s)' % stack
+        raise_desc(Malformed, msg, s=s)
     assert a[0] in ['{', '['] 
     assert a[-1] in ['}', ']']
     assert a + b == s
@@ -642,7 +686,7 @@ def replace_captionsideleft(s):
             idpart = ' id="%s"' % label
         else:
             idpart = ""
-        res = ('<figure class="captionsideleft"%s>' % idpart)
+        res = ('<figure class="captionsideleft caption_left"%s>' % idpart)
         res += ('%s<figcaption></figcaption></figure>') % second
         
         return res
@@ -860,7 +904,13 @@ def extract_delimited(s, d1, d2, subs, domain, acceptance=None):
     s2 = s[:a] + key + s[b:]
     return extract_delimited(s2, d1, d2, subs, domain, acceptance=acceptance)
     
-
+def replace_inside_equations(s):
+    """ Processing inside equations """
+    s = s.replace('⟶', '\\rightarrow')
+    s = s.replace('⟼', '\\mapsto')
+    s = s.replace('⟨', '\\langle')
+    s = s.replace('⟩', '\\rangle')
+    return s
 
 def extract_maths(s):
     """ returns s2, subs(str->str) """
