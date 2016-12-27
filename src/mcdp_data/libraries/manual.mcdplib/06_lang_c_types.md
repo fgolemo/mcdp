@@ -5,9 +5,10 @@ MCDPL has 5 "types universes", which we are going to call "Posets", "Values",
 "Named DPs (NDPs)", "Primitive DPs (PDPs)" and "Templates". Every expression in
 the language belongs to one of these universes ([](#tab:types-universes)).
 
+<!-- figure-class="float_top" -->
 <col3 figure-id="tab:types-universes"
       figure-caption="Types universe"
-      figure-class="float_top"
+
       class='labels-row1'>
     <s>Type universe </s>
     <s>example</s>
@@ -109,11 +110,11 @@ top element $\top$. This makes the poset a [complete partial order](#def:cpo)
 ([](#def:cpo)).
 
 
-The natural numbers with completion are expressed as <pos np>Nat</pos>
-or with the Unicode letter "<pos>Nat</pos>".
+The natural numbers with completion are expressed as <q><pos np>Nat</pos></q>
+or with the Unicode letter <q><pos>Nat</pos></q>.
 %
-Their values using the syntax <val np>Nat:42</val>
-or simply <val>42</val>.
+Their values are denoted using the syntax <q><val np>Nat:42</val></q>
+or simply <q><val>42</val></q>.
 
 Internally, $\mathbb{N}$ is represented by the [Python type `int`][int], which
 is equivalent to the 32 bits `signed long` type in C. So, it is really
@@ -335,33 +336,20 @@ easily refer to the elements. For example, the following declares a product of
 the two spaces <pos>J</pos> and <pos>A</pos> with the two entries named
 ``energy`` and ``current``.
 
-<div center>
+<center>
     <pre class='mcdp_poset'>
     product(energy:J, current:A)
     </pre>
-</div>
+</center>
 
 The names for the fields must be valid identifiers (starts with a letter,
 contains letters, underscore, and numbers).
 
 ### Power sets <k>set-of</k> <k>℘</k>   {#syntax-powerset}
 
-MCDPL allows to describe the set of subsets of a poset, i.e. its [power
-set][powerset]. The power set $\pset(Q)$ of a poset $Q$ is a poset with the
-order given by inclusion:
+MCDPL allows to describe the set of subsets of a poset, i.e. its power
+set ([](#def:powerset)).
 
-$$
-    a \posleq_{\pset(Q)} b
-    \quad \equiv \quad
-    a \subseteq b.
-$$
-<!-- %
-In this order, $\emptyset$ is the top.  -->
-
-In this poset, [meet](#def:meet) and [join](#def:join) are
-union and intersection, respectively.
-
-[powerset]: https://en.wikipedia.org/wiki/Power_set
 <!--
 <figure class='figure'>
     <img src='Hasse_diagram_of_powerset_of_3.svg' style='width:13em'/>

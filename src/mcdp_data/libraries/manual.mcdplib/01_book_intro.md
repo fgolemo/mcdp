@@ -120,7 +120,7 @@ can ask what is the optimal configuration of the system that has the least
 amount of resources.
 
 
-MCDPL comes with a web-based GUI described in <ref>Chapter ???</ref>. The user
+MCDPL comes with a web-based GUI described in <a href="#gui"/>. The user
 can input a model and immediately see the graphical representation of such
 model.
 
@@ -136,14 +136,27 @@ It can be applied in different fields...
 
 Chapter ... shows the case when
 
-<col2>
+<center>
+<img figure-id="fig:workflow"
+    src='workflow.png' style='width: 14em'/>
+</center>
+
+<figcaption id='fig:workflow:caption'>
+    Workflow that we imagine.
+</figcaption>
+
+<col2
+    figure-id="fig:some-examples"
+    figure-caption='Some examples'
+    figure-class="float_bottom">
+
     <render class='ndp_graph_templatized' id='3D_Printer'>
     template mcdp {
         provides accuracy [1/s]
-        provides shape [*]
+        provides shape [lux]
         requires time [s]
         requires cost [USD]
-        requires materials [*]
+        requires materials [lux]
     }
     </render>
     <s>
@@ -155,7 +168,7 @@ Chapter ... shows the case when
         provides false_positives [1/s]
         requires latency [s]
         requires computation [USD]
-        requires false_negatives [*]
+        requires false_negatives [lux]``
     }
     </render>
     <s>
@@ -166,14 +179,16 @@ Chapter ... shows the case when
 
 ## This book
 
+
+
 This book presents a new approach to formalizing and solving co-design problems
 through the definition of a formal language, called MCDPL, and its interpreter
 and design environment.
-
+<!-- 
 This book does not discuss the theory, which is explained in detail in [other
 papers].
 
-[other papers]: #papers
+[other papers]: #papers -->
 
 By reading this book, you will learn:
 
@@ -183,7 +198,7 @@ By reading this book, you will learn:
 * how to model design problems in several specific domains of engineering.
 
 
-At this point:
+But beware! At this point:
 
 * the book is an early incomplete draft;
 * the software is experimental and only partially documented.

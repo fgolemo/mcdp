@@ -204,8 +204,20 @@ of the Kleene ascent chain
 \end{defn}
 
 
-\begin{defn}[Power set]\label{def:powerset} \xxx
+\begin{defn}[Power set]\label{def:powerset}
+    The power set $\pset(Q)$ of a poset $Q$ is a poset with the
+    order given by inclusion:
+    $$
+       a \posleq_{\pset(Q)} b
+       \quad \equiv \quad
+       a \subseteq b.
+    $$
+    In this poset, [meet](#def:meet) and [join](#def:join) are
+    union and intersection, respectively.
 \end{defn}
+<!-- %
+In this order, $\emptyset$ is the top.  -->
+
 
 \begin{defn}[Cartesian product of posets]
   \label{def:posets-cartesian-product}

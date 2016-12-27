@@ -1,6 +1,6 @@
 /* These are the fixes for printing / prince */
 
-@page { 
+@page {
     /* good for ipad */
     /*size: A5;  148 x 210 mm   5.8 x 8.3 in */
     /* 4:3 with short side being 5.8in; 5.8/3*4=7.73 */
@@ -10,101 +10,81 @@
     margin: 1cm 1cm; /* todo: remove from python */ ;
     margin-top: 1.7cm;
     margin-bottom: 0.312in;
- 
+
     /*
     for Lulu 6x9
      let right margins 6.125 - 5.5  = 0.625 / 2 = 0.312in
        top bottom margins = 9.25 - 8.5 = 0.75 / 2 = 0.375in */
    /* margin:0.375in  0.312in;
     size: 6.125in 9.25in; */
-
-    
-
 }
-@page {
-@top {
-    vertical-align: bottom;
-    content: string(doctitle);
-    font-size: 10pt;
-    font-variant: small-caps;
+
+@page normal {
+    @top {
+        vertical-align: bottom;
+        content: string(current-header);
+        font-size: 10pt;
+        font-variant: small-caps;
     }
 }
-
-
-h1 { string-set: doctitle content() }
+@page normal:first {
+    @top {
+        content: none;
+    }
+    @bottom {
+        /*content: 'first of chapter';*/
+    }
+}
+body {
+    page: normal;
+}
+h1 {
+  /*page: normal;*/ /* all are normale */
+  prince-page-group: start;
+  string-set: current-header content();
+}
 
 @media print {
 
-@page { @top-right { padding-bottom: 10pt;} }
-@page { @top-left  { padding-bottom: 10pt;} }
-@page { @top       { padding-bottom: 10pt;} }
+    @page { @top-right { padding-bottom: 10pt;} }
+    @page { @top-left  { padding-bottom: 10pt;} }
+    @page { @top       { padding-bottom: 10pt;} }
 
-@page:first {
-     @top-right { content: none; }
-    @top { content: none; }
+    @page normal:first {
+        @top-right { content: none; }
+        @top { content: none; }
+    }
+    @page normal:right {
+        @top-right {
+            vertical-align: bottom;
+            font-size: 10pt;
+            content: counter(page);
+        }
+    }
+    @page normal:left {
+        @top-left {
+            vertical-align: bottom;
+            /*padding-right:20px; */
+            /*
+            padding-bottom: 20px;*/
+            /*border: solid 1px red;*/
+            font-size: 10pt;
+            content: counter(page);
+         }
 }
-@page:right { @top-right {
-    vertical-align: bottom;
-    /*padding-right:20px; */
-    /*
-    padding-bottom: 20px;*/
-    /*border: solid;*/
-    font-size: 10pt;
-    content: counter(page); 
-}}
-@page:left { @top-left {
-    vertical-align: bottom;
-    /*padding-right:20px; */
-    /*
-    padding-bottom: 20px;*/
-    /*border: solid 1px red;*/
-    font-size: 10pt;
-    content: counter(page); 
-}}
-
-
 
     /* only in the manual, not in mcdp-render, that is, after a #booktitle */
-    h1:not(#booktitle) { 
-        page-break-before: always; 
+    h1:not(#booktitle) {
+        page-break-before: always;
     }
 
 }
 
-/*h1#booktitle  { page-break-before: avoid; }*/
-
-
-/*
-pre  { 
-    font-size: 7pt !important; 
-    
-
-    display: inline-block;
-}
-
-*/
-
-/*line-height: 7pt !important; */
-
-
-
  td pre { margin-top: 0 !important;  margin: 0 !important;}
 
-
-/*td {padding: 0 !important;}*/
-/*
-table { 
-    border: solid 1px blue; 
-    max-width: 100%; width: 100%;}
-*/
-td { 
+td {
     /*border: solid 1px red;*/
  }
-/*
-svg { display: inline-block; transform: scale(0.5);
- outline: 1px solid transparent;
-  }*/
-
 
 
 
@@ -112,14 +92,14 @@ merror { color: red; }
 
 
 
-body { 
+body {
     /*font-family: "Palatino" !important;*/
     /*font-family: "Arial" !important;*/
     /*font-kerning: normal;*/
     /*font-variant: prince-opentype(liga);*/
-    
+
      /*prince-text-replace: "ffi" "\fb03" "fi" "\fb01" "ffl" "\fb04" "fl" "\fb02" "ff" "\fb00";*/
-     
+
        /*font-variant: prince-opentype(onum) prince-opentype(liga);*/
 
   font-variant: prince-opentype(onum, dlig, liga);
@@ -127,7 +107,7 @@ body {
 
 
 
-svg.hasse text { font-family: monospace !important;}
+
 
 
 /*pre, pre code { font-family:"Consolas", "Anka/Coder Narrow" !important; }*/
@@ -138,15 +118,15 @@ span.OpenBraceKeyword,  span.CloseBraceKeyword, span.PlaceholderLabel {
 }
 
 
-p + table {  
+p + table {
     margin-top: 0.9em !important;
 }
 
 /*
 
-pre { 
+pre {
     margin-left: auto !important;
-    margin-right: auto !important; 
+    margin-right: auto !important;
 }*/
 
 #mine { text-align: center; }
@@ -180,8 +160,8 @@ ul.toc ul:not(.toc) {
 
 
 
-footnote { 
-    float: footnote; 
+footnote {
+    float: footnote;
     font-size: smaller;
 
 }
@@ -219,6 +199,5 @@ h1::after {
     height: 3cm;
     display: block;
     top: 0;
-} 
+}
 */
-

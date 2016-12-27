@@ -2,10 +2,12 @@
 # -*- coding: utf-8 -*-
 import sys
 
-from bs4.element import Comment, Tag, NavigableString
+from bs4.element import Comment, Tag
 
 from contracts import contract
 from mocdp import logger
+import os
+from mcdp_docs.manual_constants import MCDPManualConstants
 
 
 def get_manual_css_frag():
@@ -47,23 +49,10 @@ def manual_join(files_contents):
 #                 displayMath: [ ['$$','$$'], ["\\[","\\]"] ]
 #             });
 #         </script>
-
-
-    template = """
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <!--- PYMCDP_VERSION - PYMCDP_COMPILE_DATE - PYMCDP_COMPILE_TIME -->
-        <title>PYMCDP_COMPILE_TIME - TITLE</title>
-        <meta charset="utf-8">
-        CSS
-        </head>
-    <body>
-    FIRSTPAGE
-    <div id='body'/>
-    </body>
-    </html>
-    """ 
+    fn = MCDPManualConstants.main_template
+    if not os.path.exists(fn):
+        raise ValueError('Could not find %s' % fn )
+    template = open(fn).read()
     
     from mcdp_web.renderdoc.main import replace_macros
     template = replace_macros(template)
@@ -72,6 +61,7 @@ def manual_join(files_contents):
     template = template.replace('CSS', frag)
     template = template.replace('TITLE', 'Practical Tools for Co-Design')
     
+    print template
     # title page
     (_libname, docname), first_data = files_contents.pop(0)
     assert 'first' in docname
@@ -90,7 +80,7 @@ def manual_join(files_contents):
     main_body = Tag(name='div', attrs={'id':'main_body'})
 
     for (_libname, docname), data in files_contents:
-        print('docname %r -> %s bytes' % (docname, len(data)))
+        print('docname %r -> %s KB' % (docname, len(data)/1024))
         from mcdp_web.renderdoc.latex_preprocess import assert_not_inside
         assert_not_inside(data, 'DOCTYPE')
         frag = bs(data)
@@ -160,6 +150,7 @@ def manual_join(files_contents):
     print('done - %d bytes' % len(res))
     return res
 
+    
 def check_various_errors(d):
     error_names = ['DPSemanticError', 'DPSyntaxError']
     selector = ", ".join('.'+_ for _ in error_names)
@@ -194,10 +185,15 @@ def generate_doc(soup):
 
             if self.tag is not None:
                 # add a span inside the header
-                span = Tag(name='span')
-                span['class'] = 'toc_number'
-                span.string = prefix + ' – '
-                self.tag.insert(0, span)
+                
+                if False:
+                    span = Tag(name='span')
+                    span['class'] = 'toc_number'
+                    span.string = prefix + ' – '
+                    self.tag.insert(0, span)
+                else:
+                    msg = 'number_items: By my count, this should be %r.' % prefix
+                    self.tag.insert_after(Comment(msg))
                 #self.tag.string = prefix + ' - ' + self.tag.string
 
             def get_number(i, level):
@@ -298,12 +294,13 @@ def generate_doc(soup):
     for item in root.items:
         s = item.__str__(root=True)
         stoc = bs(s)
-        if stoc.html is not None: # empty document case
+        if stoc.ul is not None: # empty document case
             ul = stoc.ul
             ul.extract() 
             ul['class'] = 'toc chapter_toc'
             # todo: add specific h1
             item.tag.insert_after(ul)
+            
     print('toc done iterating')
     return root.__str__(root=True)
 

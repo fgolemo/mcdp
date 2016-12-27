@@ -1,16 +1,23 @@
 # -*- coding: utf-8 -*-
+import itertools
+from string import Template
+
 from contracts import contract
+from contracts.interface import location, Where
 from contracts.utils import raise_desc, indent
+from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_library import MCDPLibrary
 from mcdp_web.renderdoc.abbrevs import other_abbrevs
 from mcdp_web.renderdoc.highlight import fix_subfig_references
-from mcdp_web.renderdoc.latex_preprocess import extract_maths, extract_tabular,\
-    assert_not_inside
+from mcdp_web.renderdoc.latex_preprocess import extract_maths, extract_tabular
+from mcdp_web.renderdoc.lessc import preprocess_lessc
 from mcdp_web.renderdoc.macro_col2 import col_macros,\
     col_macros_prepare_before_markdown
 from mcdp_web.renderdoc.markdown_transform import is_inside_markdown_quoted_block
 from mcdp_web.renderdoc.preliminary_checks import do_preliminary_checks_and_fixes
-from mocdp.exceptions import DPInternalError
+from mcdp_web.renderdoc.xmlutils import to_html_stripping_fragment, bs
+from mocdp import logger
+from mocdp.exceptions import DPInternalError, DPSyntaxError
 
 from .highlight import html_interpret,  mark_console_pres,\
     escape_for_mathjax, make_figure_from_figureid_attr
@@ -18,12 +25,6 @@ from .latex_preprocess import latex_preprocessing
 from .markd import render_markdown
 from .prerender_math import prerender_mathjax
 from .xmlutils import check_html_fragment
-from mocdp import logger
-import itertools
-from mcdp_web.renderdoc.lessc import preprocess_lessc
-from mcdp_web.renderdoc.xmlutils import to_html_stripping_fragment, bs
-import mocdp
-import datetime
 
 
 __all__ = ['render_document']
@@ -173,18 +174,41 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     s = fix_validation_problems(s)
     return s
 
-def replace_macros(s):
-    macros = {}
-    macros['PYMCDP_VERSION'] = mocdp.__version__
-    # 'July 23, 2010'
-    macros['PYMCDP_COMPILE_DATE'] = datetime.date.today().strftime("%B %d, %Y") 
-    macros['PYMCDP_COMPILE_TIME'] = datetime.datetime.now().strftime("%I:%M%p")
+def replace_macros(s):    
+    macros = MCDPManualConstants.macros
+    class MyTemplate(Template):
+        delimiter = '@@'
+        def _invalid(self, mo):
+            i = mo.start('invalid')
+            lines = self.template[:i].splitlines(True)
+            if not lines:
+                colno = 1
+                lineno = 1
+            else:
+                colno = i - len(''.join(lines[:-1]))
+                lineno = len(lines)
+                
+            char = location(lineno-1, colno-1, s)
+            w = Where(s, char)
+            raise DPSyntaxError('Invalid placeholder', where=w)
+
+    t = MyTemplate(s)
     
-    for k, v in macros.items():
-        s = s.replace(k, v)
-        
-    assert_not_inside(s, 'PYMCDP_')
-    return s
+    
+#     for k, v in macros.items():
+#         s = s.replace(k, v)
+#         
+#     assert_not_inside(s, 'PYMCDP_')
+    try:
+        s2 = t.substitute(macros)
+    except KeyError as e:
+        key = str(e).replace("'","")
+        search_for = MyTemplate.delimiter + key
+        char = s.index(search_for)
+        w = Where(s, char)
+        msg = 'Key %r not found - maybe use braces?' % key
+        raise DPSyntaxError(msg, where=w)
+    return s2 
 
 def fix_validation_problems(s):
     """ Fixes things that make the document not validate. """
@@ -234,7 +258,7 @@ def get_mathjax_preamble():
     lines = tex.split('\n')
     lines = ['$%s$' % l for l in filter(lambda x: len(x.strip())>0, lines)]
     tex = "\n".join(lines)
-    frag = '<div class="mathjax-symbols">%s</div>\n' % tex
+#     frag = '<div class="mathjax-symbols">%s</div>\n' % tex
     frag = tex
     return frag
 

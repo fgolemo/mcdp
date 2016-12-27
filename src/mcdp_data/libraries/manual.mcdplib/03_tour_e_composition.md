@@ -126,7 +126,7 @@ weight = total_mass * gravity
 lift provided by actuation ≽ weight
 </pre>
 
-Now there is a loop in the co-design diagram [](#fig:Composition).
+Now there is a loop in the co-design diagram ([](#fig:Composition)).
 
 <col2 id='mine' style='float: bottom'>
 <pre class="mcdp" id='composition' label='Composition.mcdp'

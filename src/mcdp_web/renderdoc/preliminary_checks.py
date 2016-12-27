@@ -57,7 +57,7 @@ def fix_tag(m):
     allow_empty_attributes = MCDPConstants.docs_xml_allow_empty_attributes
     for att in allow_empty_attributes:
         def fix_if_empty(m2):
-#             print('matched tag 1: %r 2: %r' %( m2.group(1), m2.group(2)))
+#  print('matched tag 1: %r 2: %r' %( m2.group(1), m2.group(2)))
             char = m2.group(2)
             if char is None: char = ''
             if char is None or char != '=':

@@ -52,11 +52,6 @@ def lessc_string(s1):
     mcdp_tmp_dir = get_mcdp_tmp_dir()
     prefix = 'prerender_lessc'
     d = mkdtemp(dir=mcdp_tmp_dir, prefix=prefix)
-#     try:
-#         node = get_nodejs_bin()
-#     except NodeNotFound as e:
-#         raise_wrapped(LesscError, e, "Could not find node", compact=True)
-#         
     try:
         f1 = os.path.join(d, 'input.less')
         f2 = os.path.join(d, 'out.css')
@@ -72,21 +67,6 @@ def lessc_string(s1):
                     raise_on_error=False)
             
             if res.ret:
-#                 if 'Error: Cannot find module' in res.stderr:
-#                     msg = 'You have to install the MathJax and/or jsdom libraries.'
-#                     msg += '\nOn Ubuntu, you can install them using:'
-#                     msg += '\n\n\tsudo apt-get install npm'
-#                     msg += '\n\n\tnpm install MathJax-node jsdom'
-#                     msg += '\n\n' + indent(res.stderr, '  |')
-#                     raise PrerenderError(msg) 
-#                 
-#                 if 'parse error' in res.stderr:
-#                     lines = [_ for _ in res.stderr.split('\n')
-#                              if 'parse error' in _ ]
-#                     assert lines
-#                     msg = 'LaTeX conversion errors:\n\n' + '\n'.join(lines)
-#                     raise PrerenderError(msg)
-#             
                 msg = 'lessc error (ret = %d).' % res.ret 
                 msg += '\n\n' + indent(res.stderr, '  |')
                 raise LesscError(msg)

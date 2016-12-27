@@ -1,19 +1,20 @@
 
-<h1 id='booktitle' nonumber>
+<h1 id='booktitle' nonumber  style='margin-top: -3em'>
     <!-- PyMCDP user manual -->
-    <!-- The MCDPL co-design modeling language <br/>
+    <!-- The MCDPL co-design modeling language
     and its interactive co-design environment -->
     <!-- A Practical Approach to Co-Design -->
-    <!-- Practical Tools <br/>for Co-Design -->
-    <!-- Formal Tools <br/>for Systems Co-Design -->
-    Formal Tools <br/>for <f>Co</f>-<r>Design</r>
+    <!-- Practical Tools for Co-Design -->
+    <!-- Formal Tools for Systems Co-Design -->
+    <span style='color:white;'>@@{PYMCDP_COMPILE_TIME}</span>
+    <br/>Formal Tools <br/>for <f>Co</f>-<r>Design</r>
 </h1>
 
 <div id='author'>
-    <p><a href="http://censi.mit.edu">Andrea Censi</a>
+    <p>Andrea Censi</p>
+    <!-- <p><a href="http://censi.mit.edu">Andrea Censi</a>
 
-    </p>
-
+    </p> -->
 </div>
 
 <p id='logop'>
@@ -21,7 +22,7 @@
 </p>
 
 <div class='abstract'>
-    PYMCDP_COMPILE_TIME - PYMCDP_COMPILE_DATE - PYMCDP_COMPILE_TIME
+    Compiled: @@{PYMCDP_COMPILE_TIME} at @@{PYMCDP_COMPILE_DATE}
 
     <!-- Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
     tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
@@ -35,9 +36,9 @@
     Version PYMCDP_VERSION. Manual compiled from branch COMPILE_BRANCH on COMPILE_DATE.
 </div> -->
 
-<div id='affiliation'>
-    The author is with the Laboratory of Information and Decision Systems at the Massachusetts Institute of Technology;
-    with ETH Zurich; with nuTonomy, inc.; and with Duckietown Engineering.
+<div id='affiliation'> The author is with the Laboratory of Information and
+    Decision Systems at the Massachusetts Institute of Technology; with ETH Zurich;
+    with nuTonomy, inc.; and with Duckietown Engineering.
 </div>
 
 <h2 nonumber id='toc-heading'>Table of contents</h2>
@@ -67,7 +68,12 @@
         }
     }
 
-    #author, #affiliation { display: none; }
+    #author, #affiliation {
+        color: white;
+        margin: 0; padding: 0;
+        margin-top: -2em;
+
+    }
     @media print {
         #affiliation {
             float: footnote;

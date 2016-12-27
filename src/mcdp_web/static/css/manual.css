@@ -12,7 +12,7 @@
 
 
 
-        Automatically created ---  do not modify 
+        Automatically created ---  do not modify
 
 
     -----------------
@@ -824,9 +824,9 @@ div[center] > * {
   background-color: white;
   /*border: solid 1px red;*/
 }
-@page rotated {
+/*@page rotated {
   size: 3.8in 4.73in !important;
-}
+}*/
 div.float_top {
   float: bottom;
 }
@@ -854,7 +854,7 @@ code {
 
 
 
-        Automatically created ---  do not modify 
+        Automatically created ---  do not modify
 
 
     -----------------

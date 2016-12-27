@@ -66,11 +66,11 @@ The primitive DPs are shown in [](#fig:primitive).
 
 The syntax is
 
-<div center>
+<center>
     <pre class='mcdp_poset'>
     Interval([["lower bound"]], [["upper bound"]])
     </pre>
-</div>
+</center>
 
 <!--
 <pre><code><span class="keyword">Interval</span>(<span class='ph'>lower bound</span>,<span class='ph'>upper bound</span>)</code></pre>

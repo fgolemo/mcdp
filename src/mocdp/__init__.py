@@ -167,7 +167,7 @@ class MCDPConstants():
     pdf_to_png_dpi = 100 # dots per inch
     
     docs_xml_allow_empty_attributes = ['np', 'noprettify', 'nonumber',
-                                        'mcdp-value', 'mcdp-poset', 'center']
+                                        'mcdp-value', 'mcdp-poset']
     
     
 def get_mcdp_tmp_dir():

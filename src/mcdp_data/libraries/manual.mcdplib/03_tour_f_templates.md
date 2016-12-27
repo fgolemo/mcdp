@@ -1,4 +1,4 @@
-## Using templates to describe design patterns
+## Describing design patterns
 
 "Templates" are a way to describe reusable design patterns.
 

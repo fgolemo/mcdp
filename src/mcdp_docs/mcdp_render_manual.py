@@ -6,13 +6,21 @@ import tempfile
 from mcdp_library import MCDPLibrary
 from mcdp_library_tests.tests import get_test_librarian
 from mcdp_web.renderdoc.highlight import get_minimal_document
-from mcdp_web.renderdoc.main import render_complete
+from mcdp_web.renderdoc.main import render_complete, replace_macros
 from mocdp import logger
 from quickapp import QuickApp
 
 from .manual_join_imp import manual_join
 from mcdp_library.utils.locate_files_imp import locate_files
 from reprep.utils.natsorting import natsorted
+from mcdp_docs.manual_constants import MCDPManualConstants
+from compmake.context import Context
+from compmake.structures import Promise
+from contracts import contract
+from contracts.utils import check_isinstance
+from compmake.jobs.storage import get_job_cache
+from compmake.jobs.actions import mark_to_remake
+import time
 
 def get_manual_contents():
     root = os.getcwd()
@@ -88,11 +96,59 @@ class RenderManual(QuickApp):
             res = context.comp(render, libname, docname, generate_pdf,
                                job_id=docname)
 #                                job_id='render-%s-%s' % (libname, docname))
+            if libname == 'manual':
+                source = '%s.md' % docname
+                erase_job_if_files_updated(context.cc, promise=res, filenames=[source])
+            
             files_contents.append(res)
 
         d = context.comp(manual_join, files_contents)
         context.comp(write, d, options.output_file)
+        
+        context.comp(generate_metadata)
 
+@contract(compmake_context=Context, promise=Promise, filename='seq(str)')
+def erase_job_if_files_updated(compmake_context, promise, filenames):
+    """ Invalidates the job if the filename is newer """
+    check_isinstance(promise, Promise)
+    check_isinstance(filenames, (list, tuple))
+    
+    def friendly_age(ts):
+        age = time.time() - ts
+        return '%.3fs ago' % age
+    #    if age > 0.5:
+    #        ages = '%.3fs ago' % age
+    
+    filenames = list(filenames)
+    for _ in filenames:
+        if not os.path.exists(_):
+            raise ValueError(_)
+    last_update = max(os.path.getmtime(_) for _ in filenames)
+    db = compmake_context.get_compmake_db()
+    job_id = promise.job_id
+    cache = get_job_cache(job_id, db)
+    if cache.state == cache.DONE:
+        done_at = cache.timestamp
+        if done_at < last_update:
+            logger.info('Cleaning job %r because files updated %r' % (job_id, filenames))
+            logger.info('  files last updated: %s' % friendly_age(last_update))
+            logger.info('       job last done: %s' % friendly_age(done_at))
+                    
+#             mark_to_remake(job_id, db)
+    
+def generate_metadata():
+    template = MCDPManualConstants.pdf_metadata_template
+    if not os.path.exists(template):
+        msg = 'Metadata template does not exist: %s' % template
+        raise ValueError(msg)
+
+    out = MCDPManualConstants.pdf_metadata
+    s = open(template).read()
+    s = replace_macros(s)
+    with open(out, 'w') as f:
+        f.write(s)
+    print(s)
+    
 
 def write(s, out):
     dn = os.path.dirname(out)

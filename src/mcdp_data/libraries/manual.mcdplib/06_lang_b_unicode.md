@@ -60,15 +60,22 @@ Every occurrence of a superscript of the digit *d* is interpreted as a power
 ## Use of Unicode letters as part of identifiers ## {#sub:unicode-in-identifiers}
 
 MCDPL allows to use some Unicode characters, Greek letters and subscripts, also
-in identifiers and expressions. For exmple, it is equivalent to write
+in identifiers and expressions. For example, it is equivalent to write
 <q>`alpha_1`</q> and <q>`α₁`</q>.
 
-The rules are that:
+<!-- The rules are that: -->
 
-1. Greek letters can only appear at the beginning of an identifier.
-2. Subscripts can only appear at the end of an identifier.
+<!-- 1. Greek letters can only appear at the beginning of an identifier. -->
+<!-- 2. Subscripts can only appear at the end of an identifier. -->
 
 ### Greek letters
+
+Every Greek letter is converted to its name. It is syntactically equivalent to
+write <q>`alpha_material`</q> or <q>`α_material`</q>.
+
+Greek letter names are only considered at the beginning of the identifier and
+only if they are followed by a non-word character. For example, the identifer
+<q>`alphabet`</q> is not converted to <q>`αbet`</q>.
 
 [](#tab:greek-letters) shows the Greek letters supported and their
 translitteration. Note that there is a difference between lower case and upper
@@ -138,13 +145,6 @@ case.
     }
 }
 </style>
-
-Every Greek letter is converted to its name. It is syntactically equivalent to
-write <q>`alpha_material`</q> or <q>`α_material`</q>.
-
-Greek letter names are only considered at the beginning of the identifier
-and if they are followed by a non-word character.
-For example, the identifer <q>`alphabet`</q> is not converted to <q>`αbet`</q>.
 
 ### Subscripts
 
