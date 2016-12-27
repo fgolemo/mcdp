@@ -103,7 +103,7 @@ solutions.
 
 This paper describes how to add a notion of \emph{uncertainty} in
 the MCDP framework. The model of uncertainty considered is interval
-uncertainty on arbitrary partial orders. For a poset~$\left⟨ \posA,\posleq\right⟩ $,
+uncertainty on arbitrary partial orders. For a poset~$⟨\posA,\posleq⟩$,
 these are sets of the type~$\{x∈\posA\colon a\posleq x\posleq b\}$.
 I will show how one can introduce this type of uncertainty in the
 MCDP framework by considering ordered pairs of design problems. Each
@@ -177,7 +177,7 @@ informally called a ``Pareto front''.
 
 
 \begin{defn}
-An \emph{antichain}~$S$ in a poset~$\left⟨ \posA,\posleq\right⟩ $
+An \emph{antichain}~$S$ in a poset~$⟨\posA,\posleq⟩$
 is a subset of~$\posA$ such that no element of~$S$ dominates another
 element: if~$x,y∈ S$ and~$x\posleq y$, then~$x=y$.
 \end{defn}
@@ -191,7 +191,7 @@ S₁\posleq_{\antichains\posA}S₂\ \equiv\ \uparrow S₁\supseteq\,\uparrow S�
 \end{lem}
 \begin{defn}
 \label{def:A-monotone-design}A\emph{ monotone design problem~}(DP)
-is a tuple~$\left⟨ \funsp,\ressp,\ftor\right⟩ $ such
+is a tuple~$⟨\funsp,\ressp,\ftor⟩$ such
 that~$\funsp$ and~$\ressp$ are CPOs, and~${\colH\ftor}:{\colF\fun}⟶{\colR\antichains\ressp}$
 is a monotone and Scott-continuous function~(\cite{gierz03continuous}
 or \cite[Definition 11]{censi16codesign_sep16}).
@@ -261,7 +261,7 @@ and there is only one atom~$a$, then the terms are $\terms(\{f\},\{a\})=\{a,f(a)
 
 
 \begin{defn}[Algebraic definition Monotone Co-Design Problems]
-\label{def:MCDP-algebraic}An MCDP is a tuple~$\left⟨ \atoms,\atree,\val\right⟩ $,
+\label{def:MCDP-algebraic}An MCDP is a tuple~$⟨\atoms,\atree,\val⟩$,
 where:
 \begin{enumerate}
 \item $\atoms$ is any set of atoms, to be used as labels.
@@ -278,7 +278,7 @@ that assigns a DP to each atom.
 The MCDP in~\prettyref{fig:example} can be described by the atoms
 $\atoms=\{a,b,c\}$, the term $\atree=\dploop(\dpseries(a,\dppar(b,c)),$
 plus the valuation $\val:\{a⟼\ftorₐ,b⟼\ftor_{b},c⟼\ftor_{c}\}.$
-The tuple~$\left⟨ \atoms,\atree,\val\right⟩ $ for this
+The tuple~$⟨\atoms,\atree,\val⟩$ for this
 example is shown in \prettyref{fig:example-b}.
 \end{example}
 \captionsideleft{\label{fig:example-b}}{\includegraphics[scale=0.33]{unc_atoms_g_v}}
@@ -300,10 +300,10 @@ define~$\dpsem$, we need to only define what happens in the base
 case (equation~\ref{eq:base}), and what happens for each operator
 $\dpseries,\dppar,\dploop$ (equations~\ref{eq:series}\textendash \ref{eq:loop}).
 \begin{defn}[Semantics of MCDP]
-\label{def:dpsem}Given an MCDP in algebraic form~$\left⟨ \atoms,\atree,\val\right⟩ $,
+\label{def:dpsem}Given an MCDP in algebraic form~$⟨\atoms,\atree,\val⟩$,
 the semantics
 \[
-\dpsem⟦\left⟨ \atoms,\atree,\val\right⟩ ⟧∈\dpsp
+\dpsem⟦\left⟨\atoms,\atree,\val\right⟩⟧∈\dpsp
 \]
 is defined as follows:
 
@@ -311,10 +311,10 @@ is defined as follows:
 \begin{minipage}[t]{1.05\columnwidth}
 {\small{}
 \begin{align}
-\dpsem⟦\left⟨ \atoms,a,\val\right⟩ ⟧ & ≐\val(a),\qquad\text{for all}\ a∈\atoms,\label{eq:base}\\
-\dpsem⟦\left⟨ \atoms,\dpseries(\atree₁,\atree₂),\val\right⟩ ⟧ & ≐\dpsem⟦\left⟨ \atoms,\atree₁,\val\right⟩ ⟧\,\opseries\,\dpsem⟦\left⟨ \atoms,\atree₂,\val\right⟩ ⟧,\label{eq:series}\\
-\dpsem⟦\left⟨ \atoms,\dppar(\atree₁,\atree₂),\val\right⟩ ⟧ & ≐\dpsem⟦\left⟨ \atoms,\atree₁,\val\right⟩ ⟧\,\oppar\,\dpsem⟦\left⟨ \atoms,\atree₂,\val\right⟩ ⟧,\label{eq:par}\\
-\dpsem⟦\left⟨ \atoms,\dploop(\atree),\val\right⟩ ⟧ & ≐\dpsem⟦\left⟨ \atoms,\atree,\val\right⟩ ⟧^{\oploop}.\label{eq:loop}
+\dpsem⟦\left⟨\atoms,a,\val\right⟩⟧ & ≐\val(a),\qquad\text{for all}\ a∈\atoms,\label{eq:base}\\
+\dpsem⟦\left⟨\atoms,\dpseries(\atree₁,\atree₂),\val\right⟩⟧ & ≐\dpsem⟦\left⟨\atoms,\atree₁,\val\right⟩⟧\,\opseries\,\dpsem⟦\left⟨\atoms,\atree₂,\val\right⟩⟧,\label{eq:series}\\
+\dpsem⟦\left⟨\atoms,\dppar(\atree₁,\atree₂),\val\right⟩⟧ & ≐\dpsem⟦\left⟨\atoms,\atree₁,\val\right⟩⟧\,\oppar\,\dpsem⟦\left⟨\atoms,\atree₂,\val\right⟩⟧,\label{eq:par}\\
+\dpsem⟦\left⟨\atoms,\dploop(\atree),\val\right⟩⟧ & ≐\dpsem⟦\left⟨\atoms,\atree,\val\right⟩⟧^{\oploop}.\label{eq:loop}
 \end{align}
 }
 \end{minipage}{\small{}}}{\small \par}
@@ -331,7 +331,7 @@ and~$\ftor₂$.
 and $\ftor₂\colon\funsp₂⟶\Aressp₂$, define
 \begin{align*}
 \ftor₁\oppar\ftor₂:(\funsp₁×\funsp₂) & ⟶\antichains(\ressp₁×\ressp₂),\\
-\left⟨ \fun₁,\fun₂\right⟩  & ⟼\ftor₁(\fun₁)\acprod\ftor₂(\fun₂),
+\left⟨\fun₁,\fun₂\right⟩ & ⟼\ftor₁(\fun₁)\acprod\ftor₂(\fun₂),
 \end{align*}
 where $\acprod$ is the product of two antichains.
 \end{defn}
@@ -487,7 +487,7 @@ is contained in the interval~$[\udpL\udpa,\udpU\udpa]$ (\prettyref{fig:udpspace}
 \end{defn}
 \captionsideleft{\label{fig:udpspace}}{\includegraphics[scale=0.33]{unc_udpab2}\includegraphics[scale=0.33]{unc_udpab}}
 
-The partial order~$\udpleq$ has a top~$\top_{\udpsp}=\left⟨ \bot_{\dpsp},\top_{\dpsp}\right⟩ .$
+The partial order~$\udpleq$ has a top~$\top_{\udpsp}=\left⟨\bot_{\dpsp},\top_{\dpsp}\right⟩.$
 This pair describes maximum uncertainty about the DP: we do not know
 if the DP is feasible with 0 resources~($\bot_{\dpsp}$), or if it
 is completely infeasible~($\top_{\dpsp}$).
@@ -515,7 +515,7 @@ the definition of MCDPs. The only difference between \prettyref{def:MCDP-algebra
 and~\prettyref{def:umcdp} below is that the valuation assigns to
 each atom an UDP, rather than a~DP.
 \begin{defn}[Algebraic definition of UMCDPs]
-\label{def:umcdp}An Uncertain MCDP (UMCDP) is a tuple~$\left⟨ \atoms,\atree,\val\right⟩ $,
+\label{def:umcdp}An Uncertain MCDP (UMCDP) is a tuple~$⟨\atoms,\atree,\val⟩$,
 where~$\atoms$ is a set of atoms,~$\atree∈\terms(\{\dpseries,\dppar,\dploop\},\atoms)$
 is the algebraic representation of the graph, and~$\val:\atoms⟶\udpsp$
 is a valuation that assigns to each atom a UDP.
@@ -526,29 +526,29 @@ Next, the semantics of a UMCDP is defined as a map~$\udpsem$ that
 computes the UDP. \prettyref{def:semantics-udp}~below is analogous
 to~\prettyref{def:dpsem}.
 \begin{defn}[Semantics of UMCDPs]
-\label{def:semantics-udp}Given an UMCDP~$\left⟨ \atoms,\atree,\val\right⟩ $,
+\label{def:semantics-udp}Given an UMCDP~$⟨\atoms,\atree,\val⟩$,
 the semantics function~$\udpsem$ computes a UDP
 \[
-\udpsem⟦\left⟨ \atoms,\atree,\val\right⟩ ⟧∈\udpsp,
+\udpsem⟦\left⟨\atoms,\atree,\val\right⟩⟧∈\udpsp,
 \]
 and it is recursively defined as follows:
 
 \adjustbox{max width=8.6cm}{
 \noindent\begin{minipage}[t]{1\columnwidth}
 \[
-\udpsem⟦\left⟨ \atoms,a,\val\right⟩ ⟧=\val(a),\qquad\text{for all}\ a∈\atoms.
+\udpsem⟦\left⟨\atoms,a,\val\right⟩⟧=\val(a),\qquad\text{for all}\ a∈\atoms.
 \]
 \begin{align*}
-\udpL\udpsem⟦\left⟨ \atoms,\dpseries(\atree₁,\atree₂),\val\right⟩ ⟧ & =(\udpL\udpsem⟦\left⟨ \atoms,\atree₁,\val\right⟩ ⟧)\,\opseries\,(\udpL\udpsem⟦\left⟨ \atoms,\atree₂,\val\right⟩ ⟧),\\
-\udpU\udpsem⟦\left⟨ \atoms,\dpseries(\atree₁,\atree₂),\val\right⟩ ⟧ & =(\udpU\udpsem⟦\left⟨ \atoms,\atree₁,\val\right⟩ ⟧)\,\opseries\,(\udpU\udpsem⟦\left⟨ \atoms,\atree₂,\val\right⟩ ⟧),
+\udpL\udpsem⟦\left⟨\atoms,\dpseries(\atree₁,\atree₂),\val\right⟩⟧ & =(\udpL\udpsem⟦\left⟨\atoms,\atree₁,\val\right⟩⟧)\,\opseries\,(\udpL\udpsem⟦\left⟨\atoms,\atree₂,\val\right⟩⟧),\\
+\udpU\udpsem⟦\left⟨\atoms,\dpseries(\atree₁,\atree₂),\val\right⟩⟧ & =(\udpU\udpsem⟦\left⟨\atoms,\atree₁,\val\right⟩⟧)\,\opseries\,(\udpU\udpsem⟦\left⟨\atoms,\atree₂,\val\right⟩⟧),
 \end{align*}
 \begin{align*}
-\udpL\udpsem⟦\left⟨ \atoms,\dppar(\atree₁,\atree₂),\val\right⟩ ] & =(\udpL\udpsem⟦\left⟨ \atoms,\atree₁,\val\right⟩ ⟧)\ \oppar\ (\udpL\udpsem⟦\left⟨ \atoms,\atree₂,\val\right⟩ ⟧),\\
-\udpU\udpsem⟦\left⟨ \atoms,\dppar(\atree₁,\atree₂),\val\right⟩ ] & =(\udpU\udpsem⟦\left⟨ \atoms,\atree₁,\val\right⟩ ⟧)\ \oppar\ (\udpU\udpsem⟦\left⟨ \atoms,\atree₂,\val\right⟩ ⟧),
+\udpL\udpsem⟦\left⟨\atoms,\dppar(\atree₁,\atree₂),\val\right⟩] & =(\udpL\udpsem⟦\left⟨\atoms,\atree₁,\val\right⟩⟧)\ \oppar\ (\udpL\udpsem⟦\left⟨\atoms,\atree₂,\val\right⟩⟧),\\
+\udpU\udpsem⟦\left⟨\atoms,\dppar(\atree₁,\atree₂),\val\right⟩] & =(\udpU\udpsem⟦\left⟨\atoms,\atree₁,\val\right⟩⟧)\ \oppar\ (\udpU\udpsem⟦\left⟨\atoms,\atree₂,\val\right⟩⟧),
 \end{align*}
 \begin{align*}
-\udpL\udpsem⟦\left⟨ \atoms,\dploop(\atree),\val\right⟩ ⟧ & =(\udpL\udpsem⟦\left⟨ \atoms,\atree,\val\right⟩ ⟧)^{\oploop},\\
-\udpU\udpsem⟦\left⟨ \atoms,\dploop(\atree),\val\right⟩ ⟧ & =(\udpU\udpsem⟦\left⟨ \atoms,\atree,\val\right⟩ ⟧)^{\oploop}.
+\udpL\udpsem⟦\left⟨\atoms,\dploop(\atree),\val\right⟩⟧ & =(\udpL\udpsem⟦\left⟨\atoms,\atree,\val\right⟩⟧)^{\oploop},\\
+\udpU\udpsem⟦\left⟨\atoms,\dploop(\atree),\val\right⟩⟧ & =(\udpU\udpsem⟦\left⟨\atoms,\atree,\val\right⟩⟧)^{\oploop}.
 \end{align*}
 
 \end{minipage}}
@@ -576,7 +576,7 @@ $\boldsymbol{\mathsf{U}}$ that bound the DP~$\ftorₐ$~(\prettyref{fig:consider2
 of~$\ftorₐ$, or (b)~a relaxation that we willingly introduce.
 
 \noindent Then we can consider the pair~$\boldsymbol{\mathsf{L}}$,
-$\boldsymbol{\mathsf{U}}$ as a UDP~$\left⟨ \boldsymbol{\mathsf{L}},\boldsymbol{\mathsf{U}}\right⟩ $
+$\boldsymbol{\mathsf{U}}$ as a UDP~$⟨\boldsymbol{\mathsf{L}},\boldsymbol{\mathsf{U}}⟩$
 and we can plug it in the original MCDP in place of~$\ftorₐ$~(\prettyref{fig:luinside}).
 \begin{center}
 \captionsideleft{\label{fig:luinside}}{\includegraphics[scale=0.33]{unc_f3}}
@@ -611,7 +611,7 @@ state the result as ``the semantics is monotone in the valuation''.
 \begin{thm}[$\udpsem$ is monotone in the valuation]
 \label{thm:udpsem-monotone}If $\val₁\posleq_{V}\val₂$, then
 \[
-\udpsem⟦\left⟨ \atoms,\atree,\val₁\right⟩ ⟧\udpleq\udpsem⟦\left⟨ \atoms,\atree,\val₂\right⟩ ⟧.
+\udpsem⟦\left⟨\atoms,\atree,\val₁\right⟩⟧\udpleq\udpsem⟦\left⟨\atoms,\atree,\val₂\right⟩⟧.
 \]
 \end{thm}
 The proof is given in Appendix~\prettyref{subsec:proof-main-result}
@@ -650,7 +650,7 @@ By browsing Wikipedia, one can find the figures in~\prettyref{tab:batteries}.
 
 \caption{\label{tab:batteries}Specifications of common batteries technologies}
 \par
-\centering{}{\footnotesize{}}
+{\footnotesize{}}
 \begin{tabular}{crr@{\extracolsep{0pt}.}lr}
 \multirow{2}{*}{{\footnotesize{}\tableColors}\emph{\footnotesize{}technology}} & \emph{\footnotesize{}energy density} & \multicolumn{2}{c}{\emph{\footnotesize{}specific cost}} & \emph{\footnotesize{}operating life}\tabularnewline
  & {\footnotesize{}{[}Wh/kg{]}} & \multicolumn{2}{c}{{\footnotesize{}{[}Wh/\${]}}} & \# cycles\tabularnewline
@@ -723,7 +723,7 @@ By construction, $\ufloor_{α}\dpleq\mathsf{Id}\dpleq\uceil_{α}.$
 and $\uceil_{α}$.}
 \end{figure}
 
-Let $\UId_{α}≐\left⟨ \ufloor_{α},\uceil_{α}\right⟩ $
+Let $\UId_{α}≐\left⟨\ufloor_{α},\uceil_{α}⟩$
 be the ``uncertain identity''. For~$0<α<β$, it holds
 that
 \[
@@ -742,8 +742,8 @@ we first introduce an identity~$\mathsf{Id}$ and then relax it using~$\UId_{α}$
 
 \captionsideleft{\label{fig:introduce}}{\includegraphics[scale=0.33]{unc_introduce}}
 
-Mathematically, given an MCDP~$\left⟨ \atoms,\atree,\val\right⟩ $,
-we generate a UMCDP~$\left⟨ \atoms,\atree,\val_{α}\right⟩ $,
+Mathematically, given an MCDP~$⟨\atoms,\atree,\val⟩$,
+we generate a UMCDP~$⟨\atoms,\atree,\val_{α}⟩$,
 where the new valuation~$\val_{α}$ agrees with~$\val$ except
 on a particular atom~$a∈\atoms$, which is replaced by the series
 of the original~$\val(a)$ and the approximation~$\text{UId}_{α}$:
@@ -753,7 +753,7 @@ of the original~$\val(a)$ and the approximation~$\text{UId}_{α}$:
 Call the original and approximated DPs~$\dprob$ and~$\dprob_{α}$:
 \[
 \begin{array}{ccc}
-\dprob≐\udpsem ⟦ \left⟨ \atoms,\atree,\val\right⟩ ⟧ , &  & \dprob{}_{α}≐\udpsem⟦ \left⟨ \atoms,\atree,\val_{α}\right⟩ ⟧ .\end{array}
+\dprob≐\udpsem ⟦ \left⟨\atoms,\atree,\val\right⟩⟧ , &  & \dprob{}_{α}≐\udpsem⟦ \left⟨\atoms,\atree,\val_{α}\right⟩⟧ .\end{array}
 \]
 Because $\val\posleq_{V}\val_{α}$ (in the sense of~\prettyref{def:For-two-valuations,}),
 \prettyref{thm:udpsem-monotone} implies that
@@ -807,7 +807,7 @@ consider a relation like
 which appears in the model in \prettyref{fig:Example1}. If we take
 these three quantities in \prettyref{eq:qun} as belonging to~$ℝ$,
 then, for each value of the \F{travel distance}, there are infinite
-pairs of~$\left⟨ {\colR\text{velocity}},{\colR\text{endurance}}\right⟩ $
+pairs of~$⟨{\colR\text{velocity}},{\colR\text{endurance}}⟩$
 that are feasible. (On a computer, where the quantities could be represented
 as floating point numbers, the combinations are properly not ``infinite'',
 but, still, extremely large.)
@@ -829,7 +829,7 @@ allocate to the first~($\res₁$) or the second~($\res₂$).
 The formal definition of this constraint as an DP is
 \begin{align*}
 \overline{+}:{\colFℝ₊} & ⟶{\colR\antichains(ℝ₊×ℝ₊)},\\
-\fun₁ & ⟼\{\left⟨ x,\fun₁-x\right⟩ \mid x∈ℝ₊\}.
+\fun₁ & ⟼\{\left⟨x,\fun₁-x\right⟩\mid x∈ℝ₊\}.
 \end{align*}
 Note that, for each value~$\fun₁$, $\overline{+}(\fun₁)$
 is a set of infinite cardinality.
@@ -841,7 +841,7 @@ with a fixed number of solutions~$n≥1$.
 
 We will first define a sequence of UDPs~$Sₙ$ based on uniform
 sampling. Let~$\udpU Sₙ$ consist of~$n$ points sampled on the
-segment with extrema~$\left⟨ 0,\fun₁\right⟩ $ and~$\left⟨ \fun₁,0\right⟩ $.
+segment with extrema~$⟨0,\fun₁⟩$ and~$⟨\fun₁,0⟩$.
 For~$\udpL Sₙ$, sample~$n+1$ points on the segment and take
 the \emph{meet} of successive points~(\prettyref{fig:make_lower}).
 \begin{center}
@@ -855,7 +855,7 @@ that~$\overline{+}\udpleq Sₙ$. Moreover, $Sₙ$ converges to
 $\overline{+}$ as $n⟶∞$.
 \begin{center}
 \begin{figure}[H]
-\centering{}\includegraphics[scale=0.33]{unc_sampling}\caption{\label{fig:approx_invplus}Approximations to $\overline{+}$ using
+\includegraphics[scale=0.33]{unc_sampling}\caption{\label{fig:approx_invplus}Approximations to $\overline{+}$ using
 the uniform sampling sequence~$Sₙ$. }
 \end{figure}
 \par\end{center}
@@ -869,22 +869,21 @@ gives smaller bounds than~$Sₙ$.
 
 \subsubsection*{Relaxation based on Van Der Corput sequence}
 
-We can easily create an approximation sequence~$V:\mathbb{N}⟶\udpsp$
+We can easily create an approximation sequence~$V:ℕ⟶\udpsp$
 that converges monotonically using Var Der Corput (VDC) sampling~\cite[Section 5.2]{LaValle2006Planning}.
 Let~$\vdc(n)$ be the VDC sequence of~$n$ elements in the interval~$[0,1]$.
 The first elements of the VDC are $0,0.5,0.25,0.75,0.125,\dots$.
-The sequence is guaranteed to satisfy~$\vdc(n)\subseteq\vdc(n+1)$
+The sequence is guaranteed to satisfy~$\vdc(n)⊆\vdc(n+1)$
 and to minimize the discrepancy. The upper bound~$\udpU Vₙ$
-is defined as sampling the segment with extrema~$\left⟨ 0,\fun₁\right⟩ $
-and~$\left⟨ \fun₁,0\right⟩ $ using the VDC sequence:
+is defined as sampling the segment with extrema~$⟨0,\fun₁⟩$
+and~$⟨\fun₁,0⟩$ using the VDC sequence:
 \[
-\udpU Vₙ\colon\fun₁⟼\{\left⟨ \fun₁x,\fun₁(1-x)\right⟩ \mid x∈\vdc(n)\}.
+\udpU Vₙ\colon\fun₁⟼\{\left⟨\fun₁x,\fun₁(1-x)\right⟩\mid x∈\vdc(n)\}.
 \]
  The lower bound~$\udpL Vₙ$ is defined by taking meets of successive
 points, according to the procedure in~\prettyref{fig:make_lower}.
 \begin{center}
 \begin{figure}[H]
-
 \adjustbox{max width=8.6cm}{\includegraphics[scale=0.33]{unc_samplingb}}
 \par
 \caption{\label{fig:Vn}Approximations to $\overline{+}$ using the Van Der
@@ -928,7 +927,7 @@ convergence, while VDC sampling does.
 \begin{center}
 \begin{figure}[t]
 
-\subfloat[\label{fig:notchain}Qualitative behavior for $Sₙ$]{\centering{}\includegraphics[scale=0.33]{unc_convergence_pyramid}}\subfloat[\label{fig:convergence_pyramid}Qualitative behavior for $Vₙ$]{
+\subfloat[\label{fig:notchain}Qualitative behavior for $Sₙ$]{\includegraphics[scale=0.33]{unc_convergence_pyramid}}\subfloat[\label{fig:convergence_pyramid}Qualitative behavior for $Vₙ$]{
 \includegraphics[scale=0.33]{unc_convergence_pyramid2}
 \par
 }
@@ -1020,10 +1019,10 @@ formed, in the sense that {\small{}
 \udpL\udpsem⟦⟨\atoms,\dpseries(\atree₁,\atree₂),\val⟩⟧\dpleq\udpU\udpsem⟦⟨\atoms,\dpseries(\atree₁,\atree₂),\val⟩⟧,\label{eq:wf1}
 \end{equation}
 \begin{equation}
-\udpL\udpsem⟦\left⟨ \atoms,\dppar(\atree₁,\atree₂),\val\right⟩ ⟧\dpleq\udpU\udpsem⟦\left⟨ \atoms,\dppar(\atree₁,\atree₂),\val\right⟩ ⟧,\label{eq:wf2}
+\udpL\udpsem⟦\left⟨\atoms,\dppar(\atree₁,\atree₂),\val\right⟩⟧\dpleq\udpU\udpsem⟦\left⟨\atoms,\dppar(\atree₁,\atree₂),\val\right⟩⟧,\label{eq:wf2}
 \end{equation}
 \begin{equation}
-\udpL\udpsem⟦\left⟨ \atoms,\dploop(\atree),\val\right⟩ ⟧\dpleq\udpU\udpsem⟦\left⟨ \atoms,\dploop(\atree),\val\right⟩ ⟧.\label{eq:wf3}
+\udpL\udpsem⟦\left⟨\atoms,\dploop(\atree),\val\right⟩⟧\dpleq\udpU\udpsem⟦\left⟨\atoms,\dploop(\atree),\val\right⟩⟧.\label{eq:wf3}
 \end{equation}
 }{\small \par}
 \end{lem}
@@ -1116,7 +1115,7 @@ is monotone on~$⟨\dpsp,\dpleq⟩$.
 The definition of $\oppar$ (\prettyref{def:opmaps}) is:
 \begin{align*}
 \ftor₁\oppar\ftor₂:(\funsp₁×\funsp₂) & ⟶\antichains(\ressp₁×\ressp₂),\\
-\left⟨ \fun₁,\fun₂\right⟩  & ⟼\ftor₁(\fun₁)×\ftor₂(\fun₂).
+\left⟨\fun₁,\fun₂\right⟩ & ⟼\ftor₁(\fun₁)×\ftor₂(\fun₂).
 \end{align*}
 Because of symmetry, it suffices to prove that $\oppar$ is monotone
 in the first argument, leaving the second fixed.
@@ -1183,7 +1182,7 @@ then
 \begin{lem}[$\dpsem$ is monotone in the valuation]
 \label{lem:dpsem-monotone}Suppose that~$\val₁,\val₂:\atoms⟶\dpsp$
 are two valuations for which it holds that~$\val₁(a)\dpleq\val₂(a)$.
-Then~$\dpsem⟦\left⟨ \atoms,\atree,\val₁\right⟩ ⟧\dpleq\dpsem⟦\left⟨ \atoms,\atree,\val₂\right⟩ ⟧$.
+Then~$\dpsem⟦\left⟨\atoms,\atree,\val₁\right⟩⟧\dpleq\dpsem⟦\left⟨\atoms,\atree,\val₂\right⟩⟧$.
 \end{lem}
 \begin{IEEEproof}
 Given the recursive definition of \prettyref{def:dpsem}, we need
@@ -1191,12 +1190,12 @@ to prove this just for the base case and for the recursive cases.
 
 The base case, given in \eqref{eq:base}, is
 \[
-\dpsem⟦\left⟨ \atoms,a,\val\right⟩ ⟧≐\val(a),\qquad\text{for all}\ a∈\atoms.
+\dpsem⟦\left⟨\atoms,a,\val\right⟩⟧≐\val(a),\qquad\text{for all}\ a∈\atoms.
 \]
 We have
 \begin{align*}
-\dpsem⟦\left⟨ \atoms,\atree,\val₁\right⟩ ⟧ & =\val₁(a)\\
-\dpsem⟦\left⟨ \atoms,\atree,\val₂\right⟩ ⟧ & =\val₂(a)
+\dpsem⟦\left⟨\atoms,\atree,\val₁\right⟩⟧ & =\val₁(a)\\
+\dpsem⟦\left⟨\atoms,\atree,\val₂\right⟩⟧ & =\val₂(a)
 \end{align*}
 and $\val₁(a)\dpleq\val₂(a)$ by assumption.
 
@@ -1218,7 +1217,7 @@ We restate the theorem.
 \]
 then
 \[
-\udpsem⟦\left⟨ \atoms,\atree,\val₁\right⟩ ⟧\udpleq\udpsem⟦\left⟨ \atoms,\atree,\val₂\right⟩ ⟧.
+\udpsem⟦\left⟨\atoms,\atree,\val₁\right⟩⟧\udpleq\udpsem⟦\left⟨\atoms,\atree,\val₂\right⟩⟧.
 \]
 }
 \begin{IEEEproof}

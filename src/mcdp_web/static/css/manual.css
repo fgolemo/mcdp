@@ -855,14 +855,12 @@ code {
 svg.hasse text {
   font-family: monospace !important;
 }
-div.proof {
-  font-style: italic;
-}
 div.proof::before {
   content: 'Proof: ';
+  font-style: italic;
 }
 div.proof::after {
-  content: 'QED';
+  content: '∎';
 }
 div.abstract {
   font-weight: bold;

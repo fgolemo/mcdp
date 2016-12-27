@@ -771,11 +771,13 @@ svg.hasse text { font-family: monospace !important;}
 
 div.proof {
     &::before {
-        content: 'Proof: '
+        content: 'Proof: ';
+        font-style: italic;
     }
-    font-style: italic;
+
     &::after {
-        content: 'QED'
+        break-before: avoid;
+        content: '∎'
     }
 }
 

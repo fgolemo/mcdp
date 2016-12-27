@@ -17,16 +17,20 @@
         CSS
         <script type='text/javascript'>
         // console.log('Running script');
-        Prince.addEventListener("complete", function() {
-            // console.log('document complete');
-            PDF.title = "@@{TITLE}";
-            PDF.author = "@@{AUTHOR}";
-            PDF.subject = "@@{SUBJECT}";
-            PDF.keywords = "@@{KEYWORDS_HTML}";
-            PDF.date = "@@{PYMCDP_COMPILE_DATE_SHORT}";
-            PDF.generator = "@@{GENERATOR}";
-            // console.log('done');
-        });
+        if(Prince === undefined) {
+            console.log('Skipping Prince-specific initialization.')
+        } else {
+            Prince.addEventListener("complete", function() {
+                // console.log('document complete');
+                PDF.title = "@@{TITLE}";
+                PDF.author = "@@{AUTHOR}";
+                PDF.subject = "@@{SUBJECT}";
+                PDF.keywords = "@@{KEYWORDS_HTML}";
+                PDF.date = "@@{PYMCDP_COMPILE_DATE_SHORT}";
+                PDF.generator = "@@{GENERATOR}";
+                // console.log('done');
+            });
+        }
         </script>
     </head>
 
