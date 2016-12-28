@@ -115,7 +115,7 @@ class RenderManual(QuickApp):
         
         context.comp(generate_metadata)
 
-@contract(compmake_context=Context, promise=Promise, filename='seq(str)')
+@contract(compmake_context=Context, promise=Promise, filenames='seq(str)')
 def erase_job_if_files_updated(compmake_context, promise, filenames):
     """ Invalidates the job if the filename is newer """
     check_isinstance(promise, Promise)

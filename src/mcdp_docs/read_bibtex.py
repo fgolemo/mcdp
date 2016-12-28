@@ -36,19 +36,22 @@ def get_bibliography():
         entry = dd.__copy__()
         entry.name = 'cite'
         entry.attrs['id'] = name
-        for x in entry.descendants:
-            #print('child', x)
-            if isinstance(x, NavigableString):
-                s = x.string.encode('utf-8')
-                s = s.replace('\n', ' ')
-                s = s.replace('[', '')
-                s = s.replace('|', '')
-                s = s.replace(']', '')
-                y = NavigableString(unicode(s, 'utf-8'))
-                x.replace_with(y)
-                #print('string %r' % x.string)
-            if isinstance(x, Tag) and x.name == 'a' and x.string == 'bib':
-                x.extract()
+        
+        try_to_replace_stuff = False
+        if try_to_replace_stuff:
+            for x in entry.descendants:
+                #print('child', x)
+                if isinstance(x, NavigableString):
+                    s = x.string.encode('utf-8')
+                    s = s.replace('\n', ' ')
+                    s = s.replace('[', '')
+                    s = s.replace('|', '')
+                    s = s.replace(']', '')
+                    y = NavigableString(unicode(s, 'utf-8'))
+                    x.replace_with(y)
+                    #print('string %r' % x.string)
+                if isinstance(x, Tag) and x.name == 'a' and x.string == 'bib':
+                    x.extract()
         res.append(NavigableString('\n'))
         res.append(entry)
         res.append(NavigableString('\n'))

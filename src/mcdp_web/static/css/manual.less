@@ -495,18 +495,6 @@ div.fbox { border: solid 1pt black; padding: 3pt;}
 div.center, div.centering { text-align: center; }
 
 
-cite {
-    display: block;
-    font-style: normal;
-    font-size: smaller;
-}
-cite[id^='bib:'] {
-    counter-increment: bib;
-}
-cite[id^='bib:']::before {
-    content: '[' counter(bib) '] ';
-    font-style: normal;
-}
 a[href^='#bib:'] {
 
     &:empty::before {
@@ -717,7 +705,26 @@ h1.article_title {
     font-variant: normal;
 }
 
+cite {
+    display: block;
+    font-style: normal;
+    font-size: smaller;
+    line-height: 120%;
+}
+cite + cite {
+    padding-bottom: 0.5em;
+}
+
+cite[id^='bib:'] {
+    counter-increment: bib;
+}
+cite[id^='bib:']::before {
+    content: '[' counter(bib) '] ';
+    font-style: normal;
+}
+
 /* abstract */
 cite blockquote { display: none; }
+
 
 #bibliography_entries { display: none;}
