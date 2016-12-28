@@ -1,0 +1,123 @@
+
+.toc a { text-decoration: none; }
+
+/************ TOC ***************/
+
+@media screen {
+    ul.toc {
+        column-count: 2;
+        column-gap: 20px;
+        /*max-height: 30em;*/
+    }
+    ul#main_toc > li > ul > li {
+        padding-top: 2pt;
+        /*color: red;*/
+    }
+    ul#main_toc > li > ul > li > ul   {
+        margin-top: 1pt;
+        margin-bottom: 1pt;
+    }
+
+}
+
+@media print {
+    /** two-column format */
+    ul.toc {
+        column-count: 2;
+        column-gap: 20px;
+    }
+
+    /** add page numbers for the first two */
+    ul#main_toc > li > a::after {
+        content: leader('_')  target-counter(attr(href), page) ;
+        font-weight: bold;
+    }
+
+    ul#main_toc > li > ul > li > a::after {
+         content: leader('_') target-counter(attr(href), page);
+     }
+}
+
+ul#main_toc > li > a > span.toc_number {
+    font-weight: bold;
+
+    ::before {
+        content: 'Chapter ';
+        font-weight: bold;
+    }
+}
+
+ul#main_toc ul {
+    margin-left: 0;
+
+    ul {
+        margin-left: 0;
+
+        li  {
+            display: inline;
+            a {
+                color: gray !important;
+
+                span.toc_number { display: none; }
+                span.toc_name::before {
+                    margin-right: 3pt;
+
+                    content: '⟡'; /*◇';*/
+                    font-family: 'Cambria' !important;
+                    font-size: 6pt;
+                    /*padding-bottom: 5pt !important;*/
+                /*border: solid 1px red;*/
+                /*margin-top: -20pt !important;*/
+                /*display: inline;*/
+                }
+            }
+
+            &:first-child a span.toc_name::before {
+                content: '';
+                margin: 0;
+            }
+
+        }
+    }
+}
+
+
+/* first header down is highlighted */
+ul.chapter_toc > li > a {
+    font-weight: bold;
+}
+
+
+/* below numbers are erased */
+
+ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
+    display: none;
+}
+
+ul.chapter_toc > li > ul > li > a.toc_link > span.toc_name::before {
+    content: '•';
+    margin-right: 0.5em;
+}
+
+
+/* keywords appearing in headers */
+#maintoc code {
+    /*color: red !important;*/
+    font-size: 7pt !important;
+    color: #a2a2a2 !important;
+}
+ul.toc, ul.toc ul { padding: 0; margin-left: 1em;}
+
+ul.toc li { padding: 0; margin: 0;}
+
+ul#main_toc > li {
+    padding-bottom: 1em;
+
+    > ul {
+        padding-top: 4pt;
+    }
+    > a span.toc_name {
+        font-weight: bold;
+    }
+
+}

@@ -369,11 +369,11 @@ This is P: <code class='mcdp_value'>Nat:0</code>.
 
 Always close the render and pre elements:
 
-    <render ...></render>
+    <render etc etc ></render>
 
 Never:
 
-    <render .../>
+    <render etc etc/>
 
 
 Avoid two backticks in the same paragraph, it will give an error:

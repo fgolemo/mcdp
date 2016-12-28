@@ -370,6 +370,9 @@ def get_language_css():
 def get_markdown_css_filename():
     return get_css_filename('markdown')
 
+def get_reset_css_filename():
+    return get_css_filename('reset')
+
 def get_markdown_css():
     fn = get_markdown_css_filename()
     return open(fn).read()

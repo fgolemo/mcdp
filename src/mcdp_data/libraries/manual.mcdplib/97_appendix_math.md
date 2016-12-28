@@ -68,14 +68,17 @@ An "upper set" is a subset of a poset that is closed upward.
 A subset $S\subseteq\posA$ is an upper set iff~$x\in S$ and~$x\posleq y$
 implies~$y\in S$.
 \end{defn}
+
 Call~$\upsets\posA$ the set of upper sets of~$\posA$. By this
 definition, the empty set is an upper set: $\emptyset\in\upsets\posA$.
+
 \begin{lem}
 $\upsets\posA$ is a poset itself, with the order given by
 \begin{equation}
 A\posleq_{\upsets\posA}B\qquad\equiv\qquad A\supseteq B.\label{eq:up_order}
 \end{equation}
 \end{lem}
+
 Note in (\ref{eq:up_order}) the use of~"$\supseteq$" instead
 of~"$\subseteq$", which might seem more natural. This choice
 will make things easier later.

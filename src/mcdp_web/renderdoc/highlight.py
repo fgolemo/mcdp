@@ -73,11 +73,6 @@ def html_interpret(library, html, raise_errors=False,
                         raise_error_others=raise_errors,
                         realpath=realpath)
 
-
-#     if False:
-#         html = add_br_before_pres(html)
-#     print 'after make_plots: %s' % html
-
     return html
 
 def make_image_tag_from_png(f):
@@ -785,19 +780,7 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                         html = html_mark(html, w.where, "language_warning")
                         
                 frag2 = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
-                
-                
-#                 texts = [i for i in frag2.recursiveChildGenerator() 
-#                         if type(i) == NavigableString]
-#                 for t in texts:
-#                     s = t.string
-#                     if ' ' in s:
-# 
-#                         s = s.replace(' ', ' ')
-#                         r = Tag(name='span', attrs={'class': 'space_in_code'})
-#                         r.append(NavigableString(s))
-#                         t.replace_with(r)
-                    
+                            
                 if use_pre:
                     rendered = Tag(name='div', attrs={'class':'rendered'})
                     pre = frag2.pre
@@ -820,14 +803,12 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                         tag_label_outside.append(NavigableString(text))
                         rendered.insert(0, tag_label_outside)
                         
-                    max_len = max_len_of_pre_html(html)
-#                     frag2.pre['string_len'] = max_len
+                    max_len = max_len_of_pre_html(html) 
                     
                     if tag.has_attr('label'): 
                         add_class(rendered, 'has_label')
                         max_len = max(max_len, len(tag['label']) + 6)
                         
-#                     add_style_for_size(frag2.pre, max_len)
                     style = ''
                 else:
                     # using <code>

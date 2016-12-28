@@ -78,20 +78,190 @@ ul.toc code:last-of-type::after {
   font-weight: normal;
   font-family: serif;
 }
-body {
-  font-family: "Times New Roman", Times, serif !important;
-  font-size: 10pt;
+@page {
+  /* good for ipad */
+  /*size: A5;  148 x 210 mm   5.8 x 8.3 in */
+  /* 4:3 with short side being 5.8in; 5.8/3*4=7.73 */
+  /*
+    for Lulu 6x9
+     let right margins 6.125 - 5.5  = 0.625 / 2 = 0.312in
+       top bottom margins = 9.25 - 8.5 = 0.75 / 2 = 0.375in */
+  size: 6in 9in;
+  margin-top: 1.7cm;
+  /*here*/
+  margin-bottom: 0.312in;
+  @center {
+    border: solid 1px black;
+  }
 }
-@font-face {
+@page :left {
+  margin-left: 1cm;
+  margin-right: 2cm;
+}
+@page :right {
+  margin-left: 2cm;
+  margin-right: 1cm;
+}
+/* basics (after reset) */
+ul {
+  list-style-type: disc;
+  list-style-position: inside;
+}
+ol {
+  list-style-type: decimal;
+  list-style-position: inside;
+}
+ul ul,
+ol ul {
+  list-style-type: circle;
+  list-style-position: inside;
+  margin-left: 15px;
+}
+ol ol,
+ul ol {
+  list-style-type: lower-latin;
+  list-style-position: inside;
+  margin-left: 15px;
+}
+li {
+  padding-left: 0;
+}
+q::before {
+  content: '“';
+}
+q::after {
+  content: '”';
+}
+pre {
   font-family: monospace;
-  /*src: local("Consolas")*/
-  src: local("Anka/Coder Narrow");
-}
-h1 {
-  text-align: center;
 }
 .toc a {
   text-decoration: none;
+}
+/************ TOC ***************/
+@media screen {
+  ul.toc {
+    column-count: 2;
+    column-gap: 20px;
+    /*max-height: 30em;*/
+  }
+  ul#main_toc > li > ul > li {
+    padding-top: 2pt;
+    /*color: red;*/
+  }
+  ul#main_toc > li > ul > li > ul {
+    margin-top: 1pt;
+    margin-bottom: 1pt;
+  }
+}
+@media print {
+  /** two-column format */
+  ul.toc {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  /** add page numbers for the first two */
+  ul#main_toc > li > a::after {
+    content: leader('_') target-counter(attr(href), page);
+    font-weight: bold;
+  }
+  ul#main_toc > li > ul > li > a::after {
+    content: leader('_') target-counter(attr(href), page);
+  }
+}
+ul#main_toc > li > a > span.toc_number {
+  font-weight: bold;
+}
+ul#main_toc > li > a > span.toc_number ::before {
+  content: 'Chapter ';
+  font-weight: bold;
+}
+ul#main_toc ul {
+  margin-left: 0;
+}
+ul#main_toc ul ul {
+  margin-left: 0;
+}
+ul#main_toc ul ul li {
+  display: inline;
+}
+ul#main_toc ul ul li a {
+  color: gray !important;
+}
+ul#main_toc ul ul li a span.toc_number {
+  display: none;
+}
+ul#main_toc ul ul li a span.toc_name::before {
+  margin-right: 3pt;
+  content: '⟡';
+  /*◇';*/
+  font-family: 'Cambria' !important;
+  font-size: 6pt;
+  /*padding-bottom: 5pt !important;*/
+  /*border: solid 1px red;*/
+  /*margin-top: -20pt !important;*/
+  /*display: inline;*/
+}
+ul#main_toc ul ul li:first-child a span.toc_name::before {
+  content: '';
+  margin: 0;
+}
+/* first header down is highlighted */
+ul.chapter_toc > li > a {
+  font-weight: bold;
+}
+/* below numbers are erased */
+ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
+  display: none;
+}
+ul.chapter_toc > li > ul > li > a.toc_link > span.toc_name::before {
+  content: '•';
+  margin-right: 0.5em;
+}
+/* keywords appearing in headers */
+#maintoc code {
+  /*color: red !important;*/
+  font-size: 7pt !important;
+  color: #a2a2a2 !important;
+}
+ul.toc,
+ul.toc ul {
+  padding: 0;
+  margin-left: 1em;
+}
+ul.toc li {
+  padding: 0;
+  margin: 0;
+}
+ul#main_toc > li {
+  padding-bottom: 1em;
+}
+ul#main_toc > li > ul {
+  padding-top: 4pt;
+}
+ul#main_toc > li > a span.toc_name {
+  font-weight: bold;
+}
+p {
+  line-height: 125%;
+  margin-bottom: 3pt;
+  margin-top: 3pt;
+}
+figcaption {
+  line-height: 125%;
+}
+blockquote {
+  margin-left: 3em;
+}
+h1 {
+  font-weight: bold;
+  text-align: center;
+}
+h2 {
+  font-weight: bold;
+}
+body {
+  font-size: 10pt;
 }
 /* Good for safari */
 @media screen {
@@ -133,9 +303,6 @@ h2 {
 }
 h3 {
   font-size: 10pt;
-}
-code {
-  font-family: monospace, Cambria, "Cambria Math";
 }
 p code {
   font-size: 8pt;
@@ -188,120 +355,6 @@ li {
   margin-left: 0;
 }
 /*.toc ul ul li { display: none; }*/
-/************ TOC ***************/
-@media screen {
-  ul.toc {
-    column-count: 2;
-    column-gap: 20px;
-    /*max-height: 30em;*/
-  }
-  ul#main_toc > li > ul > li {
-    padding-top: 2pt;
-    /*color: red;*/
-  }
-  ul#main_toc > li > ul > li > ul {
-    margin-top: 1pt;
-    margin-bottom: 1pt;
-  }
-}
-@media print {
-  /** two-column format */
-  ul.toc {
-    column-count: 2;
-    column-gap: 20px;
-  }
-  /** add page numbers for the first two */
-  ul#main_toc > li > a::after {
-    content: leader('_') target-counter(attr(href), page);
-    font-weight: bold;
-  }
-  ul#main_toc > li > ul > li > a::after {
-    content: leader('_') target-counter(attr(href), page);
-  }
-}
-ul#main_toc > li > a > span.toc_number {
-  font-weight: bold;
-}
-ul#main_toc > li > a > span.toc_number::before {
-  content: 'Chapter ';
-  font-weight: bold;
-}
-ul#main_toc ul,
-ul#main_toc ul ul {
-  margin-left: 0;
-}
-ul#main_toc ul ul li a {
-  color: gray !important;
-}
-ul#main_toc ul ul li {
-  display: inline;
-}
-ul.toc ul ul li a span.toc_number {
-  display: none;
-}
-ul.toc ul ul li a span.toc_name::before {
-  margin-right: 3pt;
-  content: '⟡';
-  /*◇';*/
-  font-family: 'Cambria' !important;
-  font-size: 6pt;
-  /*padding-bottom: 5pt !important;*/
-  /*border: solid 1px red;*/
-  /*margin-top: -20pt !important;*/
-  /*display: inline;*/
-}
-ul.toc ul ul li:first-child a span.toc_name::before {
-  content: '';
-  margin: 0;
-}
-/*div > ul:not(.toc)  {
-    margin-left: 2em;
-    margin-top: -0.3em;
-    margin-bottom: -0.3em;
-}
-*/
-/* first header down is highlighted */
-ul.chapter_toc > li > a {
-  font-weight: bold;
-}
-/* below numbers are erased */
-ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
-  /*color: red; */
-}
-ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
-  display: none;
-}
-ul.chapter_toc > li > ul > li > a.toc_link > span.toc_name::before {
-  content: '•';
-  margin-right: 0.5em;
-}
-/* keywords appearing in headers */
-#maintoc code {
-  /*color: red !important;*/
-  font-size: 7pt !important;
-  color: #a2a2a2 !important;
-}
-ul.toc,
-ul.toc ul {
-  padding: 0;
-  margin-left: 1em;
-}
-ul.toc li {
-  padding: 0;
-  margin: 0;
-}
-ul#main_toc > li {
-  /*margin-bottom: 3em;*/
-  padding-bottom: 1em;
-}
-ul#main_toc > li > ul {
-  padding-top: 4pt;
-}
-ul#main_toc > li > a span.toc_name {
-  font-weight: bold;
-  /*    font-size: larger;*/
-}
-/*********  end TOC ************/
 /********** headings *********/
 #toc-heading {
   text-align: center;
@@ -318,7 +371,6 @@ h3 {
   padding-bottom: 3pt;
   border-bottom: solid 0.5pt grey;
 }
-h1:not(#booktitle),
 #toc-heading {
   font-variant: small-caps;
 }
@@ -490,6 +542,9 @@ figure[id^='subfig:'] > figcaption:not(:empty)::before {
 figure[id^='subfig:'] > figcaption:empty::before {
   content: '(' counter(subfloat, lower-alpha) ')';
 }
+figure[id^='subfig:'] > figcaption:empty {
+  text-align: center;
+}
 /* Empty caption */
 figcaption {
   font-size: smaller;
@@ -499,7 +554,7 @@ a[href^='#code:']:empty.only-number::before {
   content: target-counter(attr(href), listing);
 }
 a[href^='#code:']:empty:not(.only-number)::before {
-  content: '♦';
+  content: 'Listing' '\0000a0' '♦';
   content: 'Listing' '\0000a0' target-counter(attr(href), listing);
 }
 a[href^='#fig:']:empty.only-number::before {
@@ -507,7 +562,7 @@ a[href^='#fig:']:empty.only-number::before {
   content: target-counter(attr(href), figure);
 }
 a[href^='#fig:']:empty:not(.only-number)::before {
-  content: '♦';
+  content: 'Figure' '\0000a0' '♦';
   content: 'Fig.' '\0000a0' target-counter(attr(href), figure);
 }
 a[href^='#subfig:']:empty.only-number::before {
@@ -515,8 +570,16 @@ a[href^='#subfig:']:empty.only-number::before {
   content: target-counter(attr(href), figure) target-counter(attr(href), subfloat, lower-alpha);
 }
 a[href^='#subfig:']:empty:not(.only-number)::before {
-  content: '♦';
+  content: 'Fig.' '\0000a0' '♦' '?';
   content: 'Fig.' '\0000a0' target-counter(attr(href), figure) target-counter(attr(href), subfloat, lower-alpha);
+}
+a[href^='#exa:']:empty.only-number::before {
+  content: '♦';
+  content: target-counter(attr(href), example);
+}
+a[href^='#exa:']:empty:not(.only-number)::before {
+  content: 'Example' '\0000a0' '♦';
+  content: 'Example' '\0000a0' target-counter(attr(href), listing);
 }
 a[href^='#tab:']:empty:not(.only-number)::before {
   content: 'Table♦';
@@ -545,10 +608,6 @@ a[href^='#prop:']:empty::before {
 a[href^='#prob:']:empty::before {
   content: 'Problem.♦';
   content: 'Problem\0000a0' target-counter(attr(href), problem);
-}
-a[href^='#exa:']:empty::before {
-  content: 'Example.♦';
-  content: 'Example\0000a0' target-counter(attr(href), example);
 }
 a[href^='#thm:']:empty:not(.only-number)::before {
   content: 'Theorem♦';
@@ -713,6 +772,7 @@ div.centering {
 cite {
   display: block;
   font-style: normal;
+  font-size: smaller;
 }
 cite[id^='bib:'] {
   counter-increment: bib;
@@ -722,15 +782,14 @@ cite[id^='bib:']::before {
   font-style: normal;
 }
 a[href^='#bib:']:empty::before {
-  content: '♦';
+  content: '[' '♦' ']';
   content: '[' target-counter(attr(href), bib) ']';
 }
 a[href^='#bib:']:not(:empty)::before {
-  content: '♦';
+  content: '[' '♦' ', ';
   content: '[' target-counter(attr(href), bib) ', ';
 }
 a[href^='#bib:']:not(:empty)::after {
-  content: '♦';
   content: ']';
 }
 figure.table figcaption {
@@ -836,9 +895,6 @@ div[center] > * {
   background-color: white;
   /*border: solid 1px red;*/
 }
-@page rotated {
-  size: 3.8in 4.73in !important;
-}
 div.float_top {
   float: bottom;
 }
@@ -860,6 +916,7 @@ div.proof::before {
   font-style: italic;
 }
 div.proof::after {
+  break-before: avoid;
   content: '∎';
 }
 div.abstract {
@@ -872,6 +929,29 @@ figure figure.subfloat {
 }
 figure figure.subfloat:not(:first-of-type) {
   margin-left: 2em;
+}
+div.wrapfigure {
+  float: right;
+  clear: right;
+}
+div.wrapfigure figure {
+  margin-right: 0;
+  margin-left: 1em;
+  margin-bottom: 0.5em;
+  margin-top: 0.5em;
+}
+div.author {
+  text-align: center;
+}
+h1.article_title {
+  font-variant: normal;
+}
+/* abstract */
+cite blockquote {
+  display: none;
+}
+#bibliography_entries {
+  display: none;
 }
 /*
 

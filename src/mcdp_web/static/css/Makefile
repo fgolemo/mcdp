@@ -1,5 +1,5 @@
 
-others=colors.less
+others=*.less
 
 all: manual.css mcdp_language_highlight.css
 

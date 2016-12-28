@@ -79,4 +79,5 @@ bibfile=all_only_one.bib
 bibout=bibliography
 bib: $(bibout)
 $(bibout):
-	bibtex2html --dl -o $(bibout) $(bibfile)
+	bibtex2html -unicode --dl -o $(bibout) $(bibfile)
+

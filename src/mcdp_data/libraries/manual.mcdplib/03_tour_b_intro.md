@@ -6,6 +6,13 @@ MCDPL allows to define design problems, which are represented as in
 [](#fig:complicated): a box with green arrows for functionalities and red arrows
 for resources.
 
+<style>
+#fig\:complicated {
+    td {
+        vertical-align: top;
+    }
+}
+</style>
 <center>
     <col3 figure-id='fig:complicated'>
         <s><f>Functionalities</f> <br/><br/>

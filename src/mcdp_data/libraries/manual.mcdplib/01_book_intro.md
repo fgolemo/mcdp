@@ -168,7 +168,7 @@ Chapter ... shows the case when
         provides false_positives [1/s]
         requires latency [s]
         requires computation [USD]
-        requires false_negatives [lux]``
+        requires false_negatives [lux]
     }
     </render>
     <s>
@@ -184,7 +184,7 @@ Chapter ... shows the case when
 This book presents a new approach to formalizing and solving co-design problems
 through the definition of a formal language, called MCDPL, and its interpreter
 and design environment.
-<!-- 
+<!--
 This book does not discuss the theory, which is explained in detail in [other
 papers].
 

@@ -22,6 +22,7 @@ from tempfile import mkdtemp
 import shutil
 import cStringIO
 import re
+import warnings
 
 
 
@@ -75,15 +76,19 @@ def graphvizgen_plot(ggraph, output, prog='dot'):
             graphviz_run(filename_dot, output, prog=prog)
         except:
             contents = open(filename_dot).read()
-            import hashlib
-            m = hashlib.md5()
-            m.update(contents)
-            s = m.hexdigest()
+            s = get_md5(contents)
             filename = 'out-%s.dot' % s
             with open(filename, 'w') as f:
                 f.write(contents)
             print('Saved problematic dot as %r.' % filename)
             raise
+
+def get_md5(contents):
+    import hashlib
+    m = hashlib.md5()
+    m.update(contents)
+    s = m.hexdigest()
+    return s
 
 def nx_generic_graphviz_plot(G, output, prog='dot'):
     """ Converts to dot and writes on the file output """
@@ -296,7 +301,6 @@ def embed_images_from_library(html, library, raise_errors=True):
         width_in = width_px / float(density)
         height_in = height_px / float(density)
         
-        
         if tag.has_attr('latex-options'):
             latex_options = tag['latex-options']
             props = {}
@@ -366,12 +370,16 @@ def png_from_pdf(pdf_data, density):
         cmd = [
             'convert',
             '-density', str(density), 
+            tmpfile, 
             '-background', 'white',
             '-alpha','remove',
             '-alpha','off', 
-            tmpfile, 
-            out
         ]
+        shave = True
+        if shave:
+            warnings.warn('Using shave to fix some bug in imagemagic')
+            cmd += ['-shave', '1']
+        cmd += [out]
         try:
             system_cmd_result(cwd='.', cmd=cmd,
                      display_stdout=False,

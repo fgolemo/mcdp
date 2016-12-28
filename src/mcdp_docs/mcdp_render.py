@@ -6,8 +6,6 @@ from contracts.enabling import disable_all
 from contracts.utils import raise_desc
 from decent_params import UserError
 from mcdp_library import Librarian, MCDPLibrary
-from mcdp_web.renderdoc.highlight import get_minimal_document
-from mcdp_web.renderdoc.main import render_complete
 from mocdp import logger
 from quickapp import QuickAppBase
 
@@ -81,7 +79,11 @@ class Render(QuickAppBase):
 
 
 def render(library, docname, data, realpath, out_dir, generate_pdf):
+    from mcdp_web.renderdoc.highlight import get_minimal_document
+    from mcdp_web.renderdoc.main import render_complete
+
     out = os.path.join(out_dir, docname + '.html')
+    
     html_contents = render_complete(library=library,
                                     s=data, raise_errors=True, realpath=realpath,
                                     generate_pdf=generate_pdf)

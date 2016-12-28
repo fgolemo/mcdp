@@ -8,6 +8,7 @@ import decent_logs
 from contracts.utils import raise_wrapped
 import decent_params
 import quickapp
+import warnings
 
 
 logging.basicConfig()
@@ -165,6 +166,8 @@ class MCDPConstants():
     
 #     pdf_to_png_dpi = 300 # dots per inch
     pdf_to_png_dpi = 100 # dots per inch
+    if pdf_to_png_dpi < 300:
+        warnings.warn('Note that pdf_to_png_dpi is set to %d, which is not suitable for printing')
     
     docs_xml_allow_empty_attributes = ['np', 'noprettify', 'nonumber',
                                         'mcdp-value', 'mcdp-poset']

@@ -5,8 +5,6 @@ import tempfile
 
 from mcdp_library import MCDPLibrary
 from mcdp_library_tests.tests import get_test_librarian
-from mcdp_web.renderdoc.highlight import get_minimal_document
-from mcdp_web.renderdoc.main import render_complete, replace_macros
 from mocdp import logger
 from quickapp import QuickApp
 
@@ -81,8 +79,13 @@ class RenderManual(QuickApp):
         # processors: composition
         ]
         
+        
         at = manual_contents.index(insert_after) + 1
         manual_contents = manual_contents[:at] + extra + manual_contents[at:] 
+
+        manual_contents.append(('manual', 'merged'))
+        manual_contents.append(('manual', 'reits'))
+        manual_contents.append(('manual', 'paper-uncertainty'))
         
         # check that all the docnames are unique
         pnames = [_[1] for _ in manual_contents]
@@ -98,8 +101,13 @@ class RenderManual(QuickApp):
 #                                job_id='render-%s-%s' % (libname, docname))
             if libname == 'manual':
                 source = '%s.md' % docname
-                erase_job_if_files_updated(context.cc, promise=res, filenames=[source])
-            
+                if os.path.exists(source):
+                    filenames = [source]
+                    erase_job_if_files_updated(context.cc, promise=res, 
+                                           filenames=filenames)
+                else:
+                    logger.debug('Could not find file %r for date check' % source)
+                    
             files_contents.append(res)
 
         d = context.comp(manual_join, files_contents)
@@ -144,6 +152,10 @@ def generate_metadata():
 
     out = MCDPManualConstants.pdf_metadata
     s = open(template).read()
+    
+
+    from mcdp_web.renderdoc.main import replace_macros
+
     s = replace_macros(s)
     with open(out, 'w') as f:
         f.write(s)
@@ -171,6 +183,8 @@ def render(libname, docname, generate_pdf):
     f = l._get_file_data(basename)
     data = f['data']
     realpath = f['realpath']
+    from mcdp_web.renderdoc.highlight import get_minimal_document
+    from mcdp_web.renderdoc.main import render_complete
 
     html_contents = render_complete(library=l,
                                     s=data, raise_errors=True, realpath=realpath,

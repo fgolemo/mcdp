@@ -4,30 +4,21 @@ from string import Template
 
 from contracts import contract
 from contracts.interface import location, Where
-from contracts.utils import raise_desc, indent
+from contracts.utils import raise_desc
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_library import MCDPLibrary
-from mcdp_web.renderdoc.abbrevs import other_abbrevs
-from mcdp_web.renderdoc.highlight import fix_subfig_references
-from mcdp_web.renderdoc.latex_preprocess import extract_maths, extract_tabular
-from mcdp_web.renderdoc.lessc import preprocess_lessc
-from mcdp_web.renderdoc.macro_col2 import col_macros,\
-    col_macros_prepare_before_markdown
-from mcdp_web.renderdoc.markdown_transform import is_inside_markdown_quoted_block
-from mcdp_web.renderdoc.preliminary_checks import do_preliminary_checks_and_fixes
-from mcdp_web.renderdoc.xmlutils import to_html_stripping_fragment, bs
 from mocdp import logger
 from mocdp.exceptions import DPInternalError, DPSyntaxError
 
-from .highlight import html_interpret,  mark_console_pres,\
+from .abbrevs import other_abbrevs
+from .highlight import fix_subfig_references, html_interpret,  mark_console_pres,\
     escape_for_mathjax, make_figure_from_figureid_attr
-from .latex_preprocess import latex_preprocessing
-from .markd import render_markdown
-from .prerender_math import prerender_mathjax
-from .xmlutils import check_html_fragment
+from .xmlutils import check_html_fragment, to_html_stripping_fragment, bs
 
 
-__all__ = ['render_document']
+__all__ = [
+    'render_complete',
+]
 
 @contract(returns='str', s=str, library=MCDPLibrary, raise_errors=bool)
 def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
@@ -39,6 +30,16 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
         
         Returns an HTML string; not a complete document.
     """
+    from .latex_preprocess import extract_maths, extract_tabular
+    from .latex_preprocess import latex_preprocessing
+    from .lessc import preprocess_lessc
+    from .macro_col2 import col_macros, col_macros_prepare_before_markdown
+    from .markd import render_markdown
+    from .preliminary_checks import do_preliminary_checks_and_fixes
+    from .prerender_math import prerender_mathjax
+    from mcdp_web.renderdoc.latex_preprocess import replace_equations
+    
+
     if isinstance(s, unicode):
         msg = 'I expect a str encoded with utf-8, not unicode.'
         raise_desc(TypeError, msg, s=s)
@@ -70,21 +71,14 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
                 raise ValueError(msg)
     
     # fixes for LaTeX
-    s = latex_preprocessing(s)
-#     assert not '\\par' in s
-#     assert not '\\vspace' in s
-#     assert not 'begin{tabular}' in s
+    s = latex_preprocessing(s) 
     
     s = '<div style="display:none">Because of mathjax bug</div>\n\n\n' + s
 
     # cannot parse html before markdown, because md will take
     # invalid html, (in particular '$   ciao <ciao>' and make it work)
     
-    s = s.replace('*}', '\*}')
-#     def markdown_fixes(l):
-#         l = replace_backticks_except_in_backticks_expression(l)
-#         l = replace_underscore_etc_in_formulas(l)
-#         return l
+    s = s.replace('*}', '\*}') 
 
     s = other_abbrevs(s)
     s, mcdpenvs = protect_my_envs(s) 
@@ -111,7 +105,6 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
         v = preprocess_equations(v)
         s = s.replace(k, v)
 
-    from mcdp_web.renderdoc.latex_preprocess import replace_equations
     s = replace_equations(s)        
     s = s.replace('\\*}', '*}')
     
@@ -193,12 +186,6 @@ def replace_macros(s):
             raise DPSyntaxError('Invalid placeholder', where=w)
 
     t = MyTemplate(s)
-    
-    
-#     for k, v in macros.items():
-#         s = s.replace(k, v)
-#         
-#     assert_not_inside(s, 'PYMCDP_')
     try:
         s2 = t.substitute(macros)
     except KeyError as e:
@@ -228,7 +215,6 @@ def fix_validation_problems(s):
             del e.attrs[a]
         
     # add missing type for <style>
-#     for e in soup.select('style:not([type])'):
     for e in soup.select('style'):
         if not 'type' in e.attrs:
             e.attrs['type'] = 'text/css'
@@ -251,7 +237,6 @@ def fix_validation_problems(s):
     return to_html_stripping_fragment(soup)
 
 def get_mathjax_preamble():
-    
     symbols = '/Users/andrea/env_mcdp/src/mcdp/libraries/manual.mcdplib/symbols.tex'
     tex = open(symbols).read()
     
@@ -263,6 +248,8 @@ def get_mathjax_preamble():
     return frag
 
 def protect_my_envs(s):
+    from .markdown_transform import is_inside_markdown_quoted_block
+
     # we don't want MathJax to look inside these
     elements = ['mcdp-value', 'mcdp-poset', 'pre', 'render', 
                 'poset', 'pos',
@@ -310,13 +297,13 @@ def protect_my_envs(s):
 #     l2 = l2.replace(D, '``')
 #     return l2
 
-def replace_backticks_except_in_backticks_expression(l):
-    def inside(sf):
-        sf = sf.replace('`', '&#96;')
-        return sf
-    def outside(sf):
-        return sf
-    return replace_inside_delims(l, '$', inside=inside, outside=outside)
+# def replace_backticks_except_in_backticks_expression(l):
+#     def inside(sf):
+#         sf = sf.replace('`', '&#96;')
+#         return sf
+#     def outside(sf):
+#         return sf
+#     return replace_inside_delims(l, '$', inside=inside, outside=outside)
 
 def replace_inside_delims(l, delim, inside, outside):
     D = 'DELIM'

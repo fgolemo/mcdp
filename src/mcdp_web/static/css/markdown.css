@@ -155,8 +155,8 @@ div.latex_env { margin-top: 0.5em; margin-bottom: 0.5em; }
 
 
 .errored {
-    border: solid 2px red !important;
-    padding: 3px !important;
+    /*border: solid 2px red !important;*/
+    /*padding: 3px !important;*/
     /*background-color: red;*/
 }
 .duplicated-id {

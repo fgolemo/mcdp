@@ -31,7 +31,7 @@ def run_lessc(soup):
         s1 = s1.replace('AND', '&')
         s2 = lessc_string(s1)
         
-        print indent(s2, 'less |')
+#         print indent(s2, 'less |')
         s2 = '/* preprocessed with less */\n' + s2
         style.string = s2
         style['type'] = 'text/css'

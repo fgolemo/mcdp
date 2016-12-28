@@ -3,11 +3,13 @@ import os
 import re
 
 from contracts.interface import Where
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_web.renderdoc.markdown_transform import is_inside_markdown_quoted_block
 from mocdp import logger
 from mocdp.exceptions import DPSyntaxError
 from mcdp_lang.dealing_with_special_letters import greek_letters
+from mcdp_report.gg_utils import get_md5
+from mcdp_web.renderdoc.latex_inside_equation_abbrevs import replace_inside_equations
 
 def assert_not_inside(substring, s):
     if substring in s:
@@ -33,13 +35,13 @@ def latex_preprocessing(s):
     s = s.replace('~', ' ') # XXX
     s = s.replace(group, '~~~')
     
-    s = re.sub(r'\\textendash\s*', '&ndash;', s) # XXX
-    s = re.sub(r'\\textemdash\s*', '&mdash;', s) # XXX
+    s = substitute_simple(s, 'textendash', '&ndash;')
+    s = substitute_simple(s, 'textemdash', '&mdash;')
      
-    justignore = ['vfill', 'pagebreak']
+    justignore = ['vfill', 'pagebreak', 'leavevmode', 'clearpage']
     for j in justignore:
         s = substitute_command_ext(s, j, lambda args, opts: '<!--skipped %s-->' % j,  # @UnusedVariable
-                                   nargs=1, nopt=0)
+                                   nargs=0, nopt=0)
 
     class Tmp:
         title = None
@@ -56,14 +58,10 @@ def latex_preprocessing(s):
 
 
     title = ""
-    title += "<h1>%s</h1>" % Tmp.title
+    title += "<h1 class='article_title'>%s</h1>" % Tmp.title
     title += "<div class='author'>%s</div>" % Tmp.author
-    
-    print title
-    print s.index('maketitle')
-#     s = substitute_command_ext(s, "maketitle", make_title, nargs=0, nopt=0)
     s = substitute_simple(s, "maketitle", title)
-    assert_not_inside(s, 'maketitle')
+
     s = re.sub(r'\\noindent\s*', '', s) # XXX
 # {[}m{]}}, and we need to choose the \R{endurance~$T$~{[}s{]}}
     s = re.sub(r'{(\[|\])}', r'\1', s)
@@ -104,9 +102,23 @@ def latex_preprocessing(s):
     s = re.sub(r'\\coderef{(.*?)}', r'<a href="#code:\1"></a>', s)
     
     s = sub_headers(s)               
-    s = re.sub(r'\\cite\[(.*)?\]{(.*?)}', r'<a href="#bib:\2">[\1]</a>', s)
-    s = re.sub(r'\\cite{(.*?)}', r'<a href="#bib:\1" replace="true"></a>', s)
+    def sub_cite(args, opts):
+#         print('cite args=%s opt=%s' % (args, opts))
+        cits = args[0].split(',')
+        inside = opts[0]
+        if inside is None:
+            inside = ""
+        res = ""
+        for i, id_cite in enumerate(cits):
+            inside_this = '' if i >0 else inside
+            res += '<a href="#bib:%s">%s</a>' % (id_cite, inside_this)
+        return res
     
+    s = substitute_command_ext(s, 'cite', sub_cite, nargs=1, nopt=1)
+   
+#     s = re.sub(r'\\cite\[(.*)?\]{(.*?)}', r'<a href="#bib:\2">[\1]</a>', s)
+#     s = re.sub(r'\\cite{(.*?)}', r'<a href="#bib:\1" replace="true"></a>', s)
+#     
     # note: nongreedy matching ("?" after *); and multiline (re.M) DOTALL = '\n' part of .
     s = re.sub(r'\\emph{(.*?)}', r'<em>\1</em>', s, flags=re.M | re.DOTALL)
     s = re.sub(r'\\textbf{(.*?)}', r'<strong>\1</strong>', s, flags=re.M | re.DOTALL)
@@ -117,6 +129,9 @@ def latex_preprocessing(s):
     s = substitute_simple(s, 'etal', 'et. al.')
 
     s = replace_includegraphics(s)
+    s = substitute_command(s, 'thanks', lambda name, inside:  # @UnusedVariable
+                           '<footnote>' + inside + "</footnote>" )
+
     s = substitute_command(s, 'fbox', lambda name, inside:  # @UnusedVariable
                            '<div class="fbox">' + inside + "</div>" )
     s = substitute_simple(s, 'scottcontinuity', 'Scott continuity', xspace=True)
@@ -133,6 +148,7 @@ def latex_preprocessing(s):
     s = substitute_simple(s, 'hfill', '')
     s = substitute_simple(s, 'quad', '')
     s = substitute_simple(s, 'centering', '')
+
     s = substitute_simple(s, 'bigskip', '<span class="bigskip"/>')
     s = substitute_simple(s, 'medskip', '<span class="medskip"/>')
     s = substitute_simple(s, 'smallskip', '<span class="medskip"/>')
@@ -178,7 +194,9 @@ def latex_preprocessing(s):
 #         assert_not_inside('\\' + x, s)
 
     s = replace_environment(s, "defn", "definition", "def:")
+    s = replace_environment(s, "definition", "definition", "def:")
     s = replace_environment(s, "lem", "lemma", "lem:")
+    s = replace_environment(s, "lemma", "lemma", "lem:")
     s = replace_environment(s, "rem", "remark", "rem:")
     s = replace_environment(s, "thm", "theorem", "thm:")
     s = replace_environment(s, "prop", "proposition", ("pro:", "prop:"))
@@ -186,13 +204,17 @@ def latex_preprocessing(s):
     s = replace_environment(s, "proof", "proof", "proof:")
     s = replace_environment(s, "IEEEproof", "proof", "proof:")
     s = replace_environment(s, "problem", "problem", "prob:")
+    s = replace_environment(s, "proposition", "proposition", "prop:")
     s = replace_environment(s, "abstract", "abstract", 'don-t-steal-label')
     s = replace_environment(s, "centering", "centering", 'don-t-steal-label')
     
     assert_not_inside('begin{centering}', s)
     s = replace_environment(s, "center", "center", 'don-t-steal-label')
     
+    s = replace_environment_ext(s, "quote", lambda inside, opt:  # @UnusedVariable
+                                '<blockquote>'+inside+'</blockquote>')
     s = replace_environment_ext(s, "tabular", maketabular)
+    s = replace_environment_ext(s, "wrapfigure", make_wrapfigure)
     s = replace_environment_ext(s, "enumerate", make_enumerate)
     s = replace_environment_ext(s, "itemize", make_itemize)
     s = replace_environment_ext(s, "minipage", makeminipage)
@@ -233,6 +255,17 @@ def maketabular(inside, opt):  # @UnusedVariable
     r += '</table>'
     return r
 
+def make_wrapfigure(inside, opt):  # @UnusedVariable
+    # two options
+    _arg1, inside = get_balanced_brace(inside)
+    _arg2, inside = get_balanced_brace(inside)
+    
+    res = makefigure(inside, opt, asterisk=False)
+    
+    res = '<div class="wrapfigure">' + res + '</div>'
+    return res
+    
+    
 def make_enumerate(inside, opt):
     return make_list(inside, opt, 'ul')
 def make_itemize(inside, opt):
@@ -298,24 +331,32 @@ def makeminipage(inside, opt):
 
 def makefigure(inside, opt, asterisk):
     align = opt  # @UnusedVariable
-    
+#     print('makefigure inside = %r' % inside)
     def subfloat_replace(args, opts):
         contents = args[0]
         caption = opts[0]
+        check_isinstance(contents, str)
         
-        caption, label = get_s_without_label(caption, labelprefix="fig:")
-        if label is None:
-            caption, label = get_s_without_label(caption, labelprefix="subfig:")
-        if label is not None and not label.startswith('subfig:'):
-            msg = 'Subfigure labels should start with "subfig:"; found %r.' % (label)
-            label = 'sub' + label
-            msg += 'I will change to %r.' % label
-            logger.debug(msg)
-            
-        if label is not None:
-            idpart = ' id="%s"' % label
+        if caption is None:
+            label = None
         else:
-            idpart = ""
+            caption, label = get_s_without_label(caption, labelprefix="fig:")
+            if label is None:
+                caption, label = get_s_without_label(caption, labelprefix="subfig:")
+            if label is not None and not label.startswith('subfig:'):
+                msg = 'Subfigure labels should start with "subfig:"; found %r.' % (label)
+                label = 'sub' + label
+                msg += 'I will change to %r.' % label
+                logger.debug(msg)
+        
+        # we need to make up an ID
+        if label is None:
+            label = 'subfig:' + get_md5(contents)
+#             print('making up label %r' % label)    
+#         if label is not None:
+        idpart = ' id="%s"' % label
+#         else:
+#             idpart = ""
 
         if caption is None: caption = 'no subfloat caption'
         res = '<figure class="subfloat"%s>%s<figcaption>%s</figcaption></figure>' % (idpart, contents, caption)
@@ -329,7 +370,7 @@ def makefigure(inside, opt, asterisk):
         assert not opts and len(args) == 1
         x, Tmp.label = get_s_without_label(args[0], labelprefix="fig:")
         res = '<figcaption>' + x + "</figcaption>" 
-        print('caption args: %r, %r' % (args, opts))
+#         print('caption args: %r, %r' % (args, opts))
         return res
     
     inside = substitute_command_ext(inside, 'caption', sub_caption, nargs=1, nopt=0)
@@ -337,10 +378,13 @@ def makefigure(inside, opt, asterisk):
 #     print('makefigure inside without caption = %r'  % inside)
     assert not '\\caption' in inside
 
-    if Tmp.label is not None:
-        idpart = ' id="%s"' % Tmp.label
-    else:
-        idpart = ""
+    if Tmp.label is None:
+        Tmp.label = 'fig:' + get_md5(inside)
+        #print('making up label %r' % Tmp.label)
+#     if Tmp.label is not None:
+    idpart = ' id="%s"' % Tmp.label
+#     else:
+#         idpart = ""
 
     res  = '<figure%s>%s</figure>' % (idpart, inside)
     return res
@@ -418,7 +462,7 @@ def eat_spaces(x):
 def possibly_eat_braces(remaining):
     """ x -> braces, x' """
     if remaining.startswith('{}'):
-        return '{}', remaining[3:]
+        return '{}', remaining[2:]
     else:
         return '', remaining
     
@@ -433,44 +477,39 @@ def substitute_command_ext(s, name, f, nargs, nopt):
             f : x -> s
     """
 #     noccur = s.count('\\'+name)
-#     print('substitute_command_ext name = %s  len(s)=%s occur = %d' % (name, len(s), noccur))
-#     if nargs == 0 and nopt == 0:
-#         lookfor = '\\' + name
-    lookfor = ('\\' + name) +( '[' if nopt > 0 else '{')
+    #print('substitute_command_ext name = %s  len(s)=%s occur = %d' % (name, len(s), noccur))
+    lookfor = ('\\' + name) #+( '[' if nopt > 0 else '{')
     
     try:
-        start = get_next_unescaped_appearance(s, lookfor, 0)
+        start = get_next_unescaped_appearance(s, lookfor, 0, next_char_not_word=True)
         assert s[start:].startswith(lookfor)
 #         print('s[start:]  = %r starts with %r ' % (s[start:start+14], lookfor))
     except NotFound:
-#         print('no string %r found' % lookfor)
+        #print('no string %r found' % lookfor)
         return s
     
     before = s[:start]
     rest = s[start:]
 #     print('before: %r' % before)
-    assert s[start:].startswith('\\'+name)
+    assert s[start:].startswith(lookfor)
 #     print('s[start:]: %r' % s[start:])
-    assert rest.startswith('\\'+name)
+    assert rest.startswith(lookfor)
     
-#     assert_not_inside('\\' + name, before)
-    
-    
-    consume = consume0 = s[start + len(lookfor) - 1:]
+    consume = consume0 = s[start + len(lookfor):]
     
     opts = []
     args = []
-    print('---- %r' % name)
+#     print('---- %r' % name)
 #     print('consume= %r'% consume)
     for _ in range(nopt):
         consume = consume_whitespace(consume)
         if not consume or consume[0] != '[':
-            print('skipping option')
+#             print('skipping option')
             opt = None
         else:
             opt_string, consume = get_balanced_brace(consume)
             opt = opt_string[1:-1] # remove brace
-            print('opt string %r consume %r opt = %r' % (opt_string, consume, opt))
+#             print('opt string %r consume %r opt = %r' % (opt_string, consume, opt))
         opts.append(opt)
         
 #     print('after opts= %r'% consume)
@@ -630,12 +669,13 @@ def replace_environment_ext(s, envname, f):
     subs = {}
     acceptance = None
     s = extract_delimited(s, d1, d2, subs, domain, acceptance=acceptance)
-    print('I found %d occurrences of environment %r' %  (len(subs), envname))
+#     print('I found %d occurrences of environment %r' %  (len(subs), envname))
     
     for k, complete in subs.items():
         assert complete.startswith(d1)
         assert complete.endswith(d2)
         inside = complete[len(d1):len(complete)-len(d2)]
+        print('%s inside %r' % (k, inside))
         assert_not_inside(d1, inside)
         assert_not_inside(d2, inside)
         if inside.startswith('['):
@@ -664,7 +704,7 @@ def replace_environment_ext(s, envname, f):
     
 def replace_environment(s, envname, classname, labelprefix):
     def replace_m(inside, opt):
-        print('replacing environment %r inside %r opt %r' % (envname, inside, opt))
+#         print('replacing environment %r inside %r opt %r' % (envname, inside, opt))
         thm_label = opt
         contents, label = get_s_without_label(inside, labelprefix=labelprefix)
         if label is not None and isinstance(labelprefix, str):
@@ -699,28 +739,32 @@ def replace_captionsideleft(s):
 def replace_includegraphics(s):
     
 #     \includegraphics[scale=0.4]{boot-art/1509-gmcdp/gmcdp_antichains_upsets}
-    def match(matchobj):
-        latex_options = matchobj.group(1)
+    def match(args, opts):
+        latex_options = opts[0]
         # remove [, ]
-        latex_options = latex_options[1:-1]
-        latex_path = matchobj.group(2)
+        latex_path = args[0]
         basename = os.path.basename(latex_path)
         res = '<img src="%s.pdf" latex-options="%s" latex-path="%s"/>' % (
                 basename, latex_options, latex_path
             )
-        return res
         
-    s = re.sub(r'\\includegraphics(\[.*?\])?{(.*?)}', 
-               match, s, flags=re.M | re.DOTALL)
+        return res
+    
+    s = substitute_command_ext(s, 'includegraphics', match, nargs=1, nopt=1)
+    
+#     print('after includegraphics: %r' % s)
+    
     return s
 
 def get_s_without_label(contents, labelprefix=None):
     """ Returns a pair s', label 
         where label could be None """
+    check_isinstance(contents, str)
+    
     class Scope:
         def_id = None
-    def got_it(m):
-        found = m.group(1)
+    def got_it(args, opts):  # @UnusedVariable
+        found = args[0]
         if labelprefix is None:
             ok = True
         else:
@@ -741,8 +785,9 @@ def get_s_without_label(contents, labelprefix=None):
 #             print('not using %r' % ( found))
             # keep 
             return "\\label{%s}" % found
+
+    contents2 = substitute_command_ext(contents, 'label', got_it, nargs=1, nopt=0)
         
-    contents2 = re.sub(r'\\label{(.*?)}', got_it, contents)
     label =  Scope.def_id
     if isinstance(labelprefix, str) and label is not None:
         assert label.startswith(labelprefix), (label, labelprefix)
@@ -808,7 +853,7 @@ def replace_equations(s):
     return s
 
 
-def get_next_unescaped_appearance(s, d1, search_from):
+def get_next_unescaped_appearance(s, d1, search_from, next_char_not_word=False):
     while True:
         if not d1 in s[search_from:]:
 #             print('nope, no %r in s[%s:] = %r' % (d1,search_from, s[search_from:]))
@@ -824,8 +869,17 @@ def get_next_unescaped_appearance(s, d1, search_from):
             search_from = maybe + 1
         else:
             assert s[maybe:].startswith(d1)
+            nextchar_i = maybe + len(d1)
+            nextchar = s[nextchar_i] if nextchar_i < len(s) else 'o' 
+            if next_char_not_word and can_be_used_in_command(nextchar):
+                print('skipping because nextchar = %r' % nextchar)
+                search_from = maybe + 1
+                continue
 #             print('found %r at %r ' % (d1, s[maybe:]))
             return maybe
+
+def can_be_used_in_command(c):
+    return c.isalpha() or c in ['*']
         
 class NotFound(Exception):
     pass
@@ -905,33 +959,6 @@ def extract_delimited(s, d1, d2, subs, domain, acceptance=None):
     s2 = s[:a] + key + s[b:]
     return extract_delimited(s2, d1, d2, subs, domain, acceptance=acceptance)
     
-def replace_inside_equations(s):
-    """ Processing inside equations """
-    s = s.replace('⟶', '\\rightarrow')
-    s = s.replace('⟼', '\\mapsto')
-    s = s.replace('⟨', '\\langle')
-    s = s.replace('⟩', '\\rangle')
-    s = s.replace('≤', '\\leq')
-    s = s.replace('≥', '\\geq')
-    s = s.replace('₁', '_{1}')
-    s = s.replace('₂', '_{2}')
-    s = s.replace('ₐ', '_{a}')
-    s = s.replace('ₐ', '_{a}')
-    s = s.replace('₂', '_{b}')
-    s = s.replace('ₙ', '_{n}')
-    s = s.replace('₊', '_{+}')
-    s = s.replace('ℝ', '\\mathbb{R}')
-    s = s.replace('×', '\\times')
-    s = s.replace('∞', '\\infty')
-    s = s.replace('∈', '\\in')
-    s = s.replace('⟦', '\\llbracket')
-    s = s.replace('⟧', '\\rrbracket')
-    s = s.replace('≐', '\\doteq')
-    for letter_name, symbol in greek_letters.items():
-        symbol = symbol.encode('utf-8')
-        letter_name = str(letter_name)
-        s = s.replace(symbol, '\\' + letter_name)
-    return s
 
 def extract_maths(s):
     """ returns s2, subs(str->str) """

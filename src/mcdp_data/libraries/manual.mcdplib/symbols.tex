@@ -3,8 +3,9 @@
 % These are available in Unicode as ⟦ (U+27E6) and ⟧ (U+27E7),
 % \newcommand{\llbracket}{\text{⟦}}
 % \newcommand{\rrbracket}{\text{⟧}}
-\newcommand{\llbracket}{[\!\![}
-\newcommand{\rrbracket}{]\!\!]}
+\newcommand{\llbracket}{[\![}
+\newcommand{\rrbracket}{]\!]}
+
 
 
 \newcommand{\exc}{\vmath{\colF exec}} % Executation $\exc: \impsp \rightarrow \funsp$
@@ -306,3 +307,136 @@
 
 \newcommand{\posetwidth}{\vmath{width}}
 \newcommand{\posetheight}{\vmath{height}}
+
+% reits
+\newcommand{\posdef}[1]{\mathcal{P}_{#1}} % Positive definite matrices
+\newcommand{\MR}{\M{R}}
+
+
+%:section:0typography:Basic typography
+
+\newcommand{\myacronym}[1]{\textsc{#1}\xspace} % All acronyms; good for text as well as math mode. Use lower case.
+
+%:section:0typography/tensors:Tensors and tensor elements
+\newcommand{\T}[1]{\boldsymbol{{\mathsf{#1}}}} % Tensor
+%:nomenc:\T{A},\T{B},\T{C},\dots: Symbols denoting tensors
+%:sort:---40a
+
+\newcommand{\Tel}[1]{{\mathsf{#1}}} % Tensor element
+%:nomenc:\Tel{A}_{ijk},\Tel{B}_{ijk},\Tel{C}_{ijk},\dots: Symbols denoting tensors elements
+%:sort:---40b
+
+\newcommand{\Te}[1]{\Tel{#1}}
+%:deprecated:
+
+
+%:section:0typography/matrices:Matrices and matrix elements
+\newcommand{\M}[1]{\mathbf{#1}} %  A matrix
+%:nomenc:\M{A},\M{B},\M{C},\dots: Symbols denoting matrices
+%:sort:---30a
+
+\newcommand{\Mel}[1]{\mathrm{#1}} % The elements of a matrix
+%:nomenc:\Mel{A},\Mel{B},\Mel{C},\dots: Symbols denoting matrix elements
+%:sort:---30b
+
+%:section:0typography/sets:Sets
+\newcommand{\aset}[1]{\mathscr{#1}} % A set
+%:nomenc:\setA,\setB,\setC,\dots,\setM,\setX,\setY,\setZ:Symbols denoting sets.
+%:sort:---10
+
+\newcommand{\agroup}[1]{\mathrm{#1}} % Fonts for a set which is a group.
+%:example: A set $\aset{X}$, a group $\agroup{X}$, $\agroup{G}$, \dots
+%:nomenc:\grG,\grH,\grK,\grN,\dots:Symbols denoting groups.
+%:sort:---50
+
+\newcommand{\aseq}[1]{\boldsymbol{#1}} % Formatting for sequences
+%:nomenc:\sqa,\sqb,\sqc,\dots:Symbols used for denoting sequences.
+%:sort:---20a
+
+\newcommand{\aseqe}[1]{#1} % Formatting for one element in a sequence
+%:nomenc:\sqae_k,\sqbe_k,\sqce_k,\dots:Symbols denoting the elements of sequences
+%:sort:---20b
+
+\newcommand{\dummyIndices}{}
+%:nomenc:i,j,k,s,v,\dots:Symbols usually used as indices.
+
+
+%:section:0typography/misc:Everything else
+\newcommand{\aword}[1]{\mathsf{#1}} % How words should look like in formulas.
+%:example: Consider the operator $\aword{scale}$, \dots
+
+\newcommand{\vmath}[1]{\aword{#1}} % How words should appear in math mode.
+
+\newcommand{\codefunc}[1]{\texttt{#1}\xspace} % Code functions
+%:example: The function \codefunc{select}
+
+\newcommand{\swpackage}[1]{\textsc{#1}\xspace} % Name of software packages
+%:example: The package \swpackage{Procgraph}, \swpackage{ZMQ}, \swpackage{Unix} .
+
+
+%:section:articles/optbody:Optimal design of body and mind
+
+
+\newcommand{\MA}{\M{A}}
+\newcommand{\MB}{\M{B}}
+\newcommand{\MC}{\M{C}}
+\newcommand{\MG}{\M{G}}
+\newcommand{\MH}{\M{H}}
+
+\newcommand{\ML}{\M{L}}
+\newcommand{\MQ}{\M{Q}}
+\newcommand{\MP}{\M{P}}
+\newcommand{\MS}{\M{S}}
+\newcommand{\MSigma}{\M{\Sigma}}
+\newcommand{\MV}{\M{V}}
+\newcommand{\MW}{\M{W}}
+
+
+\newcommand{\SP}{P_{\text{s}}} % Sensing power
+\newcommand{\AP}{P_{\text{a}}} % Actuation power
+\newcommand{\SE}{E} % Stored energy
+\newcommand{\ER}{r} % Trajectory efficiency ratio
+\newcommand{\HP}{\Theta} % Heading precision
+\newcommand{\np}{n} % Number of pixels
+%:section:common/algebra: Algebra
+\newcommand{\ones}{\boldsymbol{1}}
+%:nomenc:\ones_n:A vector of all ones in $\reals^n$.
+%:sort:1
+
+\newcommand{\idMat}{\M{I}} % Identity matrix
+%:nomenc:\idMat_n:Identity matrix of size $n\times n$.
+%:sort:I
+
+%%:def:def:idMat
+
+
+\newcommand{\matTrace}{\vmath{Tr}} % Trace of a matrix.
+%:sort:trace
+
+%%:def:def:matrix-trace
+
+\newcommand{\angleFun}{\angle} % Angle function
+%:def:def:angle-function
+
+\newcommand{\flatten}{\mathsf{vec}} % Matrix-to-vector rearrangement.
+%:sort:vec
+
+%%:def:def:vec
+
+
+
+
+\newcommand{\batterymass}{{\colR m}}
+\newcommand{\batterycapacity}{{\colF C}}
+\newcommand{\batterycost}{{\colR c}}
+\newcommand{\specificenergy}{{\colR \rho}}
+\newcommand{\specificcost}{{\colR \alpha}}
+
+
+
+\newcommand{\D}{\,\textrm{d}} % Used for integrals
+%:nomenc:\D x:integration measure
+%:nomenc-exclude:
+%:sort:d
+
+\newcommand{\ex}{\mathbb{E}}

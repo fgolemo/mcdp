@@ -48,6 +48,28 @@
 <!-- <h2 id='symbols-heading'>Table of important symbols</h2> -->
 
 
+Media info:
+
+    @page {
+    size: 6in 9in;
+    margin-top: 1.7cm;
+    /*here*/
+    margin-bottom: 0.312in;
+    @center {
+    border: solid 1px black;
+    }
+    }
+    @page :left {
+    margin-left: 1cm;
+    margin-right: 2cm;
+    }
+    @page :right {
+    margin-left: 2cm;
+    margin-right: 1cm;
+    }
+
+    Render params: @@{RENDER_PARAMS}
+
 
 <style>
     #booktitle, #author {

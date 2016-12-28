@@ -1,5 +1,6 @@
 import datetime
 import mocdp
+from mocdp import MCDPConstants
 
 
 class MCDPManualConstants:
@@ -31,6 +32,10 @@ class MCDPManualConstants:
     # D:19970915110347
     macros['CREATION_DATE_PDF'] = "D:" + now.strftime("%Y%m%d%H%M%S-05'00'")
     macros['MOD_DATE_PDF'] = macros['CREATION_DATE_PDF']
+    
+    macros['RENDER_PARAMS'] = str({
+        'pdf_to_png_dpi': MCDPConstants.pdf_to_png_dpi,
+    })
     
 #     InfoBegin
 # InfoKey: dc:description

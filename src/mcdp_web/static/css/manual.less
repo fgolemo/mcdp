@@ -1,26 +1,43 @@
+
+
 @import 'colors';
 @import 'captions';
 @import 'keywords_in_headers';
 
 
+@import 'page-six_by_nine';
+// @import 'page-ipad';
+
+@import 'reset-fix';
+
+@import 'toc';
+
+p {
+    // line-height: 12.5pt;
+    line-height: 125%;
+
+    margin-bottom: 3pt;
+    margin-top: 3pt;
+
+}
+figcaption {
+    line-height: 125%;
+}
+blockquote {
+    margin-left: 3em;
+}
+
+h1 {
+    font-weight: bold;
+    text-align: center;
+}
+h2 { font-weight: bold; }
+
+
 body {
-  font-family: "Times New Roman", Times, serif !important;
   font-size: 10pt;
 }
 
-
-@font-face {
-    font-family: monospace;
-    /*src: local("Consolas")*/
-    src: local("Anka/Coder Narrow")
-}
-
-
-h1 {
-    text-align: center;
-}
-
-.toc a { text-decoration: none; }
 
 /* Good for safari */
 
@@ -48,7 +65,9 @@ code { page-break-inside: avoid; }
 
 
 
-pre, code { font-size: 8pt; }
+pre, code {
+    font-size: 8pt;
+}
 
 
 body {
@@ -60,9 +79,6 @@ h2 { font-size: 12pt; color: black !important;}
 h3 {
     font-size: 10pt; }
 
-code {
-    font-family: monospace, Cambria, "Cambria Math";
-}
 
 p code { font-size: 8pt; }
 pre {
@@ -97,132 +113,7 @@ li {margin: 0; margin-left: 0;}
 /*.toc ul ul li { display: none; }*/
 
 
-/************ TOC ***************/
 
-@media screen {
-    ul.toc {
-        column-count: 2;
-        column-gap: 20px;
-        /*max-height: 30em;*/
-    }
-    ul#main_toc > li > ul > li{
-        padding-top: 2pt;
-        /*color: red;*/
-    }
-    ul#main_toc > li > ul > li > ul   {
-        margin-top: 1pt;
-        margin-bottom: 1pt;
-    }
-
-}
-@media print {
-    /** two-column format */
-    ul.toc {
-        column-count: 2;
-        column-gap: 20px;
-    }
-
-    /** add page numbers for the first two */
-    ul#main_toc > li > a::after {
-        content: leader('_')  target-counter(attr(href), page) ;
-        font-weight: bold;
-    }
-
-    ul#main_toc > li > ul > li > a::after {
-         content: leader('_') target-counter(attr(href), page);
-     }
-}
-
-ul#main_toc > li > a > span.toc_number {
-    font-weight: bold;
-}
-ul#main_toc > li > a > span.toc_number::before {
-    content: 'Chapter ';
-    font-weight: bold;
-}
-
-ul#main_toc ul,
-ul#main_toc ul ul {
-    margin-left: 0;
-}
-ul#main_toc ul ul li  a {
-    color: gray !important;
-}
-ul#main_toc ul ul li {
-    display: inline;
-}
-
-ul.toc ul ul li a span.toc_number { display: none; }
-
-ul.toc ul ul li a span.toc_name::before {
-    margin-right: 3pt;
-
-    content: '⟡'; /*◇';*/
-    font-family: 'Cambria' !important;
-    font-size: 6pt;
-    /*padding-bottom: 5pt !important;*/
-    /*border: solid 1px red;*/
-    /*margin-top: -20pt !important;*/
-    /*display: inline;*/
-}
-ul.toc ul ul li:first-child a span.toc_name::before {
-    content: '';
-    margin: 0;
-}
-
-/*div > ul:not(.toc)  {
-    margin-left: 2em;
-    margin-top: -0.3em;
-    margin-bottom: -0.3em;
-}
-*/
-
-/* first header down is highlighted */
-ul.chapter_toc > li > a {
-    font-weight: bold;
-}
-
-
-/* below numbers are erased */
-ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
-    /*color: red; */
-}
-
-ul.chapter_toc > li > ul > li > a.toc_link > span.toc_number {
-    display: none;
-}
-
-ul.chapter_toc > li > ul > li > a.toc_link > span.toc_name::before {
-    content: '•';
-    margin-right: 0.5em;
-}
-
-
-
-/* keywords appearing in headers */
-#maintoc code {
-    /*color: red !important;*/
-    font-size: 7pt !important;
-    color: #a2a2a2 !important;
-}
-ul.toc, ul.toc ul { padding: 0; margin-left: 1em;}
-
-ul.toc li { padding: 0; margin: 0;}
-
-ul#main_toc > li {
-    /*margin-bottom: 3em;*/
-    padding-bottom: 1em;
-}
-ul#main_toc > li > ul {
-    padding-top: 4pt;
-}
-ul#main_toc > li > a span.toc_name {
-    font-weight: bold;
-
-/*    font-size: larger;*/
-}
-
-/*********  end TOC ************/
 
 /********** headings *********/
 
@@ -241,8 +132,11 @@ h3 {
     border-bottom: solid 0.5pt grey;
 }
 
-h1:not(#booktitle), #toc-heading { font-variant: small-caps; }
-h1:not(#booktitle) ::before { content: 'Chapter '; }
+
+#toc-heading { font-variant: small-caps; }
+h1:not(#booktitle) {
+    ::before { content: 'Chapter '; }
+}
 /***** end headings *****/
 
 
@@ -374,6 +268,8 @@ figure.table figcaption {
 @label-code: 'Listing' @nbsp counter(listing);
 @num-code: target-counter(attr(href), listing);
 @ref-code: 'Listing' @nbsp @num-code;
+@num-exa: target-counter(attr(href), example);
+@ref-exa: 'Example' @nbsp @num-code;
 
 @label-fig: 'Figure' @nbsp counter(figure);
 @num-fig: target-counter(attr(href), figure);
@@ -400,11 +296,14 @@ figure[id^='fig:'] > figcaption {
     &@{empty_before}     { content: @label-fig;      }
 }
 
-figure[id^='subfig:'] > figcaption{
+figure[id^='subfig:'] > figcaption {
     &@{not_empty_before} { content: @label-subfig @nbsp; }
     &@{empty_before}     { content: @label-subfig;       }
 }
 
+figure[id^='subfig:'] > figcaption:empty {
+    text-align: center;
+}
 /* Empty caption */
 figcaption { font-size: smaller; }
 
@@ -413,18 +312,26 @@ figcaption { font-size: smaller; }
 
 a[href^='#code:']:empty {
     &@{only-number} {  content: @NS; content: @num-code; }
-    &@{regular-ref} {  content: @NS; content: @ref-code; }
+    &@{regular-ref} {  content: 'Listing' @nbsp @NS; content: @ref-code; }
 }
 
 a[href^='#fig:']:empty  {
     &@{only-number} {  content: @NS; content: @num-fig; }
-    &@{regular-ref} {  content: @NS; content: @ref-fig; }
+    &@{regular-ref} {  content: 'Figure' @nbsp @NS; content: @ref-fig; }
 }
 
 a[href^='#subfig:']:empty  {
     &@{only-number} {  content: @NS; content: @num-subfig; }
-    &@{regular-ref} {  content: @NS; content: @ref-subfig; }
+    &@{regular-ref} {  content: 'Fig.' @nbsp @NS '?'; content: @ref-subfig; }
 }
+
+a[href^='#exa:']:empty  {
+    &@{only-number} {  content: @NS; content: @num-exa; }
+    &@{regular-ref} {  content: 'Example' @nbsp @NS; content: @ref-exa; }
+}
+//
+// a[href^='#exa:'   ]:empty  {  content: 'Example.♦';content: 'Example\0000a0' target-counter(attr(href), example); }
+
 
 //
 // a[href^='#subfig:']:empty:not(.only-number)::before {  content: 'Fig.♦?'; content: 'Fig.\0000a0' target-counter(attr(href), figure)  target-counter(attr(href), subfloat,  lower-alpha); }
@@ -437,7 +344,6 @@ a[href^='#lem:'   ]:empty::before {  content: 'Lemma.♦';content: 'Lemma\0000a0
 a[href^='#def:'   ]:empty::before {  content: 'Def.♦'; content: 'Def.\0000a0' target-counter(attr(href), definition); }
 a[href^='#prop:'  ]:empty::before {  content: 'Prop.♦';content: 'Prop.\0000a0' target-counter(attr(href), proposition); }
 a[href^='#prob:'  ]:empty::before {  content: 'Problem.♦';content: 'Problem\0000a0' target-counter(attr(href), problem); }
-a[href^='#exa:'   ]:empty::before  {  content: 'Example.♦';content: 'Example\0000a0' target-counter(attr(href), example); }
 a[href^='#thm:'   ]:empty:not(.only-number)::before {  content: 'Theorem♦'; content: 'Theorem\0000a0' target-counter(attr(href), theorem); }
 a[href^='#thm:'   ]:empty.only-number::before {  content: '♦'; content: target-counter(attr(href), theorem); }
 a[href^='#sub:'   ]:empty:not(.only-number)::before { content: 'Subsection♦.♦'; content: 'Subsection\0000a0' target-counter(attr(href), section) '.' target-counter(attr(href), subsection) ; }
@@ -592,6 +498,7 @@ div.center, div.centering { text-align: center; }
 cite {
     display: block;
     font-style: normal;
+    font-size: smaller;
 }
 cite[id^='bib:'] {
     counter-increment: bib;
@@ -603,16 +510,16 @@ cite[id^='bib:']::before {
 a[href^='#bib:'] {
 
     &:empty::before {
-        content: @NS;
+        content: '['@NS']';
         content: '[' target-counter(attr(href), bib) ']';
     }
     &:not(:empty){
         &::before{
-            content: @NS;
+            content: '[' @NS ', ';
             content: '[' target-counter(attr(href), bib) ', ';
         }
         &::after{
-            content: @NS;
+            // content: @NS;
             content: ']';
         }
     }
@@ -736,10 +643,6 @@ div[center] > * {
     /*border: solid 1px red;*/
 }
 
-@page rotated {
-    size: 3.8in 4.73in !important;
-
-}
 
 div.float_top {
     float: bottom;
@@ -793,3 +696,28 @@ figure figure.subfloat {
         margin-left: 2em;
     }
 }
+
+div.wrapfigure {
+    float: right;
+    clear: right;
+
+    figure {
+        margin-right: 0;
+        margin-left: 1em;
+        margin-bottom: 0.5em;
+        margin-top: 0.5em;
+    }
+}
+
+div.author {
+    text-align: center;
+}
+
+h1.article_title {
+    font-variant: normal;
+}
+
+/* abstract */
+cite blockquote { display: none; }
+
+#bibliography_entries { display: none;}

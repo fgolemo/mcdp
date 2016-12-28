@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
 import sys
 
 from bs4.element import Comment, Tag
 
 from contracts import contract
-from mocdp import logger
-import os
 from mcdp_docs.manual_constants import MCDPManualConstants
+from mcdp_docs.read_bibtex import get_bibliography
+from mcdp_web.renderdoc.highlight import add_class
+from mocdp import logger
 
 
 def get_manual_css_frag():
@@ -17,9 +19,10 @@ def get_manual_css_frag():
     from mcdp_report.html import \
     get_manual_print_css_filename, get_manual_screen_css_filename,\
     get_manual_generic_css_filename, get_markdown_css_filename,\
-    get_language_css_filename
+    get_language_css_filename, get_reset_css_filename
 
     css_files = [
+        get_reset_css_filename(),
         get_language_css_filename(),
         get_markdown_css_filename(),
         get_manual_generic_css_filename(),
@@ -61,7 +64,7 @@ def manual_join(files_contents):
     template = template.replace('CSS', frag)
     template = template.replace('TITLE', 'Practical Tools for Co-Design')
     
-    print template
+    
     # title page
     (_libname, docname), first_data = files_contents.pop(0)
     assert 'first' in docname
@@ -126,7 +129,20 @@ def manual_join(files_contents):
     body_place.replaceWith(main_body)
     main_body.insert_after(Comment('end of main_body'))
 
-    print('putting bibliography')
+    print('external bib')
+    bibliography_entries = get_bibliography()
+    bibliography_entries['id'] = 'bibliography_entries'
+    d.find(id='bibliography_entries').replace_with(bibliography_entries)
+    
+    
+    # find used bibliography entries
+    used = set()
+    unused = set()
+    for a in d.find_all('a'):
+        href = a.attrs.get('href', '')
+        if href.startswith('#bib:'):
+            used.add(href[1:]) # no "#"
+    print('I found %d references, to these: %s' % (len(used), used))
     bibhere = d.find('div', id='put-bibliography-here')
     if bibhere is None:
         logger.error('Could not find #put-bibliography-here in document.')
@@ -134,11 +150,17 @@ def manual_join(files_contents):
         cites = list(d.find_all('cite'))
         # TODO: sort
         for c in cites:
-            # remove it from parent
-            c.extract()
-            # add to bibliography
-            bibhere.append(c)
-
+            ID = c.attrs.get('id', None)
+            if ID in used:
+                # remove it from parent
+                c.extract()
+                # add to bibliography
+                bibhere.append(c)
+                add_class(c, 'used')
+            else:
+                unused.add(ID)
+                add_class(c, 'unused')
+    print('I found %d unused bibs.' % (len(unused)))
     print('checking errors')
     check_various_errors(d)
     
@@ -151,6 +173,8 @@ def manual_join(files_contents):
     return res
 
     
+
+
 def check_various_errors(d):
     error_names = ['DPSemanticError', 'DPSyntaxError']
     selector = ", ".join('.'+_ for _ in error_names)
