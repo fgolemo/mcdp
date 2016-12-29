@@ -601,7 +601,7 @@ This result generalizes for any number of substitutions.
 
 First, we define a partial order on the valuations. A valuation precedes
 another if it gives more information on each DP.
-\begin{defn}[Partial order $ ≼_{V}$ on valuations]
+\begin{defn}[Partial order $≼_{V}$ on valuations]
 \label{def:For-two-valuations,}For two valuations $\val₁,\val₂:\atoms⟶\udpsp$,
 say that $\val₁ ≼_{V}\val₂$ if $\val₁(a)\udpleq\val₂(a)$
 for all $a ∈ \atoms$.
@@ -817,12 +817,12 @@ uncertain DPs that use finite and prescribed computation.
 
 \subsubsection{Relaxations for addition}
 
-Consider a monotone relation between some functionality $\fun₁ ∈ ℝ₊$
-and resources $\res₁,\res₂ ∈ ℝ₊$ described by
-the constraint that $\fun₁≤\res₁+\res₂$ (\figref{example-invplus}).
-For example, this could represent the case where there are two batteries
-providing the power $\fun₁$, and we need to decide how much to
-allocate to the first~($\res₁$) or the second~($\res₂$).
+Consider a monotone relation between some functionality $\fun₁ ∈ ℝ₊$ and
+resources $\res₁,\res₂ ∈ ℝ₊$ described by the constraint that
+$\fun₁≤\res₁+\res₂$ (\figref{example-invplus}). For example, this could
+represent the case where there are two batteries providing the power $\fun₁$,
+and we need to decide how much to allocate to the first~($\res₁$) or the
+second~($\res₂$).
 
 \captionsideleft{\label{fig:example-invplus}}{\includegraphics[scale=0.33]{unc_plusinv}}
 

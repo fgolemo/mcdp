@@ -4,12 +4,12 @@ import re
 
 from contracts.interface import Where
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from mcdp_report.gg_utils import get_md5
+from mcdp_web.renderdoc.latex_inside_equation_abbrevs import replace_inside_equations
 from mcdp_web.renderdoc.markdown_transform import is_inside_markdown_quoted_block
 from mocdp import logger
 from mocdp.exceptions import DPSyntaxError
-from mcdp_lang.dealing_with_special_letters import greek_letters
-from mcdp_report.gg_utils import get_md5
-from mcdp_web.renderdoc.latex_inside_equation_abbrevs import replace_inside_equations
+
 
 def assert_not_inside(substring, s):
     if substring in s:
@@ -17,18 +17,10 @@ def assert_not_inside(substring, s):
         w = Where(s, i, i + len(substring))
         msg = 'I found the forbidden substring %r in string.' % substring
         raise DPSyntaxError(msg, where=w)
+    
 def latex_preprocessing(s):
 #     assert_not_inside('\\\\hspace', s)
-    s = s.replace('~$', '&nbsp;$')
-#     s = s.replace('{}', '') # cannot do - mcdp { }
-    # note: nongreedy matching ("?" after *);
-#     def fix(m):
-#         x=m.group(1)
-#         if not 'eq:' in x:
-#             print('fixing %r to eq:%s' % (x, x))
-#             x = 'eq:' + x
-#         return '\\eqref{%s}' %x
-    
+    s = s.replace('~$', '&nbsp;$') 
     # note: thi
     group = 'TILDETILDETILDE'
     s = s.replace('~~~', group)
@@ -37,6 +29,8 @@ def latex_preprocessing(s):
     
     s = substitute_simple(s, 'textendash', '&ndash;')
     s = substitute_simple(s, 'textemdash', '&mdash;')
+    
+    s = substitute_simple(s, 'and', '<span class="and" style="margin-left: 2em"></span>')
      
     justignore = ['vfill', 'pagebreak', 'leavevmode', 'clearpage']
     for j in justignore:
@@ -216,6 +210,7 @@ def latex_preprocessing(s):
     s = replace_environment_ext(s, "tabular", maketabular)
     s = replace_environment_ext(s, "wrapfigure", make_wrapfigure)
     s = replace_environment_ext(s, "enumerate", make_enumerate)
+    s = replace_environment_ext(s, "description", make_description)
     s = replace_environment_ext(s, "itemize", make_itemize)
     s = replace_environment_ext(s, "minipage", makeminipage)
     s = replace_environment_ext(s, "figure", lambda inside, opt: makefigure(inside, opt, False))
@@ -280,7 +275,28 @@ def make_list(inside, opt, name):
     r = "<%s>%s</%s>" % (name, html, name)
     return r
 
-def maketable(inside, opt, asterisk):
+def make_description(inside, opt):  # @UnusedVariable
+    labels = []
+    SEP = 'SEP'
+    def found_label(args, opts):  # @UnusedVariable
+        labels.append(opts[0])
+        return SEP
+    
+    inside = substitute_command_ext(inside, 'item', found_label, nargs=0, nopt=1)
+    
+    items = inside.split(SEP)
+    items = items[1:]
+
+    html = ""
+    for i, item in enumerate(items):
+        if i < len(labels):
+            html += '<dt>%s</dt>' % labels[i]
+        html += '<dd>%s</dd>' % item
+        
+    r = "<dl>%s</dl>" % html
+    return r
+
+def maketable(inside, opt, asterisk):  # @UnusedVariable
     placement = opt  # @UnusedVariable
     
     class Tmp:
@@ -404,6 +420,8 @@ def sub_headers(s):
     # note that we need to do the * version before the others
     s = sub_header(s, cmd='section*', hname='h1', number=False)
     s = sub_header(s, cmd='section', hname='h1', number=True)
+    s = sub_header(s, cmd='chapter*', hname='h1', number=False)
+    s = sub_header(s, cmd='chapter', hname='h1', number=True)
     s = sub_header(s, cmd='subsection*', hname='h2', number=False)
     s = sub_header(s, cmd='subsection', hname='h2', number=True)
     s = sub_header(s, cmd='subsubsection*', hname='h3', number=False)
@@ -494,6 +512,8 @@ def substitute_command_ext(s, name, f, nargs, nopt):
     assert s[start:].startswith(lookfor)
 #     print('s[start:]: %r' % s[start:])
     assert rest.startswith(lookfor)
+
+        
     
     consume = consume0 = s[start + len(lookfor):]
     
@@ -675,7 +695,7 @@ def replace_environment_ext(s, envname, f):
         assert complete.startswith(d1)
         assert complete.endswith(d2)
         inside = complete[len(d1):len(complete)-len(d2)]
-        print('%s inside %r' % (k, inside))
+#         print('%s inside %r' % (k, inside))
         assert_not_inside(d1, inside)
         assert_not_inside(d2, inside)
         if inside.startswith('['):
@@ -685,22 +705,7 @@ def replace_environment_ext(s, envname, f):
             opt = None
         r = f(inside, opt)
         s = s.replace(k, r)
-    return s
-#     
-#     if '*' in envname:
-#         envname = envname.replace('*', '\\*')
-#     reg = '\\\\begin{%s}(\\[.*?\\])?(.*?)\\\\end{%s}' % (envname, envname)
-#     # note multiline and matching '\n'
-#     reg = re.compile(reg, flags=re.M | re.DOTALL)
-#     def S(m):
-#         if m.group(1) is not None:
-#             opt = m.group(1)[1:-1]
-#         else:
-#             opt = None
-#         inside = m.group(2)
-#         return f(inside=inside, opt=opt)
-#     s = re.sub(reg, S, s)
-#     return s
+    return s 
     
 def replace_environment(s, envname, classname, labelprefix):
     def replace_m(inside, opt):
@@ -715,6 +720,7 @@ def replace_environment(s, envname, classname, labelprefix):
         l = "<span class='%s_label latex_env_label'>%s</span>" % (classname, thm_label) if thm_label else ""
         rr = '<div %sclass="%s latex_env" markdown="1">%s%s</div>' % (id_part, classname, l, contents)
         return rr
+    
     return replace_environment_ext(s, envname, replace_m)
     
 def replace_captionsideleft(s):

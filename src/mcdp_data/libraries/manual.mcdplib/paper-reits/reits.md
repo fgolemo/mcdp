@@ -87,7 +87,7 @@ This paper continues the work started in~\cite{censi15monotone,censi15same}.
 
 
 
-\section{Design Problems (DPs)}
+<!-- \section{Design Problems (DPs)}
 
 \noindent\begin{minipage}[t]{1\columnwidth}
 \begin{wrapfigure}{r}{0\columnwidth}
@@ -319,12 +319,12 @@ The map~$\ftor$ is
 \end{align}
 In this case, each capacity~$\batterycapacity$ is mapped to an antichain
 of~$n$ elements.
-\end{example}
+\end{example} -->
 
 
 
 
-<!-- 
+<!--
 \subsection{Examples in the robotics domain}
 
 
@@ -652,7 +652,7 @@ resource.
 \caption{}
 \end{figure} -->
 
-
+<!--
 
 
 \subsection{Examples of non monotone relations}
@@ -681,10 +681,10 @@ is resampling the data so that its length is a power of 2, a step
 that can be omitted when~$n$ itself is a power of~$2$. Therefore,
 it might be faster to compute the answer for~$n=2^{m}$ than for~$n=2^{m}-1$.
 \end{example}
+ -->
 
 
-
-
+<!--
 
 \section{Monotone Co-Design Problems (MCDPs)}
 
@@ -756,46 +756,12 @@ The function~$\ftor$ for the entire MCDP can be written as the solution
 of a least-fixed-point recursive equation involving the functions~$\{\ftor_{n},\ n\in\mathcal{N}\}$.
 Therefore, given a systematic procedure to solve the single DPs, in
 the sense of being able to evaluate~$\ftor_{n}$ point-wise, there
-exists a systematic procedure to solve the larger MCDP.
+exists a systematic procedure to solve the larger MCDP. -->
 
 
 
-\subsection{Some related work}
 
-Modern engineering has long since recognized the two ideas of modularity
-and hierarchical decomposition, yet there is no general quantitative
-theory of design that is applied to different domains. Most of the
-works in the theory of design literature study abstractions that are
-meant to be useful for a human designer, rather than an automated
-system. For example, a \emph{function structure }diagram~\cite[p. 32]{pahl07}
-decomposes the function of a system in subsystems that exchange energy,
-materials, and signals~(\prettyref{fig:thatbook}). Design approaches
-such as Suh's theory of \emph{axiomatic design~}\cite{suh01} provide
-quantitative formalization but are limited to linear or linearized
-models, and cannot deal with recursive constraints.
-
-\begin{figure}[H]
-\subfloat[\emph{Function structure diagram} from~\cite{pahl07}\label{fig:thatbook}]{\includegraphics[scale=0.33]{reits2_other_intro}}
-\subfloat[Hierarchical decomposition of a watch's "form" and "function"~\cite{sussman80constraints}]{\includegraphics[scale=0.33]{reits2_steele}}
-\caption{}
-\end{figure}
-
-Researchers in Optimization study much more general constraints systems
-than those expressible as an MCDP~\cite{dechter03}, at the cost
-of having fewer guarantees, and not having a clear compositional property.
-
-In Computer Science, researchers have proposed models of computations
-based on constraint satisfaction, such as \emph{Prolog, }or constraint
-propagation~\cite{steele80definition}. Compared to these, there
-are two distinct features of MCDPs: (1)~the semantics accommodates
-multiple options for any quantity (the valuation of an edge is an
-antichain of values, rather than a single value); (2)~inference can
-accommodate arbitrary topologies of the graph of relations, including
-cycles. On the other hand, the class of monotone relations is much
-smaller than the set of all relations that more general-purpose constraint-based
-systems can represent.
-
-
+<!--
 
 
 
@@ -921,7 +887,7 @@ the business point of view.
 \par
 \caption{\label{fig:customer}}
 \end{figure}
-\par\end{center}
+\par\end{center} -->
 
 
 

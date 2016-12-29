@@ -44,7 +44,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
         msg = 'I expect a str encoded with utf-8, not unicode.'
         raise_desc(TypeError, msg, s=s)
 
-    s = replace_macros(s)
+    
     # need to do this before do_preliminary_checks_and_fixes 
     # because of & char
     s, tabulars = extract_tabular(s)

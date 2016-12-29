@@ -71,7 +71,7 @@ This puts the MCDP in a canonical form:
 
 
 
-### <k>approx_lower</k>, <k>approx_upper</k>
+### <k>approx_lower</k> <k>approx_upper</k>
 
 This creates a lower and upper bound for the MCDP:
 
@@ -113,7 +113,7 @@ is equivalent to
 </pre>
 
 
-### Abstraction and flattening <k>abstract</k>,  <k>flatten</k>
+### Abstraction and flattening <k>abstract</k> <k>flatten</k>
 
 It is easy to create recursive composition in MCDP.
 

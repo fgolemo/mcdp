@@ -1,5 +1,5 @@
 
-<h1 id='booktitle' nonumber  style='margin-top: -3em'>
+<h1 id='booktitle' nonumber notoc style='margin-top: -3em'>
     <!-- PyMCDP user manual -->
     <!-- The MCDPL co-design modeling language
     and its interactive co-design environment -->
@@ -41,8 +41,9 @@
     with nuTonomy, inc.; and with Duckietown Engineering.
 </div>
 
-<h2 nonumber id='toc-heading'>Table of contents</h2>
+<h1 notoc nonumber id='toc-heading'>Table of contents</h1>
 
+<!-- place toc here -->
 <div id='toc'></div>
 
 <!-- <h2 id='symbols-heading'>Table of important symbols</h2> -->

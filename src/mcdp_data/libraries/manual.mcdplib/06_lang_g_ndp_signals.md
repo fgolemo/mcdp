@@ -30,11 +30,11 @@ In fact, it is different than:
     sqrt(a) &gt;= b
 </pre>
 
-#### <k>pow</k>, <k>sqrt</k>
+#### <k>pow</k> <k>sqrt</k>
 
-#### <k>min</k>, <k>max</k>
+#### <k>min</k> <k>max</k>
 
-#### <k>floor</k>, <k>floor0</k>, <k>ceil</k>
+#### <k>floor</k> <k>floor0</k> <k>ceil</k>
 
 
 

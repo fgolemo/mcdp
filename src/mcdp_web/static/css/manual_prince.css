@@ -4,11 +4,11 @@
 body {
     page: normal;
 }
-h1 {
+
+h1:not(#booktitle) {
   prince-page-group: start;
   string-set: current-header content();
 }
-
 
 @page normal {
     @top {
@@ -56,10 +56,9 @@ h1 {
          }
 }
 
-    /* only in the manual, not in mcdp-render, that is, after a #booktitle */
+    /* only in the manual */
     h1:not(#booktitle) {
         page-break-before: always;
-    }
 
 }
 

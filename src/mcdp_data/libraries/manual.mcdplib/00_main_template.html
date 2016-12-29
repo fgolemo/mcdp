@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE html PUBLIC
-    "-//W3C//DTD XHTML 1.1 plus MathML 2.0 plus SVG 1.1//EN"
-    "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg.dtd">
-<!-- <!DOCTYPE html> -->
+<!DOCTYPE html>
     <html lang="en">
     <head>
-        <!--- PYMCDP_VERSION - PYMCDP_COMPILE_DATE - PYMCDP_COMPILE_TIME -->
+    <!---
+        PyMCDP version @@PYMCDP_VERSION
+        Compiled on PYMCDP_COMPILE_DATE at PYMCDP_COMPILE_TIME
+    -->
         <title>@@{PYMCDP_COMPILE_TIME} - @@{TITLE}</title>
         <meta name="author" content="@@{AUTHOR}"/>
         <meta name="subject" content="@@{SUBJECT}"/>
@@ -13,30 +13,39 @@
         <meta name="date" content="@@{PYMCDP_COMPILE_DATE_SHORT}"/>
         <meta name="generator" content="@@{GENERATOR}"/>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-        <!-- <meta charset="utf-8"/> -->
-        CSS
-        <script type='text/javascript'>
-        // console.log('Running script');
-        if(Prince === undefined) {
-            console.log('Skipping Prince-specific initialization.')
-        } else {
-            Prince.addEventListener("complete", function() {
-                // console.log('document complete');
-                PDF.title = "@@{TITLE}";
-                PDF.author = "@@{AUTHOR}";
-                PDF.subject = "@@{SUBJECT}";
-                PDF.keywords = "@@{KEYWORDS_HTML}";
-                PDF.date = "@@{PYMCDP_COMPILE_DATE_SHORT}";
-                PDF.generator = "@@{GENERATOR}";
-                // console.log('done');
-            });
-        }
-        </script>
     </head>
-
 <body>
-FIRSTPAGE
-<div id='body'/>
-<div id='bibliography_entries'/>
+<script type='text/javascript'>
+
+try {
+    prince = Prince;
+} catch (e) {
+    console.log("Not running in Prince");
+    prince = null;
+}
+
+if(prince != null) {
+    prince.addEventListener("complete", function() {
+        console.log('Adding PDF properties via Javascript.');
+        PDF.title = "@@{TITLE}";
+        PDF.author = "@@{AUTHOR}";
+        PDF.subject = "@@{SUBJECT}";
+        PDF.keywords = "@@{KEYWORDS_HTML}";
+        PDF.date = "@@{PYMCDP_COMPILE_DATE_SHORT}";
+        PDF.generator = "@@{GENERATOR}";
+        // console.log('done');
+    });
+}
+</script>
+<!-- content will be added here -->
 </body>
 </html>
+
+<!-- <script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
+
+<script type="text/x-mathjax-config">
+    MathJax.Hub.Config({
+      tex2jax: {inlineMath: [['$','$']]},
+        displayMath: [ ['$$','$$'], ["\\[","\\]"] ]
+    });
+</script> -->

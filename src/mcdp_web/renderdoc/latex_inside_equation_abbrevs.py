@@ -9,7 +9,10 @@ def replace_inside_equations(s):
     rs = get_replacements()
 #     counts = defaultdict(lambda: 0)
     for _ in rs:
-        s = s.replace(_.text, _.latex) 
+        latex = _.latex
+        if latex.startswith('\\'):
+            latex = latex + ' '
+        s = s.replace(_.text, latex) 
     return s
     
 replacement = namedtuple('replacement', 'text latex')
@@ -18,33 +21,56 @@ replacement = namedtuple('replacement', 'text latex')
 def get_replacements():
     """ Returns a list of replacement objects """
     x = [
-        ('⟶', '\\rightarrow'),
-        ('⟼', '\\mapsto'),
+        ('→', '\\rightarrow'),
+        ('⇒','\\Rightarrow'),
+        ('↦', '\\mapsto'),
         ('⟨', '\\langle'),
         ('⟩', '\\rangle'),
         ('≤', '\\leq'),
         ('≥', '\\geq'),
+#         0: u'₀',
+#     1: u'₁',
+#     2: u'₂',
+#     3: u'₃',
+#     4: u'₄',
+#     5: u'₅',
+#     6: u'₆',
+#     7: u'₇',
+#     8: u'₈',
+#     9: u'₉',
+        ('₀', '_{0}'),
         ('₁', '_{1}'),
         ('₂', '_{2}'),
         ('ₐ', '_{a}'),
-        ('ₐ', '_{a}'),
-        ('₂', '_{b}'),
+        ('ᵢ', '_{i}'),
+        ('ⁱ', '^{i}'),
+        ('ₒ', '_{o}'),
+        ('ᵦ', '_{\beta}'),
+#         ('₂', '_{b}'),
         ('ₙ', '_{n}'),
+        ('ⱼ','_{j}'),
         ('₊', '_{+}'),
+        ('ₜ', '_{t}'),
+        ('∃','\exists'),
+        ('∀','\forall'),
         ('ℝ', '\\mathbb{R}'),
         ('ℕ', '\\mathbb{N}'),
+        ('ℚ', '\\mathbb{Q}'),
+        
         ('×', '\\times'),
         ('∞', '\\infty'),
-        ('∈', '\\in'),
+        ('∈', '\\in'), # only if followed by '\'
         ('⟦', '\\llbracket'),
         ('⟧', '\\rrbracket'),
         ('≐', '\\doteq'),
+        ('⊂', '\\subset'),
+        ('⊃', '\\supset'),
         ('⊆', '\\subseteq'),
         ('⊇', '\\supseteq'),
         ('±','\\pm'),
         ('…','\\dots'),
-        ('↑','\\uparrow'),
-        ('↓','\\downarrow'),
+#         ('↑','\\uparrow'),
+#         ('↓','\\downarrow'),
         ('∩','\\cap'),
         ('○','\\circ'),
         ('∪','\\bigcup'),
@@ -55,9 +81,33 @@ def get_replacements():
         ('⊤','\\top'),
         ('⊥','\\bot'),
         ('≡','\\equiv'),
+        ('∧', '\\wedge'),
+        ('∨', '\\vee'),
         ('⌑','\\,'), # arbitrary
         ('␣','\\ '), # arbitrary
         ('⍽','\\quad'), # arbitrary
+        ('⎵', '\\quad'),
+        ('∏','\\prod'),
+        ('∫','\\int'),
+        ('★', '\\star'),
+        ('½', '\\frac{1}{2}'),
+        
+        ('𝒩', '\\mathcal{N}'),
+        ('ℰ', '\\mathcal{E}'),
+        
+        ('ℱ', '\\funsp'),
+        ('ℛ', '\\ressp'),
+        ('𝒫', '\\posA'),
+        ('𝒬', '\\posB'),
+        ('↑','\\upit'),
+        ('↓','\\downarrow'),
+        ('⌈','\\lceil'),
+        ('⌉','\\rceil'),
+        
+        ('∅','\\emptyset'),
+        
+        # TODO:
+        # \star
     ]
     
     from mcdp_lang.dealing_with_special_letters import greek_letters
@@ -76,8 +126,8 @@ def count_possible_replacements(fn):
     rs = get_replacements()
     latex2text = dict((_.latex, _.text) for _ in rs)
     
-    for _ in rs:
-        print('%s     %s' % (_.text, _.latex))
+#     for _ in rs:
+#         print('%s     %s' % (_.text, _.latex))
     
     s, subs = extract_maths(s)
     

@@ -31,10 +31,16 @@ def get_manual_contents():
     ok = []
     for fn in filenames:
         fn = os.path.relpath(fn, root)
-        # only root files
-        is_root = os.path.dirname(fn) == ''
-        if not is_root: 
+        # accept the ones with at least two digits in it
+        ndigits = len(list(_ for _ in os.path.basename(fn) if _.isdigit() ))
+        if ndigits < 2:
             continue
+        
+        # only root files
+        depth = len(fn.split('/'))
+        if depth >= 3:
+            continue
+
         b, _extension = os.path.splitext(os.path.basename(fn))
         ok.append(b)
         

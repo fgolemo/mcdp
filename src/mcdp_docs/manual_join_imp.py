@@ -3,13 +3,14 @@
 import os
 import sys
 
-from bs4.element import Comment, Tag
+from bs4.element import Comment, Tag, NavigableString
 
 from contracts import contract
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_docs.read_bibtex import get_bibliography
 from mcdp_web.renderdoc.highlight import add_class
 from mocdp import logger
+from bs4 import BeautifulSoup
 
 
 def get_manual_css_frag():
@@ -32,122 +33,123 @@ def get_manual_css_frag():
     
     link_css = MCDPConstants.manual_link_css_instead_of_including
     
+    frag = Tag(name='fragment-css')
     if link_css:
-        frag = ""
         for fn in css_files:
             url = 'file://%s' % fn
-            frag += '\n<link rel="stylesheet" type="text/css" href="%s">\n' % url 
+            frag.append(NavigableString('\n'))
+            link = Tag(name='link')
+            link['rel'] = 'stylesheet'
+            link['type'] = 'text/css'
+            link['href'] = url
+            frag.append(link) 
         return frag
     else:
         assert False
             
 @contract(files_contents='list( tuple( tuple(str,str), str) )', returns='str')
 def manual_join(files_contents):
+    from mcdp_web.renderdoc.main import replace_macros
+    from mcdp_web.renderdoc.xmlutils import bs
 
-#         <script src='https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML'></script>
-# 
-#         <script type="text/x-mathjax-config">
-#             MathJax.Hub.Config({
-#               tex2jax: {inlineMath: [['$','$']]},
-#                 displayMath: [ ['$$','$$'], ["\\[","\\]"] ]
-#             });
-#         </script>
+    
     fn = MCDPManualConstants.main_template
     if not os.path.exists(fn):
-        raise ValueError('Could not find %s' % fn )
+        raise ValueError('Could not find template %s' % fn )
     template = open(fn).read()
-    
-    from mcdp_web.renderdoc.main import replace_macros
     template = replace_macros(template)
     
-    frag = get_manual_css_frag()
-    template = template.replace('CSS', frag)
-    template = template.replace('TITLE', 'Practical Tools for Co-Design')
-    
-    
+            
     # title page
-    (_libname, docname), first_data = files_contents.pop(0)
-    assert 'first' in docname
-    
-    from mcdp_web.renderdoc.xmlutils import bs
-    first_contents = bs(first_data)
-    first_contents.name = 'div'
-    
-    first_contents['class'] = 'doc'
-    first_contents['docname'] = docname
-    template = template.replace('FIRSTPAGE', str(first_contents))
-    
-    d = bs(template)
-    
-    # empty document
-    main_body = Tag(name='div', attrs={'id':'main_body'})
+#     (_libname, docname), first_data = files_contents.pop(0)
+#     assert 'first' in docname
+#     
+#     first_contents = bs(first_data)
+#     first_contents.name = 'div'
+#     
+#     first_contents['class'] = 'doc'
+#     first_contents['docname'] = docname
+#     template = template.replace('FIRSTPAGE', str(first_contents))
+#     
+    # cannot use bs because entire document
+    template_soup = BeautifulSoup(template, 'lxml', from_encoding='utf-8')
+    d = template_soup 
+    assert d.html is not None
+    assert '<html' in  str(d)
+    head = d.find('head')
+    assert head is not None
+    for x in get_manual_css_frag().contents:
+        head.append(x.__copy__())
 
+    body = d.find('body')
     for (_libname, docname), data in files_contents:
-        print('docname %r -> %s KB' % (docname, len(data)/1024))
+        logger.debug('docname %r -> %s KB' % (docname, len(data)/1024))
         from mcdp_web.renderdoc.latex_preprocess import assert_not_inside
         assert_not_inside(data, 'DOCTYPE')
-        frag = bs(data)
-#         frag.name = 'div' # from fragment
-#         frag.attrs['title'] = "This was the contents of %r, now a DIV." % docname
-#         frag['id'] = docname
-        main_body.append('\n')
-        main_body.append(Comment('Beginning of body of %r' % docname))
-        main_body.append('\n')
-        if True:
-            for x in frag.contents:
-                x2 = x.__copy__() # not clone, not extract
-                main_body.append(x2)
-        else: 
-            main_body.append(frag)
-        main_body.append('\n')
-        main_body.append(Comment('End of body of %r' % docname))
+        frag = bs(data) 
+        body.append(NavigableString('\n\n'))
+        body.append(Comment('Beginning of document dump of %r' % docname))
+        body.append(NavigableString('\n\n'))
+        for x in frag.contents:
+            x2 = x.__copy__() # not clone, not extract
+            body.append(x2) 
+        body.append(NavigableString('\n\n'))
+        body.append(Comment('End of document dump of %r' % docname))
+        body.append(NavigableString('\n\n'))
 
-    
-    for tag in main_body.select("a"):
-        href = tag['href']
-        # debug(href)
-        # http://127.0.0.1:8080/libraries/tour1/types.html
-        if href.endswith('html'):
-            page = href.split('/')[-1]
-            new_ref = '#%s' % page
-            tag['href'] = new_ref
-
-    print('adding toc')
-    toc = generate_doc(main_body)
+    logger.info('adding toc')
+    toc = generate_doc(body)
     toc_ul = bs(toc).ul
     toc_ul.extract()
     assert toc_ul.name == 'ul'
     toc_ul['class'] = 'toc'
     toc_ul['id'] = 'main_toc'
     toc_place = d.select('div#toc')[0]
-    body_place = d.select('div#body')[0]
     
     #print('toc element: %s' % str(toc))
     toc_place.replaceWith(toc_ul)
 
-    print('replacing body_place with main_body')
-    body_place.replaceWith(main_body)
-    main_body.insert_after(Comment('end of main_body'))
 
-    print('external bib')
+    logger.info('external bib')
     bibliography_entries = get_bibliography()
     bibliography_entries['id'] = 'bibliography_entries'
-    d.find(id='bibliography_entries').replace_with(bibliography_entries)
+    body.append(bibliography_entries)
+    bibhere = d.find('div', id='put-bibliography-here')
+    do_bib(d, bibhere)
+
+    logger.info('reorganizing contents in <sections>')    
+    body2 = reorganize_contents(d.find('body'))
+    body.replace_with(body2)
     
+    logger.info('checking errors')
+    check_various_errors(d)
+
+    from mcdp_docs.check_missing_links import check_if_any_href_is_invalid
+    logger.info('checking hrefs')
+    check_if_any_href_is_invalid(d) 
     
-    # find used bibliography entries
+    warn_for_duplicated_ids(d)
+    logger.info('converting to string')
+    res = str(d) # do not use to_html_stripping_fragment - this is a complete doc
+    logger.info('replacing macros')
+    res = replace_macros(res)
+    logger.info('done - %d bytes' % len(res))
+    return res
+
+def do_bib(soup, bibhere):
+    """ find used bibliography entries put them there """
     used = set()
     unused = set()
-    for a in d.find_all('a'):
+    for a in soup.find_all('a'):
         href = a.attrs.get('href', '')
         if href.startswith('#bib:'):
             used.add(href[1:]) # no "#"
     print('I found %d references, to these: %s' % (len(used), used))
-    bibhere = d.find('div', id='put-bibliography-here')
+    
     if bibhere is None:
         logger.error('Could not find #put-bibliography-here in document.')
     else:
-        cites = list(d.find_all('cite'))
+        cites = list(soup.find_all('cite'))
         # TODO: sort
         for c in cites:
             ID = c.attrs.get('id', None)
@@ -161,17 +163,102 @@ def manual_join(files_contents):
                 unused.add(ID)
                 add_class(c, 'unused')
     print('I found %d unused bibs.' % (len(unused)))
-    print('checking errors')
-    check_various_errors(d)
     
-    from mcdp_docs.check_missing_links import check_if_any_href_is_invalid
-    print('checking hrefs')
-    check_if_any_href_is_invalid(d) 
-    print('converting to string')
-    res = str(d) # do not use to_html_stripping_fragment - this is a complete doc
-    print('done - %d bytes' % len(res))
-    return res
+def warn_for_duplicated_ids(soup):
+    from collections import defaultdict
+    
+    counts = defaultdict(lambda: [])
+    for e in soup.select('[id]'):
+        ID = e['id']
+        counts[ID].append(e)
+        
+    problematic = []
+    for ID, elements in counts.items():
+        n = len(elements)
+        if n == 1:
+            continue
+        
+        ignore_if_contains = ['MathJax', 'MJ', 'edge', 'mjx-eqn',]
+        if any(_ in ID for _ in ignore_if_contains):
+            continue
+        
+        inside_svg = False
+        for e in elements:
+            for _ in e.parents:
+                if _.name =='svg':
+                    inside_svg = True
+                    break
+        if inside_svg:
+            continue  
+        
+        #msg = ('ID %15s: found %s - numbering will be screwed up' % (ID, n))
+        #logger.error(msg)
+        problematic.append(ID)
+        
+        for e in elements:
+            t = Tag(name='span')
+            t['class'] = 'duplicated-id'
+            t.string = 'Error: warn_for_duplicated_ids:  There are %d tags with ID %s' % (n, ID)  
+            #e.insert_before(t)
+            add_class(e, 'errored')
+            
+        for i, e in enumerate(elements[1:]):
+            e['id'] = e['id'] + '-duplicate-%d' % (i + 1)
+            #print('changing ID to %r' % e['id'])
+    if problematic:
+        logger.error('The following IDs were duplicated: %s' %  ", ".join(problematic))
+        logger.error('I renamed some of them; references and numbering are screwed up')
+    
+        
+def reorganize_contents(body):
+    """ reorganizes contents 
+    
+        h1
+        h2
+        h1
+        
+        section
+            h1
+            h2
+        section 
+            h1
+        
+    """ 
+#     assert body.name == 'body'
+    sections = []
+    
+    current_section = Tag(name='section')
+    current_section['id'] = 'before-any-h1'
+    current_section['class'] = 'doc_section'
+    sections.append(current_section)
+    for x in body.contents:
+        if isinstance(x, Tag) and x.name == 'h1':
+            #print('starting %s' % str(x))
+            sections.append(current_section)
+            current_section = Tag(name='section')
+            current_section['id'] = x.attrs.get('id', 'unnamed-h1') + ':section'
+            print('section %s' % current_section['id'])
+            #x.extract()
+            current_section.append(x.__copy__())
+        else:
+            #x.extract()
+            current_section.append(x.__copy__())
+    sections.append(current_section)
+            
+    print('now body has %d elmeents' % len(list(body.contents)))
+    new_body = Tag(name=body.name)
+    new_body['id'] = 'filled-by-reorganizator'
+#     print('body %s' % str(body))
+    if not sections:
+        msg = 'No sections found.'
+        raise ValueError(msg)
 
+    for s in sections:
+        new_body.append(s)
+        
+    return new_body
+    
+    
     
 
 
@@ -232,9 +319,9 @@ def generate_doc(soup):
 
                 if i >= len(headings):
                     msg = 'i = %d level %s headings = %s' % (i, level, headings)
-                    logger.error(msg)
+                    #logger.error(msg)
                     return 'extraheading%s' % i
-                    raise ValueError(msg)
+                    #raise ValueError(msg)
                 return headings[i]
 
             if prefix:
@@ -265,6 +352,8 @@ def generate_doc(soup):
     formatter="html"
     formatter = headers[0]._formatter_for_name(formatter)
     for header in headers:
+        if header.has_attr('notoc'):
+            continue
         ID = header.get('id', None)
         prefix = None if (ID is None or not ':' in ID) else ID[:ID.index(':')] 
         
@@ -328,3 +417,14 @@ def generate_doc(soup):
     print('toc done iterating')
     return root.__str__(root=True)
 
+
+
+#     
+#     for tag in main_body.select("a"):
+#         href = tag['href']
+#         # debug(href)
+#         # http://127.0.0.1:8080/libraries/tour1/types.html
+#         if href.endswith('html'):
+#             page = href.split('/')[-1]
+#             new_ref = '#%s' % page
+#             tag['href'] = new_ref

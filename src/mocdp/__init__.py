@@ -167,9 +167,11 @@ class MCDPConstants():
 #     pdf_to_png_dpi = 300 # dots per inch
     pdf_to_png_dpi = 100 # dots per inch
     if pdf_to_png_dpi < 300:
-        warnings.warn('Note that pdf_to_png_dpi is set to %d, which is not suitable for printing')
+        msg =( 'Note that pdf_to_png_dpi is set to %d, which is not suitable for printing'
+               % pdf_to_png_dpi)
+        warnings.warn(msg)
     
-    docs_xml_allow_empty_attributes = ['np', 'noprettify', 'nonumber',
+    docs_xml_allow_empty_attributes = ['np', 'noprettify', 'nonumber', 'notoc',
                                         'mcdp-value', 'mcdp-poset']
     
     

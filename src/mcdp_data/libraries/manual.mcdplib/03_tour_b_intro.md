@@ -353,7 +353,7 @@ the inverse of the specific energy.
         required mass ≽ provided capacity / ρ
     }
     </pre>
-    <render class='ndp_graph_enclosed'
+    <render class='ndp_graph_enclosed_TB'
     figure-id='fig:model4'>`model4</render>
 </col2>
 

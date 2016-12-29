@@ -55,7 +55,7 @@ def get_bibliography():
         res.append(NavigableString('\n'))
         res.append(entry)
         res.append(NavigableString('\n'))
-    print('Found bib: %s' % ", ".join(ids))
+    print('Found %d bib entries.' % len(ids))
     return res
     
     

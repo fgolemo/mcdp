@@ -30,11 +30,13 @@ On Ubuntu:
 
     $ sudo apt-get install graphviz wkhtmltopdf
     $ sudo apt-get install git
+    $ sudo apt-get install pdftk
+
 
 For math support:
 
     $ sudo apt-get install nodejs npm
-    $ sudo npm install MathJax-node jsdom
+    $ sudo npm install MathJax-node jsdom less
 
 For printing to PDF, install Prince from https://www.princexml.com/download/.
 

@@ -11,11 +11,14 @@
 @import 'reset-fix';
 
 @import 'toc';
+@import 'hide_errors';
+@import 'only_good'; 
 
-p {
+p, div.latex_env, div.minipage {
     // line-height: 12.5pt;
     line-height: 125%;
-
+}
+p {
     margin-bottom: 3pt;
     margin-top: 3pt;
 
@@ -360,8 +363,8 @@ a[href^='#subsub:']:empty::before {
 /** Very important - otherwise counters are local to divs,
     and not robust to errors with divs */
 
-html {
-    counter-reset: table  listing  bib  section appendix subsection  subsubsection figure example remark definition proposition lemma theorem problem ;
+body {
+    counter-reset: table listing  bib section appendix subsection subsubsection figure example remark definition proposition lemma theorem problem ;
 
 }
 
