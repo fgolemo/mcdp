@@ -12,7 +12,8 @@
 
 @import 'toc';
 @import 'hide_errors';
-@import 'only_good'; 
+@import 'only_good';
+@import 'fonts';
 
 p, div.latex_env, div.minipage {
     // line-height: 12.5pt;
@@ -729,5 +730,9 @@ cite[id^='bib:']::before {
 /* abstract */
 cite blockquote { display: none; }
 
+
+section > svg {
+    max-width: 100%;
+}
 
 #bibliography_entries { display: none;}

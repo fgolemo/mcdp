@@ -20,13 +20,13 @@ one DC input (USB Micro B).
 
 <pre class='mcdp' id='BatteryRavpower' label='BatteryRavpower.mcdp'></pre>
 
-<div style='text-align:center'>
-    <pre class='ndp_graph_templatized'>`BatteryRavpower</pre>
-    <pre class='ndp_graph_enclosed'>`BatteryRavpower</pre>
-</div>
+<center>
+    <render class='ndp_graph_templatized'>`BatteryRavpower</render>
+    <render class='ndp_graph_enclosed'>`BatteryRavpower</render>
+</center>
 
 <!-- 
 
-<pre class='ndp_graph_enclosed'>`BarrelCharger</pre>
+class='ndp_graph_enclosed'>`BarrelCharger</pre>
 <pre class='mcdp' id='BarrelCharger' label='BarrelCharger.mcdp'></pre>
  -->

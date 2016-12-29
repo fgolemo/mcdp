@@ -441,8 +441,17 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 - warn if you see the string "<=" or ">=" in the text
 
 
-- use Appendix A instead of "chapter 12 - Appendix"
-
-
-
 - use cdot in diagrms for units like J*kg/kWh]
+
+- h4 formatting: undo
+- check the different kind of caption (caption_left, caption_top)
+
+
+
+
+- add HTML syntax hl in manual
+
+
+
+
+

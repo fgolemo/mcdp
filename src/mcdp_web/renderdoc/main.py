@@ -7,6 +7,7 @@ from contracts.interface import location, Where
 from contracts.utils import raise_desc
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_library import MCDPLibrary
+from mcdp_report.gg_utils import embed_images_from_library2
 from mocdp import logger
 from mocdp.exceptions import DPInternalError, DPSyntaxError
 
@@ -148,17 +149,19 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
                            raise_errors=raise_errors, realpath=realpath)
 
     check_html_fragment(s)
-    from mcdp_report.gg_utils import embed_images_from_library
     
     raise_missing_image_errors = False
-    s = embed_images_from_library(html=s, library=library, 
-                                      raise_errors=raise_missing_image_errors)
-    from mcdp_docs.check_missing_links import check_if_any_href_is_invalid
     
-    if check_refs:
-        d = bs(s)
-        check_if_any_href_is_invalid(d)
-        s = to_html_stripping_fragment(d)
+    soup = bs(s)
+    
+    embed_images_from_library2(soup=soup, library=library, 
+                              raise_errors=raise_missing_image_errors)
+        
+    if check_refs:    
+        from mcdp_docs.check_missing_links import check_if_any_href_is_invalid
+        check_if_any_href_is_invalid(soup=soup)
+        
+    s = to_html_stripping_fragment(soup)
 
     check_html_fragment(s) 
     

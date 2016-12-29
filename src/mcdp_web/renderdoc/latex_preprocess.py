@@ -1,10 +1,11 @@
+
 # -*- coding: utf-8 -*-
 import os
 import re
 
 from contracts.interface import Where
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
-from mcdp_report.gg_utils import get_md5
+from mcdp.utils.string_utils import get_md5
 from mcdp_web.renderdoc.latex_inside_equation_abbrevs import replace_inside_equations
 from mcdp_web.renderdoc.markdown_transform import is_inside_markdown_quoted_block
 from mocdp import logger

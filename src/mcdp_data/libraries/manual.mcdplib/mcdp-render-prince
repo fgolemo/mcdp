@@ -6,6 +6,11 @@ echo Docname: ${docname}
 
 mcdp-render ${docname}
 
-prince -o ${docname}.pdf out/mcdp_render/${docname}.html
+out_html=out/mcdp_render/${docname}.html
+
+./extract-assets ${out_html} ${out_html}
+
+prince -o ${docname}.pdf  ${out_html}
+
 
 echo Written on  ${docname}.pdf

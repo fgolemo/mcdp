@@ -14,13 +14,13 @@ This is a device with 1 input and 3 outputs:
 <pre class='mcdp' id='goldsource_STU_200' label='goldsource_STU_200.mcdp'></pre>
 
 <div style='text-align:center'>
-    <pre class='ndp_graph_templatized'>`goldsource_STU_200</pre>
-    <pre class='ndp_graph_enclosed'>`goldsource_STU_200</pre>
+    <render class='ndp_graph_templatized'>`goldsource_STU_200</render>
+    <render class='ndp_graph_enclosed'>`goldsource_STU_200</render>
 </div>
 
 ### A Micro USB charger
 
 
-<pre class='ndp_graph_enclosed'>`USBMicroCharger</pre>
+<render class='ndp_graph_enclosed'>`USBMicroCharger</render>
 <pre class='mcdp' id='USBMicroCharger' label='USBMicroCharger.mcdp'></pre>
 

@@ -31,6 +31,10 @@ html: $(manual_html)
 
 $(manual_html): *.md 00_main_template.html
 	DISABLE_CONTRACTS=1 mcdp-render-manual --output_file $@ -c "config echo 1; rparmake"
+	$(MAKE) extract-assets-manual
+
+extract-assets-manual:
+	./extract-assets $(manual_html) $(manual_html)
 
 # prerender:
 
@@ -73,15 +77,16 @@ $(manual_pdf_prince): $(manual_html) $(pdf_metadata) $(cssdir)/*less $(cssdir)/*
 	@echo "Written on:    $@"
 
 prince-only:
+	$(MAKE) css
 	prince --javascript $(manual_html) -o $(manual_pdf_prince)
+#
+# lulu-6by9.pdf: $(manual_pdf_prince)
+# 	echo User Preview to print to the page size -- pdfjam does not work
+# 	# actually doesn't workopen
+# 	# pdfjam --outfile  $@  --fitpaper true --papersize '{6.125in,9.250in}' $^
+# 	# echo written $@
 
-lulu-6by9.pdf: $(manual_pdf_prince)
-	echo User Preview to print to the page size -- pdfjam does not work
-	# actually doesn't workopen
-	# pdfjam --outfile  $@  --fitpaper true --papersize '{6.125in,9.250in}' $^
-	# echo written $@
-
-lulu: lulu-6by9.pdf
+# lulu: lulu-6by9.pdf
 
 bibfile=all_only_one.bib
 bibout=bibliography

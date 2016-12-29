@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """ Utils for graphgen """
 
-import base64
 import codecs
 from contextlib import contextmanager
 from copy import deepcopy
@@ -12,18 +11,14 @@ from bs4 import BeautifulSoup
 
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc
+from mcdp.utils.string_utils import get_md5
 from mcdp_library_tests.tests import timeit_wall
+
 from mocdp import logger, MCDPConstants
 from mocdp.exceptions import mcdp_dev_warning, DPSemanticError
 import networkx as nx  # @UnresolvedImport
 from reprep.constants import MIME_PDF, MIME_PLAIN, MIME_PNG, MIME_SVG
 from system_cmd import CmdException, system_cmd_result
-from tempfile import mkdtemp
-import shutil
-import cStringIO
-import re
-import warnings
-
 
 
 def graphviz_run(filename_dot, output, prog='dot'):
@@ -83,13 +78,6 @@ def graphvizgen_plot(ggraph, output, prog='dot'):
             print('Saved problematic dot as %r.' % filename)
             raise
 
-def get_md5(contents):
-    import hashlib
-    m = hashlib.md5()
-    m.update(contents)
-    s = m.hexdigest()
-    return s
-
 def nx_generic_graphviz_plot(G, output, prog='dot'):
     """ Converts to dot and writes on the file output """
     with tmpfile(".dot") as filename_dot:
@@ -143,23 +131,10 @@ def gg_figure(r, name, ggraph, do_png=True, do_pdf=True, do_svg=True,
                     graphviz_run(filename_dot, filename, prog=prog)
     
                     soup = BeautifulSoup(open(filename).read(), 'lxml', from_encoding='utf-8')
-                    for tag in soup.select('image'):
-                        href = tag['xlink:href']
-                        extensions = ['png', 'jpg']
-                        for ext in extensions:
-                            if ext in href:
-                                with open(href) as ff:
-                                    png = ff.read()
-                                encoded = base64.b64encode(png)
-                                from mcdp_web.images.images import get_mime_for_format
-                                mime = get_mime_for_format(ext)
-                                src = 'data:%s;base64,%s' % (mime, encoded)
-                                tag['xlink:href'] = src
-    
-                    with codecs.open(filename, 'w', encoding='utf-8') as ff:
-                        s = str(soup)
-                        u = unicode(s, 'utf-8')
-                        ff.write(u)
+                    from mcdp_report.embedded_images import embed_svg_images
+                    embed_svg_images(soup)
+                    write_bytes_to_file_as_utf8(str(soup), filename)
+
         except CmdException:
             if MCDPConstants.test_ignore_graphviz_errors:
                 mcdp_dev_warning('suppressing errors from graphviz')
@@ -175,6 +150,18 @@ def gg_figure(r, name, ggraph, do_png=True, do_pdf=True, do_svg=True,
                     f.write(s)
         
     return f
+
+    
+def write_bytes_to_file_as_utf8(s, filename):
+    """ Accept a string s (internally using utf-8) and writes
+        it to a file in UTF-8 (first converting to unicode, to do it properly)."""
+    check_isinstance(s, bytes)
+    u = unicode(s, 'utf-8')
+    with codecs.open(filename, 'w', encoding='utf-8') as ff:
+        ff.write(u)
+    
+                            
+                            
 
 allowed_formats = ['png', 'pdf', 'svg', 'dot']
 
@@ -225,43 +212,9 @@ def gg_get_format(gg, data_format):
     else:
         raise ValueError('No known format %r.' % data_format)
 
-def embed_images(html, basedir):
-    """ Embeds png and Jpg images using data """
-    soup = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
-    for tag in soup.select('img'):
-        href = tag['src']
-        extensions = ['png', 'jpg']
-        for ext in extensions:
-            if ext in href and not 'data:' in href:
-                resolve = os.path.join(basedir, href)
-                with open(resolve) as ff:
-                    data = ff.read()
-                encoded = base64.b64encode(data)
-                from mcdp_web.images.images import get_mime_for_format
-                mime = get_mime_for_format(ext)
-                src = 'data:%s;base64,%s' % (mime, encoded)
-                tag['src'] = src
-    return str(soup)
 
-def get_length_in_inches(s):
-    """ "1cm" = 0.393 """
-#     s = s.replace('\\columnwidth', '8.')
-    inpoints = {'cm': 0.393, 'in': 1.0,
-                '\\textwidth': 6.0}
-    for unit, ininches in inpoints.items():
-        if unit in s:
-            digits = s[:s.index(unit)]
-            num = float(digits)
-            res = num * ininches
-            print ('%r = %s inches (digits: %s)' % (s, res, digits))
-            return res
-    msg = 'Cannot interpreted length %r.' % s
-    raise ValueError(msg)
-        
-def embed_images_from_library(html, library, raise_errors=True):
+def embed_images_from_library2(soup, library, raise_errors=True):
     """ Resolves images from library """
-    from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
-    
     def resolve(href):
         #print('resolving %r' % href)
         try:
@@ -276,162 +229,15 @@ def embed_images_from_library(html, library, raise_errors=True):
         data = f['data']
         # realpath = f['realpath']
         return data
-
-    from mcdp_web.images.images import get_mime_for_format
-        
-        
-    soup = bs(html)
-    assert soup.name == 'fragment'
-    # first, convert pdf to png
-    for tag in soup.select('img[src$=pdf], img[src$=PDF]'):
-        # load pdf data
-        data_pdf = resolve(tag['src'])
-        if data_pdf is None:
-            from mcdp_web.renderdoc.highlight import add_class
-            add_class(tag, 'missing-image')
-            continue
-
-        density = MCDPConstants.pdf_to_png_dpi # dots per inch
-        data_png = png_from_pdf(data_pdf, density=density)
-        
-        # get png image size
-        from PIL import Image
-        im = Image.open(cStringIO.StringIO(data_png))
-        width_px, height_px = im.size # (width,height) tuple
-        width_in = width_px / float(density)
-        height_in = height_px / float(density)
-        
-        if tag.has_attr('latex-options'):
-            latex_options = tag['latex-options']
-            props = {}
-            for assignment in re.split(',', latex_options):
-                tokens = list(re.split('=', assignment))
-                if len(tokens) ==2:
-                    props[tokens[0]] = tokens[1]
-                elif len(tokens) == 1:
-                    props[tokens[0]] = True
-                else:
-                    raise ValueError((latex_options, tokens))
-                
-                
-            if 'scale' in props:
-                scale = float(props['scale'])
-                use_width_in = width_in * scale
-                use_height_in = height_in * scale
-            elif 'width' in props:
-                try:
-                    use_width_in = get_length_in_inches(props['width'])
-                except ValueError as e:
-                    logger.error('Cannot interpret %s: %s' % (latex_options, e))
-                    use_width_in = 5.0
-                ratio = height_in/width_in
-                use_height_in = use_width_in * ratio
-            else:
-                use_width_in = width_in 
-                use_height_in = height_in 
-        else:
-            use_width_in = width_in 
-            use_height_in = height_in 
-        # now, let's work out the original size
-        sizing = 'width: %sin; height: %sin;' % (use_width_in, use_height_in)
-        s = tag['style'] + ';' if tag.has_attr('style') else ''
-        tag['style'] = s + sizing
-        tag['size_in_pixels'] = '%s, %s' % (width_px, height_px)
-        # encode
-        encoded = base64.b64encode(data_png)
-        mime = get_mime_for_format('png')
-        src = 'data:%s;base64,%s' % (mime, encoded)
-        tag['src'] = src
-        
-        
-    for tag in soup.select('img'):
-        href = tag['src']
-        img_extensions = ['png', 'jpg', 'PNG', 'JPG', 'svg', 'SVG']
-        for ext in img_extensions:
-            if ext in href and not 'data:' in href:
-                data = resolve(href)
-                encoded = base64.b64encode(data) 
-                mime = get_mime_for_format(ext)
-                src = 'data:%s;base64,%s' % (mime, encoded)
-                tag['src'] = src
-                
-    return to_html_stripping_fragment(soup)
+            
+    density = MCDPConstants.pdf_to_png_dpi # dots per inch
     
+    from mcdp_report.embedded_images import embed_img_data, embed_pdf_images
     
-def png_from_pdf(pdf_data, density):
-    d = mkdtemp()
-    try:
-        tmpfile = os.path.join(d, 'file.pdf')
-        with open(tmpfile, 'wb') as f:
-            f.write(pdf_data)
+    embed_pdf_images(soup, resolve, density)
+    embed_img_data(soup, resolve)
+    return None
         
-        out = os.path.join(d, 'file.png')
-    
-        cmd = [
-            'convert',
-            '-density', str(density), 
-            tmpfile, 
-            '-background', 'white',
-            '-alpha','remove',
-            '-alpha','off', 
-        ]
-        shave = True
-        if shave:
-            warnings.warn('Using shave to fix some bug in imagemagic')
-            cmd += ['-shave', '1']
-        cmd += [out]
-        try:
-            system_cmd_result(cwd='.', cmd=cmd,
-                     display_stdout=False,
-                     display_stderr=False,
-                     raise_on_error=True)
-
-        except CmdException:
-            raise
-        
-        r = open(out,'rb').read()
-        return r
-    finally:
-        shutil.rmtree(d)
-        
-def extract_assets(html, basedir):
-    """ Extracts all embedded assets. """
-    if not os.path.exists(basedir):
-        os.makedirs(basedir)
-    soup = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
-    for tag in soup.select('a'):
-        href = tag['href']
-        if href.startswith('data:'):
-            _mime, data = link_data(href)
-#             from mcdp_web.images.images import get_ext_for_mime
-#             ext = get_ext_for_mime(mime)
-            if tag.has_attr('download'):
-                basename = tag['download']
-            else:
-                print('cannot find attr "download" in tag')
-                # print tag
-                continue
-            filename = os.path.join(basedir, basename)
-            with open(filename, 'w') as f:
-                f.write(data)
-            print('written to %s' % filename)
-
-@contract(returns='tuple(str,str)')
-def link_data(data_ref):
-    """ data_ref: data:<mime>;base64, 
-    
-        Returns mime, data.
-    """
-    assert data_ref.startswith('data:')
-    first, second = data_ref.split(';')
-    mime = first[len('data:'):]
-    assert second.startswith('base64,')
-    data = second[len('base64,'):]
-    # print('link %r' % data_ref[:100])
-    # print('decoding %r' % data[:100])
-    decoded = base64.b64decode(data)
-    return mime, decoded
-
 
 
 

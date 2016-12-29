@@ -23,5 +23,5 @@ outputs. It requires a Raspberry PI to work as well as an extra DC power input.
 <pre class='mcdp' id='AdafruitDCHat' label='AdafruitDCHat.mcdp'></pre>
 
 
-<pre class='ndp_graph_templatized'>`AdafruitDCHat</pre>
-<pre class='ndp_graph_enclosed'>`AdafruitDCHat</pre>
+<render class='ndp_graph_templatized'>`AdafruitDCHat</render>
+<render class='ndp_graph_enclosed'>`AdafruitDCHat</render>

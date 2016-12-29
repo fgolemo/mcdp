@@ -1,0 +1,4 @@
+#!/bin/bash
+set -e
+set -x
+python ../../../mcdp_web/renderdoc/mcdp_util_extract_assets.py $*

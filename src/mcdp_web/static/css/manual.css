@@ -132,7 +132,8 @@ q::before {
 q::after {
   content: '”';
 }
-pre {
+pre,
+code {
   font-family: monospace;
 }
 dt {
@@ -264,6 +265,20 @@ ul#main_toc > li > a span.toc_name {
 .href-invalid,
 .href-replaced {
   display: none;
+}
+body {
+  font-family: "chaparral-pro";
+  font-kerning: normal;
+  font-variant: prince-opentype(dlig, liga);
+  font-feature-settings: "liga" 1;
+}
+@font-face {
+  font-family: monospace;
+  /*src: local("Consolas")*/
+  src: local("Anka/Coder Narrow");
+}
+code {
+  font-family: monospace, Cambria, "Cambria Math";
 }
 p,
 div.latex_env,
@@ -980,6 +995,9 @@ cite[id^='bib:']::before {
 /* abstract */
 cite blockquote {
   display: none;
+}
+section > svg {
+  max-width: 100%;
 }
 #bibliography_entries {
   display: none;

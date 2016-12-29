@@ -98,7 +98,7 @@ This is the complete MCDP:
 
 This is the graphical representation:
 
-<pre class='ndp_graph_enclosed'>`Actuation</pre>
+<render class='ndp_graph_enclosed'>`Actuation</render>
 
 ### Actuation + energetics
 
@@ -111,7 +111,7 @@ We will take as high-level functionality:
 * <f>extra payload</f>: things that must be carried on board
 * <f>extra power</f>: power to be provided for other subsystems
 
-<pre class='ndp_graph_templatized'>`ActuationEnergetics</pre>
+<render class='ndp_graph_templatized'>`ActuationEnergetics</render>
 
 
 In the model below, first we instantiate the models of battery and actuation:
@@ -155,57 +155,32 @@ total_cost ≽ (
 </pre>
 
 <pre class='mcdp' id='ActuationEnergetics' label='ActuationEnergetics.mcdp'></pre>
-<pre class='ndp_graph_enclosed'>`ActuationEnergetics</pre>
+<render class='ndp_graph_enclosed'>`ActuationEnergetics</render>
 
 ### Other parts
 
 These are other parts that we need.
 
 
-<table>
-    <tr>
-        <td>
-            <pre class='ndp_graph_templatized'>`Computer</pre>
-        </td>
-        <td>
-            <pre class='ndp_graph_templatized'>`Sensor</pre>
-        </td>
-    </tr>
-    <tr>
-    <td>
-        <pre class='ndp_graph_templatized'>`Perception</pre>
-    </td>
-    <td>
-        <pre class='ndp_graph_templatized'>`Strategy</pre>
-    </td>
-    </tr>
-</table>
+<col2>
+    <render class='ndp_graph_templatized'>`Computer</render>
+    <render class='ndp_graph_templatized'>`Sensor</render>
+    <render class='ndp_graph_templatized'>`Perception</render>
+    <render class='ndp_graph_templatized'>`Strategy</render>
+</col2>
 
 
-<table>
-    <tr>
-        <td>
-        <pre class='mcdp' id='Computer' label='Computer.mcdp'></pre>
-        </td>
-        <td>
-            <pre class='mcdp' id='Sensor' label='Sensor.mcdp'></pre>
-        </td>
-    </tr>
-    <tr>
-    <td>
+<col2>
+    <pre class='mcdp' id='Computer' label='Computer.mcdp'></pre>
+    <pre class='mcdp' id='Sensor' label='Sensor.mcdp'></pre>
     <pre class='mcdp' id='Perception' label='Perception.mcdp'></pre>
-
-    </td>
-    <td>
-        <pre class='mcdp' id='Strategy' label='Strategy.mcdp'></pre>
-    </td>
-    </tr>
-</table>
+    <pre class='mcdp' id='Strategy' label='Strategy.mcdp'></pre>
+</col2>
 
 <!-- ### Shipping
 
 <pre class='mcdp' id='Shipping' label='Shipping.mcdp'></pre>
-<pre class='ndp_graph_templatized'>`Shipping</pre>
+<render class='ndp_graph_templatized'>`Shipping</render>
  -->
 
 ### Complete drone model
@@ -216,8 +191,8 @@ for the entire drone, with high-level functionality:
 * <f>carry payload</f>
 * <f>num_missions</f>
 
-<pre class='ndp_graph_templatized'>`DroneComplete</pre>
-<pre class='ndp_graph_enclosed'>`DroneComplete</pre>
+<render class='ndp_graph_templatized'>`DroneComplete</render>
+<render class='ndp_graph_enclosed'>`DroneComplete</render>
 <pre class='mcdp' id='DroneComplete' label='DroneComplete.mcdp'></pre>
 
 
@@ -225,10 +200,10 @@ for the entire drone, with high-level functionality:
 
 Finally, we can define a model of the customer:
 
-<pre class='ndp_graph_templatized'>`Customer</pre>
+<render class='ndp_graph_templatized'>`Customer</render>
 
 
 and put it in the loop:
 
 <pre class='mcdp' id='CustomerPlusEngineering' label='CustomerPlusEngineering.mcdp'></pre>
-<pre class='ndp_graph_enclosed'>`CustomerPlusEngineering</pre>
+<render class='ndp_graph_enclosed'>`CustomerPlusEngineering</render>

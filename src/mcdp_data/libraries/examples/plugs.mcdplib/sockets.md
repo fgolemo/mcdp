@@ -118,8 +118,8 @@ A plug adapter can be modeled as follows:
 
 <pre class='mcdp' id='orei' label='orei.mcdp'></pre>
 
-<pre class='ndp_graph_templatized'>`orei</pre>
-<pre class='ndp_graph_enclosed'>`orei</pre>
+<render class='ndp_graph_templatized'>`orei</render>
+<render class='ndp_graph_enclosed'>`orei</render>
 
 
 ### A 2-in-1 adapter
@@ -139,8 +139,8 @@ This one provides 2 outputs:
 We can forget all this complexity and consider the block:
 
 <div style='text-align: center'>
-    <pre class='ndp_graph_templatized'>`orei_2in1</pre>
-    <pre class='ndp_graph_enclosed'>`orei_2in1</pre>
+    <render class='ndp_graph_templatized'>`orei_2in1</render>
+    <render class='ndp_graph_enclosed'>`orei_2in1</render>
 </div>
 
 
@@ -149,16 +149,18 @@ We can forget all this complexity and consider the block:
 We can repeat the same story with DC connectors.
 
 <img src='DC_connectors.jpg' 
-    style='width: 15em;'/>
+     style='width: 15em;'/>
 
 <pre class='mcdp_poset' id='barrel_connectors'
-    label='barrel_connectors.mcdp_poset'></pre>
+        label='barrel_connectors.mcdp_poset'></pre>
 
 
 ### USB connectors
     
 <style type='text/css'>
-    table#usb img {width: 5em;}
+    table#usb img {
+        width: 5em;
+    }
 </style>
 
 <col4 figure-id="tab:usb" figure-caption="USB Shapes">
@@ -166,7 +168,6 @@ We can repeat the same story with DC connectors.
         <s><img src='USB_Micro_B.png'/></s>
         <s><img src='USB_Mini_A.png'/></s>
         <s><img src='USB_Mini_B.png'/></s>
-
         <s><img src='USB_Std_A.png'/></s>
         <s><img src='USB_Std_B.png'/></s>
         <s><img src='USB_Type_C.png'/></s>
@@ -204,10 +205,10 @@ from AC power to DC power.
 
 <pre class='mcdp' id='Ravpower' label='Ravpower.mcdp'></pre>
 
-<div style='text-align: center'>
-    <pre class='ndp_graph_templatized'>`Ravpower</pre>
-    <pre class='ndp_graph_enclosed'>`Ravpower</pre>
-</div>
+<center>
+    <render class='ndp_graph_templatized'>`Ravpower</render>
+    <render class='ndp_graph_enclosed'>`Ravpower</render>
+</center>
 
 We can query the model as follows. Suppose we need 2 outputs, each of 0.5A.
 
@@ -241,7 +242,7 @@ and the <a href="#Orei_2in1">Orei_2in1 adapter</a>.
 Note the use of the keyword "<code class='keyword'>ignore</code>" to ignore the 
 functionality that we do not need.
 
-<pre class='ndp_graph_enclosed'>`orei_plus_ravpower</pre>
+<render class='ndp_graph_enclosed'>`orei_plus_ravpower</render>
 
 We can ask now for what resources we would need for a 0.5 A load:
 

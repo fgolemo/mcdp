@@ -46,7 +46,7 @@ specialize [
 `ActuationEnergeticsTemplate
 </pre>
 
-<!-- <pre class='ndp_graph_enclosed'>`AE1</pre> -->
+<!-- <render class='ndp_graph_enclosed'>`AE1</render> -->
 
  
 <!-- <pre class='print_mcdp'>approx_lower(5, `AE1)</pre> -->

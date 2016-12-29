@@ -81,7 +81,7 @@ and to do so requires the <mcdp-poset>&#96;PPM</mcdp-poset> resource.
 [Traxxas_2075]: https://www.amazon.com/Traxxas-Digital-High-Torque-Waterproof-Servo/dp/B002PGW31G
 
 
-<pre class='ndp_graph_templatized_labeled'>`Traxxas_2075</pre>
+<render class='ndp_graph_templatized_labeled'>`Traxxas_2075</render>
 
 <pre class='mcdp' id='Traxxas_2075' label='Traxxas_2075.mcdp'></pre>
 
@@ -95,7 +95,7 @@ and requires the <mcdp-poset>&#96;PWM</mcdp-poset> resource.
 [Traxxas_3351]: https://www.amazon.com/Traxxas-3351-Velineon-Brushless-Motor/dp/B000SU3VCG
 
 
-<pre class='ndp_graph_templatized_labeled'>`Traxxas_3351</pre>
+<render class='ndp_graph_templatized_labeled'>`Traxxas_3351</render>
 
 <pre class='mcdp' id='Traxxas_3351' label='Traxxas_3351.mcdp'></pre>
 
@@ -110,7 +110,7 @@ can drive servos/motors using PPM/PWM.
 
 [vesc]: http://vedder.se/2015/01/vesc-open-source-esc/
 
-<pre class='ndp_graph_templatized_labeled'>`VESC</pre>
+<render class='ndp_graph_templatized_labeled'>`VESC</render>
 <pre class='mcdp' id='VESC'></pre>
 
 

@@ -130,10 +130,14 @@ h4 {
 	font-size: 100%;
 	font-style: italic;
 	font-weight: normal;
-	float: left;
+
+	margin-top: 0.5em;
+	/*float: left;
 	clear: left;
+
 	margin: 0; padding: 0;
-	margin-right: 0.34em;
+	margin-right: 0.34em;*/
+
     /*
     font-size: 1em; margin: 1em 0;
 
