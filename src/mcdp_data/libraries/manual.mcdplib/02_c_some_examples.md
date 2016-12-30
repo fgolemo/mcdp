@@ -4,8 +4,8 @@
 
 Define a \emph{design problem} as a relation between \emph{\F{provided functionality}}
 and \emph{\R{required resources}}~(\figref{dp}). \F{Functionality}
-and \R{resources} are partially ordered sets, indicated by by $⟨ℱ,\funleq⟩$
-and $⟨ℛ,\resleq⟩$.
+and \R{resources} are partially ordered sets, indicated by by $⟨ℱ,≼_ℱ⟩$
+and $⟨ℛ,≼_ℛ⟩$.
 
 \begin{figure}
 \includegraphics[scale=0.33]{reits2_dp}\caption{\label{fig:dp}}
@@ -24,9 +24,10 @@ The \F{capacity} is a functionality because it is what a battery
 \end{figure}
 
 The \R{mass} is a resource: it is what the battery \emph{requires}
-to provide the functionality. The functionality space is $ℱ=\Rcpu{J},≤⟩$.
+to provide the functionality. The functionality space is $ℱ = \Rcpu{J},≤⟩$.
 The superscript $\text{J}$ indicates that the values have the dimensionality
-of Joules. The resource space is $ℛ=⟨\Rcpu{g},≤⟩.$
+of Joules. The resource space is $ℛ = ⟨\Rcpu{g},≤⟩.$
+
 
 As in all modeling efforts, the level of detail depends on the application.
 Other models for a battery would take into account other resources.
@@ -46,18 +47,18 @@ of interest for a battery-like device include the \F{maximum output current},
 A DP is described by the answer to the question
 
 \begin{quote}
-(&#42;) "Given a certain \F{functionality} $\fun∈ℱ$ to be
+(&#42;) "Given a certain \F{functionality} $𝖿 ∈ ℱ$ to be
 implemented, what are \R{the \textbf{minimal} resources}, a subset
-of $ℛ$, necessary to implement $\fun$?".
+of ℛ, necessary to implement 𝖿?".
 \end{quote}
 
-This choice imposes the direction \F{functionality}$⇒$\R{resources},
+This choice imposes the direction \F{functionality}$→$\R{resources},
 but the theory is entirely symmetric, and one could choose to consider
-the \emph{dual} question: "Given certain available resources $\res∈ℛ$,
-what are \F{the\textbf{ maximal} functionalities}, a subset of $ℱ$,
+the \emph{dual} question: "Given certain available resources $𝗋 ∈ ℛ$,
+what are \F{the\textbf{ maximal} functionalities}, a subset of ℱ,
 that can be implemented?".
 
-In general, fixed a functionality $\fun∈ℱ$, there will be
+In general, fixed a functionality $𝖿 ∈ ℱ$, there will be
 multiple resources that are sufficient to perform the functionality
 that are incomparable. For example, in the case of a battery one might
 consider different battery technologies that are incomparable in the
@@ -72,16 +73,16 @@ A subset with "minimal", "incomparable" elements is called
 "antichain".
 
 \begin{definition}
-An antichain $S$ in a poset $⟨\posA,≼⟩ $
-is a subset of $\posA$ such that no element of $S$ dominates another
-element: if $x,y∈S$ and $x≤ y$, then $x=y$.
+An antichain $S$ in a poset $⟨𝒫,≼⟩ $
+is a subset of $𝒫$ such that no element of $S$ dominates another
+element: if $x,y ∈ S$ and $x≤ y$, then $x = y$.
 \end{definition}
 
 \begin{lemma}
-Let $\antichains\posA$ be the set of antichains of $\posA$. $\antichains\posA$
+Let $𝖠𝒫$ be the set of antichains of $𝒫$. $𝖠𝒫$
 is a poset itself, with the partial order given by
 \begin{equation}
-S₁≼_{\antichains\posA}S₂␣≡␣\uparrow S₁⊃eq\,\uparrow S₂.\label{eq:orderantichains}
+S₁≼_{𝖠𝒫}S₂␣≡␣↑ S₁\supseteq⌑↑ S₂.\label{eq:orderantichains}
 \end{equation}
 \end{lemma}
 
@@ -92,34 +93,35 @@ S₁≼_{\antichains\posA}S₂␣≡␣\uparrow S₁⊃eq\,\uparrow S₂.\label{
 
 Answering the question (&#42;) above is equivalent to defining a map
 \[
-\ftor:ℱ⇒\Aressp
+𝗁:ℱ→\Aressp
 \]
-that associates to each functionality $\fun$ an antichain of resources $\ftor(\fun)⊂ℛ$,
+that associates to each functionality 𝖿 an antichain of resources $𝗁(𝖿)⊂ℛ$,
 with the semantics that those are the \emph{minimal} resources needed
-to provide the functionality $\fun$. The set $\ftor(\fun)$ need
+to provide the functionality 𝖿. The set $𝗁(𝖿)$ need
 not be finite or discrete; it can be either.
 \end{minipage}
 
 
-A further condition is imposed on $\ftor.$ We require that the map $\ftor$
-is monotone, in the sense that
+A further condition is imposed on the map 𝗁. We require that the map 𝗁 is
+monotone, in the sense that
+
 \[
-(\fun₂≽_{ℱ}{\fun₁})⇒(\ftor(\fun₂)≽_{\Aressp}\ftor(\fun₁))
+  (𝖿₂ ≽ ℱ {𝖿₁})  ⇒  ( 𝗁(𝖿₂) ≽𝖠ℛ  𝗁(𝖿₁))
 \]
 \begin{figure}
 \includegraphics[scale=0.33]{reits2_dp_h_two}\caption{\label{fig:up}}
 \end{figure}
 
-This means that if $\fun₂≽_{ℱ}{\fun₁}$, the curve $\ftor(\fun₂)$
-is higher than $\ftor(\fun₁)$ (\figref{up}, right), as
+This means that if $𝖿₂≽_{ℱ} 𝖿₁$, the curve $𝗁(𝖿₂)$
+is higher than $𝗁(𝖿₁)$ (\figref{up}, right), as
 implied by the order on the antichains given by~\eqref{orderantichains}.
 \end{minipage}
 
 
 We are now ready to give a formal definition of a design problem.
 \begin{definition}
-\label{def:A-monotone-design}A\emph{ design problem~}(DP) is a tuple $⟨ℱ,ℛ,\ftor⟩ $
-such that $ℱ$ and $ℛ$ are posets, and ${\colH\ftor}:{\colF\fun}⇒{\colR\antichainsℛ}$
+\label{def:A-monotone-design}A\emph{ design problem~}(DP) is a tuple $⟨ℱ,ℛ,𝗁⟩$
+such that ℱ and ℛ are posets, and $𝗁: 𝖿 → 𝖠ℛ$
 is a monotone function.
 \end{definition}
 
@@ -130,21 +132,21 @@ is a monotone function.
 
 
 \begin{example}
-(battery, continued) To specify a DP, one needs to specify the poset $ℱ$,
-the poset $ℛ$, and the function $\ftor:ℱ⇒\Aressp$
+(battery, continued) To specify a DP, one needs to specify the poset ℱ,
+the poset ℛ, and the function $𝗁:ℱ→\Aressp$
 in~\prettyref{def:A-monotone-design}. It was already established
-that $ℱ=\colF⟨ℝ₊^{J},≤⟩$ and $ℛ={\colR⟨ℝ₊^{g},≤⟩}$.
+that $ℱ = 𝔣 ⟨ℝ₊^{J},≤⟩$ and $ℛ = {𝔯 ⟨ℝ₊^{g},≤⟩}$.
 The relation between \R{battery mass} $\batterymass$ and \F{capacity} $\batterycapacity$
 is given by the specific energy $ρ$, with the simple linear constraint
 \begin{equation}
-ρ\,\batterymass≥\batterycapacity.\label{eq:battery_se}
+ρ⌑\batterymass≥\batterycapacity.\label{eq:battery_se}
 \end{equation}
-The formal definition of the map $\ftor$ is
+The formal definition of the map 𝗁 is
 \begin{align}
-\ftor:{\colF⟨ℝ₊^{J},≤⟩} & ⇒{\colR\antichains⟨ℝ₊^{g},≤⟩},\nonumber \\
+𝗁:{𝔣 ⟨ℝ₊^{J},≤⟩} & → {𝔯 𝖠⟨ℝ₊^{g},≤⟩},\nonumber \\
 \batterycapacity & ⟼\{\batterycapacity/ρ\}.\label{eq:ftor_battery_continuous}
 \end{align}
-The map $\ftor$ associates to each value of the \F{capacity} $\batterycapacity$
+The map 𝗁 associates to each value of the \F{capacity} $\batterycapacity$
 a set $\{\batterycapacity/ρ\}$ describing the minimal \R{mass}
 sufficient to provide the given \F{capacity}.
 
@@ -165,13 +167,13 @@ that case of only a discrete set of available battery models.
 
 \begin{example}
 (Discrete increments) Suppose that the batteries are available in
-increments of $\Delta_{m}$ &#91;g&#93;, so that we can only have \R{mass} $\batterymass∈\{{\colF k}\Delta_{m},␣{\colF k}∈\mathbb{N}\}.$
+increments of $\Delta_{m}$ &#91;g&#93;, so that we can only have \R{mass} $\batterymass ∈ \{{𝔣  k}\Delta_{m},␣{𝔣  k} ∈ 𝐀thbb{N}\}.$
 The map in~\eqref{eq:ftor_battery_continuous} can be amended as
 follows:
 \begin{align}
-    \ftor:{\colF⟨ℝ₊^{J},≤⟩} & ⇒{\colR\antichains⟨ℝ₊^{g},≤⟩},\nonumber \\
+    𝗁:{𝔣 ⟨ℝ₊^{J},≤⟩} & →{𝔯 𝖠⟨ℝ₊^{g},≤⟩},\nonumber \\
     \batterycapacity & ⟼\{\batterymass^{★}\},\label{eq:ftor_battery_continuous-1-1}\\
-     & \batterymass^{★}=\begin{cases}
+     & \batterymass^{★} = \begin{cases}
     \min_{k} & k\Delta_{m}\\
     \subto & ρ k\Delta_{m}≥\batterycapacity.
     \end{cases}
@@ -179,9 +181,9 @@ follows:
 In other words, the best mass $\batterymass^{★}$ is the minimum
 mass that satisfies the capacity constraint, searching over all the
 implementation possibilities, here described by the index $k$. The
-graph of the function $\ftor$ has a shape similar to the one pictured
+graph of the function 𝗁 has a shape similar to the one pictured
 in~\figref{Finite-number-of-1}. Note that the graph is discontinuous;
-in this framework, there is no continuity constraint on $\ftor$.
+in this framework, there is no continuity constraint on 𝗁.
 \end{example}
 
 \begin{figure}
@@ -193,13 +195,13 @@ in this framework, there is no continuity constraint on $\ftor$.
 (Different batteries technologies) Consider choosing between $n$
 competing battery technologies, characterized by the specific energy $ρᵢ$
 &#91;kWh/g&#93; and specific cost $αᵢ$ &#91;&#96;/kWh&#93;. The resource
-space is $ℛ=\colR⟨ℝ₊^{g},≤⟩×⟨ℝ₊^{\$},≤⟩.$
+space is $ℛ = 𝔯 ⟨ℝ₊^{g},≤⟩×⟨ℝ₊^{€},≤⟩.$
 The cost $\batterycost$ is related to the capacity linearly through
-the specific cost $αᵢ$: $\batterycost≥αᵢ\,\batterycapacity.$
-The map $\ftor$ is
+the specific cost $αᵢ$: $\batterycost≥αᵢ⌑\batterycapacity.$
+The map 𝗁 is
 \begin{align}
-    \ftor:{\colF⟨\Rcpu{J},≤⟩} & ⇒{\colR\antichains⟨\Rcpu{g},≤⟩×⟨\Rcpu{\$},≤⟩},\nonumber \\
-    \batterycapacity & ⟼\{⟨\batterycapacity/ρᵢ,αᵢ\,\batterycapacity⟩ \mid i=1, …, n\}.\label{eq:ftor_battery_continuous-2-1}
+    𝗁:{𝔣 ⟨\Rcpu{J},≤⟩} & → 𝔯 𝖠⟨\Rcpu{g},≤⟩×⟨\Rcpu{€},≤⟩,\nonumber \\
+    \batterycapacity & ⟼\{⟨\batterycapacity/ρᵢ,αᵢ⌑\batterycapacity⟩ | i = 1, …, n\}.\label{eq:ftor_battery_continuous-2-1}
 \end{align}
 In this case, each capacity $\batterycapacity$ is mapped to an antichain
 of $n$ elements.
@@ -230,10 +232,10 @@ are \R{current} and \R{voltage}.
 A gearbox (\figref{gearbox}) provides a certain \F{output
 torque $τₒ$} and \F{speed $τₒ$}, given a certain
 \R{input torque $τᵢ$} and \R{speed $ωᵢ$}. For
-an ideal gearbox with a reduction ratio $r∈ℚ₊$ and
+an ideal gearbox with a reduction ratio $r ∈ ℚ₊$ and
 efficiency ratio $γ$, $0<γ<1$, the constraints among
-those quantities are ${\colRωᵢ}≥ r\,{\colFωₒ}$
-and ${\colRτᵢωᵢ}≥γ\,{\colFτₒωₒ}.$
+those quantities are ${𝔯 ωᵢ}≥ r⌑{𝔣 ωₒ}$
+and ${𝔯 τᵢωᵢ}≥γ⌑{𝔣 τₒωₒ}.$
 \end{example}
 
 
@@ -343,7 +345,7 @@ and "\F{\emph{minus} the packet drop probability}" for them
 to count as functionality. As for the resources, apart from the \R{transmission
 power &#91;W&#93;}, one should consider at least \R{the spectrum occupation},
 which could be described as an interval $[f₀,f₁]$ of the frequency
-axis $\Rcpu{Hz}$. Thus the resources space is $ℛ=\colR\Rcpu{W}×\vmath{intervals}(\Rcpu{Hz})$.
+axis $\Rcpu{Hz}$. Thus the resources space is $ℛ = 𝔯 \Rcpu{W}×\vmath{intervals}(\Rcpu{Hz})$.
 \end{example}
 
 
@@ -375,30 +377,29 @@ of an agent or the number of agents~(\figref{multirobot2}).
 
 
 \subsubsection{LQG Control}
-\begin{example}
-\label{exa:lqg}Consider the simple case of a linear-quadratic-Gaussian
-regulation control problem. The plant is described by the time-invariant
-stochastic differential equations:
+\begin{example}[LQG control] \label{exa:lqg}
+Consider the simple case of a linear-quadratic-Gaussian regulation control
+problem. The plant is described by the time-invariant stochastic
+differential equations:
 \begin{eqnarray*}
-\D\boldsymbol{x}ₜ & = & \MA\boldsymbol{x}ₜ\D t+\MB\boldsymbol{u}ₜ\D t+\ML\D\boldsymbol{v}ₜ,\\
-\D\boldsymbol{y}ₜ & = & \MC\boldsymbol{y}ₜ\D t+\MG\D\boldsymbol{w}ₜ,
+    𝖽𝐱ₜ  &=&  𝐀 𝐱ₜ 𝖽t + 𝐁 𝐮ₜ 𝖽t + 𝐋 𝖽𝐯ₜ,\\
+    𝖽𝐲ₜ  &=&  𝐂 𝐲ₜ 𝖽t +           𝐆 𝖽𝐰ₜ,
 \end{eqnarray*}
-with $\boldsymbol{v}ₜ$ and $\boldsymbol{w}ₜ$ two standard
-Brownian processes. Let $\MV=\ML\ML^{*}$ and $\MW=\MG\MG^{*}$
-be the effective noise covariances. Also assume that the pair $(\MA,\MB)$
-is stabilizable and $(\MC,\MA)$ is detectable. Consider the quadratic
-cost
+with $𝐯ₜ$ and $𝐰ₜ$ two standard Brownian processes.
+Let $𝐕 = 𝐋𝐋˟$ and $𝐖 = 𝐆𝐆˟$ be the effective noise covariances.
+Also assume that the pair $(𝐀,𝐁)$ is stabilizable and $(𝐂,𝐀)$ is detectable.
+Consider the quadratic cost
 \[
-J=\lim_{T⇒∞}\tfrac{1}{T}∫₀^{T}\|\MQ^{½}\boldsymbol{x}ₜ\|₂^{2}+\|\MR^{½}\boldsymbol{u}ₜ\|₂^{2}\D t.
+    J = \lim_{T → ∞} \tfrac{1}{T} ∫₀^T ‖𝐐^½ 𝐱ₜ‖₂²+ ‖𝐑^½ 𝐮ₜ‖₂² 𝖽t.
 \]
-Let the control objective be of the type "enforce $\ex{\{J\}}≤ J₀$".
+Let the control objective be of the type "enforce $𝔼 \{ J \} ≤ J₀$".
 \end{example}
 
 
 \begin{proposition}
 The LQG problem admits a formulation as a monotone design problem
-in which $\colF-J₀$ is the functionality, and ${\colR\M{V}^{-1}}$
-and ${\colR\M{W}^{-1}}$ are resources.
+in which $𝔣 -J₀$ is the functionality, and $𝔯 𝐕↺$
+and $𝔯 𝐖↺$ are resources.
 \end{proposition}
 
 \begin{figure}
@@ -409,45 +410,45 @@ and ${\colR\M{W}^{-1}}$ are resources.
 \begin{proof}
 The performance requirements are specified by the value of $J₀$.
 In the DP formalization, it is required that the functionality space
-is ordered so that "smaller is easier", so one should take $\colF-J₀$
+is ordered so that "smaller is easier", so one should take $𝔣 -J₀$
 instead of $J₀$ as the functionality.
 
-It is possible to interpret the covariances $\M{V}$ and $\M{W}$
+It is possible to interpret the covariances $𝐕$ and $𝐖$
 as resources; specifically, as the quality of the sensors and actuators.
 Also in this case a reparameterization is necessary. Intuitively,
-given a \uline{lower} bound on the functionality $\colF-J₀$
+given a \uline{lower} bound on the functionality $𝔣 -J₀$
 , one has an upper bound on the cost function $J$, from which one
-gets an \uline{upper} bound on the sensor noise covariance matrix $\M{W}$.
+gets an \uline{upper} bound on the sensor noise covariance matrix $𝐖$.
 This is straightforward given the Data Processing Inequality: if increasing
 the observation noise could decrease the control objective then the
 optimal controller would be injecting extra noise on the observations.
 However, a \uline{lower} bound on the functionality requires a
-\uline{lower} bound on the resources. The solution is to choose ${\colR\M{W}^{-1}}$
+\uline{lower} bound on the resources. The solution is to choose ${𝔯 𝐖↺}$
 as the resource.
 
-More formally, to see that ${\colR\M{V}^{-1}}$ and ${\colR\M{W}^{-1}}$
+More formally, to see that $𝔯 𝐕↺$ and $𝔯 𝐖↺$
 are resources, it is sufficient to write down the value of the optimal
-LQG cost $J^{★}$ as a function of the parameters (\prettyref{lem:The-minimum-cost})
-and observe the monotonicity relations between $\M{V},\M{W}$, $\overline{\MS}$,
-$\overline{\MSigma}$ and $J^{★}$.
+LQG cost $J^★$ as a function of the parameters (\prettyref{lem:The-minimum-cost})
+and observe the monotonicity relations between $𝐕,𝐖$, $𝐒̅$,
+$𝚺̅$ and $J^★$.
 \end{proof}
 
 \begin{lemma}
 \label{lem:The-minimum-cost}The minimum cost for an LQG problem is~\cite[p. 357]{speyer08stochastic}
 \begin{equation}
-J^{\ast}=\matTrace\{\overline{\MS}\MB\MR^{-1}\MB^{\ast}\overline{\MS}\,\overline{\MSigma}+\overline{\MS}\MV\}\label{eq:Jlqg2}
+J˟ = 𝖳𝗋 \{ 𝐒̅𝐁𝐑↺𝐁˟𝐒̅ ⌑ 𝚺̅+ 𝐒̅𝐕  \}  \label{eq:Jlqg2}
 \end{equation}
-where $\overline{\MS}$ is the solution of the Riccati equation
+where $𝐒̅$ is the solution of the Riccati equation
 \[
-\MA\MS+\MS\MA^{\ast}-\MS\MB\MR^{-1}\MB^{\ast}\MS+\MQ=\M{0}.
+   𝐀 𝐒 + 𝐒 𝐀˟ - 𝐒 𝐁 𝐑↺ 𝐁˟ 𝐒 + 𝐐 = 𝟎.
 \]
-and $\overline{\MSigma}$ is solution of the algebraic Riccati equation
+and $𝚺̅$ is solution of the algebraic Riccati equation
 \begin{equation}
-\MA\MSigma+\MSigma\MA^{\ast}-\MSigma\MC^{\ast}\boldsymbol{\M{W}^{-1}}\MC\MSigma+\MV=\M{0}.\label{eq:riccati2}
+    𝐀 𝚺 + 𝚺 𝐀˟ - 𝚺 𝐂˟ 𝐖↺ 𝐂 𝚺 + 𝐕 = 𝟎.\label{eq:riccati2}
 \end{equation}
 The minimum cost~\eqref{Jlqg2} can also be written as~\cite[p. 188]{davis77linear}
 \begin{equation}
-J^{★}=\matTrace\{ \MC\overline{\MSigma}\,\overline{\MS}\,\overline{\MSigma}\MC^{*}\M{W}^{-1}+\overline{\MSigma}\MQ\} .\label{eq:Jlqg}
+J^{★} = 𝖳𝗋 \{ 𝐂 𝚺̅ ⌑ 𝐒̅ ⌑ 𝚺̅ 𝐂˟↺ + 𝚺̅ 𝐐 \} .\label{eq:Jlqg}
 \end{equation}
 \end{lemma}
 
@@ -455,15 +456,16 @@ J^{★}=\matTrace\{ \MC\overline{\MSigma}\,\overline{\MS}\,\overline{\MSigma}\MC
 
 \subsubsection{Computation}
 
-% keep wrapped
-\begin{wrapfigure}{r}{0\columnwidth}
-\includegraphics[scale=0.33]{reits2_cpu_simple}\caption{}
-\end{wrapfigure}
-\leavevmode
+<!-- % keep wrapped -->
+
 
 The trivial model of a CPU is as a device that provides \F{computation,
 measured in flops}, and requires \R{power &#91;W&#93;}. Clearly there
 is a monotone relation between the two.
+
+\begin{figure}{r}{0\columnwidth}
+\includegraphics[scale=0.33]{reits2_cpu_simple}\caption{}
+\end{figure}
 
 A similar monotone relation between application requirements and computation
 resources holds in a much more general setting, where both application
@@ -474,24 +476,21 @@ In the Static Data Flow (SDF) model of computation~\cite[Chapter 3]{sriram00,lee
 the application is represented as a graph of procedures that need
 to be allocated on a network of processors.
 
-% keep wrapped
+<!-- % keep wrapped -->
 \begin{wrapfigure}{r}{0\columnwidth}
 \includegraphics[scale=0.33]{reits2_small_app_graph}
 \end{wrapfigure}
 
-Define the\emph{ application graph }(sometimes called "computation
-graph") as a graph where each node is a procedure (or "actor")
-and each edge is a message that needs to be passed between procedures.
-Each node is labeled by the number of ops necessary to run the procedure.
-Each edge is labeled by the size of the message. There is a partial
-order $≼$ on application graphs. In this order, it holds that $A₁≼ A₂$
-if the application graph $A₂$ needs more computation or bandwidth
-for its execution than $A₁$. Formally, it holds that $A₁≼ A₂$
-if there is a homomorphism $\varphi:A₁ ⇒ A₂$; and,
-for each node $n∈A₁$, the node $\varphi(n)$ has equal or
-larger computational requirements than $n$; and for each edge $⟨n₁,n₂⟩ $
-in $A₂$, the edge $⟨\varphi(n₁),\varphi(n₂)⟩ $
-has equal or larger message size.
+Define the *application graph* (sometimes called *computation graph*) as a graph
+where each node is a procedure (or "actor") and each edge is a message that
+needs to be passed between procedures. Each node is labeled by the number of ops
+necessary to run the procedure. Each edge is labeled by the size of the message.
+There is a partial order $≼$ on application graphs. In this order, it holds that
+$A₁≼ A₂$ if the application graph $A₂$ needs more computation or bandwidth for
+its execution than $A₁$. Formally, it holds that $A₁≼ A₂$ if there is a
+homomorphism $𝜑:A₁ → A₂$; and, for each node $n ∈ A₁$, the node $𝜑(n)$ has
+equal or larger computational requirements than $n$; and for each edge $⟨n₁,n₂⟩$
+in $A₂$, the edge $⟨𝜑(n₁),𝜑(n₂)⟩$ has equal or larger message size.
 
 \begin{wrapfigure}{r}{0\columnwidth}
 \includegraphics[scale=0.33]{reits2_small_res_graph}\end{wrapfigure}
@@ -503,7 +502,7 @@ by latency &#91;s&#93; and bandwidth &#91;B/s&#93;. There is a partial order
 on resources graph as well: it holds that $R₁≼ R₂$ if
 the resource graph $R₂$ has more computation or network available
 than $R₁$. The definition is similar to the case of the application
-graph: there must exist a graph homomorphism $\varphi:R₁⇒ R₂$
+graph: there must exist a graph homomorphism $𝜑:R₁→ R₂$
 and the corresponding nodes (edges) of $R₂$ must have larger
 or equal computation (bandwidth) than those of $R₁$.
 
@@ -513,13 +512,13 @@ or equal computation (bandwidth) than those of $R₁$.
 Given an application graph $A$ and a resource graph $R$, a typical
 resource allocation problem consists in choosing in which processor
 each actor must be scheduled to maximize the throughput $T$~&#91;Hz&#93;.
-This is equivalent to the problem of finding a graph homomorphism $\Psi:A⇒ R$.
-Let $T^{\ast}$ be the optimal throughput, and write it as a function
+This is equivalent to the problem of finding a graph homomorphism $\Psi:A→R$.
+Let $T˟$ be the optimal throughput, and write it as a function
 of the two graphs:
 \[
-T^{\ast}=T^{\ast}(A,R).
+T˟ = T˟(A,R).
 \]
-Then the optimal throughput $T^{*}$ is decreasing in $A$ (a more
+Then the optimal throughput $T˟$ is decreasing in $A$ (a more
 computationally demanding application graph decreases the throughput)
 and increasing in $R$ (more available computation/bandwidth increase
 the throughput).
@@ -544,11 +543,11 @@ resource.
 A Monotone Co-Design Problem (MCDP) is a multigraph of DPs with arbitrary
 interconnections, including loops and self-loops.
 
-If two DPs have a resource $\res₁∈ ℛ₁$ and a functionality $\fun₂∈ℱ₂$
-of the same type~($ℱ=ℛ$), then they can be connected by
-an edge. The edge represents a partial order constraint of the type $\res₁≼\fun₂$.
+If two DPs have a resource $𝗋₁ ∈ ℛ₁$ and a functionality $𝖿₂ ∈ ℱ₂$
+of the same type~($ℱ = ℛ$), then they can be connected by
+an edge. The edge represents a partial order constraint of the type $𝗋₁≼𝖿₂$.
 
-The semantics of an edge is: the resources $\res₁$ required by
+The semantics of an edge is: the resources $𝗋₁$ required by
 the first system must not exceed the functionality provided by the
 second system~(\figref{sem}).
 
@@ -561,26 +560,27 @@ second system~(\figref{sem}).
 
 \begin{definition}
 A\emph{ }Monotone Co-Design Problem (MCDP) is a tuple $⟨ℱ,ℛ,⟨𝒩,ℰ⟩⟩$,
-where $ℱ$ and $ℛ$ are two posets, and $⟨𝒩,ℰ⟩ $
+where ℱ and ℛ are two posets, and $⟨𝒩,ℰ⟩$
 is a\emph{ }multigraph of DPs:
-\begin{itemize}
-\item Each node $n∈𝒩$ corresponds to a DP $⟨ℱₙ,ℛₙ,\ftorₙ⟩ $.
+
+* Each node $n ∈ 𝒩$ corresponds to a DP $⟨ℱₙ,ℛₙ,𝗁ₙ⟩$.
 The spaces $ℱₙ$ and $ℛₙ$ are composed of individually
-addressable components $\{ℱₙⁱ\}_{i=1}^{Fₙ}$ and $\{ℛₙ^{j}\}_{j=1}^{Rₙ}$,
-so that they can be written as $ℱₙ=∏_{i=1}^{Fₙ}ℱₙⁱ,$
-$ℛₙ=∏ⱼ^{Rₙ}ℛₙ^{j}.$
-\item An edge $e∈ℰ$ is a tuple $e=⟨⟨n₁,i₁⟩, ⟨n₂,j₂⟩⟩ $,
-where $n₁,n₂∈𝒩$ are two nodes and $i₁$~and $j₂$
+addressable components $\{ℱₙⁱ\}_{i = 1}^{Fₙ}$ and $\{ℛₙ^{j}\}_{j = 1}^{Rₙ}$,
+so that they can be written as $ℱₙ = ∏_{i = 1}^{Fₙ}ℱₙⁱ,$
+$ℛₙ = ∏ⱼ^{Rₙ}ℛₙ^{j}.$
+* An edge $e ∈ ℰ$ is a tuple $e = ⟨⟨n₁,i₁⟩, ⟨n₂,j₂⟩⟩$,
+where $n₁,n₂ ∈ 𝒩$ are two nodes and $i₁$~and $j₂$
 are the indices of the components of the nodes' functionality and
-resources. A valid edge is such that $ℱ_{n₁}^{i₁}=ℛ_{n₂}^{j₂}$.
-\item The posets $ℱ,ℛ$ are the products of the unconnected components.
+resources. A valid edge is such that $ℱ_{n₁}^{i₁} = ℛ_{n₂}^{j₂}$.
+* The posets $ℱ,ℛ$ are the products of the unconnected components.
 For a node $n$, let $\unconnectedfun(n)$ and $\unconnectedres(n)$
-be the set of unconnected functionalities and resources. Then $ℱ$
-and $ℛ$ are defined as follows:
+be the set of unconnected functionalities and resources. Then ℱ
+and ℛ are defined as follows:
 \[
-\begin{array}{ccc}
-ℱ & ={\displaystyle ∏_{n∈𝒩}∏_{i∈\unconnectedfun(n)}}ℱₙⁱ,\qquad & \qquadℛ={\displaystyle ∏_{n∈𝒩}∏_{j∈\unconnectedres(n)}}ℛₙⁱ.\end{array}
-\]`
+    \begin{array}{ccc}
+        ℱ &  = {\displaystyle ∏_{n ∈ 𝒩}∏_{i ∈ \unconnectedfun(n)}}ℱₙⁱ,\qquad & \qquadℛ = {\displaystyle ∏_{n ∈ 𝒩}∏_{j ∈ \unconnectedres(n)}}ℛₙⁱ.
+    \end{array}
+\]
 \end{itemize}
 \end{definition}
 
@@ -597,7 +597,7 @@ and $ℛ$ are defined as follows:
 
 It can be shown~\cite{censi16codesign} that the property of monotonicity
 is preserved by arbitrary interconnection, which means that there
-exists a monotone function $\ftor$ for the entire MCDP that is equivalent
+exists a monotone function 𝗁 for the entire MCDP that is equivalent
 to the interconnection of the simple DPs~(\figref{mcdps},
 right).
 
@@ -605,10 +605,10 @@ right).
 
 
 
-The function $\ftor$ for the entire MCDP can be written as the solution
-of a least-fixed-point recursive equation involving the functions $\{\ftorₙ,␣n∈𝒩\}$.
+The function 𝗁 for the entire MCDP can be written as the solution
+of a least-fixed-point recursive equation involving the functions $\{𝗁ₙ,␣n ∈ 𝒩\}$.
 Therefore, given a systematic procedure to solve the single DPs, in
-the sense of being able to evaluate $\ftorₙ$ point-wise, there
+the sense of being able to evaluate $𝗁ₙ$ point-wise, there
 exists a systematic procedure to solve the larger MCDP.
 
 
@@ -640,11 +640,11 @@ value of the mission you propose.
 \end{figure}
 
 \begin{example}
-(LQG, continued from Example~\ref{exa:lqg}) Suppose that the observations $\boldsymbol{y}$
-are provided by a camera. A lower bound on the information matrix $\colR\M{W}^{-1}$
+(LQG, continued from Example~\ref{exa:lqg}) Suppose that the observations $𝐲$
+are provided by a camera. A lower bound on the information matrix $𝔯 𝐖↺$
 induces a constraint on \R{the sensor resolution $ρ$ &#91;pixels/deg&#93;}~(\figref{lqg2}).
 Assuming independent sensor elements, then the relation between $ρ$
-and $\M{W}^{-1}$ is linear: ${\colRρ}≤ c␣\colF\M{W}^{-1}$.
+and $𝐖↺$ is linear: ${𝔯 ρ} ≤ c␣ 𝔣 𝐖↺$.
 The \R{resource \emph{sensor resolution}} then induces a constraint
 on the \F{functionality \emph{sensor resolution}} provided by the
 sensor, as well as the amount of computation required.
@@ -665,16 +665,16 @@ be a DP with \F{capacity &#91;J&#93;} and \F{life span &#91; number of
 missions&#93;} as functionalities and \R{mass} and \R{cost} as
 resources. Let the actuation be formalized a DP with functionality
 \F{lift &#91;N&#93;} and resources \R{power &#91;W&#93;} and \R{cost
-&#91;\$&#93;}. Assume that other mission requirements include \F{extra
+&#91;€&#93;}. Assume that other mission requirements include \F{extra
 payload &#91;g&#93;}, \F{extra power &#91;W&#93;} and \F{endurance &#91;s&#93;}.
 Then one can write down the following constraints:
 \begin{align*}
 \text{battery capacity} & ≤\text{endurance}×\text{total power},\\
-\text{total power} & =\text{extra power}+\text{actuation power},\\
+\text{total power} &  = \text{extra power}+\text{actuation power},\\
 \text{lift} & ≤(\text{battery mass}+\text{actuator mass})×\text{gravity}.
 \end{align*}
 The constraints create one loop in the graph~(\figref{actuation_energetics}).
-For the purpose of counting loops, consider the edges with the \F{functionality}$arrow$\R{resource}
+For the purpose of counting loops, consider the edges with the \F{functionality}$\rightarrow$\R{resource}
 orientation. This implies that the choices of battery and actuator
 are not independent.
 \end{example}
@@ -697,7 +697,7 @@ For example, \figref{drone_complete} shows the MCDP corresponding
 to a UAV, obtained by composing the actuation/energetics constraint.
 The entire UAV is abstracted as a DP between high-level functionality
 (\F{travel distance}, \F{payload}, \F{number of missions}),
-and one resource (\R{total cost of ownership &#91;\$&#93;}). This MCDP
+and one resource (\R{total cost of ownership &#91;€&#93;}). This MCDP
 was defined using MCDP\textbf{L}, a domain-specific language to describe
 MCDPs. See \url{http://mcdp.mit.edu/wafr.html} for a detailed walkthrough
 of this example.
@@ -716,7 +716,7 @@ and resources is dual with respect to the point of view of the engineer~(\figref
 The engineering problem is: "Given a certain functionality to be
 implemented, what are the minimal resources necessary to implement
 it?". The customer preferences can be encoded by the answer to the
-dual question: "Given the resources (\$) to be provided by the customer,
+dual question: "Given the resources (€) to be provided by the customer,
 what is the minimal functionality required?". A feasible solution
 to such an MCDP with a "customer in the loop" is a solution that
 is feasible both from the engineering point of view, as well as from

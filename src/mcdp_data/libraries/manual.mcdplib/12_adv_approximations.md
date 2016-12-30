@@ -79,7 +79,7 @@ mcdp {
 }
 </pre>
 
-<!-- <pre class='ndp_graph_templatized'>`invplus</pre> -->
+<!-- <render class='ndp_graph_templatized'>`invplus</render> -->
 
 <table class="approx">
     <tr>

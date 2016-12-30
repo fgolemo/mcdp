@@ -156,10 +156,10 @@ mcdp {
     required mass ≽ total_mass
 }
 </pre>
-        <pre class='ndp_graph_enclosed_TB' style='max-height: 70ex'
+        <render class='ndp_graph_enclosed_TB' style='max-height: 70ex'
             figure-id='fig:Composition'>
             `Composition
-        </pre>
+        </render>
 </col2>
 
 

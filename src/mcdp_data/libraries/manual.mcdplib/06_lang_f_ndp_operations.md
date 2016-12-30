@@ -41,11 +41,11 @@ those edges are being replaced.
 
 Original:
 
-<pre class='ndp_graph_expand'>`compact_example</pre>
+<render class='ndp_graph_expand'>`compact_example</render>
 
 Compacted:
 
-<pre class='ndp_graph_expand'>compact `compact_example</pre>
+<render class='ndp_graph_expand'>compact `compact_example</render>
 
 ### <k>template</k>   {#keyword-template}
 
@@ -147,7 +147,7 @@ mcdp {
 }
 </pre>
 
-<pre class='ndp_graph_expand'>`Composition1</pre>
+<render class='ndp_graph_expand'>`Composition1</render>
 
 
 We can completely abstract an MCDP, using the <k>abstract</k> keyword.
@@ -158,11 +158,11 @@ For example:
 
 <pre class='mcdp'>abstract `Composition1</pre>
 
-<pre class='ndp_graph_expand'>abstract `Composition1</pre>
+<render class='ndp_graph_expand'>abstract `Composition1</render>
 
 And we can also completely **flatten** it, by erasing the border between subproblems:
 
 
 <pre class='mcdp'>flatten `Composition1</pre>
 
-<pre class='ndp_graph_expand'>flatten `Composition1</pre>
+<render class='ndp_graph_expand'>flatten `Composition1</render>

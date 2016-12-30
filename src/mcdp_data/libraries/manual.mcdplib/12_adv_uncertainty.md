@@ -24,7 +24,7 @@ mcdp {
 The resulting MCDP has an uncertainty gate, marked with "?", which joins two
 branches, the optimistic and the pessimistic branch.
 
-<pre class='ndp_graph_enclosed'>`uncertain1</pre>
+<render class='ndp_graph_enclosed'>`uncertain1</render>
 
 
 <!--
@@ -45,7 +45,7 @@ mcdp {
 }
 </pre>
 
-<pre class='ndp_graph_expand'>`uncertain2</pre>
+<render class='ndp_graph_expand'>`uncertain2</render>
 
 <img style='max-width: 30em' src="/libraries/uncertainty/models/uncertain_battery2/views/solver2/display1u.png?xaxis=capacity&amp;yaxis=mass&amp;xmin=0J&amp;xmax=1MJ&amp;nsamples=50"/>
 

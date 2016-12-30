@@ -29,10 +29,10 @@ mcdp {
 }
 </pre>
 
-<pre class='ndp_graph_templatized_labeled'
+<render class='ndp_graph_templatized_labeled'
     figure-id="fig:Battery1">
     `Battery1
-</pre>
+</render>
 
 
 Consider two different battery technologies, characterized by their specific
@@ -60,8 +60,8 @@ as two MCDP using the same interface (same resources and same functionality).
         rho = 150 Wh/kg
         alpha = 2.50 Wh/&#36;
 
-        required mass ≽ provided capacity / rho
-        required cost ≽ provided capacity / alpha
+        mass ≽ capacity / rho
+        cost ≽ capacity / alpha
     }
     </pre>
 
@@ -74,8 +74,8 @@ as two MCDP using the same interface (same resources and same functionality).
         rho = 45 Wh/kg
         alpha = 10.50 Wh/&#36;
 
-        required mass ≽ provided capacity / rho
-        required cost ≽ provided capacity / alpha
+        mass ≽ capacity / rho
+        cost ≽ capacity / alpha
     }
     </pre>
 
