@@ -1,3 +1,6 @@
+@import 'reset';
+@import 'reset-fix';
+
 
 
 @import 'colors';
@@ -8,12 +11,13 @@
 @import 'page-six_by_nine';
 // @import 'page-ipad';
 
-@import 'reset-fix';
 
 @import 'toc';
-@import 'hide_errors';
-@import 'only_good';
 @import 'fonts';
+
+// IF RELEASE {
+// @import 'hide_errors';
+// @import 'only_good';
 
 p, div.latex_env, div.minipage {
     // line-height: 12.5pt;
@@ -365,13 +369,14 @@ a[href^='#subsub:']:empty::before {
     and not robust to errors with divs */
 
 body {
-    counter-reset: table listing  bib section appendix subsection subsubsection figure example remark definition proposition lemma theorem problem ;
+    counter-reset: part table listing bib section appendix subsection subsubsection figure example remark definition proposition lemma theorem problem ;
 
 }
 
 h1 {
     counter-reset: subsection subsubsection;
 
+    &:not([nonumber])[id^='part:'] { counter-increment: part; }
     &:not([nonumber])[id^='sec:'] { counter-increment: section; }
     &:not([nonumber])[id^='app:'] { counter-increment: appendix; }
 }

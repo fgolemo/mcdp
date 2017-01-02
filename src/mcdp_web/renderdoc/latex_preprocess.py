@@ -59,10 +59,7 @@ def latex_preprocessing(s):
 
     s = re.sub(r'\\noindent\s*', '', s) # XXX
 # {[}m{]}}, and we need to choose the \R{endurance~$T$~{[}s{]}}
-    s = re.sub(r'{(\[|\])}', r'\1', s)
-#     s = re.sub(r'\\R{(.*?)}', r'<r>\1</r>', s)
-#     s = re.sub(r'\\F{(.*?)}', r'<f>\1</f>', s)
-#     
+    s = re.sub(r'{(\[|\])}', r'\1', s) 
 
     # no! let mathjax do it
     def subit(m):
@@ -81,9 +78,7 @@ def latex_preprocessing(s):
     
     # \vref
     s = re.sub(r'\\vref{(.*?)}', r'<a class="only-number" href="#\1"></a>', s)
-       
-    
-#     s = re.sub(r'\\eqref{(.*?)}', r'<a href="#eq:\1"></a>', s)
+        
     
     s = re.sub(r'\\lemref{(.*?)}', r'<a href="#lem:\1"></a>', s)
     s = re.sub(r'\\tabref{(.*?)}', r'<a href="#tab:\1"></a>', s)

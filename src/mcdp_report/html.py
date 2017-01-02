@@ -360,31 +360,30 @@ def get_css_filename(basename):
         raise ValueError('File does not exist: %s' % fn)
     return os.path.realpath(fn)
 
-def get_language_css_filename():
-    return get_css_filename('mcdp_language_highlight')
     
 def get_language_css():
     fn = get_language_css_filename()
     return open(fn).read()
 
-def get_markdown_css_filename():
-    return get_css_filename('markdown')
+def get_language_css_filename():
+    return get_css_filename('out/mcdp_language_highlight')
 
-def get_reset_css_filename():
-    return get_css_filename('reset')
+def get_markdown_css_filename():
+    return get_css_filename('out/markdown')
+
+def get_manual_generic_css_filename():
+    return get_css_filename('out/manual')
+
+def get_manual_screen_css_filename():
+    return get_css_filename('out/manual_screen')
+
+def get_manual_print_css_filename():
+    return get_css_filename('out/manual_prince')
+
 
 def get_markdown_css():
     fn = get_markdown_css_filename()
     return open(fn).read()
-
-def get_manual_generic_css_filename():
-    return get_css_filename('manual')
-
-def get_manual_screen_css_filename():
-    return get_css_filename('manual_screen')
-
-def get_manual_print_css_filename():
-    return get_css_filename('manual_prince')
 
 
 def comment_out(s, line):

@@ -38,14 +38,6 @@
      }
 }
 
-ul#main_toc > li > a > span.toc_number {
-    font-weight: bold;
-
-    ::before {
-        content: 'Chapter ';
-        font-weight: bold;
-    }
-}
 
 ul#main_toc ul {
     margin-left: 0;
@@ -120,4 +112,35 @@ ul#main_toc > li {
         font-weight: bold;
     }
 
+}
+
+
+
+ul#main_toc > li > a > span.toc_number {
+    font-weight: bold;
+
+    ::before {
+        content: 'Chapter ';
+        font-weight: bold;
+    }
+}
+
+ul.toc, ul.toc li, ul.toc ul {
+    margin:0; padding: 0;
+}
+
+ul#main_toc > li > a[href^='#part:'] {
+    display: block;
+    font-weight: bold;
+    text-align: center;
+
+    ::before {
+        content: 'Part ? – ';
+        content: 'Part ' target-counter(attr(href), part) ' – ';
+        font-weight: bold;
+    }
+    color: black !important;
+    ::after {
+        content: none !important;
+    }
 }

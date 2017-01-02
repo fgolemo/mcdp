@@ -4,7 +4,9 @@ set -x
 docname=${1%.*}
 echo Docname: ${docname}
 
-mcdp-render ${docname}
+libraries=~/env_mcdp/src/mcdp/src/mcdp_data/libraries
+
+mcdp-render -D ${libraries} ${docname}
 
 out_html=out/mcdp_render/${docname}.html
 

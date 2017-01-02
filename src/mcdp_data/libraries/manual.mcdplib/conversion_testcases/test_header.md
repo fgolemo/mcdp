@@ -19,7 +19,7 @@ Citing them in order:
 
 * <a href="#sub:sssF"/> (should be: sssF)
 
-
+# Part 1    {#part:1}
 
 \section{sA \label{sec:sA} (should be 1)} 
 \section{second bu without label (should be 2)}
@@ -32,6 +32,8 @@ Citing them in order:
 \section*{sB-not numbered}
 
 \subsection{child of sB - this will be 3.0 however it's a bug - no numbered inside nn}
+
+# Part 2    {#part:2}
 
 \section{sC (should be Section 4)}
 

@@ -15,6 +15,7 @@ from .abbrevs import other_abbrevs
 from .highlight import fix_subfig_references, html_interpret,  mark_console_pres,\
     escape_for_mathjax, make_figure_from_figureid_attr
 from .xmlutils import check_html_fragment, to_html_stripping_fragment, bs
+from mcdp_web.renderdoc.xmlutils import describe_tag
 
 
 __all__ = [
@@ -38,8 +39,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     from .markd import render_markdown
     from .preliminary_checks import do_preliminary_checks_and_fixes
     from .prerender_math import prerender_mathjax
-    from mcdp_web.renderdoc.latex_preprocess import replace_equations
-    
+    from .latex_preprocess import replace_equations
 
     if isinstance(s, unicode):
         msg = 'I expect a str encoded with utf-8, not unicode.'
@@ -145,6 +145,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     check_html_fragment(s)
     
 #     print(indent(s, 'before  html_interpret | '))
+    library = get_library_from_document(s=s, default_library=library)
     s = html_interpret(library, s, generate_pdf=generate_pdf,
                            raise_errors=raise_errors, realpath=realpath)
 
@@ -169,6 +170,34 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     
     s = fix_validation_problems(s)
     return s
+
+def get_document_properties(s):
+    """ Reads a document's <meta> tags into a dict """
+    soup = bs(s)
+    metas = list(soup.select('meta'))
+    FK, FV = 'name', 'content'
+    properties = {}
+    for e in metas:
+        if not FK in e.attrs or not FV in e.attrs:
+            msg = 'Expected "%s" and "%s" attribute for meta tag.' % (FK, FV)
+            raise_desc(ValueError, msg, tag=describe_tag(e))
+            
+        properties[e[FK]] = e[FV]
+    return properties
+    
+def get_library_from_document(s, default_library):
+    properties = get_document_properties(s)
+    print('properties: %s' % properties)
+        
+    KEY_MCDP_LIBRARY = 'mcdp-library'
+    if KEY_MCDP_LIBRARY in properties:
+        use = properties[KEY_MCDP_LIBRARY]
+        print('using library %r ' % use)
+        library = default_library.load_library(use)
+        return library
+        
+    return default_library
+
 
 def replace_macros(s):    
     macros = MCDPManualConstants.macros

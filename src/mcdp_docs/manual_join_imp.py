@@ -3,6 +3,7 @@
 import os
 import sys
 
+from bs4 import BeautifulSoup
 from bs4.element import Comment, Tag, NavigableString
 
 from contracts import contract
@@ -10,7 +11,6 @@ from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_docs.read_bibtex import get_bibliography
 from mcdp_web.renderdoc.highlight import add_class
 from mocdp import logger
-from bs4 import BeautifulSoup
 
 
 def get_manual_css_frag():
@@ -20,10 +20,9 @@ def get_manual_css_frag():
     from mcdp_report.html import \
     get_manual_print_css_filename, get_manual_screen_css_filename,\
     get_manual_generic_css_filename, get_markdown_css_filename,\
-    get_language_css_filename, get_reset_css_filename
+    get_language_css_filename
 
     css_files = [
-        get_reset_css_filename(),
         get_language_css_filename(),
         get_markdown_css_filename(),
         get_manual_generic_css_filename(),
@@ -59,18 +58,6 @@ def manual_join(files_contents):
     template = open(fn).read()
     template = replace_macros(template)
     
-            
-    # title page
-#     (_libname, docname), first_data = files_contents.pop(0)
-#     assert 'first' in docname
-#     
-#     first_contents = bs(first_data)
-#     first_contents.name = 'div'
-#     
-#     first_contents['class'] = 'doc'
-#     first_contents['docname'] = docname
-#     template = template.replace('FIRSTPAGE', str(first_contents))
-#     
     # cannot use bs because entire document
     template_soup = BeautifulSoup(template, 'lxml', from_encoding='utf-8')
     d = template_soup 
@@ -210,7 +197,7 @@ def warn_for_duplicated_ids(soup):
         logger.error('I renamed some of them; references and numbering are screwed up')
     
         
-def reorganize_contents(body):
+def reorganize_contents(body0):
     """ reorganizes contents 
     
         h1
@@ -224,39 +211,55 @@ def reorganize_contents(body):
             h1
         
     """ 
-#     assert body.name == 'body'
-    sections = []
+    def is_chapter_marker(x):
+        return isinstance(x, Tag) and x.name == 'h1' and (not 'part' in x.attrs.get('id',''))
     
-    current_section = Tag(name='section')
-    current_section['id'] = 'before-any-h1'
-    current_section['class'] = 'doc_section'
-    sections.append(current_section)
-    for x in body.contents:
-        if isinstance(x, Tag) and x.name == 'h1':
-            #print('starting %s' % str(x))
-            sections.append(current_section)
-            current_section = Tag(name='section')
-            current_section['id'] = x.attrs.get('id', 'unnamed-h1') + ':section'
-            print('section %s' % current_section['id'])
-            #x.extract()
-            current_section.append(x.__copy__())
-        else:
-            #x.extract()
-            current_section.append(x.__copy__())
-    sections.append(current_section)
-            
-    print('now body has %d elmeents' % len(list(body.contents)))
-    new_body = Tag(name=body.name)
-    new_body['id'] = 'filled-by-reorganizator'
-#     print('body %s' % str(body))
-    if not sections:
-        msg = 'No sections found.'
-        raise ValueError(msg)
+    def is_part_marker(x):
+        return isinstance(x, Tag) and x.name == 'h1' and 'part' in x.attrs.get('id','')
 
-    for s in sections:
-        new_body.append(s)
+    def make_sections(body, is_marker, preserve = lambda _: False, element_name='section'):
+        sections = []
+        current_section = Tag(name=element_name)
+        current_section['id'] = 'before-any-match-of-%s' % is_marker.__name__
+        sections.append(current_section)
+        for x in body.contents:
+            if is_marker(x):
+                #print('starting %s' % str(x))
+                if len(list(current_section.contents)) > 0:
+                    sections.append(current_section)
+                current_section = Tag(name=element_name)
+                current_section['id'] = x.attrs.get('id', 'unnamed-h1') + ':' + element_name
+                #print('%s/section %s %s' % (is_marker.__name__, x.attrs.get('id','unnamed'), current_section['id']))
+                current_section.append(x.__copy__())
+            elif preserve(x):
+                sections.append(current_section)
+                #current_section['id'] = x.attrs.get('id', 'unnamed-h1') + ':' + element_name
+                #print('%s/preserve %s' % (preserve.__name__, current_section['id']))
+                sections.append(x.__copy__())
+                current_section = Tag(name=element_name)
+            else:
+                current_section.append(x.__copy__())
+        sections.append(current_section)     # XXX
+        new_body = Tag(name=body.name)
+        if len(sections) < 3:
+            msg = 'Only %d sections found (%s).' % (len(sections), is_marker.__name__)
+            raise ValueError(msg)
         
-    return new_body
+        logger.info('make_sections: %s found using marker %s' % (len(sections), is_marker.__name__))
+        for i, s in enumerate(sections):
+            new_body.append('\n')
+            new_body.append(Comment('Start of %s section %d/%d' % (is_marker.__name__, i, len(sections))))
+            new_body.append('\n')
+            new_body.append(s)
+            new_body.append('\n')
+            new_body.append(Comment('End of %s section %d/%d'% (is_marker.__name__, i, len(sections))))
+            new_body.append('\n')
+        return new_body
+    
+    body1 = make_sections(body0, is_chapter_marker, is_part_marker)
+    body2 = make_sections(body1, is_part_marker)
+            
+    return body2
     
     
     
@@ -272,6 +275,11 @@ def check_various_errors(d):
         for e in errors:
             logger.error(e.contents)
             
+    fragments = list(d.find_all('fragment'))
+    if fragments:
+        msg = 'There are %d spurious elements "fragment".' % len(fragments)
+        logger.error(msg)
+        
 def debug(s):
     sys.stderr.write(str(s) + ' \n')
 
@@ -346,9 +354,8 @@ def generate_doc(soup):
 
     stack = [ Item(None, 0, 'root', 'root', []) ]
 
-    print('Finding headers')
     headers = list(soup.findAll(['h1', 'h2', 'h3', 'h4']))
-    print('iterating headers')
+    #print('iterating headers')
     formatter="html"
     formatter = headers[0]._formatter_for_name(formatter)
     for header in headers:
@@ -358,7 +365,7 @@ def generate_doc(soup):
         prefix = None if (ID is None or not ':' in ID) else ID[:ID.index(':')] 
         
         allowed_prefixes = {
-            'h1': ['sec', 'app'],
+            'h1': ['sec', 'app', 'part'],
             'h2': ['sub', 'appsub'],
             'h3': ['subsub', 'appsubsub'],
             'h4': ['par'],
@@ -386,7 +393,10 @@ def generate_doc(soup):
         depth = int(header.name[1])
 
         using = header.decode_contents(formatter=formatter)
-        print('header %s %s %s ' % (' '*2*depth, header.name, using))
+        using =  using[:35]
+        m = 'header %s %s   %-50s    %s  ' % (' '*2*depth,  header.name, header['id'],  using)
+        m = m + ' ' * (120-len(m))
+        print(m)
         item = Item(header, depth, using, header['id'], [])
         
         while(stack[-1].depth >= depth):
@@ -412,7 +422,7 @@ def generate_doc(soup):
             ul.extract() 
             ul['class'] = 'toc chapter_toc'
             # todo: add specific h1
-            item.tag.insert_after(ul)
+            item.tag.insert_after(ul) # XXX: uses <fragment>
             
     print('toc done iterating')
     return root.__str__(root=True)

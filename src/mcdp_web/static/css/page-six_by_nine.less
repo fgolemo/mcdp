@@ -3,6 +3,7 @@
 @bigmargin: 2cm;
 // @smallmargin: 0.75in;
 @smallmargin: 1cm;
+@bleed: 1cm;
 
 @page {
     /* good for ipad */
@@ -20,17 +21,17 @@
        top bottom margins = 9.25 - 8.5 = 0.75 / 2 = 0.375in */
    // /* margin:0.375in  0.312in;
     // size: 6.125in 9.25in;
-    size: 6in 9in;
+    size: (6in+@bleed) (9in+@bleed);
     @space_for_numbers: 0.7cm;
     margin-top: @smallmargin + @space_for_numbers; /*here*/
     margin-bottom: 0.312in;
     //
-    // bleed: 1cm;
-    // mark: crop cross;
-
-    @center {
-        border: solid 1px black;
-    }
+    bleed: @bleed;
+    mark: crop cross;
+    //
+    // @center {
+    //     border: solid 1px black;
+    // }
 }
 
 @page:left {

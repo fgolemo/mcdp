@@ -6,7 +6,7 @@
         PyMCDP version @@PYMCDP_VERSION
         Compiled on PYMCDP_COMPILE_DATE at PYMCDP_COMPILE_TIME
     -->
-        <title>@@{PYMCDP_COMPILE_TIME} - @@{TITLE}</title>
+        <title>@@{TITLE}</title>
         <meta name="author" content="@@{AUTHOR}"/>
         <meta name="subject" content="@@{SUBJECT}"/>
         <meta name="keywords" content="@@{KEYWORDS_HTML}"/>
@@ -16,14 +16,12 @@
     </head>
 <body>
 <script type='text/javascript'>
-
 try {
     prince = Prince;
 } catch (e) {
     console.log("Not running in Prince");
     prince = null;
 }
-
 if(prince != null) {
     prince.addEventListener("complete", function() {
         console.log('Adding PDF properties via Javascript.');

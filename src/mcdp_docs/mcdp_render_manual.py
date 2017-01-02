@@ -2,27 +2,31 @@
 import logging
 import os
 import tempfile
+import time
 
-from mcdp_library import MCDPLibrary
-from mcdp_library_tests.tests import get_test_librarian
-from mocdp import logger
-from quickapp import QuickApp
-
-from .manual_join_imp import manual_join
-from mcdp_library.utils.locate_files_imp import locate_files
-from reprep.utils.natsorting import natsorted
-from mcdp_docs.manual_constants import MCDPManualConstants
 from compmake.context import Context
+from compmake.jobs.actions import mark_to_remake
+from compmake.jobs.storage import get_job_cache
 from compmake.structures import Promise
 from contracts import contract
 from contracts.utils import check_isinstance
-from compmake.jobs.storage import get_job_cache
-from compmake.jobs.actions import mark_to_remake
-import time
+from mcdp_docs.manual_constants import MCDPManualConstants
+from mcdp_library import MCDPLibrary
+from mcdp_library.utils.locate_files_imp import locate_files
+from mcdp_library_tests.tests import get_test_librarian
+from mocdp import logger
+from quickapp import QuickApp
+from reprep.utils.natsorting import natsorted
+
+from .manual_join_imp import manual_join
+
 
 def get_manual_contents():
     root = os.getcwd()
-    directory = root
+    directory = os.path.join(root, 'docs')
+    if not os.path.exists(directory):
+        msg = 'Expected directory %s' % directory
+        raise Exception(msg)
     pattern = '*.md'
     filenames = locate_files(directory, pattern, followlinks=True,
                  include_directories=False,
@@ -32,21 +36,24 @@ def get_manual_contents():
     for fn in filenames:
         fn = os.path.relpath(fn, root)
         # accept the ones with at least two digits in it
-        ndigits = len(list(_ for _ in os.path.basename(fn) if _.isdigit() ))
-        if ndigits < 2:
+#         bn = 
+#         ndigits = len(list(_ for _ in os.path.basename(fn) if _.isdigit() ))
+#         if ndigits < 2:
+#             continue
+#         
+#         # only root files
+#         depth = len(fn.split('/'))
+#         if depth >= 3:
+#             continue
+        if 'exclude' in fn:
+            print('Excluding file %r because of string "exclude" in it' % fn)
             continue
-        
-        # only root files
-        depth = len(fn.split('/'))
-        if depth >= 3:
-            continue
-
-        b, _extension = os.path.splitext(os.path.basename(fn))
-        ok.append(b)
-        
+        ok.append(fn) 
     filenames = natsorted(ok)
+    print "sorted:\n" + "\n - ".join(filenames)
     for f in filenames:
-        yield 'manual', f
+        docname, _extension = os.path.splitext(os.path.basename(f))
+        yield 'manual', docname
                  
 class RenderManual(QuickApp):
     """ Renders the PyMCDP manual """
@@ -85,13 +92,12 @@ class RenderManual(QuickApp):
         # processors: composition
         ]
         
-        
         at = manual_contents.index(insert_after) + 1
         manual_contents = manual_contents[:at] + extra + manual_contents[at:] 
 
-        manual_contents.append(('manual', 'merged'))
-        manual_contents.append(('manual', 'reits'))
-        manual_contents.append(('manual', 'paper-uncertainty'))
+        #manual_contents.append(('manual', 'merged'))
+        #manual_contents.append(('manual', 'reits'))
+        #manual_contents.append(('manual', 'paper-uncertainty'))
         
         # check that all the docnames are unique
         pnames = [_[1] for _ in manual_contents]
@@ -99,16 +105,15 @@ class RenderManual(QuickApp):
             msg = 'Repeated names detected: %s' % pnames
             raise ValueError(msg)
         
-        print('manual contents: %s' % manual_contents)
         for libname, docname in manual_contents:
             print('%s - %s' % (libname, docname))
             res = context.comp(render, libname, docname, generate_pdf,
                                job_id=docname)
-#                                job_id='render-%s-%s' % (libname, docname))
             if libname == 'manual':
                 source = '%s.md' % docname
-                if os.path.exists(source):
-                    filenames = [source]
+                s = list(locate_files(".", source))
+                if s:
+                    filenames = [s[0]]
                     erase_job_if_files_updated(context.cc, promise=res, 
                                            filenames=filenames)
                 else:

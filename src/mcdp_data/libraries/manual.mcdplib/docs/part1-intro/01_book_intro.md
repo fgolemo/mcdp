@@ -1,3 +1,5 @@
+# First part      {#part:introduction}
+
 # Introduction
 
 ## The problem of system co-design
@@ -14,13 +16,15 @@ Here is a great quote:
 
     <p><a href="https://en.wikipedia.org/wiki/Howard_H._Aiken"
           title="Howard H. Aiken (1900-1973). Creator of the MARK I computer.">
-          &mdash; Howard Aiken</a>,
-        quoted by <a href="https://en.wikipedia.org/wiki/Kenneth_E._Iverson"
+          &mdash; Howard Aiken</a>
+          <footnote>
+        Quoted by <a href="https://en.wikipedia.org/wiki/Kenneth_E._Iverson"
             title='Kenneth E. Iverson (1920-2004). Creator of programming language APL.'>
             Kenneth Iverson</a>,
             quoted<!--  by Donald McIntyre  -->
             in <a href='http://dl.acm.org/citation.cfm?id=206985'>this paper</a>,
-            but ultimately sourceless and probably apocryphical.
+            but ultimately sourceless and probably apocryph`1    al.
+            </footnote>
     </p>
     <style>
      #firstquote p:nth-child(2) {

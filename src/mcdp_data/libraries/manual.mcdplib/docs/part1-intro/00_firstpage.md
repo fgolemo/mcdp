@@ -22,19 +22,13 @@
 </p>
 
 <div class='abstract'>
-    Compiled: @@{PYMCDP_COMPILE_TIME} at @@{PYMCDP_COMPILE_DATE}
-
-    <!-- Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-    tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-    quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse
-    cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non
-    proident, sunt in culpa qui officia deserunt mollit anim id est laborum. -->
 </div>
-<!--
-<div id='build_stats'>
-    Version PYMCDP_VERSION. Manual compiled from branch COMPILE_BRANCH on COMPILE_DATE.
-</div> -->
+
+<pre id='build_stats'>
+    Compiled: @@{PYMCDP_COMPILE_TIME} at @@{PYMCDP_COMPILE_DATE}
+    Version @@{PYMCDP_VERSION}.
+    <!-- Manual compiled from branch COMPILE_BRANCH on COMPILE_DATE. -->
+</pre>
 
 <div id='affiliation'> The author is with the Laboratory of Information and
     Decision Systems at the Massachusetts Institute of Technology; with ETH Zurich;

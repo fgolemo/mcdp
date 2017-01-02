@@ -29,7 +29,7 @@ html: $(manual_html)
 # always check
 .PHONY: $(manual_html)
 
-$(manual_html): *.md 00_main_template.html
+$(manual_html): 
 	DISABLE_CONTRACTS=1 mcdp-render-manual --output_file $@ -c "config echo 1; rparmake"
 	$(MAKE) extract-assets-manual
 
@@ -79,6 +79,9 @@ $(manual_pdf_prince): $(manual_html) $(pdf_metadata) $(cssdir)/*less $(cssdir)/*
 prince-only:
 	$(MAKE) css
 	prince --javascript $(manual_html) -o $(manual_pdf_prince)
+	@echo ""
+	@echo "Written on:    $(manual_pdf_prince)"
+
 #
 # lulu-6by9.pdf: $(manual_pdf_prince)
 # 	echo User Preview to print to the page size -- pdfjam does not work

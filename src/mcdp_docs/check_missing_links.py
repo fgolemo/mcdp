@@ -15,7 +15,6 @@ def get_id2element(soup):
     for element in soup.select('[id^="MathJax"]'): # stuff created by MathJax
         ignore.add(element['id'])
         
-    
     for element in soup.select('[id]'):
         ID = element['id']
         if ID in ignore:
@@ -23,18 +22,18 @@ def get_id2element(soup):
         if ID in id2element:
             duplicates.add(ID)
             other = id2element[ID]
-            msg = 'More than one element with id %r.' % ID
-#             msg += str(other)
-            logger.error(msg)
             for e0 in [element, other]:
                 if not 'errored' in e0.attrs.get('class', ''):
-                    msg =  'Duplicated ID %r' % element['id']
-                    logger.error(msg)
                     add_class(e0, 'errored')
                     w = Tag(name='span', attrs={'class':'duplicated-id'})
-                    w.string =msg
+                    w.string = 'More than one element with id %r.' % ID
                     e0.insert_after(w)
-        id2element[element['id']] = element  
+        id2element[element['id']] = element
+        
+    if duplicates:
+        s = ", ".join(sorted(duplicates))
+        msg = '%d duplicated IDs found (not errored): %s' % (len(duplicates), s) 
+        logger.error(msg)
     return id2element, duplicates
 
 def check_if_any_href_is_invalid(soup):
@@ -56,6 +55,7 @@ def check_if_any_href_is_invalid(soup):
 
         assert href.startswith('#')
         ID = href[1:]
+#         not_found = []
         if not ID in id2element:
             # try to fix it
             # if there is already a prefix, remove it 
@@ -93,14 +93,14 @@ def check_if_any_href_is_invalid(soup):
                 a.insert_after(w)
                 
             else:
-                msg = 'Not found %r' % (href)
 #                 msg = 'Not found %r (also tried %s)' % (href, ", ".join(others))
-                logger.error(msg)
-                errors.append(msg)
+#                 not_found.append(ID)
+#                 logger.error(msg)
+                errors.append('Not found %r' % (href))
                 if not 'errored' in a.attrs.get('class', ''):
                     add_class(a, 'errored')
                     w = Tag(name='span', attrs={'class':'href-invalid href-invalid-missing'})
-                    w.string = msg
+                    w.string = 'Not found %r' % (href)
                     a.insert_after(w)
             
         if ID in duplicates:

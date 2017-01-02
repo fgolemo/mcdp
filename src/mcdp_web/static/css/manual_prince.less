@@ -10,6 +10,78 @@ h1:not(#booktitle) {
   string-set: current-header content();
 }
 
+section#part\:introduction\:section {    page: part-introduction; }
+section#part\:domains\:section {    page: part-domains; }
+section#part\:reference\:section {    page: part-reference; }
+section#part\:math\:section      {    page: part-math; }
+section#part\:developers\:section      {    page: part-developers; }
+
+@part-reference-color: yellow;
+
+@page part-reference:left {
+    @left-top {
+        background-color: @part-reference-color;
+        content: 'left-top';
+    }
+    @left-middle {
+        background-color: @part-reference-color;
+        content: 'left-middle';
+    }
+    @left-bottom {
+        background-color: @part-reference-color;
+        content: 'left-bottom';
+    }
+    @top-left-corner {
+        background-color: @part-reference-color;
+        content: 'top-left-corner';
+    }
+    @bottom-left-corner {
+        background-color: @part-reference-color;
+        content: 'bottom-left-corner';
+    }
+
+
+    @left-middle {
+        content: 'Reference left';
+        /*transform: rotate(90deg);*/
+    }
+}
+
+@page part-reference:right {
+    @right-middle {
+        background-color: @part-reference-color;
+    }
+    @right-top {
+        background-color: @part-reference-color;
+        content: 'right-top';
+    }
+    @right-bottom {
+        background-color: @part-reference-color;
+        content: 'right-bottom';
+    }
+    @top-right-corner {
+        background-color: @part-reference-color;
+        content: 'top-right-corner';
+    }
+    @bottom-right-corner{
+        background-color: @part-reference-color;
+        content: 'bottom-right-corner';
+    }
+
+    @right-middle {
+        content: 'Reference right';
+
+        /*transform: rotate(90deg);*/
+    }
+}
+
+@page part-math {
+    @right {
+        background-color: blue;
+        content: 'The math';
+    }
+}
+
 @page normal {
     @top {
         vertical-align: bottom;
@@ -54,12 +126,14 @@ h1:not(#booktitle) {
             font-size: 10pt;
             content: counter(page);
          }
-}
+    }
+
 
     /* only in the manual */
     h1:not(#booktitle) {
         page-break-before: always;
 
+    }
 }
 
  td pre { margin-top: 0 !important;  margin: 0 !important;}
