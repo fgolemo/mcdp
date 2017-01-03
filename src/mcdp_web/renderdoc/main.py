@@ -4,7 +4,7 @@ from string import Template
 
 from contracts import contract
 from contracts.interface import location, Where
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, indent
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_library import MCDPLibrary
 from mcdp_report.gg_utils import embed_images_from_library2
@@ -56,7 +56,7 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
         assert k in s
         s = s.replace(k, v)
         
-    s = s.replace('%\n', '&nbsp;')
+    
     # copy all math content,
     #  between $$ and $$
     #  between various limiters etc.
@@ -98,8 +98,8 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
             raise_desc(DPInternalError, msg, s=s)
         def preprocess_equations(x):
             # this gets mathjax confused
-            x = x.replace('>', '\\gt')
-            x = x.replace('<', '\\lt')
+            x = x.replace('>', '\\gt{}') # need brace; think a<b -> a\lt{}b
+            x = x.replace('<', '\\lt{}')
 #             print('replaced equation %r by %r ' % (x0, x))
             return x
             
@@ -113,12 +113,11 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     # need to process tabular before mathjax 
     s = escape_for_mathjax(s)
 
-    check_html_fragment(s)
 #     print(indent(s, 'before prerender_mathjax | '))
     # mathjax must be after markdown because of code blocks using "$"
     
     s = prerender_mathjax(s)
-
+#     print(indent(s, 'after prerender_mathjax | '))
     for k,v in mcdpenvs.items():
         # there is this case:
         # ~~~
@@ -126,9 +125,6 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
         # ~~~
         s = s.replace(k, v)
 
-    check_html_fragment(s)
-    
-#     print(indent(s, 'after prerender_mathjax | '))
     
 
     s = s.replace('<p>DRAFT</p>', '<div class="draft">')
@@ -186,6 +182,12 @@ def get_document_properties(s):
     return properties
     
 def get_library_from_document(s, default_library):
+    """
+        Reads a tag like this:
+        
+            <meta name="mcdp-library" content='am'/>
+
+    """ 
     properties = get_document_properties(s)
     print('properties: %s' % properties)
         
@@ -306,9 +308,10 @@ def protect_my_envs(s):
     for k, v in list(subs.items()):
         # replace back if k is in a line that is a comment
         # or there is an odd numbers of \n~~~
-        if is_inside_markdown_quoted_block(s, s.index(k)):
-            s = s.replace(k, v)
-            del subs[k]
+        if k in s: # it might be recursively inside something
+            if is_inside_markdown_quoted_block(s, s.index(k)):
+                s = s.replace(k, v)
+                del subs[k]
 
     return s, subs
 

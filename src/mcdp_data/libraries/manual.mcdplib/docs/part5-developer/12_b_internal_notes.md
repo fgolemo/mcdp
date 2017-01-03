@@ -128,7 +128,7 @@ Other abbreviations
 </col2>
 
 ~~~
-<pre mcdp-value>
+<mcdp-value></mcdp-value>
 ~~~
 instead of
 ~~~
@@ -143,7 +143,7 @@ instead of
 
 
 ~~~
-<pre mcdp-poset>
+<pre mcdp-poset/>
 ~~~
 instead of
 ~~~
@@ -189,7 +189,7 @@ To add a caption, use `figure-caption`:
         content
     </element>
 
-Alternatively, you can put anywhere an element `figucaption` with ID `...:caption`:
+Alternatively, you can put anywhere an element `figcaption` with ID `...:caption`:
 
     <element figure-id="fig:code">
         content
@@ -199,7 +199,7 @@ Alternatively, you can put anywhere an element `figucaption` with ID `...:captio
         This is my caption. Can contain <code>code</code>.
     </figcaption>
 
-Other... -->
+
 
 ### mcdp_ndp_graph_templatized
 

@@ -10,7 +10,7 @@ mcdp-render -D ${libraries} ${docname}
 
 out_html=out/mcdp_render/${docname}.html
 
-./extract-assets ${out_html} ${out_html}
+#./extract-assets ${out_html} ${out_html}
 
 prince -o ${docname}.pdf  ${out_html}
 

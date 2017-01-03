@@ -1,3 +1,5 @@
+<meta name="mcdp-library" content='droneD_complete_v2'/>
+
 <style type='text/css'>
 .F { color: darkgreen; }
 .R { color: darkred;}

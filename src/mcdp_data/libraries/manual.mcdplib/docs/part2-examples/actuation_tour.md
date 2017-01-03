@@ -1,3 +1,7 @@
+<meta name="mcdp-library" content='actuation'/>
+
+
+
 A servo motor like the [Traxxas 2075 Digital High-Torque Waterproof Servo][Traxxas_2075]
 is a device that provides the <mcdp-poset>load AngularPlacement</mcdp-poset> functionality,
 and to do so requires the <mcdp-poset>load PPM</mcdp-poset> resource.

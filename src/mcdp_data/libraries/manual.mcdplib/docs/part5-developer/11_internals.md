@@ -1,7 +1,6 @@
 # Behind the scenes
 
-This chapter provides a description of the computation that is happening behind
-the scenes, including the intermediate representation formats.
+This chapter provides a description of the computation that is happening behind the scenes, including the intermediate representation formats.
 
 Before looking at this, you should read some of the papers; see \ref{papers}.
 

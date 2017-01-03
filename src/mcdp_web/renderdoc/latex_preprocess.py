@@ -10,6 +10,7 @@ from mcdp_web.renderdoc.latex_inside_equation_abbrevs import replace_inside_equa
 from mcdp_web.renderdoc.markdown_transform import is_inside_markdown_quoted_block
 from mocdp import logger
 from mocdp.exceptions import DPSyntaxError
+from contracts import contract
 
 
 def assert_not_inside(substring, s):
@@ -19,13 +20,15 @@ def assert_not_inside(substring, s):
         msg = 'I found the forbidden substring %r in string.' % substring
         raise DPSyntaxError(msg, where=w)
     
+UNICODE_NBSP = u"\u00A0".encode('utf-8')
+
 def latex_preprocessing(s):
-#     assert_not_inside('\\\\hspace', s)
-    s = s.replace('~$', '&nbsp;$') 
-    # note: thi
     group = 'TILDETILDETILDE'
     s = s.replace('~~~', group)
-    s = s.replace('~', ' ') # XXX
+    
+    
+    s = s.replace('%\n', UNICODE_NBSP)
+    s = s.replace('~', UNICODE_NBSP) # XXX
     s = s.replace(group, '~~~')
     
     s = substitute_simple(s, 'textendash', '&ndash;')
@@ -33,7 +36,7 @@ def latex_preprocessing(s):
     
     s = substitute_simple(s, 'and', '<span class="and" style="margin-left: 2em"></span>')
      
-    justignore = ['vfill', 'pagebreak', 'leavevmode', 'clearpage']
+    justignore = ['vfill', 'pagebreak', 'leavevmode', 'clearpage', 'hline']
     for j in justignore:
         s = substitute_command_ext(s, j, lambda args, opts: '<!--skipped %s-->' % j,  # @UnusedVariable
                                    nargs=0, nopt=0)
@@ -93,7 +96,6 @@ def latex_preprocessing(s):
     
     s = sub_headers(s)               
     def sub_cite(args, opts):
-#         print('cite args=%s opt=%s' % (args, opts))
         cits = args[0].split(',')
         inside = opts[0]
         if inside is None:
@@ -106,13 +108,18 @@ def latex_preprocessing(s):
     
     s = substitute_command_ext(s, 'cite', sub_cite, nargs=1, nopt=1)
    
-#     s = re.sub(r'\\cite\[(.*)?\]{(.*?)}', r'<a href="#bib:\2">[\1]</a>', s)
-#     s = re.sub(r'\\cite{(.*?)}', r'<a href="#bib:\1" replace="true"></a>', s)
-#     
+    def sub_multicolumn(args, opts):
+        ncols, align, contents = args[:3]
+        # TODO:
+        return '<span multicolumn="%s" align="%s">%s</span>' % (ncols, align, contents)  
+    
+    s = substitute_command_ext(s, 'multicolumn', sub_multicolumn, nargs=3, nopt=0)
+
+
     # note: nongreedy matching ("?" after *); and multiline (re.M) DOTALL = '\n' part of .
     s = re.sub(r'\\emph{(.*?)}', r'<em>\1</em>', s, flags=re.M | re.DOTALL)
     s = re.sub(r'\\textbf{(.*?)}', r'<strong>\1</strong>', s, flags=re.M | re.DOTALL)
-    s = s.replace('~"', '&nbsp;&ldquo;')
+    
     s = s.replace('\,', '&ensp;')
     s = s.replace('%\n', '\n')
     
@@ -686,8 +693,7 @@ def replace_environment_ext(s, envname, f):
     acceptance = None
     s = extract_delimited(s, d1, d2, subs, domain, acceptance=acceptance)
 #     print('I found %d occurrences of environment %r' %  (len(subs), envname))
-    
-    for k, complete in subs.items():
+    for k, complete in list(subs.items()):
         assert complete.startswith(d1)
         assert complete.endswith(d2)
         inside = complete[len(d1):len(complete)-len(d2)]
@@ -700,7 +706,17 @@ def replace_environment_ext(s, envname, f):
         else:
             opt = None
         r = f(inside, opt)
-        s = s.replace(k, r)
+        subs[k] = r
+        
+    # recursive substitutions
+    while True:
+        changed = False
+        for k, v in subs.items():
+            if k in s:
+                s = s.replace(k, v)
+                changed = True
+        if not changed:
+            break
     return s 
     
 def replace_environment(s, envname, classname, labelprefix):
@@ -886,7 +902,7 @@ def can_be_used_in_command(c):
 class NotFound(Exception):
     pass
 
-        
+@contract(returns=str)
 def extract_delimited(s, d1, d2, subs, domain, acceptance=None):
     """
         acceptance: s, i -> Bool
@@ -926,14 +942,29 @@ def extract_delimited(s, d1, d2, subs, domain, acceptance=None):
     assert complete.endswith(d2)
     
     inside = complete[len(d1):len(complete)-len(d2)]
-    if False:
+    if True and 'begin' in d1:
         try:
             a2 = get_next_unescaped_appearance(inside, d1, 0)
-            if acceptance(s,a + a2):
-                msg = 'Recursive %r' % d1
-                msg +=  '\n\n starting at (inaccurate):\n\n'+ Where(s, a).__str__()
-                msg +=  '\n\n inside (inaccurate):\n\n'+ Where(inside, a2).__str__()
-                raise ValueError(msg)
+            if acceptance(s, a + a2):
+#                 msg = 'Recursive %r' % d1
+#                 msg +=  '\n\n starting at (inaccurate):\n\n'+ Where(s, a).__str__()
+#                 msg +=  '\n\n inside (inaccurate):\n\n'+ Where(inside, a2).__str__()
+#                 
+                
+                # this is the case
+                #   d1 d1 d2 d2
+                #  what we want is to defer it
+                start_from = a + len(d1)
+                sb = s[start_from:]
+                def acceptance2(string, index):
+#                     assert string == sb, (string, sb)
+                    return acceptance(s, index+start_from)
+                sb2 = extract_delimited(sb, d1, d2, subs, domain, acceptance=acceptance2)
+                # now we have done 
+                #   d1  s2
+                s0 = s[:start_from] + sb2
+                return extract_delimited(s0, d1, d2, subs, domain, acceptance=acceptance)
+            
         except NotFound:
             pass
     
@@ -941,20 +972,20 @@ def extract_delimited(s, d1, d2, subs, domain, acceptance=None):
     KEYPREFIX = 'KEY' + domain
     POSTFIX = 'ENDKEY'
     key = KEYPREFIX + ('%0003d' % len(subs)) + POSTFIX
-    if KEYPREFIX in complete:
-        msg = 'recursive - %s = %r' % (key, complete)
-        msg += '\n\n'
-        def abit(s):
-            def nl(x):
-                return x.replace('\n', ' ↵ ')
-            L = len(s)
-            if L < 80: return nl(s)
-            ss = nl(s[:min(L, 50)])
-            se = nl(s[L-min(L, 50):])
-            return ss + ' ... ' + se
-        for k in sorted(subs):
-            msg += '%r = %s\n' % (k, abit(subs[k]))
-        raise ValueError(msg)
+#     if KEYPREFIX in complete:
+#         msg = 'recursive - %s = %r' % (key, complete)
+#         msg += '\n\n'
+#         def abit(s):
+#             def nl(x):
+#                 return x.replace('\n', ' ↵ ')
+#             L = len(s)
+#             if L < 80: return nl(s)
+#             ss = nl(s[:min(L, 50)])
+#             se = nl(s[L-min(L, 50):])
+#             return ss + ' ... ' + se
+#         for k in sorted(subs):
+#             msg += '%r = %s\n' % (k, abit(subs[k]))
+#         raise ValueError(msg)
     subs[key] = complete
     
 #     print ('%r = %s' % (key, complete))

@@ -1,3 +1,4 @@
+<meta name="mcdp-library" content='rover_energetics'/>
 
 ## Space Rovers Energetics
 
@@ -20,7 +21,7 @@ One way to get the heat is to procure a bit of Plutonium.
       <render class="ndp_graph_templatized_labeled">`PlutoniumPellet</render>
 </col2>
 
-We can connect the two, by specifying that the heat required by the 
+We can connect the two, by specifying that the heat required by the
 thermocouple is provided by the pellet:
 
 <render class="ndp_graph_enclosed" id="plutonium_plus_thermocouple" enclosed="false">
@@ -30,10 +31,18 @@ mcdp {
   heat required by thermocouple ≼ heat provided by plutonium_pellet
 }
 </render>
- 
+
 
 The masses are summed together:
 
 <pre class="mcdp" id='rtig'></pre>
 
 <render class="ndp_graph_enclosed">`rtig</render>
+
+
+Putting everything together
+
+
+<render class='ndp_graph_normal'>
+  `EnergySources
+</render>

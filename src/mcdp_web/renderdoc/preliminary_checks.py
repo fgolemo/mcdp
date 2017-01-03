@@ -95,8 +95,8 @@ def check_most_of_it_xml(s):
 
 def check_parsable(s):
     from xml.etree import ElementTree as ET
-#     parser = ET.XMLParser()
-#     parser.entity["nbsp"] = unichr(160)
+    #     parser = ET.XMLParser()
+    #     parser.entity["nbsp"] = unichr(160)
     s = '<add-wrap-for-xml-parser>'+s+'</add-wrap-for-xml-parser>'
     # print indent(s, ' for xml')
     try:
@@ -105,7 +105,6 @@ def check_parsable(s):
         line1, col1 = e.position
         line = line1 - 1
         col = col1 - 1
-#         print('XML says position = %s' % str(e.position))
         character = location(line, col, s)
         msg = 'Invalid XML: %s' % e
         raise DPSyntaxError(msg, where=Where(s, character))

@@ -31,7 +31,7 @@ html: $(manual_html)
 
 $(manual_html): 
 	DISABLE_CONTRACTS=1 mcdp-render-manual --output_file $@ -c "config echo 1; rparmake"
-	$(MAKE) extract-assets-manual
+	#$(MAKE) extract-assets-manual
 
 extract-assets-manual:
 	./extract-assets $(manual_html) $(manual_html)

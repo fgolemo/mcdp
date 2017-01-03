@@ -75,29 +75,7 @@ class RenderManual(QuickApp):
         generate_pdf = options.pdf
         files_contents = []
         
-        manual_contents = list(get_manual_contents())
-        
-        insert_after = ('manual', '10_scenarios')
-        
-        extra = [
-            ('rover_energetics', 'energy_choices'),
-            ('rover_energetics', 'energy_choices2'),
-            ('rover_energetics', 'energy_choices3'),
-        
-            ('plugs', 'sockets'),
-            ('plugs', 'sockets2'),
-            ('droneD_complete_v2', 'drone_complete'),
-            ('actuation', 'actuation_tour'),
-        # 3d printing
-        # processors: composition
-        ]
-        
-        at = manual_contents.index(insert_after) + 1
-        manual_contents = manual_contents[:at] + extra + manual_contents[at:] 
-
-        #manual_contents.append(('manual', 'merged'))
-        #manual_contents.append(('manual', 'reits'))
-        #manual_contents.append(('manual', 'paper-uncertainty'))
+        manual_contents = list(get_manual_contents()) 
         
         # check that all the docnames are unique
         pnames = [_[1] for _ in manual_contents]
@@ -105,15 +83,18 @@ class RenderManual(QuickApp):
             msg = 'Repeated names detected: %s' % pnames
             raise ValueError(msg)
         
+        local_files = list(locate_files('.', '*.md'))
+        basename2filename = dict( (os.path.basename(_), _) for _ in local_files)
+        
         for libname, docname in manual_contents:
-            print('%s - %s' % (libname, docname))
+            print('adding document %s - %s' % (libname, docname))
             res = context.comp(render, libname, docname, generate_pdf,
                                job_id=docname)
             if libname == 'manual':
+                
                 source = '%s.md' % docname
-                s = list(locate_files(".", source))
-                if s:
-                    filenames = [s[0]]
+                if source in basename2filename:
+                    filenames = [basename2filename[source]]
                     erase_job_if_files_updated(context.cc, promise=res, 
                                            filenames=filenames)
                 else:

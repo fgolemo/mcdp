@@ -1,4 +1,4 @@
-<meta name="mcdp-library" value="plugs"></meta>
+<!-- <meta name="mcdp-library" content='plugs'/> -->
 
 
 # Cute examples

@@ -4,9 +4,7 @@
 
 ## Basics
 
-The goal of the language is to represent all and only [MCDPs (Monotone Co-Design
-Problems)](#def:MCDP). For example, multiplying by a negative number is a syntax
-error.
+The goal of the language is to represent all and only [MCDPs (Monotone Co-Design Problems)](#def:MCDP). For example, multiplying by a negative number is a syntax error.
 <!-- <footnote>Similarly, CVX's~\cite{cvx} goal
 is to describe all only convex problems.</footnote> -->
 
@@ -17,8 +15,7 @@ by its <f>functionality</f> and its <r>resources</r>.
 
 The language encourages a compositional approach to co-design.
 
-There are several notions of "compositions" between two design problems (DPs)
-for which MCDPL provides syntactic constructs:
+There are several notions of "compositions" between two design problems (DPs) for which MCDPL provides syntactic constructs:
 
 * *series* ([](#subfig:series)): two DPs can be connected in series
   if the second provides
@@ -91,20 +88,10 @@ Interval(1g, 10g)
 
 \subsection{Some related work}
 
-Modern engineering has long since recognized the two ideas of modularity
-and hierarchical decomposition, yet there is no general quantitative
-theory of design that is applied to different domains. Most of the
-works in the theory of design literature study abstractions that are
-meant to be useful for a human designer, rather than an automated
-system. For example, a \emph{function structure }diagram~\cite[p. 32]{pahl07}
-decomposes the function of a system in subsystems that exchange energy,
-materials, and signals~(\prettyref{fig:thatbook}). Design approaches
-such as Suh's theory of \emph{axiomatic design~}\cite{suh01} provide
-quantitative formalization but are limited to linear or linearized
-models, and cannot deal with recursive constraints.
+Modern engineering has long since recognized the two ideas of modularity and hierarchical decomposition, yet there is no general quantitative theory of design that is applied to different domains. Most of the works in the theory of design literature study abstractions that are meant to be useful for a human designer, rather than an automated system. For example, a *function structure* diagram~\cite[p. 32]{pahl07} decomposes the function of a system in subsystems that exchange energy, materials, and signals~(\prettyref{fig:thatbook}). Design approaches such as Suh's theory of \emph{axiomatic design~}\cite{suh01} provide quantitative formalization but are limited to linear or linearized models, and cannot deal with recursive constraints.
 
 \begin{figure}[H]
-\subfloat[\emph{Function structure diagram} from~\cite{pahl07}\label{fig:thatbook}]{\includegraphics[scale=0.33]{reits2_other_intro}}
+\subfloat[Function structure diagram from~\cite{pahl07}\label{fig:thatbook}]{\includegraphics[scale=0.33]{reits2_other_intro}}
 \subfloat[Hierarchical decomposition of a watch's "form" and "function"~\cite{sussman80constraints}]{\includegraphics[scale=0.33]{reits2_steele}}
 \caption{}
 \end{figure}
@@ -114,7 +101,7 @@ than those expressible as an MCDP~\cite{dechter03}, at the cost
 of having fewer guarantees, and not having a clear compositional property.
 
 In Computer Science, researchers have proposed models of computations
-based on constraint satisfaction, such as \emph{Prolog, }or constraint
+based on constraint satisfaction, such as \emph{Prolog,} or constraint
 propagation~\cite{steele80definition}. Compared to these, there
 are two distinct features of MCDPs: (1)~the semantics accommodates
 multiple options for any quantity (the valuation of an edge is an

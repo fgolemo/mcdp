@@ -35,15 +35,7 @@ Here is a great quote:
 </blockquote>
 
 
-The first part of the quote, "A system is composed of components", is plain as
-day as much as it is tautological. We could equally say: "A system is
-partitioned in parts". The second part, "a component is something you
-understand", is insightful: we call "system" what is too difficult to
-understand. Something is a "system" if we cannot keep it in mind in its entirety
-at the same time. This definition is, of course, an anthropocentric definition,
-as it is a limitation of the human mind, related to the amount of neurons in the
-brain. It also depends on what exactly is the task at hand with which we are
-confronted. Here, we consider the task of *designing* systems.
+The first part of the quote, "A system is composed of components", is plain as day as much as it is tautological. We could equally say: "A system is partitioned in parts". The second part, "a component is something you understand", is insightful: we call "system" what is too difficult to understand. Something is a "system" if we cannot keep it in mind in its entirety at the same time. This definition is, of course, an anthropocentric definition, as it is a limitation of the human mind, related to the amount of neurons in the brain. It also depends on what exactly is the task at hand with which we are confronted. Here, we consider the task of *designing* systems.
 
 So, our slogan will be:
 
@@ -64,19 +56,13 @@ So, our slogan will be:
 </style>
 
 
-After you know how to design all components separately, you still have the
-problem of designing the components in the system together. This problem of
-"designing things together" is what we shall call "**co-design**". This problem
-is one of the fundamental issues in engineering and computer sciences and
-appears by different names everywhere.
+After you know how to design all components separately, you still have the problem of designing the components in the system together. This problem of "designing things together" is what we shall call "**co-design**". This problem is one of the fundamental issues in engineering and computer sciences and appears by different names everywhere.
 
 
 
 ## A new approach
 
-Recently developed theory and tools allow to define these co-design problems in
-a formal yet intuitive way that is cross-disciplinary \xxx and to develop solution
-methods.
+Recently developed theory and tools allow to define these co-design problems in a formal yet intuitive way that is cross-disciplinary \xxx and to develop solution methods.
 
 
 Understand a component
@@ -84,12 +70,7 @@ Understand a component
 The idea is to formalize these components by their "functionality" and
 "resources". \xxx
 
-We call <q>**<f>functionality</f>**</q> is what the component provides: why is
-it in the system in the first place? For example, a battery provides capacity
-(kWh) Other words for functionality are: <f>(functional) requirements</f>,
-<f>specifications</f>, simply <q><f>functions</f></q>. <footnote> Used
-extensively in embedded systems, a field which is familiar with these issues.
-This name is not used because too confusing.</footnote>
+We call <q>**<f>functionality</f>**</q> is what the component provides: why is it in the system in the first place? For example, a battery provides capacity (kWh) Other words for functionality are: <f>(functional) requirements</f>, <f>specifications</f>, simply <q><f>functions</f></q>. <footnote> Used extensively in embedded systems, a field which is familiar with these issues. This name is not used because too confusing.</footnote>
 
 We call "**<r>resources</r>**" what the component needs. Synonyms for resources
 are: <r>costs</r>, <r>dependencies</r>, \xxx
@@ -102,10 +83,7 @@ The **co-design constraints** are the \xxx
 <img class='art' latex-options='scale=0.33' src="gmcdp_setup.pdf" />
 
 
-If we generalize beyond "components", the physical components of engineering and
-the logical components of computer sciences, we can (as in "physical" or
-"logical" components) and further abstract and generalize to *relations*. So
-instead of "components" we are going to talk about **design problems**.
+If we generalize beyond "components", the physical components of engineering and the logical components of computer sciences, we can (as in "physical" or "logical" components) and further abstract and generalize to *relations*. So instead of "components" we are going to talk about **design problems**.
 
 All the concepts used have an intuitive graphical representation.
 
@@ -119,19 +97,13 @@ because of the node $\posleq$ that joins them.</footnote>
 Workflow \xxx
 
 
-After an MCDP has been defined, then it can be "queried". For example, the user
-can ask what is the optimal configuration of the system that has the least
-amount of resources.
+After an MCDP has been defined, then it can be "queried". For example, the user can ask what is the optimal configuration of the system that has the least amount of resources.
 
 
-MCDPL comes with a web-based GUI described in <a href="#gui"/>. The user
-can input a model and immediately see the graphical representation of such
-model.
+MCDPL comes with a web-based GUI described in <a href="#gui"/>. The user can input a model and immediately see the graphical representation of such model.
 
 
-The tools for this do not exist yet completely. So far, the language exists
-(though new constructs will be found) and the environment is an approximation of
-what we need.
+The tools for this do not exist yet completely. So far, the language exists (though new constructs will be found) and the environment is an approximation of what we need.
 
 
 ## Where to use it?

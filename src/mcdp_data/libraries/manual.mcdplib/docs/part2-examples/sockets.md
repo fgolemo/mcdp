@@ -1,3 +1,5 @@
+<meta name="mcdp-library" content='plugs'/>
+
 ## The socket/plugs/converters domain
 
 We are going to model the domain of AC sockets and plugs.
@@ -10,13 +12,13 @@ There are many [AC power plugs and sockets][wiki].
 [wiki]: https://en.wikipedia.org/wiki/AC_power_plugs_and_sockets
 
 <style type='text/css'>
-    table.sockets td { 
-        font-style: italic; 
-        text-align:center; 
+    table.sockets td {
+        font-style: italic;
+        text-align:center;
         font-size: smaller;
     }
     table.sockets img {
-        width: 5em; 
+        width: 5em;
         margin-top: 0.5em;
     }
 </style>
@@ -50,18 +52,18 @@ We can use a ``poset`` to describe the poset [](#fig:socket_type):
 
 <pre class='mcdp_poset' id='socket_type' label='socket_type.mcdp_poset'></pre>
 
-<render class='hasse_icons' figure-id='fig:socket_type' 
+<render class='hasse_icons' figure-id='fig:socket_type'
     figure-caption='The poset of plugs.' style='width: 10em'>
    `socket_type
 </render>
 
 
-### Voltages 
+### Voltages
 
 Around the world, the two main voltages are <code class='mcdp_value'>110V</code> and <code class='mcdp_value'>220V</code>.
 In this case, we cannot use the usual Volt poset indicated
 by <code class='mcdp_poset'>V</code>, because that would mean
-that <code class='mcdp_value'>220V</code> is always 
+that <code class='mcdp_value'>220V</code> is always
 preferable to <code class='mcdp_value'>110V</code>.
 
 Thus we create a discrete poset as follows:
@@ -78,7 +80,7 @@ Similarly, we model different frequencies with the poset
 
 ### Power consumption
 
-The function of a socket in the wall is 
+The function of a socket in the wall is
 to provide power. This function is parameterized (at least) by:
 
 * The socket shape, indicated by <code class='mcdp_poset'>`socket_type</code>
@@ -87,7 +89,7 @@ to provide power. This function is parameterized (at least) by:
 
 * The frequency, indicated by <code class='mcdp_poset'>`AC_frequencies</code>
 
-* The maximum power draw, measured in Watts. (Alternatively, this 
+* The maximum power draw, measured in Watts. (Alternatively, this
 could be parameterized by current.)
 
 Therefore, we can create the poset <code class='mcdp_poset'>`AC_power</code> as follows:
@@ -97,7 +99,7 @@ Therefore, we can create the poset <code class='mcdp_poset'>`AC_power</code> as 
 ### Modeling a plug adapter
 
 
-Based on these definitions, we can define the function of 
+Based on these definitions, we can define the function of
 a socket adapter.
 
 Consider [one of these OREI adapters][orei], which you can buy for $7.31:
@@ -125,7 +127,7 @@ A plug adapter can be modeled as follows:
 ### A 2-in-1 adapter
 
 
-This is another [handy 2-in-1 adapter][another] that 
+This is another [handy 2-in-1 adapter][another] that
 sells for 6.31:
 
 <img src='orei_2in1.png' style='width: 10em'/>
@@ -148,7 +150,7 @@ We can forget all this complexity and consider the block:
 
 We can repeat the same story with DC connectors.
 
-<img src='DC_connectors.jpg' 
+<img src='DC_connectors.jpg'
      style='width: 15em;'/>
 
 <pre class='mcdp_poset' id='barrel_connectors'
@@ -156,7 +158,7 @@ We can repeat the same story with DC connectors.
 
 
 ### USB connectors
-    
+
 <style type='text/css'>
     table#usb img {
         width: 5em;
@@ -180,13 +182,13 @@ We can repeat the same story with DC connectors.
 We can define DC connectors to be the union (co-product)
 of the two sets:
 
-<pre class='mcdp_poset' id='DC_connectors' 
+<pre class='mcdp_poset' id='DC_connectors'
      label='DC_connectors.mcdp_poset'></pre>
 
 
 ### DC power
 
-<pre class='mcdp_poset' id='DC_voltages' 
+<pre class='mcdp_poset' id='DC_voltages'
      label='DC_voltages.mcdp_poset'></pre>
 
 <pre class='mcdp_poset' id='DC_power'
@@ -200,7 +202,7 @@ of the two sets:
 from AC power to DC power.
 
 <img src='ravpower.png' style='height: 8em'/>
-    
+
 [converter]: https://www.amazon.com/RAVPower-Charger-Technology-Foldable-indicator/dp/B00OQ1I2C2/
 
 <pre class='mcdp' id='Ravpower' label='Ravpower.mcdp'></pre>
@@ -214,7 +216,7 @@ We can query the model as follows. Suppose we need 2 outputs, each of 0.5A.
 
 <pre class='mcdp_value'>solve(
     ⟨ ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩,
-      ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩ ⟩, 
+      ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩ ⟩,
     `Ravpower)
 </pre>
 
@@ -223,23 +225,23 @@ This is the output:
 <pre class='print_value'>
     solve(
     ⟨ ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩,
-      ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩ ⟩, 
+      ⟨ `USB_connectors:USB_Std_A, `DC_voltages: v5, 0.5 A⟩ ⟩,
     `Ravpower)
 </pre>
 
 The model says we have two options: we need to find an outlet of ``TypeM``
-at either 110 V or 220 V which will provide 5 W of power. Moreover, we need 
+at either 110 V or 220 V which will provide 5 W of power. Moreover, we need
 at least 10.99 USD to buy the component.
 
 
 ### Composition
 
 This is an example of composition of the <a href="#Ravpower">Ravpower charger</a>
-and the <a href="#Orei_2in1">Orei_2in1 adapter</a>. 
+and the <a href="#Orei_2in1">Orei_2in1 adapter</a>.
 
 <pre class='mcdp' id='orei_plus_ravpower' label='orei_plus_ravpower.mcdp'></pre>
 
-Note the use of the keyword "<code class='keyword'>ignore</code>" to ignore the 
+Note the use of the keyword "<code class='keyword'>ignore</code>" to ignore the
 functionality that we do not need.
 
 <render class='ndp_graph_enclosed'>`orei_plus_ravpower</render>
@@ -262,3 +264,27 @@ and obtain
 </pre>
 
 
+### A step-up/step-down voltage converter
+
+Next, we are going to model a
+[Goldsource STU-200 Step Up/Down Voltage Transformer Converter][goldsource].
+
+[goldsource]: https://www.amazon.com/Goldsource-STU-200-Voltage-Transformer-Converter/dp/B0022TMB9A/
+
+<img src='goldsource_STU_200.jpg' style='width: 15em'/>
+
+This is a device with 1 input and 3 outputs:
+
+
+<pre class='mcdp' id='goldsource_STU_200' label='goldsource_STU_200.mcdp'></pre>
+
+<div style='text-align:center'>
+    <render class='ndp_graph_templatized'>`goldsource_STU_200</render>
+    <render class='ndp_graph_enclosed'>`goldsource_STU_200</render>
+</div>
+
+### A Micro USB charger
+
+
+<render class='ndp_graph_enclosed'>`USBMicroCharger</render>
+<pre class='mcdp' id='USBMicroCharger' label='USBMicroCharger.mcdp'></pre>
