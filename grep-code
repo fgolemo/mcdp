@@ -1,0 +1,4 @@
+#!/bin/bash
+set -e
+#set -x
+grep -r "$*" src/**/*py | grep -v node_modules

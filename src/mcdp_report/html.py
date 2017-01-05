@@ -366,19 +366,19 @@ def get_language_css():
     return open(fn).read()
 
 def get_language_css_filename():
-    return get_css_filename('out/mcdp_language_highlight')
+    return get_css_filename('compiled/mcdp_language_highlight')
 
 def get_markdown_css_filename():
-    return get_css_filename('out/markdown')
+    return get_css_filename('compiled/markdown')
 
 def get_manual_generic_css_filename():
-    return get_css_filename('out/manual')
+    return get_css_filename('compiled/manual')
 
 def get_manual_screen_css_filename():
-    return get_css_filename('out/manual_screen')
+    return get_css_filename('compiled/manual_screen')
 
 def get_manual_print_css_filename():
-    return get_css_filename('out/manual_prince')
+    return get_css_filename('compiled/manual_prince')
 
 
 def get_markdown_css():
