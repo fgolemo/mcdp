@@ -79,6 +79,9 @@ $(manual_pdf_prince): $(manual_html) $(pdf_metadata) $(cssdir)/*less $(cssdir)/*
 prince-only:
 	$(MAKE) css
 	prince --javascript $(manual_html) -o $(manual_pdf_prince)
+
+	pdftk $(manual_pdf_prince) dump_data | grep PageMediaDimensions | head -n 3
+	@echo "Expecting 441 x 666 points for Blurb/hardcover"
 	@echo ""
 	@echo "Written on:    $(manual_pdf_prince)"
 

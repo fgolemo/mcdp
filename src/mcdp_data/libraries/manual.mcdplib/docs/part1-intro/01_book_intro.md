@@ -23,7 +23,7 @@ Here is a great quote:
             Kenneth Iverson</a>,
             quoted<!--  by Donald McIntyre  -->
             in <a href='http://dl.acm.org/citation.cfm?id=206985'>this paper</a>,
-            but ultimately sourceless and probably apocryph`1    al.
+            but ultimately sourceless and probably apocryphal.
             </footnote>
     </p>
     <style>

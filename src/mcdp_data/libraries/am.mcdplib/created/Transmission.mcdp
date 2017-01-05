@@ -1,0 +1,6 @@
+template mcdp {
+    provides linear_velocity [m/s]
+    provides force [N]
+    requires torque [N*m]
+    requires rotational_velocity [deg/s]
+}

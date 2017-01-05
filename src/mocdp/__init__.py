@@ -165,7 +165,7 @@ class MCDPConstants():
     
     
 #     pdf_to_png_dpi = 300 # dots per inch
-    pdf_to_png_dpi = 100 # dots per inch
+    pdf_to_png_dpi = 300 # dots per inch
     if pdf_to_png_dpi < 300:
         msg =( 'Note that pdf_to_png_dpi is set to %d, which is not suitable for printing'
                % pdf_to_png_dpi)

@@ -9,11 +9,12 @@ from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_lang.syntax import Syntax
 from mcdp_report.out_mcdpl import ast_to_mcdpl
 from mocdp.comp.context import Context
+from contracts.utils import indent
 
 
 CDP = CDPLanguage
 
-@comptest
+# @comptest
 def check_correction():
     s = """
     mcdp {  
@@ -31,8 +32,8 @@ def check_correction():
   }
  capacity provided by battery >= 
     endurance * (actuation.power)
-a = actuation. power
-b = actuation .lift
+a = power required by actuation
+b = lift provided by actuation
  g = 9.81 m/s^2
  actuation.lift  >=
     (mass required by battery + payload) * g
@@ -97,7 +98,7 @@ def try_corrections2(s):
     s2 = apply_suggestions(s, suggestions)
     #print s2
     _x2 = parse_wrap(Syntax.ndpt_dp_rvalue, s2)[0]
-    
+    return s2
 #     print recursive_print(t)
 #     ts = ast_to_mcdpl(t)
 #     print ts
@@ -106,19 +107,40 @@ def try_corrections2(s):
 # #     print recursive_print(x2)
 CDP = CDPLanguage
 
-@comptest
+# @comptest
 def check_print():
     s = """ mcdp {
 #     provides f [m]
     f <= 10 m
     } """
     x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
-#     print recursive_print(x)
-
-    s2 = ast_to_mcdpl(x)
-#     print s.__repr__()
-#     print s2.__repr__()
+    s2 = ast_to_mcdpl(x) 
     assert_equal(s.strip(), s2.strip())
+    
+    
+
+
+@comptest
+def check_suggestions_greek1():
+    s = """ mcdp {
+     provides eta [m]
+     provides rho [m]
+     provides rho_1 [m]
+     provides alpha [m]
+     provides alphabet [m]
+    } """
+ 
+    s2 = try_corrections2(s)
+    print indent(s, 's : ')
+    print indent(s2, 's2: ')
+    
+    assert 'eta' not in s2
+    assert 'alpha ' not in s2
+    assert 'α' in s2
+    assert 'η' in s2
+    assert 'alphabet' in s2
+    assert 'ρ₁' in s2
+    
     
 if __name__ == '__main__': 
     

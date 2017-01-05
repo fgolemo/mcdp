@@ -19,23 +19,24 @@ def assert_not_inside(substring, s):
         w = Where(s, i, i + len(substring))
         msg = 'I found the forbidden substring %r in string.' % substring
         raise DPSyntaxError(msg, where=w)
-    
+
 UNICODE_NBSP = u"\u00A0".encode('utf-8')
+
 
 def latex_preprocessing(s):
     group = 'TILDETILDETILDE'
     s = s.replace('~~~', group)
-    
-    
+
     s = s.replace('%\n', UNICODE_NBSP)
-    s = s.replace('~', UNICODE_NBSP) # XXX
+    s = s.replace('~', UNICODE_NBSP)  # XXX
     s = s.replace(group, '~~~')
-    
+
     s = substitute_simple(s, 'textendash', '&ndash;')
     s = substitute_simple(s, 'textemdash', '&mdash;')
-    
-    s = substitute_simple(s, 'and', '<span class="and" style="margin-left: 2em"></span>')
-     
+
+    s = substitute_simple(
+        s, 'and', '<span class="and" style="margin-left: 2em"></span>')
+
     justignore = ['vfill', 'pagebreak', 'leavevmode', 'clearpage', 'hline']
     for j in justignore:
         s = substitute_command_ext(s, j, lambda args, opts: '<!--skipped %s-->' % j,  # @UnusedVariable
@@ -44,25 +45,25 @@ def latex_preprocessing(s):
     class Tmp:
         title = None
         author = None
-    
+
     def find_title(args, opts):  # @UnusedVariable
         Tmp.title = args[0]
         return ''
     s = substitute_command_ext(s, "title", find_title, nargs=1, nopt=0)
+
     def find_author(args, opts):  # @UnusedVariable
         Tmp.author = args[0]
         return ''
     s = substitute_command_ext(s, "author", find_author, nargs=1, nopt=0)
-
 
     title = ""
     title += "<h1 class='article_title'>%s</h1>" % Tmp.title
     title += "<div class='author'>%s</div>" % Tmp.author
     s = substitute_simple(s, "maketitle", title)
 
-    s = re.sub(r'\\noindent\s*', '', s) # XXX
+    s = re.sub(r'\\noindent\s*', '', s)  # XXX
 # {[}m{]}}, and we need to choose the \R{endurance~$T$~{[}s{]}}
-    s = re.sub(r'{(\[|\])}', r'\1', s) 
+    s = re.sub(r'{(\[|\])}', r'\1', s)
 
     # no! let mathjax do it
     def subit(m):
@@ -72,17 +73,16 @@ def latex_preprocessing(s):
         else:
             return '<a href="#%s" class="only-number"></a>' % x
     s = re.sub(r'\\ref{(.*?)}', subit, s)
-    
+
     s = substitute_command(s, 'prettyref', lambda name, inside:  # @UnusedVariable
                            '<a href="#%s"/>' % inside)
 
     s = re.sub(r'\\eqref{(.*?)}', r'\\eqref{eq:\1}', s)
     s = s.replace('eq:eq:', 'eq:')
-    
+
     # \vref
     s = re.sub(r'\\vref{(.*?)}', r'<a class="only-number" href="#\1"></a>', s)
-        
-    
+
     s = re.sub(r'\\lemref{(.*?)}', r'<a href="#lem:\1"></a>', s)
     s = re.sub(r'\\tabref{(.*?)}', r'<a href="#tab:\1"></a>', s)
     s = re.sub(r'\\figref{(.*?)}', r'<a href="#fig:\1"></a>', s)
@@ -93,8 +93,9 @@ def latex_preprocessing(s):
     s = re.sub(r'\\exaref{(.*?)}', r'<a href="#exa:\1"></a>', s)
     s = re.sub(r'\\secref{(.*?)}', r'<a href="#sec:\1"></a>', s)
     s = re.sub(r'\\coderef{(.*?)}', r'<a href="#code:\1"></a>', s)
-    
-    s = sub_headers(s)               
+
+    s = sub_headers(s)
+
     def sub_cite(args, opts):
         cits = args[0].split(',')
         inside = opts[0]
@@ -102,46 +103,50 @@ def latex_preprocessing(s):
             inside = ""
         res = ""
         for i, id_cite in enumerate(cits):
-            inside_this = '' if i >0 else inside
+            inside_this = '' if i > 0 else inside
             res += '<a href="#bib:%s">%s</a>' % (id_cite, inside_this)
         return res
-    
+
     s = substitute_command_ext(s, 'cite', sub_cite, nargs=1, nopt=1)
-   
+
     def sub_multicolumn(args, opts):
         ncols, align, contents = args[:3]
         # TODO:
-        return '<span multicolumn="%s" align="%s">%s</span>' % (ncols, align, contents)  
-    
-    s = substitute_command_ext(s, 'multicolumn', sub_multicolumn, nargs=3, nopt=0)
+        return '<span multicolumn="%s" align="%s">%s</span>' % (ncols, align, contents)
 
+    s = substitute_command_ext(
+        s, 'multicolumn', sub_multicolumn, nargs=3, nopt=0)
 
-    # note: nongreedy matching ("?" after *); and multiline (re.M) DOTALL = '\n' part of .
+    # note: nongreedy matching ("?" after *); and multiline (re.M) DOTALL =
+    # '\n' part of .
     s = re.sub(r'\\emph{(.*?)}', r'<em>\1</em>', s, flags=re.M | re.DOTALL)
-    s = re.sub(r'\\textbf{(.*?)}', r'<strong>\1</strong>', s, flags=re.M | re.DOTALL)
-    
+    s = re.sub(
+        r'\\textbf{(.*?)}', r'<strong>\1</strong>', s, flags=re.M | re.DOTALL)
+
     s = s.replace('\,', '&ensp;')
     s = s.replace('%\n', '\n')
-    
+
     s = substitute_simple(s, 'etal', 'et. al.')
 
     s = replace_includegraphics(s)
     s = substitute_command(s, 'thanks', lambda name, inside:  # @UnusedVariable
-                           '<footnote>' + inside + "</footnote>" )
+                           '<footnote>' + inside + "</footnote>")
 
     s = substitute_command(s, 'fbox', lambda name, inside:  # @UnusedVariable
-                           '<div class="fbox">' + inside + "</div>" )
-    s = substitute_simple(s, 'scottcontinuity', 'Scott continuity', xspace=True)
-    s = substitute_simple(s, 'scottcontinuous', 'Scott continuous', xspace=True)
+                           '<div class="fbox">' + inside + "</div>")
+    s = substitute_simple(
+        s, 'scottcontinuity', 'Scott continuity', xspace=True)
+    s = substitute_simple(
+        s, 'scottcontinuous', 'Scott continuous', xspace=True)
     s = substitute_simple(s, 'CPO', 'CPO', xspace=True)
     s = substitute_simple(s, 'DCPO', 'DCPO', xspace=True)
     s = substitute_simple(s, 'eg', 'e.g.', xspace=True)
     s = substitute_simple(s, '$', '&#36;')
     s = substitute_simple(s, '#', '&#35;')
     s = substitute_simple(s, 'ldots', '&hellip;')
-    
+
     s = substitute_simple(s, 'xxx', '<span class="xxx">XXX</span>')
-    
+
     s = substitute_simple(s, 'hfill', '')
     s = substitute_simple(s, 'quad', '')
     s = substitute_simple(s, 'centering', '')
@@ -152,42 +157,49 @@ def latex_preprocessing(s):
     s = substitute_simple(s, 'par', '<br class="from_latex_par"/>')
 #     assert_not_inside('\\par', s)
     s = substitute_command_ext(s, 'vspace', lambda args, opts: '<!--skipped v-space-->',  # @UnusedVariable
-                           nargs=1, nopt=0)
+                               nargs=1, nopt=0)
     s = substitute_command_ext(s, 'vspace*', lambda args, opts: '<!--skipped v-space*-->',  # @UnusedVariable
-                           nargs=1, nopt=0)
+                               nargs=1, nopt=0)
     s = substitute_command_ext(s, 'hspace', lambda args, opts: '<!--skipped h-space-->',  # @UnusedVariable
-                           nargs=1, nopt=0)
+                               nargs=1, nopt=0)
     s = substitute_command_ext(s, 'hspace*', lambda args, opts: '<!--skipped h-space*-->',  # @UnusedVariable
-                           nargs=1, nopt=0)
+                               nargs=1, nopt=0)
 #     s = substitute_command_ext(s, 'setcounter', lambda args, opts: '<!--skipped h-space*-->',  # @UnusedVariable
 #                            nargs=2, nopt=0)
-#     
+#
 #     \IEEEPARstart{O}{ne}
-    s = substitute_command_ext(s, 'IEEEPARstart', lambda args, opts: args[0]+args[1],  # @UnusedVariable
-                           nargs=2, nopt=0)
-#     
+    s = substitute_command_ext(s, 'IEEEPARstart', lambda args, opts: args[0] + args[1],  # @UnusedVariable
+                               nargs=2, nopt=0)
+#
 #     assert_not_inside('\\vspace', s)
 #     assert_not_inside('\\hspace', s)
-#     
+#
     s = substitute_simple(s, 'setlength', '')
-    s = substitute_command_ext(s, 'extrarowheight', lambda args, opts: '', nargs=1, nopt=0)  # @UnusedVariable
-    
-    s = substitute_command_ext(s, 'url', lambda args, opts: '<a href="%s">%s</a>' % (args[0], args[0]), nargs=1, nopt=0)  # @UnusedVariable
+    s = substitute_command_ext(
+        s, 'extrarowheight', lambda args, opts: '', nargs=1, nopt=0)  # @UnusedVariable
 
-    # \adjustbox{max width=4.0cm}{ 
+    s = substitute_command_ext(s, 'url', lambda args, opts: '<a href="%s">%s</a>' % (
+        args[0], args[0]), nargs=1, nopt=0)  # @UnusedVariable
+
+    # \adjustbox{max width=4.0cm}{
     # TODO:
-    s = substitute_command_ext(s, 'adjustbox', lambda args, opts: args[1], nargs=2, nopt=0)  # @UnusedVariable
-    
+    s = substitute_command_ext(
+        s, 'adjustbox', lambda args, opts: args[1], nargs=2, nopt=0)  # @UnusedVariable
+
     s = replace_captionsideleft(s)
-    
-    s = substitute_command(s, 'F', lambda name, inside: '<span class="Fcolor">%s</span>' % inside)  # @UnusedVariable
-    s = substitute_command(s, 'R', lambda name, inside: '<span class="Rcolor">%s</span>' % inside)  # @UnusedVariable
-    s = substitute_command(s, 'I', lambda name, inside: '<span class="Icolor">%s</span>' % inside)  # @UnusedVariable
-    s = substitute_command(s, 'uline', lambda name, inside: '<span class="uline">%s</span>' % inside)  # @UnusedVariable
+
+    s = substitute_command(
+        s, 'F', lambda name, inside: '<span class="Fcolor">%s</span>' % inside)  # @UnusedVariable
+    s = substitute_command(
+        s, 'R', lambda name, inside: '<span class="Rcolor">%s</span>' % inside)  # @UnusedVariable
+    s = substitute_command(
+        s, 'I', lambda name, inside: '<span class="Icolor">%s</span>' % inside)  # @UnusedVariable
+    s = substitute_command(s, 'uline', lambda name, inside:
+                           '<span class="uline">%s</span>' % inside)  # @UnusedVariable
 
     for x in ['footnotesize', 'small', 'normalsize']:
-        s = substitute_simple(s, x, 
-                               '<span class="apply-parent %s"></span>' %x)  # @UnusedVariable
+        s = substitute_simple(s, x,
+                              '<span class="apply-parent %s"></span>' % x)  # @UnusedVariable
 #         assert_not_inside('\\' + x, s)
 
     s = replace_environment(s, "defn", "definition", "def:")
@@ -204,40 +216,46 @@ def latex_preprocessing(s):
     s = replace_environment(s, "proposition", "proposition", "prop:")
     s = replace_environment(s, "abstract", "abstract", 'don-t-steal-label')
     s = replace_environment(s, "centering", "centering", 'don-t-steal-label')
-    
+
     assert_not_inside('begin{centering}', s)
     s = replace_environment(s, "center", "center", 'don-t-steal-label')
-    
+
     s = replace_environment_ext(s, "quote", lambda inside, opt:  # @UnusedVariable
-                                '<blockquote>'+inside+'</blockquote>')
+                                '<blockquote>' + inside + '</blockquote>')
     s = replace_environment_ext(s, "tabular", maketabular)
     s = replace_environment_ext(s, "wrapfigure", make_wrapfigure)
     s = replace_environment_ext(s, "enumerate", make_enumerate)
     s = replace_environment_ext(s, "description", make_description)
     s = replace_environment_ext(s, "itemize", make_itemize)
     s = replace_environment_ext(s, "minipage", makeminipage)
-    s = replace_environment_ext(s, "figure", lambda inside, opt: makefigure(inside, opt, False))
-    s = replace_environment_ext(s, "figure*", lambda inside, opt: makefigure(inside, opt, True))
-    s = replace_environment_ext(s, "table", lambda inside, opt: maketable(inside, opt, False))
-    s = replace_environment_ext(s, "table*",lambda inside, opt: maketable(inside, opt, True))
-    
+    s = replace_environment_ext(
+        s, "figure", lambda inside, opt: makefigure(inside, opt, False))
+    s = replace_environment_ext(
+        s, "figure*", lambda inside, opt: makefigure(inside, opt, True))
+    s = replace_environment_ext(
+        s, "table", lambda inside, opt: maketable(inside, opt, False))
+    s = replace_environment_ext(
+        s, "table*", lambda inside, opt: maketable(inside, opt, True))
+
     s = s.replace('pro:', 'prop:')
 
 #     s = replace_environment_ext(s, "enumerate", makenumerate)
 #     s = replace_environment_ext(s, "itemize", makeitemize)
-#     
-    s = s.replace('{}','')
+#
+    s = s.replace('{}', '')
     s = replace_quotes(s)
 #     if 'defn' in s:
 #         raise ValueError(s)
     return s
 
 # def makenumerate(inside, opt):
+
+
 def maketabular(inside, opt):  # @UnusedVariable
     # get alignment like {ccc}
     arg, inside = get_balanced_brace(inside)
     align = arg[1:-1]
-    
+
     SEP = '\\\\'
     inside = inside.replace('\\tabularnewline', SEP)
     rows = inside.split(SEP)
@@ -253,22 +271,26 @@ def maketabular(inside, opt):  # @UnusedVariable
     r += '</table>'
     return r
 
+
 def make_wrapfigure(inside, opt):  # @UnusedVariable
     # two options
     _arg1, inside = get_balanced_brace(inside)
     _arg2, inside = get_balanced_brace(inside)
-    
+
     res = makefigure(inside, opt, asterisk=False)
-    
+
     res = '<div class="wrapfigure">' + res + '</div>'
     return res
-    
-    
+
+
 def make_enumerate(inside, opt):
     return make_list(inside, opt, 'ul')
+
+
 def make_itemize(inside, opt):
     return make_list(inside, opt, 'ul')
-    
+
+
 def make_list(inside, opt, name):
     # get alignment like {ccc}
     assert name in ['ul', 'ol']
@@ -278,15 +300,18 @@ def make_list(inside, opt, name):
     r = "<%s>%s</%s>" % (name, html, name)
     return r
 
+
 def make_description(inside, opt):  # @UnusedVariable
     labels = []
     SEP = 'SEP'
+
     def found_label(args, opts):  # @UnusedVariable
         labels.append(opts[0])
         return SEP
-    
-    inside = substitute_command_ext(inside, 'item', found_label, nargs=0, nopt=1)
-    
+
+    inside = substitute_command_ext(
+        inside, 'item', found_label, nargs=0, nopt=1)
+
     items = inside.split(SEP)
     items = items[1:]
 
@@ -295,23 +320,26 @@ def make_description(inside, opt):  # @UnusedVariable
         if i < len(labels):
             html += '<dt>%s</dt>' % labels[i]
         html += '<dd>%s</dd>' % item
-        
+
     r = "<dl>%s</dl>" % html
     return r
 
+
 def maketable(inside, opt, asterisk):  # @UnusedVariable
     placement = opt  # @UnusedVariable
-    
+
     class Tmp:
         label = None
         caption = None
-    
+
     def sub_caption(args, opts):
         assert not opts and len(args) == 1
-        Tmp.caption, Tmp.label = get_s_without_label(args[0], labelprefix="tab:")
+        Tmp.caption, Tmp.label = get_s_without_label(
+            args[0], labelprefix="tab:")
         return ''
-    
-    inside = substitute_command_ext(inside, 'caption', sub_caption, nargs=1, nopt=0)
+
+    inside = substitute_command_ext(
+        inside, 'caption', sub_caption, nargs=1, nopt=0)
     assert not '\\caption' in inside
 
     if Tmp.label is not None:
@@ -322,8 +350,8 @@ def maketable(inside, opt, asterisk):  # @UnusedVariable
     if Tmp.caption is not None:
         inside = '<figcaption>' + Tmp.caption + "</figcaption>" + inside
 #     print('tmp.caption: %s' % Tmp.caption)
-    res  = '<figure class="table"%s>%s</figure>' % (idpart, inside)
-    
+    res = '<figure class="table"%s>%s</figure>' % (idpart, inside)
+
     if Tmp.label is not None:
         idpart = ' id="%s-wrap"' % Tmp.label
     else:
@@ -332,68 +360,78 @@ def maketable(inside, opt, asterisk):  # @UnusedVariable
     res = '<div class="table-wrap"%s>%s</div>' % (idpart, res)
     return res
 
+
 def makeminipage(inside, opt):
     align = opt  # @UnusedVariable
     if inside[0] == '{':
         opt_string, inside = get_balanced_brace(inside)
-        latex_width = opt_string[1:-1] # remove brace
+        latex_width = opt_string[1:-1]  # remove brace
     else:
         latex_width = None
-    
+
     if latex_width is not None:
         attrs = ' latex-width="%s"' % latex_width
     else:
         attrs = ''
-    
-    res  = '<div class="minipage"%s>%s</div>' % (attrs, inside)
+
+    res = '<div class="minipage"%s>%s</div>' % (attrs, inside)
     return res
+
 
 def makefigure(inside, opt, asterisk):
     align = opt  # @UnusedVariable
 #     print('makefigure inside = %r' % inside)
+
     def subfloat_replace(args, opts):
         contents = args[0]
         caption = opts[0]
         check_isinstance(contents, str)
-        
+
         if caption is None:
             label = None
         else:
             caption, label = get_s_without_label(caption, labelprefix="fig:")
             if label is None:
-                caption, label = get_s_without_label(caption, labelprefix="subfig:")
+                caption, label = get_s_without_label(
+                    caption, labelprefix="subfig:")
             if label is not None and not label.startswith('subfig:'):
-                msg = 'Subfigure labels should start with "subfig:"; found %r.' % (label)
+                msg = 'Subfigure labels should start with "subfig:"; found %r.' % (
+                    label)
                 label = 'sub' + label
                 msg += 'I will change to %r.' % label
                 logger.debug(msg)
-        
+
         # we need to make up an ID
         if label is None:
             label = 'subfig:' + get_md5(contents)
-#             print('making up label %r' % label)    
+#             print('making up label %r' % label)
 #         if label is not None:
         idpart = ' id="%s"' % label
 #         else:
 #             idpart = ""
 
-        if caption is None: caption = 'no subfloat caption'
-        res = '<figure class="subfloat"%s>%s<figcaption>%s</figcaption></figure>' % (idpart, contents, caption)
+        if caption is None:
+            caption = 'no subfloat caption'
+        res = '<figure class="subfloat"%s>%s<figcaption>%s</figcaption></figure>' % (
+            idpart, contents, caption)
         return res
-    
-    inside = substitute_command_ext(inside, 'subfloat', subfloat_replace, nargs=1, nopt=1)
+
+    inside = substitute_command_ext(
+        inside, 'subfloat', subfloat_replace, nargs=1, nopt=1)
+
     class Tmp:
         label = None
-    
+
     def sub_caption(args, opts):
         assert not opts and len(args) == 1
         x, Tmp.label = get_s_without_label(args[0], labelprefix="fig:")
-        res = '<figcaption>' + x + "</figcaption>" 
+        res = '<figcaption>' + x + "</figcaption>"
 #         print('caption args: %r, %r' % (args, opts))
         return res
-    
-    inside = substitute_command_ext(inside, 'caption', sub_caption, nargs=1, nopt=0)
-    
+
+    inside = substitute_command_ext(
+        inside, 'caption', sub_caption, nargs=1, nopt=0)
+
 #     print('makefigure inside without caption = %r'  % inside)
     assert not '\\caption' in inside
 
@@ -405,8 +443,9 @@ def makefigure(inside, opt, asterisk):
 #     else:
 #         idpart = ""
 
-    res  = '<figure%s>%s</figure>' % (idpart, inside)
+    res = '<figure%s>%s</figure>' % (idpart, inside)
     return res
+
 
 def sub_headers(s):
     def sub_header(ss, cmd, hname, number=True):
@@ -415,11 +454,11 @@ def sub_headers(s):
             options += ' nonumber=""' if number is False else ''
             inside, label = get_s_without_label(inside, labelprefix=None)
             options += ' id="%s"' % label if label is not None else ''
-            template = '<{hname}{options}>{inside}</{hname}>' 
+            template = '<{hname}{options}>{inside}</{hname}>'
             r = template.format(hname=hname, inside=inside, options=options)
             return r
         return substitute_command(ss, cmd, replace)
-    
+
     # note that we need to do the * version before the others
     s = sub_header(s, cmd='section*', hname='h1', number=False)
     s = sub_header(s, cmd='section', hname='h1', number=True)
@@ -432,7 +471,8 @@ def sub_headers(s):
     s = sub_header(s, cmd='paragraph*', hname='h4', number=False)
     s = sub_header(s, cmd='paragraph', hname='h4', number=True)
     return s
-  
+
+
 def substitute_simple(s, name, replace, xspace=False):
     """
         \ciao material-> submaterial
@@ -442,26 +482,26 @@ def substitute_simple(s, name, replace, xspace=False):
     start = '\\' + name
     if not start in s:
         return s
-    
+
     # points to the '{'
     istart = s.index(start)
     i = istart + len(start)
-    
+
     if i >= len(s) - 1:
         is_match = True
         next_char = None
     else:
-        assert i < len(s) -1 
-        next_char = s[i] 
-        
+        assert i < len(s) - 1
+        next_char = s[i]
+
         # don't match '\ciao' when looking for '\c'
         is_match = not next_char.isalpha()
-        
-    if not is_match:
-#         print('skip %s match at %r next char %r ' % (start, s[i-10:i+10], next_char)) 
-        return s[:i] + substitute_simple(s[i:], name, replace) 
 
-    before = s[:istart] 
+    if not is_match:
+        #         print('skip %s match at %r next char %r ' % (start, s[i-10:i+10], next_char))
+        return s[:i] + substitute_simple(s[i:], name, replace)
+
+    before = s[:istart]
     after = s[i:]
 
     if xspace:
@@ -470,9 +510,10 @@ def substitute_simple(s, name, replace, xspace=False):
         braces, after = possibly_eat_braces(after)
         if braces:
             _spaces, after = eat_spaces(after)
-    
+
     return before + replace + substitute_simple(after, name, replace)
-    
+
+
 def eat_spaces(x):
     """ x -> spaces, x' """
     j = 0
@@ -480,15 +521,18 @@ def eat_spaces(x):
         j += 1
     return x[:j], x[j:]
 
+
 def possibly_eat_braces(remaining):
     """ x -> braces, x' """
     if remaining.startswith('{}'):
         return '{}', remaining[2:]
     else:
         return '', remaining
-    
+
+
 class Malformed(Exception):
     pass
+
 
 def substitute_command_ext(s, name, f, nargs, nopt):
     """
@@ -499,16 +543,17 @@ def substitute_command_ext(s, name, f, nargs, nopt):
     """
 #     noccur = s.count('\\'+name)
     #print('substitute_command_ext name = %s  len(s)=%s occur = %d' % (name, len(s), noccur))
-    lookfor = ('\\' + name) #+( '[' if nopt > 0 else '{')
-    
+    lookfor = ('\\' + name)  # +( '[' if nopt > 0 else '{')
+
     try:
-        start = get_next_unescaped_appearance(s, lookfor, 0, next_char_not_word=True)
+        start = get_next_unescaped_appearance(
+            s, lookfor, 0, next_char_not_word=True)
         assert s[start:].startswith(lookfor)
 #         print('s[start:]  = %r starts with %r ' % (s[start:start+14], lookfor))
     except NotFound:
         #print('no string %r found' % lookfor)
         return s
-    
+
     before = s[:start]
     rest = s[start:]
 #     print('before: %r' % before)
@@ -516,10 +561,8 @@ def substitute_command_ext(s, name, f, nargs, nopt):
 #     print('s[start:]: %r' % s[start:])
     assert rest.startswith(lookfor)
 
-        
-    
     consume = consume0 = s[start + len(lookfor):]
-    
+
     opts = []
     args = []
 #     print('---- %r' % name)
@@ -527,34 +570,34 @@ def substitute_command_ext(s, name, f, nargs, nopt):
     for _ in range(nopt):
         consume = consume_whitespace(consume)
         if not consume or consume[0] != '[':
-#             print('skipping option')
+            #             print('skipping option')
             opt = None
         else:
             opt_string, consume = get_balanced_brace(consume)
-            opt = opt_string[1:-1] # remove brace
+            opt = opt_string[1:-1]  # remove brace
 #             print('opt string %r consume %r opt = %r' % (opt_string, consume, opt))
         opts.append(opt)
-        
+
 #     print('after opts= %r'% consume)
     for _ in range(nargs):
         consume = consume_whitespace(consume)
         if not consume or consume[0] != '{':
-            msg = 'Command %r: Expected {: got %r. opts=%s args=%s' % (name, consume[0], opts, args)
-            character = start 
-            character_end =  len(s) - len(consume)
+            msg = 'Command %r: Expected {: got %r. opts=%s args=%s' % (
+                name, consume[0], opts, args)
+            character = start
+            character_end = len(s) - len(consume)
             where = Where(s, character, character_end)
-            raise DPSyntaxError(msg, where=where)            
+            raise DPSyntaxError(msg, where=where)
         arg_string, consume2 = get_balanced_brace(consume)
         assert arg_string + consume2 == consume
         consume = consume2
-        arg = arg_string[1:-1] # remove brace
+        arg = arg_string[1:-1]  # remove brace
         args.append(arg)
 #     print('*')
 #     print('substitute_command_ext for %r : args = %s opts = %s consume0 = %r' % (name, args, opts, consume0))
     args = tuple(args)
     opts = tuple(opts)
-    
-    
+
     replace = f(args=args, opts=opts)
     if replace is None:
         msg = 'function %s returned none' % f
@@ -563,49 +606,51 @@ def substitute_command_ext(s, name, f, nargs, nopt):
     assert consume0.endswith(consume)
 #     print('consume0: %r' % consume0[:nchars])
 #     print('%s %s %s -> %s ' % (f.__name__, args, opts, replace))
-#     print('substitute_command_ext calling itself len(s*)=%s occur* = %d' % 
+#     print('substitute_command_ext calling itself len(s*)=%s occur* = %d' %
 #           (len(consume), consume.count('\\'+name)))
     after_tran = substitute_command_ext(consume, name, f, nargs, nopt)
     res = before + replace + after_tran
-#     print('before: %r' % before) 
+#     print('before: %r' % before)
 #     print('replace: %r' % replace)
 #     print('after_tran: %r' % after_tran)
 #     assert not ('\\' + name ) in res, res
     return res
 
+
 def consume_whitespace(s):
-    while s and (s[0] in  [' ']):
+    while s and (s[0] in [' ']):
         s = s[1:]
     return s
+
 
 def substitute_command(s, name, sub):
     """
         Subsitute \name{<inside>} with 
         sub : name, inside -> s
     """
-    
+
     start = '\\' + name + '{'
     if not start in s:
         return s
-    
+
     # points to the '{'
     istart = s.index(start)
-    i = istart + len(start) -1 # minus brace
+    i = istart + len(start) - 1  # minus brace
     after = s[i:]
-#     
+#
 #     # don't match '\ciao' when looking for '\c'
 #     is_match = not next_char.isalpha()
 #     if not is_match:
-#         return s[:i] + substitute_command(s[i:], name, sub) 
-#     
+#         return s[:i] + substitute_command(s[i:], name, sub)
+#
 #     if not after[0] == '{':
 #         msg = 'I expected brace after %r, but I see .' % start
-#         raise_desc(ValueError, msg, s=s) 
+#         raise_desc(ValueError, msg, s=s)
     try:
         assert after[0] == '{'
         inside_plus_brace, after = get_balanced_brace(after)
     except Malformed as e:
-        bit = after[:max(len(after), 15 )]
+        bit = after[:max(len(after), 15)]
         msg = 'Could not find completion for "%s".' % bit
         raise_wrapped(Malformed, e, msg)
     inside = inside_plus_brace[1:-1]
@@ -614,8 +659,8 @@ def substitute_command(s, name, sub):
     after_tran = substitute_command(after, name, sub)
     res = before + replace + after_tran
     return res
-    
-    
+
+
 def get_balanced_brace(s):
     """ s is a string that starts with '{'. 
         returns pair a, b, with a + b = s and 
@@ -626,9 +671,9 @@ def get_balanced_brace(s):
     i = 0
     while i < len(s):
         # take care of escaping
-        if s[i] == '\\' and i < len(s)-1 and s[i+1] in ['{','[','}',']']:
+        if s[i] == '\\' and i < len(s) - 1 and s[i + 1] in ['{', '[', '}', ']']:
             i += 2
-            continue 
+            continue
         if s[i] == '{':
             stack.append(s[i])
         if s[i] == '[':
@@ -647,18 +692,19 @@ def get_balanced_brace(s):
             stack.pop()
 
         if not stack:
-            a = s[:i+1]
-            b = s[i+1:]
+            a = s[:i + 1]
+            b = s[i + 1:]
             break
         i += 1
     if stack:
         msg = 'Unmatched braces at the end of s (stack = %s)' % stack
         raise_desc(Malformed, msg, s=s)
-    assert a[0] in ['{', '['] 
+    assert a[0] in ['{', '[']
     assert a[-1] in ['}', ']']
     assert a + b == s
     return a, b
-    
+
+
 def replace_quotes(s):
     """ Replaces ``xxx'' sequences """
     START = '``'
@@ -668,10 +714,10 @@ def replace_quotes(s):
     a = s.index(START)
     if not END in s[a:]:
         return s
-    
+
     b = s.index(END, a) + len(END)
-    
-    inside = s[a+len(START):b-len(END)]
+
+    inside = s[a + len(START):b - len(END)]
     if '\n\n' in inside:
         return s
     max_dist = 200
@@ -680,7 +726,8 @@ def replace_quotes(s):
     repl = '&ldquo;' + inside + '&rdquo;'
     s2 = s[:a] + repl + s[b:]
     return replace_quotes(s2)
-    
+
+
 def replace_environment_ext(s, envname, f):
     """
         f: inside, opt -> replace
@@ -696,7 +743,7 @@ def replace_environment_ext(s, envname, f):
     for k, complete in list(subs.items()):
         assert complete.startswith(d1)
         assert complete.endswith(d2)
-        inside = complete[len(d1):len(complete)-len(d2)]
+        inside = complete[len(d1):len(complete) - len(d2)]
 #         print('%s inside %r' % (k, inside))
         assert_not_inside(d1, inside)
         assert_not_inside(d2, inside)
@@ -707,7 +754,7 @@ def replace_environment_ext(s, envname, f):
             opt = None
         r = f(inside, opt)
         subs[k] = r
-        
+
     # recursive substitutions
     while True:
         changed = False
@@ -717,26 +764,31 @@ def replace_environment_ext(s, envname, f):
                 changed = True
         if not changed:
             break
-    return s 
-    
+    return s
+
+
 def replace_environment(s, envname, classname, labelprefix):
     def replace_m(inside, opt):
-#         print('replacing environment %r inside %r opt %r' % (envname, inside, opt))
+        #         print('replacing environment %r inside %r opt %r' % (envname, inside, opt))
         thm_label = opt
         contents, label = get_s_without_label(inside, labelprefix=labelprefix)
         if label is not None and isinstance(labelprefix, str):
             assert label.startswith(labelprefix), (s, labelprefix, label)
-        id_part = "id='%s' "% label if label is not None else ""
-        
+        id_part = "id='%s' " % label if label is not None else ""
+
 #         print('using label %r for env %r (labelprefix %r)' % (label, envname, labelprefix))
-        l = "<span class='%s_label latex_env_label'>%s</span>" % (classname, thm_label) if thm_label else ""
-        rr = '<div %sclass="%s latex_env" markdown="1">%s%s</div>' % (id_part, classname, l, contents)
+        l = "<span class='%s_label latex_env_label'>%s</span>" % (
+            classname, thm_label) if thm_label else ""
+        rr = '<div %sclass="%s latex_env" markdown="1">%s%s</div>' % (
+            id_part, classname, l, contents)
         return rr
-    
+
     return replace_environment_ext(s, envname, replace_m)
-    
+
+
 def replace_captionsideleft(s):
     assert not 'includegraphics' in s
+
     def match(matchobj):
         first = matchobj.group(1)
         first2, label = get_s_without_label(first, labelprefix="fig:")
@@ -747,125 +799,131 @@ def replace_captionsideleft(s):
             idpart = ""
         res = ('<figure class="captionsideleft caption_left"%s>' % idpart)
         res += ('%s<figcaption></figcaption></figure>') % second
-        
+
         return res
-        
-    s = re.sub(r'\\captionsideleft{(.*?)}{(.*?)}', 
+
+    s = re.sub(r'\\captionsideleft{(.*?)}{(.*?)}',
                match, s, flags=re.M | re.DOTALL)
     return s
 
+
 def replace_includegraphics(s):
-    
-#     \includegraphics[scale=0.4]{boot-art/1509-gmcdp/gmcdp_antichains_upsets}
+
+    #     \includegraphics[scale=0.4]{boot-art/1509-gmcdp/gmcdp_antichains_upsets}
     def match(args, opts):
         latex_options = opts[0]
         # remove [, ]
         latex_path = args[0]
         basename = os.path.basename(latex_path)
         res = '<img src="%s.pdf" latex-options="%s" latex-path="%s"/>' % (
-                basename, latex_options, latex_path
-            )
-        
+            basename, latex_options, latex_path
+        )
+
         return res
-    
+
     s = substitute_command_ext(s, 'includegraphics', match, nargs=1, nopt=1)
-    
+
 #     print('after includegraphics: %r' % s)
-    
+
     return s
+
 
 def get_s_without_label(contents, labelprefix=None):
     """ Returns a pair s', label 
         where label could be None """
     check_isinstance(contents, str)
-    
+
     class Scope:
         def_id = None
+
     def got_it(args, opts):  # @UnusedVariable
         found = args[0]
         if labelprefix is None:
             ok = True
         else:
-            if  isinstance(labelprefix, tuple):
+            if isinstance(labelprefix, tuple):
                 options = labelprefix
             elif isinstance(labelprefix, str):
                 options = (labelprefix,)
-            else: 
+            else:
                 raise ValueError(labelprefix)
             ok = any(found.startswith(_) for _ in options)
-        
+
         if ok:
             Scope.def_id = found
             # extract
 #             print('looking for labelprefix %r found label %r in %s' % ( labelprefix, found, contents))
             return ""
         else:
-#             print('not using %r' % ( found))
-            # keep 
+            #             print('not using %r' % ( found))
+            # keep
             return "\\label{%s}" % found
 
-    contents2 = substitute_command_ext(contents, 'label', got_it, nargs=1, nopt=0)
-        
-    label =  Scope.def_id
+    contents2 = substitute_command_ext(
+        contents, 'label', got_it, nargs=1, nopt=0)
+
+    label = Scope.def_id
     if isinstance(labelprefix, str) and label is not None:
         assert label.startswith(labelprefix), (label, labelprefix)
     return contents2, label
-    
+
+
 def replace_equations(s):
     class Tmp:
         count = 0
         format = None
-        
+
     def replace_eq(matchobj):
         contents = matchobj.group(1)
-         
+
         def replace_label(args, opts):  # @UnusedVariable
             label = args[0]
             ss = ''
-            ss +='\\label{%s}' % label
-            ss +='\\tag{%s}' % (Tmp.count + 1)
+            ss += '\\label{%s}' % label
+            ss += '\\tag{%s}' % (Tmp.count + 1)
             Tmp.count += 1
             return ss
-        
-        contents2 = substitute_command_ext(contents, 'label',replace_label, nargs=1, nopt=0)
-         
+
+        contents2 = substitute_command_ext(
+            contents, 'label', replace_label, nargs=1, nopt=0)
+
 #         contents2, label = get_s_without_label(contents, labelprefix = None)
 # #         print('contents %r - %r label %r' % (contents, contents2, label))
 #         if label is not None:
 # #             print('found label %r' % label)
-            
+
         f = Tmp.format
         s = f(Tmp(), contents2)
-        
+
         return s
-    
+
     # do this first
-    reg = r'\$\$(.*?)\$\$' 
-    Tmp.format = lambda self, x : '$$%s$$' % x
+    reg = r'\$\$(.*?)\$\$'
+    Tmp.format = lambda self, x: '$$%s$$' % x
     s = re.sub(reg, replace_eq, s, flags=re.M | re.DOTALL)
 
     reg = r'\\\[(.*?)\\\]'
-    Tmp.format = lambda self, x : '$$%s$$' % x
+    Tmp.format = lambda self, x: '$$%s$$' % x
     s = re.sub(reg, replace_eq, s, flags=re.M | re.DOTALL)
-    
+
     reg = r'\\begin{equation}(.*?)\\end{equation}'
-    Tmp.format = lambda self, x : '\\begin{equation}%s\\end{equation}' % x
+    Tmp.format = lambda self, x: '\\begin{equation}%s\\end{equation}' % x
     s = re.sub(reg, replace_eq, s, flags=re.M | re.DOTALL)
-    
+
     reg = r'\\begin{align}(.*?)\\end{align}'
-    Tmp.format = lambda self, x : '\\begin{align}%s\\end{align}' % x
+    Tmp.format = lambda self, x: '\\begin{align}%s\\end{align}' % x
     s = re.sub(reg, replace_eq, s, flags=re.M | re.DOTALL)
-    
+
     reg = r'\\begin{align\*}(.*?)\\end{align\*}'
-    Tmp.format = lambda self, x : '\\begin{align*}%s\\end{align*}' % x
+    Tmp.format = lambda self, x: '\\begin{align*}%s\\end{align*}' % x
     s = re.sub(reg, replace_eq, s, flags=re.M | re.DOTALL)
 
     reg = r'\\begin{eqnarray\*}(.*?)\\end{eqnarray\*}'
-    Tmp.format = lambda self, x : '\\begin{eqnarray*}%s\\end{eqnarray*}' % x
+    Tmp.format = lambda self, x: '\\begin{eqnarray*}%s\\end{eqnarray*}' % x
     s = re.sub(reg, replace_eq, s, flags=re.M | re.DOTALL)
-    
+
     reg = r'\\begin{eqnarray}(.*?)\\end{eqnarray}'
-    Tmp.format = lambda self, x : '\\begin{eqnarray}%s\\end{eqnarray}' % x
+    Tmp.format = lambda self, x: '\\begin{eqnarray}%s\\end{eqnarray}' % x
     s = re.sub(reg, replace_eq, s, flags=re.M | re.DOTALL)
 
     return s
@@ -874,11 +932,11 @@ def replace_equations(s):
 def get_next_unescaped_appearance(s, d1, search_from, next_char_not_word=False):
     while True:
         if not d1 in s[search_from:]:
-#             print('nope, no %r in s[%s:] = %r' % (d1,search_from, s[search_from:]))
-#             print('cannot find %r in s o f len = %s starting from %s' % (d1, len(s), search_from))
+            #             print('nope, no %r in s[%s:] = %r' % (d1,search_from, s[search_from:]))
+            #             print('cannot find %r in s o f len = %s starting from %s' % (d1, len(s), search_from))
             raise NotFound()
         maybe = s.index(d1, search_from)
-        if s[maybe-1] == '\\':
+        if s[maybe - 1] == '\\':
             if 'space' in d1:
                 w = Where(s, maybe, maybe + len(d1))
                 msg = 'Skipping escaped sequence:\n\n' + w.__str__()
@@ -888,7 +946,7 @@ def get_next_unescaped_appearance(s, d1, search_from, next_char_not_word=False):
         else:
             assert s[maybe:].startswith(d1)
             nextchar_i = maybe + len(d1)
-            nextchar = s[nextchar_i] if nextchar_i < len(s) else 'o' 
+            nextchar = s[nextchar_i] if nextchar_i < len(s) else 'o'
             if next_char_not_word and can_be_used_in_command(nextchar):
                 print('skipping because nextchar = %r' % nextchar)
                 search_from = maybe + 1
@@ -896,11 +954,14 @@ def get_next_unescaped_appearance(s, d1, search_from, next_char_not_word=False):
 #             print('found %r at %r ' % (d1, s[maybe:]))
             return maybe
 
+
 def can_be_used_in_command(c):
     return c.isalpha() or c in ['*']
-        
+
+
 class NotFound(Exception):
     pass
+
 
 @contract(returns=str)
 def extract_delimited(s, d1, d2, subs, domain, acceptance=None):
@@ -908,7 +969,7 @@ def extract_delimited(s, d1, d2, subs, domain, acceptance=None):
         acceptance: s, i -> Bool
     """
     if acceptance is None:
-        acceptance = lambda _s, _i : True
+        acceptance = lambda _s, _i: True
     try:
         a_search_from = 0
         while True:
@@ -918,13 +979,13 @@ def extract_delimited(s, d1, d2, subs, domain, acceptance=None):
             else:
                 pass
 #                 print('match of %s at %d not accepted' % (d1, a))
-            a_search_from = a + 1 
-            
+            a_search_from = a + 1
+
 #         print('found delimiter start %r in %r at a = %s' %( d1,s,a))
         assert s[a:].startswith(d1)
     except NotFound:
         return s
-     
+
     try:
         search_d1_from = a + len(d1)
 #         print('search_d1_from = %s' % search_d1_from)
@@ -936,38 +997,40 @@ def extract_delimited(s, d1, d2, subs, domain, acceptance=None):
     except NotFound:
         assert s[a:].startswith(d1)
 #         print('could not find delimiter d2 %r in %r' % (d2, s[search_d1_from:]))
-        return s 
-     
+        return s
+
     assert complete.startswith(d1)
     assert complete.endswith(d2)
-    
-    inside = complete[len(d1):len(complete)-len(d2)]
+
+    inside = complete[len(d1):len(complete) - len(d2)]
     if True and 'begin' in d1:
         try:
             a2 = get_next_unescaped_appearance(inside, d1, 0)
             if acceptance(s, a + a2):
-#                 msg = 'Recursive %r' % d1
-#                 msg +=  '\n\n starting at (inaccurate):\n\n'+ Where(s, a).__str__()
-#                 msg +=  '\n\n inside (inaccurate):\n\n'+ Where(inside, a2).__str__()
-#                 
-                
+                #                 msg = 'Recursive %r' % d1
+                #                 msg +=  '\n\n starting at (inaccurate):\n\n'+ Where(s, a).__str__()
+                #                 msg +=  '\n\n inside (inaccurate):\n\n'+ Where(inside, a2).__str__()
+                #
+
                 # this is the case
                 #   d1 d1 d2 d2
                 #  what we want is to defer it
                 start_from = a + len(d1)
                 sb = s[start_from:]
+
                 def acceptance2(string, index):
-#                     assert string == sb, (string, sb)
-                    return acceptance(s, index+start_from)
-                sb2 = extract_delimited(sb, d1, d2, subs, domain, acceptance=acceptance2)
-                # now we have done 
+                    #                     assert string == sb, (string, sb)
+                    return acceptance(s, index + start_from)
+                sb2 = extract_delimited(
+                    sb, d1, d2, subs, domain, acceptance=acceptance2)
+                # now we have done
                 #   d1  s2
                 s0 = s[:start_from] + sb2
                 return extract_delimited(s0, d1, d2, subs, domain, acceptance=acceptance)
-            
+
         except NotFound:
             pass
-    
+
     #inside = s[a+len(d1):b-len(d2)]
     KEYPREFIX = 'KEY' + domain
     POSTFIX = 'ENDKEY'
@@ -987,41 +1050,42 @@ def extract_delimited(s, d1, d2, subs, domain, acceptance=None):
 #             msg += '%r = %s\n' % (k, abit(subs[k]))
 #         raise ValueError(msg)
     subs[key] = complete
-    
+
 #     print ('%r = %s' % (key, complete))
     s2 = s[:a] + key + s[b:]
     return extract_delimited(s2, d1, d2, subs, domain, acceptance=acceptance)
-    
+
 
 def extract_maths(s):
     """ returns s2, subs(str->str) """
     # these first, because they might contain $ $
     envs = [
-        'equation','align','align*',
-            
-            # no - should be inside of $$
-            'eqnarray','eqnarray*',
-            
-#             'tabular' # have pesky &
-            ]
- 
+        'equation', 'align', 'align*',
+
+        # no - should be inside of $$
+        'eqnarray', 'eqnarray*',
+
+        #             'tabular' # have pesky &
+    ]
+
     delimiters = []
     for e in envs:
-        delimiters.append(('\\begin{%s}' % e, '\\end{%s}'% e))
-   
+        delimiters.append(('\\begin{%s}' % e, '\\end{%s}' % e))
+
     # AFTER the environments
-    delimiters.extend([('$$','$$'),
-                    ('$','$'),
-                   ('\\[', '\\]')])
-    
+    delimiters.extend([('$$', '$$'),
+                       ('$', '$'),
+                       ('\\[', '\\]')])
+
     def acceptance(s0, i):
         inside = is_inside_markdown_quoted_block(s0, i)
         return not inside
-    
+
     subs = {}
     for d1, d2 in delimiters:
-        s = extract_delimited(s, d1, d2, subs, domain='MATHS', acceptance=acceptance)
-        
+        s = extract_delimited(
+            s, d1, d2, subs, domain='MATHS', acceptance=acceptance)
+
     for k, v in subs.items():
         subs[k] = replace_inside_equations(v)
     return s, subs
@@ -1029,16 +1093,17 @@ def extract_maths(s):
 
 def extract_tabular(s):
     """ So, tabular is a special case because it uses & """
-    
-    delimiters = [ ('\\begin{tabular}', '\\end{tabular}') ]
-     
+
+    delimiters = [('\\begin{tabular}', '\\end{tabular}')]
+
     def acceptance(s0, i):
         inside = is_inside_markdown_quoted_block(s0, i)
         return not inside
-    
+
     subs = {}
     for d1, d2 in delimiters:
-        s = extract_delimited(s, d1, d2, subs, domain='TABULAR', acceptance=acceptance)
+        s = extract_delimited(
+            s, d1, d2, subs, domain='TABULAR', acceptance=acceptance)
     return s, subs
 
 
@@ -1050,4 +1115,3 @@ and <code class='mcdp-value'>2 A</code>.
 """
     d1 = '<mcdp-value'
     a = get_next_unescaped_appearance(s, d1, 0)
-

@@ -1,45 +1,68 @@
 
 
-@bigmargin: 2cm;
+
+@bigmargin: 1.7cm;
 // @smallmargin: 0.75in;
 @smallmargin: 1cm;
-@bleed: 1cm;
 
 @page {
     /* good for ipad */
-    /*size: A5;  148 x 210 mm   5.8 x 8.3 in */
-    /* 4:3 with short side being 5.8in; 5.8/3*4=7.73 */
+    // size: A5;  148 x 210 mm   5.8 x 8.3 in
+    // 4:3 with short side being 5.8in; 5.8/3*4=7.73
     // size: 5.8in 7.73in;
     // margin-left: 1cm;
     // margin-right: 1cm;
     // margin-top: 1.7cm;
     // margin-bottom: 0.312in;
 
-    /*
-    for Lulu 6x9
-     let right margins 6.125 - 5.5  = 0.625 / 2 = 0.312in
-       top bottom margins = 9.25 - 8.5 = 0.75 / 2 = 0.375in */
-   // /* margin:0.375in  0.312in;
-    // size: 6.125in 9.25in;
-    size: (6in+@bleed) (9in+@bleed);
+    // @bleed: 1cm;
+
+   //
+   //  for Lulu 6x9
+   //   let right margins 6.125 - 5.5  = 0.625 / 2 = 0.312in
+   //     top bottom margins = 9.25 - 8.5 = 0.75 / 2 = 0.375in
+   // // /* margin:0.375in  0.312in;
+   //  // size: 6.125in 9.25in;
+   //  size: (6in+@bleed) (9in+@bleed);
+   //  @space_for_numbers: 0.7cm;
+   //  margin-top: @smallmargin + @space_for_numbers;
+   //  margin-bottom: 0.312in;
+    //
+
+    // Final pdf should measure:
+    // 6.125in x 9.25 = 441 x 666 points
+
+    // @bleed: 0.125in;
+    size: 6.125in 9.250in;
+
     @space_for_numbers: 0.7cm;
-    margin-top: @smallmargin + @space_for_numbers; /*here*/
+    margin-top: @smallmargin + @space_for_numbers;
     margin-bottom: 0.312in;
     //
-    bleed: @bleed;
-    mark: crop cross;
+    // bleed: @bleed;
+    // mark: crop cross;
+
+    // mark: crop cross;
     //
     // @center {
     //     border: solid 1px black;
     // }
 }
 
+@highlight: 3mm;
+
+@bleed: 0.125in;
+
 @page:left {
-    margin-left: @smallmargin;
-    margin-right: @bigmargin;
+    margin-left: @highlight + @bleed;
+    padding-left: @smallmargin - @highlight - @bleed;
+
+    margin-right: @bigmargin; // no bleed on inner margin
 }
 
 @page:right {
-    margin-left: @bigmargin;
-    margin-right: @smallmargin;
+    margin-right: @highlight + @bleed;
+    padding-right: @smallmargin - @highlight - @bleed;
+
+    margin-left: @bigmargin; // // no bleed on inner margin
 }

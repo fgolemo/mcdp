@@ -10,168 +10,276 @@ h1:not(#booktitle) {
   string-set: current-header content();
 }
 
+
+
 section#part\:introduction\:section {    page: part-introduction; }
 section#part\:domains\:section {    page: part-domains; }
 section#part\:reference\:section {    page: part-reference; }
 section#part\:math\:section      {    page: part-math; }
 section#part\:developers\:section      {    page: part-developers; }
 
-@part-reference-color: yellow;
+@part-introduction-color: #f1d6f9;
+@part-domains-color: #d8d6f9;
+@part-reference-color: #d6f3f9;
+@part-math-color: #d9f9d6;
+@part-developers-color: #f9d6d6;
+
+
+@page part-introduction:left {
+    @left-top {
+        background-color: @part-introduction-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @left-middle {
+        background-color: @part-introduction-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @left-bottom {
+        background-color: @part-introduction-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @top-left-corner {
+        background-color: @part-introduction-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @bottom-left-corner {
+        background-color: @part-introduction-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+}
+
+@page part-introduction:right {
+    @right-middle {
+        background-color: @part-introduction-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @right-top {
+        background-color: @part-introduction-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @right-bottom {
+        background-color: @part-introduction-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @top-right-corner {
+        background-color: @part-introduction-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @bottom-right-corner{
+        background-color: @part-introduction-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+}
+
+
+
+@page part-domains:left {
+    @left-top {
+        background-color: @part-domains-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @left-middle {
+        background-color: @part-domains-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @left-bottom {
+        background-color: @part-domains-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @top-left-corner {
+        background-color: @part-domains-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @bottom-left-corner {
+        background-color: @part-domains-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+}
+
+@page part-domains:right {
+    @right-middle {
+        background-color: @part-domains-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @right-top {
+        background-color: @part-domains-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @right-bottom {
+        background-color: @part-domains-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @top-right-corner {
+        background-color: @part-domains-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @bottom-right-corner{
+        background-color: @part-domains-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+}
+
 
 @page part-reference:left {
     @left-top {
         background-color: @part-reference-color;
-        content: 'left-top';
+        content: ' '; // necessary, otherwise the background color is not applied
     }
     @left-middle {
         background-color: @part-reference-color;
-        content: 'left-middle';
+        content: ' '; // necessary, otherwise the background color is not applied
     }
     @left-bottom {
         background-color: @part-reference-color;
-        content: 'left-bottom';
+        content: ' '; // necessary, otherwise the background color is not applied
     }
     @top-left-corner {
         background-color: @part-reference-color;
-        content: 'top-left-corner';
+        content: ' '; // necessary, otherwise the background color is not applied
     }
     @bottom-left-corner {
         background-color: @part-reference-color;
-        content: 'bottom-left-corner';
-    }
-
-
-    @left-middle {
-        content: 'Reference left';
-        /*transform: rotate(90deg);*/
+        content: ' '; // necessary, otherwise the background color is not applied
     }
 }
 
 @page part-reference:right {
     @right-middle {
         background-color: @part-reference-color;
+        content: ' '; // necessary, otherwise the background color is not applied
     }
     @right-top {
         background-color: @part-reference-color;
-        content: 'right-top';
+        content: ' '; // necessary, otherwise the background color is not applied
     }
     @right-bottom {
         background-color: @part-reference-color;
-        content: 'right-bottom';
+        content: ' '; // necessary, otherwise the background color is not applied
     }
     @top-right-corner {
         background-color: @part-reference-color;
-        content: 'top-right-corner';
+        content: ' '; // necessary, otherwise the background color is not applied
     }
     @bottom-right-corner{
         background-color: @part-reference-color;
-        content: 'bottom-right-corner';
+        content: ' '; // necessary, otherwise the background color is not applied
     }
+}
 
+
+
+@page part-math:left {
+    @left-top {
+        background-color: @part-math-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @left-middle {
+        background-color: @part-math-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @left-bottom {
+        background-color: @part-math-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @top-left-corner {
+        background-color: @part-math-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @bottom-left-corner {
+        background-color: @part-math-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+}
+
+@page part-math:right {
     @right-middle {
-        content: 'Reference right';
-
-        /*transform: rotate(90deg);*/
+        background-color: @part-math-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @right-top {
+        background-color: @part-math-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @right-bottom {
+        background-color: @part-math-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @top-right-corner {
+        background-color: @part-math-color;
+        content: ' '; // necessary, otherwise the background color is not applied
+    }
+    @bottom-right-corner{
+        background-color: @part-math-color;
+        content: ' '; // necessary, otherwise the background color is not applied
     }
 }
 
-@page part-math {
-    @right {
-        background-color: blue;
-        content: 'The math';
-    }
-}
 
-@page normal {
+
+
+
+@pagenumber-fontsize: 10pt;
+@pagenumber-padding-outer: 5pt;
+@pagenumber-padding-bottom: 10pt;
+@page {
     @top {
         vertical-align: bottom;
         content: string(current-header);
         font-size: 10pt;
         font-variant: small-caps;
+        padding-bottom: 10pt;
     }
 }
-@page normal:first {
+
+@page :right {
+    @top-right {
+        vertical-align: bottom;
+        font-size: @pagenumber-fontsize;
+        content: counter(page);
+        padding-bottom: @pagenumber-padding-bottom;
+        padding-right: @pagenumber-padding-outer;
+    }
+}
+
+@page :left {
+    @top-left {
+        vertical-align: bottom;
+        font-size: @pagenumber-fontsize;
+        content: counter(page);
+        padding-bottom: @pagenumber-padding-bottom;
+        padding-left: @pagenumber-padding-outer;
+     }
+}
+
+
+@page :first {
     @top {
+        // content: ':first';
         content: none;
     }
-    @bottom {
-        /*content: 'first of chapter';*/
+    @top-right {
+        content: none;
     }
 }
 
-@media print {
+h1[id^='part:'] { display: flow(part-string); }
 
-    @page { @top-right { padding-bottom: 10pt;} }
-    @page { @top-left  { padding-bottom: 10pt;} }
-    @page { @top       { padding-bottom: 10pt;} }
-
-    @page normal:first {
-        @top-right { content: none; }
-        @top { content: none; }
-    }
-    @page normal:right {
-        @top-right {
-            vertical-align: bottom;
-            font-size: 10pt;
-            content: counter(page);
-        }
-    }
-    @page normal:left {
-        @top-left {
-            vertical-align: bottom;
-            /*padding-right:20px; */
-            /*
-            padding-bottom: 20px;*/
-            /*border: solid 1px red;*/
-            font-size: 10pt;
-            content: counter(page);
-         }
-    }
+a { color: black !important; }
 
 
-    /* only in the manual */
-    h1:not(#booktitle) {
-        page-break-before: always;
 
-    }
+/* only in the manual */
+h1:not(#booktitle) {
+    page-break-before: always;
+
 }
 
  td pre { margin-top: 0 !important;  margin: 0 !important;}
 
-td {
-    /*border: solid 1px red;*/
- }
+
+// error { color: red; }
 
 
-
-merror { color: red; }
-
-
-
-body {
-    /*font-family: "Palatino" !important;*/
-    /*font-family: "Arial" !important;*/
-    /*font-kerning: normal;*/
-    /*font-variant: prince-opentype(liga);*/
-
-     /*prince-text-replace: "ffi" "\fb03" "fi" "\fb01" "ffl" "\fb04" "fl" "\fb02" "ff" "\fb00";*/
-
-       /*font-variant: prince-opentype(onum) prince-opentype(liga);*/
-
-  font-variant: prince-opentype(onum, dlig, liga);
-}
-
-
-
-
-
-
-/*pre, pre code { font-family:"Consolas", "Anka/Coder Narrow" !important; }*/
-
-/* ⟨ */
-span.OpenBraceKeyword,  span.CloseBraceKeyword, span.PlaceholderLabel {
-    font-family:  "Cambria Math" !important;
-}
 
 
 p + table {
@@ -257,3 +365,14 @@ h1::after {
     top: 0;
 }
 */
+
+
+#main_toc {
+    ul, li {
+        padding-left: 0!important;
+        margin-left: 0!important;
+    }
+    code.keyword {
+        color:black;
+    }
+}

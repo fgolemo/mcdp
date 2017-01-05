@@ -18,7 +18,8 @@ import re
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import check_isinstance, raise_desc
-from mcdp_lang.dealing_with_special_letters import subscripts, greek_letters
+from mcdp_lang.dealing_with_special_letters import subscripts, greek_letters,\
+    greek_letters_utf8
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.refinement import namedtuple_visitor_ext
 from mocdp import MCDPConstants
@@ -318,27 +319,32 @@ def findall(p, s):
 
 @contract(s=bytes, returns='tuple')
 def get_suggestion_identifier(s):
-    """ Returns a pair of what, replacement, or None if no suggestions available""" 
+    """ Returns a pair of (what, replacement), or None if no suggestions available""" 
     check_isinstance(s, bytes)
     for num, subscript in subscripts.items():
         s0 = '_%d' % num
         if s.endswith(s0):
             return s0, subscript.encode('utf8')
-    for name, letter in greek_letters.items():
-        if name.encode('utf8') in s:
+    for name, letter in greek_letters_utf8.items():
+        
+        if name in s or name == s:
+            print(name, letter, s)
             # yes: 'alpha_0'
             # yes: 'alpha0'
             # no: 'alphabet'
             i = s.index(name)
             letter_before = None if i == 0 else s[i-1:i]
             a = i + len(name)
-            letter_after = None if a == len(s) - 1 else s[a:a+1]
+            print a, i, len(s)
+            letter_after = None if a == len(s)  else s[a:a+1]
             
             dividers = ['_','0','1','2','3','4','5','6','7','8','9']
             ok1 = letter_before is None or letter_before in dividers
             ok2 = letter_after is None or letter_after in dividers
+            print (letter_before, letter_after)
+            print(ok1, ok2)
             if ok1 and ok2:
-                return name.encode('utf8'), letter.encode('utf8')
+                return name, letter
     return None
     
 def get_suggestions(xr):

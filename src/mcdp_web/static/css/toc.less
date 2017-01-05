@@ -29,12 +29,12 @@
 
     /** add page numbers for the first two */
     ul#main_toc > li > a::after {
-        content: leader('_')  target-counter(attr(href), page) ;
+        content: leader('.')  target-counter(attr(href), page) ;
         font-weight: bold;
     }
 
     ul#main_toc > li > ul > li > a::after {
-         content: leader('_') target-counter(attr(href), page);
+         content: leader('.') target-counter(attr(href), page);
      }
 }
 

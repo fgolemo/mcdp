@@ -452,6 +452,5 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 - add HTML syntax hl in manual
 
 
-
-
+- "X" and Xd should be red and green, respectively
 

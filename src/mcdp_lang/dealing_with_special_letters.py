@@ -49,6 +49,7 @@ greek_letters = {
     u'Psi': u'Ψ',
     u'Omega': u'Ω',
 }
+greek_letters_utf8 = dict( (k.encode('utf8'),v.encode('utf8')) for k,v in greek_letters.items())
 
 subscripts = { 
     0: u'₀',

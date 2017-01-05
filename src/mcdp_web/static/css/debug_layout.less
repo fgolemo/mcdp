@@ -1,0 +1,51 @@
+
+.border {
+    border: solid 1pt blue;
+}
+
+
+@page {
+    @left-top    { .border; }
+    @left-middle { .border; }
+    @left-bottom  { .border; }
+    @right-top     { .border; }
+    @right-middle  { .border; }
+    @right-bottom { .border; }
+
+    @top-left-corner{ .border; }
+    @top-left { .border; }
+    @top-center { .border; }
+    @top-right { .border; }
+    @top-right-corner { .border; }
+
+    @bottom-left-corner { .border; }
+    @bottom-left { .border; }
+    @bottom-center { .border; }
+    @bottom-right { .border; }
+    @bottom-right-corner { .border; }
+}
+
+@page {
+    border: solid 0.5pt grey;
+}
+//
+// @page {
+//     @left-top { content: 'LT';  }
+//     @left-middle { content: 'LM'; }
+//     @left-bottom  { content: 'LB'; }
+//     @right-top     { content: 'RT'; }
+//     @right-middle  { content: 'RM'; }
+//     @right-bottom {content: 'RB'; }
+//
+//     @top-left-corner {content: 'TLC';}
+//     @top-left {content: 'TL'; }
+//     @top-center {content: 'TC';}
+//     @top-right {content: 'TR';}
+//     @top-right-corner { content: 'TRC';}
+//
+//     @bottom-left-corner {content: 'BLC';}
+//     @bottom-left {content: 'BL'; }
+//     @bottom-center {content: 'BC'; }
+//     @bottom-right {content: 'BR'; }
+//     @bottom-right-corner {content: 'BRC';}
+// }
