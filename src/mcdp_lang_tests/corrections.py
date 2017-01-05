@@ -5,11 +5,14 @@ from comptests.registrar import comptest, run_module_tests
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp_refine
 from mcdp_lang.parts import CDPLanguage
-from mcdp_lang.suggestions import get_suggestions, apply_suggestions
+from mcdp_lang.suggestions import get_suggestions, apply_suggestions,\
+    get_suggestion_identifier
 from mcdp_lang.syntax import Syntax
 from mcdp_report.out_mcdpl import ast_to_mcdpl
 from mocdp.comp.context import Context
 from contracts.utils import indent
+from mcdp_lang.dealing_with_special_letters import ends_with_divider,\
+    starts_with_divider
 
 
 CDP = CDPLanguage
@@ -140,6 +143,21 @@ def check_suggestions_greek1():
     assert 'η' in s2
     assert 'alphabet' in s2
     assert 'ρ₁' in s2
+    
+@comptest
+def check_get_suggestion_identifier1():
+    assert ends_with_divider('rho₁')
+    assert starts_with_divider('₁a')
+    assert ends_with_divider('rho_')
+    assert starts_with_divider('_a')
+    assert_equal(get_suggestion_identifier('eta'), ('eta', 'η'))
+    assert_equal(get_suggestion_identifier('alpha'), ('alpha', 'α'))
+    assert_equal(get_suggestion_identifier('alphabet'), None)
+    assert_equal(get_suggestion_identifier('rho'), ('rho', 'ρ'))
+    assert_equal(get_suggestion_identifier('a_1'), ('_1', '₁'))
+    assert_equal(get_suggestion_identifier('rho_1'), ('rho_1', 'ρ₁'))
+    assert_equal(get_suggestion_identifier('alpha_rho_1'), ('alpha_rho_1', 'α_ρ₁'))
+    assert_equal(get_suggestion_identifier('rho_rho_1'), ('rho_rho_1', 'ρ_ρ₁'))
     
     
 if __name__ == '__main__': 

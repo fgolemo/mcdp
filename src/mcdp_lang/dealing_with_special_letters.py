@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+from contracts.utils import check_isinstance
+from contracts import contract
 
 greek_letters = {
     u'alpha': u'α',
@@ -63,4 +65,26 @@ subscripts = {
     8: u'₈',
     9: u'₉',
 }
+
+subscripts_utf8 = dict( (k, v.encode('utf8')) for k, v in subscripts.items())
+
+# these count as dividers
+dividers = ['_','0','1','2','3','4','5','6','7','8','9']
+dividers.extend(sorted(subscripts_utf8.values()))
+
+@contract(s=bytes)
+def ends_with_divider(s):
+    check_isinstance(s, bytes)
+    if not s: return False
+    last_char = unicode(s, 'utf-8')[-1].encode('utf8')
+    #print('last_char: %s %r' % (last_char, last_char))
+    return  last_char in dividers
+
+@contract(s=bytes)
+def starts_with_divider(s):
+    check_isinstance(s, bytes)
+    if not s: return False
+    first_char = unicode(s, 'utf-8')[0].encode('utf8')
+    #print('last_char: %s %r' % (first_char, first_char))
+    return first_char in dividers
 

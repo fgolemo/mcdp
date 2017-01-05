@@ -19,7 +19,8 @@ from contracts import contract
 from contracts.interface import Where
 from contracts.utils import check_isinstance, raise_desc
 from mcdp_lang.dealing_with_special_letters import subscripts, greek_letters,\
-    greek_letters_utf8
+    greek_letters_utf8, subscripts_utf8, dividers, ends_with_divider,\
+    starts_with_divider
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.refinement import namedtuple_visitor_ext
 from mocdp import MCDPConstants
@@ -316,35 +317,68 @@ def findall(p, s):
     while i != -1:
         yield i
         i = s.find(p, i+1)
+        
+        
+ 
+@contract(s=bytes, returns='None|tuple')
+def get_suggestion_identifier(s0):
+    """ Returns a pair of (what, replacement), or None if no suggestions available"""
+    #print('get_suggestion_identifier(%s)' % s0)
+    suggestions = []
+    s = s0
+    while True:
+        suggestion = get_suggestion_identifier0(s)
+        
+        if suggestion is None: 
+            break
+        
+        suggestions.append(suggestion)
+        
+        # TODO: check only one match
+        i, what, replacement = suggestion
+        # check it is correct
+        sub = s[i:i+len(what)]
+        assert sub == what, (sub, what)
+        s = s[:i] + replacement + s[i+len(what):]
+        
+    #print('suggestions: %s  s: %r  s0: %r' % (suggestions, s, s0))
+    if not suggestions:
+        return None
+    elif len(suggestions) == 1:
+        return suggestions[0].what, suggestions[0].replacement
+    else:
+        return s0, s   
+        
+IdentifierSuggestion = namedtuple('IdentifierSuggestion', 'i what replacement')
 
-@contract(s=bytes, returns='tuple')
-def get_suggestion_identifier(s):
-    """ Returns a pair of (what, replacement), or None if no suggestions available""" 
+@contract(s=bytes, returns='None|$IdentifierSuggestion')
+def get_suggestion_identifier0(s):
+    """ Returns a tuple of (index, what, replacement), or None if no suggestions available""" 
     check_isinstance(s, bytes)
-    for num, subscript in subscripts.items():
+    for num, subscript in subscripts_utf8.items():
         s0 = '_%d' % num
         if s.endswith(s0):
-            return s0, subscript.encode('utf8')
+            i = len(s) - 2
+            x = IdentifierSuggestion(i=i, what=s0[-2:], replacement=subscript)
+            assert s[x.i:].startswith(x.what), (s[x.i:], x.what)
+            return x
+    
     for name, letter in greek_letters_utf8.items():
-        
-        if name in s or name == s:
-            print(name, letter, s)
+        for m in re.finditer(name, s):
+            i = m.start(0)
+            assert s[i:].startswith(name)
             # yes: 'alpha_0'
             # yes: 'alpha0'
             # no: 'alphabet'
-            i = s.index(name)
-            letter_before = None if i == 0 else s[i-1:i]
-            a = i + len(name)
-            print a, i, len(s)
-            letter_after = None if a == len(s)  else s[a:a+1]
-            
-            dividers = ['_','0','1','2','3','4','5','6','7','8','9']
-            ok1 = letter_before is None or letter_before in dividers
-            ok2 = letter_after is None or letter_after in dividers
-            print (letter_before, letter_after)
-            print(ok1, ok2)
+            after = s[i + len(name):]
+            before = s[:i]
+            ok1 = after == '' or starts_with_divider(after)
+            ok2 = before == '' or ends_with_divider(before)
             if ok1 and ok2:
-                return name, letter
+                return IdentifierSuggestion(i=i, what=name, replacement=letter)
+            else:
+                pass
+                #print('skipping present %r for %s %s' % (name, ok1,ok2) )
     return None
     
 def get_suggestions(xr):
