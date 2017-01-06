@@ -98,7 +98,7 @@ publish: $(manual_html)
 
 css:
 	@echo cssdir=$(cssdir)
-	$(MAKE) -C $(cssdir)
+	$(MAKE) -C $(cssdir) -j
 
 $(out)/%.html: $(manual_html)
 	sed 's@VERSIONCSS@$(cssprefix)/$*.css@' < $< > $@

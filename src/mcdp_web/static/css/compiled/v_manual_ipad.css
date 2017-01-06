@@ -28,7 +28,10 @@
 
 
 
-*//* http://meyerweb.com/eric/tools/css/reset/
+*/body > :first-child::before {
+  content: 'Stylesheet: ' 'v_manual_ipad';
+}
+/* http://meyerweb.com/eric/tools/css/reset/
    v2.0 | 20110126
    License: none (public domain)
 */
@@ -1167,6 +1170,336 @@ section > svg {
 }
 #bibliography_entries {
   display: none;
+}
+/* These are the fixes for printing / prince */
+body {
+  page: normal;
+}
+h1:not(#booktitle) {
+  prince-page-group: start;
+  string-set: current-header content();
+}
+section#part\:introduction\:section {
+  page: part-introduction;
+}
+section#part\:domains\:section {
+  page: part-domains;
+}
+section#part\:reference\:section {
+  page: part-reference;
+}
+section#part\:math\:section {
+  page: part-math;
+}
+section#part\:developers\:section {
+  page: part-developers;
+}
+@page part-introduction:left {
+  @left-top {
+    background-color: #f1d6f9;
+    content: ' ';
+  }
+  @left-middle {
+    background-color: #f1d6f9;
+    content: ' ';
+  }
+  @left-bottom {
+    background-color: #f1d6f9;
+    content: ' ';
+  }
+  @top-left-corner {
+    background-color: #f1d6f9;
+    content: ' ';
+  }
+  @bottom-left-corner {
+    background-color: #f1d6f9;
+    content: ' ';
+  }
+}
+@page part-introduction:right {
+  @right-middle {
+    background-color: #f1d6f9;
+    content: ' ';
+  }
+  @right-top {
+    background-color: #f1d6f9;
+    content: ' ';
+  }
+  @right-bottom {
+    background-color: #f1d6f9;
+    content: ' ';
+  }
+  @top-right-corner {
+    background-color: #f1d6f9;
+    content: ' ';
+  }
+  @bottom-right-corner {
+    background-color: #f1d6f9;
+    content: ' ';
+  }
+}
+@page part-domains:left {
+  @left-top {
+    background-color: #d8d6f9;
+    content: ' ';
+  }
+  @left-middle {
+    background-color: #d8d6f9;
+    content: ' ';
+  }
+  @left-bottom {
+    background-color: #d8d6f9;
+    content: ' ';
+  }
+  @top-left-corner {
+    background-color: #d8d6f9;
+    content: ' ';
+  }
+  @bottom-left-corner {
+    background-color: #d8d6f9;
+    content: ' ';
+  }
+}
+@page part-domains:right {
+  @right-middle {
+    background-color: #d8d6f9;
+    content: ' ';
+  }
+  @right-top {
+    background-color: #d8d6f9;
+    content: ' ';
+  }
+  @right-bottom {
+    background-color: #d8d6f9;
+    content: ' ';
+  }
+  @top-right-corner {
+    background-color: #d8d6f9;
+    content: ' ';
+  }
+  @bottom-right-corner {
+    background-color: #d8d6f9;
+    content: ' ';
+  }
+}
+@page part-reference:left {
+  @left-top {
+    background-color: #d6f3f9;
+    content: ' ';
+  }
+  @left-middle {
+    background-color: #d6f3f9;
+    content: ' ';
+  }
+  @left-bottom {
+    background-color: #d6f3f9;
+    content: ' ';
+  }
+  @top-left-corner {
+    background-color: #d6f3f9;
+    content: ' ';
+  }
+  @bottom-left-corner {
+    background-color: #d6f3f9;
+    content: ' ';
+  }
+}
+@page part-reference:right {
+  @right-middle {
+    background-color: #d6f3f9;
+    content: ' ';
+  }
+  @right-top {
+    background-color: #d6f3f9;
+    content: ' ';
+  }
+  @right-bottom {
+    background-color: #d6f3f9;
+    content: ' ';
+  }
+  @top-right-corner {
+    background-color: #d6f3f9;
+    content: ' ';
+  }
+  @bottom-right-corner {
+    background-color: #d6f3f9;
+    content: ' ';
+  }
+}
+@page part-math:left {
+  @left-top {
+    background-color: #d9f9d6;
+    content: ' ';
+  }
+  @left-middle {
+    background-color: #d9f9d6;
+    content: ' ';
+  }
+  @left-bottom {
+    background-color: #d9f9d6;
+    content: ' ';
+  }
+  @top-left-corner {
+    background-color: #d9f9d6;
+    content: ' ';
+  }
+  @bottom-left-corner {
+    background-color: #d9f9d6;
+    content: ' ';
+  }
+}
+@page part-math:right {
+  @right-middle {
+    background-color: #d9f9d6;
+    content: ' ';
+  }
+  @right-top {
+    background-color: #d9f9d6;
+    content: ' ';
+  }
+  @right-bottom {
+    background-color: #d9f9d6;
+    content: ' ';
+  }
+  @top-right-corner {
+    background-color: #d9f9d6;
+    content: ' ';
+  }
+  @bottom-right-corner {
+    background-color: #d9f9d6;
+    content: ' ';
+  }
+}
+@page {
+  @top {
+    vertical-align: bottom;
+    content: string(current-header);
+    font-size: 10pt;
+    font-variant: small-caps;
+    padding-bottom: 10pt;
+  }
+}
+@page :right {
+  @top-right {
+    vertical-align: bottom;
+    font-size: 10pt;
+    content: counter(page);
+    padding-bottom: 10pt;
+    padding-right: 5pt;
+  }
+}
+@page :left {
+  @top-left {
+    vertical-align: bottom;
+    font-size: 10pt;
+    content: counter(page);
+    padding-bottom: 10pt;
+    padding-left: 5pt;
+  }
+}
+@page :first {
+  @top {
+    content: none;
+  }
+  @top-right {
+    content: none;
+  }
+}
+h1[id^='part:'] {
+  display: flow(part-string);
+}
+a {
+  color: black !important;
+}
+/* only in the manual */
+h1:not(#booktitle) {
+  page-break-before: always;
+}
+td pre {
+  margin-top: 0 !important;
+  margin: 0 !important;
+}
+p + table {
+  margin-top: 0.9em !important;
+}
+/*
+
+pre {
+    margin-left: auto !important;
+    margin-right: auto !important;
+}*/
+#mine {
+  text-align: center;
+}
+/*table {
+    width: 100% !important;
+}
+*/
+@media screen {
+  body div > ul:not(.toc) {
+    margin-left: 0em;
+    padding-left: 2em;
+    /*border : solid 1px blue;*/
+    margin-top: 0.2em;
+    margin-bottom: 0.2em;
+  }
+}
+@media print {
+  /* this is some thing weird, not very robust. Need div.document */
+  body div > ul:not(.toc) {
+    /*border : solid 1px blue;*/
+    margin-left: 2em;
+    /*prince wants */
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+  }
+  ul.toc ul:not(.toc) {
+    /*border : solid 1px red;*/
+  }
+}
+footnote {
+  float: footnote;
+  font-size: smaller;
+}
+@page {
+  @footnotes {
+    border-top: solid black thin;
+    margin-left: 1em;
+    padding-top: 3pt;
+    margin-top: 5pt;
+  }
+}
+/* saves 75% of time */
+/*ul.toc { display: none; }*/
+/*span.MathJax_SVG { border: solid 1px red;  position: relative; left: -4em;}*/
+/* fix this in Prince */
+svg {
+  max-width: 100%;
+}
+figcaption {
+  page-break-before: avoid;
+}
+/*
+@media print {
+h1::after {
+    margin-top: -3em;
+    content: ' ';
+    background-color: red;
+    position: absolute;
+    left: 3cm;
+    width: 8cm;
+    height: 3cm;
+    display: block;
+    top: 0;
+}
+*/
+#main_toc ul,
+#main_toc li {
+  padding-left: 0!important;
+  margin-left: 0!important;
+}
+#main_toc code.keyword {
+  color: black;
 }
 @page {
   /* good for ipad */

@@ -3,12 +3,13 @@ others=*.less
 
 d=compiled
 
+# $(d)/manual.css \
+# $(d)/manual_prince.css \
+# $(d)/mcdp_language_highlight.css \
+# $(d)/manual_screen.css \
+# $(d)/markdown.css \
+
 targets=\
-	$(d)/manual.css \
-	$(d)/manual_prince.css \
-	$(d)/mcdp_language_highlight.css \
-	$(d)/manual_screen.css \
-	$(d)/markdown.css \
 	$(d)/v_manual_ipad.css \
 	$(d)/v_manual_blurb.css \
 	$(d)/v_manual_screen.css \

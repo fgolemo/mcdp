@@ -397,6 +397,7 @@ def namedtuple_visitor_only_visit(x, visit):
     
     
 def namedtuple_visitor_ext(x, transform, parents=None):
+    """ It's not a visitor ... """
     if parents is None:
         parents = ()
         

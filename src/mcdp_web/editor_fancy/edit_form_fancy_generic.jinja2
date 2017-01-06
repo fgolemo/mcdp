@@ -7,27 +7,16 @@
   	<style type='text/css'>
 	  	{% include 'editor_fancy/edit_form_fancy_generic.css' %}
 
-	  	
+	  	tr, td {
+	  		margin: 0;
+	  		padding: 0;
+	  	}
   	</style>
+
   	<title>{{navigation['current_thing']}}</title>
 
+
   </head>
-  
-  <body spellcheck="false">
-  	{% include 'model_views_navigation.jinja2' %}
-  
-  
-  <table style='width: 100%; border: solid 0px black'>
-    <tr>
-  <td colspan=2>
-    <div id='commands'>
-    	<button id='save'><span class='unicode-icons'>&#128190;</span>save</button> <!-- 💾 -->
-    	<button id='close'><span class='unicode-icons'>×</span> save and close</button> 
-	  	<button id='discard'><span class='unicode-icons'>&#128465;</span>discard and close</button> <!-- 🗑 -->
-	  	<button id='apply_suggestions' style='display: none; margin-left: 5em'>
-	  		<span class='unicode-icons'>&#128161;</span>beautify</button> <!--💡-->
-	  	<span id='save_status'></span>
-  	</div>
   	<script type='text/javascript'>
 	  	$(document).ready(function() {  		
 		  	function nodefault(event) { 
@@ -50,20 +39,28 @@
 		  }
 		});
 	 </script>
+
+  
+  <body spellcheck="false">
+  	{% include 'model_views_navigation.jinja2' %}
+  
+  
+  <table style='width: 100%; border: solid 0px black'>
+    <tr>
+  <td colspan=1>
+    <div id='commands'>
+    	<button id='save'><span class='unicode-icons'>&#128190;</span>save</button> <!-- 💾 -->
+    	<button id='close'><span class='unicode-icons'>×</span> save and close</button> 
+	  	<button id='discard'><span class='unicode-icons'>&#128465;</span>discard and close</button> <!-- 🗑 -->
+	  	<button id='apply_suggestions' style='display: none; margin-left: 5em'>
+	  		<span class='unicode-icons'>&#128161;</span>beautify</button> <!--💡-->
+	  	<span id='save_status'></span>
+  	</div>
 </td>
-</tr>
-
-  <tr style=''><td style=' border: solid 0px gray; width: 50%'>
-  		<!-- do not add spaces between div and pre because we
-  			 are doing tricks with html()-->
-	  <div id='around_editor'><pre><code contenteditable="true" id='editor'>{{source_code|safe}}</code></pre>
-	  </div>
-  </td>
-
-	<td style='border: solid 0px gray; text-align: center'>
-	  <div style='height: 100%; border: solid 0px yellow'>
+	<td style='border: solid 0px gray;  position:fixed; ' width='49%' rowspan=2>
+	  <div style='height: 100%; margin: 0; width: 100%; text-align: center; border: solid 0px blue;'>
 	  <a id='graph' href="graph.png">
-	  	<img src='/static/white.png' style='max-height: 20em; max-width: 100%'/>
+	  	<img src='/static/white.png' style='max-height: 95vh; max-width: 100%'/>
 	  </a>
 	  	<script type='text/javascript'>
 	  	$(document).ready(function() {
@@ -72,6 +69,16 @@
 	  	</script>
 	  </div>
   	</td>
+
+</tr>
+
+  <tr style=''><td style=' border: solid 0px gray' width="50%">
+  		<!-- do not add spaces between div and pre because we
+  			 are doing tricks with html()-->
+	  <div id='around_editor'><pre><code contenteditable="true" id='editor'>{{source_code|safe}}</code></pre>
+	  </div>
+  </td>
+
   </tr>
 
 <tr>

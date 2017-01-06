@@ -18,6 +18,7 @@ from .pyparsing_bundled import ParseException, ParseFatalException
 from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list, unwrap_list
 from nose.tools import assert_equal
+from mcdp_lang.fix_whitespace_imp import fix_whitespace
 
 
 CDP = CDPLanguage
@@ -333,7 +334,8 @@ def parse_wrap(expr, string):
                 # could be an int, str
                 assert_equal(parsed_transformed.where.string, string)
             
-            return [parsed_transformed]
+            res = fix_whitespace(parsed_transformed)
+            return [res]
           
     except (ParseException, ParseFatalException) as e:
         where1 = Where(string0, e.loc)

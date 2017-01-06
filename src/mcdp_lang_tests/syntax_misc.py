@@ -1,18 +1,21 @@
 # -*- coding: utf-8 -*-
 from nose.tools import assert_equal
 
-from comptests.registrar import comptest
+from comptests.registrar import comptest, run_module_tests
 from contracts.utils import raise_desc, check_isinstance
 from mcdp_dp import (CatalogueDP, CoProductDP, NotFeasible, Template, Constant,
                      Limit, MaxF1DP, MinF1DP, MinusValueDP, MinusValueNatDP,
                      MinusValueRcompDP)
 from mcdp_dp import PlusValueNatDP
 from mcdp_lang.eval_warnings import MCDPWarnings
+from mcdp_lang.namedtuple_tricks import recursive_print
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp, parse_poset
 from mcdp_lang.pyparsing_bundled import Literal
 from mcdp_lang.syntax import Syntax, SyntaxIdentifiers
 from mcdp_lang.syntax_codespec import SyntaxCodeSpec
+from mcdp_lang_tests.utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
+                                   parse_wrap_check)
 from mcdp_lang_tests.utils import assert_parse_ndp_semantic_error
 from mcdp_posets import LowerSets, Rcomp, UpperSet, UpperSets, PosetProduct, get_product_compact
 from mcdp_posets import Nat
@@ -21,9 +24,8 @@ from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.comp.context import ModelBuildingContext, Context
 from mocdp.comp.recursive_name_labeling import get_names_used
 from mocdp.exceptions import DPNotImplementedError, DPSemanticError
+from mcdp_lang.fix_whitespace_imp import fix_whitespace
 
-from .utils import (assert_parsable_to_connected_ndp, assert_semantic_error,
-    parse_wrap_check)
 
 
 @comptest
@@ -1756,4 +1758,34 @@ def check_lang119(): # TODO: rename
 def check_lang120(): # TODO: rename
     pass
 
+
+@comptest
+def spaces1():
+    string = """requires  ciao [ m]   \n"comment" """
+    expr = Syntax.line_expr
+    x = parse_wrap(expr, string)[0]
+    #print x
+#     x2 = fix_whitespace(x)
+    #print x2
+    
+    assert_no_whitespace(x.comment)
+    assert_no_whitespace(x.rnames.e0)
+
+    string = ' 0  >=  1 ' 
+    expr = Syntax.constraint_expr_geq
+    x = parse_wrap(expr, string)[0]
+#     x2 = fix_whitespace(x)
+    assert_no_whitespace(x.prep)
+
+
+def assert_no_whitespace(x):
+    w = x.where
+    s = w.string[w.character:w.character_end]
+    if  s.strip() != s:
+        raise ValueError(w)
+
+
+
+if __name__=='__main__':
+    run_module_tests()
 
