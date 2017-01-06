@@ -17,7 +17,7 @@ __all__ = [
 
 @contract(returns='list(str)', directory='str',
           pattern='str|list(str)', followlinks='bool')
-def  locate_files(directory, pattern, followlinks=True,
+def locate_files(directory, pattern, followlinks=True,
                  include_directories=False,
                  include_files=True,
                  normalize=True,

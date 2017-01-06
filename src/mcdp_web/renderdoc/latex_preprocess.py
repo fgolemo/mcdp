@@ -3,6 +3,7 @@
 import os
 import re
 
+from contracts import contract
 from contracts.interface import Where
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp.utils.string_utils import get_md5
@@ -10,8 +11,39 @@ from mcdp_web.renderdoc.latex_inside_equation_abbrevs import replace_inside_equa
 from mcdp_web.renderdoc.markdown_transform import is_inside_markdown_quoted_block
 from mocdp import logger
 from mocdp.exceptions import DPSyntaxError
-from contracts import contract
 
+
+class LatexProcessingConstants:
+    justignore = [
+        'vfill', 'pagebreak', 'leavevmode', 'clearpage', 'hline',
+        'hfill', 'quad', 'qquad', 'noindent',
+    ]
+    just_ignore_1_arg = [
+        'vspace', 'vspace*', 'hspace', 'hspace*',
+        'extrarowheight',
+    ]
+    simplewraps = [
+        ('emph', 'em', ''),
+        ('textbf', 'strong', ''),
+        ('footnote', 'footnote', ''),
+        ('thanks', 'footnote', ''),
+        ('marginpar', 'div', 'class="marginpar"'),
+        ('fbox', 'div', 'class="fbox"'),
+        ('uline', 'span', 'class="uline"'),
+        ('F', 'span', 'class="Fcolor"'),
+        ('R', 'span', 'class="Rcolor"'),
+        ('I', 'span', 'class="Icolor"'),
+    ]
+
+    simples_xspace = [
+        ('scottcontinuity', 'Scott continuity',)
+         ('scottcontinuous', 'Scott continuous', )
+         ('CPO', 'CPO',)
+         ('DCPO', 'DCPO',)
+         ('eg', 'e.g.',)
+         ('etal', '<em>et al.</em>',)
+    ]
+    
 
 def assert_not_inside(substring, s):
     if substring in s:
@@ -23,25 +55,28 @@ def assert_not_inside(substring, s):
 UNICODE_NBSP = u"\u00A0".encode('utf-8')
 
 
-def latex_preprocessing(s):
-    group = 'TILDETILDETILDE'
-    s = s.replace('~~~', group)
-
-    s = s.replace('\n%\n', '\n')
-    s = s.replace('~', UNICODE_NBSP)  # XXX
-    s = s.replace(group, '~~~')
-
-    s = substitute_simple(s, 'textendash', '&ndash;')
-    s = substitute_simple(s, 'textemdash', '&mdash;')
-
-    s = substitute_simple(
-        s, 'and', '<span class="and" style="margin-left: 2em"></span>')
-
-    justignore = ['vfill', 'pagebreak', 'leavevmode', 'clearpage', 'hline']
-    for j in justignore:
+def latex_process_ignores(s):
+    for j in LatexProcessingConstants.justignore:
         s = substitute_command_ext(s, j, lambda args, opts: '<!--skipped %s-->' % j,  # @UnusedVariable
                                    nargs=0, nopt=0)
+    for cmd in LatexProcessingConstants.just_ignore_1_arg:
+        f = lambda args, _: '<!-- skipped %s{%s} -->' % (cmd, args[0])
+        s = substitute_command_ext(s, cmd, f, nargs=1, nopt=0)
+    return s
 
+def latex_process_simple_wraps(s):
+    
+    def wrap(tag, extra_attrs, s):
+        return '<%s %s>%s</%s>' % (tag, extra_attrs, s,tag) 
+    def justwrap(tag, extra_attrs=''):
+        return lambda args, _opts: wrap(tag, extra_attrs, args[0])
+    
+    
+    for cmd, tag, tagattrs in LatexProcessingConstants.simplewraps:    
+        s = substitute_command_ext(s, cmd, justwrap(tag, tagattrs), nargs=1, nopts=0)
+    return s
+
+def latex_process_title(s):
     class Tmp:
         title = None
         author = None
@@ -61,18 +96,27 @@ def latex_preprocessing(s):
     title += "<div class='author'>%s</div>" % Tmp.author
     s = substitute_simple(s, "maketitle", title)
 
-    s = re.sub(r'\\noindent\s*', '', s)  # XXX
-# {[}m{]}}, and we need to choose the \R{endurance~$T$~{[}s{]}}
-    s = re.sub(r'{(\[|\])}', r'\1', s)
+    s = substitute_simple(
+        s, 'and', '<span class="and" style="margin-left: 2em"></span>')
 
+    return s
+
+def latex_process_tilde_nbsp_and_protect_fenced(s):
+    group = 'TILDETILDETILDE'
+    s = s.replace('~~~', group)
+    s = s.replace('~', UNICODE_NBSP)
+    s = s.replace(group, '~~~')
+    return s
+
+def latex_process_references(s):
     # no! let mathjax do it
-    def subit(m):
+    def ref_subit(m):
         x = m.group(1)
         if x.startswith('eq:'):
             return '\\ref{%s}' % x
         else:
             return '<a href="#%s" class="only-number"></a>' % x
-    s = re.sub(r'\\ref{(.*?)}', subit, s)
+    s = re.sub(r'\\ref{(.*?)}', ref_subit, s)
 
     s = substitute_command(s, 'prettyref', lambda name, inside:  # @UnusedVariable
                            '<a href="#%s"/>' % inside)
@@ -93,9 +137,10 @@ def latex_preprocessing(s):
     s = re.sub(r'\\exaref{(.*?)}', r'<a href="#exa:\1"></a>', s)
     s = re.sub(r'\\secref{(.*?)}', r'<a href="#sec:\1"></a>', s)
     s = re.sub(r'\\coderef{(.*?)}', r'<a href="#code:\1"></a>', s)
+    return s
 
-    s = sub_headers(s)
-
+def latex_process_citations(s):
+    
     def sub_cite(args, opts):
         cits = args[0].split(',')
         inside = opts[0]
@@ -108,8 +153,35 @@ def latex_preprocessing(s):
         return res
 
     s = substitute_command_ext(s, 'cite', sub_cite, nargs=1, nopt=1)
+    
+    return s
 
-    def sub_multicolumn(args, opts):
+def latex_process_mcdp_words(s):
+    for a,b in LatexProcessingConstants.simples_xspace:
+        s = substitute_simple(a, b, xspace=True)
+    return s
+
+def latex_preprocessing(s):
+    s = s.replace('\n%\n', '\n')
+
+    s = substitute_simple(s, 'textendash', '&ndash;')
+    s = substitute_simple(s, 'textemdash', '&mdash;')
+
+    s = latex_process_tilde_nbsp_and_protect_fenced(s)
+    s = latex_process_ignores(s)
+    s = latex_process_title(s)
+    s = latex_process_references(s)
+    s = latex_process_citations(s)
+    s = latex_process_headers(s)
+
+    
+# {[}m{]}}, and we need to choose the \R{endurance~$T$~{[}s{]}}
+    s = re.sub(r'{(\[|\])}', r'\1', s)
+
+
+
+
+    def sub_multicolumn(args, opts):  # @UnusedVariable
         ncols, align, contents = args[:3]
         # TODO:
         return '<span multicolumn="%s" align="%s">%s</span>' % (ncols, align, contents)
@@ -119,70 +191,34 @@ def latex_preprocessing(s):
 
     # note: nongreedy matching ("?" after *); and multiline (re.M) DOTALL =
     # '\n' part of .
-    s = re.sub(r'\\emph{(.*?)}', r'<em>\1</em>', s, flags=re.M | re.DOTALL)
-    s = re.sub(
-        r'\\textbf{(.*?)}', r'<strong>\1</strong>', s, flags=re.M | re.DOTALL)
-
+    s = latex_process_simple_wraps(s)
     s = s.replace('\,', '&ensp;')
-    s = s.replace('%\n', '\n')
+#     s = s.replace('%\n', '\n')
 
-    s = substitute_simple(s, 'etal', 'et. al.')
+#     s = substitute_simple(s, 'etal', 'et. al.')
 
-    s = replace_includegraphics(s)
-    s = substitute_command(s, 'thanks', lambda name, inside:  # @UnusedVariable
-                           '<footnote>' + inside + "</footnote>")
+    s = replace_includegraphics(s) 
+    s = latex_process_mcdp_words(s)
 
-    s = substitute_command(s, 'fbox', lambda name, inside:  # @UnusedVariable
-                           '<div class="fbox">' + inside + "</div>")
-    s = substitute_simple(
-        s, 'scottcontinuity', 'Scott continuity', xspace=True)
-    s = substitute_simple(
-        s, 'scottcontinuous', 'Scott continuous', xspace=True)
-    s = substitute_simple(s, 'CPO', 'CPO', xspace=True)
-    s = substitute_simple(s, 'DCPO', 'DCPO', xspace=True)
-    s = substitute_simple(s, 'eg', 'e.g.', xspace=True)
     s = substitute_simple(s, '$', '&#36;')
     s = substitute_simple(s, '#', '&#35;')
     s = substitute_simple(s, 'ldots', '&hellip;')
 
     s = substitute_simple(s, 'xxx', '<span class="xxx">XXX</span>')
 
-    s = substitute_simple(s, 'hfill', '')
-    s = substitute_simple(s, 'quad', '')
-    s = substitute_simple(s, 'centering', '')
+    s = substitute_simple(s, 'centering', '<formatting class="centering">Make this centered</formatting>')
 
     s = substitute_simple(s, 'bigskip', '<span class="bigskip"/>')
     s = substitute_simple(s, 'medskip', '<span class="medskip"/>')
     s = substitute_simple(s, 'smallskip', '<span class="medskip"/>')
-    s = substitute_simple(s, 'par', '<br class="from_latex_par"/>')
-#     assert_not_inside('\\par', s)
-    s = substitute_command_ext(s, 'vspace', lambda args, opts: '<!--skipped v-space-->',  # @UnusedVariable
-                               nargs=1, nopt=0)
-    s = substitute_command_ext(s, 'vspace*', lambda args, opts: '<!--skipped v-space*-->',  # @UnusedVariable
-                               nargs=1, nopt=0)
-    s = substitute_command_ext(s, 'hspace', lambda args, opts: '<!--skipped h-space-->',  # @UnusedVariable
-                               nargs=1, nopt=0)
-    s = substitute_command_ext(s, 'hspace*', lambda args, opts: '<!--skipped h-space*-->',  # @UnusedVariable
-                               nargs=1, nopt=0)
-    s = substitute_command_ext(s, 'footnote', nargs=1, nopt=0,
-                               f =lambda (a,), _: '<footnote>%s</footnote>' % a)
-    s = substitute_command_ext(s, 'marginpar', nargs=1, nopt=0,
-                               f =lambda (a,), _: '<div class="marginpar">%s</div>' % a)
-#     s = substitute_command_ext(s, 'setcounter', lambda args, opts: '<!--skipped h-space*-->',  # @UnusedVariable
-#                            nargs=2, nopt=0)
-#
+    s = substitute_simple(s, 'par', '<br class="from_latex_par"/>') 
+
+         
 #     \IEEEPARstart{O}{ne}
     s = substitute_command_ext(s, 'IEEEPARstart', lambda args, opts: args[0] + args[1],  # @UnusedVariable
-                               nargs=2, nopt=0)
-#
-#     assert_not_inside('\\vspace', s)
-#     assert_not_inside('\\hspace', s)
-#
-    s = substitute_simple(s, 'setlength', '')
-    s = substitute_command_ext(
-        s, 'extrarowheight', lambda args, opts: '', nargs=1, nopt=0)  # @UnusedVariable
+                               nargs=2, nopt=0) 
 
-    s = substitute_command_ext(s, 'url', lambda args, opts: '<a href="%s">%s</a>' % (
+    s = substitute_command_ext(s, 'url', lambda args, _: '<a href="%s">%s</a>' % (
         args[0], args[0]), nargs=1, nopt=0)  # @UnusedVariable
 
     # \adjustbox{max width=4.0cm}{
@@ -190,17 +226,7 @@ def latex_preprocessing(s):
     s = substitute_command_ext(
         s, 'adjustbox', lambda args, opts: args[1], nargs=2, nopt=0)  # @UnusedVariable
 
-    s = replace_captionsideleft(s)
-
-    s = substitute_command(
-        s, 'F', lambda name, inside: '<span class="Fcolor">%s</span>' % inside)  # @UnusedVariable
-    s = substitute_command(
-        s, 'R', lambda name, inside: '<span class="Rcolor">%s</span>' % inside)  # @UnusedVariable
-    s = substitute_command(
-        s, 'I', lambda name, inside: '<span class="Icolor">%s</span>' % inside)  # @UnusedVariable
-    s = substitute_command(s, 'uline', lambda name, inside:
-                           '<span class="uline">%s</span>' % inside)  # @UnusedVariable
-
+    s = replace_captionsideleft(s) 
     for x in ['footnotesize', 'small', 'normalsize']:
         s = substitute_simple(s, x,
                               '<span class="apply-parent %s"></span>' % x)  # @UnusedVariable
@@ -225,6 +251,7 @@ def latex_preprocessing(s):
     s = replace_environment(s, "center", "center", 'don-t-steal-label')
 
     s = replace_environment_ext(s, "verbatim", lambda s, _: s)
+    s = replace_environment_ext(s, "lstlisting", lambda s, _: s)
     s = replace_environment_ext(s, "quote", lambda inside, opt:  # @UnusedVariable
                                 '<blockquote>' + inside + '</blockquote>')
     s = replace_environment_ext(s, "tabular", maketabular)
@@ -243,14 +270,9 @@ def latex_preprocessing(s):
         s, "table*", lambda inside, opt: maketable(inside, opt, True))
 
     s = s.replace('pro:', 'prop:')
-
-#     s = replace_environment_ext(s, "enumerate", makenumerate)
-#     s = replace_environment_ext(s, "itemize", makeitemize)
-#
+ 
     s = s.replace('{}', '')
     s = replace_quotes(s)
-#     if 'defn' in s:
-#         raise ValueError(s)
     return s
 
 # def makenumerate(inside, opt):
@@ -452,7 +474,7 @@ def makefigure(inside, opt, asterisk):
     return res
 
 
-def sub_headers(s):
+def latex_process_headers(s):
     def sub_header(ss, cmd, hname, number=True):
         def replace(name, inside):  # @UnusedVariable
             options = ""
@@ -642,15 +664,7 @@ def substitute_command(s, name, sub):
     istart = s.index(start)
     i = istart + len(start) - 1  # minus brace
     after = s[i:]
-#
-#     # don't match '\ciao' when looking for '\c'
-#     is_match = not next_char.isalpha()
-#     if not is_match:
-#         return s[:i] + substitute_command(s[i:], name, sub)
-#
-#     if not after[0] == '{':
-#         msg = 'I expected brace after %r, but I see .' % start
-#         raise_desc(ValueError, msg, s=s)
+# 
     try:
         assert after[0] == '{'
         inside_plus_brace, after = get_balanced_brace(after)
