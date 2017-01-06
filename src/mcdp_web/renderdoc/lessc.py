@@ -29,8 +29,9 @@ def run_lessc(soup):
         s1 = style.string
         s1 = unescape_entities(s1)
         s1 = s1.replace('AND', '&')
+        s1 = s1.encode('utf-8')
         s2 = lessc_string(s1)
-        
+        s2 = unicode(s2, 'utf-8')
 #         print indent(s2, 'less |')
         s2 = '/* preprocessed with less */\n' + s2
         style.string = s2
