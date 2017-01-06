@@ -305,7 +305,7 @@ def findall(p, s):
         
         
  
-@contract(s=bytes, returns='None|tuple')
+@contract(s0=bytes, returns='None|tuple')
 def get_suggestion_identifier(s0):
     """ Returns a pair of (what, replacement), or None if no suggestions available"""
     if s0 != s0.strip():
