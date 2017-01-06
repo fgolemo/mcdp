@@ -5,17 +5,17 @@ from types import NoneType
 from contracts import contract
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_dp import (Constant, ConstantMinimals, Conversion,
-    Identity, InvMult2, InvPlus2, InvPlus2Nat, JoinNDP, Limit, MeetNDualDP,
-    Mux, MuxMap, ProductNDP, SumNDP, SumNNatDP, TakeFun, TakeRes,
-    WrapAMap, InvMult2Nat, MeetNDP, ProductNNatDP, ProductNRcompDP, SumNRcompDP,
-    IdentityDP, FunctionNode, ResourceNode)
+                     Identity, InvMult2, InvPlus2, InvPlus2Nat, JoinNDP, Limit, MeetNDualDP,
+                     Mux, MuxMap, ProductNDP, SumNDP, SumNNatDP, TakeFun, TakeRes,
+                     WrapAMap, InvMult2Nat, MeetNDP, ProductNNatDP, ProductNRcompDP, SumNRcompDP,
+                     IdentityDP, FunctionNode, ResourceNode)
 from mcdp_lang.blocks import get_missing_connections
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
-    RcompUnits, TopCompletion, format_pint_unit_short)
+                         RcompUnits, TopCompletion, format_pint_unit_short)
 from mocdp import logger, MCDPConstants
 from mocdp.comp import CompositeNamedDP, SimpleWrap
 from mocdp.comp.context import (get_name_for_fun_node, get_name_for_res_node,
-    is_fun_node_name, is_res_node_name)
+                                is_fun_node_name, is_res_node_name)
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning, DPInternalError
 from mocdp.ndp import NamedDPCoproduct
@@ -87,8 +87,8 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
     
     rel_to_8 = MCDPConstants.diagrams_fontsize / 8.0
     gg.styleDefaultAppend('fontsize', MCDPConstants.diagrams_fontsize)
-    marginx = 0.07 * 1.2* rel_to_8
-    marginy = 0.03 * 1.2*  rel_to_8
+#     marginx = 0.07 * 1.2* rel_to_8
+#     marginy = 0.03 * 1.2*  rel_to_8
 #     gg.styleDefaultAppend('margin', "%f,%f" % (marginx , marginy ))
 #     0.11,0.055.
     gg.styleDefaultAppend("width", 0.2 * rel_to_8) # minimum width of node

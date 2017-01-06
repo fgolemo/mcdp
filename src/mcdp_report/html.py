@@ -5,8 +5,7 @@ import os
 from contracts import contract
 from contracts.interface import line_and_col, location, Where
 from contracts.utils import indent, raise_desc, raise_wrapped, check_isinstance
-from mcdp_lang.namedtuple_tricks import isnamedtuplewhere, get_copy_with_where,\
-    recursive_print
+from mcdp_lang.namedtuple_tricks import isnamedtuplewhere, get_copy_with_where
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.refinement import namedtuple_visitor_ext

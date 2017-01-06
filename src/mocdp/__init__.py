@@ -60,8 +60,6 @@ except ImportError as e:
 
 # command dot -> graphviz
 
-# import conf_tools
-
 # some constants
 
 # deprecated, used as attr for implementation spaces
@@ -81,8 +79,10 @@ class MCDPConstants():
     
     # source
     
+    # preferred indent
     indent = 4
-    tabsize = 4
+    # number of spaces to which a tab is equivalent
+    tabsize = 4 
         
     
     #
@@ -180,9 +180,9 @@ class MCDPConstants():
                                     '*.html_resources', 'out-*', 'compmake', '*.key']
 
     # images used to look for icons for DPs 
-    exts_for_icons = ['png', 'jpg', 'PNG', 'JPG', 'jpeg', 'JPEG'] # XXX
+    exts_for_icons = ('png', 'jpg', 'PNG', 'JPG', 'jpeg', 'JPEG') # XXX
     # all images 
-    exts_images = exts_for_icons + ['svg', 'SVG', 'pdf', 'PDF']
+    exts_images = exts_for_icons + ('svg', 'SVG', 'pdf', 'PDF')
     
 def get_mcdp_tmp_dir():
     from tempfile import gettempdir

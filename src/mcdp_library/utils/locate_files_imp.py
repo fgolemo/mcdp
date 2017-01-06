@@ -46,7 +46,7 @@ def locate_files(directory, pattern, followlinks=True,
         return any(fnmatch.fnmatch(x, p) for p in patterns)
     
     def should_ignore_resource(x):
-        return not any(fnmatch.fnmatch(x, ip) for ip in ignore_patterns) 
+        return any(fnmatch.fnmatch(x, ip) for ip in ignore_patterns) 
 
     def accept_dirname_to_go_inside(root, d):
         if should_ignore_resource(d):
@@ -100,8 +100,9 @@ def locate_files(directory, pattern, followlinks=True,
         filenames = list(real2norm.keys())
 
     seconds = time.time() - t0
-    n = len(filenames)
-    nuniques = len(set(filenames))
-    print('%.4f s for locate_files(%s,%s): %d traversed, found %d filenames (%d uniques)' % 
-          (seconds, directory, pattern, ntraversed, n, nuniques))
+    if seconds > 0.2:
+        n = len(filenames)
+        nuniques = len(set(filenames))
+        print('%.4f s for locate_files(%s,%s): %d traversed, found %d filenames (%d uniques)' % 
+              (seconds, directory, pattern, ntraversed, n, nuniques))
     return filenames

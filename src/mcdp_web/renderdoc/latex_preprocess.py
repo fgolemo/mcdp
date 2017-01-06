@@ -36,12 +36,12 @@ class LatexProcessingConstants:
     ]
 
     simples_xspace = [
-        ('scottcontinuity', 'Scott continuity',)
-         ('scottcontinuous', 'Scott continuous', )
-         ('CPO', 'CPO',)
-         ('DCPO', 'DCPO',)
-         ('eg', 'e.g.',)
-         ('etal', '<em>et al.</em>',)
+        ('scottcontinuity', 'Scott continuity'),
+         ('scottcontinuous', 'Scott continuous'),
+         ('CPO', 'CPO'),
+         ('DCPO', 'DCPO'),
+         ('eg', 'e.g.'),
+         ('etal', '<em>et al.</em>'),
     ]
     
 
@@ -65,15 +65,13 @@ def latex_process_ignores(s):
     return s
 
 def latex_process_simple_wraps(s):
-    
     def wrap(tag, extra_attrs, s):
         return '<%s %s>%s</%s>' % (tag, extra_attrs, s,tag) 
     def justwrap(tag, extra_attrs=''):
         return lambda args, _opts: wrap(tag, extra_attrs, args[0])
     
-    
     for cmd, tag, tagattrs in LatexProcessingConstants.simplewraps:    
-        s = substitute_command_ext(s, cmd, justwrap(tag, tagattrs), nargs=1, nopts=0)
+        s = substitute_command_ext(s, cmd, justwrap(tag, tagattrs), nargs=1, nopt=0)
     return s
 
 def latex_process_title(s):
@@ -157,8 +155,8 @@ def latex_process_citations(s):
     return s
 
 def latex_process_mcdp_words(s):
-    for a,b in LatexProcessingConstants.simples_xspace:
-        s = substitute_simple(a, b, xspace=True)
+    for a, b in LatexProcessingConstants.simples_xspace:
+        s = substitute_simple(s, a, b, xspace=True)
     return s
 
 def latex_preprocessing(s):
@@ -174,7 +172,6 @@ def latex_preprocessing(s):
     s = latex_process_citations(s)
     s = latex_process_headers(s)
 
-    
 # {[}m{]}}, and we need to choose the \R{endurance~$T$~{[}s{]}}
     s = re.sub(r'{(\[|\])}', r'\1', s)
 

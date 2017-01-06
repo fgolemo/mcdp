@@ -54,8 +54,9 @@ class MCDPLibrary():
     ext_explanation2 = 'expl2.md'  # after the model
     ext_doc_md = 'md'  # library document
 
-    all_extensions = [ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps,
-                      ext_explanation1, ext_explanation2, ext_doc_md] + MCDPConstants.exts_images
+    # all the files we look for
+    all_extensions = (ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps,
+                      ext_explanation1, ext_explanation2, ext_doc_md) + MCDPConstants.exts_images
 
     def __init__(self, cache_dir=None, file_to_contents=None, search_dirs=None,
                  load_library_hooks=None):
@@ -87,7 +88,7 @@ class MCDPLibrary():
         dirs = set()
         for basename, d in self.file_to_contents.items():
             ext = os.path.splitext(basename)[1][1:]
-            if ext in MCDPLibrary.exts_images:
+            if ext in MCDPConstants.exts_images:
                 dirname = os.path.dirname(d['realpath'])
                 dirs.add(dirname)
         return list(dirs)

@@ -34,14 +34,21 @@ def get_manual_css_frag():
     
     frag = Tag(name='fragment-css')
     if link_css:
-        for fn in css_files:
-            url = 'file://%s' % fn
-            frag.append(NavigableString('\n'))
-            link = Tag(name='link')
-            link['rel'] = 'stylesheet'
-            link['type'] = 'text/css'
-            link['href'] = url
-            frag.append(link) 
+#         for fn in css_files:
+#             url = 'file://%s' % fn
+#             frag.append(NavigableString('\n'))
+#             link = Tag(name='link')
+#             link['rel'] = 'stylesheet'
+#             link['type'] = 'text/css'
+#             link['href'] = url
+#             frag.append(link) 
+
+        link = Tag(name='link')
+        link['rel'] = 'stylesheet'
+        link['type'] = 'text/css'
+        link['href'] = 'VERSIONCSS'
+        frag.append(link) 
+        
         return frag
     else:
         assert False

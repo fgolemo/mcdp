@@ -1,9 +1,26 @@
 
 others=*.less
 
-all: out/manual.css out/manual_prince.css out/mcdp_language_highlight.css out/manual_screen.css out/markdown.css
+d=compiled
 
-out/%.css: %.less $(others)
+targets=\
+	$(d)/manual.css \
+	$(d)/manual_prince.css \
+	$(d)/mcdp_language_highlight.css \
+	$(d)/manual_screen.css \
+	$(d)/markdown.css \
+	$(d)/v_manual_ipad.css \
+	$(d)/v_manual_blurb.css \
+	$(d)/v_manual_screen.css \
+	$(d)/v_standalone_ipad.css \
+	$(d)/v_standalone_blurb.css \
+	$(d)/v_standalone_screen.css \
+	$(d)/v_mcdpweb.css
+
+all: $(targets)
+
+
+compiled/%.css: %.less $(others)
 	lessc --verbose $< $@.tmp
 	@cat banner.txt > $@
 	@cat $@.tmp >> $@

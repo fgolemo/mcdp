@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from comptests.registrar import comptest
-from contracts.utils import raise_desc
+from contracts.utils import raise_desc, indent
 from mcdp_library.library import MCDPLibrary
 from mcdp_web.renderdoc.highlight import get_minimal_document
 from mcdp_web.renderdoc.main import render_complete
@@ -9,7 +9,7 @@ from mcdp_web.renderdoc.main import render_complete
 def tryit(s, write_to=None, forbid=[]):
     library = MCDPLibrary()
     raise_errors = True
-    realpath = 'trasnformations.py'
+    realpath = 'transformations.py'
     s2 = render_complete(library, s, raise_errors, realpath, generate_pdf=False)
     
     if False:
@@ -390,9 +390,20 @@ def other10(): tryit(others[10])
 @comptest
 def other11(): tryit(others[11]) 
 
+@comptest
+def another():
+    s = """
+This is the case of unreasonable demands (1 kg of extra payload):
+
+    $ mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 1.0 kg, 1 W>"
+    """
+    s2 = tryit(s)
+    print indent(s2, 's2: ')
+    assert '1 hour' in s2
+    
 assert len(others) == 12, len(others)
 
 if __name__ == '__main__': 
-    conv_f5()
+    another()
 #     run_module_tests()
     

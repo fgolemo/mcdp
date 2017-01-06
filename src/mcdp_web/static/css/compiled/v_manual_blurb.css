@@ -1168,6 +1168,21 @@ section > svg {
 #bibliography_entries {
   display: none;
 }
+@page {
+  size: 6.125in 9.250in;
+  margin-top: 1.7cm;
+  margin-bottom: 0.312in;
+}
+@page :left {
+  margin-left: 6.175mm;
+  padding-left: 0.3825cm;
+  margin-right: 1.7cm;
+}
+@page :right {
+  margin-right: 6.175mm;
+  padding-right: 0.3825cm;
+  margin-left: 1.7cm;
+}
 /*
 
 

@@ -39,9 +39,6 @@ from mcdp_figures import( MakeFiguresNDP, MakeFiguresTemplate,
     MakeFiguresPoset)
 
 
-
-
-
 @contract(returns=str, html=str)
 def html_interpret(library, html, raise_errors=False, 
                    generate_pdf=False, realpath='unavailable'):
@@ -633,8 +630,8 @@ def get_minimal_document(body_contents, title=None,
     "http://www.w3.org/2002/04/xhtml-math-svg/xhtml-math-svg.dtd">"""
     res = ns + '\n' +  s
     
-    if add_manual_css and MCDPConstants.manual_link_css_instead_of_including:
-        assert 'manual.css' in res, res
+#     if add_manual_css and MCDPConstants.manual_link_css_instead_of_including:
+#         assert 'manual.css' in res, res
     
     res = res.replace('<div><!DOCTYPE html>', '<div>')
         

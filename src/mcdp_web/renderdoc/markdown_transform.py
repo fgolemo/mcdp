@@ -142,77 +142,77 @@ def replace_markdown_line_by_line(s, line_transform=None, code_transform=None, i
     return res
     
     
-def replace_markdown_line_by_line0(s, line_transform, code_transform=None, inside_tag=None):
-    """
-       No support for nested tags:
-        
-            <tag>
-                <tag> ... </tag>  # counted as comment because it is 4 lines
-            </tag>
-            
-            
-    """    
-    lines = s.split('\n')
-    block_started = False
-    tag_started = False
-    tagname = None
-    
-    
-    for i in range(len(lines)):
-        l = lines[i]
-        if block_started:
-            assert not tag_started
-            if l.startswith('~~~'):
-                block_started = False
-            continue
-        elif tag_started:
-            assert not block_started
-            assert tagname is not None
-            
-            end = '</%s' % tagname
-            if end in l:
-                #print('detected end of tag %r' % tagname)
-                tag_started = False
-                
-                # some garbage after end
-                i = l.index(end)
-                closing = l.index('>', i)
-                garbage = l[closing+1:]
-                if garbage.strip():
-                    #print('trailing: %r' % garbage)
-                    l = garbage
-            else:
-                lines[i] = inside_tag(lines[i])
-                continue
-        else:
-            assert not block_started and not tag_started
-            if l.startswith('~~~'):
-                block_started = False
-                continue
-            if l.startswith('<'):
-                tagname = ''
-                while l and l[0].isalpha():
-                    tagname += l[0]
-                    l = l[1:]
-                #print('detected start of tag %r' % tagname)
-                continue
-            
-        
-        MARK = ' ' *4 
-        is_literal = l.startswith(MARK)
-        is_code = block_started or is_literal
-        
-        if is_code:
-        
-            if is_literal:
-                l1 = l[len(MARK):]
-                l2 = MARK + code_transform(l1)
-            else: 
-                l2 = code_transform(l)
-       
-        else:
-            l2 = line_transform(l)
-        lines[i] = l2
-    s2 = "\n".join(lines)
-
-    return s2
+# def replace_markdown_line_by_line0(s, line_transform, code_transform=None, inside_tag=None):
+#     """
+#        No support for nested tags:
+#         
+#             <tag>
+#                 <tag> ... </tag>  # counted as comment because it is 4 lines
+#             </tag>
+#             
+#             
+#     """    
+#     lines = s.split('\n')
+#     block_started = False
+#     tag_started = False
+#     tagname = None
+#     
+#     
+#     for i in range(len(lines)):
+#         l = lines[i]
+#         if block_started:
+#             assert not tag_started
+#             if l.startswith('~~~'):
+#                 block_started = False
+#             continue
+#         elif tag_started:
+#             assert not block_started
+#             assert tagname is not None
+#             
+#             end = '</%s' % tagname
+#             if end in l:
+#                 #print('detected end of tag %r' % tagname)
+#                 tag_started = False
+#                 
+#                 # some garbage after end
+#                 i = l.index(end)
+#                 closing = l.index('>', i)
+#                 garbage = l[closing+1:]
+#                 if garbage.strip():
+#                     #print('trailing: %r' % garbage)
+#                     l = garbage
+#             else:
+#                 lines[i] = inside_tag(lines[i])
+#                 continue
+#         else:
+#             assert not block_started and not tag_started
+#             if l.startswith('~~~'):
+#                 block_started = False
+#                 continue
+#             if l.startswith('<'):
+#                 tagname = ''
+#                 while l and l[0].isalpha():
+#                     tagname += l[0]
+#                     l = l[1:]
+#                 #print('detected start of tag %r' % tagname)
+#                 continue
+#             
+#         
+#         MARK = ' ' *4 
+#         is_literal = l.startswith(MARK)
+#         is_code = block_started or is_literal
+#         
+#         if is_code:
+#         
+#             if is_literal:
+#                 l1 = l[len(MARK):]
+#                 l2 = MARK + code_transform(l1)
+#             else: 
+#                 l2 = code_transform(l)
+#        
+#         else:
+#             l2 = line_transform(l)
+#         lines[i] = l2
+#     s2 = "\n".join(lines)
+# 
+#     return s2

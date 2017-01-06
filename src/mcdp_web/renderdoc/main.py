@@ -80,17 +80,16 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
     # invalid html, (in particular '$   ciao <ciao>' and make it work)
     
     s = s.replace('*}', '\*}') 
-
-    s = other_abbrevs(s)
+    
+    
     s, mcdpenvs = protect_my_envs(s) 
 #     print('mcdpenvs = %s' % maths)
-
-    
+ 
     s = col_macros_prepare_before_markdown(s)
     
-#     print(indent(s, 'before markdown | '))
+    print(indent(s, 'before markdown | '))
     s = render_markdown(s)
-#     print(indent(s, 'after  markdown | '))
+    print(indent(s, 'after  markdown | '))
     
     for k,v in maths.items():
         if not k in s:
@@ -108,6 +107,9 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
 
     s = replace_equations(s)        
     s = s.replace('\\*}', '*}')
+
+    # this parses the XML
+    s = other_abbrevs(s)
     
     
     # need to process tabular before mathjax 

@@ -7,6 +7,7 @@ from mocdp.exceptions import DPSemanticError
 
 from .library import MCDPLibrary
 from .utils import locate_files
+from mocdp import MCDPConstants
 
 
 __all__ = [
@@ -60,7 +61,7 @@ class Librarian():
         allimages = {} # base.ext -> same struct as l.file_to_contents
         for short, data in self.libraries.items():
             l = data['library']
-            for ext in MCDPLibrary.exts_images:
+            for ext in MCDPConstants.exts_images:
                 basenames = l._list_with_extension(ext)
 #                 print('basenames: for %s are  %s' % (ext, basenames))
                 for b in basenames:

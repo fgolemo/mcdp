@@ -1168,6 +1168,16 @@ section > svg {
 #bibliography_entries {
   display: none;
 }
+@page {
+  /* good for ipad */
+  /*size: A5;  148 x 210 mm   5.8 x 8.3 in */
+  /* 4:3 with short side being 5.8in; 5.8/3*4=7.73 */
+  size: 5.8in 7.73in;
+  margin-left: 1cm;
+  margin-right: 1cm;
+  margin-top: 1.7cm;
+  margin-bottom: 0.312in;
+}
 /*
 
 

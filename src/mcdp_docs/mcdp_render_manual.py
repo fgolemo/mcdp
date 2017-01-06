@@ -46,11 +46,11 @@ def get_manual_contents():
 #         if depth >= 3:
 #             continue
         if 'exclude' in fn:
-            print('Excluding file %r because of string "exclude" in it' % fn)
+            logger.info('Excluding file %r because of string "exclude" in it' % fn)
             continue
         ok.append(fn) 
     filenames = natsorted(ok)
-    print "sorted:\n" + "\n - ".join(filenames)
+#     print "sorted:\n" + "\n - ".join(filenames)
     for f in filenames:
         docname, _extension = os.path.splitext(os.path.basename(f))
         yield 'manual', docname
@@ -86,24 +86,28 @@ class RenderManual(QuickApp):
         local_files = list(locate_files('.', '*.md'))
         basename2filename = dict( (os.path.basename(_), _) for _ in local_files)
         
-        for libname, docname in manual_contents:
-            print('adding document %s - %s' % (libname, docname))
+        output_file = options.output_file
+        
+        for i, (libname, docname) in enumerate(manual_contents):
+            logger.info('adding document %s - %s' % (libname, docname))
+            out_part_basename = '%02d%s' % (i, docname) 
             res = context.comp(render, libname, docname, generate_pdf,
-                               job_id=docname)
+                               job_id=docname, main_file=output_file, 
+                               out_part_basename=out_part_basename)
             if libname == 'manual':
                 
                 source = '%s.md' % docname
                 if source in basename2filename:
                     filenames = [basename2filename[source]]
                     erase_job_if_files_updated(context.cc, promise=res, 
-                                           filenames=filenames)
+                                               filenames=filenames)
                 else:
                     logger.debug('Could not find file %r for date check' % source)
                     
             files_contents.append(res)
 
         d = context.comp(manual_join, files_contents)
-        context.comp(write, d, options.output_file)
+        context.comp(write, d, output_file)
         
         context.comp(generate_metadata)
 
@@ -151,7 +155,7 @@ def generate_metadata():
     s = replace_macros(s)
     with open(out, 'w') as f:
         f.write(s)
-    print(s)
+    #print(s)
     
 
 def write(s, out):
@@ -163,7 +167,7 @@ def write(s, out):
     print('Written %s ' % out)
 
 
-def render(libname, docname, generate_pdf):
+def render(libname, docname, generate_pdf, main_file, out_part_basename):
     librarian = get_test_librarian()
     library = librarian.load_library('manual')
 
@@ -183,10 +187,10 @@ def render(libname, docname, generate_pdf):
                                     generate_pdf=generate_pdf)
 
     doc = get_minimal_document(html_contents, add_markdown_css=True)
-    dirname = 'out-html'
+    dirname = main_file + '.parts'
     if not os.path.exists(dirname):
         os.makedirs(dirname)
-    fn = os.path.join(dirname, 'part-%s.html' % docname)
+    fn = os.path.join(dirname, '%s.html' % out_part_basename)
     with open(fn, 'w') as f:
         f.write(doc)
         

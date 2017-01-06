@@ -195,7 +195,7 @@ def generic_plot_sequence(r, plotter, space, sequence,
                 if ylabel:
                     pylab.ylabel(ylabel)
 
-            except UnicodeDecodeError as e:
+            except UnicodeDecodeError:
                 # print xlabel, xlabel.__repr__(), ylabel, ylabel.__repr__(), e
                 pass
             
