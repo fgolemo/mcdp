@@ -345,11 +345,6 @@ code.rvalue span.RcompUnit {
 .CatalogueRes span.RcompUnit {
   color: darkred !important;
 }
-span.CommentFun,
-.CommentRes {
-  display: inline-block;
-  margin-bottom: 3pt;
-}
 .ui-button {
   padding: 3px !important;
 }

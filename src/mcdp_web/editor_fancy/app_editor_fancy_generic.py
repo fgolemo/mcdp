@@ -31,6 +31,7 @@ from mcdp_lang.parse_interface import( parse_ndp_eval, parse_ndp_refine,
     parse_template_eval, parse_template_refine, parse_constant_eval, 
     parse_constant_refine, parse_poset_eval, parse_poset_refine)
 from mcdp_library_tests.tests import timeit, timeit_wall
+import json
 
 
 
@@ -153,7 +154,7 @@ class AppEditorFancyGeneric():
         def go():
             l = self.get_library(request)
             spec.write(l, widget_name, string)
-            return {'ok': True}
+            return {'ok': True, 'saved_string': string}
 
         return ajax_error_catch(go)
 
@@ -170,13 +171,15 @@ class AppEditorFancyGeneric():
 
         source_code = cgi.escape(source_code)
         return {'source_code': unicode(source_code, 'utf-8'),
+                'source_code_json': unicode(json.dumps(source_code), 'utf-8'),
                 'realpath': realpath,
                 spec.url_variable: widget_name,
                 'rows': nrows,
                 'navigation': self.get_navigation_links(request),
 
                 'ajax_parse': spec.url_part + '_ajax_parse',
-                'error': None}
+                'error': None,
+                'url_part': spec.url_part}
 
     def get_text_from_request2(self, request):
         """ Gets the 'text' field, taking care of weird

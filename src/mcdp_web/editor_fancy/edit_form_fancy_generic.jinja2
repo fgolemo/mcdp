@@ -27,6 +27,7 @@
 	    	$('#graph img').load( function(){
 	    		console.log('loaded');
 	    	})
+	    	update_save_button_color();
 		});
 		$(document).on('keydown', '#editor', function(e){
 		  //detect 'tab' key
@@ -94,6 +95,7 @@
   
 	
 <script type='text/javascript'>
+	var saved_text = {{source_code_json|safe}};
 	var last_text_sent_to_server = null;
 	var last_rendered_text = null;
 	var timeoutID = null;
@@ -151,9 +153,31 @@
 		return text;
 	}
 
+	function update_save_button_color() {
+		text = current_text();
+
+		title_s = "{{navigation['current_thing']}}";
+		title_u = "*{{navigation['current_thing']}}";
+		icon_s = '/static/favicon_editor_{{url_part}}_saved.png';
+		icon_u = '/static/favicon_editor_{{url_part}}_unsaved.png';
+
+		if (text == saved_text) {
+			$('#save').css('color', '');
+			document.title = title_s;
+			$('link[rel="icon"]').attr('href', icon_s);
+
+		} else {
+			$('#save').css('color', 'red');			
+			document.title = title_u;
+			$('link[rel="icon"]').attr('href', icon_u);
+		}
+
+	}
+
 	function keyup() {
 		/* We do not ask for parsing every time a key is pressed */
 		text = current_text();
+
 
 		// do not do it twice
 		if (text == last_rendered_text)
@@ -177,6 +201,8 @@
 	}
 
 	function text_has_changed() {
+		update_save_button_color();
+
 		// $('button#save').disable();
 		$('#around_editor').css('background-color', '#ffe');
 		$('#syntax_error').hide();
@@ -372,9 +398,12 @@
 	
 	function click_button_save_success(res) {
 		show_status('#save_status', 'success');
+		console.log()
 		console.log('success');
-		console.log(res);
+		console.log(JSON.stringify(res));
 		/// XXX not if the text has changed in the mean time
+		saved_text = res['saved_string'];
+		update_save_button_color();
 		saved = true;
 	}
 

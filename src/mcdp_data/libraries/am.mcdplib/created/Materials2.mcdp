@@ -2,7 +2,7 @@ catalogue {
    provides service_temperature [C] 
      "Temperature that the produced part can resist." 
    requires liquefaction_temperature [C] 
-     "Temperature required for liquefaction."
+      "Temperature required for liquefaction."
    requires specific_cost [$/kg] 
      "Cost per unit weight."
 

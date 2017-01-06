@@ -2,7 +2,7 @@ mcdp {
     provides part_volume     [mm³]     
     "Volume of the part to be produced."
     provides part_resolution [1/mm]     
-    "(Inverse) resolution of the part to be produced."
+    "(Inverse) resolution of the part to be produced." 
     # These are placeholders for the part properties (strength, etc.) that are TBD
     provides part_property1  [furlongs] 
     "Placeholder property1"   
