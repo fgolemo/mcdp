@@ -438,9 +438,7 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 
 - Change "TODO: XX" in <div class="Todo">XXX</div>
 
-- warn if you see the string "<=" or ">=" in the text
-
-
+- use prettified names in diagrams
 - use cdot in diagrms for units like J*kg/kWh]
 
 - h4 formatting: undo
@@ -454,3 +452,15 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 
 - "X" and Xd should be red and green, respectively
 
+- L: comments in catalogue
+
+- web: highlight save button
+- L: allow constants in catalogue 
+
+catalogue {
+  T_0 = 10 C
+  T_0 + 1 C ⟻ ULTEM ⟼ 335 C, 200 $/kg
+
+}
+
+- manual: construction top-down, bottom up, or coarse to fine

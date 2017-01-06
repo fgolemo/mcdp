@@ -1,0 +1,427 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\use_default_options true
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Standard
+I will use this:
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula 
+\[
+\res\in\ftor(\fun)
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+Model of a battery
+\end_layout
+
+\begin_layout Standard
+The choice of a battery can be modeled as a DPI (
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "fig:battery"
+
+\end_inset
+
+) with functionalities 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+F{
+\end_layout
+
+\end_inset
+
+capacity [J]
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+F{
+\end_layout
+
+\end_inset
+
+number of missions
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ and with resources 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+R{
+\end_layout
+
+\end_inset
+
+mass [kg]
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+, 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+R{
+\end_layout
+
+\end_inset
+
+cost [$]
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+R{
+\end_layout
+
+\end_inset
+
+maintenance
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+, defined as the number of times that the battery needs to be replaced over
+ the lifetime of the robot.
+ 
+\end_layout
+
+\begin_layout Standard
+Each battery technology is described by the three parameters specific energy,
+ specific cost, and lifetime (number of cycles):
+\begin_inset Formula 
+\begin{align*}
+\rho & \doteq\text{specific energy [Wh/kg]},\\
+\alpha & \doteq\text{specific cost [Wh/\$]},\\
+c & \doteq\text{battery lifetime [\# of cycles]}.
+\end{align*}
+
+\end_inset
+
+The relation between functionality and resources is described by three nonlinear
+ monotone constraints: 
+\begin_inset Formula 
+\begin{align}
+\R{\text{mass}} & \geq\F{\text{capacity}}/\rho,\label{eq:mass}\\
+\R{\text{maintenance}} & \geq\left\lceil \F{\text{missions}}/c\right\rceil ,\label{eq:maintenance}\\
+\R{\text{cost}} & \geq\left\lceil \F{\text{missions}}/c\right\rceil (\F{\text{capacity}}/\alpha).\label{eq:cost}
+\end{align}
+
+\end_inset
+
+Model of a battery
+\end_layout
+
+\begin_layout Standard
+The choice of a battery can be modeled as a DPI (
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "fig:battery"
+
+\end_inset
+
+) with functionalities 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+F{
+\end_layout
+
+\end_inset
+
+capacity [J]
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+F{
+\end_layout
+
+\end_inset
+
+number of missions
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ and with resources 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+R{
+\end_layout
+
+\end_inset
+
+mass [kg]
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+, 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+R{
+\end_layout
+
+\end_inset
+
+cost [$]
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+R{
+\end_layout
+
+\end_inset
+
+maintenance
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+, defined as the number of times that the battery needs to be replaced over
+ the lifetime of the robot.
+ 
+\end_layout
+
+\begin_layout Standard
+Each battery technology is described by the three parameters specific energy,
+ specific cost, and lifetime (number of cycles):
+\begin_inset Formula 
+\begin{align*}
+\rho & \doteq\text{specific energy [Wh/kg]},\\
+\alpha & \doteq\text{specific cost [Wh/\$]},\\
+c & \doteq\text{battery lifetime [\# of cycles]}.
+\end{align*}
+
+\end_inset
+
+The relation between functionality and resources is described by three nonlinear
+ monotone constraints: 
+\begin_inset Formula 
+\begin{align}
+\R{\text{mass}} & \geq\F{\text{capacity}}/\rho,\label{eq:mass-1}\\
+\R{\text{maintenance}} & \geq\left\lceil \F{\text{missions}}/c\right\rceil ,\label{eq:maintenance-1}\\
+\R{\text{cost}} & \geq\left\lceil \F{\text{missions}}/c\right\rceil (\F{\text{capacity}}/\alpha).\label{eq:cost-1}
+\end{align}
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

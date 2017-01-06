@@ -220,27 +220,29 @@ class GraphDrawingContext():
             propertyAppend(n, 'fontcolor', COLOR_DARKGREEN)
 
 
-    
+
+
 # reset with: get_images.cache = {}
 @memoize_simple
 def get_images(dirname, exts=None):
     if exts is None:
-        exts = ('png', 'jpg', 'PNG', 'JPG')
+        exts = MCDPConstants.exts_for_icons
+        
     """ Returns a dict from lowercase basename to realpath """
+    
+    pattern = ['*.%s' % ext for ext in exts]
     allfiles = {}
-    for ext in exts:
-        search = '*.%s' % ext
-        files = locate_files(dirname, search, followlinks=True,
-                             normalize=False)
-        for f in files:
-            basename = os.path.basename(f)
-            basename = basename.lower()
-            allfiles[basename] = f
+    files = locate_files(dirname, pattern, followlinks=True, normalize=False)
+    for f in files:
+        basename = os.path.basename(f)
+        basename = basename.lower()
+        allfiles[basename] = f
     return allfiles
+
 
 def choose_best_icon(iconoptions, imagepaths):
 #     logger.debug('Looking for %s in %s.' % (str(iconoptions), imagepaths))
-    exts = ('png', 'jpg', 'PNG', 'JPG', 'jpeg', 'JPEG')
+    exts = MCDPConstants.exts_for_icons
 
     files = {}
     for path in reversed(imagepaths):

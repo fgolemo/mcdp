@@ -8,6 +8,7 @@ from decent_params import UserError
 from mcdp_library import Librarian, MCDPLibrary
 from mocdp import logger
 from quickapp import QuickAppBase
+from system_cmd.interface import system_cmd_show
 
 
 class Render(QuickAppBase):
@@ -19,7 +20,8 @@ class Render(QuickAppBase):
         params.accept_extra()
         params.add_flag('cache')
         params.add_flag('contracts')
-        params.add_flag('pdf', help='Generate PDF version of code and figures.')
+        params.add_flag('pdf')
+        params.add_flag('pdf_figures', help='Generate PDF version of code and figures.')
 
         params.add_string('config_dirs', default='.', short='-D',
                            help='Other libraries.')
@@ -43,9 +45,6 @@ class Render(QuickAppBase):
         maindir = options.maindir
         out_dir = options.out
 
-        if out_dir is None:
-            out_dir = os.path.join('out', 'mcdp_render')
-
         if options.cache:
             cache_dir = os.path.join(out_dir, '_cached', 'solve')
         else:
@@ -66,18 +65,40 @@ class Render(QuickAppBase):
             raise_desc(UserError, msg)
 
         for docname in docs:
+            if '/' in docname:
+                docname0 = os.path.split(docname)[-1]
+                logger.info("Using %r rather than %r" % (docname0, docname))
+                docname = docname0
             suffix =  '.' + MCDPLibrary.ext_doc_md
             if docname.endswith(suffix):
-                docname = docname.replace(suffix,'')
+                docname = docname.replace(suffix, '')
             basename = docname + suffix
             f = library._get_file_data(basename)
             data = f['data']
             realpath = f['realpath']
             
-            generate_pdf = options.pdf
-            render(library, docname, data, realpath, out_dir, generate_pdf)
+            generate_pdf = options.pdf_figures
+            if out_dir is None:
+                use_out_dir = os.path.dirname(realpath)
+            else:
+                use_out_dir = os.path.join('out', 'mcdp_render')
 
+            html_filename = render(library, docname, data, realpath, use_out_dir, generate_pdf)
+            if options.pdf:
+                run_prince(html_filename)
 
+def run_prince(html_filename):
+    pdf = os.path.splitext(html_filename)[0] + '.pdf'
+    cwd = '.'
+    cmd = ['prince', 
+           '-o', pdf, 
+           html_filename]
+#     try:
+    system_cmd_show(cwd, cmd)
+#     finally:
+#         if os.path.exists(pdf):
+#             os.unlink(pdf)
+#     
 def render(library, docname, data, realpath, out_dir, generate_pdf):
     from mcdp_web.renderdoc.highlight import get_minimal_document
     from mcdp_web.renderdoc.main import render_complete
@@ -92,11 +113,6 @@ def render(library, docname, data, realpath, out_dir, generate_pdf):
     doc = get_minimal_document(html_contents, title=title,
                                add_markdown_css=True, add_manual_css=True)
 
-#     from mcdp_docs.check_missing_links import check_if_any_href_is_invalid
-#     soup = bs(doc)
-#     check_if_any_href_is_invalid(doc)
-#     
-    
     d = os.path.dirname(out)
     if not os.path.exists(d):
         os.makedirs(d)
@@ -104,6 +120,7 @@ def render(library, docname, data, realpath, out_dir, generate_pdf):
         f.write(doc)
 
     logger.info('Written %s ' % out)
+    return out
 
 
 mcdp_render_main = Render.get_sys_main()

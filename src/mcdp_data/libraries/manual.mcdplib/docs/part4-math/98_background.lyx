@@ -1,0 +1,4009 @@
+#LyX 2.2 created this file. For more info see http://www.lyx.org/
+\lyxformat 508
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass IEEEconf
+\begin_preamble
+\input{tex/preamble.tex}\input{tex/preamble_IEEEconf.tex}
+\end_preamble
+\options letterpaper,conference,10pt
+\use_default_options true
+\begin_modules
+theorems-ams-bytype
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\pdf_bookmarks true
+\pdf_bookmarksnumbered false
+\pdf_bookmarksopen false
+\pdf_bookmarksopenlevel 1
+\pdf_breaklinks true
+\pdf_pdfborder true
+\pdf_colorlinks true
+\pdf_backref page
+\pdf_pdfusetitle true
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date true
+\justification true
+\use_refstyle 1
+\branch report
+\selected 0
+\filename_suffix 0
+\color #000000
+\end_branch
+\branch journal
+\selected 0
+\filename_suffix 0
+\color #000000
+\end_branch
+\branch conf
+\selected 1
+\filename_suffix 0
+\color #000000
+\end_branch
+\branch AC
+\selected 1
+\filename_suffix 0
+\color #682743
+\end_branch
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 2
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Section
+Background in Order Theory
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Boyd and Vandenberghe
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "boyd04convex"
+
+\end_inset
+
+ provide a great introduction to the field of convex optimization.
+ In the book, the reader can find definitions for the following concepts:
+ convex functions, convex sets, affine sets, cones, log-convexity, duality,
+ etc., as well as an explanation of the most widely-used algorithms, such
+ as gradient descent, Newton's algorithm, interior-point methods, etc.
+\end_layout
+
+\begin_layout Plain Layout
+We are not going to use any of that.
+ In particular, we are not going to use any of these symbols:
+\end_layout
+
+\end_inset
+
+The good news is that we are not going to use any of these:
+\begin_inset Formula 
+\[
+\partial\qquad\nabla\qquad\nabla^{2}.
+\]
+
+\end_inset
+
+What we 
+\emph on
+are
+\emph default
+ going to use are basic facts about order theory.
+ Davey and Priestley
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "davey02"
+
+\end_inset
+
+ and Roman
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "roman08"
+
+\end_inset
+
+ are possible references.
+ These notions are objectively easy—certainly easier than
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\nabla^{2}$
+\end_inset
+
+; however, they might be unfamiliar to readers with an engineering background.
+ 
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+they are not usually taught in engineering.
+ I promise that it is worth it.
+ And I also promise that this is going to be 
+\emph on
+fun, 
+\emph default
+though that depends on whether the reader shares our notion of 
+\begin_inset Quotes eld
+\end_inset
+
+fun
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Poset
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "def:poset"
+
+\end_inset
+
+A partially ordered set, or 
+\emph on
+poset
+\emph default
+, is a pair
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\left\langle \posA,\posAleq\right\rangle $
+\end_inset
+
+, where
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\posA$
+\end_inset
+
+ is a set and 
+\begin_inset Formula $\posAleq$
+\end_inset
+
+ is a partial order
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\posAleq$
+\end_inset
+
+ (a reflexive, antisymmetric, and transitive relation).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator plain
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+\begin_inset Argument 1
+status collapsed
+
+\begin_layout Plain Layout
+Top and bottom
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "def:top"
+
+\end_inset
+
+If a poset has a least element, it is called 
+\begin_inset Quotes eld
+\end_inset
+
+bottom
+\begin_inset Quotes erd
+\end_inset
+
+ and it is denoted by
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\bot_{\posA}$
+\end_inset
+
+.
+ If the poset has a maximum element, it is called 
+\begin_inset Quotes eld
+\end_inset
+
+top
+\begin_inset Quotes erd
+\end_inset
+
+ and denoted as
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\top_{\posA}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+The partial order
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $\posAleq$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ is written as
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $\posleq$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ if the context is clear, and
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\top_{\posA}$
+\end_inset
+
+ is written as 
+\begin_inset Formula $\top$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection
+Hasse diagram
+\end_layout
+
+\begin_layout Verbatim
+
+<!-- comments in HTML -->
+\end_layout
+
+\begin_layout Verbatim
+
+<render class='hasse'>
+\end_layout
+
+\begin_layout Verbatim
+
+poset { 
+\end_layout
+
+\begin_layout Verbatim
+
+	a b c  
+\end_layout
+
+\begin_layout Verbatim
+
+	a <= b 
+\end_layout
+
+\begin_layout Verbatim
+
+	b >= c
+\end_layout
+
+\begin_layout Verbatim
+
+}
+\end_layout
+
+\begin_layout Verbatim
+
+</render>
+\end_layout
+
+\begin_layout Example
+....
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator plain
+\end_inset
+
+
+\end_layout
+
+\begin_layout Example
+...
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator plain
+\end_inset
+
+
+\end_layout
+
+\begin_layout Example
+...
+\end_layout
+
+\begin_layout Subsubsection
+Chains and antichains
+\end_layout
+
+\begin_layout Standard
+This is a footnote
+\begin_inset Foot
+status open
+
+\begin_layout Plain Layout
+Footnote text goes here
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is a margin note
+\begin_inset Marginal
+status open
+
+\begin_layout Plain Layout
+Footnote text goes here
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+This is a listing:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+inline false
+status open
+
+\begin_layout Plain Layout
+
+Program listing goes here:
+\end_layout
+
+\begin_layout Verbatim
+
+<!-- comments in HTML -->
+\end_layout
+
+\begin_layout Verbatim
+
+<render class='hasse'>
+\end_layout
+
+\begin_layout Verbatim
+
+poset { 
+\end_layout
+
+\begin_layout Verbatim
+
+	a b c  
+\end_layout
+
+\begin_layout Verbatim
+
+	a <= b 
+\end_layout
+
+\begin_layout Verbatim
+
+	b >= c
+\end_layout
+
+\begin_layout Verbatim
+
+}
+\end_layout
+
+\begin_layout Verbatim
+
+</render>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "def:chain"
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Chain
+\end_layout
+
+\end_inset
+
+A 
+\emph on
+chain
+\emph default
+ 
+\begin_inset Formula $x\posleq y\posleq z\posleq\dots$
+\end_inset
+
+ is a subset of a poset in which all elements are comparable.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+An 
+\emph on
+antichain
+\emph default
+ is a subset of a poset in which 
+\emph on
+no
+\emph default
+ elements are comparable.
+ This is the mathematical concept that formalizes the idea of 
+\begin_inset Quotes eld
+\end_inset
+
+Pareto front
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "def:antichain"
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Antichains
+\end_layout
+
+\end_inset
+
+A subset 
+\begin_inset Formula $S\subseteq\posA$
+\end_inset
+
+ is an antichain iff no elements are comparable: for
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $x,y\in S$
+\end_inset
+
+, 
+\begin_inset Formula $x\posleq y$
+\end_inset
+
+ implies
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $x=y$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Call
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\antichains\posA$
+\end_inset
+
+ the set of all antichains in
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\posA$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Notable antichains in
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\antichains\posA$
+\end_inset
+
+ include:
+\end_layout
+
+\begin_layout Itemize
+The empty set is an antichain: 
+\begin_inset Formula $\emptyset\in\antichains\posA$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+Any singleton.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "def:poset-width-height"
+
+\end_inset
+
+
+\begin_inset Argument 1
+status collapsed
+
+\begin_layout Plain Layout
+Width and height of a poset
+\end_layout
+
+\end_inset
+
+ 
+\begin_inset Formula $\mathsf{width}(\posA)$
+\end_inset
+
+ is the maximum cardinality of an antichain in
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\posA$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathsf{height}(\posA)$
+\end_inset
+
+ is the maximum cardinality of a chain in
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\posA$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+Here are some examples: 
+\begin_inset Formula 
+\[
+\mathsf{height}(\overline{\mathbb{N}})=\aleph_{0},\qquad\mathsf{width}(\overline{\mathbb{N}})=1,
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\[
+\mathsf{height}(\overline{\mathbb{N}}\times\overline{\mathbb{N}})=\aleph_{0},\qquad\mathsf{width}(\overline{\mathbb{N}}\times\overline{\mathbb{N}})=\aleph_{0},
+\]
+
+\end_inset
+
+
+\begin_inset Formula 
+\begin{eqnarray*}
+\mathsf{height}(\mathtt{int32}) & \simeq & 2^{32},\\
+\mathsf{height}(\mathtt{float32}) & \simeq & 2^{32},\\
+\mathsf{height}(\overline{\mathbb{N}}) & = & \aleph_{0},\\
+\mathsf{height}(\overline{\reals}) & = & \aleph_{1}>\aleph_{0}.
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection
+Minimal and least elements
+\end_layout
+
+\begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "def:Min"
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Minimal elements
+\end_layout
+
+\end_inset
+
+Uppercase 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $\Min$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ will denote the 
+\emph on
+minimal
+\emph default
+ elements of a set.
+ The minimal elements are the elements that are not dominated by any other
+ in the set.
+ 
+\end_layout
+
+\begin_layout Standard
+The set of minimal elements might be empty even if
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $S$
+\end_inset
+
+ is nonempty.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator plain
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "def:min"
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Least element / minimum
+\end_layout
+
+\end_inset
+
+Lowercase 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $\min$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ denotes
+\emph on
+ the least
+\emph default
+ element, an element that dominates all others, if it exists.
+ 
+\end_layout
+
+\begin_layout Definition
+\begin_inset Formula 
+\[
+\posAmin S=x\quad\Leftrightarrow\quad(x\in S)\wedge\left((y\in S)\Rightarrow(x\posAleq y)\right).
+\]
+
+\end_inset
+
+A least element need not exist, but if it exists it is unique.
+ ≼
+\end_layout
+
+\begin_layout Standard
+If
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\min S$
+\end_inset
+
+ exists, then
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\Min S=\{\min S\}$
+\end_inset
+
+.
+ However, 
+\begin_inset Formula $\Min S\neq\emptyset$
+\end_inset
+
+ does not imply
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\min S$
+\end_inset
+
+ exists.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+ 
+\begin_inset Formula $\min S$
+\end_inset
+
+ is equal to 
+\begin_inset Formula $\inf S$
+\end_inset
+
+ if that belongs to the set and does not exist otherwise; in turn 
+\begin_inset Formula $\inf S$
+\end_inset
+
+ the infimum is the maximum of the lower bounds.
+\end_layout
+
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+The set of minimal elements of a set are an antichain, so
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\Min$
+\end_inset
+
+ is a map from the power set 
+\begin_inset Formula $\pset(\posA)$
+\end_inset
+
+ to the antichains
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\antichains\posA$
+\end_inset
+
+:
+\begin_inset Formula 
+\begin{align*}
+\Min\colon\pset(\posA) & \rightarrow\antichains\posA,\\
+S & \mapsto\{x\in S:\ (y\in S)\wedge(y\posleq x)\Rightarrow(x=y)\ \}.
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $\Max$
+\end_inset
+
+ and 
+\begin_inset Formula $\max$
+\end_inset
+
+ are similarly defined.
+\end_layout
+
+\begin_layout Subsubsection
+Upper sets
+\end_layout
+
+\begin_layout Standard
+An 
+\begin_inset Quotes eld
+\end_inset
+
+upper set
+\begin_inset Quotes erd
+\end_inset
+
+ is a subset of a poset that is closed upward.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+The set 
+\begin_inset Formula $\antichains\posA$
+\end_inset
+
+ is a We shall be working with the set of antichains of
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\posA$
+\end_inset
+
+, denoted here as
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\antichains\posA$
+\end_inset
+
+, and the set of upper sets, denoted
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\upsets\posA$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Upper sets
+\end_layout
+
+\end_inset
+
+A subset 
+\begin_inset Formula $S\subseteq\posA$
+\end_inset
+
+ is an upper set iff
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $x\in S$
+\end_inset
+
+ and
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $x\posleq y$
+\end_inset
+
+ implies
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $y\in S$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Call
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\upsets\posA$
+\end_inset
+
+ the set of upper sets of
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\posA$
+\end_inset
+
+.
+ By this definition, the empty set is an upper set: 
+\begin_inset Formula $\emptyset\in\upsets\posA$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Lemma
+\begin_inset Formula $\upsets\posA$
+\end_inset
+
+ is a poset itself, with the order given by 
+\begin_inset Formula 
+\begin{equation}
+A\posleq_{\upsets\posA}B\qquad\equiv\qquad A\supseteq B.\label{eq:up_order}
+\end{equation}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note in 
+\begin_inset CommandInset ref
+LatexCommand eqref
+reference "eq:up_order"
+
+\end_inset
+
+ the use of
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $\supseteq$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ instead of
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $\subseteq$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+, which might seem more natural.
+ This choice will make things easier later.
+ 
+\end_layout
+
+\begin_layout Standard
+In the poset
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\left\langle \upsets\posA,\posleq_{\upsets\posA}\right\rangle $
+\end_inset
+
+, the top is the empty set, and the bottom is the entire poset
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\posA$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+\begin_inset Formula $\upsets\posA$
+\end_inset
+
+ is a lattice with
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\posleq_{\upsets\posA}\,\doteq\,\supseteq$
+\end_inset
+
+, 
+\begin_inset Formula $\bot_{\upsets\posA}\,\doteq\,\posA,$
+\end_inset
+
+
+\begin_inset Formula $\top_{\upsets\posA}\,\doteq\,\emptyset$
+\end_inset
+
+, 
+\begin_inset Formula $\wedge_{\upsets\posA}\,\doteq\,\cup$
+\end_inset
+
+, 
+\begin_inset Formula $\vee_{\upsets\posA}\,\doteq\,\cap$
+\end_inset
+
+.
+ (Note that we are setting 
+\begin_inset Formula $\posleq_{\upsets\posA}\,\doteq\,\supseteq$
+\end_inset
+
+ rather than
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\posleq_{\upsets\posA}\,\doteq\,\subseteq$
+\end_inset
+
+, which is the usual way of making
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\upsets\posA$
+\end_inset
+
+ a lattice.
+ This will make some things easier later, as we will deal with exclusively
+ 
+\emph on
+monotone
+\emph default
+ maps, rather than a diverse set of 
+\emph on
+monotone
+\emph default
+ and 
+\emph on
+antitone
+\emph default
+ maps.) 
+\end_layout
+
+\begin_layout Plain Layout
+In the poset
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\left\langle L\posA,\posleq_{L\posA}\right\rangle $
+\end_inset
+
+:
+\begin_inset Formula 
+\begin{align*}
+\bot_{L\posA} & =\posA\\
+\top_{L\posA} & =\emptyset
+\end{align*}
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The upper closure operator 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $\upit$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ maps a subset of a poset to an upper set.
+\end_layout
+
+\begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "def:upper-closure"
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Upper closure
+\end_layout
+
+\end_inset
+
+The operator
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\upit$
+\end_inset
+
+ maps a subset to the smallest upper set that includes it: 
+\begin_inset Formula 
+\begin{eqnarray*}
+\upit\colon\pset(\posA) & \rightarrow & \upsets\posA,\\
+S & \mapsto & \{y\in\posA:\exists\,x\in S:x\posleq y\}.
+\end{eqnarray*}
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+captionsideleft{
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:antichains_upsets"
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename boot-art/1509-gmcdp/gmcdp_antichains_upsets.pdf
+	scale 40
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Lemma
+If 
+\begin_inset Formula $\left\langle \posA,\posAleq\right\rangle $
+\end_inset
+
+ satisfies the DCC, the set 
+\begin_inset Formula $\antichains(\posA)$
+\end_inset
+
+ are a lattice with the order
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\posleq_{\antichains(\posA)}$
+\end_inset
+
+ given by 
+\begin_inset Formula 
+\[
+(\highB{A}\posleq_{\antichains(\posA)}\highA{B})\doteq(\upit\highA{B}\subseteq\upit\highB{A}).
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Proof
+This follows from 
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "lem:upper-sets-are-lattice"
+
+\end_inset
+
+ and 
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "lem:DCC-implies-antichains-are-uppersets"
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Lemma
+\begin_inset CommandInset label
+LatexCommand label
+name "lem:antitone-1"
+
+\end_inset
+
+Let 
+\begin_inset Formula $\left\langle \posA,\posAleq\right\rangle $
+\end_inset
+
+ be a poset.
+ Then the operator 
+\begin_inset Formula 
+\[
+\posAMin\colon\pset(P)\rightarrow\antichains(P)
+\]
+
+\end_inset
+
+is antitone (
+\begin_inset Quotes eld
+\end_inset
+
+order-reversing
+\begin_inset Quotes erd
+\end_inset
+
+) for the order 
+\begin_inset Formula $\subseteq$
+\end_inset
+
+ on 
+\begin_inset Formula $\pset(P)$
+\end_inset
+
+ and the order on 
+\begin_inset Formula $\antichains(P)$
+\end_inset
+
+: 
+\begin_inset Formula 
+\[
+\left(S\subseteq\highB{T}\right)\Rightarrow\big(\posAMin\highB{T}\posleq_{\antichains(P)}\posAMin S\,\big).
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+By using the upper closure operator, we can define an order on antichains
+ using the order on the upper sets
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "fig:antichains_upsets"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Lemma
+\begin_inset CommandInset label
+LatexCommand label
+name "lem:antichains-are-poset"
+
+\end_inset
+
+
+\begin_inset Formula $\antichains\posA$
+\end_inset
+
+ is a poset with the relation
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\posleq_{\antichains\posA}$
+\end_inset
+
+ defined by
+\begin_inset Formula 
+\[
+A\posleq_{\antichains\posA}B\qquad\equiv\qquad\upit A\supseteq\upit B.
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In the poset 
+\begin_inset Formula $\left\langle \antichains\posA,\posleq_{\antichains\posA}\right\rangle $
+\end_inset
+
+, the top is the empty set:
+\begin_inset Formula $\top_{\antichains\posA}=\emptyset.$
+\end_inset
+
+ If a bottom for 
+\begin_inset Formula $\posA$
+\end_inset
+
+ exists, then the bottom for
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\antichains\posA$
+\end_inset
+
+ is the singleton containing only the bottom for
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\posA$
+\end_inset
+
+: 
+\begin_inset Formula $\bot_{\antichains\posA}=\{\bot_{\posA}\}.$
+\end_inset
+
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Starred (
+\begin_inset Formula $\star$
+\end_inset
+
+) sections can be omitted without losing understanding of the main points.
+\end_layout
+
+\end_inset
+
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Are upper sets and antichains isomorphic?
+\end_layout
+
+\end_inset
+
+If the poset is finite, then there is a 1-to-1 identification of antichains
+ and upper sets, however, that does not hold in general for infinite posets.
+ In general, all antichains are the minimal elements of an upper set.
+ In fact, for any antichain 
+\begin_inset Formula $A\in\antichains\posA$
+\end_inset
+
+, 
+\begin_inset Formula $A=\Min\upit A$
+\end_inset
+
+.
+ However, it is not true, in general, that each upper set
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $U$
+\end_inset
+
+ is generated by its minimal elements, as in
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $U=\upit\Min U$
+\end_inset
+
+.
+ As a counterexample, take the poset
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\left\langle [0,1],\leq\right\rangle $
+\end_inset
+
+ and the upper set
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $U=(0,1]$
+\end_inset
+
+.
+ Then
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $U$
+\end_inset
+
+ has no minimal elements: 
+\begin_inset Formula $\Min U=\emptyset$
+\end_inset
+
+.
+ A sufficient condition for antichains and upper set to be in a 1-to-1 correspon
+dence is the descending chain condition (DCC) + the axiom of dependent choice
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hamkins15personal"
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout \twohyphens
+Separator–
+\end_layout
+
+\begin_layout Definition
+A poset satisfies the descending chain condition (DCC) if there is no infinite
+ descending chain
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $x_{0}\posgeq x_{1}\posgeq x_{2}\posgeq\dots$
+\end_inset
+
+ that does not stabilize; 
+\begin_inset Formula $x_{n+1}=x_{n}$
+\end_inset
+
+ for some finite
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $n$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Plain Layout
+One can verify the poset
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\left\langle [0,1],\leq\right\rangle $
+\end_inset
+
+ does not satisfy the DCC by considering the infinite descending chain 
+\begin_inset Formula $1\geq1/2\geq1/3\geq1/4\geq\dots\geq1/n\geq\dots$
+\end_inset
+
+ for
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $n\in\mathbb{N}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+All finite posets satisfy the DCC, but the DCC does not imply that the poset
+ if finite.
+ An example of an infinite poset satisfying the DCC is
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\left\langle \mathbb{N},\leq\right\rangle $
+\end_inset
+
+.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+\begin_inset Note Note
+status open
+
+\begin_layout \twohyphens
+Separator–
+\end_layout
+
+\begin_layout Lemma
+\begin_inset CommandInset label
+LatexCommand label
+name "lem:a-b"
+
+\end_inset
+
+For 
+\begin_inset Formula $a,b\in\posA$
+\end_inset
+
+, 
+\begin_inset Formula $(a\posAleq b)\Leftrightarrow(\upit a\supseteq\upit b).$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout \twohyphens
+Separator–
+\end_layout
+
+\begin_layout Lemma
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+For all 
+\begin_inset Formula $S\subseteq\posA$
+\end_inset
+
+, the set of minimal elements 
+\begin_inset Formula $\posAMin S$
+\end_inset
+
+ is an antichain.
+\end_layout
+
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status collapsed
+
+\begin_layout \twohyphens
+Separator–
+\end_layout
+
+\begin_layout Lemma
+\begin_inset CommandInset label
+LatexCommand label
+name "lem:DCC-implies-antichains-are-uppersets-1"
+
+\end_inset
+
+If the DCC is satisfied, and the axiom of dependent choice is assumed true,
+ there is a 1-to-1 correspondence between the set of upper sets
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\upsets\posA$
+\end_inset
+
+ and the antichains
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\antichains\posA$
+\end_inset
+
+ given by
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\upit$
+\end_inset
+
+ and
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\Min_{\posleq}$
+\end_inset
+
+ (
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "fig:antichains_upsets"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Proof
+See
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "hamkins15personal"
+
+\end_inset
+
+ for a proof and a counterexample that shows the axiom of dependent choice
+ is necessary.
+\end_layout
+
+\end_inset
+
+
+\begin_inset Separator latexpar
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsubsection*
+Monotonicity and fixed points
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Monotonicity-and-fixed"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+We will use Kleene's theorem, a celebrated result that is used in disparate
+ fields.
+ It is used in computer science for defining denotational semantics
+\begin_inset space ~
+\end_inset
+
+(see, e.g.,
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "manes86"
+
+\end_inset
+
+).
+ It is used in embedded systems for defining the semantics of models of
+ computation
+\begin_inset space ~
+\end_inset
+
+(see, e.g.,
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "lee10"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Branch report
+status collapsed
+
+\begin_layout Standard
+For readers from other engineering backgrounds, the best way to appreciate
+ the results is to see them as the parallel to Banach's theorem on metric
+ spaces, transcribed below as
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "lem:banach"
+
+\end_inset
+
+.
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Brouwer's fixed-point theorem
+\end_layout
+
+\end_inset
+
+Let
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $X$
+\end_inset
+
+ be a simply-connected compact set.
+ Then any function
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $f:X\rightarrow X$
+\end_inset
+
+ has a fixed point; there exists
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $x\in X$
+\end_inset
+
+ such that
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $f(x)=x$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "def:complete-metric-space"
+
+\end_inset
+
+A metric space
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\left\langle \mathcal{X},d\right\rangle $
+\end_inset
+
+ is 
+\emph on
+complete
+\emph default
+ iff every Cauchy sequence in
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\mathcal{X}$
+\end_inset
+
+ has a limit in
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\mathcal{X}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "def:contraction"
+
+\end_inset
+
+A map
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $f:\mathcal{X}\rightarrow\mathcal{X}$
+\end_inset
+
+ on a metric space
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\left\langle \mathcal{X},d\right\rangle $
+\end_inset
+
+ is a 
+\emph on
+contraction
+\emph default
+ if there exists a constant
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $q\in[0,1)$
+\end_inset
+
+ such that 
+\begin_inset Formula $d(f(x_{1}),f(x_{2}))\leq q\,d(x_{1},x_{2})$
+\end_inset
+
+ for all
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $x_{1},x_{2}\in\mathcal{X}$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Lemma
+\begin_inset CommandInset label
+LatexCommand label
+name "lem:banach"
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Banach's Fixed Point Theorem
+\end_layout
+
+\end_inset
+
+Let
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $f$
+\end_inset
+
+ be a contraction on a complete metric space
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\left\langle \mathcal{X},d\right\rangle $
+\end_inset
+
+.
+ Then
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $f$
+\end_inset
+
+ has a unique fixed point in
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\mathcal{X}$
+\end_inset
+
+, and this point can be found by computing
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\lim_{n\rightarrow\infty}f^{n}(x_{0})$
+\end_inset
+
+ starting from any
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $x_{0}\in\mathcal{X}$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+The equivalent of complete metric space
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "def:complete-metric-space"
+
+\end_inset
+
+) in order theory is that of complete partial order
+\begin_inset space ~
+\end_inset
+
+(
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "def:cpo"
+
+\end_inset
+
+).
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Directed set
+\end_layout
+
+\end_inset
+
+A set
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $S\subseteq\posA$
+\end_inset
+
+ is 
+\emph on
+directed
+\emph default
+ if each pair of elements in
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $S$
+\end_inset
+
+ has an upper bound: for all
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $a,b\in S$
+\end_inset
+
+, there exists
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $c\in S$
+\end_inset
+
+ such that
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $a\posleq c$
+\end_inset
+
+ and
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $b\posleq c$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "def:cpo"
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Completeness
+\end_layout
+
+\end_inset
+
+A poset is a 
+\emph on
+directed complete partial order
+\emph default
+ (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+DCPO
+\end_layout
+
+\end_inset
+
+) if each of its directed subsets has a supremum (least of upper bounds).
+ It is a 
+\emph on
+complete partial order
+\emph default
+ (
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+CPO
+\end_layout
+
+\end_inset
+
+) if it also has a bottom.
+\end_layout
+
+\begin_layout Definition
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+The product of two CPOs is a CPO.
+ 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+xxx
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Example
+\begin_inset CommandInset label
+LatexCommand label
+name "exa:Rcomp"
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Completion of 
+\begin_inset Formula $\nonNegReals$
+\end_inset
+
+ to
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\nonNegRealsComp$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+This is a simple construction that illustrates the principle and is needed
+ for the successive examples.
+ 
+\end_layout
+
+\end_inset
+
+The set of real numbers
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\mathbb{R}$
+\end_inset
+
+ is not a 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+CPO
+\end_layout
+
+\end_inset
+
+, because it lacks a bottom.
+ The nonnegative reals
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\nonNegReals=\{x\in\reals\mid x\geq0\}$
+\end_inset
+
+ have a bottom
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\bot=0$
+\end_inset
+
+, however, they are not a 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+DCPO
+\end_layout
+
+\end_inset
+
+ because some of their directed subsets do not have an upper bound.
+ For example, take
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\nonNegReals$
+\end_inset
+
+, which is a subset of
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\nonNegReals$
+\end_inset
+
+.
+ Then
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\nonNegReals$
+\end_inset
+
+ is directed, because for each
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $a,b\in\nonNegReals$
+\end_inset
+
+, there exists
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $c=\max\{a,b\}\in\nonNegReals$
+\end_inset
+
+ for which
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $a\leq c$
+\end_inset
+
+ and
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $b\leq c$
+\end_inset
+
+.
+ One way to make
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\left\langle \nonNegReals,\leq\right\rangle $
+\end_inset
+
+ a 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+CPO
+\end_layout
+
+\end_inset
+
+ is by adding an artificial top element
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\top$
+\end_inset
+
+, by defining
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\nonNegRealsComp\triangleq\nonNegReals\cup\{\top\},$
+\end_inset
+
+ and extending the partial order
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\leq$
+\end_inset
+
+ so that
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $a\leq\top$
+\end_inset
+
+ for all
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $a\in\reals^{+}$
+\end_inset
+
+.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+Now
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\nonNegRealsComp$
+\end_inset
+
+ is a 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+CPO
+\end_layout
+
+\end_inset
+
+, because each directed subset has a supremum.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Separator parbreak
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Branch report
+status open
+
+\begin_layout Standard
+The equivalent of contractivity (
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "def:contraction"
+
+\end_inset
+
+) is monotonicity (
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "def:monotone"
+
+\end_inset
+
+), or the stronger property of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+scottcontinuity
+\end_layout
+
+\end_inset
+
+ (
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "def:scott"
+
+\end_inset
+
+).
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Branch journal
+status open
+
+\begin_layout Standard
+Two properties of maps that will be important are monotonicity and the stronger
+ property of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+scottcontinuity
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "def:monotone"
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Monotonicity
+\end_layout
+
+\end_inset
+
+A map
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $f\colon\posA\rightarrow\posB$
+\end_inset
+
+ between two posets is 
+\emph on
+monotone
+\emph default
+ iff
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $x\posAleq y$
+\end_inset
+
+ implies
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $f(x)\posBleq f(y)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "def:scott"
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+scottcontinuity
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+A map
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $f:\posA\rightarrow\posB$
+\end_inset
+
+ between DCPOs is
+\series bold
+ 
+\series default
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+emph{
+\backslash
+scottcontinuous{}}
+\end_layout
+
+\end_inset
+
+
+\series bold
+ 
+\series default
+iff for each directed subset
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $D\subseteq\posA$
+\end_inset
+
+, the image
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $f(D)$
+\end_inset
+
+ is directed, and 
+\begin_inset Formula $f(\sup D)=\sup f(D).$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Remark
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+scottcontinuity
+\end_layout
+
+\end_inset
+
+ implies monotonicity.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Remark
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+scottcontinuity
+\end_layout
+
+\end_inset
+
+ does not imply topological continuity.
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+\begin_inset Foot
+status collapsed
+
+\begin_layout Plain Layout
+Why did Dana Scott choose the name 
+\begin_inset Quotes eld
+\end_inset
+
+continuous
+\begin_inset Quotes erd
+\end_inset
+
+ for a notion that, when projected to
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\reals$
+\end_inset
+
+, does not imply topologically continuous? This confused me for a while.
+ I have asked friends of his, and the answer was: 
+\begin_inset Quotes eld
+\end_inset
+
+He just thinks 
+\emph on
+abstractly
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+ A map from the CPO 
+\begin_inset Formula $\langle\Rcomp,\leq\rangle$
+\end_inset
+
+ to itself is 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+scottcontinuous
+\end_layout
+
+\end_inset
+
+ iff it is nondecreasing and left-continuous.
+ For example, the ceiling function 
+\begin_inset Formula $x\mapsto\left\lceil x\right\rceil $
+\end_inset
+
+
+\begin_inset space ~
+\end_inset
+
+ is 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+scottcontinuous
+\end_layout
+
+\end_inset
+
+ (
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "fig:ceil"
+
+\end_inset
+
+).
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+captionsideleft{
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "fig:ceil"
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}{
+\end_layout
+
+\end_inset
+
+
+\begin_inset Graphics
+	filename boot-art/1512-mcdp-tro/gmcdptro_ceil.pdf
+	scale 33
+
+\end_inset
+
+
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\emph on
+\begin_inset Branch report
+status collapsed
+
+\begin_layout Standard
+In order theory there are many 
+\begin_inset Quotes eld
+\end_inset
+
+fixed-point theorems
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The results were stated multiple times in different fields with slightly
+ different assumptions and conclusions
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "lassez82fixed"
+
+\end_inset
+
+.
+ In this context, what is needed is Kleene's theorem, which allows the computati
+on of the 
+\emph on
+least fixed points.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+A 
+\emph on
+fixed
+\emph default
+ 
+\emph on
+point
+\emph default
+ of 
+\begin_inset Formula $f:\posA\rightarrow\posA$
+\end_inset
+
+ is a point
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $x$
+\end_inset
+
+ such that 
+\begin_inset Formula $f(x)=x$
+\end_inset
+
+.
+ 
+\begin_inset Note Note
+status open
+
+\begin_layout Plain Layout
+A map might have zero, one, or more fixed points.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+A 
+\emph on
+least fixed point
+\emph default
+ of
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $f:\posA\rightarrow\posA$
+\end_inset
+
+ is the minimum (if it exists) of the set of fixed points of
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $f$
+\end_inset
+
+:
+\begin_inset Formula 
+\begin{equation}
+\lfp(f)\,\,\doteq\,\,\min_{\posleq}\,\{x\in\posA\colon f(x)=x\}.\label{eq:lfp-one}
+\end{equation}
+
+\end_inset
+
+The equality in 
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "eq:lfp-one"
+
+\end_inset
+
+ can be relaxed to 
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $\posleq$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+ 
+\begin_inset Formula 
+\[
+\lfp(f)\,\,=\,\,\min_{\posleq}\,\{x\in\posA\colon f(x)\posleq x\}.
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The least fixed point need not exist.
+ Monotonicity of the map
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $f$
+\end_inset
+
+ plus completeness is sufficient to ensure existence.
+\end_layout
+
+\begin_layout Lemma
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+\begin_inset CommandInset citation
+LatexCommand cite
+after "CPO Fixpoint Theorem II, 8.22"
+key "davey02"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "lem:CPO-fix-point-2"
+
+\end_inset
+
+If
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\posA$
+\end_inset
+
+ is a 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+CPO
+\end_layout
+
+\end_inset
+
+ and
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $f:\posA\rightarrow\posA$
+\end_inset
+
+ is monotone, then 
+\begin_inset Formula $\lfp(f)$
+\end_inset
+
+ exists.
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+With the additional assumption of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+scottcontinuity
+\end_layout
+
+\end_inset
+
+, Kleene's algorithm is a systematic procedure to find the least fixed point.
+\end_layout
+
+\begin_layout Lemma
+\begin_inset CommandInset label
+LatexCommand label
+name "lem:kleene-1"
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Kleene's fixed-point theorem 
+\begin_inset CommandInset citation
+LatexCommand cite
+after "CPO fixpoint theorem I, 8.15"
+key "davey02"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+Assume 
+\begin_inset Formula $\posA$
+\end_inset
+
+ is a 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+CPO
+\end_layout
+
+\end_inset
+
+, and
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $f:\posA\rightarrow\posA$
+\end_inset
+
+ is 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+scottcontinuous
+\end_layout
+
+\end_inset
+
+.
+ Then the least fixed point of
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $f$
+\end_inset
+
+ is the supremum of the Kleene ascent chain 
+\begin_inset Formula 
+\[
+\bot\posleq f(\bot)\posleq f(f(\bot))\posleq\cdots\posleq f^{(n)}(\bot)\leq\cdots.
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Branch report
+status open
+
+\begin_layout Standard
+There are many other interesting connections between contraction theory
+ and order theory.
+ For example, Kleene's theorem might appear to be weaker, but it is possible
+ to prove Banach's theorem directly from Kleene's theorem
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset citation
+LatexCommand cite
+key "barang91contraction"
+
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%
+\end_layout
+
+\end_inset
+
+
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Remark
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+scottcontinuity
+\end_layout
+
+\end_inset
+
+vs topology
+\end_layout
+
+\end_inset
+
+The other natural question has to do with the relationship between Scott
+ continuity and topology.
+ In general, the engineer does not need to worry too much about topologists;
+ topology is not a good model of the real world, as Tarski's paradox shows.
+ 
+\end_layout
+
+\begin_layout Remark
+Note also that in the real world there exists 
+\end_layout
+
+\begin_layout Remark
+I don't have a device to store infinite information.
+ So 
+\end_layout
+
+\begin_layout Remark
+That said, it is still interesting to understand 
+\end_layout
+
+\begin_layout Remark
+It is a well known puzzle to find a way to show that 
+\begin_inset Formula 
+\begin{equation}
+0.99999\dots=1.\label{eq:periodic}
+\end{equation}
+
+\end_inset
+
+However, this is true only for the usual topology.
+ First, note that 
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "eq:periodic"
+
+\end_inset
+
+ is interpreted as a limit
+\begin_inset Formula 
+\begin{equation}
+\lim_{n\rightarrow\infty}\sum_{i=1}9\times10^{-i}=1.\label{eq:lim}
+\end{equation}
+
+\end_inset
+
+There exists topologies for which
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "eq:lim"
+
+\end_inset
+
+ is false.
+ In particular, there exists topologies in which 
+\begin_inset Formula $0.999\dots$
+\end_inset
+
+ is an element different than
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $1$
+\end_inset
+
+.
+ So even 
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "eq:periodic"
+
+\end_inset
+
+ is false without worrying about limits.
+ 
+\end_layout
+
+\begin_layout Remark
+An example of this topology is....
+\end_layout
+
+\begin_layout Remark
+Returning to 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+scottcontinuity
+\end_layout
+
+\end_inset
+
+: The property of 
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+scottcontinuity
+\end_layout
+
+\end_inset
+
+ is the weakest property for which Kleene's ascending chain has some computabili
+ty property.
+ In particular, it guarantees that the iteration starts from the bottom,
+ the sequence of iterates has a
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\sup$
+\end_inset
+
+ to converge to.
+ This is, of course, just an oversimplification of domain theory.
+\end_layout
+
+\begin_layout Remark
+So there could be a version of this theory, in which 
+\begin_inset Formula $\sup$
+\end_inset
+
+ is not compatible with
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\lim$
+\end_inset
+
+.
+ That is, you can have as consultant a computer scientist and a topologist,
+ and have them argue about this.
+\end_layout
+
+\begin_layout Remark
+For the engineer, the distinction is interesting to ponder, but irrelevant.
+\end_layout
+
+\begin_layout Remark
+So, in a sense, everything that we can compute is 1) measurable and 2) finitely
+ representable.
+ And so I could have just said 
+\begin_inset Quotes eld
+\end_inset
+
+let us assume that all posets are finite
+\begin_inset Quotes erd
+\end_inset
+
+, and we would 
+\end_layout
+
+\begin_layout Remark
+But I thought it would still be good to have this, as there are interesting
+ questions: such as when there is a finite structure sufficient for an infinite
+ problem? For example, Gaussian + linear is a finite representation.
+ In the same way, there are optimization problems in robotics in which we
+ are optimizing over filters; which is to say, sigma algebras.
+ When can the solution be finite? 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%
+\end_layout
+
+\end_inset
+
+
+\begin_inset Note Note
+status collapsed
+
+\begin_layout Plain Layout
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+*What was Dana Scott thinking?
+\end_layout
+
+\end_inset
+
+Once we have understood all of the above, one question still remains: why
+ did Dana Scott choose the name 
+\begin_inset Quotes eld
+\end_inset
+
+continuous
+\begin_inset Quotes erd
+\end_inset
+
+ for a notion that, when projected to
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\reals$
+\end_inset
+
+, does not imply topologically continuous? This confused me for a while.
+ I have asked friends of his, and the answer was: 
+\begin_inset Quotes eld
+\end_inset
+
+He just thinks 
+\emph on
+abstractly
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ 
+\end_layout
+
+\end_inset
+
+
+\begin_inset Note Note
+status open
+
+\begin_layout Subsection
+Other notation
+\end_layout
+
+\begin_layout Definition
+Let 
+\begin_inset Formula $\pi_{i}$
+\end_inset
+
+ be the projection to the 
+\begin_inset Formula $i$
+\end_inset
+
+-th component of a tuple or a space.
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+%
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+For two sets 
+\begin_inset Formula $A,B$
+\end_inset
+
+, write their product as
+\begin_inset Formula 
+\[
+A\acprod B=\{\left\langle a,b\right\rangle \mid a\in A,b\in B\}.
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Note Note
+status open
+
+\begin_layout Lemma
+\begin_inset CommandInset label
+LatexCommand label
+name "lem:isantichain"
+
+\end_inset
+
+Let 
+\begin_inset Formula $A\in\antichains\posA$
+\end_inset
+
+ and 
+\begin_inset Formula $B\in\antichains\posB$
+\end_inset
+
+.
+ Then 
+\begin_inset Formula $A\times B\in\antichains(\posA\times\posB)$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Proof
+We have 
+\begin_inset Formula $A\times B=\{\left\langle a,b\right\rangle \mid a\in A,b\in B\}$
+\end_inset
+
+.
+ This is an antichain because for every pair
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\left\langle a_{1},b_{1}\right\rangle $
+\end_inset
+
+ and
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\left\langle a_{2},b_{2}\right\rangle $
+\end_inset
+
+ in
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $A\times B$
+\end_inset
+
+, either
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $a_{1}\not\posleq_{\posA}a_{2}$
+\end_inset
+
+ or
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $b_{1}\not\posleq_{\posB}b_{2}$
+\end_inset
+
+ on account that both 
+\begin_inset Formula $A$
+\end_inset
+
+ and 
+\begin_inset Formula $B$
+\end_inset
+
+ are themselves antichains.
+\end_layout
+
+\begin_layout Lemma
+\begin_inset CommandInset label
+LatexCommand label
+name "lem:product-antichain"
+
+\end_inset
+
+Let
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $A_{1},B_{1}\in\antichains\posA$
+\end_inset
+
+ and
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $B\in\antichains\posB$
+\end_inset
+
+.
+ Then if
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $A_{1}\posleq_{\antichains\posA}A_{2}$
+\end_inset
+
+, it follows that
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $A_{1}\times B\posleq_{\antichains(\posA\times\posB)}A_{2}\times B$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Proof
+From 
+\begin_inset Formula $A_{1}\posleq_{\antichains\posA}A_{2}$
+\end_inset
+
+ it follows 
+\begin_inset Formula $\upit A_{1}\posleq_{\upsets(\posA)}\upit A_{2}.$
+\end_inset
+
+ From 
+\begin_inset CommandInset ref
+LatexCommand formatted
+reference "lem:product-of-antichains"
+
+\end_inset
+
+ it follows that 
+\begin_inset Formula $\upit(A_{1}\times B)=\upit A_{1}\times\upit B$
+\end_inset
+
+ and 
+\begin_inset Formula $\upit(A_{2}\times B)=\upit A_{2}\times\upit B$
+\end_inset
+
+ and thus 
+\begin_inset Formula $\upit(A_{1}\times B)\posleq_{\upsets(\posA\times\posB)}\upit(A_{1}\times B)$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Lemma
+\begin_inset CommandInset label
+LatexCommand label
+name "lem:product-of-antichains"
+
+\end_inset
+
+If 
+\begin_inset Formula $A\in\antichains\posA$
+\end_inset
+
+ and 
+\begin_inset Formula $B\in\antichains\posB$
+\end_inset
+
+, 
+\begin_inset Formula $\upit(A\times B)=\upit A\times\upit B$
+\end_inset
+
+.
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

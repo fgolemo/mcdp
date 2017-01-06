@@ -1,10 +1,10 @@
 catalogue {
-   # These "property" fields are placeholders
+  # These "property" fields are placeholders
    # for the good properties of the part built 
    # from this material (strength, etc.)
    provides property1 [furlongs]  "Placeholder property1"
    provides property2 [furlongs]  "Placeholder property2"
-   requires temperature [C]       "Temperature required for liquefaction"
+   requires temperature [C] "Temperature required for liquefaction"
    requires specific_cost [$/mm³] "Cost per unit volume"
 
    1 furlongs, 1 furlongs ⟻ material1 ⟼ 120 C, 1 USD/mm³

@@ -165,7 +165,7 @@ class MCDPConstants():
     
     
 #     pdf_to_png_dpi = 300 # dots per inch
-    pdf_to_png_dpi = 300 # dots per inch
+    pdf_to_png_dpi = 100 # dots per inch
     if pdf_to_png_dpi < 300:
         msg =( 'Note that pdf_to_png_dpi is set to %d, which is not suitable for printing'
                % pdf_to_png_dpi)
@@ -173,7 +173,16 @@ class MCDPConstants():
     
     docs_xml_allow_empty_attributes = ['np', 'noprettify', 'nonumber', 'notoc',
                                         'mcdp-value', 'mcdp-poset']
-    
+
+    # directories ignored by locate_files
+    locate_files_ignore_patterns = ['node_modules', '.git', 'commons', '_cached', '_mcdpweb_cache', 'resized', 
+                                    '1301-jbds-figures', 'out', 'out-html', 'reprep-static',
+                                    '*.html_resources', 'out-*', 'compmake', '*.key']
+
+    # images used to look for icons for DPs 
+    exts_for_icons = ['png', 'jpg', 'PNG', 'JPG', 'jpeg', 'JPEG'] # XXX
+    # all images 
+    exts_images = exts_for_icons + ['svg', 'SVG', 'pdf', 'PDF']
     
 def get_mcdp_tmp_dir():
     from tempfile import gettempdir

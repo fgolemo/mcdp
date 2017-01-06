@@ -18,9 +18,9 @@ import re
 from contracts import contract
 from contracts.interface import Where
 from contracts.utils import check_isinstance, raise_desc
-from mcdp_lang.dealing_with_special_letters import subscripts, greek_letters,\
-    greek_letters_utf8, subscripts_utf8, dividers, ends_with_divider,\
-    starts_with_divider
+from mcdp_lang.dealing_with_special_letters import\
+    greek_letters_utf8, subscripts_utf8, ends_with_divider,\
+    starts_with_divider, digit2superscript
 from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.refinement import namedtuple_visitor_ext
 from mocdp import MCDPConstants
@@ -110,18 +110,7 @@ def correct(x, parents):  # @UnusedVariable
         yield old, new
     
     if isinstance(x, CDP.RcompUnit):
-        replacements = {
-            '1':'¹',
-            '2':'²' ,
-            '3':'³',
-            '4':'⁴',
-            '5':'⁵',
-            '6':'⁶',
-            '7':'⁷',
-            '8':'⁸',
-            '9':'⁹',
-        }
-        for n, replacement in replacements.items():
+        for n, replacement in digit2superscript.items():
             w = '^' + n
             if w in x_string:
                 s2 = x_string.replace(w, replacement)
@@ -133,18 +122,7 @@ def correct(x, parents):  # @UnusedVariable
                 yield x_string, s2
 
     if isinstance(x, CDP.PowerShort):
-        replacements = {
-            '1':'¹',
-            '2':'²' ,
-            '3':'³',
-            '4':'⁴',
-            '5':'⁵',
-            '6':'⁶',
-            '7':'⁷',
-            '8':'⁸',
-            '9':'⁹',
-        }
-        for n, replacement in replacements.items():
+        for n, replacement in digit2superscript.items():
             for i in reversed(range(3)):
                 for j in reversed(range(3)):
                     w = ' ' * i + '^' + ' ' * j + n
@@ -152,12 +130,19 @@ def correct(x, parents):  # @UnusedVariable
                         yield w, replacement
                     
     if isinstance(x, (CDP.VName, CDP.RName, CDP.FName, CDP.CName)):
-        suggestion = get_suggestion_identifier(x_string)
+        value_string = x_string.strip()
+        # This is not always true --- sometimes whitespace is included
+        # eventually, when ow is everywhere (or similar mechanism)
+        # we can assume that x_string == value_string
+        # value_string = x.value
+        # if not value_string in x_string:
+        #     msg = 'Something fishy'
+        #     raise_desc(DPInternalError, msg, x_string=x_string, value_string=value_string)
+        suggestion = get_suggestion_identifier(value_string)
         if suggestion is not None:
             yield suggestion
         
     if isinstance(x, CDP.BuildProblem):
-#         print 'build', x_string.__repr__()
         for _ in suggestions_build_problem(x):
             yield _
             
@@ -323,6 +308,9 @@ def findall(p, s):
 @contract(s=bytes, returns='None|tuple')
 def get_suggestion_identifier(s0):
     """ Returns a pair of (what, replacement), or None if no suggestions available"""
+    if s0 != s0.strip():
+        msg = 'This is not an identifier: %r' % s0
+        raise ValueError(msg)
     #print('get_suggestion_identifier(%s)' % s0)
     suggestions = []
     s = s0

@@ -72,6 +72,18 @@ subscripts_utf8 = dict( (k, v.encode('utf8')) for k, v in subscripts.items())
 dividers = ['_','0','1','2','3','4','5','6','7','8','9']
 dividers.extend(sorted(subscripts_utf8.values()))
 
+digit2superscript = {
+    '1':'¹',
+    '2':'²' ,
+    '3':'³',
+    '4':'⁴',
+    '5':'⁵',
+    '6':'⁶',
+    '7':'⁷',
+    '8':'⁸',
+    '9':'⁹',
+}
+
 @contract(s=bytes)
 def ends_with_divider(s):
     check_isinstance(s, bytes)

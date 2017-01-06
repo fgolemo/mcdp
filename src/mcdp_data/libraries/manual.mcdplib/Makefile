@@ -1,3 +1,9 @@
+all::
+
+
+install:
+	npm install MathJax-node jsdom less
+
 
 htmltmpdir=out-html
 
@@ -7,14 +13,26 @@ manual_tmp_html=$(htmltmpdir)/manual_tmp.html
 manual_pdf_wk=$(htmltmpdir)/manual-wk.pdf
 manual_pdf_prince=$(htmltmpdir)/manual-prince.pdf
 
-all: \
+# include commons/make/latex.mk
+include commons/make/lyx.mk
+
+%.md: %.tex
+	./latex2md.py < $< > $@
+
+%.pdf: %.md
+	mcdp-render --pdf $* 
+
+lyxes=$(wildcard docs/**/*.lyx)
+generated_mds=$(lyxes:.lyx=.md)
+
+
+all:: \
 	$(manual_html) \
 	$(manual_pdf_prince)
 
+clean::
+	rm -f $(generated_mds)
 #$(manual_pdf_wk)
-
-install:
-	npm install MathJax-node jsdom less
 
 prince: $(manual_pdf_prince)
 html: $(manual_html)
@@ -29,7 +47,7 @@ html: $(manual_html)
 # always check
 .PHONY: $(manual_html)
 
-$(manual_html): 
+$(manual_html): $(generated_mds)
 	DISABLE_CONTRACTS=1 mcdp-render-manual --output_file $@ -c "config echo 1; rparmake"
 	#$(MAKE) extract-assets-manual
 
@@ -42,7 +60,7 @@ extract-assets-manual:
 $(manual_pdf_wk):# $(manual_html)
 	wkhtmltopdf --print-media-type $< $@
 
-clean:
+clean::
 	rm -rf out-mcdp-render-manual
 
 
@@ -99,3 +117,5 @@ bibout=bibliography
 bib: $(bibout)
 $(bibout):
 	bibtex2html -unicode --dl -o $(bibout) $(bibfile)
+
+

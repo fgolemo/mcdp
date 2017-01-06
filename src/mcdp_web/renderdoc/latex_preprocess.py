@@ -27,7 +27,7 @@ def latex_preprocessing(s):
     group = 'TILDETILDETILDE'
     s = s.replace('~~~', group)
 
-    s = s.replace('%\n', UNICODE_NBSP)
+    s = s.replace('\n%\n', '\n')
     s = s.replace('~', UNICODE_NBSP)  # XXX
     s = s.replace(group, '~~~')
 
@@ -164,6 +164,10 @@ def latex_preprocessing(s):
                                nargs=1, nopt=0)
     s = substitute_command_ext(s, 'hspace*', lambda args, opts: '<!--skipped h-space*-->',  # @UnusedVariable
                                nargs=1, nopt=0)
+    s = substitute_command_ext(s, 'footnote', nargs=1, nopt=0,
+                               f =lambda (a,), _: '<footnote>%s</footnote>' % a)
+    s = substitute_command_ext(s, 'marginpar', nargs=1, nopt=0,
+                               f =lambda (a,), _: '<div class="marginpar">%s</div>' % a)
 #     s = substitute_command_ext(s, 'setcounter', lambda args, opts: '<!--skipped h-space*-->',  # @UnusedVariable
 #                            nargs=2, nopt=0)
 #
@@ -220,6 +224,7 @@ def latex_preprocessing(s):
     assert_not_inside('begin{centering}', s)
     s = replace_environment(s, "center", "center", 'don-t-steal-label')
 
+    s = replace_environment_ext(s, "verbatim", lambda s, _: s)
     s = replace_environment_ext(s, "quote", lambda inside, opt:  # @UnusedVariable
                                 '<blockquote>' + inside + '</blockquote>')
     s = replace_environment_ext(s, "tabular", maketabular)
@@ -598,7 +603,7 @@ def substitute_command_ext(s, name, f, nargs, nopt):
     args = tuple(args)
     opts = tuple(opts)
 
-    replace = f(args=args, opts=opts)
+    replace = f(args, opts)
     if replace is None:
         msg = 'function %s returned none' % f
         raise Exception(msg)

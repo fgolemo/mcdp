@@ -7,12 +7,12 @@ import sys
 
 from contracts import contract
 from contracts.utils import (check_isinstance, format_obs, raise_desc,
-    raise_wrapped)
+                             raise_wrapped)
 from mcdp_dp import PrimitiveDP
 from mcdp_lang import parse_ndp, parse_poset
 from mcdp_posets import Poset
 from mocdp import ATTR_LOAD_LIBNAME, ATTR_LOAD_NAME, logger, ATTR_LOAD_REALPATH, \
-    get_mcdp_tmp_dir
+    get_mcdp_tmp_dir, MCDPConstants
 from mocdp.comp.context import Context, ValueWithUnits
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.template_for_nameddp import TemplateForNamedDP
@@ -54,9 +54,8 @@ class MCDPLibrary():
     ext_explanation2 = 'expl2.md'  # after the model
     ext_doc_md = 'md'  # library document
 
-    exts_images = ["png", 'jpg', 'PNG', 'JPG', 'JPEG', 'jpeg', 'svg', 'SVG', 'pdf', 'PDF']
     all_extensions = [ext_ndps, ext_posets, ext_values, ext_templates, ext_primitivedps,
-                      ext_explanation1, ext_explanation2, ext_doc_md] + exts_images
+                      ext_explanation1, ext_explanation2, ext_doc_md] + MCDPConstants.exts_images
 
     def __init__(self, cache_dir=None, file_to_contents=None, search_dirs=None,
                  load_library_hooks=None):
@@ -412,26 +411,13 @@ class MCDPLibrary():
     @contract(d=str)
     def _add_search_dir(self, d):
         """ Adds the directory to the search directory list. """
-
-        ignore_patterns = ['/out/', '/out-html/', '/reprep-static/', 'html_resources',
-                           'node_modules']
-
-        def should_ignore(f):
-            for i in ignore_patterns:
-                if i in f:
-                    # logger.debug('Ignoring %r because of pattern %r.' % (f, i))
-                    return True
-            return False
-
-        for ext in MCDPLibrary.all_extensions:
-            pattern = '*.%s' % ext
-            files_mcdp = locate_files(directory=d, pattern=pattern,
-                                      followlinks=True)
-            for f in files_mcdp:
-                if should_ignore(f):
-                    continue
-                assert isinstance(f, str)
-                self._update_file(f, from_search_dir=d)
+        pattern = ['*.%s' % ext for ext in MCDPLibrary.all_extensions]
+            
+        files_mcdp = locate_files(directory=d, pattern=pattern,
+                                  followlinks=True)
+        for f in files_mcdp:
+            assert isinstance(f, str)
+            self._update_file(f, from_search_dir=d)
 
     @contract(f=str)
     def _update_file_from_editor(self, f):

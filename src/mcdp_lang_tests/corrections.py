@@ -13,6 +13,7 @@ from mocdp.comp.context import Context
 from contracts.utils import indent
 from mcdp_lang.dealing_with_special_letters import ends_with_divider,\
     starts_with_divider
+from mcdp_lang.namedtuple_tricks import recursive_print
 
 
 CDP = CDPLanguage
@@ -91,6 +92,8 @@ def try_corrections2(s):
     x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
     context = Context()
     xr = parse_ndp_refine(x, context)
+    
+    print indent(recursive_print(xr), 'xr|')
     suggestions = get_suggestions(xr)
    
     for orig_where, sub in suggestions:
@@ -134,15 +137,47 @@ def check_suggestions_greek1():
     } """
  
     s2 = try_corrections2(s)
-    print indent(s, 's : ')
-    print indent(s2, 's2: ')
-    
+#     print indent(s, 's : ')
+#     print indent(s2, 's2: ')
+#     
     assert 'eta' not in s2
     assert 'alpha ' not in s2
     assert 'α' in s2
     assert 'η' in s2
     assert 'alphabet' in s2
     assert 'ρ₁' in s2
+ 
+@comptest
+def check_suggestions_greek2():
+    s = """mcdp {
+    provides eta₁ [m]
+} """ 
+    s2 = try_corrections2(s)
+#     print indent(s, 's : ')
+#     print indent(s2, 's2: ')
+    assert 'η₁' in s2
+
+@comptest
+def check_suggestions_greek3():
+    s = """ mcdp {
+     provides eta_1 [m]
+    } """ 
+    s2 = try_corrections2(s)
+#     print indent(s, 's : ')
+#     print indent(s2, 's2: ')
+    assert 'η₁' in s2
+
+
+@comptest
+def check_suggestions_greek4():
+    s ="""
+    catalogue { 
+   provides eta_1    [furlongs]  "Placeholder property2"
+} """
+    s2 = try_corrections2(s)
+#     print indent(s, 's : ')
+#     print indent(s2, 's2: ')
+    assert 'η₁' in s2
     
 @comptest
 def check_get_suggestion_identifier1():
@@ -158,6 +193,10 @@ def check_get_suggestion_identifier1():
     assert_equal(get_suggestion_identifier('rho_1'), ('rho_1', 'ρ₁'))
     assert_equal(get_suggestion_identifier('alpha_rho_1'), ('alpha_rho_1', 'α_ρ₁'))
     assert_equal(get_suggestion_identifier('rho_rho_1'), ('rho_rho_1', 'ρ_ρ₁'))
+    
+    assert_equal(get_suggestion_identifier('eta_'), ('eta', 'η'))
+    assert_equal(get_suggestion_identifier('eta1'), ('eta', 'η'))
+    assert_equal(get_suggestion_identifier('eta₁'), ('eta', 'η'))
     
     
 if __name__ == '__main__': 
