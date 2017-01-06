@@ -25,6 +25,7 @@ from mocdp.comp.composite_makecanonical import connect_resources_to_outside, \
 from mocdp.comp.context import Context
 from mocdp.comp.wrap import dpwrap
 from mocdp.exceptions import DPInternalError, DPSemanticError
+from contracts.interface import ContractNotRespected
 
 
 @comptest
@@ -155,7 +156,7 @@ def test_ex_InvMult2Nat():
     F = Nat()
     Rs = (F, F, F) # too many!
     
-    assert_raises(ValueError, InvMult2Nat, F, Rs)
+    assert_raises((ContractNotRespected, ValueError), InvMult2Nat, F, Rs)
     
 
 @comptest
