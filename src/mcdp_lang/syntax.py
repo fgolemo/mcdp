@@ -232,10 +232,10 @@ class Syntax():
     python_style_multiline2 = QuotedString(
         quoteChar="'''", escChar='\\', unquoteResults=True, multiline=True)
     python_style_multiline = python_style_multiline1 | python_style_multiline2
-    comment_string_simple = sp(
-        copy_expr_remove_action(quoted), lambda t: CDP.CommentStringSimple(t[0]))
-    comment_string_complex = sp(copy_expr_remove_action(
-        python_style_multiline), lambda t: CDP.CommentStringTriple(t[0]))
+    comment_string_simple = sp(copy_expr_remove_action(quoted), 
+                               lambda t: CDP.CommentStringSimple(t[0]))
+    comment_string_complex = sp(copy_expr_remove_action(python_style_multiline), 
+                                lambda t: CDP.CommentStringTriple(t[0]))
 
     comment_model = sp(comment_string_simple | comment_string_complex,
                        lambda t: CDP.CommentModel(t[0])).setName('comment_model')

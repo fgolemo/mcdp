@@ -347,9 +347,8 @@ code.rvalue span.RcompUnit {
 }
 span.CommentFun,
 .CommentRes {
-  border: solid;
   display: inline-block;
-  margin-bottom: 7pt;
+  margin-bottom: 3pt;
 }
 .ui-button {
   padding: 3px !important;

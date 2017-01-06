@@ -23,7 +23,8 @@ from mcdp_posets.rcomp_units import R_dimensionless
 from mocdp import ATTRIBUTE_NDP_RECURSIVE_NAME
 from mocdp.comp.context import ModelBuildingContext, Context
 from mocdp.comp.recursive_name_labeling import get_names_used
-from mocdp.exceptions import DPNotImplementedError, DPSemanticError
+from mocdp.exceptions import DPNotImplementedError, DPSemanticError,\
+    DPSyntaxError
 from mcdp_lang.fix_whitespace_imp import fix_whitespace
 
 
@@ -1777,7 +1778,31 @@ def spaces1():
 #     x2 = fix_whitespace(x)
     assert_no_whitespace(x.prep)
 
-
+@comptest
+def spaces2():
+    expr=Syntax.python_style_multiline1
+    string = '"""ciao\n\tciao\nciao"""'
+    x = parse_wrap(expr, string)[0]
+    #print x.__repr__()
+    assert_equal(x, 'ciao\n\tciao\nciao')
+    
+    # singles cannot have \n inside
+    expr=Syntax.quoted
+    string2 = '"ciao\n\tciao\nciao"'
+    try:
+        parse_wrap(expr, string2)[0]
+    except DPSyntaxError:
+        pass
+    
+    # The comment cannot be multiline
+    expr = Syntax.line_expr
+    string = """requires  ciao [ m]   \n'''this\nis\n\tmultiline''' """
+    try:
+        parse_wrap(expr, string)[0]
+    except DPSyntaxError:
+        pass
+     
+    
 def assert_no_whitespace(x):
     w = x.where
     s = w.string[w.character:w.character_end]
