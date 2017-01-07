@@ -1,9 +1,5 @@
 
 
-install:
-	npm install MathJax-node jsdom less
-
-
 # htmltmpdir=out-html
 
 out=out-versions
@@ -81,11 +77,11 @@ remake-join:
 
 clean::
 	rm -f $(generated_mds)
-	rm -f $(targets)
+	rm -f $(all_targets)
 
 realclean: clean
-	# rm -rf $(mcdp_render_manual_dir)
-	# rm -rf $(out)
+	rm -rf $(out)
+# rm -rf $(mcdp_render_manual_dir)
 	
 
 publish: $(manual_html)
@@ -141,3 +137,7 @@ $(bibout):
 	bibtex2html -unicode --dl -o $(bibout) $(bibfile)
 
 
+
+
+install:
+	npm install MathJax-node jsdom less

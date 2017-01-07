@@ -367,9 +367,9 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
     best_icon = gdc.get_icon(iconoptions)
     #print('icon options: %s' % iconoptions)
     #print('best_icon: %r' % best_icon)
-    print('type %s' % type(ndp).__name__)
-    print('only_string: %r' % only_string)
-    print('is special: %r' % is_special)
+#     print('type %s' % type(ndp).__name__)
+#     print('only_string: %r' % only_string)
+#     print('is special: %r' % is_special)
     if is_special and 'default.png' in best_icon: # pragma: no cover
         raise_desc(DPInternalError, 'Could not find icon for special',
                    iconoptions=iconoptions, is_special=is_special, best_icon=best_icon,

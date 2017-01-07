@@ -19,11 +19,11 @@ for resources.
                 $\langle\funsp,\funleq\rangle$</s>
         <render class='ndp_graph_templatized' id='complicated'>
         template mcdp {
-            provides f1 [g]
-            provides f2 [J]
-            provides f3 [m]
-            requires r1 [lux]
-            requires r2 [USD]
+            provides f_1 [g]
+            provides f_2 [J]
+            provides f_3 [m]
+            requires r_1 [lux]
+            requires r_2 [USD]
         }
         </render>
         <s><r>Resources</r><br/><br/>
@@ -31,9 +31,9 @@ for resources.
     </col3>
     <figcaption id='fig:complicated:caption'>
         Representation of a design problem with three functionalities
-        (<fname>f1</fname>, <fname>f2</fname>, <fname>f3</fname>)
-        and three resources (<rname>r1</rname>, <rname>r2</rname>,
-        <rname>r3</rname>). In this case, the functionality
+        (<fname>f_1</fname>, <fname>f_2</fname>, <fname>f_3</fname>)
+        and two resources (<rname>r_1</rname>, <rname>r_2</rname>,
+        <rname>r_3</rname>). In this case, the functionality
         space $\funsp$ is the product of three copies
         of $\Rcomp$: $\funsp = \Rcpu{g} \times \Rcpu{J} \times \Rcpu{m}$
         and $\ressp = \Rcpu{lux} \times \Rcpu{USD}$.

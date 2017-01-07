@@ -1,30 +1,30 @@
 mcdp {
-    requires r1 [Nat] 
-    provides f1 [Nat]
-    variable v1 [Nat]
-    c1 = Nat:1
-    c2 = c1
-    c3 = c2
-    c4 = c3 + c1
+    requires r_1 [Nat] 
+    provides f_1 [Nat]
+    variable v_1 [Nat]
+    c_1 = Nat:1
+    c_2 = c_1
+    c_3 = c_2
+    c_4 = c_3 + c_1
 
-    r2 = r1 
-    r2b = required r1
+    r_2 = r_1 
+    r_2b = required r_1
 
-    f2 = f1
-    f2b = provided f1
+    f_2 = f_1
+    f_2b = provided f_1
 
-    requires r5 = f2b
+    requires r_5 = f_2b
 
-    f3 = f1 + f2
+    f3 = f_1 + f_2
     # v1 can be used as either
-    r3 = r2 + v1
-    f3b = f2 + v1
-    f4 = f1 + c2
-    r4 = r1 + c2
+    r3 = r_2 + v_1
+    f3b = f_2 + v_1
+    f4 = f_1 + c_2
+    r4 = r_1 + c_2
 
     # These are really truly ambiguous
     # v2 = v1 + c1 
-    v2 = v1 + c1  + f2
+    v2 = v_1 + c_1  + f_2
 
    requires r_unconnected [Nat]
    provides f_unconnected [Nat]

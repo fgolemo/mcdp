@@ -436,6 +436,481 @@ code {
   font-weight: bold;
   src: url("/Library/Fonts/STIXGeneralBolIta.otf");
 }
+body {
+  /*padding-left: 3em;*/
+  /*width: 50em;*/
+}
+pre {
+  background-color: #eee;
+  white-space: pre-wrap;
+  margin-left: 2em;
+  /*margin-top: 2em;*/
+  padding: 10px;
+  border-radius: 10px ;
+  /*display: inline-block;*/
+  margin-right: 1em;
+  /*white-space: pre-wrap;                 /* CSS3 browsers  */
+  /*white-space: -moz-pre-wrap !important; /* 1999+ Mozilla  */
+  /*white-space: -pre-wrap;                /* Opera 4 thru 6 */
+  /*white-space: -o-pre-wrap;              /* Opera 7 and up */
+  /*word-wrap: break-word;                 /* IE 5.5+ and up */
+}
+@media screen {
+  pre {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  }
+}
+pre.error,
+pre.DPSemanticError,
+pre.DPSyntaxError {
+  color: red;
+  font-weight: bold;
+  white-space: pre-wrap;
+}
+.ndp_graph_expand,
+.ndp_graph_enclosed,
+.ndp_graph_normal,
+.ndp_graph_templatized,
+.ndp_graph_templatized_labeled,
+.template_graph_enclosed {
+  max-width: 100%;
+  /*height: auto;*/
+}
+/* This screws up wkhtomlpdf */
+@media screen {
+  .ndp_graph_expand,
+  .ndp_graph_enclosed,
+  .ndp_graph_normal,
+  .ndp_graph_templatized,
+  .ndp_graph_templatized_labeled,
+  .template_graph_enclosed {
+    height: auto;
+  }
+}
+span.label_outside {
+  display: block;
+  font-size: 6pt;
+  letter-spacing: 0.4pt;
+  font-family: "Andale Mono", monospace;
+  text-align: left;
+  padding-left: 1em;
+  padding-bottom: 2pt;
+  font-weight: bold;
+  color: gray;
+}
+span.label_outside + * {
+  page-break-before: avoid;
+}
+pre span.label_inside {
+  display: none;
+  float: right;
+  font-style: italic;
+  border-radius: 10px ;
+  /*border: solid 1px black; */
+  background-color: #eee;
+  padding: 5px;
+  padding-left: 1em;
+  padding-right: 1em;
+  margin-top: -1.8em;
+  margin-right: 1em;
+}
+/*svg text {color: red !important;}
+svg { border: solid 1px red; }*/
+td br.added_before_pre {
+  display: none;
+}
+/* sometimes we want to text-align: left; the entire pre */
+pre {
+  text-align: left;
+}
+pre.console {
+  background-color: black;
+  color: #ccf;
+  display: inline-block;
+}
+pre.console .console_sign {
+  color: #cfc;
+}
+pre.console .program {
+  color: #cff;
+  /*color: brown;*/
+}
+pre.console .program_option {
+  /*color: red;*/
+}
+pre.console .program_command {
+  color: green;
+}
+merror {
+  color: red;
+}
+/*ol + h4, ul + h4 {color: red;}*/
+h4::after {
+  content: ':';
+}
+/*ul { margin-bottom: 1em; border: solid; clear: left; margin-left:0; }
+li {border: solid 1px red;}
+*/
+h4 {
+  font-size: 100%;
+  font-style: italic;
+  font-weight: normal;
+  margin-top: 0.5em;
+  /*float: left;
+	clear: left;
+
+	margin: 0; padding: 0;
+	margin-right: 0.34em;*/
+  /*
+    font-size: 1em; margin: 1em 0;
+
+
+	display: run-in;
+	 float: left;
+    clear: both;*/
+  /*margin: 0 0.5em 0 0;*/
+  /*border : solid;*/
+}
+/*h4 + p {display: inline-block;}*/
+/* fix markdonw extra */
+div.latex_env p {
+  display: inline;
+}
+div.latex_env {
+  margin-top: 0.5em;
+  margin-bottom: 0.5em;
+}
+.errored {
+  /*border: solid 2px red !important;*/
+  /*padding: 3px !important;*/
+  /*background-color: red;*/
+}
+.duplicated-id {
+  color: red;
+}
+.href-invalid {
+  color: red;
+}
+.href-replaced {
+  background-color: yellow;
+}
+span.Unit,
+span.Nat,
+span.Int,
+span.Rcomp {
+  color: #ac5600;
+}
+span.ValueExpr,
+span.IntegerFraction,
+span.NatConstant,
+span.RcompConstant {
+  color: #cc6600;
+}
+span.RcompUnit {
+  color: #cc6600 ;
+}
+span.MCDPKeyword,
+span.SubKeyword,
+span.CompactKeyword,
+span.AbstractKeyword,
+span.TemplateKeyword,
+span.ForKeyword,
+span.UsingKeyword,
+span.LoadKeyword,
+span.CodeKeyword,
+span.FromLibraryKeyword,
+span.leq,
+span.geq,
+span.OpKeyword,
+span.eq,
+span.plus,
+span.times,
+span.DPWrapToken,
+span.ImplementedbyKeyword,
+span.FromCatalogueKeyword,
+span.MCDPTypeKeywor,
+span.InstanceKeyword,
+span.CoproductWithNamesChooseKeyword,
+span.MCDPTypeKeyword,
+span.FromLibraryKeyword,
+span.CoproductWithNamesChooseKeyword,
+span.MCDPKeyword,
+span.SubKeyword,
+span.CompactKeyword,
+span.AbstractKeyword,
+span.TemplateKeyword,
+span.ForKeyword,
+span.UsingKeyword,
+span.LoadKeyword,
+span.CodeKeyword,
+span.leq,
+span.geq,
+span.OpKeyword,
+span.eq,
+span.plus,
+span.times,
+span.exponent,
+span.product,
+span.OpenBraceKeyword,
+span.CloseBraceKeyword,
+span.comma,
+span.DPWrapToken,
+span.ImplementedbyKeyword,
+span.FromCatalogueKeyword,
+span.MCDPTypeKeyword,
+span.InstanceKeyword,
+span.FlattenKeyword,
+span.ApproxKeyword,
+span.TakeKeyword,
+span.SpecializeKeyword,
+span.FinitePosetKeyword,
+span.ProductKeyword,
+span.UncertainKeyword,
+span.UpperSetsKeyword,
+span.LowerSetsKeyword,
+span.EmptySetKeyword,
+span.PowerSetKeyword,
+span.IntervalKeyword,
+span.UpperSetFromCollectionKeyword,
+span.LowerSetFromCollectionKeyword,
+span.TopKeyword,
+span.BottomKeyword,
+span.SingleElementPosetKeyword,
+span.SpaceCoproductKeyword,
+span.IgnoreKeyword,
+span.SolveModelKeyword,
+span.AnyOfKeyword,
+span.MaximalsKeyword,
+span.MinimalsKeyword,
+span.IgnoreResourcesKeyword,
+span.ProcName,
+span.ApproxUpperKeyword,
+span.ApproxLowerKeyword,
+span.VarStatementKeyword,
+span.GenericOperationName,
+span.EversionKeyword,
+span.AddBottomKeyword,
+span.LBRACE,
+span.RBRACE,
+span.LBRACKET,
+span.RBRACKET,
+span.AssertEqualKeyword,
+span.AssertLEQKeyword,
+span.AssertGEQKeyword,
+span.AssertLTKeyword,
+span.AssertGTKeyword,
+span.AssertNonemptyKeyword,
+span.AssertEmptyKeyword {
+  font-weight: bold;
+  color: #00a;
+}
+span.MAPSTO {
+  font-weight: bold;
+  color: darkred;
+}
+span.MAPSFROM {
+  font-weight: bold;
+  color: darkgreen;
+}
+span.VName {
+  color: blue;
+}
+/* constant */
+span.CName {
+  color: #333;
+}
+span.SetNameRValue > span.RName {
+  color: darkred;
+}
+span.SetNameFValue > span.FName {
+  color: darkgreen;
+}
+span.DerivFunctionName {
+  color: darkgreen;
+}
+span.DerivResourceName {
+  color: darkred;
+}
+span.ProvideKeyword,
+span.RequireKeyword {
+  font-weight: bold;
+}
+span.ProductWithLabelsLabel,
+span.IndexLabel {
+  color: #cc6600;
+}
+/* f provided by s */
+span.ProvidedByKeyword,
+span.Function > span.FName {
+  color: darkgreen;
+}
+/* f required by s */
+span.RequiredByKeyword,
+span.Resource > span.RName {
+  color: darkred;
+}
+/* required rname - this is a function inside */
+span.RequiredKeyword,
+span.NewResource > span.RName {
+  color: darkgreen;
+}
+/* provided fname - this is a resource inside */
+span.ProvidedKeyword,
+span.NewFunction > span.FName {
+  color: darkred;
+}
+/* provides f [m] */
+span.ProvideKeyword {
+  color: darkgreen;
+}
+span.FunStatement > span.FName,
+span.FunShortcut1 > span.FName,
+span.FunShortcut1m > span.FName,
+span.FunShortcut2 > span.FName,
+span.FunShortcut3 > span.FName,
+span.FunShortcut4 > span.FName,
+span.FunShortcut5 > span.FName {
+  color: darkgreen;
+}
+/* requires r [m] */
+/* requires r >= ... */
+/* requires r1, r2*/
+span.RequireKeyword {
+  color: darkred;
+}
+span.ResStatement > span.RName,
+span.ResShortcut1 > span.RName,
+span.ResShortcut1m > span.RName,
+span.ResShortcut2 > span.RName,
+span.ResShortcut3 > span.RName,
+span.ResShortcut4 > span.RName,
+span.ResShortcut5 > span.RName {
+  color: darkred;
+}
+span.SetNameRValue > span.SetNameGenericVar {
+  color: darkred;
+}
+span.SetNameFValue > span.SetNameGenericVar {
+  color: darkgreen;
+}
+/* There is a bug that prevents this from working correctly. */
+/* span.ImpName { color: #cc6600; } */
+span.FuncName {
+  color: #cc6600 ;
+}
+span.DPName,
+span.NDPName,
+span.PosetName,
+span.TemplateName,
+span.TemplateParamName,
+span.FinitePosetElement,
+span.SingleElementPosetTag {
+  color: #a0a;
+}
+span.DPTypeName,
+span.DPVariableRef {
+  color: #00f;
+  font-weight: bold;
+}
+span.comment {
+  color: grey;
+}
+span.line-gutter {
+  margin-right: 1em;
+  color: grey;
+}
+span.PlaceholderLabel {
+  color: grey;
+  /*font-style: italic;*/
+}
+span.CommentModel {
+  color: purple ;
+  font-weight: bold;
+}
+span.CommentFun {
+  color: darkgreen;
+  font-weight: bold;
+}
+span.CommentRes {
+  color: darkred;
+  font-weight: bold;
+}
+/* Special case: ≤ does not look good in regular font Courier */
+span.leq,
+span.geq,
+span.OpenBraceKeyword,
+span.CloseBraceKeyword {
+  /*font-family: Courier, monospace;*/
+  font-weight: bold;
+}
+span.leq,
+span.geq {
+  font-family: "FreeSerif";
+  font-weight: normal !important;
+}
+span.semantic_error {
+  background-color: pink;
+}
+span.language_warning {
+  background-color: yellow !important;
+}
+span.suggestion {
+  background-color: white;
+}
+span.has_tooltip {
+  /*border: solid 1px red;*/
+}
+div.tooltip {
+  position: absolute;
+  visibility: hidden;
+}
+span.has_tooltip:hover div.tooltip {
+  visibility: visible;
+  background-color: yellow !important;
+  padding: 5px;
+}
+span.indentation {
+  border-left: solid 10px white !important;
+  margin-left: -10px !important;
+}
+@media screen {
+  /* unsupported by prince */
+  pre,
+  code {
+    tab-size: 4;
+  }
+}
+code.keyword {
+  color: #00a;
+  font-weight: bold;
+}
+/* allow for manual */
+code.FName {
+  color: darkgreen;
+}
+code.RName {
+  color: darkred;
+}
+span.ImpName {
+  color: #cc7a00;
+}
+code.fvalue span.ValueExpr,
+code.fvalue span.RcompUnit {
+  color: darkgreen;
+}
+code.rvalue span.ValueExpr,
+code.rvalue span.RcompUnit {
+  color: darkred;
+}
+/* for catalogue */
+.CatalogueFun span.ValueExpr,
+.CatalogueFun span.RcompUnit {
+  color: darkgreen !important;
+}
+.CatalogueRes span.ValueExpr,
+.CatalogueRes span.RcompUnit {
+  color: darkred !important;
+}
 .errored {
   /*border: solid 2px red !important;*/
   /*padding: 3px !important;*/

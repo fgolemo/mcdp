@@ -63,8 +63,8 @@ def get_nodejs_bin():
         cmd= [tries[0], '--version']
         _res = system_cmd_result(
                 os.getcwd(), cmd, 
-                display_stdout=True,
-                display_stderr=True,
+                display_stdout=False,
+                display_stderr=False,
                 raise_on_error=True)
         return tries[0]
     except CmdException as e:
@@ -72,8 +72,8 @@ def get_nodejs_bin():
             cmd= [tries[1], '--version']
             _res = system_cmd_result(
                     os.getcwd(), cmd, 
-                    display_stdout=True,
-                    display_stderr=True,
+                    display_stdout=False,
+                    display_stderr=False,
                     raise_on_error=True)
             return tries[1]
         except CmdException as e:

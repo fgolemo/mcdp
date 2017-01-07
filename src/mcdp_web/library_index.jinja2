@@ -46,18 +46,20 @@ tbody td:first-child { /* ndps */
 	
 }
 tbody td:first-child /*ndps*/ code {
-	max-width: 10em;
+	/*max-width: 10em;*/
 }
 body td a:hover {
 	background-color: white !important;
 }
-tbody td code {
+tbody td .url {
 	display: inline-block;
 	overflow: hidden;
+	vertical-align: bottom;
 	max-width: 12em;
 
     text-overflow: ellipsis;
 }
+tbody a:hover { font-weight: bold; }
 tbody p.entry  {
 	/*border: solid 1px red;*/
 	margin-top: 0;
@@ -68,6 +70,9 @@ tbody p.entry  {
 }
 tbody p.entry .url_edit {
 	visibility: hidden;
+	padding-left: 1em;
+	position: relative;
+	z-index: 10000;
 }
 tbody p.entry:hover .url_edit {
 	/*background-color: red;*/
@@ -75,11 +80,11 @@ tbody p.entry:hover .url_edit {
 }
 
 tbody td a:hover {
-	background-color: white;
-	text-decoration: none;
+	/*background-color: white;*/
+	/*text-decoration: none;*/
 }
 
-tbody p.entry:hover code {
+tbody p.entry:hover .url {
 	overflow: visible;
 	/*background-color: yellow	;*/
 }
@@ -130,7 +135,7 @@ table#library-contents td {vertical-align: top;}
 
 	{% for d in navigation[what] %}
 		<p class='entry'>
-		<code><a href="{{d['url']}}">{{d['id']}}</a>{% if 'url_edit' in d %}<a class='url_edit' href="{{d['url_edit']}}">✎</a>
+		<code><a class="url" href="{{d['url']}}">{{d['id']}}</a>{% if 'url_edit' in d %}<a class='url_edit' href="{{d['url_edit']}}">✎</a>
 		{% endif %}
 		</code>
 		</p>
