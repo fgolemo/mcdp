@@ -33,9 +33,14 @@
 		  //detect 'tab' key
 		  if(e.keyCode == 9){
 		    //add tab
-		    //document.execCommand('insertHTML', false, '&#009');
 		    document.execCommand('insertHTML', false, '   ');
 		    //prevent focusing on next element
+		    e.preventDefault();
+		  }
+		  // fix for firefox which creates <br/>
+		  // when enter is pressed
+		  if(e.keyCode == 13) { //enter
+		  	document.execCommand('insertHTML', false, "\n");
 		    e.preventDefault();
 		  }
 		});
@@ -45,14 +50,15 @@
   <body spellcheck="false">
   	{% include 'model_views_navigation.jinja2' %}
   
-  
+  <div id='allcontents' style='visibility: hidden'>
   <table style='width: 100%; border: solid 0px black'>
     <tr>
   <td colspan=1>
     <div id='commands'>
-    	<button id='save'><span class='unicode-icons'>&#128190;</span>save</button> <!-- 💾 -->
-    	<button id='close'><span class='unicode-icons'>×</span> save and close</button> 
-	  	<button id='discard'><span class='unicode-icons'>&#128465;</span>discard and close</button> <!-- 🗑 -->
+    	<button id='save'><span class='unicode-icons' title='💾'>&#128190;</span>save</button> 
+    	<!-- <button id='close'><span class='unicode-icons'>×</span> save and close</button>  -->
+	  	<!-- <button id='discard'><span class='unicode-icons' title='🗑'>&#128465;</span>discard and close</button>  -->
+	  	<button id='revert'><span class='unicode-icons'>&#128465;</span>revert</button> <!-- 🗑 -->
 	  	<button id='apply_suggestions' style='display: none; margin-left: 5em'>
 	  		<span class='unicode-icons'>&#128161;</span>beautify</button> <!--💡-->
 	  	<span id='save_status'></span>
@@ -107,15 +113,18 @@
 
 		$(document).tooltip();
 		$("#editor").keyup(keyup);
-		$( "button#close" ).click(click_button_close);
-		$( "button#save" ).click(click_button_save);
-		$( "button#discard" ).click(click_button_discard);
-		$( "button#apply_suggestions" ).click(click_apply_suggestions);
+		$("button#close" ).click(click_button_close);
+		$("button#save" ).click(click_button_save);
+		$("button#discard" ).click(click_button_discard);
+		$("button#revert" ).click(click_button_revert);
+		$("button#apply_suggestions" ).click(click_apply_suggestions);
 
 		text0 = current_text()
 		console.log('asking server');
 	    try_to_parse(text0);
 	    update_image();
+
+	    $('#allcontents').css('visibility', 'visible');
 	});
 
 	function show_tooltip(obj, s) {
@@ -162,16 +171,32 @@
 		icon_u = '/static/favicon_editor_{{url_part}}_unsaved.png';
 
 		if (text == saved_text) {
-			$('#save').css('color', '');
+			$('button#save').css('color', '');
+			$('button#revert').css('color', '');
+			$('button#revert').button('disable');
+			$('button#save').button('disable');
 			document.title = title_s;
 			$('link[rel="icon"]').attr('href', icon_s);
 
 		} else {
-			$('#save').css('color', 'red');			
+			$('button#save').css('color', 'red');			
+			$('button#revert').css('color', 'orange ');			
+			$('button#revert').button('enable');
+			$('button#save').button('enable');
 			document.title = title_u;
 			$('link[rel="icon"]').attr('href', icon_u);
 		}
 
+		console.log(JSON.stringify(text));
+
+		ends_with_spaces = /\s+$/g.test(text);
+		console.log(JSON.stringify(ends_with_spaces));
+		console.log('ends_with_spaces ' + ends_with_spaces);
+		if (ends_with_spaces) {
+			$('#editor').addClass('endswithspace');
+		} else {
+			$('#editor').removeClass('endswithspace');
+		}
 	}
 
 	function keyup() {
@@ -202,6 +227,8 @@
 
 	function text_has_changed() {
 		update_save_button_color();
+
+
 
 		// $('button#save').disable();
 		$('#around_editor').css('background-color', '#ffe');
@@ -380,6 +407,14 @@
 		location.reload();
 	}
 
+	function click_button_revert(res) {
+		// Override safety mechanism
+		console.log("revert to text " + saved_text);
+		// try_to_parse(saved_text);
+		s = saved_text;
+		update_text_with_highlight(s, s);
+		try_to_parse_it();
+	}
 
 	function click_button_close(res) {
 		click_button_save();
@@ -387,7 +422,6 @@
 		url = '../syntax/'
 		window.location = url;
 	}
-
 
 	function click_button_save() {
 		$('#save_status').html('saving...');
@@ -467,6 +501,6 @@
 });
 </script>
 
-  
+  </div>
   </body>
 </html>

@@ -306,20 +306,23 @@ class WebApp(AppEditor, AppVisualization,
         d['documents'] = []
         for id_doc in documents:
             url = '/libraries/%s/%s.html' % (current_library, id_doc)
-            desc = dict(id_document=id_doc, name=id_doc, url=url, current=False)
+            desc = dict(id=id_doc,id_document=id_doc, name=id_doc, url=url, current=False)
             d['documents'].append(desc)
 
         d['models'] = []
         
+        VIEW_EDITOR = 'edit_fancy'
         for m in natural_sorted(models):
             is_current = m == current_model
 
             url = self.get_lmv_url(library=current_library,
                                    model=m,
                                    view='syntax')
-
+            url_edit =  self.get_lmv_url(library=current_library,
+                                   model=m,
+                                   view=VIEW_EDITOR)
             name = "Model %s" % m
-            desc = dict(id_ndp=m, name=name, url=url, current=is_current)
+            desc = dict(id=m, id_ndp=m, name=name, url=url, url_edit=url_edit, current=is_current)
             d['models'].append(desc)
 
 
@@ -331,9 +334,12 @@ class WebApp(AppEditor, AppVisualization,
             url = self.get_lib_template_view_url(library=current_library,
                                                  template=t,
                                                  view='syntax')  # XXX
+            url_edit = self.get_lib_template_view_url(library=current_library,
+                                                 template=t,
+                                                 view=VIEW_EDITOR)  # XXX
 
             name = "Template: %s" % t
-            desc = dict(name=name, url=url, current=is_current)
+            desc = dict(id=t, name=name, url=url, current=is_current, url_edit=url_edit)
             d['templates'].append(desc)
 
         posets = library.list_posets()
@@ -343,8 +349,11 @@ class WebApp(AppEditor, AppVisualization,
             url = self.get_lpv_url(library=current_library,
                                    poset=p,
                                    view='syntax')
+            url_edit = self.get_lpv_url(library=current_library,
+                                   poset=p,
+                                   view=VIEW_EDITOR)
             name = "Poset: %s" % p
-            desc = dict(name=name, url=url, current=is_current)
+            desc = dict(id=p, name=name, url=url, current=is_current, url_edit=url_edit)
             d['posets'].append(desc)
 
         values = library.list_values()
@@ -352,8 +361,9 @@ class WebApp(AppEditor, AppVisualization,
         for v in natural_sorted(values):
             is_current = (v == current_value)
             url = '/libraries/%s/values/%s/views/edit_fancy/' % (current_library, v)
+            url_edit = '/libraries/%s/values/%s/views/%s/' % (current_library, v, VIEW_EDITOR)
             name = "Value: %s" % v
-            desc = dict(name=name, url=url, current=is_current)
+            desc = dict(id=v,name=name, url=url, current=is_current, url_edit=url_edit)
             d['values'].append(desc)
 
 
@@ -381,7 +391,7 @@ class WebApp(AppEditor, AppVisualization,
             url = '/libraries/%s/' % l
             #name = "Library: %s" % l
             name = l
-            desc = dict(name=name, url=url, current=is_current)
+            desc = dict(id=l,name=name, url=url, current=is_current)
             libname2desc[l] =desc
             d['libraries'].append(desc)
 

@@ -5,11 +5,11 @@
 
 	#back_to_library, #select_view, #select_model { height: 1.5em !important;}
 
-	#back_to_library { display: none;}
+	/*#back_to_library { display: none;}*/
 	#select_view, #select_model {
 		display: none;
 	}
-	/*.hot_select { display: none;}*/
+	.hot_select { visibility: hidden;}
 </style>
 
 
@@ -19,7 +19,7 @@
 		{% include 'menu.jinja2' %}
 	</td>
 	<td>
-	
+
 	{% if not navigation['current_model'] %}
 	  <select id='select_library' class='hot_select'>
 	    <!-- {% for li in navigation['libraries'] %}
@@ -39,16 +39,19 @@
 
 	  </select>
 	 {% else %}
-	 	<a id='back_to_library' href="/libraries/{{navigation['current_library']}}/">
+	 	<a id='back_to_library' style='visibility: hidden' href="/libraries/{{navigation['current_library']}}/">
 	 		<span class='unicode-icons'>⟲</span> Library
 	 		 <span class="library_name">
 	 		 	{{navigation['current_library']}}
 	 		 </span>
 	 	</a> 
+	
 	 	
 	 	<script type='text/javascript'>
 	 	$(document).ready(function() {  		
 	    	$("#back_to_library").button();
+	    	$("#back_to_library").css('visibility', 'visible');
+	    	
 		});
 		</script>
 	 {% endif %}
@@ -118,6 +121,7 @@
 		}
 		
 		$('.hot_select').selectmenu({change: handle});
+		$('.hot_select').css('visibility', 'visible');
 		/*$('.hot_select').show();*/
 	});
 </script>

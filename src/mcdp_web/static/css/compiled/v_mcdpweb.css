@@ -362,7 +362,7 @@ a:hover {
   color: blue;
 }
 pre code {
-  font-family: "Anka/Coder Narrow";
+  font-family: "Anka/Coder Narrow", "Lucida Console", monospace;
 }
 /*
 

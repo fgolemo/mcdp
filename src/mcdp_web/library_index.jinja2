@@ -10,45 +10,199 @@
 
 {% include 'model_views_navigation.jinja2' %}
 {% set index_doc = navigation['current_library'] + '-index' %}
+
+<div id='allcontents' style='visibility: hidden'>
 {% if has_library_doc(index_doc) %}
 	{{ render_library_doc(index_doc) | safe }}
 {% else %}
 
 <!--<p>Click &#9776; in the upper left and select "new" to add a new model.</p>-->
+<style>
+#library-contents thead tr {
+}
+
+tr#things td {
+	font-weight: bold;
+	min-width: 12vw;
+	border-bottom: solid 1px black;
+	padding-left: 1em;
+	padding-right: 1em;
+	margin-left: 1em;
+	margin-right: 1em;
+}
+p.none-available {
+	text-align:center;
+	font-style: italic;
+	color: grey;
+}
+tbody tr:first-child td {
+	padding-top: 0.5em;
+}
+tbody td {
+	font-size: smaller;
+}
+tbody td:first-child { /* ndps */
+	column-count: 3;
+	
+}
+tbody td:first-child /*ndps*/ code {
+	max-width: 10em;
+}
+body td a:hover {
+	background-color: white !important;
+}
+tbody td code {
+	display: inline-block;
+	overflow: hidden;
+	max-width: 12em;
+
+    text-overflow: ellipsis;
+}
+tbody p.entry  {
+	/*border: solid 1px red;*/
+	margin-top: 0;
+	margin-bottom: 0;
+	padding-top: 6px;
+	padding-bottom: 6px;
+	padding-left: 10px;
+}
+tbody p.entry .url_edit {
+	visibility: hidden;
+}
+tbody p.entry:hover .url_edit {
+	/*background-color: red;*/
+	visibility: visible;
+}
+
+tbody td a:hover {
+	background-color: white;
+	text-decoration: none;
+}
+
+tbody p.entry:hover code {
+	overflow: visible;
+	/*background-color: yellow	;*/
+}
+#outside {
+	display: block;
+	width: 100%;
+	/*text-align: center;*/
+}
+#outside {
+	display:inline-block;
+}
+#ttitle {
+	font-weight: bold;
+	padding-bottom: 1em;
+	text-align: center;
+}
+p.new {
+	text-align: center;
+	/*margin-top: 1em;*/
+}
+table#library-contents {font-family: sans-serif;}
+table#library-contents td {vertical-align: top;}
+</style>
+<div id='outside'>
+<table align='center' id='library-contents'>
+<thead>
+<tr><td id='ttitle' colspan="5">
+		Library <code>{{navigation['current_library']}}</code>
+</td></tr>
+<tr id="things">
+	<td>MCDPs</td>
+	<td>Templates</td>
+	<td>Posets</td>
+	<td>Values</td>
+	{% if navigation['documents'] %}
+	<td>Documents</td>
+	{% endif %}
+</tr></thead>
+
+<tbody>
+	{% for what in ["models","templates","posets","values","documents"] %}
+	<!-- only put the documents if they exist -->
+	{% if what != 'documents' or navigation[what] %}
+<td>
+	{% if not navigation[what] %}
+	<p class='none-available'>(none)</p><br/>
+	{% endif %}
+
+	{% for d in navigation[what] %}
+		<p class='entry'>
+		<code><a href="{{d['url']}}">{{d['id']}}</a>{% if 'url_edit' in d %}<a class='url_edit' href="{{d['url_edit']}}">✎</a>
+		{% endif %}
+		</code>
+		</p>
+	{% endfor %}
+
+	{% if what != 'documents' %}
+	<p class="new" style='text-align: center'>
+	<button id="table_new_{{what}}">+</button>
+	</p>
+	{% endif %}
+
+	{% if what =='models' and navigation[what] %}
+	<p><button id='show_previews'>Show previews<br/> (might take time)</button>
+	</p>
+	{% endif %}
+</td>
+	{% endif %}
+	{%endfor%}
+</tbody>
+
+</table>
+</div><!-- 
 
 {% if navigation['documents'] %}
 <p> Documents available as part of the <code>{{navigation['current_library']}}</code>
 	current library:</p>
 <ul>
 	{% for d in navigation['documents'] %}
-	<li><a href='{{d['url']}}'>{{d['name']}}</a></li>
+	<li><a href="{{d['url']}}">{{d['name']}}</a></li>
 	{% endfor %}
 </ul>
-{% endif %}
+{% endif %} -->
 
 
 <style type='text/css'>
-	div.compact { display: block; float: left; width: 20em; height: 13em; }
 	div.compact { 
-		margin: 2em;
+/*		display: block; 
+		float: left; 
+*/		width: 20em;
+display: inline-block; 
+		/* height: 13em; */ /* old resolution */
+
+	}
+	a.modellink {
+		background-color: inherit;
+	}
+	div.compact { 
+		margin-top: 0.4em;
+		margin-left: 0.4em;
+		margin-right: 0.4em;
 		text-align: center;
 		border-radius: 8px;
 		padding-top: 0.5em;
 	}
+
 	div.compact span { margin-bottom: 1em; }
-		div.compact:hover {
+	div.compact {
+		border: solid 1px white;
+	}
+	div.compact:hover {
+		border: solid 1px black;
 		box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);    
 	}
 	div.compact span {display: block; text-align: center; }
 	div.compact img { max-width: 20em; max-height: 10em; } 
 </style>
 
-<button id='show_previews'>Show previews</button>
 
 <script type='text/javascript'>
 
 	function click_show_previews() {
-		// $('.preview').show();
+		$('#previews').show();
 		console.log(all_images);
 		for (var i in all_images) {
 			x = all_images[i];
@@ -63,18 +217,48 @@
 	}
 
 	$(document).ready(function() {
+		$( "button#show_previews" ).button();
 		$( "button#show_previews" ).click(click_show_previews);
+
+		  url_base = "/libraries/{{navigation['current_library']}}/";
+
+		  function new_model() {
+		    url = url_base + 'models/new/';
+		    prompt_user('model', url);
+		  }
+		  
+		  function new_template() {
+		    url = url_base + 'templates/new/';
+		    prompt_user('template', url);
+		  }
+		  
+		  function new_value() {
+		    url = url_base + 'values/new/';
+		    prompt_user('value', url);
+		  }
+
+		  function new_poset() {
+		    url = url_base + 'posets/new/';
+		    prompt_user('poset', url);
+		  }
+
+
+		$('#table_new_ndps').click(new_model);
+	    $('#table_new_posets').click(new_poset);
+	    $('#table_new_templates').click(new_template);
+	    $('#table_new_values').click(new_value);
+
 	});
 
 	var all_images = [];
 </script>
-
+<div id='previews' style='display: none;'>
 {% for m in navigation['models'] %}
 
 <a class='modellink' href="{{m['url']}}">
-<div id='{{ m["id_ndp"] }}-div' class="compact">
+<div id='{{ m["id"] }}-div' class="compact">
 	<span class="name">	
-		{{ m['id_ndp'] }}
+		<code>{{ m['id'] }}</code>
 	</span>
 	
 	<img id='{{ m["id_ndp"] }}-image' src='/static/white_small.png'/>
@@ -94,6 +278,8 @@
 
 	$(document).ready(function() {
 		$( '#{{ m["id_ndp"] }}-div' ).hover({{ m["id_ndp"] }}_callback);
+	
+		$('#allcontents').css('visibility', 'visible');
 	});
 
 	</script>
@@ -102,10 +288,11 @@
 	
 </div>
 </a>
-
 {% endfor %}
+</div>
 {%endif%}
   
-  
+ </div>
+
 </body>
 </html>

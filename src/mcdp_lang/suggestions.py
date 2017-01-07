@@ -303,7 +303,14 @@ def findall(p, s):
         yield i
         i = s.find(p, i+1)
         
-        
+def get_suggested_identifier(s0):
+    """ Returns the suggested form of the identifier """
+    suggestion = get_suggestion_identifier(s0)
+    if suggestion is None:
+        return s0
+    else:
+        what, replacement = suggestion
+        return s0.replace(what, replacement)
  
 @contract(s0=bytes, returns='None|tuple')
 def get_suggestion_identifier(s0):

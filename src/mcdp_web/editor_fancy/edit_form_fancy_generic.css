@@ -37,9 +37,12 @@
 	color: red;
 }
 
+#around_editor > pre  {
+    min-height: 20em;  
+}
 #editor {
 	font-size: 75%;
-	width: 40em;
+	min-width: 40em;
     /*font-family: "Andale Mono", Courier, monospace;*/
     // font-family:  "Anka/Coder Narrow", Courier, monospace;
 
@@ -68,5 +71,7 @@
 /* .ui-button-text {font-size: 12px !important; padding :0px;} */
 
 
-
-/*pre { line-height: 90%; }*/
+// #editor.endswithspace::after {
+//     content: '∎';
+//     color: grey;
+// }

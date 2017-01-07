@@ -127,8 +127,11 @@ class MCDPConstants():
     #
     
     # Affects things like Nat
-    use_unicode_symbols = False
-    
+    use_unicode_symbols = True
+    if not use_unicode_symbols:
+        msg =( 'Note that use_unicode_symbols is false, which is not suitable for printing')
+        warnings.warn(msg)
+
     # Any time we need to solve a relation like (r1*r2==f),
     # we will bound r1 and r2 in the interval [eps, 1/eps].
     inv_relations_eps = numpy.finfo(float).eps # ~1e-16

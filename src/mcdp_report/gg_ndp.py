@@ -19,6 +19,7 @@ from mocdp.comp.context import (get_name_for_fun_node, get_name_for_res_node,
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning, DPInternalError
 from mocdp.ndp import NamedDPCoproduct
+from mcdp_lang.suggestions import get_suggested_identifier
 
 
 STYLE_GREENRED = 'greenred'
@@ -193,7 +194,8 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
 
     for fname, n in functions.items():
         F = ndp.get_ftype(fname)
-        label = fname + ' ' + format_unit(F)
+        # XXX: DRY 
+        label = get_suggested_identifier(fname) + ' ' + format_unit(F)
         x = gg.newItem(label, parent=cluster_functions)
 
         gg.styleApply("external", x)
@@ -212,7 +214,7 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
 
     for rname, n in resources.items():
         R = ndp.get_rtype(rname)
-        label = rname + ' ' + format_unit(R)
+        label = get_suggested_identifier(rname) + ' ' + format_unit(R)
         x = gg.newItem(label, parent=cluster_resources)
 
         gg.styleApply("external", x)
@@ -295,7 +297,6 @@ def is_simple(ndp):
 def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
     assert isinstance(ndp, SimpleWrap)
     from mocdp.comp.composite_templatize import OnlyTemplate
-
     label = str(ndp)
 
     sname = None  # name of style to apply, if any
@@ -366,8 +367,9 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
     best_icon = gdc.get_icon(iconoptions)
     #print('icon options: %s' % iconoptions)
     #print('best_icon: %r' % best_icon)
-    #print('only_string: %r' % only_string)
-    #print('is special: %r' % is_special)
+    print('type %s' % type(ndp).__name__)
+    print('only_string: %r' % only_string)
+    print('is special: %r' % is_special)
     if is_special and 'default.png' in best_icon: # pragma: no cover
         raise_desc(DPInternalError, 'Could not find icon for special',
                    iconoptions=iconoptions, is_special=is_special, best_icon=best_icon,
@@ -472,6 +474,11 @@ def create_simplewrap(gdc, ndp, plotting_info):  # @UnusedVariable
         label = make_short_label(label)
         sname = 'limit'
 
+
+    if isinstance(ndp.dp, (FunctionNode)):
+        label = get_suggested_identifier(ndp.dp.fname)
+    if isinstance(ndp.dp, (ResourceNode)):
+        label = get_suggested_identifier(ndp.dp.rname)
 
 #     if label[:2] != '<T':
 #         # Only available in svg or cairo renderer
@@ -756,7 +763,6 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
                 if dec is not None:
                     l1_label = get_signal_label_namepart(c.s2) + '\n' + dec
 
-                
                 if isinstance(ndp_second, SimpleWrap) and isinstance(ndp_second.dp, ResourceNode):
                     l1_label = 'required ' + l1_label
 
@@ -868,6 +874,8 @@ def get_signal_label_namepart(name):
 
     if len(name) >= 1 and name[0] == '_':
         name = ''
+        
+    name = get_suggested_identifier(name)
     return name
 
 def get_signal_label(name, unit):

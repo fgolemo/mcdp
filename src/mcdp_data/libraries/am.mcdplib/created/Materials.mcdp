@@ -1,4 +1,4 @@
-catalogue {
+catalogue {  
   # These "property" fields are placeholders
    # for the good properties of the part built 
    # from this material (strength, etc.)

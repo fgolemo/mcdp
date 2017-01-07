@@ -1,11 +1,11 @@
 mcdp  { 
     'Displaying all types of stuff '
-    provides f1 [ℕ] 
-    provides f2 [ℕ] 'function'
-    requires r1 [ℕ] "resource"
-    requires r2 [ℕ]
-    provided f1 + provided f2 ≤ required r1 + required r2
-    provided f1 + provided f2 ≤ required r1 + required r2
+    provides f_1 [ℕ] 
+    provides f_2 [ℕ] 'function'
+    requires r_1 [ℕ] "resource"
+    requires r_2 [ℕ]
+    provided f_1 + provided f_2 ≤ required r_1 + required r_2
+    provided f_1 + provided f_2 ≤ required r_1 + required r_2
     s = instance mcdp {
       provides energy [ℕ] 
       requires mass [ℕ]
@@ -16,22 +16,22 @@ mcdp  {
       requires mass3 = ℕ:2
     }
 
-    mass required by s ≤ required r1
-    mass required by s ≤ required r1
-    provided f2 ≤ energy provided by s  
-    provided f2 ≤ energy provided by s
+    mass required by s ≤ required r_1
+    mass required by s ≤ required r_1
+    provided f_2 ≤ energy provided by s  
+    provided f_2 ≤ energy provided by s
 
-    r4 = provided f1 + ℕ:2
-    r5 = provided f1 + ℕ:2
-    requires r4, r5
-    requires r6 = provided f1
-    f4 = required r1 + ℕ:2
-    f5 = required r1 + ℕ:2
-    provides f4, f5
-    provides f6 = required r1
+    r_4 = provided f_1 + ℕ:2
+    r_5 = provided f_1 + ℕ:2
+    requires r_4, r_5
+    requires r_6 = provided f_1
+    f_4 = required r_1 + ℕ:2
+    f_5 = required r_1 + ℕ:2
+    provides f_4, f_5
+    provides f_6 = required r_1
 
-    provided f1 ≤ ℕ: 5
-    required r1 ≥ ℕ: 3   
+    provided f_1 ≤ ℕ: 5
+    required r_1 ≥ ℕ: 3   
 
     provides energy using s
     requires mass for s

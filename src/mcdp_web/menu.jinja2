@@ -1,9 +1,12 @@
 <style type='text/css'>
+#outer {display: inline-block;}
   #outer li {padding: 5px; }
   #outer a {text-decoration: none;}
+  #home, #menu { display: inline-block;}
 </style>
+<a id='home' style='visibility: hidden' href="/">⌂</a>
 <div id='outer'>
-<ul id="menu">
+<ul id="menu" style='visibility: hidden'>
 <li id='root'>&#9776;
 <ul>
   <li class="l1" id='menu_new'><span><span class='unicode-icons'>✎</span>New&hellip;</span>
@@ -41,6 +44,8 @@
 $(document).ready(function() {
   options = { position: { my: "left top", at: "right top" } };
   $('#menu').menu(options);
+  $('#menu').css('visibility', 'visible');
+  $("#home").css('visibility', 'visible');
 })
 </script>
   
@@ -55,6 +60,7 @@ li a { display: block; width: 90%; }
 }
 #menu {
 	/* font-size: 80%; */
+
 }
 #menu li li li {
 	width: 14em;
@@ -88,18 +94,43 @@ function valid_identifier(s) {
 	}
 }
 
-function prompt_user(what, url_base) {
-  s  = "Please enter the name for the new " + what + ":";
-  var name=prompt(s);
+// function prompt_user0(what, url_base) {
+//   s  = "Please enter the name for the new " + what + ":";
+//   var name=prompt(s);
+//   if(name == null) {
+//   	return;
+//   }
+//   if(!valid_identifier(name)) {
+//     msg = 'The string "'+name+'" is not a valid identifier.';
+//   	alert(msg);
+//   	return;
+//   }
+//   url = url_base + name;
+//   var win = window.open(url, '_blank');
+//   if (win) {
+//       //Browser has allowed it to be opened
+//       win.focus();
+//   } else {
+//       //Browser has blocked it
+//       alert('Please allow popups for this application.');
+//   }
+// }
+
+var g_what = null;
+var g_url_base = null;
+var dialog = null;
+
+
+function create0(name) {
   if(name == null) {
-  	return;
+    return;
   }
   if(!valid_identifier(name)) {
     msg = 'The string "'+name+'" is not a valid identifier.';
-  	alert(msg);
-  	return;
+    alert(msg);
+    return;
   }
-  url = url_base + name;
+  url = g_url_base + name;
   var win = window.open(url, '_blank');
   if (win) {
       //Browser has allowed it to be opened
@@ -110,7 +141,33 @@ function prompt_user(what, url_base) {
   }
 }
 
+function prompt_user(what, url_base) {
+  g_what = what;
+  g_url_base = url_base;
+  dialog.dialog( "open" );
+  // s  = "Please enter the name for the new " + what + ":";
+  // var name=prompt(s);
+  // if(name == null) {
+  //   return;
+  // }
+  // if(!valid_identifier(name)) {
+  //   msg = 'The string "'+name+'" is not a valid identifier.';
+  //   alert(msg);
+  //   return;
+  // }
+  // url = url_base + name;
+  // var win = window.open(url, '_blank');
+  // if (win) {
+  //     //Browser has allowed it to be opened
+  //     win.focus();
+  // } else {
+  //     //Browser has blocked it
+  //     alert('Please allow popups for this application.');
+  // }
+}
 $(document).ready(function() {
+  //$("#home").button();
+
   url_base = "/libraries/{{navigation['current_library']}}/";
 
   function new_model() {
@@ -140,8 +197,64 @@ $(document).ready(function() {
 	
 	
   $("#outer").show();
-});
+
+  dialog =  $( "#dialog-form" ).dialog({
+    autoOpen: false,
+    // height: 200,
+    width: 350,
+    modal: true,
+    buttons: {
+      "Create": function() {
+        var valid = true;
+        $( "#name" ).removeClass( "ui-state-error" );
+        use = $( "#name" ).val();
+        console.log(use);
+        valid = valid && valid_identifier(use);
+        if(valid) {
+          dialog.dialog( "close" );
+          create0(use);
+        } else {
+          $("#form_error").text("Invalid identifier “"+use+"”.");
+        }
+        return valid;
+      },
+      Cancel: function() {
+        dialog.dialog( "close" );
+      }
+    },
+    close: function() {
+      // form[ 0 ].reset();
+      $( "#name" ).removeClass( "ui-state-error" );
+    }
+    });
+
+  });
 
   $("#outer").hide();
+
+
 </script> 
 
+
+<div id="dialog-form" title="Create new" style='display: none'>
+<!--   <p class="validateTips">All form fields are required.</p>
+ --> 
+  <form >
+    <fieldset style='border:0'>
+      <label for="name">Name</label>
+      <input type="text" name="name" id="name" value="" 
+            class="  ">
+<!--       <label for="email">Email</label>
+      <input type="text" name="email" id="email" value="jane@smith.com" class="text ui-widget-content ui-corner-all">
+      <label for="password">Password</label>
+      <input type="password" name="password" id="password" value="xxxxxxx" class="text ui-widget-content ui-corner-all">
+ 
+ -->      <!-- Allow form submission with keyboard without duplicating the dialog button -->
+      <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
+    </fieldset>
+  </form>
+  <p style='color:red' id='form_error'></p>
+  <p>Valid identifiers start with a letter or underscore 
+  and can contain letters, underscores, numbers, subscripts,
+  and greek letters.</p>
+</div>
