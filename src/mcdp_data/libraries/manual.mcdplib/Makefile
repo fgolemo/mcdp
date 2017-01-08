@@ -1,4 +1,4 @@
-
+all::
 
 # htmltmpdir=out-html
 
@@ -23,7 +23,7 @@ pdf_metadata=pdf_metadata.txt
 
 cssdir=$(realpath ../../../mcdp_web/static/css)
 cssprefix=$(cssdir)/compiled
-
+ 
 
 all:: $(all_targets)
 
@@ -32,6 +32,7 @@ all:: $(all_targets)
 # include commons/make/latex.mk
 include commons/make/lyx.mk
 
+# Latex conversion
 %.md: %.tex
 	./latex2md.py < $< > $@
 
@@ -42,22 +43,31 @@ lyxes=$(wildcard docs/**/*.lyx)
 generated_mds=$(lyxes:.lyx=.md)
 
 
-#$(manual_pdf_wk)
+# dot conversion
+dots=$(wildcard docs/**/*.dot)
+generated_graphs=$(dots:.dot=.svg) 
+#$(dots:.dot=.pdf)
 
-# prince: $(manual_pdf_prince)
+# %.pdf: %.dot
+# 	dot -Tpdf -o$@ $<
+# 	@echo "Created $@"
+%.svg: %.dot
+	dot -Tsvg -o$@ $<
+	@echo "Created $@"
+
+generated=\
+	$(generated_mds)\
+	$(generated_graphs)
+
+generated_files: $(generated)
+	@echo $(generated)
+
+
+
 html: $(manual_html)
 
 
-# .PHONY: $(manual_pdf_prince)
-#
-# $(manual_html): $(manual_tmp_html)
-# 	# node prerender.js $^ $@
-# 	cp $^ $@
-
-# always check
-# .PHONY: $(manual_html)
-
-$(manual_html): $(generated_mds) $(wildcard docs/**/*)
+$(manual_html): $(generated) $(wildcard docs/**/*)
 	DISABLE_CONTRACTS=1 mcdp-render-manual \
 		-o $(mcdp_render_manual_dir) \
 		--output_file $@ -c "config echo 1; rparmake"
@@ -69,14 +79,8 @@ remake-join:
 # extract-assets-manual:
 # 	./extract-assets $(manual_html) $(manual_html)
 
-# prerender:
-
-
-# $(manual_pdf_wk):# $(manual_html)
-# 	wkhtmltopdf --print-media-type $< $@
-
 clean::
-	rm -f $(generated_mds)
+	rm -f $(generated)
 	rm -f $(all_targets)
 
 realclean: clean
@@ -141,3 +145,7 @@ $(bibout):
 
 install:
 	npm install MathJax-node jsdom less
+
+
+# $(manual_pdf_wk):# $(manual_html)
+# 	wkhtmltopdf --print-media-type $< $@

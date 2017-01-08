@@ -1110,7 +1110,7 @@ def check_lang89q(): # TODO: rename
     """
     ndp = parse_ndp(s)
     dp = ndp.get_dp()
-    print dp.repr_long()
+    #print dp.repr_long()
 
 @comptest
 def check_lang89r(): # TODO: rename
@@ -1126,7 +1126,7 @@ def check_lang89r(): # TODO: rename
         provided f <= max(required r1, required r2) 
     }
     """
-    expect = 'Could not convert R[m] to N'
+    expect = 'Could not convert R[m] to' # N might change to BB
     assert_parse_ndp_semantic_error(s, expect)
      
 @comptest
@@ -1300,7 +1300,7 @@ def check_lang95b(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+#     print dp.repr_long()
     
     s = """
     mcdp {
@@ -1310,7 +1310,7 @@ def check_lang95b(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+#     print dp.repr_long()
 #     ur = dp.solve(12)
 #     check_isinstance(dp, MinusValueNatDP)
 #     assert list(ur.minimals)[0] == 10
@@ -1325,7 +1325,7 @@ def check_lang96(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long() 
+#     print dp.repr_long() 
     
     
     
@@ -1340,7 +1340,7 @@ def check_lang97(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long() 
+#     print dp.repr_long() 
     
     s = """
     mcdp {
@@ -1364,7 +1364,7 @@ def check_lang98(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long() 
+#     print dp.repr_long() 
     
     s = """
     mcdp {
@@ -1374,7 +1374,7 @@ def check_lang98(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long() 
+#     print dp.repr_long() 
 
     s = """
     mcdp {
@@ -1383,7 +1383,7 @@ def check_lang98(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long() 
+#     print dp.repr_long() 
     
     s = """
     mcdp {
@@ -1393,7 +1393,7 @@ def check_lang98(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long() 
+#     print dp.repr_long() 
 
     
 #     check_optimization_RuleEvaluateConstantTimesMux()
@@ -1409,7 +1409,7 @@ def check_lang99(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long() 
+#     print dp.repr_long() 
 
     s = """
     mcdp {
@@ -1419,7 +1419,7 @@ def check_lang99(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long() 
+#     print dp.repr_long() 
 
     s = """
     mcdp {
@@ -1429,7 +1429,7 @@ def check_lang99(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-    print dp.repr_long()
+#     print dp.repr_long()
      
 
 @comptest

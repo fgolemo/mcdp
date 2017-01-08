@@ -1,6 +1,28 @@
 # Staging area
 
+## First chapter
 
+
+Compositionality
+
+Composability
+
+Modularity
+
+Functional requirements
+
+Non-functional requirements
+
+## Diagram
+
+
+    Part 1
+    Chapter 1
+    Chapter 2
+    Chapter 3
+    Chapter 4
+    Chapter 5
+    
 
 ## Basics
 

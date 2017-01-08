@@ -35,6 +35,52 @@
     with nuTonomy, inc.; and with Duckietown Engineering.
 </div>
 
+
+## Versions for this book
+
+This book is available in several versions:
+
+<ul>
+    <li id='version-v_manual_blurb'>
+        In print, either hardcover version or softcover version.
+    </li>
+    <li id='version-v_manual_ipad'>
+        PDF, optimized for screen readers.
+    </li>
+    <li id='version-v_manual_screen'>
+        HTML, for viewing on a computers. Includes links to
+        interactive demonstrations (diagrams can be edited in PyMCDPWeb).
+    </li>
+</ul>
+
+
+
+
+<!-- ## License information
+The code is available under the GPL license. -->
+
+
+<img id='license' src="by-nc-sa.svg"/>
+
+The book is available under the Creative Commons Attribution NonCommercial ShareAlike
+(CC BY-NC-SA) license.
+
+<style type='text/css'>
+#license {
+    float: right;
+}
+    blockquote#firstquote  p:first-child,
+    blockquote#secondquote p:first-child {
+        font-style: italic;
+    }
+    blockquote#firstquote p:not(:first-child) {
+        font-size: smaller;
+    }
+</style>
+
+
+
+
 <h1 notoc nonumber id='toc-heading'>Table of contents</h1>
 
 <!-- place toc here -->
@@ -42,26 +88,6 @@
 
 <!-- <h2 id='symbols-heading'>Table of important symbols</h2> -->
 
-
-Media info:
-
-    @page {
-    size: 6in 9in;
-    margin-top: 1.7cm;
-    /*here*/
-    margin-bottom: 0.312in;
-    @center {
-    border: solid 1px black;
-    }
-    }
-    @page :left {
-    margin-left: 1cm;
-    margin-right: 2cm;
-    }
-    @page :right {
-    margin-left: 2cm;
-    margin-right: 1cm;
-    }
 
     Render params: @@{RENDER_PARAMS}
 

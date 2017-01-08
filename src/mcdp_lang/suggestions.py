@@ -88,22 +88,24 @@ def correct(x, parents):  # @UnusedVariable
 
     
     if isinstance(x, CDP.NewFunction) and x.keyword is None:
-        name = x.name.value
+        # name = x.name.value # no! name is interpreted (expanded) 
+        name = x.name.where.get_substring()
         yield name, 'provided %s' % name
     
     if isinstance(x, CDP.NewResource) and x.keyword is None:
-        name = x.name.value
+        # name = x.name.value # no! name is interpreted (expanded) 
+        name = x.name.where.get_substring()
         yield name, 'required %s' % name
     
     if isinstance(x, CDP.Resource) and isinstance(x.keyword, CDP.DotPrep):
-        dp, s = x.dp.value, x.s.value
+        dp, s = x.dp.where.get_substring(), x.s.where.get_substring()
         r = '%s.*\..*%s' % (dp, s)
         old = match_in_x_string(r)
         new = '%s required by %s' % (s, dp)
         yield old, new
     
     if isinstance(x, CDP.Function) and isinstance(x.keyword, CDP.DotPrep):
-        dp, s = x.dp.value, x.s.value
+        dp, s = x.dp.where.get_substring(), x.s.where.get_substring()
         r = '%s.*\..*%s' % (dp, s)
         old = match_in_x_string(r)
         new = '%s provided by %s' % (s, dp)
@@ -140,6 +142,7 @@ def correct(x, parents):  # @UnusedVariable
         #     raise_desc(DPInternalError, msg, x_string=x_string, value_string=value_string)
         suggestion = get_suggestion_identifier(value_string)
         if suggestion is not None:
+            print('got suggestion %s for %s (col %s:%s)' % (suggestion, x, x.where.line, x.where.col))
             yield suggestion
         
     if isinstance(x, CDP.BuildProblem):
@@ -387,7 +390,7 @@ def get_suggestions(xr):
             a, b = suggestion
             if isinstance(a, str):
                 if not a in s:
-                    msg = 'Could not find piece %r in %r.' % (a, s)
+                    msg = 'Invalid suggestion %s. Could not find piece %r in %r.' % (suggestion, a, s)
                     raise DPInternalError(msg)
                 a_index = s.index(a)
                 a_len = len(a) # in bytes

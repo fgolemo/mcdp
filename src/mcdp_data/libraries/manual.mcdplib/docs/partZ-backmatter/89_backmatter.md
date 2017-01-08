@@ -147,26 +147,3 @@ Particular enablers were:
 
 * Python, Numpy, Scipy, PyParsing, ...
 * NodeJS, MathJax, ...
-
-
-## License information
-The code is available under the GPL license.
-
-
-<img id='license' src="by-nc-sa.svg"/>
-
-The book is available under the Creative Commons Attribution NonCommercial ShareAlike
-(CC BY-NC-SA) license.
-
-<style type='text/css'>
-#license {
-    float: right;
-}
-    blockquote#firstquote  p:first-child,
-    blockquote#secondquote p:first-child {
-        font-style: italic;
-    }
-    blockquote#firstquote p:not(:first-child) {
-        font-size: smaller;
-    }
-</style>

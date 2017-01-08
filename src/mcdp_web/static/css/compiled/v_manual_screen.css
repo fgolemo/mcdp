@@ -28,7 +28,10 @@
 
 
 
-*/body > :first-child::before {
+*/#version-'v_manual_string' {
+  border: solid 1px red;
+}
+body > :first-child::before {
   content: 'Stylesheet: ' 'v_manual_string';
 }
 /* http://meyerweb.com/eric/tools/css/reset/
