@@ -22,39 +22,49 @@ Porting is not difficult, but it is not done yet.
 
 ## Installing dependencies
 
-### Installing dependencies on Ubuntu
+### Installing dependencies on Ubuntu 16.x
 
-On Ubuntu:
+Install git:
+
+    $ sudo apt-get install git
+
+Install Python:
 
     $ sudo apt-get install python-numpy python-matplotlib python-yaml python-pip python-dev python-setproctitle python-psutil
 
-    $ sudo apt-get install graphviz wkhtmltopdf
-    $ sudo apt-get install git
-    $ sudo apt-get install pdftk
+Install graphviz and pdftk:
 
+    $ sudo apt-get install graphviz pdftk
+
+
+#### Optional extra dependencies for compiling the manual
 
 For math support:
 
     $ sudo apt-get install nodejs npm
     $ sudo npm install MathJax-node jsdom less
 
-For printing to PDF, install Prince from https://www.princexml.com/download/.
+For printing to PDF, install Prince from
+[`https://www.princexml.com>`](https://www.princexml.com/>).
 
 ### Installing dependencies on OS X
 
-Canopy...
+The Python distribution used for developing is Enthought Canopy, but
+any other distribution should do.
 
 ## Installing PyMCDP
 
-### Option 1: Install using pip
+### Option 1: Install using `pip`
+
+This is marginally easier than option 2.
 
 Run this command:
 
     $ sudo pip install -U PyMCDP conftools quickapp decentlogs systemcmd
 
-Note that if you omit the ``sudo``, modern Ubuntu 16 will install
-correctly in the directory ``~/.local/``. In this case,
-make sure you have ``~/.local/bin/`` in your ``PATH``.
+Note that if you omit the `sudo`, modern Ubuntu 16 will install
+(correctly) in the directory `~/.local/`. In this case,
+make sure you have `~/.local/bin/` in your `PATH`.
 
 ### Option 2: Installation from source (preferred)
 
@@ -62,25 +72,23 @@ Clone the repo using:
 
     $ git clone https://github.com/AndreaCensi/mcdp.git
 
-Jump into the directory:
+Jump into the directory and install the main module:
 
     $ cd mcdp
-
-Then install the main module:
-
     $ sudo python setup.py develop
 
-Omit the sudo if you have already set up a virtual environment.
+Omit the command `sudo` if you have already set up a virtual environment.
 
-## Troubleshooting
+<!-- ## Troubleshooting -->
 
-### ``wkhtmltopdf``
+
+<!-- ### ``wkhtmltopdf`
 
 If you get an error like "cannot connect to X server", try  [this solution](http://stackoverflow.com/a/34947479/334788).
 
+ -->
 
-
-## Verifying the installation worked
+## Verifying that the installation worked
 
 ### Running the web interface
 
@@ -88,7 +96,7 @@ Run the command:
 
     $ mcdp-web
 
-Then point your browser to the address [http://127.0.0.1:8080/](http://127.0.0.1:8080/).
+Then point your browser to the address [`http://127.0.0.1:8080/`](http://127.0.0.1:8080/).
 
 ### Running command-line programs
 

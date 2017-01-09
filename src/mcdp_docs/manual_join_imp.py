@@ -17,18 +17,18 @@ def get_manual_css_frag():
     """ Returns fragment of doc with CSS, either inline or linked,
         depending on MCDPConstants.manual_link_css_instead_of_including. """
     from mocdp import MCDPConstants
-    from mcdp_report.html import \
-    get_manual_print_css_filename, get_manual_screen_css_filename,\
-    get_manual_generic_css_filename, get_markdown_css_filename,\
-    get_language_css_filename
-
-    css_files = [
-        get_language_css_filename(),
-        get_markdown_css_filename(),
-        get_manual_generic_css_filename(),
-        get_manual_screen_css_filename(),
-        get_manual_print_css_filename()
-    ]
+#     from mcdp_report.html import \
+#     get_manual_print_css_filename, get_manual_screen_css_filename,\
+#     get_manual_generic_css_filename, get_markdown_css_filename,\
+#     get_language_css_filename
+# 
+#     css_files = [
+#         get_language_css_filename(),
+#         get_markdown_css_filename(),
+#         get_manual_generic_css_filename(),
+#         get_manual_screen_css_filename(),
+#         get_manual_print_css_filename()
+#     ]
     
     link_css = MCDPConstants.manual_link_css_instead_of_including
     

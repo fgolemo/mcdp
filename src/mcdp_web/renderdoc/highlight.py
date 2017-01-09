@@ -18,12 +18,13 @@ from contracts.utils import raise_desc, raise_wrapped, indent
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import (parse_template_refine, parse_poset_refine,
                                        parse_ndp_refine)
-from mcdp_lang.suggestions import get_suggestions, apply_suggestions
+from mcdp_lang.suggestions import get_suggestions, apply_suggestions,\
+    get_suggested_identifier
 from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.generic_report_utils import (
     NotPlottable, enlarge, get_plotters)
-from mcdp_report.html import ast_to_html, get_markdown_css
+from mcdp_report.html import ast_to_html, get_markdown_css, get_css_filename
 from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters
 from mcdp_web.images.images import (get_mime_for_format)
 from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment,\
@@ -463,7 +464,7 @@ def mark_console_pres(html):
         lines = s.split('\n')
         
         programs = ['sudo', 'pip', 'git', 'python', 'cd', 'apt-get',
-                    'mcdp-web', 'mcdp-solve', 'mcdp-render',
+                    'mcdp-web', 'mcdp-solve', 'mcdp-render', 'npm',
                     'mcdp-plot','mcdp-eval','mcdp-render-manual']
         program_commands = ['install', 'develop', 'clone']
         
@@ -555,7 +556,7 @@ def get_source_code(tag):
 
 @contract(body_contents=str, returns=str)
 def get_minimal_document(body_contents, title=None,
-                         add_markdown_css=False, add_manual_css=False):
+                         add_markdown_css=False, add_manual_css=False, stylesheet=None):
     """ Creates the minimal html document with MCDPL css.
     
         add_markdown_css: language + markdown
@@ -588,28 +589,37 @@ def get_minimal_document(body_contents, title=None,
     head.append(Tag(name='meta', attrs={'http-equiv':"Content-Type",
                                         'content': "application/xhtml+xml; charset=utf-8"}))
     
+    if stylesheet is None:
+        stylesheet = 'v_mcdp_render_default'
+    if add_markdown_css or add_manual_css:
+        link = Tag(name='link')
+        link['rel'] = 'stylesheet'
+        link['type'] = 'text/css'
+        link['href'] = get_css_filename('compiled/%s' % stylesheet)
+        head.append(link) 
+        
 
     tag_title = Tag(name='title')
     tag_title.append(NavigableString(title))
     head.append(tag_title)
-
-    if add_markdown_css and not add_manual_css:
-        from mcdp_report.html import get_language_css
-        mcdp_css = get_language_css()
-        markdown_css = get_markdown_css()
-        allcss = mcdp_css + '\n' + markdown_css
-        css.append(NavigableString(allcss))
-        head.append(css)
-    
-    if add_manual_css:
-        from mcdp_docs.manual_join_imp import get_manual_css_frag
-        frags = indent(get_manual_css_frag(), ' '*10)
-        frag = bs(frags)
-
-        children = list(frag.children)
-        for element in children:
-            head.append(element)
-    
+# 
+#     if add_markdown_css and not add_manual_css:
+#         from mcdp_report.html import get_language_css
+#         mcdp_css = get_language_css()
+#         markdown_css = get_markdown_css()
+#         allcss = mcdp_css + '\n' + markdown_css
+#         css.append(NavigableString(allcss))
+#         head.append(css)
+#     
+#     if add_manual_css:
+#         from mcdp_docs.manual_join_imp import get_manual_css_frag
+#         frags = indent(get_manual_css_frag(), ' '*10)
+#         frag = bs(frags)
+# 
+#         children = list(frag.children)
+#         for element in children:
+#             head.append(element)
+#     
     parsed = bs(body_contents)
     
 #     assert parsed.html is not None
@@ -929,7 +939,14 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
             e.name = 'code'
             # THEN add class
             add_class(e, x)
-
+    
+    prettify = list(soup.select('fname')) + list(soup.select('rname'))  
+    for e in prettify:
+        if e.has_attr('np') or e.has_attr('noprettify'):
+            x0 = e.text.encode('utf-88')
+            x1 = get_suggested_identifier(x0)
+            e.text = unicode(x1, 'utf-8')
+            
     
     # this is a bug with bs4. The replace_with above only adds an escaped
     # text rather than the actual tag (!).

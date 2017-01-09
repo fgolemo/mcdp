@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-console.log('Loading libraries..');
+// console.log('Loading libraries..');
 var mjAPI = require("MathJax-node/lib/mj-page.js");
 var jsdom = require("jsdom").jsdom;
 var fs = require('fs');
@@ -10,7 +10,7 @@ manual_out = process.argv[3];
 // var manual = d + 'out-html/manual.html';
 // var manual_out = d + 'out-html/manual_prerender.html';
 
-console.log('reading ' + manual);
+// console.log('reading ' + manual);
 var data = fs.readFileSync(manual, 'utf8');
 var document = jsdom(data); 
 
@@ -54,10 +54,11 @@ mjAPI.typeset({
   // var HTML = "<!DOCTYPE html>\n" + h;
   HTML = result.html;
   fs.writeFileSync(manual_out, HTML);
-  console.log('written to ' + manual_out);
+  // console.log('written to ' + manual_out);
+  console.log('success');
 });
 
-console.log('end');
+
 
 
 

@@ -37,7 +37,7 @@ include commons/make/lyx.mk
 	./latex2md.py < $< > $@
 
 %.pdf: %.md
-	mcdp-render --pdf $* 
+	mcdp-render --pdf --stylesheet v_manual_blurb $* 
 
 lyxes=$(wildcard docs/**/*.lyx)
 generated_mds=$(lyxes:.lyx=.md)

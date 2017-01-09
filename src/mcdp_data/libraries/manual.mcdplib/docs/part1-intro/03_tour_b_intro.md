@@ -32,8 +32,8 @@ for resources.
     <figcaption id='fig:complicated:caption'>
         Representation of a design problem with three functionalities
         (<fname>f_1</fname>, <fname>f_2</fname>, <fname>f_3</fname>)
-        and two resources (<rname>r_1</rname>, <rname>r_2</rname>,
-        <rname>r_3</rname>). In this case, the functionality
+        and two resources (<rname>r_1</rname>, <rname>r_2</rname>).
+        In this case, the functionality
         space $\funsp$ is the product of three copies
         of $\Rcomp$: $\funsp = \Rcpu{g} \times \Rcpu{J} \times \Rcpu{m}$
         and $\ressp = \Rcpu{lux} \times \Rcpu{USD}$.

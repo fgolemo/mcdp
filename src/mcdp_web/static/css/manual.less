@@ -2,7 +2,8 @@
     border: solid 1px red;
 }
 
-body > :first-child::before {
+
+body > P:first-of-type::before {
     content: 'Stylesheet: ' @stylesheet;
 }
 
@@ -23,12 +24,13 @@ body > :first-child::before {
 
 
 // IF RELEASE {
-@import 'hide_errors';
+// @import 'hide_errors';
 // @import 'only_good';
 
+@line-height: 1.15;
 p, div.latex_env, div.minipage {
     // line-height: 12.5pt;
-    line-height: 125%;
+    line-height: @line-height;
 }
 p {
     margin-bottom: 3pt;
@@ -36,7 +38,7 @@ p {
 
 }
 figcaption {
-    line-height: 125%;
+    line-height: @line-height;
 }
 blockquote {
     margin-left: 3em;
@@ -573,9 +575,9 @@ table.col2 td {
     margin-right: auto;
 }
 
-p svg {
-    margin-top: -100px;
-}
+// p svg {
+//     margin-top: -100px;
+// }
 
 h2,h3,h4 { clear: both; }
 
@@ -725,7 +727,7 @@ cite {
     display: block;
     font-style: normal;
     font-size: smaller;
-    line-height: 120%;
+    line-height: @line-height * 1.2;
 }
 cite + cite {
     padding-bottom: 0.5em;

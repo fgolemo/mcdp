@@ -20,7 +20,7 @@ class LatexProcessingConstants:
     ]
     just_ignore_1_arg = [
         'vspace', 'vspace*', 'hspace', 'hspace*',
-        'extrarowheight',
+        'extrarowheight', 'selectlanguage',
     ]
     simplewraps = [
         ('emph', 'em', ''),
@@ -161,6 +161,7 @@ def latex_process_mcdp_words(s):
 
 def latex_preprocessing(s):
     s = s.replace('\n%\n', '\n')
+    s = s.replace('%\n', '\n') # inside minipage
 
     s = substitute_simple(s, 'textendash', '&ndash;')
     s = substitute_simple(s, 'textemdash', '&mdash;')
@@ -203,7 +204,7 @@ def latex_preprocessing(s):
 
     s = substitute_simple(s, 'xxx', '<span class="xxx">XXX</span>')
 
-    s = substitute_simple(s, 'centering', '<formatting class="centering">Make this centered</formatting>')
+    s = substitute_simple(s, 'centering', '<formatting class="centering"/>')
 
     s = substitute_simple(s, 'bigskip', '<span class="bigskip"/>')
     s = substitute_simple(s, 'medskip', '<span class="medskip"/>')
@@ -248,6 +249,13 @@ def latex_preprocessing(s):
     s = replace_environment(s, "center", "center", 'don-t-steal-label')
 
     s = replace_environment_ext(s, "verbatim", lambda s, _: s)
+    
+    def lyxcode_unescape(x, opt):  # @UnusedVariable
+        x = x.replace('\{', '{')
+        x = x.replace('\}', '}')
+        return x
+        
+    s = replace_environment_ext(s, "lyxcode", lyxcode_unescape) # TODO: replace ~ by ' ' 
     s = replace_environment_ext(s, "lstlisting", lambda s, _: s)
     s = replace_environment_ext(s, "quote", lambda inside, opt:  # @UnusedVariable
                                 '<blockquote>' + inside + '</blockquote>')

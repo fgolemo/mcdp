@@ -36,12 +36,14 @@
 </div>
 
 
-## Versions for this book
+<div style='page-break-before: always'/>
+
+#### Alternative versions for this book
 
 This book is available in several versions:
 
 <ul>
-    <li id='version-v_manual_blurb'>
+        <li id='version-v_manual_blurb'>
         In print, either hardcover version or softcover version.
     </li>
     <li id='version-v_manual_ipad'>

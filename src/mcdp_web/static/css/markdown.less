@@ -104,22 +104,20 @@ pre.console {
 	display: inline-block;
 }
 
+@command_color: #cff;
 pre.console .console_sign {
-	color: #cfc;
+  color: #cfc;
 }
-
 pre.console .program {
-	color: #cff;
-	/*color: brown;*/
+  color: @command_color;
 }
 pre.console .program_option {
-	/*color: red;*/
 }
 pre.console .program_command {
-	color: green;
+  color: @command_color;
 }
 
-merror { color: red; }
+error { color: red; }
 
 /*ol + h4, ul + h4 {color: red;}*/
 h4::after { content: ':'; }

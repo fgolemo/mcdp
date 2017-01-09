@@ -9,6 +9,7 @@ from mcdp_library import Librarian, MCDPLibrary
 from mocdp import logger
 from quickapp import QuickAppBase
 from system_cmd.interface import system_cmd_show
+from mcdp_report.html import get_css_filename
 
 
 class Render(QuickAppBase):
@@ -21,6 +22,7 @@ class Render(QuickAppBase):
         params.add_flag('cache')
         params.add_flag('contracts')
         params.add_flag('pdf')
+        params.add_string('stylesheet', default='v_mcdp_render_default')
         params.add_flag('pdf_figures', help='Generate PDF version of code and figures.')
 
         params.add_string('config_dirs', default='.', short='-D',
@@ -36,6 +38,10 @@ class Render(QuickAppBase):
         if not options.contracts:
             disable_all()
 
+        stylesheet = options.stylesheet
+        # make sure it exists
+        get_css_filename('compiled/%s' % stylesheet)
+        
         params = options.get_extra()
 
         if len(params) < 1:
@@ -83,7 +89,8 @@ class Render(QuickAppBase):
             else:
                 use_out_dir = os.path.join('out', 'mcdp_render')
 
-            html_filename = render(library, docname, data, realpath, use_out_dir, generate_pdf)
+            html_filename = render(library, docname, data, realpath, use_out_dir, 
+                                   generate_pdf, stylesheet=stylesheet)
             if options.pdf:
                 run_prince(html_filename)
 
@@ -95,11 +102,15 @@ def run_prince(html_filename):
            html_filename]
 #     try:
     system_cmd_show(cwd, cmd)
+    
+    cwd = os.getcwd()
+    rel = os.path.relpath(pdf, cwd)
+    logger.info('Written %s' % rel)
 #     finally:
 #         if os.path.exists(pdf):
 #             os.unlink(pdf)
 #     
-def render(library, docname, data, realpath, out_dir, generate_pdf):
+def render(library, docname, data, realpath, out_dir, generate_pdf, stylesheet):
     from mcdp_web.renderdoc.highlight import get_minimal_document
     from mcdp_web.renderdoc.main import render_complete
 
@@ -110,7 +121,7 @@ def render(library, docname, data, realpath, out_dir, generate_pdf):
                                     generate_pdf=generate_pdf)
 
     title = docname
-    doc = get_minimal_document(html_contents, title=title,
+    doc = get_minimal_document(html_contents, title=title, stylesheet=stylesheet,
                                add_markdown_css=True, add_manual_css=True)
 
     d = os.path.dirname(out)
