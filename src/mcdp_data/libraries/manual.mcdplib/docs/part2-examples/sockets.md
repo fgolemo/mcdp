@@ -12,18 +12,21 @@ There are many [AC power plugs and sockets][wiki].
 [wiki]: https://en.wikipedia.org/wiki/AC_power_plugs_and_sockets
 
 <style type='text/css'>
-    table.sockets td {
-        font-style: italic;
-        text-align:center;
-        font-size: smaller;
-    }
-    table.sockets img {
-        width: 5em;
-        margin-top: 0.5em;
+    #tab\:sockets{
+        td {
+            font-style: italic;
+            text-align:center;
+            font-size: smaller;
+        }
+         img {
+            width: 5em;
+            margin-top: 0.5em;
+        }
     }
 </style>
 
-<col5>
+<center>
+<col5 figure-id="tab:sockets" figure-caption="Standard AC sockets">
     <!--  -->
     <s>Type A<br/><img src='typeA.jpg'/></s>
     <s>Type B<br/><img src='typeB.jpg'/></s>
@@ -43,26 +46,29 @@ There are many [AC power plugs and sockets][wiki].
     <s>Type N<br/><img src='typeN.jpg'/></s>
     <s>Type O<br/><img src='typeO.jpg'/></s>
 </col5>
+</center>
 
 Some of them are compatible. For example we can fit
 a plug ot Type A into a socket of Type B. This
 creates a natural partial order structure.
 
-We can use a ``poset`` to describe the poset [](#fig:socket_type):
+We can use a `poset` to describe the poset [](#fig:socket_type):
 
-<pre class='mcdp_poset' id='socket_type' label='socket_type.mcdp_poset'></pre>
+<col2>
+    <pre class='mcdp_poset' id='socket_type' label='socket_type.mcdp_poset'
+        figure-id="code:socket_type"></pre>
 
-<render class='hasse_icons' figure-id='fig:socket_type'
-    figure-caption='The poset of plugs.' style='width: 10em'>
-   `socket_type
-</render>
-
+    <render class='hasse_icons' figure-id='fig:socket_type'
+        figure-caption='The poset of plugs.' style='width: 16em'>
+       `socket_type
+    </render>
+</col2>
 
 ### Voltages
 
 Around the world, the two main voltages are <code class='mcdp_value'>110V</code> and <code class='mcdp_value'>220V</code>.
 In this case, we cannot use the usual Volt poset indicated
-by <code class='mcdp_poset'>V</code>, because that would mean
+by <poset>V</poset>, because that would mean
 that <code class='mcdp_value'>220V</code> is always
 preferable to <code class='mcdp_value'>110V</code>.
 
@@ -83,16 +89,16 @@ Similarly, we model different frequencies with the poset
 The function of a socket in the wall is
 to provide power. This function is parameterized (at least) by:
 
-* The socket shape, indicated by <code class='mcdp_poset'>`socket_type</code>
+* The socket shape, indicated by <poset>`socket_type</poset>
 
-* The voltage, indicated by <code class='mcdp_poset'>`AC_voltages</code>
+* The voltage, indicated by <poset>`AC_voltages</poset>
 
-* The frequency, indicated by <code class='mcdp_poset'>`AC_frequencies</code>
+* The frequency, indicated by <poset>`AC_frequencies</poset>
 
 * The maximum power draw, measured in Watts. (Alternatively, this
 could be parameterized by current.)
 
-Therefore, we can create the poset <code class='mcdp_poset'>`AC_power</code> as follows:
+Therefore, we can create the poset <poset>`AC_power</poset> as follows:
 
 <pre class='mcdp_poset' id='AC_power' label='AC_power.mcdp_poset'></pre>
 
@@ -160,7 +166,7 @@ We can repeat the same story with DC connectors.
 ### USB connectors
 
 <style type='text/css'>
-    table#usb img {
+    table#tab\:usb img {
         width: 5em;
     }
 </style>

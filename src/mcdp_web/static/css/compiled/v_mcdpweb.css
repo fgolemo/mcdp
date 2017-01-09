@@ -28,7 +28,22 @@
 
 
 
-*/eyword,
+*/span.Unit,
+span.Nat,
+span.Int,
+span.Rcomp {
+  color: #ac5600;
+}
+span.ValueExpr,
+span.IntegerFraction,
+span.NatConstant,
+span.RcompConstant {
+  color: #cc6600;
+}
+span.RcompUnit {
+  color: #cc6600 ;
+}
+span.MCDPKeyword,
 span.SubKeyword,
 span.CompactKeyword,
 span.AbstractKeyword,

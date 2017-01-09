@@ -24,7 +24,7 @@ from mcdp_lang.syntax import Syntax
 from mcdp_library import MCDPLibrary
 from mcdp_report.generic_report_utils import (
     NotPlottable, enlarge, get_plotters)
-from mcdp_report.html import ast_to_html, get_markdown_css, get_css_filename
+from mcdp_report.html import ast_to_html, get_css_filename
 from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters
 from mcdp_web.images.images import (get_mime_for_format)
 from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment,\

@@ -6,7 +6,7 @@
     <!-- A Practical Approach to Co-Design -->
     <!-- Practical Tools for Co-Design -->
     <!-- Formal Tools for Systems Co-Design -->
-    <span style='color:white;'>@@{PYMCDP_COMPILE_TIME}</span>
+    <span style='color:white;'>@@{PYMCDP_COMPILE_DATE} @@{PYMCDP_COMPILE_TIME} </span>
     <br/>Formal Tools <br/>for <f>Co</f>-<r>Design</r>
 </h1>
 
@@ -24,11 +24,7 @@
 <div class='abstract'>
 </div>
 
-<pre id='build_stats'>
-    Compiled: @@{PYMCDP_COMPILE_TIME} at @@{PYMCDP_COMPILE_DATE}
-    Version @@{PYMCDP_VERSION}.
-    <!-- Manual compiled from branch COMPILE_BRANCH on COMPILE_DATE. -->
-</pre>
+
 
 <div id='affiliation'> The author is with the Laboratory of Information and
     Decision Systems at the Massachusetts Institute of Technology; with ETH Zurich;
@@ -36,14 +32,16 @@
 </div>
 
 
-<div style='page-break-before: always'/>
+<div style='page-break-before: always'>
+</div>
 
-#### Alternative versions for this book
+
+<h4 nonumber>Alternative versions for this book</h4>
 
 This book is available in several versions:
 
 <ul>
-        <li id='version-v_manual_blurb'>
+    <li id='version-v_manual_blurb'>
         In print, either hardcover version or softcover version.
     </li>
     <li id='version-v_manual_ipad'>
@@ -62,14 +60,14 @@ This book is available in several versions:
 The code is available under the GPL license. -->
 
 
-<img id='license' src="by-nc-sa.svg"/>
-
+<img id='license' src="by-nc-sa.svg" style='width: 10em'/>
 The book is available under the Creative Commons Attribution NonCommercial ShareAlike
 (CC BY-NC-SA) license.
 
 <style type='text/css'>
 #license {
     float: right;
+    margin-left: 2em;
 }
     blockquote#firstquote  p:first-child,
     blockquote#secondquote p:first-child {
@@ -81,6 +79,10 @@ The book is available under the Creative Commons Attribution NonCommercial Share
 </style>
 
 
+    Render params: @@{RENDER_PARAMS}
+    Compiled: @@{PYMCDP_COMPILE_TIME} at @@{PYMCDP_COMPILE_DATE}
+    PyMCDP version @@{PYMCDP_VERSION}.
+    <!-- Manual compiled from branch COMPILE_BRANCH on COMPILE_DATE. -->
 
 
 <h1 notoc nonumber id='toc-heading'>Table of contents</h1>
@@ -91,7 +93,7 @@ The book is available under the Creative Commons Attribution NonCommercial Share
 <!-- <h2 id='symbols-heading'>Table of important symbols</h2> -->
 
 
-    Render params: @@{RENDER_PARAMS}
+
 
 
 <style>

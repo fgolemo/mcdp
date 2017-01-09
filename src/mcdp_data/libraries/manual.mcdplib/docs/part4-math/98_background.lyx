@@ -602,19 +602,19 @@ Posets
 \end_layout
 
 \begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "def:poset"
+
+\end_inset
+
+
 \begin_inset Argument 1
 status open
 
 \begin_layout Plain Layout
 Poset
 \end_layout
-
-\end_inset
-
-
-\begin_inset CommandInset label
-LatexCommand label
-name "def:poset"
 
 \end_inset
 
@@ -725,6 +725,42 @@ transitive
  
 \end_layout
 
+\begin_layout Standard
+The partial order
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $\posAleq$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ is written as
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Quotes eld
+\end_inset
+
+
+\begin_inset Formula $\posleq$
+\end_inset
+
+
+\begin_inset Quotes erd
+\end_inset
+
+ if the context is clear,
+\end_layout
+
 \end_deeper
 \begin_layout Standard
 \begin_inset Separator plain
@@ -733,13 +769,37 @@ transitive
 
 \end_layout
 
-\begin_layout Standard
-A pre-order is similar to a poset, with the exception that the relation
- is not antisymmetric.
- 
+\begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "def:preorder"
+
+\end_inset
+
+
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Pre-order
 \end_layout
 
-\begin_layout Standard
+\end_inset
+
+A pre-order is a slightly weaker concept of a partial order; it is assumed
+ to be only reflexive and transitive, but not necessarily antisymmetric.
+\end_layout
+
+\begin_layout Example
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Numbers with units
+\end_layout
+
+\end_inset
+
 PyMCDP supports numbers with units (
 \begin_inset ERT
 status open
@@ -790,7 +850,7 @@ grams
  describes the numbers with units joules.
  One can convert grams to pounds but not grams to joules.
  Let 
-\begin_inset Formula $\posleq_{U}$
+\begin_inset Formula $\triangleleft_{U}$
 \end_inset
 
  be the relation 
@@ -803,7 +863,7 @@ can be converted to
 
 .
  Then 
-\begin_inset Formula $\Rcpu{g}\posleq_{U}\Rcpu{kg}$
+\begin_inset Formula $\Rcpu{g}\triangleleft_{U}\Rcpu{kg}$
 \end_inset
 
  but 
@@ -858,11 +918,11 @@ not
 antisymmetric:
 \emph default
   
-\begin_inset Formula $\Rcpu{g}\posleq_{U}\Rcpu{kg}$
+\begin_inset Formula $\Rcpu{g}\triangleleft_{U}\Rcpu{kg}$
 \end_inset
 
  and 
-\begin_inset Formula $\Rcpu{kg}\posleq_{U}\Rcpu{g}$
+\begin_inset Formula $\Rcpu{kg}\triangleleft_{U}\Rcpu{g}$
 \end_inset
 
 , but 
@@ -908,10 +968,11 @@ symmetric
 
 .
  In conclusion, 
-\begin_inset Formula $\posleq_{U}$
+\begin_inset Formula $\triangleleft_{U}$
 \end_inset
 
-is a pre-order, but not a partial order.
+ is a pre-order, but not a partial order.
+ 
 \end_layout
 
 \begin_layout Definition
@@ -931,7 +992,15 @@ name "def:top"
 
 \end_inset
 
-If a poset has a least element, it is called 
+If a poset
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\left\langle \posA,\posAleq\right\rangle $
+\end_inset
+
+ has a least element, it is called 
 \begin_inset Quotes eld
 \end_inset
 
@@ -945,6 +1014,14 @@ bottom
 
 
 \begin_inset Formula $\bot_{\posA}$
+\end_inset
+
+, or simply
+\begin_inset space ~
+\end_inset
+
+
+\begin_inset Formula $\bot$
 \end_inset
 
 .
@@ -967,151 +1044,20 @@ top
 .
 \end_layout
 
-\begin_layout Standard
-The partial order
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset Quotes eld
-\end_inset
-
-
-\begin_inset Formula $\posAleq$
-\end_inset
-
-
-\begin_inset Quotes erd
-\end_inset
-
- is written as
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset Quotes eld
-\end_inset
-
-
-\begin_inset Formula $\posleq$
-\end_inset
-
-
-\begin_inset Quotes erd
-\end_inset
-
- if the context is clear, and
-\begin_inset space ~
-\end_inset
-
-
-\begin_inset Formula $\top_{\posA}$
-\end_inset
-
- is written as 
-\begin_inset Formula $\top$
-\end_inset
-
-.
-\end_layout
-
 \begin_layout Subsubsection
 Hasse diagram
 \end_layout
 
 \begin_layout Standard
-\begin_inset Float figure
-placement H
-wide false
-sideways false
+A hasse diagram is 
+\begin_inset ERT
 status open
 
-\begin_layout Verbatim
-
-<!-- comments in HTML -->
-\end_layout
-
-\begin_layout Verbatim
-
-<render class='hasse'>
-\end_layout
-
-\begin_layout Verbatim
-
-poset { 
-\end_layout
-
-\begin_layout Verbatim
-
-	a b c  
-\end_layout
-
-\begin_layout Verbatim
-
-	a <= b 
-\end_layout
-
-\begin_layout Verbatim
-
-	b >= c
-\end_layout
-
-\begin_layout Verbatim
-
-}
-\end_layout
-
-\begin_layout Verbatim
-
-</render>
-\end_layout
-
 \begin_layout Plain Layout
-\begin_inset Box Frameless
-position "t"
-hor_pos "c"
-has_inner_box 1
-inner_pos "t"
-use_parbox 0
-use_makebox 0
-width "100col%"
-special "none"
-height "1in"
-height_special "totalheight"
-thickness "0.4pt"
-separation "3pt"
-shadowsize "4pt"
-framecolor "black"
-backgroundcolor "none"
-status collapsed
-
-\begin_layout LyX-Code
-<render class='hasse'>
-\end_layout
-
-\begin_layout LyX-Code
-poset { x <= y <= z }
-\end_layout
-
-\begin_layout LyX-Code
-</render>
-\end_layout
-
-\end_inset
 
 
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Caption of figure with centered content
-\end_layout
-
-\end_inset
-
-
+\backslash
+xxx
 \end_layout
 
 \end_inset
@@ -1121,11 +1067,10 @@ Caption of figure with centered content
 
 \begin_layout Standard
 \align center
-Centered
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
@@ -1182,11 +1127,11 @@ Caption of figure with centered content
 \end_layout
 
 \begin_layout Subsubsection
-Examples
+Examples of posets 
 \end_layout
 
 \begin_layout Example
-....
+Natural number
 \end_layout
 
 \begin_layout Standard
@@ -1197,7 +1142,7 @@ Examples
 \end_layout
 
 \begin_layout Example
-...
+{rare, medium, well-done}
 \end_layout
 
 \begin_layout Standard
@@ -1303,45 +1248,6 @@ centered
 \end_inset
 
 
-\end_layout
-
-\begin_layout Standard
-\begin_inset Separator plain
-\end_inset
-
-
-\end_layout
-
-\begin_layout Definition
-\begin_inset CommandInset label
-LatexCommand label
-name "def:poset-height"
-
-\end_inset
-
-
-\begin_inset Argument 1
-status open
-
-\begin_layout Plain Layout
-Poset height
-\end_layout
-
-\end_inset
-
-The cardinality of the largest chain is called the 
-\begin_inset Quotes eld
-\end_inset
-
-height
-\begin_inset Quotes erd
-\end_inset
-
- of the poset, and referred to as 
-\begin_inset Formula $\mathsf{height}(\posA)$
-\end_inset
-
- .
 \end_layout
 
 \begin_layout Standard
@@ -1494,6 +1400,10 @@ Any singleton
 
 \end_layout
 
+\begin_layout Subsection
+Width and height
+\end_layout
+
 \begin_layout Definition
 \begin_inset CommandInset label
 LatexCommand label
@@ -1515,7 +1425,7 @@ Width and height of a poset
 \begin_inset Formula $\mathsf{width}(\posA)$
 \end_inset
 
- is the maximum cardinality of an antichain in
+ is the cardinality of the largest antichain in
 \begin_inset space ~
 \end_inset
 
@@ -1527,30 +1437,483 @@ Width and height of a poset
 \end_layout
 
 \begin_layout Standard
-Here are some examples: 
-\begin_inset Formula 
-\[
-\mathsf{height}(\overline{\mathbb{N}})=\aleph_{0},\qquad\mathsf{width}(\overline{\mathbb{N}})=1,
-\]
+\begin_inset Separator plain
+\end_inset
+
+
+\end_layout
+
+\begin_layout Definition
+\begin_inset CommandInset label
+LatexCommand label
+name "def:poset-height"
 
 \end_inset
 
 
-\begin_inset Formula 
-\[
-\mathsf{height}(\overline{\mathbb{N}}\times\overline{\mathbb{N}})=\aleph_{0},\qquad\mathsf{width}(\overline{\mathbb{N}}\times\overline{\mathbb{N}})=\aleph_{0},
-\]
+\begin_inset Argument 1
+status open
+
+\begin_layout Plain Layout
+Poset height
+\end_layout
+
+\end_inset
+
+The cardinality of the largest chain is called the 
+\begin_inset Quotes eld
+\end_inset
+
+height
+\begin_inset Quotes erd
+\end_inset
+
+ of the poset, and referred to as 
+\begin_inset Formula $\mathsf{height}(\posA)$
+\end_inset
+
+ .
+\end_layout
+
+\begin_layout Standard
+Here are some examples:
+\end_layout
+
+\begin_layout Standard
+\align center
+\begin_inset Float table
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Some examples of poset width and height
+\end_layout
 
 \end_inset
 
 
-\begin_inset Formula 
-\begin{eqnarray*}
-\mathsf{height}(\mathtt{int32}) & \simeq & 2^{32},\\
-\mathsf{height}(\mathtt{float32}) & \simeq & 2^{32},\\
-\mathsf{height}(\overline{\mathbb{N}}) & = & \aleph_{0},\\
-\mathsf{height}(\overline{\reals}) & = & \aleph_{1}>\aleph_{0}.
-\end{eqnarray*}
+\end_layout
+
+\begin_layout Plain Layout
+\align center
+\begin_inset Tabular
+<lyxtabular version="3" rows="8" columns="4">
+<features tabularvalignment="middle">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<column alignment="center" valignment="top">
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\posA$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $|\posA|$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\mathsf{height}(\posA)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\mathsf{width}(\posA)$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\mathbb{N}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\aleph_{0}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\aleph_{0}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\mathbb{N}\times\mathbb{N}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\aleph_{0}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\aleph_{0}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\aleph_{0}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\overline{\reals}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\aleph_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\aleph_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\family roman
+\series medium
+\shape up
+\size normal
+\emph off
+\bar no
+\strikeout off
+\uuline off
+\uwave off
+\noun off
+\color none
+1
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\overline{\reals}^{2}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\aleph_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\aleph_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\aleph_{1}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\mathtt{int32}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\sim2^{32}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\sim2^{32}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\mathtt{float32}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\sim2^{32}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+\begin_inset Formula $\sim2^{32}$
+\end_inset
+
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+</cell>
+</row>
+<row>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" rightline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+<cell alignment="center" valignment="top" topline="true" bottomline="true" leftline="true" usebox="none">
+\begin_inset Text
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+</cell>
+</row>
+</lyxtabular>
+
+\end_inset
+
+
+\end_layout
 
 \end_inset
 

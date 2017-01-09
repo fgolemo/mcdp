@@ -12,7 +12,7 @@ Possible introductory references include:
 \item Davey and Priestley \cite{davey02} 
 \item Roman \cite{roman08}
 \end{itemize}
-More advanced references is Gierz \etal \cite{gierz03continuous}
+A more advanced reference is Gierz \etal \cite{gierz03continuous}
 
 
 \subsection{Sets}
@@ -20,25 +20,22 @@ More advanced references is Gierz \etal \cite{gierz03continuous}
 We will use letters $A,B,\dots$ to indicate sets.
 
 Some famous sets are the natural numbers $\mathbb{N}$, the integers $\mathbb{Z}$,
-and the reals: $\mathbb{N}\subseteq\mathbb{Z}\subseteq\mathbb{R}.$
-$\mathbb{R}_{+}$ is the set of nonnegative numbers, including zero:
-$\mathbb{R}_{+}=\{x\in\reals:x\geq0\}$. 
-
-Some references refer to set ``$\boldsymbol{\omega}$''; for our
-purposes, it can be considered a synonym of $\mathbb{N}$.
-
-$\overline{\mathbb{R}}_{+}$ is the completion of $\mathbb{R}_{+}$
-\textemdash{} see \ref{exa:Rcomp}
+and the reals $\reals$. The set $\mathbb{R}_{+}$ is the set of
+nonnegative numbers, \uline{including} zero: $\mathbb{R}_{+}=\{x\in\reals:x\geq0\}$.
+$\overline{\mathbb{R}}_{+}$ is the completion of $\mathbb{R}_{+}$\textemdash the
+construction is in \exaref{Rcomp}
 \begin{defn}[Cardinality of a set]
 The cardinality of a set $A$ is indicated as $|A|$. The cardinality
 of a finite set is the number of elements. The cardinality of $\mathbb{N}$
 is $\aleph_{0}$ (``aleph-null''); the cardinality of $\reals^{n}$
 is $\aleph_{1}$. 
 \end{defn}
-Some references refer to a set ``$\boldsymbol{\omega}$''; for our
-purposes, this is a synonym of $\mathbb{N}$. The name ``$\omega$'',
-or sometimes ``$\omega_{0}$'' is the smallest infinite ordinal;
+\begin{rem}
+Some references refer to a set ``$\boldsymbol{\omega}$''; for
+our purposes, it is a synonym of $\mathbb{N}$. The symbol ``$\omega$'',
+or sometimes ``$\omega_{0}$'', denotes the smallest infinite ordinal;
 for our purposes, it is a synonym of $\aleph_{0}$.
+\end{rem}
 \begin{defn}[Cartesian product]
 For two sets $A,B$, their Cartesian product $A\times B$ is the
 set of ordered pairs $\langle a,b\rangle$ for $a\in A$ and $b\in B$. 
@@ -68,58 +65,50 @@ pair $\left\langle \posA,\posAleq\right\rangle $, where $\posA$
 is a set and $\posAleq$ is a \emph{partial order} $\posAleq$. A
 partial order is a relation that is:
 \begin{itemize}
-\item \emph{reflexive}: $a\posAleq a$ always holds
+\item \emph{reflexive}: $a\posAleq a$ always holds.
 \item \emph{antisymmetric}: If $a\neq b$, then $a\posAleq b$ and $b\posAleq a$
 cannot both hold. Equivalently, from $a\posAleq b$ and $b\posAleq a$
 we can conclude $a=b$.
 \item \emph{transitive}: If $a\posAleq b$ and $b\posAleq c$ imply $a\posAleq c$. 
 \end{itemize}
+The partial order ``$\posAleq$'' is written as ``$\posleq$''
+if the context is clear,
 \end{defn}
 %
-A pre-order is similar to a poset, with the exception that the relation
-is not antisymmetric. 
-
-Consider the real numbers augmented with units indication. For example,
-$\Rcpu{g}$ describes the numbers with units ``grams'' and $\Rcpu{J}$
-describes the 
-\begin{defn}[Top and bottom]
-\label{def:top}If a poset has a least element, it is called ``bottom''
-and it is denoted by $\bot_{\posA}$. If the poset has a maximum
-element, it is called ``top'' and denoted as $\top_{\posA}$.
+\begin{defn}[Pre-order]
+\label{def:preorder}A pre-order is a slightly weaker concept of
+a partial order; it is assumed to be only reflexive and transitive,
+but not necessarily antisymmetric.
 \end{defn}
-The partial order ``$\posAleq$'' is written as ``$\posleq$''
-if the context is clear, and $\top_{\posA}$ is written as $\top$.
+\begin{example}[Numbers with units]
+PyMCDP supports numbers with units (\xxx). Let $U$ be a set containing
+many copies of $\Rcomp$, each one augmented with an indication of
+the units. For example, $\Rcpu{g}$ describes the numbers with units
+``grams'' and $\Rcpu{J}$ describes the numbers with units joules.
+One can convert grams to pounds but not grams to joules. Let $\triangleleft_{U}$
+be the relation ``can be converted to''. Then $\Rcpu{g}\triangleleft_{U}\Rcpu{kg}$
+but $\Rcpu{g}$ is not related to $\Rcpu{J}$ in either direction.
+This relation is obviously \emph{reflexive}. This relation is \emph{transitive},
+because if we can convert from $\Rcpu{u}$ to $\Rcpu{v}$ and from
+$\Rcpu{v}$ to $\Rcpu{w}$, we can convert from $\Rcpu{u}$ to $\Rcpu{v}$.
+However, it is not a partial order, because it is \emph{not} \emph{antisymmetric:}
+ $\Rcpu{g}\triangleleft_{U}\Rcpu{kg}$ and $\Rcpu{kg}\triangleleft_{U}\Rcpu{g}$,
+but $\Rcpu{g}\neq\Rcpu{kg}$. This relation is actually \emph{symmetric}:
+if we can convert from $\Rcpu{u}$ to $\Rcpu{v}$ then we can always
+go back and convert $\Rcpu{v}$ to $\Rcpu{u}$. In conclusion, $\triangleleft_{U}$
+is a pre-order, but not a partial order. 
+\end{example}
+\begin{defn}[Top and bottom]
+\label{def:top}If a poset $\left\langle \posA,\posAleq\right\rangle $
+has a least element, it is called ``bottom'' and it is denoted by $\bot_{\posA}$,
+or simply $\bot$. If the poset has a maximum element, it is called
+``top'' and denoted as $\top_{\posA}$.
+\end{defn}
 
 \subsubsection{Hasse diagram}
 
-\begin{figure}[H]
-\begin{verbatim}
-<!-- comments in HTML -->
-<render class='hasse'>
-poset { 
-    a b c  
-    a &lt;= b 
-    b &gt;= c
-}
-</render>
-\end{verbatim}
-\selectlanguage{english}%
-\noindent\begin{minipage}[t]{1\columnwidth}%
-\begin{lyxcode}
-<render class='hasse'>
-
-poset \{ x &lt;= y &lt;= z \}
-
-</render>
-\end{lyxcode}
-%
-\end{minipage}
-
-\caption{Caption of figure with centered content}
-\end{figure}
-
+A hasse diagram is \xxx
 \begin{center}
-Centered
 \begin{figure}
 \begin{centering}
 \noindent\begin{minipage}[t]{1\columnwidth}%
@@ -137,13 +126,13 @@ poset \{ x &lt;= y &lt;= z \}
 \end{figure}
 \par\end{center}
 
-\subsubsection{Examples}
+\subsubsection{Examples of posets }
 \begin{example}
-....
+Natural number
 \end{example}
 %
 \begin{example}
-...
+\{rare, medium, well-done\}
 \end{example}
 %
 \begin{example}
@@ -171,11 +160,6 @@ poset \{ x &lt;= y &lt;= z &lt;= dotdot \}
 \caption{centered}
 \end{figure}
 
-\begin{defn}[Poset height]
-\label{def:poset-height}The cardinality of the largest chain is
-called the ``height'' of the poset, and referred to as $\mathsf{height}(\posA)$
-.
-\end{defn}
 %
 
 \subsection{Antichains}
@@ -196,24 +180,46 @@ Notable antichains in $\antichains\posA$ include:
 \item Any singleton $\{x\}$ for $x\in\posA$.
 \end{itemize}
 
-\begin{defn}[Width and height of a poset]
-\label{def:poset-width} $\mathsf{width}(\posA)$ is the maximum
-cardinality of an antichain in $\posA$.
-\end{defn}
-Here are some examples: 
-\[
-\mathsf{height}(\overline{\mathbb{N}})=\aleph_{0},\qquad\mathsf{width}(\overline{\mathbb{N}})=1,
-\]
-\[
-\mathsf{height}(\overline{\mathbb{N}}\times\overline{\mathbb{N}})=\aleph_{0},\qquad\mathsf{width}(\overline{\mathbb{N}}\times\overline{\mathbb{N}})=\aleph_{0},
-\]
-\begin{eqnarray*}
-\mathsf{height}(\mathtt{int32}) & \simeq & 2^{32},\\
-\mathsf{height}(\mathtt{float32}) & \simeq & 2^{32},\\
-\mathsf{height}(\overline{\mathbb{N}}) & = & \aleph_{0},\\
-\mathsf{height}(\overline{\reals}) & = & \aleph_{1}>\aleph_{0}.
-\end{eqnarray*}
 
+\subsection{Width and height}
+\begin{defn}[Width and height of a poset]
+\label{def:poset-width} $\mathsf{width}(\posA)$ is the cardinality
+of the largest antichain in $\posA$.
+\end{defn}
+%
+\begin{defn}[Poset height]
+\label{def:poset-height}The cardinality of the largest chain is
+called the ``height'' of the poset, and referred to as $\mathsf{height}(\posA)$
+.
+\end{defn}
+Here are some examples:
+\begin{center}
+\begin{table}[H]
+\caption{Some examples of poset width and height}
+
+\centering{}%
+\begin{tabular}{|c|c|c||c}
+\hline 
+$\posA$ & $|\posA|$ & $\mathsf{height}(\posA)$ & $\mathsf{width}(\posA)$\tabularnewline
+\hline 
+\hline 
+$\mathbb{N}$ & $\aleph_{0}$ & $\aleph_{0}$ & 1\tabularnewline
+\hline 
+$\mathbb{N}\times\mathbb{N}$ & $\aleph_{0}$ & $\aleph_{0}$ & $\aleph_{0}$\tabularnewline
+\hline 
+$\overline{\reals}$ & $\aleph_{1}$ & $\aleph_{1}$ & 1\tabularnewline
+\hline 
+$\overline{\reals}^{2}$ & $\aleph_{1}$ & $\aleph_{1}$ & $\aleph_{1}$\tabularnewline
+\hline 
+$\mathtt{int32}$ & $\sim2^{32}$ & $\sim2^{32}$ & 2\tabularnewline
+\hline 
+$\mathtt{float32}$ & $\sim2^{32}$ & $\sim2^{32}$ & 2\tabularnewline
+\hline 
+ &  &  & \tabularnewline
+\hline 
+\end{tabular}
+\end{table}
+\par\end{center}
 
 \subsection{Minimal and least elements}
 \begin{defn}[Minimal elements]

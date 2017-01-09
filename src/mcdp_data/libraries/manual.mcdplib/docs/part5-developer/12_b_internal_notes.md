@@ -336,19 +336,37 @@ Can use `plot_value_generic`
 ### Using `code`
 
 Use &lt;code&gt; tags.
-
-
+<!--
+<col2> -->
 
 ~~~
-This is P: <code class='mcdp_poset'>`my_poset</code>.
+<code class='mcdp_poset'>`my_poset x Nat</code>.
 
-This is P: <code class='mcdp_value'>Nat:0</code>.
+<poset>`my_poset x Nat</poset>.
+
+<poset np>`my_poset x Nat</poset>.
+
+<code class='mcdp_value'>Nat:0</code>.
+
+<value>Nat:0</value>.
+
+<value np>Nat:0</value>.
 ~~~
 
-This is P: <code class='mcdp_poset'>`my_poset</code>.
+<pre>
+<code class='mcdp_poset'>`my_poset x Nat</code>.
 
-This is P: <code class='mcdp_value'>Nat:0</code>.
+<poset>`my_poset x Nat</poset>.
 
+<poset np>`my_poset x Nat</poset>.
+
+<code class='mcdp_value'>Nat:0</code>.
+
+<value>Nat:0</value>.
+
+<value np>Nat:0</value>.
+</pre>
+<!-- </col2> -->
 
 ### Abbreviations
 

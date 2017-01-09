@@ -127,8 +127,6 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
         # ~~~
         s = s.replace(k, v)
 
-    
-
     s = s.replace('<p>DRAFT</p>', '<div class="draft">')
     
     s = s.replace('<p>/DRAFT</p>', '</div>')

@@ -28,7 +28,307 @@
 
 
 
-*/ontent: '';
+*/#version-v_manual_blurb {
+  border: solid 1px red;
+}
+body > P:first-of-type::before {
+  content: 'Stylesheet: ' v_manual_blurb;
+}
+/* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol,
+ul {
+  list-style: none;
+}
+blockquote,
+q {
+  quotes: none;
+}
+blockquote::before,
+blockquote::after,
+q::before,
+q::after {
+  content: '';
+  content: none;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+/* basics (after reset) */
+ul {
+  list-style-type: disc;
+  list-style-position: inside;
+}
+ol {
+  list-style-type: decimal;
+  list-style-position: inside;
+}
+ul ul,
+ol ul {
+  list-style-type: circle;
+  list-style-position: inside;
+  margin-left: 15px;
+}
+ol ol,
+ul ol {
+  list-style-type: lower-latin;
+  list-style-position: inside;
+  margin-left: 15px;
+}
+li {
+  padding-left: 0;
+}
+q::before {
+  content: '“';
+}
+q::after {
+  content: '”';
+}
+pre,
+code {
+  font-family: monospace;
+}
+dt {
+  display: inline;
+  font-weight: bold;
+}
+dl {
+  margin-left: 2em;
+}
+dd {
+  margin-left: 1em;
+}
+li {
+  margin-top: 3pt;
+}
+strong {
+  font-weight: bold;
+}
+blockquote {
+  font-size: 100%;
+}
+em {
+  font-style: italic;
+}
+.figcontent {
+  margin: 0;
+  padding: 0;
+}
+@media screen {
+  div.caption-left figure {
+    display: table;
+  }
+  div.caption-left figure > figcaption {
+    display: inline-block;
+    margin-right: 3em;
+  }
+  div.caption-left figure > .figcontent {
+    display: table-cell;
+  }
+  div.caption-right figure {
+    display: table-row;
+  }
+  div.caption-right figure > figcaption {
+    display: inline-block;
+    margin-left: 3em;
+  }
+  div.caption-right figure > .figcontent {
+    display: table-cell;
+  }
+}
+h2 code:first-of-type::before,
+h3 code:first-of-type::before,
+h4 code:first-of-type::before,
+ul.toc code:first-of-type::before {
+  content: '(';
+  font-weight: normal;
+  font-family: serif;
+}
+h2 code:not(:last-of-type)::after,
+h3 code:not(:last-of-type)::after,
+h4 code:not(:last-of-type)::after,
+ul.toc code:not(:last-of-type)::after {
+  content: ', ';
+  font-weight: normal;
+  font-family: serif;
+}
+h2 code:last-of-type::after,
+h3 code:last-of-type::after,
+h4 code:last-of-type::after,
+ul.toc code:last-of-type::after {
+  content: ')';
+  font-weight: normal;
+  font-family: serif;
+}
+.toc a {
+  text-decoration: none;
+}
+/************ TOC ***************/
+@media screen {
+  ul.toc {
+    column-count: 2;
+    column-gap: 20px;
+    /*max-height: 30em;*/
+  }
+  ul#main_toc > li > ul > li {
+    padding-top: 2pt;
+    /*color: red;*/
+  }
+  ul#main_toc > li > ul > li > ul {
+    margin-top: 1pt;
+    margin-bottom: 1pt;
+  }
+}
+@media print {
+  /** two-column format */
+  ul.toc {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  /** add page numbers for the first two */
+  ul#main_toc > li > a::after {
+    content: leader('.') target-counter(attr(href), page);
+    font-weight: bold;
+  }
+  ul#main_toc > li > ul > li > a::after {
+    content: leader('.') target-counter(attr(href), page);
+  }
+}
+ul#main_toc ul {
+  margin-left: 0;
+}
+ul#main_toc ul ul {
+  margin-left: 0;
+}
+ul#main_toc ul ul li {
+  display: inline;
+}
+ul#main_toc ul ul li a {
+  color: gray !important;
+}
+ul#main_toc ul ul li a span.toc_number {
+  display: none;
+}
+ul#main_toc ul ul li a span.toc_name::before {
+  margin-right: 3pt;
+  content: '⟡';
+  /*◇';*/
+  font-family: 'Cambria' !important;
+  font-size: 6pt;
+  /*padding-bottom: 5pt !important;*/
+  /*border: solid 1px red;*/
+  /*margin-top: -20pt !important;*/
+  /*display: inline;*/
+}
+ul#main_toc ul ul li:first-child a span.toc_name::before {
+  content: '';
   margin: 0;
 }
 /* first header down is highlighted */
