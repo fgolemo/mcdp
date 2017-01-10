@@ -233,6 +233,10 @@ class WebApp(AppEditor, AppVisualization,
     def get_lmv_url(self, library, model, view):
         url = '/libraries/%s/models/%s/views/%s/' % (library, model, view)
         return url
+    
+    def get_lvv_url(self, library, value, view):
+        url = '/libraries/%s/values/%s/views/%s/' % (library, value, view)
+        return url
 
     def get_ltv_url(self, library, template, view):
         url = '/libraries/%s/templates/%s/views/%s/' % (library, template, view)
@@ -287,6 +291,7 @@ class WebApp(AppEditor, AppVisualization,
 
 
         current_library = self.get_current_library_name(request)
+        
         library = self.get_library(request)
 
         d = {}
@@ -360,7 +365,7 @@ class WebApp(AppEditor, AppVisualization,
         d['values'] = []
         for v in natural_sorted(values):
             is_current = (v == current_value)
-            url = '/libraries/%s/values/%s/views/edit_fancy/' % (current_library, v)
+            url = '/libraries/%s/values/%s/views/syntax/' % (current_library, v)
             url_edit = '/libraries/%s/values/%s/views/%s/' % (current_library, v, VIEW_EDITOR)
             name = "Value: %s" % v
             desc = dict(id=v,name=name, url=url, current=is_current, url_edit=url_edit)

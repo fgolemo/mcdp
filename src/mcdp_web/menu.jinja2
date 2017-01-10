@@ -48,11 +48,11 @@ $(document).ready(function() {
   $("#home").css('visibility', 'visible');
 })
 </script>
-  
+
 <style type='text/css'>
 /* This makes the link fill all of the menu item
   otherwise it is hard to click */
-li a { display: block; width: 90%; } 
+li a { display: block; width: 90%; }
 
 
 .ui-widget {
@@ -62,199 +62,62 @@ li a { display: block; width: 90%; }
 	/* font-size: 80%; */
 
 }
+
 #menu li li li {
 	width: 14em;
 }
+
 li#root {width: 1em;}
 
 #outer {
 /*	font-size: 80%; */
 }
-#outer { 	
+
+#outer {
 
 }
 
- .l1 { 
-  
+ .l1 {
+
   }
 </style>
 
 
 <script type="text/javascript">
-function valid_identifier(s) {
-	var reg = /^[a-zA-Z_$][0-9a-zA-Z_$]*$/g;
-	var match = reg.test(s);
-	console.log(reg);
-	console.log(s);
-	console.log(match);
-	if(!match) {
-		return false;
-	} else {
-		return true;
-	}
+
+
+
+function new_model() {
+    url = url_base + 'models/new/';
+    prompt_user('model', url, "Create new MCDP");
 }
 
-// function prompt_user0(what, url_base) {
-//   s  = "Please enter the name for the new " + what + ":";
-//   var name=prompt(s);
-//   if(name == null) {
-//   	return;
-//   }
-//   if(!valid_identifier(name)) {
-//     msg = 'The string "'+name+'" is not a valid identifier.';
-//   	alert(msg);
-//   	return;
-//   }
-//   url = url_base + name;
-//   var win = window.open(url, '_blank');
-//   if (win) {
-//       //Browser has allowed it to be opened
-//       win.focus();
-//   } else {
-//       //Browser has blocked it
-//       alert('Please allow popups for this application.');
-//   }
-// }
-
-var g_what = null;
-var g_url_base = null;
-var dialog = null;
-
-
-function create0(name) {
-  if(name == null) {
-    return;
-  }
-  if(!valid_identifier(name)) {
-    msg = 'The string "'+name+'" is not a valid identifier.';
-    alert(msg);
-    return;
-  }
-  url = g_url_base + name;
-  var win = window.open(url, '_blank');
-  if (win) {
-      //Browser has allowed it to be opened
-      win.focus();
-  } else {
-      //Browser has blocked it
-      alert('Please allow popups for this application.');
-  }
+function new_template() {
+    url = url_base + 'templates/new/';
+    prompt_user('template', url, "Create new template");
 }
 
-function prompt_user(what, url_base) {
-  g_what = what;
-  g_url_base = url_base;
-  dialog.dialog( "open" );
-  // s  = "Please enter the name for the new " + what + ":";
-  // var name=prompt(s);
-  // if(name == null) {
-  //   return;
-  // }
-  // if(!valid_identifier(name)) {
-  //   msg = 'The string "'+name+'" is not a valid identifier.';
-  //   alert(msg);
-  //   return;
-  // }
-  // url = url_base + name;
-  // var win = window.open(url, '_blank');
-  // if (win) {
-  //     //Browser has allowed it to be opened
-  //     win.focus();
-  // } else {
-  //     //Browser has blocked it
-  //     alert('Please allow popups for this application.');
-  // }
+function new_value() {
+    url = url_base + 'values/new/';
+    prompt_user('value', url, "Create new value");
 }
+
+function new_poset() {
+    url = url_base + 'posets/new/';
+    prompt_user('poset', url, "Create new poset");
+}
+
 $(document).ready(function() {
-  //$("#home").button();
 
   url_base = "/libraries/{{navigation['current_library']}}/";
-
-  function new_model() {
-    url = url_base + 'models/new/';
-    prompt_user('model', url);
-  }
-  
-  function new_template() {
-    url = url_base + 'templates/new/';
-    prompt_user('template', url);
-  }
-  
-  function new_value() {
-    url = url_base + 'values/new/';
-    prompt_user('value', url);
-  }
-
-  function new_poset() {
-    url = url_base + 'posets/new/';
-    prompt_user('poset', url);
-  }
 
   $('#new_model').click(new_model);
   $('#new_poset').click(new_poset);
   $('#new_template').click(new_template);
   $('#new_value').click(new_value);
-	
-	
   $("#outer").show();
+});
 
-  dialog =  $( "#dialog-form" ).dialog({
-    autoOpen: false,
-    // height: 200,
-    width: 350,
-    modal: true,
-    buttons: {
-      "Create": function() {
-        var valid = true;
-        $( "#name" ).removeClass( "ui-state-error" );
-        use = $( "#name" ).val();
-        console.log(use);
-        valid = valid && valid_identifier(use);
-        if(valid) {
-          dialog.dialog( "close" );
-          create0(use);
-        } else {
-          $("#form_error").text("Invalid identifier “"+use+"”.");
-        }
-        return valid;
-      },
-      Cancel: function() {
-        dialog.dialog( "close" );
-      }
-    },
-    close: function() {
-      // form[ 0 ].reset();
-      $( "#name" ).removeClass( "ui-state-error" );
-    }
-    });
+$("#outer").hide();
 
-  });
-
-  $("#outer").hide();
-
-
-</script> 
-
-
-<div id="dialog-form" title="Create new" style='display: none'>
-<!--   <p class="validateTips">All form fields are required.</p>
- --> 
-  <form >
-    <fieldset style='border:0'>
-      <label for="name">Name</label>
-      <input type="text" name="name" id="name" value="" 
-            class="  ">
-<!--       <label for="email">Email</label>
-      <input type="text" name="email" id="email" value="jane@smith.com" class="text ui-widget-content ui-corner-all">
-      <label for="password">Password</label>
-      <input type="password" name="password" id="password" value="xxxxxxx" class="text ui-widget-content ui-corner-all">
- 
- -->      <!-- Allow form submission with keyboard without duplicating the dialog button -->
-      <input type="submit" tabindex="-1" style="position:absolute; top:-1000px">
-    </fieldset>
-  </form>
-  <p style='color:red' id='form_error'></p>
-  <p>Valid identifiers start with a letter or underscore 
-  and can contain letters, underscores, numbers, subscripts,
-  and greek letters.</p>
-</div>
+</script>

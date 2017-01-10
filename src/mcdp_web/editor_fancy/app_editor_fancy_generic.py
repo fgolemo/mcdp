@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import cgi
 from collections import defaultdict, namedtuple
+import json
 import os
 
 from bs4 import BeautifulSoup
@@ -20,7 +21,7 @@ from mcdp_report.html import ast_to_html, ATTR_WHERE_CHAR, ATTR_WHERE_CHAR_END
 from mcdp_web.editor_fancy.image import get_png_data_model, \
     ndp_template_enclosed, get_png_data_unavailable, get_png_data_poset
 from mcdp_web.utils import (ajax_error_catch,
-    format_exception_for_ajax_response, response_image)
+                            format_exception_for_ajax_response, response_image)
 from mcdp_web.utils.response import response_data
 from mocdp import logger
 from mocdp.comp.interfaces import NamedDP, NotConnected
@@ -30,8 +31,7 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mcdp_lang.parse_interface import( parse_ndp_eval, parse_ndp_refine, 
     parse_template_eval, parse_template_refine, parse_constant_eval, 
     parse_constant_refine, parse_poset_eval, parse_poset_refine)
-from mcdp_library_tests.tests import timeit, timeit_wall
-import json
+from mcdp_library_tests.tests import timeit_wall
 
 
 
@@ -43,9 +43,9 @@ Spec = namedtuple('Spec', 'url_part url_variable extension '
                   ' parse_eval '   # ndp = parse_eval(expr2, context
                   ' load ' # load(name, context)
                   'get_png_data write minimal_source_code')
+specs = {}
 
-
-spec_models = Spec(url_part='models', url_variable='model_name',
+spec_models = specs['models'] = Spec(url_part='models', url_variable='model_name',
                       extension=MCDPLibrary.ext_ndps,
                       parse=MCDPLibrary.parse_ndp,
                       parse_expr=Syntax.ndpt_dp_rvalue,
@@ -56,7 +56,7 @@ spec_models = Spec(url_part='models', url_variable='model_name',
                       write=MCDPLibrary.write_to_model,
                       minimal_source_code="mcdp {\n\n}")
 
-spec_templates = Spec(url_part='templates', url_variable='template_name',
+spec_templates = specs['templates']= Spec(url_part='templates', url_variable='template_name',
                       extension=MCDPLibrary.ext_templates,
                       parse=MCDPLibrary.parse_template,
                       parse_expr=Syntax.template,
@@ -67,7 +67,7 @@ spec_templates = Spec(url_part='templates', url_variable='template_name',
                       write=MCDPLibrary.write_to_template,
                       minimal_source_code="template []\n\nmcdp {\n\n}")
 
-spec_values = Spec(url_part='values', url_variable='value_name',
+spec_values = specs['values'] = Spec(url_part='values', url_variable='value_name',
                    extension=MCDPLibrary.ext_values,
                    parse=MCDPLibrary.parse_constant,
                    parse_expr=Syntax.rvalue,
@@ -78,7 +78,7 @@ spec_values = Spec(url_part='values', url_variable='value_name',
                    write=MCDPLibrary.write_to_constant,
                    minimal_source_code="0 g")
 
-spec_posets = Spec(url_part='posets', url_variable='poset_name',
+spec_posets =specs['posets']= Spec(url_part='posets', url_variable='poset_name',
                    extension=MCDPLibrary.ext_posets,
                    parse=MCDPLibrary.parse_poset,
                    parse_expr=Syntax.space,

@@ -1182,12 +1182,14 @@ class Syntax():
     CATALOGUE = keyword('catalogue', CDP.FromCatalogueKeyword)
 
 #     'keyword lbrace funres table rbrace')
-    ndpt_catalogue2 = sp(CATALOGUE +
-                         lbrace +
-                         simple_dp_model_stats +
+    ndpt_catalogue2 = sp(CATALOGUE -
+                         lbrace 
+                         - O(comment_model)
+                         + simple_dp_model_stats +
                          ZeroOrMore(catalogue_row2 + S(ow)) +
                          rbrace,
-                         lambda t: CDP.Catalogue2(t[0], t[1], t[2], make_list(list(t[3:-1]), where=t[-1].where),
+                         lambda t: CDP.Catalogue2(t[0], t[2], t[3], make_list(list(t[4:-1]), 
+                                                                              where=t[-1].where),
                                                   t[-1])).setName('ndpt_catalogue2')
 
     # f <-> r

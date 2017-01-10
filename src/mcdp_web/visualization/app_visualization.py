@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-from mcdp_lang.parse_interface import parse_ndp_refine, parse_template_refine, \
-    parse_poset_refine
-from mcdp_lang.syntax import Syntax
+
 from mcdp_library import MCDPLibrary
 from mcdp_report.html import ast_to_html
+from mcdp_web.editor_fancy.app_editor_fancy_generic import spec_models,\
+    spec_values, spec_templates, spec_posets, specs
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSyntaxError, DPSemanticError
 
@@ -14,23 +14,25 @@ class AppVisualization():
         pass
 
     def config(self, config):
-        config.add_route('model_syntax',
-                         self.get_lmv_url('{library}', '{model_name}', 'syntax'))
-
-        config.add_view(self.view_model_syntax, route_name='model_syntax',
-                        renderer='visualization/model_syntax.jinja2')
-
-        config.add_route('template_syntax',
-                         self.get_ltv_url('{library}', '{template_name}', 'syntax'))
-
-        config.add_view(self.view_template_syntax, route_name='template_syntax',
-                        renderer='visualization/template_syntax.jinja2')
-
-        config.add_route('poset_syntax',
-                         self.get_lpv_url('{library}', '{poset_name}', 'syntax'))
-
-        config.add_view(self.view_poset_syntax, route_name='poset_syntax',
-                        renderer='visualization/poset_syntax.jinja2')
+        
+        renderer = 'visualization/syntax.jinja2'
+        for s in specs:
+            url = ('/libraries/{library}/{%s}/{%s}/views/syntax/' % 
+                   (specs[s].url_part, specs[s].url_variable))
+            route = '%s_syntax' % s
+            config.add_route(route, url)
+            
+            generate_view = self.generate_view
+            class G():
+                def __init__(self, spec):
+                    self.spec = spec
+                def __call__(self, request):
+                    return generate_view(request, self.spec)
+                    
+            #view = lambda request: self.generate_view(request, specs[s])
+            view = G(specs[s])
+            print('%s -> %s' % (url, view))
+            config.add_view(view, route_name=route, renderer=renderer)
 
         # these are images view for which the only change is the jinja2 template
         image_views = [
@@ -38,30 +40,13 @@ class AppVisualization():
             'dp_tree', 
             'ndp_graph',
         ]
-
         for image_view in image_views:
             route = 'model_%s' % image_view
             url = self.get_lmv_url('{library}', '{model_name}', image_view)
             renderer = 'visualization/model_%s.jinja2' % image_view
             config.add_route(route, url)
             config.add_view(self.view_model_info, route_name=route, renderer=renderer)
-
-#         config.add_route('model_ndp_graph',
-#                          self.get_lmv_url('{library}', '{model_name}', 'ndp_graph'))
-# 
-#         config.add_view(self.view_model_ndp_graph, route_name='model_ndp_graph',
-#                         renderer='visualization/model_ndp_graph.jinja2')
-#         
-# 
-#         config.add_route('model_dp_graph',
-#                          self.get_lmv_url('{library}', '{model_name}', 'dp_graph'))
-#         config.add_view(self.view_model_dp_graph, route_name='model_dp_graph',
-#                         renderer='visualization/model_dp_graph.jinja2')
-# 
-#         config.add_route('model_dp_tree',
-#                          self.get_lmv_url('{library}', '{model_name}', 'dp_tree'))
-#         config.add_view(self.view_model_dp_tree, route_name='model_dp_tree',
-#                         renderer='visualization/model_dp_tree.jinja2')
+ 
 
         config.add_route('model_ndp_repr',
                          self.get_lmv_url('{library}', '{model_name}', 'ndp_repr'))
@@ -102,33 +87,19 @@ class AppVisualization():
             'content': ndp_string,
             'navigation': self.get_navigation_links(request),
         }
+ 
 
-
-    def view_model_syntax(self, request):
-        name = str(request.matchdict['model_name'])  # unicode
-        ext = MCDPLibrary.ext_ndps
-        expr = Syntax.ndpt_dp_rvalue
-        parse_refine = parse_ndp_refine
-        res = self._generate_view_syntax(request, name, ext, expr, parse_refine)
+    def generate_view(self, request, spec):
+        print('spec: %s' % str(spec))
+        print dict(request.matchdict)
+        name = str(request.matchdict[spec.url_variable])  # unicode
+        ext = spec.extension
+        expr = spec.parse_expr
+        parse_refine = spec.parse_refine
+        res = self._generate_view_syntax(request, name, ext, expr, parse_refine, spec.url_part)
         return res
 
-    def view_template_syntax(self, request):
-        name = str(request.matchdict['template_name'])  # unicode
-        ext = MCDPLibrary.ext_templates
-        expr = Syntax.template
-        parse_refine = parse_template_refine
-        res = self._generate_view_syntax(request, name, ext, expr, parse_refine)
-        return res
-
-    def view_poset_syntax(self, request):
-        name = str(request.matchdict['poset_name'])  # unicode
-        ext = MCDPLibrary.ext_posets
-        expr = Syntax.space
-        parse_refine = parse_poset_refine
-        res = self._generate_view_syntax(request, name, ext, expr, parse_refine)
-        return res
-
-    def _generate_view_syntax(self, request, name, ext, expr, parse_refine=None):
+    def _generate_view_syntax(self, request, name, ext, expr, parse_refine, url_part):
         filename = '%s.%s' % (name, ext)
         l = self.get_library(request)
         f = l._get_file_data(filename)
@@ -172,14 +143,26 @@ class AppVisualization():
             highlight = '<pre class="source_code_with_error">%s</pre>' % source_code
             error = e.__str__()
             
-        return {'source_code': source_code,
-                'error': unicode(error, 'utf-8'),
-                'highlight': highlight,
-                'realpath': realpath,
-                'navigation': self.get_navigation_links(request),
-                'current_view': 'syntax',
-                'explanation1_html': html1,
-                'explanation2_html': html2, }
+        navigation = self.get_navigation_links(request)
+        
+        url_edit = ("/libraries/%s/%s/%s/views/edit_fancy/" %  
+                    (navigation['current_library'],
+                     url_part,
+                     name))
+
+        res= {
+            'source_code': source_code,
+            'error': unicode(error, 'utf-8'),
+            'highlight': highlight,
+            'realpath': realpath,
+            'navigation': navigation, 
+            'current_view': 'syntax',
+            'explanation1_html': html1,
+            'explanation2_html': html2,
+            'url_edit': url_edit,
+ 
+        }
+        return res
 
     def add_html_links(self, request, frag):
         """ Puts links to the models. """

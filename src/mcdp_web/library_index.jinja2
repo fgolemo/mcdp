@@ -3,7 +3,7 @@
 <head>
     <title>Library {{navigation['current_library']}}</title>
     {% include 'head.jinja2' %}
-    
+
 </head>
 <body>
 {% include 'refresh_shortcut.jinja2' %}
@@ -18,15 +18,17 @@
 
 <!--<p>Click &#9776; in the upper left and select "new" to add a new model.</p>-->
 <style>
+
+body { margin: 0; }
 #library-contents thead tr {
 }
 
-tr#things td {
+#library-contents  tr#things td {
 	font-weight: bold;
 	min-width: 12vw;
-	border-bottom: solid 1px black;
-	padding-left: 1em;
-	padding-right: 1em;
+	/*border-bottom: solid 2px grey;*/
+	/*padding-left: 1em;*/
+	/*padding-right: 1em;*/
 	margin-left: 1em;
 	margin-right: 1em;
 }
@@ -35,56 +37,79 @@ p.none-available {
 	font-style: italic;
 	color: grey;
 }
-tbody tr:first-child td {
+#library-contents tbody td {
+    border-left: solid 1px grey;
+}
+
+#library-contents tbody td:first-child {
+    border-left: 0;
+}
+#library-contents thead td {
+        text-align: center;
+}
+#library-contents td:nth-child(even) {
+
+
+    /*background-color: #eeeeee;*/
+}
+#library-contents td:nth-child(odd) {
+
+    /*background-color: #eee;*/
+}
+#library-contents tbody tr:first-child td {
 	padding-top: 0.5em;
 }
-tbody td {
+#library-contents tbody td {
 	font-size: smaller;
 }
-tbody td:first-child { /* ndps */
+#library-contents tbody td:first-child { /* ndps */
 	column-count: 3;
-	
+
 }
-tbody td:first-child /*ndps*/ code {
+#library-contents tbody td:first-child /*ndps*/ code {
 	/*max-width: 10em;*/
 }
-body td a:hover {
+#library-contents tbody td a:hover {
 	background-color: white !important;
 }
-tbody td .url {
+#library-contents tbody td .url {
 	display: inline-block;
 	overflow: hidden;
 	vertical-align: bottom;
 	max-width: 12em;
-
+margin-right: 1.5em;
     text-overflow: ellipsis;
 }
-tbody a:hover { font-weight: bold; }
-tbody p.entry  {
+#library-contents  tbody a:hover { font-weight: bold; }
+#library-contents  tbody p.entry  {
 	/*border: solid 1px red;*/
 	margin-top: 0;
 	margin-bottom: 0;
-	padding-top: 6px;
-	padding-bottom: 6px;
-	padding-left: 10px;
+	padding-top: 2px;
+	padding-bottom: 2px;
+	padding-left: 3px;
 }
-tbody p.entry .url_edit {
-	visibility: hidden;
-	padding-left: 1em;
-	position: relative;
-	z-index: 10000;
+#library-contents  tbody p.entry .url_edit {
+    /*display: inline-block;*/
+    padding-right: 0.5em;
+    /*padding-left: 0.5em;*/
+	/*visibility: hidden;*/
+	/*position: relative;
+	z-index: 10000;*/
+    color: white;
 }
-tbody p.entry:hover .url_edit {
+#library-contents  tbody p.entry:hover .url_edit {
+    color: blue;
 	/*background-color: red;*/
-	visibility: visible;
+	/*visibility: visible;*/
 }
 
-tbody td a:hover {
+#library-contents  tbody td a:hover {
 	/*background-color: white;*/
 	/*text-decoration: none;*/
 }
 
-tbody p.entry:hover .url {
+#library-contents  tbody p.entry:hover .url {
 	overflow: visible;
 	/*background-color: yellow	;*/
 }
@@ -105,8 +130,15 @@ p.new {
 	text-align: center;
 	/*margin-top: 1em;*/
 }
-table#library-contents {font-family: sans-serif;}
-table#library-contents td {vertical-align: top;}
+#library-contents  td.plus button {
+    display: inline-block;
+}
+#library-contents  td.plus {
+    vertical-align: bottom;
+    text-align: center;
+}
+#library-contents {font-family: sans-serif;}
+#library-contents td {vertical-align: top;}
 </style>
 <div id='outside'>
 <table align='center' id='library-contents'>
@@ -125,6 +157,7 @@ table#library-contents td {vertical-align: top;}
 </tr></thead>
 
 <tbody>
+<tr>
 	{% for what in ["models","templates","posets","values","documents"] %}
 	<!-- only put the documents if they exist -->
 	{% if what != 'documents' or navigation[what] %}
@@ -135,29 +168,38 @@ table#library-contents td {vertical-align: top;}
 
 	{% for d in navigation[what] %}
 		<p class='entry'>
-		<code><a class="url" href="{{d['url']}}">{{d['id']}}</a>{% if 'url_edit' in d %}<a class='url_edit' href="{{d['url_edit']}}">✎</a>
-		{% endif %}
-		</code>
+		{% if 'url_edit' in d %}<a class='url_edit' href="{{d['url_edit']}}">✎</a>{% endif %}<code><a class="url" href="{{d['url']}}">{{d['id']}}</a></code>
 		</p>
 	{% endfor %}
 
-	{% if what != 'documents' %}
-	<p class="new" style='text-align: center'>
-	<button id="table_new_{{what}}">+</button>
-	</p>
-	{% endif %}
-
-	{% if what =='models' and navigation[what] %}
-	<p><button id='show_previews'>Show previews<br/> (might take time)</button>
-	</p>
-	{% endif %}
 </td>
 	{% endif %}
-	{%endfor%}
+	{% endfor %}
+
+</tr>
+<tr>
+    {% for what in ["models","templates","posets","values","documents"] %}
+    {% if what != 'documents' or navigation[what] %}
+    <td class='plus'>
+    {% if what != 'documents' %}
+	<!-- <p class="new" style='text-align: center'> -->
+	<button id="table_new_{{what}}">+</button>
+	<!-- </p> -->
+	{% endif %}
+    </td>
+    {% endif %}
+    {% endfor %}
+</tr>
+
 </tbody>
 
 </table>
-</div><!-- 
+{% if  navigation['models'] %}
+<p><button id='show_previews'>Show MCDP previews</button></p>
+{% endif %}
+</td
+
+</div><!--
 
 {% if navigation['documents'] %}
 <p> Documents available as part of the <code>{{navigation['current_library']}}</code>
@@ -171,18 +213,18 @@ table#library-contents td {vertical-align: top;}
 
 
 <style type='text/css'>
-	div.compact { 
-/*		display: block; 
-		float: left; 
+	div.compact {
+/*		display: block;
+		float: left;
 */		width: 20em;
-display: inline-block; 
+display: inline-block;
 		/* height: 13em; */ /* old resolution */
 
 	}
 	a.modellink {
 		background-color: inherit;
 	}
-	div.compact { 
+	div.compact {
 		margin-top: 0.4em;
 		margin-left: 0.4em;
 		margin-right: 0.4em;
@@ -197,10 +239,10 @@ display: inline-block;
 	}
 	div.compact:hover {
 		border: solid 1px black;
-		box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);    
+		box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 	}
 	div.compact span {display: block; text-align: center; }
-	div.compact img { max-width: 20em; max-height: 10em; } 
+	div.compact img { max-width: 20em; max-height: 10em; }
 </style>
 
 
@@ -225,34 +267,11 @@ display: inline-block;
 		$( "button#show_previews" ).button();
 		$( "button#show_previews" ).click(click_show_previews);
 
-		  url_base = "/libraries/{{navigation['current_library']}}/";
-
-		  function new_model() {
-		    url = url_base + 'models/new/';
-		    prompt_user('model', url);
-		  }
-		  
-		  function new_template() {
-		    url = url_base + 'templates/new/';
-		    prompt_user('template', url);
-		  }
-		  
-		  function new_value() {
-		    url = url_base + 'values/new/';
-		    prompt_user('value', url);
-		  }
-
-		  function new_poset() {
-		    url = url_base + 'posets/new/';
-		    prompt_user('poset', url);
-		  }
-
-
-		$('#table_new_ndps').click(new_model);
+	    $('#table_new_models').click(new_model);
 	    $('#table_new_posets').click(new_poset);
 	    $('#table_new_templates').click(new_template);
 	    $('#table_new_values').click(new_value);
-
+        console.log('inited 1');
 	});
 
 	var all_images = [];
@@ -262,17 +281,17 @@ display: inline-block;
 
 <a class='modellink' href="{{m['url']}}">
 <div id='{{ m["id"] }}-div' class="compact">
-	<span class="name">	
+	<span class="name">
 		<code>{{ m['id'] }}</code>
 	</span>
-	
+
 	<img id='{{ m["id_ndp"] }}-image' src='/static/white_small.png'/>
 
 	<script type='text/javascript'>
 		tmp_img="/libraries/{{navigation['current_library']}}/models/{{m['id_ndp']}}/views/solver2/compact_graph.png";
 		tmp_target = '#{{ m["id_ndp"] }}-image';
 		all_images.push([tmp_img, tmp_target]);
-		
+
 	function {{ m["id_ndp"] }}_callback() {
 		src="/libraries/{{navigation['current_library']}}/models/{{m['id_ndp']}}/views/solver2/compact_graph.png";
 
@@ -283,20 +302,20 @@ display: inline-block;
 
 	$(document).ready(function() {
 		$( '#{{ m["id_ndp"] }}-div' ).hover({{ m["id_ndp"] }}_callback);
-	
+
 		$('#allcontents').css('visibility', 'visible');
 	});
 
 	</script>
-		        
+
 		<!-- <img class='preview' style='display:none; border: solid 1px red' src="/libraries/{{navigation['current_library']}}/models/{{m['id_ndp']}}/views/solver2/compact_graph.png"/> -->
-	
+
 </div>
 </a>
 {% endfor %}
 </div>
 {%endif%}
-  
+
  </div>
 
 </body>
