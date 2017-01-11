@@ -2,7 +2,7 @@ mcdp {
     provides num_parts [ℕ] 'Number of parts to produce'
     
     technology = instance choose(fdm:`FDM, other_technology:`OtherTechnology)
-    provides part_length, part_resolution, part_property1, part_property2 using technology 
+    provides part_length, part_resolution, service_temperature using technology 
     
     cost_of_power = 0.001 $ / kWh   
     
