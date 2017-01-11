@@ -18,6 +18,7 @@ from .rcomp import RcompBase, Rbicomp
 from .space import Map
 
 
+
 class MyUnitRegistry(UnitRegistry):
     def __init__(self, *args, **kwargs):
         UnitRegistry.__init__(self, *args, **kwargs)
@@ -296,7 +297,28 @@ def format_pint_unit_short(units):
     x = x.replace('dollars', '$')
     x = x.replace(' ', '')
     x = x.replace('**', '^')
-    x = x.replace('^2', '²')
+    
+    if x.startswith('/'):
+        x = '1' + x
+        
+        
+    digit2superscript = {
+        '1':'¹',
+        '2':'²' ,
+        '3':'³',
+        '4':'⁴',
+        '5':'⁵',
+        '6':'⁶',
+        '7':'⁷',
+        '8':'⁸',
+        '9':'⁹',
+    }
+    # XXX
+#     from mcdp_lang.dealing_with_special_letters import digit2superscript
+    for n, replacement in digit2superscript.items():
+        w = '^' + n
+        x = x.replace(w, replacement)
+            
     return str(x)
 
 R_dimensionless = make_rcompunit('m/m')

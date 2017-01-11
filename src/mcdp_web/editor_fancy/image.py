@@ -1,15 +1,22 @@
-from mocdp.exceptions import mcdp_dev_warning
-from mocdp.comp.template_for_nameddp import TemplateForNamedDP
 from mcdp_figures.figures_ndp import MakeFiguresNDP
-from mcdp_report.gg_utils import gg_get_format
-from mcdp_report.gg_ndp import gvgen_from_ndp
 from mcdp_figures.figures_poset import MakeFiguresPoset
-from mcdp_posets.finite_poset import FinitePoset
+from mcdp_posets import FinitePoset
+from mcdp_report.gg_ndp import gvgen_from_ndp
+from mcdp_report.gg_utils import gg_get_format
 from mcdp_web.utils.image_error_catch_imp import create_image_with_string
+from mocdp.comp.template_for_nameddp import TemplateForNamedDP
+from mocdp.exceptions import mcdp_dev_warning
+
 
 def get_png_data_model(library, name, ndp, data_format): 
     mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=name)
     f = 'fancy_editor' 
+    res = mf.get_figure(f, data_format)
+    return res
+
+def get_png_data_syntax_model(library, name, ndp, data_format):
+    mf = MakeFiguresNDP(ndp=ndp, library=library, yourname=name)
+    f = 'ndp_graph_enclosed_TB' 
     res = mf.get_figure(f, data_format)
     return res
 

@@ -50,6 +50,7 @@ span.AbstractKeyword,
 span.TemplateKeyword,
 span.ForKeyword,
 span.UsingKeyword,
+span.ImplementsKeyword,
 span.LoadKeyword,
 span.CodeKeyword,
 span.FromLibraryKeyword,
@@ -345,14 +346,20 @@ code.rvalue span.RcompUnit {
 .CatalogueRes span.RcompUnit {
   color: darkred !important;
 }
+body {
+  font-size: 100%;
+}
 .ui-button {
   padding: 3px !important;
+}
+.ui-widget {
+  font-size: 80%;
 }
 .unicode-icons {
   font-size: 50%;
   margin-bottom: -5px;
   margin-top: -5px;
-  margin-right: 0.3em;
+  margin-right: 0.5em;
 }
 a {
   text-decoration: none;

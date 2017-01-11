@@ -8,7 +8,6 @@ from mcdp_dp import (CatalogueDP, CoProductDP, NotFeasible, Template, Constant,
                      MinusValueRcompDP)
 from mcdp_dp import PlusValueNatDP
 from mcdp_lang.eval_warnings import MCDPWarnings
-from mcdp_lang.namedtuple_tricks import recursive_print
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp, parse_poset
 from mcdp_lang.pyparsing_bundled import Literal
@@ -25,8 +24,6 @@ from mocdp.comp.context import ModelBuildingContext, Context
 from mocdp.comp.recursive_name_labeling import get_names_used
 from mocdp.exceptions import DPNotImplementedError, DPSemanticError,\
     DPSyntaxError
-from mcdp_lang.fix_whitespace_imp import fix_whitespace
-
 
 
 @comptest
@@ -1808,6 +1805,31 @@ def assert_no_whitespace(x):
     s = w.string[w.character:w.character_end]
     if  s.strip() != s:
         raise ValueError(w)
+
+
+@comptest
+def imlements1():
+    s = """
+    mcdp {
+        implements mcdp { }
+    }
+    """
+    parse_ndp(s) 
+
+@comptest
+def imlements2():
+    s = """
+    mcdp {
+        implements mcdp { 
+            provides f_1 [m]
+            requires r_1 [m]
+        }
+    }
+    """
+    ndp = parse_ndp(s)
+    assert 'f_1' in ndp.get_fnames() 
+    assert 'r_1' in ndp.get_rnames()
+
 
 
 

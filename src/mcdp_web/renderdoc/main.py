@@ -87,9 +87,9 @@ def render_complete(library, s, raise_errors, realpath, generate_pdf=False,
  
     s = col_macros_prepare_before_markdown(s)
     
-    print(indent(s, 'before markdown | '))
+#     print(indent(s, 'before markdown | '))
     s = render_markdown(s)
-    print(indent(s, 'after  markdown | '))
+#     print(indent(s, 'after  markdown | '))
     
     for k,v in maths.items():
         if not k in s:

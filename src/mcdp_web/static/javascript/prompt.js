@@ -13,6 +13,7 @@ function prompt_user(what, url_base, prompt="Create new item") {
   $('#dialog-form').dialog('option', 'title', prompt);
   $('#dialog-form').data('dialog.title', prompt);
   dialog.dialog( "open" );
+  // $('#dialog-form').tooltip( "disable" );
 
   $('.ui-dialog-buttonpane > button:last').focus();
 }

@@ -46,9 +46,6 @@ def html_interpret(library, html, raise_errors=False,
     # clone library, so that we don't pollute it 
     # with our private definitions
     
-    warnings.warn('For debugging, raise_errors = False')
-    raise_errors = False # XXX
-    
     if not raise_errors:
         logger.error('raise_errors is False: we add errors in the document')
         

@@ -111,7 +111,8 @@
 
 	$(document).ready(function() {
 
-		$(document).tooltip();
+          // console.log('disabling tooltip')
+		// $(document).tooltip();
 		$("#editor").keyup(keyup);
 		$("button#close" ).click(click_button_close);
 		$("button#save" ).click(click_button_save);
@@ -129,10 +130,8 @@
 
 	function show_tooltip(obj, s) {
 		console.log('tooltip' + s);
-		// c = '<pre>'+ s + '</pre>'
-		// $( obj ).tooltip({'content': c});
-		$( obj ).tooltip(); //{'content': c});
-		//$( obj ).tooltip();
+		// $( obj ).tooltip(); //{'content': c});
+
 	}
 	function current_text() {
 		text = $("#editor").text();

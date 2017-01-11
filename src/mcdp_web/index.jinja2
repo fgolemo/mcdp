@@ -5,29 +5,37 @@
     {% include 'head.jinja2' %}
     <style type='text/css'>
     	body { font-family: Georgia; }
+        /* logo */
         #diagram { width: 10em; margin: 2em; }
         body { padding-left: 6em; }
 
-        h3 { 
-            margin: 10px; }
-        #create_library { 
-            display: none; font-size: 80%;
-            padding: 10px;
-margin-left: 2em;
-margin-bottom: 4em; 
-            } /* button */
+        h3 { margin: 10px; }
 
-            a#create_library.ui-button { padding: 3px !important; }
+        #buttons { visibility: hidden; }
+        #buttons button  {
+            /*font-size: 80%;*/
+            padding: 10px;
+            margin-left: 2em;
+            margin-bottom: 4em;
+        } /* button */
+
+        #buttons .ui-button { padding: 3px !important; }
 
     </style>
 </head>
 <body>
+{% include 'prompt.jinja2' %}
 
 <script type='text/javascript'>
-    $(document).ready(function() {          
-        $("#create_library").button();
-        $("#create_library").show();
-        $("#create_library").disable();
+    function create_library() {
+        url_base = '/libraries/new/';
+        prompt_user("library", url_base, prompt="Create new library");
+    }
+    $(document).ready(function() {
+        $("#create_library").button().click(create_library);
+        $("#refresh").button();
+        $("#buttons").css('visibility', 'visible');
+       // $("#create_library").disable();
     });
 
 </script>
@@ -50,34 +58,66 @@ margin-bottom: 4em;
 
 <!--<p><a href="/docs/language_notes/">The MCDP language specification</a></p>-->
 <ul>
-<li>Papers and presentations</li>
+<li><a href="http://mcdp.mit.edu/papers/">Papers and presentations</a></li>
 <li><a href="/static/manual.html">The PyMCDP Manual</a></li>
 </ul>
- 
 
-<h3>Do</h3>
-
-<ul>
-	<li>Look at <a href='/libraries/'>the list of available libraries.</a></li>
-</ul>
-
-<a id='create_library'>Create a new library</a>
-<!-- 
-<p>
-	Some interesting starting points: 
-		<a href="/libraries/droneD_complete_v2/">the drone example</a>,
-	 	<a href="/libraries/plugs/">the plugs domain</a>.
-</p>
- -->
 
 <h3>Help</h3>
 
 <ul>
 <li>
-    Please file bug reports at the 
+    Please file bug reports at the
         <a href="https://github.com/AndreaCensi/mcdp/issues">
-            Github website</a></li> 
+            Github website</a></li>
 </ul>
+
+<h3>Available libraries</h3>
+<!--
+<ul>
+	<li>Look at <a href='/libraries/'>the list of available libraries.</a></li>
+</ul> -->
+
+<style>
+.library_list {
+    /*column-count: 3;*/
+    column-width: 14em;
+}
+.library_list .sup {
+     display: block;
+    /*padding-left: 2em; */
+    font-style: italic;
+}
+.library_list .library span {
+    padding-left: 1em;
+}
+</style>
+
+<div class="library_list">
+{% for sup, sup_libraries in navigation['libraries_indexed'] %}
+    <div class='sup'>{{sup}}</div>
+    {% for li in sup_libraries %}
+    <!-- <option name='{{li['name']}}' value="{{li['url']}}" {% if li['current'] %} selected = 1 {% endif %}> -->
+        <!-- note the span has no effect inside option -->
+        <div class='library'><a href="{{li['url']}}"><code>📖<span>{{li['name']}}</span></code></a></div>
+    <!-- </option> -->
+    {% endfor %}
+{% endfor %}
+</div>
+
+<div id='buttons'>
+<p><a id='create_library'>Create a new library</a></p>
+<p><a id='refresh' href='/refresh'>Refresh list of libraries</a></p>
+</div>
+
+<!--
+<p>
+	Some interesting starting points:
+		<a href="/libraries/droneD_complete_v2/">the drone example</a>,
+	 	<a href="/libraries/plugs/">the plugs domain</a>.
+</p>
+ -->
+
 
 </div>
 
@@ -85,7 +125,7 @@ margin-bottom: 4em;
 <p>Shortcuts:</p>
 <ul>
 	<li>Alt+R: refresh library (re-loads all cached files)</li>
-	<li>In Editor view: CMD+S: saves</li> 
+	<li>In Editor view: CMD+S: saves</li>
 </ul>
 <ul>
 <li><a href="/docs/TODO/">TODO</a></li>

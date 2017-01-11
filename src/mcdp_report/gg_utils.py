@@ -7,13 +7,10 @@ from copy import deepcopy
 import os
 import traceback
 
-from bs4 import BeautifulSoup
-
 from contracts import contract
-from contracts.utils import check_isinstance, raise_desc
+from contracts.utils import check_isinstance, raise_desc, indent
 from mcdp.utils.string_utils import get_md5
 from mcdp_library_tests.tests import timeit_wall
-
 from mocdp import logger, MCDPConstants
 from mocdp.exceptions import mcdp_dev_warning, DPSemanticError
 import networkx as nx  # @UnresolvedImport
@@ -129,11 +126,18 @@ def gg_figure(r, name, ggraph, do_png=True, do_pdf=True, do_svg=True,
             if do_svg:
                 with f.data_file('graph_svg', MIME_SVG) as filename:
                     graphviz_run(filename_dot, filename, prog=prog)
-    
-                    soup = BeautifulSoup(open(filename).read(), 'lxml', from_encoding='utf-8')
+                    
+                    from mcdp_web.renderdoc.xmlutils import bs
                     from mcdp_report.embedded_images import embed_svg_images
+                    data = open(filename).read()
+                    soup = bs(data)
                     embed_svg_images(soup)
-                    write_bytes_to_file_as_utf8(str(soup), filename)
+#                     data = to_html_stripping_fragment(soup)
+                    # this will keep the doctype
+                    s = str(soup)
+                    s = s.replace('<fragment>','')
+                    s = s.replace('</fragment>','')
+                    write_bytes_to_file_as_utf8(s, filename)
 
         except CmdException:
             if MCDPConstants.test_ignore_graphviz_errors:
@@ -179,7 +183,7 @@ def gg_get_formats(gg, data_formats):
             d = get_dot_string(gg)
         else:
             d = gg_get_format(gg, data_format)
-
+            
         res.append(d)
     return tuple(res)
  
@@ -208,6 +212,10 @@ def gg_get_format(gg, data_format):
         return dot
     elif data_format == 'svg':
         svg = r.resolve_url('graph_svg').get_raw_data()
+        if '<html>' in svg:
+            msg = 'I did not expect a tag <html> in the SVG output'
+            svg = indent(svg, '> ')
+            raise_desc(Exception, msg, svg=svg) 
         return svg
     else:
         raise ValueError('No known format %r.' % data_format)

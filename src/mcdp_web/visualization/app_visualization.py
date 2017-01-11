@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from mcdp_library import MCDPLibrary
+from mcdp_library_tests.tests import timeit_wall
 from mcdp_report.html import ast_to_html
-from mcdp_web.editor_fancy.app_editor_fancy_generic import spec_models,\
-    spec_values, spec_templates, spec_posets, specs
+from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
+from mcdp_web.utils.response import response_data
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSyntaxError, DPSemanticError
 
@@ -16,23 +17,42 @@ class AppVisualization():
     def config(self, config):
         
         renderer = 'visualization/syntax.jinja2'
+        generate_view = self.generate_view
+        generate_graph = self.generate_graph
+        
         for s in specs:
-            url = ('/libraries/{library}/{%s}/{%s}/views/syntax/' % 
+            url = ('/libraries/{library}/%s/{%s}/views/syntax/' % 
                    (specs[s].url_part, specs[s].url_variable))
-            route = '%s_syntax' % s
-            config.add_route(route, url)
+            route = 'visualization_%s_syntax' % s
             
-            generate_view = self.generate_view
+            config.add_route(route, url)    
+            
             class G():
                 def __init__(self, spec):
                     self.spec = spec
+
                 def __call__(self, request):
                     return generate_view(request, self.spec)
-                    
+
+            # scoping bug!                    
             #view = lambda request: self.generate_view(request, specs[s])
-            view = G(specs[s])
-            print('%s -> %s' % (url, view))
-            config.add_view(view, route_name=route, renderer=renderer)
+            config.add_view(G(specs[s]), route_name=route, renderer=renderer)
+            
+            graph_route = 'visualization_%s_graph' % s
+            graph_url = url + 'graph.{data_format}'
+            config.add_route(graph_route, graph_url)    
+
+
+            class H():
+                def __init__(self, spec):
+                    self.spec = spec
+
+                def __call__(self, request):
+                    return generate_graph(request, self.spec)
+
+            
+            config.add_view(H(specs[s]), route_name=graph_route, renderer=renderer)
+
 
         # these are images view for which the only change is the jinja2 template
         image_views = [
@@ -90,15 +110,41 @@ class AppVisualization():
  
 
     def generate_view(self, request, spec):
-        print('spec: %s' % str(spec))
-        print dict(request.matchdict)
         name = str(request.matchdict[spec.url_variable])  # unicode
         ext = spec.extension
         expr = spec.parse_expr
         parse_refine = spec.parse_refine
+
         res = self._generate_view_syntax(request, name, ext, expr, parse_refine, spec.url_part)
         return res
 
+    def generate_graph(self, request, spec):
+        def go():
+            with timeit_wall('generate_graph', 1.0):
+                data_format = str(request.matchdict['data_format'])  # unicode
+                library = self.get_library(request)
+                widget_name = self.get_widget_name(request, spec)
+#                 library_name = self.get_current_library_name(request)
+#                 key = (library_name, spec, widget_name)
+    
+#                 if not key in self.last_processed2:
+                l = self.get_library(request)
+                context = l._generate_context_with_hooks()
+                thing = spec.load(l, widget_name, context=context)
+#                 else:
+#                     thing = self.last_processed2[key]
+#                     if thing is None:
+#                         return response_image(request, 'Could not parse.')
+    
+                with timeit_wall('graph_generic - get_png_data', 1.0):
+                    data = spec.get_png_data_syntax(library, widget_name, thing, 
+                                             data_format=data_format)
+                    
+                from mcdp_web.images.images import get_mime_for_format
+                mime = get_mime_for_format(data_format)
+                return response_data(request, data, mime)
+        return self.png_error_catch2(request, go)
+    
     def _generate_view_syntax(self, request, name, ext, expr, parse_refine, url_part):
         filename = '%s.%s' % (name, ext)
         l = self.get_library(request)

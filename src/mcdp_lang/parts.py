@@ -46,6 +46,10 @@ class CDPLanguage():
     IgnoreFun = namedtuplewhere('IgnoreFun', 'keyword fvalue')
     IgnoreRes = namedtuplewhere('IgnoreRes', 'keyword rvalue')
 
+    # implements `ndp
+    ImplementsKeyword = namedtuplewhere('ImplementsKeyword', 'keyword')
+    Implements = namedtuplewhere('Implements', 'keyword interface')
+    
     MakeTuple = namedtuplewhere('MakeTuple', 'open ops close')
 
     MakeTemplate = namedtuplewhere('MakeTemplate', 'keyword dp_rvalue')

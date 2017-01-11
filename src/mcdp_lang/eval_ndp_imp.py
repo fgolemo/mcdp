@@ -37,6 +37,7 @@ from .parse_actions import (add_where_information, decorate_add_where, raise_wit
                             parse_wrap)
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+import warnings
 
 
 CDP = CDPLanguage
@@ -980,7 +981,7 @@ def ndp_rename_resource(ndp, current, updated):
     else:
         raise CouldNotRename()
     
-def add_function(fname, F, context, r):
+def add_function(fname, F, context, r, repeated_ok=False):
     check_isinstance(fname, str)
     try:
         check_good_name_for_function(fname)
@@ -989,13 +990,17 @@ def add_function(fname, F, context, r):
         raise DPSemanticError(msg, where=r.where)
 
     if fname in context.fnames:
-        msg = 'Repeated function name %r.' % fname
-        raise DPSemanticError(msg, where=r.where)
-
-    context.add_ndp_fun_node(fname, F)
+        if not repeated_ok:
+            msg = 'Repeated function name %r.' % fname
+            raise DPSemanticError(msg, where=r.where)
+        else:
+            # check same or different 
+            warnings.warn('check same')
+    else:
+        context.add_ndp_fun_node(fname, F)
     return context.make_resource(get_name_for_fun_node(fname), fname)
 
-def add_resource(rname, R, context, r):
+def add_resource(rname, R, context, r, repeated_ok=False):
     check_isinstance(rname, str)
     try:
         check_good_name_for_resource(rname)
@@ -1004,9 +1009,14 @@ def add_resource(rname, R, context, r):
         raise DPSemanticError(msg, where=r.where)
 
     if rname in context.rnames:
-        msg = 'Repeated resource name %r.' % rname
-        raise DPSemanticError(msg, where=r.where)
-    context.add_ndp_res_node(rname, R)
+        if not repeated_ok:
+            msg = 'Repeated resource name %r.' % rname
+            raise DPSemanticError(msg, where=r.where)
+        else:
+            # check same or different 
+            warnings.warn('check same')
+    else:
+        context.add_ndp_res_node(rname, R)
     return context.make_function(get_name_for_res_node(rname), rname)
 
 @decorate_add_where
@@ -1073,7 +1083,9 @@ def eval_statement(r, context):
     elif isinstance(r, CDP.SetNameConstant):
         return eval_statement_SetNameConstant(r, context)
     elif isinstance(r, CDP.SetNameFValue):
-        return eval_statement_SetNameFvalue(r,context)
+        return eval_statement_SetNameFvalue(r, context)
+    elif isinstance(r, CDP.Implements):
+        return eval_statement_implements(r, context)
 
     elif isinstance(r, CDP.IgnoreFun):
         # equivalent to f >= any-of(Minimals S)
@@ -1135,13 +1147,24 @@ def eval_statement(r, context):
             r2 = recursive_print(r)
             raise_desc(DPInternalError, msg, r=r2) # where=r.where.__repr__())
 
+def eval_statement_implements(r, context):
+    interface = eval_ndp(r.interface, context)
+    for fn in interface.get_fnames():
+        F = interface.get_ftype(fn)
+        add_function(fn, F, context, r=interface)
+    
+    for rn in interface.get_rnames():
+        R = interface.get_rtype(rn)
+        add_resource(rn, R, context, r=interface)
+        
+        
 def eval_statement_FunShortcut1(r, context):
     # provides fname using name
     fname = r.fname.value
     with add_where_information(r.name.where):
         B = context.make_function(r.name.value, fname)
     F = context.get_ftype(B)
-    A = add_function(r.fname.value, F, context, r=r.name)
+    A = add_function(r.fname.value, F, context, r=r.name, repeated_ok=True)
     add_constraint(context, resource=A, function=B)
 
 def eval_statement_ResShortcut1(r, context):  
@@ -1149,7 +1172,7 @@ def eval_statement_ResShortcut1(r, context):
     with add_where_information(r.name.where):
         A = context.make_resource(r.name.value, r.rname.value)
     R = context.get_rtype(A)
-    B = add_resource(r.rname.value, R, context, r=r.name)
+    B = add_resource(r.rname.value, R, context, r=r.name, repeated_ok=True)
     add_constraint(context, resource=A, function=B)  # B >= A
 
 
@@ -1187,7 +1210,7 @@ def eval_statement_ResShortcut1m(r, context):
     for rname in rnames:
         A = context.make_resource(r.name.value, rname.value)
         R = context.get_rtype(A)
-        B = add_resource(rname.value, R, context, r=rname)
+        B = add_resource(rname.value, R, context, r=rname, repeated_ok=True)
         add_constraint(context, resource=A, function=B)
 
         
@@ -1197,7 +1220,7 @@ def eval_statement_FunShortcut1m(r, context):
     for fname in fnames:
         B = context.make_function(r.name.value, fname.value)
         F = context.get_ftype(B)
-        A = add_function(fname.value, F, context, r=fname)
+        A = add_function(fname.value, F, context, r=fname, repeated_ok=True)
         add_constraint(context, resource=A, function=B)
 
 

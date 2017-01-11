@@ -1,0 +1,19 @@
+mcdp {
+    implements `PartProducerInterface
+    
+    #extruder = instance `Extruder
+    
+    #provided part_resolution ≼ part_resolution provided by extruder
+    #provided part_property1 ≼ part_property1 provided by extruder
+    #provided part_property2 ≼ part_property1 provided by extruder
+    # provided part_volume ≼ part_volume provided by extruder
+    
+    #volume = (provided part_length)³
+    
+    #provides part_resolution, part_property1, part_property2, part_volume using extruder
+    
+    
+    #requires budget, electric_power for extruder
+    
+    
+}

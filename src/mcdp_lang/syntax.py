@@ -131,7 +131,8 @@ class SyntaxIdentifiers():
         'variable',
         'eversion',
         'poset',
-        'add_bottom'
+        'add_bottom',
+        'implements',
     ]
 
     # remember to .copy() this otherwise things don't work
@@ -291,7 +292,8 @@ class Syntax():
     mcdp_dev_warning('these variations are not tested')
     PROVIDED_BY = sp((K('provided') | K('prov.') | K('p.')) - K('by'),
                      lambda _: CDP.ProvidedByKeyword('provided by'))
-
+    
+    IMPLEMENTS = keyword('implements', CDP.ImplementsKeyword)
     PROVIDED = keyword('provided', CDP.ProvidedKeyword)
     REQUIRED = keyword('required', CDP.RequiredKeyword)
     GEQ = spk(L('>=') | L('≥') | L('≽'), CDP.geq)
@@ -1086,10 +1088,12 @@ class Syntax():
                     lambda t: CDP.IgnoreFun(t[0], t[1])).setName('ignore_fun')
     ignore_res = sp(IGNORE + rvalue_resource,
                     lambda t: CDP.IgnoreRes(t[0], t[1])).setName('ignore_res')
-
+    implements_statement = sp(IMPLEMENTS + ndpt_dp_rvalue,
+                              lambda t: CDP.Implements(t[0], t[1]) ).setName('implements_statement')
     line_expr = (
         setname_ndp_instance1 |
         setname_ndp_instance2 |
+        implements_statement |
         ((constraint_expr_geq ^ constraint_expr_leq) | constraint_invalid)
         ^
         (setname_constant ^ (
@@ -1182,16 +1186,28 @@ class Syntax():
     CATALOGUE = keyword('catalogue', CDP.FromCatalogueKeyword)
 
 #     'keyword lbrace funres table rbrace')
-    ndpt_catalogue2 = sp(CATALOGUE -
+    ndpt_catalogue2a = sp(CATALOGUE +
                          lbrace 
-                         - O(comment_model)
-                         + simple_dp_model_stats +
+                         + comment_model
+                         - # now we know 
+                         simple_dp_model_stats +
                          ZeroOrMore(catalogue_row2 + S(ow)) +
                          rbrace,
                          lambda t: CDP.Catalogue2(t[0], t[2], t[3], make_list(list(t[4:-1]), 
                                                                               where=t[-1].where),
-                                                  t[-1])).setName('ndpt_catalogue2')
-
+                                                  t[-1])).setName('ndpt_catalogue2a_comment')
+    ndpt_catalogue2b = sp(CATALOGUE +
+                         lbrace 
+                         # no comment
+                         + simple_dp_model_stats 
+                         - # now we know
+                         ZeroOrMore(catalogue_row2 + S(ow)) +
+                         rbrace,
+                         lambda t: CDP.Catalogue2(t[0], t[1], t[2], make_list(list(t[3:-1]), 
+                                                                              where=t[-1].where),
+                                                  t[-1])).setName('ndpt_catalogue2b_nocomment')
+    ndpt_catalogue2 = ndpt_catalogue2a | ndpt_catalogue2b
+    
     # f <-> r
     catalogue_row3 = sp(catalogue_func + LEFTRIGHTARROW + catalogue_res,
                         lambda t: CDP.CatalogueRow3(t[0], t[1], t[2]))

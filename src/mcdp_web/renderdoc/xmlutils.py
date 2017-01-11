@@ -6,7 +6,8 @@ from contracts import contract
 # def bs(fragment):
 #     return BeautifulSoup(fragment, 'html.parser', from_encoding='utf-8')
 def bs(fragment):
-    """ Returns the contents wrapped in an element called "fragment" """
+    """ Returns the contents wrapped in an element called "fragment".
+        Expects fragment as a str in utf-8 """
     s = '<fragment>%s</fragment>' % fragment
     parsed = BeautifulSoup(s, 'lxml', from_encoding='utf-8')
     res = parsed.html.body.fragment
@@ -14,6 +15,8 @@ def bs(fragment):
     return res
 
 def to_html_stripping_fragment(soup):
+    
+    """ Returns a string encoded in UTF-8 """
     assert soup.name == 'fragment'
     s = str(soup)
     check_html_fragment(s)

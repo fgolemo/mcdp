@@ -305,7 +305,10 @@ def findall(p, s):
     while i != -1:
         yield i
         i = s.find(p, i+1)
-        
+
+def get_suggested_space(s0):
+    """ Replaces mm^4 -> with exponent """
+            
 def get_suggested_identifier(s0):
     """ Returns the suggested form of the identifier """
     suggestion = get_suggestion_identifier(s0)

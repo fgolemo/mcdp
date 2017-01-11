@@ -64,6 +64,7 @@ p.none-available {
 }
 #library-contents tbody td:first-child { /* ndps */
 	column-count: 3;
+    /*column-width: 15em;*/
 
 }
 #library-contents tbody td:first-child /*ndps*/ code {
@@ -194,10 +195,11 @@ p.new {
 </tbody>
 
 </table>
+
 {% if  navigation['models'] %}
-<p><button id='show_previews'>Show MCDP previews</button></p>
+<p id='show_previews_container'><button id='show_previews'>Show MCDP previews</button></p>
 {% endif %}
-</td
+
 
 </div><!--
 
@@ -213,6 +215,9 @@ p.new {
 
 
 <style type='text/css'>
+    #show_previews_container {
+        margin-left: 2em;
+    }
 	div.compact {
 /*		display: block;
 		float: left;

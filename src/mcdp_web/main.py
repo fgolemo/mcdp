@@ -98,6 +98,7 @@ class WebApp(AppEditor, AppVisualization,
     def view_index(self, request):  # @UnusedVariable
         d = {}
         d['version'] = lambda: mocdp.__version__
+        d['navigation'] = self.get_navigation_links(request)
         return d
 
     def view_list(self, request):
@@ -135,6 +136,12 @@ class WebApp(AppEditor, AppVisualization,
     def view_refresh_library(self, request):
         """ Refreshes the current library (if external files have changed) 
             then reloads the current url. """
+#         self._refresh_library(request) 
+        # Note this currently is equivalent to global refresh
+        return self.view_refresh(request);
+
+    def view_refresh(self, request):
+        """ Refreshes all """
         self._refresh_library(request)
         raise HTTPFound(request.referrer)
 
@@ -289,102 +296,110 @@ class WebApp(AppEditor, AppVisualization,
             current_value = None
 
 
-
-        current_library = self.get_current_library_name(request)
+        if 'library' in request.matchdict:
+            current_library = self.get_current_library_name(request)
+            library = self.get_library(request)
+        else:
+            current_library = None
+            library = None
         
-        library = self.get_library(request)
+        
 
         d = {}
-        
-        models = self.list_of_models(request)
-        
+
         d['current_thing'] = current_thing
         d['current_library'] = current_library
         d['current_template'] = current_template
         d['current_poset'] = current_poset
         d['current_model'] = current_model
-
         d['current_view'] = current_view
 
-        documents = library._list_with_extension(MCDPLibrary.ext_doc_md)
 
-        d['documents'] = []
-        for id_doc in documents:
-            url = '/libraries/%s/%s.html' % (current_library, id_doc)
-            desc = dict(id=id_doc,id_document=id_doc, name=id_doc, url=url, current=False)
-            d['documents'].append(desc)
+        if library is not None:
+            documents = library._list_with_extension(MCDPLibrary.ext_doc_md)
+    
+            d['documents'] = []
+            for id_doc in documents:
+                url = '/libraries/%s/%s.html' % (current_library, id_doc)
+                desc = dict(id=id_doc,id_document=id_doc, name=id_doc, url=url, current=False)
+                d['documents'].append(desc)
+    
+            d['models'] = []
+            
+            VIEW_EDITOR = 'edit_fancy'
+            
+            models = self.list_of_models(request)
+            for m in natural_sorted(models):
+                is_current = m == current_model
+    
+                url = self.get_lmv_url(library=current_library,
+                                       model=m,
+                                       view='syntax')
+                url_edit =  self.get_lmv_url(library=current_library,
+                                       model=m,
+                                       view=VIEW_EDITOR)
+                name = "Model %s" % m
+                desc = dict(id=m, id_ndp=m, name=name, url=url, url_edit=url_edit, current=is_current)
+                d['models'].append(desc)
+    
+    
+            templates = library.list_templates()
+            d['templates'] = []
+            for t in natural_sorted(templates):
+                is_current = (t == current_template)
+    
+                url = self.get_lib_template_view_url(library=current_library,
+                                                     template=t,
+                                                     view='syntax')  # XXX
+                url_edit = self.get_lib_template_view_url(library=current_library,
+                                                     template=t,
+                                                     view=VIEW_EDITOR)  # XXX
+    
+                name = "Template: %s" % t
+                desc = dict(id=t, name=name, url=url, current=is_current, url_edit=url_edit)
+                d['templates'].append(desc)
+    
+            posets = library.list_posets()
+            d['posets'] = []
+            for p in natural_sorted(posets):
+                is_current = (p == current_poset)
+                url = self.get_lpv_url(library=current_library,
+                                       poset=p,
+                                       view='syntax')
+                url_edit = self.get_lpv_url(library=current_library,
+                                       poset=p,
+                                       view=VIEW_EDITOR)
+                name = "Poset: %s" % p
+                desc = dict(id=p, name=name, url=url, current=is_current, url_edit=url_edit)
+                d['posets'].append(desc)
+    
+            values = library.list_values()
+            d['values'] = []
+            for v in natural_sorted(values):
+                is_current = (v == current_value)
+                url = '/libraries/%s/values/%s/views/syntax/' % (current_library, v)
+                url_edit = '/libraries/%s/values/%s/views/%s/' % (current_library, v, VIEW_EDITOR)
+                name = "Value: %s" % v
+                desc = dict(id=v,name=name, url=url, current=is_current, url_edit=url_edit)
+                d['values'].append(desc)
+    
+    
+            d['views'] = []
+            views = self._get_views()
+            for v in views:
+                view = self.views[v]
+                is_current = v == current_view
+    
+                url = self.get_lmv_url(library=current_library,
+                                       model=current_model,
+                                       view=v)
+    
+                name = "View: %s" % view['desc']
+                desc = dict(name=name, url=url, current=is_current)
+                d['views'].append(desc)
+        # endif library not None
 
-        d['models'] = []
-        
-        VIEW_EDITOR = 'edit_fancy'
-        for m in natural_sorted(models):
-            is_current = m == current_model
 
-            url = self.get_lmv_url(library=current_library,
-                                   model=m,
-                                   view='syntax')
-            url_edit =  self.get_lmv_url(library=current_library,
-                                   model=m,
-                                   view=VIEW_EDITOR)
-            name = "Model %s" % m
-            desc = dict(id=m, id_ndp=m, name=name, url=url, url_edit=url_edit, current=is_current)
-            d['models'].append(desc)
-
-
-        templates = library.list_templates()
-        d['templates'] = []
-        for t in natural_sorted(templates):
-            is_current = (t == current_template)
-
-            url = self.get_lib_template_view_url(library=current_library,
-                                                 template=t,
-                                                 view='syntax')  # XXX
-            url_edit = self.get_lib_template_view_url(library=current_library,
-                                                 template=t,
-                                                 view=VIEW_EDITOR)  # XXX
-
-            name = "Template: %s" % t
-            desc = dict(id=t, name=name, url=url, current=is_current, url_edit=url_edit)
-            d['templates'].append(desc)
-
-        posets = library.list_posets()
-        d['posets'] = []
-        for p in natural_sorted(posets):
-            is_current = (p == current_poset)
-            url = self.get_lpv_url(library=current_library,
-                                   poset=p,
-                                   view='syntax')
-            url_edit = self.get_lpv_url(library=current_library,
-                                   poset=p,
-                                   view=VIEW_EDITOR)
-            name = "Poset: %s" % p
-            desc = dict(id=p, name=name, url=url, current=is_current, url_edit=url_edit)
-            d['posets'].append(desc)
-
-        values = library.list_values()
-        d['values'] = []
-        for v in natural_sorted(values):
-            is_current = (v == current_value)
-            url = '/libraries/%s/values/%s/views/syntax/' % (current_library, v)
-            url_edit = '/libraries/%s/values/%s/views/%s/' % (current_library, v, VIEW_EDITOR)
-            name = "Value: %s" % v
-            desc = dict(id=v,name=name, url=url, current=is_current, url_edit=url_edit)
-            d['values'].append(desc)
-
-
-        d['views'] = []
-        views = self._get_views()
-        for v in views:
-            view = self.views[v]
-            is_current = v == current_view
-
-            url = self.get_lmv_url(library=current_library,
-                                   model=current_model,
-                                   view=v)
-
-            name = "View: %s" % view['desc']
-            desc = dict(name=name, url=url, current=is_current)
-            d['views'].append(desc)
 
         libraries = self.list_libraries()
 
@@ -533,6 +548,8 @@ class WebApp(AppEditor, AppVisualization,
 
         config.add_route('refresh_library', '/libraries/{library}/refresh_library')
         config.add_view(self.view_refresh_library, route_name='refresh_library')
+        config.add_route('refresh', '/refresh')
+        config.add_view(self.view_refresh, route_name='refresh')
 
         config.add_view(self.view_exception, context=Exception, renderer='exception.jinja2')
 
