@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 from nose.tools import assert_equal
 
-from comptests.registrar import comptest, run_module_tests
+from comptests.registrar import comptest, run_module_tests, comptest_fails
 from contracts.utils import raise_desc, check_isinstance
 from mcdp_dp import (CatalogueDP, CoProductDP, NotFeasible, Template, Constant,
                      Limit, MaxF1DP, MinF1DP, MinusValueDP, MinusValueNatDP,
@@ -9,7 +9,7 @@ from mcdp_dp import (CatalogueDP, CoProductDP, NotFeasible, Template, Constant,
 from mcdp_dp import PlusValueNatDP
 from mcdp_lang.eval_warnings import MCDPWarnings
 from mcdp_lang.parse_actions import parse_wrap
-from mcdp_lang.parse_interface import parse_ndp, parse_poset
+from mcdp_lang.parse_interface import parse_ndp, parse_poset, parse_constant
 from mcdp_lang.pyparsing_bundled import Literal
 from mcdp_lang.syntax import Syntax, SyntaxIdentifiers
 from mcdp_lang.syntax_codespec import SyntaxCodeSpec
@@ -1769,7 +1769,7 @@ def spaces1():
     assert_no_whitespace(x.comment)
     assert_no_whitespace(x.rnames.e0)
 
-    string = ' 0  >=  1 ' 
+    string = ' 0  >=  2 ' 
     expr = Syntax.constraint_expr_geq
     x = parse_wrap(expr, string)[0]
 #     x2 = fix_whitespace(x)
@@ -1830,9 +1830,70 @@ def imlements2():
     assert 'f_1' in ndp.get_fnames() 
     assert 'r_1' in ndp.get_rnames()
 
+    
+@comptest_fails
+def constant_inverse_constant():
+    s = """
+    mcdp {
+        constant x = 1 / 2 m
+    }
+    """
+    parse_ndp(s)
+
+@comptest
+def constant_inverse2():
+    s = """
+    mcdp {
+        provides precision [1/mm]
+        provided precision <= 1 / 2 m
+    }
+    """
+    parse_ndp(s)
+
+@comptest
+def constant_inverse3():
+    s = """
+    mcdp {
+        provides precision [1/mm]
+        provided precision <= 1 / 2 m
+    }
+    """
+    parse_ndp(s)
 
 
+@comptest
+def constant_fvalue():
+    s = """ 1 / 2 m """
+    print parse_wrap(Syntax.constant_value_divided, s)[0]
+    
+    
+    print parse_wrap(Syntax.fvalue, s)[0]
 
+@comptest_fails
+def constant_fail():
+    s = """ 1 / 2 m """
+    print parse_wrap(Syntax.constant_value, s)[0]
+    
+@comptest_fails
+def constant_fail2():
+    s = """ 1 / 2 m """
+    print parse_wrap(Syntax.constant_value_op, s)[0]
+    
+@comptest_fails
+def constant_rvalue():
+    s = """ 1 / 2 m """
+    val = parse_wrap(Syntax.rvalue, s)[0]
+    print val
+    
+    
+@comptest_fails
+def constant_inverse():
+    s = """ 1 / 2 m """
+    val = parse_constant(s)
+    print val
+    
+    
+    
 if __name__=='__main__':
     run_module_tests()
 

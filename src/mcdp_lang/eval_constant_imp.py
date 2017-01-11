@@ -16,6 +16,7 @@ from .namedtuple_tricks import recursive_print
 from .parse_actions import decorate_add_where
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
+from mcdp_lang.misc_math import inv_constant
 
 
 CDP = CDPLanguage
@@ -70,6 +71,7 @@ def eval_constant(op, context):
         CDP.ConstantRef: eval_constant_ConstantRef,
         
         CDP.RcompConstant: eval_constant_RcompConstant,
+        CDP.ConstantDivision: eval_constant_ConstantDivision,
     }
     
     for klass, hook in cases.items():
@@ -92,6 +94,12 @@ def eval_constant_ConstantRef(rvalue, context):
     else:
         msg = 'Constant value %r not found.' % _
         raise DPSemanticError(msg, where=rvalue.where) # or internal?
+    
+def eval_constant_ConstantDivision(op, context):
+    # op1 = 1 # XXX
+    op2 = eval_constant(op.op2, context)
+    op2_inverse =  inv_constant(op2)
+    return op2_inverse
     
 def eval_constant_RcompConstant(op, context):  # @UnusedVariable
     return ValueWithUnits(unit=Rcomp(), value=op.value)

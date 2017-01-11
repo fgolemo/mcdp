@@ -642,6 +642,9 @@ class Syntax():
                            + S(O(comment_con)),
                            lambda t: CDP.SetNameConstant(t[0], t[1], t[2]))
 
+    constant_value_divided = sp('1' + BAR + constant_value,
+                                lambda t: CDP.ConstantDivision(t[0],t[1],t[2]))
+
     setname_constant = (setname_constant1 | setname_constant2).setName(
         'setname_constant')
     setname_rvalue = sp(setname_generic_var + EQ + (ELLIPSIS | rvalue)
@@ -771,7 +774,6 @@ class Syntax():
         | constant_emptyset
         | rcomp_constant  # after valuewithunit
         # after valuewithunit and rcomp_constant
-        | nat_constant2
     )
     definitely_constant_value_operand = (
         collection_of_constants
@@ -1415,7 +1417,8 @@ class Syntax():
         ^ lf_tuple_indexing
         ^ fvalue_any_of
         ^ fvalue_placeholder
-        ^ fvalue_generic_op)
+        ^ fvalue_generic_op
+        ^ constant_value_divided)
 
     # here we cannot use "|" because otherwise (cokode).id is not
     # parsedcorrectly

@@ -22,6 +22,7 @@ def inv_unit(S):
     res = RcompUnits(1 / S.units, string)
     return res
 
+@contract(returns=ValueWithUnits, a =ValueWithUnits)
 def inv_constant(a):
     if a.unit == Nat():
         raise NotImplementedError('division by natural number')

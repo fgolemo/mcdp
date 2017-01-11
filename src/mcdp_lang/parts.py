@@ -66,6 +66,7 @@ class CDPLanguage():
     DPInstance = namedtuplewhere('DPInstance', 'keyword dp_rvalue')
     DPInstanceFromLibrary = namedtuplewhere('DPInstanceFromLibrary', 'keyword dpname')
 
+    ConstantDivision = namedtuplewhere('ConstantDivision', 'op1 bar op2')
     PlusN = namedtuplewhere('PlusN', 'ops')
     MultN = namedtuplewhere('MultN', 'ops')
     RValueMinusN = namedtuplewhere('RValueMinusN', 'ops')

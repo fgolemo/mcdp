@@ -464,3 +464,27 @@ catalogue {
 }
 
 - manual: construction top-down, bottom up, or coarse to fine
+   provided precision <= 1 / (0.5 mm)
+
+
+- bold constant
+
+- extruder image
+- compile!
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
