@@ -1171,9 +1171,9 @@ class Syntax():
     entry = rvalue
     imp_name = sp(get_idn(), lambda t: CDP.ImpName(t[0]))
     col_separator = L('|') | L('│')  # box drawing
-    catalogue_row = sp(imp_name +
-                       ZeroOrMore(S(col_separator) + entry),
-                       lambda t: make_list(list(t)))
+#     catalogue_row = sp(imp_name +
+#                        ZeroOrMore(S(col_separator) + entry),
+#                        lambda t: make_list(list(t)))
 
     catalogue_func = sp(constant_value + ZeroOrMore(COMMA + constant_value),
                         lambda t: CDP.CatalogueFunc(make_list(list(t))))
@@ -1182,8 +1182,8 @@ class Syntax():
     catalogue_row2 = sp(catalogue_func + MAPSFROM - imp_name - MAPSTO - catalogue_res,
                         lambda t: CDP.CatalogueRowMapsfromto(t[0], t[1], t[2], t[3], t[4]))
 
-    catalogue_table = sp(OneOrMore(catalogue_row),
-                         lambda t: CDP.CatalogueTable(make_list(list(t))))
+#     catalogue_table = sp(OneOrMore(catalogue_row),
+#                          lambda t: CDP.CatalogueTable(make_list(list(t))))
 
     CATALOGUE = keyword('catalogue', CDP.FromCatalogueKeyword)
 
@@ -1191,7 +1191,7 @@ class Syntax():
     ndpt_catalogue2a = sp(CATALOGUE +
                          lbrace 
                          + comment_model
-                         - # now we know 
+                         + # now we know 
                          simple_dp_model_stats +
                          ZeroOrMore(catalogue_row2 + S(ow)) +
                          rbrace,
@@ -1202,7 +1202,7 @@ class Syntax():
                          lbrace 
                          # no comment
                          + simple_dp_model_stats 
-                         - # now we know
+                         + # now we don't know beacuse of catalogu3
                          ZeroOrMore(catalogue_row2 + S(ow)) +
                          rbrace,
                          lambda t: CDP.Catalogue2(t[0], t[1], t[2], make_list(list(t[3:-1]), 
@@ -1222,12 +1222,12 @@ class Syntax():
                          lambda t: CDP.Catalogue3(t[0], t[1], t[2], make_list(list(t[3:-1]), where=t[-1].where),
                                                   t[-1])).setName('ndpt_catalogue3')
 
-    ndpt_catalogue_dp = sp(CATALOGUE +
-                           S(lbrace) +
-                           simple_dp_model_stats +
-                           catalogue_table +
-                           S(rbrace),
-                           lambda t: CDP.FromCatalogue(t[0], t[1], t[2])).setName('ndpt_catalogue_dp')
+#     ndpt_catalogue_dp = sp(CATALOGUE +
+#                            S(lbrace) +
+#                            simple_dp_model_stats +
+#                            catalogue_table +
+#                            S(rbrace),
+#                            lambda t: CDP.FromCatalogue(t[0], t[1], t[2])).setName('ndpt_catalogue_dp')
     # Example:
     #    choose(name: <dp>, name2: <dp>)
     CHOOSE = keyword('choose', CDP.CoproductWithNamesChooseKeyword)
@@ -1357,7 +1357,7 @@ class Syntax():
         ndpt_abstract |
         ndpt_template |
         ndpt_compact |
-        ndpt_catalogue_dp |
+#         ndpt_catalogue_dp |
         ndpt_catalogue2 |
         ndpt_catalogue3 |
         ndpt_approx_lower |

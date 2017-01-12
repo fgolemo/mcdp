@@ -480,9 +480,16 @@ catalogue {
   http://127.0.0.1:8080/libraries/basic/models/all_icons2/views/edit_fancy/
 
 - use subscript in figure (also needs to change highlight code)
-http://127.0.0.1:8080/libraries/basic/models/all_icons2/views/syntax/
+  http://127.0.0.1:8080/libraries/basic/models/all_icons2/views/syntax/
 
+  - manual
 
+  catalogue {
+      provides f1 [m]    
+      requires r1 [g]
+      10 m ⟷ 1 g
+      10 m <-> 1 g
+  }
 
 
 
