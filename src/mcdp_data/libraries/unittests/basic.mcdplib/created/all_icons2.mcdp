@@ -8,7 +8,7 @@ mcdp {
     provides f3 [ ℕ]
     requires r3 [ℕ]
     p_1 = instance `empty
-     
+    
     provides f4 [ ℕ]
     requires r4 [ℕ]
     

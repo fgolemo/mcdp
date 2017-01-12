@@ -4,21 +4,21 @@ import sys
 import traceback
 
 from decorator import decorator
+from nose.tools import assert_equal
 
 from contracts import contract
 from contracts.interface import Where, line_and_col, location
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mocdp import logger, MCDPConstants
 from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
-    MCDPExceptionWithWhere, do_extra_checks, mcdp_dev_warning)
+                              MCDPExceptionWithWhere, do_extra_checks, mcdp_dev_warning)
 
+from .fix_whitespace_imp import fix_whitespace
 from .namedtuple_tricks import get_copy_with_where, recursive_print
 from .parts import CDPLanguage
 from .pyparsing_bundled import ParseException, ParseFatalException
 from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list, unwrap_list
-from nose.tools import assert_equal
-from mcdp_lang.fix_whitespace_imp import fix_whitespace
 
 
 CDP = CDPLanguage

@@ -1,21 +1,22 @@
 # -*- coding: utf-8 -*-
 
+from collections import namedtuple
+
+from bs4.element import Declaration, ProcessingInstruction, Doctype, Comment,\
+    Tag
+
+from mcdp_lang.namedtuple_tricks import recursive_print
+from mcdp_lang.parts import CDPLanguage
+from mcdp_lang.utils_lists import unwrap_list
 from mcdp_library import MCDPLibrary
 from mcdp_library_tests.tests import timeit_wall
 from mcdp_report.html import ast_to_html
 from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
+from mcdp_web.renderdoc.highlight import add_style
+from mcdp_web.renderdoc.xmlutils import to_html_stripping_fragment, bs
 from mcdp_web.utils.response import response_data
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSyntaxError, DPSemanticError
-from mcdp_web.renderdoc.xmlutils import to_html_stripping_fragment, bs
-import bs4
-from bs4.element import Declaration, ProcessingInstruction, Doctype, Comment,\
-    Tag
-from mcdp_lang.namedtuple_tricks import recursive_print
-from mcdp_lang.utils_lists import unwrap_list
-from mcdp_lang.parts import CDPLanguage
-from collections import namedtuple
-from mcdp_web.renderdoc.highlight import add_style
 
 
 class AppVisualization():

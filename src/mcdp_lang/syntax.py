@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
-from mcdp_lang.pyparsing_bundled import QuotedString
+from contracts.utils import check_isinstance
+from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts
+from mcdp_lang.parse_actions import integer_fraction_from_superscript
+from mcdp_lang.pyparsing_bundled import QuotedString, ParseExpression
 from mocdp.exceptions import mcdp_dev_warning
 
 from .parse_actions import (divide_parse_action,
@@ -17,9 +20,6 @@ from .pyparsing_bundled import (
 from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
 from .utils_lists import make_list
-from mcdp_lang.parse_actions import integer_fraction_from_superscript
-from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts
-from contracts.utils import check_isinstance
 
 
 ParserElement.enablePackrat()
@@ -330,8 +330,8 @@ class Syntax():
     pint_unit_base = NotAny(
         oneOf(SyntaxIdentifiers.keywords + ['x'])) + pint_alphas
     pint_unit_base.setWhitespaceChars(' ')
-    pint_unit_power = (L('^') + Word(nums)) | L('¹') | L('²') |  L('³') |  L('⁴') | \
-        L('⁵') | L('⁶') | L('⁷') | L('⁸') | L('⁹')
+    pint_unit_power = ((L('^') + Word(nums)) | L('¹') | L('²') |  L('³') |  L('⁴') | \
+        L('⁵') | L('⁶') | L('⁷') | L('⁸') | L('⁹')).setName('pint_unit_power')
     pint_unit_simple = pint_unit_base + O(pint_unit_power)
     pint_unit_simple.setWhitespaceChars(' ')
     pint_unit_connector = L('/') | L('*')
@@ -555,17 +555,17 @@ class Syntax():
     BOTTOM = spk(K(BOTTOM_LITERAL) | K('⊥'), CDP.BottomKeyword)
 
     valuewithunit_bottom = sp(BOTTOM + space,
-                              lambda t: CDP.Bottom(t[0], t[1]))
+                              lambda t: CDP.Bottom(t[0], t[1])).setName('valuewithunit_bottom')
 
     # Minimals <space>
     MINIMALS = keyword('Minimals', CDP.MinimalsKeyword)
     valuewithunit_minimals = sp(MINIMALS + space,
-                                lambda t: CDP.Minimals(t[0], t[1]))
+                                lambda t: CDP.Minimals(t[0], t[1])).setName('valuewithunit_minimals')
 
     # Maximals <space>
     MAXIMALS = keyword('Maximals', CDP.MaximalsKeyword)
     valuewithunit_maximals = sp(MAXIMALS + space,
-                                lambda t: CDP.Maximals(t[0], t[1]))
+                                lambda t: CDP.Maximals(t[0], t[1])).setName('valuewithunit_maximals')
 
     valuewithunit = (
         valuewithunit_top |
@@ -740,22 +740,22 @@ class Syntax():
     ASSERT_EMPTY = keyword('assert_empty', CDP.AssertEmptyKeyword)
 
     assert_equal = sp(ASSERT_EQUAL - SLPAR - constant_value - SCOMMA - constant_value - SRPAR,
-                      lambda t: CDP.AssertEqual(keyword=t[0], v1=t[1], v2=t[2]))
+                      lambda t: CDP.AssertEqual(keyword=t[0], v1=t[1], v2=t[2])).setName('assert_equal')
     assert_leq = sp(ASSERT_LEQ - SLPAR - constant_value - SCOMMA - constant_value - SRPAR,
-                    lambda t: CDP.AssertLEQ(keyword=t[0], v1=t[1], v2=t[2]))
+                    lambda t: CDP.AssertLEQ(keyword=t[0], v1=t[1], v2=t[2])).setName('assert_leq')
     assert_geq = sp(ASSERT_GEQ - SLPAR + constant_value - SCOMMA - constant_value - SRPAR,
-                    lambda t: CDP.AssertGEQ(keyword=t[0], v1=t[1], v2=t[2]))
+                    lambda t: CDP.AssertGEQ(keyword=t[0], v1=t[1], v2=t[2])).setName('assert_geq')
     assert_lt = sp(ASSERT_LT - SLPAR + constant_value - SCOMMA - constant_value - SRPAR,
-                   lambda t: CDP.AssertLT(keyword=t[0], v1=t[1], v2=t[2]))
+                   lambda t: CDP.AssertLT(keyword=t[0], v1=t[1], v2=t[2])).setName('assert_lt')
     assert_gt = sp(ASSERT_GT - SLPAR + constant_value - SCOMMA - constant_value - SRPAR,
-                   lambda t: CDP.AssertGT(keyword=t[0], v1=t[1], v2=t[2]))
+                   lambda t: CDP.AssertGT(keyword=t[0], v1=t[1], v2=t[2])).setName('assert_gt')
     assert_nonempty = sp(ASSERT_NONEMPTY - SLPAR - constant_value - SRPAR,
-                         lambda t: CDP.AssertNonempty(keyword=t[0], value=t[1]))
+                         lambda t: CDP.AssertNonempty(keyword=t[0], value=t[1])).setName('assert_nonempty')
     assert_empty = sp(ASSERT_EMPTY - SLPAR - constant_value - SRPAR,
-                      lambda t: CDP.AssertEmpty(keyword=t[0], value=t[1]))
+                      lambda t: CDP.AssertEmpty(keyword=t[0], value=t[1])).setName('assert_empty')
 
     asserts = (assert_equal | assert_leq | assert_leq | assert_geq
-               | assert_lt | assert_gt | assert_nonempty | assert_empty)
+               | assert_lt | assert_gt | assert_nonempty | assert_empty).setName('asserts')
 
     constant_value_op = (
         collection_of_constants
@@ -773,7 +773,7 @@ class Syntax():
         | constant_placeholder
         | constant_emptyset
         | rcomp_constant  # after valuewithunit
-        # after valuewithunit and rcomp_constant
+        | nat_constant2   # after valuewithunit and rcomp_constant
     )
     definitely_constant_value_operand = (
         collection_of_constants
@@ -966,7 +966,7 @@ class Syntax():
                              lambda t: CDP.PowerShort(op1=t[0], glyph=t[1], exponent=t[2]))
 
     superscripts = sp(oneOf(['²', '³', '⁴', '⁵', '⁶', '⁷', '⁸', '⁹']),
-                      lambda t: integer_fraction_from_superscript(t[0]))
+                      lambda t: integer_fraction_from_superscript(t[0])).setName('superscripts')
 
     rvalue_power_expr_3 = sp(rvalue_power_base + superscripts,
                              lambda t: CDP.PowerShort(op1=t[0], glyph=None,
@@ -1430,3 +1430,9 @@ class Syntax():
         (PLUS, 2, opAssoc.LEFT, plus_inv_parse_action),
         (MINUS, 2, opAssoc.LEFT, fvalue_minus_parse_action),
     ])
+
+for x, expr in Syntax.__dict__.items():  # @UndefinedVariable
+    #print x, type(expr)
+    if isinstance(expr, ParseExpression):
+        #print('setting name %s' % expr)
+        expr.setName(x)
