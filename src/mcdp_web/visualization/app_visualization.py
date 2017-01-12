@@ -7,6 +7,15 @@ from mcdp_web.editor_fancy.app_editor_fancy_generic import specs
 from mcdp_web.utils.response import response_data
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSyntaxError, DPSemanticError
+from mcdp_web.renderdoc.xmlutils import to_html_stripping_fragment, bs
+import bs4
+from bs4.element import Declaration, ProcessingInstruction, Doctype, Comment,\
+    Tag
+from mcdp_lang.namedtuple_tricks import recursive_print
+from mcdp_lang.utils_lists import unwrap_list
+from mcdp_lang.parts import CDPLanguage
+from collections import namedtuple
+from mcdp_web.renderdoc.highlight import add_style
 
 
 class AppVisualization():
@@ -80,20 +89,7 @@ class AppVisualization():
             'views': self._get_views(),
             'navigation': self.get_navigation_links(request),
         }
-
-#     def view_model_dp_graph(self, request):
-#         return {
-#             'model_name': self.get_model_name(),
-#             'views': self._get_views(),
-#             'navigation': self.get_navigation_links(request)
-#         }
-#     
-#     def view_model_dp_tree(self, request):
-#         return {
-#             'model_name': self.get_model_name(),
-#             'views': self._get_views(),
-#             'navigation': self.get_navigation_links(request)
-#         }
+ 
 
     def view_model_ndp_repr(self, request):
         model_name = str(request.matchdict['model_name'])  # unicode
@@ -115,7 +111,7 @@ class AppVisualization():
         expr = spec.parse_expr
         parse_refine = spec.parse_refine
 
-        res = self._generate_view_syntax(request, name, ext, expr, parse_refine, spec.url_part)
+        res = self._generate_view_syntax(request, name, ext, expr, parse_refine, spec)
         return res
 
     def generate_graph(self, request, spec):
@@ -145,9 +141,11 @@ class AppVisualization():
                 return response_data(request, data, mime)
         return self.png_error_catch2(request, go)
     
-    def _generate_view_syntax(self, request, name, ext, expr, parse_refine, url_part):
+    def _generate_view_syntax(self, request, name, ext, expr, parse_refine, spec):
+        url_part = spec.url_part
         filename = '%s.%s' % (name, ext)
         l = self.get_library(request)
+        library_name = self.get_current_library_name(request)
         f = l._get_file_data(filename)
         source_code = f['data']
         realpath = f['realpath']
@@ -167,13 +165,14 @@ class AppVisualization():
             html2 = None
             
         context = Context()
-
+        class Tmp:
+            refined = None
         def postprocess(block):
             if parse_refine is None:
                 return block
             try:
-                x= parse_refine(block, context) 
-                return x
+                Tmp.refined = parse_refine(block, context) 
+                return Tmp.refined
             except DPSemanticError:
                 return block 
               
@@ -194,8 +193,55 @@ class AppVisualization():
         url_edit = ("/libraries/%s/%s/%s/views/edit_fancy/" %  
                     (navigation['current_library'],
                      url_part,
-                     name))
-
+                     name)) 
+        context = l._generate_context_with_hooks()
+        thing = spec.load(l, name, context=context)
+        with timeit_wall('graph_generic - get_png_data', 1.0):
+            svg_data0 = spec.get_png_data_syntax(l, name, thing, data_format='svg')
+            fragment = bs(svg_data0)
+            assert fragment.svg is not None
+#             if True:
+#                 for a in ['width', 'height']:
+#                     if a in fragment.svg.attrs:
+#                         del fragment.svg.attrs[a]
+#                         c = Comment('Removed attribute %r' % a)
+#                         fragment.svg.insert_before(c)
+            if True:
+                style = {}
+                for a in ['width', 'height']:
+                    if a in fragment.svg.attrs:
+                        value = fragment.svg.attrs[a]
+                        del fragment.svg.attrs[a]
+                        style['max-%s' %a ]= value
+                add_style(fragment.svg, **style)
+                    
+            for e in list(fragment):
+                remove = (Declaration, ProcessingInstruction, Doctype)
+                if isinstance(e, remove):
+                    c = Comment('Removed object of type %s' % type(e).__name__)
+                    e.replace_with(c)
+            remove_all_titles(fragment.svg)
+            
+            if Tmp.refined is not None:
+                table = identifier2ndp(Tmp.refined)
+            else:
+                print('no refined available')
+                table = {}
+            print table
+            def link_for_dp_name(identifier0):
+                identifier = identifier0 # todo translate
+                if identifier in table:
+                    a = table[identifier]
+                    libname = a.libname if a.libname is not None else library_name
+                    href = self.get_lmv_url(libname, a.name, 'syntax')
+                    #href = '/libraries/%s/models/%s/views/syntax/' %(libname, name)
+                    return href
+                else:
+                    return None
+                                        
+            
+            add_html_links_to_svg(fragment.svg, link_for_dp_name)
+            svg_data = to_html_stripping_fragment(fragment)
         res= {
             'source_code': source_code,
             'error': unicode(error, 'utf-8'),
@@ -205,8 +251,8 @@ class AppVisualization():
             'current_view': 'syntax',
             'explanation1_html': html1,
             'explanation2_html': html2,
+            'svg_data': unicode(svg_data, 'utf-8'),
             'url_edit': url_edit,
- 
         }
         return res
 
@@ -357,4 +403,86 @@ class AppVisualization():
 
         return soup.prettify()
 
+def remove_all_titles(svg):
+    assert isinstance(svg, Tag) and svg.name == 'svg'
+    for e in svg.select('[title]'):
+        del e.attrs['title']
+    for e in svg.select('title'):
+        e.extract()
 
+def add_html_links_to_svg(svg, link_for_dpname):
+    assert isinstance(svg, Tag) and svg.name == 'svg'
+    
+    def enclose_in_link(element, href):
+        a = Tag(name='a')
+        a['href'] = href
+        a.append(element.__copy__())
+        element.replace_with(a)
+        
+#     <text font-family="Anka/Coder Narrow" font-size="14.00" text-anchor="start" x="421.092" y="-863.288">nozzle</text>
+    for e in svg.select('text'):
+        t = e.text.encode('utf-8')
+        is_identifier = not ' ' in t and not '[' in t
+        if is_identifier:
+            href = link_for_dpname(t)
+            if href is not None:
+                s0 = e.next_sibling
+                while s0 != None:
+                    if isinstance(s0, Tag) and s0.name == 'image':
+                        enclose_in_link(s0, href)
+                        break
+                    s0 = s0.next_sibling
+                
+                enclose_in_link(e, href)
+                
+                
+        
+
+LibnameName = namedtuple('LibnameName', 'libname name')
+   
+CDP = CDPLanguage
+def identifier2ndp(xr):
+    """ Returns a map identifier -> (libname, ndpname) where libname can be None """
+    
+    res = {}
+    
+    if isinstance(xr, CDP.BuildProblem):
+        for s in unwrap_list(xr.statements.statements):
+            if isinstance(s, CDP.SetNameNDPInstance):
+                print recursive_print(s)
+                name = s.name.value
+                ndp = s.dp_rvalue
+                if isinstance(ndp, CDP.DPInstance):
+                    if isinstance(ndp.dp_rvalue, CDP.LoadNDP):
+                        load_arg = ndp.dp_rvalue.load_arg
+                        res[name] = get_from_load_arg(load_arg)
+                elif isinstance(ndp, CDP.CoproductWithNames):
+                    look_in_coproduct_with_names(ndp, res)
+                    
+    elif isinstance(xr, CDP.CoproductWithNames):
+        look_in_coproduct_with_names(xr, res)
+    return res
+
+def get_from_load_arg(load_arg):
+    if isinstance(load_arg, CDP.NDPName):
+        model = load_arg.value
+        libname = None
+    elif isinstance(load_arg, CDP.NDPNameWithLibrary):
+        libname =load_arg.library.value 
+        model = load_arg.name.value
+    else:
+        raise Exception(recursive_print(load_arg))
+    return LibnameName(libname, model)
+
+def look_in_coproduct_with_names(x, res):
+    assert isinstance(x, CDP.CoproductWithNames)
+
+    ops = unwrap_list(x.elements)
+    nops = len(ops)
+    n = nops/2
+    for i in range(n):
+        e, load = ops[i*2], ops[i*2 +1]
+        assert isinstance(e, CDP.CoproductWithNamesName)
+        name = e.value
+        res[name] = get_from_load_arg(load.load_arg)
+                

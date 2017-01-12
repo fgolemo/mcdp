@@ -1,3 +1,4 @@
+{% set format = 'png' %}
 <!DOCTYPE html>
 
 <html lang="en">
@@ -66,7 +67,7 @@
 </td>
 	<td style='border: solid 0px gray;  position:fixed; ' width='49%' rowspan=2>
 	  <div style='height: 100%; margin: 0; width: 100%; text-align: center; border: solid 0px blue;'>
-	  <a id='graph' href="graph.png">
+	  <a id='graph' href="graph.{{format}}">
 	  	<img src='/static/white.png' style='max-height: 95vh; max-width: 100%'/>
 	  </a>
 	  	<script type='text/javascript'>
@@ -111,8 +112,6 @@
 
 	$(document).ready(function() {
 
-          // console.log('disabling tooltip')
-		// $(document).tooltip();
 		$("#editor").keyup(keyup);
 		$("button#close" ).click(click_button_close);
 		$("button#save" ).click(click_button_save);
@@ -128,11 +127,11 @@
 	    $('#allcontents').css('visibility', 'visible');
 	});
 
-	function show_tooltip(obj, s) {
-		console.log('tooltip' + s);
-		// $( obj ).tooltip(); //{'content': c});
+	//function show_tooltip(obj, s) {
+	//	console.log('tooltip' + s);
+	//	// $( obj ).tooltip(); //{'content': c});
+	//}
 
-	}
 	function current_text() {
 		text = $("#editor").text();
 
@@ -265,6 +264,7 @@
 
 		$(".ui-tooltip").hide();
 		$("#editor").html(highlight);
+         $("#editor").tooltip();
 
 		editor = $("#editor").get(0);
 		elements = get_elements(editor);
@@ -461,7 +461,7 @@
 	function update_image() {
 		text = current_text();
 		hash = hex_sha1(text);
-		url = "graph.png?"+hash;
+		url = "graph.{{format}}?"+hash;
 		// $("a#graph").attr("href", url);
 		$("a#graph img").prop('src', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==');
 		$("a#graph img").prop("src", url);

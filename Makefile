@@ -98,3 +98,8 @@ naked-prints:
 
 list-ignored:
 	git status --ignored src | grep -v pyc | grep -v .DS_Store | grep -v out/ | grep -v .compmake_history.txt | grep -v _cached | grep -v .egg-info
+
+
+big-files-in-git:
+	git rev-list --objects --all | grep "$(git verify-pack -v .git/objects/pack/*.idx | sort -k 3 -n | tail -10 | awk '{print$1}')"
+

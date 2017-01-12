@@ -1,16 +1,16 @@
 mcdp {
-   provides f [Nat]
-   requires r [Nat]  
-   provides f2 [Nat]
-   provided f2 <= Nat: 2 
-   required r >= provided f
-
-   provides f3 [ Nat]
-   requires r3 [Nat]
-
-
-   provides f4 [ Nat]
-   requires r4 [Nat]
-
-   provided f4 <= required r4 * Nat: 4
+    provides f [ℕ]
+    requires r [ℕ]  
+    provides f2 [ℕ]
+    provided f2 ≼ ℕ: 2 
+    required r ≽ provided f
+    
+    provides f3 [ ℕ]
+    requires r3 [ℕ]
+    p_1 = instance `empty
+     
+    provides f4 [ ℕ]
+    requires r4 [ℕ]
+    
+    provided f4 ≼ required r4 · ℕ: 4
 }

@@ -1,4 +1,4 @@
-<meta name="mcdp-library" content='first_try'/>
+<!-- <meta name="mcdp-library" content='fabrication'/> -->
 
 <!-- # Simplified model for 3D printer design  {#sec:3dprinter} -->
 
@@ -6,15 +6,15 @@
 ## Extruder
 
 <col1>
-    <render class='ndp_graph_templatized_labeled'>`Extruder</render>
-    <pre class='mcdp' np id='Extruder' label='Extruder.mcdp' figure-id="code:Extruder"></pre>
+    <render class='ndp_graph_templatized_labeled'>`FDM_library.Extruder</render>
+    <pre class='mcdp' np id='FDM_library.Extruder' label='Extruder.mcdp' figure-id="code:Extruder"></pre>
 </col1>
 
 <col1>
-<render class='ndp_graph_templatized_labeled_TB'>`Extruder</render>
+<render class='ndp_graph_templatized_labeled_TB'>`FDM_library.Extruder</render>
 <render class='ndp_graph_enclosed_TB' style='width: 5in'
     figure-id='fig:Extruder'>
-    `Extruder
+    `FDM_library.Extruder
 </render>
 </col1>
 
@@ -33,8 +33,8 @@
 ## Liquefier
 
 <col1>
-    <render class='ndp_graph_templatized_labeled'>`Liquefier</render>
-    <pre class='mcdp' id='Liquefier'  label='Liquefier.mcdp' figure-id="code:Liquefier"></pre>
+    <render class='ndp_graph_templatized_labeled'>`FDM_library.Liquefier</render>
+    <pre class='mcdp' id='FDM_library.Liquefier'  label='Liquefier.mcdp' figure-id="code:Liquefier"></pre>
 </col1>
 
 
@@ -50,8 +50,8 @@
 This is meant to describe filaments, etc.
 
 <col1>
-    <render class='ndp_graph_templatized_labeled'>`Materials</render>
-    <pre class='mcdp' id='Materials' label='Materials.mcdp' figure-id="code:Materials"></pre>
+    <render class='ndp_graph_templatized_labeled'>`FDM_library.Materials</render>
+    <pre class='mcdp' id='FDM_library.Materials' label='Materials.mcdp' figure-id="code:Materials"></pre>
 </col1>
 
 
@@ -65,8 +65,8 @@ This is meant to describe filaments, etc.
 
 
 <col1>
-    <render class='ndp_graph_templatized_labeled'>`Motor</render>
-    <pre class='mcdp' id='Motor' label='Motor.mcdp' figure-id="code:Motor"></pre>
+    <render class='ndp_graph_templatized_labeled'>`mechanisms.Motor</render>
+    <pre class='mcdp' id='mechanisms.Motor' label='Motor.mcdp' figure-id="code:Motor"></pre>
 </col1>
 
 
@@ -75,7 +75,7 @@ This is meant to describe filaments, etc.
     figure-id='fig:Motor'>
     `Motor
 </render> -->
-
+<!--
 ## Transmission
 
 
@@ -83,7 +83,7 @@ This is meant to describe filaments, etc.
 <col1>
     <render class='ndp_graph_templatized_labeled'>`Transmission</render>
     <pre class='mcdp' id='Transmission' label='Transmission.mcdp' figure-id="code:Transmission"></pre>
-</col1>
+</col1> -->
 
 <!--
 <render class='ndp_graph_enclosed_TB'
@@ -95,11 +95,14 @@ This is meant to describe filaments, etc.
 
 
 <col1>
-    <render class='ndp_graph_templatized_labeled'>`Nozzle</render>
-    <pre class='mcdp' id='Nozzle' label='Nozzle.mcdp' figure-id="code:Nozzle"></pre>
+    <render class='ndp_graph_templatized_labeled'>`FDM_library.Nozzle</render>
+    <pre class='mcdp' id='FDM_library.Nozzle' label='Nozzle.mcdp' figure-id="code:Nozzle"></pre>
 </col1>
 
-
+<col1>
+<render class='ndp_graph_enclosed_TB'>`fabrication.FDM_design_moving_plate</render>
+    <pre class='mcdp' id='FDM_design_moving_plate.mcdp'>`fabrication.FDM_design_moving_plate</pre>
+</col1>
 <!--
 <render class='ndp_graph_enclosed_TB'
     figure-id='fig:Nozzle'>

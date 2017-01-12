@@ -7,7 +7,6 @@ import sys
 from tempfile import mkdtemp
 import textwrap
 import traceback
-import warnings
 
 from bs4 import BeautifulSoup
 import bs4
@@ -737,8 +736,15 @@ def highlight_mcdp_code(library, frag, realpath, generate_pdf=False, raise_error
                         
                     # load it
                     tag_id = tag['id'].encode('utf-8')
-                    basename = '%s.%s' % (tag_id, extension)
-                    data = library._get_file_data(basename)
+                    if '.' in tag_id:
+                        i = tag_id.index('.')
+                        libname, name = tag_id[:i], tag_id[i+1:]
+                        use_library = library.load_library(libname)
+                    else:
+                        name = tag_id
+                        use_library= library
+                    basename = '%s.%s' % (name, extension)
+                    data = use_library._get_file_data(basename)
                     source_code = data['data']
                 else:
                     source_code = get_source_code(tag)
@@ -1277,12 +1283,14 @@ def create_a_to_data(download, data_format, data):
     attrs = dict(href=href, download=download)
     return Tag(name='a', attrs=attrs)
 
+
 def create_img_png_base64(png, **attrs):
     encoded = base64.b64encode(png)
     src = 'data:image/png;base64,%s' % encoded
     attrs = dict(**attrs)
     attrs['src'] =src
     return Tag(name='img', attrs=attrs)
+
 
 def bool_from_string(b):
     yes = ['True', 'true', '1', 'yes']

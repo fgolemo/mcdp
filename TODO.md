@@ -1,3 +1,6 @@
+
+
+
 Keys:
 
 - R: refactoring / reorganization
@@ -467,19 +470,17 @@ catalogue {
    provided precision <= 1 / (0.5 mm)
 
 
-- bold constant
-
-- extruder image
-- compile!
+- remove attrs in ast_to_html c="696" ce="704" 
 
 
+- suggestions of subscripts for identifiers
 
 
+- fancy_editor: warning if something disconnected
+  http://127.0.0.1:8080/libraries/basic/models/all_icons2/views/edit_fancy/
 
-
-
-
-
+- use subscript in figure (also needs to change highlight code)
+http://127.0.0.1:8080/libraries/basic/models/all_icons2/views/syntax/
 
 
 

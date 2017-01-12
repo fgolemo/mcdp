@@ -2,7 +2,7 @@ mcdp {
     implements `PartProducerInterface
     
     # extruder 
-    extruder = instance `FDM_library.Extruder2
+    extruder = instance `FDM_library.Extruder
     min_workspace= provided part_length
     
     part_volume = (provided part_length)³
