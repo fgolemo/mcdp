@@ -405,43 +405,43 @@ def add_html_links_to_svg(svg, link_for_dpname):
                 
                 
         
-
+# with timeit_wall('graph_generic - get_png_data', 1.0):
 def get_svg_for_visualization(library, library_name, spec, name, thing, refined):
-    with timeit_wall('graph_generic - get_png_data', 1.0):
-        svg_data0 = spec.get_png_data_syntax(library, name, thing, data_format='svg')
-        fragment = bs(svg_data0)
-        assert fragment.svg is not None 
-        style = {}
-        for a in ['width', 'height']:
-            if a in fragment.svg.attrs:
-                value = fragment.svg.attrs[a]
-                del fragment.svg.attrs[a]
-                style['max-%s' %a ]= value
-        add_style(fragment.svg, **style)
-                
-        remove_doctype_etc(fragment)
-        remove_all_titles(fragment.svg)
-        
-        if refined is not None:
-            table = identifier2ndp(refined)
-        else:
-            table = {}
+
+    svg_data0 = spec.get_png_data_syntax(library, name, thing, data_format='svg')
+    fragment = bs(svg_data0)
+    assert fragment.svg is not None 
+    style = {}
+    for a in ['width', 'height']:
+        if a in fragment.svg.attrs:
+            value = fragment.svg.attrs[a]
+            del fragment.svg.attrs[a]
+            style['max-%s' %a ]= value
+    add_style(fragment.svg, **style)
             
-        print table
-        def link_for_dp_name(identifier0):
-            identifier = identifier0 # todo translate
-            if identifier in table:
-                a = table[identifier]
-                libname = a.libname if a.libname is not None else library_name
+    remove_doctype_etc(fragment)
+    remove_all_titles(fragment.svg)
+    
+    if refined is not None:
+        table = identifier2ndp(refined)
+    else:
+        table = {}
+        
+#         print table
+    def link_for_dp_name(identifier0):
+        identifier = identifier0 # todo translate
+        if identifier in table:
+            a = table[identifier]
+            libname = a.libname if a.libname is not None else library_name
 #                 href = self.get_lmv_url(libname, a.name, 'syntax')
-                href = '/libraries/%s/models/%s/views/syntax/' % (libname, a.name)
-                return href
-            else:
-                return None
-                                    
-        add_html_links_to_svg(fragment.svg, link_for_dp_name)
-        svg_data = to_html_stripping_fragment(fragment)
-        return svg_data
+            href = '/libraries/%s/models/%s/views/syntax/' % (libname, a.name)
+            return href
+        else:
+            return None
+                                
+    add_html_links_to_svg(fragment.svg, link_for_dp_name)
+    svg_data = to_html_stripping_fragment(fragment)
+    return svg_data
     
 LibnameName = namedtuple('LibnameName', 'libname name')
    

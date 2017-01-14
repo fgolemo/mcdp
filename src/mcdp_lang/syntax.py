@@ -138,7 +138,7 @@ class SyntaxIdentifiers():
 
     # remember to .copy() this otherwise things don't work
     not_keyword = NotAny(
-        MatchFirst([Keyword(_) for _ in keywords])).setName('not_keyword')
+        MatchFirst([Keyword(_) for _ in keywords]))
 
     """ 
         Valid identifiers:
@@ -160,9 +160,9 @@ class SyntaxIdentifiers():
     last_letter = list('_' + alphanums) + greek + subs
 
     combined = Combine(
-        oneOf(first_letter) + O(Word(''.join(mid_letter))) + O(oneOf(last_letter))).setName('combined')
+        oneOf(first_letter) + O(Word(''.join(mid_letter))) + O(oneOf(last_letter)))
     _identifier = sp(combined,
-                     lambda t: decode_identifier(t[0])).setName('identifier')
+                     lambda t: decode_identifier(t[0]))
 
     _idn = (
         not_keyword + _identifier).setName('identifier except keywords')
@@ -174,7 +174,7 @@ class SyntaxIdentifiers():
     normal_identifier_first = '_' + alphas
     normal_identifier_middle = '_' + alphanums
     normal_identifier = Combine(oneOf(list(normal_identifier_first)) +
-                                O(Word(normal_identifier_middle))).setName('normal_identifier')
+                                O(Word(normal_identifier_middle)))
 
     @staticmethod
     def get_identifier_unconstrained():
@@ -203,17 +203,16 @@ def decode_identifier(s):
 class Syntax():
 
     # An expression that evaluates to a constant value
-    constant_value = Forward().setName('constant_value')
-    definitely_constant_value = Forward().setName(
-        'definitely_constant_value')  # no variable refs allowed
+    constant_value = Forward()
+    definitely_constant_value = Forward()  # no variable refs allowed
     # An expression that evaluates to a resource reference
-    rvalue = Forward().setName('rvalue')
+    rvalue = Forward()
     # An expression that evaluates to a function reference
-    fvalue = Forward().setName('fvalue')
+    fvalue = Forward()
     # An expression that evaluates to a Poset
-    space = Forward().setName('space')
+    space = Forward()
     # An expression that evaluates to a NamedDP
-    ndpt_dp_rvalue = Forward().setName('ndpt_dp_rvalue')
+    ndpt_dp_rvalue = Forward()
 
     # An expression that evaluates to a Template
     template = Forward()
@@ -1172,9 +1171,6 @@ class Syntax():
     entry = rvalue
     imp_name = sp(get_idn(), lambda t: CDP.ImpName(t[0]))
     col_separator = L('|') | L('│')  # box drawing
-#     catalogue_row = sp(imp_name +
-#                        ZeroOrMore(S(col_separator) + entry),
-#                        lambda t: make_list(list(t)))
 
     catalogue_func = sp(constant_value + ZeroOrMore(COMMA + constant_value),
                         lambda t: CDP.CatalogueFunc(make_list(list(t))))
@@ -1182,9 +1178,6 @@ class Syntax():
                        lambda t: CDP.CatalogueRes(make_list(list(t))))
     catalogue_row2 = sp(catalogue_func + MAPSFROM - imp_name - MAPSTO - catalogue_res,
                         lambda t: CDP.CatalogueRowMapsfromto(t[0], t[1], t[2], t[3], t[4]))
-
-#     catalogue_table = sp(OneOrMore(catalogue_row),
-#                          lambda t: CDP.CatalogueTable(make_list(list(t))))
 
     CATALOGUE = keyword('catalogue', CDP.FromCatalogueKeyword)
 
@@ -1208,7 +1201,7 @@ class Syntax():
                          rbrace,
                          lambda t: CDP.Catalogue2(t[0], t[1], t[2], make_list(list(t[3:-1]), 
                                                                               where=t[-1].where),
-                                                  t[-1])).setName('ndpt_catalogue2b_nocomment')
+                                                  t[-1]))
     ndpt_catalogue2 = ndpt_catalogue2a | ndpt_catalogue2b
     
     # f <-> r
@@ -1221,14 +1214,22 @@ class Syntax():
                          ZeroOrMore(catalogue_row3) +
                          rbrace,
                          lambda t: CDP.Catalogue3(t[0], t[1], t[2], make_list(list(t[3:-1]), where=t[-1].where),
-                                                  t[-1])).setName('ndpt_catalogue3')
+                                                  t[-1]))
 
-#     ndpt_catalogue_dp = sp(CATALOGUE +
-#                            S(lbrace) +
-#                            simple_dp_model_stats +
-#                            catalogue_table +
-#                            S(rbrace),
-#                            lambda t: CDP.FromCatalogue(t[0], t[1], t[2])).setName('ndpt_catalogue_dp')
+    if True:
+        catalogue_row = sp(imp_name +
+                           ZeroOrMore(S(col_separator) + entry),
+                           lambda t: make_list(list(t)))
+        catalogue_table = sp(OneOrMore(catalogue_row),
+                             lambda t: CDP.CatalogueTable(make_list(list(t))))
+    
+    
+        ndpt_catalogue_dp = sp(CATALOGUE +
+                               S(lbrace) +
+                               simple_dp_model_stats +
+                               catalogue_table +
+                               S(rbrace),
+                               lambda t: CDP.FromCatalogue(t[0], t[1], t[2]))
     # Example:
     #    choose(name: <dp>, name2: <dp>)
     CHOOSE = keyword('choose', CDP.CoproductWithNamesChooseKeyword)
@@ -1358,7 +1359,7 @@ class Syntax():
         ndpt_abstract |
         ndpt_template |
         ndpt_compact |
-#         ndpt_catalogue_dp |
+        ndpt_catalogue_dp | # to remove
         ndpt_catalogue2 |
         ndpt_catalogue3 |
         ndpt_approx_lower |
@@ -1373,10 +1374,9 @@ class Syntax():
         ndpt_ignore_resources |
         ndpt_eversion |
         ndpt_placeholder
-    ).setName('ndpt_dp_operand')
+    )
 
-    ndpt_dp_rvalue << (ndpt_dp_operand | (
-        SLPAR - ndpt_dp_operand - SRPAR).setName('ndpt_dp_operand in parentheses'))
+    ndpt_dp_rvalue << (ndpt_dp_operand | (SLPAR - ndpt_dp_operand - SRPAR))
 
     rvalue_operand = (
         rvalue_new_function

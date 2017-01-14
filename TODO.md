@@ -289,7 +289,7 @@ http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/v
 
       r1 + r2 * r3 + 2 dimensionless >= f1 * f2 + f3 + 2 dimensionless
     }
-
+ 
 
 - core: better error message:
 DPSemanticError: Constraint between incompatible spaces.
@@ -417,3 +417,34 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 
 - manual: mark the first part in 4.1.C - Finite Posets
 - manual: add brackets, succeq, etc. in the list of unicode characters
+
+
+
+
+- manual:
+
+  Support level:
+
+    Chrome  A+
+    Safari  A - clicking in SVG not supported
+    Opera   A+
+    Firefox: B - bug with editing
+    Edge    A?
+      some fonts are missing for >=
+    Explorer D 
+      editor does not work
+      figure size is incorrect
+
+- add in interface: primitivedps and interfaces
+
+  interface ~= type
+
+  interface {
+    provides mass [g]
+    requires mass 
+  }
+
+- mcdp_web: in list library, add icons 
+
+
+- remove old catalogue interface

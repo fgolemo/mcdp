@@ -1,7 +1,0 @@
-
-        choose(
-actuation_a1:(load actuation_a1),
-actuation_a3:(load actuation_a3),
-actuation_a2:(load actuation_a2)
-)
-    

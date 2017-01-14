@@ -13,6 +13,7 @@ from mcdp_lang.blocks import get_missing_connections
 from mcdp_lang.suggestions import get_suggested_identifier
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
                          RcompUnits, TopCompletion, format_pint_unit_short)
+from mcdp_posets.poset import Poset
 from mocdp import logger, MCDPConstants
 from mocdp.comp import CompositeNamedDP, SimpleWrap
 from mocdp.comp.context import (get_name_for_fun_node, get_name_for_res_node,
@@ -20,7 +21,6 @@ from mocdp.comp.context import (get_name_for_fun_node, get_name_for_res_node,
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning, DPInternalError
 from mocdp.ndp import NamedDPCoproduct
-from mcdp_posets.poset import Poset
 
 
 STYLE_GREENRED = 'greenred'
