@@ -1,0 +1,63 @@
+{% macro font_control(element) -%}
+    <button class='size-button' style='visibility: hidden' id='size-plus'>𝖠▴</button>
+    <button class='size-button' style='visibility: hidden' id='size-minus'><span style ='font-size:smaller'>A</span>▾</button>
+    <button class='size-button' style='visibility: hidden' id='size-reset'>=</button>
+    <script type='text/javascript'>
+
+        var initial_size = null;
+        var element = '{{element}}';
+
+        function current_size() {
+           return parseInt($(element).css('font-size'));
+        }
+
+
+        function set_size(size) {
+           $(element).css('font-size', size);
+
+           if(size != initial_size) {
+               $('#size-reset').css('visibility','');
+           } else {
+               $('#size-reset').css('visibility','hidden');
+           }
+
+        }
+
+        function size_reset() {
+            if(initial_size != null)
+                set_size(initial_size);
+
+        }
+
+        function size_plus() {
+           c = current_size();
+           if(initial_size == null) {
+            initial_size = c;
+           }
+           set_size(c + 1);
+
+        }
+
+        function size_minus() {
+        c = current_size();
+        if(initial_size == null) {
+
+         initial_size = c;
+         }
+            set_size(c - 1);
+        }
+
+        function init_size() {
+
+            $('.size-button').button();
+            $('#size-plus').click(size_plus);
+            $('#size-minus').click(size_minus);
+            $('#size-reset').click(size_reset);
+            $('#size-plus, #size-minus').css('visibility','');
+        }
+
+        $(document).ready(init_size);
+
+    </script>
+
+{%- endmacro %}

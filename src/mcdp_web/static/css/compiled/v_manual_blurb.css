@@ -1963,6 +1963,13 @@ h1::after {
 #main_toc code.keyword {
   color: black;
 }
+li {
+  border: solid 1px red;
+  padding: 0 !important;
+}
+ul {
+  border: solid 1px blue;
+}
 @page {
   size: 6.125in 9.250in;
   margin-top: 1.7cm;

@@ -14,8 +14,6 @@ Goals:
 
 (*) Show visualization of solve-r 
 
-(*) Write paper that explains language
-
 (*) Make tutorial video
 
 (*) Improve correctness of symmetrization
@@ -33,9 +31,7 @@ Goals:
 - core: generalize InvPlus2 -> InvPlusN with placeholders
 
 (*) Test corner cases:
-- get to 100% code coverage
-- core: test ignore_resource for wrong inputs
-- T: what happens with recursive definitions? (a.poset = "`a")
+- core: 
 
 (*) Doing extra stuff:
 - F: color the constants to reflect whether they are funcs or resources
@@ -51,7 +47,6 @@ Goals:
 (*) Language additions
  
 
-- F: "op(Poset)" => constructs opposite poset
 - F: intervals - what happens
 
 
@@ -295,7 +290,6 @@ http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/v
       r1 + r2 * r3 + 2 dimensionless >= f1 * f2 + f3 + 2 dimensionless
     }
 
-- W: turn text back to black when editing after a syntax error
 
 - core: better error message:
 DPSemanticError: Constraint between incompatible spaces.
@@ -371,17 +365,13 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 
 - manual/docs: automatically beautify the code in the manual, unless there is 
   a class "dontbeautify"
-- manual/docs: add "edit in editor" to documents
+- manual/docs: 
 
 - misc: make tool that looks for warning everywhere
 
 - W: for some error messages, only the string "msg" does not make sense.
   See, e.g., http://127.0.0.1:8080/libraries/eversion/models/battert2_eversion_battery_loop/views/edit_fancy/
 
-- W: favicon
-- W: make splash screen
-- W: make first pages nicer
-- W: hide QR code, unless "andrea"
 - W: in library view, list all contents in columns, and add "create new" links
   directly in there.
 
@@ -391,53 +381,30 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
   +     +     + create
 
 - W: add credits page
+ 
 
-- docs: be able to reference to figures using pubcss/prince but implemented by me
-
-- docs: add brackets, succeq, etc. in the list of unicode characters
 - L: other subscripts
 
   E_r
 
-- suggest cdot in  0.882 N * m
-- suggest indentation for poset {}, catalogue {}, product/namedproduct
-- suggest different spaceing for mcdp {
+- 
 - suggest: fix recursive
 
 
-- change keyword 'template' to something else ('dummy?')
 
-- css: EmptySet
-- css: using for should be green/red
-
-- add initial icon to manual
-- add "home" button to web
-- web: create new library button
 
 - throw error if 
    b >= a
    a >= b
 
 
-- L set-of -> PowerSet
-- manual: Version PYMCDP_VERSION. Manual compiled from branch COMPILE_BRANCH on COMPILE_DATE.
-
 - add short headers <h1 short="describing MCDPs">Very looooon</h1>
 
 
-- mark the first part in 4.1.C - Finite Posets
 
 - ø
 - V: Top
 
-- cite Keymera prover*
-
-
-
-- Simple substs from Tex:  
-  - definition?
-
-- print version information of key libraries (Pyparsing, Bs4, numpy, etc.)
 
 - Change "TODO: XX" in <div class="Todo">XXX</div>
 
@@ -448,51 +415,5 @@ R1: Instance of <class 'mcdp_posets.rcomp_units.RcompUnits'>.
 - check the different kind of caption (caption_left, caption_top)
 
 
-
-
-- add HTML syntax hl in manual
-
-
-- "X" and Xd should be red and green, respectively
-
-- L: comments in catalogue
-
-- web: highlight save button
-- L: allow constants in catalogue 
-
-catalogue {
-  T_0 = 10 C
-  T_0 + 1 C ⟻ ULTEM ⟼ 335 C, 200 $/kg
-
-}
-
-- manual: construction top-down, bottom up, or coarse to fine
-   provided precision <= 1 / (0.5 mm)
-
-
-- remove attrs in ast_to_html c="696" ce="704" 
-
-
-- suggestions of subscripts for identifiers
-
-
-- fancy_editor: warning if something disconnected
-  http://127.0.0.1:8080/libraries/basic/models/all_icons2/views/edit_fancy/
-
-- use subscript in figure (also needs to change highlight code)
-  http://127.0.0.1:8080/libraries/basic/models/all_icons2/views/syntax/
-
-  - manual
-
-  catalogue {
-      provides f1 [m]    
-      requires r1 [g]
-      10 m ⟷ 1 g
-      10 m <-> 1 g
-  }
-
-
-
-
-
-
+- manual: mark the first part in 4.1.C - Finite Posets
+- manual: add brackets, succeq, etc. in the list of unicode characters

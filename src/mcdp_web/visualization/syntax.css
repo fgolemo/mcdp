@@ -1,0 +1,131 @@
+body {
+    margin: 0
+}
+
+.DPSyntaxError {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    width: 100ex;
+    font-weight: bold;
+    font-size: 70%;
+}
+
+div#code {
+    font-size: 75%;
+    min-width: 20em;
+    /*font-family: "Andale Mono", Courier, monospace;*/
+    margin-left: 10px;
+    margin-top: 10px;
+    box-shadow: 1px 1px 4px lightgrey;
+    padding: 0;
+    border-radius: 5px;
+    /*background-color: #eeeeff;  */
+}
+
+code {
+    font-family: Courier, monospace;
+}
+
+div#code pre {
+    padding: 8px;
+}
+
+div#graph {
+    width: 100%;
+}
+
+a.link-to-keyword {
+    color: inherit;
+    text-decoration: inherit;
+}
+
+a.link-to-model {
+    color: inherit;
+    /*text-decoration: inherit;*/
+}
+
+img.popup {
+    /* DO NOT DISPLAY*/
+    display: none;
+    /*float: right;
+    height: 8em;
+    clear: right;*/
+}
+
+.line-gutter {
+    display: none;
+}
+
+table#main td {
+    vertical-align: top;
+}
+
+.DPSyntaxError {
+    color: red;
+    font-weight: bold;
+    font-size: smaller;
+}
+
+table#main {
+    width: 100%;
+    display: block;
+}
+
+table#main tbody {
+    width: 100%;
+    display: block;
+}
+
+table#main tbody tr {
+    width: 100%;
+    display: block;
+}
+
+td#left {
+    /*width: 40vw;*/
+    /*min-width: 50vw;*/
+    text-align: center;
+}
+td#left  div#code {
+    /*border: solid;*/
+    display: inline-block;
+    text-align: left;
+    /*display: inline-block;*/
+}
+td#left  div#code pre {
+    margin: 0;
+}
+
+
+td#right {
+    text-align: center;
+    width: 60vw;
+    vertical-align: top;
+}
+
+td#right div#graph {
+    vertical-align: top;
+    display: inline-block;
+}
+
+td#right div#graph svg {
+    max-width: 100%;
+    display: inline;
+}
+
+svg text {
+    font-family: "Anka/Coder Narrow";
+}
+
+@media only screen and (max-device-width < 80!$0px) {
+    svg text {
+        display: none;
+    }
+}
+
+#error_in_place_of_image {
+    color:grey;
+    font-size: 60%;
+    text-align: center;
+    margin-top: 3em;
+}

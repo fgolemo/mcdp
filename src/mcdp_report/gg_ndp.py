@@ -3,13 +3,14 @@ from collections import defaultdict
 from types import NoneType
 
 from contracts import contract
-from contracts.utils import raise_desc, raise_wrapped
+from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_dp import (Constant, ConstantMinimals, Conversion,
                      Identity, InvMult2, InvPlus2, InvPlus2Nat, JoinNDP, Limit, MeetNDualDP,
                      Mux, MuxMap, ProductNDP, SumNDP, SumNNatDP, TakeFun, TakeRes,
                      WrapAMap, InvMult2Nat, MeetNDP, ProductNNatDP, ProductNRcompDP, SumNRcompDP,
                      IdentityDP, FunctionNode, ResourceNode)
 from mcdp_lang.blocks import get_missing_connections
+from mcdp_lang.suggestions import get_suggested_identifier
 from mcdp_posets import (Any, BottomCompletion, R_dimensionless, Rcomp,
                          RcompUnits, TopCompletion, format_pint_unit_short)
 from mocdp import logger, MCDPConstants
@@ -19,7 +20,7 @@ from mocdp.comp.context import (get_name_for_fun_node, get_name_for_res_node,
 from mocdp.comp.interfaces import NamedDP
 from mocdp.exceptions import mcdp_dev_warning, DPInternalError
 from mocdp.ndp import NamedDPCoproduct
-from mcdp_lang.suggestions import get_suggested_identifier
+from mcdp_posets.poset import Poset
 
 
 STYLE_GREENRED = 'greenred'
@@ -194,8 +195,7 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
 
     for fname, n in functions.items():
         F = ndp.get_ftype(fname)
-        # XXX: DRY 
-        label = get_suggested_identifier(fname) + ' ' + format_unit(F)
+        label = get_signal_label(get_suggested_identifier(fname), F)
         x = gg.newItem(label, parent=cluster_functions)
 
         gg.styleApply("external", x)
@@ -204,9 +204,9 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
         if not l_label: l_label = ""
 
         l = gg.newLink(x, n, l_label)
-        if False:
-            gg.propertyAppend(l, "headport", "w")
-            gg.propertyAppend(l, "tailport", "e")
+#         if False:
+#             gg.propertyAppend(l, "headport", "w")
+#             gg.propertyAppend(l, "tailport", "e")
 
         gdc.decorate_arrow_function(l)
         gdc.decorate_function_name(x)
@@ -214,7 +214,7 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
 
     for rname, n in resources.items():
         R = ndp.get_rtype(rname)
-        label = get_suggested_identifier(rname) + ' ' + format_unit(R)
+        label = get_signal_label(get_suggested_identifier(rname), R)
         x = gg.newItem(label, parent=cluster_resources)
 
         gg.styleApply("external", x)
@@ -225,9 +225,9 @@ def gvgen_from_ndp(ndp, style='default', direction='LR', images_paths=[], yourna
         l = gg.newLink(n, x, l_label)
         gdc.decorate_arrow_resource(l)
         gdc.decorate_resource_name(x)
-        if False:
-            gg.propertyAppend(l, "headport", "w")
-            gg.propertyAppend(l, "tailport", "e")
+#         if False:
+#             gg.propertyAppend(l, "headport", "w")
+#             gg.propertyAppend(l, "tailport", "e")
 
 
     if cluster_functions is not None:
@@ -746,7 +746,8 @@ def create_composite_(gdc0, ndp, plotting_info, SKIP_INITIAL):
             ub = ndp.context.names[c.dp1].get_rtype(c.s1)
 
             if skip:
-                l1 = gdc.newLink(n_b, n_a , label=get_signal_label(c.s1, ub))
+                label = get_signal_label(c.s1, ub)
+                l1 = gdc.newLink(n_b, n_a , label=label)
 
             else:
                 box = gdc.newItem('')  # '≼') # LEQ
@@ -878,12 +879,19 @@ def get_signal_label_namepart(name):
     name = get_suggested_identifier(name)
     return name
 
-def get_signal_label(name, unit):
-    name = get_signal_label_namepart(name)
+def get_signal_label(name0, unit):
+    check_isinstance(name0, str)
+    check_isinstance(unit, Poset)
+    name = get_signal_label_namepart(name0)
     
     s2 = format_unit(unit)
     if name:
-        return name + ' ' + s2
+#         return name + ' ' + s2
+        twolines = len(unicode(name, 'utf-8')) > 6
+        if twolines:
+            return name + '\n' + s2
+        else:
+            return name + ' ' + s2
     else:
         return s2
 

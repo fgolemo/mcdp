@@ -28,7 +28,350 @@
 
 
 
-*//*
+*/span.Unit,
+span.Nat,
+span.Int,
+span.Rcomp {
+  color: #ac5600;
+}
+span.ValueExpr,
+span.IntegerFraction,
+span.NatConstant,
+span.RcompConstant {
+  color: #cc6600;
+}
+span.RcompUnit {
+  color: #cc6600 ;
+}
+span.MCDPKeyword,
+span.SubKeyword,
+span.CompactKeyword,
+span.AbstractKeyword,
+span.TemplateKeyword,
+span.ForKeyword,
+span.UsingKeyword,
+span.ImplementsKeyword,
+span.LoadKeyword,
+span.CodeKeyword,
+span.FromLibraryKeyword,
+span.leq,
+span.geq,
+span.OpKeyword,
+span.eq,
+span.plus,
+span.times,
+span.DPWrapToken,
+span.ImplementedbyKeyword,
+span.FromCatalogueKeyword,
+span.MCDPTypeKeywor,
+span.InstanceKeyword,
+span.CoproductWithNamesChooseKeyword,
+span.MCDPTypeKeyword,
+span.FromLibraryKeyword,
+span.CoproductWithNamesChooseKeyword,
+span.MCDPKeyword,
+span.SubKeyword,
+span.CompactKeyword,
+span.AbstractKeyword,
+span.TemplateKeyword,
+span.ForKeyword,
+span.UsingKeyword,
+span.LoadKeyword,
+span.CodeKeyword,
+span.leq,
+span.geq,
+span.OpKeyword,
+span.eq,
+span.plus,
+span.times,
+span.exponent,
+span.product,
+span.OpenBraceKeyword,
+span.CloseBraceKeyword,
+span.comma,
+span.DPWrapToken,
+span.ImplementedbyKeyword,
+span.FromCatalogueKeyword,
+span.MCDPTypeKeyword,
+span.InstanceKeyword,
+span.FlattenKeyword,
+span.ApproxKeyword,
+span.TakeKeyword,
+span.SpecializeKeyword,
+span.FinitePosetKeyword,
+span.ProductKeyword,
+span.UncertainKeyword,
+span.UpperSetsKeyword,
+span.LowerSetsKeyword,
+span.EmptySetKeyword,
+span.PowerSetKeyword,
+span.IntervalKeyword,
+span.UpperSetFromCollectionKeyword,
+span.LowerSetFromCollectionKeyword,
+span.TopKeyword,
+span.BottomKeyword,
+span.SingleElementPosetKeyword,
+span.SpaceCoproductKeyword,
+span.IgnoreKeyword,
+span.SolveModelKeyword,
+span.AnyOfKeyword,
+span.MaximalsKeyword,
+span.MinimalsKeyword,
+span.IgnoreResourcesKeyword,
+span.ProcName,
+span.ApproxUpperKeyword,
+span.ApproxLowerKeyword,
+span.VarStatementKeyword,
+span.GenericOperationName,
+span.EversionKeyword,
+span.AddBottomKeyword,
+span.LBRACE,
+span.RBRACE,
+span.LBRACKET,
+span.RBRACKET,
+span.AssertEqualKeyword,
+span.AssertLEQKeyword,
+span.AssertGEQKeyword,
+span.AssertLTKeyword,
+span.AssertGTKeyword,
+span.AssertNonemptyKeyword,
+span.AssertEmptyKeyword {
+  font-weight: bold;
+  color: #00a;
+}
+span.MAPSTO {
+  font-weight: bold;
+  color: darkred;
+}
+span.MAPSFROM {
+  font-weight: bold;
+  color: darkgreen;
+}
+span.VName {
+  color: blue;
+}
+/* constant */
+span.CName {
+  color: #333;
+}
+span.SetNameRValue > span.RName {
+  color: darkred;
+}
+span.SetNameFValue > span.FName {
+  color: darkgreen;
+}
+span.DerivFunctionName {
+  color: darkgreen;
+}
+span.DerivResourceName {
+  color: darkred;
+}
+span.ProvideKeyword,
+span.RequireKeyword {
+  font-weight: bold;
+}
+span.ProductWithLabelsLabel,
+span.IndexLabel {
+  color: #cc6600;
+}
+/* f provided by s */
+span.ProvidedByKeyword,
+span.Function > span.FName {
+  color: darkgreen;
+}
+/* f required by s */
+span.RequiredByKeyword,
+span.Resource > span.RName {
+  color: darkred;
+}
+/* required rname - this is a function inside */
+span.RequiredKeyword,
+span.NewResource > span.RName {
+  color: darkgreen;
+}
+/* provided fname - this is a resource inside */
+span.ProvidedKeyword,
+span.NewFunction > span.FName {
+  color: darkred;
+}
+/* provides f [m] */
+span.ProvideKeyword {
+  color: darkgreen;
+}
+span.FunStatement > span.FName,
+span.FunShortcut1 > span.FName,
+span.FunShortcut1m > span.FName,
+span.FunShortcut2 > span.FName,
+span.FunShortcut3 > span.FName,
+span.FunShortcut4 > span.FName,
+span.FunShortcut5 > span.FName {
+  color: darkgreen;
+}
+/* requires r [m] */
+/* requires r >= ... */
+/* requires r1, r2*/
+span.RequireKeyword {
+  color: darkred;
+}
+span.ResStatement > span.RName,
+span.ResShortcut1 > span.RName,
+span.ResShortcut1m > span.RName,
+span.ResShortcut2 > span.RName,
+span.ResShortcut3 > span.RName,
+span.ResShortcut4 > span.RName,
+span.ResShortcut5 > span.RName {
+  color: darkred;
+}
+span.SetNameRValue > span.SetNameGenericVar {
+  color: darkred;
+}
+span.SetNameFValue > span.SetNameGenericVar {
+  color: darkgreen;
+}
+/* There is a bug that prevents this from working correctly. */
+/* span.ImpName { color: #cc6600; } */
+span.FuncName {
+  color: #cc6600 ;
+}
+span.DPName,
+span.NDPName,
+span.PosetName,
+span.TemplateName,
+span.TemplateParamName,
+span.FinitePosetElement,
+span.SingleElementPosetTag {
+  color: #a0a;
+}
+span.DPTypeName,
+span.DPVariableRef {
+  color: #00f;
+  font-weight: bold;
+}
+span.comment {
+  color: grey;
+}
+span.line-gutter {
+  margin-right: 1em;
+  color: grey;
+}
+span.PlaceholderLabel {
+  color: grey;
+  /*font-style: italic;*/
+}
+span.CommentModel {
+  color: purple ;
+  font-weight: bold;
+}
+span.CommentFun {
+  color: darkgreen;
+  font-weight: bold;
+}
+span.CommentRes {
+  color: darkred;
+  font-weight: bold;
+}
+/* Special case: ≤ does not look good in regular font Courier */
+span.leq,
+span.geq,
+span.OpenBraceKeyword,
+span.CloseBraceKeyword {
+  /*font-family: Courier, monospace;*/
+  font-weight: bold;
+}
+span.leq,
+span.geq {
+  font-family: "FreeSerif";
+  font-weight: normal !important;
+}
+span.semantic_error {
+  background-color: pink;
+}
+span.language_warning {
+  background-color: yellow !important;
+}
+span.suggestion {
+  background-color: white;
+}
+span.has_tooltip {
+  /*border: solid 1px red;*/
+}
+div.tooltip {
+  position: absolute;
+  visibility: hidden;
+}
+span.has_tooltip:hover div.tooltip {
+  visibility: visible;
+  background-color: yellow !important;
+  padding: 5px;
+}
+span.indentation {
+  border-left: solid 10px white !important;
+  margin-left: -10px !important;
+}
+@media screen {
+  /* unsupported by prince */
+  pre,
+  code {
+    tab-size: 4;
+  }
+}
+code.keyword {
+  color: #00a;
+  font-weight: bold;
+}
+/* allow for manual */
+code.FName {
+  color: darkgreen;
+}
+code.RName {
+  color: darkred;
+}
+span.ImpName {
+  color: #cc7a00;
+}
+code.fvalue span.ValueExpr,
+code.fvalue span.RcompUnit {
+  color: darkgreen;
+}
+code.rvalue span.ValueExpr,
+code.rvalue span.RcompUnit {
+  color: darkred;
+}
+/* for catalogue */
+.CatalogueFun span.ValueExpr,
+.CatalogueFun span.RcompUnit {
+  color: darkgreen !important;
+}
+.CatalogueRes span.ValueExpr,
+.CatalogueRes span.RcompUnit {
+  color: darkred !important;
+}
+body {
+  font-size: 100%;
+}
+.ui-button {
+  padding: 3px !important;
+}
+.ui-widget {
+  font-size: 80%;
+}
+.unicode-icons {
+  font-size: 50%;
+  margin-bottom: -5px;
+  margin-top: -5px;
+  margin-right: 0.5em;
+}
+a {
+  text-decoration: none;
+}
+a:hover {
+  background-color: #fff8c7;
+  color: blue;
+}
+pre code {
+  font-family: "Anka/Coder Narrow", "Lucida Console", monospace;
+}
+/*
 
 
 

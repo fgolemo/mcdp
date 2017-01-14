@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import check_isinstance
-from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts
+from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts,\
+    subscripts_utf8, greek_letters_utf8
 from mcdp_lang.parse_actions import integer_fraction_from_superscript
 from mcdp_lang.pyparsing_bundled import QuotedString, ParseExpression
 from mocdp.exceptions import mcdp_dev_warning
@@ -152,19 +153,19 @@ class SyntaxIdentifiers():
         Subscripts are translated; from '₁' to '_1'.
     """
 
-    greek = list(_.encode('utf8') for _ in greek_letters.values())
-    subs = list(_.encode('utf8') for _ in subscripts.values())
+    greek = list(greek_letters_utf8.values())
+    subs = list(subscripts_utf8.values())
     first_letter = list('_' + alphas) + greek
     mid_letter = list('_' + alphanums) + greek
     last_letter = list('_' + alphanums) + greek + subs
 
     combined = Combine(
-        oneOf(first_letter) + O(Word(''.join(mid_letter))) + O(oneOf(last_letter)))
+        oneOf(first_letter) + O(Word(''.join(mid_letter))) + O(oneOf(last_letter))).setName('combined')
     _identifier = sp(combined,
                      lambda t: decode_identifier(t[0])).setName('identifier')
 
     _idn = (
-        not_keyword + _identifier).setResultsName('identifier except keywords')
+        not_keyword + _identifier).setName('identifier except keywords')
 
     @staticmethod
     def get_idn():
@@ -173,7 +174,7 @@ class SyntaxIdentifiers():
     normal_identifier_first = '_' + alphas
     normal_identifier_middle = '_' + alphanums
     normal_identifier = Combine(oneOf(list(normal_identifier_first)) +
-                                O(Word(normal_identifier_middle)))
+                                O(Word(normal_identifier_middle))).setName('normal_identifier')
 
     @staticmethod
     def get_identifier_unconstrained():
@@ -298,12 +299,12 @@ class Syntax():
     REQUIRED = keyword('required', CDP.RequiredKeyword)
     GEQ = spk(L('>=') | L('≥') | L('≽'), CDP.geq)
     LEQ = spk(L('<=') | L('≤') | L('≼'), CDP.leq)
-    MAPSTO = spk(L('⟼') | L('↦') | L('|->') | L('|-->') | L('|--->') | L('|---->') |
-                 L('->') | L('-->') | L('--->') | L('---->'),
+    MAPSTO = spk(L('⟼') ^ L('↦') ^ L('|->') ^ L('|-->') ^ L('|--->') ^ L('|---->') ^
+                 L('->') ^ L('-->') ^ L('--->') ^ L('---->'),
                  CDP.MAPSTO).setName('⟼')
-    MAPSFROM = spk(L('↤') | L('⟻') |
-                   L('<-|') | L('<--|') | L('<---|') | L('<----|') |
-                   L('<-') | L('<--') | L('<---') | L('<----'),
+    MAPSFROM = spk(L('↤') ^ L('⟻') ^
+                   L('<-|') ^  L('<--|') ^ L('<---|') ^ L('<----|') ^
+                   L('<-') ^ L('<--') ^ L('<---') ^ L('<----'),
                    CDP.MAPSFROM).setName('⟻')
     LEFTRIGHTARROW = spk(L('↔') | L('⟷') | L('<->') | L('<-->') | L('<--->')
                          | L('<---->'), CDP.LEFTRIGHTARROW).setName('⟷')
@@ -316,7 +317,7 @@ class Syntax():
     BAR = spk(L('/'), CDP.bar)
 
     # "call"
-    C = lambda x, b: x.setResultsName(b)
+#     C = lambda x, b: x.setResultsName(b)
 
     # optional whitespace
     ow = S(ZeroOrMore(L(' ')))

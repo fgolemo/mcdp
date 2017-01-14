@@ -53,12 +53,13 @@ jQuery.fn.imageZoom = function (conf) {
 		dontFadeIn:		1,		// 1 = Do not fade in, 0 = Do fade in
 		hideClicked:	1,		// Whether to hide the image that was clicked to bring up the imgzoom
 		imageMargin:	15,		// Margin from image-edge to window-edge if image is larger than screen
-		className:		'jquery-image-zoom', 
+		className:		'jquery-image-zoom',
 		loading:		'Loading...'
 	}, conf);
 	config.doubleSpeed = config.speed / 4; // Used for fading in the close-button
 
 	return this.click(function(e) {
+		console.log('imagezoom click!');
 		// Make sure the target-element is a link (or an element inside a link)
 		var clickedElement	= jQuery(e.target); // The element that was actually clicked
 		var clickedLink		= clickedElement.is('a') ? clickedElement : clickedElement.parents('a'); // If it's not an a, check if any of its parents is
@@ -90,7 +91,9 @@ jQuery.fn.imageZoom = function (conf) {
 			};
 
 			// The URI to the image we are going to display
-			var displayImgSrc = clickedLink.attr('href');
+			//var displayImgSrc = clickedLink.attr('href');
+			var displayImgSrc = clickedImg.attr('src');
+			console.log('displayImgSrc: ' + displayImgSrc);
 
 			// If an imgzoom wiv this image is already open dont do nathin
 			if (jQuery('div.' + config.className + ' img[src="' + displayImgSrc + '"]').length) {
@@ -107,36 +110,36 @@ jQuery.fn.imageZoom = function (conf) {
 				var hideClicked		= clickedImg ? config.hideClicked : 0; // Whether to hide clicked link (set in config but always true for non-image-links)
 				var offset			= dimElement.offset(); // Offset of clicked link (or image inside)
 				var imgzoomBefore	= { // The dimensions of the imgzoom _before_ it is zoomed out
-					width:		dimElement.outerWidth(), 
-					height:		dimElement.outerHeight(), 
-					left:		offset.left, 
-					top:		offset.top/*, 
+					width:		dimElement.outerWidth(),
+					height:		dimElement.outerHeight(),
+					left:		offset.left,
+					top:		offset.top/*,
 					opacity:	config.dontFadeIn*/
 				};
-				
+
 				var imgzoom			= jQuery('<div class="imgzoom"><img  class="imgzoom" src="' + displayImgSrc + '" alt="" /></div>').css('position', 'absolute').appendTo(document.body); // We don't want any class-name or any other contents part from the image when we calculate the new dimensions of the imgzoom
 				var imgzoomAfter	= { // The dimensions of the imgzoom _after_ it is zoomed out
 					width:		100, /*imgzoom.outerWidth(), */
-					height:		100 /*imgzoom.outerHeight()/*, 
+					height:		100 /*imgzoom.outerHeight()/*,
 					opacity:	1*/
 				};
 				var windowDim = {
-					width:	jQuery(window).width(), 
+					width:	jQuery(window).width(),
 					height:	jQuery(window).height()
 				};
 				/* Make sure it is zoomed all the way. */
 				/*ratio = imgzoomAfter.height  / imgzoomAfter.width;*/
-				
+
 				/*alert("width " + imgzoomAfter.width + " height " + imgzoomAfter.height + " ratio " + ratio);*/
 				/* AC: width = height = 1 for some reason (preload?) */
 				/* AC: use ratio from current dimensions */
 				ratio = imgzoomBefore.height  / imgzoomBefore.width;
-				
+
 				/*alert("width " + imgzoomBefore.width + " height " + imgzoomBefore.height + " ratio " + ratio);*/
 
 				imgzoomAfter.width = windowDim.width * 0.9;
 				imgzoomAfter.height = imgzoomAfter.width * ratio;
-				
+
 				// Make sure imgzoom isn't wider than screen
 				if (imgzoomAfter.width > (windowDim.width - config.imageMargin * 2)) {
 					var nWidth			= windowDim.width - config.imageMargin * 2;

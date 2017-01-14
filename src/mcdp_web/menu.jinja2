@@ -4,12 +4,14 @@
   #outer a {text-decoration: none;}
   #home, #menu { display: inline-block;}
 </style>
-<a id='home' style='visibility: hidden' href="/">⌂</a>
+<!-- <a id='home' style='visibility: hidden' href="/">⌂</a> -->
 <div id='outer'>
 <ul id="menu" style='visibility: hidden'>
+
 <li id='root'>&#9776;
 <ul>
-  <li class="l1" id='menu_new'><span><span class='unicode-icons'>✎</span>New&hellip;</span>
+    <li><a class='l1' href='/'>⌂ Front page</a></li>
+  <li class="l1" id='menu_new'><span><span class='unicode-icons'>✎</span>Create new&hellip;</span>
     <ul>
       <li><a id='new_model'><span class='unicode-icons'>&#10213;</span> model&hellip;</a></li>
       <li><a id='new_template'><span class='unicode-icons'>&#x2661;</span>template&hellip;</a></li>
@@ -17,23 +19,24 @@
       <li><a id='new_value'><span class='unicode-icons'>&#x2723;</span>value&hellip;</a></li>
     </ul>
   </li>
-  <li class="l1">Other
-  <ul>
-  <li>
+  <!-- <li class="l1">Other
+  <ul> -->
+  <!--<li>
     <a href="/libraries/{{navigation['current_library']}}/qr_reader/">Import using QR</a>
-  </li>
+  </li>-->
   <li>
-    <a href="/libraries/{{navigation['current_library']}}/refresh_library">Refresh library caches</a>
+    <a href="/libraries/{{navigation['current_library']}}/refresh_library"><span class='unicode-icons'>↻</span>Refresh caches</a>
   </li>
   <li>
    <a href="/libraries/{{navigation['current_library']}}/interactive/mcdp_value/">
-   	Interactive evaluation</a>
+   	<span class='unicode-icons'>📟</span>Calculator</a>
    </li>
   <li>
-    	<a href="{{request.url}}" target="_blank">open a copy of this page</a>
+    	<a href="{{request.url}}" target="_blank">
+            <span class='unicode-icons'>📓</span>open a copy <br/>of this page</a>
    </li>
-  </ul>
-  </li>
+  <!-- </ul> -->
+  <!-- </li> -->
 </ul>
 </li>
 </ul>
@@ -57,7 +60,7 @@ li a { display: block; width: 90%; }
 
 .ui-widget {
     font-size:70%;
-} 
+}
 #menu li li li {
 	width: 14em;
 }

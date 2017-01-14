@@ -2,5 +2,5 @@ catalogue {
   provides f1 [set-of(V)]
   requires r1 [$]
   
-  model1 | {1.5 V} | 5 $  
+ {1.5 V} ⟻ model1 ⟼ 5 $   
 }

@@ -17,6 +17,7 @@ from mcdp_web.renderdoc.xmlutils import to_html_stripping_fragment, bs
 from mcdp_web.utils.response import response_data
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSyntaxError, DPSemanticError
+from contracts.utils import check_isinstance
 
 
 class AppVisualization():
@@ -91,7 +92,6 @@ class AppVisualization():
             'navigation': self.get_navigation_links(request),
         }
  
-
     def view_model_ndp_repr(self, request):
         model_name = str(request.matchdict['model_name'])  # unicode
 
@@ -105,7 +105,6 @@ class AppVisualization():
             'navigation': self.get_navigation_links(request),
         }
  
-
     def generate_view(self, request, spec):
         name = str(request.matchdict[spec.url_variable])  # unicode
         ext = spec.extension
@@ -184,10 +183,12 @@ class AppVisualization():
                                     postprocess=postprocess)
             
             highlight = self.add_html_links(request, highlight)
+            parses = True 
             error = ''
         except DPSyntaxError as e:
             highlight = '<pre class="source_code_with_error">%s</pre>' % source_code
             error = e.__str__()
+            parses = False
             
         navigation = self.get_navigation_links(request)
         
@@ -195,54 +196,19 @@ class AppVisualization():
                     (navigation['current_library'],
                      url_part,
                      name)) 
-        context = l._generate_context_with_hooks()
-        thing = spec.load(l, name, context=context)
-        with timeit_wall('graph_generic - get_png_data', 1.0):
-            svg_data0 = spec.get_png_data_syntax(l, name, thing, data_format='svg')
-            fragment = bs(svg_data0)
-            assert fragment.svg is not None
-#             if True:
-#                 for a in ['width', 'height']:
-#                     if a in fragment.svg.attrs:
-#                         del fragment.svg.attrs[a]
-#                         c = Comment('Removed attribute %r' % a)
-#                         fragment.svg.insert_before(c)
-            if True:
-                style = {}
-                for a in ['width', 'height']:
-                    if a in fragment.svg.attrs:
-                        value = fragment.svg.attrs[a]
-                        del fragment.svg.attrs[a]
-                        style['max-%s' %a ]= value
-                add_style(fragment.svg, **style)
-                    
-            for e in list(fragment):
-                remove = (Declaration, ProcessingInstruction, Doctype)
-                if isinstance(e, remove):
-                    c = Comment('Removed object of type %s' % type(e).__name__)
-                    e.replace_with(c)
-            remove_all_titles(fragment.svg)
+        
+        if parses:
+            context = l._generate_context_with_hooks()
+            thing = spec.load(l, name, context=context)
+        
+            try:
+                svg_data = get_svg_for_visualization(l, library_name, spec, 
+                                                     name, thing, Tmp.refined)
+            except DPSemanticError:
+                svg_data = None
+        else:
+            svg_data = None
             
-            if Tmp.refined is not None:
-                table = identifier2ndp(Tmp.refined)
-            else:
-                print('no refined available')
-                table = {}
-            print table
-            def link_for_dp_name(identifier0):
-                identifier = identifier0 # todo translate
-                if identifier in table:
-                    a = table[identifier]
-                    libname = a.libname if a.libname is not None else library_name
-                    href = self.get_lmv_url(libname, a.name, 'syntax')
-                    #href = '/libraries/%s/models/%s/views/syntax/' %(libname, name)
-                    return href
-                else:
-                    return None
-                                        
-            
-            add_html_links_to_svg(fragment.svg, link_for_dp_name)
-            svg_data = to_html_stripping_fragment(fragment)
         res= {
             'source_code': source_code,
             'error': unicode(error, 'utf-8'),
@@ -252,8 +218,9 @@ class AppVisualization():
             'current_view': 'syntax',
             'explanation1_html': html1,
             'explanation2_html': html2,
-            'svg_data': unicode(svg_data, 'utf-8'),
+            'svg_data': unicode(svg_data, 'utf-8') if svg_data is not None else None,
             'url_edit': url_edit,
+            'parses': parses, # whether it parses
         }
         return res
 
@@ -439,6 +406,43 @@ def add_html_links_to_svg(svg, link_for_dpname):
                 
         
 
+def get_svg_for_visualization(library, library_name, spec, name, thing, refined):
+    with timeit_wall('graph_generic - get_png_data', 1.0):
+        svg_data0 = spec.get_png_data_syntax(library, name, thing, data_format='svg')
+        fragment = bs(svg_data0)
+        assert fragment.svg is not None 
+        style = {}
+        for a in ['width', 'height']:
+            if a in fragment.svg.attrs:
+                value = fragment.svg.attrs[a]
+                del fragment.svg.attrs[a]
+                style['max-%s' %a ]= value
+        add_style(fragment.svg, **style)
+                
+        remove_doctype_etc(fragment)
+        remove_all_titles(fragment.svg)
+        
+        if refined is not None:
+            table = identifier2ndp(refined)
+        else:
+            table = {}
+            
+        print table
+        def link_for_dp_name(identifier0):
+            identifier = identifier0 # todo translate
+            if identifier in table:
+                a = table[identifier]
+                libname = a.libname if a.libname is not None else library_name
+#                 href = self.get_lmv_url(libname, a.name, 'syntax')
+                href = '/libraries/%s/models/%s/views/syntax/' % (libname, a.name)
+                return href
+            else:
+                return None
+                                    
+        add_html_links_to_svg(fragment.svg, link_for_dp_name)
+        svg_data = to_html_stripping_fragment(fragment)
+        return svg_data
+    
 LibnameName = namedtuple('LibnameName', 'libname name')
    
 CDP = CDPLanguage
@@ -454,11 +458,15 @@ def identifier2ndp(xr):
                 name = s.name.value
                 ndp = s.dp_rvalue
                 if isinstance(ndp, CDP.DPInstance):
-                    if isinstance(ndp.dp_rvalue, CDP.LoadNDP):
-                        load_arg = ndp.dp_rvalue.load_arg
+                    x = ndp.dp_rvalue
+                    if isinstance(x, CDP.LoadNDP):
+                        load_arg = x.load_arg
                         res[name] = get_from_load_arg(load_arg)
-                elif isinstance(ndp, CDP.CoproductWithNames):
-                    look_in_coproduct_with_names(ndp, res)
+                    elif isinstance(x, CDP.CoproductWithNames):
+                        look_in_coproduct_with_names(x, res)
+                    else:
+                        pass
+#                         print('cannot identify %s' % type(x).__name__)
                     
     elif isinstance(xr, CDP.CoproductWithNames):
         look_in_coproduct_with_names(xr, res)
@@ -476,7 +484,7 @@ def get_from_load_arg(load_arg):
     return LibnameName(libname, model)
 
 def look_in_coproduct_with_names(x, res):
-    assert isinstance(x, CDP.CoproductWithNames)
+    check_isinstance(x, CDP.CoproductWithNames)
 
     ops = unwrap_list(x.elements)
     nops = len(ops)
@@ -487,3 +495,10 @@ def look_in_coproduct_with_names(x, res):
         name = e.value
         res[name] = get_from_load_arg(load.load_arg)
                 
+
+def remove_doctype_etc(fragment):
+    for e in list(fragment):
+        remove = (Declaration, ProcessingInstruction, Doctype)
+        if isinstance(e, remove):
+            c = Comment('Removed object of type %s' % type(e).__name__)
+            e.replace_with(c)

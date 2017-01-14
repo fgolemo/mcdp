@@ -1,11 +1,11 @@
 mcdp {
-    battery = new Batteries
-
-    provides capacity <= battery.capacity
-    provides missions <= battery.missions
-
-    requires mass >= battery.mass
-
+    battery = instance `Batteries
+    
+    provides capacity, missions using battery
+    
+    requires mass for battery
+    
     labor_per_replacement = 10 $ 
-    requires cost >= battery.cost + battery.maintenance * labor_per_replacement
+    requires cost = cost required by battery +
+      maintenance required by battery · labor_per_replacement
 }

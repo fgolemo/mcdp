@@ -56,17 +56,21 @@
     <tr>
   <td colspan=1>
     <div id='commands'>
-    	<button id='save'><span class='unicode-icons' title='💾'>&#128190;</span>save</button>
+    	<button id='save'><span class='unicode-icons' title='💾'>💾</span>save</button>
     	<!-- <button id='close'><span class='unicode-icons'>×</span> save and close</button>  -->
-	  	<!-- <button id='discard'><span class='unicode-icons' title='🗑'>&#128465;</span>discard and close</button>  -->
-	  	<button id='revert'><span class='unicode-icons'>&#128465;</span>revert</button> <!-- 🗑 -->
+	  	<!-- <button id='discard'><span class='unicode-icons' title='🗑'>🗑</span>discard and close</button>  -->
+	  	<button id='revert'><span class='unicode-icons'>🗑</span>revert</button>
+
+        {%import 'font_control.jinja2' as font_control%}
+        {{font_control.font_control('div#around_editor')}}
+
 	  	<button id='apply_suggestions' style='display: none; margin-left: 5em'>
-	  		<span class='unicode-icons'>&#128161;</span>beautify</button> <!--💡-->
+	  		<span class='unicode-icons'>💡</span>beautify</button>
 	  	<span id='save_status'></span>
   	</div>
 </td>
 	<td style='border: solid 0px gray;  position:fixed; ' width='49%' rowspan=2>
-	  <div style='height: 100%; margin: 0; width: 100%; text-align: center; border: solid 0px blue;'>
+	  <div style='height: 100%; margin: 0; width: 100%; text-align: center;'>
 	  <a id='graph' href="graph.{{format}}">
 	  	<img src='/static/white.png' style='max-height: 95vh; max-width: 100%'/>
 	  </a>
@@ -80,7 +84,7 @@
 
 </tr>
 
-  <tr style=''><td style=' border: solid 0px gray' width="50%">
+  <tr style=''><td style='' width="50%">
   		<!-- do not add spaces between div and pre because we
   			 are doing tricks with html()-->
 	  <div id='around_editor'><pre><code contenteditable="true" id='editor'>{{source_code|safe}}</code></pre>
@@ -187,14 +191,16 @@
 
 		console.log(JSON.stringify(text));
 
-		ends_with_spaces = /\s+$/g.test(text);
-		console.log(JSON.stringify(ends_with_spaces));
-		console.log('ends_with_spaces ' + ends_with_spaces);
-		if (ends_with_spaces) {
-			$('#editor').addClass('endswithspace');
-		} else {
-			$('#editor').removeClass('endswithspace');
-		}
+         if(false ) {
+    		ends_with_spaces = /\s+$/g.test(text);
+    		console.log(JSON.stringify(ends_with_spaces));
+    		console.log('ends_with_spaces ' + ends_with_spaces);
+    		if (ends_with_spaces) {
+    			$('#editor').addClass('endswithspace');
+    		} else {
+    			$('#editor').removeClass('endswithspace');
+    		}
+        }
 	}
 
 	function keyup() {
@@ -238,7 +244,7 @@
 		desired = '/static/white.png';
 		if (current != desired) {
 			$("a#graph img").attr("src", desired);
-			//$('a#graph').imageZoom();
+              //$("a#graph").attr('href', desired);
 		}
 		saved = false;
 	}
@@ -465,6 +471,7 @@
 		// $("a#graph").attr("href", url);
 		$("a#graph img").prop('src', 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==');
 		$("a#graph img").prop("src", url);
+        //$("a#graph").attr("href", url);
 		//$('a#graph').imageZoom();
 	}
 
