@@ -4,12 +4,11 @@ from tempfile import mkdtemp
 
 from contracts import contract
 from contracts.utils import raise_wrapped, indent
-from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
+from mcdp_library.utils import dir_from_package_name
 from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
 from mocdp import get_mcdp_tmp_dir, logger
 from mocdp.memoize_simple_imp import memoize_simple
-from system_cmd.meat import system_cmd_result
-from system_cmd.structures import CmdException
+from system_cmd import CmdException, system_cmd_result
 
 
 __all__ = [
@@ -38,14 +37,14 @@ def prerender_mathjax(s):
             logger.error(msg)
             return s
         else:
-            raise
-         
-    
+            raise 
+        
     c0 = s.index(STARTTAG)
     c1 = s.index(ENDTAG) + len(ENDTAG)
     s = s[:c0] + s[c1:]
     return s
 
+@memoize_simple
 def get_mathjax_preamble():
     package = dir_from_package_name('mcdp_data')
     fn = os.path.join(package, 'libraries/manual.mcdplib/symbols.tex')
@@ -148,9 +147,8 @@ def prerender_mathjax_(html):
                 raise PrerenderError(msg)
             
             with open(f_out) as f:
-                data = f.read()
-            # remove DOCTYPE and spurious
-#             print indent(data, 'from node |')
+                data = f.read() 
+                
             data = to_html_stripping_fragment(bs(data))
             
             return data
