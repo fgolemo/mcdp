@@ -36,10 +36,10 @@ comptests-run-parallel-nocontracts: prepare_tests
 circle: prepare_tests
 	echo Make: $(CIRCLE_NODE_INDEX) " of " $(CIRCLE_NODE_TOTAL)
 	DISABLE_CONTRACTS=1 \
-	-MCDP_TEST_LIBRARIES_EXCLUDE="mcdp_theory,droneD_complete_templates,manual" \
+	MCDP_TEST_LIBRARIES_EXCLUDE="mcdp_theory,droneD_complete_templates,manual" \
 		comptests -o $(out) --nonose -c "rparmake n=2" $(package)
-	./misc/t ls failed
-	./misc/t parmake
+	# ./misc/t ls failed
+	# ./misc/t parmake
 
 comptests-run-parallel-nocontracts-onlysetup: prepare_tests
 	DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "parmake dynamic and ready; parmake dynamic and ready; parmake dynamic and ready" $(package)
