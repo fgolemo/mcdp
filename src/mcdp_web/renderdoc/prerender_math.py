@@ -15,9 +15,10 @@ __all__ = [
     'prerender_mathjax',
 ]
 
+@memoize_simple
 def get_prerender_js():
-    package = dir_from_package_name('mcdp_data')
-    fn = os.path.join(package, 'libraries', 'manual.mcdplib', 'prerender.js')
+    package = dir_from_package_name('mcdp_docs')
+    fn = os.path.join(package, 'prerender.js')
     assert os.path.exists(fn), fn
     return fn
 
@@ -46,8 +47,8 @@ def prerender_mathjax(s):
 
 @memoize_simple
 def get_mathjax_preamble():
-    package = dir_from_package_name('mcdp_data')
-    fn = os.path.join(package, 'libraries/symbols.tex')
+    package = dir_from_package_name('mcdp_docs')
+    fn = os.path.join(package, 'symbols.tex')
     if not os.path.exists(fn):
         raise ValueError(fn)
     tex = open(fn).read()
