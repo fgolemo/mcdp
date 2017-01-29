@@ -1,13 +1,14 @@
-
+l
 out=out/comptests
 
 package=mcdp_tests
 
+libraries=src/mcdp_data/libraries
 
 prepare_tests:
 	mkdir -p $(out)
 
-	$(MAKE) -C libraries/unittests/basic.mcdplib/generated_dps/ clean all
+	$(MAKE) -C $(libraries)/unittests/basic.mcdplib/generated_dps/ clean all
 
 comptests: prepare_tests
 	comptests -o $(out) --contracts --nonose --console $(package)
@@ -88,9 +89,11 @@ bump-upload:
 	git push --tags
 	python setup.py sdist upload
 
+
+
 readme-commands:
-	mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 0.1 kg, 1 W>"
-	mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 1.0 kg, 1 W>"
+	mcdp-solve -d $(libraries)/examples/example-battery.mcdplib battery "<1 hour, 0.1 kg, 1 W>"
+	mcdp-solve -d $(libraries)/examples/example-battery.mcdplib battery "<1 hour, 1.0 kg, 1 W>"
 
 check-unicode-encoding-line:
 	grep 'coding: utf-8' -r --include '*.py' -L  src/
