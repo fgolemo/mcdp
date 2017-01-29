@@ -47,7 +47,7 @@ def prerender_mathjax(s):
 @memoize_simple
 def get_mathjax_preamble():
     package = dir_from_package_name('mcdp_data')
-    fn = os.path.join(package, 'libraries/manual.mcdplib/symbols.tex')
+    fn = os.path.join(package, 'libraries/symbols.tex')
     if not os.path.exists(fn):
         raise ValueError(fn)
     tex = open(fn).read()

@@ -272,16 +272,16 @@ def fix_validation_problems(s):
             
     return to_html_stripping_fragment(soup)
 
-def get_mathjax_preamble():
-    symbols = '/Users/andrea/env_mcdp/src/mcdp/libraries/manual.mcdplib/symbols.tex'
-    tex = open(symbols).read()
-    
-    lines = tex.split('\n')
-    lines = ['$%s$' % l for l in filter(lambda x: len(x.strip())>0, lines)]
-    tex = "\n".join(lines)
-#     frag = '<div class="mathjax-symbols">%s</div>\n' % tex
-    frag = tex
-    return frag
+# def get_mathjax_preamble():
+#     symbols = '/Users/andrea/env_mcdp/src/mcdp/libraries/manual.mcdplib/symbols.tex'
+#     tex = open(symbols).read()
+#     
+#     lines = tex.split('\n')
+#     lines = ['$%s$' % l for l in filter(lambda x: len(x.strip())>0, lines)]
+#     tex = "\n".join(lines)
+# #     frag = '<div class="mathjax-symbols">%s</div>\n' % tex
+#     frag = tex
+#     return frag
 
 def protect_my_envs(s):
     from .markdown_transform import is_inside_markdown_quoted_block
