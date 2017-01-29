@@ -11,7 +11,7 @@
 	table,
 	body {
 		font-family: 'Anka/Coder Narrow','Monaco', monospace;
-		font-size: 12pt;
+		font-size: 10pt;
 	}
 
 	table {
@@ -131,10 +131,12 @@
 			$(rowsel + ' #branch-name').html(data['branch-name']);
 			$(rowsel + ' #branch-date').html(data['branch-date']);
 			console.log(data['geoip'])
-			
+
 			$(rowsel + ' #server-location').html(data['geoip']['city']);
 			code = data['geoip']['country_code'];
-			$(rowsel + ' #flag').html(get_flag(code));
+			flag = get_flag(code);
+			console.log(flag);
+			$(rowsel + ' #flag').html(flag);
 
 
 
@@ -201,15 +203,22 @@
 
 	<script>
 	function get_flag(code) {
-			for(x in flags) {
-				if (x['code'] == code) {
-					return x['emoji'];
-				}
-			}
-			return code;
+		flags = get_all_flags();
+
+		for (i = 0, len = flags.length; i < len; i++) {
+			x = flags[i];
+
+			console.log(x);
+			if (x['code'] == code)
+				return x['emoji'];
+
+
+		}
+		return code+'?';
 	}
 
-	flags = [
+	function get_all_flags() {
+	return [
     {
         "code": "AD",
         "emoji": "🇦🇩",
@@ -1960,7 +1969,7 @@
         "name": "Zimbabwe",
         "title": "flag for Zimbabwe"
     }
-]
+]}
 	</script>
 
 		<p><a href="http://status.co-design.science/">Historical uptime statistics</a></p>
