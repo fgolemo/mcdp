@@ -3,8 +3,8 @@ import itertools
 from string import Template
 
 from contracts import contract
-from contracts.interface import location, Where
 from contracts.utils import raise_desc
+
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_library import MCDPLibrary
 from mcdp_report.gg_utils import embed_images_from_library2
@@ -16,6 +16,8 @@ from .abbrevs import other_abbrevs
 from .highlight import fix_subfig_references, html_interpret,  mark_console_pres,\
     escape_for_mathjax, make_figure_from_figureid_attr
 from .xmlutils import check_html_fragment, to_html_stripping_fragment, bs
+from mcdp_lang_utils.where_utils import location
+from mcdp_lang_utils.where import Where
 
 
 __all__ = [
