@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
-from mocdp import logger
-from contracts.interface import Where, location
+import re
+
+from mcdp_lang_utils.where import Where
+from mcdp_lang_utils.where_utils import location
 from mcdp_web.renderdoc.latex_preprocess import extract_maths
 from mcdp_web.renderdoc.markdown_transform import censor_markdown_code_blocks
-from contracts.utils import indent
-from mocdp.exceptions import DPSyntaxError
-import re
 from mocdp import MCDPConstants
+from mocdp import logger
+from mocdp.exceptions import DPSyntaxError
 
 
+# from mcdp_web.renderdoc.latex_preprocess import extract_maths
 __all__ = ['do_preliminary_checks_and_fixes']
 
 def do_preliminary_checks_and_fixes(s):

@@ -2,7 +2,7 @@
 import itertools
 
 from comptests.registrar import comptest, comptest_fails
-from contracts.interface import ContractNotRespected
+from contracts import ContractNotRespected
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_posets import FinitePoset, Interval, NotBounded, PosetProduct, Uninhabited, NotBelongs, NotEqual, Rcomp
 from mcdp_posets import Multisets, Nat, NotLeq, PosetCoproduct, PosetCoproductWithLabels
@@ -14,21 +14,21 @@ import numpy as np
 
 @for_all_posets
 def check_poset1(_id_poset, poset):
-    
+
     print poset.__str__()
     print poset.__repr__()
-    
-    # Checks that bottom <= top 
-    
+
+    # Checks that bottom <= top
+
     try:
         bot = poset.get_bottom()
     except NotBounded:
         return
 
     poset.leq(bot, bot)
-    
+
     poset.format(bot)
-    
+
     x = poset.witness()
     poset.leq(bot, x)
 
@@ -39,7 +39,7 @@ def check_poset1(_id_poset, poset):
     else:
         poset.leq(top, top)
         poset.leq(bot, top)
-    
+
         poset.leq(x, top)
         poset.format(top)
 
@@ -53,7 +53,7 @@ def check_poset1_chain(id_poset, poset):
         if isinstance(poset, FinitePoset):
             return
         raise Exception('%s %s is Uninhabited' % (id_poset, poset))
-        
+
 
     for a in chain:
         poset.check_equal(a, a)
@@ -74,21 +74,21 @@ def check_poset1_chain(id_poset, poset):
     for i, j in itertools.combinations(range(len(chain)), 2):
         if i > j:
             i, j = j, i
-        
+
         e1 = chain[i]
         e2 = chain[j]
-        
+
         print('Comparing e1 = {} and e2 = {}'.format(poset.format(e1), poset.format(e2)))
-        
+
         poset.check_leq(e1, e2)
-        try: 
+        try:
             poset.check_leq(e2, e1)
         except NotLeq:
             pass
-        
+
         meet1 = poset.meet(e1, e2)
         meet2 = poset.meet(e2, e1)
-        
+
         print('meet1: {}'.format(meet1))
         print('meet2: {}'.format(meet2))
 
@@ -97,13 +97,13 @@ def check_poset1_chain(id_poset, poset):
 
         print('join1: {}'.format(join1))
         print('join2: {}'.format(join2))
-        
+
         poset.check_equal(meet1, e1)
         poset.check_equal(meet2, e1)
         poset.check_equal(join1, e2)
         poset.check_equal(join2, e2)
 
-        
+
 
 
 @for_all_posets
@@ -132,7 +132,7 @@ def check_poset_top(_id_poset, poset):
         raise_wrapped(Exception, e, msg, top=top, witness=a,
                       compact=True)
 
-    
+
 
 
 @for_all_posets
@@ -141,7 +141,7 @@ def check_poset_bottom(_id_poset, poset):
         bottom = poset.get_bottom()
     except NotBounded:
         return
-    
+
     poset.check_leq(bottom, bottom)
     a = poset.witness()
     try:
@@ -150,7 +150,7 @@ def check_poset_bottom(_id_poset, poset):
         msg = 'Could not verify bottom <= witness'
         raise_wrapped(Exception, e, msg, bottom=bottom, witness=a,
                       compact=True)
-    
+
 class Stranger():
     pass
 
@@ -162,7 +162,7 @@ def check_poset_not_belongs(_id_poset, poset):
         pass
     else:
         raise Exception()
-    
+
 @comptest
 def check_square():
     I = Interval(0.0, 1.0)
@@ -175,22 +175,22 @@ def check_square():
     assert not P.leq((0.0, 0.1), (0.0, 0.0))
 
     # TODO: move away
-    
-@comptest_fails    
+
+@comptest_fails
 def check_embedding21():
-    # In general P ~= PosetProduct((P,)) 
+    # In general P ~= PosetProduct((P,))
     # but we don't do it yet.
     P = Rcomp()
     S = PosetProduct((P, ))
     tu = get_types_universe()
     _, _ = tu.get_embedding(P, S)
-    
+
 @comptest
 def check_equality():
     assert Rcomp() == Rcomp()
     assert not (Rcomp() != Rcomp())
-    
-    
+
+
 @comptest
 def check_rcomp_corner_cases():
     P = Rcomp()
@@ -201,12 +201,12 @@ def check_rcomp_corner_cases():
             pass
         else:
             raise Exception('Violation with {}'.format(x))
-     
+
     not_belongs(2) # not a float
     not_belongs(-2.0) # negative
     not_belongs(np.inf)
-    not_belongs(np.nan)  
-      
+    not_belongs(np.nan)
+
 @comptest
 def check_coproduct():
     try:
@@ -216,7 +216,7 @@ def check_coproduct():
     else:
         assert False
 
-def test_PosetCoproductWithLabels_1(): 
+def test_PosetCoproductWithLabels_1():
     # used in coprod1.mcdp_poset
     f1 = FinitePoset(set(['a','b','c']), [])
     f2 = FinitePoset(set(['A','B','C']), [])
@@ -256,8 +256,8 @@ def check_posets_misc1():
         pass
     else:
         assert False
-        
-        
+
+
 @for_all_posets
 def check_minimal_elements(_, poset):
     try:
@@ -272,5 +272,3 @@ def check_maximal_elements(_, poset):
         poset.get_maximal_elements()
     except NotBounded:
         pass
-    
-    

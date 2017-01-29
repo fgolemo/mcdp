@@ -25,7 +25,7 @@ from mocdp.comp.composite_makecanonical import connect_resources_to_outside, \
 from mocdp.comp.context import Context
 from mocdp.comp.wrap import dpwrap
 from mocdp.exceptions import DPInternalError, DPSemanticError
-from contracts.interface import ContractNotRespected
+from contracts import ContractNotRespected
 from mcdp_web.renderdoc.xmlutils import project_html
 
 
