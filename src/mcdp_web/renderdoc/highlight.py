@@ -27,7 +27,8 @@ from mcdp_report.html import ast_to_html, get_css_filename
 from mcdp_report.plotters.get_plotters_imp import get_all_available_plotters
 from mcdp_web.images.images import (get_mime_for_format)
 from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment,\
-    check_html_fragment, to_html_stripping_fragment_document, describe_tag
+    check_html_fragment, to_html_stripping_fragment_document, describe_tag,\
+    project_html
 from mocdp import ATTR_LOAD_NAME, logger, get_mcdp_tmp_dir, MCDPConstants
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPSyntaxError, DPInternalError
@@ -1050,44 +1051,14 @@ def add_class(e, c):
     if isinstance(cur, str):
         cur = cur.split()
     cur = cur + cc
-    e['class'] = cur
-#     print 'old %s new %s attr %s ' %(cur, n, e['class'])
-
-# def compute_size_for_pre_without_class(soup):
-#     for pre in soup.select('pre'):
-#         if not pre.has_attr('class'):
-#             s = ''.join(pre.findAll(text=True))
-#             max_len = max_len_of_pre_html(s)
-#             add_style_for_size(pre, max_len)
-
-# think of :[[space]] × [[space]] × [["..."]] × [[space]]
+    e['class'] = cur 
+    
 def max_len_of_pre_html(html):
-    from mcdp_report_ndp_tests.test0 import project_html
     source2 = project_html(html)
     line_len = lambda _: len(unicode(_, 'utf-8').rstrip())
     max_len = max(map(line_len, source2.split('\n')))
     return max_len 
-# 
-# def add_style_for_size(element, max_len):         
-#     fontsize = 14 # px
-#     fontsize = 8
-#     padding = 30
-#     fontname = 'Courier'
-#     ratio = 0.65 # ratio for Courier font
-#     width = fontsize * (max_len) * ratio + padding
-#     style = 'font-family: %s; font-size: %spx; width: %dpx;' % (fontname, fontsize, width)
-#     
-#     if not element.has_attr('style'):
-#         element['style'] = ''
-# #         
-# #         style = element['style'] +';' + style
-# #             
-# 
-#     if True:
-#         style = 'display: inline-block'
-#         
-#     element['style']+=  ';' + style
-#     
+
 
 @contract(frag=str, returns=str)
 def make_figures(library, frag, raise_error_dp, raise_error_others, realpath, generate_pdf):

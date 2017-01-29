@@ -3,6 +3,7 @@
 from contracts import contract
 from mcdp_posets.poset import Poset
 from .utils import time_poset_minima_func
+from mcdp.utils.timing import timeit
 
 __all__ = [
     'poset_minima',
@@ -21,7 +22,6 @@ def poset_minima(elements, leq):
         function. For small sets only - O(n^2). """
     n = len(elements)
     
-    from mcdp_library_tests.tests import timeit
     with timeit('poset_minima with n = %d' % n, minimum=0.5):
         if n == 1:
             return set(elements)

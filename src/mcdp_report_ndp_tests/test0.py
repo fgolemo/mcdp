@@ -11,27 +11,7 @@ from mcdp_tests.generation import (for_all_dps_dyn, for_all_nameddps,
 from mocdp import logger
 from comptests.registrar import comptest_fails
 
-def project_html(html):
-    from bs4 import BeautifulSoup
-    doc = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
-    res = gettext(doc, 0)
-    return res
 
-def gettext(element, n):
-    # print('%d %s element %r' % (n, '  ' * n, element.string))
-    
-    if isinstance(element, NavigableString):
-        string = element.string
-        if string is None:
-            return ''
-        else:
-            return string.encode('utf-8')
-    else:
-        out = ''
-        for child in element.children:
-            out += gettext(child, n + 1)
-     
-        return out
     
 
 @for_all_source_mcdp

@@ -1,6 +1,6 @@
 from bs4 import BeautifulSoup
 from contracts.utils import raise_desc, indent, check_isinstance
-from bs4.element import Tag
+from bs4.element import Tag, NavigableString
 from contracts import contract
 
 # def bs(fragment):
@@ -69,5 +69,24 @@ def describe_tag(tag):
     return s
     
     
+
+def project_html(html):
+    doc = BeautifulSoup(html, 'lxml', from_encoding='utf-8')
+    res = gettext(doc, 0)
+    return res
+
+def gettext(element, n):
+    # print('%d %s element %r' % (n, '  ' * n, element.string))
     
-    
+    if isinstance(element, NavigableString):
+        string = element.string
+        if string is None:
+            return ''
+        else:
+            return string.encode('utf-8')
+    else:
+        out = ''
+        for child in element.children:
+            out += gettext(child, n + 1)
+     
+        return out

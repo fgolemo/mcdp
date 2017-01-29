@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from collections import namedtuple
 import math
 import os
 import tempfile
@@ -7,13 +6,13 @@ import tempfile
 from contracts.enabling import all_disabled
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp.utils.timing import timeit
-from mcdp_library import Librarian, MCDPLibrary
-from mcdp_library.utils import dir_from_package_name
+from mcdp_library import MCDPLibrary
+from mcdp_library.stdlib import get_test_librarian
 from mcdp_tests import get_test_index
 from mcdp_tests.generation import for_all_source_mcdp,\
     for_all_source_mcdp_template, for_all_source_mcdp_poset,\
     for_all_source_mcdp_value, for_all_source_all
-from mocdp import logger, get_mcdp_tmp_dir, MCDPConstants
+from mocdp import logger, get_mcdp_tmp_dir
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPNotImplementedError
 from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
@@ -22,63 +21,6 @@ from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
 __all__ = [
     'define_tests_for_mcdplibs',
 ]
-
-TestLibrary = namedtuple('TestLibrary', 'bigpath librarian short path ')
-
-@memoize_simple
-def get_test_librarian():
-    package = dir_from_package_name('mcdp_data')
-    folder = os.path.join(package, 'libraries')
-
-    if not os.path.exists(folder):
-        raise_desc(ValueError, 'Test folders not found.' , folder=folder)
-
-    librarian = Librarian()
-    librarian.find_libraries(folder)
-    
-    libraries = librarian.libraries
-    n = len(libraries)
-    if n <= 1:
-        msg = 'Expected more libraries.'
-        raise_desc(ValueError, msg, folder, libraries=libraries)
-
-    orig = list(libraries)
-    vname = MCDPConstants.ENV_TEST_LIBRARIES
-    
-    if vname in os.environ:
-        use = os.environ[vname].split(",")
-        
-        logger.debug('environment variable %s = %s' % (vname, use))
-        
-        logger.info('Because %s is set, I will use only %s instead of %s.' %
-                     (vname, use, orig))
-        
-        for _ in orig:
-            if not _ in use:
-                del libraries[_] 
-    else:
-        logger.debug('environment variable %s is unset' % vname)
-        
-
-    vname2 = MCDPConstants.ENV_TEST_LIBRARIES_EXCLUDE
-    if vname2 in os.environ:
-        exclude = os.environ[vname2].split(',')
-        logger.debug('environment variable %s = %s' % (vname2, exclude))
-    else:
-        exclude = []
-        logger.debug('environment variable %s is unset')
-
-
-    if exclude:
-        for a in exclude:
-            if not a in libraries:
-                msg = '%s = %s but %r is not a library.' % (vname2, exclude, a)
-                logger.error(msg)
-            else:
-                logger.info('Excluding %s' % vname2)
-                del libraries[a]
-
-    return librarian
 
 def testing_includes(libname):
     librarian = get_test_librarian()

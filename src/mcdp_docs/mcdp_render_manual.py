@@ -12,8 +12,9 @@ from contracts import contract
 from contracts.utils import check_isinstance
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_library import MCDPLibrary
+from mcdp_library.stdlib import get_test_librarian
 from mcdp_library.utils.locate_files_imp import locate_files
-from mocdp import logger, mcdp_dev_warning
+from mocdp import logger
 from quickapp import QuickApp
 from reprep.utils.natsorting import natsorted
 
@@ -167,8 +168,6 @@ def write(s, out):
 
 
 def render(libname, docname, generate_pdf, main_file, out_part_basename):
-    from mcdp_library_tests.tests import get_test_librarian
-    mcdp_dev_warning('should not include this!: from mcdp_library_tests.tests import get_test_librarian')
     librarian = get_test_librarian()
     library = librarian.load_library('manual')
 

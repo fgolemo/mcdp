@@ -7,10 +7,10 @@ from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_lang.namedtuple_tricks import remove_where_info
 from mcdp_lang.parse_actions import parse_wrap, parse_wrap_filename
 from mcdp_lang.parse_interface import parse_ndp, parse_ndp_filename
-from mcdp_lang.syntax import find_parsing_element, ParsingElement
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import SimpleWrap
 from mocdp.exceptions import DPSemanticError, DPSyntaxError, DPNotImplementedError
+from mcdp_lang.find_parsing_el import ParsingElement, find_parsing_element
 
 
 def assert_syntax_error(s, expr, desc=None):
