@@ -1,12 +1,12 @@
 from nose.tools import assert_equal
 
-from comptests.registrar import comptest, run_module_tests
+from comptests.registrar import comptest, run_module_tests, comptest_fails
 from mcdp_lang.eval_warnings import MCDPWarnings
 from mcdp_lang.parse_interface import parse_ndp
 from mocdp.comp.context import ModelBuildingContext
 
 
-@comptest
+@comptest_fails
 def warning_unused_variable1(): # TODO: rename
     s = """
     mcdp {

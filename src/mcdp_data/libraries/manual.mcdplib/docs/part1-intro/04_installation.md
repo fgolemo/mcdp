@@ -65,7 +65,7 @@ Compiling the manual takes a bit more effort.
 For math support:
 
     $ sudo apt-get install nodejs npm
-    $ sudo npm install -g MathJax-node jsdom less
+    $ sudo npm install -g MathJax-node jsdom less stylelint
 
 If the last step fails, try the following first:
 
