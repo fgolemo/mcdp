@@ -39,7 +39,8 @@ class AppStatus():
         w = int(fontsize * len(s) * ratio)
         size = (w, h)
         green = (0,255,0)
-        color = green
+        black = (0,0,0)
+        color = black
         return response_image(request, s, size, color, fontsize)
         
     def view_uptime(self, request):  # @UnusedVariable
@@ -74,4 +75,5 @@ def get_branch_date():
     branch_name = get_branch_name()
     cmd=['git', 'show', '--format=%ci', branch_name]
     s = get_command_output(cmd)
-    return s.split('\n')[0]
+    line = s.split('\n')[0]
+    return line[:16]
