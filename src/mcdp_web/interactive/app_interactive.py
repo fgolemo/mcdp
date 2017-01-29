@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import cgi
+from mcdp_web.utils0 import add_std_vars
 
 
 class AppInteractive():
@@ -24,6 +25,7 @@ class AppInteractive():
         config.add_view(self.view_mcdp_value_parse, route_name='mcdp_value_parse',
                         renderer='json')
 
+    @add_std_vars
     def view_mcdp_value(self, request):  # @UnusedVariable
         return {}
 

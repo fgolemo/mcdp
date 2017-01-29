@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
+from bs4.element import NavigableString
+
 from mcdp_lang.syntax import Syntax
+from mcdp_lang_tests.syntax_spaces import assert_equal_string
 from mcdp_report.gg_ndp import gvgen_from_ndp
 from mcdp_report.html import ast_to_html
 from mcdp_report.report import report_dp1, report_ndp1
 from mcdp_tests.generation import (for_all_dps_dyn, for_all_nameddps,
-    for_all_nameddps_dyn, for_all_source_mcdp)
+                                   for_all_nameddps_dyn, for_all_source_mcdp)
 from mocdp import logger
-from nose.tools import assert_equal
-from bs4.element import NavigableString
-from comptests.registrar import comptest, comptest_fails
-from mcdp_lang_tests.syntax_spaces import assert_equal_string
-from contracts.utils import indent
+from comptests.registrar import comptest_fails
 
 def project_html(html):
     from bs4 import BeautifulSoup

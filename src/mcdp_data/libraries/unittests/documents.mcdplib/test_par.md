@@ -1,6 +1,6 @@
 Might get confused to consider these as inside:
 
-<p 
+<p
     style='width: 15em;'/>
 
 <p src='2.jpg'/>
@@ -12,13 +12,13 @@ b
 
 <pre  >mcdp{}
 </pre>
-
+<!--
 d
 
 <pre  >mcdp{}
-    </pre>
+    </pre> -->
 
 Nonumber on second line:
 
-<h1 
+<h1
     nonumber>titile</h1>

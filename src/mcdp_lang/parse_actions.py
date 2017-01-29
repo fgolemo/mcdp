@@ -7,7 +7,7 @@ from decorator import decorator
 from nose.tools import assert_equal
 
 from contracts import contract
-from contracts.interface import Where, line_and_col, location
+from mcdp_lang_utils import Where, line_and_col, location
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mocdp import logger, MCDPConstants
 from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,

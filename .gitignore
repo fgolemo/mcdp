@@ -38,3 +38,6 @@ tc
 out2
 instructions.txt
 .compmake_history.txt
+out_coverage
+tmp*
+src/mcdp_data/libraries/manual.mcdplib/attic/

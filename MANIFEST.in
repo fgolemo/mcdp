@@ -22,20 +22,55 @@ recursive-include src/mcdp_library_tests *
 recursive-include src/mcdp_maps *
 recursive-include src/mcdp_posets *
 recursive-include src/mcdp_report *
-recursive-include src/mcdp_tests * 
+recursive-include src/mcdp_tests *
 recursive-include src/mcdp_web *
 recursive-include src/mocdp *
 recursive-include src/multi_index *
 
-recursive-include src/mcdp_data Makefile
-recursive-include src/mcdp_data *.mcdp
+recursive-include src/mcdp_data *.in
 recursive-include src/mcdp_data *.md
+recursive-include src/mcdp_data *.tex
+recursive-include src/mcdp_data *.lyx
 recursive-include src/mcdp_data *.txt
+recursive-include src/mcdp_data *.bib
+
+# there is also code in the libraries
+recursive-include src/mcdp_data *.py
+recursive-include src/mcdp_data *.dot
+recursive-include src/mcdp_data *.less
+recursive-include src/mcdp_data *.js
+
+recursive-include src/mcdp_data *.png
+recursive-include src/mcdp_data *.gif
+recursive-include src/mcdp_data *.jpg
+recursive-include src/mcdp_data *.jpeg
+recursive-include src/mcdp_data *.ico
+recursive-include src/mcdp_data *.svg
+
+
+recursive-include src/mcdp_data *.rc
+recursive-include src/mcdp_data *.properties
+recursive-include src/mcdp_data *.cfg
+recursive-include src/mcdp_data *.yaml
+
+
+recursive-include src/mcdp_data *.mcdp
 recursive-include src/mcdp_data *.mcdp_value
+recursive-include src/mcdp_data *.mcdp_uncertain_value
 recursive-include src/mcdp_data *.mcdp_poset
+recursive-include src/mcdp_data *.mcdp_interface
 recursive-include src/mcdp_data *.mcdp_template
 recursive-include src/mcdp_data *.mcdp_primitivedp
- 
+recursive-include src/mcdp_data .mcdp_test_ignore
+
+recursive-include src/mcdp_data Makefile
+recursive-include src/mcdp_data *.mk
+recursive-include src/mcdp_data *.css
+recursive-include src/mcdp_data *.less
+recursive-include src/mcdp_data *.jinja2
+
+recursive-include src/mcdp_data *.sh
+recursive-include src/mcdp_data *.rc
 recursive-exclude src *.pyc
 
 recursive-exclude src out
@@ -43,9 +78,6 @@ recursive-exclude src _mcdpweb_cache
 
 global-exclude out out-* *.pyc out_expected _attic _mcdpweb_cache
 
-prune docs
+prune web
 
 prune src/mcdp_data/libraries/examples/example-plusinv.mcdplib/out_expected
-
-
-

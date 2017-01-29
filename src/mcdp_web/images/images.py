@@ -1,10 +1,6 @@
 # -*- coding: utf-8 -*-
 from mcdp_figures import MakeFiguresNDP
-from mcdp_report.gg_ndp import gvgen_from_ndp
-from mcdp_report.gg_utils import gg_get_format
 from mcdp_web.utils.response import response_data
-from mocdp.comp.template_for_nameddp import TemplateForNamedDP
-from mocdp.exceptions import mcdp_dev_warning
 
 
 __all__ = ['WebAppImages']
@@ -29,12 +25,12 @@ class WebAppImages():
         mf = MakeFiguresNDP(None)
         for x in mf.available(): 
             route_name = 'make_figures_%s' % x
-            url = self.get_lmv_url('{library}', '{model_name}', 'images') + '{which}.{format}'
+            url = self.get_lmv_url2('{library}', '{model_name}', 'images', None) + '{which}.{format}'
             config.add_route(route_name, url)
             config.add_view(self.make_figures, route_name=route_name)
         
         route_name = 'list_views'
-        url = self.get_lmv_url('{library}', '{model_name}', 'images')
+        url = self.get_lmv_url2('{library}', '{model_name}', 'images', None)
         config.add_route(route_name, url)
         config.add_view(self.list_views, route_name=route_name, renderer='images/list_views.jinja2')
 

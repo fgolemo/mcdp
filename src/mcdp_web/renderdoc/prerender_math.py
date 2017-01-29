@@ -6,7 +6,7 @@ from contracts import contract
 from contracts.utils import raise_wrapped, indent
 from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
 from mcdp_web.renderdoc.xmlutils import bs, to_html_stripping_fragment
-from mocdp import get_mcdp_tmp_dir
+from mocdp import get_mcdp_tmp_dir, logger
 from mocdp.memoize_simple_imp import memoize_simple
 from system_cmd.meat import system_cmd_result
 from system_cmd.structures import CmdException
@@ -29,7 +29,18 @@ def prerender_mathjax(s):
     STARTTAG = 'STARTHERE'
     ENDTAG = 'ENDHERE'
     s = STARTTAG +  get_mathjax_preamble() + ENDTAG + s
-    s = prerender_mathjax_(s)
+    
+    try:
+        s = prerender_mathjax_(s)
+    except PrerenderError:
+        if 'CIRCLECI' in os.environ:
+            msg = 'Ignoring PrerenderError because of CircleCI.'
+            logger.error(msg)
+            return s
+        else:
+            raise
+         
+    
     c0 = s.index(STARTTAG)
     c1 = s.index(ENDTAG) + len(ENDTAG)
     s = s[:c0] + s[c1:]
@@ -91,6 +102,7 @@ def prerender_mathjax_(html):
         Raises PrerenderError.
     """
     assert not '<html>' in html, html
+    
     use = get_nodejs_bin()
         
     html = html.replace('<p>$$', '\n$$')
@@ -108,8 +120,9 @@ def prerender_mathjax_(html):
         try:
             f_out = os.path.join(d, 'out.html')
             cmd= [use, script, f_html, f_out]
+            pwd = os.getcwd()
             res = system_cmd_result(
-                    d, cmd, 
+                    pwd, cmd, 
                     display_stdout=True,
                     display_stderr=True,
                     raise_on_error=False)

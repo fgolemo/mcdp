@@ -7,12 +7,12 @@ $(document).ready(function() {
 		CODE_L = 76;
 		CODE_R = 82;
 
-	    if (e.altKey && e.keyCode == CODE_R) { 
+	    if (e.altKey && e.keyCode == CODE_R) {
 	        e.preventDefault();
 	        //console.log('ciao');
 	        //$('#menu').menu('expand');
-	        window.location ='/libraries/{{navigation['current_library']}}/refresh_library';
+	        window.location ='{{root}}/libraries/{{navigation['current_library']}}/refresh_library';
 	    }
-	});	
+	});
 })
 </script>

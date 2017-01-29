@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
+import itertools
+
+from pyramid.httpexceptions import HTTPSeeOther  # @UnresolvedImport
+
 from mcdp_web.solver.app_solver_state import SolverState, get_decisions_for_axes
 from mcdp_web.utils.ajax_errors import ajax_error_catch
-from pyramid.httpexceptions import HTTPSeeOther  # @UnresolvedImport
-import itertools
+from mcdp_web.utils0 import add_std_vars
 
 
 class AppSolver():
@@ -75,6 +78,7 @@ class AppSolver():
                 'res_axes': res_axes,
                 'library': library}
 
+    @add_std_vars
     def view_solver_base(self, request):
         model_name = self.get_model_name(request)
         library = self.get_current_library_name(request)
@@ -106,7 +110,7 @@ class AppSolver():
                     'message': message,
                     'navigation': self.get_navigation_links(request)}
 
-        
+    @add_std_vars
     def view_solver(self, request):
         print('View solver')
         params = self.parse_params(request)

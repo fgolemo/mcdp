@@ -1,4 +1,4 @@
- 
+
 out=out/comptests
 
 package=mcdp_tests
@@ -16,29 +16,37 @@ comptests-nocontracts: prepare_tests
 	comptests -o $(out) --nonose --console $(package)
 
 comptests-run: prepare_tests
-	comptests -o $(out) --contracts --nonose $(package) 
+	comptests -o $(out) --contracts --nonose $(package)
 
 comptests-run-nocontracts: prepare_tests
-	comptests -o $(out) --nonose $(package) 
+	comptests -o $(out) --nonose $(package)
 	compmake $(out) -c "ls failed"
 
 comptests-run-nocontracts-console: prepare_tests
 	comptests -o $(out) --nonose $(package) --console
 
 comptests-run-parallel: prepare_tests
-	comptests -o $(out) --contracts --nonose -c "rparmake" $(package)  
+	comptests -o $(out) --contracts --nonose -c "rparmake" $(package)
 
 comptests-run-parallel-nocontracts: prepare_tests
-	DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "rparmake" $(package)  
+	DISABLE_CONTRACTS=1 \
+	MCDP_TEST_LIBRARIES_EXCLUDE="mcdp_theory,droneD_complete_templates" \
+		comptests -o $(out) --nonose -c "rparmake" $(package)
+
+circle: prepare_tests
+	echo Make: $(CIRCLE_NODE_INDEX) " of " $(CIRCLE_NODE_TOTAL)
+	DISABLE_CONTRACTS=1 \
+	MCDP_TEST_LIBRARIES_EXCLUDE="mcdp_theory,droneD_complete_templates" \
+		comptests -o $(out) --nonose -c "rparmake n=2" $(package)
 
 comptests-run-parallel-nocontracts-onlysetup: prepare_tests
-	DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "parmake dynamic and ready; parmake dynamic and ready; parmake dynamic and ready" $(package)  
+	DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "parmake dynamic and ready; parmake dynamic and ready; parmake dynamic and ready" $(package)
 
 comptests-run-parallel-nocontracts-cov: prepare_tests
-	DISABLE_CONTRACTS=1 comptests -o $(out) --coverage --nonose -c "rparmake" $(package)  
+	DISABLE_CONTRACTS=1 comptests -o $(out) --coverage --nonose -c "rparmake" $(package)
 
 comptests-run-parallel-nocontracts-prof: prepare_tests
-	DISABLE_CONTRACTS=1 comptests -o $(out) --profile --nonose -c "make; rparmake" $(package)  
+	DISABLE_CONTRACTS=1 comptests -o $(out) --profile --nonose -c "make; rparmake" $(package)
 
 
 docoverage-single: prepare_tests
@@ -51,7 +59,7 @@ docoverage-single: prepare_tests
 docoverage-parallel: prepare_tests
 	# note you need "rmake" otherwise it will not be captured
 	rm -rf ouf_coverage .coverage .coverage.*
-	-DISABLE_CONTRACTS=1 comptests -o $(out) --nonose -c "exit" $(package)
+	-DISABLE_CONTRACTS=1 MCDP_TEST_LIBRARIES_EXCLUDE="mcdp_theory" comptests -o $(out) --nonose -c "exit" $(package)
 	-DISABLE_CONTRACTS=1 coverage run --concurrency=multiprocessing  `which compmake` $(out) -c "rparmake"
 	coverage combine
 	$(MAKE) coverage-report
@@ -108,4 +116,9 @@ offline-issues-install:
 	npm install -g offline-issues
 offline-issues:
 	offline-issues AndreaCensi/mcdp
-	
+
+show-unicode:
+	cat src/mcdp_lang/*.py | python show_not_ascii.py
+
+serve-continuously:
+	./misc/serve_continuously.sh

@@ -290,15 +290,15 @@ display: inline-block;
 		<code>{{ m['id'] }}</code>
 	</span>
 
-	<img id='{{ m["id_ndp"] }}-image' src='/static/white_small.png'/>
+	<img id='{{ m["id_ndp"] }}-image' src='{{root}}/static/white_small.png'/>
 
 	<script type='text/javascript'>
-		tmp_img="/libraries/{{navigation['current_library']}}/models/{{m['id_ndp']}}/views/solver2/compact_graph.png";
+		tmp_img="{{root}}/libraries/{{navigation['current_library']}}/models/{{m['id_ndp']}}/views/solver2/compact_graph.png";
 		tmp_target = '#{{ m["id_ndp"] }}-image';
 		all_images.push([tmp_img, tmp_target]);
 
 	function {{ m["id_ndp"] }}_callback() {
-		src="/libraries/{{navigation['current_library']}}/models/{{m['id_ndp']}}/views/solver2/compact_graph.png";
+		src = "{{root}}/libraries/{{navigation['current_library']}}/models/{{m['id_ndp']}}/views/solver2/compact_graph.png";
 
 		which = '#{{ m["id_ndp"] }}-image';
 
@@ -313,7 +313,6 @@ display: inline-block;
 
 	</script>
 
-		<!-- <img class='preview' style='display:none; border: solid 1px red' src="/libraries/{{navigation['current_library']}}/models/{{m['id_ndp']}}/views/solver2/compact_graph.png"/> -->
 
 </div>
 </a>
@@ -323,5 +322,6 @@ display: inline-block;
 
  </div>
 
+{% include 'footer.jinja2' %}
 </body>
 </html>

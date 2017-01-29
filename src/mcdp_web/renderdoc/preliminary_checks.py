@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from mocdp import logger
 from contracts.interface import Where, location
 from mcdp_web.renderdoc.latex_preprocess import extract_maths
 from mcdp_web.renderdoc.markdown_transform import censor_markdown_code_blocks
@@ -107,5 +108,8 @@ def check_parsable(s):
         col = col1 - 1
         character = location(line, col, s)
         msg = 'Invalid XML: %s' % e
-        raise DPSyntaxError(msg, where=Where(s, character))
+        where = Where(s, character)
+        logger.error('line %s col %s' % (where.line, where.col))
+        logger.error(where)
+        raise DPSyntaxError(msg, where=where)
     

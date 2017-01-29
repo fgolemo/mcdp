@@ -122,7 +122,9 @@ def assert_equal_string(s2, s2_expected, original=None):
         raise ValueError(msg)
     
     
-  
+def indent_plus_invisibles(x, c='  |'):
+    return indent(make_chars_visible(x),c)
+    
 def make_chars_visible(x):
     """ Replaces whitespaces ' ' and '\t' with '␣' and '⇥' """
     x = x.replace(' ', '␣')
@@ -296,17 +298,31 @@ mcdp {
     check_suggestions_result(s, s2_exp, nexpected=1)
     
 
+
+@comptest
+def dont_suggest_if_already_done1():
+    s = """
+mcdp {  
+    # this is already done
+    variable a₁ [dimensionless]
+}"""
+    suggestions = get_suggestions_ndp(s)
+    if suggestions: print suggestions
+    assert_equal(0, len(suggestions))
+
 @comptest
 def dont_suggest_if_already_done():
     s = """
 mcdp {  
     # this is already done
-    variable a₁ [dimensionless]
-    variable alpha [dimensionless]
+    variable α [dimensionless]
 }"""
     suggestions = get_suggestions_ndp(s)
     if suggestions: print suggestions
     assert_equal(0, len(suggestions))
+
+
+    
     
 def get_suggestions_ndp(s):
     x = parse_wrap(Syntax.ndpt_dp_rvalue, s)[0]
@@ -546,6 +562,19 @@ def first():
     s = "mcdp {}"
     s2_expected = "mcdp {\n}"
     check_suggestions_result(s, s2_expected)
+    
+@comptest
+def suggestions_space_empty1():
+    # 3 spaces, but we should leave alone
+    s = "mcdp {\n   \n}"
+    check_suggestions_result(s, nexpected=0)
+    
+@comptest
+def suggestions_space_empty2():
+    # 0 spaces, but we should leave alone
+    s = "mcdp {\n    \n\n}"
+    check_suggestions_result(s, nexpected=0)
+    
     
 if __name__ == '__main__': 
 #     overlapping()

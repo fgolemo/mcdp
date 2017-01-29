@@ -1,16 +1,19 @@
 import base64
-from mcdp_report.pdf_conversion import png_from_pdf
 import cStringIO
-import re
-from mocdp import logger
-from mcdp_web.renderdoc.highlight import add_style
-from contracts import contract
-import os
-from bs4 import BeautifulSoup
-from mcdp.utils.string_utils import get_md5
-from contracts.utils import check_isinstance
 import mimetypes
+import os
+import re
+
+from bs4 import BeautifulSoup
 from bs4.element import Tag
+
+from contracts import contract
+from contracts.utils import check_isinstance
+from mcdp.utils.string_utils import get_md5
+from mcdp_web.renderdoc.highlight import add_style
+from mocdp import logger
+
+from .pdf_conversion import png_from_pdf
 
 
 # def embed_images(html, basedir):
@@ -29,12 +32,8 @@ from bs4.element import Tag
 #                 mime = get_mime_for_format(ext)
 #                 src = 'data:%s;base64,%s' % (mime, encoded)
 #                 tag['src'] = src
-#     return str(soup)
-
-# def embed_regular_images(soup, extensions=()):
-
+#     return str(soup) 
 #### One direction
-
 def data_encoded_for_src(data, ext):
     """ data =  
         ext = png, jpg, ...

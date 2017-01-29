@@ -82,6 +82,8 @@ class MCDPLibrary():
         if load_library_hooks is None:
             load_library_hooks = []
         self.load_library_hooks = load_library_hooks
+        
+        self.set_read_only(True)
 
     def get_images_paths(self):
         """ Returns a list of paths to search for images assets. """
@@ -493,7 +495,15 @@ class MCDPLibrary():
         basename = '%s.%s' % (name, MCDPLibrary.ext_posets)
         self._write_generic(basename, data)
 
+    def set_read_only(self, read_only=True):
+        """ Sets the library to read-only. Any write operation will 
+            create an error. """
+        self.read_only = read_only
+        
     def _write_generic(self, basename, data):
+        if self.read_only:
+            raise LibraryIsReadOnly()
+        
         d = self._get_file_data(basename)
         realpath = d['realpath']
         logger.info('writing to %r' % realpath)
@@ -501,4 +511,8 @@ class MCDPLibrary():
             f.write(data)
         # reload
         self._update_file_from_editor(realpath)
+
+
+class LibraryIsReadOnly(Exception):
+    pass
 

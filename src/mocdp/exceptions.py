@@ -2,6 +2,7 @@
 import getpass
 
 from contracts import all_disabled
+import warnings
 
 
 class MCDPException(Exception):
@@ -85,21 +86,6 @@ def _get_where_with_filename(e, filename):
         
     return where
 
-user = getpass.getuser()
-# class _storage:
-#     first = True
-
-def do_extra_checks():
-    return False
-    res = not all_disabled()
-#     if _storage.first:
-#         # logger.info('do_extra_checks: %s' % res)
-#         pass
-#     _storage.first = False
-    return res
-
-def mcdp_dev_warning(s):  # @UnusedVariable
-    if user == 'andrea':
-        # warnings.warn(s)
-        pass
+        
+from . import mcdp_dev_warning, do_extra_checks
 

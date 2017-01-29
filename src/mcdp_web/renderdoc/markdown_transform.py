@@ -21,7 +21,10 @@ def censor_markdown_code_blocks(s):
     def inside_tag(x): 
         return x
     def code_transform(_): 
-        return 'censored-code'
+        if not _.strip(): # ignore if empty
+            return _
+        else:
+            return 'censored-code'
     return replace_markdown_line_by_line(s, line_transform, code_transform, inside_tag)
     
 

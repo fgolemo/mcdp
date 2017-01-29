@@ -17,6 +17,7 @@ from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import unwrap_list
 from mcdp_library import MCDPLibrary
+from mcdp_library_tests.tests import timeit_wall
 from mcdp_report.html import ast_to_html, ATTR_WHERE_CHAR, ATTR_WHERE_CHAR_END
 from mcdp_web.editor_fancy.image import get_png_data_model, \
     ndp_template_enclosed, get_png_data_unavailable, get_png_data_poset,\
@@ -24,6 +25,7 @@ from mcdp_web.editor_fancy.image import get_png_data_model, \
 from mcdp_web.utils import (ajax_error_catch,
                             format_exception_for_ajax_response, response_image)
 from mcdp_web.utils.response import response_data
+from mcdp_web.utils0 import add_other_fields
 from mocdp import logger
 from mocdp.comp.interfaces import NamedDP, NotConnected
 from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
@@ -32,7 +34,6 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mcdp_lang.parse_interface import( parse_ndp_eval, parse_ndp_refine, 
     parse_template_eval, parse_template_refine, parse_constant_eval, 
     parse_constant_refine, parse_poset_eval, parse_poset_refine)
-from mcdp_library_tests.tests import timeit_wall
 
 
 
@@ -58,7 +59,7 @@ spec_models = specs['models'] = Spec(url_part='models', url_variable='model_name
                       get_png_data=get_png_data_model,
                       get_png_data_syntax=get_png_data_syntax_model,
                       write=MCDPLibrary.write_to_model,
-                      minimal_source_code="mcdp {\n\n}")
+                      minimal_source_code="mcdp {\n    \n}")
 
 spec_templates = specs['templates']= Spec(url_part='templates', url_variable='template_name',
                       extension=MCDPLibrary.ext_templates,
@@ -70,7 +71,7 @@ spec_templates = specs['templates']= Spec(url_part='templates', url_variable='te
                       get_png_data=ndp_template_enclosed,
                       get_png_data_syntax=ndp_template_enclosed,
                       write=MCDPLibrary.write_to_template,
-                      minimal_source_code="template []\n\nmcdp {\n\n}")
+                      minimal_source_code="template []\n\nmcdp {\n    \n}")
 
 spec_values = specs['values'] = Spec(url_part='values', url_variable='value_name',
                    extension=MCDPLibrary.ext_values,
@@ -110,17 +111,14 @@ class AppEditorFancyGeneric():
         self.config_(config, spec_posets)
         self.config_(config, spec_models)
 
-    def get_glmv_url(self, library, url_part, model, view):
-        url = '/libraries/%s/%s/%s/views/%s/' % (library, url_part, model, view)
-        return url
 
     def config_(self, config, spec):
         """
             what = templates, values, posets
         """
         route = spec.url_part + '_edit_form_fancy'
-        url = self.get_glmv_url('{library}', spec.url_part, '{%s}' % spec.url_variable,
-                                 'edit_fancy')
+        url = self.get_glmv_url2('{library}', spec.url_part, '{%s}' % spec.url_variable,
+                                 'edit_fancy', request=None)
         renderer = 'editor_fancy/edit_form_fancy_generic.jinja2'
         view = lambda req: self.view_edit_form_fancy_generic(req, spec=spec)
         config.add_route(route, url)
@@ -165,6 +163,7 @@ class AppEditorFancyGeneric():
 
         return ajax_error_catch(go)
 
+    #@add_std_vars
     def view_edit_form_fancy_generic(self, request, spec):
         widget_name = self.get_widget_name(request, spec)
 
@@ -177,7 +176,7 @@ class AppEditorFancyGeneric():
         nrows = min(nrows, 25)
 
         source_code = cgi.escape(source_code)
-        return {'source_code': unicode(source_code, 'utf-8'),
+        res=  {'source_code': unicode(source_code, 'utf-8'),
                 'source_code_json': unicode(json.dumps(source_code), 'utf-8'),
                 'realpath': realpath,
                 spec.url_variable: widget_name,
@@ -188,6 +187,9 @@ class AppEditorFancyGeneric():
                 'error': None,
                 'url_part': spec.url_part}
 
+        add_other_fields(self, res, request)
+        return res
+    
     def get_text_from_request2(self, request):
         """ Gets the 'text' field, taking care of weird
             unicode characters from the browser. 
@@ -257,8 +259,9 @@ class AppEditorFancyGeneric():
         basename = '%s.%s' % (widget_name, spec.extension)
         l = self.get_library(request)
 
-        url_edit = ('/libraries/%s/%s/%s/views/edit_fancy/' %
+        url_edit0 = ('/libraries/%s/%s/%s/views/edit_fancy/' %
                     (library, spec.url_part, widget_name))
+        url_edit = self.make_relative(request, url_edit0)
         
         if l.file_exists(basename):
             error = 'File %r already exists.' % basename
@@ -365,59 +368,26 @@ def process_parse_request(library, string, spec, key, cache):
             string_nospaces_parse_tree_interpreted = None
              
         def postprocess(block):
-            x = parse_refine(block, context0)
+            try:
+                x = parse_refine(block, context0)
+            except DPSemanticError:
+                x = block
             Tmp.string_nospaces_parse_tree_interpreted = x 
             return x
         
         try:
-            try:
-                highlight = ast_to_html(string,
-                                        parse_expr=parse_expr,
-                                        add_line_gutter=False,
-                                        encapsulate_in_precode=False,
-                                        postprocess=postprocess)
-                
-            except DPSemanticError:
-                # Do it again without postprocess
-                highlight = ast_to_html(string,
-                                        parse_expr=parse_expr,
-                                        add_line_gutter=False,
-                                        encapsulate_in_precode=False,
-                                        postprocess=None)
-                raise
+            highlight = ast_to_html(string,
+                                    parse_expr=parse_expr,
+                                    add_line_gutter=False,
+                                    encapsulate_in_precode=False,
+                                    postprocess=postprocess)
             
             thing = parse_eval(Tmp.string_nospaces_parse_tree_interpreted, context0)
             
             if isinstance(thing, NamedDP):
-                ndp = thing
                 x = Tmp.string_nospaces_parse_tree_interpreted
-                CDP = CDPLanguage
-                
-                if isinstance(x, CDP.BuildProblem):
-                    si = SemanticInformation()
-                    line_exprs = unwrap_list(x.statements.statements)
-                    infer_types_of_variables(line_exprs, context0, si)
-                    try:
-                        ndp.check_fully_connected()
-                    except NotConnected as e:
-                        if hasattr(e, 'unconnected_fun'):
-                            ufs = e.unconnected_fun
-                            urs = e.unconnected_res
+                generate_unconnected_warnings(thing, context0, x)
                             
-                            for uf in ufs:
-                                if uf.dp in si.instances:    
-                                    msg = 'Unconnected function “%s”.' % uf.s
-                                    element = si.instances[uf.dp].element_defined
-                                    which = MCDPWarnings.UNCONNECTED_FUNCTION
-                                    warn_language(element, which, msg, context0)
-                
-                            for ur in urs:
-                                if ur.dp in si.instances:
-                                    msg = 'Unconnected resource “%s”.' % ur.s
-                                    element = si.instances[ur.dp].element_defined
-                                    which = MCDPWarnings.UNCONNECTED_RESOURCE 
-                                    warn_language(element, which, msg, context0)
-            
         except DPSyntaxError as e:
             return format_syntax_error2(parse_expr, string, e)
         except (DPSemanticError, DPInternalError) as e:
@@ -435,27 +405,9 @@ def process_parse_request(library, string, spec, key, cache):
         raise
     
     if Tmp.string_nospaces_parse_tree_interpreted:
-        suggestions = get_suggestions(Tmp.string_nospaces_parse_tree_interpreted)
-        string_with_suggestions = apply_suggestions(string, suggestions)
-        for where, replacement in suggestions:
-            if where.character < where.character_end:
-                orig = where.string[where.character:where.character_end]
-                if replacement.strip():
-                    tooltip = 'Aesthetic suggestion: replace “%s” with “%s”.' % (orig, replacement)
-                    bulb = '\xf0\x9f\x92\xa1'
-                    tooltip += ' The “%sbeautify” button on the top right does it for you.' % bulb
-                    klass = "suggestion"
-                else:
-                    tooltip = 'Fix indentation.'
-                    klass = 'indentation'
-            elif where.character == where.character_end:
-                if replacement.strip():
-                    tooltip = 'Add “%s”.' % replacement
-                    klass = 'suggestion'
-                else:
-                    tooltip = 'Fix indentation.'
-                    klass = 'indentation'
-            highlight = html_mark(highlight, where, klass, tooltip=tooltip)
+        xri = Tmp.string_nospaces_parse_tree_interpreted
+        highlight, string_with_suggestions = \
+            get_suggestions_for_string(highlight, string, xri)
     else:
         string_with_suggestions = None
      
@@ -481,6 +433,32 @@ def process_parse_request(library, string, spec, key, cache):
     }
     return res
     
+
+def get_suggestions_for_string(highlight, string, xri):
+    """ Returns highlight, string_with_suggestions """
+    suggestions = get_suggestions(xri)
+    string_with_suggestions = apply_suggestions(string, suggestions)
+    for where, replacement in suggestions:
+        if where.character < where.character_end:
+            orig = where.string[where.character:where.character_end]
+            if replacement.strip():
+                tooltip = 'Aesthetic suggestion: replace “%s” with “%s”.' % (orig, replacement)
+                bulb = '\xf0\x9f\x92\xa1'
+                tooltip += ' The “%sbeautify” button on the top right does it for you.' % bulb
+                klass = "suggestion"
+            else:
+                tooltip = 'Fix indentation.'
+                klass = 'indentation'
+        elif where.character == where.character_end:
+            if replacement.strip():
+                tooltip = 'Add “%s”.' % replacement
+                klass = 'suggestion'
+            else:
+                tooltip = 'Fix indentation.'
+                klass = 'indentation'
+        highlight = html_mark(highlight, where, klass, tooltip=tooltip)
+    return highlight, string_with_suggestions
+
 def format_syntax_error2(parse_expr, string, e):
     from mcdp_report.html import mark_unparsable
     string2, expr, _commented_lines = mark_unparsable(string, parse_expr)
@@ -503,3 +481,31 @@ def format_syntax_error2(parse_expr, string, e):
      
     return res
     
+
+def generate_unconnected_warnings(ndp, context0, x):
+    CDP = CDPLanguage
+    
+    if isinstance(x, CDP.BuildProblem):
+        si = SemanticInformation()
+        line_exprs = unwrap_list(x.statements.statements)
+        infer_types_of_variables(line_exprs, context0, si)
+        try:
+            ndp.check_fully_connected()
+        except NotConnected as e:
+            if hasattr(e, 'unconnected_fun'):
+                ufs = e.unconnected_fun
+                urs = e.unconnected_res
+                
+                for uf in ufs:
+                    if uf.dp in si.instances:    
+                        msg = 'Unconnected function “%s”.' % uf.s
+                        element = si.instances[uf.dp].element_defined
+                        which = MCDPWarnings.UNCONNECTED_FUNCTION
+                        warn_language(element, which, msg, context0)
+    
+                for ur in urs:
+                    if ur.dp in si.instances:
+                        msg = 'Unconnected resource “%s”.' % ur.s
+                        element = si.instances[ur.dp].element_defined
+                        which = MCDPWarnings.UNCONNECTED_RESOURCE 
+                        warn_language(element, which, msg, context0)

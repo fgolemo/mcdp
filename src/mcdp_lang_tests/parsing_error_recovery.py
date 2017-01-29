@@ -1,9 +1,9 @@
 from nose.tools import assert_equal
 
 from comptests.registrar import comptest, comptest_fails
-from contracts.interface import line_and_col, location
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.syntax import Syntax
+from mcdp_lang_utils import line_and_col, location
 from mcdp_report.html import mark_unparsable
 
 

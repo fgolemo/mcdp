@@ -3,14 +3,14 @@
 <head>
     <title>Sorry</title>
     {% include 'head.jinja2' %}
-    
+
 </head>
 <body>
 
 <style type='text/css'>
 	#exception {
 		font-weight: bold;
-		
+
 	white-space: pre-wrap;
 	}
 </style>
@@ -18,14 +18,14 @@
 <p> The code created an uncaught exception.  </p>
 
 <pre><code id='exception'>{{exception}}</code></pre>
-        
+
 
 {% if url_refresh %}
 <p> If the problem is that something is not found
 because of stale caches, <a href='{{url_refresh}}'>try to refresh the library</a>.
 {% endif %}
 
-<p> <a href='/exceptions_formatted'>List of all exceptions obtained so far. </a></p>
+<p> <a href='{{root}}/exceptions_formatted'>List of all exceptions obtained so far. </a></p>
 
 </body>
 </html>

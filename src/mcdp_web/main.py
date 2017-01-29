@@ -1,22 +1,23 @@
 # -*- coding: utf-8 -*-
 import os
-
+import time
+import urlparse
 from wsgiref.simple_server import make_server
 
 from pyramid.config import Configurator  # @UnresolvedImport
 from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
 from pyramid.response import Response  # @UnresolvedImport
 
+from compmake.utils.duration_hum import duration_compact
 from contracts import contract
 from contracts.utils import indent, raise_desc
 from mcdp_library import Librarian, MCDPLibrary
 from mcdp_library.utils.dir_from_package_nam import dir_from_package_name
+from mcdp_web.utils0 import add_std_vars
 from mocdp import logger
-import mocdp
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from quickapp import QuickAppBase
 
-from .editor.app_editor import AppEditor
 from .editor_fancy.app_editor_fancy_generic import AppEditorFancyGeneric
 from .images.images import WebAppImages, get_mime_for_format
 from .interactive.app_interactive import AppInteractive
@@ -28,12 +29,12 @@ from .solver2.app_solver2 import AppSolver2
 from .visualization.app_visualization import AppVisualization
 
 
+# from .editor.app_editor import AppEditor
 __all__ = [
     'mcdp_web_main',
 ]
 
-
-class WebApp(AppEditor, AppVisualization, 
+class WebApp(AppVisualization, 
              AppQR, AppSolver, AppInteractive,
              AppSolver2, AppEditorFancyGeneric, WebAppImages):
 
@@ -43,10 +44,10 @@ class WebApp(AppEditor, AppVisualization,
         self._load_libraries()
 
 
-        logger.info('Found %d libraries underneath %r.' %
+        logger.info('Found %d libraries in %r.' %
                         (len(self.libraries), self.dirname))
 
-        AppEditor.__init__(self)
+        
         AppVisualization.__init__(self)
         AppQR.__init__(self)
         AppSolver.__init__(self)
@@ -96,18 +97,16 @@ class WebApp(AppEditor, AppVisualization,
         """ Returns the list of libraries """
         return sorted(self.libraries)
 
+    @add_std_vars
     def view_index(self, request):  # @UnusedVariable
-        d = {}
-        d['version'] = lambda: mocdp.__version__
-        d['navigation'] = self.get_navigation_links(request)
-        return d
+        return {}
+        
 
-    def view_list(self, request):
-        res = {}
-        res['navigation'] = self.get_navigation_links(request)
-        res.update(self.get_jinja_hooks(request))
-        return res
-
+    @add_std_vars
+    def view_list(self, request):  # @UnusedVariable
+        return {}
+        
+    @add_std_vars
     def view_list_libraries(self, request):  # @UnusedVariable
         libraries = self.list_libraries()
         return {'libraries': sorted(libraries)}
@@ -134,6 +133,7 @@ class WebApp(AppEditor, AppVisualization,
             cache_dir = os.path.join(path, '_cached/mcdpweb_cache')
             l.use_cache_dir(cache_dir)
 
+    @add_std_vars
     def view_refresh_library(self, request):
         """ Refreshes the current library (if external files have changed) 
             then reloads the current url. """
@@ -141,11 +141,13 @@ class WebApp(AppEditor, AppVisualization,
         # Note this currently is equivalent to global refresh
         return self.view_refresh(request);
 
+    @add_std_vars
     def view_refresh(self, request):
         """ Refreshes all """
         self._refresh_library(request)
         raise HTTPFound(request.referrer)
 
+    @add_std_vars
     def view_not_found(self, request):
         request.response.status = 404
         url = request.url
@@ -153,6 +155,7 @@ class WebApp(AppEditor, AppVisualization,
         self.exceptions.append('Path not found.\n url: %s\n ref: %s' % (url, referrer))
         return {'url': url, 'referrer': referrer}
 
+    @add_std_vars
     def view_exceptions_occurred(self, request):  # @UnusedVariable
         exceptions = []
         for e in self.exceptions:
@@ -160,6 +163,7 @@ class WebApp(AppEditor, AppVisualization,
             exceptions.append(u)
         return {'exceptions': exceptions}
 
+    #@add_std_vars # note it takes 3 arguments
     def view_exception(self, exc, request):
         request.response.status = 500  # Internal Server Error
 
@@ -181,7 +185,7 @@ class WebApp(AppEditor, AppVisualization,
 
         if 'library' in request.matchdict:
             library = self.get_current_library_name(request)
-            url_refresh = '/libraries/%s/refresh_library' % library
+            url_refresh = self.make_relative(request, '/libraries/%s/refresh_library' % library)
         else:
             url_refresh = None
 
@@ -218,14 +222,14 @@ class WebApp(AppEditor, AppVisualization,
             from mcdp_web.utils.image_error_catch_imp import response_image
             return response_image(request, s)
 
+    @add_std_vars
     def view_docs(self, request):  # XXX check this
         docname = str(request.matchdict['document'])  # unicode
         # from pkg_resources import resource_filename  # @UnresolvedImport
         res = self.render_markdown_doc(docname)
-
-        res.update(self.get_jinja_hooks(request))
         return res
 
+    @add_std_vars
     def render_markdown_doc(self, docname):
         package = dir_from_package_name('mcdp_data')
         docs = os.path.join(package, 'docs')
@@ -238,26 +242,46 @@ class WebApp(AppEditor, AppVisualization,
         return {'contents': html_u}
 
     # This is where we keep all the URLS
-    def get_lmv_url(self, library, model, view):
-        url = '/libraries/%s/models/%s/views/%s/' % (library, model, view)
-        return url
     
-    def get_lvv_url(self, library, value, view):
-        url = '/libraries/%s/values/%s/views/%s/' % (library, value, view)
-        return url
+    def make_relative(self, request, url):
+        if not url.startswith('/'):
+            msg = 'Expected url to start with /: %r' % url
+            raise ValueError(msg)
+        root = self.get_root_relative_to_here(request)
+        return root + url
+    
+    def get_lmv_url2(self, library, model, view, request):
+        url0 = '/libraries/%s/models/%s/views/%s/' % (library, model, view)
+        return self.make_relative(request, url0)
+    
+    def get_lvv_url2(self, library, value, view, request):
+        url0 = '/libraries/%s/values/%s/views/%s/' % (library, value, view)
+        return self.make_relative(request, url0)
 
-    def get_ltv_url(self, library, template, view):
-        url = '/libraries/%s/templates/%s/views/%s/' % (library, template, view)
-        return url
+    def get_ltv_url2(self, library, template, view, request):
+        url0='/libraries/%s/templates/%s/views/%s/' % (library, template, view)
+        return self.make_relative(request, url0)
 
-    def get_lpv_url(self, library, poset, view):
-        url = '/libraries/%s/posets/%s/views/%s/' % (library, poset, view)
-        return url
+    def get_lpv_url2(self, library, poset, view, request):
+        url0 = '/libraries/%s/posets/%s/views/%s/' % (library, poset, view)
+        return self.make_relative(request, url0)
 
-    def get_lib_template_view_url(self, library, template, view):
-        url = '/libraries/%s/templates/%s/views/%s/' % (library, template, view)
-        return url
+    def get_glmv_url2(self, library, url_part, model, view, request):
+        url0 = '/libraries/%s/%s/%s/views/%s/' % (library, url_part, model, view)
+        return self.make_relative(request, url0)
+    
+    def get_lib_template_view_url2(self, library, template, view, request):
+        url0 = '/libraries/%s/templates/%s/views/%s/' % (library, template, view)
+        return self.make_relative(request, url0)
 
+    def get_root_relative_to_here(self, request):
+        if request is None:
+            return ''
+        else:
+            path = urlparse.urlparse(request.url).path
+            r = os.path.relpath('/', path)
+            return r
+        
     def get_model_name(self, request):
         model_name = str(request.matchdict['model_name'])  # unicod
         return model_name
@@ -315,13 +339,14 @@ class WebApp(AppEditor, AppVisualization,
         d['current_model'] = current_model
         d['current_view'] = current_view
 
+        make_relative = lambda _: self.make_relative(request, _)
 
         if library is not None:
             documents = library._list_with_extension(MCDPLibrary.ext_doc_md)
     
             d['documents'] = []
             for id_doc in documents:
-                url = '/libraries/%s/%s.html' % (current_library, id_doc)
+                url = make_relative('/libraries/%s/%s.html' % (current_library, id_doc))
                 desc = dict(id=id_doc,id_document=id_doc, name=id_doc, url=url, current=False)
                 d['documents'].append(desc)
     
@@ -333,12 +358,12 @@ class WebApp(AppEditor, AppVisualization,
             for m in natural_sorted(models):
                 is_current = m == current_model
     
-                url = self.get_lmv_url(library=current_library,
+                url = self.get_lmv_url2(library=current_library,
                                        model=m,
-                                       view='syntax')
-                url_edit =  self.get_lmv_url(library=current_library,
+                                       view='syntax', request=request)
+                url_edit =  self.get_lmv_url2(library=current_library,
                                        model=m,
-                                       view=VIEW_EDITOR)
+                                       view=VIEW_EDITOR, request=request)
                 name = "Model %s" % m
                 desc = dict(id=m, id_ndp=m, name=name, url=url, url_edit=url_edit, current=is_current)
                 d['models'].append(desc)
@@ -349,12 +374,12 @@ class WebApp(AppEditor, AppVisualization,
             for t in natural_sorted(templates):
                 is_current = (t == current_template)
     
-                url = self.get_lib_template_view_url(library=current_library,
+                url = self.get_lib_template_view_url2(library=current_library,
                                                      template=t,
-                                                     view='syntax')  # XXX
-                url_edit = self.get_lib_template_view_url(library=current_library,
+                                                     view='syntax', request=request) 
+                url_edit = self.get_lib_template_view_url2(library=current_library,
                                                      template=t,
-                                                     view=VIEW_EDITOR)  # XXX
+                                                     view=VIEW_EDITOR,request= request)  
     
                 name = "Template: %s" % t
                 desc = dict(id=t, name=name, url=url, current=is_current, url_edit=url_edit)
@@ -364,12 +389,12 @@ class WebApp(AppEditor, AppVisualization,
             d['posets'] = []
             for p in natural_sorted(posets):
                 is_current = (p == current_poset)
-                url = self.get_lpv_url(library=current_library,
+                url = self.get_lpv_url2(library=current_library,
                                        poset=p,
-                                       view='syntax')
-                url_edit = self.get_lpv_url(library=current_library,
+                                       view='syntax', request=request)
+                url_edit = self.get_lpv_url2(library=current_library,
                                        poset=p,
-                                       view=VIEW_EDITOR)
+                                       view=VIEW_EDITOR,request= request)
                 name = "Poset: %s" % p
                 desc = dict(id=p, name=name, url=url, current=is_current, url_edit=url_edit)
                 d['posets'].append(desc)
@@ -391,17 +416,14 @@ class WebApp(AppEditor, AppVisualization,
                 view = self.views[v]
                 is_current = v == current_view
     
-                url = self.get_lmv_url(library=current_library,
+                url = self.get_lmv_url2(library=current_library,
                                        model=current_model,
-                                       view=v)
+                                       view=v, request=request)
     
                 name = "View: %s" % view['desc']
                 desc = dict(name=name, url=url, current=is_current)
                 d['views'].append(desc)
         # endif library not None
-
-
-
         libraries = self.list_libraries()
 
         # just the list of names
@@ -409,7 +431,7 @@ class WebApp(AppEditor, AppVisualization,
         libname2desc = {}
         for l in natural_sorted(libraries):
             is_current = l == current_library
-            url = '/libraries/%s/' % l
+            url = make_relative('/libraries/%s/' % l)
             #name = "Library: %s" % l
             name = l
             desc = dict(id=l,name=name, url=url, current=is_current)
@@ -446,13 +468,7 @@ class WebApp(AppEditor, AppVisualization,
         return res
         
 
-    def get_jinja_hooks(self, request):
-        """ Returns a set of useful template functions. """
-        d = {}
-        d['version'] = lambda: mocdp.__version__
-        d['render_library_doc'] = lambda docname: self._render_library_doc(request, docname)
-        d['has_library_doc'] = lambda docname: self._has_library_doc(request, docname)
-        return d
+    
 
     def _has_library_doc(self, request, document):
         l = self.get_library(request)
@@ -476,6 +492,7 @@ class WebApp(AppEditor, AppVisualization,
         html = render_complete(library=l, s=data_str, realpath=realpath, raise_errors=raise_errors)
         return html
 
+    @add_std_vars
     def view_library_doc(self, request):
         """ '/libraries/{library}/{document}.html' """
         # f['data'] not utf-8
@@ -489,9 +506,7 @@ class WebApp(AppEditor, AppVisualization,
         res = {}
         res['contents'] = html
         res['title'] = document
-        res['navigation'] = self.get_navigation_links(request)
         res['print'] = bool(request.params.get('print', False))
-        res.update(self.get_jinja_hooks(request))
         return res
 
     def view_library_asset(self, request):
@@ -507,14 +522,19 @@ class WebApp(AppEditor, AppVisualization,
 
     def exit(self, request):  # @UnusedVariable
         setattr(self.server, '_BaseServer__shutdown_request', True)
-        return {}
+        howlong = duration_compact(self.get_uptime_s())
+        return "Bye. Uptime: %s." % howlong
+#         return {'text':'Bye. Uptime: %s.' % howlong}
 
+    def get_uptime_s(self):
+        return time.time() - self.time_start
+    
     def serve(self, port):
+        self.time_start = time.time()
         config = Configurator()
-        config.add_static_view(name='static', path='static')
+        config.add_static_view(name='static', path='static', cache_max_age=3600)
         config.include('pyramid_jinja2')
 
-        AppEditor.config(self, config)
         AppVisualization.config(self, config)
         AppQR.config(self, config)
         AppSolver.config(self, config)
@@ -555,7 +575,7 @@ class WebApp(AppEditor, AppVisualization,
         config.add_view(self.view_exception, context=Exception, renderer='exception.jinja2')
 
         config.add_route('exit', '/exit')
-        config.add_view(self.exit, route_name='exit', renderer='empty.jinja2')
+        config.add_view(self.exit, route_name='exit', renderer='json')
 
         config.add_route('exceptions', '/exceptions')
         config.add_view(self.view_exceptions_occurred, route_name='exceptions', renderer='json')
@@ -571,11 +591,14 @@ class WebApp(AppEditor, AppVisualization,
         config.add_view(serve_robots, route_name='robots')
 
         config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
+#  
 
         app = config.make_wsgi_app()
         self.server = make_server('0.0.0.0', port, app)
         self.server.serve_forever()
 
+        
+        
 
 class MCDPWeb(QuickAppBase):
     """ Runs the MCDP web interface. """
@@ -583,8 +606,7 @@ class MCDPWeb(QuickAppBase):
     def define_program_options(self, params):
         params.add_string('dir', default=None, short='-d',
                            help='Library directories containing models.')
-        params.add_int('port', default=8080,
-                           help='Port to listen to.')
+        params.add_int('port', default=8080, help='Port to listen to.')
         params.add_flag('delete_cache', help='Removes the cached files before starting.')
 
     def go(self):

@@ -1,14 +1,16 @@
 # -*- coding: utf-8 -*-
-__version__ = '2.9.7'
+__version__ = '3.0.0'
 
+import getpass
 import logging
+import warnings
 
 import decent_logs
 
+from contracts.enabling import all_disabled
 from contracts.utils import raise_wrapped
 import decent_params
 import quickapp
-import warnings
 
 
 logging.basicConfig()
@@ -169,16 +171,13 @@ class MCDPConstants():
     
 #     pdf_to_png_dpi = 300 # dots per inch
     pdf_to_png_dpi = 100 # dots per inch
-    if pdf_to_png_dpi < 300:
-        msg =( 'Note that pdf_to_png_dpi is set to %d, which is not suitable for printing'
-               % pdf_to_png_dpi)
-        warnings.warn(msg)
     
     docs_xml_allow_empty_attributes = ['np', 'noprettify', 'nonumber', 'notoc',
                                         'mcdp-value', 'mcdp-poset']
 
     # directories ignored by locate_files
-    locate_files_ignore_patterns = ['node_modules', '.git', 'commons', '_cached', '_mcdpweb_cache', 'resized', 
+    locate_files_ignore_patterns = ['node_modules', '.git', 'commons', '_cached', 
+                                    '_mcdpweb_cache', 'resized', 
                                     '1301-jbds-figures', 'out', 'out-html', 'reprep-static',
                                     '*.html_resources', 'out-*', 'compmake', '*.key']
 
@@ -187,6 +186,36 @@ class MCDPConstants():
     # all images 
     exts_images = exts_for_icons + ('svg', 'SVG', 'pdf', 'PDF')
     
+    ENV_TEST_LIBRARIES = 'MCDP_TEST_LIBRARIES'
+    ENV_TEST_LIBRARIES_EXCLUDE = 'MCDP_TEST_LIBRARIES_EXCLUDE'
+    ENV_TEST_SKIP_MCDPOPT = 'MCDP_TEST_SKIP_MCDPOPT'
+    
+    
+
+user = getpass.getuser()
+# class _storage:
+#     first = True
+
+def do_extra_checks():
+    res = not all_disabled()
+#     if _storage.first:
+#         # logger.info('do_extra_checks: %s' % res)
+#         pass
+#     _storage.first = False
+    return res
+
+
+def mcdp_dev_warning(s):  # @UnusedVariable
+    if user == 'andrea':
+        warnings.warn(s)
+
+
+if MCDPConstants.pdf_to_png_dpi < 300:
+    msg =( 'Note that pdf_to_png_dpi is set to %d, which is not suitable for printing'
+           % MCDPConstants.pdf_to_png_dpi)
+    mcdp_dev_warning(msg)
+
+        
 def get_mcdp_tmp_dir():
     from tempfile import gettempdir
     import os

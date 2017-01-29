@@ -20,16 +20,6 @@ mcdp {
 
 
 @comptest_fails
-def future_comments_syntax():
-    assert_parsable_to_connected_ndp('''
-    mcdp {
-       """ this is the comment """
-
-      provides x [J] "This is a comment for the description"
-    }
-''')
-
-@comptest_fails
 def future_empty_set():
     eval_rvalue_as_constant("{} g")
 

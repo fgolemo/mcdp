@@ -7,7 +7,7 @@ from mocdp.exceptions import DPSemanticError
 
 from .library import MCDPLibrary
 from .utils import locate_files
-from mocdp import MCDPConstants
+from mocdp import MCDPConstants, logger
 
 
 __all__ = [
@@ -52,9 +52,14 @@ class Librarian():
         for path in libraries:
             short, data = self._load_entry(path)
             if short in self.libraries:
-                msg = 'I already know library.'
-                raise_desc(ValueError, msg, short=short,
-                           available=list(self.libraries))
+                entry = self.libraries[short]
+                if entry['path'] != path:
+                    msg = 'I already know library "%s".\n' % short
+                    msg += 'Current entry path:  %s\n' % path
+                    msg += 'Previous entry path: %s\n' % entry['path']
+                    raise_desc(ValueError, msg)
+                else:
+                    logger.debug('Reached "%s" twice' % path)
             self.libraries[short] = data
             
         # get all the images

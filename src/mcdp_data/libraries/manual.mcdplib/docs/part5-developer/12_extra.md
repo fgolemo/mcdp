@@ -22,7 +22,7 @@ Non-functional requirements
     Chapter 3
     Chapter 4
     Chapter 5
-    
+
 
 ## Basics
 
@@ -64,13 +64,13 @@ The primitive DPs are shown in [](#fig:primitive).
 
 <col4>
 
-    $\fun_1 + \fun_2 \posleq \res$
+    <s>$\fun_1 + \fun_2 \posleq \res$</s>
 
-    $\fun \posleq \res_1 + \res_2$
+    <s>$\fun \posleq \res_1 + \res_2$</s>
 
-    $\max(\fun_1, \fun_2) \posleq \res$
+    <s>$\max(\fun_1, \fun_2) \posleq \res$</s>
 
-    $\max(\fun_1, \fun_2) \posleq \res$
+    <s>$\max(\fun_1, \fun_2) \posleq \res$</s>
 
     <span>\xxx</span>
     <span>\xxx</span>

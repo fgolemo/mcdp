@@ -4,7 +4,7 @@ catalogue {
     requires mass     [kg]
     requires cost     [CHF]
 
-    battery1 | 10 Wh | 2000 [] | 50 g |  5 CHF 
-    battery2 | 15 Wh | 2500 [] | 70 g | 15 CHF 
-    battery3 | 20 Wh | 1000 [] | 90 g | 20 CHF 
+    10 Wh, 2000 dimensionless <--| battery1 |--> 50 g,  5 CHF
+    15 Wh, 2500 dimensionless <--| battery2 |--> 70 g, 15 CHF
+    20 Wh, 1000 dimensionless <--| battery3 |->> 90 g, 20 CHF 
 }

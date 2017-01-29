@@ -10,11 +10,10 @@ from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.primitive import NotSolvableNeedsApprox
 from mcdp_dp.tracer import Tracer
 from mcdp_lang.parse_interface import parse_constant
+from mcdp_posets import (express_value_in_isomorphic_space)
+from mcdp_posets import LowerSets
+from mcdp_posets import NotLeq
 from mcdp_posets import UpperSets
-from mcdp_posets.poset import NotLeq
-from mcdp_posets.types_universe import (express_value_in_isomorphic_space,
-)
-from mcdp_posets.uppersets import LowerSets
 from mcdp_report.gg_ndp import format_unit
 from mcdp_report.plotters.get_plotters_imp import get_best_plotter
 from mcdp_web.utils import ajax_error_catch, memoize_simple, response_data
@@ -25,6 +24,7 @@ from mocdp.exceptions import DPSyntaxError, mcdp_dev_warning, DPSemanticError, \
 from reprep import Report
 from reprep.constants import MIME_PNG
 from reprep.plot_utils.axes import x_axis_extra_space, y_axis_extra_space
+from mcdp_web.utils0 import add_std_vars
 
 
 # Alternate chars used for Base64 instead of + / which give problems with urls
@@ -80,6 +80,7 @@ class AppSolver2():
         dp = ndp.get_dp()
         return ndp, dp
 
+    @add_std_vars
     def view_solver2_base(self, request):
         model_name = self.get_model_name(request)
         library = self.get_current_library_name(request)

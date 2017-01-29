@@ -28,7 +28,7 @@
 
 <script type='text/javascript'>
     function create_library() {
-        url_base = '/libraries/new/';
+        url_base = '{{root}}/libraries/new/';
         prompt_user("library", url_base, prompt="Create new library");
     }
     $(document).ready(function() {
@@ -42,7 +42,7 @@
 
 <table><tr>
 <td>
-<img id='diagram' src='/static/diagram_blank.png'/>
+<img id='diagram' src='{{root}}/static/diagram_blank.png'/>
 </td>
 <td><br/>
     <h2>PyMCDP <br/>
@@ -59,7 +59,7 @@
 <!--<p><a href="/docs/language_notes/">The MCDP language specification</a></p>-->
 <ul>
 <li><a href="http://mcdp.mit.edu/papers/">Papers and presentations</a></li>
-<li><a href="/static/manual.html">The PyMCDP Manual</a></li>
+<li><a href="{{root}}/static/manual.html">The PyMCDP Manual</a></li>
 </ul>
 
 
@@ -73,10 +73,6 @@
 </ul>
 
 <h3>Available libraries</h3>
-<!--
-<ul>
-	<li>Look at <a href='/libraries/'>the list of available libraries.</a></li>
-</ul> -->
 
 <style>
 .library_list {
@@ -107,14 +103,14 @@
 
 <div id='buttons'>
 <p><a id='create_library'>Create a new library</a></p>
-<p><a id='refresh' href='/refresh'>Refresh list of libraries</a></p>
+<p><a id='refresh' href='{{root}}/refresh'>Refresh list of libraries</a></p>
 </div>
 
 <!--
 <p>
 	Some interesting starting points:
-		<a href="/libraries/droneD_complete_v2/">the drone example</a>,
-	 	<a href="/libraries/plugs/">the plugs domain</a>.
+		<a href="{{root}}/libraries/droneD_complete_v2/">the drone example</a>,
+	 	<a href="{{root}}/libraries/plugs/">the plugs domain</a>.
 </p>
  -->
 
@@ -132,5 +128,6 @@
 </ul>
 -->
 
+{% include 'footer.jinja2' %}
 </body>
 </html>

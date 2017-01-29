@@ -21,10 +21,10 @@ for func0 in all_primitivedps_tests:
     func = func0.__name__
     fn = '%s.%s' % (func, ext)
     contents = """
-code mcdp_dp_tests.primitivedps.%s  
+code mcdp_dp_tests.primitivedps.%s
 """ % func
 
     with open(fn, 'w') as f:
         f.write(contents)
 
-    print('Created %r.' % fn)
+    #print('Created %r.' % fn)

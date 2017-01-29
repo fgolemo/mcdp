@@ -8,7 +8,11 @@ def make_accumulator():
     g.registered = []
     return g
 
+for_all_source_all = make_accumulator() # all of the below
 for_all_source_mcdp = make_accumulator()
+for_all_source_mcdp_poset = make_accumulator()
+for_all_source_mcdp_template = make_accumulator()
+for_all_source_mcdp_value = make_accumulator()
 
 for_all_posets = make_accumulator()
 # 

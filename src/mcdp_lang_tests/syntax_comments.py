@@ -117,12 +117,12 @@ def check_comments16():
     
     parse_wrap_check("axx = 1.2 g", Syntax.setname_rvalue)
     parse_wrap_check("axx", Syntax.constant_name)
-    expr=Syntax.constant_name + Syntax.EQ + Syntax.definitely_constant_value
-    parse_wrap_check("axx = 1.2 g", expr)
-    def parse(t):
-        return CDPLanguage.SetNameConstant(t[0], t[1], t[2])
-    expr2 = sp(expr, parse)
-    parse_wrap_check("axx = 1.2 g", expr2)
+#     expr = Syntax.constant_name + Syntax.EQ + Syntax.definitely_constant_value
+#     parse_wrap_check("axx = 1.2 g", expr)
+#     def parse(t):
+#         return CDPLanguage.SetNameConstant(t[0], t[1], t[2], t[3])
+#     expr2 = sp(expr, parse)
+#     parse_wrap_check("axx = 1.2 g", expr2)
     parse_wrap_check("axx = 1.2 g", Syntax.setname_constant)
     parse_wrap_check("a = 1 g", Syntax.setname_constant)
     parse_wrap_check("a = 1 g  'Number of constants'", Syntax.setname_constant)

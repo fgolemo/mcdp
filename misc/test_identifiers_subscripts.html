@@ -1,0 +1,70 @@
+<style>
+ 
+#suba.special:not(.editing_parent) span, #subb.special:not(.editing_parent) span {
+    overflow: hidden;
+    width: 0.1em;
+    display:inline-block;
+    font-size: 0%;
+    color: white;
+}
+.editing {
+}
+
+#suba.special:not(.editing_parent)::after {
+    content: 'a\2009';
+    vertical-align: sub;
+    font-size: smaller; 
+    font-family: serif;
+}
+#subb.special:not(.editing_parent)::after {
+    content: 'b\2009';
+    vertical-align: sub;
+    font-size: smaller; 
+    font-family: serif;
+}
+
+
+
+</style>
+
+<script>
+var selectedElement = null;
+function callback(e) {
+  if (selectedElement) {
+    parentNode = selectedElement.parentNode;
+    selectedElement.classList.remove("editing");
+    selectedElement.parentNode.classList.remove("editing_parent"); 
+} 
+
+  selectedElement = window.getSelection().focusNode.parentNode;
+  parentNode = selectedElement.parentNode;
+  // console.log("current");
+  // console.log(selectedElement);
+  // console.log(parentNode); 
+  selectedElement.classList.add("editing");
+  parentNode.classList.add("editing_parent");
+  
+  var contenteditable = document.querySelector('[contenteditable]'),
+    text = contenteditable.textContent;
+    console.log(text);
+
+};
+function callback_oninput(e) {
+  selectedElement = window.getSelection().focusNode.parentNode;
+  parentNode = selectedElement.parentNode;
+  parentNode.classList.remove("special");
+  console.log("callback_oninput");
+  console.log(selectedElement);
+  console.log(parentNode); 
+
+}
+document.onkeyup = callback;
+document.onmouseup = callback;
+document.oninput = callback_oninput;
+</script>
+
+<p><pre><code contenteditable>
+x<span id='suba' class='special'><span id='suba_inner'>_a</span></span> + x<span id='subb' class='special'><span id='suba_inner'>_b</span></span></p>
+</code>
+</pre>
+</p>

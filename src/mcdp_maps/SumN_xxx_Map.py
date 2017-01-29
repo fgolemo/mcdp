@@ -82,6 +82,7 @@ def sum_dimensionality_works(Fs, R):
         except Exception as e: # pragma: no cover
             raise_wrapped(ValueError, e, 'Could not convert.', Fs=Fs, R=R)
 
+from pint import DimensionalityError as pint_DimensionalityError  # @UnresolvedImport
 
 # Fs: sequence of Rcompunits
 def sum_units(Fs, values, R):
@@ -95,7 +96,8 @@ def sum_units(Fs, values, R):
         # reasonably sure this is correct...
         try:
             factor = 1.0 / float(R.units / Fi.units)
-        except Exception as e:  # pragma: no cover (DimensionalityError)
+        except pint_DimensionalityError as e:  # pragma: no cover (DimensionalityError)
+#             msg = 'Cannot '
             raise_wrapped(Exception, e, 'some error', Fs=Fs, R=R)
 
         try:

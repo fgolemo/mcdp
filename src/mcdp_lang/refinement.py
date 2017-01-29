@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from contracts.interface import Where
+from mcdp_lang_utils import Where
 from contracts.utils import check_isinstance
 from mcdp_lang.utils_lists import get_odd_ops
 from mocdp import logger

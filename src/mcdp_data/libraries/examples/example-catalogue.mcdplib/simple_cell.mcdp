@@ -7,8 +7,8 @@ catalogue {
 
   # These two have some functions, but
   # non-dominating resources
-  model1 | {1.5 V} | 1 MJ |  5 $ | 0.20 kg
-  model2 | {1.5 V} | 1 MJ | 15 $ | 0.10 kg
+   {1.5 V}, 1 MJ ⟻   model1 ⟼  5 $ , 0.20 kg
+   {1.5 V} , 1 MJ ⟻   model2 ⟼ 15 $ , 0.10 kg
   # This model gives 5V and needs an adapter
-  model3 | {5.0 V} | 1 MJ |  5 $ | 0.30 kg
-}
+   {5.0 V}, 1 MJ  ⟻   model2 ⟼ 5 $ , 0.30 kg
+} 

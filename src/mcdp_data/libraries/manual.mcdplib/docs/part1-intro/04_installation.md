@@ -28,24 +28,52 @@ Install git:
 
     $ sudo apt-get install git
 
-Install Python:
+Install Python and libraries:
 
-    $ sudo apt-get install python-numpy python-matplotlib python-yaml python-pip python-dev python-setproctitle python-psutil
+    $ sudo apt-get install python-numpy python-matplotlib python-yaml python-pip python-dev python-setproctitle python-psutil python-lxml
 
-Install graphviz and pdftk:
 
-    $ sudo apt-get install graphviz pdftk
+Install other external programs used for creating the graphics:
 
+    $ sudo apt-get install graphviz pdftk imagemagick
+
+For the manual, need to install LyX ([instructions(https://launchpad.net/~lyx-devel/+archive/ubuntu/release)]):
+
+    $ sudo add-apt-repository ppa:lyx-devel/release
+    $ sudo apt-get install lyx
+
+Fonts:
+
+    https://fontlibrary.org/en/font/anka-coder-narrow
+    $ sudo mv *.ttf ~/.fonts/
+
+<!-- STIX:
+    https://sourceforge.net/projects/stixfonts/files/latest/download
+
+Copy the ttf to `/usr/share/fonts`:
+
+    $ sudo cp STIXv2.0.0 ~/.fonts -->
+
+and run
+    $ sudo cd /usr/share/fonts
+    $ sudo fc-cache -fv
 
 #### Optional extra dependencies for compiling the manual
+
+Compiling the manual takes a bit more effort.
 
 For math support:
 
     $ sudo apt-get install nodejs npm
-    $ sudo npm install MathJax-node jsdom less
+    $ sudo npm install -g MathJax-node jsdom less
+
+If the last step fails, try the following first:
+
+    $ sudo ln -s /usr/bin/nodejs /usr/local/bin/node
 
 For printing to PDF, install Prince from
-[`https://www.princexml.com>`](https://www.princexml.com/>).
+[`https://www.princexml.com>`](https://www.princexml.com/>). Download the .deb for Ubuntu
+and use `dpkg -i xxx.deb`.
 
 ### Installing dependencies on OS X
 

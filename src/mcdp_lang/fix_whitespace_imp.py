@@ -1,6 +1,6 @@
 from mcdp_lang.refinement import namedtuple_visitor_ext
 from mcdp_lang.namedtuple_tricks import get_copy_with_where
-from contracts.interface import Where
+from mcdp_lang_utils import Where
 
 
 def fix_whitespace(root):

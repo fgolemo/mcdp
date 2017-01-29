@@ -9,11 +9,15 @@ from contracts.enabling import all_disabled
 from contracts.utils import raise_desc, raise_wrapped
 from mcdp_library import Librarian, MCDPLibrary
 from mcdp_library.utils import dir_from_package_name
-from mcdp_tests.generation import for_all_source_mcdp
-from mocdp import logger, get_mcdp_tmp_dir
+from mcdp_tests import get_test_index
+from mcdp_tests.generation import for_all_source_mcdp,\
+    for_all_source_mcdp_template, for_all_source_mcdp_poset,\
+    for_all_source_mcdp_value, for_all_source_all
+from mocdp import logger, get_mcdp_tmp_dir, MCDPConstants
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPNotImplementedError
 from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
+import math
 
 
 __all__ = [
@@ -33,25 +37,67 @@ def get_test_librarian():
     librarian = Librarian()
     librarian.find_libraries(folder)
     
-    libraries = librarian.get_libraries()
-
+    libraries = librarian.libraries
     n = len(libraries)
     if n <= 1:
         msg = 'Expected more libraries.'
         raise_desc(ValueError, msg, folder, libraries=libraries)
 
+    orig = list(libraries)
+    vname = MCDPConstants.ENV_TEST_LIBRARIES
+    
+    if vname in os.environ:
+        use = os.environ[vname].split(",")
+        
+        logger.debug('environment variable %s = %s' % (vname, use))
+        
+        logger.info('Because %s is set, I will use only %s instead of %s.' %
+                     (vname, use, orig))
+        
+        for _ in orig:
+            if not _ in use:
+                del libraries[_] 
+    else:
+        logger.debug('environment variable %s is unset' % vname)
+        
+
+    vname2 = MCDPConstants.ENV_TEST_LIBRARIES_EXCLUDE
+    if vname2 in os.environ:
+        exclude = os.environ[vname2].split(',')
+        logger.debug('environment variable %s = %s' % (vname2, exclude))
+    else:
+        exclude = []
+        logger.debug('environment variable %s is unset')
+
+
+    if exclude:
+        for a in exclude:
+            if not a in libraries:
+                msg = '%s = %s but %r is not a library.' % (vname2, exclude, a)
+                logger.error(msg)
+            else:
+                logger.info('Excluding %s' % vname2)
+                del libraries[a]
+
     return librarian
 
-
+def testing_includes(libname):
+    librarian = get_test_librarian()
+    return libname in librarian.get_libraries()
+    
 def enumerate_test_libraries():
-    """ Returns list of (bigpath, short_name, path) """
+    """ 
+        Libraries on which we need to run tests. 
+    
+    Returns list of (bigpath, short_name, path) """
     librarian = get_test_librarian()
 
     found = []
 
     libraries = librarian.get_libraries()
 
-    for short, data in libraries.items():
+    for short in list(libraries):
+        data = libraries[short]
         path = data['path']
         f = os.path.join(path, '.mcdp_test_ignore')
         if os.path.exists(f):
@@ -59,7 +105,45 @@ def enumerate_test_libraries():
 
         found.append(short)
 
-    return found
+    i, n = get_test_index()
+    if n == 1:
+        uselibs = found
+    else:
+        assert n > 1
+        # 0 only gets the basic tests
+        if i == 0:
+            return []
+        else:
+            n_effective = n - 1
+            i_effective = i - 1
+            assert 0 <= i_effective < n_effective
+            
+            uselibs = []
+            buckets = [ [] for _ in range(n_effective)] 
+            
+            for j, libname in enumerate(found):
+                #do = j % n_effective == i_effective
+                which = int(math.floor((float(j) / len(found)) * n_effective))
+                
+                assert 0 <= which < n_effective, (j, which, n_effective)
+                buckets[which].append(libname)
+                 
+#                 do = math.floor((j - 1) / n_effective) == i_effective
+            for libname in found:
+                do = libname in buckets[i_effective]
+                if do:
+                    uselibs.append(libname)
+                    s = 'will do'
+                else:
+                    s = 'skipped because of parallelism'
+                logger.debug('%20s: %s' % (libname, s))
+                
+            
+            ntot = sum(len(_) for _ in buckets)
+            assert ntot == len(found)
+            
+        
+    return uselibs
 
 
 @memoize_simple
@@ -86,12 +170,13 @@ def define_tests_for_mcdplibs(context):
     librarian = get_test_librarian()
 
     for libname in enumerate_test_libraries():
+        
         c2 = context.child(libname, extra_report_keys=dict(libname=libname))
 
         c2.child('ndp').comp_dynamic(mcdplib_test_setup_nameddps, libname=libname)
         c2.child('poset').comp_dynamic(mcdplib_test_setup_posets, libname=libname)
         c2.child('primitivedp').comp_dynamic(mcdplib_test_setup_primitivedps, libname=libname)
-        c2.child('source_mcdp').comp_dynamic(mcdplib_test_setup_source_mcdp, libname=libname)
+        c2.child('source_mcdp').comp_dynamic(mcdplib_test_setup_sources, libname=libname)
         c2.child('value').comp_dynamic(mcdplib_test_setup_value, libname=libname)
         c2.child('template').comp_dynamic(mcdplib_test_setup_template, libname=libname)
 
@@ -107,10 +192,15 @@ def mcdplib_run_make(mcdplib):
     cwd = mcdplib
     cmd = [
         'make', 
-        '-j', 
         'clean', 
         'all',
     ]
+    # do not use too many resources
+    circle = 'CIRCLECI' in os.environ
+    parallel = not circle
+    if parallel:
+        cmd.append('-j')
+        
     from system_cmd.meat import system_cmd_result
     logger.debug('$ cd %s' % cwd)
     env = os.environ.copy()
@@ -195,26 +285,35 @@ def accepts_arg(f, name):
     # print args
     return name in args.args
 
-def mcdplib_test_setup_source_mcdp(context, libname):
+def mcdplib_test_setup_sources(context, libname):
     from mcdp_tests import load_tests_modules
 
     l = get_test_library(libname)
 
     load_tests_modules()
 
-    registered = for_all_source_mcdp.registered
+    types = [
+        (['mcdp','mcdp_template','mcdp_poset','mcdp_value'], for_all_source_all),
+        (['mcdp'], for_all_source_mcdp),
+        (['mcdp_template'], for_all_source_mcdp_template),
+        (['mcdp_poset'], for_all_source_mcdp_poset),
+        (['mcdp_value'], for_all_source_mcdp_value),
+    ]
+    for extensions, accumulator in types:
+        mcdplib_test_setup_sources_(context, libname, l, extensions, accumulator)
+        
+def mcdplib_test_setup_sources_(context, libname, l, extensions, accumulator):
+    registered = accumulator.registered
 
     #print('Found registered: %r' % registered)
 
     for basename in l.file_to_contents:
-        _model_name, ext = os.path.splitext(basename)
-        if ext != ".mcdp":
-            # print basename, ext
+        _model_name, dotext = os.path.splitext(basename)
+        ext = dotext[1:] # remove '.'
+        if not ext in extensions:
             continue
 
-        f = l._get_file_data(basename)
-#         if not belongs_to_lib(f['realpath'], mcdplib):
-#             continue
+        f = l._get_file_data(basename) 
 
         source = f['data']
         filename = f['realpath']

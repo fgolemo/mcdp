@@ -50,7 +50,7 @@ def lessc_string(s1):
         
         Raises LesscError.
     """
-    print(indent(s1, 'lessc input: '))
+#     print(indent(s1, 'lessc input: '))
     mcdp_tmp_dir = get_mcdp_tmp_dir()
     prefix = 'prerender_lessc'
     d = mkdtemp(dir=mcdp_tmp_dir, prefix=prefix)

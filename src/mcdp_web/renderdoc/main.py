@@ -4,10 +4,11 @@ from string import Template
 
 from contracts import contract
 from contracts.interface import location, Where
-from contracts.utils import raise_desc, indent
+from contracts.utils import raise_desc
 from mcdp_docs.manual_constants import MCDPManualConstants
 from mcdp_library import MCDPLibrary
 from mcdp_report.gg_utils import embed_images_from_library2
+from mcdp_web.renderdoc.xmlutils import describe_tag
 from mocdp import logger
 from mocdp.exceptions import DPInternalError, DPSyntaxError
 
@@ -15,7 +16,6 @@ from .abbrevs import other_abbrevs
 from .highlight import fix_subfig_references, html_interpret,  mark_console_pres,\
     escape_for_mathjax, make_figure_from_figureid_attr
 from .xmlutils import check_html_fragment, to_html_stripping_fragment, bs
-from mcdp_web.renderdoc.xmlutils import describe_tag
 
 
 __all__ = [
@@ -189,12 +189,11 @@ def get_library_from_document(s, default_library):
 
     """ 
     properties = get_document_properties(s)
-    print('properties: %s' % properties)
         
     KEY_MCDP_LIBRARY = 'mcdp-library'
     if KEY_MCDP_LIBRARY in properties:
         use = properties[KEY_MCDP_LIBRARY]
-        print('using library %r ' % use)
+        #print('using library %r ' % use)
         library = default_library.load_library(use)
         return library
         
@@ -253,10 +252,11 @@ def fix_validation_problems(s):
         if not 'type' in e.attrs:
             e.attrs['type'] = 'text/css'
 
-    for e in soup.select('span.MathJax_SVG'):
-        style = e.attrs['style']
-        style = style.replace('display: inline-block;' ,'/* decided-to-ignore-inline-block: 0;*/')
-        e.attrs['style'] = style
+    if False:
+        for e in soup.select('span.MathJax_SVG'):
+            style = e.attrs['style']
+            style = style.replace('display: inline-block;' ,'/* decided-to-ignore-inline-block: 0;*/')
+            e.attrs['style'] = style
         
     # remove useless <defs id="MathJax_SVG_glyphs"></defs>
 #     for e in list(soup.select('defs')):
@@ -315,31 +315,7 @@ def protect_my_envs(s):
 
     return s, subs
 
-
-
-# 
-# def replace_backticks_except_in_backticks_expression(l):
-#     D = 'DOUBLETICKS'
-#     l = l.replace('``', D)
-#     tokens = l.split(D)
-#     tokens2 = []
-#     for j, f in enumerate(tokens):
-#         if j % 2 == 0: # outside the quotes
-#             f = f.replace('`', '&#96;')
-#         tokens2.append(f)
-#     l2 = D.join(tokens2)
-#     # now re-replace the doubleticks
-#     l2 = l2.replace(D, '``')
-#     return l2
-
-# def replace_backticks_except_in_backticks_expression(l):
-#     def inside(sf):
-#         sf = sf.replace('`', '&#96;')
-#         return sf
-#     def outside(sf):
-#         return sf
-#     return replace_inside_delims(l, '$', inside=inside, outside=outside)
-
+ 
 def replace_inside_delims(l, delim, inside, outside):
     D = 'DELIM'
     l = l.replace(delim, D)
@@ -355,24 +331,4 @@ def replace_inside_delims(l, delim, inside, outside):
     # now re-replace the doubleticks
     l2 = l2.replace(D, delim)
     return l2
-
-# UNDERSCORE_IN_FORMULA = 'UNDERSCOREINFORMULA'
-# STAR_IN_FORMULA = 'STARINFORMULA'
-# 
-# def replace_underscore_etc_in_formulas(l):
-#     """ Replace the special characters in the formulas """
-#     def inside(sf):
-#         sf = sf.replace('_', UNDERSCORE_IN_FORMULA)
-#         sf = sf.replace('*', STAR_IN_FORMULA)
-#         sf = sf.replace('\\', '\\\\')
-#         return sf
-#     def outside(sf):
-#         return sf
-#     l = replace_inside_delims(l, '$', inside=inside, outside=outside)
-#     return l
-    
-# def replace_underscore_etc_in_formulas_undo(s):
-#     s = s.replace(UNDERSCORE_IN_FORMULA, '_')
-#     s = s.replace(STAR_IN_FORMULA, '*')
-#     return s
-
+ 

@@ -73,3 +73,4 @@ from .test_suggestions import *
 from .special_letters import *
 from .detection_unused_constants import *
 from .corrections import *
+from .constants import *

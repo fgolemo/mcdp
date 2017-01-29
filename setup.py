@@ -61,6 +61,9 @@ setup(name=name,
           'setproctitle',
         'markdown',
       ],
+      # This avoids creating the egg file, which is a zip file, which makes our data
+      # inaccessible by dir_from_package_name()
+      zip_safe = False,
       dependency_links  = [
           # 'https://github.com/AndreaCensi/contracts/archive/env_mcdp.zip#egg=PyContracts',
           # 'https://github.com/AndreaCensi/conf_tools/archive/env_fault.zip#egg=ConfTools',

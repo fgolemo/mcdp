@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
-set -e
-set -x
-compmake out/comptests -c "$1 $2 $3 $4 $5 $6 $7 $8 $9"
+set -e # raise
+# set -x # show
+compmake out/comptests -c "$*"
+# http://stackoverflow.com/questions/12314451/accessing-bash-command-line-args-vs

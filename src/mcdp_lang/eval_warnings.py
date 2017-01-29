@@ -2,7 +2,8 @@ from mocdp import logger
 from contracts.utils import indent, check_isinstance
 from collections import namedtuple
 from mocdp.exceptions import DPInternalError
-from contracts.interface import format_where
+from mcdp_lang_utils import format_where
+
 
 class MCDPWarnings:
     LANGUAGE_REFERENCE_OK_BUT_IMPRECISE = 'Language imprecise'

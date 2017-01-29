@@ -10,9 +10,9 @@
 </head>
 <body>
 	{% include 'model_views_navigation.jinja2' %}
-	
-  	<img src='compact_graph.png' style='max-width: 50%; float: right'/> 
-  
+
+  	<img src='compact_graph.png' style='max-width: 50%; float: right'/>
+
   <style type='text/css'>
   #slider-ln { width: 10em; }
   #slider-un { width: 10em; }
@@ -23,7 +23,7 @@
   <tr>
   <td style='width: 10em'>
   Query
-  
+
   </td>
   <td>
   <textarea id="area" cols=40 rows=3/></textarea>
@@ -47,30 +47,30 @@
   Upper bound n:
   </td>
   <td>
-  <input type="text" id="slider-un-value" value="1" readonly "/>
+  <input type="text" id="slider-un-value" value="1" readonly/>
   </td>
   <td>
   <div id='slider-un'></div> </p>
   </td>
   </tr>
 </table>
-    
+
   <pre class='output_error' id='output_error'></pre>
   <pre class='output_success' id='output_result'></pre>
-  
-  <img id='output_img' src="/static/white.png" style='width: 20em; height: 20em'/>
+
+  <img id='output_img' src="{{root}}/static/white.png" style='width: 20em; height: 20em'/>
 
   <p>{{space_description}}</p>
-  
+
   <pre class='output_success' id='output_parsed'></pre>
   <pre class='output_success'  id='output_format'></pre>
   <pre class='output_success' id='output_space'></pre>
   <pre class='output_success' id='output_trace'></pre>
-  
+
   <pre class='output_error' id='ajax_error'></pre>
   </div>
 
-  
+
   <script type="text/javascript">
     var timeoutID = null;
     var wait_ms = 1000;
@@ -120,11 +120,11 @@
 	});
   </script>
 
- 
-  	
+
+
 
 <script type="text/javascript">
- 
+
 function ajax_begin() {
 	$('#operation_error').html('sending...');
 }
@@ -134,7 +134,7 @@ function ajax_success(data) {
     	console.log('ok');
         console.log(data);
         $('.output_error').html('');
-                
+
         $('#output_raw').html(data['output_raw']);
         $('#output_formatted').html(data['output_formatted']);
         $('#output_parsed').html(data['output_parsed'])
@@ -147,15 +147,15 @@ function ajax_success(data) {
     } else {
     	console.log(data);
     	$('.output_success').html('');
-    	
+
         error = data['error']
     	console.log(error);
-    	
+
     	$('#output_error').html(error);
-      $('#output_img').attr("src",'/static/error.png');
+      $('#output_img').attr("src",'{{root}}/static/error.png');
 	}
 }
-    	
+
 function ajax_failure(error) {
 	console.log(error);
 	$('.output_success').html();
@@ -163,7 +163,7 @@ function ajax_failure(error) {
 }
 
 function evaluate() {
-    string = $('#area').val(); 
+    string = $('#area').val();
     // console.log('string: "'+string+"'");
     if (string.length == 0){
         //console.log('String not present yet.');
@@ -173,7 +173,7 @@ function evaluate() {
     nu = $('#slider-un').slider('value');
     //console.log("nl,nu: " + nl + "," + nu);
 
-    $('#output_img').attr("src",'/static/evaluating.gif');
+    $('#output_img').attr("src",'{{root}}/static/evaluating.gif');
 
     payload = {'string': string, 'nl': nl, 'nu': nu};
     jQuery.ajax({

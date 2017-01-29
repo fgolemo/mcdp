@@ -245,9 +245,7 @@ def embed_images_from_library2(soup, library, raise_errors=True):
     embed_pdf_images(soup, resolve, density)
     embed_img_data(soup, resolve)
     return None
-        
-
-
+         
 
 @contextmanager
 def tmpfile(suffix):

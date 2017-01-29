@@ -16,15 +16,14 @@ from collections import namedtuple
 import re
 
 from contracts import contract
-from contracts.interface import Where
 from contracts.utils import check_isinstance, raise_desc
-from mcdp_lang.dealing_with_special_letters import\
-    greek_letters_utf8, subscripts_utf8, ends_with_divider,\
-    starts_with_divider, digit2superscript
-from mcdp_lang.parts import CDPLanguage
-from mcdp_lang.refinement import namedtuple_visitor_ext
+from mcdp_lang_utils import Where
 from mocdp import MCDPConstants
 from mocdp.exceptions import DPInternalError
+
+from .dealing_with_special_letters import greek_letters_utf8, subscripts_utf8, ends_with_divider, starts_with_divider, digit2superscript
+from .parts import CDPLanguage
+from .refinement import namedtuple_visitor_ext
 
 
 __all__ = [
@@ -142,7 +141,8 @@ def correct(x, parents):  # @UnusedVariable
         #     raise_desc(DPInternalError, msg, x_string=x_string, value_string=value_string)
         suggestion = get_suggestion_identifier(value_string)
         if suggestion is not None:
-            print('got suggestion %s for %s (col %s:%s)' % (suggestion, x, x.where.line, x.where.col))
+            #print('got suggestion "%s" -> "%s" for %s (col %s:%s)' %
+            #       (suggestion[0], suggestion[1], x, x.where.line, x.where.col))
             yield suggestion
         
     if isinstance(x, CDP.BuildProblem):
@@ -202,6 +202,9 @@ def suggestions_build_problem(x):
     
     initial_spaces = count_initial_spaces(line_infos[0].line_string, TABSIZE)
     for line_info in line_infos:
+        # ignore if empty
+        if 0 == len(line_info.line_string.strip()):
+            continue 
 #         print(' --- line %s' % str(line_info))
         i = line_info.character
         that_line = line_info.line_string

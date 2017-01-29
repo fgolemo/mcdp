@@ -10,7 +10,7 @@ manual_html=$(out_intermediate)/manual.html
 # vstring='1.0'
 
 versions_html=v_manual_screen
-versions_pdf=v_manual_blurb v_manual_ipad 
+versions_pdf=v_manual_blurb v_manual_ipad
 
 # tmpfile=$(htmltmpdir)/.tmp.pdf
 
@@ -23,21 +23,24 @@ pdf_metadata=pdf_metadata.txt
 
 cssdir=$(realpath ../../../mcdp_web/static/css)
 cssprefix=$(cssdir)/compiled
- 
+
 
 all:: $(all_targets)
 
 
 
 # include commons/make/latex.mk
-include commons/make/lyx.mk
+include lyx.mk
 
 # Latex conversion
 %.md: %.tex
 	./latex2md.py < $< > $@
 
 %.pdf: %.md
-	mcdp-render --pdf --stylesheet v_manual_blurb $* 
+	mcdp-render --pdf --stylesheet v_manual_blurb $*
+
+%.html: %.md
+	mcdp-render       --stylesheet v_manual_blurb $*
 
 lyxes=$(wildcard docs/**/*.lyx)
 generated_mds=$(lyxes:.lyx=.md)
@@ -45,7 +48,7 @@ generated_mds=$(lyxes:.lyx=.md)
 
 # dot conversion
 dots=$(wildcard docs/**/*.dot)
-generated_graphs=$(dots:.dot=.svg) 
+generated_graphs=$(dots:.dot=.svg)
 #$(dots:.dot=.pdf)
 
 # %.pdf: %.dot
@@ -86,7 +89,7 @@ clean::
 realclean: clean
 	rm -rf $(out)
 # rm -rf $(mcdp_render_manual_dir)
-	
+
 
 publish: $(manual_html)
 	# TODO: embed css

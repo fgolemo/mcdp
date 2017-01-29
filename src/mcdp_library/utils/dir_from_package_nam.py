@@ -10,7 +10,8 @@ __all__ = [
 
 @contract(d='str')
 def dir_from_package_name(d):
-    """ This works for "package.sub" format. """
+    """ This works for "package.sub" format. If it's only
+        package, we look for __init__.py"""
     tokens = d.split('.')
     if len(tokens) == 1:
         package = d
@@ -20,7 +21,7 @@ def dir_from_package_name(d):
         sub = tokens[-1]
     try:
         from pkg_resources import resource_filename  # @UnresolvedImport
-        res = resource_filename(package, sub)
+        res = resource_filename(package, sub + '.py')
 
         if len(tokens) == 1:
             res = os.path.dirname(res)

@@ -1,26 +1,51 @@
 # -*- coding: utf-8 -*-
 
 import logging
+import os
+
 import numpy
+
+from mocdp import MCDPConstants
 logging.basicConfig()
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+def get_test_index():
+    """ Returns i,n: machine index and tests """
+    n = int(os.environ.get('CIRCLE_NODE_TOTAL', 1))
+    i = int(os.environ.get('CIRCLE_NODE_INDEX', 0))
+    return i, n
 
 def load_tests_modules():
     """ Loads all the mcdp_lang_tests that register using comptests facilities. """
-    import mcdp_posets_tests
-    import mcdp_lang_tests
-    import mcdp_dp_tests
-    import mcdp_web_tests
-    import mcdp_figures_tests
-    import mcdp_docs_tests
-    import mcdp_report_ndp_tests
-
-    from mocdp.comp.flattening import tests  # @Reimport
-    from mocdp.comp import tests  # @Reimport
+    
+    # if there is build parallelism
+    # only do basic tests if we are #0
+    i, n = get_test_index()
+    
+    logger.info('Testing box #%d of %d' % (i+1, n))
+    if n == 1:
+        should_do_basic_tests = True
+    else:
+        should_do_basic_tests = (i == 0)
+    
+    if should_do_basic_tests:
+        import mcdp_posets_tests
+        import mcdp_lang_tests
+        import mcdp_dp_tests
+        import mcdp_web_tests
+        import mcdp_figures_tests
+        import mcdp_docs_tests
+        import mcdp_report_ndp_tests
+    
+        from mocdp.comp.flattening import tests  # @Reimport
+        from mocdp.comp import tests  # @Reimport
  
-    import mcdp_opt_tests
+        vname = MCDPConstants.ENV_TEST_SKIP_MCDPOPT 
+        if vname in os.environ:
+            logger.info('skipping mcdp_opt_tests')
+        else:
+            import mcdp_opt_tests
 
 
 def jobs_comptests(context):

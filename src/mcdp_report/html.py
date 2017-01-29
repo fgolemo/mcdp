@@ -3,7 +3,7 @@ from collections import namedtuple
 import os
 
 from contracts import contract
-from contracts.interface import line_and_col, location, Where
+from mcdp_lang_utils import line_and_col, location, Where
 from contracts.utils import indent, raise_desc, raise_wrapped, check_isinstance
 from mcdp_lang.namedtuple_tricks import isnamedtuplewhere, get_copy_with_where
 from mcdp_lang.parse_actions import parse_wrap

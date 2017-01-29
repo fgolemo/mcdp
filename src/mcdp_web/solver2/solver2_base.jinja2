@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<!--  2,3 http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiOiIiLCJhcmVhX1IiOiIiLCJmdG9yX2NoZWNrYm94Ijp0cnVlLCJydG9mX2NoZWNrYm94IjpmYWxzZSwiZG9fYXBwcm94aW1hdGlvbnMiOnRydWUsIm51IjoyLCJubCI6bnVsbH0= 
+<!--  2,3 http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiOiIiLCJhcmVhX1IiOiIiLCJmdG9yX2NoZWNrYm94Ijp0cnVlLCJydG9mX2NoZWNrYm94IjpmYWxzZSwiZG9fYXBwcm94aW1hdGlvbnMiOnRydWUsIm51IjoyLCJubCI6bnVsbH0=
 http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiOiIiLCJhcmVhX1IiOiIiLCJmdG9yX2NoZWNrYm94Ijp0cnVlLCJydG9mX2NoZWNrYm94IjpmYWxzZSwiZG9fYXBwcm94aW1hdGlvbnMiOnRydWUsIm51IjoyLCJubCI6OX0=
 -->
 <head>
@@ -18,10 +18,10 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
         width: 100ex;
     }
     img#compact_graph {
-      max-width: 50%; 
-      max-width: 35ex; 
-      float: right ;
-      margin-right: 10ex;
+      /*max-width: 50%;*/
+      /*max-width: 35ex;*/
+      /*float: right ;*/
+      /*margin-right: 10ex;*/
     }
 
     #slider-ln { width: 10em; }
@@ -33,82 +33,127 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
   #area_R { color: darkred;  font-family: Courier, monospace; font-size: 80%;}
   .Ftext {color: darkgreen;}
   .Rtext {color: darkred;}
+  .Itext {color: darkorange;}
+  table#params {
+      display:inline-block;
+  }
+  table#params td:first-child {
+      vertical-align: top;
+      font-weight: bold;
+      padding-right: 12pt;
+      white-space : nowrap;
 
-  table#params td:first-child, table#params label, #F_label, #R_label { 
-    text-align: right;
+  }
+  table#params td:first-child, table#params label, #F_label, #R_label {
+    /*text-align: right;*/
     font-size: 80%;
   }
+   table#params label {text-align:left;}
   fieldset { border: none; padding: 0; margin: 0; }
 
-  h2 { font-size: 100%; margin-bottom: -1.5em; margin-left: 0.5em;}
+  h2 { font-size: 100%; margin-bottom: 0; margin-left: 0.5em;}
   table#params {padding-top: 1em; /* for h2 trick above */}
 
-  div#query_box { border: solid 1px #ddd; padding: 1em;}
+  div#query_box {
+        border: solid 1px #ddd; padding: 1em;
 
-  label { border: 0 !important; background-color: white !important; }
+   }
+  div#query_box p#par_image {
+      margin: 0; padding:0;
+      text-align: center;
+  }
+
+  label { border: 0 !important; background-color: white !important;
+      color: black !important;
+      font-weight: normal !important;
+      max-width: 34em;
+      margin-bottom: 3pt;
+    }
 
   img#problem_icon {height: 7em;}
+
+  .not-implemented { color: gray; font-weight:normal;}
 	</style>
 </head>
 <body>
 	{% include 'model_views_navigation.jinja2' %}
-	
-  <h2>Query</h2>
-  <div id='query_box'>
-  <img src='compact_graph.png' id='compact_graph'/>
+    <h2>Query</h2>
 
+  <div id='query_box'>
+      <p id='par_image'>
+  <img src='compact_graph.svg' id='compact_graph'/>
+</p>
   <table id='params'>
   <tr>
-    <td></td>
+    <td>
+        Choose query type:
     <td>
     <!-- <p  id='query-type-label' valign='top'>Query type</p> -->
-      <fieldset class='query_type'> 
+      <fieldset class='query_type'>
       <label for="ftor_checkbox">
-        <span class='Ftext'>Fixed the functionality</span>,
+        <span class='Ftext'>Fixed the functionality</span>,<br/>
         <span class='Rtext'>minimize the resources</span>.
       </label>
       <input type="radio" name="query-type" id="ftor_checkbox" checked="checked">
-      <br/>
+
       <label for="rtof_checkbox">
-        <span class='Rtext'>Fixed the resources</span>, 
+        <span class='Rtext'>Fixed the resources</span>,<br/>
         <span class='Ftext'>maximize the functionality</span>.
       </label>
       <input type="radio" name="query-type" id="rtof_checkbox">
       <br/>
-      <label for="option3">
-        Given an implementation, evaluate functionality/resources.
+      <label for="itofr_checkbox">
+        Given an <span class='Itext'>implementation</span>,<br/>evaluate <span class='Ftext'>functionality</span>/resources.
+        <span class='not-implemented'>[not implemented]</span>
       </label>
-      <input type="radio" name="query-type" id="option3" disabled='1'>
+      <input type="radio" name="query-type" id="itofr_checkbox" >
       <br/>
-      <label for="option4">
-        Given min functionality and max resources, find an implementation.
-      </label>
-      <input type="radio" name="query-type" id="option4" disabled='1'>
+
+      <label for="existsi_checkbox">
+          Given  <span class='Ftext'>min functionality</span> and
+          <span class='Rtext'>max resources</span>,<br/>
+          determine if there is a <span class='Itext'>feasible implementation</span>.
+          <span class='not-implemented'>[not implemented]</span>
+        </label>
+      <input type="radio" name="query-type" id="existsi_checkbox"  >
       <br/>
-      <label for="option5">
-        Solve for component that makes problem feasible.
+
+      <label for="frtoi_checkbox">
+          Given <span class='Ftext'>min functionality</span> and
+          <span class='Rtext'>max resources</span> and max resources,<br/> find a
+        <span class='Itext'>feasible implementation</span>.
+        <span class='not-implemented'>[not implemented]</span>
       </label>
-      <input type="radio" name="query-type" id="option5" disabled='1'>
+      <input type="radio" name="query-type" id="frtoi_checkbox"  >
+      <br/>
+
+      <label for="solveforx_checkbox">
+          "Solve for X": find the minimal component that makes the co-design problem feasible.
+          <span class='not-implemented'>[not implemented]</span>
+      </label>
+      <input type="radio" name="query-type" id="solveforx_checkbox" >
     </fieldset>
     <br/>
-    <img id='problem_icon' src='/static/white_small.png'/>
+    <img id='problem_icon' src='{{root}}/static/white_small.png'/>
     </td>
-  </tr>  
+  </tr>
   <tr id='row-fun'>
     <td>
+        Enter  <span class='Ftext'>functionality</span>:
     </td>
     <td id='F_cell'>
       <span id='F_label'>{{F_names}}<br/> {{F_description}}</span><br/>
-      <textarea id="area_F" cols=70 rows=5/></textarea>
+      <textarea id="area_F" cols=45 rows=5/></textarea>
     </td>
   </tr>
 
   <tr id='row-res'>
     <td>
+        Enter <span class='Rtext'>resources</span>:
     </td>
    <td id='R_cell'>
       <span id='R_label'>{{R_names}}<br/> {{R_description}}</span><br/>
-      <textarea id="area_R" cols=70 rows=5/></textarea>
+      <textarea id="area_R" cols=45 rows=5/></textarea>
     </td>
   </tr>
 
@@ -116,7 +161,7 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
     <td></td><td>
         <fieldset>
             <input type="checkbox" name="do_approximations_x" id="do_approximations"/>
-            <label for="do_approximations_x">Use finite approximations 
+            <label for="do_approximations_x">Use finite approximations
               to infinite antichains</label>
 
         </fieldset>
@@ -125,7 +170,7 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
   <tr>
     <td valign='top' id='approx_cell'></td>
       <!-- <fieldset> -->
-      
+
 
     <td id='approx_params'>
       <table>
@@ -133,7 +178,7 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
           <td>
           Upper bound complexity
           </td>
-          
+
           <td>
             <input type="spinner" id="spinner-un" value='1'/>
           </td>
@@ -159,30 +204,30 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
         </fieldset>
     </td>
   </tr>
-   
+
 </table>
 </div> <!-- query box -->
-    
+
   <pre class='output_error' id='output_error'></pre>
   <pre class='output_success' id='output_result'></pre>
-  
-  <img id='output_img' src="/static/white.png" style='width: 20em; height: 20em'/>
+
+  <img id='output_img' src="{{root}}/static/white.png" style='width: 20em; height: 20em'/>
 
   <p>{{space_description}}</p>
-  
+
   <pre class='output_success' id='output_parsed'></pre>
   <pre class='output_success'  id='output_format'></pre>
   <pre class='output_success' id='output_space'></pre>
   <pre class='output_success' id='output_trace'></pre>
- 
+
   <pre class='output_success' id='output_raw'></pre>
   <pre class='output_success' id='output_formatted'></pre>
 
-  
+
   <pre class='output_error' id='ajax_error'></pre>
   </div>
-      
-  
+
+
   <script type="text/javascript">
     var timeoutID = null;
     var wait_ms = 1000;
@@ -196,11 +241,11 @@ http://127.0.0.1:8080/libraries/basic/models/prod2r/views/solver2/#eyJhcmVhX0YiO
 
   </script>
 
- 
-  	
+
+
 
 <script type="text/javascript">
- 
+
 function ajax_begin() {
 	S('#operation_error').html('sending...');
 }
@@ -210,7 +255,7 @@ function ajax_success(data) {
     	console.log('ok');
         console.log(data);
         S('.output_error').html('');
-                
+
         S('#output_raw').html(data['output_raw']);
         S('#output_formatted').html(data['output_formatted']);
         S('#output_parsed').html(data['output_parsed'])
@@ -223,16 +268,16 @@ function ajax_success(data) {
     } else {
     	console.log(data);
     	S('.output_success').html('');
-    	
+
         error = data['error']
     	console.log(error);
-    	
+
     	S('#output_error').html(error);
-      // S('#output_img').attr("src",'/static/error.png');
-      S('#output_img').attr("src",'/static/white_small.png');
+      // S('#output_img').attr("src",'{{root}}/static/error.png');
+      S('#output_img').attr("src",'{{root}}/static/white_small.png');
 	}
 }
-    	
+
 function ajax_failure(error) {
 	console.log(error);
 	S('.output_success').html();
@@ -243,10 +288,10 @@ function evaluate() {
 
     ui_state = get_ui_state();
 
-    areaF = S('#area_F').val(); 
+    areaF = S('#area_F').val();
     areaR = S('#area_R').val();
-    areaF = areaF.replace(/\s/g, ""); 
-    areaR = areaR.replace(/\s/g, ""); 
+    areaF = areaF.replace(/\s/g, "");
+    areaR = areaR.replace(/\s/g, "");
 
     if(ui_state['ftor_checkbox'] && areaF.length == 0)
       return;
@@ -254,9 +299,9 @@ function evaluate() {
     if(ui_state['rtof_checkbox'] && areaR.length == 0)
       return;
 
-    S('#output_img').attr("src",'/static/evaluating.gif');
+    S('#output_img').attr("src",'{{root}}/static/evaluating.gif');
 
-    
+
     payload = {'ui_state': ui_state};
     jQuery.ajax({
         url     : 'submit',
@@ -267,19 +312,28 @@ function evaluate() {
         error : ajax_failure
     });
 }
+var problems = ['ftor', 'rtof', 'solveforx',
+'frtoi', 'existsi', 'itofr']
+
+var checkboxes = ['ftor_checkbox', 'rtof_checkbox', 'solveforx_checkbox',
+'frtoi_checkbox', 'existsi_checkbox', 'itofr_checkbox']
 
 function get_ui_state() {
   state = {};
-  state['area_F'] = S('#area_F').val(); 
-  state['area_R'] = S('#area_R').val(); 
-  state['ftor_checkbox'] = S("#ftor_checkbox").is(':checked');
-  state['rtof_checkbox'] = S("#rtof_checkbox").is(':checked');
+  state['area_F'] = S('#area_F').val();
+  state['area_R'] = S('#area_R').val();
+  for(c of checkboxes) {
+        state[c] = S("#"+c).is(':checked');
+  }
+
+  // state['rtof_checkbox'] = S("#rtof_checkbox").is(':checked');
   state['do_approximations'] = S("#do_approximations").is(':checked');
+
   state['nu'] = S('#spinner-un').spinner('value');
   state['nl'] = S('#spinner-ln').spinner('value');
   console.log('just read ln ' +state['nl']);
   console.log('just read un ' +state['nu']);
-  return state;  
+  return state;
 }
 
 function save_as_hash() {
@@ -323,29 +377,29 @@ function set_state_from_hash() {
   /* Ensure $ returns at least 1 element */
   function S(selector) {
       x = $(selector);
-      if (x.length === 0) 
+      if (x.length === 0)
           throw "Empty jQuery result for " + selector;
       return x;
+  }
+
+  function save_hash_and_call() {
+    save_as_hash();
+    call_after_pause(evaluate, wait_ms);
   }
 
   $( function() {
     S( "input[type=radio]" ).checkboxradio();
     // $( "input[type=checkbox]" ).checkboxradio();
-    
-    S('#ftor_checkbox').change(update_ui);
-    S('#rtof_checkbox').change(update_ui);
-    S('#do_approximations').change(update_ui);
-  
-    function save_hash_and_call() {
-      save_as_hash();
-      call_after_pause(evaluate, wait_ms); 
+    for(c of checkboxes) {
+          S("#"+c).change(update_ui);
+          S("#"+c).change(save_hash_and_call);
     }
-    S('#ftor_checkbox').change(save_hash_and_call);
-    S('#rtof_checkbox').change(save_hash_and_call);
+
+    S('#do_approximations').change(update_ui);
 
 
-    S( "#spinner-un" ).spinner({'min': 1, 'numberFormat': "n", 'spin': save_hash_and_call}); 
-    S( "#spinner-ln" ).spinner({'min': 1, 'numberFormat': "n", 'spin': save_hash_and_call}); 
+    S( "#spinner-un" ).spinner({'min': 1, 'numberFormat': "n", 'spin': save_hash_and_call});
+    S( "#spinner-ln" ).spinner({'min': 1, 'numberFormat': "n", 'spin': save_hash_and_call});
     update_ui();
 
     S('#area_F').on('inputchange', function() {
@@ -374,25 +428,32 @@ function set_state_from_hash() {
       S(which).css('background-color', 'lightgrey');
     }
   }
-  
+
   function update_ui() {
     console.log('update_ui()');
-    if( S("#ftor_checkbox").is(':checked') ){ 
+
+    for(p of problems) {
+        cb = '#' + p + '_checkbox';
+        if (S(cb).is(':checked')) {
+            image = '{{root}}/static/' + p + '.png';
+            S('#problem_icon').attr("src", image);
+        }
+    }
+
+    if( S("#ftor_checkbox").is(':checked') ){
       mark('#area_F', true);
       mark('#area_R', false);
       S('#row-res').hide();
       S('#row-fun').show();
-      S('#problem_icon').attr("src", '/static/ftor.png');
     }
-    if( S("#rtof_checkbox").is(':checked') ){ 
+    if( S("#rtof_checkbox").is(':checked') ){
       mark('#area_F', false);
       mark('#area_R', true);
       S('#row-res').show();
       S('#row-fun').hide();
-      S('#problem_icon').attr("src", '/static/rtof.png');
     }
 
-    if( S("#do_approximations").is(':checked') ){ 
+    if( S("#do_approximations").is(':checked') ){
       S("#approx_params").show();
       console.log('checked');
     } else {
@@ -402,7 +463,7 @@ function set_state_from_hash() {
 
   }
 
-  
+
   </script>
 
 </body>

@@ -1,12 +1,12 @@
 mcdp {
     converter = instance `converter
     cell = instance `simple_cell
-
+    
     provides voltage  using converter
     provides capacity using cell
-
-    (v_in required by converter) <= (voltage provided by cell)
-
-    requires cost >= cost required by cell + cost required by converter
-    requires mass >= mass required by cell + mass required by converter
+    
+    (v_in required by converter) ≼ (voltage provided by cell)
+    
+    requires cost = cost required by cell + cost required by converter
+    requires mass = mass required by cell + mass required by converter
 }

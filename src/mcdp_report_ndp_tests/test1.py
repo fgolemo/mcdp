@@ -7,7 +7,7 @@ from contracts.utils import raise_desc, raise_wrapped
 from mcdp_cli.query_interpretation import convert_string_query
 from mcdp_dp import IdentityDP, Mux
 from mcdp_dp.dp_transformations import get_dp_bounds
-from mcdp_library_tests.tests import get_test_library
+from mcdp_library_tests.tests import get_test_library, testing_includes
 from mcdp_posets import NotBelongs, lowerset_project, upperset_project, UpperSet, \
     LowerSet
 from mcdp_report.gdc import STYLE_GREENREDSYM
@@ -214,7 +214,8 @@ def check_ndp_grap_imp1():
     ndpname = 'batteries'
     query = dict(missions='600 []', capacity='10 MJ')
     out = 'out/check_ndp_grap_imp1'
-    plot_different_solutions(libname, ndpname, query, out)
+    if testing_includes(libname):
+        plot_different_solutions(libname, ndpname, query, out)
 
 
 @comptest
@@ -223,7 +224,8 @@ def check_ndp_grap_imp2():
     ndpname = 'batteries'
     query = dict(missions='600 []', capacity='10 MJ')
     out = 'out/check_ndp_grap_imp2'
-    plot_different_solutions(libname, ndpname, query, out)
+    if testing_includes(libname):
+        plot_different_solutions(libname, ndpname, query, out)
     
 
 @comptest
@@ -234,7 +236,8 @@ def check_ndp_grap_imp3():
                  travel_distance='10 km',
                  carry_payload='10g')
     out = 'out/check_ndp_grap_imp3'
-    plot_different_solutions(libname, ndpname, query, out, upper=100)
+    if testing_includes(libname):
+        plot_different_solutions(libname, ndpname, query, out, upper=100)
 
 
 @comptest
@@ -245,7 +248,8 @@ def check_ndp_grap_imp4():
                  travel_distance='10 km',
                  carry_payload='10g')
     out = 'out/check_ndp_grap_imp4'
-    plot_different_solutions(libname, ndpname, query, out, upper=100)
+    if testing_includes(libname):
+        plot_different_solutions(libname, ndpname, query, out, upper=100)
 
 
 def plot_different_solutions(libname, ndpname, query, out, upper=None):

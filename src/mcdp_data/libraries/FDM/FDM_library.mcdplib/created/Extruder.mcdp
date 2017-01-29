@@ -23,8 +23,7 @@ mcdp {
     # Each material has a liquefaction temperature 
     temperature provided by liquefier ≽ liquefaction_temperature required by material  
     
-    # AC: I'm not sure which "force" this is
-    # force provided by liquefier ≽ force required by nozzle  # XXX
+    #force provided by gears ≽ force required by nozzle  
     
     # The time it takes to produce the part depends on the part volume
     # and the nozzle properties (time_per_unit_volume)

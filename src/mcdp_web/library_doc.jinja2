@@ -2,13 +2,13 @@
 <html lang="en">
 <head>
     <title>{{title}}</title>
-    
+
     {% include 'head.jinja2' %}
     {% include 'head_markdown.jinja2' %}
-    
-	 	
+
+
 	 <script type='text/javascript'>
-	 	$(document).ready(function() {  		
+	 	$(document).ready(function() {
 	    	$(".make_button").button();
 		});
 	</script>
@@ -16,7 +16,7 @@
 	<style type='text/css'>
 	a.make_button { font-size: 70%; }
 	a.make_button { display: none; }
-	
+
 	div#content {
 		margin-left: 13em;
 		padding-right: 2em;
@@ -37,30 +37,30 @@
 	div#toc a {
 		text-decoration: none;
 		color:black;
-		display: block;	
+		display: block;
 		width: 100%;
 		padding: 0.3em;
 	}
 	div#toc a:hover {
 		background-color: #f0f0ff;
-	 
+
 	}
 	div#toc a.current {
 	 background-color: #eee;
-	 
+
 	}
-	</style>		    
+	</style>
 </head>
 <body class='markdown'>
 {% include 'refresh_shortcut.jinja2' %}
 
 {% if not print %}
-<a class='make_button' href="/libraries/{{navigation['current_library']}}/list">
+<a class='make_button' href="{{root}}/libraries/{{navigation['current_library']}}/list">
 	Library
 	 		 <span class="library_name">
 	 		 	{{navigation['current_library']}}
 	 		 </span>
-</a> 
+</a>
 {% endif %}
 
 {% if print %}

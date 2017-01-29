@@ -1,20 +1,23 @@
 # -*- coding: utf-8 -*-
 from contracts import contract
-from contracts.interface import format_where
+from mcdp_lang_utils import format_where
+
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance, indent
 from mcdp_dp import (MinusValueNatDP, MinusValueRcompDP, MinusValueDP,
                      MultValueDP, MultValueNatDP, PlusValueRcompDP, PlusValueDP,
-                     PlusValueNatDP , ProductNDP, SumNNatDP, ProductNNatDP,
+                     PlusValueNatDP, ProductNDP, SumNNatDP, ProductNNatDP,
                      SumNRcompDP, SumNDP, SumNIntDP, ProductNRcompDP)
+from mcdp_lang.misc_math import ConstantsNotCompatibleForAddition
 from mcdp_maps.SumN_xxx_Map import sum_dimensionality_works
 from mcdp_posets import (Int, Nat, RbicompUnits, RcompUnits,
-    express_value_in_isomorphic_space, get_types_universe, mult_table, Rcomp)
+                         express_value_in_isomorphic_space, get_types_universe, mult_table, Rcomp)
 from mcdp_posets import is_top
 from mcdp_posets.rcomp_units import (RbicompUnits_subtract, RbicompUnits_reflect,
-    R_dimensionless)
+                                     R_dimensionless)
 from mocdp import MCDPConstants
 from mocdp.comp.context import CResource, ValueWithUnits
-from mocdp.exceptions import DPInternalError, DPSemanticError
+from mocdp.exceptions import DPInternalError, DPSemanticError,\
+    DPNotImplementedError
 
 from .eval_constant_imp import NotConstant
 from .eval_resources_imp import eval_rvalue
@@ -22,7 +25,6 @@ from .helpers import create_operation, get_valuewithunits_as_resource, get_resou
 from .misc_math import inv_constant
 from .parts import CDPLanguage
 from .utils_lists import get_odd_ops, unwrap_list
-from mcdp_lang.misc_math import ConstantsNotCompatibleForAddition
 
 
 CDP = CDPLanguage
@@ -316,13 +318,14 @@ def get_mult_op(context, r, c):
         R = F
         unit, value = R_dimensionless, c.cast_to(R_dimensionless)
         dp = MultValueDP(F=F, R=F, unit=unit, value=value)
+    elif isinstance(rtype, Rcomp) and isinstance(c.unit, Rcomp):
+        msg = 'Multiplication not implemented with Rcomp().'
+        raise_desc(DPNotImplementedError, msg, rtype=rtype, c=c)
     else:
         msg = 'Cannot create multiplication operation.'
-        raise_desc(DPInternalError, msg, rtype=rtype, c=c)
+        raise_desc(DPSemanticError, msg, rtype=rtype, c=c)
 
-    r2 = create_operation(context, dp, resources=[r],
-                          name_prefix='_mult', op_prefix='_x',
-                          res_prefix='_y')
+    r2 = create_operation(context, dp, resources=[r], name_prefix='_mult')
     return r2
 
 

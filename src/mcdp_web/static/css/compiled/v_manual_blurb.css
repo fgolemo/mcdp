@@ -31,7 +31,7 @@
 */#version-v_manual_blurb {
   border: solid 1px red;
 }
-body > P:first-of-type::before {
+body > p:first-of-type::before {
   content: 'Stylesheet: ' v_manual_blurb;
 }
 /* http://meyerweb.com/eric/tools/css/reset/
@@ -419,25 +419,25 @@ code {
   font-family: STIX;
   font-style: normal;
   font-weight: normal;
-  src: local("STIX General"), url("/Library/Fonts/STIXGeneral.otf");
+  src: local("STIX General");
 }
 @font-face {
   font-family: STIX;
   font-style: normal;
   font-weight: bold;
-  src: url("/Library/Fonts/STIXGeneralBol.otf");
+  src: local("STIX General Bold");
 }
 @font-face {
   font-family: STIX;
   font-style: italic;
   font-weight: normal;
-  src: url("/Library/Fonts/STIXGeneralItalic.otf");
+  src: local("STIX General Italic");
 }
 @font-face {
   font-family: STIX;
   font-style: italic;
   font-weight: bold;
-  src: url("/Library/Fonts/STIXGeneralBolIta.otf");
+  src: local("STIX General Bold Italic");
 }
 body {
   /*padding-left: 3em;*/
@@ -540,9 +540,6 @@ pre.console .program {
 pre.console .program_command {
   color: #cff;
 }
-error {
-  color: red;
-}
 /*ol + h4, ul + h4 {color: red;}*/
 h4::after {
   content: ':';
@@ -592,6 +589,9 @@ div.latex_env {
 }
 .href-replaced {
   background-color: yellow;
+}
+.error {
+  color: red;
 }
 span.Unit,
 span.Nat,
@@ -700,7 +700,8 @@ span.AssertGEQKeyword,
 span.AssertLTKeyword,
 span.AssertGTKeyword,
 span.AssertNonemptyKeyword,
-span.AssertEmptyKeyword {
+span.AssertEmptyKeyword,
+span.ConstantKeyword {
   font-weight: bold;
   color: #00a;
 }
@@ -1962,13 +1963,6 @@ h1::after {
 }
 #main_toc code.keyword {
   color: black;
-}
-li {
-  border: solid 1px red;
-  padding: 0 !important;
-}
-ul {
-  border: solid 1px blue;
 }
 @page {
   size: 6.125in 9.250in;

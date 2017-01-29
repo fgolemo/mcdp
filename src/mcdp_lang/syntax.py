@@ -98,7 +98,6 @@ class SyntaxIdentifiers():
         'UpperSets',
         'LowerSets',  # TODO
         'specialize',
-        'with',
         'Uncertain',
         'Interval',
         'product',
@@ -109,7 +108,7 @@ class SyntaxIdentifiers():
         'ignore',
         'addmake',
         'approxu',
-        'import',
+        # 'import',
         'from',
         'upperclosure',
         'lowerclosure',
@@ -140,15 +139,15 @@ class SyntaxIdentifiers():
     not_keyword = NotAny(
         MatchFirst([Keyword(_) for _ in keywords]))
 
-    """ 
+    """
         Valid identifiers:
-        
+
             first letter:  _a-Z_a-z + the greek letters
             middle letter: _a-Z_a-z1-9 + the greek letters
             last letter:   _a-Z_a-z1-9 + the greek letters + subscripts
-            
+
         plus the constraint that it cannot be a keyword.
-        
+
         Greek letters are translated to their spelling.
         Subscripts are translated; from '₁' to '_1'.
     """
@@ -178,8 +177,8 @@ class SyntaxIdentifiers():
 
     @staticmethod
     def get_identifier_unconstrained():
-        """ 
-            Returns an identifier expression ([_a-Z(_a-z1-9)*] 
+        """
+            Returns an identifier expression ([_a-Z(_a-z1-9)*]
             This can be a keyword.
         """
         return SyntaxIdentifiers.normal_identifier.copy()
@@ -233,9 +232,9 @@ class Syntax():
     python_style_multiline2 = QuotedString(
         quoteChar="'''", escChar='\\', unquoteResults=True, multiline=True)
     python_style_multiline = python_style_multiline1 | python_style_multiline2
-    comment_string_simple = sp(copy_expr_remove_action(quoted), 
+    comment_string_simple = sp(copy_expr_remove_action(quoted),
                                lambda t: CDP.CommentStringSimple(t[0]))
-    comment_string_complex = sp(copy_expr_remove_action(python_style_multiline), 
+    comment_string_complex = sp(copy_expr_remove_action(python_style_multiline),
                                 lambda t: CDP.CommentStringTriple(t[0]))
 
     comment_model = sp(comment_string_simple | comment_string_complex,
@@ -292,7 +291,7 @@ class Syntax():
     mcdp_dev_warning('these variations are not tested')
     PROVIDED_BY = sp((K('provided') | K('prov.') | K('p.')) - K('by'),
                      lambda _: CDP.ProvidedByKeyword('provided by'))
-    
+
     IMPLEMENTS = keyword('implements', CDP.ImplementsKeyword)
     PROVIDED = keyword('provided', CDP.ProvidedKeyword)
     REQUIRED = keyword('required', CDP.RequiredKeyword)
@@ -633,20 +632,23 @@ class Syntax():
 #     RESOURCE = keyword('resource', CDP.ResourceKeyword)
 #     FUNCTION = keyword('function', CDP.FunctionKeyword)
 
-    setname_constant1 = sp(S(CONSTANT) +
+    setname_constant1 = sp(CONSTANT +
                            constant_name + EQ + (rvalue)
                            + S(O(comment_con)),
-                           lambda t: CDP.SetNameConstant(t[0], t[1], t[2]))
-    setname_constant2 = sp(S(O(CONSTANT)) +
+                           lambda t: CDP.SetNameConstant(t[0], t[1], t[2], t[3]))
+    setname_constant2a = sp(CONSTANT +
                            constant_name + EQ + (definitely_constant_value)
                            + S(O(comment_con)),
-                           lambda t: CDP.SetNameConstant(t[0], t[1], t[2]))
+                           lambda t: CDP.SetNameConstant(t[0], t[1], t[2], t[3]))
+    setname_constant2b = sp( 
+                           constant_name + EQ + (definitely_constant_value)
+                           + S(O(comment_con)),
+                           lambda t: CDP.SetNameConstant(None, t[0], t[1], t[2]))
 
     constant_value_divided = sp('1' + BAR + constant_value,
                                 lambda t: CDP.ConstantDivision(t[0],t[1],t[2]))
 
-    setname_constant = (setname_constant1 | setname_constant2).setName(
-        'setname_constant')
+    setname_constant = setname_constant1 | setname_constant2a | setname_constant2b
     setname_rvalue = sp(setname_generic_var + EQ + (ELLIPSIS | rvalue)
                         + S(O(comment_res)),
                         lambda t: CDP.SetNameRValue(t[0], t[1], t[2])).setName('setname_rvalue')
@@ -1183,27 +1185,27 @@ class Syntax():
 
 #     'keyword lbrace funres table rbrace')
     ndpt_catalogue2a = sp(CATALOGUE +
-                         lbrace 
+                         lbrace
                          + comment_model
-                         + # now we know 
+                         + # now we know
                          simple_dp_model_stats +
                          ZeroOrMore(catalogue_row2 + S(ow)) +
                          rbrace,
-                         lambda t: CDP.Catalogue2(t[0], t[2], t[3], make_list(list(t[4:-1]), 
+                         lambda t: CDP.Catalogue2(t[0], t[2], t[3], make_list(list(t[4:-1]),
                                                                               where=t[-1].where),
                                                   t[-1])).setName('ndpt_catalogue2a_comment')
     ndpt_catalogue2b = sp(CATALOGUE +
-                         lbrace 
+                         lbrace
                          # no comment
-                         + simple_dp_model_stats 
+                         + simple_dp_model_stats
                          + # now we don't know beacuse of catalogu3
                          ZeroOrMore(catalogue_row2 + S(ow)) +
                          rbrace,
-                         lambda t: CDP.Catalogue2(t[0], t[1], t[2], make_list(list(t[3:-1]), 
+                         lambda t: CDP.Catalogue2(t[0], t[1], t[2], make_list(list(t[3:-1]),
                                                                               where=t[-1].where),
                                                   t[-1]))
     ndpt_catalogue2 = ndpt_catalogue2a | ndpt_catalogue2b
-    
+
     # f <-> r
     catalogue_row3 = sp(catalogue_func + LEFTRIGHTARROW + catalogue_res,
                         lambda t: CDP.CatalogueRow3(t[0], t[1], t[2]))
@@ -1222,8 +1224,8 @@ class Syntax():
                            lambda t: make_list(list(t)))
         catalogue_table = sp(OneOrMore(catalogue_row),
                              lambda t: CDP.CatalogueTable(make_list(list(t))))
-    
-    
+
+
         ndpt_catalogue_dp = sp(CATALOGUE +
                                S(lbrace) +
                                simple_dp_model_stats +

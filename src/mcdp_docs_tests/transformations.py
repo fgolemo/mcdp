@@ -4,6 +4,8 @@ from contracts.utils import raise_desc, indent
 from mcdp_library.library import MCDPLibrary
 from mcdp_web.renderdoc.highlight import get_minimal_document
 from mcdp_web.renderdoc.main import render_complete
+from mcdp_web.renderdoc.markdown_transform import censor_markdown_code_blocks
+from mcdp_lang_tests.syntax_spaces import indent_plus_invisibles
 
 
 def tryit(s, write_to=None, forbid=[]):
@@ -24,7 +26,8 @@ def tryit(s, write_to=None, forbid=[]):
      'warn_caption': not 'caption' in s2,
      'warn_centering': not 'centering' in s2,
      'warn_tabular': not 'tabular' in s2,
-     'funny': not '&amp;#96;' in s2
+     'funny': not '&amp;#96;' in s2,
+     'dollarfix': not 'DOLLAR' in s2,
 #     assert not '&#96;' in s2
 #     assert not '&amp;' in s2
 
@@ -135,17 +138,16 @@ syntax ``instance `Name``. The backtick means "load symbols from the library".
 
 @comptest
 def conv_f3():
-    s = """    
-That is, $\\funsp=\\mathbb{R}_{+}^{[\\text{J}]}$ and $\\ressp=\\mathbb{R}_{+}^{[\text{g}]}$. 
-"""
-    s = """    
-That is, $F=\\mathbb{R}_{+}^{[\\text{J}]}$ and $R=\\mathbb{R}_{+}^{[\text{g}]}$. 
+#     s = """    
+# That is, $\\funsp=\\mathbb{R}_{+}^{[\\text{J}]}$ and $\\ressp=\\mathbb{R}_{+}^{[\text{g}]}$. 
+# """
+    s = r"""    
+That is, $F=\mathbb{R}_{+}^{[\text{J}]}$ and $R=\mathbb{R}_{+}^{[\text{g}]}$. 
 
 and $c=d_e$ and ``code_b`` and <code>a_b</code>. 
 """
-    s2 = tryit(s, write_to="f3.html",
-               forbid=['<em'])
-    
+    s2 = tryit(s, write_to="f3.html", forbid=['<em'])
+#     print s2
     
     
 @comptest
@@ -227,7 +229,7 @@ S & \\mapsto & \\{y\\in P:\\exists\\,x\\in S:x\\leq y\\}.
 \\end{defn}
 
     """,
-    """
+    r"""
     
 
 (if it exists) of the set of fixed points of~$f$:
@@ -250,7 +252,7 @@ the library ``src/mcdp_data/libraries/examples/example-battery.mcdplib``, use:
 
     $ mcdp-solve -d src/mcdp_data/libraries/examples/example-battery.mcdplib battery "<1 hour, 0.1 kg, 1 W>"
 """,
-"""
+r"""
 Requires <strong>`bold</strong>.
 
 Requires <mcdp-poset>`bold</mcdp-poset>.
@@ -267,7 +269,7 @@ This is fbox2: \\fbox{ ciao !!! }
 """
 A:
 
-~~~
+r~~~
 <strong>This should be pre, not strong</strong>
 ~~~
 """,
@@ -403,7 +405,34 @@ This is the case of unreasonable demands (1 kg of extra payload):
     
 assert len(others) == 12, len(others)
 
+@comptest
+def another2():
+    # four spaces in the first line
+    s = r"""
+    
+(if it exists) of the set of fixed points of~$f$:
+\begin{equation}
+x = y .\label{eq:lfp-one}
+\end{equation}
+The equality in \eqref{lfp-one} can be relaxed to ``$xxx$''.
+
+The equality in \ref{eq:lfp-one} can be relaxed to ``$xxx$''.
+
+
+The least fixed point need not exist. Monotonicity of the map~$f$
+plus completeness is sufficient to ensure existence. 
+"""
+    s2 = censor_markdown_code_blocks(s)
+    
+    print('original:')
+    print indent_plus_invisibles(s)
+    print('later:')
+    print indent_plus_invisibles(s2)
+    
+    assert not 'censored-code' in s
+
+    
 if __name__ == '__main__': 
-    another()
+    another2()
 #     run_module_tests()
     

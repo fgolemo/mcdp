@@ -6,7 +6,10 @@
 	#select_view { width: 18em; }
 	#select_model { width: 18em; }
 
-	#back_to_library, #select_view, #select_model { height: 1.5em !important;}
+	#back_to_library, #select_view, #select_model-button {
+		/*height: 1.5em !important;*/
+		/*min-height: 80%;*/
+	}
 
 
 	#select_view, #select_model {
@@ -46,7 +49,8 @@
 
 	  </select>
 	 {% else %}
-	 	<a id='back_to_library' style='visibility: hidden' href="/libraries/{{navigation['current_library']}}/">
+	 	<a id='back_to_library' style='visibility: hidden'
+		href="{{root}}/libraries/{{navigation['current_library']}}/">
 	 		<span class='unicode-icons'>⟲</span> Library
 	 		 <span class="library_name">
 	 		 	{{navigation['current_library']}}
@@ -101,7 +105,7 @@
 		    {% for vi in navigation['views'] %}
 		    <option value="{{vi['url']}}" {% if vi['current'] %} selected = 1 {% endif %}>
 		    	<!--<span class='unicode-icons'></span> -->
-				&#128065;&nbsp; {{vi['name']}}
+				👁&nbsp; {{vi['name']}} <!--&#128065; 👁-->
 		    </option>
 		    {% endfor %}
 		  </select>

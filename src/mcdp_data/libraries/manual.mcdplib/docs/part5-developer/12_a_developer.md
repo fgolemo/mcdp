@@ -62,10 +62,52 @@ And this is the interface that must be implemented:
 
 ## Library API
 
-## Running unit tests
+## Unit tests
+
+
+### Running manually
 
 Use:
 
     $ make clean comptests-run-parallel-nocontracts
 
 It takes about 40 minutes to run all the tests.
+
+### Continuous integration using CircleCI
+
+
+#### Parallelism
+
+CircleCI supports build parallelism. If more than one container is allocated
+to the test (the information provided by `CIRCLE_NODE_INDEX` and `CIRCLE_NODE_TOTAL`),
+then container 0/n runs only the core tests,while containers 1...n-1 run only library tests.
+
+### Environment variables
+
+There are several environment variables that affect
+which tests are going to be run (#[](tab:test_environment_variables)).
+
+<col3
+    figure-id='tab:test_environment_variables'
+    figure-caption="Environment variables for unit tests">
+    <s>Variable</s> <s>Default</s> <s></s>
+
+    <s>`MCDP_TEST_LIBRARIES`</s> <s>`*`</s>
+    <s>Comma-separated list of libraries to include</s>
+
+    <s>`MCDP_TEST_LIBRARIES_EXCLUDE`</s> <s>`(empty)`</s>
+    <s>Comma-separated list of libraries to exclude</s>
+
+    <s>`CIRCLE_NODE_TOTAL`</s> <s>`1`</s>
+    <s>The total number of test containers.</s>
+
+    <s>`CIRCLE_NODE_INDEX`</s> <s>`0`</s>
+    <s>If there are more than 1 test containers, the index
+        of the current one</s>
+
+    <s>`MCDP_TEST_SKIP_MCDPOPT`</s> <s>`false`</s>
+</col3>
+<!-- 
+Other useful variables:
+
+* `MPLBACKEND`:  -->

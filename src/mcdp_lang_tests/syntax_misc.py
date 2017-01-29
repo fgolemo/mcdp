@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-from nose.tools import assert_equal
+from nose.tools import assert_equal, assert_raises
 
 from comptests.registrar import comptest, run_module_tests, comptest_fails
 from contracts.utils import raise_desc, check_isinstance
 from mcdp_dp import (CatalogueDP, CoProductDP, NotFeasible, Template, Constant,
                      Limit, MaxF1DP, MinF1DP, MinusValueDP, MinusValueNatDP,
-                     MinusValueRcompDP)
-from mcdp_dp import PlusValueNatDP
+                     MinusValueRcompDP, PlusValueNatDP)
 from mcdp_lang.eval_warnings import MCDPWarnings
 from mcdp_lang.parse_actions import parse_wrap
 from mcdp_lang.parse_interface import parse_ndp, parse_poset, parse_constant
@@ -1831,7 +1830,7 @@ def imlements2():
     assert 'r_1' in ndp.get_rnames()
 
     
-@comptest_fails
+@comptest
 def constant_inverse_constant():
     s = """
     mcdp {
@@ -1866,7 +1865,6 @@ def constant_fvalue():
     s = """ 1 / 2 m """
     print parse_wrap(Syntax.constant_value_divided, s)[0]
     
-    
     print parse_wrap(Syntax.fvalue, s)[0]
 
 @comptest_fails
@@ -1879,21 +1877,37 @@ def constant_fail2():
     s = """ 1 / 2 m """
     print parse_wrap(Syntax.constant_value_op, s)[0]
     
-@comptest_fails
+@comptest
 def constant_rvalue():
     s = """ 1 / 2 m """
     val = parse_wrap(Syntax.rvalue, s)[0]
     print val
     
     
-@comptest_fails
-def constant_inverse():
+@comptest 
+def constant_inverse_ok():
     s = """ 1 / 2 m """
     val = parse_constant(s)
     print val
     
+@comptest_fails
+def constant_inverse():
+    s = """ 1 / 2 """
+    val = parse_constant(s)
+    print val
+    
+@comptest_fails
+def expect_sem_error():
+    s = "1 g + 10 k"
+    assert_raises(DPSemanticError, parse_constant, s)
     
     
+    
+@comptest_fails
+def math_constants3():
+    parse_constant('pi^2')
+    pow(3.14,2)
+        
 if __name__=='__main__':
     run_module_tests()
 

@@ -242,29 +242,31 @@ To describe the inequality constraints, MCDPL allows to use <q><k>&lt;=</k></q>,
 class="leq">≼</span></k></q>, <q><k><span class="geq">≽</span></k></q>. These
 two expressions are equivalent:
 
-<col2>
-    <pre class='mcdp_statements' np>
-    provided capacity &lt;= 500 J
-    required mass &gt;= 100g
-    </pre>
-    <pre class='mcdp_statements'>
-    provided capacity ≼ 500 J
-    required mass ≽ 100g
-    </pre>
-</col2>
+<center>
+    <col2>
+        <pre class='mcdp_statements' np>
+        provided capacity &lt;= 500 J
+        required mass &gt;= 100g
+        </pre>
+        <pre class='mcdp_statements'>
+        provided capacity ≼ 500 J
+        required mass ≽ 100g
+        </pre>
+    </col2>
+</center>
 
 MCDPL also allows to use some special letters in identifiers.
 These two are equivalent:
 
 <center>
-<col1>
-    <pre class='mcdp_statements' noprettify="1">
-    alpha_1 = beta^3 + 9.81 m/s^2
-    </pre>
-    <pre class='mcdp_statements'>
-    α₁ = β³ + 9.81 m/s²
-    </pre>
-</col1>
+    <col2>
+        <pre class='mcdp_statements' noprettify="1">
+        alpha_1 = beta^3 + 9.81 m/s^2
+        </pre>
+        <pre class='mcdp_statements'>
+        α₁ = β³ + 9.81 m/s²
+        </pre>
+    </col2>
 </center>
 
 ## Aside: an helpful interpreter

@@ -18,21 +18,21 @@ that have units associated to them.
 
         <pos np>Nat</pos>
 
-        $\langle\mathbb{N} \cup \top, \leq\rangle$
+        <s>$\langle\mathbb{N} \cup \top, \leq\rangle$</s>
 
         <s><code>int</code> plus a special <code>Top</code> object</s>
 
 
         <pos np>Rcomp</pos>
 
-        $\langle{\mathbb{R}}_+ \cup \top, \leq\rangle$
+        <s>$\langle{\mathbb{R}}_+ \cup \top, \leq\rangle$</s>
 
         <s><code>float</code> plus a special <code>Top</code> object</s>
 
 
         <pos np>g</pos>
 
-        $\langle\mathbb{R}^{[\text{g}]}_+\cup \top, \leq\rangle$
+        <s>$\langle\mathbb{R}^{[\text{g}]}_+\cup \top, \leq\rangle$</s>
 
         <s><code>float</code> plus a special <code>Top</code> object</s>
 </col3>

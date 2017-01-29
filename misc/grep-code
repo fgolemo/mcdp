@@ -1,4 +1,5 @@
 #!/bin/bash
-set -e
-#set -x
+set -euox pipefail
+IFS=$'\n\t'
+
 grep -r "$*" src/**/*py | grep -v node_modules

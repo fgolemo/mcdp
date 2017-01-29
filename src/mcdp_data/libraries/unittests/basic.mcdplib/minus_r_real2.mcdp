@@ -2,5 +2,5 @@ mcdp {
     provides f [m]
     requires r [m]
 
-    required r - Top m >= provided f 
+    required r - ⊤ m ≽ provided f 
 }

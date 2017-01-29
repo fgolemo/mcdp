@@ -28,6 +28,12 @@ class MyUnitRegistry(UnitRegistry):
         self.define(' episodes = [episodes]')
         self.define(' CHF = 1.03 dollars')
         self.define(' EUR = 1.14 dollars')
+        self.define(' SGD = 0.70 dollars')
+        self.define(' JPY = 0.0088 dollars')
+        self.define(' GBP = 1.24 dollars')
+        
+        
+
 
 _ureg = MyUnitRegistry()
 
