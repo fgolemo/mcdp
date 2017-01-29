@@ -103,18 +103,28 @@ global-exclude _mcdpweb_cache
 global-exclude node_modules
 
 
-prune ./src/mcdp_data/libraries/1600-hepa/1609-minimal_demo.mcdplib/out
-prune ./src/mcdp_data/libraries/examples/example-battery.mcdplib/out
-prune ./src/mcdp_data/libraries/examples/example-catalogue.mcdplib/out
-prune ./src/mcdp_data/libraries/examples/example-plusinv.mcdplib/out
-prune ./src/mcdp_data/libraries/examples/plugs.mcdplib/out
-prune ./src/mcdp_data/libraries/examples/rover_energetics.mcdplib/out
-prune ./src/mcdp_data/libraries/examples/uav_energetics/actuations_v1.mcdplib/out
-prune ./src/mcdp_data/libraries/examples/uav_energetics/actuations_v2.mcdplib/out
-prune ./src/mcdp_data/libraries/examples/uav_energetics/batteries_v1.mcdplib/out
-prune ./src/mcdp_data/libraries/examples/uav_energetics/droneA_v1.mcdplib/out
-prune ./src/mcdp_data/libraries/examples/uav_energetics/droneB_v1.mcdplib/out
-prune ./src/mcdp_data/libraries/examples/uav_energetics/droneD_complete_v1.mcdplib/out
-prune ./src/mcdp_data/libraries/examples/uav_energetics/droneD_complete_v2.mcdplib/out
-prune ./src/mcdp_data/libraries/examples/uav_energetics/mcdp_uncertainty/droneD_complete_templates.mcdplib/out
-prune ./src/mcdp_data/libraries/examples-devel/actuation.mcdplib/out
+prune src/mcdp_data/libraries/1600-hepa/1609-minimal_demo.mcdplib/out
+prune src/mcdp_data/libraries/examples/example-battery.mcdplib/out
+prune src/mcdp_data/libraries/examples/example-catalogue.mcdplib/out
+prune src/mcdp_data/libraries/examples/example-plusinv.mcdplib/out
+prune src/mcdp_data/libraries/examples/plugs.mcdplib/out
+prune src/mcdp_data/libraries/examples/rover_energetics.mcdplib/out
+prune src/mcdp_data/libraries/examples/uav_energetics/actuations_v1.mcdplib/out
+prune src/mcdp_data/libraries/examples/uav_energetics/actuations_v2.mcdplib/out
+prune src/mcdp_data/libraries/examples/uav_energetics/batteries_v1.mcdplib/out
+prune src/mcdp_data/libraries/examples/uav_energetics/droneA_v1.mcdplib/out
+prune src/mcdp_data/libraries/examples/uav_energetics/droneB_v1.mcdplib/out
+prune src/mcdp_data/libraries/examples/uav_energetics/droneD_complete_v1.mcdplib/out
+prune src/mcdp_data/libraries/examples/uav_energetics/droneD_complete_v2.mcdplib/out
+prune src/mcdp_data/libraries/examples/uav_energetics/mcdp_uncertainty/droneD_complete_templates.mcdplib/out
+prune src/mcdp_data/libraries/examples-devel/actuation.mcdplib/out
+
+prune src/mcdp_data/libraries/examples/uav_energetics/mcdp_theory.mcdplib/out-plot_batteries_choice.py
+prune src/mcdp_data/libraries/examples/uav_energetics/mcdp_theory.mcdplib/out-plot_drone.py
+prune src/mcdp_data/libraries/examples/uav_energetics/mcdp_uncertainty/droneD_complete_templates.mcdplib/out-drone_unc1.py
+prune src/mcdp_data/libraries/examples/uav_energetics/mcdp_uncertainty/droneD_complete_templates.mcdplib/out-drone_unc2.py
+prune src/mcdp_data/libraries/examples/uav_energetics/mcdp_uncertainty/droneD_complete_templates.mcdplib/out-drone_unc3.py
+prune src/mcdp_data/libraries/examples/uav_energetics/mcdp_uncertainty/droneD_complete_templates.mcdplib/out-plot_approximations
+prune src/mcdp_data/libraries/manual.mcdplib/out-versions
+prune src/mcdp_data/libraries/unittests/basic.mcdplib/out-mcdp_plot
+prune src/mcdp_data/libraries/examples/plugs.mcdplib/out-mcdp_plot
