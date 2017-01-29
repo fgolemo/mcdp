@@ -25,7 +25,7 @@ def inv_unit(S):
 @contract(returns=ValueWithUnits, a =ValueWithUnits)
 def inv_constant(a):
     if a.unit == Nat():
-        raise NotImplementedError('division by natural number')
+        raise DPNotImplementedError('division by natural number')
         warnings.warn('Please think more about this. Now 1/N -> 1.0/N')
         unit = Rcomp()
     else:

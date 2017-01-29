@@ -7,11 +7,15 @@ pyramid_jinja2
 bs4
 nose
 reprep
+
 PyContracts
-decentlogs
+#-e git+https://github.com/AndreaCensi/contracts.git@mcdp#egg=PyContracts
+
 markdown
 junit_xml
-#-e git+https://github.com/AndreaCensi/contracts.git@mcdp#egg=PyContracts
+lxml
+
+decentlogs
 -e git+https://github.com/AndreaCensi/compmake.git@mcdp#egg=compmake
 -e git+https://github.com/AndreaCensi/quickapp.git@mcdp#egg=quickapp
 -e git+https://github.com/AndreaCensi/conf_tools.git@mcdp#egg=ConfTools
