@@ -4,6 +4,9 @@ from mocdp.memoize_simple_imp import memoize_simple
 from system_cmd.meat import system_cmd_result
 import os
 from compmake.utils.duration_hum import duration_compact
+import mocdp
+import socket
+import json
 
 
 class AppStatus():
@@ -23,52 +26,62 @@ class AppStatus():
         route = 'json'
         config.add_route(route, base + '/status.json')
         config.add_view(self.view_status, route_name=route, renderer='jsonp')
-        
-        route = 'uptime'
-        config.add_route(route, base + '/uptime.png')
-        config.add_view(self.view_uptime, route_name=route)
-
-        route = 'branch'
-        config.add_route(route, base + '/branch-name.png')
-        config.add_view(self.view_branch_name, route_name=route)
-
-        route = 'branch-date'
-        config.add_route(route, base + '/branch-date.png')
-        config.add_view(self.view_branch_date, route_name=route)
-
-    def format_string(self, request, s):
-        fontsize = 20
-        ratio = 2.5/4
-        h = int(fontsize)
-        w = int(fontsize * len(s) * ratio)
-        size = (w, h)
-        green = (0,255,0)
-        black = (0,0,0)
-        color = black
-        return response_image(request, s, size, color, fontsize)
-        
-    def view_uptime(self, request):  # @UnusedVariable
-        s = duration_compact(self.get_uptime_s())
-        return self.format_string(request, s)
-        
-    def view_branch_name(self, request):  # @UnusedVariable
-        s = get_branch_name()
-        return self.format_string(request, s)
-    
-    def view_branch_date(self, request):  # @UnusedVariable
-        s = get_branch_date()
-        return self.format_string(request, s)
+#         
+#         route = 'uptime'
+#         config.add_route(route, base + '/uptime.png')
+#         config.add_view(self.view_uptime, route_name=route)
+# 
+#         route = 'branch'
+#         config.add_route(route, base + '/branch-name.png')
+#         config.add_view(self.view_branch_name, route_name=route)
+# 
+#         route = 'branch-date'
+#         config.add_route(route, base + '/branch-date.png')
+#         config.add_view(self.view_branch_date, route_name=route)
+# 
+#     def format_string(self, request, s):
+#         fontsize = 20
+#         ratio = 2.5/4
+#         h = int(fontsize)
+#         w = int(fontsize * len(s) * ratio)
+#         size = (w, h)
+#         green = (0,255,0)
+#         black = (0,0,0)
+#         color = black
+#         return response_image(request, s, size, color, fontsize)
+#         
+#     def view_uptime(self, request):  # @UnusedVariable
+#         s = duration_compact(self.get_uptime_s())
+#         return self.format_string(request, s)
+#         
+#     def view_branch_name(self, request):  # @UnusedVariable
+#         s = get_branch_name()
+#         return self.format_string(request, s)
+#     
+#     def view_branch_date(self, request):  # @UnusedVariable
+#         s = get_branch_date()
+#         return self.format_string(request, s)
 
     def view_status(self, request):  # @UnusedVariable
         res = {
-            'server-name': 'frankfurt',
-            'server-location': '🇩🇪',
+            'version': mocdp.__version__,
+            'server-name': socket.gethostname(),
+#             'server-location': '🇩🇪',
             'access': 'public',
+            'geoip': geoip(),
             'branch-date':  get_branch_date(),
             'branch-name': get_branch_name(),
             'uptime': duration_compact(self.get_uptime_s()) 
         }
         return res
+    
+@memoize_simple
+def geoip(): 
+    url = 'http://freegeoip.net/json/'
+    from urllib import urlopen
+    s = urlopen(url).read()
+    return json.loads(s)
+    
     
 def get_command_output(cmd):
     cwd = os.getcwd()
