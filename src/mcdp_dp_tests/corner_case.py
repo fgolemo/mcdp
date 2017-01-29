@@ -17,7 +17,7 @@ from mcdp_maps import ProductNNatMap
 from mcdp_posets import Nat
 from mcdp_posets_tests.utils import assert_belongs, assert_does_not_belong
 from mcdp_report.html import ast_to_html
-from mcdp_report_ndp_tests.test0 import project_html
+
 from mcdp_web.editor_fancy.app_editor_fancy_generic import html_mark
 from mocdp import MCDPConstants
 from mocdp.comp.composite_makecanonical import connect_resources_to_outside, \
@@ -26,6 +26,7 @@ from mocdp.comp.context import Context
 from mocdp.comp.wrap import dpwrap
 from mocdp.exceptions import DPInternalError, DPSemanticError
 from contracts.interface import ContractNotRespected
+from mcdp_web.renderdoc.xmlutils import project_html
 
 
 @comptest

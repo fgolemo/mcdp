@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-from bs4.element import NavigableString
-
+from comptests.registrar import comptest_fails
 from mcdp_lang.syntax import Syntax
 from mcdp_lang_tests.syntax_spaces import assert_equal_string
 from mcdp_report.gg_ndp import gvgen_from_ndp
@@ -8,11 +7,9 @@ from mcdp_report.html import ast_to_html
 from mcdp_report.report import report_dp1, report_ndp1
 from mcdp_tests.generation import (for_all_dps_dyn, for_all_nameddps,
                                    for_all_nameddps_dyn, for_all_source_mcdp)
+from mcdp_web.renderdoc.xmlutils import project_html
 from mocdp import logger
-from comptests.registrar import comptest_fails
 
-
-    
 
 @for_all_source_mcdp
 def check_syntax(filename, source, parse_expr=Syntax.ndpt_dp_rvalue):  # @UnusedVariable
