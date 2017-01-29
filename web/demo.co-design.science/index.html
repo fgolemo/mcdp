@@ -1,107 +1,185 @@
-<h2>Demo servers</h2>
+<html>
 
-<table>
-	<thead>
+<head>
+	<meta content="application/xhtml+xml; charset=utf-8" http-equiv="Content-Type"></meta>
+</head>
+
+<body>
+
+	<h2>Demo servers</h2>
+
+	<style type='text/css'>
+	table { font-family: monospace; font-size: smaller;}
+	table td { vertical-align: middle;  text-align: left; padding: 0.7em;}
+	table thead { font-style: normal; font-weight:bold;}
+
+	.inactive { opacity: 0.3;}
+	img[src*=status] { height: 1em;}
+	</style>
+	<table id='instances'>
+		<thead>
+			<tr>
+				<td>Server</td>
+				<td>Instance</td>
+				<td>Access</td>
+				<td>Uptime</td>
+				<td>Branch name</td>
+				<td>Last commit</td>
+			</tr>
+		</thead>
 		<tr>
-			<td>server</td>
-			<td>location</td>
-			<td>demo instances</td>
+			<td><a href="https://frankfurt.co-design.science/">Frankfurt&nbsp;🇩🇪</td>
+
+			<td>
+				<a href='https://demo.co-design.science/inst00/'><code>inst00</code></a>
+			</td>
+			<td>🌎&nbsp;public</td>
+
+			<td> <img src="https://demo.co-design.science/inst00/status/uptime.png" /> </td>
+			<td> <img src="https://demo.co-design.science/inst00/status/branch-name.png" /> </td>
+			<td> <img src="https://demo.co-design.science/inst00/status/branch-date.png" /> </td>
+			<td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst00"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst00.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776" /></a></td>
+			<td>
+				basic demo
+			</td>
 		</tr>
-	</thead>
-	<tr>
-		<td>
-			<a href="https://frankfurt.co-design.science/">
-				frankfurt.co-design.science
-			</a>
-		</td>
-		<td>EU (Frankfurt)</td>
-		<td>
-			<table>
-				<thead><td>Branch</td><td>Access</td><td></td></thead>
-				<tr>
-					<td>
-						<a href='https://demo.co-design.science/inst00/'><code>inst00</code></a>
-					</td>
-					<td>🌎 public</td>
-					<td>
-						basic demo
-					</td>
-				</tr>
-				<tr>
-					<td>
-						<a href='https://demo.co-design.science/inst01/'><code>inst01</code></a>
-					</td>
-					<td>🔒 closed</td>
-					<td>
-						basic demo
-					</td>
-				</tr>
-			</table>
-		</td>
-	</tr>
-</table>
 
-<h3>Uptime statistics</h3>
+		<tr class=inactive>
+			<td><a href="https://frankfurt.co-design.science/">Frankfurt&nbsp;🇩🇪</td>
+			<td>
+				<a href='https://demo.co-design.science/inst01/'><code>inst01</code></a>
+			</td>
+			<td>🔒&nbsp;closed</td>
 
-<a href="http://status.co-design.science/">Service status</a>
+			<td> <img src="https://demo.co-design.science/inst01/status/uptime.png" /> </td>
+			<td> <img src="https://demo.co-design.science/inst01/status/branch-name.png" /> </td>
+			<td> <img src="https://demo.co-design.science/inst01/status/branch-date.png" /> </td>
+			<td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst01"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst01.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776" /></a></td>
+			<td>
+				staging
+			</td>
+		</tr>
 
-<h3>Unit-tests for branches</h3>
-<table>
-	<thead>
-		<tr>
+		<tr class=inactive>
+			<td><a href="https://virginia.co-design.science/">Virginia&nbsp;🇺🇸</td>
+			<td>
+				<a href='https://demo-us.co-design.science/inst02/'><code>inst01</code></a>
+			</td>
+			<td>🌎&nbsp;public</td>
+
+			<td> <img src="https://demo-us.co-design.science/inst02/status/uptime.png" /> </td>
+			<td> <img src="https://demo-us.co-design.science/inst02/status/branch-name.png" /> </td>
+			<td> <img src="https://demo-us.co-design.science/inst02/status/branch-date.png" /> </td>
+			<td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst02"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst02.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776" /></a></td>
+			<td>
+				staging
+			</td>
+		</tr>
+
+
+		<tr class=inactive>
+			<td><a href="https://virginia.co-design.science/">Virginia&nbsp;🇺🇸</td>
+			<td>
+				<a href='https://demo-us.co-design.science/inst03/'><code>inst01</code></a>
+			</td>
+			<td>🔒&nbsp;closed</td>
+
+			<td> <img src="https://demo-us.co-design.science/inst03/status/uptime.png" /> </td>
+			<td> <img src="https://demo-us.co-design.science/inst03/status/branch-name.png" /> </td>
+			<td> <img src="https://demo-us.co-design.science/inst03/status/branch-date.png" /> </td>
+			<td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst03"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst03.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776" /></a></td>
+			<td>
+				staging
+			</td>
+		</tr>
+
+		<tr class=inactive>
 			<td></td>
-			<td>branch</td>
-			<td>unit tests</td>
+			<td>
+
+			</td>
+			<td>🔒&nbsp;closed</td>
+
+			<td> <img src="http://127.0.0.1:8080/status/uptime.png" /> </td>
+			<td> <img src="http://127.0.0.1:8080/status/branch-name.png" /> </td>
+			<td> <img src="http://127.0.0.1:8080/status/branch-date.png" /> </td>
+			<td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst03"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst03.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776" /></a></td>
+			<td>
+				staging
+			</td>
 		</tr>
-	</thead>
-	<tr>
-		<td>Production server (EU)</td>
-		<td><a href="https://github.com/AndreaCensi/mcdp/tree/inst00">inst00</a></td>
-		<td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst00"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst00.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776"/></a>
-		</td>
-	</tr>
-	<tr>
-		<td></td>
-		<td><a href="https://github.com/AndreaCensi/mcdp/tree/inst01">inst01</a></td>
-		<td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst01"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst01.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776"/></a>
-		</td>
-	</tr>
-	<tr>
-		<td>Production server (US)</td>
-		<td><code>-</code></td>
-		<td>-</a>
-		</td>
-	</tr>
-	<tr>
-		<td>Master</td>
-		<td><a href="https://github.com/AndreaCensi/mcdp/tree/master">master</a></td>
-		<td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/master"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/master.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776"/></a>
-		</td>
-	</tr>
-	<tr>
-		<td>Development</td>
-		<td><a href="https://github.com/AndreaCensi/mcdp/tree/devel">devel</a></td>
-		<td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/devel"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/devel.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776"/></a>
-		</td>
-	</tr>
-	<tr>
-		<td>Daily</td>
-		<td><a href="https://github.com/AndreaCensi/mcdp/tree/last">last</a></td>
-		<td><a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/last"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/last.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776"/></a>
-		</td>
-	</tr>
-</table>
 
-<style>
-thead {
-	 font-style: italic;
-	text-align: center;
-}
-td { padding: 5pt;
-	vertical-align:top;
-}
+	</table>
+	</td>
+	</tr>
+	</table>
 
-table table td {
-	vertical-align: middle;
-}
-</style>
+	<h3>Uptime statistics</h3>
+
+	<a href="http://status.co-design.science/">Service status</a>
+
+	<h3>Unit-tests for branches</h3>
+	<table>
+		<thead>
+			<tr>
+				<td></td>
+				<td>branch</td>
+				<td>unit tests</td>
+			</tr>
+		</thead>
+		<!-- <tr>
+			<td><a href="https://frankfurt.co-design.science/">Frankfurt&nbsp;🇩🇪</td>
+			<td><a href="https://github.com/AndreaCensi/mcdp/tree/inst00">inst00</a></td>
+			<td>
+				<a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst00"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst00.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776" /></a>
+			</td>
+		</tr>
+		<tr class=inactive>
+			<td><a href="https://frankfurt.co-design.science/">Frankfurt&nbsp;🇩🇪</td>
+			<td><a href="https://github.com/AndreaCensi/mcdp/tree/inst01">inst01</a></td>
+			<td>
+				<a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst01"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/inst01.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776" /></a>
+			</td>
+		</tr>
+ -->
+		<tr>
+			<td>Master</td>
+			<td><a href="https://github.com/AndreaCensi/mcdp/tree/master">master</a></td>
+			<td>
+				<a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/master"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/master.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776" /></a>
+			</td>
+		</tr>
+		<tr>
+			<td>Development</td>
+			<td><a href="https://github.com/AndreaCensi/mcdp/tree/devel">devel</a></td>
+			<td>
+				<a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/devel"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/devel.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776" /></a>
+			</td>
+		</tr>
+		<tr>
+			<td>Daily</td>
+			<td><a href="https://github.com/AndreaCensi/mcdp/tree/last">last</a></td>
+			<td>
+				<a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/last"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/last.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776" /></a>
+			</td>
+		</tr>
+	</table>
+
+	<style>
+		thead {
+			font-style: italic;
+			text-align: center;
+		}
+
+		td {
+			padding: 5pt;
+			vertical-align: top;
+		}
+
+		table table td {
+			vertical-align: middle;
+		}
+	</style>
+</body>
+
+</html>

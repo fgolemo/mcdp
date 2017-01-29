@@ -33,13 +33,14 @@ class AppStatus():
         config.add_view(self.view_branch_date, route_name=route)
 
     def format_string(self, request, s):
-        c = 10
-        h = c
-        w = c * len(s)
+        fontsize = 20
+        ratio = 2.5/4
+        h = int(fontsize)
+        w = int(fontsize * len(s) * ratio)
         size = (w, h)
-        green =(0,255,0)
+        green = (0,255,0)
         color = green
-        return response_image(request, s, size, color)
+        return response_image(request, s, size, color, fontsize)
         
     def view_uptime(self, request):  # @UnusedVariable
         s = duration_compact(self.get_uptime_s())
