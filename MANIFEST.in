@@ -128,3 +128,4 @@ prune src/mcdp_data/libraries/examples/uav_energetics/mcdp_uncertainty/droneD_co
 prune src/mcdp_data/libraries/manual.mcdplib/out-versions
 prune src/mcdp_data/libraries/unittests/basic.mcdplib/out-mcdp_plot
 prune src/mcdp_data/libraries/examples/plugs.mcdplib/out-mcdp_plot
+prune libraries
