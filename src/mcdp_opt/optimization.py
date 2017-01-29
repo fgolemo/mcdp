@@ -11,9 +11,11 @@ from mcdp_opt.cachedp import CacheDP
 from mcdp_opt.compare_different_resources import less_resources2
 from mcdp_opt.context_utils import create_context0
 from mcdp_opt.report_utils import get_optim_state_report
+from mcdp_posets import Nat
 from mcdp_posets import NotBounded, Poset, get_types_universe
-from mcdp_posets.types_universe import express_value_in_isomorphic_space
-from mcdp_posets.uppersets import UpperSet, upperset_project
+from mcdp_posets import PosetProduct
+from mcdp_posets import UpperSet, upperset_project
+from mcdp_posets import express_value_in_isomorphic_space
 from mcdp_report import my_gvgen
 from mcdp_report.gg_utils import gg_figure
 from mocdp.comp.composite import CompositeNamedDP
@@ -316,8 +318,6 @@ class Optimization():
         return False, None
 
     def dominates(self, s1, s2):
-        from mcdp_posets.nat import Nat
-        from mcdp_posets.poset_product import PosetProduct
         
         n1 = (40 - s1.num_connection_options, s1.num_resources_need_connecting)
         n2 = (40 - s2.num_connection_options, s2.num_resources_need_connecting)
