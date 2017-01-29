@@ -28,6 +28,7 @@ from .solver.app_solver import AppSolver
 from .solver2.app_solver2 import AppSolver2
 from .visualization.app_visualization import AppVisualization
 from .status import AppStatus
+from pyramid.renderers import JSONP
 
 
 # from .editor.app_editor import AppEditor
@@ -532,6 +533,8 @@ class WebApp(AppVisualization, AppStatus,
     def serve(self, port):
         self.time_start = time.time()
         config = Configurator()
+        config.add_renderer('jsonp', JSONP(param_name='callback'))
+
         config.add_static_view(name='static', path='static', cache_max_age=3600)
         config.include('pyramid_jinja2')
 

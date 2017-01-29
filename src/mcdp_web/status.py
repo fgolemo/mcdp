@@ -19,6 +19,10 @@ class AppStatus():
 
     def config(self, config):
         base = '/status'
+
+        route = 'json'
+        config.add_route(route, base + '/status.json')
+        config.add_view(self.view_status, route_name=route, renderer='jsonp')
         
         route = 'uptime'
         config.add_route(route, base + '/uptime.png')
@@ -55,6 +59,17 @@ class AppStatus():
         s = get_branch_date()
         return self.format_string(request, s)
 
+    def view_status(self, request):  # @UnusedVariable
+        res = {
+            'server-name': 'frankfurt',
+            'server-location': '🇩🇪',
+            'access': 'public',
+            'branch-date':  get_branch_date(),
+            'branch-name': get_branch_name(),
+            'uptime': duration_compact(self.get_uptime_s()) 
+        }
+        return res
+    
 def get_command_output(cmd):
     cwd = os.getcwd()
     res = system_cmd_result(
