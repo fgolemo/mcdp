@@ -12,6 +12,7 @@ from mocdp.exceptions import DPSemanticError
 from system_cmd import CmdException
 
 from .find_dep import EntryNDP, EntryTemplate, FindDependencies
+from mcdp_web.editor_fancy.image import ndp_template_graph_enclosed
 
 
 @contract(config_dirs='list(str)', outdir='str', maindir='str')

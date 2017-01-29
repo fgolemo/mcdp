@@ -1,23 +1,19 @@
 # -*- coding: utf-8 -*-
 from contracts.utils import check_isinstance
-from mcdp_lang.dealing_with_special_letters import greek_letters, subscripts,\
-    subscripts_utf8, greek_letters_utf8
-from mcdp_lang.parse_actions import integer_fraction_from_superscript
-from mcdp_lang.pyparsing_bundled import QuotedString, ParseExpression
 from mocdp.exceptions import mcdp_dev_warning
 
+from .dealing_with_special_letters import greek_letters, subscripts, subscripts_utf8, greek_letters_utf8
 from .parse_actions import (divide_parse_action,
                             funshortcut1m, mult_inv_parse_action, mult_parse_action, parse_pint_unit,
                             plus_inv_parse_action, plus_parse_action, resshortcut1m,
                             space_product_parse_action, rvalue_minus_parse_action, fvalue_minus_parse_action,
-                            dp_model_statements_parse_action, add_where_to_empty_list)
-from .parse_actions import copy_expr_remove_action
+                            dp_model_statements_parse_action, add_where_to_empty_list, copy_expr_remove_action, integer_fraction_from_superscript)
 from .parts import CDPLanguage
 from .pyparsing_bundled import (
     CaselessLiteral, Combine, Forward, Group, Keyword, Literal, MatchFirst,
     NotAny, OneOrMore, Optional, ParserElement, Word, ZeroOrMore, alphanums,
     alphas, dblQuotedString, nums, oneOf, opAssoc, operatorPrecedence,
-    sglQuotedString, FollowedBy)
+    sglQuotedString, FollowedBy, QuotedString, ParseExpression)
 from .syntax_utils import (
     COMMA, L, O, S, SCOLON, SCOMMA, SLPAR, SRPAR, keyword, sp, spk)
 from .utils_lists import make_list
@@ -1439,3 +1435,4 @@ for x, expr in Syntax.__dict__.items():  # @UndefinedVariable
     if isinstance(expr, ParseExpression):
         #print('setting name %s' % expr)
         expr.setName(x)
+

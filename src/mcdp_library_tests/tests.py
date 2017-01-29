@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from collections import namedtuple
-from contextlib import contextmanager
+import math
 import os
 import tempfile
-import time
 
 from contracts.enabling import all_disabled
 from contracts.utils import raise_desc, raise_wrapped
+from mcdp.utils.timing import timeit
 from mcdp_library import Librarian, MCDPLibrary
 from mcdp_library.utils import dir_from_package_name
 from mcdp_tests import get_test_index
@@ -17,7 +17,6 @@ from mocdp import logger, get_mcdp_tmp_dir, MCDPConstants
 from mocdp.comp.context import Context
 from mocdp.exceptions import DPSemanticError, DPNotImplementedError
 from mocdp.memoize_simple_imp import memoize_simple  # XXX: move sooner
-import math
 
 
 __all__ = [
@@ -468,28 +467,6 @@ def mcdplib_test_setup_template(context, libname):
 
         for ftest in registered:
             c.comp(ftest, id_template, ndp)
-
-@contextmanager
-def timeit(desc, minimum=None):
-    t0 = time.clock()
-    yield
-    t1 = time.clock()
-    delta = t1 - t0
-    if minimum is not None:
-        if delta < minimum:
-            return
-    logger.debug('timeit %s: %.2f s (>= %s)' % (desc, delta, minimum))
-
-@contextmanager
-def timeit_wall(desc, minimum=None):
-    t0 = time.time()
-    yield
-    t1 = time.time()
-    delta = t1 - t0
-    if minimum is not None:
-        if delta < minimum:
-            return
-    logger.debug('timeit(wall) %s: %.2f s (>= %s)' % (desc, delta, minimum))
 
     
 min_time_warn = 0.5

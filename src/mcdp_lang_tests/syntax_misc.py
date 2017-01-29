@@ -1105,7 +1105,7 @@ def check_lang89q(): # TODO: rename
     }
     """
     ndp = parse_ndp(s)
-    dp = ndp.get_dp()
+    ndp.get_dp()
     #print dp.repr_long()
 
 @comptest
@@ -1141,7 +1141,7 @@ def check_lang89s(): # TODO: rename
     """
     ndp = parse_ndp(s)
     dp = ndp.get_dp()
-    print dp.repr_long()
+    #print dp.repr_long()
     
 @comptest
 def check_lang91(): # TODO: rename
@@ -1321,7 +1321,7 @@ def check_lang96(): # TODO: rename
     }
     """
     dp = parse_ndp(s).get_dp()
-#     print dp.repr_long() 
+    print dp.repr_long() 
     
     
     

@@ -1,5 +1,4 @@
 from abc import abstractmethod, ABCMeta
-from mcdp_library_tests.tests import timeit_wall
 
 
 class MakeFigures_Formatter():

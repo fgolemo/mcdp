@@ -7,11 +7,10 @@ from contracts.utils import raise_desc, raise_wrapped, check_isinstance
 from mcdp_lang.namedtuple_tricks import remove_where_info
 from mcdp_lang.parse_actions import parse_wrap, parse_wrap_filename
 from mcdp_lang.parse_interface import parse_ndp, parse_ndp_filename
-from mcdp_lang.syntax import Syntax
+from mcdp_lang.syntax import find_parsing_element, ParsingElement
 from mocdp.comp.interfaces import NamedDP
 from mocdp.comp.wrap import SimpleWrap
-from mocdp.exceptions import DPSemanticError, DPSyntaxError,\
-    DPNotImplementedError
+from mocdp.exceptions import DPSemanticError, DPSyntaxError, DPNotImplementedError
 
 
 def assert_syntax_error(s, expr, desc=None):
@@ -266,27 +265,4 @@ def syn(expr, string):
                    args=(string, expr), kwargs=dict())
 
 
-class ParsingElement():
-    def __init__(self, name):
-        self.name = name
-    def get(self):
-        return getattr(Syntax, self.name)
-    def __repr__(self):
-        return 'ParsingElement(%s)' % self.name
-
-
-@contract(returns=ParsingElement)
-def find_parsing_element(x):
-    from mcdp_lang.syntax_codespec import SyntaxCodeSpec
-    from mcdp_lang.syntax import SyntaxBasics
-    
-    d = dict(**Syntax.__dict__)  # @UndefinedVariable
-    d.update(**SyntaxCodeSpec.__dict__)  # @UndefinedVariable
-    d.update(**SyntaxBasics.__dict__) # @UndefinedVariable
-
-    for name, value in d.items():  # @UndefinedVariable
-        if value is x:
-            return ParsingElement(name)
-
-    raise ValueError('Cannot find element for %s.' % str(x))
 

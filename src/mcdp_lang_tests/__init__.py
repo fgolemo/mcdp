@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+import os
+if 'raise_if_test_included' in os.environ:
+    raise Exception()
+
 """
     
     For syntax, use assert_syntax_error or parse_wrap_check:

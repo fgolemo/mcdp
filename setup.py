@@ -26,6 +26,8 @@ setup(name=name,
       description='PyMCDP is an interpreter and solver for Monotone Co-Design Problems',
       long_description='',
       #package_data={'':['*.*', '*.mcdp*', '*.js', '*.png', '*.css']},
+
+      # without this, the stuff is included but not installed
       include_package_data=True,
       keywords="Optimization",
       license="GPLv2",

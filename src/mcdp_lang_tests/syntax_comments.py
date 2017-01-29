@@ -1,8 +1,6 @@
 from comptests.registrar import comptest
 from mcdp_lang.parse_interface import parse_ndp
-from mcdp_lang.parts import CDPLanguage
 from mcdp_lang.syntax import Syntax
-from mcdp_lang.syntax_utils import sp
 from mcdp_lang_tests.utils import parse_wrap_check, assert_syntax_error
 from mcdp_report.html import ast_to_html
 

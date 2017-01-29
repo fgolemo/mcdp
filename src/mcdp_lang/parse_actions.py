@@ -7,8 +7,9 @@ from decorator import decorator
 from nose.tools import assert_equal
 
 from contracts import contract
-from mcdp_lang_utils import Where, line_and_col, location
 from contracts.utils import raise_desc, raise_wrapped, check_isinstance
+from mcdp.utils.timing import timeit
+from mcdp_lang_utils import Where, line_and_col, location
 from mocdp import logger, MCDPConstants
 from mocdp.exceptions import (DPInternalError, DPSemanticError, DPSyntaxError,
                               MCDPExceptionWithWhere, do_extra_checks, mcdp_dev_warning)
@@ -19,6 +20,7 @@ from .parts import CDPLanguage
 from .pyparsing_bundled import ParseException, ParseFatalException
 from .utils import isnamedtupleinstance, parse_action
 from .utils_lists import make_list, unwrap_list
+from .find_parsing_el import find_parsing_element
 
 
 CDP = CDPLanguage
@@ -288,8 +290,6 @@ def translate_where(where0, string):
     return where
 
 def parse_wrap(expr, string):
-    from mcdp_lang_tests.utils import find_parsing_element
-    from mcdp_library_tests.tests import timeit
     from .refinement import namedtuple_visitor_ext
     
     if isinstance(string, unicode):

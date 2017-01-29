@@ -17,7 +17,6 @@ from mcdp_lang.suggestions import get_suggestions, apply_suggestions
 from mcdp_lang.syntax import Syntax
 from mcdp_lang.utils_lists import unwrap_list
 from mcdp_library import MCDPLibrary
-from mcdp_library_tests.tests import timeit_wall
 from mcdp_report.html import ast_to_html, ATTR_WHERE_CHAR, ATTR_WHERE_CHAR_END
 from mcdp_web.editor_fancy.image import get_png_data_model, \
     ndp_template_enclosed, get_png_data_unavailable, get_png_data_poset,\
@@ -34,6 +33,7 @@ from mocdp.exceptions import DPInternalError, DPSemanticError, DPSyntaxError
 from mcdp_lang.parse_interface import( parse_ndp_eval, parse_ndp_refine, 
     parse_template_eval, parse_template_refine, parse_constant_eval, 
     parse_constant_refine, parse_poset_eval, parse_poset_refine)
+from mcdp.utils.timing import timeit_wall
 
 
 

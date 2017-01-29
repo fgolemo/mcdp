@@ -10,7 +10,7 @@ import traceback
 from contracts import contract
 from contracts.utils import check_isinstance, raise_desc, indent
 from mcdp.utils.string_utils import get_md5
-from mcdp_library_tests.tests import timeit_wall
+from mcdp.utils.timing import timeit_wall
 from mocdp import logger, MCDPConstants
 from mocdp.exceptions import mcdp_dev_warning, DPSemanticError
 import networkx as nx  # @UnresolvedImport
@@ -196,7 +196,7 @@ def gg_get_format(gg, data_format):
     do_png = data_format == 'png'
     do_pdf = data_format == 'pdf'
     do_svg = data_format == 'svg'
-#     from mcdp_library_tests.tests import timeit_wall
+
     with timeit_wall('gg_figure %s' % data_format): 
         gg_figure(r, 'graph', gg, do_dot=do_dot,
                     do_png=do_png, do_pdf=do_pdf, do_svg=do_svg)
