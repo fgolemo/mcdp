@@ -1,31 +1,43 @@
-include *.md
-exclude *.pyc
-prune out-*
-prune out
-
+# root files
 include Makefile
+include *.md
+include MANIFEST.in
 include requirements.txt
+include setup.py
+include circle.yml
 
-recursive-include misc *.tmTheme
-recursive-include misc *.sublime-syntax
+#recursive-include misc *.tmTheme
+#recursive-include misc *.sublime-syntax
 
-
-recursive-include src/mcdp_cli *
-recursive-include src/mcdp_dp *
-recursive-include src/mcdp_dp_tests *
-recursive-include src/mcdp_ext_libraries *
-recursive-include src/mcdp_ipython_utils *
-recursive-include src/mcdp_lang *
-recursive-include src/mcdp_lang_tests *
-recursive-include src/mcdp_library *
-recursive-include src/mcdp_library_tests *
-recursive-include src/mcdp_maps *
-recursive-include src/mcdp_posets *
-recursive-include src/mcdp_report *
-recursive-include src/mcdp_tests *
-recursive-include src/mcdp_web *
-recursive-include src/mocdp *
-recursive-include src/multi_index *
+graft src/mcdp
+graft src/mcdp_cli
+# no! graft src/mcdp_data
+graft src/mcdp_depgraph
+graft src/mcdp_docs
+graft src/mcdp_docs_tests
+graft src/mcdp_dp
+graft src/mcdp_dp_tests
+#graft src/mcdp_ext_libraries
+graft src/mcdp_figures
+graft src/mcdp_figures_tests
+graft src/mcdp_ipython_utils
+graft src/mcdp_lang
+graft src/mcdp_lang_tests
+graft src/mcdp_lang_utils
+graft src/mcdp_library
+graft src/mcdp_library_tests
+graft src/mcdp_maps
+graft src/mcdp_opt
+graft src/mcdp_opt_tests
+graft src/mcdp_posets
+graft src/mcdp_posets_tests
+graft src/mcdp_report
+graft src/mcdp_report_ndp_tests
+graft src/mcdp_tests
+graft src/mcdp_web_tests
+graft src/mcdp_web
+graft src/mocdp
+graft src/multi_index
 
 recursive-include src/mcdp_data *.in
 recursive-include src/mcdp_data *.md
@@ -47,12 +59,10 @@ recursive-include src/mcdp_data *.jpeg
 recursive-include src/mcdp_data *.ico
 recursive-include src/mcdp_data *.svg
 
-
 recursive-include src/mcdp_data *.rc
 recursive-include src/mcdp_data *.properties
 recursive-include src/mcdp_data *.cfg
 recursive-include src/mcdp_data *.yaml
-
 
 recursive-include src/mcdp_data *.mcdp
 recursive-include src/mcdp_data *.mcdp_value
@@ -71,13 +81,40 @@ recursive-include src/mcdp_data *.jinja2
 
 recursive-include src/mcdp_data *.sh
 recursive-include src/mcdp_data *.rc
-recursive-exclude src *.pyc
 
-recursive-exclude src out
-recursive-exclude src _mcdpweb_cache
-
-global-exclude out out-* *.pyc out_expected _attic _mcdpweb_cache
-
+prune src/mcdp_data/libraries/manual.mcdplib
 prune web
+prune out
 
-prune src/mcdp_data/libraries/examples/example-plusinv.mcdplib/out_expected
+#prune src/mcdp_data/libraries/manual.mcdplib/node_modules
+
+#prune src/mcdp_data/libraries/examples/example-plusinv.mcdplib/out_expected
+
+prune src/mcdp_data/libraries/manual.mcdplib/node_modules
+
+global-exclude boot_art
+global-exclude out
+global-exclude out/*
+global-exclude out-*
+global-exclude *.pyc
+global-exclude out_expected
+global-exclude _attic
+global-exclude _mcdpweb_cache
+global-exclude node_modules
+
+
+prune ./src/mcdp_data/libraries/1600-hepa/1609-minimal_demo.mcdplib/out
+prune ./src/mcdp_data/libraries/examples/example-battery.mcdplib/out
+prune ./src/mcdp_data/libraries/examples/example-catalogue.mcdplib/out
+prune ./src/mcdp_data/libraries/examples/example-plusinv.mcdplib/out
+prune ./src/mcdp_data/libraries/examples/plugs.mcdplib/out
+prune ./src/mcdp_data/libraries/examples/rover_energetics.mcdplib/out
+prune ./src/mcdp_data/libraries/examples/uav_energetics/actuations_v1.mcdplib/out
+prune ./src/mcdp_data/libraries/examples/uav_energetics/actuations_v2.mcdplib/out
+prune ./src/mcdp_data/libraries/examples/uav_energetics/batteries_v1.mcdplib/out
+prune ./src/mcdp_data/libraries/examples/uav_energetics/droneA_v1.mcdplib/out
+prune ./src/mcdp_data/libraries/examples/uav_energetics/droneB_v1.mcdplib/out
+prune ./src/mcdp_data/libraries/examples/uav_energetics/droneD_complete_v1.mcdplib/out
+prune ./src/mcdp_data/libraries/examples/uav_energetics/droneD_complete_v2.mcdplib/out
+prune ./src/mcdp_data/libraries/examples/uav_energetics/mcdp_uncertainty/droneD_complete_templates.mcdplib/out
+prune ./src/mcdp_data/libraries/examples-devel/actuation.mcdplib/out

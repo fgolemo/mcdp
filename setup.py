@@ -25,8 +25,8 @@ setup(name=name,
       maintainer_email="censi@mit.edu",
       description='PyMCDP is an interpreter and solver for Monotone Co-Design Problems',
       long_description='',
-      package_data={'':['*.*', '*.mcdp*', '*.js', '*.png', '*.css']},
-      include_package_data=True,
+      #package_data={'':['*.*', '*.mcdp*', '*.js', '*.png', '*.css']},
+      #include_package_data=True,
       keywords="Optimization",
       license="GPLv2",
       classifiers=[
@@ -41,7 +41,7 @@ setup(name=name,
       packages=find_packages('src'),
       install_requires=[
         #'ConfTools>=1.0,<2',
-        # '#quickapp', 
+        # '#quickapp',
         # 'reprep',
         'pint',
         'watchdog',
@@ -53,7 +53,7 @@ setup(name=name,
         'PyContracts>=1.7.6',
         'ConfTools>=1.7', # even if implied
         'comptests', # xxx: now it's always needed
-        'RepRep>=2.9.3', 
+        'RepRep>=2.9.3',
         'DecentLogs',
         'QuickApp>=1.2',
         'compmake',
@@ -90,4 +90,3 @@ setup(name=name,
         ]
       }
 )
-
