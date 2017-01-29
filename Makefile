@@ -113,12 +113,6 @@ list-ignored:
 big-files-in-git:
 	git rev-list --objects --all | grep "$(git verify-pack -v .git/objects/pack/*.idx | sort -k 3 -n | tail -10 | awk '{print$1}')"
 
-
-offline-issues-install:
-	npm install -g offline-issues
-offline-issues:
-	offline-issues AndreaCensi/mcdp
-
 show-unicode:
 	cat src/mcdp_lang/*.py | python show_not_ascii.py
 
