@@ -1,4 +1,4 @@
-l
+
 out=out/comptests
 
 package=mcdp_tests
