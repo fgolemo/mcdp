@@ -37,6 +37,7 @@ from .confi import describe_mcdpweb_params
 from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from mcdp_web.security import AppLogin
+import pyramid
 
 __all__ = [
     'mcdp_web_main',
@@ -633,7 +634,8 @@ class WebApp(AppVisualization, AppStatus,
         config.add_view(self.view_exception, context=Exception, renderer='exception.jinja2')
 
         config.add_route('exit', '/exit')
-        config.add_view(self.exit, route_name='exit', renderer='json')
+        config.add_view(self.exit, route_name='exit', renderer='json',
+                        permission=pyramid.security.NO_PERMISSION_REQUIRED)
 
         config.add_route('exceptions', '/exceptions')
         config.add_view(self.view_exceptions_occurred, route_name='exceptions', renderer='json')
