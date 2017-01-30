@@ -81,6 +81,8 @@ setup(name=name,
       ],
 
       entry_points={
+          'paste.app_factory': ['app=mcdp_web:app_factory'],
+
          'console_scripts': [
             'mcdp-plot = mcdp_cli:mcdp_plot_main',
             'mcdp-solve = mcdp_cli:mcdp_solve_main',

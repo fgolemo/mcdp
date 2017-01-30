@@ -32,6 +32,7 @@ from .visualization.app_visualization import AppVisualization
 # from .editor.app_editor import AppEditor
 __all__ = [
     'mcdp_web_main',
+    'app_factory',
 ]
 
 class WebApp(AppVisualization, 
@@ -530,6 +531,11 @@ class WebApp(AppVisualization,
         return time.time() - self.time_start
     
     def serve(self, port):
+        app = self.get_app()
+        self.server = make_server('0.0.0.0', port, app)
+        self.server.serve_forever()
+        
+    def get_app(self): 
         self.time_start = time.time()
         config = Configurator()
         config.add_static_view(name='static', path='static', cache_max_age=3600)
@@ -594,11 +600,10 @@ class WebApp(AppVisualization,
 #  
 
         app = config.make_wsgi_app()
-        self.server = make_server('0.0.0.0', port, app)
-        self.server.serve_forever()
-
-        
-        
+        return app
+    
+    
+    
 
 class MCDPWeb(QuickAppBase):
     """ Runs the MCDP web interface. """
@@ -635,6 +640,17 @@ Use Chrome, Firefox, or Opera - Internet Explorer is not supported.
             wa._refresh_library(None)
         logger.info(msg)
         wa.serve(port=options.port)
+
+
+def app_factory(global_config, **settings):
+    package = dir_from_package_name('mcdp_data')
+    default_libraries = os.path.join(package, 'libraries')
+          
+    dirname = global_config.get('libraries', default_libraries)
+    wa = WebApp(dirname)
+    app = wa.get_app()
+    return app
+
 
 mcdp_web_main = MCDPWeb.get_sys_main()
 

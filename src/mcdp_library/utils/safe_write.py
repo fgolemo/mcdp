@@ -2,6 +2,8 @@
 from contextlib import contextmanager
 import gzip
 import os
+import math
+import random
 
 __all__ = [
     'safe_write',
@@ -36,7 +38,8 @@ def safe_write(filename, mode='wb', compresslevel=5):
                 # os.unlink(filename)
                 #     assert not os.path.exists(filename)
                 #
-    tmp_filename = '%s.tmp.%s' % (filename, os.getpid())
+    n = random.randint(0, 10000)
+    tmp_filename = '%s.tmp.%s.%s' % (filename, os.getpid(), n)
     try:
         if is_gzip_filename(filename):
             fopen = lambda fname, fmode: gzip.open(filename=fname, mode=fmode,

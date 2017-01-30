@@ -44,6 +44,8 @@ def memo_disk_cache2(cache_file, data, f):
     if MCDPConstants.log_cache_writes:
         logger.info('Writing to cache %s.' % cache_file)
     res = dict(data=data, result=result)
+    
     safe_pickle_dump(res, cache_file)
+    
 
     return result
