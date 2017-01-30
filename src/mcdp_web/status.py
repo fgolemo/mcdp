@@ -2,6 +2,10 @@
 import json
 import os
 import socket
+import time
+
+from dateutil.parser import parse
+import pyramid
 
 from compmake.utils import duration_compact
 import mocdp
@@ -22,52 +26,22 @@ class AppStatus():
 
         route = 'json'
         config.add_route(route, base + '/status.json')
-        config.add_view(self.view_status, route_name=route, renderer='jsonp')
-#         
-#         route = 'uptime'
-#         config.add_route(route, base + '/uptime.png')
-#         config.add_view(self.view_uptime, route_name=route)
-# 
-#         route = 'branch'
-#         config.add_route(route, base + '/branch-name.png')
-#         config.add_view(self.view_branch_name, route_name=route)
-# 
-#         route = 'branch-date'
-#         config.add_route(route, base + '/branch-date.png')
-#         config.add_view(self.view_branch_date, route_name=route)
-# 
-#     def format_string(self, request, s):
-#         fontsize = 20
-#         ratio = 2.5/4
-#         h = int(fontsize)
-#         w = int(fontsize * len(s) * ratio)
-#         size = (w, h)
-#         green = (0,255,0)
-#         black = (0,0,0)
-#         color = black
-#         return response_image(request, s, size, color, fontsize)
-#         
-#     def view_uptime(self, request):  # @UnusedVariable
-#         s = duration_compact(self.get_uptime_s())
-#         return self.format_string(request, s)
-#         
-#     def view_branch_name(self, request):  # @UnusedVariable
-#         s = get_branch_name()
-#         return self.format_string(request, s)
-#     
-#     def view_branch_date(self, request):  # @UnusedVariable
-#         s = get_branch_date()
-#         return self.format_string(request, s)
+        config.add_view(self.view_status, route_name=route, renderer='jsonp',
+                        permission=pyramid.security.NO_PERMISSION_REQUIRED)
+
 
     def view_status(self, request):  # @UnusedVariable
         uptime_s = self.get_uptime_s()
-        print self.options._values
+        
+        t = get_branch_date()
+        dt = time.time() - t
         res = {
             'version': mocdp.__version__,
             'server-name': socket.gethostname(),
             'access': 'public',
             'geoip': geoip(),
-            'branch-date':  get_branch_date(),
+            'branch-date':  t,
+            'branch-date-h': duration_compact(dt),
             'branch-name': get_branch_name(),
             'uptime': duration_compact(uptime_s),
             'uptime_s': uptime_s,
@@ -104,4 +78,51 @@ def get_branch_date():
     cmd=['git', 'show', '--format=%ci', branch_name]
     s = get_command_output(cmd)
     line = s.split('\n')[0]
-    return line[:16]
+    print line
+    t = parse(line)
+#     timestamp = (t - datetime(1970, 1, 1)).total_seconds()
+
+    stamp = time.mktime(t.timetuple())
+
+    return stamp
+#     return line[:16]
+
+ 
+
+
+
+#         
+#         route = 'uptime'
+#         config.add_route(route, base + '/uptime.png')
+#         config.add_view(self.view_uptime, route_name=route)
+# 
+#         route = 'branch'
+#         config.add_route(route, base + '/branch-name.png')
+#         config.add_view(self.view_branch_name, route_name=route)
+# 
+#         route = 'branch-date'
+#         config.add_route(route, base + '/branch-date.png')
+#         config.add_view(self.view_branch_date, route_name=route)
+# 
+#     def format_string(self, request, s):
+#         fontsize = 20
+#         ratio = 2.5/4
+#         h = int(fontsize)
+#         w = int(fontsize * len(s) * ratio)
+#         size = (w, h)
+#         green = (0,255,0)
+#         black = (0,0,0)
+#         color = black
+#         return response_image(request, s, size, color, fontsize)
+#         
+#     def view_uptime(self, request):  # @UnusedVariable
+#         s = duration_compact(self.get_uptime_s())
+#         return self.format_string(request, s)
+#         
+#     def view_branch_name(self, request):  # @UnusedVariable
+#         s = get_branch_name()
+#         return self.format_string(request, s)
+#     
+#     def view_branch_date(self, request):  # @UnusedVariable
+#         s = get_branch_date()
+#         return self.format_string(request, s)

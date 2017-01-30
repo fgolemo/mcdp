@@ -36,7 +36,8 @@
 		font-size: larger;
 	}
 	tr.unavailable {
-		background-color: pink;
+		/*background-color: pink;*/
+		color: red !important;
 	}
 	tr.unavailable #server:after {
 		content: ' (unavailable)';
@@ -59,48 +60,24 @@
 		font-family: 'FreeMono', monospace;
 	}
 	div { display: block; text-align: center; margin-bottom: 3em;}
+
+	table#destination {
+		width: 100%;
+	}
+
+	#tests\:outside {
+		float: right;
+	}
 </style>
 
+	<p><strong>Active installations</strong></p>
 
-	<div id='tests:outside'>
-	<table>
-		<thead>
-			<tr><td colspan=3>Unit tests</td></tr>
-			<tr>
-				<td></td>
-				<td>branch</td>
-				<td>unit tests</td>
-			</tr>
-		</thead>
-
-		<tr>
-			<td>Master</td>
-			<td><a href="https://github.com/AndreaCensi/mcdp/tree/master">master</a></td>
-			<td>
-				<a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/master"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/master.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776" /></a>
-			</td>
-		</tr>
-		<tr>
-			<td>Development</td>
-			<td><a href="https://github.com/AndreaCensi/mcdp/tree/devel">devel</a></td>
-			<td>
-				<a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/devel"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/devel.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776" /></a>
-			</td>
-		</tr>
-		<tr>
-			<td>Daily</td>
-			<td><a href="https://github.com/AndreaCensi/mcdp/tree/last">last</a></td>
-			<td>
-				<a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/last"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/last.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776" /></a>
-			</td>
-		</tr>
-	</table>
-</div>
 	<div id='destination:outside'>
 	<table id='destination'>
 		<thead>
-			<tr><td colspan=9>Active installations</td></tr>
+			<!-- <tr><td colspan=9>Active installations</td></tr> -->
 			<tr id='template'>
+				<td id='status'></td>
 				<td id='server'>URL</td>
 				<td id='server-name'>Server</td>
 				<td id='server-location'></td>
@@ -109,7 +86,8 @@
 				<td id='uptime'>Uptime</td>
 				<td id='version'>Version</td>
 				<td id='branch-name'>Branch</td>
-				<td id='branch-date'>Last commit</td>
+				<!-- <td id='branch-date'>Last commit</td> -->
+				<td id='branch-date-h'>Last commit</td>
 				<td id='circle'>Unit tests</td>
 				<td id='latency'>Latency</td>
 			</tr>
@@ -130,7 +108,7 @@
 			$(rowsel + ' td').html('?');
 			$(rowsel + ' #uptime').html(data['uptime']);
 			$(rowsel + ' #branch-name').html(data['branch-name']);
-			$(rowsel + ' #branch-date').html(data['branch-date']);
+			$(rowsel + ' #branch-date-h').html(data['branch-date-h']);
 			console.log(data['geoip'])
 
 			$(rowsel + ' #server-location').html(data['geoip']['city']);
@@ -154,15 +132,18 @@
 			$(rowsel + ' #access').html(d[data['access']]);
 
 			$(rowsel + ' #latency').html(''+delta+ ' ms');
+			$('#'+rowid + ' #status').html('✅')
 		}
 
 		function error(data, rowid, name, server) {
-			$('#'+rowid+ ' td').attr('colspan', 1)
+
+			// $('#'+rowid+ ' td').attr('colspan', 1)
 			rowsel = '#'+rowid;
 			console.log('error!');
 
-			w = '<span style="color:black">?</span>';
-			$(rowsel + ' td').html(w);
+			// w = '<span style="color:black">?</span>';
+			// $(rowsel + ' td').html(w);
+			$('#'+rowid + ' #status').html('❌');
 			servers = '<a href="S/">N</a>'.replace('S', server).replace('N', name);
 			$(rowsel + ' #server').html(servers);
 			$(rowsel).attr('class','unavailable');
@@ -173,6 +154,9 @@
 
 			$("#template").clone().attr('id', rowid).appendTo("#destination");
 			$('#'+rowid + ' td').html('');
+			$('#'+rowid + ' #status').html('⌛');
+
+
 			$('#'+rowid+ ' #server').attr('colspan', 10).html('<strong>trying to contact ' + server + '</strong>');
 			t0=new Date().getTime();
 			$.ajax({
@@ -1963,7 +1947,47 @@
 ]}
 	</script>
 
-		<p><a href="http://status.co-design.science/">Historical uptime statistics</a></p>
+		<ul>
+			<li>
+				<a href="http://status.co-design.science/">Historical uptime statistics</a>
+			</li>
+		</ul>
+
+
+		<div id='tests:outside'>
+		<table>
+			<thead>
+				<!-- <tr><td colspan=3>Unit tests</td></tr> -->
+				<tr>
+					<td></td>
+					<td>branch</td>
+					<td>unit tests</td>
+				</tr>
+			</thead>
+
+			<tr>
+				<td>Master</td>
+				<td><a href="https://github.com/AndreaCensi/mcdp/tree/master">master</a></td>
+				<td>
+					<a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/master"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/master.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776" /></a>
+				</td>
+			</tr>
+			<tr>
+				<td>Development</td>
+				<td><a href="https://github.com/AndreaCensi/mcdp/tree/devel">devel</a></td>
+				<td>
+					<a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/devel"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/devel.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776" /></a>
+				</td>
+			</tr>
+			<tr>
+				<td>Daily</td>
+				<td><a href="https://github.com/AndreaCensi/mcdp/tree/last">last</a></td>
+				<td>
+					<a href="https://circleci.com/gh/AndreaCensi/mcdp/tree/last"><img src="https://circleci.com/gh/AndreaCensi/mcdp/tree/last.png?style=shield&amp;circle-token=f59172bb200232cffc45e43473c4eaf5c2b3e776" /></a>
+				</td>
+			</tr>
+		</table>
+	</div>
 
 </body>
 
