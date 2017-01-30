@@ -27,6 +27,8 @@ from .renderdoc.markd import render_markdown
 from .solver.app_solver import AppSolver
 from .solver2.app_solver2 import AppSolver2
 from .visualization.app_visualization import AppVisualization
+from .status import AppStatus
+from pyramid.renderers import JSONP
 
 
 # from .editor.app_editor import AppEditor
@@ -35,7 +37,7 @@ __all__ = [
     'app_factory',
 ]
 
-class WebApp(AppVisualization, 
+class WebApp(AppVisualization, AppStatus,
              AppQR, AppSolver, AppInteractive,
              AppSolver2, AppEditorFancyGeneric, WebAppImages):
 
@@ -148,7 +150,6 @@ class WebApp(AppVisualization,
         self._refresh_library(request)
         raise HTTPFound(request.referrer)
 
-    @add_std_vars
     def view_not_found(self, request):
         request.response.status = 404
         url = request.url
@@ -538,9 +539,12 @@ class WebApp(AppVisualization,
     def get_app(self): 
         self.time_start = time.time()
         config = Configurator()
+        config.add_renderer('jsonp', JSONP(param_name='callback'))
+
         config.add_static_view(name='static', path='static', cache_max_age=3600)
         config.include('pyramid_jinja2')
 
+        AppStatus.config(self, config)
         AppVisualization.config(self, config)
         AppQR.config(self, config)
         AppSolver.config(self, config)
