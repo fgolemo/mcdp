@@ -1,10 +1,10 @@
-import bcrypt  # @UnresolvedImport
+import os
+
 import pyramid
 from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember, forget
 
 from mocdp import logger
-import os
 
 
 USERS = {}
@@ -24,10 +24,11 @@ def load_users(userdir):
         USERS[user] = password
     print USERS
         
-        
+URL_LOGIN = '/login/'
+
 class AppLogin():
     def config(self, config):
-        config.add_route('login', '/login')
+        config.add_route('login', URL_LOGIN)
         config.add_view(self.login, route_name='login', renderer='login.jinja2',
                         permission=pyramid.security.NO_PERMISSION_REQUIRED)
 
@@ -38,7 +39,6 @@ class AppLogin():
         config.add_forbidden_view(self.view_forbidden, renderer='forbidden.jinja2')
         
         load_users(self.options.users)
-        
         
     def view_forbidden(self, request):
         logger.error(request.url)
@@ -51,14 +51,15 @@ class AppLogin():
         res['result'] = request.exception.result
         res['url'] = request.url
         res['referrer'] = request.referrer
+        res['login_form'] = self.make_relative(request, URL_LOGIN)
         return res
 
 
     def login(self, request): 
-        login_url = request.route_url('login')
+#         login_url = request.route_url('login')
         referrer = request.url
-        if referrer == login_url:
-            referrer = '/'  # never use login form itself as came_from
+#         if referrer == login_url:
+#             referrer = '/'  # never use login form itself as came_from
         came_from = request.params.get('came_from', referrer)
         message = ''
         login = ''
@@ -78,10 +79,12 @@ class AppLogin():
                 else:
                     message = 'Password does not match.'
             
+        login_form = self.make_relative(request, URL_LOGIN)
+        print('login_form: %s' % login_form)
         return dict(
             name='Login',
             message=message,
-            url=request.application_url + '/login',
+            login_form=login_form,
             came_from=came_from,
             login=login,
             password=password,

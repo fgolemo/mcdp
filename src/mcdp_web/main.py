@@ -38,6 +38,7 @@ from pyramid.authentication import AuthTktAuthenticationPolicy
 from pyramid.authorization import ACLAuthorizationPolicy
 from mcdp_web.security import AppLogin
 import pyramid
+import sys
 
 __all__ = [
     'mcdp_web_main',
@@ -544,6 +545,7 @@ class WebApp(AppVisualization, AppStatus,
         return response_data(request, data, content_type)
 
     def exit(self, request):  # @UnusedVariable
+        sys.exit(0)
         setattr(self.server, '_BaseServer__shutdown_request', True)
         howlong = duration_compact(self.get_uptime_s())
         return "Bye. Uptime: %s." % howlong

@@ -68,6 +68,10 @@
 	#tests\:outside {
 		float: right;
 	}
+	td#circle {
+		width: 10em;
+	}
+	td { white-space: nowrap; }
 </style>
 
 	<p><strong>Active installations</strong></p>
@@ -78,16 +82,16 @@
 			<!-- <tr><td colspan=9>Active installations</td></tr> -->
 			<tr id='template'>
 				<td id='status'></td>
-				<td id='server'>URL</td>
-				<td id='server-name'>Server</td>
-				<td id='server-location'></td>
+				<td id='server'>Link</td>
+				<td id='server-name'>Hostname</td>
+				<td id='server-location'>Location</td>
 				<td id='flag'></td>
 				<td id='access'>Access</td>
 				<td id='uptime'>Uptime</td>
 				<td id='version'>Version</td>
 				<td id='branch-name'>Branch</td>
 				<!-- <td id='branch-date'>Last commit</td> -->
-				<td id='branch-date-h'>Last commit</td>
+				<td id='branch-date-h'>Last&nbsp;commit</td>
 				<td id='circle'>Unit tests</td>
 				<td id='latency'>Latency</td>
 			</tr>
@@ -155,6 +159,9 @@
 			$("#template").clone().attr('id', rowid).appendTo("#destination");
 			$('#'+rowid + ' td').html('');
 			$('#'+rowid + ' #status').html('⌛');
+
+			servers = '<a href="S/">N</a>'.replace('S', server).replace('N', name);
+			$('#'+rowid + ' #server').html(servers);
 
 
 			$('#'+rowid+ ' #server').attr('colspan', 10).html('<strong>trying to contact ' + server + '</strong>');

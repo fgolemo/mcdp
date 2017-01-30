@@ -35,10 +35,12 @@ class AppStatus():
         
         t = get_branch_date()
         dt = time.time() - t
+        
+        access = 'public' if self.options.allow_anonymous else 'private'
         res = {
             'version': mocdp.__version__,
             'server-name': socket.gethostname(),
-            'access': 'public',
+            'access': access,
             'geoip': geoip(),
             'branch-date':  t,
             'branch-date-h': duration_compact(dt),
@@ -78,17 +80,9 @@ def get_branch_date():
     cmd=['git', 'show', '--format=%ci', branch_name]
     s = get_command_output(cmd)
     line = s.split('\n')[0]
-    print line
     t = parse(line)
-#     timestamp = (t - datetime(1970, 1, 1)).total_seconds()
-
     stamp = time.mktime(t.timetuple())
-
     return stamp
-#     return line[:16]
-
- 
-
 
 
 #         
