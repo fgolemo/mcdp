@@ -3,9 +3,12 @@ import os
 import time
 import urlparse
 from wsgiref.simple_server import make_server
+from pyramid.security import Allow, Authenticated
+from pyramid.security import Everyone
 
 from pyramid.config import Configurator  # @UnresolvedImport
 from pyramid.httpexceptions import HTTPFound  # @UnresolvedImport
+from pyramid.renderers import JSONP
 from pyramid.response import Response  # @UnresolvedImport
 
 from compmake.utils.duration_hum import duration_compact
@@ -18,30 +21,47 @@ from mocdp import logger
 from mocdp.exceptions import DPSemanticError, DPSyntaxError
 from quickapp import QuickAppBase
 
+from .confi import parse_mcdpweb_params_from_dict
 from .editor_fancy.app_editor_fancy_generic import AppEditorFancyGeneric
 from .images.images import WebAppImages, get_mime_for_format
 from .interactive.app_interactive import AppInteractive
 from .qr.app_qr import AppQR
 from .renderdoc.main import render_complete
-from .renderdoc.markd import render_markdown
 from .solver.app_solver import AppSolver
 from .solver2.app_solver2 import AppSolver2
-from .visualization.app_visualization import AppVisualization
+
 from .status import AppStatus
-from pyramid.renderers import JSONP
+from .visualization.app_visualization import AppVisualization
+from .confi import describe_mcdpweb_params
 
+from pyramid.authentication import AuthTktAuthenticationPolicy
+from pyramid.authorization import ACLAuthorizationPolicy
+from mcdp_web.security import AppLogin
 
-# from .editor.app_editor import AppEditor
 __all__ = [
     'mcdp_web_main',
     'app_factory',
 ]
 
+
+
 class WebApp(AppVisualization, AppStatus,
              AppQR, AppSolver, AppInteractive,
-             AppSolver2, AppEditorFancyGeneric, WebAppImages):
+             AppSolver2, AppEditorFancyGeneric, WebAppImages,
+             AppLogin):
+   
+    def __init__(self, options):
+        self.options = options
+        
+        dirname = options.libraries
+        if dirname is None:
+            package = dir_from_package_name('mcdp_data')
+            libraries = os.path.join(package, 'libraries')
+            msg = ('Option "-d" not passed, so I will open the default libraries '
+                   'shipped with PyMCDP. These might not be writable depending on your setup.')
+            logger.info(msg)
+            dirname = libraries
 
-    def __init__(self, dirname):
         self.dirname = dirname
 
         self._load_libraries()
@@ -223,25 +243,25 @@ class WebApp(AppVisualization, AppStatus,
             self.exceptions.append(n)
             from mcdp_web.utils.image_error_catch_imp import response_image
             return response_image(request, s)
-
-    @add_std_vars
-    def view_docs(self, request):  # XXX check this
-        docname = str(request.matchdict['document'])  # unicode
-        # from pkg_resources import resource_filename  # @UnresolvedImport
-        res = self.render_markdown_doc(docname)
-        return res
-
-    @add_std_vars
-    def render_markdown_doc(self, docname):
-        package = dir_from_package_name('mcdp_data')
-        docs = os.path.join(package, 'docs')
-        f = os.path.join(docs, '%s.md' % docname)
-        import codecs
-        data = codecs.open(f, encoding='utf-8').read()  # XXX
-        data_str = data.encode('utf-8')
-        html = render_markdown(data_str)
-        html_u = unicode(html, 'utf-8')
-        return {'contents': html_u}
+# 
+#     @add_std_vars
+#     def view_docs(self, request):  # XXX check this
+#         docname = str(request.matchdict['document'])  # unicode
+#         # from pkg_resources import resource_filename  # @UnresolvedImport
+#         res = self.render_markdown_doc(docname)
+#         return res
+# 
+#     @add_std_vars
+#     def render_markdown_doc(self, docname):
+#         package = dir_from_package_name('mcdp_data')
+#         docs = os.path.join(package, 'docs')
+#         f = os.path.join(docs, '%s.md' % docname)
+#         import codecs
+#         data = codecs.open(f, encoding='utf-8').read()  # XXX
+#         data_str = data.encode('utf-8')
+#         html = render_markdown(data_str)
+#         html_u = unicode(html, 'utf-8')
+#         return {'contents': html_u}
 
     # This is where we keep all the URLS
     
@@ -538,7 +558,36 @@ class WebApp(AppVisualization, AppStatus,
         
     def get_app(self): 
         self.time_start = time.time()
-        config = Configurator()
+        
+        options = self.options
+        print options
+        class Root(object):
+            __acl__ = [
+                #(Allow, Everyone, 'view'),
+                (Allow, Authenticated, 'view'), 
+                (Allow, Authenticated, 'edit'),
+            ]
+            
+            def __init__(self, request):  # @UnusedVariable
+                pass
+            
+        if options.allow_anonymous:
+            Root.__acl__.append((Allow, Everyone, 'access'))
+            logger.info('Allowing everyone to access')
+        else:
+            Root.__acl__.append((Allow, Authenticated, 'access'))
+            logger.info('Allowing authenticated to access')
+        
+        config = Configurator(root_factory=Root)
+        
+        config.include('pyramid_debugtoolbar')
+
+        authn_policy = AuthTktAuthenticationPolicy('seekrit', hashalg='sha512')
+        authz_policy = ACLAuthorizationPolicy()
+        config.set_authentication_policy(authn_policy)
+        config.set_authorization_policy(authz_policy)
+        config.set_default_permission('access')
+
         config.add_renderer('jsonp', JSONP(param_name='callback'))
 
         config.add_static_view(name='static', path='static', cache_max_age=3600)
@@ -551,28 +600,27 @@ class WebApp(AppVisualization, AppStatus,
         AppInteractive.config(self, config)
         AppEditorFancyGeneric.config(self, config)
         WebAppImages.config(self, config)
-
+        AppLogin.config(self, config)
         AppSolver2.config(self, config)
 
+        
         config.add_route('index', '/')
         config.add_view(self.view_index, route_name='index', renderer='index.jinja2')
 
         config.add_route('list_libraries', '/libraries/')
-        config.add_view(self.view_list_libraries, route_name='list_libraries', renderer='list_libraries.jinja2')
+        config.add_view(self.view_list_libraries, route_name='list_libraries', 
+                        renderer='list_libraries.jinja2')
 
         config.add_route('library_index', '/libraries/{library}/')
-        config.add_view(self.view_list, route_name='library_index', renderer='library_index.jinja2')
+        config.add_view(self.view_list, route_name='library_index', 
+                        renderer='library_index.jinja2')
 
         config.add_route('library_doc', '/libraries/{library}/{document}.html')
-        config.add_view(self.view_library_doc,
-                        route_name='library_doc',
+        config.add_view(self.view_library_doc, route_name='library_doc',
                         renderer='library_doc.jinja2')
 
         config.add_route('library_asset', '/libraries/{library}/{asset}.{ext}')
         config.add_view(self.view_library_asset, route_name='library_asset')
-
-        config.add_route('docs', '/docs/{document}/')
-        config.add_view(self.view_docs, route_name='docs', renderer='language.jinja2')
 
         config.add_route('empty', '/empty')
         config.add_view(self.view_index, route_name='empty', renderer='empty.jinja2')
@@ -602,6 +650,8 @@ class WebApp(AppVisualization, AppStatus,
 
         config.add_notfound_view(self.view_not_found, renderer='404.jinja2')
 #  
+        config.scan()
+        
 
         app = config.make_wsgi_app()
         return app
@@ -613,22 +663,12 @@ class MCDPWeb(QuickAppBase):
     """ Runs the MCDP web interface. """
 
     def define_program_options(self, params):
-        params.add_string('dir', default=None, short='-d',
-                           help='Library directories containing models.')
+        describe_mcdpweb_params(params)
         params.add_int('port', default=8080, help='Port to listen to.')
-        params.add_flag('delete_cache', help='Removes the cached files before starting.')
-
+        
     def go(self):
         options = self.get_options()
         dirname = options.dir
-        if dirname is None:
-            package = dir_from_package_name('mcdp_data')
-            libraries = os.path.join(package, 'libraries')
-            msg = ('Option "-d" not passed, so I will open the default libraries '
-                   'shipped with PyMCDP. These might not be writable depending on your setup.')
-            logger.info(msg)
-            dirname = libraries
-
         wa = WebApp(dirname)
         msg = """Welcome to PyMCDP!
         
@@ -646,12 +686,20 @@ Use Chrome, Firefox, or Opera - Internet Explorer is not supported.
         wa.serve(port=options.port)
 
 
+def get_only_prefixed(settings, prefix):
+    res = {}
+    for k, v in settings.items():
+        if k.startswith(prefix):
+            k2 = k[len(prefix):]
+            res[k2]= v
+    return res
+            
 def app_factory(global_config, **settings):
-    package = dir_from_package_name('mcdp_data')
-    default_libraries = os.path.join(package, 'libraries')
-          
-    dirname = global_config.get('libraries', default_libraries)
-    wa = WebApp(dirname)
+    settings = get_only_prefixed(settings, 'mcdp_web.')
+    print('app_factory settings %s' % settings)
+    options = parse_mcdpweb_params_from_dict(settings)
+    
+    wa = WebApp(options)
     app = wa.get_app()
     return app
 

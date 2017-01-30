@@ -60,6 +60,8 @@ class AppStatus():
 #         return self.format_string(request, s)
 
     def view_status(self, request):  # @UnusedVariable
+        uptime_s = self.get_uptime_s()
+        print self.options._values
         res = {
             'version': mocdp.__version__,
             'server-name': socket.gethostname(),
@@ -67,7 +69,9 @@ class AppStatus():
             'geoip': geoip(),
             'branch-date':  get_branch_date(),
             'branch-name': get_branch_name(),
-            'uptime': duration_compact(self.get_uptime_s()) 
+            'uptime': duration_compact(uptime_s),
+            'uptime_s': uptime_s,
+            'options': self.options._values, 
         }
         return res
     

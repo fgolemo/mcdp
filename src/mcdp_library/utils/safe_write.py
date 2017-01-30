@@ -2,8 +2,8 @@
 from contextlib import contextmanager
 import gzip
 import os
-import math
 import random
+
 
 __all__ = [
     'safe_write',

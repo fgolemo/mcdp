@@ -1,0 +1,16 @@
+<div id='userbox'>
+{% if authenticated_userid %}
+👤 {{authenticated_userid}} (<a href='/logout'>logout</a>)
+{% else %}
+👤 <a href="/login">login</a>
+{% endif %}
+</div>
+
+<style type='text/css'>
+	#userbox {
+		right: 0;
+		position: fixed;
+		top: 0;
+		padding: 6pt;	
+	} 
+</style>

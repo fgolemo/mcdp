@@ -1,5 +1,6 @@
 
 {% include 'prompt.jinja2' %}
+{% include 'user.jinja2' %}
 
 <style type='text/css'>
 
@@ -11,15 +12,23 @@
 		/*min-height: 80%;*/
 	}
 
-
 	#select_view, #select_model {
 		display: none;
 	}
 	.hot_select { visibility: hidden;}
+	
+	table#maintable {
+		position: fixed;
+		top: 0; left: 0;
+	}
+	#aftertable {
+		margin-top: 2em; 
+	}
+	
 </style>
 
 
-<table>
+<table id='maintable'>
 <tr>
 	<td>
 		{% include 'menu.jinja2' %}
@@ -118,8 +127,13 @@
 	  {% endif %}
 	  </td>
 </td>
+</td>
 </tr>
 </table>
+<div id='aftertable'/>
+
+
+
 
 <script type = "text/javascript">
 	$(document).ready(function() {

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Login</title>
+    {% include 'head.jinja2' %}
+</head>
+<body> 
+{% if message %}
+	<p>{{message}}</p>
+{% endif %}
+
+{% include 'login_form.jinja2' %}
+
+</body>
+</html>

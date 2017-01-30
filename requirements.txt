@@ -14,6 +14,7 @@ PyContracts
 markdown
 junit_xml
 lxml
+bcrypt
 
 decentlogs
 -e git+https://github.com/AndreaCensi/compmake.git@mcdp#egg=compmake

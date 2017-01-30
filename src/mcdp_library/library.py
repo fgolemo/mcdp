@@ -83,7 +83,7 @@ class MCDPLibrary():
             load_library_hooks = []
         self.load_library_hooks = load_library_hooks
         
-        self.set_read_only(True)
+        self.set_read_only(False)
 
     def get_images_paths(self):
         """ Returns a list of paths to search for images assets. """

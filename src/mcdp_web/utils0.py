@@ -16,6 +16,7 @@ def add_other_fields(self, res, request):
     res['uptime_s'] = int(self.get_uptime_s())
     res['uptime_string'] = duration_compact(res['uptime_s'])
     res['time_start'] = self.time_start
+    res['authenticated_userid'] = request.authenticated_userid
     
 def add_std_vars(f):
     def f0(self, request):
