@@ -1,20 +1,17 @@
 # -*- coding: utf-8 -*-
-from mcdp_web.utils.image_error_catch_imp import response_image
+import json
+import os
+import socket
+
+from compmake.utils import duration_compact
+import mocdp
 from mocdp.memoize_simple_imp import memoize_simple
 from system_cmd.meat import system_cmd_result
-import os
-from compmake.utils.duration_hum import duration_compact
-import mocdp
-import socket
-import json
 
 
 class AppStatus():
     """
-       /status/uptime.png
-       /status/branch-name.png -  git rev-parse --abbrev-ref HEAD
-       /status/branch-date.png - git show --format="%ci" master | head -n 1
-
+       /status/status.json
     """
 
     def __init__(self):
@@ -66,7 +63,6 @@ class AppStatus():
         res = {
             'version': mocdp.__version__,
             'server-name': socket.gethostname(),
-#             'server-location': '🇩🇪',
             'access': 'public',
             'geoip': geoip(),
             'branch-date':  get_branch_date(),

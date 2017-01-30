@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import cgi
+
 from mcdp_web.utils0 import add_std_vars
 
 

@@ -105,6 +105,7 @@
 				<td id='server-name'>Server</td>
 				<td id='server-location'></td>
 				<td id='flag'></td>
+				<td id='access'>Access</td>
 				<td id='uptime'>Uptime</td>
 				<td id='version'>Version</td>
 				<td id='branch-name'>Branch</td>
@@ -118,14 +119,14 @@
 
 	<script>
 		function success(data, rowid, name, server, t0) {
+			$('#'+rowid+ ' td').attr('colspan', 1)
+
 			t1=new Date().getTime();
 			delta = t1-t0;
 			rowsel = '#'+rowid;
 			console.log(data);
 
-
-
-			$("#template").clone().appendTo( "#destination").attr('id', rowid).css('visibility', '');
+			// $("#template").clone().appendTo( "#destination").attr('id', rowid).css('visibility', '');
 			$(rowsel + ' td').html('?');
 			$(rowsel + ' #uptime').html(data['uptime']);
 			$(rowsel + ' #branch-name').html(data['branch-name']);
@@ -137,8 +138,6 @@
 			flag = get_flag(code);
 			console.log(flag);
 			$(rowsel + ' #flag').html(flag);
-
-
 
 			$(rowsel + ' #server-name').html(data['server-name']);
 			$(rowsel + ' #version').html(data['version']);
@@ -155,36 +154,26 @@
 			$(rowsel + ' #access').html(d[data['access']]);
 
 			$(rowsel + ' #latency').html(''+delta+ ' ms');
-
-
 		}
 
 		function error(data, rowid, name, server) {
+			$('#'+rowid+ ' td').attr('colspan', 1)
 			rowsel = '#'+rowid;
 			console.log('error!');
 
-			$("#template").clone().attr('id', rowid).appendTo("#destination");
-
 			w = '<span style="color:black">?</span>';
 			$(rowsel + ' td').html(w);
-
 			servers = '<a href="S/">N</a>'.replace('S', server).replace('N', name);
 			$(rowsel + ' #server').html(servers);
-			//
-			//
-			// $(rowsel + ' #circle').html(w);
-			// $(rowsel + ' #uptime').html(w);
-			// $(rowsel + ' #branch-name').html(w);
-			// $(rowsel + ' #branch-date').html(w);
-			// $(rowsel + ' #server-location').html(w);
-			// $(rowsel + ' #server-name').html(w);
-			// $(rowsel + ' #latency').html(w);
 			$(rowsel).attr('class','unavailable');
 		}
 
 		function go(rowid, name, server) {
 			url = server + '/status/status.json';
 
+			$("#template").clone().attr('id', rowid).appendTo("#destination");
+			$('#'+rowid + ' td').html('');
+			$('#'+rowid+ ' #server').attr('colspan', 10).html('<strong>trying to contact ' + server + '</strong>');
 			t0=new Date().getTime();
 			$.ajax({
 				url: url,
@@ -192,13 +181,15 @@
 				dataType: 'jsonp',
 				success: function (data) { success(data, rowid, name, server, t0); },
 				error: function(data) { error(data, rowid, name, server); },
-				timeout: 1000
+				timeout: 10000
 			});
 		}
 
-		go('row2', 'Production 1', 'https://demo.co-design.science/inst00');
-		go('row3', 'Production 2', 'https://demo.co-design.science/inst01');
 		go('row1', 'Local installation', 'http://127.0.0.1:8080');
+		go('row2', 'Production (EU)', 'https://demo.co-design.science/inst00');
+		go('row3', 'Staging (EU)', 'https://demo.co-design.science/inst01');
+		go('row4', 'Production (US)', 'https://8.8.8.3');
+		go('row5', 'Staging (US)', 'https://ares-super.lids.mit.edu/inst02');
 	</script>
 
 	<script>
@@ -208,7 +199,7 @@
 		for (i = 0, len = flags.length; i < len; i++) {
 			x = flags[i];
 
-			console.log(x);
+			// console.log(x);
 			if (x['code'] == code)
 				return x['emoji'];
 
