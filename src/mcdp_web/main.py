@@ -177,7 +177,10 @@ class WebApp(AppVisualization, AppStatus,
         url = request.url
         referrer = request.referrer
         self.exceptions.append('Path not found.\n url: %s\n ref: %s' % (url, referrer))
-        return {'url': url, 'referrer': referrer}
+        res = {'url': url, 'referrer': referrer}
+        
+        res['root'] =  self.get_root_relative_to_here(request)
+        return res
 
     @add_std_vars
     def view_exceptions_occurred(self, request):  # @UnusedVariable
@@ -215,7 +218,9 @@ class WebApp(AppVisualization, AppStatus,
 
         u = unicode(s, 'utf-8')
         logger.error(u)
-        return {'exception': u, 'url_refresh': url_refresh}
+        res = {'exception': u, 'url_refresh': url_refresh}
+        res['root'] =  self.get_root_relative_to_here(request)
+        return res
     
     def png_error_catch2(self, request, func):
         """ func is supposed to return an image response.
@@ -272,7 +277,12 @@ class WebApp(AppVisualization, AppStatus,
             msg = 'Expected url to start with /: %r' % url
             raise ValueError(msg)
         root = self.get_root_relative_to_here(request)
-        return root + url
+        comb = root + url
+        
+        # note: fails for trailing /
+#         comb2 = os.path.normpath(comb)
+#         print('comb %s -> %s' %(comb, comb2))
+        return comb
     
     def get_lmv_url2(self, library, model, view, request):
         url0 = '/libraries/%s/models/%s/views/%s/' % (library, model, view)
@@ -698,9 +708,9 @@ def get_only_prefixed(settings, prefix):
             res[k2]= v
     return res
             
-def app_factory(global_config, **settings):
+def app_factory(global_config, **settings):  # @UnusedVariable
     settings = get_only_prefixed(settings, 'mcdp_web.')
-    print('app_factory settings %s' % settings)
+    #print('app_factory settings %s' % settings)
     options = parse_mcdpweb_params_from_dict(settings)
     
     wa = WebApp(options)

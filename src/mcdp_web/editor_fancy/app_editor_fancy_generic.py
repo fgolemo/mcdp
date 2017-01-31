@@ -34,6 +34,7 @@ from mcdp_lang.parse_interface import( parse_ndp_eval, parse_ndp_refine,
     parse_template_eval, parse_template_refine, parse_constant_eval, 
     parse_constant_refine, parse_poset_eval, parse_poset_refine)
 from mcdp.utils.timing import timeit_wall
+import urlparse
 
 
 
@@ -165,6 +166,7 @@ class AppEditorFancyGeneric():
 
     #@add_std_vars
     def view_edit_form_fancy_generic(self, request, spec):
+#         print('view_edit_form_fancy_generic request.url: %s' % request.url)
         widget_name = self.get_widget_name(request, spec)
 
         filename = '%s.%s' % (widget_name, spec.extension)
@@ -253,22 +255,34 @@ class AppEditorFancyGeneric():
 
     def view_new_model_generic(self, request, spec):
         widget_name = self.get_widget_name(request, spec)
-        logger.info('New : %r' % widget_name)
+        logger.info('Creating new %r' % widget_name)
         library = self.get_current_library_name(request)
 
         basename = '%s.%s' % (widget_name, spec.extension)
         l = self.get_library(request)
 
-        url_edit0 = ('/libraries/%s/%s/%s/views/edit_fancy/' %
-                    (library, spec.url_part, widget_name))
-        url_edit = self.make_relative(request, url_edit0)
+#         url_edit0 = ('/libraries/%s/%s/%s/views/edit_fancy/' %
+#                     (library, spec.url_part, widget_name))
+#         url_edit = self.make_relative(request, url_edit0)
+#         
+#         path = urlparse.urlparse(request.url).path + '/'
+#         r = os.path.relpath('/', path)
+#         url_edit2 = r + url_edit0
         
+        url_edit = '../%s/views/edit_fancy/' % widget_name
+#         
+#         print('request.url: %s' % request.url)
+        print('url_edit: %s' % url_edit)
+#         print('r: %s' % r)
+#         print('url_edit2: %s' % url_edit2)
+#         
         if l.file_exists(basename):
             error = 'File %r already exists.' % basename
             template = 'editor_fancy/error_model_exists_generic.jinja2'
-            params = {'error': error, 'url_edit': url_edit,
+            res = {'error': error, 'url_edit': url_edit,
                       'widget_name': widget_name}
-            return render_to_response(template, params, request=request)
+            res['root'] = self.get_root_relative_to_here(request)
+            return render_to_response(template, res, request=request)
 
         else:
             path = self.libraries[library]['path']

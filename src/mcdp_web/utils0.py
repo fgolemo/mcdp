@@ -18,6 +18,14 @@ def add_other_fields(self, res, request):
     res['time_start'] = self.time_start
     res['authenticated_userid'] = request.authenticated_userid
     
+    if request.authenticated_userid is not None:
+        from mcdp_web.security import USERS
+        u = USERS[request.authenticated_userid]._asdict()
+        del u['password']
+        res['user'] = u
+    else:
+        res['user'] = None
+    
 def add_std_vars(f):
     def f0(self, request):
         try:

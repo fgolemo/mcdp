@@ -1,8 +1,10 @@
 <div id='userbox'>
-{% if authenticated_userid %}
-👤 {{authenticated_userid}} (<a href='/logout'>logout</a>)
+{% if user is defined %}
+<img src='{{user['gravatar20']}}'/>
+{{user['name']}}
+ (<a href='{{root}}/logout'>logout</a>)
 {% else %}
-👤 <a href="/login/">login</a>
+👤 <a href="{{root}}/login/">login</a>
 {% endif %}
 </div>
 

@@ -5,25 +5,56 @@ from pyramid.httpexceptions import HTTPFound
 from pyramid.security import remember, forget
 
 from mocdp import logger
+from collections import namedtuple
+import yaml
 
 
 USERS = {}
 
 GROUPS = {'editor': ['group:editors']}
 
+UserInfo = namedtuple('UserInfo', 
+                      ['username', 
+                       'name',
+                       'password',
+                       'email',
+                       'gravatar40',
+                       'gravatar20',
+                       ])
+
 def load_users(userdir):
     if not os.path.exists(userdir):
         msg = 'Directory %s does not exist' % userdir
         Exception(msg)
     for user in os.listdir(userdir):
-        password = os.path.join(userdir, user, 'password')
-        if not os.path.exists(password):
-            msg = 'Password file %s does not exist.'  % password
+        info = os.path.join(userdir, user, 'user.yaml')
+        if not os.path.exists(info):
+            msg = 'Info file %s does not exist.'  % info
             raise Exception(msg)
-        password = open(password).read().strip()
-        USERS[user] = password
+        data = open(info).read()
+        s = yaml.load(data)
+        
+        res = {}
+        res['username'] = user
+        res['name'] = s['name']
+        res['password'] = s['password']
+        res['email'] = s['email']
+        default = "https://www.example.com/default.jpg"
+        
+        res['gravatar40'] = gravatar(s['email'], default=default, size=40)
+        res['gravatar20'] = gravatar(s['email'], default=default, size=20)
+        struct = UserInfo(**res)
+        USERS[user] = struct
+        
     print USERS
         
+def gravatar(email, default, size):
+    # import code for encoding urls and generating md5 hashes
+    import urllib, hashlib
+    gravatar_url = "https://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest() + "?"
+    gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
+    return gravatar_url
+
 URL_LOGIN = '/login/'
 
 class AppLogin():
@@ -49,45 +80,49 @@ class AppLogin():
         res = {}
         res['message'] = request.exception.message
         res['result'] = request.exception.result
-        res['url'] = request.url
+        
+        # path_qs The path of the request, without host but with query string
+        res['came_from'] = request.path_qs
         res['referrer'] = request.referrer
         res['login_form'] = self.make_relative(request, URL_LOGIN)
+        res['root'] =  self.get_root_relative_to_here(request)
+        
+        print res
         return res
 
 
     def login(self, request): 
 #         login_url = request.route_url('login')
-        referrer = request.url
+#         referrer = request.url
 #         if referrer == login_url:
 #             referrer = '/'  # never use login form itself as came_from
-        came_from = request.params.get('came_from', referrer)
+        came_from = request.params['came_from']
+        print('came_from: %r' % came_from)
         message = ''
-        login = ''
-        password = ''
+        error = ''
         if 'form.submitted' in request.params:
             login = request.params['login']
             password = request.params['password']
             if not login in USERS:
-                message = 'Could not find user name "%s".' % login
+                error = 'Could not find user name "%s".' % login
             else:
-                password_expected = USERS.get(login)
+                password_expected = USERS[login].password
                 #if check_password(password, hashed):
                 if password == password_expected:
                     headers = remember(request, login)
                     logger.info('successfully authenticated user %s' % login)
                     return HTTPFound(location=came_from, headers=headers)
                 else:
-                    message = 'Password does not match.'
+                    error = 'Password does not match.'
             
         login_form = self.make_relative(request, URL_LOGIN)
-        print('login_form: %s' % login_form)
+        came_from = self.make_relative(request, came_from)
         return dict(
             name='Login',
             message=message,
+            error=error,
             login_form=login_form,
             came_from=came_from,
-            login=login,
-            password=password,
         )
 
     def logout(self, request):
