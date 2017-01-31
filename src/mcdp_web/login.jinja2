@@ -5,17 +5,6 @@
     {% include 'head.jinja2' %}
 </head>
 <body> 
-<style>
-#login-error {color:red;}
-</style>
-{% if message %}
-	<p>{{message}}</p>
-{% endif %}
-{% if error %}
-	<p id='login-error'>{{error}}</p>
-{% endif %}
-
-Root: {{root2}
 
 {% include 'login_form.jinja2' %}
 

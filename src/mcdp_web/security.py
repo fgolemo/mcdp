@@ -18,8 +18,8 @@ UserInfo = namedtuple('UserInfo',
                        'name',
                        'password',
                        'email',
-                       'gravatar40',
-                       'gravatar20',
+                       'gravatar64',
+                       'gravatar32',
                        ])
 
 def load_users(userdir):
@@ -41,20 +41,24 @@ def load_users(userdir):
         res['name'] = s['name']
         res['password'] = s['password']
         res['email'] = s['email']
-        default = "https://www.example.com/default.jpg"
+#         default = "https://www.example.com/default.jpg"
         
-        res['gravatar40'] = gravatar(s['email'], default=default, size=40)
-        res['gravatar20'] = gravatar(s['email'], default=default, size=20)
+        res['gravatar64'] = gravatar(s['email'], size=64)
+        res['gravatar32'] = gravatar(s['email'], size=32)
         struct = UserInfo(**res)
         USERS[user] = struct
         
     print USERS
         
-def gravatar(email, default, size):
+def gravatar(email, size, default=None):
     # import code for encoding urls and generating md5 hashes
     import urllib, hashlib
     gravatar_url = "https://www.gravatar.com/avatar/" + hashlib.md5(email.lower()).hexdigest() + "?"
-    gravatar_url += urllib.urlencode({'d':default, 's':str(size)})
+    p = {}
+    p['s'] = str(size)
+    if default:
+        p['d'] = default
+    gravatar_url += urllib.urlencode(p)
     return gravatar_url
 
 URL_LOGIN = '/login/'
@@ -80,24 +84,27 @@ class AppLogin():
         logger.error(request.exception.result)
         request.response.status = 403
         res = {}
-        res['message'] = request.exception.message
-        res['result'] = request.exception.result
+        res['request_exception_message'] = request.exception.message
+        res['request_exception_result'] = request.exception.result
         
         # path_qs The path of the request, without host but with query string
         res['came_from'] = request.path_qs
         res['referrer'] = request.referrer
         res['login_form'] = self.make_relative(request, URL_LOGIN)
         res['root'] =  self.get_root_relative_to_here(request)
-        
+        res['message'] = ''
+        res['error'] = 'You need to login to access this resource.'
         print res
         return res
 
 
     def login(self, request): 
-#         login_url = request.route_url('login')
 #         referrer = request.url
 #         if referrer == login_url:
 #             referrer = '/'  # never use login form itself as came_from
+#         if not 'came_from' in request.params:
+#             came_from = request.referrer
+#         else:
         came_from = request.params['came_from']
         print('came_from: %r' % came_from)
         message = ''
@@ -116,16 +123,23 @@ class AppLogin():
                     return HTTPFound(location=came_from, headers=headers)
                 else:
                     error = 'Password does not match.'
+        else: 
+            login = None
             
         login_form = self.make_relative(request, URL_LOGIN)
-        came_from = self.make_relative(request, came_from)
-        return dict(
+        if came_from.startswith('/'):
+            came_from = self.make_relative(request, came_from)
+        res = dict(
             name='Login',
             message=message,
             error=error,
             login_form=login_form,
             came_from=came_from,
         )
+        if login is not None:
+            res['login'] = login
+        res['root'] =  self.get_root_relative_to_here(request)
+        return res
 
     def logout(self, request):
         headers = forget(request)
