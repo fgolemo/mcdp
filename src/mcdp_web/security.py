@@ -27,6 +27,8 @@ def load_users(userdir):
         msg = 'Directory %s does not exist' % userdir
         Exception(msg)
     for user in os.listdir(userdir):
+        if user.startswith('.'):
+            continue
         info = os.path.join(userdir, user, 'user.yaml')
         if not os.path.exists(info):
             msg = 'Info file %s does not exist.'  % info
