@@ -5,16 +5,17 @@
     {% include 'head.jinja2' %}
 </head>
 <body>
-{% include 'user.jinja2' %} 
-<p>You need to login to access this resource</p>
+<!--{% include 'user.jinja2' %}--> 
 
+<div>
 {% include 'login_form.jinja2' %}
-
-<div class='extra' style='color:white'>
-<p>Could not access: <code>{{came_from}}</code></p>
-<p>{{result}}</p>
-<p>{{message}}</p>
 </div>
 
+<!--<div class='extra' style='color:white'>
+<p>Could not access: <code>{{came_from}}</code></p>
+<p>{{request_exception_message}}</p>
+<p>{{request_exception_result}}</p>
+</div>
+-->
 </body>
 </html>

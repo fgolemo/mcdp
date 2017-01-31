@@ -1,10 +1,10 @@
 <div id='userbox'>
-{% if user is defined %}
-<img src='{{user['gravatar20']}}'/>
-{{user['name']}}
+{% if user is defined and user %}
+<img id='gravatar' src='{{user['gravatar64']}}'/>
+{{user['name']}}<br/>
  (<a href='{{root}}/logout'>logout</a>)
 {% else %}
-👤 <a href="{{root}}/login/">login</a>
+👤 <a href="{{root}}/login/?came_from={{request.path}}">login</a>
 {% endif %}
 </div>
 
@@ -14,5 +14,11 @@
 		position: fixed;
 		top: 0;
 		padding: 6pt;	
+		font-size: smaller;
 	} 
+	img#gravatar {
+		height: 30pt;
+		float:left;
+		margin-right: 5pt;
+	}
 </style>
