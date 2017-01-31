@@ -18,13 +18,13 @@ from mcdp_report.gg_ndp import format_unit
 from mcdp_report.plotters.get_plotters_imp import get_best_plotter
 from mcdp_web.utils import ajax_error_catch, memoize_simple, response_data
 from mcdp_web.utils.image_error_catch_imp import response_image
+from mcdp_web.utils0 import add_std_vars
 from mocdp import logger
 from mocdp.exceptions import DPSyntaxError, mcdp_dev_warning, DPSemanticError, \
     DPInternalError
 from reprep import Report
 from reprep.constants import MIME_PNG
 from reprep.plot_utils.axes import x_axis_extra_space, y_axis_extra_space
-from mcdp_web.utils0 import add_std_vars
 
 
 # Alternate chars used for Base64 instead of + / which give problems with urls
@@ -95,7 +95,7 @@ class AppSolver2():
         I_description = str(I)
         
         u = lambda s: unicode(s, 'utf-8')
-        return {
+        res =  {
             'navigation': self.get_navigation_links(request),
             'F_description': u(F_description),
             'R_description': u(R_description),
@@ -103,6 +103,11 @@ class AppSolver2():
             'R_names': ", ".join(ndp.get_rnames()),
             'I_description': u(I_description),
         }
+#         # XXX: not sure what's going on
+#         res['root'] =  self.get_root_relative_to_here(request)
+# 
+#         print('solver2 base: %s' % list(res.keys()))
+        return res
 
     def view_solver2_submit(self, request):
         def go():

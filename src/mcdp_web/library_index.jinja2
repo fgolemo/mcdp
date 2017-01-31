@@ -307,8 +307,6 @@ display: inline-block;
 
 	$(document).ready(function() {
 		$( '#{{ m["id_ndp"] }}-div' ).hover({{ m["id_ndp"] }}_callback);
-
-		$('#allcontents').css('visibility', 'visible');
 	});
 
 	</script>
@@ -321,6 +319,12 @@ display: inline-block;
 {%endif%}
 
  </div>
+
+ <script>
+ 	$(document).ready(function() {
+ 		$('#allcontents').css('visibility', 'visible');
+ 	});
+</script>
 
 {% include 'footer.jinja2' %}
 </body>

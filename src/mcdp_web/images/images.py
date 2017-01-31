@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from mcdp_figures import MakeFiguresNDP
 from mcdp_web.utils.response import response_data
+from mcdp_web.utils0 import add_std_vars
 
 
 __all__ = ['WebAppImages']
@@ -50,6 +51,7 @@ class WebAppImages():
             return response_data(request=request, data=data, content_type=mime)
         return self.png_error_catch2(request, go)
  
+    @add_std_vars
     def list_views(self, request):
         available = []
         mf = MakeFiguresNDP(None)

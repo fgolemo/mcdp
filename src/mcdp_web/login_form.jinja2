@@ -1,12 +1,14 @@
-  <form action="{{login_form}}" method="post">
+
+
+  <form action="{{root}}/login/" method="post">
     <input type="hidden" name="came_from" value="{{came_from}}">
     <div class="form-group">
       <label for="login">Username</label>
-      <input type="text" name="login" value="{{login}}">
+      <input type="text" name="login" value="">
     </div>
     <div class="form-group">
       <label for="password">Password</label>
-      <input type="password" name="password" value="{{password}}">
+      <input type="password" name="password" value="">
     </div>
     <div class="form-group">
       <button type="submit" name="form.submitted" value="Log In">Log In</button>

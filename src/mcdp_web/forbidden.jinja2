@@ -8,12 +8,10 @@
 {% include 'user.jinja2' %} 
 <p>You need to login to access this resource</p>
 
-{% set came_from = url %}
 {% include 'login_form.jinja2' %}
 
-
 <div class='extra' style='color:white'>
-<p>Could not access: <code>{{url}}</code></p>
+<p>Could not access: <code>{{came_from}}</code></p>
 <p>{{result}}</p>
 <p>{{message}}</p>
 </div>
