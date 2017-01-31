@@ -5,7 +5,7 @@ IFS=$'\n\t'
 while :
 do
     git pull
-    mcdp-web --delete_cache
+    pserve needs_authentication.ini
 done
 
 
