@@ -4,13 +4,17 @@
 	<meta content="application/xhtml+xml; charset=utf-8" http-equiv="Content-Type"></meta>
 
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
 </head>
 
 <body>
 <style type='text/css'>
 	table,
 	body {
-		font-family: 'Anka/Coder Narrow','Monaco', monospace;
+		/*font-family: 'Anka/Coder Narrow','Monaco', monospace;*/
 		font-size: 10pt;
 	}
 
@@ -59,22 +63,34 @@
 	code {
 		font-family: 'FreeMono', monospace;
 	}
-	div { display: block; text-align: center; margin-bottom: 3em;}
+	/*div { display: block; text-align: center; margin-bottom: 3em;}*/
 
 	table#destination {
-		width: 100%;
+		/*width: 100%;*/
 	}
 
-	#tests\:outside {
-		float: right;
+	#tests-outside {
+		/*float: right;*/
+		display: none;
 	}
 	td#circle {
 		width: 10em;
 	}
 	td { white-space: nowrap; }
+	.extended {display:none;}
+
+	#server { font-weight: bold;}
 </style>
 
-	<p><strong>Active installations</strong></p>
+	<h4>PyMCDP online demo</h4>
+	<p>Please choose the server that is closest to you from the list below.
+		A low latency is important to use the online editor.
+	</p>
+
+	<p>For the servers marked &ldquo;🔒 private&rdquo; you need to have
+		an account. Please ask <a href="mailto:censi@mit.edu">Andrea</a>.
+	</p>
+
 
 	<div id='destination:outside'>
 	<table id='destination'>
@@ -83,17 +99,17 @@
 			<tr id='template'>
 				<td id='status'></td>
 				<td id='server'>Link</td>
-				<td id='server-name'>Hostname</td>
-				<td id='server-location'>Location</td>
+				<td id='server-name' class='extended'>Hostname</td>
 				<td id='flag'></td>
-				<td id='access'>Access</td>
-				<td id='uptime'>Uptime</td>
-				<td id='version'>Version</td>
-				<td id='branch-name'>Branch</td>
-				<!-- <td id='branch-date'>Last commit</td> -->
-				<td id='branch-date-h'>Last&nbsp;commit</td>
-				<td id='circle'>Unit tests</td>
+				<td id='server-location' class='extended'>Location</td>
 				<td id='latency'>Latency</td>
+				<td id='access'>Access</td>
+				<td id='uptime' class='extended'>Uptime</td>
+				<td id='version' class='extended'>Version</td>
+				<td id='branch-name' class='extended'>Branch</td>
+				<!-- <td id='branch-date'>Last commit</td> -->
+				<td id='branch-date-h' class='extended'>Last&nbsp;commit</td>
+				<td id='circle' class='extended'>Unit tests</td>
 			</tr>
 		</thead>
 	</table>
@@ -176,11 +192,25 @@
 			});
 		}
 
-		go('row1', 'Local installation', 'http://127.0.0.1:8080');
-		go('row2', 'Production (EU)', 'https://demo.co-design.science/inst00');
-		go('row3', 'Staging (EU)', 'https://demo.co-design.science/inst01');
-		go('row4', 'Production (US)', 'https://8.8.8.3');
-		go('row5', 'Staging (US)', 'https://ares-super.lids.mit.edu/inst02');
+		function click_details() {
+			$('.extended').toggle();
+		}
+		function click_show_circle() {
+			$('#tests-outside').toggle();
+		}
+
+		function init(){
+			// go('row1', 'Local installation', 'http://127.0.0.1:8080');
+			go('row2', 'Demo server (EU)', 'https://demo.co-design.science/inst00');
+			// go('row3', 'Staging (EU)', 'https://demo.co-design.science/inst01');
+			// go('row4', 'Production (US)', 'https://8.8.8.3');
+			// go('row5', 'Staging (US)', 'https://ares-super.lids.mit.edu/inst02');
+
+			// $('#details').button();
+			$('#details').click(click_details);
+			$('#show-circle').click(click_show_circle);
+		}
+		$( document ).ready(init);
 	</script>
 
 	<script>
@@ -1956,12 +1986,18 @@
 
 		<ul>
 			<li>
-				<a href="http://status.co-design.science/">Historical uptime statistics</a>
+				<a href="#" id=details>Show more details about the servers above.</a>
+			</li>
+			<li>
+				<a href="#" id='show-circle'>Show the unittests status.</a>
+			</li>
+			<li>
+				<a href="http://status.co-design.science/">See historical uptime statistics (new page)</a>
 			</li>
 		</ul>
 
 
-		<div id='tests:outside'>
+		<div id='tests-outside'>
 		<table>
 			<thead>
 				<!-- <tr><td colspan=3>Unit tests</td></tr> -->
