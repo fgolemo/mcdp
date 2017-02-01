@@ -1,5 +1,5 @@
 
 class BranchInfo:
     """ Information about this particular branch """
-    branch_name = "1701-server-improvements"
-    branch_topic = "Server improvements"
+    branch_name = "inst00"
+    branch_topic = "Production"
