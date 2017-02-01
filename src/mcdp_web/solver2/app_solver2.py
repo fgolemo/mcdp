@@ -10,10 +10,7 @@ from mcdp_dp.dp_transformations import get_dp_bounds
 from mcdp_dp.primitive import NotSolvableNeedsApprox
 from mcdp_dp.tracer import Tracer
 from mcdp_lang.parse_interface import parse_constant
-from mcdp_posets import (express_value_in_isomorphic_space)
-from mcdp_posets import LowerSets
-from mcdp_posets import NotLeq
-from mcdp_posets import UpperSets
+from mcdp_posets import express_value_in_isomorphic_space, LowerSets,  NotLeq, UpperSets
 from mcdp_report.gg_ndp import format_unit
 from mcdp_report.plotters.get_plotters_imp import get_best_plotter
 from mcdp_web.utils import ajax_error_catch, memoize_simple, response_data
@@ -22,6 +19,7 @@ from mcdp_web.utils0 import add_std_vars
 from mocdp import logger
 from mocdp.exceptions import DPSyntaxError, mcdp_dev_warning, DPSemanticError, \
     DPInternalError
+import numpy as np
 from reprep import Report
 from reprep.constants import MIME_PNG
 from reprep.plot_utils.axes import x_axis_extra_space, y_axis_extra_space
@@ -184,7 +182,7 @@ class AppSolver2():
         tracer = Tracer(logger=logger)
         
         max_steps = 10000
-        intervals = False
+        intervals = False  
         
         res = {}
         if do_approximations:
@@ -498,7 +496,7 @@ def get_samples(request, ndp):
     xmax = express_value_in_isomorphic_space(xmax.unit, xmax.value, F)
 
 
-    import numpy as np
+    
     xsamples = np.linspace(xmin, xmax, nsamples)
     samples = []
     for xsample in xsamples:

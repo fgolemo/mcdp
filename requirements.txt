@@ -1,3 +1,4 @@
+pint
 pyparsing
 networkx
 pint

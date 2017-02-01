@@ -10,7 +10,7 @@ from mocdp.exceptions import DPSyntaxError, do_extra_checks, mcdp_dev_warning, \
     DPSemanticError
 from mocdp.memoize_simple_imp import memoize_simple
 from pint import UnitRegistry  # @UnresolvedImport
-from pint.errors import UndefinedUnitError  # @UnresolvedImport
+from pint import UndefinedUnitError  # @UnresolvedImport
 
 from .any import Any, BottomCompletion, TopCompletion
 from .poset import is_top, is_bottom
@@ -216,6 +216,7 @@ class RbicompUnits(Rbicomp):
 @memoize_simple
 def parse_pint(s0):
     """ thin wrapper taking care of dollars not recognized """
+    check_isinstance(s0, str)
     replacements = {
         '$': ' dollars ',
         '¹': '^1',
@@ -230,6 +231,8 @@ def parse_pint(s0):
     }
     s = s0
     for p, replacement in replacements.items():
+        check_isinstance(p, str)
+        check_isinstance(replacement, str)
         s = s.replace(p, replacement)
         
     ureg = get_ureg()

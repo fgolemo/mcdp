@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 // console.log('Loading libraries..');
+require('MathJax-node')
+
 var mjAPI = require("MathJax-node/lib/mj-page.js");
 var jsdom = require("jsdom").jsdom;
 var fs = require('fs');
@@ -12,7 +14,7 @@ manual_out = process.argv[3];
 
 // console.log('reading ' + manual);
 var data = fs.readFileSync(manual, 'utf8');
-var document = jsdom(data); 
+var document = jsdom(data);
 
 
 console.log('rendering...');
@@ -35,7 +37,7 @@ mjAPI.start();
 //     SVG: {
 //       scale: 300
 //     }
-// }); 
+// });
 console.log('started');
 
 mjAPI.typeset({
@@ -57,9 +59,3 @@ mjAPI.typeset({
   // console.log('written to ' + manual_out);
   console.log('success');
 });
-
-
-
-
-
-

@@ -18,7 +18,7 @@ from mcdp_posets.poset import NotLeq
 def inv_unit(S):
     # S.units is a pint quantity
     unit = 1 / S.units
-    string = '%s' % unit
+    string = ('%s' % unit).encode('utf-8')
     res = RcompUnits(1 / S.units, string)
     return res
 
