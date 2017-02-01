@@ -8,9 +8,11 @@ from dateutil.parser import parse
 import pyramid
 
 from compmake.utils import duration_compact
+from system_cmd.meat import system_cmd_result
+
 import mocdp
 from mocdp.memoize_simple_imp import memoize_simple
-from system_cmd.meat import system_cmd_result
+import mcdp
 
 
 class AppStatus():
@@ -44,10 +46,12 @@ class AppStatus():
             'geoip': geoip(),
             'branch-date':  t,
             'branch-date-h': duration_compact(dt),
-            'branch-name': get_branch_name(),
+            'branch-name-actual': get_branch_name(),
             'uptime': duration_compact(uptime_s),
             'uptime_s': uptime_s,
             'options': self.options._values, 
+            'branch-name': mcdp.BranchInfo.branch_name,
+            'branch-topic': mcdp.BranchInfo.branch_topic,
         }
         return res
     

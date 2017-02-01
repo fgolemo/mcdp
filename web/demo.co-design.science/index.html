@@ -106,9 +106,11 @@
 				<td id='access'>Access</td>
 				<td id='uptime' class='extended'>Uptime</td>
 				<td id='version' class='extended'>Version</td>
-				<td id='branch-name' class='extended'>Branch</td>
+				<td id='branch-name0' class='extended'>Branch</td>
 				<!-- <td id='branch-date'>Last commit</td> -->
 				<td id='branch-date-h' class='extended'>Last&nbsp;commit</td>
+				<td id='branch-name' class='extended'>Branch name</td>
+				<td id='branch-topic' class='extended'>Branch topic</td>
 				<td id='circle' class='extended'>Unit tests</td>
 			</tr>
 		</thead>
@@ -127,8 +129,12 @@
 			// $("#template").clone().appendTo( "#destination").attr('id', rowid).css('visibility', '');
 			$(rowsel + ' td').html('?');
 			$(rowsel + ' #uptime').html(data['uptime']);
-			$(rowsel + ' #branch-name').html(data['branch-name']);
+			$(rowsel + ' #branch-name-actual').html(data['branch-name-actual']);
 			$(rowsel + ' #branch-date-h').html(data['branch-date-h']);
+
+			$(rowsel + ' #branch-name').html(data['branch-name']);
+			$(rowsel + ' #branch-topic').html(data['branch-topic']);
+
 			console.log(data['geoip'])
 
 			$(rowsel + ' #server-location').html(data['geoip']['city']);
@@ -200,7 +206,7 @@
 		}
 
 		function init(){
-			// go('row1', 'Local installation', 'http://127.0.0.1:8080');
+			go('row1', 'Local installation', 'http://127.0.0.1:8080');
 			go('row2', 'Demo server (EU)', 'https://demo.co-design.science/inst00');
 			// go('row3', 'Staging (EU)', 'https://demo.co-design.science/inst01');
 			// go('row4', 'Production (US)', 'https://8.8.8.3');
