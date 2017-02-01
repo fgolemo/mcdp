@@ -1,3 +1,2 @@
-# this just added to devel
-branch_name = "devel"
-branch_topic = "Development version"
+branch_name = "17"
+branch_topic = "17 version"
