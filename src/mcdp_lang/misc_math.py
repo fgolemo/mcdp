@@ -8,19 +8,20 @@ from mcdp_maps.SumN_xxx_Map import sum_units
 from mcdp_posets import Nat, RcompUnits, mult_table, Rcomp, express_value_in_isomorphic_space
 from mcdp_posets.nat import Nat_mult_uppersets_continuous, Nat_add
 from mcdp_posets.rcomp_units import (R_dimensionless, mult_table_seq,
-    RbicompUnits, rcomp_add)
+    RbicompUnits, rcomp_add,inverse_of_unit)
 from mocdp.comp.context import ValueWithUnits
 from mocdp.exceptions import DPSemanticError, DPNotImplementedError
 from mcdp_posets.poset import NotLeq
 
-
-@contract(S=RcompUnits)
-def inv_unit(S):
-    # S.units is a pint quantity
-    unit = 1 / S.units
-    string = ('%s' % unit).encode('utf-8')
-    res = RcompUnits(1 / S.units, string)
-    return res
+inv_unit = inverse_of_unit
+# 
+# @contract(S=RcompUnits)
+# def inv_unit(S):
+#     # S.units is a pint quantity
+#     unit = 1 / S.units
+#     string = ('%s' % unit).encode('utf-8')
+#     res = RcompUnits(1 / S.units, string)
+#     return res
 
 @contract(returns=ValueWithUnits, a =ValueWithUnits)
 def inv_constant(a):

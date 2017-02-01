@@ -45,6 +45,7 @@ def get_ureg():
 class RcompUnits(RcompBase):
 
     def __init__(self, pint_unit, string):
+        check_isinstance(string, str) # utf-8
         if do_extra_checks():
             ureg = get_ureg()
             check_isinstance(pint_unit, ureg.Quantity)
@@ -353,7 +354,7 @@ def mult_table(a, b):
     check_isinstance(b, RcompUnits)
 
     unit2 = a.units * b.units
-    s = '%s' % unit2
+    s = ('%s' % unit2).encode('utf-8')
     return RcompUnits(unit2, s)
 
 def check_mult_units_consistency_seq(factors, c):
@@ -381,7 +382,7 @@ def check_mult_units_consistency(a, b, c):
 def inverse_of_unit(a):
     check_isinstance(a, RcompUnits)
     unit2 = 1 / a.units
-    s = '%s' % unit2
+    s = ('%s' % unit2).encode('utf-8')
     return RcompUnits(unit2, s)
 
 def RbicompUnits_reflect(P, x):
@@ -468,7 +469,7 @@ def rcompunits_pow(a, num, den):
     check_isinstance(a, RcompUnits)
     x = 1.0 * num / den
     u = a.units ** x
-    s = '%s' % u
+    s = ('%s' % u).encode('utf-8')
     return RcompUnits(u, s)
 
 

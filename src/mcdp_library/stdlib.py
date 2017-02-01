@@ -51,7 +51,7 @@ def get_test_librarian():
         logger.debug('environment variable %s = %s' % (vname2, exclude))
     else:
         exclude = []
-        logger.debug('environment variable %s is unset')
+        logger.debug('environment variable %s is unset' % vname2)
 
 
     if exclude:

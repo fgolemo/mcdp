@@ -3,5 +3,5 @@ template mcdp {
     requires mass [g]
     requires cost [USD]
     requires area [m^2]
-    requires solar_radiation [lux]                       
+    requires solar_radiation [W/m^2]                       
 }
