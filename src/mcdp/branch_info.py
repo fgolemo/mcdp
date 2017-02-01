@@ -1,3 +1,2 @@
-# this just added to devel
 branch_name = "devel"
-branch_topic = "Development version"
+branch_topic = "This is the development version"
