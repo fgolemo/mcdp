@@ -74,7 +74,7 @@
             Github website</a></li>
 </ul>
 </div>
-<h3>Available libraries</h3>
+
 
 <style>
 .library_list {
@@ -91,23 +91,39 @@
 }
 </style>
 
-<div class="library_list">
-{% for sup, sup_libraries in navigation['libraries_indexed'] %}
-    <div class='sup'>{{sup}}</div>
-    {% for li in sup_libraries %}
-    <!-- <option name='{{li['name']}}' value="{{li['url']}}" {% if li['current'] %} selected = 1 {% endif %}> -->
-        <!-- note the span has no effect inside option -->
-        <div class='library'><a href="{{li['url']}}"><code>📖<span>{{li['name']}}</span></code></a></div>
-    <!-- </option> -->
-    {% endfor %}
-{% endfor %}
-</div>
+<script>
+	function click_show_available() {
+		$('#available').show();
+		$('button#show-available').hide();
+	}
+	function init_index() { 
+		$('button#show-available').button().click(click_show_available);
+	}
+	$(document).ready(init_index);
+</script>
 
-<div id='buttons'>
-<p><a id='create_library'>Create a new library</a></p>
-<p><a id='refresh' href='{{root}}/refresh'>Refresh list of libraries</a></p>
-</div>
+<p><button id='show-available'>Show available libraries</button></p>
 
+<div id='available' style='display:none'>
+	<h3>Available libraries</h3>
+	
+	<div class="library_list">
+	{% for sup, sup_libraries in navigation['libraries_indexed'] %}
+	    <div class='sup'>{{sup}}</div>
+	    {% for li in sup_libraries %}
+	    <!-- <option name='{{li['name']}}' value="{{li['url']}}" {% if li['current'] %} selected = 1 {% endif %}> -->
+	        <!-- note the span has no effect inside option -->
+	        <div class='library'><a href="{{li['url']}}"><code>📖<span>{{li['name']}}</span></code></a></div>
+	    <!-- </option> -->
+	    {% endfor %}
+	{% endfor %}
+	</div>
+	
+	<div id='buttons'>
+		<p><a id='create_library'>Create a new library</a></p>
+		<p><a id='refresh' href='{{root}}/refresh'>Refresh list of libraries</a></p>
+	</div>
+</div>
 <!--
 <p>
 	Some interesting starting points:
